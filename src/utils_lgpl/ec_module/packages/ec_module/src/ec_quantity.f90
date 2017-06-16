@@ -185,8 +185,8 @@ module m_ec_quantity
                if (.not.(ecQuantitySet(instancePtr, quantityId, units=units))) return
             end if
          end if
-         if (nf90_get_att(ncid, varid, '_FillValue', fillvalue)==NF90_NOERR) then
-            if (.not.(ecQuantitySet(instancePtr, quantityId, fillvalue=fillvalue))) return
+         if (nf90_get_att(ncid, varid, '_FillValue', fillvalue)==NF90_NOERR) then                  ! RL: Possibly redundant: we store the missing value with the field
+            if (.not.(ecQuantitySet(instancePtr, quantityId, fillvalue=fillvalue))) return         !     And not with the quantity. TODO: check if this can be removed
          end if
          if ((nf90_get_att(ncid, varid, 'scale_factor', scalefactor)==NF90_NOERR)         &
               .or. (nf90_get_att(ncid, varid, 'add_offset', add_offset)==NF90_NOERR)) then

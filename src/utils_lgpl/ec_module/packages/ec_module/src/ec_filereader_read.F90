@@ -806,8 +806,6 @@ module m_ec_filereader_read
          do i=1, item%elementSetPtr%n_rows * item%elementSetPtr%n_cols * item%elementSetPtr%n_layers
             if ( fieldPtr%arr1dPtr(i).ne.dmiss_nc ) then
                fieldPtr%arr1dPtr(i) = fieldPtr%arr1dPtr(i) * item%quantityPtr%factor + item%quantityPtr%offset    
-            else
-               fieldPtr%arr1dPtr(i) = ec_undef_hp
             end if
          end do
 

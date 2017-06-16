@@ -2360,8 +2360,7 @@ module m_ec_provider
          real(hp),                   dimension(:),   allocatable :: sgd_data_trans        !< coordinate data along first dimension's axis transformed, rotating pole
          real(hp),                   dimension(:),   allocatable :: tgd_data_1d           !< coordinate data along third dimension's axis
          real(hp),                   dimension(:),   allocatable :: pdiri                 !< 
-         real(hp)                                                :: fdg_miss              !< missing data value in first dimension
-         real(hp)                                                :: sdg_miss              !< missing data value in second dimension
+         real(hp)                                                :: var_miss              !< missing data value in second dimension
          character(len=NF90_MAX_NAME)                            :: grid_mapping          !< name of the applied grid mapping 
          character(len=NF90_MAX_NAME)                            :: units                 !< helper variable for variable's units
          real(hp)                                                :: add_offset            !< helper variable
@@ -2782,26 +2781,21 @@ module m_ec_provider
             ! ========================
             ! Create the source Fields 
             ! ========================
-            !  --- Determine missingDataValue ---
-            if (.not. ecSupportNetcdfCheckError(nf90_get_att(fileReaderPtr%fileHandle, fgd_id, "_FillValue", fdg_miss), "reading _FillValue", fileReaderPtr%fileName)) then
-               if (.not. ecSupportNetcdfCheckError(nf90_get_att(fileReaderPtr%fileHandle, NF90_GLOBAL, "NF90_FILL_DOUBLE", fdg_miss), "reading _FillValue", fileReaderPtr%fileName)) then
-                  fdg_miss = ec_undef_hp
-               end if
-            end if
-            if (.not. ecSupportNetcdfCheckError(nf90_get_att(fileReaderPtr%fileHandle, fgd_id, "_FillValue", sdg_miss), "reading _FillValue", fileReaderPtr%fileName)) then
-               if (.not. ecSupportNetcdfCheckError(nf90_get_att(fileReaderPtr%fileHandle, NF90_GLOBAL, "NF90_FILL_DOUBLE", sdg_miss), "reading _FillValue", fileReaderPtr%fileName)) then
-                  sdg_miss = ec_undef_hp
+            !  --- Determine ssmissingDataValue ---
+            if (.not. ecSupportNetcdfCheckError(nf90_get_att(fileReaderPtr%fileHandle, idvar, "_FillValue", var_miss), "reading _FillValue", fileReaderPtr%fileName)) then
+               if (.not. ecSupportNetcdfCheckError(nf90_get_att(fileReaderPtr%fileHandle, NF90_GLOBAL, "NF90_FILL_DOUBLE", var_miss), "reading _FillValue", fileReaderPtr%fileName)) then
+                  var_miss = ec_undef_hp
                end if
             end if
             !
             field0Id = ecInstanceCreateField(instancePtr)
             if (.not. (ecFieldCreate1dArray(instancePtr, field0Id, fgd_size*sgd_size*max(tgd_size,1)) .and. &
-                       ecFieldSetMissingValue(instancePtr, field0Id, fdg_miss))) then
+                       ecFieldSetMissingValue(instancePtr, field0Id, var_miss))) then
                   return
             end if
             field1Id = ecInstanceCreateField(instancePtr)
             if (.not. (ecFieldCreate1dArray(instancePtr, field1Id, fgd_size*sgd_size*max(tgd_size,1)) .and. &
-                       ecFieldSetMissingValue(instancePtr, field1Id, sdg_miss))) then
+                       ecFieldSetMissingValue(instancePtr, field1Id, var_miss))) then
                   return
             end if
             ! ==================

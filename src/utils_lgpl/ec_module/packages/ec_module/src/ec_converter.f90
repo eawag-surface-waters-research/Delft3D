@@ -271,6 +271,7 @@ module m_ec_converter
          type(tEcElementSet),  pointer :: targetElementSet !< target ElementSet
          real(hp) :: wx, wy
          integer  :: i !< loop counter
+         integer  :: ii, jj
          integer  :: n_cols, n_rows, n_points
          integer, dimension(1)  :: nn
          integer  :: inside, mp, np, in, jn !< return values of findnm
@@ -333,10 +334,13 @@ module m_ec_converter
 
                         wx = (targetElementSet%x(i) - sourceElementSet%x(mp))/(sourceElementSet%x(mp+1) - sourceElementSet%x(mp)) 
                         wy = (targetElementSet%y(i) - sourceElementSet%y(np))/(sourceElementSet%y(np+1) - sourceElementSet%y(np)) 
-                        weight%weightFactors(1,i) = (1.-wx)*(1.-wy)
-                        weight%weightFactors(2,i) =     wx *(1.-wy)
-                        weight%weightFactors(3,i) =     wx *    wy
-                        weight%weightFactors(4,i) = (1.-wx)*    wy 
+
+                        do jj=0,1
+                           do ii=0,1
+                              weight%weightFactors(1+ii+2*jj,i) = ((1.-wx)*(1-ii) + wx*ii) * ((1.-wy)*(1-jj) + wy*jj)
+                           enddo
+                        enddo
+
                         weight%indices(1,i) = mp
                         weight%indices(2,i) = np
                      end do
@@ -2153,8 +2157,8 @@ module m_ec_converter
          real(hp)                :: t1            !< source item t1
          real(hp)                :: a0            !< weight for source t0 data
          real(hp)                :: a1            !< weight for source t1 data
-         real(hp)                :: z0            !< weight for source data below
-         real(hp)                :: z1            !< weight for source data above
+         real(hp)                :: wb            !< weight for source data below
+         real(hp)                :: wt            !< weight for source data above
          real(hp)                :: a_s, b_s      !< coefficients for a linear transformation of source vertical coordinates to elevation above datum 
          real(hp)                :: a_t, b_t      !< coefficients for a linear transformation of target vertical coordinates to elevation above datum 
          real(hp)                :: sourceValueT0 !< source value at t0
@@ -2163,6 +2167,7 @@ module m_ec_converter
          real(hp)                :: targetMissing !< Target side missing value 
          type(tEcField), pointer :: sourceT0Field !< helper pointer
          type(tEcField), pointer :: sourceT1Field !< helper pointer
+         real(hp)                :: sourceMissing !< Source side missing value 
          real(hp), dimension(:,:,:), pointer :: s3D_T0, s3D_T1   !< 3D representation of linearly indexed array arr1D
          real(hp), dimension(:,:),   pointer :: s2D_T0, s2D_T1   !< 2D representation of linearly indexed array arr1D
          real(hp)                :: up_old, down_old !< source values on upper and lower level at T0
@@ -2170,6 +2175,8 @@ module m_ec_converter
          type(tEcIndexWeight), pointer :: indexWeight !< helper pointer, saved index weights
          type(tEcElementSet), pointer :: sourceElementSet !< source ElementSet
          type(tEcElementSet), pointer :: targetElementSet !< target ElementSet
+         type(tEcItem), pointer :: sourceItem !< source Item
+         type(tEcItem), pointer :: targetItem !< target item 
          integer :: n_layers, n_cols, n_rows, mp, np, kp, dkp, k_inc, n_points
          type(tEcItem), pointer  :: windxPtr ! pointer to item for windx     
          type(tEcItem), pointer  :: windyPtr ! pointer to item for windy
@@ -2180,10 +2187,11 @@ module m_ec_converter
          double precision        :: PI, phi, xtmp
          integer                 :: time_interpolation
          
-         real(hp), dimension(2,2) :: val
-         real(hp)                 :: weight
-         integer                  :: ii, jj, kk
-         integer                  :: jamissing
+         real(hp), dimension(2,2,2,2) :: sourcevals
+         real(hp), dimension(2,2)   :: val
+         real(hp)                   :: weight, lastvalue
+         integer                    :: ii, jj, kk, LL
+         integer                    :: jamissing
          
          !
          PI = datan(1.d0)*4.d0
@@ -2225,35 +2233,35 @@ module m_ec_converter
             case (interpolate_spacetimeSaveWeightFactors)
                ! bilinear interpolation in space
                do i=1, connection%nSourceItems
-                  sourceT0Field => connection%sourceItemsPtr(i)%ptr%sourceT0FieldPtr
-                  sourceT1Field => connection%sourceItemsPtr(i)%ptr%sourceT1FieldPtr
-                  time_interpolation = connection%sourceItemsPtr(i)%ptr%quantityptr%timeint
-                  indexWeight => connection%converterPtr%indexWeight
-                  sourceElementSet => connection%sourceItemsPtr(i)%ptr%elementSetPtr
-                  targetElementSet => connection%targetItemsPtr(i)%ptr%elementSetPtr
-                  n_points = connection%targetItemsPtr(i)%ptr%elementSetPtr%nCoordinates
-                  targetValues => connection%targetItemsPtr(i)%ptr%targetFieldPtr%arr1dPtr
-                  targetMissing = connection%targetItemsPtr(i)%ptr%targetFieldPtr%MISSINGVALUE
+                  sourceItem => connection%sourceItemsPtr(i)%ptr
+                  sourceT0Field => sourceItem%sourceT0FieldPtr
+                  sourceT1Field => sourceItem%sourceT1FieldPtr
+                  sourceMissing = sourceT0Field%MISSINGVALUE
+                  sourceElementSet => sourceItem%elementSetPtr
+                  time_interpolation = sourceItem%quantityptr%timeint
 
+                  indexWeight => connection%converterPtr%indexWeight
+
+                  targetItem => connection%targetItemsPtr(i)%ptr
+                  targetField => targetItem%targetFieldPtr
+                  targetValues => targetField%arr1dPtr
+                  targetMissing = targetField%MISSINGVALUE
+                  targetElementSet => targetItem%elementSetPtr
+
+                  n_points = targetElementSet%nCoordinates
                   n_cols = sourceElementSet%n_cols
                   n_rows = sourceElementSet%n_rows
                   n_layers = sourceElementSet%n_layers
-                  allocate(zsrc(n_layers))
-
-                  s3D_T0(1:n_cols,1:n_rows,1:n_layers) => sourceT0Field%arr1d
-                  s3D_T1(1:n_cols,1:n_rows,1:n_layers) => sourceT1Field%arr1d
-                  
                   t0 = sourceT0Field%timesteps
                   t1 = sourceT1Field%timesteps
+
                   call time_weight_factors(a0, a1, timesteps, t0, t1, timeint=time_interpolation)
                   
                   if (n_layers>0 .and. associated(targetElementSet%z) .and. associated(sourceElementSet%z)) then 
+                     allocate(zsrc(n_layers))
+                     s3D_T0(1:n_cols,1:n_rows,1:n_layers) => sourceT0Field%arr1d
+                     s3D_T1(1:n_cols,1:n_rows,1:n_layers) => sourceT1Field%arr1d
                      do j=1, n_points
-                     
-                        if ( j.eq.22503 ) then
-                           continue
-                        end if
-                     
                         kbot = targetElementSet%kbot(j)
                         ktop = targetElementSet%ktop(j)
                         if (connection%converterPtr%operandType==operand_replace) then
@@ -2301,6 +2309,10 @@ module m_ec_converter
                            else
                               dkp = -1
                            end if      ! write source vertical coordinate in terms of target system
+                           
+                           if ( j.eq.25278 ) then
+                              continue
+                           end if
 
                            do k = kbot, ktop
                               ztgt = targetElementSet%z(k)
@@ -2324,53 +2336,72 @@ module m_ec_converter
                                  kp = min(max(kp,1),n_layers-1)
                               end if
                               
-!                             check missing values
-                              jamissing = 0
-                       kloop: do kk=0,dkp,dkp
+!                             fill source values
+                              do kk=0,1
                                  do jj=0,1
                                     do ii=0,1
-                                       if ( s3D_T0(mp+ii, np+jj, kp-kk ) .eq. ec_undef_hp .or.   &
-                                            s3D_T0(mp+ii, np+jj, kp-kk ) .eq. ec_undef_hp ) then
-                                          jamissing = 1
-                                          exit kloop
-                                       end if
+                                       sourcevals(1+ii,1+jj,1+kk,1) = s3D_T0(mp+ii, np+jj, kp+dkp*(kk-1) )
+                                       sourcevals(1+ii,1+jj,1+kk,2) = s3D_T1(mp+ii, np+jj, kp+dkp*(kk-1) )
                                     end do
                                  end do
-                              end do kloop
+                              end do
                               
-                              if ( jamissing.eq.1 ) then
+                              call extrapolate_missing(sourcevals, sourceMissing, jamissing)
+                              
+                              if ( jamissing>0 ) then
                                  targetValues(k) = targetMissing
                               else
                               
 !                                horizontal interpolation 
                                  val = 0d0   ! (down-up,old-new)
-                                 do jj=0,1
-                                    do ii=0,1
-                                        weight = indexWeight%weightFactors(1+ii+2*jj,j)
-                                        val(1,1) = val(1,1) + weight * s3D_T0(mp+ii, np+jj, kp-dkp)
-                                        val(2,1) = val(2,1) + weight * s3D_T0(mp+ii, np+jj, kp    )
-                                        val(1,2) = val(1,2) + weight * s3D_T1(mp+ii, np+jj, kp-dkp)
-                                        val(2,2) = val(2,2) + weight * s3D_T1(mp+ii, np+jj, kp    )
+                                 do ll=1,2
+                                    do kk=1,2
+                                       do jj=1,2
+                                          do ii=1,2
+                                              weight = indexWeight%weightFactors(ii+2*(jj-1),j)
+                                              val(kk,ll) = val(kk,ll) + weight * sourcevals(ii, jj, kk, ll)
+                                          end do
+                                       end do
                                     end do
                                  end do
                                  
                                  ! get weights for vertical interpolation
-                                 z0 = (zsrc(kp) - ztgt)/(zsrc(kp)-zsrc(kp-dkp))
-                                 z0 = min(max(z0,0.0_hp),1.0_hp)                       ! zeroth-order extrapolation beyond range of source vertical coordinates
-                                 z1 = (1.0_hp - z0)
+                                 wb = (zsrc(kp) - ztgt)/(zsrc(kp)-zsrc(kp-dkp))
+                                 wb = min(max(wb,0.0_hp),1.0_hp)                       ! zeroth-order extrapolation beyond range of source vertical coordinates
+                                 wt = (1.0_hp - wb)
                                  
                                  ! interpolating between times and between vertical layers
-!                                 targetValues(k) = targetValues(k) + a0*(z1*up_old+z0*down_old) + a1*(z1*up_new+z0*down_new)
-                                 targetValues(k) = targetValues(k) + a0*(z0*val(1,1) + z1*val(2,1)) + a1*(z0*val(1,2) + z1*val(2,2))
+                                 targetValues(k) = targetValues(k) + a0*(wb*val(1,1) + wt*val(2,1)) + a1*(wb*val(1,2) + wt*val(2,2))
                                  
-!                                 write(666,'(15e15.5)') ztgt, zsrc(kp-dkp), zsrc(kp), zsrc(1), zsrc(n_layers)                   ! RL666
+                              end if
+                           end do
+                           
+!                          fill missing values
+                           lastvalue = targetMissing
+                           do k=ktop,kbot,-1
+                              if ( targetValues(k).ne.targetMissing ) then
+                                 lastvalue = targetValues(k)
+                              else if ( lastvalue.ne.targetMissing ) then
+                                 targetValues(k) = lastvalue
+                              end if
+                           end do
+                           
+                           lastvalue = targetMissing
+                           do k=kbot,ktop
+                              if ( targetValues(k).ne.targetMissing ) then
+                                 lastvalue = targetValues(k)
+                              else if ( lastvalue.ne.targetMissing ) then
+                                 targetValues(k) = lastvalue
                               end if
                            end do
                         else
                            targetValues(kbot:ktop) = targetMissing   ! 0.0_hp
                         end if
                      end do
+                     deallocate(zsrc)
                   else
+                     s2D_T0(1:n_cols,1:n_rows) => sourceT0Field%arr1d
+                     s2D_T1(1:n_cols,1:n_rows) => sourceT1Field%arr1d
                      do j=1, n_points
                         mp = indexWeight%indices(1,j)
                         np = indexWeight%indices(2,j)
@@ -2379,25 +2410,56 @@ module m_ec_converter
                         end if
                         if (mp > 0 .and. np > 0) then
                            ! FM's 2D to EC's 1D array mapping requires np = np-1 from this point on.
-                           !
 
-                           targetValues(j) = targetValues(j) +  &
-                                              a0 * (indexWeight%weightFactors(1,j)*sourceT0Field%arr1d(mp+n_cols*(np-1)) + &
-                                                    indexWeight%weightFactors(2,j)*sourceT0Field%arr1d(mp+1+n_cols*(np-1)) + &
-                                                    indexWeight%weightFactors(3,j)*sourceT0Field%arr1d(mp+1+n_cols*((np-1)+1)) + &
-                                                    indexWeight%weightFactors(4,j)*sourceT0Field%arr1d(mp+n_cols*((np-1)+1))) &
-                                               + &
-                                              a1 * (indexWeight%weightFactors(1,j)*sourceT1Field%arr1d(mp+n_cols*(np-1)) + &
-                                                    indexWeight%weightFactors(2,j)*sourceT1Field%arr1d(mp+1+n_cols*(np-1)) + &
-                                                    indexWeight%weightFactors(3,j)*sourceT1Field%arr1d(mp+1+n_cols*((np-1)+1)) + &
-                                                    indexWeight%weightFactors(4,j)*sourceT1Field%arr1d(mp+n_cols*((np-1)+1)))
+                           ! check missing values
+                           jamissing = 0
+                  kloop2D: do jj=0,1
+                              do ii=0,1
+                                 if ( comparereal(s2D_T0(mp+ii, np+jj), sourceMissing)==0 .or.   &
+                                      comparereal(s2D_T0(mp+ii, np+jj), sourceMissing)==0 ) then
+                                    jamissing = jamissing + 1
+                                    exit kloop2D
+                                 end if
+                              end do
+                           end do kloop2D
+
+                           if ( jamissing>0 ) then
+                              targetValues(k) = targetMissing
+                           else
+                              do jj=0,1
+                                 do ii=0,1
+                                     weight = indexWeight%weightFactors(1+ii+2*jj,j)
+                                     targetValues(j) = targetValues(j) + a0 * weight * s2D_T0(mp+ii, np+jj)
+                                     targetValues(j) = targetValues(j) + a1 * weight * s2D_T1(mp+ii, np+jj)
+                                 end do
+                              end do
+
+                              !targetValues(j) = targetValues(j) +  &
+                              !                   a0 * (indexWeight%weightFactors(1,j)*s2D_T0(mp  ,np  ) + &
+                              !                         indexWeight%weightFactors(2,j)*s2D_T0(mp+1,np  ) + &
+                              !                         indexWeight%weightFactors(3,j)*s2D_T0(mp+1,np+1) + &
+                              !                         indexWeight%weightFactors(4,j)*s2D_T0(mp  ,np+1))  &
+                              !                    + &
+                              !                   a1 * (indexWeight%weightFactors(1,j)*s2D_T1(mp  ,np  ) + &
+                              !                         indexWeight%weightFactors(2,j)*s2D_T1(mp+1,np  ) + &
+                              !                         indexWeight%weightFactors(3,j)*s2D_T1(mp+1,np+1) + &
+                              !                         indexWeight%weightFactors(4,j)*s2D_T1(mp  ,np+1))
+                                                 !a0 * (indexWeight%weightFactors(1,j)*sourceT0Field%arr1d(mp+n_cols*(np-1)) + &
+                                                 !      indexWeight%weightFactors(2,j)*sourceT0Field%arr1d(mp+1+n_cols*(np-1)) + &
+                                                 !      indexWeight%weightFactors(3,j)*sourceT0Field%arr1d(mp+1+n_cols*((np-1)+1)) + &
+                                                 !      indexWeight%weightFactors(4,j)*sourceT0Field%arr1d(mp+n_cols*((np-1)+1))) &
+                                                 ! + &
+                                                 !a1 * (indexWeight%weightFactors(1,j)*sourceT1Field%arr1d(mp+n_cols*(np-1)) + &
+                                                 !      indexWeight%weightFactors(2,j)*sourceT1Field%arr1d(mp+1+n_cols*(np-1)) + &
+                                                 !      indexWeight%weightFactors(3,j)*sourceT1Field%arr1d(mp+1+n_cols*((np-1)+1)) + &
+                                                 !      indexWeight%weightFactors(4,j)*sourceT1Field%arr1d(mp+n_cols*((np-1)+1)))
+                           end if                              
                         else
-                           targetValues(j) = 0.0_hp
+                           targetValues(j) = targetMissing
                         end if
                      end do
                   end if
                   connection%targetItemsPtr(i)%ptr%targetFieldPtr%timesteps = timesteps
-                  deallocate(zsrc)
                end do
             case (interpolate_time, interpolate_time_extrapolation_ok)
                ! linear interpolation in time
@@ -2650,4 +2712,100 @@ module m_ec_converter
             dbdistance = sqrt(rr)
          endif
       end function dbdistance
+      
+      
+!> extrapolate missing values
+      subroutine extrapolate_missing(vals, Missing, jamissing)
+         implicit none
+         
+         real(hp), dimension(2,2,2,2), intent(inout) :: vals   !< values
+         real(hp),                     intent(in)    :: Missing   !< missing values
+         integer,                      intent(out)   :: jamissing !< missing values left (1) or not (0)
+         
+         real(hp)                                    :: value
+         
+         integer, dimension(4)                       :: imiss, jmiss
+         integer                                     :: nummissing, n
+         
+         integer :: i, j, k, L
+         integer :: i1, j1, i2, j2
+         
+         jamissing = 0
+
+!        first two dimensions (horizontal)         
+         do L=1,2
+            do k=1,2
+            
+!              count number of missing values            
+               nummissing = 0
+               imiss = 0
+               jmiss = 0
+               n = 0
+               do j=1,2
+                  do i=1,2
+                     if ( vals(i,j,k,L)==Missing ) then
+                        nummissing = nummissing+1
+                        imiss(nummissing) = i
+                        jmiss(nummissing) = j
+                     else
+                        n = n+1
+                        imiss(5-n) = i
+                        jmiss(5-n) = j
+                     end if
+                  end do
+               end do
+              
+               if ( nummissing.eq.1 ) then
+!                 linear extrapolation
+                  i = imiss(1)
+                  j = jmiss(1)
+                  i1 = 3-i
+                  j1 = 3-j
+                  vals(i,j,k,L) = vals(i,j1,k,L) + vals(i1,j,k,L) - vals(i1,j1,k,L)
+               else if ( nummissing.eq.2 ) then
+!                 linear extrapolation in one direction, constant in other
+                  i1 = imiss(1)
+                  j1 = jmiss(1)
+                  i2 = imiss(2)
+                  j2 = jmiss(2)
+                  if ( i1.eq.i2 ) then
+                     vals(i1,:,k,L) = vals(3-i1,:,k,L)
+                  else if ( j1.eq.j2 ) then
+                     vals(:,j1,k,L) = vals(:,3-j1,k,L)
+                  else
+                     vals(i1,j1,k,L) = 0.5d0*(vals(i2,j1,k,L)+vals(i1,j2,k,L))
+                     vals(i2,j2,k,L) = vals(i1,j1,k,L)
+                  end if
+               else if ( nummissing.eq.3 ) then
+                  i = imiss(4)
+                  j = jmiss(4)
+                  value = vals(i,j,k,L)
+                  vals(:,:,k,L) = value
+               else if ( nummissing.eq.4 ) then
+!                 can not extrapolate   
+               end if
+            end do
+         end do
+         
+!        third dimension
+         do L=1,2
+            do j=1,2
+               do i=1,2
+                  if ( vals(i,j,1,L).eq.Missing .or. vals(i,j,2,L).eq.Missing ) then
+                     if ( vals(i,j,1,L).eq.Missing .and. vals(i,j,2,L).ne.Missing ) then
+                        vals(i,j,1,L) = vals(i,j,2,L)
+                     else if ( vals(i,j,2,L).eq.Missing .and. vals(i,j,1,L).ne.Missing ) then
+                        vals(i,j,2,L) = vals(i,j,1,L)
+                     else
+!                       can not extrapolate
+                        jamissing = 1
+                     end if
+                  end if
+               end do
+            end do
+         end do
+         
+         return
+      end subroutine extrapolate_missing
+      
 end module m_ec_converter
