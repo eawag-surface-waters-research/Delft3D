@@ -1107,7 +1107,7 @@ double* Dimr::send(
       if (my_rank == processes[m]) 
       {
          log->Write(Log::DETAIL, my_rank, "Dimr::send (%s)", name);
-         if (*sourceVarPtr != NULL && compType != COMP_TYPE_WANDA) 
+         if (sourceVarPtr != NULL && compType != COMP_TYPE_WANDA) 
          {
             transfer[m] = *sourceVarPtr;
          }
