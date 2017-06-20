@@ -51,13 +51,10 @@ echo Working directory: %workdir%
     rem
 set D3D_HOME=%~dp0..\..
 
-rem Two possibilities for %ARCH% are suitable (win32 and x86)
-if exist %D3D_HOME%\win32 (
-    set ARCH=win32
-) else (
-    set ARCH=x86
-)
-
+rem Remove "\scripts\..\.." from D3D_HOME
+set D3DT=%D3D_HOME:~0,-14%
+rem last directory will be the architecture directory
+for %%f in ("%D3DT%") do set ARCH=%%~nxf
 
 set delwaqexedir=%D3D_HOME%\%ARCH%\dwaq\bin
 set dflowfmexedir=%D3D_HOME%\%ARCH%\dflowfm\bin

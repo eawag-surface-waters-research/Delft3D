@@ -116,10 +116,15 @@ if [ ! -d $D3D_HOME ]; then
     print_usage_info
 fi
 export D3D_HOME
-
+ 
+    # find ARCH from scriptdir path
+pth=( $( echo $scriptdir | tr "/" "\n"} ) )
+a=${#pth[@]}-2
+export ARCH=${pth[a]}
 
 echo "    Configfile       : $configfile"
 echo "    D3D_HOME         : $D3D_HOME"
+echo "    ARCH             : $ARCH"
 echo "    Working directory: $workdir"
 echo "    Number of slots  : $NSLOTS"
 echo 
@@ -127,7 +132,6 @@ echo
     #
     # Set the directories containing the binaries
     #
-export ARCH=lnx64
 
 delwaqexedir=$D3D_HOME/$ARCH/dwaq/bin
 dflowfmexedir=$D3D_HOME/$ARCH/dflowfm/lib
