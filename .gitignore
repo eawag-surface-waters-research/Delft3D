@@ -62,3 +62,13 @@ src/utils_lgpl/io_netcdf/packages/tests/UGrid.tests/[Dd]ebug
 src/utils_lgpl/io_netcdf/packages/tests/UGrid.tests/[Rr]elease
 src/utils_lgpl/io_netcdf/packages/tests/UGrid.tests/_Pvt_Extensions
 src/utils_lgpl/io_netcdf/packages/tests/UGrid.tests/obj
+src/utils_lgpl/unittests/General.tests/*.aps
+src/utils_lgpl/unittests/General.tests/*.eto
+src/utils_lgpl/unittests/General.tests/*.user
+src/utils_lgpl/unittests/General.tests/ClientBin
+src/utils_lgpl/unittests/General.tests/GeneratedArtifacts
+src/utils_lgpl/unittests/General.tests/[Bb]in
+src/utils_lgpl/unittests/General.tests/[Dd]ebug
+src/utils_lgpl/unittests/General.tests/[Rr]elease
+src/utils_lgpl/unittests/General.tests/_Pvt_Extensions
+src/utils_lgpl/unittests/General.tests/obj
