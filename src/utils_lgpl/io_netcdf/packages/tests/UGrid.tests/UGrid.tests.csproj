@@ -88,9 +88,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\..\csharp\utils\utils.Tests\utils.Tests.csproj">
-      <Project>{5b78553f-b290-4718-992c-51bc2b924647}</Project>
-      <Name>utils.Tests</Name>
+    <ProjectReference Include="..\..\..\..\unittests\General.tests\General.tests.csproj">
+      <Project>{977f480f-21e9-47b0-acad-8e6c23d94f13}</Project>
+      <Name>General.tests</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

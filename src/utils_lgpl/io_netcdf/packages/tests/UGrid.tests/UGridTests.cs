@@ -1,10 +1,9 @@
 ﻿using System;
 using System.IO;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using NUnit.Framework;
-using utils.Tests;
+using General.tests;
 
 // The build of this test is disable by default because it requires NUnit.
 // If you decide to build the test make sure to install Nunit in your solution.
