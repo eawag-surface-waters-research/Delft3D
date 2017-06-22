@@ -17,9 +17,9 @@ examples/01_standard/f34.par -text
 examples/01_standard/f34.src -text
 examples/01_standard/f34.thd -text
 examples/01_standard/f34.wnd -text
+examples/01_standard/run_docker.sh -text
 examples/01_standard/run_flow2d3d.bat -text
 examples/01_standard/run_flow2d3d.sh -text
-examples/01_standard/run_flow2d3d_docker.sh -text
 examples/01_standard/run_flow2d3d_parallel.bat -text
 examples/01_standard/run_flow2d3d_parallel.sh -text
 examples/01_standard/run_flow2d3d_parallel_gnu4.6.2.log -text
