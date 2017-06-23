@@ -299,7 +299,10 @@ class Dimr {
         bool               done;           // set to true when it's time to stop
         char *             redirectFile;   // Name of file to redirect stdout/stderr to
                                            // Default: Off when started via dimr-exe, On otherwise
-
+        int                redirectFileIdstdout;
+        int                redirectFileIdstderr;
+        int                stdoutClone;
+        int                stderrClone;
 
         enum {
             MAXSTRING = 1024    // max string length in bytes, use same value as used in the kernels

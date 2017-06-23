@@ -67,9 +67,13 @@ using namespace std;
 #  include <Strsafe.h>
 #  include <windows.h>
 #  include <direct.h>
+#include <errno.h>
+#  include <io.h>
+#  include <sys/stat.h>
 #  define strdup _strdup
 #  define chdir _chdir
 #  define getcwd _getcwd
+#  define dup2 _dup2
 #else
 #  include <unistd.h>
 #endif
@@ -98,7 +102,7 @@ Dimr::Dimr(void) {
     configfile                   = NULL;
     done                         = false;
     // Initialize redirectFile. Default: switched On (!=NULL)
-    const char * filename        = "dimr_redirected_stdout_stderr.log";
+    const char * filename        = "dimr_redirected";
     int len                      = strlen(filename);
     redirectFile                 = (char *) malloc((len+1)*sizeof(char));
     strncpy(redirectFile, (const char*)filename, len);
@@ -131,14 +135,44 @@ DllExport int initialize(const char * configfile) {
         thisDimr = new Dimr();
     }
     if (thisDimr->redirectFile != NULL) {
-        printf("stdout and stderr are redirected to file \"%s\"\n", thisDimr->redirectFile);
         fflush(stdout);
-        freopen (thisDimr->redirectFile,"w",stdout);
-        freopen (thisDimr->redirectFile,"w",stderr);
+        // Deze regel reproduceert het probleem in DeltaShell: thisDimr->redirectFileId = open(thisDimr->redirectFile, O_RDWR | O_TEXT);
+        FILE * fp;
+        // stderr
+        // First redirect stderr, then stdout, to have the logging in the right location
+        thisDimr->stderrClone = dup(2);
+        char * redirSTDERR = new char[thisDimr->MAXSTRING];
+        strcpy(redirSTDERR, thisDimr->redirectFile);
+        strcat(redirSTDERR, "_stderr.log");
+        thisDimr->log->Write(Log::MAJOR, thisDimr->my_rank, "stderr is redirected to file \"%s\"", redirSTDERR);
+        fp = fopen(redirSTDERR,"w+");
+        thisDimr->redirectFileIdstderr = fileno(fp);
+        if (thisDimr->redirectFileIdstderr < 0) {
+            throw new Exception (true, "ERROR on opening file \"%s\". Errormessage: %s\n",thisDimr->redirectFileIdstderr, strerror(errno));
+        }
+        dup2(thisDimr->redirectFileIdstderr,2);
+
+        // stdout
+        thisDimr->stdoutClone = dup(1);
+        char * redirSTDOUT = new char[thisDimr->MAXSTRING];
+        strcpy(redirSTDOUT, thisDimr->redirectFile);
+        strcat(redirSTDOUT, "_stdout.log");
+        thisDimr->log->Write(Log::MAJOR, thisDimr->my_rank, "stdout is redirected to file \"%s\"", redirSTDOUT);
+        fp = fopen(redirSTDOUT,"w+");
+        // thisDimr->redirectFileIdstdout = open(redirSTDOUT, O_RDWR|O_APPEND|O_CREAT);
+        thisDimr->redirectFileIdstdout = fileno(fp);
+        if (thisDimr->redirectFileIdstdout < 0) {
+            throw new Exception (true, "ERROR on opening file \"%s\". Errormessage: %s\n",thisDimr->redirectFileIdstdout, strerror(errno));
+        }
+        dup2(thisDimr->redirectFileIdstdout,1);
+        //freopen (thisDimr->redirectFile,"w",stdout);
+        //freopen (thisDimr->redirectFile,"w",stderr);
         // Sometimes stderr overwrites stdout messages at the beginning of redirectFile
         // Add some empty lines at the start of the file
         printf("\n\n\n\n\n");
         fflush(stdout);
+        delete[] redirSTDOUT;
+        delete[] redirSTDERR;
     }
 
     thisDimr->log->Write(Log::MAJOR, thisDimr->my_rank, getfullversionstring_dimr_lib());
@@ -247,12 +281,16 @@ DllExport void finalize (void) {
     if (thisDimr->redirectFile != NULL) {
         // Stop redirecting stdout/stderr to file now
         // This is the "last" statement in dimr.dll and redirection blocks manipulations of the resulting file
-        thisDimr->log->Write (Log::MAJOR, thisDimr->my_rank, "Finished: Redirection of stdout and stderr to file \"%s\"\n", thisDimr->redirectFile);
+        thisDimr->log->Write (Log::MAJOR, thisDimr->my_rank, "Finished: Redirection of stdout and stderr to file\n");
+        dup2(thisDimr->stdoutClone,1);
+        dup2(thisDimr->stderrClone,2);
+        close(thisDimr->redirectFileIdstdout);
+        close(thisDimr->redirectFileIdstderr);
         // Redirection to CONOUT$ probably only works on Windows, but the redirection to file will only be used on Windows
-        freopen("CONOUT$", "a", stdout);
+        //freopen("CONOUT$", "a", stdout);
         // Not very nice to redirect stderr to CONOUT$ too, but CONERR$ does not exist
-        freopen("CONOUT$", "a", stderr);
-        thisDimr->log->Write (Log::MAJOR, thisDimr->my_rank, "Finished: Redirection of stdout and stderr to file \"%s\"\n", thisDimr->redirectFile);
+        //freopen("CONOUT$", "a", stderr);
+        thisDimr->log->Write (Log::MAJOR, thisDimr->my_rank, "Finished: Redirection of stdout and stderr to file \n");
     }
 }
 
