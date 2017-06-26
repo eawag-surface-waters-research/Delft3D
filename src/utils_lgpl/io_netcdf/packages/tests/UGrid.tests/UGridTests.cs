@@ -33,7 +33,7 @@ namespace UGrid.tests
 
         private int nBranches = 3;
 
-        private int nGeometry = 7;
+        private int nGeometry = 9;
 
         //node info
         private double[] nodesX = {1.0, 5.0, 5.0, 8.0};
@@ -47,15 +47,15 @@ namespace UGrid.tests
         //branches info
         private double[] branchlengths = {4.0, 3.0, 3.0};
 
-        private int[] nbranchgeometrypoints = {2, 3, 2};
+        private int[] nbranchgeometrypoints = {3, 3, 3};
         private string[] branchids = {"branch1", "branch2", "branch3"};
 
         private string[] branchlongNames = {"branchlong1", "branchlong2", "branchlong3"};
 
         //geometry info
-        private double[] geopointsX = {1.0, 3.0, 5.0, 7.0, 8.0, 5.0, 5.0};
+        private double[] geopointsX = { 1.0, 3.0, 5.0, 5.0, 7.0, 8.0, 5.0, 5.0, 5.0 };
 
-        private double[] geopointsY = {4.0, 4.0, 4.0, 4.0, 4.0, 1.0, 2.0};
+        private double[] geopointsY = { 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 1.0, 2.0, 4.0 };
 
         //mesh name
         private string meshname = "1dmesh";
@@ -87,6 +87,7 @@ namespace UGrid.tests
         private int[] mesh2indexes = {1, 2, 3};
         private string[] linksids = {"link1", "link2", "link3"};
         private string[] linkslongnames = {"linklong1", "linklong2", "linklong3"};
+        private double[] branch_order = { -1, -1, -1 }; 
 
         // mesh2d
         private int numberOf2DNodes = 5;
@@ -418,6 +419,7 @@ namespace UGrid.tests
             IntPtr c_nbranchgeometrypoints = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nBranches);
             IntPtr c_geopointsX = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nGeometry);
             IntPtr c_geopointsY = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nGeometry);
+            IntPtr c_branch_order = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nBranches); 
             try
             {
                 int ierr = -1;
@@ -464,6 +466,26 @@ namespace UGrid.tests
                 ierr = wrapper.ionc_write_1d_network_branches_geometry(ref ioncid, ref networkid, ref c_geopointsX,
                     ref c_geopointsY, ref nGeometry);
                 Assert.That(ierr, Is.EqualTo(0));
+
+                //4. Define the branch order 
+                //int id_var = -1;
+                //int itype = (int)NetcdfDataType.nf90_double;
+                //int iloctype =(int)Locations.UG_LOC_EDGE;
+                //string c_var_name = "branch_order";
+                //string c_standard_name = " ";
+                //string c_long_name = " ";
+                //string c_unit = " ";
+                //double dfill = -1.0;
+                //int ugent = 1; // defined on the network
+
+                //ierr = wrapper.ionc_def_var( ref ioncid, ref networkid, ref id_var, ref itype, ref iloctype, c_var_name, 
+                //    c_standard_name, c_long_name, c_unit, ref dfill, ref ugent);
+                //Assert.That(ierr, Is.EqualTo(0));
+
+                ////5. Put the branch order values
+                //Marshal.Copy(branch_order, 0, c_branch_order, nBranches);
+                //ierr = wrapper.ionc_put_var(ref ioncid, ref networkid, ref iloctype, c_var_name, ref c_branch_order, ref nBranches, ref ugent);
+                //Assert.That(ierr, Is.EqualTo(0));
             }
             finally
             {
@@ -475,6 +497,7 @@ namespace UGrid.tests
                 Marshal.FreeCoTaskMem(c_nbranchgeometrypoints);
                 Marshal.FreeCoTaskMem(c_geopointsX);
                 Marshal.FreeCoTaskMem(c_geopointsY);
+                Marshal.FreeCoTaskMem(c_branch_order);
             }
         }
 
@@ -497,7 +520,7 @@ namespace UGrid.tests
             tmpstring = "Unknown";
             tmpstring = tmpstring.PadRight(LibWrapper.metadatasize, ' ');
             metadata.modelname = tmpstring.ToCharArray();
-            int ierr = wrapper.ionc_add_global_attributes(ref ioncid, metadata);
+            int ierr = wrapper.ionc_add_global_attributes(ref ioncid, ref metadata);
             Assert.That(ierr, Is.EqualTo(0));
         }
 

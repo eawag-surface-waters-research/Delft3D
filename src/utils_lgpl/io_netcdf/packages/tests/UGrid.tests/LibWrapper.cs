@@ -5,6 +5,50 @@ using System.Text;
 
 namespace UGrid.tests
 {
+    public class UGridAttributeConstants
+    {
+        public class LocationValues
+        {
+            public const string Face = "face";
+            public const string Edge = "edge";
+            public const string Node = "node";
+            public const string Volume = "volume";
+        }
+
+        public class Names
+        {
+            public const string Location = "location";
+        }
+    }
+
+    public enum NetcdfOpenMode
+    {
+        nf90_nowrite = 0,
+        nf90_write = 1,
+        nf90_clobber = 0,
+        nf90_noclobber = 4,
+        nf90_fill = 0,
+        nf90_nofill = 256,
+        nf90_64bit_offset = 512,
+        nf90_lock = 1024,
+        nf90_share = 2048
+    }
+
+    public enum NetcdfDataType
+    {
+        nf90_int = 4,
+        nf90_double = 6
+    }
+
+    public enum Locations
+    {
+        UG_LOC_NONE = 0,
+        UG_LOC_NODE = 1,
+        UG_LOC_EDGE = 2,
+        UG_LOC_FACE = 4,
+        UG_LOC_VOL = 8,
+        UG_LOC_ALL2D = UG_LOC_NODE + UG_LOC_EDGE + UG_LOC_FACE
+    }
     public class LibWrapper
     {
         /// <summary>
@@ -257,7 +301,7 @@ namespace UGrid.tests
         /// <param name="metadata"></param>
         /// <returns></returns>
         [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ionc_add_global_attributes", CallingConvention = CallingConvention.Cdecl)]
-        private static extern int ionc_add_global_attributes_dll([In] ref int ioncid, interop_metadata metadata);
+        private static extern int ionc_add_global_attributes_dll([In] ref int ioncid, ref interop_metadata metadata);
 
         /// <summary>
         /// This function creates a new netCDF file
@@ -687,9 +731,9 @@ namespace UGrid.tests
             return ionc_put_node_coordinates_dll(ref ioncid, ref meshid, ref c_xvalues_ptr, ref c_yvalues_ptr, ref nNode);
         }
 
-        public int ionc_add_global_attributes(ref int ioncid, interop_metadata metadata)
+        public int ionc_add_global_attributes(ref int ioncid, ref interop_metadata metadata)
         {
-            return ionc_add_global_attributes_dll(ref ioncid, metadata);
+            return ionc_add_global_attributes_dll(ref ioncid, ref metadata);
         }
 
         public int ionc_create(string c_path, ref int mode, ref int ioncid)

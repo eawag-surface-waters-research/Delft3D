@@ -1118,6 +1118,8 @@ function ionc_create_1d_network_ugrid(ioncid, networkid, networkName, nNodes, nB
       
    ! allocate add a meshids
    ierr = ug_add_network(datasets(ioncid)%ncid, datasets(ioncid)%ug_file, networkid)
+   ! set the network name
+   datasets(ioncid)%ug_file%networksnames(networkid) = networkName
    ! add a 1d network
    ierr = ug_create_1d_network(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%netids(networkid), networkName, nNodes, nBranches, nGeometry)
    
@@ -1244,6 +1246,8 @@ function ionc_create_1d_mesh_ugrid(ioncid, networkid, meshid, meshname, nmeshpoi
    
    ! allocate add a meshids
    ierr = ug_add_mesh(datasets(ioncid)%ncid, datasets(ioncid)%ug_file, meshid)
+   ! set the meshname
+   datasets(ioncid)%ug_file%meshnames(meshid) = meshname
    ! create mesh
    ierr = ug_create_1d_mesh(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%netids(networkid), datasets(ioncid)%ug_file%meshids(meshid), meshname, nmeshpoints, nmeshedges)
   
@@ -1296,6 +1300,8 @@ function ionc_def_mesh_contact_ugrid(ioncid, contactsmesh, contactmeshname, ncon
   ! first add an ug datastructure
   ierr = ug_add_mesh_contact(datasets(ioncid)%ncid, datasets(ioncid)%ug_file, contactsmesh)
   
+  ! set the contact mesh name
+  datasets(ioncid)%ug_file%contactsnames(contactsmesh) = contactmeshname
   ! create the variables and attributes
   ierr = ug_def_mesh_contact(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%contactids(contactsmesh), contactmeshname, ncontacts, idmesh1, idmesh2, locationType1Id, locationType2Id)
    

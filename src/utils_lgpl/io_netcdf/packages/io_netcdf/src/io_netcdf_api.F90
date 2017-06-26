@@ -1053,4 +1053,6 @@ function ionc_get_3d_mesh_id_dll(ioncid, meshid)  result(ierr) bind(C, name="ion
    
 end function ionc_get_3d_mesh_id_dll
 
+!!function ionc_get_networkId_from_meshId_dll(ioncid, meshid( IN) , networkId(Out) result(ierr) //to add
+
 end module io_netcdf_api

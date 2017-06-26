@@ -1460,6 +1460,7 @@ function ug_add_mesh(ncid, ug_file, meshid) result(ierr)
    integer                          :: ierr,i   !< Result status (UG_NOERR if successful).
    integer,intent(inout)            :: meshid
    type(t_ug_mesh), allocatable     :: newmeshids(:)
+   character(len=256), allocatable  :: newmeshnames(:)
    integer                          :: nmesh, npresentmeshes 
    
    ! Count nr of meshes present in the file
@@ -1478,15 +1479,24 @@ function ug_add_mesh(ncid, ug_file, meshid) result(ierr)
       goto 999
    end if
    
+   allocate(newmeshnames(nmesh), stat=ierr) 
+   if (ierr /= 0) then
+       ierr = UG_SOMEERR
+      goto 999
+   end if
+   
    if (npresentmeshes > 0) then
        do i= 1, npresentmeshes
           newmeshids(i)%dimids = ug_file%meshids(i)%dimids
           newmeshids(i)%varids = ug_file%meshids(i)%varids
+          newmeshnames(i)      = ug_file%meshnames(i)
        enddo
    endif
    
    ! here we pass the ownership of the allocated space from newmeshids to ug_file%meshidsvec
    call move_alloc(newmeshids,ug_file%meshids) 
+   call move_alloc(newmeshnames,ug_file%meshnames)   
+   
    meshid = nmesh
    
 999 continue
@@ -1501,6 +1511,7 @@ function ug_add_mesh_contact(ncid, ug_file, contactsmesh) result(ierr)
    integer                          :: ierr    !< Result status (UG_NOERR if successful).
    integer,intent(inout)            :: contactsmesh
    type(t_ug_contacts), allocatable :: newcontacts(:)
+   character(len=256), allocatable  :: newcontactsnames(:)
    integer                          :: npresentcontactmeshes, ncontactmeshes, i
    
    ! Count nr of meshes present in the file
@@ -1519,15 +1530,22 @@ function ug_add_mesh_contact(ncid, ug_file, contactsmesh) result(ierr)
       goto 999
    end if
    
+   allocate(newcontactsnames(ncontactmeshes), stat=ierr) 
+   if (ierr /= 0) then
+       ierr = UG_SOMEERR
+      goto 999
+   end if
    if (npresentcontactmeshes > 0) then
        do i= 1, npresentcontactmeshes
           newcontacts(i)%dimids = ug_file%contactids(i)%dimids
           newcontacts(i)%varids = ug_file%contactids(i)%varids
+          newcontactsnames(i)   = ug_file%contactsnames(i)
        enddo
    endif
 
    ! here we pass the ownership of the allocated space from newcontacts to ug_file%contactids
    call move_alloc(newcontacts,ug_file%contactids) 
+   call move_alloc(newcontactsnames,ug_file%contactsnames) 
    contactsmesh = ncontactmeshes
    
 999 continue
@@ -1542,6 +1560,7 @@ function ug_add_network(ncid, ug_file, networkid) result(ierr)
    integer                          :: ierr,i   !< Result status (UG_NOERR if successful).
    integer,intent(inout)            :: networkid
    type(t_ug_network), allocatable  :: newnetids(:)
+   character(len=256), allocatable  :: newnetworksnames(:)
    integer                          :: nnet, npresentnet 
    
    ! Count nr of meshes present in the file
@@ -1560,15 +1579,22 @@ function ug_add_network(ncid, ug_file, networkid) result(ierr)
       goto 999
    end if
    
+   allocate(newnetworksnames(nnet), stat=ierr) 
+   if (ierr /= 0) then
+       ierr = UG_SOMEERR
+      goto 999
+   end if
    if (npresentnet > 0) then
        do i= 1, npresentnet
           newnetids(i)%dimids = ug_file%netids(i)%dimids
           newnetids(i)%varids = ug_file%netids(i)%varids
+          newnetworksnames(i)   = ug_file%networksnames(i)
        enddo
    endif
    
    ! here we pass the ownership of the allocated space from newnetids to ug_file%meshidsvec
    call move_alloc(newnetids,ug_file%netids) 
+   call move_alloc(newnetworksnames,ug_file%networksnames) 
    networkid = nnet
    
 999 continue
