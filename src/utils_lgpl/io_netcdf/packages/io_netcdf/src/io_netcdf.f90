@@ -138,8 +138,12 @@ public :: ionc_get_number_of_networks_ugrid
 public :: ionc_get_number_of_meshes_ugrid
 public :: ionc_get_network_ids_ugrid
 public :: ionc_ug_get_mesh_ids_ugrid
+!branch order
+public :: ionc_put_1d_network_branchorder_ugrid
+public :: ionc_get_1d_network_branchorder_ugrid
 
 public :: ionc_getfullversionstring_io_netcdf
+
 
 private
 
@@ -1206,7 +1210,19 @@ function ionc_write_1d_network_branches_ugrid(ioncid, networkid, sourcenodeid, t
    ierr = ug_write_1d_network_branches(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%netids(networkid),sourcenodeid,targetnodeid, &
        branchIds, branchlengths, branchlongnames, nbranchgeometrypoints,nBranches) 
    
-end function ionc_write_1d_network_branches_ugrid
+    end function ionc_write_1d_network_branches_ugrid
+    
+!< write the branch order array, it might be temporary function
+function ionc_put_1d_network_branchorder_ugrid(ioncid, networkid, branchorder) result(ierr)
+    
+    integer, intent(in)                :: ioncid   
+    integer, intent(in)                :: networkId
+    integer, intent(in)                :: branchorder(:)
+    integer                            :: ierr
+    
+    ierr =  ug_put_1d_network_branchorder(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%netids(networkid), branchorder)
+    
+end function ionc_put_1d_network_branchorder_ugrid
 
 function ionc_write_1d_network_branches_geometry_ugrid(ioncid, networkid, geopointsX, geopointsY) result(ierr)
 
@@ -1279,6 +1295,20 @@ function  ionc_read_1d_network_branches_ugrid(ioncid, networkid, sourcenodeid, t
        targetnodeid,branchid,branchlengths,branchlongnames,nbranchgeometrypoints )
 
 end function ionc_read_1d_network_branches_ugrid
+
+
+!< get the branch order array, it might be temporary function
+   function ionc_get_1d_network_branchorder_ugrid(ioncid, networkid, branchorder) result(ierr)
+
+   integer, intent(in)                :: ioncid   
+   integer, intent(in)                :: networkid 
+   integer,intent(out)                :: branchorder(:)
+   integer                            :: ierr
+   
+   ierr = ug_get_1d_network_branchorder(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%netids(networkid), branchorder)
+
+   end function ionc_get_1d_network_branchorder_ugrid  
+   
 
 function  ionc_read_1d_network_branches_geometry_ugrid(ioncid, networkid, geopointsX, geopointsY) result(ierr)
 

@@ -597,6 +597,17 @@ namespace UGrid.tests
         [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ionc_ug_get_mesh_ids", CallingConvention = CallingConvention.Cdecl)]
         private static extern int ionc_ug_get_mesh_ids_dll([In] ref int ncidin, [In] ref int meshType, [In, Out] ref IntPtr c_meshids, [In] ref int nnumNetworks);
 
+        //-Branch order functions -------------------//
+
+        [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ionc_put_1d_network_branchorder", CallingConvention = CallingConvention.Cdecl)]
+        private static extern int ionc_put_1d_network_branchorder_dll([In] ref int ncidin, [In] ref int networkid, [In] ref IntPtr c_branchorder, [In] ref int nbranches);
+
+
+        [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ionc_get_1d_network_branchorder", CallingConvention = CallingConvention.Cdecl)]
+        private static extern int ionc_get_1d_network_branchorder_dll([In] ref int ncidin, [In] ref int networkid, [In, Out] ref IntPtr c_branchorder, [In] ref int nnumNetworks);
+
+
+
         #endregion
 
         #region Implementation of LibWrapper
@@ -873,6 +884,16 @@ namespace UGrid.tests
         public int ionc_ug_get_mesh_ids(ref int ncidin, ref int meshType, ref IntPtr c_meshids, ref int nnumNetworks)
         {
             return ionc_ug_get_mesh_ids_dll(ref ncidin, ref meshType, ref c_meshids, ref nnumNetworks);
+        }
+
+        public int ionc_put_1d_network_branchorder(ref int ncidin, ref int networkid, ref IntPtr c_branchorder, ref int nbranches)
+        {
+            return ionc_put_1d_network_branchorder_dll(ref ncidin, ref networkid, ref c_branchorder, ref  nbranches);
+        }
+
+        public int ionc_get_1d_network_branchorder(ref int ncidin, ref int networkid, ref IntPtr c_branchorder, ref int nbranches)
+        {
+            return ionc_get_1d_network_branchorder_dll(ref ncidin, ref networkid, ref c_branchorder, ref nbranches);
         }
 
         #endregion

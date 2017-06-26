@@ -87,7 +87,7 @@ namespace UGrid.tests
         private int[] mesh2indexes = {1, 2, 3};
         private string[] linksids = {"link1", "link2", "link3"};
         private string[] linkslongnames = {"linklong1", "linklong2", "linklong3"};
-        private double[] branch_order = { -1, -1, -1 }; 
+        private int[] branch_order = { -1, -1, -1 }; 
 
         // mesh2d
         private int numberOf2DNodes = 5;
@@ -109,6 +109,7 @@ namespace UGrid.tests
             IntPtr c_nbranchgeometrypoints = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nBranches);
             IntPtr c_geopointsX = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nGeometry);
             IntPtr c_geopointsY = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nGeometry);
+            IntPtr c_branch_order = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nBranches);
             try
             {
                 //1. Get the node count
@@ -193,6 +194,17 @@ namespace UGrid.tests
                     Assert.That(rc_geopointsY[i], Is.EqualTo(geopointsY[i]));
                 }
 
+                //7. Get the branch order 
+                Marshal.Copy(branch_order, 0, c_branch_order, nBranches);
+                ierr = wrapper.ionc_get_1d_network_branchorder(ref ioncid, ref networkid, ref c_branch_order, ref nBranches);
+                Assert.That(ierr, Is.EqualTo(0));
+                int[] rc_branch_order = new int[nBranches];
+                Marshal.Copy(c_branch_order, rc_branch_order, 0, nBranches);
+                for (int i = 0; i < nBranches; i++)
+                {
+                    Assert.That(rc_branch_order[i], Is.EqualTo(branch_order[i]));
+                }
+
             }
             finally
             {
@@ -204,6 +216,7 @@ namespace UGrid.tests
                 Marshal.FreeCoTaskMem(c_nbranchgeometrypoints);
                 Marshal.FreeCoTaskMem(c_geopointsX);
                 Marshal.FreeCoTaskMem(c_geopointsY);
+                Marshal.FreeCoTaskMem(c_branch_order);
             }
         }
 
@@ -419,7 +432,7 @@ namespace UGrid.tests
             IntPtr c_nbranchgeometrypoints = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nBranches);
             IntPtr c_geopointsX = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nGeometry);
             IntPtr c_geopointsY = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nGeometry);
-            IntPtr c_branch_order = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nBranches); 
+            IntPtr c_branch_order = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nBranches); 
             try
             {
                 int ierr = -1;
@@ -468,24 +481,9 @@ namespace UGrid.tests
                 Assert.That(ierr, Is.EqualTo(0));
 
                 //4. Define the branch order 
-                //int id_var = -1;
-                //int itype = (int)NetcdfDataType.nf90_double;
-                //int iloctype =(int)Locations.UG_LOC_EDGE;
-                //string c_var_name = "branch_order";
-                //string c_standard_name = " ";
-                //string c_long_name = " ";
-                //string c_unit = " ";
-                //double dfill = -1.0;
-                //int ugent = 1; // defined on the network
-
-                //ierr = wrapper.ionc_def_var( ref ioncid, ref networkid, ref id_var, ref itype, ref iloctype, c_var_name, 
-                //    c_standard_name, c_long_name, c_unit, ref dfill, ref ugent);
-                //Assert.That(ierr, Is.EqualTo(0));
-
-                ////5. Put the branch order values
-                //Marshal.Copy(branch_order, 0, c_branch_order, nBranches);
-                //ierr = wrapper.ionc_put_var(ref ioncid, ref networkid, ref iloctype, c_var_name, ref c_branch_order, ref nBranches, ref ugent);
-                //Assert.That(ierr, Is.EqualTo(0));
+                Marshal.Copy(branch_order, 0, c_branch_order, nBranches);
+                ierr = wrapper.ionc_put_1d_network_branchorder(ref ioncid, ref networkid, ref c_branch_order, ref nBranches);
+                Assert.That(ierr, Is.EqualTo(0));
             }
             finally
             {

@@ -253,6 +253,7 @@ enumerator ntid_1dnodey
 enumerator ntid_1dnodids
 enumerator ntid_1dnodlongnames
 enumerator ntid_1dedgenodes
+enumerator ntid_1dbranchorder              !< Coordinate variable for the branch order
 enumerator ntid_end
 end enum    
 
@@ -1788,7 +1789,8 @@ function ug_init_network_topology(ncid, varid, netids) result(ierr)
 
    integer,            intent(in)    :: ncid          !< ID of already opened data set.
    integer,            intent(in)    :: varid         !< NetCDF variable ID that contains the network topology information.
-   type(t_ug_network), intent(inout) :: netids       !< vector in which all mesh topology dimension and variables ids will be stored.
+   type(t_ug_network), intent(inout) :: netids        !< vector in which all mesh topology dimension and variables ids will be stored.
+   character(len=nf90_max_name)      :: varname       !< char array  to hold the network name
    integer                           :: ierr          !< Result status (UG_NOERR if successful).
    integer                           :: dimids(2)
    
@@ -1820,6 +1822,10 @@ function ug_init_network_topology(ncid, varid, netids) result(ierr)
    netids%dimids(ntdim_idstring) = dimids(1)
    ierr = nf90_inquire_variable( ncid, netids%varids(ntid_1dbranchlongnames),dimids = dimids)
    netids%dimids(ntdim_longnamestring) = dimids(1)
+   
+   !read the branch order
+   ierr = nf90_inquire_variable(ncid, varid, name = varname)
+   ierr = nf90_inq_varid(ncid, trim(varname)//'_branch_order', netids%varids(ntid_1dbranchorder))
 
 end function ug_init_network_topology
 
@@ -3105,6 +3111,11 @@ function ug_create_1d_network(ncid, netids, networkName, nNodes, nBranches,nGeom
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dgeoy), 'long_name', 'y coordinates of the branch geometries')
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dgeoy), 'units', 'm')
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dgeoy), 'cf_role', 'geometry_y_node')
+   
+   !5 Branch order : might be temporary, could be defined, written and retrived using ug_def_var, ug_put_var, ug_get_var
+   ierr = nf90_def_var(ncid, prefix//'_branch_order', nf90_int, (/ netids%dimids(ntdim_1dbranches) /) , netids%varids(ntid_1dbranchorder))
+   ierr = nf90_put_att(ncid, netids%varids(ntid_1dbranchorder), 'mesh', prefix)
+   ierr = nf90_put_att(ncid, netids%varids(ntid_1dbranchorder), 'location', 'edge')
 
    ierr = nf90_enddef(ncid)
    
@@ -3331,7 +3342,19 @@ function ug_write_1d_network_branches(ncid,netids, sourceNodeId,targetNodeId, br
    ierr = nf90_put_var(ncid, netids%varids(ntid_1dbranchlengths), branchlengths) 
    ierr = nf90_put_var(ncid, netids%varids(ntid_1dgeopointsperbranch), nbranchgeometrynodes) 
   
-end function ug_write_1d_network_branches
+   end function ug_write_1d_network_branches
+   
+!> This function writes the branch order array
+   function ug_put_1d_network_branchorder(ncid, netids, branchorder) result(ierr)
+
+   integer, intent(in)               :: ncid
+   type(t_ug_network), intent(in)    :: netids !< Set of NetCDF-ids for network
+   integer,           intent(in)     :: branchorder(:)
+   integer                           :: ierr
+   
+   ierr = nf90_put_var(ncid, netids%varids(ntid_1dbranchorder), branchorder) 
+
+   end function ug_put_1d_network_branchorder
 
 !> This function writes the geometry points
 function ug_write_1d_network_branches_geometry(ncid,netids, geopointsX, geopointsY)  result(ierr)
@@ -3492,7 +3515,22 @@ function ug_read_1d_network_branches(ncid, netids, sourcenodeid, targetnodeid, b
        Call SetMessage(Level_Fatal, 'could not read the geometry points of each branch in 1d network')
    end if 
    
-end function ug_read_1d_network_branches
+   end function ug_read_1d_network_branches
+   
+!> This function writes the branch order array
+   function ug_get_1d_network_branchorder(ncid, netids, branchorder) result(ierr)
+
+   integer, intent(in)               :: ncid
+   type(t_ug_network), intent(in)    :: netids !< Set of NetCDF-ids for network
+   integer,           intent( out)   :: branchorder(:)
+   integer                           :: ierr
+   
+   ierr = nf90_get_var(ncid, netids%varids(ntid_1dbranchorder), branchorder) 
+   if(ierr /= UG_NOERR) then 
+       Call SetMessage(Level_Fatal, 'could not read the branch order of 1d network')
+   end if 
+
+   end function ug_get_1d_network_branchorder   
 
 !> This function reads the coordinates of the geometry points
 function ug_read_1d_network_branches_geometry(ncid, netids, geopointsX, geopointsY) result(ierr)

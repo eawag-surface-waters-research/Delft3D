@@ -713,6 +713,22 @@ function ionc_write_1d_network_branches_dll(ioncid,networkid, c_sourcenodeid, c_
   
 end function ionc_write_1d_network_branches_dll
 
+!< write the branch order array, it might be temporary function
+function ionc_put_1d_network_branchorder_dll(ioncid, networkid, c_branchorder, nbranches) result(ierr) bind(C, name="ionc_put_1d_network_branchorder")
+!DEC$ ATTRIBUTES DLLEXPORT :: ionc_put_1d_network_branchorder_dll
+
+    integer, intent(in)                :: ioncid, nbranches   
+    integer, intent(in)                :: networkId
+    type(c_ptr), intent(in)            :: c_branchorder
+    integer, pointer                   :: branchorder(:)
+    integer                            :: ierr
+    
+    call c_f_pointer(c_branchorder, branchorder, (/ nbranches /))
+    
+    ierr =  ionc_put_1d_network_branchorder_ugrid(ioncid, networkid, branchorder)
+    
+end function ionc_put_1d_network_branchorder_dll
+
 function ionc_write_1d_network_branches_geometry_dll(ioncid, networkid, c_geopointsX, c_geopointsY, nGeometry) result(ierr) bind(C, name="ionc_write_1d_network_branches_geometry")
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_write_1d_network_branches_geometry_dll
   
@@ -811,6 +827,24 @@ function ionc_read_1d_network_branches_dll(ioncid, networkid, c_sourcenodeid, c_
   end do
     
 end function ionc_read_1d_network_branches_dll
+
+
+!< get the branch order array, it might be temporary function
+function ionc_get_1d_network_branchorder_dll(ioncid, networkid, c_branchorder, nbranches) result(ierr) bind(C, name="ionc_get_1d_network_branchorder")
+!DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_1d_network_branchorder_dll
+   
+   integer, intent(in)                :: ioncid, nbranches   
+   integer, intent(in)                :: networkid 
+   type(c_ptr), intent(inout)         :: c_branchorder
+   integer,pointer                    :: branchorder(:)
+   integer                            :: ierr
+   
+   call c_f_pointer(c_branchorder, branchorder, (/ nbranches /))
+   
+   ierr = ionc_get_1d_network_branchorder_ugrid(ioncid, networkid, branchorder)
+
+end function ionc_get_1d_network_branchorder_dll  
+   
 
 function ionc_read_1d_network_branches_geometry_dll(ioncid, networkid, c_geopointsX, c_geopointsY, ngeometrypoints) result(ierr) bind(C, name="ionc_read_1d_network_branches_geometry")
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_read_1d_network_branches_geometry_dll
