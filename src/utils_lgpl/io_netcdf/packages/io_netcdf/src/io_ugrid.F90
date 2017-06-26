@@ -67,16 +67,16 @@ end type t_ug_charinfo
 
 !! Error codes
 integer, parameter :: UG_NOERR                 = NF90_NOERR
-integer, parameter :: UG_SOMEERR               = 10 !< Some unspecified error.
-integer, parameter :: UG_INVALID_MESHNAME      = 11
-integer, parameter :: UG_INVALID_MESHDIMENSION = 12
-integer, parameter :: UG_INVALID_DATALOCATION  = 13
-integer, parameter :: UG_ARRAY_TOOSMALL        = 14 !< If while getting data, the target array is too small for the amount of data that needs to be put into it.
-integer, parameter :: UG_VAR_NOTFOUND          = 15 !< Some variable was not found.
-integer, parameter :: UG_VAR_TOOMANYFOUND      = 16 !< Multiple variables were found in an inquiry whereas only one was expected or requested.
-integer, parameter :: UG_INVALID_LAYERS        = 17
-integer, parameter :: UG_INVALID_CRS           = 30 !< Invalid/missing coordinate reference system (using default)
-integer, parameter :: UG_NOTIMPLEMENTED        = 99
+integer, parameter :: UG_SOMEERR               = -1010 !< Some unspecified error.
+integer, parameter :: UG_INVALID_MESHNAME      = -1011
+integer, parameter :: UG_INVALID_MESHDIMENSION = -1012
+integer, parameter :: UG_INVALID_DATALOCATION  = -1013
+integer, parameter :: UG_ARRAY_TOOSMALL        = -1014 !< If while getting data, the target array is too small for the amount of data that needs to be put into it.
+integer, parameter :: UG_VAR_NOTFOUND          = -1015 !< Some variable was not found.
+integer, parameter :: UG_VAR_TOOMANYFOUND      = -1016 !< Multiple variables were found in an inquiry whereas only one was expected or requested.
+integer, parameter :: UG_INVALID_LAYERS        = -1017
+integer, parameter :: UG_INVALID_CRS           = -1030 !< Invalid/missing coordinate reference system (using default)
+integer, parameter :: UG_NOTIMPLEMENTED        = -1099
 
 !! Geometry options
 integer, parameter :: LAYERTYPE_OCEANSIGMA = 1 !< Dimensionless vertical ocean sigma coordinate.
@@ -306,6 +306,77 @@ integer function ug_get_message(str) result(ierr)
    ug_messagestr = ' '
 
 end function ug_get_message
+
+
+!> Given an error number, return an error message.
+!!
+!! Use this when a previous function call has returned a nonzero error status.
+!! For a more detailed error message (including possible input arguments/filenames) consider using
+!! ug_get_message instead.
+!! \see ug_get_message
+function ug_strerror(ugerr) result(str)
+   integer,                       intent(in) :: ugerr !< Integer error code for which to return the error message.
+   character(len=:), allocatable             :: str !< String variable in which the message will be stored.
+
+   select case (ugerr)
+   case (UG_NOERR);                 str = 'No error'
+   case (UG_SOMEERR);               str = 'Generic error'
+   case (UG_INVALID_MESHNAME);      str = 'Invalid or missing mesh name, or mesh not found'
+   case (UG_INVALID_MESHDIMENSION); str = 'Invalid mesh topology dimension'
+   case (UG_INVALID_DATALOCATION);  str = 'Invalid topological data location'
+   case (UG_ARRAY_TOOSMALL);        str = 'Output array too small to store all values'
+   case (UG_VAR_NOTFOUND);          str = 'Variable not found in dataset'
+   case (UG_VAR_TOOMANYFOUND);      str = 'Too many matching variables found in dataset'  
+   case (UG_INVALID_LAYERS);        str = 'Invalid layer type'    
+   case (UG_INVALID_CRS);           str = 'Invalid coordinate reference system'       
+   case (UG_NOTIMPLEMENTED);        str = 'Functionality not available yet (not implemented)'
+   case default
+      str = 'Unknown error'
+   end select
+
+end function ug_strerror
+
+
+!> Returns the integer value for a named constant.
+!! When requested constant does not exist, the returned value is undefined, and ierr contains an error code.
+integer function ug_get_constant(constname, constvalue) result(ierr)
+   character(len=*), intent(in)    :: constname  !< The name of the requested constant.
+   integer,          intent(  out) :: constvalue !< The integer value of the requested constant.
+
+   ierr = UG_NOERR
+
+   select case (trim(constname))
+   case('ug_strLenMeta');               constvalue = ug_strLenMeta
+   case('ug_idsLen');                   constvalue = ug_idsLen          
+   case('ug_idsLongNamesLen');          constvalue = ug_idsLongNamesLen 
+   case('UG_NOERR');                    constvalue = UG_NOERR                
+   case('UG_SOMEERR');                  constvalue = UG_SOMEERR              
+   case('UG_INVALID_MESHNAME');         constvalue = UG_INVALID_MESHNAME     
+   case('UG_INVALID_MESHDIMENSION');    constvalue = UG_INVALID_MESHDIMENSION
+   case('UG_INVALID_DATALOCATION');     constvalue = UG_INVALID_DATALOCATION 
+   case('UG_ARRAY_TOOSMALL');           constvalue = UG_ARRAY_TOOSMALL    
+   case('UG_VAR_NOTFOUND');             constvalue = UG_VAR_NOTFOUND      
+   case('UG_VAR_TOOMANYFOUND');         constvalue = UG_VAR_TOOMANYFOUND  
+   case('UG_INVALID_LAYERS');           constvalue = UG_INVALID_LAYERS    
+   case('UG_INVALID_CRS');              constvalue = UG_INVALID_CRS       
+   case('UG_NOTIMPLEMENTED');           constvalue = UG_NOTIMPLEMENTED    
+   case('LAYERTYPE_OCEANSIGMA');        constvalue = LAYERTYPE_OCEANSIGMA 
+   case('LAYERTYPE_Z');                 constvalue = LAYERTYPE_Z          
+   case('UG_LOC_NONE');                 constvalue = UG_LOC_NONE
+   case('UG_LOC_NODE');                 constvalue = UG_LOC_NODE
+   case('UG_LOC_EDGE');                 constvalue = UG_LOC_EDGE
+   case('UG_LOC_FACE');                 constvalue = UG_LOC_FACE
+   case('UG_LOC_VOL');                  constvalue = UG_LOC_VOL 
+   case('UG_LOC_ALL2D');                constvalue = UG_LOC_ALL2D
+   case('UG_EDGETYPE_INTERNAL_CLOSED'); constvalue = UG_EDGETYPE_INTERNAL_CLOSED
+   case('UG_EDGETYPE_INTERNAL');        constvalue = UG_EDGETYPE_INTERNAL      
+   case('UG_EDGETYPE_BND');             constvalue = UG_EDGETYPE_BND           
+   case('UG_EDGETYPE_BND_CLOSED');      constvalue = UG_EDGETYPE_BND_CLOSED    
+   case default
+      ierr = UG_SOMEERR
+   end select
+end function ug_get_constant
+
 
 !
 ! -- Writing-related routines ---------------------------------------------

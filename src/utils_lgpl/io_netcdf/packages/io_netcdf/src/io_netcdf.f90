@@ -68,6 +68,8 @@ public :: ug_strLenMeta
 !
 ! Subroutines
 !
+public :: ionc_strerror
+public :: ionc_get_constant
 public :: ionc_create
 public :: ionc_inq_conventions
 public :: ionc_adheresto_conventions
@@ -159,12 +161,12 @@ integer, public, parameter :: MAXSTRLEN = 255 !< Max string length (e.g. for inq
 !
 ! Error statuses
 !
-integer, parameter :: IONC_NOERR         = 0 !< Successful
-integer, parameter :: IONC_EBADID        = 1 !< Not a valid IONC dataset id
-integer, parameter :: IONC_ENOPEN        = 2 !< File could not be opened
-integer, parameter :: IONC_ENOMEM        = 3 !< Memory allocation error
-integer, parameter :: IONC_ENONCOMPLIANT = 4 !< File is non-compliant with its specified conventions
-integer, parameter :: IONC_ENOTAVAILABLE = 5 !< Requested function is not available, because the file has different conventions.
+integer, parameter :: IONC_NOERR         = 0     !< Successful
+integer, parameter :: IONC_EBADID        = -2001 !< Not a valid IONC dataset id
+integer, parameter :: IONC_ENOPEN        = -2002 !< File could not be opened
+integer, parameter :: IONC_ENOMEM        = -2003 !< Memory allocation error
+integer, parameter :: IONC_ENONCOMPLIANT = -2004 !< File is non-compliant with its specified conventions
+integer, parameter :: IONC_ENOTAVAILABLE = -2005 !< Requested function is not available, because the file has different conventions.
 
 
 
@@ -181,8 +183,60 @@ type(t_ionc), allocatable :: datasets(:) !< List of available datasets, maintain
 integer                   :: ndatasets   !< Number of available datasets. May be smaller than array size of datasets(:).
 
 !-------------------------------------------------------------------------------
-contains
+   contains
 !-------------------------------------------------------------------------------
+
+!> Given an error number, return an error message.
+!!
+!! Use this when a previous function call has returned a nonzero error status.
+!! Note that the error number may be an IONC error, but also an underlying UG error.
+function ionc_strerror(ierr) result(str)
+   integer,                       intent(in) :: ierr !< Integer error code for which to return the error message.
+   character(len=:), allocatable             :: str  !< String variable in which the message will be stored.
+
+   select case (ierr)
+      ! 1. First try list of IONC error numbers...
+   case (IONC_NOERR);         str = 'No error'
+   case (IONC_EBADID);        str = 'Bad io_netcdf dataset ID'
+   case (IONC_ENOPEN);        str = 'File not opened/created'
+   case (IONC_ENOMEM);        str = 'Memory allocation failure'
+   case (IONC_ENONCOMPLIANT); str = 'Dataset non-compliant to any of the supported standards'
+   case (IONC_ENOTAVAILABLE); str = 'Functionality not available for this dataset (possibly dataset adheres to different conventions?)'
+   case default
+      ! 2. Otherwise, try in list of UGRID error numbers...
+      str = ug_strerror(ierr)
+   end select
+
+end function ionc_strerror
+
+
+!> Returns the integer value for a named constant.
+!! When requested constant does not exist, the returned value is undefined, and ierr contains an error code.
+integer function ionc_get_constant(constname, constvalue) result(ierr)
+   character(len=*), intent(in)    :: constname  !< The name of the requested constant.
+   integer,          intent(  out) :: constvalue !< The integer value of the requested constant.
+
+   ierr = IONC_NOERR
+
+   select case (trim(constname))
+      ! 1. First try list of IONC constants...
+   case ('IONC_CONV_NULL');     constvalue = IONC_CONV_NULL
+   case ('IONC_CONV_CF');       constvalue = IONC_CONV_CF
+   case ('IONC_CONV_UGRID');    constvalue = IONC_CONV_UGRID
+   case ('IONC_CONV_SGRID');    constvalue = IONC_CONV_SGRID
+   case ('IONC_CONV_OTHER');    constvalue = IONC_CONV_OTHER
+   case ('IONC_NOERR');         constvalue = IONC_NOERR
+   case ('IONC_EBADID');        constvalue = IONC_EBADID
+   case ('IONC_ENOPEN');        constvalue = IONC_ENOPEN
+   case ('IONC_ENOMEM');        constvalue = IONC_ENOMEM
+   case ('IONC_ENONCOMPLIANT'); constvalue = IONC_ENONCOMPLIANT
+   case ('IONC_ENOTAVAILABLE'); constvalue = IONC_ENOTAVAILABLE
+   case default
+      ! 2. Otherwise, try in list of UGRID constants...
+      ierr = ug_get_constant(constname, constvalue)
+   end select
+end function ionc_get_constant
+
 
 !> Tries to create a NetCDF file and initialize based on its specified conventions.
 function ionc_create(netCDFFile, mode, ioncid, iconvtype, chunksize) result(ierr)

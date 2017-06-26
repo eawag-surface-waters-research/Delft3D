@@ -53,6 +53,43 @@ implicit none
 contains
 !-------------------------------------------------------------------------------
 
+   
+!> Given an error number, return an error message.
+!!
+!! Use this when a previous function call has returned a nonzero error status.
+!! Note that the error number may be an IONC error, but also an underlying UG error.
+function ionc_strerror_dll(ierr) result(c_strptr) bind(C, name="ionc_strerror")
+!DEC$ ATTRIBUTES DLLEXPORT :: ionc_strerror_dll
+   integer(kind=c_int),    intent(in   ) :: ierr     !< Integer error code for which to return the error message.
+   type(c_ptr)                           :: c_strptr !< String variable in which the message will be stored.
+
+   character(len=MAXSTRLEN) :: str
+   character(kind=c_char, len=1) :: c_str(MAXSTRLEN)
+
+   str = ionc_strerror(ierr)
+   c_str = string_to_char_array(str, len_trim(str))
+   c_strptr = c_loc(c_str)
+
+end function ionc_strerror_dll
+
+
+!> Returns the integer value for a named constant, for example 'IONC_NOERR'.
+!! When requested constant does not exist, the returned value is undefined, and ierr contains an error code.
+function ionc_get_constant_dll(c_constname, constvalue) result(ierr) bind(C, name="ionc_get_constant")
+!DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_constant_dll
+   character(kind=c_char), intent(in)    :: c_constname(MAXSTRLEN)  !< The name of the requested constant.
+   integer(kind=c_int),    intent(  out) :: constvalue              !< The integer value of the requested constant.
+   integer(kind=c_int)                   :: ierr                    !< Result status (IONC_NOERR if successful).
+
+   character(len=MAXSTRLEN) :: constname
+
+   ! Store the name
+   constname = char_array_to_string(c_constname, strlen(c_constname))
+
+   ierr = ionc_get_constant(constname, constvalue)
+
+end function ionc_get_constant_dll
+
 
 !> Tries to create a NetCDF file and initialize based on its specified conventions.
 function ionc_create_dll(c_path, mode, ioncid) result(ierr) bind(C, name="ionc_create")
