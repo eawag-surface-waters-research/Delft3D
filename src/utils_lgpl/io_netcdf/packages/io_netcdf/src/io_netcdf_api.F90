@@ -64,7 +64,7 @@ function ionc_strerror_dll(ierr) result(c_strptr) bind(C, name="ionc_strerror")
    type(c_ptr)                           :: c_strptr !< String variable in which the message will be stored.
 
    character(len=MAXSTRLEN) :: str
-   character(kind=c_char, len=1) :: c_str(MAXSTRLEN)
+   character(kind=c_char, len=1), target :: c_str(MAXSTRLEN)
 
    str = ionc_strerror(ierr)
    c_str = string_to_char_array(str, len_trim(str))
