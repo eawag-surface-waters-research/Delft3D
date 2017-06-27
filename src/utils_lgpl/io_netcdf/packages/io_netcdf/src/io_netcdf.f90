@@ -141,6 +141,11 @@ public :: ionc_ug_get_mesh_ids_ugrid
 !branch order
 public :: ionc_put_1d_network_branchorder_ugrid
 public :: ionc_get_1d_network_branchorder_ugrid
+!get network names
+public :: ionc_get_network_name
+!get the meshids from network ids
+public :: ionc_count_network_id_from_mesh_ugrid
+public :: ionc_get_network_ids_from_mesh_id_ugrid
 
 public :: ionc_getfullversionstring_io_netcdf
 
@@ -450,6 +455,16 @@ function ionc_get_mesh_name(ioncid, meshid, meshname) result(ierr)
 
    ierr = ug_get_mesh_name(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), meshname)
 end function ionc_get_mesh_name
+
+!> Gets the name of the network variable in an open dataset.
+function ionc_get_network_name(ioncid, networkid, networkname) result(ierr)
+   integer,             intent(in)    :: ioncid      !< The IONC data set id.
+   integer,             intent(in)    :: networkid   !< The network id in the specified data set.
+   character(len=*),    intent(  out) :: networkname !< The name of the network topology variable.
+   integer                            :: ierr        !< Result status, ionc_noerr if successful.
+
+   ierr = ug_get_network_name(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%netids(networkid), networkname)
+end function ionc_get_network_name
 
 !> Gets the dimension of the mesh topology for the specified mesh in a UGRID data set.
 function ionc_get_topology_dimension(ioncid, meshid, dim) result(ierr)
@@ -1298,7 +1313,7 @@ end function ionc_read_1d_network_branches_ugrid
 
 
 !< get the branch order array, it might be temporary function
-   function ionc_get_1d_network_branchorder_ugrid(ioncid, networkid, branchorder) result(ierr)
+function ionc_get_1d_network_branchorder_ugrid(ioncid, networkid, branchorder) result(ierr)
 
    integer, intent(in)                :: ioncid   
    integer, intent(in)                :: networkid 
@@ -1307,7 +1322,7 @@ end function ionc_read_1d_network_branches_ugrid
    
    ierr = ug_get_1d_network_branchorder(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%netids(networkid), branchorder)
 
-   end function ionc_get_1d_network_branchorder_ugrid  
+end function ionc_get_1d_network_branchorder_ugrid  
    
 
 function  ionc_read_1d_network_branches_geometry_ugrid(ioncid, networkid, geopointsX, geopointsY) result(ierr)
@@ -1545,5 +1560,29 @@ function ionc_get_3d_mesh_id_ugrid(ioncid, meshid) result(ierr)
    ierr = ug_get_mesh_id(datasets(ioncid)%ncid, datasets(ioncid)%ug_file, meshid, 3)
 
 end function ionc_get_3d_mesh_id_ugrid
+
+!< Count the number of meshes associated with a network
+function ionc_count_network_id_from_mesh_ugrid(ioncid, netid, nmeshids) result(ierr)
+
+   integer,  intent(in)              :: ioncid 
+   integer,  intent(in)              :: netid
+   integer,  intent(inout)           :: nmeshids
+   integer                           :: ierr
+      
+   ierr = ug_count_network_id_from_mesh_id(datasets(ioncid)%ncid, datasets(ioncid)%ug_file, netid, nmeshids)
+   
+end function ionc_count_network_id_from_mesh_ugrid
+
+!< Get an integer array array of the mesh ids associated with the network id
+function ionc_get_network_ids_from_mesh_id_ugrid(ioncid, netid, meshids) result(ierr)
+
+   integer,  intent(in)              :: ioncid 
+   integer,  intent(in)              :: netid
+   integer,  intent(inout)           :: meshids(:)
+   integer                           :: ierr
+   
+   ierr = ug_get_network_ids_from_mesh_id(datasets(ioncid)%ncid, datasets(ioncid)%ug_file, netid, meshids)
+
+end function ionc_get_network_ids_from_mesh_id_ugrid
 
 end module io_netcdf

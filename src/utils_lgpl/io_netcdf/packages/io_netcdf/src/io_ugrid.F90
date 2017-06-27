@@ -76,6 +76,7 @@ integer, parameter :: UG_VAR_NOTFOUND          = -1015 !< Some variable was not 
 integer, parameter :: UG_VAR_TOOMANYFOUND      = -1016 !< Multiple variables were found in an inquiry whereas only one was expected or requested.
 integer, parameter :: UG_INVALID_LAYERS        = -1017
 integer, parameter :: UG_INVALID_CRS           = -1030 !< Invalid/missing coordinate reference system (using default)
+integer, parameter :: UG_INVALID_NETNAME       = -1031 !< Invalid network name
 integer, parameter :: UG_NOTIMPLEMENTED        = -1099
 
 !! Geometry options
@@ -2150,7 +2151,7 @@ end function ug_get_contact_topo_count
 !! \see 
 function ug_get_mesh_name(ncid, meshids, meshname) result(ierr)
    integer,             intent(in)    :: ncid     !< NetCDF dataset id, should be already open.
-   type(t_ug_mesh),  intent(in)    :: meshids  !< Set of NetCDF-ids for all mesh geometry arrays.
+   type(t_ug_mesh),  intent(in)       :: meshids  !< Set of NetCDF-ids for all mesh geometry arrays.
    character(len=*),    intent(  out) :: meshname !< The name of the mesh topology variable.
    integer                            :: ierr     !< Result status, ug_noerr if successful.
    
@@ -2162,6 +2163,47 @@ function ug_get_mesh_name(ncid, meshids, meshname) result(ierr)
       Call SetMessage(Level_Fatal, ug_messagestr)
    end if
 end function ug_get_mesh_name
+
+!> Gets the name of the network topology variable in an open dataset.
+!!
+!! \see 
+function ug_get_network_name(ncid, netids, networkname) result(ierr)
+   integer,             intent(in)    :: ncid     !< NetCDF dataset id, should be already open.
+   type(t_ug_network),  intent(in)    :: netids  !< Set of NetCDF-ids for all mesh geometry arrays.
+   character(len=*),    intent(  out) :: networkname !< The name of the mesh topology variable.
+   integer                            :: ierr     !< Result status, ug_noerr if successful.
+   
+   networkname = ''
+   ierr = nf90_inquire_variable(ncid, netids%varids(ntid_1dtopo), name=networkname)
+   if (ierr /= nf90_noerr) then
+      write (ug_messagestr, '(a,i0)') 'ug_get_network_name: could not find networkname for topology var id ', netids%varids(ntid_1dtopo)
+      ierr = UG_INVALID_NETNAME
+      Call SetMessage(Level_Fatal, ug_messagestr)
+   end if
+end function ug_get_network_name
+
+!> Gets the name of the network topology variable in an open dataset.
+!!
+!! \see 
+function ug_get_mesh_network_name(ncid, meshids, networkname) result(ierr)
+   integer,             intent(in)    :: ncid         !< NetCDF dataset id, should be already open.
+   type(t_ug_mesh),     intent(in)    :: meshids      !< Set of NetCDF-ids for all mesh geometry arrays.
+   character(len=*),    intent(  out) :: networkname  !< The name of the mesh topology variable.
+   integer                            :: ierr         !< Result status, ug_noerr if successful.
+   
+   ierr = UG_NOERR
+   networkname = ''
+   if (meshids%varids(mid_1dtopo)/= - 1) then
+      ierr = nf90_inquire_variable(ncid, meshids%varids(mid_1dtopo), name=networkname)
+   
+      if (ierr /= nf90_noerr) then
+         write (ug_messagestr, '(a,i0)') 'ug_get_network_name: could not find networkname for mesh ', meshids%varids(mid_1dtopo)
+         ierr = UG_INVALID_NETNAME
+         Call SetMessage(Level_Fatal, ug_messagestr)
+      end if
+   endif
+   
+end function ug_get_mesh_network_name
 
 !> Gets the size/count of items for the specified topological location.
 !! Use this to get the number of nodes/edges/faces/volumes.
@@ -4061,5 +4103,51 @@ function ug_get_mesh_id(ncid, ug_file, meshid, dim) result(ierr)
    meshid    = -1
    
 end function ug_get_mesh_id 
+
+function ug_count_network_id_from_mesh_id(ncid, ug_file, netid, nmeshids) result(ierr)
+
+   integer,          intent(in)      :: ncid 
+   integer,          intent(in)      :: netid
+   integer,          intent(inout)   :: nmeshids
+   type(t_ug_file),  intent(in)      :: ug_file 
+   character(len=nf90_max_name)      :: networkname   !< the network name
+   character(len=nf90_max_name)      :: networkmeshname      !< the mesh name
+   integer                           :: i, ierr
    
+   ierr = UG_NOERR
+   !get the variable mesh id 
+   networkname = ug_file%networksnames(netid);
+   nmeshids = 0
+   do i = 1 , size(ug_file%meshnames)
+      ierr = ug_get_mesh_network_name(ncid, ug_file%meshids(i), networkmeshname)
+      if (trim(networkname) == trim(networkmeshname) ) then
+         nmeshids = nmeshids + 1;
+      endif
+   end do
+
+end function ug_count_network_id_from_mesh_id
+
+
+function ug_get_network_ids_from_mesh_id(ncid, ug_file, netid, meshids) result(ierr)
+
+   integer,          intent(in)      :: ncid 
+   integer,          intent(in)      :: netid
+   integer,          intent(inout)   :: meshids(:)
+   type(t_ug_file),  intent(in)      :: ug_file 
+   character(len=nf90_max_name)      :: networkname   !< the network name
+   character(len=nf90_max_name)      :: networkmeshname      !< the mesh name
+   integer                           :: i, ierr
+
+   ierr = UG_NOERR
+   !get the variable mesh id 
+   networkname = ug_file%networksnames(netid);
+   do i = 1 , size(ug_file%meshnames)
+      ierr = ug_get_mesh_network_name(ncid, ug_file%meshids(i), networkmeshname)
+      if (trim(networkname) == trim(networkmeshname) ) then
+         meshids(i) = i;
+      endif
+   end do
+
+end function ug_get_network_ids_from_mesh_id
+
 end module io_ugrid
