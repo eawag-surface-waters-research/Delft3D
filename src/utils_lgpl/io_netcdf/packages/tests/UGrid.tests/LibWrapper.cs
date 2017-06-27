@@ -611,11 +611,15 @@ namespace UGrid.tests
         private static extern int ionc_get_1d_network_name_dll([In] ref int ncidin, [In] ref int networkid, [MarshalAs(UnmanagedType.LPStr)][In, Out] StringBuilder networkName);
 
         //-Get the meshids from network ids ---//
-        [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ionc_count_network_id_from_mesh_id", CallingConvention = CallingConvention.Cdecl)]
-        private static extern int ionc_count_network_id_from_mesh_id_dll([In] ref int ncidin, [In] ref int networkid, [In, Out] ref int nmeshids);
+        [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ionc_count_mesh_ids_from_network_id", CallingConvention = CallingConvention.Cdecl)]
+        private static extern int ionc_count_mesh_ids_from_network_id_dll([In] ref int ncidin, [In] ref int networkid, [In, Out] ref int nmeshids);
 
-        [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ionc_get_network_ids_from_mesh_id", CallingConvention = CallingConvention.Cdecl)]
-        private static extern int ionc_get_network_ids_from_mesh_id_dll([In] ref int ncidin, [In] ref int networkid, [In] ref int nmeshids, [In, Out] ref IntPtr c_meshids);
+        [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ionc_get_mesh_ids_from_network_id", CallingConvention = CallingConvention.Cdecl)]
+        private static extern int ionc_get_mesh_ids_from_network_id_dll([In] ref int ncidin, [In] ref int networkid, [In] ref int nmeshids, [In, Out] ref IntPtr c_meshids);
+
+        //-Get the network id for a specified mesh
+        [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ionc_get_network_id_from_mesh_id", CallingConvention = CallingConvention.Cdecl)]
+        private static extern int ionc_get_network_id_from_mesh_id_dll([In] ref int ncidin, [In] ref int meshid, [In, Out] ref int networkid);
 
         #endregion
 
@@ -912,16 +916,20 @@ namespace UGrid.tests
         }
 
         //- Counts the mesh ids associated with a network id
-        public int ionc_count_network_id_from_mesh_id(ref int ncidin, ref int networkid, ref int nmeshids)
+        public int ionc_count_mesh_ids_from_network_id(ref int ncidin, ref int networkid, ref int nmeshids)
         {
-            return ionc_count_network_id_from_mesh_id_dll(ref ncidin, ref networkid, ref nmeshids);
+            return ionc_count_mesh_ids_from_network_id_dll(ref ncidin, ref networkid, ref nmeshids);
         }
         //- Gets the mesh ids associated with a network id
-        public int ionc_get_network_ids_from_mesh_id(ref int ncidin, ref int networkid, ref int nmeshids, ref IntPtr c_meshids)
+        public int ionc_get_mesh_ids_from_network_id(ref int ncidin, ref int networkid, ref int nmeshids, ref IntPtr c_meshids)
         {
-            return ionc_get_network_ids_from_mesh_id_dll(ref ncidin, ref networkid, ref nmeshids, ref c_meshids);
+            return ionc_get_mesh_ids_from_network_id_dll(ref ncidin, ref networkid, ref nmeshids, ref c_meshids);
         }
 
+        public int ionc_get_network_id_from_mesh_id(ref int ncidin, ref int meshid, ref int networkid)
+        {
+            return ionc_get_network_id_from_mesh_id_dll(ref ncidin, ref meshid, ref networkid);
+        }
 
         #endregion
     }

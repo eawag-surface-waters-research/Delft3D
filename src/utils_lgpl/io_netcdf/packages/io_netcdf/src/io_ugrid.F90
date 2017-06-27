@@ -4104,7 +4104,7 @@ function ug_get_mesh_id(ncid, ug_file, meshid, dim) result(ierr)
    
 end function ug_get_mesh_id 
 
-function ug_count_network_id_from_mesh_id(ncid, ug_file, netid, nmeshids) result(ierr)
+function ug_count_mesh_ids_from_network_id(ncid, ug_file, netid, nmeshids) result(ierr)
 
    integer,          intent(in)      :: ncid 
    integer,          intent(in)      :: netid
@@ -4125,10 +4125,10 @@ function ug_count_network_id_from_mesh_id(ncid, ug_file, netid, nmeshids) result
       endif
    end do
 
-end function ug_count_network_id_from_mesh_id
+end function ug_count_mesh_ids_from_network_id
 
 
-function ug_get_network_ids_from_mesh_id(ncid, ug_file, netid, meshids) result(ierr)
+function ug_get_mesh_ids_from_network_id(ncid, ug_file, netid, meshids) result(ierr)
 
    integer,          intent(in)      :: ncid 
    integer,          intent(in)      :: netid
@@ -4148,6 +4148,32 @@ function ug_get_network_ids_from_mesh_id(ncid, ug_file, netid, meshids) result(i
       endif
    end do
 
-end function ug_get_network_ids_from_mesh_id
+end function ug_get_mesh_ids_from_network_id
+
+function ug_get_network_id_from_mesh_id(ncid, meshids, ug_file, networkid) result(ierr)
+
+   integer,          intent(in)      :: ncid 
+   type(t_ug_mesh),  intent(in)      :: meshids 
+   type(t_ug_file),  intent(in)      :: ug_file 
+   integer,          intent(inout)   :: networkid
+   character(len=nf90_max_name)      :: networkname          !< the network name
+   character(len=nf90_max_name)      :: networkmeshname      !< the network name associated with the mesh
+   integer                           :: i, ierr
+   
+   ierr = ug_get_mesh_network_name(ncid, meshids, networkmeshname)
+   ierr = UG_NOERR
+   networkid = -1
+   
+   if(ierr == 0) then
+      do i = 1 , size(ug_file%netids)
+         ierr = ug_get_network_name(ncid, ug_file%netids(i), networkname)
+         if (trim(networkmeshname) == trim(networkname) ) then
+            networkid = i
+            exit
+         end if
+      enddo
+   endif
+   
+end function ug_get_network_id_from_mesh_id
 
 end module io_ugrid

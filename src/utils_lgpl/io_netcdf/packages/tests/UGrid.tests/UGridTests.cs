@@ -639,17 +639,23 @@ namespace UGrid.tests
 
                 //4. count the meshes associated with this network
                 int nmeshids = -1;
-                ierr = wrapper.ionc_count_network_id_from_mesh_id(ref ioncid, ref networkid, ref nmeshids);
+                ierr = wrapper.ionc_count_mesh_ids_from_network_id(ref ioncid, ref networkid, ref nmeshids);
                 Assert.That(ierr, Is.EqualTo(0));
                 Assert.That(nmeshids, Is.EqualTo(1));
 
                 int[] meshidsfromnetworkid = new int[nmeshids];
-                ierr = wrapper.ionc_get_network_ids_from_mesh_id(ref ioncid, ref networkid, ref nmeshids, ref c_meshidsfromnetworkid);
+                ierr = wrapper.ionc_get_mesh_ids_from_network_id(ref ioncid, ref networkid, ref nmeshids, ref c_meshidsfromnetworkid);
                 Assert.That(ierr, Is.EqualTo(0));
                 Marshal.Copy(c_meshidsfromnetworkid, meshidsfromnetworkid, 0, nmeshids);
                 Assert.That(meshidsfromnetworkid[0], Is.EqualTo(1));
 
-                //5. Close the file
+                //5. get the network id from the mesh id
+                networkid = -1;
+                ierr = wrapper.ionc_get_network_id_from_mesh_id(ref ioncid, ref meshid, ref networkid);
+                Assert.That(ierr, Is.EqualTo(0));
+                Assert.That(networkid, Is.EqualTo(1));
+
+                //6. Close the file
                 ierr = wrapper.ionc_close(ref ioncid);
             }
             finally

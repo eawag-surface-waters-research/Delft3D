@@ -144,8 +144,9 @@ public :: ionc_get_1d_network_branchorder_ugrid
 !get network names
 public :: ionc_get_network_name
 !get the meshids from network ids
-public :: ionc_count_network_id_from_mesh_ugrid
-public :: ionc_get_network_ids_from_mesh_id_ugrid
+public :: ionc_count_mesh_ids_from_network_id_ugrid
+public :: ionc_get_mesh_ids_from_network_id_ugrid
+public :: ionc_get_network_id_from_mesh_id_ugrid
 
 public :: ionc_getfullversionstring_io_netcdf
 
@@ -1562,27 +1563,39 @@ function ionc_get_3d_mesh_id_ugrid(ioncid, meshid) result(ierr)
 end function ionc_get_3d_mesh_id_ugrid
 
 !< Count the number of meshes associated with a network
-function ionc_count_network_id_from_mesh_ugrid(ioncid, netid, nmeshids) result(ierr)
+function ionc_count_mesh_ids_from_network_id_ugrid(ioncid, netid, nmeshids) result(ierr)
 
    integer,  intent(in)              :: ioncid 
    integer,  intent(in)              :: netid
    integer,  intent(inout)           :: nmeshids
    integer                           :: ierr
       
-   ierr = ug_count_network_id_from_mesh_id(datasets(ioncid)%ncid, datasets(ioncid)%ug_file, netid, nmeshids)
+   ierr = ug_count_mesh_ids_from_network_id(datasets(ioncid)%ncid, datasets(ioncid)%ug_file, netid, nmeshids)
    
-end function ionc_count_network_id_from_mesh_ugrid
+end function ionc_count_mesh_ids_from_network_id_ugrid
 
 !< Get an integer array array of the mesh ids associated with the network id
-function ionc_get_network_ids_from_mesh_id_ugrid(ioncid, netid, meshids) result(ierr)
+function ionc_get_mesh_ids_from_network_id_ugrid(ioncid, netid, meshids) result(ierr)
 
    integer,  intent(in)              :: ioncid 
    integer,  intent(in)              :: netid
    integer,  intent(inout)           :: meshids(:)
    integer                           :: ierr
    
-   ierr = ug_get_network_ids_from_mesh_id(datasets(ioncid)%ncid, datasets(ioncid)%ug_file, netid, meshids)
+   ierr = ug_get_mesh_ids_from_network_id(datasets(ioncid)%ncid, datasets(ioncid)%ug_file, netid, meshids)
 
-end function ionc_get_network_ids_from_mesh_id_ugrid
+end function ionc_get_mesh_ids_from_network_id_ugrid
+
+
+function ionc_get_network_id_from_mesh_id_ugrid(ioncid, meshid, networkid) result(ierr)
+
+   integer,  intent(in)              :: ioncid 
+   integer,  intent(in)              :: meshid
+   integer,  intent(inout)           :: networkid
+   integer                           :: ierr
+   
+   ierr = ug_get_network_id_from_mesh_id(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), datasets(ioncid)%ug_file, networkid)
+
+end function ionc_get_network_id_from_mesh_id_ugrid
 
 end module io_netcdf

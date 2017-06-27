@@ -1139,20 +1139,20 @@ function ionc_get_3d_mesh_id_dll(ioncid, meshid)  result(ierr) bind(C, name="ion
    
 end function ionc_get_3d_mesh_id_dll
 
-function ionc_count_network_id_from_mesh_id_dll(ioncid, networkid, nmeshids) result(ierr) bind(C, name="ionc_count_network_id_from_mesh_id")
-!DEC$ ATTRIBUTES DLLEXPORT :: ionc_count_network_id_from_mesh_id_dll
+function ionc_count_mesh_ids_from_network_id_dll(ioncid, networkid, nmeshids) result(ierr) bind(C, name="ionc_count_mesh_ids_from_network_id")
+!DEC$ ATTRIBUTES DLLEXPORT :: ionc_count_mesh_ids_from_network_id_dll
    integer, intent(in)    :: ioncid
    integer, intent(in)    :: networkid 
    integer, intent(inout) :: nmeshids   
    integer                :: ierr
 
-   ierr = ionc_count_network_id_from_mesh_ugrid(ioncid, networkid, nmeshids)
+   ierr = ionc_count_mesh_ids_from_network_id_ugrid(ioncid, networkid, nmeshids)
    
-end function ionc_count_network_id_from_mesh_id_dll
+end function ionc_count_mesh_ids_from_network_id_dll
 
 
-function ionc_get_network_ids_from_mesh_id_dll(ioncid, networkid, nmeshids, c_meshids) result(ierr) bind(C, name="ionc_get_network_ids_from_mesh_id")
-!DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_network_ids_from_mesh_id_dll
+function ionc_get_mesh_ids_from_network_id_dll(ioncid, networkid, nmeshids, c_meshids) result(ierr) bind(C, name="ionc_get_mesh_ids_from_network_id")
+!DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_mesh_ids_from_network_id_dll
    integer, intent(in)        :: ioncid
    integer, intent(in)        :: networkid 
    type(c_ptr), intent(inout) :: c_meshids  
@@ -1162,9 +1162,20 @@ function ionc_get_network_ids_from_mesh_id_dll(ioncid, networkid, nmeshids, c_me
    
    call c_f_pointer(c_meshids, meshids, (/ nmeshids /))
 
-   ierr = ionc_get_network_ids_from_mesh_id_ugrid(ioncid, networkid, meshids)
+   ierr = ionc_get_mesh_ids_from_network_id_ugrid(ioncid, networkid, meshids)
    
-end function ionc_get_network_ids_from_mesh_id_dll
+end function ionc_get_mesh_ids_from_network_id_dll
+
+function ionc_get_network_id_from_mesh_id_dll(ioncid, meshid, networkid) result(ierr) bind(C, name="ionc_get_network_id_from_mesh_id")
+!DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_network_id_from_mesh_id_dll
+   integer, intent(in)        :: ioncid
+   integer, intent(in)        :: meshid  
+   integer, intent(inout)     :: networkid   
+   integer                    :: ierr
+   
+   ierr = ionc_get_network_id_from_mesh_id_ugrid(ioncid, meshid, networkid)
+   
+end function ionc_get_network_id_from_mesh_id_dll
 
 
 end module io_netcdf_api
