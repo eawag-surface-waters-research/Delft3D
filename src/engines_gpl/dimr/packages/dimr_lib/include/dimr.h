@@ -117,6 +117,10 @@ enum {
    GLOBAL_PHASE_FINISH = 3  // Finish of first control block and init+update+finish of all other control blocks
    };
 
+enum {
+    MAXSTRING = 1000    // max string length in bytes
+    };
+
 
 // Store the exact name of the entry points in the dlls
 const char BmiDimrSetLogger            [] = "set_logger";
@@ -299,10 +303,6 @@ class Dimr {
         bool               done;           // set to true when it's time to stop
         char *             redirectFile;   // Name of file to redirect stdout/stderr to
                                            // Default: Off when started via dimr-exe, On otherwise
-        int                redirectFileIdstdout;
-        int                redirectFileIdstderr;
-        int                stdoutClone;
-        int                stderrClone;
 
         enum {
             MAXSTRING = 1024    // max string length in bytes, use same value as used in the kernels

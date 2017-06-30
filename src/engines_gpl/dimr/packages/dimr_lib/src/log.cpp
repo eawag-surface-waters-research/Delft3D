@@ -56,6 +56,7 @@ Log::Log (
     this->clock         = clock;
     this->mask          = mask;
     this->feedbackMask  = feedbackMask;
+    this->redirectFile  = NULL;
 
     this->writeCallback = NULL;
 
@@ -168,7 +169,7 @@ Log::Write (
     va_end (arguments);
     buffer[bufsize-1] = '\0';
 
-    char clock [100];
+    char * clock = new char [100];
     clock[0] = '\0';
     this->clock->Now (clock);
 
@@ -176,13 +177,25 @@ Log::Write (
     if (threadID == NULL)
         threadID = "<anonymous>";
 
-    // Write to stdout:
-    fprintf (this->output, "Dimr [%s] #%d >> %s\n",
-                        clock,
-                        rank,
-                        buffer
-                        );
-    fflush (this->output);
+    if (redirectFile != NULL) {
+        // Append to file:
+        FILE * fp;
+        fp = fopen(redirectFile,"a");
+        fprintf (fp, "Dimr [%s] #%d >> %s\n",
+                            clock,
+                            rank,
+                            buffer
+                            );
+        fclose (fp);
+    } else {
+        // Write to stdout:
+        fprintf (this->output, "Dimr [%s] #%d >> %s\n",
+                            clock,
+                            rank,
+                            buffer
+                            );
+        fflush (this->output);
+    }
 
     // Write to Callback (if registered)
     // Use separate write Mask
@@ -191,8 +204,9 @@ Log::Write (
     }
 
     delete[] buffer;
+    delete[] clock;
     return true;
-    }
+}
 
 void
 Log::SetWriteCallBack(

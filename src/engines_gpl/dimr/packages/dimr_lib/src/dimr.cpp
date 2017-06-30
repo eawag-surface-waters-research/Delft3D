@@ -48,7 +48,6 @@
 #include <limits.h>
 #include <time.h>
 
-
 #if defined (MEMCHECK)
 #include <mcheck.h>
 #endif
@@ -102,7 +101,7 @@ Dimr::Dimr(void) {
     configfile                   = NULL;
     done                         = false;
     // Initialize redirectFile. Default: switched On (!=NULL)
-    const char * filename        = "dimr_redirected";
+    const char * filename        = "dimr_redirected.log";
     int len                      = strlen(filename);
     redirectFile                 = (char *) malloc((len+1)*sizeof(char));
     strncpy(redirectFile, (const char*)filename, len);
@@ -135,44 +134,44 @@ DllExport int initialize(const char * configfile) {
         thisDimr = new Dimr();
     }
     if (thisDimr->redirectFile != NULL) {
-        fflush(stdout);
-        // Deze regel reproduceert het probleem in DeltaShell: thisDimr->redirectFileId = open(thisDimr->redirectFile, O_RDWR | O_TEXT);
-        FILE * fp;
-        // stderr
-        // First redirect stderr, then stdout, to have the logging in the right location
-        thisDimr->stderrClone = dup(2);
-        char * redirSTDERR = new char[thisDimr->MAXSTRING];
-        strcpy(redirSTDERR, thisDimr->redirectFile);
-        strcat(redirSTDERR, "_stderr.log");
-        thisDimr->log->Write(Log::MAJOR, thisDimr->my_rank, "stderr is redirected to file \"%s\"", redirSTDERR);
-        fp = fopen(redirSTDERR,"w+");
-        thisDimr->redirectFileIdstderr = fileno(fp);
-        if (thisDimr->redirectFileIdstderr < 0) {
-            throw new Exception (true, "ERROR on opening file \"%s\". Errormessage: %s\n",thisDimr->redirectFileIdstderr, strerror(errno));
-        }
-        dup2(thisDimr->redirectFileIdstderr,2);
+        // RedirectFile must be including the full path:
+        // - Get the basename (platform dependent implementation)
+        // - if (redirectfile == basename) then
+        //       Make copy of redirectfile
+        //       Put CWD in redirectfile
+        //       redirectfile = redirectfile + / + copy
+        char *fileBasename = new char[MAXSTRING];
+#if defined(HAVE_CONFIG_H)
+        fileBasename = strdup (basename (thisDimr->redirectFile));
+        const char *dirSeparator = "/";
+#else
+        char * ext = new char[5];
+        _splitpath (thisDimr->redirectFile, NULL, NULL, fileBasename, ext);
+        StringCbCatA (fileBasename, MAXSTRING, ext);
+        delete [] ext;
+        const char *dirSeparator = "\\";
+#endif
+        if (strcmp(thisDimr->redirectFile,fileBasename) == 0) {
+            char *filenameCopy = new char[MAXSTRING];
+            strcpy(filenameCopy, thisDimr->redirectFile);
 
-        // stdout
-        thisDimr->stdoutClone = dup(1);
-        char * redirSTDOUT = new char[thisDimr->MAXSTRING];
-        strcpy(redirSTDOUT, thisDimr->redirectFile);
-        strcat(redirSTDOUT, "_stdout.log");
-        thisDimr->log->Write(Log::MAJOR, thisDimr->my_rank, "stdout is redirected to file \"%s\"", redirSTDOUT);
-        fp = fopen(redirSTDOUT,"w+");
-        // thisDimr->redirectFileIdstdout = open(redirSTDOUT, O_RDWR|O_APPEND|O_CREAT);
-        thisDimr->redirectFileIdstdout = fileno(fp);
-        if (thisDimr->redirectFileIdstdout < 0) {
-            throw new Exception (true, "ERROR on opening file \"%s\". Errormessage: %s\n",thisDimr->redirectFileIdstdout, strerror(errno));
+            delete [] thisDimr->redirectFile;
+            thisDimr->redirectFile                 = (char *) malloc((MAXSTRING)*sizeof(char));
+            if (!getcwd(thisDimr->redirectFile, MAXSTRING)) {
+                throw new Exception (true, "ERROR obtaining the current working directory (init)");
+            }
+            strcat(thisDimr->redirectFile,dirSeparator);
+            strcat(thisDimr->redirectFile,filenameCopy);
+            delete [] filenameCopy;
         }
-        dup2(thisDimr->redirectFileIdstdout,1);
-        //freopen (thisDimr->redirectFile,"w",stdout);
-        //freopen (thisDimr->redirectFile,"w",stderr);
-        // Sometimes stderr overwrites stdout messages at the beginning of redirectFile
-        // Add some empty lines at the start of the file
-        printf("\n\n\n\n\n");
+        // Redirection to file is currently handled in the logger by writing directly to the specified file
+        thisDimr->log->redirectFile = thisDimr->redirectFile;
+        printf("DIMR messages are redirected to file \"%s\"\n", thisDimr->redirectFile);
         fflush(stdout);
-        delete[] redirSTDOUT;
-        delete[] redirSTDERR;
+        // Create an empty file
+        FILE * fp = fopen(thisDimr->redirectFile,"w+");
+        fclose(fp);
+        delete [] fileBasename;
     }
 
     thisDimr->log->Write(Log::MAJOR, thisDimr->my_rank, getfullversionstring_dimr_lib());
@@ -279,18 +278,9 @@ DllExport void finalize (void) {
     }
 
     if (thisDimr->redirectFile != NULL) {
-        // Stop redirecting stdout/stderr to file now
-        // This is the "last" statement in dimr.dll and redirection blocks manipulations of the resulting file
-        thisDimr->log->Write (Log::MAJOR, thisDimr->my_rank, "Finished: Redirection of stdout and stderr to file\n");
-        dup2(thisDimr->stdoutClone,1);
-        dup2(thisDimr->stderrClone,2);
-        close(thisDimr->redirectFileIdstdout);
-        close(thisDimr->redirectFileIdstderr);
-        // Redirection to CONOUT$ probably only works on Windows, but the redirection to file will only be used on Windows
-        //freopen("CONOUT$", "a", stdout);
-        // Not very nice to redirect stderr to CONOUT$ too, but CONERR$ does not exist
-        //freopen("CONOUT$", "a", stderr);
-        thisDimr->log->Write (Log::MAJOR, thisDimr->my_rank, "Finished: Redirection of stdout and stderr to file \n");
+        thisDimr->log->redirectFile = NULL;
+        printf("Finished: redirecting DIMR messages to file \"%s\"", thisDimr->redirectFile);
+        fflush(stdout);
     }
 }
 
@@ -1307,9 +1297,9 @@ void Dimr::scanComponent(XmlTree * xmlComponent, dimr_component * newComp) {
 #else
     const char *dirSeparator = "\\";
 #endif
-    char curPath[FILENAME_MAX];
-    if (!getcwd(curPath, sizeof(curPath)))
-        throw new Exception (true, "ERROR obtaining the current working directory");
+    char *curPath = new char[MAXSTRING];
+    if (!getcwd(curPath, MAXSTRING))
+        throw new Exception (true, "ERROR obtaining the current working directory (scan)");
     //
     //
     newComp->name = xmlComponent->GetAttrib("name");
@@ -1410,7 +1400,7 @@ void Dimr::scanComponent(XmlTree * xmlComponent, dimr_component * newComp) {
         newComp->workingDir = workingDirElement->charData;
         }
     // Is workingDir a valid relative path?
-    char *combinedPath= new char[FILENAME_MAX];
+    char *combinedPath= new char[MAXSTRING];
     sprintf(combinedPath, "%s%s%s", curPath, dirSeparator, newComp->workingDir);
     if (chdir(combinedPath)) {
         // CombinedPath is not correct. May be just workingDir?
@@ -1433,6 +1423,7 @@ void Dimr::scanComponent(XmlTree * xmlComponent, dimr_component * newComp) {
     if (strcmp(newComp->inputFile, ".") == 0) {
         newComp->inputFile = newComp->workingDir;
     }
+    delete [] curPath;
 }
 
 

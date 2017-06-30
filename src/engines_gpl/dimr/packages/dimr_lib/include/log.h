@@ -148,11 +148,13 @@ class Log {
             );
 
     private:
-        FILE *      output;
-        Clock *     clock;
-        Log::Mask   mask;
-        Log::Mask   feedbackMask;
+        FILE *        output;
+        Clock *       clock;
+        Log::Mask     mask;
+        Log::Mask     feedbackMask;
 
-        pthread_key_t   thkey;      // contains key for thread-specific log data
+        pthread_key_t thkey;      // contains key for thread-specific log data
         WriteCallback writeCallback;
+    public:
+        char *        redirectFile;
     };
