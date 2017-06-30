@@ -187,11 +187,9 @@ module m_ec_support
          !
          integer :: ierror   !< netcdf helper variable
          integer :: i        !< loop counter
-         logical :: unitused !< IO unit number already in use
          integer :: istat    !< status of file open operation
          !
          success = .false.
-         unitused = .false.
          ! Sanity checks.
          if (len_trim(filename) == 0) then
             call setECMessage("ERROR: ec_support::ecSupportOpenExistingFile: Name is empty")
@@ -212,19 +210,8 @@ module m_ec_support
             end if
             return
          endif
-         ! Locate an unused file unit.
-         do i = 10, maxFileUnits
-            inquire (unit = i, opened = unitused) 
-            if (.not. unitused) exit
-         enddo
-         if (unitused) then
-            call setECMessage("ERROR: ec_support::ecSupportOpenExistingFile: No free unit number available")
-            success = .false.
-            return
-         endif
-         minp = i
          ! Open the data file.
-         open(minp, file = trim(filename), action = 'READ', iostat = istat)
+         open(newunit=minp, file = trim(filename), action = 'READ', iostat = istat)
          if (istat == 0) success = .true.
       end function ecSupportOpenExistingFile
    

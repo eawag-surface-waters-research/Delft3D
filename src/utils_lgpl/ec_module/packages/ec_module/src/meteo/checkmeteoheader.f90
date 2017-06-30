@@ -32,7 +32,7 @@ function checkmeteoheader(meteoitem) result(success)
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
-    use meteo
+    use meteo_data
     use precision
     implicit none
 !

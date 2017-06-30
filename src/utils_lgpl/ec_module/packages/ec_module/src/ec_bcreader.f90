@@ -701,17 +701,7 @@ contains
     logical     :: opened
 
     iostat = 0                ! ran out of free file handles
-    do unit=1, maxunit
-       inquire(unit,opened=opened)
-       if (.not.opened) then
-          exit
-       endif
-    enddo
-    if (unit<=maxunit) then
-       open(unit, file=trim(fname), status='old', iostat=iostat)
-    else
-       iostat = -66           ! ran out of free file handles
-    endif
+    open(newunit=unit, file=trim(fname), status='old', iostat=iostat)
     ! .....
     return
   end function oldfil

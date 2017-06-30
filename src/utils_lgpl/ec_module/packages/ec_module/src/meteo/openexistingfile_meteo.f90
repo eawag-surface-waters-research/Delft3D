@@ -44,7 +44,6 @@ function openexistingfile_meteo(minp, filename) result(success)
 ! Local variables
 !
     integer :: i
-    logical :: unitused
 !
 !! executable statements -------------------------------------------------------
 !
@@ -59,16 +58,6 @@ function openexistingfile_meteo(minp, filename) result(success)
        success = .false.
        return
     endif
-    do i = 32, 200
-       inquire (unit = i, opened = unitused) 
-       if (.not. unitused) exit
-    enddo
-    if (unitused) then
-       meteomessage = 'No free unit number available for opening file'
-       success = .false.
-       return
-    endif
-    minp = i
-    open (minp, file = trim(filename), action = 'READ')
+    open(newunit=minp, file = trim(filename), action = 'READ')
     success = .true.
 end function openexistingfile_meteo
