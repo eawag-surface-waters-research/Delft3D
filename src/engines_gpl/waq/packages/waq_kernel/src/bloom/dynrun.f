@@ -84,7 +84,6 @@
 !
 !  Check whether a selective dump for periods and/or segments is requested for this period.
       IDUMP = 0
-      IGDUMP = -1
       IF (ISDUMP .EQ. 1) THEN
          IF ((ID .GE. ISDPER(1) .AND. ID .LE. ISDPER(2)) .AND.
      &       (IGDUMP .EQ. 0 .OR. IGDUMP .EQ. ISEG)) THEN
