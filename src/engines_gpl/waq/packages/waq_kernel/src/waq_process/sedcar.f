@@ -132,7 +132,7 @@
 !
       CONC    = MAX (0.0, PMSA(IP1) )
       ZERSED  = PMSA(IP2 )
-      VSED    = MAX (0.0, PMSA(IP3) )
+      VSED    = MAX (0.0, PMSA(IP3) )  ! Avoid inadvertent source if VSED negative (Delft3D-35562)
       TAU     = PMSA(IP4 )
       TCRSED  = PMSA(IP5 )
       DEPTH   = PMSA(IP6 )
