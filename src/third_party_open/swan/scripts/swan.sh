@@ -74,9 +74,9 @@ else
   # swan40.72AB and newer runs parallel using OpenMP, using the total number of cores on the machine by default
   # Two ways to force the number of parallel processes:
   # 1. Define environment parameter OMP_NUM_THREADS_SWAN with the correct number of processes
-  # 2. Put a number behind the =-sign on the line "export OMP_NUM_THREADS=" below
+  # 2. Below: replace "unset OMP_NUM_THREADS" by "export OMP_NUM_THREADS=4" (with a self choosen value, 4 is choosen as an example)
   if [ -z "$OMP_NUM_THREADS_SWAN" ]; then
-      export OMP_NUM_THREADS=
+      unset OMP_NUM_THREADS
   else
       export OMP_NUM_THREADS=$OMP_NUM_THREADS_SWAN
   fi
