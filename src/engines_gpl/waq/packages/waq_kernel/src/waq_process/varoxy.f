@@ -50,9 +50,7 @@
      J         FRESPI, DEPTHW, T1    , T2    , PPMAX , TRISE ,
      J         TSET  , TOTAL , V1    , V2
       REAL     INTEGR(0:12*24), PPLAST, RELAST, DAYLLAST
-      LOGICAL  FIRST
-      SAVE     FIRST, PPLAST, RELAST, DAYLLAST, INTEGR
-      DATA     FIRST /.TRUE./
+      SAVE     PPLAST, RELAST, DAYLLAST, INTEGR
       DATA     PPLAST, RELAST, DAYLLAST /-999.,-999.,-999./
       INTEGER  NR_MES
       SAVE     NR_MES
@@ -73,19 +71,16 @@
 
 !     Check whether certain input parameters are independent of X
 
-      IF (FIRST) THEN
-          FIRST = .FALSE.
-          IF ( (INCREM(1) .GT. 0) .OR.
-     J         (INCREM(2) .GT. 0) .OR.
-     J         (INCREM(3) .GT. 0) .OR.
-     J         (INCREM(4) .GT. 0) .OR.
-     J         (INCREM(5) .GT. 0) .OR.
-     J         (INCREM(6) .GT. 0) ) THEN
+      IF ( (INCREM(1) .GT. 0) .OR.
+     J     (INCREM(2) .GT. 0) .OR.
+     J     (INCREM(3) .GT. 0) .OR.
+     J     (INCREM(4) .GT. 0) .OR.
+     J     (INCREM(5) .GT. 0) .OR.
+     J     (INCREM(6) .GT. 0) ) THEN
 
-              WRITE (*,*)
-     J        ' VAROXY: Time parameters function(x) not ALLOWED'
-              CALL SRSTOP(1)
-          ENDIF
+          WRITE (*,*)
+     J    ' VAROXY: Time parameters function(x) not ALLOWED'
+          CALL SRSTOP(1)
       ENDIF
 
       IFLUX = 1
