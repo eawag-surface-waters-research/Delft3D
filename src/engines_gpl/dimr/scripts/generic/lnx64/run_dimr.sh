@@ -110,6 +110,11 @@ if [ -z "${D3D_HOME}" ]; then
     scriptdirname=`readlink \-f \$0`
     scriptdir=`dirname $scriptdirname`
     export D3D_HOME=$scriptdir/../..
+else
+    # D3D_HOME is passed through via argument --D3D_HOME
+    # Commonly its value is "/some/path/lnx64/scripts/../.."
+    # Remove "/../.." at the end of the string
+    scriptdir=${D3D_HOME%"/../.."}
 fi
 if [ ! -d $D3D_HOME ]; then
     echo "ERROR: directory $D3D_HOME does not exist"
@@ -118,7 +123,7 @@ fi
 export D3D_HOME
  
     # find ARCH from scriptdir path
-pth=( $( echo $scriptdir | tr "/" "\n"} ) )
+pth=( $( echo $scriptdir | tr "/" "\n" ) )
 a=${#pth[@]}-2
 export ARCH=${pth[a]}
 
@@ -157,25 +162,30 @@ export LD_LIBRARY_PATH=$shareddir:$dimrexedir:$dflowfmexedir:$flow1dexedir:$flow
 export PATH=$swanbatdir:$esmfbatdir:$PATH
 export LD_PRELOAD=$shareddir/libmkl_core.so
 
-echo === LD_LIBRARY_PATH =========================================
-echo $LD_LIBRARY_PATH
-echo =========================================================
-echo " "
-echo === ldd DFlowFM =========================================
-ldd $dflowfmexedir/libdflowfm.so
-echo =========================================================
-echo " "
-echo ===  DFlowFM -v =========================================
-$dflowfmexedir/../bin/dflowfm -v
-echo =========================================================
-echo " "
-echo ===  ldd Dimr =========================================
-ldd $dimrexedir/dimr.exe
-echo ========================================================
-echo " "
-echo ===  ldd libDimr =======================================
-ldd $dimrexedir/libdimr.so
-echo =========================================================
+# For debugging only (should be related to debuglevel?)
+# if [ 1 ]; then
+if [  ]; then
+    echo === LD_LIBRARY_PATH =========================================
+    echo $LD_LIBRARY_PATH
+    echo =========================================================
+    echo " "
+    echo === ldd DFlowFM =========================================
+    ldd $dflowfmexedir/libdflowfm.so
+    echo =========================================================
+    echo " "
+    echo ===  DFlowFM -v =========================================
+    $dflowfmexedir/../bin/dflowfm -v
+    echo =========================================================
+    echo " "
+    echo ===  ldd Dimr =========================================
+    ldd $dimrexedir/dimr.exe
+    echo ========================================================
+    echo " "
+    echo ===  ldd libDimr =======================================
+    ldd $dimrexedir/libdimr.so
+    echo =========================================================
+fi
+
 
 if [ $NSLOTS -eq 1 ]; then
     echo "executing:"
