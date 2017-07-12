@@ -312,6 +312,7 @@ subroutine rdtrafrm(lundia    ,error     ,filtrn    ,lsedtot   , &
                  & parfil    ,iparfld   ,nparfld   ,0         , &
                  & filtrn    ,name      ,dll_handle,dll_name  ,dll_function, &
                  & dll_usrfil,ipardef   ,rpardef   ,npardef   ,sedblock  )
+    if (error) return
     iformdef = iform(1)
     do ll=2, lsedtot
        if (iform(ll)==-999 .and. flstrn(ll)==' ') then
