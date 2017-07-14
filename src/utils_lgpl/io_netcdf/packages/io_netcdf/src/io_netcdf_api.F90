@@ -46,7 +46,6 @@
 module io_netcdf_api
 use io_netcdf
 use iso_c_binding
-
 implicit none
 
 !-------------------------------------------------------------------------------
@@ -1176,6 +1175,74 @@ function ionc_get_network_id_from_mesh_id_dll(ioncid, meshid, networkid) result(
    ierr = ionc_get_network_id_from_mesh_id_ugrid(ioncid, meshid, networkid)
    
 end function ionc_get_network_id_from_mesh_id_dll
+
+
+function ionc_get_meshgeom_dim_dll(ioncid, meshid, c_meshgeomdim) result(ierr) bind(C, name="ionc_get_meshgeom_dim")
+!DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_meshgeom_dim_dll
+   integer, intent(in)                         :: ioncid
+   integer, intent(in)                         :: meshid  
+   type(c_t_ug_meshgeomdim), intent(inout)     :: c_meshgeomdim 
+   type(t_ug_meshgeom)                         :: meshgeom
+   integer                                     :: ierr
+   
+   ierr = ionc_get_meshgeom(ioncid, meshid, meshgeom)
+   
+   c_meshgeomdim%dim             = meshgeom%dim
+   c_meshgeomdim%numnode         = meshgeom%numnode            
+   c_meshgeomdim%numedge         = meshgeom%numedge            
+   c_meshgeomdim%numface         = meshgeom%numface          
+   c_meshgeomdim%maxnumfacenodes = meshgeom%maxnumfacenodes   
+   c_meshgeomdim%numlayer        = meshgeom%numlayer
+   c_meshgeomdim%layertype       = meshgeom%layertype
+   c_meshgeomdim%nt_nbranches    = meshgeom%nt_nbranches
+   c_meshgeomdim%nt_ngeometry    = meshgeom%nt_ngeometry
+   
+end function ionc_get_meshgeom_dim_dll
+
+function ionc_get_meshgeom_dll(ioncid, meshid, c_meshgeom, includeArrays) result(ierr) bind(C, name="ionc_get_meshgeom")
+!DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_meshgeom_dll
+   use meshdata
+   integer, intent(in)                         :: ioncid, meshid
+   type (c_t_ug_meshgeom), intent(inout)       :: c_meshgeom
+   logical, optional,   intent(in   )          :: includeArrays
+   integer                                     :: ierr
+   type(t_ug_meshgeom)                         :: meshgeom
+   
+   
+   if(allocated(meshgeom%edge_nodes)) deallocate(meshgeom%edge_nodes)
+   if(allocated(meshgeom%face_nodes)) deallocate(meshgeom%face_nodes)
+   if(allocated(meshgeom%edge_faces)) deallocate(meshgeom%edge_faces)
+   if(allocated(meshgeom%face_edges)) deallocate(meshgeom%face_edges)
+   if(allocated(meshgeom%face_links)) deallocate(meshgeom%face_links)
+   
+   if(allocated(meshgeom%branchids)) deallocate(meshgeom%branchids)
+   if(allocated(meshgeom%nbranchgeometrynodes)) deallocate(meshgeom%nbranchgeometrynodes)
+   if(allocated(meshgeom%nodex)) deallocate(meshgeom%nodex)
+   if(allocated(meshgeom%nodey)) deallocate(meshgeom%nodey)
+   if(allocated(meshgeom%nodez)) deallocate(meshgeom%nodez)
+   
+   if(allocated(meshgeom%edgex)) deallocate(meshgeom%edgex)
+   if(allocated(meshgeom%edgey)) deallocate(meshgeom%edgey)
+   if(allocated(meshgeom%edgez)) deallocate(meshgeom%edgez)
+   
+   if(allocated(meshgeom%facex)) deallocate(meshgeom%facex)
+   if(allocated(meshgeom%facey)) deallocate(meshgeom%facey)
+   if(allocated(meshgeom%facez)) deallocate(meshgeom%facez)
+
+   if(allocated(meshgeom%branchoffsets)) deallocate(meshgeom%branchoffsets)
+   if(allocated(meshgeom%geopointsX)) deallocate(meshgeom%geopointsX)
+   if(allocated(meshgeom%geopointsY)) deallocate(meshgeom%geopointsY)
+   
+   if(allocated(meshgeom%branchlengths)) deallocate(meshgeom%branchlengths)
+   if(allocated(meshgeom%layer_zs)) deallocate(meshgeom%layer_zs)
+   if(allocated(meshgeom%interface_zs)) deallocate(meshgeom%interface_zs)
+
+   !get the mesh geometry
+   ierr = ionc_get_meshgeom(ioncid, meshid, meshgeom, includeArrays)
+   !set the pointers in c_meshgeom
+   ierr = convert_meshgeom_to_cptr(meshgeom, c_meshgeom)
+   
+end function ionc_get_meshgeom_dll
 
 
 end module io_netcdf_api

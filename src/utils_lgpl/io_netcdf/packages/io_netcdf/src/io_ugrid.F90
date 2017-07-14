@@ -34,7 +34,9 @@
 module io_ugrid
 use netcdf
 use messagehandling
+use meshdata, only: t_ug_meshgeom, c_t_ug_meshgeom, c_t_ug_meshgeomdim
 use coordinate_reference_system
+
 implicit none
 
 ! TODO: AvD: GL2: add 'full_grid_output' support, to write 1. face_edge_connectivity; 2. edge_face_connectivity; and possibly more.
@@ -113,39 +115,7 @@ type t_face
    integer, allocatable           :: lin(:)          !< link nrs, kn(1 of 2,netcell(n)%lin(1)) =  netcell(n)%nod(1)  
 end type t_face
 
-!> Structure for storing an entire mesh geometry (topology and coordinates and more).
-type t_ug_meshgeom
-! TODO: AvD: extend this to 3D (volumes)
-   character(len=256) :: meshname           !< Name of this mesh ! TODO: AvD: should this be in this data type?
-   integer            :: dim                !< Dimensionality of the mesh (1/2/3)
-   integer            :: numnode            !< Number of mesh nodes.
-   integer            :: numedge            !< Number of mesh edges.
-   integer            :: numface            !< Number of mesh faces.
-   integer            :: maxnumfacenodes    !< Maximum of number of face nodes.
-   integer            :: numlayer           !< Number of mesh layers (num interfaces == numlayer + 1), numlayer = 0 means "no layers".
-   integer            :: layertype          !< Type of vertical layer definition (only if numlayer >= 1), one of LAYERTYPE_* parameters.
 
-   integer,      pointer :: edge_nodes(:,:) !< Edge-to-node mapping array.
-   integer,      pointer :: face_nodes(:,:) !< Face-to-node mapping array.
-   integer,      pointer :: edge_faces(:,:) !< Edge-to-face mapping array (optional, can be null()).
-   integer,      pointer :: face_edges(:,:) !< Face-to-edge mapping array (optional, can be null()).
-   integer,      pointer :: face_links(:,:) !< Face-to-face mapping array (optional, can be null()).
-
-   real(kind=dp), pointer :: nodex(:)       !< x-coordinates of the mesh nodes.
-   real(kind=dp), pointer :: nodey(:)       !< y-coordinates of the mesh nodes.
-   real(kind=dp), pointer :: nodez(:)       !< z-coordinates of the mesh nodes.
-   real(kind=dp), pointer :: edgex(:)       !< x-coordinates of the mesh edges.
-   real(kind=dp), pointer :: edgey(:)       !< y-coordinates of the mesh edges.
-   real(kind=dp), pointer :: edgez(:)       !< z-coordinates of the mesh edges.
-   real(kind=dp), pointer :: facex(:)       !< x-coordinates of the mesh faces.
-   real(kind=dp), pointer :: facey(:)       !< y-coordinates of the mesh faces.
-   real(kind=dp), pointer :: facez(:)       !< z-coordinates of the mesh faces.
-
-   real(kind=dp), pointer :: layer_zs(:)     !< Vertical coordinates of the mesh layers' center (either z or sigma).
-   real(kind=dp), pointer :: interface_zs(:) !< Vertical coordinates of the mesh layers' interface (either z or sigma).
-
-   type(t_crs),  pointer :: crs           !< Map projection/coordinate transformation used for the coordinates of this mesh.
-end type t_ug_meshgeom
 
 !mesh dimensions
 enum, bind(C)
@@ -284,6 +254,7 @@ type t_ug_file
    integer                          :: nummesh
    integer                          :: numcontacts
    integer                          :: numnet
+   type(t_crs)                      :: crs                !< Move CRS to file 
    type(t_ug_mesh),allocatable      :: meshids(:)         !< The type with underlying variable IDs (one column for each mesh topology).
    type(t_ug_network),allocatable   :: netids(:)    
    type(t_ug_contacts),allocatable  :: contactids(:)      !< The array with underlying variable IDs, one column for each link topology.
@@ -575,7 +546,6 @@ function ug_new_meshgeom(meshgeom) result(ierr)
    meshgeom%layer_zs     => null()
    meshgeom%interface_zs => null()
 
-   meshgeom%crs   => null()
 
 end function ug_new_meshgeom
 
@@ -1074,16 +1044,17 @@ end function ug_def_var
 !! The mesh geometry is the required starting point for all variables/data defined ON that mesh.
 !! This function accepts the mesh geometry derived type as input, for the arrays-based function, see ug_write_mesh_arrays
 !! This only writes the mesh variables, not the actual data variables that are defined ON the mesh.
-function ug_write_mesh_struct(ncid, meshids, meshgeom) result(ierr)
+function ug_write_mesh_struct(ncid, meshids, crs, meshgeom) result(ierr)
    integer,             intent(in   ) :: ncid     !< NetCDF dataset id, should be already open and ready for writing.
    type(t_ug_mesh),  intent(inout)    :: meshids  !< Set of NetCDF-ids for all mesh geometry arrays.
    type(t_ug_meshgeom), intent(in   ) :: meshgeom !< The complete mesh geometry in a single struct.
+   type(t_crs),intent(in)             :: crs      !< The coordinate reference system
    integer                            :: ierr     !< Result status (UG_NOERR==NF90_NOERR) if successful.
 
    ierr = ug_write_mesh_arrays(ncid, meshids, meshgeom%meshName, meshgeom%dim, UG_LOC_ALL2D, meshgeom%numNode, meshgeom%numEdge, meshgeom%numFace, meshgeom%maxNumFaceNodes, &
                                meshgeom%edge_nodes, meshgeom%face_nodes, meshgeom%edge_faces, meshgeom%face_edges, meshgeom%face_links, meshgeom%nodex, meshgeom%nodey, & ! meshgeom%nodez, &
                                meshgeom%edgex, meshgeom%edgey, meshgeom%facex, meshgeom%facey, &
-                               meshgeom%crs, -999, -999d0, meshgeom%numlayer, meshgeom%layertype, meshgeom%layer_zs, meshgeom%interface_zs)
+                               crs, -999, -999d0, meshgeom%numlayer, meshgeom%layertype, meshgeom%layer_zs, meshgeom%interface_zs)
 end function ug_write_mesh_struct
 
 !> Writes a complete mesh geometry to an open NetCDF data set based on separate arrays with all mesh data.
@@ -2261,14 +2232,23 @@ end function ug_get_topology_dimension
 !> Reads the actual mesh geometry from the specified mesh in a UGRID dataset.
 !! By default only reads in the dimensions (face/edge/node counts).
 !! Optionally, also all coordinate arrays + connectivity tables can be read.
-function ug_get_meshgeom(ncid, meshids, meshgeom, includeArrays) result(ierr)
+function ug_get_meshgeom(ncid, meshids, meshgeom, includeArrays, netid) result(ierr)
+   
    use m_alloc
+   use odugrid
 
    integer,             intent(in   ) :: ncid          !< ID of already opened data set.
-   type(t_ug_mesh),     intent(in)    :: meshids !< Structure with all mesh topology variable ids (should be initialized already).
+   type(t_ug_mesh),     intent(in)    :: meshids       !< Structure with all mesh topology variable ids (should be initialized already).
    type(t_ug_meshgeom), intent(inout) :: meshgeom      !< Structure in which all mesh geometry will be stored.
    logical, optional,   intent(in   ) :: includeArrays !< (optional) Whether or not to include coordinate arrays and connectivity tables. Default: .false., i.e., dimension counts only.
-   integer                            :: ierr      !< Result status (UG_NOERR if successful).
+   integer                            :: ierr          !< Result status (UG_NOERR if successful).
+   
+   ! Variables for 1d ugrid
+   type(t_ug_network), optional, intent(in   ) :: netid     !< (optional) The network associated with the mesh (for 1d Ugrid)
+   integer,allocatable                :: sourcenodeid(:), targetnodeid(:)
+   character(len=30),allocatable      :: branchid(:)
+   character(len=80),allocatable      :: branchlongnames(:)
+   integer                            :: i, k, idxstart, idxbr, cbranchid, idxend
 
    logical :: includeArrays_
    character(len=255) :: varname
@@ -2282,22 +2262,34 @@ function ug_get_meshgeom(ncid, meshids, meshgeom, includeArrays) result(ierr)
    else
       includeArrays_ = .false.
    end if
-
+   
    !
    ! Topology dimension:
    !
    ierr = nf90_inquire_variable(ncid, meshids%varids(mid_meshtopo), name = meshgeom%meshname)
    ierr = ug_get_topology_dimension(ncid, meshids, meshgeom%dim)
-
+   
    !
    ! Dimensions/location counts:
    !
+   
    ierr = ug_inquire_dimension(ncid, meshids, UG_LOC_NODE, meshgeom%numnode)
    ierr = ug_inquire_dimension(ncid, meshids, UG_LOC_EDGE, meshgeom%numedge)
    if (meshgeom%dim >= 2) then
       ierr = ug_inquire_dimension(ncid, meshids, UG_LOC_FACE, meshgeom%numface)
       ierr = ug_inquire_dimension(ncid, meshids, UG_DIM_MAXFACENODES, meshgeom%maxnumfacenodes)
+      meshgeom%nt_nbranches = -1
+      meshgeom%nt_ngeometry = -1
    end if
+   if (meshgeom%dim == 1 .and. present(netid) ) then
+         !We are in 1d ugrid, populate dimensions
+         ierr = ug_get_1d_network_branches_count(ncid, netid, meshgeom%nt_nbranches)
+         ierr = ug_get_1d_network_branches_geometry_coordinate_count(ncid,netid, meshgeom%nt_ngeometry)
+         ierr = ug_get_1d_mesh_discretisation_points_count(ncid, meshids, meshgeom%numnode) 
+         !Is this correct?
+         meshgeom%numedge = meshgeom%numnode - meshgeom%nt_nbranches
+   endif
+
    ! TODO: AvD: extend to 3D
 
    if (includeArrays_) then
@@ -2310,12 +2302,68 @@ function ug_get_meshgeom(ncid, meshids, meshgeom, includeArrays) result(ierr)
       call reallocP(meshgeom%nodey, meshgeom%numnode, keepExisting = .false., fill = -999d0)
       call reallocP(meshgeom%nodez, meshgeom%numnode, keepExisting = .false., fill = -999d0)
       
-      ierr = ug_get_node_coordinates(ncid, meshids, meshgeom%nodex, meshgeom%nodey)
-      ! TODO: AvD: include zk coordinates
+      ! Get the node coordinates
+      if (meshgeom%dim == 2) then
+          ierr = ug_get_node_coordinates(ncid, meshids, meshgeom%nodex, meshgeom%nodey)
+          ! TODO: AvD: include zk coordinates
+      
+          !
+          ! Edges
+          !
+          call reallocP(meshgeom%edge_nodes, (/ 2, meshgeom%numedge /), keepExisting=.false.)
+          ierr = ug_get_edge_nodes(ncid, meshids, meshgeom%edge_nodes)
+      endif
+      
+      if (meshgeom%dim == 1) then
+         
+         !mesh and network 1d variables
+         call reallocP(meshgeom%branchids, meshgeom%numnode, keepExisting = .false., fill = -999)
+         call reallocP(meshgeom%branchoffsets, meshgeom%numnode, keepExisting = .false., fill = -999d0)
+         call reallocP(meshgeom%geopointsX, meshgeom%nt_ngeometry, keepExisting = .false., fill = -999d0)
+         call reallocP(meshgeom%geopointsY, meshgeom%nt_ngeometry, keepExisting = .false., fill = -999d0)
+         call reallocP(meshgeom%nbranchgeometrynodes, meshgeom%nt_nbranches, keepExisting = .false., fill = -999)
+         call reallocP(meshgeom%branchlengths, meshgeom%nt_nbranches, keepExisting = .false., fill = -999d0)
+         
+         allocate(sourcenodeid(meshgeom%nt_nbranches))
+         allocate(targetnodeid(meshgeom%nt_nbranches))
+         allocate(branchid(meshgeom%nt_nbranches))
+         allocate(branchlongnames(meshgeom%nt_nbranches))
+         
+         ierr = ug_read_1d_mesh_discretisation_points(ncid, meshids, meshgeom%branchids, meshgeom%branchoffsets)
+         ierr = ug_read_1d_network_branches_geometry(ncid, netid, meshgeom%geopointsX, meshgeom%geopointsY)
+         ierr = ug_read_1d_network_branches(ncid, netid, sourcenodeid, targetnodeid, branchid, meshgeom%branchlengths, branchlongnames, meshgeom%nbranchgeometrynodes)
+         !convert index based to coordinates
+         ierr = odu_get_xy_coordinates(meshgeom%branchids, meshgeom%branchoffsets, meshgeom%geopointsX, meshgeom%geopointsY, meshgeom%nbranchgeometrynodes, meshgeom%branchlengths, meshgeom%nodex, meshgeom%nodey)
+         
+         !calculate the starting and ending indexses of the mesh points         
+         call reallocP(meshgeom%edge_nodes, (/ 2, meshgeom%numedge /), keepExisting=.false.)
+         cbranchid       = meshgeom%branchids(1)
+         idxstart       = 1
+         idxbr          = 1
+         idxend         = 1
+         k              = 0
+         do while (idxbr<=size(meshgeom%branchlengths,1))
+            do i = idxstart + 1, size(meshgeom%branchoffsets,1)
+               if (meshgeom%branchids(i)/=cbranchid) then
+                  cbranchid = meshgeom%branchids(i)
+                  idxend = i-1;
+               exit
+               endif
+               if (i ==  size(meshgeom%branchoffsets,1)) then
+                  idxend = i;
+               endif
+            enddo
+            do i = idxstart, idxend - 1
+               k = k +1
+               meshgeom%edge_nodes(1,k) = i 
+               meshgeom%edge_nodes(2,k) = i + 1
+            enddo
+               idxstart    = idxend + 1
+               idxbr       = idxbr + 1
+         enddo
+         
+      endif
 
-      !
-      ! Edges
-      !
       ! TODO: AvD: introduce ug_read_mesh_arrays( .. intent out arrays ..)
    end if
 end function ug_get_meshgeom
@@ -2325,7 +2373,7 @@ end function ug_get_meshgeom
 !! The output x,y arrays are supposed to be of exact correct length already.
 function ug_get_node_coordinates(ncid, meshids, xn, yn) result(ierr)
    integer,            intent(in)  :: ncid    !< NetCDF dataset id, should be already open.
-   type(t_ug_mesh), intent(in)  :: meshids !< Set of NetCDF-ids for all mesh geometry arrays.
+   type(t_ug_mesh),    intent(in)  :: meshids !< Set of NetCDF-ids for all mesh geometry arrays.
    real(kind=dp),      intent(out) :: xn(:), yn(:) !< Arrays to store x,y-coordinates of the mesh nodes.
    integer                         :: ierr     !< Result status (UG_NOERR==NF90_NOERR if successful).
 
@@ -2763,10 +2811,10 @@ end subroutine write_edge_type_variable
 !!
 !! NOTE: do not pass already filled mesh geometries to this function,
 !! since array pointers will become disassociated, possibly causing memory leaks.
-function ug_create_ugrid_geometry(meshgeom) result(ierr)   
+function ug_create_ugrid_geometry(meshgeom, crs) result(ierr)   
     type(t_ug_meshgeom), intent(out) :: meshgeom     !< The mesh geometry that is to be created and filled.
     
-    type(t_crs), target, save :: crs  !< The coordinate system
+    type(t_crs), intent(inout) :: crs 
     
     ! TODO why need save here?
     integer, allocatable, target, save       :: edge_nodes(:,:), edge_faces(:,:), face_nodes(:,:), face_edges(:,:), face_links(:,:) !< Output arrays.
@@ -2789,9 +2837,6 @@ function ug_create_ugrid_geometry(meshgeom) result(ierr)
     crs%is_spherical = .TRUE.
     crs%varname = "wgs84"
     crs%epsg_code = 4326
-    
-    meshgeom%crs => crs
-
 
     ! Nodes.
     meshgeom%numNode = 5
@@ -2928,9 +2973,10 @@ subroutine ug_create_ugrid_meta(meta)
 end subroutine ug_create_ugrid_meta
 
 !> Writes the unstructured network and edge type to an already opened netCDF dataset.
-function ug_write_geom_filepointer_ugrid(ncid, meshgeom, meshids) result(ierr)
+function ug_write_geom_filepointer_ugrid(ncid, meshgeom, crs, meshids) result(ierr)
     integer,             intent(in)    :: ncid !< file pointer to netcdf file to write to.
     type(t_ug_meshgeom), intent(in)    :: meshgeom !< Mesh geometry to be written to the NetCDF file.
+    type(t_crs), intent(in)            :: crs !< Mesh geometry to be written to the NetCDF file.
     type(t_ug_mesh), intent(inout)     :: meshids  !< Set of NetCDF-ids for all mesh geometry variables.
     integer                            :: ierr     !< Result status (UG_NOERR==NF90_NOERR if successful).
     type(t_ug_meta)                    :: meta  !< Meta information on file. ! TODO: later also input arg
@@ -2944,7 +2990,7 @@ function ug_write_geom_filepointer_ugrid(ncid, meshgeom, meshids) result(ierr)
     ierr = ug_addglobalatts(ncid, meta)
     
     ! Write mesh geometry.
-    ierr = ug_write_mesh_struct(ncid, meshids, meshgeom)
+    ierr = ug_write_mesh_struct(ncid, meshids, crs, meshgeom)
 
 end function ug_write_geom_filepointer_ugrid
 
@@ -2956,7 +3002,8 @@ function ug_write_geom_ugrid(filename) result(ierr)
     integer :: ierr
 
     type(t_ug_meshgeom) :: meshgeom !< Mesh geometry to be written to the NetCDF file.
-    type(t_ug_mesh) :: meshids              !< Set of NetCDF-ids for all mesh geometry variables.
+    type(t_ug_mesh)     :: meshids          !< Set of NetCDF-ids for all mesh geometry variables.
+    type(t_crs)         :: crs              !< Set of NetCDF-ids for all mesh geometry variables.
     integer :: ncid
     
     ierr = nf90_create(filename, 0, ncid)
@@ -2965,9 +3012,9 @@ function ug_write_geom_ugrid(filename) result(ierr)
     end if
     
     ! create mesh geometry
-    ierr = ug_create_ugrid_geometry(meshgeom)
+    ierr = ug_create_ugrid_geometry(meshgeom, crs)
 
-    ierr = ug_write_geom_filepointer_ugrid(ncid, meshgeom, meshids)
+    ierr = ug_write_geom_filepointer_ugrid(ncid, meshgeom, crs, meshids)
          
     ierr = nf90_close(ncid)
         
@@ -2983,6 +3030,7 @@ function ug_write_map_ugrid(filename) result(ierr)
 
     type(t_ug_meshgeom)               :: meshgeom    !< Mesh geometry to be written to the NetCDF file.
     type(t_ug_mesh)                   :: meshids     !< Set of NetCDF-ids for all mesh geometry variables.
+    type(t_crs)                       :: crs     !< Set of NetCDF-ids for all mesh geometry variables.
     integer                           :: id_s1, id_s2, id_u1, id_zk, id_time, itim ! example: water levels, water depth, edge speed, bed level and a timer
     integer                           :: ncid, id_timedim
     double precision, allocatable     :: workf(:), worke(:), workn(:)
@@ -2997,9 +3045,9 @@ function ug_write_map_ugrid(filename) result(ierr)
     
     
     ! create mesh geometry
-    ierr = ug_create_ugrid_geometry(meshgeom)
+    ierr = ug_create_ugrid_geometry(meshgeom, crs)
 
-    ierr = ug_write_geom_filepointer_ugrid(ncid, meshgeom, meshids)
+    ierr = ug_write_geom_filepointer_ugrid(ncid, meshgeom, crs, meshids)
 
     ierr = nf90_def_dim(ncid, 'time', nf90_unlimited, id_timedim)
 
@@ -3008,16 +3056,16 @@ function ug_write_map_ugrid(filename) result(ierr)
     ierr = nf90_put_att(ncid, id_time, 'units'        , 'seconds since 2008-01-09 00:00:00')
 
     ierr = ug_def_var(ncid, id_s1, (/ meshids%dimids(mdim_face), id_timedim /), nf90_double, UG_LOC_FACE, meshgeom%meshname, "s1", "sea_surface_level_above_geoid", "Water level on cell centres", &
-                    "m", "average", meshgeom%crs, -1, -999d0)
+                    "m", "average", crs, -1, -999d0)
     
     ierr = ug_def_var(ncid, id_s2, (/ meshids%dimids(mdim_face), id_timedim /), nf90_double, UG_LOC_FACE, meshgeom%meshname, "s2", "sea_floor_depth_below_geoid", "Water depth on cell centres", &
-                    "m", "average", meshgeom%crs, -1, -999d0)
+                    "m", "average", crs, -1, -999d0)
     
     ierr = ug_def_var(ncid, id_u1, (/ meshids%dimids(mdim_edge), id_timedim /), nf90_double, UG_LOC_EDGE, meshgeom%meshname, "u1", "", "Normal velocity on cell edges", &
-                    "m s-1", "average", meshgeom%crs, -1, -999d0)
+                    "m s-1", "average", crs, -1, -999d0)
     
     ierr = ug_def_var(ncid, id_zk, (/ meshids%dimids(mdim_node), id_timedim /), nf90_double, UG_LOC_NODE, meshgeom%meshname, "zk", "", "Bed level on cell corners", &
-                    "m", "point", meshgeom%crs, -1, -999d0)
+                    "m", "point", crs, -1, -999d0)
     ! NOTE: zk is rarely time-dependent, but just as an example
 
     ierr = nf90_enddef(ncid)
@@ -3610,11 +3658,11 @@ function ug_get_1d_mesh_discretisation_points_count(ncid, meshids, nmeshpoints) 
 end function ug_get_1d_mesh_discretisation_points_count
 
 !> This function reads the geometry information for the mesh points
-function ug_read_1d_mesh_discretisation_points(ncid, meshids, branchidx, offset) result(ierr)
+function ug_read_1d_mesh_discretisation_points(ncid, meshids, branchidx, offsets) result(ierr)
 
    integer, intent(in)                      :: ncid
-   type(t_ug_mesh), intent(in)           :: meshids 
-   real(kind=dp),   intent(out)             :: offset(:)
+   type(t_ug_mesh), intent(in)              :: meshids 
+   real(kind=dp),   intent(out)             :: offsets(:)
    integer,intent(out)                      :: branchidx(:)
    integer                                  :: ierr
          
@@ -3623,7 +3671,7 @@ function ug_read_1d_mesh_discretisation_points(ncid, meshids, branchidx, offset)
    if(ierr /= UG_NOERR) then 
        Call SetMessage(Level_Fatal, 'could not read the branch ids')
    end if 
-   ierr = nf90_get_var(ncid, meshids%varids(mid_1doffset), offset)
+   ierr = nf90_get_var(ncid, meshids%varids(mid_1doffset), offsets)
    if(ierr /= UG_NOERR) then 
        Call SetMessage(Level_Fatal, 'could not read the branch offsets')
    end if 

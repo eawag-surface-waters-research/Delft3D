@@ -5,7 +5,7 @@ using System.Text;
 using NUnit.Framework;
 using General.tests;
 
-// The build of this test is disable by default because it requires NUnit.
+// The build of this test is disabled by default because it requires NUnit.
 // If you decide to build the test make sure to install Nunit in your solution.
 
 namespace UGrid.tests
@@ -53,9 +53,8 @@ namespace UGrid.tests
         private string[] branchlongNames = {"branchlong1", "branchlong2", "branchlong3"};
 
         //geometry info
-        private double[] geopointsX = { 1.0, 3.0, 5.0, 5.0, 7.0, 8.0, 5.0, 5.0, 5.0 };
-
-        private double[] geopointsY = { 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 1.0, 2.0, 4.0 };
+        double[] geopointsX = { 1.0, 3.0, 5.0, 5.0, 5.0, 5.0, 5.0, 7.0, 8.0 };
+        double[] geopointsY = { 4.0, 4.0, 4.0, 1.0, 2.0, 4.0, 4.0, 4.0, 4.0 };
 
         //mesh name
         private string meshname = "1dmesh";
@@ -99,7 +98,7 @@ namespace UGrid.tests
         private double[,] mesh2d_face_nodes = {{1, 2, 5, -999}, {2, 3, 4, 5}};
 
         //function to check mesh1d data
-        private void check1dnetwork(int ioncid, int networkid, ref LibWrapper wrapper)
+        private void check1dnetwork(int ioncid, int networkid, ref IoNetcdfLibWrapper wrapper)
         {
             IntPtr c_nodesX = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nNodes);
             IntPtr c_nodesY = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nNodes);
@@ -139,7 +138,7 @@ namespace UGrid.tests
                 Assert.That(rnGeometry, Is.EqualTo(nGeometry));
 
                 //5. Get nodes info and coordinates
-                LibWrapper.interop_charinfo[] nodesinfo = new LibWrapper.interop_charinfo[4];
+                IoNetcdfLibWrapper.interop_charinfo[] nodesinfo = new IoNetcdfLibWrapper.interop_charinfo[4];
                 ierr = wrapper.ionc_read_1d_network_nodes(ref ioncid, ref networkid, ref c_nodesX, ref c_nodesY,
                     nodesinfo, ref rnNodes);
                 Assert.That(ierr, Is.EqualTo(0));
@@ -159,7 +158,7 @@ namespace UGrid.tests
                 }
 
                 //6. Get the branch info and coordinates
-                LibWrapper.interop_charinfo[] branchinfo = new LibWrapper.interop_charinfo[3];
+                IoNetcdfLibWrapper.interop_charinfo[] branchinfo = new IoNetcdfLibWrapper.interop_charinfo[3];
                 ierr = wrapper.ionc_read_1d_network_branches(ref ioncid, ref networkid, ref c_sourcenodeid,
                     ref c_targetnodeid,
                     ref c_branchlengths, branchinfo, ref c_nbranchgeometrypoints, ref rnBranches);
@@ -228,7 +227,7 @@ namespace UGrid.tests
         }
 
         //function to check mesh1d data
-        private void check1dmesh(int ioncid, int meshid, ref LibWrapper wrapper)
+        private void check1dmesh(int ioncid, int meshid, ref IoNetcdfLibWrapper wrapper)
         {
             IntPtr c_branchidx = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nmeshpoints);
             IntPtr c_offset = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nmeshpoints);
@@ -271,7 +270,7 @@ namespace UGrid.tests
                 ierr = wrapper.ionc_get_contacts_count(ref ioncid, ref linkmesh, ref r_nlinks);
                 Assert.That(ierr, Is.EqualTo(0));
                 Assert.That(r_nlinks, Is.EqualTo(nlinks));
-                LibWrapper.interop_charinfo[] linksinfo = new LibWrapper.interop_charinfo[nlinks];
+                IoNetcdfLibWrapper.interop_charinfo[] linksinfo = new IoNetcdfLibWrapper.interop_charinfo[nlinks];
 
                 //5. Get the links values
                 ierr = wrapper.ionc_get_mesh_contact(ref ioncid, ref linkmesh, ref c_mesh1indexes, ref c_mesh2indexes,
@@ -300,7 +299,7 @@ namespace UGrid.tests
             }
         }
 
-        private void check2dmesh(int ioncid, int meshid, ref LibWrapper wrapper)
+        private void check2dmesh(int ioncid, int meshid, ref IoNetcdfLibWrapper wrapper)
         {
             IntPtr c_nodesX = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * numberOf2DNodes);
             IntPtr c_nodesY = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * numberOf2DNodes);
@@ -370,7 +369,7 @@ namespace UGrid.tests
             }
         }
 
-        private void write1dmesh(int ioncid, int networkid, ref LibWrapper wrapper)
+        private void write1dmesh(int ioncid, int networkid, ref IoNetcdfLibWrapper wrapper)
         {
             IntPtr c_branchidx = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nmeshpoints);
             IntPtr c_offset = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nmeshpoints);
@@ -402,15 +401,15 @@ namespace UGrid.tests
                 ierr = wrapper.ionc_def_mesh_contact(ref ioncid, ref linkmesh, linkmeshname, ref nlinks, ref linkmesh1,
                     ref linkmesh2, ref locationType1, ref locationType2);
                 Assert.That(ierr, Is.EqualTo(0));
-                LibWrapper.interop_charinfo[] linksinfo = new LibWrapper.interop_charinfo[nlinks];
+                IoNetcdfLibWrapper.interop_charinfo[] linksinfo = new IoNetcdfLibWrapper.interop_charinfo[nlinks];
 
                 for (int i = 0; i < nlinks; i++)
                 {
                     tmpstring = linksids[i];
-                    tmpstring = tmpstring.PadRight(LibWrapper.idssize, ' ');
+                    tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.idssize, ' ');
                     linksinfo[i].ids = tmpstring.ToCharArray();
                     tmpstring = linkslongnames[i];
-                    tmpstring = tmpstring.PadRight(LibWrapper.longnamessize, ' ');
+                    tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.longnamessize, ' ');
                     linksinfo[i].longnames = tmpstring.ToCharArray();
                 }
 
@@ -429,7 +428,7 @@ namespace UGrid.tests
 
         }
 
-        private void write1dnetwork(int ioncid, int networkid, ref LibWrapper wrapper)
+        private void write1dnetwork(int ioncid, int networkid, ref IoNetcdfLibWrapper wrapper)
         {
             IntPtr c_nodesX = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nNodes);
             IntPtr c_nodesY = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nNodes);
@@ -447,14 +446,14 @@ namespace UGrid.tests
                 //1. Write 1d network network nodes
                 Marshal.Copy(nodesX, 0, c_nodesX, nNodes);
                 Marshal.Copy(nodesY, 0, c_nodesY, nNodes);
-                LibWrapper.interop_charinfo[] nodesinfo = new LibWrapper.interop_charinfo[4];
+                IoNetcdfLibWrapper.interop_charinfo[] nodesinfo = new IoNetcdfLibWrapper.interop_charinfo[4];
                 for (int i = 0; i < nNodes; i++)
                 {
                     tmpstring = nodesids[i];
-                    tmpstring = tmpstring.PadRight(LibWrapper.idssize, ' ');
+                    tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.idssize, ' ');
                     nodesinfo[i].ids = tmpstring.ToCharArray();
                     tmpstring = nodeslongNames[i];
-                    tmpstring = tmpstring.PadRight(LibWrapper.longnamessize, ' ');
+                    tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.longnamessize, ' ');
                     nodesinfo[i].longnames = tmpstring.ToCharArray();
                 }
                 ierr = wrapper.ionc_write_1d_network_nodes(ref ioncid, ref networkid, ref c_nodesX, ref c_nodesY,
@@ -466,14 +465,14 @@ namespace UGrid.tests
                 Marshal.Copy(targetnodeid, 0, c_targetnodeid, nBranches);
                 Marshal.Copy(branchlengths, 0, c_branchlengths, nBranches);
                 Marshal.Copy(nbranchgeometrypoints, 0, c_nbranchgeometrypoints, nBranches);
-                LibWrapper.interop_charinfo[] branchinfo = new LibWrapper.interop_charinfo[3];
+                IoNetcdfLibWrapper.interop_charinfo[] branchinfo = new IoNetcdfLibWrapper.interop_charinfo[3];
                 for (int i = 0; i < nBranches; i++)
                 {
                     tmpstring = branchids[i];
-                    tmpstring = tmpstring.PadRight(LibWrapper.idssize, ' ');
+                    tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.idssize, ' ');
                     branchinfo[i].ids = tmpstring.ToCharArray();
                     tmpstring = branchlongNames[i];
-                    tmpstring = tmpstring.PadRight(LibWrapper.longnamessize, ' ');
+                    tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.longnamessize, ' ');
                     branchinfo[i].longnames = tmpstring.ToCharArray();
                 }
                 ierr = wrapper.ionc_write_1d_network_branches(ref ioncid, ref networkid, ref c_sourcenodeid,
@@ -506,30 +505,30 @@ namespace UGrid.tests
             }
         }
 
-        private void addglobalattributes(int ioncid, ref LibWrapper wrapper)
+        private void addglobalattributes(int ioncid, ref IoNetcdfLibWrapper wrapper)
         {
             string tmpstring;
-            LibWrapper.interop_metadata metadata;
+            IoNetcdfLibWrapper.interop_metadata metadata;
             tmpstring = "Deltares";
-            tmpstring = tmpstring.PadRight(LibWrapper.metadatasize, ' ');
+            tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.metadatasize, ' ');
             metadata.institution = tmpstring.ToCharArray();
             tmpstring = "Unknown";
-            tmpstring = tmpstring.PadRight(LibWrapper.metadatasize, ' ');
+            tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.metadatasize, ' ');
             metadata.source = tmpstring.ToCharArray();
             tmpstring = "Unknown";
-            tmpstring = tmpstring.PadRight(LibWrapper.metadatasize, ' ');
+            tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.metadatasize, ' ');
             metadata.references = tmpstring.ToCharArray();
             tmpstring = "Unknown";
-            tmpstring = tmpstring.PadRight(LibWrapper.metadatasize, ' ');
+            tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.metadatasize, ' ');
             metadata.version = tmpstring.ToCharArray();
             tmpstring = "Unknown";
-            tmpstring = tmpstring.PadRight(LibWrapper.metadatasize, ' ');
+            tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.metadatasize, ' ');
             metadata.modelname = tmpstring.ToCharArray();
             int ierr = wrapper.ionc_add_global_attributes(ref ioncid, ref metadata);
             Assert.That(ierr, Is.EqualTo(0));
         }
 
-        private void getNetworkid(int ioncid, ref int networkid, ref LibWrapper wrapper)
+        private void getNetworkid(int ioncid, ref int networkid, ref IoNetcdfLibWrapper wrapper)
         {
             //get the number of networks
             int nnumNetworks = -1;
@@ -545,7 +544,7 @@ namespace UGrid.tests
             networkid = rc_networksids[0];
         }
 
-        private void getMeshid(int ioncid, ref int meshid, int meshType, ref LibWrapper wrapper)
+        private void getMeshid(int ioncid, ref int meshid, int meshType, ref IoNetcdfLibWrapper wrapper)
         {
             // get the number meshes 
             int numMeshes = -1;
@@ -574,7 +573,7 @@ namespace UGrid.tests
             string c_path = TestHelper.TestDirectoryPath() + @"\write1d.nc";
             TestHelper.DeleteIfExists(c_path);
             Assert.IsFalse(File.Exists(c_path));
-            var wrapper = new LibWrapper();
+            var wrapper = new IoNetcdfLibWrapper();
 
             //2. Create the file, will not add any dataset 
             ierr = wrapper.ionc_create(c_path, ref mode, ref ioncid);
@@ -613,7 +612,7 @@ namespace UGrid.tests
                 Assert.IsTrue(File.Exists(c_path));
                 int ioncid = 0; //file variable 
                 int mode = 0; //create in read mode
-                var wrapper = new LibWrapper();
+                var wrapper = new IoNetcdfLibWrapper();
                 var ierr = wrapper.ionc_open(c_path, ref mode, ref ioncid, ref iconvtype, ref convversion);
                 Assert.That(ierr, Is.EqualTo(0));
 
@@ -670,7 +669,7 @@ namespace UGrid.tests
         [NUnit.Framework.Category("UGRIDTests")]
         public void Clones2dMesh()
         {
-            var wrapper = new LibWrapper();
+            var wrapper = new IoNetcdfLibWrapper();
 
             //1. RGF grid creates a 2d mesh. The info is in memory, here simulated by opening a file containing a mesh2d
             // and by reading all data in
@@ -783,7 +782,7 @@ namespace UGrid.tests
             string c_path = TestHelper.TestDirectoryPath() + @"\write1dNetwork.nc";
             TestHelper.DeleteIfExists(c_path);
             Assert.IsFalse(File.Exists(c_path));
-            var wrapper = new LibWrapper();
+            var wrapper = new IoNetcdfLibWrapper();
 
             //2. Create the file, will not add any dataset 
             ierr = wrapper.ionc_create(c_path, ref mode, ref ioncid);
@@ -818,7 +817,7 @@ namespace UGrid.tests
             Assert.IsTrue(File.Exists(c_path));
             int ioncid = 0; //file variable 
             int mode = 0; //create in read mode
-            var wrapper = new LibWrapper();
+            var wrapper = new IoNetcdfLibWrapper();
             var ierr = wrapper.ionc_open(c_path, ref mode, ref ioncid, ref iconvtype, ref convversion);
             Assert.That(ierr, Is.EqualTo(0));
 

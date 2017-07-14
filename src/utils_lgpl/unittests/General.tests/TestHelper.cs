@@ -37,7 +37,7 @@ namespace General.tests
         public static string GetLibraryPath(string libName)
         {
             FileInfo fileInfo = new FileInfo(AppDomain.CurrentDomain.BaseDirectory);
-            string path = fileInfo.Directory.Parent.Parent.Parent.Parent.FullName;
+            string path = fileInfo.Directory.Parent.Parent.Parent.Parent.Parent.Parent.FullName;
             bool is64bit = Environment.Is64BitProcess;
             string prefix = @"\";
             // If 64-bit process, load 64-bit DLL otherwise load the 32 bit dll 
@@ -45,7 +45,7 @@ namespace General.tests
             {
                 prefix = @"\x64\";
             }
-            path = path + @"\" + libName + @"\dll" + prefix + NativeLibrary.mode + @"\" + libName + @".dll";
+            path = path + @"\" + libName + @"\packages\" + libName + @"\dll" + prefix + NativeLibrary.mode + @"\" + libName + @".dll";
             return path;
         }
 

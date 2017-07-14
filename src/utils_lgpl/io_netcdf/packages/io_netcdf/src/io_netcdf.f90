@@ -64,6 +64,9 @@ public :: ug_idsLen
 public :: ug_idsLongNamesLen
 public :: t_ug_meta
 public :: ug_strLenMeta
+public :: t_ug_meshgeom
+public :: c_t_ug_meshgeom
+public :: c_t_ug_meshgeomdim
 
 !
 ! Subroutines
@@ -184,9 +187,9 @@ integer, parameter :: IONC_ENOTAVAILABLE = -2005 !< Requested function is not av
 type t_ionc
    integer                  :: ncid      =  0               !< The underlying native NetCDF data set id.
    integer                  :: iconvtype =  IONC_CONV_OTHER !< Detected type of the conventions used in this dataset.
-   double precision         :: convversion =  0 !< Detected version of the conventions used in this dataset.
+   double precision         :: convversion =  0             !< Detected version of the conventions used in this dataset.
    type(t_ug_file), pointer :: ug_file   => null()          !< For UGRID-type files, the underlying file structure.
-   type(t_crs),     pointer :: crs           !< Map projection/coordinate transformation used for the coordinates of this mesh.
+   type(t_crs),     pointer :: crs                          !< Map projection/coordinate transformation used for the coordinates of this mesh.
 end type t_ionc
 
 type(t_ionc), allocatable :: datasets(:) !< List of available datasets, maintained in global library state, indexed by the unique ionc_id.
@@ -491,7 +494,6 @@ function ionc_get_topology_dimension(ioncid, meshid, dim) result(ierr)
 
 end function ionc_get_topology_dimension
 
-
 !> Reads the actual mesh geometry from the specified mesh in a IONC/UGRID dataset.
 !! By default only reads in the dimensions (face/edge/node counts).
 !! Optionally, also all coordinate arrays + connectivity tables can be read.
@@ -501,17 +503,30 @@ function ionc_get_meshgeom(ioncid, meshid, meshgeom, includeArrays) result(ierr)
    type(t_ug_meshgeom), intent(inout) :: meshgeom      !< Structure in which all mesh geometry will be stored.
    logical, optional,   intent(in   ) :: includeArrays !< (optional) Whether or not to include coordinate arrays and connectivity tables. Default: .false., i.e., dimension counts only.
    integer                            :: ierr          !< Result status, ionc_noerr if successful.
+   integer                            :: networkid 
+   type(t_ug_network)                 :: netid  
 
    ! TODO: AvD: some error handling if ioncid or meshid is wrong
    if (datasets(ioncid)%iconvtype /= IONC_CONV_UGRID) then
       ierr = IONC_ENOTAVAILABLE
       goto 999
    end if
+   
+   networkid = -1
+   ierr = ug_get_network_id_from_mesh_id(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), datasets(ioncid)%ug_file, networkid)
 
    if (present(includeArrays)) then
-      ierr = ug_get_meshgeom(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), meshgeom, includeArrays)
+      if(networkid /= -1 ) then
+         ierr = ug_get_meshgeom(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), meshgeom, includeArrays, datasets(ioncid)%ug_file%netids(networkid))
+      else
+         ierr = ug_get_meshgeom(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), meshgeom, includeArrays)
+      endif 
    else
-      ierr = ug_get_meshgeom(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), meshgeom)
+      if(networkid /= -1 ) then
+         ierr = ug_get_meshgeom(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), meshgeom, netid = datasets(ioncid)%ug_file%netids(networkid))
+      else
+         ierr = ug_get_meshgeom(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), meshgeom)
+      endif
    end if
 
    ! Successful
@@ -913,7 +928,7 @@ function ionc_write_mesh_struct(ioncid, meshids, meshgeom) result(ierr)
    type(t_ug_meshgeom), intent(in)    :: meshgeom !< The complete mesh geometry in a single struct.
    integer                            :: ierr     !< Result status, ionc_noerr if successful.
 
-   ierr = ug_write_mesh_struct(datasets(ioncid)%ncid, meshids, meshgeom)
+   ierr = ug_write_mesh_struct(datasets(ioncid)%ncid, meshids, datasets(ioncid)%ug_file%crs, meshgeom)
 end function ionc_write_mesh_struct
 
 !> Initializes the io_netcdf library, setting up the logger.

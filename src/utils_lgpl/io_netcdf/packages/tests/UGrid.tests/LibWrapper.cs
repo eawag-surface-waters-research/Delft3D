@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Text;
+using General.tests;
 
 
 namespace UGrid.tests
@@ -49,7 +50,7 @@ namespace UGrid.tests
         UG_LOC_VOL = 8,
         UG_LOC_ALL2D = UG_LOC_NODE + UG_LOC_EDGE + UG_LOC_FACE
     }
-    public class LibWrapper
+    public class IoNetcdfLibWrapper
     {
         /// <summary>
         /// Checks whether the specified data set adheres to a specific set of conventions.
@@ -623,6 +624,12 @@ namespace UGrid.tests
 
         #endregion
 
+        [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ionc_get_meshgeom", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ionc_get_meshgeom_dll([In] ref int ioncid, [In] ref int meshid, [In, Out] ref meshgeom meshgeom, [In] ref bool includeArrays);
+
+        [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ionc_get_meshgeom_dim", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ionc_get_meshgeom_dim_dll([In] ref int ioncid, [In] ref int meshid, [In, Out] ref meshgeomdim meshgeomdim);
+
         #region Implementation of LibWrapper
 
         public bool ionc_adheresto_conventions(ref int ioncid, ref int iconvtype)
@@ -930,7 +937,16 @@ namespace UGrid.tests
         {
             return ionc_get_network_id_from_mesh_id_dll(ref ncidin, ref meshid, ref networkid);
         }
-
         #endregion
+
+        public int ionc_get_meshgeom(ref int ioncid, ref int meshid, ref meshgeom meshgeom, ref bool includeArrays)
+        {
+            return ionc_get_meshgeom_dll(ref  ioncid, ref  meshid, ref meshgeom, ref  includeArrays);
+        }
+
+        public int ionc_get_meshgeom_dim(ref int ioncid, ref int meshid, ref meshgeomdim meshgeomdim)
+        {
+            return ionc_get_meshgeom_dim_dll(ref  ioncid, ref  meshid, ref meshgeomdim);
+        }
     }
 }
