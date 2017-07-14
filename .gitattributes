@@ -6385,7 +6385,6 @@ src/utils_lgpl/gridgeom/packages/gridgeom/src/gridgeom.F90 -text
 src/utils_lgpl/gridgeom/packages/gridgeom/src/gridgeom_api.F90 -text
 src/utils_lgpl/gridgeom/packages/gridgeom/src/gridgeom_version.F90.svn -text
 src/utils_lgpl/gridgeom/packages/gridgeom/src/gridoperations.F90 -text
-src/utils_lgpl/gridgeom/packages/gridgeom/src/meshdata.F90 -text
 src/utils_lgpl/gridgeom/packages/gridgeom/src/network_data.f90 -text
 src/utils_lgpl/gridgeom/packages/gridgeom/src/odugrid.F90 -text
 src/utils_lgpl/gridgeom/packages/gridgeom/src/polygon.f90 -text
@@ -6451,6 +6450,7 @@ src/utils_lgpl/io_netcdf/packages/io_netcdf/src/io_netcdf.f90 -text
 src/utils_lgpl/io_netcdf/packages/io_netcdf/src/io_netcdf_api.F90 -text
 src/utils_lgpl/io_netcdf/packages/io_netcdf/src/io_netcdf_version.F90.svn -text
 src/utils_lgpl/io_netcdf/packages/io_netcdf/src/io_ugrid.F90 -text
+src/utils_lgpl/io_netcdf/packages/io_netcdf/src/meshdata.F90 -text
 src/utils_lgpl/io_netcdf/packages/io_netcdf/src/netcdf_utils.F90 -text
 src/utils_lgpl/io_netcdf/packages/io_netcdf_matlab/test_io_netcfd_matlab.m -text
 src/utils_lgpl/io_netcdf/packages/io_netcdf_python/io_netcdf[!!-~]Python[!!-~]tests.ipynb -text

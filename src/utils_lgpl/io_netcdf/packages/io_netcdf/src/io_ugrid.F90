@@ -34,8 +34,8 @@
 module io_ugrid
 use netcdf
 use messagehandling
-use meshdata, only: t_ug_meshgeom, c_t_ug_meshgeom, c_t_ug_meshgeomdim
 use coordinate_reference_system
+use meshdata
 
 implicit none
 
@@ -114,8 +114,6 @@ type t_face
    integer, allocatable           :: nod(:)          !< node nrs
    integer, allocatable           :: lin(:)          !< link nrs, kn(1 of 2,netcell(n)%lin(1)) =  netcell(n)%nod(1)  
 end type t_face
-
-
 
 !mesh dimensions
 enum, bind(C)
@@ -2235,7 +2233,7 @@ end function ug_get_topology_dimension
 function ug_get_meshgeom(ncid, meshids, meshgeom, includeArrays, netid) result(ierr)
    
    use m_alloc
-   use odugrid
+   !use odugrid !LC, TODO
 
    integer,             intent(in   ) :: ncid          !< ID of already opened data set.
    type(t_ug_mesh),     intent(in)    :: meshids       !< Structure with all mesh topology variable ids (should be initialized already).
@@ -2286,7 +2284,7 @@ function ug_get_meshgeom(ncid, meshids, meshgeom, includeArrays, netid) result(i
          ierr = ug_get_1d_network_branches_count(ncid, netid, meshgeom%nt_nbranches)
          ierr = ug_get_1d_network_branches_geometry_coordinate_count(ncid,netid, meshgeom%nt_ngeometry)
          ierr = ug_get_1d_mesh_discretisation_points_count(ncid, meshids, meshgeom%numnode) 
-         !Is this correct?
+         !LC check if this is correct
          meshgeom%numedge = meshgeom%numnode - meshgeom%nt_nbranches
    endif
 
@@ -2332,35 +2330,35 @@ function ug_get_meshgeom(ncid, meshids, meshgeom, includeArrays, netid) result(i
          ierr = ug_read_1d_mesh_discretisation_points(ncid, meshids, meshgeom%branchids, meshgeom%branchoffsets)
          ierr = ug_read_1d_network_branches_geometry(ncid, netid, meshgeom%geopointsX, meshgeom%geopointsY)
          ierr = ug_read_1d_network_branches(ncid, netid, sourcenodeid, targetnodeid, branchid, meshgeom%branchlengths, branchlongnames, meshgeom%nbranchgeometrynodes)
-         !convert index based to coordinates
-         ierr = odu_get_xy_coordinates(meshgeom%branchids, meshgeom%branchoffsets, meshgeom%geopointsX, meshgeom%geopointsY, meshgeom%nbranchgeometrynodes, meshgeom%branchlengths, meshgeom%nodex, meshgeom%nodey)
          
-         !calculate the starting and ending indexses of the mesh points         
-         call reallocP(meshgeom%edge_nodes, (/ 2, meshgeom%numedge /), keepExisting=.false.)
-         cbranchid       = meshgeom%branchids(1)
-         idxstart       = 1
-         idxbr          = 1
-         idxend         = 1
-         k              = 0
-         do while (idxbr<=size(meshgeom%branchlengths,1))
-            do i = idxstart + 1, size(meshgeom%branchoffsets,1)
-               if (meshgeom%branchids(i)/=cbranchid) then
-                  cbranchid = meshgeom%branchids(i)
-                  idxend = i-1;
-               exit
-               endif
-               if (i ==  size(meshgeom%branchoffsets,1)) then
-                  idxend = i;
-               endif
-            enddo
-            do i = idxstart, idxend - 1
-               k = k +1
-               meshgeom%edge_nodes(1,k) = i 
-               meshgeom%edge_nodes(2,k) = i + 1
-            enddo
-               idxstart    = idxend + 1
-               idxbr       = idxbr + 1
-         enddo
+         !convert index based to coordinates, do this in meshgeom
+         !ierr = odu_get_xy_coordinates(meshgeom%branchids, meshgeom%branchoffsets, meshgeom%geopointsX, meshgeom%geopointsY, meshgeom%nbranchgeometrynodes, meshgeom%branchlengths, meshgeom%nodex, meshgeom%nodey)
+
+         !call reallocP(meshgeom%edge_nodes, (/ 2, meshgeom%numedge /), keepExisting=.false.)
+         !cbranchid       = meshgeom%branchids(1)
+         !idxstart       = 1
+         !idxbr          = 1
+         !idxend         = 1
+         !k              = 0
+         !do while (idxbr<=size(meshgeom%branchlengths,1))
+         !   do i = idxstart + 1, size(meshgeom%branchoffsets,1)
+         !      if (meshgeom%branchids(i)/=cbranchid) then
+         !         cbranchid = meshgeom%branchids(i)
+         !         idxend = i-1;
+         !      exit
+         !      endif
+         !      if (i ==  size(meshgeom%branchoffsets,1)) then
+         !         idxend = i;
+         !      endif
+         !   enddo
+         !   do i = idxstart, idxend - 1
+         !      k = k +1
+         !      meshgeom%edge_nodes(1,k) = i 
+         !      meshgeom%edge_nodes(2,k) = i + 1
+         !   enddo
+         !      idxstart    = idxend + 1
+         !      idxbr       = idxbr + 1
+         !enddo
          
       endif
 

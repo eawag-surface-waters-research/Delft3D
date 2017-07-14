@@ -37,6 +37,7 @@ use iso_c_binding
 implicit none
 
 !> Structure for storing an entire mesh geometry (topology and coordinates and more).
+!> This is general data structures shared also by gridgeom
 type t_ug_meshgeom
 ! TODO: AvD: extend this to 3D (volumes)
    character(len=256) :: meshname           !< Name of this mesh ! TODO: AvD: should this be in this data type?
