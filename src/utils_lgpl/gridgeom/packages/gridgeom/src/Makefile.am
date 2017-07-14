@@ -49,7 +49,6 @@ libGridgeom_la_SOURCES = \
          gridgeom_api.F90 \
          generalmodules.f90 \
          gridoperations.F90 \
-         meshdata.F90 \
          network_data.f90 \
          odugrid.F90 \
          polygon.f90
