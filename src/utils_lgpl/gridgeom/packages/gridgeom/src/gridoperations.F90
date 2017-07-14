@@ -3319,7 +3319,7 @@
    CALL DRIETWEE(XD,YD,ZD,X,Y,Z)
    DINVIEW = INVIEW(X,Y)
    RETURN
-   END
+   END FUNCTION DINVIEW
 
    !-----------------------------------------------------------------!
    ! unstruct.F90
