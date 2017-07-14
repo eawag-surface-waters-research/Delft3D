@@ -6393,7 +6393,6 @@ src/utils_lgpl/gridgeom/packages/tests/gridgeom.Tests/LibWrapper.cs -text
 src/utils_lgpl/gridgeom/packages/tests/gridgeom.Tests/ODugrid.cs -text
 src/utils_lgpl/gridgeom/packages/tests/gridgeom.Tests/Properties/AssemblyInfo.cs -text
 src/utils_lgpl/gridgeom/packages/tests/gridgeom.Tests/gridgeom.Tests.csproj -text
-src/utils_lgpl/gridgeom/packages/tests/gridgeom.Tests/packages.config -text
 src/utils_lgpl/hyd_to_waq_part_lib/Makefile.am -text
 src/utils_lgpl/hyd_to_waq_part_lib/packages/Makefile.am -text
 src/utils_lgpl/hyd_to_waq_part_lib/packages/hyd_to_waq_part_lib/Makefile.am -text
