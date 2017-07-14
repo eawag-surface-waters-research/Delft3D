@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using General.tests;
 
 namespace gridgeom.Tests
 {
     //this class wraps the single library functions
-    public class LibWrapper
+    public class GridGeomLibWrapper
     {
+        #region import_ggeo_functions
         /// <summary>
         /// 
         /// </summary>
@@ -36,6 +38,18 @@ namespace gridgeom.Tests
             [In] ref int ngeopoints,
             [In] ref int nmeshnodes);
 
+        [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ggeo_convert",
+            CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ggeo_convert_dll([In, Out] ref meshgeom meshgeom, [In] ref meshgeomdim meshgeomdim, [In] ref int numk_keep, [In] ref int numl_keep);
+
+        [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ggeo_make1D2Dinternalnetlinks",
+            CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ggeo_make1D2Dinternalnetlinks_dll();
+
+
+        #endregion import_ggeo_functions
+
+
         public int ggeo_get_xy_coordinates(
             ref IntPtr c_branchids,
             ref IntPtr c_branchoffsets,
@@ -64,5 +78,20 @@ namespace gridgeom.Tests
                 ref  nmeshnodes);
             return ierr;
         }
+
+
+        public int ggeo_convert(ref meshgeom c_meshgeom, ref meshgeomdim c_meshgeomdim, ref int numk_keep, ref int numl_keep)
+        {
+            int ierr = ggeo_convert_dll(ref  c_meshgeom, ref  c_meshgeomdim, ref numk_keep, ref numl_keep);
+            return ierr;
+        }
+
+        public int ggeo_make1D2Dinternalnetlinks()
+        {
+            int ierr = ggeo_make1D2Dinternalnetlinks_dll();
+            return ierr;
+        }
+
+
     }
 }

@@ -6380,10 +6380,15 @@ src/utils_lgpl/gridgeom/packages/gridgeom/include/resource.h -text
 src/utils_lgpl/gridgeom/packages/gridgeom/include/version_number.ini -text
 src/utils_lgpl/gridgeom/packages/gridgeom/include/version_number.rc.svn -text
 src/utils_lgpl/gridgeom/packages/gridgeom/src/Makefile.am -text
+src/utils_lgpl/gridgeom/packages/gridgeom/src/generalmodules.f90 -text
 src/utils_lgpl/gridgeom/packages/gridgeom/src/gridgeom.F90 -text
 src/utils_lgpl/gridgeom/packages/gridgeom/src/gridgeom_api.F90 -text
 src/utils_lgpl/gridgeom/packages/gridgeom/src/gridgeom_version.F90.svn -text
+src/utils_lgpl/gridgeom/packages/gridgeom/src/gridoperations.F90 -text
+src/utils_lgpl/gridgeom/packages/gridgeom/src/meshdata.F90 -text
+src/utils_lgpl/gridgeom/packages/gridgeom/src/network_data.f90 -text
 src/utils_lgpl/gridgeom/packages/gridgeom/src/odugrid.F90 -text
+src/utils_lgpl/gridgeom/packages/gridgeom/src/polygon.f90 -text
 src/utils_lgpl/gridgeom/packages/tests/gridgeom.Tests/LibDetails.cs -text
 src/utils_lgpl/gridgeom/packages/tests/gridgeom.Tests/LibWrapper.cs -text
 src/utils_lgpl/gridgeom/packages/tests/gridgeom.Tests/ODugrid.cs -text

@@ -34,12 +34,12 @@ module odugrid
 !use xxx
 
 implicit none
+
 !user defined data types
    contains
 !
 ! Calculates a
 ! 
-!
 function odu_get_xy_coordinates(branchids, branchoffsets, geopointsX, geopointsY, nbranchgeometrynodes, branchlengths, meshXCoords, meshYCoords) result(ierr)
 
    integer, intent(in)               :: branchids(:), nbranchgeometrynodes(:)
@@ -88,7 +88,7 @@ function odu_get_xy_coordinates(branchids, branchoffsets, geopointsX, geopointsY
          branchSegmentLengths(i)= sqrt(deltaX(i)**2+deltaY(i)**2)
          totallength = totallength + branchSegmentLengths(i)
       enddo
-      !correct for total segment lenght
+      !correct for total segment length
       afac = branchlengths(idxbr)/totallength
       branchSegmentLengths(idxgeostart: idxgeoend -1) = branchSegmentLengths(idxgeostart: idxgeoend -1) * afac
       !calculate the increments
@@ -116,11 +116,21 @@ function odu_get_xy_coordinates(branchids, branchoffsets, geopointsX, geopointsY
             meshYCoords(i) = geopointsY(ind) + fractionbranchlength * yincrement(ind)
       enddo
       !update indexses
-      idxgeostart = idxgeoend +1
+      idxgeostart = idxgeoend + 1
       idxstart    = idxend + 1
       idxbr       = idxbr + 1
    enddo
 
 end function odu_get_xy_coordinates
+
+!builds nodes from links
+
+
+!function make1D2Dinternalnetlinks(meshgeom2d, meshgeom1d) result(ierr)
+!
+! type(t_ug_meshgeom), intent(in) :: meshgeom2d
+! type(t_ug_meshgeom), intent(in) :: meshgeom1d
+! 
+!end function 
 
 end module odugrid

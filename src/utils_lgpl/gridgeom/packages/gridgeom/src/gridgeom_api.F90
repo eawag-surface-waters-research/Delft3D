@@ -33,7 +33,6 @@
 
 module gridgeom_api
 
-use gridgeom
 use iso_c_binding
 
 implicit none
@@ -45,7 +44,10 @@ implicit none
 !> Gets the x,y coordinates from UGRID
 function ggeo_get_xy_coordinates_dll(c_branchids, c_branchoffsets, c_geopointsX, c_geopointsY, c_nbranchgeometrynodes, c_branchlengths, c_meshXCoords, c_meshYCoords, nbranches, ngeopoints, nmeshnodes) result(ierr) bind(C, name="ggeo_get_xy_coordinates")
 !DEC$ ATTRIBUTES DLLEXPORT :: ggeo_get_xy_coordinates_dll
-
+   
+   use gridgeom
+   use meshdata
+   
    integer(kind=c_int), intent(in)   :: nbranches, ngeopoints, nmeshnodes
    type(c_ptr), intent(in)           :: c_branchids
    type(c_ptr), intent(in)           :: c_branchoffsets, c_geopointsX, c_geopointsY, c_nbranchgeometrynodes, c_branchlengths
@@ -70,5 +72,31 @@ function ggeo_get_xy_coordinates_dll(c_branchids, c_branchoffsets, c_geopointsX,
    ierr = ggeo_get_xy_coordinates(branchids, branchoffsets, geopointsX, geopointsY, nbranchgeometrynodes, branchlengths, meshXCoords, meshYCoords)
    
 end function ggeo_get_xy_coordinates_dll
+
+function ggeo_convert_dll(c_meshgeom, c_meshgeomdim, numk_keep, numl_keep) result(ierr) bind(C, name="ggeo_convert")
+!DEC$ ATTRIBUTES DLLEXPORT :: ggeo_convert_dll
+
+   use gridoperations
+   use gridgeom
+   use meshdata
+   
+   type(c_t_ug_meshgeom), intent(in)      :: c_meshgeom
+   type(c_t_ug_meshgeomdim), intent(in)   :: c_meshgeomdim
+   type(t_ug_meshgeom)                    :: meshgeom
+   integer(kind=c_int), intent(in)        :: numk_keep, numl_keep 
+   integer                                :: ierr
+   
+   ierr = convert_cptr_to_meshgeom(c_meshgeom, c_meshgeomdim, meshgeom)
+   ierr = ggeo_convert(meshgeom, numk_keep, numl_keep)
+   
+end function ggeo_convert_dll
+
+function ggeo_make1D2Dinternalnetlinks_dll() result(ierr) bind(C, name="ggeo_make1D2Dinternalnetlinks")
+!DEC$ ATTRIBUTES DLLEXPORT :: ggeo_make1D2Dinternalnetlinks_dll
+   use gridgeom
+   integer :: ierr
+   ierr = ggeo_make1D2Dinternalnetlinks()
+   
+end function ggeo_make1D2Dinternalnetlinks_dll
 
 end module gridgeom_api

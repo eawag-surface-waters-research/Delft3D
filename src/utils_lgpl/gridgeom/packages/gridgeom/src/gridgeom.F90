@@ -32,18 +32,19 @@
 
 module gridgeom
 
-use odugrid
 
 implicit none
+
 !
 ! Subroutines
 !
-public :: ggeo_get_xy_coordinates
 
    contains
    
 function ggeo_get_xy_coordinates(branchids, branchoffsets, geopointsX, geopointsY, nbranchgeometrynodes, branchlengths, meshXCoords, meshYCoords) result(ierr)
-
+   
+   use odugrid
+   
    integer, intent(in)               :: branchids(:),nbranchgeometrynodes(:)
    double precision, intent(in)      :: branchoffsets(:), geopointsX(:), geopointsY(:), branchlengths(:)
    double precision, intent(inout)   :: meshXCoords(:), meshYCoords(:)
@@ -53,5 +54,16 @@ function ggeo_get_xy_coordinates(branchids, branchoffsets, geopointsX, geopoints
    ierr = odu_get_xy_coordinates(branchids, branchoffsets, geopointsX, geopointsY, nbranchgeometrynodes, branchlengths, meshXCoords, meshYCoords)
 
 end function ggeo_get_xy_coordinates
+
+function ggeo_make1D2Dinternalnetlinks() result(ierr)
+   
+   use gridoperations
+   
+   integer :: ierr
+   
+   ierr = make1D2Dinternalnetlinks()
+
+end function ggeo_make1D2Dinternalnetlinks
+
 
 end module gridgeom
