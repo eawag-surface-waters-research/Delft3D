@@ -263,7 +263,6 @@ function aggregate_ugrid_geometry(input, output, input_edge_type, output_edge_ty
     ! Store remaining output variables in output mesh geometry.
     output%meshName = trim(input%meshName)//'_agg'
     output%dim = input%dim
-    output%crs => input%crs
 
     output%numNode = output_node_count
     output%numEdge = output_edge_count

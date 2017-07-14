@@ -507,7 +507,6 @@ contains
     
     meshgeom%meshName = 'mesh2d'
     meshgeom%dim = 2
-    meshgeom%crs => crs
 
     meshgeom%numNode = nr_nodes
     meshgeom%nodex => nodex 
@@ -557,7 +556,7 @@ contains
     !
     ! Write mesh as UGRID
     !
-    ierr = ug_write_mesh_struct(igeomfile, meshids, meshgeom)
+    ierr = ug_write_mesh_struct(igeomfile, meshids, crs, meshgeom)
     call nc_check_err(lundia, ierr, "writing mesh", geomfilename)
     !
     ! Write edge type variable (this is an extra variable that is not part of the UGRID standard).
