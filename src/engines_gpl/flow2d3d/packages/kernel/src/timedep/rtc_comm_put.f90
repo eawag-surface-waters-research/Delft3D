@@ -40,7 +40,7 @@ subroutine rtc_comm_put(kfs       ,kfsmin    ,kfsmax    ,sig       , &
     use flow2d3d_timers
     use SyncRtcFlow
     use globaldata
-    use dfparall, only: dfloat, dfsum
+    use dfparall, only: parll, dfloat, dfsum
     !
     implicit none
     !
@@ -161,7 +161,7 @@ subroutine rtc_comm_put(kfs       ,kfsmin    ,kfsmax    ,sig       , &
           !
           call timer_start(timer_wait, gdp)
           if (rtc_ndomains>1) then
-             call rtccommunicate(tparput, tnparput*tnlocput)
+             call dd_rtccommunicate(tparput, tnparput*tnlocput)
           endif
           !
           ! Communication with RTC occurs only by the master domain

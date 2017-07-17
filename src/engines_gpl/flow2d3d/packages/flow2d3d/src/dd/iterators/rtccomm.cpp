@@ -290,7 +290,7 @@ RTCSTARTCOMMUNICATION (
 
 extern "C" {
 void STDCALL
-RTCCOMMUNICATE (
+DD_RTCCOMMUNICATE (
     REAL_FP * values,
     int     * numelements
     ) {
@@ -347,7 +347,7 @@ RTCCOMMUNICATE (
 
 extern "C" {
 void STDCALL
-RTCCHARCOMMUNICATE (
+DD_RTCCHARCOMMUNICATE (
     char    * strings,
     int     * numelements,
     int     numchar
