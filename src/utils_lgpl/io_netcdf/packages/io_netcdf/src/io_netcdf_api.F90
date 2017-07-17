@@ -1209,33 +1209,33 @@ function ionc_get_meshgeom_dll(ioncid, meshid, c_meshgeom, includeArrays) result
    type(t_ug_meshgeom)                         :: meshgeom
    
    
-   if(allocated(meshgeom%edge_nodes)) deallocate(meshgeom%edge_nodes)
-   if(allocated(meshgeom%face_nodes)) deallocate(meshgeom%face_nodes)
-   if(allocated(meshgeom%edge_faces)) deallocate(meshgeom%edge_faces)
-   if(allocated(meshgeom%face_edges)) deallocate(meshgeom%face_edges)
-   if(allocated(meshgeom%face_links)) deallocate(meshgeom%face_links)
+   if(associated(meshgeom%edge_nodes)) deallocate(meshgeom%edge_nodes)
+   if(associated(meshgeom%face_nodes)) deallocate(meshgeom%face_nodes)
+   if(associated(meshgeom%edge_faces)) deallocate(meshgeom%edge_faces)
+   if(associated(meshgeom%face_edges)) deallocate(meshgeom%face_edges)
+   if(associated(meshgeom%face_links)) deallocate(meshgeom%face_links)
    
-   if(allocated(meshgeom%branchids)) deallocate(meshgeom%branchids)
-   if(allocated(meshgeom%nbranchgeometrynodes)) deallocate(meshgeom%nbranchgeometrynodes)
-   if(allocated(meshgeom%nodex)) deallocate(meshgeom%nodex)
-   if(allocated(meshgeom%nodey)) deallocate(meshgeom%nodey)
-   if(allocated(meshgeom%nodez)) deallocate(meshgeom%nodez)
+   if(associated(meshgeom%branchids)) deallocate(meshgeom%branchids)
+   if(associated(meshgeom%nbranchgeometrynodes)) deallocate(meshgeom%nbranchgeometrynodes)
+   if(associated(meshgeom%nodex)) deallocate(meshgeom%nodex)
+   if(associated(meshgeom%nodey)) deallocate(meshgeom%nodey)
+   if(associated(meshgeom%nodez)) deallocate(meshgeom%nodez)
    
-   if(allocated(meshgeom%edgex)) deallocate(meshgeom%edgex)
-   if(allocated(meshgeom%edgey)) deallocate(meshgeom%edgey)
-   if(allocated(meshgeom%edgez)) deallocate(meshgeom%edgez)
+   if(associated(meshgeom%edgex)) deallocate(meshgeom%edgex)
+   if(associated(meshgeom%edgey)) deallocate(meshgeom%edgey)
+   if(associated(meshgeom%edgez)) deallocate(meshgeom%edgez)
    
-   if(allocated(meshgeom%facex)) deallocate(meshgeom%facex)
-   if(allocated(meshgeom%facey)) deallocate(meshgeom%facey)
-   if(allocated(meshgeom%facez)) deallocate(meshgeom%facez)
+   if(associated(meshgeom%facex)) deallocate(meshgeom%facex)
+   if(associated(meshgeom%facey)) deallocate(meshgeom%facey)
+   if(associated(meshgeom%facez)) deallocate(meshgeom%facez)
 
-   if(allocated(meshgeom%branchoffsets)) deallocate(meshgeom%branchoffsets)
-   if(allocated(meshgeom%geopointsX)) deallocate(meshgeom%geopointsX)
-   if(allocated(meshgeom%geopointsY)) deallocate(meshgeom%geopointsY)
+   if(associated(meshgeom%branchoffsets)) deallocate(meshgeom%branchoffsets)
+   if(associated(meshgeom%geopointsX)) deallocate(meshgeom%geopointsX)
+   if(associated(meshgeom%geopointsY)) deallocate(meshgeom%geopointsY)
    
-   if(allocated(meshgeom%branchlengths)) deallocate(meshgeom%branchlengths)
-   if(allocated(meshgeom%layer_zs)) deallocate(meshgeom%layer_zs)
-   if(allocated(meshgeom%interface_zs)) deallocate(meshgeom%interface_zs)
+   if(associated(meshgeom%branchlengths)) deallocate(meshgeom%branchlengths)
+   if(associated(meshgeom%layer_zs)) deallocate(meshgeom%layer_zs)
+   if(associated(meshgeom%interface_zs)) deallocate(meshgeom%interface_zs)
 
    !get the mesh geometry
    ierr = ionc_get_meshgeom(ioncid, meshid, meshgeom, includeArrays)
