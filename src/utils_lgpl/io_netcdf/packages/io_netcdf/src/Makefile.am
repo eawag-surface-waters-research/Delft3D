@@ -51,7 +51,7 @@ libIONetcdf_la_SOURCES = \
          io_ugrid.F90 \
          io_netcdf.f90 \
          io_netcdf_api.F90 \
-         meshdata.F90 \
+         meshdata.F90
 
 #-------------------------------------------------------------------------------
 #Libraries
