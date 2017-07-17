@@ -154,7 +154,7 @@ subroutine rtc_comm_init(error     ,nambar    ,namcon    ,namsrc    , &
          ! is not interested in rtc communication
          ! If numdomains=1, there is no rtc iterator
          !
-         call rtcnocommunication()
+         call dd_rtcnocommunication()
       endif
       return
     endif
@@ -165,7 +165,7 @@ subroutine rtc_comm_init(error     ,nambar    ,namcon    ,namsrc    , &
          rtc_domainnr = inode
          rtc_ndomains = 1 ! set the number of domains to 1 to avoid most of the communications
       elseif (numdomains > 1) then
-         call rtcstartcommunication(rtc_domainnr, rtc_ndomains)
+         call dd_rtcstartcommunication(rtc_domainnr, rtc_ndomains)
          rtc_domainnr = rtc_domainnr+1
       else
          rtc_ndomains = 1
@@ -304,7 +304,7 @@ subroutine rtc_comm_init(error     ,nambar    ,namcon    ,namsrc    , &
          ! is not interested in rtc communication
          ! If numdomains=1, there is no rtc iterator
          !
-         call rtcnocommunication()
+         call dd_rtcnocommunication()
       endif
     endif
     return
