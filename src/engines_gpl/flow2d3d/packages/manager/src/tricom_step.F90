@@ -871,7 +871,7 @@ subroutine tricom_step(olv_handle, gdp)
                       if (ex) then
                          exit
                       else
-                         call CUTIL_SLEEP(sleepduringwave);
+                         call CUTIL_SLEEP(sleepduringwave)
                       endif
                    enddo
                 endif
