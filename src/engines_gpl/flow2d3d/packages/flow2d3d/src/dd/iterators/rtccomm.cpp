@@ -241,7 +241,7 @@ Rtc_Function (
 
 extern "C" {
 void STDCALL
-RTCSTARTCOMMUNICATION (
+DD_RTCSTARTCOMMUNICATION (
     int * domainnumber,
     int * numdomains
     ) {
@@ -404,7 +404,7 @@ DD_RTCCHARCOMMUNICATE (
 
 extern "C" {
 void STDCALL
-RTCNOCOMMUNICATION (
+DD_RTCNOCOMMUNICATION (
     void
     ) {
 
