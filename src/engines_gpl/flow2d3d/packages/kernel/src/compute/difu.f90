@@ -93,10 +93,13 @@ subroutine difu(icreep    ,timest    ,lundia    ,nst       ,icx       , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
     include 'flow_steps_f.inc'
+    integer                , pointer :: ad_itrmax
     integer                , pointer :: iro
     integer                , pointer :: mfg
     integer                , pointer :: nfg
     integer                , pointer :: nudge
+    real(fp)               , pointer :: ad_epsabs
+    real(fp)               , pointer :: ad_epsrel
     real(fp)               , pointer :: ck
     real(fp)               , pointer :: dicoww
     real(fp)               , pointer :: eps
@@ -298,6 +301,9 @@ integer                 :: nm_pos ! indicating the array to be exchanged has nm 
     nfg         => gdp%gdparall%nfg
     nudge       => gdp%gdnumeco%nudge
     hdt         => gdp%gdnumeco%hdt
+    ad_itrmax   => gdp%gdnumeco%ad_itrmax
+    ad_epsabs   => gdp%gdnumeco%ad_epsabs
+    ad_epsrel   => gdp%gdnumeco%ad_epsrel
     !
     ! INITIALISATION
     !
@@ -921,7 +927,7 @@ integer                 :: nm_pos ! indicating the array to be exchanged has nm 
        do k = 1, kmax
           do nm = nmsta, nmmax, 2
              if ( (kfs(nm)==1) .and. (kcs(nm)==1) ) then
-                epsitr = max(1.e-8_fp, 0.5e-3*abs(r1(nm, k, l)))
+                epsitr = max(ad_epsabs, ad_epsrel*abs(r1(nm, k, l)))
                 if (abs(vvdwk(nm, k) - r1(nm, k, l)) > epsitr) itr = 1
                 r1(nm, k, l) = vvdwk(nm, k)
              endif
@@ -989,7 +995,7 @@ integer                 :: nm_pos ! indicating the array to be exchanged has nm 
        do k = 1, kmax
           do nm = nmsta, nmmax, 2
              if ( (kfs(nm)==1) .and. (kcs(nm)==1) ) then
-                epsitr = max(1.e-8_fp, 0.5e-3*abs(r1(nm, k, l)))
+                epsitr = max(ad_epsabs, ad_epsrel*abs(r1(nm, k, l)))
                 if (abs(vvdwk(nm, k) - r1(nm, k, l)) > epsitr) itr = 1
                 r1(nm, k, l) = vvdwk(nm, k)
              endif
@@ -1005,14 +1011,15 @@ integer                 :: nm_pos ! indicating the array to be exchanged has nm 
        ! determine global maximum of 'itr' over all nodes
        ! Note: this enables to synchronize the iteration process
        !
+       itr = 1
        call dfreduce_gdp( itr, 1, dfint, dfmax, gdp )
        !
-       if (itr>0 .and. iter<50) goto 1100
+       if (itr>0 .and. iter<ad_itrmax) goto 1100
        !
        if (gdp%gdflwpar%flwoutput%iteroutputsteps >= gdp%gdinttim%ntstep) then
           write (lundia, '(3(a,i0))') 'difu(ntstep,l,iter):',gdp%gdinttim%ntstep, ' ', l, ' ',iter
        endif
-       if (iter >= 50) then
+       if (iter >= ad_itrmax) then
           write (errtxt, '(i0,a,i0)') l, ' ', nst
           call prterr(lundia    ,'S206'    ,trim(errtxt)    )
        endif

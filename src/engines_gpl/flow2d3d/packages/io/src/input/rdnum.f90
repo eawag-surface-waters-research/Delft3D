@@ -55,10 +55,13 @@ subroutine rdnum(lunmd     ,lundia    ,nrrec     ,mdfrec    , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
+    real(fp), pointer :: ad_epsabs
+    real(fp), pointer :: ad_epsrel
     real(fp), pointer :: depini
-    logical , pointer :: slplim
+    integer , pointer :: ad_itrmax
     integer , pointer :: itis
     logical , pointer :: chz_k2d
+    logical , pointer :: slplim
 !
 ! Global variables
 !
@@ -117,10 +120,13 @@ subroutine rdnum(lunmd     ,lundia    ,nrrec     ,mdfrec    , &
 !
 !! executable statements -------------------------------------------------------
 !
-    depini  => gdp%gdnumeco%depini
-    slplim  => gdp%gdnumeco%slplim
-    itis    => gdp%gdrdpara%itis
-    chz_k2d => gdp%gdrivpro%chz_k2d
+    ad_itrmax   => gdp%gdnumeco%ad_itrmax
+    ad_epsabs   => gdp%gdnumeco%ad_epsabs
+    ad_epsrel   => gdp%gdnumeco%ad_epsrel
+    depini      => gdp%gdnumeco%depini
+    slplim      => gdp%gdnumeco%slplim
+    itis        => gdp%gdrdpara%itis
+    chz_k2d     => gdp%gdrivpro%chz_k2d
     !
     ! initialize local parameters
     !
@@ -132,9 +138,10 @@ subroutine rdnum(lunmd     ,lundia    ,nrrec     ,mdfrec    , &
     !
     ! initialize parameters that are to be read
     ! 
-    ! eps was initialized here, but is moved from numeco.igs to const.igs
-    !
     iter1  = 2
+    ad_itrmax = 50
+    ad_epsabs = 1.e-8_fp
+    ad_epsrel = 0.5e-3_fp
     dryflc = 0.1_fp
     drycrt = -999.999_fp
     dco    = -999.999_fp
@@ -351,6 +358,12 @@ subroutine rdnum(lunmd     ,lundia    ,nrrec     ,mdfrec    , &
     !          then iter1 has a default value
     !
     call prop_get_integer(gdp%mdfile_ptr, '*', 'Iter', iter1)
+    !
+    ! Numerical settings for iteration in advection-diffusion solver (DIFU)
+    !
+    call prop_get(gdp%mdfile_ptr, '*', 'ADmxIt', ad_itrmax)
+    call prop_get(gdp%mdfile_ptr, '*', 'ADepAb', ad_epsabs)
+    call prop_get(gdp%mdfile_ptr, '*', 'ADepRl', ad_epsrel)
     !
     ! Before DPSOPT existed, Delft3D-FLOW used the variable DRYFLP.
     ! This variable could be set to NO or MIN/MAX/MEAN. With the
