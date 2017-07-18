@@ -41,6 +41,7 @@ subroutine wrthisbal(ithisc    ,filename  ,lundia    ,error     ,irequest  , &
     use netcdf, only: nf90_unlimited
     use dfparall, only: inode, master
     use wrtarray, only: wrtvar
+    use dfparall, only: dfloat, dfsum
     !
     implicit none
     !
@@ -87,8 +88,10 @@ subroutine wrthisbal(ithisc    ,filename  ,lundia    ,error     ,irequest  , &
     !
     integer                                           :: idatt_coord
     !
+    real(fp)        , dimension(:)    , allocatable   :: tvolumes
     real(fp)        , dimension(:)    , allocatable   :: rbuff1
     real(fp)        , dimension(:,:)  , allocatable   :: rbuff2
+    real(fp)        , dimension(:,:,:), allocatable   :: rbuff3
     integer                                           :: filetype
     integer                                           :: istat
     integer                                           :: ierror       ! Local error flag
@@ -157,56 +160,81 @@ subroutine wrthisbal(ithisc    ,filename  ,lundia    ,error     ,irequest  , &
        !
        celidt = celidt + 1
        !
-       if (inode == master) then
-          if (filetype /= FTYPE_NETCDF) then ! don't store duplicate times
-             call wrtvar(fds, filename, filetype, grpnam, celidt, &
-                       & gdp, ierror, lundia, ithisc, 'ITHISC')
-             if (ierror/=0) goto 9999
-          endif
-          !
+       if (filetype /= FTYPE_NETCDF) then ! don't store duplicate times
           call wrtvar(fds, filename, filetype, grpnam, celidt, &
-                    & gdp, ierror, lundia, volumes, 'BALVOLUME')
+                    & gdp, ierror, lundia, ithisc, 'ITHISC')
+          if (ierror/=0) goto 9999
+       endif
+       !
+       allocate(tvolumes(nbalpol), stat=istat)
+       do n = 1,nbalpol
+          tvolumes(n) = volumes(n)
+       enddo
+       call dfreduce_gdp (tvolumes, nbalpol, dfloat, dfsum, gdp )
+       call wrtvar(fds, filename, filetype, grpnam, celidt, &
+                 & gdp, ierror, lundia, tvolumes, 'BALVOLUME')
+       if (ierror/= 0) goto 9999
+       !
+       allocate(rbuff2(2,nneighb), stat=istat)
+       rbuff2(:,:) = fluxes(:,:)
+       call dfreduce_gdp (rbuff2, 2*nneighb, dfloat, dfsum, gdp )
+       call wrtvar(fds, filename, filetype, grpnam, celidt, &
+                 & gdp, ierror, lundia, rbuff2, 'BALFLUX')
+       deallocate(rbuff2, stat=istat)
+       if (ierror/= 0) goto 9999
+       !
+       if (lstsci>0) then
+          allocate(rbuff2(nbalpol,lstsci), stat=istat)
+          rbuff2(:,:) = mass_r1(:,:)
+          call dfreduce_gdp ( rbuff2, nbalpol*lstsci, dfloat, dfsum, gdp )
+          do l = 1,lstsci
+             do n = 1,nbalpol
+                rbuff2(n,l) = rbuff2(n,l)/tvolumes(n)
+             enddo
+          enddo
+          call wrtvar(fds, filename, filetype, grpnam, celidt, &
+                    & gdp, ierror, lundia, rbuff2, 'BALR1CONC')
+          deallocate(rbuff2, stat=istat)
           if (ierror/= 0) goto 9999
           !
+          allocate(rbuff3(2,nneighb,lstsci), stat=istat)
+          rbuff3(:,:,:) = fluxes_r1(:,:,:)
+          call dfreduce_gdp ( rbuff3, 2*nneighb*lstsci, dfloat, dfsum, gdp )
           call wrtvar(fds, filename, filetype, grpnam, celidt, &
-                    & gdp, ierror, lundia, fluxes, 'BALFLUX')
+                    & gdp, ierror, lundia, rbuff3, 'BALR1FLUX')
+          deallocate(rbuff3, stat=istat)
+          if (ierror/= 0) goto 9999
+       endif
+       !
+       if (lsedtot>0) then
+          allocate(rbuff1(nbalpol), rbuff2(2,nbalpol), stat=istat)
+          do n = 1,nbalpol
+             rbuff2(1,n) = accdps(n)
+             rbuff2(2,n) = horareas(n)
+          enddo
+          call dfreduce_gdp ( rbuff2, 2*nbalpol, dfloat, dfsum, gdp )
+          do n = 1,nbalpol
+             rbuff1(n) = rbuff2(1,n)/rbuff2(2,n)
+          enddo
+          call wrtvar(fds, filename, filetype, grpnam, celidt, &
+                    & gdp, ierror, lundia, rbuff1, 'BALDPS')
+          deallocate(rbuff1, rbuff2, stat=istat)
+          if (ierror/= 0) goto 9999
           !
-          if (lstsci>0) then
-             allocate(rbuff2(nbalpol,lstsci), stat=istat)
-             do l = 1,lstsci
-                do n = 1,nbalpol
-                   rbuff2(n,l) = mass_r1(n,l)/volumes(n)
-                enddo
-             enddo
-             call wrtvar(fds, filename, filetype, grpnam, celidt, &
-                       & gdp, ierror, lundia, rbuff2, 'BALR1CONC')
-             deallocate(rbuff2)
-             if (ierror/= 0) goto 9999
-             !
-             call wrtvar(fds, filename, filetype, grpnam, celidt, &
-                       & gdp, ierror, lundia, fluxes_r1, 'BALR1FLUX')
-          endif
-          !
-          if (lsedtot>0) then
-             allocate(rbuff1(nbalpol), stat=istat)
-             do n = 1,nbalpol
-                rbuff1(n) = accdps(n)/horareas(n)
-             enddo
-             call wrtvar(fds, filename, filetype, grpnam, celidt, &
-                       & gdp, ierror, lundia, rbuff1, 'BALDPS')
-             deallocate(rbuff1)
-             if (ierror/= 0) goto 9999
-             !
-             call wrtvar(fds, filename, filetype, grpnam, celidt, &
-                       & gdp, ierror, lundia, fluxes_sd, 'BALSDFLUX')
-             if (ierror/= 0) goto 9999
-          endif
+          allocate(rbuff3(2,nneighb,lsedtot), stat=istat)
+          rbuff3(:,:,:) = fluxes_sd(:,:,:)
+          call dfreduce_gdp ( rbuff3, 2*nneighb*lsedtot, dfloat, dfsum, gdp )
+          call wrtvar(fds, filename, filetype, grpnam, celidt, &
+                    & gdp, ierror, lundia, rbuff3, 'BALSDFLUX')
+          deallocate(rbuff3, stat=istat)
+          if (ierror/= 0) goto 9999
        endif
        !
     end select
     !
     ! write error message if error occured and set error = .true.
     !
-9999   continue
+9999 continue
+    if (allocated(tvolumes)) deallocate(tvolumes, stat=istat)
     if (ierror /= 0) error = .true.
 end subroutine wrthisbal

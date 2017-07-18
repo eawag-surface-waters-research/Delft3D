@@ -193,12 +193,14 @@ subroutine updmassbal(imode     ,qxk       ,qyk       ,kcs       ,r1        , &
        enddo
        !
        do isrc = 1,gdp%d%nsrc
-          ! all fluxes are defined positive INTO the model
-          ! the exchange is one of the last "nbalpol" exchanges
-          call n_and_m_to_nm(mnksrc(5,isrc), mnksrc(4,isrc), nm, gdp)
           k = mnksrc(6,isrc)
-          ex = nneighb - nbalpol + volnr(nm)
+          ! skip this discharge if it is outside this partition
+          if (k == -1) cycle
+          call n_and_m_to_nm(mnksrc(5,isrc), mnksrc(4,isrc), nm, gdp)
           !
+          ! all discharge exchanges are defined positive INTO the model, they are the last "nbalpol" exchanges
+          !
+          ex = nneighb - nbalpol + volnr(nm)
           if (mnksrc(7,isrc)>=2) then
              call n_and_m_to_nm(mnksrc(2,isrc), mnksrc(1,isrc), nm1, gdp)
              k1 = mnksrc(3,isrc)
@@ -333,9 +335,6 @@ subroutine updmassbal(imode     ,qxk       ,qyk       ,kcs       ,r1        , &
              enddo
           enddo
        endif
-       !
-       ! TODO: Accumulate fluxes across domains/partitions.
-       !
     endif
     !
     ! If requested: compute total volume and mass
@@ -379,8 +378,6 @@ subroutine updmassbal(imode     ,qxk       ,qyk       ,kcs       ,r1        , &
              endif
           enddo
        endif
-       !
-       ! TODO: Accumulate volumes and masses across domains/partitions.
        !
        ! Delft3D outputs cumulative fluxes, so we don't reset the fluxes after each output.
        ! This could easily be changed by activating the following line.

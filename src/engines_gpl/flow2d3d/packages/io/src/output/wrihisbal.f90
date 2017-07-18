@@ -38,8 +38,8 @@ subroutine wrihisbal(filename  ,lundia    ,error     ,irequest  ,fds       , &
     use precision
     use datagroups
     use globaldata
-    use dfparall, only: inode, master
     use wrtarray, only: wrtvar
+    use dfparall, only: dfloat, dfsum
     !
     implicit none
     !
@@ -76,7 +76,9 @@ subroutine wrihisbal(filename  ,lundia    ,error     ,irequest  ,fds       , &
     integer                                           :: i
     integer         , dimension(1)                    :: idummy       ! Help array to write integers
     integer                                           :: ierror       ! Local error flag
+    integer                                           :: istat
     integer                                           :: n
+    real(fp)        , dimension(:)    , allocatable   :: rbuff1
     character(16)                                     :: grpnam       ! Data-group name for the NEFIS-file
 !
 !! executable statements -------------------------------------------------------
@@ -103,7 +105,7 @@ subroutine wrihisbal(filename  ,lundia    ,error     ,irequest  ,fds       , &
        !
        ! Set up the element chracteristics
        !
-       iddim_nbalpole = adddim(gdp, lundia, FILOUT_HIS, 'nbalpolygonse', nbalpol+2) ! balance polygons extended with label "open boundaries" and "discharges"
+       iddim_nbalpole = adddim(gdp, lundia, FILOUT_HIS, 'nbalpolygonse', size(volnames)) ! balance polygons extended with "open boundaries" and possibly "discharges"
        iddim_nbalpol  = adddim(gdp, lundia, FILOUT_HIS, 'nbalpolygons', nbalpol)
        iddim_nneighb  = adddim(gdp, lundia, FILOUT_HIS, 'nbalneighbrs', nneighb)
        iddim_2        = adddim(gdp, lundia, FILOUT_HIS, 'length_2', 2)
@@ -121,29 +123,29 @@ subroutine wrihisbal(filename  ,lundia    ,error     ,irequest  ,fds       , &
        !
     case (REQUESTTYPE_WRITE)
        !
-       if (inode == master) then
-          !
-          if (filetype == FTYPE_NEFIS) then
-             call wrtvar(fds, filename, filetype, grpnam, 1, &
-                       & gdp, ierror, lundia, volnames, 'BALVOLNAMES')
-          else
-             call wrtvar(fds, filename, filetype, grpnam, 1, &
-                       & gdp, ierror, lundia, volnames, 'BALVOLNAMESE')
-             if (ierror/= 0) goto 9999
-             !
-             call wrtvar(fds, filename, filetype, grpnam, 1, &
-                       & gdp, ierror, lundia, volnames(1:nbalpol), 'BALVOLNAMES')
-          endif
-          !
+       if (filetype == FTYPE_NEFIS) then
           call wrtvar(fds, filename, filetype, grpnam, 1, &
-                    & gdp, ierror, lundia, horareas, 'BALAREAS')
+                    & gdp, ierror, lundia, volnames, 'BALVOLNAMES')
+       else
+          call wrtvar(fds, filename, filetype, grpnam, 1, &
+                    & gdp, ierror, lundia, volnames, 'BALVOLNAMESE')
           if (ierror/= 0) goto 9999
           !
           call wrtvar(fds, filename, filetype, grpnam, 1, &
-                    & gdp, ierror, lundia, neighb, 'BALNEIGHB')
-          if (ierror/= 0) goto 9999
-          !
+                    & gdp, ierror, lundia, volnames(1:nbalpol), 'BALVOLNAMES')
        endif
+       !
+       allocate(rbuff1(nbalpol), stat=istat)
+       rbuff1(:) = horareas(:)
+       call dfreduce_gdp ( rbuff1, nbalpol, dfloat, dfsum, gdp )
+       call wrtvar(fds, filename, filetype, grpnam, 1, &
+                 & gdp, ierror, lundia, rbuff1, 'BALAREAS')
+       deallocate(rbuff1, stat=istat)
+       if (ierror/=0) goto 9999
+       !
+       call wrtvar(fds, filename, filetype, grpnam, 1, &
+                 & gdp, ierror, lundia, neighb, 'BALNEIGHB')
+       if (ierror/= 0) goto 9999
        !
     end select
     !

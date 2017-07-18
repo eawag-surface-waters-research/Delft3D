@@ -41,6 +41,7 @@ subroutine rdmassbal(xz        ,yz        ,kcs       ,gsqs      , &
     use properties
     use polygon_module
     use m_alloc
+    use dfparall, only: dfint, dfmax, nproc, inode
     !
     use globaldata
     !
@@ -104,6 +105,10 @@ subroutine rdmassbal(xz        ,yz        ,kcs       ,gsqs      , &
     character(80)                           :: name
     character(20)                           :: keyword
     logical                                 :: found
+    integer                                 :: offset
+    integer                                 :: tot_nneighb
+    integer,  dimension(:,:), allocatable   :: par_neighb
+    integer,  dimension(:)  , allocatable   :: par_nneighb
     real(fp), dimension(:)  , allocatable   :: xdr
     real(fp), dimension(:)  , allocatable   :: ydr
     integer, dimension(:,:) , pointer       :: neighb
@@ -195,7 +200,7 @@ subroutine rdmassbal(xz        ,yz        ,kcs       ,gsqs      , &
        ! the volume corresponding to the first polygon.
        !
        do nm = 1, nmmax
-          if (volnr(nm)==0 .and. kcs(nm) == 1) then
+          if (volnr(nm)==0 .and. abs(kcs(nm)) == 1) then
              call ipon(xdr, ydr, nbalpnt, xz(nm), yz(nm), istat, gdp)
              if (istat >= 0) then
                 volnr(nm) = i
@@ -218,16 +223,14 @@ subroutine rdmassbal(xz        ,yz        ,kcs       ,gsqs      , &
              volnr(nm) = nbalpol
           endif
           horareas(volnr(nm)) = horareas(volnr(nm)) + gsqs(nm)
+       elseif (kcs(nm) == -1) then
+          if (volnr(nm) == 0) then
+             volnr(nm) = nbalpol
+          endif
        elseif (kcs(nm) == 2) then
           volnr(nm) = nbalpol+1
        endif
     enddo
-    !
-    ! TODO: determine volume number of halo cells from other partitions and domains
-    !       - domains/partitions should only accumulate their own volumes
-    !       - avoid double counting exchanges:
-    !            in case of DD refinement: best information on high resolution domain
-    !            in case of equal resolution: let domain with lowest rank count
     !
     ! Determine connections between polygons (for this partition/domain)
     !
@@ -238,6 +241,7 @@ subroutine rdmassbal(xz        ,yz        ,kcs       ,gsqs      , &
        call d3stop(1, gdp)
     endif
     do nm = 1,nmmax
+       if (kcs(nm) == -1) cycle ! avoid double processing - only consider links with "left" cell inside partition
        ivol = volnr(nm)
        if (ivol==0) cycle
        !
@@ -290,6 +294,58 @@ subroutine rdmassbal(xz        ,yz        ,kcs       ,gsqs      , &
        enddo
     enddo
     !
+    ! synchronize neighbour information across partitions and domains
+    !
+    allocate(par_nneighb(nproc), stat = istat)
+    par_nneighb = 0
+    par_nneighb(inode) = nneighb
+    call dfreduce_gdp ( par_nneighb, nproc, dfint, dfmax, gdp )
+    tot_nneighb = sum(par_nneighb)
+    offset = 0
+    do j = 1,inode-1
+        offset = offset+par_nneighb(j)
+    enddo
+    !
+    allocate(par_neighb(2,tot_nneighb), stat = istat)
+    par_neighb = 0
+    do n = 1,nneighb
+        do j = 1,2
+            par_neighb(j,offset+n) = neighb(j,n)
+        enddo
+    enddo
+    call dfreduce_gdp ( par_neighb, 2*tot_nneighb, dfint, dfmax, gdp )
+    !
+    ! find unique pairs
+    !
+    nneighb = 0
+    neighb = 0
+    do vol1 = 1,nbalpol
+        do vol2 = vol1+1, nbalpol+1
+            found = .false.
+            do j = 1,tot_nneighb
+                if (par_neighb(1,j) == vol1 .and. par_neighb(2,j) == vol2) then
+                    found = .true.
+                    exit
+                endif
+            enddo
+            if (found) then
+                if (nneighb==size(neighb,2)) then
+                   call reallocP(neighb,(/2,2*nneighb/),stat = istat)
+                   if (istat /= 0) then
+                      call prterr(lundia, 'U021', 'RdMassBal: memory alloc error')
+                      call d3stop(1, gdp)
+                   endif
+                endif
+                !
+                nneighb = nneighb+1
+                neighb(1,nneighb) = vol1
+                neighb(2,nneighb) = vol2
+            endif
+        enddo
+    enddo
+    !
+    deallocate(par_nneighb, par_neighb, stat = istat)
+    !
     ! Exchanges with intakes/outfalls
     !
     if (nsrc>0) then
@@ -318,8 +374,6 @@ subroutine rdmassbal(xz        ,yz        ,kcs       ,gsqs      , &
        nneighb = nneighb+nbalpol
     endif
     !
-    ! TODO: synchronize neighbour information across partitions and domains
-    !
     ! Store NEIGHB array in GDP for output purposes.
     !
     call reallocP(neighb, (/2,nneighb/) )
@@ -328,6 +382,7 @@ subroutine rdmassbal(xz        ,yz        ,kcs       ,gsqs      , &
     ! Now convert NEIGHB array to EXCHNR array
     !
     do nm = 1,nmmax
+       if (kcs(nm) == -1) cycle ! avoid double processing - only consider links with "left" cell inside partition
        ivol = volnr(nm)
        if (ivol==0) cycle
        !
