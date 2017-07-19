@@ -3,6 +3,7 @@ import os
 import glob
 import sys
 import shutil
+import subprocess
 if sys.version_info<(3,0,0):
    # To avoid problems with encoding:
    # - Use codecs.open instead of open (Python 2.x only)
@@ -156,14 +157,24 @@ platformtoolset[2017] = "    <PlatformToolset>v141</PlatformToolset>"
 # Since VisualStudio2015 (Update 3?), it is sometimes necessary to add the location of ucrt.lib
 # to the AdditionalLibaryDirectories of the projects linking with Fortran
 # The string "$(OSS_UCRTLIBDIR)" is added at these locations by default (it doesn't harm when
-# it is not defined), and will be replaced by this prepare_sln.py script to get the proper value vor VS2015 and up
+# it is not defined), and will be replaced by this prepare_sln.py script to get the proper value vor VS2015 and up.
 # "UCRTLIBDIRVERSIONNUMBER" is a place holder that will be replaced in getUCRTVersionNumber()
+# $(UniversalCRTSdkDir) is always used in this string (and not replaced by something like c:\Program Files (x86)\Windows Kits\10\Lib\)
 ucrtlibdir = {}
 ucrtlibdir["-1"] = "$(OSS_UCRTLIBDIR)"
 ucrtlibdir["201532"] = "$(UniversalCRTSdkDir)Lib\\UCRTLIBDIRVERSIONNUMBER\\ucrt\\x86"
 ucrtlibdir["201564"] = "$(UniversalCRTSdkDir)Lib\\UCRTLIBDIRVERSIONNUMBER\\ucrt\\x64"
 ucrtlibdir["201732"] = "$(UniversalCRTSdkDir)Lib\\UCRTLIBDIRVERSIONNUMBER\\ucrt\\x86"
 ucrtlibdir["201764"] = "$(UniversalCRTSdkDir)Lib\\UCRTLIBDIRVERSIONNUMBER\\ucrt\\x64"
+
+#
+#
+# To obtain the ucrt directory:
+# Execute the matching vcvarsall.bat and in that shell, get the value of environment parameter UniversalCRTSdkDir
+# This is combined in the folowing string:
+getucrtdir = {}
+getucrtdir["2015"] = '"' + str(os.environ.get("VS140COMNTOOLS")) + "..\\..\\VC\\vcvarsall.bat" + '" amd64&&set UniversalCRTSdkDir'
+getucrtdir["2017"] = '"' + str(os.environ.get("VS140COMNTOOLS")) + "..\\..\\VC\\vcvarsall.bat" + '" amd64&&set UniversalCRTSdkDir'
 
 #
 #
@@ -429,27 +440,48 @@ def process_project_file(pfile):
 #
 #
 # getUCRTVersionNumber ===================================
+# Note: UniversalCRTSdkDir is resolved to find the version number on this system,
+#       $(UniversalCRTSdkDir) is not replaced in ucrtlibdir
 def getUCRTVersionNumber():
     global vs
     global ucrtlibdir
     # Only for VS2015 or higher
     if vs >= 2015:
-        # Try to use $(UniversalCRTSdkDir)
-        ucrtdir = os.environ.get("UniversalCRTSdkDir")
-        if ucrtdir == None:
+        # To get the ucrt directory: execute the matching getucrtdir string, 
+        # catch the stdout of that command,
+        # check whether UniversalCRTSdkDir is in that string,
+        # if so, get the value behind the '='-sign
+        sys.stdout.write("Trying to execute: " + getucrtdir[str(vs)] + " ...\n")
+        try:
+            result = subprocess.check_output(getucrtdir[str(vs)], shell=True)
+        except:
+            result = ""
+            sys.stdout.write("Execution failed; is VisualStudio " + str(vs) + " installed?\n")
+        result = result.decode('utf-8')
+        if result.find("UniversalCRTSdkDir") == -1:
             # Fallback: it should be this:
+            sys.stdout.write("ucrtdir not found; set to default value\n")
             ucrtdir = "c:\\Program Files (x86)\\Windows Kits\\10\\Lib\\"
+        else:
+            ucrtdir = result[19:]
+            # Remove the trailing slash and the newline-character behind it
+            lastslash = ucrtdir.rfind("\\")
+            if lastslash != -1:
+                ucrtdir = ucrtdir[:lastslash]
+            sys.stdout.write("ucrtdir found:" + ucrtdir + "\n")
         # Search in subdir Lib for directories starting with a digit and containing at least one "."
         searchstring = os.path.join(ucrtdir, "Lib", "[0-9]*.*")
         versions = glob.glob(searchstring)
         if len(versions) <= 0:
             # Fallback: it should be this:
             ucrtversion = "10.0.10586.0"
+            sys.stdout.write("No versions found, using default version:" + ucrtversion + "\n")
         else:
             # Choose the highest version number
             versions.sort(reverse=True)
             ucrtversion = versions[0]
             ucrtversion = os.path.basename(ucrtversion)
+            sys.stdout.write("Versions found, using:" + ucrtversion + "\n")
         # Inside ucrtlibdir, replace all occurences of UCRTLIBDIRVERSIONNUMBER by ucrtversion
         for key in iter(ucrtlibdir):
             ucrtlibdir[key] = str(ucrtlibdir[key]).replace("UCRTLIBDIRVERSIONNUMBER", ucrtversion)
