@@ -54,6 +54,7 @@
 
 
 #include <typeinfo>
+#include "dimr_bmi_utils.h"
 using namespace std;
 
 #include <string>
@@ -139,7 +140,7 @@ BMI_API void set_logger(Logger logger){
 			if (thisDimr->componentsList.components[i].setLogger != NULL) {
 				thisDimr->componentsList.components[i].setLogger(logger);
 			}
-			double level = (double)Dimr::convertDimrLogLevelToLogLevel(thisDimr->logMask);
+			double level = (double)DimrBmiUtils::convertDimrLogLevelToLogLevel(thisDimr->logMask);
 			thisDimr->componentsList.components[i].dllSetVar("debugLevel", (const void *)&level);
 		}
 	}
@@ -1715,7 +1716,7 @@ void Dimr::connectLibs (void) {
 				throw new Exception(true, "Cannot find function \"%s\" in library \"%s\". Return code: %d", BmiSetLogger, lib, GetLastError());
 			}
 			componentsList.components[i].setLogger(&_log);
-			double level = (double)Dimr::convertDimrLogLevelToLogLevel(this->logMask);
+			double level = (double)DimrBmiUtils::convertDimrLogLevelToLogLevel(this->logMask);
 			componentsList.components[i].dllSetVar("debugLevel", (const void *)&level);
 
 		}
@@ -1757,50 +1758,13 @@ void Dimr::printComponentVersionStrings (unsigned int my_mask) {
     delete[] versionstr;
 }
 
-Level Dimr::convertDimrLogLevelToLogLevel(unsigned int mask)
-{
-	if (mask & Log::LOG_DETAIL)
-		return ALL;
-	if (mask & Log::DETAIL)
-		return DEBUG;
-	if (mask & Log::MINOR)
-		return INFO;
-	if (mask & Log::MAJOR)
-		return WARNINGS;
-	if (mask & Log::WARN)
-		return ERRORS;
-	if (mask & Log::ALWAYS)
-		return FATAL;
-	return INFO;
-}
-
-unsigned int Dimr::convertBMILogLevelToDimrLogLevel(int level)
-{
-	switch ((Level)level)
-	{
-	case ALL:
-		return Log::LOG_DETAIL;
-	case DEBUG:
-		return Log::DETAIL;
-	case INFO:
-	default:
-		return Log::MINOR;
-	case WARNINGS:
-		return Log::MAJOR;
-	case ERRORS:
-		return Log::WARN;
-	case FATAL:
-		return Log::ALWAYS;
-	}	
-}
-
 
 //void _log(int level, char * msg) {
 void _log(Level level, const char * msg) {
 	if (thisDimr == NULL) {
 		thisDimr = new Dimr();
 	}	
-	thisDimr->log->Write(Dimr::convertBMILogLevelToDimrLogLevel(level), thisDimr->my_rank, msg);
+	thisDimr->log->Write(DimrBmiUtils::convertBMILogLevelToDimrLogLevel(level), thisDimr->my_rank, msg);
 }
 
 //------------------------------------------------------------------------------

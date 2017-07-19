@@ -287,9 +287,7 @@ class Dimr {
         void           receive(const char *, int, BMI_SETVAR, BMI_GETVAR, double *, int *, int, int, const void *);
         void           getAddress(const char * name, int compType, BMI_GETVAR dllGetVar, double ** sourceVarPtr, int * processes, int nProc, double * transfer);
         double *       send(const char * name, int compType, double* sourceVarPtr, int* processes, int nProc, double* transfer);
-		static Level   convertDimrLogLevelToLogLevel(unsigned int);
-		static unsigned int convertBMILogLevelToDimrLogLevel(int level);
-
+		
     public:
         bool               ready;          // true means constructor succeeded and DH ready to run
         char *             exePath;        // name of running dimr executable (argv[0])

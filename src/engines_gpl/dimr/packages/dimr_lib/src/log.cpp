@@ -39,6 +39,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
+#include "dimr_bmi_utils.h"
 
 
 #if defined (WIN32)
@@ -126,8 +127,8 @@ bool Log::Write( Mask mask, int rank, const char *  format, ... ) {
 	buffer[bufsize - 1] = '\0';
 
 	if (this->externalLogger){
-		//Level level = Dimr::convertDimrLogLevelToLogLevel((int)(mask));
-		this->externalLogger(INFO, buffer);
+		Level level = DimrBmiUtils::convertDimrLogLevelToLogLevel((int)(mask));
+		this->externalLogger(level, buffer);
 	}
 
 	if ((int)this->mask - (int)mask < 0) {
