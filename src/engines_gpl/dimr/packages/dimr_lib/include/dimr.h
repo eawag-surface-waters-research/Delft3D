@@ -82,6 +82,7 @@ class Log;
 #include "log.h"
 #include "stringutils.h"
 #include "xmltree.h"
+#include "bmi.h"
 
 #ifdef WIN32
 #   define DllExport   __declspec( dllexport )
@@ -123,7 +124,7 @@ enum {
 
 
 // Store the exact name of the entry points in the dlls
-const char BmiDimrSetLogger            [] = "set_logger";
+const char BmiDimrSetLogger            [] = "set_dimr_logger";
 const char BmiInitializeEntryPoint     [] = "initialize";
 const char BmiUpdateEntryPoint         [] = "update";
 const char BmiFinalizeEntryPoint       [] = "finalize";
@@ -133,7 +134,8 @@ const char BmiGetTimeStepEntryPoint    [] = "get_time_step";
 const char BmiGetCurrentTimeEntryPoint [] = "get_current_time";
 const char BmiGetVarEntryPoint         [] = "get_var";
 const char BmiSetVarEntryPoint         [] = "set_var";
-const char BmiGetAttributeEntryPoint   [] = "get_attribute";
+const char BmiSetLogger				   [] = "set_logger";
+const char BmiGetAttributeEntryPoint[] = "get_attribute";
 
 // Define the exact api of the entry points in the dlls
 #if HAVE_CONFIG_H
@@ -142,6 +144,9 @@ const char BmiGetAttributeEntryPoint   [] = "get_attribute";
 #define CDECLOPT __cdecl
 #endif
 typedef int  (CDECLOPT *BMI_DIMR_SET_LOGGER)(Log *);
+/* logger to be set from outside so we can log messages */
+//typedef int  (CDECLOPT *BMI_SET_LOGGER)		(void(*)(int, char *));
+typedef int  (CDECLOPT *BMI_SET_LOGGER)		(Logger);
 typedef int  (CDECLOPT *BMI_INITIALIZE)     (const char *);
 typedef void (CDECLOPT *BMI_UPDATE)         (double);
 typedef void (CDECLOPT *BMI_FINALIZE)       (void);
@@ -183,6 +188,7 @@ struct dimr_component {
     BMI_GETVAR         dllGetVar;         // entry point in dll
     BMI_SETVAR         dllSetVar;         // entry point in dll
     BMI_GETATTRIBUTE   dllGetAttribute;   // entry point in dll
+	BMI_SET_LOGGER	   setLogger;   // entry point in dll
     int                result;            // return value when calling an entry point in dll
     keyValueLL      *  settings;          // list of settings
     keyValueLL      *  parameters;        // list of parameters
@@ -303,7 +309,6 @@ class Dimr {
         bool               done;           // set to true when it's time to stop
         char *             redirectFile;   // Name of file to redirect stdout/stderr to
                                            // Default: Off when started via dimr-exe, On otherwise
-
         enum {
             MAXSTRING = 1024    // max string length in bytes, use same value as used in the kernels
             };
@@ -331,23 +336,16 @@ class Dimr {
 
         dimr_coupler *   getCoupler     (const char *);
 
-        void           char_to_ints     (char *, int **, int *);
+        void           char_to_ints     (char *, int **, int *);		
     };
 
 
 //------------------------------------------------------------------------------
-
+/* Logger function */
+void _log(Level, const char*);
+Level convertDimrLogLevelToLogLevel(unsigned int);
 
 extern "C" {
-DllExport void set_logger(Log *);
-DllExport int  initialize(const char *);
-DllExport void update    (double);
-DllExport void finalize  (void);
-DllExport void get_start_time (double *);
-DllExport void get_end_time (double *);
-DllExport void get_time_step (double *);
-DllExport void get_current_time (double *);
-DllExport void get_var (const char *, void **);
-DllExport void set_var (const char *, const void *);
+DllExport void set_dimr_logger(Log *);
 DllExport void set_logger_callback(WriteCallback);
 }

@@ -119,16 +119,33 @@ DllExport void set_logger_callback(WriteCallback writeCallBack) {
 }
     
 //------------------------------------------------------------------------------
-DllExport void set_logger(Log * loggerFromDimrExe) {
+DllExport void set_dimr_logger(Log * loggerFromDimrExe) {
     if (thisDimr == NULL) {
         thisDimr = new Dimr();
     }
     thisDimr->log = loggerFromDimrExe;
 }
 
-
+BMI_API void set_logger(Logger logger){
+	if (thisDimr == NULL) {
+		thisDimr = new Dimr();
+	}
+	
+	thisDimr->log->SetExternalLogger(logger);
+	//Update or add the extertnal logger function in the kernels
+	for (int i = 0; i < thisDimr->componentsList.numComponents; i++) {
+		if (thisDimr->componentsList.components[i].type == COMP_TYPE_FLOW1D)
+		{
+			if (thisDimr->componentsList.components[i].setLogger != NULL) {
+				thisDimr->componentsList.components[i].setLogger(logger);
+			}
+			double level = (double)convertDimrLogLevelToLogLevel(thisDimr->logMask);
+			thisDimr->componentsList.components[i].dllSetVar("debugLevel", (const void *)&level);
+		}
+	}
+}
 //------------------------------------------------------------------------------
-DllExport int initialize(const char * configfile) {
+BMI_API int initialize(const char * configfile) {
     int nSettingsSet, nParamsSet;
     if (thisDimr == NULL) {
         thisDimr = new Dimr();
@@ -240,7 +257,7 @@ DllExport int initialize(const char * configfile) {
 }
 
 //------------------------------------------------------------------------------
-DllExport void update (double tStep) {
+BMI_API int update(double tStep) {
     thisDimr->log->Write (Log::MAJOR, thisDimr->my_rank, "dimr_lib:update");
     // Execute update on the first controlBlock only
     if (thisDimr->control->subBlocks[0].type == CT_PARALLEL) {
@@ -254,10 +271,11 @@ DllExport void update (double tStep) {
         thisDimr->timerEnd(thisDimr->control->subBlocks[0].unit.component);
         (thisDimr->control->subBlocks[0].unit.component->dllGetCurrentTime) (&thisDimr->control->subBlocks[0].tCur);
     }
+	return 0;
 }
 
 //------------------------------------------------------------------------------
-DllExport void finalize (void) {
+BMI_API int finalize(void) {
     thisDimr->log->Write (Log::MAJOR, thisDimr->my_rank, "dimr_lib:finalize");
     // Execute finalize on the first controlBlock and
     // initialize, step, finalize on all other controlBlocks
@@ -282,10 +300,11 @@ DllExport void finalize (void) {
         printf("Finished: redirecting DIMR messages to file \"%s\"", thisDimr->redirectFile);
         fflush(stdout);
     }
+	return 0;
 }
 
 //------------------------------------------------------------------------------
-DllExport void get_start_time (double * tStart) {
+BMI_API void get_start_time(double * tStart) {
     thisDimr->log->Write (Log::MAJOR, thisDimr->my_rank, "dimr_lib:get_start_time");
     if (thisDimr->control->subBlocks[0].type == CT_PARALLEL) {
         *tStart = thisDimr->control->subBlocks[0].subBlocks[thisDimr->control->subBlocks[0].masterSubBlockId].tStart;
@@ -296,7 +315,7 @@ DllExport void get_start_time (double * tStart) {
 }
 
 //------------------------------------------------------------------------------
-DllExport void get_end_time (double * tEnd) {
+BMI_API void get_end_time(double * tEnd) {
     thisDimr->log->Write (Log::MAJOR, thisDimr->my_rank, "dimr_lib:get_end_time");
     if (thisDimr->control->subBlocks[0].type == CT_PARALLEL) {
         *tEnd = thisDimr->control->subBlocks[0].subBlocks[thisDimr->control->subBlocks[0].masterSubBlockId].tEnd;
@@ -307,7 +326,7 @@ DllExport void get_end_time (double * tEnd) {
 }
 
 //------------------------------------------------------------------------------
-DllExport void get_time_step (double * tStep) {
+BMI_API void get_time_step(double * tStep) {
     thisDimr->log->Write (Log::MAJOR, thisDimr->my_rank, "dimr_lib:get_time_step");
     if (thisDimr->control->subBlocks[0].type == CT_PARALLEL) {
         *tStep = thisDimr->control->subBlocks[0].subBlocks[thisDimr->control->subBlocks[0].masterSubBlockId].tStep;
@@ -318,7 +337,7 @@ DllExport void get_time_step (double * tStep) {
 }
 
 //------------------------------------------------------------------------------
-DllExport void get_current_time (double * tCur) {
+BMI_API void get_current_time(double * tCur) {
     thisDimr->log->Write (Log::MAJOR, thisDimr->my_rank, "dimr_lib:get_current_time");
     if (thisDimr->control->subBlocks[0].type == CT_PARALLEL) {
         *tCur = thisDimr->control->subBlocks[0].subBlocks[thisDimr->control->subBlocks[0].masterSubBlockId].tCur;
@@ -329,7 +348,7 @@ DllExport void get_current_time (double * tCur) {
 }
 
 //------------------------------------------------------------------------------
-DllExport void get_var (const char * key, void ** ref) {
+BMI_API void get_var(const char * key, void ** ref) {
     char           * componentName = new char[thisDimr->MAXSTRING];
     const char     * slash         = strstr(key, "/");
     const char     * sourceName;
@@ -378,7 +397,7 @@ DllExport void get_var (const char * key, void ** ref) {
 }
 
 //------------------------------------------------------------------------------
-DllExport void set_var (const char * key, const void * value) {
+BMI_API void set_var(const char * key, const void * value) {
     char           * componentName = new char[thisDimr->MAXSTRING];
     const char     * slash = strstr(key, "/");
     const char     * targetName;
@@ -1672,7 +1691,7 @@ void Dimr::connectLibs (void) {
 //          throw new Exception (true, "Cannot find function \"%s\" in library \"%s\". Return code: %d", BmiGetAttributeEntryPoint, lib, GetLastError());
 //        }
 
-        if (   componentsList.components[i].type == COMP_TYPE_FM
+		if (   componentsList.components[i].type == COMP_TYPE_FM
             || componentsList.components[i].type == COMP_TYPE_RTC 
             || componentsList.components[i].type == COMP_TYPE_RR 
             || componentsList.components[i].type == COMP_TYPE_FLOW1D 
@@ -1689,8 +1708,20 @@ void Dimr::connectLibs (void) {
             componentsList.components[i].dllSetVar = NULL;
         }
 
+		if (componentsList.components[i].type == COMP_TYPE_FLOW1D)
+		{
+			componentsList.components[i].setLogger = (BMI_SET_LOGGER)GETPROCADDRESS(dllhandle, BmiSetLogger);
+			if (componentsList.components[i].setLogger == NULL) {
+				throw new Exception(true, "Cannot find function \"%s\" in library \"%s\". Return code: %d", BmiSetLogger, lib, GetLastError());
+			}
+			componentsList.components[i].setLogger(&_log);
+			double level = (double)convertDimrLogLevelToLogLevel(this->logMask);
+			componentsList.components[i].dllSetVar("debugLevel", (const void *)&level);
+
+		}
+
         // Not implemented yet in Delwaq:
-        if (componentsList.components[i].type != COMP_TYPE_DELWAQ) { 
+	        if (componentsList.components[i].type != COMP_TYPE_DELWAQ) { 
             componentsList.components[i].dllGetVar = (BMI_GETVAR) GETPROCADDRESS (dllhandle, BmiGetVarEntryPoint);
             if (componentsList.components[i].dllGetVar == NULL) {
                 throw new Exception (true, "Cannot find function \"%s\" in library \"%s\". Return code: %d", BmiGetVarEntryPoint, lib, GetLastError());
@@ -1724,6 +1755,52 @@ void Dimr::printComponentVersionStrings (unsigned int my_mask) {
     log->Write (my_mask, my_rank, "---------------------------------");
     log->Write (my_mask, my_rank, "");
     delete[] versionstr;
+}
+
+Level convertDimrLogLevelToLogLevel(unsigned int mask)
+{
+	if (mask & Log::LOG_DETAIL)
+		return ALL;
+	if (mask & Log::DETAIL)
+		return DEBUG;
+	if (mask & Log::MINOR)
+		return INFO;
+	if (mask & Log::MAJOR)
+		return WARNINGS;
+	if (mask & Log::WARN)
+		return ERRORS;
+	if (mask & Log::ALWAYS)
+		return FATAL;
+	return INFO;
+}
+
+unsigned int convertBMILogLevelToDimrLogLevel(int level)
+{
+	switch ((Level)level)
+	{
+	case ALL:
+		return Log::LOG_DETAIL;
+	case DEBUG:
+		return Log::DETAIL;
+	case INFO:
+	default:
+		return Log::MINOR;
+	case WARNINGS:
+		return Log::MAJOR;
+	case ERRORS:
+		return Log::WARN;
+	case FATAL:
+		return Log::ALWAYS;
+	}	
+}
+
+
+//void _log(int level, char * msg) {
+void _log(Level level, const char * msg) {
+	if (thisDimr == NULL) {
+		thisDimr = new Dimr();
+	}	
+	thisDimr->log->Write(convertBMILogLevelToDimrLogLevel(level), thisDimr->my_rank, msg);
 }
 
 //------------------------------------------------------------------------------

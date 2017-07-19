@@ -59,6 +59,7 @@ Log::Log (
     this->redirectFile  = NULL;
 
     this->writeCallback = NULL;
+    this->externalLogger = NULL;
 
     if (pthread_key_create (&this->thkey, NULL) != 0)
         throw new Exception (true, "Pthreads error in Log: Cannot create thread-specific key: %s", strerror (errno));
@@ -156,9 +157,6 @@ Log::Write (
     const char *  format,
     ...
     ) {
-    if ((int)this->mask - (int)mask < 0) {
-        return false;
-    }
 
     const int bufsize = 256*1024;
     char * buffer = new char [bufsize]; // really big temporary buffer, just in case
@@ -168,6 +166,15 @@ Log::Write (
     int len = vsnprintf (buffer, bufsize-1, format, arguments);
     va_end (arguments);
     buffer[bufsize-1] = '\0';
+
+	if (this->externalLogger){
+		Level level = convertDimrLogLevelToLogLevel(static_cast<int>(mask));
+		this->externalLogger(level, buffer);
+	}
+
+	if ((int)this->mask - (int)mask < 0) {
+		return false;
+	}
 
     char * clock = new char [100];
     clock[0] = '\0';
@@ -202,7 +209,7 @@ Log::Write (
     if (this->writeCallback && (int)this->feedbackMask - (int)mask >= 0){
         this->writeCallback(&clock[0], buffer, mask);
     }
-
+	
     delete[] buffer;
     delete[] clock;
     return true;
@@ -216,4 +223,10 @@ WriteCallback writeCallback
     this->writeCallback = writeCallback;
     this->Write(Log::MAJOR, 0, "WriteCallBack is set");
 }
+void Log::SetExternalLogger(Logger logger)
+{
+	this->externalLogger = logger;
+	this->Write(Log::MAJOR, 0, "External logger is set");
+}
+
 

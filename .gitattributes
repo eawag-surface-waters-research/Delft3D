@@ -341,6 +341,7 @@ src/engines_gpl/dimr/packages/dimr/src/readme.txt -text
 src/engines_gpl/dimr/packages/dimr_lib/Makefile.am -text
 src/engines_gpl/dimr/packages/dimr_lib/dimr_lib.vcxproj -text
 src/engines_gpl/dimr/packages/dimr_lib/include/Makefile.am -text
+src/engines_gpl/dimr/packages/dimr_lib/include/bmi.h -text
 src/engines_gpl/dimr/packages/dimr_lib/include/clock.h -text
 src/engines_gpl/dimr/packages/dimr_lib/include/component.h -text
 src/engines_gpl/dimr/packages/dimr_lib/include/dimr.h -text

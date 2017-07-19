@@ -46,6 +46,7 @@ extern "C" {
     typedef void(STDCALL * WriteCallback)(char* time, char* message, unsigned int level);
 }
 #include "dimr.h"
+#include "bmi.h"
 
 class Log {
     public:
@@ -146,6 +147,10 @@ class Log {
         SetWriteCallBack(
             WriteCallback writeCallback
             );
+		void
+			SetExternalLogger(
+			Logger logger
+			);
 
     private:
         FILE *        output;
@@ -155,6 +160,7 @@ class Log {
 
         pthread_key_t thkey;      // contains key for thread-specific log data
         WriteCallback writeCallback;
+		Logger        externalLogger;
     public:
         char *        redirectFile;
     };
