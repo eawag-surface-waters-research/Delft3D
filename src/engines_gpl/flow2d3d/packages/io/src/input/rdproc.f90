@@ -1,6 +1,6 @@
 subroutine rdproc(error    ,nrrec     ,mdfrec    ,htur2d      ,salin    , &
                 & temp     ,wind      ,ktemp     ,keva        ,ivapop2  , &
-                & irov     ,ctunit    ,z0v       ,sferic      ,tgfcmp   , &
+                & irov     ,z0v       ,sferic      ,tgfcmp   , &
                 & temeqs   ,saleqs    ,wstcof    ,rhoa        ,secflo   , &
                 & betac    ,equili    ,lsec      ,chzmin      ,rmincf   , &
                 & rtcmod   ,couplemod ,nonhyd    ,mmax        ,nmax     , &
@@ -98,6 +98,7 @@ subroutine rdproc(error    ,nrrec     ,mdfrec    ,htur2d      ,salin    , &
     real(fp)                   , pointer :: ti_nodal
     logical                    , pointer :: xbeach
     real(fp)                   , pointer :: tunit
+    character(10)              , pointer :: tunitstr
     logical                    , pointer :: ztbml
 !
 ! Global variables
@@ -133,7 +134,6 @@ subroutine rdproc(error    ,nrrec     ,mdfrec    ,htur2d      ,salin    , &
     real(fp)                 :: z0v         !  Description and declaration in physco.igs
     real(fp), dimension(6)   :: wstcof      !  Description and declaration in physco.igs
     character(*)             :: mdfrec      !!  Standard rec. length in MD-file (300)
-    character(1)             :: ctunit      ! Time scale for time parameters, currently set to 'M'(inute - fixed). 
     character(1)             :: equili      !!  Equilibrium or advection and diffusion default = no equilibrium ('N') which means lsec = 1
     character(36)            :: tgfcmp      !  Description and declaration in tricom.igs
 !
@@ -214,6 +214,7 @@ subroutine rdproc(error    ,nrrec     ,mdfrec    ,htur2d      ,salin    , &
     ti_nodal            => gdp%gdinttim%ti_nodal
     xbeach              => gdp%gdprocs%xbeach
     tunit               => gdp%gdexttim%tunit
+    tunitstr            => gdp%gdexttim%tunitstr
     ztbml               => gdp%gdzmodel%ztbml
     sleepduringwave     => gdp%gdtricom%sleepduringwave
     include 'tfzeta.gdt'
@@ -1303,7 +1304,7 @@ subroutine rdproc(error    ,nrrec     ,mdfrec    ,htur2d      ,salin    , &
     ti_nodal = 21600.0_fp / tunit
     call prop_get(gdp%mdfile_ptr, '*', 'NodalT', ti_nodal)
     if (comparereal(ti_nodal,21600.0_fp/tunit) /= 0) then
-       write (message,'(a,e12.4,3a)') 'Updating tidal node factors every ', ti_nodal, ' [',ctunit,']'
+       write (message,'(a,e12.4,3a)') 'Updating tidal node factors every ', ti_nodal, ' [',trim(tunitstr),']'
        call prterr(lundia, 'G051', trim(message))
     endif
     !

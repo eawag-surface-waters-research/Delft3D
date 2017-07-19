@@ -28,6 +28,7 @@ module m_rdtrafrm
 !  $Id$
 !  $HeadURL$
 !-------------------------------------------------------------------------------
+use m_depfil_stm
 
 private
 
@@ -718,8 +719,8 @@ subroutine rdtraparfld(lundia    ,error     ,lsedtot   ,trapar    , &
           if (j>0) then
              filename = trapar%parfil(i,ll)
              write (lundia, '(a,a)') 'Reading: ',trim(filename)
-             call depfil(lundia     ,error      ,filename   ,fmttmp    , &
-                       & parfld(:,j),1          ,1          ,dims      )
+             call depfil_stm(lundia     ,error      ,filename   ,fmttmp    , &
+                           & parfld(:,j),1          ,1          ,dims      )
              if (error) return
           endif
        enddo
@@ -1112,6 +1113,67 @@ subroutine traparams(iform     ,name      ,nparreq   ,nparopt   ,parkeyw   , &
        pardef(1)  = 0.03_fp
        parkeyw(2) = 'Alpha0'
        pardef(2)  = 0.3_fp
+    elseif (iform == 19) then
+       name       = 'Van Thiel / Van Rijn (2008)'
+       nparopt    =  13
+       parkeyw(1) = 'facua'
+       pardef(1)  = 0.1_fp               
+       parkeyw(2) = 'facAs'
+       pardef(2)  = 0.1_fp     
+       parkeyw(3) = 'facSk'
+       pardef(3)  = 0.1_fp      
+       parkeyw(4) = 'waveform'
+       pardef(4)  = 2.0_fp      ! 1=ruessink, 2=van thiel         
+       parkeyw(5) = 'sws'
+       pardef(5)  = 1.0_fp ! true    
+       parkeyw(6) = 'lws'
+       pardef(6)  = 1.0_fp ! true           
+       parkeyw(7) = 'dilatancy'
+       pardef(7)  = 0.0_fp ! false      
+       parkeyw(8) = 'rheeA'
+       pardef(8)  = 0.75_fp      
+       parkeyw(9) = 'pormax'
+       pardef(9)  = 0.5_fp        
+       parkeyw(10) = 'bedslpini'
+       pardef(10)  = 0.0_fp  ! 0=none, 1=total; 2=bedload only                  
+       parkeyw(11) = 'smax'
+       pardef(11)  = -1.0_fp     ! [-1; 3]             
+       parkeyw(12) = 'reposeangle'
+       pardef(12)  = 30.0_fp
+       parkeyw(13) = 'cmax'
+       pardef(13)  = 0.1_fp
+       
+    elseif (iform == 20) then
+       name       = 'Soulsby / Van Rijn, XBeach flavour'
+       nparopt    =  14
+       parkeyw(1) = 'facua'
+       pardef(1)  = 0.1_fp               
+       parkeyw(2) = 'facAs'
+       pardef(2)  = 0.1_fp     
+       parkeyw(3) = 'facSk'
+       pardef(3)  = 0.1_fp      
+       parkeyw(4) = 'waveform'
+       pardef(4)  =  2.0_fp      ! 1=ruessink, 2=van thiel         
+       parkeyw(5) = 'sws'
+       pardef(5)  = 1.0_fp ! true    
+       parkeyw(6) = 'lws'
+       pardef(6)  = 1.0_fp ! true           
+       parkeyw(7) = 'dilatancy'
+       pardef(7)  = 0.0_fp ! false      
+       parkeyw(8) = 'rheeA'
+       pardef(8)  = 0.75_fp      
+       parkeyw(9) = 'pormax'
+       pardef(9)  = 0.5_fp        
+       parkeyw(10) = 'bedslpini'
+       pardef(10)  = 0.0_fp ! 0=none, 1=total; 2=bedload only                  
+       parkeyw(11) = 'smax'
+       pardef(11)  = -1.0_fp   ! [-1; 3]             
+       parkeyw(12) = 'reposeangle'
+       pardef(12)  = 30.0_fp
+       parkeyw(13) = 'cmax'
+       pardef(13)  = 0.1_fp 
+       parkeyw(15) = 'z0'
+       pardef(15)  = 0.006_fp
     endif
 end subroutine traparams
 

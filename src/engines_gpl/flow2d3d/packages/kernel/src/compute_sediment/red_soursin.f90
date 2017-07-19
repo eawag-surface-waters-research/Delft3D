@@ -61,7 +61,6 @@ subroutine red_soursin(nmmax     ,kmax      ,thick     , &
     real(fp)                         , pointer :: thresh
     real(fp)                         , pointer :: dzmax
     real(fp)                         , pointer :: bed
-    real(fp)                         , pointer :: tmor
     integer                          , pointer :: itmor
     logical                          , pointer :: bedupd
     real(fp)                         , pointer :: hdt
@@ -119,7 +118,6 @@ subroutine red_soursin(nmmax     ,kmax      ,thick     , &
     thresh              => gdp%gdmorpar%thresh
     dzmax               => gdp%gdmorpar%dzmax
     bed                 => gdp%gdmorpar%bed
-    tmor                => gdp%gdmorpar%tmor
     itmor               => gdp%gdmorpar%itmor
     bedupd              => gdp%gdmorpar%bedupd
     hdt                 => gdp%gdnumeco%hdt

@@ -1,3 +1,5 @@
+subroutine ua_rvr(facas,    facsk,    sws,    h,    hrms, &
+               &  rlabda, uorb, ua)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2017.                                
@@ -25,18 +27,60 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 !  $Id$
-!  $HeadURL$$
-!-------------------------------------------------------------------------------
-    type gd_exttim
-!
-       real(fp) :: tstart    !  Simulation start time (in tunit)
-       real(fp) :: tstop     !  Simulation stop  time (in tunit)
-       real(fp) :: dt        !  Time step (in tunit)
-       real(fp) :: tunit     !  Time scale in seconds as read from mdf-file (in seconds)
-                             !  Default is 60.0 secs
-       real(fp) :: tzone     !  Local (FLOW) time - GMT (in hours)
-       integer  :: itdate    !  Reference date for the simulation times. Format: YYYYMMDD
-!
-	   character(10) :: tunitstr ! Time scale string e.g. "min", "s"
-!
-    end type gd_exttim
+!  $HeadURL$
+!!--description-----------------------------------------------------------------
+! computes velocity asymmetry due to waves according to
+! Ruessink et al. 2009 JGR
+! -
+!!--pseudo code and references--------------------------------------------------
+! NONE
+!!--declarations----------------------------------------------------------------
+    use precision
+    use mathconsts
+    !
+    implicit none
+    !
+    ! Arguments
+    !
+    real(fp), intent(in)          :: facas
+    real(fp), intent(in)          :: facsk
+    integer, intent(in)           :: sws
+    real(fp), intent(in)          :: rlabda
+    real(fp), intent(in)          :: hrms
+    real(fp), intent(in)          :: h
+    real(fp), intent(in)          :: uorb
+    real(fp), intent(out)         :: ua
+    !
+    ! Local variables
+    !
+    real(fp)       :: m1, m2, m3, m4, m5, m6
+    real(fp)       :: alpha
+    real(fp)       :: beta
+    real(fp)       :: urs
+    real(fp)       :: bm
+    real(fp)       :: b1
+    real(fp)       :: waveno
+    real(fp)       :: sk
+    real(fp)       :: as
+    !
+    ! Constants
+    !
+    m1 = 0_fp       ! a = 0
+    m2 = 0.7939_fp  ! b = 0.79 +/- 0.023
+    m3 = -0.6065_fp ! c = -0.61 +/- 0.041
+    m4 = 0.3539_fp  ! d = -0.35 +/- 0.032 
+    m5 = 0.6373_fp  ! e = 0.64 +/- 0.025
+    m6 = 0.5995_fp  ! f = 0.60 +/- 0.043
+    alpha = -log10(exp(1.0_fp))/m4
+    beta  = exp(m3/m4)
+    !
+    waveno = twopi / rlabda
+    urs = 3.0_fp/8.0_fp*sqrt(2.0_fp)*hrms*waveno/(waveno*h)**3              !Ursell number
+    urs = max(urs,1e-12_fp)
+    bm = m1 + (m2-m1)/(1.0_fp+beta*urs**alpha)                              !Boltzmann sigmoid (eq 6)         
+    b1 = (-90.0_fp+90.0_fp*tanh(m5/urs**m6))*pi/180.0_fp
+    sk = bm*cos(b1)                                                         !Skewness (eq 8)
+    as = bm*sin(b1)                                                         !Asymmetry(eq 9)                                
+    ua = sws*(facsk*sk-facas*as)*uorb
+   
+end subroutine ua_rvr

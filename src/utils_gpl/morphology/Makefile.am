@@ -1,3 +1,4 @@
-include $(top_srcdir)/common.am
+include $(top_srcdir)/common.am 
 SUBDIRS = \
-         packages
+	include \
+	packages

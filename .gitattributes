@@ -5501,6 +5501,9 @@ src/tools_lgpl/matlab/quickplot/svnstripfile.m -text
 src/tools_lgpl/matlab/rtc/progsrc/rtc_communicator.m -text
 src/utils_gpl/Makefile.am -text
 src/utils_gpl/morphology/Makefile.am -text
+src/utils_gpl/morphology/include/Makefile.am -text
+src/utils_gpl/morphology/include/RF.inc -text
+src/utils_gpl/morphology/include/global_config.inc -text
 src/utils_gpl/morphology/packages/Makefile.am -text
 src/utils_gpl/morphology/packages/morphology_data/Makefile.am -text
 src/utils_gpl/morphology/packages/morphology_data/morphology_data.vfproj -text
@@ -5510,6 +5513,7 @@ src/utils_gpl/morphology/packages/morphology_data/src/sediment_basics_module.f90
 src/utils_gpl/morphology/packages/morphology_io/Makefile.am -text
 src/utils_gpl/morphology/packages/morphology_io/morphology_io.vfproj -text
 src/utils_gpl/morphology/packages/morphology_io/src/Makefile.am -text
+src/utils_gpl/morphology/packages/morphology_io/src/depfil_stm.F90 -text
 src/utils_gpl/morphology/packages/morphology_io/src/rdmor.f90 -text
 src/utils_gpl/morphology/packages/morphology_io/src/rdmorlyr.f90 -text
 src/utils_gpl/morphology/packages/morphology_io/src/rdsed.f90 -text
@@ -5548,6 +5552,8 @@ src/utils_gpl/morphology/packages/morphology_kernel/src/termgy.f90 -text
 src/utils_gpl/morphology/packages/morphology_kernel/src/trab11.f90 -text
 src/utils_gpl/morphology/packages/morphology_kernel/src/trab12.f90 -text
 src/utils_gpl/morphology/packages/morphology_kernel/src/trab14.f90 -text
+src/utils_gpl/morphology/packages/morphology_kernel/src/trab19.f90 -text
+src/utils_gpl/morphology/packages/morphology_kernel/src/trab20.f90 -text
 src/utils_gpl/morphology/packages/morphology_kernel/src/trabg.f90 -text
 src/utils_gpl/morphology/packages/morphology_kernel/src/trabwc.f90 -text
 src/utils_gpl/morphology/packages/morphology_kernel/src/trabwc2.f90 -text
@@ -5560,6 +5566,8 @@ src/utils_gpl/morphology/packages/morphology_kernel/src/tranb3.f90 -text
 src/utils_gpl/morphology/packages/morphology_kernel/src/tranb4.f90 -text
 src/utils_gpl/morphology/packages/morphology_kernel/src/tranb5.f90 -text
 src/utils_gpl/morphology/packages/morphology_kernel/src/tranb7.f90 -text
+src/utils_gpl/morphology/packages/morphology_kernel/src/ua_rvr.f90 -text
+src/utils_gpl/morphology/packages/morphology_kernel/src/ua_vt.f90 -text
 src/utils_gpl/morphology/packages/morphology_kernel/src/updmorfac.f90 -text
 src/utils_gpl/morphology/packages/morphology_kernel/src/wave.f90 -text
 src/utils_gpl/morphology/packages/morphology_plugins_c/Makefile.am -text

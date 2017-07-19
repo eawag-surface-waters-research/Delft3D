@@ -1,7 +1,7 @@
 subroutine rdirt(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                & citdat    ,tstart    ,tstop     ,tzone     ,iitdat    , &
-               & julday    ,itstrt    ,itfinish  ,dt        ,ctunit    , &
-               & rtunit    ,gdp       )
+               & julday    ,itstrt    ,itfinish  ,dt        ,tunit     , &
+               & gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2017.                                
@@ -53,6 +53,7 @@ subroutine rdirt(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     !
     integer , pointer :: itis
     logical , pointer :: dryrun
+    character(10), pointer :: tunitstr
 !
 ! Global variables
 !
@@ -65,12 +66,11 @@ subroutine rdirt(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     integer                    :: nrrec    !!  Pointer to the record number in the MD-file
     logical      , intent(out) :: error    !!  Flag=TRUE if an error is encountered
     real(fp)                   :: dt       !  Description and declaration in esm_alloc_real.f90
-    real(fp)     , intent(out) :: rtunit   !!  Time scale for time parameters (sec)
+    real(fp)     , intent(out) :: tunit    !  Time scale for time parameters (sec)
     real(fp)                   :: tstart   !  Description and declaration in exttim.igs
     real(fp)                   :: tstop    !  Description and declaration in exttim.igs
     real(fp)     , intent(out) :: tzone    !  Description and declaration in exttim.igs
     character(*)               :: mdfrec   !!  Standard rec. length in MD-file (300)
-    character(1)               :: ctunit   !!  Time scale for time parameters, currently set to 'M'(inute - fixed).
     character(10)              :: citdat   !!  Reference date for the simulation times. Format: "YYYY-MM-DD"
 !
 ! Local variables
@@ -97,7 +97,7 @@ subroutine rdirt(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     logical                :: nodef  ! Flag set to YES if default value may NOT be applied in case var. read is empty (ier <= 0, or nrread < nlook) 
     real(fp)               :: rdef   ! Help var. containing default va- lue(s) for real variable 
     real(fp), dimension(1) :: rval   ! Help array (real) where the data, recently read from the MD-file, are stored temporarily 
-    real(fp), dimension(5) :: scale  ! Array containing the time scale mul- tiplier (now only the 2-nd value = 60.0 is used) as TUNIT = 'M' (fixed) 
+    character(1)           :: ctunit ! Help var for time scale
     character(10)          :: cdef   ! Default value when CVAR not found 
     character(100)         :: chulp  ! Help var. 
     character(3)           :: maand  ! Actual month of CITDAT 
@@ -107,12 +107,12 @@ subroutine rdirt(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     character(3)           :: sign   ! Sign of local time zone 
     !
     data month/'jan feb mar apr may jun jul aug sep oct nov dec '/
-    data scale/1.0, 60.0, 3600.0, 86400.0, 604800.0/
 !
 !! executable statements -------------------------------------------------------
 !
     itis   => gdp%gdrdpara%itis
     dryrun => gdp%gdtmpfil%dryrun
+    tunitstr => gdp%gdexttim%tunitstr
     !
     ! initialize local parameters
     !
@@ -279,21 +279,25 @@ subroutine rdirt(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     !
     ctunit = ' '
     call prop_get_string(gdp%mdfile_ptr, '*', 'Tunit', ctunit)
-    if (ctunit == ' ') then
-       ctunit = 'M'
-    endif
+    if (ctunit == ' ') ctunit = 'M'
     if (ctunit == 'S') then
-       rtunit = scale(1)
+       tunit = 1.0_fp
+       tunitstr = 's'
     elseif (ctunit == 'M') then
-    rtunit = scale(2)
+       tunit = 60.0_fp
+       tunitstr = 'min'
     elseif (ctunit == 'H') then
-       rtunit = scale(3)
+       tunit = 3600.0_fp
+       tunitstr = 'h'
     elseif (ctunit == 'D') then
-       rtunit = scale(4)
+       tunit = 86400.0_fp
+       tunitstr = 'day'
     elseif (ctunit == 'W') then
-       rtunit = scale(5)
+       tunit = 604800.0_fp
+       tunitstr = 'week'
     else
        call prterr(lundia, 'V006', ' ')
+       tunitstr = 'UNKNOWN'
     endif
     !
     ! Time step, start time, stop time and time step for time-dependent

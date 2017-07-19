@@ -142,15 +142,15 @@ type bedcomp_settings
     !
     ! pointers
     !
-    type (morlyrnumericstype)    , pointer :: morlyrnum ! structure containing numerical settings
-    integer    , dimension(:)    , pointer :: sedtyp    ! sediment type: 0=total/1=noncoh/2=coh
-    real(fp)   , dimension(:,:)  , pointer :: kdiff     ! diffusion coefficients for mixing between layers, units : m2/s
-    real(fp)   , dimension(:)    , pointer :: phi       ! D50 diameter expressed on phi scale
-    real(fp)   , dimension(:)    , pointer :: rhofrac   ! density of fraction (specific density or including pores)
-    real(fp)   , dimension(:)    , pointer :: sigphi    ! standard deviation expressed on phi scale
-    real(fp)   , dimension(:)    , pointer :: thexlyr   ! thickness of exchange layer
-    real(fp)   , dimension(:)    , pointer :: thtrlyr   ! thickness of transport layer
-    real(fp)   , dimension(:)    , pointer :: zdiff     ! depth below bed level for which diffusion coefficients are defined, units : m
+    type (morlyrnumericstype) , pointer :: morlyrnum ! structure containing numerical settings
+    integer  , dimension(:)   , pointer :: sedtyp    ! sediment type: 0=total/1=noncoh/2=coh
+    real(fp) , dimension(:,:) , pointer :: kdiff     ! diffusion coefficients for mixing between layers, units : m2/s
+    real(fp) , dimension(:)   , pointer :: phi       ! D50 diameter expressed on phi scale
+    real(fp) , dimension(:)   , pointer :: rhofrac   ! density of fraction (specific density or including pores)
+    real(fp) , dimension(:)   , pointer :: sigphi    ! standard deviation expressed on phi scale
+    real(fp) , dimension(:)   , pointer :: thexlyr   ! thickness of exchange layer
+    real(fp) , dimension(:)   , pointer :: thtrlyr   ! thickness of transport layer
+    real(fp) , dimension(:)   , pointer :: zdiff     ! depth below bed level for which diffusion coefficients are defined, units : m
     ! 
     ! logicals
     !
@@ -161,13 +161,13 @@ type bedcomp_settings
 end type bedcomp_settings
 !
 type bedcomp_state
-    real(prec) , dimension(:,:)  , pointer :: bodsed    ! Array with total sediment, units : kg /m2
-    real(fp)   , dimension(:)    , pointer :: dpsed     ! Total depth sediment layer, units : m
-    real(fp)   , dimension(:,:,:), pointer :: msed      ! composition of morphological layers: mass of sediment fractions, units : kg /m2
-    real(fp)   , dimension(:,:)  , pointer :: preload   ! historical largest load, units : kg
-    real(fp)   , dimension(:,:)  , pointer :: sedshort  ! sediment shortage in transport layer, units : kg /m2
-    real(fp)   , dimension(:,:)  , pointer :: svfrac    ! 1 - porosity coefficient, units : -
-    real(fp)   , dimension(:,:)  , pointer :: thlyr     ! thickness of morphological layers, units : m
+    real(prec) , dimension(:,:)  , pointer :: bodsed   ! Array with total sediment, units : kg /m2
+    real(fp)   , dimension(:)    , pointer :: dpsed    ! Total depth sediment layer, units : m
+    real(fp)   , dimension(:,:,:), pointer :: msed     ! composition of morphological layers: mass of sediment fractions, units : kg /m2
+    real(fp)   , dimension(:,:)  , pointer :: preload  ! historical largest load, units : kg
+    real(fp)   , dimension(:,:)  , pointer :: sedshort ! sediment shortage in transport layer, units : kg /m2
+    real(fp)   , dimension(:,:)  , pointer :: svfrac   ! 1 - porosity coefficient, units : -
+    real(fp)   , dimension(:,:)  , pointer :: thlyr    ! thickness of morphological layers, units : m
 end type bedcomp_state
 !
 type bedcomp_work
@@ -1734,7 +1734,7 @@ subroutine getvfrac(this, frac, nmfrom, nmto)
     select case(this%settings%iunderlyr)
     case(2)
        do nm = nmfrom, nmto
-          if (comparereal(thlyr(1, nm),0.0_fp) == 0) then
+          if (comparereal(thlyr(1, nm), 0.0_fp) == 0) then
              frac(nm, :) = 1.0_fp/this%settings%nfrac
           else
              thick = svfrac(1, nm) * thlyr(1, nm)
@@ -2109,6 +2109,8 @@ function allocwork(this, work) result (istat)
     integer, pointer :: nfrac
     integer, pointer :: nlyr
     !
+    real(fp) :: dmiss = -999.0_fp
+    !
     !! executable statements -------------------------------------------------------
     !
     nfrac => this%settings%nfrac
@@ -2116,8 +2118,11 @@ function allocwork(this, work) result (istat)
     !
     istat = 0
     if (istat == 0) allocate (work%msed2(nfrac, nlyr), stat = istat)
+    if (istat == 0) work%msed2 = dmiss
     if (istat == 0) allocate (work%thlyr2(nlyr)     , stat = istat)
+    if (istat == 0) work%thlyr2 = dmiss
     if (istat == 0) allocate (work%svfrac2(nlyr)    , stat = istat)
+    if (istat == 0) work%svfrac2 = dmiss
 end function allocwork
 !
 !
@@ -2689,7 +2694,7 @@ subroutine bedcomp_use_bodsed(this)
           enddo
           !
           ! base layer
-          ! 
+          !
           thlyr(this%settings%nlyr, nm) = sedthick
           fac = thlyr(this%settings%nlyr, nm)/thsed
           do ised = 1, this%settings%nfrac

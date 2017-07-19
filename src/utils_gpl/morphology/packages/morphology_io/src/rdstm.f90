@@ -59,7 +59,9 @@ end type stmtype
 
 contains
 
-subroutine rdstm(stm, griddim, filsed, filmor, filtrn, lundia, lsal, ltem, ltur, lsec, lfbedfrm, julrefday, nambnd, error)
+subroutine rdstm(stm, griddim, filsed, filmor, filtrn, &
+               & lundia, lsal, ltem, ltur, lsec, lfbedfrm, &
+               & julrefday, dtunit, nambnd, error)
 !!--description-----------------------------------------------------------------
 !
 ! Read sediment transport and morphology data from filsed, filemor and filtrn
@@ -86,6 +88,7 @@ subroutine rdstm(stm, griddim, filsed, filmor, filtrn, lundia, lsal, ltem, ltur,
     logical                     , intent(in)  :: lfbedfrm
     integer                     , intent(in)  :: julrefday
     character(20) , dimension(:), intent(in)  :: nambnd
+    character(*)                , intent(in)  :: dtunit
     logical                     , intent(out) :: error
 !
 ! Local variables
@@ -137,7 +140,7 @@ subroutine rdstm(stm, griddim, filsed, filmor, filtrn, lundia, lsal, ltem, ltur,
     !
     lstsci = max(0,lsal,ltem) + stm%lsedsus
     !
-    allocate(stm%facdss(stm%lsedsus)   , stat = istat)
+    allocate(stm%facdss(stm%lsedsus), stat = istat)
     allocate(stm%namcon(lstsci+ltur), stat = istat)
     !
     if (lsal>0) then
@@ -168,6 +171,7 @@ subroutine rdstm(stm, griddim, filsed, filmor, filtrn, lundia, lsal, ltem, ltur,
                & stm%lsedtot, lstsci, ltur, stm%namcon, &
                & stm%iopsus, nmlb, nmub, filsed, &
                & sedfil_tree, stm%sedpar, stm%trapar, griddim)
+    if (error) goto 999
     !
     ! Read morphology parameters
     !
@@ -180,6 +184,7 @@ subroutine rdstm(stm, griddim, filsed, filmor, filtrn, lundia, lsal, ltem, ltur,
                & stm%lsedsus, nmaxus, nto, lfbedfrm, nambnd, julrefday, morfil_tree, &
                & stm%sedpar, stm%morpar, stm%fwfac, stm%morlyr, &
                & griddim)
+    if (error) goto 999
     !
     ! Some other parameters are transport formula specific. Use the value
     ! historically specified in mor file as default.
@@ -215,7 +220,7 @@ subroutine rdstm(stm, griddim, filsed, filmor, filtrn, lundia, lsal, ltem, ltur,
     ! Echo morphology parameters
     !
     call echomor(lundia, error, lsec, stm%lsedtot, nto, &
-               & nambnd, stm%sedpar, stm%morpar)
+               & nambnd, stm%sedpar, stm%morpar, dtunit)
     !
 999 continue
     !
@@ -245,10 +250,22 @@ function clrstm(stm) result(istat)
 !! executable statements -------------------------------------------------------
 !
     istat = 0
-    call clrsedpar(istat, stm%sedpar)
-    if (istat==0) call clrmorpar(istat, stm%morpar)
-    if (istat==0) call clrtrapar(istat, stm%trapar)
-    if (istat==0) istat = clrmorlyr(stm%morlyr)
+    if (associated(stm%sedpar)) then
+        call clrsedpar(istat, stm%sedpar)
+        deallocate(stm%sedpar, STAT = istat)
+    endif
+    if (associated(stm%morpar) .and. istat==0) then
+        call clrmorpar(istat, stm%morpar)
+        deallocate(stm%morpar, STAT = istat)
+    endif
+    if (associated(stm%trapar) .and. istat==0) then
+        call clrtrapar(istat, stm%trapar)
+        deallocate(stm%trapar, STAT = istat)
+    endif
+    if (associated(stm%morlyr) .and. istat==0) then
+        istat = clrmorlyr(stm%morlyr)
+        deallocate(stm%morlyr, STAT = istat)
+    endif
 end function clrstm
 
 end module m_rdstm

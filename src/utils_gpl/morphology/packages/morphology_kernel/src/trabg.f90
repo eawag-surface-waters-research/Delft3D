@@ -96,7 +96,7 @@ subroutine trabg(utot      ,di        ,taub      ,par       ,sbot      , &
     b       = (1.0_fp - ao) / (1.0_fp + exp(1.9_fp - (di / (3.0_fp * dg))))
     ! converts true dgsd back to sigma phi squared consistent with definition in paper
     sigphi  = (log(dgsd) / log(2.0_fp))**2
-    taurm   = (thco + 0.022_fp / (1_fp + exp(7.1_fp * sigphi - 11.786_fp))) * (rhosol - rhow) * ag * dg
+    taurm   = (thco + 0.022_fp / (1.0_fp + exp(7.1_fp * sigphi - 11.786_fp))) * (rhosol - rhow) * ag * dg
     tauri   = taurm * (di / dg)**b
     phi     = taub / tauri
     if (phi < 1.35_fp) then

@@ -139,32 +139,12 @@ subroutine tricom_finish(olv_handle, gdp)
     integer                             , pointer :: itdiag
     integer                             , pointer :: julday
     integer                             , pointer :: ntstep
-    real(fp)                            , pointer :: tmor
-    real(fp)                            , pointer :: rdc
-    integer                             , pointer :: itmor
-    type (bedbndtype) , dimension(:)    , pointer :: morbnd
-    logical                             , pointer :: densin
     logical                             , pointer :: multi
     character(256)                      , pointer :: mmsyncfilnam
-    real(fp)                            , pointer :: hdt
-    character(6)                        , pointer :: momsol
     real(fp)                            , pointer :: rhow
-    real(fp)                            , pointer :: ag
     integer                             , pointer :: iro
     logical                             , pointer :: wind
-    logical                             , pointer :: temp
-    logical                             , pointer :: const
-    logical                             , pointer :: culvert
-    logical                             , pointer :: dredge
-    logical                             , pointer :: drogue
-    logical                             , pointer :: wave
     integer                             , pointer :: waveol
-    logical                             , pointer :: threed
-    logical                             , pointer :: secflo
-    logical                             , pointer :: struct
-    logical                             , pointer :: sedim
-    logical                             , pointer :: htur2d
-    logical                             , pointer :: flmd2l
     logical                             , pointer :: mudlay
     logical                             , pointer :: mudwave
     logical                             , pointer :: coupleact
@@ -175,7 +155,6 @@ subroutine tricom_finish(olv_handle, gdp)
     logical                             , pointer :: wavcmp
     logical                             , pointer :: cnstwv
     logical                             , pointer :: lftrto
-    logical                             , pointer :: snelli
     logical                             , pointer :: sbkol
     integer                             , pointer :: numdomains
     integer                             , pointer :: nummappers
@@ -485,32 +464,12 @@ subroutine tricom_finish(olv_handle, gdp)
     itdiag              => gdp%gdinttim%itdiag
     julday              => gdp%gdinttim%julday
     ntstep              => gdp%gdinttim%ntstep
-    tmor                => gdp%gdmorpar%tmor
-    rdc                 => gdp%gdmorpar%rdc
-    itmor               => gdp%gdmorpar%itmor
-    morbnd              => gdp%gdmorpar%morbnd
-    densin              => gdp%gdmorpar%densin
     multi               => gdp%gdmorpar%multi
     mmsyncfilnam        => gdp%gdmorpar%mmsyncfilnam
-    hdt                 => gdp%gdnumeco%hdt
-    momsol              => gdp%gdnumeco%momsol
     rhow                => gdp%gdphysco%rhow
-    ag                  => gdp%gdphysco%ag
     iro                 => gdp%gdphysco%iro
     wind                => gdp%gdprocs%wind
-    temp                => gdp%gdprocs%temp
-    const               => gdp%gdprocs%const
-    culvert             => gdp%gdprocs%culvert
-    dredge              => gdp%gdprocs%dredge
-    drogue              => gdp%gdprocs%drogue
-    wave                => gdp%gdprocs%wave
     waveol              => gdp%gdprocs%waveol
-    threed              => gdp%gdprocs%threed
-    secflo              => gdp%gdprocs%secflo
-    struct              => gdp%gdprocs%struct
-    sedim               => gdp%gdprocs%sedim
-    htur2d              => gdp%gdprocs%htur2d
-    flmd2l              => gdp%gdprocs%flmd2l
     mudlay              => gdp%gdprocs%mudlay
     mudwave             => gdp%gdprocs%mudwave
     coupleact           => gdp%gdprocs%coupleact
@@ -521,7 +480,6 @@ subroutine tricom_finish(olv_handle, gdp)
     wavcmp              => gdp%gdprocs%wavcmp
     cnstwv              => gdp%gdprocs%cnstwv
     lftrto              => gdp%gdprocs%lftrto
-    snelli              => gdp%gdprocs%snelli
     sbkol               => gdp%gdprocs%sbkol
     numdomains          => gdp%gdprognm%numdomains
     nummappers          => gdp%gdprognm%nummappers

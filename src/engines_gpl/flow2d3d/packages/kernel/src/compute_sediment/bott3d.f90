@@ -80,7 +80,6 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
     real(fp)                             , pointer :: morfac
     real(fp)                             , pointer :: sus
     real(fp)                             , pointer :: bed
-    real(fp)                             , pointer :: tmor
     real(fp)                             , pointer :: thetsd
     real(fp)                             , pointer :: sedthr
     real(fp)                             , pointer :: hmaxth
@@ -258,7 +257,6 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
     morfac              => gdp%gdmorpar%morfac
     sus                 => gdp%gdmorpar%sus
     bed                 => gdp%gdmorpar%bed
-    tmor                => gdp%gdmorpar%tmor
     thetsd              => gdp%gdmorpar%thetsd
     sedthr              => gdp%gdmorpar%sedthr
     hmaxth              => gdp%gdmorpar%hmaxth
@@ -591,7 +589,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
        !
        do jb = 1, nto
           icond = morbnd(jb)%icond
-          if (icond == 4 .or. icond == 5) then
+          if (icond == 4 .or. icond == 5 .or. icond == 8) then
              !
              ! Open boundary with transport boundary condition:
              ! Get data from table file
@@ -659,14 +657,19 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
                    !
                    if (icond == 4) then
                       !
-                      ! transport including pores
+                      ! transport volume including pores
                       !
                       rate = rate*cdryb(l)
-                   else
+                   elseif (icond == 5) then
                       !
-                      ! transport excluding pores
+                      ! transport volume excluding pores
                       !
                       rate = rate*rhosol(l)
+                   elseif (icond == 8) then
+                      !
+                      ! transport mass
+                      !
+                      !rate = rate
                    endif
                    !
                    ! impose boundary condition
@@ -678,7 +681,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
                    endif
                 enddo ! l (sediment fraction)
              enddo    ! ib (boundary point)
-          endif       ! icond = 4 or 5 (boundary with transport condition)
+          endif       ! icond = 4, 5 or 8 (boundary with transport condition)
        enddo          ! jb (open boundary) 
        !
        ! Update quantity of bottom sediment
@@ -1070,11 +1073,12 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
              endif
              !
              select case(icond)
-             case (0,4,5)
+             case (0,4,5,8)
                 !
                 ! outflow or free boundary (0)
-                ! or prescribed transport with pores (4)
-                ! or prescribed transport without pores (5)
+                ! or prescribed transport volume with pores (4)
+                ! or prescribed transport volume without pores (5)
+                ! or prescribed transport mass (8)
                 !
                 depchg(nm) = depchg(nm) + depchg(nxmx) * alfa_mag
              case (1)

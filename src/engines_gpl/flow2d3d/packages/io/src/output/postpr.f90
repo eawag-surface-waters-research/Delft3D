@@ -134,40 +134,26 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     integer                              , pointer :: julday
     integer                              , pointer :: ntstep
     integer                              , pointer :: nto
-    real(fp)                             , pointer :: bed
-    real(fp)                             , pointer :: tmor
-    integer                              , pointer :: itmor
-    logical                              , pointer :: multi
     logical                              , pointer :: first
     integer                              , pointer :: nuprpg
     integer                              , pointer :: nuprln
     character(131)   , dimension(:)      , pointer :: header
     logical                              , pointer :: wind
-    logical                              , pointer :: culvert
-    logical                              , pointer :: dredge
     logical                              , pointer :: drogue
     logical                              , pointer :: wave
     integer                              , pointer :: waveol
-    logical                              , pointer :: sedim
     logical                              , pointer :: coupleact
     logical                              , pointer :: couplemod
     logical                              , pointer :: zmodel
-    logical                              , pointer :: roller
-    logical                              , pointer :: xbeach
     integer(pntrsize)                    , pointer :: alfas
     integer(pntrsize)                    , pointer :: areau
     integer(pntrsize)                    , pointer :: areav
     integer(pntrsize)                    , pointer :: atr
-    integer(pntrsize)                    , pointer :: c
     integer(pntrsize)                    , pointer :: cfurou
     integer(pntrsize)                    , pointer :: cfvrou
-    integer(pntrsize)                    , pointer :: cvalu0
-    integer(pntrsize)                    , pointer :: cvalv0
     integer(pntrsize)                    , pointer :: ctr
     integer(pntrsize)                    , pointer :: dicuv
     integer(pntrsize)                    , pointer :: dicww
-    integer(pntrsize)                    , pointer :: dis
-    integer(pntrsize)                    , pointer :: disch
     integer(pntrsize)                    , pointer :: discum
     integer(pntrsize)                    , pointer :: dp
     integer(pntrsize)                    , pointer :: dps
@@ -487,39 +473,25 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     ipmap               => gdp%gdinttim%ipmap
     julday              => gdp%gdinttim%julday
     ntstep              => gdp%gdinttim%ntstep
-    bed                 => gdp%gdmorpar%bed
-    tmor                => gdp%gdmorpar%tmor
-    itmor               => gdp%gdmorpar%itmor
-    multi               => gdp%gdmorpar%multi
     nuprpg              => gdp%gdpostpr%nuprpg
     nuprln              => gdp%gdpostpr%nuprln
     header              => gdp%gdpostpr%header
     wind                => gdp%gdprocs%wind
-    culvert             => gdp%gdprocs%culvert
-    dredge              => gdp%gdprocs%dredge
     drogue              => gdp%gdprocs%drogue
     wave                => gdp%gdprocs%wave
     waveol              => gdp%gdprocs%waveol
-    sedim               => gdp%gdprocs%sedim
     coupleact           => gdp%gdprocs%coupleact
     couplemod           => gdp%gdprocs%couplemod
     zmodel              => gdp%gdprocs%zmodel
-    roller              => gdp%gdprocs%roller
-    xbeach              => gdp%gdprocs%xbeach
     alfas               => gdp%gdr_i_ch%alfas
     areau               => gdp%gdr_i_ch%areau
     areav               => gdp%gdr_i_ch%areav
     atr                 => gdp%gdr_i_ch%atr
-    c                   => gdp%gdr_i_ch%c
     cfurou              => gdp%gdr_i_ch%cfurou
     cfvrou              => gdp%gdr_i_ch%cfvrou
-    cvalu0              => gdp%gdr_i_ch%cvalu0
-    cvalv0              => gdp%gdr_i_ch%cvalv0
     ctr                 => gdp%gdr_i_ch%ctr
     dicuv               => gdp%gdr_i_ch%dicuv
     dicww               => gdp%gdr_i_ch%dicww
-    dis                 => gdp%gdr_i_ch%dis
-    disch               => gdp%gdr_i_ch%disch
     discum              => gdp%gdr_i_ch%discum
     dp                  => gdp%gdr_i_ch%dp
     dps                 => gdp%gdr_i_ch%dps

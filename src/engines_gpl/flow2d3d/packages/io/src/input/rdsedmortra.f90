@@ -192,7 +192,7 @@ subroutine rdsedmortra(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     ! Echo morphology parameters
     !
     call echomor(lundia    ,error     ,lsec      ,lsedtot   ,nto        , &
-               & nambnd    ,gdp%gdsedpar, gdp%gdmorpar)
+               & nambnd    ,gdp%gdsedpar, gdp%gdmorpar, gdp%gdexttim%tunitstr)
     if (error) goto 999
     !
     ! Read scour and echo parameters

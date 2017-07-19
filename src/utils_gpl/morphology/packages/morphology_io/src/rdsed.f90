@@ -28,6 +28,7 @@ module m_rdsed
 !  $Id$
 !  $HeadURL$
 !-------------------------------------------------------------------------------
+use m_depfil_stm
 
 private
 
@@ -367,8 +368,8 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
           ! Space varying data has been specified
           ! Use routine that also read the depth file to read the data
           !
-          call depfil(lundia    ,error     ,flsmdc    ,fmttmp    , &
-                    & mudcnt    ,1         ,1         ,griddim   )
+          call depfil_stm(lundia    ,error     ,flsmdc    ,fmttmp    , &
+                        & mudcnt    ,1         ,1         ,griddim   )
           if (error) return
           do nm = 1, griddim%nmmax
              mudcnt(nm) = max(0.0_fp, min(mudcnt(nm), 1.0_fp))
@@ -407,8 +408,8 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
           ! Space varying data has been specified
           ! Use routine that also read the depth file to read the data
           !
-          call depfil(lundia    ,error     ,flspmc    ,fmttmp    , &
-                    & pmcrit    ,1         ,1         ,griddim   )
+          call depfil_stm(lundia    ,error     ,flspmc    ,fmttmp    , &
+                        & pmcrit    ,1         ,1         ,griddim   )
           if (error) return
           do nm = 1, griddim%nmmax
              pmcrit(nm) = min(pmcrit(nm), 1.0_fp)
@@ -501,8 +502,8 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
                 !
                 !  File with space varying data has been specified, read it now.
                 !
-                call depfil(lundia    ,error     ,flsdia    ,fmttmp    , &
-                          & sedd50fld ,1         ,1         ,griddim   )
+                call depfil_stm(lundia    ,error     ,flsdia    ,fmttmp    , &
+                              & sedd50fld ,1         ,1         ,griddim   )
                 if (error) return
              else
                 flsdia = ' '
@@ -1567,12 +1568,12 @@ subroutine count_sed(lundia    ,error     ,lsed      ,lsedtot   , &
     call prop_file('ini', trim(filsed), sed_ptr, istat)
     if (istat /= 0) then
        select case (istat)
-       case(1)
-          call write_error(FILE_NOT_FOUND//trim(filsed), unit=lundia)
-       case(3)
-          call write_error(PREMATURE_EOF//trim(filsed), unit=lundia)
-       case default
-          call write_error(FILE_READ_ERROR//trim(filsed), unit=lundia)
+          case(1)
+             call write_error(FILE_NOT_FOUND//trim(filsed), unit=lundia)
+          case(3)
+             call write_error(PREMATURE_EOF//trim(filsed), unit=lundia)
+          case default
+             call write_error(FILE_READ_ERROR//trim(filsed), unit=lundia)
        endselect
        error = .true.
        return

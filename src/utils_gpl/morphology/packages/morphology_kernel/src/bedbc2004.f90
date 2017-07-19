@@ -238,7 +238,7 @@ subroutine bedbc2004(tp        ,rhowat    , &
        ! ksc due to ripples, mega-ripples and dunes
        !
        ra = 30.0_fp * z0rou
-       ra = min(10.*rc, ra)
+       ra = min(10.0_fp*rc, ra)
        !
        ! convert velocity to velocity at top of wave mixing layer, based on
        ! ENHANCED bed roughness

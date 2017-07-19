@@ -102,7 +102,7 @@ integer, parameter, public :: RP_ZVLBD = 34
 integer, parameter, public :: RP_VNKAR = 35
 integer, parameter, public :: RP_Z0CUR = 36
 integer, parameter, public :: RP_Z0ROU = 37
-integer, parameter, public :: RP_KTUR  = 38
+integer, parameter, public :: RP_KTUR  = 38     ! flow induced turbulence
 integer, parameter, public :: RP_DG    = 39
 integer, parameter, public :: RP_SNDFR = 40
 integer, parameter, public :: RP_DGSD  = 41
@@ -110,7 +110,15 @@ integer, parameter, public :: RP_UMEAN = 42
 integer, parameter, public :: RP_VMEAN = 43
 integer, parameter, public :: RP_VELMN = 44
 integer, parameter, public :: RP_USTAR = 45
-integer, parameter, public :: MAX_RP   = 45
+integer, parameter, public :: RP_KWTUR = 46     ! wave breaking induced turbulence
+integer, parameter, public :: RP_UAU   = 47     ! velocity asymmetry due to short waves, x component
+integer, parameter, public :: RP_VAU   = 48     ! same, y component
+integer, parameter, public :: RP_BLCHG = 49     ! dzb/dt, needed for dilatancy calculation in van Thiel formulation
+integer, parameter, public :: RP_D15MX = 50     ! same, d15
+integer, parameter, public :: RP_POROS = 51     ! same, porosity
+integer, parameter, public :: RP_DZDX  = 52     ! same, bottom slope x dir
+integer, parameter, public :: RP_DZDY  = 53     ! same, bottom slope y dir
+integer, parameter, public :: MAX_RP   = 53
 !
 integer, parameter, public :: IP_NM    =  1
 integer, parameter, public :: IP_N     =  2
@@ -205,6 +213,7 @@ type moroutputtype
     logical :: sandfrac
     logical :: sbuuvv
     logical :: sbcuv
+    logical :: sscuv
     logical :: sbcuuvv
     logical :: sbwuv
     logical :: sbwuuvv
@@ -249,8 +258,9 @@ type bedbndtype
                                                 !  (4) last used record in table
     integer                         :: npnt     ! number points of boundary
     integer , dimension(:), pointer :: idir
-    integer , dimension(:), pointer :: nm
-    integer , dimension(:), pointer :: nxmx
+    integer , dimension(:), pointer :: nm       ! outside boundary cell
+    integer , dimension(:), pointer :: nxmx     ! inside boundary cell
+    integer , dimension(:), pointer :: lm       ! "flow link"
     real(fp), dimension(:), pointer :: alfa_mag
     real(fp), dimension(:), pointer :: alfa_dist
 end type bedbndtype
@@ -357,7 +367,10 @@ type morpar_type
     real(fp):: ttlalpha   !  transport layer thickness: proportionality factor
     real(fp):: ttlmin     !  transport layer thickness: minimum thickness
     real(fp):: wetslope   !  maximum wet bed slope (used for avalanching)
+    real(fp):: dryslope   !  maximum dry bed slope (used for avalanching)
     real(fp):: avaltime   !  time scale in seconds (used for avalanching)
+    real(fp):: hswitch    !  depth to switch dryslope and wetslope
+    real(fp):: dzmaxdune  !  Maximum bed level change per hydrodynamic time step
     !
     !  (sp)
     !
@@ -366,6 +379,7 @@ type morpar_type
     !
     integer :: mergehandle !  stream handle for communication with mormerge
     integer :: i10         !  index of D10 in the xx array
+    integer :: i15         !  index of D15 in the xx array
     integer :: i50         !  index of D50 in the xx array
     integer :: i90         !  index of D90 in the xx array
     integer :: ihidexp     !  switch for hiding exposure effect
@@ -424,6 +438,7 @@ type morpar_type
     logical :: oldmudfrac          !  true: use the old method for the mud source term calculation (without Frac multiplication)
     logical :: varyingmorfac       !  true: morfac specified in a time serie file
     logical :: multi               !  Flag for merging bottoms of different parallel runs
+    logical :: duneavalan          !  Flag for avalanching using wetslope and dryslope
     !
     ! characters
     !
@@ -622,6 +637,8 @@ type sedtra_type
     real(fp)         , dimension(:,:)    , pointer :: sswy     !(nc1:nc2,lsedtot) sswv in structured Delft3D-FLOW
     real(fp)         , dimension(:,:)    , pointer :: sxtot    !(nc1:nc2,lsedtot) sutot in structured Delft3D-FLOW
     real(fp)         , dimension(:,:)    , pointer :: sytot    !(nc1:nc2,lsedtot) svtot in structured Delft3D-FLOW
+    real(fp)         , dimension(:,:)    , pointer :: sscx     !(nc1:nc2,lsedtot) svtot in structured Delft3D-FLOW
+    real(fp)         , dimension(:,:)    , pointer :: sscy     !(nc1:nc2,lsedtot) svtot in structured Delft3D-FLOW
     !
     real(fp)         , dimension(:,:)    , pointer :: srcmax   !(nc1:nc2,lsedtot)
     real(fp)         , dimension(:,:)    , pointer :: fixfac   !(nc1:nc2,lsedtot)
@@ -720,6 +737,8 @@ subroutine nullsedtra(sedtra)
     nullify(sedtra%sswy)
     nullify(sedtra%sxtot)
     nullify(sedtra%sytot)
+    nullify(sedtra%sscx)
+    nullify(sedtra%sscy)
     !
     nullify(sedtra%srcmax)
     nullify(sedtra%fixfac)
@@ -837,6 +856,13 @@ subroutine allocsedtra(sedtra, moroutput, kmax, lsed, lsedtot, nc1, nc2, nu1, nu
     if (istat==0) allocate(sedtra%sswy    (nc1:nc2,lsedtot), STAT = istat)
     if (istat==0) allocate(sedtra%sxtot   (nc1:nc2,lsedtot), STAT = istat)
     if (istat==0) allocate(sedtra%sytot   (nc1:nc2,lsedtot), STAT = istat)
+    if (ioptloc==CODE_DEFAULT) then
+       if (istat==0) allocate(sedtra%sscx   (nc1:nc2,lsedtot), STAT = istat)  ! to have ss output in FM in zeta points
+       if (istat==0) allocate(sedtra%sscy   (nc1:nc2,lsedtot), STAT = istat)  ! dimensioned on sedtot on purpose!!
+    else
+       if (istat==0) allocate(sedtra%sscx   (1,1), STAT = istat)           ! not used in structured Delft3D-FLOW
+       if (istat==0) allocate(sedtra%sscy   (1,1), STAT = istat)           ! not used in structured Delft3D-FLOW
+    endif
     !
     if (istat==0) allocate(sedtra%srcmax  (nc1:nc2,lsedtot), STAT = istat)
     if (istat==0) allocate(sedtra%fixfac  (nc1:nc2,lsedtot), STAT = istat)
@@ -910,6 +936,8 @@ subroutine allocsedtra(sedtra, moroutput, kmax, lsed, lsedtot, nc1, nc2, nu1, nu
     sedtra%sswy     = 0.0_fp
     sedtra%sxtot    = 0.0_fp
     sedtra%sytot    = 0.0_fp
+    sedtra%sscx     = 0.0_fp
+    sedtra%sscy     = 0.0_fp
     !
     sedtra%srcmax   = 0.0_fp
     sedtra%fixfac   = 1.0_fp
@@ -943,8 +971,8 @@ subroutine clrsedtra(istat, sedtra)
     !
     ! Function/routine arguments
     !
-    type (sedtra_type)                         , pointer     :: sedtra
-    integer                                    , intent(out) :: istat
+    type (sedtra_type)                         , intent(inout) :: sedtra
+    integer                                    , intent(out)   :: istat
     !
     ! Local variables
     !
@@ -1017,6 +1045,8 @@ subroutine clrsedtra(istat, sedtra)
     if (associated(sedtra%sswy    ))   deallocate(sedtra%sswy    , STAT = istat)
     if (associated(sedtra%sxtot   ))   deallocate(sedtra%sxtot   , STAT = istat)
     if (associated(sedtra%sytot   ))   deallocate(sedtra%sytot   , STAT = istat)
+    if (associated(sedtra%sytot   ))   deallocate(sedtra%sscx    , STAT = istat)
+    if (associated(sedtra%sytot   ))   deallocate(sedtra%sscy    , STAT = istat)
     !
     if (associated(sedtra%srcmax  ))   deallocate(sedtra%srcmax  , STAT = istat)
     if (associated(sedtra%fixfac  ))   deallocate(sedtra%fixfac  , STAT = istat)
@@ -1206,7 +1236,11 @@ subroutine nullmorpar(morpar)
     real(fp)                             , pointer :: ttlalpha
     real(fp)                             , pointer :: ttlmin
     real(fp)                             , pointer :: wetslope
+    real(fp)                             , pointer :: dryslope
     real(fp)                             , pointer :: avaltime
+    logical                              , pointer :: duneavalan
+    real(fp)                             , pointer :: hswitch
+    real(fp)                             , pointer :: dzmaxdune
     real(fp)              , dimension(:) , pointer :: xx
     !
     real(hp)              , dimension(:) , pointer :: mergebuf
@@ -1275,7 +1309,11 @@ subroutine nullmorpar(morpar)
     ttlalpha            => morpar%ttlalpha
     ttlmin              => morpar%ttlmin
     wetslope            => morpar%wetslope
+    dryslope            => morpar%dryslope
     avaltime            => morpar%avaltime
+    duneavalan          => morpar%duneavalan
+    hswitch             => morpar%hswitch
+    dzmaxdune           => morpar%dzmaxdune
     !
     ihidexp             => morpar%ihidexp
     itmor               => morpar%itmor
@@ -1324,46 +1362,47 @@ subroutine nullmorpar(morpar)
     eulerisoglm         => morpar%eulerisoglm
     glmisoeuler         => morpar%glmisoeuler
     !
-    morpar%moroutput%transptype   = 2
+    morpar%moroutput%transptype  = 2
     !
     morpar%moroutput%statflg(:,:) = 0
     morpar%moroutput%nstatqnt     = 0
     !
-    morpar%moroutput%aks          = .false.
-    morpar%moroutput%cumavg       = .false.
-    morpar%moroutput%dg           = .false.
-    morpar%moroutput%dgsd         = .false.
-    morpar%moroutput%dm           = .false.
+    morpar%moroutput%aks         = .false.
+    morpar%moroutput%cumavg      = .false.
+    morpar%moroutput%dg          = .false.
+    morpar%moroutput%dgsd        = .false.
+    morpar%moroutput%dm          = .false.
     morpar%moroutput%dmsedcum     = .false.
     morpar%moroutput%dpbedlyr     = .true.
-    morpar%moroutput%dzduuvv      = .false.
-    morpar%moroutput%fixfac       = .false.
-    morpar%moroutput%hidexp       = .false.
-    morpar%moroutput%frac         = .false.
+    morpar%moroutput%dzduuvv     = .false.
+    morpar%moroutput%fixfac      = .false.
+    morpar%moroutput%hidexp      = .false.
+    morpar%moroutput%frac        = .false.
     morpar%moroutput%lyrfrac      = .true.
     morpar%moroutput%msed         = .true.
-    morpar%moroutput%mudfrac      = .false.
+    morpar%moroutput%mudfrac     = .false.
     morpar%moroutput%percentiles  = .false.
     morpar%moroutput%poros        = .true.
     morpar%moroutput%rca          = .true.
     morpar%moroutput%rsedeq       = .true.
-    morpar%moroutput%sandfrac     = .false.
+    morpar%moroutput%sandfrac    = .false.
     morpar%moroutput%sbuuvv       = .true.
-    morpar%moroutput%sbcuv        = .false.
-    morpar%moroutput%sbcuuvv      = .false.
+    morpar%moroutput%sbcuv       = .false.
+    morpar%moroutput%sscuv       = .false.
+    morpar%moroutput%sbcuuvv     = .false.
     morpar%moroutput%ssuuvv       = .true.
-    morpar%moroutput%sbwuv        = .false.
-    morpar%moroutput%sbwuuvv      = .false.
-    morpar%moroutput%sswuv        = .false.
-    morpar%moroutput%sswuuvv      = .false.
-    morpar%moroutput%suvcor       = .false.
-    morpar%moroutput%sourcesink   = .false.
-    morpar%moroutput%taurat       = .false.
-    morpar%moroutput%umod         = .false.
-    morpar%moroutput%ustar        = .false.
-    morpar%moroutput%uuuvvv       = .false.
+    morpar%moroutput%sbwuv       = .false.
+    morpar%moroutput%sbwuuvv     = .false.
+    morpar%moroutput%sswuv       = .false.
+    morpar%moroutput%sswuuvv     = .false.
+    morpar%moroutput%suvcor      = .false.
+    morpar%moroutput%sourcesink  = .false.
+    morpar%moroutput%taurat      = .false.
+    morpar%moroutput%umod        = .false.
+    morpar%moroutput%ustar       = .false.
+    morpar%moroutput%uuuvvv      = .false.
     morpar%moroutput%ws           = .true.
-    morpar%moroutput%zumod        = .false.
+    morpar%moroutput%zumod       = .false.
     !
     morpar%mornum%upwindbedload            = .true.
     morpar%mornum%laterallyaveragedbedload = .false.
@@ -1420,7 +1459,11 @@ subroutine nullmorpar(morpar)
     ttlalpha           = 0.1_fp
     ttlmin             = 0.0_fp
     wetslope           = 10.0_fp
+    dryslope           = 1.0_fp
     avaltime           = 86400.0_fp
+    duneavalan         = .false.
+    hswitch            = 0.1_fp
+    dzmaxdune          = 0.05_fp
     !
     ihidexp            = 1
     itmor              = 0
@@ -1597,6 +1640,7 @@ subroutine clrmorpar(istat, morpar)
           if (associated(morbnd(i)%idir))      deallocate(morbnd(i)%idir,      STAT = istat)
           if (associated(morbnd(i)%nm))        deallocate(morbnd(i)%nm,        STAT = istat)
           if (associated(morbnd(i)%nxmx))      deallocate(morbnd(i)%nxmx,      STAT = istat)
+          if (associated(morbnd(i)%lm))        deallocate(morbnd(i)%lm,        STAT = istat)
           if (associated(morbnd(i)%alfa_dist)) deallocate(morbnd(i)%alfa_dist, STAT = istat)
           if (associated(morbnd(i)%alfa_mag))  deallocate(morbnd(i)%alfa_mag,  STAT = istat)
        enddo
