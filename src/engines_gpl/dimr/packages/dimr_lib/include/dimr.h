@@ -287,6 +287,8 @@ class Dimr {
         void           receive(const char *, int, BMI_SETVAR, BMI_GETVAR, double *, int *, int, int, const void *);
         void           getAddress(const char * name, int compType, BMI_GETVAR dllGetVar, double ** sourceVarPtr, int * processes, int nProc, double * transfer);
         double *       send(const char * name, int compType, double* sourceVarPtr, int* processes, int nProc, double* transfer);
+		static Level   convertDimrLogLevelToLogLevel(unsigned int);
+		static unsigned int convertBMILogLevelToDimrLogLevel(int level);
 
     public:
         bool               ready;          // true means constructor succeeded and DH ready to run
@@ -312,7 +314,7 @@ class Dimr {
         enum {
             MAXSTRING = 1024    // max string length in bytes, use same value as used in the kernels
             };
-
+		
         // String constants; initialized below, outside class definition
 
     private:
@@ -343,7 +345,6 @@ class Dimr {
 //------------------------------------------------------------------------------
 /* Logger function */
 void _log(Level, const char*);
-Level convertDimrLogLevelToLogLevel(unsigned int);
 
 extern "C" {
 DllExport void set_dimr_logger(Log *);

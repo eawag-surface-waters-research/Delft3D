@@ -139,7 +139,7 @@ BMI_API void set_logger(Logger logger){
 			if (thisDimr->componentsList.components[i].setLogger != NULL) {
 				thisDimr->componentsList.components[i].setLogger(logger);
 			}
-			double level = (double)convertDimrLogLevelToLogLevel(thisDimr->logMask);
+			double level = (double)Dimr::convertDimrLogLevelToLogLevel(thisDimr->logMask);
 			thisDimr->componentsList.components[i].dllSetVar("debugLevel", (const void *)&level);
 		}
 	}
@@ -1715,7 +1715,7 @@ void Dimr::connectLibs (void) {
 				throw new Exception(true, "Cannot find function \"%s\" in library \"%s\". Return code: %d", BmiSetLogger, lib, GetLastError());
 			}
 			componentsList.components[i].setLogger(&_log);
-			double level = (double)convertDimrLogLevelToLogLevel(this->logMask);
+			double level = (double)Dimr::convertDimrLogLevelToLogLevel(this->logMask);
 			componentsList.components[i].dllSetVar("debugLevel", (const void *)&level);
 
 		}
@@ -1757,7 +1757,7 @@ void Dimr::printComponentVersionStrings (unsigned int my_mask) {
     delete[] versionstr;
 }
 
-Level convertDimrLogLevelToLogLevel(unsigned int mask)
+Level Dimr::convertDimrLogLevelToLogLevel(unsigned int mask)
 {
 	if (mask & Log::LOG_DETAIL)
 		return ALL;
@@ -1774,7 +1774,7 @@ Level convertDimrLogLevelToLogLevel(unsigned int mask)
 	return INFO;
 }
 
-unsigned int convertBMILogLevelToDimrLogLevel(int level)
+unsigned int Dimr::convertBMILogLevelToDimrLogLevel(int level)
 {
 	switch ((Level)level)
 	{
@@ -1800,7 +1800,7 @@ void _log(Level level, const char * msg) {
 	if (thisDimr == NULL) {
 		thisDimr = new Dimr();
 	}	
-	thisDimr->log->Write(convertBMILogLevelToDimrLogLevel(level), thisDimr->my_rank, msg);
+	thisDimr->log->Write(Dimr::convertBMILogLevelToDimrLogLevel(level), thisDimr->my_rank, msg);
 }
 
 //------------------------------------------------------------------------------
