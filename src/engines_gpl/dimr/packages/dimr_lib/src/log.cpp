@@ -116,6 +116,18 @@ void Log::UnregisterThread( void ) {
 }
 
 
+const char * Log::AddLeadingZero(int number, int offset)
+{
+	char returnValue[2];
+	if (number + offset < 10)
+		//Fill in the leading 0 if less than 10
+		sprintf(returnValue, "0%s", to_string(number+offset).c_str());
+	else
+		sprintf(returnValue, "%s", to_string(number + offset).c_str());
+	
+	return returnValue;
+}
+
 bool Log::Write( Mask mask, int rank, const char *  format, ... ) {
 	const int bufsize = 256 * 1024;
 	char * buffer = new char[bufsize]; // really big temporary buffer, just in case
@@ -149,12 +161,7 @@ bool Log::Write( Mask mask, int rank, const char *  format, ... ) {
 	string year = to_string(1900 + ptmNow->tm_year);
 
 	// month
-	string month;
-	if (ptmNow->tm_mon < 9)
-		//Fill in the leading 0 if less than 10
-		month = "0" + to_string(1 + ptmNow->tm_mon);
-	else
-		month = (1 + ptmNow->tm_mon);
+	string month = AddLeadingZero(ptmNow->tm_mon, 1);
 
 	char * seconds = new char[strlen(clock) + 1];
 	strcpy(seconds, clock);
@@ -167,14 +174,22 @@ bool Log::Write( Mask mask, int rank, const char *  format, ... ) {
 	int msec = atoi(remainder);
 	//day
 	int d = (int)(sec / 60 / 60 / 24);
-	string day = to_string(d);
+	string day = AddLeadingZero(d,0);
 	int h = (int)((sec - (d * 60 * 60 * 24)) / 60 / 60);
-	string hours = to_string(h);
+	string hours = AddLeadingZero(h,0);
 	int m = (int)(sec - (d * 60 * 60 * 24) - (h * 60 * 60)) / 60;
-	string mins = to_string(m);
+	string mins = AddLeadingZero(m,0);
 	int s = (int)(sec - (d * 60 * 60 * 24) - (h * 60 * 60) - (m * 60));
-	string secs = to_string(s);
-	string msecs = to_string(msec);
+	string secs = AddLeadingZero(s,0);
+	string msecs;
+	if (msec <= 9)	
+		//Fill in the leading 00 if less than 10
+		msecs = "00"+to_string(msec);
+	else if (msec <= 99)
+		//Fill in the padding 0 if less than 100
+		msecs = "0"+to_string(msec);
+	else
+		msecs = to_string(msec);
 
 
 	char * threadID = (char *)pthread_getspecific(this->thkey);

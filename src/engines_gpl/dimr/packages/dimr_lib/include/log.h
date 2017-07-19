@@ -107,11 +107,15 @@ public:
 
 	void UnregisterThread( void );
 
-	bool Write(	Mask mask, int rank, const char * format, ... );
+	const char * AddLeadingZero(int, int);
+
+	bool Write(Mask mask, int rank, const char * format, ...);
 
 	void SetWriteCallBack( WriteCallback writeCallback );
 	
 	void SetExternalLogger( Logger logger );
+
+	
 	
 private:
 	FILE *        output;
@@ -122,6 +126,8 @@ private:
 	pthread_key_t thkey;      // contains key for thread-specific log data
 	WriteCallback writeCallback;
 	Logger        externalLogger;
+
+
 public:
 	char *        redirectFile;
 };
