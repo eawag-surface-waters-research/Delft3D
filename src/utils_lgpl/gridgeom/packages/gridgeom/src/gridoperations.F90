@@ -1,65 +1,23 @@
    module gridoperations
-   !use xxx
+
+   !use module (should not be used)
 
    implicit none
    
-   !All subroutines/modules are made private (we do not expose them for now)
-   !private::   get_startend
-   private::	RESTORE
-   private::	SAVENET
-   private::	INCREASENETW
-   private::	increasenetcells
-   private::	alreadycell
-   private::	SETNEWPOINT
-   private::	CROSSED2d_BNDCELL
-   private::	OTHERNODE
-   private::	OTHERNODECHK
-   private::	SETNODADM
-   private::	INIALLOCnetcell
-   private::	update_cell_circumcenters
-   private::	FINDCELLS
-   private::	FINDTRIS
-   private::	FINDQUADS
-   private::	FINDPENTAS
-   private::	FINDHEXAS
-   private::	iscounterclockwise
-   private::	RECHTSAF
-   private::	CONNECTDBN
-   private::	CONNECTDB
-   private::	ADDLINKTONODES
-   private::	SETNODLIN
-   private::	CHKLINSIZTONODE
-   private::	GIVENEWNODENUM
-   private::	DRIETWEE
-   private::	TWEEDRIE
-   private::	DVIEW
-   private::	INDEXX
-   private::	INCELLS
-   private::	sort_links_ccw
-   private::	comp_masscenter
-   private::	comp_masscenter2D
-   private::	comp_masscenter3D
-   private::	get_cellpolygon
-   private::	comp_circumcenter3D
-   private::	normalin
-   private::	normalout
-   private::	DUITPL
-   private::	GAUSSJ
-   private::	half
-   private::	INVIEW
-   private::	GETCIRCUMCENTER
-   private::	dotp
-   private::	circumcenter3
-   private::	getcellsurface
-   private::	getcellweightedcenter
-   !private::   increasepol
+   !public functions
+   public :: make1D2Dinternalnetlinks
+   public :: ggeo_convert
+   
+   !All subroutines are made private (we do not expose them for now)
+   private
    
    contains
-
+   
    !-----------------------------------------------------------------!
    ! net.f90
    !-----------------------------------------------------------------!
    
+   !> Restore variables with backup data
    SUBROUTINE RESTORE()
    !LC use m_netw
    use network_ggeo_data
@@ -106,6 +64,7 @@
    RETURN
    END SUBROUTINE RESTORE
 
+   !> Save variables in the back ups
    SUBROUTINE SAVENET()
    !LC use m_netw
    use network_ggeo_data
@@ -170,6 +129,7 @@
    RETURN
    END SUBROUTINE SAVENET
 
+   !> Increase the number of net links
    SUBROUTINE INCREASENETW(K0,L0) ! TODO AFMAKEN
    use m_ggeo_missing
    !LC removed use m_netw
@@ -413,6 +373,7 @@
 
    end function alreadycell
 
+   !> TODO: Document me
    SUBROUTINE SETNEWPOINT(XP,YP,ZP,K1)
    !LC use m_netw
    use network_ggeo_data
@@ -424,7 +385,8 @@
    double precision :: XP, YP, ZP
    integer :: K1
 
-   !LC for viewing, it can go COMMON /HOWTOVIEW/ JVIEW, JAV, XYZ ! 1,2,3 OF 4
+   !LC old common block for viewing, it can go
+   !COMMON /HOWTOVIEW/ JVIEW, JAV, XYZ ! 1,2,3 OF 4
 
    JVIEW     = 1
    JAV       = 3

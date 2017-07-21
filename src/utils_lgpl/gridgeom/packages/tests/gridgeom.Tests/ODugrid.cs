@@ -304,8 +304,6 @@ namespace gridgeom.Tests
             Assert.That(meshoneddim.dim, Is.EqualTo(oneddim));
             Assert.That(meshoneddim.numnode, Is.EqualTo(onednumnode));
             Assert.That(meshoneddim.numedge, Is.EqualTo(onednumedge));
-            Assert.That(meshoneddim.numface, Is.EqualTo(onednumface));
-            Assert.That(meshoneddim.maxnumfacenodes, Is.EqualTo(onedmaxnumfacenodes));
             Assert.That(meshoneddim.numlayer, Is.EqualTo(onednumlayer));
             Assert.That(meshoneddim.layertype, Is.EqualTo(onedlayertype));
 
@@ -332,7 +330,7 @@ namespace gridgeom.Tests
             Marshal.Copy(meshoned.nodey, rc_onednodey, 0, onednumnode);
             Marshal.Copy(meshoned.nodez, rc_onednodez, 0, onednumnode);
 
-            //Convert ggeo_convert to fill in kn matrix, so we can call make1D2Dinternalnetlinks_dll
+            //ggeo_convert to fill in kn matrix, so we can call make1D2Dinternalnetlinks_dll
             var wrapperGridgeom = new GridGeomLibWrapper();
             int numk_keep = 0;
             int numl_keep = 0;
@@ -341,7 +339,12 @@ namespace gridgeom.Tests
             numk_keep = numk_keep + meshoneddim.numnode;
             numl_keep = numl_keep + meshoneddim.numedge;
             ierr = wrapperGridgeom.ggeo_convert(ref meshtwod, ref meshtwoddim, ref numk_keep, ref numl_keep);
-            //now you can call make1d2dlinks, no argument needed
+            //convert ugrid to xy coordinates
+            ierr = wrapperGridgeom.ggeo_get_xy_coordinates(ref meshoned.branchids, ref meshoned.branchoffsets, ref meshoned.geopointsX,
+                ref meshoned.geopointsY, ref meshoned.nbranchgeometrynodes, ref meshoned.branchlengths, ref meshoned.nodex, ref meshoned.nodey, ref meshoneddim.nt_nbranches, ref meshoneddim.nt_ngeometry, ref  meshoneddim.numnode);
+            Assert.That(ierr, Is.EqualTo(0));
+            
+            //call make1d2dlinks, no argument needed (all in memory)
             ierr = wrapperGridgeom.ggeo_make1D2Dinternalnetlinks();
 
             //free arrays
