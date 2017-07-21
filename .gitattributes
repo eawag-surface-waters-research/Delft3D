@@ -345,7 +345,6 @@ src/engines_gpl/dimr/packages/dimr_lib/include/bmi.h -text
 src/engines_gpl/dimr/packages/dimr_lib/include/clock.h -text
 src/engines_gpl/dimr/packages/dimr_lib/include/component.h -text
 src/engines_gpl/dimr/packages/dimr_lib/include/dimr.h -text
-src/engines_gpl/dimr/packages/dimr_lib/include/dimr_bmi_utils.h -text
 src/engines_gpl/dimr/packages/dimr_lib/include/dimr_lib_version.h.svn -text
 src/engines_gpl/dimr/packages/dimr_lib/include/dimr_lib_version.rc.svn -text
 src/engines_gpl/dimr/packages/dimr_lib/include/exception.h -text
@@ -360,7 +359,6 @@ src/engines_gpl/dimr/packages/dimr_lib/src/clock.cpp -text
 src/engines_gpl/dimr/packages/dimr_lib/src/component.cpp -text
 src/engines_gpl/dimr/packages/dimr_lib/src/coredump.cpp -text
 src/engines_gpl/dimr/packages/dimr_lib/src/dimr.cpp -text
-src/engines_gpl/dimr/packages/dimr_lib/src/dimr_bmi_utils.cpp -text
 src/engines_gpl/dimr/packages/dimr_lib/src/dimr_lib_version.cpp -text
 src/engines_gpl/dimr/packages/dimr_lib/src/exception.cpp -text
 src/engines_gpl/dimr/packages/dimr_lib/src/log.cpp -text

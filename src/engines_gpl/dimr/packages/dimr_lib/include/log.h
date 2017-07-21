@@ -49,57 +49,19 @@ extern "C" {
 #include "bmi.h"
 
 class Log {
-public:
-	typedef unsigned int Mask;
-
-	static const Mask SILENT = 0;        // no messages
-	static const Mask ALWAYS = 1 << 1;   // a message that cannot never be supressed
-	static const Mask WARN = 1 << 2;   // warning message
-	static const Mask MAJOR = 1 << 3;   // major events in entire program
-	static const Mask MINOR = 1 << 4;   // minor events in entire program
-	static const Mask DETAIL = 1 << 5;   //
-	static const Mask CONFIG_MAJOR = 1 << 6;   // major events during initial configuration phase
-	static const Mask ITER_MAJOR = 1 << 7;   // DD iterator major events
-	static const Mask DDMAPPER_MAJOR = 1 << 8;   // DD mapper major events
-	static const Mask RESERVED_9 = 1 << 9;   //
-	static const Mask RESERVED_10 = 1 << 10;  //
-	static const Mask RESERVED_11 = 1 << 11;  //
-	static const Mask RESERVED_12 = 1 << 12;  //
-	static const Mask RESERVED_13 = 1 << 13;  //
-	static const Mask RESERVED_14 = 1 << 14;  //
-	static const Mask RESERVED_15 = 1 << 15;  //
-
-	static const Mask CONFIG_MINOR = 1 << 16;  // minor events during initial configuration phase
-	static const Mask ITER_MINOR = 1 << 17;  // DD iterator minor events
-	static const Mask DDMAPPER_MINOR = 1 << 18;  // DD mapper minor events
-	static const Mask DD_SENDRECV = 1 << 19;  // DD iterator send/receive events
-	static const Mask DD_SEMAPHORE = 1 << 20;  // DD iterator semaphore events
-	static const Mask RESERVED_21 = 1 << 21;  //
-	static const Mask RESERVED_22 = 1 << 22;  //
-	static const Mask RESERVED_23 = 1 << 23;  //
-	static const Mask RESERVED_24 = 1 << 24;  //
-	static const Mask RESERVED_25 = 1 << 25;  //
-	static const Mask RESERVED_26 = 1 << 26;  //
-	static const Mask RESERVED_27 = 1 << 27;  //
-	static const Mask RESERVED_28 = 1 << 28;  //
-	static const Mask RESERVED_29 = 1 << 29;  //
-	static const Mask LOG_DETAIL = 1 << 30;  // include detailed time, node and iterator info in log messages
-
-	static const Mask TRACE = INT_MAX;   // every possible event
-	// Do not use UINT_MAX: differences between masks have to be tested
 
 public:
-	Log( FILE *  output, Clock * clock, Mask mask = SILENT,	Mask feedbackMask = SILENT );
+	Log( FILE * output, Clock * clock, Level level = FATAL, Level feedbackLevel = FATAL );
 
 	~Log( void );
 
-	Mask GetMask( void );
+	Level GetLevel( void );
 
-	void SetMask( Mask mask );
+	void SetLevel( Level level );
 
-	Mask GetFeedbackLevel( void );
+	Level GetFeedbackLevel( void );
 
-	void SetFeedbackLevel( Mask feedbackMask );
+	void SetFeedbackLevel( Level feedbackLevel );
 
 	void RegisterThread( const char * id );
 
@@ -109,19 +71,20 @@ public:
 
 	const char * AddLeadingZero(int, int);
 
-	bool Write(Mask mask, int rank, const char * format, ...);
+	bool Write(Level level, int rank, const char * format, ...);
 
 	void SetWriteCallBack( WriteCallback writeCallback );
-	
+
 	void SetExternalLogger( Logger logger );
 
-	
-	
+    void logLevelToString( int level, char ** levelString );
+
+
 private:
 	FILE *        output;
 	Clock *       clock;
-	Log::Mask     mask;
-	Log::Mask     feedbackMask;
+	Log::Level     level;
+	Log::Level     feedbackLevel;
 
 	pthread_key_t thkey;      // contains key for thread-specific log data
 	WriteCallback writeCallback;

@@ -77,46 +77,11 @@ class Log;
 
 
 #include "clock.h"
-//#include "component.h"
 #include "exception.h"
 #include "log.h"
 #include "stringutils.h"
-//#include "xmltree.h"
 #include "dimr.h"
 
-//#ifdef WIN32
-//#   define DllExport   __declspec( dllexport )
-//#  define strdup _strdup
-//#else
-//#   define DllExport
-//#endif
-//
-//// Store the exact name of the entry points in the dlls
-//const char BmiInitializeEntryPoint     [] = "initialize";
-//const char BmiUpdateEntryPoint         [] = "update";
-//const char BmiFinalizeEntryPoint       [] = "finalize";
-//const char BmiGetStartTimeEntryPoint   [] = "get_start_time";
-//const char BmiGetEndTimeEntryPoint     [] = "get_end_time";
-//const char BmiGetTimeStepEntryPoint    [] = "get_time_step";
-//const char BmiGetCurrentTimeEntryPoint [] = "get_current_time";
-//const char BmiGetVarEntryPoint         [] = "get_var";
-//const char BmiSetVarEntryPoint         [] = "set_var";
-//
-//// Define the exact api of the entry points in the dlls
-//#if HAVE_CONFIG_H
-//#define CDECLOPT
-//#else
-//#define CDECLOPT __cdecl
-//#endif
-//typedef int  (CDECLOPT *BMI_INITIALIZE)     (const char *);
-//typedef void (CDECLOPT *BMI_UPDATE)         (double);
-//typedef void (CDECLOPT *BMI_FINALIZE)       (void);
-//typedef void (CDECLOPT *BMI_GETSTARTTIME)   (double *);
-//typedef void (CDECLOPT *BMI_GETENDTIME)     (double *);
-//typedef void (CDECLOPT *BMI_GETTIMESTEP)    (double *);
-//typedef void (CDECLOPT *BMI_GETCURRENTTIME) (double *);
-//typedef void (CDECLOPT *BMI_GETVAR)         (const char *, void *);
-//typedef void (CDECLOPT *BMI_SETVAR)         (const char *, void *);
 
 //------------------------------------------------------------------------------
 
@@ -138,28 +103,18 @@ class DimrExe {
         void lib_finalize(void);
 
     public:
-        bool               ready;          // true means constructor succeeded and DH ready to run
-        char *             exePath;        // name of running dimr executable (argv[0])
-        char *             exeName;        // short name of executable
-        Clock *            clock;          // timing facility
-        Log *              log;            // logging facility
-        //XmlTree *          config;         // top of entire XML configuration tree
-        char *             mainArgs;       // reassembled command-line arguments (argv[1...])
-        char *             slaveArg;       // command-line argument for slave mode
-        //dh_control_block * control;        // structure containing all information from the control block in the config.xml file
-        //dh_components      componentsList; // Array of all components
-        //dh_couplers        couplersList;   // Array of all couplers
-
-        enum {
-            MAXSTRING = 1000    // max string length in bytes
-            };
-
-        // String constants; initialized below, outside class definition
+        bool       ready;          // true means constructor succeeded and DH ready to run
+        char  *    exePath;        // name of running dimr executable (argv[0])
+        char  *    exeName;        // short name of executable
+        Clock *    clock;          // timing facility
+        Log   *    log;            // logging facility
+        char  *    mainArgs;       // reassembled command-line arguments (argv[1...])
+        char  *    slaveArg;       // command-line argument for slave mode
 
     private:
-        char    *     configfile;             // name of configuration file
-        bool          done;                   // set to true when it's time to stop
-        char          *    library;           // Component library name, without extension/prefix
+        char  *    configfile;     // name of configuration file
+        bool       done;           // set to true when it's time to stop
+        char  *    library;        // Component library name, without extension/prefix
 #if HAVE_CONFIG_H
     void          *    libHandle;         // (Linux) Handle to the loaded library for this component.
 #else
@@ -174,7 +129,7 @@ class DimrExe {
     BMI_GETCURRENTTIME dllGetCurrentTime; // entry point in dll
     BMI_GETVAR         dllGetVar;         // entry point in dll
     BMI_SETVAR         dllSetVar;         // entry point in dll
-    Log::Mask   logMask;
+    Level              logLevel;
     private:
     };
 

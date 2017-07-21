@@ -20,7 +20,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\dimr_lib\src\clock.cpp" />
-    <ClCompile Include="..\dimr_lib\src\dimr_bmi_utils.cpp" />
     <ClCompile Include="..\dimr_lib\src\exception.cpp" />
     <ClCompile Include="..\dimr_lib\src\log.cpp" />
     <ClCompile Include="src\dimr_exe.cpp" />
@@ -31,9 +30,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="include\version_number.ini" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\dimr_lib\include\dimr_bmi_utils.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{B9D5FB4A-803E-414D-AA15-BE75F06DAB60}</ProjectGuid>

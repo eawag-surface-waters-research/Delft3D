@@ -36,7 +36,7 @@
 
 #include "clock.h"
 #include <ctime>
-
+#include <time.h>
 
 Clock::Clock (
     void
@@ -118,11 +118,19 @@ char *
 Clock::Now (
     char *  buffer
     ) {
-
-    Timestamp time = this->Epoch ();
-    sprintf (buffer, "%d.%06d",
-                        (int) (time / 1000000),
-                        (int) (time % 1000000)
+    // Epoch is only used for the milliseconds
+    Timestamp eTime = this->Epoch ();
+	time_t ttNow = time(0);
+	tm * ptmNow;
+	ptmNow = localtime(&ttNow);
+    sprintf (buffer, "%04d-%02d-%02d %02d:%02d:%02d.%03d",
+                        1900 + ptmNow->tm_year,
+                        1 + ptmNow->tm_mon,
+                        ptmNow->tm_mday,
+                        ptmNow->tm_hour,
+                        ptmNow->tm_min,
+                        ptmNow->tm_sec,
+                        (int) (eTime % 1000000)
                         );
     return buffer;
     }

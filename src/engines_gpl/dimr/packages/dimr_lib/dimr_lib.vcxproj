@@ -220,7 +220,6 @@ echo "This file is overwritten by the post-build command of the project dimr_lib
     <ClCompile Include="src\component.cpp" />
     <ClCompile Include="src\coredump.cpp" />
     <ClCompile Include="src\dimr.cpp" />
-    <ClCompile Include="src\dimr_bmi_utils.cpp" />
     <ClCompile Include="src\dimr_lib_version.cpp" />
     <ClCompile Include="src\exception.cpp" />
     <ClCompile Include="src\log.cpp" />
@@ -232,7 +231,6 @@ echo "This file is overwritten by the post-build command of the project dimr_lib
     <ClInclude Include="include\clock.h" />
     <ClInclude Include="include\component.h" />
     <ClInclude Include="include\dimr.h" />
-    <ClInclude Include="include\dimr_bmi_utils.h" />
     <ClInclude Include="include\exception.h" />
     <ClInclude Include="include\getopt.h" />
     <ClInclude Include="include\log.h" />

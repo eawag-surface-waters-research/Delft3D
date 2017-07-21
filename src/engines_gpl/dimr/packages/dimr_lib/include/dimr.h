@@ -135,7 +135,8 @@ const char BmiGetCurrentTimeEntryPoint [] = "get_current_time";
 const char BmiGetVarEntryPoint         [] = "get_var";
 const char BmiSetVarEntryPoint         [] = "set_var";
 const char BmiSetLogger				   [] = "set_logger";
-const char BmiGetAttributeEntryPoint[] = "get_attribute";
+const char BmiSetLogger2			   [] = "set_logger_c_callback";
+const char BmiGetAttributeEntryPoint   [] = "get_attribute";
 
 // Define the exact api of the entry points in the dlls
 #if HAVE_CONFIG_H
@@ -273,7 +274,7 @@ class Dimr {
         void           scanConfigFile(void);
         void           connectLibs(void);
 
-        void           printComponentVersionStrings (unsigned int);
+        void           printComponentVersionStrings (Level);
 
         void           freeLibs(void);
         void           processWaitFile(void);
@@ -289,29 +290,26 @@ class Dimr {
         double *       send(const char * name, int compType, double* sourceVarPtr, int* processes, int nProc, double* transfer);
 		
     public:
-        bool               ready;          // true means constructor succeeded and DH ready to run
-        char *             exePath;        // name of running dimr executable (argv[0])
-        char *             exeName;        // short name of executable
-        Clock *            clock;          // timing facility
-        Log *              log;            // logging facility
-        XmlTree *          config;         // top of entire XML configuration tree
-        char *             mainArgs;       // reassembled command-line arguments (argv[1...])
-        char *             slaveArg;       // command-line argument for slave mode
-        dimr_control_block * control;      // structure containing all information from the control block in the config.xml file
-        dimr_components    componentsList; // Array of all components
-        dimr_couplers      couplersList;   // Array of all couplers
-        bool               use_mpi;        // Whether MPI-mode is active for this run.
-        int                my_rank;        // Rank# of current process
-        int                numranks;       // Total nr of MPI processes for dimr main.
-        unsigned int       logMask;
-        unsigned int       feedbackMask;
-        const char *       configfile;     // name of configuration file
-        bool               done;           // set to true when it's time to stop
-        char *             redirectFile;   // Name of file to redirect stdout/stderr to
-                                           // Default: Off when started via dimr-exe, On otherwise
-        enum {
-            MAXSTRING = 1024    // max string length in bytes, use same value as used in the kernels
-            };
+        bool                 ready;          // true means constructor succeeded and DH ready to run
+        char *               exePath;        // name of running dimr executable (argv[0])
+        char *               exeName;        // short name of executable
+        Clock *              clock;          // timing facility
+        Log *                log;            // logging facility
+        XmlTree *            config;         // top of entire XML configuration tree
+        char *               mainArgs;       // reassembled command-line arguments (argv[1...])
+        char *               slaveArg;       // command-line argument for slave mode
+        dimr_control_block * control;        // structure containing all information from the control block in the config.xml file
+        dimr_components      componentsList; // Array of all components
+        dimr_couplers        couplersList;   // Array of all couplers
+        bool                 use_mpi;        // Whether MPI-mode is active for this run.
+        int                  my_rank;        // Rank# of current process
+        int                  numranks;       // Total nr of MPI processes for dimr main.
+        Level                logLevel;
+        Level                feedbackLevel;
+        const char *         configfile;     // name of configuration file
+        bool                 done;           // set to true when it's time to stop
+        char *               redirectFile;   // Name of file to redirect stdout/stderr to
+                                             // Default: Off when started via dimr-exe, On otherwise
 		
         // String constants; initialized below, outside class definition
 

@@ -39,18 +39,17 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
-#include "dimr_bmi_utils.h"
 
 
 #if defined (WIN32)
 #   define strdup _strdup
 #endif
 
-Log::Log( FILE *  output, Clock * clock, Mask mask,	Mask feedbackMask) {
+Log::Log( FILE *  output, Clock * clock, Level level, Level feedbackLevel) {
 	this->output = output;
 	this->clock = clock;
-	this->mask = mask;
-	this->feedbackMask = feedbackMask;
+	this->level = level;
+	this->feedbackLevel = feedbackLevel;
 	this->redirectFile = NULL;
 
 	this->writeCallback = NULL;
@@ -72,25 +71,33 @@ Log::~Log( void ) {
 //------------------------------------------------------------------------------
 
 
-Log::Mask Log::GetMask( void ) {
-	return this->mask;
+Level Log::GetLevel( void ) {
+	return this->level;
 }
 
 
-void Log::SetMask( Mask mask ) {
-	this->mask = mask;
-	this->Write(Log::MAJOR, 0, "Log mask set to 0x%08x", this->mask);
+void Log::SetLevel( Level level ) {
+	this->level = min(max(level,Level::ALL),Level::FATAL);
+
+    char * levelString = new char[MAXSTRING];
+    logLevelToString(this->level, &levelString);
+	this->Write(Level::INFO, 0, "Log level set to %s", levelString);
+    delete [] levelString;
 }
 
 
-Log::Mask Log::GetFeedbackLevel( void ) {
-	return this->feedbackMask;
+Level Log::GetFeedbackLevel( void ) {
+	return this->feedbackLevel;
 }
 
 
-void Log::SetFeedbackLevel( Mask feedbackMask) {
-	this->feedbackMask = feedbackMask;
-	this->Write(Log::MAJOR, 0, "Feedback Level mask set to 0x%08x", this->feedbackMask);
+void Log::SetFeedbackLevel( Level feedbackLevel) {
+	this->feedbackLevel = min(max(feedbackLevel,Level::ALL),Level::FATAL);;
+
+    char * levelString = new char[MAXSTRING];
+    logLevelToString(this->feedbackLevel, &levelString);
+	this->Write(Level::INFO, 0, "feedbackLevel set to %s", levelString);
+    delete [] levelString;
 }
 
 
@@ -116,19 +123,7 @@ void Log::UnregisterThread( void ) {
 }
 
 
-const char * Log::AddLeadingZero(int number, int offset)
-{
-	char returnValue[2];
-	if (number + offset < 10)
-		//Fill in the leading 0 if less than 10
-		sprintf(returnValue, "0%s", to_string(number+offset).c_str());
-	else
-		sprintf(returnValue, "%s", to_string(number + offset).c_str());
-	
-	return returnValue;
-}
-
-bool Log::Write( Mask mask, int rank, const char *  format, ... ) {
+bool Log::Write( Level level, int rank, const char *  format, ... ) {
 	const int bufsize = 256 * 1024;
 	char * buffer = new char[bufsize]; // really big temporary buffer, just in case
 
@@ -139,90 +134,35 @@ bool Log::Write( Mask mask, int rank, const char *  format, ... ) {
 	buffer[bufsize - 1] = '\0';
 
 	if (this->externalLogger){
-		Level level = DimrBmiUtils::convertDimrLogLevelToLogLevel((int)(mask));
 		this->externalLogger(level, buffer);
 	}
 
-	if ((int)this->mask - (int)mask < 0) {
+	if (this->level > level) {
 		return false;
 	}
 
 	char * clock = new char[100];
 	clock[0] = '\0';
 	this->clock->Now(clock);
-	string clockstring;
-	sscanf(clock, "%s", clockstring);
-	time_t ttNow = time(0);
-	tm * ptmNow;
-
-	ptmNow = localtime(&ttNow);
-
-	//year
-	string year = to_string(1900 + ptmNow->tm_year);
-
-	// month
-	string month = AddLeadingZero(ptmNow->tm_mon, 1);
-
-	char * seconds = new char[strlen(clock) + 1];
-	strcpy(seconds, clock);
-	char * remainder = strchr(seconds, '.');
-	if (remainder == NULL)
-		remainder = (char *) "";
-	else
-		*remainder++ = '\0';
-	int sec = atoi(seconds);
-	int msec = atoi(remainder);
-	//day
-	int d = (int)(sec / 60 / 60 / 24);
-	string day = AddLeadingZero(d,0);
-	int h = (int)((sec - (d * 60 * 60 * 24)) / 60 / 60);
-	string hours = AddLeadingZero(h,0);
-	int m = (int)(sec - (d * 60 * 60 * 24) - (h * 60 * 60)) / 60;
-	string mins = AddLeadingZero(m,0);
-	int s = (int)(sec - (d * 60 * 60 * 24) - (h * 60 * 60) - (m * 60));
-	string secs = AddLeadingZero(s,0);
-	string msecs;
-	if (msec <= 9)	
-		//Fill in the leading 00 if less than 10
-		msecs = "00"+to_string(msec);
-	else if (msec <= 99)
-		//Fill in the padding 0 if less than 100
-		msecs = "0"+to_string(msec);
-	else
-		msecs = to_string(msec);
-
 
 	char * threadID = (char *)pthread_getspecific(this->thkey);
 	if (threadID == NULL)
 		threadID = "<anonymous>";
 
-	if (redirectFile != NULL) {	
+	if (redirectFile != NULL) {
 		// Append to file:
 		FILE * fp;
 		fp = fopen(redirectFile, "a");
-		fprintf(fp, "Dimr [%s-%s-%s %s:%s:%s.%s] #%d >> %s\n",
-			year.c_str(),
-			month.c_str(),
-			day.c_str(),
-			hours.c_str(),
-			mins.c_str(),
-			secs.c_str(),
-			msecs.c_str(),
+        fprintf (fp, "Dimr [%s] #%d >> %s\n",
+            clock,
 			rank,
 			buffer
 			);
 		fclose(fp);
-	}
-	else {
+    } else {
 		// Write to stdout:
-		fprintf(this->output, "Dimr [%s-%s-%s %s:%s:%s.%s] #%d >> %s\n",
-			year.c_str(),
-			month.c_str(),
-			day.c_str(),
-			hours.c_str(),
-			mins.c_str(),
-			secs.c_str(),
-			msecs.c_str(),
+        fprintf (this->output, "Dimr [%s] #%d >> %s\n",
+            clock,
 			rank,
 			buffer
 			);
@@ -230,9 +170,9 @@ bool Log::Write( Mask mask, int rank, const char *  format, ... ) {
 	}
 
 	// Write to Callback (if registered)
-	// Use separate write Mask
-	if (this->writeCallback && (int)this->feedbackMask - (int)mask >= 0){
-		this->writeCallback(&clock[0], buffer, mask);
+	// Use separate write Level
+	if (this->writeCallback && this->feedbackLevel <= level) {
+		this->writeCallback(&clock[0], buffer, level);
 	}
 
 	delete[] buffer;
@@ -243,13 +183,24 @@ bool Log::Write( Mask mask, int rank, const char *  format, ... ) {
 
 void Log::SetWriteCallBack( WriteCallback writeCallback ) {
 	this->writeCallback = writeCallback;
-	this->Write(Log::MAJOR, 0, "WriteCallBack is set");
+	this->Write(Level::INFO, 0, "WriteCallBack is set");
 }
 
 
-void Log::SetExternalLogger(Logger logger){
+void Log::SetExternalLogger( Logger logger ) {
 	this->externalLogger = logger;
-	this->Write(Log::MAJOR, 0, "External logger is set");
+	this->Write(Level::INFO, 0, "External logger is set");
 }
 
 
+void Log::logLevelToString( int level, char ** levelString ){
+    strcpy(*levelString, "UNKNOWN");
+    if (level <= 0) strcpy(*levelString, "ALL");
+    switch(level) {
+    case 1: { strcpy(*levelString, "DEBUG"); break;}
+    case 2: { strcpy(*levelString, "INFO"); break;}
+    case 3: { strcpy(*levelString, "WARNINGS"); break;}
+    case 4: { strcpy(*levelString, "ERRORS"); break;}
+    }
+    if (level >= 5) strcpy(*levelString, "FATAL");
+}
