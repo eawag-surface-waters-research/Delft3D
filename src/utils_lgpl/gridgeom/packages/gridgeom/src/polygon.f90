@@ -987,7 +987,7 @@
    end if
 
    return
-   end subroutine
+   end subroutine get_startend
    
    end module m_ggeo_tpoly
    

@@ -2975,44 +2975,6 @@
    end function dbdistance
    
 
-   !    transform 3D Cartesian coordinates to 2D spherical (jsferic=1) or 2D Cartesian (jsferic=0) coordinates
-   !        x1 will be close to xref in spherical coordinates
-   subroutine Cart3Dtospher(xx1,yy1,zz1,x1,y1,xref)
-   use m_ggeo_sferic
-   use m_ggeo_missing
-   implicit none
-
-   double precision, intent(in)  :: xx1   !< 3D x-coordinate
-   double precision, intent(in)  :: yy1   !< 3D y-coordinate
-   double precision, intent(in)  :: zz1   !< 3D z-coordinate
-   double precision, intent(out) :: x1    !< longitude (spherical) or x-coordinate (2D Cartesian)
-   double precision, intent(out) :: y1    !< lattitude (spherical) or y-coordinate (2D Cartesian)
-   double precision, intent(in)  :: xref  !< reference point longitude
-
-   double precision              :: xx1_, yy1a
-
-   double precision, parameter   :: dtol=1d-16
-
-   if ( jsferic.eq.1 ) then
-      xx1_ = xx1
-      !            yy1a = abs(yy1)
-      !            if ( xx1.gt.-dtol*yy1a .and. xx1.lt.dtol*yy1a ) then
-      !               xx1_ = 0d0
-      !            end if
-      x1 = atan2(yy1,xx1)*rd2dg
-      y1 = atan2(zz1,sqrt(xx1**2+yy1**2))*rd2dg
-
-      if ( x1.ne.DMISS ) then
-         x1 = x1 + nint((xref-x1)/360d0) * 360d0
-      end if
-   else
-      x1 = xx1
-      y1 = yy1
-   end if
-
-   return
-   end subroutine Cart3Dtospher
-
    !> Normalized vector in direction 1 -> 2, in the orientation of (xu,yu)
    subroutine normalin(x1,y1,x2,y2,xn,yn,xu,yu)
    use m_ggeo_sferic

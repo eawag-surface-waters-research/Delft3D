@@ -42,22 +42,54 @@ implicit none
 ! 
 function odu_get_xy_coordinates(branchids, branchoffsets, geopointsX, geopointsY, nbranchgeometrynodes, branchlengths, meshXCoords, meshYCoords) result(ierr)
 
+   use m_ggeo_sferic
    integer, intent(in)               :: branchids(:), nbranchgeometrynodes(:)
    double precision, intent(in)      :: branchoffsets(:), geopointsX(:), geopointsY(:), branchlengths(:)
    double precision, intent(inout)   :: meshXCoords(:), meshYCoords(:)
 
    integer                           :: angle, i, ierr, ind, branchid, idxstart, idxend, idxbr, idxgeostart, idxgeoend, nsegments
-   double precision, allocatable     :: branchSegmentLengths(:), deltaX(:), deltaY(:), xincrement(:), yincrement(:)
-   double precision                  :: totallength, previousLength, afac, fractionbranchlength
+   double precision, allocatable     :: branchSegmentLengths(:)
+   double precision, allocatable     :: xincrement(:), yincrement(:), zincrement(:)
+   double precision, allocatable     :: deltaX(:), deltaY(:), deltaZ(:)
+   double precision, allocatable     :: cartMeshXCoords(:), cartMeshYCoords(:), cartMeshZCoords(:)
+   double precision, allocatable     :: cartGeopointsX(:), cartGeopointsY(:), cartGeopointsZ(:)
+   double precision, allocatable     :: meshZCoords(:)
+   double precision, allocatable     :: geopointsZ(:)  !returned by sphertocart3D 
+   double precision                  :: totallength, previousLength, afac, fractionbranchlength, maxlat
 
    ierr = 0
    ! the number of geometry segments is always equal to number of geopoints - 1
    allocate(branchSegmentLengths(size(geopointsX,1) - 1))
+   
    allocate(deltaX(size(geopointsX,1) - 1))
    allocate(deltaY(size(geopointsX,1) - 1))
+   allocate(deltaZ(size(geopointsX,1) - 1))
+   
    allocate(xincrement(size(geopointsX,1) - 1))
    allocate(yincrement(size(geopointsX,1) - 1))
-
+   allocate(zincrement(size(geopointsX,1) - 1))
+   
+   allocate(cartGeopointsX(size(geopointsX,1)))
+   allocate(cartGeopointsY(size(geopointsX,1)))
+   allocate(cartGeopointsZ(size(geopointsX,1)))
+   
+   allocate(cartMeshXCoords(size(meshXCoords,1)))
+   allocate(cartMeshYCoords(size(meshXCoords,1)))
+   allocate(cartMeshZCoords(size(meshXCoords,1)))
+   
+   !If the coordinates are spherical, trasform them in cartesian, so we operate in linear space
+   maxlat = 0
+   if (jsferic == 1) then
+      do i = 1, size(geopointsX,1)
+         maxlat = max(maxlat,geopointsX(i))
+         call sphertocart3D(geopointsX(i),geopointsY(i),cartGeopointsX(i),cartGeopointsY(i), cartGeopointsZ(i)) 
+      end do
+   else
+      cartGeopointsX(:) = geopointsX(:)
+      cartGeopointsY(:) = geopointsY(:)
+      cartGeopointsZ(:) = 0
+   endif
+   
    ! initialization
    branchid       = branchids(1)
    idxstart       = 1
@@ -83,9 +115,10 @@ function odu_get_xy_coordinates(branchids, branchoffsets, geopointsX, geopointsY
       !calculate the branch lenghts
       totallength = 0.0D0
       do i = idxgeostart, idxgeoend -1
-         deltaX(i) = geopointsX(i+1)-geopointsX(i)
-         deltaY(i) = geopointsY(i+1)-geopointsY(i)
-         branchSegmentLengths(i)= sqrt(deltaX(i)**2+deltaY(i)**2)
+         deltaX(i) = cartGeopointsX(i+1) - cartGeopointsX(i)
+         deltaY(i) = cartGeopointsY(i+1) - cartGeopointsY(i)
+         deltaZ(i) = cartGeopointsZ(i+1) - cartGeopointsZ(i)
+         branchSegmentLengths(i)= sqrt(deltaX(i)**2+deltaY(i)**2+deltaZ(i)**2)
          totallength = totallength + branchSegmentLengths(i)
       enddo
       !correct for total segment length
@@ -96,9 +129,11 @@ function odu_get_xy_coordinates(branchids, branchoffsets, geopointsX, geopointsY
          if (branchSegmentLengths(i) > epsilon(0.D0)) then
             xincrement(i)  = deltaX(i)/branchSegmentLengths(i)
             yincrement(i)  = deltaY(i)/branchSegmentLengths(i)
+            zincrement(i)  = deltaZ(i)/branchSegmentLengths(i)
          else
             xincrement(i)  = 0.D0
-            yincrement(i)  = 0.D0           
+            yincrement(i)  = 0.D0   
+            zincrement(i)  = 0.D0   
          endif
       enddo
       !now loop over the mesh points
@@ -112,25 +147,28 @@ function odu_get_xy_coordinates(branchids, branchoffsets, geopointsX, geopointsY
             totallength = totallength + branchSegmentLengths(ind)
          endif
             fractionbranchlength =  branchoffsets(i) - previousLength
-            meshXCoords(i) = geopointsX(ind) + fractionbranchlength * xincrement(ind)
-            meshYCoords(i) = geopointsY(ind) + fractionbranchlength * yincrement(ind)
+            cartMeshXCoords(i) = cartGeopointsX(ind) + fractionbranchlength * xincrement(ind)
+            cartMeshYCoords(i) = cartGeopointsY(ind) + fractionbranchlength * yincrement(ind)
+            !TODO: this function should also return meshZCoords (it is relevant if coordinates are spheric) 
+            cartMeshZCoords(i) = cartGeopointsZ(ind) + fractionbranchlength * zincrement(ind)
       enddo
       !update indexses
       idxgeostart = idxgeoend + 1
       idxstart    = idxend + 1
       idxbr       = idxbr + 1
    enddo
+   
+   if (jsferic == 1) then
+      do i = 1, size(meshXCoords,1)
+         call Cart3Dtospher(cartMeshXCoords(i),cartMeshYCoords(i),cartMeshZCoords(i),meshXCoords(i),meshYCoords(i),maxlat) 
+      end do
+   else
+      meshXCoords(:) = cartMeshXCoords(:)
+      meshYCoords(:) = cartMeshYCoords(:)
+      meshZCoords(:) = cartMeshZCoords(:)
+   endif
 
 end function odu_get_xy_coordinates
 
-!builds nodes from links
-
-
-!function make1D2Dinternalnetlinks(meshgeom2d, meshgeom1d) result(ierr)
-!
-! type(t_ug_meshgeom), intent(in) :: meshgeom2d
-! type(t_ug_meshgeom), intent(in) :: meshgeom1d
-! 
-!end function 
 
 end module odugrid
