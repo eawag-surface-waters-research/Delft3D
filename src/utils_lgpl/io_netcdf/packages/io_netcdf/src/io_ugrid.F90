@@ -2233,7 +2233,6 @@ end function ug_get_topology_dimension
 function ug_get_meshgeom(ncid, meshids, meshgeom, includeArrays, netid) result(ierr)
    
    use m_alloc
-   !use odugrid !LC, TODO
 
    integer,             intent(in   ) :: ncid          !< ID of already opened data set.
    type(t_ug_mesh),     intent(in)    :: meshids       !< Structure with all mesh topology variable ids (should be initialized already).
@@ -2284,7 +2283,7 @@ function ug_get_meshgeom(ncid, meshids, meshgeom, includeArrays, netid) result(i
          ierr = ug_get_1d_network_branches_count(ncid, netid, meshgeom%nt_nbranches)
          ierr = ug_get_1d_network_branches_geometry_coordinate_count(ncid,netid, meshgeom%nt_ngeometry)
          ierr = ug_get_1d_mesh_discretisation_points_count(ncid, meshids, meshgeom%numnode) 
-         !LC check if this is correct
+         !The last computational node of a branch overlaps with the starting one
          meshgeom%numedge = meshgeom%numnode - meshgeom%nt_nbranches
    endif
 
@@ -2331,34 +2330,32 @@ function ug_get_meshgeom(ncid, meshids, meshgeom, includeArrays, netid) result(i
          ierr = ug_read_1d_network_branches_geometry(ncid, netid, meshgeom%geopointsX, meshgeom%geopointsY)
          ierr = ug_read_1d_network_branches(ncid, netid, sourcenodeid, targetnodeid, branchid, meshgeom%branchlengths, branchlongnames, meshgeom%nbranchgeometrynodes)
          
-         !convert index based to coordinates, do this in meshgeom
-         !ierr = odu_get_xy_coordinates(meshgeom%branchids, meshgeom%branchoffsets, meshgeom%geopointsX, meshgeom%geopointsY, meshgeom%nbranchgeometrynodes, meshgeom%branchlengths, meshgeom%nodex, meshgeom%nodey)
-
-         !call reallocP(meshgeom%edge_nodes, (/ 2, meshgeom%numedge /), keepExisting=.false.)
-         !cbranchid       = meshgeom%branchids(1)
-         !idxstart       = 1
-         !idxbr          = 1
-         !idxend         = 1
-         !k              = 0
-         !do while (idxbr<=size(meshgeom%branchlengths,1))
-         !   do i = idxstart + 1, size(meshgeom%branchoffsets,1)
-         !      if (meshgeom%branchids(i)/=cbranchid) then
-         !         cbranchid = meshgeom%branchids(i)
-         !         idxend = i-1;
-         !      exit
-         !      endif
-         !      if (i ==  size(meshgeom%branchoffsets,1)) then
-         !         idxend = i;
-         !      endif
-         !   enddo
-         !   do i = idxstart, idxend - 1
-         !      k = k +1
-         !      meshgeom%edge_nodes(1,k) = i 
-         !      meshgeom%edge_nodes(2,k) = i + 1
-         !   enddo
-         !      idxstart    = idxend + 1
-         !      idxbr       = idxbr + 1
-         !enddo
+         call reallocP(meshgeom%edge_nodes, (/ 2, meshgeom%numedge /), keepExisting=.false.)
+         
+         cbranchid       = meshgeom%branchids(1)
+         idxstart       = 1
+         idxbr          = 1
+         idxend         = 1
+         k              = 0
+         do while (idxbr<=size(meshgeom%branchlengths,1))
+            do i = idxstart + 1, size(meshgeom%branchoffsets,1)
+               if (meshgeom%branchids(i)/=cbranchid) then
+                  cbranchid = meshgeom%branchids(i)
+                  idxend = i - 1;
+               exit
+               endif
+               if (i ==  size(meshgeom%branchoffsets,1)) then
+                  idxend = i;
+               endif
+            enddo
+            do i = idxstart, idxend - 1
+               k = k +1
+               meshgeom%edge_nodes(1,k) = i 
+               meshgeom%edge_nodes(2,k) = i + 1
+            enddo
+               idxstart    = idxend + 1
+               idxbr       = idxbr + 1
+         enddo
          
       endif
 
