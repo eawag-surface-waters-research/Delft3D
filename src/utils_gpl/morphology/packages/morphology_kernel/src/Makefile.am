@@ -15,7 +15,8 @@ noinst_LTLIBRARIES = libMorphologyKernel.la
 #-------------------------------------------------------------------------------
 #Includes
 FINCLUDES += \
-	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/include
+	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/include \
+	-I$(top_builddir)/utils_gpl/morphology/include
 
 FMODULES += \
 	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src \
