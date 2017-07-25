@@ -194,7 +194,7 @@ subroutine trab19(u         ,v         ,hrms      ,rlabda    ,teta      ,h      
        tp = max(tp,1.0_fp)
        !
        call wavenr(h         ,tp        ,k         ,ag        )
-       if (ubot_from_com==.true.) then
+       if (ubot_from_com) then
           uorb = ubot
        else
           uorb = pi*hrms/tp/sinh(k*h)
