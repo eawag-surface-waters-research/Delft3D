@@ -1,5 +1,4 @@
 #include "global_config.inc"
-module m_depfil_stm
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2017.                                
@@ -36,8 +35,6 @@ module m_depfil_stm
 !    EC-module for extended file type and unstructured grid support.
 ! 
 !-------------------------------------------------------------------------------
-
-contains
 subroutine depfil_stm(lundia    ,error     ,fildep    ,fmttmp    , &
                     & array     ,nfld      ,ifld      ,dims      , &
                     & errmsg    )
@@ -56,7 +53,7 @@ subroutine depfil_stm(lundia    ,error     ,fildep    ,fmttmp    , &
     integer                                                                          :: lundia !  unit number for diagnostic file
     integer                                                            , intent(in)  :: nfld   !  number of fields
     logical                                                            , intent(out) :: error  !  Flag=TRUE if an error is encountered 
-    real(fp), dimension(nfld, dims%nlb:dims%nub, dims%mlb:dims%mub)    , intent(out) :: array  !  data array to fill
+    real(sp), dimension(nfld, dims%nlb:dims%nub, dims%mlb:dims%mub)    , intent(out) :: array  !  data array to fill
     character(*)                                             , optional, intent(out) :: errmsg !  Error message in case of error
     character(*)                                                       , intent(in)  :: fildep !  Name of the relevant file 
     character(11)                                                      , intent(in)  :: fmttmp !  Format switch for the attribute file 
@@ -119,8 +116,10 @@ subroutine depfil_stm(lundia    ,error     ,fildep    ,fmttmp    , &
     if (present(errmsg)) errmsg = 'Error reading QUICKIN file '//trim(fildep)
 #endif
 end subroutine depfil_stm
-
-
+    
+!
+!
+!===================================================================
 subroutine depfil_stm_double(lundia    ,error     ,fildep    ,fmttmp    , &
                            & array     ,nfld      ,ifld      ,dims      , &
                            & errmsg    )
@@ -200,5 +199,3 @@ subroutine depfil_stm_double(lundia    ,error     ,fildep    ,fmttmp    , &
     if (present(errmsg)) errmsg = 'Error reading QUICKIN file '//trim(fildep)
 #endif
 end subroutine depfil_stm_double
-
-end module m_depfil_stm

@@ -28,7 +28,6 @@ module m_rdmorlyr
 !  $Id$
 !  $HeadURL$
 !-------------------------------------------------------------------------------
-use m_depfil_stm
 contains
 
 subroutine rdmorlyr(lundia    ,error     ,filmor    , &
@@ -972,7 +971,6 @@ subroutine rdinimorlyr(lsedtot   ,lsed      ,lundia    ,error     , &
     use message_module, only: write_error, write_warning, FILE_NOT_FOUND, FILE_READ_ERROR, PREMATURE_EOF
     use sediment_basics_module, only: SEDTYP_COHESIVE
     use morphology_data_module, only: sedpar_type, morpar_type
-    use m_depfil_stm
     !
     implicit none
 !
