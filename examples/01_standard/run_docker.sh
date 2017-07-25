@@ -24,7 +24,7 @@ argfile=config_d_hydro.xml
     # Set the directory containing delftflow.exe here
     #
 export ARCH=lnx64
-export D3D_HOME=/opt/delft3d_gt
+export D3D_HOME=/opt/delft3d_4.03.00
 exedir=$D3D_HOME/$ARCH/flow2d3d/bin
  
     #
@@ -35,4 +35,5 @@ exedir=$D3D_HOME/$ARCH/flow2d3d/bin
 export LD_LIBRARY_PATH=$exedir:$LD_LIBRARY_PATH 
 
     # Run
+ls -l /opt
 $exedir/d_hydro.exe $argfile
