@@ -77,11 +77,11 @@ Level Log::GetLevel( void ) {
 
 
 void Log::SetLevel( Level level ) {
-	this->level = min(max(level,Level::ALL),Level::FATAL);
+	this->level = min(max(level,ALL),FATAL);
 
     char * levelString = new char[MAXSTRING];
     logLevelToString(this->level, &levelString);
-	this->Write(Level::INFO, 0, "Log level set to %s", levelString);
+	this->Write(INFO, 0, "Log level set to %s", levelString);
     delete [] levelString;
 }
 
@@ -92,11 +92,11 @@ Level Log::GetFeedbackLevel( void ) {
 
 
 void Log::SetFeedbackLevel( Level feedbackLevel) {
-	this->feedbackLevel = min(max(feedbackLevel,Level::ALL),Level::FATAL);;
+	this->feedbackLevel = min(max(feedbackLevel,ALL),FATAL);;
 
     char * levelString = new char[MAXSTRING];
     logLevelToString(this->feedbackLevel, &levelString);
-	this->Write(Level::INFO, 0, "feedbackLevel set to %s", levelString);
+	this->Write(INFO, 0, "feedbackLevel set to %s", levelString);
     delete [] levelString;
 }
 
@@ -183,13 +183,13 @@ bool Log::Write( Level level, int rank, const char *  format, ... ) {
 
 void Log::SetWriteCallBack( WriteCallback writeCallback ) {
 	this->writeCallback = writeCallback;
-	this->Write(Level::INFO, 0, "WriteCallBack is set");
+	this->Write(INFO, 0, "WriteCallBack is set");
 }
 
 
 void Log::SetExternalLogger( Logger logger ) {
 	this->externalLogger = logger;
-	this->Write(Level::INFO, 0, "External logger is set");
+	this->Write(INFO, 0, "External logger is set");
 }
 
 

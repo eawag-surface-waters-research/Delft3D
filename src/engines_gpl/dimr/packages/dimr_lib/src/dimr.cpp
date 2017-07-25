@@ -86,8 +86,8 @@ Dimr::Dimr(void) {
     exePath                      = NULL;
     exeName                      = NULL;
     clock                        = new Clock ();
-    logLevel                     = Level::WARNINGS;
-    feedbackLevel                = Level::INFO;
+    logLevel                     = WARNINGS;
+    feedbackLevel                = INFO;
     log                          = new Log (logFile, clock, logLevel, feedbackLevel);
     config                       = NULL;
     mainArgs                     = NULL;
@@ -191,8 +191,8 @@ BMI_API int initialize(const char * configfile) {
         delete [] fileBasename;
     }
 
-    thisDimr->log->Write(Level::INFO, thisDimr->my_rank, getfullversionstring_dimr_lib());
-    thisDimr->log->Write(Level::INFO, thisDimr->my_rank, "dimr_dll:initialize(%s)", configfile);
+    thisDimr->log->Write(INFO, thisDimr->my_rank, getfullversionstring_dimr_lib());
+    thisDimr->log->Write(INFO, thisDimr->my_rank, "dimr_dll:initialize(%s)", configfile);
     //
     //
     // Read XML configuration file into tree structure
@@ -203,7 +203,7 @@ BMI_API int initialize(const char * configfile) {
     else {
         conf = fopen (thisDimr->configfile, "r");
         if (conf == NULL){
-            thisDimr->log->Write(Level::INFO, thisDimr->my_rank, "Cannot open configuration file \"%s\"", thisDimr->configfile);
+            thisDimr->log->Write(INFO, thisDimr->my_rank, "Cannot open configuration file \"%s\"", thisDimr->configfile);
             throw new Exception(true, "Cannot open configuration file \"%s\"", thisDimr->configfile);
         }
     }
@@ -213,7 +213,7 @@ BMI_API int initialize(const char * configfile) {
     fclose (conf);
     //
     // Build controlBlock administration by scanning the XmlTree
-    thisDimr->log->Write(Level::INFO, thisDimr->my_rank, "Build controlBlock administration by scanning the XmlTree");
+    thisDimr->log->Write(INFO, thisDimr->my_rank, "Build controlBlock administration by scanning the XmlTree");
     thisDimr->scanConfigFile();
     //
     // ToDo: check whether a core dump is requested on abort; if so set global variable for Dimr_CoreDump
@@ -241,7 +241,7 @@ BMI_API int initialize(const char * configfile) {
         }
 
         chdir(thisDimr->control->subBlocks[0].unit.component->workingDir);
-        thisDimr->log->Write (Level::FATAL, thisDimr->my_rank, "%s.Initialize(%s)", thisDimr->control->subBlocks[0].unit.component->name, thisDimr->control->subBlocks[0].unit.component->inputFile);
+        thisDimr->log->Write (FATAL, thisDimr->my_rank, "%s.Initialize(%s)", thisDimr->control->subBlocks[0].unit.component->name, thisDimr->control->subBlocks[0].unit.component->inputFile);
         nSettingsSet = thisDimr->control->subBlocks[0].unit.component->dllSetKeyVals(thisDimr->control->subBlocks[0].unit.component->settings);
         thisDimr->timerStart(thisDimr->control->subBlocks[0].unit.component);
         thisDimr->control->subBlocks[0].unit.component->result = (thisDimr->control->subBlocks[0].unit.component->dllInitialize) (thisDimr->control->subBlocks[0].unit.component->inputFile);
@@ -258,14 +258,14 @@ BMI_API int initialize(const char * configfile) {
 
 //------------------------------------------------------------------------------
 BMI_API int update(double tStep) {
-    thisDimr->log->Write (Level::INFO, thisDimr->my_rank, "dimr_lib:update");
+    thisDimr->log->Write (INFO, thisDimr->my_rank, "dimr_lib:update");
     // Execute update on the first controlBlock only
     if (thisDimr->control->subBlocks[0].type == CT_PARALLEL) {
         thisDimr->runControlBlock(&(thisDimr->control->subBlocks[0]), tStep, GLOBAL_PHASE_UPDATE);
     } else {
         // Start block
         chdir(thisDimr->control->subBlocks[0].unit.component->workingDir);
-        thisDimr->log->Write (Level::FATAL, thisDimr->my_rank, "%s.Update(%6.1f)", thisDimr->control->subBlocks[0].unit.component->name, tStep);
+        thisDimr->log->Write (FATAL, thisDimr->my_rank, "%s.Update(%6.1f)", thisDimr->control->subBlocks[0].unit.component->name, tStep);
         thisDimr->timerStart(thisDimr->control->subBlocks[0].unit.component);
         (thisDimr->control->subBlocks[0].unit.component->dllUpdate) (tStep);
         thisDimr->timerEnd(thisDimr->control->subBlocks[0].unit.component);
@@ -276,7 +276,7 @@ BMI_API int update(double tStep) {
 
 //------------------------------------------------------------------------------
 BMI_API int finalize(void) {
-    thisDimr->log->Write (Level::INFO, thisDimr->my_rank, "dimr_lib:finalize");
+    thisDimr->log->Write (INFO, thisDimr->my_rank, "dimr_lib:finalize");
     // Execute finalize on the first controlBlock and
     // initialize, step, finalize on all other controlBlocks
     if (thisDimr->control->subBlocks[0].type == CT_PARALLEL) {
@@ -284,7 +284,7 @@ BMI_API int finalize(void) {
     } else {
         // Start block
         chdir(thisDimr->control->subBlocks[0].unit.component->workingDir);
-        thisDimr->log->Write (Level::FATAL, thisDimr->my_rank, "%s.Finalize()", thisDimr->control->subBlocks[0].unit.component->name);
+        thisDimr->log->Write (FATAL, thisDimr->my_rank, "%s.Finalize()", thisDimr->control->subBlocks[0].unit.component->name);
         thisDimr->timerStart(thisDimr->control->subBlocks[0].unit.component);
         (thisDimr->control->subBlocks[0].unit.component->dllFinalize) ();
         thisDimr->timerEnd(thisDimr->control->subBlocks[0].unit.component);
@@ -305,7 +305,7 @@ BMI_API int finalize(void) {
 
 //------------------------------------------------------------------------------
 BMI_API void get_start_time(double * tStart) {
-    thisDimr->log->Write (Level::INFO, thisDimr->my_rank, "dimr_lib:get_start_time");
+    thisDimr->log->Write (INFO, thisDimr->my_rank, "dimr_lib:get_start_time");
     if (thisDimr->control->subBlocks[0].type == CT_PARALLEL) {
         *tStart = thisDimr->control->subBlocks[0].subBlocks[thisDimr->control->subBlocks[0].masterSubBlockId].tStart;
     } else {
@@ -316,7 +316,7 @@ BMI_API void get_start_time(double * tStart) {
 
 //------------------------------------------------------------------------------
 BMI_API void get_end_time(double * tEnd) {
-    thisDimr->log->Write (Level::INFO, thisDimr->my_rank, "dimr_lib:get_end_time");
+    thisDimr->log->Write (INFO, thisDimr->my_rank, "dimr_lib:get_end_time");
     if (thisDimr->control->subBlocks[0].type == CT_PARALLEL) {
         *tEnd = thisDimr->control->subBlocks[0].subBlocks[thisDimr->control->subBlocks[0].masterSubBlockId].tEnd;
     } else {
@@ -327,7 +327,7 @@ BMI_API void get_end_time(double * tEnd) {
 
 //------------------------------------------------------------------------------
 BMI_API void get_time_step(double * tStep) {
-    thisDimr->log->Write (Level::INFO, thisDimr->my_rank, "dimr_lib:get_time_step");
+    thisDimr->log->Write (INFO, thisDimr->my_rank, "dimr_lib:get_time_step");
     if (thisDimr->control->subBlocks[0].type == CT_PARALLEL) {
         *tStep = thisDimr->control->subBlocks[0].subBlocks[thisDimr->control->subBlocks[0].masterSubBlockId].tStep;
     } else {
@@ -338,7 +338,7 @@ BMI_API void get_time_step(double * tStep) {
 
 //------------------------------------------------------------------------------
 BMI_API void get_current_time(double * tCur) {
-    thisDimr->log->Write (Level::INFO, thisDimr->my_rank, "dimr_lib:get_current_time");
+    thisDimr->log->Write (INFO, thisDimr->my_rank, "dimr_lib:get_current_time");
     if (thisDimr->control->subBlocks[0].type == CT_PARALLEL) {
         *tCur = thisDimr->control->subBlocks[0].subBlocks[thisDimr->control->subBlocks[0].masterSubBlockId].tCur;
     } else {
@@ -515,7 +515,7 @@ Dimr::~Dimr (void) {
     // to do:  (void) FreeLibrary(handle);
     freeLibs();
 
-    log->Write (Level::INFO, thisDimr->my_rank, "dimr shutting down normally");
+    log->Write (INFO, thisDimr->my_rank, "dimr shutting down normally");
 
 #if defined(HAVE_CONFIG_H)
     free (exeName);
@@ -562,7 +562,7 @@ void Dimr::deleteControlBlock (dimr_control_block cb) {
 //------------------------------------------------------------------------------
 void Dimr::runControlBlock (dimr_control_block * cb, double tStep, int phase) {
     if (cb->type == CT_PARALLEL) {
-        log->Write (Level::INFO, my_rank, "PARALLEL:");
+        log->Write (INFO, my_rank, "PARALLEL:");
         //
         //
         // Initialize loop
@@ -589,11 +589,11 @@ void Dimr::runControlBlock (dimr_control_block * cb, double tStep, int phase) {
 
 //------------------------------------------------------------------------------
 void Dimr::runStartBlock (dimr_control_block * cb, double tStep, int phase) {
-    log->Write (Level::INFO, my_rank, "START:");
+    log->Write (INFO, my_rank, "START:");
 
     chdir(cb->unit.component->workingDir);
     if (phase == GLOBAL_PHASE_FINISH) {
-        log->Write (Level::FATAL, my_rank, "%s.Initialize(%s)", cb->unit.component->name, cb->unit.component->inputFile);
+        log->Write (FATAL, my_rank, "%s.Initialize(%s)", cb->unit.component->name, cb->unit.component->inputFile);
         timerStart(cb->unit.component);
         cb->unit.component->result = (cb->unit.component->dllInitialize) (cb->unit.component->inputFile);
         timerEnd(cb->unit.component);
@@ -601,12 +601,12 @@ void Dimr::runStartBlock (dimr_control_block * cb, double tStep, int phase) {
         (cb->unit.component->dllGetEndTime) (&cb->tEnd);
     }
     cb->tStep = tStep;
-    log->Write (Level::FATAL, my_rank, "%s.Update(%6.1f)", cb->unit.component->name, cb->tStep);
+    log->Write (FATAL, my_rank, "%s.Update(%6.1f)", cb->unit.component->name, cb->tStep);
     timerStart(cb->unit.component);
     (cb->unit.component->dllUpdate) (cb->tStep);
     timerEnd(cb->unit.component);
     if (phase == GLOBAL_PHASE_FINISH) {
-        log->Write (Level::FATAL, my_rank, "%s.Finalize()", cb->unit.component->name);
+        log->Write (FATAL, my_rank, "%s.Finalize()", cb->unit.component->name);
         timerStart(cb->unit.component);
         (cb->unit.component->dllFinalize) ();
         timerEnd(cb->unit.component);
@@ -671,7 +671,7 @@ void Dimr::runParallelInit (dimr_control_block * cb) {
     }
     if (masterComponent->onThisRank) {
         chdir(masterComponent->workingDir);
-        log->Write (Level::FATAL, my_rank, "%s.Initialize(%s)", masterComponent->name, masterComponent->inputFile);
+        log->Write (FATAL, my_rank, "%s.Initialize(%s)", masterComponent->name, masterComponent->inputFile);
         timerStart(masterComponent);
         masterComponent->result = (masterComponent->dllInitialize) (masterComponent->inputFile);
         timerEnd(masterComponent);
@@ -704,7 +704,7 @@ void Dimr::runParallelInit (dimr_control_block * cb) {
                         }
 
                         chdir(thisComponent->workingDir);
-                        log->Write (Level::FATAL, my_rank, "%s.Initialize(%s)", thisComponent->name, thisComponent->inputFile);
+                        log->Write (FATAL, my_rank, "%s.Initialize(%s)", thisComponent->name, thisComponent->inputFile);
                         timerStart(thisComponent);
                         thisComponent->result = (thisComponent->dllInitialize) (thisComponent->inputFile);
                         timerEnd(thisComponent);
@@ -913,7 +913,7 @@ void Dimr::runParallelUpdate (dimr_control_block * cb, double tStep) {
             if (i == cb->masterSubBlockId) {
                 // masterComponent
                 chdir(masterComponent->unit.component->workingDir);
-                log->Write (Level::FATAL, my_rank, "%10.1f:    %s.Update(%10.1f)", *currentTime, masterComponent->unit.component->name, tStep);
+                log->Write (FATAL, my_rank, "%10.1f:    %s.Update(%10.1f)", *currentTime, masterComponent->unit.component->name, tStep);
                 timerStart(masterComponent->unit.component);
                 (masterComponent->unit.component->dllUpdate) (tStep);
                 timerEnd(masterComponent->unit.component);
@@ -948,7 +948,7 @@ void Dimr::runParallelUpdate (dimr_control_block * cb, double tStep) {
                             }
                             // Update
                             chdir(thisComponent->workingDir);
-                            log->Write (Level::FATAL, my_rank, "%10.1f:    %s.Update(%10.1f)", *currentTime, thisComponent->name, tUpdate);
+                            log->Write (FATAL, my_rank, "%10.1f:    %s.Update(%10.1f)", *currentTime, thisComponent->name, tUpdate);
                             timerStart(thisComponent);
                             (thisComponent->dllUpdate) (tUpdate);
                             timerEnd(thisComponent);
@@ -958,7 +958,7 @@ void Dimr::runParallelUpdate (dimr_control_block * cb, double tStep) {
                             double * transferValuePtr;
                             log->Write (DEBUG, my_rank, "%10.1f:    %s.communicate", *currentTime, thisCoupler->name);
                             for (int k = 0 ; k < thisCoupler->numItems ; k++) {
-                                log->Write (Level::ALL, my_rank, "    %s -> %s", thisCoupler->items[k].sourceName, thisCoupler->items[k].targetName);
+                                log->Write (ALL, my_rank, "    %s -> %s", thisCoupler->items[k].sourceName, thisCoupler->items[k].targetName);
                                 // Getting and Setting of data is split to enable
                                 // transferring data, possibly inbetween different partitions
                                 // TODO: This does not work for arrays (yet), only scalar double
@@ -1023,7 +1023,7 @@ void Dimr::receive(const char * name,
    if (*(double*)(transferValuePtr) == *(double*)(transferValuePtr)) {
       for (int m = 0; m < nProc; m++) {
          if (my_rank == processes[m]) {
-            log->Write(Level::ALL, my_rank, "Dimr::receive(%s) %20.10f", name, *(double*)(transferValuePtr));
+            log->Write(ALL, my_rank, "Dimr::receive(%s) %20.10f", name, *(double*)(transferValuePtr));
             if (compType == COMP_TYPE_RTC
                || compType == COMP_TYPE_RR
                || compType == COMP_TYPE_FLOW1D
@@ -1104,7 +1104,7 @@ void Dimr::getAddress(
 {
    for (int m = 0; m < nProc; m++) {
       if (my_rank == processes[m]) {
-         log->Write(Level::ALL, my_rank, "Dimr::getAddress (%s)", name);
+         log->Write(ALL, my_rank, "Dimr::getAddress (%s)", name);
          if (compType == COMP_TYPE_RTC
             || compType == COMP_TYPE_RR
             || compType == COMP_TYPE_FLOW1D
@@ -1153,7 +1153,7 @@ double* Dimr::send(
       transfer[m] = -999000.0;
       if (my_rank == processes[m]) 
       {
-         log->Write(Level::ALL, my_rank, "Dimr::send (%s)", name);
+         log->Write(ALL, my_rank, "Dimr::send (%s)", name);
          if (sourceVarPtr != NULL && compType != COMP_TYPE_WANDA) 
          {
             transfer[m] = *sourceVarPtr;
@@ -1202,7 +1202,7 @@ void Dimr::runParallelFinish (dimr_control_block * cb) {
                 continue;
             }
             chdir(cb->subBlocks[i].unit.component->workingDir);
-            log->Write (Level::INFO, my_rank, "    %s.Finalize()", cb->subBlocks[i].unit.component->name);
+            log->Write (INFO, my_rank, "    %s.Finalize()", cb->subBlocks[i].unit.component->name);
             timerStart(cb->subBlocks[i].unit.component);
             (cb->subBlocks[i].unit.component->dllFinalize) ();
             timerEnd(cb->subBlocks[i].unit.component);
@@ -1221,7 +1221,7 @@ void Dimr::runParallelFinish (dimr_control_block * cb) {
                         continue;
                     }
                     chdir(cb->subBlocks[i].subBlocks[j].unit.component->workingDir);
-                    log->Write (Level::INFO, my_rank, "    %s.Finalize()", cb->subBlocks[i].subBlocks[j].unit.component->name);
+                    log->Write (INFO, my_rank, "    %s.Finalize()", cb->subBlocks[i].subBlocks[j].unit.component->name);
                     timerStart(cb->subBlocks[i].subBlocks[j].unit.component);
                     (cb->subBlocks[i].subBlocks[j].unit.component->dllFinalize) ();
                     timerEnd(cb->subBlocks[i].subBlocks[j].unit.component);
@@ -1379,7 +1379,7 @@ void Dimr::scanComponent(XmlTree * xmlComponent, dimr_component * newComp) {
 
     } else {
         // No <process> specified, default: only run on rank #0.
-        log->Write (Level::ALL, my_rank, "INFO: \"<process>\" not specified for component \"%s\". Assuming it only runs on rank #0.", newComp->name);
+        log->Write (ALL, my_rank, "INFO: \"<process>\" not specified for component \"%s\". Assuming it only runs on rank #0.", newComp->name);
         newComp->numProcesses = 1;
         char *defaultProc = "0";
         char_to_ints(defaultProc, &(newComp->processes), &(newComp->numProcesses));
@@ -1403,7 +1403,7 @@ void Dimr::scanComponent(XmlTree * xmlComponent, dimr_component * newComp) {
     // Element inputFile (optional?)
     XmlTree * inputFileElement = xmlComponent->Lookup ("inputFile");
     if (inputFileElement == NULL) {
-        log->Write (Level::INFO, my_rank, "WARNING: No inputFile specified for component %s.", newComp->name);
+        log->Write (INFO, my_rank, "WARNING: No inputFile specified for component %s.", newComp->name);
         }
     else {
         newComp->inputFile = inputFileElement->charData;
@@ -1412,8 +1412,8 @@ void Dimr::scanComponent(XmlTree * xmlComponent, dimr_component * newComp) {
     XmlTree * workingDirElement = xmlComponent->Lookup ("workingDir");
     if (workingDirElement == NULL) {
         newComp->workingDir = (char *) &curPath;
-        log->Write (Level::INFO, my_rank, "WARNING: No workingDir specified for component %s.", newComp->name);
-        log->Write (Level::INFO, my_rank, "         workingDir is set to %s", newComp->workingDir);
+        log->Write (INFO, my_rank, "WARNING: No workingDir specified for component %s.", newComp->name);
+        log->Write (INFO, my_rank, "         workingDir is set to %s", newComp->workingDir);
         }
     else {
         newComp->workingDir = workingDirElement->charData;
@@ -1595,7 +1595,7 @@ void Dimr::connectLibs (void) {
     // do for all libraries
     for (int i = 0 ; i < componentsList.numComponents ; i++) {
         if (!componentsList.components[i].onThisRank) {
-            log->Write (Level::ALL, my_rank, "Not necessary to load component library \"%s\" on this rank.", componentsList.components[i].library);
+            log->Write (ALL, my_rank, "Not necessary to load component library \"%s\" on this rank.", componentsList.components[i].library);
             continue;
         }
 
@@ -1617,7 +1617,7 @@ void Dimr::connectLibs (void) {
         }
 #endif
 
-        log->Write (Level::ALL, my_rank, "Loading library \"%s\"", lib);
+        log->Write (ALL, my_rank, "Loading library \"%s\"", lib);
 
 #if defined (HAVE_CONFIG_H)
         dlerror(); /* clear error code */
@@ -1684,7 +1684,7 @@ void Dimr::connectLibs (void) {
 
         componentsList.components[i].dllGetAttribute = (BMI_GETATTRIBUTE) GETPROCADDRESS (dllhandle, BmiGetAttributeEntryPoint);
         if (componentsList.components[i].dllGetAttribute == NULL) {
-            log->Write (Level::ALL, my_rank, "No GetAttribute entry point in %s !", componentsList.components[i].library);
+            log->Write (ALL, my_rank, "No GetAttribute entry point in %s !", componentsList.components[i].library);
         }    
 //      If GetAttribute is optional in a lib, no need to throw an exception
 //      if (componentsList.components[i].dllGetStartTime == NULL) {
@@ -1795,7 +1795,7 @@ void Dimr::freeLibs (void) {
             continue;
         }
 
-        log->Write (Level::ALL, my_rank, "Freeing library \"%s\"", componentsList.components[i].library);
+        log->Write (ALL, my_rank, "Freeing library \"%s\"", componentsList.components[i].library);
 #if defined (HAVE_CONFIG_H)
         dlerror(); /* clear error code */
         int ierr = dlclose(componentsList.components[i].libHandle);
@@ -1823,14 +1823,14 @@ void Dimr::processWaitFile (void) {
     XmlTree * rootXml     = config->Lookup ("/dimrConfig");
     const char * waitFile = rootXml->GetElement ("waitFile");
     if (waitFile != NULL) {
-        log->Write (Level::INFO, my_rank, "Waiting for file \"%s\" to appear...", waitFile);
+        log->Write (INFO, my_rank, "Waiting for file \"%s\" to appear...", waitFile);
         fflush (stdout);
         FILE * f;
         do {
             f = fopen (waitFile, "r");
             Sleep (1000);
         } while (f == NULL);
-        log->Write (Level::INFO, my_rank, "Found waitfile \"%s\".", waitFile);
+        log->Write (INFO, my_rank, "Found waitfile \"%s\".", waitFile);
         fclose (f);
     }
     ready = 1;
@@ -1866,10 +1866,10 @@ void Dimr::timerEnd (dimr_component * thisComponent) {
 
 //------------------------------------------------------------------------------
 void Dimr::timersFinish (void) {
-    log->Write (Level::INFO, my_rank, "TIMER INFO:\n");
+    log->Write (INFO, my_rank, "TIMER INFO:\n");
     for (int i = 0 ; i < thisDimr->componentsList.numComponents ; i++) {
         componentsList.components[i].timerStart = 0;
-        log->Write (Level::INFO, my_rank, "%s\t: %d.%d sec", componentsList.components[i].name, 
+        log->Write (INFO, my_rank, "%s\t: %d.%d sec", componentsList.components[i].name, 
                           componentsList.components[i].timerSum/1000000,
                           componentsList.components[i].timerSum%1000000);
         componentsList.components[i].timerSum   =  0.0;

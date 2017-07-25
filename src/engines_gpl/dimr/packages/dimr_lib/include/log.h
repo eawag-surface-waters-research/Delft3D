@@ -83,8 +83,8 @@ public:
 private:
 	FILE *        output;
 	Clock *       clock;
-	Log::Level     level;
-	Log::Level     feedbackLevel;
+	Level         level;
+	Level         feedbackLevel;
 
 	pthread_key_t thkey;      // contains key for thread-specific log data
 	WriteCallback writeCallback;

@@ -513,6 +513,7 @@ tools_gpl/vs/packages/vs_version_number/Makefile
 tools_gpl/vs/packages/vs_version_number/src/Makefile
 utils_gpl/Makefile
 utils_gpl/morphology/Makefile
+utils_gpl/morphology/include/Makefile
 utils_gpl/morphology/packages/Makefile
 utils_gpl/morphology/packages/morphology_data/Makefile
 utils_gpl/morphology/packages/morphology_data/src/Makefile
