@@ -1202,7 +1202,7 @@ void Dimr::runParallelFinish (dimr_control_block * cb) {
                 continue;
             }
             chdir(cb->subBlocks[i].unit.component->workingDir);
-            log->Write (INFO, my_rank, "    %s.Finalize()", cb->subBlocks[i].unit.component->name);
+            log->Write (FATAL, my_rank, "    %s.Finalize()", cb->subBlocks[i].unit.component->name);
             timerStart(cb->subBlocks[i].unit.component);
             (cb->subBlocks[i].unit.component->dllFinalize) ();
             timerEnd(cb->subBlocks[i].unit.component);
@@ -1221,7 +1221,7 @@ void Dimr::runParallelFinish (dimr_control_block * cb) {
                         continue;
                     }
                     chdir(cb->subBlocks[i].subBlocks[j].unit.component->workingDir);
-                    log->Write (INFO, my_rank, "    %s.Finalize()", cb->subBlocks[i].subBlocks[j].unit.component->name);
+                    log->Write (FATAL, my_rank, "    %s.Finalize()", cb->subBlocks[i].subBlocks[j].unit.component->name);
                     timerStart(cb->subBlocks[i].subBlocks[j].unit.component);
                     (cb->subBlocks[i].subBlocks[j].unit.component->dllFinalize) ();
                     timerEnd(cb->subBlocks[i].subBlocks[j].unit.component);
@@ -1866,10 +1866,10 @@ void Dimr::timerEnd (dimr_component * thisComponent) {
 
 //------------------------------------------------------------------------------
 void Dimr::timersFinish (void) {
-    log->Write (INFO, my_rank, "TIMER INFO:\n");
+    log->Write (FATAL, my_rank, "TIMER INFO:\n");
     for (int i = 0 ; i < thisDimr->componentsList.numComponents ; i++) {
         componentsList.components[i].timerStart = 0;
-        log->Write (INFO, my_rank, "%s\t: %d.%d sec", componentsList.components[i].name, 
+        log->Write (FATAL, my_rank, "%s\t: %d.%d sec", componentsList.components[i].name, 
                           componentsList.components[i].timerSum/1000000,
                           componentsList.components[i].timerSum%1000000);
         componentsList.components[i].timerSum   =  0.0;

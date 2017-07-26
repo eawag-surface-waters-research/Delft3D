@@ -138,6 +138,7 @@ bool Log::Write( Level level, int rank, const char *  format, ... ) {
 	}
 
 	if (this->level > level) {
+	    delete[] buffer;
 		return false;
 	}
 
