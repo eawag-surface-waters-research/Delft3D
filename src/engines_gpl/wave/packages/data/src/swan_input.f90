@@ -3825,7 +3825,7 @@ subroutine write_swan_inp (wavedata, calccount, &
     character(37)               :: vegfil
     character(60)               :: lijn
     character(60)               :: outfirst
-    character(79)               :: line
+    character(85)               :: line
     character(79)               :: pointname
     character(256)              :: fname
     type(swan_bnd), pointer     :: bnd
