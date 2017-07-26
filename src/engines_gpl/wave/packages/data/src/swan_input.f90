@@ -3890,12 +3890,12 @@ subroutine write_swan_inp (wavedata, calccount, &
     endif
     luninp = new_lun()
     open (luninp, file = 'swan.inp')
-    line(1:79) = ' '
+    line       = ' '
     line(1:72) =                                           &
      & '$***************************** HEADING ************&
      &*********************'
     write (luninp, '(1X,A)') line
-    line(1:79)  = ' '
+    line        = ' '
     line(1:2)   = '$ '
     write (luninp, '(1X,A)') line
     line(1:9)   = 'PROJECT  '
@@ -3906,7 +3906,7 @@ subroutine write_swan_inp (wavedata, calccount, &
     line(31:34) = prnumb
     i           = 35
     line(i:i)   = ''''''
-    line(36:79) = ' '
+    line(36:)   = ' '
     write (luninp, '(1X,A)') line(1:35)
     i           = 1
     line(i:i)   = ''''''
@@ -3918,18 +3918,18 @@ subroutine write_swan_inp (wavedata, calccount, &
     write (luninp, '(5X,A)') line(1:74)
     line(2:73)  = title3
     write (luninp, '(5X,A)') line(1:74)
-    line(1:79)  = ' '
+    line        = ' '
     line(1:2)   = '$ '
     write (luninp, '(1X,A)') line
-    line(1:79)  = ' '
+    line        = ' '
     line(1:72)  =                                           &
      & '$***************************** MODEL INPUT ********&
      &*********************'
     write (luninp, '(1X,A)') line
-    line(1:79) = ' '
+    line       = ' '
     line(1:2)  = '$ '
     write (luninp, '(1X,A)') line
-    line(1:79) = ' '
+    line       = ' '
     !
     !     Coefficient settings
     !
@@ -3944,7 +3944,7 @@ subroutine write_swan_inp (wavedata, calccount, &
        write(line,'(a,i0,a)') '       MAXMES = 1000   MAXERR = ', sr%maxerr, ' _'
        write (luninp, '(1X,A)') line
     endif
-    line(1:79)  = ' '
+    line        = ' '
     line(7:22)  = 'GRAV =          '
     line(23:47) = 'RHO =           INRHOG = '
     write (line(15:21), '(F6.2)') grav
@@ -3952,7 +3952,7 @@ subroutine write_swan_inp (wavedata, calccount, &
     write (line(48:53), '(  I6)') inrhog
     line(54:55) = ' _'
     write (luninp, '(1X,A)') line
-    line(1:79)  = ' '
+    line        = ' '
     if (sr%nautconv) then
        line(7:11) = 'NAUT '
     else
@@ -3960,27 +3960,27 @@ subroutine write_swan_inp (wavedata, calccount, &
     endif
     write (luninp, '(1X,A)') line
 !-----------------------------------------------------------------------
-    line(1:79) = ' '
+    line       = ' '
     line(1:2)  = '$ '
     write (luninp, '(1X,A)') line
-    line(1:79) = ' '
+    line       = ' '
     !
     ! hotfile= .true.: use hotfile
     ! modsim = 2     : quasi-stationary
     ! modsim = 3     : non-stationary
     !
     if (sr%modsim <= 1) then
-       line(1:79) = ' '
+       line       = ' '
        line(1:10) = 'MODE STAT '
        write (luninp, '(1X,A)') line
     elseif (sr%modsim > 1) then
-       line(1:79) = ' '
+       line       = ' '
        line(1:10) = 'MODE NONST'
        write (luninp, '(1X,A)') line
     else
     endif
     if (sferic) then
-       line(1:79) = ' '
+       line       = ' '
        line(1:11) = 'COORD SPHE '
        write (luninp, '(1X,A)') line
     endif
@@ -3988,7 +3988,7 @@ subroutine write_swan_inp (wavedata, calccount, &
     !     *** activate Setup in SWAN ***
     !
     if (sr%setup) then
-       line(1:79) = ' '
+       line       = ' '
        line(1:5) = 'SETUP'
        write (luninp, '(1X,A)') line
     endif
@@ -4000,14 +4000,14 @@ subroutine write_swan_inp (wavedata, calccount, &
     !     ***  additional commands for CURVI-LINEAR grid      ***
     !     ***                                                 ***
     !
-    line(1:79) = ' '
+    line       = ' '
     line(1:6)  = 'CGRID '
     line(7:11) = 'CURV '
     write (line(12:21), '(2(I4,1X))') dom%mxc, dom%myc
     line(31:48) = 'EXCEPT  0.0    0.0'
     line(57:58) = ' _'
     write (luninp, '(1X,A)') line
-    line(1:79)  = ' '
+    line        = ' '
     if (cs==1) then
        line(7:22) = 'CIR             '
     elseif (cs==2) then
@@ -4020,10 +4020,10 @@ subroutine write_swan_inp (wavedata, calccount, &
     write (line(60:64), '(I4,1X)') msc
     write (luninp, '(1X,A)') line
 !-----------------------------------------------------------------------
-    line(1:79) = ' '
+    line       = ' '
     line(1:2)  = '$ '
     write (luninp, '(1X,A)') line
-    line(1:79) = ' '
+    line       = ' '
     !
     !     READING of coordinates CURVILINEAR computational grid
     !
@@ -4034,16 +4034,16 @@ subroutine write_swan_inp (wavedata, calccount, &
     line(15:14 + ind) = curlif
     line(14 + ind:14 + ind) = ''''''
     line(15 + ind:16 + ind) = ' _'
-    line(17 + ind:79) = ' '
+    line(17 + ind:)   = ' '
     write (luninp, '(1X,A)') line
-    line(1:79) = ' '
+    line       = ' '
     line(1:)   = ' 4   0   1 FREE'
     write (luninp, '(1X,A)') line
-    line(1:79) = ' '
+    line       = ' '
     line(1:2)  = '$ '
     write (luninp, '(1X,A)') line
 !-----------------------------------------------------------------------
-    line(1:79) = ' '
+    line       = ' '
     !
     !     Definition of bottom grid(s)
     !
@@ -4070,7 +4070,7 @@ subroutine write_swan_inp (wavedata, calccount, &
        write (luninp, '(1X,A)') line
        botfil = dom%botfil(1:37)
     endif
-    line(1:79) = ' '
+    line       = ' '
     !
     !     File-name bottom depth  (use temporary file)
     !
@@ -4091,8 +4091,8 @@ subroutine write_swan_inp (wavedata, calccount, &
     endif
     i = i+2
     line(i:) = ' 0 FREE'
-    write (luninp, '(1X,A)') line(1:79)
-    line(1:79) = ' '
+    write (luninp, '(1X,A)') trim(line)
+    line       = ' '
     !
     !     File-name current field (temporary file)
     !
@@ -4101,15 +4101,15 @@ subroutine write_swan_inp (wavedata, calccount, &
        line(1:18) = 'CURREN CURV 0. 0. '
        write (line(19:28), '(2(I4,1X))')    dom%mxc, dom%myc
        write (luninp, '(1X,A)') lijn
-       write (luninp, '(1X,A)') line(1:79)
-       line(1:79) = ' '
+       write (luninp, '(1X,A)') trim(line)
+       line       = ' '
        !
        !        *** read current grid ***
        !
        line(1:21)  = 'READ CUR FAC= 1.    _'
-       line(22:79) = ' '
-       write (luninp, '(1X,A)') line(1:79)
-       line(1:79)  = ' '
+       line(22:)   = ' '
+       write (luninp, '(1X,A)') trim(line)
+       line        = ' '
        ind         = index(curfil, ' ')
        i           = 1
        line(i:i)   = ''''''
@@ -4118,11 +4118,11 @@ subroutine write_swan_inp (wavedata, calccount, &
        line(ind + 4:ind + 10)  = 'IDLA=4 '
        line(ind + 11:ind + 14) = 'FREE'
        line(ind + 15:79)       = ' '
-       write (luninp, '(1X,A)') line(1:79)
-       line(1:79)  = ' '
+       write (luninp, '(1X,A)') trim(line)
+       line        = ' '
     endif
 !-----------------------------------------------------------------------
-    line(1:79) = ' '
+    line       = ' '
     !
     !     Fluid Mud
     !
@@ -4131,8 +4131,8 @@ subroutine write_swan_inp (wavedata, calccount, &
        line(1:18) = 'MUDL CURV 0. 0. '
        write (line(19:28), '(2(I4,1X))')    dom%mxc, dom%myc
        write (luninp, '(1X,A)') lijn
-       write (luninp, '(1X,A)') line(1:79)
-       line(1:79) = ' '
+       write (luninp, '(1X,A)') trim(line)
+       line       = ' '
        !
        !     File-name mud depth  (use temporary file)
        !
@@ -4148,7 +4148,7 @@ subroutine write_swan_inp (wavedata, calccount, &
        line(i:) = ' 4'
        i = i+2
        line(i:) = ' 0 FREE'
-       write (luninp, '(1X,A)') line(1:79)
+       write (luninp, '(1X,A)') trim(line)
     endif
     !
     !     Vegetation map
@@ -4160,19 +4160,19 @@ subroutine write_swan_inp (wavedata, calccount, &
        line(1:19) = 'NPLANTS CURV 0. 0. '
        write (line(20:29), '(2(I4,1X))')    dom%mxc, dom%myc
        write (luninp, '(1X,A)') lijn
-       write (luninp, '(1X,A)') line(1:79)
-       line(1:79) = ' '
+       write (luninp, '(1X,A)') trim(line)
+       line       = ' '
        !
        !     File-name vegetation map 
        !
        line  = 'READINP NPLANTS 1.0 ''' // trim(vegfil) // ''' 4 0 FREE'
-       write (luninp, '(1X,A)') line(1:79)
+       write (luninp, '(1X,A)') trim(line)
     endif
 !-----------------------------------------------------------------------
-    line(1:79) = ' '
+    line       = ' '
     line(1:2) = '$ '
     write (luninp, '(1X,A)') line
-    line(1:79) = ' '
+    line       = ' '
     !
     !     diffraction
     !
@@ -4182,13 +4182,13 @@ subroutine write_swan_inp (wavedata, calccount, &
        write (line(11:20), '(F10.5)') sr%diffr_coeff
        write (line(22:25), '(I4)'   ) sr%diffr_smsteps
        write (line(27:27), '(I1)'   ) sr%diffr_adapt_propag
-       write (luninp, '(1X,A)') line(1:79)
-       line(1:79)  = ' '
+       write (luninp, '(1X,A)') trim(line)
+       line        = ' '
     endif
 !-----------------------------------------------------------------------
     line(1:2) = '$ '
     write (luninp, '(1X,A)') line
-    line(1:79) = ' '
+    line       = ' '
     !
     !     definition of grid for wind field
     !
@@ -4197,38 +4197,38 @@ subroutine write_swan_inp (wavedata, calccount, &
        !
        if (.not.sr%curviwind) then
           lijn       = 'INPGRID _'
-          line(1:79) = ' '
+          line       = ' '
           line(1:7)  = 'WIND   '
           write (line(8:35),  '(2(F10.2,4X))') xw, yw
           write (line(36:43), '(  F7.1 ,1X) ') alpw
           write (line(44:53), '(2(I4   ,1X))') mxw, myw
           write (line(54:71), '(2(F8.2 ,1X))') dxw, dyw
           write (luninp, '(1X,A)') lijn
-          write (luninp, '(1X,A)') line(1:79)
-          line(1:79)  = ' '
+          write (luninp, '(1X,A)') trim(line)
+          line        = ' '
        else
           lijn       = 'INPGRID _'
-          line(1:79) = ' '
+          line       = ' '
           line(1:18) = 'WIND CURV 0. 0.   '
           write (line(19:28), '(2(I4,1X))') dom%mxc, dom%myc
           if (sr%excval> - 998.99 .or. sr%excval< - 999.01) then
              line(29:37) = ' EXCVAL '
              write (line(38:49), '(F12.4)') sr%excval
-             line(50:79) = ' '
+             line(50:)   = ' '
           else
-             line(29:79) = ' '
+             line(29:)   = ' '
           endif
           write (luninp, '(1X,A)') lijn
-          write (luninp, '(1X,A)') line(1:79)
-          line(1:79) = ' '
+          write (luninp, '(1X,A)') trim(line)
+          line       = ' '
        endif
        !
        !        *** read wind grid ***
        !
        line(1:20)  = 'READ WIN FAC= 1.   _'
-       line(21:79) = ' '
-       write (luninp, '(1X,A)') line(1:79)
-       line(1:79)  = ' '
+       line(21:)   = ' '
+       write (luninp, '(1X,A)') trim(line)
+       line        = ' '
        ind         = index(wfil, ' ')
        i           = 1
        line(i:i)   = ''''''
@@ -4237,55 +4237,55 @@ subroutine write_swan_inp (wavedata, calccount, &
        line(ind + 4:ind + 10)  = 'IDLA=4 '
        line(ind + 11:ind + 14) = 'FREE'
        line(ind + 15:79)       = ' '
-       write (luninp, '(1X,A)') line(1:79)
+       write (luninp, '(1X,A)') trim(line)
        line(1:79)              = ' '
     endif
     line(1:2)  = '$ '
     write (luninp, '(1X,A)') line
-    line(1:79) = ' '
+    line       = ' '
     !
     !     Uniform wind velocity and direction
     !
     if (.not.varwin .and. dom%n_meteofiles_dom == 0) then
        if (sr%genmode==0) then
-          line(1:79) = ' '
+          line       = ' '
           write (luninp, '(1X,A)') line
        elseif (abs(wvel)>0.) then
           line(1:10)  = 'WIND  VEL='
           write (line(11:20), '(F10.2)') wvel
           line(21:25) = ' DIR='
           write (line(26:35), '(F10.2)') wdir
-          line(36:79) = ' '
+          line(36:)   = ' '
           write (luninp, '(1X,A)') line
        else
        endif
     endif
 !-----------------------------------------------------------------------
-    line(1:79) = ' '
+    line       = ' '
     line(1:2)  = '$ '
     write (luninp, '(1X,A)') line
-    line(1:79) = ' '
+    line       = ' '
     !
     !     definition of grid for friction field
     !
     if (varfri) then
        lijn       = 'INPGRID _'
-       line(1:79) = ' '
+       line       = ' '
        line(1:18) = 'FRIC CURV 0. 0.   '
        write (line(19:28), '(2(I4,1X))') dom%mxc, dom%myc
        if (sr%excval> - 998.99 .or. sr%excval< - 999.01) then
           line(29:37) = ' EXCVAL '
           write (line(38:49), '(F12.4)') sr%excval
-          line(50:79) = ' '
+          line(50:)   = ' '
        else
-          line(29:79) = ' '
+          line(29:)   = ' '
        endif
        write (luninp, '(1X,A)') lijn
-       write (luninp, '(1X,A)') line(1:79)
-       line(1:79) = ' '
+       write (luninp, '(1X,A)') trim(line)
+       line       = ' '
        line(1:20)  = 'READ FRI FAC= 1.   _'
-       line(21:79) = ' '
-       write (luninp, '(1X,A)') line(1:79)
+       line(21:)   = ' '
+       write (luninp, '(1X,A)') trim(line)
        ind         = index(ffil, ' ')
        i                       = 1
        line(i:i)               = ''''''
@@ -4294,7 +4294,7 @@ subroutine write_swan_inp (wavedata, calccount, &
        line(ind + 4:ind + 10)  = 'IDLA=4 '
        line(ind + 11:ind + 14) = 'FREE'
        line(ind + 15:79)       = ' '
-       write (luninp, '(1X,A)') line(1:79)
+       write (luninp, '(1X,A)') trim(line)
        line(1:79)              = ' '
     endif
 !-----------------------------------------------------------------------
@@ -4337,7 +4337,7 @@ subroutine write_swan_inp (wavedata, calccount, &
             write(luninp, '(1X,A)') line
             cycle
           endif
-          line(1:79) = ' '
+          line       = ' '
           parread = bnd%parread
           !              User specified conditions
           shape     = bnd%sshape
@@ -4367,7 +4367,7 @@ subroutine write_swan_inp (wavedata, calccount, &
              write (luninp, '(1X,A)') line
           endif
           !
-          line(1:79) = ' '
+          line       = ' '
           line(1:)   = 'BOUN'
           nsect      = bnd%nsect
           convar     = bnd%convar
@@ -4420,7 +4420,7 @@ subroutine write_swan_inp (wavedata, calccount, &
              write (luninp, '(1X,A)') line
              rindx = rindx + 4
           endif
-          line(1:79) = ' '
+          line       = ' '
           if (convar==1) then
              !                 Constant conditions
              line(21:) = 'CON'
@@ -4458,7 +4458,7 @@ subroutine write_swan_inp (wavedata, calccount, &
                    endif
                    rindx      = rindx + 5
                    write (luninp, '(1X,A)') line
-                   line(1:79) = ' '
+                   line       = ' '
                 enddo
                 cindx = cindx + nsect
              else
@@ -4496,7 +4496,7 @@ subroutine write_swan_inp (wavedata, calccount, &
        write(luninp, '(1X,A)') line
     endif
 !-----------------------------------------------------------------------
-    line(1:79) = ' '
+    line       = ' '
     !
     ! hotfile= true: use hotfile
     !
@@ -4519,10 +4519,10 @@ subroutine write_swan_inp (wavedata, calccount, &
     !     Physics activated in SWAN (default options)
     !
 !-----------------------------------------------------------------------
-    line(1:79) = ' '
+    line       = ' '
     line(1:2)  = '$ '
     write (luninp, '(1X,A)') line
-    line(1:79) = ' '
+    line       = ' '
     if (sr%genmode == 1) then
        line(1:8) = 'GEN1 '
     elseif (sr%genmode == 2) then
@@ -4536,17 +4536,17 @@ subroutine write_swan_inp (wavedata, calccount, &
     else
     endif
     write (luninp, '(1X,A)') line
-    line(1:79) = ' '
+    line       = ' '
     if (.not.sr%breaking) then
        line(1:9)   = 'OFF BREAK'
-       line(10:79) = ' '
+       line(10:)   = ' '
        write (luninp, '(1X,A)') line
-       line(1:79)  = ' '
+       line        = ' '
     else
        line(1:9)   = 'BREAK CON'
        write (line(15:30), '(2(F6.2,2X))') sr%cfbr1, sr%cfbr2
        write (luninp, '(1X,A)') line
-       line(1:79)  = ' '
+       line        = ' '
     endif
     if (sr%frictype==1) then
        line(1:9) = 'FRIC JON '
@@ -4561,7 +4561,7 @@ subroutine write_swan_inp (wavedata, calccount, &
     endif
     if (sr%frictype/=0) then
        write (luninp, '(1X,A)') line
-       line(1:79) = ' '
+       line       = ' '
     endif
     if (wavedata%mode == flow_mud_online) then
        !
@@ -4576,49 +4576,49 @@ subroutine write_swan_inp (wavedata, calccount, &
        write (line(15:41), '(a,F7.4,a,F7.4)') 'trfac=',sr%cftriad1, ' cutfr=', sr%cftriad2
        line(44:66)= ' urcrit=0.2 urslim=0.01'
        write (luninp, '(1X,A)') line
-       line(1:79) = ' '
+       line       = ' '
     endif
     if (.not.sr%windgrowth) then
        line(1:10)  = 'OFF WINDG '
-       line(11:79) = ' '
+       line(11:)   = ' '
        write (luninp, '(1X,A)') line
-       line(1:79)  = ' '
+       line        = ' '
     endif
     if (.not.sr%quadruplets) then
        line(1:10)  = 'OFF QUAD  '
-       line(11:79) = ' '
+       line(11:)   = ' '
        write (luninp, '(1X,A)') line
-       line(1:79)  = ' '
+       line        = ' '
     endif
     if (sr%whitecap==0) then
        line(1:10)  = 'OFF WCAP  '
-       line(11:79) = ' '
+       line(11:)   = ' '
        write (luninp, '(1X,A)') line
     !else
     !   line(1:20)  = 'WCAP   CSM   4   2  '
     !   write (luninp, '(1X,A)') line
     endif
-    line(1:79)  = ' '
+    line        = ' '
     line(1:10)  = 'LIM  10 1 '
     write (luninp, '(1X,A)') line
-    line(1:79)  = ' '
+    line        = ' '
     if (.not.sr%refraction) then
        line(1:10)  = 'OFF REFRAC'
-       line(11:79) = ' '
+       line(11:)   = ' '
        write (luninp, '(1X,A)') line
-       line(1:79)  = ' '
+       line        = ' '
     endif
     if (.not.sr%fshift) then
        line(1:10)  = 'OFF FSHIFT'
-       line(11:79) = ' '
+       line(11:)   = ' '
        write (luninp, '(1X,A)') line
-       line(1:79)  = ' '
+       line        = ' '
     endif
     if (dom%vegetation == 1) then
        line(1:10) = 'VEGETATION'
        write (line(15:), '(F6.2,1X,F7.4,1X,I4,1X,F7.4)') dom%veg_height, dom%veg_diamtr, dom%veg_nstems, dom%veg_drag
        write (luninp, '(1X,A)') line
-       line(1:79) = ' '
+       line       = ' '
     endif
     if (sr%modsim == 3) then
        write (luninp, '(1X,A)') 'PROP BSBT'
@@ -4629,12 +4629,12 @@ subroutine write_swan_inp (wavedata, calccount, &
     line(1:47) = 'NUM DIR cdd=        SIGIM css=                 '
     write (line(14:19), '(F6.2)') cdd
     write (line(32:37), '(F6.2)') css
-    line(48:79) = ' '
-    write (luninp, '(1X,A)') line(1:79)
-    line(1:79)  = ' '
+    line(48:)   = ' '
+    write (luninp, '(1X,A)') trim(line)
+    line        = ' '
     line(1:2)   = '$ '
     write (luninp, '(1X,A)') line
-    line(1:79)  = ' '
+    line        = ' '
     line(1:10)  = 'NUM ACCUR '
     if ( sr%modsim /= 3 ) then
         write (line(15:), '(F8.3,1X,F8.3,1X,F8.3,1X,F8.3,1X,I4)') &
@@ -4644,16 +4644,16 @@ subroutine write_swan_inp (wavedata, calccount, &
         & sr%drel, sr%dh_abs, sr%dt_abs, sr%percwet, &
         & 'NONSTAT', sr%itermx
     endif
-    write (luninp, '(1X,A)') line(1:79)
+    write (luninp, '(1X,A)') trim(line)
 !-----------------------------------------------------------------------
-    line(1:79)  = ' '
+    line        = ' '
     !
     !     Obstacles
     !
     if (nobst>0) then
        l = 0
        do i = 1, nobst
-          line(1:79) = ' '
+          line       = ' '
           if (trane(i)<999.0) then
              line(1:11) = 'OBST TRANS '
              write (line(12:17), '(F6.3)') trane(i)
@@ -4681,24 +4681,24 @@ subroutine write_swan_inp (wavedata, calccount, &
           endif
           line(57:62) = ' LIN _'
           write (luninp, '(1X,A)') line
-          line(1:79)  = ' '
+          line        = ' '
           do j = 1, nlin(i)
-             line(1:79) = ' '
+             line       = ' '
              l = l + 1
              write (line(13:70), '(2(E25.17,4X))') xpob(l), ypob(l)
              if (j/=nlin(i)) line(72:72) = '_'
              write (luninp, '(1X,A)') line
-             line(1:79) = ' '
+             line       = ' '
           enddo
        enddo
     endif
     line(1:2)  = '$ '
     write (luninp, '(1X,A)') line
 !-----------------------------------------------------------------------
-    line(1:79) = ' '
+    line       = ' '
     line(1:72) = '$***************************** OUTPUT REQUEST **************************'
     write (luninp, '(1X,A)') line
-    line(1:79) = ' '
+    line       = ' '
     line(1:2)  = '$ '
     write (luninp, '(1X,A)') line
     do i=1, size(varnam1)
@@ -4713,7 +4713,7 @@ subroutine write_swan_inp (wavedata, calccount, &
        enddo
     endif
     write (luninp, '(1X,A)') '$ '
-    line(1:79) = ' '
+    line       = ' '
     !
     !     *** output definitions ***
     !
@@ -4740,11 +4740,11 @@ subroutine write_swan_inp (wavedata, calccount, &
                 line(i:i)             = ''''''
                 line(41:79)           = ' '
                 write (luninp, '(1X,A)') line
-                line(1:79) = ' '
+                line       = ' '
                 line(1:6)  = 'SPEC _'
-                line(7:79) = ' '
+                line(7:)   = ' '
                 write (luninp, '(1X,A)') line
-                line(1:79) = ' '
+                line       = ' '
                 i          = 1
                 line(i:i)  = ''''''
                 line(2:9)  = fname(1:8)
@@ -4779,9 +4779,9 @@ subroutine write_swan_inp (wavedata, calccount, &
     i           = 34
     line(i:i)   = ''''''
     line(35:37) = '  _'
-    line(38:79) = ' '
+    line(38:)   = ' '
     write (luninp, '(1X,A)') line
-    line(1:79)  = ' '
+    line        = ' '
     if (calccount == 1 .and. sr%modsim == 3) then
        ! The following do-loop is used to write an underscore (_) at the end of the last line with varnam elements
        ! Is there a more easy way?
@@ -4796,7 +4796,7 @@ subroutine write_swan_inp (wavedata, calccount, &
     else
        write (luninp, '(6(2X,A),''_'')') varnam1
     endif
-    line(1:79)  = ' '
+    line        = ' '
     line(1:2)   = '$ '
     write (luninp, '(1X,A)') line
     !
@@ -4813,9 +4813,9 @@ subroutine write_swan_inp (wavedata, calccount, &
     i           = 34
     line(i:i)   = ''''''
     line(35:37) = '  _'
-    line(38:79) = ' '
+    line(38:)   = ' '
     write (luninp, '(1X,A)') line
-    line(1:79)  = ' '
+    line        = ' '
     if (calccount == 1 .and. sr%modsim == 3) then
        ! The following do-loop is used to write an underscore (_) at the end of the last line with varnam elements
        ! Is there a more easy way?
@@ -4830,7 +4830,7 @@ subroutine write_swan_inp (wavedata, calccount, &
     else
        write (luninp, '(6(2X,A),''_'')') varnam2
     endif
-    line(1:79)  = ' '
+    line        = ' '
     line(1:2)   = '$ '
     write (luninp, '(1X,A)') line
     !
@@ -4848,23 +4848,23 @@ subroutine write_swan_inp (wavedata, calccount, &
        i           = 34
        line(i:i)   = ''''''
        line(35:37) = '  _'
-       line(38:79) = ' '
+       line(38:)   = ' '
        write (luninp, '(1X,A)') line
-       line(1:79)  = ' '
+       line        = ' '
        write (luninp, '(6(2X,A7),''_'')') sr%add_out_names
-       line(1:79)  = ' '
+       line        = ' '
        line(1:2)   = '$ '
        write (luninp, '(1X,A)') line
     endif
 !-----------------------------------------------------------------------
-    line(1:79)  = ' '
+    line        = ' '
     !
     !     Curves
     !
     if (ncurv > 0) then
        k = 0
        do i = 1, ncurv
-          line(1:79) = ' '
+          line       = ' '
           line(1:7)  = 'CURVE  '
           j          = 8
           line(j:j)  = ''''''
@@ -4877,21 +4877,21 @@ subroutine write_swan_inp (wavedata, calccount, &
           write (line(21:48), '(2(F10.2,4X))') xpcu(k), ypcu(k)
           line(49:49) = '_'
           write (luninp, '(1X,A)') line
-          line(1:79)  = ' '
+          line        = ' '
           jendcrv     = nclin(k)
           do j = 2, jendcrv
              k = k + 1
-             line(1:79) = ' '
+             line       = ' '
              write (line(11:15), '(I5)') nclin(k)
              write (line(21:48), '(2(F10.2,4X))') xpcu(k), ypcu(k)
              !              Modification
              if (j/=jendcrv) line(50:50) = '_'
              write (luninp, '(1X,A)') line
-             line(1:79) = ' '
+             line       = ' '
           enddo
           line(1:2)  = '$ '
           write (luninp, '(1X,A)') line
-          line(1:79) = ' '
+          line       = ' '
           line(1:7)  = 'TABLE  '
           j          = 8
           line(j:j)  = ''''''
@@ -4906,13 +4906,13 @@ subroutine write_swan_inp (wavedata, calccount, &
           line(40:47) = line(9:16)
           line(51:51) = '_'
           write (luninp, '(1X,A)') line
-          line(1:79) = ' '
+          line       = ' '
           write (luninp, '(4(2X,A),A)') varnam1(11), varnam1(12), varnam1(13),     &
                                       & varnam1(4), ' _'
           write (luninp, '(5(2X,A),A)') varnam1(1), varnam1(3), varnam1(2),        &
                                       & varnam1(7), varnam1(8), ' _'
           write (luninp, '(2(2X,A))') varnam1(16), varnam1(5)
-          line(1:79) = ' '
+          line       = ' '
        enddo
     elseif (ncurv == -1) then
        !
@@ -4928,7 +4928,7 @@ subroutine write_swan_inp (wavedata, calccount, &
     !
     !     Output locations
     !
-    line(1:79) = ' '
+    line       = ' '
     !
     ! loop over the location files
     !
@@ -4960,7 +4960,7 @@ subroutine write_swan_inp (wavedata, calccount, &
              i         = ind - 1 + 7
              line(i:i) = ''''''
              write (luninp, '(1X,A)') line
-             line(1:79) = ' '
+             line       = ' '
           else
              do n = 1, npoints
                 write (line(1:26),  '(E25.17,1X)') sr%xyloc(1,n)
@@ -4974,7 +4974,7 @@ subroutine write_swan_inp (wavedata, calccount, &
           endif
           line(1:2) = '$ '
           write (luninp, '(1X,A)') line
-          line(1:79) = ' '
+          line       = ' '
           if (sr%output_table) then
              line(1:6)  = 'TABLE '
              i          = 7
@@ -5007,11 +5007,11 @@ subroutine write_swan_inp (wavedata, calccount, &
              line(i:i)   = ''''''
              line(i+1:) = ' XP YP DEP HS DIR RTP TM01 _'
              write (luninp, '(1X,A)') line
-             line(1:79)  = ' '
+             line        = ' '
              line(37:56) = 'DSPR UBOT WIND VEL  '
              write (luninp, '(1X,A)') line
           endif
-          line(1:79) = ' '
+          line       = ' '
           if (sr%output_spec1d) then
              line(1:6)  = 'SPEC  '
              i          = 7
@@ -5046,7 +5046,7 @@ subroutine write_swan_inp (wavedata, calccount, &
              i         = i+4
              line(i:i) = ''''''
              write (luninp, '(1X,A)') line
-             line(1:79) = ' '
+             line       = ' '
           endif
           if (sr%output_spec2d) then
              line(1:6) = 'SPEC  '
@@ -5092,13 +5092,13 @@ subroutine write_swan_inp (wavedata, calccount, &
                 line(i+2:)  = trim(outfirst)
              endif
              write (luninp, '(1X,A)') line
-             line(1:79) = ' '
+             line       = ' '
           endif
       enddo
     endif
     line(1:2) = '$ '
     write (luninp, '(1X,A)') line
-    line(1:79) = ' '
+    line       = ' '
     ! frame not set anywhere!
     frame = .false.
     if (frame) then
@@ -5117,25 +5117,25 @@ subroutine write_swan_inp (wavedata, calccount, &
        write (line(55:65), '(F10.2,1X)') ylenfr
        line(66:67) = '_ '
        write (luninp, '(1X,A)') line
-       line(1:79) = ' '
+       line       = ' '
        write (line(1:9), '(I4,1X,I4)') mxfr, myfr
        write (luninp, '(1X,A)') line
-       line(1:79) = ' '
+       line       = ' '
     endif
-    line(1:79) = ' '
+    line       = ' '
     line(1:2) = '$ '
     write (luninp, '(1X,A)') line
 !-----------------------------------------------------------------------
     !
     !     Compute and test parameters
     !
-    line(1:79) = ' '
+    line       = ' '
     line(1:35) = 'TEST  ITEST=      ITRACE=          '
     write (line(14:16), '(I3)') itest
     write (line(27:29), '(I3)') itrace
-    line(36:79) = ' '
+    line(36:)   = ' '
     write (luninp, '(1X,A)') line
-    line(1:79) = ' '
+    line       = ' '
     !
     ! Default: put current time in writehottime
     ! writehottime will be overwritten by tendc when quasi-/non-stationary
@@ -5145,13 +5145,13 @@ subroutine write_swan_inp (wavedata, calccount, &
     ! 
     if (.not.sr%compmode) then
        line(1:1) = '$'
-       line(2:79) = ' '
+       line(2:)   = ' '
     else
        !
        ! modsim = 2   : quasi-stationary
        ! modsim = 3   : non-stationary
        !
-       line(1:79) = ' '
+       line       = ' '
        if (sr%modsim <= 1) then
           !
           ! stationary
@@ -5175,7 +5175,7 @@ subroutine write_swan_inp (wavedata, calccount, &
           !
           ! built line
           !
-          line(1:79)  = ' '
+          line        = ' '
           line(1:16)  = 'COMPUTE NONSTAT '
           write (line(17:31), '(a)')    tbegc
           write (line(33:40), '(f8.2)') sr%deltc
@@ -5201,11 +5201,11 @@ subroutine write_swan_inp (wavedata, calccount, &
        write (luninp, '(1X,A)') line
     endif
     !
-    line(1:79)  = ' '
+    line        = ' '
     line(1:4)   = 'STOP'
-    line(5:79)  = ' '
+    line(5:)    = ' '
     write (luninp, '(1X,A)') line
-    line(1:79)  = ' '
+    line        = ' '
     close (luninp)
 !
 !
