@@ -5216,16 +5216,19 @@ contains
 !===============================================================================
 subroutine outputCurvesFromFile()
     use precision_basics
-    integer                     :: i,j,istat
-    real(sp)             , dimension(1:2) :: inputvals
-    character(1), pointer, dimension(:)   :: data_ptr
-    character(30)               :: node_type
-    character(30)               :: parname
-    character(80)               :: curname
-    character(80)               :: line
-    type(tree_data)   , pointer :: cur_ptr
-    type(tree_data)   , pointer :: pol_ptr
-    type(tree_data)   , pointer :: tmp_ptr
+    integer                                     :: i
+    integer                                     :: j
+    integer                                     :: istat
+    real(sp)                   , dimension(1:2) :: inputvals
+    character(1)      , pointer, dimension(:)   :: data_ptr
+    character(6)                                :: number
+    character(30)                               :: node_type
+    character(30)                               :: parname
+    character(80)                               :: curname
+    character(80)                               :: line
+    type(tree_data)   , pointer                 :: cur_ptr
+    type(tree_data)   , pointer                 :: pol_ptr
+    type(tree_data)   , pointer                 :: tmp_ptr
 
     nullify(pol_ptr)
     call tree_create('Delft3D-WAVE output curves', pol_ptr)
@@ -5274,8 +5277,13 @@ subroutine outputCurvesFromFile()
           endif
           write(luninp,'(a)') line
        enddo
+       if (nttide > 1) then
+           write (number, '(I6.6)') itide
+       else  ! wavedata%mode /= stand_alone
+          write (number, '(I6.6)') calccount
+       endif
        write(luninp,'(1x,a)') '$ '
-       write(luninp,'(1x,5a)') 'TABLE  ''', trim(curname), '''    NOHEAD    ''SWANOUT_', trim(curname), '''   _'
+       write(luninp,'(1x,6a)') 'TABLE  ''', trim(curname), '''    NOHEAD    ''SWANOUT_', trim(curname), trim(number), '''   _'
        write(luninp, '(4(2X,A),A)') varnam1(11), varnam1(12), varnam1(13),     &
                                   & varnam1(4), ' _'
        write(luninp, '(5(2X,A),A)') varnam1(1), varnam1(3), varnam1(2),        &
