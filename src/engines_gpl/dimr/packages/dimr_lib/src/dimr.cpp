@@ -653,12 +653,12 @@ void Dimr::runParallelInit (dimr_control_block * cb) {
     if (use_mpi && masterComponent->mpiCommVar != NULL  && masterComponent->numProcesses > 1) { // TODO: consider removing the numproc>1 check.
         ierr = MPI_Group_incl(mpiGroupWorld, masterComponent->numProcesses, masterComponent->processes, &mpiGroupComp);
         if (ierr != MPI_SUCCESS) {
-            throw new Exception(true, "runParallelInit: cannot create a subgroup of %d processes for component \"%s\". Code: %d.", masterComponent->name, ierr);
+            throw new Exception(true, "runParallelInit: cannot create a subgroup of %d processes for component \"%s\". Code: %d.", masterComponent->numProcesses, masterComponent->name, ierr);
         }
         // Needs to be called by *all* ranks:
         ierr = MPI_Comm_create(MPI_COMM_WORLD, mpiGroupComp, &masterComponent->mpiComm);
         if (ierr != MPI_SUCCESS) {
-            throw new Exception(true, "runParallelInit: cannot create a subcommunicator of %d processes for component \"%s\". Code: %d.", masterComponent->name, ierr);
+            throw new Exception(true, "runParallelInit: cannot create a subcommunicator of %d processes for component \"%s\". Code: %d.", masterComponent->numProcesses, masterComponent->name, ierr);
         }
         if (masterComponent->onThisRank) {
             MPI_Fint *fComm;
