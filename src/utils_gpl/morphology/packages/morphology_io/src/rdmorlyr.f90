@@ -28,6 +28,7 @@ module m_rdmorlyr
 !  $Id$
 !  $HeadURL$
 !-------------------------------------------------------------------------------
+use m_depfil_stm
 contains
 
 subroutine rdmorlyr(lundia    ,error     ,filmor    , &
@@ -971,6 +972,7 @@ subroutine rdinimorlyr(lsedtot   ,lsed      ,lundia    ,error     , &
     use message_module, only: write_error, write_warning, FILE_NOT_FOUND, FILE_READ_ERROR, PREMATURE_EOF
     use sediment_basics_module, only: SEDTYP_COHESIVE
     use morphology_data_module, only: sedpar_type, morpar_type
+    use m_depfil_stm
     !
     implicit none
 !
@@ -1125,15 +1127,9 @@ subroutine rdinimorlyr(lsedtot   ,lsed      ,lundia    ,error     , &
                 ! Space varying data has been specified
                 ! Use routine that also read the depth file to read the data
                 !
-                if (prec == hp) then
-                   call depfil_stm_double(lundia    ,error     ,flsdbd(ised) , &
-                                        & fmttmp    ,bodsed    ,lsedtot      , &
-                                        & ised      ,dims      ,message      )
-                else
-                   call depfil_stm(lundia    ,error     ,flsdbd(ised) , &
-                                 & fmttmp    ,bodsed    ,lsedtot      , &
-                                 & ised      ,dims      ,message      )
-                endif
+                call depfil_stm_double(lundia    ,error     ,flsdbd(ised) , &
+                                     & fmttmp    ,bodsed    ,lsedtot      , &
+                                     & ised      ,dims      ,message      )
                 if (error) then
                    message = 'ERROR: RDMORLYR '//message
                    call write_error(message, unit=lundia)

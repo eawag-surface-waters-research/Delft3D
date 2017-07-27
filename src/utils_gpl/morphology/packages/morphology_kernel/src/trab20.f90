@@ -228,26 +228,26 @@ subroutine trab20(u         ,v         ,hrms      ,rlabda    ,teta      ,h      
     if (bedslpeffini == 0) then
          srfTotal = 1.0_fp + srfRhee
     elseif (bedslpeffini == 1 .or. bedslpeffini == 2) then
-       if  ((dabs(real(u,hp))>dtol .or. dabs(real(v,hp))>dtol) .and. (dabs(real(dzdx,hp))>dtol .or. dabs(real(dzdy,hp))>dtol)) then
+       if  ((abs(u)>dtol .or. abs(v)>dtol) .and. (abs(dzdx)>dtol .or. abs(dzdy)>dtol)) then
           ! 
           alpha1 = atan2(v,u)
           ! Angle between the x-axis and the bed slope vector directed in down-slope direction
           alpha2 = mod(atan2(-dzdy,-dzdx),2.0_fp*pi)
           psi = alpha1-(alpha2-pi) 
-          if (dabs(real(dzdx,hp))<dtol) then 
+          if (abs(dzdx)<dtol) then 
               !  Beta purely based on dzdy
-              beta = datan(dabs(real(dzdy,hp)))
+              beta = atan(abs(dzdy))
           else
-              beta = datan(dabs(real(dzdx,hp)/dsin(datan(real(dzdx,hp)/real(max(dzdy,dtol),hp)))))     ! Maximum absolute bed slope angle, derived in de Vet 2014
+              beta = atan(abs(dzdx/sin(atan(dzdx/max(dzdy,dtol)))))     ! Maximum absolute bed slope angle, derived in de Vet 2014
           endif
           beta = min(beta,phi) 
           if (dilatancy == 1) then
-             srfTotal = (dcos(real(psi,hp))*dsin(real(beta,hp))+dsqrt( &
-                        (srfRhee**2+2.0_fp*srfRhee*dcos(real(beta,hp))+dcos(real(beta,hp))**2) * &
-                         dtan(real(phi,hp))**2-dsin(real(psi,hp))**2*dsin(real(beta,hp))**2)) / dtan(real(phi,hp))                   ! Soulsby (1997), modified by de Vet 2014
+             srfTotal = (cos(psi)*sin(beta)+sqrt( &
+                        (srfRhee**2+2.0_fp*srfRhee*cos(beta)+cos(beta)**2) * &
+                         tan(phi)**2-sin(psi)**2*sin(beta)**2)) / tan(phi)                   ! Soulsby (1997), modified by de Vet 2014
           else
-             srfTotal = (dcos(real(psi,hp))*dsin(real(beta,hp)) + &
-                         dsqrt(dcos(real(beta,hp))**2*dtan(real(phi,hp))**2-dsin(real(psi,hp))**2*dsin(real(beta,hp))**2))/dtan(real(phi,hp)) ! Soulsby (1997)
+             srfTotal = (cos(psi)*sin(beta) + &
+                         sqrt(cos(beta)**2*tan(phi)**2-sin(psi)**2*sin(beta)**2))/tan(phi) ! Soulsby (1997)
           endif
        endif
     endif
