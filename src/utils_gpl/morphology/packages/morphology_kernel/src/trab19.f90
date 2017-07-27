@@ -242,7 +242,7 @@ subroutine trab19(u         ,v         ,hrms      ,rlabda    ,teta      ,h      
               !  Beta purely based on dzdy
               beta = atan(abs(dzdy))
           else
-              beta = atan(abs(dzdx/dsin(atan(dzdx/max(dzdy,dtol)))))     ! Maximum absolute bed slope angle, derived in de Vet 2014
+              beta = atan(abs(dzdx/sin(atan(dzdx/max(dzdy,dtol)))))     ! Maximum absolute bed slope angle, derived in de Vet 2014
           endif
           beta = min(beta,phi) 
           if (dilatancy == 1) then
