@@ -112,8 +112,7 @@ call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\dimr_lib_versio
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>..\..\..\..\scripts_lgpl\win32\oss-install_debug.cmd d_hydro
-echo "This file is overwritten by the post-build command of the project dimr_lib" &gt; .\include\dimr_lib_version.h</Command>
+      <Command>echo "This file is overwritten by the post-build command of the project dimr_lib" &gt; .\include\dimr_lib_version.h</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -143,8 +142,7 @@ call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\dimr_lib_versio
       <DelayLoadDLLs>fmpich2.dll</DelayLoadDLLs>
     </Link>
     <PostBuildEvent>
-      <Command>..\..\..\..\scripts_lgpl\win32\oss-install_debug.cmd d_hydro
-echo "This file is overwritten by the post-build command of the project dimr_lib" &gt; .\include\dimr_lib_version.h</Command>
+      <Command>echo "This file is overwritten by the post-build command of the project dimr_lib" &gt; .\include\dimr_lib_version.h</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -177,8 +175,7 @@ call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\dimr_lib_versio
       <OutputFile>$(TargetPath)</OutputFile>
     </Link>
     <PostBuildEvent>
-      <Command>..\..\..\..\scripts_lgpl\win32\oss-install_debug.cmd d_hydro
-echo "This file is overwritten by the post-build command of the project dimr_lib" &gt; .\include\dimr_lib_version.h</Command>
+      <Command>echo "This file is overwritten by the post-build command of the project dimr_lib" &gt; .\include\dimr_lib_version.h</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -211,8 +208,7 @@ call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\dimr_lib_versio
       <DelayLoadDLLs>fmpich2.dll</DelayLoadDLLs>
     </Link>
     <PostBuildEvent>
-      <Command>..\..\..\..\scripts_lgpl\win32\oss-install_debug.cmd d_hydro
-echo "This file is overwritten by the post-build command of the project dimr_lib" &gt; .\include\dimr_lib_version.h</Command>
+      <Command>echo "This file is overwritten by the post-build command of the project dimr_lib" &gt; .\include\dimr_lib_version.h</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
