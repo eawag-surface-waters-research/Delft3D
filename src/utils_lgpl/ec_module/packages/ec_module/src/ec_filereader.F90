@@ -62,7 +62,6 @@ module m_ec_filereader
          integer,                     intent(in) :: fileReaderId  !< unique FileReader id
          !
          integer :: istat   !< allocate() status
-         integer :: i       !< loop counter
          logical :: success !< helper variable
          !
          success = .false.
@@ -104,7 +103,6 @@ module m_ec_filereader
          logical                            :: success !< function status
          type(tEcFileReader), intent(inout) :: fileReader !< intent(inout)
          !
-         integer :: ierror !< return value of NetCDF function calls
          integer :: istat  !< deallocate() status
          integer :: i      !< loop counter
          logical :: opened
@@ -191,16 +189,14 @@ module m_ec_filereader
          type(tEcField), pointer :: fieldPtrA     !< helper for pointer flipping
          type(tEcField), pointer :: fieldPtrB     !< helper for pointer flipping
          real(hp)                :: time_steps    !< time steps of read data block
-         real(hp)                :: jd            !< holds time of read data as a Julian Date
          integer                 :: i             !< loop counter
          integer                 :: t0t1          !< indicates whether the 0 or the 1 field is read. -1: choose yourself
          integer                 :: numlay        !< number of layers in 3D = number of columns in a t3D file 
-         integer                 :: istat, yyyymmdd, hhmmss, q
+         integer                 :: istat, yyyymmdd, hhmmss
          integer                 :: vectormax
          character(len=255)      :: qname 
          integer                 :: nv, nl, iitem
          integer                 :: from, thru
-         integer                 :: nmissing, kcmp
          real(hp), dimension(:), allocatable    :: values
          type(tEcItem), pointer  :: itemPtr
          integer                 :: n_invalid_components
@@ -443,7 +439,6 @@ module m_ec_filereader
          integer,                   intent(in) :: x            !< array-index of Item to return
          !
          type(tEcFileReader), pointer :: fileReaderPtr !< FileReader corresponding to fileReaderId
-         integer                      :: i             !< loop counter
          !
          itemId = ec_undef_int
          fileReaderPtr => null()
@@ -469,7 +464,6 @@ module m_ec_filereader
          integer,                   intent(in) :: fileReaderId !< unique FileReader id
          !
          type(tEcFileReader), pointer :: fileReaderPtr !< FileReader corresponding to fileReaderId
-         integer                      :: i             !< loop counter
          !
          nr = 0
          fileReaderPtr => null()
@@ -490,13 +484,10 @@ module m_ec_filereader
          logical                               :: is_QH        !< true if QH table
          type(tEcInstance), pointer            :: instancePtr  !< intent(in)
          integer,           intent(in)         :: fileReaderId !< unique FileReader id
-         real(hp), dimension(:), pointer       :: Hptr         !< pointer to the waterlevel array
-         real(hp), dimension(:), pointer       :: Qptr         !< pointer to the discharge array
          integer,           intent(out)        :: item_Q        !< ID of item holding the discharges
          integer,           intent(out)        :: item_H        !< ID of item holding the waterlevels
          !
          type(tEcFileReader), pointer :: fileReaderPtr  !< FileReader corresponding to fileReaderId
-         integer                      :: i              !< loop counter
          !
          item_Q = ec_undef_int
          item_H = ec_undef_int
@@ -559,10 +550,9 @@ module m_ec_filereader
       
       function ecFileReaderLookupAstroComponents(fileReaderPtr) result (nmissing)
          implicit none
-         logical                               :: success       !< function status
+         integer                               :: nmissing      !< function status
          type(tEcFileReader), pointer          :: fileReaderPtr !< FileReader corresponding to fileReaderId
          integer :: kcmp, icmp
-         integer :: nmissing
 
          nmissing = 0
          kcmp = size(fileReaderPtr%items(1)%ptr%sourceT1FieldPtr%arr1d)

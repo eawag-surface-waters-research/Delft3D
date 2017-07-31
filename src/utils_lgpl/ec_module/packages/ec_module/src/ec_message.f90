@@ -115,7 +115,7 @@ module m_ec_message
          end subroutine
       end interface
       character(len=maxMessageLen) :: retval, message 
-      integer                      :: i, i0, iostat 
+      integer                      :: i, i0
       character(len=maxMessageLen) :: messages(15)
       message = getECMessage()
       messages = ''

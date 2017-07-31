@@ -270,7 +270,6 @@ function read_equidistant_block(minp, meteoitem, d, mx, nx) result(success)
    !
    integer                :: i
    integer                :: j
-   character(4000)        :: rec
    character(16)          :: tex
    !
    if ( size(d,1) .ne. mx .or. size(d,2) .ne. nx ) then
@@ -334,7 +333,6 @@ function read_curvilinear_block(minp, d, meteoitem) result(success)
    integer                   :: j
    integer                   :: mincr
    integer                   :: nincr
-   character(4000)           :: rec
    character(16)             :: tex
    !
    mincr  = sign(1, meteoitem%mlast-meteoitem%mfirst)
@@ -459,7 +457,6 @@ function read_spv_block(minp, meteoitem, d, mx, nx, kx) result(success)
    integer                    :: i
    integer                    :: j
    integer                    :: k
-   character(132)             :: rec
    !
    if ( size(d,1) .ne. mx .or. size(d,2) .ne. nx .or. size(d,3) .ne. kx ) then
       meteomessage = 'READ_SPV_BLOCK: wrong sizes'

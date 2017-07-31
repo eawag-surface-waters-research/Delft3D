@@ -30,7 +30,6 @@ module m_ec_netcdf_timeseries
        integer,                 intent(in) :: netCDFId  !< unique netCDF instance id
        !
        integer :: istat   !< allocate() status
-       integer :: i       !< loop counter
        logical :: success !< helper variable
        !
        success = .false.
@@ -126,7 +125,7 @@ module m_ec_netcdf_timeseries
     character(len=50)                              :: name, cf_role , positive, zunits
 
     integer    :: iDims, nDims, iVars, iTims, nVars, nTims, nGlobalAtts, unlimdimid, ierr 
-    integer    :: nts, tslen
+    integer    :: tslen
     integer    :: dimids_tsid(2)
     integer, allocatable :: var_dimids(:,:)
     integer, allocatable :: var_ndims(:)
@@ -250,17 +249,17 @@ module m_ec_netcdf_timeseries
     use string_module
     implicit none
     logical                          :: success
-    type (tEcNetCDF),   pointer      :: ncptr              
+    type (tEcNetCDF),   pointer      :: ncptr
     character(len=*),   intent(in)   :: quantity
     character(len=*),   intent(in)   :: location
     integer, intent(out)             :: q_id
     integer, intent(out)             :: l_id
-    integer, dimension(:), allocatable, intent(out) :: dimids 
+    integer, dimension(:), allocatable, intent(out) :: dimids
     integer    :: ndims
-    integer    :: ivar, itim, ltl, i
-    integer    :: ierr           
+    integer    :: ivar, itim, ltl
+    integer    :: ierr
 
-    success = .False. 
+    success = .False.
     do ivar=1,ncptr%nVars
        ltl = len_trim(quantity)
        if (strcmpi(ncptr%standard_names(ivar), quantity, ltl)) exit

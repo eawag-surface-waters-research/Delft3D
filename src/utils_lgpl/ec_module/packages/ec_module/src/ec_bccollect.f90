@@ -45,7 +45,6 @@ module m_ec_bccollect
     integer             ::  nfld
     integer             ::  nq
     logical             ::  jablock, jaheader
-    integer             ::  reallocstat
     integer             ::  lineno 
     integer (kind=8)    ::  savepos 
     integer             ::  iostatloc
@@ -194,7 +193,6 @@ module m_ec_bccollect
     integer             ::  nfld
     integer             ::  nq
     logical             ::  jablock, jaheader
-    integer             ::  reallocstat
     integer             ::  lineno 
     integer (kind=8)    ::  savepos 
     integer             ::  iostatloc
@@ -203,9 +201,6 @@ module m_ec_bccollect
     integer             :: bcBlockId, fileReaderId
     integer             :: ifr 
     logical             :: success, isLateral
-    integer             :: unit
-
-    real(hp)            :: ref_date
 
     iostat = EC_UNKNOWN_ERROR
     lineno = 0 
@@ -340,21 +335,15 @@ module m_ec_bccollect
     type (tEcBCBlock),  intent(inout)       ::      bc              !< boundary condition instance   
     integer,            intent(in)          ::      nfld            !< number of fields in the header 
     integer,            intent(in)          ::      nq              !< number of quantities (quantity block) 
-    character(len=*),   intent(in)          ::      keyvaluestr     !< string containing header fields as key-value pairs            
+    character(len=*),   intent(in)          ::      keyvaluestr     !< string containing header fields as key-value pairs
 
     integer                          ::     ifld 
-    integer                          ::     i, jv
     integer                          ::     iostat
     character(len=60),  allocatable  ::     hdrkeys(:)     !< All keys from header
-    character(len=60),  allocatable  ::     hdrvals(:)     !< All values from header 
-    integer, allocatable             ::     iv(:), il(:), perm_vpos(:)
-    character(len=60)                ::     dumstr 
+    character(len=60),  allocatable  ::     hdrvals(:)     !< All values from header
+    character(len=60)                ::     dumstr
 
-    integer                          ::     ipos, npos, posfs  
-    integer                          ::     iq, iq_sel, idim
-    integer, parameter               ::     MAXDIM = 10    !< max number of vector quantities in one vector 
-    character(len=10)                ::     vectorquantities(MAXDIM) 
-    character(len=60)                ::     vectordefinition, vectorstr   
+    integer                          ::     iq, iq_sel
 
     success = .False.
     if (allocated(hdrkeys)) then 

@@ -46,7 +46,6 @@ function checkmeteoheader(meteoitem) result(success)
 !
 ! Local variables
 !
-    integer       :: ierr
     real(fp)      :: pi
 !
 !! executable statements -------------------------------------------------------

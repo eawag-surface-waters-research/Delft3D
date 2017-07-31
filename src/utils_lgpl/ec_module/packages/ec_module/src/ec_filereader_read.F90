@@ -189,7 +189,7 @@ module m_ec_filereader_read
          type(tEcFileReader),    pointer       :: fileReaderPtr !< intent(in)
          real(hp),               intent(inout) :: time_steps    !< number of time steps of duration: seconds
          real(hp), dimension(:), intent(inout) :: values        !< read values
-         type(tEcItem),          pointer       :: item
+
          success = ecBCreadline(fileReaderPtr, values = values, time_steps = time_steps, eof = fileReaderPtr%end_of_data)
       end function ecBCReadBlock
 
@@ -643,18 +643,13 @@ module m_ec_filereader_read
          type(tEcField), pointer                 :: fieldPtr         !< Field to update
          integer                                 :: ierror           !< return status of NetCDF method call
          integer                                 :: varid            !< NetCDF id of NetCDF variable
-         integer                                 :: ndims            !< NetCDF variable's number of dimensions
-         integer,  dimension(4)                  :: dimids           !< NetCDF variable's dimension ids
-         integer                                 :: length           !< size of a NetCDF variable's dimension
          integer                                 :: times_index      !< Index in tEcTimeFrame's times array
          real(hp)                                :: netcdf_timesteps !< seconds since k_refdate
          integer                                 :: i, j, k          !< loop counters
          real(hp), dimension(:,:,:), allocatable :: data_block       !< 2D slice of NetCDF variable's data
          integer                                 :: istat            !< allocation status
-         real(hp)                                :: time_window      !< time window between times(i) and times(i+1)
          real(hp)                                :: dmiss_nc         !< local netcdf missing
 
-         real(hp)                                :: fillvalue             !< helper variable
          real(hp)                                :: mintime, maxtime      !< range of kernel times that can be requested from this netcdf reader
          logical                                 :: valid_field
          character(len=300) :: str
@@ -830,16 +825,13 @@ module m_ec_filereader_read
          integer,             intent(in) :: n             !< dimension of quantity to read
          !
          integer                             :: i             !< loop counter
-         integer                             :: j             !< loop counter
          integer                             :: ierror        !< return value of function calls
          integer                             :: iddim_time    !< id as obtained from NetCDF
          integer                             :: idvar_time    !< id as obtained from NetCDF
          integer                             :: idvar_q       !< id as obtained from NetCDF
          integer                             :: ntimes        !< number of times on the NetCDF file
          integer                             :: read_index    !< index of field to read
-         logical                             :: local_success !< when the return flag should not be influenced
          real(hp), dimension(:), allocatable :: times         !< time array read from NetCDF
-         character(len=maxNameLen)           :: rec           !< helper variable
          character(NF90_MAX_NAME)            :: string        !< to catch NetCDF messages
          !
          success = .false.
@@ -1019,16 +1011,12 @@ module m_ec_filereader_read
          !
          integer                   :: istat     !< status of allocation operation
          character(132)            :: rec       !< content of a line
-         integer                   :: reclen    !< record length minus comment 
          integer                   :: i1        !< start index of first word
          integer                   :: i2        !< stop index of first word
          character(len=maxNameLen) :: component !< helper variable, when converting from component to period
-         real(hp)                  :: dummy_amplitude, dummy_phase
          logical                   :: eof       !< true if the end of file was reached 
-         logical                   :: is_corr   !< true if the fourier data is an astronomic/harmonic correction
          logical                   :: is_astro  !< true if an astronomical component has been parsed
 
-         real(hp)                  :: magdum, phasedum, period, ampl, shift
          integer                   :: MAXCMP = 100 
          !
          success = .true.
@@ -1200,7 +1188,6 @@ module m_ec_filereader_read
          !
          ! locals
          integer               :: istat !< status of read operation
-         integer               :: indx  !< helper index variable
          character(maxNameLen) :: rec_small
          character(maxNameLen) :: keyword_small
          !
@@ -1275,7 +1262,6 @@ module m_ec_filereader_read
          !
          character(len=maxNameLen) :: word
          character(len=maxNameLen) :: rec     !< content of read line
-         integer                   :: istat   !< status of read operation
          integer                   :: indx    !< helper index variable
          !
          answer = ''
@@ -1416,14 +1402,7 @@ module m_ec_filereader_read
          real(hp), dimension(kcmp) :: v0u !< Astronomical arguments of the referenced components [rad]
          real(hp), dimension(kcmp) :: w   !< Angular velocity of the referenced components [rad/hr]
 
-         integer                               :: i      !< Help var.
-         integer                               :: ik     !< Help var.
-         integer                               :: il     !< Help var.
-         integer                               :: j      !< Help var.
          integer                               :: jaar   !< Present year
-         integer,           dimension(16*mxkc) :: jnaam  !< Help var.
-         character(len=8),  dimension(mxkc)    :: knaam  !< Array with the names of all components
-         character(len=80), dimension(mxkc)    :: kombes !< Array with tidal components
          real(hp)                              :: t      !< Time in hours referred to January 1, 00:00 of the year 'JAAR'
          real(hp),          dimension(15)      :: v      !< Help var. to calculate V0U()
          real(hp),          dimension(25)      :: f      !< Help var. to calculate FR()
@@ -2039,7 +2018,6 @@ module m_ec_filereader_read
          integer  :: mp1   !< 
          integer  :: ms    !< 
          integer  :: mt    !< 
-         integer  :: ierr  !< error (1) or not (0)
          real(hp) :: dhalf !< Value for 0.5 in SIGN function
          real(hp) :: pix2  !< 
          real(hp) :: s1    !< 
@@ -2548,13 +2526,6 @@ module m_ec_filereader_read
          type(tEcInstance),   pointer :: instancePtr       !< intent(in)
          type(tEcFileReader), pointer :: corFileReaderPtr  !< intent(inout)
          !
-         integer :: i            !< loop counter
-         integer :: quantityId   !< helper variable 
-         integer :: elementSetId !< helper variable 
-         integer :: field0Id     !< helper variable 
-         integer :: field1Id     !< helper variable 
-         integer :: itemId       !< helper variable 
-         !
          integer                             :: nPeriods          !< number of periods
          real(hp), dimension(:), allocatable :: periods           !< Fourier components transformed into periods
          character(len=8), dimension(:), allocatable :: components
@@ -2570,10 +2541,8 @@ module m_ec_filereader_read
          real(hp), pointer                 :: cmpphase_result_T0(:)
          real(hp), pointer                 :: cmpamplitude_result_T1(:)
          real(hp), pointer                 :: cmpphase_result_T1(:)
-         
-         real(hp)                          :: omega               !< dummy variable for astro component period
 
-         integer           ::  icmp, ncmp, icor, ncor, iitem, istat  
+         integer           ::  icmp, ncmp, icor, ncor, iitem
          logical           ::  cmpfound 
          !
          success = .true.
@@ -2645,15 +2614,14 @@ module m_ec_filereader_read
          type(tEcMask),      intent(out) :: mask
          type(tEcFileReader),pointer     :: fileReaderPtr
    
-         integer             :: fmask            
+         integer             :: fmask
          integer             :: iostat 
          character(len=999)  :: rec 
          logical             :: jamaskinit
-         integer             :: i, j
-         logical             :: exists
-   
-         success = .false. 
-         
+         integer             :: i
+
+         success = .false.
+
          if (.not.ecSupportOpenExistingFile(fmask, maskfilname)) then
             call setECMessage('Cannot open maskfile '//trim(maskfilname))
             return

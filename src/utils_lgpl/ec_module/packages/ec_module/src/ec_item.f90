@@ -253,7 +253,6 @@ module m_ec_item
       !> Retrieve a pointer to the item's field's arr1d
       function ecItemGetArr1DPtr(instancePtr, itemId, selector) result(Arr1DPtr)
       implicit none
-      integer                               :: providerID
       type(tEcInstance),      pointer       :: instancePtr  !< intent(in)
       integer,                intent(in)    :: itemID       !< unique Item id
       integer,                intent(in)    :: selector     !< selects field, 0:source0, 1:source1, 2:target

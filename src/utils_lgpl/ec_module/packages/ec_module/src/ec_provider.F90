@@ -95,10 +95,7 @@ module m_ec_provider
 
          type(tEcBCBlock),    pointer :: bcBlockPtr     !< BCBlock corresponding to bcBlockId
          type(tEcFileReader), pointer :: fileReaderPtr  !< FileReader associated with the BC instance 
-         integer(kind=8)              :: filehandle 
-         integer                      :: iostat, istat_
-         integer                      :: unit
-         real(hp)                     :: ref_date
+         integer                      :: iostat
 
          integer                      :: netCDFId
 
@@ -192,10 +189,7 @@ module m_ec_provider
          real(kind=hp),    optional, intent(in) :: dtnodal      !< Nodal factors update interval
          !
          type(tEcFileReader), pointer :: fileReaderPtr  !< FileReader corresponding to fileReaderId
-         integer                      :: i              !< loop counter
          character(maxNameLen)        :: l_quantityName !< explicit length version of quantityName
-         integer                      :: iostat         !< status returned from various file operations 
-         logical                      :: exist, opened  !< status of the file obtained by inquire
          !
          success = .false.
          fileReaderPtr => null()
@@ -251,7 +245,6 @@ module m_ec_provider
          character(maxNameLen), optional :: quantityname     !< Names of the quantities read from file, needed for structured files (NetCDF),
                                                              !< but also for bct-file 
          character(maxNameLen), optional :: bctfilename      !< file name of bct-file with data
-         integer                         :: iitem
          !
          success = .false.
          select case(fileReaderPtr%ofType)
@@ -748,13 +741,9 @@ module m_ec_provider
          integer                :: field0Id     !< helper variable 
          integer                :: field1Id     !< helper variable 
          integer                :: itemId       !< helper variable 
-         integer                :: indx         !< 
-         real(hp)               :: time_steps   !< number of time steps for next data block
          type(tEcItem), pointer :: item         !< Item containing all components
-         character(len=1)       :: excl         !< 
          character(len=300)     :: msgbuf 
          character(len=:), allocatable :: elementSetName
-         character(len=:), allocatable :: quantityName
          character(len=maxMessageLen)  :: message
          !
          success = .false.
@@ -887,8 +876,6 @@ module m_ec_provider
          integer  :: field1Id     !< helper variable 
          integer  :: itemId       !< helper variable
          type(tEcItem), pointer :: item
-         character(len=20) :: name   !< 
-         integer :: i !< loop counter
          !
          success = .true.
          item => null()
@@ -1158,7 +1145,6 @@ module m_ec_provider
          integer  :: field1Id     !< helper variable 
          integer  :: itemId       !< helper variable
          type(tEcItem), pointer :: item
-         character(len=20) :: name   !< 
          integer :: i !< loop counter
          !
          success = .false.
@@ -1230,12 +1216,7 @@ module m_ec_provider
          real(hp), dimension(:), allocatable :: zws           !< z-values of vertical velocities
          real(hp), dimension(MAXLAY)         :: a             !< 
 
-         integer                             :: ilay, jlay 
-         integer                             :: col_tmp 
-         real(hp)                            :: zws_tmp
          integer                             :: vectormax, iostat
-             
-            
          !
          success = .false.
          valueptr => null()
@@ -1393,15 +1374,13 @@ module m_ec_provider
          !
          real(hp), dimension(:), allocatable :: xs    !< x-coordinates of support points
          real(hp), dimension(:), allocatable :: ys    !< y-coordinates of support points
-         real(hp), dimension(:), allocatable :: zs    !< z/sigma-coordinates of support points
          integer,  dimension(:), allocatable :: mask  !< support point mask array (for polytime ElementSet)
          integer                             :: n_points !< number of support points
          integer                             :: n_signals !< Number of forcing signals created (at most n_signals==n_points, but warn if n_signals==0)
          character(len=132)                  :: rec      !< a read line
-         integer                             :: i, j     !< loop counters
+         integer                             :: i        !< loop counters
          integer                             :: istat    !< status of read operation
          integer                             :: L        !< helper index
-         character(len=4)                    :: tex      !< helper string for constructin file names
          character(len=maxFileNameLen)       :: filename !< helper string containing subprovider file name.
          character(len=maxFileNameLen)       :: plipointlbl   !< temporary name of current pli-point in bct context 
          character(len=maxFileNameLen), &
@@ -1410,19 +1389,18 @@ module m_ec_provider
          logical                             :: exists   !< helper boolian, indicating file existence
          integer                             :: id       !< dummy, catches ids which are not used
          integer                             :: k_yyyymmdd !< calculated Gregorian calender date, serving as reference date
-         integer                             :: quantityId, elementSetId, fieldId, itemId, subconverterId, connectionId, BCBlockID
-         integer                             :: wind_x, wind_y
-         integer                             :: magnitude, discharge, waterlevel, slope, crossing, maxLay
+         integer                             :: quantityId, elementSetId, fieldId, itemId, subconverterId, connectionId
+         integer                             :: discharge, waterlevel, slope, crossing, maxLay
          type(tEcItem), pointer              :: itemPT
          type(tEcItem), pointer              :: itemt3D
          type(tEcItem), pointer              :: sourceItem
          integer,  dimension(:), allocatable :: itemIDList
          integer                             :: vectormax
-          
-         logical		                        ::	is_tim, is_cmp, is_tim3d, is_qh
-         logical                             :: has_label 
-         integer                             :: lblstart, lblend                
-         type(tEcFileReader), pointer	      :: fileReaderPtr2
+
+         logical                             :: is_tim, is_cmp, is_tim3d, is_qh
+         logical                             :: has_label
+         integer                             :: lblstart
+         type(tEcFileReader), pointer        :: fileReaderPtr2
          !
 
 !        initialization         
@@ -1665,37 +1643,30 @@ module m_ec_provider
          !
          real(hp), dimension(:), allocatable :: xs    !< x-coordinates of support points
          real(hp), dimension(:), allocatable :: ys    !< y-coordinates of support points
-         real(hp), dimension(:), allocatable :: zs    !< z/sigma-coordinates of support points
          integer,  dimension(:), allocatable :: mask  !< support point mask array (for polytime ElementSet)
          integer                             :: n_points !< number of support points
          integer                             :: n_signals !< Number of forcing signals created (at most n_signals==n_points, but warn if n_signals==0)
          character(len=132)                  :: rec      !< a read line
-         integer                             :: i, j     !< loop counters
+         integer                             :: i        !< loop counters
          integer                             :: istat    !< status of read operation
-         integer                             :: L        !< helper index
-         character(len=4)                    :: tex      !< helper string for constructin file names
-         character(len=maxFileNameLen)       :: filename !< helper string containing subprovider file name.
          character(len=maxFileNameLen)       :: plipointlbl   !< temporary name of current pli-point in bct context 
          character(len=maxFileNameLen), &
          &   dimension(:), allocatable       :: plipointlbls  !< user-specified name for all pli-point in bct context 
          character(len=maxFileNameLen)       :: polyline_name !< polyline name read from pli-file 
-         logical                             :: exists   !< helper boolian, indicating file existence
          integer                             :: id       !< dummy, catches ids which are not used
          integer                             :: k_yyyymmdd !< calculated Gregorian calender date, serving as reference date
          integer                             :: quantityId, elementSetId, fieldId, itemId, subconverterId, connectionId, BCBlockID
-         integer                             :: wind_x, wind_y
-         integer                             :: magnitude, discharge, waterlevel, slope, crossing, maxLay
+         integer                             :: discharge, waterlevel, slope, crossing, maxLay
          type(tEcItem), pointer              :: itemPT
          type(tEcItem), pointer              :: itemt3D
          type(tEcItem), pointer              :: sourceItem
          integer,  dimension(:), allocatable :: itemIDList
          integer                             :: vectormax
-         logical		                        ::	is_tim, is_cmp, is_tim3d, is_qh
-         type(tEcBCBlock), pointer	         :: bcBlockPtr
-         type(tEcFileReader), pointer	      :: fileReaderPtr2
+         logical                             :: is_tim, is_cmp, is_tim3d, is_qh
+         type(tEcBCBlock), pointer           :: bcBlockPtr
          logical :: all_points_are_corr
          logical :: has_label
-         integer :: lblstart, lblend                
+         integer :: lblstart
          !
 
 !        initialization         
@@ -2249,9 +2220,7 @@ module m_ec_provider
           integer, intent(in), optional :: tgtNdx         !< Optional target index, 1 is assumed as default
           integer                       :: targetItemId   !< Target item id, after temporal interpolation
           integer                       :: itemId         !< returned  target item ID, if successful, otherwise -1 
-          integer                       :: convertId 
           type(tECItem), pointer        :: sourceItemPtr => null() 
-          type(tECItem), pointer        :: targetItemPtr => null()
           character(len=:), allocatable :: quantityName
           integer                       :: arraySize
 
@@ -2323,19 +2292,11 @@ module m_ec_provider
          character(len=maxMessageLen)          :: message
          !
          integer                                                 :: ierror                !< return value of NetCDF function calls
-
-
          integer                                                 :: idvar
-         integer                                                 :: n_quantity            !< number of requested variables from the netcdf-file 
-         
-         integer                                                 :: idvar_coord           !< id as obtained from NetCDF
-         integer                                                 :: idvar_time            !< id as obtained from NetCDF
          integer                                                 :: ndims, idims          !< helper variables
          integer                                                 :: ifgd, isgd            !< helper variables
          integer,                      dimension(:), allocatable :: dimids                !< ids of a variable's dimensions
-         integer,                      dimension(:), allocatable :: dimids_tmp            !< temporary ids of a variable's dimensions (compare vars)
          integer,                      dimension(:), allocatable :: coordids              !< helper variable
-         character(len=NF90_MAX_NAME), dimension(:), allocatable :: names                 !< helper variable, containing dimension names
          integer                                                 :: i,j                   !< loop counter
          integer                                                 :: grid_mapping_id       !< id of the applied grid mapping 
          integer                                                 :: fgd_id                !< var_id for elementset X or latitude
@@ -2363,11 +2324,7 @@ module m_ec_provider
          real(hp)                                                :: var_miss              !< missing data value in second dimension
          character(len=NF90_MAX_NAME)                            :: grid_mapping          !< name of the applied grid mapping 
          character(len=NF90_MAX_NAME)                            :: units                 !< helper variable for variable's units
-         real(hp)                                                :: add_offset            !< helper variable
-         real(hp)                                                :: scalefactor           !< helper variable
-         real(hp)                                                :: fillvalue             !< helper variable
          character(len=NF90_MAX_NAME)                            :: coord_name            !< helper variable
-         character(len=NF90_MAX_NAME)                            :: coord_name_tmp        !< helper variable
          character(len=NF90_MAX_NAME), dimension(:), allocatable :: coord_names           !< helper variable
          character(len=NF90_MAX_NAME)                            :: name                  !< helper variable
          character(len=NF90_MAX_NAME), dimension(15)             :: ncstdnames            !< helper variable : temp. list of standard names to search for in netcdf  
@@ -2379,14 +2336,10 @@ module m_ec_provider
          integer                                                 :: itemId                !< helper variable 
          integer                                                 :: istat                 !< helper variable 
          type(tEcItem),              pointer                     :: itemPtr               !< Item containing quantity
-         integer                                                 :: t0t1                  !< t0 / t1 switch
          logical                                                 :: dummy                 !< temp
-         integer,                    dimension(:), allocatable   :: dim_sizes             !< helper variable
          character(len=20)                                       :: attstr 
          logical                                                 :: rotate_pole
-         integer                                                 :: nvar, ivar            !< number/loopvariable of varids in this netcdf file 
-         double precision                                        :: PI 
-         character(len=NF90_MAX_NAME)                            :: expected_fgd, expected_sgd
+         integer                                                 :: nvar                  !< number/loopvariable of varids in this netcdf file 
          integer                                                 :: lon_varid, lon_dimid, lat_varid, lat_dimid, tim_varid, tim_dimid
          integer                                                 :: x_varid, x_dimid, y_varid, y_dimid, z_varid, z_dimid
 
@@ -2837,14 +2790,10 @@ module m_ec_provider
          type(tEcFileReader), pointer :: fileReaderPtr !< intent(inout)
          character(maxNameLen), intent(in) :: quantityName  !< name of quantity to read
          !
-         integer                   :: i              !< loop counter
          integer                   :: ierror         !< return value of function calls
          integer                   :: iddim_netelem  !< id as obtained from NetCDF
-         integer                   :: idvar_x        !< id as obtained from NetCDF
          integer                   :: idvar_q        !< id as obtained from NetCDF
-         integer                   :: ivar           !< loopvariable of varids in this netcdf file
          integer                   :: n              !< number of values
-         integer                   :: nvar           !< number of varids in this netcdf file 
          integer                   :: quantityId     !< helper variable 
          integer                   :: elementSetId   !< helper variable 
          integer                   :: field0Id       !< helper variable 
@@ -2854,7 +2803,6 @@ module m_ec_provider
          logical                   :: local_success  !< when the return flag should not be influenced
          real(hp)                  :: dmiss          !< missing data value
          type(tEcItem), pointer    :: item
-         character(20)             :: name           !< 
          character(NF90_MAX_NAME)  :: string         !< read from NetCDF file
          character(300)            :: message
 
@@ -2964,7 +2912,6 @@ module m_ec_provider
          real(hp),            intent(in) :: k_timezone       !< Kernel's timezone.
          integer,             intent(in) :: k_timestep_unit  !< Kernel's time step unit (1=seconds, 2=minutes, 3=hours)
          real(hp), optional,  intent(in) :: dtnodal          !< Nodal factors update interval
-         real(hp) :: julianDay
          real(hp) :: defTimeZone
          !
          success = .false.
@@ -3061,11 +3008,6 @@ module m_ec_provider
          character(len=maxNameLen) :: keyword    !< helper variable
          character(len=maxNameLen) :: rec        !< helper variable
          character(len=maxNameLen) :: prev_rec   !< helper variable
-         integer                   :: indx       !< helper variable
-         integer                   :: year       !< helper variable
-         integer                   :: month      !< helper variable
-         integer                   :: day        !< helper variable
-         real(hp)                  :: time_steps !< helper variable
          !
          success = .false.
          keyword = 'TIME'
@@ -3111,9 +3053,6 @@ module m_ec_provider
          logical                                 :: success       !< function status
          type(tEcFileReader), pointer            :: fileReaderPtr !< FileReader to initialize
          !
-         real(hp) :: time_steps      !< number of timesteps
-         real(hp) :: prev_time_steps !< helper variable for determining tstop
-         !
          success = .false.
          fileReaderPtr%tframe%ec_refdate = fileReaderPtr%tframe%k_refdate
          ! Obtain the total number of timesteps in this file.
@@ -3144,12 +3083,10 @@ module m_ec_provider
          integer                      :: nVariables !< number of variables in NetCDF file
          integer                      :: time_id    !< integer id of variable with standard_name "time"
          integer                      :: i          !< loop counter
-         character(len=NF90_MAX_NAME) :: name       !< name of a variable
          character(len=NF90_MAX_NAME) :: units      !< units attribute of a variable
          integer, dimension(1)        :: dimid      !< integer id of time variable's dimension variable
          integer                      :: length     !< number of time steps
          integer                      :: istat      !< status of allocation operation
-         integer                      :: tzone
          !
          success = .false.
          nVariables = 0

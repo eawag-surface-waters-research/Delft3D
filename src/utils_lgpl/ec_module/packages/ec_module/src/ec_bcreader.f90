@@ -43,10 +43,6 @@ contains
     type (tEcBCBlock),             intent(inout)   :: bc
     integer, optional,             intent(out)     :: iostat
 
-    integer :: netCDFId, iNetCDF
-    integer :: vectormax
-    type(tEcQuantity), pointer :: qptr
-
     success = .false.
     bc%qname = quantityName
     bc%bcname = plilabel
@@ -114,7 +110,6 @@ contains
     integer             ::  nfld
     integer             ::  nq
     logical             ::  jablock, jaheader
-    integer             ::  reallocstat
     integer             ::  lineno
     integer (kind=8)    ::  savepos
     integer             ::  iostatloc
@@ -533,7 +528,6 @@ contains
     integer        :: commentpos
     integer(kind=8):: savepos    !< saved position in file, for mf_read to enabled rewinding
     real(kind=hp), dimension(1:1)  :: ec_timesteps ! to read in source time from file block
-    real(kind=hp), dimension(1:1)  :: time ! to read in source time from file block
     real(kind=hp)  :: amplitude
 
     bcPtr => fileReaderPtr%bc
@@ -725,7 +719,6 @@ contains
     integer,                  intent(in) :: bcBlockId  !< unique BCBlock id
     !
     integer :: istat   !< allocate() status
-    integer :: i       !< loop counter
     logical :: success !< helper variable
     !
     success = .false.

@@ -375,7 +375,6 @@ module m_ec_elementSet
          type(tEcElementSet),    pointer :: elementSetPtr !< ElementSet corresponding to elementSetId
          integer                         :: newSize       !< size of zArray
          integer                         :: istat         !< reallocation status
-         integer                         :: i             !< loop counter
 
          logical                         :: Lpointer
 
@@ -428,7 +427,6 @@ module m_ec_elementSet
          type(tEcElementSet),    pointer :: elementSetPtr !< ElementSet corresponding to elementSetId
          integer                         :: newSize       !< size of zArray
          integer                         :: istat         !< reallocation status
-         integer                         :: i             !< loop counter
          logical                         :: Lpointer
 
          Lpointer = .false.
