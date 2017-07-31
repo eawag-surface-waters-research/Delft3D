@@ -2965,6 +2965,7 @@ module m_ec_provider
          integer,             intent(in) :: k_timestep_unit  !< Kernel's time step unit (1=seconds, 2=minutes, 3=hours)
          real(hp), optional,  intent(in) :: dtnodal          !< Nodal factors update interval
          real(hp) :: julianDay
+         real(hp) :: defTimeZone
          !
          success = .false.
          !
@@ -3036,12 +3037,14 @@ module m_ec_provider
                success = ecDefaultInitializeTimeFrame(fileReaderPtr)
             case (provFile_bc)
                ! Filereader was created thru a BC-instance. This instance has a timeunit (netcdf-style) property
-               if (fileReaderPtr%bc%func == BC_FUNC_TSERIES .or. fileReaderPtr%bc%func == BC_FUNC_TIM3D) then 
+               if (fileReaderPtr%bc%func == BC_FUNC_TSERIES .or. fileReaderPtr%bc%func == BC_FUNC_TIM3D) then
+                  defTimeZone = fileReaderPtr%tframe%ec_timezone
                   success = ecSupportTimestringToUnitAndRefdate(fileReaderPtr%bc%timeunit, &
-                                                                fileReaderPtr%tframe%ec_timestep_unit, fileReaderPtr%tframe%ec_refdate)
-               else 
+                                fileReaderPtr%tframe%ec_timestep_unit, fileReaderPtr%tframe%ec_refdate, &
+                                fileReaderPtr%tframe%ec_timezone, defTimeZone)
+               else
                   success = .true.
-               endif 
+               endif
             case default
                call setECMessage("ERROR: ec_provider::ecProviderInitializeTimeFrame: Unknown file type.")
          end select

@@ -543,7 +543,7 @@ contains
     select case (bcPtr%ftype)
     case (BC_FTYPE_ASCII)
        n_col = bcPtr%numcols             ! Number of quantities = columns specified in the header
-       n_col_time = bcPtr%timecolumn     ! Rank number of the colunm presumably holding the time (not necessarily the first)
+       n_col_time = bcPtr%timecolumn     ! Rank number of the column presumably holding the time (not necessarily the first)
 
        if(present(recout)) then
           recout = ''                       ! initialize return string to empty

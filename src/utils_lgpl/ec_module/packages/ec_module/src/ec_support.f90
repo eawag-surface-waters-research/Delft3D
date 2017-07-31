@@ -791,7 +791,6 @@ end subroutine ecInstanceListSourceItems
          character(len=maxFileNameLen), intent(in) :: filename    !< 
          !
          character(3000) :: message
-         integer         :: iostat
          !
          if (ierror /= nf90_noerr) then
             write (message,'(6a)') 'ERROR ', trim(description), '. NetCDF file : "', trim(filename), '". Error message:', nf90_strerror(ierror)
@@ -803,22 +802,26 @@ end subroutine ecInstanceListSourceItems
       end function ecSupportNetcdfCheckError
 
       ! =======================================================================
-      
+
       !> Extracts time unit and reference date from a standard time string.
       !! ASCII example: "TIME = 0 hours since 2006-01-01 00:00:00 +00:00"
       !! NetCDF example: "minutes since 1970-01-01 00:00:00.0 +0000"
-      function ecSupportTimestringToUnitAndRefdate(string, unit, ref_date, tzone) result(success)
+      function ecSupportTimestringToUnitAndRefdate(string, unit, ref_date, tzone, tzone_default) result(success)
          use netcdf
          use time_module
          !
-         logical                          :: success  !< function status
-         character(len=*),   intent(in)   :: string   !< units string
-         integer,  optional, intent(out)  :: unit     !< time unit enumeration
-         real(hp), optional, intent(out)  :: ref_date !< reference date formatted as Modified Julian Date
-         integer                          :: iostat
-         real(hp), optional, intent(out)  :: tzone    !< timezone
+         logical                           :: success       !< function status
+         character(len=*),   intent(inout) :: string        !< units string (at out in lowercase)
+         integer,  optional, intent(out)   :: unit          !< time unit enumeration
+         real(hp), optional, intent(out)   :: ref_date      !< reference date formatted as Modified Julian Date
+         real(hp), optional, intent(out)   :: tzone         !< time zone
+         real(hp), optional, intent(in)    :: tzone_default !< default for time zone
          !
-         integer :: i        !< helper index
+         integer :: i        !< helper index for location of 'since'
+         integer :: j        !< helper index for location of '+/-' in time zone
+         integer :: jplus    !< helper index for location of '+' in time zone
+         integer :: jmin     !< helper index for location of '-' in time zone
+         integer :: minsize  !< helper index for time zone
          integer :: temp     !< helper variable
          integer :: yyyymmdd !< reference date as Gregorian yyyymmdd
          !
@@ -840,8 +843,8 @@ end subroutine ecInstanceListSourceItems
             end if
          end if
          ! Determine the reference date.
+         i = index(string, 'since') + 6
          if (present(ref_date)) then
-            i = index(string, 'since') + 6
             if (i /= 0) then
                ! Date
                read(string(i : i+4), '(I4)') temp
@@ -869,18 +872,80 @@ end subroutine ecInstanceListSourceItems
 
          ! Determine the timezone
          if (present(tzone)) then
-            tzone = 0
-            i = index(string, '+',BACK=.True.)           ! Timezone following a '+'
-            if (i>0) then
-               read(string(i+1:i+2),*,iostat=iostat) tzone
-            end if
+             minsize = i + 18   ! +/- is to be found after date and time (note that date has '-')
+             jplus = index(string, '+', back=.true.)
+             jmin  = index(string, '-', back=.true.)
+             j     = max(jplus, jmin)
+             if (j > minsize) then
+                 if (present(tzone_default)) then
+                     success = parseTimezone(string(j:), tzone, tzone_default)
+                 else
+                     success = parseTimezone(string(j:), tzone)
+                 endif
+             else
+                 call setECMessage("WARNING: ec_support::ecSupportTimestringToUnitAndRefdate: no timezone found; assume same as Kernel.")
+                 if (present(tzone_default)) then
+                     tzone = tzone_default
+                 else
+                     tzone = 0.0_hp
+                 endif
+                 success = .true.
+             endif
+         else
+             success = .true.
          end if
          !
-         success = .true.
       end function ecSupportTimestringToUnitAndRefdate
 
       ! =======================================================================
-      
+
+      !> Extracts time zone from a standard time string.
+      !! examples: "+01:00", "+0200", "-01:00", "-0200", "+5:30"
+      function parseTimezone(string, tzone, tzone_default) result(success)
+         logical                           :: success         !< function status
+         character(len=*),   intent(inout) :: string          !< units string
+         real(hp),           intent(out)   :: tzone           !< time zone
+         real(hp), optional, intent(in)    :: tzone_default   !< default value for time zone
+
+         integer          :: ierr      !< error code
+         integer          :: jcolon    !< helper index for location of ':' in timezone
+         integer          :: jend      !< helper index
+         real(hp)         :: min       !< minutes part of time zone, as double
+         real(hp)         :: hour      !< hours part of time zone, as double
+         character(len=2) :: cmin      !< minutes part of time zone, as character string
+         character(len=3) :: chour     !< hours part of time zone, as character string
+
+         if (present(tzone_default)) then
+             tzone = tzone_default
+         else
+             tzone = 0.0_hp
+         endif
+
+         jcolon = index(string, ':')
+
+         if (jcolon == 0) then
+             jend = len_trim(string)
+             cmin = string(jend-1:)
+             chour = string(:jend-2)
+         else
+             cmin = string(jcolon+1:)
+             chour = string(:jcolon-1)
+         end if
+
+         read(chour, *, iostat=ierr) hour
+         if (ierr == 0) read(cmin, *, iostat=ierr) min
+         if (string(1:1) == '-') then
+             tzone = hour - min / 60.0_hp
+         else
+             tzone = hour + min / 60.0_hp
+         endif
+
+         success = (ierr == 0)
+         if (.not. success) call setECMessage("ERROR: ec_support::parseTimezone: error parsing time zone " // trim(string))
+      end function parseTimezone
+
+      ! =======================================================================
+
       !> Calculate conversion factor from ec_timestep_unit to seconds
       function ecSupportTimeUnitConversionFactor(unit) result(factor)
          integer             :: factor
@@ -925,7 +990,7 @@ end subroutine ecInstanceListSourceItems
          !
          integer :: factor_in    !< conversion factor from ec_timestep_unit to seconds    (EC-module)
          integer :: factor_out   !< conversion factor from k_timestep_unit to seconds     (Kernel)
-         integer :: factor       !< resulting conversion factor 
+         integer :: factor       !< resulting conversion factor
          !
          if (tframe%k_refdate > (-1.0d+0 + 1.0d-10)) then
             ! convert time stamp in file (*.tmp) to kernel time stamp
@@ -935,8 +1000,8 @@ end subroutine ecInstanceListSourceItems
             !
             timesteps = thistime * factor + (tframe%ec_refdate - tframe%k_refdate) * 60.0_hp*60.0_hp*24.0_hp
             !
-            ! Correct for Kernel's timzone.
-            timesteps = timesteps + tframe%k_timezone*3600.0_hp
+            ! Correct for difference in Kernel's timezone and EC's timezone.
+            timesteps = timesteps + (tframe%k_timezone - tframe%ec_timezone)*3600.0_hp
          else
             ! no kernel ref date defined, convert to modified julian day
             factor_in = ecSupportTimeUnitConversionFactor(tframe%ec_timestep_unit)
