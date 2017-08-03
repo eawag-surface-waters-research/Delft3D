@@ -148,6 +148,10 @@ enumerator mid_facenodes                   !< Variable ID for face-to-node mappi
 enumerator mid_edgefaces                   !< Variable ID for edge-to-face mapping table (optional, can be -1).
 enumerator mid_faceedges                   !< Variable ID for face-to-edge mapping table (optional, can be -1).
 enumerator mid_facelinks                   !< Variable ID for face-to-face mapping table (optional, can be -1).
+!mesh ids variables
+enumerator mid_node_ids                    !< Variable ID for node ids (optional, can be -1).
+enumerator mid_edge_ids                    !< Variable ID for edge ids (optional, can be -1).
+enumerator mid_face_ids                    !< Variable ID for face ids (optional, can be -1).
 !Coordinate variables
 enumerator mid_nodex                       !< Coordinate variable ID for node x-coordinate.     
 enumerator mid_nodey                       !< Coordinate variable ID for node y-coordinate.   
@@ -170,8 +174,8 @@ enumerator mid_facelon                     !< Coordinate variable ID for face lo
 enumerator mid_facelat                     !< Coordinate variable ID for face latitude coordinate. 
 enumerator mid_facelonbnd                  !< Coordinate variable ID for face boundaries' longitude coordinate. 
 enumerator mid_facelatbnd                  !< Coordinate variable ID for face boundaries' latitude coordinate.
-enumerator mid_layerzs                    !< Coordinate variable ID for fixed z/sigma layer center vertical coordinate (either z or sigma).
-enumerator mid_interfacezs                !< Coordinate variable ID for fixed z/sigma layer interface vertical coordinate (either z or sigma).   
+enumerator mid_layerzs                     !< Coordinate variable ID for fixed z/sigma layer center vertical coordinate (either z or sigma).
+enumerator mid_interfacezs                 !< Coordinate variable ID for fixed z/sigma layer interface vertical coordinate (either z or sigma).   
 enumerator mid_end
 end enum
 
@@ -980,7 +984,7 @@ function ug_def_var(ncid, id_var, id_dims, itype, iloctype, mesh_name, var_name,
    prefix = trim(mesh_name)
    
    ierr = nf90_def_var(ncid, prefix//'_'//trim(var_name), itype, id_dims, id_var)
-   ierr = nf90_put_att(ncid, id_var, 'mesh',   trim(mesh_name))
+   ierr = nf90_put_att(ncid, id_var, 'mesh', trim(mesh_name))
    select case (iloctype)
    case (UG_LOC_NODE)
       ierr = nf90_put_att(ncid, id_var, 'location',    'node')
@@ -1805,7 +1809,7 @@ function ug_init_mesh_topology(ncid, varid, meshids) result(ierr)
    
    integer,         intent(in   )    :: ncid          !< ID of already opened data set.
    integer,         intent(in   )    :: varid         !< NetCDF variable ID that contains the mesh topology information.
-   type(t_ug_mesh), intent(inout) :: meshids       !< vector in which all mesh topology dimension and variables ids will be stored.
+   type(t_ug_mesh), intent(inout)    :: meshids          !< vector in which all mesh topology dimension and variables ids will be stored.
    integer                           :: ierr          !< Result status (UG_NOERR if successful).
    integer                           :: coordspaceind !< The index where the mesh is mapped
    character(len=nf90_max_name)      :: varname
@@ -1873,6 +1877,13 @@ function ug_init_mesh_topology(ncid, varid, meshids) result(ierr)
    ierr = att_to_varid(ncid,'edge_face_connectivity', meshids%varids(mid_edgefaces),varid) !< Variable ID for edge-to-face mapping table (optional, can be -1).   
    ierr = att_to_varid(ncid,'face_edge_connectivity', meshids%varids(mid_faceedges),varid) !< Variable ID for face-to-edge mapping table (optional, can be -1).
    ierr = att_to_varid(ncid,'face_face_connectivity', meshids%varids(mid_facelinks),varid) !< Variable ID for face-to-face mapping table (optional, can be -1).
+   
+   ! 
+   ! Get the ids defined in nodes/edges/faces
+   !
+   ierr = att_to_varid(ncid,'node_ids', meshids%varids(mid_node_ids),varid) !< Variable ID for node ids
+   ierr = att_to_varid(ncid,'edge_ids', meshids%varids(mid_edge_ids),varid) !< Variable ID for edge ids
+   ierr = att_to_varid(ncid,'face_ids', meshids%varids(mid_face_ids),varid) !< Variable ID for face ids
 
 end function ug_init_mesh_topology
 
@@ -2028,7 +2039,7 @@ function ug_is_network_topology(ncid, varid) result(is_mesh_topo)
 
    buffer = ' '
    cfrole    = nf90_get_att(ncid, varid, 'cf_role', buffer)
-   nodeid    = nf90_get_att(ncid, varid, 'node_ids', nodeidsvar)
+   nodeid    = nf90_get_att(ncid, varid, 'branch_ids', nodeidsvar)
    if (cfrole == nf90_noerr .and. nodeid == nf90_noerr ) then
          is_mesh_topo = .true. !new ugrid format detected
    end if
@@ -3209,10 +3220,10 @@ end function ug_create_1d_network
 !> This function creates a 1d mesh accordingly to the new 1d format. 
 function ug_create_1d_mesh(ncid, netids, meshids, meshname, nmeshpoints, nmeshedges) result(ierr)
    
-   integer, intent(in)                  :: nmeshpoints, nmeshedges
+   integer, intent(in)                  :: ncid, nmeshpoints, nmeshedges
    type(t_ug_mesh), intent(inout)       :: meshids   
    type(t_ug_network), intent(in)       :: netids
-   integer                              :: ierr,ncid
+   integer                              :: ierr
    character(len=*),intent(in)          :: meshname
    character(len=len_trim(meshname))    :: prefix
    
@@ -3245,6 +3256,46 @@ function ug_create_1d_mesh(ncid, netids, meshids, meshname, nmeshpoints, nmeshed
    ierr = nf90_enddef(ncid)
 
 end function ug_create_1d_mesh
+
+!> This function defines the ids of a specific entity (node/edge/face) on the current mesh and creates the variable to store the ids
+function ug_def_mesh_ids(ncid, meshids, meshname, locationType) result(ierr)
+
+   integer, intent(in)                  :: ncid, locationType
+   type(t_ug_mesh), intent(inout)       :: meshids
+   character(len=*),intent(in)          :: meshname
+   character(len=len_trim(meshname))    :: prefix
+   integer                              :: ierr
+
+   prefix=trim(meshname)
+
+   ierr = UG_SOMEERR
+   ierr = nf90_redef(ncid) !open NetCDF in define mode
+
+   ierr = nf90_inq_dimid(ncid, 'idstrlength', meshids%dimids(mdim_idstring))
+   if ( ierr /= UG_NOERR) then 
+   ierr = nf90_def_dim(ncid, 'idstrlength', ug_idsLen, meshids%dimids(mdim_idstring))   
+   endif
+
+   if(locationType == UG_LOC_NODE ) then
+      ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'node_ids',prefix//'_node_ids')
+      ierr = nf90_def_var(ncid, prefix//'_node_ids', nf90_char, (/ meshids%dimids(mdim_idstring), meshids%dimids(mdim_node) /) , meshids%varids(mid_node_ids))
+      ierr = nf90_put_att(ncid, meshids%varids(mid_node_ids), 'long_name', 'the node ids')
+      ierr = nf90_put_att(ncid, meshids%varids(mid_node_ids), 'mesh', prefix)
+   else if (locationType == UG_LOC_EDGE ) then
+      ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'edge_ids',prefix//'_edge_ids')
+      ierr = nf90_def_var(ncid, prefix//'_edge_ids', nf90_char, (/ meshids%dimids(mdim_idstring), meshids%dimids(mdim_edge) /) , meshids%varids(mid_edge_ids))
+      ierr = nf90_put_att(ncid, meshids%varids(mid_edge_ids), 'long_name', 'the edge ids')
+      ierr = nf90_put_att(ncid, meshids%varids(mid_edge_ids), 'mesh', prefix)
+   else if (locationType == UG_LOC_FACE ) then
+      ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'face_ids',prefix//'_face_ids')
+      ierr = nf90_def_var(ncid, prefix//'_face_ids', nf90_char, (/ meshids%dimids(mdim_idstring), meshids%dimids(mdim_face) /) , meshids%varids(mid_face_ids))
+      ierr = nf90_put_att(ncid, meshids%varids(mid_face_ids), 'long_name', 'the face ids')
+      ierr = nf90_put_att(ncid, meshids%varids(mid_face_ids), 'mesh', prefix)
+   end if
+
+   ierr = nf90_enddef(ncid)
+ 
+end function ug_def_mesh_ids
 
 ! Creates a mesh_topology_contact variable for storing links between meshes.
 function ug_def_mesh_contact(ncid, contactids, linkmeshname, ncontacts, idmesh1, idmesh2, locationType1Id, locationType2Id) result(ierr)

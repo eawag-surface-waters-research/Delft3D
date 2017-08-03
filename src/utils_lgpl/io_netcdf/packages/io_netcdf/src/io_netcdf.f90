@@ -150,6 +150,10 @@ public :: ionc_get_network_name
 public :: ionc_count_mesh_ids_from_network_id_ugrid
 public :: ionc_get_mesh_ids_from_network_id_ugrid
 public :: ionc_get_network_id_from_mesh_id_ugrid
+! define/put/read mesh ids
+public :: ionc_def_mesh_ids_ugrid
+public :: ionc_put_var_chars
+public :: ionc_get_var_chars
 
 public :: ionc_getfullversionstring_io_netcdf
 
@@ -765,7 +769,7 @@ function ionc_inq_varid_by_standard_name(ioncid, meshid, iloctype, stdname, vari
 end function ionc_inq_varid_by_standard_name
 
 
-!> Gets the values for a named variable in the specified dataset on the specified mesh.
+!> Gets the numerical values for a named variable in the specified dataset on the specified mesh.
 !! The location type allows to select the specific topological mesh location.
 !! (UGRID-compliant, so UG_LOC_FACE/EDGE/NODE/ALL2D)
 function ionc_get_var_1D_EightByteReal(ioncid, meshid, iloctype, varname, values, fillvalue) result(ierr) ! TODO (?): AvD: support start, count, stride, map
@@ -806,6 +810,36 @@ function ionc_get_var_1D_EightByteReal(ioncid, meshid, iloctype, varname, values
 end function ionc_get_var_1D_EightByteReal
 
 
+!> Gets the characters values for a named variable in the specified dataset on the specified mesh.
+!! The type is not needed because the variable is retrived from its full name
+function ionc_get_var_chars(ioncid, meshid, varname, values) result(ierr) 
+   integer,             intent(in)          :: ioncid         !< The IONC data set id.
+   integer,             intent(in)          :: meshid         !< The mesh id in the specified data set.
+   character(len=*),    intent(in)          :: varname        !< The name of the variable to be found. Should be without any "meshnd_" prefix.
+   character(len=*),    intent(inout)       :: values(:)      !< Array to store the values in.
+   integer                                  :: ierr           !< Result status, ionc_noerr if successful.
+
+   integer :: varid
+
+   ierr = ionc_inq_varid(ioncid, meshid, varname, varid)
+   if (ierr /= ionc_noerr) then
+      goto 999
+   end if
+
+   ierr = nf90_get_var(datasets(ioncid)%ncid, varid, values)
+   if (ierr /= nf90_noerr) then
+      goto 999
+   end if
+
+   ierr = UG_NOERR
+   return ! Return with success
+
+999 continue
+    ! Some error (status was set earlier)
+
+end function ionc_get_var_chars
+
+
 !> Puts the values for a named variable into the specified dataset on the specified mesh.
 !! NOTE: Assumes that the variable already exists in the file (i.e., needs no def_var anymore).
 !! The location type allows to select the specific topological mesh location.
@@ -841,6 +875,35 @@ function ionc_put_var_1D_EightByteReal(ioncid, meshid, iloctype, varname, values
     ! Some error (status was set earlier)
 
 end function ionc_put_var_1D_EightByteReal
+
+!> Puts the character values for a named variable into the specified dataset on the specified mesh.
+function ionc_put_var_chars(ioncid, meshid, varname, values) result(ierr)
+
+    integer,             intent(in)    :: ioncid           !< The IONC data set id.
+    integer,             intent(in)    :: meshid           !< The mesh id in the specified data set.
+    character(len=*),    intent(in)    :: varname          !< The name of the variable to be found. Should be without any "meshnd_" prefix.
+    character(len=*),    intent(in)    :: values(:)        !< Array with the charter values to be written.
+    integer                            :: ierr, varid      !< Result status, ionc_noerr if successful.
+
+    ierr = UG_SOMEERR
+   ierr = ionc_inq_varid(ioncid, meshid, varname, varid)
+
+   if (ierr /= ionc_noerr) then
+      goto 999
+   end if
+
+   ierr = nf90_put_var(datasets(ioncid)%ncid, varid, values)
+   if (ierr /= nf90_noerr) then
+      goto 999
+   end if
+
+   ierr = UG_NOERR
+   return ! Return with success
+
+999 continue
+    ! Some error (status was set earlier)
+
+end function ionc_put_var_chars
 
 
 !> Writes a complete mesh geometry
@@ -1359,7 +1422,7 @@ function ionc_create_1d_mesh_ugrid(ioncid, networkid, meshid, meshname, nmeshpoi
    character(len=*),intent(in) :: meshname 
    integer                     :: ierr
    
-   ! allocate add a meshids
+   !adds a meshids structure
    ierr = ug_add_mesh(datasets(ioncid)%ncid, datasets(ioncid)%ug_file, meshid)
    ! set the meshname
    datasets(ioncid)%ug_file%meshnames(meshid) = meshname
@@ -1367,6 +1430,17 @@ function ionc_create_1d_mesh_ugrid(ioncid, networkid, meshid, meshname, nmeshpoi
    ierr = ug_create_1d_mesh(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%netids(networkid), datasets(ioncid)%ug_file%meshids(meshid), meshname, nmeshpoints, nmeshedges)
   
 end function ionc_create_1d_mesh_ugrid
+
+
+function ionc_def_mesh_ids_ugrid(ioncid, meshid, locationType) result(ierr)
+
+   integer, intent(in)         :: ioncid, meshid, locationType
+   integer                     :: ierr
+
+   ierr = ug_def_mesh_ids(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid),datasets(ioncid)%ug_file%meshnames(meshid), locationType)
+
+end function ionc_def_mesh_ids_ugrid
+
 
 function ionc_write_1d_mesh_discretisation_points_ugrid(ioncid, networkid, branchidx, offset) result(ierr) 
 

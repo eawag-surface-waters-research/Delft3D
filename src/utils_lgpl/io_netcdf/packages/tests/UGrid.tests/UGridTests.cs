@@ -30,9 +30,7 @@ namespace UGrid.tests
 
         //dimension info
         private int nNodes = 4;
-
         private int nBranches = 3;
-
         private int nGeometry = 9;
 
         //node info
@@ -65,9 +63,10 @@ namespace UGrid.tests
         private int nmeshedges = 14;
 
         //mesh geometry
+        private int nmesh1dPoints = 10;
         private int[] branchidx = {1, 1, 1, 1, 2, 2, 2, 3, 3, 3};
-
         private double[] offset = {0.0, 2.0, 3.0, 4.0, 0.0, 1.5, 3.0, 0.0, 1.5, 3.0};
+        private string[] meshnodeids = { "node1_branch1", "node2_branch1", "node3_branch1", "node4_branch1", "node1_branch2", "node2_branch2", "node3_branch2", "node1_branch3", "node2_branch3", "node3_branch3" };
 
         //netcdf file specifications 
         private int iconvtype = 2;
@@ -90,7 +89,6 @@ namespace UGrid.tests
 
         // mesh2d
         private int numberOf2DNodes = 5;
-
         private int numberOfFaces = 2;
         private int numberOfMaxFaceNodes = 4;
         private double[] mesh2d_nodesX = {0, 10, 15, 10, 5};
@@ -289,6 +287,18 @@ namespace UGrid.tests
                     Assert.That(rc_mesh1indexes[i], Is.EqualTo(mesh1indexes[i]));
                     Assert.That(rc_mesh2indexes[i], Is.EqualTo(mesh2indexes[i]));
                 }
+
+                //6. Get the written nodes ids
+                StringBuilder varname = new StringBuilder("node_ids");
+                IoNetcdfLibWrapper.interop_charinfo[] nodeidsvalues = new IoNetcdfLibWrapper.interop_charinfo[nmesh1dPoints];
+
+                ierr = wrapper.ionc_get_var_chars(ref ioncid, ref meshid, varname, nodeidsvalues, ref nmesh1dPoints);
+                Assert.That(ierr, Is.EqualTo(0));
+                for (int i = 0; i < nmesh1dPoints; i++)
+                {
+                    string tmpstring = new string(nodeidsvalues[i].ids);
+                    Assert.That(tmpstring.Trim(), Is.EqualTo(meshnodeids[i]));
+                }
             }
             finally
             {
@@ -416,6 +426,24 @@ namespace UGrid.tests
                 //7. Write the mesh links
                 ierr = wrapper.ionc_put_mesh_contact(ref ioncid, ref linkmesh, ref c_mesh1indexes, ref c_mesh2indexes,
                     linksinfo, ref nlinks);
+                Assert.That(ierr, Is.EqualTo(0));
+
+                //8. Add node ids to the 1d mesh
+                int iconvtype = 1; 
+                ierr = wrapper.ionc_def_mesh_ids(ref ioncid, ref meshid, ref iconvtype);
+
+                //9. write the node ids to file
+                IoNetcdfLibWrapper.interop_charinfo[] meshnodeidsinfo = new IoNetcdfLibWrapper.interop_charinfo[nmesh1dPoints];
+
+                for (int i = 0; i < nmesh1dPoints; i++)
+                {
+                    tmpstring = meshnodeids[i];
+                    tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.idssize, ' ');
+                    meshnodeidsinfo[i].ids = tmpstring.ToCharArray();
+                }
+
+                StringBuilder varname = new StringBuilder("node_ids");
+                ierr = wrapper.ionc_put_var_chars(ref  ioncid, ref  meshid, varname, meshnodeidsinfo, ref nmesh1dPoints);
                 Assert.That(ierr, Is.EqualTo(0));
             }
             finally

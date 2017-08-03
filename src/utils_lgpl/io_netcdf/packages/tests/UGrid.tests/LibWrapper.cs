@@ -630,6 +630,15 @@ namespace UGrid.tests
         [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ionc_get_meshgeom_dim", CallingConvention = CallingConvention.Cdecl)]
         public static extern int ionc_get_meshgeom_dim_dll([In] ref int ioncid, [In] ref int meshid, [In, Out] ref meshgeomdim meshgeomdim);
 
+        [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ionc_def_mesh_ids", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ionc_def_mesh_ids_dll([In] ref int ioncid, [In] ref int meshid, [In] ref int iloctype);
+
+        [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ionc_put_var_chars", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ionc_put_var_chars_dll([In] ref int ioncid, [In] ref int meshid, [MarshalAs(UnmanagedType.LPStr)][In, Out] StringBuilder varname, [In] interop_charinfo[] values, [In] ref int nvalues);
+
+        [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ionc_get_var_chars", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ionc_get_var_chars_dll([In] ref int ioncid, [In] ref int meshid, [MarshalAs(UnmanagedType.LPStr)][In, Out] StringBuilder varname, [In, Out] interop_charinfo[] values, [In] ref int nvalues);
+
         #region Implementation of LibWrapper
 
         public bool ionc_adheresto_conventions(ref int ioncid, ref int iconvtype)
@@ -948,5 +957,21 @@ namespace UGrid.tests
         {
             return ionc_get_meshgeom_dim_dll(ref  ioncid, ref  meshid, ref meshgeomdim);
         }
+
+        public int ionc_def_mesh_ids(ref int ioncid, ref int meshid, ref int iconvtype)
+        {
+            return ionc_def_mesh_ids_dll(ref ioncid, ref meshid, ref iconvtype);
+        }
+
+        public int ionc_put_var_chars(ref int ioncid, ref int meshid, StringBuilder varname, interop_charinfo[] values, ref int nvalues)
+        {
+            return ionc_put_var_chars_dll(ref ioncid, ref meshid, varname, values, ref nvalues);
+        }
+
+        public int ionc_get_var_chars(ref int ioncid, ref int meshid, StringBuilder varname, interop_charinfo[] values, ref int nvalues)
+        {
+            return ionc_get_var_chars_dll(ref ioncid, ref meshid, varname, values, ref nvalues);
+        }
+   
     }
 }

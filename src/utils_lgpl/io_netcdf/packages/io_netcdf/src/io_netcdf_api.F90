@@ -518,7 +518,7 @@ function ionc_def_var_dll(ioncid, meshid, id_var, itype, iloctype, c_var_name, c
 end function ionc_def_var_dll
 
 
-!> Gets the values for a named variable in the specified dataset on the specified mesh.
+!> Gets the numerical values for a named variable in the specified dataset on the specified mesh.
 !! The location type allows to select the specific topological mesh location.
 !! (UGRID-compliant, so UG_LOC_FACE/EDGE/NODE/ALL2D)
 function ionc_get_var_1D_EightByteReal_dll(ioncid, meshid, iloctype, c_varname, c_values_ptr, nval, c_fillvalue) result(ierr) bind(C, name="ionc_get_var")
@@ -544,8 +544,31 @@ function ionc_get_var_1D_EightByteReal_dll(ioncid, meshid, iloctype, c_varname, 
 
 end function ionc_get_var_1D_EightByteReal_dll
 
+!> Gets the charater values for a named variable in the specified dataset on the specified mesh.
+function ionc_get_var_chars_dll(ioncid, meshid, c_varname, c_values_ptr, nval) result(ierr) bind(C, name="ionc_get_var_chars")
+!DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_var_chars_dll
+   integer,                intent(in)    :: ioncid                  !< The IONC data set id.
+   integer,                intent(in)    :: meshid                  !< The mesh id in the specified data set.
+   character(kind=c_char), intent(in)    :: c_varname(MAXSTRLEN)    !< The name of the variable to be found. Should be without any "meshnd_" prefix.
+   type(t_ug_charinfo),  intent(inout)   :: c_values_ptr(nval)      !< Pointer to the array of values
+   character(len=ug_idsLen)              :: values(nval)            !< Temporary array to store the read values
+   integer,                intent(in)    :: nval                    !< The number of values in the target array. TODO: AvD: remove this somehow, now only required to call c_f_pointer
+   integer                               :: i, ierr                 !< Result status, ionc_noerr if successful.
+   character(len=MAXSTRLEN)              :: varname
 
-!> Puts the values for a named variable into the specified dataset on the specified mesh.
+
+   ! Store the name
+   varname = char_array_to_string(c_varname, strlen(c_varname))
+
+   ierr = ionc_get_var_chars(ioncid, meshid, varname, values)
+   
+    do i=1,nval
+        c_values_ptr(i)%ids = values(i)        
+    end do
+
+end function ionc_get_var_chars_dll
+
+!> Puts the numerical values for a named variable into the specified dataset on the specified mesh.
 !! NOTE: Assumes that the variable already exists in the file (i.e., needs no def_var anymore).
 !! The location type allows to select the specific topological mesh location.
 !! (UGRID-compliant, so UG_LOC_FACE/EDGE/NODE/ALL2D)
@@ -571,6 +594,29 @@ function ionc_put_var_1D_EightByteReal_dll(ioncid, meshid, iloctype, c_varname, 
 
 end function ionc_put_var_1D_EightByteReal_dll
 
+!> Puts the charaters values for a named variable into the specified dataset on the specified mesh.
+function ionc_put_var_chars_dll(ioncid, meshid, c_varname, c_values_ptr, nval) result(ierr) bind(C, name="ionc_put_var_chars")
+!DEC$ ATTRIBUTES DLLEXPORT :: ionc_put_var_chars_dll
+
+   integer,                intent(in)    :: ioncid                  !< The IONC data set id.
+   integer,                intent(in)    :: meshid                  !< The mesh id in the specified data set.
+   character(kind=c_char), intent(in)    :: c_varname(MAXSTRLEN)    !< The name of the variable to be found. Should be without any "meshnd_" prefix.
+   integer,                intent(in)    :: nval                    !< The number of values in the target array.
+   type(t_ug_charinfo),    intent(in)    :: c_values_ptr(nval)      !< The array of character arrays, here passed using t_ug_charinfo type. In the future, we could use the field longnames to pass more charaters (e.g. the longnames/descriptions).  
+   character(len=ug_idsLen)              :: values(nval)            !< The array to write. 
+   character(len=MAXSTRLEN)              :: varname                 !< The variable name where the data are stored.
+   integer                               :: i, ierr                 !< Result status, ionc_noerr if successful.
+
+   !Decode the variable name
+   varname = char_array_to_string(c_varname, strlen(c_varname))
+
+   do i=1,nval
+       values(i) = c_values_ptr(i)%ids
+   end do
+
+   ierr = ionc_put_var_chars(ioncid, meshid, varname, values) 
+
+end function ionc_put_var_chars_dll
 
 ! TODO ******* DERIVED TYPE GIVEN BY C/C++/C#-PROGRAM
 !> Add the global attributes to a NetCDF file 
@@ -668,7 +714,7 @@ function ionc_write_1d_network_nodes_dll(ioncid,networkid, c_nodesX, c_nodesY, n
    
    integer(kind=c_int),     intent(in)    :: ioncid,networkid, nNodes
    type(c_ptr),             intent(in)    :: c_nodesX, c_nodesY 
-   type(t_ug_charinfo),  intent(in)       :: nodeinfo(nNodes)
+   type(t_ug_charinfo),     intent(in)    :: nodeinfo(nNodes)
    double precision, pointer              :: nodesX(:), nodesY(:)
    integer                                :: ierr, i 
    character(len=ug_idsLen)               :: nodeids(nNodes)
@@ -874,6 +920,15 @@ function ionc_create_1d_mesh_dll(ioncid, networkid, meshid, c_meshname, nmeshpoi
   
 end function ionc_create_1d_mesh_dll
 
+ 
+function ionc_def_mesh_ids_dll(ioncid, meshid, locationType) result(ierr) bind(C, name="ionc_def_mesh_ids")
+!DEC$ ATTRIBUTES DLLEXPORT :: ionc_def_mesh_ids_dll
+  integer(kind=c_int)   , intent(in)    ::  ioncid, meshid, locationType
+  integer                               ::  ierr
+
+  ierr = ionc_def_mesh_ids_ugrid(ioncid, meshid, locationType) 
+  
+end function ionc_def_mesh_ids_dll
 
 function ionc_write_1d_mesh_discretisation_points_dll(ioncid, meshid, c_branchidx, c_offset, nmeshpoints) result(ierr) bind(C, name="ionc_write_1d_mesh_discretisation_points")
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_write_1d_mesh_discretisation_points_dll
