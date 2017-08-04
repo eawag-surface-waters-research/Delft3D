@@ -101,7 +101,17 @@ if [ ! -f $configfile ]; then
     print_usage_info
 fi
 
-export OMP_NUM_THREADS=1
+# set the number of OpenMP threads equal to max(2,NumberOfPhysicalCores-2)
+if [ -z ${OMP_NUM_THREADS+x} ]; then 
+   export NumberOfPhysicalCores=`cat /proc/cpuinfo | grep "cpu cores" | uniq | awk -F: '{print $2}'` 
+   export OMP_NUM_THREADS=`expr $NumberOfPhysicalCores - 2`
+   if [ $OMP_NUM_THREADS -lt 2 ];then
+      export OMP_NUM_THREADS=2
+   fi
+   else echo "OMP_NUM_THREADS is already defined"
+fi
+echo "OMP_NUM_THREADS" is $OMP_NUM_THREADS
+
 export NSLOTS=`expr $NNODES \* $corespernode` 
 
 workdir=`pwd`
