@@ -2293,7 +2293,8 @@ module m_ec_provider
          !
          integer                                                 :: ierror                !< return value of NetCDF function calls
          integer                                                 :: idvar
-         integer                                                 :: ndims, idims          !< helper variables
+         integer                                                 :: ndims                 !< number of dimensions within NetCDF or for the current variable
+         integer                                                 :: idims                 !< helper variables
          integer                                                 :: ifgd, isgd            !< helper variables
          integer,                      dimension(:), allocatable :: dimids                !< ids of a variable's dimensions
          integer,                      dimension(:), allocatable :: coordids              !< helper variable
@@ -2429,7 +2430,7 @@ module m_ec_provider
          end select 
 
          ! ------------------------------------------------------------------------------------------------
-         ! Inquiry of the dimids and the varids of lon/lat/time coordinate accoriding to the CF-convetion
+         ! Inquiry of the dimids and the varids of lon/lat/time coordinate according to the CF-convention
          ! Lateron we can match the dimids to the dimids of the variable
 
          ! For now not sure yet if we need this call.

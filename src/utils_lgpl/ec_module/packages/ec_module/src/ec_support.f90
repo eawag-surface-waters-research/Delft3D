@@ -1022,17 +1022,17 @@ end subroutine ecInstanceListSourceItems
       integer, intent(out) :: lat_varid      !< One dimensional coordinate variable recognized as latitude
       integer, intent(out) ::   x_varid      !< One dimensional coordinate variable recognized as X
       integer, intent(out) ::   y_varid      !< One dimensional coordinate variable recognized as Y
-      integer, intent(out) ::   z_varid      !< One dimensional coordinate variable recognized as Y
+      integer, intent(out) ::   z_varid      !< One dimensional coordinate variable recognized as Z
       integer, intent(out) :: tim_varid      !< One dimensional coordinate variable recognized as time
       integer, intent(out) :: lon_dimid      !< Longitude dimension
       integer, intent(out) :: lat_dimid      !< Latitude dimension
       integer, intent(out) ::   x_dimid      !< X dimension
       integer, intent(out) ::   y_dimid      !< Y dimension
-      integer, intent(out) ::   z_dimid      !< Y dimension
+      integer, intent(out) ::   z_dimid      !< Z dimension
       integer, intent(out) :: tim_dimid      !< Time dimension
       integer :: ndim, nvar, ivar, nglobatts, unlimdimid, ierr
       integer :: dimids(1)
-      character(len=NF90_MAX_NAME)  :: units, axis
+      character(len=NF90_MAX_NAME)  :: units, axis, varname
 
       success = .False.
       lon_varid = -1
@@ -1064,15 +1064,19 @@ end subroutine ecInstanceListSourceItems
                case ('m','meters','km','kilometers')
                   axis=''
                   ierr = nf90_get_att(ncid, ivar, 'axis', axis)
-                  if (strcmpi(axis,'X')) then
+                  if (ierr /= 0) ierr = nf90_get_att(ncid, ivar, 'AXIS', axis) ! support 'axis' in upper case, lower case and camel case
+                  if (ierr /= 0) ierr = nf90_get_att(ncid, ivar, 'Axis', axis)
+
+                  if (ierr /= 0) then
+                      ierr = nf90_inquire_variable(ncid, ivar, name = varname)
+                      call setECmessage("attribute 'axis' not found for variable " // trim(varname))
+                  else if (strcmpi(axis,'X')) then
                      x_varid = ivar
                      x_dimid = dimids(1)
-                  end if
-                  if (strcmpi(axis,'Y')) then
+                  else if (strcmpi(axis,'Y')) then
                      y_varid = ivar
                      y_dimid = dimids(1)
-                  end if
-                  if (strcmpi(axis,'Z')) then
+                  else if (strcmpi(axis,'Z')) then
                      z_varid = ivar
                      z_dimid = dimids(1)
                   end if
