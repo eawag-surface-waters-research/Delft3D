@@ -274,11 +274,11 @@ extern "C" {
             (thisDimr->control->subBlocks[0].unit.component->dllGetCurrentTime) (&thisDimr->control->subBlocks[0].tCur);
          }
       }
-      catch (Exception & ex)
+      catch (Exception * ex)
       {
-         printf("#### ERROR: dimr initialize ABORT: %s\n", ex.message);
-         thisDimr->log->Write(INFO, thisDimr->my_rank, ex.message, thisDimr->configfile);
-         return ex.errorCode;
+         printf("#### ERROR: dimr initialize ABORT: %s\n", ex->message);
+         thisDimr->log->Write(INFO, thisDimr->my_rank, ex->message, thisDimr->configfile);
+         return ex->errorCode;
       }
       catch (...)
       {
@@ -310,11 +310,11 @@ extern "C" {
             (thisDimr->control->subBlocks[0].unit.component->dllGetCurrentTime) (&thisDimr->control->subBlocks[0].tCur);
          }
       }
-      catch (Exception & ex)
+      catch (Exception * ex)
       {
-         printf("#### ERROR: dimr update ABORT: %s\n", ex.message);
-         thisDimr->log->Write(INFO, thisDimr->my_rank, ex.message, thisDimr->configfile);
-         return ex.errorCode;
+         printf("#### ERROR: dimr update ABORT: %s\n", ex->message);
+         thisDimr->log->Write(INFO, thisDimr->my_rank, ex->message, thisDimr->configfile);
+         return ex->errorCode;
       }
       catch (...)
       {
@@ -356,11 +356,11 @@ extern "C" {
             fflush(stdout);
          }
       }
-      catch (Exception & ex)
+      catch (Exception * ex)
       {
-         printf("#### ERROR: dimr finalize ABORT: %s\n", ex.message);
-         thisDimr->log->Write(INFO, thisDimr->my_rank, ex.message, thisDimr->configfile);
-         return ex.errorCode;
+         printf("#### ERROR: dimr finalize ABORT: %s\n", ex->message);
+         thisDimr->log->Write(INFO, thisDimr->my_rank, ex->message, thisDimr->configfile);
+         return ex->errorCode;
       }
       catch (...)
       {
