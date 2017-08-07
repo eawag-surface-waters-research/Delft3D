@@ -309,15 +309,15 @@ void initialize_parallel(int argc, char *  argv [])
     if (use_mpi) {
         ierr = MPI_Init(&argc, &argv);
         if (ierr != 0) {
-            throw new Exception (true, "MPI_Init returns error code \"%d\"", ierr);
+            throw new Exception (true, Exception::ERR_MPI, "MPI_Init returns error code \"%d\"", ierr);
         }
         ierr = MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
         if (ierr != 0) {
-            throw new Exception (true, "MPI_Comm_rank returns error code \"%d\"", ierr);
+            throw new Exception (true, Exception::ERR_MPI, "MPI_Comm_rank returns error code \"%d\"", ierr);
         }
         ierr = MPI_Comm_size(MPI_COMM_WORLD, &numranks);
         if (ierr != 0) {
-            throw new Exception (true, "MPI_Comm_size returns error code \"%d\"", ierr);
+            throw new Exception (true, Exception::ERR_MPI, "MPI_Comm_size returns error code \"%d\"", ierr);
         }
         printf("#%d: Running parallel with %d partitions\n", my_rank, numranks);
         fflush(stdout);
@@ -417,7 +417,7 @@ void DimrExe::initialize (int     argc,
         switch (c) {
             case 'd': {
                 if (sscanf (optarg, "%i", &logLevel) != 1)
-                    throw new Exception (true, "Invalid log level (-d option)");
+                    throw new Exception (true, Exception::ERR_INVALID_INPUT, "Invalid log level (-d option)");
                 else
                     logLevel = min(max(logLevel,ALL),FATAL);
                 break;
@@ -431,7 +431,7 @@ void DimrExe::initialize (int     argc,
             case 'l': {
                 logFile = fopen (optarg, "w");
                 if (logFile == NULL)
-                    throw new Exception (true, "Cannot create log file \"%s\"", optarg);
+                    throw new Exception (true, Exception::ERR_OS, "Cannot create log file \"%s\"", optarg);
 
                 break;
             }
@@ -454,13 +454,13 @@ void DimrExe::initialize (int     argc,
             }
 
             default: {
-                throw new Exception (true, "Invalid command-line argument.  Execute \"%s -?\" for command-line syntax", this->exeName);
+                throw new Exception (true, Exception::ERR_INVALID_INPUT, "Invalid command-line argument.  Execute \"%s -?\" for command-line syntax", this->exeName);
             }
         }
     }
 
     if (argc - optind != 1) {
-        throw new Exception (true, "Improper usage.  Execute \"%s -?\" for command-line syntax", this->exeName);
+        throw new Exception (true, Exception::ERR_INVALID_INPUT,  "Improper usage.  Execute \"%s -?\" for command-line syntax", this->exeName);
     }
 
     this->clock = new Clock ();
@@ -548,63 +548,63 @@ void DimrExe::openLibrary (void) {
                 throw new Exception (true, "Cannot load component library \"%s\". Error: %s\n", this->library, err);
 #else
             if (GetLastError() == 193)
-                throw new Exception (true, "Cannot load component library \"%s\". Return code: %d\n    Most probably a 32bit - 64bit conflict.", this->library, GetLastError());
+                throw new Exception (true, Exception::ERR_OS, "Cannot load component library \"%s\". Return code: %d\n    Most probably a 32bit - 64bit conflict.", this->library, GetLastError());
             else
-                throw new Exception (true, "Cannot load component library \"%s\". Return code: %d", this->library, GetLastError());
+                throw new Exception (true, Exception::ERR_OS, "Cannot load component library \"%s\". Return code: %d", this->library, GetLastError());
 #endif
         }
 
         // Get entry point for set_logger
         BMI_DIMR_SET_LOGGER set_logger_entry = (BMI_DIMR_SET_LOGGER) GETPROCADDRESS(dllhandle, BmiDimrSetLogger);
         if (set_logger_entry == NULL) {
-            throw new Exception(true, "Cannot find function \"%s\" in library \"%s\". Return code: %d", BmiDimrSetLogger, this->library, GetLastError());
+            throw new Exception(true, Exception::ERR_METHOD_NOT_IMPLEMENTED, "Cannot find function \"%s\" in library \"%s\". Return code: %d", BmiDimrSetLogger, this->library, GetLastError());
         }
         (set_logger_entry)(this->log);
 
         // Collect BMI entry points
         this->dllInitialize = (BMI_INITIALIZE) GETPROCADDRESS (dllhandle, BmiInitializeEntryPoint);
         if (this->dllInitialize == NULL) {
-            throw new Exception (true, "Cannot find function \"%s\" in library \"%s\". Return code: %d", BmiInitializeEntryPoint, this->library, GetLastError());
+            throw new Exception (true, Exception::ERR_METHOD_NOT_IMPLEMENTED, "Cannot find function \"%s\" in library \"%s\". Return code: %d", BmiInitializeEntryPoint, this->library, GetLastError());
         }
 
         this->dllUpdate = (BMI_UPDATE) GETPROCADDRESS (dllhandle, BmiUpdateEntryPoint);
         if (this->dllUpdate == NULL) {
-            throw new Exception (true, "Cannot find function \"%s\" in library \"%s\". Return code: %d", BmiUpdateEntryPoint, this->library, GetLastError());
+            throw new Exception (true, Exception::ERR_METHOD_NOT_IMPLEMENTED, "Cannot find function \"%s\" in library \"%s\". Return code: %d", BmiUpdateEntryPoint, this->library, GetLastError());
         }
 
         this->dllFinalize = (BMI_FINALIZE) GETPROCADDRESS (dllhandle, BmiFinalizeEntryPoint);
         if (this->dllFinalize == NULL) {
-            throw new Exception (true, "Cannot find function \"%s\" in library \"%s\". Return code: %d", BmiFinalizeEntryPoint, this->library, GetLastError());
+            throw new Exception (true, Exception::ERR_METHOD_NOT_IMPLEMENTED, "Cannot find function \"%s\" in library \"%s\". Return code: %d", BmiFinalizeEntryPoint, this->library, GetLastError());
         }
 
         this->dllGetStartTime = (BMI_GETSTARTTIME) GETPROCADDRESS (dllhandle, BmiGetStartTimeEntryPoint);
         if (this->dllGetStartTime == NULL) {
-            throw new Exception (true, "Cannot find function \"%s\" in library \"%s\". Return code: %d", BmiGetStartTimeEntryPoint, this->library, GetLastError());
+            throw new Exception (true, Exception::ERR_METHOD_NOT_IMPLEMENTED, "Cannot find function \"%s\" in library \"%s\". Return code: %d", BmiGetStartTimeEntryPoint, this->library, GetLastError());
         }
 
         this->dllGetEndTime = (BMI_GETENDTIME) GETPROCADDRESS (dllhandle, BmiGetEndTimeEntryPoint);
         if (this->dllGetEndTime == NULL) {
-            throw new Exception (true, "Cannot find function \"%s\" in library \"%s\". Return code: %d", BmiGetEndTimeEntryPoint, this->library, GetLastError());
+            throw new Exception (true, Exception::ERR_METHOD_NOT_IMPLEMENTED, "Cannot find function \"%s\" in library \"%s\". Return code: %d", BmiGetEndTimeEntryPoint, this->library, GetLastError());
         }
 
         this->dllGetTimeStep = (BMI_GETTIMESTEP) GETPROCADDRESS (dllhandle, BmiGetTimeStepEntryPoint);
         if (this->dllGetStartTime == NULL) {
-            throw new Exception (true, "Cannot find function \"%s\" in library \"%s\". Return code: %d", BmiGetStartTimeEntryPoint, this->library, GetLastError());
+            throw new Exception (true, Exception::ERR_METHOD_NOT_IMPLEMENTED, "Cannot find function \"%s\" in library \"%s\". Return code: %d", BmiGetStartTimeEntryPoint, this->library, GetLastError());
         }
 
         this->dllGetCurrentTime = (BMI_GETCURRENTTIME) GETPROCADDRESS (dllhandle, BmiGetCurrentTimeEntryPoint);
         if (this->dllGetCurrentTime == NULL) {
-            throw new Exception (true, "Cannot find function \"%s\" in library \"%s\". Return code: %d", BmiGetCurrentTimeEntryPoint, this->library, GetLastError());
+            throw new Exception (true, Exception::ERR_METHOD_NOT_IMPLEMENTED, "Cannot find function \"%s\" in library \"%s\". Return code: %d", BmiGetCurrentTimeEntryPoint, this->library, GetLastError());
         }
 
         this->dllSetVar = (BMI_SETVAR) GETPROCADDRESS (dllhandle, BmiSetVarEntryPoint);
         if (this->dllSetVar == NULL) {
-            throw new Exception (true, "Cannot find function \"%s\" in library \"%s\". Return code: %d", BmiSetVarEntryPoint, this->library, GetLastError());
+            throw new Exception (true, Exception::ERR_METHOD_NOT_IMPLEMENTED, "Cannot find function \"%s\" in library \"%s\". Return code: %d", BmiSetVarEntryPoint, this->library, GetLastError());
         }
 
         this->dllGetVar = (BMI_GETVAR) GETPROCADDRESS (dllhandle, BmiGetVarEntryPoint);
         if (this->dllGetVar == NULL) {
-            throw new Exception (true, "Cannot find function \"%s\" in library \"%s\". Return code: %d", BmiGetVarEntryPoint, this->library, GetLastError());
+            throw new Exception (true, Exception::ERR_METHOD_NOT_IMPLEMENTED, "Cannot find function \"%s\" in library \"%s\". Return code: %d", BmiGetVarEntryPoint, this->library, GetLastError());
         }
 
 }
@@ -636,7 +636,7 @@ void DimrExe::freeLib (void) {
         SetLastError(0); /* clear error code */
         BOOL success = FreeLibrary(this->libHandle);
         if (success == 0 || (ierr = GetLastError()) != 0) {
-            throw new Exception (true, "Cannot free component library \"%s\". Return code: %d.", this->library, ierr);
+            throw new Exception (true, Exception::ERR_OS, "Cannot free component library \"%s\". Return code: %d.", this->library, ierr);
         }
 #endif
 
