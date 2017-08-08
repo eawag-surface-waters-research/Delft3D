@@ -116,7 +116,7 @@ XmlTree::XmlTree (
     char *buffer = new char[bufSize];
     while (fgets (buffer, bufSize, input) != NULL)
         if (XML_Parse (parser, buffer, strlen (buffer), 0) != XML_STATUS_OK)
-            throw new Exception (true, Exception::ERR_XML_PARSING, "XML parse error in configuration file");
+            throw Exception (true, Exception::ERR_XML_PARSING, "XML parse error in configuration file");
 
     XML_Parse (parser, buffer, 0, 1);
     XML_ParserFree (parser);
@@ -187,7 +187,7 @@ chardata (
     XmlTree ** curnode = (XmlTree **) userdata;
 
     if (len + CharDataLen >= sizeof CharDataBuffer)
-        throw new Exception (true, Exception::ERR_XML_PARSING, "XML charcter data block exceeds buffer size (%d bytes)", sizeof CharDataBuffer);
+        throw Exception (true, Exception::ERR_XML_PARSING, "XML charcter data block exceeds buffer size (%d bytes)", sizeof CharDataBuffer);
 
     memcpy (CharDataBuffer+CharDataLen, data, len);
     CharDataLen += len;
@@ -212,7 +212,7 @@ XmlTree::XmlTree (
 
     int pathlen = strlen (ppn) + strlen (name) + 2;
     if (pathlen > this->maxPathname)
-        throw new Exception (true, Exception::ERR_XML_PARSING," XML pathname for node \"%s\" is too long", name);
+        throw Exception (true, Exception::ERR_XML_PARSING," XML pathname for node \"%s\" is too long", name);
 
     this->name = new char [strlen (name) + 1];
     strcpy (this->name, name);
@@ -263,7 +263,7 @@ XmlTree::AddAttrib (
     ) {
 
     if (this->numAttrib >= this->maxAttrib)
-        throw new Exception (true, Exception::ERR_XML_PARSING, "XML node %s has too many attributes", this->name);
+        throw Exception (true, Exception::ERR_XML_PARSING, "XML node %s has too many attributes", this->name);
 
     int i = this->numAttrib++;
     this->attribNames[i] = new char [strlen (name) + 1];
@@ -280,7 +280,7 @@ XmlTree::AddChild (
     ) {
 
     if (this->numChildren >= this->maxChildren)
-        throw new Exception (true, Exception::ERR_XML_PARSING, "XML node %s has too many children", this->name);
+        throw Exception (true, Exception::ERR_XML_PARSING, "XML node %s has too many children", this->name);
 
     this->children [this->numChildren++] = child;
     }
