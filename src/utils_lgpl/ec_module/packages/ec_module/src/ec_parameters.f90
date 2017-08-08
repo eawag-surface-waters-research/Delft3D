@@ -33,24 +33,24 @@
 !! @author edwin.bos@deltares.nl
 module m_ec_parameters
    use precision
-   
+
    implicit none
-   
+
    integer,  parameter :: maxNameLen           = 100
    integer,  parameter :: maxRecordLen         = 132
    integer,  parameter :: maxFileNameLen       = 256
    integer,  parameter :: maxFileReaderFiles   = 3
-   integer,  parameter :: maxFileUnits         = 1000
-   
+   integer,  parameter :: maxFileUnits         = 2000
+
    integer,  parameter :: EC_MISSING_VALUE = -999
    integer,  parameter :: ec_undef_int = -987
    real(fp), parameter :: ec_undef_fp = -9.87e+05_fp
    real(hp), parameter :: ec_undef_hp = -9.87e+10_hp
-   
+
    integer, parameter :: ec_second = 1
    integer, parameter :: ec_minute = 2
    integer, parameter :: ec_hour   = 3
-   
+
    !> Enumeration for tEcElementSet role
    integer, parameter :: elmSetType_undefined             = 0
    integer, parameter :: elmSetType_Cartesian             = 1
@@ -66,13 +66,13 @@ module m_ec_parameters
    integer, parameter :: elmSetType_samples               = 11
    integer, parameter :: elmSetType_spheric_ortho         = 12! A spherical element set the lat, lon of which are one dimension (no cross-product array)
    integer, parameter :: elmSetType_Cartesian_ortho       = 13! A carthesian element set the lat, lon of which are one dimension (no cross-product array)
-   
+
    !> Enumeration for tEcItem role
    integer, parameter :: itemType_undefined = 0
    integer, parameter :: itemType_source    = 1
    integer, parameter :: itemType_target    = 2
-   
-   
+
+
    !> enumeration for tEcFileReader filetypes
    integer, parameter :: provFile_undefined           =  0
    integer, parameter :: provFile_uniform             =  1  !< kx values each timestep 1 dim arr       uni
@@ -90,11 +90,11 @@ module m_ec_parameters
    integer, parameter :: provFile_fourier             = 12  !< period(hrs), ampl(m), phas(deg)
    integer, parameter :: provFile_grib                = 13  !< grib files from KNMI
    integer, parameter :: provFile_netcdf              = 14  !< NetCDF files
-   integer, parameter :: provFile_qhtable             = 15  !< 
+   integer, parameter :: provFile_qhtable             = 15  !<
    integer, parameter :: provFile_t3D                 = 16  !< temporary type for 3D salinity boundaries
    integer, parameter :: provFile_bc                  = 17  !< BC-format
-   integer, parameter :: provFile_fourier_cor         = 18  !< period(hrs), ampl(m), phas(deg) correction 
-   
+   integer, parameter :: provFile_fourier_cor         = 18  !< period(hrs), ampl(m), phas(deg) correction
+
    ! enumeration for access types
    integer, parameter :: accessType_undefined     = 0
    integer, parameter :: accessType_fileReader    = 1
@@ -120,12 +120,12 @@ module m_ec_parameters
 
    ! enumeration for time interpolation types
    integer, parameter :: timeint_lin                           = 1   !< linear
-   integer, parameter :: timeint_bto                           = 2   !< block-to 
-   integer, parameter :: timeint_bfrom                         = 3   !< block-from 
+   integer, parameter :: timeint_bto                           = 2   !< block-to
+   integer, parameter :: timeint_bfrom                         = 3   !< block-from
    integer, parameter :: timeint_lin_extrapol                  = 4   !< linear
    integer, parameter :: timeint_rainfall                      = 5   !< specific type of interpolation dividing the t1-value by t1-t0
                                                                      !< effectively from rainfall amount to intensity
- 
+
 
    ! enumeration for vertical interpolation types
    integer, parameter :: zinterpolate_unknown                   = 0 !< type is uninitialized
@@ -159,12 +159,12 @@ module m_ec_parameters
    integer, parameter :: convType_uniform_to_magnitude = 11 !< first time, then space
    integer, parameter :: convType_polytim = 12
    integer, parameter :: convType_spiderweb = 13
-   integer, parameter :: convType_netcdf = 14 
-   integer, parameter :: convType_qhtable = 15 
+   integer, parameter :: convType_netcdf = 14
+   integer, parameter :: convType_qhtable = 15
    integer, parameter :: convType_sigma   = 16
    integer, parameter :: convType_samples = 17
 
-   
+
    ! Error states, in addition to success=.true./.false. returns.
    integer, parameter :: EC_UNKNOWN_ERROR      = -1 !< Unknown error.
    integer, parameter :: EC_NOERR              = 0  !< Success
@@ -175,36 +175,36 @@ module m_ec_parameters
 
    ! COORDINATE SYSTEM that applies to all elementsets in this instance
    integer, parameter :: EC_COORDS_CARTESIAN  = 1  !< Cartesian coordinates (x,y)
-   integer, parameter :: EC_COORDS_SFERIC      = 2  !< Sferic coordinates (Lon,Lat) WGS84 
-   
+   integer, parameter :: EC_COORDS_SFERIC      = 2  !< Sferic coordinates (Lon,Lat) WGS84
+
     !------------------------ BC-header related parameters ----------------------------------
-    ! Function types 
-    integer, parameter :: BC_FUNC_TSERIES      = 1   !< timeseries     
+    ! Function types
+    integer, parameter :: BC_FUNC_TSERIES      = 1   !< timeseries
     integer, parameter :: BC_FUNC_HARMONIC     = 2   !< harmonic
     integer, parameter :: BC_FUNC_ASTRO        = 3   !< astronomic
     integer, parameter :: BC_FUNC_HARMOCORR    = 4   !< harmonic correction
     integer, parameter :: BC_FUNC_ASTROCORR    = 5   !< astronomic correction
     integer, parameter :: BC_FUNC_QHTABLE      = 6   !< qh-relation
-    integer, parameter :: BC_FUNC_TIM3D        = 7   !< t3d  timeseries 
+    integer, parameter :: BC_FUNC_TIM3D        = 7   !< t3d  timeseries
     integer, parameter :: BC_FUNC_CMP3D        = 8   !< t3d  components
     integer, parameter :: BC_FUNC_CONSTANT     = 9   !< timeseries with one constant value
 
-    ! Time interpolation type 
+    ! Time interpolation type
     integer, parameter :: BC_TIMEINT_LIN           = 1   !< linear
-    integer, parameter :: BC_TIMEINT_BTO           = 2   !< block-to 
-    integer, parameter :: BC_TIMEINT_BFROM         = 3   !< block-from 
+    integer, parameter :: BC_TIMEINT_BTO           = 2   !< block-to
+    integer, parameter :: BC_TIMEINT_BFROM         = 3   !< block-from
     integer, parameter :: BC_TIMEINT_LIN_EXTRAPOL  = 4   !< linear
 
-    ! Vertical position type 
-    integer, parameter :: BC_VPTYP_PERCBED     = 1   !< precentage from bed 
-    integer, parameter :: BC_VPTYP_ZDATUM      = 2   !< z above datum 
-    integer, parameter :: BC_VPTYP_ZDATUM_DOWN = 3   !< z below datum 
-    integer, parameter :: BC_VPTYP_BEDSURF     = 4   !< bedsurface 
-    integer, parameter :: BC_VPTYP_PERCSURF    = 5   !< percentage from surface 
-    integer, parameter :: BC_VPTYP_ZBED        = 6   !< z from bed 
-    integer, parameter :: BC_VPTYP_ZSURF       = 7   !< z from surface 
+    ! Vertical position type
+    integer, parameter :: BC_VPTYP_PERCBED     = 1   !< precentage from bed
+    integer, parameter :: BC_VPTYP_ZDATUM      = 2   !< z above datum
+    integer, parameter :: BC_VPTYP_ZDATUM_DOWN = 3   !< z below datum
+    integer, parameter :: BC_VPTYP_BEDSURF     = 4   !< bedsurface
+    integer, parameter :: BC_VPTYP_PERCSURF    = 5   !< percentage from surface
+    integer, parameter :: BC_VPTYP_ZBED        = 6   !< z from bed
+    integer, parameter :: BC_VPTYP_ZSURF       = 7   !< z from surface
 
-    ! Vertical interpolation type 
+    ! Vertical interpolation type
     integer, parameter :: BC_VERTINT_LIN       = 1   !< linear
     integer, parameter :: BC_VERTINT_LOG       = 2   !< log
     integer, parameter :: BC_VERTINT_BLOCK     = 3   !< block
@@ -212,7 +212,7 @@ module m_ec_parameters
     integer, parameter :: BC_FTYPE_ASCII       = 1   !< ASCII BC file
     integer, parameter :: BC_FTYPE_NETCDF      = 2   !< NETCDF BC file
     !------------------------ BC-header related parameters ----------------------------------
-   
+
 end module m_ec_parameters
 
 module m_ec_magic_number
