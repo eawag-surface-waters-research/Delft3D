@@ -545,7 +545,7 @@ void DimrExe::openLibrary (void) {
 
 #if defined (HAVE_CONFIG_H)
             if ((err = dlerror()) != NULL)
-                throw new Exception (true, "Cannot load component library \"%s\". Error: %s\n", this->library, err);
+                throw new Exception (true, Exception::ERR_OS, "Cannot load component library \"%s\". Error: %s\n", this->library, err);
 #else
             if (GetLastError() == 193)
                 throw new Exception (true, Exception::ERR_OS, "Cannot load component library \"%s\". Return code: %d\n    Most probably a 32bit - 64bit conflict.", this->library, GetLastError());

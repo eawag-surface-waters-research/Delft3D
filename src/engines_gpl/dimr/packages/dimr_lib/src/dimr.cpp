@@ -1687,7 +1687,7 @@ void Dimr::connectLibs (void) {
         if (   strchr (componentsList.components[i].library, '/' ) != NULL 
             || strchr (componentsList.components[i].library, '\\') != NULL 
             || strchr (componentsList.components[i].library, '.' ) != NULL) {
-            throw new Exception (true, "Invalid component library name \"%s\"\n", lib, -1);
+            throw new Exception (true, Exception::ERR_INVALID_INPUT, "Invalid component library name \"%s\"\n", lib, -1);
         }
 #else
         char * lib = new char[strlen (componentsList.components[i].library) + 4+1];
@@ -1719,7 +1719,7 @@ void Dimr::connectLibs (void) {
 
 #if defined (HAVE_CONFIG_H)
             if ((err = dlerror()) != NULL)
-                throw new Exception (true, "Cannot load component library \"%s\". Error: %s\n", lib, err);
+                throw new Exception (true, Exception::ERR_OS, "Cannot load component library \"%s\". Error: %s\n", lib, err);
 #else
             if (GetLastError() == 193)
                 throw new Exception (true, Exception::ERR_OS, "Cannot load component library \"%s\". Return code: %d\n    Most probably a 32bit - 64bit conflict.", lib, GetLastError());
@@ -1882,7 +1882,7 @@ void Dimr::freeLibs (void) {
         dlerror(); /* clear error code */
         int ierr = dlclose(componentsList.components[i].libHandle);
         if ((err = dlerror()) != NULL) {
-            throw new Exception (true, "Cannot free component library \"%s\". Error: %s\n",  componentsList.components[i].library, err);
+            throw new Exception (true, Exception::ERR_OS, "Cannot free component library \"%s\". Error: %s\n",  componentsList.components[i].library, err);
         }
 #else
         DWORD ierr;
