@@ -2888,8 +2888,7 @@ subroutine DioPltPutHisStepReals1D(plt, intTime, values, allowLarger)
     logical, optional , intent(in)             :: allowLarger ! size > nPar*nLoc allowed
 
     ! body
-    if (plt % ds % id <= 0) return   ! Happens when Initialize failed
-    
+
     if (plt % header % allowJumpBack) then
         call DioPltCheckJumpBack(plt, integerHisTime=intTime)
     endif
