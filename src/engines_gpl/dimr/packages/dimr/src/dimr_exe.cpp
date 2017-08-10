@@ -513,7 +513,7 @@ void DimrExe::openLibrary (void) {
 
 #if defined (OSX)
     // Macintosh:VERY SIMILAR TO LINUX
-    throw Exception (true, "ABORT: %s has not be ported to Apple Mac OS/X yet", this->exeName);
+    throw Exception (true, Exception::ERR_OS, "ABORT: %s has not be ported to Apple Mac OS/X yet", this->exeName);
 #endif
 #if defined (HAVE_CONFIG_H)
     char *err;
@@ -621,7 +621,7 @@ void DimrExe::freeLib (void) {
 
 #if defined (OSX)
     // Macintosh:VERY SIMILAR TO LINUX
-    throw Exception (true, "ABORT: %s has not be ported to Apple Mac OS/X yet", this->exeName);
+    throw Exception (true, Exception::ERR_OS, "ABORT: %s has not be ported to Apple Mac OS/X yet", this->exeName);
 #endif
 #if defined (HAVE_CONFIG_H)
     char *err;
@@ -632,7 +632,7 @@ void DimrExe::freeLib (void) {
         dlerror(); /* clear error code */
         int ierr = dlclose(this->libHandle);
         if ((err = dlerror()) != NULL) {
-            throw Exception (true, "Cannot free component library \"%s\". Error: %s\n",  this->library, err);
+            throw Exception (true, Exception::ERR_OS, "Cannot free component library \"%s\". Error: %s\n",  this->library, err);
         }
 #else
         DWORD ierr;

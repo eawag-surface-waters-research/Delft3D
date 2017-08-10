@@ -1668,7 +1668,7 @@ void Dimr::connectLibs (void) {
 
 #if defined (OSX)
     // Macintosh:VERY SIMILAR TO LINUX
-    throw Exception (true, "ABORT: %s has not be ported to Apple Mac OS/X yet", exeName);
+    throw Exception (true, Exception::ERR_OS, "ABORT: %s has not be ported to Apple Mac OS/X yet", exeName);
 #endif
 #if defined (HAVE_CONFIG_H)
     char *err;
@@ -1770,7 +1770,7 @@ void Dimr::connectLibs (void) {
         }    
 //      If GetAttribute is optional in a lib, no need to throw an exception
 //      if (componentsList.components[i].dllGetStartTime == NULL) {
-//          throw Exception (true, "Cannot find function \"%s\" in library \"%s\". Return code: %d", BmiGetAttributeEntryPoint, lib, GetLastError());
+//          throw Exception (true,  Exception::ERR_METHOD_NOT_IMPLEMENTED, "Cannot find function \"%s\" in library \"%s\". Return code: %d", BmiGetAttributeEntryPoint, lib, GetLastError());
 //        }
 
 		if (   componentsList.components[i].type == COMP_TYPE_FM
@@ -1865,7 +1865,7 @@ void Dimr::freeLibs (void) {
 
 #if defined (OSX)
     // Macintosh:VERY SIMILAR TO LINUX
-    throw Exception (true, "ABORT: %s has not be ported to Apple Mac OS/X yet", exeName);
+    throw Exception (true, Exception::ERR_OS, "ABORT: %s has not be ported to Apple Mac OS/X yet", exeName);
 #endif
 #if defined (HAVE_CONFIG_H)
     char *err;
