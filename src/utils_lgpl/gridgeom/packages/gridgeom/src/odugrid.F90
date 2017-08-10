@@ -165,7 +165,7 @@ function odu_get_xy_coordinates(branchids, branchoffsets, geopointsX, geopointsY
    else
       meshXCoords(:) = cartMeshXCoords(:)
       meshYCoords(:) = cartMeshYCoords(:)
-      meshZCoords(:) = cartMeshZCoords(:)
+      ! meshZCoords(:) = cartMeshZCoords(:)  !  meshZCoords is never used and assignment causes runtime error
    endif
 
 end function odu_get_xy_coordinates
