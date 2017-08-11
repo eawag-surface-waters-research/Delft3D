@@ -279,6 +279,8 @@ module m_ec_converter
          integer  :: fmask(4) !< return value of findnm
          real(hp) :: fsum 
          type(tEcMask), pointer :: srcmask 
+         
+         logical :: Lincreasex, Lincreasey
          !
          success = .false.
          sourceElementSet => null()
@@ -323,14 +325,22 @@ module m_ec_converter
                if (associated(weight%weightFactors)) deallocate(weight%weightFactors)
                allocate(weight%weightFactors(4, n_points))
                weight%weightFactors = ec_undef_hp
+               
+!              determine if x and y are increasing
+               Lincreasex = ( (sourceElementSet%x(2) - sourceElementSet%x(1)) > 0)
+               Lincreasey = ( (sourceElementSet%y(2) - sourceElementSet%y(1)) > 0)
 
                select case (sourceElementSet%ofType)
                   case (elmSetType_spheric_ortho, elmSetType_Cartesian_ortho)
                      do i=1, n_points
+                     
+!                       assumption: x and y are increasing
                         nn = maxloc(sourceElementSet%x, mask=(sourceElementSet%x<=targetElementSet%x(i)))
                         mp = nn(1)
+                        if ( .not.Lincreasex ) mp = max(mp-1,1)
                         nn = maxloc(sourceElementSet%y, mask=(sourceElementSet%y<=targetElementSet%y(i)))
                         np = nn(1)
+                        if ( .not.Lincreasey ) np = max(np-1,1)
 
                         wx = (targetElementSet%x(i) - sourceElementSet%x(mp))/(sourceElementSet%x(mp+1) - sourceElementSet%x(mp)) 
                         wy = (targetElementSet%y(i) - sourceElementSet%y(np))/(sourceElementSet%y(np+1) - sourceElementSet%y(np)) 
