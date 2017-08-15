@@ -225,7 +225,11 @@ module m_ec_support
          minp = i
          ! Open the data file.
          open(minp, file = trim(filename), action = 'READ', iostat = istat)
-         if (istat == 0) success = .true.
+         if (istat == 0) then
+            success = .true.
+         else
+            call setECMessage("ERROR: ec_support::ecSupportOpenExistingFile: opening file " // trim(filename) // " failed")
+         endif
       end function ecSupportOpenExistingFile
    
       ! ==========================================================================
