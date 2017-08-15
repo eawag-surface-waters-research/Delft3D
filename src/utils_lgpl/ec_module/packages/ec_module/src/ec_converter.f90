@@ -2415,7 +2415,7 @@ module m_ec_converter
                            end do kloop2D
 
                            if ( jamissing>0 ) then
-                              targetValues(k) = targetMissing
+                              targetValues(j) = targetMissing
                            else
                               do jj=0,1
                                  do ii=0,1
