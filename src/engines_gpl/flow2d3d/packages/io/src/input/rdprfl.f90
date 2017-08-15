@@ -53,6 +53,7 @@ subroutine rdprfl(lunmd     ,lundia    ,nrrec     ,mdfrec    ,tstprt    , &
     use globaldata
     use netcdf
     use dfparall, only: parll
+    use string_module, only: str_lower
     !
     implicit none
     !
@@ -131,6 +132,7 @@ subroutine rdprfl(lunmd     ,lundia    ,nrrec     ,mdfrec    ,tstprt    , &
     !
     inputstring = ' '
     call prop_get(gdp%mdfile_ptr, '*', 'FLNcdf', inputstring)
+    call str_lower(inputstring)
     if (index(inputstring,'map') > 0) then
        gdp%iofiles(FILOUT_MAP)%filetype = FTYPE_NETCDF
        write (lundia, '(a)') '*** MESSAGE map-file format is NetCDF'
