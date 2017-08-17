@@ -24,7 +24,7 @@ namespace UGrid.tests
 
         //pointer to the loaded dll
         public static IntPtr m_libptr;
-        
+
         //network name
         private string networkName = "network";
 
@@ -34,21 +34,21 @@ namespace UGrid.tests
         private int nGeometry = 9;
 
         //node info
-        private double[] nodesX = {1.0, 5.0, 5.0, 8.0};
+        private double[] nodesX = { 1.0, 5.0, 5.0, 8.0 };
 
-        private double[] nodesY = {4.0, 4.0, 1.0, 4.0};
-        private string[] nodesids = {"node1", "node2", "node3", "node4"};
-        private string[] nodeslongNames = {"nodelong1", "nodelong2", "nodelong3", "nodelong4"};
-        private int[] sourcenodeid = {1, 3, 2};
-        private int[] targetnodeid = {2, 2, 4};
+        private double[] nodesY = { 4.0, 4.0, 1.0, 4.0 };
+        private string[] nodesids = { "node1", "node2", "node3", "node4" };
+        private string[] nodeslongNames = { "nodelong1", "nodelong2", "nodelong3", "nodelong4" };
+        private int[] sourcenodeid = { 1, 3, 2 };
+        private int[] targetnodeid = { 2, 2, 4 };
 
         //branches info
-        private double[] branchlengths = {4.0, 3.0, 3.0};
+        private double[] branchlengths = { 4.0, 3.0, 3.0 };
 
-        private int[] nbranchgeometrypoints = {3, 3, 3};
-        private string[] branchids = {"branch1", "branch2", "branch3"};
+        private int[] nbranchgeometrypoints = { 3, 3, 3 };
+        private string[] branchids = { "branch1", "branch2", "branch3" };
 
-        private string[] branchlongNames = {"branchlong1", "branchlong2", "branchlong3"};
+        private string[] branchlongNames = { "branchlong1", "branchlong2", "branchlong3" };
 
         //geometry info
         double[] geopointsX = { 1.0, 3.0, 5.0, 5.0, 5.0, 5.0, 5.0, 7.0, 8.0 };
@@ -64,8 +64,8 @@ namespace UGrid.tests
 
         //mesh geometry
         private int nmesh1dPoints = 10;
-        private int[] branchidx = {1, 1, 1, 1, 2, 2, 2, 3, 3, 3};
-        private double[] offset = {0.0, 2.0, 3.0, 4.0, 0.0, 1.5, 3.0, 0.0, 1.5, 3.0};
+        private int[] branchidx = { 1, 1, 1, 1, 2, 2, 2, 3, 3, 3 };
+        private double[] offset = { 0.0, 2.0, 3.0, 4.0, 0.0, 1.5, 3.0, 0.0, 1.5, 3.0 };
         private string[] meshnodeids = { "node1_branch1", "node2_branch1", "node3_branch1", "node4_branch1", "node1_branch2", "node2_branch2", "node3_branch2", "node1_branch3", "node2_branch3", "node3_branch3" };
 
         //netcdf file specifications 
@@ -81,19 +81,19 @@ namespace UGrid.tests
         private int linkmesh2 = 2;
         private int locationType1 = 1;
         private int locationType2 = 1;
-        private int[] mesh1indexes = {1, 2, 3};
-        private int[] mesh2indexes = {1, 2, 3};
-        private string[] linksids = {"link1", "link2", "link3"};
-        private string[] linkslongnames = {"linklong1", "linklong2", "linklong3"};
-        private int[] branch_order = { -1, -1, -1 }; 
+        private int[] mesh1indexes = { 1, 2, 3 };
+        private int[] mesh2indexes = { 1, 2, 3 };
+        private string[] linksids = { "link1", "link2", "link3" };
+        private string[] linkslongnames = { "linklong1", "linklong2", "linklong3" };
+        private int[] branch_order = { -1, -1, -1 };
 
         // mesh2d
         private int numberOf2DNodes = 5;
         private int numberOfFaces = 2;
         private int numberOfMaxFaceNodes = 4;
-        private double[] mesh2d_nodesX = {0, 10, 15, 10, 5};
-        private double[] mesh2d_nodesY = {0, 0, 5, 10, 5};
-        private double[,] mesh2d_face_nodes = {{1, 2, 5, -999}, {2, 3, 4, 5}};
+        private double[] mesh2d_nodesX = { 0, 10, 15, 10, 5 };
+        private double[] mesh2d_nodesY = { 0, 0, 5, 10, 5 };
+        private double[,] mesh2d_face_nodes = { { 1, 2, 5, -999 }, { 2, 3, 4, 5 } };
 
         //function to check mesh1d data
         private void check1dnetwork(int ioncid, int networkid, ref IoNetcdfLibWrapper wrapper)
@@ -249,9 +249,18 @@ namespace UGrid.tests
                 Assert.That(rnmeshpoints, Is.EqualTo(nmeshpoints));
 
                 //3. Get the coordinates of the mesh points
+                IoNetcdfLibWrapper.interop_charinfo[] nodeinfo = new IoNetcdfLibWrapper.interop_charinfo[nmesh1dPoints];
+
                 ierr = wrapper.ionc_read_1d_mesh_discretisation_points(ref ioncid, ref meshid, ref c_branchidx,
-                    ref c_offset, ref rnmeshpoints);
+                    ref c_offset, nodeinfo, ref rnmeshpoints);
                 Assert.That(ierr, Is.EqualTo(0));
+
+                for (int i = 0; i < nmesh1dPoints; i++)
+                {
+                    string tmpstring = new string(nodeinfo[i].ids);
+                    Assert.That(tmpstring.Trim(), Is.EqualTo(meshnodeids[i]));
+                }
+
                 int[] rc_branchidx = new int[rnmeshpoints];
                 double[] rc_offset = new double[rnmeshpoints];
                 Marshal.Copy(c_branchidx, rc_branchidx, 0, rnmeshpoints);
@@ -289,16 +298,16 @@ namespace UGrid.tests
                 }
 
                 //6. Get the written nodes ids
-                StringBuilder varname = new StringBuilder("node_ids");
-                IoNetcdfLibWrapper.interop_charinfo[] nodeidsvalues = new IoNetcdfLibWrapper.interop_charinfo[nmesh1dPoints];
+                //StringBuilder varname = new StringBuilder("node_ids");
+                //IoNetcdfLibWrapper.interop_charinfo[] nodeidsvalues = new IoNetcdfLibWrapper.interop_charinfo[nmesh1dPoints];
 
-                ierr = wrapper.ionc_get_var_chars(ref ioncid, ref meshid, varname, nodeidsvalues, ref nmesh1dPoints);
-                Assert.That(ierr, Is.EqualTo(0));
-                for (int i = 0; i < nmesh1dPoints; i++)
-                {
-                    string tmpstring = new string(nodeidsvalues[i].ids);
-                    Assert.That(tmpstring.Trim(), Is.EqualTo(meshnodeids[i]));
-                }
+                //ierr = wrapper.ionc_get_var_chars(ref ioncid, ref meshid, varname, nodeidsvalues, ref nmesh1dPoints);
+                //Assert.That(ierr, Is.EqualTo(0));
+                //for (int i = 0; i < nmesh1dPoints; i++)
+                //{
+                //    string tmpstring = new string(nodeidsvalues[i].ids);
+                //    Assert.That(tmpstring.Trim(), Is.EqualTo(meshnodeids[i]));
+                //}
             }
             finally
             {
@@ -400,8 +409,17 @@ namespace UGrid.tests
                 //5. Write the 1d mesh geometry
                 Marshal.Copy(branchidx, 0, c_branchidx, nmeshpoints);
                 Marshal.Copy(offset, 0, c_offset, nmeshpoints);
+                // Define the node ids
+                IoNetcdfLibWrapper.interop_charinfo[] meshnodeidsinfo = new IoNetcdfLibWrapper.interop_charinfo[nmesh1dPoints];
+                for (int i = 0; i < nmesh1dPoints; i++)
+                {
+                    tmpstring = meshnodeids[i];
+                    tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.idssize, ' ');
+                    meshnodeidsinfo[i].ids = tmpstring.ToCharArray();
+                }
+
                 ierr = wrapper.ionc_write_1d_mesh_discretisation_points(ref ioncid, ref meshid, ref c_branchidx,
-                    ref c_offset, ref nmeshpoints);
+                    ref c_offset, meshnodeidsinfo, ref nmeshpoints);
                 Assert.That(ierr, Is.EqualTo(0));
 
                 //6. Write links attributes
@@ -429,22 +447,22 @@ namespace UGrid.tests
                 Assert.That(ierr, Is.EqualTo(0));
 
                 //8. Add node ids to the 1d mesh
-                int iconvtype = 1; 
-                ierr = wrapper.ionc_def_mesh_ids(ref ioncid, ref meshid, ref iconvtype);
+                //int iconvtype = 1; 
+                //ierr = wrapper.ionc_def_mesh_ids(ref ioncid, ref meshid, ref iconvtype);
 
                 //9. write the node ids to file
-                IoNetcdfLibWrapper.interop_charinfo[] meshnodeidsinfo = new IoNetcdfLibWrapper.interop_charinfo[nmesh1dPoints];
+                //IoNetcdfLibWrapper.interop_charinfo[] meshnodeidsinfo = new IoNetcdfLibWrapper.interop_charinfo[nmesh1dPoints];
 
-                for (int i = 0; i < nmesh1dPoints; i++)
-                {
-                    tmpstring = meshnodeids[i];
-                    tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.idssize, ' ');
-                    meshnodeidsinfo[i].ids = tmpstring.ToCharArray();
-                }
-
-                StringBuilder varname = new StringBuilder("node_ids");
-                ierr = wrapper.ionc_put_var_chars(ref  ioncid, ref  meshid, varname, meshnodeidsinfo, ref nmesh1dPoints);
-                Assert.That(ierr, Is.EqualTo(0));
+                //for (int i = 0; i < nmesh1dPoints; i++)
+                //{
+                //    tmpstring = meshnodeids[i];
+                //    tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.idssize, ' ');
+                //    meshnodeidsinfo[i].ids = tmpstring.ToCharArray();
+                //}
+                //StringBuilder varname = new StringBuilder("node_ids");
+                //ierr = wrapper.ionc_put_var_chars(ref  ioncid, ref  meshid, varname, meshnodeidsinfo, ref nmesh1dPoints);
+                // define and write mesh ids
+                //Assert.That(ierr, Is.EqualTo(0));
             }
             finally
             {
@@ -466,7 +484,7 @@ namespace UGrid.tests
             IntPtr c_nbranchgeometrypoints = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nBranches);
             IntPtr c_geopointsX = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nGeometry);
             IntPtr c_geopointsY = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nGeometry);
-            IntPtr c_branch_order = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nBranches); 
+            IntPtr c_branch_order = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nBranches);
             try
             {
                 int ierr = -1;
@@ -712,7 +730,7 @@ namespace UGrid.tests
             //2. Now we create a new empty file where to save 1d and 2d meshes
             int targetioncid = -1; //file id  
             int targetmode = 1; //create in write mode
-            string target_path = TestHelper.TestDirectoryPath() +"/target.nc";
+            string target_path = TestHelper.TestDirectoryPath() + "/target.nc";
             TestHelper.DeleteIfExists(target_path);
             Assert.IsFalse(File.Exists(target_path));
 
@@ -868,4 +886,4 @@ namespace UGrid.tests
         }
     }
 }
-    
+

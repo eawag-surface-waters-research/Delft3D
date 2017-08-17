@@ -387,10 +387,11 @@ namespace UGrid.tests
         /// <param name="networkid">The network id (in)</param>
         /// <param name="c_branchidx">The branch id for each mesh point (in)</param>
         /// <param name="c_offset">The offset along the branch from the starting point (in)</param>
+        /// <param name="nodeinfo">The node info (in)</param>
         /// <param name="nmeshpoints">The number of mesh points (in)</param>
         /// <returns></returns>
         [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ionc_write_1d_mesh_discretisation_points", CallingConvention = CallingConvention.Cdecl)]
-        private static extern int ionc_write_1d_mesh_discretisation_points_dll([In] ref int ioncid, [In] ref int networkid, [In] ref IntPtr c_branchidx, [In] ref IntPtr c_offset, [In] ref int nmeshpoints);
+        private static extern int ionc_write_1d_mesh_discretisation_points_dll([In] ref int ioncid, [In] ref int networkid, [In] ref IntPtr c_branchidx, [In] ref IntPtr c_offset, interop_charinfo[] nodeinfo, [In] ref int nmeshpoints);
 
         /// <summary>
         /// Get the number of network nodes
@@ -482,7 +483,7 @@ namespace UGrid.tests
         /// <param name="nmeshpoints">The number of mesh points (in)</param>
         /// <returns></returns>
         [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ionc_read_1d_mesh_discretisation_points", CallingConvention = CallingConvention.Cdecl)]
-        private static extern int ionc_read_1d_mesh_discretisation_points_dll([In] ref int ioncid, [In] ref int networkid, [In, Out] ref IntPtr c_branchidx, [In, Out] ref IntPtr c_offset, [In] ref int nmeshpoints);
+        private static extern int ionc_read_1d_mesh_discretisation_points_dll([In] ref int ioncid, [In] ref int networkid, [In, Out] ref IntPtr c_branchidx, [In, Out] ref IntPtr c_offset, [In, Out]  interop_charinfo[] nodeinfo, [In] ref int nmeshpoints);
 
         /// <summary>
         /// Defines the contacts structure.
@@ -810,10 +811,11 @@ namespace UGrid.tests
         }
 
         public int ionc_write_1d_mesh_discretisation_points(ref int ioncid, ref int networkid, ref IntPtr c_branchidx,
-            ref IntPtr c_offset, ref int nmeshpoints)
+            ref IntPtr c_offset, interop_charinfo[]  nodeinfo, ref int nmeshpoints)
         {
-            return ionc_write_1d_mesh_discretisation_points_dll(ref ioncid, ref networkid, ref c_branchidx, ref c_offset, ref nmeshpoints);
+            return ionc_write_1d_mesh_discretisation_points_dll(ref ioncid, ref networkid, ref c_branchidx, ref c_offset, nodeinfo, ref nmeshpoints);
         }
+     
 
         public int ionc_get_1d_network_nodes_count(ref int ioncid, ref int networkid, ref int nNodes)
         {
@@ -859,10 +861,10 @@ namespace UGrid.tests
         }
 
         public int ionc_read_1d_mesh_discretisation_points(ref int ioncid, ref int networkid, ref IntPtr c_branchidx,
-            ref IntPtr c_offset, ref int nmeshpoints)
+            ref IntPtr c_offset, interop_charinfo[] nodeinfo, ref int nmeshpoints)
         {
             return ionc_read_1d_mesh_discretisation_points_dll(ref ioncid, ref networkid, ref c_branchidx,
-                ref c_offset, ref nmeshpoints);
+                ref c_offset, nodeinfo, ref nmeshpoints);
         }
 
         public int ionc_def_mesh_contact(ref int ioncid, ref int contactsmesh, string contactsmeshname, ref int ncontacts, ref int mesh1, ref int mesh2, ref int locationType1Id, ref int locationType2Id)

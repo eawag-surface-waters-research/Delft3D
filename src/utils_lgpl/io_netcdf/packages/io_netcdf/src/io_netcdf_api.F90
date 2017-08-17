@@ -918,6 +918,9 @@ function ionc_create_1d_mesh_dll(ioncid, networkid, meshid, c_meshname, nmeshpoi
    
   ierr = ionc_create_1d_mesh_ugrid(ioncid, networkid, meshid, meshname, nmeshpoints, nmeshedges) 
   
+  ! Define attributes and variables to store the mesh ids, UG_LOC_NODE = 1
+  ierr = ionc_def_mesh_ids_ugrid(ioncid, meshid, 1) 
+  
 end function ionc_create_1d_mesh_dll
 
  
@@ -927,21 +930,34 @@ function ionc_def_mesh_ids_dll(ioncid, meshid, locationType) result(ierr) bind(C
   integer                               ::  ierr
 
   ierr = ionc_def_mesh_ids_ugrid(ioncid, meshid, locationType) 
-  
+
 end function ionc_def_mesh_ids_dll
 
-function ionc_write_1d_mesh_discretisation_points_dll(ioncid, meshid, c_branchidx, c_offset, nmeshpoints) result(ierr) bind(C, name="ionc_write_1d_mesh_discretisation_points")
+function ionc_write_1d_mesh_discretisation_points_dll(ioncid, meshid, c_branchidx, c_offset, nodesinfo, nmeshpoints) result(ierr) bind(C, name="ionc_write_1d_mesh_discretisation_points")
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_write_1d_mesh_discretisation_points_dll
   integer(kind=c_int), intent(in)     :: ioncid, meshid, nmeshpoints  
   type(c_ptr), intent(in)             :: c_branchidx,c_offset
+  type(t_ug_charinfo),  intent(in)    :: nodesinfo(nmeshpoints)
   integer,pointer                     :: branchidx(:)
   double precision,pointer            :: offset(:)
-  integer                             :: ierr
+  character(len=ug_idsLen)            :: nodeids(nmeshpoints)
+  character(len=ug_idsLongNamesLen)   :: nodelongnames(nmeshpoints)
+  character(len=8)                    :: varname
+  integer                             :: ierr,i
   
   call c_f_pointer(c_branchidx, branchidx, (/ nmeshpoints /))
   call c_f_pointer(c_offset, offset, (/ nmeshpoints /))
   
   ierr = ionc_write_1d_mesh_discretisation_points_ugrid(ioncid, meshid, branchidx, offset) 
+
+  !get and write the node_ids
+  do i=1,nmeshpoints
+       nodeids(i)       = nodesinfo(i)%ids
+  end do
+  
+  !this is an hard-coded variable name for node ids of the network
+  varname='node_ids'
+  ierr = ionc_put_var_chars(ioncid, meshid, varname, nodeids) 
   
 end function ionc_write_1d_mesh_discretisation_points_dll
 
@@ -957,18 +973,29 @@ function ionc_get_1d_mesh_discretisation_points_count_dll(ioncid, meshid, nmeshp
 end function ionc_get_1d_mesh_discretisation_points_count_dll
 
 
-function ionc_read_1d_mesh_discretisation_points_dll(ioncid, meshid, c_branchidx, c_offset,nmeshpoints) result(ierr) bind(C, name="ionc_read_1d_mesh_discretisation_points")
+function ionc_read_1d_mesh_discretisation_points_dll(ioncid, meshid, c_branchidx, c_offset, nodesinfo, nmeshpoints) result(ierr) bind(C, name="ionc_read_1d_mesh_discretisation_points")
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_read_1d_mesh_discretisation_points_dll
   integer(kind=c_int), intent(in)   :: ioncid, meshid, nmeshpoints 
   type(c_ptr), intent(inout)        :: c_branchidx, c_offset
+  type(t_ug_charinfo),  intent(inout)  :: nodesinfo(nmeshpoints)
+  character(len=ug_idsLen)          :: nodeids(nmeshpoints)
   double precision,pointer          :: offset(:)
   integer,pointer                   :: branchidx(:)
-  integer                           :: ierr
+  character(len=8)                  :: varname
+  integer                           :: ierr,i
   
   call c_f_pointer(c_branchidx, branchidx, (/ nmeshpoints /))
   call c_f_pointer(c_offset, offset, (/ nmeshpoints /))
   
   ierr = ionc_read_1d_mesh_discretisation_points_ugrid(ioncid, meshid, branchidx, offset)
+  
+  !get the node ids
+  varname='node_ids'
+  ierr = ionc_get_var_chars(ioncid, meshid, varname, nodeids)
+  
+  do i=1,nmeshpoints
+     nodesinfo(i)%ids = nodeids(i)  
+  end do
   
 end function ionc_read_1d_mesh_discretisation_points_dll
 
