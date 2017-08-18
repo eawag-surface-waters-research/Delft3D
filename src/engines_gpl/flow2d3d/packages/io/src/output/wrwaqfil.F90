@@ -395,13 +395,11 @@
          call getfullversionstring_flow2d3d(meta%version)
          meta%modelname   = filnam(1:(len(trim(filnam))-1))
          
-         if (.not.parll) then
-            call wrwaqgeomcl( meta  , lundia, nmaxus , mmax  , kmax  , &
-                            nlb   , nub    , mlb   , mub   ,         &
-                            xcor  , ycor  , xz     , yz    , dp    , &
-                            kcs   , kcu   , kcv    , sferic, aggre , &
-                            isaggr, nto   , nambnd , mnbnd)
-         end if
+         call wrwaqgeomcl( meta  , lundia, nmaxus , mmax  , kmax  , &
+                           nlb   , nub    , mlb   , mub   ,         &
+                           xcor  , ycor  , xz     , yz    , dp    , &
+                           kcs   , kcu   , kcv    , sferic, aggre , &
+                           isaggr, nto   , nambnd , mnbnd)
 
 !           open all files for time dependent write
 !           WARNING: WAQ input files must be written using form=binary
