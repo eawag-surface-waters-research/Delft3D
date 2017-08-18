@@ -328,6 +328,7 @@ src/engines_gpl/dimr/packages/DimrTesting/Program.cs -text
 src/engines_gpl/dimr/packages/DimrTesting/Sobek3ModelWrapper.cs -text
 src/engines_gpl/dimr/packages/Makefile.am -text
 src/engines_gpl/dimr/packages/dimr/Makefile.am -text
+src/engines_gpl/dimr/packages/dimr/dimr_class_diagram.cd -text
 src/engines_gpl/dimr/packages/dimr/dimr_exe.vcxproj -text
 src/engines_gpl/dimr/packages/dimr/include/dimr_exe.h -text
 src/engines_gpl/dimr/packages/dimr/include/dimr_exe_version.h.svn -text
@@ -340,6 +341,7 @@ src/engines_gpl/dimr/packages/dimr/src/dimr_exe_version.cpp -text
 src/engines_gpl/dimr/packages/dimr/src/readme.txt -text
 src/engines_gpl/dimr/packages/dimr_lib/Makefile.am -text
 src/engines_gpl/dimr/packages/dimr_lib/dimr_lib.vcxproj -text
+src/engines_gpl/dimr/packages/dimr_lib/dimr_lib_class_diagram.cd -text
 src/engines_gpl/dimr/packages/dimr_lib/include/Makefile.am -text
 src/engines_gpl/dimr/packages/dimr_lib/include/bmi.h -text
 src/engines_gpl/dimr/packages/dimr_lib/include/clock.h -text
