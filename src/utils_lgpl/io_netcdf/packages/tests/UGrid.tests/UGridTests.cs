@@ -66,7 +66,12 @@ namespace UGrid.tests
         private int nmesh1dPoints = 10;
         private int[] branchidx = { 1, 1, 1, 1, 2, 2, 2, 3, 3, 3 };
         private double[] offset = { 0.0, 2.0, 3.0, 4.0, 0.0, 1.5, 3.0, 0.0, 1.5, 3.0 };
-        private string[] meshnodeids = { "node1_branch1", "node2_branch1", "node3_branch1", "node4_branch1", "node1_branch2", "node2_branch2", "node3_branch2", "node1_branch3", "node2_branch3", "node3_branch3" };
+
+        private string[] meshnodeids = { "node1_branch1", "node2_branch1", "node3_branch1", "node4_branch1", "node1_branch2",
+                                         "node2_branch2", "node3_branch2", "node1_branch3", "node2_branch3", "node3_branch3" };
+
+        private string[] meshnodelongnames = { "node1_branch1_long_name", "node2_branch1_long_name", "node3_branch1_long_name", "node4_branch1_long_name", "node1_branch2_long_name",
+                                               "node2_branch2_long_name", "node3_branch2_long_name", "node1_branch3_long_name", "node2_branch3_long_name", "node3_branch3_long_name" };
 
         //netcdf file specifications 
         private int iconvtype = 2;
@@ -259,6 +264,8 @@ namespace UGrid.tests
                 {
                     string tmpstring = new string(nodeinfo[i].ids);
                     Assert.That(tmpstring.Trim(), Is.EqualTo(meshnodeids[i]));
+                    tmpstring = new string(nodeinfo[i].longnames);
+                    Assert.That(tmpstring.Trim(), Is.EqualTo(meshnodelongnames[i]));
                 }
 
                 int[] rc_branchidx = new int[rnmeshpoints];
@@ -416,6 +423,9 @@ namespace UGrid.tests
                     tmpstring = meshnodeids[i];
                     tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.idssize, ' ');
                     meshnodeidsinfo[i].ids = tmpstring.ToCharArray();
+                    tmpstring = meshnodelongnames[i];
+                    tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.longnamessize, ' ');
+                    meshnodeidsinfo[i].longnames = tmpstring.ToCharArray();
                 }
 
                 ierr = wrapper.ionc_write_1d_mesh_discretisation_points(ref ioncid, ref meshid, ref c_branchidx,

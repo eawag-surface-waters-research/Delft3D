@@ -152,6 +152,9 @@ enumerator mid_facelinks                   !< Variable ID for face-to-face mappi
 enumerator mid_node_ids                    !< Variable ID for node ids (optional, can be -1).
 enumerator mid_edge_ids                    !< Variable ID for edge ids (optional, can be -1).
 enumerator mid_face_ids                    !< Variable ID for face ids (optional, can be -1).
+enumerator mid_node_longnames              !< Variable ID for node longnames (optional, can be -1).
+enumerator mid_edge_longnames              !< Variable ID for edge longnames (optional, can be -1).
+enumerator mid_face_longnames              !< Variable ID for face longnames (optional, can be -1).
 !Coordinate variables
 enumerator mid_nodex                       !< Coordinate variable ID for node x-coordinate.     
 enumerator mid_nodey                       !< Coordinate variable ID for node y-coordinate.   
@@ -1884,6 +1887,13 @@ function ug_init_mesh_topology(ncid, varid, meshids) result(ierr)
    ierr = att_to_varid(ncid,'node_ids', meshids%varids(mid_node_ids),varid) !< Variable ID for node ids
    ierr = att_to_varid(ncid,'edge_ids', meshids%varids(mid_edge_ids),varid) !< Variable ID for edge ids
    ierr = att_to_varid(ncid,'face_ids', meshids%varids(mid_face_ids),varid) !< Variable ID for face ids
+   
+   ! 
+   ! Get the longnames defined in nodes/edges/faces
+   !
+   ierr = att_to_varid(ncid,'node_long_names', meshids%varids(mid_node_longnames),varid) !< Variable ID for node ids
+   ierr = att_to_varid(ncid,'edge_long_names', meshids%varids(mid_edge_longnames),varid) !< Variable ID for edge ids
+   ierr = att_to_varid(ncid,'face_long_names', meshids%varids(mid_face_longnames),varid) !< Variable ID for face ids
 
 end function ug_init_mesh_topology
 
@@ -3275,22 +3285,44 @@ function ug_def_mesh_ids(ncid, meshids, meshname, locationType) result(ierr)
    if ( ierr /= UG_NOERR) then 
    ierr = nf90_def_dim(ncid, 'idstrlength', ug_idsLen, meshids%dimids(mdim_idstring))   
    endif
+   ierr = nf90_inq_dimid(ncid, 'longstrlength', meshids%dimids(mdim_longnamestring))
+   if ( ierr /= UG_NOERR) then 
+   ierr = nf90_def_dim(ncid, 'longstrlength', ug_idsLongNamesLen, meshids%dimids(mdim_longnamestring))   
+   endif
 
    if(locationType == UG_LOC_NODE ) then
+      !ids
       ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'node_ids',prefix//'_node_ids')
       ierr = nf90_def_var(ncid, prefix//'_node_ids', nf90_char, (/ meshids%dimids(mdim_idstring), meshids%dimids(mdim_node) /) , meshids%varids(mid_node_ids))
       ierr = nf90_put_att(ncid, meshids%varids(mid_node_ids), 'long_name', 'the node ids')
       ierr = nf90_put_att(ncid, meshids%varids(mid_node_ids), 'mesh', prefix)
+      !long_names
+      ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'node_long_names',prefix//'_node_long_names')
+      ierr = nf90_def_var(ncid, prefix//'_node_long_names', nf90_char, (/ meshids%dimids(mdim_longnamestring), meshids%dimids(mdim_node) /) , meshids%varids(mid_node_longnames))
+      ierr = nf90_put_att(ncid, meshids%varids(mid_node_longnames), 'long_name', 'the node long names')
+      ierr = nf90_put_att(ncid, meshids%varids(mid_node_longnames), 'mesh', prefix)
    else if (locationType == UG_LOC_EDGE ) then
+      !ids
       ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'edge_ids',prefix//'_edge_ids')
       ierr = nf90_def_var(ncid, prefix//'_edge_ids', nf90_char, (/ meshids%dimids(mdim_idstring), meshids%dimids(mdim_edge) /) , meshids%varids(mid_edge_ids))
       ierr = nf90_put_att(ncid, meshids%varids(mid_edge_ids), 'long_name', 'the edge ids')
       ierr = nf90_put_att(ncid, meshids%varids(mid_edge_ids), 'mesh', prefix)
+      !long names
+      ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'edge_long_names',prefix//'_edge_long_names')
+      ierr = nf90_def_var(ncid, prefix//'_edge_long_names', nf90_char, (/ meshids%dimids(mdim_longnamestring), meshids%dimids(mdim_edge) /) , meshids%varids(mid_edge_longnames))
+      ierr = nf90_put_att(ncid, meshids%varids(mid_edge_longnames), 'long_name', 'the edge long names')
+      ierr = nf90_put_att(ncid, meshids%varids(mid_edge_longnames), 'mesh', prefix)
    else if (locationType == UG_LOC_FACE ) then
+      !ids
       ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'face_ids',prefix//'_face_ids')
       ierr = nf90_def_var(ncid, prefix//'_face_ids', nf90_char, (/ meshids%dimids(mdim_idstring), meshids%dimids(mdim_face) /) , meshids%varids(mid_face_ids))
       ierr = nf90_put_att(ncid, meshids%varids(mid_face_ids), 'long_name', 'the face ids')
       ierr = nf90_put_att(ncid, meshids%varids(mid_face_ids), 'mesh', prefix)
+      !long names
+      ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'face_long_names',prefix//'_face_long_names')
+      ierr = nf90_def_var(ncid, prefix//'_face_long_names', nf90_char, (/ meshids%dimids(mdim_longnamestring), meshids%dimids(mdim_face) /) , meshids%varids(mid_face_longnames))
+      ierr = nf90_put_att(ncid, meshids%varids(mid_face_longnames), 'long_name', 'the face long names')
+      ierr = nf90_put_att(ncid, meshids%varids(mid_face_longnames), 'mesh', prefix)
    end if
 
    ierr = nf90_enddef(ncid)
