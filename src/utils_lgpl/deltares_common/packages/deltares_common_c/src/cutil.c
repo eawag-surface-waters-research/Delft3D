@@ -36,6 +36,11 @@
 
 
 #include "util_mf.h"
+#if !defined (WIN32)
+#include <sys/time.h>
+#include <sys/resource.h>
+#include <inttypes.h>
+#endif
 
 
 /*----- Function to determine with a path name is a directory or not.*/
@@ -334,7 +339,19 @@ CUTIL_MF_SETMAXSTDIO(
 int* max_size
 ) {
 #if !defined (WIN32)
-	return -1;
+    struct rlimit old, new;
+    
+    getrlimit(RLIMIT_NOFILE, &old);
+    new.rlim_max = old.rlim_max;
+    new.rlim_cur = *max_size;
+    if ( setrlimit(RLIMIT_NOFILE, &new) == 0)
+    {
+        return *max_size;
+    }
+    else
+    {
+        return -1;
+    }
 #else
     return _setmaxstdio(*max_size);
 #endif
