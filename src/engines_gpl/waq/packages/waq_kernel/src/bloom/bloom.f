@@ -158,7 +158,7 @@
 !  Update 28 oct 92: added DEP to argument list.
 !
       USOL = CSOL
-      CALL SETABC(XINIT,EXTB,EXTTOT,ZOOD,CSOL,DSOL,T,DEP,ID,NSET,SWBLSA)
+      CALL SETABC(XINIT,EXTB,EXTTOT,ZOOD,CSOL,DSOL,T,DEP,ID,NSET)
 !
 !   Test for (in)feasibility of the nutrient constraints in
 !   a run with a dynamic detritus computation.

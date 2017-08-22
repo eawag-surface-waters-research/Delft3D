@@ -39,8 +39,7 @@
 !  *          SUBROUTINE TO SET MATRIX A AND B                         *
 !  *********************************************************************
 !
-      SUBROUTINE SETABC(XINIT,EXTB,EXTTOT,ZOOD,CSOL,DSOL,T,DEP,ID,NSET,
-     1                  SWBLSA)
+      SUBROUTINE SETABC(XINIT,EXTB,EXTTOT,ZOOD,CSOL,DSOL,T,DEP,ID,NSET)
       IMPLICIT REAL*8 (A-H,O-Z)
       SAVE
       INCLUDE 'blmdim.inc'
@@ -55,7 +54,7 @@
       INCLUDE 'dynam.inc'
       INCLUDE 'ioblck.inc'
       REAL*8 XINIT(*),PMAX20(MT),TCORR(MT),SDMIXN(MT),ZOOD(0:MG)
-      INTEGER SWBLSA
+!      INTEGER SWBLSA
 !
 !  If this is the first time through the subroutine,
 !  then initiate A, B and C
@@ -186,20 +185,23 @@
 !  If RNUT(2,I)=1.0, remineralisation rate I =RNUT(1,I) * temperature
 !
       QMREM = 0.0
-      IF (SWBLSA .NE. 1) GO TO 170
-      DO 150 J=1,NUNUCO
-      IF (RNUT(2,J) .LT. 1.0D-6) THEN
-         RNUTRI=RNUT(1,J)+SEDRAT+FLUSH
-      ELSE
-         RNUTRI=RNUT(1,J)*T+SEDRAT+FLUSH
-      END IF
-      EXPNUT=DEXP(-RNUTRI*TSTEP*MI)
-      EXPNUT=EXPMUL*EXPNUT
-      REMEXP(J)=EXPNUT
-      REMINU(J)=RNUTRI
-      DO 140 K=1,NUSPEC
-  140 A(J,K)=AA(J,K)*(AVAILN(K)*RMORT(K)*(1.0-EXPNUT)+RNUTRI)/RNUTRI
-  150 CONTINUE
+!  From now on this will always be skipped, also in 'stand alone' mode, because
+!  the equilibrium detritus concentration was deducted twice (also in blprim.f)
+!
+!     IF (SWBLSA .NE. 1) GO TO 170
+!     DO 150 J=1,NUNUCO
+!     IF (RNUT(2,J) .LT. 1.0D-6) THEN
+!        RNUTRI=RNUT(1,J)+SEDRAT+FLUSH
+!     ELSE
+!        RNUTRI=RNUT(1,J)*T+SEDRAT+FLUSH
+!     END IF
+!     EXPNUT=DEXP(-RNUTRI*TSTEP*MI)
+!     EXPNUT=EXPMUL*EXPNUT
+!     REMEXP(J)=EXPNUT
+!     REMINU(J)=RNUTRI
+!     DO 140 K=1,NUSPEC
+! 140 A(J,K)=AA(J,K)*(AVAILN(K)*RMORT(K)*(1.0-EXPNUT)+RNUTRI)/RNUTRI
+! 150 CONTINUE
 !
 !  Calculate extinction coefficients
 !  Update nov 4 1992:
@@ -207,12 +209,12 @@
 !  to the bottom.
 !
 !
-      REMIT=DEXP(REMILI(1)*T-REMILI(2))
-      DO 160 K=1,NUSPEC
-        QMREM=AVAILN(K)/(REMIT+SEDRAT+FLUSH)
-        ATEMP=EKX(K)*(QMREM*RMORT(K)*DABS(SDMIX(K))+1.0)
-        DO 160 J=NUFILI,NUABCO
-  160     A(J,K)=ATEMP
+!     REMIT=DEXP(REMILI(1)*T-REMILI(2))
+!     DO 160 K=1,NUSPEC
+!       QMREM=AVAILN(K)/(REMIT+SEDRAT+FLUSH)
+!       ATEMP=EKX(K)*(QMREM*RMORT(K)*DABS(SDMIX(K))+1.0)
+!       DO 160 J=NUFILI,NUABCO
+! 160     A(J,K)=ATEMP
 !
 !  Set "B" values for nutrients by substracting the amount in
 !  zooplankton from the input values and correcting for deviations
