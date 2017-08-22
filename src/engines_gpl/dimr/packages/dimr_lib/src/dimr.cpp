@@ -1353,7 +1353,7 @@ void Dimr::scanUnits(XmlTree * rootXml) {
     couplersList.numCouplers     = 0;
     couplersList.couplers        = NULL;
     // Scan
-    for (int i = 0 ; i < rootXml->numChildren ; i++) {
+    for (int i = 0 ; i < rootXml->children.size(); i++) {
         if (strcmp(rootXml->children[i]->name, "component") == 0) {
             componentsList.numComponents++;
             if (componentsList.components == NULL) {
@@ -1544,7 +1544,7 @@ void Dimr::scanCoupler(XmlTree * xmlCoupler, dimr_coupler * newCoup) {
     // Items
     newCoup->numItems = 0;
     newCoup->items    = NULL;
-    for (int j = 0 ; j < xmlCoupler->numChildren ; j++) 
+    for (int j = 0 ; j < xmlCoupler->children.size(); j++)
     {
         if (strcmp(xmlCoupler->children[j]->name, "item") == 0) {
             // Create the item
@@ -1613,7 +1613,7 @@ void Dimr::scanControl(XmlTree * controlBlockXml, dimr_control_block * controlBl
     controlBlock->numSubBlocks = 0;
     controlBlock->subBlocks    = NULL;
     controlBlock->masterSubBlockId = -1;
-    for (int i = 0 ; i < controlBlockXml->numChildren ; i++) {
+    for (int i = 0 ; i < controlBlockXml->children.size(); i++) {
         if (   strcmp(controlBlockXml->children[i]->name, "parallel"  ) == 0
             || strcmp(controlBlockXml->children[i]->name, "start"     ) == 0
             || strcmp(controlBlockXml->children[i]->name, "startGroup") == 0

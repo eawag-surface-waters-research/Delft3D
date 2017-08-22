@@ -46,6 +46,7 @@
 
 using namespace std;
 #include <list>
+#include <vector>
 
 #include "exception.h"
 struct keyValueLL{
@@ -170,21 +171,17 @@ class XmlTree {
 	    );
 
     public:
-        static const int maxCharData = 100000;  // maximum size of an XML character data block
-        static const int maxAttrib   = 10;      // maximum number of attributes a start tag can have
-        static const int maxChildren = 100;     // maximum number of children a tag can have
-        static const int maxPathname = 256;     // maximum length of a full path name
+        static const int maxCharData = 1000000;  // maximum size of an XML character data block
+        static const int maxPathname = 2560;     // maximum length of a full path name
 
         XmlTree *   parent;
         char *      name;
         char *      pathname;
 
-        int         numAttrib;
-        char *      attribNames [maxAttrib];
-        char *      attribValues [maxAttrib];
+        vector<char *>   attribNames;
+        vector<char *>   attribValues;
 
-        int         numChildren;
-        XmlTree *   children [maxChildren];
+        vector<XmlTree *>   children;
 
         char *      charData;
         int         charDataLen;
