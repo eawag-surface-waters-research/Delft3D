@@ -428,6 +428,14 @@ rem ======================
         set localstring="!compiler_dir!svml_dispmd.dll"
         call :copyFile !!localstring! !dest_bin!!
     )
+
+    rem
+    rem Copy all VCR libraries since we don't know what VS version was used and all versions have unique names
+    rem
+    call :copyFile "third_party_open\vcredist\x86\Microsoft.VC100.CRT\msvcr100.dll"             !dest_bin!
+    call :copyFile "third_party_open\vcredist\x86\Microsoft.VC110.CRT\msvcr110.dll"             !dest_bin!
+    call :copyFile "third_party_open\vcredist\x86\Microsoft.VC120.CRT\msvcr120.dll"             !dest_bin!
+
 goto :endproc
 
 
