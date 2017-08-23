@@ -420,6 +420,7 @@ rem ======================
     call :copyFile "third_party_open\vcredist\x64\Microsoft.VC100.CRT\msvcr100.dll"             !dest_bin!
     call :copyFile "third_party_open\vcredist\x64\Microsoft.VC110.CRT\msvcr110.dll"             !dest_bin!
     call :copyFile "third_party_open\vcredist\x64\Microsoft.VC120.CRT\msvcr120.dll"             !dest_bin!
+    call :copyFile "third_party_open\microsoft_redist\vs2015\vcruntime140.dll"                  !dest_bin!
 
 goto :endproc
 
