@@ -824,7 +824,7 @@ contains
          ! c is the identity of which coordinate has the greatest spread.
          !
          
-         if (res%box(c)%upper == res%box(c)%lower) then
+         if (.false.) then
             ! select exact median to have fully balanced tree.
             m = (l+u)/2
             call select_on_coordinate(tp%the_data,tp%ind,c,m,l,u)
@@ -834,7 +834,7 @@ contains
             ! who says this helps in some degenerate cases, or 
             ! actual arithmetic average. 
             !
-            if (.false.) then
+            if (.true.) then
                ! actually compute average
                average = sum(tp%the_data(c,tp%ind(l:u))) / real(u-l+1,kdkind)
             else
