@@ -630,13 +630,14 @@ end function ionc_get_edge_faces
 
 !> Gets the edge_nodes connectivity table for all edges in the specified mesh.
 !! The output edge_nodes array is supposed to be of exact correct size already.
-function ionc_get_edge_nodes(ioncid, meshid, edge_nodes) result(ierr)
+function ionc_get_edge_nodes(ioncid, meshid, edge_nodes, start_index) result(ierr)
    integer, intent(in)    :: ioncid  !< The IONC data set id.
    integer, intent(in)    :: meshid  !< The mesh id in the specified data set.
    integer, intent(  out) :: edge_nodes(:,:)  !< Array to the face-node connectivity table.
    integer                :: ierr  !< Result status, ionc_noerr if successful.
+   integer                :: start_index !< The requested start index   
 
-   ierr = ug_get_edge_nodes(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), edge_nodes)   
+   ierr = ug_get_edge_nodes(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), edge_nodes, start_index)   
 end function ionc_get_edge_nodes
 
 !> Gets the x,y coordinates (representative centre) for all faces in a single mesh from a data set.

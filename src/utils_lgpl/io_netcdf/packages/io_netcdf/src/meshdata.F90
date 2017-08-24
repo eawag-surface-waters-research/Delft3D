@@ -50,6 +50,7 @@ type t_ug_meshgeom
    integer            :: layertype          !< Type of vertical layer definition (only if numlayer >= 1), one of LAYERTYPE_* parameters.
    integer            :: nt_nbranches       !< Number of branches
    integer            :: nt_ngeometry       !< Number of geometrical points
+   integer            :: start_index        !< The base index of the arrays
 
    integer,      pointer :: edge_nodes(:,:) !< Edge-to-node mapping array.
    integer,      pointer :: face_nodes(:,:) !< Face-to-node mapping array.
@@ -94,6 +95,7 @@ type c_t_ug_meshgeomdim
    integer(kind=c_int)      :: layertype          !< Type of vertical layer definition (only if numlayer >= 1), one of LAYERTYPE_* parameters.
    integer(kind=c_int)      :: nt_nbranches       !< Number of branches
    integer(kind=c_int)      :: nt_ngeometry       !< Number of geometry points
+   integer(kind=c_int)      :: start_index        !< The base index of the arrays
    
 end type c_t_ug_meshgeomdim
 
@@ -302,7 +304,8 @@ function convert_cptr_to_meshgeom(c_meshgeom, c_meshgeomdim, meshgeom) result(ie
    meshgeom%numlayer = c_meshgeomdim%numlayer          
    meshgeom%layertype = c_meshgeomdim%layertype     
    meshgeom%nt_nbranches = c_meshgeomdim%nt_nbranches        
-   meshgeom%nt_ngeometry = c_meshgeomdim%nt_ngeometry  
+   meshgeom%nt_ngeometry = c_meshgeomdim%nt_ngeometry 
+   meshgeom%start_index = c_meshgeomdim%start_index
   
    ierr = 0
    ! to finish

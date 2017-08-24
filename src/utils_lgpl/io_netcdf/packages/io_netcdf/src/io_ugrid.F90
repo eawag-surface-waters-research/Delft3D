@@ -1059,7 +1059,7 @@ function ug_write_mesh_struct(ncid, meshids, crs, meshgeom) result(ierr)
    ierr = ug_write_mesh_arrays(ncid, meshids, meshgeom%meshName, meshgeom%dim, UG_LOC_ALL2D, meshgeom%numNode, meshgeom%numEdge, meshgeom%numFace, meshgeom%maxNumFaceNodes, &
                                meshgeom%edge_nodes, meshgeom%face_nodes, meshgeom%edge_faces, meshgeom%face_edges, meshgeom%face_links, meshgeom%nodex, meshgeom%nodey, & ! meshgeom%nodez, &
                                meshgeom%edgex, meshgeom%edgey, meshgeom%facex, meshgeom%facey, &
-                               crs, -999, -999d0, meshgeom%numlayer, meshgeom%layertype, meshgeom%layer_zs, meshgeom%interface_zs)
+                               crs, -999, -999d0, meshgeom%start_index, meshgeom%numlayer, meshgeom%layertype, meshgeom%layer_zs, meshgeom%interface_zs)
 end function ug_write_mesh_struct
 
 !> Writes a complete mesh geometry to an open NetCDF data set based on separate arrays with all mesh data.
@@ -1068,7 +1068,7 @@ end function ug_write_mesh_struct
 !! This only writes the mesh variables, not the actual data variables that are defined ON the mesh.
 function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, numEdge, numFace, maxNumNodesPerFace, &
                               edge_nodes, face_nodes, edge_faces, face_edges, face_links, xn, yn, xe, ye, xf, yf, &
-                              crs, imiss, dmiss, numLayer, layerType, layer_zs, interface_zs) result(ierr)
+                              crs, imiss, dmiss, start_index, numLayer, layerType, layer_zs, interface_zs) result(ierr)
 
    use m_alloc
 
@@ -1094,11 +1094,13 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    type(t_crs),      intent(in) :: crs      !< Coordinate reference system for input coordinates
    integer,          intent(in) :: imiss    !< Fill value used for integer values (e.g. in edge/face_nodes arrays).
    real(kind=dp),    intent(in) :: dmiss    !< Fill value used for double precision values (e.g. in face_x_bnd variable).
+   integer                             :: start_index     !< The base index of the provided arrays (0 if this function writes array from C/C++/C#, 1 for Fortran)
    integer, optional,       intent(in) :: numLayer  !< Number of vertical layers in the mesh. Optional.
    integer, optional,       intent(in) :: layerType !< Type of vertical layering in the mesh. One of LAYERTYPE_* parameters. Optional, only used if numLayer >= 1.
    real(kind=dp), optional, intent(in) :: layer_zs(:)     !< Vertical coordinates of the mesh layers' center (either z or sigma). Optional, only used if numLayer >= 1.
    real(kind=dp), optional, intent(in) :: interface_zs(:) !< Vertical coordinates of the mesh layers' interface (either z or sigma). Optional, only used if numLayer >= 1.
-   integer                      :: ierr     !< Result status (UG_NOERR==NF90_NOERR) if successful.
+   integer                             :: ierr            !< Result status (UG_NOERR==NF90_NOERR) if successful.
+   
       
    real(kind=dp), allocatable :: edgexbnd(:,:), edgeybnd(:,:), facexbnd(:,:), faceybnd(:,:)
    real(kind=dp), allocatable :: lonn(:), latn(:) !< lon,lat-coordinates of the mesh nodes.
@@ -1183,7 +1185,9 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
       ierr = nf90_put_att(ncid, meshids%varids(mid_edgenodes), 'mesh', trim(meshName))
       ierr = nf90_put_att(ncid, meshids%varids(mid_edgenodes), 'location', 'edge')
       ierr = nf90_put_att(ncid, meshids%varids(mid_edgenodes), 'long_name',  'Mapping from every edge to the two nodes that it connects')
-      ierr = nf90_put_att(ncid, meshids%varids(mid_edgenodes), 'start_index',  1)
+      if (start_index.ne.0) then
+            ierr = nf90_put_att(ncid, meshids%varids(mid_edgenodes), 'start_index',  start_index)
+      endif
       ierr = nf90_put_att(ncid, meshids%varids(mid_edgenodes), '_FillValue',  imiss)
    end if
    if (ug_checklocation(dataLocs, UG_LOC_EDGE)) then
@@ -1227,7 +1231,9 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
       ierr = nf90_put_att(ncid, meshids%varids(mid_facenodes), 'mesh', trim(meshName))
       ierr = nf90_put_att(ncid, meshids%varids(mid_facenodes), 'location', 'face')
       ierr = nf90_put_att(ncid, meshids%varids(mid_facenodes), 'long_name',  'Mapping from every face to its corner nodes (counterclockwise)')
-      ierr = nf90_put_att(ncid, meshids%varids(mid_facenodes), 'start_index',  1)
+      if (start_index.ne.0) then
+            ierr = nf90_put_att(ncid, meshids%varids(mid_facenodes), 'start_index',  start_index)
+      endif
       ierr = nf90_put_att(ncid, meshids%varids(mid_facenodes), '_FillValue',  imiss)
 
       ! Face edge connectivity.
@@ -1235,7 +1241,9 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
          ierr = nf90_def_var(ncid, prefix//'_face_edges', nf90_int, (/ meshids%dimids(mdim_maxfacenodes), meshids%dimids(mdim_face) /) , meshids%varids(mid_faceedges))
          ierr = nf90_put_att(ncid, meshids%varids(mid_faceedges), 'cf_role',     'face_edge_connectivity')
          ierr = nf90_put_att(ncid, meshids%varids(mid_faceedges), 'long_name',   'Mapping from every face to its edges (in counterclockwise order)')
-         ierr = nf90_put_att(ncid, meshids%varids(mid_faceedges), 'start_index', 1)
+         if (start_index.ne.0) then
+            ierr = nf90_put_att(ncid, meshids%varids(mid_faceedges), 'start_index', 1)
+         endif
          ierr = nf90_put_att(ncid, meshids%varids(mid_faceedges), '_FillValue',  imiss)
       end if
 
@@ -1245,7 +1253,9 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
          ierr = nf90_put_att(ncid, meshids%varids(mid_facelinks), 'cf_role',     'face_face_connectivity')
          ierr = nf90_put_att(ncid, meshids%varids(mid_facelinks), 'mesh', trim(meshName))
          ierr = nf90_put_att(ncid, meshids%varids(mid_facelinks), 'long_name',   'Mapping from every face to its neighboring faces (in counterclockwise order)')
-         ierr = nf90_put_att(ncid, meshids%varids(mid_facelinks), 'start_index', 1)
+         if (start_index.ne.0) then
+            ierr = nf90_put_att(ncid, meshids%varids(mid_facelinks), 'start_index', start_index)
+         endif
          ierr = nf90_put_att(ncid, meshids%varids(mid_facelinks), '_FillValue',  imiss)
       end if
 
@@ -1255,7 +1265,9 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
          ierr = nf90_def_var(ncid, prefix//'_edge_faces', nf90_int, (/ meshids%dimids(mdim_two), meshids%dimids(mdim_edge) /) , meshids%varids(mid_edgefaces))
          ierr = nf90_put_att(ncid, meshids%varids(mid_edgefaces), 'cf_role',     'edge_face_connectivity')
          ierr = nf90_put_att(ncid, meshids%varids(mid_edgefaces), 'long_name',   'Mapping from every edge to the two faces that it separates')
-         ierr = nf90_put_att(ncid, meshids%varids(mid_edgefaces), 'start_index', 1)
+         if (start_index.ne.0) then
+            ierr = nf90_put_att(ncid, meshids%varids(mid_edgefaces), 'start_index', start_index)
+         endif
          ierr = nf90_put_att(ncid, meshids%varids(mid_edgefaces), '_FillValue',  imiss)
       end if
    end if
@@ -2329,7 +2341,7 @@ function ug_get_meshgeom(ncid, meshids, meshgeom, includeArrays, netid) result(i
           ! Edges
           !
           call reallocP(meshgeom%edge_nodes, (/ 2, meshgeom%numedge /), keepExisting=.false.)
-          ierr = ug_get_edge_nodes(ncid, meshids, meshgeom%edge_nodes)
+          ierr = ug_get_edge_nodes(ncid, meshids, meshgeom%edge_nodes, meshgeom%start_index)
       endif
       
       if (meshgeom%dim == 1) then
@@ -2443,12 +2455,24 @@ end function ug_get_edge_faces
 
 !> Gets the edge-node connectivity table for all edges in the specified mesh.
 !! The output edge_nodes array is supposed to be of exact correct size already.
-function ug_get_edge_nodes(ncid, meshids, edge_nodes) result(ierr)
+function ug_get_edge_nodes(ncid, meshids, edge_nodes, startIndex) result(ierr)
    integer,           intent(in)  :: ncid             !< NetCDF dataset id, should be already open.
    type(t_ug_mesh),   intent(in)  :: meshids          !< Set of NetCDF-ids for all mesh geometry arrays.
    integer,           intent(out) :: edge_nodes(:,:)  !< Array to the edge-node connectivity table.
    integer                        :: ierr             !< Result status (UG_NOERR==NF90_NOERRif successful).
+   integer        ,   intent(in)  :: startIndex      !< The requested index
+   integer                        :: varStartIndex    !< The index stored in the netCDF file
 
+   !we check for the start_index, we do not know if the variable was written as 0 based
+   ierr = nf90_get_att(ncid, meshids%varids(mid_edgenodes),'start_index', varStartIndex)  
+   if (ierr .eq. UG_NOERR) then
+        ierr = ug_convert_start_index(edge_nodes(1,:), varStartIndex, startIndex)
+        ierr = ug_convert_start_index(edge_nodes(2,:), varStartIndex, startIndex)
+   else
+        ierr = ug_convert_start_index(edge_nodes(1,:), 0, startIndex)
+        ierr = ug_convert_start_index(edge_nodes(2,:), 0, startIndex)
+   endif
+   
    ierr = nf90_get_var(ncid, meshids%varids(mid_edgenodes), edge_nodes)
    ! Getting fillvalue is unnecessary because each edge should have a begin- and end-point
 end function ug_get_edge_nodes

@@ -298,9 +298,10 @@ end function ionc_get_edge_faces_dll
 
 
 !> Gets the edge-node connectivity table for all edges in the specified mesh.
-function ionc_get_edge_nodes_dll(ioncid, meshid, c_edge_nodes_ptr, nedge) result(ierr) bind(C, name="ionc_get_edge_nodes")
+function ionc_get_edge_nodes_dll(ioncid, meshid, c_edge_nodes_ptr, nedge, start_index) result(ierr) bind(C, name="ionc_get_edge_nodes")
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_edge_nodes_dll
    integer(kind=c_int), intent(in)    :: ioncid  !< The IONC data set id.
+   integer(kind=c_int), intent(in)    :: start_index !< The requested start index
    integer(kind=c_int), intent(in)    :: meshid  !< The mesh id in the specified data set.
    type(c_ptr),         intent(  out) :: c_edge_nodes_ptr !< Pointer to array for the edge-node connectivity table.
    integer(kind=c_int), intent(in)    :: nedge  !< The number of edges in the mesh.    
@@ -310,7 +311,7 @@ function ionc_get_edge_nodes_dll(ioncid, meshid, c_edge_nodes_ptr, nedge) result
 
    call c_f_pointer(c_edge_nodes_ptr, edge_nodes, (/ 2 , nedge /))
    
-   ierr = ionc_get_edge_nodes(ioncid, meshid, edge_nodes)
+   ierr = ionc_get_edge_nodes(ioncid, meshid, edge_nodes, start_index)
 end function ionc_get_edge_nodes_dll
 
 
@@ -1274,8 +1275,9 @@ function ionc_get_meshgeom_dim_dll(ioncid, meshid, c_meshgeomdim) result(ierr) b
    integer, intent(in)                         :: meshid  
    type(c_t_ug_meshgeomdim), intent(inout)     :: c_meshgeomdim 
    type(t_ug_meshgeom)                         :: meshgeom
-   integer                                     :: ierr
+   integer                                     :: ierr, startIndex
    
+   meshgeom%start_index = c_meshgeomdim%start_index
    ierr = ionc_get_meshgeom(ioncid, meshid, meshgeom)
    
    c_meshgeomdim%dim             = meshgeom%dim

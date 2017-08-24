@@ -213,7 +213,7 @@ namespace UGrid.tests
         /// <param name="nedge">The number of edges in the mesh.</param>
         /// <returns>Result status (IONC_NOERR if successful).</returns>
         [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ionc_get_edge_nodes", CallingConvention = CallingConvention.Cdecl)]
-        private static extern int ionc_get_edge_nodes_dll(ref int ioncid, ref int meshid, ref IntPtr c_edge_nodes_ptr, ref int nedge);
+        private static extern int ionc_get_edge_nodes_dll(ref int ioncid, ref int meshid, ref IntPtr c_edge_nodes_ptr, ref int nedge, ref int start_index);
 
         /// <summary>
         /// Gets the face-node connectvit table for all faces in the specified mesh.
@@ -717,9 +717,9 @@ namespace UGrid.tests
             return ionc_get_node_coordinates_dll(ref ioncid, ref meshid, ref c_xptr, ref c_yptr, ref nnode);
         }
 
-        public int ionc_get_edge_nodes(ref int ioncid, ref int meshid, ref IntPtr c_edge_nodes_ptr, ref int nedge)
+        public int ionc_get_edge_nodes(ref int ioncid, ref int meshid, ref IntPtr c_edge_nodes_ptr, ref int nedge, ref int startIndex)
         {
-            return ionc_get_edge_nodes_dll(ref ioncid, ref meshid, ref c_edge_nodes_ptr, ref nedge);
+            return ionc_get_edge_nodes_dll(ref ioncid, ref meshid, ref c_edge_nodes_ptr, ref nedge, ref startIndex);
         }
 
         public int ionc_get_face_nodes(ref int ioncid, ref int meshid, ref IntPtr c_face_nodes_ptr, ref int nface, ref int nmaxfacenodes, ref int fillvalue)
