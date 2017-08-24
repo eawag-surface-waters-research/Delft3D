@@ -2347,9 +2347,11 @@ function ug_get_meshgeom(ncid, meshids, meshgeom, includeArrays, netid) result(i
          allocate(branchid(meshgeom%nt_nbranches))
          allocate(branchlongnames(meshgeom%nt_nbranches))
          
-         ierr = ug_read_1d_mesh_discretisation_points(ncid, meshids, meshgeom%branchids, meshgeom%branchoffsets)
+         ierr = ug_get_1d_mesh_discretisation_points(ncid, meshids, meshgeom%branchids, meshgeom%branchoffsets, 1)
          ierr = ug_read_1d_network_branches_geometry(ncid, netid, meshgeom%geopointsX, meshgeom%geopointsY)
-         ierr = ug_read_1d_network_branches(ncid, netid, sourcenodeid, targetnodeid, branchid, meshgeom%branchlengths, branchlongnames, meshgeom%nbranchgeometrynodes)
+         
+         !read 1d network branches, 1 based indexing
+         ierr = ug_get_1d_network_branches(ncid, netid, sourcenodeid, targetnodeid, branchid, meshgeom%branchlengths, branchlongnames, meshgeom%nbranchgeometrynodes, 1)
          
          call reallocP(meshgeom%edge_nodes, (/ 2, meshgeom%numedge /), keepExisting=.false.)
          
@@ -3374,7 +3376,6 @@ function ug_def_mesh_contact(ncid, contactids, linkmeshname, ncontacts, idmesh1,
    ierr = nf90_def_var(ncid, trim(buffer), nf90_int, (/ contactids%dimids(cdim_ncontacts), contactids%dimids(cdim_two) /), contactids%varids(cid_contacttopo))
    ierr = nf90_put_att(ncid, contactids%varids(cid_contacttopo), 'cf_role'           , 'mesh_topology_contact')
    ierr = nf90_put_att(ncid, contactids%varids(cid_contacttopo), 'contact'           , 'mesh1: '//trim(locationType1)//' mesh2: '//trim(locationType2)) 
-   ierr = nf90_put_att(ncid, contactids%varids(cid_contacttopo), 'start_index'       , 1) 
    ierr = nf90_put_att(ncid, contactids%varids(cid_contacttopo), 'links_ids'         , prefix//'_links_ids')
    ierr = nf90_put_att(ncid, contactids%varids(cid_contacttopo), 'links_long_names'  , prefix//'_links_long_names') 
    
@@ -3411,9 +3412,9 @@ function ug_get_contacts_count(ncid, contactids, ncontacts) result(ierr)
 end function ug_get_contacts_count
 
 ! Writes the mesh_topology_contact mesh.
-function ug_put_mesh_contact(ncid, contactids, mesh1indexes, mesh2indexes, contactsids, contactslongnames) result(ierr)
+function ug_put_mesh_contact(ncid, contactids, mesh1indexes, mesh2indexes, contactsids, contactslongnames, startIndex) result(ierr)
 
-   integer, intent(in)                :: ncid 
+   integer, intent(in)                :: ncid, startIndex 
    type(t_ug_contacts), intent(in)    :: contactids
    integer, intent(in)                :: mesh1indexes(:),mesh2indexes(:)
    character(len=*), intent(in)       :: contactsids(:), contactslongnames(:)  
@@ -3429,17 +3430,22 @@ function ug_put_mesh_contact(ncid, contactids, mesh1indexes, mesh2indexes, conta
       contacts(i,1) = mesh1indexes(i)
       contacts(i,2) = mesh2indexes(i)
    end do
-   
-   ierr = nf90_put_var(ncid, contactids%varids(cid_contacttopo), contacts)  
-   ierr = nf90_put_var(ncid, contactids%varids(cid_contactids), contactsids)  
+
+   if (startIndex.ne.0) then
+       ierr = ug_convert_start_index(contacts(:,1), startIndex, 0)
+       ierr = ug_convert_start_index(contacts(:,2), startIndex, 0)
+   endif
+
+   ierr = nf90_put_var(ncid, contactids%varids(cid_contacttopo), contacts)
+   ierr = nf90_put_var(ncid, contactids%varids(cid_contactids), contactsids)
    ierr = nf90_put_var(ncid, contactids%varids(cid_contactlongnames), contactslongnames) 
 
 end function ug_put_mesh_contact
 
 ! Gets the indexses of the contacts and the ids and the descriptions of each link
-function ug_get_mesh_contact(ncid, contactids, mesh1indexes, mesh2indexes, contactsids, contactslongnames) result(ierr)
+function ug_get_mesh_contact(ncid, contactids, mesh1indexes, mesh2indexes, contactsids, contactslongnames, startIndex) result(ierr)
 
-   integer, intent(in)               :: ncid 
+   integer, intent(in)               :: ncid, startIndex 
    type(t_ug_contacts), intent(in)   :: contactids
    integer, intent(out)              :: mesh1indexes(:),mesh2indexes(:)
    character(len=*), intent(out)     :: contactsids(:), contactslongnames(:) 
@@ -3451,6 +3457,11 @@ function ug_get_mesh_contact(ncid, contactids, mesh1indexes, mesh2indexes, conta
    ierr = nf90_get_var(ncid, contactids%varids(cid_contacttopo), contacts) 
    ierr = nf90_get_var(ncid, contactids%varids(cid_contactids), contactsids)  
    ierr = nf90_get_var(ncid, contactids%varids(cid_contactlongnames), contactslongnames) 
+   
+   if (startIndex.ne.0) then
+        ierr = ug_convert_start_index(contacts(:,1), 0, startIndex)
+        ierr = ug_convert_start_index(contacts(:,2), 0, startIndex)
+   endif
    
    do i = 1, size(mesh1indexes)
       mesh1indexes(i) = contacts(i,1) 
@@ -3471,7 +3482,7 @@ function ug_write_1d_network_nodes(ncid,netids, nodesX, nodesY, nodeids, nodelon
    ierr = UG_SOMEERR
    !Put the NetCDF in write mode
    ierr = nf90_enddef(ncid)
-   
+      
    ierr = nf90_put_var(ncid, netids%varids(ntid_1dnodex), nodesX)
    ierr = nf90_put_var(ncid, netids%varids(ntid_1dnodey), nodesY)
    ierr = nf90_put_var(ncid, netids%varids(ntid_1dnodids), nodeids) 
@@ -3481,9 +3492,9 @@ end function ug_write_1d_network_nodes
 
 !> This function writes the branches information
 !> This function writes the branches information
-function ug_write_1d_network_branches(ncid,netids, sourceNodeId,targetNodeId, branchids, branchlengths, branchlongnames, nbranchgeometrynodes,nBranches) result(ierr)
+function ug_put_1d_network_branches(ncid,netids, sourceNodeId,targetNodeId, branchids, branchlengths, branchlongnames, nbranchgeometrynodes,nBranches, startIndex) result(ierr)
 
-   integer, intent(in)               ::ncid, nBranches
+   integer, intent(in)               ::ncid, nBranches, startIndex
    type(t_ug_network), intent(in)    :: netids !< Set of NetCDF-ids for all mesh geometry arrays
    integer,           intent(in)     ::sourceNodeId(:),targetNodeId(:)
    integer,           allocatable    ::sourcestargets(:)
@@ -3504,13 +3515,29 @@ function ug_write_1d_network_branches(ncid,netids, sourceNodeId,targetNodeId, br
        sourcestargets(k)=targetNodeId(n)
    end do
    
+   if (startIndex.ne.0) then
+        ierr = ug_convert_start_index(sourcestargets, startIndex, 0)
+   endif
+   
    ierr = nf90_put_var(ncid, netids%varids(ntid_1dedgenodes), sourcestargets)
    ierr = nf90_put_var(ncid, netids%varids(ntid_1dbranchids), branchids)  
    ierr = nf90_put_var(ncid, netids%varids(ntid_1dbranchlongnames), branchlongnames) 
    ierr = nf90_put_var(ncid, netids%varids(ntid_1dbranchlengths), branchlengths) 
    ierr = nf90_put_var(ncid, netids%varids(ntid_1dgeopointsperbranch), nbranchgeometrynodes) 
   
-   end function ug_write_1d_network_branches
+end function ug_put_1d_network_branches
+
+function ug_convert_start_index(sourcestargets, providedIndex, requestedIndex) result(ierr)
+    
+    integer, intent(inout) ::sourcestargets(:)
+    integer, intent(in)    ::providedIndex, requestedIndex
+    integer                ::shift, ierr
+    
+    shift = requestedIndex - providedIndex
+    sourcestargets= sourcestargets + shift
+    ierr = 0
+    
+end function 
    
 !> This function writes the branch order array
    function ug_put_1d_network_branchorder(ncid, netids, branchorder) result(ierr)
@@ -3541,25 +3568,32 @@ function ug_write_1d_network_branches_geometry(ncid,netids, geopointsX, geopoint
 end function ug_write_1d_network_branches_geometry
 
 !> This function writes the mesh points
-function ug_write_1d_mesh_discretisation_points(ncid, meshids, branchidx, offset) result(ierr)
+function ug_put_1d_mesh_discretisation_points(ncid, meshids, branchidx, offset, startIndex) result(ierr)
 
-   integer, intent(in)                :: ncid, branchidx(:)
+   integer, intent(in)                :: ncid, branchidx(:), startIndex
    double precision, intent(in)       :: offset(:)
    type(t_ug_mesh), intent(in)        :: meshids 
+   integer,          allocatable      :: shiftedBranchidx(:)
    integer                            :: ierr,nmeshpoints
 
    ierr = UG_SOMEERR
    ierr = nf90_enddef(ncid)
    
    ierr = nf90_inquire_dimension(ncid, meshids%dimids(mdim_node), len=nmeshpoints)
-   if(ierr /= UG_NOERR) then 
+   if(ierr /= UG_NOERR) then
        Call SetMessage(Level_Fatal, 'could not read the branch dimension')
-   end if 
-   
-   ierr = nf90_put_var(ncid, meshids%varids(mid_1dmeshtobranch), branchidx)
+   end if
+
+   allocate(shiftedBranchidx(size(branchidx)))
+   shiftedBranchidx = branchidx
+   if (startIndex.ne.0) then
+       ierr = ug_convert_start_index(shiftedBranchidx, startIndex, 0)
+   endif
+
+   ierr = nf90_put_var(ncid, meshids%varids(mid_1dmeshtobranch), shiftedBranchidx)
    ierr = nf90_put_var(ncid, meshids%varids(mid_1doffset), offset)
 
-end function ug_write_1d_mesh_discretisation_points
+end function ug_put_1d_mesh_discretisation_points
 
 !> This function gets the number of network nodes
 function ug_get_1d_network_nodes_count(ncid,netids, nNodes) result(ierr)
@@ -3638,9 +3672,9 @@ function ug_read_1d_network_nodes(ncid, netids, nodesX, nodesY, nodeids, nodelon
 end function ug_read_1d_network_nodes
 
 !> This function reads the network branches
-function ug_read_1d_network_branches(ncid, netids, sourcenodeid, targetnodeid, branchid, branchlengths, branchlongnames, nbranchgeometrypoints) result(ierr)
+function ug_get_1d_network_branches(ncid, netids, sourcenodeid, targetnodeid, branchid, branchlengths, branchlongnames, nbranchgeometrypoints, startIndex) result(ierr)
 
-   integer, intent(in)              :: ncid
+   integer, intent(in)              :: ncid, startIndex
    type(t_ug_network), intent(in)   :: netids 
    integer,intent(out)              :: sourcenodeid(:), targetnodeid(:),nbranchgeometrypoints(:) 
    real(kind=dp),intent(out)        :: branchlengths(:)
@@ -3650,11 +3684,17 @@ function ug_read_1d_network_branches(ncid, netids, sourcenodeid, targetnodeid, b
 
    nbranches = size(sourceNodeId,1)
    allocate(sourcestargets(nbranches * 2))
-   
+
    ierr = nf90_get_var(ncid, netids%varids(ntid_1dedgenodes), sourcestargets)
-   if(ierr /= UG_NOERR) then 
+   if(ierr /= UG_NOERR) then
        Call SetMessage(Level_Fatal, 'could not read the source and targets nodes of each branch in 1d network')
    end if 
+   
+   ! Convert 0 based to user request startIndex
+   if (startIndex.ne.0) then
+       ierr = ug_convert_start_index(sourcestargets, 0, startIndex)
+   endif
+   
    k = 0
    do n=1,nBranches
        k = k + 1
@@ -3683,7 +3723,7 @@ function ug_read_1d_network_branches(ncid, netids, sourcenodeid, targetnodeid, b
        Call SetMessage(Level_Fatal, 'could not read the geometry points of each branch in 1d network')
    end if 
    
-   end function ug_read_1d_network_branches
+   end function ug_get_1d_network_branches
    
 !> This function writes the branch order array
    function ug_get_1d_network_branchorder(ncid, netids, branchorder) result(ierr)
@@ -3736,15 +3776,20 @@ function ug_get_1d_mesh_discretisation_points_count(ncid, meshids, nmeshpoints) 
 end function ug_get_1d_mesh_discretisation_points_count
 
 !> This function reads the geometry information for the mesh points
-function ug_read_1d_mesh_discretisation_points(ncid, meshids, branchidx, offsets) result(ierr)
+function ug_get_1d_mesh_discretisation_points(ncid, meshids, branchidx, offsets, startIndex) result(ierr)
 
-   integer, intent(in)                      :: ncid
+   integer, intent(in)                      :: ncid, startIndex
    type(t_ug_mesh), intent(in)              :: meshids 
    real(kind=dp),   intent(out)             :: offsets(:)
    integer,intent(out)                      :: branchidx(:)
    integer                                  :: ierr
          
    ierr = nf90_get_var(ncid, meshids%varids(mid_1dmeshtobranch), branchidx)
+
+   if (startIndex.ne.0) then
+        ierr = ug_convert_start_index(branchidx, 0, startIndex)
+   endif
+   
    !define dim
    if(ierr /= UG_NOERR) then 
        Call SetMessage(Level_Fatal, 'could not read the branch ids')
@@ -3754,7 +3799,7 @@ function ug_read_1d_mesh_discretisation_points(ncid, meshids, branchidx, offsets
        Call SetMessage(Level_Fatal, 'could not read the branch offsets')
    end if 
     
-end function  ug_read_1d_mesh_discretisation_points
+end function  ug_get_1d_mesh_discretisation_points
 
 !
 ! Cloning functions

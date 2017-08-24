@@ -32,6 +32,7 @@ namespace UGrid.tests
         private int nNodes = 4;
         private int nBranches = 3;
         private int nGeometry = 9;
+        private int startIndex = 1;
 
         //node info
         private double[] nodesX = { 1.0, 5.0, 5.0, 8.0 };
@@ -162,9 +163,9 @@ namespace UGrid.tests
 
                 //6. Get the branch info and coordinates
                 IoNetcdfLibWrapper.interop_charinfo[] branchinfo = new IoNetcdfLibWrapper.interop_charinfo[3];
-                ierr = wrapper.ionc_read_1d_network_branches(ref ioncid, ref networkid, ref c_sourcenodeid,
+                ierr = wrapper.ionc_get_1d_network_branches(ref ioncid, ref networkid, ref c_sourcenodeid,
                     ref c_targetnodeid,
-                    ref c_branchlengths, branchinfo, ref c_nbranchgeometrypoints, ref rnBranches);
+                    ref c_branchlengths, branchinfo, ref c_nbranchgeometrypoints, ref rnBranches, ref startIndex);
                 Assert.That(ierr, Is.EqualTo(0));
 
                 int[] rc_targetnodeid = new int[3];
@@ -256,8 +257,8 @@ namespace UGrid.tests
                 //3. Get the coordinates of the mesh points
                 IoNetcdfLibWrapper.interop_charinfo[] nodeinfo = new IoNetcdfLibWrapper.interop_charinfo[nmesh1dPoints];
 
-                ierr = wrapper.ionc_read_1d_mesh_discretisation_points(ref ioncid, ref meshid, ref c_branchidx,
-                    ref c_offset, nodeinfo, ref rnmeshpoints);
+                ierr = wrapper.ionc_get_1d_mesh_discretisation_points(ref ioncid, ref meshid, ref c_branchidx,
+                    ref c_offset, nodeinfo, ref rnmeshpoints, ref startIndex);
                 Assert.That(ierr, Is.EqualTo(0));
 
                 for (int i = 0; i < nmesh1dPoints; i++)
@@ -288,7 +289,7 @@ namespace UGrid.tests
 
                 //5. Get the links values
                 ierr = wrapper.ionc_get_mesh_contact(ref ioncid, ref linkmesh, ref c_mesh1indexes, ref c_mesh2indexes,
-                    linksinfo, ref nlinks);
+                    linksinfo, ref nlinks, ref startIndex);
                 Assert.That(ierr, Is.EqualTo(0));
                 int[] rc_mesh1indexes = new int[nlinks];
                 int[] rc_mesh2indexes = new int[nlinks];
@@ -428,8 +429,8 @@ namespace UGrid.tests
                     meshnodeidsinfo[i].longnames = tmpstring.ToCharArray();
                 }
 
-                ierr = wrapper.ionc_write_1d_mesh_discretisation_points(ref ioncid, ref meshid, ref c_branchidx,
-                    ref c_offset, meshnodeidsinfo, ref nmeshpoints);
+                ierr = wrapper.ionc_put_1d_mesh_discretisation_points(ref ioncid, ref meshid, ref c_branchidx,
+                    ref c_offset, meshnodeidsinfo, ref nmeshpoints, ref startIndex);
                 Assert.That(ierr, Is.EqualTo(0));
 
                 //6. Write links attributes
@@ -453,7 +454,7 @@ namespace UGrid.tests
 
                 //7. Write the mesh links
                 ierr = wrapper.ionc_put_mesh_contact(ref ioncid, ref linkmesh, ref c_mesh1indexes, ref c_mesh2indexes,
-                    linksinfo, ref nlinks);
+                    linksinfo, ref nlinks, ref startIndex);
                 Assert.That(ierr, Is.EqualTo(0));
 
                 //8. Add node ids to the 1d mesh
@@ -531,8 +532,8 @@ namespace UGrid.tests
                     tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.longnamessize, ' ');
                     branchinfo[i].longnames = tmpstring.ToCharArray();
                 }
-                ierr = wrapper.ionc_write_1d_network_branches(ref ioncid, ref networkid, ref c_sourcenodeid,
-                    ref c_targetnodeid, branchinfo, ref c_branchlengths, ref c_nbranchgeometrypoints, ref nBranches);
+                ierr = wrapper.ionc_put_1d_network_branches(ref ioncid, ref networkid, ref c_sourcenodeid,
+                    ref c_targetnodeid, branchinfo, ref c_branchlengths, ref c_nbranchgeometrypoints, ref nBranches, ref startIndex);
                 Assert.That(ierr, Is.EqualTo(0));
 
                 //3. Write 1d network geometry

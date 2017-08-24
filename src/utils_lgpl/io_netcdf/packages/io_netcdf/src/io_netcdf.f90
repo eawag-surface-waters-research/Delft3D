@@ -111,18 +111,18 @@ public :: ionc_initialize
 !network 1d functions
 public :: ionc_create_1d_network_ugrid
 public :: ionc_write_1d_network_nodes_ugrid
-public :: ionc_write_1d_network_branches_ugrid
+public :: ionc_put_1d_network_branches_ugrid
 public :: ionc_write_1d_network_branches_geometry_ugrid
 public :: ionc_get_1d_network_nodes_count_ugrid
 public :: ionc_get_1d_network_branches_count_ugrid
 public :: ionc_get_1d_network_branches_geometry_coordinate_count_ugrid
 public :: ionc_read_1d_network_nodes_ugrid
-public :: ionc_read_1d_network_branches_ugrid
+public :: ionc_get_1d_network_branches_ugrid
 public :: ionc_read_1d_network_branches_geometry_ugrid
 public :: ionc_create_1d_mesh_ugrid
-public :: ionc_write_1d_mesh_discretisation_points_ugrid
+public :: ionc_put_1d_mesh_discretisation_points_ugrid
 public :: ionc_get_1d_mesh_discretisation_points_count_ugrid
-public :: ionc_read_1d_mesh_discretisation_points_ugrid
+public :: ionc_get_1d_mesh_discretisation_points_ugrid
 !links functions
 public :: ionc_def_mesh_contact_ugrid
 public :: ionc_get_contacts_count_ugrid
@@ -1291,20 +1291,20 @@ function ionc_write_1d_network_nodes_ugrid(ioncid, networkid, nodesX, nodesY, no
    
 end function ionc_write_1d_network_nodes_ugrid
 
-function ionc_write_1d_network_branches_ugrid(ioncid, networkid, sourcenodeid, targetnodeid, branchids, branchlengths, branchlongnames, &
-    nbranchgeometrypoints, nBranches) result(ierr)
+function ionc_put_1d_network_branches_ugrid(ioncid, networkid, sourcenodeid, targetnodeid, branchids, branchlengths, branchlongnames, &
+    nbranchgeometrypoints, nBranches, startIndex) result(ierr)
 
-   integer, intent(in)                :: ioncid   
+   integer, intent(in)                :: ioncid, startIndex   
    integer, intent(in)                :: networkId, nBranches 
    integer, intent(in)                :: sourcenodeid(:), targetnodeid(:), nbranchgeometrypoints(:)
    character(len=*),intent(in)        :: branchids(:),branchlongnames(:)
    double precision, intent(in)       :: branchlengths(:)
    integer                            :: ierr
    
-   ierr = ug_write_1d_network_branches(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%netids(networkid),sourcenodeid,targetnodeid, &
-       branchIds, branchlengths, branchlongnames, nbranchgeometrypoints,nBranches) 
+   ierr = ug_put_1d_network_branches(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%netids(networkid),sourcenodeid,targetnodeid, &
+       branchIds, branchlengths, branchlongnames, nbranchgeometrypoints,nBranches, startIndex) 
    
-    end function ionc_write_1d_network_branches_ugrid
+    end function ionc_put_1d_network_branches_ugrid
     
 !< write the branch order array, it might be temporary function
 function ionc_put_1d_network_branchorder_ugrid(ioncid, networkid, branchorder) result(ierr)
@@ -1376,19 +1376,19 @@ function  ionc_read_1d_network_nodes_ugrid(ioncid, networkid, nodesX, nodesY, no
 
 end function ionc_read_1d_network_nodes_ugrid
 
-function  ionc_read_1d_network_branches_ugrid(ioncid, networkid, sourcenodeid, targetnodeid, branchid, branchlengths, branchlongnames, nbranchgeometrypoints) result(ierr)
+function  ionc_get_1d_network_branches_ugrid(ioncid, networkid, sourcenodeid, targetnodeid, branchid, branchlengths, branchlongnames, nbranchgeometrypoints, startIndex) result(ierr)
 
-   integer, intent(in)                :: ioncid   
+   integer, intent(in)                :: ioncid, startIndex   
    integer, intent(in)                :: networkid 
    integer,intent(out)                :: sourcenodeid(:), targetnodeid(:), nbranchgeometrypoints(:)  
    character(len=*), intent(out)      :: branchid(:), branchlongnames(:)  
    double precision, intent(out)      :: branchlengths(:)
    integer                            :: ierr
    
-   ierr = ug_read_1d_network_branches(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%netids(networkid), sourcenodeid, & 
-       targetnodeid,branchid,branchlengths,branchlongnames,nbranchgeometrypoints )
+   ierr = ug_get_1d_network_branches(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%netids(networkid), sourcenodeid, & 
+       targetnodeid,branchid,branchlengths,branchlongnames,nbranchgeometrypoints, startIndex)
 
-end function ionc_read_1d_network_branches_ugrid
+end function ionc_get_1d_network_branches_ugrid
 
 
 !< get the branch order array, it might be temporary function
@@ -1442,16 +1442,16 @@ function ionc_def_mesh_ids_ugrid(ioncid, meshid, locationType) result(ierr)
 end function ionc_def_mesh_ids_ugrid
 
 
-function ionc_write_1d_mesh_discretisation_points_ugrid(ioncid, networkid, branchidx, offset) result(ierr) 
+function ionc_put_1d_mesh_discretisation_points_ugrid(ioncid, networkid, branchidx, offset, startIndex) result(ierr) 
 
-  integer, intent(in)         :: ioncid, networkid  
+  integer, intent(in)         :: ioncid, networkid, startIndex  
   integer, intent(in)         :: branchidx(:)
   double precision,intent(in) :: offset(:)
   integer                     :: ierr
   
-  ierr=ug_write_1d_mesh_discretisation_points(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(networkid), branchidx, offset)  
+  ierr=ug_put_1d_mesh_discretisation_points(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(networkid), branchidx, offset, startIndex)  
   
-end function ionc_write_1d_mesh_discretisation_points_ugrid
+end function ionc_put_1d_mesh_discretisation_points_ugrid
 
 function ionc_get_1d_mesh_discretisation_points_count_ugrid(ioncid, networkid, nmeshpoints) result(ierr) 
 
@@ -1464,16 +1464,16 @@ function ionc_get_1d_mesh_discretisation_points_count_ugrid(ioncid, networkid, n
 end function ionc_get_1d_mesh_discretisation_points_count_ugrid
 
 
-function ionc_read_1d_mesh_discretisation_points_ugrid(ioncid, networkid, branchidx, offset) result(ierr) 
+function ionc_get_1d_mesh_discretisation_points_ugrid(ioncid, networkid, branchidx, offset, startIndex) result(ierr) 
 
-  integer, intent(in)         :: ioncid, networkid  
+  integer, intent(in)         :: ioncid, networkid, startIndex 
   integer, intent(out)        :: branchidx(:)
   double precision,intent(out):: offset(:)
   integer                     :: ierr
   
-  ierr = ug_read_1d_mesh_discretisation_points(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(networkid), branchidx, offset)
+  ierr = ug_get_1d_mesh_discretisation_points(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(networkid), branchidx, offset, startIndex)
    
-end function ionc_read_1d_mesh_discretisation_points_ugrid
+end function ionc_get_1d_mesh_discretisation_points_ugrid
 
 !
 ! create mesh links
@@ -1506,25 +1506,25 @@ function ionc_get_contacts_count_ugrid(ioncid, contactsmesh, ncontacts) result(i
    
 end function ionc_get_contacts_count_ugrid
 
-function ionc_put_mesh_contact_ugrid(ioncid, contactsmesh, mesh1indexes, mesh2indexes, contactsids, contactslongnames)  result(ierr) 
+function ionc_put_mesh_contact_ugrid(ioncid, contactsmesh, mesh1indexes, mesh2indexes, contactsids, contactslongnames,startIndex)  result(ierr) 
 
-   integer, intent(in)                :: ioncid, contactsmesh 
+   integer, intent(in)                :: ioncid, contactsmesh, startIndex 
    integer, intent(in)                :: mesh1indexes(:),mesh2indexes(:)
    character(len=*), intent(in)       :: contactsids(:), contactslongnames(:)  
    integer                            :: ierr
 
-   ierr = ug_put_mesh_contact(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%contactids(contactsmesh), mesh1indexes, mesh2indexes, contactsids, contactslongnames) 
+   ierr = ug_put_mesh_contact(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%contactids(contactsmesh), mesh1indexes, mesh2indexes, contactsids, contactslongnames, startIndex) 
 
 end function ionc_put_mesh_contact_ugrid
 
-function ionc_get_mesh_contact_ugrid(ioncid, contactsmesh, mesh1indexes, mesh2indexes, contactsids, contactslongnames)  result(ierr) 
+function ionc_get_mesh_contact_ugrid(ioncid, contactsmesh, mesh1indexes, mesh2indexes, contactsids, contactslongnames, startIndex)  result(ierr) 
 
-   integer, intent(in)                :: ioncid, contactsmesh 
+   integer, intent(in)                :: ioncid, contactsmesh, startIndex 
    integer, intent(inout)             :: mesh1indexes(:),mesh2indexes(:)
    character(len=*), intent(inout)    :: contactsids(:), contactslongnames(:)  
    integer                            :: ierr
 
-   ierr = ug_get_mesh_contact(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%contactids(contactsmesh), mesh1indexes, mesh2indexes, contactsids, contactslongnames) 
+   ierr = ug_get_mesh_contact(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%contactids(contactsmesh), mesh1indexes, mesh2indexes, contactsids, contactslongnames, startIndex) 
 
 end function ionc_get_mesh_contact_ugrid
 
