@@ -113,6 +113,7 @@ module MessageHandling
    public progress
    public stringtolevel
    
+   integer,parameter, public     :: LEVEL_ALL   = 0
    integer,parameter, public     :: LEVEL_DEBUG = 1
    integer,parameter, public     :: LEVEL_INFO  = 2
    integer,parameter, public     :: LEVEL_WARN  = 3
@@ -202,16 +203,18 @@ function stringtolevel(levelname) result(ilevel)
    ilevel = LEVEL_NONE  
 
    select case (trim(levelname))
+   case ('ALL')
+      ilevel = LEVEL_ALL
    case ('DEBUG')
-      ilevel = LEVEL_DEBUG 
+      ilevel = LEVEL_DEBUG
    case ('INFO')
-      ilevel = LEVEL_INFO  
+      ilevel = LEVEL_INFO
    case ('WARN')
-      ilevel = LEVEL_WARN  
+      ilevel = LEVEL_WARN
    case ('ERROR')
-      ilevel = LEVEL_ERROR 
+      ilevel = LEVEL_ERROR
    case ('FATAL')
-      ilevel = LEVEL_FATAL 
+      ilevel = LEVEL_FATAL
    end select
 
 end function stringtolevel
