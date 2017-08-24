@@ -40,7 +40,7 @@ module m_ec_parameters
    integer,  parameter :: maxRecordLen         = 132
    integer,  parameter :: maxFileNameLen       = 256
    integer,  parameter :: maxFileReaderFiles   = 3
-   integer,  parameter :: maxFileUnits         = 2000
+   integer             :: maxFileUnits         = 2000   !< may be lowered if too high for current OS
 
    integer,  parameter :: EC_MISSING_VALUE = -999
    integer,  parameter :: ec_undef_int = -987

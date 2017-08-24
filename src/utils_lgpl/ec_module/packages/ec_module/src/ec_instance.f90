@@ -74,7 +74,9 @@ module m_ec_instance
       function ecInstanceCreate(ptr) result (success)
          logical                    :: success !< function status
          type(tEcInstance), pointer :: ptr     !< intent(out)
-         integer                    :: istat   !< allocate() status
+
+         integer                    :: istat        !< allocate() status
+         integer                    :: maxOpenFiles !< default for max. open files
          !
          success = .false.
          !
@@ -142,6 +144,12 @@ module m_ec_instance
                ptr%idCounter = 0
             end if
          end if
+
+         !
+         ! set max open files
+         maxOpenFiles = maxFileUnits
+         success = ecIncreaseMaxOpenFiles(maxOpenFiles)
+
       end function ecInstanceCreate
       
       ! =======================================================================
@@ -580,16 +588,21 @@ module m_ec_instance
 
       function ecIncreaseMaxOpenFiles(max_open_files) result(success)
       implicit none
-      logical                     :: success
-      integer(kind=4), intent(in) :: max_open_files
-      integer (kind=4)            :: ret
+      logical                     :: success          !< function result
+      integer(kind=4), intent(in) :: max_open_files   !< preferred max open files
+      integer (kind=4)            :: ret              !< actual max open files, as returned by mf_increase_max_open
+      character(len=128)          :: message          !< error message
+
       success = .false.
       ret = mf_increase_max_open(max_open_files)
-      if (ret<max_open_files) then
-         call setECMessage("ERROR: ec_instance::ecIncreaseMaxOpenFiles: Increasing the max number of open files failed.")
-         return
+      if (ret < max_open_files) then
+         maxFileUnits = ret
+         write(message, '(a,i0,a)') "ERROR: ec_instance::ecIncreaseMaxOpenFiles: Increasing the max number of open files to ", max_open_files, " failed."
+         call setECMessage(message)
+      else
+         success = .true.
       end if
-      success = .true.
+
       end function ecIncreaseMaxOpenFiles
 
 
