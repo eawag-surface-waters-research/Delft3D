@@ -3431,6 +3431,7 @@ function ug_put_mesh_contact(ncid, contactids, mesh1indexes, mesh2indexes, conta
       contacts(i,2) = mesh2indexes(i)
    end do
 
+   !we have not defined the start_index, so when we put the variable it must be zero based
    if (startIndex.ne.0) then
        ierr = ug_convert_start_index(contacts(:,1), startIndex, 0)
        ierr = ug_convert_start_index(contacts(:,2), startIndex, 0)
@@ -3450,7 +3451,7 @@ function ug_get_mesh_contact(ncid, contactids, mesh1indexes, mesh2indexes, conta
    integer, intent(out)              :: mesh1indexes(:),mesh2indexes(:)
    character(len=*), intent(out)     :: contactsids(:), contactslongnames(:) 
    integer, allocatable              :: contacts(:,:)
-   integer                           :: ierr, i
+   integer                           :: ierr, i, varStartIndex
 
    allocate(contacts(size(mesh1indexes),2))
    
@@ -3458,7 +3459,12 @@ function ug_get_mesh_contact(ncid, contactids, mesh1indexes, mesh2indexes, conta
    ierr = nf90_get_var(ncid, contactids%varids(cid_contactids), contactsids)  
    ierr = nf90_get_var(ncid, contactids%varids(cid_contactlongnames), contactslongnames) 
    
-   if (startIndex.ne.0) then
+   !we check for the start_index, we do not know if the variable was written as 0 based
+   ierr = nf90_get_att(ncid, contactids%varids(cid_contacttopo),'start_index', varStartIndex)  
+   if (ierr .eq. UG_NOERR) then
+        ierr = ug_convert_start_index(contacts(:,1), varStartIndex, startIndex)
+        ierr = ug_convert_start_index(contacts(:,2), varStartIndex, startIndex)
+   else
         ierr = ug_convert_start_index(contacts(:,1), 0, startIndex)
         ierr = ug_convert_start_index(contacts(:,2), 0, startIndex)
    endif
@@ -3515,6 +3521,7 @@ function ug_put_1d_network_branches(ncid,netids, sourceNodeId,targetNodeId, bran
        sourcestargets(k)=targetNodeId(n)
    end do
    
+   !we have not defined the start_index, so when we put the variable it must be zero based
    if (startIndex.ne.0) then
         ierr = ug_convert_start_index(sourcestargets, startIndex, 0)
    endif
@@ -3583,7 +3590,8 @@ function ug_put_1d_mesh_discretisation_points(ncid, meshids, branchidx, offset, 
    if(ierr /= UG_NOERR) then
        Call SetMessage(Level_Fatal, 'could not read the branch dimension')
    end if
-
+   
+   !we have not defined the start_index, so when we put the variable it must be zero based
    allocate(shiftedBranchidx(size(branchidx)))
    shiftedBranchidx = branchidx
    if (startIndex.ne.0) then
@@ -3679,7 +3687,7 @@ function ug_get_1d_network_branches(ncid, netids, sourcenodeid, targetnodeid, br
    integer,intent(out)              :: sourcenodeid(:), targetnodeid(:),nbranchgeometrypoints(:) 
    real(kind=dp),intent(out)        :: branchlengths(:)
    character(len=*),intent(out)     :: branchid(:),branchlongnames(:)
-   integer                          :: ierr, n, k, bid, nmeshpoints, nbranches
+   integer                          :: ierr, n, k, bid, nmeshpoints, nbranches, varStartIndex
    integer,allocatable              :: sourcestargets(:)
 
    nbranches = size(sourceNodeId,1)
@@ -3690,8 +3698,11 @@ function ug_get_1d_network_branches(ncid, netids, sourcenodeid, targetnodeid, br
        Call SetMessage(Level_Fatal, 'could not read the source and targets nodes of each branch in 1d network')
    end if 
    
-   ! Convert 0 based to user request startIndex
-   if (startIndex.ne.0) then
+   !we check for the start_index, we do not know if the variable was written as 0 based
+   ierr = nf90_get_att(ncid, netids%varids(ntid_1dedgenodes),'start_index', varStartIndex)
+   if (ierr .eq. UG_NOERR) then
+       ierr = ug_convert_start_index(sourcestargets, varStartIndex, startIndex)
+   else
        ierr = ug_convert_start_index(sourcestargets, 0, startIndex)
    endif
    
@@ -3782,11 +3793,15 @@ function ug_get_1d_mesh_discretisation_points(ncid, meshids, branchidx, offsets,
    type(t_ug_mesh), intent(in)              :: meshids 
    real(kind=dp),   intent(out)             :: offsets(:)
    integer,intent(out)                      :: branchidx(:)
-   integer                                  :: ierr
+   integer                                  :: ierr,varStartIndex
          
    ierr = nf90_get_var(ncid, meshids%varids(mid_1dmeshtobranch), branchidx)
 
-   if (startIndex.ne.0) then
+   !we check for the start_index, we do not know if the variable was written as 0 based
+   ierr = nf90_get_att(ncid, meshids%varids(mid_1dmeshtobranch),'start_index', varStartIndex)
+   if (ierr .eq. UG_NOERR) then
+        ierr = ug_convert_start_index(branchidx, varStartIndex, startIndex)
+   else
         ierr = ug_convert_start_index(branchidx, 0, startIndex)
    endif
    
