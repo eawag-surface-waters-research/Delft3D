@@ -26,9 +26,10 @@ typedef enum {
     ALL,
     DEBUG,
     INFO,
-    WARNINGS,
+    WARNING,
     ERRORS,
-    FATAL
+    FATAL,
+    NONE
 } Level;
 
 #ifdef __cplusplus

@@ -86,7 +86,7 @@ Dimr::Dimr(void) {
     exePath                      = NULL;
     exeName                      = NULL;
     clock                        = new Clock ();
-    logLevel                     = WARNINGS;
+    logLevel                     = WARNING;
     feedbackLevel                = INFO;
     log                          = new Log (logFile, clock, logLevel, feedbackLevel);
     config                       = NULL;
@@ -836,7 +836,7 @@ void Dimr::runParallelInit (dimr_control_block * cb) {
                                         // Produce a warning
                                         // The "if (my_rank == m)" avoids multiple identical messages
                                         if (my_rank == m) {
-                                            log->Write(WARNINGS, my_rank, "WARNING: coupler %s: item %d: \"%s\" will be delivered by partition %d. Ignoring deliverance by partition %d",
+                                            log->Write(WARNING, my_rank, "WARNING: coupler %s: item %d: \"%s\" will be delivered by partition %d. Ignoring deliverance by partition %d",
                                                 thisCoupler->name, k, thisCoupler->items[k].sourceName, thisCoupler->items[k].sourceProcess, m);
                                         }
                                     }
@@ -887,7 +887,7 @@ void Dimr::runParallelInit (dimr_control_block * cb) {
                                         // Produce a warning
                                         // The "if (my_rank == m)" avoids multiple identical messages
                                         if (my_rank == m) {
-                                            log->Write(WARNINGS, my_rank, "WARNING: coupler %s: item %d: \"%s\" will be delivered to multiple partitions: %d and %d.",
+                                            log->Write(WARNING, my_rank, "WARNING: coupler %s: item %d: \"%s\" will be delivered to multiple partitions: %d and %d.",
                                                 thisCoupler->name, k, thisCoupler->items[k].targetName, thisCoupler->items[k].targetProcess, m);
                                         }
                                     }

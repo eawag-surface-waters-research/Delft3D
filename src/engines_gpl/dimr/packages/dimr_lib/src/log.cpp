@@ -198,10 +198,13 @@ void Log::logLevelToString( int level, char ** levelString ){
     strcpy(*levelString, "UNKNOWN");
     if (level <= 0) strcpy(*levelString, "ALL");
     switch(level) {
+    case 0: { strcpy(*levelString, "ALL"); break; }
     case 1: { strcpy(*levelString, "DEBUG"); break;}
     case 2: { strcpy(*levelString, "INFO"); break;}
-    case 3: { strcpy(*levelString, "WARNINGS"); break;}
+    case 3: { strcpy(*levelString, "WARNING"); break;}
     case 4: { strcpy(*levelString, "ERRORS"); break;}
+    case 5: { strcpy(*levelString, "FATAL"); break; }
+    case 6: { strcpy(*levelString, "NONE"); break; }
     }
     if (level >= 5) strcpy(*levelString, "FATAL");
 }
