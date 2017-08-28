@@ -390,7 +390,7 @@ void DimrExe::initialize (int     argc,
     this->slaveArg  = NULL;
     this->done      = false;
 
-    this->logLevel = WARNINGS;  // selector of debugging/trace information
+    this->logLevel = WARNING;  // selector of debugging/trace information
                                         // minLog: FATAL  maxLog: ALL
     FILE *      logFile = stdout;       // log file descriptor
 
