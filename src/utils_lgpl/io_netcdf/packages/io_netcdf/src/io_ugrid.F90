@@ -673,12 +673,12 @@ function ug_add_coordmapping(ncid, crs) result(ierr)
    epsgstring = ' '
 
    varname = ' '
-   if (len_trim(crs%varname) > 0) then
-      varname = crs%varname
-   else if (crs%is_spherical) then
+   if (crs%is_spherical) then
       ierr_missing = UG_INVALID_CRS
       varname = 'wgs84'
-   else
+   else if (len_trim(crs%varname) > 0) then
+      varname = crs%varname
+   else 
       ierr_missing = UG_INVALID_CRS
       varname = 'projected_coordinate_system'
    end if
@@ -692,9 +692,7 @@ function ug_add_coordmapping(ncid, crs) result(ierr)
 
    ierr = nf90_def_var(ncid, trim(varname), nf90_int, id_crs)
 
-   if (allocated(crs%attset)) then
-      ierr = ug_put_var_attset(ncid, id_crs, crs%attset)
-   elseif (crs%is_spherical) then
+   if (crs%is_spherical) then
       ierr_missing = UG_INVALID_CRS
       epsg      = 4326
       epsgstring = 'EPSG:4326'
@@ -711,6 +709,8 @@ function ug_add_coordmapping(ncid, crs) result(ierr)
 !      ierr = nf90_put_att(ncid, id_crs, 'wkt',                         ' '                ) ! WKT
 !      ierr = nf90_put_att(ncid, id_crs, 'comment',                     ' '                )
       ierr = nf90_put_att(ncid, id_crs, 'value',                       'value is equal to EPSG code')
+   else if (allocated(crs%attset)) then
+      ierr = ug_put_var_attset(ncid, id_crs, crs%attset)
    else
       ierr_missing = UG_INVALID_CRS
       epsg      = crs%epsg_code
