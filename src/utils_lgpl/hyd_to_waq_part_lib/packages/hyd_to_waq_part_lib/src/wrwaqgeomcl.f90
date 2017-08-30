@@ -148,13 +148,9 @@ contains
         do n = 1, nmax
             cellindex = func(m, n, nmax)
             if (kcs(n, m) == 1) then
-                if (kcu(n  ,m-1)==0 .and. kcu(n  ,m  )==0 .and. &
-                    kcv(n-1,m  )==0 .and. kcv(n  ,m  )==0) then ! do not count active cells defined with four thin dams
-                else
-                    ! Valid cell found
-                    nr_elems = nr_elems + 1
-                    flow_vol(cellindex) = nr_elems
-                end if
+                ! Valid cell found
+                nr_elems = nr_elems + 1
+                flow_vol(cellindex) = nr_elems
             else if (kcs(n, m) == 2) then
                 flow_vol(cellindex) = isaggr(cellindex)
             end if
