@@ -50,7 +50,7 @@ contains
                              nlb      , nub   , mlb    , mub    ,          &
                              xcor     , ycor  , xz     , yz     , dep    , &
                              kcs      , kcu   , kcv    , sferic , aggre  , &
-                             isaggr   , nto   , nambnd , mnbnd)
+                             isaggrl  , nto   , nambnd , mnbnd)
 
     use netcdf
     use io_ugrid
@@ -80,7 +80,7 @@ contains
     integer        , dimension(nlb:nub,mlb:mub), intent(in) :: kcv        !! v-flowlink type (0=closed, 1=open)
     logical                                    , intent(in) :: sferic     !! sferic grid
     integer                                    , intent(in) :: aggre      !! aggregation type (0=no-aggregation, active cells only, 1=aggregation table)
-    integer        , dimension(nmax*mmax*kmax) , intent(in) :: isaggr     !! grid aggregation pointer
+    integer        , dimension(nmax*mmax)      , intent(in) :: isaggrl    !! grid aggregation pointer (only top/bottom layer, depending on zmodel)
     character(20)  , dimension(nto)            , intent(in) :: nambnd     !! names of the open boundaries
     integer        , dimension(7,nto)          , intent(in) :: mnbnd      !! indices of the open boundaries
 !
@@ -152,7 +152,7 @@ contains
                 nr_elems = nr_elems + 1
                 flow_vol(cellindex) = nr_elems
             else if (kcs(n, m) == 2) then
-                flow_vol(cellindex) = isaggr(cellindex)
+                flow_vol(cellindex) = isaggrl(cellindex)
             end if
         end do
     end do        
@@ -528,21 +528,15 @@ contains
     !
     if (aggre==1) then
         allocate(iapnt(nr_elems))
-!        allocate(iapnt(nr_elems+nr_bnd_elm))
         do m = 1, mmax
             do n = 1, nmax
                 cellindex = func(m, n, nmax)
                 elm = flow_vol(cellindex)
                 if (elm > 0) then
-                    iapnt(elm) = isaggr(cellindex)
+                    iapnt(elm) = isaggrl(cellindex)
                 end if
             end do
         end do
-        ! added renumbering for boundary nodes
-!        nr_elems_aggr = maxval(isaggr(1:nmax*mmax))
-!        do elm = 1, nr_bnd_elm
-!           iapnt(nr_elems + elm) = nr_elems_aggr + elm
-!        enddo
         success = aggregate_ugrid_geometry(meshgeom, aggregated_meshgeom, edge_type, aggr_edge_type, iapnt)
         if(success) then
             meshgeom = aggregated_meshgeom

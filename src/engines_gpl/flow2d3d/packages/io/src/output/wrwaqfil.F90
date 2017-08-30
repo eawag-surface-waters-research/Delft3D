@@ -188,6 +188,8 @@
       character(5) sf                  !!  character variable for s(ediment concentration)f(iles)
       character(8) ssrff               !!  character variable for s(ediment) s(edimentation and) r(esuspension) f(lux) f(iles)
       integer  (4) istat               !!  allocate return status
+      integer, allocatable :: isaggrl(:) !!  segment aggregation pointer (only top/bottom layer, depending on zmodel)
+      integer  (4) ipiv                !!  help variable for array shift
       integer, external :: newunit
       type(t_ug_meta)     :: meta
 !
@@ -394,12 +396,22 @@
          meta%references  = "http://www.deltares.nl"    
          call getfullversionstring_flow2d3d(meta%version)
          meta%modelname   = filnam(1:(len(trim(filnam))-1))
+
+         allocate ( isaggrl(nmaxus*mmax) , stat=istat)
+         if (istat/=0) then
+            write(*,*) '*** ERROR: wrwaqfil: memory allocation error'
+            return
+         endif
+         ipiv = 0
+         if ( zmodel ) ipiv = ( kmax - 1 ) * nmaxus * mmax
+         isaggrl( 1 : nmaxus * mmax ) = isaggr ( 1 + ipiv : nmaxus * mmax + ipiv )
          
-         call wrwaqgeomcl( meta  , lundia, nmaxus , mmax  , kmax  , &
-                           nlb   , nub    , mlb   , mub   ,         &
-                           xcor  , ycor  , xz     , yz    , dp    , &
-                           kcs   , kcu   , kcv    , sferic, aggre , &
-                           isaggr, nto   , nambnd , mnbnd)
+         call wrwaqgeomcl( meta   , lundia, nmaxus , mmax  , kmax  , &
+                           nlb    , nub    , mlb   , mub   ,         &
+                           xcor   , ycor  , xz     , yz    , dp    , &
+                           kcs    , kcu   , kcv    , sferic, aggre , &
+                           isaggrl, nto   , nambnd , mnbnd)
+         deallocate ( isaggrl , stat = istat )
 
 !           open all files for time dependent write
 !           WARNING: WAQ input files must be written using form=binary
