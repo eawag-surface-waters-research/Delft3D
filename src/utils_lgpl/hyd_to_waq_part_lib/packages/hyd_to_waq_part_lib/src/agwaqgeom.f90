@@ -374,6 +374,8 @@ function sort_first_two_nodes(output_face, output_edge, input_edge_nodes, input_
     integer                            :: i !< Counter.
     logical                            :: sorted
     integer, dimension(2)              :: sorted_output_nodes !< The two nodes of the first edge of the current face in sorted order.
+    integer                            :: input_face1, input_face2
+
 
     ! Get input edge, nodes and faces that correspond to the given output edge.
     input_edge = reverse_edge_mapping_table(output_edge)
@@ -381,9 +383,13 @@ function sort_first_two_nodes(output_face, output_edge, input_edge_nodes, input_
     input_faces = input_edge_faces(1:2, input_edge)
 
     ! Get the input face of the input edge that is part of the given output face.
-    if (input_faces(1) /= missing_value .and. face_mapping_table(input_faces(1)) == output_face) then
+    input_face1=-1
+    input_face2=-1
+    if (input_faces(1) /= missing_value) input_face1 = face_mapping_table(input_faces(1))
+    if (input_faces(2) /= missing_value) input_face2 = face_mapping_table(input_faces(2))
+    if (input_face1 == output_face) then
         input_face = input_faces(1)
-    else if (input_faces(2) /= missing_value .and. face_mapping_table(input_faces(2)) == output_face) then
+    else if (input_face2 == output_face) then
         input_face = input_faces(2)
     else
         write(message, *) 'Cannot find input face for output face ', output_face, ' and output edge ', output_edge, ' in un-aggregated mesh. Mesh will not be aggregated.'
