@@ -907,41 +907,47 @@ end subroutine ecInstanceListSourceItems
       !! examples: "+01:00", "+0200", "-01:00", "-0200", "+5:30"
       function parseTimezone(string, tzone, tzone_default) result(success)
          logical                           :: success         !< function status
-         character(len=*),   intent(inout) :: string          !< units string
+         character(len=*),   intent(in)    :: string          !< units string
          real(hp),           intent(out)   :: tzone           !< time zone
          real(hp), optional, intent(in)    :: tzone_default   !< default value for time zone
 
-         integer          :: ierr      !< error code
-         integer          :: jcolon    !< helper index for location of ':' in timezone
-         integer          :: jend      !< helper index
-         real(hp)         :: min       !< minutes part of time zone, as double
-         real(hp)         :: hour      !< hours part of time zone, as double
-         character(len=2) :: cmin      !< minutes part of time zone, as character string
-         character(len=3) :: chour     !< hours part of time zone, as character string
+         integer          :: ierr        !< error code
+         integer          :: jcolon      !< helper index for location of ':' in timezone
+         integer          :: jend        !< helper index
+         integer          :: posNulChar  !< position of null char; end of string if from C
+         real(hp)         :: min         !< minutes part of time zone, as double
+         real(hp)         :: hour        !< hours part of time zone, as double
+         character(len=2) :: cmin        !< minutes part of time zone, as character string
+         character(len=3) :: chour       !< hours part of time zone, as character string
 
          if (present(tzone_default)) then
-             tzone = tzone_default
+            tzone = tzone_default
          else
-             tzone = 0.0_hp
+            tzone = 0.0_hp
          endif
 
          jcolon = index(string, ':')
 
          if (jcolon == 0) then
-             jend = len_trim(string)
-             cmin = string(jend-1:)
-             chour = string(:jend-2)
+            posNulChar = index(string, char(0))
+            if (posNulChar > 0) then
+               jend = posNulChar-1
+            else
+               jend = len_trim(string)
+            endif
+            cmin = string(jend-1:)
+            chour = string(:jend-2)
          else
-             cmin = string(jcolon+1:)
-             chour = string(:jcolon-1)
+            cmin = string(jcolon+1:)
+            chour = string(:jcolon-1)
          end if
 
          read(chour, *, iostat=ierr) hour
          if (ierr == 0) read(cmin, *, iostat=ierr) min
          if (string(1:1) == '-') then
-             tzone = hour - min / 60.0_hp
+            tzone = hour - min / 60.0_hp
          else
-             tzone = hour + min / 60.0_hp
+            tzone = hour + min / 60.0_hp
          endif
 
          success = (ierr == 0)
