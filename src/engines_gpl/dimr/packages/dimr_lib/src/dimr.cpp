@@ -1287,7 +1287,8 @@ void Dimr::runParallelFinish (dimr_control_block * cb) {
                 MPI_Group mpiGroupComp;
                 int ierr = MPI_Comm_group(cb->subBlocks[i].unit.component->mpiComm, &mpiGroupComp);
                 ierr = MPI_Group_free(&mpiGroupComp);
-                ierr = MPI_Comm_free(&cb->subBlocks[i].unit.component->mpiComm);
+                // Is this really needed? In dflowfm the communicator is already freed in petsc finalize is solver 6 is used and this line causes a runtime error at the end of a dimr run
+                //ierr = MPI_Comm_free(&cb->subBlocks[i].unit.component->mpiComm);
             }
         } else {
             // CT_STARTGROUP
