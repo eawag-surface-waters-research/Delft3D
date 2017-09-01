@@ -400,7 +400,11 @@ subroutine wrimap(lundia      ,error     ,filename  ,selmap    ,simdat    , &
        call addelm(gdp, lundia, ifile, grnam2, 'KCU', ' ', IO_INT4         , 2, dimids=(/iddim_n , iddim_mc/), longname='Mask array for U-velocity points', acl='u')
        call addelm(gdp, lundia, ifile, grnam2, 'KCV', ' ', IO_INT4         , 2, dimids=(/iddim_nc, iddim_m /), longname='Mask array for V-velocity points', acl='v')
        call addelm(gdp, lundia, ifile, grnam2, 'KCS', ' ', IO_INT4         , 2, dimids=(/iddim_n , iddim_m /), longname='Non-active/active water-level point', acl='z')
-       call addelm(gdp, lundia, ifile, grnam2, 'DP0', ' ', io_prec         , 2, dimids=(/iddim_nc, iddim_mc/), longname='Initial bottom depth (positive down)', unit='m', acl='d')
+       if (dpsopt == 'DP') then
+          call addelm(gdp, lundia, ifile, grnam2, 'DP0', ' ', io_prec         , 2, dimids=(/iddim_n, iddim_m/), longname='Initial bottom depth (positive down)', unit='m', acl='z')
+       else
+          call addelm(gdp, lundia, ifile, grnam2, 'DP0', ' ', io_prec         , 2, dimids=(/iddim_nc, iddim_mc/), longname='Initial bottom depth (positive down)', unit='m', acl='d')
+       endif
        call addelm(gdp, lundia, ifile, grnam2, 'DPS0', ' ', io_prec        , 2, dimids=(/iddim_n , iddim_m /), longname='Initial bottom depth at zeta points (positive down)', unit='m', acl='z')
        call addelm(gdp, lundia, ifile, grnam2, 'DPU0', ' ', io_prec        , 2, dimids=(/iddim_n , iddim_mc/), longname='Initial bottom depth at u points (positive down)', unit='m', acl='u')
        call addelm(gdp, lundia, ifile, grnam2, 'DPV0', ' ', io_prec        , 2, dimids=(/iddim_nc, iddim_m /), longname='Initial bottom depth at v points (positive down)', unit='m', acl='v')
