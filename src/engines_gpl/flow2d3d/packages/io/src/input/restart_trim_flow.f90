@@ -444,6 +444,7 @@ subroutine restart_trim_flow(lundia    ,error     ,restid1   ,lturi     ,mmax   
                !
                if (ierror == 0 .and. rst_lstsci > 0) then
                   allocate(rst_namcon(rst_lstsci+rst_ltur), stat = ierror)
+                  rst_namcon = 0.0_fp
                   if (ierror == 0) ierror = getelt(fds, 'map-const', 'NAMCON', cuindex, 1, 20*(rst_lstsci+rst_ltur), rst_namcon)
                   if (ierror /= 0) ierror = neferr(0,error_string)
                endif
@@ -498,6 +499,7 @@ subroutine restart_trim_flow(lundia    ,error     ,restid1   ,lturi     ,mmax   
                !
                if (ierror == 0 .and. rst_lstsci > 0) then
                   allocate(rst_namcon(rst_lstsci), stat = ierror)
+                  rst_namcon = 0.0_fp
                   ierror = nf90_inq_varid(fds, 'NAMCON', idvar)
                   if (ierror == 0) ierror = nf90_get_var(fds, idvar, rst_namcon)
                endif
@@ -612,6 +614,7 @@ subroutine restart_trim_flow(lundia    ,error     ,restid1   ,lturi     ,mmax   
     !
     if (rst_lstsci>0) then
         allocate(rst_r1(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax, rst_lstsci), stat = ierror)
+        rst_r1 = 0.0_fp
         call rdarray_nmkl(fds, filename, filetype, grnam3, i_restart, &
                       & nf, nl, mf, ml, iarrc, gdp, &
                       & 1, kmax, rst_lstsci, ierror, lundia, rst_r1, 'R1')
@@ -640,6 +643,7 @@ subroutine restart_trim_flow(lundia    ,error     ,restid1   ,lturi     ,mmax   
        endif
        !
        allocate(rst_rtur1(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax, rst_ltur), stat = ierror)
+       rst_rtur1 = 0.0_fp
        call rdarray_nmkl(fds, filename, filetype, grnam3, i_restart, &
                      & nf, nl, mf, ml, iarrc, gdp, &
                      & 0, kmax, rst_ltur, ierror, lundia, rst_rtur1, 'RTUR1')
