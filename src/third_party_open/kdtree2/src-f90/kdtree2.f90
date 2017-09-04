@@ -755,6 +755,9 @@ contains
       integer :: i, c, m, dimen
       logical :: recompute
       real(kdkind)    :: average
+      ! Temp variables for the correction in the k-d tree algorithm
+      real(kdkind), allocatable :: toSort(:)
+      integer                   ::sizeToSort
 
 !!$      If (.False.) Then 
 !!$         If ((l .Lt. 1) .Or. (l .Gt. tp%n)) Then
@@ -834,15 +837,30 @@ contains
             ! who says this helps in some degenerate cases, or 
             ! actual arithmetic average. 
             !
-            if (.true.) then
-               ! actually compute average
-               average = sum(tp%the_data(c,tp%ind(l:u))) / real(u-l+1,kdkind)
-            else
-               average = (res%box(c)%upper + res%box(c)%lower)/2.0
-            endif
-               
-            res%cut_val = average
-            m = select_on_coordinate_value(tp%the_data,tp%ind,c,average,l,u)
+             
+            !if (.true.) then
+            !   ! actually compute average
+            !   average = sum(tp%the_data(c,tp%ind(l:u))) / real(u-l+1,kdkind)
+            !else
+            !   average = (res%box(c)%upper + res%box(c)%lower)/2.0
+            !endif
+            !   
+            !res%cut_val = average
+            !m = select_on_coordinate_value(tp%the_data,tp%ind,c,average,l,u)
+             
+            ! Adapted implementation of the kd-tree algorithm: https://en.wikipedia.org/wiki/K-d_tree
+            ! Recursively devide and sort on the c-axis part of the original data (tp%the_data(c,tp%ind(l:u))
+            ! and calculate the median index of the sorted part (m = l + (u - l) / 2)
+            ! Note that the sorting of the original data occours in heapsort (time complexity O(n log n)) and select_on_coordinate_value is not needed anymore.
+            ! Indeed what select_on_coordinate_value does is another type of sorting (bubble sort), which has even a worse time complexity (O(n^2))
+            sizeToSort = u - l + 1
+            allocate(toSort(sizeToSort))
+            
+            toSort = tp%the_data(c,tp%ind(l:u))
+            call heapsort(tp%the_data(c,tp%ind(l:u)), tp%ind(l:u), sizeToSort)
+            
+            m = l + (u - l) / 2 
+            
          endif
             
          ! moves indexes around
