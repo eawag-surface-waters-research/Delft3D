@@ -444,7 +444,6 @@ subroutine restart_trim_flow(lundia    ,error     ,restid1   ,lturi     ,mmax   
                !
                if (ierror == 0 .and. rst_lstsci > 0) then
                   allocate(rst_namcon(rst_lstsci+rst_ltur), stat = ierror)
-                  rst_namcon = 0.0_fp
                   if (ierror == 0) ierror = getelt(fds, 'map-const', 'NAMCON', cuindex, 1, 20*(rst_lstsci+rst_ltur), rst_namcon)
                   if (ierror /= 0) ierror = neferr(0,error_string)
                endif
@@ -499,7 +498,6 @@ subroutine restart_trim_flow(lundia    ,error     ,restid1   ,lturi     ,mmax   
                !
                if (ierror == 0 .and. rst_lstsci > 0) then
                   allocate(rst_namcon(rst_lstsci), stat = ierror)
-                  rst_namcon = 0.0_fp
                   ierror = nf90_inq_varid(fds, 'NAMCON', idvar)
                   if (ierror == 0) ierror = nf90_get_var(fds, idvar, rst_namcon)
                endif
