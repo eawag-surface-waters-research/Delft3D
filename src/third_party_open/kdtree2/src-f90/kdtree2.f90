@@ -857,7 +857,7 @@ contains
             allocate(toSort(sizeToSort))
             
             toSort = tp%the_data(c,tp%ind(l:u))
-            call heapsort(tp%the_data(c,tp%ind(l:u)), tp%ind(l:u), sizeToSort)
+            call heapsort(toSort, tp%ind(l:u), sizeToSort)
             
             m = l + (u - l) / 2 
             
