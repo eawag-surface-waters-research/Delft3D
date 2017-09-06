@@ -510,7 +510,6 @@
 
 !     assumed from dll
 
-!JVB  WRITE(32,*) 'calling from dll:',PRONAM(1:6)
             ierror = perf_function(dll_opb, pronam,                                          ! &
      &                             pmsa   , flux   , ipoint , increm , noseg  ,                   ! &
      &                             noflux , iexpnt , iknmrk , noq1   , noq2   ,                   ! &
@@ -527,27 +526,8 @@
             endif
 
       end select
-!
-!     Voor debuggen van in/output per proces.
-!     Print voor ieder proces dat berekend is de gebruikte/gewijzigd waardes
-!     uit pmsa, voor segment "mydbgseg" van de horizontaal, "mynolay" lagen
-!     Gaat helaas alleen goed voor arrays die voor segmenten werken.
-!
-!     mynoseg  = 13860
-!     mynolay  =   5
-!     mynosegh = mynoseg / mynolay
-!     mydbgseg = 1509
-!     call getmlu(lunrep)
-!     write(lunrep,*) 'arr-end of procal for module=',imodul,', debug-seg=',
-!    +   mydbgseg
-!     do iarr = 1, pronvr
-!        write(lunrep,'(a,i2,a,i1,a,15g14.7)') 'arr-',iarr,', type=',
-!    +      prvtyp(iarr),':',
-!    +      ( pmsa(ipoint(iarr) + increm(iarr)* (mydbgseg-1+(ilay-1)*mynosegh) ),ilay=1,mynolay)
-!     enddo
 
 !     call timer_stop(timer_offs_proces0+imodul)
-
       if ( timon ) then
          if ( imodul .le. nomax ) call timstop ( ithand(imodul) )
       endif
