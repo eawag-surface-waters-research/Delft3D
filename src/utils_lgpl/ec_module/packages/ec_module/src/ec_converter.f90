@@ -1134,6 +1134,7 @@ module m_ec_converter
          integer  :: maxlay_srcL      !< number of layers at the LEFT interpolation support point
          integer  :: maxlay_srcR      !< number of layers at the RIGHT interpolation support point
          integer  :: kbegin, kend, kbeginL, kendL, kbeginR, kendR, idxL1, idxR1, idxL2, idxR2 !< 
+         logical, save :: alreadyPrinted = .false.
          real(hp) :: wwL, wwR  !< 
          real(hp), dimension(:), allocatable :: valL1, valL2, valR1, valR2, val !< 
          real(hp), dimension(:), allocatable :: sigmaL, sigmaR, sigma !< 
@@ -1211,9 +1212,9 @@ module m_ec_converter
                   allocate(sigmaR(maxlay_src))
                end if
 
-				   ! zmax and zmin are absolute top and bottom at target point coordinates
-				   zmax => connection%targetItemsPtr(1)%ptr%elementSetPtr%zmax
-				   zmin => connection%targetItemsPtr(1)%ptr%elementSetPtr%zmin
+               ! zmax and zmin are absolute top and bottom at target point coordinates
+               zmax => connection%targetItemsPtr(1)%ptr%elementSetPtr%zmax
+               zmin => connection%targetItemsPtr(1)%ptr%elementSetPtr%zmin
                !
                ! The polytim FileReader's source Item is actually a target Item, containing the time-interpolated wind_magnitude from the subFileReaders.
                do i=1, connection%targetItemsPtr(1)%ptr%elementSetPtr%nCoordinates
@@ -1247,8 +1248,8 @@ module m_ec_converter
                                  kbeginR = maxlay_src*(kR-1)+1                       ! refers to source right column 
                                  kendR   = maxlay_src*kR
                                  sigmaR  = connection%sourceItemsPtr(1)%ptr%ElementSetPtr%z(kbeginR:kendR)
-                                 
-				                     ! Convert Z-coordinate to absolute z wrt datum
+
+                                 ! Convert Z-coordinate to absolute z wrt datum
                                  ! For the time being, let's assume that both support points have the same 
                                  ! zmin and zmax as the support points. This way interpolation from sigma->sigma
                                  ! and z->z gives the same result. 
@@ -1328,7 +1329,10 @@ module m_ec_converter
                                     !
                                     select case(connection%sourceItemsPtr(1)%ptr%quantityPtr%zInterpolationType)
                                        case(zinterpolate_unknown)
-                                          call setECMessage("WARNING: ec_converter::ecConverterPolytim: Unknown vertical interpolation type given, will proceed with linear method.")
+                                          if ( .not. alreadyPrinted) then
+                                             call setECMessage("WARNING: ec_converter::ecConverterPolytim: Unknown vertical interpolation type given, will proceed with linear method.")
+                                             alreadyPrinted = .true.
+                                          endif
                                           val = wL*(wwL*valL1 + (1.0_hp-wwL)*valL2) + wR*(wwR*valR1 + (1.0_hp-wwR)*valR2)
                                        case(zinterpolate_linear)
                                           val = wL*(wwL*valL1 + (1.0_hp-wwL)*valL2) + wR*(wwR*valR1 + (1.0_hp-wwR)*valR2)
@@ -2354,8 +2358,7 @@ module m_ec_converter
                                           end do
                                        end do
                                     end do
-                                 end do
-                                 
+                                 end do                                 
                                  ! get weights for vertical interpolation
                                  wb = (zsrc(kp) - ztgt)/(zsrc(kp)-zsrc(kp-dkp))
                                  wb = min(max(wb,0.0_hp),1.0_hp)                       ! zeroth-order extrapolation beyond range of source vertical coordinates

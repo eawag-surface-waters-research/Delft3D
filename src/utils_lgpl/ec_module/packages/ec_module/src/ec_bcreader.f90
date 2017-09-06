@@ -101,7 +101,7 @@ contains
     integer (kind=8),       intent(in)      :: fhandle
     integer,                intent(out)     :: iostat
 
-    character*(255)     ::  rec
+    character*(1000)    ::  rec
     integer             ::  reclen
     integer             ::  commentpos
     character(len=:),   &
@@ -255,7 +255,7 @@ contains
     integer                          ::     i, jv
     integer                          ::     iostat
     character(len=maxNameLen),  allocatable   ::     hdrkeys(:)     !< All keys from header
-    character(len=maxRecordLen),  allocatable ::     hdrvals(:)     !< All values from header
+    character(len=10*maxRecordLen),  allocatable ::     hdrvals(:)     !< All values from header
     integer, allocatable             ::     iv(:), il(:), perm_vpos(:)
 
     integer                          ::     ipos, npos, posfs
@@ -520,7 +520,7 @@ contains
     type(tEcBCBlock),           pointer                     :: bcPtr
     integer        :: n_col      !< number of columns in the file, inferred from the number of quantity blocks in the header
     integer        :: n_col_time !< position of the dedicated time-column in the line, deduced from the header
-    character(256) :: rec        !< content of a line
+    character(1000):: rec        !< content of a line
     character(30)  :: ncolstr
     integer        :: istat      !< status of read operation
     integer        :: i, j       !< loop counters
