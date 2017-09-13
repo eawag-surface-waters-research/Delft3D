@@ -503,9 +503,21 @@
                if ( data_block%subject .eq. SUBJECT_SEGFUNC ) data_block%iorder = ORDER_LOC_PARAM
                write ( lunut   ,   2220   ) ctoken
                data_block%filename = ctoken
+
+               ! Check the size of the file (if it is binary, otherwise this is not reliable)
+
+               call check_file_size( ctoken, noits*noseg, mod(data_block%filetype,10), ierr2 )
+               if ( ierr2 < 0 ) then
+                   ierr2 = 1
+                   write( lunut , 2320 ) ctoken
+               endif
+               if ( ierr2 > 0 ) then
+                   write( lunut , 2330 ) ctoken, 4*(1+noits*noseg), noits, noseg
+               endif
+
             else
 
-               ! Check if an inner loop collumn header exists for the data matrix
+               ! Check if an inner loop column header exists for the data matrix
 
                nocol = noits
                call read_header( waq_param, data_param, nocol , itfact, dtflg1,
@@ -638,4 +650,79 @@
  2290 FORMAT( ' Input grid for this item is :',A)
  2300 FORMAT( ' Input will be given for ',I10,' segments.' )
  2310 FORMAT( ' ERROR: Input grid not defined :',A)
+ 2320 FORMAT( ' ERROR: Binary/unformatted file does not exist or could not be opened: ',A)
+ 2330 FORMAT( ' ERROR: Binary/unformatted file does not have the correct size: ',A,/,
+     &        '        The size should not be zero and it should be a whole multiple of ',I0,
+     &        ' (= 4*(1+',I0,'*',I0,'))')
+
+      CONTAINS
+
+      subroutine check_file_size( filename, nodata, type, ierr )
+      character(len=*), intent(in)    :: filename
+      integer, intent(in)             :: nodata
+      integer, intent(in)             :: type
+      integer, intent(out)            :: ierr
+
+      integer                         :: norcd, i
+      integer                         :: lun
+      integer                         :: time
+      real, dimension(:), allocatable :: data
+
+      ierr = 0
+
+      allocate( data(nodata) )
+
+      !
+      ! Check that the file exists and can be opened
+      !
+
+      if ( type == FILE_BINARY ) then
+          open( newunit = lun, file = filename, iostat = ierr, status = 'old', access = 'stream' )
+      else
+          open( newunit = lun, file = filename, iostat = ierr, status = 'old', form = 'unformatted' )
+      endif
+      if ( ierr /= 0 ) then
+          ierr = -999 ! Explicitly mark the file as unuseable
+          return
+      endif
+
+      !
+      ! Determine the number of records - iostat does not seem to distinguish between partly fulfilled
+      ! reads and end-of-file
+      !
+      norcd   = 0
+      do
+          read( lun, iostat = ierr ) time, data
+          if ( ierr /= 0 ) then
+              exit
+          endif
+          norcd = norcd + 1
+      enddo
+
+      !
+      ! The last record may have been too short, so try again:
+      ! - Read all the records we have been able to read
+      ! - Try reading an extra number (time). This should fail
+      !
+      rewind( lun )
+      do i = 1,norcd
+          read( lun, iostat = ierr ) time, data
+      enddo
+
+      read( lun, iostat = ierr )
+
+      !
+      ! If we have been able to read at least one record and the last read
+      ! let to and end-of-file condition, we accept the file. Otherwise return
+      ! an error.
+      !
+      if ( norcd > 0 .and. ierr < 0 ) then
+          ierr = 0
+      else
+          ierr = 1
+      endif
+
+      close( lun )
+
+      end subroutine check_file_size
       END
