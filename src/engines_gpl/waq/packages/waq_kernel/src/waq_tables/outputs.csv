@@ -1186,9 +1186,9 @@ outppr,outpit,outpnm,outpdo,outpsx
 "Sed_AAP   ","fSedAAP   ",   1,"x",1
 "Sed_AAP   ","fSedAAPS2 ",   2," ",1
 "Sed_AAP   ","VxSedAAP  ",   3,"x",0
-"Sed_CAAP  ","PSedAAP   ",   1,"x",1
-"Sed_CAAP  ","fSedAAP   ",   2,"x",1
-"Sed_CAAP  ","VxSedAAP  ",   3,"x",0
+"Sed_CAAP  ","PSedCAAP  ",   1,"x",1
+"Sed_CAAP  ","fSedCAAP  ",   2,"x",1
+"Sed_CAAP  ","VxSedCAAP ",   3,"x",0
 "Res_DM    ","fResS1DM  ",   1,"x",1
 "Res_DM    ","fResS2DM  ",   2,"x",1
 "Res_DM    ","PResS1DM  ",   3,"x",1

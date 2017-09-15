@@ -66,6 +66,7 @@ veloit,velosu,velosc
 "VxSedFeS2 ","FeS2      ",   1.00000
 "VxSedFeCO3","FeCO3     ",   1.00000
 "VxSedAAP  ","AAP       ",   1.00000
+"VxSedCAAP ","AAP       ",   1.00000
 "VxResVol  ","Bulkvolume",   1.00000
 "VxSedVol  ","Bulkvolume",   1.00000
 "VxBurVol  ","Bulkvolume",   1.00000

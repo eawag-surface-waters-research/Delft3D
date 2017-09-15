@@ -22,7 +22,7 @@
 				<Tool Name="VFCustomBuildTool"/>
 				<Tool Name="VFPreLinkEventTool"/>
 				<Tool Name="VFPreBuildEventTool" CommandLine="call $(SolutionDir)scripts_lgpl\win32\update_version.cmd $(SolutionDir)engines_gpl\waq\version\version_number_delwaq1.rc $(SolutionDir)\engines_gpl\waq\ $(SolutionDir)engines_gpl\waq\version\version_number.ini --Onlyifmissing&#xA;call $(SolutionDir)\scripts_lgpl\win32\update_version.cmd .\src\delwaq1_version.F90 $(SolutionDir)engines_gpl\waq\ $(SolutionDir)\engines_gpl\waq\version\version_number.ini --Onlyifmissing"/>
-				<Tool Name="VFPostBuildEventTool" CommandLine="..\..\..\..\scripts_lgpl\win32\oss-install.cmd delwaq1  ..\bin &quot;$(IFORT_COMPILER13)redist\ia32\compiler\&quot;"/>
+				<Tool Name="VFPostBuildEventTool" CommandLine="..\..\..\..\scripts_lgpl\win32\oss-install.cmd delwaq1  ..\bin &quot;$(IFORT_COMPILER15)redist\ia32\compiler\&quot;"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Debug|x64" OutputDirectory="..\..\bin\$(PlatformName)\$(ConfigurationName)">
 				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="..\..\..\part\include;..\..\include" FixedFormLineLength="fixedLength132" LocalVariableStorage="localStorageAutomatic" ModulePath="$(OutDir)\" Traceback="true"/>
@@ -42,7 +42,7 @@
 				<Tool Name="VFCustomBuildTool"/>
 				<Tool Name="VFPreLinkEventTool"/>
 				<Tool Name="VFPreBuildEventTool" CommandLine="call $(SolutionDir)scripts_lgpl\win32\update_version.cmd $(SolutionDir)engines_gpl\waq\version\version_number_delwaq1.rc $(SolutionDir)\engines_gpl\waq\ $(SolutionDir)engines_gpl\waq\version\version_number.ini --Onlyifmissing&#xA;call $(SolutionDir)\scripts_lgpl\win32\update_version.cmd .\src\delwaq1_version.F90 $(SolutionDir)engines_gpl\waq\ $(SolutionDir)\engines_gpl\waq\version\version_number.ini --Onlyifmissing"/>
-				<Tool Name="VFPostBuildEventTool" CommandLine="..\..\..\..\scripts_lgpl\win64\oss-install_x64.cmd delwaq1 ..\bin &quot;$(IFORT_COMPILER13)redist\intel64\compiler\&quot;"/>
+				<Tool Name="VFPostBuildEventTool" CommandLine="..\..\..\..\scripts_lgpl\win64\oss-install_x64.cmd delwaq1 ..\bin &quot;$(IFORT_COMPILER15)redist\intel64\compiler\&quot;"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration></Configurations>
 	<Files>
 		<Filter Name="Header Files" Filter="fi;fd"/>
