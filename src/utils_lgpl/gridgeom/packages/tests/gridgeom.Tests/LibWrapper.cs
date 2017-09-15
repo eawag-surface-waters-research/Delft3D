@@ -7,24 +7,23 @@ namespace gridgeom.Tests
     //this class wraps the single library functions
     public class GridGeomLibWrapper
     {
-        #region import_ggeo_functions
+        #region ggeo_functions
         /// <summary>
-        /// 
+        /// Converts 1d ugrid coordinates to x-y coordinates
         /// </summary>
-        /// <param name="c_branchids"></param>
-        /// <param name="c_branchoffsets"></param>
-        /// <param name="c_geopointsX"></param>
-        /// <param name="c_geopointsY"></param>
-        /// <param name="c_nbranchgeometrynodes"></param>
-        /// <param name="c_branchlengths"></param>
-        /// <param name="c_meshXCoords"></param>
-        /// <param name="c_meshYCoords"></param>
-        /// <param name="nbranches"></param>
-        /// <param name="ngeopoints"></param>
-        /// <param name="nmeshnodes"></param>
+        /// <param name="c_branchids">The branch ids</param>
+        /// <param name="c_branchoffsets">The branch offsets</param>
+        /// <param name="c_geopointsX">The x coordiantes of the geometrical points</param>
+        /// <param name="c_geopointsY">The y coordiantes of the geometrical points</param>
+        /// <param name="c_nbranchgeometrynodes">The number of geometrical points per branch</param>
+        /// <param name="c_branchlengths">The branch lengths</param>
+        /// <param name="c_meshXCoords">The x coordinates of the mesh points</param>
+        /// <param name="c_meshYCoords">The y coordinates of the mesh points</param>
+        /// <param name="nbranches">The number of branches</param>
+        /// <param name="ngeopoints">The number of geometrical points</param>
+        /// <param name="nmeshnodes">The number of mesh nodes</param>
         /// <returns></returns>
-        [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ggeo_get_xy_coordinates",
-            CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ggeo_get_xy_coordinates", CallingConvention = CallingConvention.Cdecl)]
         public static extern int ggeo_get_xy_coordinates_dll(
             [In] ref IntPtr c_branchids,
             [In] ref IntPtr c_branchoffsets,
@@ -39,50 +38,53 @@ namespace gridgeom.Tests
             [In] ref int nmeshnodes);
 
         /// <summary>
-        /// 
+        /// Use meshgeom to fill kn matrix
         /// </summary>
-        /// <param name="meshgeom"></param>
-        /// <param name="meshgeomdim"></param>
-        /// <param name="numk_keep"></param>
-        /// <param name="numl_keep"></param>
+        /// <param name="meshgeom"> The data structure containing the mesh information</param>
+        /// <param name="meshgeomdim">The data structure containing the mesh dimensions</param>
         /// <returns></returns>
-        [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ggeo_convert",
-            CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ggeo_convert", CallingConvention = CallingConvention.Cdecl)]
         public static extern int ggeo_convert_dll([In, Out] ref meshgeom meshgeom, [In] ref meshgeomdim meshgeomdim);
 
         /// <summary>
-        /// 
+        /// Makes the 1d/2d links (results are stored in memory)
         /// </summary>
         /// <returns></returns>
-        [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ggeo_make1D2Dinternalnetlinks",
-            CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ggeo_make1D2Dinternalnetlinks", CallingConvention = CallingConvention.Cdecl)]
         public static extern int ggeo_make1D2Dinternalnetlinks_dll();
 
         /// <summary>
-        /// 
+        /// Use 1d array to fill kn matrix
         /// </summary>
+        /// <param name="c_meshXCoords">The x coordinates of the mesh points</param>
+        /// <param name="c_meshYCoords">The y coordinates of the mesh points</param>
+        /// <param name="c_branchids">The branch ids</param>
+        /// <param name="nbranches">The number of branches</param>
+        /// <param name="nmeshnodes">The number of mesh nodes</param>
         /// <returns></returns>
-        [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ggeo_convert_1d_arrays",
-            CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ggeo_convert_1d_arrays", CallingConvention = CallingConvention.Cdecl)]
         public static extern int ggeo_convert_1d_arrays_dll([In] ref IntPtr c_meshXCoords, [In] ref IntPtr c_meshYCoords, [In] ref IntPtr c_branchids, [In] ref int nbranches, [In] ref int nmeshnodes);
 
 
         /// <summary>
-        /// The number of links
+        /// Gets the number of 1d-2d links produced by ggeo_make1D2Dinternalnetlinks_dll
         /// </summary>
-        /// <param name="nlinks"></param>
+        /// <param name="nlinks">The number of links</param>
         /// <returns></returns>
-        [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ggeo_get_links_count",
-            CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ggeo_get_links_count", CallingConvention = CallingConvention.Cdecl)]
         public static extern int ggeo_get_links_count_dll([In, Out] ref int nlinks);
 
-
-        [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ggeo_get_links",
-            CallingConvention = CallingConvention.Cdecl)]
+        /// <summary>
+        /// Gets the number the 1d-2d links produced by ggeo_make1D2Dinternalnetlinks_dll
+        /// </summary>
+        /// <param name="arrayfrom">The cell indexes where the links start</param>
+        /// <param name="arrayto">The node indexes where the links end</param>
+        /// <param name="nlinks">The number of links</param>
+        /// <returns></returns>
+        [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ggeo_get_links", CallingConvention = CallingConvention.Cdecl)]
         public static extern int ggeo_get_links_dll([In, Out] ref IntPtr arrayfrom, [In, Out] ref IntPtr arrayto, [In] ref int nlinks);
 
-
-        #endregion import_ggeo_functions
+        #endregion ggeo_functions
 
 
         public int ggeo_get_xy_coordinates(
