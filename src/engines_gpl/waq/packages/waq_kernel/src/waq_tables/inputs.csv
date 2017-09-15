@@ -123,7 +123,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "Coverage  ","PotEM04   ",  10,"Y","x",1
 "Coverage  ","EM05      ",  11,"Y","x",1
 "Coverage  ","PotEM05   ",  12,"Y","x",1
-"Coverage  ","IbotSeg   ",  13,"N","x",1
+"Coverage  ","IBotSeg   ",  13,"N","x",1
 "Coverage  ","RadMacrop ",  14,"N","x",1
 "DAYRAD    ","RadSurf   ",   1,"N","x",1
 "DAYRAD    ","ITIME     ",   2,"N"," ",1
@@ -14637,3 +14637,15 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "IM_Floceq ","RcFloc    ",   6,"Y","x",1
 "IM_Floceq ","RcBreakup ",   7,"Y","x",1
 "IM_Floceq ","DELT      ",   8,"N","x",1
+"AtmDep_Sal","fAtmDepSal",   1,"N","x",1
+"AtmDep_Sal","Depth     ",   2,"N","x",1
+"AtmDep_Sal","Salinity  ",   3,"Y","x",1
+"AtmDep_Sal","sw1AtmDSal",   4,"Y","x",1
+"AtmDep_Sal","sw2AtmDSal",   5,"Y","x",1
+"AtmDep_Sal","DELT      ",   6,"N","x",1
+"AtmDep_Ecl","fAtmDepEcl",   1,"N","x",1
+"AtmDep_Ecl","Depth     ",   2,"N","x",1
+"AtmDep_Ecl","EColi     ",   3,"Y","x",1
+"AtmDep_Ecl","sw1AtmDEcl",   4,"Y","x",1
+"AtmDep_Ecl","sw2AtmDEcl",   5,"Y","x",1
+"AtmDep_Ecl","DELT      ",   6,"N","x",1

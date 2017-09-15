@@ -50,7 +50,7 @@ outppr,outpit,outpnm,outpdo,outpsx
 "Coverage  ","CoverEM03 ",   4,"x",1
 "Coverage  ","CoverEM04 ",   5,"x",1
 "Coverage  ","CoverEM05 ",   6,"x",1
-"Coverage  ","IbotSeg   ",   7,"x",1
+"Coverage  ","IBotSeg   ",   7,"x",1
 "Coverage  ","RadSurf   ",   8,"x",1
 "DAYRAD    ","DayRadSurf",   1,"x",1
 "Temperatur","RCHeat    ",   1,"x",1

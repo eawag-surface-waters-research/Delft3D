@@ -800,6 +800,8 @@ stocfl,stocsu,stocsc
 "dSedAAP   ","AAPS1     ",   1.00000
 "dSedAAPS2 ","AAP       ",  -1.00000
 "dSedAAPS2 ","AAPS2     ",   1.00000
+"dSedCAAP  ","AAP       ",  -1.00000
+"dSedCAAP  ","AAPS1     ",   1.00000
 "dResS1DetC","POC1      ",   1.00000
 "dResS1DetC","DetCS1    ",  -1.00000
 "dResS2DetC","DetCS2    ",  -1.00000
@@ -2680,3 +2682,5 @@ stocfl,stocsu,stocsc
 "dFlocIM1  ","IM1       ",   1.00000
 "dFlocIM2  ","IM2       ",   1.00000
 "dFlocIM3  ","IM3       ",   1.00000
+"dAtmDepSal","Salinity  ",   1.00000
+"dAtmDepEcl","Ecoli     ",   1.00000

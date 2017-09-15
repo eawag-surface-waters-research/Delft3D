@@ -674,3 +674,5 @@ procid,procco,procfo,procnm
 "DEBGRZ_G5 ",123,"DEBGRZ    ","Dynamics of DEB Grazer5 (def: passive isomorphs)  "
 "Dredge    ",123,"DREDGE    ","Dredging and dumping of basins                    "
 "IM_Floceq ",123,"FLOCEQ    ","Flocculation equilibrium emperical model Manning  "
+"AtmDep_Sal",123,"ATMDEP    ","Atmospheric deposition salinity                   "
+"AtmDep_Ecl",123,"ATMDEP    ","Atmospheric deposition E-coli bacteria            "
