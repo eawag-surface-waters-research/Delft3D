@@ -78,6 +78,10 @@ libdir["fortran1732"] = "$(IFORT_COMPILER17)\\compiler\\lib\\ia32"
 libdir["c1732"] = libdir["fortran1732"]
 libdir["fortran1764"] = "$(IFORT_COMPILER17)\\compiler\\lib\\intel64"
 libdir["c1764"] = libdir["fortran1764"]
+libdir["fortran1832"] = "$(IFORT_COMPILER18)\\compiler\\lib\\ia32"
+libdir["c1832"] = libdir["fortran1832"]
+libdir["fortran1864"] = "$(IFORT_COMPILER18)\\compiler\\lib\\intel64"
+libdir["c1864"] = libdir["fortran1864"]
 
 #
 #
@@ -115,6 +119,10 @@ redistdir["fortran1732"] = "$(IFORT_COMPILER17)redist\\ia32\\compiler\\&quot"
 redistdir["c1732"] = "$(IFORT_COMPILER17)redist\\ia32\\compiler\\"
 redistdir["fortran1764"] = "$(IFORT_COMPILER17)redist\\intel64\\compiler\\&quot"
 redistdir["c1764"] = "$(IFORT_COMPILER17)redist\\intel64\\compiler\\"
+redistdir["fortran1832"] = "$(IFORT_COMPILER18)redist\\ia32\\compiler\\&quot"
+redistdir["c1832"] = "$(IFORT_COMPILER18)redist\\ia32\\compiler\\"
+redistdir["fortran1864"] = "$(IFORT_COMPILER18)redist\\intel64\\compiler\\&quot"
+redistdir["c1864"] = "$(IFORT_COMPILER18)redist\\intel64\\compiler\\"
 
 #
 #
@@ -540,7 +548,7 @@ def build_gui():
     global chooseIfort
 
     root = Tk(className="Choose IDE and compiler")
-    root.geometry("600x300")
+    root.geometry("650x350")
     
     vs_gui = IntVar()
     ifort_gui = IntVar()
@@ -553,29 +561,30 @@ def build_gui():
     Radiobutton(root, text="VS 2012           + .Net Framework 4.5", variable=vs_gui, value=2012).grid(row=4, column=0, sticky=W)
     Radiobutton(root, text="VS 2010           + .Net Framework 4.0", variable=vs_gui, value=2010).grid(row=5, column=0, sticky=W)
     # default value
-    vs_gui.set(2012)
+    vs_gui.set(2015)
     
     if chooseIfort == 1:
         Label(text="IFORT Version:", relief=RIDGE, width=20).grid(row=0, column=2)
-        Radiobutton(root, text="IFORT17: (not tested yet)                      ", variable=ifort_gui, value=17).grid(row=1, column=2, sticky=W)
-        Radiobutton(root, text="IFORT16: Intel Parallel Studio XE 2016 Update 4", variable=ifort_gui, value=16).grid(row=2, column=2, sticky=W)
-        Radiobutton(root, text="IFORT15: Intel Parallel Studio XE 2015 Update 6", variable=ifort_gui, value=15).grid(row=3, column=2, sticky=W)
-        Radiobutton(root, text="IFORT14: Intel Visual Fortran Composer XE 2014 ", variable=ifort_gui, value=14).grid(row=4, column=2, sticky=W)
-        Radiobutton(root, text="IFORT13: Intel Visual Fortran Composer XE 2013 ", variable=ifort_gui, value=13).grid(row=5, column=2, sticky=W)
-        Radiobutton(root, text="IFORT12: Intel Visual Fortran Composer XE 2011 ", variable=ifort_gui, value=12).grid(row=6, column=2, sticky=W)
+        Radiobutton(root, text="IFORT18: (not tested yet)                      ", variable=ifort_gui, value=18).grid(row=1, column=2, sticky=W)
+        Radiobutton(root, text="IFORT17: (not tested yet)                      ", variable=ifort_gui, value=17).grid(row=2, column=2, sticky=W)
+        Radiobutton(root, text="IFORT16: Intel Parallel Studio XE 2016 Update 4", variable=ifort_gui, value=16).grid(row=3, column=2, sticky=W)
+        Radiobutton(root, text="IFORT15: Intel Parallel Studio XE 2015 Update 6", variable=ifort_gui, value=15).grid(row=4, column=2, sticky=W)
+        Radiobutton(root, text="IFORT14: Intel Visual Fortran Composer XE 2014 ", variable=ifort_gui, value=14).grid(row=5, column=2, sticky=W)
+        Radiobutton(root, text="IFORT13: Intel Visual Fortran Composer XE 2013 ", variable=ifort_gui, value=13).grid(row=6, column=2, sticky=W)
+        Radiobutton(root, text="IFORT12: Intel Visual Fortran Composer XE 2011 ", variable=ifort_gui, value=12).grid(row=7, column=2, sticky=W)
         # default value
-        ifort_gui.set(13)
+        ifort_gui.set(16)
     else:
         ifort_gui.set(-999)
     
-    Label(text=" ").grid(row=7)
+    Label(text=" ").grid(row=8)
     if chooseIfort == 1:
-        Label(text="Choose your Visual Studio version and IFORT version and click 'Apply'").grid(row=8, column=0, columnspan=3)
+        Label(text="Choose your Visual Studio version and IFORT version and click 'Apply'").grid(row=9, column=0, columnspan=3)
     else:
-        Label(text="Choose your Visual Studio version and click 'Apply'").grid(row=8, column=0, columnspan=3)
+        Label(text="Choose your Visual Studio version and click 'Apply'").grid(row=9, column=0, columnspan=3)
     
-    b1 = Button(root, text="Apply", width=20, command=do_work).grid(row=9, column=0, sticky=W)
-    b2 = Button(root, text="Exit", width=20, command=exit_button_pressed).grid(row=9, column=2, sticky=E)
+    b1 = Button(root, text="Apply", width=20, command=do_work).grid(row=10, column=0, sticky=W)
+    b2 = Button(root, text="Exit", width=20, command=exit_button_pressed).grid(row=10, column=2, sticky=E)
     
     # To keep GUI window running
     root.mainloop()
