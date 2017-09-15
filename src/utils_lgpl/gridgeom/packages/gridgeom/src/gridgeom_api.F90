@@ -73,7 +73,7 @@ function ggeo_get_xy_coordinates_dll(c_branchids, c_branchoffsets, c_geopointsX,
    
 end function ggeo_get_xy_coordinates_dll
 
-function ggeo_convert_dll(c_meshgeom, c_meshgeomdim, numk_keep, numl_keep) result(ierr) bind(C, name="ggeo_convert")
+function ggeo_convert_dll(c_meshgeom, c_meshgeomdim) result(ierr) bind(C, name="ggeo_convert")
 !DEC$ ATTRIBUTES DLLEXPORT :: ggeo_convert_dll
 
    use gridoperations
@@ -83,11 +83,10 @@ function ggeo_convert_dll(c_meshgeom, c_meshgeomdim, numk_keep, numl_keep) resul
    type(c_t_ug_meshgeom), intent(in)      :: c_meshgeom
    type(c_t_ug_meshgeomdim), intent(in)   :: c_meshgeomdim
    type(t_ug_meshgeom)                    :: meshgeom
-   integer(kind=c_int), intent(in)        :: numk_keep, numl_keep 
    integer                                :: ierr
    
    ierr = convert_cptr_to_meshgeom(c_meshgeom, c_meshgeomdim, meshgeom)
-   ierr = ggeo_convert(meshgeom, numk_keep, numl_keep)
+   ierr = ggeo_convert(meshgeom)
    
 end function ggeo_convert_dll
 
@@ -98,5 +97,59 @@ function ggeo_make1D2Dinternalnetlinks_dll() result(ierr) bind(C, name="ggeo_mak
    ierr = ggeo_make1D2Dinternalnetlinks()
    
 end function ggeo_make1D2Dinternalnetlinks_dll
+
+
+function ggeo_get_links_count_dll(nlinks) result(ierr) bind(C, name="ggeo_get_links_count")
+!DEC$ ATTRIBUTES DLLEXPORT :: ggeo_get_links_count_dll
+   
+   use gridoperations
+   
+   integer(kind=c_int), intent(inout):: nlinks
+   integer :: ierr
+   
+   ierr =  ggeo_get_links_count(nlinks)
+   
+end function ggeo_get_links_count_dll
+
+
+function ggeo_get_links_dll(c_arrayfrom, c_arrayto, nlinks) result(ierr) bind(C, name="ggeo_get_links")
+!DEC$ ATTRIBUTES DLLEXPORT :: ggeo_get_links_dll
+   use gridoperations
+   
+   type(c_ptr), intent(in)                  :: c_arrayfrom, c_arrayto
+   integer(kind=c_int), intent(in)          :: nlinks
+   integer, pointer                         :: arrayfrom(:), arrayto(:)
+   integer                                  :: ierr
+   
+   call c_f_pointer(c_arrayfrom, arrayfrom, (/ nlinks /))
+   call c_f_pointer(c_arrayto, arrayto, (/ nlinks /))
+   
+   ierr = ggeo_get_links(arrayfrom, arrayto)
+   
+end function ggeo_get_links_dll
+
+function ggeo_convert_1d_arrays_dll(c_nodex, c_nodey, c_branchid, nbranches, nmeshnodes) result(ierr) bind(C, name="ggeo_convert_1d_arrays")
+!DEC$ ATTRIBUTES DLLEXPORT :: ggeo_convert_1d_arrays_dll
+
+   use gridoperations
+   use gridgeom
+   use meshdata
+   
+   type(c_ptr), intent(in)                :: c_nodex, c_nodey, c_branchid   
+   integer(kind=c_int), intent(in)        :: nmeshnodes, nBranches
+   !fortran pointers
+   double precision, pointer              :: nodex(:), nodey(:)
+   integer, pointer                       :: branchids(:)
+   integer                                :: ierr
+   type(t_ug_meshgeom)                    :: meshgeom
+   
+   call c_f_pointer(c_nodex, nodex, (/ nmeshnodes /))
+   call c_f_pointer(c_nodey, nodey, (/ nmeshnodes /))
+   call c_f_pointer(c_branchid, branchids, (/ nmeshnodes /))
+   
+   ierr = ggeo_convert_1d_arrays(nodex, nodey, nBranches, branchids, meshgeom)
+   ierr = ggeo_convert(meshgeom)
+
+end function ggeo_convert_1d_arrays_dll
 
 end module gridgeom_api

@@ -54,8 +54,8 @@ module network_ggeo_data
 
   ! Net link related :
   integer,  allocatable, target    :: kn(:,:)         !< [-] Net links: kn(1,:)=from-idx, kn(2,:)=to-idx, kn(3,:)=net link type (0/1/2/3/4) {"shape": [3, "numl"]}
-  integer,  allocatable            :: KN0 (:,:)       !< Backup for kn.
-  integer,  allocatable            :: LC  (:)         !< (numl) Mask array for net links.
+  integer,  allocatable            :: KN0(:,:)        !< Backup for kn.
+  integer,  allocatable            :: LC(:)           !< (numl) Mask array for net links.
   integer,  allocatable            :: LC0 (:)         !< Backup for lc.
   real   , allocatable             :: RLIN(:)         !< (numl) Placeholder for link values to be displayed.
   double precision, allocatable    :: xe(:), ye(:)    !< (numl) Edge (link) center coordinates.

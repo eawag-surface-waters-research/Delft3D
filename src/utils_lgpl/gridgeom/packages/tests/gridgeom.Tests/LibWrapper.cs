@@ -38,13 +38,48 @@ namespace gridgeom.Tests
             [In] ref int ngeopoints,
             [In] ref int nmeshnodes);
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="meshgeom"></param>
+        /// <param name="meshgeomdim"></param>
+        /// <param name="numk_keep"></param>
+        /// <param name="numl_keep"></param>
+        /// <returns></returns>
         [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ggeo_convert",
             CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ggeo_convert_dll([In, Out] ref meshgeom meshgeom, [In] ref meshgeomdim meshgeomdim, [In] ref int numk_keep, [In] ref int numl_keep);
+        public static extern int ggeo_convert_dll([In, Out] ref meshgeom meshgeom, [In] ref meshgeomdim meshgeomdim);
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ggeo_make1D2Dinternalnetlinks",
             CallingConvention = CallingConvention.Cdecl)]
         public static extern int ggeo_make1D2Dinternalnetlinks_dll();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ggeo_convert_1d_arrays",
+            CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ggeo_convert_1d_arrays_dll([In] ref IntPtr c_meshXCoords, [In] ref IntPtr c_meshYCoords, [In] ref IntPtr c_branchids, [In] ref int nbranches, [In] ref int nmeshnodes);
+
+
+        /// <summary>
+        /// The number of links
+        /// </summary>
+        /// <param name="nlinks"></param>
+        /// <returns></returns>
+        [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ggeo_get_links_count",
+            CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ggeo_get_links_count_dll([In, Out] ref int nlinks);
+
+
+        [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ggeo_get_links",
+            CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ggeo_get_links_dll([In, Out] ref IntPtr arrayfrom, [In, Out] ref IntPtr arrayto, [In] ref int nlinks);
 
 
         #endregion import_ggeo_functions
@@ -80,9 +115,9 @@ namespace gridgeom.Tests
         }
 
 
-        public int ggeo_convert(ref meshgeom c_meshgeom, ref meshgeomdim c_meshgeomdim, ref int numk_keep, ref int numl_keep)
+        public int ggeo_convert(ref meshgeom c_meshgeom, ref meshgeomdim c_meshgeomdim )
         {
-            int ierr = ggeo_convert_dll(ref  c_meshgeom, ref  c_meshgeomdim, ref numk_keep, ref numl_keep);
+            int ierr = ggeo_convert_dll(ref  c_meshgeom, ref  c_meshgeomdim );
             return ierr;
         }
 
@@ -92,6 +127,23 @@ namespace gridgeom.Tests
             return ierr;
         }
 
+        public int ggeo_convert_1d_arrays(ref IntPtr c_meshXCoords, ref IntPtr c_meshYCoords, ref IntPtr c_branchids, ref int  nbranches,ref int nmeshnodes)
+        {
+            int ierr = ggeo_convert_1d_arrays_dll(ref c_meshXCoords, ref c_meshYCoords, ref c_branchids, ref nbranches, ref nmeshnodes);
+            return ierr;
+        }
+
+        public int ggeo_get_links_count(ref int nbranches)
+        {
+            int ierr = ggeo_get_links_count_dll(ref nbranches);
+            return ierr;
+        }
+
+        public int ggeo_get_links(ref IntPtr arrayfrom, ref IntPtr arrayto, ref int nlinks)
+        {
+            int ierr = ggeo_get_links_dll(ref arrayfrom, ref arrayto, ref nlinks);
+            return ierr;
+        }
 
     }
 }

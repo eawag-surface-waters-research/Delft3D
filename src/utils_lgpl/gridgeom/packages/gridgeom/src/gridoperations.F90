@@ -7,6 +7,9 @@
    !public functions
    public :: make1D2Dinternalnetlinks
    public :: ggeo_convert
+   public :: ggeo_convert_1d_arrays
+   public :: ggeo_get_links_count
+   public :: ggeo_get_links
    
    !All subroutines are made private (we do not expose them for now)
    private
@@ -3650,21 +3653,18 @@
    end function make1D2Dinternalnetlinks
 
    !< converter function
-   function ggeo_convert(meshgeom, numk_keep, numl_keep) result(ierr)
+   function ggeo_convert(meshgeom) result(ierr)
 
    use meshdata
    use network_ggeo_data
    use m_ggeo_missing
 
-   !integer                             :: NUMK, NUML, jathindams, ierr
    type(t_ug_meshgeom), intent(in)      :: meshgeom
    integer                              :: numk_last, numl_last, ierr, numk_read, l
-   integer, intent(in)                  :: numk_keep, numl_keep
-
-   ierr = 0
-
-   numk_last = numk_keep
-   numl_last = numl_keep
+   ierr = 0   
+   
+   numk_last = LNUMK
+   numl_last = LNUML
    numk_read = meshgeom%numnode
 
    !Prepare net vars for new data and fill with values from file, increases nod, xk, yk, zk, kn if needed
@@ -3683,7 +3683,111 @@
    !Increase the number of links
    NUML = numl_last + meshgeom%numedge
    NUMK = numk_last + meshgeom%numnode
+   
+   LNUMK = NUMK 
+   LNUML = NUML
 
    end function ggeo_convert
+   
+   !< get the number of created links
+   function ggeo_get_links_count(nlinks) result(ierr)
+   
+   use network_ggeo_data
+      
+   integer, intent(inout)  :: nlinks
+   integer                 :: l, ierr
+   
+   ierr = 0
+   nlinks = 0
+   do l=1,NUML
+        if(kn(3,l).eq.3) then
+            nlinks = nlinks + 1
+        end if
+   end do
+   
+   end function ggeo_get_links_count
+   
+   !< get the links
+   function ggeo_get_links(arrayfrom, arrayto)  result(ierr)
+   
+   use network_ggeo_data
+      
+   integer, intent(inout):: arrayfrom(:), arrayto(:)
+   integer :: ierr, nlinks, l, nc
+   
+   ierr     = 0
+   nlinks   = 0
+   
+   do l=1,numl
+        if(kn(3,l).eq.3) then
+            nlinks = nlinks + 1
+            nc = 0
+            call incells(xk(kn(1,l)), yk(kn(1,l)), nc)
+            if (nc < 1) then
+                ierr = -1
+                return
+            endif
+            arrayfrom(nlinks) = nc  !2d cell       
+            arrayto(nlinks)   = kn(2,l)  !1dlink
+        end if
+   end do
+   
+   end function ggeo_get_links
+    
+   !< create meshgeom from array
+   function ggeo_convert_1d_arrays(nodex, nodey, nBranches, branchid, meshgeom) result(ierr)
+   
+   use meshdata
+   use m_alloc
+   
+   integer, intent(in)                  :: branchid(:), nBranches
+   double precision, intent(in)         :: nodex(:), nodey(:)
+   type(t_ug_meshgeom), intent(inout)   :: meshgeom
+   integer                              :: ierr, i, k, idxstart, idxbr, cbranchid, idxend
+   
+   ierr = 0
+   
+   !The last computational node of a branch overlaps with the starting one
+   meshgeom%dim = 1
+   meshgeom%numnode =  size(nodex,1)
+   meshgeom%numedge = meshgeom%numnode - nBranches
 
+   allocate(meshgeom%nodex(meshgeom%numnode))
+   allocate(meshgeom%nodey(meshgeom%numnode))
+   allocate(meshgeom%edge_nodes(2, meshgeom%numedge))
+   allocate(meshgeom%branchids(size(branchid,1)))
+
+   !Assign the node coordinates
+   meshgeom%nodex = nodex
+   meshgeom%nodey = nodey
+   meshgeom%branchids = branchid
+
+   !Calculate the edge_node assuming discretization points are consecutive within the same branch.
+   cbranchid       = meshgeom%branchids(1)
+   idxstart       = 1
+   idxbr          = 1
+   idxend         = 1
+   k              = 0
+   do while (idxbr<=nBranches)
+       do i = idxstart + 1, meshgeom%numnode
+           if (meshgeom%branchids(i).ne.cbranchid) then
+               cbranchid = meshgeom%branchids(i)
+               idxend = i - 1;
+               exit
+           endif
+           if (i == meshgeom%numnode) then
+               idxend = i;
+           endif
+       enddo
+       do i = idxstart, idxend - 1
+           k = k +1
+           meshgeom%edge_nodes(1,k) = i
+           meshgeom%edge_nodes(2,k) = i + 1
+       enddo
+       idxstart    = idxend + 1
+       idxbr       = idxbr + 1
+   enddo
+   
+   end function ggeo_convert_1d_arrays
+   
    end module gridoperations
