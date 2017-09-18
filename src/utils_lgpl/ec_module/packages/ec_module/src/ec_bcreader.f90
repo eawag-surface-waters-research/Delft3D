@@ -46,10 +46,8 @@ contains
     success = .false.
     bc%qname = quantityName
     bc%bcname = plilabel
-    bc%fname = fname                                  ! store original filename for later referece (?)
-    if (associated(bc%quantity)) then
-       nullify(bc%quantity)
-    endif
+    bc%fname = fname                                  ! store original filename for later reference (?)
+    if (associated(bc%quantity)) deallocate(bc%quantity)
     allocate(bc%quantity)
     call str_upper(bc%qname,len(trim(bc%qname)))
     call str_upper(bc%bcname,len(trim(bc%bcname)))
@@ -101,18 +99,16 @@ contains
     integer (kind=8),       intent(in)      :: fhandle
     integer,                intent(out)     :: iostat
 
-    character*(1000)    ::  rec
-    integer             ::  reclen
-    integer             ::  commentpos
-    character(len=:),   &
-         allocatable    ::  keyvaluestr                         ! all key-value pairs in one header
-    integer             ::  posfs
-    integer             ::  nfld
-    integer             ::  nq
-    logical             ::  jablock, jaheader
-    integer             ::  lineno
-    integer (kind=8)    ::  savepos
-    integer             ::  iostatloc
+    character*(1000)              ::  rec
+    integer                       ::  reclen
+    integer                       ::  commentpos
+    character(len=:), allocatable ::  keyvaluestr ! all key-value pairs in one header; allocated on assign
+    integer                       ::  posfs
+    integer                       ::  nfld
+    integer                       ::  nq
+    logical                       ::  jablock, jaheader
+    integer                       ::  lineno
+    integer (kind=8)              ::  savepos
 
     success = .false.
     iostat = EC_UNKNOWN_ERROR
@@ -125,13 +121,7 @@ contains
           iostat = EC_EOF
           return
        endif
-       !      read(fhandle,'(a200)', iostat=iostat) rec
        call mf_read(fhandle,rec,savepos)
-       iostatloc = 0 ! mf_read always ok?
-       if (iostatloc /= 0) then
-          iostat = iostatloc
-          return ! beter break?
-       endif
        lineno = lineno + 1
        if (index('!#%*',rec(1:1))>0) cycle                     ! deal with various begin-of-line delimiters
        reclen = len_trim(rec)                                  ! deal with various comment delimiters
@@ -212,8 +202,6 @@ contains
                       iostat = EC_DATA_NOTFOUND
                    endif                                       ! Right label
                    jaheader = .false.                          ! No, we are NOT reading a header
-                   if (jablock) then                           ! Yes, we are in the bc-block of interest
-                   endif                                       ! found matching block
                 endif                                          ! switch to datamode
              endif          ! in header mode (data lines are ignored)
           endif             ! not a new '[forcing]' item
