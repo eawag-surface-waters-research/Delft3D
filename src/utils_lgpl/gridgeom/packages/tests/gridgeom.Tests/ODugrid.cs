@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using NUnit.Framework;
-using NUnit.Framework.Internal;
 using General.tests;
-using UGrid.tests;
 using System.IO;
 
 //To compile and run this test you add NUnit to your visual studio solution and 
@@ -17,14 +15,14 @@ namespace gridgeom.Tests
         //Constructor loads the library
         static ODugrid()
         {
-            string filename = TestHelper.GetLibraryPath(LibDetails.LIB_NAME);
+            string filename = TestHelper.GetLibraryPath(GridGeomLibWrapper.LibDetails.LIB_NAME);
             _gridgeom_libptr = TestHelper.LoadLibrary(filename);
             //we should chek the pointer is not null
             Assert.That(_gridgeom_libptr, Is.Not.Null);
 
             //load netcdf for reading in meshgeom
-            TestHelper.SetSharedPath(LibDetails.NETCDF_DEP);
-            filename = TestHelper.GetLibraryPath(LibDetails.NETCDF_LIB_NAME);
+            TestHelper.SetSharedPath(GridGeomLibWrapper.LibDetails.NETCDF_DEP);
+            filename = TestHelper.GetLibraryPath(GridGeomLibWrapper.LibDetails.NETCDF_LIB_NAME);
             _netcdf_libptr = TestHelper.LoadLibrary(filename);
             Assert.That(_netcdf_libptr, Is.Not.Null);
         }

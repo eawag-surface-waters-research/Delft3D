@@ -6401,8 +6401,6 @@ src/utils_lgpl/gridgeom/packages/gridgeom/src/odugrid.F90 -text
 src/utils_lgpl/gridgeom/packages/gridgeom/src/polygon.f90 -text
 src/utils_lgpl/gridgeom/packages/test_data/1d2d_ugrid_net.nc -text
 src/utils_lgpl/gridgeom/packages/test_data/2d_ugrid_net.nc -text
-src/utils_lgpl/gridgeom/packages/tests/gridgeom.Tests/LibDetails.cs -text
-src/utils_lgpl/gridgeom/packages/tests/gridgeom.Tests/LibWrapper.cs -text
 src/utils_lgpl/gridgeom/packages/tests/gridgeom.Tests/ODugrid.cs -text
 src/utils_lgpl/gridgeom/packages/tests/gridgeom.Tests/Properties/AssemblyInfo.cs -text
 src/utils_lgpl/gridgeom/packages/tests/gridgeom.Tests/gridgeom.Tests.csproj -text
