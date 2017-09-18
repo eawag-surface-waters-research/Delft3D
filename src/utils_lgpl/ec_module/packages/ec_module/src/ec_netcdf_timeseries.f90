@@ -109,18 +109,17 @@ module m_ec_netcdf_timeseries
        end if
        nNetCDFs = 0
     end function ecNetCDFFree1dArray
-    
-    
-    !> Initialize NetCDF instance 
-    function ecNetCDFInit (ncname, ncptr, iostat) result (success)   
+
+
+    !> Initialize NetCDF instance
+    function ecNetCDFInit (ncname, ncptr, iostat) result (success)
     use string_module
-    implicit none 
-!   Open a netCDF file, store ncid, standard names ....
+    implicit none
+!   Open a netCDF file, store ncid, standard names and long names ....
 !   Open only if this file is not already opened, so check the list of nc-objects first and return a pointer ....
     logical                                        :: success
-    character(len=*),              intent(in)      :: ncname       
-!   type (tEcNetCDF),              intent(inout)   :: nc              
-    type (tEcNetCDF),              pointer         :: ncptr              
+    character(len=*),              intent(in)      :: ncname
+    type (tEcNetCDF),              pointer         :: ncptr
     integer, optional,             intent(out)     :: iostat
     character(len=50)                              :: name, cf_role , positive, zunits
 
@@ -134,6 +133,10 @@ module m_ec_netcdf_timeseries
     success = .false.
 
     ierr = nf90_open(trim(ncname), NF90_NOWRITE, ncptr%ncid)
+    if (ierr /= 0) then
+        call setECmessage("Error opening " // trim(ncname))
+        return
+    endif
     ierr = nf90_inquire(ncptr%ncid, nDims, nVars, nGlobalAtts, unlimdimid)
     ncptr%nDIms = nDims
     ncptr%nVars = nVars
@@ -143,15 +146,21 @@ module m_ec_netcdf_timeseries
     iostat = 0                                                                              ! not yet used, placeholder 
     do iDims = 1, nDims
        ierr = nf90_inquire_dimension(ncptr%ncid, iDims, name, ncptr%dimlen(iDims))
-    enddo 
+    enddo
     allocate (ncptr%standard_names(nVars))
-    ncptr%standard_names = ''
+    allocate (ncptr%long_names(nVars))
+    allocate (ncptr%variable_names(nVars))
+    ncptr%standard_names = ' '
+    ncptr%long_names = ' '
+    ncptr%variable_names = ' '
     allocate(var_dimids(nDims, nVars)) ! NOTE: nDims is only an upper bound here!
     allocate(var_ndims(nVars))
     var_ndims = 0
-    do iVars = 1, nVars                                                                     ! Inventorize variables 
-       ierr = nf90_inquire_variable(ncptr%ncid,iVars,name=ncptr%standard_names(iVars))      ! Variable name as fallback 
-       ierr = nf90_get_att(ncptr%ncid,iVars,'standard_name',ncptr%standard_names(iVars))    ! Standard name if available 
+    do iVars = 1, nVars                                                                     ! Inventorize variables
+       ierr = nf90_inquire_variable(ncptr%ncid,iVars,name=ncptr%variable_names(iVars))      ! Variable name
+       ierr = nf90_get_att(ncptr%ncid,iVars,'standard_name',ncptr%standard_names(iVars))    ! Standard name if available
+       if (ierr /= 0) ncptr%standard_names(iVars) = ncptr%variable_names(iVars)             ! Variable name as fallback for standard_name
+       ierr = nf90_get_att(ncptr%ncid,iVars,'long_name',ncptr%long_names(iVars))            ! Long name for non CF names
        ierr = nf90_inquire_variable(ncptr%ncid,iVars,ndims=var_ndims(iVars),dimids=var_dimids(:,iVars))
 
        ! Check for important var: was it the stations?
@@ -245,7 +254,7 @@ module m_ec_netcdf_timeseries
     end function ecNetCDFInit
 
     !> Scan netcdf instance for a specific quantity name and location label 
-    function ecNetCDFScan (ncptr, quantity, location, q_id, l_id, dimids) result (success)  
+    function ecNetCDFScan (ncptr, quantity, location, q_id, l_id, dimids) result (success)
     use string_module
     implicit none
     logical                          :: success
@@ -259,14 +268,34 @@ module m_ec_netcdf_timeseries
     integer    :: ivar, itim, ltl
     integer    :: ierr
 
+    ! initialization
     success = .False.
-    do ivar=1,ncptr%nVars
+
+    ! search for standard_name
+    do ivar=1, ncptr%nVars
        ltl = len_trim(quantity)
        if (strcmpi(ncptr%standard_names(ivar), quantity, ltl)) exit
-    enddo 
-    if (ivar<=ncptr%nVars) then 
+    enddo
+
+    ! if standard_name not found, search for long_name
+    if (ivar > ncptr%nVars) then
+       do ivar=1, ncptr%nVars
+          ltl = len_trim(quantity)
+          if (strcmpi(ncptr%long_names(ivar), quantity, ltl)) exit
+       enddo
+    endif
+
+    ! if also long_name not found, search for variable_name
+    if (ivar > ncptr%nVars .and. allocated(ncptr%variable_names)) then
+       do ivar=1, ncptr%nVars
+          ltl = len_trim(quantity)
+          if (strcmpi(ncptr%variable_names(ivar), quantity, ltl)) exit
+       enddo
+    endif
+
+    if (ivar <= ncptr%nVars) then
        q_id = ivar
-    else 
+    else
        call setECMessage("Quantity '"//trim(quantity)//"' not found in file '"//trim(ncptr%ncname)//"'.")
        q_id = -1 
     endif 

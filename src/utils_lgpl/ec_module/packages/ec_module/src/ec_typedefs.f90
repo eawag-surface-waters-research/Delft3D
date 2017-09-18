@@ -141,6 +141,7 @@ module m_ec_typedefs
         character(len=maxFileNameLen)                ::  ncname          !< netCDF filename
         integer, allocatable, dimension(:)           ::  dimlen          !< lengths of dimensions 
         character(len=maxFileNameLen), allocatable, dimension(:)  ::  standard_names   !< list of standard names
+        character(len=maxFileNameLen), allocatable, dimension(:)  ::  long_names       !< list of long names
         character(len=maxFileNameLen), allocatable, dimension(:)  ::  variable_names   !< list of variable names
         integer                                      ::  nDims = 0       !< Number of dimensions 
         integer                                      ::  nTims = 0       !< Number of timeseries 
