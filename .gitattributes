@@ -6840,6 +6840,8 @@ src/utils_lgpl/ods/tests/testods/testods.vcproj -text
 src/utils_lgpl/ods/tests/testods/trih-scs.dat -text
 src/utils_lgpl/ods/tests/testods/trih-scs.def -text
 src/utils_lgpl/unittests/General.tests/General.tests.csproj -text
+src/utils_lgpl/unittests/General.tests/GridGeomLibWrapper.cs -text
+src/utils_lgpl/unittests/General.tests/IoNetcdfLibWrapper.cs -text
 src/utils_lgpl/unittests/General.tests/MeshGeom.cs -text
 src/utils_lgpl/unittests/General.tests/NativeLibrary.cs -text
 src/utils_lgpl/unittests/General.tests/Properties/AssemblyInfo.cs -text
