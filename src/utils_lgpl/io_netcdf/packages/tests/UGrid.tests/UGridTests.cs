@@ -15,8 +15,8 @@ namespace UGrid.tests
         //Constructor loads the library
         static UGridTests()
         {
-            TestHelper.SetSharedPath(LibDetails.LIB_DEP);
-            string filename = TestHelper.GetLibraryPath(LibDetails.LIB_NAME);
+            TestHelper.SetSharedPath(IoNetcdfLibWrapper.LibDetails.LIB_DEP);
+            string filename = TestHelper.GetLibraryPath(IoNetcdfLibWrapper.LibDetails.LIB_NAME);
             m_libptr = TestHelper.LoadLibrary(filename);
             //we should chek the pointer is not null
             Assert.That(m_libptr, Is.Not.Null);
@@ -36,7 +36,6 @@ namespace UGrid.tests
 
         //node info
         private double[] nodesX = { 1.0, 5.0, 5.0, 8.0 };
-
         private double[] nodesY = { 4.0, 4.0, 1.0, 4.0 };
         private string[] nodesids = { "node1", "node2", "node3", "node4" };
         private string[] nodeslongNames = { "nodelong1", "nodelong2", "nodelong3", "nodelong4" };
@@ -117,7 +116,7 @@ namespace UGrid.tests
             {
                 //1. Get the mesh name
                 int ierr = -1;
-                var rnetworkName = new StringBuilder(LibDetails.MAXSTRLEN);
+                var rnetworkName = new StringBuilder(IoNetcdfLibWrapper.LibDetails.MAXSTRLEN);
                 ierr = wrapper.ionc_get_1d_network_name(ref ioncid, ref networkid, rnetworkName);
                 Assert.That(ierr, Is.EqualTo(0));
                 Assert.That(rnetworkName.ToString().Trim(), Is.EqualTo(networkName));
@@ -241,7 +240,7 @@ namespace UGrid.tests
             {
                 //1. Get the mesh name
                 int ierr = -1;
-                var rmeshName = new StringBuilder(LibDetails.MAXSTRLEN);
+                var rmeshName = new StringBuilder(IoNetcdfLibWrapper.LibDetails.MAXSTRLEN);
                 ierr = wrapper.ionc_get_mesh_name(ref ioncid, ref meshid, rmeshName);
                 Assert.That(ierr, Is.EqualTo(0));
                 Assert.That(rmeshName.ToString().Trim(), Is.EqualTo(meshname));
@@ -646,6 +645,9 @@ namespace UGrid.tests
             ierr = wrapper.ionc_create_1d_network(ref ioncid, ref networkid, networkName, ref nNodes,
                 ref nBranches, ref nGeometry);
             Assert.That(ierr, Is.EqualTo(0));
+
+
+            //var wrapperGridgeom = new GridGeomLibWrapper();
 
             //5. Write 1d network and mesh
             write1dnetwork(ioncid, networkid, ref wrapper);
