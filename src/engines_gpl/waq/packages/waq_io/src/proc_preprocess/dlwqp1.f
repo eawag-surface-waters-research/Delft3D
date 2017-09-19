@@ -940,20 +940,4 @@
  2003 format( ' Serial                        : ',i10  )
  2020 format (//' Model :            ',a40,/20x,a40 )
  2030 format (//' Run   :            ',a40,/20x,a40//)
-
- 2540 format ( / ' ERROR, no variable found with requested attribute "delwaq_role"' )
- 2550 format ( / ' Mesh used for Delwaq output: ', A )
- 2555 format ( / ' ERROR, Getting the mesh name failed' )
- 2556 format ( / ' Getting the mesh ID failed - variable: ', A )
- 2560 format ( / ' Creating the output file failed. Filename:', A )
- 2570 format ( / ' Copying the attributes failed' )
- 2571 format ( / ' Writing the UUID failed' )
- 2572 format ( / ' Copying the mesh data failed' )
- 2573 format ( / ' Rewriting the attribute failed' )
- 2580 format ( / ' Creating layer dimension failed' )
-
- 2590 format ( / ' ERROR, closing NetCDF file. Filename: ',A )
- 2599 format ( / ' NetCDF error message: ', A60 )
- 2640 format ( / ' Creating time failed' )
-
       end
