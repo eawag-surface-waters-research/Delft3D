@@ -73,6 +73,7 @@
       integer, parameter :: FILE_OMS          = 3            ! data in OMS dataspace
       integer, parameter :: FILE_DIO          = 4            ! data in DIO coupling
       integer, parameter :: FILE_UNFORMATTED  = 5            ! real unformatted file (so not binary)
+      integer, parameter :: FILE_MHY_WRK      = 6            ! multiple hyd work file
       integer, parameter :: FILE_BIG_ENDIAN  = 10            ! big endian pattern (Telemac)
 
       type t_dlwqdata
