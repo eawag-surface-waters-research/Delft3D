@@ -4701,6 +4701,11 @@ subroutine write_swan_inp (wavedata, calccount, &
     line       = ' '
     line(1:2)  = '$ '
     write (luninp, '(1X,A)') line
+    !
+    ! The following line avoids "****" being written in the spectral files due to format errors
+    !
+    line       = 'OUTPUT OPTIONS SPEC ndec=8'
+    write (luninp, '(1X,A)') line
     do i=1, size(varnam1)
        write (luninp, '(1X,3A)') 'QUANTITY ',varnam1(i), ' excv=-999.0'
     enddo
