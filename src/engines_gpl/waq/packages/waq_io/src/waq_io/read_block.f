@@ -246,7 +246,7 @@
 
             ierr2 = puttoken(lchar(17))
             data_block%extern   = .true.
-            data_block%filetype = FILE_BINARY
+            data_block%filetype = FILE_MHY_WRK
             cycle
          endif
          if ( ctoken .eq. 'INITIALS' ) then
@@ -499,22 +499,24 @@
                deallocate(data_buffer%times,data_buffer%values)
 
             elseif ( mod(data_block%filetype,10) .eq. FILE_BINARY .or.
-     &               mod(data_block%filetype,10) .eq. FILE_UNFORMATTED ) then
+     &               mod(data_block%filetype,10) .eq. FILE_UNFORMATTED .or.
+     &               mod(data_block%filetype,10) .eq. FILE_MHY_WRK) then
                if ( data_block%subject .eq. SUBJECT_SEGFUNC ) data_block%iorder = ORDER_LOC_PARAM
                write ( lunut   ,   2220   ) ctoken
                data_block%filename = ctoken
+               
+               if (mod(data_block%filetype,10) .ne. FILE_MHY_WRK) then
+                  ! Check the size of the file (if it is binary, otherwise this is not reliable)
 
-               ! Check the size of the file (if it is binary, otherwise this is not reliable)
-
-               call check_file_size( ctoken, noits*noseg, mod(data_block%filetype,10), ierr2 )
-               if ( ierr2 < 0 ) then
-                   ierr2 = 1
-                   write( lunut , 2320 ) ctoken
+                  call check_file_size( ctoken, noits*noseg, mod(data_block%filetype,10), ierr2 )
+                  if ( ierr2 < 0 ) then
+                      ierr2 = 1
+                      write( lunut , 2320 ) ctoken
+                  endif
+                  if ( ierr2 > 0 ) then
+                      write( lunut , 2330 ) ctoken, 4*(1+noits*noseg), noits, noseg
+                  endif
                endif
-               if ( ierr2 > 0 ) then
-                   write( lunut , 2330 ) ctoken, 4*(1+noits*noseg), noits, noseg
-               endif
-
             else
 
                ! Check if an inner loop column header exists for the data matrix
