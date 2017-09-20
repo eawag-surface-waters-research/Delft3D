@@ -814,7 +814,8 @@
    implicit none
    double precision,                 intent(in)    :: xp, yp    !< point coordinates
    integer,                          intent(inout) :: in        !< in(-1): initialization, out(0): outside polygon, out(1): inside polygon
-
+   
+!  Note: dbpinpol_optinside_perpol has changed in the kernel
    call dbpinpol_optinside_perpol(xp, yp, 0, in)
    end subroutine dbpinpol
 
@@ -823,6 +824,9 @@
    !! Optionally, the global jins=1/other:inside/outside-mode can be replaced by an
    !! inside/outside mode per polygon: that should then be stored as a +1/-1 in the first
    !! zpl(istart) point of each polygon.
+   
+   
+!>  Note: dbpinpol_optinside_perpol has changed in the kernel
    subroutine dbpinpol_optinside_perpol(xp,yp, inside_perpol, in) ! ALS JE VOOR VEEL PUNTEN MOET NAGAAN OF ZE IN POLYGON ZITTEN
    use m_ggeo_polygon
    use m_ggeo_missing
