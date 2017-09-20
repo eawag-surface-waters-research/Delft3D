@@ -127,6 +127,9 @@
       KEYPAR(1) = 'real-parameter'
       KEYPAR(2) = 'time-parameter'
       KEYPAR(3) = 'logical-parameter'
+
+      CALL DLWQ0T ( 'START               ', itstrt, .FALSE., .FALSE., IERR2 )
+      CALL DLWQ0T ( 'STOP                ', itstop, .FALSE., .FALSE., IERR2 )
 !
   100 CONTINUE
          ITYPE = 0
@@ -250,7 +253,7 @@
                ELSE
                   CALL CNVTIM ( istart, 1     , DTFLG1 , DTFLG3 )
                ENDIF
-               PSTART(NPERIOD) = istart
+               PSTART(NPERIOD) = max( itstrt, istart )
 !
             ELSEIF ( IKEY2 .EQ. 3 ) THEN
 !
@@ -271,7 +274,7 @@
                ELSE
                   CALL CNVTIM ( istop , 1     , DTFLG1 , DTFLG3 )
                ENDIF
-               PSTOP(NPERIOD) = istop
+               PSTOP(NPERIOD) = min( itstop, istop )
 !
             ELSEIF ( IKEY2 .EQ. 4 ) THEN
 !
