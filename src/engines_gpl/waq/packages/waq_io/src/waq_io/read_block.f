@@ -246,7 +246,7 @@
 
             ierr2 = puttoken(lchar(17))
             data_block%extern   = .true.
-            data_block%filetype = FILE_MHY_WRK
+            data_block%filetype = FILE_BINARY
             cycle
          endif
          if ( ctoken .eq. 'INITIALS' ) then
@@ -499,24 +499,22 @@
                deallocate(data_buffer%times,data_buffer%values)
 
             elseif ( mod(data_block%filetype,10) .eq. FILE_BINARY .or.
-     &               mod(data_block%filetype,10) .eq. FILE_UNFORMATTED .or.
-     &               mod(data_block%filetype,10) .eq. FILE_MHY_WRK) then
+     &               mod(data_block%filetype,10) .eq. FILE_UNFORMATTED ) then
                if ( data_block%subject .eq. SUBJECT_SEGFUNC ) data_block%iorder = ORDER_LOC_PARAM
                write ( lunut   ,   2220   ) ctoken
                data_block%filename = ctoken
-               
-               if (mod(data_block%filetype,10) .ne. FILE_MHY_WRK) then
-                  ! Check the size of the file (if it is binary, otherwise this is not reliable)
 
-                  call check_file_size( ctoken, noits*noseg, mod(data_block%filetype,10), ierr2 )
-                  if ( ierr2 < 0 ) then
-                      ierr2 = 1
-                      write( lunut , 2320 ) ctoken
-                  endif
-                  if ( ierr2 > 0 ) then
-                      write( lunut , 2330 ) ctoken, 4*(1+noits*noseg), noits, noseg
-                  endif
+               ! Check the size of the file (if it is binary, otherwise this is not reliable)
+
+               call check_file_size( ctoken, noits*noseg, mod(data_block%filetype,10), ierr2 )
+               if ( ierr2 < 0 ) then
+                   ierr2 = 1
+                   write( lunut , 2320 ) ctoken
                endif
+               if ( ierr2 > 0 ) then
+                   write( lunut , 2330 ) ctoken, 4*(1+noits*noseg), noits, noseg
+               endif
+
             else
 
                ! Check if an inner loop column header exists for the data matrix
@@ -669,6 +667,7 @@
       integer                         :: lun
       integer                         :: time
       real, dimension(:), allocatable :: data
+      character(14)                   :: strng
 
       ierr = 0
 
@@ -689,40 +688,55 @@
       endif
 
       !
-      ! Determine the number of records - iostat does not seem to distinguish between partly fulfilled
-      ! reads and end-of-file
+      ! Check if this is a steering file
       !
-      norcd   = 0
-      do
-          read( lun, iostat = ierr ) time, data
-          if ( ierr /= 0 ) then
-              exit
-          endif
-          norcd = norcd + 1
-      enddo
+      
+      read ( lun , iostat = ierr ) strng
+      if ( ierr .ne. 0 ) strng = 'x'
+      if ( strng(1:14) .ne. 'Steering file ' ) then
+         rewind( lun )
+         !
+         ! Determine the number of records - iostat does not seem to distinguish between partly fulfilled
+         ! reads and end-of-file
+         !
+         norcd   = 0
+         do
+             read( lun, iostat = ierr ) time, data
+             if ( ierr /= 0 ) then
+                 exit
+             endif
+             norcd = norcd + 1
+         enddo
 
-      !
-      ! The last record may have been too short, so try again:
-      ! - Read all the records we have been able to read
-      ! - Try reading an extra number (time). This should fail
-      !
-      rewind( lun )
-      do i = 1,norcd
-          read( lun, iostat = ierr ) time, data
-      enddo
+         !
+         ! The last record may have been too short, so try again:
+         ! - Read all the records we have been able to read
+         ! - Try reading an extra number (time). This should fail
+         !
+         rewind( lun )
+         do i = 1,norcd
+             read( lun, iostat = ierr ) time, data
+         enddo
 
-      read( lun, iostat = ierr )
+         read( lun, iostat = ierr )
 
-      !
-      ! If we have been able to read at least one record and the last read
-      ! let to and end-of-file condition, we accept the file. Otherwise return
-      ! an error.
-      !
-      if ( norcd > 0 .and. ierr < 0 ) then
-          ierr = 0
+         !
+         ! If we have been able to read at least one record and the last read
+         ! let to and end-of-file condition, we accept the file. Otherwise return
+         ! an error.
+         !
+         if ( norcd > 0 .and. ierr < 0 ) then
+             ierr = 0
+         else
+             ierr = 1
+         endif
       else
-          ierr = 1
+         !
+         ! No check yet if it is a steering file
+         !
       endif
+
+      deallocate( data )
 
       close( lun )
 
