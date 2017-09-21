@@ -275,6 +275,6 @@ subroutine get_cur(wavetime  ,kfu       ,kfv       ,u1        ,v1         , &
     deallocate (dzv1 , stat=ierr)
   if (error /= 0) then
      write(*,'(2a)') '*** ERROR: Unable to read velocities from file ', trim(filnam)
-     stop
+     call wavestop(1, '*** ERROR: Unable to read velocities from file '//trim(filnam))
   endif
 end subroutine get_cur

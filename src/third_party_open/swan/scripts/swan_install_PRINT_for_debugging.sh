@@ -1,4 +1,12 @@
 #!/bin/sh
+
+if [ -f "swan_sh.log" ]; then
+  rm -rf swan_sh.log
+fi
+echo screen output of swan.sh is written to this file >swan_sh.log
+echo and will be overwritten everytime that swan.bat is executed >>swan_sh.log
+echo >>swan_sh.log
+
 #
 ################################################################################
 ## Example shell script for submitting Delft3D-FLOW/WAVE jobs using           ##
@@ -70,16 +78,16 @@ fi
 ################################################################################
 #
 if [ $debug -eq 1 ]; then
-  echo "=== debug information (start) ==="
-  echo SGE_O_WORKDIR: $SGE_O_WORKDIR
-  echo HOSTNAME     : $HOSTNAME
-  echo NHOSTS       : $NHOSTS
-  echo NQUEUES      : $NQUEUES
-  echo NSLOTS       : $NSLOTS
-  echo PE_HOSTFILE  : $PE_HOSTFILE
-  echo D3D_HOME     : $D3D_HOME
-  echo PATH         : $PATH
-  echo "=== debug information (end) ==="
+  echo "=== debug information (start) ===" >>swan_sh.log
+  echo SGE_O_WORKDIR: $SGE_O_WORKDIR >>swan_sh.log
+  echo HOSTNAME     : $HOSTNAME >>swan_sh.log
+  echo NHOSTS       : $NHOSTS >>swan_sh.log
+  echo NQUEUES      : $NQUEUES >>swan_sh.log
+  echo NSLOTS       : $NSLOTS >>swan_sh.log
+  echo PE_HOSTFILE  : $PE_HOSTFILE >>swan_sh.log
+  echo D3D_HOME     : $D3D_HOME >>swan_sh.log
+  echo PATH         : $PATH >>swan_sh.log
+  echo "=== debug information (end) ===" >>swan_sh.log
 fi
 #
 #
@@ -88,34 +96,32 @@ fi
 ## RUN                                                                        ##
 ################################################################################
 #
-type swan.sh
-echo "Using swan executable $SWANEXEC"
-echo " "
-echo "SWAN batchfile executed for Delft3D"
+type swan.sh >>swan_sh.log
+echo "Using swan executable $SWANEXEC" >>swan_sh.log
+echo " " >>swan_sh.log
+echo "SWAN batchfile executed for Delft3D" >>swan_sh.log
 #
 # Check D3D_HOME environment variable
 #
 ready=0
 if [ "${D3D_HOME:-0}" = "0" ]; then
-  echo " "
-  echo "***ERROR: Delft3D profile not yet executed; can\'t run SWAN"
-  # No user interaction!
+  echo " " >>swan_sh.log
+  echo "***ERROR: Delft3D profile not yet executed; can\'t run SWAN" >>swan_sh.log
   # read dummy
-  ready=1
+  # ready=1
 fi
 #
 # Check swan.bat argument(s)
 #
 if [ "${1:-0}" = "0" ]; then
-  echo " "
-  echo "***ERROR: No argument added to call"
-  echo "          Should be \"swan.bat Run_Id\" "
-  # No user interaction!
+  echo " " >>swan_sh.log
+  echo "***ERROR: No argument added to call" >>swan_sh.log
+  echo "          Should be \"swan.bat Run_Id\" " >>swan_sh.log
   # read dummy
-  ready=1
+  # ready=1
 fi
 if [ ${ready} -eq 0 ]; then
-  echo "Performing computation for: ${1}.swn"
+  echo "Performing computation for: ${1}.swn" >>swan_sh.log
   #
   # Check whether SWAN executable exist
   #
@@ -137,7 +143,7 @@ if [ ${ready} -eq 0 ]; then
       #read dummy
       #
       if [ $mpirun -eq 1 ]; then
-         echo "Start of parallel computation with MPICH2 using $NSLOTS slots"
+         echo "Start of parallel computation with MPICH2 using $NSLOTS slots" >>swan_sh.log
          #
          ## General.
          #
@@ -163,7 +169,7 @@ if [ ${ready} -eq 0 ]; then
             elif [ $slot_number -lt 1000 ]; then
                print_filename=PRINT-$slot_number
             else
-               echo Warning: for all slot numbers larger than 999, print files will be moved to PRINT-1000.
+               echo Warning: for all slot numbers larger than 999, print files will be moved to PRINT-1000. >>swan_sh.log
                print_filename=PRINT-1000
             fi
             if [ -e $print_filename ]
@@ -195,17 +201,15 @@ if [ ${ready} -eq 0 ]; then
         cp source ${1}.src >/dev/null
       fi
     else
-      echo " "
-      echo "*** Error: SWAN input file ${1}.swn does not exist"
-      echo " "
-      # No user interaction!
+      echo " " >>swan_sh.log
+      echo "*** Error: SWAN input file ${1}.swn does not exist" >>swan_sh.log
+      echo " " >>swan_sh.log
       # read dummy
     fi
   else
-    echo " "
-    echo "*** ERROR: SWAN executable does not exist"
-    echo "           ${SWANEXEC}"
-    # No user interaction!
+    echo " " >>swan_sh.log
+    echo "*** ERROR: SWAN executable does not exist" >>swan_sh.log
+    echo "           ${SWANEXEC}" >>swan_sh.log
     # read dummy
   fi
 fi

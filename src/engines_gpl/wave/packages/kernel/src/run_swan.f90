@@ -73,10 +73,11 @@ subroutine run_swan (casl)
     call cp_file( swninp, wvsswn, copy, nuerr)
     if (nuerr > 0) then
        write (*, '(a,i3)') '*** ERROR: While copying swan.inp to waves.swn, errorcode:', nuerr
-       stop
+       call wavestop(1, '*** ERROR: While copying swan.inp to waves.swn')
     endif
     !
     if (arch == 'linux') then
+       write(*,'(a)')'>>...Check file swan_sh.log'
        write(swanCommand, '(3a)') 'swan.sh', ' ', trim(casl)
        !
        ! SWAN execution
@@ -96,6 +97,7 @@ subroutine run_swan (casl)
           call util_system(swanCommand(1:len_trim(swanCommand)+5))
        endif
     else
+       write(*,'(a)')'>>...Check file swan_bat.log'
        write(swanCommand,'(3a)') 'swan.bat', ' ', trim(casl)
        !
        ! SWAN execution
@@ -111,7 +113,7 @@ subroutine run_swan (casl)
     inquire (file = 'norm_end', exist = ex)
     if (.not. ex) then
        write (*,'(a)') '*** ERROR: file ''norm_end'' expected to signal a correct SWAN calculation'
-       stop
+       call wavestop(1, '*** ERROR: file ''norm_end'' expected to signal a correct SWAN calculation')
     endif
     !
     ! Check SWAN output file PRINT

@@ -97,7 +97,6 @@ module swan_input
     use wave_data
     use handles
     use table_handles
-    use utilities
     use rdsec_module
     !
     type swan_dom
@@ -205,6 +204,7 @@ module swan_input
        integer                                 :: whitecap         ! 0: off, 1: on, 2: westhuysen
        integer                                 :: nloc
        integer                                 :: swdis
+       integer                                 :: msurpnts         ! minimum number of surrounding valid source-points for a target-point to be covered. default: 3, Delft3D: 4
        !
        integer       , dimension(4)            :: ts_wl
        integer       , dimension(4)            :: ts_xv
@@ -244,12 +244,15 @@ module swan_input
        logical                                 :: swwindt
        logical                                 :: swwav
        logical                                 :: swwlt
+       logical                                 :: swmapwritenetcdf
+       logical                                 :: netcdf_sp
        logical                                 :: timedependent
        logical                                 :: triads
        logical                                 :: useflowdata      ! true when FLOW data is used
        logical                                 :: varwin
        logical                                 :: varfri
        logical                                 :: windgrowth
+       logical                                 :: flowLinkConnectivity ! false: (default) use netlink connectivity from DFlowFM, true: use flowlink connectivity from DFlowFM
        !
        real                                    :: alpw
        real                                    :: cdd
@@ -321,12 +324,14 @@ module swan_input
        character(72)                            :: title3
        character(256)                           :: casl
        character(256)                           :: filnam
+       character(256)                           :: flowgridfile ! netcdf file containing flow grid
        character(256)                           :: specfile
        character(1024)                          :: comfile
        character(15)                            :: usehottime    = '00000000.000000'       ! Time in the name of the hotfile that has to be used by SWAN
        character(15)                            :: writehottime  = '00000000.000000'       ! Time in the name of the hotfile that has to be written by SWAN
        character(15)                            :: keephottime   = '00000000.000000'       ! Time in the name of the hotfile that should not be deleted
-       character(20), dimension(:), allocatable :: pntfilnam
+       character(50), dimension(:), allocatable :: pntfilnam     ! Name of file containing locations for which output is requested
+       character(20), dimension(:), allocatable :: pntfilnamtab  ! Name of file containing output on locations
        !
        type(handletype)                         :: tseriesfile
        !
@@ -392,14 +397,69 @@ end subroutine alloc_swan
 !
 !
 !==============================================================================
+subroutine dealloc_swan(sr)
+   implicit none
+   !
+   type (swan) :: sr
+   integer     :: i
+   integer     :: istat
+   !
+   if (associated (sr%timwav)) deallocate(sr%timwav, stat=istat)
+   if (associated (sr%zeta)) deallocate(sr%zeta, stat=istat)
+   if (associated (sr%ux0)) deallocate(sr%ux0, stat=istat)
+   if (associated (sr%uy0)) deallocate(sr%uy0, stat=istat)
+   if (associated (sr%wvel)) deallocate(sr%wvel, stat=istat)
+   if (associated (sr%wdir)) deallocate(sr%wdir, stat=istat)
+   !!
+   if (associated (sr%nclin)) deallocate(sr%nclin, stat=istat)
+   if (associated (sr%nlin)) deallocate(sr%nlin, stat=istat)
+   if (associated (sr%f)) deallocate(sr%f, stat=istat)
+   if (associated (sr%obet)) deallocate(sr%obet, stat=istat)
+   if (associated (sr%ogam)) deallocate(sr%ogam, stat=istat)
+   if (associated (sr%trane)) deallocate(sr%trane, stat=istat)
+   if (associated (sr%xpcu)) deallocate(sr%xpcu, stat=istat)
+   if (associated (sr%xpob)) deallocate(sr%xpob, stat=istat)
+   if (associated (sr%ypcu)) deallocate(sr%ypcu, stat=istat)
+   if (associated (sr%ypob)) deallocate(sr%ypob, stat=istat)
+   !!
+   !! Only allocate the array below if output to locations has been defined
+   !! in the mdw file
+   !!
+   !if (sr%output_points .and. .not. sr%output_pnt_file) &
+   if (associated (sr%xyloc)) deallocate(sr%xyloc, stat=istat)
+   !
+   if (associated (sr%reflection)) deallocate(sr%reflection, stat=istat)
+   if (associated (sr%refl_type)) deallocate(sr%refl_type, stat=istat)
+   if (associated (sr%refl_coeff)) deallocate(sr%refl_coeff, stat=istat)
+   if (associated (sr%bnd)) then
+      do i = 1, sr%maxbound
+         if (associated (sr%bnd(i)%distance)) deallocate(sr%bnd(i)%distance, stat=istat)
+         if (associated (sr%bnd(i)%waveheight)) deallocate(sr%bnd(i)%waveheight, stat=istat)
+         if (associated (sr%bnd(i)%period)) deallocate(sr%bnd(i)%period, stat=istat)
+         if (associated (sr%bnd(i)%direction)) deallocate(sr%bnd(i)%direction, stat=istat)
+         if (associated (sr%bnd(i)%dirspread)) deallocate(sr%bnd(i)%dirspread, stat=istat)
+         if (associated (sr%bnd(i)%spectrum)) deallocate(sr%bnd(i)%spectrum, stat=istat)
+      enddo
+      deallocate(sr%bnd, stat=istat)
+   endif
+   if (associated (sr%dom)) deallocate(sr%dom, stat=istat)
+   if (allocated (sr%pntfilnam)) deallocate(sr%pntfilnam, stat=istat)
+   if (allocated (sr%pntfilnamtab)) deallocate(sr%pntfilnamtab, stat=istat)
+   if (allocated (sr%add_out_names)) deallocate(sr%add_out_names, stat=istat)
+   if (allocated (sr%meteofile_gen)) deallocate(sr%meteofile_gen, stat=istat)
+end subroutine dealloc_swan
+!
+!
+!==============================================================================
 subroutine read_swan (filnam, sr, wavedata)
    implicit none
    !
-   character(256)              :: filnam
+   character(*)                :: filnam
    type(swan)                  :: sr
    type(wave_data_type)        :: wavedata
    !
-   integer            :: ind
+   integer            :: indend
+   integer            :: indstart
    integer            :: iuntim 
    integer            :: istat
    integer            :: it01
@@ -416,6 +476,7 @@ subroutine read_swan (filnam, sr, wavedata)
    sr%title2        = ''
    sr%title3        = ''
    sr%comfile       = ''
+   sr%flowgridfile  = ' '
    sr%useflowdata   = .false.
    sr%swmor         = .false.
    sr%swwlt         = .false.
@@ -500,12 +561,13 @@ subroutine read_swan (filnam, sr, wavedata)
                        & sr%mxr      ,sr%myr     ,sr%ffil    , &
                        & sr%maxsteps ,sr%maxobst ,sr%maxcurv ,sr        )
    endif
-   ind=index(filnam,'.mdw')
-   sr%casl=filnam(1:ind-1)
+   indend=index(filnam,'.mdw')
+   indstart= max(0 , index(filnam,'/',back=.true.) , index(filnam,'\',back=.true.))
+   sr%casl=filnam(indstart+1:indend-1)
    return
 999 continue
    write (*,'(a)') '*** ERROR: While reading file ''waves_alone''.'
-   stop 
+   call wavestop(1, '*** ERROR: While reading file ''waves_alone''.')
 end subroutine read_swan
 !
 !
@@ -1137,13 +1199,12 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     if (istat /= 0) then
        select case (istat)
        case(1)
-          write(*,*) '*** ERROR File: '//trim(sr%filnam)//' not found'
+          call wavestop(1, '*** ERROR File: '//trim(sr%filnam)//' not found')
        case(3)
-          write(*,*) '*** ERROR Premature EOF in file: '//trim(sr%filnam)
+          call wavestop(1, '*** ERROR Premature EOF in file: '//trim(sr%filnam))
        case default
-          write(*,*) '*** ERROR Read error from file: '//trim(sr%filnam)
+          call wavestop(1, '*** ERROR Read error from file: '//trim(sr%filnam))
        endselect
-       stop
     endif
     !
     ! Check version number of wave input file
@@ -1251,12 +1312,14 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     call prop_get_string (mdw_ptr, 'General', 'TSeriesFile', tseriesfilename)
     if (tseriesfilename /= ' ') then
        sr%timedependent = .true.
-       call readtable(sr%tseriesfile, newlun(), tseriesfilename, sr%refjulday, errorstring)
+       call readtable(sr%tseriesfile, tseriesfilename, sr%refjulday, errorstring)
        if (errorstring /= ' ') then
           write(*,'(A)') trim(errorstring)
           goto 999
        endif
     endif
+    sr%flowLinkConnectivity = .false.
+    call prop_get_logical (mdw_ptr, 'General', 'flowLinkConnectivity', sr%flowLinkConnectivity)
     !
     ! Time points
     !
@@ -1505,6 +1568,14 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
        !
     endif
     !
+    ! Minimum number of surrounding source-points
+    !
+    sr%msurpnts = 3
+    call prop_get_integer(mdw_ptr, 'General', 'MinSurroundPoints'   , sr%msurpnts)
+    if (sr%msurpnts /= 3) then
+       write(*,*) "Minimum number of surrounding valid source-points for a target-point to be covered: ", sr%msurpnts
+    endif
+    !
     ! Constants
     !
     sr%grav       = 9.81
@@ -1667,12 +1738,15 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     sr%wavm_write_interval = 0.0
     sr%swwav               = .false.
     sr%deltcom             = 0.0
+    sr%flowgridfile        = ' '
     sr%append_com          = .false.
     sr%output_points       = .false.
     sr%output_pnt_file     = .false.
     sr%pntfil              = ' '
     sr%curvefil            = ' '
     sr%swflux              = .true.
+    sr%swmapwritenetcdf    = .true.
+    sr%netcdf_sp           = .false.
     !
     ! Standard output options
     !
@@ -1684,7 +1758,25 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     call prop_get_logical(mdw_ptr, 'Output', 'WriteCOM'        , sr%swwav)
     call prop_get_logical(mdw_ptr, 'Output', 'MassFluxToCOM'   , sr%swflux)
     call prop_get_real   (mdw_ptr, 'Output', 'COMWriteInterval', sr%deltcom)
+    call prop_get_string (mdw_ptr, 'Output', 'FlowGridForCom'  , sr%flowgridfile)
+    if (sr%flowgridfile /= ' ') then
+       write(*,'(a)') "ERROR: No longer supported: stand alone WAVE computation using FLOW data in a com-file via keyword 'FlowGridForCom'"
+       goto 999
+    endif
+    call prop_get_string (mdw_ptr, 'Output', 'COMFile'         , sr%flowgridfile)
     call prop_get_logical(mdw_ptr, 'Output', 'AppendCOM'       , sr%append_com)
+    call prop_get_logical(mdw_ptr, 'Output', 'MapWriteNetCDF'  , sr%swmapwritenetcdf)
+    call prop_get_logical(mdw_ptr, 'Output', 'NetCDFSinglePrecision'  , sr%netcdf_sp)
+    !
+    ! Check that the comfile is not a map file (not allowed. Was allowed in preliminary versions)
+    !
+    if (sr%flowgridfile /= ' ') then
+       i = len_trim(sr%flowgridfile)
+       if (sr%flowgridfile(i-5:i) /= "com.nc") then
+          write(*,'(3a)') "ERROR: The name of the COMFile (", trim(sr%flowgridfile), ") must end on 'com.nc'"
+          goto 999
+       endif
+    endif
     !
     ! determine the number of location files
     !
@@ -1701,10 +1793,13 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
        sr%output_points   = .true.
        sr%output_pnt_file = .true.
        allocate (sr%pntfilnam(nlocc), stat = istat)
+       allocate (sr%pntfilnamtab(nlocc), stat = istat)
        if (istat/=0) then
           write(*,*) 'SWAN_INPUT: memory alloc error (pntfilnam)'
           goto 999
        endif
+       sr%pntfilnam    = ' '
+       sr%pntfilnamtab = ' '
     endif
     !
     ! read the location files
@@ -2674,7 +2769,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     !
     return
 999 continue
-    stop
+    call wavestop(1, "ERROR whil reading keyword based mdw file")
 end subroutine read_keyw_mdw
 !
 !
@@ -2779,7 +2874,8 @@ subroutine read_swan_mdw(casl      ,wavedata  , &
     integer           :: i
     integer           :: ierr
     integer           :: in
-    integer           :: ind
+    integer           :: indend
+    integer           :: indstart
     integer           :: ipfl
     integer           :: it
     integer           :: iuni
@@ -2991,7 +3087,7 @@ subroutine read_swan_mdw(casl      ,wavedata  , &
              write (*,'(11x,a,i5)')        'Line ',rccnt
              write (*,'(11x,a)')           'This option is only supported when ''Bathymetry from FLOW'' is not used'
              close(iuni)
-             stop
+             call wavestop(1, "Rectilinear Bathymetry specified but not being used.")
           endif
           read(line,*, err =1002, end = 1009) dom%depfil
           call readgriddims(dom%depfil, dom%mxb, dom%myb)
@@ -3532,14 +3628,14 @@ subroutine read_swan_mdw(casl      ,wavedata  , &
        if (ierr /= 0) then
           write(*,*)'*** ERROR: Unable to read modsim from file ''simulation_mode'''
           close (lunsm)
-          stop
+          call wavestop(1, '*** ERROR: Unable to read modsim from file ''simulation_mode''')
        endif
        read (lunsm, *,iostat=ierr) sr%deltc       ! Time step in non-stat SWAN runs
        if (ierr /= 0 .and. sr%modsim == 3) then
           write(*,*)'*** ERROR: Unable to read deltc from file ''simulation_mode'''
           write(*,*)'           Necessary when modsim =3'
           close (lunsm)
-          stop
+          call wavestop(1, '*** ERROR: Unable to read deltc from file ''simulation_mode''')
        endif
        if (ierr == 0) then
           read (lunsm, *,iostat=ierr) sr%deltcom     ! Interval of communication FLOW-WAVE
@@ -3547,7 +3643,7 @@ subroutine read_swan_mdw(casl      ,wavedata  , &
              write(*,*)'*** ERROR: Unable to read deltcom from file ''simulation_mode'''
              write(*,*)'           Necessary when modsim =3'
              close (lunsm)
-             stop
+             call wavestop(1, '*** ERROR: Unable to read deltcom from file ''simulation_mode''')
           endif
        endif
        close (lunsm)
@@ -3608,8 +3704,9 @@ subroutine read_swan_mdw(casl      ,wavedata  , &
     !
     ! File md-wave is no longer accepted
     !
-    ind=index(filnam,'.mdw')
-    casl=filnam(1:ind-1)
+    indend      = index(filnam,'.mdw')
+    indstart    = max(0 , index(filnam,'/',back=.true.) , index(filnam,'\',back=.true.))
+    casl        = filnam(indstart+1:indend-1)
     inrhog      = 1
     sr%nbound   = nbound    !  number of boundaries
     sr%npoints  = npoints
@@ -3646,7 +3743,7 @@ subroutine read_swan_mdw(casl      ,wavedata  , &
     error = 1
     !
  1012 continue
-    if (error /= 0) stop
+    if (error /= 0) call wavestop(1, "ERROR while reading old format mdw file")
 end subroutine read_swan_mdw
 !
 !
@@ -3768,6 +3865,8 @@ subroutine write_swan_inp (wavedata, calccount, &
     integer                     :: dsprtype
     integer                     :: i
     integer                     :: ind
+    integer                     :: indend
+    integer                     :: indstart
     integer                     :: j
     integer                     :: jendcrv
     integer                     :: k
@@ -4939,31 +5038,25 @@ subroutine write_swan_inp (wavedata, calccount, &
     !
     if (sr%output_points) then
        do loc = 1, sr%nloc
-          pointname                = ' '
-          lc = len_trim(sr%pntfilnam(loc))
-          if (lc>8) then 
-             pointname(1:) = sr%pntfilnam(loc)(1:8)
-          else
-             pointname(1:)  = sr%pntfilnam(loc)
-          endif
+          pointname = ' '
+          !
+          ! Remove the path from pntfilnam
+          !
+          indstart  = max(0 , index(sr%pntfilnam(loc),'/',back=.true.) , index(sr%pntfilnam(loc),'\',back=.true.))
+          pointname = sr%pntfilnam(loc)(indstart+1:)
+          indend    = min(9 , index(pointname,' ',back=.false.) , index(pointname,'.',back=.false.))
+          pointname(indend:) = ' '
           line(1:7)       = 'POINTS '
           i               = 8
           line(i:i)       = ''''''
           line(i+1:)      = pointname
-          i               = i+1+8
+          i               = i+1+len_trim(pointname)
           line(i:i)       = ''''''
           line(i+1:)     = ' _'
           write (luninp, '(1X,A)') line
           line(1:79)      = ' '
           if (sr%output_pnt_file) then
-             line(1:5) = 'FILE '
-             i         = 6
-             line(i:i) = ''''''
-             line(7:)  = sr%pntfilnam(loc)
-             ind       = index(sr%pntfilnam(loc), ' ')
-             if (ind==0) ind = 8
-             i         = ind - 1 + 7
-             line(i:i) = ''''''
+             line = "FILE '" // trim(sr%pntfilnam(loc)) // "'"
              write (luninp, '(1X,A)') line
              line       = ' '
           else
@@ -4981,18 +5074,22 @@ subroutine write_swan_inp (wavedata, calccount, &
           write (luninp, '(1X,A)') line
           line       = ' '
           if (sr%output_table) then
+             ! Write the (constructed) name of the tabfile to pntfilnamtab
+             ! The indexes indstart and indend are used to flag the region in line containing this name
+             !
              line(1:6)  = 'TABLE '
              i          = 7
              line(i:i)  = ''''''
              line(i+1:) = pointname
-             i          = i+1+8
+             i          = i+1+len_trim(pointname)
              line(i:i)  = ''''''
              line(i+1:) = ' '
              line(i+2:) = 'HEAD '
              i          = i+7
              line(i:i)  = ''''''
-             line(i+1:) = sr%pntfilnam(loc)
-             i          = i+1+lc
+             line(i+1:) = pointname
+             indstart   = i+1
+             i          = i+1+len_trim(pointname)
              if (nnest>1) then
                 line(i:) = 'n'
                 write (line(i+1:), '(I1)') inest
@@ -5000,6 +5097,7 @@ subroutine write_swan_inp (wavedata, calccount, &
              endif
              if (nttide>1 .or. wavedata%mode /= stand_alone) then
                 line(i:) = 't'
+                i = i+1
                 if (nttide > 1) then
                     write (line(i+1:), '(I7.7)') 1000000*inest + itide
                 else  ! wavedata%mode /= stand_alone
@@ -5009,6 +5107,8 @@ subroutine write_swan_inp (wavedata, calccount, &
              endif
              line(i:)    = '.tab'
              i           = i+4
+             indend      = i-1
+             sr%pntfilnamtab(loc) = line(indstart:indend)
              line(i:i)   = ''''''
              line(i+1:) = ' XP YP DEP HS DIR RTP TM01 _'
              write (luninp, '(1X,A)') line
@@ -5022,7 +5122,7 @@ subroutine write_swan_inp (wavedata, calccount, &
              i          = 7
              line(i:i)  = ''''''
              line(i+1:) = pointname
-             i          = i+1+8
+             i          = i+1+len_trim(pointname)
              line(i:i)  = ''''''
              line(i+1:) = ' '
              line(i+2:) = 'SPEC1D '
@@ -5054,18 +5154,18 @@ subroutine write_swan_inp (wavedata, calccount, &
              line       = ' '
           endif
           if (sr%output_spec2d) then
-             line(1:6) = 'SPEC  '
-             i         = 7
-             line(i:i) = ''''''
-             line(8:10 + lc) = pointname
-             i         = i+1+8
-             line(i:i) = ''''''
+             line(1:6)  = 'SPEC  '
+             i          = 7
+             line(i:i)  = ''''''
+             line(i+1:) = pointname
+             i          = i+1+len_trim(pointname)
+             line(i:i)  = ''''''
              line(i+1:) = ' '
              line(i+2:) = 'SPEC2D '
-             i         = i+9
-             line(i:i) = ''''''
-             line(i+1:) = sr%pntfilnam(loc)
-             i         = i+1+8
+             i          = i+9
+             line(i:i)  = ''''''
+             line(i+1:) = pointname
+             i          = i+1+len_trim(pointname)
              if (nnest>1) then
                 line(i:) = 'n'
                 write (line(i+1:), '(I1)') inest
@@ -5224,16 +5324,16 @@ subroutine outputCurvesFromFile()
     integer                                     :: i
     integer                                     :: j
     integer                                     :: istat
-    real(sp)                   , dimension(1:2) :: inputvals
-    character(1)      , pointer, dimension(:)   :: data_ptr
+    real(sp)             , dimension(1:2) :: inputvals
+    character(1), pointer, dimension(:)   :: data_ptr
     character(6)                                :: number
-    character(30)                               :: node_type
-    character(30)                               :: parname
-    character(80)                               :: curname
-    character(80)                               :: line
-    type(tree_data)   , pointer                 :: cur_ptr
-    type(tree_data)   , pointer                 :: pol_ptr
-    type(tree_data)   , pointer                 :: tmp_ptr
+    character(30)               :: node_type
+    character(30)               :: parname
+    character(80)               :: curname
+    character(80)               :: line
+    type(tree_data)   , pointer :: cur_ptr
+    type(tree_data)   , pointer :: pol_ptr
+    type(tree_data)   , pointer :: tmp_ptr
 
     nullify(pol_ptr)
     call tree_create('Delft3D-WAVE output curves', pol_ptr)
@@ -5242,20 +5342,19 @@ subroutine outputCurvesFromFile()
     if (istat /= 0) then
        select case (istat)
        case(1)
-          write(*,*) '*** ERROR File: '//trim(sr%curvefil)//' not found'
+          call wavestop(1, '*** ERROR File: '//trim(sr%curvefil)//' not found')
        case(3)
-          write(*,*) '*** ERROR Premature EOF in file: '//trim(sr%curvefil)
+          call wavestop(1, '*** ERROR Premature EOF in file: '//trim(sr%curvefil))
        case default
-          write(*,*) '*** ERROR Read error from file: '//trim(sr%curvefil)
+          call wavestop(1, '*** ERROR Read error from file: '//trim(sr%curvefil))
        endselect
-       stop
     endif
     !
     ! if no line exists in the polyline file
     !
     if(.not. associated(pol_ptr%child_nodes) ) then
         write(*,'(1X,A)') ' Error! 0 output curve is specified in the polyline file!'
-        stop
+        call wavestop(1, ' Error! 0 output curve is specified in the polyline file!')
     endif
     do i = 1,size(pol_ptr%child_nodes)
        cur_ptr => pol_ptr%child_nodes(i)%node_ptr

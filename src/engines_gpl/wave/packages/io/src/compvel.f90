@@ -88,7 +88,7 @@ subroutine compvel(wavetime ,layer_model ,flowVelocityType ,kfu       ,kfv     ,
                        & filnam    ,dps         ,s1        ,thick     , &
                        & dzu1      ,rbuff       )
         else
-           stop 'compvel: flowVelocityType value unrecognised'
+           call wavestop(1, 'compvel: flowVelocityType value unrecognized')
         endif
     elseif (layer_model(1:7) == 'Z-MODEL') then
         !
@@ -124,13 +124,13 @@ subroutine compvel(wavetime ,layer_model ,flowVelocityType ,kfu       ,kfv     ,
                        & filnam    ,dps         ,s1        ,thick     , &
                        & dzu1      ,rbuff       )
         else
-           stop 'compvel: flowVelocityType value unrecognised'
+           call wavestop(1, 'compvel: flowVelocityType value unrecognized')
         endif
     else
        !
        ! Erroneous vertical layering definition found on COM-FILE
        !
        write(*, '(2a)') 'compvel: Erroneous vertical layering definition found on COM-FILE: LAYER_MODEL = ', trim(layer_model)
-       stop
+       call wavestop(1, 'compvel: Erroneous vertical layering definition found on COM-FILE: LAYER_MODEL = '//trim(layer_model))
     endif
 end subroutine compvel

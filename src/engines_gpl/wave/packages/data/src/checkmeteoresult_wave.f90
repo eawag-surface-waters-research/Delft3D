@@ -55,9 +55,7 @@ subroutine checkmeteoresult_wave(success)
        !
        ! Error occurred: write error and stop
        !
-       write(*, '(2a)') 'Error in meteo module: ', trim(message)
-       write(*, '(a)' ) 'Stopping WAVE computation'
-       stop
+       call wavestop(1, 'Error in meteo module: ' // trim(message))
     elseif (message /= '') then
        !
        ! Message or warning issued by meteo module: write message

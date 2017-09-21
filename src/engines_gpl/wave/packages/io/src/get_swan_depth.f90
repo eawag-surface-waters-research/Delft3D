@@ -80,5 +80,5 @@ subroutine read_bot(dpb       ,mb        ,nb        ,botfil    ,fac  )
   999 continue
     write (*, '('' Premature end of file while reading file: '',A)') botfil
     close (lunbot)
-    stop
+    call wavestop(1, ' Premature end of file while reading file: '//trim(botfil))
 end subroutine read_bot 

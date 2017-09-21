@@ -462,6 +462,7 @@ plugins_lgpl/plugin_delftflow_traform/src/Makefile
 scripts_lgpl/linux/Makefile
 scripts_lgpl/Makefile
 third_party_open/Makefile
+third_party_open/triangle/Makefile
 third_party_open/version_number/Makefile
 third_party_open/version_number/packages/Makefile
 third_party_open/version_number/packages/version_number/Makefile

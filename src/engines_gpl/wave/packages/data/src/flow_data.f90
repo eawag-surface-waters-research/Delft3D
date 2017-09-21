@@ -76,26 +76,37 @@ subroutine flow_init (mode, it01, tscale)
 !
    mud          = .false.
    subdom_names = ' '
-   if (mode == stand_alone) then
+   if (mode==stand_alone .or. swan_run%flowgridfile/=' ') then
       if (swan_run%useflowdata .or. swan_run%swwav) then
-         if (swan_run%comfile == ' ') then
-            swan_run%comfile = swan_run%casl
-            num_subdomains = 1
+         if (swan_run%flowgridfile == ' ') then
+            if (swan_run%comfile == ' ') then
+               swan_run%comfile = swan_run%casl
+               num_subdomains = 1
+            else
+               num_subdomains = count_words(swan_run%comfile)
+            endif
+            !
+               allocate (runids(num_subdomains))
+            write(*,'(a,i0,a)') '*** MESSAGE: Using data from the following FLOW domain(s):'
+            do idom = 1,num_subdomains
+               call str_token(swan_run%comfile,runids(idom))
+               write(*,'(13x,a)') trim(runids(idom))
+            enddo
+            !
+            ! Obtain time settings from first com file
+            !
+            write(filnam,'(2a)') 'com-',trim(runids(1))
+            call get_params(tscale, dummy, filnam)
          else
-            num_subdomains = count_words(swan_run%comfile)
+            num_subdomains = checkcomfiles(swan_run%flowgridfile)
+            if (num_subdomains == 1) then
+               write(*,'(3a)') '*** MESSAGE: Using data from NetCDF file "', trim(swan_run%flowgridfile), '".'
+            else
+               write(*,'(a,i0,a)') '*** MESSAGE: Using data from ', num_subdomains, ' NetCDF files'
+               write(*,'(2a)')     '             Base name: ', trim(swan_run%flowgridfile)
+               write(*,'(a,i4.4)')  '             Partition range: 0000 - ', num_subdomains-1
+            endif
          endif
-         !
-         allocate (runids(num_subdomains))
-         write(*,'(a,i0,a)') '*** MESSAGE: Using data from the following FLOW domain(s):'
-         do idom = 1,num_subdomains
-            call str_token(swan_run%comfile,runids(idom))
-            write(*,'(13x,a)') trim(runids(idom))
-         enddo
-         !
-         ! Obtain time settings from first com file
-         !
-         write(filnam,'(2a)') 'com-',trim(runids(1))
-         call get_params(tscale, dummy, filnam)
          flow_data_initialized = .true.
       endif
    else
@@ -104,8 +115,7 @@ subroutine flow_init (mode, it01, tscale)
       tscale        = real(d_tscale,sp)
       if (num_subdomains < 1) then
          write(*,'(a)') '*** ERROR: Delftio initialization WAVE side failed'
-         write(*,'(a)') '           Is file ''dioconfig.ini'' present?'
-         stop
+         call wavestop(1, '           Is file ''dioconfig.ini'' present?')
       endif
       allocate (runids(num_subdomains))
       write(*,'(a,i0,a)') '*** MESSAGE: Connected to the following ',num_subdomains,' FLOW domain(s):'
@@ -122,8 +132,7 @@ subroutine flow_init (mode, it01, tscale)
          num_muddomains = wave_from_flow_init(subdom_names, it01, d_tscale, mud)
          if (num_muddomains < 1) then
             write(*,'(a)') '*** ERROR: Delftio initialization WAVE side failed'
-            write(*,'(a)') '           Is file ''dioconfig.ini'' present?'
-            stop
+            call wavestop(1, '           Is file ''dioconfig.ini'' present?')
          endif
          allocate (mudids(num_muddomains))
          write(*,'(a,i0,a)') '*** MESSAGE: Connected to the following ',num_muddomains,' MUD domain(s):'
@@ -134,13 +143,13 @@ subroutine flow_init (mode, it01, tscale)
          if (num_muddomains /= 1) then
             write(*,'(a)') '*** ERROR: Interaction with Fluid Mud is currently only possible for one domain'
             call wave_to_flow_status(flow_wave_comm_error, mud)
-            stop
+            call wavestop(1, '*** ERROR: Interaction with Fluid Mud is currently only possible for one domain')
          endif
          if (num_muddomains /= num_subdomains) then
             write(*,'(a,2(i0,a))') '*** ERROR: number of mud domains (', num_muddomains, &
                 & ') is not equal to the number of water domains (',num_subdomains,').'
             call wave_to_flow_status(flow_wave_comm_error, mud)
-            stop
+            call wavestop(1, 'Number of mud domains is not equal to the number of water domains')
          endif
          call wave_to_flow_status(flow_wave_comm_result_ok, mud)
       endif
@@ -157,5 +166,51 @@ subroutine deallocate_flow_data ()
       deallocate (mudids, stat=ierr)
    endif
 end subroutine deallocate_flow_data
+!
+!
+!===============================================================================
+function checkcomfiles(basename) result(numDomains)
+   !
+   ! Return
+   integer :: numDomains
+   !
+   ! Parameters
+   character(*), intent(in) :: basename
+   !
+   ! Locals
+   integer :: partitionlocation
+   integer :: retval
+   logical :: ex
+   character(300) :: filnam
+   !
+   ! Body
+   retval = 0
+   inquire (file = trim(basename), exist = ex)
+   if (ex) then
+      retval = 1
+   else
+      partitionlocation = index(basename, '_com.nc')
+      if (partitionlocation == 0) then
+          call wavestop(1, 'The NetCDF com file specified does not contain the substring "_com.nc"')
+      endif
+      do
+         write(filnam,'(a,a,i4.4,a)') basename(:partitionlocation-1), '_', retval, trim(basename(partitionlocation:))
+         inquire (file = trim(filnam), exist = ex)
+         if (ex) then
+            ! Found an existing com-file
+            retval = retval + 1
+         else
+            ! Not an existing com-file (anymore)
+            exit
+         endif
+      enddo
+      if (retval == 0) then
+          write(*,'(2a)') '*** ERROR: File does not exist:', trim(basename)
+          write(*,'(2a)') '           And partition variant does not exist:', trim(filnam)
+          call wavestop(1, 'No com-file to connect to')
+      endif
+   endif
+   numDomains = retval
+end function checkcomfiles
 
 end module flow_data

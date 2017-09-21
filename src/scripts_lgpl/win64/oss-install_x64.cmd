@@ -513,23 +513,39 @@ rem ================
 :wave
     echo "installing wave . . ."
 
-    set dest_bin="!dest_main!\win64\wave\bin"
-    set dest_default="!dest_main!\win64\wave\default"
-    set dest_swan_bin="!dest_main!\win64\swan\bin"
+    set dest_bin=!dest_main!\win64\wave\bin
+    set dest_default=!dest_main!\win64\wave\default
+    set dest_swan_bin=!dest_main!\win64\swan\bin
        rem When adding quotes here AND when using dest_swan_scripts, xcopy also gets confused
        rem Neat solution: do not add quotes on defining the destination folders, but only at calling :copyFile
     set dest_swan_scripts=!dest_main!\win64\swan\scripts
+    set dest_esmf_bin=!dest_main!\win64\esmf\bin
+    set dest_esmf_scripts=!dest_main!\win64\esmf\scripts
 
     call :makeDir !dest_bin!
     call :makeDir !dest_default!
     call :makeDir !dest_swan_bin!
     call :makeDir !dest_swan_scripts!
+    call :makeDir !dest_esmf_bin!
+    call :makeDir !dest_esmf_scripts!
 
-    call :copyFile engines_gpl\wave\bin\x64\release\wave.exe            !dest_bin!
-    call :copyFile engines_gpl\flow2d3d\default\dioconfig.ini           !dest_default!
-    call :copyFile "third_party_open\pthreads\bin\x64\*.dll"            !dest_bin!
-    call :copyFile "third_party_open\swan\bin\w64_i11\*.*"              !dest_swan_bin!
-    call :copyFile third_party_open\swan\scripts\swan_install_x64.bat " !dest_swan_scripts!\swan.bat"
+    rem
+    rem This wave block is called twice:
+    rem - once for wave.dll     (then wave_exe.exe might not be present yet)
+    rem - once for wave_exe.exe (then wave.dll     might not be present yet)
+    rem
+    if exist engines_gpl\wave\bin\x64\release\wave.dll (
+        call :copyFile engines_gpl\wave\bin\x64\release\wave.dll          "!dest_bin!"
+    )
+    if exist engines_gpl\wave\bin\x64\release\wave_exe.exe (
+        call :copyFile engines_gpl\wave\bin\x64\release\wave_exe.exe      "!dest_bin!\wave.exe"
+    )
+    call :copyFile engines_gpl\flow2d3d\default\dioconfig.ini         "!dest_default!"
+    call :copyFile "third_party_open\pthreads\bin\x64\*.dll"          "!dest_bin!"
+    call :copyFile "third_party_open\swan\bin\w64_i11\*.*"            "!dest_swan_bin!"
+    call :copyFile third_party_open\swan\scripts\swan_install_x64.bat "!dest_swan_scripts!\swan.bat"
+    call :copyFile "third_party_open\esmf\win64\bin\*.*"              "!dest_esmf_bin!"
+    call :copyFile "third_party_open\esmf\win64\scripts\*.*"          "!dest_esmf_scripts!"
     rem
     rem The following if-else statements MUST BE executed AFTER copying "third_party_open\intel_fortran" libraries.
     rem Some (older) libraries will be overwritten.

@@ -12,4 +12,5 @@
 
 include $(top_srcdir)/common.am
 SUBDIRS = \
+	triangle \
 	version_number

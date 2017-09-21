@@ -110,7 +110,7 @@ subroutine get_params(tscale, rho, filnam)
   200 continue
     if (error /= 0) then
        write(*,'(5a)') '*** ERROR: Reading file "', trim(filnam), '.dat" or "', trim(filnam), '.def"'
-       stop
+       call wavestop(1, '*** ERROR: Reading file "'//trim(filnam)//'.dat" or "'//trim(filnam)//'.def"')
     endif
     deallocate(rbuff, stat=ierr)
 end subroutine get_params

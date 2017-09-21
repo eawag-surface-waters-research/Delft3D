@@ -55,7 +55,7 @@ subroutine wave_init (mdw_file)
       if (mdw_file == ' ') then
          write (*,'(a)') '*** ERROR: No mdw-file specified on command-line.'
          call usage()
-         stop
+         call wavestop(1, '*** ERROR: No mdw-file specified on command-line.')
       endif
       !
       ! check if file exists
@@ -63,6 +63,6 @@ subroutine wave_init (mdw_file)
       inquire (file=mdw_file, exist=ex)
       if (.not. ex) then
          write (*,'(a,a,a)') '*** ERROR: mdw-file ''', trim(mdw_file),''' does not exist.'
-         stop
+         call wavestop(1, '*** ERROR: mdw-file '''//trim(mdw_file)//''' does not exist.')
       endif
 end subroutine wave_init

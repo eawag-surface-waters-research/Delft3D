@@ -70,10 +70,7 @@ function new_lun( )
     if (opened) then
        write (*, *) ' *** FATAL ERROR - New unit number not available'
        write (*, *) ' Abnormal end'
-       !
-       !--------stop routine for DELFT3D
-       !
-       stop
+       call wavestop(1, ' *** FATAL ERROR - New unit number not available')
     else
        new_lun = lunit
     endif

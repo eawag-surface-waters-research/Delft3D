@@ -53,7 +53,7 @@ subroutine check_input(sr, wavedata)
        if (.not.sr%swwav) then
           write(*,'(a)') '*** ERROR: Online calculation but no writing to com-file'
           write(*,'(a)') '           Is flag ''WriteCOM'' set to true?'
-          stop
+          call wavestop(1, 'Is flag ''WriteCOM'' set to true?')
        endif
     endif
 end subroutine check_input

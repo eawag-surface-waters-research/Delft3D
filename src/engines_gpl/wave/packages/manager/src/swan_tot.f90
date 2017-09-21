@@ -1,4 +1,4 @@
-subroutine swan_tot (n_swan_grids, n_flow_grids, wavedata)
+subroutine swan_tot (n_swan_grids, n_flow_grids, wavedata, selectedtime)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2017.                                
@@ -39,6 +39,7 @@ subroutine swan_tot (n_swan_grids, n_flow_grids, wavedata)
    use wave_data
    use buffer
    use meteo
+   use m_deletehotfile
    use write_swan_datafile, only: write_swan_file
    !
    implicit none
@@ -48,6 +49,7 @@ subroutine swan_tot (n_swan_grids, n_flow_grids, wavedata)
    integer, intent(in)  :: n_flow_grids
    integer, intent(in)  :: n_swan_grids
    type(wave_data_type) :: wavedata
+   integer, intent(in)  :: selectedtime  ! <=0: no time selected, >0: only compute for swan_run%timwav(selectedtime)
 !
 ! Local variables
 !
@@ -73,7 +75,6 @@ subroutine swan_tot (n_swan_grids, n_flow_grids, wavedata)
    logical                                       :: positiveonly
    logical                                       :: success
    logical                                       :: exists
-   logical                         , external    :: deletehotfile
    character(256)                                :: fname
    character(500)                                :: message
    type(swan_dom), pointer                       :: dom
@@ -99,6 +100,8 @@ subroutine swan_tot (n_swan_grids, n_flow_grids, wavedata)
       !
    endif
    do itide = 1, swan_run%nttide
+      if (selectedtime>0 .and. itide/=selectedtime) cycle
+      !
       call setcalculationcount(wavedata%time, wavedata%time%calccount + 1)
       if (wavedata%output%write_wavm) then
          call setoutputcount(wavedata%output, wavedata%output%count + 1)
@@ -148,8 +151,9 @@ subroutine swan_tot (n_swan_grids, n_flow_grids, wavedata)
          if (swan_run%useflowdata) then
             do i_flow = 1, n_flow_grids
                write(*,'(a,i0,a)') '  Get flow fields, domain ',i_flow,' :'
-               call get_flow_fields (swan_input_fields, flow_grids(i_flow), &
-                                   & flow2swan_maps(i_swan,i_flow), wavedata, swan_run, dom%flowVelocityType)
+               call get_flow_fields (i_flow, swan_input_fields, flow_grids(i_flow), swan_grids(i_swan), &
+                                   & flow2swan_maps(i_swan,i_flow), wavedata, &
+                                   & swan_run, dom%flowVelocityType)
             enddo
          endif
          !
@@ -343,6 +347,11 @@ subroutine swan_tot (n_swan_grids, n_flow_grids, wavedata)
                call write_wave_map (swan_grids(i_swan), swan_output_fields, n_swan_grids, &
                                   & wavedata, swan_run%casl, DataFromPreviousTimestep, &
                                   & swan_run%gamma0)
+               if (swan_run%swmapwritenetcdf) then
+                  write(*,'(a,i10,a,f10.3)') '  Write WAVE NetCDF map file, nest ',i_swan,' time ',wavedata%time%timmin
+                  call write_wave_map_netcdf (swan_grids(i_swan), swan_output_fields, n_swan_grids, &
+                                     & wavedata, swan_run%casl, swan_run%netcdf_sp)
+               endif
                call setoutputcount(wavedata%output, wavedata%output%count + 1)
             endif
             offset = 1
@@ -374,6 +383,16 @@ subroutine swan_tot (n_swan_grids, n_flow_grids, wavedata)
             call write_wave_map (swan_grids(i_swan), swan_output_fields, n_swan_grids, &
                                & wavedata, swan_run%casl, DataFromPreviousTimestep, &
                                & swan_run%gamma0)
+            if (swan_run%swmapwritenetcdf) then
+               write(*,'(a,i10,a,f10.3)') '  Write WAVE NetCDF map file, nest ',i_swan,' time ',wavedata%time%timmin
+               call write_wave_map_netcdf (swan_grids(i_swan), swan_output_fields, n_swan_grids, &
+                                  & wavedata, swan_run%casl, swan_run%netcdf_sp)
+            endif
+         endif
+         if (swan_run%output_points .and. swan_run%output_table) then
+            write(*,'(a,i10,a,f10.3)') '  Write WAVE NetCDF his file, nest ',i_swan,' time ',wavedata%time%timmin
+            call write_wave_his_netcdf (swan_grids(i_swan), swan_output_fields, n_swan_grids, i_swan, &
+                               & wavedata)
          endif
          call dealloc_output_fields (swan_output_fields)
          !
@@ -420,11 +439,13 @@ subroutine swan_tot (n_swan_grids, n_flow_grids, wavedata)
       !
       if (swan_run%swwav) then
          do i_flow = 1, n_flow_grids
-            !
-            ! Convert vector fields to curvilinear directions
-            !
-            write(*,'(a,i10)') '  Convert vector field ', i_flow
-            call wave2flow (flow_output_fields(i_flow), flow_grids(i_flow))
+            if (swan_run%flowgridfile == ' ') then
+               !
+               ! Convert vector fields to curvilinear directions
+               !
+               write(*,'(a,i10)') '  Convert vector field ', i_flow
+               call wave2flow (flow_output_fields(i_flow), flow_grids(i_flow))
+            endif
             !
             ! Convert some parameters to communication parameters
             !
@@ -436,9 +457,15 @@ subroutine swan_tot (n_swan_grids, n_flow_grids, wavedata)
             write(*,'(a)') '  Write to com-file'
             itidewrite = itide
             if (swan_run%append_com) itidewrite = -1
-            call put_wave_fields (flow_grids(i_flow), flow_output_fields(i_flow),  &
-                                & itidewrite        , wavedata%time             , swan_run%swflux)
+            call put_wave_fields (flow_grids(i_flow), flow_output_fields(i_flow), itidewrite        , &
+                                & wavedata          , swan_run%swflux           , swan_run%flowgridfile, &
+                                & swan_run%netcdf_sp)
          enddo
+         ! Initially comcount = 0
+         ! After writing the first data set to (all) the comfile(s), comcount must be increased
+         ! Always write to field 1
+         ! To Do: optionally store all fields
+         wavedata%output%comcount = 1
       endif
    enddo   ! time steps
 end subroutine swan_tot

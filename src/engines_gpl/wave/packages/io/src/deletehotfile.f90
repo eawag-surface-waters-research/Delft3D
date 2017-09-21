@@ -1,3 +1,7 @@
+module m_deletehotfile
+
+contains
+
 function deletehotfile(wavedata) result (dodelete)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
@@ -80,3 +84,5 @@ character(15), external :: datetime_to_string
       dodelete = .true.
    endif
 end function deletehotfile
+
+end module m_deletehotfile

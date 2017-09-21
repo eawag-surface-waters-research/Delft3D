@@ -44,6 +44,7 @@ contains
 subroutine update_wavecond(sr,wavetime)
    use swan_input
    use wave_data
+   use table_handles
    !
    implicit none
    !
@@ -102,7 +103,7 @@ subroutine update_wavecond(sr,wavetime)
               & 'md-unib.', sr%casl, ' ( ', nwavec,         &
               & ') not equal to number ',                &
               & 'of tide steps (', sr%nttide, ')'
-            stop
+            call wavestop(1, ' Error : number of steps on md-unib file not equal to number of tide steps')
          endif
          ! Set options to match UNIBEST input
          !
@@ -161,7 +162,7 @@ subroutine update_wavecond(sr,wavetime)
         !sr%wfil     = windfln
         !sr%zeta     = zeta
          write(*,*) 'Option varbound not implemented yet!'
-         stop
+         call wavestop(1, 'Option varbound not implemented yet!')
         !call setswn_var(sr%nnest, dist, hsig, tpeak, wavedir, ms, sr%swani, sr%swanr, windfln)
       else
          call skcoma(luniwp    )
@@ -417,7 +418,7 @@ subroutine varcon(fname     ,timmin    ,result    ,isdir     ,nres )
     if (blname(1:1)=='*') goto 100
     read (iuntim, *) nt, ncol
     if (ncol<nres + 1) then
-       stop 'Not enough columns in file'
+       call wavestop(1, 'Not enough columns in file')
     endif
     read (iuntim, *, err = 998) t1, (buff1(i), i = 1, nres)
     !
@@ -436,7 +437,7 @@ subroutine varcon(fname     ,timmin    ,result    ,isdir     ,nres )
           enddo
        else
           if (t2<=t1) then
-             stop ' Varcon - time series not monotonous'
+             call wavestop(1, ' Varcon - time series not monotonous')
           endif
           b = (timmin - t1)/(t2 - t1)
           a = 1.0 - b
@@ -488,10 +489,10 @@ subroutine varcon(fname     ,timmin    ,result    ,isdir     ,nres )
     !
   998 continue
     write (*, *) ' Varcon - Error reading file ', fname
-    stop
+    call wavestop(1, ' Varcon - Error reading file '//trim(fname))
   999 continue
     write (*, *) ' Varcon - Error opening file ', fname
-    stop
+    call wavestop(1, ' Varcon - Error opening file '//trim(fname))
 end subroutine varcon
 
 

@@ -61,15 +61,23 @@ module table_handles
     public CHKTAB_POSITIVE
     public CHKTAB_BLOCK
     public CHKTAB_LOGICAL
+
 !
 !! -----------------------------------------------------------------------------
 !
+    interface gettabletimes
+       module procedure gettabletimes_hp
+       module procedure gettabletimes_sp
+    end interface gettabletimes
+
     interface gettable
        module procedure gettable_vector, gettable_scalar
     end interface
 
     interface gettabledata
-       module procedure gettabledata_vector, gettabledata_scalar
+       module procedure gettabledata_vector_hp
+       module procedure gettabledata_vector_sp
+       module procedure gettabledata_scalar
     end interface
 
     type tablefiletypehandle
@@ -200,14 +208,50 @@ subroutine gettable_scalar(handle    ,location  ,parname   ,itable    , &
     !
 end subroutine gettable_scalar
 
-subroutine gettabletimes(handle     ,itable     ,times      ,refjulday  , &
+subroutine gettabletimes_sp(handle     ,itable     ,times      ,refjulday  , &
                        & errorstring)
 !
 ! Global variables
 !
     integer                ,intent(in)  :: itable
     integer                ,intent(in)  :: refjulday
-    real(fp), dimension(*) ,intent(out) :: times
+    real(sp), dimension(:) ,intent(out) :: times
+    character(256)         ,intent(out) :: errorstring
+    type(handletype)       ,intent(in)  :: handle
+!
+! Local variables
+!
+    integer                             :: i
+    integer                             :: istat
+    real(hp), dimension(:), allocatable :: times_hp
+!
+!! executable statements -------------------------------------------------------
+!
+    allocate(times_hp(size(times,1)), stat=istat)
+    do i=1,size(times,1)
+       times_hp(i) = real(times(i),hp)
+    enddo
+    if (istat /= 0) then
+       errorstring = 'GETDATAFILE: Memory allocation error'
+       return
+    endif
+    call gettabletimes_hp(handle, itable, times_hp, refjulday, &
+                       & errorstring)
+    do i=1,size(times,1)
+       times(i) = real(times_hp(i),sp)
+    enddo
+    deallocate(times_hp, stat=istat)
+end subroutine gettabletimes_sp
+
+
+subroutine gettabletimes_hp(handle     ,itable     ,times      ,refjulday  , &
+                       & errorstring)
+!
+! Global variables
+!
+    integer                ,intent(in)  :: itable
+    integer                ,intent(in)  :: refjulday
+    real(hp), dimension(:) ,intent(out) :: times
     character(256)         ,intent(out) :: errorstring
     type(handletype)       ,intent(in)  :: handle
 !
@@ -226,38 +270,84 @@ subroutine gettabletimes(handle     ,itable     ,times      ,refjulday  , &
                             & refjulday  ,errorstring)
     endif
     !
-end subroutine gettabletimes
+end subroutine gettabletimes_hp
 
 
-subroutine gettabledata_vector(handle     ,ivec       ,values     , &
+subroutine gettabledata_vector_sp(handle     ,ivec       ,values     , &
+                                & timhr      ,refjulday  ,errorstring, extrapol_in)
+!
+! Global variables
+!
+    integer, dimension(4)               :: ivec
+    integer                ,intent(in)  :: refjulday
+    real(sp), optional     ,intent(in)  :: extrapol_in
+    real(sp)               ,intent(in)  :: timhr
+    real(sp), dimension(:) ,intent(out) :: values
+    character(256)         ,intent(out) :: errorstring
+    type(handletype)       ,intent(in)  :: handle
+!
+! Local variables
+!
+    integer                           :: i
+    integer                           :: istat
+    real(hp)                          :: extrapol
+    real(hp)                          :: timhr_hp
+    real(hp),dimension(:),allocatable :: values_hp
+!
+!! executable statements -------------------------------------------------------
+!
+    allocate(values_hp(size(values,1)), stat=istat)
+    if (istat /= 0) then
+       errorstring = 'GETTABLEDATA_VECTOR_SP: Memory allocation error'
+       return
+    endif
+    if (present(extrapol_in)) then
+       extrapol = real(extrapol_in,hp)
+    else
+       extrapol = 0.0_hp
+    endif
+    timhr_hp = real(timhr,hp)
+    do i=1, size(values,1)
+       values_hp(i) = real(values(i),hp)
+    enddo
+    call gettabledata_scalar(handle     ,ivec(1)    ,ivec(2)    , &
+               & ivec(3)    ,ivec(4)    ,values_hp  ,timhr_hp   , &
+               & refjulday  ,errorstring,extrapol   )
+    do i=1, size(values,1)
+       values(i) = real(values_hp(i),sp)
+    enddo
+    deallocate(values_hp, stat=istat)
+end subroutine gettabledata_vector_sp
+
+subroutine gettabledata_vector_hp(handle     ,ivec       ,values     , &
                              & timhr      ,refjulday  ,errorstring, extrapol_in)
 !
 ! Global variables
 !
     integer, dimension(4)               :: ivec
     integer                ,intent(in)  :: refjulday
-    real(fp), optional     ,intent(in)  :: extrapol_in
-    real(fp)               ,intent(in)  :: timhr
-    real(fp), dimension(:) ,intent(out) :: values
+    real(hp), optional     ,intent(in)  :: extrapol_in
+    real(hp)               ,intent(in)  :: timhr
+    real(hp), dimension(:) ,intent(out) :: values
     character(256)         ,intent(out) :: errorstring
     type(handletype)       ,intent(in)  :: handle
 !
 ! Local variables
 !
-    real(fp)                  :: extrapol
+    real(hp)                  :: extrapol
 !
 !! executable statements -------------------------------------------------------
 !
     if (present(extrapol_in)) then
        extrapol = extrapol_in
     else
-       extrapol = 0.0_fp
+       extrapol = 0.0_hp
     endif
     call gettabledata_scalar(handle     ,ivec(1)    ,ivec(2)    , &
                & ivec(3)    ,ivec(4)    ,values     ,timhr      , &
                & refjulday  ,errorstring,extrapol   )
     !
-end subroutine gettabledata_vector
+end subroutine gettabledata_vector_hp
 
 
 subroutine gettabledata_scalar(handle     ,itable     ,ipar       , &
@@ -271,15 +361,15 @@ subroutine gettabledata_scalar(handle     ,itable     ,ipar       , &
     integer                             :: irec
     integer                ,intent(in)  :: npar
     integer                ,intent(in)  :: refjulday
-    real(fp), optional     ,intent(in)  :: extrapol_in
-    real(fp)               ,intent(in)  :: timhr
-    real(fp), dimension(:) ,intent(out) :: values
+    real(hp), optional     ,intent(in)  :: extrapol_in
+    real(hp)               ,intent(in)  :: timhr
+    real(hp), dimension(:) ,intent(out) :: values
     character(256)         ,intent(out) :: errorstring
     type(handletype)       ,intent(in)  :: handle
 !
 ! Local variables
 !
-    real(fp)                  :: extrapol
+    real(hp)                  :: extrapol
     type(tablefiletypehandle) :: tablehandle
 !
 !! executable statements -------------------------------------------------------

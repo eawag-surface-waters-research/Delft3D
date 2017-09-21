@@ -311,7 +311,7 @@ subroutine wavcur2d(wavetime  ,layer_model ,kfu       ,kfv       , &
        ! Erroneous vertical layering definition found on COM-FILE
        !
        write(*, '(2a)') '*** ERROR: Erroneous vertical layering definition found on COM-FILE: LAYER_MODEL = ', trim(layer_model)
-       stop
+       call wavestop(1, '*** ERROR: Erroneous vertical layering definition found on COM-FILE: LAYER_MODEL = '//trim(layer_model))
     endif
     !
     ! Normal end
@@ -350,7 +350,7 @@ subroutine wavcur2d(wavetime  ,layer_model ,kfu       ,kfv       , &
        ! Erroneous vertical layering definition found on COM-FILE
        !
        write(*, '(2a)') '*** ERROR: Erroneous vertical layering definition found on COM-FILE: LAYER_MODEL = ', trim(layer_model)
-       stop
+       call wavestop(1, '*** ERROR: Erroneous vertical layering definition found on COM-FILE: LAYER_MODEL = '//trim(layer_model))
     endif
     !
     ! assuming error is solved
@@ -360,6 +360,6 @@ subroutine wavcur2d(wavetime  ,layer_model ,kfu       ,kfv       , &
     deallocate (rlabda, stat=ierr)
     if (error /= 0) then
        write(*,'(2a)') '*** ERROR: Unable to read/calculate wave-dependent flow velocities from file ', trim(filnam)
-       stop
+       call wavestop(1, '*** ERROR: Unable to read/calculate wave-dependent flow velocities from file '//trim(filnam))
     endif
 end subroutine wavcur2d

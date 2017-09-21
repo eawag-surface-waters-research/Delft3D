@@ -146,6 +146,6 @@ subroutine get_lev(wavetime, s1, mmax, nmax, filnam)
   deallocate(rbuff, stat=ierr)
   if (error /= 0) then
      write(*,'(2a)') '*** ERROR: Unable to read water level from file ', trim(filnam)
-     stop
+     call wavestop(1, '*** ERROR: Unable to read water level from file '//trim(filnam))
   endif
 end subroutine get_lev

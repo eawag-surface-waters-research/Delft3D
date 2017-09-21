@@ -118,7 +118,7 @@ subroutine hiscom(hs        ,dir       ,period    ,depth     , &
     call perpar(gamma0, perfac, ierr)
     if (ierr < 0) then
        write(*,'(a,f10.5)') 'ERROR: gamma0 = ',gamma0,' lies outside allowed range [1,20]'
-       stop
+       call wavestop(1, 'ERROR: gamma0 lies outside allowed range [1,20]')
     endif
     !
     ! Start loop

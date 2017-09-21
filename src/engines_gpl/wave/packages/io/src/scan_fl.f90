@@ -64,13 +64,13 @@ subroutine scan_fl(checkVersionNumber, versionNumberOK)
        if (k > 0) then
           write (*, '(a)') '*** ERROR: SWAN file PRINT contains SEVERE errors'
           close (uh)
-          stop
+          call wavestop(1, '*** ERROR: SWAN file PRINT contains SEVERE errors')
        endif
        k = index(line, 'error')
        if (k > 0) then
           write (*, '(a)') '*** ERROR: SWAN file PRINT contains ERRORS'
           close (uh)
-          stop
+          call wavestop(1, '*** ERROR: SWAN file PRINT contains ERRORS')
        endif
        if (checkVersionNumber) then
           k = index(line, 'version number')
@@ -79,7 +79,7 @@ subroutine scan_fl(checkVersionNumber, versionNumberOK)
              if (versionNumber < versionNumberOK) then
                 write (*, '(3a)') '*** ERROR: use SWAN version ',trim(versionNumberOK), ' or newer.'
                 close (uh)
-                stop
+                call wavestop(1, '*** ERROR: use SWAN version '//trim(versionNumberOK)//' or newer.')
              endif
           endif
        endif

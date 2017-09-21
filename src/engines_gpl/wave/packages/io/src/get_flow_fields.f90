@@ -1,4 +1,4 @@
-subroutine get_flow_fields (sif, fg, f2s, wavedata, sr, flowVelocityType)
+subroutine get_flow_fields (i_flow, sif, fg, sg, f2s, wavedata, sr, flowVelocityType)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2017.                                
@@ -41,21 +41,39 @@ subroutine get_flow_fields (sif, fg, f2s, wavedata, sr, flowVelocityType)
 !
 ! Global variables
 !
-   integer              :: flowVelocityType
-   type(input_fields)   :: sif              ! input fields defined on swan grid
-   type(grid)           :: fg               ! flow grid
-   type(grid_map)       :: f2s              ! flow to swn grid mapper
-   type(input_fields)   :: fif              ! input fields defined on flow grid
-   type(wave_data_type) :: wavedata
-   type(swan)           :: sr               ! swan input structure
+   integer                          :: i_flow
+   integer                          :: flowVelocityType
+   type(input_fields)               :: sif              ! input fields defined on swan grid
+   type(grid)                       :: fg               ! flow grid
+   type(grid)                       :: sg               ! swan grid
+   type(grid_map)                   :: f2s              ! flow to swn grid mapper
+   integer, dimension(:,:), pointer :: covered
+   type(wave_data_type)             :: wavedata
+   type(swan)                       :: sr               ! swan input structure
 !
 ! Local variables
 !
-   integer        :: iprint    = 0
-   real           :: alpb      = 0.0
-   real           :: dummy     = -999.0
-   logical        :: clbot     = .true.
-   character(256) :: mudfilnam = ' '
+   integer            :: iprint       = 0
+   real               :: alpb         = 0.0
+   real               :: dummy        = -999.0
+   logical            :: clbot        = .true.
+   logical            :: adaptCovered = .false.
+   character(256)     :: mudfilnam    = ' '
+   type(input_fields) :: fif                    ! input fields defined on flow grid
+
+interface
+   subroutine grmap_esmf(f1, n1, f2, mmax, nmax, f2s, f2g, adaptCovered)
+    use swan_flow_grid_maps
+    integer                   , intent(in)  :: n1
+    integer                   , intent(in)  :: mmax
+    integer                   , intent(in)  :: nmax
+    real   , dimension(n1)    , intent(in)  :: f1
+    real   , dimension(mmax,nmax)           :: f2
+    type(grid_map)            , intent(in)  :: f2s
+    type(grid)                              :: f2g  ! f2 grid
+    logical                   , optional    :: adaptCovered
+   end subroutine grmap_esmf
+end interface
 !
 !! executable statements -------------------------------------------------------
 !
@@ -64,18 +82,35 @@ subroutine get_flow_fields (sif, fg, f2s, wavedata, sr, flowVelocityType)
    call alloc_input_fields(fg, fif, wavedata%mode)
    !
    if (sr%swmor) then
-      !
-      ! Read depth from com-file
-      !
-      call get_dep (fif%dps, fif%mmax, fif%nmax, &
-                  & fg%grid_name)
-      !
-      ! Map depth to SWAN grid
-      !
-      call grmap (fif%dps      , fif%npts        , &
-                & sif%dps      , sif%npts        , &
-                & f2s%ref_table, f2s%weight_table, f2s%n_surr_points, &
-                & iprint       )
+      if (sr%flowgridfile == ' ') then
+         !
+         ! Read depth from com-file
+         !
+         call get_dep (fif%dps, fif%mmax, fif%nmax, &
+                     & fg%grid_name)
+         !
+         ! Map depth to SWAN grid
+         !
+         call grmap (fif%dps      , fif%npts        , &
+                   & sif%dps      , sif%npts        , &
+                   & f2s%ref_table, f2s%weight_table, f2s%n_surr_points, &
+                   & iprint       )
+      else
+         !
+         ! Read depth from netcdf-file
+         !
+         call get_var_netcdf (i_flow, wavedata%time , 'dps', &
+                            & fif%dps, fif%mmax, fif%nmax, &
+                            & sr%flowgridfile)
+         !
+         ! Map depth to SWAN grid, using ESMF_Regrid weights
+         !
+         adaptCovered = .true.
+         call grmap_esmf (fif%dps       , fif%npts, &
+                        & sif%dps       , sif%mmax, sif%nmax, &
+                        & f2s           , sg      , adaptCovered)
+         adaptCovered = .false.
+      endif
    endif
    !
    ! Read polygons fixed structures
@@ -83,67 +118,128 @@ subroutine get_flow_fields (sif, fg, f2s, wavedata, sr, flowVelocityType)
    call dam_cod (fg%x, fg%y, fg%kcs, fg%mmax, fg%nmax)
    !
    if (sr%swwlt) then
-      !
-      ! Read water level from com-file
-      !
-      call get_lev (wavedata%time , &
-                  & fif%s1, fif%mmax, fif%nmax, &
-                  & fg%grid_name)
-      !
-      ! Map water level to SWAN grid
-      !
-      call grmap (fif%s1       , fif%npts        , &
-                & sif%s1       , sif%npts        , &
-                & f2s%ref_table, f2s%weight_table, f2s%n_surr_points, &
-                & iprint       )
+      if (sr%flowgridfile == ' ') then
+         !
+         ! Read water level from com-file
+         !
+         call get_lev (wavedata%time , &
+                     & fif%s1, fif%mmax, fif%nmax, &
+                     & fg%grid_name)
+         !
+         ! Map water level to SWAN grid
+         !
+         call grmap (fif%s1       , fif%npts        , &
+                   & sif%s1       , sif%npts        , &
+                   & f2s%ref_table, f2s%weight_table, f2s%n_surr_points, &
+                   & iprint       )
+      else
+         !
+         ! Read water level from netcdf-file
+         !
+         call get_var_netcdf (i_flow, wavedata%time , 's1', &
+                            & fif%s1, fif%mmax, fif%nmax, &
+                            & sr%flowgridfile)
+         !
+         ! Map water level to SWAN grid, using ESMF_Regrid weights
+         !
+         call grmap_esmf (fif%s1       , fif%npts, &
+                        & sif%s1       , sif%mmax, sif%nmax, &
+                        & f2s          , sg)
+      endif
    endif
    !
    if (sr%swuvt) then
-      !
-      ! Read velocity from com-file
-      !
-      call get_cur (wavedata%time, &
-                  & fif%kfu, fif%kfv, fif%u1, fif%v1, fif%mmax, fif%nmax, &
-                  & fg%kmax, fg%grid_name, fg%layer_model, flowVelocityType, &
-                  & fif%dps, fif%s1)
-      !
-      ! Convert to Cartesian, cell centres
-      !
-      call flow2wav (fif%u1  , fif%v1 , &
-                   & fg%alfas, fg%guu , fg%gvv, fg%mmax, fg%nmax, fg%kcs, &
-                   & fif%kfu , fif%kfv, alpb  , clbot  )
-      !
-      ! Map velocity to SWAN grid
-      ! NOTE: mapping procedure only updates the part of SWAN grid covered by current FLOW domain
-      !
-      call grmap (fif%u1       , fif%npts        , &
-                & sif%u1       , sif%npts        , &
-                & f2s%ref_table, f2s%weight_table, f2s%n_surr_points, &
-                & iprint       )
-      call grmap (fif%v1       , fif%npts        , &
-                & sif%v1       , sif%npts        , &
-                & f2s%ref_table, f2s%weight_table, f2s%n_surr_points, &
-                & iprint       )
+      if (sr%flowgridfile == ' ') then
+         !
+         ! Read velocity from com-file
+         !
+         call get_cur (wavedata%time, &
+                     & fif%kfu, fif%kfv, fif%u1, fif%v1, fif%mmax, fif%nmax, &
+                     & fg%kmax, fg%grid_name, fg%layer_model, flowVelocityType, &
+                     & fif%dps, fif%s1)
+         !
+         ! Convert to Cartesian, cell centres
+         !
+         call flow2wav (fif%u1  , fif%v1 , &
+                      & fg%alfas, fg%guu , fg%gvv, fg%mmax, fg%nmax, fg%kcs, &
+                      & fif%kfu , fif%kfv, alpb  , clbot  )
+         !
+         ! Map velocity to SWAN grid
+         ! NOTE: mapping procedure only updates the part of SWAN grid covered by current FLOW domain
+         !
+         call grmap (fif%u1       , fif%npts        , &
+                   & sif%u1       , sif%npts        , &
+                   & f2s%ref_table, f2s%weight_table, f2s%n_surr_points, &
+                   & iprint       )
+         call grmap (fif%v1       , fif%npts        , &
+                   & sif%v1       , sif%npts        , &
+                   & f2s%ref_table, f2s%weight_table, f2s%n_surr_points, &
+                   & iprint       )
+      else
+         !
+         ! Read velocity components from netcdf-file
+         !
+         if (fg%kmax > 1) then
+            write(*,'(a)') "ERROR: trying to read 3 dim velocity components from NetCDF file. Not implemented yet."
+            call wavestop(1, "ERROR: trying to read 3 dim velocity components from NetCDF file. Not implemented yet.")
+         endif
+         call get_var_netcdf (i_flow, wavedata%time , 'u1', &
+                            & fif%u1, fif%mmax, fif%nmax, &
+                            & sr%flowgridfile)
+         call get_var_netcdf (i_flow, wavedata%time , 'v1', &
+                            & fif%v1, fif%mmax, fif%nmax, &
+                            & sr%flowgridfile)
+         !
+         ! Map velocity components to SWAN grid, using ESMF_Regrid weights
+         !
+         call grmap_esmf (fif%u1       , fif%npts, &
+                        & sif%u1       , sif%mmax, sif%nmax, &
+                        & f2s          , sg)
+         call grmap_esmf (fif%v1       , fif%npts, &
+                        & sif%v1       , sif%mmax, sif%nmax, &
+                        & f2s          , sg)
+      endif
    endif
    !
    if (sr%swwindt .and. sr%dom(1)%qextnd(q_wind) >= 1) then
-      !
-      ! Read wind from com-file
-      !
-      call get_wind (wavedata%time, &
-                   & fif%windu, fif%windv, fif%mmax, fif%nmax, &
-                   & fg%grid_name)
-      !
-      ! Map wind to SWAN grid
-      !
-      call grmap (fif%windu    , fif%npts        , &
-                & sif%windu    , sif%npts        , &
-                & f2s%ref_table, f2s%weight_table, f2s%n_surr_points, &
-                & iprint       )
-      call grmap (fif%windv    , fif%npts   , &
-                & sif%windv    , sif%npts   , &
-                & f2s%ref_table, f2s%weight_table, f2s%n_surr_points, &
-                & iprint       )
+      if (sr%flowgridfile == ' ') then
+         !
+         ! Read wind from com-file
+         !
+         call get_wind (wavedata%time, &
+                      & fif%windu, fif%windv, fif%mmax, fif%nmax, &
+                      & fg%grid_name)
+         !
+         ! Map wind to SWAN grid
+         !
+         call grmap (fif%windu    , fif%npts        , &
+                   & sif%windu    , sif%npts        , &
+                   & f2s%ref_table, f2s%weight_table, f2s%n_surr_points, &
+                   & iprint       )
+         call grmap (fif%windv    , fif%npts   , &
+                   & sif%windv    , sif%npts   , &
+                   & f2s%ref_table, f2s%weight_table, f2s%n_surr_points, &
+                   & iprint       )
+      else
+         !
+         ! Read wind components from netcdf-file
+         !
+         call get_var_netcdf (i_flow, wavedata%time , 'windx', &
+                            & fif%windu, fif%mmax, fif%nmax, &
+                            & sr%flowgridfile)
+         call get_var_netcdf (i_flow, wavedata%time , 'windy', &
+                            & fif%windv, fif%mmax, fif%nmax, &
+                            & sr%flowgridfile)
+         !
+         ! Map wind components to SWAN grid, using ESMF_Regrid weights
+         !
+         call grmap_esmf (fif%windu    , fif%npts, &
+                        & sif%windu    , sif%mmax, sif%nmax, &
+                        & f2s          , sg)
+         call grmap_esmf (fif%windv    , fif%npts, &
+                        & sif%windv    , sif%mmax, sif%nmax, &
+                        & f2s          , sg)
+      endif
    endif
    !
    if (wavedata%mode == flow_mud_online) then

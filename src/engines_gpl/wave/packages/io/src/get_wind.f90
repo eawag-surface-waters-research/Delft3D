@@ -172,6 +172,6 @@ subroutine get_wind(wavetime, windu, windv, mmax, nmax, filnam)
     deallocate (rbuff, stat=ierr)
     if (error /= 0) then
        write(*,'(2a)') '*** ERROR: Unable to read wind velocities from file ', trim(filnam)
-       stop
+       call wavestop(1, '*** ERROR: Unable to read wind velocities from file '//trim(filnam))
     endif
 end subroutine get_wind

@@ -292,21 +292,31 @@ function wave () {
     dest_default="$dest_main/lnx64/wave/default"
     dest_swan_bin="$dest_main/lnx64/swan/bin"
     dest_swan_scripts="$dest_main/lnx64/swan/scripts"
+    dest_esmf_bin="$dest_main/lnx64/esmf/bin"
+    dest_esmf_scripts="$dest_main/lnx64/esmf/scripts"
 
     mkdir -p $dest_bin
     mkdir -p $dest_default
     mkdir -p $dest_swan_bin
     mkdir -p $dest_swan_scripts
+    mkdir -p $dest_esmf_bin
+    mkdir -p $dest_esmf_scripts
 
+    copyFile "$prefix/lib/libwave.so"                                $dest_bin
     copyFile "$prefix/bin/wave.exe"                                  $dest_bin
     copyFile "$srcdir/engines_gpl/flow2d3d/default/dioconfig.ini"    $dest_default
     copyFile "$srcdir/third_party_open/swan/bin/linux/*.*"           $dest_swan_bin
     copyFile "$srcdir/third_party_open/swan/scripts/swan_install.sh" $dest_swan_scripts/swan.sh
+    copyFile "$srcdir/third_party_open/esmf/lnx64/bin/*"             $dest_esmf_bin
+    copyFile "$srcdir/third_party_open/esmf/lnx64/scripts/*.*"       $dest_esmf_scripts
 
     echo "Gathering libraries for wave..."
     cp -u `$gatherScript $prefix/bin/wave.exe | eval grep -v $gatherExcludeFilter` $dest_bin
+    cp -u `$gatherScript $prefix/lib/libwave.so | eval grep -v $gatherFilter` $dest_bin
     echo "Gathering libraries for swan..."
     cp -u `$gatherScript $srcdir/third_party_open/swan/bin/linux/*.exe | eval grep -v $gatherExcludeFilter` $dest_swan_bin
+    echo "Gathering libraries for esmf..."
+    cp -u `$gatherScript $srcdir/third_party_open/esmf/bin/linux/ESMF_RegridWeightGen | eval grep -v $gatherFilter` $dest_esmf_bin
 
     # chrpath -r \$ORIGIN $dest_bin/wave.exe
 

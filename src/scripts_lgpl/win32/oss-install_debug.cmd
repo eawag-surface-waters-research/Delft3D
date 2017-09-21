@@ -264,8 +264,11 @@ rem ================
 
     if not exist !dest_bin!     mkdir !dest_bin!
 
+    copy engines_gpl\wave\bin\Debug\wave.*                                               !dest_bin!
+    copy third_party_open\expat\win32\bin\Release\libexpat.dll                           !dest_bin!
     copy third_party_open\pthreads\bin\win32\pthreadVCE2.dll                             !dest_bin!
     copy third_party_open\pthreads\bin\win32\pthreadvce.dll                              !dest_bin!
+    call :copyNetcdf
 goto :endproc
 
 

@@ -201,7 +201,7 @@ subroutine hisout(hs        ,dir       ,dirc      ,dirs      ,period    , &
        endif
        if (fstat /= 0) then
           write (*, '(2a)') '*** ERROR: Unable to open file ',trim(filnam)
-          stop
+          call wavestop(1, '*** ERROR: Unable to open file '//trim(filnam))
        endif
        rewind lunhis
        do j = 1, offset
@@ -346,7 +346,7 @@ subroutine hisout(hs        ,dir       ,dirc      ,dirs      ,period    , &
                 !
                 close (lunhis)
                 write (*, '(2a)') '*** ERROR: Unable to read values from file ', trim(filnam)
-                stop
+                call wavestop(1, '*** ERROR: Unable to read values from file '//trim(filnam))
              endif
           enddo
           if (outfile == 1) then
