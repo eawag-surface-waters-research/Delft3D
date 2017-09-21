@@ -718,7 +718,7 @@
              read( lun, iostat = ierr ) time, data
          enddo
 
-         read( lun, iostat = ierr )
+         read( lun, iostat = ierr ) time
 
          !
          ! If we have been able to read at least one record and the last read
