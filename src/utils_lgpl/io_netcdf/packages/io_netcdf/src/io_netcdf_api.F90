@@ -934,12 +934,12 @@ function ionc_def_mesh_ids_dll(ioncid, meshid, locationType) result(ierr) bind(C
 
 end function ionc_def_mesh_ids_dll
 
-function ionc_put_1d_mesh_discretisation_points_dll(ioncid, meshid, c_branchidx, c_offset, nodesinfo, nmeshpoints, startIndex) result(ierr) bind(C, name="ionc_put_1d_mesh_discretisation_points")
+function ionc_put_1d_mesh_discretisation_points_dll(ioncid, meshid, c_branchidx, c_offset, c_edgenodes, nodesinfo, nmeshpoints, nedgenodes, startIndex) result(ierr) bind(C, name="ionc_put_1d_mesh_discretisation_points")
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_put_1d_mesh_discretisation_points_dll
-  integer(kind=c_int), intent(in)     :: ioncid, meshid, nmeshpoints, startIndex  
-  type(c_ptr), intent(in)             :: c_branchidx,c_offset
+  integer(kind=c_int), intent(in)     :: ioncid, meshid, nmeshpoints, nedgenodes, startIndex  
+  type(c_ptr), intent(in)             :: c_branchidx,c_offset, c_edgenodes
   type(t_ug_charinfo),  intent(in)    :: nodesinfo(nmeshpoints)
-  integer,pointer                     :: branchidx(:)
+  integer,pointer                     :: branchidx(:), edgenodes(:,:)
   double precision,pointer            :: offset(:)
   character(len=ug_idsLen)            :: nodeids(nmeshpoints)
   character(len=ug_idsLongNamesLen)   :: nodelongnames(nmeshpoints)
@@ -949,8 +949,9 @@ function ionc_put_1d_mesh_discretisation_points_dll(ioncid, meshid, c_branchidx,
   
   call c_f_pointer(c_branchidx, branchidx, (/ nmeshpoints /))
   call c_f_pointer(c_offset, offset, (/ nmeshpoints /))
-  
-  ierr = ionc_put_1d_mesh_discretisation_points_ugrid(ioncid, meshid, branchidx, offset, startIndex) 
+  call c_f_pointer(c_edgenodes, edgenodes, (/ 2, nedgenodes /))
+    
+  ierr = ionc_put_1d_mesh_discretisation_points_ugrid(ioncid, meshid, branchidx, offset, edgenodes, startIndex) 
 
   !get and write the node_ids
   do i=1,nmeshpoints

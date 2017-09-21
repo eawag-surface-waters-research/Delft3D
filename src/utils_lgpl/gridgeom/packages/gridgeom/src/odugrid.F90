@@ -100,7 +100,7 @@ function odu_get_xy_coordinates(branchids, branchoffsets, geopointsX, geopointsY
    do while (idxbr<=size(branchlengths,1))
       !calculate the starting and ending indexses of the mesh points
       do i = idxstart + 1, size(branchoffsets,1)
-         if (branchids(i)/=branchid) then
+         if (branchids(i).ne.branchid) then
             branchid = branchids(i)
             idxend = i-1;
             exit

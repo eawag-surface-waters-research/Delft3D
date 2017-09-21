@@ -1442,15 +1442,14 @@ function ionc_def_mesh_ids_ugrid(ioncid, meshid, locationType) result(ierr)
 
 end function ionc_def_mesh_ids_ugrid
 
-
-function ionc_put_1d_mesh_discretisation_points_ugrid(ioncid, networkid, branchidx, offset, startIndex) result(ierr) 
+function ionc_put_1d_mesh_discretisation_points_ugrid(ioncid, networkid, branchidx, offset, edgenodes, startIndex) result(ierr) 
 
   integer, intent(in)         :: ioncid, networkid, startIndex  
-  integer, intent(in)         :: branchidx(:)
+  integer, intent(in)         :: branchidx(:), edgenodes(:,:)
   double precision,intent(in) :: offset(:)
   integer                     :: ierr
   
-  ierr=ug_put_1d_mesh_discretisation_points(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(networkid), branchidx, offset, startIndex)  
+  ierr=ug_put_1d_mesh_discretisation_points(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(networkid), branchidx, offset, edgenodes, startIndex)  
   
 end function ionc_put_1d_mesh_discretisation_points_ugrid
 

@@ -17,13 +17,17 @@ namespace UGrid.tests
         {
             TestHelper.SetSharedPath(IoNetcdfLibWrapper.LibDetails.LIB_DEP);
             string filename = TestHelper.GetLibraryPath(IoNetcdfLibWrapper.LibDetails.LIB_NAME);
-            m_libptr = TestHelper.LoadLibrary(filename);
+            m_libnetcdf = TestHelper.LoadLibrary(filename);
             //we should chek the pointer is not null
-            Assert.That(m_libptr, Is.Not.Null);
+            Assert.That(m_libnetcdf, Is.Not.Null);
+            filename = TestHelper.GetLibraryPath(GridGeomLibWrapper.LibDetails.LIB_NAME);
+            m_libgridgeom = TestHelper.LoadLibrary(filename);
+            Assert.That(m_libgridgeom, Is.Not.Null);
         }
 
         //pointer to the loaded dll
-        public static IntPtr m_libptr;
+        public static IntPtr m_libnetcdf;
+        public static IntPtr m_libgridgeom;
 
         //network name
         private string networkName = "network";
@@ -59,8 +63,7 @@ namespace UGrid.tests
 
         //mesh dimension
         private int nmeshpoints = 10;
-
-        private int nmeshedges = 14;
+        private int nedgenodes  = 7; // nmeshpoints - 1 
 
         //mesh geometry
         private int nmesh1dPoints = 10;
@@ -355,8 +358,7 @@ namespace UGrid.tests
                 Assert.That(maxfacenodes, Is.EqualTo(numberOfMaxFaceNodes));
 
                 //get all node coordinates
-                ierr = wrapper.ionc_get_node_coordinates(ref ioncid, ref meshid, ref c_nodesX, ref c_nodesY,
-                    ref nnodes);
+                ierr = wrapper.ionc_get_node_coordinates(ref ioncid, ref meshid, ref c_nodesX, ref c_nodesY, ref nnodes);
                 Assert.That(ierr, Is.EqualTo(0));
 
                 double[] rc_nodeX = new double[numberOf2DNodes];
@@ -371,8 +373,7 @@ namespace UGrid.tests
 
                 //Check face nodes
                 int fillvalue = -1;
-                ierr = wrapper.ionc_get_face_nodes(ref ioncid, ref meshid, ref c_face_nodes, ref nface,
-                    ref maxfacenodes, ref fillvalue);
+                ierr = wrapper.ionc_get_face_nodes(ref ioncid, ref meshid, ref c_face_nodes, ref nface, ref maxfacenodes, ref fillvalue);
                 Assert.That(ierr, Is.EqualTo(0));
                 int[] rc_face_nodes = new int[nface * maxfacenodes];
                 Marshal.Copy(c_face_nodes, rc_face_nodes, 0, nface * maxfacenodes);
@@ -399,24 +400,27 @@ namespace UGrid.tests
         {
             IntPtr c_branchidx = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nmeshpoints);
             IntPtr c_offset = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nmeshpoints);
+            IntPtr c_edgenodes = Marshal.AllocCoTaskMem(2* Marshal.SizeOf(typeof(int)) * nedgenodes);
             // Links variables
             IntPtr c_mesh1indexes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nlinks);
             IntPtr c_mesh2indexes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nlinks);
             try
             {
-                int ierr = -1;
                 string tmpstring;
-                //4. Write the 1d mesh topology.
-                //Assume mesh and network are saved in the same table 
                 int meshid = -1;
-                ierr = wrapper.ionc_create_1d_mesh(ref ioncid, ref networkid, ref meshid, meshname, ref nmeshpoints,
-                    ref nmeshedges);
+
+                //1. Create: the assumption here is that nedgenodes is known (we could move this calculation inside ionc_create_1d_mesh)
+                int ierr = wrapper.ionc_create_1d_mesh(ref ioncid, ref networkid, ref meshid, meshname, ref nmeshpoints, ref nedgenodes);
                 Assert.That(ierr, Is.EqualTo(0));
 
-                //5. Write the 1d mesh geometry
+                //2. Create the edge nodes (the algorithm in in gridgeom.dll, not in ionetcdf.dll)
                 Marshal.Copy(branchidx, 0, c_branchidx, nmeshpoints);
+                var gridwrapper = new GridGeomLibWrapper();
+                ierr = gridwrapper.ggeo_create_edge_nodes(ref nBranches, ref nmeshpoints, ref nedgenodes, ref c_branchidx, ref c_edgenodes);
+                Assert.That(ierr, Is.EqualTo(0));
+                
+                //3. Create the node branchidx, offsets, meshnodeidsinfo
                 Marshal.Copy(offset, 0, c_offset, nmeshpoints);
-                // Define the node ids
                 IoNetcdfLibWrapper.interop_charinfo[] meshnodeidsinfo = new IoNetcdfLibWrapper.interop_charinfo[nmesh1dPoints];
                 for (int i = 0; i < nmesh1dPoints; i++)
                 {
@@ -428,11 +432,11 @@ namespace UGrid.tests
                     meshnodeidsinfo[i].longnames = tmpstring.ToCharArray();
                 }
 
-                ierr = wrapper.ionc_put_1d_mesh_discretisation_points(ref ioncid, ref meshid, ref c_branchidx,
-                    ref c_offset, meshnodeidsinfo, ref nmeshpoints, ref startIndex);
+                //4. Write the discretization points
+                ierr = wrapper.ionc_put_1d_mesh_discretisation_points(ref ioncid, ref meshid, ref c_branchidx, ref c_offset, ref c_edgenodes, meshnodeidsinfo, ref nmeshpoints, ref nedgenodes, ref startIndex);
                 Assert.That(ierr, Is.EqualTo(0));
 
-                //6. Write links attributes
+                //5. Create links attributes
                 Marshal.Copy(mesh1indexes, 0, c_mesh1indexes, nlinks);
                 Marshal.Copy(mesh2indexes, 0, c_mesh2indexes, nlinks);
                 int linkmesh = -1;
@@ -451,7 +455,7 @@ namespace UGrid.tests
                     linksinfo[i].longnames = tmpstring.ToCharArray();
                 }
 
-                //7. Write the mesh links
+                //6. Write the mesh links
                 ierr = wrapper.ionc_put_mesh_contact(ref ioncid, ref linkmesh, ref c_mesh1indexes, ref c_mesh2indexes,
                     linksinfo, ref nlinks, ref startIndex);
                 Assert.That(ierr, Is.EqualTo(0));
@@ -645,9 +649,6 @@ namespace UGrid.tests
             ierr = wrapper.ionc_create_1d_network(ref ioncid, ref networkid, networkName, ref nNodes,
                 ref nBranches, ref nGeometry);
             Assert.That(ierr, Is.EqualTo(0));
-
-
-            //var wrapperGridgeom = new GridGeomLibWrapper();
 
             //5. Write 1d network and mesh
             write1dnetwork(ioncid, networkid, ref wrapper);

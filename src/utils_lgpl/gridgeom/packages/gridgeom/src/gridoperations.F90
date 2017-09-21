@@ -10,6 +10,7 @@
    public :: ggeo_convert_1d_arrays
    public :: ggeo_get_links_count
    public :: ggeo_get_links
+   public :: ggeo_create_edge_nodes
    
    !All subroutines are made private (we do not expose them for now)
    private
@@ -3789,5 +3790,41 @@
    enddo
    
    end function ggeo_convert_1d_arrays
+   
+   !< Calculate the edge_node assuming discretization points are consecutive within the same branch.
+   function ggeo_create_edge_nodes(nBranches, nNodes, branchids, edgenodes) result(ierr) !edge_nodes
+      
+   integer, intent(in)      :: nBranches, nNodes, branchids(:)
+   integer, intent(inout)   :: edgenodes(:,:)
+   integer                  :: ierr, cbranchid, idxstart, idxbr, idxend, i, k
+   
+   ierr = 0
+  
+   cbranchid      = branchids(1)
+   idxstart       = 1
+   idxbr          = 1
+   idxend         = 1
+   k              = 0
+   do while (idxbr<=nBranches)
+       do i = idxstart + 1, nNodes
+           if (branchids(i).ne.cbranchid) then
+               cbranchid = branchids(i)
+               idxend = i - 1;
+               exit
+           endif
+           if (i == nNodes) then
+               idxend = i;
+           endif
+       enddo
+       do i = idxstart, idxend - 1
+           k = k +1
+           edgenodes(1,k) = i
+           edgenodes(2,k) = i + 1
+       enddo
+       idxstart    = idxend + 1
+       idxbr       = idxbr + 1
+   enddo
+   
+   end function ggeo_create_edge_nodes
    
    end module gridoperations

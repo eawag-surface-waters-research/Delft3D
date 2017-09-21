@@ -94,6 +94,18 @@ namespace General.tests
         [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ggeo_get_links", CallingConvention = CallingConvention.Cdecl)]
         public static extern int ggeo_get_links_dll([In, Out] ref IntPtr arrayfrom, [In, Out] ref IntPtr arrayto, [In] ref int nlinks);
 
+        /// <summary>
+        /// Algorithm to create the edge_nodes from the branchid
+        /// </summary>
+        /// <param name="nBranches"></param>
+        /// <param name="nNodes"></param>
+        /// <param name="nEdgeNodes"></param>
+        /// <param name="c_branchids"></param>
+        /// <param name="c_edgenodes"></param>
+        /// <returns></returns>
+        [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ggeo_create_edge_nodes", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ggeo_create_edge_nodes_dll([In] ref int nBranches, [In] ref int nNodes, [In] ref int nEdgeNodes, [In, Out] ref IntPtr c_branchids, [In, Out] ref IntPtr c_edgenodes);
+
         #endregion ggeo_functions
 
 
@@ -154,6 +166,12 @@ namespace General.tests
         public int ggeo_get_links(ref IntPtr arrayfrom, ref IntPtr arrayto, ref int nlinks)
         {
             int ierr = ggeo_get_links_dll(ref arrayfrom, ref arrayto, ref nlinks);
+            return ierr;
+        }
+
+        public int ggeo_create_edge_nodes(ref int nBranches, ref int nNodes, ref int nEdgeNodes, ref IntPtr c_branchids, ref IntPtr c_edgenodes)
+        {
+            int ierr = ggeo_create_edge_nodes_dll(ref nBranches, ref nNodes, ref nEdgeNodes, ref c_branchids, ref c_edgenodes);
             return ierr;
         }
 

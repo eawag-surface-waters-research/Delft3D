@@ -152,4 +152,21 @@ function ggeo_convert_1d_arrays_dll(c_nodex, c_nodey, c_branchid, nbranches, nme
 
 end function ggeo_convert_1d_arrays_dll
 
+function ggeo_create_edge_nodes_dll(nBranches, nNodes, nEdgeNodes, c_branchids, c_edgenodes) result(ierr) bind(C, name="ggeo_create_edge_nodes")
+!DEC$ ATTRIBUTES DLLEXPORT :: ggeo_create_edge_nodes_dll
+
+   use gridoperations
+   
+   type(c_ptr), intent(in)  :: c_branchids, c_edgenodes   
+   integer, intent(in)      :: nBranches, nNodes, nEdgeNodes
+   integer, pointer         :: branchids(:), edgenodes(:,:)
+   integer                  :: ierr
+   
+   call c_f_pointer(c_branchids, branchids, (/ nNodes /))
+   call c_f_pointer(c_edgenodes, edgenodes, (/ 2, nEdgeNodes /))
+   
+   ierr = ggeo_create_edge_nodes(nBranches, nNodes, branchids, edgenodes)
+
+end function ggeo_create_edge_nodes_dll
+
 end module gridgeom_api

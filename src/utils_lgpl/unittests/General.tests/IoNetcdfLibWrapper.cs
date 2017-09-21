@@ -401,7 +401,7 @@ namespace General.tests
         /// <param name="nmeshpoints">The number of mesh points (in)</param>
         /// <returns></returns>
         [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ionc_put_1d_mesh_discretisation_points", CallingConvention = CallingConvention.Cdecl)]
-        private static extern int ionc_put_1d_mesh_discretisation_points_dll([In] ref int ioncid, [In] ref int networkid, [In] ref IntPtr c_branchidx, [In] ref IntPtr c_offset, interop_charinfo[] nodeinfo, [In] ref int nmeshpoints, [In] ref int startIndex);
+        private static extern int ionc_put_1d_mesh_discretisation_points_dll([In] ref int ioncid, [In] ref int meshid, [In] ref IntPtr c_branchidx, [In] ref IntPtr c_offset, [In] ref IntPtr c_edgenodes, interop_charinfo[] nodeinfo, [In] ref int edgenodes, [In] ref int nmeshpoints, [In] ref int startIndex);
 
         /// <summary>
         /// Get the number of network nodes
@@ -821,11 +821,10 @@ namespace General.tests
         }
 
         public int ionc_put_1d_mesh_discretisation_points(ref int ioncid, ref int networkid, ref IntPtr c_branchidx,
-            ref IntPtr c_offset, interop_charinfo[]  nodeinfo, ref int nmeshpoints, ref int startIndex)
+            ref IntPtr c_offset, ref IntPtr c_edgenodes, interop_charinfo[]  nodeinfo, [In] ref int edgenodes, ref int nmeshpoints, ref int startIndex)
         {
-            return ionc_put_1d_mesh_discretisation_points_dll(ref ioncid, ref networkid, ref c_branchidx, ref c_offset, nodeinfo, ref nmeshpoints, ref startIndex);
+            return ionc_put_1d_mesh_discretisation_points_dll(ref ioncid, ref networkid, ref c_branchidx, ref c_offset, ref c_edgenodes, nodeinfo, ref edgenodes, ref nmeshpoints, ref startIndex);
         }
-     
 
         public int ionc_get_1d_network_nodes_count(ref int ioncid, ref int networkid, ref int nNodes)
         {
