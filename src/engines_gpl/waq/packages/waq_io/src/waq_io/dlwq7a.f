@@ -146,10 +146,6 @@
                   write(lunut,2320) nothrd
                endif
             endif
-            
-            if ( .not. associated(dlwqdata%param_name) ) then
-                write(*,*) 'Here we are!'
-            endif
             ch20 = 'TAU'
             call zoek( ch20 , dlwqdata%no_param, dlwqdata%param_name, 20 , inovec)
             if ( inovec .gt. 0 ) taupart = .true.
