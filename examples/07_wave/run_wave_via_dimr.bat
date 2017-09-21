@@ -11,11 +11,6 @@
     rem
 
 
-    rem
-    rem Set the mdw file
-    rem 
-set mdwfile=obw.mdw
-
 
 
 
@@ -25,6 +20,7 @@ set mdwfile=obw.mdw
 set ARCH=win64
 set D3D_HOME=..\..\bin
   rem set D3D_HOME=c:\Program Files (x86)\Deltares\Delft3D 4.01.00
+set dimrexedir=%D3D_HOME%\%ARCH%\dimr\bin
 set waveexedir=%D3D_HOME%\%ARCH%\wave\bin
 set swanexedir=%D3D_HOME%\%ARCH%\swan\bin
 set swanbatdir=%D3D_HOME%\%ARCH%\swan\scripts
@@ -37,8 +33,8 @@ set shareddir=%D3D_HOME%\%ARCH%\shared
 
     rem Run
 title Wave simulation
-set PATH=%shareddir%;%waveexedir%;%swanbatdir%;%swanexedir%;%PATH%
-"%waveexedir%\wave.exe" %mdwfile% 0
+set PATH=%dimrexedir%;%shareddir%;%waveexedir%;%swanbatdir%;%swanexedir%;%PATH%
+"%dimrexedir%\dimr.exe" dimr_config.xml
 title %CD%
 
     rem To prevent the DOS box from disappearing immediately: remove the rem on the following line
