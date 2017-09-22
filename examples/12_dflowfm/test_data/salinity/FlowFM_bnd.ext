@@ -1,0 +1,37 @@
+
+[boundary]
+quantity=waterlevelbnd
+locationfile=Boundary02.pli
+forcingfile=WaterLevel.bc
+return_time=0.0000000e+000
+
+[boundary]
+quantity=waterlevelbnd
+locationfile=Boundary01.pli
+forcingfile=WaterLevel.bc
+return_time=0.0000000e+000
+
+[boundary]
+quantity=uxuyadvectionvelocitybnd
+locationfile=Boundary01U.pli
+forcingfile=Velocity01.bc
+
+[boundary]
+quantity=salinitybnd
+locationfile=Boundary01.pli
+forcingfile=Salinity01.bc
+
+[boundary]
+quantity=salinitybnd
+locationfile=Boundary02.pli
+forcingfile=Salinity02.bc
+
+
+
+
+
+* QUANTITY=uxuyadvectionvelocitybnd
+* FILENAME=Velocitieszuiduxuy.pli
+* FILETYPE=9
+* METHOD=2
+* OPERAND=O

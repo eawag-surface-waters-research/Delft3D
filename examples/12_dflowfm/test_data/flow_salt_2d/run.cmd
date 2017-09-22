@@ -1,0 +1,1 @@
+..\..\bin\Win32\Release\unstruc.exe 2d.mdu

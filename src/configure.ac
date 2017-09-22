@@ -2,10 +2,12 @@
 # Process this file with autoconf to produce a configure script.
 AC_PREREQ(2.68)
 AC_INIT(Delft3D, 0.0, delft3d.support@deltares.nl)
+
 dnl Store generated files in config dir
 AC_CONFIG_AUX_DIR(config)
 dnl Define a unique file to check if we're in the right directory
 AC_CONFIG_SRCDIR([engines_gpl/flow2d3d/packages/kernel/src/compute/adi.f90])
+
 AC_CONFIG_HEADER([config.h])
 dnl m4 macro's in m4 directory.
 AC_CONFIG_MACRO_DIR([m4])
@@ -32,7 +34,7 @@ dnl We're going to make it work with older versions also, this might not work (l
 ## Libtool initialisation. ##
 ## ----------------------- ##
 
-LT_PREREQ(2.2)
+LT_PREREQ(2.4)
 LT_INIT
 dnl LTDL_INIT dnl I don't think this is required anymore
 dnl AC_PROG_LIBTOOL
@@ -52,6 +54,7 @@ AC_SUBST(INCLTDL)
 AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
+AC_PROG_SED
 # These standard macros don't work well (don't throw an error on missing yacc)
 # According to docs we can better use AM_PROG_LEX and AC_PROG_YACC
 AC_PROG_YACC
@@ -107,6 +110,7 @@ dnl Check for underscoring of external names
 AC_FC_WRAPPERS
 dnl We need to use .f90 and not .f to enable Automake FC support
 dnl Some Intel ifc/ifort do not understand .f95.  :-/
+
 AC_FC_SRCEXT([f90])
 dnl Yes, we want free form Fortran!
 AC_FC_FREEFORM
@@ -115,6 +119,7 @@ dnl but because ifort and gfortran allow it let's not raise errors by default)
 AC_FC_LINE_LENGTH([unlimited])
 dnl check to see if we can write binary files
 ACX_FC_FORM_BINARY
+
 dnl check if open(...shared) works
 ACX_FC_SHARED_SPECIFIER
 dnl add preprocess option
@@ -289,9 +294,14 @@ FC=$MPIFC
 CXX=$MPICXX
 dnl add the fortran f90 libraries to the link flags, in case mpicxx is used as linker
 MPILIBS="$MPILIBS $($MPIFC -showme:link)"
+    MPILIBS="$MPILIBS $($MPIFC -show 2>/dev/null | cut -d" " -f 2- )"
 ],
 [])
 AM_CONDITIONAL(HAVE_MPI, [test "x$with_mpi" != xno])
+
+# define usempi (same as HAVE_MPI)
+# Conditionals like this should not be needed but I don't know a shortcut
+AM_CONDITIONAL([USEMPI], test "x$with_mpi" != "xno")
 
 #
 # Checks for OpenDA if user selects this.
@@ -335,6 +345,138 @@ if test -z "$pluginext"; then
   AC_MSG_ERROR([can't detect plugin extension])
 fi
 AC_DEFINE_UNQUOTED(D3D_PLUGIN_EXT, ["$pluginext"], [Delft3D plugin extension])
+
+################ DflowFM extras #############################
+
+# Check for Intel MKL
+ACX_MKL
+AM_CONDITIONAL([USEMKL], test "x$ax_mkl_ok" == "xyes")
+
+dnl Check for PETSc
+AC_ARG_WITH(petsc,[AS_HELP_STRING([--with-petsc],[Build with petsc support @<:@default=no@:>@])], [],[with_petsc=no])
+AS_IF([test "x$with_petsc" != "xno"],
+        [
+          PKG_CHECK_MODULES([PETSc], [PETSc < 3.5])
+          AC_DEFINE([HAVE_PETSC],1,[Defined if you have PETSc library.])
+        ],
+        [
+          AC_MSG_RESULT([no])
+        ]
+)
+AM_CONDITIONAL([USEPETSC], test "x$with_petsc" != "xno")
+
+dnl Check for METIS
+AC_MSG_CHECKING([if Metis is wanted])
+AC_ARG_WITH(metis,[AS_HELP_STRING([--with-metis[=DIR]],[Build with metis support  @<:@default=no@:>@])],[],[with_metis=no])
+
+METIS_DIR=""
+AS_IF([test "x$with_metis" != "xno"],
+	[
+		AC_DEFINE([HAVE_METIS],1,[Defined if you have Metis library.])
+		AS_IF([test "x$with_metis" != "xyes"],
+		[
+		  METIS_DIR=$with_metis
+		])
+		AC_MSG_RESULT([yes])
+	],
+	[
+		AC_MSG_RESULT([no])
+	])
+AM_CONDITIONAL([USEMETIS], test "x$with_metis" != "xno")
+
+dnl Check for BLAS
+AC_MSG_CHECKING([if BLAS is wanted])
+AC_ARG_WITH(
+    blas,
+    AS_HELP_STRING(
+       [--with-blas=DIR],
+       [Root directory with BLAS includes and libraries @<:@/usr@:>@]
+    ),
+    [blasdir="$withval"],
+    [blasdir=]
+)
+if test "xno" != "x$blasdir"; then
+    if test -d "${blasdir}"; then
+        AC_MSG_RESULT([yes])
+        AC_DEFINE([HAVE_BLAS], 1,[Defined if you have BLAS  library.])
+        AC_DEFINE([HAVE_PARMS],1,[Defined if you have PARMS library.])
+    else
+        AC_MSG_RESULT([no])
+    fi
+else
+  AC_MSG_RESULT([no])
+fi
+AC_SUBST(blasdir)
+AM_CONDITIONAL([USEPARMS], test "x$withblas" != "xno" -a -d "${blasdir}")
+
+dnl Check for PROJ
+AC_MSG_CHECKING([if Proj4 is wanted])
+AC_ARG_WITH(proj,[AS_HELP_STRING([--with-proj[=DIR]],[Build with proj4 support  @<:@default=no@:>@])],[],[with_proj=no])
+
+PROJ_DIR=""
+AS_IF([test "x$with_proj" != "xno"],
+	[
+		AC_DEFINE([HAVE_PROJ],1,[Defined if you have Proj4 library.])
+		AS_IF([test "x$with_proj" != "xyes"],
+		[
+		  PROJ_DIR=$with_proj
+		])
+		AC_MSG_RESULT([yes])
+	],
+	[
+		AC_MSG_RESULT([no])
+	])
+AM_CONDITIONAL([USEPROJ], test "x$with_proj" != "xno")
+
+AC_LANG_PUSH([C])
+AC_CHECK_LIB([dl], [dlclose],, [AC_MSG_ERROR([Compiler can not find libdl])])
+
+# Check for Metis headers and set-up of flags
+AS_IF([test "x$with_metis" != "xno"], [
+	dnl # Setup temp LDFLAGS and look for METIS library/header
+	LDFLAGS_SAVE=${LDFLAGS};
+  	CPPFLAGS_SAVE=${CPPFLAGS};
+  	AC_ARG_VAR([METIS_CFLAGS], [C compiler flags for using METIS headers])
+  	AC_ARG_VAR([METIS_LIBS], [linker flags for using METIS libraries])
+
+	# Check for Metis headers
+  	AS_IF([test "x$METIS_CFLAGS" != "x"], [
+  		CPPFLAGS=$METIS_CFLAGS ],
+  	[
+  		AS_IF([test "x$METIS_DIR" != "x"], 
+  		[
+      	dnl # Look for METIS on the user specified inky install path
+      		METIS_CFLAGS="-I$METIS_DIR/include";
+      		CPPFLAGS=$METIS_CFLAGS
+  		])
+    ])
+  	AS_IF([test "x$METIS_LIBS" != "x"], [
+  		LDFLAGS=$METIS_LIBS ],
+  	[
+  		AS_IF([test "x$METIS_DIR" != "x"], 
+  		[
+      	dnl # Look for METIS on the user specified inky install path
+      		METIS_LIBS="-L$METIS_DIR/lib";
+      		LDFLAGS=$METIS_LIBS
+  		])
+    	METIS_LIBS="$METIS_LIBS -lmetis"
+    ])
+
+  	AC_LANG_PUSH([C])
+   	 AC_CHECK_HEADER(metis.h, [], [AC_MSG_ERROR([METIS headers not found. Install METIS.])])
+     AC_CHECK_LIB(metis, [METIS_PARTMESHDUAL], [foo=bar],[AC_MSG_ERROR([METIS library not found. Install METIS.])])
+  	AC_LANG_POP()
+
+    dnl # Restore original LDFLAGS
+    LDFLAGS=$LDFLAGS_SAVE;
+    CPPFLAGS=$CPPFLAGS_SAVE;
+])
+
+AC_LANG_POP
+
+###############
+
+
 
 #-------------------------------------------------------------------------------
 #   List of makefiles to generate.  This list can be created with the command:
@@ -454,6 +596,12 @@ engines_gpl/wave/packages/manager/Makefile
 engines_gpl/wave/packages/manager/src/Makefile
 engines_gpl/wave/packages/wave/Makefile
 engines_gpl/wave/packages/wave/src/Makefile
+engines_gpl/dflowfm/Makefile
+engines_gpl/dflowfm/packages/Makefile
+engines_gpl/dflowfm/packages/dflowfm_kernel/Makefile
+engines_gpl/dflowfm/packages/dflowfm_kernel/src/Makefile
+engines_gpl/dflowfm/packages/dflowfm-cli_exe/Makefile
+engines_gpl/dflowfm/packages/dflowfm-cli_exe/src/Makefile
 plugins_lgpl/Makefile
 plugins_lgpl/plugin_culvert/Makefile
 plugins_lgpl/plugin_culvert/src/Makefile
@@ -461,12 +609,17 @@ plugins_lgpl/plugin_delftflow_traform/Makefile
 plugins_lgpl/plugin_delftflow_traform/src/Makefile
 scripts_lgpl/linux/Makefile
 scripts_lgpl/Makefile
+third_party/Makefile
+third_party/interacter_stub/Makefile
+third_party/interacter_stub/src/Makefile
 third_party_open/Makefile
 third_party_open/triangle/Makefile
 third_party_open/version_number/Makefile
 third_party_open/version_number/packages/Makefile
 third_party_open/version_number/packages/version_number/Makefile
 third_party_open/version_number/packages/version_number/src/Makefile
+third_party_open/polypack/Makefile
+third_party_open/polypack/src/Makefile 
 tools_gpl/datsel/Makefile
 tools_gpl/datsel/packages/datsel_f/Makefile
 tools_gpl/datsel/packages/datsel_f/src/Makefile
@@ -512,6 +665,8 @@ tools_gpl/vs/packages/vs/Makefile
 tools_gpl/vs/packages/vs/src/Makefile
 tools_gpl/vs/packages/vs_version_number/Makefile
 tools_gpl/vs/packages/vs_version_number/src/Makefile
+tools_gpl/dfmoutput/Makefile
+tools_gpl/dfmoutput/src/Makefile
 utils_gpl/Makefile
 utils_gpl/morphology/Makefile
 utils_gpl/morphology/include/Makefile
@@ -627,6 +782,18 @@ utils_lgpl/ods/packages/Makefile
 utils_lgpl/ods/packages/ods/Makefile
 utils_lgpl/ods/packages/ods/srcf/Makefile
 utils_lgpl/ods/packages/ods/src/Makefile
+utils_gpl/trachytopes/Makefile
+utils_gpl/trachytopes/packages/Makefile
+utils_gpl/trachytopes/packages/trachytopes_kernel/Makefile
+utils_gpl/trachytopes/packages/trachytopes_kernel/src/Makefile
+utils_gpl/trachytopes/packages/trachytopes_io/Makefile
+utils_gpl/trachytopes/packages/trachytopes_io/src/Makefile
+    
+])
+
+AC_CONFIG_SUBDIRS([
+    third_party_open/kdtree2
+    third_party_open/libsigwatch
 ])
 
 AC_OUTPUT

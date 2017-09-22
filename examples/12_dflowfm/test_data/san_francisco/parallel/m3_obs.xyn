@@ -1,0 +1,93 @@
+  502049 4205261 '(POR)' Point Reyes
+  546501 4185790 '(GGT)' Golden Gate Bridge
+  552730 4198033 '(RIC)' Richmond
+  550215 4202055 '(PSP)' Point San Pablo
+  565786 4213847 '(MAR)' Mare Island
+  575527 4209246 '(MRZ)' Martinez
+  576728 4211169 '(BEN)' Benicia Bridge
+  585399 4212810 '(PCT)' Port Chicago
+  594840 4211113 '(MAL)' Mallard Island
+  614775 4223256 '(RVB)' Sacra at Rio Vista Bridge
+  615117 4224383 '(SRV)' Sacra at Rio Vista
+  616605 4230263 '(RYI)' Sacra at Ryer Island
+  630823 4234056 '(DLC)' Delta Cross Channel BTW
+  630875 4256811 '(FPT)' Sacra at Freeport
+  630164 4272220 '(IST)' Sacra at I street bridge
+  605157 4208489 '(ANH)' SJR at Antioch
+  615023 4212396 '(SJJ)' SJR at Jersey Point
+  616956 4212845 '(FAL)' False River
+  615189 4216615 '(TSL)' Threemile Slough at SJR
+  616665 4208091 '(DSJ)' Dutch slough at Jersey Is.
+  625276 4218551 '(MOK)' Mokelumne at SJR
+  625990 4209805 '(ORQ)' Old River at Bethel Is.
+  624481 4208584 '(HOL)' Holland Cut
+  631871 4212430 '(VNI)' SJR at Venice island
+  554173 4182786 '(P24)' Pier 24
+  571671 4154029 '(RWD)' Redwood
+  560998 4180668 '(ALA)' Alameda
+  547095 4184499 '(PRS)' Presidio
+  581588 4148399 '(C17)' Channel marker 17
+  577829 4151168 '(DUM)' Dumbarton bridge
+  566243 4159974 '(SMB)' San Mateo Bridge
+  567912.184 4212899.586 '(CAR)'
+  563617.477 4218389.647 '(MIC)'
+  550899.411 4186799.726 '(ALC)'
+ 627204.125     4187935.5      '(CCG)' Clifton Court Gates
+ 556689.71      4176053.49     '(HUP)' Hunters Pt
+ 554975.29      4168829.94     '(OYP)' Oyster Pt
+ 571263.03      4172282.98     '(SLE)' San Leandro
+ 560620.62      4160732.84     '(CPT)' Coyote Pt Marina
+ 586369.02      4146906.23     '(CCA)' Coyote Creek Alv
+ 554002.48      4182692.70     '(P22)' Pier 22 1/2
+ 551640.60      4184896.62     '(NPP)' North Point Pier
+ 566304         4191704        '(BER)' Berkeley
+ 545947.63      4188923.031    '(S77)' saulsilito_77-79
+ 544616.825     4190949.786    '(SAD)' saulsilito_dock_
+ 558916         4182585        '(ALN)' Alameda Nas
+ 543648.216     4207587.308    '(GAL)' Gallinas Creek
+ 544710         4211066        '(HAA)' Hamilton Afb
+ 542812.078     4199631.313    '(COM)' corte madera
+ 603919.804     4208686.662    '(ANT)' Antioch
+ 563754.284     4218445.589    '(MIS)' Mare Island Stra
+ 577034.635     4157718.079    '(CHS)' coyote hills slo
+ 580670         4220014        '(GYS)' GYS
+ 542359.3       4180960.3      '(AD1)' ADCP_Summer1
+ 542282.1       4178851.8      '(AD2)' ADCP_Summer2
+ 542475.4       4175524.3      '(AD3)' ADCP_Summer3
+ 531433.3       4182464.6      '(Ad4)' ADCP_Summer4
+ 542861.0       4180963.0      '(TBO)' tbone
+ 542217.0       4177117.0      '(AWA)' AWAC_2008
+ 629845           4273274          'A02104'
+ 615154           4224217          'B91212'
+ 614257           4242949          'B91510'
+ 629774           4233456          'B91560'
+ 629778           4233434          'B91650'
+ 628053           4245684          'B91750'
+ 624599           4220996          'B94100'
+ 632014           4231760          'B94150'
+ 636607           4235231          'B94175'
+ 615239           4216450          'B95060'
+ 623646           4218022          'B95100'
+ 619776           4204016          'B95220'
+ 625331           4203230          'B95250'
+ 624353           4197701          'B95260'
+ 625729           4194682          'B95270'
+ 623224           4188792          'B95283'
+ 636650           4186963          'B95300'
+ 636650           4186963          'B95310'
+ 638816           4186266          'B95325'
+ 627432           4187589          'B95340'
+ 628321           4185708          'B95365'
+ 628479           4185557          'B95366'
+ 636698           4185161          'B95380'
+ 648421           4185534          'B95400'
+ 629695           4206832          'B95460'
+ 628993           4200285          'B95468'
+ 632978           4194599          'B95500'
+ 635922           4193814          'B95503'
+ 642271           4193266          'B95530'
+ 631804           4212286          'B95580'
+ 638874           4206489          'B95620'
+ 643753           4202782          'B95660'
+ 642213           4188704          'B95740'
+ 647529           418610           'B95765'

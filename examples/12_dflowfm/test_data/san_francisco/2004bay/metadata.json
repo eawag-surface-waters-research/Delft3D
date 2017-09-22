@@ -1,0 +1,6 @@
+{
+    "name": "San Francisco Bay Model",
+    "description": "The Bay-Delta model applies the D-Flow FM software package to the Bay-Delta area. The model will be calibrated for water level and discharge throughout the Bay-Delta area, as well as for suspended sediment concentrations (SSC), salinity and water temperature. Coupling with DelWaq software allows for advanced modeling of water quality and ecological parameters such as phytoplankton, bivalves and fish habitats. The Bay Delta model allows for assessing the impact of scenarios related to climate change (variations in sea level rise, wind, river flow, sediment yield), or structural developments (water conversion project, potential flooding of low lying areas).",
+    "epsg": 32610,
+    "location": [37.9, -122.2]
+}

@@ -1,0 +1,6 @@
+* COLUMNN=2
+* COLUMN1=Period (min)   (use 0.0 for A0 comp)
+* COLUMN2=Amplitude (m)
+* COLUMN3=Phase (deg)
+       0             100
+40694400             100

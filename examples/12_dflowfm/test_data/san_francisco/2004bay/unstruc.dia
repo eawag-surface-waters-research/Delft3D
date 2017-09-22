@@ -1,0 +1,80 @@
+Opened file : ISOCOLOUR.hls
+Using Local FileISOCOLOUR.hls
+Closed file : ISOCOLOUR.hls
+Opened file : ISOCOLOUR.hls
+Using Local FileISOCOLOUR.hls
+Closed file : ISOCOLOUR.hls
+* Deltares, D-Flow FM Version 1.1.50.23792:24, Sep 26 2012, 13:18:30
+* File creation date: 14:08:28, 14-07-2014                                      
+ MAXIMUM NUMBER OF LINKS         :            2
+ MAXIMUM NUMBER OF NODES         :            0
+ RESOLUTION GRAPHICS SCREEN      :         1200         900
+ RESOLUTION TEXT     SCREEN      :          150          60
+ NUMBER OF COLOURS AVAILABLE     :          256
+             0        100002 NOD(KMAX)
+             6        700014 XK (KMAX), YK (KMAX), ZK (KMAX), KC (KMAX), NMK (KMAX), RNOD(KMAX)
+             6         10000 XS(NSMAX),YS(NSMAX),ZS(NSMAX)
+             6         50000 xlan(maxlan)
+             7         50000 ylan(maxlan)
+             7         50000 zlan(maxlan)
+             7         25000 nclan(maxlan)
+Load MDU-file                    (*.mdu)
+Opened file : r02b_bay.mdu
+Closed file : r02b_bay.mdu
+             8        100002 NOD(KMAX)
+            14        700014 XK (KMAX), YK (KMAX), ZK (KMAX), KC (KMAX), NMK (KMAX), RNOD(KMAX)
+            14          1440 xsp(maxspl, maxsplen)
+            14          1440 ysp(maxspl, maxsplen)
+            14          1440 xsp2(maxspl, maxsplen)
+            14          1440 ysp2(maxspl, maxsplen)
+            14         10000 XS(NSMAX),YS(NSMAX),ZS(NSMAX)
+            14         60000 xlan(maxlan)
+            15         60000 ylan(maxlan)
+            15         60000 zlan(maxlan)
+            16         30000 nclan(maxlan)
+Opened Model definition file : r02b_bay.mdu
+ Fraction diameter D50      (m)       0.000200
+ Fraction diameter Dstar    ( )       5.059190
+ Settling velocity Ws vR  (m/s)       0.024626
+ Settling velocity Ws F,C (m/s)       0.023227
+ Setting time h=5(m)     (days)       0.002350
+ Rhosed                 (kg/m3)    2650.000000
+ Ucrc h=1 (m)             (m/s)       0.116715
+ Ucrc h=5 (m)             (m/s)       0.137110
+ Ucrc h=20 (m)            (m/s)       0.154677
+Opened 'r07e_bay_net.nc' as #  3.
+Closed NetCDF file 'r07e_bay_net.nc.
+Opened file : deltabay.ldb
+            16         72000 xlan(maxlan)
+            17         72000 ylan(maxlan)
+            17         72000 zlan(maxlan)
+            18         36000 nclan(maxlan)
+            18         86400 xlan(maxlan)
+            19         86400 ylan(maxlan)
+            20         86400 zlan(maxlan)
+            20         43200 nclan(maxlan)
+            21        103680 xlan(maxlan)
+            22        103680 ylan(maxlan)
+            23        103680 zlan(maxlan)
+            23         51840 nclan(maxlan)
+            24        124416 xlan(maxlan)
+            25        124416 ylan(maxlan)
+            26        124416 zlan(maxlan)
+            26         62208 nclan(maxlan)
+            28        149299 xlan(maxlan)
+            29        149299 ylan(maxlan)
+            30        149299 zlan(maxlan)
+            31         74649 nclan(maxlan)
+            32        179158 xlan(maxlan)
+            33        179158 ylan(maxlan)
+            35        179158 zlan(maxlan)
+            36         89579 nclan(maxlan)
+            37        214989 xlan(maxlan)
+            39        214989 ylan(maxlan)
+            41        214989 zlan(maxlan)
+            42        107494 nclan(maxlan)
+Closed file : deltabay.ldb
+Opened file : m3_obs.xyn
+Closed file : m3_obs.xyn
+Opened file : all3_crs.pli
+Closed file : all3_crs.pli

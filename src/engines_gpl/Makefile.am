@@ -3,7 +3,6 @@ SUBDIRS = \
      d_hydro \
      dimr \
      flow2d3d \
-	 part \
+     part \
      waq \
-     wave
-
+     wave 

@@ -525,6 +525,7 @@ def do_work():
     getUCRTVersionNumber()
 
     process_solution_file("delft3d_open.sln", os.path.join("scripts_lgpl", "win64", "delft3d_open_template.sln"))
+    process_solution_file("dflowfm_open.sln", os.path.join("engines_gpl", "dflowfm", "scripts", "template", "dflowfm_open_template.sln"))
 
     # TODO: Consider making this optional via cmdline args:
     process_solution_file("io_netcdf.sln",    os.path.join("scripts_lgpl", "win64", "io_netcdf_template.sln"))

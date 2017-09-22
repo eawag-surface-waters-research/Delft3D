@@ -1,0 +1,233 @@
+!----- AGPL --------------------------------------------------------------------
+!                                                                               
+!  Copyright (C)  Stichting Deltares, 2017.                                     
+!                                                                               
+!  This file is part of Delft3D (D-Flow Flexible Mesh component).               
+!                                                                               
+!  Delft3D is free software: you can redistribute it and/or modify              
+!  it under the terms of the GNU Affero General Public License as               
+!  published by the Free Software Foundation version 3.                         
+!                                                                               
+!  Delft3D  is distributed in the hope that it will be useful,                  
+!  but WITHOUT ANY WARRANTY; without even the implied warranty of               
+!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                
+!  GNU Affero General Public License for more details.                          
+!                                                                               
+!  You should have received a copy of the GNU Affero General Public License     
+!  along with Delft3D.  If not, see <http://www.gnu.org/licenses/>.             
+!                                                                               
+!  contact: delft3d.support@deltares.nl                                         
+!  Stichting Deltares                                                           
+!  P.O. Box 177                                                                 
+!  2600 MH Delft, The Netherlands                                               
+!                                                                               
+!  All indications and logos of, and references to, "Delft3D",                  
+!  "D-Flow Flexible Mesh" and "Deltares" are registered trademarks of Stichting 
+!  Deltares, and remain the property of Stichting Deltares. All rights reserved.
+!                                                                               
+!-------------------------------------------------------------------------------
+
+select case(var_name)
+  case("DFM_COMM_DFMWORLD")
+    type_name = "int"
+  case("iglobal_s")
+    type_name = "int"
+  case("twav")
+    type_name = "double"
+  case("Uorb")
+    type_name = "double"
+  case("shx")
+    type_name = "double"
+  case("shy")
+    type_name = "double"
+  case("shi")
+    type_name = "double"
+  case("zsp")
+    type_name = "double"
+  case("zsp0")
+    type_name = "double"
+  case("zspc")
+    type_name = "double"
+  case("zspc0")
+    type_name = "double"
+  case("v0ship")
+    type_name = "double"
+  case("v1ship")
+    type_name = "double"
+  case("qinship")
+    type_name = "double"
+  case("vicushp")
+    type_name = "double"
+  case("vos")
+    type_name = "double"
+  case("shL")
+    type_name = "double"
+  case("shB")
+    type_name = "double"
+  case("shd")
+    type_name = "double"
+  case("stuw")
+    type_name = "double"
+  case("fstuw")
+    type_name = "double"
+  case("stuwmx")
+    type_name = "double"
+  case("roer")
+    type_name = "double"
+  case("froer")
+    type_name = "double"
+  case("roermx")
+    type_name = "double"
+  case("wx")
+    type_name = "double"
+  case("wy")
+    type_name = "double"
+  case("wmag")
+    type_name = "double"
+  case("rain")
+    type_name = "double"
+  case("rnveg")
+    type_name = "double"
+  case("diaveg")
+    type_name = "double"
+  case("stemdens")
+    type_name = "double"
+  case("stemdiam")
+    type_name = "double"
+  case("stemheight")
+    type_name = "double"
+  case("zws")
+    type_name = "double"
+  case("kbot")
+    type_name = "int"
+  case("ktop")
+    type_name = "int"
+  case("Lbot")
+    type_name = "int"
+  case("Ltop")
+    type_name = "int"
+  case("s0")
+    type_name = "double"
+  case("s1")
+    type_name = "double"
+  case("a0")
+    type_name = "double"
+  case("a1")
+    type_name = "double"
+  case("vol0")
+    type_name = "double"
+  case("vol1")
+    type_name = "double"
+  case("hs")
+    type_name = "double"
+  case("ucx")
+    type_name = "double"
+  case("ucy")
+    type_name = "double"
+  case("ucz")
+    type_name = "double"
+  case("sa0")
+    type_name = "double"
+  case("sa1")
+    type_name = "double"
+  case("satop")
+    type_name = "double"
+  case("tem0")
+    type_name = "double"
+  case("tem1")
+    type_name = "double"
+  case("u1")
+    type_name = "double"
+  case("q1")
+    type_name = "double"
+  case("au")
+    type_name = "double"
+  case("hu")
+    type_name = "double"
+  case("frcu")
+    type_name = "double"
+  case("viusp")
+    type_name = "double"
+  case("diusp")
+    type_name = "double"
+  case("ndx2d")
+    type_name = "int"
+  case("ndxi")
+    type_name = "int"
+  case("ndx1db")
+    type_name = "int"
+  case("ndx")
+    type_name = "int"
+  case("kfs")
+    type_name = "int"
+  case("kfst0")
+    type_name = "int"
+  case("ba")
+    type_name = "double"
+  case("bl")
+    type_name = "double"
+  case("xz")
+    type_name = "double"
+  case("yz")
+    type_name = "double"
+  case("lnx1D")
+    type_name = "int"
+  case("lnxi")
+    type_name = "int"
+  case("lnx1Db")
+    type_name = "int"
+  case("lnx")
+    type_name = "int"
+  case("ln")
+    type_name = "int"
+  case("lncn")
+    type_name = "int"
+  case("iadv")
+    type_name = "int"
+  case("dx")
+    type_name = "double"
+  case("wu")
+    type_name = "double"
+  case("bob")
+    type_name = "double"
+  case("vort")
+    type_name = "double"
+  case("xzw")
+    type_name = "double"
+  case("yzw")
+    type_name = "double"
+  case("xk")
+    type_name = "double"
+  case("yk")
+    type_name = "double"
+  case("zk")
+    type_name = "double"
+  case("kn")
+    type_name = "int"
+  case("zbnd1d2d1")
+    type_name = "double"
+  case("zbnd1d2d0")
+    type_name = "double"
+  case("zcrest1d2d")
+    type_name = "double"
+  case("edgenumbers1d2d")
+    type_name = "int"
+  case("kbnd1d2d")
+    type_name = "int"
+  case("width_1d")
+    type_name = "double"
+  case("qzeta_1d2d")
+    type_name = "double"
+  case("qlat_1d2d")
+    type_name = "double"
+  case("qtotal_1d2d")
+    type_name = "double"
+  case("is_sumvalsnd")
+    type_name = "double"
+  case("is_maxvalsnd")
+    type_name = "double"
+  case("is_dtint")
+    type_name = "double"
+  case default
+    type_name = ""
+end select
