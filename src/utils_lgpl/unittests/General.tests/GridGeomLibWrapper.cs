@@ -73,8 +73,7 @@ namespace General.tests
         /// <param name="nmeshnodes">The number of mesh nodes</param>
         /// <returns></returns>
         [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ggeo_convert_1d_arrays", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ggeo_convert_1d_arrays_dll([In] ref IntPtr c_meshXCoords, [In] ref IntPtr c_meshYCoords, [In] ref IntPtr c_branchids, [In] ref int nbranches, [In] ref int nmeshnodes);
-
+        public static extern int ggeo_convert_1d_arrays_dll([In] ref IntPtr c_meshXCoords, [In] ref IntPtr c_meshYCoords, [In] ref IntPtr c_branchids, [In] ref IntPtr c_sourcenodeid, [In] ref IntPtr c_targetnodeid, [In] ref int nbranches,[In] ref int nmeshnodes);
 
         /// <summary>
         /// Gets the number of 1d-2d links produced by ggeo_make1D2Dinternalnetlinks_dll
@@ -97,14 +96,14 @@ namespace General.tests
         /// <summary>
         /// Algorithm to create the edge_nodes from the branchid
         /// </summary>
+        /// <param name="c_branchids"></param>
+        /// <param name="c_edgenodes"></param>
         /// <param name="nBranches"></param>
         /// <param name="nNodes"></param>
         /// <param name="nEdgeNodes"></param>
-        /// <param name="c_branchids"></param>
-        /// <param name="c_edgenodes"></param>
         /// <returns></returns>
         [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ggeo_create_edge_nodes", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ggeo_create_edge_nodes_dll([In] ref int nBranches, [In] ref int nNodes, [In] ref int nEdgeNodes, [In, Out] ref IntPtr c_branchids, [In, Out] ref IntPtr c_edgenodes);
+        public static extern int ggeo_create_edge_nodes_dll([In] ref IntPtr c_branchids, [In] ref IntPtr c_sourceNodeId, [In] ref IntPtr c_targetNodeId, [In, Out] ref IntPtr c_edgenodes, [In] ref int nBranches, [In] ref int nNodes, [In] ref int nEdgeNodes);
 
         #endregion ggeo_functions
 
@@ -151,9 +150,9 @@ namespace General.tests
             return ierr;
         }
 
-        public int ggeo_convert_1d_arrays(ref IntPtr c_meshXCoords, ref IntPtr c_meshYCoords, ref IntPtr c_branchids, ref int  nbranches,ref int nmeshnodes)
+        public int ggeo_convert_1d_arrays(ref IntPtr c_meshXCoords, ref IntPtr c_meshYCoords, ref IntPtr c_branchids, ref IntPtr c_sourcenodeid, ref IntPtr c_targetnodeid, ref int nbranches, ref int nmeshnodes)
         {
-            int ierr = ggeo_convert_1d_arrays_dll(ref c_meshXCoords, ref c_meshYCoords, ref c_branchids, ref nbranches, ref nmeshnodes);
+            int ierr = ggeo_convert_1d_arrays_dll(ref c_meshXCoords, ref c_meshYCoords, ref c_branchids, ref c_sourcenodeid, ref c_targetnodeid, ref nbranches, ref nmeshnodes);
             return ierr;
         }
 
@@ -169,9 +168,10 @@ namespace General.tests
             return ierr;
         }
 
-        public int ggeo_create_edge_nodes(ref int nBranches, ref int nNodes, ref int nEdgeNodes, ref IntPtr c_branchids, ref IntPtr c_edgenodes)
+
+        public int ggeo_create_edge_nodes(ref IntPtr c_branchids, ref IntPtr c_sourceNodeId, ref IntPtr c_targetNodeId, ref IntPtr c_edgenodes, ref int nBranches, ref int nNodes, ref int nEdgeNodes)
         {
-            int ierr = ggeo_create_edge_nodes_dll(ref nBranches, ref nNodes, ref nEdgeNodes, ref c_branchids, ref c_edgenodes);
+            int ierr = ggeo_create_edge_nodes_dll(ref c_branchids, ref c_sourceNodeId, ref c_targetNodeId, ref c_edgenodes, ref nBranches, ref nNodes, ref nEdgeNodes);
             return ierr;
         }
 

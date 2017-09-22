@@ -3736,12 +3736,12 @@
    end function ggeo_get_links
     
    !< create meshgeom from array
-   function ggeo_convert_1d_arrays(nodex, nodey, nBranches, branchid, meshgeom) result(ierr)
+   function ggeo_convert_1d_arrays(nodex, nodey, branchid, sourceNodeId, targetNodeId, nBranches, meshgeom) result(ierr)
    
    use meshdata
    use m_alloc
    
-   integer, intent(in)                  :: branchid(:), nBranches
+   integer, intent(in)                  :: branchid(:), nBranches, targetNodeId(:), sourceNodeId(:)
    double precision, intent(in)         :: nodex(:), nodey(:)
    type(t_ug_meshgeom), intent(inout)   :: meshgeom
    integer                              :: ierr, i, k, idxstart, idxbr, cbranchid, idxend
@@ -3751,7 +3751,7 @@
    !The last computational node of a branch overlaps with the starting one
    meshgeom%dim = 1
    meshgeom%numnode =  size(nodex,1)
-   meshgeom%numedge = meshgeom%numnode - nBranches
+   meshgeom%numedge = meshgeom%numnode - 1
 
    allocate(meshgeom%nodex(meshgeom%numnode))
    allocate(meshgeom%nodey(meshgeom%numnode))
@@ -3763,66 +3763,85 @@
    meshgeom%nodey = nodey
    meshgeom%branchids = branchid
 
-   !Calculate the edge_node assuming discretization points are consecutive within the same branch.
-   cbranchid       = meshgeom%branchids(1)
-   idxstart       = 1
-   idxbr          = 1
-   idxend         = 1
-   k              = 0
-   do while (idxbr<=nBranches)
-       do i = idxstart + 1, meshgeom%numnode
-           if (meshgeom%branchids(i).ne.cbranchid) then
-               cbranchid = meshgeom%branchids(i)
-               idxend = i - 1;
-               exit
-           endif
-           if (i == meshgeom%numnode) then
-               idxend = i;
-           endif
-       enddo
-       do i = idxstart, idxend - 1
-           k = k +1
-           meshgeom%edge_nodes(1,k) = i
-           meshgeom%edge_nodes(2,k) = i + 1
-       enddo
-       idxstart    = idxend + 1
-       idxbr       = idxbr + 1
-   enddo
+   !Calculate the edge_nodes
+   ierr = ggeo_create_edge_nodes(meshgeom%branchids, sourceNodeId, targetNodeId, meshgeom%edge_nodes, nBranches, meshgeom%numnode)
    
    end function ggeo_convert_1d_arrays
    
    !< Calculate the edge_node assuming discretization points are consecutive within the same branch.
-   function ggeo_create_edge_nodes(nBranches, nNodes, branchids, edgenodes) result(ierr) !edge_nodes
-      
-   integer, intent(in)      :: nBranches, nNodes, branchids(:)
+   function ggeo_create_edge_nodes(branchids, sourceNodeId, targetNodeId, edgenodes, nBranches, nNodes) result(ierr) !edge_nodes
+
+   integer, intent(in)      :: nBranches, nNodes, branchids(:),targetNodeId(:), sourceNodeId(:)
    integer, intent(inout)   :: edgenodes(:,:)
-   integer                  :: ierr, cbranchid, idxstart, idxbr, idxend, i, k
-   
+   integer                  :: ierr, currentbranchid, nextbranchid, idxstart, idxbr, idxend, i, k
+   integer                  :: indexbranchend(nBranches), indexbranchstart(nBranches)
+
    ierr = 0
-  
-   cbranchid      = branchids(1)
-   idxstart       = 1
-   idxbr          = 1
-   idxend         = 1
-   k              = 0
+
+   currentbranchid      = branchids(1)
+   nextbranchid         = currentbranchid
+   idxstart             = 1
+   idxbr                = 1
+   idxend               = 1
+   k                    = 0
    do while (idxbr<=nBranches)
+       currentbranchid = nextbranchid
        do i = idxstart + 1, nNodes
-           if (branchids(i).ne.cbranchid) then
-               cbranchid = branchids(i)
+           if (branchids(i).ne.currentbranchid) then
+               nextbranchid = branchids(i)
                idxend = i - 1;
                exit
            endif
            if (i == nNodes) then
+               nextbranchid = - 1
                idxend = i;
            endif
        enddo
+       !Determine if the currentbranchid is connected to the start/end of a previous branch. if so create a connection at the start
+       do i = 1, nBranches
+           !skip if i equal to currentbranchid and currentbranchid is the first branchid (fully connected)
+           if((i.eq.currentbranchid).or.(currentbranchid.eq.branchids(1))) cycle 
+           if(sourceNodeId(currentbranchid).eq.sourceNodeId(i)) then
+                k = k + 1
+                edgenodes(1,k) = indexbranchstart(i)
+                edgenodes(2,k) = idxstart
+                exit
+           endif
+           if(sourceNodeId(currentbranchid).eq.targetNodeId(i)) then
+                k = k + 1
+                edgenodes(1,k) = indexbranchend(i)
+                edgenodes(2,k) = idxstart
+                exit
+           endif
+       enddo
+       !Only create internal connections
        do i = idxstart, idxend - 1
            k = k +1
            edgenodes(1,k) = i
            edgenodes(2,k) = i + 1
        enddo
-       idxstart    = idxend + 1
-       idxbr       = idxbr + 1
+       !Now determine if the currentbranchid is connected to the end/start of a previous branch. if so create a connection at the start
+       do i = 1, nBranches
+           !skip if i equal to currentbranchid and currentbranchid is the first branchid (fully connected)
+           if((i.eq.currentbranchid).or.(currentbranchid.eq.branchids(1))) cycle
+           if(targetNodeId(currentbranchid).eq.sourceNodeId(i)) then
+                k = k + 1
+                edgenodes(1,k) = idxend 
+                edgenodes(2,k) = indexbranchstart(i)
+                exit
+           endif
+           if(targetNodeId(currentbranchid).eq.targetNodeId(i)) then
+                k = k + 1
+                edgenodes(1,k) = idxend
+                edgenodes(2,k) = indexbranchend(i)
+                exit
+           endif
+       enddo     
+   indexbranchend(currentbranchid) = idxend
+   indexbranchstart(currentbranchid) = idxstart
+   !update
+   idxstart    = idxend + 1
+   idxbr       = idxbr + 1
    enddo
    
    end function ggeo_create_edge_nodes

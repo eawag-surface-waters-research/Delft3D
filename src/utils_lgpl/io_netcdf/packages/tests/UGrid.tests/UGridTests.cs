@@ -62,13 +62,13 @@ namespace UGrid.tests
         private string meshname = "1dmesh";
 
         //mesh dimension
-        private int nmeshpoints = 10;
+        private int nmeshpoints = 8;
         private int nedgenodes  = 7; // nmeshpoints - 1 
 
         //mesh geometry
-        private int nmesh1dPoints = 10;
-        private int[] branchidx = { 1, 1, 1, 1, 2, 2, 2, 3, 3, 3 };
-        private double[] offset = { 0.0, 2.0, 3.0, 4.0, 0.0, 1.5, 3.0, 0.0, 1.5, 3.0 };
+        private int nmesh1dPoints = 8;
+        private int[] branchidx = { 1, 1, 1, 1, 2, 2, 3, 3 };
+        private double[] offset = { 0.0, 2.0, 3.0, 4.0, 1.5, 3.0, 1.5, 3.0 };
 
         private string[] meshnodeids = { "node1_branch1", "node2_branch1", "node3_branch1", "node4_branch1", "node1_branch2",
                                          "node2_branch2", "node3_branch2", "node1_branch3", "node2_branch3", "node3_branch3" };
@@ -170,14 +170,14 @@ namespace UGrid.tests
                     ref c_branchlengths, branchinfo, ref c_nbranchgeometrypoints, ref rnBranches, ref startIndex);
                 Assert.That(ierr, Is.EqualTo(0));
 
-                int[] rc_targetnodeid = new int[3];
-                int[] rc_sourcenodeid = new int[3];
-                double[] rc_branchlengths = new double[3];
-                int[] rc_nbranchgeometrypoints = new int[3];
-                Marshal.Copy(c_targetnodeid, rc_targetnodeid, 0, 3);
-                Marshal.Copy(c_sourcenodeid, rc_sourcenodeid, 0, 3);
-                Marshal.Copy(c_branchlengths, rc_branchlengths, 0, 3);
-                Marshal.Copy(c_nbranchgeometrypoints, rc_nbranchgeometrypoints, 0, 3);
+                int[] rc_targetnodeid = new int[nBranches];
+                int[] rc_sourcenodeid = new int[nBranches];
+                double[] rc_branchlengths = new double[nBranches];
+                int[] rc_nbranchgeometrypoints = new int[nBranches];
+                Marshal.Copy(c_targetnodeid, rc_targetnodeid, 0, nBranches);
+                Marshal.Copy(c_sourcenodeid, rc_sourcenodeid, 0, nBranches);
+                Marshal.Copy(c_branchlengths, rc_branchlengths, 0, nBranches);
+                Marshal.Copy(c_nbranchgeometrypoints, rc_nbranchgeometrypoints, 0, nBranches);
 
                 for (int i = 0; i < rnBranches; i++)
                 {
@@ -332,8 +332,7 @@ namespace UGrid.tests
         {
             IntPtr c_nodesX = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * numberOf2DNodes);
             IntPtr c_nodesY = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * numberOf2DNodes);
-            IntPtr c_face_nodes =
-                Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * numberOfFaces * numberOfMaxFaceNodes);
+            IntPtr c_face_nodes =Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * numberOfFaces * numberOfMaxFaceNodes);
             try
             {
 
@@ -404,6 +403,8 @@ namespace UGrid.tests
             // Links variables
             IntPtr c_mesh1indexes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nlinks);
             IntPtr c_mesh2indexes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nlinks);
+            IntPtr c_sourcenodeid = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nBranches);
+            IntPtr c_targetnodeid = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nBranches);
             try
             {
                 string tmpstring;
@@ -415,8 +416,10 @@ namespace UGrid.tests
 
                 //2. Create the edge nodes (the algorithm in in gridgeom.dll, not in ionetcdf.dll)
                 Marshal.Copy(branchidx, 0, c_branchidx, nmeshpoints);
+                Marshal.Copy(sourcenodeid, 0, c_sourcenodeid, nBranches);
+                Marshal.Copy(targetnodeid, 0, c_targetnodeid, nBranches);
                 var gridwrapper = new GridGeomLibWrapper();
-                ierr = gridwrapper.ggeo_create_edge_nodes(ref nBranches, ref nmeshpoints, ref nedgenodes, ref c_branchidx, ref c_edgenodes);
+                ierr = gridwrapper.ggeo_create_edge_nodes(ref c_branchidx, ref c_sourcenodeid, ref c_targetnodeid, ref c_edgenodes,ref nBranches, ref nmeshpoints, ref nedgenodes);
                 Assert.That(ierr, Is.EqualTo(0));
                 
                 //3. Create the node branchidx, offsets, meshnodeidsinfo
@@ -484,6 +487,9 @@ namespace UGrid.tests
                 Marshal.FreeCoTaskMem(c_offset);
                 Marshal.FreeCoTaskMem(c_mesh1indexes);
                 Marshal.FreeCoTaskMem(c_mesh2indexes);
+                Marshal.FreeCoTaskMem(c_edgenodes);
+                Marshal.FreeCoTaskMem(c_sourcenodeid);
+                Marshal.FreeCoTaskMem(c_targetnodeid);
             }
 
         }
@@ -646,8 +652,7 @@ namespace UGrid.tests
 
             //4. Create a 1d network
             int networkid = -1;
-            ierr = wrapper.ionc_create_1d_network(ref ioncid, ref networkid, networkName, ref nNodes,
-                ref nBranches, ref nGeometry);
+            ierr = wrapper.ionc_create_1d_network(ref ioncid, ref networkid, networkName, ref nNodes, ref nBranches, ref nGeometry);
             Assert.That(ierr, Is.EqualTo(0));
 
             //5. Write 1d network and mesh
@@ -888,6 +893,7 @@ namespace UGrid.tests
             Assert.That(networkid, Is.EqualTo(1));
             int meshid = -1;
             ierr = wrapper.ionc_get_1d_mesh_id(ref ioncid, ref meshid);
+
             // Mesh should not be found!
             Assert.That(ierr, Is.EqualTo(-1));
             Assert.That(meshid, Is.EqualTo(-1));

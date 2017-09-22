@@ -380,6 +380,8 @@ namespace gridgeom.Tests
             int[] branchids = { 1, 1, 1, 1 };
             double[] meshXCoords = { -6, 5, 23, 34 };
             double[] meshYCoords = { 22, 16, 16, 7 };
+            int[] sourcenodeid = { 1 };
+            int[] targetnodeid = { 2 };
 
             //links
             int[] arrayfrom = { 2, 8 };
@@ -436,14 +438,18 @@ namespace gridgeom.Tests
             IntPtr c_meshXCoords = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nmeshpoints);
             IntPtr c_meshYCoords = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nmeshpoints);
             IntPtr c_branchids = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nmeshpoints);
+            IntPtr c_sourcenodeid = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nbranches);
+            IntPtr c_targetnodeid = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nbranches);
 
             Marshal.Copy(branchids, 0, c_branchids, nmeshpoints);
             Marshal.Copy(meshXCoords, 0, c_meshXCoords, nmeshpoints);
             Marshal.Copy(meshYCoords, 0, c_meshYCoords, nmeshpoints);
+            Marshal.Copy(sourcenodeid, 0, c_sourcenodeid, nbranches);
+            Marshal.Copy(targetnodeid, 0, c_targetnodeid, nbranches);
 
             //7. fill kn (Herman datastructure) for creating the links
             var wrapperGridgeom = new GridGeomLibWrapper();
-            ierr = wrapperGridgeom.ggeo_convert_1d_arrays(ref c_meshXCoords, ref c_meshYCoords, ref c_branchids, ref nbranches, ref nmeshpoints);
+            ierr = wrapperGridgeom.ggeo_convert_1d_arrays(ref c_meshXCoords, ref c_meshYCoords, ref c_branchids, ref c_sourcenodeid, ref c_targetnodeid, ref nbranches, ref nmeshpoints);
             Assert.That(ierr, Is.EqualTo(0));
             ierr = wrapperGridgeom.ggeo_convert(ref meshtwod, ref meshtwoddim);
             Assert.That(ierr, Is.EqualTo(0));
