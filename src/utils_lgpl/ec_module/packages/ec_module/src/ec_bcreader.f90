@@ -157,8 +157,7 @@ contains
 
                    !                  keyvaluestr = trim(keyvaluestr)//(trim(adjustl(rec(1:posfs-1))))//',' &
                    !                                                 //(trim(adjustl(rec(posfs+1:reclen))))//','
-                   keyvaluestr = trim(keyvaluestr)//''''// (trim(adjustl(rec(1:posfs-1))))//''',''' &
-                        //(trim(adjustl(rec(posfs+1:reclen))))//''','
+                   keyvaluestr = trim(keyvaluestr)//''''// (trim(adjustl(rec(1:posfs-1))))//''',''' //(trim(adjustl(rec(posfs+1:reclen))))//''','
                 else                                                    ! switch to datamode
                    call str_upper(keyvaluestr,len(trim(keyvaluestr)))   ! case insensitive format
                    if (jakeyvalue(keyvaluestr,'NAME',trim(bc%bcname))) then
@@ -251,6 +250,7 @@ contains
     integer, parameter               ::     MAXDIM = 10    !< max number of vector quantities in one vector
     character(len=maxNameLen)        ::     vectorquantities(MAXDIM)
     character(len=maxNameLen)        ::     vectordefinition, vectorstr
+    character(len=100)               ::     errorMessage
 
     success = .False.
     if (allocated(hdrkeys)) then
@@ -463,7 +463,16 @@ contains
     deallocate(hdrkeys)
     deallocate(hdrvals)
     deallocate(iv,il)
+
     success = .True.
+    if (bc%vptyp == BC_VPTYP_PERCBED) then
+       if (minval(bc%vp) < 0.0d0 .or. maxval(bc%vp) > 1.0d0) then
+          call setECMessage("sigma positions must be in range 0.0 - 1.0")
+          write(errorMessage,'(3a,f8.3,a,f8.3,a)') "range for ", trim(bc%quantity%name), " is ", minval(bc%vp), " - ", maxval(bc%vp), "."
+          call setECMessage(errorMessage)
+          success = .False.
+       endif
+    endif
   end function processhdr
 
 
