@@ -289,10 +289,10 @@ fi
 mpichModule=""
 
 if [ "$compiler" = 'gnu' ]; then
-    mpichModule="mpich2/1.4.1_gcc4.9.1"
+    mpichModule="mpich2/3.1.4_gcc_4.9.1"
 else
     # Intel compilers
-    mpichModule="mpich2/1.4.1_intel14.0.3"
+    mpichModule="mpich2/3.1.4_intel_14.0.3"
 fi
 initMpich2="module load $mpichModule"
 eval $initMpich2
@@ -401,7 +401,9 @@ fi
 
 log='logs/autogen.log'
 command="./autogen.sh --verbose &> $log"
-
+cd third_party_open/kdtree2
+command="./autogen.sh --verbose &>> $log"
+cd ../..
 log "Running $command"
 eval $command
 
