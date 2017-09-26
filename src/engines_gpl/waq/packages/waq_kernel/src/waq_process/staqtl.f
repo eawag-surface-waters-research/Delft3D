@@ -63,7 +63,7 @@
 !
       INTEGER  IP1   , IP2   , IP3   , IP4   , IP5   ,
      +         IP6   , IP7   , IP8   , IP9   , IP10  ,
-     +         IP11  ,
+     +         IP11  , IP    ,
      +         IN1   , IN2   , IN3   , IN4   , IN5   ,
      +         IN6   , IN7   , IN8   , IN9   , IN10  ,
      +         IN11
@@ -78,6 +78,9 @@
       REAL     BMIN  , BMAX  , BDIFF , BSUM
       REAL     PQUANT
       REAL     TSTART, TSTOP , TIME  , DELT  , TCOUNT
+
+      INTEGER, PARAMETER :: MAXWARN = 50
+      INTEGER, SAVE      :: NOWARN  = 0
 
       IP1 = IPOINT(1)
       IP2 = IPOINT(2)
@@ -95,7 +98,7 @@
 !     Names for indices that turn up in various places
 !
       IPTCNT=IP10
-      IPBUCK=10
+      IPBUCK=11
 
       IN1 = INCREM(1)
       IN2 = INCREM(2)
@@ -143,11 +146,11 @@
 
       BDIFF = ( BMAX - BMIN ) / REAL(NOBUCK-1)
 
-      DO 110 IB = 1,NOBUCK
+      DO IB = 1,NOBUCK
          IBUCK(IB)  = IPOINT(IPBUCK+IB)
          INCBCK(IB) = INCREM(IPBUCK+IB)
          BCKLIM(IB) = BMIN  + REAL(IB-1) * BDIFF
-  110 CONTINUE
+      ENDDO
 
 !
 !     There are five cases, defined by the time:
@@ -163,7 +166,6 @@
       TSTOP  = PMSA(IP3)
       TIME   = PMSA(IP4)
       DELT   = PMSA(IP5)
-      TCOUNT = PMSA(IPTCNT)
 
 !
 !      Start and stop criteria are somewhat involved. Be careful
@@ -177,93 +179,109 @@
 !        otherwise this is the last one
 !
       ITYPE  = 0
-      IF ( TIME .GE. TSTART-0.001*DELT ) THEN
+      IF ( TIME >= TSTART-0.5*DELT ) THEN
          ITYPE = 2
-         IF ( TCOUNT .EQ. 0.0 ) ITYPE = 1
+         IF ( TIME <= TSTART+0.5*DELT ) THEN
+            DO ISEG=1,NOSEG
+               IP       = IPOINT(10) + (ISEG-1) * INCREM(10)
+               PMSA(IP) = 0.0
+
+               DO IB = 1,NOBUCK
+                  IP       = IPOINT(IPBUCK+IB) + (ISEG-1) * INCREM(IPBUCK+IB)
+                  PMSA(IP) = 0.0
+               ENDDO
+
+            ENDDO
+         ENDIF
       ENDIF
-      IF ( TIME .GE. TSTOP-0.999*DELT ) THEN
+
+      IF ( TIME .GE. TSTOP-0.5*DELT .AND. TIME .LE. TSTOP+0.5*DELT ) THEN
          ITYPE  = 3
-         IF ( TCOUNT .LE. 0.0 ) ITYPE = 0
       ENDIF
 
       IF ( ITYPE  .EQ. 0 ) RETURN
 
-      TCOUNT       = TCOUNT + DELT
-      PMSA(IPTCNT) = TCOUNT
-
-!
-!     Determine the length of the period for the quantile
-!     (only used if ITYPE is 3)
-!
-      PQUANT = PMSA(IP9) * 0.01 * TCOUNT
-
       DO 9000 ISEG=1,NOSEG
          IF (BTEST(IKNMRK(ISEG),0)) THEN
-
 !
-!        The first time is special. Initialise the arrays.
-!        The last time requires additional processing.
+!           Keep track of the time within the current quantile specification
+!           that each segment is active
 !
-         IF ( ITYPE .EQ. 1 ) THEN
-            DO 2010 IB = 1,NOBUCK
-               PMSA(IBUCK(IB)) = 0.0
- 2010       CONTINUE
-         ENDIF
+            TCOUNT       = PMSA(IPTCNT) + DELT
+            PMSA(IPTCNT) = TCOUNT
 
-         DO 2020 IB = 1,NOBUCK
-            IF ( PMSA(IP1) .LE. BCKLIM(IB) ) THEN
-               PMSA(IBUCK(IB)) = PMSA(IBUCK(IB)) + DELT
-               GOTO 2030
-            ENDIF
- 2020    CONTINUE
+            DO IB = 1,NOBUCK
+               IF ( PMSA(IP1) .LE. BCKLIM(IB) ) THEN
+                  PMSA(IBUCK(IB)) = PMSA(IBUCK(IB)) + DELT
+                  EXIT
+               ENDIF
+            ENDDO
 
- 2030    CONTINUE
-
-         IF ( ITYPE .EQ. 3 .AND. TCOUNT .GT. 0.0 ) THEN
+            IF ( ITYPE .EQ. 3 .AND. TCOUNT .GT. 0.0 ) THEN
 !
-!           Accumulate the values in the buckets until we add up
-!           to at least the requested percentage of total time.
-!           Then interpolate assuming a uniform distribution
-!           within each bucket.
-!           Special note:
-!           If the ranges have been set wrongly, then the
-!           outer buckets will contain the quantile. In that
-!           case: set to -999.0
+!              Determine the length of the period for the quantile
 !
-            PMSA(IP11) = -999.0
-            BSUM   = PMSA(IBUCK(1))
-            IF ( BSUM .LT. PQUANT ) THEN
-               DO 7010 IB = 2,NOBUCK
-                  BSUM = BSUM + PMSA(IBUCK(IB))
-                  IF ( BSUM .GT. PQUANT ) THEN
-                     PMSA(IP11) = BCKLIM(IB) -
-     +                               (BSUM-PQUANT)*BDIFF/PMSA(IBUCK(IB))
-                     GOTO 7020
+               PQUANT = PMSA(IP9) * 0.01 * TCOUNT
+!
+!              Accumulate the values in the buckets until we add up
+!              to at least the requested percentage of total time.
+!              Then interpolate assuming a uniform distribution
+!              within each bucket.
+!              Special note:
+!              If the ranges have been set wrongly, then the
+!              outer buckets will contain the quantile. In that
+!              case: use the lower and upper bounds.
+!
+               PMSA(IP11) = -999.0
+               BSUM   = PMSA(IBUCK(1))
+               IF ( BSUM .LT. PQUANT ) THEN
+                  DO IB = 2,NOBUCK
+                     BSUM = BSUM + PMSA(IBUCK(IB))
+                     IF ( BSUM .GE. PQUANT ) THEN
+                        PMSA(IP11) = BCKLIM(IB) -
+     +                                  (BSUM-PQUANT)*BDIFF/PMSA(IBUCK(IB))
+                        EXIT
+                     ENDIF
+                  ENDDO
+
+                  IF ( BSUM < PQUANT ) THEN
+                     PMSA(IP11) = BMAX
+
+                     IF ( NOWARN < MAXWARN ) THEN
+                        NOWARN = NOWARN + 1
+                        WRITE(*,'(a,i0)')      'Quantile could not be determined for segment ', ISEG
+                        WRITE(*,'(a,e12.4,a)') '    - too many values above ', BMAX, ' (assuming this value)'
+
+                        IF ( NOWARN == MAXWARN ) THEN
+                           WRITE(*,'(a)') '(Further messages suppressed)'
+                        ENDIF
+                     ENDIF
                   ENDIF
- 7010          CONTINUE
+               ELSE
+                  PMSA(IP11) = BMIN
+
+                  IF ( NOWARN < MAXWARN ) THEN
+                     NOWARN = NOWARN + 1
+                     WRITE(*,'(a,i0)')    'Quantile could not be determined for segment ', ISEG
+                     WRITE(*,'(a,e12.4)') '    - too many values below ', BMIN, ' (assuming this value)'
+
+                     IF ( NOWARN == MAXWARN ) THEN
+                        WRITE(*,'(a)') '(Further messages suppressed)'
+                     ENDIF
+                  ENDIF
+               ENDIF
             ENDIF
-
- 7020       CONTINUE
          ENDIF
 
-         ENDIF
+         IP1    = IP1    + IN1
+         IPTCNT = IPTCNT + IN10
+         IP11   = IP11   + IN11
 
-         IP1  = IP1  + IN1
-         IP11 = IP11 + IN11
-
-         DO 8010 IB = 1,NOBUCK
+         DO IB = 1,NOBUCK
             IBUCK(IB)  = IBUCK(IB) + INCBCK(IB)
- 8010    CONTINUE
+         ENDDO
 
  9000 CONTINUE
-
-!
-!     Be sure to turn off the statistical procedure, once the end has been
-!     reached (by setting TCOUNT (PMSA(IP6)) to a non-positive value)
-!
-      IF ( ITYPE .EQ. 3 ) THEN
-         PMSA(IPTCNT) = -TCOUNT
-      ENDIF
 
       RETURN
       END

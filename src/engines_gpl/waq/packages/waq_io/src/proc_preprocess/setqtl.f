@@ -128,7 +128,7 @@
       ENDIF
 !
       aProcesProp%no_input      = 10 + nobuck + 1
-      aProcesProp%no_output     = 1 + nobuck + 1
+      aProcesProp%no_output     = 2 + nobuck + 1
       aProcesProp%no_FluxOutput = 0
       aProcesProp%no_FluxStochi = 0
       aProcesProp%no_DispStochi = 0
@@ -312,12 +312,12 @@
       aProcesProp%input_item(9)%ip_val  = 0
 !
       aItemProp%name    = 'TCOUNT    '//aProcesProp%name(1:10)
-      aItemProp%default = 0.0
-      aItemProp%text    = 'time step counter'
+      aItemProp%default = -999.
+      aItemProp%text    = 'time step counter (work array)'
       aItemProp%waqtype = WAQTYPE_NONE
       iret = ItemPropCollAdd( AllItems, aItemProp )
       aProcesProp%input_item(10)%name=aItemProp%name
-      aProcesProp%input_item(10)%type=IOTYPE_SEGMENT_INPUT
+      aProcesProp%input_item(10)%type=IOTYPE_SEGMENT_WORK
       aProcesProp%input_item(10)%item=>AllItems%ItemPropPnts(iret)%pnt
       aProcesProp%input_item(10)%actdef=0.0
       aProcesProp%input_item(10)%indx  = 10
@@ -352,6 +352,18 @@
       aProcesProp%output_item(1)%ip_val= 0
       WRITE(LUNREP,2000) 'Statistical output named [',aItemProp%name,
      +                   '] created with quantile average from [',aProcesProp%input_item(1)%name,']'
+
+      ! Add the companion for the TCOUNT input item
+      aItemProp%name    = 'TCOUNT    '//aProcesProp%name(1:10)
+      aItemProp%default = -999.
+      aItemProp%text    = 'time step counter (work array)'
+      aItemProp%waqtype = WAQTYPE_NONE
+      iret = ItemPropCollAdd( AllItems, aItemProp )
+      aProcesProp%output_item(2)%name=aItemProp%name
+      aProcesProp%output_item(2)%type=IOTYPE_SEGMENT_OUTPUT
+      aProcesProp%output_item(2)%item=>AllItems%ItemPropPnts(iret)%pnt
+      aProcesProp%output_item(2)%indx= 2
+      aProcesProp%output_item(2)%ip_val= 0
 !
 !     buckets input and output
 !
@@ -368,11 +380,11 @@
          aProcesProp%input_item(10+ibuck)%actdef=-999.
          aProcesProp%input_item(10+ibuck)%indx  = 10+ibuck
          aProcesProp%input_item(10+ibuck)%ip_val= 0
-         aProcesProp%output_item(1+ibuck)%name=aItemProp%name
-         aProcesProp%output_item(1+ibuck)%type=IOTYPE_SEGMENT_WORK
-         aProcesProp%output_item(1+ibuck)%item=>AllItems%ItemPropPnts(iret)%pnt
-         aProcesProp%output_item(1+ibuck)%indx=1+ibuck
-         aProcesProp%output_item(1+ibuck)%ip_val=0
+         aProcesProp%output_item(2+ibuck)%name=aItemProp%name
+         aProcesProp%output_item(2+ibuck)%type=IOTYPE_SEGMENT_WORK
+         aProcesProp%output_item(2+ibuck)%item=>AllItems%ItemPropPnts(iret)%pnt
+         aProcesProp%output_item(2+ibuck)%indx=2+ibuck
+         aProcesProp%output_item(2+ibuck)%ip_val=0
       ENDDO
 !
 !     check the use of the key words
