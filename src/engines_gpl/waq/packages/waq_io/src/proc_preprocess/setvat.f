@@ -55,13 +55,13 @@
       INTEGER             VARARR(NOVAR) , VARIDX(NOVAR) ,
      +                    VARTDA(NOVAR) , VARDAG(NOVAR) ,
      +                    VARTAG(NOVAR) , VARAGG(NOVAR)
-      CHARACTER*10        VARNAM(NOVAR)
+      CHARACTER*20        VARNAM(NOVAR)
 !
 !     Locals
 !
       PARAMETER ( MAXLOC = 2000 )
       INTEGER      VATTAG(MAXLOC), VATTDA(MAXLOC)
-      CHARACTER*10 VATNAM(MAXLOC), VATNAG(MAXLOC),
+      CHARACTER*20 VATNAM(MAXLOC), VATNAG(MAXLOC),
      +             VATNDA(MAXLOC)
       CHARACTER*20 CONAME(*)     , PANAME(*)     ,
      +             FUNAME(*)     , SFNAME(*)     ,
@@ -451,7 +451,7 @@
 !     Check if there are overrulings
 !
       DO IVAR = 1 , NOVAR
-         CALL ZOEK ( VARNAM(IVAR), NOVAT , VATNAM, 10    , IVAT  )
+         CALL ZOEK ( VARNAM(IVAR), NOVAT , VATNAM, 20    , IVAT  )
          IF ( IVAT   .GT. 0 ) THEN
 !
 !           aggregation
@@ -481,7 +481,7 @@
 !
 !              Weight average
 !
-               CALL ZOEK ( VATNAG(IVAT), NOVAR , VARNAM, 10    , IV_AG )
+               CALL ZOEK ( VATNAG(IVAT), NOVAR , VARNAM, 20    , IV_AG )
                IF ( IV_AG .GT. 0 ) THEN
                   VARTAG(IVAR) = VATTAG(IVAT)
                   VARAGG(IVAR) = IV_AG
@@ -524,7 +524,7 @@
 !
 !              distribute with weight
 !
-               CALL ZOEK ( VATNDA(IVAT), NOVAR , VARNAM, 10    , IV_DA )
+               CALL ZOEK ( VATNDA(IVAT), NOVAR , VARNAM, 20    , IV_DA )
                IF ( IV_DA .GT. 0 ) THEN
                   VARTDA(IVAR) = VATTDA(IVAT)
                   VARDAG(IVAR) = IV_DA
