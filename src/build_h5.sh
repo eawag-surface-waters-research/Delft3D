@@ -401,11 +401,12 @@ fi
 
 log='logs/autogen.log'
 command="./autogen.sh --verbose &> $log"
-cd third_party_open/kdtree2
-command="./autogen.sh --verbose &>> $log"
-cd ../..
-log "Running $command"
+log "Running $command in `pwd`"
 eval $command
+cd third_party_open/kdtree2
+log "Running $command in `pwd`"
+eval $command
+cd ../..
 
 if [ $? -ne 0 ]; then
     log "ERROR: Autogen fails!"
