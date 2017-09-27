@@ -2056,12 +2056,24 @@ function ug_is_network_topology(ncid, varid) result(is_mesh_topo)
    integer :: cfrole, nodeidvar, nodeid, edgecoord
    character(len=13) :: buffer
    character(len=nf90_max_name) :: nodeidsvar
+   integer :: iworkaround1, iworkaround2
 
    is_mesh_topo = .false.
 
+   ! NOTE: AvD: On Linux + netcdf/v4.3.2_v4.4.0_intel_14.0.3 a UGRID _net.nc file
+   ! gives an unexplained SIGSEGV in nf_attio.F90 on line 332:
+   !  cncid  = ncid
+   ! (in the second nf90_get_att call below)
+   ! TODO: check whether the latest netcdf-fortran resolves this (some var decs
+   ! have been changed there from integer(KIND=C_INT) to integer(C_INT).
+   ! For now: this workaround somehow solves it.
+
+   iworkaround1 = ncid
+   iworkaround2 = varid
+
    buffer = ' '
    cfrole    = nf90_get_att(ncid, varid, 'cf_role', buffer)
-   nodeid    = nf90_get_att(ncid, varid, 'branch_ids', nodeidsvar)
+   nodeid    = nf90_get_att(iworkaround1, iworkaround2, 'branch_ids', nodeidsvar)
    if (cfrole == nf90_noerr .and. nodeid == nf90_noerr ) then
          is_mesh_topo = .true. !new ugrid format detected
    end if
