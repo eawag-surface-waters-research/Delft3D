@@ -399,7 +399,7 @@ fi
 #===============================================================================
 # autogen: sanity checks, libtoolize and autoreconf
 
-log='logs/autogen.log'
+log="`pwd`/logs/autogen.log"
 command="./autogen.sh --verbose &> $log"
 log "Running $command in `pwd`"
 eval $command
