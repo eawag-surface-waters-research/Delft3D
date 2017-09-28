@@ -801,11 +801,9 @@ module m_ec_filereader_read
          endif
 
          ! - 3 - Apply the scale factor and offset
-         !fieldPtr%arr1dPtr = fieldPtr%arr1dPtr * item%quantityPtr%factor + item%quantityPtr%offset       
-         
-         do i=1, item%elementSetPtr%n_rows * item%elementSetPtr%n_cols * item%elementSetPtr%n_layers
-            if ( fieldPtr%arr1dPtr(i).ne.dmiss_nc ) then
-               fieldPtr%arr1dPtr(i) = fieldPtr%arr1dPtr(i) * item%quantityPtr%factor + item%quantityPtr%offset    
+         do i=1, size(fieldPtr%arr1dPtr)
+            if ( fieldPtr%arr1dPtr(i) /= dmiss_nc ) then
+               fieldPtr%arr1dPtr(i) = fieldPtr%arr1dPtr(i) * item%quantityPtr%factor + item%quantityPtr%offset
             end if
          end do
 
