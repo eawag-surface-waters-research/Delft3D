@@ -801,11 +801,13 @@ module m_ec_filereader_read
          endif
 
          ! - 3 - Apply the scale factor and offset
-         do i=1, size(fieldPtr%arr1dPtr)
-            if ( fieldPtr%arr1dPtr(i) /= dmiss_nc ) then
-               fieldPtr%arr1dPtr(i) = fieldPtr%arr1dPtr(i) * item%quantityPtr%factor + item%quantityPtr%offset
-            end if
-         end do
+         if (item%quantityPtr%factor /= 1.0_hp .or. item%quantityPtr%offset /= 0.0_hp) then
+            do i=1, size(fieldPtr%arr1dPtr)
+               if ( fieldPtr%arr1dPtr(i) /= dmiss_nc ) then
+                  fieldPtr%arr1dPtr(i) = fieldPtr%arr1dPtr(i) * item%quantityPtr%factor + item%quantityPtr%offset
+               end if
+            end do
+         end if
 
          ! Deallocate temporary datablock
          if (allocated(data_block)) deallocate(data_block, stat = istat)

@@ -2400,7 +2400,7 @@ module m_ec_converter
                         mp = indexWeight%indices(1,j)
                         np = indexWeight%indices(2,j)
                         if (connection%converterPtr%operandType==operand_replace) then
-                           targetValues(j) = 0
+                           targetValues(j) = 0.0_hp
                         end if
                         if (mp > 0 .and. np > 0) then
                            ! FM's 2D to EC's 1D array mapping requires np = np-1 from this point on.
