@@ -65,8 +65,12 @@
      +         IN1   , IN2   , IN3   , IN4   , IN5   ,
      +         IN6   , IN7   , IN8
       INTEGER  IKMRK , IKMRK1, IKMRK2, ISEG  , IQ    , IFROM , ITO
-      INTEGER  ITYPE
+      INTEGER  IACTION
+      INTEGER  ATTRIB
       REAL     TINIT , PERIOD, TIME  , DELT  , TCOUNT
+
+      INTEGER, PARAMETER :: MAXWARN = 50
+      INTEGER, SAVE      :: NOWARN  = 0
 
       IP1 = IPOINT(1)
       IP2 = IPOINT(2)
@@ -105,16 +109,24 @@
 !      - All other periods are half-open intervals (the last time
 !        of the previous period should not be reused.)
 !
-      ITYPE  = 0
-      IF ( TIME .GE. TINIT-0.001*DELT ) THEN
-         ITYPE = 2
-         IF ( TCOUNT .EQ. 0.0 ) ITYPE = 1
-      ENDIF
-      IF ( TIME .GE. (TINIT+PERIOD)-0.999*DELT ) THEN
-         ITYPE  = 3
+      IACTION = 0
+      IF ( TIME >= TINIT-0.5*DELT ) THEN
+         IACTION = 2
+         IF ( TIME <= TINIT+0.5*DELT ) THEN
+            DO ISEG=1,NOSEG
+               IP6       = IPOINT(6) + (ISEG-1) * INCREM(6)
+               IP7       = IPOINT(7) + (ISEG-1) * INCREM(7)
+               PMSA(IP6) = 0.0
+               PMSA(IP7) = 0.0
+            ENDDO
+         ENDIF
       ENDIF
 
-      IF ( ITYPE  .EQ. 0 ) RETURN
+      IF ( TIME .GE. TINIT+PERIOD-0.5*DELT .AND. TIME .LE. TINIT+PERIOD+0.5*DELT ) THEN
+         IACTION = 3
+      ENDIF
+
+      IF ( IACTION .EQ. 0 ) RETURN
 
       TCOUNT    = TCOUNT + DELT
       PMSA(IP6) = TCOUNT
@@ -123,34 +135,59 @@
          IF (BTEST(IKNMRK(ISEG),0)) THEN
 
 !
-!        The first time is special. Initialise the arrays.
-!        The last time requires additional processing.
+!           Keep track of the time within the current quantile specification
+!           that each segment is active
 !
-         IF ( ITYPE .EQ. 1 ) THEN
-            PMSA(IP7)  = 0.0
-         ENDIF
-         PMSA(IP7)  = PMSA(IP7) + PMSA(IP1) * DELT
+            TCOUNT    = PMSA(IP6) + DELT
+            PMSA(IP6) = TCOUNT
 
-         IF ( ITYPE .EQ. 3 ) THEN
-            IF ( TCOUNT .GT. 0.0 ) PMSA(IP8)  = PMSA(IP7) / TCOUNT
+            PMSA(IP7)  = PMSA(IP7) + PMSA(IP1) * DELT
+
+         ENDIF
+!
+!        Always do the final processing whether the segment is active at this moment or not
+!
+
+         IF ( IACTION .EQ. 3 ) THEN
+            IF ( TCOUNT .GT. 0.0 ) THEN
+               PMSA(IP8) = PMSA(IP7) / TCOUNT
+            ELSE
+               PMSA(IP8) = 0.0
+
+               IF ( NOWARN < MAXWARN ) THEN
+                  CALL DHKMRK(IKNMRK(ISEG), 3, ATTRIB )
+                  IF ( ATTRIB .NE. 0 ) THEN
+                     NOWARN = NOWARN + 1
+                     WRITE(*,'(a,i0)') 'Periodic average could not be determined for segment ', ISEG
+                     WRITE(*,'(a)')    '    - segment was not active. Average set to zero'
+
+                     IF ( NOWARN == MAXWARN ) THEN
+                        WRITE(*,'(a)') '(Further messages suppressed)'
+                     ENDIF
+                  ENDIF
+               ENDIF
+            ENDIF
+
+!
+!           Reset for the next round
+!
+            PMSA(IP6) = 0.0
             PMSA(IP7) = 0.0
          ENDIF
 
-         ENDIF
-
          IP1  = IP1  + IN1
+         IP6  = IP6  + IN6
          IP7  = IP7  + IN7
          IP8  = IP8  + IN8
 
  9000 CONTINUE
 
 !
-!     Be sure to reset the initial time, so that we can reset the
-!     averaging
+!     Be sure to also reset the initial time, so that we can restart the
+!     averaging for the next period
 !
-      IF ( ITYPE .EQ. 3 ) THEN
+      IF ( IACTION .EQ. 3 ) THEN
          PMSA(IP2) = TINIT  + PERIOD
-         PMSA(IP6) = 0.0
       ENDIF
 
       RETURN

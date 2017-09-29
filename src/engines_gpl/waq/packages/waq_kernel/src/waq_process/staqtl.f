@@ -68,7 +68,7 @@
      +         IN6   , IN7   , IN8   , IN9   , IN10  ,
      +         IN11
       INTEGER  IKMRK , IKMRK1, IKMRK2, ISEG  , IQ    , IFROM , ITO
-      INTEGER  IB    , IPBUCK, IPTCNT, LUNREP, ITYPE
+      INTEGER  IB    , IPBUCK, IPTCNT, LUNREP, IACTION, ATTRIB
 
       INTEGER  NOBUCK
       INTEGER  MAXBCK
@@ -178,9 +178,9 @@
 !      - Check that the NEXT timestep will not exceed the stop time,
 !        otherwise this is the last one
 !
-      ITYPE  = 0
+      IACTION = 0
       IF ( TIME >= TSTART-0.5*DELT ) THEN
-         ITYPE = 2
+         IACTION = 2
          IF ( TIME <= TSTART+0.5*DELT ) THEN
             DO ISEG=1,NOSEG
                IP       = IPOINT(10) + (ISEG-1) * INCREM(10)
@@ -196,10 +196,10 @@
       ENDIF
 
       IF ( TIME .GE. TSTOP-0.5*DELT .AND. TIME .LE. TSTOP+0.5*DELT ) THEN
-         ITYPE  = 3
+         IACTION = 3
       ENDIF
 
-      IF ( ITYPE  .EQ. 0 ) RETURN
+      IF ( IACTION .EQ. 0 ) RETURN
 
       DO 9000 ISEG=1,NOSEG
          IF (BTEST(IKNMRK(ISEG),0)) THEN
@@ -216,51 +216,58 @@
                   EXIT
                ENDIF
             ENDDO
+         ENDIF
 
-            IF ( ITYPE .EQ. 3 .AND. TCOUNT .GT. 0.0 ) THEN
 !
-!              Determine the length of the period for the quantile
+!        Always do the final processing whether the segment is active at this moment or not
 !
-               PQUANT = PMSA(IP9) * 0.01 * TCOUNT
-!
-!              Accumulate the values in the buckets until we add up
-!              to at least the requested percentage of total time.
-!              Then interpolate assuming a uniform distribution
-!              within each bucket.
-!              Special note:
-!              If the ranges have been set wrongly, then the
-!              outer buckets will contain the quantile. In that
-!              case: use the lower and upper bounds.
-!
-               PMSA(IP11) = -999.0
-               BSUM   = PMSA(IBUCK(1))
-               IF ( BSUM .LT. PQUANT ) THEN
-                  DO IB = 2,NOBUCK
-                     BSUM = BSUM + PMSA(IBUCK(IB))
-                     IF ( BSUM .GE. PQUANT ) THEN
-                        PMSA(IP11) = BCKLIM(IB) -
-     +                                  (BSUM-PQUANT)*BDIFF/PMSA(IBUCK(IB))
-                        EXIT
-                     ENDIF
-                  ENDDO
 
-                  IF ( BSUM < PQUANT ) THEN
-                     PMSA(IP11) = BMAX
-
-                     IF ( NOWARN < MAXWARN ) THEN
-                        NOWARN = NOWARN + 1
-                        WRITE(*,'(a,i0)')      'Quantile could not be determined for segment ', ISEG
-                        WRITE(*,'(a,e12.4,a)') '    - too many values above ', BMAX, ' (assuming this value)'
-
-                        IF ( NOWARN == MAXWARN ) THEN
-                           WRITE(*,'(a)') '(Further messages suppressed)'
-                        ENDIF
-                     ENDIF
+         IF ( IACTION .EQ. 3 ) THEN
+!
+!           Determine the length of the period for the quantile
+!
+            PQUANT = PMSA(IP9) * 0.01 * TCOUNT
+!
+!           Accumulate the values in the buckets until we add up
+!           to at least the requested percentage of total time.
+!           Then interpolate assuming a uniform distribution
+!           within each bucket.
+!           Special note:
+!           If the ranges have been set wrongly, then the
+!           outer buckets will contain the quantile. In that
+!           case: use the lower and upper bounds.
+!
+            PMSA(IP11) = -999.0
+            BSUM   = PMSA(IBUCK(1))
+            IF ( BSUM .LT. PQUANT ) THEN
+               DO IB = 2,NOBUCK
+                  BSUM = BSUM + PMSA(IBUCK(IB))
+                  IF ( BSUM .GE. PQUANT ) THEN
+                     PMSA(IP11) = BCKLIM(IB) -
+     +                               (BSUM-PQUANT)*BDIFF/PMSA(IBUCK(IB))
+                     EXIT
                   ENDIF
-               ELSE
-                  PMSA(IP11) = BMIN
+               ENDDO
+
+               IF ( BSUM < PQUANT ) THEN
+                  PMSA(IP11) = BMAX
 
                   IF ( NOWARN < MAXWARN ) THEN
+                     NOWARN = NOWARN + 1
+                     WRITE(*,'(a,i0)')      'Quantile could not be determined for segment ', ISEG
+                     WRITE(*,'(a,e12.4,a)') '    - too many values above ', BMAX, ' (assuming this value)'
+
+                     IF ( NOWARN == MAXWARN ) THEN
+                        WRITE(*,'(a)') '(Further messages suppressed)'
+                     ENDIF
+                  ENDIF
+               ENDIF
+            ELSE
+               PMSA(IP11) = BMIN
+
+               IF ( NOWARN < MAXWARN ) THEN
+                  CALL DHKMRK(IKNMRK(ISEG), 3, ATTRIB )
+                  IF ( ATTRIB .NE. 0 ) THEN
                      NOWARN = NOWARN + 1
                      WRITE(*,'(a,i0)')    'Quantile could not be determined for segment ', ISEG
                      WRITE(*,'(a,e12.4)') '    - too many values below ', BMIN, ' (assuming this value)'

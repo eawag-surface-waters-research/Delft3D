@@ -66,10 +66,14 @@
      +         IN1   , IN2   , IN3   , IN4   , IN5   ,
      +         IN6   , IN7   , IN8   , IN9   , IN10
       INTEGER  IKMRK , IKMRK1, IKMRK2, ISEG  , IQ    , IFROM , ITO
-      INTEGER  ITYPE
+      INTEGER  IACTION
+      INTEGER  ATTRIB
       REAL     TSTART, TSTOP , TIME  , DELT
       REAL     CCRIT , TCOUNT
       REAL     ABOVE , BELOW
+
+      INTEGER, PARAMETER :: MAXWARN = 50
+      INTEGER, SAVE      :: NOWARN  = 0
 
       IP1 = IPOINT(1)
       IP2 = IPOINT(2)
@@ -116,8 +120,6 @@
          BELOW  = DELT
       ENDIF
 
-      TCOUNT = PMSA(IP8)
-
 !
 !      Start and stop criteria are somewhat involved. Be careful
 !      to avoid spurious calculations (initial and final) when
@@ -129,65 +131,84 @@
 !      - Check that the NEXT timestep will not exceed the stop time,
 !        otherwise this is the last one
 !
-      ITYPE  = 0
-      IF ( TIME .GE. TSTART-0.001*DELT ) THEN
-         ITYPE = 2
-         IF ( TCOUNT .EQ. 0.0 ) ITYPE = 1
-      ENDIF
-      IF ( TIME .GE. TSTOP-0.999*DELT ) THEN
-         ITYPE  = 3
-         IF ( TCOUNT .LE. 0.0 ) ITYPE = 0
+      IACTION = 0
+      IF ( TIME >= TSTART-0.5*DELT ) THEN
+         IACTION = 2
+         IF ( TIME <= TSTART+0.5*DELT ) THEN
+            DO ISEG=1,NOSEG
+               IP8        = IPOINT(8)  + (ISEG-1) * INCREM(8)
+               IP9        = IPOINT(9)  + (ISEG-1) * INCREM(9)
+               IP10       = IPOINT(10) + (ISEG-1) * INCREM(10)
+               PMSA(IP8)  = 0.0
+               PMSA(IP9)  = 0.0
+               PMSA(IP10) = 0.0
+            ENDDO
+         ENDIF
       ENDIF
 
-      IF ( ITYPE  .EQ. 0 ) RETURN
+      IF ( TIME .GE. TSTOP-0.5*DELT .AND. TIME .LE. TSTOP+0.5*DELT ) THEN
+         IACTION = 3
+      ENDIF
 
-      TCOUNT    = TCOUNT + DELT
-      PMSA(IP8) = TCOUNT
+      IF ( IACTION .EQ. 0 ) RETURN
+
+      IP8 = IPOINT(8)
+      IP9 = IPOINT(9)
+      IP10= IPOINT(10)
 
       DO 9000 ISEG=1,NOSEG
          IF (BTEST(IKNMRK(ISEG),0)) THEN
 
 !
-!        The first time is special. Initialise the arrays.
-!        The last time requires additional processing.
+!           Keep track of the time within the current exceedance specification
+!           that each segment is active
 !
-         IF ( ITYPE .EQ. 1 ) THEN
-            PMSA(IP9) = 0.0
-            PMSA(IP10)= 0.0
+            TCOUNT    = PMSA(IP8) + DELT
+            PMSA(IP8) = TCOUNT
+
+            IF ( PMSA(IP1) .GE. CCRIT ) THEN
+               PMSA(IP9)  = PMSA(IP9) + ABOVE
+               PMSA(IP10) = PMSA(IP10)+ ABOVE * PMSA(IP1)
+            ELSE
+               PMSA(IP9)  = PMSA(IP9) + BELOW
+               PMSA(IP10) = PMSA(IP10)+ BELOW * PMSA(IP1)
+            ENDIF
          ENDIF
 
-         IF ( PMSA(IP1) .GE. CCRIT ) THEN
-            PMSA(IP9)  = PMSA(IP9) + ABOVE
-            PMSA(IP10) = PMSA(IP10)+ ABOVE * PMSA(IP1)
-         ELSE
-            PMSA(IP9)  = PMSA(IP9) + BELOW
-            PMSA(IP10) = PMSA(IP10)+ BELOW * PMSA(IP1)
-         ENDIF
-
-         IF ( ITYPE .EQ. 3 ) THEN
+!
+!        Always do the final processing whether the segment is active at this moment or not
+!
+         IF ( IACTION .EQ. 3 ) THEN
             IF ( TCOUNT .GT. 0.0 ) THEN
                IF ( PMSA(IP9) .GT. 0 ) THEN
                   PMSA(IP10)= PMSA(IP10)/PMSA(IP9)
                ENDIF
                PMSA(IP9) = PMSA(IP9) / TCOUNT
+            ELSE
+               PMSA(IP9) = 0.0
+
+               IF ( NOWARN < MAXWARN ) THEN
+                  CALL DHKMRK(IKNMRK(ISEG), 3, ATTRIB )
+                  IF ( ATTRIB .NE. 0 ) THEN
+                     NOWARN = NOWARN + 1
+                     WRITE(*,'(a,i0)')      'Exceedance could not be determined for segment ', ISEG
+                     WRITE(*,'(a,e12.4,a)') '    - segment not active in the given period. Exceedance set to zero'
+
+                     IF ( NOWARN == MAXWARN ) THEN
+                        WRITE(*,'(a)') '(Further messages suppressed)'
+                     ENDIF
+                  ENDIF
+               ENDIF
+
             ENDIF
          ENDIF
 
-         ENDIF
-
          IP1  = IP1  + IN1
+         IP8  = IP8  + IN8
          IP9  = IP9  + IN9
          IP10 = IP10 + IN10
 
  9000 CONTINUE
-
-!
-!     Be sure to turn off the statistical procedure, once the end has been
-!     reached (by setting TCOUNT (PMSA(IP6)) to a non-positive value)
-!
-      IF ( ITYPE .EQ. 3 ) THEN
-         PMSA(IP8) = -TCOUNT
-      ENDIF
 
       RETURN
       END
