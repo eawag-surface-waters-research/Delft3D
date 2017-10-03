@@ -385,7 +385,7 @@ namespace gridgeom.Tests
 
             //links
             int[] arrayfrom = { 2, 8 };
-            int[] arrayto = { 2, 3 };
+            int[] arrayto   = { 2, 3 };
 
             //1. open the file with the 2d mesh
             string c_path = TestHelper.TestFilesDirectoryPath() + @"\2d_ugrid_net.nc";

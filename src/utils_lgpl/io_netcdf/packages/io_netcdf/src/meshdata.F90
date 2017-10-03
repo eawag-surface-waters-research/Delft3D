@@ -58,9 +58,10 @@ type t_ug_meshgeom
    integer,      pointer :: face_edges(:,:) !< Face-to-edge mapping array (optional, can be null()).
    integer,      pointer :: face_links(:,:) !< Face-to-face mapping array (optional, can be null()).
    
-   !Mesh1d, Network1d variables
-   integer,      pointer :: branchids(:)     !< Branch id of each mesh node 
+   !Network1d variables
+   integer,      pointer :: branchids(:)               !< Branch id of each mesh node 
    integer,      pointer :: nbranchgeometrynodes(:)    !< Number of geometry nodes in each branch
+   integer,      pointer :: nedge_nodes(:,:)         !< Start-end node of each branch (used to determine edge-node connectivity)
    
    double precision, pointer :: nodex(:)       !< x-coordinates of the mesh nodes.
    double precision, pointer :: nodey(:)       !< y-coordinates of the mesh nodes.
@@ -72,7 +73,7 @@ type t_ug_meshgeom
    double precision, pointer :: facey(:)       !< y-coordinates of the mesh faces.
    double precision, pointer :: facez(:)       !< z-coordinates of the mesh faces.
    
-   !Mesh1d, Network1d variables
+   !Mesh1d variables
    double precision, pointer :: branchoffsets(:) !< Branch offset of each mesh node
    double precision, pointer :: geopointsX(:)    !< x-coordinates of the geometry points.
    double precision, pointer :: geopointsY(:)    !< y-coordinates of the geometry points.
@@ -110,6 +111,7 @@ type c_t_ug_meshgeom
    !Mesh 1d variables
    type(c_ptr) :: branchids               !< Branch id of each mesh node
    type(c_ptr) :: nbranchgeometrynodes    !< Number of geometry nodes in each branch
+   type(c_ptr) :: nedge_nodes             !< Start-end node of each branch
 
    type(c_ptr) :: nodex       !< x-coordinates of the mesh nodes.
    type(c_ptr) :: nodey       !< y-coordinates of the mesh nodes.
@@ -149,6 +151,7 @@ function convert_meshgeom_to_cptr(meshgeom, c_meshgeom) result(ierr)
    !Mesh 1d variables
    integer,      pointer :: branchids(:)     !< Branch id of each mesh node
    integer,      pointer :: nbranchgeometrynodes(:)    !< Number of geometry nodes in each branch
+   integer,      pointer :: nedge_nodes(:,:)    !< Number of geometry nodes in each branch
    
    double precision, pointer :: nodex(:)       !< x-coordinates of the mesh nodes.
    double precision, pointer :: nodey(:)       !< y-coordinates of the mesh nodes.
@@ -205,7 +208,12 @@ function convert_meshgeom_to_cptr(meshgeom, c_meshgeom) result(ierr)
    if (associated(meshgeom%nbranchgeometrynodes)) then
       call c_f_pointer(c_meshgeom%nbranchgeometrynodes, nbranchgeometrynodes, (/ size(meshgeom%nbranchgeometrynodes,1)/) )
       nbranchgeometrynodes= meshgeom%nbranchgeometrynodes
-    endif
+   endif
+   
+   if (associated(meshgeom%nedge_nodes)) then
+      call c_f_pointer(c_meshgeom%nedge_nodes, nedge_nodes, (/ size(meshgeom%nedge_nodes,1), size(meshgeom%nedge_nodes,2)/) )
+      nedge_nodes= meshgeom%nedge_nodes
+   endif
                
    !mesh nodes
    if (associated(meshgeom%nodex)) then

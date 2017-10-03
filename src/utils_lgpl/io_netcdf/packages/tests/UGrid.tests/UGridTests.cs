@@ -48,15 +48,14 @@ namespace UGrid.tests
 
         //branches info
         private double[] branchlengths = { 4.0, 3.0, 3.0 };
-
         private int[] nbranchgeometrypoints = { 3, 3, 3 };
         private string[] branchids = { "branch1", "branch2", "branch3" };
-
         private string[] branchlongNames = { "branchlong1", "branchlong2", "branchlong3" };
+        private int[] branch_order = { -1, -1, -1 };
 
         //geometry info
         double[] geopointsX = { 1.0, 3.0, 5.0, 5.0, 5.0, 5.0, 5.0, 7.0, 8.0 };
-        double[] geopointsY = { 4.0, 4.0, 4.0, 1.0, 2.0, 4.0, 4.0, 4.0, 4.0 };
+        double[] geopointsY = { 4.0, 4.0, 4.0, 4.0, 2.0, 1.0, 4.0, 4.0, 4.0 };
 
         //mesh name
         private string meshname = "1dmesh";
@@ -93,7 +92,7 @@ namespace UGrid.tests
         private int[] mesh2indexes = { 1, 2, 3 };
         private string[] linksids = { "link1", "link2", "link3" };
         private string[] linkslongnames = { "linklong1", "linklong2", "linklong3" };
-        private int[] branch_order = { -1, -1, -1 };
+        private int[] contacttype = { 3, 3, 3 };
 
         // mesh2d
         private int numberOf2DNodes = 5;
@@ -235,10 +234,13 @@ namespace UGrid.tests
         //function to check mesh1d data
         private void check1dmesh(int ioncid, int meshid, ref IoNetcdfLibWrapper wrapper)
         {
+            //mesh variables
             IntPtr c_branchidx = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nmeshpoints);
             IntPtr c_offset = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nmeshpoints);
+            //links variables
             IntPtr c_mesh1indexes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nlinks);
             IntPtr c_mesh2indexes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nlinks);
+            IntPtr c_contacttype = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nlinks);
             try
             {
                 //1. Get the mesh name
@@ -290,13 +292,15 @@ namespace UGrid.tests
                 IoNetcdfLibWrapper.interop_charinfo[] linksinfo = new IoNetcdfLibWrapper.interop_charinfo[nlinks];
 
                 //5. Get the links values
-                ierr = wrapper.ionc_get_mesh_contact(ref ioncid, ref linkmesh, ref c_mesh1indexes, ref c_mesh2indexes,
+                ierr = wrapper.ionc_get_mesh_contact(ref ioncid, ref linkmesh, ref c_mesh1indexes, ref c_mesh2indexes, ref c_contacttype,
                     linksinfo, ref nlinks, ref startIndex);
                 Assert.That(ierr, Is.EqualTo(0));
+                int[] rc_contacttype = new int[nlinks];
                 int[] rc_mesh1indexes = new int[nlinks];
                 int[] rc_mesh2indexes = new int[nlinks];
                 Marshal.Copy(c_mesh1indexes, rc_mesh1indexes, 0, nlinks);
                 Marshal.Copy(c_mesh2indexes, rc_mesh2indexes, 0, nlinks);
+                Marshal.Copy(c_contacttype, rc_contacttype, 0, nlinks);
                 for (int i = 0; i < nlinks; i++)
                 {
                     string tmpstring = new string(linksinfo[i].ids);
@@ -305,6 +309,7 @@ namespace UGrid.tests
                     Assert.That(tmpstring.Trim(), Is.EqualTo(linkslongnames[i]));
                     Assert.That(rc_mesh1indexes[i], Is.EqualTo(mesh1indexes[i]));
                     Assert.That(rc_mesh2indexes[i], Is.EqualTo(mesh2indexes[i]));
+                    Assert.That(rc_contacttype[i], Is.EqualTo(contacttype[i]));
                 }
 
                 //6. Get the written nodes ids
@@ -397,14 +402,16 @@ namespace UGrid.tests
 
         private void write1dmesh(int ioncid, int networkid, ref IoNetcdfLibWrapper wrapper)
         {
+            // Mesh variables
             IntPtr c_branchidx = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nmeshpoints);
             IntPtr c_offset = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nmeshpoints);
             IntPtr c_edgenodes = Marshal.AllocCoTaskMem(2* Marshal.SizeOf(typeof(int)) * nedgenodes);
+            IntPtr c_sourcenodeid = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nBranches);
+            IntPtr c_targetnodeid = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nBranches);
             // Links variables
             IntPtr c_mesh1indexes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nlinks);
             IntPtr c_mesh2indexes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nlinks);
-            IntPtr c_sourcenodeid = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nBranches);
-            IntPtr c_targetnodeid = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nBranches);
+            IntPtr c_contacttype = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nlinks);
             try
             {
                 string tmpstring;
@@ -414,7 +421,7 @@ namespace UGrid.tests
                 int ierr = wrapper.ionc_create_1d_mesh(ref ioncid, ref networkid, ref meshid, meshname, ref nmeshpoints, ref nedgenodes);
                 Assert.That(ierr, Is.EqualTo(0));
 
-                //2. Create the edge nodes (the algorithm in in gridgeom.dll, not in ionetcdf.dll)
+                //2. Create the edge nodes (the algorithm is in gridgeom.dll, not in ionetcdf.dll)
                 Marshal.Copy(branchidx, 0, c_branchidx, nmeshpoints);
                 Marshal.Copy(sourcenodeid, 0, c_sourcenodeid, nBranches);
                 Marshal.Copy(targetnodeid, 0, c_targetnodeid, nBranches);
@@ -442,6 +449,7 @@ namespace UGrid.tests
                 //5. Create links attributes
                 Marshal.Copy(mesh1indexes, 0, c_mesh1indexes, nlinks);
                 Marshal.Copy(mesh2indexes, 0, c_mesh2indexes, nlinks);
+                Marshal.Copy(contacttype, 0, c_contacttype, nlinks);
                 int linkmesh = -1;
                 ierr = wrapper.ionc_def_mesh_contact(ref ioncid, ref linkmesh, linkmeshname, ref nlinks, ref linkmesh1,
                     ref linkmesh2, ref locationType1, ref locationType2);
@@ -459,8 +467,7 @@ namespace UGrid.tests
                 }
 
                 //6. Write the mesh links
-                ierr = wrapper.ionc_put_mesh_contact(ref ioncid, ref linkmesh, ref c_mesh1indexes, ref c_mesh2indexes,
-                    linksinfo, ref nlinks, ref startIndex);
+                ierr = wrapper.ionc_put_mesh_contact(ref ioncid, ref linkmesh, ref c_mesh1indexes, ref c_mesh2indexes, ref c_contacttype, linksinfo, ref nlinks, ref startIndex);
                 Assert.That(ierr, Is.EqualTo(0));
 
                 //8. Add node ids to the 1d mesh
@@ -490,6 +497,7 @@ namespace UGrid.tests
                 Marshal.FreeCoTaskMem(c_edgenodes);
                 Marshal.FreeCoTaskMem(c_sourcenodeid);
                 Marshal.FreeCoTaskMem(c_targetnodeid);
+                Marshal.FreeCoTaskMem(c_contacttype);
             }
 
         }
@@ -721,6 +729,7 @@ namespace UGrid.tests
 
                 //6. Close the file
                 ierr = wrapper.ionc_close(ref ioncid);
+                Assert.That(ierr, Is.EqualTo(0));
             }
             finally
             {

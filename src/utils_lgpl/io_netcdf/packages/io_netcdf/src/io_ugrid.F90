@@ -198,6 +198,7 @@ enumerator::cid_start = 1
 enumerator cid_contacttopo                !< Top-level variable ID for contact topology
 enumerator cid_contactids                 !< Variable ID for contacts ids
 enumerator cid_contactlongnames           !< Variable ID for contacts longnames
+enumerator cid_contacttype                !< Variable ID for contact types
 enumerator cid_end
 end enum   
 
@@ -1768,9 +1769,10 @@ function ug_init_link_topology(ncid, varid, contactids) result(ierr)
    ierr = UG_NOERR
    
    contactids%varids(cid_contacttopo) = varid  
-   ierr = att_to_dimid(ncid,'link_dimension'  , contactids%dimids(cdim_ncontacts)        ,varid)
+   ierr = att_to_dimid(ncid,'link_dimension'  , contactids%dimids(cdim_ncontacts)      ,varid)
    ierr = att_to_varid(ncid,'links_ids'       , contactids%varids(cid_contactids)      ,varid)
    ierr = att_to_varid(ncid,'links_long_names', contactids%varids(cid_contactlongnames),varid)
+   ierr = att_to_varid(ncid,'contact_type', contactids%varids(cid_contacttype),varid)
 
    end function ug_init_link_topology
    
@@ -2329,7 +2331,7 @@ function ug_get_meshgeom(ncid, meshids, meshgeom, includeArrays, netid) result(i
          ierr = ug_get_1d_network_branches_geometry_coordinate_count(ncid,netid, meshgeom%nt_ngeometry)
          ierr = ug_get_1d_mesh_discretisation_points_count(ncid, meshids, meshgeom%numnode) 
          !The last computational node of a branch overlaps with the starting one
-         meshgeom%numedge = meshgeom%numnode - meshgeom%nt_nbranches
+         meshgeom%numedge = meshgeom%numnode - 1
    endif
 
    ! TODO: AvD: extend to 3D
@@ -2365,6 +2367,8 @@ function ug_get_meshgeom(ncid, meshids, meshgeom, includeArrays, netid) result(i
          call reallocP(meshgeom%geopointsY, meshgeom%nt_ngeometry, keepExisting = .false., fill = -999d0)
          call reallocP(meshgeom%nbranchgeometrynodes, meshgeom%nt_nbranches, keepExisting = .false., fill = -999)
          call reallocP(meshgeom%branchlengths, meshgeom%nt_nbranches, keepExisting = .false., fill = -999d0)
+        
+         call reallocP(meshgeom%nedge_nodes,(/ 2, meshgeom%numedge /), keepExisting = .false.)
          
          allocate(sourcenodeid(meshgeom%nt_nbranches))
          allocate(targetnodeid(meshgeom%nt_nbranches))
@@ -2375,34 +2379,7 @@ function ug_get_meshgeom(ncid, meshids, meshgeom, includeArrays, netid) result(i
          ierr = ug_read_1d_network_branches_geometry(ncid, netid, meshgeom%geopointsX, meshgeom%geopointsY)
          
          !read 1d network branches, 1 based indexing
-         ierr = ug_get_1d_network_branches(ncid, netid, sourcenodeid, targetnodeid, branchid, meshgeom%branchlengths, branchlongnames, meshgeom%nbranchgeometrynodes, 1)
-         
-         call reallocP(meshgeom%edge_nodes, (/ 2, meshgeom%numedge /), keepExisting=.false.)
-         
-         cbranchid       = meshgeom%branchids(1)
-         idxstart       = 1
-         idxbr          = 1
-         idxend         = 1
-         k              = 0
-         do while (idxbr<=size(meshgeom%branchlengths,1))
-            do i = idxstart + 1, size(meshgeom%branchoffsets,1)
-               if (meshgeom%branchids(i)/=cbranchid) then
-                  cbranchid = meshgeom%branchids(i)
-                  idxend = i - 1;
-               exit
-               endif
-               if (i ==  size(meshgeom%branchoffsets,1)) then
-                  idxend = i;
-               endif
-            enddo
-            do i = idxstart, idxend - 1
-               k = k +1
-               meshgeom%edge_nodes(1,k) = i 
-               meshgeom%edge_nodes(2,k) = i + 1
-            enddo
-               idxstart    = idxend + 1
-               idxbr       = idxbr + 1
-         enddo
+         ierr = ug_get_1d_network_branches(ncid, netid, meshgeom%nedge_nodes(:,1), meshgeom%nedge_nodes(:,2), branchid, meshgeom%branchlengths, branchlongnames, meshgeom%nbranchgeometrynodes, 1)
          
       endif
 
@@ -2475,6 +2452,7 @@ function ug_get_edge_nodes(ncid, meshids, edge_nodes, startIndex) result(ierr)
    integer        ,   intent(in)  :: startIndex      !< The requested index
    integer                        :: varStartIndex    !< The index stored in the netCDF file
 
+   ierr = nf90_get_var(ncid, meshids%varids(mid_edgenodes), edge_nodes)
    !we check for the start_index, we do not know if the variable was written as 0 based
    ierr = nf90_get_att(ncid, meshids%varids(mid_edgenodes),'start_index', varStartIndex)  
    if (ierr .eq. UG_NOERR) then
@@ -2485,7 +2463,6 @@ function ug_get_edge_nodes(ncid, meshids, edge_nodes, startIndex) result(ierr)
         ierr = ug_convert_start_index(edge_nodes(2,:), 0, startIndex)
    endif
    
-   ierr = nf90_get_var(ncid, meshids%varids(mid_edgenodes), edge_nodes)
    ! Getting fillvalue is unnecessary because each edge should have a begin- and end-point
 end function ug_get_edge_nodes
 
@@ -3421,6 +3398,7 @@ function ug_def_mesh_contact(ncid, contactids, linkmeshname, ncontacts, idmesh1,
    ierr = nf90_def_var(ncid, trim(buffer), nf90_int, (/ contactids%dimids(cdim_ncontacts), contactids%dimids(cdim_two) /), contactids%varids(cid_contacttopo))
    ierr = nf90_put_att(ncid, contactids%varids(cid_contacttopo), 'cf_role'           , 'mesh_topology_contact')
    ierr = nf90_put_att(ncid, contactids%varids(cid_contacttopo), 'contact'           , 'mesh1: '//trim(locationType1)//' mesh2: '//trim(locationType2)) 
+   ierr = nf90_put_att(ncid, contactids%varids(cid_contacttopo), 'contact_type'      , prefix//'_contact_type') 
    ierr = nf90_put_att(ncid, contactids%varids(cid_contacttopo), 'links_ids'         , prefix//'_links_ids')
    ierr = nf90_put_att(ncid, contactids%varids(cid_contacttopo), 'links_long_names'  , prefix//'_links_long_names') 
    
@@ -3431,6 +3409,12 @@ function ug_def_mesh_contact(ncid, contactids, linkmeshname, ncontacts, idmesh1,
    !define the variable and attributes long names
    ierr = nf90_def_var(ncid, prefix//'_links_long_names', nf90_char, (/ contactids%dimids(cdim_longnamestring), contactids%dimids(cdim_ncontacts) /) , contactids%varids(cid_contactlongnames))
    ierr = nf90_put_att(ncid, contactids%varids(cid_contactlongnames), 'long_name', 'long names of the links')
+   
+   !define the variable and attributes long names
+   ierr = nf90_def_var(ncid, prefix//'_contact_type', nf90_int, (/ contactids%dimids(cdim_ncontacts) /) , contactids%varids(cid_contacttype))
+   ierr = nf90_put_att(ncid, contactids%varids(cid_contacttype), '_FillValue',  -1)
+   ierr = nf90_put_att(ncid, contactids%varids(cid_contacttype), 'valid_range',  (/ 3, 4/))
+   ierr = nf90_put_att(ncid, contactids%varids(cid_contacttype), 'flag_values',  (/ 3, 4/))
    
 end function ug_def_mesh_contact
 
@@ -3457,11 +3441,11 @@ function ug_get_contacts_count(ncid, contactids, ncontacts) result(ierr)
 end function ug_get_contacts_count
 
 ! Writes the mesh_topology_contact mesh.
-function ug_put_mesh_contact(ncid, contactids, mesh1indexes, mesh2indexes, contactsids, contactslongnames, startIndex) result(ierr)
+function ug_put_mesh_contact(ncid, contactids, mesh1indexes, mesh2indexes, contactsids, contactslongnames, contacttype, startIndex) result(ierr)
 
    integer, intent(in)                :: ncid, startIndex 
    type(t_ug_contacts), intent(in)    :: contactids
-   integer, intent(in)                :: mesh1indexes(:),mesh2indexes(:)
+   integer, intent(in)                :: mesh1indexes(:),mesh2indexes(:),contacttype(:)
    character(len=*), intent(in)       :: contactsids(:), contactslongnames(:)  
    integer, allocatable               :: contacts(:,:)
    integer                            :: ierr, i
@@ -3485,15 +3469,16 @@ function ug_put_mesh_contact(ncid, contactids, mesh1indexes, mesh2indexes, conta
    ierr = nf90_put_var(ncid, contactids%varids(cid_contacttopo), contacts)
    ierr = nf90_put_var(ncid, contactids%varids(cid_contactids), contactsids)
    ierr = nf90_put_var(ncid, contactids%varids(cid_contactlongnames), contactslongnames) 
+   ierr = nf90_put_var(ncid, contactids%varids(cid_contacttype), contacttype) 
 
 end function ug_put_mesh_contact
 
 ! Gets the indexses of the contacts and the ids and the descriptions of each link
-function ug_get_mesh_contact(ncid, contactids, mesh1indexes, mesh2indexes, contactsids, contactslongnames, startIndex) result(ierr)
+function ug_get_mesh_contact(ncid, contactids, mesh1indexes, mesh2indexes, contactsids, contactslongnames, contacttype, startIndex) result(ierr)
 
    integer, intent(in)               :: ncid, startIndex 
    type(t_ug_contacts), intent(in)   :: contactids
-   integer, intent(out)              :: mesh1indexes(:),mesh2indexes(:)
+   integer, intent(out)              :: mesh1indexes(:),mesh2indexes(:),contacttype(:)
    character(len=*), intent(out)     :: contactsids(:), contactslongnames(:) 
    integer, allocatable              :: contacts(:,:)
    integer                           :: ierr, i, varStartIndex
@@ -3502,6 +3487,7 @@ function ug_get_mesh_contact(ncid, contactids, mesh1indexes, mesh2indexes, conta
    
    ierr = nf90_get_var(ncid, contactids%varids(cid_contacttopo), contacts) 
    ierr = nf90_get_var(ncid, contactids%varids(cid_contactids), contactsids)  
+   ierr = nf90_get_var(ncid, contactids%varids(cid_contacttype), contacttype)  
    ierr = nf90_get_var(ncid, contactids%varids(cid_contactlongnames), contactslongnames) 
    
    !we check for the start_index, we do not know if the variable was written as 0 based

@@ -16,6 +16,7 @@ namespace General.tests
 
         public IntPtr branchids;
         public IntPtr nbranchgeometrynodes;
+        public IntPtr nedge_nodes;
 
         public IntPtr nodex;
         public IntPtr nodey;

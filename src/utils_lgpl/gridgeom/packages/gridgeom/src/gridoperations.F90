@@ -3800,8 +3800,8 @@
        !Determine if the currentbranchid is connected to the start/end of a previous branch. if so create a connection at the start
        do i = 1, nBranches
            !skip if i equal to currentbranchid and currentbranchid is the first branchid (fully connected)
-           if((i.eq.currentbranchid).or.(currentbranchid.eq.branchids(1))) cycle 
-           if(sourceNodeId(currentbranchid).eq.sourceNodeId(i)) then
+           if ((i.eq.currentbranchid).or.(currentbranchid.eq.branchids(1))) cycle 
+           if (sourceNodeId(currentbranchid).eq.sourceNodeId(i)) then
                 k = k + 1
                 edgenodes(1,k) = indexbranchstart(i)
                 edgenodes(2,k) = idxstart

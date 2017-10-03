@@ -1506,25 +1506,25 @@ function ionc_get_contacts_count_ugrid(ioncid, contactsmesh, ncontacts) result(i
    
 end function ionc_get_contacts_count_ugrid
 
-function ionc_put_mesh_contact_ugrid(ioncid, contactsmesh, mesh1indexes, mesh2indexes, contactsids, contactslongnames,startIndex)  result(ierr) 
+function ionc_put_mesh_contact_ugrid(ioncid, contactsmesh, mesh1indexes, mesh2indexes, contactsids, contactslongnames, contacttype, startIndex)  result(ierr) 
 
    integer, intent(in)                :: ioncid, contactsmesh, startIndex 
-   integer, intent(in)                :: mesh1indexes(:),mesh2indexes(:)
+   integer, intent(in)                :: mesh1indexes(:),mesh2indexes(:), contacttype(:)
    character(len=*), intent(in)       :: contactsids(:), contactslongnames(:)  
    integer                            :: ierr
 
-   ierr = ug_put_mesh_contact(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%contactids(contactsmesh), mesh1indexes, mesh2indexes, contactsids, contactslongnames, startIndex) 
+   ierr = ug_put_mesh_contact(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%contactids(contactsmesh), mesh1indexes, mesh2indexes, contactsids, contactslongnames, contacttype, startIndex) 
 
 end function ionc_put_mesh_contact_ugrid
 
-function ionc_get_mesh_contact_ugrid(ioncid, contactsmesh, mesh1indexes, mesh2indexes, contactsids, contactslongnames, startIndex)  result(ierr) 
+function ionc_get_mesh_contact_ugrid(ioncid, contactsmesh, mesh1indexes, mesh2indexes, contactsids, contactslongnames, contacttype, startIndex)  result(ierr) 
 
    integer, intent(in)                :: ioncid, contactsmesh, startIndex 
-   integer, intent(inout)             :: mesh1indexes(:),mesh2indexes(:)
+   integer, intent(inout)             :: mesh1indexes(:),mesh2indexes(:), contacttype(:)
    character(len=*), intent(inout)    :: contactsids(:), contactslongnames(:)  
    integer                            :: ierr
 
-   ierr = ug_get_mesh_contact(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%contactids(contactsmesh), mesh1indexes, mesh2indexes, contactsids, contactslongnames, startIndex) 
+   ierr = ug_get_mesh_contact(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%contactids(contactsmesh), mesh1indexes, mesh2indexes, contactsids, contactslongnames,contacttype, startIndex) 
 
 end function ionc_get_mesh_contact_ugrid
 

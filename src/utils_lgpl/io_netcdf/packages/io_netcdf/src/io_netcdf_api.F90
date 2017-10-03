@@ -1040,33 +1040,34 @@ function ionc_get_contacts_count_dll(ioncid, contactsmesh, ncontacts) result(ier
    
 end function ionc_get_contacts_count_dll
 
-function ionc_put_mesh_contact_dll(ioncid, contactsmesh, c_mesh1indexes, c_mesh2indexes, contactsinfo, ncontacts, startIndex) result(ierr) bind(C, name="ionc_put_mesh_contact")
+function ionc_put_mesh_contact_dll(ioncid, contactsmesh, c_mesh1indexes, c_mesh2indexes, c_contacttype, contactsinfo, ncontacts, startIndex) result(ierr) bind(C, name="ionc_put_mesh_contact")
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_put_mesh_contact_dll
    integer, intent(in)                   :: ioncid, contactsmesh, ncontacts, startIndex
-   type(c_ptr), intent(in)               :: c_mesh1indexes, c_mesh2indexes
+   type(c_ptr), intent(in)               :: c_mesh1indexes, c_mesh2indexes, c_contacttype
    type(t_ug_charinfo),  intent(in)      :: contactsinfo(ncontacts)
-   integer,pointer                       :: mesh1indexes(:), mesh2indexes(:)
+   integer,pointer                       :: mesh1indexes(:), mesh2indexes(:), contacttype(:)
    character(len=ug_idsLen)              :: contactsids(ncontacts)
    character(len=ug_idsLongNamesLen)     :: contactslongnames(ncontacts)
    integer                               :: ierr,i
    
    call c_f_pointer(c_mesh1indexes, mesh1indexes, (/ ncontacts /))
    call c_f_pointer(c_mesh2indexes, mesh2indexes, (/ ncontacts /))
+   call c_f_pointer(c_contacttype, contacttype, (/ ncontacts /))
 
    do i=1,ncontacts
       contactsids(i) = contactsinfo(i)%ids        
       contactslongnames(i) = contactsinfo(i)%longnames
    end do
    
-   ierr = ionc_put_mesh_contact_ugrid(ioncid, contactsmesh, mesh1indexes, mesh2indexes, contactsids, contactslongnames, startIndex) 
+   ierr = ionc_put_mesh_contact_ugrid(ioncid, contactsmesh, mesh1indexes, mesh2indexes, contactsids, contactslongnames, contacttype, startIndex) 
    
 end function ionc_put_mesh_contact_dll
 
-function ionc_get_mesh_contact_dll(ioncid, contactsmesh, c_mesh1indexes, c_mesh2indexes, contactsinfo, ncontacts, startIndex) result(ierr) bind(C, name="ionc_get_mesh_contact")
+function ionc_get_mesh_contact_dll(ioncid, contactsmesh, c_mesh1indexes, c_mesh2indexes, c_contacttype, contactsinfo, ncontacts, startIndex) result(ierr) bind(C, name="ionc_get_mesh_contact")
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_mesh_contact_dll
    integer, intent(in)                   :: ioncid, contactsmesh, ncontacts, startIndex
-   type(c_ptr), intent(inout)            :: c_mesh1indexes, c_mesh2indexes
-   integer,    pointer                   :: mesh1indexes(:), mesh2indexes(:)  
+   type(c_ptr), intent(inout)            :: c_mesh1indexes, c_mesh2indexes, c_contacttype
+   integer,    pointer                   :: mesh1indexes(:), mesh2indexes(:), contacttype(:)  
    character(len=ug_idsLen)              :: contactsids(ncontacts)
    character(len=ug_idsLongNamesLen)     :: contactslongnames(ncontacts)
    type(t_ug_charinfo),  intent(inout)   :: contactsinfo(ncontacts)
@@ -1074,8 +1075,9 @@ function ionc_get_mesh_contact_dll(ioncid, contactsmesh, c_mesh1indexes, c_mesh2
    
    call c_f_pointer(c_mesh1indexes, mesh1indexes, (/ ncontacts /))
    call c_f_pointer(c_mesh2indexes, mesh2indexes, (/ ncontacts /))
+   call c_f_pointer(c_contacttype, contacttype, (/ ncontacts /))
       
-   ierr = ionc_get_mesh_contact_ugrid(ioncid, contactsmesh, mesh1indexes, mesh2indexes, contactsids, contactslongnames, startIndex) 
+   ierr = ionc_get_mesh_contact_ugrid(ioncid, contactsmesh, mesh1indexes, mesh2indexes, contactsids, contactslongnames, contacttype, startIndex) 
    
    do i=1,ncontacts
      contactsinfo(i)%ids = contactsids(i)        
@@ -1331,6 +1333,7 @@ function ionc_get_meshgeom_dll(ioncid, meshid, c_meshgeom, includeArrays) result
    if(associated(meshgeom%layer_zs)) deallocate(meshgeom%layer_zs)
    if(associated(meshgeom%interface_zs)) deallocate(meshgeom%interface_zs)
 
+   meshgeom%start_index = 1
    !get the mesh geometry
    ierr = ionc_get_meshgeom(ioncid, meshid, meshgeom, includeArrays)
    !set the pointers in c_meshgeom
