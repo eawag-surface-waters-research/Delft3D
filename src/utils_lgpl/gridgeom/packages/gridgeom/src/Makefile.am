@@ -50,7 +50,7 @@ libgridgeom_la_SOURCES = \
          network_data.f90 \
          gridoperations.F90 \
          odugrid.F90 \
-         gridgeom.f90 \
+         gridgeom.F90 \
          gridgeom_api.F90
          
 
