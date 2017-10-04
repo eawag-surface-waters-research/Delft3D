@@ -84,7 +84,7 @@ type t_ug_meshgeom
 
 end type t_ug_meshgeom
 
-type c_t_ug_meshgeomdim
+type, bind(C) :: c_t_ug_meshgeomdim
 
    type(c_ptr)              :: meshname           !< Name of this mesh ! TODO: AvD: should this be in this data type?
    integer(kind=c_int)      :: dim                !< Dimensionality of the mesh (1/2/3)
@@ -100,7 +100,7 @@ type c_t_ug_meshgeomdim
    
 end type c_t_ug_meshgeomdim
 
-type c_t_ug_meshgeom
+type, bind(C) :: c_t_ug_meshgeom
 
    type(c_ptr) :: edge_nodes !< Edge-to-node mapping array.
    type(c_ptr) :: face_nodes !< Face-to-node mapping array.
