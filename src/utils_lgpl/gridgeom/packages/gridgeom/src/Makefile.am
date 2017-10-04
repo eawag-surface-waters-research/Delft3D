@@ -7,7 +7,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-noinst_LTLIBRARIES = libGridgeom.la
+noinst_LTLIBRARIES = libgridgeom.la
 
 # For source distributions: the tar.gz will contain the correct version numbers in the generated *version.F90
 # So, just before packaging the .tar.gz dist, disable version number REgeneration parts of this Makefile.am.
@@ -36,22 +36,22 @@ gridgeom_version.F90:
 
 #-------------------------------------------------------------------------------
 #Includes
-AM_FCFLAGS += $(GRIDGEOM_CFLAGS) $(GRIDGEOM_FORTRAN_CFLAGS)
 
 FMODULES += \
     -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src \
-    -I$(GRIDGEOMROOT)/include
+    -I$(top_builddir)/utils_lgpl/io_netcdf/packages/io_netcdf/src \
+    -I$(builddir)/../include
 
 #-------------------------------------------------------------------------------
 #Sources
-libGridgeom_la_SOURCES = \
+libgridgeom_la_SOURCES = \
          generalmodules.f90 \
+         polygon.f90 \
+         network_data.f90 \
+         gridoperations.F90 \
          odugrid.F90 \
          gridgeom.f90 \
-         gridgeom_api.F90 \
-         gridoperations.F90 \
-         network_data.f90 \
-         polygon.f90
+         gridgeom_api.F90
          
 
 #-------------------------------------------------------------------------------
