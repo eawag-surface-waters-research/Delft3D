@@ -1,9 +1,9 @@
-flowexedir       = ../../../bin/lnx64/flow2d3d/bin
+flowexedir       = ../../../src/bin/lnx64/dflow2d3d/bin
 flowargs         = config_d_hydro.xml
-waveexedir       = ../../../bin/lnx64/wave/bin
+waveexedir       = ../../../src/bin/lnx64/dwaves/bin
 waveargs         = bas.mdw 1
-swanbatdir       = ../../../bin/lnx64/swan/scripts
-mormergeexedir   = ../../../bin/lnx64/flow2d3d/bin
+swanbatdir       = ../../../src/bin/lnx64/swan/scripts
+mormergeexedir   = ../../../src/bin/lnx64/dflow2d3d/bin
 nodes            = local
 # nodes            = 1
 debug            = 0

@@ -90,12 +90,15 @@ function d_hydro () {
 
     dest_bin="$dest_main/lnx64/dflow2d3d/bin"
     dest_menu="$dest_main/lnx64/menu/bin"
+    dest_scripts="$dest_main/lnx64/scripts"
 
     mkdir -p $dest_bin
     mkdir -p $dest_menu
+    mkdir -p $dest_scripts
 
     copyFile "$prefix/bin/d_hydro.exe" 					    $dest_bin
     copyFile "$srcdir/engines_gpl/d_hydro/scripts/create_config_xml.tcl"    $dest_menu
+    copyFile "$srcdir/engines_gpl/flow2d3d/scripts/run_*.sh"                $dest_scripts
 
     echo "Gathering libraries for d_hydro..."
     cp -u `$gatherScript $prefix/bin/d_hydro.exe | eval grep -v $gatherExcludeFilter` $dest_bin
@@ -236,9 +239,11 @@ function waq () {
 
     dest_bin="$dest_main/lnx64/dwaq/bin"
     dest_default="$dest_main/lnx64/dwaq/default"
+    dest_scripts="$dest_main/lnx64/scripts"
 
     mkdir -p $dest_bin
     mkdir -p $dest_default
+    mkdir -p $dest_scripts
 
     copyFile "$prefix/bin/delwaq1"                           $dest_bin
     copyFile "$prefix/bin/delwaq2"                           $dest_bin
@@ -247,6 +252,7 @@ function waq () {
     copyFile "$srcdir/engines_gpl/waq/default/bloominp.d09"  $dest_default
     copyFile "$srcdir/engines_gpl/waq/default/proc_def.dat"  $dest_default
     copyFile "$srcdir/engines_gpl/waq/default/proc_def.def"  $dest_default
+    copyFile "$srcdir/engines_gpl/waq/scripts/run*.sh"       $dest_scripts
 
     echo "Gathering libraries for delwaq..."
     cp -u `$gatherScript $prefix/bin/delwaq1 $prefix/bin/delwaq2 | eval grep -v $gatherExcludeFilter` $dest_bin
@@ -267,11 +273,14 @@ function part () {
     echo "installing delpar . . ."
 
     dest_bin="$dest_main/lnx64/dpart/bin"
+    dest_scripts="$dest_main/lnx64/scripts"
 
     mkdir -p $dest_bin
+    mkdir -p $dest_scripts
 
-    copyFile "$prefix/bin/delpar"                    $dest_bin
-    copyFile "$prefix/bin/delpar"                    $dest_bin
+    copyFile "$prefix/bin/delpar"                          $dest_bin
+    copyFile "$prefix/bin/delpar"                          $dest_bin
+    copyFile "$srcdir/engines_gpl/part/scripts/run_*.sh"   $dest_scripts
 
     echo "Gathering libraries for delpar..."
     cp -u `$gatherScript $prefix/bin/delpar | eval grep -v $gatherExcludeFilter` $dest_bin
@@ -294,6 +303,7 @@ function wave () {
     dest_swan_scripts="$dest_main/lnx64/swan/scripts"
     dest_esmf_bin="$dest_main/lnx64/esmf/bin"
     dest_esmf_scripts="$dest_main/lnx64/esmf/scripts"
+    dest_scripts="$dest_main/lnx64/scripts"
 
     mkdir -p $dest_bin
     mkdir -p $dest_default
@@ -301,6 +311,7 @@ function wave () {
     mkdir -p $dest_swan_scripts
     mkdir -p $dest_esmf_bin
     mkdir -p $dest_esmf_scripts
+    mkdir -p $dest_scripts
 
     copyFile "$prefix/lib/libwave.so"                                $dest_bin
     copyFile "$prefix/bin/wave.exe"                                  $dest_bin
@@ -309,6 +320,7 @@ function wave () {
     copyFile "$srcdir/third_party_open/swan/scripts/swan_install.sh" $dest_swan_scripts/swan.sh
     copyFile "$srcdir/third_party_open/esmf/lnx64/bin/*"             $dest_esmf_bin
     copyFile "$srcdir/third_party_open/esmf/lnx64/scripts/*.*"       $dest_esmf_scripts
+    copyFile "$srcdir/engines_gpl/wave/scripts/run_*.sh"             $dest_scripts
 
     echo "Gathering libraries for dwaves..."
     cp -u `$gatherScript $prefix/bin/wave.exe | eval grep -v $gatherExcludeFilter` $dest_bin
