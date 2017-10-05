@@ -83,7 +83,7 @@ start "Delft3D-FLOW" "%shareddir%\mpiexec.exe" -n %numpar% -localonly "%dflow2d3
 
     rem Start WAVE
 title Delft3D-WAVE simulation
-set PATH=%waveexedir%;%swanbatdir%;%swanexedir%;%shareddir%
+set PATH=%swanbatdir%;%swanexedir%;%shareddir%;%waveexedir%
 echo executing in this window: "%waveexedir%\wave.exe" %mdwfile% 1
 "%waveexedir%\wave.exe" %mdwfile% 1
 title %CD%

@@ -79,7 +79,7 @@ start "Delft3D-FLOW" "%dflow2d3ddir%\d_hydro.exe" %argfile%
 
     rem Start WAVE
 title Delft3D-WAVE simulation
-set PATH=%waveexedir%;%swanbatdir%;%swanexedir%;%shareddir%
+set PATH=%swanbatdir%;%swanexedir%;%shareddir%;%waveexedir%
 echo executing in this window: "%waveexedir%\wave.exe" %mdwfile% 1
 "%waveexedir%\wave.exe" %mdwfile% 1
 title %CD%

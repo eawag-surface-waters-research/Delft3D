@@ -285,14 +285,9 @@ rem ====================
     rem One of these two dlls will not exist and cause an ErrorLevel=1. Reset it.
     set ErrorLevel=0
     call :copyFile "engines_gpl\flow2d3d\scripts\meteo_old2new.m"                   !dest_scriptsflow!
-    call :copyFile "third_party_open\pthreads\bin\x64\*.dll"                        !dest_bin!
-    call :copyFile "third_party_open\mpich2\x64\bin\*.exe"                          !dest_bin!
-    call :copyFile "third_party_open\mpich2\x64\lib\*.dll"                          !dest_bin!
-    call :copyFile "third_party_open\expat\x64\x64\Release\libexpat.dll"            !dest_bin!
     call :copyFile "engines_gpl\flow2d3d\default\*"                                 !dest_default!
     call :copyFile "utils_lgpl\delftonline\lib\x64\Release\dynamic\delftonline.dll" !dest_bin!
     call :copyFile "utils_lgpl\delftonline\lib\x64\Release\dynamic\delftonline.dll" !dest_plugins!
-    call :copyNetcdf
     call :copyFile "engines_gpl\flow2d3d\scripts\run_*.bat"                         !dest_scripts!
     call :copyFile "third_party_open\tcl\bin\win64\tclkitsh852.exe"                 !dest_shared!
     
@@ -549,7 +544,6 @@ rem ================
         call :copyFile engines_gpl\wave\bin\x64\release\wave_exe.exe      "!dest_bin!\wave.exe"
     )
     call :copyFile engines_gpl\flow2d3d\default\dioconfig.ini         "!dest_default!"
-    call :copyFile "third_party_open\pthreads\bin\x64\*.dll"          "!dest_bin!"
     call :copyFile "third_party_open\swan\bin\w64_i11\*.*"            "!dest_swan_bin!"
     call :copyFile third_party_open\swan\scripts\swan_install_x64.bat "!dest_swan_scripts!\swan.bat"
     call :copyFile "third_party_open\esmf\win64\bin\*.*"              "!dest_esmf_bin!"

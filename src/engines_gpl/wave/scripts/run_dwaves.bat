@@ -49,7 +49,7 @@ set waveexedir=%D3D_HOME%\%ARCH%\dwaves\bin
     rem
 
     rem Run
-set PATH=%waveexedir%;%swanbatdir%;%swanexedir%;%shareddir%
+set PATH=%swanbatdir%;%swanexedir%;%shareddir%;%waveexedir%
 echo executing in this window: "%waveexedir%\wave.exe" %argfile% 0
 "%waveexedir%\wave.exe" %argfile% 0
 
