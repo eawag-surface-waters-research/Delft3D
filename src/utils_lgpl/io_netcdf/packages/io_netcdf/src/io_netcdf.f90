@@ -276,6 +276,8 @@ function ionc_create(netCDFFile, mode, ioncid, iconvtype, chunksize) result(ierr
       ierr = IONC_ENOPEN
       goto 999
    end if
+
+   
    
    ierr = add_dataset(ncid, netCDFFile, ioncid, iconvtype)
    
@@ -984,7 +986,7 @@ end function ionc_def_var
 
 
 !> Writes the complete mesh geometry
-function ionc_write_mesh_struct(ioncid, meshids, meshgeom, crs) result(ierr)
+function ionc_write_mesh_struct(ioncid, meshids, meshgeom) result(ierr)
    integer,             intent(in)    :: ioncid   !< The IONC data set id.
    type(t_ug_mesh),  intent(inout) :: meshids  !< Set of NetCDF-ids for all mesh geometry arrays.
    type(t_ug_meshgeom), intent(in)    :: meshgeom !< The complete mesh geometry in a single struct.
