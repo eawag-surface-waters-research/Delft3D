@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -147,7 +147,7 @@ del /f vs_l.c vs_y.c
       <AdditionalDependencies>..\..\..\..\utils_lgpl\nefis\lib\$(PlatformName)\$(Configuration)\static\nefis.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>..\..\..\..\scripts_lgpl\win64\oss-install_debug_x64.cmd vs ..\bin</Command>
+      <Command>..\..\..\..\scripts_lgpl\win64\oss-install_debug_x64.cmd vs bin</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -181,7 +181,7 @@ del /f vs_l.c vs_y.c
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>..\..\..\..\scripts_lgpl\win32\oss-install.cmd vs ..\bin</Command>
+      <Command>..\..\..\..\scripts_lgpl\win32\oss-install.cmd vs bin</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -214,7 +214,7 @@ del /f vs_l.c vs_y.c
       <AdditionalDependencies>..\..\..\..\utils_lgpl\nefis\lib\x64\Release\static\nefis.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>..\..\..\..\scripts_lgpl\win64\oss-install_x64.cmd vs ..\bin</Command>
+      <Command>..\..\..\..\scripts_lgpl\win64\oss-install_x64.cmd vs bin</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

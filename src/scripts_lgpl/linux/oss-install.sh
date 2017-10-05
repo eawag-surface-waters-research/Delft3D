@@ -88,7 +88,7 @@ function delft3d_flow () {
 function d_hydro () {
     echo "installing d_hydro . . ."
 
-    dest_bin="$dest_main/lnx64/flow2d3d/bin"
+    dest_bin="$dest_main/lnx64/dflow2d3d/bin"
     dest_menu="$dest_main/lnx64/menu/bin"
 
     mkdir -p $dest_bin
@@ -122,20 +122,20 @@ function dimr () {
     mkdir -p $dest_menu
     mkdir -p $dest_scripts
 
-    copyFile "$prefix/engines_gpl/dimr/packages/dimr/src/.libs/dimr.exe"    $dest_bin
+    copyFile "$prefix/bin/dimr.exe"    $dest_bin
     # copy libdimr.so does not work: ldd will show dependency on $srcdir/lib/libdimr.so
     # => When build on TeamCity it may not work, when removing $srcdir/lib it may not work anymore
     # Therefore "copy libdimr.so" is replaced by "libtool install" and "libtool finish"
     # It might be enough to just copy libdimr.la (and libdimr.a) too?
     libtool --mode=install install -c $srcdir/engines_gpl/dimr/packages/dimr_lib/src/libdimr.la $dest_bin/libdimr.la
     libtool --finish $dest_bin/libdimr.la
-    copyFile "$prefix/engines_gpl/dimr/packages/dimr_lib/src/.libs/libdimr.lai"    $dest_bin
+    copyFile "$srcdir/engines_gpl/dimr/packages/dimr_lib/src/.libs/libdimr.lai"    $dest_bin
     copyFile "$srcdir/engines_gpl/d_hydro/scripts/create_config_xml.tcl"           $dest_menu
     copyFile "$srcdir/engines_gpl/dimr/scripts/generic/lnx64/*"                    $dest_scripts
 
     echo "Gathering libraries for dimr..."
-    cp -u `$gatherScript $prefix/engines_gpl/dimr/packages/dimr/src/.libs/dimr.exe $prefix/lib/libdimr.so | eval grep -v $gatherExcludeFilter` $dest_bin
-    cp -u `$gatherScript $prefix/engines_gpl/dimr/packages/dimr/src/.libs/dimr.exe $prefix/lib/libdimr.so | eval grep $gatherIncludeFilter` $dest_bin
+    cp -u `$gatherScript $prefix/bin/dimr.exe $prefix/lib/libdimr.so | eval grep -v $gatherExcludeFilter` $dest_bin
+    cp -u `$gatherScript $prefix/bin/dimr.exe $prefix/lib/libdimr.so | eval grep $gatherIncludeFilter` $dest_bin
 
     # chrpath -r \$ORIGIN $dest_bin/d_hydro.exe
 
@@ -148,11 +148,11 @@ function dimr () {
 # === INSTALL FLOW2D3D ===
 # ========================
 function flow2d3d () {
-    echo "installing flow2d3d . . ."
+    echo "installing dflow2d3d . . ."
 
-    dest_bin="$dest_main/lnx64/flow2d3d/bin"
-    dest_default="$dest_main/lnx64/flow2d3d/default"
-    dest_scripts="$dest_main/lnx64/flow2d3d/scripts"
+    dest_bin="$dest_main/lnx64/dflow2d3d/bin"
+    dest_default="$dest_main/lnx64/dflow2d3d/default"
+    dest_scripts="$dest_main/lnx64/dflow2d3d/scripts"
     dest_plugins="$dest_main/lnx64/plugins/bin"
 
     mkdir -p $dest_bin
@@ -177,7 +177,7 @@ function flow2d3d () {
     copyFile "$prefix/bin/esm_info"                                 $dest_bin
     copyFile "$srcdir/engines_gpl/flow2d3d/default/*"               $dest_default
 
-    echo "Gathering libraries for flow2d3d..."
+    echo "Gathering libraries for dflow2d3d..."
     cp -u `$gatherScript $prefix/lib/libflow2d3d*.so $prefix/lib/libDelftOnline.so $prefix/bin/esm_* | eval grep -v $gatherExcludeFilter` $dest_bin
     cp -u `$gatherScript $prefix/lib/libDelftOnline.so | eval grep -v $gatherExcludeFilter` $dest_plugins
 
@@ -190,11 +190,11 @@ function flow2d3d () {
 # === INSTALL FLOW2D3D_OPENDA ===
 # ===============================
 function flow2d3d_openda () {
-    echo "installing flow2d3d_openda . . ."
+    echo "installing dflow2d3d_openda . . ."
 
-    dest_bin="$dest_main/lnx64/flow2d3d/bin"
-    dest_default="$dest_main/lnx64/flow2d3d/default"
-    dest_scripts="$dest_main/lnx64/flow2d3d/scripts"
+    dest_bin="$dest_main/lnx64/dflow2d3d/bin"
+    dest_default="$dest_main/lnx64/dflow2d3d/default"
+    dest_scripts="$dest_main/lnx64/dflow2d3d/scripts"
     dest_plugins="$dest_main/lnx64/plugins/bin"
 
     mkdir -p $dest_bin
@@ -234,8 +234,8 @@ function flow2d3d_openda () {
 function waq () {
     echo "installing delwaq . . ."
 
-    dest_bin="$dest_main/lnx64/waq/bin"
-    dest_default="$dest_main/lnx64/waq/default"
+    dest_bin="$dest_main/lnx64/dwaq/bin"
+    dest_default="$dest_main/lnx64/dwaq/default"
 
     mkdir -p $dest_bin
     mkdir -p $dest_default
@@ -266,7 +266,7 @@ function waq () {
 function part () {
     echo "installing delpar . . ."
 
-    dest_bin="$dest_main/lnx64/part/bin"
+    dest_bin="$dest_main/lnx64/dpart/bin"
 
     mkdir -p $dest_bin
 
@@ -286,10 +286,10 @@ function part () {
 # === INSTALL WAVE ===
 # ====================
 function wave () {
-    echo "installing wave . . ."
+    echo "installing dwaves . . ."
 
-    dest_bin="$dest_main/lnx64/wave/bin"
-    dest_default="$dest_main/lnx64/wave/default"
+    dest_bin="$dest_main/lnx64/dwaves/bin"
+    dest_default="$dest_main/lnx64/dwaves/default"
     dest_swan_bin="$dest_main/lnx64/swan/bin"
     dest_swan_scripts="$dest_main/lnx64/swan/scripts"
     dest_esmf_bin="$dest_main/lnx64/esmf/bin"
@@ -310,7 +310,7 @@ function wave () {
     copyFile "$srcdir/third_party_open/esmf/lnx64/bin/*"             $dest_esmf_bin
     copyFile "$srcdir/third_party_open/esmf/lnx64/scripts/*.*"       $dest_esmf_scripts
 
-    echo "Gathering libraries for wave..."
+    echo "Gathering libraries for dwaves..."
     cp -u `$gatherScript $prefix/bin/wave.exe | eval grep -v $gatherExcludeFilter` $dest_bin
     cp -u `$gatherScript $prefix/lib/libwave.so | eval grep -v $gatherFilter` $dest_bin
     echo "Gathering libraries for swan..."
@@ -331,7 +331,7 @@ function wave () {
 function plugin_culvert () {
     echo "installing plugin_culvert . . ."
 
-    dest_bin="$dest_main/lnx64/flow2d3d/bin"
+    dest_bin="$dest_main/lnx64/dflow2d3d/bin"
 
     mkdir -p $dest_bin
 
@@ -353,7 +353,7 @@ function plugin_culvert () {
 function plugin_delftflow_traform () {
     echo "installing plugin_delftflow_traform . . ."
 
-    dest_bin="$dest_main/lnx64/flow2d3d/bin"
+    dest_bin="$dest_main/lnx64/dflow2d3d/bin"
 
     mkdir -p $dest_bin
 
@@ -375,7 +375,7 @@ function plugin_delftflow_traform () {
 function datsel () {
     echo "installing datsel . . ."
 
-    dest_bin="$dest_main/lnx64/flow2d3d/bin"
+    dest_bin="$dest_main/lnx64/dflow2d3d/bin"
 
     mkdir -p $dest_bin
 
@@ -397,7 +397,7 @@ function datsel () {
 function kubint () {
     echo "installing kubint . . ."
 
-    dest_bin="$dest_main/lnx64/flow2d3d/bin"
+    dest_bin="$dest_main/lnx64/dflow2d3d/bin"
 
     mkdir -p $dest_bin
 
@@ -419,7 +419,7 @@ function kubint () {
 function lint () {
     echo "installing lint . . ."
 
-    dest_bin="$dest_main/lnx64/flow2d3d/bin"
+    dest_bin="$dest_main/lnx64/dflow2d3d/bin"
 
     mkdir -p $dest_bin
 
@@ -441,8 +441,8 @@ function lint () {
 function mormerge () {
     echo "installing mormerge . . ."
 
-    dest_bin="$dest_main/lnx64/flow2d3d/bin"
-    dest_scripts="$dest_main/lnx64/flow2d3d/scripts"
+    dest_bin="$dest_main/lnx64/dflow2d3d/bin"
+    dest_scripts="$dest_main/lnx64/dflow2d3d/scripts"
 
     mkdir -p $dest_bin
     mkdir -p $dest_scripts
@@ -488,7 +488,7 @@ function vs () {
 function nesthd1 () {
     echo "installing nesthd1 . . ."
 
-    dest_bin="$dest_main/lnx64/flow2d3d/bin"
+    dest_bin="$dest_main/lnx64/dflow2d3d/bin"
 
     mkdir -p $dest_bin
 
@@ -510,7 +510,7 @@ function nesthd1 () {
 function nesthd2 () {
     echo "installing nesthd2 . . ."
 
-    dest_bin="$dest_main/lnx64/flow2d3d/bin"
+    dest_bin="$dest_main/lnx64/dflow2d3d/bin"
 
     mkdir -p $dest_bin
 
@@ -539,7 +539,7 @@ function shared () {
     mkdir -p $dest_bin
 
     # This seems to be the most complete set of shared libraries
-    copyFile "$dest_main/lnx64/flow2d3d/bin/lib*"    $dest_bin
+    copyFile "$dest_main/lnx64/dflow2d3d/bin/lib*"    $dest_bin
     # Remove the flow2d3d specific libraries
     rm -f $dest_bin/libDelftOnline.*
     rm -f $dest_bin/libflow2d3d.*

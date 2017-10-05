@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -177,7 +177,7 @@ echo "This file is overwritten by the post-build command of the project d_hydro"
       <StackReserveSize>20000000</StackReserveSize>
     </Link>
     <PostBuildEvent>
-      <Command>..\..\..\..\scripts_lgpl\win32\oss-install.cmd d_hydro ..\bin
+      <Command>..\..\..\..\scripts_lgpl\win32\oss-install.cmd d_hydro bin
 echo "This file is overwritten by the post-build command of the project d_hydro" &gt; .\include\d_hydro_version.h</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -210,7 +210,7 @@ echo "This file is overwritten by the post-build command of the project d_hydro"
       <StackReserveSize>20000000</StackReserveSize>
     </Link>
     <PostBuildEvent>
-      <Command>..\..\..\..\scripts_lgpl\win64\oss-install_x64.cmd d_hydro ..\bin</Command>
+      <Command>..\..\..\..\scripts_lgpl\win64\oss-install_x64.cmd d_hydro bin</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

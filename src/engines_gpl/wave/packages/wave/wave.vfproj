@@ -22,7 +22,7 @@
 				<Tool Name="VFCustomBuildTool"/>
 				<Tool Name="VFPreLinkEventTool"/>
 				<Tool Name="VFPreBuildEventTool"/>
-				<Tool Name="VFPostBuildEventTool" CommandLine="..\..\..\..\scripts_lgpl\win32\oss-install.cmd wave ..\bin &quot;$(IFORT_COMPILER16)redist\ia32\compiler\&quot;"/>
+				<Tool Name="VFPostBuildEventTool" CommandLine="..\..\..\..\scripts_lgpl\win32\oss-install.cmd wave bin &quot;$(IFORT_COMPILER16)redist\ia32\compiler\&quot;"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Debug|x64" OutputDirectory="..\..\bin\$(PlatformName)\$(ConfigurationName)\" ConfigurationType="typeDynamicLibrary">
 				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="..\data\lib\$(PlatformName)\$(ConfigurationName);..\kernel\lib\$(PlatformName)\$(ConfigurationName);..\..\..\..\utils_lgpl\delftio\lib\$(PlatformName)\$(ConfigurationName)\static;..\..\..\..\utils_lgpl\inifiles\lib\$(PlatformName)\$(ConfigurationName)\static;..\..\..\..\utils_lgpl\deltares_common\lib\$(PlatformName)\$(ConfigurationName)\static;..\..\..\..\utils_lgpl\meteo\lib\$(PlatformName)\$(ConfigurationName)\static;..\..\..\..\third_party_open\netcdf\lib\win32\x64\Debug" WarnInterfaces="true" Traceback="true" BoundsCheck="true" RuntimeLibrary="rtMultiThreadedDebugDLL"/>
@@ -42,7 +42,7 @@
 				<Tool Name="VFCustomBuildTool"/>
 				<Tool Name="VFPreLinkEventTool"/>
 				<Tool Name="VFPreBuildEventTool"/>
-				<Tool Name="VFPostBuildEventTool" CommandLine="..\..\..\..\scripts_lgpl\win64\oss-install_x64.cmd wave ..\bin &quot;$(IFORT_COMPILER16)redist\intel64\compiler\&quot;"/>
+				<Tool Name="VFPostBuildEventTool" CommandLine="..\..\..\..\scripts_lgpl\win64\oss-install_x64.cmd wave bin &quot;$(IFORT_COMPILER16)redist\intel64\compiler\&quot;"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration></Configurations>
 	<Files>
 		<Filter Name="Header Files" Filter="fi;fd"/>

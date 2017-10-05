@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -183,7 +183,7 @@ call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\flow2d3d_openda
       <OutputFile>$(OutDir)\flow2d3d_openda.dll</OutputFile>
     </Link>
     <PostBuildEvent>
-      <Command>..\..\..\..\scripts_lgpl\win32\oss-install.cmd flow2d3d_openda ..\bin "$(IFORT_COMPILER16)redist\ia32\compiler\"
+      <Command>..\..\..\..\scripts_lgpl\win32\oss-install.cmd flow2d3d_openda bin "$(IFORT_COMPILER16)redist\ia32\compiler\"
 echo "This file is overwritten by the post-build command of the project flow2d3d_openda" &gt; .\include\flow2d3d_openda_version.h
 echo "This file is overwritten by the post-build command of the project flow2d3d_openda" &gt; ..\flow2d3d\include\flow2d3d_version.h
 </Command>
@@ -222,7 +222,7 @@ call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\flow2d3d_openda
     <PostBuildEvent>
       <Command>echo "This file is overwritten by the post-build command of the project flow2d3d_openda" &gt; .\include\flow2d3d_openda_version.h
 echo "This file is overwritten by the post-build command of the project flow2d3d_openda" &gt; ..\flow2d3d\include\flow2d3d_version.h
-..\..\..\..\scripts_lgpl\win32\oss-install.cmd flow2d3d_openda ..\bin</Command>
+..\..\..\..\scripts_lgpl\win32\oss-install.cmd flow2d3d_openda bin</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

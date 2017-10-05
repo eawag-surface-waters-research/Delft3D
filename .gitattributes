@@ -17,6 +17,7 @@ examples/01_standard/f34.par -text
 examples/01_standard/f34.src -text
 examples/01_standard/f34.thd -text
 examples/01_standard/f34.wnd -text
+examples/01_standard/run.bat -text
 examples/01_standard/run_docker.sh -text
 examples/01_standard/run_flow2d3d.bat -text
 examples/01_standard/run_flow2d3d.sh -text
@@ -25,6 +26,7 @@ examples/01_standard/run_flow2d3d_parallel.sh -text
 examples/01_standard/run_flow2d3d_parallel_gnu4.6.2.log -text
 examples/01_standard/run_flow2d3d_parallel_intel11.1.log -text
 examples/01_standard/run_flow2d3d_parallel_sge.sh -text
+examples/01_standard/run_parallel.bat -text
 examples/02_domaindecomposition/bak_1.enc -text
 examples/02_domaindecomposition/bak_1.grd -text
 examples/02_domaindecomposition/bak_2.enc -text
@@ -32,6 +34,7 @@ examples/02_domaindecomposition/bak_2.grd -text
 examples/02_domaindecomposition/bak_3.enc -text
 examples/02_domaindecomposition/bak_3.grd -text
 examples/02_domaindecomposition/config_d_hydro.xml -text
+examples/02_domaindecomposition/run.bat -text
 examples/02_domaindecomposition/run_flow2d3d.bat -text
 examples/02_domaindecomposition/run_flow2d3d.sh -text
 examples/02_domaindecomposition/zz1.bcc -text
@@ -64,10 +67,12 @@ examples/03_flow-wave/morfac_07.mor -text
 examples/03_flow-wave/r17.mdf -text
 examples/03_flow-wave/r17.mdm -text
 examples/03_flow-wave/r17.mdw -text
+examples/03_flow-wave/run.bat -text
 examples/03_flow-wave/run_flow2d3d.bat -text
 examples/03_flow-wave/run_flow2d3d.sh -text
 examples/03_flow-wave/run_flow2d3d_parallel_wave.bat -text
 examples/03_flow-wave/run_flow2d3d_parallel_wave.sh -text
+examples/03_flow-wave/run_parallel.bat -text
 examples/03_flow-wave/sedsand.sed -text
 examples/03_flow-wave/wind_01.wnd -text
 examples/04_fluidmud/README -text
@@ -79,6 +84,7 @@ examples/04_fluidmud/config_d_hydro_sed.xml -text
 examples/04_fluidmud/dioconfig.ini -text
 examples/04_fluidmud/mud.inp -text
 examples/04_fluidmud/mud.mdf -text
+examples/04_fluidmud/run.bat -text
 examples/04_fluidmud/run_flow2d3d_flm.bat -text
 examples/04_fluidmud/run_flow2d3d_flm.sh -text
 examples/04_fluidmud/sed.bcc -text
@@ -121,6 +127,7 @@ examples/05_mormerge/input/wave.enc -text
 examples/05_mormerge/input/wave.grd -text
 examples/05_mormerge/merge/basin_linux.mm -text
 examples/05_mormerge/merge/basin_windows.mm -text
+examples/05_mormerge/merge/run.bat -text
 examples/05_mormerge/merge/run_flow2d3d_wave_mormerge.bat -text
 examples/05_mormerge/merge/run_flow2d3d_wave_mormerge.sh -text
 examples/05_mormerge/merge/run_mormerge_alternative.bat -text
@@ -151,6 +158,7 @@ examples/06_delwaq/com-tut_fti_waq.tau -text
 examples/06_delwaq/com-tut_fti_waq.vdf -text
 examples/06_delwaq/com-tut_fti_waq.vol -text
 examples/06_delwaq/com-tut_fti_waq.wlk -text
+examples/06_delwaq/run.bat -text
 examples/06_delwaq/run_delwaq.bat -text
 examples/06_delwaq/run_delwaq.sh -text
 examples/06_delwaq/run_delwaq_parallel.bat -text
@@ -166,6 +174,7 @@ examples/07_wave/obw.mdw -text
 examples/07_wave/obw.obs -text
 examples/07_wave/obw.pol -text
 examples/07_wave/points.xy -text
+examples/07_wave/run.bat -text
 examples/07_wave/run_wave.bat -text
 examples/07_wave/run_wave.sh -text
 examples/07_wave/run_wave_via_dimr.bat -text
@@ -193,6 +202,7 @@ examples/08_part-tracer/com-tut_fti_part.wlk -text
 examples/08_part-tracer/fti_tracer.inp -text
 examples/08_part-tracer/fti_tracer.mdp -text
 examples/08_part-tracer/fti_tracer.ssn -text
+examples/08_part-tracer/run.bat -text
 examples/08_part-tracer/run_part.bat -text
 examples/08_part-tracer/run_part.sh -text
 examples/09_part-oil/com-tut_fti_part.are -text
@@ -220,6 +230,7 @@ examples/09_part-oil/ekofisk_hfo.ini -text
 examples/09_part-oil/fti_oil.inp -text
 examples/09_part-oil/fti_oil.mdp -text
 examples/09_part-oil/fti_oil.ssn -text
+examples/09_part-oil/run.bat -text
 examples/09_part-oil/run_part.bat -text
 examples/09_part-oil/run_part.sh -text
 examples/10_delwaq-part-tracer/com-tut_fti_part.are -text
@@ -250,6 +261,7 @@ examples/10_delwaq-part-tracer/fti_delwaq.res -text
 examples/10_delwaq-part-tracer/fti_delwaq.scn -text
 examples/10_delwaq-part-tracer/fti_part.inp -text
 examples/10_delwaq-part-tracer/fti_part.mdp -text
+examples/10_delwaq-part-tracer/run.bat -text
 examples/10_delwaq-part-tracer/run_delwaq_part.bat -text
 examples/10_delwaq-part-tracer/run_delwaq_part.sh -text
 examples/10_delwaq-part-tracer/run_delwaq_part_with_pause.bat -text
@@ -273,6 +285,7 @@ examples/11_standard_netcdf/f34.par -text
 examples/11_standard_netcdf/f34.src -text
 examples/11_standard_netcdf/f34.thd -text
 examples/11_standard_netcdf/f34.wnd -text
+examples/11_standard_netcdf/run.bat -text
 examples/11_standard_netcdf/run_flow2d3d.bat -text
 examples/11_standard_netcdf/run_flow2d3d.sh -text
 examples/12_dflowfm/matlab/archive/+unstruc/plotHis.m -text
@@ -1721,14 +1734,16 @@ src/engines_gpl/flow2d3d/packages/plugin_user/src/usrdef.f90 -text
 src/engines_gpl/flow2d3d/packages/plugin_user/src/usrptr.f90 -text
 src/engines_gpl/flow2d3d/scripts/cleantemp_d3dflow.tcl -text
 src/engines_gpl/flow2d3d/scripts/ddb2ddd.sh -text
-src/engines_gpl/flow2d3d/scripts/delft3d-flow_run.bat -text
-src/engines_gpl/flow2d3d/scripts/delft3d-flow_run.sh -text
 src/engines_gpl/flow2d3d/scripts/fluidmud_run.sh -text
 src/engines_gpl/flow2d3d/scripts/kill.tcl -text
 src/engines_gpl/flow2d3d/scripts/kill_d3dflow.tcl -text
 src/engines_gpl/flow2d3d/scripts/meteo_old2new.m -text
 src/engines_gpl/flow2d3d/scripts/mormerge.tcl -text
-src/engines_gpl/flow2d3d/scripts/rundd.sh -text
+src/engines_gpl/flow2d3d/scripts/run_dflow2d3d.bat -text
+src/engines_gpl/flow2d3d/scripts/run_dflow2d3d_dwaves.bat -text
+src/engines_gpl/flow2d3d/scripts/run_dflow2d3d_fluidmud.bat -text
+src/engines_gpl/flow2d3d/scripts/run_dflow2d3d_parallel.bat -text
+src/engines_gpl/flow2d3d/scripts/run_dflow2d3d_parallel_dwaves.bat -text
 src/engines_gpl/part/Makefile.am -text
 src/engines_gpl/part/packages/Makefile.am -text
 src/engines_gpl/part/packages/data_f/Makefile.am -text
@@ -1831,6 +1846,7 @@ src/engines_gpl/part/packages/utils_f/src/skip_comments.f90 -text
 src/engines_gpl/part/packages/utils_f/src/stop_exit.f90 -text
 src/engines_gpl/part/packages/utils_f/src/strip_inputfile.f90 -text
 src/engines_gpl/part/packages/utils_f/src/write_version.f90 -text
+src/engines_gpl/part/scripts/run_dpart.bat -text
 src/engines_gpl/part/version/part.ico -text
 src/engines_gpl/part/version/part_icon.rc -text
 src/engines_gpl/part/version/resource.h -text
@@ -2819,6 +2835,7 @@ src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/wrwrk3.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/zero.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/zoek.f -text
 src/engines_gpl/waq/packages/waq_utils_f/waq_utils_f.vfproj -text
+src/engines_gpl/waq/scripts/run_delwaq.bat -text
 src/engines_gpl/waq/tree.f -text
 src/engines_gpl/waq/version/resource.h -text
 src/engines_gpl/waq/version/version_number.ini -text
@@ -2934,6 +2951,7 @@ src/engines_gpl/wave/packages/wave/src/wave_bmi.f90 -text
 src/engines_gpl/wave/packages/wave/src/wave_exe.f90 -text
 src/engines_gpl/wave/packages/wave/wave.vfproj -text
 src/engines_gpl/wave/packages/wave/wave_exe.vfproj -text
+src/engines_gpl/wave/scripts/run_dwaves.bat -text
 src/install.cmd -text
 src/install.sh -text
 src/logs/VS2010_Intel12_Release_Win32_Output.txt -text

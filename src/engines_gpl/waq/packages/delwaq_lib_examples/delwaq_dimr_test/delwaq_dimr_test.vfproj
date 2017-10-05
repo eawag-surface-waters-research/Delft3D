@@ -42,7 +42,7 @@
 				<Tool Name="VFCustomBuildTool"/>
 				<Tool Name="VFPreLinkEventTool"/>
 				<Tool Name="VFPreBuildEventTool"/>
-				<Tool Name="VFPostBuildEventTool" CommandLine="..\..\..\..\..\scripts_lgpl\win64\oss-install_x64.cmd delwaq_dimr_test ..\bin &quot;$(IFORT_COMPILER13)redist\intel64\compiler\&quot;"/>
+				<Tool Name="VFPostBuildEventTool" CommandLine="..\..\..\..\..\scripts_lgpl\win64\oss-install_x64.cmd delwaq_dimr_test bin &quot;$(IFORT_COMPILER13)redist\intel64\compiler\&quot;"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration></Configurations>
 	<Files>
 		<Filter Name="Header Files" Filter="fi;fd"/>

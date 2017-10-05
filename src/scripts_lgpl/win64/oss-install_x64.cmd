@@ -191,13 +191,15 @@ rem ===================
 :d_hydro
     echo "installing d_hydro . . ."
 
-    set dest_bin="!dest_main!\win64\flow2d3d\bin"
+    set dest_bin="!dest_main!\win64\dflow2d3d\bin"
     set dest_menu="!dest_main!\win64\menu\bin"
+    set dest_scripts="!dest_main!\win64\scripts"
 
     call :makeDir !dest_bin!
     call :makeDir !dest_menu!
+    call :makeDir !dest_scripts!
     
-    call :copyFile engines_gpl\d_hydro\bin\x64\Release\d_hydro.exe          !dest_bin!
+    call :copyFile engines_gpl\d_hydro\bin\x64\Release\d_hydro.exe      !dest_bin!
     call :copyFile engines_gpl\d_hydro\scripts\create_config_xml.tcl    !dest_menu!
 goto :endproc
 
@@ -255,15 +257,19 @@ rem ====================
 :flow2d3d
     echo "installing flow2d3d . . ."
 
-    set dest_bin="!dest_main!\win64\flow2d3d\bin"
-    set dest_default="!dest_main!\win64\flow2d3d\default"
-    set dest_scripts="!dest_main!\win64\flow2d3d\scripts"
+    set dest_bin="!dest_main!\win64\dflow2d3d\bin"
+    set dest_default="!dest_main!\win64\dflow2d3d\default"
+    set dest_scriptsflow="!dest_main!\win64\dflow2d3d\scripts"
     set dest_plugins="!dest_main!\win64\plugins\bin"
+    set dest_scripts="!dest_main!\win64\scripts"
+    set dest_shared="!dest_main!\win64\shared"
     
     call :makeDir !dest_bin!
     call :makeDir !dest_default!
-    call :makeDir !dest_scripts!
+    call :makeDir !dest_scriptsflow!
     call :makeDir !dest_plugins!
+    call :makeDir !dest_scripts!
+    call :makeDir !dest_shared!
 
     set ErrorLevel_flowdll=0
     copy engines_gpl\flow2d3d\bin\x64\Release\flow2d3d.dll !dest_bin!
@@ -278,7 +284,7 @@ rem ====================
     )
     rem One of these two dlls will not exist and cause an ErrorLevel=1. Reset it.
     set ErrorLevel=0
-    call :copyFile "engines_gpl\flow2d3d\scripts\meteo_old2new.m"                   !dest_scripts!
+    call :copyFile "engines_gpl\flow2d3d\scripts\meteo_old2new.m"                   !dest_scriptsflow!
     call :copyFile "third_party_open\pthreads\bin\x64\*.dll"                        !dest_bin!
     call :copyFile "third_party_open\mpich2\x64\bin\*.exe"                          !dest_bin!
     call :copyFile "third_party_open\mpich2\x64\lib\*.dll"                          !dest_bin!
@@ -287,6 +293,8 @@ rem ====================
     call :copyFile "utils_lgpl\delftonline\lib\x64\Release\dynamic\delftonline.dll" !dest_bin!
     call :copyFile "utils_lgpl\delftonline\lib\x64\Release\dynamic\delftonline.dll" !dest_plugins!
     call :copyNetcdf
+    call :copyFile "engines_gpl\flow2d3d\scripts\run_*.bat"                         !dest_scripts!
+    call :copyFile "third_party_open\tcl\bin\win64\tclkitsh852.exe"                 !dest_shared!
     
     rem
     rem The following if-else statements MUST BE executed AFTER copying "third_party_open\intel_fortran" libraries.
@@ -334,7 +342,7 @@ rem ===================
 :delwaq1
     echo "installing delwaq1 . . ."
 
-    set dest_bin="!dest_main!\win64\waq\bin"
+    set dest_bin="!dest_main!\win64\dwaq\bin"
     
     call :makeDir !dest_bin!
 
@@ -349,7 +357,7 @@ rem ===================
 :delwaq2
     echo "installing delwaq2 . . ."
 
-    set dest_bin="!dest_main!\win64\waq\bin"
+    set dest_bin="!dest_main!\win64\dwaq\bin"
     
     call :makeDir !dest_bin!
 
@@ -364,7 +372,7 @@ rem ============================
 :delwaq_dimr_test
     echo "installing delwaq_dimr_test . . ."
 
-    set dest_bin="!dest_main!\win64\waq\bin"
+    set dest_bin="!dest_main!\win64\dwaq\bin"
     
     call :makeDir !dest_bin!
 
@@ -379,11 +387,13 @@ rem ======================
 :delwaq_dll
     echo "installing delwaq dll . . ."
 
-    set dest_bin="!dest_main!\win64\waq\bin"
-    set dest_default="!dest_main!\win64\waq\default"
+    set dest_bin="!dest_main!\win64\dwaq\bin"
+    set dest_default="!dest_main!\win64\dwaq\default"
+    set dest_scripts="!dest_main!\win64\scripts"
     
     call :makeDir !dest_bin!
     call :makeDir !dest_default!
+    call :makeDir !dest_scripts!
     
     call :copyFile engines_gpl\waq\bin\x64\Release\delwaq.dll                  !dest_bin!
     call :copyNetcdf
@@ -414,14 +424,7 @@ rem ======================
            call :copyFile !!localstring! !dest_bin!!
        )
 
-    rem
-    rem Copy all VCR libraries since we don't know what VS version was used and all versions have unique names
-    rem
-    call :copyFile "third_party_open\vcredist\x64\Microsoft.VC100.CRT\msvcr100.dll"             !dest_bin!
-    call :copyFile "third_party_open\vcredist\x64\Microsoft.VC110.CRT\msvcr110.dll"             !dest_bin!
-    call :copyFile "third_party_open\vcredist\x64\Microsoft.VC120.CRT\msvcr120.dll"             !dest_bin!
-    call :copyFile "third_party_open\microsoft_redist\vs2015\vcruntime140.dll"                  !dest_bin!
-
+    call :copyFile "engines_gpl\waq\scripts\run_*.bat"                                          !dest_scripts!
 goto :endproc
 
 
@@ -432,7 +435,7 @@ rem ==============================
 :delwaq2_openda_lib
 rem    echo "installing delwaq2_openda_lib . . ."
 rem
-rem    set dest_bin="!dest_main!\win64\waq\bin"
+rem    set dest_bin="!dest_main!\win64\dwaq\bin"
 rem    
 rem    call :makeDir !dest_bin!
 rem    
@@ -470,7 +473,7 @@ rem ================================
 :waq_plugin_wasteload
     echo "installing waq_plugin_wasteload . . ."
 
-    set dest_bin="!dest_main!\win64\waq\bin"
+    set dest_bin="!dest_main!\win64\dwaq\bin"
     
     call :makeDir !dest_bin!
     
@@ -487,11 +490,14 @@ rem ================
 :part
     echo "installing part . . ."
 
-    set dest="!dest_main!\win64\part\bin"
+    set dest="!dest_main!\win64\dpart\bin"
+    set dest_scripts="!dest_main!\win64\scripts"
 
     call :makeDir !dest!
+    call :makeDir !dest_scripts!
 
     call :copyFile engines_gpl\part\bin\x64\release\delpar.exe !dest!
+    call :copyFile "engines_gpl\part\scripts\run_*.bat"        !dest_scripts!
 
     rem
     rem The following if-else statements MUST BE executed AFTER copying "third_party_open\intel_fortran" libraries.
@@ -513,14 +519,15 @@ rem ================
 :wave
     echo "installing wave . . ."
 
-    set dest_bin=!dest_main!\win64\wave\bin
-    set dest_default=!dest_main!\win64\wave\default
+    set dest_bin=!dest_main!\win64\dwaves\bin
+    set dest_default=!dest_main!\win64\dwaves\default
     set dest_swan_bin=!dest_main!\win64\swan\bin
        rem When adding quotes here AND when using dest_swan_scripts, xcopy also gets confused
        rem Neat solution: do not add quotes on defining the destination folders, but only at calling :copyFile
     set dest_swan_scripts=!dest_main!\win64\swan\scripts
     set dest_esmf_bin=!dest_main!\win64\esmf\bin
     set dest_esmf_scripts=!dest_main!\win64\esmf\scripts
+    set dest_scripts=!dest_main!\win64\scripts
 
     call :makeDir !dest_bin!
     call :makeDir !dest_default!
@@ -528,6 +535,7 @@ rem ================
     call :makeDir !dest_swan_scripts!
     call :makeDir !dest_esmf_bin!
     call :makeDir !dest_esmf_scripts!
+    call :makeDir !dest_scripts!
 
     rem
     rem This wave block is called twice:
@@ -546,6 +554,7 @@ rem ================
     call :copyFile third_party_open\swan\scripts\swan_install_x64.bat "!dest_swan_scripts!\swan.bat"
     call :copyFile "third_party_open\esmf\win64\bin\*.*"              "!dest_esmf_bin!"
     call :copyFile "third_party_open\esmf\win64\scripts\*.*"          "!dest_esmf_scripts!"
+    call :copyFile "engines_gpl\wave\scripts\run_*.bat"               "!dest_scripts!"
     rem
     rem The following if-else statements MUST BE executed AFTER copying "third_party_open\intel_fortran" libraries.
     rem Some (older) libraries will be overwritten.
@@ -568,7 +577,7 @@ rem ==========================
 :plugin_culvert
     echo "installing plugin_culvert . . ."
 
-    set dest_bin="!dest_main!\win64\flow2d3d\bin"
+    set dest_bin="!dest_main!\win64\dflow2d3d\bin"
 
     call :makeDir !dest_bin!
 
@@ -583,7 +592,7 @@ rem ====================================
 :plugin_delftflow_traform
     echo "installing plugin_delftflow_traform . . ."
 
-    set dest_bin="!dest_main!\win64\flow2d3d\bin"
+    set dest_bin="!dest_main!\win64\dflow2d3d\bin"
 
     call :makeDir !dest_bin!
 
@@ -598,7 +607,7 @@ rem ==================
 :datsel
     echo "installing datsel . . ."
 
-    set dest_bin="!dest_main!\win64\flow2d3d\bin"
+    set dest_bin="!dest_main!\win64\dflow2d3d\bin"
 
     call :makeDir !dest_bin!
 
@@ -613,7 +622,7 @@ rem ==================
 :kubint
     echo "installing kubint . . ."
 
-    set dest_bin="!dest_main!\win64\flow2d3d\bin"
+    set dest_bin="!dest_main!\win64\dflow2d3d\bin"
 
     call :makeDir !dest_bin!
 
@@ -628,7 +637,7 @@ rem ================
 :lint
     echo "installing lint . . ."
 
-    set dest_bin="!dest_main!\win64\flow2d3d\bin"
+    set dest_bin="!dest_main!\win64\dflow2d3d\bin"
 
     call :makeDir !dest_bin!
 
@@ -643,8 +652,8 @@ rem ====================
 :mormerge
     echo "installing mormerge . . ."
 
-    set dest_bin="!dest_main!\win64\flow2d3d\bin"
-    set dest_scripts="!dest_main!\win64\flow2d3d\scripts"
+    set dest_bin="!dest_main!\win64\dflow2d3d\bin"
+    set dest_scripts="!dest_main!\win64\dflow2d3d\scripts"
 
     call :makeDir !dest_bin!
     call :makeDir !dest_scripts!
@@ -676,7 +685,7 @@ rem ===================
 :nesthd1
     echo "installing nesthd1 . . ."
 
-    set dest_bin="!dest_main!\win64\flow2d3d\bin"
+    set dest_bin="!dest_main!\win64\dflow2d3d\bin"
 
     call :makeDir !dest_bin!
 
@@ -692,7 +701,7 @@ rem ===================
 :nesthd2
     echo "installing nesthd2 . . ."
 
-    set dest_bin="!dest_main!\win64\flow2d3d\bin"
+    set dest_bin="!dest_main!\win64\dflow2d3d\bin"
 
     call :makeDir !dest_bin!
 
@@ -708,7 +717,7 @@ rem ===================
 :nestwq1
     rem echo "installing nestwq1 . . ."
 
-    rem set dest_bin="!dest_main!\win64\waq\bin"
+    rem set dest_bin="!dest_main!\win64\dwaq\bin"
 
     rem call :makeDir !dest_bin!
 
@@ -723,7 +732,7 @@ rem ===================
 :nestwq2
     rem echo "installing nestwq2 . . ."
 
-    rem set dest_bin="!dest_main!\win64\waq\bin"
+    rem set dest_bin="!dest_main!\win64\dwaq\bin"
 
     rem call :makeDir !dest_bin!
 
