@@ -276,8 +276,6 @@ function ionc_create(netCDFFile, mode, ioncid, iconvtype, chunksize) result(ierr
       ierr = IONC_ENOPEN
       goto 999
    end if
-
-   
    
    ierr = add_dataset(ncid, netCDFFile, ioncid, iconvtype)
    
