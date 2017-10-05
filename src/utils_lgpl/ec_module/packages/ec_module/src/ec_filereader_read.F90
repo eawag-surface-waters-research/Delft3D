@@ -461,14 +461,14 @@ module m_ec_filereader_read
             item3%sourceT0FieldPtr%timesteps = ecSupportThisTimeToTimesteps(fileReaderPtr%tframe, time_steps)
             rec = ecSpiderwebAndCurviFindInFile(fileReaderPtr%fileHandle, 'x_spw_eye', .false.)         
             if (len_trim(rec) == 0) then
-               call setECMessage("ERROR: ec_filereader_read::ecSpiderwebReadBlock: Failed to find keyword", "x_spw_eye")
+               call setECMessage("ERROR: ec_filereader_read::ecSpiderwebReadBlock: Failed to find keyword in file: "//trim(fileReaderPtr%fileName), "x_spw_eye")
                success = .false.               
                return
             end if
             
             read(rec, *, IOSTAT = istat) x_spw_eye
             if(istat /= 0) then
-               call setECMessage("ec_filereader_read::ecUniReadBlock: Read failure before end of file: "//trim(fileReaderPtr%fileName))
+               call setECMessage("ERROR: ec_filereader_read::ecSpiderwebReadBlock: Failed to read keyword in file: "//trim(fileReaderPtr%fileName), "x_spw_eye")
                call setECMessage("     line = "//trim(rec))
                success = .false.
                return
@@ -476,16 +476,17 @@ module m_ec_filereader_read
             item1%sourceT0FieldPtr%x_spw_eye = x_spw_eye
             item2%sourceT0FieldPtr%x_spw_eye = x_spw_eye
             item3%sourceT0FieldPtr%x_spw_eye = x_spw_eye
+
             rec = ecSpiderwebAndCurviFindInFile(fileReaderPtr%fileHandle, 'y_spw_eye', .false.)  
             if (len_trim(rec) == 0) then
-               call setECMessage("ERROR: ec_filereader_read::ecSpiderwebReadBlock: Failed to find keyword", "y_spw_eye")
+               call setECMessage("ERROR: ec_filereader_read::ecSpiderwebReadBlock: Failed to find keyword in file: "//trim(fileReaderPtr%fileName), "y_spw_eye")
                success = .false.
                return
             end if
             
             read(rec, *, IOSTAT = istat) y_spw_eye
             if(istat /= 0) then
-               call setECMessage("ec_filereader_read::ecUniReadBlock: Read failure before end of file: "//trim(fileReaderPtr%fileName))
+               call setECMessage("ERROR: ec_filereader_read::ecSpiderwebReadBlock: Failed to read keyword in file: "//trim(fileReaderPtr%fileName), "y_spw_eye")
                call setECMessage("     line = "//trim(rec))
                success = .false.
                return
@@ -493,19 +494,26 @@ module m_ec_filereader_read
             item1%sourceT0FieldPtr%y_spw_eye = y_spw_eye
             item2%sourceT0FieldPtr%y_spw_eye = y_spw_eye
             item3%sourceT0FieldPtr%y_spw_eye = y_spw_eye
+
             rec = ecSpiderwebAndCurviFindInFile(fileReaderPtr%fileHandle, 'p_drop_spw_eye', .false.) 
+            if (len_trim(rec) == 0) then
+               call setECMessage("ERROR: ec_filereader_read::ecSpiderwebReadBlock: Failed to find keyword in file: "//trim(fileReaderPtr%fileName), "p_drop_spw_eye")
+               success = .false.
+               return
+            end if
 
             read(rec, *, IOSTAT = istat) p_drop_spw_eye
             if(istat /= 0) then
-               call setECMessage("ec_filereader_read::ecUniReadBlock: Read failure before end of file: "//trim(fileReaderPtr%fileName))
+               call setECMessage("ERROR: ec_filereader_read::ecSpiderwebReadBlock: Failed to read keyword in file: "//trim(fileReaderPtr%fileName), "p_drop_spw_eye")
                call setECMessage("     line = "//trim(rec))
                success = .false.
                return
             end if
+
             do i=1, n_rows-1
                read(fileReaderPtr%fileHandle, *, IOSTAT = istat) (item1%sourceT0FieldPtr%arr1dPtr(i*n_cols+j), j=1, n_cols-1)
                if(istat /= 0) then
-                  call setECMessage("ec_filereader_read::ecUniReadBlock: Read failure before end of file: "//trim(fileReaderPtr%fileName))
+                  call setECMessage("ec_filereader_read::ecSpiderwebReadBlock: Read failure before end of file: "//trim(fileReaderPtr%fileName))
                   call setECMessage("     line = "//trim(rec))
                   success = .false.
                   return
@@ -514,7 +522,7 @@ module m_ec_filereader_read
             do i=1, n_rows-1
                read(fileReaderPtr%fileHandle, *, IOSTAT = istat) (item2%sourceT0FieldPtr%arr1dPtr(i*n_cols+j), j=1, n_cols-1)
                if(istat /= 0) then
-                  call setECMessage("ec_filereader_read::ecUniReadBlock: Read failure before end of file: "//trim(fileReaderPtr%fileName))
+                  call setECMessage("ec_filereader_read::ecSpiderwebReadBlock: Read failure before end of file: "//trim(fileReaderPtr%fileName))
                   call setECMessage("     line = "//trim(rec))
                   success = .false.
                   return
@@ -523,7 +531,7 @@ module m_ec_filereader_read
             do i=1, n_rows-1
                read(fileReaderPtr%fileHandle, *, IOSTAT = istat) (item3%sourceT0FieldPtr%arr1dPtr(i*n_cols+j), j=1, n_cols-1)
                if(istat /= 0) then
-                  call setECMessage("ec_filereader_read::ecUniReadBlock: Read failure before end of file: "//trim(fileReaderPtr%fileName))
+                  call setECMessage("ec_filereader_read::ecSpiderwebReadBlock: Read failure before end of file: "//trim(fileReaderPtr%fileName))
                   call setECMessage("     line = "//trim(rec))
                   success = .false.
                   return
@@ -551,10 +559,15 @@ module m_ec_filereader_read
             item2%sourceT1FieldPtr%timesteps = ecSupportThisTimeToTimesteps(fileReaderPtr%tframe, time_steps)
             item3%sourceT1FieldPtr%timesteps = ecSupportThisTimeToTimesteps(fileReaderPtr%tframe, time_steps)
             rec = ecSpiderwebAndCurviFindInFile(fileReaderPtr%fileHandle, 'x_spw_eye', .false.) 
-            
+            if (len_trim(rec) == 0) then
+               call setECMessage("ERROR: ec_filereader_read::ecSpiderwebReadBlock: Failed to find keyword in file: "//trim(fileReaderPtr%fileName), "x_spw_eye")
+               success = .false.               
+               return
+            end if
+
             read(rec, *, IOSTAT = istat) x_spw_eye
             if(istat /= 0) then
-               call setECMessage("ec_filereader_read::ecUniReadBlock: Read failure before end of file: "//trim(fileReaderPtr%fileName))
+               call setECMessage("ERROR: ec_filereader_read::ecSpiderwebReadBlock: Failed to read keyword in file: "//trim(fileReaderPtr%fileName), "x_spw_eye")
                call setECMessage("     line = "//trim(rec))
                success = .false.
                return
@@ -564,10 +577,15 @@ module m_ec_filereader_read
             item2%sourceT1FieldPtr%x_spw_eye = x_spw_eye
             item3%sourceT1FieldPtr%x_spw_eye = x_spw_eye
             rec = ecSpiderwebAndCurviFindInFile(fileReaderPtr%fileHandle, 'y_spw_eye', .false.) 
-            
+            if (len_trim(rec) == 0) then
+               call setECMessage("ERROR: ec_filereader_read::ecSpiderwebReadBlock: Failed to find keyword in file: "//trim(fileReaderPtr%fileName), "y_spw_eye")
+               success = .false.               
+               return
+            end if
+
             read(rec, *, IOSTAT = istat) y_spw_eye
             if(istat /= 0) then
-               call setECMessage("ec_filereader_read::ecUniReadBlock: Read failure before end of file: "//trim(fileReaderPtr%fileName))
+               call setECMessage("ERROR: ec_filereader_read::ecSpiderwebReadBlock: Failed to read keyword in file: "//trim(fileReaderPtr%fileName), "y_spw_eye")
                call setECMessage("     line = "//trim(rec))
                success = .false.
                return
@@ -576,10 +594,17 @@ module m_ec_filereader_read
             item1%sourceT1FieldPtr%y_spw_eye = y_spw_eye
             item2%sourceT1FieldPtr%y_spw_eye = y_spw_eye
             item3%sourceT1FieldPtr%y_spw_eye = y_spw_eye
+
             rec = ecSpiderwebAndCurviFindInFile(fileReaderPtr%fileHandle, 'p_drop_spw_eye', .false.)  
+            if (len_trim(rec) == 0) then
+               call setECMessage("ERROR: ec_filereader_read::ecSpiderwebReadBlock: Failed to find keyword in file: "//trim(fileReaderPtr%fileName), "p_drop_spw_eye")
+               success = .false.               
+               return
+            end if
+
             read(rec, *, IOSTAT = istat) p_drop_spw_eye
             if(istat /= 0) then
-               call setECMessage("ec_filereader_read::ecUniReadBlock: Read failure before end of file: "//trim(fileReaderPtr%fileName))
+               call setECMessage("ERROR: ec_filereader_read::ecSpiderwebReadBlock: Failed to read keyword in file: "//trim(fileReaderPtr%fileName), "p_drop_spw_eye")
                call setECMessage("     line = "//trim(rec))
                success = .false.
                return
@@ -588,7 +613,7 @@ module m_ec_filereader_read
             do i=1, n_rows-1
                read(fileReaderPtr%fileHandle, *, IOSTAT = istat) (item1%sourceT1FieldPtr%arr1dPtr(i*n_cols+j), j=1, n_cols-1)
             if(istat /= 0) then
-               call setECMessage("ec_filereader_read::ecUniReadBlock: Read failure before end of file: "//trim(fileReaderPtr%fileName))
+               call setECMessage("ec_filereader_read::ecSpiderwebReadBlock: Read failure before end of file: "//trim(fileReaderPtr%fileName))
                call setECMessage("     line = "//trim(rec))
                success = .false.
                return
@@ -597,7 +622,7 @@ module m_ec_filereader_read
             do i=1, n_rows-1
                read(fileReaderPtr%fileHandle, *, IOSTAT = istat) (item2%sourceT1FieldPtr%arr1dPtr(i*n_cols+j), j=1, n_cols-1)
                if(istat /= 0) then
-                  call setECMessage("ec_filereader_read::ecUniReadBlock: Read failure before end of file: "//trim(fileReaderPtr%fileName))
+                  call setECMessage("ec_filereader_read::ecSpiderwebReadBlock: Read failure before end of file: "//trim(fileReaderPtr%fileName))
                   call setECMessage("     line = "//trim(rec))
                   success = .false.
                   return
@@ -606,7 +631,7 @@ module m_ec_filereader_read
             do i=1, n_rows-1
                read(fileReaderPtr%fileHandle, *, IOSTAT = istat) (item3%sourceT1FieldPtr%arr1dPtr(i*n_cols+j), j=1, n_cols-1)
                if(istat /= 0) then
-                  call setECMessage("ec_filereader_read::ecUniReadBlock: Read failure before end of file: "//trim(fileReaderPtr%fileName))
+                  call setECMessage("ec_filereader_read::ecSpiderwebReadBlock: Read failure before end of file: "//trim(fileReaderPtr%fileName))
                   call setECMessage("     line = "//trim(rec))
                   success = .false.
                   return

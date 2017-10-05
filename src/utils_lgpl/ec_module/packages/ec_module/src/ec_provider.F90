@@ -314,7 +314,7 @@ module m_ec_provider
             case default
                call setECMessage("ERROR: ec_provider::ecProviderCreateItems: Unknown file type.")
          end select
-         success = .true.
+         success = .true. ! TODO: AvD: why is success always true here at the end, the above success states now get lost...
       end function ecProviderCreateItems
       
       ! =======================================================================
