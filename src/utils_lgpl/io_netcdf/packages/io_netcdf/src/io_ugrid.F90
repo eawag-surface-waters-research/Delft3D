@@ -86,11 +86,12 @@ integer, parameter :: LAYERTYPE_OCEANSIGMA = 1 !< Dimensionless vertical ocean s
 integer, parameter :: LAYERTYPE_Z          = 2 !< Vertical coordinate for fixed z-layers.
 
 !! Location types
-integer, parameter :: UG_LOC_NONE = 0 !< Mesh data location: nowhere at all (include only required mesh locations)
-integer, parameter :: UG_LOC_NODE = 1 !< Mesh data location: mesh node (corner)
-integer, parameter :: UG_LOC_EDGE = 2 !< Mesh data location: mesh edge
-integer, parameter :: UG_LOC_FACE = 4 !< Mesh data location: mesh face
-integer, parameter :: UG_LOC_VOL  = 8 !< Mesh data location: mesh volume
+integer, parameter :: UG_LOC_NONE     = 0 !< Mesh data location: nowhere at all (include only required mesh locations)
+integer, parameter :: UG_LOC_NODE     = 1 !< Mesh data location: mesh node (corner)
+integer, parameter :: UG_LOC_EDGE     = 2 !< Mesh data location: mesh edge
+integer, parameter :: UG_LOC_FACE     = 4 !< Mesh data location: mesh face
+integer, parameter :: UG_LOC_VOL      = 8 !< Mesh data location: mesh volume
+integer, parameter :: UG_LOC_CONTACT  = 9 !< Mesh data location: 1d2d contacts
 integer, parameter :: UG_LOC_ALL2D = UG_LOC_NODE + UG_LOC_EDGE + UG_LOC_FACE !< All three possible 2D locations.
 
 ! The following edge type codes define for each netlink (UGRID 'edge') the type (or absence) of flowlink.
@@ -1005,6 +1006,9 @@ function ug_def_var(ncid, id_var, id_dims, itype, iloctype, mesh_name, var_name,
       if (len_trim(cell_method) > 0) then
          ierr = nf90_put_att(ncid, id_var, 'cell_methods', 'n'//prefix//'_face: '//trim(cell_method))
       end if
+   case (UG_LOC_CONTACT)
+      ierr = nf90_put_att(ncid, id_var, 'location',    'contact')
+      ierr = nf90_put_att(ncid, id_var, 'coordinates', prefix)
    case (UG_LOC_VOL)
       ierr = UG_NOTIMPLEMENTED
       goto 888
@@ -1770,8 +1774,8 @@ function ug_init_link_topology(ncid, varid, contactids) result(ierr)
    
    contactids%varids(cid_contacttopo) = varid  
    ierr = att_to_dimid(ncid,'link_dimension'  , contactids%dimids(cdim_ncontacts)      ,varid)
-   ierr = att_to_varid(ncid,'links_ids'       , contactids%varids(cid_contactids)      ,varid)
-   ierr = att_to_varid(ncid,'links_long_names', contactids%varids(cid_contactlongnames),varid)
+   ierr = att_to_varid(ncid,'contacts_ids'       , contactids%varids(cid_contactids)      ,varid)
+   ierr = att_to_varid(ncid,'contacts_long_names', contactids%varids(cid_contactlongnames),varid)
    ierr = att_to_varid(ncid,'contact_type', contactids%varids(cid_contacttype),varid)
 
    end function ug_init_link_topology
@@ -3353,14 +3357,15 @@ function ug_def_mesh_ids(ncid, meshids, meshname, locationType) result(ierr)
  
 end function ug_def_mesh_ids
 
-! Creates a mesh_topology_contact variable for storing links between meshes.
-function ug_def_mesh_contact(ncid, contactids, linkmeshname, ncontacts, idmesh1, idmesh2, locationType1Id, locationType2Id) result(ierr)
+! Creates a mesh_topology_contact variable for storing contacts between meshes.
+function ug_def_mesh_contact(ncid, contactids, linkmeshname, ncontacts, meshidfrom, meshidto, locationType1Id, locationType2Id) result(ierr)
 
-   integer, intent(in)                   :: ncid, locationType1Id, locationType2Id, ncontacts, idmesh1, idmesh2
+   integer, intent(in)                   :: ncid, locationType1Id, locationType2Id, ncontacts
+   type(t_ug_mesh), intent(in)           :: meshidfrom, meshidto
    character(len=*), intent(in)          :: linkmeshname
    character(len=len_trim(linkmeshname)) :: prefix
    type(t_ug_contacts), intent(inout)    :: contactids
-   character(len=nf90_max_name)          :: buffer, locationType1, locationType2     
+   character(len=nf90_max_name)          :: buffer, locationType1, locationType2, mesh1, mesh2     
    integer                               :: ierr 
        
    ierr = UG_SOMEERR
@@ -3368,7 +3373,7 @@ function ug_def_mesh_contact(ncid, contactids, linkmeshname, ncontacts, idmesh1,
    ierr = nf90_redef(ncid) !open NetCDF in define mode
    
    !define dim
-   ierr  = nf90_def_dim(ncid, 'n'//prefix//'links'       ,ncontacts ,contactids%dimids(cdim_ncontacts))
+   ierr  = nf90_def_dim(ncid, 'n'//prefix//'_connections'       ,ncontacts ,contactids%dimids(cdim_ncontacts))
    !These dimensions might already be defined, check first if they are present 
    ierr = nf90_inq_dimid(ncid, 'idstrlength', contactids%dimids(cdim_idstring))
    if ( ierr /= UG_NOERR) then 
@@ -3393,32 +3398,37 @@ function ug_def_mesh_contact(ncid, contactids, linkmeshname, ncontacts, idmesh1,
        Call SetMessage(Level_Fatal, 'could not select locationType2')
    end if 
    
-   write(buffer, '(a,i0,a,i0)') 'links_mesh_', idmesh1, '_',idmesh2
-   !define the variable links and its attributes
-   ierr = nf90_def_var(ncid, trim(buffer), nf90_int, (/ contactids%dimids(cdim_ncontacts), contactids%dimids(cdim_two) /), contactids%varids(cid_contacttopo))
-   ierr = nf90_put_att(ncid, contactids%varids(cid_contacttopo), 'cf_role'           , 'mesh_topology_contact')
-   ierr = nf90_put_att(ncid, contactids%varids(cid_contacttopo), 'contact'           , 'mesh1: '//trim(locationType1)//' mesh2: '//trim(locationType2)) 
-   ierr = nf90_put_att(ncid, contactids%varids(cid_contacttopo), 'contact_type'      , prefix//'_contact_type') 
-   ierr = nf90_put_att(ncid, contactids%varids(cid_contacttopo), 'links_ids'         , prefix//'_links_ids')
-   ierr = nf90_put_att(ncid, contactids%varids(cid_contacttopo), 'links_long_names'  , prefix//'_links_long_names') 
+   !get the mesh names
+   ierr = ug_get_mesh_name(ncid, meshidfrom, meshname = mesh1)
+   ierr = ug_get_mesh_name(ncid, meshidto, meshname = mesh2)
    
-   !define the variable and attributes links id
-   ierr = nf90_def_var(ncid, prefix//'_links_ids', nf90_char, (/ contactids%dimids(cdim_idstring), contactids%dimids(cdim_ncontacts) /) , contactids%varids(cid_contactids))
-   ierr = nf90_put_att(ncid, contactids%varids(cid_contactids), 'long_name',' ids of the links')
+   write(buffer, '(a,a,a,a)') 'contacts_', trim(mesh1), '_', trim(mesh2) !should have the name of from-to mesh 
+   !define the variable contacts and its attributes
+   ierr = nf90_def_var(ncid, prefix, nf90_int, (/ contactids%dimids(cdim_two), contactids%dimids(cdim_ncontacts)/), contactids%varids(cid_contacttopo))
+   ierr = nf90_put_att(ncid, contactids%varids(cid_contacttopo), 'cf_role'              , 'mesh_topology_contact')
+   ierr = nf90_put_att(ncid, contactids%varids(cid_contacttopo), 'contact'              , trim(mesh1)//': '//trim(locationType1)//' '//trim(mesh2)//': '//trim(locationType2)) 
+   ierr = nf90_put_att(ncid, contactids%varids(cid_contacttopo), 'contact_type'         , prefix//'_contact_type') 
+   ierr = nf90_put_att(ncid, contactids%varids(cid_contacttopo), 'contact_ids'         , prefix//'_ids')
+   ierr = nf90_put_att(ncid, contactids%varids(cid_contacttopo), 'contact_long_names'  , prefix//'_long_names') 
+   
+   !define the variable and attributes contacts id
+   ierr = nf90_def_var(ncid, prefix//'_ids', nf90_char, (/ contactids%dimids(cdim_idstring), contactids%dimids(cdim_ncontacts) /) , contactids%varids(cid_contactids))
+   ierr = nf90_put_att(ncid, contactids%varids(cid_contactids), 'long_name',' ids of the contacts')
    
    !define the variable and attributes long names
-   ierr = nf90_def_var(ncid, prefix//'_links_long_names', nf90_char, (/ contactids%dimids(cdim_longnamestring), contactids%dimids(cdim_ncontacts) /) , contactids%varids(cid_contactlongnames))
-   ierr = nf90_put_att(ncid, contactids%varids(cid_contactlongnames), 'long_name', 'long names of the links')
+   ierr = nf90_def_var(ncid, prefix//'_long_names', nf90_char, (/ contactids%dimids(cdim_longnamestring), contactids%dimids(cdim_ncontacts) /) , contactids%varids(cid_contactlongnames))
+   ierr = nf90_put_att(ncid, contactids%varids(cid_contactlongnames), 'long_name', 'long names of the contacts')
    
    !define the variable and attributes long names
    ierr = nf90_def_var(ncid, prefix//'_contact_type', nf90_int, (/ contactids%dimids(cdim_ncontacts) /) , contactids%varids(cid_contacttype))
    ierr = nf90_put_att(ncid, contactids%varids(cid_contacttype), '_FillValue',  -1)
    ierr = nf90_put_att(ncid, contactids%varids(cid_contacttype), 'valid_range',  (/ 3, 4/))
    ierr = nf90_put_att(ncid, contactids%varids(cid_contacttype), 'flag_values',  (/ 3, 4/))
+   ierr = nf90_put_att(ncid, contactids%varids(cid_contacttype), 'flag_meanings', 'lateral_1d2d_link longitudinal_1d2d_link')
    
 end function ug_def_mesh_contact
 
-! Gets the number of links
+! Gets the number of contacts
 function ug_get_contacts_count(ncid, contactids, ncontacts) result(ierr)
 
    integer, intent(in)               :: ncid
@@ -3430,45 +3440,51 @@ function ug_get_contacts_count(ncid, contactids, ncontacts) result(ierr)
    
    ierr = nf90_inquire_variable( ncid, contactids%varids(cid_contacttopo), name = name, xtype = xtype, ndims = ndims, dimids = dimids, nAtts = nAtts)
    if(ierr /= UG_NOERR) then 
-       Call SetMessage(Level_Fatal, 'could not inquire the number of links')
+       Call SetMessage(Level_Fatal, 'could not inquire the number of contacts')
    endif
    
    ierr = nf90_inquire_dimension(ncid, dimids(1), len=ncontacts)
    if(ierr /= UG_NOERR) then 
-       Call SetMessage(Level_Fatal, 'could not read the number of links')
+       Call SetMessage(Level_Fatal, 'could not read the number of contacts')
    endif
    
 end function ug_get_contacts_count
 
 ! Writes the mesh_topology_contact mesh.
-function ug_put_mesh_contact(ncid, contactids, mesh1indexes, mesh2indexes, contactsids, contactslongnames, contacttype, startIndex) result(ierr)
+function ug_put_mesh_contact(ncid, contactids, mesh1indexes, mesh2indexes, contacttype, contactsids, contactslongnames, startIndex) result(ierr)
 
-   integer, intent(in)                :: ncid, startIndex 
-   type(t_ug_contacts), intent(in)    :: contactids
-   integer, intent(in)                :: mesh1indexes(:),mesh2indexes(:),contacttype(:)
-   character(len=*), intent(in)       :: contactsids(:), contactslongnames(:)  
-   integer, allocatable               :: contacts(:,:)
-   integer                            :: ierr, i
+   integer, intent(in)                        :: ncid 
+   type(t_ug_contacts), intent(in)            :: contactids
+   integer, intent(in)                        :: mesh1indexes(:),mesh2indexes(:),contacttype(:) 
+   integer, allocatable                       :: contacts(:,:)
+   character(len=*), optional,intent(in)      :: contactsids(:), contactslongnames(:) 
+   integer, intent(in), optional              :: startIndex
+   integer                                    :: ierr, i
    
    ierr = UG_SOMEERR
    ierr = nf90_enddef(ncid) !Put the NetCDF in write mode
    
-   allocate(contacts(size(mesh1indexes),2))
+   allocate(contacts(2, size(mesh1indexes)))
    
    do i = 1, size(mesh1indexes)
-      contacts(i,1) = mesh1indexes(i)
-      contacts(i,2) = mesh2indexes(i)
+      contacts(1,i) = mesh1indexes(i)
+      contacts(2,i) = mesh2indexes(i)
    end do
 
-   !we have not defined the start_index, so when we put the variable it must be zero based
-   if (startIndex.ne.0) then
-       ierr = ug_convert_start_index(contacts(:,1), startIndex, 0)
-       ierr = ug_convert_start_index(contacts(:,2), startIndex, 0)
+   !we have not defined the start_index, so when we put the variable it must be zero based   
+   if (present(startIndex) .and. startIndex.ne.0) then
+       ierr = ug_convert_start_index(contacts(1,:), startIndex, 0)
+       ierr = ug_convert_start_index(contacts(2,:), startIndex, 0)
    endif
 
    ierr = nf90_put_var(ncid, contactids%varids(cid_contacttopo), contacts)
-   ierr = nf90_put_var(ncid, contactids%varids(cid_contactids), contactsids)
-   ierr = nf90_put_var(ncid, contactids%varids(cid_contactlongnames), contactslongnames) 
+   if (present(contactsids)) then 
+      ierr = nf90_put_var(ncid, contactids%varids(cid_contactids), contactsids)
+   endif
+   if (present(contactslongnames)) then 
+      ierr = nf90_put_var(ncid, contactids%varids(cid_contactlongnames), contactslongnames) 
+   endif
+   
    ierr = nf90_put_var(ncid, contactids%varids(cid_contacttype), contacttype) 
 
 end function ug_put_mesh_contact

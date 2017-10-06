@@ -1313,6 +1313,7 @@ function ionc_get_meshgeom_dll(ioncid, meshid, c_meshgeom, includeArrays) result
    
    if(associated(meshgeom%branchids)) deallocate(meshgeom%branchids)
    if(associated(meshgeom%nbranchgeometrynodes)) deallocate(meshgeom%nbranchgeometrynodes)
+   if(associated(meshgeom%nedge_nodes)) deallocate(meshgeom%nedge_nodes)
    if(associated(meshgeom%nodex)) deallocate(meshgeom%nodex)
    if(associated(meshgeom%nodey)) deallocate(meshgeom%nodey)
    if(associated(meshgeom%nodez)) deallocate(meshgeom%nodez)

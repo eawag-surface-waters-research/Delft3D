@@ -317,6 +317,7 @@ namespace gridgeom.Tests
             meshoned.geopointsX = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nt_ngeometry);
             meshoned.geopointsY = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nt_ngeometry);
             meshoned.branchlengths = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nt_nbranches);
+            meshoned.nedge_nodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nt_nbranches);
 
             ierr = wrapperNetcdf.ionc_get_meshgeom(ref ioncid, ref meshonedid, ref meshoned, ref includeArrays);
             Assert.That(ierr, Is.EqualTo(0));
@@ -352,6 +353,7 @@ namespace gridgeom.Tests
             Marshal.FreeCoTaskMem(meshoned.nodey);
             Marshal.FreeCoTaskMem(meshoned.nodez);
             Marshal.FreeCoTaskMem(meshtwod.edge_nodes);
+            Marshal.FreeCoTaskMem(meshoned.nedge_nodes);
 
         }
 

@@ -1489,8 +1489,8 @@ function ionc_def_mesh_contact_ugrid(ioncid, contactsmesh, contactmeshname, ncon
   
   ! set the contact mesh name
   datasets(ioncid)%ug_file%contactsnames(contactsmesh) = contactmeshname
-  ! create the variables and attributes
-  ierr = ug_def_mesh_contact(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%contactids(contactsmesh), contactmeshname, ncontacts, idmesh1, idmesh2, locationType1Id, locationType2Id)
+  ! create the variables and attributes  
+  ierr = ug_def_mesh_contact(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%contactids(contactsmesh), contactmeshname, ncontacts, datasets(ioncid)%ug_file%meshids(idmesh1), datasets(ioncid)%ug_file%meshids(idmesh2), locationType1Id, locationType2Id)
    
 end function ionc_def_mesh_contact_ugrid
 
@@ -1511,7 +1511,7 @@ function ionc_put_mesh_contact_ugrid(ioncid, contactsmesh, mesh1indexes, mesh2in
    character(len=*), intent(in)       :: contactsids(:), contactslongnames(:)  
    integer                            :: ierr
 
-   ierr = ug_put_mesh_contact(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%contactids(contactsmesh), mesh1indexes, mesh2indexes, contactsids, contactslongnames, contacttype, startIndex) 
+   ierr = ug_put_mesh_contact(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%contactids(contactsmesh), mesh1indexes, mesh2indexes, contacttype, contactsids, contactslongnames, startIndex) 
 
 end function ionc_put_mesh_contact_ugrid
 
