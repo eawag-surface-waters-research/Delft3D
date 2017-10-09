@@ -107,7 +107,7 @@
       aProcesProp%swtransp   = 123
       aProcesProp%type       = PROCESTYPE_STAT
       aProcesProp%no_input      = 7
-      aProcesProp%no_output     = 3
+      aProcesProp%no_output     = 4
       aProcesProp%no_FluxOutput = 0
       aProcesProp%no_FluxStochi = 0
       aProcesProp%no_DispStochi = 0
@@ -231,7 +231,7 @@
       aItemProp%waqtype = WAQTYPE_NONE
       iret = ItemPropCollAdd( AllItems, aItemProp )
       aProcesProp%input_item(7)%name=aItemProp%name
-      aProcesProp%input_item(7)%type=IOTYPE_SEGMENT_INPUT
+      aProcesProp%input_item(7)%type=IOTYPE_SEGMENT_WORK
       aProcesProp%input_item(7)%item=>AllItems%ItemPropPnts(iret)%pnt
       aProcesProp%input_item(7)%actdef=0.0
       aProcesProp%input_item(7)%indx  = 7
@@ -293,6 +293,19 @@
       aProcesProp%output_item(3)%ip_val= 0
       WRITE(LUNREP,2000) 'Statistical output named [',aItemProp%name,
      +                   '] created with geometric mean of max(value,threshold) from [',aProcesProp%input_item(1)%name,']'
+
+      ! Add the companion for the TCOUNT input item
+      aItemProp%name    = 'TCOUNT    '//aProcesProp%name(1:10)
+      aItemProp%default = -999.
+      aItemProp%text    = 'time step counter (work array)'
+      aItemProp%waqtype = WAQTYPE_NONE
+      iret = ItemPropCollAdd( AllItems, aItemProp )
+      aProcesProp%output_item(4)%name=aItemProp%name
+      aProcesProp%output_item(4)%type=IOTYPE_SEGMENT_OUTPUT
+      aProcesProp%output_item(4)%item=>AllItems%ItemPropPnts(iret)%pnt
+      aProcesProp%output_item(4)%indx= 4
+      aProcesProp%output_item(4)%ip_val= 0
+
 !
 !     check the use of the key words
 !
