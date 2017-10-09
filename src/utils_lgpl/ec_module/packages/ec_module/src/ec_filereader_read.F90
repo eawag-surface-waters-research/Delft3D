@@ -228,7 +228,7 @@ module m_ec_filereader_read
          keyword = 'TIME'
          rec = ecFindInFile(handle, keyword)
          if (len(trim(rec)) == 0) then
-            call setECMessage("ERROR: ec_filereader_read::ecCurviReadBlock: Reached end of file: "//trim(fileReaderPtr%fileName))
+            call setECMessage("ERROR: ec_filereader_read::ecCurviReadBlock: Failed to find next 'TIME =' record in file: "//trim(fileReaderPtr%fileName))
             return
          end if
          ! Read and convert the timesteps to seconds.
@@ -250,8 +250,7 @@ module m_ec_filereader_read
                do i=n_rows, 1, -1
                   read(handle, *, IOSTAT = istat) (item%sourceT0FieldPtr%arr1dPtr((i-1)*n_cols+j), j=1, n_cols)
                   if(istat /= 0) then
-                     call setECMessage("ec_filereader_read::ecUniReadBlock: Read failure before end of file: "//trim(fileReaderPtr%fileName))
-                     call setECMessage("     line = "//trim(rec))
+                     call setECMessage("ec_filereader_read::ecCurviReadBlock: Read failure before end of file: "//trim(fileReaderPtr%fileName))
                      return
                   end if
                end do
@@ -270,8 +269,7 @@ module m_ec_filereader_read
                do i=n_rows, 1, -1
                   read(handle, *, IOSTAT = istat) (item%sourceT1FieldPtr%arr1dPtr((i-1)*n_cols+j), j=1, n_cols)
                   if(istat /= 0) then
-                     call setECMessage("ec_filereader_read::ecUniReadBlock: Read failure before end of file: "//trim(fileReaderPtr%fileName))
-                     call setECMessage("     line = "//trim(rec))
+                     call setECMessage("ec_filereader_read::ecCurviReadBlock: Read failure before end of file: "//trim(fileReaderPtr%fileName))
                      return
                   end if
                end do
