@@ -128,8 +128,8 @@
 
       IF ( IACTION .EQ. 0 ) RETURN
 
-      TCOUNT    = TCOUNT + DELT
-      PMSA(IP6) = TCOUNT
+      IP6    = IPOINT(6)
+      IP7    = IPOINT(7)
 
       DO 9000 ISEG=1,NOSEG
          IF (BTEST(IKNMRK(ISEG),0)) THEN
