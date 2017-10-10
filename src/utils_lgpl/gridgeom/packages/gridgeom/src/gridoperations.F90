@@ -3736,112 +3736,117 @@
    end function ggeo_get_links
     
    !< create meshgeom from array
-   function ggeo_convert_1d_arrays(nodex, nodey, branchid, sourceNodeId, targetNodeId, nBranches, meshgeom) result(ierr)
+   function ggeo_convert_1d_arrays(nodex, nodey, branchoffset, branchlength, branchid, sourcenodeid, targetnodeid, meshgeom) result(ierr)
    
    use meshdata
    use m_alloc
    
-   integer, intent(in)                  :: branchid(:), nBranches, targetNodeId(:), sourceNodeId(:)
-   double precision, intent(in)         :: nodex(:), nodey(:)
+   double precision, intent(in)         :: nodex(:), nodey(:), branchoffset(:), branchlength(:)
+   integer, intent(in)                  :: branchid(:), sourcenodeid(:), targetnodeid(:)
    type(t_ug_meshgeom), intent(inout)   :: meshgeom
-   integer                              :: ierr, i, k, idxstart, idxbr, cbranchid, idxend
+   integer                              :: ierr, i, k, nnetworknodes, noverlaps, nbranches
+   integer, allocatable                 :: connectedBranches(:)      
    
    ierr = 0
-   
-   !The last computational node of a branch overlaps with the starting one
+   nbranches = size(sourcenodeid)
    meshgeom%dim = 1
    meshgeom%numnode =  size(nodex,1)
-   meshgeom%numedge = meshgeom%numnode - 1
-
    allocate(meshgeom%nodex(meshgeom%numnode))
    allocate(meshgeom%nodey(meshgeom%numnode))
-   allocate(meshgeom%edge_nodes(2, meshgeom%numedge))
    allocate(meshgeom%branchids(size(branchid,1)))
+   
+   !calculate the number of edge nodes, considering the overlaps 
+   ! (if more nodes are shared, then we have less edge nodes)
+   nnetworknodes = max(maxval(sourcenodeid),maxval(targetnodeid))
+   allocate(connectedBranches(nnetworknodes))
+   connectedBranches = 0
+   do i = 1, nnetworknodes
+      !for each node count how many branches are sharing it
+      do k = 1, nbranches
+         if ((targetnodeid(k).eq.i).or.(sourcenodeid(k).eq.i)) then
+            connectedBranches(i) = connectedBranches(i) + 1
+         endif
+      enddo
+   enddo
+   noverlaps = sum(connectedBranches) - nnetworknodes
+   meshgeom%numedge = meshgeom%numnode - (nBranches - noverlaps)
+   allocate(meshgeom%edge_nodes(2, meshgeom%numedge))
 
    !Assign the node coordinates
-   meshgeom%nodex = nodex
-   meshgeom%nodey = nodey
+   meshgeom%nodex    =  nodex
+   meshgeom%nodey    =  nodey
    meshgeom%branchids = branchid
 
    !Calculate the edge_nodes
-   ierr = ggeo_create_edge_nodes(meshgeom%branchids, sourceNodeId, targetNodeId, meshgeom%edge_nodes, nBranches, meshgeom%numnode)
+   ierr = ggeo_create_edge_nodes(meshgeom%branchids, branchoffset, sourcenodeid, targetnodeid, meshgeom%edge_nodes, branchlength)
    
    end function ggeo_convert_1d_arrays
    
-   !< Calculate the edge_node assuming discretization points are consecutive within the same branch.
-   function ggeo_create_edge_nodes(branchids, sourceNodeId, targetNodeId, edgenodes, nBranches, nNodes) result(ierr) !edge_nodes
+   
+   !< Algorithm to calculate the edgenodes array. The only assumption made here is that the mesh nodes are written consecutively,
+   !< in the same direction indicated by the sourcenodeid and the targetnodeid arrays (e.g. 
+   !< 1  -a-b-c-> 2 and not 1 -c-a-b-> 2 where 1 and 2 are network nodes and a, b, c are mesh nodes )
+   function ggeo_create_edge_nodes(branchids, branchoffset, sourcenodeid, targetnodeid, edgenodes, branchlength) result(ierr) !edge_nodes
 
-   integer, intent(in)      :: nBranches, nNodes, branchids(:),targetNodeId(:), sourceNodeId(:)
-   integer, intent(inout)   :: edgenodes(:,:)
-   integer                  :: ierr, currentbranchid, nextbranchid, idxstart, idxbr, idxend, i, k
-   integer                  :: indexbranchend(nBranches), indexbranchstart(nBranches)
+   integer, intent(in)          :: branchids(:), sourcenodeid(:), targetnodeid(:)
+   double precision, intent(in) :: branchoffset(:),branchlength(:)
+   integer, intent(inout)       :: edgenodes(:,:)
+   integer, allocatable         :: meshnodemapping(:),internalnodeindexses(:)
+   integer                      :: nnetworknodes, nBranches,nmeshnodes, ierr , k , n, br, st, en, kk
 
    ierr = 0
 
-   currentbranchid      = branchids(1)
-   nextbranchid         = currentbranchid
-   idxstart             = 1
-   idxbr                = 1
-   idxend               = 1
-   k                    = 0
-   do while (idxbr<=nBranches)
-       currentbranchid = nextbranchid
-       do i = idxstart + 1, nNodes
-           if (branchids(i).ne.currentbranchid) then
-               nextbranchid = branchids(i)
-               idxend = i - 1;
-               exit
-           endif
-           if (i == nNodes) then
-               nextbranchid = - 1
-               idxend = i;
-           endif
-       enddo
-       !Determine if the currentbranchid is connected to the start/end of a previous branch. if so create a connection at the start
-       do i = 1, nBranches
-           !skip if i equal to currentbranchid and currentbranchid is the first branchid (fully connected)
-           if ((i.eq.currentbranchid).or.(currentbranchid.eq.branchids(1))) cycle 
-           if (sourceNodeId(currentbranchid).eq.sourceNodeId(i)) then
-                k = k + 1
-                edgenodes(1,k) = indexbranchstart(i)
-                edgenodes(2,k) = idxstart
-                exit
-           endif
-           if(sourceNodeId(currentbranchid).eq.targetNodeId(i)) then
-                k = k + 1
-                edgenodes(1,k) = indexbranchend(i)
-                edgenodes(2,k) = idxstart
-                exit
-           endif
-       enddo
-       !Only create internal connections
-       do i = idxstart, idxend - 1
+   !Build mesh mapping: assuming not overlapping mesh nodes
+   nnetworknodes = max(maxval(sourcenodeid),maxval(targetnodeid))
+   nmeshnodes = size(branchids)
+   nbranches = size(sourcenodeid)
+   allocate(meshnodemapping(nnetworknodes))
+   allocate(internalnodeindexses(nmeshnodes))
+   
+   !map the mesh nodes 
+   meshnodemapping = -1
+   do br = 1, nbranches
+      do n=1, nmeshnodes
+         if ((branchoffset(n).eq.0).and.(branchids(n).eq.br)) then
+            meshnodemapping(sourcenodeid(br)) = n
+         endif
+         if ((branchoffset(n).eq.branchlength(br)).and.(branchids(n).eq.br)) then
+            meshnodemapping(targetnodeid(br)) = n
+         endif
+      enddo
+   enddo
+
+   k = 0
+   do br = 1, nbranches
+      if ((meshnodemapping(sourcenodeid(br)).eq.-1).or.(meshnodemapping(targetnodeid(br)).eq.-1)) then
+         ierr = -1
+         return
+      endif
+      ! starting and ending nodes    
+      st =  meshnodemapping(sourcenodeid(br))
+      en =  meshnodemapping(targetnodeid(br))
+      !the nodes between
+      kk =  0
+      do n=1, nmeshnodes
+         if(branchids(n).eq.br.and.(n.ne.st).and.(n.ne.en)) then
+            kk = kk + 1
+            internalnodeindexses(kk) = n
+         endif
+      enddo
+      !connect the start node to the first internal node
+      k = k + 1
+      edgenodes(1,k) = st
+      edgenodes(2,k) = internalnodeindexses(1)
+      !connect end node to iternal 
+      do n =1, kk - 1
            k = k +1
-           edgenodes(1,k) = i
-           edgenodes(2,k) = i + 1
-       enddo
-       !Now determine if the currentbranchid is connected to the end/start of a previous branch. if so create a connection at the start
-       do i = 1, nBranches
-           !skip if i equal to currentbranchid and currentbranchid is the first branchid (fully connected)
-           if((i.eq.currentbranchid).or.(currentbranchid.eq.branchids(1))) cycle
-           if(targetNodeId(currentbranchid).eq.sourceNodeId(i)) then
-                k = k + 1
-                edgenodes(1,k) = idxend 
-                edgenodes(2,k) = indexbranchstart(i)
-                exit
-           endif
-           if(targetNodeId(currentbranchid).eq.targetNodeId(i)) then
-                k = k + 1
-                edgenodes(1,k) = idxend
-                edgenodes(2,k) = indexbranchend(i)
-                exit
-           endif
-       enddo     
-   indexbranchend(currentbranchid) = idxend
-   indexbranchstart(currentbranchid) = idxstart
-   !update
-   idxstart    = idxend + 1
-   idxbr       = idxbr + 1
+           edgenodes(1,k) = internalnodeindexses(n) 
+           edgenodes(2,k) = internalnodeindexses(n)  + 1  
+      enddo
+      !connect the last internal node to the end node 
+      k = k + 1
+      edgenodes(1,k) = internalnodeindexses(kk) 
+      edgenodes(2,k) = en
    enddo
    
    end function ggeo_create_edge_nodes

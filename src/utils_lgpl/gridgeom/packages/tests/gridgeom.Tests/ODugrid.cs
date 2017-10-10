@@ -382,8 +382,11 @@ namespace gridgeom.Tests
             int[] branchids = { 1, 1, 1, 1 };
             double[] meshXCoords = { -6, 5, 23, 34 };
             double[] meshYCoords = { 22, 16, 16, 7 };
+            double[] branchoffset = { 0, 10, 20, 100 }; /// important are the first and last offset
+            double[] branchlength = { 100 };
             int[] sourcenodeid = { 1 };
             int[] targetnodeid = { 2 };
+
 
             //links
             int[] arrayfrom = { 2, 8 };
@@ -442,16 +445,22 @@ namespace gridgeom.Tests
             IntPtr c_branchids = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nmeshpoints);
             IntPtr c_sourcenodeid = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nbranches);
             IntPtr c_targetnodeid = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nbranches);
+            IntPtr c_branchoffset = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nmeshpoints);
+            IntPtr c_branchlength = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nbranches);
 
             Marshal.Copy(branchids, 0, c_branchids, nmeshpoints);
             Marshal.Copy(meshXCoords, 0, c_meshXCoords, nmeshpoints);
             Marshal.Copy(meshYCoords, 0, c_meshYCoords, nmeshpoints);
             Marshal.Copy(sourcenodeid, 0, c_sourcenodeid, nbranches);
             Marshal.Copy(targetnodeid, 0, c_targetnodeid, nbranches);
+            Marshal.Copy(branchoffset, 0, c_branchoffset, nmeshpoints);
+            Marshal.Copy(branchlength, 0, c_branchlength, nbranches);
+
 
             //7. fill kn (Herman datastructure) for creating the links
             var wrapperGridgeom = new GridGeomLibWrapper();
-            ierr = wrapperGridgeom.ggeo_convert_1d_arrays(ref c_meshXCoords, ref c_meshYCoords, ref c_branchids, ref c_sourcenodeid, ref c_targetnodeid, ref nbranches, ref nmeshpoints);
+            ierr = wrapperGridgeom.ggeo_convert_1d_arrays(ref c_meshXCoords, ref c_meshYCoords, ref c_branchoffset, ref c_branchlength, ref c_branchids, ref c_sourcenodeid, ref c_targetnodeid, ref nbranches, ref nmeshpoints);
+            
             Assert.That(ierr, Is.EqualTo(0));
             ierr = wrapperGridgeom.ggeo_convert(ref meshtwod, ref meshtwoddim);
             Assert.That(ierr, Is.EqualTo(0));
@@ -481,6 +490,156 @@ namespace gridgeom.Tests
                 Assert.That(rc_arrayfrom[i], Is.EqualTo(arrayfrom[i]));
                 Assert.That(rc_arrayto[i], Is.EqualTo(arrayto[i]));
             }
+            //for writing the links look io_netcdf ionc_def_mesh_contact, ionc_put_mesh_contact 
+
+            //Free 2d arrays
+            Marshal.FreeCoTaskMem(meshtwod.nodex);
+            Marshal.FreeCoTaskMem(meshtwod.nodey);
+            Marshal.FreeCoTaskMem(meshtwod.nodez);
+            Marshal.FreeCoTaskMem(meshtwod.edge_nodes);
+
+            //Free 1d arrays
+            Marshal.FreeCoTaskMem(c_meshXCoords);
+            Marshal.FreeCoTaskMem(c_meshYCoords);
+            Marshal.FreeCoTaskMem(c_branchids);
+
+            //Free from and to arrays describing the links 
+            Marshal.FreeCoTaskMem(c_arrayfrom);
+            Marshal.FreeCoTaskMem(c_arrayto);
+        }
+
+        /// <summary>
+        /// In this test we read a 2d grid from file and we provide the 1d discretization points.
+        /// We emulate the case where  Delta Shell has a 2d file opened and the user creates a 1d mesh and wants to generate the links.
+        /// 1D discretization and links are saved in memory and written afterwards. 
+        /// </summary>
+        [Test]
+        [NUnit.Framework.Category("readFileThreeBranches")]
+        public void createLinksFrom2dFileThreeBranches()
+        {
+            //mesh2d
+            int twoddim = 2;
+            int twodnumnode = 16;
+            int twodnumedge = 24;
+            int twodnumface = 9;
+            int twodmaxnumfacenodes = 4;
+            int twodnumlayer = 0;
+            int twodlayertype = 0;
+
+            //mesh1d
+            //discretization points information
+            int nmeshpoints = 9;
+            int nbranches = 3;
+            int[] branchids = { 1, 1, 1, 1, 2, 2, 2, 3, 3 };
+            double[] meshXCoords = { 7.5, 12.5, 17.5, 22.5, 22.5, 22.5, 22.5, 17.5, 12.5 };
+            double[] meshYCoords = { 22.5, 22.5, 22.5, 22.5, 17.5, 12.5, 7.5, 12.5, 17.5 };
+            double[] branchoffset = { 0, 1, 2, 10, 1, 2, 10,  1, 2 }; /// the actual values of the offset are not important 
+            double[] branchlength = { 10, 10, 10 };
+
+            int[] sourcenodeid = { 1, 2, 3 };
+            int[] targetnodeid = { 2, 3, 1 };
+
+
+            //1. open the file with the 2d mesh
+            string c_path = TestHelper.TestFilesDirectoryPath() + @"\2d_ugrid_net.nc";
+            Assert.IsTrue(File.Exists(c_path));
+            int ioncid = 0; //file variable 
+            int mode = 0;   //create in read mode
+            var wrapperNetcdf = new IoNetcdfLibWrapper();
+            int iconvtype = 2;
+            double convversion = 0.0;
+            var ierr = wrapperNetcdf.ionc_open(c_path, ref mode, ref ioncid, ref iconvtype, ref convversion);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            //2. get the 2d mesh id
+            int meshid = 1;
+            ierr = wrapperNetcdf.ionc_get_2d_mesh_id(ref ioncid, ref meshid);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            //3. get the dimensions of the 2d mesh
+            var meshtwoddim = new meshgeomdim();
+            ierr = wrapperNetcdf.ionc_get_meshgeom_dim(ref ioncid, ref meshid, ref meshtwoddim);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            Assert.That(meshtwoddim.dim, Is.EqualTo(twoddim));
+            Assert.That(meshtwoddim.numnode, Is.EqualTo(twodnumnode));
+            Assert.That(meshtwoddim.numedge, Is.EqualTo(twodnumedge));
+            Assert.That(meshtwoddim.numface, Is.EqualTo(twodnumface));
+            Assert.That(meshtwoddim.maxnumfacenodes, Is.EqualTo(twodmaxnumfacenodes));
+            Assert.That(meshtwoddim.numlayer, Is.EqualTo(twodnumlayer));
+            Assert.That(meshtwoddim.layertype, Is.EqualTo(twodlayertype));
+
+            //4. allocate the arrays in meshgeom for storing the 2d mesh coordinates, edge_nodes
+            var meshtwod = new meshgeom();
+            meshtwod.nodex = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * twodnumnode);
+            meshtwod.nodey = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * twodnumnode);
+            meshtwod.nodez = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * twodnumnode);
+            meshtwod.edge_nodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshtwoddim.numedge * 2);
+
+            //5. get the meshgeom arrays
+            bool includeArrays = true;
+            ierr = wrapperNetcdf.ionc_get_meshgeom(ref ioncid, ref meshid, ref meshtwod, ref includeArrays);
+            Assert.That(ierr, Is.EqualTo(0));
+            double[] rc_twodnodex = new double[twodnumnode];
+            double[] rc_twodnodey = new double[twodnumnode];
+            double[] rc_twodnodez = new double[twodnumnode];
+            Marshal.Copy(meshtwod.nodex, rc_twodnodex, 0, twodnumnode);
+            Marshal.Copy(meshtwod.nodey, rc_twodnodey, 0, twodnumnode);
+            Marshal.Copy(meshtwod.nodez, rc_twodnodez, 0, twodnumnode);
+
+            //6. allocate the 1d arrays for storing the 1d coordinates and edge_nodes
+            IntPtr c_meshXCoords = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nmeshpoints);
+            IntPtr c_meshYCoords = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nmeshpoints);
+            IntPtr c_branchids = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nmeshpoints);
+            IntPtr c_sourcenodeid = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nbranches);
+            IntPtr c_targetnodeid = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nbranches);
+            IntPtr c_branchoffset = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nmeshpoints);
+            IntPtr c_branchlength = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nbranches);
+
+            Marshal.Copy(branchids, 0, c_branchids, nmeshpoints);
+            Marshal.Copy(meshXCoords, 0, c_meshXCoords, nmeshpoints);
+            Marshal.Copy(meshYCoords, 0, c_meshYCoords, nmeshpoints);
+            Marshal.Copy(sourcenodeid, 0, c_sourcenodeid, nbranches);
+            Marshal.Copy(targetnodeid, 0, c_targetnodeid, nbranches);
+            Marshal.Copy(branchoffset, 0, c_branchoffset, nmeshpoints);
+            Marshal.Copy(branchlength, 0, c_branchlength, nbranches);
+
+            //7. fill kn (Herman datastructure) for creating the links
+            var wrapperGridgeom = new GridGeomLibWrapper();
+
+
+            ierr = wrapperGridgeom.ggeo_convert_1d_arrays(ref c_meshXCoords, ref c_meshYCoords, ref c_branchoffset, ref c_branchlength, ref c_branchids, ref c_sourcenodeid, ref c_targetnodeid, ref nbranches, ref nmeshpoints);
+            Assert.That(ierr, Is.EqualTo(0));
+            ierr = wrapperGridgeom.ggeo_convert(ref meshtwod, ref meshtwoddim);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            //9. make the links
+            ierr = wrapperGridgeom.ggeo_make1D2Dinternalnetlinks();
+            Assert.That(ierr, Is.EqualTo(0));
+
+            //10. get the number of links
+            int n1d2dlinks = 0;
+            ierr = wrapperGridgeom.ggeo_get_links_count(ref n1d2dlinks);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            //11. get the links: arrayfrom = 2d cell index, arrayto = 1d node index 
+            IntPtr c_arrayfrom = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * n1d2dlinks); //2d cell number
+            IntPtr c_arrayto = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * n1d2dlinks); //1d node
+            ierr = wrapperGridgeom.ggeo_get_links(ref c_arrayfrom, ref c_arrayto, ref n1d2dlinks);
+            Assert.That(ierr, Is.EqualTo(0));
+
+
+            int[] rc_arrayfrom = new int[n1d2dlinks];
+            int[] rc_arrayto = new int[n1d2dlinks];
+            Marshal.Copy(c_arrayfrom, rc_arrayfrom, 0, n1d2dlinks);
+            Marshal.Copy(c_arrayto, rc_arrayto, 0, n1d2dlinks);
+            
+            //for (int i = 0; i < n1d2dlinks; i++)
+            //{
+            //    Assert.That(rc_arrayfrom[i], Is.EqualTo(arrayfrom[i]));
+            //    Assert.That(rc_arrayto[i], Is.EqualTo(arrayto[i]));
+            //}
+
             //for writing the links look io_netcdf ionc_def_mesh_contact, ionc_put_mesh_contact 
 
             //Free 2d arrays

@@ -43,8 +43,8 @@ namespace UGrid.tests
         private double[] nodesY = { 4.0, 4.0, 1.0, 4.0 };
         private string[] nodesids = { "node1", "node2", "node3", "node4" };
         private string[] nodeslongNames = { "nodelong1", "nodelong2", "nodelong3", "nodelong4" };
-        private int[] sourcenodeid = { 1, 3, 2 };
-        private int[] targetnodeid = { 2, 2, 4 };
+        private int[] sourcenodeid = { 1, 2, 2 };
+        private int[] targetnodeid = { 2, 3, 4 };
 
         //branches info
         private double[] branchlengths = { 4.0, 3.0, 3.0 };
@@ -283,34 +283,34 @@ namespace UGrid.tests
                     Assert.That(rc_offset[i], Is.EqualTo(offset[i]));
                 }
 
-                //4. Get the number of links. 
-                int linkmesh = 1;
-                int r_nlinks = -1;
-                ierr = wrapper.ionc_get_contacts_count(ref ioncid, ref linkmesh, ref r_nlinks);
-                Assert.That(ierr, Is.EqualTo(0));
-                Assert.That(r_nlinks, Is.EqualTo(nlinks));
-                IoNetcdfLibWrapper.interop_charinfo[] linksinfo = new IoNetcdfLibWrapper.interop_charinfo[nlinks];
+                //4. Get the number of links. TODO: add a mesh 2d for this to work!
+                //int linkmesh = 1;
+                //int r_nlinks = -1;
+                //ierr = wrapper.ionc_get_contacts_count(ref ioncid, ref linkmesh, ref r_nlinks);
+                //Assert.That(ierr, Is.EqualTo(0));
+                //Assert.That(r_nlinks, Is.EqualTo(nlinks));
+                //IoNetcdfLibWrapper.interop_charinfo[] linksinfo = new IoNetcdfLibWrapper.interop_charinfo[nlinks];
 
-                //5. Get the links values
-                ierr = wrapper.ionc_get_mesh_contact(ref ioncid, ref linkmesh, ref c_mesh1indexes, ref c_mesh2indexes, ref c_contacttype,
-                    linksinfo, ref nlinks, ref startIndex);
-                Assert.That(ierr, Is.EqualTo(0));
-                int[] rc_contacttype = new int[nlinks];
-                int[] rc_mesh1indexes = new int[nlinks];
-                int[] rc_mesh2indexes = new int[nlinks];
-                Marshal.Copy(c_mesh1indexes, rc_mesh1indexes, 0, nlinks);
-                Marshal.Copy(c_mesh2indexes, rc_mesh2indexes, 0, nlinks);
-                Marshal.Copy(c_contacttype, rc_contacttype, 0, nlinks);
-                for (int i = 0; i < nlinks; i++)
-                {
-                    string tmpstring = new string(linksinfo[i].ids);
-                    Assert.That(tmpstring.Trim(), Is.EqualTo(linksids[i]));
-                    tmpstring = new string(linksinfo[i].longnames);
-                    Assert.That(tmpstring.Trim(), Is.EqualTo(linkslongnames[i]));
-                    Assert.That(rc_mesh1indexes[i], Is.EqualTo(mesh1indexes[i]));
-                    Assert.That(rc_mesh2indexes[i], Is.EqualTo(mesh2indexes[i]));
-                    Assert.That(rc_contacttype[i], Is.EqualTo(contacttype[i]));
-                }
+                ////5. Get the links values
+                //ierr = wrapper.ionc_get_mesh_contact(ref ioncid, ref linkmesh, ref c_mesh1indexes, ref c_mesh2indexes, ref c_contacttype,
+                //    linksinfo, ref nlinks, ref startIndex);
+                //Assert.That(ierr, Is.EqualTo(0));
+                //int[] rc_contacttype = new int[nlinks];
+                //int[] rc_mesh1indexes = new int[nlinks];
+                //int[] rc_mesh2indexes = new int[nlinks];
+                //Marshal.Copy(c_mesh1indexes, rc_mesh1indexes, 0, nlinks);
+                //Marshal.Copy(c_mesh2indexes, rc_mesh2indexes, 0, nlinks);
+                //Marshal.Copy(c_contacttype, rc_contacttype, 0, nlinks);
+                //for (int i = 0; i < nlinks; i++)
+                //{
+                //    string tmpstring = new string(linksinfo[i].ids);
+                //    Assert.That(tmpstring.Trim(), Is.EqualTo(linksids[i]));
+                //    tmpstring = new string(linksinfo[i].longnames);
+                //    Assert.That(tmpstring.Trim(), Is.EqualTo(linkslongnames[i]));
+                //    Assert.That(rc_mesh1indexes[i], Is.EqualTo(mesh1indexes[i]));
+                //    Assert.That(rc_mesh2indexes[i], Is.EqualTo(mesh2indexes[i]));
+                //    Assert.That(rc_contacttype[i], Is.EqualTo(contacttype[i]));
+                //}
 
                 //6. Get the written nodes ids
                 //StringBuilder varname = new StringBuilder("node_ids");
@@ -408,6 +408,8 @@ namespace UGrid.tests
             IntPtr c_edgenodes = Marshal.AllocCoTaskMem(2* Marshal.SizeOf(typeof(int)) * nedgenodes);
             IntPtr c_sourcenodeid = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nBranches);
             IntPtr c_targetnodeid = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nBranches);
+            IntPtr c_branchoffset = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nmeshpoints);
+            IntPtr c_branchlength = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nBranches);
             // Links variables
             IntPtr c_mesh1indexes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nlinks);
             IntPtr c_mesh2indexes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nlinks);
@@ -425,8 +427,12 @@ namespace UGrid.tests
                 Marshal.Copy(branchidx, 0, c_branchidx, nmeshpoints);
                 Marshal.Copy(sourcenodeid, 0, c_sourcenodeid, nBranches);
                 Marshal.Copy(targetnodeid, 0, c_targetnodeid, nBranches);
+                Marshal.Copy(offset, 0, c_branchoffset, nmeshpoints);
+                Marshal.Copy(branchlengths, 0, c_branchlength, nBranches);
+
+
                 var gridwrapper = new GridGeomLibWrapper();
-                ierr = gridwrapper.ggeo_create_edge_nodes(ref c_branchidx, ref c_sourcenodeid, ref c_targetnodeid, ref c_edgenodes,ref nBranches, ref nmeshpoints, ref nedgenodes);
+                ierr = gridwrapper.ggeo_create_edge_nodes(ref c_branchoffset, ref c_branchlength, ref c_branchidx, ref c_sourcenodeid, ref c_targetnodeid, ref c_edgenodes,ref nBranches, ref nmeshpoints, ref nedgenodes);
                 Assert.That(ierr, Is.EqualTo(0));
                 
                 //3. Create the node branchidx, offsets, meshnodeidsinfo
@@ -446,29 +452,29 @@ namespace UGrid.tests
                 ierr = wrapper.ionc_put_1d_mesh_discretisation_points(ref ioncid, ref meshid, ref c_branchidx, ref c_offset, ref c_edgenodes, meshnodeidsinfo, ref nmeshpoints, ref nedgenodes, ref startIndex);
                 Assert.That(ierr, Is.EqualTo(0));
 
-                //5. Create links attributes
-                Marshal.Copy(mesh1indexes, 0, c_mesh1indexes, nlinks);
-                Marshal.Copy(mesh2indexes, 0, c_mesh2indexes, nlinks);
-                Marshal.Copy(contacttype, 0, c_contacttype, nlinks);
-                int linkmesh = -1;
-                ierr = wrapper.ionc_def_mesh_contact(ref ioncid, ref linkmesh, linkmeshname, ref nlinks, ref linkmesh1,
-                    ref linkmesh2, ref locationType1, ref locationType2);
-                Assert.That(ierr, Is.EqualTo(0));
-                IoNetcdfLibWrapper.interop_charinfo[] linksinfo = new IoNetcdfLibWrapper.interop_charinfo[nlinks];
+                //5. Create links attributes, TODO: ADD A MESH 2D FOR THIS TO WORK!
+                //Marshal.Copy(mesh1indexes, 0, c_mesh1indexes, nlinks);
+                //Marshal.Copy(mesh2indexes, 0, c_mesh2indexes, nlinks);
+                //Marshal.Copy(contacttype, 0, c_contacttype, nlinks);
+                //int linkmesh = -1;
+                //ierr = wrapper.ionc_def_mesh_contact(ref ioncid, ref linkmesh, linkmeshname, ref nlinks, ref linkmesh1,
+                //    ref linkmesh2, ref locationType1, ref locationType2);
+                //Assert.That(ierr, Is.EqualTo(0));
+                //IoNetcdfLibWrapper.interop_charinfo[] linksinfo = new IoNetcdfLibWrapper.interop_charinfo[nlinks];
 
-                for (int i = 0; i < nlinks; i++)
-                {
-                    tmpstring = linksids[i];
-                    tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.idssize, ' ');
-                    linksinfo[i].ids = tmpstring.ToCharArray();
-                    tmpstring = linkslongnames[i];
-                    tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.longnamessize, ' ');
-                    linksinfo[i].longnames = tmpstring.ToCharArray();
-                }
+                //for (int i = 0; i < nlinks; i++)
+                //{
+                //    tmpstring = linksids[i];
+                //    tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.idssize, ' ');
+                //    linksinfo[i].ids = tmpstring.ToCharArray();
+                //    tmpstring = linkslongnames[i];
+                //    tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.longnamessize, ' ');
+                //    linksinfo[i].longnames = tmpstring.ToCharArray();
+                //}
 
-                //6. Write the mesh links
-                ierr = wrapper.ionc_put_mesh_contact(ref ioncid, ref linkmesh, ref c_mesh1indexes, ref c_mesh2indexes, ref c_contacttype, linksinfo, ref nlinks, ref startIndex);
-                Assert.That(ierr, Is.EqualTo(0));
+                ////6. Write the mesh links
+                //ierr = wrapper.ionc_put_mesh_contact(ref ioncid, ref linkmesh, ref c_mesh1indexes, ref c_mesh2indexes, ref c_contacttype, linksinfo, ref nlinks, ref startIndex);
+                //Assert.That(ierr, Is.EqualTo(0));
 
                 //8. Add node ids to the 1d mesh
                 //int iconvtype = 1; 
