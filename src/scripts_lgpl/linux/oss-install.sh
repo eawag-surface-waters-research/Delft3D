@@ -125,7 +125,7 @@ function dimr () {
     mkdir -p $dest_menu
     mkdir -p $dest_scripts
 
-    copyFile "$prefix/bin/dimr.exe"    $dest_bin
+    copyFile "$srcdir/engines_gpl/dimr/packages/dimr/src/.libs/dimr.exe"    $dest_bin
     # copy libdimr.so does not work: ldd will show dependency on $srcdir/lib/libdimr.so
     # => When build on TeamCity it may not work, when removing $srcdir/lib it may not work anymore
     # Therefore "copy libdimr.so" is replaced by "libtool install" and "libtool finish"
@@ -137,8 +137,8 @@ function dimr () {
     copyFile "$srcdir/engines_gpl/dimr/scripts/generic/lnx64/*"                    $dest_scripts
 
     echo "Gathering libraries for dimr..."
-    cp -u `$gatherScript $prefix/bin/dimr.exe $prefix/lib/libdimr.so | eval grep -v $gatherExcludeFilter` $dest_bin
-    cp -u `$gatherScript $prefix/bin/dimr.exe $prefix/lib/libdimr.so | eval grep $gatherIncludeFilter` $dest_bin
+    cp -u `$gatherScript $srcdir/engines_gpl/dimr/packages/dimr/src/.libs/dimr.exe $prefix/lib/libdimr.so | eval grep -v $gatherExcludeFilter` $dest_bin
+    cp -u `$gatherScript $srcdir/engines_gpl/dimr/packages/dimr/src/.libs/dimr.exe $prefix/lib/libdimr.so | eval grep $gatherIncludeFilter` $dest_bin
 
     # chrpath -r \$ORIGIN $dest_bin/d_hydro.exe
 
