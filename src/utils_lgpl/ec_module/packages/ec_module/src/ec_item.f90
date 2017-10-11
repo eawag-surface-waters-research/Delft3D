@@ -297,10 +297,25 @@ module m_ec_item
          type(tEcItem),     intent(inout) :: item        !< the target item
          real(hp),          intent(in)    :: timesteps   !< get data corresponding to this number of timesteps since k_refdate
          !
-         integer :: i, j !< loop variables
-         character(len=1000)              :: message
+         integer                            :: istat        !< return value of stat
+         integer                            :: i            !< loop variable
+         integer                            :: j            !< loop variable
+         character(len=1000)                :: message
+         logical, dimension(:), allocatable :: skipweights  !< Flags for each connection if weight computation can be skipped
          !
          success = .true.
+         allocate(skipweights(item%nConnections), stat = istat)
+         if (istat /= 0) then
+            call setECMessage("ERROR: ec_item::ecItemUpdateTargetItem: Unable to allocate additional memory")
+            success = .false.
+            return
+         end if
+         !
+         ! Initialize skipweights array to true
+         ! When updating source items:
+         ! For each connection i:
+         ! If there is one (or more) sourceItem(s) that needs weights then skipweights(i)=false
+         skipweights = .true.
          !
          ! update the source Items
          do i=1, item%nConnections
@@ -308,36 +323,42 @@ module m_ec_item
                if (.not. (ecItemUpdateSourceItem(instancePtr, item%connectionsPtr(i)%ptr%sourceItemsPtr(j)%ptr, timesteps, &
                           item%connectionsPtr(i)%ptr%converterPtr%interpolationType))) then
                   !
-                  ! No interpolation in time possible.
+                  ! No interpolation in time possible. => skipweights(i) is allowed to stay true
                   ! Check whether extrapolation is allowed
                   if (item%connectionsPtr(i)%ptr%converterPtr%interpolationType /= interpolate_time_extrapolation_ok) then
                      write(message,'(a,i5.5)') "Updating source failed, quantity='"//trim(item%connectionsPtr(i)%ptr%sourceItemsPtr(j)%ptr%QUANTITYPTR%NAME)   &
                               &       //"', item=",item%connectionsPtr(i)%ptr%sourceItemsPtr(j)%ptr%id
                      call setECMessage(trim(message))
                      success = .false.
+                     deallocate(skipweights, stat = istat)
                      return
                   end if
+               else
+                  skipweights(i) = .false.
                end if
             end do
          end do
          ! update the weight factors
          if (success) then
             do i=1, item%nConnections
-               if (.not. (ecConverterUpdateWeightFactors(instancePtr, item%connectionsPtr(i)%ptr))) then
+               if (.not. skipweights(i)) then
+                  if (.not. (ecConverterUpdateWeightFactors(instancePtr, item%connectionsPtr(i)%ptr))) then
                      write(message,'(a,i5.5)') "Updating weights failed, connection='",item%connectionsPtr(i)%ptr%id
                      call setECMessage(trim(message))
                      success = .false.
-                  success = .false.
-                  return
+                     deallocate(skipweights, stat = istat)
+                     return
+                  end if
                end if
             end do
          end if
+         deallocate(skipweights, stat = istat)
          ! Always try to perform the conversions, which update the target Items
          if (success) then
             do i=1, item%nConnections
                if (.not. (ecConverterPerformConversions(item%connectionsPtr(i)%ptr, timesteps))) then
-                     write(message,'(a,i5.5)') "Converter operation failed, connection='",item%connectionsPtr(i)%ptr%id
-                     call setECMessage(trim(message))
+                  write(message,'(a,i5.5)') "Converter operation failed, connection='",item%connectionsPtr(i)%ptr%id
+                  call setECMessage(trim(message))
                   success = .false.
                   return
                end if
