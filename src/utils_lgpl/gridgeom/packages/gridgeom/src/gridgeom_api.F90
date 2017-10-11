@@ -128,7 +128,7 @@ function ggeo_get_links_dll(c_arrayfrom, c_arrayto, nlinks) result(ierr) bind(C,
    
 end function ggeo_get_links_dll
 
-function ggeo_convert_1d_arrays_dll(c_nodex, c_nodey, c_branchoffset, c_branchlength, c_branchid, c_sourceNodeId, c_targetNodeId, nbranches, nmeshnodes) result(ierr) bind(C, name="ggeo_convert_1d_arrays")
+function ggeo_convert_1d_arrays_dll(c_nodex, c_nodey, c_branchoffset, c_branchlength, c_branchid, c_sourceNodeId, c_targetNodeId, nbranches, nmeshnodes, startIndex) result(ierr) bind(C, name="ggeo_convert_1d_arrays")
 !DEC$ ATTRIBUTES DLLEXPORT :: ggeo_convert_1d_arrays_dll
 
    use gridoperations
@@ -136,7 +136,7 @@ function ggeo_convert_1d_arrays_dll(c_nodex, c_nodey, c_branchoffset, c_branchle
    use meshdata
    
    type(c_ptr), intent(in)                :: c_nodex, c_nodey, c_branchoffset, c_branchlength, c_branchid, c_sourceNodeId, c_targetNodeId   
-   integer(kind=c_int), intent(in)        :: nmeshnodes, nBranches
+   integer(kind=c_int), intent(in)        :: nmeshnodes, nBranches, startIndex
    !fortran pointers
    double precision, pointer              :: nodex(:), nodey(:), branchoffset(:), branchlength(:)
    integer, pointer                       :: branchid(:), sourceNodeId(:), targetNodeId(:)
@@ -152,19 +152,19 @@ function ggeo_convert_1d_arrays_dll(c_nodex, c_nodey, c_branchoffset, c_branchle
    call c_f_pointer(c_sourceNodeId, sourceNodeId, (/ nBranches /))
    call c_f_pointer(c_targetNodeId, targetNodeId, (/ nBranches /))
       
-   ierr =  ggeo_convert_1d_arrays(nodex, nodey, branchoffset, branchlength, branchid, sourcenodeid, targetnodeid, meshgeom)
+   ierr =  ggeo_convert_1d_arrays(nodex, nodey, branchoffset, branchlength, branchid, sourcenodeid, targetnodeid, meshgeom, startIndex)
     
    ierr = ggeo_convert(meshgeom)
 
 end function ggeo_convert_1d_arrays_dll
 
-function ggeo_create_edge_nodes_dll(c_branchoffset, c_branchlength, c_branchids, c_sourceNodeId, c_targetNodeId, c_edgenodes, nBranches, nNodes, nEdgeNodes) result(ierr) bind(C, name="ggeo_create_edge_nodes")
+function ggeo_create_edge_nodes_dll(c_branchoffset, c_branchlength, c_branchids, c_sourceNodeId, c_targetNodeId, c_edgenodes, nBranches, nNodes, nEdgeNodes, startIndex) result(ierr) bind(C, name="ggeo_create_edge_nodes")
 !DEC$ ATTRIBUTES DLLEXPORT :: ggeo_create_edge_nodes_dll
 
    use gridoperations
    
    type(c_ptr), intent(in)   :: c_branchoffset, c_branchids, c_edgenodes, c_sourceNodeId, c_targetNodeId, c_branchlength    
-   integer, intent(in)       :: nBranches, nNodes, nEdgeNodes
+   integer, intent(in)       :: nBranches, nNodes, nEdgeNodes, startIndex
    double precision, pointer :: branchoffset(:), branchlength(:)
    integer, pointer          :: branchids(:), edgenodes(:,:), sourceNodeId(:), targetNodeId(:) 
    integer                   :: ierr
@@ -179,8 +179,20 @@ function ggeo_create_edge_nodes_dll(c_branchoffset, c_branchlength, c_branchids,
    call c_f_pointer(c_edgenodes, edgenodes, (/ 2, nEdgeNodes /))
    call c_f_pointer(c_branchoffset, branchoffset, (/ nNodes /))
    
-   ierr = ggeo_create_edge_nodes(branchids, branchoffset, sourcenodeid, targetnodeid, edgenodes, branchlength)
+   ierr = ggeo_create_edge_nodes(branchids, branchoffset, sourcenodeid, targetnodeid, edgenodes, branchlength, startIndex)
 
 end function ggeo_create_edge_nodes_dll
+
+
+
+function ggeo_deallocate_dll() result(ierr) bind(C, name="ggeo_deallocate")
+!DEC$ ATTRIBUTES DLLEXPORT :: ggeo_deallocate_dll
+   use gridoperations   
+   
+   integer                   :: ierr
+   
+   ierr = ggeo_deallocate()
+
+end function ggeo_deallocate_dll
 
 end module gridgeom_api

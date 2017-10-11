@@ -159,6 +159,157 @@ module network_ggeo_data
 ! for dry/illegal/cutcells (mesh generation related only)
   character(len=255)               :: dryptsfile = ''
   
+   contains
+   
+   function network_ggeo_data_destructor() result (ierr)
+   
+   integer ierr, k
+
+   ! deallocate all arrays
+   if (ALLOCATED(nod0)) then
+      do k= 1, SIZE(nod0)
+         if ( allocated(nod0(k)%lin) ) deallocate(nod0(K)%LIN)
+      enddo
+      deallocate(nod0)
+   endif
+   
+   if (ALLOCATED(nod)) then
+      do k= 1, SIZE(nod)
+         if ( allocated(nod(k)%lin) ) deallocate(nod(K)%LIN)
+      enddo
+      deallocate(nod)
+   endif
+      
+   if(allocated(cellmask)) deallocate(cellmask)
+   if(allocated(xzw))      deallocate(xzw)
+   if(allocated(xzw0))     deallocate(xzw0)
+   if(allocated(yzw))      deallocate(yzw)
+   if(allocated(yzw0))     deallocate(yzw0)
+   
+   if(allocated(xk)) deallocate(xk)
+   if(allocated(yk)) deallocate(yk)
+   if(allocated(zk)) deallocate(zk)
+   if(allocated(XK0)) deallocate(XK0)
+   if(allocated(YK0)) deallocate(YK0)
+   if(allocated(ZK0)) deallocate(ZK0)
+   
+   if(allocated(XK1)) deallocate(XK1)
+   if(allocated(YK1)) deallocate(YK1)
+   if(allocated(ZK1)) deallocate(ZK1)
+   if(allocated(RNOD)) deallocate(RNOD)
+   
+   if(allocated(netlinkpath_xk)) deallocate(netlinkpath_xk)
+   if(allocated(netlinkpath_yk)) deallocate(netlinkpath_yk)
+   if(allocated(netlinkpath_zk)) deallocate(netlinkpath_zk)
+   if(allocated(netlinkpath_end)) deallocate(netlinkpath_end)
+   
+   if(allocated(NMK)) deallocate(NMK)
+   if(allocated(KC)) deallocate(KC)
+   if(allocated(NMK0)) deallocate(NMK0)
+   if(allocated(KC0)) deallocate(KC0)
+   if(allocated(NB)) deallocate(NB)
+   
+   if(allocated(kn)) deallocate(kn)
+   if(allocated(KN0)) deallocate(KN0)   
+   if(allocated(LC)) deallocate(LC)
+   if(allocated(LC0)) deallocate(LC0)
+   if(allocated(RLIN)) deallocate(RLIN)
+   if(allocated(xe)) deallocate(xe)
+   if(allocated(ye)) deallocate(ye)
+   if(allocated(KTRI)) deallocate(KTRI)
+   if(allocated(KTON)) deallocate(KTON)
+   if(allocated(KBT)) deallocate(KBT)
+   if(allocated(lne)) deallocate(lne)
+   
+   if(allocated(lne0)) deallocate(lne0)
+   if(allocated(LNN)) deallocate(LNN)   
+   if(allocated(LNN0)) deallocate(LNN0)
+   if(allocated(ilin)) deallocate(ilin)
+   if(allocated(jlin)) deallocate(jlin)
+   if(allocated(linkcross)) deallocate(linkcross)
+   if(allocated(linkbadqual)) deallocate(linkbadqual)
+   
+   if(allocated(NETBR)) deallocate(NETBR)
+   if(allocated(IBN)) deallocate(IBN)
+   if(allocated(LIB)) deallocate(LIB)
+   if(allocated(K1BR)) deallocate(K1BR)  
+   if(allocated(NRLB)) deallocate(NRLB)
+   
+   !if(allocated(KN))   deallocate(KN)
+   !if(allocated(LC))   deallocate(LC)
+   !if(allocated(RLIN)) deallocate(RLIN)
+   !
+   !if(allocated(XK)) deallocate(XK)
+   !if(allocated(YK)) deallocate(YK)
+   !if(allocated(ZK)) deallocate(ZK)
+   !
+   !if(allocated(RNOD)) deallocate(RNOD)
+   !
+   !if(allocated(XK0)) deallocate(XK0) 
+   !if(allocated(YK0)) deallocate(YK0)    
+   !if(allocated(ZK0)) deallocate(ZK0) 
+   !
+   !if(allocated(NMK))  deallocate(NMK)        
+   !if(allocated(KC))   deallocate(KC)       
+   !if(allocated(NMK0)) deallocate(NMK0)        
+   !if(allocated(KC0))  deallocate(KC0)       
+   !if(allocated(NB))   deallocate(NB)     
+   
+   ! default initialize all variables
+   NUMK0     = 0
+   numk      = 0            
+   NUML0     = 0
+   NUML      = 0     
+   NUML1D    = 0         
+   NUMP0     = 0
+   NUMP      = 0     
+   nump1d2d  = 0      
+   nump1d2d0 = 0      
+   KN3TYP    = 2      
+   jconn     = 0
+   LNUMK     = 0
+   LNUML     = 0
+   nlinkcross = 0
+   nlinkbadortho = 0 
+   nlinktoosmall = 0
+   netflow = 2  
+   JOCHECKNET = 0
+   zkUNI    = -5d0                   
+   dcenterinside = 1d0               
+   removesmalllinkstrsh = 1d-1       
+   maxfaceallow = 4                  
+   NUMITCOURANT = 0                  
+   SMALLESTSIZEINCOURANT = 100d0     
+   TRIAREAREMFRAC = 0.2d0            
+   linmin = 0
+   linmax = 0
+   nodmin= 0
+   nodmax = 0
+   netcelmax = 0
+   netcelmin=0
+   jathindams = 0                    
+   M13QUAD = 0                       
+   cosphiutrsh = 0.5d0               
+   CORNERCOS   = 0.25d0             
+   TOOCLOSE = 0.001d0                
+   CONNECT1DEND = 200d0              
+   Unidx1D = 100d0                   
+   makeorthocenters = 0             
+   xkmin = 0
+   xkmax = 0
+   ykmin = 0
+   ykmax = 0
+   MXNETBR = 0
+   lasttopology = 0 
+   jaswan = 0
+   netstat = NETSTAT_CELLS_DIRTY
+   keepcircumcenters = 0
+   
+   ! return error
+   ierr = 0
+   
+   end function network_ggeo_data_destructor
+  
    end module network_ggeo_data
    
    module m_ggeo_cutcells

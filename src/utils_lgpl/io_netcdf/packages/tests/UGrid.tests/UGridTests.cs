@@ -432,7 +432,7 @@ namespace UGrid.tests
 
 
                 var gridwrapper = new GridGeomLibWrapper();
-                ierr = gridwrapper.ggeo_create_edge_nodes(ref c_branchoffset, ref c_branchlength, ref c_branchidx, ref c_sourcenodeid, ref c_targetnodeid, ref c_edgenodes,ref nBranches, ref nmeshpoints, ref nedgenodes);
+                ierr = gridwrapper.ggeo_create_edge_nodes(ref c_branchoffset, ref c_branchlength, ref c_branchidx, ref c_sourcenodeid, ref c_targetnodeid, ref c_edgenodes,ref nBranches, ref nmeshpoints, ref nedgenodes, ref startIndex);
                 Assert.That(ierr, Is.EqualTo(0));
                 
                 //3. Create the node branchidx, offsets, meshnodeidsinfo

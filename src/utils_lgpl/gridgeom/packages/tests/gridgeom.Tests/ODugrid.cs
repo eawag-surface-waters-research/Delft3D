@@ -374,6 +374,7 @@ namespace gridgeom.Tests
             int twodmaxnumfacenodes = 4;
             int twodnumlayer = 0;
             int twodlayertype = 0;
+            int startIndex = 1; // the indexes in the array are zero based
 
             //mesh1d
             //discretization points information
@@ -459,13 +460,23 @@ namespace gridgeom.Tests
 
             //7. fill kn (Herman datastructure) for creating the links
             var wrapperGridgeom = new GridGeomLibWrapper();
-            ierr = wrapperGridgeom.ggeo_convert_1d_arrays(ref c_meshXCoords, ref c_meshYCoords, ref c_branchoffset, ref c_branchlength, ref c_branchids, ref c_sourcenodeid, ref c_targetnodeid, ref nbranches, ref nmeshpoints);
+            ierr = wrapperGridgeom.ggeo_convert_1d_arrays(ref c_meshXCoords, ref c_meshYCoords, ref c_branchoffset, ref c_branchlength, ref c_branchids, ref c_sourcenodeid, ref c_targetnodeid, ref nbranches, ref nmeshpoints, ref startIndex);
             
             Assert.That(ierr, Is.EqualTo(0));
             ierr = wrapperGridgeom.ggeo_convert(ref meshtwod, ref meshtwoddim);
             Assert.That(ierr, Is.EqualTo(0));
 
             //9. make the links
+            ierr = wrapperGridgeom.ggeo_make1D2Dinternalnetlinks();
+            Assert.That(ierr, Is.EqualTo(0));
+
+            //10. check if we can call ggeo_get_links_count two times: we  need to (1) deallocate the memory stored in network_ggeo_data and (2) reload the 1d and 2d arrays in memory
+            ierr = wrapperGridgeom.ggeo_deallocate();
+            Assert.That(ierr, Is.EqualTo(0));
+            ierr = wrapperGridgeom.ggeo_convert_1d_arrays(ref c_meshXCoords, ref c_meshYCoords, ref c_branchoffset, ref c_branchlength, ref c_branchids, ref c_sourcenodeid, ref c_targetnodeid, ref nbranches, ref nmeshpoints, ref startIndex);
+            Assert.That(ierr, Is.EqualTo(0));
+            ierr = wrapperGridgeom.ggeo_convert(ref meshtwod, ref meshtwoddim);
+            Assert.That(ierr, Is.EqualTo(0));
             ierr = wrapperGridgeom.ggeo_make1D2Dinternalnetlinks();
             Assert.That(ierr, Is.EqualTo(0));
 
@@ -525,6 +536,7 @@ namespace gridgeom.Tests
             int twodmaxnumfacenodes = 4;
             int twodnumlayer = 0;
             int twodlayertype = 0;
+            int startIndex = 1;
 
             //mesh1d
             //discretization points information
@@ -606,9 +618,7 @@ namespace gridgeom.Tests
 
             //7. fill kn (Herman datastructure) for creating the links
             var wrapperGridgeom = new GridGeomLibWrapper();
-
-
-            ierr = wrapperGridgeom.ggeo_convert_1d_arrays(ref c_meshXCoords, ref c_meshYCoords, ref c_branchoffset, ref c_branchlength, ref c_branchids, ref c_sourcenodeid, ref c_targetnodeid, ref nbranches, ref nmeshpoints);
+            ierr = wrapperGridgeom.ggeo_convert_1d_arrays(ref c_meshXCoords, ref c_meshYCoords, ref c_branchoffset, ref c_branchlength, ref c_branchids, ref c_sourcenodeid, ref c_targetnodeid, ref nbranches, ref nmeshpoints, ref startIndex);
             Assert.That(ierr, Is.EqualTo(0));
             ierr = wrapperGridgeom.ggeo_convert(ref meshtwod, ref meshtwoddim);
             Assert.That(ierr, Is.EqualTo(0));
@@ -622,6 +632,7 @@ namespace gridgeom.Tests
             ierr = wrapperGridgeom.ggeo_get_links_count(ref n1d2dlinks);
             Assert.That(ierr, Is.EqualTo(0));
 
+
             //11. get the links: arrayfrom = 2d cell index, arrayto = 1d node index 
             IntPtr c_arrayfrom = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * n1d2dlinks); //2d cell number
             IntPtr c_arrayto = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * n1d2dlinks); //1d node
@@ -634,12 +645,6 @@ namespace gridgeom.Tests
             Marshal.Copy(c_arrayfrom, rc_arrayfrom, 0, n1d2dlinks);
             Marshal.Copy(c_arrayto, rc_arrayto, 0, n1d2dlinks);
             
-            //for (int i = 0; i < n1d2dlinks; i++)
-            //{
-            //    Assert.That(rc_arrayfrom[i], Is.EqualTo(arrayfrom[i]));
-            //    Assert.That(rc_arrayto[i], Is.EqualTo(arrayto[i]));
-            //}
-
             //for writing the links look io_netcdf ionc_def_mesh_contact, ionc_put_mesh_contact 
 
             //Free 2d arrays
@@ -657,6 +662,6 @@ namespace gridgeom.Tests
             Marshal.FreeCoTaskMem(c_arrayfrom);
             Marshal.FreeCoTaskMem(c_arrayto);
         }
-
+        
     }
 }

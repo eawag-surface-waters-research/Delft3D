@@ -11,6 +11,7 @@
    public :: ggeo_get_links_count
    public :: ggeo_get_links
    public :: ggeo_create_edge_nodes
+   public :: ggeo_deallocate
    
    !All subroutines are made private (we do not expose them for now)
    private
@@ -164,7 +165,7 @@
       CALL AERR('XK (KMAX), YK (KMAX), ZK (KMAX), KC (KMAX), NMK (KMAX), RNOD(KMAX)', IERR, 7*KMAX)
 
       DO K = 1,KMAX
-         IF (K .LE. SIZE(NMK0) ) THEN
+         IF (allocated(NMK0).and.(K .LE. SIZE(NMK0))) THEN
             KNXX = MAX(NMK0(K),KNX)
          ELSE
             KNXX = KNX
@@ -774,19 +775,19 @@
       ! We can safely ignore it here, but won't, because this saves some
       ! realloc costs for xz, yz in flow_geominit.
       numc = max(ndx,nump)
-      if (numc > size(xz)) then
+      if (numc > size(xz).or.(.not.allocated(xz))) then
          call realloc(xz, numc, stat=ierr, keepExisting=.false.)
          call aerr('xz(numc)',IERR, numc)
          call realloc(yz, numc, stat=ierr, keepExisting=.false.)
          call aerr('yz(numc)',IERR, numc)
       end if
-      if (numc > size(xzw)) then
+      if (numc > size(xzw).or.(.not.allocated(xzw))) then
          call realloc(xzw, numc, stat=ierr, keepExisting=.false.)
          call aerr('xzw(numc)',IERR, numc)
          call realloc(yzw, numc, stat=ierr, keepExisting=.false.)
          call aerr('yzw(numc)',IERR, numc)
       end if
-      if (numc > size(ba)) then
+      if (numc > size(ba).or.(.not.allocated(ba))) then
          call realloc(ba, numc, stat=ierr, keepExisting=.false.)
          call aerr('ba(numc)',IERR, numc)
       endif
@@ -3690,6 +3691,17 @@
 
    end function ggeo_convert
    
+   function ggeo_deallocate() result (ierr)
+   
+   use network_ggeo_data
+   use m_ggeo_dimens
+   
+   integer ierr
+   ierr = network_ggeo_data_destructor()
+   ierr = m_ggeo_dimens_destructor()
+   
+   end function 
+   
    !< get the number of created links
    function ggeo_get_links_count(nlinks) result(ierr)
    
@@ -3736,13 +3748,13 @@
    end function ggeo_get_links
     
    !< create meshgeom from array
-   function ggeo_convert_1d_arrays(nodex, nodey, branchoffset, branchlength, branchid, sourcenodeid, targetnodeid, meshgeom) result(ierr)
+   function ggeo_convert_1d_arrays(nodex, nodey, branchoffset, branchlength, branchid, sourcenodeid, targetnodeid, meshgeom, startindex) result(ierr)
    
    use meshdata
    use m_alloc
    
    double precision, intent(in)         :: nodex(:), nodey(:), branchoffset(:), branchlength(:)
-   integer, intent(in)                  :: branchid(:), sourcenodeid(:), targetnodeid(:)
+   integer, intent(in)                  :: branchid(:), sourcenodeid(:), targetnodeid(:), startindex
    type(t_ug_meshgeom), intent(inout)   :: meshgeom
    integer                              :: ierr, i, k, nnetworknodes, noverlaps, nbranches
    integer, allocatable                 :: connectedBranches(:)      
@@ -3778,7 +3790,7 @@
    meshgeom%branchids = branchid
 
    !Calculate the edge_nodes
-   ierr = ggeo_create_edge_nodes(meshgeom%branchids, branchoffset, sourcenodeid, targetnodeid, meshgeom%edge_nodes, branchlength)
+   ierr = ggeo_create_edge_nodes(meshgeom%branchids, branchoffset, sourcenodeid, targetnodeid, meshgeom%edge_nodes, branchlength, startindex)
    
    end function ggeo_convert_1d_arrays
    
@@ -3786,49 +3798,54 @@
    !< Algorithm to calculate the edgenodes array. The only assumption made here is that the mesh nodes are written consecutively,
    !< in the same direction indicated by the sourcenodeid and the targetnodeid arrays (e.g. 
    !< 1  -a-b-c-> 2 and not 1 -c-a-b-> 2 where 1 and 2 are network nodes and a, b, c are mesh nodes )
-   function ggeo_create_edge_nodes(branchids, branchoffset, sourcenodeid, targetnodeid, edgenodes, branchlength) result(ierr) !edge_nodes
+   function ggeo_create_edge_nodes(branchids, branchoffset, sourcenodeid, targetnodeid, edgenodes, branchlength, startindex) result(ierr) !edge_nodes
 
-   integer, intent(in)          :: branchids(:), sourcenodeid(:), targetnodeid(:)
+   integer, intent(in)          :: branchids(:), sourcenodeid(:), targetnodeid(:), startindex
    double precision, intent(in) :: branchoffset(:),branchlength(:)
    integer, intent(inout)       :: edgenodes(:,:)
    integer, allocatable         :: meshnodemapping(:),internalnodeindexses(:)
-   integer                      :: nnetworknodes, nBranches,nmeshnodes, ierr , k , n, br, st, en, kk
+   integer                      :: nnetworknodes, nBranches,nmeshnodes, ierr , k , n, br, st, en, kk, firstvalidarraypos
 
    ierr = 0
-
+   firstvalidarraypos = 0
+   
+   if (startindex.eq.0) then
+      firstvalidarraypos = 1
+   endif
+   
    !Build mesh mapping: assuming not overlapping mesh nodes
-   nnetworknodes = max(maxval(sourcenodeid),maxval(targetnodeid))
+   nnetworknodes = max(maxval(sourcenodeid),maxval(targetnodeid)) + firstvalidarraypos
    nmeshnodes = size(branchids)
    nbranches = size(sourcenodeid)
    allocate(meshnodemapping(nnetworknodes))
    allocate(internalnodeindexses(nmeshnodes))
-   
+
    !map the mesh nodes 
    meshnodemapping = -1
    do br = 1, nbranches
       do n=1, nmeshnodes
-         if ((branchoffset(n).eq.0).and.(branchids(n).eq.br)) then
-            meshnodemapping(sourcenodeid(br)) = n
+         if ((abs(branchoffset(n)).le.1e-6).and.(branchids(n)+firstvalidarraypos.eq.br)) then
+            meshnodemapping(sourcenodeid(br)+firstvalidarraypos) = n
          endif
-         if ((branchoffset(n).eq.branchlength(br)).and.(branchids(n).eq.br)) then
-            meshnodemapping(targetnodeid(br)) = n
+         if ((abs(branchoffset(n)-branchlength(br)).le.1e-6).and.(branchids(n)+firstvalidarraypos.eq.br)) then
+            meshnodemapping(targetnodeid(br)+firstvalidarraypos) = n
          endif
       enddo
    enddo
 
    k = 0
    do br = 1, nbranches
-      if ((meshnodemapping(sourcenodeid(br)).eq.-1).or.(meshnodemapping(targetnodeid(br)).eq.-1)) then
+      if ((meshnodemapping(sourcenodeid(br)+firstvalidarraypos).eq.-1).or.(meshnodemapping(targetnodeid(br)+firstvalidarraypos).eq.-1)) then
          ierr = -1
          return
       endif
       ! starting and ending nodes    
-      st =  meshnodemapping(sourcenodeid(br))
-      en =  meshnodemapping(targetnodeid(br))
+      st =  meshnodemapping(sourcenodeid(br)+firstvalidarraypos)
+      en =  meshnodemapping(targetnodeid(br)+firstvalidarraypos)
       !the nodes between
       kk =  0
       do n=1, nmeshnodes
-         if(branchids(n).eq.br.and.(n.ne.st).and.(n.ne.en)) then
+         if(branchids(n)+firstvalidarraypos.eq.br.and.(n.ne.st).and.(n.ne.en)) then
             kk = kk + 1
             internalnodeindexses(kk) = n
          endif

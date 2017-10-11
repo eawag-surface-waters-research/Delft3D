@@ -16,6 +16,22 @@
    implicit none
    integer                       :: MMAX_old = 3, NMAX_old = 3
    integer                       :: KMAX, LMAX, KNX, MXB
+   
+   contains
+   
+   function m_ggeo_dimens_destructor() result (ierr)
+   
+   integer ierr
+   MMAX_old = 3
+   NMAX_old = 3
+   KMAX = 0
+   LMAX = 0
+   KNX   = 0
+   MXB  = 0
+   
+   ierr = 0
+   end function m_ggeo_dimens_destructor
+
    end module m_ggeo_dimens
 
    module m_ggeo_landboundary
