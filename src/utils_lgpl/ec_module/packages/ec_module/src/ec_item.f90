@@ -301,58 +301,57 @@ module m_ec_item
          integer                            :: i            !< loop variable
          integer                            :: j            !< loop variable
          character(len=1000)                :: message
-         logical, dimension(:), allocatable :: skipweights  !< Flags for each connection if weight computation can be skipped
+         logical, dimension(:), allocatable :: skipWeights  !< Flags for each connection if weight computation can be skipped
          !
          success = .true.
-         allocate(skipweights(item%nConnections), stat = istat)
+         allocate(skipWeights(item%nConnections), stat = istat)
          if (istat /= 0) then
             call setECMessage("ERROR: ec_item::ecItemUpdateTargetItem: Unable to allocate additional memory")
             success = .false.
-            return
          end if
          !
          ! Initialize skipweights array to true
          ! When updating source items:
          ! For each connection i:
          ! If there is one (or more) sourceItem(s) that needs weights then skipweights(i)=false
-         skipweights = .true.
-         !
-         ! update the source Items
-         do i=1, item%nConnections
-            do j=1, item%connectionsPtr(i)%ptr%nSourceItems
-               if (.not. (ecItemUpdateSourceItem(instancePtr, item%connectionsPtr(i)%ptr%sourceItemsPtr(j)%ptr, timesteps, &
-                          item%connectionsPtr(i)%ptr%converterPtr%interpolationType))) then
-                  !
-                  ! No interpolation in time possible. => skipweights(i) is allowed to stay true
-                  ! Check whether extrapolation is allowed
-                  if (item%connectionsPtr(i)%ptr%converterPtr%interpolationType /= interpolate_time_extrapolation_ok) then
-                     write(message,'(a,i5.5)') "Updating source failed, quantity='"//trim(item%connectionsPtr(i)%ptr%sourceItemsPtr(j)%ptr%QUANTITYPTR%NAME)   &
-                              &       //"', item=",item%connectionsPtr(i)%ptr%sourceItemsPtr(j)%ptr%id
-                     call setECMessage(trim(message))
-                     success = .false.
-                     deallocate(skipweights, stat = istat)
-                     return
+         if (success) then
+            skipweights = .true.
+            !
+            ! update the source Items
+            UpdateSrc: do i=1, item%nConnections
+               do j=1, item%connectionsPtr(i)%ptr%nSourceItems
+                  if (.not. (ecItemUpdateSourceItem(instancePtr, item%connectionsPtr(i)%ptr%sourceItemsPtr(j)%ptr, timesteps, &
+                             item%connectionsPtr(i)%ptr%converterPtr%interpolationType))) then
+                     !
+                     ! No interpolation in time possible. => skipWeights(i) is allowed to stay true
+                     ! Check whether extrapolation is allowed
+                     if (item%connectionsPtr(i)%ptr%converterPtr%interpolationType /= interpolate_time_extrapolation_ok) then
+                        write(message,'(a,i5.5)') "Updating source failed, quantity='" &
+                                 &       //trim(item%connectionsPtr(i)%ptr%sourceItemsPtr(j)%ptr%quantityPtr%name)   &
+                                 &       //"', item=",item%connectionsPtr(i)%ptr%sourceItemsPtr(j)%ptr%id
+                        call setECMessage(trim(message))
+                        success = .false.
+                        exit UpdateSrc
+                     end if
+                  else
+                     skipWeights(i) = .false.
                   end if
-               else
-                  skipweights(i) = .false.
-               end if
-            end do
-         end do
+               end do
+            end do UpdateSrc
+         endif
          ! update the weight factors
          if (success) then
-            do i=1, item%nConnections
+            UpdateWeight: do i=1, item%nConnections
                if (.not. skipweights(i)) then
                   if (.not. (ecConverterUpdateWeightFactors(instancePtr, item%connectionsPtr(i)%ptr))) then
                      write(message,'(a,i5.5)') "Updating weights failed, connection='",item%connectionsPtr(i)%ptr%id
                      call setECMessage(trim(message))
                      success = .false.
-                     deallocate(skipweights, stat = istat)
-                     return
+                     exit UpdateWeight
                   end if
                end if
-            end do
+            end do UpdateWeight
          end if
-         deallocate(skipweights, stat = istat)
          ! Always try to perform the conversions, which update the target Items
          if (success) then
             do i=1, item%nConnections
@@ -360,10 +359,19 @@ module m_ec_item
                   write(message,'(a,i5.5)') "Converter operation failed, connection='",item%connectionsPtr(i)%ptr%id
                   call setECMessage(trim(message))
                   success = .false.
-                  return
+                  exit
                end if
             end do
          end if
+
+         ! clean up
+         if (allocated(skipWeights)) then
+            deallocate(skipWeights, stat = istat)
+            if (istat /= 0) then
+               call setECMessage("Warning: deallocate skipWeights failed. Will continue.")
+               success = .false.
+            endif
+         endif
       end function ecItemUpdateTargetItem
       
       ! =======================================================================
