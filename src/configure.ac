@@ -92,6 +92,14 @@ dnl this variable ends up in the makefile.
 AC_SUBST(dolcli)
 AM_CONDITIONAL([ENABLE_DOLCLI], [test x$enableval = xyes])
 
+AC_ARG_WITH(netcdf,[AS_HELP_STRING([--with-netcdf],[Build with netcdf support @<:@default=check@:>@])], [],[with_netcdf=check])
+AS_IF([test "x$with_netcdf" != "xno"],
+        [
+        PKG_CHECK_MODULES([NETCDF], [netcdf])
+        AC_DEFINE([HAVE_NETCDF],1,[Defined if you have NETCDF library.])
+        ],
+        [])
+AM_CONDITIONAL([USENETCDF], test "x$with_netcdf" != "xno")
 AC_LANG_POP
 
 ## This is copied from the libtool examples
