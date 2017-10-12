@@ -66,8 +66,10 @@
 
 #include <cstddef>
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <mpi.h>
+#include <map>
 
 
 class Dimr;
@@ -215,6 +217,26 @@ struct dimr_couple_item {
     double     * targetVarPtr;       // idem
 };
 
+typedef struct netcdf_references netcdf_references;
+struct netcdf_references
+{
+    int   strlenDim;
+    int   timeDim;
+    int   timeVar;
+    int * item_values;
+    int * item_variables;
+};
+
+// A logger logs values that are exhanged between two components
+// Corresponds with a logger block in config.xml
+typedef struct dimr_logger dimr_logger;
+struct dimr_logger
+{
+	const char        * workingDir;
+	const char        * outputFile;
+    netcdf_references * netcdfReferences;
+};
+
 // A coupler defines the communication between two components, one coupler for each direction
 // Corresponds with a coupler block in config.xml
 typedef struct dimr_coupler dimr_coupler;
@@ -226,7 +248,9 @@ struct dimr_coupler {
     dimr_component   *   targetComponent;     // idem
     unsigned int         numItems;
     dimr_couple_item *   items;               // Array of items defining this coupler
+	dimr_logger      *   logger;
 };
+
 // Array of all couplers
 typedef struct DIMR_COUPLERS {
     unsigned int numCouplers;
@@ -334,7 +358,9 @@ class Dimr {
 
         dimr_coupler *   getCoupler     (const char *);
 
-        void           char_to_ints     (char *, int **, int *);		
+        void           char_to_ints     (char *, int **, int *);
+
+        map<string, int> ncfiles;
     };
 
 

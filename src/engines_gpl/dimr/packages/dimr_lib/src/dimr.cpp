@@ -54,12 +54,17 @@
 
 
 #include <typeinfo>
+#include <filesystem>
 using namespace std;
 
 #include <string>
 #include <sstream>
 #include <math.h>
 #include <mpi.h>
+#include <netcdf.h>
+#include <ctime>
+# include <stdio.h>
+#include <fstream>
 
 #if defined (WIN32)
 //#  include "getopt.h"
@@ -69,6 +74,7 @@ using namespace std;
 #include <errno.h>
 #  include <io.h>
 #  include <sys/stat.h>
+
 #  define strdup _strdup
 #  define chdir _chdir
 #  define getcwd _getcwd
@@ -560,6 +566,15 @@ BMI_API void set_var(const char * key, const void * value) {
 
 
 //------------------------------------------------------------------------------
+string GetLoggerFilename(dimr_logger* logger) {
+    string fileName = logger->workingDir;
+    fileName += '/';
+    fileName += logger->outputFile;
+    return fileName;
+}
+
+
+//------------------------------------------------------------------------------
 int dimr_component::dllSetKeyVals (keyValueLL * kv) {
         // Pass parameters for the first controll block's component: parameters
         int count = 0;
@@ -607,6 +622,9 @@ Dimr::~Dimr (void) {
     // couplersList
     for (int i = 0 ; i < couplersList.numCouplers ; i++) {
         delete [] couplersList.couplers[i].items;
+		if (couplersList.couplers[i].logger != NULL) {
+			delete couplersList.couplers[i].logger;
+		}
     }
     delete [] couplersList.couplers;
     // control
@@ -901,6 +919,96 @@ void Dimr::runParallelInit (dimr_control_block * cb) {
                             free(gtargets);
                         }
                     }
+
+					// create netcdf logfiles
+					if (thisCoupler->logger != NULL)
+					{
+						// create netcdf file in workingdir
+
+                        string fileName = GetLoggerFilename(thisCoupler->logger);
+
+                        // write NetCDF file
+
+                        int ncid = -1;
+                        if (nc_create(fileName.c_str(), NC_CLOBBER, &ncid))
+                            throw Exception(true, Exception::ERR_OS, "Could not create NetCDF file at location \"%s\".", fileName);
+                        ncfiles[fileName] = ncid;
+
+                        // write global attributes
+
+					    time_t now;
+                        time(&now);
+                        char buf[sizeof("2017-10-10T16:57:32Z")+1];
+                        strftime(buf, sizeof buf, "%Y-%m-%dT%H:%M:%SZ", gmtime(&now));
+
+                        const char institution[] = "Deltares";
+                        nc_put_att_text(ncid, NC_GLOBAL, "institution", strlen(institution), institution);
+                        const char references[] = "https://www.deltares.nl";
+                        nc_put_att_text(ncid, NC_GLOBAL, "references", strlen(references), references);
+                        std::ostringstream source;
+                        source << "DIMR "; // << getversionstring_dimr_lib();
+                        string sourcestr(source.str());
+                        nc_put_att_text(ncid, NC_GLOBAL, "source", strlen(sourcestr.c_str()), sourcestr.c_str());
+                        std::ostringstream history;
+                        history << "Created on " << buf << ", DIMR.";
+                        string historystr(history.str());
+                        nc_put_att_text(ncid, NC_GLOBAL, "history", strlen(historystr.c_str()), historystr.c_str());
+                        std::ostringstream title;
+                        //char sourceComponentVersion[256], targetComponentVersion[256];
+                        //thisCoupler->sourceComponent->dllGetAttribute("version", sourceComponentVersion);
+                        //thisCoupler->targetComponent->dllGetAttribute("version", targetComponentVersion);
+                        //string sourceComponentVersionStr(sourceComponentVersion);
+                        //string targetComponentVersionStr(targetComponentVersion);
+                        //title << "Data transferred from " << thisCoupler->sourceComponentName << " " << sourceComponentVersionStr
+                        //      << " to " << thisCoupler->targetComponentName << " " << targetComponentVersionStr;
+                        title << "todo";
+                        string titlestr(title.str());
+                        nc_put_att_text(ncid, NC_GLOBAL, "title", strlen(titlestr.c_str()), titlestr.c_str());
+                        const char conventions[] = "CF-1.6";
+                        nc_put_att_text(ncid, NC_GLOBAL, "conventions", strlen(conventions), conventions);
+                        
+                        // write dimensions
+
+                        nc_def_dim(ncid, "strlen", 256, &thisCoupler->logger->netcdfReferences->strlenDim);
+                        nc_def_dim(ncid, "time", NC_UNLIMITED, &thisCoupler->logger->netcdfReferences->timeDim);
+
+                        nc_def_var(ncid, "time", NC_DOUBLE, 1, &thisCoupler->logger->netcdfReferences->timeDim, &thisCoupler->logger->netcdfReferences->timeVar);
+                        const char longnametime[] = "time";
+                        nc_put_att_text(ncid, thisCoupler->logger->netcdfReferences->timeVar, "long_name", sizeof(longnametime), longnametime);
+                        const char units[] = "seconds since TODO_STARTTIJD_BEPALEN_";
+                        nc_put_att_text(ncid, thisCoupler->logger->netcdfReferences->timeVar, "units", sizeof(units), units);
+                        const char axis[] = "T";
+                        nc_put_att_text(ncid, thisCoupler->logger->netcdfReferences->timeVar, "axis", sizeof(axis), axis);
+
+                        // write variables
+
+                        thisCoupler->logger->netcdfReferences->item_values = new int[thisCoupler->numItems];
+                        thisCoupler->logger->netcdfReferences->item_variables = new int[thisCoupler->numItems];
+                        for (int k = 0; k < thisCoupler->numItems; k++)
+                        {
+                            std::ostringstream oss;
+                            oss << "item" << k + 1 << "_nValues";
+                            string valuestr(oss.str());
+                            nc_def_dim(ncid, valuestr.c_str(), 1, &thisCoupler->logger->netcdfReferences->item_values[k]);
+
+                            int dimensions[2] = { thisCoupler->logger->netcdfReferences->timeDim, thisCoupler->logger->netcdfReferences->item_values[k] };
+                            int dummyVar;
+                            std::ostringstream varName;
+                            varName << "item" << k + 1 << "_values";
+                            string varnamestr(varName.str());
+                            nc_def_var(ncid, varnamestr.c_str(), NC_DOUBLE, 2, dimensions, &thisCoupler->logger->netcdfReferences->item_variables[k]);
+
+                            std::ostringstream itemValuesLongName;
+                            itemValuesLongName << thisCoupler->sourceComponentName << "-" << thisCoupler->items[k].sourceName
+                                << " " << thisCoupler->targetComponentName << "-" << thisCoupler->items[k].targetName;
+                            string itemvaluesstr(itemValuesLongName.str());
+                            nc_put_att_text(ncid, thisCoupler->logger->netcdfReferences->item_variables[k], "long_name", sizeof(itemvaluesstr.c_str()), itemvaluesstr.c_str());
+                        }
+
+                        nc_enddef(ncid);
+                    }
+
+                    // Het hele spul MOET NAAR DELTARES_COMMON_C !!!
                 }
             }
         }
@@ -947,6 +1055,7 @@ void Dimr::runParallelUpdate (dimr_control_block * cb, double tStep) {
     //
     // TIME LOOP
     //
+    int timeIndexCounter = 0;
     while (*currentTime < masterComponent->tNext) {
         //
         // define tStep
@@ -1033,8 +1142,19 @@ void Dimr::runParallelUpdate (dimr_control_block * cb, double tStep) {
                             dimr_coupler * thisCoupler = cb->subBlocks[i].subBlocks[j].unit.coupler;
                             double * transferValuePtr;
                             log->Write (DEBUG, my_rank, "%10.1f:    %s.communicate", *currentTime, thisCoupler->name);
+
+                            // log netcdf time variable
+                            if (thisCoupler->logger != NULL) {
+                                string fileName = GetLoggerFilename(thisCoupler->logger);
+
+                                int ncid = ncfiles[fileName];
+                                size_t index[] = { timeIndexCounter };
+                                nc_put_var1_double(ncid, thisCoupler->logger->netcdfReferences->timeVar, index, currentTime);
+                            }
+
                             for (int k = 0 ; k < thisCoupler->numItems ; k++) {
                                 log->Write (ALL, my_rank, "    %s -> %s", thisCoupler->items[k].sourceName, thisCoupler->items[k].targetName);
+
                                 // Getting and Setting of data is split to enable
                                 // transferring data, possibly inbetween different partitions
                                 // TODO: This does not work for arrays (yet), only scalar double
@@ -1065,6 +1185,15 @@ void Dimr::runParallelUpdate (dimr_control_block * cb, double tStep) {
                                          thisCoupler->targetComponent->numProcesses,
                                          thisCoupler->items[k].targetProcess,
                                          transferValuePtr);
+
+
+                                if (thisCoupler->logger != NULL) {
+                                    string fileName = GetLoggerFilename(thisCoupler->logger);
+
+                                    int ncid = ncfiles[fileName];
+                                    size_t indices[] = { timeIndexCounter, k };
+                                    nc_put_var1_double(ncid, thisCoupler->logger->netcdfReferences->item_variables[k], indices, thisCoupler->items[k].sourceVarPtr);
+                                }
                             }
                         }
                     }
@@ -1078,6 +1207,7 @@ void Dimr::runParallelUpdate (dimr_control_block * cb, double tStep) {
                 }
             }
         }
+        timeIndexCounter++;
     }
 }
 
@@ -1303,12 +1433,21 @@ void Dimr::runParallelFinish (dimr_control_block * cb) {
                     (cb->subBlocks[i].subBlocks[j].unit.component->dllFinalize) ();
                     timerEnd(cb->subBlocks[i].subBlocks[j].unit.component);
                     }
+				else { //coupler
+					dimr_coupler * thisCoupler = cb->subBlocks[i].subBlocks[j].unit.coupler;
+					if (thisCoupler->logger != NULL) {
+                        string fileName = GetLoggerFilename(thisCoupler->logger);
+                        int ncid = ncfiles[fileName];
+                        if (ncid >= 0) {
+                            // todo: what if the computation crashes - can we read the file?
+                            nc_close(ncid);
+                        }
+					}
+				}
             }
         }
     }
 }
-
-
 
 //------------------------------------------------------------------------------
 void Dimr::scanConfigFile (void) {
@@ -1411,7 +1550,7 @@ void Dimr::scanComponent(XmlTree * xmlComponent, dimr_component * newComp) {
     for (int i=0; i < libLen; i++) {
         libNameLowercase[i] = (tolower(libNameLowercase[i]));
     }
-    if (strstr(libNameLowercase, "rtc") != NULL) {
+    if (strstr(libNameLowercase, "fbc") != NULL) {
         newComp->type = COMP_TYPE_RTC;
     } else if (strstr(libNameLowercase, "wave") != NULL) {
         newComp->type = COMP_TYPE_WAVE;
@@ -1585,6 +1724,25 @@ void Dimr::scanCoupler(XmlTree * xmlCoupler, dimr_coupler * newCoup) {
             newItem->targetVarPtr = NULL;
         }
     }
+
+	// Logger (optional)
+    newCoup->logger = NULL;
+    XmlTree * logger = xmlCoupler->Lookup("logger");
+	if (logger != NULL) {
+		// Store settings in coupler's logger.
+		newCoup->logger = (dimr_logger*)malloc(sizeof(dimr_logger));
+        newCoup->logger->netcdfReferences = (netcdf_references*)malloc(sizeof(netcdf_references));
+
+		// Read workingDir
+		newCoup->logger->workingDir = logger->GetElement("workingDir");
+		if (newCoup->logger->workingDir == NULL)
+			throw Exception(true, Exception::ERR_INVALID_INPUT, "The coupler \"%s\"'s logger element does not contain a workingDir element.", newCoup->name);
+
+		// Read fileName
+        newCoup->logger->outputFile = logger->GetElement("outputFile");
+		if (newCoup->logger->outputFile == NULL)
+			throw Exception(true, Exception::ERR_INVALID_INPUT, "The coupler \"%s\"'s logger element does not contain an outputFile element.", newCoup->name);
+	}
 }
 
 
