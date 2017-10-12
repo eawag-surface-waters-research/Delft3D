@@ -310,12 +310,12 @@ module m_ec_item
             success = .false.
          end if
          !
-         ! Initialize skipweights array to true
+         ! Initialize skipWeights array to true
          ! When updating source items:
          ! For each connection i:
-         ! If there is one (or more) sourceItem(s) that needs weights then skipweights(i)=false
+         ! If there is one (or more) sourceItem(s) that needs weights then skipWeights(i)=false
          if (success) then
-            skipweights = .true.
+            skipWeights = .true.
             !
             ! update the source Items
             UpdateSrc: do i=1, item%nConnections
@@ -342,7 +342,7 @@ module m_ec_item
          ! update the weight factors
          if (success) then
             UpdateWeight: do i=1, item%nConnections
-               if (.not. skipweights(i)) then
+               if (.not. skipWeights(i)) then
                   if (.not. (ecConverterUpdateWeightFactors(instancePtr, item%connectionsPtr(i)%ptr))) then
                      write(message,'(a,i5.5)') "Updating weights failed, connection='",item%connectionsPtr(i)%ptr%id
                      call setECMessage(trim(message))
