@@ -36,7 +36,7 @@ AM_CXXFLAGS += -fPIC
 dimr_exe_LDADD = \
     $(top_builddir)/engines_gpl/dimr/packages/dimr_lib/src/libdimr.la \
     -ldl \
-    $(FCLIBS)
+    $(NETCDF_LIBS) $(FCLIBS)
 
 # dimr_exe_LDFLAGS = -export-dynamic
 

@@ -18,8 +18,8 @@ AM_CPPFLAGS = \
     -I$(STANDARD_C_INCLUDES) \
     -I../include
 
-AM_CFLAGS += -fPIC
-AM_CXXFLAGS += -fPIC
+AM_CFLAGS += -fPIC ${NETCDF_CFLAGS}
+AM_CXXFLAGS += -fPIC ${NETCDF_CFLAGS}
 
 #-------------------------------------------------------------------------------
 #Sources
