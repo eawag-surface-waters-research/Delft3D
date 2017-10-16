@@ -946,24 +946,41 @@ void Dimr::runParallelInit (dimr_control_block * cb) {
                         const char references[] = "https://www.deltares.nl";
                         nc_put_att_text(ncid, NC_GLOBAL, "references", strlen(references), references);
                         std::ostringstream source;
-                        source << "DIMR "; // << getversionstring_dimr_lib();
+                        source << "DIMR " << getfullversionstring_dimr_lib();
                         string sourcestr(source.str());
-                        nc_put_att_text(ncid, NC_GLOBAL, "source", strlen(sourcestr.c_str()), sourcestr.c_str());
+                        nc_put_att_text(ncid, NC_GLOBAL, "source", sourcestr.size(), sourcestr.c_str());
                         std::ostringstream history;
                         history << "Created on " << buf << ", DIMR.";
                         string historystr(history.str());
-                        nc_put_att_text(ncid, NC_GLOBAL, "history", strlen(historystr.c_str()), historystr.c_str());
+                        nc_put_att_text(ncid, NC_GLOBAL, "history", historystr.size(), historystr.c_str());
                         std::ostringstream title;
-                        //char sourceComponentVersion[256], targetComponentVersion[256];
-                        //thisCoupler->sourceComponent->dllGetAttribute("version", sourceComponentVersion);
-                        //thisCoupler->targetComponent->dllGetAttribute("version", targetComponentVersion);
-                        //string sourceComponentVersionStr(sourceComponentVersion);
-                        //string targetComponentVersionStr(targetComponentVersion);
-                        //title << "Data transferred from " << thisCoupler->sourceComponentName << " " << sourceComponentVersionStr
-                        //      << " to " << thisCoupler->targetComponentName << " " << targetComponentVersionStr;
-                        title << "todo";
+                        const char * version = "version";
+                        char * sourceComponentVersion = new char[1024];
+					    char * targetComponentVersion = new char[1024];
+                        strcpy(sourceComponentVersion, "");
+                        strcpy(targetComponentVersion, "");
+                        if (thisCoupler->sourceComponent->dllGetAttribute != NULL) {
+                            thisCoupler->sourceComponent->dllGetAttribute(version, sourceComponentVersion);
+                        }
+                        if (thisCoupler->targetComponent->dllGetAttribute != NULL) {
+                            thisCoupler->targetComponent->dllGetAttribute(version, targetComponentVersion);
+                        }
+                        if (strlen(sourceComponentVersion) == 0){
+                            strcpy(sourceComponentVersion, "Unknown");
+                        }
+                        if (strlen(targetComponentVersion) == 0){
+                            strcpy(targetComponentVersion, "Unknown");
+                        }
+                        const string sourceComponentName(thisCoupler->sourceComponentName);
+                        const string targetComponentName(thisCoupler->targetComponentName);
+                        const string sourceComponentVersionStr(sourceComponentVersion);
+                        const string targetComponentVersionStr(targetComponentVersion);
+                        title << "Data transferred from " << sourceComponentName << " " << sourceComponentVersionStr
+                              << " to " << targetComponentName << " " << targetComponentVersionStr;
                         string titlestr(title.str());
-                        nc_put_att_text(ncid, NC_GLOBAL, "title", strlen(titlestr.c_str()), titlestr.c_str());
+                        nc_put_att_text(ncid, NC_GLOBAL, "title", titlestr.size(), titlestr.c_str());
+                        delete[] sourceComponentVersion;
+                        delete[] targetComponentVersion;
                         const char conventions[] = "CF-1.6";
                         nc_put_att_text(ncid, NC_GLOBAL, "conventions", strlen(conventions), conventions);
                         
@@ -988,21 +1005,25 @@ void Dimr::runParallelInit (dimr_control_block * cb) {
                         {
                             std::ostringstream oss;
                             oss << "item" << k + 1 << "_nValues";
-                            string valuestr(oss.str());
-                            nc_def_dim(ncid, valuestr.c_str(), 1, &thisCoupler->logger->netcdfReferences->item_values[k]);
+                            const string valuestr(oss.str());
+                            int status = nc_def_dim(ncid, valuestr.c_str(), 1, &thisCoupler->logger->netcdfReferences->item_values[k]);
+                            if (status != NC_NOERR) {
+                                throw Exception(true, Exception::ERR_OS, "Could not create dimension \"%s\".", valuestr);
+                            }
 
                             int dimensions[2] = { thisCoupler->logger->netcdfReferences->timeDim, thisCoupler->logger->netcdfReferences->item_values[k] };
                             int dummyVar;
                             std::ostringstream varName;
                             varName << "item" << k + 1 << "_values";
-                            string varnamestr(varName.str());
+                            const string varnamestr(varName.str());
                             nc_def_var(ncid, varnamestr.c_str(), NC_DOUBLE, 2, dimensions, &thisCoupler->logger->netcdfReferences->item_variables[k]);
 
                             std::ostringstream itemValuesLongName;
-                            itemValuesLongName << thisCoupler->sourceComponentName << "-" << thisCoupler->items[k].sourceName
-                                << " " << thisCoupler->targetComponentName << "-" << thisCoupler->items[k].targetName;
-                            string itemvaluesstr(itemValuesLongName.str());
-                            nc_put_att_text(ncid, thisCoupler->logger->netcdfReferences->item_variables[k], "long_name", sizeof(itemvaluesstr.c_str()), itemvaluesstr.c_str());
+                            const string sourceName = string(thisCoupler->items[k].sourceName);
+                            itemValuesLongName << string(thisCoupler->sourceComponentName) << ":" << sourceName
+                                << " -> " << string(thisCoupler->targetComponentName) << ":" << string(thisCoupler->items[k].targetName);
+                            const string itemvaluesstr(itemValuesLongName.str());
+                            nc_put_att_text(ncid, thisCoupler->logger->netcdfReferences->item_variables[k], "long_name", itemvaluesstr.size(), itemvaluesstr.c_str());
                         }
 
                         nc_enddef(ncid);
@@ -1191,8 +1212,10 @@ void Dimr::runParallelUpdate (dimr_control_block * cb, double tStep) {
                                     string fileName = GetLoggerFilename(thisCoupler->logger);
 
                                     int ncid = ncfiles[fileName];
-                                    size_t indices[] = { timeIndexCounter, k };
-                                    nc_put_var1_double(ncid, thisCoupler->logger->netcdfReferences->item_variables[k], indices, thisCoupler->items[k].sourceVarPtr);
+                                    size_t indices[] = { timeIndexCounter, 0 };
+                                    int status = nc_put_var1_double(ncid, thisCoupler->logger->netcdfReferences->item_variables[k], indices, thisCoupler->items[k].sourceVarPtr);
+                                    if (status != NC_NOERR)
+                                        throw Exception(true, Exception::ERR_OS, "Could not write value at index (%i, 0).", timeIndexCounter);
                                 }
                             }
                         }
