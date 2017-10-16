@@ -1664,6 +1664,13 @@ subroutine count_sed(lundia    ,error     ,lsed      ,lsedtot   , &
     !
     ! rhosol, namsed and sedtyp must always be allocated
     !
+    if (lsedtot == 0) then
+       message = 'No sediment fractions defined in ' // trim(filsed)
+       call write_error(message, unit=lundia)
+       error = .true.
+       return
+    endif
+    
                     allocate (sedpar%rhosol(lsedtot), stat = istat)
     if (istat == 0) allocate (sedpar%namsed(lsedtot), stat = istat)
     if (istat == 0) allocate (sedpar%sedtyp(lsedtot), stat = istat)
