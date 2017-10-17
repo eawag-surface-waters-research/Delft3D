@@ -73,8 +73,8 @@ subroutine ua_vt(facas,      facsk,        sws,      h,   &
    !
    dh = 0.03_fp
    dt = 1.25_fp
-   nh = floor(0.99_fp/dh);
-   nt = floor(50.0_fp/dt);
+   nh = floor(0.99_fp/dh)
+   nt = floor(50.0_fp/dt)
 
    ! compute dimensionless wave height and wave period in each grid point..
    h0 = min(nh*dh,max(dh,min(hrms,h)/max(h,1e-5_fp)))
