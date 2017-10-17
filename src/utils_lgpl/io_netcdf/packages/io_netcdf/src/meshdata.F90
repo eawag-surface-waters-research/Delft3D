@@ -52,35 +52,35 @@ type t_ug_meshgeom
    integer            :: nt_ngeometry       !< Number of geometrical points
    integer            :: start_index        !< The base index of the arrays
 
-   integer,      pointer :: edge_nodes(:,:) !< Edge-to-node mapping array.
-   integer,      pointer :: face_nodes(:,:) !< Face-to-node mapping array.
-   integer,      pointer :: edge_faces(:,:) !< Edge-to-face mapping array (optional, can be null()).
-   integer,      pointer :: face_edges(:,:) !< Face-to-edge mapping array (optional, can be null()).
-   integer,      pointer :: face_links(:,:) !< Face-to-face mapping array (optional, can be null()).
+   integer,      pointer :: edge_nodes(:,:) => null() !< Edge-to-node mapping array.
+   integer,      pointer :: face_nodes(:,:) => null() !< Face-to-node mapping array.
+   integer,      pointer :: edge_faces(:,:) => null() !< Edge-to-face mapping array (optional, can be null()).
+   integer,      pointer :: face_edges(:,:) => null() !< Face-to-edge mapping array (optional, can be null()).
+   integer,      pointer :: face_links(:,:) => null() !< Face-to-face mapping array (optional, can be null()).
    
    !Network1d variables
-   integer,      pointer :: branchids(:)               !< Branch id of each mesh node 
-   integer,      pointer :: nbranchgeometrynodes(:)    !< Number of geometry nodes in each branch
-   integer,      pointer :: nedge_nodes(:,:)         !< Start-end node of each branch (used to determine edge-node connectivity)
+   integer,      pointer :: branchids(:) => null()            !< Branch id of each mesh node 
+   integer,      pointer :: nbranchgeometrynodes(:) => null() !< Number of geometry nodes in each branch
+   integer,      pointer :: nedge_nodes(:,:) => null()        !< Start-end node of each branch (used to determine edge-node connectivity)
    
-   double precision, pointer :: nodex(:)       !< x-coordinates of the mesh nodes.
-   double precision, pointer :: nodey(:)       !< y-coordinates of the mesh nodes.
-   double precision, pointer :: nodez(:)       !< z-coordinates of the mesh nodes.
-   double precision, pointer :: edgex(:)       !< x-coordinates of the mesh edges.
-   double precision, pointer :: edgey(:)       !< y-coordinates of the mesh edges.
-   double precision, pointer :: edgez(:)       !< z-coordinates of the mesh edges.
-   double precision, pointer :: facex(:)       !< x-coordinates of the mesh faces.
-   double precision, pointer :: facey(:)       !< y-coordinates of the mesh faces.
-   double precision, pointer :: facez(:)       !< z-coordinates of the mesh faces.
+   double precision, pointer :: nodex(:)=> null()       !< x-coordinates of the mesh nodes.
+   double precision, pointer :: nodey(:)=> null()       !< y-coordinates of the mesh nodes.
+   double precision, pointer :: nodez(:)=> null()       !< z-coordinates of the mesh nodes.
+   double precision, pointer :: edgex(:)=> null()       !< x-coordinates of the mesh edges.
+   double precision, pointer :: edgey(:)=> null()       !< y-coordinates of the mesh edges.
+   double precision, pointer :: edgez(:)=> null()       !< z-coordinates of the mesh edges.
+   double precision, pointer :: facex(:)=> null()       !< x-coordinates of the mesh faces.
+   double precision, pointer :: facey(:)=> null()       !< y-coordinates of the mesh faces.
+   double precision, pointer :: facez(:)=> null()       !< z-coordinates of the mesh faces.
    
    !Mesh1d variables
-   double precision, pointer :: branchoffsets(:) !< Branch offset of each mesh node
-   double precision, pointer :: geopointsX(:)    !< x-coordinates of the geometry points.
-   double precision, pointer :: geopointsY(:)    !< y-coordinates of the geometry points.
-   double precision, pointer :: branchlengths(:) !< lengths of each branch
+   double precision, pointer :: branchoffsets(:)=> null() !< Branch offset of each mesh node
+   double precision, pointer :: geopointsX(:) => null()   !< x-coordinates of the geometry points.
+   double precision, pointer :: geopointsY(:) => null()   !< y-coordinates of the geometry points.
+   double precision, pointer :: branchlengths(:)=> null() !< lengths of each branch
    
-   double precision, pointer :: layer_zs(:)     !< Vertical coordinates of the mesh layers' center (either z or sigma).
-   double precision, pointer :: interface_zs(:) !< Vertical coordinates of the mesh layers' interface (either z or sigma).
+   double precision, pointer :: layer_zs(:) => null()    !< Vertical coordinates of the mesh layers' center (either z or sigma).
+   double precision, pointer :: interface_zs(:)=> null() !< Vertical coordinates of the mesh layers' interface (either z or sigma).
 
 end type t_ug_meshgeom
 
