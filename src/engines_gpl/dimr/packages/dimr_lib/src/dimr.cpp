@@ -931,7 +931,7 @@ void Dimr::runParallelInit (dimr_control_block * cb) {
 
                         int ncid = -1;
                         if (nc_create(fileName.c_str(), NC_CLOBBER, &ncid))
-                            throw Exception(true, Exception::ERR_OS, "Could not create NetCDF file at location \"%s\".", fileName);
+                            throw Exception(true, Exception::ERR_OS, "Could not create NetCDF file at location \"%s\".", fileName.c_str());
                         ncfiles[fileName] = ncid;
 
                         // write global attributes
@@ -1008,7 +1008,7 @@ void Dimr::runParallelInit (dimr_control_block * cb) {
                             const string valuestr(oss.str());
                             int status = nc_def_dim(ncid, valuestr.c_str(), 1, &thisCoupler->logger->netcdfReferences->item_values[k]);
                             if (status != NC_NOERR) {
-                                throw Exception(true, Exception::ERR_OS, "Could not create dimension \"%s\".", valuestr);
+                                throw Exception(true, Exception::ERR_OS, "Could not create dimension \"%s\".", valuestr.c_str());
                             }
 
                             int dimensions[2] = { thisCoupler->logger->netcdfReferences->timeDim, thisCoupler->logger->netcdfReferences->item_values[k] };
