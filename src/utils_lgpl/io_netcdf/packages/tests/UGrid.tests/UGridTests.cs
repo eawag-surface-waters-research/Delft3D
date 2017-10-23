@@ -420,7 +420,7 @@ namespace UGrid.tests
                 int meshid = -1;
 
                 //1. Create: the assumption here is that nedgenodes is known (we could move this calculation inside ionc_create_1d_mesh)
-                int ierr = wrapper.ionc_create_1d_mesh(ref ioncid, ref networkid, ref meshid, meshname, ref nmeshpoints, ref nedgenodes);
+                int ierr = wrapper.ionc_create_1d_mesh(ref ioncid, networkName, ref meshid, meshname, ref nmeshpoints, ref nedgenodes);
                 Assert.That(ierr, Is.EqualTo(0));
 
                 //2. Create the edge nodes (the algorithm is in gridgeom.dll, not in ionetcdf.dll)

@@ -12,6 +12,7 @@
    public :: ggeo_get_links
    public :: ggeo_create_edge_nodes
    public :: ggeo_deallocate
+   public :: ggeo_edge_nodes_count
    
    !All subroutines are made private (we do not expose them for now)
    private
@@ -3748,16 +3749,15 @@
    end function ggeo_get_links
     
    !< create meshgeom from array
-   function ggeo_convert_1d_arrays(nodex, nodey, branchoffset, branchlength, branchid, sourcenodeid, targetnodeid, meshgeom, startindex) result(ierr)
+   function ggeo_convert_1d_arrays(nodex, nodey, branchoffset, branchlength, branchidx, sourcenodeid, targetnodeid, meshgeom, startindex) result(ierr)
    
    use meshdata
    use m_alloc
    
    double precision, intent(in)         :: nodex(:), nodey(:), branchoffset(:), branchlength(:)
-   integer, intent(in)                  :: branchid(:), sourcenodeid(:), targetnodeid(:), startindex
+   integer, intent(in)                  :: branchidx(:), sourcenodeid(:), targetnodeid(:), startindex
    type(t_ug_meshgeom), intent(inout)   :: meshgeom
-   integer                              :: ierr, i, k, nnetworknodes, noverlaps, nbranches
-   integer, allocatable                 :: connectedBranches(:)      
+   integer                              :: ierr, numedge, nbranches    
    
    ierr = 0
    nbranches = size(sourcenodeid)
@@ -3765,9 +3765,31 @@
    meshgeom%numnode =  size(nodex,1)
    allocate(meshgeom%nodex(meshgeom%numnode))
    allocate(meshgeom%nodey(meshgeom%numnode))
-   allocate(meshgeom%branchids(size(branchid,1)))
+   allocate(meshgeom%branchidx(size(branchidx,1)))
    
-   !calculate the number of edge nodes, considering the overlaps 
+   ierr = ggeo_edge_nodes_count(sourcenodeid, targetnodeid, meshgeom%numnode, numedge)
+   meshgeom%numedge = numedge
+   allocate(meshgeom%edge_nodes(2, meshgeom%numedge))
+
+   !Assign the node coordinates
+   meshgeom%nodex      =  nodex
+   meshgeom%nodey      =  nodey
+   meshgeom%branchidx =  branchidx
+
+   !Calculate the edge_nodes
+   ierr = ggeo_create_edge_nodes(meshgeom%branchidx, branchoffset, sourcenodeid, targetnodeid, meshgeom%edge_nodes, branchlength, startindex)
+   
+   end function ggeo_convert_1d_arrays
+   
+   function ggeo_edge_nodes_count(sourcenodeid, targetnodeid, numnode, numedge) result(ierr)
+
+   integer, intent(in)     :: sourcenodeid(:), targetnodeid(:), numnode
+   integer, intent(inout)  :: numedge
+   integer                 :: ierr, i, k, nnetworknodes, noverlaps, nbranches
+   integer, allocatable    :: connectedBranches(:)  
+   
+   nbranches = size(sourcenodeid)
+   ! calculate the number of edge nodes, considering the overlaps 
    ! (if more nodes are shared, then we have less edge nodes)
    nnetworknodes = max(maxval(sourcenodeid),maxval(targetnodeid))
    allocate(connectedBranches(nnetworknodes))
@@ -3781,26 +3803,17 @@
       enddo
    enddo
    noverlaps = sum(connectedBranches) - nnetworknodes
-   meshgeom%numedge = meshgeom%numnode - (nBranches - noverlaps)
-   allocate(meshgeom%edge_nodes(2, meshgeom%numedge))
-
-   !Assign the node coordinates
-   meshgeom%nodex    =  nodex
-   meshgeom%nodey    =  nodey
-   meshgeom%branchids = branchid
-
-   !Calculate the edge_nodes
-   ierr = ggeo_create_edge_nodes(meshgeom%branchids, branchoffset, sourcenodeid, targetnodeid, meshgeom%edge_nodes, branchlength, startindex)
+   numedge = numnode - (nBranches - noverlaps)   
    
-   end function ggeo_convert_1d_arrays
+   end function ggeo_edge_nodes_count
    
    
    !< Algorithm to calculate the edgenodes array. The only assumption made here is that the mesh nodes are written consecutively,
    !< in the same direction indicated by the sourcenodeid and the targetnodeid arrays (e.g. 
    !< 1  -a-b-c-> 2 and not 1 -c-a-b-> 2 where 1 and 2 are network nodes and a, b, c are mesh nodes )
-   function ggeo_create_edge_nodes(branchids, branchoffset, sourcenodeid, targetnodeid, edgenodes, branchlength, startindex) result(ierr) !edge_nodes
+   function ggeo_create_edge_nodes(branchidx, branchoffset, sourcenodeid, targetnodeid, edgenodes, branchlength, startindex) result(ierr) !edge_nodes
 
-   integer, intent(in)          :: branchids(:), sourcenodeid(:), targetnodeid(:), startindex
+   integer, intent(in)          :: branchidx(:), sourcenodeid(:), targetnodeid(:), startindex
    double precision, intent(in) :: branchoffset(:),branchlength(:)
    integer, intent(inout)       :: edgenodes(:,:)
    integer, allocatable         :: meshnodemapping(:),internalnodeindexses(:)
@@ -3815,7 +3828,7 @@
    
    !Build mesh mapping: assuming not overlapping mesh nodes
    nnetworknodes = max(maxval(sourcenodeid),maxval(targetnodeid)) + firstvalidarraypos
-   nmeshnodes = size(branchids)
+   nmeshnodes = size(branchidx)
    nbranches = size(sourcenodeid)
    allocate(meshnodemapping(nnetworknodes))
    allocate(internalnodeindexses(nmeshnodes))
@@ -3824,10 +3837,10 @@
    meshnodemapping = -1
    do br = 1, nbranches
       do n=1, nmeshnodes
-         if ((abs(branchoffset(n)).le.1e-6).and.(branchids(n)+firstvalidarraypos.eq.br)) then
+         if ((abs(branchoffset(n)).le.1e-6).and.(branchidx(n)+firstvalidarraypos.eq.br)) then
             meshnodemapping(sourcenodeid(br)+firstvalidarraypos) = n
          endif
-         if ((abs(branchoffset(n)-branchlength(br)).le.1e-6).and.(branchids(n)+firstvalidarraypos.eq.br)) then
+         if ((abs(branchoffset(n)-branchlength(br)).le.1e-6).and.(branchidx(n)+firstvalidarraypos.eq.br)) then
             meshnodemapping(targetnodeid(br)+firstvalidarraypos) = n
          endif
       enddo
@@ -3845,7 +3858,7 @@
       !the nodes between
       kk =  0
       do n=1, nmeshnodes
-         if(branchids(n)+firstvalidarraypos.eq.br.and.(n.ne.st).and.(n.ne.en)) then
+         if(branchidx(n)+firstvalidarraypos.eq.br.and.(n.ne.st).and.(n.ne.en)) then
             kk = kk + 1
             internalnodeindexses(kk) = n
          endif

@@ -59,14 +59,14 @@ public :: IONC_ENOTAVAILABLE
 ! Types
 !
 public :: t_ionc
-public :: t_ug_charinfo
-public :: ug_idsLen
-public :: ug_idsLongNamesLen
 public :: t_ug_meta
+public :: t_ug_charinfo
 public :: ug_strLenMeta
 public :: t_ug_meshgeom
 public :: c_t_ug_meshgeom
 public :: c_t_ug_meshgeomdim
+public :: ug_idsLen
+public :: ug_idsLongNamesLen
 
 !
 ! Subroutines
@@ -499,14 +499,17 @@ end function ionc_get_topology_dimension
 !> Reads the actual mesh geometry from the specified mesh in a IONC/UGRID dataset.
 !! By default only reads in the dimensions (face/edge/node counts).
 !! Optionally, also all coordinate arrays + connectivity tables can be read.
-function ionc_get_meshgeom(ioncid, meshid, meshgeom, includeArrays) result(ierr)
+function ionc_get_meshgeom(ioncid, meshid, meshgeom, includeArrays, nbranchids, nbranchlongnames, nnodeids, nnodelongnames, network1dname) result(ierr)
    integer,             intent(in   ) :: ioncid        !< The IONC data set id.
    integer,             intent(in   ) :: meshid        !< The mesh id in the specified data set.
    type(t_ug_meshgeom), intent(inout) :: meshgeom      !< Structure in which all mesh geometry will be stored.
    logical, optional,   intent(in   ) :: includeArrays !< (optional) Whether or not to include coordinate arrays and connectivity tables. Default: .false., i.e., dimension counts only.
    integer                            :: ierr          !< Result status, ionc_noerr if successful.
    integer                            :: networkid 
-   type(t_ug_network)                 :: netid  
+   type(t_ug_network)                 :: netid 
+   character(len=ug_idsLen), allocatable, optional          :: nbranchids(:), nnodeids(:)       
+   character(len=ug_idsLongNamesLen), allocatable, optional :: nbranchlongnames(:), nnodelongnames(:) 
+   character(len=*), optional, intent(inout)              :: network1dname
 
    ! TODO: AvD: some error handling if ioncid or meshid is wrong
    if (datasets(ioncid)%iconvtype /= IONC_CONV_UGRID) then
@@ -519,7 +522,8 @@ function ionc_get_meshgeom(ioncid, meshid, meshgeom, includeArrays) result(ierr)
 
    if (present(includeArrays)) then
       if(networkid /= -1 ) then
-         ierr = ug_get_meshgeom(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), meshgeom, includeArrays, datasets(ioncid)%ug_file%netids(networkid))
+         ierr = ug_get_meshgeom(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), meshgeom, includeArrays, datasets(ioncid)%ug_file%netids(networkid), &
+            nbranchids, nbranchlongnames, nnodeids, nnodelongnames, network1dname)
       else
          ierr = ug_get_meshgeom(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), meshgeom, includeArrays)
       endif 
@@ -530,7 +534,7 @@ function ionc_get_meshgeom(ioncid, meshid, meshgeom, includeArrays) result(ierr)
          ierr = ug_get_meshgeom(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), meshgeom)
       endif
    end if
-
+   
    ! Successful
    return
 
@@ -984,13 +988,14 @@ end function ionc_def_var
 
 
 !> Writes the complete mesh geometry
-function ionc_write_mesh_struct(ioncid, meshids, meshgeom) result(ierr)
+function ionc_write_mesh_struct(ioncid, meshids, networkids, meshgeom) result(ierr)
    integer,             intent(in)    :: ioncid   !< The IONC data set id.
-   type(t_ug_mesh),  intent(inout) :: meshids  !< Set of NetCDF-ids for all mesh geometry arrays.
+   type(t_ug_mesh),     intent(inout) :: meshids  !< Set of NetCDF-ids for all mesh geometry arrays.
+   type(t_ug_network),  intent(inout) :: networkids  !< Set of NetCDF-ids for all mesh geometry arrays.
    type(t_ug_meshgeom), intent(in)    :: meshgeom !< The complete mesh geometry in a single struct.
    integer                            :: ierr     !< Result status, ionc_noerr if successful.
 
-   ierr = ug_write_mesh_struct(datasets(ioncid)%ncid, meshids, datasets(ioncid)%ug_file%crs, meshgeom)
+   ierr = ug_write_mesh_struct(datasets(ioncid)%ncid, meshids, networkids, datasets(ioncid)%ug_file%crs, meshgeom)
 end function ionc_write_mesh_struct
 
 !> Initializes the io_netcdf library, setting up the logger.
@@ -1385,7 +1390,7 @@ function  ionc_get_1d_network_branches_ugrid(ioncid, networkid, sourcenodeid, ta
    integer                            :: ierr
    
    ierr = ug_get_1d_network_branches(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%netids(networkid), sourcenodeid, & 
-       targetnodeid,branchid,branchlengths,branchlongnames,nbranchgeometrypoints, startIndex)
+       targetnodeid,branchlengths,nbranchgeometrypoints, startIndex, branchid, branchlongnames)
 
 end function ionc_get_1d_network_branches_ugrid
 
@@ -1414,11 +1419,11 @@ function  ionc_read_1d_network_branches_geometry_ugrid(ioncid, networkid, geopoi
 end function ionc_read_1d_network_branches_geometry_ugrid
 
 
-function ionc_create_1d_mesh_ugrid(ioncid, networkid, meshid, meshname, nmeshpoints, nmeshedges) result(ierr)
+function ionc_create_1d_mesh_ugrid(ioncid, networkname, meshid, meshname, nmeshpoints, nmeshedges) result(ierr)
 
-   integer, intent(in)         :: ioncid, networkid, nmeshpoints, nmeshedges
+   integer, intent(in)         :: ioncid, nmeshpoints, nmeshedges
    integer, intent (inout)     :: meshid
-   character(len=*),intent(in) :: meshname 
+   character(len=*),intent(in) :: meshname, networkname 
    integer                     :: ierr
    
    !adds a meshids structure
@@ -1426,7 +1431,7 @@ function ionc_create_1d_mesh_ugrid(ioncid, networkid, meshid, meshname, nmeshpoi
    ! set the meshname
    datasets(ioncid)%ug_file%meshnames(meshid) = meshname
    ! create mesh
-   ierr = ug_create_1d_mesh(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%netids(networkid), datasets(ioncid)%ug_file%meshids(meshid), meshname, nmeshpoints, nmeshedges)
+   ierr = ug_create_1d_mesh(datasets(ioncid)%ncid, networkname, datasets(ioncid)%ug_file%meshids(meshid), meshname, nmeshpoints, nmeshedges)
   
 end function ionc_create_1d_mesh_ugrid
 

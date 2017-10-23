@@ -388,7 +388,7 @@ namespace General.tests
         /// <param name="nmeshedges">The number of mesh edges (in)</param>
         /// <returns></returns>
         [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ionc_create_1d_mesh", CallingConvention = CallingConvention.Cdecl)]
-        private static extern int ionc_create_1d_mesh_dll([In] ref int ioncid, [In] ref int networkid, [In, Out] ref int meshid, string meshname, [In] ref int nmeshpoints, [In] ref int nmeshedges);
+        private static extern int ionc_create_1d_mesh_dll([In] ref int ioncid, [In] string networkname, [In, Out] ref int meshid, string meshname, [In] ref int nmeshpoints, [In] ref int nmeshedges);
 
         /// <summary>
         /// Writes the mesh coordinates points 
@@ -815,9 +815,9 @@ namespace General.tests
             return ionc_write_1d_network_branches_geometry_dll(ref ioncid, ref networkid, ref c_geopointsX, ref c_geopointsY, ref nGeometry);
         }
 
-        public int ionc_create_1d_mesh(ref int ioncid, ref int networkid, ref int meshid, string meshname, ref int nmeshpoints, ref int nmeshedges)
+        public int ionc_create_1d_mesh(ref int ioncid, string networkname, ref int meshid, string meshname, ref int nmeshpoints, ref int nmeshedges)
         {
-            return ionc_create_1d_mesh_dll(ref ioncid, ref networkid, ref meshid, meshname, ref nmeshpoints, ref nmeshedges);
+            return ionc_create_1d_mesh_dll(ref ioncid, networkname, ref meshid, meshname, ref nmeshpoints, ref nmeshedges);
         }
 
         public int ionc_put_1d_mesh_discretisation_points(ref int ioncid, ref int networkid, ref IntPtr c_branchidx,

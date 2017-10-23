@@ -14,9 +14,17 @@ namespace General.tests
         public IntPtr face_edges;
         public IntPtr face_links;
 
-        public IntPtr branchids;
-        public IntPtr nbranchgeometrynodes;
+        public IntPtr nnodex;
+        public IntPtr nnodey;
         public IntPtr nedge_nodes;
+        public IntPtr nbranchlengths;
+        public IntPtr nbranchgeometrynodes;
+
+        public IntPtr ngeopointx;
+        public IntPtr ngeopointy;
+        public IntPtr nbranchorder;
+        public IntPtr branchidx;
+        public IntPtr branchoffsets;
 
         public IntPtr nodex;
         public IntPtr nodey;
@@ -27,11 +35,6 @@ namespace General.tests
         public IntPtr facex;
         public IntPtr facey;
         public IntPtr facez;
-
-        public IntPtr branchoffsets;
-        public IntPtr geopointsX;
-        public IntPtr geopointsY;
-        public IntPtr branchlengths;
 
         public IntPtr layer_zs;
         public IntPtr interface_zs;
@@ -49,8 +52,9 @@ namespace General.tests
         public int maxnumfacenodes;
         public int numlayer;
         public int layertype;
-        public int nt_nbranches;
-        public int nt_ngeometry;
+        public int nnodes;
+        public int nbranches;
+        public int ngeometry;
     }
 
     #endregion meshgeom

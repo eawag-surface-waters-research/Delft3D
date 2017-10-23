@@ -34,7 +34,12 @@ module meshdata
 
 use iso_c_binding
 
+
 implicit none
+
+integer, parameter :: ug_strLenMeta      = 100
+integer, parameter :: ug_idsLen          = 40
+integer, parameter :: ug_idsLongNamesLen = 80
 
 !> Structure for storing an entire mesh geometry (topology and coordinates and more).
 !> This is general data structures shared also by gridgeom
@@ -48,8 +53,9 @@ type t_ug_meshgeom
    integer            :: maxnumfacenodes    !< Maximum of number of face nodes.
    integer            :: numlayer           !< Number of mesh layers (num interfaces == numlayer + 1), numlayer = 0 means "no layers".
    integer            :: layertype          !< Type of vertical layer definition (only if numlayer >= 1), one of LAYERTYPE_* parameters.
-   integer            :: nt_nbranches       !< Number of branches
-   integer            :: nt_ngeometry       !< Number of geometrical points
+   integer            :: nnodes             !< Number of branches
+   integer            :: nbranches          !< Number of branches
+   integer            :: ngeometry          !< Number of geometrical points
    integer            :: start_index        !< The base index of the arrays
 
    integer,      pointer :: edge_nodes(:,:) => null() !< Edge-to-node mapping array.
@@ -59,10 +65,24 @@ type t_ug_meshgeom
    integer,      pointer :: face_links(:,:) => null() !< Face-to-face mapping array (optional, can be null()).
    
    !Network1d variables
-   integer,      pointer :: branchids(:) => null()            !< Branch id of each mesh node 
-   integer,      pointer :: nbranchgeometrynodes(:) => null() !< Number of geometry nodes in each branch
-   integer,      pointer :: nedge_nodes(:,:) => null()        !< Start-end node of each branch (used to determine edge-node connectivity)
+   double precision,                  pointer :: nnodex(:) => null()   !< x-coordinates of the geometry points.
+   double precision,                  pointer :: nnodey(:) => null()   !< x-coordinates of the geometry points.
+   character(len=ug_idsLen),          pointer :: nnodeids(:) => null()     
+   character(len=ug_idsLongNamesLen), pointer :: nnodelongnames(:) => null()  
+
+   integer,                           pointer :: nedge_nodes(:,:)   => null()        !< Start-end node of each branch (used to determine edge-node connectivity)
+   character(len=ug_idsLen),          pointer :: nbranchids(:)       => null() 
+   character(len=ug_idsLongNamesLen), pointer :: nbranchlongnames(:) => null() 
+   double precision,                  pointer :: nbranchlengths(:)  => null() !< lengths of each branch
+   integer,                           pointer :: nbranchgeometrynodes(:) => null() !< Number of geometry nodes in each branch
+   double precision,                  pointer :: ngeopointx(:) => null()   !< x-coordinates of the geometry points.
+   double precision,                  pointer :: ngeopointy(:) => null()   !< y-coordinates of the geometry points.
+   integer,                           pointer :: nbranchorder(:) => null()   !< y-coordinates of the geometry points.
    
+   !Mesh1d variables
+   integer,                           pointer :: branchidx(:) => null()    !< Branch id of each mesh node 
+   double precision,                  pointer :: branchoffsets(:)=> null() !< Branch offset of each mesh node
+
    double precision, pointer :: nodex(:)=> null()       !< x-coordinates of the mesh nodes.
    double precision, pointer :: nodey(:)=> null()       !< y-coordinates of the mesh nodes.
    double precision, pointer :: nodez(:)=> null()       !< z-coordinates of the mesh nodes.
@@ -72,12 +92,6 @@ type t_ug_meshgeom
    double precision, pointer :: facex(:)=> null()       !< x-coordinates of the mesh faces.
    double precision, pointer :: facey(:)=> null()       !< y-coordinates of the mesh faces.
    double precision, pointer :: facez(:)=> null()       !< z-coordinates of the mesh faces.
-   
-   !Mesh1d variables
-   double precision, pointer :: branchoffsets(:)=> null() !< Branch offset of each mesh node
-   double precision, pointer :: geopointsX(:) => null()   !< x-coordinates of the geometry points.
-   double precision, pointer :: geopointsY(:) => null()   !< y-coordinates of the geometry points.
-   double precision, pointer :: branchlengths(:)=> null() !< lengths of each branch
    
    double precision, pointer :: layer_zs(:) => null()    !< Vertical coordinates of the mesh layers' center (either z or sigma).
    double precision, pointer :: interface_zs(:)=> null() !< Vertical coordinates of the mesh layers' interface (either z or sigma).
@@ -94,8 +108,9 @@ type, bind(C) :: c_t_ug_meshgeomdim
    integer(kind=c_int)      :: maxnumfacenodes    !< Maximum of number of face nodes.
    integer(kind=c_int)      :: numlayer           !< Number of mesh layers (num interfaces == numlayer + 1), numlayer = 0 means "no layers".
    integer(kind=c_int)      :: layertype          !< Type of vertical layer definition (only if numlayer >= 1), one of LAYERTYPE_* parameters.
-   integer(kind=c_int)      :: nt_nbranches       !< Number of branches
-   integer(kind=c_int)      :: nt_ngeometry       !< Number of geometry points
+   integer(kind=c_int)      :: nnodes
+   integer(kind=c_int)      :: nbranches       !< Number of branches
+   integer(kind=c_int)      :: ngeometry       !< Number of geometry points
    integer(kind=c_int)      :: start_index        !< The base index of the arrays
    
 end type c_t_ug_meshgeomdim
@@ -109,10 +124,17 @@ type, bind(C) :: c_t_ug_meshgeom
    type(c_ptr) :: face_links !< Face-to-face mapping array (optional, can be null()).
    
    !Mesh 1d variables
-   type(c_ptr) :: branchids               !< Branch id of each mesh node
-   type(c_ptr) :: nbranchgeometrynodes    !< Number of geometry nodes in each branch
-   type(c_ptr) :: nedge_nodes             !< Start-end node of each branch
-
+   type(c_ptr)  :: nnodex               
+   type(c_ptr)  :: nnodey    
+   type(c_ptr)  :: nedge_nodes                          
+   type(c_ptr)  :: nbranchlengths
+   type(c_ptr)  :: nbranchgeometrynodes
+   type(c_ptr)  :: ngeopointx
+   type(c_ptr)  :: ngeopointy
+   type(c_ptr)  :: nbranchorder
+   type(c_ptr)  :: branchidx
+   type(c_ptr)  :: branchoffsets
+   
    type(c_ptr) :: nodex       !< x-coordinates of the mesh nodes.
    type(c_ptr) :: nodey       !< y-coordinates of the mesh nodes.
    type(c_ptr) :: nodez       !< z-coordinates of the mesh nodes.
@@ -123,12 +145,6 @@ type, bind(C) :: c_t_ug_meshgeom
    type(c_ptr) :: facey       !< y-coordinates of the mesh faces.
    type(c_ptr) :: facez       !< z-coordinates of the mesh faces.
    
-   !Network 1d variables
-   type(c_ptr) :: branchoffsets           !< Branch offset of each mesh node
-   type(c_ptr) :: geopointsX    !< x-coordinates of the geometry points.
-   type(c_ptr) :: geopointsY    !< y-coordinates of the geometry points.
-   type(c_ptr) :: branchlengths !< lengths of each branch
-      
    type(c_ptr) :: layer_zs
    type(c_ptr) :: interface_zs
 
@@ -141,36 +157,38 @@ function convert_meshgeom_to_cptr(meshgeom, c_meshgeom) result(ierr)
    type(t_ug_meshgeom), intent(in)      :: meshgeom
    type(c_t_ug_meshgeom), intent(inout) :: c_meshgeom
    integer                              :: ierr
-!support variables
-   integer,          pointer  :: edge_nodes(:,:) !< Edge-to-node mapping array.
-   integer,          pointer  :: face_nodes(:,:) !< Face-to-node mapping array.
-   integer,          pointer  :: edge_faces(:,:) !< Edge-to-face mapping array (optional, can be null()).
-   integer,          pointer  :: face_edges(:,:) !< Face-to-edge mapping array (optional, can be null()).
-   integer,          pointer  :: face_links(:,:) !< Face-to-face mapping array (optional, can be null()).
+   !support variables
+   integer,          pointer  :: edge_nodes(:,:) => null()!< Edge-to-node mapping array.
+   integer,          pointer  :: face_nodes(:,:) => null()!< Face-to-node mapping array.
+   integer,          pointer  :: edge_faces(:,:) => null()!< Edge-to-face mapping array (optional, can be null()).
+   integer,          pointer  :: face_edges(:,:) => null()!< Face-to-edge mapping array (optional, can be null()).
+   integer,          pointer  :: face_links(:,:) => null()!< Face-to-face mapping array (optional, can be null()).
    
-   !Mesh 1d variables
-   integer,      pointer :: branchids(:)     !< Branch id of each mesh node
-   integer,      pointer :: nbranchgeometrynodes(:)    !< Number of geometry nodes in each branch
-   integer,      pointer :: nedge_nodes(:,:)    !< Number of geometry nodes in each branch
+   !Network1d variables
+   double precision, pointer :: nnodex(:) => null() 
+   double precision, pointer :: nnodey(:) => null() 
+   integer,          pointer :: nedge_nodes(:,:) => null()        
+   double precision, pointer :: nbranchlengths(:) => null() 
+   integer,          pointer :: nbranchgeometrynodes(:)=> null()  
+   double precision, pointer :: ngeopointx(:) => null() 
+   double precision, pointer :: ngeopointy(:)   => null() 
+   integer,          pointer :: nbranchorder(:) => null()   
+   !Mesh1d variables
+   integer,          pointer :: branchidx(:) => null()    !< Branch id of each mesh node 
+   double precision, pointer :: branchoffsets(:)=> null() !< Branch offset of each mesh node
    
-   double precision, pointer :: nodex(:)       !< x-coordinates of the mesh nodes.
-   double precision, pointer :: nodey(:)       !< y-coordinates of the mesh nodes.
-   double precision, pointer :: nodez(:)       !< z-coordinates of the mesh nodes.
-   double precision, pointer :: edgex(:)       !< x-coordinates of the mesh edges.
-   double precision, pointer :: edgey(:)       !< y-coordinates of the mesh edges.
-   double precision, pointer :: edgez(:)       !< z-coordinates of the mesh edges.
-   double precision, pointer :: facex(:)       !< x-coordinates of the mesh faces.
-   double precision, pointer :: facey(:)       !< y-coordinates of the mesh faces.
-   double precision, pointer :: facez(:)       !< z-coordinates of the mesh faces.
+   double precision, pointer :: nodex(:) => null()       !< x-coordinates of the mesh nodes.
+   double precision, pointer :: nodey(:) => null()      !< y-coordinates of the mesh nodes.
+   double precision, pointer :: nodez(:) => null()      !< z-coordinates of the mesh nodes.
+   double precision, pointer :: edgex(:) => null()      !< x-coordinates of the mesh edges.
+   double precision, pointer :: edgey(:) => null()      !< y-coordinates of the mesh edges.
+   double precision, pointer :: edgez(:) => null()      !< z-coordinates of the mesh edges.
+   double precision, pointer :: facex(:) => null()      !< x-coordinates of the mesh faces.
+   double precision, pointer :: facey(:) => null()      !< y-coordinates of the mesh faces.
+   double precision, pointer :: facez(:) => null()      !< z-coordinates of the mesh faces.
 
-   !Network 1d variables
-   double precision, pointer :: branchoffsets(:) !< Branch offset of each mesh node
-   double precision, pointer :: geopointsX(:)    !< x-coordinates of the geometry points.
-   double precision, pointer :: geopointsY(:)    !< y-coordinates of the geometry points.
-   double precision, pointer :: branchlengths(:) !< lengths of each branch
-
-   double precision, pointer :: layer_zs(:)     !< Vertical coordinates of the mesh layers' center (either z or sigma).
-   double precision, pointer :: interface_zs(:) !< Vertical coordinates of the mesh layers' interface (either z or sigma).
+   double precision, pointer :: layer_zs(:) => null()     !< Vertical coordinates of the mesh layers' center (either z or sigma).
+   double precision, pointer :: interface_zs(:) => null() !< Vertical coordinates of the mesh layers' interface (either z or sigma).
    
    ierr = 0
    !! array variables
@@ -198,21 +216,57 @@ function convert_meshgeom_to_cptr(meshgeom, c_meshgeom) result(ierr)
       call c_f_pointer(c_meshgeom%face_links, face_links, (/ size(meshgeom%face_links,1), size(meshgeom%face_links,2)/) )
       face_links= meshgeom%face_links
    endif
-
-   !Mesh1d/Network1d
-   if (associated(meshgeom%branchids)) then
-      call c_f_pointer(c_meshgeom%branchids, branchids, (/ size(meshgeom%branchids,1)/) )
-      branchids= meshgeom%branchids
+   
+   !Network1d variables
+   if (associated(meshgeom%nnodex)) then
+      call c_f_pointer(c_meshgeom%nnodex, nnodex, (/ size(meshgeom%nnodex)/))
+      nnodex = meshgeom%nnodex
    endif
-      
-   if (associated(meshgeom%nbranchgeometrynodes)) then
-      call c_f_pointer(c_meshgeom%nbranchgeometrynodes, nbranchgeometrynodes, (/ size(meshgeom%nbranchgeometrynodes,1)/) )
-      nbranchgeometrynodes= meshgeom%nbranchgeometrynodes
+   
+   if (associated(meshgeom%nnodey)) then
+      call c_f_pointer(c_meshgeom%nnodey, nnodey, (/ size(meshgeom%nnodey)/))
+      nnodey = meshgeom%nnodey
    endif
    
    if (associated(meshgeom%nedge_nodes)) then
-      call c_f_pointer(c_meshgeom%nedge_nodes, nedge_nodes, (/ size(meshgeom%nedge_nodes,1), size(meshgeom%nedge_nodes,2)/) )
+      call c_f_pointer(c_meshgeom%nedge_nodes,nedge_nodes , (/ size(meshgeom%nedge_nodes, 2)/))
       nedge_nodes= meshgeom%nedge_nodes
+   endif
+   
+   if (associated(meshgeom%nbranchlengths)) then
+      call c_f_pointer(c_meshgeom%nbranchlengths, nbranchlengths, (/ size(meshgeom%nbranchlengths)/))
+      nbranchlengths= meshgeom%nbranchlengths
+   endif
+   
+   if (associated(meshgeom%nbranchgeometrynodes)) then
+      call c_f_pointer(c_meshgeom%nbranchgeometrynodes, nbranchgeometrynodes , (/ size(meshgeom%nbranchgeometrynodes)/))
+      nbranchgeometrynodes = meshgeom%nbranchgeometrynodes
+   endif
+   
+   if (associated(meshgeom%ngeopointx)) then
+      call c_f_pointer(c_meshgeom%ngeopointx, ngeopointx , (/ size(meshgeom%ngeopointx)/))
+      ngeopointx = meshgeom%ngeopointx
+   endif
+   
+   if (associated(meshgeom%ngeopointy)) then
+      call c_f_pointer(c_meshgeom%ngeopointy, ngeopointy , (/ size(meshgeom%ngeopointy)/))
+      ngeopointy = meshgeom%ngeopointy
+   endif
+   
+   if (associated(meshgeom%nbranchorder)) then
+      call c_f_pointer(c_meshgeom%nbranchorder, nbranchorder, (/ size(meshgeom%nbranchorder)/))
+      nbranchorder = meshgeom%nbranchorder
+   endif
+   
+   !Mesh1d
+   if (associated(meshgeom%branchidx)) then
+      call c_f_pointer(c_meshgeom%branchidx, branchidx, (/ size(meshgeom%branchidx,1)/) )
+      branchidx = meshgeom%branchidx
+   endif
+      
+   if (associated(meshgeom%branchoffsets)) then
+      call c_f_pointer(c_meshgeom%branchoffsets, branchoffsets, (/ size(meshgeom%branchoffsets,1)/) )
+      branchoffsets = meshgeom%branchoffsets
    endif
                
    !mesh nodes
@@ -259,27 +313,6 @@ function convert_meshgeom_to_cptr(meshgeom, c_meshgeom) result(ierr)
       facez= meshgeom%facez
    endif
    
-   !Mesh1d/Network1d
-   if (associated(meshgeom%branchoffsets)) then
-      call c_f_pointer(c_meshgeom%branchoffsets, branchoffsets, (/ size(meshgeom%branchoffsets,1)/) )
-      branchoffsets= meshgeom%branchoffsets
-   endif
-
-   if (associated(meshgeom%geopointsX)) then
-      call c_f_pointer(c_meshgeom%geopointsX, geopointsX, (/ size(meshgeom%geopointsX,1)/) )
-      geopointsX= meshgeom%geopointsX
-   endif
-
-   if (associated(meshgeom%geopointsY)) then
-      call c_f_pointer(c_meshgeom%geopointsY, geopointsY, (/ size(meshgeom%geopointsY,1)/) )
-      geopointsY= meshgeom%geopointsY
-   endif
-
-   if (associated(meshgeom%branchlengths)) then
-      call c_f_pointer(c_meshgeom%branchlengths, branchlengths, (/ size(meshgeom%branchlengths,1)/) )
-      branchlengths= meshgeom%branchlengths
-   endif
-
    !layer
    if (associated(meshgeom%layer_zs)) then
       call c_f_pointer(c_meshgeom%layer_zs, layer_zs, (/ size(meshgeom%layer_zs,1)/) )
@@ -310,39 +343,47 @@ function convert_cptr_to_meshgeom(c_meshgeom, c_meshgeomdim, meshgeom) result(ie
    meshgeom%numface = c_meshgeomdim%numface          
    meshgeom%maxnumfacenodes = c_meshgeomdim%maxnumfacenodes    
    meshgeom%numlayer = c_meshgeomdim%numlayer          
-   meshgeom%layertype = c_meshgeomdim%layertype     
-   meshgeom%nt_nbranches = c_meshgeomdim%nt_nbranches        
-   meshgeom%nt_ngeometry = c_meshgeomdim%nt_ngeometry 
+   meshgeom%layertype = c_meshgeomdim%layertype   
+   
+   meshgeom%nnodes = c_meshgeomdim%nnodes  
+   meshgeom%nbranches = c_meshgeomdim%nbranches       
+   meshgeom%ngeometry = c_meshgeomdim%ngeometry
    meshgeom%start_index = c_meshgeomdim%start_index
   
    ierr = 0
-   ! to finish
+   
    call c_f_pointer(c_meshgeom%edge_nodes, meshgeom%edge_nodes, (/ 2, c_meshgeomdim%numedge /)) 
    call c_f_pointer(c_meshgeom%face_nodes, meshgeom%face_nodes, (/ c_meshgeomdim%maxnumfacenodes, c_meshgeomdim%numface /))
    call c_f_pointer(c_meshgeom%edge_faces, meshgeom%edge_faces, (/ 2, c_meshgeomdim%numedge /))
    call c_f_pointer(c_meshgeom%face_edges, meshgeom%face_edges, (/ c_meshgeomdim%maxnumfacenodes, c_meshgeomdim%numface /))
    call c_f_pointer(c_meshgeom%face_links, meshgeom%face_links, (/ c_meshgeomdim%maxnumfacenodes, c_meshgeomdim%numface /))
    
-   call c_f_pointer(c_meshgeom%branchids, meshgeom%branchids, (/ c_meshgeomdim%numnode/))
-   call c_f_pointer(c_meshgeom%nbranchgeometrynodes, meshgeom%nbranchgeometrynodes, (/ c_meshgeomdim%nt_nbranches /))
+   !Network variables 
+   call c_f_pointer(c_meshgeom%nnodex, meshgeom%nnodex,(/c_meshgeomdim%nnodes/))
+   call c_f_pointer(c_meshgeom%nnodey, meshgeom%nnodey,(/c_meshgeomdim%nnodes/))
+   !nodeids and nodelongnames are not communicated using meshgeom
+   call c_f_pointer(c_meshgeom%nedge_nodes, meshgeom%nedge_nodes, (/ 2, c_meshgeomdim%nbranches /))   
+   !branchids and branchlongnames are not communicated using meshgeom
+   call c_f_pointer(c_meshgeom%nbranchlengths, meshgeom%nbranchlengths, (/ c_meshgeomdim%nbranches /))
+   call c_f_pointer(c_meshgeom%nbranchgeometrynodes, meshgeom%nbranchgeometrynodes, (/ c_meshgeomdim%nbranches /))   
+   call c_f_pointer(c_meshgeom%ngeopointx, meshgeom%ngeopointx, (/ c_meshgeomdim%ngeometry/))
+   call c_f_pointer(c_meshgeom%ngeopointy, meshgeom%ngeopointy, (/ c_meshgeomdim%ngeometry/))   
+   call c_f_pointer(c_meshgeom%nbranchorder, meshgeom%nbranchorder, (/ c_meshgeomdim%nbranches/))   
+   
+   !Mesh1d variables
+   call c_f_pointer(c_meshgeom%branchidx, meshgeom%branchidx, (/ c_meshgeomdim%numnode/))
+   call c_f_pointer(c_meshgeom%branchoffsets, meshgeom%branchoffsets, (/ c_meshgeomdim%numnode /))   
    
    call c_f_pointer(c_meshgeom%nodex, meshgeom%nodex,(/c_meshgeomdim%numnode/))
    call c_f_pointer(c_meshgeom%nodey, meshgeom%nodey,(/c_meshgeomdim%numnode/))
    call c_f_pointer(c_meshgeom%nodez, meshgeom%nodez,(/c_meshgeomdim%numnode/))
-   
    call c_f_pointer(c_meshgeom%edgex, meshgeom%edgex,(/c_meshgeomdim%numedge/))
    call c_f_pointer(c_meshgeom%edgey, meshgeom%edgey,(/c_meshgeomdim%numedge/))
-   call c_f_pointer(c_meshgeom%edgez, meshgeom%edgez,(/c_meshgeomdim%numedge/))
-   
+   call c_f_pointer(c_meshgeom%edgez, meshgeom%edgez,(/c_meshgeomdim%numedge/)) 
    call c_f_pointer(c_meshgeom%facex, meshgeom%facex,(/c_meshgeomdim%numface/))
    call c_f_pointer(c_meshgeom%facey, meshgeom%facey,(/c_meshgeomdim%numface/))
    call c_f_pointer(c_meshgeom%facez, meshgeom%facez,(/c_meshgeomdim%numface/))
- 
-   call c_f_pointer(c_meshgeom%branchoffsets, meshgeom%branchoffsets, (/ c_meshgeomdim%numnode /))
-   call c_f_pointer(c_meshgeom%geopointsX, meshgeom%geopointsX, (/ c_meshgeomdim%nt_ngeometry/))
-   call c_f_pointer(c_meshgeom%geopointsY, meshgeom%geopointsY, (/ c_meshgeomdim%nt_ngeometry/))
-   call c_f_pointer(c_meshgeom%branchlengths, meshgeom%branchlengths, (/ c_meshgeomdim%nt_nbranches /))
-   
+  
    call c_f_pointer(c_meshgeom%layer_zs, meshgeom%layer_zs,(/c_meshgeomdim%numlayer/))
    call c_f_pointer(c_meshgeom%interface_zs, meshgeom%interface_zs,(/c_meshgeomdim%numlayer + 1/))
       

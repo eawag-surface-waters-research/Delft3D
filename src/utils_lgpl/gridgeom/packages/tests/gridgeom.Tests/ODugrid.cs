@@ -639,7 +639,6 @@ namespace gridgeom.Tests
             ierr = wrapperGridgeom.ggeo_get_links(ref c_arrayfrom, ref c_arrayto, ref n1d2dlinks);
             Assert.That(ierr, Is.EqualTo(0));
 
-
             int[] rc_arrayfrom = new int[n1d2dlinks];
             int[] rc_arrayto = new int[n1d2dlinks];
             Marshal.Copy(c_arrayfrom, rc_arrayfrom, 0, n1d2dlinks);
