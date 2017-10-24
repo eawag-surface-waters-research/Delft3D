@@ -535,6 +535,7 @@ rem ================
     set dest_swan_scripts=!dest_main!\win32\swan\scripts
     set dest_esmf_bin="!dest_main!\win32\esmf\bin"
     set dest_esmf_scripts="!dest_main!\win32\esmf\scripts"
+    set dest_scripts=!dest_main!\win32\scripts
 
     call :makeDir !dest_bin!
     call :makeDir !dest_default!
@@ -542,8 +543,19 @@ rem ================
     call :makeDir !dest_swan_scripts!
     call :makeDir !dest_esmf_bin!
     call :makeDir !dest_esmf_scripts!
+    call :makeDir !dest_scripts!
 
-    call :copyFile engines_gpl\wave\bin\release\wave.dll                  !dest_bin!
+    rem
+    rem This wave block is called twice:
+    rem - once for wave.dll     (then wave_exe.exe might not be present yet)
+    rem - once for wave_exe.exe (then wave.dll     might not be present yet)
+    rem
+    if exist engines_gpl\wave\bin\release\wave.dll (
+        call :copyFile engines_gpl\wave\bin\release\wave.dll          "!dest_bin!"
+    )
+    if exist engines_gpl\wave\bin\release\wave_exe.exe (
+        call :copyFile engines_gpl\wave\bin\release\wave_exe.exe      "!dest_bin!\wave.exe"
+    ) 
     call :copyFile engines_gpl\flow2d3d\default\dioconfig.ini             !dest_default!
     call :copyFile "third_party_open\pthreads\bin\win32\*.dll"      !dest_bin!
     call :copyFile "third_party_open\intel_fortran\lib\win32\*.dll" !dest_bin!
@@ -551,6 +563,7 @@ rem ================
     call :copyFile third_party_open\swan\scripts\swan_install.bat "       !dest_swan_scripts!\swan.bat"
     call :copyFile "third_party_open\esmf\win64\bin\*.*"                  !dest_esmf_bin!
     call :copyFile "third_party_open\esmf\win64\scripts\*.*"              !dest_esmf_scripts!
+    call :copyFile "engines_gpl\wave\scripts\run_*.bat"               "!dest_scripts!"
     call :copyNetcdf
     rem
     rem The following if-else statements MUST BE executed AFTER copying "third_party_open\intel_fortran" libraries.
