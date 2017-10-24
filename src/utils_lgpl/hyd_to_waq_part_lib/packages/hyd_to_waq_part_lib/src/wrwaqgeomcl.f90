@@ -88,6 +88,7 @@ contains
 !
     type(t_crs), target                 :: crs
     type(t_ug_mesh)                     :: meshids               !< Set of NetCDF-ids for all mesh geometry arrays.
+    type(t_ug_network)                  :: networkids            !< Set of NetCDF-ids for all network arrays.
     type(t_ug_meshgeom)                 :: meshgeom              !< Mesh geometry to be written to the NetCDF file.
     type(t_ug_meshgeom)                 :: aggregated_meshgeom   !< Mesh geometry to be written to the NetCDF file.
                                         
@@ -546,7 +547,7 @@ contains
     !
     ! Write mesh as UGRID
     !
-    ierr = ug_write_mesh_struct(igeomfile, meshids, crs, meshgeom)
+    ierr = ug_write_mesh_struct(igeomfile, meshids, networkids, crs, meshgeom)
     call nc_check_err(lundia, ierr, "writing mesh", geomfilename)
     !
     ! Write edge type variable (this is an extra variable that is not part of the UGRID standard).
