@@ -579,21 +579,6 @@ rem ================
     )
 goto :endproc
 
-rem ====================
-rem === INSTALL_WAVE_EXE
-rem ====================
-:wave_exe
-    echo "installing wave_exe . . ."
-
-    set dest_bin="!dest_main!\win32\wave\bin"
-
-    call :makeDir !dest_bin!
-
-    call :copyFile engines_gpl\wave\bin\release\wave.exe            !dest_bin!
-    call :copyFile "third_party_open\pthreads\bin\win32\*.dll"      !dest_bin!
-
-goto :endproc
-
 
 
 rem ==========================
