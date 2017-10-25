@@ -3,6 +3,7 @@
      *                     thick ,wl    ,uu    ,vv    ,alfas ,bndval,
      *                     kfs   ,mcbsp ,ncbsp ,mnstat,
      *                     typbnd,nambnd,namcon                     )
+      implicit none
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2017.                                
@@ -60,18 +61,31 @@
      *              ncbsp (nobnd ,2     )       ,
      *              mnstat(2     ,nostat)
 
-      real          thick (kmax  ),alfas (nostat),
+      double precision           thick (kmax  ),alfas (nostat),
      *              cadd  (  6   ),cmax  (   6  ),
      *              cmin  (  6   )
 
-      real          wl    (nostat,notims)
+      double precision           wl    (nostat,notims)
       integer       kfs   (nostat,notims)
       integer       iwet  (nostat)
 
-      real          uu    (nostat,kmax  ,notims),
-     *              vv    (nostat,kmax  ,notims,mincon)
+      double precision uu    (nostat,kmax  ,notims),
+     *                 vv    (nostat,kmax  ,notims,mincon)
 
-      real          bndval(nobnd ,notims,kmax  ,mincon,2)
+      double precision bndval(nobnd ,notims,kmax  ,mincon,2)
+      double precision grdang
+      double precision tstart
+      double precision dtmin
+      double precision a0
+      integer itypc
+      integer nolay
+      integer nocon
+      integer nostat
+      integer notims
+      integer kmax
+      integer lstci
+      integer nobnd
+      integer mincon
 
       character*  1 typbnd(nobnd )
       character* 20 nambnd(nobnd )
@@ -90,17 +104,17 @@
       mcbsp = 0
       ncbsp = 0
 
-      thick = 0.0
-      alfas = 0.0
-      cadd  = 0.0
-      cmax  = 0.0
-      cmin  = 0.0
+      thick = 0.0d0
+      alfas = 0.0d0
+      cadd  = 0.0d0
+      cmax  = 0.0d0
+      cmin  = 0.0d0
 
       kfs   = 0
-      wl    = 0.0
-      uu    = 0.0
-      vv    = 0.0
-      bndval= 0.0
+      wl    = 0.0d0
+      uu    = 0.0d0
+      vv    = 0.0d0
+      bndval= 0.0d0
 
       fout = .false.
       new  = .false.
@@ -178,7 +192,7 @@
      *            vv                                              )
       if (fout) goto 999
 
-      bndval = 0.0
+      bndval = 0.0d0
 
       call detcon (lun(5),fout  ,lun(2),bndval,mcbsp ,ncbsp ,
      *             mnstat,vv    ,iwet  ,nobnd ,notims,nostat,

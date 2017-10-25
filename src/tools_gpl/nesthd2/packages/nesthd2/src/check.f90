@@ -1,5 +1,6 @@
 subroutine check  (lundia,fout  ,mnstat,mnes ,nnes   ,weight , &
                    mcbsp ,ncbsp ,iwet  ,nostat               )
+    implicit none
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2017.                                
@@ -41,10 +42,12 @@ subroutine check  (lundia,fout  ,mnstat,mnes ,nnes   ,weight , &
 ! limitations        :
 ! subroutines called :
 !***********************************************************************
+    integer :: nones, iwght, istat, lundia, mcbsp, ncbsp, nostat
+    double precision :: wghtot
     integer :: iwet  (nostat), mnes   (  4  ), nnes  (  4  )
     integer :: mnstat(2,nostat)
 
-    real    :: weight (  4  )
+    double precision :: weight (  4  )
 
     logical :: fout  ,found
 !

@@ -1,6 +1,7 @@
       subroutine addinp(a0    , dav   , cgen  , cadd  , cmax  ,
      *                  cmin  , itypc , typbnd, nobnd , namcon,
      *                  lstci , kmax                          )
+      implicit none
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2017.                                
@@ -40,8 +41,15 @@
 !***********************************************************************
 
       integer      cgen  (  6   )
+      integer itypc
+      integer ibnd
+      integer kmax
+      integer icon
+      integer nobnd
+      integer lstci
 
-      real         cadd  (  6   ), cmax  (   6   ), cmin  (  6   )
+      double precision cadd  (  6   ), cmax  (   6   ), cmin  (  6   )
+      double precision a0
 
       logical      dav   , atlone
 

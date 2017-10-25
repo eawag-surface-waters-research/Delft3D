@@ -1,5 +1,6 @@
       subroutine wricon(lundia,lun   ,bndval,itypc ,nobnd ,notims,
      *                  kmax  ,lstci ,nocon ,tstart,dtmin )
+      implicit none
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2017.                                
@@ -42,9 +43,13 @@
 ! subroutines called :
 !***********************************************************************
 
-      real         bndval (nobnd ,notims,kmax  ,lstci ,2)
+      integer lundia, lun, nobnd, notims, kmax, lstci, nocon
+      double precision bndval (nobnd ,notims,kmax  ,lstci ,2)
+      double precision tstart
+      double precision dtmin
 
       character*19 format
+      integer itypc, itim, ibnd, k, icon
 
       write (*     ,
      *'('' >>> Writing transport boundary conditions <<<'')')

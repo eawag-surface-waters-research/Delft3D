@@ -2,6 +2,7 @@
      *                   kmax  ,lstci ,nocon ,
      *                   tstart,dtmin ,
      *                   namcon,nambnd,itdate              )
+      implicit none
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2017.                                
@@ -44,12 +45,16 @@
 ! subroutines called :
 !***********************************************************************
 
+      integer lundia, lun, notims, kmax, lstci, nocon, nobnd
+
       character(len=37), dimension(13) :: fmtbcc
       character(len=20), dimension(16) :: keywrd
 
       integer      itdate
 
-      real         bndval (nobnd ,notims,kmax  ,lstci ,2)
+      double precision bndval (nobnd ,notims,kmax  ,lstci ,2)
+      double precision tstart
+      double precision dtmin
 
       character*1  eol
       character*1  quote
@@ -58,6 +63,7 @@
       character*20 nambnd (nobnd )
       character*20 namcon (lstci )
       character*40 cntain
+      integer ifmt, ibnd, ic, itim, itypc, k
 
       data         fmtbcc/'(a1,i5,                       t89,a1)',
      *                    '(a20,a1,a63,a3,a1,            t89,a1)',

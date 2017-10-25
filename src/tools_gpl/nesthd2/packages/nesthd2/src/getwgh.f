@@ -1,5 +1,6 @@
       subroutine getwgh (lundia,fout  ,lunadm,mcbsp ,ncbsp ,typbnd,
      *                   mnes  ,nnes  ,weight,angle               )
+      implicit none
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2017.                                
@@ -41,11 +42,13 @@
 ! limitations        :
 ! subroutines called :
 !***********************************************************************
+      integer lundia, lunadm, k1, k2, m, n, mcbsp, ncbsp, iwght
+      double precision angle
       integer       mnes   (  4  ), nnes (  4  )
 
-      real          pi
+      double precision pi
 
-      real          weight (  4  )
+      double precision weight (  4  )
 
       character*1   typbnd
       character*100 record

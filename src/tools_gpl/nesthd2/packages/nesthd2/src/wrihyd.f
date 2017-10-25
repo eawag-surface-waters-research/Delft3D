@@ -1,5 +1,6 @@
       subroutine wrihyd(lundia,lun   ,bndval,typbnd,nobnd ,notims,
      *                  kmax  ,nolay ,tstart,dtmin )
+      implicit none
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2017.                                
@@ -42,7 +43,13 @@
 ! subroutines called :
 !***********************************************************************
 
-      real         bndval (nobnd ,notims,kmax  ,1     ,2)
+      double precision tstart
+      integer lundia, itdate, nolay, nobnd, notims, kmax
+      
+      double precision dtmin
+      integer ifmt, ibnd, itim, lun, k, isize
+
+      double precision bndval (nobnd ,notims,kmax  ,1     ,2)
 
       character*15 format
       character* 1 typbnd (nobnd )

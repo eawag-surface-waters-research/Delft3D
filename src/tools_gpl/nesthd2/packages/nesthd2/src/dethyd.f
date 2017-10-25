@@ -1,6 +1,7 @@
       subroutine dethyd(lundia,fout  ,lunadm,bndval,mcbsp ,ncbsp ,
      *                  typbnd,mnstat,wl    ,uu    ,vv    ,iwet  ,
      *                  nobnd ,notims,nostat,kmax  ,a0           )
+      implicit none
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2017.                                
@@ -43,24 +44,41 @@
 ! subroutines called : getwgh, check
 !***********************************************************************
 
-      integer       iwet  (nostat), mnes  (  4   )  , nnes (  4   )
+      integer lundia
+      integer notims
+      integer nostat
+      integer iwet  (nostat), mnes  (  4   )  , nnes (  4   )
+      integer mnstat(2,nostat),
+     *        mcbsp (nobnd ,2), ncbsp(nobnd ,2)
 
-      integer       mnstat(2,nostat),
-     *              mcbsp (nobnd ,2), ncbsp(nobnd ,2)
+      double precision weight(  4   )
 
-      real          weight(  4   )
+      double precision a0
+      double precision wl    (nostat,notims)
 
-      real          wl    (nostat,notims)
+      double precision uu    (nostat,kmax  ,notims),
+     *                 vv    (nostat,kmax  ,notims)
 
-      real          uu    (nostat,kmax  ,notims),
-     *              vv    (nostat,kmax  ,notims)
-
-      real          bndval(nobnd ,notims,kmax  ,1     ,2)
+      double precision bndval(nobnd ,notims,kmax  ,1     ,2)
 
       character*  1 type
       character*  1 typbnd(nobnd )
 
-      logical       fout
+      double precision angle
+      
+      integer ibnd
+      integer isize
+      integer m
+      integer n
+      integer lunadm
+      integer iwght
+      integer istat
+      integer itim
+      integer k
+      integer nobnd
+      integer kmax
+      
+      logical fout
 
       write (*     ,'('' >>> Generating hydrodynamic boundary '',
      *                ''conditions <<<'')')

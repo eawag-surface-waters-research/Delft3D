@@ -63,12 +63,12 @@ program nesthd2
       integer, dimension(:,:), pointer :: ncbsp
       integer, dimension(:,:), pointer :: mnstat
 
-      real   , dimension(:)        , pointer :: thick
-      real   , dimension(:,:)      , pointer :: wl
-      real   , dimension(:,:,:)    , pointer :: uu
-      real   , dimension(:,:,:,:)  , pointer :: vv
-      real   , dimension(:)        , pointer :: angle
-      real   , dimension(:,:,:,:,:), pointer :: bndva
+      double precision, dimension(:)        , pointer :: thick
+      double precision, dimension(:,:)      , pointer :: wl
+      double precision, dimension(:,:,:)    , pointer :: uu
+      double precision, dimension(:,:,:,:)  , pointer :: vv
+      double precision, dimension(:)        , pointer :: angle
+      double precision, dimension(:,:,:,:,:), pointer :: bndva
       
       character(len= 1), dimension(:), pointer :: typbn
       character(len=20), dimension(:), pointer :: nambn
