@@ -5444,7 +5444,7 @@ subroutine unc_write_net_ugrid2(mapids, janetcell)
    integer :: nn
    integer, allocatable :: edge_nodes(:,:), face_nodes(:,:), edge_type(:)
    integer :: layer_count, layer_type
-   real(kind=dp), dimension(:), allocatable :: layer_zs, interface_zs
+   real(kind=dp), dimension(:), pointer :: layer_zs=>null(), interface_zs=>null()
 !   type(t_crs) :: pj
 
    integer :: ierr
@@ -8102,7 +8102,7 @@ subroutine unc_write_flowgeom_filepointer_ugrid(mapids, jabndnd)
    integer :: nn
    integer, allocatable :: edge_nodes(:,:), face_nodes(:,:), edge_type(:)
    integer :: layer_count, layer_type
-   real(kind=dp), dimension(:), allocatable :: layer_zs, interface_zs
+   real(kind=dp), dimension(:), pointer :: layer_zs=>null(), interface_zs=>null()
 !   type(t_crs) :: pj
 
    integer :: ierr
@@ -8158,8 +8158,8 @@ subroutine unc_write_flowgeom_filepointer_ugrid(mapids, jabndnd)
          goto 888
       else
          layer_count = laymx(1)
-         call realloc(layer_zs, layer_count, fill=dmiss, keepExisting=.false.)
-         call realloc(interface_zs, layer_count + 1, fill=dmiss, keepExisting=.false.)
+         call reallocP(layer_zs, layer_count, fill=dmiss, keepExisting=.false.)
+         call reallocP(interface_zs, layer_count + 1, fill=dmiss, keepExisting=.false.)
          call get_layer_data_ugrid(layer_count, layer_type, layer_zs, interface_zs)
       end if
    end if
@@ -8330,8 +8330,8 @@ subroutine unc_write_flowgeom_filepointer_ugrid(mapids, jabndnd)
 
    if (allocated(edge_type)) deallocate(edge_type)
    ! TODO: AvD: also edge_type for 1D
-   if (allocated(layer_zs)) deallocate(layer_zs)
-   if (allocated(interface_zs)) deallocate(interface_zs)
+   if (associated(layer_zs)) deallocate(layer_zs)
+   if (associated(interface_zs)) deallocate(interface_zs)
 
    ! TODO: AvD:
    ! * in WAVE: handle the obsolete 'nFlowElemWithBnd'/'nFlowElem' difference
