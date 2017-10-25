@@ -504,6 +504,7 @@ contains
     
     meshgeom%meshName = 'mesh2d'
     meshgeom%dim = 2
+    meshgeom%start_index = 1
 
     meshgeom%numNode = nr_nodes
     meshgeom%nodex => nodex 
