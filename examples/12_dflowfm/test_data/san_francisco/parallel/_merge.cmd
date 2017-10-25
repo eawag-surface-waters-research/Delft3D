@@ -1,1 +1,0 @@
-python ..\..\..\python\dflowfm_merge\dflowfm_merge\dflowfm_merge.py --input *.nc --output merged.nc
