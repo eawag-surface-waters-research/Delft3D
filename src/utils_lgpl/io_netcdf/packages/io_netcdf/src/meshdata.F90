@@ -229,7 +229,7 @@ function convert_meshgeom_to_cptr(meshgeom, c_meshgeom) result(ierr)
    endif
    
    if (associated(meshgeom%nedge_nodes)) then
-      call c_f_pointer(c_meshgeom%nedge_nodes,nedge_nodes , (/ size(meshgeom%nedge_nodes, 2)/))
+      call c_f_pointer(c_meshgeom%nedge_nodes,nedge_nodes , (/ size(meshgeom%nedge_nodes, 1), size(meshgeom%nedge_nodes, 2)/))
       nedge_nodes= meshgeom%nedge_nodes
    endif
    

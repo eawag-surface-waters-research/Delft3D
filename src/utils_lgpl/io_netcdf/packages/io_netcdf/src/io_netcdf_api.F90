@@ -950,7 +950,7 @@ function ionc_put_1d_mesh_discretisation_points_dll(ioncid, meshid, c_branchidx,
   
   call c_f_pointer(c_branchidx, branchidx, (/ nmeshpoints /))
   call c_f_pointer(c_offset, offset, (/ nmeshpoints /))
-  call c_f_pointer(c_edgenodes, edgenodes, (/ 2, nedgenodes /))
+  call c_f_pointer(c_edgenodes, edgenodes, (/ 2, nedgenodes/))
     
   ierr = ionc_put_1d_mesh_discretisation_points_ugrid(ioncid, meshid, branchidx, offset, edgenodes, startIndex) 
 

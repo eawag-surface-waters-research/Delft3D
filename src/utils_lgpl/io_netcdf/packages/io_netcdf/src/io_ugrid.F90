@@ -204,10 +204,10 @@ enum, bind(C)
 enumerator::ntdim_start = 1
 enumerator ntdim_1dnodes                    !< Dimension ID for the number of network nodes
 enumerator ntdim_1dgeopoints                !< Dimension ID for the geometry points
-enumerator ntdim_1dedgenodes                !< Dimension ID for start/end node of each branch
 enumerator ntdim_1dbranches                 !< Dimension ID for 1d network branches
 enumerator ntdim_idstring                   !< Dimension ID for the string id
 enumerator ntdim_longnamestring             !< Dimension ID for the string longnames
+enumerator ntdim_two
 enumerator ntdim_end
 end enum
 
@@ -1066,7 +1066,7 @@ function ug_write_mesh_struct(ncid, meshids, networkids, crs, meshgeom, nnodeids
                                meshgeom%edgex, meshgeom%edgey, meshgeom%facex, meshgeom%facey, &
                                crs, -999, -999d0, meshgeom%start_index, meshgeom%numlayer, meshgeom%layertype, meshgeom%layer_zs, meshgeom%interface_zs, &
                                networkids, network1dname, meshgeom%nnodex, meshgeom%nnodey, nnodeids, nnodelongnames, &
-                               meshgeom%nedge_nodes(:,1), meshgeom%nedge_nodes(:,2), nbranchids, nbranchlongnames, meshgeom%nbranchlengths, meshgeom%nbranchgeometrynodes, meshgeom%nbranches, & 
+                               meshgeom%nedge_nodes(1,:), meshgeom%nedge_nodes(2,:), nbranchids, nbranchlongnames, meshgeom%nbranchlengths, meshgeom%nbranchgeometrynodes, meshgeom%nbranches, & 
                                meshgeom%ngeopointx, meshgeom%ngeopointy, meshgeom%ngeometry, &
                                meshgeom%nbranchorder, &
                                meshgeom%branchidx, meshgeom%branchoffsets)
@@ -1205,7 +1205,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
                      meshName, 'node_z', 'altitude', 'z-coordinate of mesh nodes', 'm', '', crs, dfill=dmiss)
 
    ! Edges
-   if ((.not.present(ngeopointx)).and.(dim == 1 .or. ug_checklocation(dataLocs, UG_LOC_EDGE)))  then
+   if ((.not.associated(ngeopointx)).and.(dim == 1 .or. ug_checklocation(dataLocs, UG_LOC_EDGE)))  then
       ierr = nf90_def_var(ncid, prefix//'_edge_nodes', nf90_int, (/ meshids%dimids(mdim_two), meshids%dimids(mdim_edge) /) , meshids%varids(mid_edgenodes))
       ierr = nf90_put_att(ncid, meshids%varids(mid_edgenodes), 'cf_role',   'edge_node_connectivity')
       ierr = nf90_put_att(ncid, meshids%varids(mid_edgenodes), 'mesh', trim(meshName))
@@ -1217,7 +1217,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
       ierr = nf90_put_att(ncid, meshids%varids(mid_edgenodes), '_FillValue',  imiss)
    end if
    
-   if (dim == 1 .and. present(ngeopointx)) then          
+   if (dim == 1 .and. associated(ngeopointx)) then          
       ierr = ug_create_1d_mesh(ncid, network1dname, meshids, meshname, numNode, numEdge)
    endif 
    
@@ -1392,7 +1392,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    ! Edges:
    if (dim == 1 .or. ug_checklocation(dataLocs, UG_LOC_EDGE)) then
       !if is UGRID 1.0 network, we need to write the network here
-      if (present(ngeopointx)) then   
+      if (associated(ngeopointx)) then   
          ! write network
          ierr = ug_write_1d_network_nodes(ncid, networkids, ngeopointx, ngeopointy) 
          ierr = ug_put_1d_network_branches(ncid, networkids, sourceNodeId,targetNodeId, nbranchids, nbranchlengths, nbranchlongnames, nbranchgeometrynodes, nbranches, start_index)
@@ -1851,8 +1851,6 @@ function ug_init_network_topology(ncid, varid, netids) result(ierr)
    ierr = att_to_coordvarids(ncid,'node_coordinates', netids%varids(ntid_1dgeox), netids%varids(ntid_1dgeoy), varin = netids%varids(ntid_1dgeometry))
 
    !dim variables
-   ierr = nf90_inquire_variable( ncid, netids%varids(ntid_1dedgenodes),dimids = dimids)
-   netids%dimids(ntdim_1dedgenodes) = dimids(1)
    ierr = nf90_inquire_variable( ncid, netids%varids(ntid_1dbranchids),dimids = dimids)
    netids%dimids(ntdim_idstring) = dimids(1)
    ierr = nf90_inquire_variable( ncid, netids%varids(ntid_1dbranchlongnames),dimids = dimids)
@@ -2435,7 +2433,7 @@ function ug_get_meshgeom(ncid, meshids, meshgeom, includeArrays, netid, nbranchi
          allocate(nnodelongnames(meshgeom%nnodes))
 
          ierr = ug_get_network_name_from_mesh1d(ncid, meshids, network1dname)
-         ierr = ug_get_1d_network_branches(ncid, netid, meshgeom%nedge_nodes(:,1), meshgeom%nedge_nodes(:,2), meshgeom%nbranchlengths, meshgeom%nbranchgeometrynodes, 1, nbranchids, nbranchlongnames)
+         ierr = ug_get_1d_network_branches(ncid, netid, meshgeom%nedge_nodes(1,:), meshgeom%nedge_nodes(2,:), meshgeom%nbranchlengths, meshgeom%nbranchgeometrynodes, 1, nbranchids, nbranchlongnames)
                    
          ierr = ug_get_1d_mesh_discretisation_points(ncid, meshids, meshgeom%branchidx, meshgeom%branchoffsets, 1)
          ierr = ug_read_1d_network_branches_geometry(ncid, netid, meshgeom%ngeopointx, meshgeom%ngeopointy)
@@ -3223,7 +3221,12 @@ function ug_create_1d_network(ncid, netids, networkName, nNodes, nBranches,nGeom
    if ( ierr /= UG_NOERR) then 
    ierr = nf90_def_dim(ncid, 'longstrlength', ug_idsLongNamesLen,  netids%dimids(ntdim_longnamestring))   
    endif
-   ierr  = nf90_def_dim(ncid, 'n'//prefix//'_edge_nodes' , nBranches * 2, netids%dimids(ntdim_1dedgenodes)) 
+   
+   ! Dimension 2 might already be present
+   ierr = nf90_inq_dimid(ncid, 'Two', netids%dimids(ntdim_two))
+   if ( ierr /= UG_NOERR) then 
+   ierr = nf90_def_dim(ncid, 'Two', 2, netids%dimids(ntdim_two))   
+   endif
 
    !Variable declarations: Network1d
    !1. Network1D
@@ -3244,7 +3247,7 @@ function ug_create_1d_network(ncid, netids, networkName, nNodes, nBranches,nGeom
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dtopo), 'branch_lengths', prefix//'_branch_lengths')  
 
    !2. Branch: the start and the end nodes of each branch
-   ierr = nf90_def_var(ncid, prefix//'_edge_nodes', nf90_int, netids%dimids(ntdim_1dedgenodes), netids%varids(ntid_1dedgenodes))
+   ierr = nf90_def_var(ncid, prefix//'_edge_nodes', nf90_int, (/ netids%dimids(ntdim_two), netids%dimids(ntdim_1dbranches) /), netids%varids(ntid_1dedgenodes))
    ierr = nf90_put_att(ncid,  netids%varids(ntid_1dedgenodes), 'cf_role', 'edge_node_connectivity')
    ierr = nf90_put_att(ncid,  netids%varids(ntid_1dedgenodes), 'long_name', 'start and end nodes of each branch in the network')
    !2. Branch: the branch ids
@@ -3608,12 +3611,12 @@ end function ug_write_1d_network_nodes
 
 !> This function writes the branches information
 !> This function writes the branches information
-function ug_put_1d_network_branches(ncid,netids, sourceNodeId,targetNodeId, branchids, branchlengths, branchlongnames, nbranchgeometrynodes,nBranches, startIndex) result(ierr)
+function ug_put_1d_network_branches(ncid,netids, sourceNodeId, targetNodeId, branchids, branchlengths, branchlongnames, nbranchgeometrynodes,nBranches, startIndex) result(ierr)
 
    integer, intent(in)               ::ncid, nBranches, startIndex
    type(t_ug_network), intent(in)    :: netids !< Set of NetCDF-ids for all mesh geometry arrays
    integer,           intent(in)     ::sourceNodeId(:),targetNodeId(:)
-   integer,           allocatable    ::sourcestargets(:)
+   integer,           allocatable    ::sourcestargets(:,:)
    double precision,  intent(in)     ::branchlengths(:) 
    character(len=*),  intent(in)     ::branchids(:),branchlongnames(:)
    integer,           intent(in)     ::nbranchgeometrynodes(:)
@@ -3622,18 +3625,18 @@ function ug_put_1d_network_branches(ncid,netids, sourceNodeId,targetNodeId, bran
    ierr = UG_SOMEERR
    ierr = nf90_enddef(ncid)
    
-   allocate(sourcestargets(nBranches*2))
+   allocate(sourcestargets(2, nBranches))
    k = 0
    do n=1,nBranches
        k = k + 1
-       sourcestargets(k)=sourceNodeId(n) 
-       k = k + 1
-       sourcestargets(k)=targetNodeId(n)
+       sourcestargets(1, k)=sourceNodeId(n) 
+       sourcestargets(2, k)=targetNodeId(n)
    end do
    
    !we have not defined the start_index, so when we put the variable it must be zero based
    if (startIndex.ne.0) then
-        ierr = ug_convert_start_index(sourcestargets, startIndex, 0)
+        ierr = ug_convert_start_index(sourcestargets(1,:), startIndex, 0)
+        ierr = ug_convert_start_index(sourcestargets(2,:), startIndex, 0)
    endif
    
    ierr = nf90_put_var(ncid, netids%varids(ntid_1dedgenodes), sourcestargets)
@@ -3803,10 +3806,10 @@ function ug_get_1d_network_branches(ncid, netids, sourcenodeid, targetnodeid, br
    real(kind=dp),intent(out)                  :: branchlengths(:)
    character(len=*),intent(out), optional     :: nbranchid(:),nbranchlongnames(:)
    integer                                    :: ierr, n, k, bid, nmeshpoints, nbranches, varStartIndex
-   integer,allocatable                        :: sourcestargets(:)
+   integer,allocatable                        :: sourcestargets(:,:)
 
    nbranches = size(sourceNodeId,1)
-   allocate(sourcestargets(nbranches * 2))
+   allocate(sourcestargets(2, nbranches))
 
    ierr = nf90_get_var(ncid, netids%varids(ntid_1dedgenodes), sourcestargets)
    if(ierr /= UG_NOERR) then
@@ -3816,17 +3819,18 @@ function ug_get_1d_network_branches(ncid, netids, sourcenodeid, targetnodeid, br
    !we check for the start_index, we do not know if the variable was written as 0 based
    ierr = nf90_get_att(ncid, netids%varids(ntid_1dedgenodes),'start_index', varStartIndex)
    if (ierr .eq. UG_NOERR) then
-       ierr = ug_convert_start_index(sourcestargets, varStartIndex, startIndex)
+       ierr = ug_convert_start_index(sourcestargets(1,:), varStartIndex, startIndex)
+       ierr = ug_convert_start_index(sourcestargets(2,:), varStartIndex, startIndex)
    else
-       ierr = ug_convert_start_index(sourcestargets, 0, startIndex)
+       ierr = ug_convert_start_index(sourcestargets(1,:), 0, startIndex)
+       ierr = ug_convert_start_index(sourcestargets(2,:), 0, startIndex)
    endif
    
    k = 0
    do n=1,nBranches
        k = k + 1
-       sourceNodeId(n)=sourcestargets(k)
-       k = k + 1
-       targetNodeId(n)=sourcestargets(k)
+       sourceNodeId(n)=sourcestargets(1,k)
+       targetNodeId(n)=sourcestargets(2,k)
    end do
 
    
