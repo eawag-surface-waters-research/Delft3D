@@ -1205,7 +1205,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
                      meshName, 'node_z', 'altitude', 'z-coordinate of mesh nodes', 'm', '', crs, dfill=dmiss)
 
    ! Edges
-   if ((.not.associated(ngeopointx)).and.(dim == 1 .or. ug_checklocation(dataLocs, UG_LOC_EDGE)))  then
+   if (((.not.present(ngeopointx)).or.(.not.associated(ngeopointx))).and.(dim == 1 .or. ug_checklocation(dataLocs, UG_LOC_EDGE)))  then
       ierr = nf90_def_var(ncid, prefix//'_edge_nodes', nf90_int, (/ meshids%dimids(mdim_two), meshids%dimids(mdim_edge) /) , meshids%varids(mid_edgenodes))
       ierr = nf90_put_att(ncid, meshids%varids(mid_edgenodes), 'cf_role',   'edge_node_connectivity')
       ierr = nf90_put_att(ncid, meshids%varids(mid_edgenodes), 'mesh', trim(meshName))
@@ -1217,7 +1217,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
       ierr = nf90_put_att(ncid, meshids%varids(mid_edgenodes), '_FillValue',  imiss)
    end if
    
-   if (dim == 1 .and. associated(ngeopointx)) then          
+   if (dim == 1 .and. present(ngeopointx) .and. associated(ngeopointx)) then          
       ierr = ug_create_1d_mesh(ncid, network1dname, meshids, meshname, numNode, numEdge)
    endif 
    
@@ -1392,7 +1392,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    ! Edges:
    if (dim == 1 .or. ug_checklocation(dataLocs, UG_LOC_EDGE)) then
       !if is UGRID 1.0 network, we need to write the network here
-      if (associated(ngeopointx)) then   
+      if (present(ngeopointx).and.associated(ngeopointx)) then   
          ! write network
          ierr = ug_write_1d_network_nodes(ncid, networkids, ngeopointx, ngeopointy) 
          ierr = ug_put_1d_network_branches(ncid, networkids, sourceNodeId,targetNodeId, nbranchids, nbranchlengths, nbranchlongnames, nbranchgeometrynodes, nbranches, start_index)
