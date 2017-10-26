@@ -121,7 +121,7 @@ subroutine qkwcg(tp        ,rlabda    ,teta      ,qxkw      ,qykw      , &
              !
              if (tp(n, m)>0.01_fp) then
                  !
-                 if (iopt==1) then
+                 if (iopt==2) then
                    !
                    q = 2.0_fp*pi*h/max(5.0_fp,rlabda(n, m)) ! k*h
                    !
