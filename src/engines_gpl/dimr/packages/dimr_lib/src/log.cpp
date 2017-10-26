@@ -92,7 +92,7 @@ Level Log::GetFeedbackLevel( void ) {
 
 
 void Log::SetFeedbackLevel( Level feedbackLevel) {
-	this->feedbackLevel = min(max(feedbackLevel,ALL),FATAL);;
+	this->feedbackLevel = min(max(feedbackLevel,ALL), NONE);
 
     char * levelString = new char[MAXSTRING];
     logLevelToString(this->feedbackLevel, &levelString);
