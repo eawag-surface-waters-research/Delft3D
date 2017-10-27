@@ -58,30 +58,30 @@ type t_ug_meshgeom
    integer            :: ngeometry          !< Number of geometrical points
    integer            :: start_index        !< The base index of the arrays
 
-   integer,      pointer :: edge_nodes(:,:) => null() !< Edge-to-node mapping array.
-   integer,      pointer :: face_nodes(:,:) => null() !< Face-to-node mapping array.
-   integer,      pointer :: edge_faces(:,:) => null() !< Edge-to-face mapping array (optional, can be null()).
-   integer,      pointer :: face_edges(:,:) => null() !< Face-to-edge mapping array (optional, can be null()).
-   integer,      pointer :: face_links(:,:) => null() !< Face-to-face mapping array (optional, can be null()).
+   integer, pointer :: edge_nodes(:,:) => null() !< Edge-to-node mapping array.
+   integer, pointer :: face_nodes(:,:) => null() !< Face-to-node mapping array.
+   integer, pointer :: edge_faces(:,:) => null() !< Edge-to-face mapping array (optional, can be null()).
+   integer, pointer :: face_edges(:,:) => null() !< Face-to-edge mapping array (optional, can be null()).
+   integer, pointer :: face_links(:,:) => null() !< Face-to-face mapping array (optional, can be null()).
    
    !Network1d variables
-   double precision,                  pointer :: nnodex(:) => null()   !< x-coordinates of the geometry points.
-   double precision,                  pointer :: nnodey(:) => null()   !< x-coordinates of the geometry points.
-   character(len=ug_idsLen),          pointer :: nnodeids(:) => null()     
-   character(len=ug_idsLongNamesLen), pointer :: nnodelongnames(:) => null()  
+   double precision,                  pointer :: nnodex(:) => null()                 !< x-coordinates of the network points.
+   double precision,                  pointer :: nnodey(:) => null()                 !< y-coordinates of the network points.
+   character(len=ug_idsLen),          pointer :: nnodeids(:) => null()               !< network nodes ids description 
+   character(len=ug_idsLongNamesLen), pointer :: nnodelongnames(:) => null()         !< network nodes nnodelongnames description 
 
-   integer,                           pointer :: nedge_nodes(:,:)   => null()        !< Start-end node of each branch (used to determine edge-node connectivity)
-   character(len=ug_idsLen),          pointer :: nbranchids(:)       => null() 
-   character(len=ug_idsLongNamesLen), pointer :: nbranchlongnames(:) => null() 
-   double precision,                  pointer :: nbranchlengths(:)  => null() !< lengths of each branch
-   integer,                           pointer :: nbranchgeometrynodes(:) => null() !< Number of geometry nodes in each branch
-   double precision,                  pointer :: ngeopointx(:) => null()   !< x-coordinates of the geometry points.
-   double precision,                  pointer :: ngeopointy(:) => null()   !< y-coordinates of the geometry points.
-   integer,                           pointer :: nbranchorder(:) => null()   !< y-coordinates of the geometry points.
+   integer,                           pointer :: nedge_nodes(:,:) => null()          !< Start-end node of each branch
+   character(len=ug_idsLen),          pointer :: nbranchids(:) => null()             !< Branch nodes ids 
+   character(len=ug_idsLongNamesLen), pointer :: nbranchlongnames(:) => null()       !< Branch long names
+   double precision,                  pointer :: nbranchlengths(:) => null()         !< Branch lenghts
+   integer,                           pointer :: nbranchgeometrynodes(:) => null()   !< Number of geometry points in each branch
+   double precision,                  pointer :: ngeopointx(:) => null()             !< x-coordinates of geometry points.
+   double precision,                  pointer :: ngeopointy(:) => null()             !< y-coordinates of geometry points.
+   integer,                           pointer :: nbranchorder(:) => null()           !< the branch order
    
    !Mesh1d variables
-   integer,                           pointer :: branchidx(:) => null()    !< Branch id of each mesh node 
-   double precision,                  pointer :: branchoffsets(:)=> null() !< Branch offset of each mesh node
+   integer,                           pointer :: branchidx(:) => null()              !< The branch index of each 1d mesh point
+   double precision,                  pointer :: branchoffsets(:)=> null()           !< The branch offset of each 1d mesh point
 
    double precision, pointer :: nodex(:)=> null()       !< x-coordinates of the mesh nodes.
    double precision, pointer :: nodey(:)=> null()       !< y-coordinates of the mesh nodes.
@@ -109,44 +109,45 @@ type, bind(C) :: c_t_ug_meshgeomdim
    integer(kind=c_int)      :: numlayer           !< Number of mesh layers (num interfaces == numlayer + 1), numlayer = 0 means "no layers".
    integer(kind=c_int)      :: layertype          !< Type of vertical layer definition (only if numlayer >= 1), one of LAYERTYPE_* parameters.
    integer(kind=c_int)      :: nnodes
-   integer(kind=c_int)      :: nbranches       !< Number of branches
-   integer(kind=c_int)      :: ngeometry       !< Number of geometry points
+   integer(kind=c_int)      :: nbranches          !< Number of branches
+   integer(kind=c_int)      :: ngeometry          !< Number of geometry points
    integer(kind=c_int)      :: start_index        !< The base index of the arrays
    
 end type c_t_ug_meshgeomdim
 
 type, bind(C) :: c_t_ug_meshgeom
 
-   type(c_ptr) :: edge_nodes !< Edge-to-node mapping array.
-   type(c_ptr) :: face_nodes !< Face-to-node mapping array.
-   type(c_ptr) :: edge_faces !< Edge-to-face mapping array (optional, can be null()).
-   type(c_ptr) :: face_edges !< Face-to-edge mapping array (optional, can be null()).
-   type(c_ptr) :: face_links !< Face-to-face mapping array (optional, can be null()).
+   type(c_ptr) :: edge_nodes              !< Edge-to-node mapping array.
+   type(c_ptr) :: face_nodes              !< Face-to-node mapping array.
+   type(c_ptr) :: edge_faces              !< Edge-to-face mapping array (optional, can be null()).
+   type(c_ptr) :: face_edges              !< Face-to-edge mapping array (optional, can be null()).
+   type(c_ptr) :: face_links              !< Face-to-face mapping array (optional, can be null()).
    
    !Mesh 1d variables
-   type(c_ptr)  :: nnodex               
-   type(c_ptr)  :: nnodey    
-   type(c_ptr)  :: nedge_nodes                          
-   type(c_ptr)  :: nbranchlengths
-   type(c_ptr)  :: nbranchgeometrynodes
-   type(c_ptr)  :: ngeopointx
-   type(c_ptr)  :: ngeopointy
-   type(c_ptr)  :: nbranchorder
-   type(c_ptr)  :: branchidx
-   type(c_ptr)  :: branchoffsets
+   type(c_ptr)  :: nnodex                 !< x-coordinates of the network points.  
+   type(c_ptr)  :: nnodey                 !< y-coordinates of the network points.
+   type(c_ptr)  :: nedge_nodes            !< Start-end node of each branch                
+   type(c_ptr)  :: nbranchlengths         !< The branch lenghts  
+   type(c_ptr)  :: nbranchgeometrynodes   !< Number of geometry points in each branch
+   type(c_ptr)  :: ngeopointx             !< x-coordinates of geometry points.
+   type(c_ptr)  :: ngeopointy             !< y-coordinates of geometry points.
+   type(c_ptr)  :: nbranchorder           !< the branch order
    
-   type(c_ptr) :: nodex       !< x-coordinates of the mesh nodes.
-   type(c_ptr) :: nodey       !< y-coordinates of the mesh nodes.
-   type(c_ptr) :: nodez       !< z-coordinates of the mesh nodes.
-   type(c_ptr) :: edgex       !< x-coordinates of the mesh edges.
-   type(c_ptr) :: edgey       !< y-coordinates of the mesh edges.
-   type(c_ptr) :: edgez       !< z-coordinates of the mesh edges.
-   type(c_ptr) :: facex       !< x-coordinates of the mesh faces.
-   type(c_ptr) :: facey       !< y-coordinates of the mesh faces.
-   type(c_ptr) :: facez       !< z-coordinates of the mesh faces.
+   type(c_ptr)  :: branchidx              !< The branch index of each 1d mesh point
+   type(c_ptr)  :: branchoffsets          !< The branch offset of each 1d mesh point
    
-   type(c_ptr) :: layer_zs
-   type(c_ptr) :: interface_zs
+   type(c_ptr) :: nodex                   !< x-coordinates of the mesh nodes.
+   type(c_ptr) :: nodey                   !< y-coordinates of the mesh nodes.
+   type(c_ptr) :: nodez                   !< z-coordinates of the mesh nodes.
+   type(c_ptr) :: edgex                   !< x-coordinates of the mesh edges.
+   type(c_ptr) :: edgey                   !< y-coordinates of the mesh edges.
+   type(c_ptr) :: edgez                   !< z-coordinates of the mesh edges.
+   type(c_ptr) :: facex                   !< x-coordinates of the mesh faces.
+   type(c_ptr) :: facey                   !< y-coordinates of the mesh faces.
+   type(c_ptr) :: facez                   !< z-coordinates of the mesh faces.
+   
+   type(c_ptr) :: layer_zs                !< Vertical coordinates of the mesh layers' center (either z or sigma).
+   type(c_ptr) :: interface_zs            !< Vertical coordinates of the mesh layers' interface (either z or sigma).
 
 end type c_t_ug_meshgeom
 

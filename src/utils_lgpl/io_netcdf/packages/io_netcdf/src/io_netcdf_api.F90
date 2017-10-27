@@ -280,10 +280,11 @@ end function ionc_put_node_coordinates_dll
 
 
 !> Gets the edge-facee connectivity table for all edges in the specified mesh.
-function ionc_get_edge_faces_dll(ioncid, meshid, c_edge_faces_ptr, nedge, fillvalue) result(ierr) bind(C, name="ionc_get_edge_faces")
+function ionc_get_edge_faces_dll(ioncid, meshid, c_edge_faces_ptr, nedge, fillvalue, start_index) result(ierr) bind(C, name="ionc_get_edge_faces")
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_edge_nodes_dll
-   integer(kind=c_int), intent(in)    :: ioncid  !< The IONC data set id.
-   integer(kind=c_int), intent(in)    :: meshid  !< The mesh id in the specified data set.
+   integer(kind=c_int), intent(in)    :: ioncid      !< The IONC data set id.
+   integer(kind=c_int), intent(in)    :: start_index !< The requested start index
+   integer(kind=c_int), intent(in)    :: meshid       !< The mesh id in the specified data set.
    type(c_ptr),         intent(  out) :: c_edge_faces_ptr !< Pointer to array for the edge-node connectivity table.
    integer(kind=c_int), intent(in)    :: nedge   !< The number of edges in the mesh.    
    integer(kind=c_int)                :: fillvalue    !< Scalar for getting the fill value parameter for the requested variable.
@@ -293,7 +294,7 @@ function ionc_get_edge_faces_dll(ioncid, meshid, c_edge_faces_ptr, nedge, fillva
 
    call c_f_pointer(c_edge_faces_ptr, edge_faces, (/ 2 , nedge /))
    
-   ierr = ionc_get_edge_faces(ioncid, meshid, edge_faces, fillvalue)
+   ierr = ionc_get_edge_faces(ioncid, meshid, edge_faces, fillvalue, start_index)
 end function ionc_get_edge_faces_dll
 
 
@@ -317,7 +318,7 @@ end function ionc_get_edge_nodes_dll
 
 !> Gets the face-edge connectivity table for all faces in the specified mesh.
 !! The output face_edges array is supposed to be of exact correct size already.
-function ionc_get_face_edges_dll(ioncid, meshid, c_face_edges_ptr, nface, nmax_face_edges, fillvalue) result(ierr) bind(C, name="ionc_get_face_edges")
+function ionc_get_face_edges_dll(ioncid, meshid, c_face_edges_ptr, nface, nmax_face_edges, fillvalue, startIndex) result(ierr) bind(C, name="ionc_get_face_edges")
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_face_edges_dll
    integer(kind=c_int), intent(in)    :: ioncid  !< The IONC data set id.
    integer(kind=c_int), intent(in)    :: meshid  !< The mesh id in the specified data set.
@@ -326,32 +327,34 @@ function ionc_get_face_edges_dll(ioncid, meshid, c_face_edges_ptr, nface, nmax_f
    integer(kind=c_int), intent(in)    :: nmax_face_edges  !< The maximum number of edges per face in the mesh. TODO: AvD: remove this somehow, now only required to call c_f_pointer
    integer(kind=c_int)                :: fillvalue    !< Scalar for getting the fill value parameter for the requested variable.
    integer(kind=c_int)                :: ierr    !< Result status, ionc_noerr if successful.
+   integer(kind=c_int)                :: startIndex         !< The start index the caller asks for
 
    integer, pointer :: face_edges(:,:)
 
    call c_f_pointer(c_face_edges_ptr, face_edges, (/ nmax_face_edges, nface /))
    
-   ierr = ionc_get_face_edges(ioncid, meshid, face_edges, fillvalue)
+   ierr = ionc_get_face_edges(ioncid, meshid, face_edges, fillvalue, startIndex)
 end function ionc_get_face_edges_dll
 
 
 !> Gets the face-node connectivity table for all faces in the specified mesh.
 !! The output face_nodes array is supposed to be of exact correct size already.
-function ionc_get_face_nodes_dll(ioncid, meshid, c_face_nodes_ptr, nface, nmaxfacenodes, fillvalue) result(ierr) bind(C, name="ionc_get_face_nodes")
+function ionc_get_face_nodes_dll(ioncid, meshid, c_face_nodes_ptr, nface, nmaxfacenodes, fillvalue, startIndex) result(ierr) bind(C, name="ionc_get_face_nodes")
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_face_nodes_dll
-   integer(kind=c_int), intent(in)    :: ioncid  !< The IONC data set id.
-   integer(kind=c_int), intent(in)    :: meshid  !< The mesh id in the specified data set.
-   type(c_ptr),         intent(  out) :: c_face_nodes_ptr !< Pointer to array for the face-node connectivity table.
-   integer(kind=c_int), intent(in)    :: nface  !< The number of faces in the mesh. TODO: AvD: remove this somehow, now only required to call c_f_pointer
-   integer(kind=c_int), intent(in)    :: nmaxfacenodes  !< The maximum number of nodes per face in the mesh. TODO: AvD: remove this somehow, now only required to call c_f_pointer
-   integer(kind=c_int)                :: fillvalue    !< Scalar for getting the fill value parameter for the requested variable.
-   integer(kind=c_int)                :: ierr    !< Result status, ionc_noerr if successful.
+   integer(kind=c_int), intent(in)    :: ioncid             !< The IONC data set id.
+   integer(kind=c_int), intent(in)    :: meshid             !< The mesh id in the specified data set.
+   type(c_ptr),         intent(  out) :: c_face_nodes_ptr   !< Pointer to array for the face-node connectivity table.
+   integer(kind=c_int), intent(in)    :: nface              !< The number of faces in the mesh. TODO: AvD: remove this somehow, now only required to call c_f_pointer
+   integer(kind=c_int), intent(in)    :: nmaxfacenodes      !< The maximum number of nodes per face in the mesh. TODO: AvD: remove this somehow, now only required to call c_f_pointer
+   integer(kind=c_int)                :: fillvalue          !< Scalar for getting the fill value parameter for the requested variable.
+   integer(kind=c_int)                :: ierr               !< Result status, ionc_noerr if successful.
+   integer(kind=c_int)                :: startIndex         !< The start index the caller asks for
 
    integer, pointer :: face_nodes(:,:)
 
    call c_f_pointer(c_face_nodes_ptr, face_nodes, (/ nmaxfacenodes, nface /))
    
-   ierr = ionc_get_face_nodes(ioncid, meshid, face_nodes, fillvalue)
+   ierr = ionc_get_face_nodes(ioncid, meshid, face_nodes, fillvalue, startIndex)
 end function ionc_get_face_nodes_dll
 
 

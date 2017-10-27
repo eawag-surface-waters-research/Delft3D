@@ -2081,6 +2081,7 @@ function ug_is_mesh_topology(ncid, varid) result(is_mesh_topo)
    buffer = ' '
    cfrole    = nf90_get_att(ncid, varid, 'cf_role', buffer)
    geomesh   = nf90_get_att(ncid, varid, 'coordinate_space', geomeshid)
+      !if it has edge_geometry is not a mesh! 
    if (cfrole == nf90_noerr .and. geomesh == nf90_noerr .and. trim(buffer) == 'mesh_topology') then
          is_mesh_topo = .true. !new ugrid format detected
    else if (cfrole == nf90_noerr .and. trim(buffer) == 'mesh_topology') then
@@ -2485,17 +2486,31 @@ end function ug_put_node_coordinates
 
 !> Gets the edge-face connectivity table for all edges in the specified mesh.
 !! The output edge_faces array is supposed to be of exact correct size already.
-function ug_get_edge_faces(ncid, meshids, edge_faces, ifill) result(ierr)
-   integer,           intent(in)  :: ncid             !< NetCDF dataset id, should be already open.
-   type(t_ug_mesh),   intent(in)  :: meshids          !< Set of NetCDF-ids for all mesh geometry arrays.
-   integer,           intent(out) :: edge_faces(:,:)  !< Array to the edge-node connectivity table.
-   integer, optional, intent(out) :: ifill            !< (Optional) Integer fill value.
-   integer                        :: ierr             !< Result status (UG_NOERR==NF90_NOERRif successful).
+function ug_get_edge_faces(ncid, meshids, edge_faces, ifill, startIndex) result(ierr)
+   integer,           intent(in)  :: ncid              !< NetCDF dataset id, should be already open.
+   type(t_ug_mesh),   intent(in)  :: meshids           !< Set of NetCDF-ids for all mesh geometry arrays.
+   integer,           intent(out) :: edge_faces(:,:)   !< Array to the edge-node connectivity table.
+   integer, optional, intent(out) :: ifill             !< (Optional) Integer fill value.
+   integer                        :: ierr              !< Result status (UG_NOERR==NF90_NOERRif successful).
+   integer, optional, intent(in)  :: startIndex        !< The start index the caller asks for
+   integer                        :: k, varStartIndex  !< Temp variables
 
    ierr = nf90_get_var(ncid, meshids%varids(mid_edgefaces), edge_faces)
    if (present(ifill)) then
       ierr = nf90_get_att(ncid, meshids%varids(mid_edgefaces), '_FillValue', ifill)
    end if
+   
+   if (present(startIndex)) then
+      !we check for the start_index, we do not know if the variable was written as 0 based
+      ierr = nf90_get_att(ncid, meshids%varids(mid_edgefaces),'start_index', varStartIndex)  
+      if (ierr .eq. UG_NOERR) then
+         ierr = ug_convert_start_index(edge_faces(1,:), varStartIndex, startIndex)
+         ierr = ug_convert_start_index(edge_faces(2,:), varStartIndex, startIndex)
+      else
+         ierr = ug_convert_start_index(edge_faces(1,:), 0, startIndex)
+         ierr = ug_convert_start_index(edge_faces(2,:), 0, startIndex)
+      endif
+   endif
 
 end function ug_get_edge_faces
 
@@ -2507,18 +2522,21 @@ function ug_get_edge_nodes(ncid, meshids, edge_nodes, startIndex) result(ierr)
    type(t_ug_mesh),   intent(in)  :: meshids          !< Set of NetCDF-ids for all mesh geometry arrays.
    integer,           intent(out) :: edge_nodes(:,:)  !< Array to the edge-node connectivity table.
    integer                        :: ierr             !< Result status (UG_NOERR==NF90_NOERRif successful).
-   integer        ,   intent(in)  :: startIndex      !< The requested index
+   integer, optional, intent(in)  :: startIndex      !< The requested index
    integer                        :: varStartIndex    !< The index stored in the netCDF file
 
    ierr = nf90_get_var(ncid, meshids%varids(mid_edgenodes), edge_nodes)
-   !we check for the start_index, we do not know if the variable was written as 0 based
-   ierr = nf90_get_att(ncid, meshids%varids(mid_edgenodes),'start_index', varStartIndex)  
-   if (ierr .eq. UG_NOERR) then
-        ierr = ug_convert_start_index(edge_nodes(1,:), varStartIndex, startIndex)
-        ierr = ug_convert_start_index(edge_nodes(2,:), varStartIndex, startIndex)
-   else
+   
+   if (present(startIndex)) then
+      !we check for the start_index, we do not know if the variable was written as 0 based
+      ierr = nf90_get_att(ncid, meshids%varids(mid_edgenodes),'start_index', varStartIndex)  
+      if (ierr .eq. UG_NOERR) then
+         ierr = ug_convert_start_index(edge_nodes(1,:), varStartIndex, startIndex)
+         ierr = ug_convert_start_index(edge_nodes(2,:), varStartIndex, startIndex)
+      else
         ierr = ug_convert_start_index(edge_nodes(1,:), 0, startIndex)
         ierr = ug_convert_start_index(edge_nodes(2,:), 0, startIndex)
+      endif
    endif
    
    ! Getting fillvalue is unnecessary because each edge should have a begin- and end-point
@@ -2563,34 +2581,66 @@ end function ug_put_face_coordinates
 
 !> Gets the face-edge connectivity table for all faces in the specified mesh.
 !! The output face_edges array is supposed to be of exact correct size already.
-function ug_get_face_edges(ncid, meshids, face_edges, ifill) result(ierr)
+function ug_get_face_edges(ncid, meshids, face_edges, ifill, startIndex) result(ierr)
    integer,           intent(in)  :: ncid            !< NetCDF dataset id, should be already open.
    type(t_ug_mesh),   intent(in)  :: meshids         !< Set of NetCDF-ids for all mesh geometry arrays.
    integer,           intent(out) :: face_edges(:,:) !< Array to the face-node connectivity table.
    integer, optional, intent(out) :: ifill           !< (Optional) Integer fill value.
+   integer, optional, intent(in)  :: startIndex      !< The start index the caller asks for
+   integer                        :: k,varStartIndex   !< Temp variables
    integer                        :: ierr            !< Result status (UG_NOERR==NF90_NOERRif successful).
-
+   
    ierr = nf90_get_var(ncid, meshids%varids(mid_faceedges), face_edges)
    if (present(ifill)) then
       ierr = nf90_get_att(ncid, meshids%varids(mid_faceedges), '_FillValue', ifill)
    end if
+   
+   if (present(startIndex)) then
+      !we check for the start_index, we do not know if the variable was written as 0 based
+      ierr = nf90_get_att(ncid, meshids%varids(mid_faceedges),'start_index', varStartIndex)  
+      if (ierr .eq. UG_NOERR) then
+         do k = 1, size(face_edges,1)
+            ierr = ug_convert_start_index(face_edges(k,:), varStartIndex, startIndex)
+         enddo
+      else
+         do k = 1, size(face_edges,1)
+         ierr = ug_convert_start_index(face_edges(k,:), 0, startIndex)
+         enddo
+      endif
+   endif
 
 end function ug_get_face_edges
 
 
 !> Gets the face-node connectivity table for all faces in the specified mesh.
 !! The output face_nodes array is supposed to be of exact correct size already.
-function ug_get_face_nodes(ncid, meshids, face_nodes, ifill) result(ierr)
+function ug_get_face_nodes(ncid, meshids, face_nodes, ifill, startIndex) result(ierr)
    integer,           intent(in)  :: ncid            !< NetCDF dataset id, should be already open.
    type(t_ug_mesh),   intent(in)  :: meshids         !< Set of NetCDF-ids for all mesh geometry arrays.
    integer,           intent(out) :: face_nodes(:,:) !< Array to the face-node connectivity table.
    integer, optional, intent(out) :: ifill           !< (Optional) Integer fill value.
+   integer, optional, intent(in)  :: startIndex      !< The start index the caller asks for
+   integer                        :: k,varStartIndex   !< Temp variables
    integer                        :: ierr            !< Result status (UG_NOERR==NF90_NOERRif successful).
 
    ierr = nf90_get_var(ncid, meshids%varids(mid_facenodes), face_nodes)
    if (present(ifill)) then
       ierr = nf90_get_att(ncid, meshids%varids(mid_facenodes), '_FillValue', ifill)
    end if
+   
+   if (present(startIndex)) then
+      !we check for the start_index, we do not know if the variable was written as 0 based
+      ierr = nf90_get_att(ncid, meshids%varids(mid_facenodes),'start_index', varStartIndex)  
+      if (ierr .eq. UG_NOERR) then
+         do k = 1, size(face_nodes,1)
+         ierr = ug_convert_start_index(face_nodes(k,:), varStartIndex, startIndex)
+         enddo
+      else
+         do k = 1, size(face_nodes,1)
+         ierr = ug_convert_start_index(face_nodes(k,:), 0, startIndex)
+         enddo
+      endif
+   endif
 
 end function ug_get_face_nodes
 
