@@ -50,14 +50,14 @@ namespace gridgeom.Tests
             double[] geopointsY = { 4.0, 4.0, 4.0, 1.0, 2.0, 4.0, 4.0, 4.0, 4.0 };
 
             //mesh geometry
-            int[] branchidx = { 1, 1, 1, 1, 2, 2, 2, 3, 3, 3 };
+            int[] branchids = { 1, 1, 1, 1, 2, 2, 2, 3, 3, 3 };
             double[] branchoffsets = { 0.0, 2.0, 3.0, 4.0, 0.0, 1.5, 3.0, 0.0, 1.5, 3.0 };
 
             // Create the netcdf files
             double[] meshXCoords = { 1.0, 3.0, 4.0, 5.0, 5.0, 5.0, 5.0, 5.0, 6.5, 8.0 };
             double[] meshYCoords = { 4.0, 4.0, 4.0, 4.0, 1.0, 2.5, 4.0, 4.0, 4.0, 4.0 };
 
-            IntPtr c_branchidx = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nmeshpoints);
+            IntPtr c_branchids = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nmeshpoints);
             IntPtr c_branchoffsets = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nmeshpoints);
             IntPtr c_geopointsX = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * ngeopoints);
             IntPtr c_geopointsY = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * ngeopoints);
@@ -68,7 +68,7 @@ namespace gridgeom.Tests
             try
             {
                 var wrapper = new GridGeomLibWrapper();
-                Marshal.Copy(branchidx, 0, c_branchidx, nmeshpoints);
+                Marshal.Copy(branchids, 0, c_branchids, nmeshpoints);
                 Marshal.Copy(branchoffsets, 0, c_branchoffsets, nmeshpoints);
                 Marshal.Copy(geopointsX, 0, c_geopointsX, ngeopoints);
                 Marshal.Copy(geopointsY, 0, c_geopointsY, ngeopoints);
@@ -76,7 +76,7 @@ namespace gridgeom.Tests
                 Marshal.Copy(branchlengths, 0, c_branchlengths, nbranches);
 
                 //call the function and assert for validity 
-                int ierr = wrapper.ggeo_get_xy_coordinates(ref c_branchidx, ref c_branchoffsets, ref c_geopointsX,
+                int ierr = wrapper.ggeo_get_xy_coordinates(ref c_branchids, ref c_branchoffsets, ref c_geopointsX,
                     ref c_geopointsY, ref c_nbranchgeometrynodes, ref c_branchlengths, ref c_meshXCoords,
                     ref c_meshYCoords, ref nbranches, ref ngeopoints, ref nmeshpoints);
                 Assert.That(ierr, Is.EqualTo(0));
@@ -95,7 +95,7 @@ namespace gridgeom.Tests
             }
             finally
             {
-                Marshal.FreeCoTaskMem(c_branchidx);
+                Marshal.FreeCoTaskMem(c_branchids);
                 Marshal.FreeCoTaskMem(c_branchoffsets);
                 Marshal.FreeCoTaskMem(c_geopointsX);
                 Marshal.FreeCoTaskMem(c_geopointsY);
@@ -125,7 +125,7 @@ namespace gridgeom.Tests
             double[] s_geopointsY = { 0.0, 0.0, 0.0, -2.0 };
 
             //mesh geometry
-            int[] s_branchidx = { 1, 1, 1, 2, 2, 2 };
+            int[] s_branchids = { 1, 1, 1, 2, 2, 2 };
             double[] s_branchoffsets = { 0.0, 1.0, 2.0, 0.0, 1.0, 2.0 };
 
             //mesh coordinates
@@ -141,7 +141,7 @@ namespace gridgeom.Tests
             int[] nbranchgeometrynodes = new int[nbranches];
             double[] geopointsX = new double[ngeopoints];
             double[] geopointsY = new double[ngeopoints];
-            int[] branchidx = new int[nmeshpoints];
+            int[] branchids = new int[nmeshpoints];
             double[] branchoffsets = new double[nmeshpoints];
             double[] meshXCoords = new double[nmeshpoints];
             double[] meshYCoords = new double[nmeshpoints];
@@ -169,13 +169,13 @@ namespace gridgeom.Tests
                 {
                     meshXCoords[mid] = s_meshXCoords[j] + i; //add positive offset
                     meshYCoords[mid] = s_meshYCoords[j] - i; //add negative offset
-                    branchidx[mid] = s_branchidx[j] + i * 2; //add branch ids
+                    branchids[mid] = s_branchids[j] + i * 2; //add branch ids
                     branchoffsets[mid] = s_branchoffsets[j];
                     mid = mid + 1;
                 }
             }
 
-            IntPtr c_branchidx = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nmeshpoints);
+            IntPtr c_branchids = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nmeshpoints);
             IntPtr c_branchoffsets = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nmeshpoints);
             IntPtr c_geopointsX = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * ngeopoints);
             IntPtr c_geopointsY = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * ngeopoints);
@@ -186,7 +186,7 @@ namespace gridgeom.Tests
             try
             {
                 var wrapper = new GridGeomLibWrapper();
-                Marshal.Copy(branchidx, 0, c_branchidx, nmeshpoints);
+                Marshal.Copy(branchids, 0, c_branchids, nmeshpoints);
                 Marshal.Copy(branchoffsets, 0, c_branchoffsets, nmeshpoints);
                 Marshal.Copy(geopointsX, 0, c_geopointsX, ngeopoints);
                 Marshal.Copy(geopointsY, 0, c_geopointsY, ngeopoints);
@@ -194,7 +194,7 @@ namespace gridgeom.Tests
                 Marshal.Copy(branchlengths, 0, c_branchlengths, nbranches);
 
                 //call the function 
-                int ierr = wrapper.ggeo_get_xy_coordinates(ref c_branchidx, ref c_branchoffsets, ref c_geopointsX,
+                int ierr = wrapper.ggeo_get_xy_coordinates(ref c_branchids, ref c_branchoffsets, ref c_geopointsX,
                     ref c_geopointsY, ref c_nbranchgeometrynodes, ref c_branchlengths, ref c_meshXCoords, ref c_meshYCoords, ref nbranches, ref ngeopoints, ref  nmeshpoints);
                 Assert.That(ierr, Is.EqualTo(0));
 
@@ -212,7 +212,7 @@ namespace gridgeom.Tests
             }
             finally
             {
-                Marshal.FreeCoTaskMem(c_branchidx);
+                Marshal.FreeCoTaskMem(c_branchids);
                 Marshal.FreeCoTaskMem(c_branchoffsets);
                 Marshal.FreeCoTaskMem(c_geopointsX);
                 Marshal.FreeCoTaskMem(c_geopointsY);
@@ -247,7 +247,7 @@ namespace gridgeom.Tests
             int onedmaxnumfacenodes = 0;
             int onednumlayer = 0;
             int onedlayertype = 0;
-            int nbranches = 1;
+            int nt_nbranches = 1;
             int nt_ngeometry = 4;
 
             int numnodes = 10;
@@ -312,12 +312,12 @@ namespace gridgeom.Tests
             meshoned.edge_nodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * onednumedge * 2);
 
             meshoned.branchidx = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * onednumnode);
-            meshoned.nbranchgeometrynodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nbranches);
+            meshoned.nbranchgeometrynodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nt_nbranches);
             meshoned.branchoffsets = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * onednumnode);
             meshoned.ngeopointx = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nt_ngeometry);
             meshoned.ngeopointy = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nt_ngeometry);
-            meshoned.nbranchlengths = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nbranches);
-            meshoned.nedge_nodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nbranches * 2);
+            meshoned.nbranchlengths = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nt_nbranches);
+            meshoned.nedge_nodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nt_nbranches);
 
             ierr = wrapperNetcdf.ionc_get_meshgeom(ref ioncid, ref meshonedid, ref meshoned, ref includeArrays);
             Assert.That(ierr, Is.EqualTo(0));
@@ -380,7 +380,7 @@ namespace gridgeom.Tests
             //discretization points information
             int nmeshpoints = 4;
             int nbranches = 1;
-            int[] branchidx = { 1, 1, 1, 1 };
+            int[] branchids = { 1, 1, 1, 1 };
             double[] meshXCoords = { -6, 5, 23, 34 };
             double[] meshYCoords = { 22, 16, 16, 7 };
             double[] branchoffset = { 0, 10, 20, 100 }; /// important are the first and last offset
@@ -443,13 +443,13 @@ namespace gridgeom.Tests
             //6. allocate the 1d arrays for storing the 1d coordinates and edge_nodes
             IntPtr c_meshXCoords = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nmeshpoints);
             IntPtr c_meshYCoords = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nmeshpoints);
-            IntPtr c_branchidx = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nmeshpoints);
+            IntPtr c_branchids = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nmeshpoints);
             IntPtr c_sourcenodeid = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nbranches);
             IntPtr c_targetnodeid = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nbranches);
             IntPtr c_branchoffset = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nmeshpoints);
             IntPtr c_branchlength = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nbranches);
 
-            Marshal.Copy(branchidx, 0, c_branchidx, nmeshpoints);
+            Marshal.Copy(branchids, 0, c_branchids, nmeshpoints);
             Marshal.Copy(meshXCoords, 0, c_meshXCoords, nmeshpoints);
             Marshal.Copy(meshYCoords, 0, c_meshYCoords, nmeshpoints);
             Marshal.Copy(sourcenodeid, 0, c_sourcenodeid, nbranches);
@@ -460,7 +460,7 @@ namespace gridgeom.Tests
 
             //7. fill kn (Herman datastructure) for creating the links
             var wrapperGridgeom = new GridGeomLibWrapper();
-            ierr = wrapperGridgeom.ggeo_convert_1d_arrays(ref c_meshXCoords, ref c_meshYCoords, ref c_branchoffset, ref c_branchlength, ref c_branchidx, ref c_sourcenodeid, ref c_targetnodeid, ref nbranches, ref nmeshpoints, ref startIndex);
+            ierr = wrapperGridgeom.ggeo_convert_1d_arrays(ref c_meshXCoords, ref c_meshYCoords, ref c_branchoffset, ref c_branchlength, ref c_branchids, ref c_sourcenodeid, ref c_targetnodeid, ref nbranches, ref nmeshpoints, ref startIndex);
             
             Assert.That(ierr, Is.EqualTo(0));
             ierr = wrapperGridgeom.ggeo_convert(ref meshtwod, ref meshtwoddim);
@@ -473,7 +473,7 @@ namespace gridgeom.Tests
             //10. check if we can call ggeo_get_links_count two times: we  need to (1) deallocate the memory stored in network_ggeo_data and (2) reload the 1d and 2d arrays in memory
             ierr = wrapperGridgeom.ggeo_deallocate();
             Assert.That(ierr, Is.EqualTo(0));
-            ierr = wrapperGridgeom.ggeo_convert_1d_arrays(ref c_meshXCoords, ref c_meshYCoords, ref c_branchoffset, ref c_branchlength, ref c_branchidx, ref c_sourcenodeid, ref c_targetnodeid, ref nbranches, ref nmeshpoints, ref startIndex);
+            ierr = wrapperGridgeom.ggeo_convert_1d_arrays(ref c_meshXCoords, ref c_meshYCoords, ref c_branchoffset, ref c_branchlength, ref c_branchids, ref c_sourcenodeid, ref c_targetnodeid, ref nbranches, ref nmeshpoints, ref startIndex);
             Assert.That(ierr, Is.EqualTo(0));
             ierr = wrapperGridgeom.ggeo_convert(ref meshtwod, ref meshtwoddim);
             Assert.That(ierr, Is.EqualTo(0));
@@ -512,7 +512,7 @@ namespace gridgeom.Tests
             //Free 1d arrays
             Marshal.FreeCoTaskMem(c_meshXCoords);
             Marshal.FreeCoTaskMem(c_meshYCoords);
-            Marshal.FreeCoTaskMem(c_branchidx);
+            Marshal.FreeCoTaskMem(c_branchids);
 
             //Free from and to arrays describing the links 
             Marshal.FreeCoTaskMem(c_arrayfrom);
@@ -542,7 +542,7 @@ namespace gridgeom.Tests
             //discretization points information
             int nmeshpoints = 9;
             int nbranches = 3;
-            int[] branchidx = { 1, 1, 1, 1, 2, 2, 2, 3, 3 };
+            int[] branchids = { 1, 1, 1, 1, 2, 2, 2, 3, 3 };
             double[] meshXCoords = { 7.5, 12.5, 17.5, 22.5, 22.5, 22.5, 22.5, 17.5, 12.5 };
             double[] meshYCoords = { 22.5, 22.5, 22.5, 22.5, 17.5, 12.5, 7.5, 12.5, 17.5 };
             double[] branchoffset = { 0, 1, 2, 10, 1, 2, 10,  1, 2 }; /// the actual values of the offset are not important 
@@ -602,13 +602,13 @@ namespace gridgeom.Tests
             //6. allocate the 1d arrays for storing the 1d coordinates and edge_nodes
             IntPtr c_meshXCoords = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nmeshpoints);
             IntPtr c_meshYCoords = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nmeshpoints);
-            IntPtr c_branchidx = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nmeshpoints);
+            IntPtr c_branchids = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nmeshpoints);
             IntPtr c_sourcenodeid = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nbranches);
             IntPtr c_targetnodeid = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nbranches);
             IntPtr c_branchoffset = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nmeshpoints);
             IntPtr c_branchlength = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nbranches);
 
-            Marshal.Copy(branchidx, 0, c_branchidx, nmeshpoints);
+            Marshal.Copy(branchids, 0, c_branchids, nmeshpoints);
             Marshal.Copy(meshXCoords, 0, c_meshXCoords, nmeshpoints);
             Marshal.Copy(meshYCoords, 0, c_meshYCoords, nmeshpoints);
             Marshal.Copy(sourcenodeid, 0, c_sourcenodeid, nbranches);
@@ -618,7 +618,7 @@ namespace gridgeom.Tests
 
             //7. fill kn (Herman datastructure) for creating the links
             var wrapperGridgeom = new GridGeomLibWrapper();
-            ierr = wrapperGridgeom.ggeo_convert_1d_arrays(ref c_meshXCoords, ref c_meshYCoords, ref c_branchoffset, ref c_branchlength, ref c_branchidx, ref c_sourcenodeid, ref c_targetnodeid, ref nbranches, ref nmeshpoints, ref startIndex);
+            ierr = wrapperGridgeom.ggeo_convert_1d_arrays(ref c_meshXCoords, ref c_meshYCoords, ref c_branchoffset, ref c_branchlength, ref c_branchids, ref c_sourcenodeid, ref c_targetnodeid, ref nbranches, ref nmeshpoints, ref startIndex);
             Assert.That(ierr, Is.EqualTo(0));
             ierr = wrapperGridgeom.ggeo_convert(ref meshtwod, ref meshtwoddim);
             Assert.That(ierr, Is.EqualTo(0));
@@ -655,7 +655,7 @@ namespace gridgeom.Tests
             //Free 1d arrays
             Marshal.FreeCoTaskMem(c_meshXCoords);
             Marshal.FreeCoTaskMem(c_meshYCoords);
-            Marshal.FreeCoTaskMem(c_branchidx);
+            Marshal.FreeCoTaskMem(c_branchids);
 
             //Free from and to arrays describing the links 
             Marshal.FreeCoTaskMem(c_arrayfrom);
