@@ -2072,25 +2072,31 @@ function ug_is_mesh_topology(ncid, varid) result(is_mesh_topo)
    integer,        intent(in)  :: varid        !< NetCDF variable id
    logical                     :: is_mesh_topo !< Return value
 
-   integer :: cfrole, geomesh, edgecoord
-   character(len=13) :: buffer
-   character(len=nf90_max_name) :: geomeshid
+   integer :: ierr, topology_dimension 
+   character(len=nf90_max_name) :: edge_geometry_buffer, cf_role_buffer
 
    is_mesh_topo = .false.
 
-   buffer = ' '
-   cfrole    = nf90_get_att(ncid, varid, 'cf_role', buffer)
-   geomesh   = nf90_get_att(ncid, varid, 'coordinate_space', geomeshid)
-      !if it has edge_geometry is not a mesh! 
-   if (cfrole == nf90_noerr .and. geomesh == nf90_noerr .and. trim(buffer) == 'mesh_topology') then
-         is_mesh_topo = .true. !new ugrid format detected
-   else if (cfrole == nf90_noerr .and. trim(buffer) == 'mesh_topology') then
-         edgecoord = nf90_get_att(ncid, varid, 'edge_coordinates', buffer)
-         if (edgecoord == nf90_noerr) then 
-            is_mesh_topo = .true. !old format detected, based on the existence of the edge_coordinates variable
-         end if
-   end if
-   end function ug_is_mesh_topology
+   cf_role_buffer = ' '
+   edge_geometry_buffer = ' '
+   topology_dimension =  -1
+   ierr = nf90_get_att(ncid, varid, 'cf_role', cf_role_buffer)
+   
+   if (trim(cf_role_buffer)=='mesh_topology') then
+     
+      ierr = nf90_get_att(ncid, varid, 'topology_dimension', topology_dimension)
+      
+      if (topology_dimension.eq.1) then !1d case
+         ierr = nf90_get_att(ncid, varid, 'edge_geometry', edge_geometry_buffer)
+         if (ierr.ne.nf90_noerr) then
+            is_mesh_topo = .true. !true only if does not contain edge_geometry
+         endif
+      else if(topology_dimension.gt.1) then 
+            is_mesh_topo = .true.
+      endif
+   endif
+      
+end function ug_is_mesh_topology
    
 !> Returns whether a given variable is a mesh topology variable.
 function ug_is_network_topology(ncid, varid) result(is_mesh_topo)
