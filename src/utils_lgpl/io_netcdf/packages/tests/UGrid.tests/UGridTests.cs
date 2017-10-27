@@ -471,18 +471,17 @@ namespace UGrid.tests
 
         }
 
-        // write1dnetwork 
+
+        // writes a network from the arrays 
         private void write1dnetwork(
             int ioncid, 
             int networkid, 
             ref IoNetcdfLibWrapper wrapper, 
             int l_nnodes, 
             int l_nbranches, 
-            int l_nGeometry, 
-            ref string[]  l_nodesids,
-            ref string[]  l_nodeslongNames,
-            ref string[]  l_branchids,
-            ref string[]  l_branchlongNames,
+            int l_nGeometry,
+            ref IoNetcdfLibWrapper.interop_charinfo[] l_nodesinfo,
+            ref IoNetcdfLibWrapper.interop_charinfo[] l_branchinfo,
             ref double[]  l_nodesX,
             ref double[]  l_nodesY,
             ref int[]     l_sourcenodeid,
@@ -509,18 +508,9 @@ namespace UGrid.tests
                 //1. Write 1d network network nodes
                 Marshal.Copy(l_nodesX, 0, c_nodesX, l_nnodes);
                 Marshal.Copy(l_nodesY, 0, c_nodesY, l_nnodes);
-                IoNetcdfLibWrapper.interop_charinfo[] nodesinfo = new IoNetcdfLibWrapper.interop_charinfo[l_nnodes];
-                for (int i = 0; i < l_nnodes; i++)
-                {
-                    tmpstring = l_nodesids[i];
-                    tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.idssize, ' ');
-                    nodesinfo[i].ids = tmpstring.ToCharArray();
-                    tmpstring = l_nodeslongNames[i];
-                    tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.longnamessize, ' ');
-                    nodesinfo[i].longnames = tmpstring.ToCharArray();
-                }
+            
                 ierr = wrapper.ionc_write_1d_network_nodes(ref ioncid, ref networkid, ref c_nodesX, ref c_nodesY,
-                    nodesinfo, ref l_nnodes);
+                    l_nodesinfo, ref l_nnodes);
                 Assert.That(ierr, Is.EqualTo(0));
 
                 //2. Write 1d network branches
@@ -528,18 +518,8 @@ namespace UGrid.tests
                 Marshal.Copy(l_targetnodeid, 0, c_targetnodeid, l_nbranches);
                 Marshal.Copy(l_branchlengths, 0, c_branchlengths, l_nbranches);
                 Marshal.Copy(l_nbranchgeometrypoints, 0, c_nbranchgeometrypoints, l_nbranches);
-                IoNetcdfLibWrapper.interop_charinfo[] branchinfo = new IoNetcdfLibWrapper.interop_charinfo[l_nbranches];
-                for (int i = 0; i < l_nbranches; i++)
-                {
-                    tmpstring = l_branchids[i];
-                    tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.idssize, ' ');
-                    branchinfo[i].ids = tmpstring.ToCharArray();
-                    tmpstring = l_branchlongNames[i];
-                    tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.longnamessize, ' ');
-                    branchinfo[i].longnames = tmpstring.ToCharArray();
-                }
                 ierr = wrapper.ionc_put_1d_network_branches(ref ioncid, ref networkid, ref c_sourcenodeid,
-                    ref c_targetnodeid, branchinfo, ref c_branchlengths, ref c_nbranchgeometrypoints, ref l_nbranches, ref startIndex);
+                    ref c_targetnodeid, l_branchinfo, ref c_branchlengths, ref c_nbranchgeometrypoints, ref l_nbranches, ref startIndex);
                 Assert.That(ierr, Is.EqualTo(0));
 
                 //3. Write 1d network geometry
@@ -642,10 +622,6 @@ namespace UGrid.tests
             int l_nnodes = nNodes;
             int l_nbranches = nBranches;
             int l_nGeometry = nGeometry;
-            string[] l_nodesids = nodesids;
-            string[] l_nodeslongNames = nodeslongNames;
-            string[] l_branchids = branchids;
-            string[] l_branchlongNames = branchlongNames;
             double[] l_nodesX = nodesX;
             double[] l_nodesY = nodesY;
             int[] l_sourcenodeid = sourcenodeid;
@@ -655,6 +631,30 @@ namespace UGrid.tests
             double[] l_geopointsX = geopointsX;
             double[] l_geopointsY = geopointsY;
             int[] l_branch_order = branch_order;
+
+            IoNetcdfLibWrapper.interop_charinfo[] l_nodesinfo = new IoNetcdfLibWrapper.interop_charinfo[l_nnodes];
+            IoNetcdfLibWrapper.interop_charinfo[] l_branchinfo = new IoNetcdfLibWrapper.interop_charinfo[l_nbranches];
+
+            for (int i = 0; i < l_nnodes; i++)
+            {
+                tmpstring = nodesids[i];
+                tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.idssize, ' ');
+                l_nodesinfo[i].ids = tmpstring.ToCharArray();
+                tmpstring = nodeslongNames[i];
+                tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.longnamessize, ' ');
+                l_nodesinfo[i].longnames = tmpstring.ToCharArray();
+            }
+
+            for (int i = 0; i < l_nbranches; i++)
+            {
+                tmpstring = branchids[i];
+                tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.idssize, ' ');
+                l_branchinfo[i].ids = tmpstring.ToCharArray();
+                tmpstring = branchlongNames[i];
+                tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.longnamessize, ' ');
+                l_branchinfo[i].longnames = tmpstring.ToCharArray();
+            }
+
 
             //2. Create the file, will not add any dataset 
             ierr = wrapper.ionc_create(c_path, ref mode, ref ioncid);
@@ -677,10 +677,8 @@ namespace UGrid.tests
                 l_nnodes, 
                 l_nbranches, 
                 l_nGeometry,
-                ref l_nodesids,
-                ref l_nodeslongNames,
-                ref l_branchids,
-                ref l_branchlongNames,
+                ref l_nodesinfo,
+                ref l_branchinfo,
                 ref l_nodesX,
                 ref l_nodesY,
                 ref l_sourcenodeid,
@@ -858,10 +856,6 @@ namespace UGrid.tests
             int l_nnodes = nNodes;
             int l_nbranches = nBranches;
             int l_nGeometry = nGeometry;
-            string[] l_nodesids = nodesids;
-            string[] l_nodeslongNames = nodeslongNames;
-            string[] l_branchids = branchids;
-            string[] l_branchlongNames = branchlongNames;
             double[] l_nodesX = nodesX;
             double[] l_nodesY = nodesY;
             int[] l_sourcenodeid = sourcenodeid;
@@ -871,6 +865,31 @@ namespace UGrid.tests
             double[] l_geopointsX = geopointsX;
             double[] l_geopointsY = geopointsY;
             int[] l_branch_order = branch_order;
+
+            IoNetcdfLibWrapper.interop_charinfo[] l_nodesinfo = new IoNetcdfLibWrapper.interop_charinfo[l_nnodes];
+            IoNetcdfLibWrapper.interop_charinfo[] l_branchinfo = new IoNetcdfLibWrapper.interop_charinfo[l_nbranches];
+
+            for (int i = 0; i < l_nnodes; i++)
+            {
+                string tmpstring = "";
+                tmpstring = nodesids[i];
+                tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.idssize, ' ');
+                l_nodesinfo[i].ids = tmpstring.ToCharArray();
+                tmpstring = nodeslongNames[i];
+                tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.longnamessize, ' ');
+                l_nodesinfo[i].longnames = tmpstring.ToCharArray();
+            }
+
+            for (int i = 0; i < l_nbranches; i++)
+            {
+                string tmpstring = "";
+                tmpstring = branchids[i];
+                tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.idssize, ' ');
+                l_branchinfo[i].ids = tmpstring.ToCharArray();
+                tmpstring = branchlongNames[i];
+                tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.longnamessize, ' ');
+                l_branchinfo[i].longnames = tmpstring.ToCharArray();
+            }
 
 
             //2. Now we create a new empty file where to save 1d and 2d meshes
@@ -907,10 +926,8 @@ namespace UGrid.tests
                 l_nnodes,
                 l_nbranches,
                 l_nGeometry,
-                ref l_nodesids,
-                ref l_nodeslongNames,
-                ref l_branchids,
-                ref l_branchlongNames,
+                ref l_nodesinfo,
+                ref l_branchinfo,
                 ref l_nodesX,
                 ref l_nodesY,
                 ref l_sourcenodeid,
@@ -973,8 +990,6 @@ namespace UGrid.tests
             //13. Check all 1d and 2d data
             int l_startIndex = startIndex;
             StringBuilder l_networkName = new StringBuilder(IoNetcdfLibWrapper.LibDetails.MAXSTRLEN);
-            IoNetcdfLibWrapper.interop_charinfo[] l_nodesinfo = new IoNetcdfLibWrapper.interop_charinfo[nNodes];
-            IoNetcdfLibWrapper.interop_charinfo[] l_branchinfo = new IoNetcdfLibWrapper.interop_charinfo[nNodes];
 
             read1dnetwork(
                 targetioncid,
@@ -1050,7 +1065,6 @@ namespace UGrid.tests
             int ioncid = 0; //file variable 
             int mode = 1; //create in write mode
             var ierr = -1;
-            string tmpstring; //temporary string for several operations
             string c_path = TestHelper.TestDirectoryPath() + @"\write1dNetwork.nc";
             TestHelper.DeleteIfExists(c_path);
             Assert.IsFalse(File.Exists(c_path));
@@ -1060,10 +1074,6 @@ namespace UGrid.tests
             int l_nnodes = nNodes;
             int l_nbranches = nBranches;
             int l_nGeometry = nGeometry;
-            string[] l_nodesids = nodesids;
-            string[] l_nodeslongNames = nodeslongNames;
-            string[] l_branchids = branchids;
-            string[] l_branchlongNames = branchlongNames;
             double[] l_nodesX = nodesX;
             double[] l_nodesY = nodesY;
             int[] l_sourcenodeid = sourcenodeid;
@@ -1073,6 +1083,32 @@ namespace UGrid.tests
             double[] l_geopointsX = geopointsX;
             double[] l_geopointsY = geopointsY;
             int[] l_branch_order = branch_order;
+
+
+            IoNetcdfLibWrapper.interop_charinfo[] l_nodesinfo = new IoNetcdfLibWrapper.interop_charinfo[l_nnodes];
+            IoNetcdfLibWrapper.interop_charinfo[] l_branchinfo = new IoNetcdfLibWrapper.interop_charinfo[l_nbranches];
+
+            for (int i = 0; i < l_nnodes; i++)
+            {
+                string tmpstring = "";
+                tmpstring = nodesids[i];
+                tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.idssize, ' ');
+                l_nodesinfo[i].ids = tmpstring.ToCharArray();
+                tmpstring = nodeslongNames[i];
+                tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.longnamessize, ' ');
+                l_nodesinfo[i].longnames = tmpstring.ToCharArray();
+            }
+
+            for (int i = 0; i < l_nbranches; i++)
+            {
+                string tmpstring = "";
+                tmpstring = branchids[i];
+                tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.idssize, ' ');
+                l_branchinfo[i].ids = tmpstring.ToCharArray();
+                tmpstring = branchlongNames[i];
+                tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.longnamessize, ' ');
+                l_branchinfo[i].longnames = tmpstring.ToCharArray();
+            }
 
             //2. Create the file, will not add any dataset 
             ierr = wrapper.ionc_create(c_path, ref mode, ref ioncid);
@@ -1096,10 +1132,8 @@ namespace UGrid.tests
                 l_nnodes,
                 l_nbranches,
                 l_nGeometry,
-                ref l_nodesids,
-                ref l_nodeslongNames,
-                ref l_branchids,
-                ref l_branchlongNames,
+                ref l_nodesinfo,
+                ref l_branchinfo,
                 ref l_nodesX,
                 ref l_nodesY,
                 ref l_sourcenodeid,
@@ -1201,8 +1235,8 @@ namespace UGrid.tests
                 Assert.That(tmpstring.Trim(), Is.EqualTo(branchids[i]));
                 tmpstring = new string(l_branchinfo[i].longnames);
                 Assert.That(tmpstring.Trim(), Is.EqualTo(branchlongNames[i]));
-                Assert.That(l_targetnodeid[i], Is.EqualTo(sourcenodeid[i]));
-                Assert.That(l_sourcenodeid[i], Is.EqualTo(targetnodeid[i]));
+                Assert.That(l_targetnodeid[i], Is.EqualTo(targetnodeid[i]));
+                Assert.That(l_sourcenodeid[i], Is.EqualTo(sourcenodeid[i]));
                 Assert.That(l_branchlengths[i], Is.EqualTo(branchlengths[i]));
                 Assert.That(l_nbranchgeometrypoints[i], Is.EqualTo(nbranchgeometrypoints[i]));
                 Assert.That(l_branch_order[i], Is.EqualTo(branch_order[i]));
@@ -1236,22 +1270,18 @@ namespace UGrid.tests
         [NUnit.Framework.Category("UGRIDTests")]
         public void LargeSewerSystem()
         {
-            int stackSize = 1024 * 1024 * 16; //LC: in c# the default stack size is 1 MB, increase it to something larger for this test!
+            int stackSize = 1024 * 1024 * 16; //LC: in C# the default stack size is 1 MB, increase it to something larger for this test!
             Thread th = new Thread(() =>
             {
                 //1. Allocates the arrays defining the network 
                 int firstCaseNumberOfNodes = 100000; //5000 limit win64, without stack increase
+                string tmpstring = "";
 
                 int l_nnodes = firstCaseNumberOfNodes + 1;
                 int l_nbranches = firstCaseNumberOfNodes;
                 int l_nGeometry = firstCaseNumberOfNodes * 3;
-                string[] l_nodesids = new string[l_nnodes];
-                string[] l_nodeslongNames = new string[l_nnodes];
                 double[] l_nodesX = new double[l_nnodes];
                 double[] l_nodesY = new double[l_nnodes];
-
-                string[] l_branchids = new string[l_nbranches];
-                string[] l_branchlongNames = new string[l_nbranches];
                 double[] l_branchlengths = new double[l_nbranches];
                 int[] l_nbranchgeometrypoints = new int[l_nbranches];
 
@@ -1262,18 +1292,29 @@ namespace UGrid.tests
                 double[] l_geopointsX = new double[l_nGeometry];
                 double[] l_geopointsY = new double[l_nGeometry];
 
+                IoNetcdfLibWrapper.interop_charinfo[] l_nodesinfo = new IoNetcdfLibWrapper.interop_charinfo[l_nnodes];
+                IoNetcdfLibWrapper.interop_charinfo[] l_branchinfo = new IoNetcdfLibWrapper.interop_charinfo[l_nbranches];
+
                 for (int i = 0; i < l_nnodes; i++)
                 {
-                    l_nodesids[i] = "node_id_" + i.ToString();
-                    l_nodeslongNames[i] = "node_longname_" + i.ToString();
+                    tmpstring = "node_id_" + i.ToString();
+                    tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.idssize, ' ');
+                    l_nodesinfo[i].ids = tmpstring.ToCharArray();
+                    tmpstring = "node_longname_" + i.ToString();
+                    tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.longnamessize, ' ');
+                    l_nodesinfo[i].longnames = tmpstring.ToCharArray();
                     l_nodesX[i] = i;
                     l_nodesY[i] = i;
                 }
 
                 for (int i = 0; i < l_nbranches; i++)
                 {
-                    l_branchids[i] = "branch_id_" + i.ToString();
-                    l_branchlongNames[i] = "branch_longname_" + i.ToString();
+                    tmpstring = "branch_id_" + i.ToString();
+                    tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.idssize, ' ');
+                    l_branchinfo[i].ids = tmpstring.ToCharArray();
+                    tmpstring = "branch_longname_" + i.ToString();
+                    tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.longnamessize, ' ');
+                    l_branchinfo[i].longnames = tmpstring.ToCharArray();
                     l_branchlengths[i] = 1.414;
                     l_nbranchgeometrypoints[i] = 1;
                     l_sourcenodeid[i] = i;
@@ -1316,10 +1357,8 @@ namespace UGrid.tests
                     l_nnodes,
                     l_nbranches,
                     l_nGeometry,
-                    ref l_nodesids,
-                    ref l_nodeslongNames,
-                    ref l_branchids,
-                    ref l_branchlongNames,
+                    ref l_nodesinfo,
+                    ref l_branchinfo,
                     ref l_nodesX,
                     ref l_nodesY,
                     ref l_sourcenodeid,
@@ -1346,9 +1385,6 @@ namespace UGrid.tests
                 //Create local variables
                 int l_startIndex = startIndex;
                 StringBuilder l_networkName = new StringBuilder(IoNetcdfLibWrapper.LibDetails.MAXSTRLEN);
-                IoNetcdfLibWrapper.interop_charinfo[] l_nodesinfo = new IoNetcdfLibWrapper.interop_charinfo[firstCaseNumberOfNodes];
-                IoNetcdfLibWrapper.interop_charinfo[] l_branchinfo = new IoNetcdfLibWrapper.interop_charinfo[firstCaseNumberOfNodes];
-
                 //6. Read the arrays back in
                 read1dnetwork(
                     ioncid,
@@ -1381,13 +1417,10 @@ namespace UGrid.tests
                 int sl_nnodes = secondCaseNumberOfNodes + 1;
                 int sl_nbranches = secondCaseNumberOfNodes;
                 int sl_nGeometry = secondCaseNumberOfNodes * 3;
-                string[] sl_nodesids = new string[sl_nnodes];
-                string[] sl_nodeslongNames = new string[sl_nnodes];
                 double[] sl_nodesX = new double[sl_nnodes];
                 double[] sl_nodesY = new double[sl_nnodes];
 
-                string[] sl_branchids = new string[sl_nbranches];
-                string[] sl_branchlongNames = new string[sl_nbranches];
+
                 double[] sl_branchlengths = new double[sl_nbranches];
                 int[] sl_nbranchgeometrypoints = new int[sl_nbranches];
                 int[] sl_sourcenodeid = new int[sl_nbranches];
@@ -1397,13 +1430,24 @@ namespace UGrid.tests
                 double[] sl_geopointsX = new double[sl_nGeometry];
                 double[] sl_geopointsY = new double[sl_nGeometry];
 
+                IoNetcdfLibWrapper.interop_charinfo[] sl_nodesinfo = new IoNetcdfLibWrapper.interop_charinfo[sl_nnodes];
+                IoNetcdfLibWrapper.interop_charinfo[] sl_branchinfo = new IoNetcdfLibWrapper.interop_charinfo[sl_nbranches];
+
                 //9. Copy the values of sewer_system in the arrays of the augmented network
-                Array.Copy(l_nodesids, sl_nodesids, l_nodesids.Length);
-                Array.Copy(l_nodeslongNames, sl_nodeslongNames, l_nodeslongNames.Length);
+                for (int i = 0; i < l_nnodes; i++)
+                {
+                    sl_nodesinfo[i].ids = l_nodesinfo[i].ids;
+                    sl_nodesinfo[i].longnames = l_nodesinfo[i].longnames;
+                }
+
+                for (int i = 0; i < l_nbranches; i++)
+                {
+                    sl_branchinfo[i].ids = l_branchinfo[i].ids;
+                    sl_branchinfo[i].longnames = l_branchinfo[i].longnames;
+                }
+
                 Array.Copy(l_nodesX, sl_nodesX, l_nodesX.Length);
                 Array.Copy(l_nodesY, sl_nodesY, l_nodesY.Length);
-                Array.Copy(l_branchids, sl_branchids, l_branchids.Length);
-                Array.Copy(l_branchlongNames, sl_branchlongNames, l_branchlongNames.Length);
                 Array.Copy(l_branchlengths, sl_branchlengths, l_branchlengths.Length);
                 Array.Copy(l_nbranchgeometrypoints, sl_nbranchgeometrypoints, l_nbranchgeometrypoints.Length);
                 Array.Copy(l_sourcenodeid, sl_sourcenodeid, l_sourcenodeid.Length);
@@ -1413,14 +1457,22 @@ namespace UGrid.tests
                 Array.Copy(l_geopointsY, sl_geopointsY, l_geopointsY.Length);
 
                 //10. Add the stranger..
-                sl_nodesids[l_nnodes] = "i_am_the_strange_node_id";
-                sl_nodeslongNames[l_nnodes] = "i_am_the_strange_node_longname";
+                tmpstring = "i_am_the_stranger_nodeid";
+                tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.idssize, ' ');
+                sl_nodesinfo[l_nnodes].ids  = tmpstring.ToCharArray();
+                tmpstring = "i_am_the_stranger_nodelongname";
+                tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.longnamessize, ' ');
+                sl_nodesinfo[l_nnodes].longnames = tmpstring.ToCharArray();
                 sl_nodesX[l_nnodes] = -1.0;
                 sl_nodesY[l_nnodes] = -1.0;
 
 
-                sl_branchids[l_nbranches] = "i_am_the_strange_branch_id";
-                sl_branchlongNames[l_nbranches] = "i_am_the_strange_branch_longname";
+                tmpstring = "i_am_the_stranger_branchid";
+                tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.idssize, ' ');
+                sl_branchinfo[l_nbranches].ids = tmpstring.ToCharArray();
+                tmpstring = "i_am_the_stranger_branchlongname";
+                tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.longnamessize, ' ');
+                sl_branchinfo[l_nbranches].longnames = tmpstring.ToCharArray();
                 sl_branchlengths[l_nbranches] =-1.0;
                 sl_nbranchgeometrypoints[l_nbranches] = 1;
                 sl_sourcenodeid[l_nbranches] =  -1;
@@ -1429,7 +1481,6 @@ namespace UGrid.tests
 
                 sl_geopointsX[l_nGeometry] = -1.0;
                 sl_geopointsY[l_nGeometry] = -1.0;
-
 
                 //11. Creates the second file, will not add any dataset 
                 c_path = TestHelper.TestDirectoryPath() + @"\LargeSewerSystemSecondTest.nc";
@@ -1453,10 +1504,8 @@ namespace UGrid.tests
                     sl_nnodes,
                     sl_nbranches,
                     sl_nGeometry,
-                    ref sl_nodesids,
-                    ref sl_nodeslongNames,
-                    ref sl_branchids,
-                    ref sl_branchlongNames,
+                    ref sl_nodesinfo,
+                    ref sl_branchinfo,
                     ref sl_nodesX,
                     ref sl_nodesY,
                     ref sl_sourcenodeid,
