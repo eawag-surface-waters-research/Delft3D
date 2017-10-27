@@ -325,13 +325,14 @@ module m_ec_converter
                if (associated(weight%weightFactors)) deallocate(weight%weightFactors)
                allocate(weight%weightFactors(4, n_points))
                weight%weightFactors = ec_undef_hp
-               
-!              determine if x and y are increasing
-               Lincreasex = ( (sourceElementSet%x(2) - sourceElementSet%x(1)) > 0)
-               Lincreasey = ( (sourceElementSet%y(2) - sourceElementSet%y(1)) > 0)
 
                select case (sourceElementSet%ofType)
                   case (elmSetType_spheric_ortho, elmSetType_Cartesian_ortho)
+               
+!                    determine if x and y are increasing
+                     Lincreasex = ( (sourceElementSet%x(2) - sourceElementSet%x(1)) > 0)
+                     Lincreasey = ( (sourceElementSet%y(2) - sourceElementSet%y(1)) > 0)
+               
                      do i=1, n_points
                      
 !                       assumption: x and y are increasing
