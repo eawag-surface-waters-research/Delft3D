@@ -246,27 +246,27 @@
 
       ! local declarations
 
-      integer, parameter  :: mxcomb = 100     ! maximum number of combinations
-      integer, save       :: ifirst = 1       ! initialisation indicator
-      integer             :: lunrep           ! report file
-      logical             :: l_exi            ! file exists or not
-      integer             :: ncomb            ! number of possible inlet outlet combinations
-      integer             :: ninout           ! actual number of inlet outlet combinations
-      character(len=20)   :: c_in             ! read buffer name inlet
-      character(len=20)   :: c_out            ! read buffer name outlet
-      character(len=20)   :: namin(mxcomb)    ! names inlet in the possible combinations
-      character(len=20)   :: namout(mxcomb)   ! names outlet in the possible combinations
-      integer             :: iwin(mxcomb)     ! wasteload number inlet of the actual combinations
-      integer             :: iwout(mxcomb)    ! wasteload number outlet of the actual combinations
-      real                :: flow             ! inlet flow rate
-      integer             :: ipin             ! wasteload number inlet
-      integer             :: ipout            ! wasteload number outlet
-      integer             :: iseg             ! inlet segment number
-      integer             :: iwst             ! loop counter wasteloads
-      integer             :: isys             ! loop counter substances
-      integer             :: icomb            ! loop counter combinations
-      integer             :: iinout           ! loop counter of inlet outlet combinations
-      integer             :: i                ! loop counter
+      integer, save       :: ifirst = 1                       ! initialisation indicator
+      integer             :: lunrep                           ! report file
+      logical             :: l_exi                            ! file exists or not
+      integer             :: ncomb                            ! number of possible inlet outlet combinations
+      integer             :: ninout                           ! actual number of inlet outlet combinations
+      character(len=20)   :: c_in                             ! read buffer name inlet
+      character(len=20)   :: c_out                            ! read buffer name outlet
+      character(len=20), dimension(:), allocatable  :: namin  ! names inlet in the possible combinations
+      character(len=20), dimension(:), allocatable  :: namout ! names outlet in the possible combinations
+      integer, dimension(:), allocatable  ::           iwin   ! wasteload number inlet of the actual combinations
+      integer, dimension(:), allocatable  ::           iwout  ! wasteload number outlet of the actual combinations
+      real                :: flow                             ! inlet flow rate
+      integer             :: ipin                             ! wasteload number inlet
+      integer             :: ipout                            ! wasteload number outlet
+      integer             :: iseg                             ! inlet segment number
+      integer             :: iwst                             ! loop counter wasteloads
+      integer             :: isys                             ! loop counter substances
+      integer             :: icomb                            ! loop counter combinations
+      integer             :: iinout                           ! loop counter of inlet outlet combinations
+      integer             :: ierr                             ! local I/O error
+      integer             :: i                                ! loop counter
 
       ! Save all local variables
 
@@ -286,36 +286,38 @@
             write(lunrep,2004)
             open ( 83 , file='inloutl.dat' )
             ncomb = 0
-   10       continue
-               read ( 83 , '(2a20)' , end = 20 ) c_in,c_out
-               ncomb = ncomb + 1
-               if ( ncomb .gt. mxcomb ) then
-                  write(lunrep,2005) mxcomb
-                  call srstop(1)
+            do
+               read ( 83 , '(2a20)' , iostat = ierr ) c_in,c_out
+               if ( ierr /= 0 ) then
+                   exit
                endif
-               namin(ncomb) = c_in
-               namout(ncomb) = c_out
-               goto 10
-   20       continue
+
+               ncomb = ncomb + 1
+            enddo
+
+            allocate( namin(ncomb), namout(ncomb), iwin(ncomb), iwout(ncomb) )
+
+            rewind( 83 )
+
+            do i = 1,ncomb
+               read ( 83 , '(2a20)' ) c_in,c_out
+               namin(i) = c_in
+               namout(i) = c_out
+            enddo
             close ( 83 )
          else
 
             ! construct the default list of combination INLETxx/OUTLETxx
 
+            ncomb = size(wasteloads)
+
+            allocate( namin(ncomb), namout(ncomb), iwin(ncomb), iwout(ncomb) )
+
             write(lunrep,2006)
-            do i = 1 , min(mxcomb,9)
-               write(namin(i),2007) i
-               write(namout(i),2008) i
+            do i = 1 , ncomb
+               write(namin(i),'(a,i0)')  'INLET',  i
+               write(namout(i),'(a,i0)') 'OUTLET', i
             enddo
-            do i = 10 , min(mxcomb,99)
-               write(namin(i),2009) i
-               write(namout(i),2010) i
-            enddo
-            do i = 100 , min(mxcomb,999)
-               write(namin(i),2011) i
-               write(namout(i),2012) i
-            enddo
-            ncomb = mxcomb
          endif
 
          ! check the actual list of wasteloads with the list of possible combinations
@@ -368,12 +370,6 @@
      +        'file <inloutl.dat>')
  2005 format ('    error : number of combinations exceed maximum:',i4)
  2006 format ('    no file <inloutl.dat> using default combinations names')
- 2007 format ('INLET',i1,14x)
- 2008 format ('OUTLET',i1,13x)
- 2009 format ('INLET',i2,13x)
- 2010 format ('OUTLET',i2,12x)
- 2011 format ('INLET',i3,12x)
- 2012 format ('OUTLET',i3,11x)
  2013 format ('    no INLET/OUTLET combination found')
 
       end subroutine delwaq_user_inlet_outlet
