@@ -309,7 +309,7 @@
 
             ! construct the default list of combination INLETxx/OUTLETxx
 
-            ncomb = size(wasteloads)
+            ncomb = max(999,size(wasteloads))
 
             allocate( namin(ncomb), namout(ncomb), iwin(ncomb), iwout(ncomb) )
 
