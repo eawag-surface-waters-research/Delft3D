@@ -47,6 +47,8 @@ module dlwq_netcdf
     integer, parameter :: type_ugrid_face_crds = 1 ! Names used by UNTRIM
     integer, parameter :: type_ugrid_node_crds = 2 ! Names used by D-Flow-FM
 
+    logical, save, private :: warning_message  = .false. ! Because of optional attributes (UGRID standard)
+
 contains
 
 ! dlwqnc_debug_status --
@@ -215,6 +217,7 @@ integer function dlwqnc_copy_mesh( ncidin, ncidout, meshidin, mesh_name, type_ug
 
     integer                           :: meshidout, varidin, varidout
     integer                           :: ierror
+    integer, dimension(7)             :: ierrorn
     integer                           :: meshvalue
     integer                           :: i, k
     integer                           :: xtype, length, attnum, crs_value
@@ -292,28 +295,39 @@ integer function dlwqnc_copy_mesh( ncidin, ncidout, meshidin, mesh_name, type_ug
         return
     endif
 
+    ierrorn = 0
     select case ( type_ugrid )
         case ( type_ugrid_face_crds )
-            ierror = 0      + dlwqnc_copy_associated( ncidin, ncidout, meshidin, meshidout, "edge_coordinates", dimsizes )
-            ierror = ierror + dlwqnc_copy_associated( ncidin, ncidout, meshidin, meshidout, "face_coordinates", dimsizes )
-            ierror = ierror + dlwqnc_copy_associated( ncidin, ncidout, meshidin, meshidout, "edge_node_connectivity", dimsizes )
-            ierror = ierror + dlwqnc_copy_associated( ncidin, ncidout, meshidin, meshidout, "edge_face_connectivity", dimsizes )
-            ierror = ierror + dlwqnc_copy_associated( ncidin, ncidout, meshidin, meshidout, "face_node_connectivity", dimsizes )
-            ierror = ierror + dlwqnc_copy_associated( ncidin, ncidout, meshidin, meshidout, "face_edge_connectivity", dimsizes )
-            ierror = ierror + dlwqnc_copy_associated( ncidin, ncidout, meshidin, meshidout, &
+            ierrorn(1) = dlwqnc_copy_associated( ncidin, ncidout, meshidin, meshidout, "edge_coordinates", dimsizes )
+            ierrorn(2) = dlwqnc_copy_associated( ncidin, ncidout, meshidin, meshidout, "face_coordinates", dimsizes )
+            ierrorn(3) = dlwqnc_copy_associated( ncidin, ncidout, meshidin, meshidout, "edge_node_connectivity", dimsizes )
+            ierrorn(4) = dlwqnc_copy_associated( ncidin, ncidout, meshidin, meshidout, "edge_face_connectivity", dimsizes )
+            ierrorn(5) = dlwqnc_copy_associated( ncidin, ncidout, meshidin, meshidout, "face_node_connectivity", dimsizes )
+            ierrorn(6) = dlwqnc_copy_associated( ncidin, ncidout, meshidin, meshidout, "face_edge_connectivity", dimsizes )
+            ierrorn(7) = dlwqnc_copy_associated( ncidin, ncidout, meshidin, meshidout, &
                         trim(mesh_name)//"_edge_bc", dimsizes, use_attrib = .false. )
         case ( type_ugrid_node_crds )
-            ierror = 0      + dlwqnc_copy_associated( ncidin, ncidout, meshidin, meshidout, "edge_coordinates", dimsizes )
-            ierror = ierror + dlwqnc_copy_associated( ncidin, ncidout, meshidin, meshidout, "face_coordinates", dimsizes )
-            ierror = ierror + dlwqnc_copy_associated( ncidin, ncidout, meshidin, meshidout, "edge_node_connectivity", dimsizes )
-            ierror = ierror + dlwqnc_copy_associated( ncidin, ncidout, meshidin, meshidout, "edge_face_connectivity", dimsizes )
-            ierror = ierror + dlwqnc_copy_associated( ncidin, ncidout, meshidin, meshidout, "face_node_connectivity", dimsizes )
+            warning_message = .true.
+            ierrorn(1) = dlwqnc_copy_associated( ncidin, ncidout, meshidin, meshidout, "edge_coordinates", dimsizes )
+            ierrorn(2) = dlwqnc_copy_associated( ncidin, ncidout, meshidin, meshidout, "face_coordinates", dimsizes )
+            ierrorn(3) = dlwqnc_copy_associated( ncidin, ncidout, meshidin, meshidout, "edge_node_connectivity", dimsizes )
+            ierrorn(4) = dlwqnc_copy_associated( ncidin, ncidout, meshidin, meshidout, "edge_face_connectivity", dimsizes )
+            ierrorn(5) = dlwqnc_copy_associated( ncidin, ncidout, meshidin, meshidout, "face_node_connectivity", dimsizes )
+            warning_message = .false.
     end select
 
-    if ( ierror /= nf90_noerr ) then
-        if (dlwqnc_debug) write(*,*) 'Copy associated failed (copying mesh) - ', ierror
-        dlwqnc_copy_mesh = ierror
-        return
+    if ( any(ierrorn /= nf90_noerr .and. ierrorn /= -999) ) then
+        if ( type_ugrid == type_ugrid_face_crds ) then
+            if (dlwqnc_debug) write(*,*) 'Copy associated failed (copying mesh) - ', maxval(ierrorn)
+        endif
+!!      dlwqnc_copy_mesh = ierror
+!!      return
+    endif
+    if ( any(ierrorn == -999) ) then
+        if (dlwqnc_debug) then
+            write(*,*) 'One or more mesh attributes missing - '
+            write(*,*) 'this may cause problems in some postprocessing programs'
+        endif
     endif
 
     !
@@ -359,6 +373,9 @@ integer function dlwqnc_copy_mesh( ncidin, ncidout, meshidin, mesh_name, type_ug
         ierror = nf90_put_var( ncidout, varidout, values = crs_value )
     else
         ierror = nf90_enddef( ncidout )
+        if ( ierror == nf90_enotindefine ) then
+            ierror = 0 ! TODO: For some reason we may be stuck in data mode - possibly if optional attributes are missing
+        endif
     endif
 
     dlwqnc_copy_mesh = nf90_noerr
@@ -510,8 +527,13 @@ recursive function dlwqnc_copy_associated( ncidin, ncidout, meshidin, meshidout,
         attvalue = ' '
         ierror   = nf90_get_att( ncidin, meshidin, attribute, attvalue )
         if ( ierror /= nf90_noerr .and. .not. suppress_message ) then
-            if (dlwqnc_debug) write(*,*) 'Error retrieving attribute ', trim(attribute), ' -- ', ierror
-            dlwqnc_result = ierror
+            if (warning_message) then
+                if (dlwqnc_debug) write(*,*) 'Warning: retrieving attribute ', trim(attribute), ' failed -- ', ierror
+                dlwqnc_result = -999
+            else
+                if (dlwqnc_debug) write(*,*) 'Error retrieving attribute ', trim(attribute), ' -- ', ierror
+                dlwqnc_result = ierror
+            endif
             return
         endif
     else
@@ -1210,21 +1232,29 @@ end function dlwqnc_create_wqvariable
 !     nf90_noerr if all okay, otherwise an error code
 !
 integer function dlwqnc_create_layer_dim( ncidout, mesh_name, nolay, thickness, nolayid )
-    integer, intent(in)            :: ncidout
-    character(len=*), intent(in)   :: mesh_name
-    integer, intent(in)            :: nolay
-    real, dimension(:), intent(in) :: thickness
-    integer, intent(out)           :: nolayid
+    integer, intent(in)              :: ncidout
+    character(len=*), intent(in)     :: mesh_name
+    integer, intent(in)              :: nolay
+    real, dimension(:), intent(in)   :: thickness
+    integer, intent(out)             :: nolayid
 
-    integer                        :: i, k
-    integer                        :: ierror
-    integer                        :: varlayid
-    character(len=nf90_max_name)   :: name
+    integer                          :: i, k
+    integer                          :: ierror
+    integer                          :: varlayid, cumlayid
+    character(len=nf90_max_name)     :: name
+    real, dimension(size(thickness)) :: z_centre
+    real                             :: z_sum
 
     character(len=20), dimension(5) :: attname =  &
         (/ 'long_name    ',    'units        ',    'axis         ',    'positive     ',    'standard_name' /)
     character(len=20), dimension(5) :: attvalue = &
         (/ 'depth of layer',   'm             ',   'Z             ',   'down          ',   'depth         '/)
+    character(len=40), dimension(5) :: z_attvalue = &
+        (/ 'sigma layer coordinate at element center', &
+           '                                        ', &
+           'Z                                       ', &
+           'up                                      ', &
+           'ocean_sigma_coordinate                  '  /)
 
     dlwqnc_create_layer_dim = nf90_noerr
 
@@ -1251,6 +1281,7 @@ integer function dlwqnc_create_layer_dim( ncidout, mesh_name, nolay, thickness, 
         return
     endif
 
+    write( name, '(3a)' ) mesh_name(1:k), '_layer_dlwq'
     ierror = nf90_def_var( ncidout, name, nf90_float, (/ nolayid /), varlayid )
     if ( ierror /= 0 ) then
         if (dlwqnc_debug) write(*,*) 'Note: Creating layer dimension failed (def_var): ', ierror
@@ -1267,6 +1298,26 @@ integer function dlwqnc_create_layer_dim( ncidout, mesh_name, nolay, thickness, 
         endif
     enddo
 
+    !
+    ! Cumulative sigma coordinate
+    !
+    write( name, '(3a)' ) mesh_name(1:k), '_sigma_dlwq'
+    ierror = nf90_def_var( ncidout, name, nf90_float, (/ nolayid /), cumlayid )
+    if ( ierror /= 0 ) then
+        if (dlwqnc_debug) write(*,*) 'Note: Creating layer dimension failed (def_var): ', ierror
+        dlwqnc_create_layer_dim = ierror
+        return
+    endif
+
+    do i = 1,5
+        ierror = nf90_put_att( ncidout, cumlayid, attname(i), z_attvalue(i) )
+        if ( ierror /= 0 ) then
+            if (dlwqnc_debug) write(*,*) 'Note: Creating layer dimension failed (put_att): ', ierror
+            dlwqnc_create_layer_dim = ierror
+            return
+        endif
+    enddo
+
     ierror = nf90_enddef( ncidout )
     if ( ierror /= 0 ) then
         if (dlwqnc_debug) write(*,*) 'Note: Creating layer dimension failed (enddef): ', ierror
@@ -1275,6 +1326,23 @@ integer function dlwqnc_create_layer_dim( ncidout, mesh_name, nolay, thickness, 
     endif
 
     ierror = nf90_put_var( ncidout, varlayid, thickness )
+    if ( ierror /= 0 ) then
+        if (dlwqnc_debug) write(*,*) 'Note: Creating layer dimension failed (put_var): ', ierror
+        dlwqnc_create_layer_dim = ierror
+        return
+    endif
+
+    !
+    ! Construct the cumulative sigma coordinate and write it to the file
+    ! Note: following the D-FLOW-FM convention, sigma = 0 is the bottom
+    !
+    z_sum = 0.0
+    do i = nolay,1,-1
+        z_centre(i) = z_sum + 0.5 * thickness(i)
+        z_sum       = z_sum + thickness(i)
+    enddo
+
+    ierror = nf90_put_var( ncidout, cumlayid, z_centre )
     if ( ierror /= 0 ) then
         if (dlwqnc_debug) write(*,*) 'Note: Creating layer dimension failed (put_var): ', ierror
         dlwqnc_create_layer_dim = ierror
