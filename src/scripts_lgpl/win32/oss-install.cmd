@@ -8,11 +8,13 @@ rem Usage:
 rem > oss-install.cmd <destiny>
 rem > oss-install.cmd [project] <destiny>
 rem > oss-install.cmd [project] <destiny> ["compiler_dir"]
+
 rem with:
 rem   <destiny>        : Target directory where all binaries etc. are going to be installed by this script
 rem   [project]        : (optional) project to install. If missing, "everything" is installed
 rem   ["compiler_dir"] : (optional) Directory containing compiler specific dll's to be installed,
 rem                      surrounded by quotes to be able to handle white spaces in the path
+
 rem
 rem Example calls:
 rem > install.cmd <dest directory>                # Install entire solution
@@ -56,6 +58,7 @@ if [%3] EQU [] (
     rem These quotes MUST be present in argument number 3, because "compiler_dir" may contain white spaces
     set compiler_dir=!compiler_dir_read:~1,-1!
 )
+
 
 rem Change to directory tree where this batch file resides (necessary when oss-install.cmd is called from outside of oss/trunk/src)
 cd %~dp0\..\..
@@ -188,7 +191,7 @@ rem ===================
 :d_hydro
     echo "installing d_hydro . . ."
 
-    set dest_bin="!dest_main!\win32\flow2d3d\bin"
+    set dest_bin="!dest_main!\win32\dflow2d3d\bin"
     set dest_menu="!dest_main!\win32\menu\bin"
 
     call :makeDir !dest_bin!
@@ -200,11 +203,11 @@ goto :endproc
 
 
 
-rem ===================
+rem ================
 rem === INSTALL_DIMR
-rem ===================
+rem ================
 :dimr
-    echo "installing d_hydro . . ."
+    echo "installing dimr . . ."
 
     set dest_bin="!dest_main!\win32\dimr\bin"
     set dest_menu="!dest_main!\win32\menu\bin"
@@ -252,9 +255,9 @@ rem ====================
 :flow2d3d
     echo "installing flow2d3d . . ."
 
-    set dest_bin="!dest_main!\win32\flow2d3d\bin"
-    set dest_default="!dest_main!\win32\flow2d3d\default"
-    set dest_scripts="!dest_main!\win32\flow2d3d\scripts"
+    set dest_bin="!dest_main!\win32\dflow2d3d\bin"
+    set dest_default="!dest_main!\win32\dflow2d3d\default"
+    set dest_scripts="!dest_main!\win32\dflow2d3d\scripts"
     set dest_plugins="!dest_main!\win32\plugins\bin"
     
     call :makeDir !dest_bin!
@@ -307,9 +310,9 @@ rem ===========================
 :flow2d3d_openda
     echo "installing flow2d3d_openda . . ."
 
-    set dest_bin="!dest_main!\win32\flow2d3d\bin"
-    set dest_default="!dest_main!\win32\flow2d3d\default"
-    set dest_scripts="!dest_main!\win32\flow2d3d\scripts"
+    set dest_bin="!dest_main!\win32\dflow2d3d\bin"
+    set dest_default="!dest_main!\win32\dflow2d3d\default"
+    set dest_scripts="!dest_main!\win32\dflow2d3d\scripts"
     set dest_plugins="!dest_main!\win32\plugins\bin"
 
     call :makeDir !dest_bin!
@@ -364,7 +367,7 @@ rem ===================
 :delwaq1
     echo "installing delwaq1 . . ."
 
-    set dest_bin="!dest_main!\win32\waq\bin"
+    set dest_bin="!dest_main!\win32\dwaq\bin"
     
     call :makeDir !dest_bin!
 
@@ -379,7 +382,7 @@ rem ===================
 :delwaq2
     echo "installing delwaq2 . . ."
 
-    set dest_bin="!dest_main!\win32\waq\bin"
+    set dest_bin="!dest_main!\win32\dwaq\bin"
     
     call :makeDir !dest_bin!
 
@@ -394,8 +397,8 @@ rem ======================
 :delwaq_dll
     echo "installing delwaq dll . . ."
 
-    set dest_bin="!dest_main!\win32\waq\bin"
-    set dest_default="!dest_main!\win32\waq\default"
+    set dest_bin="!dest_main!\win32\dwaq\bin"
+    set dest_default="!dest_main!\win32\dwaq\default"
     
     call :makeDir !dest_bin!
     call :makeDir !dest_default!
@@ -446,7 +449,7 @@ rem ==============================
 :delwaq2_openda_lib
     echo "installing delwaq2_openda_lib . . ."
 
-    set dest_bin="!dest_main!\win32\waq\bin"
+    set dest_bin="!dest_main!\win32\dwaq\bin"
     
     call :makeDir !dest_bin!
     
@@ -483,7 +486,7 @@ rem ================================
 :waq_plugin_wasteload
     echo "installing waq_plugin_wasteload . . ."
 
-    set dest_bin="!dest_main!\win32\waq\bin"
+    set dest_bin="!dest_main!\win32\dwaq\bin"
     
     call :makeDir !dest_bin!
     
@@ -498,7 +501,7 @@ rem ================
 :part
     echo "installing part . . ."
 
-    set dest="!dest_main!\win32\part\bin"
+    set dest="!dest_main!\win32\dpart\bin"
 
     call :makeDir !dest!
 
@@ -527,8 +530,8 @@ rem ================
 :wave
     echo "installing wave . . ."
 
-    set dest_bin="!dest_main!\win32\wave\bin"
-    set dest_default="!dest_main!\win32\wave\default"
+    set dest_bin="!dest_main!\win32\dwaves\bin"
+    set dest_default="!dest_main!\win32\dwaves\default"
     set dest_swan_bin="!dest_main!\win32\swan\bin"
        rem When adding quotes here AND when using dest_swan_scripts, xcopy also gets confused
        rem Neat solution: do not add quotes on defining the destination folders, but only at calling :copyFile
@@ -587,7 +590,7 @@ rem ==========================
 :plugin_culvert
     echo "installing plugin_culvert . . ."
 
-    set dest_bin="!dest_main!\win32\flow2d3d\bin"
+    set dest_bin="!dest_main!\win32\dflow2d3d\bin"
 
     call :makeDir !dest_bin!
 
@@ -602,7 +605,7 @@ rem ====================================
 :plugin_delftflow_traform
     echo "installing plugin_delftflow_traform . . ."
 
-    set dest_bin="!dest_main!\win32\flow2d3d\bin"
+    set dest_bin="!dest_main!\win32\dflow2d3d\bin"
 
     call :makeDir !dest_bin!
 
@@ -617,7 +620,7 @@ rem ==================
 :datsel
     echo "installing datsel . . ."
 
-    set dest_bin="!dest_main!\win32\flow2d3d\bin"
+    set dest_bin="!dest_main!\win32\dflow2d3d\bin"
 
     call :makeDir !dest_bin!
 
@@ -632,7 +635,7 @@ rem ==================
 :kubint
     echo "installing kubint . . ."
 
-    set dest_bin="!dest_main!\win32\flow2d3d\bin"
+    set dest_bin="!dest_main!\win32\dflow2d3d\bin"
 
     call :makeDir !dest_bin!
 
@@ -647,7 +650,7 @@ rem ================
 :lint
     echo "installing lint . . ."
 
-    set dest_bin="!dest_main!\win32\flow2d3d\bin"
+    set dest_bin="!dest_main!\win32\dflow2d3d\bin"
 
     call :makeDir !dest_bin!
 
@@ -662,8 +665,8 @@ rem ====================
 :mormerge
     echo "installing mormerge . . ."
 
-    set dest_bin="!dest_main!\win32\flow2d3d\bin"
-    set dest_scripts="!dest_main!\win32\flow2d3d\scripts"
+    set dest_bin="!dest_main!\win32\dflow2d3d\bin"
+    set dest_scripts="!dest_main!\win32\dflow2d3d\scripts"
 
     call :makeDir !dest_bin!
     call :makeDir !dest_scripts!
@@ -695,7 +698,7 @@ rem ===================
 :nesthd1
     echo "installing nesthd1 . . ."
 
-    set dest_bin="!dest_main!\win32\flow2d3d\bin"
+    set dest_bin="!dest_main!\win32\dflow2d3d\bin"
 
     call :makeDir !dest_bin!
 
@@ -711,7 +714,7 @@ rem ===================
 :nesthd2
     echo "installing nesthd2 . . ."
 
-    set dest_bin="!dest_main!\win32\flow2d3d\bin"
+    set dest_bin="!dest_main!\win32\dflow2d3d\bin"
 
     call :makeDir !dest_bin!
 
