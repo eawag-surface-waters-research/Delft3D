@@ -1,4 +1,7 @@
 #!/bin/bash
+#$ -V
+#$ -j yes
+#$ -cwd
     #
     # This script is an example for running Delft3D-FLOW
     # Adapt and use it for your own purpose
