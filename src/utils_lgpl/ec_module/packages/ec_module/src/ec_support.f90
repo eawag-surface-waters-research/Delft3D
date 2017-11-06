@@ -1042,7 +1042,7 @@ end subroutine ecInstanceListSourceItems
       integer, intent(out) :: tim_dimid      !< Time dimension
       integer :: ndim, nvar, ivar, nglobatts, unlimdimid, ierr
       integer :: dimids(1)
-      character(len=NF90_MAX_NAME)  :: units, axis, varname
+      character(len=NF90_MAX_NAME)  :: units, axis, varname, stdname
 
       success = .False.
       lon_varid = -1
@@ -1107,6 +1107,15 @@ end subroutine ecInstanceListSourceItems
                   lon_varid = ivar
                case ('degrees_north','degree_north','degree_N','degrees_N','degreeN','degreesN')
                   lat_varid = ivar
+               case ('m','meters','km','kilometers')
+                   stdname = ''
+                   ierr = nf90_get_att(ncid, ivar, 'standard_name', stdname)
+                   select case (stdname) 
+                      case ('projection_x_coordinate')
+                         x_varid = ivar
+                      case ('projection_y_coordinate')
+                         y_varid = ivar
+                   end select
                end select
          end if
       end do   !ivar
