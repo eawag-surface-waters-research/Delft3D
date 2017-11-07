@@ -429,9 +429,9 @@ subroutine ecInstanceListSourceItems(instancePtr,dev)
          do ii=1, instancePtr%nItems 
             sourceItemPtr => instancePtr%ecItemsPtr(ii)%ptr
             if (sourceItemPtr%role == itemType_source) then
-                     write(dev,'(a,i4.4,a,i1,a)') 'Source Item ',sourceItemPtr%id
-                     write(dev,'(a,i4.4,a,i1,a)') '  Quantity = '//trim(sourceItemPtr%quantityPtr%name)
-                     write(dev,'(a,i4.4,a,i1,a)') '  Location = '//trim(sourceItemPtr%elementsetPtr%name)
+                     write(dev,'(a,i5.5)') 'Source Item ',sourceItemPtr%id
+                     write(dev,'(a)')      '  Quantity = '//trim(sourceItemPtr%quantityPtr%name)
+                     write(dev,'(a)')      '  Location = '//trim(sourceItemPtr%elementsetPtr%name)
                      write(dev,*) ''
             endif 
          enddo

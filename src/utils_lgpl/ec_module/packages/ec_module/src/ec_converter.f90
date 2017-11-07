@@ -1270,7 +1270,7 @@ module m_ec_converter
                                     if (sigmaL(maxlay_srcL)>0.5*ec_undef_hp) exit
                                  enddo 
                                  if (maxlay_srcL<1) then 
-                                    write(errormsg,'(a,i0,a,i4.4)') "ERROR: ec_converter::ecConverterPolytim: No valid sigma (layer) associated with point ", &
+                                    write(errormsg,'(a,i0,a,i5.5)') "ERROR: ec_converter::ecConverterPolytim: No valid sigma (layer) associated with point ", &
                                                                       kL," of polytim item ", connection%sourceItemsPtr(1)%ptr%id
                                     call setECMessage(errormsg)
                                     return
@@ -1279,7 +1279,7 @@ module m_ec_converter
                                     if (sigmaR(maxlay_srcR)>0.5*ec_undef_hp) exit
                                  enddo 
                                  if (maxlay_srcR<1) then 
-                                    write(errormsg,'(a,i0,a,i4.4)') "ERROR: ec_converter::ecConverterPolytim: No valid sigma (layer) associated with point ", &
+                                    write(errormsg,'(a,i0,a,i5.5)') "ERROR: ec_converter::ecConverterPolytim: No valid sigma (layer) associated with point ", &
                                                                       kR," of polytim item ", connection%sourceItemsPtr(1)%ptr%id
                                     call setECMessage(errormsg)
                                     return

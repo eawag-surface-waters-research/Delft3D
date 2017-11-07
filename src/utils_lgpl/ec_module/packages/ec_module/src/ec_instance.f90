@@ -459,9 +459,9 @@ module m_ec_instance
          do ii=1, instancePtr%nItems 
             sourceItemPtr => instancePtr%ecItemsPtr(ii)%ptr
             if (sourceItemPtr%role == itemType_source) then
-                     write(dev,'(a,i4.4,a,i1,a)') 'Source Item ',sourceItemPtr%id
-                     write(dev,'(a,i4.4,a,i1,a)') '  Quantity = '//trim(sourceItemPtr%quantityPtr%name)
-                     write(dev,'(a,i4.4,a,i1,a)') '  Location = '//trim(sourceItemPtr%elementsetPtr%name)
+                     write(dev,'(a,i5.5)') 'Source Item ',sourceItemPtr%id
+                     write(dev,'(a)')      '  Quantity = '//trim(sourceItemPtr%quantityPtr%name)
+                     write(dev,'(a)')      '  Location = '//trim(sourceItemPtr%elementsetPtr%name)
                      write(dev,*) ''
             endif 
          enddo
@@ -488,12 +488,12 @@ module m_ec_instance
             case default
                filename = ''
             end select
-            write(dev,'(a,i4.4,a,i1,a)') 'Filereader ',fileReaderPtr%id,' ('''//filename//''') provides items: '
+            write(dev,'(a,i5.5,a,i1,a)') 'Filereader ',fileReaderPtr%id,' ('''//filename//''') provides items: '
             do jj=1, fileReaderPtr%nItems
                sourceItemPtr => fileReaderPtr%items(jj)%ptr
-               write(dev,'(a,i4.4,a,i1,a)') '   Item ',sourceItemPtr%id
-               write(dev,'(a,i4.4,a,i1,a)') '      Quantity = '//trim(sourceItemPtr%quantityPtr%name)
-               write(dev,'(a,i4.4,a,i1,a)') '      Location = '//trim(sourceItemPtr%elementsetPtr%name)
+               write(dev,'(a,i5.5)') '   Item ',sourceItemPtr%id
+               write(dev,'(a)')      '      Quantity = '//trim(sourceItemPtr%quantityPtr%name)
+               write(dev,'(a)')      '      Location = '//trim(sourceItemPtr%elementsetPtr%name)
             enddo 
          write(dev,*) ''
          enddo
@@ -526,9 +526,9 @@ module m_ec_instance
             ! TODO: This lookup loop of items may be expensive for large models, use a lookup table with ids.
             targetItemPtr => instancePtr%ecItemsPtr(ii)%ptr
             if (targetItemPtr%role == itemType_target) then
-               write(line,'(a,i4.4,a,i1,a)') 'Target Item ', targetItemPtr%id, ' (name='//trim(targetItemPtr%quantityPtr%name)//', vectormax=',targetItemPtr%quantityPtr%vectormax,')'
+               write(line,'(a,i5.5,a,i1,a)') 'Target Item ', targetItemPtr%id, ' (name='//trim(targetItemPtr%quantityPtr%name)//', vectormax=',targetItemPtr%quantityPtr%vectormax,')'
                call messenger(lvl, line)
-               write(line,'(a,i4.4,a,i1,a)') 'Element Set ', targetItemPtr%elementSetPtr%id
+               write(line,'(a,i5.5,a,i1,a)') 'Element Set ', targetItemPtr%elementSetPtr%id
                call messenger(lvl, line)
                if (targetItemPtr%nConnections==0) then
                   write(line,'(a)') '   TARGET ITEM HAS NO CONNECTIONS !!!'
@@ -536,7 +536,7 @@ module m_ec_instance
                end if
                do ic=1, targetItemPtr%nConnections
                   connectionPtr => targetItemPtr%connectionsPtr(ic)%ptr
-                  write(line,'(a,i4.4)') '   Connection ',connectionPtr%id 
+                  write(line,'(a,i5.5)') '   Connection ',connectionPtr%id 
                   call messenger(lvl, line)
                   if (connectionPtr%nSourceItems==0) then
                      write(line,'(a)') '   CONNECTION HAS NO SOURCE ITEMS !!!'
@@ -544,7 +544,7 @@ module m_ec_instance
                   end if
                   do js=1, connectionPtr%nSourceItems
                      sourceItemPtr => connectionPtr%sourceItemsPtr(js)%ptr
-                     write(line,'(a,i4.4,a,i1,a)') '      Source Item ',sourceItemPtr%id, ' (name='//trim(sourceItemPtr%quantityPtr%name)//', vectormax=',sourceItemPtr%quantityPtr%vectormax,')'
+                     write(line,'(a,i5.5,a,i1,a)') '      Source Item ',sourceItemPtr%id, ' (name='//trim(sourceItemPtr%quantityPtr%name)//', vectormax=',sourceItemPtr%quantityPtr%vectormax,')'
                      call messenger(lvl, line)
                      ! Find the FileReader which can update this source Item.
                      frs: do i=1, instancePtr%nFileReaders
@@ -553,12 +553,12 @@ module m_ec_instance
                               fileReaderPtr => instancePtr%ecFileReadersPtr(i)%ptr
                               if (associated(fileReaderPtr%bc)) then 
                                  BCBlockPtr => fileReaderPtr%bc
-                                 write(line,'(a,i4.4,a)') '         File Reader ',fileReaderPtr%id, '(filename='//trim(fileReaderPtr%bc%fname)//')'
+                                 write(line,'(a,i5.5,a)') '         File Reader ',fileReaderPtr%id, '(filename='//trim(fileReaderPtr%bc%fname)//')'
                                  call messenger(lvl, line)
-                                 write(line,'(a,i4.4)') '            BCBlock ',BCBlockPtr%id 
+                                 write(line,'(a,i5.5)') '            BCBlock ',BCBlockPtr%id 
                                  call messenger(lvl, line)
                               else 
-                                 write(line,'(a,i4.4,a)') '         File Reader ',fileReaderPtr%id, '(filename='//trim(fileReaderPtr%filename)//')'
+                                 write(line,'(a,i5.5,a)') '         File Reader ',fileReaderPtr%id, '(filename='//trim(fileReaderPtr%filename)//')'
                                  call messenger(lvl, line)
                               end if 
                               if (associated(sourceItemPtr%QuantityPtr)) then
