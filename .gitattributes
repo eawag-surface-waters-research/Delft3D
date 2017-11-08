@@ -379,6 +379,7 @@ examples/12_dflowfm/test_data/e100_f02_c02-FriesianInlet_schematic_FM/f34_drypoi
 examples/12_dflowfm/test_data/e100_f02_c02-FriesianInlet_schematic_FM/f34_net.nc -text
 examples/12_dflowfm/test_data/e100_f02_c02-FriesianInlet_schematic_FM/f34_obs.xyn -text
 examples/12_dflowfm/test_data/e100_f02_c02-FriesianInlet_schematic_FM/f34_thd.pli -text
+examples/12_dflowfm/test_data/e100_f02_c02-FriesianInlet_schematic_FM/run_docker.sh -text
 examples/12_dflowfm/test_data/e100_f02_c02-FriesianInlet_schematic_FM_wave/casedoc.pdf -text
 examples/12_dflowfm/test_data/e100_f02_c02-FriesianInlet_schematic_FM_wave/dimr_config.xml -text
 examples/12_dflowfm/test_data/e100_f02_c02-FriesianInlet_schematic_FM_wave/fm/f34.ext -text
