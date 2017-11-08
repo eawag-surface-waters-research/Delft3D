@@ -82,10 +82,6 @@ Rhoair                              = 1.0000000                          # Air d
 PavBnd                              = 101325.0000000                     # Average air Pressure on open boundaries, (N/m2), only applied if value > 0
 Gapres                              = 101325.0000000                     # Global Atmospheric Pressure, (N/m2)
 
-[waves]
-Wavemodelnr                         = 3
-Rouwav                              = FR84
-
 [time]
 RefDate                             = 19900805                           # Reference date (yyyymmdd)
 Tunit                               = M                                  # Time units in MDU (H, M or S)

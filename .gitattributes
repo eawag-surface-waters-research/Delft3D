@@ -364,6 +364,7 @@ examples/12_dflowfm/python/notebooks/test_dflowfm_merge.py -text
 examples/12_dflowfm/python/notebooks/zerorpc_client.ipynb -text
 examples/12_dflowfm/python/notebooks/zerorpc_server.ipynb -text
 examples/12_dflowfm/python/test.cmd -text
+examples/12_dflowfm/test_data/e100_f02_c02-FriesianInlet_schematic_FM/dimr_config.xml -text
 examples/12_dflowfm/test_data/e100_f02_c02-FriesianInlet_schematic_FM/f34.ext -text
 examples/12_dflowfm/test_data/e100_f02_c02-FriesianInlet_schematic_FM/f34.mdu -text
 examples/12_dflowfm/test_data/e100_f02_c02-FriesianInlet_schematic_FM/f34.wnd -text
@@ -377,7 +378,6 @@ examples/12_dflowfm/test_data/e100_f02_c02-FriesianInlet_schematic_FM/f34_crs.pl
 examples/12_dflowfm/test_data/e100_f02_c02-FriesianInlet_schematic_FM/f34_drypoints.xyz -text
 examples/12_dflowfm/test_data/e100_f02_c02-FriesianInlet_schematic_FM/f34_net.nc -text
 examples/12_dflowfm/test_data/e100_f02_c02-FriesianInlet_schematic_FM/f34_obs.xyn -text
-examples/12_dflowfm/test_data/e100_f02_c02-FriesianInlet_schematic_FM/f34_prep.mdu -text
 examples/12_dflowfm/test_data/e100_f02_c02-FriesianInlet_schematic_FM/f34_thd.pli -text
 examples/12_dflowfm/test_data/e100_f02_c02-FriesianInlet_schematic_FM_wave/casedoc.pdf -text
 examples/12_dflowfm/test_data/e100_f02_c02-FriesianInlet_schematic_FM_wave/dimr_config.xml -text
