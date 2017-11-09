@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 function fcheck {
     if [ ! -f "$1" ]; then
