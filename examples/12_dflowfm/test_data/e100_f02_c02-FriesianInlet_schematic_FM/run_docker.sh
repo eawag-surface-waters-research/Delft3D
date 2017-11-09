@@ -1,3 +1,3 @@
 #!/bin/bash
 
-/opt/dflowfm_latest/scripts/run_dimr.sh
+/opt/delft3dfm_latest/lnx64/scripts/run_dimr.sh
