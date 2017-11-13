@@ -293,7 +293,7 @@ module m_ec_provider
                            "airpressure_windx_windy",                               &
                            "windxy","windx","windy",                                &
                            "nudge_salinity_temperature",                            &
-                           "atmosphericpressure",                                   &
+                           "airpressure","atmosphericpressure",                                   &
                            "humidity_airtemperature_cloudiness",                    &
                            "humidity_airtemperature_cloudiness_solarradiation",     &
                            "dewpoint_airtemperature_cloudiness",                    &
@@ -2393,7 +2393,7 @@ module m_ec_provider
             ncstdnames(1) = 'eastward_wind'
             ncvarnames(2) = 'v10'                            ! 10 meter eastward wind
             ncstdnames(2) = 'northward_wind'
-         case ('atmosphericpressure') 
+         case ('airpressure','atmosphericpressure') 
             ncvarnames(1) = 'msl'                            ! mean sea-level pressure
             ncstdnames(1) = 'air_pressure'
          case ('airpressure_windx_windy') 

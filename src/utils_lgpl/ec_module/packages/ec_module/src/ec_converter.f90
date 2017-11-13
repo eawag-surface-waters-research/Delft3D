@@ -1950,7 +1950,7 @@ module m_ec_converter
                twx = 1
                twy = 2
                twp = 3
-            case ('atmosphericpressure')
+            case ('airpressure','atmosphericpressure')
                twp = 1
             case ('windx')
                twx = 1
