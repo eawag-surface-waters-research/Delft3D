@@ -26,27 +26,27 @@
 !-------------------------------------------------------------------------------
 !  $Id$
 !  $HeadURL$
-C
-C     dio_function77.inc
-C
-C     F77 Interface function declarations
-C
-C     Stef.Hummel@deltares.nl
-C
-C     (c) Deltares, Nov 03
-C---------------------------------------------
-C
-C
-C     Function declarations for PLT DATASETS
-C
+!
+!     dio_function77.inc
+!
+!     F77 Interface function declarations
+!
+!     Stef.Hummel@deltares.nl
+!
+!     (c) Deltares, Nov 03
+!---------------------------------------------
+!
+!
+!     Function declarations for PLT DATASETS
+!
       integer DioDefinePltDataSet
       integer DioGetPltDataSetInfo
       logical DioGetPltDataSetReals
-C
+!
       external DioDefinePltDataSet
       external DioGetPltDataSetInfo, DioGetPltDataSetReals
-C
-C     Function declarations for Streams
-C
+!
+!     Function declarations for Streams
+!
       integer DioCreateStreamSynched
       external DioCreateStreamSynched
