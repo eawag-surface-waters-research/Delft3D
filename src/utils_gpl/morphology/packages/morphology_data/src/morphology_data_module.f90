@@ -36,6 +36,7 @@ module morphology_data_module
 use precision
 use handles, only:handletype
 use properties, only:tree_data
+use m_tables, only:t_table
 private
 
 !
@@ -65,6 +66,8 @@ public allocsedtra
 public clrsedtra
 public allocfluffy
 
+integer, parameter         :: CHARLEN = 40
+      
 integer, parameter, public :: RP_TIME  =  1
 integer, parameter, public :: RP_EFUMN =  2
 integer, parameter, public :: RP_EFVMN =  3
@@ -449,6 +452,33 @@ type morpar_type
     character(256) :: ttlfil       !  name of file containing transport layer thickness
     !
 end type morpar_type
+
+type t_noderelation
+   character(len=CHARLEN)                         :: Node       = ' '
+   character(len=CHARLEN)                         :: BranchIn   = ' '
+   character(len=CHARLEN)                         :: BranchOut1 = ' '
+   character(len=CHARLEN)                         :: BranchOut2 = ' '
+   character(len=CHARLEN)                         :: tableName  = ' '
+   character(len=CHARLEN)                         :: Method     = ' '
+   real(fp)                                       :: expQ       = -1.0_fp
+   real(fp)                                       :: expW       = -1.0_fp
+   type(t_table), pointer                         :: Table
+end type t_noderelation
+
+type t_nodefraction
+   character(20)                                   :: Name
+   character(256)                                  :: tableFile      = ' '  ! Name of Table File for Node Relations
+   integer                                         :: nNodeRelations = 0
+   type(t_noderelation), pointer, dimension(:)     :: noderelations
+end type t_nodefraction
+
+type t_nodereldata
+    integer                                     :: nFractions       = 0
+    logical                                     :: NRD_Overall
+    logical                                     :: NRD_Default      = .false.
+    character(256), dimension(:), pointer       :: flnrd            !  Files with Node Relation Data (NRD-Files)
+    type(t_nodefraction), pointer, dimension(:) :: nodefractions
+end type t_nodereldata
 
 type sedpar_type
     !
