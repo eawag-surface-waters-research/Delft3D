@@ -567,7 +567,7 @@ def build_gui():
     if chooseIfort == 1:
         Label(text="IFORT Version:", relief=RIDGE, width=20).grid(row=0, column=2)
         Radiobutton(root, text="IFORT18: (not tested yet)                      ", variable=ifort_gui, value=18).grid(row=1, column=2, sticky=W)
-        Radiobutton(root, text="IFORT17: (not tested yet)                      ", variable=ifort_gui, value=17).grid(row=2, column=2, sticky=W)
+        Radiobutton(root, text="IFORT17: (NOT Recommended)                     ", variable=ifort_gui, value=17).grid(row=2, column=2, sticky=W)
         Radiobutton(root, text="IFORT16: Intel Parallel Studio XE 2016 Update 4", variable=ifort_gui, value=16).grid(row=3, column=2, sticky=W)
         Radiobutton(root, text="IFORT15: Intel Parallel Studio XE 2015 Update 6", variable=ifort_gui, value=15).grid(row=4, column=2, sticky=W)
         Radiobutton(root, text="IFORT14: Intel Visual Fortran Composer XE 2014 ", variable=ifort_gui, value=14).grid(row=5, column=2, sticky=W)
