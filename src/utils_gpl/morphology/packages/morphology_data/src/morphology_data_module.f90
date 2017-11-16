@@ -51,6 +51,10 @@ public sedpar_type
 public trapar_type
 public sedtra_type
 public fluffy_type
+public t_noderelation
+public t_nodefraction
+public t_nodereldata
+
 
 !
 ! public routines
