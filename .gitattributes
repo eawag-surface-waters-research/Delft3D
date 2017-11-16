@@ -5982,6 +5982,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/private/spirint.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/stack2str.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/stdbeep.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/stdinputdlg.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/private/stl.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/str2file.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/str2vec.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/swan.m -text
