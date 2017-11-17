@@ -468,6 +468,12 @@ command="make ds-install &> $log"
 log "Running $command"
 eval $command
 
+log='logs/make_dflowfm.log'
+command="make -C engines_gpl/dflowfm &> $log"
+
+log "Running $command"
+eval $command
+
 if [ $? -ne 0 ]; then
     log "ERROR: Make fails!"
     cd $orgdir
