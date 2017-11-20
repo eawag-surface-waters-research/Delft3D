@@ -992,7 +992,7 @@ void Dimr::runParallelInit (dimr_control_block * cb) {
                         nc_def_var(ncid, "time", NC_DOUBLE, 1, &thisCoupler->logger->netcdfReferences->timeDim, &thisCoupler->logger->netcdfReferences->timeVar);
                         const char longnametime[] = "time";
                         nc_put_att_text(ncid, thisCoupler->logger->netcdfReferences->timeVar, "long_name", sizeof(longnametime), longnametime);
-                        const char units[] = "seconds since TODO_STARTTIJD_BEPALEN_";
+                        const char units[] = "seconds since 2017-10-09T00:00:00"; // TODO: STARTTIJD BEPALEN!!
                         nc_put_att_text(ncid, thisCoupler->logger->netcdfReferences->timeVar, "units", sizeof(units), units);
                         const char axis[] = "T";
                         nc_put_att_text(ncid, thisCoupler->logger->netcdfReferences->timeVar, "axis", sizeof(axis), axis);
@@ -1076,7 +1076,6 @@ void Dimr::runParallelUpdate (dimr_control_block * cb, double tStep) {
     //
     // TIME LOOP
     //
-    int timeIndexCounter = 0;
     while (*currentTime < masterComponent->tNext) {
         //
         // define tStep
@@ -1165,6 +1164,7 @@ void Dimr::runParallelUpdate (dimr_control_block * cb, double tStep) {
                             log->Write (DEBUG, my_rank, "%10.1f:    %s.communicate", *currentTime, thisCoupler->name);
 
                             // log netcdf time variable
+                            int timeIndexCounter = static_cast<int>(floor(*currentTime / tStep));
                             if (thisCoupler->logger != NULL) {
                                 string fileName = GetLoggerFilename(thisCoupler->logger);
 
@@ -1230,7 +1230,6 @@ void Dimr::runParallelUpdate (dimr_control_block * cb, double tStep) {
                 }
             }
         }
-        timeIndexCounter++;
     }
 }
 
