@@ -1281,22 +1281,22 @@ integer function dlwqnc_create_layer_dim( ncidout, mesh_name, nolay, thickness, 
         return
     endif
 
-    write( name, '(3a)' ) mesh_name(1:k), '_layer_dlwq'
-    ierror = nf90_def_var( ncidout, name, nf90_float, (/ nolayid /), varlayid )
-    if ( ierror /= 0 ) then
-        if (dlwqnc_debug) write(*,*) 'Note: Creating layer dimension failed (def_var): ', ierror
-        dlwqnc_create_layer_dim = ierror
-        return
-    endif
-
-    do i = 1,5
-        ierror = nf90_put_att( ncidout, varlayid, attname(i), attvalue(i) )
-        if ( ierror /= 0 ) then
-            if (dlwqnc_debug) write(*,*) 'Note: Creating layer dimension failed (put_att): ', ierror
-            dlwqnc_create_layer_dim = ierror
-            return
-        endif
-    enddo
+   !write( name, '(3a)' ) mesh_name(1:k), '_layer_dlwq'
+   !ierror = nf90_def_var( ncidout, name, nf90_float, (/ nolayid /), varlayid )
+   !if ( ierror /= 0 ) then
+   !    if (dlwqnc_debug) write(*,*) 'Note: Creating layer dimension failed (def_var): ', ierror
+   !    dlwqnc_create_layer_dim = ierror
+   !    return
+   !endif
+   !
+   !do i = 1,5
+   !    ierror = nf90_put_att( ncidout, varlayid, attname(i), attvalue(i) )
+   !    if ( ierror /= 0 ) then
+   !        if (dlwqnc_debug) write(*,*) 'Note: Creating layer dimension failed (put_att): ', ierror
+   !        dlwqnc_create_layer_dim = ierror
+   !        return
+   !    endif
+   !enddo
 
     !
     ! Cumulative sigma coordinate
@@ -1325,12 +1325,12 @@ integer function dlwqnc_create_layer_dim( ncidout, mesh_name, nolay, thickness, 
         return
     endif
 
-    ierror = nf90_put_var( ncidout, varlayid, thickness )
-    if ( ierror /= 0 ) then
-        if (dlwqnc_debug) write(*,*) 'Note: Creating layer dimension failed (put_var): ', ierror
-        dlwqnc_create_layer_dim = ierror
-        return
-    endif
+   !ierror = nf90_put_var( ncidout, varlayid, thickness )
+   !if ( ierror /= 0 ) then
+   !    if (dlwqnc_debug) write(*,*) 'Note: Creating layer dimension failed (put_var): ', ierror
+   !    dlwqnc_create_layer_dim = ierror
+   !    return
+   !endif
 
     !
     ! Construct the cumulative sigma coordinate and write it to the file
