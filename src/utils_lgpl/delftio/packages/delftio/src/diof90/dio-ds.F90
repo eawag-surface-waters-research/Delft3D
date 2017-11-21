@@ -271,13 +271,24 @@ subroutine DioDsDestroy(ds)
     ds % name          = DsNoName
     ds % descript      = DsNoDesc
 
-    deallocate(ds % timeStep)  ;    nullify(ds % timeStep)
-    deallocate(ds % hisStep)   ;    nullify(ds % hisStep)
-    if (associated(ds % preReadTims)) then
-        deallocate(ds % preReadTims) ; nullify(ds % preReadTims)
+    if (associated(ds % timeStep)) then
+       deallocate(ds % timeStep)
+       nullify(ds % timeStep)
     endif
+    
+    if (associated(ds % hisStep)) then
+       deallocate(ds % hisStep)
+       nullify(ds % hisStep)
+    endif
+    
+    if (associated(ds % preReadTims)) then
+        deallocate(ds % preReadTims)
+        nullify(ds % preReadTims)
+    endif
+    
     if (associated(ds % preReadHisSteps)) then
-        deallocate(ds % preReadHisSteps) ; nullify(ds % preReadHisSteps)
+        deallocate(ds % preReadHisSteps)
+        nullify(ds % preReadHisSteps)
     endif
 
     if (ds % inStream % opened) then
@@ -286,6 +297,7 @@ subroutine DioDsDestroy(ds)
             ds % inStream % opened = .false.
         endif
     endif
+    
     if (ds % outStream % opened) then
         if ( ds % outStream % autoStream ) then
             call DioStreamClose(ds % outStream)
