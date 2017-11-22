@@ -468,11 +468,14 @@ command="make ds-install &> $log"
 log "Running $command"
 eval $command
 
-log='logs/make_dflowfm.log'
-command="make -C engines_gpl/dflowfm &> $log"
+# Build D-Flow FM, only when not in singlePrecision mode
+if [ $useSp -eq 0 ]; then
+    log='logs/make_dflowfm.log'
+    command="make -C engines_gpl/dflowfm &> $log"
 
-log "Running $command"
-eval $command
+    log "Running $command"
+    eval $command
+fi
 
 if [ $? -ne 0 ]; then
     log "ERROR: Make fails!"
