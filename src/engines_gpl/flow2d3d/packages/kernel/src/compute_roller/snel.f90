@@ -89,10 +89,11 @@ subroutine snel(mmax      ,nmax      ,norow     ,noroco    ,ubot      , &
     integer                :: nf
     integer                :: nfu
     integer                :: nl
+    integer                :: nh0    ! Number of open boundary points
     integer                :: nwav
     integer                :: nlu
     real(fp)               :: cstdir
-    real(fp)               :: h0
+    real(fp)               :: h0     ! Average water depth on open boundary points
     real(fp)               :: hrms0
     real(fp)               :: hrmsl
     real(fp)               :: hw
@@ -137,9 +138,10 @@ subroutine snel(mmax      ,nmax      ,norow     ,noroco    ,ubot      , &
     tp0    = wavcon(2)
     incdir = wavcon(3)
     !
-    ! h0 is waterdepth at boundary is now programmed ad hoc needs to be modified
+    ! h0 is average waterdepth at boundary: first it contains the sum of all waterdepths, then it will be divided by nh0
     !
-    h0 = real(dps(2,1),fp) + s0(2,1)
+    h0  = 0.0_fp
+    nh0 = 0
     !
     ! orientation of grid is assumed to be constant
     !
@@ -172,6 +174,10 @@ subroutine snel(mmax      ,nmax      ,norow     ,noroco    ,ubot      , &
        ibl = irocol(5,ic)
        mf  = mfu - 1
        mlu = ml  + 1
+       do m = mf, ml
+          nh0 = nh0 + 1
+          h0  = h0 + max(0.1_fp , real(dps(n,m),fp) + s0(n,m))
+       enddo
        !
        ! Left side of row
        !
@@ -196,6 +202,10 @@ subroutine snel(mmax      ,nmax      ,norow     ,noroco    ,ubot      , &
        ibl = irocol(5,ic)
        nf  = nfu - 1
        nlu = nl + 1
+       do n = nf, nl
+          nh0 = nh0 + 1
+          h0  = h0 + max(0.1_fp , real(dps(n,m),fp) + s0(n,m))
+       enddo
        !
        ! Lower side of column
        !
@@ -209,6 +219,12 @@ subroutine snel(mmax      ,nmax      ,norow     ,noroco    ,ubot      , &
           ewave0(nlu, m) = rhow * ag * hrms0 * hrms0 / 8.0_fp
        endif
     enddo
+    !
+    ! Divide the sum of all waterdepths by nh0.
+    ! nh0 might be zero (no open boundaries)
+    ! The resulting h0 must be 0.1 or bigger
+    !
+    h0 = max(0.1_fp, h0 / real(max(1,nh0),fp) )
     !
     ! Compute the orbital velocity and wave length.
     !
