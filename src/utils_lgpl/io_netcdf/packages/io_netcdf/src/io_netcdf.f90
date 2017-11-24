@@ -502,7 +502,7 @@ end function ionc_get_topology_dimension
 function ionc_get_meshgeom(ioncid, meshid, meshgeom, includeArrays, nbranchids, nbranchlongnames, nnodeids, nnodelongnames, nodeids, nodelongnames, network1dname, mesh1dname) result(ierr)
    integer,             intent(in   ) :: ioncid        !< The IONC data set id.
    integer,             intent(in   ) :: meshid        !< The mesh id in the specified data set.
-   type(t_ug_meshgeom), intent(inout) :: meshgeom      !< Structure in which all mesh geometry will be stored.
+   type(t_ug_meshgeom), intent(out)   :: meshgeom      !< Structure in which all mesh geometry will be stored.
    logical, optional,   intent(in   ) :: includeArrays !< (optional) Whether or not to include coordinate arrays and connectivity tables. Default: .false., i.e., dimension counts only.
    integer                            :: ierr          !< Result status, ionc_noerr if successful.
    integer                            :: networkid 

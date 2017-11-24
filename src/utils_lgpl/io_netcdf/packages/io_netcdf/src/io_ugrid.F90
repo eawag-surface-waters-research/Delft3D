@@ -118,9 +118,9 @@ enumerator::mdim_start = 1
 enumerator mdim_node                       !< Dimension ID for nodes.
 enumerator mdim_edge                       !< Dimension ID for edges.
 enumerator mdim_face                       !< Dimension ID for faces.
-enumerator mdim_1dbranches                !< Dimension ID for 1d network branches
-enumerator mdim_1dnodes                   !< Dimension ID for 1d network nodes 
-enumerator mdim_1dgeopoints               !< Dimension ID for 1d network geometry points
+enumerator mdim_1dbranches                 !< Dimension ID for 1d network branches
+enumerator mdim_1dnodes                    !< Dimension ID for 1d network nodes 
+enumerator mdim_1dgeopoints                !< Dimension ID for 1d network geometry points
 enumerator mdim_maxfacenodes               !< Dimension ID for max nr of nodes per face.
 enumerator mdim_two                        !< Dimension ID for two
 enumerator mdim_layer                      !< Dimension ID for layer centers.
@@ -1911,8 +1911,11 @@ function ug_init_mesh_topology(ncid, varid, meshids) result(ierr)
    end if
    ! Dimension 2 might already be present
    ierr = nf90_inq_dimid(ncid, 'Two', meshids%dimids(mdim_two))
+   ! Otherwise check another possible definitions
    if ( ierr /= UG_NOERR) then 
-   ierr = nf90_def_dim(ncid, 'Two', 2,  meshids%dimids(mdim_two))   
+   ierr = nf90_inquire_variable( ncid, varid, name = varname)
+   varname = 'n'//trim(varname)//'_Two'
+   ierr = nf90_inq_dimid(ncid, trim(varname), meshids%dimids(mdim_two))   
    endif
    
    !check here if this is a mapped mesh
