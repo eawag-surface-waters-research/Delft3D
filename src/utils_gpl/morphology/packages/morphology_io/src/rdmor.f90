@@ -2056,10 +2056,13 @@ subroutine rdflufflyr(lundia   ,error    ,filmor   ,lsed     ,mor_ptr ,flufflyr,
             endif
             depfac(1,:) = depfac(1,1)
         endif
+        do l = 2, lsed   ! moved here, depfac not allocated for ifluff==1
+            depfac(l,:) = depfac(1,:)
+        enddo 
     endif
-    do l = 2, lsed
-        depfac(l,:) = depfac(1,:)
-    enddo                                                                                                                                                             
+    !do l = 2, lsed
+    !    depfac(l,:) = depfac(1,:)
+    !enddo                                                                                                                                                         
 end subroutine rdflufflyr
 
 subroutine echoflufflyr(lundia    ,error    ,flufflyr)
