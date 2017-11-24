@@ -487,7 +487,7 @@
                if (aggr(isegl, ilay).gt.0) then
                   dlwq_values(isegl,ilay) = conc2(iout, aggr(isegl, ilay))
                   if ( nolay .gt. 1 ) then
-                     if ( .not. sumconc1(iout) ) then
+                     if ( .not. sumconc2(iout) ) then
                         dlwq_values_2d(isegl)   = dlwq_values_2d(isegl) +
      &                                            conc2(iout, aggr(isegl, ilay)) *
      &                                            volume(aggr(isegl, ilay))
