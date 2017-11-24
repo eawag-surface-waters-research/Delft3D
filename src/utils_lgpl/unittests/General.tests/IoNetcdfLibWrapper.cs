@@ -237,7 +237,7 @@ namespace General.tests
         /// <param name="fillvalue"></param>
         /// <returns>Result status (IONC_NOERR if successful).</returns>
         [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ionc_get_face_nodes", CallingConvention = CallingConvention.Cdecl)]
-        private static extern int ionc_get_face_nodes_dll(ref int ioncid, ref int meshid, ref IntPtr c_face_nodes_ptr, ref int nface, ref int nmaxfacenodes, ref int fillvalue);
+        private static extern int ionc_get_face_nodes_dll(ref int ioncid, ref int meshid, ref IntPtr c_face_nodes_ptr, ref int nface, ref int nmaxfacenodes, ref int fillvalue, ref int startIndex);
 
         [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ionc_write_geom_ugrid", CallingConvention = CallingConvention.Cdecl)]
         private static extern int ionc_write_geom_ugrid_dll(string filename);
@@ -732,9 +732,9 @@ namespace General.tests
             return ionc_get_edge_nodes_dll(ref ioncid, ref meshid, ref c_edge_nodes_ptr, ref nedge, ref startIndex);
         }
 
-        public int ionc_get_face_nodes(ref int ioncid, ref int meshid, ref IntPtr c_face_nodes_ptr, ref int nface, ref int nmaxfacenodes, ref int fillvalue)
+        public int ionc_get_face_nodes(ref int ioncid, ref int meshid, ref IntPtr c_face_nodes_ptr, ref int nface, ref int nmaxfacenodes, ref int fillvalue, ref int startIndex)
         {
-            return ionc_get_face_nodes_dll(ref ioncid, ref meshid, ref c_face_nodes_ptr, ref nface, ref nmaxfacenodes, ref fillvalue);
+            return ionc_get_face_nodes_dll(ref ioncid, ref meshid, ref c_face_nodes_ptr, ref nface, ref nmaxfacenodes, ref fillvalue, ref startIndex);
         }
 
         public int ionc_write_geom_ugrid(string filename)
