@@ -69,6 +69,7 @@ public nullsedtra
 public allocsedtra
 public clrsedtra
 public allocfluffy
+public CHARLEN
 
 integer, parameter         :: CHARLEN = 40
       
@@ -504,7 +505,9 @@ type sedpar_type
     !
     ! pointers
     !
-    type(tree_data), dimension(:)   , pointer :: sedblock => null()    !  Pointer to array of data block per fraction in .sed file (version 2)
+    type(tree_data)     , dimension(:), pointer :: sedblock => null()  !  Pointer to array of data block per fraction in .sed file (version 2)
+    type(t_nodefraction), dimension(:), pointer :: nodefractions       !  Pointer to array of nodal point relations
+    !
     real(fp)      , dimension(:)    , pointer :: rhosol     !  Soil density
     !
     real(fp)      , dimension(:,:,:), pointer :: logseddia             !  Characteristic sediment diameter table using log scale [%,log(m)]
