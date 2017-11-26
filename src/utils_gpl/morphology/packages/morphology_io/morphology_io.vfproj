@@ -53,7 +53,8 @@
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
-		<File RelativePath=".\src\rdmor.f90"/>
+		<File RelativePath=".\src\ini_noderel.f90"/>
+        <File RelativePath=".\src\rdmor.f90"/>
 		<File RelativePath=".\src\rdmorlyr.f90"/>
 		<File RelativePath=".\src\rdsed.f90"/>
 		<File RelativePath=".\src\rdstm.f90"/>

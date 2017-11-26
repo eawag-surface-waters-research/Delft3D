@@ -29,6 +29,7 @@ FMODULES += \
 #Sources
 libMorphologyIO_la_SOURCES = \
          depfil_stm.F90 \
+         ini_noderel.f90 \
          rdtrafrm.f90 \
          rdsed.f90 \
          rdmorlyr.f90 \
