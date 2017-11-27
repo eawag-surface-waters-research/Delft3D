@@ -7075,6 +7075,7 @@ src/utils_lgpl/io_netcdf/packages/test_data/2d_net_river.nc -text
 src/utils_lgpl/io_netcdf/packages/test_data/Custom_Ugrid.nc -text
 src/utils_lgpl/io_netcdf/packages/test_data/Custom_Ugrid_map.nc -text
 src/utils_lgpl/io_netcdf/packages/test_data/hex7_ugrid_net.nc -text
+src/utils_lgpl/io_netcdf/packages/test_data/river1_full_net.nc -text
 src/utils_lgpl/io_netcdf/packages/test_data/write1d.nc -text
 src/utils_lgpl/io_netcdf/packages/tests/UGrid.tests/Properties/AssemblyInfo.cs -text
 src/utils_lgpl/io_netcdf/packages/tests/UGrid.tests/UGrid.tests.csproj -text
