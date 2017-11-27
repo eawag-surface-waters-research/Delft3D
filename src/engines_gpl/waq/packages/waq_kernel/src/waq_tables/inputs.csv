@@ -14645,7 +14645,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "AtmDep_Sal","DELT      ",   6,"N","x",1
 "AtmDep_Ecl","fAtmDepEcl",   1,"N","x",1
 "AtmDep_Ecl","Depth     ",   2,"N","x",1
-"AtmDep_Ecl","EColi     ",   3,"Y","x",1
+"AtmDep_Ecl","EColi     ",   3,"N","x",1
 "AtmDep_Ecl","sw1AtmDEcl",   4,"Y","x",1
 "AtmDep_Ecl","sw2AtmDEcl",   5,"Y","x",1
 "AtmDep_Ecl","DELT      ",   6,"N","x",1
