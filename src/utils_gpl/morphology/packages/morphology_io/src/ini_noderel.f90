@@ -28,10 +28,13 @@ module m_ini_noderel
 !  $Id$
 !  $HeadURL$
 !!--description-----------------------------------------------------------------
+private
+public ini_noderel
+public get_noderel_idx
 
 contains
 
-   subroutine ini_noderel(nrd, sedpar, lsedtot)
+subroutine ini_noderel(nrd, sedpar, lsedtot)
 
 !
 !    Function: - Read and Initialize NodeRelation Data
@@ -252,6 +255,70 @@ contains
    endif
    
 end subroutine ini_noderel
+
+integer function get_noderel_idx(iNod, pFrac, nodeID, branInID, nodbrt)
+!
+!    Function: - Get the Nodal Point Relation for the Current Node/Branch
+!                If nothing Found return 0 (zero which means default)
+
+   use morphology_data_module, only : CHARLEN, t_nodefraction, t_noderelation
+   use messageHandling
+   
+   ! Global variables
+   integer                                :: iNod     !< Index of Actual Node
+   type(t_nodefraction)                   :: pFrac
+   character(len=Charlen)                 :: nodeID
+   character(len=Charlen)                 :: branInID
+   integer                                :: nodbrt
+
+   ! Local variables
+   integer                                :: iNodeRel
+   logical                                :: getFunctionRelation
+   type(t_noderelation),pointer           :: pNodRel
+
+   ! executable statements -------------------------------------------------------
+
+   get_noderel_idx = 0
+   getFunctionRelation = .true.
+   
+   
+   if (branInID .ne. ' ' .and. branInID .ne. '#####' .and. nodbrt == 3) then
+      
+      ! Only One Incoming Branch at a Real Bifurcation
+      do iNodeRel = 1, pFrac%nNodeRelations
+      
+         pNodRel => pFrac%noderelations(iNodeRel)
+         
+         if (pNodRel%Node == nodeID .and. pNodRel%BranchIn == branInID) then
+         
+            ! Found/Bingo
+            get_noderel_idx = iNodeRel
+            getFunctionRelation = .false.
+            exit
+         endif
+         
+      enddo
+      
+   endif
+   
+   if (getFunctionRelation) then
+   
+      do iNodeRel = 1, pFrac%nNodeRelations
+      
+         pNodRel => pFrac%noderelations(iNodeRel)
+         
+         if (pNodRel%Node == nodeID .and. pNodRel%BranchIn == ' ') then
+         
+            ! Found/Bingo
+            get_noderel_idx = iNodeRel
+
+         endif
+         
+      enddo
+
+   endif
+   
+end function get_noderel_idx
 
 subroutine GetAndCheckFileNames(nrd, sedpar, lsedtot)
 
