@@ -1893,7 +1893,7 @@ itemid,itemse,itemex,itemde,itemun,itemnm,itemag,itemda,itemwk,itemgr
 "SWSatCO2  ","x"," ",    1.00000    ,"(-)                 ","switch for CO2 saturation formulation (1, 2)      ","volume    ","volume    "," ","                              "
 "PCO2      ","x"," ",   0.316000E-03,"(atm)               ","partial atmospheric CO2 pressure                  ","volume    ","volume    "," ","                              "
 "SaturCO2  ","x"," ",   -999.000    ,"(gCO2/m3)           ","saturation concentration                          ","volume    ","volume    "," ","                              "
-"SWRearCO2 ","x"," ",    14.0000    ,"(-)                 ","switch for CO2 reaeration formulation (11,14)     ","volume    ","volume    "," ","                              "
+"SWRearCO2 ","x"," ",    14.0000    ,"(-)                 ","switch for CO2 reaeration formulation (11,13)     ","volume    ","volume    "," ","                              "
 "KLRearCO2 ","x"," ",    1.00000    ,"(m/d)               ","CO2 reaeration transfer coefficient               ","volume    ","volume    "," ","                              "
 "TCRearCO2 ","x"," ",    1.01600    ,"(-)                 ","temperature coefficient for rearation CO2         ","volume    ","volume    "," ","                              "
 "fcover    ","x"," ",    0.00000    ,"(-)                 ","fraction of water surface covered <0-1>           ","volume    ","volume    "," ","                              "
