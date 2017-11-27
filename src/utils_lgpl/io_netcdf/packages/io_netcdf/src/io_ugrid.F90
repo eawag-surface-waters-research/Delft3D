@@ -3513,7 +3513,7 @@ function ug_def_mesh_contact(ncid, contactids, linkmeshname, ncontacts, meshidfr
    character(len=*), intent(in)          :: linkmeshname
    character(len=len_trim(linkmeshname)) :: prefix
    type(t_ug_contacts), intent(inout)    :: contactids
-   character(len=nf90_max_name)          :: buffer, locationType1, locationType2, mesh1, mesh2     
+   character(len=nf90_max_name)          :: locationType1, locationType2, mesh1, mesh2     
    integer                               :: ierr 
        
    ierr = UG_SOMEERR
@@ -3550,9 +3550,8 @@ function ug_def_mesh_contact(ncid, contactids, linkmeshname, ncontacts, meshidfr
    ierr = ug_get_mesh_name(ncid, meshidfrom, meshname = mesh1)
    ierr = ug_get_mesh_name(ncid, meshidto, meshname = mesh2)
    
-   write(buffer, '(a,a,a,a)') 'contacts_', trim(mesh1), '_', trim(mesh2) !should have the name of from-to mesh 
    !define the variable contacts and its attributes
-   ierr = nf90_def_var(ncid, prefix, nf90_int, (/ contactids%dimids(cdim_two), contactids%dimids(cdim_ncontacts)/), contactids%varids(cid_contacttopo))
+   ierr = nf90_def_var(ncid, prefix, nf90_int, (/ contactids%dimids(cdim_two), contactids%dimids(cdim_ncontacts) /), contactids%varids(cid_contacttopo))
    ierr = nf90_put_att(ncid, contactids%varids(cid_contacttopo), 'cf_role'              , 'mesh_topology_contact')
    ierr = nf90_put_att(ncid, contactids%varids(cid_contacttopo), 'contact'              , trim(mesh1)//': '//trim(locationType1)//' '//trim(mesh2)//': '//trim(locationType2)) 
    ierr = nf90_put_att(ncid, contactids%varids(cid_contacttopo), 'contact_type'         , prefix//'_contact_type') 
@@ -3612,12 +3611,10 @@ function ug_put_mesh_contact(ncid, contactids, mesh1indexes, mesh2indexes, conta
    ierr = UG_SOMEERR
    ierr = nf90_enddef(ncid) !Put the NetCDF in write mode
    
-   allocate(contacts(2, size(mesh1indexes)))
+   allocate(contacts(2,size(mesh1indexes)))
    
-   do i = 1, size(mesh1indexes)
-      contacts(1,i) = mesh1indexes(i)
-      contacts(2,i) = mesh2indexes(i)
-   end do
+   contacts(1,:) = mesh1indexes(:)
+   contacts(2,:) = mesh2indexes(:)
 
    !we have not defined the start_index, so when we put the variable it must be zero based   
    if (present(startIndex) .and. startIndex.ne.0) then
@@ -3626,6 +3623,7 @@ function ug_put_mesh_contact(ncid, contactids, mesh1indexes, mesh2indexes, conta
    endif
 
    ierr = nf90_put_var(ncid, contactids%varids(cid_contacttopo), contacts)
+
    if (present(contactsids)) then 
       ierr = nf90_put_var(ncid, contactids%varids(cid_contactids), contactsids)
    endif
