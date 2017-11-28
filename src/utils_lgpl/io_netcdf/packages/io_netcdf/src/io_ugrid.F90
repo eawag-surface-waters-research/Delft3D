@@ -3581,7 +3581,7 @@ function ug_get_contacts_count(ncid, contactids, ncontacts) result(ierr)
    integer, intent(in)               :: ncid
    type(t_ug_contacts), intent(in)   :: contactids
    integer, intent(out)              :: ncontacts
-   integer                           :: ierr, xtype, ndims, nAtts, dimvalue
+   integer                           :: ierr, xtype, ndims, nAtts, dimvalue, ncontactsDim1, ncontactsDim2
    character(len=nf90_max_name)      :: name
    integer, dimension(nf90_max_dims) :: dimids
    
@@ -3590,10 +3590,17 @@ function ug_get_contacts_count(ncid, contactids, ncontacts) result(ierr)
        Call SetMessage(Level_Fatal, 'could not inquire the number of contacts')
    endif
    
-   ierr = nf90_inquire_dimension(ncid, dimids(1), len=ncontacts)
+   ierr = nf90_inquire_dimension(ncid, dimids(1), len=ncontactsDim1)
    if(ierr /= UG_NOERR) then 
-       Call SetMessage(Level_Fatal, 'could not read the number of contacts')
+       Call SetMessage(Level_Fatal, 'could not read the first dimension of the link mesh')
    endif
+   
+   ierr = nf90_inquire_dimension(ncid, dimids(2), len=ncontactsDim2)
+   if(ierr /= UG_NOERR) then 
+       Call SetMessage(Level_Fatal, 'could not read the second dimension of the link mesh')
+   endif
+   
+   ncontacts = max(ncontactsDim1,ncontactsDim2)
    
 end function ug_get_contacts_count
 
@@ -3645,7 +3652,7 @@ function ug_get_mesh_contact(ncid, contactids, mesh1indexes, mesh2indexes, conta
    integer, allocatable              :: contacts(:,:)
    integer                           :: ierr, i, varStartIndex
 
-   allocate(contacts(size(mesh1indexes),2))
+   allocate(contacts(2,size(mesh1indexes)))
    
    ierr = nf90_get_var(ncid, contactids%varids(cid_contacttopo), contacts) 
    ierr = nf90_get_var(ncid, contactids%varids(cid_contactids), contactsids)  
@@ -3655,16 +3662,16 @@ function ug_get_mesh_contact(ncid, contactids, mesh1indexes, mesh2indexes, conta
    !we check for the start_index, we do not know if the variable was written as 0 based
    ierr = nf90_get_att(ncid, contactids%varids(cid_contacttopo),'start_index', varStartIndex)  
    if (ierr .eq. UG_NOERR) then
-        ierr = ug_convert_start_index(contacts(:,1), varStartIndex, startIndex)
-        ierr = ug_convert_start_index(contacts(:,2), varStartIndex, startIndex)
+        ierr = ug_convert_start_index(contacts(1,:), varStartIndex, startIndex)
+        ierr = ug_convert_start_index(contacts(2,:), varStartIndex, startIndex)
    else
-        ierr = ug_convert_start_index(contacts(:,1), 0, startIndex)
-        ierr = ug_convert_start_index(contacts(:,2), 0, startIndex)
+        ierr = ug_convert_start_index(contacts(1,:), 0, startIndex)
+        ierr = ug_convert_start_index(contacts(2,:), 0, startIndex)
    endif
    
    do i = 1, size(mesh1indexes)
-      mesh1indexes(i) = contacts(i,1) 
-      mesh2indexes(i) = contacts(i,2) 
+      mesh1indexes(i) = contacts(1,i) 
+      mesh2indexes(i) = contacts(2,i) 
    end do
    
 end function ug_get_mesh_contact
