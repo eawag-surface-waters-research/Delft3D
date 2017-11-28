@@ -290,10 +290,11 @@ module m_ec_provider
                      case ("ERA_Interim_Dataset")
                         success = ecProviderCreateNetcdfItems(instancePtr, fileReaderPtr, quantityname)
                      case ("rainfall",                                              &
+                           "rainfall_rate",                                         &
                            "airpressure_windx_windy",                               &
                            "windxy","windx","windy",                                &
                            "nudge_salinity_temperature",                            &
-                           "airpressure","atmosphericpressure",                                   &
+                           "airpressure","atmosphericpressure",                     &
                            "humidity_airtemperature_cloudiness",                    &
                            "humidity_airtemperature_cloudiness_solarradiation",     &
                            "dewpoint_airtemperature_cloudiness",                    &
@@ -315,6 +316,8 @@ module m_ec_provider
                call setECMessage("ERROR: ec_provider::ecProviderCreateItems: Unknown file type.")
          end select
          success = .true. ! TODO: AvD: why is success always true here at the end, the above success states now get lost...
+                          !       RL: ALL Ec routines should be refactored such that success=False on the first line, success=True on the last
+                          !           Intermediate lines cannot modify success, only return to the call site. 
       end function ecProviderCreateItems
       
       ! =======================================================================
@@ -2382,6 +2385,9 @@ module m_ec_provider
          case ('rainfall') 
             ncvarnames(1) = 'rainfall' 
             ncstdnames(1) = 'precipitation_amount' 
+         case ('rainfall_rate') 
+            ncvarnames(1) = 'rainfall' 
+            ncstdnames(1) = 'rainfall_rate' 
          case ('windx') 
             ncvarnames(1) = 'u10'                            ! 10 meter eastward wind
             ncstdnames(1) = 'eastward_wind'

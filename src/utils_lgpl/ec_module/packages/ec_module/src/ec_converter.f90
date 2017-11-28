@@ -2367,7 +2367,6 @@ module m_ec_converter
                                  
                                  ! interpolating between times and between vertical layers
                                  targetValues(k) = targetValues(k) + a0*(wb*val(1,1) + wt*val(2,1)) + a1*(wb*val(1,2) + wt*val(2,2))
-                                 
                               end if
                            end do
                            
