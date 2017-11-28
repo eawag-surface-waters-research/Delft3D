@@ -6725,6 +6725,7 @@ src/utils_lgpl/deltares_common/packages/deltares_common/src/message_module.f90 -
 src/utils_lgpl/deltares_common/packages/deltares_common/src/multi_file_io.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/nan_check_module.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/newunit.f90 -text
+src/utils_lgpl/deltares_common/packages/deltares_common/src/physicalconsts.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/precision.F90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/precision_basics.F90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/precision_sp.F90 -text
@@ -6737,6 +6738,7 @@ src/utils_lgpl/deltares_common/packages/deltares_common/src/rd_token/rdtok1.f -t
 src/utils_lgpl/deltares_common/packages/deltares_common/src/scannr.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/skipstarlines.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/small.f90 -text
+src/utils_lgpl/deltares_common/packages/deltares_common/src/sorting_algorithms.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/string_module.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/stringsequal.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/system_utils.F90 -text
@@ -6850,8 +6852,10 @@ src/utils_lgpl/ec_module/Makefile.am -text
 src/utils_lgpl/ec_module/packages/Makefile.am -text
 src/utils_lgpl/ec_module/packages/ec_module/Makefile.am -text
 src/utils_lgpl/ec_module/packages/ec_module/ec_module.vfproj -text
+src/utils_lgpl/ec_module/packages/ec_module/ec_module_dll.vfproj -text
 src/utils_lgpl/ec_module/packages/ec_module/include/version_number.ini -text
 src/utils_lgpl/ec_module/packages/ec_module/src/Makefile.am -text
+src/utils_lgpl/ec_module/packages/ec_module/src/ec_basic_interpolation.f90 -text
 src/utils_lgpl/ec_module/packages/ec_module/src/ec_bccollect.f90 -text
 src/utils_lgpl/ec_module/packages/ec_module/src/ec_bcreader.f90 -text
 src/utils_lgpl/ec_module/packages/ec_module/src/ec_connection.f90 -text
@@ -6864,6 +6868,7 @@ src/utils_lgpl/ec_module/packages/ec_module/src/ec_instance.f90 -text
 src/utils_lgpl/ec_module/packages/ec_module/src/ec_item.f90 -text
 src/utils_lgpl/ec_module/packages/ec_module/src/ec_message.f90 -text
 src/utils_lgpl/ec_module/packages/ec_module/src/ec_module.f90 -text
+src/utils_lgpl/ec_module/packages/ec_module/src/ec_module_api.f90 -text
 src/utils_lgpl/ec_module/packages/ec_module/src/ec_module_version.F90.svn -text
 src/utils_lgpl/ec_module/packages/ec_module/src/ec_netcdf_timeseries.f90 -text
 src/utils_lgpl/ec_module/packages/ec_module/src/ec_parameters.f90 -text
@@ -6896,6 +6901,9 @@ src/utils_lgpl/ec_module/packages/ec_module/src/meteo/numbersonline_m.f90 -text
 src/utils_lgpl/ec_module/packages/ec_module/src/meteo/openexistingfile_meteo.f90 -text
 src/utils_lgpl/ec_module/packages/ec_module/src/meteo/readmeteoheader.f90 -text
 src/utils_lgpl/ec_module/packages/ec_module/src/transform_shiftedpole.f90 -text
+src/utils_lgpl/ec_module/packages/tests/ec_module_tests/ECModule.tests.csproj -text
+src/utils_lgpl/ec_module/packages/tests/ec_module_tests/Properties/AssemblyInfo.cs -text
+src/utils_lgpl/ec_module/packages/tests/ec_module_tests/ec_module_tests.cs -text
 src/utils_lgpl/esmfsm/Makefile.am -text
 src/utils_lgpl/esmfsm/doc/esm.html -text
 src/utils_lgpl/esmfsm/doc/fsm.html -text
@@ -7445,6 +7453,7 @@ src/utils_lgpl/ods/tests/testods/testods.c -text
 src/utils_lgpl/ods/tests/testods/testods.vcproj -text
 src/utils_lgpl/ods/tests/testods/trih-scs.dat -text
 src/utils_lgpl/ods/tests/testods/trih-scs.def -text
+src/utils_lgpl/unittests/General.tests/Ec_ModuleLibWrapper.cs -text
 src/utils_lgpl/unittests/General.tests/General.tests.csproj -text
 src/utils_lgpl/unittests/General.tests/GridGeomLibWrapper.cs -text
 src/utils_lgpl/unittests/General.tests/IoNetcdfLibWrapper.cs -text

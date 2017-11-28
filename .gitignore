@@ -42,6 +42,16 @@ src/engines_gpl/waq/packages/delwaq2_openda_lib/obj
 src/third_party_open/openda/tests/bin
 src/third_party_open/openda/tests/test_dll_noise/Release
 src/tools_lgpl/matlab/quickplot/progsrc/tekal_map.m
+src/utils_lgpl/ec_module/packages/tests/ec_module_tests/*.aps
+src/utils_lgpl/ec_module/packages/tests/ec_module_tests/*.eto
+src/utils_lgpl/ec_module/packages/tests/ec_module_tests/*.user
+src/utils_lgpl/ec_module/packages/tests/ec_module_tests/ClientBin
+src/utils_lgpl/ec_module/packages/tests/ec_module_tests/GeneratedArtifacts
+src/utils_lgpl/ec_module/packages/tests/ec_module_tests/[Bb]in
+src/utils_lgpl/ec_module/packages/tests/ec_module_tests/[Dd]ebug
+src/utils_lgpl/ec_module/packages/tests/ec_module_tests/[Rr]elease
+src/utils_lgpl/ec_module/packages/tests/ec_module_tests/_Pvt_Extensions
+src/utils_lgpl/ec_module/packages/tests/ec_module_tests/obj
 src/utils_lgpl/gridgeom/packages/gridgeom/*.aps
 src/utils_lgpl/gridgeom/packages/gridgeom/*.eto
 src/utils_lgpl/gridgeom/packages/gridgeom/*.user

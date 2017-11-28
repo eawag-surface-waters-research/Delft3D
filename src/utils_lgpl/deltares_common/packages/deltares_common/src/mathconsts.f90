@@ -71,16 +71,16 @@ module mathconsts
    !
    ! high precision constants
    !
-   real(hp), save :: ee_hp      = exp(1.0_hp)                      !< ee = 2.71828182845904...
-   real(hp), save :: pi_hp      = 4.0_hp*atan(1.0_hp)              !< pi = 3.14159265358979...
-   real(hp), save :: twopi_hp   = 8.0_hp*atan(1.0_hp)              !< 2pi
-   real(hp), save :: sqrt2_hp   = sqrt(2.0_hp)                     !< sqrt(2)
-   real(hp), save :: degrad_hp  = 4.0_hp*atan(1.0_hp)/180.0_hp     !< conversion factor from degrees to radians (pi/180)
-   real(hp), save :: raddeg_hp  = 180.0_hp/(4.0_hp*atan(1.0_hp))   !< conversion factor from radians to degrees (180/pi)
-   real(hp), save :: daysec_hp  = 24.0_hp*60.0_hp*60.0_hp          !< conversion factor from earth day to seconds
-   real(hp), save :: yearsec_hp = 365.0_hp*24.0_hp*60.0_hp*60.0_hp !< conversion factor from earth year to seconds (non-leap)
-   real(hp), save :: eps_hp     = epsilon(1.0_hp)                  !< epsilon for hp
-   
+   real(hp), save :: ee_hp        = exp(1.0_hp)                      !< ee = 2.71828182845904...
+   real(hp), save :: pi_hp        = 4.0_hp*atan(1.0_hp)              !< pi = 3.14159265358979...
+   real(hp), save :: twopi_hp     = 8.0_hp*atan(1.0_hp)              !< 2pi
+   real(hp), save :: sqrt2_hp     = sqrt(2.0_hp)                     !< sqrt(2)
+   real(hp), save :: degrad_hp    = 4.0_hp*atan(1.0_hp)/180.0_hp     !< conversion factor from degrees to radians (pi/180)
+   real(hp), save :: raddeg_hp    = 180.0_hp/(4.0_hp*atan(1.0_hp))   !< conversion factor from radians to degrees (180/pi)
+   real(hp), save :: daysec_hp    = 24.0_hp*60.0_hp*60.0_hp          !< conversion factor from earth day to seconds
+   real(hp), save :: yearsec_hp   = 365.0_hp*24.0_hp*60.0_hp*60.0_hp !< conversion factor from earth year to seconds (non-leap)
+   real(hp), save :: eps_hp       = epsilon(1.0_hp)                  !< epsilon for hp
+      
    contains
       
       !> Obsolete initialization method.
