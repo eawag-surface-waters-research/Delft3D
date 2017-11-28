@@ -65,7 +65,8 @@ libECModule_la_SOURCES = \
          ec_instance.f90 \
          ec_provider.F90 \
          ec_bccollect.f90 \
-         ec_module.f90
+         ec_module.f90 \
+         ec_basic_interpolation.f90
 
 
 # Version number generation (only when in SVN source dir, not for tar.gz dist)
