@@ -18,7 +18,8 @@ noinst_LTLIBRARIES = libDeltaresCommon.la
 
 #-------------------------------------------------------------------------------
 #Includes
-
+FMODULES += \
+	-I$(top_builddir)/third_party_open/kdtree2/src-f90
 
 #-------------------------------------------------------------------------------
 #Sources
@@ -27,14 +28,16 @@ libDeltaresCommon_la_SOURCES = \
 	precision_basics.F90 \
 	precision.F90 \
 	precision_sp.F90 \
+	mathconsts.f90 \
+	physicalconsts.f90 \
+	MessageHandling.f90 \
+	malloc.f90 \
 	geometry_module.f90 \
 	grid_dimens_module.f90 \
 	message_module.f90 \
-	MessageHandling.f90 \
 	string_module.f90 \
 	stringsequal.f90 \
 	system_utils.F90 \
-	mathconsts.f90 \
 	tree_struct.f90 \
 	array_module.f90 \
 	buffer.f90 \
@@ -47,8 +50,7 @@ libDeltaresCommon_la_SOURCES = \
 	handles.f90 \
 	tables.f90 \
 	table_handles.f90 \
-	malloc.f90 \
-    m_tables.f90 \
+	m_tables.f90 \
 	nan_check_module.f90 \
 	newunit.f90 \
 	properties.f90 \
@@ -60,7 +62,8 @@ libDeltaresCommon_la_SOURCES = \
 	multi_file_io.f90 \
 	hash_search.f90 \
 	wavenr.f90 \
-   sorting_algorithms.f90
+	sorting_algorithms.f90 \
+	kdtree2Factory.f90
 
 # For source distributions: the tar.gz will contain the correct version numbers in the generated *version.F90
 # So, just before packaging the .tar.gz dist, disable version number REgeneration parts of this Makefile.am.
