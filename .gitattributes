@@ -3558,7 +3558,6 @@ src/third_party_open/kdtree2/m4/ax_check_compile_flag.m4 -text
 src/third_party_open/kdtree2/src-f90/Makefile.am -text
 src/third_party_open/kdtree2/src-f90/kdtree2.f90 -text
 src/third_party_open/kdtree2/src-f90/kdtree2.vfproj -text
-src/third_party_open/kdtree2/src-f90/kdtree2Factory.f90 -text
 src/third_party_open/kdtree2/src-f90/kdtree2_test.f90 -text
 src/third_party_open/lexyacc/bin/win32/byacc.exe -text
 src/third_party_open/lexyacc/bin/win32/cygwin1.dll -text

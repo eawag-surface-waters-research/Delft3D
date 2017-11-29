@@ -44,6 +44,5 @@
 		<Filter Name="Header Files" Filter="fi;fd"/>
 		<Filter Name="Resource Files" Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"/>
 		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
-		<File RelativePath=".\kdtree2.f90"/>
-		<File RelativePath=".\kdtree2Factory.f90"/></Filter></Files>
+		<File RelativePath=".\kdtree2.f90"/></Filter></Files>
 	<Globals/></VisualStudioProject>
