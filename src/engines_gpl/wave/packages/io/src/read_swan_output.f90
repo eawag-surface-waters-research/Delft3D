@@ -130,7 +130,6 @@ subroutine hisout(hs        ,dir       ,dirc      ,dirs      ,period    , &
     integer           :: k
     integer           :: lunhis
     integer           :: npnt
-    integer, external :: new_lun
     integer           :: outfile          ! The SWAN output is written to n_outfiles files
     integer           :: n_outfiles       ! Can be 2 or 3, depending on whether additional output is requested
     integer           :: neg_dissip_found ! = 1,2,3,4 when a negative dissip, dissurf, diswcap or disbot is found in the swanout file, repectively
@@ -196,8 +195,7 @@ subroutine hisout(hs        ,dir       ,dirc      ,dirs      ,period    , &
        if (open) then
           inquire (file = filnam, number = lunhis)
        else
-          lunhis = new_lun()
-          open (lunhis, file=filnam, iostat=fstat, status='old')
+          open (newunit=lunhis, file=filnam, iostat=fstat, status='old')
        endif
        if (fstat /= 0) then
           write (*, '(2a)') '*** ERROR: Unable to open file ',trim(filnam)

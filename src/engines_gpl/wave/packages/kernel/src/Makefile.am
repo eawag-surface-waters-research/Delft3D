@@ -29,7 +29,6 @@ libkernel_la_SOURCES = \
          grids_and_gridmaps.f90 \
          grmap.f90 \
          map_swan_output.f90 \
-         new_lun.f90 \
          perpar.f90 \
          rm_del.f90 \
          run_swan.f90 \

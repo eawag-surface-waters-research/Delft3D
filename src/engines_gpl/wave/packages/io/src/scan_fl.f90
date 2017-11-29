@@ -47,7 +47,6 @@ subroutine scan_fl(checkVersionNumber, versionNumberOK)
     integer           :: k
     integer           :: verLen
     integer           :: uh
-    integer, external :: new_lun
     character(20)     :: versionNumber
     character(*)      :: versionNumberOK
     character(80)     :: line
@@ -55,8 +54,7 @@ subroutine scan_fl(checkVersionNumber, versionNumberOK)
 !! executable statements -------------------------------------------------------
 !
     verLen = len_trim(versionNumberOK)
-    uh = new_lun()
-    open (uh, file = 'PRINT', form = 'FORMATTED')
+    open (newunit = uh, file = 'PRINT', form = 'FORMATTED')
 100 continue
        read (uh, '(A)', end = 200) line
        call small(line, 80)

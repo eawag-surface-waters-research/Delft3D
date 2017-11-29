@@ -56,7 +56,6 @@ subroutine grids_and_gridmaps (n_swan_grids, n_flow_grids, sr, mode)
    integer                           :: j
    integer                           :: i_swan
    integer                           :: lun              ! file unit
-   integer, external                 :: new_lun
    integer                           :: partitionlocation
    logical                           :: exists
    logical                           :: netcdf_files     ! .true.: Flow data is read from  NetCDF file(s)
@@ -95,11 +94,10 @@ subroutine grids_and_gridmaps (n_swan_grids, n_flow_grids, sr, mode)
 
 ! Find out number of SWAN grids
 
-   lun = new_lun()
    i_swan=1
    inquire(file='swangrids', exist=exists)
    if (exists) then
-      open(lun, file='swangrids')
+      open(newunit=lun, file='swangrids')
       do
          read(lun,'(a)')swangrid(i_swan)
          if (trim(swangrid(i_swan)).eq.'end') exit

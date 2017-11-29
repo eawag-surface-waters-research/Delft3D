@@ -71,7 +71,6 @@ subroutine write_swan_file (var1  , var2       , mmax   , nmax, covered, &
     integer                                :: j1
     integer                                :: ierr
     integer                                :: lunfil
-    integer, external                      :: new_lun
     integer                                :: sweep
     integer                                :: sweepEnd
     integer                                :: sweepStart
@@ -231,8 +230,7 @@ subroutine write_swan_file (var1  , var2       , mmax   , nmax, covered, &
     !
     ! write var1 and var2 to file for SWAN
     !
-    lunfil = new_lun()
-    open (lunfil, file = filnam, status = 'unknown')
+    open (newunit = lunfil, file = filnam, status = 'unknown')
     !
     ! Up to now, SWAN data files are produced for writing
     ! var1 and var2 (current, wind) or var1+var2 (bottom)

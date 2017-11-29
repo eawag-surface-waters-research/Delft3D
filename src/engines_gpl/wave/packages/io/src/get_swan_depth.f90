@@ -60,13 +60,11 @@ subroutine read_bot(dpb       ,mb        ,nb        ,botfil    ,fac  )
     integer           :: i
     integer           :: j
     integer           :: lunbot
-    integer, external :: new_lun
     real              :: dummy
 !
 !! executable statements -------------------------------------------------------
 !
-    lunbot = new_lun()
-    open (lunbot, file = botfil, status = 'unknown')
+    open (newunit = lunbot, file = botfil, status = 'unknown')
     do j = 1, nb
        read (lunbot, *, end = 999) (dpb(i, j), i = 1, mb), dummy
     enddo

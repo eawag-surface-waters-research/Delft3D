@@ -463,7 +463,6 @@ subroutine read_swan (filnam, sr, wavedata)
    integer            :: iuntim 
    integer            :: istat
    integer            :: it01
-   integer, external  :: new_lun
    real               :: tscale
    logical            :: ex
    logical            :: keywbased
@@ -524,8 +523,7 @@ subroutine read_swan (filnam, sr, wavedata)
          !
          inquire (file = 'waves_alone', exist = ex)
          if (ex) then
-            iuntim = new_lun()
-            open (iuntim, file = 'waves_alone', status = 'old', iostat = istat)
+            open (newunit = iuntim, file = 'waves_alone', status = 'old', iostat = istat)
             if (istat /= 0) goto 999
             !
             read (iuntim, "(A)", iostat = istat) line
@@ -609,7 +607,6 @@ subroutine scan_mdw(sr)
     integer                     :: swwnd
     integer                     :: turn
     integer                     :: windtype
-    integer, external           :: new_lun
     integer, parameter          :: NWIND       = 7
     integer, parameter          :: NNEST       = 8
     integer, parameter          :: NTTIDE      = 14
@@ -625,8 +622,7 @@ subroutine scan_mdw(sr)
 
     num  = 0
     irec = 0
-    iuni = new_lun()
-    open (iuni, file = sr%filnam, iostat = ios)
+    open (newunit = iuni, file = sr%filnam, iostat = ios)
     if (ios /= 0) then   
         write (*,'(a,a,a)') '*** ERROR: While opening file ''',trim(sr%filnam),''','
         write (*,'(a,i5,a,a,a)')  '           Error on Record ',irec, ' in file ''',trim(sr%filnam),'''.'
@@ -2911,7 +2907,6 @@ subroutine read_swan_mdw(casl      ,wavedata  , &
     integer           :: triads
     integer           :: windgrowth
     integer           :: windtype
-    integer, external :: new_lun
     integer, external :: skcomc
     logical           :: exists
     character(7)      :: vers
@@ -2926,9 +2921,8 @@ subroutine read_swan_mdw(casl      ,wavedata  , &
     error = 0
     rccnt = 0
     vers  = ' '
-    iuni  = new_lun()
     message = filnam
-    open (iuni, file = filnam, status = 'old', err = 1001)
+    open (newunit = iuni, file = filnam, status = 'old', err = 1001)
     rewind (iuni, err = 1002)
     !
     !  General information
@@ -3618,8 +3612,7 @@ subroutine read_swan_mdw(casl      ,wavedata  , &
     !
     inquire (file = 'simulation_mode', exist = exists)
     if (exists) then
-       lunsm = new_lun()
-       open (lunsm, file = 'simulation_mode')
+       open (newunit = lunsm, file = 'simulation_mode')
        !
        ! modsim==2:    quasi-stationary run; time-varying input
        ! modsim==3:    non-stationary run with restart
@@ -3891,7 +3884,6 @@ subroutine write_swan_inp (wavedata, calccount, &
     integer                     :: sect
     integer                     :: shape
     integer                     :: loc    
-    integer, external           :: new_lun
     logical                     :: exists
     logical                     :: frame
     real                        :: alpb
@@ -3987,8 +3979,7 @@ subroutine write_swan_inp (wavedata, calccount, &
        write(*,'(5a)') '*** MESSAGE: ''',trim(casl),''' is truncated to ''',trim(casl_short),''' in SWAN input file'
        lc = len_trim(casl_short)
     endif
-    luninp = new_lun()
-    open (luninp, file = 'swan.inp')
+    open (newunit = luninp, file = 'swan.inp')
     line       = ' '
     line(1:72) =                                           &
      & '$***************************** HEADING ************&

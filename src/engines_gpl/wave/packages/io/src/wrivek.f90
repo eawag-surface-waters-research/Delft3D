@@ -52,12 +52,10 @@ subroutine wrivec(nammap, u, v, xb, yb, m, n, np)
     integer           :: i
     integer           :: j
     integer           :: lun
-    integer, external :: new_lun
 !
 !! executable statements -------------------------------------------------------
 !
-    lun=new_lun()
-    open(lun,file=nammap)
+    open(newunit=lun,file=nammap)
     write(lun,'(a4)') 'VECT'
     write(lun,*)np,4,n,m
     do i=1,m

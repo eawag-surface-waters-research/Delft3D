@@ -301,13 +301,11 @@ subroutine readgriddims(filnam, mmax, nmax)
 ! Local variables
 !
     integer           :: irgf
-    integer, external :: new_lun
     character(256)    :: rec
 !
 !! executable statements -------------------------------------------------------
 !
-    irgf   = new_lun()
-    open (irgf, file = filnam, form = 'formatted', status = 'old')
+    open (newunit=irgf, file = filnam, form = 'formatted', status = 'old')
     read (irgf, '(a)', end = 7777, err = 8888) rec
 10  continue
        read(irgf,'(a)',end = 7777,err=8888) rec
@@ -343,13 +341,11 @@ subroutine replacecoordinates(filnam, mmax, nmax, xb, yb)
     integer           :: i
     integer           :: irgf
     integer           :: j
-    integer, external :: new_lun
     character(256)    :: rec
 !
 !! executable statements -------------------------------------------------------
 !
-    irgf   = new_lun()
-    open (irgf, file = filnam, form = 'formatted', status = 'old')
+    open (newunit=irgf, file = filnam, form = 'formatted', status = 'old')
     do j=1,nmax
        do i=1,mmax
           read(irgf,*) xb(i,j), yb(i,j)
@@ -390,7 +386,6 @@ subroutine read_grd(filnam    ,xb     ,yb   ,codb ,covered, mmax  ,nmax ,sferic 
     integer                                :: k
     integer                                :: ksimax
     integer                                :: npareg
-    integer, external                      :: new_lun
     integer                                :: pos
     logical                                :: kw_found
     character(10)                          :: dum
@@ -402,8 +397,7 @@ subroutine read_grd(filnam    ,xb     ,yb   ,codb ,covered, mmax  ,nmax ,sferic 
     !
     xymiss = 0.0
     sferic = .false.
-    irgf   = new_lun()
-    open (irgf, file = filnam, form = 'formatted', status = 'old')
+    open (newunit=irgf, file = filnam, form = 'formatted', status = 'old')
     !
     ! Copied from file rdrgf
     !
@@ -647,7 +641,6 @@ subroutine read_netcdf_grd(i_grid, filename, xcc, ycc, codb, covered, mmax, nmax
     integer                                :: nnodes
     integer                                :: npareg
     integer, external                      :: nc_def_var
-    integer, external                      :: new_lun
     integer                                :: numedge
     integer                                :: pos
     integer                                :: elt
@@ -1396,7 +1389,6 @@ subroutine readregulargrid(filnam, sferic_exp, xorigin, yorigin, alpha, &
     integer                        :: irgf
     integer                        :: j
     integer                        :: k
-    integer, external              :: new_lun
     integer                        :: pos
     real                           :: dxx
     real                           :: dxy
@@ -1418,8 +1410,7 @@ subroutine readregulargrid(filnam, sferic_exp, xorigin, yorigin, alpha, &
 !! executable statements -------------------------------------------------------
 !
     sferic_read = .false.
-    irgf   = new_lun()
-    open (irgf, file = filnam, form = 'formatted', status = 'old')
+    open (newunit=irgf, file = filnam, form = 'formatted', status = 'old')
     !
     ! Copied from file rdrgf
     !
@@ -1561,14 +1552,12 @@ subroutine write_swan_grid (x,y,mmax,nmax,inest,fname)
    !
    integer                        :: m
    integer                        :: n
-   integer, external              :: new_lun
    integer                        :: ugrd
    !
    fname       = ' '
    fname(1:13) = 'TMP_grid2swan'
-   ugrd        = new_lun()
    write (fname(14:15),'(I2.2)') inest
-   open  ( unit = ugrd, file = fname(1:15), form ='formatted')
+   open  (newunit = ugrd, file = fname(1:15), form ='formatted')
    write (ugrd,'(A)') 'x-coordinates'
    do n = 1,nmax
       write (ugrd,'(6(E25.17,1X))') (x(m,n),m=1,mmax)

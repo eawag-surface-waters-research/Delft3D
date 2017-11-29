@@ -54,7 +54,6 @@ subroutine del_temp_files(n_swan_grids)
     integer           :: istat
     integer           :: itide
     integer           :: fillun
-    integer, external :: new_lun
     integer           :: numtempgrid
     logical           :: ex
     character(256)    :: filnam
@@ -73,8 +72,7 @@ subroutine del_temp_files(n_swan_grids)
        filnam = swan_grids(igrid)%tmp_name
        inquire (file = trim(filnam), exist = ex, iostat = istat)
        if (istat==0 .and. ex) then
-          fillun = new_lun()
-          open (fillun, file=trim(filnam), status='unknown')
+          open (newunit=fillun, file=trim(filnam), status='unknown')
           close(fillun, status='delete')
        endif
        !
@@ -86,8 +84,7 @@ subroutine del_temp_files(n_swan_grids)
           write (filnam,'(a,i3.3)') trim(tmpfiles(i)), igrid
           inquire (file = trim(filnam), exist = ex, iostat = istat)
           if (istat==0 .and. ex) then
-             fillun = new_lun()
-             open (fillun, file=trim(filnam), status='unknown')
+             open (newunit=fillun, file=trim(filnam), status='unknown')
              close(fillun, status='delete')
           endif
        enddo
@@ -104,8 +101,7 @@ subroutine del_temp_files(n_swan_grids)
           write (filnam,'(a,i0,2a)') 'hot_', igrid, '_', trim(swan_run%writehottime)
           inquire (file = trim(filnam), exist = ex, iostat = istat)
           if (istat==0 .and. ex) then
-             fillun = new_lun()
-             open (fillun, file = trim(filnam))
+             open (newunit=fillun, file = trim(filnam))
              close (fillun, status = 'delete')
           endif
        enddo
@@ -124,8 +120,7 @@ subroutine del_temp_files(n_swan_grids)
        filnam = tmpfiles(i)
        inquire (file = trim(filnam), exist = ex, iostat = istat)
        if (istat==0 .and. ex) then
-         fillun = new_lun()
-         open (fillun, file=trim(filnam), status='unknown')
+         open (newunit=fillun, file=trim(filnam), status='unknown')
          close(fillun, status='delete')
        endif
     enddo

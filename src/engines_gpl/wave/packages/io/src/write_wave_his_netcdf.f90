@@ -103,7 +103,6 @@ subroutine write_wave_his_netcdf (sg, sof, n_swan_grids, i_swan, wavedata)
     integer                                            :: month
     integer                                            :: day
     integer, external                                  :: nc_def_var
-    integer, external                                  :: new_lun
     real(hp), dimension(:,:), allocatable       , save :: rval
     real(hp), dimension(:)  , allocatable       , save :: xcor
     real(hp), dimension(:)  , allocatable       , save :: ycor
@@ -138,8 +137,7 @@ subroutine write_wave_his_netcdf (sg, sof, n_swan_grids, i_swan, wavedata)
        istat = 0
        do mode=SCANMODE, READMODE
           do loc=1,swan_run%nloc
-             fillun = new_lun()
-             open (fillun, file = trim(swan_run%pntfilnam(loc)), status = 'old', iostat = ierror)
+             open (newunit = fillun, file = trim(swan_run%pntfilnam(loc)), status = 'old', iostat = ierror)
              if (ierror /= 0) then
                 write(*,'(3a)') "ERROR: Write wavh-file: unable to open file '",trim(swan_run%pntfilnam(loc)), "' for reading."
                 return
@@ -204,8 +202,7 @@ subroutine write_wave_his_netcdf (sg, sof, n_swan_grids, i_swan, wavedata)
        else
           tabfil = swan_run%pntfilnamtab(loc)
        endif
-       fillun = new_lun()
-       open (fillun, file = trim(tabfil), status = 'old', iostat = ierror)
+       open (newunit = fillun, file = trim(tabfil), status = 'old', iostat = ierror)
        if (ierror /= 0) then
           write(*,'(3a)') "ERROR: Write wavh-file: unable to open file '",trim(tabfil), "' for reading."
           return

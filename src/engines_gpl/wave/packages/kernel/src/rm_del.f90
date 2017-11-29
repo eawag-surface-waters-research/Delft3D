@@ -44,7 +44,6 @@ subroutine rm_del( filnamin )
 !
     integer           :: istat
     integer           :: luntmp  ! Unit number for file
-    integer, external :: new_lun
     logical           :: ex      ! Logical flag used for INQUIRE state-
     character(300)    :: filnam
 !
@@ -57,8 +56,7 @@ subroutine rm_del( filnamin )
        if (istat==0 .and. ex) then
           inquire (file = trim(filnam), number = luntmp, iostat =  istat)
        else
-          luntmp = new_lun()
-          open (luntmp, file = trim(filnam), iostat =  istat)
+          open (newunit=luntmp, file = trim(filnam), iostat =  istat)
        endif
        close (luntmp, status = 'delete', iostat =  istat)
     endif

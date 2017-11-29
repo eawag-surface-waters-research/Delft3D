@@ -53,7 +53,6 @@ subroutine update_wavecond(sr,wavetime)
    !
    integer                    :: i
    integer, dimension(7)      :: isdir
-   integer, external          :: new_lun
    integer                    :: namlen
    integer                    :: nwavec
    integer                    :: nwav
@@ -85,8 +84,7 @@ subroutine update_wavecond(sr,wavetime)
    if (unibest) then
       if (luniwp < 0) then
          ! Open md-vwac file first time only
-         luniwp     = new_lun()
-         open (unit = luniwp, file = filnam)
+         open (newunit = luniwp, file = filnam)
          call skcoma(luniwp    )
          read (luniwp, '(A)') model
          !
@@ -396,7 +394,6 @@ subroutine varcon(fname     ,timmin    ,result    ,isdir     ,nres )
     integer                        :: iuntim
     integer                        :: ncol
     integer                        :: nt
-    integer, external              :: new_lun
     real                           :: a
     real                           :: b
     real                           :: facrad
@@ -411,8 +408,7 @@ subroutine varcon(fname     ,timmin    ,result    ,isdir     ,nres )
 !
     pi = 4.*atan(1.)
     facrad = pi/180.
-    iuntim = new_lun()
-    open (iuntim, file = fname, err = 999)
+    open (newunit = iuntim, file = fname, err = 999)
   100 continue
     read (iuntim, '(A)') blname
     if (blname(1:1)=='*') goto 100

@@ -60,7 +60,6 @@ subroutine swan_tot (n_swan_grids, n_flow_grids, wavedata, selectedtime)
    integer                                       :: itide
    integer                                       :: itidewrite
    integer                                       :: lunhot
-   integer                         , external    :: new_lun
    integer                                       :: offset
    real(fp)                                      :: wave_timezone
    real(fp)                                      :: wave_timmin
@@ -403,8 +402,7 @@ subroutine swan_tot (n_swan_grids, n_flow_grids, wavedata, selectedtime)
             write (fname,'(a,i0,2a)') 'hot_', i_swan, '_', trim(swan_run%usehottime)
             inquire (file = trim(fname), exist = exists)
             if (exists) then
-               lunhot = new_lun()
-               open (lunhot, file = trim(fname))
+               open (newunit=lunhot, file = trim(fname))
                close (lunhot, status = 'delete')
             endif
             !
@@ -417,8 +415,7 @@ subroutine swan_tot (n_swan_grids, n_flow_grids, wavedata, selectedtime)
                write (fname,'(a,i0,3a,i3.3)') 'hot_', i_swan, '_', trim(swan_run%usehottime), '-', count
                inquire (file = trim(fname), exist = exists)
                if (exists) then
-                  lunhot = new_lun()
-                  open (lunhot, file = trim(fname))
+                  open (newunit = lunhot, file = trim(fname))
                   close (lunhot, status = 'delete')
                else
                   !

@@ -54,7 +54,6 @@ subroutine cp_file(filnm1    ,filnm2    ,filtype      ,nuerr         )
     integer           :: lunf2     ! Unit number for FILNM2
     integer           :: nr
     integer           :: nrec
-    integer, external :: new_lun
     logical           :: ex        ! Flag for existing file
     logical           :: opend1    ! Flag to test if file FILNM1 is already opened
     logical           :: opend2    ! Flag to test if file FILNM2 is already opened
@@ -85,8 +84,7 @@ subroutine cp_file(filnm1    ,filnm2    ,filtype      ,nuerr         )
     elseif (opend1) then
        rewind (lunf1)
     else
-       lunf1 = new_lun()
-       open (lunf1, file = filnm1(:lf1), form = 'formatted', status = 'old')
+       open (newunit = lunf1, file = filnm1(:lf1), form = 'formatted', status = 'old')
     endif
     !
     ! open the target file in replace or append mode
@@ -105,11 +103,10 @@ subroutine cp_file(filnm1    ,filnm2    ,filtype      ,nuerr         )
     if (ex .and. opend2) then
        close(lunf2)
     endif
-    lunf2 = new_lun()
     if (filtype=='append') then
-        open (lunf2, file = filnm2(:lf2), form = 'formatted', position = 'append')
+        open (newunit = lunf2, file = filnm2(:lf2), form = 'formatted', position = 'append')
     elseif (filtype=='copy') then
-        open (lunf2, file = filnm2(:lf2), form = 'formatted', status = 'replace')
+        open (newunit = lunf2, file = filnm2(:lf2), form = 'formatted', status = 'replace')
     else
         nuerr = 2
         return
