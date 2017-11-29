@@ -105,6 +105,7 @@ EndProject
 Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "deltares_common", "utils_lgpl\deltares_common\packages\deltares_common\deltares_common.vfproj", "{2D6BCBCA-CC6C-49FE-A6AA-61AF62529118}"
 	ProjectSection(ProjectDependencies) = postProject
 		{51065F4C-23D3-4C5F-AF5B-E70776409D7B} = {51065F4C-23D3-4C5F-AF5B-E70776409D7B}
+		{1ED7D7C9-ACA9-4A50-8217-0901E12B1D70} = {1ED7D7C9-ACA9-4A50-8217-0901E12B1D70}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "deltares_common_c", "utils_lgpl\deltares_common\packages\deltares_common_c\deltares_common_c.vcxproj", "{51065F4C-23D3-4C5F-AF5B-E70776409D7B}"
@@ -606,9 +607,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "kdtree", "kdtree", "{C7778AEB-A70B-4A77-96CF-09A8E5185BEF}"
 EndProject
 Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "kdtree2", "third_party_open\kdtree2\src-f90\kdtree2.vfproj", "{1ED7D7C9-ACA9-4A50-8217-0901E12B1D70}"
-	ProjectSection(ProjectDependencies) = postProject
-		{2D6BCBCA-CC6C-49FE-A6AA-61AF62529118} = {2D6BCBCA-CC6C-49FE-A6AA-61AF62529118}
-	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
