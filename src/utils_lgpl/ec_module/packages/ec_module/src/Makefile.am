@@ -28,6 +28,7 @@ dist-hook:
 #Includes
 FMODULES += \
 	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src \
+	-I$(top_builddir)/third_party_open/kdtree2/src-f90 \
 	-I$(NETCDF_FORTRAN_LIBS)
 
 #-------------------------------------------------------------------------------
