@@ -7087,6 +7087,12 @@ src/utils_lgpl/io_netcdf/packages/test_data/write1d.nc -text
 src/utils_lgpl/io_netcdf/packages/tests/UGrid.tests/Properties/AssemblyInfo.cs -text
 src/utils_lgpl/io_netcdf/packages/tests/UGrid.tests/UGrid.tests.csproj -text
 src/utils_lgpl/io_netcdf/packages/tests/UGrid.tests/UGridTests.cs -text
+src/utils_lgpl/kdtree_wrapper/Makefile.am -text
+src/utils_lgpl/kdtree_wrapper/packages/Makefile.am -text
+src/utils_lgpl/kdtree_wrapper/packages/kdtree_wrapper/Makefile.am -text
+src/utils_lgpl/kdtree_wrapper/packages/kdtree_wrapper/kdtree_wrapper.vfproj -text
+src/utils_lgpl/kdtree_wrapper/packages/kdtree_wrapper/src/Makefile.am -text
+src/utils_lgpl/kdtree_wrapper/packages/kdtree_wrapper/src/kdtreeWrapper.f90 -text
 src/utils_lgpl/nefis/AUTHORS -text
 src/utils_lgpl/nefis/COPYING -text
 src/utils_lgpl/nefis/ChangeLog -text
