@@ -11,7 +11,7 @@
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
 				<Tool Name="VFCustomBuildTool"/>
 				<Tool Name="VFPreLinkEventTool"/>
-				<Tool Name="VFPreBuildEventTool" CommandLine="call $(SolutionDir)scripts_lgpl\win32\update_version.cmd $(SolutionDir)engines_gpl\waq\version\version_number_delwaq2.rc $(SolutionDir)\engines_gpl\waq\ $(SolutionDir)engines_gpl\waq\version\version_number.ini --Onlyifmissing&#xA;call $(SolutionDir)\scripts_lgpl\win32\update_version.cmd .\src\delwaq2_version.F90 $(SolutionDir)engines_gpl\waq\ $(SolutionDir)\engines_gpl\waq\version\version_number.ini --Onlyifmissing"/>
+				<Tool Name="VFPreBuildEventTool" CommandLine="call ..\..\..\..\scripts_lgpl\win32\update_version.cmd ..\..\..\..\engines_gpl\waq\version\version_number_delwaq2.rc ..\..\..\..\engines_gpl\waq\ ..\..\..\..\engines_gpl\waq\version\version_number.ini --Onlyifmissing&#xA;call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\src\delwaq2_version.F90 ..\..\..\..\engines_gpl\waq\ ..\..\..\..\engines_gpl\waq\version\version_number.ini --Onlyifmissing"/>
 				<Tool Name="VFPostBuildEventTool" CommandLine="..\..\..\..\scripts_lgpl\win32\oss-install_debug.cmd delwaq2"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Release|Win32" OutputDirectory="..\..\bin\$(ConfigurationName)">
@@ -21,7 +21,7 @@
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
 				<Tool Name="VFCustomBuildTool"/>
 				<Tool Name="VFPreLinkEventTool"/>
-				<Tool Name="VFPreBuildEventTool" CommandLine="call $(SolutionDir)scripts_lgpl\win32\update_version.cmd $(SolutionDir)engines_gpl\waq\version\version_number_delwaq2.rc $(SolutionDir)\engines_gpl\waq\ $(SolutionDir)engines_gpl\waq\version\version_number.ini --Onlyifmissing&#xA;call $(SolutionDir)\scripts_lgpl\win32\update_version.cmd .\src\delwaq2_version.F90 $(SolutionDir)engines_gpl\waq\ $(SolutionDir)\engines_gpl\waq\version\version_number.ini --Onlyifmissing"/>
+				<Tool Name="VFPreBuildEventTool" CommandLine="call ..\..\..\..\scripts_lgpl\win32\update_version.cmd ..\..\..\..\engines_gpl\waq\version\version_number_delwaq2.rc ..\..\..\..\engines_gpl\waq\ ..\..\..\..\engines_gpl\waq\version\version_number.ini --Onlyifmissing&#xA;call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\src\delwaq2_version.F90 ..\..\..\..\engines_gpl\waq\ ..\..\..\..\engines_gpl\waq\version\version_number.ini --Onlyifmissing"/>
 				<Tool Name="VFPostBuildEventTool" CommandLine="..\..\..\..\scripts_lgpl\win32\oss-install.cmd delwaq2  bin"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Debug|x64" OutputDirectory="..\..\bin\$(PlatformName)\$(ConfigurationName)">
@@ -31,7 +31,7 @@
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
 				<Tool Name="VFCustomBuildTool"/>
 				<Tool Name="VFPreLinkEventTool"/>
-				<Tool Name="VFPreBuildEventTool" CommandLine="call $(SolutionDir)scripts_lgpl\win32\update_version.cmd $(SolutionDir)engines_gpl\waq\version\version_number_delwaq2.rc $(SolutionDir)\engines_gpl\waq\ $(SolutionDir)engines_gpl\waq\version\version_number.ini --Onlyifmissing&#xA;call $(SolutionDir)\scripts_lgpl\win32\update_version.cmd .\src\delwaq2_version.F90 $(SolutionDir)engines_gpl\waq\ $(SolutionDir)\engines_gpl\waq\version\version_number.ini --Onlyifmissing"/>
+				<Tool Name="VFPreBuildEventTool" CommandLine="call ..\..\..\..\scripts_lgpl\win32\update_version.cmd ..\..\..\..\engines_gpl\waq\version\version_number_delwaq2.rc ..\..\..\..\engines_gpl\waq\ ..\..\..\..\engines_gpl\waq\version\version_number.ini --Onlyifmissing&#xA;call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\src\delwaq2_version.F90 ..\..\..\..\engines_gpl\waq\ ..\..\..\..\engines_gpl\waq\version\version_number.ini --Onlyifmissing"/>
 				<Tool Name="VFPostBuildEventTool"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Release|x64" OutputDirectory="..\..\bin\$(PlatformName)\$(ConfigurationName)">
@@ -41,7 +41,7 @@
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
 				<Tool Name="VFCustomBuildTool"/>
 				<Tool Name="VFPreLinkEventTool"/>
-				<Tool Name="VFPreBuildEventTool" CommandLine="call $(SolutionDir)scripts_lgpl\win32\update_version.cmd $(SolutionDir)engines_gpl\waq\version\version_number_delwaq2.rc $(SolutionDir)\engines_gpl\waq\ $(SolutionDir)engines_gpl\waq\version\version_number.ini --Onlyifmissing&#xA;call $(SolutionDir)\scripts_lgpl\win32\update_version.cmd .\src\delwaq2_version.F90 $(SolutionDir)engines_gpl\waq\ $(SolutionDir)\engines_gpl\waq\version\version_number.ini --Onlyifmissing"/>
+				<Tool Name="VFPreBuildEventTool" CommandLine="call ..\..\..\..\scripts_lgpl\win32\update_version.cmd ..\..\..\..\engines_gpl\waq\version\version_number_delwaq2.rc ..\..\..\..\engines_gpl\waq\ ..\..\..\..\engines_gpl\waq\version\version_number.ini --Onlyifmissing&#xA;call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\src\delwaq2_version.F90 ..\..\..\..\engines_gpl\waq\ ..\..\..\..\engines_gpl\waq\version\version_number.ini --Onlyifmissing"/>
 				<Tool Name="VFPostBuildEventTool" CommandLine="..\..\..\..\scripts_lgpl\win64\oss-install_x64.cmd delwaq2 bin"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration></Configurations>
 	<Files>
