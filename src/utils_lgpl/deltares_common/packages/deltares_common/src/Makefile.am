@@ -18,8 +18,6 @@ noinst_LTLIBRARIES = libDeltaresCommon.la
 
 #-------------------------------------------------------------------------------
 #Includes
-FMODULES += \
-	-I$(top_builddir)/third_party_open/kdtree2/src-f90
 
 #-------------------------------------------------------------------------------
 #Sources
@@ -62,8 +60,7 @@ libDeltaresCommon_la_SOURCES = \
 	multi_file_io.f90 \
 	hash_search.f90 \
 	wavenr.f90 \
-	sorting_algorithms.f90 \
-	kdtree2Factory.f90
+	sorting_algorithms.f90
 
 # For source distributions: the tar.gz will contain the correct version numbers in the generated *version.F90
 # So, just before packaging the .tar.gz dist, disable version number REgeneration parts of this Makefile.am.
