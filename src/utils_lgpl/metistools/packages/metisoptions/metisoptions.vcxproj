@@ -71,7 +71,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>..\..\third_party_open\metis\metis-5.1.0\include\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\third_party_open\metis\metis-5.1.0\include\</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>HAVE_METIS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
@@ -83,7 +83,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>..\..\third_party_open\metis\metis-5.1.0\include\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\third_party_open\metis\metis-5.1.0\include\</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>HAVE_METIS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
@@ -97,7 +97,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>..\..\third_party_open\metis\metis-5.1.0\include\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\third_party_open\metis\metis-5.1.0\include\</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>HAVE_METIS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
@@ -113,7 +113,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>..\..\third_party_open\metis\metis-5.1.0\include\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\third_party_open\metis\metis-5.1.0\include\</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>HAVE_METIS;WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
@@ -127,10 +127,8 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">HAVE_METIS;WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">HAVE_METIS;WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">HAVE_METIS;WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\..\..\..\third_party_open\metis\metis-5.1.0\include\</AdditionalIncludeDirectories>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="include\metisoptions.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
