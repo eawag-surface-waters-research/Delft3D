@@ -7095,25 +7095,6 @@ src/utils_lgpl/kdtree_wrapper/packages/kdtree_wrapper/src/Makefile.am -text
 src/utils_lgpl/kdtree_wrapper/packages/kdtree_wrapper/src/kdtreeWrapper.f90 -text
 src/utils_lgpl/metistools/Makefile.am -text
 src/utils_lgpl/metistools/packages/Makefile.am -text
-src/utils_lgpl/metistools/packages/metisoptions/Debug/CL.read.1.tlog -text
-src/utils_lgpl/metistools/packages/metisoptions/Debug/CL.write.1.tlog -text
-src/utils_lgpl/metistools/packages/metisoptions/Debug/Lib-link.read.1.tlog -text
-src/utils_lgpl/metistools/packages/metisoptions/Debug/Lib-link.write.1.tlog -text
-src/utils_lgpl/metistools/packages/metisoptions/Debug/cl.command.1.tlog -text
-src/utils_lgpl/metistools/packages/metisoptions/Debug/lib.command.1.tlog -text
-src/utils_lgpl/metistools/packages/metisoptions/Debug/link-cvtres.read.1.tlog -text svneol=unset#application/octet-stream
-src/utils_lgpl/metistools/packages/metisoptions/Debug/link-cvtres.write.1.tlog -text svneol=unset#application/octet-stream
-src/utils_lgpl/metistools/packages/metisoptions/Debug/link-rc.read.1.tlog -text svneol=unset#application/octet-stream
-src/utils_lgpl/metistools/packages/metisoptions/Debug/link-rc.write.1.tlog -text svneol=unset#application/octet-stream
-src/utils_lgpl/metistools/packages/metisoptions/Debug/link.command.1.tlog -text
-src/utils_lgpl/metistools/packages/metisoptions/Debug/link.read.1.tlog -text
-src/utils_lgpl/metistools/packages/metisoptions/Debug/link.write.1.tlog -text
-src/utils_lgpl/metistools/packages/metisoptions/Debug/metisoptions.lastbuildstate -text
-src/utils_lgpl/metistools/packages/metisoptions/Debug/metisoptions.lib -text
-src/utils_lgpl/metistools/packages/metisoptions/Debug/metisoptions.log -text
-src/utils_lgpl/metistools/packages/metisoptions/Debug/metisoptions.obj -text
-src/utils_lgpl/metistools/packages/metisoptions/Debug/vc110.idb -text
-src/utils_lgpl/metistools/packages/metisoptions/Debug/vc110.pdb -text
 src/utils_lgpl/metistools/packages/metisoptions/Makefile.am -text
 src/utils_lgpl/metistools/packages/metisoptions/include/metisoptions.h -text
 src/utils_lgpl/metistools/packages/metisoptions/metisoptions.opensdf -text
