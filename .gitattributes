@@ -7096,7 +7096,6 @@ src/utils_lgpl/kdtree_wrapper/packages/kdtree_wrapper/src/kdtreeWrapper.f90 -tex
 src/utils_lgpl/metistools/Makefile.am -text
 src/utils_lgpl/metistools/packages/Makefile.am -text
 src/utils_lgpl/metistools/packages/metisoptions/Makefile.am -text
-src/utils_lgpl/metistools/packages/metisoptions/include/metisoptions.h -text
 src/utils_lgpl/metistools/packages/metisoptions/metisoptions.opensdf -text
 src/utils_lgpl/metistools/packages/metisoptions/metisoptions.sdf -text
 src/utils_lgpl/metistools/packages/metisoptions/metisoptions.sln -text
