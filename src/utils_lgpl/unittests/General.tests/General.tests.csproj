@@ -75,6 +75,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Ec_ModuleLibWrapper.cs" />
     <Compile Include="GridGeomLibWrapper.cs" />
     <Compile Include="IoNetcdfLibWrapper.cs" />
     <Compile Include="MeshGeom.cs" />
