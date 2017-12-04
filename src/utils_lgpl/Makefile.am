@@ -8,6 +8,7 @@ SUBDIRS = \
          io_netcdf \
          hyd_to_waq_part_lib \
          nefis \
+         kdtree_wrapper \
          ec_module \
          d_hydro_lib \
          ods
