@@ -757,6 +757,10 @@ utils_lgpl/io_netcdf/packages/io_netcdf/src/Makefile
 utils_lgpl/io_netcdf/packages/io_netcdf/Makefile
 utils_lgpl/io_netcdf/packages/Makefile
 utils_lgpl/io_netcdf/Makefile
+utils_lgpl/kdtree_wrapper/packages/kdtree_wrapper/src/Makefile
+utils_lgpl/kdtree_wrapper/packages/kdtree_wrapper/Makefile
+utils_lgpl/kdtree_wrapper/packages/Makefile
+utils_lgpl/kdtree_wrapper/Makefile
 utils_lgpl/Makefile
 utils_lgpl/nefis/Makefile
 utils_lgpl/nefis/packages/Makefile
