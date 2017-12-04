@@ -97,12 +97,13 @@ endif
 
 
 EXTRALIBS=\
-        $(top_builddir)/engines_gpl/dflowfm/packages/dflowfm_kernel/src/libdflowfm.la \
+        $(top_builddir)/utils_lgpl/kdtree_wrapper/packages/kdtree_wrapper/src/libkdtreewrapper.la \
         $(CCLIBS)
 
 #dflowfm_LDFLAGS=-static
 dflowfm_LDADD=\
-        $(top_builddir)/engines_gpl/dflowfm/packages/dflowfm_kernel/src/libdflowfm.la 
+        $(top_builddir)/engines_gpl/dflowfm/packages/dflowfm_kernel/src/libdflowfm.la \
+        $(EXTRALIBS)
 
 
 
