@@ -136,12 +136,14 @@
 !     FL2BAL  INT   NOTOT+NOSUM,* Pointer to relevant fluxes per substance
 !     DANAMP  C*20     NDMPAR+1   Copy of DANAM including sum segment
 !     SYNAMP  C*20  NOTOT+NOSUM   Copy of SYNAME including sum parameters
+!     IBSTRT  INTEGER     1       Proper start time of the balance period
+!     IBSTOP  INTEGER     1       Proper stop time of the balance period
 
       INTEGER       IOSOBH, IOBALI, ISYS  , IBOUN , NEMISS, IFRAC ,
      J              IFLUX , IDUMP , IPQ   , ISYS2 , ITEL  , IINIT ,
      J              ITEL1 , IP1   , ITEL2 , NQC   , IQC   , IQ    ,
      J              IPOIN , NOOUT , IERR  , IOUT  , ISUM  , NOSUM ,
-     J              NSC   , ISC   , LUNREP
+     J              NSC   , ISC   , LUNREP, IBSTRT, IBSTOP
       PARAMETER    (NOSUM=2)
       real   ,      allocatable : : SFACTO(:,:),
      J                              STOCHL(:,:),
@@ -845,6 +847,9 @@
 !     one of the two time levels
       IF ( ITIME .GE. ITSTOP .OR. ITIME .GE. IMSTOP ) THEN
 
+          IBSTRT = MAX( ITSTRT, IMSTRT )
+          IBSTOP = MIN( ITSTOP, IMSTOP )
+
           IF ( .NOT. SUPPFT ) CLOSE ( LUNOUT )
           DO ISYS = 1,NOTOT+NOSUM
               IOUT = IMASSA(ISYS)
@@ -866,7 +871,7 @@
           OPEN ( IOBALI , FILE = FILNAM )
 
 !         In mass
-          CALL OUTBAI (IOBALI, MONAME      , IMSTRT, IMSTOP, NOOUT ,
+          CALL OUTBAI (IOBALI, MONAME      , IBSTRT, IBSTOP, NOOUT ,
      J                 NOTOT , NDMPAR_OUT+1, DANAMP, OUNAME, SYNAMP,
      J                 IMASSA, IEMISS      , NEMISS, ITRANS, NTRANS,
      J                 IPROCS, NPROCS      , BALTOT, ONLYSM, NOSUM ,
@@ -897,7 +902,7 @@
                 BALTOT(IOUT,NDMPAR_OUT+1) = -999.0
              END IF
           ENDDO
-          CALL OUTBAI (IOBALI, MONAME      , IMSTRT, IMSTOP, NOOUT ,
+          CALL OUTBAI (IOBALI, MONAME      , IBSTRT, IBSTOP, NOOUT ,
      J                 NOTOT , NDMPAR_OUT+1, DANAMP, OUNAME, SYNAMP,
      J                 IMASSA, IEMISS      , NEMISS, ITRANS, NTRANS,
      J                 IPROCS, NPROCS      , BALTOT, ONLYSM, NOSUM ,
@@ -920,7 +925,7 @@
           DO IOUT  = 1,NOOUT
              BALTOT(IOUT,NDMPAR_OUT+1) = BALTOT(IOUT,NDMPAR_OUT+1)*TOT_SURF/TOT_VOLU
           ENDDO
-          CALL OUTBAI (IOBALI, MONAME      , IMSTRT, IMSTOP, NOOUT ,
+          CALL OUTBAI (IOBALI, MONAME      , IBSTRT, IBSTOP, NOOUT ,
      J                 NOTOT , NDMPAR_OUT+1, DANAMP, OUNAME, SYNAMP,
      J                 IMASSA, IEMISS      , NEMISS, ITRANS, NTRANS,
      J                 IPROCS, NPROCS      , BALTOT, ONLYSM, NOSUM ,
@@ -942,14 +947,14 @@
       write (*,*) 'Error deallocating memory'
       call srstop(1)
       end
-      SUBROUTINE OUTBAI (IOBALI, MONAME, IMSTRT, IMSTOP, NOOUT ,
+      SUBROUTINE OUTBAI (IOBALI, MONAME, IBSTRT, IBSTOP, NOOUT ,
      J                   NOTOT , NDMPAR, DANAMP, OUNAME, SYNAME,
      J                   IMASSA, IEMISS, NEMISS, ITRANS, NTRANS,
      J                   IPROCS, NPROCS, BALTOT, ONLYSM, NOSUM ,
      J                   SFACTO, IUNIT , INIT  )
       use timers
 
-      INTEGER      IOBALI, IMSTRT, IMSTOP, NOOUT , NOTOT , NDMPAR,
+      INTEGER      IOBALI, IBSTRT, IBSTOP, NOOUT , NOTOT , NDMPAR,
      J             IMASSA(*), IEMISS(*), NEMISS, ITRANS(*), NTRANS,
      J             IPROCS(*), NPROCS(*), NOSUM    , IUNIT , INIT
       CHARACTER*40 MONAME(4)
@@ -968,7 +973,7 @@
           WRITE (IOBALI,1000) MONAME(1), MONAME(2), MONAME(3), MONAME(4)
 
 !         Write timers
-          WRITE (IOBALI,1010) REAL(IMSTRT)/86400., REAL(IMSTOP)/86400.
+          WRITE (IOBALI,1010) REAL(IBSTRT)/86400., REAL(IBSTOP)/86400.
 
 !         Write sum parameters
           DO ISUM = 1,NOSUM
