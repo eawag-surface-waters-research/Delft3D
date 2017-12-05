@@ -115,7 +115,7 @@ procid,procco,procfo,procnm
 "NLDiat    ",123,"NLALG     ","Nutrient limiation function for diatoms           "
 "Rad_Green ",123,"RADALG    ","Light efficiency function green algae             "
 "Rad_Diat  ",123,"RADALG    ","Light efficiency function diatoms                 "
-"Rad_DiatS1",123,"RDBALG    ","Light efficiency function diatoms                 "
+"Rad_DiatS1",123,"RDBALG    ","Light efficiency function benthic diatoms         "
 "GroMrt_Gre",123,"PRIPRO    ","Nett primary production and mortality green algae "
 "GroMrt_Dia",123,"PRIPRO    ","Nett primary production and mortality diatoms     "
 "GroMrt_DS1",123,"SDPPRO    ","Nett primary production and mortality diatoms     "
