@@ -196,7 +196,7 @@ C
       IF ( ITYPE .EQ. 1 .AND. CHULP .EQ. 'INCLUDE' ) THEN
          IF ( IFL .EQ. LSTACK ) THEN
             WRITE ( LUNUT , 1020 ) LSTACK
-            IERR = 2
+            IERR = 1
             GOTO 20
          ENDIF
          IERR = 0
@@ -208,7 +208,7 @@ C
      *                    IPOSR  , NPOS   , ' '     , 1     , ITYPE  ,
      *                                      CURLINE(IFL)    , 0      )
             WRITE ( LUNUT , 1030 )
-            IERR = 2
+            IERR = 1
             GOTO 20
          ENDIF
          WRITE ( LUNUT , 1040 ) CHULP
@@ -218,7 +218,7 @@ C
          IF ( IOERR .GT. 0 ) THEN
             IFL = IFL - 1
             WRITE ( LUNUT , 1050 )
-            IERR = 2
+            IERR = 1
             GOTO 20
          ELSE
             LCH (IFL) = CHULP
