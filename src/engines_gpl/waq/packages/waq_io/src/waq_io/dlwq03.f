@@ -625,7 +625,7 @@
  2510 format ( / ' File containing the grid: ', A )
  2520 format ( / ' NetCDF version: ', A )
  2530 format ( / ' ERROR, opening NetCDF file. Filename: ',A )
- 2540 format ( / ' WARNING, no variable found with required attribute "delwaq_role" or "cf_type"' 
+ 2540 format ( / ' WARNING, no variable found with required attribute "delwaq_role" or "cf_role"'
      &         / '          this version of Delwaq is not compatible with older non-ugrid waqgeom-files'  )
  2550 format ( / ' Mesh used for Delwaq output: ', A )
  2555 format ( / ' ERROR, Getting the mesh name failed' )
