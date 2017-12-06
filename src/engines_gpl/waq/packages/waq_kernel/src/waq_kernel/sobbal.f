@@ -29,7 +29,7 @@
      J                    CONS  , NOQ   , IPOINT, FLXNAM, INTOPT,
      J                    VOLUME, SURF  , NOSEG , LUNOUT, LCHOUT,
      J                    INIOUT, DMPBAL, NOWST , NOWTYP, WSTTYP,
-     J                    IWASTE, INWTYP, WSTDMP, ISEGCOL)
+     J                    IWASTE, INWTYP, WSTDMP, ISEGCOL,IMSTEP)
 !
 !     Deltares      SECTOR WATERRESOURCES AND ENVIRONMENT
 !
@@ -94,7 +94,7 @@
       use timers
       INTEGER       NOTOT , ITIME , NOSYS ,
      j              NOFLUX, NDMPAR, NDMPQ , NTDMPQ,
-     j              NOBND , ITSTOP, IMSTOP, IMSTRT,
+     j              NOBND , ITSTOP, IMSTOP, IMSTRT, IMSTEP,
      J              NOBTYP, NOCONS, NOQ   , INIOUT
       INTEGER       IQDMP(*)      , IPDMP(*)  ,
      +              INBTYP(NOBND) , IPOINT( 4,NOQ )
@@ -845,10 +845,10 @@
 
 !     This is an incorrect statement in case ITIME never reaches
 !     one of the two time levels
-      IF ( ITIME .GE. ITSTOP .OR. ITIME .GE. IMSTOP ) THEN
+      IF ( ITIME .GE. ITSTOP-IMSTEP+1 .OR. ITIME .GE. IMSTOP ) THEN
 
           IBSTRT = MAX( ITSTRT, IMSTRT )
-          IBSTOP = MIN( ITSTOP, IMSTOP )
+          IBSTOP = MIN( ITIME , IMSTOP )
 
           IF ( .NOT. SUPPFT ) CLOSE ( LUNOUT )
           DO ISYS = 1,NOTOT+NOSUM

@@ -622,7 +622,7 @@
      J                       CONS  , NOQ   , IPOINT, OUNAM(K1), INTOPT,
      J                       VOLUME, SURF  , NOSEG , LUNOUT   , LCHOUT,
      J                       INIOUT, DMPBAL, NOWST , NOWTYP   , WSTTYP,
-     J                       IWASTE, INXTYP, WSTDMP, ISEGCOL  )
+     J                       IWASTE, INXTYP, WSTDMP, ISEGCOL  , IMSTEP)
                DEALLOCATE (SURF)
 !
             ENDIF
