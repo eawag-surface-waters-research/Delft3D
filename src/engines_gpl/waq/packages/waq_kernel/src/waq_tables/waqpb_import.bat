@@ -1,5 +1,12 @@
 @echo off
-if exist ..\..\..\..\..\..\tools_gpl\waqpb\packages\waqpb_import\Release\waqpb_import.exe (
+set toolfound=false
+set toolx64=false
+
+if exist ..\..\..\..\..\..\tools_gpl\waqpb\packages\waqpb_import\Release\waqpb_import.exe     set toolfound=true
+if exist ..\..\..\..\..\..\tools_gpl\waqpb\packages\waqpb_import\x64\Release\waqpb_import.exe set toolfound=true
+if exist ..\..\..\..\..\..\tools_gpl\waqpb\packages\waqpb_import\x64\Release\waqpb_import.exe set toolx64=true
+
+if %toolfound%==true  (
     echo This will execute: waqpb_import.exe
     echo.
     echo This command will 'import' changes from the proces.asc file.
@@ -8,7 +15,8 @@ if exist ..\..\..\..\..\..\tools_gpl\waqpb\packages\waqpb_import\Release\waqpb_i
     echo Run waqpb_help.bat for more information
     echo.
     pause
-    ..\..\..\..\..\..\tools_gpl\waqpb\packages\waqpb_import\Release\waqpb_import.exe
+    if %toolx64%==true ..\..\..\..\..\..\tools_gpl\waqpb\packages\waqpb_import\x64\Release\waqpb_import.exe
+    if not %toolx64%==true ..\..\..\..\..\..\tools_gpl\waqpb\packages\waqpb_import\Release\waqpb_import.exe
     copy proc_def.* ..\..\..\..\default
     echo.
     pause
