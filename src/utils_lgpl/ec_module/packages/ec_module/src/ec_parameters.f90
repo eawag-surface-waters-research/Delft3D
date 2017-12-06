@@ -50,6 +50,7 @@ module m_ec_parameters
    integer, parameter :: ec_second = 1
    integer, parameter :: ec_minute = 2
    integer, parameter :: ec_hour   = 3
+   integer, parameter :: ec_day    = 4 
 
    !> Enumeration for tEcElementSet role
    integer, parameter :: elmSetType_undefined             = 0

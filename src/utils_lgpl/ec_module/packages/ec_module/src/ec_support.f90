@@ -841,7 +841,10 @@ end subroutine ecInstanceListSourceItems
                unit = ec_minute
             else if (index(string, 'hours') /= 0 .or. index( string, 'hrs') /= 0) then
                unit = ec_hour
+            else if (index(string, 'days') /= 0) then
+               unit = ec_day
             else
+               call setECMessage("ERROR: unitstring = '"//trim(string)//"'.")
                call setECMessage("ERROR: ec_support::ecSupportTimestringToUnitAndRefdate: Unable to identify the time unit.")
                return
             end if
@@ -969,6 +972,8 @@ end subroutine ecInstanceListSourceItems
             factor = 60
          else if (unit == ec_hour) then
             factor = 3600
+         else if (unit == ec_day) then
+            factor = 3600*24
          end if
       end function ecSupportTimeUnitConversionFactor
 
