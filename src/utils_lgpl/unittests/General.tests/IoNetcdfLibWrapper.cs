@@ -636,7 +636,7 @@ namespace General.tests
         #endregion
 
         [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ionc_get_meshgeom", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ionc_get_meshgeom_dll([In] ref int ioncid, [In] ref int meshid, [In, Out] ref meshgeom meshgeom, [In] ref bool includeArrays);
+        public static extern int ionc_get_meshgeom_dll([In] ref int ioncid, [In] ref int meshid, [In, Out] ref meshgeom meshgeom, [In] ref int start_index, [In] ref bool includeArrays);
 
         [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ionc_get_meshgeom_dim", CallingConvention = CallingConvention.Cdecl)]
         public static extern int ionc_get_meshgeom_dim_dll([In] ref int ioncid, [In] ref int meshid, [In, Out] ref meshgeomdim meshgeomdim);
@@ -959,9 +959,9 @@ namespace General.tests
         }
         #endregion
 
-        public int ionc_get_meshgeom(ref int ioncid, ref int meshid, ref meshgeom meshgeom, ref bool includeArrays)
+        public int ionc_get_meshgeom(ref int ioncid, ref int meshid, ref meshgeom meshgeom, ref int start_index, ref bool includeArrays)
         {
-            return ionc_get_meshgeom_dll(ref  ioncid, ref  meshid, ref meshgeom, ref  includeArrays);
+            return ionc_get_meshgeom_dll(ref  ioncid, ref  meshid, ref meshgeom, ref start_index, ref includeArrays);
         }
 
         public int ionc_get_meshgeom_dim(ref int ioncid, ref int meshid, ref meshgeomdim meshgeomdim)
