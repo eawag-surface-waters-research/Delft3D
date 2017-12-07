@@ -1629,10 +1629,10 @@ unwind_new:
 int
 ncio_filesize(ncio *nciop, off_t *filesizep)
 {
-    struct stat sb;
+    struct _stat64 sb;
 
     assert(nciop != NULL);
-    if (fstat(nciop->fd, &sb) < 0)
+    if (_fstat64(nciop->fd, &sb) < 0)
 	return errno;
     *filesizep = sb.st_size;
     return ENOERR;
