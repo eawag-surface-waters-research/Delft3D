@@ -111,7 +111,6 @@ type, bind(C) :: c_t_ug_meshgeomdim
    integer(kind=c_int)      :: nnodes
    integer(kind=c_int)      :: nbranches          !< Number of branches
    integer(kind=c_int)      :: ngeometry          !< Number of geometry points
-   integer(kind=c_int)      :: start_index        !< The base index of the arrays
    
 end type c_t_ug_meshgeomdim
 
@@ -146,8 +145,9 @@ type, bind(C) :: c_t_ug_meshgeom
    type(c_ptr) :: facey                   !< y-coordinates of the mesh faces.
    type(c_ptr) :: facez                   !< z-coordinates of the mesh faces.
    
-   type(c_ptr) :: layer_zs                !< Vertical coordinates of the mesh layers' center (either z or sigma).
-   type(c_ptr) :: interface_zs            !< Vertical coordinates of the mesh layers' interface (either z or sigma).
+   type(c_ptr)              :: layer_zs           !< Vertical coordinates of the mesh layers' center (either z or sigma).
+   type(c_ptr)              :: interface_zs       !< Vertical coordinates of the mesh layers' interface (either z or sigma).
+   integer(kind=c_int)      :: start_index        !< The base index of the arrays
 
 end type c_t_ug_meshgeom
 
@@ -349,7 +349,9 @@ function convert_cptr_to_meshgeom(c_meshgeom, c_meshgeomdim, meshgeom) result(ie
    meshgeom%nnodes = c_meshgeomdim%nnodes  
    meshgeom%nbranches = c_meshgeomdim%nbranches       
    meshgeom%ngeometry = c_meshgeomdim%ngeometry
-   meshgeom%start_index = c_meshgeomdim%start_index
+   
+   !start index is an array property
+   meshgeom%start_index = c_meshgeom%start_index
   
    ierr = 0
    

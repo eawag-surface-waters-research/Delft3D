@@ -499,13 +499,14 @@ end function ionc_get_topology_dimension
 !> Reads the actual mesh geometry from the specified mesh in a IONC/UGRID dataset.
 !! By default only reads in the dimensions (face/edge/node counts).
 !! Optionally, also all coordinate arrays + connectivity tables can be read.
-function ionc_get_meshgeom(ioncid, meshid, meshgeom, includeArrays, nbranchids, nbranchlongnames, nnodeids, nnodelongnames, nodeids, nodelongnames, network1dname, mesh1dname) result(ierr)
+function ionc_get_meshgeom(ioncid, meshid, meshgeom, start_index, includeArrays, nbranchids, nbranchlongnames, nnodeids, nnodelongnames, nodeids, nodelongnames, network1dname, mesh1dname) result(ierr)
    integer,             intent(in   ) :: ioncid        !< The IONC data set id.
    integer,             intent(in   ) :: meshid        !< The mesh id in the specified data set.
-   type(t_ug_meshgeom), intent(out)   :: meshgeom      !< Structure in which all mesh geometry will be stored.
-   logical, optional,   intent(in   ) :: includeArrays !< (optional) Whether or not to include coordinate arrays and connectivity tables. Default: .false., i.e., dimension counts only.
+   type(t_ug_meshgeom), intent(out  ) :: meshgeom      !< Structure in which all mesh geometry will be stored.
    integer                            :: ierr          !< Result status, ionc_noerr if successful.
    integer                            :: networkid 
+   logical, optional,   intent(in)    :: includeArrays !< (optional) Whether or not to include coordinate arrays and connectivity tables. Default: .false., i.e., dimension counts only.
+   integer, optional,   intent(in)    :: start_index   !< (optional) The start index
    type(t_ug_network)                 :: netid 
    character(len=ug_idsLen), allocatable, optional          :: nbranchids(:), nnodeids(:), nodeids(:)       
    character(len=ug_idsLongNamesLen), allocatable, optional :: nbranchlongnames(:), nnodelongnames(:), nodelongnames(:) 
@@ -519,6 +520,12 @@ function ionc_get_meshgeom(ioncid, meshid, meshgeom, includeArrays, nbranchids, 
    
    networkid = -1
    ierr = ug_get_network_id_from_mesh_id(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), datasets(ioncid)%ug_file, networkid)
+   
+   if(present(start_index)) then
+      meshgeom%start_index = start_index
+   else
+      meshgeom%start_index = 1 !As requested by fortran applications
+   endif
 
    if (present(includeArrays)) then
       if(networkid /= -1 ) then

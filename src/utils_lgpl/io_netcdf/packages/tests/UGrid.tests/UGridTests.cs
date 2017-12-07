@@ -1621,7 +1621,6 @@ namespace UGrid.tests
         public void CreateNetInputFile()
         {
 
-
             //1. Load 2d file 
             var wrapperNetcdf = new IoNetcdfLibWrapper();
             string sourcetwod_path = TestHelper.CreateLocalCopy("2d_net_river.nc");
@@ -1905,7 +1904,8 @@ namespace UGrid.tests
             meshtwod.nodez = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshtwoddim.numnode);
             meshtwod.edge_nodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshtwoddim.numedge * 2);
             bool includeArrays = true;
-            ierr = wrapperNetcdf.ionc_get_meshgeom(ref targetioncid, ref mesh2d, ref meshtwod, ref includeArrays);
+            int start_index = 1;
+            ierr = wrapperNetcdf.ionc_get_meshgeom(ref targetioncid, ref mesh2d, ref meshtwod, ref start_index, ref includeArrays);
             Assert.That(ierr, Is.EqualTo(0));
 
             //15. Using the existing arrays in memory (delta shell scenario), convert 1d into herman datastructure
