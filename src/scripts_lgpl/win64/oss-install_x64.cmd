@@ -123,7 +123,12 @@ rem =============================================================
 rem === copyNetcdf copy the appropriate netcdf.dll            ===
 rem =============================================================
 :copyNetcdf
-    call :copyFile "third_party_open\netcdf\src\win32\2005\libsrc\x64\Release\netcdf.dll" !dest_bin!
+    set dest=%~1
+    if not exist !dest! mkdir !dest!
+    if not !ErrorLevel! EQU 0 (
+        echo ERROR: while creating directory "!dest!"
+    )
+    call :copyFile "third_party_open\netcdf\src\win32\2005\libsrc\x64\Release\netcdf.dll" !dest!
 goto :endproc
 
 
@@ -237,8 +242,7 @@ rem ================
     call :copyFile "third_party_open\vcredist\x64\Microsoft.VC120.CRT\*.dll"             !dest_shared!
     call :copyFile "third_party_open\vcredist\x64\Microsoft.VC140.CRT\*.dll"             !dest_shared!
     call :copyFile "third_party_open\intel_fortran\lib\x64\*.dll"                        !dest_shared!
-    call :copyFile "third_party_open\netcdf\lib\x64\Release\ifort17\*.dll"               !dest_shared!
-    call :copyFile "third_party_open\netcdf\bin\ncdump.exe"                              !dest_shared!
+    call :copyNetcdf                                                                     !dest_shared!
     call :copyFile "third_party_open\mpich2\x64\lib\*.dll"                               !dest_shared!
     call :copyFile "third_party_open\mpich2\x64\bin\mpiexec.exe"                         !dest_shared!
     call :copyFile "third_party_open\mpich2\x64\bin\smpd.exe"                            !dest_shared!
@@ -288,6 +292,7 @@ rem ====================
     call :copyFile "engines_gpl\flow2d3d\default\*"                                 !dest_default!
     call :copyFile "utils_lgpl\delftonline\lib\x64\Release\dynamic\delftonline.dll" !dest_bin!
     call :copyFile "utils_lgpl\delftonline\lib\x64\Release\dynamic\delftonline.dll" !dest_plugins!
+    call :copyNetcdf                                                                !dest_shared!
     call :copyFile "engines_gpl\flow2d3d\scripts\run_*.bat"                         !dest_scripts!
     call :copyFile "third_party_open\tcl\bin\win64\tclkitsh852.exe"                 !dest_shared!
     
@@ -326,7 +331,7 @@ rem    )
 rem    rem One of these two dlls will not exist and cause an ErrorLevel=1. Reset it.
 rem    set ErrorLevel=0
 rem    call :copyFile "third_party_open\openda\core\native\lib\win64\*.dll"      !dest_bin!
-rem    call :copyNetcdf
+rem    call :copyNetcdf                                                          !dest_shared!
 goto :endproc
 
 
@@ -385,13 +390,15 @@ rem ======================
     set dest_bin="!dest_main!\win64\dwaq\bin"
     set dest_default="!dest_main!\win64\dwaq\default"
     set dest_scripts="!dest_main!\win64\scripts"
+    set dest_shared="!dest_main!\win64\shared"
     
     call :makeDir !dest_bin!
     call :makeDir !dest_default!
     call :makeDir !dest_scripts!
+    call :makeDir !dest_shared!
     
     call :copyFile engines_gpl\waq\bin\x64\Release\delwaq.dll                  !dest_bin!
-    call :copyNetcdf
+    call :copyNetcdf                                                           !dest_shared!
 
     call :copyFile engines_gpl\waq\default\bloom.spe                           !dest_default!
     call :copyFile engines_gpl\waq\default\bloominp.d09                        !dest_default!
@@ -435,7 +442,7 @@ rem
 rem    call :makeDir !dest_bin!
 rem    
 rem    call :copyFile engines_gpl\waq\bin\Release\delwaq2_openda_lib.dll          !dest_bin!
-rem    call :copyNetcdf
+rem    call :copyNetcdf                                                           !dest_shared!
 rem	
 
 rem    rem
