@@ -2438,37 +2438,52 @@ function ug_get_meshgeom(ncid, meshids, meshgeom, includeArrays, netid, nbranchi
       
       if (meshgeom%dim == 1) then
          
-         !mesh and network 1d variables
+         !Mesh variables
          call reallocP(meshgeom%branchidx, meshgeom%numnode, keepExisting = .false., fill = -999)
          call reallocP(meshgeom%branchoffsets, meshgeom%numnode, keepExisting = .false., fill = -999d0)
-         call reallocP(meshgeom%nbranchorder, meshgeom%nbranches, keepExisting = .false., fill = -999)
-         call reallocP(meshgeom%ngeopointx, meshgeom%ngeometry, keepExisting = .false., fill = -999d0)
-         call reallocP(meshgeom%ngeopointy, meshgeom%ngeometry, keepExisting = .false., fill = -999d0)
-         call reallocP(meshgeom%nnodex, meshgeom%nnodes, keepExisting = .false., fill = -999d0)
-         call reallocP(meshgeom%nnodey, meshgeom%nnodes, keepExisting = .false., fill = -999d0)
+         ierr = ug_get_1d_mesh_discretisation_points(ncid, meshids, meshgeom%branchidx, meshgeom%branchoffsets, meshgeom%start_index)
+         if(present(network1dname)) then
+               ierr = ug_get_network_name_from_mesh1d(ncid, meshids, network1dname)
+         endif
+         if(present(nodeids).and.present(nodelongnames)) then
+               allocate(nodeids(meshgeom%numnode))
+               allocate(nodelongnames(meshgeom%numnode))
+               ierr = nf90_get_var(ncid, meshids%varids(mid_node_ids), nodeids)
+               ierr = nf90_get_var(ncid, meshids%varids(mid_node_longnames), nodelongnames)
+         endif  
          
-         call reallocP(meshgeom%nedge_nodes,(/ 2, meshgeom%nbranches /), keepExisting = .false.)
-         call reallocP(meshgeom%nbranchlengths, meshgeom%nbranches, keepExisting = .false., fill = -999d0)
-         call reallocP(meshgeom%nbranchgeometrynodes, meshgeom%nbranches, keepExisting = .false., fill = -999)
-
-         allocate(nbranchids(meshgeom%nbranches))
-         allocate(nbranchlongnames(meshgeom%nbranches))
-         allocate(nnodeids(meshgeom%nnodes))
-         allocate(nnodelongnames(meshgeom%nnodes))
-         allocate(nodeids(meshgeom%numnode))
-         allocate(nodelongnames(meshgeom%numnode))
-
-         ierr = ug_get_network_name_from_mesh1d(ncid, meshids, network1dname)
-         ierr = ug_get_1d_network_branches(ncid, netid, meshgeom%nedge_nodes(1,:), meshgeom%nedge_nodes(2,:), meshgeom%nbranchlengths, meshgeom%nbranchgeometrynodes, 1, nbranchids, nbranchlongnames)
-                   
-         ierr = ug_get_1d_mesh_discretisation_points(ncid, meshids, meshgeom%branchidx, meshgeom%branchoffsets, 1)
-         ierr = ug_read_1d_network_branches_geometry(ncid, netid, meshgeom%ngeopointx, meshgeom%ngeopointy)
-         ierr = ug_read_1d_network_nodes(ncid, netid, meshgeom%nnodex, meshgeom%nnodey, nnodeids, nnodelongnames)
-         ierr = ug_get_1d_network_branchorder(ncid, netid, meshgeom%nbranchorder) 
-         
-         ierr = nf90_get_var(ncid, meshids%varids(mid_node_ids), nodeids)
-         ierr = nf90_get_var(ncid, meshids%varids(mid_node_longnames), nodelongnames)
-         
+         !Network variables
+         if(present(netid)) then
+            call reallocP(meshgeom%nbranchorder, meshgeom%nbranches, keepExisting = .false., fill = -999)
+            call reallocP(meshgeom%ngeopointx, meshgeom%ngeometry, keepExisting = .false., fill = -999d0)
+            call reallocP(meshgeom%ngeopointy, meshgeom%ngeometry, keepExisting = .false., fill = -999d0)
+            ierr = ug_get_1d_network_branchorder(ncid, netid, meshgeom%nbranchorder)
+            ierr = ug_read_1d_network_branches_geometry(ncid, netid, meshgeom%ngeopointx, meshgeom%ngeopointy)
+            
+            
+            call reallocP(meshgeom%nbranchgeometrynodes, meshgeom%nbranches, keepExisting = .false., fill = -999)
+            call reallocP(meshgeom%nedge_nodes,(/ 2, meshgeom%nbranches /), keepExisting = .false.)
+            call reallocP(meshgeom%nbranchlengths, meshgeom%nbranches, keepExisting = .false., fill = -999d0)
+            if(present(nbranchids).and.present(nbranchlongnames)) then
+               allocate(nbranchids(meshgeom%nbranches))
+               allocate(nbranchlongnames(meshgeom%nbranches))
+               ierr = ug_get_1d_network_branches(ncid, netid, meshgeom%nedge_nodes(1,:), meshgeom%nedge_nodes(2,:), meshgeom%nbranchlengths, meshgeom%nbranchgeometrynodes,  meshgeom%start_index, nbranchids, nbranchlongnames)
+            else
+               ierr = ug_get_1d_network_branches(ncid, netid, meshgeom%nedge_nodes(1,:), meshgeom%nedge_nodes(2,:), meshgeom%nbranchlengths, meshgeom%nbranchgeometrynodes,  meshgeom%start_index)
+            endif
+            
+            call reallocP(meshgeom%nnodex, meshgeom%nnodes, keepExisting = .false., fill = -999d0)
+            call reallocP(meshgeom%nnodey, meshgeom%nnodes, keepExisting = .false., fill = -999d0)
+            if(present(nnodeids).and.present(nnodelongnames)) then
+               allocate(nnodeids(meshgeom%nnodes))
+               allocate(nnodelongnames(meshgeom%nnodes))
+               ierr = ug_read_1d_network_nodes(ncid, netid, meshgeom%nnodex, meshgeom%nnodey, nnodeids, nnodelongnames)
+            else
+               ierr = ug_read_1d_network_nodes(ncid, netid, meshgeom%nnodex, meshgeom%nnodey)
+            endif   
+            
+         endif  
+            
       endif
 
       ! TODO: AvD: introduce ug_read_mesh_arrays( .. intent out arrays ..)
@@ -3940,11 +3955,11 @@ end function ug_get_1d_network_branches_geometry_coordinate_count
 !> This function gets the coordinates of the network nodes
 function ug_read_1d_network_nodes(ncid, netids, nodesX, nodesY, nodeids, nodelongnames) result(ierr)
 
-   integer, intent(in)             :: ncid
-   type(t_ug_network), intent(in)  :: netids 
-   double precision,intent(out)    :: nodesX(:), nodesY(:) 
-   character(len=*),intent(out)    :: nodeids(:), nodelongnames(:)
-   integer                         :: ierr
+   integer, intent(in)                      :: ncid
+   type(t_ug_network), intent(in)           :: netids 
+   double precision,intent(out)             :: nodesX(:), nodesY(:) 
+   character(len=*),optional,intent(out)    :: nodeids(:), nodelongnames(:)
+   integer                                  :: ierr
  
    ierr = nf90_get_var(ncid, netids%varids(ntid_1dnodex), nodesX)
    if(ierr /= UG_NOERR) then 
@@ -3956,12 +3971,12 @@ function ug_read_1d_network_nodes(ncid, netids, nodesX, nodesY, nodeids, nodelon
        Call SetMessage(Level_Fatal, 'could not read x coordinates of 1d network')
    end if 
    
-   ierr = nf90_get_var(ncid, netids%varids(ntid_1dnodids), nodeids)
+   if(present(nodeids)) ierr = nf90_get_var(ncid, netids%varids(ntid_1dnodids), nodeids)
    if(ierr /= UG_NOERR) then 
        Call SetMessage(Level_Fatal, 'could not read nodeids of 1d network')
    end if 
    
-   ierr = nf90_get_var(ncid, netids%varids(ntid_1dnodlongnames), nodelongnames)
+   if(present(nodelongnames)) ierr = nf90_get_var(ncid, netids%varids(ntid_1dnodlongnames), nodelongnames)
    if(ierr /= UG_NOERR) then 
        Call SetMessage(Level_Fatal, 'could not read nodelongnames of 1d network')
    end if 

@@ -505,9 +505,11 @@ function ionc_get_meshgeom(ioncid, meshid, meshgeom, start_index, includeArrays,
    type(t_ug_meshgeom), intent(out  ) :: meshgeom      !< Structure in which all mesh geometry will be stored.
    integer                            :: ierr          !< Result status, ionc_noerr if successful.
    integer                            :: networkid 
-   logical, optional,   intent(in)    :: includeArrays !< (optional) Whether or not to include coordinate arrays and connectivity tables. Default: .false., i.e., dimension counts only.
-   integer, optional,   intent(in)    :: start_index   !< (optional) The start index
    type(t_ug_network)                 :: netid 
+   
+   !Optional variables
+   logical, optional,   intent(in)    :: includeArrays !< (optional) Whether or not to include coordinate arrays and connectivity tables. Default: .false., i.e., dimension counts only.
+   integer, optional,   intent(in)    :: start_index   !< (optional) The start index   
    character(len=ug_idsLen), allocatable, optional          :: nbranchids(:), nnodeids(:), nodeids(:)       
    character(len=ug_idsLongNamesLen), allocatable, optional :: nbranchlongnames(:), nnodelongnames(:), nodelongnames(:) 
    character(len=*), optional, intent(inout)                :: network1dname, mesh1dname
@@ -528,9 +530,10 @@ function ionc_get_meshgeom(ioncid, meshid, meshgeom, start_index, includeArrays,
    endif
 
    if (present(includeArrays)) then
-      if(networkid /= -1 ) then
-         ierr = ug_get_meshgeom(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), meshgeom, includeArrays, datasets(ioncid)%ug_file%netids(networkid), nbranchids, nbranchlongnames, &
-                                nnodeids, nnodelongnames, nodeids, nodelongnames, network1dname, mesh1dname)  
+      if(networkid /= -1 .and. present(nbranchids) .and. present(nbranchlongnames) .and. present(nnodeids) .and. present(nnodelongnames).and. &
+         present(nodeids) .and. present(nodelongnames) .and. present(network1dname) .and. present(mesh1dname)) then
+         ierr = ug_get_meshgeom(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), meshgeom, includeArrays, datasets(ioncid)%ug_file%netids(networkid), & 
+                                nbranchids, nbranchlongnames, nnodeids, nnodelongnames, nodeids, nodelongnames, network1dname, mesh1dname)  
       else
          ierr = ug_get_meshgeom(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), meshgeom, includeArrays)
       endif 

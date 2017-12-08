@@ -32,6 +32,23 @@ namespace gridgeom.Tests
         //pointer to the loaded dll
         public static IntPtr _netcdf_libptr;
 
+        private void getMeshid(int ioncid, ref int meshid, int meshType, ref IoNetcdfLibWrapper wrapper)
+        {
+            // get the number meshes 
+            int numMeshes = -1;
+            int ierr = wrapper.ionc_get_number_of_meshes(ref ioncid, ref meshType, ref numMeshes);
+            Assert.That(ierr, Is.EqualTo(0));
+            Assert.That(numMeshes, Is.EqualTo(1));
+            // get the mesh id
+            IntPtr c_meshids = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * numMeshes);
+            ierr = wrapper.ionc_ug_get_mesh_ids(ref ioncid, ref meshType, ref c_meshids, ref numMeshes);
+            Assert.That(ierr, Is.EqualTo(0));
+            int[] rc_meshids = new int[numMeshes];
+            Marshal.Copy(c_meshids, rc_meshids, 0, numMeshes);
+            meshid = rc_meshids[0];
+            Marshal.FreeCoTaskMem(c_meshids);
+        }
+
         [Test]
         [NUnit.Framework.Category("ougridTests")]
         public void convert1DUgridToXY()
@@ -112,9 +129,9 @@ namespace gridgeom.Tests
         {
             //dimension info
             int s_nmeshpoints = 6;
-            int s_nbranches = 2;
-            int s_ngeopoints = 4;
-            int repetition = 100000;
+            int s_nbranches   = 2;
+            int s_ngeopoints  = 4;
+            int repetition    = 100000;
 
             //branches info
             double[] s_branchlengths = { 2.0, 2.0 };
@@ -227,33 +244,32 @@ namespace gridgeom.Tests
         /// Read a netcdf file and populate meshgeom datastructure
         /// </summary>
         [Test]
-        [NUnit.Framework.Category("readFile")]
+        [NUnit.Framework.Category("ougridTests")]
         public void createLinksFrom1d2dFile()
         {
             //mesh2d
             int twoddim = 2;
-            int twodnumnode = 121;
-            int twodnumedge = 220;
-            int twodnumface = 100;
+            int twodnumnode = 452;
+            int twodnumedge = 825;
+            int twodnumface = 375;
             int twodmaxnumfacenodes = 4;
             int twodnumlayer = 0;
             int twodlayertype = 0;
 
             //mesh1d
-            int oneddim = 1;
-            int onednumnode = 21;
-            int onednumedge = 20;
+            int oneddim     = 1;
+            int onednumnode = 25;
+            int onednumedge = 24;
             int onednumface = 0;
             int onedmaxnumfacenodes = 0;
             int onednumlayer = 0;
             int onedlayertype = 0;
             int nt_nbranches = 1;
-            int nt_ngeometry = 4;
+            int nt_ngeometry = 25;
 
             int numnodes = 10;
             int numedge = 1;
-            //string c_path = TestHelper.TestDirectoryPath() + @"\write1d.nc";
-            string c_path = TestHelper.TestFilesDirectoryPath() + @"\1d2d_ugrid_net.nc";
+            string c_path = TestHelper.TestFilesDirectoryPath() + @"\river1_full_net.nc";
             Assert.IsTrue(File.Exists(c_path));
             int ioncid = 0; //file variable 
             int mode = 0;   //create in read mode
@@ -263,8 +279,10 @@ namespace gridgeom.Tests
             var ierr = wrapperNetcdf.ionc_open(c_path, ref mode, ref ioncid, ref iconvtype, ref convversion);
             Assert.That(ierr, Is.EqualTo(0));
 
-            int meshid = 1;
+            int meshid = -1;
+            int meshType = 2;
             var meshtwoddim = new meshgeomdim();
+            getMeshid(ioncid, ref meshid, meshType, ref wrapperNetcdf);
             ierr = wrapperNetcdf.ionc_get_meshgeom_dim(ref ioncid, ref meshid, ref meshtwoddim);
             Assert.That(ierr, Is.EqualTo(0));
 
@@ -287,6 +305,7 @@ namespace gridgeom.Tests
             bool includeArrays = true;
             int start_index    = 1; //the base index of the arrays
             ierr = wrapperNetcdf.ionc_get_meshgeom(ref ioncid, ref  meshid, ref meshtwod, ref start_index, ref includeArrays);
+            Assert.That(ierr, Is.EqualTo(0));
             double[] rc_twodnodex = new double[twodnumnode];
             double[] rc_twodnodey = new double[twodnumnode];
             double[] rc_twodnodez = new double[twodnumnode];
@@ -295,8 +314,10 @@ namespace gridgeom.Tests
             Marshal.Copy(meshtwod.nodez, rc_twodnodez, 0, twodnumnode);
 
             // mesh1d 
-            int meshonedid = 2;
             var meshoneddim = new meshgeomdim();
+            meshType = 1;
+            int meshonedid = -1;
+            getMeshid(ioncid, ref meshonedid, meshType, ref wrapperNetcdf);
             ierr = wrapperNetcdf.ionc_get_meshgeom_dim(ref ioncid, ref meshonedid, ref meshoneddim);
             Assert.That(ierr, Is.EqualTo(0));
 
@@ -304,60 +325,63 @@ namespace gridgeom.Tests
             Assert.That(meshoneddim.numnode, Is.EqualTo(onednumnode));
             Assert.That(meshoneddim.numedge, Is.EqualTo(onednumedge));
             Assert.That(meshoneddim.numlayer, Is.EqualTo(onednumlayer));
+            Assert.That(meshoneddim.ngeometry, Is.EqualTo(nt_ngeometry));
             Assert.That(meshoneddim.layertype, Is.EqualTo(onedlayertype));
 
             var meshoned = new meshgeom();
-            meshoned.nodex = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * onednumnode);
-            meshoned.nodey = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * onednumnode);
-            meshoned.nodez = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * onednumnode);
-            meshoned.startIndex = 1; //get one based 
-            meshoned.edge_nodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * onednumedge * 2);
+            meshoned.nodex = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshoneddim.numnode);
+            meshoned.nodey = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshoneddim.numnode);
+            meshoned.nodez = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshoneddim.numnode);
+            meshoned.edge_nodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshoneddim.numedge * 2);
 
-            meshoned.branchidx = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * onednumnode);
+            meshoned.branchidx = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshoneddim.numnode);
             meshoned.nbranchgeometrynodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nt_nbranches);
-            meshoned.branchoffsets = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * onednumnode);
-            meshoned.ngeopointx = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nt_ngeometry);
-            meshoned.ngeopointy = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nt_ngeometry);
+            meshoned.branchoffsets = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshoneddim.numnode);
+            meshoned.ngeopointx = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshoneddim.ngeometry);
+            meshoned.ngeopointy = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshoneddim.ngeometry);
             meshoned.nbranchlengths = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nt_nbranches);
             meshoned.nedge_nodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nt_nbranches);
 
             //need to produce a file with coordinate_space = string variable
-            //ierr = wrapperNetcdf.ionc_get_meshgeom(ref ioncid, ref meshonedid, ref meshoned, ref includeArrays);
-            //Assert.That(ierr, Is.EqualTo(0));
+            ierr = wrapperNetcdf.ionc_get_meshgeom(ref ioncid, ref meshonedid, ref meshoned, ref start_index, ref includeArrays);
+            Assert.That(ierr, Is.EqualTo(0));
 
-            //double[] rc_onednodex = new double[onednumnode];
-            //double[] rc_onednodey = new double[onednumnode];
-            //double[] rc_onednodez = new double[onednumnode];
-            //Marshal.Copy(meshoned.nodex, rc_onednodex, 0, onednumnode);
-            //Marshal.Copy(meshoned.nodey, rc_onednodey, 0, onednumnode);
-            //Marshal.Copy(meshoned.nodez, rc_onednodez, 0, onednumnode);
+            double[] rc_onednodex = new double[onednumnode];
+            double[] rc_onednodey = new double[onednumnode];
+            double[] rc_onednodez = new double[onednumnode];
+            Marshal.Copy(meshoned.nodex, rc_onednodex, 0, onednumnode);
+            Marshal.Copy(meshoned.nodey, rc_onednodey, 0, onednumnode);
+            Marshal.Copy(meshoned.nodez, rc_onednodez, 0, onednumnode);
 
-            ////ggeo_convert to fill in kn matrix, so we can call make1D2Dinternalnetlinks_dll
-            //var wrapperGridgeom = new GridGeomLibWrapper();
-            //ierr = wrapperGridgeom.ggeo_convert(ref meshoned, ref meshoneddim);
-            //Assert.That(ierr, Is.EqualTo(0));
-            //ierr = wrapperGridgeom.ggeo_convert(ref meshtwod, ref meshtwoddim);
-            //Assert.That(ierr, Is.EqualTo(0));
-            ////convert ugrid to xy coordinates
-            //ierr = wrapperGridgeom.ggeo_get_xy_coordinates(ref meshoned.branchidx, ref meshoned.branchoffsets, ref meshoned.ngeopointx,
-            //    ref meshoned.ngeopointy, ref meshoned.nbranchgeometrynodes, ref meshoned.nbranchlengths, ref meshoned.nodex, ref meshoned.nodey, ref meshoneddim.nbranches, ref meshoneddim.ngeometry, ref  meshoneddim.numnode);
-            //Assert.That(ierr, Is.EqualTo(0));
-            
-            ////call make1d2dlinks, no argument needed (all in memory)
-            //ierr = wrapperGridgeom.ggeo_make1D2Dinternalnetlinks();
-            //Assert.That(ierr, Is.EqualTo(0));
+            //gridwrapper
+            var wrapperGridgeom = new GridGeomLibWrapper();
+            ierr = wrapperGridgeom.ggeo_get_xy_coordinates(ref meshoned.branchidx, ref meshoned.branchoffsets, ref meshoned.ngeopointx,
+                ref meshoned.ngeopointy, ref meshoned.nbranchgeometrynodes, ref meshoned.nbranchlengths, ref meshoned.nodex, ref meshoned.nodey, ref meshoneddim.nbranches, ref meshoneddim.ngeometry, ref meshoneddim.numnode);
+            Assert.That(ierr, Is.EqualTo(0));
 
-            ////free arrays
-            //Marshal.FreeCoTaskMem(meshtwod.nodex);
-            //Marshal.FreeCoTaskMem(meshtwod.nodey);
-            //Marshal.FreeCoTaskMem(meshtwod.nodez);
-            //Marshal.FreeCoTaskMem(meshoned.edge_nodes);
-            
-            //Marshal.FreeCoTaskMem(meshoned.nodex);
-            //Marshal.FreeCoTaskMem(meshoned.nodey);
-            //Marshal.FreeCoTaskMem(meshoned.nodez);
-            //Marshal.FreeCoTaskMem(meshtwod.edge_nodes);
-            //Marshal.FreeCoTaskMem(meshoned.nedge_nodes);
+            //ggeo_convert to fill in kn matrix, so we can call make1D2Dinternalnetlinks_dll
+            ierr = wrapperGridgeom.ggeo_convert(ref meshoned, ref meshoneddim);
+            Assert.That(ierr, Is.EqualTo(0));
+            ierr = wrapperGridgeom.ggeo_convert(ref meshtwod, ref meshtwoddim);
+            Assert.That(ierr, Is.EqualTo(0));
+            //convert ugrid to xy coordinates
+            Assert.That(ierr, Is.EqualTo(0));
+
+            //call make1d2dlinks, no argument needed (all in memory)
+            ierr = wrapperGridgeom.ggeo_make1D2Dinternalnetlinks();
+            Assert.That(ierr, Is.EqualTo(0));
+
+            //free arrays
+            Marshal.FreeCoTaskMem(meshtwod.nodex);
+            Marshal.FreeCoTaskMem(meshtwod.nodey);
+            Marshal.FreeCoTaskMem(meshtwod.nodez);
+            Marshal.FreeCoTaskMem(meshoned.edge_nodes);
+
+            Marshal.FreeCoTaskMem(meshoned.nodex);
+            Marshal.FreeCoTaskMem(meshoned.nodey);
+            Marshal.FreeCoTaskMem(meshoned.nodez);
+            Marshal.FreeCoTaskMem(meshtwod.edge_nodes);
+            Marshal.FreeCoTaskMem(meshoned.nedge_nodes);
 
         }
 
@@ -367,7 +391,7 @@ namespace gridgeom.Tests
         /// 1D discretization and links are saved in memory and written afterwards. 
         /// </summary>
         [Test]
-        [NUnit.Framework.Category("readFile")]
+        [NUnit.Framework.Category("ougridTests")]
         public void createLinksFrom2dFile()
         {
             //mesh2d
@@ -530,7 +554,7 @@ namespace gridgeom.Tests
         /// 1D discretization and links are saved in memory and written afterwards. 
         /// </summary>
         [Test]
-        [NUnit.Framework.Category("readFileThreeBranches")]
+        [NUnit.Framework.Category("ougridTests")]
         public void createLinksFrom2dFileThreeBranches()
         {
             //mesh2d

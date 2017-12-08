@@ -682,7 +682,6 @@ namespace UGrid.tests
             Assert.That(ierr, Is.EqualTo(0));
 
             StringBuilder l_meshname = new StringBuilder(meshname);
-            StringBuilder l_linkmeshname = new StringBuilder(linkmeshname);
             int l_nmeshpoints = nmeshpoints;
             int l_nedgenodes = nedgenodes;
             int l_nBranches = nBranches;
@@ -1179,8 +1178,7 @@ namespace UGrid.tests
 
             for (int i = 0; i < l_nnodes; i++)
             {
-                string tmpstring = "";
-                tmpstring = nodesids[i];
+                string tmpstring = nodesids[i];
                 tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.idssize, ' ');
                 l_nodesinfo[i].ids = tmpstring.ToCharArray();
                 tmpstring = nodeslongNames[i];
@@ -1190,8 +1188,7 @@ namespace UGrid.tests
 
             for (int i = 0; i < l_nbranches; i++)
             {
-                string tmpstring = "";
-                tmpstring = branchids[i];
+                string tmpstring = branchids[i];
                 tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.idssize, ' ');
                 l_branchinfo[i].ids = tmpstring.ToCharArray();
                 tmpstring = branchlongNames[i];
@@ -1364,7 +1361,7 @@ namespace UGrid.tests
             {
                 //1. Allocates the arrays defining the network 
                 int firstCaseNumberOfNodes = 100000; //5000 limit win64, without stack increase
-                string tmpstring = "";
+                string tmpstring;
 
                 int l_nnodes = firstCaseNumberOfNodes + 1;
                 int l_nbranches = firstCaseNumberOfNodes;
@@ -1727,7 +1724,7 @@ namespace UGrid.tests
 
             //3. Now we create a new empty file where to save 1d and 2d meshes
             int targetioncid = -1; //file id  
-            int targetmode = 1; //create in write mode
+            int targetmode   =  1;    //create in write mode
             string target_path = TestHelper.TestDirectoryPath() + "/river1_full_net.nc";
             TestHelper.DeleteIfExists(target_path);
             Assert.IsFalse(File.Exists(target_path));
