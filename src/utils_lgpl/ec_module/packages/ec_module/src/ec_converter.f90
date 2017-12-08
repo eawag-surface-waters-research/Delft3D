@@ -279,8 +279,10 @@ module m_ec_converter
          integer  :: fmask(4) !< return value of findnm
          real(hp) :: fsum 
          type(tEcMask), pointer :: srcmask 
+         real(hp), dimension(:), pointer ::  src_x, src_y
+         real(hp)                        ::  tgt_x, tgt_y
+         integer                         ::  nsx, nsy
          
-         logical :: Lincreasex, Lincreasey
          !
          success = .false.
          sourceElementSet => null()
@@ -328,29 +330,37 @@ module m_ec_converter
 
                select case (sourceElementSet%ofType)
                   case (elmSetType_spheric_ortho, elmSetType_Cartesian_ortho)
-               
-!                    determine if x and y are increasing
-                     Lincreasex = ( (sourceElementSet%x(2) - sourceElementSet%x(1)) > 0)
-                     Lincreasey = ( (sourceElementSet%y(2) - sourceElementSet%y(1)) > 0)
-               
+                     src_x=>sourceElementSet%x
+                     src_y=>sourceElementSet%y
+                     nsx=n_cols
+                     nsy=n_rows
                      do i=1, n_points
+                        tgt_x=targetElementSet%x(i)
+                        tgt_y=targetElementSet%y(i)
+                        np = 0
+                        mp = 0
+                        if ((tgt_x-src_x(1))*(src_x(nsx)-tgt_x)>=0) then			! point is within in the range  
+                           do mp=1, nsx-1
+                              if ((tgt_x-src_x(mp))*(src_x(mp+1)-tgt_x)>=0) exit	! find m
+                           end do
+                           do np=1, nsy-1
+                              if ((tgt_y-src_y(np))*(src_y(np+1)-tgt_y)>=0) exit	! find n
+                           end do
+                        end if
+                        if ((np<=0 .or. np>=nsy) .or. (mp<=0 .or. mp>=nsx)) then    ! if one coordinate out of bounds, both indices are zero
+                           np=0
+                           mp=0
+                        end if
                      
-!                       assumption: x and y are increasing
-                        nn = maxloc(sourceElementSet%x, mask=(sourceElementSet%x<=targetElementSet%x(i)))
-                        mp = nn(1)
-                        if ( .not.Lincreasex ) mp = max(mp-1,1)
-                        nn = maxloc(sourceElementSet%y, mask=(sourceElementSet%y<=targetElementSet%y(i)))
-                        np = nn(1)
-                        if ( .not.Lincreasey ) np = max(np-1,1)
-
-                        wx = (targetElementSet%x(i) - sourceElementSet%x(mp))/(sourceElementSet%x(mp+1) - sourceElementSet%x(mp)) 
-                        wy = (targetElementSet%y(i) - sourceElementSet%y(np))/(sourceElementSet%y(np+1) - sourceElementSet%y(np)) 
-
-                        do jj=0,1
-                           do ii=0,1
-                              weight%weightFactors(1+ii+2*jj,i) = ((1.-wx)*(1-ii) + wx*ii) * ((1.-wy)*(1-jj) + wy*jj)
+                        if (np>0 .and. mp>0) then
+                           wx = (targetElementSet%x(i) - sourceElementSet%x(mp))/(sourceElementSet%x(mp+1) - sourceElementSet%x(mp)) 
+                           wy = (targetElementSet%y(i) - sourceElementSet%y(np))/(sourceElementSet%y(np+1) - sourceElementSet%y(np)) 
+                           do jj=0,1
+                              do ii=0,1
+                                 weight%weightFactors(1+ii+2*jj,i) = ((1.-wx)*(1-ii) + wx*ii) * ((1.-wy)*(1-jj) + wy*jj)
+                              enddo
                            enddo
-                        enddo
+                        endif
 
                         weight%indices(1,i) = mp
                         weight%indices(2,i) = np
