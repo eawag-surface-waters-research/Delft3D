@@ -329,18 +329,22 @@ namespace gridgeom.Tests
             Assert.That(meshoneddim.layertype, Is.EqualTo(onedlayertype));
 
             var meshoned = new meshgeom();
-            meshoned.nodex = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshoneddim.numnode);
-            meshoned.nodey = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshoneddim.numnode);
-            meshoned.nodez = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshoneddim.numnode);
+            //mesh variables
+            meshoned.nodex  = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshoneddim.numnode);
+            meshoned.nodey  = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshoneddim.numnode);
+            meshoned.nodez  = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshoneddim.numnode);
             meshoned.edge_nodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshoneddim.numedge * 2);
-
+            //network variables
+            meshoned.nnodex = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshoneddim.nnodes);
+            meshoned.nnodey = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshoneddim.nnodes);
             meshoned.branchidx = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshoneddim.numnode);
-            meshoned.nbranchgeometrynodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nt_nbranches);
+            meshoned.nbranchgeometrynodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshoneddim.nbranches);
             meshoned.branchoffsets = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshoneddim.numnode);
             meshoned.ngeopointx = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshoneddim.ngeometry);
             meshoned.ngeopointy = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshoneddim.ngeometry);
-            meshoned.nbranchlengths = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nt_nbranches);
-            meshoned.nedge_nodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nt_nbranches);
+            meshoned.nbranchlengths = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshoneddim.nbranches);
+            meshoned.nedge_nodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshoneddim.nbranches);
+            meshoned.nbranchorder = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshoneddim.nbranches);
 
             //need to produce a file with coordinate_space = string variable
             ierr = wrapperNetcdf.ionc_get_meshgeom(ref ioncid, ref meshonedid, ref meshoned, ref start_index, ref includeArrays);
@@ -370,19 +374,34 @@ namespace gridgeom.Tests
             //call make1d2dlinks, no argument needed (all in memory)
             ierr = wrapperGridgeom.ggeo_make1D2Dinternalnetlinks();
             Assert.That(ierr, Is.EqualTo(0));
+            //deallocate memory of gridgeom
+            ierr = wrapperGridgeom.ggeo_deallocate();
+            Assert.That(ierr, Is.EqualTo(0));
 
             //free arrays
+             //2d
             Marshal.FreeCoTaskMem(meshtwod.nodex);
             Marshal.FreeCoTaskMem(meshtwod.nodey);
             Marshal.FreeCoTaskMem(meshtwod.nodez);
-            Marshal.FreeCoTaskMem(meshoned.edge_nodes);
+            Marshal.FreeCoTaskMem(meshtwod.edge_nodes);
 
+             //1d
+                //mesh variables
             Marshal.FreeCoTaskMem(meshoned.nodex);
             Marshal.FreeCoTaskMem(meshoned.nodey);
             Marshal.FreeCoTaskMem(meshoned.nodez);
-            Marshal.FreeCoTaskMem(meshtwod.edge_nodes);
+            //Marshal.FreeCoTaskMem(meshoned.edge_nodes);
+            //network variables
+            //Marshal.FreeCoTaskMem(meshoned.nnodex);
+            Marshal.FreeCoTaskMem(meshoned.nnodey);
+            Marshal.FreeCoTaskMem(meshoned.branchidx);
+            Marshal.FreeCoTaskMem(meshoned.nbranchgeometrynodes);
+            Marshal.FreeCoTaskMem(meshoned.branchoffsets);
+            Marshal.FreeCoTaskMem(meshoned.ngeopointx);
+            Marshal.FreeCoTaskMem(meshoned.ngeopointy);
+            Marshal.FreeCoTaskMem(meshoned.nbranchlengths);
             Marshal.FreeCoTaskMem(meshoned.nedge_nodes);
-
+            Marshal.FreeCoTaskMem(meshoned.nbranchorder);
         }
 
         /// <summary>

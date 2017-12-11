@@ -38,7 +38,6 @@ namespace General.tests
 
         public IntPtr layer_zs;
         public IntPtr interface_zs;
-        public int startIndex;
     }
 
     [StructLayout(LayoutKind.Sequential)]

@@ -528,15 +528,17 @@ function ionc_get_meshgeom(ioncid, meshid, meshgeom, start_index, includeArrays,
    else
       meshgeom%start_index = 1 !As requested by fortran applications
    endif
-
+   
    if (present(includeArrays)) then
       if(networkid /= -1 .and. present(nbranchids) .and. present(nbranchlongnames) .and. present(nnodeids) .and. present(nnodelongnames).and. &
          present(nodeids) .and. present(nodelongnames) .and. present(network1dname) .and. present(mesh1dname)) then
          ierr = ug_get_meshgeom(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), meshgeom, includeArrays, datasets(ioncid)%ug_file%netids(networkid), & 
                                 nbranchids, nbranchlongnames, nnodeids, nnodelongnames, nodeids, nodelongnames, network1dname, mesh1dname)  
+      else if (networkid /= -1) then
+         ierr = ug_get_meshgeom(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), meshgeom, includeArrays, datasets(ioncid)%ug_file%netids(networkid))
       else
          ierr = ug_get_meshgeom(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), meshgeom, includeArrays)
-      endif 
+      endif
    else
       if(networkid /= -1 ) then
          ierr = ug_get_meshgeom(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), meshgeom, netid = datasets(ioncid)%ug_file%netids(networkid))

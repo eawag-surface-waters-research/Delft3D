@@ -1293,6 +1293,7 @@ function ionc_get_meshgeom_dim_dll(ioncid, meshid, c_meshgeomdim) result(ierr) b
    c_meshgeomdim%maxnumfacenodes = meshgeom%maxnumfacenodes   
    c_meshgeomdim%numlayer        = meshgeom%numlayer
    c_meshgeomdim%layertype       = meshgeom%layertype
+   c_meshgeomdim%nnodes          = meshgeom%nnodes
    c_meshgeomdim%nbranches       = meshgeom%nbranches
    c_meshgeomdim%ngeometry       = meshgeom%ngeometry
    

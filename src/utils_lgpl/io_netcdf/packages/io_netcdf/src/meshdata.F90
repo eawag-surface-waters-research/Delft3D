@@ -147,7 +147,6 @@ type, bind(C) :: c_t_ug_meshgeom
    
    type(c_ptr)              :: layer_zs           !< Vertical coordinates of the mesh layers' center (either z or sigma).
    type(c_ptr)              :: interface_zs       !< Vertical coordinates of the mesh layers' interface (either z or sigma).
-   integer(kind=c_int)      :: start_index        !< The base index of the arrays
 
 end type c_t_ug_meshgeom
 
@@ -194,135 +193,135 @@ function convert_meshgeom_to_cptr(meshgeom, c_meshgeom) result(ierr)
    ierr = 0
    !! array variables
    if (associated(meshgeom%edge_nodes)) then
-      call c_f_pointer(c_meshgeom%edge_nodes, edge_nodes, (/ size(meshgeom%edge_nodes,1), size(meshgeom%edge_nodes,2)/) )
+      call c_f_pointer(c_meshgeom%edge_nodes, edge_nodes, shape(meshgeom%edge_nodes))
       edge_nodes = meshgeom%edge_nodes
    endif
    
    if (associated(meshgeom%face_nodes)) then
-      call c_f_pointer(c_meshgeom%face_nodes, face_nodes, (/ size(meshgeom%face_nodes,1), size(meshgeom%face_nodes,2)/) )
+      call c_f_pointer(c_meshgeom%face_nodes, face_nodes, shape(meshgeom%face_nodes))
       face_nodes= meshgeom%face_nodes
    endif
    
    if (associated(meshgeom%edge_faces)) then
-      call c_f_pointer(c_meshgeom%edge_faces, edge_faces, (/ size(meshgeom%edge_faces,1), size(meshgeom%edge_faces,2)/) )
+      call c_f_pointer(c_meshgeom%edge_faces, edge_faces, shape(meshgeom%edge_faces))
       edge_faces= meshgeom%edge_faces
    endif
    
    if (associated(meshgeom%face_edges)) then
-      call c_f_pointer(c_meshgeom%face_edges, face_edges, (/ size(meshgeom%face_edges,1), size(meshgeom%face_edges,2)/) )
+      call c_f_pointer(c_meshgeom%face_edges, face_edges, shape(meshgeom%face_edges))
       face_edges= meshgeom%face_edges
    endif
    
    if (associated(meshgeom%face_links)) then
-      call c_f_pointer(c_meshgeom%face_links, face_links, (/ size(meshgeom%face_links,1), size(meshgeom%face_links,2)/) )
+      call c_f_pointer(c_meshgeom%face_links, face_links, shape(face_links))
       face_links= meshgeom%face_links
    endif
    
    !Network1d variables
    if (associated(meshgeom%nnodex)) then
-      call c_f_pointer(c_meshgeom%nnodex, nnodex, (/ size(meshgeom%nnodex)/))
+      call c_f_pointer(c_meshgeom%nnodex, nnodex, shape(meshgeom%nnodex))
       nnodex = meshgeom%nnodex
    endif
    
    if (associated(meshgeom%nnodey)) then
-      call c_f_pointer(c_meshgeom%nnodey, nnodey, (/ size(meshgeom%nnodey)/))
+      call c_f_pointer(c_meshgeom%nnodey, nnodey,shape(meshgeom%nnodey))
       nnodey = meshgeom%nnodey
    endif
    
    if (associated(meshgeom%nedge_nodes)) then
-      call c_f_pointer(c_meshgeom%nedge_nodes,nedge_nodes , (/ size(meshgeom%nedge_nodes, 1), size(meshgeom%nedge_nodes, 2)/))
+      call c_f_pointer(c_meshgeom%nedge_nodes,nedge_nodes , shape(meshgeom%nedge_nodes))
       nedge_nodes= meshgeom%nedge_nodes
    endif
    
    if (associated(meshgeom%nbranchlengths)) then
-      call c_f_pointer(c_meshgeom%nbranchlengths, nbranchlengths, (/ size(meshgeom%nbranchlengths)/))
+      call c_f_pointer(c_meshgeom%nbranchlengths, nbranchlengths, shape(meshgeom%nbranchlengths))
       nbranchlengths= meshgeom%nbranchlengths
    endif
    
    if (associated(meshgeom%nbranchgeometrynodes)) then
-      call c_f_pointer(c_meshgeom%nbranchgeometrynodes, nbranchgeometrynodes , (/ size(meshgeom%nbranchgeometrynodes)/))
+      call c_f_pointer(c_meshgeom%nbranchgeometrynodes, nbranchgeometrynodes , shape(meshgeom%nbranchgeometrynodes))
       nbranchgeometrynodes = meshgeom%nbranchgeometrynodes
    endif
    
    if (associated(meshgeom%ngeopointx)) then
-      call c_f_pointer(c_meshgeom%ngeopointx, ngeopointx , (/ size(meshgeom%ngeopointx)/))
+      call c_f_pointer(c_meshgeom%ngeopointx, ngeopointx , shape(meshgeom%ngeopointx))
       ngeopointx = meshgeom%ngeopointx
    endif
    
    if (associated(meshgeom%ngeopointy)) then
-      call c_f_pointer(c_meshgeom%ngeopointy, ngeopointy , (/ size(meshgeom%ngeopointy)/))
+      call c_f_pointer(c_meshgeom%ngeopointy, ngeopointy , shape(meshgeom%ngeopointy))
       ngeopointy = meshgeom%ngeopointy
    endif
    
    if (associated(meshgeom%nbranchorder)) then
-      call c_f_pointer(c_meshgeom%nbranchorder, nbranchorder, (/ size(meshgeom%nbranchorder)/))
+      call c_f_pointer(c_meshgeom%nbranchorder, nbranchorder, shape(meshgeom%nbranchorder))
       nbranchorder = meshgeom%nbranchorder
    endif
    
    !Mesh1d
    if (associated(meshgeom%branchidx)) then
-      call c_f_pointer(c_meshgeom%branchidx, branchidx, (/ size(meshgeom%branchidx,1)/) )
+      call c_f_pointer(c_meshgeom%branchidx, branchidx, shape(meshgeom%branchidx))
       branchidx = meshgeom%branchidx
    endif
       
    if (associated(meshgeom%branchoffsets)) then
-      call c_f_pointer(c_meshgeom%branchoffsets, branchoffsets, (/ size(meshgeom%branchoffsets,1)/) )
+      call c_f_pointer(c_meshgeom%branchoffsets, branchoffsets, shape(meshgeom%branchoffsets))
       branchoffsets = meshgeom%branchoffsets
    endif
                
    !mesh nodes
    if (associated(meshgeom%nodex)) then
-      call c_f_pointer(c_meshgeom%nodex, nodex, (/ size(meshgeom%nodex,1) /) )
+      call c_f_pointer(c_meshgeom%nodex, nodex, shape(meshgeom%nodex))
       nodex = meshgeom%nodex
    endif
 
    if (associated(meshgeom%nodey)) then
-      call c_f_pointer(c_meshgeom%nodey, nodey, (/ size(meshgeom%nodey,1)/) )
+      call c_f_pointer(c_meshgeom%nodey, nodey, shape(meshgeom%nodey))
       nodey = meshgeom%nodey
    endif
    
    if (associated(meshgeom%nodez)) then
-      call c_f_pointer(c_meshgeom%nodez, nodez, (/ size(meshgeom%nodez,1)/) )
+      call c_f_pointer(c_meshgeom%nodez, nodez, shape(meshgeom%nodez))
       nodez = meshgeom%nodez
    endif
 
    !mesh edges
    if (associated(meshgeom%edgex)) then
-      call c_f_pointer(c_meshgeom%edgex, edgex, (/ size(meshgeom%edgex,1)/) )
+      call c_f_pointer(c_meshgeom%edgex, edgex, shape(meshgeom%edgex))
       edgex= meshgeom%edgex
    endif
    if (associated(meshgeom%edgey)) then
-      call c_f_pointer(c_meshgeom%edgey, edgey, (/ size(meshgeom%edgey,1)/) )
+      call c_f_pointer(c_meshgeom%edgey, edgey, shape(meshgeom%edgey))
       edgey= meshgeom%edgey
    endif
    if (associated(meshgeom%edgez)) then
-      call c_f_pointer(c_meshgeom%edgez, edgez, (/ size(meshgeom%edgez,1)/) )
+      call c_f_pointer(c_meshgeom%edgez, edgez, shape(meshgeom%edgez))
       edgez= meshgeom%edgez
    endif   
    
    !mesh faces
    if (associated(meshgeom%facex)) then
-      call c_f_pointer(c_meshgeom%facex, facex, (/ size(meshgeom%facex,1)/) )
+      call c_f_pointer(c_meshgeom%facex, facex, shape(meshgeom%facex))
       facex= meshgeom%facex
    endif
    if (associated(meshgeom%facey)) then
-      call c_f_pointer(c_meshgeom%facey, facey, (/ size(meshgeom%facey,1)/) )
+      call c_f_pointer(c_meshgeom%facey, facey, shape(meshgeom%facey))
       facey= meshgeom%facey
    endif
    if (associated(meshgeom%facez)) then
-      call c_f_pointer(c_meshgeom%facez, facez, (/ size(meshgeom%facez,1)/) )
+      call c_f_pointer(c_meshgeom%facez, facez, shape(meshgeom%facez))
       facez= meshgeom%facez
    endif
    
    !layer
    if (associated(meshgeom%layer_zs)) then
-      call c_f_pointer(c_meshgeom%layer_zs, layer_zs, (/ size(meshgeom%layer_zs,1)/) )
+      call c_f_pointer(c_meshgeom%layer_zs, layer_zs, shape(meshgeom%layer_zs))
       layer_zs= meshgeom%layer_zs
    endif
 
    !interface
    if (associated(meshgeom%interface_zs)) then
-      call c_f_pointer(c_meshgeom%interface_zs, interface_zs, (/ size(meshgeom%interface_zs,1)/) )
+      call c_f_pointer(c_meshgeom%interface_zs, interface_zs, shape(meshgeom%interface_zs))
       interface_zs= meshgeom%interface_zs
    endif
    
@@ -349,9 +348,6 @@ function convert_cptr_to_meshgeom(c_meshgeom, c_meshgeomdim, meshgeom) result(ie
    meshgeom%nnodes = c_meshgeomdim%nnodes  
    meshgeom%nbranches = c_meshgeomdim%nbranches       
    meshgeom%ngeometry = c_meshgeomdim%ngeometry
-   
-   !start index is an array property
-   meshgeom%start_index = c_meshgeom%start_index
   
    ierr = 0
    

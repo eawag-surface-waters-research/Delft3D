@@ -2360,17 +2360,16 @@ function ug_get_meshgeom(ncid, meshids, meshgeom, includeArrays, netid, nbranchi
    use m_alloc
 
    integer,             intent(in   ) :: ncid          !< ID of already opened data set.
-   type(t_ug_mesh),     intent(in)    :: meshids       !< Structure with all mesh topology variable ids (should be initialized already).
+   type(t_ug_mesh),     intent(in   ) :: meshids       !< Structure with all mesh topology variable ids (should be initialized already).
    type(t_ug_meshgeom), intent(inout) :: meshgeom      !< Structure in which all mesh geometry will be stored.
    logical, optional,   intent(in   ) :: includeArrays !< (optional) Whether or not to include coordinate arrays and connectivity tables. Default: .false., i.e., dimension counts only.
    integer                            :: ierr          !< Result status (UG_NOERR if successful).
-   
-   ! Variables for 1d ugrid
-   type(t_ug_network), optional, intent(in   )                                  :: netid     !< (optional) The network associated with the mesh (for 1d Ugrid)
    integer,allocatable                                                          :: sourcenodeid(:), targetnodeid(:)
-   character(len=ug_idsLen),allocatable, optional, intent(inout)                :: nbranchids(:), nnodeids(:),  nodeids(:)
+   ! Variables for 1d ugrid
+   type(t_ug_network),                             optional, intent(in   )      :: netid     !< (optional) The network associated with the mesh (for 1d Ugrid)
+   character(len=ug_idsLen),          allocatable, optional, intent(inout)      :: nbranchids(:), nnodeids(:),  nodeids(:)
    character(len=ug_idsLongNamesLen), allocatable, optional, intent(inout)      :: nbranchlongnames(:), nnodelongnames(:), nodelongnames(:)
-   character(len=*), optional, intent(inout)                                    :: network1dname, mesh1dname
+   character(len=*),                               optional, intent(inout)      :: network1dname, mesh1dname
    integer                                                                      :: i, k, idxstart, idxbr, cbranchid, idxend
 
    logical :: includeArrays_
@@ -2423,44 +2422,43 @@ function ug_get_meshgeom(ncid, meshids, meshgeom, includeArrays, netid, nbranchi
       call reallocP(meshgeom%nodex, meshgeom%numnode, keepExisting = .false., fill = -999d0)
       call reallocP(meshgeom%nodey, meshgeom%numnode, keepExisting = .false., fill = -999d0)
       call reallocP(meshgeom%nodez, meshgeom%numnode, keepExisting = .false., fill = -999d0)
+      call reallocP(meshgeom%edge_nodes, (/ 2, meshgeom%numedge /), keepExisting=.false.)
       
+      ! Edge nodes 
+      ierr = ug_get_edge_nodes(ncid, meshids, meshgeom%edge_nodes, meshgeom%start_index)
+          
       ! Get the node coordinates
       if (meshgeom%dim == 2) then
           ierr = ug_get_node_coordinates(ncid, meshids, meshgeom%nodex, meshgeom%nodey)
           ! TODO: AvD: include zk coordinates
-      
-          !
-          ! Edges
-          !
-          call reallocP(meshgeom%edge_nodes, (/ 2, meshgeom%numedge /), keepExisting=.false.)
-          ierr = ug_get_edge_nodes(ncid, meshids, meshgeom%edge_nodes, meshgeom%start_index)
+
       endif
       
       if (meshgeom%dim == 1) then
-         
+
          !Mesh variables
          call reallocP(meshgeom%branchidx, meshgeom%numnode, keepExisting = .false., fill = -999)
          call reallocP(meshgeom%branchoffsets, meshgeom%numnode, keepExisting = .false., fill = -999d0)
          ierr = ug_get_1d_mesh_discretisation_points(ncid, meshids, meshgeom%branchidx, meshgeom%branchoffsets, meshgeom%start_index)
-         if(present(network1dname)) then
-               ierr = ug_get_network_name_from_mesh1d(ncid, meshids, network1dname)
+         if (present(network1dname)) then
+            ierr = ug_get_network_name_from_mesh1d(ncid, meshids, network1dname)
          endif
          if(present(nodeids).and.present(nodelongnames)) then
-               allocate(nodeids(meshgeom%numnode))
-               allocate(nodelongnames(meshgeom%numnode))
-               ierr = nf90_get_var(ncid, meshids%varids(mid_node_ids), nodeids)
-               ierr = nf90_get_var(ncid, meshids%varids(mid_node_longnames), nodelongnames)
-         endif  
-         
+            allocate(nodeids(meshgeom%numnode))
+            allocate(nodelongnames(meshgeom%numnode))
+            ierr = nf90_get_var(ncid, meshids%varids(mid_node_ids), nodeids)
+            ierr = nf90_get_var(ncid, meshids%varids(mid_node_longnames), nodelongnames)
+         endif
+
          !Network variables
          if(present(netid)) then
+
             call reallocP(meshgeom%nbranchorder, meshgeom%nbranches, keepExisting = .false., fill = -999)
             call reallocP(meshgeom%ngeopointx, meshgeom%ngeometry, keepExisting = .false., fill = -999d0)
             call reallocP(meshgeom%ngeopointy, meshgeom%ngeometry, keepExisting = .false., fill = -999d0)
             ierr = ug_get_1d_network_branchorder(ncid, netid, meshgeom%nbranchorder)
             ierr = ug_read_1d_network_branches_geometry(ncid, netid, meshgeom%ngeopointx, meshgeom%ngeopointy)
-            
-            
+
             call reallocP(meshgeom%nbranchgeometrynodes, meshgeom%nbranches, keepExisting = .false., fill = -999)
             call reallocP(meshgeom%nedge_nodes,(/ 2, meshgeom%nbranches /), keepExisting = .false.)
             call reallocP(meshgeom%nbranchlengths, meshgeom%nbranches, keepExisting = .false., fill = -999d0)
@@ -2471,7 +2469,7 @@ function ug_get_meshgeom(ncid, meshids, meshgeom, includeArrays, netid, nbranchi
             else
                ierr = ug_get_1d_network_branches(ncid, netid, meshgeom%nedge_nodes(1,:), meshgeom%nedge_nodes(2,:), meshgeom%nbranchlengths, meshgeom%nbranchgeometrynodes,  meshgeom%start_index)
             endif
-            
+
             call reallocP(meshgeom%nnodex, meshgeom%nnodes, keepExisting = .false., fill = -999d0)
             call reallocP(meshgeom%nnodey, meshgeom%nnodes, keepExisting = .false., fill = -999d0)
             if(present(nnodeids).and.present(nnodelongnames)) then
@@ -2480,10 +2478,10 @@ function ug_get_meshgeom(ncid, meshids, meshgeom, includeArrays, netid, nbranchi
                ierr = ug_read_1d_network_nodes(ncid, netid, meshgeom%nnodex, meshgeom%nnodey, nnodeids, nnodelongnames)
             else
                ierr = ug_read_1d_network_nodes(ncid, netid, meshgeom%nnodex, meshgeom%nnodey)
-            endif   
-            
-         endif  
-            
+            endif
+
+         endif
+
       endif
 
       ! TODO: AvD: introduce ug_read_mesh_arrays( .. intent out arrays ..)
