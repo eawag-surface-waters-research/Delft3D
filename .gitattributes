@@ -2386,6 +2386,7 @@ src/engines_gpl/waq/packages/waq_kernel/src/waq_process/adspo4.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/advtra.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/apatit.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/atmdep.f -text
+src/engines_gpl/waq/packages/waq_kernel/src/waq_process/attout.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/bacmrt.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/bodcod.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/botmin.f -text
@@ -2395,6 +2396,7 @@ src/engines_gpl/waq/packages/waq_kernel/src/waq_process/calchz.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/calsed.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/caltau.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/calwav.f -text
+src/engines_gpl/waq/packages/waq_kernel/src/waq_process/cascad.f90 -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/clcrad.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/consbl.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/covmac.f -text
