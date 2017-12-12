@@ -2684,3 +2684,28 @@ stocfl,stocsu,stocsc
 "dFlocIM3  ","IM3       ",   1.00000
 "dAtmDepSal","Salinity  ",   1.00000
 "dAtmDepEcl","Ecoli     ",   1.00000
+"dDecayC1  ","Cascade1  ",  -1.00000
+"dDecayC2  ","Cascade2  ",  -1.00000
+"dDecayC3  ","Cascade3  ",  -1.00000
+"dDecayC4  ","Cascade4  ",  -1.00000
+"dDecayC5  ","Cascade5  ",  -1.00000
+"dTransC1C2","Cascade1  ",  -1.00000
+"dTransC1C2","Cascade2  ",   1.00000
+"dTransC1C3","Cascade1  ",  -1.00000
+"dTransC1C3","Cascade3  ",   1.00000
+"dTransC1C4","Cascade1  ",  -1.00000
+"dTransC1C4","Cascade4  ",   1.00000
+"dTransC1C5","Cascade1  ",  -1.00000
+"dTransC1C5","Cascade5  ",   1.00000
+"dTransC2C3","Cascade2  ",  -1.00000
+"dTransC2C3","Cascade3  ",   1.00000
+"dTransC2C4","Cascade2  ",  -1.00000
+"dTransC2C4","Cascade4  ",   1.00000
+"dTransC2C5","Cascade2  ",  -1.00000
+"dTransC2C5","Cascade5  ",   1.00000
+"dTransC3C4","Cascade3  ",  -1.00000
+"dTransC3C4","Cascade4  ",   1.00000
+"dTransC3C5","Cascade3  ",  -1.00000
+"dTransC3C5","Cascade5  ",   1.00000
+"dTransC4C5","Cascade4  ",  -1.00000
+"dTransC4C5","Cascade5  ",   1.00000

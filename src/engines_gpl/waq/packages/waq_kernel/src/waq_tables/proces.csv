@@ -676,3 +676,5 @@ procid,procco,procfo,procnm
 "IM_Floceq ",123,"FLOCEQ    ","Flocculation equilibrium emperical model Manning  "
 "AtmDep_Sal",123,"ATMDEP    ","Atmospheric deposition salinity                   "
 "AtmDep_Ecl",123,"ATMDEP    ","Atmospheric deposition E-coli bacteria            "
+"AttribOut ",123,"ATTOUT    ","Output segment attribute                          "
+"Cascade   ",123,"CASCAD    "," Cascadal transformation                          "

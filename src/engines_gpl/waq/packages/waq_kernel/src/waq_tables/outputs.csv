@@ -3875,3 +3875,4 @@ outppr,outpit,outpnm,outpdo,outpsx
 "DEBGRZ_G5 ","G5_Nbal   ",  20,"x",1
 "DEBGRZ_G5 ","G5_Pbal   ",  21,"x",1
 "IM_Floceq ","SPMratioem",   1,"x",1
+"AttribOut ","Attribute ",   1,"x",1
