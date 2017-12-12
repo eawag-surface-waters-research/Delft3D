@@ -73,6 +73,7 @@ module m_ec_filereader_read
    integer, parameter                      :: mxkc = 234     !< 
    integer,           dimension(16*mxkc)   :: kb_values      !< Help var.
    character(len=8),  dimension(mxkc)      :: kb_keys = ''   !< Array with the names of all components
+   character(len=128) :: message
 
    contains
   
@@ -84,7 +85,6 @@ module m_ec_filereader_read
          type(tEcFileReader), pointer :: fileReaderPtr !< intent(in)
          !
          integer :: istat !< status of read operation
-         character(len=128) :: message
          !
          rewind(unit=fileReaderPtr%fileHandle, IOMSG = message, IOSTAT = istat)
          if (istat /= 0) then
@@ -674,7 +674,7 @@ module m_ec_filereader_read
          integer                                 :: times_index      !< Index in tEcTimeFrame's times array
          real(hp)                                :: netcdf_timesteps !< seconds since k_refdate
          integer                                 :: i, j, k          !< loop counters
-         real(hp), dimension(:,:,:), allocatable :: data_block       !< 2D slice of NetCDF variable's data
+         real(hp), dimension(:,:), allocatable :: data_block       !< 2D slice of NetCDF variable's data
          integer                                 :: istat            !< allocation status
          real(hp)                                :: dmiss_nc         !< local netcdf missing
 
@@ -774,9 +774,17 @@ module m_ec_filereader_read
                !
                ! - 4 - Read a grid data block.
                valid_field = .False.
+
+               allocate(data_block( item%elementSetPtr%n_cols, item%elementSetPtr%n_rows), stat = istat)
+               if (istat/=0) then
+                  write(message,'(a,i0,a,i0,a)') 'Allocating temporary array of ',item%elementSetPtr%n_cols,' x ',item%elementSetPtr%n_rows,' elements.'
+                  call setECMessage(trim(message))
+                  call setECMessage("Allocation of data_block (data from NetCDF) failed.")
+                  return
+               end if
+
                if (item%elementSetPtr%nCoordinates > 0) then
                   if (item%elementSetPtr%n_layers == 0) then                  ! 2D elementset
-                     allocate(data_block( item%elementSetPtr%n_cols, item%elementSetPtr%n_rows, 1 ), stat = istat)
                      ierror = nf90_get_var(fileReaderPtr%fileHandle, varid, data_block, start=(/1, 1, times_index/), count=(/item%elementSetPtr%n_cols, item%elementSetPtr%n_rows, 1/))
                      ! copy data to source Field's 1D array, store (X1Y1, X1Y2, ..., X1Yn_rows, X2Y1, XYy2, ..., Xn_colsY1, ...)
                      do i=1, item%elementSetPtr%n_rows
@@ -784,17 +792,15 @@ module m_ec_filereader_read
 !                           if (data_block(j,i,1) == dmiss_nc) then 
 !                              fieldPtr%arr1dPtr( (i-1)*item%elementSetPtr%n_cols + j ) = 0d0
 !                           else                     
-                              fieldPtr%arr1dPtr( (i-1)*item%elementSetPtr%n_cols + j ) = data_block(j,i,1)
+                              fieldPtr%arr1dPtr( (i-1)*item%elementSetPtr%n_cols + j ) = data_block(j,i)
                               valid_field = .True.
 !                           endif
                         end do
                      end do
                   else                                                                                                                       
-                     allocate(data_block( item%elementSetPtr%n_cols, item%elementSetPtr%n_rows, item%elementSetPtr%n_layers), stat = istat)
-                     ierror = nf90_get_var(fileReaderPtr%fileHandle, varid, data_block, start=(/1, 1, 1, times_index/), count=(/item%elementSetPtr%n_cols, item%elementSetPtr%n_rows, item%elementSetPtr%n_layers, 1/))
-                     
                      ! copy data to source Field's 1D array, store (X1Y1, X1Y2, ..., X1Yn_rows, X2Y1, XYy2, ..., Xn_colsY1, ...)
                      do k=1, item%elementSetPtr%n_layers
+                        ierror = nf90_get_var(fileReaderPtr%fileHandle, varid, data_block, start=(/1, 1, k, times_index/), count=(/item%elementSetPtr%n_cols, item%elementSetPtr%n_rows, 1, 1/))
                         do i=1, item%elementSetPtr%n_rows
                            do j=1, item%elementSetPtr%n_cols
 !                              if (data_block(j,i,k) == dmiss_nc) then 
@@ -804,7 +810,7 @@ module m_ec_filereader_read
 !                              else                     
                                  fieldPtr%arr1dPtr( (k-1)*item%elementSetPtr%n_cols*item%elementSetPtr%n_rows        &
                                                   + (i-1)*item%elementSetPtr%n_cols                                &
-                                                  +  j ) = data_block(j,i,k)
+                                                  +  j ) = data_block(j,i)
                                  valid_field = .True.
 !                              endif
                            end do
