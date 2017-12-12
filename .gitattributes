@@ -5996,7 +5996,6 @@ src/tools_lgpl/matlab/quickplot/progsrc/private/tofront.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/transferfields.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/trim2rst.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/trtarea.m -text
-src/tools_lgpl/matlab/quickplot/progsrc/private/ui_getdir.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/ui_type.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/ui_typeandname.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/uigetfolder.m -text
