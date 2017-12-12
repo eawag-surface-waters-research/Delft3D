@@ -1116,7 +1116,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    real(kind=dp), optional, pointer, intent(in) :: interface_zs(:) !< Vertical coordinates of the mesh layers' interface (either z or sigma). Optional, only used if numLayer >= 1.
    
    ! Optional network1d variables for 1d UGrid                            
-   type(t_ug_network), optional, intent(in)                  :: networkids
+   type(t_ug_network), optional, intent(inout)               :: networkids
    double precision, optional, pointer,intent(in)            :: nnodex(:), nnodey(:), nbranchlengths(:), ngeopointx(:), ngeopointy(:)
    integer, optional, intent(in)                             :: sourceNodeId(:), targetNodeId(:), nbranchgeometrynodes(:), nbranchorder(:), nbranches, ngeometry
    character(len=ug_idsLen), optional, allocatable           :: nnodeids(:), nbranchids(:), nodeids(:)    
@@ -1153,78 +1153,79 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    add_face_edge_connectivity = associated(face_edges)
    add_face_face_connectivity = associated(face_links)
    add_layers = .false.
+   
    if (present(numLayer) .and. present(layerType) .and. present(layer_zs) .and. present(interface_zs)) then
       add_layers = numLayer >= 1
    end if
-   if ((.not.present(ngeopointx)).or.(.not.associated(ngeopointx))) then
+
+   if (.not.present(ngeopointx) .or. (.not.associated(ngeopointx))) then !2d/3d and 1d not UGRID 1.6
       ierr = ug_write_meshtopology(ncid, meshids, meshName, dim, dataLocs, add_edge_face_connectivity, add_face_edge_connectivity, add_face_face_connectivity, add_layers)
+      ! Dimensions
+      ierr = nf90_def_dim(ncid, 'n'//prefix//'_edge',        numEdge,   meshids%dimids(mdim_edge))
+      ierr = nf90_def_dim(ncid, 'n'//prefix//'_node',        numNode,   meshids%dimids(mdim_node))
+
+      ! This dimension might already be defined, check first if it is present
+      ierr = nf90_inq_dimid(ncid, 'Two', meshids%dimids(mdim_two))
+      if ( ierr /= UG_NOERR) then
+         ierr = nf90_def_dim(ncid, 'Two', 2,  meshids%dimids(mdim_two))
+      endif
+
+      if (dim == 2 .or. ug_checklocation(dataLocs, UG_LOC_FACE)) then
+         ! TODO: AvD: the new maxNumNodesPerFace dummy variable overlaps with this nv here, but they may be different. Remove one.
+         maxnv = size(face_nodes, 1)
+         ierr = nf90_def_dim(ncid, 'n'//prefix//'_face',         numFace,   meshids%dimids(mdim_face))
+         ierr = nf90_def_dim(ncid, 'max_n'//prefix//'_face_nodes', maxnv,   meshids%dimids(mdim_maxfacenodes))
+      end if
+
+      if (add_layers) then
+         if (dim >= 3) then
+            ! Only 1D and 2D mesh topologies can be layered.
+            ierr = UG_INVALID_LAYERS
+            goto 888
+         end if
+         ierr = nf90_def_dim(ncid, 'n'//prefix//'_layer',     numLayer,     meshids%dimids(mdim_layer))
+         ierr = nf90_def_dim(ncid, 'n'//prefix//'_interface', numLayer + 1, meshids%dimids(mdim_interface))
+      end if
+
+      ierr = ug_add_coordmapping(ncid, crs)
+
+      ! Nodes
+      ! node x,y coordinates.
+      ierr = ug_addcoordvars(ncid, meshids%varids(mid_nodex), meshids%varids(mid_nodey), (/ meshids%dimids(mdim_node) /), prefix//'_node_x', prefix//'_node_y', &
+         'x-coordinate of mesh nodes', 'y-coordinate of mesh nodes', trim(meshName), 'node', crs)
+#ifdef HAVE_PROJ
+      if (.not. crs%is_spherical) then ! If x,y are not in WGS84 system, then add mandatory additional lon/lat coordinates.
+         ierr = ug_addlonlatcoordvars(ncid, meshids%varids(mid_nodelon), meshids%varids(mid_nodelat), (/ meshids%dimids(mdim_node) /), prefix//'_node_lon', prefix//'_node_lat', &
+            'longitude coordinate of mesh nodes', 'latitude coordinate of mesh nodes', trim(meshName), 'node')
+      end if
+#endif
+
+      ierr = ug_def_var(ncid, meshids%varids(mid_nodez), (/ meshids%dimids(mdim_node) /), nf90_double, UG_LOC_NODE, &
+         meshName, 'node_z', 'altitude', 'z-coordinate of mesh nodes', 'm', '', crs, dfill=dmiss)
+
+      ! Edges
+      if (dim == 1 .or. ug_checklocation(dataLocs, UG_LOC_EDGE))  then
+         ierr = nf90_def_var(ncid, prefix//'_edge_nodes', nf90_int, (/ meshids%dimids(mdim_two), meshids%dimids(mdim_edge) /) , meshids%varids(mid_edgenodes))
+         ierr = nf90_put_att(ncid, meshids%varids(mid_edgenodes), 'cf_role',   'edge_node_connectivity')
+         ierr = nf90_put_att(ncid, meshids%varids(mid_edgenodes), 'mesh', trim(meshName))
+         ierr = nf90_put_att(ncid, meshids%varids(mid_edgenodes), 'location', 'edge')
+         ierr = nf90_put_att(ncid, meshids%varids(mid_edgenodes), 'long_name',  'Mapping from every edge to the two nodes that it connects')
+         if (start_index.ne.0) then
+            ierr = nf90_put_att(ncid, meshids%varids(mid_edgenodes), 'start_index',  start_index)
+         endif
+         ierr = nf90_put_att(ncid, meshids%varids(mid_edgenodes), '_FillValue',  imiss)
+      end if
+
+   else if (dim == 1 .and. present(ngeopointx) .and. associated(ngeopointx)) then !1d UGRID 1.6
+      ierr = ug_create_1d_network(ncid, networkids, network1dname, size(nnodex), nbranches, ngeometry)
+      ierr = ug_create_1d_mesh(ncid, network1dname, meshids, meshname, numNode, numEdge)
+      ierr = ug_def_mesh_ids(ncid, meshids, meshname, UG_LOC_NODE)
    endif
    
    if (ierr /= UG_NOERR) then
       goto 888
    end if
    
-   ! Dimensions
-   ierr = nf90_def_dim(ncid, 'n'//prefix//'_edge',        numEdge,   meshids%dimids(mdim_edge))
-   ierr = nf90_def_dim(ncid, 'n'//prefix//'_node',        numNode,   meshids%dimids(mdim_node))
-   
-   ! This dimension might already be defined, check first if it is present 
-   ierr = nf90_inq_dimid(ncid, 'Two', meshids%dimids(mdim_two))
-   if ( ierr /= UG_NOERR) then 
-   ierr = nf90_def_dim(ncid, 'Two', 2,  meshids%dimids(mdim_two))   
-   endif
-
-   if (dim == 2 .or. ug_checklocation(dataLocs, UG_LOC_FACE)) then
-      ! TODO: AvD: the new maxNumNodesPerFace dummy variable overlaps with this nv here, but they may be different. Remove one.
-      maxnv = size(face_nodes, 1)
-      ierr = nf90_def_dim(ncid, 'n'//prefix//'_face',         numFace,   meshids%dimids(mdim_face))
-      ierr = nf90_def_dim(ncid, 'max_n'//prefix//'_face_nodes', maxnv,   meshids%dimids(mdim_maxfacenodes))
-   end if
- 
-   if (add_layers) then
-      if (dim >= 3) then
-         ! Only 1D and 2D mesh topologies can be layered.
-         ierr = UG_INVALID_LAYERS
-         goto 888
-      end if
-      ierr = nf90_def_dim(ncid, 'n'//prefix//'_layer',     numLayer,     meshids%dimids(mdim_layer))
-      ierr = nf90_def_dim(ncid, 'n'//prefix//'_interface', numLayer + 1, meshids%dimids(mdim_interface))
-   end if
-
-   ierr = ug_add_coordmapping(ncid, crs)
-
-   ! Nodes
-   ! node x,y coordinates.
-   ierr = ug_addcoordvars(ncid, meshids%varids(mid_nodex), meshids%varids(mid_nodey), (/ meshids%dimids(mdim_node) /), prefix//'_node_x', prefix//'_node_y', &
-                          'x-coordinate of mesh nodes', 'y-coordinate of mesh nodes', trim(meshName), 'node', crs)
-#ifdef HAVE_PROJ
-   if (.not. crs%is_spherical) then ! If x,y are not in WGS84 system, then add mandatory additional lon/lat coordinates.
-      ierr = ug_addlonlatcoordvars(ncid, meshids%varids(mid_nodelon), meshids%varids(mid_nodelat), (/ meshids%dimids(mdim_node) /), prefix//'_node_lon', prefix//'_node_lat', &
-                                   'longitude coordinate of mesh nodes', 'latitude coordinate of mesh nodes', trim(meshName), 'node')
-   end if
-#endif
-
-   ierr = ug_def_var(ncid, meshids%varids(mid_nodez), (/ meshids%dimids(mdim_node) /), nf90_double, UG_LOC_NODE, &
-                     meshName, 'node_z', 'altitude', 'z-coordinate of mesh nodes', 'm', '', crs, dfill=dmiss)
-
-   ! Edges
-   if (((.not.present(ngeopointx)).or.(.not.associated(ngeopointx))).and.(dim == 1 .or. ug_checklocation(dataLocs, UG_LOC_EDGE)))  then
-      ierr = nf90_def_var(ncid, prefix//'_edge_nodes', nf90_int, (/ meshids%dimids(mdim_two), meshids%dimids(mdim_edge) /) , meshids%varids(mid_edgenodes))
-      ierr = nf90_put_att(ncid, meshids%varids(mid_edgenodes), 'cf_role',   'edge_node_connectivity')
-      ierr = nf90_put_att(ncid, meshids%varids(mid_edgenodes), 'mesh', trim(meshName))
-      ierr = nf90_put_att(ncid, meshids%varids(mid_edgenodes), 'location', 'edge')
-      ierr = nf90_put_att(ncid, meshids%varids(mid_edgenodes), 'long_name',  'Mapping from every edge to the two nodes that it connects')
-      if (start_index.ne.0) then
-         ierr = nf90_put_att(ncid, meshids%varids(mid_edgenodes), 'start_index',  start_index)
-      endif
-      ierr = nf90_put_att(ncid, meshids%varids(mid_edgenodes), '_FillValue',  imiss)
-   end if
-   
-   if (dim == 1 .and. present(ngeopointx) .and. associated(ngeopointx)) then          
-      ierr = ug_create_1d_mesh(ncid, network1dname, meshids, meshname, numNode, numEdge)
-      !Define the mesh ids
-      ierr = ug_def_mesh_ids(ncid, meshids, meshname, UG_LOC_NODE) 
-   endif 
    
    if (ug_checklocation(dataLocs, UG_LOC_EDGE)) then
       ! edge x,y coordinates.
