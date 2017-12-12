@@ -387,7 +387,7 @@ module m_ec_item
          integer                        :: i                       !< loop counter
          integer                        :: j                       !< loop counter
          type(tEcFileReader), pointer   :: fileReaderPtr           !< helper pointer for a file reader 
-         character(len=300) :: str
+         character(len=300) :: str, filename
          !
          success = .false.
          fileReaderPtr => null()
@@ -417,6 +417,14 @@ module m_ec_item
          ! timesteps < t0 : not supported 
          if (comparereal(timesteps, item%sourceT0FieldPtr%timesteps) == -1) then
             if (interpol_type /= interpolate_time_extrapolation_ok) then
+               if (associated (fileReaderPtr)) then
+                  if (associated (fileReaderPtr%bc)) then
+                     filename = fileReaderPtr%bc%fname
+                  else
+                     filename = fileReaderPtr%fileName
+                  endif
+                  call setECMessage("       in file: '"//trim(filename)//"'.")                
+               endif
                write(str, '(a,f13.3,a,f8.1,a,a)') "             Requested: t=", timesteps, ' seconds'
                call setECMessage(str)
                write(str, '(a,f13.3,a,f8.1,a,a)') "       Current EC-time: t=", item%sourceT0FieldPtr%timesteps,' seconds'
