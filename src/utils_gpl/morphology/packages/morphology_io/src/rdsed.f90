@@ -974,7 +974,7 @@ subroutine echosed(lundia    ,error     ,lsed      ,lsedtot   , &
     real(fp)                  :: xxinv               ! Help var. [1/xx or 1/(1-xx) in log unif distrib.]
     real(fp)                  :: xm
     logical        , external :: stringsequalinsens
-    character(40)             :: txtput1
+    character(45)             :: txtput1
     character(10)             :: txtput2
     character(256)            :: errmsg
 !

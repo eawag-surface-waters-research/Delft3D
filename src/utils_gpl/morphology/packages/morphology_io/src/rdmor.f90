@@ -1267,7 +1267,7 @@ subroutine echomor(lundia    ,error     ,lsec      ,lsedtot   ,nto       , &
     integer                                                           :: l
     integer                                                           :: nval
     character(20)                                                     :: parname
-    character(40)                                                     :: txtput1
+    character(45)                                                     :: txtput1
     character(20)                                                     :: txtput2
     character(120)                                                    :: txtput3
     character(256)                                                    :: errmsg
