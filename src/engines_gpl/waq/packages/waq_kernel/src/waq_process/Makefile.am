@@ -25,6 +25,7 @@ libwaq_process_la_SOURCES = \
        advtra.f \
        apatit.f \
        atmdep.f \
+       attout.f \
        bacmrt.f \
        bodcod.f \
        botmin.f \
@@ -33,6 +34,7 @@ libwaq_process_la_SOURCES = \
        calsed.f \
        caltau.f \
        calwav.f \
+       cascad.f \
        clcrad.f \
        consbl.f \
        cselac.f \
