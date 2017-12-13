@@ -34,7 +34,7 @@ libwaq_process_la_SOURCES = \
        calsed.f \
        caltau.f \
        calwav.f \
-       cascad.f \
+       cascad.f90 \
        clcrad.f \
        consbl.f \
        cselac.f \
