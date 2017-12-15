@@ -44,7 +44,8 @@ function usage {
     echo "    -intel11.1"
     echo "    -intel12"
     echo "    -intel14 (-intel14.0.3)"
-    echo "WARNING: On h5 currently for Intel only -64bit and -intel14 (intel14.0.3) are supported"
+    echo "    -intel16 (-intel16.0.3)"
+    echo "WARNING: On h5 currently for Intel only -64bit is supported"
     }
 
 
@@ -114,6 +115,9 @@ while [ $# -gt 0 ]; do
         -intel14|-intel14.0.3)
             compiler='intel14'
             ;;
+        -intel16|-intel16.0.3)
+            compiler='intel16'
+            ;;
         -m|-make)
             noMake=1
             ;;
@@ -176,6 +180,13 @@ case $compiler in
         ifortInit="module load $fortranModule"
         iccInit=""
         echo "Using GNU compilers in `witch gfortran`"
+        ;;
+
+    intel16)
+        fortranModule="intel/16.0.3"
+        ifortInit="module load $fortranModule"
+        iccInit=""
+        echo "Using Intel 16.0.3 Fortran ($platform) compiler"
         ;;
 
     intel14)
@@ -292,7 +303,13 @@ if [ "$compiler" = 'gnu' ]; then
     mpichModule="mpich2/3.1.4_gcc_4.9.1"
 else
     # Intel compilers
-    mpichModule="mpich2/3.1.4_intel_14.0.3"
+    if [ "$compiler" = 'intel14' ]; then
+        mpichModule="mpich2/3.1.4_intel_14.0.3"
+    else
+        if [ "$compiler" = 'intel16' ]; then
+            mpichModule="mpich2/3.1.4_intel_16.0.3"
+        fi
+    fi
 fi
 initMpich2="module load $mpichModule"
 eval $initMpich2
@@ -330,7 +347,13 @@ if [ "$compiler" = 'gnu' ]; then
     netcdfModule="netcdf/v4.3.2_v4.4.0_gcc_4.9.1"
 else
     # Intel compilers
-    netcdfModule="netcdf/v4.3.2_v4.4.0_intel_14.0.3"
+    if [ "$compiler" = 'intel14' ]; then
+        netcdfModule="netcdf/v4.3.2_v4.4.0_intel_14.0.3"
+    else
+        if [ "$compiler" = 'intel16' ]; then
+            netcdfModule="netcdf/v4.4.0_v4.4.4_intel_16.0.3"
+        fi
+    fi
 fi
 initNetcdf="module load $netcdfModule"
 eval $initNetcdf
