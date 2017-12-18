@@ -235,8 +235,7 @@ rem ================
     call :copyFile "third_party_open\vcredist\x86\Microsoft.VC120.CRT\*.dll"             !dest_shared!
     call :copyFile "third_party_open\vcredist\x86\Microsoft.VC140.CRT\*.dll"             !dest_shared!
     call :copyFile "third_party_open\intel_fortran\lib\win32\*.dll"                      !dest_shared!
-    call :copyFile "third_party_open\netcdf\lib\win32\Release\ifort17\*.dll"             !dest_shared!
-    call :copyFile "third_party_open\netcdf\bin\win32\ncdump.exe"                        !dest_shared!
+    call :copyNetcdf                                                                     !dest_shared!
     call :copyFile "third_party_open\mpich2\lib\*.dll"                                   !dest_shared!
     call :copyFile "third_party_open\mpich2\bin\mpiexec.exe"                             !dest_shared!
     call :copyFile "third_party_open\mpich2\bin\smpd.exe"                                !dest_shared!
@@ -338,7 +337,6 @@ rem ===========================
     call :copyFile "third_party_open\mpich2\bin\*.exe"                        !dest_bin!
     call :copyFile "third_party_open\mpich2\lib\*.dll"                        !dest_bin!
     call :copyFile third_party_open\expat\win32\bin\Release\libexpat.dll      !dest_bin!
-    call :copyFile third_party_open\netcdf\lib\win32\release\netcdf.dll       !dest_bin!
     call :copyFile "third_party_open\openda\core\native\lib\win32\*.dll"      !dest_bin!
     call :copyFile "engines_gpl\flow2d3d\default\*.*"                         !dest_default!
     call :copyFile utils_lgpl\delftonline\lib\Release\dynamic\delftonline.dll !dest_bin!

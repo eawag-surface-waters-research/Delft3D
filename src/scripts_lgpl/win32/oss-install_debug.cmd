@@ -192,7 +192,6 @@ rem ===========================
     copy third_party_open\mpich2\bin\*.exe                                               !dest_bin!
     copy third_party_open\mpich2\lib\*.dll                                               !dest_bin!
     copy third_party_open\expat\win32\bin\Release\libexpat.dll                           !dest_bin!
-    copy third_party_open\netcdf\lib\win32\release\netcdf.dll                            !dest_bin!
     copy third_party_open\openda\core\native\lib\win32\*.dll                             !dest_bin!
     copy utils_lgpl\delftonline\lib\Debug\dynamic\delftonline.dll                        !dest_bin!
     call :copyNetcdf
