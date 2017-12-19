@@ -2341,7 +2341,7 @@ module m_ec_provider
          integer                                                 :: istat                 !< helper variable 
          type(tEcItem),              pointer                     :: itemPtr               !< Item containing quantity
          logical                                                 :: dummy                 !< temp
-         character(len=20)                                       :: attstr 
+         character(len=50)                                       :: attstr 
          logical                                                 :: rotate_pole
          integer                                                 :: nvar                  !< number/loopvariable of varids in this netcdf file 
          integer                                                 :: lon_varid, lon_dimid, lat_varid, lat_dimid, tim_varid, tim_dimid
@@ -2383,52 +2383,52 @@ module m_ec_provider
          idvar = -1 
          select case (trim(quantityName))
          case ('rainfall') 
-            ncvarnames(1) = 'rainfall' 
+            ncvarnames(1) = '|rainfall|' 
             ncstdnames(1) = 'precipitation_amount' 
          case ('rainfall_rate') 
-            ncvarnames(1) = 'rainfall' 
+            ncvarnames(1) = '|rainfall|' 
             ncstdnames(1) = 'rainfall_rate' 
          case ('windx') 
-            ncvarnames(1) = 'u10'                            ! 10 meter eastward wind
+            ncvarnames(1) = '|u10|'                            ! 10 meter eastward wind
             ncstdnames(1) = 'eastward_wind'
          case ('windy') 
-            ncvarnames(1) = 'v10'                            ! 10 meter eastward wind
+            ncvarnames(1) = '|v10|'                            ! 10 meter eastward wind
             ncstdnames(1) = 'northward_wind'
          case ('windxy') 
-            ncvarnames(1) = 'u10'                            ! 10 meter eastward wind
+            ncvarnames(1) = '|u10|'                            ! 10 meter eastward wind
             ncstdnames(1) = 'eastward_wind'
-            ncvarnames(2) = 'v10'                            ! 10 meter eastward wind
+            ncvarnames(2) = '|v10|'                            ! 10 meter eastward wind
             ncstdnames(2) = 'northward_wind'
          case ('airpressure','atmosphericpressure') 
-            ncvarnames(1) = 'msl'                            ! mean sea-level pressure
+            ncvarnames(1) = '|msl|psl|'                            ! mean sea-level pressure
             ncstdnames(1) = 'air_pressure'
          case ('airpressure_windx_windy') 
-            ncvarnames(1) = 'msl'                            ! mean sea-level pressure
+            ncvarnames(1) = '|msl|'                            ! mean sea-level pressure
             ncstdnames(1) = 'air_pressure'
-            ncvarnames(2) = 'u10'                            ! 10 meter eastward wind
+            ncvarnames(2) = '|u10|'                            ! 10 meter eastward wind
             ncstdnames(2) = 'eastward_wind'
-            ncvarnames(3) = 'v10'                            ! 10 meter northward wind
+            ncvarnames(3) = '|v10|'                            ! 10 meter northward wind
             ncstdnames(3) = 'northward_wind'
          case ('dewpoint_airtemperature_cloudiness')
-            ncvarnames(1) = 'd2m'                            ! dew-point temperature
+            ncvarnames(1) = '|d2m|'                            ! dew-point temperature
             ncstdnames(1) = 'dew_point_temperature'
-            ncvarnames(2) = 't2m'                            ! 2-meter air temperature
+            ncvarnames(2) = '|t2m|'                            ! 2-meter air temperature
             ncstdnames(2) = 'air_temperature'
-            ncvarnames(3) = 'tcc'                            ! cloud cover (fraction)
+            ncvarnames(3) = '|tcc|'                            ! cloud cover (fraction)
             ncstdnames(3) = 'cloud_area_fraction'
          case ('dewpoint_airtemperature_cloudiness_solarradiation')
-            ncvarnames(1) = 'd2m'                            ! dew-point temperature
+            ncvarnames(1) = '|d2m|'                            ! dew-point temperature
             ncstdnames(1) = 'dew_point_temperature'
-            ncvarnames(2) = 't2m'                            ! 2-meter air temperature
+            ncvarnames(2) = '|t2m|'                            ! 2-meter air temperature
             ncstdnames(2) = 'air_temperature'
-            ncvarnames(3) = 'tcc'                            ! cloud cover (fraction)
+            ncvarnames(3) = '|tcc|'                            ! cloud cover (fraction)
             ncstdnames(3) = 'cloud_area_fraction'
-            ncvarnames(4) = 'ssr'                            ! outgoing SW radiation at the top-of-the-atmosphere
+            ncvarnames(4) = '|ssr|'                            ! outgoing SW radiation at the top-of-the-atmosphere
             ncstdnames(4) = 'surface_net_downward_shortwave_flux'
          case ('nudge_salinity_temperature')
-            ncvarnames(1) = 'thetao'                        ! temperature
+            ncvarnames(1) = '|thetao|'                        ! temperature
             ncstdnames(1) = 'sea_water_potential_temperature'
-            ncvarnames(2) = 'so'                            ! salinity
+            ncvarnames(2) = '|so|'                            ! salinity
             ncstdnames(2) = 'sea_water_salinity'
          case default                                        ! experiment: gather miscellaneous variables from an NC-file,
             ! we have faulty 
@@ -2451,12 +2451,12 @@ module m_ec_provider
          nvar = size(fileReaderPtr%standard_names,dim=1)
          do i = 1, count(ncstdnames>' ')
             do idvar = 1,nvar
-               if (strcmpi(fileReaderPtr%standard_names(idvar),ncstdnames(i))) exit     ! Match standard names ...
+               if (ncstdnames(i).eq.fileReaderPtr%standard_names(idvar)) exit       ! Match standard names ...
             enddo 
             if (idvar>nvar) then                                                       ! Variable not found among standard names
                ! ERROR: standard name not found in this filereader, Try the variable names
-               do idvar = 1,nvar                                                       ! Find the varid 
-                  if (strcmpi(fileReaderPtr%variable_names(idvar),ncvarnames(i))) exit ! Match variable names ...
+               do idvar = 1,nvar
+                  if (index(ncvarnames(i),'|'//trim(fileReaderPtr%variable_names(idvar))//'|')>0) exit    ! Match variable names ...
                enddo 
                if (idvar>nvar) then                                                    ! Variable not found among variable names either
                   ! ERROR: variable name not found in this filereader, TODO: handle exception 
@@ -2532,23 +2532,19 @@ module m_ec_provider
                   gnplon = -999.9
                   gnplat = -999.9
                   attstr=''
-                  ierror = nf90_get_att(fileReaderPtr%fileHandle, grid_mapping_id, "grid_north_pole_longitude", attstr)
-                  read(attstr,*,iostat=ierror) gnplon
-                  attstr=''
-                  ierror = nf90_get_att(fileReaderPtr%fileHandle, grid_mapping_id, "grid_north_pole_latitude", attstr)
-                  read(attstr,*,iostat=ierror) gnplat
-                  attstr=''
-                  ierror = nf90_get_att(fileReaderPtr%fileHandle, grid_mapping_id, "grid_south_pole_longitude", attstr)
-                  read(attstr,*,iostat=ierror) gsplon
-                  attstr=''
-                  ierror = nf90_get_att(fileReaderPtr%fileHandle, grid_mapping_id, "grid_south_pole_latitude", attstr)
-                  read(attstr,*,iostat=ierror) gsplat
-                  if ((gnplon > -900.d0) .and. (gnplat > -900.d0)) then         ! northpole given 
-                     gsplon =  gnplon + 180.d0 
-                     gsplat = -gnplat
-                  endif 
-                  if ((gsplon > -900.d0) .and. (gsplat > -900.d0)) then         ! southpole given 
-                     rotate_pole = .True.
+                  ierror = nf90_get_att(fileReaderPtr%fileHandle, grid_mapping_id, "grid_mapping_name", attstr)
+                  if (attstr.eq.'rotated_latitude_longitude') then
+                     if (.not.(nf90_get_att(fileReaderPtr%fileHandle, grid_mapping_id, "grid_north_pole_longitude", gnplon)==NF90_NOERR)) gnplon = -999.9
+                     if (.not.(nf90_get_att(fileReaderPtr%fileHandle, grid_mapping_id, "grid_north_pole_latitude",  gnplat)==NF90_NOERR)) gnplat = -999.9
+                     if (.not.(nf90_get_att(fileReaderPtr%fileHandle, grid_mapping_id, "grid_south_pole_longitude", gsplon)==NF90_NOERR)) gsplon = -999.9
+                     if (.not.(nf90_get_att(fileReaderPtr%fileHandle, grid_mapping_id, "grid_south_pole_latitude",  gsplat)==NF90_NOERR)) gsplat = -999.9
+                     if ((gnplon > -900.d0) .and. (gnplat > -900.d0)) then         ! northpole given 
+                        gsplon =  gnplon + 180.d0 
+                        gsplat = -gnplat
+                     endif 
+                     if ((gsplon > -900.d0) .and. (gsplat > -900.d0)) then         ! southpole given 
+                        rotate_pole = .True.
+                     endif 
                   endif 
                endif 
             endif 
@@ -3407,7 +3403,9 @@ module m_ec_provider
       do ivar = 1,nvar 
          fileReaderPtr%standard_names(ivar) = ''
          ierror = nf90_get_att(fileReaderPtr%fileHandle, ivar, 'standard_name', fileReaderPtr%standard_names(ivar))
+         call str_lower(fileReaderPtr%standard_names(ivar))
          ierror = nf90_inquire_variable(fileReaderPtr%fileHandle, ivar, name=fileReaderPtr%variable_names(ivar))
+         call str_lower(fileReaderPtr%variable_names(ivar))
          ierror = nf90_inquire_variable(fileReaderPtr%fileHandle, ivar, nDims=ndim)
          dim_name=''
          name_len=0

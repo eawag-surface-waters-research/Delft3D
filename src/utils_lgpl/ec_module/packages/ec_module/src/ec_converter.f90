@@ -2270,12 +2270,12 @@ module m_ec_converter
                      do j=1, n_points
                         kbot = targetElementSet%kbot(j)
                         ktop = targetElementSet%ktop(j)
-                        if (connection%converterPtr%operandType==operand_replace) then
-                           targetValues(kbot:ktop) = 0.0_hp
-                        end if
                         mp = indexWeight%indices(1,j)
                         np = indexWeight%indices(2,j)
                         if (mp > 0 .and. np > 0) then
+                           if (connection%converterPtr%operandType==operand_replace) then
+                              targetValues(kbot:ktop) = 0.0_hp
+                           end if
                            ! The save horizontal weigths are used. The vertical weights are recalculated because z changes.
                            ! transformation coefficients for the z-array, target side:
                            select case (targetElementSet%vptyp)
@@ -2316,10 +2316,6 @@ module m_ec_converter
                               dkp = -1
                            end if      ! write source vertical coordinate in terms of target system
                            
-                           if ( j.eq.25278 ) then
-                              continue
-                           end if
-
                            do k = kbot, ktop
                               ztgt = targetElementSet%z(k)
                               
