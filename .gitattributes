@@ -343,6 +343,8 @@ examples/12_dflowfm/python/dflowfm_merge/dflowfm_merge/merger.py -text
 examples/12_dflowfm/python/dflowfm_merge/dflowfm_merge/test/__init__.py -text
 examples/12_dflowfm/python/dflowfm_merge/dflowfm_merge/test/test_dflowfm_merge.py -text
 examples/12_dflowfm/python/dflowfm_merge/setup.py -text
+examples/12_dflowfm/python/generate_model/README.md -text
+examples/12_dflowfm/python/generate_model/generate_model.py -text
 examples/12_dflowfm/python/meteodatascripts/getprecip_climate4impact.py -text
 examples/12_dflowfm/python/notebooks.cmd -text
 examples/12_dflowfm/python/notebooks/2d[!!-~]flow[!!-~]and[!!-~]salinity[!!-~]transport.ipynb -text
