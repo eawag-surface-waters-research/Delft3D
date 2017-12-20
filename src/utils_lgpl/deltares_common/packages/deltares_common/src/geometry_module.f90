@@ -54,6 +54,12 @@ module geometry_module
    public :: cross
    public :: dbpinpol_optinside_perpol
    public :: get_startend
+   public :: pinpok3D
+   public :: cross3D
+   public :: inprod
+   public :: vecprod
+   public :: matprod
+   public :: gaussj
 
    interface clockwise
       module procedure clockwise_sp
@@ -487,6 +493,92 @@ module geometry_module
       RETURN
       
       end subroutine CROSS
+      
+      subroutine cross3D(x1, y1, x2, y2, x3, y3, x4, y4, jacros, sL, sm, jsferic)    ! ,SL,SM,XCR,YCR,CRP, jsferic, dmiss)
+      
+         implicit none
+         
+         double precision, intent(in)   :: x1, y1 !< first  point coordinates
+         double precision, intent(in)   :: x2, y2 !< second point coordinates
+         double precision, intent(in)   :: x3, y3 !< third  point coordinates
+         double precision, intent(in)   :: x4, y4 !< fourth point coordinates
+         integer,          intent(out)  :: jacros !< line 1-2 crosses line 3-4 (1) or not (0)
+         double precision, intent(out)  :: sL, sm
+         integer,          intent(in)   :: jsferic
+         
+         double precision, dimension(3) :: xx1, xx2, xx3, xx4
+         
+         double precision, dimension(3) :: n12, n34, n
+         
+         double precision               :: Det12, Det34
+         
+         double precision, parameter    :: dtol = 1d-16
+
+!        get 3D coordinates of four points
+         call sphertocart3D(x1, y1, xx1(1), xx1(2), xx1(3), jsferic)
+         call sphertocart3D(x2, y2, xx2(1), xx2(2), xx2(3), jsferic)
+         call sphertocart3D(x3, y3, xx3(1), xx3(2), xx3(3), jsferic)
+         call sphertocart3D(x4, y4, xx4(1), xx4(2), xx4(3), jsferic)
+         
+!        n12 = ( x1 X x2)
+         n12 = vecprod(xx1, xx2)
+         
+!        n34 = ( x3 X x4)
+         n34 = vecprod(xx3, xx4)
+         
+         Det12 = inprod(xx2-xx1,n34)
+         Det34 = inprod(xx4-xx3,n12)
+         
+         if ( abs(Det12).gt.dtol .and. abs(Det34).gt.dtol ) then
+            SL = - inprod(xx1,n34) / Det12
+            SM = - inprod(xx3,n12) / Det34
+            
+            if ( SM .GE. 0d0 .AND. SM .LE. 1d0 .AND. &
+                 SL .GE. 0d0 .AND. SL .LE. 1d0 ) THEN
+               jacros = 1
+            endif
+         else
+            sL = 0d0
+            sm = 0d0
+            jacros = 0
+         end if
+         
+         return
+      end subroutine cross3D
+      
+      
+!>    c = a X b
+      function vecprod(a,b)
+         implicit none
+         double precision, dimension(3)             :: vecprod
+         double precision, dimension(3), intent(in) :: a, b
+         
+         vecprod = (/ a(2)*b(3)-a(3)*b(2), a(3)*b(1)-a(1)*b(3), a(1)*b(2)-a(2)*b(1) /)
+         
+         return
+      end function vecprod
+      
+!>    c = a.b
+      double precision function inprod(a,b)
+         implicit none
+         
+         double precision, dimension(3) :: a, b
+         
+         inprod = a(1)*b(1) + a(2)*b(2) + a(3)*b(3)
+      end function inprod
+      
+!>    c = A b
+      function matprod(A,b)
+         implicit none
+         
+         double precision, dimension(3)               :: matprod
+         double precision, dimension(3,3), intent(in) :: A
+         double precision, dimension(3),   intent(in) :: b
+         
+         integer                                      :: i
+         
+         matprod = (/ ( A(i,1) * b(1) + A(i,2) * b(2) + A(i,3) * b(3), i=1,3) /)
+      end function matprod
 
       subroutine dbpinpol(xp,yp, in, dmiss, JINS, NPL, xpl, ypl, zpl) ! ALS JE VOOR VEEL PUNTEN MOET NAGAAN OF ZE IN POLYGON ZITTEN
       implicit none
@@ -681,5 +773,204 @@ module geometry_module
 
       return
       end subroutine get_startend
+      
+      
+!> determine if point is "inside" (first) polygon (1) or not (0)
+   subroutine pinpok3D(xp, yp, N, x, y, inside, dmiss, jins, jsferic, jasfer3D)
+!      use m_sferic
+!      use m_missing
+!      use geometry_module, only: sphertocart3D
+      use mathconsts, only: degrad_hp
+      implicit none
+      
+      double precision,               intent(in)  :: xp, yp !< point coordinates
+      integer,                        intent(in)  :: N      !< polygon size
+      double precision, dimension(N), intent(in)  :: x, y   !< polygon coordinates
+      integer,                        intent(out) :: inside !< inside (1) or not (0)
+      double precision,               intent(in)  :: dmiss  !< missing value
+      integer,                        intent(in)  :: jins   !< global inside/outside
+      integer,                        intent(in)  :: jsferic   !< spherical coordinates (1) or Cartesian (0)
+      integer,                        intent(in)  :: jasfer3D
+      
+      double precision, dimension(:), allocatable :: xx, yy, zz
+      
+      double precision, dimension(3)              :: xiXxip1 ! x_i X x_{i+1}
+      double precision, dimension(3)              :: xpXe ! xp X e
+      
+      double precision                            :: xxp, yyp, zzp
+      
+      double precision                            :: D, Di
+      double precision                            :: xi, eta, zeta
+      double precision                            :: lambda
+      
+      integer                                     :: i, ip1, num
+      
+      double precision, dimension(3)              :: ee
+      
+      double precision,               parameter   :: dtol = 1d-8
+      
+      if ( N.lt.3 ) then
+         inside = 0
+         if ( jins.ne.1 ) inside = 1-inside
+         goto 1234
+      end if
+      
+!     allocate
+      allocate(xx(N), yy(N), zz(N))
+      
+!     get 3D polygon coordinates
+      num = 0
+      do i=1,N
+         if ( x(i).ne.DMISS .and. y(i).ne.DMISS ) then
+            num = num+1
+            call sphertocart3D(x(i),y(i),xx(num),yy(num),zz(num),jsferic)
+         else if ( num.gt.0 ) then
+            exit
+         end if
+      end do
+      
+      if ( num.lt.3 ) then
+         inside = 0
+         if ( jins.ne.1 ) inside=1-inside
+         goto 1234  ! no valid polygon found
+      end if
+      
+      call sphertocart3D(xp,yp,xxp,yyp,zzp,jsferic)
+      
+!     get test direction: e_lambda
+      lambda = xp*degrad_hp   ! dg2rd
+      ee = (/ -sin(lambda), cos(lambda), 0d0 /)
+      
+!     loop over polygon sections
+      inside = 0
+      do i=1,num
+         ip1 = i+1; if ( ip1.gt.num ) ip1=ip1-num
+         
+         xiXxip1 = (/ yy(i)*zz(ip1) - zz(i)*yy(ip1),   &
+                      zz(i)*xx(ip1) - xx(i)*zz(ip1),   &
+                      xx(i)*yy(ip1) - yy(i)*xx(ip1) /)
+                     
+         xpXe = (/ yyp*ee(3) - zzp*ee(2),  &
+                   zzp*ee(1) - xxp*ee(3),  &
+                   xxp*ee(2) - yyp*ee(1) /)
+                     
+         D = xiXxip1(1)*ee(1) + xiXxip1(2)*ee(2) + xiXxip1(3)*ee(3)
+         
+         if ( abs(D).gt.dtol ) then
+            Di = 1d0/D
+            xi   = -( xpXe(1)*xx(ip1) + xpXe(2)*yy(ip1) + xpXe(3)*zz(ip1) ) * Di
+            eta  =  ( xpXe(1)*xx(i)   + xpXe(2)*yy(i)   + xpXe(3)*zz(i)   ) * Di
+            zeta = -( xiXxip1(1)*xxp  + xiXxip1(2)*yyp  + xiXxip1(3)*zzp  ) * Di
+         else
+!           enforce no intersection
+            xi   = -1d0
+            eta  = -1d0
+            zeta = -1d0
+         end if
+         
+         if ( zeta.eq.0d0 ) then
+            inside=1
+            if ( jins.eq.0 ) inside=1-inside
+            goto 1234
+         else if ( xi.ge.0d0 .and. eta.gt.0d0 .and. zeta.gt.0d0 ) then
+            inside = 1-inside
+         end if
+                     
+      end do
+      
+      if ( jins.eq.0 ) inside=1-inside
+      
+ 1234 continue      
+!     deallocate
+      if ( allocated(xx) ) deallocate(xx)
+      if ( allocated(yy) ) deallocate(yy)
+      if ( allocated(zz) ) deallocate(zz)
+      
+      return
+   end subroutine pinpok3D
+   
+   
+
+   SUBROUTINE GAUSSJ(A,N,NP,B,M,MP)
+      implicit none
+      
+      integer          :: n,np,m,mp
+      double precision :: a,b
+      
+      integer          :: ipiv, indxr, indxc, i, j, k, L, LL, irow, icol
+      double precision :: big, dum, pivinv
+      
+!      PARAMETER (NMAX=50)
+!      DIMENSION A(NP,NP),B(NP,MP),IPIV(NMAX),INDXR(NMAX),INDXC(NMAX)
+      
+      DIMENSION A(NP,NP),B(NP,MP),IPIV(NP),INDXR(NP),INDXC(NP) ! SPvdP: set NMAX to N
+      DO 11 J=1,N
+        IPIV(J)=0
+11    CONTINUE
+      DO 22 I=1,N
+        BIG=0.
+        DO 13 J=1,N
+          IF(IPIV(J).NE.1)THEN
+            DO 12 K=1,N
+              IF (IPIV(K).EQ.0) THEN
+                IF (ABS(A(J,K)).GE.BIG)THEN
+                  BIG=ABS(A(J,K))
+                  IROW=J
+                  ICOL=K
+                ENDIF
+              ELSE IF (IPIV(K).GT.1) THEN
+                WRITE(*,*) 'Singular matrix'
+              ENDIF
+12          CONTINUE
+          ENDIF
+13      CONTINUE
+        IPIV(ICOL)=IPIV(ICOL)+1
+        IF (IROW.NE.ICOL) THEN
+          DO 14 L=1,N
+            DUM=A(IROW,L)
+            A(IROW,L)=A(ICOL,L)
+            A(ICOL,L)=DUM
+14        CONTINUE
+          DO 15 L=1,M
+            DUM=B(IROW,L)
+            B(IROW,L)=B(ICOL,L)
+            B(ICOL,L)=DUM
+15        CONTINUE
+        ENDIF
+        INDXR(I)=IROW
+        INDXC(I)=ICOL
+        IF (A(ICOL,ICOL).EQ.0.) WRITE(*,*) 'Singular matrix'
+        PIVINV=1./A(ICOL,ICOL)
+        A(ICOL,ICOL)=1.
+        DO 16 L=1,N
+          A(ICOL,L)=A(ICOL,L)*PIVINV
+16      CONTINUE
+        DO 17 L=1,M
+          B(ICOL,L)=B(ICOL,L)*PIVINV
+17      CONTINUE
+        DO 21 LL=1,N
+          IF(LL.NE.ICOL)THEN
+            DUM=A(LL,ICOL)
+            A(LL,ICOL)=0.
+            DO 18 L=1,N
+              A(LL,L)=A(LL,L)-A(ICOL,L)*DUM
+18          CONTINUE
+            DO 19 L=1,M
+              B(LL,L)=B(LL,L)-B(ICOL,L)*DUM
+19          CONTINUE
+          ENDIF
+21      CONTINUE
+22    CONTINUE
+      DO 24 L=N,1,-1
+        IF(INDXR(L).NE.INDXC(L))THEN
+          DO 23 K=1,N
+            DUM=A(K,INDXR(L))
+            A(K,INDXR(L))=A(K,INDXC(L))
+            A(K,INDXC(L))=DUM
+23        CONTINUE
+        ENDIF
+24    CONTINUE
+      RETURN
+   END
 
    end module geometry_module
