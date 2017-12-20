@@ -426,11 +426,13 @@ subroutine restart_trim_lyrs (msed      ,thlyr     ,lsedtot   ,cdryb     , &
           do m = gdp%d%mlb, gdp%d%mub
              do n = gdp%d%nlb, gdp%d%nub
                 call n_and_m_to_nm(n, m, nm, gdp)
-                sedthick = 0.0_fp
-                do l = 1, lsedtot
-                   sedthick = sedthick + msed(l, k, nm)/rhosol(l)
+                do k = 1,nlyr
+                   sedthick = 0.0_fp
+                   do l = 1, lsedtot
+                      sedthick = sedthick + msed(l, k, nm)/rhosol(l)
+                   enddo
+                   svfrac(k, nm) = sedthick/thlyr(k, nm)
                 enddo
-                svfrac(k, nm) = sedthick/thlyr(k, nm)
              enddo
           enddo
        endif
