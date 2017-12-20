@@ -971,6 +971,6 @@ module geometry_module
         ENDIF
 24    CONTINUE
       RETURN
-   END
+   END SUBROUTINE GAUSSJ
 
    end module geometry_module
