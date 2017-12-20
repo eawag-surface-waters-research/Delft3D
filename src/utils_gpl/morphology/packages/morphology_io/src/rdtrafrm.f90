@@ -669,6 +669,7 @@ subroutine rdtraparfld(lundia    ,error     ,lsedtot   ,trapar    , &
     use precision
     use morphology_data_module
     use grid_dimens_module 
+    use message_module, only: write_error
     !
     implicit none
     !
@@ -693,6 +694,7 @@ subroutine rdtraparfld(lundia    ,error     ,lsedtot   ,trapar    , &
     integer           :: j
     integer           :: ll
     character(256)    :: filename
+    character(256)    :: errmsg
     character(11)     :: fmttmp
 !
 !! executable statements -------------------------------------------------------
@@ -720,8 +722,11 @@ subroutine rdtraparfld(lundia    ,error     ,lsedtot   ,trapar    , &
              filename = trapar%parfil(i,ll)
              write (lundia, '(a,a)') 'Reading: ',trim(filename)
              call depfil_stm(lundia     ,error      ,filename   ,fmttmp    , &
-                           & parfld(:,j),1          ,1          ,dims      )
-             if (error) return
+                           & parfld(:,j),1          ,1          ,dims      , errmsg)
+             if (error) then 
+                 call write_error(errmsg, unit=lundia)
+                 return
+             endif
           endif
        enddo
     enddo

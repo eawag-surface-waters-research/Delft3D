@@ -1932,8 +1932,9 @@ subroutine rdflufflyr(lundia   ,error    ,filmor   ,lsed     ,mor_ptr ,flufflyr,
             ! read data from file
             !
             call depfil_stm(lundia    ,error     ,filfluff  ,fmttmp    , &
-                          & bfluff0   ,lsed      ,1         ,griddim)
+                          & bfluff0   ,lsed      ,1         ,griddim   ,errmsg )
             if (error) then
+                call write_error(errmsg, unit=lundia)
                 errmsg = 'Unable to read burial term 1 from ' // trim(filfluff)
                 call write_error(errmsg, unit=lundia)
                 return
@@ -1979,8 +1980,9 @@ subroutine rdflufflyr(lundia   ,error    ,filmor   ,lsed     ,mor_ptr ,flufflyr,
             ! read data from file
             !
             call depfil_stm(lundia    ,error     ,filfluff  ,fmttmp    , &
-                          & bfluff1   ,lsed      ,1         ,griddim)
+                          & bfluff1   ,lsed      ,1         ,griddim   ,errmsg)
             if (error) then
+                call write_error(errmsg, unit=lundia)
                 errmsg = 'Unable to read burial term 2 from ' // trim(filfluff)
                 call write_error(errmsg, unit=lundia)
                 return
@@ -2029,8 +2031,9 @@ subroutine rdflufflyr(lundia   ,error    ,filmor   ,lsed     ,mor_ptr ,flufflyr,
             ! read data from file
             !
             call depfil_stm(lundia    ,error     ,filfluff  ,fmttmp    , &
-                          & depfac    ,lsed      ,1         ,griddim)
+                          & depfac    ,lsed      ,1         ,griddim   , errmsg)
             if (error) then
+                call write_error(errmsg, unit=lundia)
                 errmsg = 'Unable to read deposition factor from ' // trim(filfluff)
                 call write_error(errmsg, unit=lundia)
                 return

@@ -369,8 +369,11 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
           ! Use routine that also read the depth file to read the data
           !
           call depfil_stm(lundia    ,error     ,flsmdc    ,fmttmp    , &
-                        & mudcnt    ,1         ,1         ,griddim   )
-          if (error) return
+                        & mudcnt    ,1         ,1         ,griddim   , errmsg)
+          if (error) then
+              call write_error(errmsg, unit=lundia)
+              return
+          endif
           do nm = 1, griddim%nmmax
              mudcnt(nm) = max(0.0_fp, min(mudcnt(nm), 1.0_fp))
           enddo
@@ -503,8 +506,11 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
                 !  File with space varying data has been specified, read it now.
                 !
                 call depfil_stm(lundia    ,error     ,flsdia    ,fmttmp    , &
-                              & sedd50fld ,1         ,1         ,griddim   )
-                if (error) return
+                              & sedd50fld ,1         ,1         ,griddim   , errmsg)
+                if (error) then 
+                    call write_error(errmsg, unit=lundia)
+                    return
+                endif      
              else
                 flsdia = ' '
              endif

@@ -477,8 +477,9 @@ subroutine rdmorlyr(lundia    ,error     ,filmor    , &
              write(lundia,'(3a)') txtput1, ':', ttlfil
              !
              call depfil_stm(lundia    ,error     ,ttlfil    ,fmttmp    , &
-                           & thtrlyr   ,1         ,1         ,griddim   )
+                           & thtrlyr   ,1         ,1         ,griddim   ,errmsg)
              if (error) then
+                call write_error(errmsg, unit=lundia)
                 errmsg = 'Unable to read transport layer thickness from ' // trim(ttlfil)
                 call write_error(errmsg, unit=lundia)
                 return
@@ -557,8 +558,9 @@ subroutine rdmorlyr(lundia    ,error     ,filmor    , &
                 ! read data from file
                 !
                 call depfil_stm(lundia    ,error     ,telfil    ,fmttmp    , &
-                              & thexlyr   ,1         ,1         ,griddim   )
+                              & thexlyr   ,1         ,1         ,griddim   , errmsg)
                 if (error) then
+                   call write_error(errmsg, unit=lundia)
                    errmsg = 'Unable to read exchange layer thickness from ' // trim(telfil)
                    call write_error(errmsg, unit=lundia)
                    return
@@ -908,8 +910,9 @@ subroutine rdinidiff(lundia    ,fildiff   ,ndiff     ,kdiff    , &
                 ! Spatially varying diffusion coefficient
                 !
                 call depfil_stm(lundia    ,error     ,filename  ,fmttmp    , &
-                              & kdiff(ilyr,griddim%nmlb),1         ,1         ,griddim   )
+                              & kdiff(ilyr,griddim%nmlb),1         ,1         ,griddim   , message)
                 if (error) then
+                   call write_error(message, unit=lundia)
                    message = 'Unable to read diffusion coefficients from ' // trim(filename)
                    call write_error(message, unit=lundia)
                    return
@@ -1083,8 +1086,11 @@ subroutine rdinimorlyr(lsedtot   ,lsed      ,lundia    ,error     , &
            if (ex) then
                call depfil_stm(lundia    ,error     ,mflfil(ised)         , &
                              & fmttmp    ,mfluff    ,lsed      ,ised      , &
-                             & dims      )
-               if (error) return
+                             & dims      ,message)
+               if (error) then 
+                   call write_error(message, unit=lundia)
+                   return
+               endif
            else
                mfluff(ised,:) = mfluni(ised)
            endif
@@ -1376,8 +1382,9 @@ subroutine rdinimorlyr(lsedtot   ,lsed      ,lundia    ,error     , &
                       ! Spatially varying thickness
                       !
                       call depfil_stm(lundia    ,error     ,filename  ,fmttmp    , &
-                                    & thtemp    ,1         ,1         ,dims)
+                                    & thtemp    ,1         ,1         ,dims,   message)
                       if (error) then
+                         call write_error(message, unit=lundia)
                          write (message,'(3a,i2,2a)')  &
                              & 'Error reading thickness from ', trim(filename), &
                              & ' for layer ', ilyr, ' in file ', trim(flcomp)
@@ -1452,8 +1459,9 @@ subroutine rdinimorlyr(lsedtot   ,lsed      ,lundia    ,error     , &
                          !
                          anyfrac = .true.
                          call depfil_stm(lundia    ,error     ,filename  , fmttmp    , &
-                                       & rtemp(nmlb,ised)        ,1   ,1    ,dims)
+                                       & rtemp(nmlb,ised)        ,1   ,1    ,dims, message)
                          if (error) then
+                            call write_error(message, unit=lundia)
                             write (message,'(a,i2,3a,i2,2a)')  &
                                 & 'Error reading fraction ', ised, 'from ', &
                                 & trim(filename), ' for layer ', ilyr, ' in file ', &
@@ -1736,8 +1744,9 @@ subroutine rdinimorlyr(lsedtot   ,lsed      ,lundia    ,error     , &
                          !
                          anysedbed = .true.
                          call depfil_stm(lundia    ,error     ,filename  , fmttmp    , &
-                                       & rtemp(nmlb,ised)     ,1   ,1    ,dims)
+                                       & rtemp(nmlb,ised)     ,1   ,1    ,dims, message)
                          if (error) then
+                            call write_error(message, unit=lundia)
                             write (message,'(5a,i2,2a)')  &
                                 & 'Error reading ', layertype, '  from ', trim(filename), &
                                 & ' for layer ', ilyr, ' in file ', trim(flcomp)
