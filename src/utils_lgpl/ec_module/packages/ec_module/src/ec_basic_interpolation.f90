@@ -95,12 +95,12 @@
    !---------------------------------------------------------------------------!
 
    subroutine triinterp2(XZ, YZ, BL, NDX, JDLA,&
-                        XS, YS, ZS, NS, dmiss, jsferic, jins, NPL, MXSAM, MYSAM, XPL, YPL, ZPL, transformcoef)
+                        XS, YS, ZS, NS, dmiss, jsferic, jins, jasfer3D, NPL, MXSAM, MYSAM, XPL, YPL, ZPL, transformcoef)
    implicit none
    
    double precision, intent(in)            :: XZ(NDX), YZ(NDX)
    double precision, intent(inout)         :: BL(NDX)
-   integer, intent(in)                     :: NDX, JDLA, NS, jins, NPL, MXSAM, MYSAM
+   integer, intent(in)                     :: NDX, JDLA, NS, jins, jasfer3D, NPL, MXSAM, MYSAM
    double precision, intent(in)            :: XS(:), YS(:), ZS(:), dmiss
    integer                                 :: jakdtree, jsferic
    
@@ -108,10 +108,10 @@
    
    integer :: i, in_unit, out_unit 
    
-  jsferic = 0
+!   jsferic = 0
   
-   ! assign 'missing value' to all elements of dRes
-   BL = -999d0
+!   ! assign 'missing value' to all elements of dRes
+!   BL = -999d0
 
    if (ndx < 1) return
 
@@ -120,7 +120,7 @@
    if ( MXSAM.gt.0 .and. MYSAM.gt. 0 ) then  ! bi-linear interpolation
       call bilin_interp(NDX, XZ, YZ, BL, dmiss, XS, YS, ZS, MXSAM, MYSAM, XPL, YPL, ZPL, NPL, jsferic)
    else  ! Delauny
-      call TRIINTfast(XS,YS,ZS,NS,1,XZ,YZ,BL,Ndx,JDLA, jakdtree, jsferic, Npl, jins, dmiss, XPL, YPL, ZPL, transformcoef)
+      call TRIINTfast(XS,YS,ZS,NS,1,XZ,YZ,BL,Ndx,JDLA, jakdtree, jsferic, Npl, jins, dmiss, jasfer3D, XPL, YPL, ZPL, transformcoef)
    end if
    
       !in_unit = 10 
@@ -142,7 +142,7 @@
    end subroutine triinterp2
 
 
-   SUBROUTINE TRIINTfast(XS, YS, ZS, NS,NDIM,X,Y,Z,NXY,JDLA,jakdtree, jsferic, NH, jins, dmiss, &
+   SUBROUTINE TRIINTfast(XS, YS, ZS, NS,NDIM,X,Y,Z,NXY,JDLA,jakdtree, jsferic, NH, jins, dmiss, jasfer3D, &
                          XH, YH, ZH, transformcoef)
    use m_ec_triangle
    use m_ec_interpolationsettings
@@ -152,6 +152,7 @@
    use mathconsts,  only: degrad_hp 
    use physicalconsts, only: earth_radius
    use kdtree2Factory
+   use MessageHandling
 
    implicit none
    integer, intent(inout) :: jakdtree !< use kdtree (1) or not (0)
@@ -196,6 +197,7 @@
 
    integer                                       :: nh, jins, jsferic
    double precision, intent(in)                  :: dmiss    
+   integer,          intent(in)                  :: jasfer3D
    double precision                              :: XH(nh), YH(nh), ZH(nh), transformcoef(:)
    integer                                       :: KMOD
 
@@ -378,7 +380,7 @@
                !if ( N.eq.341 ) jadum =
                !if ( N.eq.9 ) jadum = 1
                call findtri_kdtree(XP,YP,ZP,XS,YS,ZS,N2,NDIM, &
-                  NRFIND,INTRI,JSLO,SLO,Jtekinterpolationprocess,jadum,ierror,indf,wf, dmiss, jsferic, jins)
+                  NRFIND,INTRI,JSLO,SLO,Jtekinterpolationprocess,jadum,ierror,indf,wf, dmiss, jsferic, jins, jasfer3D)
                if ( ierror.ne.0 ) then
                   !                    deallocate
                   if ( treeglob%itreestat.ne.ITREE_EMPTY ) call delete_kdtree2(treeglob)
@@ -413,6 +415,10 @@
 
       !!!!!!!!!! give it another try with nearest neighbour opr inverse distance.
       if (intri == 0 .and. R2search.gt.0d0) then
+      
+!  this part is probably not prepared for spherical coordinates (and "jseric" isn't put to "0" temporarily either)
+         call mess(LEVEL_ERROR, 'triintfast: smallest distance search not prepared for spherical coordinates, see UNST-1720')
+      
          if (RD == dmiss) then
             if( jakdtree2 == 1 ) then
                call make_queryvector_kdtree(sampletree, xp, yp, jsferic)
@@ -585,13 +591,13 @@
 
    !>    find triangle for interpolation with kdtree
    !>       will initialize kdtree and triangulation connectivity
-   subroutine findtri_kdtree(XP,YP,ZP,XS,YS,ZS,NS,NDIM,NRFIND,INTRI,JSLO,SLO,JATEK,jadum,ierror,ind, wf, dmiss, jsferic, jins)
+   subroutine findtri_kdtree(XP,YP,ZP,XS,YS,ZS,NS,NDIM,NRFIND,INTRI,JSLO,SLO,JATEK,jadum,ierror,ind, wf, dmiss, jsferic, jins, jasfer3D)
    use m_ec_triangle
    use kdtree2Factory
    !LC use MessageHandling
    use mathconsts, only: degrad_hp
    use physicalconsts, only: earth_radius
-   use geometry_module, only: pinpok, cross
+   use geometry_module, only: pinpok, cross, pinpok3D, cross3D
    use m_alloc
    
    
@@ -636,8 +642,9 @@
 
    double precision, external          :: dcosphi
    double precision, intent(in)        :: dmiss
-   integer, intent(in)                 :: jins
+   integer,          intent(in)        :: jins
    integer                             :: jsferic
+   integer,          intent(in)        :: jasfer3D
 
    ierror = 1
 
@@ -767,7 +774,12 @@
             intri = 0
          else
             numsearched = numsearched+1
-            call pinpok(xp,yp,3,xv,yv,intri, jins, dmiss)
+            if ( jasfer3D.eq.0 ) then
+               call pinpok(xp,yp,3,xv,yv,intri, jins, dmiss)
+            else
+               call pinpok3D(xp,yp,3,xv,yv,intri, dmiss, jins, 1, 1)
+            end if
+            
             imask(i) = IDENT
          end if
 
@@ -802,7 +814,11 @@
 
             k1 = edgeindx(1,iedge)
             k2 = edgeindx(2,iedge)
-            call CROSS(xz, yz, xp, yp, xs(k1), ys(k1), xs(k2), ys(k2), JACROS,SL,SM,XCR,YCR,CRP, jsferic, dmiss)
+            if ( jasfer3D.eq.0 ) then
+               call CROSS(xz, yz, xp, yp, xs(k1), ys(k1), xs(k2), ys(k2), JACROS,SL,SM,XCR,YCR,CRP, jsferic, dmiss)
+            else
+               call cross3D(xz, yz, xp, yp, xs(k1), ys(k1), xs(k2), ys(k2), jacros, sL, sm, jsferic)
+            end if
 
             !              use tolerance
             if ( jacros.eq.0 ) then
@@ -844,7 +860,11 @@
    end if
 
    if (intri .eq. 1) then
-      call linear(xv, yv, zv, NDIM, xp, yp, zp, JSLO, SLO, JATEK, wf, dmiss, jsferic)
+      if ( jasfer3D.eq.0 ) then
+         call linear(xv, yv, zv, NDIM, xp, yp, zp, JSLO, SLO, JATEK, wf, dmiss, jsferic)
+      else
+         call linear3D(xv, yv, zv, NDIM, xp, yp, zp, JSLO, SLO, JATEK, wf, dmiss, jsferic)
+      end if
       do k = 1,3
          ind(k) = indx(k,nrfind)
       enddo
@@ -1046,6 +1066,81 @@
    ENDIF
    RETURN
    END SUBROUTINE LINEAR
+   
+   
+   subroutine linear3D(X, Y, Z, NDIM, XP, YP, ZP, JSLO, SLO, JATEK, w, dmiss, jsferic)
+      use geometry_module, only: sphertocart3D, inprod, vecprod, matprod, gaussj
+      use MessageHandling
+      implicit none
+
+      integer,                             intent(in)     :: NDIM       !< sample vector dimension
+      double precision, dimension(3),      intent(in)     :: x, y
+      double precision, dimension(NDIM,3), intent(in)     :: z
+      double precision,                    intent(in)     :: xp, yp
+      double precision,                    intent(out)    :: zp(NDIM)
+      integer,                             intent(in)     :: jslo       !< not supported
+      double precision, dimension(NDIM),   intent(out)    :: slo(NDIM)
+      integer,                             intent(in)     :: jatek      !< not supported
+      double precision, dimension(3),      intent(out)    :: w
+      double precision,                    intent(in)     :: dmiss
+      integer,                             intent(in)     :: jsferic
+                                       
+      double precision, dimension(3)                      :: xx1, xx2, xx3, xxp
+      double precision, dimension(3)                      :: s123, rhs
+                                                          
+      double precision, dimension(3,3)                    :: A
+      
+      double precision                                    :: D
+                                                          
+      integer                                             :: idim
+                                                          
+      double precision, parameter                         :: dtol = 1d-8
+      
+      if ( jslo.eq.1 ) then
+         call mess(LEVEL_ERROR, 'linear3D: jslo=1 not supported')
+      end if
+
+!     get 3D coordinates of the points
+      call sphertocart3D(x(1), y(1), xx1(1), xx1(2), xx1(3), jsferic)
+      call sphertocart3D(x(2), y(2), xx2(1), xx2(2), xx2(3), jsferic)      
+      call sphertocart3D(x(3), y(3), xx3(1), xx3(2), xx3(3), jsferic)     
+      call sphertocart3D(xp, yp, xxp(1), xxp(2), xxp(3), jsferic)             
+      
+!     get (double) area vector
+      s123 = vecprod(xx2-xx1,xx3-xx1)
+      
+      D = sqrt( inprod(s123,s123) )
+      
+      if ( D.gt.dtol ) then
+!        build system:
+!           gradz . (x2-x1) = z2-z1
+!           gradz . (x3-x1) = z3-z1
+!           gradz . ((x2-x1) X (x3-x1)) = 0
+         
+         A(1,:) = xx2-xx1
+         A(2,:) = xx3-xx1
+         A(3,:) = s123
+         rhs = 0d0   ! not used
+         
+!        compute inverse
+         call gaussj(A,3,3,rhs,1,1)
+         
+!        compute weights
+         w(2) = inprod(xxp-xx1, A(:,1))
+         w(3) = inprod(xxp-xx1, A(:,2))
+         w(1) = 1d0 - w(2) - w(3)
+         
+!        interpolate
+         do idim=1,NDIM
+            zp(idim) = w(1) * z(idim,1) + w(2) * z(idim,2) + w(3) * z(idim,3)
+         end do
+      else
+         zp = DMISS
+         call mess(LEVEL_ERROR, 'linear3D: area too small')
+      end if
+      
+      return
+   end subroutine linear3D
    
    !---------------------------------------------------------------------------!
    !   bilin_interp
