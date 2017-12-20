@@ -474,113 +474,113 @@
 
    end subroutine increasepol
    
-   !> determine if point is "inside" (first) polygon (1) or not (0)
-   subroutine pinpok3D(xp, yp, N, x, y, inside)
-   use m_ggeo_sferic
-   use m_ggeo_missing
-   implicit none
-
-   double precision,               intent(in)  :: xp, yp !< point coordinates
-   integer,                        intent(in)  :: N      !< polygon size
-   double precision, dimension(N), intent(in)  :: x, y   !< polygon coordinates
-   integer,                        intent(out) :: inside !< inside (1) or not (0)
-
-   double precision, dimension(:), allocatable :: xx, yy, zz
-
-   double precision, dimension(3)              :: xiXxip1 ! x_i X x_{i+1}
-   double precision, dimension(3)              :: xpXe ! xp X e
-
-   double precision                            :: xxp, yyp, zzp
-
-   double precision                            :: D, Di
-   double precision                            :: xi, eta, zeta
-   double precision                            :: lambda
-
-   integer                                     :: i, ip1, num
-
-   double precision, dimension(3)              :: ee
-
-   double precision,               parameter   :: dtol = 1d-8
-
-   if ( N.lt.3 ) then
-      inside = 0
-      if ( jins.ne.1 ) inside = 1-inside
-      goto 1234
-   end if
-
-   !     allocate
-   allocate(xx(N), yy(N), zz(N))
-
-   !     get 3D polygon coordinates
-   num = 0
-   do i=1,N
-      if ( x(i).ne.DMISS .and. y(i).ne.DMISS ) then
-         num = num+1
-         call sphertocart3D(x(i),y(i),xx(num),yy(num),zz(num))
-      else if ( num.gt.0 ) then
-         exit
-      end if
-   end do
-
-   if ( num.lt.3 ) then
-      inside = 0
-      if ( jins.ne.1 ) inside=1-inside
-      goto 1234  ! no valid polygon found
-   end if
-
-   call sphertocart3D(xp,yp,xxp,yyp,zzp)
-
-   !     get test direction: e_lambda
-   lambda = xp*dg2rd
-   ee = (/ -sin(lambda), cos(lambda), 0d0 /)
-
-   !     loop over polygon sections
-   inside = 0
-   do i=1,num
-      ip1 = i+1; if ( ip1.gt.num ) ip1=ip1-num
-
-      xiXxip1 = (/ yy(i)*zz(ip1) - zz(i)*yy(ip1),   &
-         zz(i)*xx(ip1) - xx(i)*zz(ip1),   &
-         xx(i)*yy(ip1) - yy(i)*xx(ip1) /)
-
-      xpXe = (/ yyp*ee(3) - zzp*ee(2),  &
-         zzp*ee(1) - xxp*ee(3),  &
-         xxp*ee(2) - yyp*ee(1) /)
-
-      D = xiXxip1(1)*ee(1) + xiXxip1(2)*ee(2) + xiXxip1(3)*ee(3)
-
-      if ( abs(D).gt.dtol ) then
-         Di = 1d0/D
-         xi   = -( xpXe(1)*xx(ip1) + xpXe(2)*yy(ip1) + xpXe(3)*zz(ip1) ) * Di
-         eta  =  ( xpXe(1)*xx(i)   + xpXe(2)*yy(i)   + xpXe(3)*zz(i)   ) * Di
-         zeta = -( xiXxip1(1)*xxp  + xiXxip1(2)*yyp  + xiXxip1(3)*zzp  ) * Di
-      else
-         !           enforce no intersection
-         xi   = -1d0
-         eta  = -1d0
-         zeta = -1d0
-      end if
-
-      if ( zeta.eq.0d0 ) then
-         inside=1
-         if ( jins.eq.0 ) inside=1-inside
-         goto 1234
-      else if ( xi.ge.0d0 .and. eta.gt.0d0 .and. zeta.gt.0d0 ) then
-         inside = 1-inside
-      end if
-
-   end do
-
-   if ( jins.eq.0 ) inside=1-inside
-
-1234 continue
-   !     deallocate
-   if ( allocated(xx) ) deallocate(xx)
-   if ( allocated(yy) ) deallocate(yy)
-   if ( allocated(zz) ) deallocate(zz)
-
-   return
-   end subroutine pinpok3D
+!   !> determine if point is "inside" (first) polygon (1) or not (0)
+!   subroutine pinpok3D(xp, yp, N, x, y, inside)
+!   use m_ggeo_sferic
+!   use m_ggeo_missing
+!   implicit none
+!
+!   double precision,               intent(in)  :: xp, yp !< point coordinates
+!   integer,                        intent(in)  :: N      !< polygon size
+!   double precision, dimension(N), intent(in)  :: x, y   !< polygon coordinates
+!   integer,                        intent(out) :: inside !< inside (1) or not (0)
+!
+!   double precision, dimension(:), allocatable :: xx, yy, zz
+!
+!   double precision, dimension(3)              :: xiXxip1 ! x_i X x_{i+1}
+!   double precision, dimension(3)              :: xpXe ! xp X e
+!
+!   double precision                            :: xxp, yyp, zzp
+!
+!   double precision                            :: D, Di
+!   double precision                            :: xi, eta, zeta
+!   double precision                            :: lambda
+!
+!   integer                                     :: i, ip1, num
+!
+!   double precision, dimension(3)              :: ee
+!
+!   double precision,               parameter   :: dtol = 1d-8
+!
+!   if ( N.lt.3 ) then
+!      inside = 0
+!      if ( jins.ne.1 ) inside = 1-inside
+!      goto 1234
+!   end if
+!
+!   !     allocate
+!   allocate(xx(N), yy(N), zz(N))
+!
+!   !     get 3D polygon coordinates
+!   num = 0
+!   do i=1,N
+!      if ( x(i).ne.DMISS .and. y(i).ne.DMISS ) then
+!         num = num+1
+!         call sphertocart3D(x(i),y(i),xx(num),yy(num),zz(num))
+!      else if ( num.gt.0 ) then
+!         exit
+!      end if
+!   end do
+!
+!   if ( num.lt.3 ) then
+!      inside = 0
+!      if ( jins.ne.1 ) inside=1-inside
+!      goto 1234  ! no valid polygon found
+!   end if
+!
+!   call sphertocart3D(xp,yp,xxp,yyp,zzp)
+!
+!   !     get test direction: e_lambda
+!   lambda = xp*dg2rd
+!   ee = (/ -sin(lambda), cos(lambda), 0d0 /)
+!
+!   !     loop over polygon sections
+!   inside = 0
+!   do i=1,num
+!      ip1 = i+1; if ( ip1.gt.num ) ip1=ip1-num
+!
+!      xiXxip1 = (/ yy(i)*zz(ip1) - zz(i)*yy(ip1),   &
+!         zz(i)*xx(ip1) - xx(i)*zz(ip1),   &
+!         xx(i)*yy(ip1) - yy(i)*xx(ip1) /)
+!
+!      xpXe = (/ yyp*ee(3) - zzp*ee(2),  &
+!         zzp*ee(1) - xxp*ee(3),  &
+!         xxp*ee(2) - yyp*ee(1) /)
+!
+!      D = xiXxip1(1)*ee(1) + xiXxip1(2)*ee(2) + xiXxip1(3)*ee(3)
+!
+!      if ( abs(D).gt.dtol ) then
+!         Di = 1d0/D
+!         xi   = -( xpXe(1)*xx(ip1) + xpXe(2)*yy(ip1) + xpXe(3)*zz(ip1) ) * Di
+!         eta  =  ( xpXe(1)*xx(i)   + xpXe(2)*yy(i)   + xpXe(3)*zz(i)   ) * Di
+!         zeta = -( xiXxip1(1)*xxp  + xiXxip1(2)*yyp  + xiXxip1(3)*zzp  ) * Di
+!      else
+!         !           enforce no intersection
+!         xi   = -1d0
+!         eta  = -1d0
+!         zeta = -1d0
+!      end if
+!
+!      if ( zeta.eq.0d0 ) then
+!         inside=1
+!         if ( jins.eq.0 ) inside=1-inside
+!         goto 1234
+!      else if ( xi.ge.0d0 .and. eta.gt.0d0 .and. zeta.gt.0d0 ) then
+!         inside = 1-inside
+!      end if
+!
+!   end do
+!
+!   if ( jins.eq.0 ) inside=1-inside
+!
+!1234 continue
+!   !     deallocate
+!   if ( allocated(xx) ) deallocate(xx)
+!   if ( allocated(yy) ) deallocate(yy)
+!   if ( allocated(zz) ) deallocate(zz)
+!
+!   return
+!   end subroutine pinpok3D
    
    
    !> Determines the orientation of a polygon.
