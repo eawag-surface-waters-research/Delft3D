@@ -24,8 +24,8 @@
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id: wave_version.F90.svn 3187 2013-12-09 10:01:20Z mourits $
-!  $HeadURL: https://svn.oss.deltares.nl/repos/delft3d/branches/research/Deltares/20170621_unst-807_d-hydro_merge/src/engines_gpl/wave/packages/manager/src/wave_version.F90.svn $
+!  $Id$
+!  $HeadURL$
 !
 ! Do not use a module here; that will cause a serious dependency problem
 !
