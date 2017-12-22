@@ -5168,11 +5168,11 @@ subroutine write_swan_inp (wavedata, calccount, &
              if (nttide>1 .or. wavedata%mode /= stand_alone) then
                 line(i:) = 't'
                 if (nttide > 1) then
-                   write (line(i+1:), '(I3.3)') itide
+                   write (line(i+1:), '(I6.6)') itide
                 else  ! wavedata%mode /= stand_alone
-                   write (line(i+1:), '(I3.3)') calccount
+                   write (line(i+1:), '(I6.6)') calccount
                 endif
-                i = i+4
+                i = i+7
              endif
              line(i:)  = '.sp2'
              i         = i+4
