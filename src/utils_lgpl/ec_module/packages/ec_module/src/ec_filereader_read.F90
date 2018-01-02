@@ -67,6 +67,12 @@ module m_ec_filereader_read
    public :: ecParseARCinfoMask
    public :: asc
    public :: asc_map_components
+
+   interface ecSampleReadAll
+      module procedure ecSampleReadAll_from_fileReader
+      module procedure ecSampleReadAll_from_lun
+   end interface
+
    
    ! Related to astronomic components
    integer, parameter                      :: kcmp = 1       !< 
@@ -1330,10 +1336,9 @@ module m_ec_filereader_read
          end if
       end function ecSpiderAndCurviAndArcinfoReadToBody
       
-      ! =======================================================================
-
-      function ecSampleReadAll(fileReaderPtr, xs, ys, zs, nSamples, kx) result(success)
-         use m_alloc
+      !> Reads a sample file (*.xyz) given a tEcFileReader, into allocatable arrays.
+      !! \see ecSampleReadAll_from_lun
+      function ecSampleReadAll_from_fileReader(fileReaderPtr, xs, ys, zs, nSamples, kx) result(success)
          logical                                                       :: success       !< function status
          type(tEcFileReader),                              pointer     :: fileReaderPtr !< intent(in)
          real(hp),            dimension(:),   allocatable, intent(out) :: xs            !< list of x-coordinates of all samples
@@ -1342,16 +1347,31 @@ module m_ec_filereader_read
          integer,                                          intent(out) :: nSamples      !< number of samples
          integer,                                          intent(out) :: kx            !< number of vector components in each sample value (1 for scalars)
 
-         integer :: msam
+         success = ecSampleReadAll_from_lun(fileReaderPtr%fileHandle, fileReaderPtr%filename, xs, ys, zs, nSamples, kx)
+
+      end function ecSampleReadAll_from_fileReader
+
+
+      !> Reads a sample file (*.xyz) given an already opened logical unit number, into allocatable arrays.
+      function ecSampleReadAll_from_lun(msam, filename, xs, ys, zs, nSamples, kx) result(success)
+         logical                                                         :: success       !< function status
+         integer,                                          intent(inout) :: msam          !< logical unit number (to already opened file)
+         character(len=*),                                 intent(in   ) :: filename      !< Name of the file (for messaging only)
+         real(hp),            dimension(:),   allocatable, intent(  out) :: xs            !< list of x-coordinates of all samples
+         real(hp),            dimension(:),   allocatable, intent(  out) :: ys            !< list of y-coordinates of all samples
+         real(hp),            dimension(:,:), allocatable, intent(  out) :: zs            !< list of z-values of all samples
+         integer,                                          intent(  out) :: nSamples      !< number of samples
+         integer,                                          intent(  out) :: kx            !< number of vector components in each sample value (1 for scalars)
+
          double precision :: xx, yy, zz
          double precision :: dmiss_dflt = -999d0   ! Use default missing value for this 'old' sample file type
          double precision :: xymis_dflt = -999d0   !
          character(len=132) :: rec
          character(len=maxMessageLen) :: tex
 
+
          success = .true.
 
-         msam = fileReaderPtr%fileHandle
          nSamples = 0
 
          rewind(msam)
@@ -1365,7 +1385,7 @@ module m_ec_filereader_read
          call realloc(zs, (/ kx, nSamples /), keepExisting = .false.)
 
          rewind(msam)
-
+! TODO: this reader does not yet have all functionality that reasam() in dflowfm kernel has (comments *, PHAROS filetype, ...)
          nSamples = 0
 10       continue
          read (msam,'(a)',end = 30) rec
@@ -1383,7 +1403,7 @@ module m_ec_filereader_read
 
 40       continue
          success = .false.
-         write(tex,'(a,a,a,i0,a)') "ERROR: ec_filereader_read::ecSampleReadAll: read error in file '", trim(fileReaderPtr%filename), "' on line ", nSamples+1, "."
+         write(tex,'(a,a,a,i0,a)') "ERROR: ec_filereader_read::ecSampleReadAll: read error in file '", trim(filename), "' on line ", nSamples+1, "."
          call setECMessage(trim(tex))
          return
 
@@ -1397,7 +1417,7 @@ module m_ec_filereader_read
 !           ipstat = ipstat_ok
 !        end if
          return
-      end function ecSampleReadAll
+      end function ecSampleReadAll_from_lun
 
       ! =======================================================================
 
