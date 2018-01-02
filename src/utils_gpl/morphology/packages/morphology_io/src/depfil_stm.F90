@@ -45,6 +45,8 @@ subroutine depfil_stm(lundia    ,error     ,fildep    ,fmttmp    , &
     use grid_dimens_module
 #if MOR_USE_ECMODULE
     use m_ec_module ! NOTE: AvD: ds trunk cannot use this yet, as m_ec_module is still in branches/research/Deltares/20130912_12819_EC-module/
+    use m_ec_filereader_read, only: ecSampleReadAll
+    use m_ec_basic_interpolation, only: triinterp2
 #endif
     ! 
     implicit none 
@@ -64,6 +66,8 @@ subroutine depfil_stm(lundia    ,error     ,fildep    ,fmttmp    , &
 ! Local variables 
 ! 
 !!#if MOR_USE_ECMODULE
+ real(hp), allocatable :: xs(:), ys(:), zs(:,:)
+ real(hp) :: xpl(1), ypl(1), zpl(1)
  real(hp) :: transformcoef(25)
  integer  :: minp0, jdla
  integer  :: ibnd
@@ -71,6 +75,9 @@ subroutine depfil_stm(lundia    ,error     ,fildep    ,fmttmp    , &
  integer  :: nm2
  logical  :: success
  real(hp) :: dmiss    = -999.0_hp
+ integer  :: ns, kx
+ integer  :: npl
+ integer  :: jsferic, jasfer3D, jins
  transformcoef = 0.0_hp
 !!#endif
 ! 
@@ -84,14 +91,21 @@ subroutine depfil_stm(lundia    ,error     ,fildep    ,fmttmp    , &
    ! This part only works if fp==hp !!
    !
    ! some call to timespaceinitialfield in EC module
-   ! TODO: AvD: test code below works, since we abuse some routines in FM, later REMOVE the additional include dir Slutiondir/src/.../...
-   call oldfil(minp0, fildep)
-   call reasam(minp0, 0) 
+   ! TODO: AvD: test code below now works via EC module, but still needs some inconvenient additional 'dummy' arguments. Consider further refactoring.
+   open (newunit=minp0, file = fildep, form = fmttmp, status = 'old') 
+   success = ecSampleReadAll(minp0, fildep, xs, ys, zs, ns, kx)
 
-   jdla = 1 
+   jdla = 1
+   jsferic = 0
+   jasfer3D = 0
+   jins = 1
+   NPL = 0 ! Dummies, since STM is not aware of these yet.
+
    array(ifld, :, :) = dmiss
-   call triinterp2(dims%xz, dims%yz, array(ifld, :, :), dims%nmmax, jdla)
-   
+
+   CALL triinterp2(dims%xz, dims%yz, array(ifld, :, :), dims%nmmax, jdla, & 
+                   XS, YS, ZS(1,:), NS, dmiss, jsferic, jins, jasfer3D, NPL, 0, 0, XPL, YPL, ZPL, transformcoef)
+
    ! mirror boundary cells if undefined if equal to dmiss
    do ibnd = 1, size(dims%nmbnd,1)  ! loop over boundary flow links (TO DO: what about 3D?)
       nm  = dims%nmbnd(ibnd,1)      ! point outside net
@@ -108,9 +122,8 @@ subroutine depfil_stm(lundia    ,error     ,fildep    ,fmttmp    , &
           if (present(errmsg)) errmsg = 'Error reading samples (not covering full grid) ' // trim(fildep) //' .'
       endif
    enddo    
-   call delsam(-1)
-   call doclose(minp0)
-   
+   close(minp0)
+
    ! success = timespaceinitialfield(dims%xz, dims%yz, array(ifld, :, :), dims%nmmax, fildep, 7, 5,  'O', transformcoef, 1) ! zie meteo module
    continue
 #else
@@ -128,6 +141,8 @@ subroutine depfil_stm_double(lundia    ,error     ,fildep    ,fmttmp    , &
     use grid_dimens_module
 #if MOR_USE_ECMODULE
     use m_ec_module ! NOTE: AvD: ds trunk cannot use this yet, as m_ec_module is still in branches/research/Deltares/20130912_12819_EC-module/
+    use m_ec_basic_interpolation, only: triinterp2
+    use m_ec_filereader_read, only: ecSampleReadAll
 #endif
 !    use timespace ! TODO: AvD: replace by EC location and remove current temp extra include path
     ! 
@@ -148,6 +163,8 @@ subroutine depfil_stm_double(lundia    ,error     ,fildep    ,fmttmp    , &
 ! Local variables 
 ! 
 !!#if MOR_USE_ECMODULE
+ real(hp), allocatable :: xs(:), ys(:), zs(:,:)
+ real(hp) :: xpl(1), ypl(1), zpl(1)
  real(hp) :: transformcoef(25)
  integer  :: minp0, jdla
  integer  :: ibnd
@@ -155,6 +172,9 @@ subroutine depfil_stm_double(lundia    ,error     ,fildep    ,fmttmp    , &
  integer  :: nm2
  logical  :: success
  real(hp) :: dmiss    = -999.0_hp
+ integer  :: ns, kx
+ integer  :: npl
+ integer  :: jsferic, jasfer3D, jins
  transformcoef = 0.0_hp
 !!#endif
 ! 
@@ -164,15 +184,22 @@ subroutine depfil_stm_double(lundia    ,error     ,fildep    ,fmttmp    , &
    if (present(errmsg)) errmsg = ' '
 ! MOR_USE_ECMODULE macro used from global_config.h to enable/disable EC-module for space-varying input in sed/mor.
 #if MOR_USE_ECMODULE
-               ! some call to timespaceinitialfield in EC module
-! TODO: AvD: test code below works, since we abuse some routines in FM, later REMOVE the additional include dir Slutiondir/src/.../...
-   call oldfil(minp0, fildep)
-   call reasam(minp0, 0) 
-   
-   jdla = 1 
+   ! some call to timespaceinitialfield in EC module
+   ! TODO: AvD: test code below now works via EC module, but still needs some inconvenient additional 'dummy' arguments. Consider further refactoring.
+   open (newunit=minp0, file = fildep, form = fmttmp, status = 'old') 
+   success = ecSampleReadAll(minp0, fildep, xs, ys, zs, ns, kx)
+
+   jdla = 1
+   jsferic = 0
+   jasfer3D = 0
+   jins = 1
+   NPL = 0 ! Dummies, since STM is not aware of these yet.
+
    array(ifld, :, :) = dmiss
-   call triinterp2(dims%xz, dims%yz, array(ifld, :, :), dims%nmmax, jdla)
-   
+
+   CALL triinterp2(dims%xz, dims%yz, array(ifld, :, :), dims%nmmax, jdla, & 
+                   XS, YS, ZS(1,:), NS, dmiss, jsferic, jins, jasfer3D, NPL, 0, 0, XPL, YPL, ZPL, transformcoef)
+
    ! mirror boundary cells if undefined if equal to dmiss
    do ibnd = 1, size(dims%nmbnd,1)  ! loop over boundary flow links (TO DO: what about 3D?)
       nm  = dims%nmbnd(ibnd,1)      ! point outside net
@@ -189,9 +216,8 @@ subroutine depfil_stm_double(lundia    ,error     ,fildep    ,fmttmp    , &
           if (present(errmsg)) errmsg = 'Error reading samples (not covering full grid) ' // trim(fildep) //' .'
       endif    
    enddo    
-   call delsam(-1)
-   call doclose(minp0)
-   
+   close(minp0)
+
    ! success = timespaceinitialfield(dims%xz, dims%yz, array(ifld, :, :), dims%nmmax, fildep, 7, 5,  'O', transformcoef, 1) ! zie meteo module
    continue
 #else
