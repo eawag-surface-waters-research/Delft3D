@@ -188,7 +188,7 @@
             TEMPC  = TC ** TEMP20
             AMFUNC = NH4 / ( KSAM * POROS + NH4 )
             OXFUNC = OXY / ( KSOX * POROS + OXY )
-            FLNIT  = K0NIT + KNIT * TEMPC * AMFUNC * OXFUNC
+            FLNIT  = K0NIT + KNIT * TEMPC * AMFUNC * OXFUNC * NH4
 
 !           maximise on the availebility of DO and NH4 with safety margin 0.5/0.9
 
@@ -256,11 +256,11 @@
 !           Calculate flux
 !
             IF (TEMP .LE. CRTEMP) THEN
-                  FL( 1+ IFLUX ) = ZERO
+                  FL( 1 + IFLUX ) = ZERO
             ELSE
                   TEMP20 = TEMP - 20.0
                   TEMPC  = TC ** TEMP20
-                  FL( 1 + IFLUX ) = ZERO + RC * CONC* TEMPC * O2FUNC
+                  FL( 1 + IFLUX ) = ZERO + RC * CONC * TEMPC * O2FUNC
             ENDIF
 !
 !           Zuurstoffunctie als uitvoer
