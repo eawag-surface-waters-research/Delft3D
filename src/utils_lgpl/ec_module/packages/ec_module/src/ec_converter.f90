@@ -2186,6 +2186,7 @@ module m_ec_converter
          integer :: n_layers, n_cols, n_rows, mp, np, kp, dkp, k_inc, n_points
          type(tEcItem), pointer  :: windxPtr ! pointer to item for windx     
          type(tEcItem), pointer  :: windyPtr ! pointer to item for windy
+         logical :: has_x_wind, has_y_wind
 !        real(hp), dimension(:), allocatable :: targetValues
          real(hp), dimension(:), pointer     :: targetValues
          real(hp), dimension(:), allocatable :: zsrc
@@ -2209,18 +2210,31 @@ module m_ec_converter
          sourceElementSet => null()
          targetElementSet => null()
          ! ===== preprocessing: rotate windx and windy of the source fields if the array of rotations exists in the filereader =====
-         windxPtr => null()
-         windyPtr => null()
-         do i=1, connection%nSourceItems
+         windxPtr   => null()
+         windyPtr   => null()
+         has_x_wind = .False.
+         has_y_wind = .False.
+          do i=1, connection%nSourceItems
             if (connection%SourceItemsPtr(i)%ptr%quantityPtr%name=='eastward_wind') then 
                windxPtr => connection%SourceItemsPtr(i)%ptr
             endif 
             if (connection%SourceItemsPtr(i)%ptr%quantityPtr%name=='northward_wind') then 
                windyPtr => connection%SourceItemsPtr(i)%ptr
             endif 
+            if (connection%SourceItemsPtr(i)%ptr%quantityPtr%name=='grid_eastward_wind' .or. connection%SourceItemsPtr(i)%ptr%quantityPtr%name=='x_wind') then 
+               windxPtr => connection%SourceItemsPtr(i)%ptr
+               has_x_wind = .True.
+            endif 
+            if (connection%SourceItemsPtr(i)%ptr%quantityPtr%name=='grid_northward_wind' .or. connection%SourceItemsPtr(i)%ptr%quantityPtr%name=='y_wind') then 
+               windyPtr => connection%SourceItemsPtr(i)%ptr
+               has_y_wind = .True.
+            endif 
          enddo 
-         if (associated(windxPtr) .and. associated(windyPtr)) then 
-            if (associated(windxPtr%elementsetPtr%dir)) then 
+
+         if (has_x_wind .and. has_y_wind) then 
+             ! This should only be performed if the standard_name for the x-component was x_wind or grid_eastward_wind (and similar for the y-component)
+             ! If eastward_wind was given, this operation should formally be ommitted, according to the CF-convention
+             if (associated(windxPtr%elementsetPtr%dir)) then 
                do ipt = 1,  windxPtr%elementsetPtr%ncoordinates
                   phi = windxPtr%elementsetPtr%dir(ipt)*PI/180.d0
                   xtmp = windxPtr%SourceT0fieldptr%arr1dptr(ipt)*cos(phi) + windyPtr%SourceT0fieldptr%arr1dptr(ipt)*sin(phi)
