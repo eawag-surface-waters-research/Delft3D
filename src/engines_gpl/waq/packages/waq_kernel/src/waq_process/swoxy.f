@@ -84,15 +84,12 @@
 !****                ISWOXY = 0  always in S2
 !***********************************************************************
 
-      IF (OXY .LE. CROXY) THEN
+      IF (OXY/POROS.LE.CROXY) THEN
         ISWWK = 0
-      ELSE
-        ISWWK = 1
-      ENDIF
-      IF (OXY/POROS .LE. CROXY) THEN
         ISWS1 = 0
         ISWS2 = 0
       ELSE
+        ISWWK = 1
         ISWS1 = 1
         ISWS2 = 0
       ENDIF
