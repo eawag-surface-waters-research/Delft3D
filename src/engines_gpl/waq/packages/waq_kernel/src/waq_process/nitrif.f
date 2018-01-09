@@ -207,7 +207,7 @@
       ELSEIF ( IVERSN .EQ. 2 ) THEN
 
             NH4    = MAX ( 0.0, PMSA(IP2 ) )
-            KNIT   = PMSA(IP14)
+            RC     = PMSA(IP14)
             OXY    = MAX ( 0.0, PMSA(IP5 ) )
             KSOX   = PMSA(IP7 )
             POROS  = PMSA(IP12)
@@ -215,7 +215,7 @@
 !           Calculate the nitrification flux
 !
             OXFUNC = OXY / ( KSOX*POROS + OXY )
-            FL( 1 + IFLUX ) = KNIT * NH4 * OXFUNC
+            FL( 1 + IFLUX ) = RC * NH4 * OXFUNC
 !
 !           Zuurstoffunctie als uitvoer
 !
