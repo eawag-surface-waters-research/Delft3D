@@ -1,5 +1,5 @@
 !
-!    Copyright 2013 Guy Munhoven
+!    Copyright 2013-2018.unhoven
 !
 !    This file is part of SolveSAPHE.
 
