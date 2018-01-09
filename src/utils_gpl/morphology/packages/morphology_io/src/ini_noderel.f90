@@ -195,11 +195,11 @@ subroutine ini_noderel(nrd, sedpar, lsedtot)
                   call GetTableData(pNodRel, pFrac)      ! Read the Table
                   
                elseif (pNodRel%Method == 'function') then
-                  call prop_get_double(block_ptr, '*', 'k', pNodRel%expQ)
+                  call prop_get(block_ptr, '*', 'k', pNodRel%expQ)
                   if (pNodRel%expQ < 0.0_fp) then
                      call SetMessage(LEVEL_FATAL, 'Exponent k of Discharge Ratio not/wrongly Specified in File: '//trim(fileName))
                   endif
-                  call prop_get_double(block_ptr, '*', 'm', pNodRel%expW)
+                  call prop_get(block_ptr, '*', 'm', pNodRel%expW)
                   if (pNodRel%expW < 0.0_fp) then
                      call SetMessage(LEVEL_FATAL, 'Exponent m of Width Ratio not/wrongly Specified in File: '//trim(fileName))
                   endif
@@ -446,8 +446,8 @@ subroutine GetTableData(nodRel, nodFrac)
    integer                                :: nRows
    integer                                :: nCols
    integer                                :: iRow
-   real(fp), allocatable, dimension(:)    :: x
-   real(fp), allocatable, dimension(:)    :: y
+   real(hp), allocatable, dimension(:)    :: x
+   real(hp), allocatable, dimension(:)    :: y
    
    tableFileName = nodFrac%tableFile
 
