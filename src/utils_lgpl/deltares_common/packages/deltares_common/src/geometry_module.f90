@@ -50,6 +50,7 @@ module geometry_module
    public :: getdy
    public :: getdxdy
    public :: sphertocart3D
+   public :: cart3Dtospher
    public :: dbpinpol
    public :: cross
    public :: dbpinpol_optinside_perpol
@@ -60,6 +61,7 @@ module geometry_module
    public :: vecprod
    public :: matprod
    public :: gaussj
+   public :: ave3D
 
    interface clockwise
       module procedure clockwise_sp
@@ -289,8 +291,8 @@ module geometry_module
       end if
 
       if ( jsferic.eq.1 .and. jasfer3D.eq.1 ) then
-         call sphertocart3D(x1,y1,xx1,yy1,zz1, jsferic)
-         call sphertocart3D(x2,y2,xx2,yy2,zz2, jsferic)
+         call sphertocart3D(x1,y1,xx1,yy1,zz1)
+         call sphertocart3D(x2,y2,xx2,yy2,zz2)
          dbdistance = sqrt( (xx2-xx1)**2 + (yy2-yy1)**2 + (zz2-zz1)**2 )
       else
          ddx = getdx(x1,y1,x2,y2,jsferic)
@@ -394,25 +396,62 @@ module geometry_module
       !
       ! sphertocart3D
       !
-      subroutine sphertocart3D(x1,y1,xx1,yy1,zz1, jsferic) ! from spherical 2D to Cartesian 3D coordinates
+      subroutine sphertocart3D(x1,y1,xx1,yy1,zz1)  !, jsferic) ! from spherical 2D to Cartesian 3D coordinates
       use mathconsts, only: degrad_hp
       use physicalconsts, only: earth_radius, dtol_pole
       implicit none
       double precision     :: x1,y1,xx1,yy1,zz1,rr
-      integer, intent(in)  :: jsferic
       
-      if ( jsferic.eq.1 ) then
+!      if ( jsferic.eq.1 ) then
          zz1 = earth_radius*sin(y1*degrad_hp)
          rr  = earth_radius*cos(y1*degrad_hp)
          xx1 = rr*cos(x1*degrad_hp)
          yy1 = rr*sin(x1*degrad_hp)
-      else
-         zz1 = 0d0
-         xx1 = x1
-         yy1 = y1
-      end if
+!      else
+!         zz1 = 0d0
+!         xx1 = x1
+!         yy1 = y1
+!      end if
       
       end subroutine sphertocart3D
+
+      
+ !    transform 3D Cartesian coordinates to 2D spherical (jsferic=1) or 2D Cartesian (jsferic=0) coordinates
+!        x1 will be close to xref in spherical coordinates
+      subroutine Cart3Dtospher(xx1,yy1,zz1,x1,y1,xref)
+         use mathconsts, only: raddeg_hp
+         implicit none
+         
+         double precision, intent(in)  :: xx1   !< 3D x-coordinate
+         double precision, intent(in)  :: yy1   !< 3D y-coordinate
+         double precision, intent(in)  :: zz1   !< 3D z-coordinate
+         double precision, intent(out) :: x1    !< longitude (spherical) or x-coordinate (2D Cartesian)
+         double precision, intent(out) :: y1    !< lattitude (spherical) or y-coordinate (2D Cartesian)
+         double precision, intent(in)  :: xref  !< reference point longitude
+         
+         double precision              :: xx1_, yy1a
+         
+         double precision, parameter   :: dtol=1d-16
+         
+!         if ( jsferic.eq.1 ) then
+            xx1_ = xx1
+!            yy1a = abs(yy1)
+!            if ( xx1.gt.-dtol*yy1a .and. xx1.lt.dtol*yy1a ) then
+!               xx1_ = 0d0
+!            end if
+            x1 = atan2(yy1,xx1)*raddeg_hp
+            y1 = atan2(zz1,sqrt(xx1**2+yy1**2))*raddeg_hp
+            
+!            if ( x1.ne.DMISS ) then
+               x1 = x1 + nint((xref-x1)/360d0) * 360d0
+!            end if
+!         else
+!            x1 = xx1
+!            y1 = yy1
+!         end if
+         
+         return
+      end subroutine Cart3Dtospher
       
       !
       ! CROSS
@@ -494,7 +533,7 @@ module geometry_module
       
       end subroutine CROSS
       
-      subroutine cross3D(x1, y1, x2, y2, x3, y3, x4, y4, jacros, sL, sm, jsferic)    ! ,SL,SM,XCR,YCR,CRP, jsferic, dmiss)
+      subroutine cross3D(x1, y1, x2, y2, x3, y3, x4, y4, jacros, sL, sm, jsferic, dmiss)    ! ,SL,SM,XCR,YCR,CRP, jsferic, dmiss)
       
          implicit none
          
@@ -505,46 +544,109 @@ module geometry_module
          integer,          intent(out)  :: jacros !< line 1-2 crosses line 3-4 (1) or not (0)
          double precision, intent(out)  :: sL, sm
          integer,          intent(in)   :: jsferic
+         double precision, intent(in)   :: dmiss
          
          double precision, dimension(3) :: xx1, xx2, xx3, xx4
          
          double precision, dimension(3) :: n12, n34, n
          
-         double precision               :: Det12, Det34
+         double precision               :: Det12, Det34, dum
          
-         double precision, parameter    :: dtol = 1d-16
+         double precision, parameter    :: dtol = 1d-12
 
 !        get 3D coordinates of four points
-         call sphertocart3D(x1, y1, xx1(1), xx1(2), xx1(3), jsferic)
-         call sphertocart3D(x2, y2, xx2(1), xx2(2), xx2(3), jsferic)
-         call sphertocart3D(x3, y3, xx3(1), xx3(2), xx3(3), jsferic)
-         call sphertocart3D(x4, y4, xx4(1), xx4(2), xx4(3), jsferic)
+         call sphertocart3D(x1, y1, xx1(1), xx1(2), xx1(3))
+         call sphertocart3D(x2, y2, xx2(1), xx2(2), xx2(3))
+         call sphertocart3D(x3, y3, xx3(1), xx3(2), xx3(3))
+         call sphertocart3D(x4, y4, xx4(1), xx4(2), xx4(3))
          
 !        n12 = ( x1 X x2)
          n12 = vecprod(xx1, xx2)
+         n12 = n12 / sqrt(inprod(n12,n12))
          
 !        n34 = ( x3 X x4)
          n34 = vecprod(xx3, xx4)
+         n34 = n34 / sqrt(inprod(n34,n34))
          
-         Det12 = inprod(xx2-xx1,n34)
-         Det34 = inprod(xx4-xx3,n12)
+         sL = DMISS
+         sm = DMISS
+         jacros = 0
          
-         if ( abs(Det12).gt.dtol .and. abs(Det34).gt.dtol ) then
-            SL = - inprod(xx1,n34) / Det12
-            SM = - inprod(xx3,n12) / Det34
-            
-            if ( SM .GE. 0d0 .AND. SM .LE. 1d0 .AND. &
-                 SL .GE. 0d0 .AND. SL .LE. 1d0 ) THEN
-               jacros = 1
-            endif
+         dum = sqrt(abs(inprod(n12,n34)))
+         
+         if ( 1d0-dum.gt.dtol ) then
+!           3D         
+            Det12 = inprod(xx2-xx1,n34)
+            Det34 = inprod(xx4-xx3,n12)
+         
+            if ( abs(Det12).gt.dtol .and. abs(Det34).gt.dtol ) then
+               SL = - inprod(xx1,n34) / Det12
+               SM = - inprod(xx3,n12) / Det34
+            end if
          else
-            sL = 0d0
-            sm = 0d0
-            jacros = 0
+!           2D
+           
          end if
+            
+         if ( SM .GE. 0d0 .AND. SM .LE. 1d0 .AND. &
+               SL .GE. 0d0 .AND. SL .LE. 1d0 ) THEN
+            jacros = 1
+         endif
          
          return
       end subroutine cross3D
+
+
+! compute average of coordinates in 3D
+subroutine ave3D(N,x,y,xu,yu,jsferic,jasfer3D)
+   implicit none
+   
+   integer,                        intent(in)  :: N      !< number of points
+   double precision, dimension(N), intent(in)  :: x, y   !< point coordinates
+   double precision,               intent(out) :: xu, yu !< average coordinates
+   integer,                        intent(in)  :: jsferic
+   integer,                        intent(in)  :: jasfer3D
+   
+   double precision                            :: xx, yy, zz
+   double precision                            :: xxu, yyu, zzu
+   
+   double precision                            :: dNi, x1
+   
+   integer                                     :: i
+   
+   if ( N.lt.1 ) return
+   
+   dNi = 1d0/N
+   x1 = x(1)
+   
+   if ( jsferic.eq.1 .and. jasfer3D.eq.1 ) then
+      xxu = 0d0
+      yyu = 0d0
+      zzu = 0d0
+      do i=1,N
+         call sphertoCart3D(x(i),y(i),xx,yy,zz)
+         xxu = xxu + xx
+         yyu = yyu + yy
+         zzu = zzu + zz
+         x1 = max(x1,x(i))
+      end do
+      xxu = xxu * dNi
+      yyu = yyu * dNi
+      zzu = zzu * dNi
+      call Cart3Dtospher(xxu,yyu,zzu,xu,yu,x1)
+   else
+      xu = 0d0
+      yu = 0d0
+      do i=1,N
+         xu = xu+x(i)
+         yu = yu+y(i)
+      end do
+      xu = xu*dNi
+      yu = yu*dNi
+   end if
+   
+   return
+end subroutine ave3D
       
       
 !>    c = a X b
@@ -776,7 +878,7 @@ module geometry_module
       
       
 !> determine if point is "inside" (first) polygon (1) or not (0)
-   subroutine pinpok3D(xp, yp, N, x, y, inside, dmiss, jins, jsferic, jasfer3D)
+   subroutine pinpok3D(xp, yp, N, x, y, inside, dmiss, jins, jsferic, jasfer3D, dfac, xz, yz)
 !      use m_sferic
 !      use m_missing
 !      use geometry_module, only: sphertocart3D
@@ -791,6 +893,8 @@ module geometry_module
       integer,                        intent(in)  :: jins   !< global inside/outside
       integer,                        intent(in)  :: jsferic   !< spherical coordinates (1) or Cartesian (0)
       integer,                        intent(in)  :: jasfer3D
+      double precision, optional,     intent(in)  :: dfac      !< polygon enlargement factor
+      double precision, optional,     intent(in)  :: xz, yz    !< coordinates of enlargement center
       
       double precision, dimension(:), allocatable :: xx, yy, zz
       
@@ -798,6 +902,7 @@ module geometry_module
       double precision, dimension(3)              :: xpXe ! xp X e
       
       double precision                            :: xxp, yyp, zzp
+      double precision                            :: xxz, yyz, zzz
       
       double precision                            :: D, Di
       double precision                            :: xi, eta, zeta
@@ -807,7 +912,7 @@ module geometry_module
       
       double precision, dimension(3)              :: ee
       
-      double precision,               parameter   :: dtol = 1d-8
+      double precision,               parameter   :: dtol = 0d0
       
       if ( N.lt.3 ) then
          inside = 0
@@ -823,11 +928,23 @@ module geometry_module
       do i=1,N
          if ( x(i).ne.DMISS .and. y(i).ne.DMISS ) then
             num = num+1
-            call sphertocart3D(x(i),y(i),xx(num),yy(num),zz(num),jsferic)
+            call sphertocart3D(x(i),y(i),xx(num),yy(num),zz(num))
          else if ( num.gt.0 ) then
             exit
          end if
       end do
+      
+!     check if enlargement is required
+      if ( present(dfac) .and. present(xz) .and. present(yz) ) then
+!        enlarge
+      
+         call sphertocart3D(xz,yz,xxz,yyz,zzz)
+         do i=1,N
+            xx(i) = xxz + dfac*(xx(i)-xxz)
+            yy(i) = yyz + dfac*(yy(i)-yyz)
+            zz(i) = zzz + dfac*(zz(i)-zzz)
+         end do
+      end if
       
       if ( num.lt.3 ) then
          inside = 0
@@ -835,7 +952,7 @@ module geometry_module
          goto 1234  ! no valid polygon found
       end if
       
-      call sphertocart3D(xp,yp,xxp,yyp,zzp,jsferic)
+      call sphertocart3D(xp,yp,xxp,yyp,zzp)
       
 !     get test direction: e_lambda
       lambda = xp*degrad_hp   ! dg2rd
@@ -846,21 +963,32 @@ module geometry_module
       do i=1,num
          ip1 = i+1; if ( ip1.gt.num ) ip1=ip1-num
          
-         xiXxip1 = (/ yy(i)*zz(ip1) - zz(i)*yy(ip1),   &
-                      zz(i)*xx(ip1) - xx(i)*zz(ip1),   &
-                      xx(i)*yy(ip1) - yy(i)*xx(ip1) /)
+!         xiXxip1 = (/ yy(i)*zz(ip1) - zz(i)*yy(ip1),   &
+!                      zz(i)*xx(ip1) - xx(i)*zz(ip1),   &
+!                      xx(i)*yy(ip1) - yy(i)*xx(ip1) /)
+         
+         xiXxip1 = vecprod( (/ xx(i),yy(i),zz(i) /), (/ xx(ip1),yy(ip1),zz(ip1) /) )
                      
-         xpXe = (/ yyp*ee(3) - zzp*ee(2),  &
-                   zzp*ee(1) - xxp*ee(3),  &
-                   xxp*ee(2) - yyp*ee(1) /)
+!         xpXe = (/ yyp*ee(3) - zzp*ee(2),  &
+!                   zzp*ee(1) - xxp*ee(3),  &
+!                   xxp*ee(2) - yyp*ee(1) /)
+         
+         xpXe = vecprod( (/ xxp,yyp,zzp /), ee )
                      
-         D = xiXxip1(1)*ee(1) + xiXxip1(2)*ee(2) + xiXxip1(3)*ee(3)
+!         D = xiXxip1(1)*ee(1) + xiXxip1(2)*ee(2) + xiXxip1(3)*ee(3)
+         
+         D = inprod( xiXxip1, ee )
+!         D = dsign(1d0,D)
          
          if ( abs(D).gt.dtol ) then
             Di = 1d0/D
-            xi   = -( xpXe(1)*xx(ip1) + xpXe(2)*yy(ip1) + xpXe(3)*zz(ip1) ) * Di
-            eta  =  ( xpXe(1)*xx(i)   + xpXe(2)*yy(i)   + xpXe(3)*zz(i)   ) * Di
-            zeta = -( xiXxip1(1)*xxp  + xiXxip1(2)*yyp  + xiXxip1(3)*zzp  ) * Di
+!            xi   = -( xpXe(1)*xx(ip1) + xpXe(2)*yy(ip1) + xpXe(3)*zz(ip1) ) * Di
+!            eta  =  ( xpXe(1)*xx(i)   + xpXe(2)*yy(i)   + xpXe(3)*zz(i)   ) * Di
+!            zeta = -( xiXxip1(1)*xxp  + xiXxip1(2)*yyp  + xiXxip1(3)*zzp  ) * Di
+            
+            xi   = -( inprod( xpXe, (/ xx(ip1),yy(ip1),zz(ip1) /) )  ) * Di
+            eta  =  ( inprod( xpXe, (/ xx(i),yy(i),zz(i) /) )  ) * Di
+            zeta = -( inprod( xiXxip1, (/ xxp,yyp,zzp /) )  ) * Di
          else
 !           enforce no intersection
             xi   = -1d0
@@ -870,7 +998,6 @@ module geometry_module
          
          if ( zeta.eq.0d0 ) then
             inside=1
-            if ( jins.eq.0 ) inside=1-inside
             goto 1234
          else if ( xi.ge.0d0 .and. eta.gt.0d0 .and. zeta.gt.0d0 ) then
             inside = 1-inside
@@ -878,9 +1005,10 @@ module geometry_module
                      
       end do
       
+ 1234 continue      
+      
       if ( jins.eq.0 ) inside=1-inside
       
- 1234 continue      
 !     deallocate
       if ( allocated(xx) ) deallocate(xx)
       if ( allocated(yy) ) deallocate(yy)
