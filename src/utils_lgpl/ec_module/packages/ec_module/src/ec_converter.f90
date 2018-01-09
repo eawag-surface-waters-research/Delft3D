@@ -2408,8 +2408,6 @@ module m_ec_converter
                                  targetValues(k) = lastvalue
                               end if
                            end do
-                        else
-                           targetValues(kbot:ktop) = targetMissing   ! 0.0_hp
                         end if
                      end do
                      deallocate(zsrc)
@@ -2447,29 +2445,7 @@ module m_ec_converter
                                      targetValues(j) = targetValues(j) + a1 * weight * s2D_T1(mp+ii, np+jj)
                                  end do
                               end do
-
-                              !targetValues(j) = targetValues(j) +  &
-                              !                   a0 * (indexWeight%weightFactors(1,j)*s2D_T0(mp  ,np  ) + &
-                              !                         indexWeight%weightFactors(2,j)*s2D_T0(mp+1,np  ) + &
-                              !                         indexWeight%weightFactors(3,j)*s2D_T0(mp+1,np+1) + &
-                              !                         indexWeight%weightFactors(4,j)*s2D_T0(mp  ,np+1))  &
-                              !                    + &
-                              !                   a1 * (indexWeight%weightFactors(1,j)*s2D_T1(mp  ,np  ) + &
-                              !                         indexWeight%weightFactors(2,j)*s2D_T1(mp+1,np  ) + &
-                              !                         indexWeight%weightFactors(3,j)*s2D_T1(mp+1,np+1) + &
-                              !                         indexWeight%weightFactors(4,j)*s2D_T1(mp  ,np+1))
-                                                 !a0 * (indexWeight%weightFactors(1,j)*sourceT0Field%arr1d(mp+n_cols*(np-1)) + &
-                                                 !      indexWeight%weightFactors(2,j)*sourceT0Field%arr1d(mp+1+n_cols*(np-1)) + &
-                                                 !      indexWeight%weightFactors(3,j)*sourceT0Field%arr1d(mp+1+n_cols*((np-1)+1)) + &
-                                                 !      indexWeight%weightFactors(4,j)*sourceT0Field%arr1d(mp+n_cols*((np-1)+1))) &
-                                                 ! + &
-                                                 !a1 * (indexWeight%weightFactors(1,j)*sourceT1Field%arr1d(mp+n_cols*(np-1)) + &
-                                                 !      indexWeight%weightFactors(2,j)*sourceT1Field%arr1d(mp+1+n_cols*(np-1)) + &
-                                                 !      indexWeight%weightFactors(3,j)*sourceT1Field%arr1d(mp+1+n_cols*((np-1)+1)) + &
-                                                 !      indexWeight%weightFactors(4,j)*sourceT1Field%arr1d(mp+n_cols*((np-1)+1)))
                            end if                              
-                        else
-                           targetValues(j) = targetMissing
                         end if
                      end do
                   end if
