@@ -411,6 +411,10 @@
             ENDIF ! (INTRI .EQ. 1)
          ENDIF ! (XP .NE. XYMIS .AND. ... .AND. YP .LE. YMAXS )
       endif
+      
+      if ( intri.eq.0 ) then
+         continue
+      end if
 
 
       !!!!!!!!!! give it another try with nearest neighbour opr inverse distance.
@@ -597,7 +601,7 @@
    !LC use MessageHandling
    use mathconsts, only: degrad_hp
    use physicalconsts, only: earth_radius
-   use geometry_module, only: pinpok, cross, pinpok3D, cross3D
+   use geometry_module, only: pinpok, cross, pinpok3D, cross3D, ave3D
    use m_alloc
    
    
@@ -645,6 +649,8 @@
    integer,          intent(in)        :: jins
    integer                             :: jsferic
    integer,          intent(in)        :: jasfer3D
+   
+   double precision, parameter         :: dfac = 1.000001d0  ! enlargement factor for pinpok3D
 
    ierror = 1
 
@@ -697,8 +703,12 @@
 
          !              compute triangle circumcenter
          !call circumcenter3(3, xv, yv, xx(i), yy(i))
-         xx(i) = sum(xv(1:3)) / 3d0
-         yy(i) = sum(yv(1:3)) / 3d0
+         if ( jasfer3D.eq.1 ) then
+            call ave3D(3,xv,yv, xx(i), yy(i),jsferic_store,jasfer3D)
+         else
+            xx(i) = sum(xv(1:3)) / 3d0
+            yy(i) = sum(yv(1:3)) / 3d0
+         end if
       end do
 
       !        restore jsferic
@@ -740,17 +750,21 @@
 
       numsearched = 0
 
-      !        check current triangle
-      do ii=1,3
-         inod = indx(ii,inext)
-         xv(ii) = xs(inod)
-         yv(ii) = ys(inod)
-         zv(1:NDIM,ii) = zs(1:NDIM,inod)
-      end do
-
-      !        get cell centroid
-      xz = sum(xv(1:3)) / 3d0
-      yz = sum(yv(1:3)) / 3d0
+!!      !        check current triangle
+!      do ii=1,3
+!         inod = indx(ii,inext)
+!         xv(ii) = xs(inod)
+!         yv(ii) = ys(inod)
+!         zv(1:NDIM,ii) = zs(1:NDIM,inod)
+!      end do
+!
+!      !        get cell centroid
+!      if ( jasfer3D.eq.1 ) then
+!         call ave3D(3,xv,yv,xz,yz,jsferic,jasfer3D)
+!      else
+!         xz = sum(xv(1:3)) / 3d0
+!         yz = sum(yv(1:3)) / 3d0
+!      end if
 
       do while ( inext.gt.0 .and. inext.le.numtri .and. numsearched.le.2*NUMTRI )   ! numsearched: safety
          i = inext
@@ -762,11 +776,17 @@
             yv(ii) = ys(inod)
             zv(1:NDIM,ii) = zs(1:NDIM,inod)
          end do
+         
+!        get a point in the cell
+         if ( jasfer3D.eq.1 ) then
+            call ave3D(3,xv,yv,xz,yz,jsferic,jasfer3D)
+         else
+            xz = sum(xv(1:3)) / 3d0
+            yz = sum(yv(1:3)) / 3d0
+         end if
 
          if ( jadum.eq.1 ) then
             !LC call tektri(xv,yv,31)
-            xz = sum(xv(1:3)) / 3d0
-            yz = sum(yv(1:3)) / 3d0
             !LC call cirr(xz,yz,31)
          end if
 
@@ -777,7 +797,7 @@
             if ( jasfer3D.eq.0 ) then
                call pinpok(xp,yp,3,xv,yv,intri, jins, dmiss)
             else
-               call pinpok3D(xp,yp,3,xv,yv,intri, dmiss, jins, 1, 1)
+               call pinpok3D(xp,yp,3,xv,yv,intri, dmiss, jins, 1, 1, dfac=dfac, xz=xz, yz=yz)
             end if
             
             imask(i) = IDENT
@@ -792,8 +812,12 @@
          jsferic = 0
 
          !           proceed to next triangle, which is adjacent to the edge that is cut by the line from the current triangle to the query point
-         xz = sum(xv(1:3)) / 3d0
-         yz = sum(yv(1:3)) / 3d0
+!         if ( jasfer3D.eq.1 ) then
+!            call ave3D(3,xv,yv,xz,yz,jsferic_store,jasfer3D)
+!         else
+!            xz = sum(xv(1:3)) / 3d0
+!            yz = sum(yv(1:3)) / 3d0
+!         end if
          inext = 0
 
          if ( jadum.eq.1 ) then
@@ -817,7 +841,7 @@
             if ( jasfer3D.eq.0 ) then
                call CROSS(xz, yz, xp, yp, xs(k1), ys(k1), xs(k2), ys(k2), JACROS,SL,SM,XCR,YCR,CRP, jsferic, dmiss)
             else
-               call cross3D(xz, yz, xp, yp, xs(k1), ys(k1), xs(k2), ys(k2), jacros, sL, sm, jsferic)
+               call cross3D(xz, yz, xp, yp, xs(k1), ys(k1), xs(k2), ys(k2), jacros, sL, sm, jsferic_store, dmiss)
             end if
 
             !              use tolerance
@@ -1069,7 +1093,7 @@
    
    
    subroutine linear3D(X, Y, Z, NDIM, XP, YP, ZP, JSLO, SLO, JATEK, w, dmiss, jsferic)
-      use geometry_module, only: sphertocart3D, inprod, vecprod, matprod, gaussj
+      use geometry_module
       use MessageHandling
       implicit none
 
@@ -1092,19 +1116,19 @@
       
       double precision                                    :: D
                                                           
-      integer                                             :: idim
+      integer                                             :: idim, i
                                                           
-      double precision, parameter                         :: dtol = 1d-8
+      double precision, parameter                         :: dtol = 0d0
       
       if ( jslo.eq.1 ) then
          call mess(LEVEL_ERROR, 'linear3D: jslo=1 not supported')
       end if
 
 !     get 3D coordinates of the points
-      call sphertocart3D(x(1), y(1), xx1(1), xx1(2), xx1(3), jsferic)
-      call sphertocart3D(x(2), y(2), xx2(1), xx2(2), xx2(3), jsferic)      
-      call sphertocart3D(x(3), y(3), xx3(1), xx3(2), xx3(3), jsferic)     
-      call sphertocart3D(xp, yp, xxp(1), xxp(2), xxp(3), jsferic)             
+      call sphertocart3D(x(1), y(1), xx1(1), xx1(2), xx1(3))
+      call sphertocart3D(x(2), y(2), xx2(1), xx2(2), xx2(3))      
+      call sphertocart3D(x(3), y(3), xx3(1), xx3(2), xx3(3))     
+      call sphertocart3D(xp, yp, xxp(1), xxp(2), xxp(3))             
       
 !     get (double) area vector
       s123 = vecprod(xx2-xx1,xx3-xx1)
@@ -1136,6 +1160,12 @@
          end do
       else
          zp = DMISS
+         write(6,*) xp, yp
+         write(6,*) 'L001'
+         write(6,*) 3, 2
+         do i=1,3
+            write(6,*) x(i), y(i)
+         end do
          call mess(LEVEL_ERROR, 'linear3D: area too small')
       end if
       
