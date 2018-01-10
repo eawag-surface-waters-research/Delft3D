@@ -62,7 +62,7 @@
 !
       LFLAG  = .TRUE.
       LFIRST = .FALSE.
-      IF ( ISTEP                  .LE. 0         ) THEN
+      IF ( ISTEP .LE. 0  .AND.  ISTRT .NE. ISTOP ) THEN
          LFLAG = .FALSE.
          GOTO 100
       ENDIF
