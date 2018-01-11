@@ -81,7 +81,7 @@
          if ( btest(iknmrk(iseg),0) ) then
             write (iomap)   conc1(:,iseg), conc2(:,iseg)
          else
-            write (iomap) ( amiss, k = 1, notot1+notot2 )
+            write (iomap) ( amiss, k = 1, notot1), conc2(:,iseg)
          endif
       enddo
 

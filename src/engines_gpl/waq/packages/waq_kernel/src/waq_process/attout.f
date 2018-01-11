@@ -41,34 +41,31 @@
 !     Name     Type   Library
 !     ------   -----  ------------
 
-      IMPLICIT REAL (A-H,J-Z)
+      implicit none
 
-      REAL     PMSA  ( * ) , FL    (*)
-      INTEGER  IPOINT( * ) , INCREM(*) , NOSEG , NOFLUX,
-     +         IEXPNT(4,*) , IKNMRK(*) , NOQ1, NOQ2, NOQ3, NOQ4
+      real     pmsa  ( * ) , fl    (*)
+      integer  ipoint(2)   , increm(2) , noseg , noflux
+      integer  iexpnt(4,*) , iknmrk(*) , noq1, noq2, noq3, noq4
 
-      INTEGER  IDX
-      INTEGER  ATTRIB
+      integer  ip (2)
+      integer  iseg
+      integer  idx
+      integer  attrib
 
-      IP1  = IPOINT( 1)
-      IP2  = IPOINT( 2)
-!
-      DO 9000 ISEG = 1 , NOSEG
+      ip = ipoint
 
-      IDX    = PMSA(IP1 )
-      CALL DHKMRK(IDX,IKNMRK(ISEG),ATTRIB)
+      do iseg = 1 , noseg
+         idx    = pmsa(ip(1))
+         if (idx.eq.0) then
+             attrib = iknmrk(iseg)
+         else
+             call dhkmrk(idx,iknmrk(iseg),attrib)
+         endif
+         ! Store the value
+         pmsa(ip(2)) = attrib
 
-      ! Store the value
-
-      PMSA(IP2 ) = ATTRIB
-
-      ! Next segment
-
-      IP1   = IP1   + INCREM (  1 )
-      IP2   = IP2   + INCREM (  2 )
-!
- 9000 CONTINUE
-!
-      RETURN
-!
-      END
+         ! Next segment
+         ip = ip + increm
+      end do
+      return
+      end
