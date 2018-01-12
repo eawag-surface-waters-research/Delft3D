@@ -38,14 +38,17 @@ implicit none
 !user defined data types
    contains
 !
-! Calculates a
+! Calculates x and y coordinates from UGrid filr format
 ! 
-function odu_get_xy_coordinates(branchids, branchoffsets, geopointsX, geopointsY, nbranchgeometrynodes, branchlengths, meshXCoords, meshYCoords) result(ierr)
+function odu_get_xy_coordinates(branchids, branchoffsets, geopointsX, geopointsY, nbranchgeometrynodes, branchlengths, jsferic, meshXCoords, meshYCoords) result(ierr)
 
-   use m_ggeo_sferic
+   use geometry_module, only: sphertocart3D, cart3Dtospher
+   use m_ggeo_missing, only : dmiss
+   
    integer, intent(in)               :: branchids(:), nbranchgeometrynodes(:)
    double precision, intent(in)      :: branchoffsets(:), geopointsX(:), geopointsY(:), branchlengths(:)
    double precision, intent(inout)   :: meshXCoords(:), meshYCoords(:)
+   integer, intent(in)               :: jsferic
 
    integer                           :: angle, i, ierr, ind, branchid, idxstart, idxend, idxbr, idxgeostart, idxgeoend, nsegments
    double precision, allocatable     :: branchSegmentLengths(:)
@@ -160,7 +163,7 @@ function odu_get_xy_coordinates(branchids, branchoffsets, geopointsX, geopointsY
    
    if (jsferic == 1) then
       do i = 1, size(meshXCoords,1)
-         call Cart3Dtospher(cartMeshXCoords(i),cartMeshYCoords(i),cartMeshZCoords(i),meshXCoords(i),meshYCoords(i),maxlat) 
+         call cart3Dtospher(cartMeshXCoords(i),cartMeshYCoords(i),cartMeshZCoords(i),meshXCoords(i),meshYCoords(i), maxlat) 
       end do
    else
       meshXCoords(:) = cartMeshXCoords(:)

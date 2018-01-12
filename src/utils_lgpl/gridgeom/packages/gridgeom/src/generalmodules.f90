@@ -1,16 +1,15 @@
-
    module m_ggeo_missing
-
    implicit none
-   double precision                  :: dmiss    = -999d0   !
-   double precision                  :: xymis    = -999d0   !
-   double precision                  :: dxymis   = -999d0
-   integer                           :: intmiss    = -2147483647 ! integer fillvlue
-   integer                           :: LMOD, KMOD ! TBV READDY
-   integer                           :: jins     = 1
+   double precision                  :: dmiss           = -999d0      !
+   double precision                  :: xymis           = -999d0      !
+   double precision                  :: dxymis          = -999d0
+   !double precision                 :: ieee_negative_inf = -1.7976931348623158e+308 ! IEEE standard for the maximum negative value
+   integer                           :: intmiss         = -2147483647 ! integer fillvlue
+   integer                           :: LMOD, KMOD                    ! TBV READDY
+   integer                           :: jins            = 1
    integer                           :: jadelnetlinktyp = 0
-
    end module m_ggeo_missing
+
 
    module m_ggeo_dimens
    implicit none
@@ -33,107 +32,6 @@
    end function m_ggeo_dimens_destructor
 
    end module m_ggeo_dimens
-
-   module m_ggeo_landboundary
-   implicit none
-   double precision, allocatable :: XLAN (:), YLAN(:), ZLAN(:)
-   integer, allocatable          :: NCLAN(:)
-   integer                       :: MXLAN, MAXLAN
-
-   ! SPvdP: segments
-   integer                              :: MXLAN_loc        ! actual MXLAN
-   integer                              :: Nlanseg          ! number of land boundary segments
-   integer, allocatable, dimension(:,:) :: lanseg_startend  ! segment start and end indices,          dim(2,Nlanseg)
-   integer, allocatable, dimension(:)   :: lanseg_map       ! node to land boundary segment mapping,  dim(numk)
-
-   integer                              :: jleft, jright    !< outer land boundary segments in projection
-
-   double precision                     :: rLleft, rLright  !< fractional location of the projected outer nodes (min and max) on the land boundary segment
-
-   double precision                     :: DCLOSE_bound = 5d0 !< close-to-landboundary tolerance, netbound only, measured in number of meshwidths
-   double precision                     :: DCLOSE_whole = 1d0 !< close-to-landboundary tolerance, whole network, measured in number of meshwidths
-
-   double precision                     :: DCLOSE = 1d0       ! close-to-landboundary tolerance, measured in number of meshwidths
-
-   logical                              :: Ladd_land = .true. ! add land boundary between land boundary segments that are close to each other
-   end module m_ggeo_landboundary
-
-   module m_ggeo_sferic
-   implicit none
-   integer                           :: jsferic = 0        ! xy pair is in : 0=cart, 1=sferic coordinates
-   integer                           :: jsfertek= 0        ! drawn in 0=cart, 1=stereografisch
-   integer                           :: jasfer3D = 0      ! 0 = org, 1 = sqrt(dx2+dy2+dz2), 2= greatcircle
-   integer                           :: jglobe  = 0       ! if (jsferic==1) do we need extra tests for 360-0 transgression
-   double precision                  :: pi                ! pi
-   double precision                  :: twopi             ! 2pi
-   double precision                  :: dg2rd             ! degrees to radians
-   double precision                  :: rd2dg             ! and vice versa
-   double precision                  :: ra = 6378137d0    ! earth radius (m)
-   double precision                  :: omega             ! earth angular velocity (rad/s)
-   double precision                  :: fcorio            ! 2omegasinfi
-   double precision                  :: anglat = 0d0      ! 26.0     ! dubai 52.5     ! angle of latitude  (horizontal)
-   double precision                  :: anglon = 0d0      ! 26.0     ! dubai 52.5     ! angle of longitude (vertical)
-   double precision                  :: dy2dg             ! from dy in m to lat in degrees
-   double precision                  :: csphi             ! cosphi of latest requested
-
-   double precision, parameter       :: dtol_pole = 1d-4   ! pole tolerance in degrees
-   
-   contains
-   
-   subroutine sphertocart3D(x1,y1,xx1,yy1,zz1) ! from spherical 2D to Cartesian 3D coordinates
-   implicit none
-   double precision :: x1,y1,xx1,yy1,zz1,rr
-
-   if ( jsferic.eq.1 ) then
-      zz1 = ra*sin(y1*dg2rd)
-      rr  = ra*cos(y1*dg2rd)
-      xx1 = rr*cos(x1*dg2rd)
-      yy1 = rr*sin(x1*dg2rd)
-   else
-      zz1 = 0d0
-      xx1 = x1
-      yy1 = y1
-   end if
-   end subroutine sphertocart3D
-   
-   !    transform 3D Cartesian coordinates to 2D spherical (jsferic=1) or 2D Cartesian (jsferic=0) coordinates
-   !        x1 will be close to xref in spherical coordinates
-   subroutine Cart3Dtospher(xx1,yy1,zz1,x1,y1,xref)
-   use m_ggeo_missing
-   implicit none
-
-   double precision, intent(in)  :: xx1   !< 3D x-coordinate
-   double precision, intent(in)  :: yy1   !< 3D y-coordinate
-   double precision, intent(in)  :: zz1   !< 3D z-coordinate
-   double precision, intent(out) :: x1    !< longitude (spherical) or x-coordinate (2D Cartesian)
-   double precision, intent(out) :: y1    !< lattitude (spherical) or y-coordinate (2D Cartesian)
-   double precision, intent(in)  :: xref  !< reference point longitude
-
-   double precision              :: xx1_, yy1a
-
-   double precision, parameter   :: dtol=1d-16
-
-   if ( jsferic.eq.1 ) then
-      xx1_ = xx1
-      !            yy1a = abs(yy1)
-      !            if ( xx1.gt.-dtol*yy1a .and. xx1.lt.dtol*yy1a ) then
-      !               xx1_ = 0d0
-      !            end if
-      x1 = atan2(yy1,xx1)*rd2dg
-      y1 = atan2(zz1,sqrt(xx1**2+yy1**2))*rd2dg
-
-      if ( x1.ne.DMISS ) then
-         x1 = x1 + nint((xref-x1)/360d0) * 360d0
-      end if
-   else
-      x1 = xx1
-      y1 = yy1
-   end if
-
-   return
-   end subroutine Cart3Dtospher
-      
-   end module m_ggeo_sferic
 
    module m_ggeo_polygon
    implicit none

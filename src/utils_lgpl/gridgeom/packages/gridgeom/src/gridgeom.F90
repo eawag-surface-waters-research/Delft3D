@@ -41,27 +41,33 @@ implicit none
 
    contains
    
-function ggeo_get_xy_coordinates(branchids, branchoffsets, geopointsX, geopointsY, nbranchgeometrynodes, branchlengths, meshXCoords, meshYCoords) result(ierr)
+function ggeo_get_xy_coordinates(branchids, branchoffsets, geopointsX, geopointsY, nbranchgeometrynodes, branchlengths, jsferic, meshXCoords, meshYCoords) result(ierr)
    
    use odugrid
    
    integer, intent(in)               :: branchids(:),nbranchgeometrynodes(:)
    double precision, intent(in)      :: branchoffsets(:), geopointsX(:), geopointsY(:), branchlengths(:)
    double precision, intent(inout)   :: meshXCoords(:), meshYCoords(:)
+   integer, intent(in)               :: jsferic
    
    integer                           :: ierr
 
-   ierr = odu_get_xy_coordinates(branchids, branchoffsets, geopointsX, geopointsY, nbranchgeometrynodes, branchlengths, meshXCoords, meshYCoords)
+   ierr = odu_get_xy_coordinates(branchids, branchoffsets, geopointsX, geopointsY, nbranchgeometrynodes, branchlengths, jsferic, meshXCoords, meshYCoords)
 
 end function ggeo_get_xy_coordinates
 
-function ggeo_make1D2Dinternalnetlinks() result(ierr)
+function ggeo_make1D2Dinternalnetlinks(jsferic, jasfer3D, jglobe) result(ierr)
    
    use gridoperations
-   
+
    integer :: ierr
+   integer, intent(in)          :: jsferic
+   integer, intent(in)          :: jasfer3D
+   integer, intent(in)          :: jglobe
    
-   ierr = make1D2Dinternalnetlinks()
+   double precision :: dtol_pole = 1d-4 
+
+   ierr = make1D2Dinternalnetlinks(jsferic, jasfer3D, jglobe, dtol_pole)
 
 end function ggeo_make1D2Dinternalnetlinks
 

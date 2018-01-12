@@ -137,10 +137,10 @@
 
    !> Increase the number of net links
    SUBROUTINE INCREASENETW(K0,L0) ! TODO AFMAKEN
-   use m_ggeo_missing
    !LC removed use m_netw
    use network_ggeo_data
-   !LC
+   use m_ggeo_missing, only : xymis
+
    use m_alloc
    implicit none
    integer :: ierr
@@ -381,9 +381,10 @@
 
    !> TODO: Document me
    SUBROUTINE SETNEWPOINT(XP,YP,ZP,K1)
-   !LC use m_netw
+
    use network_ggeo_data
-   use m_ggeo_missing
+   use m_ggeo_missing, only : dmiss, xymis
+   
    implicit none
    integer :: jav
    integer :: jview
@@ -411,15 +412,18 @@
    RETURN
    END SUBROUTINE SETNEWPOINT
 
-   SUBROUTINE CROSSED2d_BNDCELL(NML, XP1, YP1, XP2, YP2 , NC1)
+   SUBROUTINE CROSSED2d_BNDCELL(NML, XP1, YP1, XP2, YP2 , NC1, jsferic)
    !use m_netw
    use network_ggeo_data
+   use m_ggeo_missing, only : dmiss
+   use geometry_module, only : crossinbox
    implicit none
    INTEGER          :: NML, NC1
    DOUBLE PRECISION :: XP1, YP1, XP2, YP2
 
    INTEGER          :: L, JACROS, K1, K2
    DOUBLE PRECISION :: SL, SM, XCR, YCR, CRP, slm
+   integer, intent(in)          :: jsferic
 
    NC1 = 0
    slm = 1d9
@@ -428,7 +432,7 @@
       if ( k1.lt.1 .or. k2.lt.1 ) cycle   ! SPvdP: safety
       IF (LNN(L) == 1) THEN       ! LINK MET 1 BUURCEL
          IF (KN(3,L) == 2) THEN
-            CALL CROSSinbox (XP1, YP1, XP2, YP2, XK(K1), YK(K1), XK(K2), YK(K2), jacros, SL, SM, XCR, YCR, CRP)
+            CALL CROSSinbox (XP1, YP1, XP2, YP2, XK(K1), YK(K1), XK(K2), YK(K2), jacros, SL, SM, XCR, YCR, CRP, jsferic, dmiss)
             if (jacros == 1) then
                if (sl < slm) then
                   NC1 = LNE(1,L)
@@ -442,7 +446,7 @@
    END SUBROUTINE CROSSED2d_BNDCELL
 
    SUBROUTINE OTHERNODE(K1,L1,K2)
-   !LC use m_netw
+
    use network_ggeo_data
    implicit none
    integer :: K1, L1, K2
@@ -479,16 +483,19 @@
    RETURN
    END SUBROUTINE OTHERNODECHK
 
-   SUBROUTINE SETNODADM(JACROSSCHECK)
-   !LC use m_netw
-   use network_ggeo_data
-   use m_ggeo_missing
-   use m_ggeo_sferic, only: pi, dg2rd
-   !LC use unstruc_messages
-   use M_GGEO_TRIANGLE, only: triangleminangle
+   SUBROUTINE SETNODADM(jacrosscheck, jsferic, jasfer3D)
 
+   use network_ggeo_data
+
+   !LC use unstruc_messages
+   use mathconsts, only: degrad_hp
+   use M_GGEO_TRIANGLE, only: triangleminangle
+   use geometry_module, only: getdx, getdy, dcosphi, cross
+   use m_ggeo_missing, only : dmiss, dxymis
    implicit none
-   INTEGER               :: JACROSSCHECK
+
+   integer                      :: jacrosscheck
+   integer, intent(in)          :: jsferic, jasfer3D
 
    double precision :: crp, e, e1
    integer          :: jacros, mout
@@ -496,11 +503,9 @@
    INTEGER          :: jDupLinks, jOverlapLinks, jSmallAng, maxlin
    double precision :: sl, sm, xcr, ycr
 
-   INTEGER, ALLOCATABLE          ::  KC2(:), KN2(:,:), KCK(:)
+   integer, allocatable          ::  KC2(:), KN2(:,:), KCK(:)
    double precision, allocatable :: arglin(:)
    integer, allocatable          :: linnrs(:), inn(:)
-   !LC   LOGICAL                       :: DINVIEW
-   double precision              :: getdx, getdy !LC , dcosphi
    double precision              :: phi, dx, dy, dmaxcosp, dcosp, costriangleminangle, phi0
 
    double precision :: X(4), Y(4)
@@ -531,7 +536,7 @@
                Y(3) = YK(KA)
                X(4) = XK(KB)
                Y(4) = YK(KB)
-               CALL CROSS(XK(K1), YK(K1), XK(K2), YK(K2), XK(KA), YK(KA), XK(KB), YK(KB), JACROS,SL,SM,XCR,YCR,CRP)
+               CALL CROSS(XK(K1), YK(K1), XK(K2), YK(K2), XK(KA), YK(KA), XK(KB), YK(KB), JACROS,SL,SM,XCR,YCR,CRP, jsferic, dmiss)
                IF (SL > E .AND. SL < E1 .AND. SM > E .AND. SM < E1 ) THEN
                   KN(1,L) = 0; KN(2,L) = 0 ; KN(3, L) = -1; EXIT
                ENDIF
@@ -660,7 +665,7 @@
 
    ! New cross check (two-smallangle check) is always performed
    jOverlapLinks = 0
-   costriangleminangle = cos(triangleminangle*dg2rd)
+   costriangleminangle = cos(triangleminangle*degrad_hp)
    if ( triangleminangle > 0 ) then
       lnl:do L=1,NUML
          k1 = kn(1,L) ; k2 = kn(2,L) ; k3 = kn(3,L)
@@ -685,7 +690,7 @@
                   cycle              ! Incomplete link?
                endif
 
-               dcosp = dcosphi(xk(k1), yk(k1), xk(k2), yk(k2), xk(k1), yk(k1), xk(kb), yk(kb))
+               dcosp = dcosphi(xk(k1), yk(k1), xk(k2), yk(k2), xk(k1), yk(k1), xk(kb), yk(kb), jasfer3D, jasfer3D, dxymis)
                dmaxcosp = max(dmaxcosp, dcosp)
             end do
             if (dmaxcosp > costriangleminangle) then
@@ -715,7 +720,7 @@
    maxlin = maxval(nmk(1:numk))
    allocate(linnrs(maxlin), arglin(maxlin), inn(maxlin))
    do k=1,numk
-      call sort_links_ccw(k, maxlin, linnrs, arglin, inn)
+      call sort_links_ccw(k, maxlin, linnrs, arglin, inn, jsferic)
    end do
    deallocate(linnrs, arglin, inn)
 
@@ -759,14 +764,20 @@
    RETURN
    END SUBROUTINE INIALLOCnetcell
 
-   subroutine update_cell_circumcenters()
+   subroutine update_cell_circumcenters(jsferic, jasfer3D, jglobe, dtol_pole)
+   
    use network_ggeo_data
    use m_ggeo_flowgeom
    use m_alloc
+   
    implicit none
 
    integer :: n, numc, ierr
    double precision :: zzz
+   integer, intent(in)          :: jsferic
+   integer, intent(in)          :: jasfer3D
+   integer, intent(in)          :: jglobe
+   double precision, intent(in) :: dtol_pole
 
    ! Compute (circum)center coordinates now already.
    ! nump is in same rythm as  (future) ndx2d
@@ -794,8 +805,8 @@
       endif
 
       do n = 1,nump                                      ! get cell center coordinates 2D
-         CALL GETCELLWEIGHTEDCENTER(n, xz(n) , yz(n) , zzz)
-         call getcellsurface(n, ba(n), xzw(n), yzw(n))
+         CALL getcellweightedcenter(n, xz(n) , yz(n) , zzz, jsferic, jasfer3D, jglobe, dtol_pole)
+         call getcellsurface(n, ba(n), xzw(n), yzw(n), jsferic, jasfer3D, dtol_pole)
          ! call cirr( xzw(n), yzw(n), 211 )
       end do
    end if
@@ -804,11 +815,13 @@
    !> Finds 2D cells in the unstructured net.
    !! Optionally within a polygon mask.
    ! Resets netcell data and also computes circumcenters in xz (flowgeom)
-   SUBROUTINE FINDCELLS(JP)
-   !LC use m_netw
+   SUBROUTINE FINDCELLS(JP, jsferic, jasfer3D, jglobe, dtol_pole)
+
    use network_ggeo_data
-   use m_ggeo_tpoly, only: dbpinpol
-   !LC use m_ggeo_flowgeom
+   use geometry_module, only: dbpinpol
+   use m_ggeo_polygon,  only: NPL, xpl, ypl, zpl
+   use m_ggeo_missing,  only: dmiss, jins
+
    implicit none
    integer, intent(in) :: JP !< Type of cells to find (unfolded: 3: triangle, etc. up to 6=hexa, 0 = all; folded: code+100; no new nodemask (nonzero values will be used as mask here): code+1000, no sednodadm: code+10000)
 
@@ -821,6 +834,10 @@
    integer :: l
    integer :: jafold, jakeepmask, jasetnodadm
    integer :: jp_
+   integer, intent(in)          :: jsferic
+   integer, intent(in)          :: jasfer3D
+   integer, intent(in)          :: jglobe
+   double precision, intent(in) :: dtol_pole
 
    jp_ = jp
 
@@ -849,7 +866,7 @@
    end if
 
    if ( jasetnodadm.eq.1 ) then
-      CALL SETNODADM(0)
+      CALL SETNODADM(0, jsferic, jasfer3D)
    end if
 
    CALL INIALLOCnetcell()
@@ -860,7 +877,7 @@
    if ( jakeepmask.ne.1 ) then
       KC   =  0
       DO K = 1,NUMK
-         CALL DBPINPOL(xk(k), yk(k), ik)
+         CALL DBPINPOL(xk(k), yk(k), ik, dmiss, jins, NPL, xpl, ypl, zpl)  
          IF (IK > 0) THEN
             KC(K) = IK
          ENDIF
@@ -868,34 +885,34 @@
    end if
 
    IF (JP_ .EQ. 0) THEN
-      CALL FINDTRIS(0)
-      CALL FINDQUADS(0)
-      CALL FINDPENTAS(0)
-      CALL FINDHEXAS(0)
+      CALL FINDTRIS(0, jsferic, jasfer3D)
+      CALL FINDQUADS(0, jsferic, jasfer3D)
+      CALL FINDPENTAS(0, jsferic, jasfer3D)
+      CALL FINDHEXAS(0, jsferic, jasfer3D)
       if ( jafold.eq.1 ) then
-         CALL FINDQUADS(1)
-         CALL FINDTRIS(1)
-         CALL FINDPENTAS(1)
-         CALL FINDHEXAS(1)
+         CALL FINDQUADS(1, jsferic, jasfer3D)
+         CALL FINDTRIS(1, jsferic, jasfer3D)
+         CALL FINDPENTAS(1, jsferic, jasfer3D)
+         CALL FINDHEXAS(1, jsferic, jasfer3D)
       end if
    ELSE IF (JP_ .EQ. 3) THEN
-      CALL FINDTRIS(0)
-      if ( jafold.eq.1 ) CALL FINDTRIS(1)
+      CALL FINDTRIS(0, jsferic, jasfer3D)
+      if ( jafold.eq.1 ) CALL FINDTRIS(1, jsferic, jasfer3D)
    ELSE IF (JP_ .EQ. 4) THEN
-      CALL FINDQUADS(0)
-      if ( jafold.eq.1 ) CALL FINDQUADS(1)
+      CALL FINDQUADS(0, jsferic, jasfer3D)
+      if ( jafold.eq.1 ) CALL FINDQUADS(1, jsferic, jasfer3D)
    ELSE IF (JP_ .EQ. 5) THEN
-      CALL FINDPENTAS(0)
-      if ( jafold.eq.1 ) CALL FINDPENTAS(1)
+      CALL FINDPENTAS(0, jsferic, jasfer3D)
+      if ( jafold.eq.1 ) CALL FINDPENTAS(1, jsferic, jasfer3D)
    ELSE IF (JP_ .EQ. 6) THEN
-      CALL FINDHEXAS(0)
-      if ( jafold.eq.1 ) CALL FINDHEXAS(1)
+      CALL FINDHEXAS(0, jsferic, jasfer3D)
+      if ( jafold.eq.1 ) CALL FINDHEXAS(1, jsferic, jasfer3D)
    ELSE IF (JP_ .EQ. 11)THEN
-      CALL FINDPENTAS(0)
-      CALL FINDHEXAS(0)
+      CALL FINDPENTAS(0, jsferic, jasfer3D)
+      CALL FINDHEXAS(0, jsferic, jasfer3D)
       if ( jafold.eq.1 ) then
-         CALL FINDPENTAS(1)
-         CALL FINDHEXAS(1)
+         CALL FINDPENTAS(1, jsferic,jasfer3D)
+         CALL FINDHEXAS(1, jsferic,jasfer3D)
       end if
    ENDIF
 
@@ -912,7 +929,7 @@
       ENDDO
    ENDIF
 
-   call update_cell_circumcenters()
+   call update_cell_circumcenters( jsferic, jasfer3D, jglobe, dtol_pole)
 
    nump1d2d = nump   ! there are no 1D cells yet, safety
 
@@ -944,7 +961,7 @@
    RETURN
    END SUBROUTINE FINDCELLS
 
-   SUBROUTINE FINDTRIS(jafold)
+   SUBROUTINE FINDTRIS(jafold, jsferic, jsferic3D)
    !use m_netw
    use network_ggeo_data
    USE M_ggeo_afmeting
@@ -968,6 +985,8 @@
    integer :: i
    integer :: kr(3), Lr(3)
    integer :: kkk_, kkkk_, nmkmax
+   
+   integer, intent(in)  :: jsferic, jsferic3D
    !LC LOGICAL RECHTSAF
    !LC logical :: alreadycell
    !LC logical :: iscounterclockwise
@@ -1042,7 +1061,7 @@
                         end if
 
                         kr(1)=k1; kr(2)=k2; kr(3)=k3
-                        if ( .not.iscounterclockwise(3, kr) ) cycle
+                        if ( .not.iscounterclockwise(3, kr, jsferic, jsferic3D) ) cycle
 
                         !CALL ALREADYTRI(K1,K2,K3,JA); IF (JA > 0) EXIT
                         call increasenetcells(NUMP+1, 1.2, .true.)
@@ -1082,7 +1101,7 @@
    RETURN
    END SUBROUTINE FINDTRIS
 
-   SUBROUTINE FINDQUADS(jafold)
+   SUBROUTINE FINDQUADS(jafold, jsferic, jasfer3D)
    !LC use m_netw
    use network_ggeo_data
    USE M_ggeo_afmeting
@@ -1109,6 +1128,8 @@
    integer :: llll
    integer :: kr(4), Lr(4)
    integer :: kkk_, kkkk_, kkkkk_, nmkmax
+   
+   integer, intent(in)  :: jsferic, jasfer3D
    !LC LOGICAL RECHTSAF
    !LC logical :: alreadycell
    !LC logical :: iscounterclockwise
@@ -1200,7 +1221,7 @@
                               !CALL ALREADYQUAD(K1,K2,K3,K4,JA) ; IF (JA > 0 ) EXIT
 
                               kr(1)=k1; kr(2)=k2; kr(3)=k3; kr(4)=k4
-                              if ( .not.iscounterclockwise(4, kr) ) cycle
+                              if ( .not.iscounterclockwise(4, kr, jsferic, jasfer3D) ) cycle
 
                               call increasenetcells(NUMP+1, 1.2, .true.)
                               NUMP = NUMP + 1
@@ -1247,7 +1268,7 @@
    RETURN
    END SUBROUTINE FINDQUADS
 
-   SUBROUTINE FINDPENTAS(jafold)
+   SUBROUTINE FINDPENTAS(jafold, jsferic, jasfer3D)
    !LC use m_netw
    use network_ggeo_data
    USE M_ggeo_afmeting
@@ -1276,6 +1297,8 @@
    integer :: lllll
    integer :: kr(5), Lr(5)
    integer :: kkk_, kkkk_, kkkkk_, kkkkkk_, nmkmax
+   
+   integer, intent(in)  :: jsferic, jasfer3D
    !LC LOGICAL RECHTSAF
    !LC logical :: alreadycell
    !LC logical :: iscounterclockwise
@@ -1383,7 +1406,7 @@
                                     !CALL ALREADYPENTA(K1,K2,K3,K4,K5,JA) ; IF (JA > 0) EXIT
 
                                     kr(1)=k1; kr(2)=k2; kr(3)=k3; kr(4)=k4; kr(5)=k5
-                                    if ( .not.iscounterclockwise(5, kr) ) cycle
+                                    if ( .not.iscounterclockwise(5, kr, jsferic, jasfer3D) ) cycle
 
                                     call increasenetcells(NUMP+1, 1.2, .true.)
                                     NUMP = NUMP + 1
@@ -1437,7 +1460,7 @@
    RETURN
    END SUBROUTINE FINDPENTAS
 
-   SUBROUTINE FINDHEXAS(jafold)
+   SUBROUTINE FINDHEXAS(jafold, jsferic, jasfer3D)
    !LC use m_netw
    use network_ggeo_data
    USE M_ggeo_afmeting
@@ -1469,6 +1492,9 @@
    integer :: llllll
    integer :: kr(6), Lr(6)
    integer :: kkk_, kkkk_, kkkkk_, kkkkkk_, kkkkkkk_, nmkmax
+   
+   integer, intent(in)  :: jsferic, jasfer3D
+   
    !LC LOGICAL RECHTSAF
    !LC logical :: alreadycell
    !LC logical :: iscounterclockwise
@@ -1593,7 +1619,7 @@
                                           !CALL ALREADYHEXA(K1,K2,K3,K4,K5,K6,JA) ; IF (JA > 0) EXIT
 
                                           kr(1)=k1; kr(2)=k2; kr(3)=k3; kr(4)=k4; kr(5)=k5; kr(6)=k6
-                                          if ( .not.iscounterclockwise(6, kr) ) cycle
+                                          if ( .not.iscounterclockwise(6, kr, jsferic, jasfer3D) ) cycle
 
                                           call increasenetcells(NUMP+1, 1.2, .true.)
                                           NUMP = NUMP + 1
@@ -1655,9 +1681,13 @@
    END SUBROUTINE FINDHEXAS
 
    ! check if cell is counterclockwise
-   logical function iscounterclockwise(N, K)
+   logical function iscounterclockwise(N, K, jsferic, jsferic3D)
    !LC use m_netw
+   
    use network_ggeo_data
+   use m_ggeo_missing,  only: dmiss 
+   use geometry_module, only: comp_masscenter 
+   
    implicit none
 
    integer,               intent(in) :: N  !< number of links and nodes
@@ -1671,6 +1701,7 @@
    double precision                  :: darea
    integer                           :: jacounterclockwise          ! counterclockwise (1) or not (0)
    integer                           :: i, ip1, kk, kkp1
+   integer, intent(in)               :: jsferic, jsferic3D
 
    iscounterclockwise = .true.
 
@@ -1694,7 +1725,7 @@
       yv(i) = yk(kk)
    end do
 
-   call comp_masscenter(N, xv, yv, xdum, ydum, darea, jacounterclockwise)
+   call comp_masscenter(N, xv, yv, xdum, ydum, darea, jacounterclockwise, jsferic, jsferic3D, dmiss)
    if ( jacounterclockwise.eq.1 ) then
       iscounterclockwise = .true.
    else
@@ -1725,8 +1756,12 @@
    end FUNCTION RECHTSAF
 
    SUBROUTINE CONNECTDBN(K1,K2,LNU)
+   
+   use m_ggeo_missing, only : xymis
+   
    implicit none
-   integer :: K1, K2, LNU
+   integer                       :: K1, K2, LNU
+
    if (k1 == k2) return
    CALL CONNECTDB(K1,K2,lnu)
    CALL ADDLINKTONODES(K1,K2,LNU)
@@ -1734,7 +1769,10 @@
    END SUBROUTINE CONNECTDBN
 
    SUBROUTINE CONNECTDB(K1,K2,lnu) ! fast version without refinement
+   
    use network_ggeo_data
+   use m_ggeo_missing, only : xymis
+      
    implicit none
    integer :: K1, K2, LNU
 
@@ -2000,12 +2038,14 @@
    SUBROUTINE INCELLS(XA,YA,KIN)
    !use m_netw
    use network_ggeo_data
-   use m_ggeo_tpoly, only: pinpok
+   use geometry_module, only: pinpok
+   use m_ggeo_missing, only : jins, dmiss
+   
    implicit none
-   double precision :: xa
-   double precision :: ya
-   integer :: kin
-
+   double precision             :: xa
+   double precision             :: ya
+   integer                      :: kin
+   
    integer :: in
    integer :: k
    integer :: k1
@@ -2019,7 +2059,7 @@
          K1 = netcell(K)%NOD(N)
          XH(N) = XK(K1) ; YH(N) = YK(K1)
       ENDDO
-      CALL PINPOK(XA, YA , NN, XH, YH, IN)
+      CALL PINPOK(XA, YA , NN, XH, YH, IN,  jins, dmiss)
       IF (IN == 1) THEN
          KIN = K
          RETURN
@@ -2028,10 +2068,11 @@
    END SUBROUTINE INCELLS
 
    !> sort links in nod%lin counterclockwise (copy-paste from setnodadm)
-   subroutine sort_links_ccw(k,maxlin,linnrs,arglin,inn)
+   subroutine sort_links_ccw(k,maxlin,linnrs,arglin,inn, jsferic)
    !LC use m_netw
    use network_ggeo_data
-   use m_ggeo_sferic
+   use geometry_module, only: getdxdy
+   use mathconsts, only: pi_hp
 
    implicit none
 
@@ -2047,8 +2088,9 @@
    integer                         :: jDupLinks, jOverlapLinks, jSmallAng
    double precision                :: sl, sm, xcr, ycr, phi0
 
-   double precision                :: getdx, getdy, dcosphi
+   double precision                :: dcosphi
    double precision                :: phi, dx, dy, dmaxcosp, dcosp, costriangleminangle
+   integer, intent(in)             :: jsferic
 
    do L=1,NMK(K)
       K1 = KN(1,nod(K)%lin(L)); K2 = KN(2,nod(K)%lin(L))
@@ -2057,14 +2099,12 @@
          K1 = K
       end if
 
-      !dx = getdx(xk(k1), yk(k1), xk(k2), yk(k2))
-      !dy = getdy(xk(k1), yk(k1), xk(k2), yk(k2))
-      call getdxdy(xk(k1), yk(k1), xk(k2), yk(k2),dx,dy)
+      call getdxdy(xk(k1), yk(k1), xk(k2), yk(k2),dx,dy, jsferic)
       if (abs(dx) < 1d-14 .and. abs(dy) < 1d-14) then
          if (dy < 0) then
-            phi = -pi/2
+            phi = -pi_hp/2
          else
-            phi = pi/2
+            phi = pi_hp/2
          end if
       else
          phi = atan2(dy, dx)
@@ -2074,7 +2114,7 @@
       end if
 
       arglin(L) = phi-phi0
-      if ( arglin(L).lt.0d0 ) arglin(L) = arglin(L) + 2d0*pi
+      if ( arglin(L).lt.0d0 ) arglin(L) = arglin(L) + 2d0*pi_hp
    end do
 
    call indexx(nmk(k), arglin(1:nmk(k)), inn(1:nmk(k)))
@@ -2087,336 +2127,10 @@
    return
    end subroutine sort_links_ccw
 
-   !> compute area and mass center of polygon, in two-dimensional space or three-dimensional space depending on "jsferic" and "jasfer3D"
-   subroutine comp_masscenter(N, xin , y, xcg, ycg, area, jacounterclockwise)
-   use m_ggeo_sferic
-
-   implicit none
-
-   integer,                        intent(in)    :: N        !< polygon size
-   double precision, dimension(N), intent(in)    :: xin, y     !< polygon coordinates
-   double precision,               intent(out)   :: xcg, ycg !< polygon mass center coordinates
-   double precision,               intent(out)   :: area     !< polygon area
-   integer,                        intent(out)   :: jacounterclockwise  !< counterclockwise (1) or not (0)
-
-   if ( jsferic.eq.1 .and. jasfer3D.eq.1 ) then
-      call comp_masscenter3D(N, xin , y, xcg, ycg, area, jacounterclockwise)
-   else
-      call comp_masscenter2D(N, xin , y, xcg, ycg, area, jacounterclockwise)
-   end if
-
-   return
-   end subroutine comp_masscenter
-
-   !> compute area and mass center of polygon in two-dimensional space
-   subroutine comp_masscenter2D(N, xin , y, xcg, ycg, area, jacounterclockwise)
-   use m_ggeo_sferic
-
-   implicit none
-
-   integer,                        intent(in)    :: N        !< polygon size
-   double precision, dimension(N), intent(in)    :: xin, y     !< polygon coordinates
-   double precision,               intent(out)   :: xcg, ycg !< polygon mass center coordinates
-   double precision,               intent(out)   :: area     !< polygon area
-   integer,                        intent(out)   :: jacounterclockwise  !< counterclockwise (1) or not (0)
-
-   double precision, dimension(N) :: x  ! Copy of xin, with possibly periodic fixes.
-   double precision                              :: dsx, dsy, xc, yc, dcos, xds, fac, x0, y0, x1, dx0, dx1, dy0, dy1
-   double precision                              :: xdum
-
-   integer                                       :: i, ip1
-
-   !LC double precision, external                    :: getdx, getdy
-
-   double precision, parameter                   :: dtol=1d-8
-
-   area = 0d0
-   xcg  = 0d0
-   ycg  = 0d0
-   jacounterclockwise = 1
-
-   if ( N.lt.1 ) goto 1234
-
-   x = xin
-
-   !  set reference point (furthest away from poles)
-   x0 = minval(x(1:N))
-   y0 = y(1)
-   do i=2,N
-      if ( abs(y(i)).lt.abs(y0) ) then
-         y0 = y(i)
-      end if
-   end do
-
-   !  fix for periodic, spherical coordinates
-   if ( jsferic.eq.1 ) then
-      x1 = maxval(x(1:N))
-      if ( x1-x0.gt.180d0 ) then
-         !        determine cutline
-         xdum = x1-180d0
-         do i=1,N
-            if ( x(i).lt.xdum ) then
-               x(i) = x(i) + 360d0
-            end if
-         end do
-         x0 = minval(x(1:N))
-      end if
-   end if
-
-   do i=1,N
-      ip1 = i+1; if ( ip1.gt.N ) ip1=ip1-N
-
-
-      call getdxdy(x0,y0,x(i),y(i), dx0,dy0)
-      call getdxdy(x0,y0,x(ip1),y(ip1), dx1, dy1)
-      xc = 0.5d0*(dx0 + dx1)
-      yc = 0.5d0*(dy0 + dy1)
-
-      ! xc = 0.5d0*(getdx(x0,y0,x(i),y(i)) + getdx(x0,y0,x(ip1),y(ip1)))
-      ! yc = 0.5d0*(getdy(x0,y0,x(i),y(i)) + getdy(x0,y0,x(ip1),y(ip1)))
-
-
-      call getdxdy(x(i), y(i), x(ip1), y(ip1), dx0, dy0)
-      dsx = dy0 ; dsy = -dx0
-
-      !dsx =  getdy(x(i), y(i), x(ip1), y(ip1))
-      !dsy = -getdx(x(i), y(i), x(ip1), y(ip1))
-
-      xds  = xc*dsx+yc*dsy
-      area = area + 0.5d0*xds
-      xcg  = xcg  + xds * xc
-      ycg  = ycg  + xds * yc
-   end do
-
-   !  for clockwise oriented cells, the normal will be inward, and consequently the area negative
-   !  it must stay negative in the computation of the cell center (xcg,ycg)
-   area = sign(max(abs(area),dtol),area)
-
-   fac = 1d0/(3d0*area)
-
-   xcg = fac * xcg
-   ycg = fac * ycg
-
-   if ( JSFERIC.ne.0 ) then
-      ycg = ycg / (Ra*dg2rd)
-      xcg = xcg / (Ra*dg2rd*cos((ycg+y0)*dg2rd))
-   end if
-
-   xcg = xcg + x0
-   ycg = ycg + y0
-
-   !  output cell orientation
-   if ( area.gt.0d0 ) then
-      jacounterclockwise = 1
-   else
-      jacounterclockwise = 0
-   end if
-
-   !  fix for inward normals (clockwise oriented cells)
-   area = abs(area)
-
-1234 continue
-
-   return
-   end subroutine comp_masscenter2D
-
-   !> compute area and mass center of polygon
-   subroutine comp_masscenter3D(N, x, y, xcg, ycg, area, jacounterclockwise)
-   use m_ggeo_sferic
-
-   implicit none
-
-   integer,                        intent(in)    :: N        !< polygon size
-   double precision, dimension(N), intent(in)    :: x, y     !< polygon coordinates
-   double precision,               intent(out)   :: xcg, ycg !< polygon mass center coordinates
-   double precision,               intent(out)   :: area     !< polygon area
-   integer,                        intent(out)   :: jacounterclockwise  !< counterclockwise (1) or not (0)
-
-   !   double precision, dimension(N)                :: x  ! Copy of xin, with possibly periodic fixes.
-
-   double precision, dimension(N)                :: xx, yy, zz ! 3D coordinates
-
-   double precision, dimension(4,4)              :: A
-   double precision, dimension(4)                :: rhs
-
-   double precision, dimension(N)                :: DvolDx, DvolDy, DvolDz
-
-   double precision                              :: xx0, yy0, zz0, alpha
-   double precision                              :: xxcg, yycg, zzcg
-   double precision                              :: dvol, vol, voli
-   double precision                              :: Jx, Jy, Jz
-   double precision                              :: Rai
-   double precision                              :: sx, sy, sz
-   double precision                              :: xmin, xmax
-
-   integer                                       :: i, ip1, iter
-
-
-   !   double precision, external                    :: getdx, getdy
-
-   integer,          parameter                   :: MAXITER=100
-   double precision, parameter                   :: dtol=1d-8
-   double precision, parameter                   :: deps=1d-8
-   double precision, parameter                   :: onesixth = 0.166666666666666667d0
-
-   area = 0d0
-   xcg = 0d0
-   ycg = 0d0
-   jacounterclockwise = 1
-
-   if ( N.lt.1 ) goto 1234
-
-   do i=1,N
-      call sphertocart3D(x(i), y(i), xx(i), yy(i), zz(i))
-   end do
-
-   Rai = 1d0/Ra
-
-   !  first iterate
-   xx0 = 0
-   yy0 = 0
-   zz0 = 0
-   do i=1,N
-      xx0 = xx0 + xx(i)
-      yy0 = yy0 + yy(i)
-      zz0 = zz0 + zz(i)
-   end do
-   xx0 = xx0/N
-   yy0 = yy0/N
-   zz0 = zz0/N
-   alpha = 0.75d0
-
-   !  Newton iterations
-   do iter=1,MAXITER
-
-      !     compute volume
-      vol = 0d0
-      do i=1,N
-         ip1 = i+1; if ( ip1.gt.N ) ip1=ip1-N
-
-         DvolDx(i) = onesixth * ( yy(i)*zz(ip1) - zz(i)*yy(ip1))
-         DvolDy(i) = onesixth * ( zz(i)*xx(ip1) - xx(i)*zz(ip1))
-         DvolDz(i) = onesixth * ( xx(i)*yy(ip1) - yy(i)*xx(ip1))
-
-         dvol = DvolDx(i)*xx0 + DvolDy(i)*yy0 + DvolDz(i)*zz0
-         vol = vol + dvol
-      end do
-
-      voli = 1d0/vol
-
-      A    = 0d0
-      rhs  = 0d0
-      Jx = (0.25d0-alpha)*xx0 !*vol
-      Jy = (0.25d0-alpha)*yy0 !*vol
-      Jz = (0.25d0-alpha)*zz0 !*vol
-      do i=1,N
-         ip1 = i+1; if ( ip1.gt.N ) ip1=ip1-N
-
-         dvol = (DvolDx(i)*xx0 + DvolDy(i)*yy0 + DvolDz(i)*zz0) * voli  ! *vol
-
-         Jx = Jx + 0.25d0*dvol*(xx(i)+xx(ip1))
-         Jy = Jy + 0.25d0*dvol*(yy(i)+yy(ip1))
-         Jz = Jz + 0.25d0*dvol*(zz(i)+zz(ip1))
-
-         xxcg = 0.25d0*(xx0+xx(i)+xx(ip1))
-         yycg = 0.25d0*(yy0+yy(i)+yy(ip1))
-         zzcg = 0.25d0*(zz0+zz(i)+zz(ip1))
-
-         A(1,1) = A(1,1) + xxcg * dvoldx(i)
-         A(1,2) = A(1,2) + xxcg * dvoldy(i)
-         A(1,3) = A(1,3) + xxcg * dvoldz(i)
-
-         A(2,1) = A(2,1) + yycg * dvoldx(i)
-         A(2,2) = A(2,2) + yycg * dvoldy(i)
-         A(2,3) = A(2,3) + yycg * dvoldz(i)
-
-         A(3,1) = A(3,1) + zzcg * dvoldx(i)
-         A(3,2) = A(3,2) + zzcg * dvoldy(i)
-         A(3,3) = A(3,3) + zzcg * dvoldz(i)
-      end do
-
-      A(1,1) = voli*A(1,1) + 0.25-alpha
-      A(1,2) = voli*A(1,2)
-      A(1,3) = voli*A(1,3)
-      A(1,4) = -xx0*Rai
-
-      A(2,1) = voli*A(2,1)
-      A(2,2) = voli*A(2,2) + 0.25-alpha
-      A(2,3) = voli*A(2,3)
-      A(2,4) = -yy0*Rai
-
-      A(3,1) = voli*A(3,1)
-      A(3,2) = voli*A(3,2)
-      A(3,3) = voli*A(3,3) + 0.25-alpha
-      A(3,4) = -zz0*Rai
-
-      A(4,1) = -xx0*Rai
-      A(4,2) = -yy0*Rai
-      A(4,3) = -zz0*Rai
-      A(4,4) = 0d0
-
-      rhs(1) = -Jx   ! *dvoli
-      rhs(2) = -Jy   ! *dvoli
-      rhs(3) = -Jz   ! *dvoli
-      rhs(4) = -0.5*(Ra**2 - (xx0**2+yy0**2+zz0**2))*Rai
-
-      !     solve system
-      call gaussj(A,4,4,rhs,1,1) ! rhs contains solution
-
-      !     update coordinates of centerpoint
-      xx0 = xx0 + rhs(1)
-      yy0 = yy0 + rhs(2)
-      zz0 = zz0 + rhs(3)
-      alpha = alpha + rhs(4)*Rai
-
-      !     check convergence
-      if ( rhs(1)**2 + rhs(2)**2 + rhs(3)**2 + rhs(4)**2 .lt. deps ) then
-         exit
-      end if
-
-   end do
-
-   !  check convergence
-   if ( iter.ge.MAXITER ) then
-      !LC call qnerror('comp_masscenter: no convergence', ' ', ' ')
-   end if
-
-   !  compute area
-   Area = 0d0
-   do i=1,N
-      ip1 = i+1; if ( ip1.gt.N ) ip1=ip1-N
-      sx = 0.5d0*( (yy(i)-yy0) * (zz(ip1)-zz0) - (zz(i)-zz0) * (yy(ip1)-yy0) )
-      sy = 0.5d0*( (zz(i)-zz0) * (xx(ip1)-xx0) - (xx(i)-xx0) * (zz(ip1)-zz0) )
-      sz = 0.5d0*( (xx(i)-xx0) * (yy(ip1)-yy0) - (yy(i)-yy0) * (xx(ip1)-xx0) )
-
-      Area = Area + sqrt(sx**2+sy**2+sz**2)
-
-   end do
-
-   !   write(6,*) Area*(Ra/3d0*voli)
-
-   call Cart3Dtospher(xx0,yy0,zz0,xcg,ycg,maxval(x(1:N)))
-
-   !  output cell orientation
-   if ( vol.gt.0d0 ) then
-      jacounterclockwise = 1
-   else
-      jacounterclockwise = 0
-   end if
-
-   !!  fix for inward normals (clockwise oriented cells)
-   !   area = abs(area)
-
-1234 continue
-
-   return
-   end subroutine comp_masscenter3D
-
    !> get netcell polygon that is safe for periodic, spherical coordinates and poles
-   subroutine get_cellpolygon(n, Msize, nn, xv, yv, LnnL, Lorg, zz)
-   use m_ggeo_sferic
-   use m_ggeo_missing
+   subroutine get_cellpolygon(n, Msize, nn, xv, yv, LnnL, Lorg, zz, jsferic, dtol_pole)
    use network_ggeo_data
+   use m_ggeo_missing, only : dmiss
    implicit none
 
    integer,                            intent(in)  :: n      !< cell number
@@ -2426,6 +2140,8 @@
    integer,          dimension(Msize), intent(out) :: LnnL   !< original link LnnL
    integer,          dimension(Msize), intent(out) :: Lorg   !< original link number (>0) or added link (0)
    double precision,                   intent(out) :: zz     !< polygon-averaged value
+   integer,                            intent(in)  :: jsferic
+   double precision,                   intent(in)  :: dtol_pole
 
    integer,          dimension(Msize)              :: kpole
    integer                                         :: num, numz, m, mp1, mp2, k1, k2, k3
@@ -2543,690 +2259,16 @@
    return
    end subroutine get_cellpolygon
 
-   !> compute circumcenter using 3D coordinates
-   subroutine comp_circumcenter3D(N, xv, yv, xz, yz)
-   use m_ggeo_sferic
-   use network_ggeo_data,   only: dcenterinside
-   implicit none
-   integer, intent(in)              :: N            !< Nr. of vertices
-   double precision, intent(inout)  :: xv(N), yv(N) !< Coordinates of vertices (may be changed to avoid alloc overhead)
-   double precision, intent(out)    :: xz, yz       !< Circumcenter coordinates
-
-   double precision, dimension(N)   :: xx, yy, zz
-
-   double precision, dimension(N)   :: ttx, tty, ttz      ! tangential vector in 3D coordinates
-   double precision, dimension(N)   :: xxe, yye, zze      ! edge midpoint in 3D coordinates
-   double precision, dimension(N)   :: ds                 ! edge lengths
-
-   double precision, dimension(4,4) :: A           ! matrix
-   double precision, dimension(4)   :: rhs         ! right-hand side
-   double precision, dimension(4)   :: update      ! update of (xxc,yyc,zzc,lambda)
-
-   double precision                 :: xxc, yyc, zzc      ! circumcenter in 3D coordinates
-   double precision                 :: lambda             ! Lagrange multiplier to enforce circumcenter on the sphere
-
-   double precision                 :: dsi, dinpr
-   double precision                 :: xmin, xmax
-
-   integer                          :: i, ip1
-
-   integer                          :: iter
-
-   double precision, parameter      :: dtol=1d-8    ! tolerance for ignoring edges
-   double precision, parameter      :: deps=1d-8    ! convergence tolerance (relative)
-
-   integer,          parameter      :: MAXITER=100
-
-   !  compute 3D coordinates and first iterate of circumcenter in 3D coordinates and Lagrange multiplier lambda
-   xxc = 0d0
-   yyc = 0d0
-   zzc = 0d0
-   do i=1,N
-      call sphertocart3D(xv(i), yv(i), xx(i), yy(i), zz(i))
-      xxc = xxc + xx(i)
-      yyc = yyc + yy(i)
-      zzc = zzc + zz(i)
-   end do
-   lambda = 0d0
-   xxc = xxc/N
-   yyc = yyc/N
-   zzc = zzc/N
-
-   !  compute tangential vectors and edge midpoints, edge i is from nodes i to i+1, and convergence tolerance
-   do i=1,N
-      ip1 = i+1; if ( ip1.gt.N) ip1=ip1-N
-
-      !     tangential vector
-      ttx(i) = xx(ip1)-xx(i)
-      tty(i) = yy(ip1)-yy(i)
-      ttz(i) = zz(ip1)-zz(i)
-
-      ds(i) = sqrt(ttx(i)**2 + tty(i)**2 + ttz(i)**2)
-
-      if ( ds(i).lt.dtol ) cycle
-
-      dsi = 1d0/ds(i)
-
-      ttx(i) = ttx(i) * dsi
-      tty(i) = tty(i) * dsi
-      ttz(i) = ttz(i) * dsi
-
-      !     edge midpoint
-      xxe(i) = 0.5d0*(xx(i)+xx(ip1))
-      yye(i) = 0.5d0*(yy(i)+yy(ip1))
-      zze(i) = 0.5d0*(zz(i)+zz(ip1))
-   end do
-
-
-   !  Newton iterations
-   do iter=1,MAXITER
-
-      !     build system
-      A   = 0d0
-      rhs = 0d0
-      do i=1,N
-         if ( ds(i).lt.dtol ) cycle ! no contribution
-
-         !        add to upper triangular part and right-hand side
-         A(1,1) = A(1,1) + ttx(i)*ttx(i)
-         A(1,2) = A(1,2) + ttx(i)*tty(i)
-         A(1,3) = A(1,3) + ttx(i)*ttz(i)
-
-         A(2,2) = A(2,2) + tty(i)*tty(i)
-         A(2,3) = A(2,3) + tty(i)*ttz(i)
-
-         A(3,3) = A(3,3) + ttz(i)*ttz(i)
-
-         dinpr = (xxc-xxe(i))*ttx(i) + (yyc-yye(i))*tty(i) + (zzc-zze(i))*ttz(i)
-
-         rhs(1) = rhs(1) - dinpr*ttx(i)
-         rhs(2) = rhs(2) - dinpr*tty(i)
-         rhs(3) = rhs(3) - dinpr*ttz(i)
-      end do
-
-      if ( jsferic.eq.1 ) then
-         !        add contribution of constraint
-         A(1,1) = A(1,1) - 2d0*lambda
-         A(2,2) = A(2,2) - 2d0*lambda
-         A(3,3) = A(3,3) - 2d0*lambda
-
-         A(1,4) = -2d0*xxc
-         A(2,4) = -2d0*yyc
-         A(3,4) = -2d0*zzc
-
-         A(4,4) = 0d0
-
-         rhs(1) = rhs(1) + 2d0 * lambda * xxc
-         rhs(2) = rhs(2) + 2d0 * lambda * yyc
-         rhs(3) = rhs(3) + 2d0 * lambda * zzc
-         rhs(4) = xxc**2 + yyc**2 + zzc**2 - Ra**2
-      else  ! no constraints, enforce lambda=0
-         A(1,4) = 0d0
-         A(2,4) = 0d0
-         A(3,4) = 0d0
-         A(4,4) = 1d0
-
-         rhs(4) = 0d0
-      end if
-
-      !     use symmetry of matrix
-      A(2,1) = A(1,2)
-
-      A(3,1) = A(1,3)
-      A(3,2) = A(2,3)
-
-      A(4,1) = A(1,4)
-      A(4,2) = A(2,4)
-      A(4,3) = A(3,4)
-
-      !     solve system
-      call gaussj(A,4,4,rhs,1,1) ! rhs contains solution
-
-      !     update circumcenter and Lagrange multiplier
-      xxc = xxc + rhs(1)
-      yyc = yyc + rhs(2)
-      zzc = zzc + rhs(3)
-      lambda = lambda + rhs(4)
-
-
-      !     check convergence
-      if ( rhs(1)**2 + rhs(2)**2 + rhs(3)**2 .lt. deps ) then
-         exit
-      end if
-   end do
-
-   !  check convergence
-   if ( iter.ge.MAXITER ) then
-      !LC call qnerror('comp_circumcenter3D: no convergence', ' ', ' ')
-   end if
-
-   !  project circumcenter back to spherical coordinates
-   call Cart3Dtospher(xxc,yyc,zzc,xz,yz,maxval(xv(1:N)))
-
-   return
-   end subroutine comp_circumcenter3D
-
    !-----------------------------------------------------------------!
    ! rest.f90
    !-----------------------------------------------------------------!
-   !> Checks whether lines 1-2 and 3-4 intersect.
-   !! @param[in] x1,y1,x2,y2,x3,y3,x4,y4 x- and y-coords of line endpoints.
-   !! @param[out] jacros 1 if lines cross (intersect), 0 if not.
-   !! @param[out] sl lambda in [0,1] on line segment 1-2 (outside [0,1] if no intersection). Unchanged if no intersect!!
-   !! @param[out] sm lambda in [0,1] on line segment 3-4 (outside [0,1] if no intersection). Unchanged if no intersect!!
-   !! @param[out] xcr,ycr x-coord. of intersection point.
-   SUBROUTINE CROSS(x1, y1, x2, y2, x3, y3, x4, y4, JACROS,SL,SM,XCR,YCR,CRP)
-   use m_ggeo_missing
-   implicit none
-   double precision, intent(inout) :: crp !< crp (in)==-1234 will make crp (out) non-dimensional
-   double precision :: det
-   double precision :: eps
-   integer :: jacros, jamakenondimensional
-   double precision :: sl
-   double precision :: sm
-   double precision, intent(in) :: x1, y1, x2, y2, x3, y3, x4, y4
-   double precision :: x21, y21, x31, y31, x43, y43, xcr, ycr
-   !LC double precision, external :: getdx, getdy
-
-
-
-   !     safety check on crp (in)
-   if ( isnan(crp) ) then
-      crp = 0d0
-   end if
-
-   ! Set defaults for no crossing at all:
-   jamakenondimensional = 0
-   if ( abs(crp+1234d0).lt.0.5d0 ) then
-      jamakenondimensional = 1
-      crp = 0d0
-   endif
-
-   JACROS = 0
-   EPS    = 0.00001d0
-   SL     = DMISS
-   SM     = DMISS
-   !     SL     = LABDA TUSSEN 0 EN 1 OP EERSTE PAAR
-   !     Sm     = LABDA TUSSEN 0 EN 1 OP TWEEDE PAAR
-
-   call getdxdy(x1,y1,x2,y2,x21,y21)
-   call getdxdy(x3,y3,x4,y4,x43,y43)
-   call getdxdy(x1,y1,x3,y3,x31,y31)
-
-   !X21 =  getdx(x1,y1,x2,y2)
-   !Y21 =  getdy(x1,y1,x2,y2)
-   !X43 =  getdx(x3,y3,x4,y4)
-   !Y43 =  getdy(x3,y3,x4,y4)
-   !X31 =  getdx(x1,y1,x3,y3)
-   !Y31 =  getdy(x1,y1,x3,y3)
-
-   DET =  X43*Y21 - Y43*X21
-
-   !     SPvdP: make eps have proper dimension
-   EPS = max(EPS*MAXVAL((/ X21,Y21,X43,Y43,X31,Y31 /)), tiny(0d0))
-   IF (ABS(DET) .LT. EPS) THEN
-      RETURN
-   ELSE
-      SM = (Y31*X21 - X31*Y21) / DET
-      IF (ABS(X21) .GT. EPS) THEN
-         SL = (SM*X43 + X31) / X21
-      ELSE IF (ABS(Y21) .GT. EPS) THEN
-         SL = (SM*Y43 + Y31) / Y21
-      ELSE
-         SL   = 0d0
-      ENDIF
-      IF (SM .GE. 0d0 .AND. SM .LE. 1d0 .AND. &
-         SL .GE. 0d0 .AND. SL .LE. 1d0) THEN
-      JACROS = 1
-      ENDIF
-      XCR    = X1 + SL*(X2-X1)
-      YCR    = Y1 + SL*(Y2-Y1)
-      if ( jamakenondimensional.eq.1 ) then  ! make crp non-dimensional (for spline2curvi)
-         CRP    = -DET / ( sqrt(x21**2+y21**2) * sqrt(x43**2 + y43**2) + 1d-8 )
-      else
-         CRP    = -DET
-      end if
-   ENDIF
-   RETURN
-   END SUBROUTINE CROSS
-
-   SUBROUTINE CROSSinbox (x1, y1, x2, y2, x3, y3, x4, y4, JACROS,SL,SM,XCR,YCR,CRP)  ! only if overlap
-   use m_ggeo_missing
-   implicit none
-   double precision, intent(inout) :: crp ! crp (in)==-1234 will make crp (out) non-dimensional
-   integer                         :: jacros
-   double precision, intent(in)    :: x1, y1, x2, y2, x3, y3, x4, y4
-   double precision, intent(out)   :: SL,SM,XCR,YCR
-   double precision                :: x1min, x1max, y1min, y1max, x3min, x3max, y3min, y3max
-
-   ! Set defaults for no crossing at all:
-   JACROS = 0
-
-   x1min = min(x1,x2); x1max = max(x1,x2)
-   y1min = min(y1,y2); y1max = max(y1,y2)
-   x3min = min(x3,x4); x3max = max(x3,x4)
-   y3min = min(y3,y4); y3max = max(y3,y4)
-
-   if (x1max < x3min) return
-   if (x1min > x3max) return
-   if (y1max < y3min) return
-   if (y1min > y3max) return
-
-   call CROSS (x1, y1, x2, y2, x3, y3, x4, y4, JACROS,SL,SM,XCR,YCR,CRP)
-
-   RETURN
-   END SUBROUTINE CROSSinbox
-   
-   double precision function getdx(x1,y1,x2,y2)
-   use m_ggeo_sferic
-   implicit none
-   double precision :: x1, y1, x2, y2
-   double precision :: xx1, yy1, xx2, yy2
-   double precision :: diff1, diff2, dy, r, dx2
-   double precision, external :: getdy
-
-   if (jsferic == 1) then
-
-      ! fix for poles
-      diff1 = abs(abs(y1)-90d0)
-      diff2 = abs(abs(y2)-90d0)
-      if ( (diff1.le.dtol_pole .and. diff2.gt.dtol_pole) .or. &
-         (diff1.gt.dtol_pole .and. diff2.le.dtol_pole) ) then
-      getdx = 0d0
-      return
-      end if
-
-      xx1   = x1
-      xx2   = x2
-      if      (xx1 - xx2 >  180d0) then
-         xx1 = xx1 - 360d0
-      else if (xx1 - xx2 < -180d0) then
-         xx1 = xx1 + 360d0
-      endif
-      xx1   = xx1*dg2rd
-      xx2   = xx2*dg2rd
-      yy1   = y1 *dg2rd
-      yy2   = y2 *dg2rd
-      csphi = dcos(0.5d0*(yy1+yy2))
-      getdx = ra*csphi*(xx2-xx1)
-   else
-      getdx = x2-x1
-   endif
-   end function getdx
-
-   double precision function getdy(x1,y1,x2,y2)
-   use m_ggeo_sferic
-   implicit none
-   double precision :: x1, y1, x2, y2
-   double precision :: xx1, yy1,yy2
-
-   if (jsferic == 1) then
-      yy1   = y1*dg2rd
-      yy2   = y2*dg2rd
-      getdy = ra*(yy2-yy1)
-   else
-      getdy = y2-y1
-   endif
-   end function getdy
-
-   subroutine getdxdy(x1,y1,x2,y2,dx,dy)
-   use m_ggeo_sferic
-   implicit none
-   double precision :: x1, y1, x2, y2, dx, dy, dx2, dy2, dum
-   !LC double precision, external :: getdx, getdy
-   !double precision :: getdx, getdy
-   if (Jsferic == 1) then
-      dx = getdx(x1,y1,x2,y2)
-      dy = getdy(x1,y1,x2,y2)
-   else
-      dx = x2-x1
-      dy = y2-y1
-   endif
-
-   end subroutine getdxdy
-
-   !> Normalized inner product of two segments
-   !! NOTE that parallel lines may produce abs(dcosphi)=1+O(10^-16) > 1
-   !! in Debug builds, crashes subsequent acos calls! (not in Release)
-   double precision function dcosphi(x1,y1,x2,y2,x3,y3,x4,y4)
-   use m_ggeo_missing
-   use m_ggeo_sferic
-   implicit none
-   double precision :: x1,y1,x2,y2,x3,y3,x4,y4
-   double precision :: dx1,dy1,dx2,dy2,r1,r2
-
-   double precision, dimension(4) :: xx, yy, zz
-   double precision                :: dz1, dz2
-
-   !LC double precision, external :: getdx, getdy
-
-   if ( jsferic.eq.1 .and. jasfer3D.eq.1 ) then
-      call sphertocart3D(x1, y1, xx(1), yy(1), zz(1))
-      call sphertocart3D(x2, y2, xx(2), yy(2), zz(2))
-      call sphertocart3D(x3, y3, xx(3), yy(3), zz(3))
-      call sphertocart3D(x4, y4, xx(4), yy(4), zz(4))
-
-      dx1 = xx(2)-xx(1)
-      dy1 = yy(2)-yy(1)
-      dz1 = zz(2)-zz(1)
-      r1  = dx1**2 + dy1**2 + dz1**2
-
-      dx2 = xx(4)-xx(3)
-      dy2 = yy(4)-yy(3)
-      dz2 = zz(4)-zz(3)
-      r2  = dx2**2 + dy2**2 + dz2**2
-
-      if ( r1.eq.0d0 .or. r2.eq.0d0 ) then
-         dcosphi = dxymis
-      else
-         dcosphi = (dx1*dx2 + dy1*dy2 + dz1*dz2)/sqrt(r1*r2)
-      endif
-   else
-      !call getdxdy(x1,y1,x2,y2,dx1,dy1)
-      !call getdxdy(x3,y3,x4,y4,dx2,dy2)
-
-      dx1 = getdx(x1,y1,x2,y2)
-      dx2 = getdx(x3,y3,x4,y4)
-
-      dy1 = getdy(x1,y1,x2,y2)
-      dy2 = getdy(x3,y3,x4,y4)
-
-      r1  = dx1*dx1+dy1*dy1
-      r2  = dx2*dx2+dy2*dy2
-
-      if (r1 == 0d0 .or. r2 == 0d0) then
-         dcosphi = dxymis
-      else
-         dcosphi = (dx1*dx2 + dy1*dy2)/sqrt(r1*r2)
-      endif
-
-   end if
-
-   dcosphi = max( min(dcosphi,1d0) , -1d0)
-
-   return
-   end function dcosphi
-
-   !> compute distance from (x1,y1) to (x2,y2)
-   double precision function dbdistance(x1,y1,x2,y2)                  ! distance point 1 -> 2
-   use m_ggeo_missing
-   use m_ggeo_sferic
-   implicit none
-   double precision, intent(in) :: x1, y1, x2, y2
-   ! locals
-   double precision             :: ddx, ddy, rr
-   double precision             :: xx1, yy1, zz1, xx2, yy2, zz2
-   !LC double precision, external   :: getdx, getdy
-
-   if ( x1.eq.DMISS .or. x2.eq.DMISS .or. y1.eq.DMISS .or. y2.eq.DMISS ) then
-      dbdistance = 0d0
-      return
-   end if
-
-   if ( jsferic.eq.1 .and. jasfer3D.eq.1 ) then
-      call sphertocart3D(x1,y1,xx1,yy1,zz1)
-      call sphertocart3D(x2,y2,xx2,yy2,zz2)
-      dbdistance = sqrt( (xx2-xx1)**2 + (yy2-yy1)**2 + (zz2-zz1)**2 )
-   else
-      ddx = getdx(x1,y1,x2,y2)
-      ddy = getdy(x1,y1,x2,y2)
-      rr  = ddx*ddx + ddy*ddy
-      if (rr == 0d0) then
-         dbdistance = 0d0
-      else
-         dbdistance = sqrt(rr)
-      endif
-   endif
-
-   end function dbdistance
-   
-
-   !> Normalized vector in direction 1 -> 2, in the orientation of (xu,yu)
-   subroutine normalin(x1,y1,x2,y2,xn,yn,xu,yu)
-   use m_ggeo_sferic
-   use m_ggeo_missing
-   implicit none
-   double precision :: x1, y1, x2, y2, xn, yn, xu, yu
-   ! locals
-   double precision :: ddx, ddy, rr
-   !LC double precision :: getdx, getdy
-
-   double precision, dimension(3) :: xx1
-   double precision, dimension(3) :: xx2
-   double precision, dimension(3) :: xxu
-   double precision, dimension(3) :: elambda
-   double precision, dimension(3) :: ephi
-
-   double precision :: lambda, phi
-
-   if ( jsferic.eq.1 .and. jasfer3D.eq.1 ) then
-      !    call qnerror('normalin: reference probably not set', ' ', ' ')
-
-      !   compute 3D coordinates
-      call sphertoCart3D(x1,y1,xx1(1),xx1(2),xx1(3))
-      call sphertoCart3D(x2,y2,xx2(1),xx2(2),xx2(3))
-
-      !   compute base vectors in reference point
-      lambda = xu*dg2rd
-      phi    = yu*dg2rd
-      elambda = (/ -sin(lambda),                    cos(lambda), 0d0 /)
-      ephi    = (/ -sin(phi)*cos(lambda), -sin(phi)*sin(lambda), cos(phi) /)
-
-      !   project vector in local base
-      ddx = sum((xx2-xx1)*elambda)
-      ddy = sum((xx2-xx1)*ephi)
-   else
-      ddx = getdx(x1,y1,x2,y2)
-      ddy = getdy(x1,y1,x2,y2)
-   end if
-
-   rr  = ddx*ddx + ddy*ddy
-   if (rr == 0d0) then
-      xn  = dxymis
-      yn  = dxymis
-   else
-      rr  = sqrt(rr)
-      xn  = ddx / rr
-      yn  = ddy / rr
-   endif
-   end subroutine normalin
-
-   !> Creates the relative unit normal vector to edge 1->2
-   !!
-   !! Vector is of unit length in Cartesian world.
-   !! Vector is almost unit length in spherical world, but its
-   !! x-component is scaled 1/cos(phi) such that in later uses:
-   !! (theta_B, theta_A) = (theta_A, phi_A) + alpha*(theta_n, phi_n)
-   !! the vectors 1->2 and A->B are perpendicular in Cartesian world,
-   !! not in spherical world. NOTE: the LENGTH of A->B in Cartesian
-   !! world implictly contains the earth radius and dg2rd already,
-   !! so make sure your alpha is in degrees.
-   subroutine normalout(x1,y1,x2,y2,xn,yn)             ! normals out edge 1  2
-   use m_ggeo_missing
-   use m_ggeo_sferic
-   implicit none
-   double precision :: x1, y1, x2, y2, xn, yn
-   ! locals
-   double precision :: ddx, ddy, rr
-   !LC double precision :: getdx, getdy
-
-   double precision, dimension(3) :: xx1
-   double precision, dimension(3) :: xx2
-   double precision, dimension(3) :: xxu
-   double precision, dimension(3) :: elambda
-   double precision, dimension(3) :: ephi
-
-   double precision :: xu, yu
-   double precision :: lambda, phi
-
-   if ( jsferic.eq.1 .and. jasfer3D.eq.1 ) then
-      !   get local coordinates w.r.t. (xn,yn)
-      call half(x1,y1,x2,y2,xn,yn)
-
-      !   compute 3D coordinates
-      call sphertoCart3D(x1,y1,xx1(1),xx1(2),xx1(3))
-      call sphertoCart3D(x2,y2,xx2(1),xx2(2),xx2(3))
-
-      !   compute midpoint
-      xxu = 0.5d0*(xx1+xx2)
-      call Cart3Dtospher(xxu(1),xxu(2),xxu(3),xu,yu,max(x1,x2))
-
-      !   compute base vectors at midpoint
-      lambda = xu*dg2rd
-      phi    = yu*dg2rd
-      elambda = (/ -sin(lambda),                    cos(lambda), 0d0 /)
-      ephi    = (/ -sin(phi)*cos(lambda), -sin(phi)*sin(lambda), cos(phi) /)
-
-      !   project vector in local base
-      ddx = sum((xx2-xx1)*elambda)
-      ddy = sum((xx2-xx1)*ephi)
-   else
-      ddx = getdx(x1,y1,x2,y2)
-      ddy = getdy(x1,y1,x2,y2)
-   end if
-
-   rr  = ddx*ddx + ddy*ddy
-   if (rr == 0d0) then
-      xn  = dxymis
-      yn  = dxymis
-   else
-      rr  =  sqrt(rr)
-      xn  =  ddy / rr
-      yn  = -ddx / rr
-   endif
-   if (jsferic == 1 .and. jasfer3D.eq.0) then
-      xn = xn / cos(dg2rd*0.5d0*(y1+y2) )
-      yn = yn
-   endif
-
-   end subroutine normalout
-
-   SUBROUTINE DUITPL(X1,Y1,X2,Y2,X3,Y3,X4,Y4,RU)
-   implicit none
-   double precision :: X1,Y1,X2,Y2,X3,Y3,X4,Y4,RU
-   double precision :: X12, y12, x34, y34
-   !LC double precision :: GETDX, GETDY
-   X12 = GETDX(X1,Y1,X2,Y2)
-   Y12 = GETDY(X1,Y1,X2,Y2)
-   X34 = GETDX(X3,Y3,X4,Y4)
-   Y34 = GETDY(X3,Y3,X4,Y4)
-   RU  = X12*Y34 - Y12*X34
-   RU  = SIGN(1d0,RU)
-   RETURN
-   END SUBROUTINE DUITPL
-
-   SUBROUTINE GAUSSJ(A,N,NP,B,M,MP)
-
-   implicit none
-
-   integer          :: n,np,m,mp
-   double precision :: a,b
-
-   integer          :: ipiv, indxr, indxc, i, j, k, L, LL, irow, icol
-   double precision :: big, dum, pivinv
-
-   !      PARAMETER (NMAX=50)
-   !      DIMENSION A(NP,NP),B(NP,MP),IPIV(NMAX),INDXR(NMAX),INDXC(NMAX)
-
-   DIMENSION A(NP,NP),B(NP,MP),IPIV(NP),INDXR(NP),INDXC(NP) ! SPvdP: set NMAX to N
-   DO 11 J=1,N
-      IPIV(J)=0
-11 CONTINUE
-   DO 22 I=1,N
-      BIG=0.
-      DO 13 J=1,N
-         IF(IPIV(J).NE.1)THEN
-            DO 12 K=1,N
-               IF (IPIV(K).EQ.0) THEN
-                  IF (ABS(A(J,K)).GE.BIG)THEN
-                     BIG=ABS(A(J,K))
-                     IROW=J
-                     ICOL=K
-                  ENDIF
-               ELSE IF (IPIV(K).GT.1) THEN
-                  WRITE(*,*) 'Singular matrix'
-               ENDIF
-12          CONTINUE
-         ENDIF
-13    CONTINUE
-      IPIV(ICOL)=IPIV(ICOL)+1
-      IF (IROW.NE.ICOL) THEN
-         DO 14 L=1,N
-            DUM=A(IROW,L)
-            A(IROW,L)=A(ICOL,L)
-            A(ICOL,L)=DUM
-14       CONTINUE
-         DO 15 L=1,M
-            DUM=B(IROW,L)
-            B(IROW,L)=B(ICOL,L)
-            B(ICOL,L)=DUM
-15       CONTINUE
-      ENDIF
-      INDXR(I)=IROW
-      INDXC(I)=ICOL
-      IF (A(ICOL,ICOL).EQ.0.) WRITE(*,*) 'Singular matrix'
-      PIVINV=1./A(ICOL,ICOL)
-      A(ICOL,ICOL)=1.
-      DO 16 L=1,N
-         A(ICOL,L)=A(ICOL,L)*PIVINV
-16    CONTINUE
-      DO 17 L=1,M
-         B(ICOL,L)=B(ICOL,L)*PIVINV
-17    CONTINUE
-      DO 21 LL=1,N
-         IF(LL.NE.ICOL)THEN
-            DUM=A(LL,ICOL)
-            A(LL,ICOL)=0.
-            DO 18 L=1,N
-               A(LL,L)=A(LL,L)-A(ICOL,L)*DUM
-18          CONTINUE
-            DO 19 L=1,M
-               B(LL,L)=B(LL,L)-B(ICOL,L)*DUM
-19          CONTINUE
-         ENDIF
-21    CONTINUE
-22 CONTINUE
-   DO 24 L=N,1,-1
-      IF(INDXR(L).NE.INDXC(L))THEN
-         DO 23 K=1,N
-            DUM=A(K,INDXR(L))
-            A(K,INDXR(L))=A(K,INDXC(L))
-            A(K,INDXC(L))=DUM
-23       CONTINUE
-      ENDIF
-24 CONTINUE
-   RETURN
-   END subroutine GAUSSJ
-
-   ! compute coordinates (xu, yu) halfway between (x1,y1) and (x2,y2)
-   subroutine half(x1,y1,x2,y2,xu,yu)
-   use m_ggeo_sferic
-   implicit none
-
-   double precision, intent(in)  :: x1, y1
-   double precision, intent(in)  :: x2, y2
-   double precision, intent(out) :: xu, yu
-
-   double precision              :: xx1, yy1, zz1, xx2, yy2, zz2
-
-   if ( jsferic.eq.1 .and. jasfer3D.eq.1 ) then
-      call sphertoCart3D(x1,y1,xx1,yy1,zz1)
-      call sphertoCart3D(x2,y2,xx2,yy2,zz2)
-      call Cart3Dtospher(0.5d0*(xx1+xx2),0.5d0*(yy1+yy2),0.5d0*(zz1+zz2),xu,yu,max(x1,x2))
-   else
-      xu = 0.5d0*(x1+x2)
-      yu = 0.5d0*(y1+y2)
-   end if
-
-   return
-   end subroutine half
-
+  
    LOGICAL FUNCTION INVIEW(X,Y)
-   USE m_ggeo_missing
    use m_ggeo_WEARELT
+   use m_ggeo_missing, only: dmiss
    implicit none
-   double precision :: x
-   double precision :: y
+   double precision             :: x
+   double precision             :: y
    !     ZIT IK IN ZOOMGEBIED? NULLEN EN DEFAULTS NIET
 
    IF (               X .NE. dmiss .AND.     &
@@ -3255,258 +2297,18 @@
    ! unstruct.F90
    !-----------------------------------------------------------------!
 
-   !> circumcenter of a polygon defined by set of vertices.
-   !! See also getcellcircumcenter
-   subroutine GETCIRCUMCENTER( nn, xv, yv, lnnl, xz, yz)
-   use m_ggeo_sferic
-   use network_ggeo_data,   only: dcenterinside
-   use m_ggeo_tpoly, only: pinpok
-   implicit none
-   integer, intent(in)             :: nn             !< Nr. of vertices
-   double precision, intent(inout) :: xv(nn), yv(nn) !< Coordinates of vertices (may be changed to avoid alloc overhead)
-   integer,          intent(in)    :: lnnl(nn)       !< Local lnn codes for all netlinks between vertices.
-   double precision, intent(out)   :: xz, yz         !< Circumcenter coordinates
-
-   ! locals
-   double precision :: xzw, yzw                        ! zwaartepunt
-   double precision :: xn, yn                          ! normal out
-   double precision :: dis
-   integer          :: m,k,k1,k2
-   double precision :: xz2, yz2                        ! only for help 4 corners
-   !LC double precision :: xe3,ye3,xe1,ye1,xe2,ye2,tex,tey,dp,dotp, &
-   !                    xccf,yccf,xccc,yccc,xcccf,ycccf,xccfo,yccfo,alf
-   double precision :: xe3,ye3,xe1,ye1,xe2,ye2,tex,tey,dp, &
-      xccf,yccf,xccc,yccc,xcccf,ycccf,xccfo,yccfo,alf
-
-   integer, parameter :: MMAX=10
-
-   double precision :: xh(MMAX), yh(MMAX)
-   double precision :: xr(MMAX), yr(MMAX), SL,SM,XCR,YCR,CRP
-   double precision :: eps = 1d-3, xcc3, ycc3, xf, xmx, xmn
-   !LC double precision :: getdx, getdy
-   double precision :: dfac
-   integer          :: jacros, in, m2, nintlinks ! nr of internal links = connected edges
-   logical          :: isnan
-
-   !LC double precision, external :: dbdistance
-
-   ! integer,          parameter     :: N6=6
-   ! double precision, dimension(N6) :: xhalf, yhalf
-
-   double precision, parameter      :: dtol=1d-4
-
-   xzw = 0d0 ; yzw = 0d0
-
-   if (jsferic == 1) then ! jglobe                 ! regularise sferic coordinates
-      xmx = maxval(xv(1:nn))
-      xmn = minval(xv(1:nn))
-      if (xmx - xmn > 180d0) then
-         do m  = 1,nn
-            if ( xmx - xv(m) > 180d0) then
-               xv(m) = xv(m) + 360d0
-            endif
-         enddo
-      endif
-   endif
-
-   do m  = 1,nn
-      xzw   = xzw + xv(m)
-      yzw   = yzw + yv(m)
-   enddo
-
-   xzw = xzw / nn
-   yzw = yzw / nn
-
-   !--------------------------
-   ! test
-   ! if ( nn.gt.N6 ) then
-   !    call qnerror('getcircumcenter: nn>N6', ' ', ' ')
-   !    stop
-   ! end if
-   ! xhalf(1:nn) = 0.5d0*(xv(1:nn)+(/ xv(2:nn), xv(1) /))
-   ! yhalf(1:nn) = 0.5d0*(yv(1:nn)+(/ yv(2:nn), yv(1) /))
-   ! call comp_circumcenter(nn, xv, yv, xhalf, yhalf, xz, yz)
-   ! goto 1234
-   ! end test
-   !--------------------------
-   ! if (nn == 333) then
-   if (nn == 3 .and. jglobe == 0 ) then ! for triangles
-      call circumcenter3(nn, xv, yv, xz, yz )
-   else
-      ! default case
-      if (jsferic == 1) then
-         eps = 9d-10 ! 111km = 0-e digit.
-      endif
-
-      xccf = xzw
-      yccf = yzw
-      alf  = 0.1d0
-
-      if (jsferic == 1) then
-         xf  = 1d0/dcos( dg2rd*yzw )
-      endif
-
-      nintlinks = 0
-      do m  = 1,nn
-         if ( lnnl(m) == 2) then
-            nintlinks = nintlinks + 1
-         endif
-      enddo
-
-      if (nintlinks > 1 .or. nn.eq.3) then                ! nn.eq.3: always for triangles
-         do k = 1,100                                     ! Zhang, Schmidt and Perot 2002, formula A3
-            xccfo = xccf
-            yccfo = yccf
-            do m  = 1,nn
-               if ( lnnl( m ) == 2 .or. nn.eq.3) then     ! nn.eq.3: always for triangles
-                  xe1= xv(m)
-                  ye1= yv(m)
-                  m2 = m + 1; if (m == nn) m2 = 1
-                  xe2= xv(m2)
-                  ye2= yv(m2)
-                  ! If two subsequent corners are on top of each other, see them as one.
-                  if (xe1 == xe2 .and. ye1 == ye2) then
-                     cycle
-                  end if
-                  xe3= 0.5d0*(xe1+xe2)
-                  ye3= 0.5d0*(ye1+ye2)
-                  call normalin(xe1,ye1,xe2,ye2,tex,tey,xe3,ye3)
-                  xcc3 =  getdx(xe3,ye3,xccf,yccf)
-                  ycc3 =  getdy(xe3,ye3,xccf,yccf)
-                  dp   = -alf*dotp(xcc3,ycc3,tex,tey)  ! - sign not present in given formula
-                  if (jsferic == 1) then
-                     dp   = rd2dg*dp/ra
-                     xccf = xccf + tex*dp*xf           ! even erbijblijven voor beste resultaat
-                     yccf = yccf + tey*dp
-                  else
-                     xccf = xccf + tex*dp
-                     yccf = yccf + tey*dp
-                  endif
-                  ! dp   = -alf*dotp(xccf - xe3,yccf - ye3, tex, tey)  ! - sign not present in given formula
-                  ! call cirr(xccf,yccf,31)
-                  ! call waitesc()
-               endif
-            enddo
-            if (k > 1 .and. abs(xccf-xccfo) < eps .and. abs(yccf-yccfo) < eps) then
-               m = 1
-               exit
-            endif
-         enddo
-
-         xz = xccf
-         yz = yccf
-
-      else
-
-         xz = xzw
-         yz = yzw
-
-      endif
-   endif
-
-1234 continue
-
-   ! if (jsferic == 1) then ! jglobe   ! regularisatie tbv tidal force routine
-   !    if ( xz < -180d0 ) then
-   !         xz = xz + 360d0
-   !    endif
-   ! ENDIF
-
-   if ( dcenterinside .le. 1d0 .and. dcenterinside.ge.0d0 ) then
-      if ( nn.le.3 ) then ! triangles
-         dfac = 1d0
-      else
-         dfac = dcenterinside
-      end if
-
-      do m=1,nn
-         xh(m) = dfac*xv(m)+(1-dfac)*xzw
-         yh(m) = dfac*yv(m)+(1-dfac)*yzw
-      end do
-
-      call pinpok(xz,yz,nn,xh,yh,in)                    ! circumcentre may not lie outside cell
-      if (in == 0) then
-         do m  = 1,nn
-            m2 = m + 1; if (m == nn) m2 = 1
-            call CROSS(xzw, yzw, xz, yz, xh(m ), yh(m ), xh(m2), yh(m2),&
-               JACROS,SL,SM,XCR,YCR,CRP)
-
-            if (jacros == 1) then
-               !               xz = 0.5d0*( xh(m) + xh(m2) ) ! xcr
-               !               yz = 0.5d0*( yh(m) + yh(m2) ) ! ycr
-               xz = xcr
-               yz = ycr
-
-               exit
-            endif
-         enddo
-      endif
-   endif
-
-
-   end subroutine GETCIRCUMCENTER
-
-   !> computes dot product of two two-dimensional vectors defined by (x1,y1) and (x2,y2) respectively
-   double precision function dotp(x1,y1,x2,y2)         ! dot produkt
-   implicit none
-   double precision :: x1, y1, x2, y2
-   dotp = x1*x2 + y1*y2
-   end function dotp
-
-   !> compute circumcenter of a triangle
-   subroutine circumcenter3(nn, x, y, xz, yz )             ! of triangle n                      ! todo : sferic
-   use m_ggeo_sferic
-   implicit none
-   integer          :: nn
-   double precision :: x(nn), y(nn), xz, yz, xf, phi
-   !LC double precision :: getdx, getdy
-
-
-   ! locals
-
-   double precision :: z,den,dx2,dx3,dy2,dy3
-
-
-   dx2 = x(2)-x(1)
-   dx3 = x(3)-x(1)
-
-   dy2 = y(2)-y(1)
-   dy3 = y(3)-y(1)
-
-   dx2 = getdx( x(1),y(1),x(2),y(2) )
-   dy2 = getdy( x(1),y(1),x(2),y(2) )
-
-   dx3 = getdx( x(1),y(1),x(3),y(3) )
-   dy3 = getdy( x(1),y(1),x(3),y(3) )
-
-   den = dy2*dx3-dy3*dx2
-   if (den .ne. 0) then
-      z=(dx2*(dx2-dx3)+dy2*(dy2-dy3))/den
-   else
-      ! call qnerror('coinciding points',' ',' ')
-      z = 0d0
-   endif
-   if (jsferic == 1) then
-      phi = (y(1)+y(2)+y(3))/3d0
-      xf  = 1d0/dcos( dg2rd*phi )
-      xz  = x(1) + xf*0.5d0*(dx3-z*dy3)*rd2dg/ra
-      yz  = y(1) +    0.5d0*(dy3+z*dx3)*rd2dg/ra
-   else
-      xz = x(1) + 0.5d0*(dx3-z*dy3)
-      yz = y(1) + 0.5d0*(dy3+z*dx3)
-   endif
-
-   end subroutine circumcenter3
-
    !> Computes the bottom area of a cell and the center of mass coordinates.
-   subroutine getcellsurface ( n, ba, xzwr, yzwr )                 ! bottom area of cell nr n                       ! todo : sferic
+   subroutine getcellsurface( n, ba, xzwr, yzwr,jsferic, jasfer3D, dtol_pole) ! bottom area of cell nr n                       ! todo : sferic
    !lc use m_netw
    use network_ggeo_data
-   use m_ggeo_sferic
-   use m_ggeo_missing
+   use m_ggeo_missing, only : dmiss
+   use geometry_module, only: comp_masscenter
    implicit none
    double precision :: ba, xzwr, yzwr
    integer          :: n
+   integer, intent(in)          :: jsferic
+   integer, intent(in)          :: jasfer3D
+   double precision, intent(in) :: dtol_pole
 
    ! locals
    integer          :: nn
@@ -3518,18 +2320,26 @@
    double precision                  :: zz
    integer                           :: jaccw     ! counterclockwise (1) or not (0) (not used here)
 
-   call get_cellpolygon(n,Mmax,nn,xh,yh,LnnL,Lorg,zz)
-   call comp_masscenter(nn, xh , yh, xzwr, yzwr, ba, jaccw)
+   call get_cellpolygon(n,Mmax,nn,xh,yh,LnnL,Lorg,zz, jsferic, dtol_pole)
+   call comp_masscenter(nn, xh , yh, xzwr, yzwr, ba, jaccw, jsferic, jasfer3D, dmiss)
    end subroutine getcellsurface
 
    !> computes the cell-weighted center
-   subroutine getcellweightedcenter(n, xz, yz, zz)
+   subroutine getcellweightedcenter(n, xz, yz, zz, jsferic, jasfer3D, jglobe, dtol_pole)
+   
    use m_ggeo_orthosettings
-   use network_ggeo_data, only: netcell, xk, yk, zk
-   use m_ggeo_sferic, only: jsferic, jasfer3D
+   use m_ggeo_missing,  only: jins, dmiss, dxymis
+   use geometry_module, only : getcircumcenter, comp_circumcenter3D, comp_masscenter 
+   use network_ggeo_data, only: netcell, xk, yk, zk, dcenterinside
+
    implicit none
    double precision   :: xz, yz, zz
    integer            :: n
+   
+   integer, intent(in)               :: jsferic
+   integer, intent(in)               :: jasfer3D
+   double precision, intent(in)      :: dtol_pole
+   integer, intent(in)               :: jglobe
 
    integer,                parameter :: MMAX = 10
    double precision, dimension(MMAX) :: xv, yv
@@ -3549,16 +2359,16 @@
          yv(i) = yk(k)
       end do
 
-      call comp_circumcenter3D(nn, xv, yv, xz, yz)
+      call comp_circumcenter3D(nn, xv, yv, xz, yz, jsferic, dmiss)
    else
       !   get the cell polygon that is safe for periodic, spherical coordinates, inluding poles
-      call get_cellpolygon(n,Mmax,nn,xv,yv,LnnL,Lorg,zz)
-      call getcircumcenter(nn, xv, yv, lnnl, xz, yz)
+      call get_cellpolygon(n,Mmax,nn,xv,yv,LnnL,Lorg,zz, jsferic, dtol_pole)
+      call getcircumcenter(nn, xv, yv, lnnl, xz, yz,  jsferic, jasfer3D, jglobe, jins, dmiss, dxymis, dcenterinside)
    end if
 
    if (circumormasscenter .ne. 1d0) then
       !   update with cell mass center
-      call comp_masscenter(nn, xv, yv, xzw, yzw, ba, jaccw)
+      call comp_masscenter(nn, xv, yv, xzw, yzw, ba, jaccw, jsferic, jasfer3D, dmiss)
 
       xz = circumormasscenter*xz + (1d0-circumormasscenter)*xzw
       yz = circumormasscenter*yz + (1d0-circumormasscenter)*yzw
@@ -3566,32 +2376,33 @@
    ! CALL CIRR(XZ,YZ,31)
    end subroutine getcellweightedcenter
    
-   !------------------------------------------------------------------
-   ! From polygon.F90
-   !------------------------------------------------------------------
    
-   
-   
-
    !-----------------------------------------------------------------!
    ! Library public functions
    !-----------------------------------------------------------------!
 
    ! make1D2Dinternalnetlinks
-   function make1D2Dinternalnetlinks() result(ierr)
+   function make1D2Dinternalnetlinks(jsferic, jasfer3D, jglobe, dtol_pole) result(ierr)
 
    use m_ggeo_flowgeom, only: xz, yz
    use network_ggeo_data
+   use geometry_module, only: dbdistance, normalout
+   use m_ggeo_missing, only : dmiss, dxymis
+
    implicit none
 
-   integer          :: K1, K2, K3, L, NC1, NC2, JA, KK2(2), KK, NML
-   integer          :: i, ierr, k, kcell
-   DOUBLE PRECISION :: XN, YN, XK2, YK2, WWU
+   integer                      :: K1, K2, K3, L, NC1, NC2, JA, KK2(2), KK, NML
+   integer                      :: i, ierr, k, kcell
+   double precision             :: XN, YN, XK2, YK2, WWU
+   integer, intent(in)          :: jsferic
+   integer, intent(in)          :: jasfer3D
+   integer, intent(in)          :: jglobe
+   double precision, intent(in) :: dtol_pole
 
    ierr = 0
 
    call SAVENET()
-   call findcells(0)
+   call findcells(0, jsferic, jasfer3D, jglobe, dtol_pole)
 
    KC = 2
    DO L = 1,NUML  ! FLAG TO 1 ANY NODE TOUCHED BY SOMETHING 1D
@@ -3619,13 +2430,13 @@
                   KK2(KK) = KN(1,L) + KN(2,L) - K
                ENDDO
                K1 = KK2(1) ; K2 = KK2(2)
-               CALL normalout(XK(K1), YK(K1), XK(K2), YK(K2) , XN, YN )
+               CALL normalout(XK(K1), YK(K1), XK(K2), YK(K2) , XN, YN, jsferic, jasfer3D, dmiss, dxymis)
 
-               WWU = 5D0*DBDISTANCE(XK(K1), YK(K1), XK(K2), YK(K2) )
+               WWU = 5D0*DBDISTANCE(XK(K1), YK(K1), XK(K2), YK(K2), jsferic, jasfer3D, dmiss)
 
                XK2 = XK(K) + XN*WWU
                YK2 = YK(K) + YN*WWU
-               CALL CROSSED2d_BNDCELL(NML, XK(K), YK(K), XK2, YK2, NC1)
+               CALL CROSSED2d_BNDCELL(NML, XK(K), YK(K), XK2, YK2, NC1, jsferic)
 
                IF (NC1 > 1) THEN
                   CALL SETNEWPOINT(XZ(NC1),YZ(NC1),ZK(K) ,NC2)
@@ -3635,7 +2446,7 @@
 
                XK2 = XK(K) - XN*WWU
                YK2 = YK(K) - YN*WWU
-               CALL CROSSED2d_BNDCELL(NML, XK(K), YK(K), XK2, YK2, NC1)
+               CALL CROSSED2d_BNDCELL(NML, XK(K), YK(K), XK2, YK2, NC1, jsferic)
 
                IF (NC1 > 1) THEN
                   CALL SETNEWPOINT(XZ(NC1),YZ(NC1),ZK(K) ,NC2)
@@ -3651,7 +2462,7 @@
 
    ENDDO
 
-   CALL SETNODADM(0)
+   CALL SETNODADM(0, jsferic, jasfer3D)
 
    end function make1D2Dinternalnetlinks
 
@@ -3660,10 +2471,12 @@
 
    use meshdata
    use network_ggeo_data
-   use m_ggeo_missing
-
+   use m_ggeo_missing, only : dmiss
+   
+   implicit none   
    type(t_ug_meshgeom), intent(in)      :: meshgeom
    integer                              :: numk_last, numl_last, ierr, numk_read, l
+   
    ierr = 0   
    
    numk_last = LNUMK
@@ -3788,6 +2601,7 @@
    integer                 :: ierr, i, k, nnetworknodes, noverlaps, nbranches
    integer, allocatable    :: connectedBranches(:)  
    
+   ierr = 0
    nbranches = size(sourcenodeid)
    ! calculate the number of edge nodes, considering the overlaps 
    ! (if more nodes are shared, then we have less edge nodes)

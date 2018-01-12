@@ -312,39 +312,3 @@ module network_ggeo_data
   
    end module network_ggeo_data
    
-   module m_ggeo_cutcells
-   use m_ggeo_tpoly
-   implicit none
-   integer                            :: NPOL   !< number of cutcells polygons
-   integer, dimension(:), allocatable :: ik     !< CRS of inside netnodes per polygon, startpointer, dim(NPOL+1)
-   integer, dimension(:), allocatable :: jk     !< CRS of inside netnodes per polygon, netnodes, dim(ik(NPOL+1)-1)
-   
-   type(tpoly), dimension(:), allocatable :: pli      !< tpoly-type polygons
-   integer                                :: numpols  !< number of tpoly-type polygons
-   
-!  for crossed netlinks
-   integer                                     :: jastored     ! data stored (1) or not (0)
-   integer,          dimension(:), allocatable :: idxL         ! intersecting polygon sections per netlink in CRS
-   double precision, dimension(:), allocatable :: xdxL, ydxL   ! intersecting coordinates per netlink in CRS
-   integer,          dimension(:), allocatable :: pdxL         ! intersecting polygon numbers  per netlink in CRS
-   
-   contains
-   
-!> clean-up   
-   subroutine dealloc_cutcellmasks()
-      implicit none
-      
-      if ( allocated(ik) ) deallocate(ik)
-      if ( allocated(jk) ) deallocate(jk)
-      
-      if ( allocated(idxL) ) deallocate(idxL)
-      if ( allocated(xdxL) ) deallocate(xdxL)
-      if ( allocated(ydxL) ) deallocate(ydxL)
-      if ( allocated(pdxL) ) deallocate(pdxL)
-      
-      NPOL = 0
-      
-      return
-   end subroutine dealloc_cutcellmasks
-   end module m_ggeo_cutcells
-   
