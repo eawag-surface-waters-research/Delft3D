@@ -229,7 +229,7 @@
 
       if ( action == ACTION_FINALISATION ) then
           include 'dlwqdata_restore.inc'
-          if ( timon ) call timstrt ( "dlwqnm", ithandl )
+          if ( timon ) call timstrt ( "dlwqnf", ithandl )
           goto 50
       endif
 
