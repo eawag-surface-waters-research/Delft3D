@@ -31,7 +31,13 @@
 #include <stdio.h>
 #include "dimr_lib_version.h"
 
-static char modname_version_id [] = {"@(#)Deltares, " modname_program " Version " modname_major "." modname_minor "." modname_revision "." modname_build ", " __DATE__ ", " __TIME__ ""};
+#if defined(_WIN64)
+static char modname_version_id[] = { "@(#)Deltares, " modname_program " Version " modname_major "." modname_minor "." modname_revision "." modname_build " (Win64), " __DATE__ ", " __TIME__ "" };
+#elif defined(LINUX64)
+static char modname_version_id[] = { "@(#)Deltares, " modname_program " Version " modname_major "." modname_minor "." modname_revision "." modname_build " (Linx64), " __DATE__ ", " __TIME__ "" };
+#else
+static char modname_version_id[] = { "@(#)Deltares, " modname_program " Version " modname_major "." modname_minor "." modname_revision "." modname_build " (Unknown), " __DATE__ ", " __TIME__ "" };
+#endif
 
 
 char * getversionstring_dimr_lib(void)
@@ -52,4 +58,9 @@ char * getshortversionstring_dimr_lib(void)
 char * geturlstring_dimr_lib(void)
 {
 	return modname_url;
+}
+
+char * getversionidstring_dimr_lib(void)
+{
+	return modname_version_id;
 }
