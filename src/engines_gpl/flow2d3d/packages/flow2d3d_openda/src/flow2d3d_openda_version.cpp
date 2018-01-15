@@ -51,16 +51,24 @@ static char modname_version_id [] = {"@(#)Deltares, " modname_program " Version 
 
 void STDCALL GETSHORTVERSIONSTRING( char * str, int length_str )
 {
-  int i;
-  for (i=0; i<length_str; i++) {str[i] = ' ';}
-  i  = min((int) length_str, (int) strlen(modname_version_short));
-  strncpy(str, modname_version_short, i);
+	int i;
+	for (i=0; i<length_str; i++) {str[i] = ' ';}
+	i  = min((int) length_str, (int) strlen(modname_version_short));
+	strncpy(str, modname_version_short, i);
 }
 
-void STDCALL GETFULLVERSIONSTRING( char * str, int length_str )
+void STDCALL GETFULLVERSIONSTRING(char * str, int length_str)
 {
-  int i;
-  for (i=0; i<length_str; i++) {str[i] = ' ';}
-  i  = min((int) length_str, (int) strlen(modname_version_full));
-  strncpy(str, modname_version_full, i);
+	int i;
+	for (i = 0; i<length_str; i++) { str[i] = ' '; }
+	i = min((int)length_str, (int)strlen(modname_version_full));
+	strncpy(str, modname_version_full, i);
+}
+
+void STDCALL GETVERSIONIDSTRING(char * str, int length_str)
+{
+	int i;
+	for (i = 0; i<length_str; i++) { str[i] = ' '; }
+	i = min((int)length_str, (int)strlen(modname_version_id));
+	strncpy(str, modname_version_id, i);
 }

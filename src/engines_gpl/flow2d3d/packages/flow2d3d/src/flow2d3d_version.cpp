@@ -65,6 +65,14 @@ void STDCALL GETFULLVERSIONSTRING( char * str, int length_str )
   strncpy(str, modname_version_full, i);
 }
 
+void STDCALL GETVERSIONIDSTRING(char * str, int length_str)
+{
+	int i;
+	for (i = 0; i<length_str; i++) { str[i] = ' '; }
+	i = min((int)length_str, (int)strlen(modname_version_id));
+	strncpy(str, modname_version_id, i);
+}
+
 void STDCALL GETCOMFILEVERSIONSTRING( char * str, int length_str )
 {
   int i;
