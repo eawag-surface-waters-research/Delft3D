@@ -2345,6 +2345,7 @@ module m_ec_provider
          logical                                                 :: rotate_pole
          integer                                                 :: nvar                  !< number/loopvariable of varids in this netcdf file 
          integer                                                 :: lon_varid, lon_dimid, lat_varid, lat_dimid, tim_varid, tim_dimid
+         integer                                                 :: grid_lon_varid, grid_lat_varid
          integer                                                 :: x_varid, x_dimid, y_varid, y_dimid, z_varid, z_dimid
 
          integer, dimension(:), allocatable                      :: first_coordinate_dimids, second_coordinate_dimids, third_coordinate_dimids
@@ -2441,6 +2442,7 @@ module m_ec_provider
 
          ! For now not sure yet if we need this call.
          if (.not.ecSupportNCFindCFCoordinates(fileReaderPtr%fileHandle, lon_varid, lon_dimid, lat_varid, lat_dimid,      &
+                                                                    grid_lon_varid, grid_lat_varid,                       &
                                                                            x_varid,   x_dimid,   y_varid,   y_dimid,      &
                                                                            z_varid,   z_dimid,                            &
                                                                          tim_varid, tim_dimid)) then
@@ -2492,12 +2494,56 @@ module m_ec_provider
 
             if (instancePtr%coordsystem == EC_COORDS_CARTESIAN) then 
                grid_type = elmSetType_cartesian
-               fgd_id = x_varid
-               sgd_id = y_varid
+               if ((x_varid>0) .and. (y_varid>0)) then                                  ! First try absolute lon and lat ...
+                  fgd_id = x_varid
+                  sgd_id = y_varid
+               else
+                  write (message,'(a)') "Variable '"//trim(ncstdnames(i))//"' in NetCDF file '"//trim(fileReaderPtr%filename)   &
+                      //' requires ''projected_x_coordinate'' and ''projected_y_coordinate''.'
+                  call setECMessage(message)
+                  return
+               end if
             else if (instancePtr%coordsystem == EC_COORDS_SFERIC) then 
+               rotate_pole=.False. 
                grid_type = elmSetType_spheric
-               fgd_id = lon_varid
-               sgd_id = lat_varid
+               if ((lon_varid>0) .and. (lat_varid>0)) then                                  ! First try absolute lon and lat ...
+                  fgd_id = lon_varid
+                  sgd_id = lat_varid
+               elseif ((grid_lon_varid>0) .and. (grid_lat_varid>0)) then                    ! ... then try relative (rotated-pole-) lon and lat
+                  fgd_id = grid_lon_varid
+                  sgd_id = grid_lat_varid
+                  grid_mapping=''
+                  ierror = nf90_get_att(fileReaderPtr%fileHandle, idvar, "grid_mapping", grid_mapping)      ! check if there is a gridmapping variable for this var 
+                  if (len_trim(grid_mapping)>0) then
+                     ierror = nf90_inq_varid(fileReaderPtr%fileHandle, grid_mapping, grid_mapping_id)
+                     if (ierror == NF90_NOERR) then 
+                        gsplon = -999.9
+                        gsplat = -999.9
+                        gnplon = -999.9
+                        gnplat = -999.9
+                        attstr=''
+                        ierror = nf90_get_att(fileReaderPtr%fileHandle, grid_mapping_id, "grid_mapping_name", attstr)
+                        if (attstr.eq.'rotated_latitude_longitude') then
+                           if (.not.(nf90_get_att(fileReaderPtr%fileHandle, grid_mapping_id, "grid_north_pole_longitude", gnplon)==NF90_NOERR)) gnplon = -999.9
+                           if (.not.(nf90_get_att(fileReaderPtr%fileHandle, grid_mapping_id, "grid_north_pole_latitude",  gnplat)==NF90_NOERR)) gnplat = -999.9
+                           if (.not.(nf90_get_att(fileReaderPtr%fileHandle, grid_mapping_id, "grid_south_pole_longitude", gsplon)==NF90_NOERR)) gsplon = -999.9
+                           if (.not.(nf90_get_att(fileReaderPtr%fileHandle, grid_mapping_id, "grid_south_pole_latitude",  gsplat)==NF90_NOERR)) gsplat = -999.9
+                           if ((gnplon > -900.d0) .and. (gnplat > -900.d0)) then         ! northpole given 
+                              gsplon =  gnplon + 180.d0 
+                              gsplat = -gnplat
+                           endif 
+                           if ((gsplon > -900.d0) .and. (gsplat > -900.d0)) then         ! southpole given 
+                              rotate_pole = .True.
+                           endif 
+                        endif 
+                     endif 
+                  endif 
+               else
+                  write (message,'(a)') "Variable '"//trim(ncstdnames(i))//"' in NetCDF file '"//trim(fileReaderPtr%filename)   &
+                      //' either requires ''latitude'' and ''longitude'' or ''grid_latitude'' and ''grid_longitude''.'
+                  call setECMessage(message)
+                  return
+               end if
             end if
 
             ! If we failed to read all coordinate variable id's from the dimension variable id's,
@@ -2520,34 +2566,6 @@ module m_ec_provider
                   return
                end if
             end if
-
-            grid_mapping=''
-            rotate_pole=.False. 
-            ierror = nf90_get_att(fileReaderPtr%fileHandle, idvar, "grid_mapping", grid_mapping)      ! check if there is a gridmapping variable for this var 
-            if (len_trim(grid_mapping)>0) then
-               ierror = nf90_inq_varid(fileReaderPtr%fileHandle, grid_mapping, grid_mapping_id)
-               if (ierror == NF90_NOERR) then 
-                  gsplon = -999.9
-                  gsplat = -999.9
-                  gnplon = -999.9
-                  gnplat = -999.9
-                  attstr=''
-                  ierror = nf90_get_att(fileReaderPtr%fileHandle, grid_mapping_id, "grid_mapping_name", attstr)
-                  if (attstr.eq.'rotated_latitude_longitude') then
-                     if (.not.(nf90_get_att(fileReaderPtr%fileHandle, grid_mapping_id, "grid_north_pole_longitude", gnplon)==NF90_NOERR)) gnplon = -999.9
-                     if (.not.(nf90_get_att(fileReaderPtr%fileHandle, grid_mapping_id, "grid_north_pole_latitude",  gnplat)==NF90_NOERR)) gnplat = -999.9
-                     if (.not.(nf90_get_att(fileReaderPtr%fileHandle, grid_mapping_id, "grid_south_pole_longitude", gsplon)==NF90_NOERR)) gsplon = -999.9
-                     if (.not.(nf90_get_att(fileReaderPtr%fileHandle, grid_mapping_id, "grid_south_pole_latitude",  gsplat)==NF90_NOERR)) gsplat = -999.9
-                     if ((gnplon > -900.d0) .and. (gnplat > -900.d0)) then         ! northpole given 
-                        gsplon =  gnplon + 180.d0 
-                        gsplat = -gnplat
-                     endif 
-                     if ((gsplon > -900.d0) .and. (gsplat > -900.d0)) then         ! southpole given 
-                        rotate_pole = .True.
-                     endif 
-                  endif 
-               endif 
-            endif 
 
             ! =========================================
             ! Create the ElementSet for this quantity

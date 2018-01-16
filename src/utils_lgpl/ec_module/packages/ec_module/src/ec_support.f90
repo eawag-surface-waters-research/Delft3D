@@ -1027,14 +1027,17 @@ end subroutine ecInstanceListSourceItems
 
       !> Find the CF-compliant longitude and latitude dimensions and associated variables
       function ecSupportNCFindCFCoordinates(ncid, lon_varid, lon_dimid, lat_varid, lat_dimid,      &
+                                             grid_lon_varid, grid_lat_varid,                       &
                                                     x_varid,   x_dimid,   y_varid,   y_dimid,      &
                                                     z_varid,   z_dimid,                            &
                                                   tim_varid, tim_dimid) result(success)
       use netcdf
       logical              :: success
       integer, intent(in)  :: ncid           !< NetCDF file ID
-      integer, intent(out) :: lon_varid      !< One dimensional coordinate variable recognized as longitude
-      integer, intent(out) :: lat_varid      !< One dimensional coordinate variable recognized as latitude
+      integer, intent(out) :: lon_varid      !< One dimensional coordinate variable recognized as absolute longitude
+      integer, intent(out) :: lat_varid      !< One dimensional coordinate variable recognized as absolute latitude
+      integer, intent(out) :: grid_lon_varid !< One dimensional coordinate variable recognized as 'rotated-pole' longitude
+      integer, intent(out) :: grid_lat_varid !< One dimensional coordinate variable recognized as 'rotated-pole' latitude
       integer, intent(out) ::   x_varid      !< One dimensional coordinate variable recognized as X
       integer, intent(out) ::   y_varid      !< One dimensional coordinate variable recognized as Y
       integer, intent(out) ::   z_varid      !< One dimensional coordinate variable recognized as Z
@@ -1076,6 +1079,18 @@ end subroutine ecInstanceListSourceItems
                case ('degrees_north','degree_north','degree_N','degrees_N','degreeN','degreesN')
                   lat_varid = ivar
                   lat_dimid = dimids(1)
+               case ('degrees')
+                   stdname = ''
+                   ierr = nf90_get_att(ncid, ivar, 'standard_name', stdname)
+                   select case (stdname) 
+                      case ('grid_longitude')
+                         grid_lon_varid = ivar
+                         lon_dimid = dimids(1)
+                      case ('grid_latitude')
+                         grid_lat_varid = ivar
+                         lat_dimid = dimids(1)
+                   end select
+                   !RL Set lon and lat dimids ??
                case ('m','meters','km','kilometers')
                   axis=''
                   ierr = nf90_get_att(ncid, ivar, 'axis', axis)
@@ -1112,6 +1127,15 @@ end subroutine ecInstanceListSourceItems
                   lon_varid = ivar
                case ('degrees_north','degree_north','degree_N','degrees_N','degreeN','degreesN')
                   lat_varid = ivar
+               case ('degrees')
+                   stdname = ''
+                   ierr = nf90_get_att(ncid, ivar, 'standard_name', stdname)
+                   select case (stdname) 
+                      case ('grid_latitude')
+                         grid_lat_varid = ivar
+                      case ('grid_longitude')
+                         grid_lon_varid = ivar
+                   end select
                case ('m','meters','km','kilometers')
                    stdname = ''
                    ierr = nf90_get_att(ncid, ivar, 'standard_name', stdname)

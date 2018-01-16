@@ -270,7 +270,7 @@ module m_ec_converter
          type(tEcElementSet),  pointer :: sourceElementSet !< source ElementSet
          type(tEcElementSet),  pointer :: targetElementSet !< target ElementSet
          real(hp) :: wx, wy
-         integer  :: i !< loop counter
+         integer  :: i,j !< loop counter
          integer  :: ii, jj
          integer  :: n_cols, n_rows, n_points
          integer, dimension(1)  :: nn
@@ -279,9 +279,11 @@ module m_ec_converter
          integer  :: fmask(4) !< return value of findnm
          real(hp) :: fsum 
          type(tEcMask), pointer :: srcmask 
-         real(hp), dimension(:), pointer ::  src_x, src_y
-         real(hp)                        ::  tgt_x, tgt_y
-         integer                         ::  nsx, nsy
+         real(hp), dimension(:), pointer      ::  src_x, src_y
+         real(hp)                             ::  tgt_x, tgt_y
+         integer                              ::  nsx, nsy
+         real(hp), allocatable, dimension(:)  ::  edge_poly_x
+         real(hp), allocatable, dimension(:)  ::  edge_poly_y
          
          !
          success = .false.
@@ -367,28 +369,58 @@ module m_ec_converter
                      end do
                   case (elmSetType_spheric_equidistant, elmSetType_Cartesian_equidistant)
                   case (elmSetType_spheric, elmSetType_Cartesian)
+                     allocate(edge_poly_x(2*n_cols+2*n_rows-2),edge_poly_y(2*n_cols+2*n_rows-2))
+                     j=1
+                     do i=1,n_cols
+                         edge_poly_x(j) = sourceElementSet%x(i) 
+                         edge_poly_y(j) = sourceElementSet%y(i) 
+                         j=j+1
+                     enddo
+                     do i=2,n_rows
+                         edge_poly_x(j) = sourceElementSet%x(i*n_cols) 
+                         edge_poly_y(j) = sourceElementSet%y(i*n_cols) 
+                         j=j+1
+                     enddo
+                     do i=1,n_cols-1
+                         edge_poly_x(j) = sourceElementSet%x(n_rows*n_cols-i) 
+                         edge_poly_y(j) = sourceElementSet%y(n_rows*n_cols-i) 
+                         j=j+1
+                     enddo
+                     do i=1,n_rows-1
+                         edge_poly_x(j) = sourceElementSet%x((n_rows-1-i)*n_cols+1) 
+                         edge_poly_y(j) = sourceElementSet%y((n_rows-1-i)*n_cols+1) 
+                         j=j+1
+                     enddo
+                     edge_poly_x(j) = edge_poly_x(1)
+                     edge_poly_y(j) = edge_poly_x(1)
+ 
                      do i=1, n_points
-                        call findnm(targetElementSet%x(i), targetElementSet%y(i), sourceElementSet%x, sourceElementSet%y, &
-                                    n_cols, n_rows, n_cols, n_rows, inside, mp, np, in, jn, wf)
+                        call pinpok(targetElementSet%x(i), targetElementSet%y(i), 2*n_cols+2*n_rows-2, edge_poly_x, edge_poly_y, inside)                        
                         if (inside == 1) then
-                           if (allocated(srcmask%msk)) then
-                              fmask(1) = (srcmask%msk((np   -srcmask%nmin)*srcmask%mrange+mp   -srcmask%mmin+1))
-                              fmask(2) = (srcmask%msk((np   -srcmask%nmin)*srcmask%mrange+mp+1 -srcmask%mmin+1))
-                              fmask(3) = (srcmask%msk((np+1 -srcmask%nmin)*srcmask%mrange+mp+1 -srcmask%mmin+1))
-                              fmask(4) = (srcmask%msk((np+1 -srcmask%nmin)*srcmask%mrange+mp   -srcmask%mmin+1))
-                              fsum = sum((1.d0-fmask)*wf)            ! fmask = 1 for DISCARDED corners               
-                              if (fsum>=1.0e-03) then         
-                                 wf = (wf*(1.d0-fmask))/fsum
-                              endif
-                           endif 
-                           weight%weightFactors(1,i) = wf(1)    
-                           weight%weightFactors(2,i) = wf(2)    
-                           weight%weightFactors(3,i) = wf(3)    
-                           weight%weightFactors(4,i) = wf(4)    
-                           weight%indices(1,i) = mp
-                           weight%indices(2,i) = np
+                           call findnm(targetElementSet%x(i), targetElementSet%y(i), sourceElementSet%x, sourceElementSet%y, &
+                                        n_cols, n_rows, n_cols, n_rows, inside, mp, np, in, jn, wf)
+                           if (inside == 1) then
+                              if (allocated(srcmask%msk)) then
+                                 fmask(1) = (srcmask%msk((np   -srcmask%nmin)*srcmask%mrange+mp   -srcmask%mmin+1))
+                                 fmask(2) = (srcmask%msk((np   -srcmask%nmin)*srcmask%mrange+mp+1 -srcmask%mmin+1))
+                                 fmask(3) = (srcmask%msk((np+1 -srcmask%nmin)*srcmask%mrange+mp+1 -srcmask%mmin+1))
+                                 fmask(4) = (srcmask%msk((np+1 -srcmask%nmin)*srcmask%mrange+mp   -srcmask%mmin+1))
+                                 fsum = sum((1.d0-fmask)*wf)            ! fmask = 1 for DISCARDED corners               
+                                 if (fsum>=1.0e-03) then         
+                                    wf = (wf*(1.d0-fmask))/fsum
+                                 endif
+                              endif 
+                              weight%weightFactors(1,i) = wf(1)    
+                              weight%weightFactors(2,i) = wf(2)    
+                              weight%weightFactors(3,i) = wf(3)    
+                              weight%weightFactors(4,i) = wf(4)    
+                              weight%indices(1,i) = mp
+                              weight%indices(2,i) = np
+                           endif
                         endif
                      end do
+                     deallocate(edge_poly_x)
+                     deallocate(edge_poly_y)
                   case default
                   end select
                success = .true.
@@ -2417,10 +2449,10 @@ module m_ec_converter
                      do j=1, n_points
                         mp = indexWeight%indices(1,j)
                         np = indexWeight%indices(2,j)
-                        if (connection%converterPtr%operandType==operand_replace) then
-                           targetValues(j) = 0.0_hp
-                        end if
                         if (mp > 0 .and. np > 0) then
+                           if (connection%converterPtr%operandType==operand_replace) then
+                              targetValues(j) = 0.0_hp
+                           end if
                            ! FM's 2D to EC's 1D array mapping requires np = np-1 from this point on.
 
                            ! check missing values
