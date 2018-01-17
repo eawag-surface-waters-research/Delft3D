@@ -4961,7 +4961,6 @@ src/third_party_open/swan/scripts/swan_install.sh -text
 src/third_party_open/swan/scripts/swan_install_PRINT_for_debugging.sh -text
 src/third_party_open/swan/scripts/swan_install_x64.bat -text
 src/third_party_open/swan/swan_license_info.txt -text
-src/third_party_open/tcl/bin/win32/tclkit.exe -text
 src/third_party_open/tcl/bin/win64/tclkitsh852.exe -text
 src/third_party_open/triangle/Makefile.am -text
 src/third_party_open/triangle/f2c.h -text
