@@ -117,17 +117,17 @@ subroutine rdtdtn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
     real(fp)                               :: sdt    ! dt*tunit/60
     real(fp)                               :: timrd  ! Time in minutes read 
     real(fp)                               :: timscl
-    real(fp), dimension(mxkmax, 2)         :: rwbval ! Array for the time dependent data 1,1 = value at at A 1,2 = value at at B K,1 = value at layer K, at A K,2 = value at layer K, at B 
+    real(fp), dimension(kmax, 2)           :: rwbval ! Array for the time dependent data 1,1 = value at at A 1,2 = value at at B K,1 = value at layer K, at A K,2 = value at layer K, at B 
     character(1)                           :: interp
     character(1)                           :: quote  ! Apostrophe ASCII-character 39 
     character(10), dimension(2)            :: parunt ! Unit name fitting the parameter 
     character(20)                          :: cntent
-    character(36), dimension(1 + 2*mxkmax) :: parrd  ! Parameter names read 
+    character(36), dimension(1 + 2*kmax)   :: parrd  ! Parameter names read 
     character(36), dimension(2)            :: parnam ! Names of the paramaters to write to time dependent files for BCT 
     character(40)                          :: cntain
     character(400)                         :: errmsg ! Character var. containing the error message to be written to file. The message depend on the error. 
     character(42)                          :: tablnm ! Table name specification 
-    character(5000)                        :: record ! Standard rec. length in an attribute file (maximum MXKMAX*24*2 + 48) 
+    character(kmax*24*2 + 48)              :: record ! Standard rec. length in an attribute file (maximum kmax*24*2 + 48) 
 !
 !
 !! executable statements -------------------------------------------------------

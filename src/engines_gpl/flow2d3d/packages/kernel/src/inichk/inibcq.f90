@@ -1,6 +1,6 @@
 subroutine inibcq(lundia    ,error     ,runid     ,itbct     ,nto       , &
                 & ntof      ,ntoq      ,kcd       ,nambnd    ,hydrbc    , &
-                & bubble    ,gdp       )
+                & bubble    ,kmax      ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2018.                                
@@ -56,6 +56,7 @@ subroutine inibcq(lundia    ,error     ,runid     ,itbct     ,nto       , &
 !
     integer                              , intent(in)  :: kcd    !  Description and declaration in dimens.igs
     integer                                            :: lundia !  Description and declaration in inout.igs
+    integer                              , intent(in)  :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer                              , intent(in)  :: nto    !  Description and declaration in esm_alloc_int.f90
     integer                              , intent(in)  :: ntof   !  Description and declaration in dimens.igs
     integer                              , intent(in)  :: ntoq   !  Description and declaration in dimens.igs
@@ -91,7 +92,7 @@ subroutine inibcq(lundia    ,error     ,runid     ,itbct     ,nto       , &
     character(20)                          :: chlp20
     character(20)                          :: namhlp
     character(256)                         :: filnam  ! Help var. for file name 
-    character(36), dimension(1 + 2*mxkmax) :: parnam  ! Number of parameter records in time dependent direct access files for BCT 
+    character(36), dimension(1 + 2*kmax)   :: parnam  ! Number of parameter records in time dependent direct access files for BCT 
     character(36), dimension(2)            :: defpar  ! Default parameter 
     character(500)                         :: record  ! Record for BCT file 
 !

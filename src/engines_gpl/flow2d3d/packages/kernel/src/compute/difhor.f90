@@ -108,8 +108,8 @@ subroutine difhor(nm        ,nmu       ,j         ,nmmaxj    ,kmax      , &
     integer                             :: kpoint
     integer                             :: krr
     integer                             :: l       ! Constituent number 
-    integer, dimension(2*mxkmax + 1)    :: kicol   ! K-index concentration point left for flux kf 
-    integer, dimension(2*mxkmax + 1)    :: kicor   ! K-index concentration point right for flux kf 
+    integer, dimension(2*kmax + 1)      :: kicol   ! K-index concentration point left for flux kf 
+    integer, dimension(2*kmax + 1)      :: kicor   ! K-index concentration point right for flux kf 
     real(fp)                            :: cl
     real(fp)                            :: cr
     real(fp)                            :: difl
@@ -121,12 +121,12 @@ subroutine difhor(nm        ,nmu       ,j         ,nmmaxj    ,kmax      , &
     real(fp)                            :: grmax
     real(fp)                            :: grmin
     real(fp)                            :: h0
-    real(fp), dimension(0:2*mxkmax + 1) :: point   ! Merge arrays polal and polar 
-    real(fp), dimension(0:mxkmax)       :: polal   ! Z-coordinate horizontal layers in nm 
-    real(fp), dimension(0:mxkmax)       :: polar   ! Z-coordinate horizontal layers in nmu 
-    real(fp), dimension(2*mxkmax + 1)   :: poflu   ! Z-coordinate gradient flux 
-    real(fp), dimension(mxkmax)         :: pocol   ! Z-coordinate concentr. point nm ,k 
-    real(fp), dimension(mxkmax)         :: pocor   ! Z-coordinate concentr. point nmu,k 
+    real(fp), dimension(0:2*kmax + 1)   :: point   ! Merge arrays polal and polar 
+    real(fp), dimension(0:kmax)         :: polal   ! Z-coordinate horizontal layers in nm 
+    real(fp), dimension(0:kmax)         :: polar   ! Z-coordinate horizontal layers in nmu 
+    real(fp), dimension(2*kmax + 1)     :: poflu   ! Z-coordinate gradient flux 
+    real(fp), dimension(kmax)           :: pocol   ! Z-coordinate concentr. point nm ,k 
+    real(fp), dimension(kmax)           :: pocor   ! Z-coordinate concentr. point nmu,k 
 !
 !! executable statements -------------------------------------------------------
 !

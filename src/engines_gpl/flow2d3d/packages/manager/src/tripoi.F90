@@ -110,7 +110,7 @@ subroutine tripoi(runid, filmrs, versio, filmd,gdp       )
     !
     ! test local dimensions in various subroutines
     !
-    call chklod(lundia    ,error     ,nto       ,kmax      ,nsrc      , &
+    call chklod(lundia    ,error     ,nto       ,nsrc      , &
               & gdp       )
     if (error) goto 9999
     !

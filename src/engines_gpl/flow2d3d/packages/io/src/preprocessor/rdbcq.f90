@@ -1,6 +1,6 @@
 subroutine rdbcq(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                & runid     ,filbcq    ,eol       ,nambnd    ,nto       , &
-               & ntof      ,ntoq      ,bubble    ,gdp       )
+               & ntof      ,ntoq      ,bubble    ,kmax      ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2018.                                
@@ -62,6 +62,7 @@ subroutine rdbcq(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     integer                              :: nto    !  Description and declaration in esm_alloc_int.f90
     integer                              :: ntof   !  Description and declaration in dimens.igs
     integer                              :: ntoq   !  Description and declaration in dimens.igs
+    integer                , intent(in)  :: kmax   !  Description and declaration in esm_alloc_int.f90
     logical                , intent(in)  :: bubble !  Description and declaration in procs.igs    
     logical                              :: error  !!  Flag=TRUE if an error is encountered
     character(*)                         :: filbcq !!  File name for the QH-rel.
@@ -204,7 +205,7 @@ subroutine rdbcq(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
              call prterr(lundia, 'G051', trim(message))
              call rdqh(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
                      & filbcq    ,runid     ,eol       ,nto       ,ntof      , &
-                     & ntoq      ,nambnd    ,bubble    ,gdp       )
+                     & ntoq      ,nambnd    ,bubble    ,kmax      ,gdp       )
              !
              close (lunrd)
           else

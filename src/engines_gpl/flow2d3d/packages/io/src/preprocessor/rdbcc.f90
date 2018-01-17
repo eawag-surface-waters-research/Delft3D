@@ -58,7 +58,7 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     integer                    , pointer :: itdate
     real(fp)                   , pointer :: dt
     character*20, dimension(:) , pointer :: keywrd
-    character*37, dimension(:) , pointer :: fmtbcc
+    character*38, dimension(:) , pointer :: fmtbcc
 !
 ! Global variables
 !

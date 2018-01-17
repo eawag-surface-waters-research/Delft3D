@@ -793,7 +793,7 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     if (ntoq /= 0) then
        call inibcq(lundia    ,error     ,runid     ,i(itbct)  ,nto       , &
                  & ntof      ,ntoq      ,kcd       ,ch(nambnd),r(hydrbc) , &
-                 & bubble    ,gdp       )
+                 & bubble    ,kmax      ,gdp       )
        if (error) goto 9999
     endif
     !

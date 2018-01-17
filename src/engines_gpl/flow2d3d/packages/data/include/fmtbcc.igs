@@ -31,6 +31,6 @@
 !
     type gd_fmtbcc
 !
-       character*37 :: fmtbcc(mxfmtc)
+       character*38 :: fmtbcc(mxfmtc)
 !
     end type gd_fmtbcc

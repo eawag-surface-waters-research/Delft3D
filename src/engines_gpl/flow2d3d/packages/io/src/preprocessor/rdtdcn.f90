@@ -55,7 +55,7 @@ subroutine rdtdcn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
     real(fp)                   , pointer :: dt
     real(fp)                   , pointer :: tunit
     character*20, dimension(:) , pointer :: keywrd
-    character*37, dimension(:) , pointer :: fmtbcc
+    character*38, dimension(:) , pointer :: fmtbcc
 !
 ! Global variables
 !
@@ -125,11 +125,11 @@ subroutine rdtdcn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
     character(1)                              :: quote  ! Apostrophe ASCII-character 39 
     character(10), dimension(2)               :: parunt ! Unit name fitting the parameter 
     character(10), dimension(:,:),allocatable :: tprofc ! Vertical profile for constituent - uniform - linear - step - 3d-profile 
-    character(36), dimension(1 + 2*mxkmax)    :: parrd  ! Parameter names read 
+    character(36), dimension(1 + 2*kmax)      :: parrd  ! Parameter names read 
     character(36), dimension(2)               :: parnam ! Names of the paramaters to write to time dependent files for BCC 
     character(40)                             :: cntain
     character(400)                            :: errmsg ! Character var. containing the error message to be written to file. The message depends on the error. 
-    character(5000)                           :: record ! Standard rec. length in an attribute file (maximum MXKMAX*24*2 + 48) 
+    character(kmax*24*2+48)                   :: record ! Standard rec. length in an attribute file (maximum kmax*24*2 + 48) 
     character(63)                             :: tablnm ! Table name specification 
     !
     data rarray/5*0.0/
@@ -145,7 +145,7 @@ subroutine rdtdcn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
     dt      => gdp%gdexttim%dt
     tunit   => gdp%gdexttim%tunit
     !
-    allocate(rwbval(mxkmax, 2, mxnto, lstsc))
+    allocate(rwbval(kmax, 2, mxnto, lstsc))
     allocate(zstep(mxnto, lstsc))
     allocate(tprofc(mxnto, lstsc))
     !
@@ -292,7 +292,7 @@ subroutine rdtdcn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
                 do nb = 1, mxfmtc
                    ix = index(fmtbcc(nb), 't89')
                    if (ix/=0) then
-                      write (fmtbcc(nb)(ix + 1:ix + 4), '(i4.4)') mxlrec
+                      write (fmtbcc(nb)(ix + 1:ix + 5), '(i5.5)') mxlrec
                    endif
                 enddo
              endif

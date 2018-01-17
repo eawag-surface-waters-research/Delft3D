@@ -806,7 +806,7 @@ subroutine tricom_init(olv_handle, gdp)
               & temint    ,evaint    , &
               & lturi     ,tkemod    ,riglid    , &
               & tstprt    ,prsmap    ,prshis    ,selmap    , &
-              & selhis    ,filrol    ,gdp       )
+              & selhis    ,filrol    ,kmax      ,gdp       )
     call dfsync (gdp)
     if (error) goto 9996
     !

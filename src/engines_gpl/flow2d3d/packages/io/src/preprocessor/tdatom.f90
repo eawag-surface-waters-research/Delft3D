@@ -459,7 +459,7 @@ subroutine tdatom(runid, filmrs, nuerr, gdp)
         if (istat==0) allocate(nhsub (mxnto)                          , stat = istat)
         if (istat==0) allocate(wstcof(6)                              , stat = istat)
         if (istat==0) allocate(omega (mxkc)                           , stat = istat)
-        if (istat==0) allocate(thick (mxkmax)                         , stat = istat)
+        if (istat==0) allocate(thick (kmax)                           , stat = istat)
         if (istat==0) allocate(alpha (mxnto )                         , stat = istat)
         if (istat==0) allocate(rtime (mxtime)                         , stat = istat)
         if (istat==0) allocate(disint(mxnsrc)                         , stat = istat)
@@ -488,7 +488,7 @@ subroutine tdatom(runid, filmrs, nuerr, gdp)
         ! 
         ! Test local dimensions, and define LCONC 
         ! 
-        call chklod(lundia    ,error     ,nto       ,kmax      ,nsrc      , & 
+        call chklod(lundia    ,error     ,nto       ,nsrc      , & 
                   & gdp       ) 
         if (error) goto 999 
         ! 
@@ -627,7 +627,7 @@ subroutine tdatom(runid, filmrs, nuerr, gdp)
            ! 
            call rdbcq(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , & 
                     & runid     ,filnam    ,eol       ,nambnd    ,nto       , & 
-                    & ntof      ,ntoq      ,bubble    ,gdp       ) 
+                    & ntof      ,ntoq      ,bubble    ,kmax      ,gdp       ) 
            if (error) goto 999 
         endif 
         ! 

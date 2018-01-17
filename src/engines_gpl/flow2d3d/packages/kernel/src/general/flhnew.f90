@@ -74,7 +74,7 @@ subroutine flhnew(lunrd     ,lundia    ,error     ,record    ,access    , &
     real(fp)                       , intent(out) :: timscl
     character(*)                                 :: cntent
     character(*)                                 :: record  !!  Standard rec. length in an attribute
-                                                            !!  file (maximum MXKMAX*24*2 + 48)
+                                                            !!  file (maximum kmax*24*2 + 48)
     character(1)                                 :: interp
     character(20)                  , intent(in)  :: namloc
     character(36), dimension(npara), intent(out) :: parrd

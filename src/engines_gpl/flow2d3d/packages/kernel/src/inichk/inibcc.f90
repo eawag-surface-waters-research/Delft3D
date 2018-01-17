@@ -103,8 +103,8 @@ subroutine inibcc(lundia    ,error     ,runid     ,timnow    , &
     character(20)                          :: chlp20
     character(20)                          :: namhlp  ! Name of NAMCON(ISTSC) in small characters 
     character(256)                         :: filnam  ! Help var. for file name 
-    character(36), dimension(1 + 2*mxkmax) :: parnam  ! Number of parameter records in time dependent direct access files for BCC 
-    character(5000)                        :: record  ! Record for BCC file 
+    character(36), dimension(1 + 2*kmax)   :: parnam  ! Number of parameter records in time dependent direct access files for BCC 
+    character(kmax*24*2+48)                :: record  ! Record for BCC file (maximum length kmax*24*2+48, see also rdtdcn.f90)
 !
 !! executable statements -------------------------------------------------------
 !

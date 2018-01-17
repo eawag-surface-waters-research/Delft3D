@@ -1,6 +1,6 @@
 subroutine rdqh(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
               & filbcq    ,runid     ,eol       ,nto       ,ntof      , &
-              & ntoq      ,nambnd    ,bubble    ,gdp       )
+              & ntoq      ,nambnd    ,bubble    ,kmax      ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2018.                                
@@ -58,6 +58,7 @@ subroutine rdqh(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
                                                          !!  help file between tdatom and trisim
     integer                                    :: lunrd  !!  Unit number of the attribute file
                                                          !!  containing the time series
+    integer                      , intent(in)  :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer                      , intent(in)  :: nto    !  Description and declaration in esm_alloc_int.f90
     integer                      , intent(in)  :: ntof   !  Description and declaration in dimens.igs
     integer                      , intent(in)  :: ntoq   !  Description and declaration in dimens.igs
@@ -102,12 +103,12 @@ subroutine rdqh(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
     character(1)                           :: quote   ! Apostrophe ASCII-character 39 
     character(10), dimension(2)            :: parunt  ! Unit name fitting the parameter 
     character(20)                          :: cntent
-    character(36), dimension(1 + 2*mxkmax) :: parrd   ! Parameter names read 
+    character(36), dimension(1 + 2*kmax)   :: parrd   ! Parameter names read 
     character(36), dimension(2)            :: parnam  ! Names of the paramaters to write to BCQ file 
     character(37), dimension(13)           :: fmtbcq
     character(300)                         :: errmsg ! Character var. containing the error message to be written to file. The message depends on the error.
     character(42)                          :: tablnm  ! Table name specification 
-    character(5000)                        :: record  ! Standard rec. length in an attribute file (maximum MXKMAX*24*2 + 48) 
+    character(kmax*24*2 + 48)              :: record  ! Standard rec. length in an attribute file (maximum kmax*24*2 + 48) 
     !
     !
     data parnam/'total discharge (t) ', 'water elevation (z) '/
