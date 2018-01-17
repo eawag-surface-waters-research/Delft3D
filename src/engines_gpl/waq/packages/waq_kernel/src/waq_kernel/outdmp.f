@@ -122,7 +122,7 @@
 !         start printing
 !
       IF ( MOD(IP(4),IP(3)) .EQ. 0 ) THEN
-           WRITE (IOUT,'(''1'')')
+           WRITE (IOUT,'('' '')')
            WRITE (IOUT,2040 ) ( MNAME(K),K=1,4)
       ENDIF
       IP(4) = IP(4) + 1
@@ -180,7 +180,7 @@
 !         start printing
 !
       IF ( MOD(IP(4),IP(3)) .EQ. 0 ) THEN
-           WRITE (IOUT,'(''1'')')
+           WRITE (IOUT,'('' '')')
            WRITE (IOUT,2040 ) ( MNAME(K),K=1,4)
       ENDIF
       IP(4) = IP(4) + 1

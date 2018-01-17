@@ -281,9 +281,9 @@
 !
 !         output formats
 !
- 2000 FORMAT ( '1',20X,A40/21X,A40//21X,A40/21X,A40//
+ 2000 FORMAT ( ' ',20X,A40/21X,A40//21X,A40/21X,A40//
      &             21X,'Initialisation from system file completed.')
- 2010 FORMAT ( '1  ERROR reading binary system file !!'/
+ 2010 FORMAT ( '   ERROR reading binary system file !!'/
      &         '   initialisation NOT successful    !!'/
      &         '   simulation impossible            !!')
 !
