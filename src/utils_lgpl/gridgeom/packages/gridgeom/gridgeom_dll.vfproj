@@ -16,7 +16,7 @@
             <Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
       <Configuration Name="Release|Win32" OutputDirectory="dll\$(ConfigurationName)" IntermediateDirectory="dll\$(ConfigurationName)" ConfigurationType="typeDynamicLibrary">
             <Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" RuntimeLibrary="rtMultiThreadedDLL"/>
-            <Tool Name="VFLinkerTool" OutputFile="$(OutDir)\gridgeom.dll" SuppressStartupBanner="true" AdditionalLibraryDirectories="$(UniversalCRTSdkDir)Lib\10.0.10240.0\ucrt\x86" GenerateManifest="false" ProgramDatabaseFile="$(TargetDir)gridgeom_dll.pdb" ImportLibrary="$(TargetDir)gridgeom_dll.lib" LinkDLL="true"/>
+            <Tool Name="VFLinkerTool" OutputFile="$(OutDir)\gridgeom.dll" SuppressStartupBanner="true" AdditionalLibraryDirectories="$(OSS_UCRTLIBDIR)" GenerateManifest="false" ProgramDatabaseFile="$(TargetDir)gridgeom_dll.pdb" ImportLibrary="$(TargetDir)gridgeom_dll.lib" LinkDLL="true"/>
             <Tool Name="VFResourceCompilerTool"/>
             <Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
             <Tool Name="VFCustomBuildTool"/>
@@ -36,7 +36,7 @@
             <Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
       <Configuration Name="Release|x64" OutputDirectory="dll\$(PlatformName)\$(ConfigurationName)" IntermediateDirectory="dll\$(PlatformName)\$(ConfigurationName)" ConfigurationType="typeDynamicLibrary">
             <Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" RuntimeLibrary="rtMultiThreadedDLL"/>
-            <Tool Name="VFLinkerTool" OutputFile="$(OutDir)\gridgeom.dll" SuppressStartupBanner="true" AdditionalLibraryDirectories="$(UniversalCRTSdkDir)Lib\10.0.10240.0\ucrt\x64" GenerateManifest="false" ProgramDatabaseFile="$(TargetDir)gridgeom_dll.pdb" ImportLibrary="$(TargetDir)gridgeom_dll.lib" LinkDLL="true"/>
+            <Tool Name="VFLinkerTool" OutputFile="$(OutDir)\gridgeom.dll" SuppressStartupBanner="true" AdditionalLibraryDirectories="$(OSS_UCRTLIBDIR)" GenerateManifest="false" ProgramDatabaseFile="$(TargetDir)gridgeom_dll.pdb" ImportLibrary="$(TargetDir)gridgeom_dll.lib" LinkDLL="true"/>
             <Tool Name="VFResourceCompilerTool"/>
             <Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
             <Tool Name="VFCustomBuildTool"/>
