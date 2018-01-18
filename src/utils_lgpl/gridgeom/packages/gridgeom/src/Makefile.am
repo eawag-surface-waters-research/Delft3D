@@ -46,6 +46,7 @@ FMODULES += \
 #Sources
 libgridgeom_la_SOURCES = \
          generalmodules.f90 \
+         polygon.f90 \
          network_data.f90 \
          gridoperations.F90 \
          odugrid.F90 \
