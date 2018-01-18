@@ -90,15 +90,17 @@ function ggeo_convert_dll(c_meshgeom, c_meshgeomdim) result(ierr) bind(C, name="
    
 end function ggeo_convert_dll
 
-function ggeo_make1D2Dinternalnetlinks_dll(jsferic, jasfer3D, jglobe) result(ierr) bind(C, name="ggeo_make1D2Dinternalnetlinks")
+function ggeo_make1D2Dinternalnetlinks_dll(c_jsferic, c_jasfer3D, c_jglobe) result(ierr) bind(C, name="ggeo_make1D2Dinternalnetlinks")
 !DEC$ ATTRIBUTES DLLEXPORT :: ggeo_make1D2Dinternalnetlinks_dll
-   use gridgeom
-   integer                      :: ierr  
-   integer, intent(in)          :: jsferic
-   integer, intent(in)          :: jasfer3D
-   integer, intent(in)          :: jglobe
    
-   ierr = ggeo_make1D2Dinternalnetlinks(jsferic, jasfer3D, jglobe)
+   use gridgeom
+   
+   integer                      :: ierr  
+   integer, intent(in)          :: c_jsferic
+   integer, intent(in)          :: c_jasfer3D
+   integer, intent(in)          :: c_jglobe
+
+   ierr = ggeo_make1D2Dinternalnetlinks(c_jsferic, c_jasfer3D, c_jglobe)
    
 end function ggeo_make1D2Dinternalnetlinks_dll
 
@@ -186,8 +188,6 @@ function ggeo_create_edge_nodes_dll(c_branchoffset, c_branchlength, c_branchids,
    ierr = ggeo_create_edge_nodes(branchids, branchoffset, sourcenodeid, targetnodeid, edgenodes, branchlength, startIndex)
 
 end function ggeo_create_edge_nodes_dll
-
-
 
 function ggeo_deallocate_dll() result(ierr) bind(C, name="ggeo_deallocate")
 !DEC$ ATTRIBUTES DLLEXPORT :: ggeo_deallocate_dll

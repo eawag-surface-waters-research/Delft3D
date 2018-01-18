@@ -56,18 +56,21 @@ function ggeo_get_xy_coordinates(branchids, branchoffsets, geopointsX, geopoints
 
 end function ggeo_get_xy_coordinates
 
-function ggeo_make1D2Dinternalnetlinks(jsferic, jasfer3D, jglobe) result(ierr)
+function ggeo_make1D2Dinternalnetlinks(c_jsferic, c_jasfer3D, c_jglobe) result(ierr)
    
    use gridoperations
-
-   integer :: ierr
-   integer, intent(in)          :: jsferic
-   integer, intent(in)          :: jasfer3D
-   integer, intent(in)          :: jglobe
+   use m_sferic
    
-   double precision :: dtol_pole = 1d-4 
+   integer :: ierr
+   integer, intent(in)          :: c_jsferic
+   integer, intent(in)          :: c_jasfer3D
+   integer, intent(in)          :: c_jglobe
+   
+   jsferic  = c_jsferic
+   jasfer3D = c_jasfer3D
+   jglobe   = c_jglobe
 
-   ierr = make1D2Dinternalnetlinks(jsferic, jasfer3D, jglobe, dtol_pole)
+   ierr = make1D2Dinternalnetlinks()
 
 end function ggeo_make1D2Dinternalnetlinks
 

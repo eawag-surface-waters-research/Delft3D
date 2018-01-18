@@ -6887,6 +6887,7 @@ src/utils_lgpl/gridgeom/packages/gridgeom/src/gridgeom_version.F90.svn -text
 src/utils_lgpl/gridgeom/packages/gridgeom/src/gridoperations.F90 -text
 src/utils_lgpl/gridgeom/packages/gridgeom/src/network_data.f90 -text
 src/utils_lgpl/gridgeom/packages/gridgeom/src/odugrid.F90 -text
+src/utils_lgpl/gridgeom/packages/gridgeom/src/polygon.f90 -text
 src/utils_lgpl/gridgeom/packages/test_data/2d_ugrid_net.nc -text
 src/utils_lgpl/gridgeom/packages/test_data/river1_full_net.nc -text
 src/utils_lgpl/gridgeom/packages/tests/gridgeom.Tests/ODugrid.cs -text

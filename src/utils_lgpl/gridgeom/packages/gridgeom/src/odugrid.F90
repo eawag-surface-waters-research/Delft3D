@@ -43,7 +43,7 @@ implicit none
 function odu_get_xy_coordinates(branchids, branchoffsets, geopointsX, geopointsY, nbranchgeometrynodes, branchlengths, jsferic, meshXCoords, meshYCoords) result(ierr)
 
    use geometry_module, only: sphertocart3D, cart3Dtospher
-   use m_ggeo_missing, only : dmiss
+   use m_missing, only : dmiss
    
    integer, intent(in)               :: branchids(:), nbranchgeometrynodes(:)
    double precision, intent(in)      :: branchoffsets(:), geopointsX(:), geopointsY(:), branchlengths(:)

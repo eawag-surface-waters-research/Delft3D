@@ -1,10 +1,66 @@
-module network_ggeo_data 
+!----- AGPL --------------------------------------------------------------------
+!
+!  Copyright (C)  Stichting Deltares, 2017.
+!
+!  This file is part of Delft3D (D-Flow Flexible Mesh component).
+!
+!  Delft3D is free software: you can redistribute it and/or modify
+!  it under the terms of the GNU Affero General Public License as
+!  published by the Free Software Foundation version 3.
+!
+!  Delft3D  is distributed in the hope that it will be useful,
+!  but WITHOUT ANY WARRANTY; without even the implied warranty of
+!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+!  GNU Affero General Public License for more details.
+!
+!  You should have received a copy of the GNU Affero General Public License
+!  along with Delft3D.  If not, see <http://www.gnu.org/licenses/>.
+!
+!  contact: delft3d.support@deltares.nl
+!  Stichting Deltares
+!  P.O. Box 177
+!  2600 MH Delft, The Netherlands
+!
+!  All indications and logos of, and references to, "Delft3D",
+!  "D-Flow Flexible Mesh" and "Deltares" are registered trademarks of Stichting
+!  Deltares, and remain the property of Stichting Deltares. All rights reserved.
+!
+!-------------------------------------------------------------------------------
 
-  use m_ggeo_dimens
-  !LC use m_ggeo_landboundary
-  use m_ggeo_polygon, only: NPL
+! $Id$
+! $HeadURL$
+
+!> Global network data (==unstructured grid).
+!! \see network
+!!
+!! <table>
+!! <tr><th>Concept:</th><th>Description:                      </th><th>Count:</th><th>Conventional index:</th><th>Example variables:</th></tr>
+!! <tr><td>net node</td><td>Grid point                        </td><td>numk  </td><td>K                  </td><td>xk, nod, kc       </td></tr>
+!! <tr><td>net link</td><td>Connects 2 nodes                  </td><td>numl  </td><td>L                  </td><td>kn, lne, lc       </td></tr>
+!! <tr><td>net cell</td><td>Surface delimited by links (edges)</td><td>nump  </td><td>N                  </td><td>netcell           </td></tr>
+!! </table>
+
+! NOTE: this document is automatically parsed
+! CONVENTION:
+! please use the following variable notation so the parser will pickup variables for dynamic exchange
+! {=optional}
+! typename, {allocatable, }target :: name{(:)} !< {(altname)} [units] description {JSON}
+! NOTE: only one variable definition per line, the variable should not continue on the next line.
+!
+! The JSON part can contain additional key-value pairs in JSON format, e.g.:
+! !< [m] waterlevel at previous timestep {"state":true,"slice":"1:nodtot","standard_name":"sea_surface_height"}
+!
+! For state variables values the following JSON key-value pairs are required:
+! "standard_name" is the netcdf standard name for the variable, e.g. "sea_surface_height"
+
+module network_data
+
+  use m_dimens
+  use m_landboundary
+  use m_polygon
+
   implicit none
-  
+
   !> Type tnod describes connectivity for a net node (connected net links).
   !!
   !! For each link kn(1:2, L)==(/ k1, k2 /) there exist two entries:\n
@@ -25,8 +81,9 @@ module network_ggeo_data
     integer, allocatable           :: lin(:)          !< link nrs, kn(1 of 2,netcell(n)%lin(1)) =  netcell(n)%nod(1)
   end type tface
   type (tface), allocatable        :: netcell(:)      !< (nump1d2d) 1D&2D net cells (nodes and links)
-  type (tface), allocatable        :: netcell0(:)     ! backup of netcell
-  integer,  allocatable            :: cellmask(:)     !< (nump) Mask array for net cells
+  type (tface), allocatable         :: netcell0(:)     ! backup of netcell
+  type (tface), allocatable         :: netcell_sav(:)  ! backup of netcell (for increasenetcells)
+  integer,  allocatable             :: cellmask(:)     !< (nump) Mask array for net cells
 
   double precision, allocatable, target :: xzw(:)  !< [m] centre of gravity {"shape": ["nump"]}
   double precision, allocatable         :: xzw0(:)    ! Backup of xzw
@@ -56,10 +113,10 @@ module network_ggeo_data
   integer,  allocatable, target    :: kn(:,:)         !< [-] Net links: kn(1,:)=from-idx, kn(2,:)=to-idx, kn(3,:)=net link type (0/1/2/3/4) {"shape": [3, "numl"]}
   integer,  allocatable            :: KN0(:,:)        !< Backup for kn.
   integer,  allocatable            :: LC(:)           !< (numl) Mask array for net links.
-  integer,  allocatable            :: LC0 (:)         !< Backup for lc.
+  integer,  allocatable            :: LC0(:)          !< Backup for lc.
   real   , allocatable             :: RLIN(:)         !< (numl) Placeholder for link values to be displayed.
   double precision, allocatable    :: xe(:), ye(:)    !< (numl) Edge (link) center coordinates.
-  integer,  allocatable            :: KTRI (:)  , KTON(:)  , KBT (:)
+  integer,  allocatable            :: KTRI(:), KTON(:), KBT (:)
 
   ! Edge (and cell) related :      ! there are more edges than flow links .....
   integer, allocatable             :: lne(:,:)        !< (2,numl) Edge administration 1=nd1 , 2=nd2, rythm of kn
@@ -68,7 +125,7 @@ module network_ggeo_data
   integer, allocatable             :: LNN(:)          !< (numl) Nr. of cells in which link participates (ubound for non-dummy values in lne(:,L))
   integer, allocatable             :: LNN0(:)
   integer                          :: NUMK0
-  integer                          :: numk             !< [-] Nr. of net nodes. {"shape": []}
+  integer,              target     :: numk            !< [-] Nr. of net nodes. {"shape": []}
   integer                          :: NUML0, NUML     !< Total nr. of net links. In link arrays: 1D: 1:NUML1D, 2D: NUML1D+1:NUML
   integer                          :: NUML1D          !< Nr. of 1D net links.
   integer                          :: NUMP0, NUMP     !< Nr. of 2d netcells.
@@ -158,10 +215,14 @@ module network_ggeo_data
   
 ! for dry/illegal/cutcells (mesh generation related only)
   character(len=255)               :: dryptsfile = ''
-  
+  character(len=255)               :: gridencfile = ''
+     
+!  netlink permutation by setnodadm
+   integer, dimension(:), allocatable :: Lperm  !< permuation of netlinks by setnodadm, dim(numL)
+   
    contains
    
-   function network_ggeo_data_destructor() result (ierr)
+   function network_data_destructor() result (ierr)
    
    integer ierr, k
 
@@ -308,7 +369,42 @@ module network_ggeo_data
    ! return error
    ierr = 0
    
-   end function network_ggeo_data_destructor
-  
-   end module network_ggeo_data
+   end function network_data_destructor
    
+end module network_data
+
+
+module m_cutcells
+   use m_tpoly
+   integer                            :: NPOL   !< number of cutcells polygons
+   integer, dimension(:), allocatable :: ik     !< CRS of inside netnodes per polygon, startpointer, dim(NPOL+1)
+   integer, dimension(:), allocatable :: jk     !< CRS of inside netnodes per polygon, netnodes, dim(ik(NPOL+1)-1)
+   
+   type(tpoly), dimension(:), allocatable :: pli      !< tpoly-type polygons
+   integer                                :: numpols  !< number of tpoly-type polygons
+   
+!  for crossed netlinks
+   integer                                     :: jastored     ! data stored (1) or not (0)
+   integer,          dimension(:), allocatable :: idxL         ! intersecting polygon sections per netlink in CRS
+   double precision, dimension(:), allocatable :: xdxL, ydxL   ! intersecting coordinates per netlink in CRS
+   integer,          dimension(:), allocatable :: pdxL         ! intersecting polygon numbers  per netlink in CRS
+   
+   contains
+   
+!> clean-up   
+   subroutine dealloc_cutcellmasks()
+      implicit none
+      
+      if ( allocated(ik) ) deallocate(ik)
+      if ( allocated(jk) ) deallocate(jk)
+      
+      if ( allocated(idxL) ) deallocate(idxL)
+      if ( allocated(xdxL) ) deallocate(xdxL)
+      if ( allocated(ydxL) ) deallocate(ydxL)
+      if ( allocated(pdxL) ) deallocate(pdxL)
+      
+      NPOL = 0
+      
+      return
+   end subroutine dealloc_cutcellmasks
+   end module m_cutcells
