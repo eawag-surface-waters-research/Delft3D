@@ -176,7 +176,7 @@
    !LC removed use m_netw
    use network_data
    use m_alloc
-   use m_missing, only : xymis
+   use m_missing, only : xymis, dmiss
 
    implicit none
    integer :: ierr
@@ -211,7 +211,7 @@
          NOD(K)%LIN = 0
       ENDDO
 
-      NMK = 0 ; KC = 1 ; XK = XYMIS ; YK = XYMIS ; ZK = zkUNI
+      NMK = 0 ; KC = 1 ; XK = XYMIS ; YK = XYMIS ; ZK = dmiss
    ENDIF
 
    IF (LMAX <= L0) THEN
