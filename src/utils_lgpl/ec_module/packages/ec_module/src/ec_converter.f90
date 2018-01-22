@@ -271,9 +271,8 @@ module m_ec_converter
          type(tEcElementSet),  pointer :: targetElementSet !< target ElementSet
          real(hp) :: wx, wy
          integer  :: i,j !< loop counter
-         integer  :: ii, jj
+         integer  :: ii, jj, ierr
          integer  :: n_cols, n_rows, n_points
-         integer, dimension(1)  :: nn
          integer  :: inside, mp, np, in, jn !< return values of findnm
          real(hp) :: wf(4) !< return value of findnm
          integer  :: fmask(4) !< return value of findnm
@@ -369,7 +368,11 @@ module m_ec_converter
                      end do
                   case (elmSetType_spheric_equidistant, elmSetType_Cartesian_equidistant)
                   case (elmSetType_spheric, elmSetType_Cartesian)
-                     allocate(edge_poly_x(2*n_cols+2*n_rows-2),edge_poly_y(2*n_cols+2*n_rows-2))
+                     allocate(edge_poly_x(2*n_cols+2*n_rows-2), edge_poly_y(2*n_cols+2*n_rows-2), stat=ierr)
+                     if (ierr /= 0) then
+                         call setECMessage("ERROR: ec_converter::ecConverterUpdateWeightFactors: Unable to allocate additional memory.")
+                         return
+                     endif
                      j=1
                      do i=1,n_cols
                          edge_poly_x(j) = sourceElementSet%x(i) 

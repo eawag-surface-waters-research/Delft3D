@@ -1082,14 +1082,18 @@ end subroutine ecInstanceListSourceItems
                case ('degrees')
                    stdname = ''
                    ierr = nf90_get_att(ncid, ivar, 'standard_name', stdname)
-                   select case (stdname) 
-                      case ('grid_longitude')
-                         grid_lon_varid = ivar
-                         lon_dimid = dimids(1)
-                      case ('grid_latitude')
-                         grid_lat_varid = ivar
-                         lat_dimid = dimids(1)
-                   end select
+                   if (ierr == 0) then
+                      select case (stdname) 
+                         case ('grid_longitude')
+                            grid_lon_varid = ivar
+                            lon_dimid = dimids(1)
+                         case ('grid_latitude')
+                            grid_lat_varid = ivar
+                            lat_dimid = dimids(1)
+                      end select
+                   else
+                      call setECmessage("attribute 'standard_name' not found for variable " // trim(varname))
+                   endif
                    !RL Set lon and lat dimids ??
                case ('m','meters','km','kilometers')
                   axis=''
@@ -1130,12 +1134,16 @@ end subroutine ecInstanceListSourceItems
                case ('degrees')
                    stdname = ''
                    ierr = nf90_get_att(ncid, ivar, 'standard_name', stdname)
-                   select case (stdname) 
-                      case ('grid_latitude')
-                         grid_lat_varid = ivar
-                      case ('grid_longitude')
-                         grid_lon_varid = ivar
-                   end select
+                   if (ierr == 0) then
+                      select case (stdname) 
+                         case ('grid_latitude')
+                            grid_lat_varid = ivar
+                         case ('grid_longitude')
+                            grid_lon_varid = ivar
+                      end select
+                   else
+                      call setECmessage("attribute 'standard_name' not found for variable " // trim(varname))
+                   endif
                case ('m','meters','km','kilometers')
                    stdname = ''
                    ierr = nf90_get_att(ncid, ivar, 'standard_name', stdname)

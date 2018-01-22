@@ -2494,7 +2494,7 @@ module m_ec_provider
 
             if (instancePtr%coordsystem == EC_COORDS_CARTESIAN) then 
                grid_type = elmSetType_cartesian
-               if ((x_varid>0) .and. (y_varid>0)) then                                  ! First try absolute lon and lat ...
+               if ((x_varid>0) .and. (y_varid>0)) then
                   fgd_id = x_varid
                   sgd_id = y_varid
                else
@@ -2523,7 +2523,7 @@ module m_ec_provider
                         gnplat = -999.9
                         attstr=''
                         ierror = nf90_get_att(fileReaderPtr%fileHandle, grid_mapping_id, "grid_mapping_name", attstr)
-                        if (attstr.eq.'rotated_latitude_longitude') then
+                        if (attstr == 'rotated_latitude_longitude') then
                            if (.not.(nf90_get_att(fileReaderPtr%fileHandle, grid_mapping_id, "grid_north_pole_longitude", gnplon)==NF90_NOERR)) gnplon = -999.9
                            if (.not.(nf90_get_att(fileReaderPtr%fileHandle, grid_mapping_id, "grid_north_pole_latitude",  gnplat)==NF90_NOERR)) gnplat = -999.9
                            if (.not.(nf90_get_att(fileReaderPtr%fileHandle, grid_mapping_id, "grid_south_pole_longitude", gsplon)==NF90_NOERR)) gsplon = -999.9
