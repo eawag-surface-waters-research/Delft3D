@@ -411,10 +411,6 @@
             ENDIF ! (INTRI .EQ. 1)
          ENDIF ! (XP .NE. XYMIS .AND. ... .AND. YP .LE. YMAXS )
       endif
-      
-      if ( intri.eq.0 ) then
-         continue
-      end if
 
 
       !!!!!!!!!! give it another try with nearest neighbour opr inverse distance.
@@ -1160,12 +1156,13 @@
          end do
       else
          zp = DMISS
-         write(6,*) xp, yp
-         write(6,*) 'L001'
-         write(6,*) 3, 2
-         do i=1,3
-            write(6,*) x(i), y(i)
-         end do
+!!        enable output problematic polygon to stdout:
+!         write(6,*) xp, yp
+!         write(6,*) 'L001'
+!         write(6,*) 3, 2
+!         do i=1,3
+!            write(6,*) x(i), y(i)
+!         end do
          call mess(LEVEL_ERROR, 'linear3D: area too small')
       end if
       
