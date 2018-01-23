@@ -196,13 +196,11 @@ rem ===================
 :d_hydro
     echo "installing d_hydro . . ."
 
-    set dest_bin="!dest_main!\win64\dflow2d3d\bin"
-    set dest_menu="!dest_main!\win64\menu\bin"
-    set dest_scripts="!dest_main!\win64\scripts"
+    set dest_bin="!dest_main!\x64\dflow2d3d\bin"
+    set dest_menu="!dest_main!\x64\menu\bin"
 
     call :makeDir !dest_bin!
     call :makeDir !dest_menu!
-    call :makeDir !dest_scripts!
     
     call :copyFile engines_gpl\d_hydro\bin\x64\Release\d_hydro.exe      !dest_bin!
     call :copyFile engines_gpl\d_hydro\scripts\create_config_xml.tcl    !dest_menu!
@@ -216,15 +214,15 @@ rem ================
 :dimr
     echo "installing dimr . . ."
 
-    set dest_bin="!dest_main!\win64\dimr\bin"
-    set dest_menu="!dest_main!\win64\menu\bin"
-    set dest_scripts="!dest_main!\win64\scripts"
-    set dest_shared="!dest_main!\win64\shared"
+    set dest_bin="!dest_main!\x64\dimr\bin"
+    set dest_menu="!dest_main!\x64\menu\bin"
+    set dest_scripts="!dest_main!\x64\dimr\scripts"
+    set dest_share="!dest_main!\x64\share\bin"
 
     call :makeDir !dest_bin!
     call :makeDir !dest_menu!
     call :makeDir !dest_scripts!
-    call :makeDir !dest_shared!
+    call :makeDir !dest_share!
     
     call :copyFile engines_gpl\dimr\bin\x64\Release\dimr.exe             !dest_bin!
     call :copyFile engines_gpl\dimr\bin\x64\Release\dimr_dll.dll         !dest_bin!
@@ -237,20 +235,20 @@ rem ================
 
     call :copyFile "engines_gpl\dimr\scripts\generic\win64\*.*"     !dest_scripts!
 
-    call :copyFile "third_party_open\vcredist\x64\Microsoft.VC100.CRT\*.dll"             !dest_shared!
-    call :copyFile "third_party_open\vcredist\x64\Microsoft.VC110.CRT\*.dll"             !dest_shared!
-    call :copyFile "third_party_open\vcredist\x64\Microsoft.VC120.CRT\*.dll"             !dest_shared!
-    call :copyFile "third_party_open\vcredist\x64\Microsoft.VC140.CRT\*.dll"             !dest_shared!
-    call :copyFile "third_party_open\intel_fortran\lib\x64\*.dll"                        !dest_shared!
-    call :copyNetcdf                                                                     !dest_shared!
-    call :copyFile "third_party_open\mpich2\x64\lib\*.dll"                               !dest_shared!
-    call :copyFile "third_party_open\mpich2\x64\bin\mpiexec.exe"                         !dest_shared!
-    call :copyFile "third_party_open\mpich2\x64\bin\smpd.exe"                            !dest_shared!
-    call :copyFile "third_party_open\expat\x64\x64\Release\*.dll"                        !dest_shared!
-    call :copyFile "third_party_open\pthreads\bin\x64\*.dll"                             !dest_shared!
-    echo This directory is automatically created by script https://svn.oss.deltares.nl/repos/delft3d/trunk/src/scripts_lgpl/win64/oss-install_x64.cmd >!dest_shared!\readme.txt
-    echo This script is executed via a post-build event of https://svn.oss.deltares.nl/repos/delft3d/trunk/src/engines_gpl/dimr/packages/dimr/dimr_exe.vcxproj >>!dest_shared!\readme.txt
-    echo Further modifications can be done via a Python script executed via "DIMR_collector" projects in TeamCity >>!dest_shared!\readme.txt
+    call :copyFile "third_party_open\vcredist\x64\Microsoft.VC100.CRT\*.dll"             !dest_share!
+    call :copyFile "third_party_open\vcredist\x64\Microsoft.VC110.CRT\*.dll"             !dest_share!
+    call :copyFile "third_party_open\vcredist\x64\Microsoft.VC120.CRT\*.dll"             !dest_share!
+    call :copyFile "third_party_open\vcredist\x64\Microsoft.VC140.CRT\*.dll"             !dest_share!
+    call :copyFile "third_party_open\intel_fortran\lib\x64\*.dll"                        !dest_share!
+    call :copyNetcdf                                                                     !dest_share!
+    call :copyFile "third_party_open\mpich2\x64\lib\*.dll"                               !dest_share!
+    call :copyFile "third_party_open\mpich2\x64\bin\mpiexec.exe"                         !dest_share!
+    call :copyFile "third_party_open\mpich2\x64\bin\smpd.exe"                            !dest_share!
+    call :copyFile "third_party_open\expat\x64\x64\Release\*.dll"                        !dest_share!
+    call :copyFile "third_party_open\pthreads\bin\x64\*.dll"                             !dest_share!
+    echo This directory is automatically created by script https://svn.oss.deltares.nl/repos/delft3d/trunk/src/scripts_lgpl/win64/oss-install_x64.cmd >!dest_share!\readme.txt
+    echo This script is executed via a post-build event of https://svn.oss.deltares.nl/repos/delft3d/trunk/src/engines_gpl/dimr/packages/dimr/dimr_exe.vcxproj >>!dest_share!\readme.txt
+    echo Further modifications can be done via a Python script executed via "DIMR_collector" projects in TeamCity >>!dest_share!\readme.txt
 goto :endproc
 
 
@@ -261,19 +259,17 @@ rem ====================
 :flow2d3d
     echo "installing flow2d3d . . ."
 
-    set dest_bin="!dest_main!\win64\dflow2d3d\bin"
-    set dest_default="!dest_main!\win64\dflow2d3d\default"
-    set dest_scriptsflow="!dest_main!\win64\dflow2d3d\scripts"
-    set dest_plugins="!dest_main!\win64\plugins\bin"
-    set dest_scripts="!dest_main!\win64\scripts"
-    set dest_shared="!dest_main!\win64\shared"
+    set dest_bin="!dest_main!\x64\dflow2d3d\bin"
+    set dest_default="!dest_main!\x64\dflow2d3d\default"
+    set dest_scripts="!dest_main!\x64\dflow2d3d\scripts"
+    set dest_plugins="!dest_main!\x64\plugins\bin"
+    set dest_share="!dest_main!\x64\share\bin"
     
     call :makeDir !dest_bin!
     call :makeDir !dest_default!
-    call :makeDir !dest_scriptsflow!
-    call :makeDir !dest_plugins!
     call :makeDir !dest_scripts!
-    call :makeDir !dest_shared!
+    call :makeDir !dest_plugins!
+    call :makeDir !dest_share!
 
     set ErrorLevel_flowdll=0
     copy engines_gpl\flow2d3d\bin\x64\Release\flow2d3d.dll !dest_bin!
@@ -288,13 +284,13 @@ rem ====================
     )
     rem One of these two dlls will not exist and cause an ErrorLevel=1. Reset it.
     set ErrorLevel=0
-    call :copyFile "engines_gpl\flow2d3d\scripts\meteo_old2new.m"                   !dest_scriptsflow!
+    call :copyFile "engines_gpl\flow2d3d\scripts\meteo_old2new.m"                   !dest_scripts!
     call :copyFile "engines_gpl\flow2d3d\default\*"                                 !dest_default!
     call :copyFile "utils_lgpl\delftonline\lib\x64\Release\dynamic\delftonline.dll" !dest_bin!
     call :copyFile "utils_lgpl\delftonline\lib\x64\Release\dynamic\delftonline.dll" !dest_plugins!
-    call :copyNetcdf                                                                !dest_shared!
+    call :copyNetcdf                                                                !dest_share!
     call :copyFile "engines_gpl\flow2d3d\scripts\run_*.bat"                         !dest_scripts!
-    call :copyFile "third_party_open\tcl\bin\win64\tclkitsh852.exe"                 !dest_shared!
+    call :copyFile "third_party_open\tcl\bin\win64\tclkitsh852.exe"                 !dest_share!
     
     rem
     rem The following if-else statements MUST BE executed AFTER copying "third_party_open\intel_fortran" libraries.
@@ -331,7 +327,7 @@ rem    )
 rem    rem One of these two dlls will not exist and cause an ErrorLevel=1. Reset it.
 rem    set ErrorLevel=0
 rem    call :copyFile "third_party_open\openda\core\native\lib\win64\*.dll"      !dest_bin!
-rem    call :copyNetcdf                                                          !dest_shared!
+rem    call :copyNetcdf                                                          !dest_share!
 goto :endproc
 
 
@@ -342,7 +338,7 @@ rem ===================
 :delwaq1
     echo "installing delwaq1 . . ."
 
-    set dest_bin="!dest_main!\win64\dwaq\bin"
+    set dest_bin="!dest_main!\x64\dwaq\bin"
     
     call :makeDir !dest_bin!
 
@@ -357,7 +353,7 @@ rem ===================
 :delwaq2
     echo "installing delwaq2 . . ."
 
-    set dest_bin="!dest_main!\win64\dwaq\bin"
+    set dest_bin="!dest_main!\x64\dwaq\bin"
     
     call :makeDir !dest_bin!
 
@@ -372,7 +368,7 @@ rem ============================
 :delwaq_dimr_test
     echo "installing delwaq_dimr_test . . ."
 
-    set dest_bin="!dest_main!\win64\dwaq\bin"
+    set dest_bin="!dest_main!\x64\dwaq\bin"
     
     call :makeDir !dest_bin!
 
@@ -387,18 +383,18 @@ rem ======================
 :delwaq_dll
     echo "installing delwaq dll . . ."
 
-    set dest_bin="!dest_main!\win64\dwaq\bin"
-    set dest_default="!dest_main!\win64\dwaq\default"
-    set dest_scripts="!dest_main!\win64\scripts"
-    set dest_shared="!dest_main!\win64\shared"
+    set dest_bin="!dest_main!\x64\dwaq\bin"
+    set dest_default="!dest_main!\x64\dwaq\default"
+    set dest_scripts="!dest_main!\x64\dwaq\scripts"
+    set dest_share="!dest_main!\x64\share\bin"
     
     call :makeDir !dest_bin!
     call :makeDir !dest_default!
     call :makeDir !dest_scripts!
-    call :makeDir !dest_shared!
+    call :makeDir !dest_share!
     
     call :copyFile engines_gpl\waq\bin\x64\Release\delwaq.dll                  !dest_bin!
-    call :copyNetcdf                                                           !dest_shared!
+    call :copyNetcdf                                                           !dest_share!
 
     call :copyFile engines_gpl\waq\default\bloom.spe                           !dest_default!
     call :copyFile engines_gpl\waq\default\bloominp.d09                        !dest_default!
@@ -437,12 +433,12 @@ rem ==============================
 :delwaq2_openda_lib
 rem    echo "installing delwaq2_openda_lib . . ."
 rem
-rem    set dest_bin="!dest_main!\win64\dwaq\bin"
+rem    set dest_bin="!dest_main!\x64\dwaq\bin"
 rem    
 rem    call :makeDir !dest_bin!
 rem    
 rem    call :copyFile engines_gpl\waq\bin\Release\delwaq2_openda_lib.dll          !dest_bin!
-rem    call :copyNetcdf                                                           !dest_shared!
+rem    call :copyNetcdf                                                           !dest_share!
 rem	
 
 rem    rem
@@ -475,7 +471,7 @@ rem ================================
 :waq_plugin_wasteload
     echo "installing waq_plugin_wasteload . . ."
 
-    set dest_bin="!dest_main!\win64\dwaq\bin"
+    set dest_bin="!dest_main!\x64\dwaq\bin"
     
     call :makeDir !dest_bin!
     
@@ -492,8 +488,8 @@ rem ================
 :part
     echo "installing part . . ."
 
-    set dest="!dest_main!\win64\dpart\bin"
-    set dest_scripts="!dest_main!\win64\scripts"
+    set dest="!dest_main!\x64\dpart\bin"
+    set dest_scripts="!dest_main!\x64\dpart\scripts"
 
     call :makeDir !dest!
     call :makeDir !dest_scripts!
@@ -521,15 +517,15 @@ rem ================
 :wave
     echo "installing wave . . ."
 
-    set dest_bin=!dest_main!\win64\dwaves\bin
-    set dest_default=!dest_main!\win64\dwaves\default
-    set dest_swan_bin=!dest_main!\win64\swan\bin
+    set dest_bin=!dest_main!\x64\dwaves\bin
+    set dest_default=!dest_main!\x64\dwaves\default
+    set dest_swan_bin=!dest_main!\x64\swan\bin
        rem When adding quotes here AND when using dest_swan_scripts, xcopy also gets confused
        rem Neat solution: do not add quotes on defining the destination folders, but only at calling :copyFile
-    set dest_swan_scripts=!dest_main!\win64\swan\scripts
-    set dest_esmf_bin=!dest_main!\win64\esmf\bin
-    set dest_esmf_scripts=!dest_main!\win64\esmf\scripts
-    set dest_scripts=!dest_main!\win64\scripts
+    set dest_swan_scripts=!dest_main!\x64\swan\scripts
+    set dest_esmf_bin=!dest_main!\x64\esmf\bin
+    set dest_esmf_scripts=!dest_main!\x64\esmf\scripts
+    set dest_scripts=!dest_main!\x64\dwaves\scripts
 
     call :makeDir !dest_bin!
     call :makeDir !dest_default!
@@ -578,7 +574,7 @@ rem ==========================
 :plugin_culvert
     echo "installing plugin_culvert . . ."
 
-    set dest_bin="!dest_main!\win64\dflow2d3d\bin"
+    set dest_bin="!dest_main!\x64\dflow2d3d\bin"
 
     call :makeDir !dest_bin!
 
@@ -593,7 +589,7 @@ rem ====================================
 :plugin_delftflow_traform
     echo "installing plugin_delftflow_traform . . ."
 
-    set dest_bin="!dest_main!\win64\dflow2d3d\bin"
+    set dest_bin="!dest_main!\x64\dflow2d3d\bin"
 
     call :makeDir !dest_bin!
 
@@ -608,7 +604,7 @@ rem ==================
 :datsel
     echo "installing datsel . . ."
 
-    set dest_bin="!dest_main!\win64\dflow2d3d\bin"
+    set dest_bin="!dest_main!\x64\dflow2d3d\bin"
 
     call :makeDir !dest_bin!
 
@@ -623,7 +619,7 @@ rem ==================
 :kubint
     echo "installing kubint . . ."
 
-    set dest_bin="!dest_main!\win64\dflow2d3d\bin"
+    set dest_bin="!dest_main!\x64\dflow2d3d\bin"
 
     call :makeDir !dest_bin!
 
@@ -638,7 +634,7 @@ rem ================
 :lint
     echo "installing lint . . ."
 
-    set dest_bin="!dest_main!\win64\dflow2d3d\bin"
+    set dest_bin="!dest_main!\x64\dflow2d3d\bin"
 
     call :makeDir !dest_bin!
 
@@ -653,8 +649,8 @@ rem ====================
 :mormerge
     echo "installing mormerge . . ."
 
-    set dest_bin="!dest_main!\win64\dflow2d3d\bin"
-    set dest_scripts="!dest_main!\win64\dflow2d3d\scripts"
+    set dest_bin="!dest_main!\x64\dflow2d3d\bin"
+    set dest_scripts="!dest_main!\x64\dflow2d3d\scripts"
 
     call :makeDir !dest_bin!
     call :makeDir !dest_scripts!
@@ -671,7 +667,7 @@ rem ==============
 :vs
     echo "installing vs . . ."
 
-    set dest="!dest_main!\win64\util\bin"
+    set dest="!dest_main!\x64\util\bin"
 
     call :makeDir !dest!
 
@@ -686,7 +682,7 @@ rem ===================
 :nesthd1
     echo "installing nesthd1 . . ."
 
-    set dest_bin="!dest_main!\win64\dflow2d3d\bin"
+    set dest_bin="!dest_main!\x64\dflow2d3d\bin"
 
     call :makeDir !dest_bin!
 
@@ -702,7 +698,7 @@ rem ===================
 :nesthd2
     echo "installing nesthd2 . . ."
 
-    set dest_bin="!dest_main!\win64\dflow2d3d\bin"
+    set dest_bin="!dest_main!\x64\dflow2d3d\bin"
 
     call :makeDir !dest_bin!
 
@@ -718,7 +714,7 @@ rem ===================
 :nestwq1
     rem echo "installing nestwq1 . . ."
 
-    rem set dest_bin="!dest_main!\win64\dwaq\bin"
+    rem set dest_bin="!dest_main!\x64\dwaq\bin"
 
     rem call :makeDir !dest_bin!
 
@@ -733,7 +729,7 @@ rem ===================
 :nestwq2
     rem echo "installing nestwq2 . . ."
 
-    rem set dest_bin="!dest_main!\win64\dwaq\bin"
+    rem set dest_bin="!dest_main!\x64\dwaq\bin"
 
     rem call :makeDir !dest_bin!
 
@@ -748,7 +744,7 @@ rem =====================
 :io_netcdf
     echo "installing io_netcdf . . ."
 
-    set dest_bin="!dest_main!\win64\shared"
+    set dest_bin="!dest_main!\x64\share\bin"
 
     call :makeDir !dest_bin!
 

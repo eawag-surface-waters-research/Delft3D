@@ -1,7 +1,7 @@
 '''
-Description: Path helper
+Description: DIMR artifacts organisator
 -----------------------------------------------------
-Copyright (C)  Stichting Deltares, 2013
+Copyright (C)  Stichting Deltares, 2018
 '''
 
 import os, re, sys, glob, ntpath
@@ -22,9 +22,10 @@ def platformArtifacts(platform):
     pltdir=os.path.join(root, platform)
     if os.path.isdir(pltdir):
         os.chdir(pltdir)
-        sharedir=os.path.join(pltdir, "shared")
+        sharedir=os.path.join(pltdir, "share", "bin")
         if os.path.isdir(sharedir):
             print "  Share directory found: " + sharedir
+            # Collect dll files in shared/bin in parameter "sharefiles"
             sharefiles_withpath = glob.glob(os.path.join(sharedir, "*"))
             sharefiles = []
             for afile in sharefiles_withpath:
@@ -52,7 +53,7 @@ if len(sys.argv) != 2:
     usage()
 os.chdir(sys.argv[1])
 platformArtifacts("lnx64")
-platformArtifacts("win64")
-platformArtifacts("win32")
+platformArtifacts("x64")
+platformArtifacts("x32")
 # Take care of executable bit on binaries
 sys.exit()

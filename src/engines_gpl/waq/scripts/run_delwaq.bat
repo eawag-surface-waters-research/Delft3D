@@ -32,16 +32,16 @@ echo Working directory: %workdir%
     rem
     rem Set the directories containing the binaries
     rem
-set D3D_HOME=%~dp0..\..
+set D3D_HOME=%~dp0..\..\..
 
-rem Remove "\scripts\..\.." from D3D_HOME
-set D3DT=%D3D_HOME:~0,-14%
+rem Remove "\dwaq\scripts\..\..\.." from D3D_HOME
+set D3DT=%D3D_HOME:~0,-22%
 rem last directory will be the architecture directory
 for %%f in ("%D3DT%") do set ARCH=%%~nxf
 
 set waqdir=%D3D_HOME%\%ARCH%\dwaq\bin
 set procfile=%D3D_HOME%\%ARCH%\dwaq\default\proc_def
-set shareddir=%D3D_HOME%\%ARCH%\shared
+set shareddir=%D3D_HOME%\%ARCH%\shared\bin
 
 
     rem

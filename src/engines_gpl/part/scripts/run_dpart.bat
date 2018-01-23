@@ -31,14 +31,14 @@ echo Working directory: %workdir%
     rem
     rem Set the directories containing the binaries
     rem
-set D3D_HOME=%~dp0..\..
+set D3D_HOME=%~dp0..\..\..
 
-rem Remove "\scripts\..\.." from D3D_HOME
-set D3DT=%D3D_HOME:~0,-14%
+rem Remove "\dpart\scripts\..\..\.." from D3D_HOME
+set D3DT=%D3D_HOME:~0,-23%
 rem last directory will be the architecture directory
 for %%f in ("%D3DT%") do set ARCH=%%~nxf
 
-set shareddir=%D3D_HOME%\%ARCH%\shared
+set shareddir=%D3D_HOME%\%ARCH%\shared\bin
 set partdir=%D3D_HOME%\%ARCH%\dpart\bin
 
 
@@ -47,7 +47,7 @@ set partdir=%D3D_HOME%\%ARCH%\dpart\bin
     rem
 
     rem Run
-set PATH=%partdir%;%shareddir%
+set PATH=%partdir%;%shareddir%;%~dp0
 echo executing in this window: "%partdir%\delpar.exe" "%argfile%"
 "%partdir%\delpar.exe" "%argfile%"
 
