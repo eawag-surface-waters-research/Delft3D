@@ -2,6 +2,16 @@
 
 globalErrorLevel=0
 
+
+
+echo "The script 'oss-install.sh' is disabled; 'make install' should do (almost) everything
+exit $globalErrorLevel
+
+
+
+
+
+
 # This script uses the command ldd to collect all dynamic libraries used:
 gatherScript=scripts_lgpl/linux/gatherlibraries.rb
 # The following libraries must be removed from the list created by gatherScript:

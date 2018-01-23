@@ -1,17 +1,12 @@
 #-------------------------------------------------------------------------------
 #   Makefile for delftflow
 #
-#   Irv.Elshoff@deltares.nl
-#   Adri.Mourits@deltares.nl
-#   Fedor.Baart@deltares.nl
-#   11 jan 2007
-#
 #   Copyright (C)  Stichting Deltares, 2011-2013.
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
 
-bin_PROGRAMS = wave.exe
+bin_PROGRAMS = wave
 lib_LTLIBRARIES = libwave.la
 
 FCLIBS += \
@@ -35,7 +30,7 @@ AM_CPPFLAGS = \
 
 #-------------------------------------------------------------------------------
 #Sources
-wave_exe_SOURCES = \
+wave_SOURCES = \
          wave_exe.f90
 
 libwave_la_SOURCES = \
@@ -61,7 +56,7 @@ $(FCLIBS) $(CCLIBS)
 
 #$(EXTERNALSOURCES)
 
-wave_exe_LDADD   = \
+wave_LDADD   = \
         $(EXTRALIBS)
 
 libwave_la_LIBADD   = \

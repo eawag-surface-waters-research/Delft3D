@@ -2,17 +2,10 @@
 #   dimr top-level automake configutation
 #   common.am (see also configure.ac)
 #
-#   Fedor.Baart@Deltares.NL
-#   Adri.MouritsDeltares.NL
-#   Irv.ElshoffDeltares.NL
-#   25 may 12
 #-------------------------------------------------------------------------------
 
 
 # Remove .exe extension (defaults to .exe on cygwin).
-# .exe is already done by hand and if you don't specify this you get .exe.exe files.
-# TODO: remove .exe from executables in makefiles and use the .exe which is set
-# automatically on windows builds (cygwin)
 EXEEXT=
 
 #-------------------------------------------------------------------------------
@@ -133,7 +126,7 @@ delftflow-dist: ds-install
 	( \
 	    export DEST=$(top_builddir)/dist/delftflow-linux ; \
 	    mkdir -p $$DEST ; \
-	    cp -p $(top_builddir)/bin/dimr.exe $$DEST ; \
+	    cp -p $(top_builddir)/bin/dimr $$DEST ; \
 	    cd $$DEST/.. ; \
 	    tar czf delftflow-linux.tgz delftflow-linux ; \
 	    rm -rf delftflow-linux \

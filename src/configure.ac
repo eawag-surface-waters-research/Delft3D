@@ -501,6 +501,9 @@ engines_gpl/dimr/packages/dimr/Makefile
 engines_gpl/dimr/packages/dimr/src/Makefile
 engines_gpl/dimr/packages/dimr_lib/Makefile
 engines_gpl/dimr/packages/dimr_lib/src/Makefile
+engines_gpl/dimr/scripts/Makefile.am
+engines_gpl/dimr/scripts/generic/Makefile.am
+engines_gpl/dimr/scripts/generic/lnx64/Makefile.am
 engines_gpl/flow2d3d/Makefile
 engines_gpl/flow2d3d/packages/data/Makefile
 engines_gpl/flow2d3d/packages/data/src/allocation/Makefile
