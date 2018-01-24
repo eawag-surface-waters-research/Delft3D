@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2017.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: unstruc_opengl.F90 52266 2017-09-02 11:24:11Z klecz_ml $
-! $HeadURL: https://repos.deltares.nl/repos/ds/branches/dflowfm/20161017_dflowfm_codecleanup/engines_gpl/dflowfm/packages/dflowfm_kernel/src/unstruc_opengl.F90 $
+! $Id: unstruc_opengl.F90 53642 2017-12-04 15:33:06Z kernkam $
+! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/unstruc_opengl.F90 $
 module unstruc_opengl
    use precision
 #ifdef HAVE_OPENGL
@@ -218,6 +218,7 @@ END SUBROUTINE
     COMMON /DRAWTHIS/  ndraw(50)
     
     if ( jaOpenGL.eq.0 ) then
+      InOpenGLRendering = .false.
       return
     end if
     

@@ -5,14 +5,14 @@ lib_LTLIBRARIES=libdflowfm.la
 include $(top_srcdir)/common.am
 
 INCLUDES = \
-    -I$(builddir) \
+    -I$(builddir)/../include \
     -I$(builddir)/../../dflowfm_lib/include 
-    
+
 
 # these are generated using:
 # cd $(srcdir)/src
-# $(top_srcdir)/scripts/generate.py modules.f90 network_data.f90 --template-dir=templates    
-    
+# $(top_srcdir)/scripts/generate.py modules.f90 network_data.f90 --template-dir=templates
+
 EXTRA_DIST = \
 	$(builddir)/../../dflowfm_lib/include/bmi_get_var_count.inc \
 	$(builddir)/../../dflowfm_lib/include/bmi_get_var_name.inc \
@@ -22,7 +22,8 @@ EXTRA_DIST = \
 	$(builddir)/../../dflowfm_lib/include/bmi_get_var_shape.inc \
 	$(builddir)/../../dflowfm_lib/include/bmi_get_var_type.inc \
 	$(builddir)/../../dflowfm_lib/include/bmi_set_var.inc \
-	$(builddir)/../../dflowfm_lib/include/bmi_set_var_slice.inc
+	$(builddir)/../../dflowfm_lib/include/bmi_set_var_slice.inc \
+   $(builddir)/../include/RF.inc
 
 EXTRA_DIST += $(builddir)/../../dflowfm_lib/templates 
 
@@ -46,11 +47,12 @@ libdflowfm_la_SOURCES=\
         unstruc_messages.f90 \
         unstruc_ini.f90 \
         xbeach_typesandkinds.F90 \
+        dredge_data.f90 \
+        bedform_data.f90 \
         d3ddimens.f90 \
         modules.f90 \
         dfm_signals.F90 \
-        polygon.f90 \
-        network_data.f90 \
+        oned_functions.f90 \
         d_flooding.f90 \
         partition.F90 \
         unstruc_netcdf.f90 \
@@ -70,6 +72,8 @@ libdflowfm_la_SOURCES=\
         fourier_analysis.f90 \
         unstruc_model.f90 \
         unstruc_files.f90 \
+        dredgepolygon.f90 \
+        bedform_io.f90 \
         unstruc_startup.f90 \
         unstruc_opengis.f90 \
         wrwaq.F90 \
@@ -81,6 +85,7 @@ libdflowfm_la_SOURCES=\
         unstruc_api.F90 \
         rest.F90 \
         unstruc_boundaries.f90 \
+        xbeach_paramsconst.f90 \
         xbeach_netcdf.f90 \
         xbeach_errorhandling.f90 \
         xbeach_filefunctions.F90 \
@@ -93,7 +98,7 @@ libdflowfm_la_SOURCES=\
         xbeach_wave_boundary_main.f90 \
         xbeachwaves.f90 \
         net.F90 \
-		partition_utilities.f90 \
+        partition_utilities.f90 \
         gui.F90 \
         saadf.F \
         saadf90.F90 \ 
@@ -109,8 +114,11 @@ endif
 
 # then the final part of the source
 libdflowfm_la_SOURCES+=\
+        solve_parms.F90 \
         solve_guus.F90 \
         waves.f90 \
+        fm_bedform.f90 \
+        fm_dredge.f90 \
         fm_erosed.f90 \
         fm_thahbc.f90 \
         tecplot.F90 \
@@ -118,7 +126,7 @@ libdflowfm_la_SOURCES+=\
         part.f90 \
         advec.f90 \
         unstruc.F90
-
+# and the library interface
 libdflowfm_la_SOURCES+=\
         $(builddir)/../../dflowfm_lib/src/unstruc_bmi.F90
 
@@ -151,14 +159,12 @@ MOSTLYCLEANFILES = *.mod
 #-------------------------------------------------------------------------------
 #   Fortran flags
 
-AM_FFLAGS += \
-     $(OPENMP_FFLAGS)
-
 FINCLUDES +=
 
 FMODULES += \
     -I$(top_builddir)/utils_lgpl/ec_module/packages/ec_module/src \
     -I$(top_builddir)/utils_lgpl/io_netcdf/packages/io_netcdf/src \
+    -I$(top_builddir)/utils_lgpl/gridgeom/packages/gridgeom/src \
     -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src \
     -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common_mpi/src \
     -I$(top_builddir)/utils_gpl/morphology/packages/morphology_data/src \
@@ -166,9 +172,11 @@ FMODULES += \
     -I$(top_builddir)/utils_gpl/morphology/packages/morphology_kernel/src \
     -I$(top_builddir)/utils_gpl/trachytopes/packages/trachytopes_io/src \
     -I$(top_builddir)/utils_gpl/trachytopes/packages/trachytopes_kernel/src \
+    -I$(top_builddir)/utils/flow1d/packages/flow1d_core/src \
+    -I$(top_builddir)/utils/flow1d/packages/flow1d_io/src \
     -I$(top_builddir)/third_party_open/kdtree2/src-f90 \
-    -I$(top_builddir)/third_party_open/libsigwatch
-
+    -I$(top_builddir)/third_party_open/libsigwatch \ 
+    -I$(top_builddir)/utils_lgpl/kdtree_wrapper/packages/kdtree_wrapper/src
 
 # NOTE:
 # includes, modules, optimization and openmp are all added to AM_FCFLAGS by common.am
@@ -177,7 +185,6 @@ FMODULES += \
 #   Fortran 90 flags
 
 AM_FCFLAGS+= \
-    $(OPENMP_FCFLAGS) \
     -DHAVE_DISPLAY=0
 
 if USENETCDF
@@ -208,10 +215,22 @@ endif
 #LIBS+=${TECIO_LIBS}
 #endif
 
+if USEPARMS
+LIBS+=-L../third_party_open/pARMS/pARMS_3.2/lib -lparms
+LIBS+=-L${blasdir}/lib -lrefblas
+endif
+
 if USEMKL
 LIBS+=${MKL_LIBS}
 AM_FCFLAGS+=${MKL_FCFLAGS}
 endif
+
+if USEESMF
+ESMFSOURCES=unstruc_esmf.F90
+else
+ESMFSOURCES=
+endif
+
 
 
 EXTRALIBS=\
@@ -223,14 +242,23 @@ EXTRALIBS=\
         $(top_builddir)/utils_gpl/morphology/packages/morphology_data/src/libMorphologyData.la \
         $(top_builddir)/utils_gpl/trachytopes/packages/trachytopes_kernel/src/libTrachytopesKernel.la \
         $(top_builddir)/utils_gpl/trachytopes/packages/trachytopes_io/src/libTrachytopesIO.la \
+        $(top_builddir)/utils_lgpl/kdtree_wrapper/packages/kdtree_wrapper/src/libkdtreewrapper.la \
         $(top_builddir)/utils_lgpl/ec_module/packages/ec_module/src/libECModule.la \
-        $(top_builddir)/utils_lgpl/io_netcdf/packages/io_netcdf/src/libIONetcdf.la \
+        $(top_builddir)/utils_lgpl/io_netcdf/packages/io_netcdf/src/libIONetcdf.la \  
+        $(top_builddir)/utils_lgpl/gridgeom/packages/gridgeom/src/libgridgeom.la \
+        $(top_builddir)/utils_lgpl/metistools/packages/metisoptions/src/libmetisoptions.la \
+        $(top_builddir)/utils/flow1d/packages/flow1d/src/libflow1d.la \
+        $(top_builddir)/utils/flow1d/packages/flow1d_core/src/libflow1d_core.la \
+        $(top_builddir)/utils/flow1d/packages/flow1d_io/src/libflow1d_io.la \
         $(top_builddir)/third_party_open/triangle/libtriangle_c.la \
-        $(top_builddir)/third_party/interacter_stub/src/libintstub.la \
+        $(top_builddir)/third_party/interacter/src/libintstub.la \
         $(top_builddir)/third_party_open/kdtree2/src-f90/libkdtree2f.la \
         $(top_builddir)/third_party_open/polypack/src/libpolypack.la \
         $(top_builddir)/third_party_open/libsigwatch/libsigwatch.la \
         $(CCLIBS)
 
+dflowfm_LDADD = \
+        libdflowfm.la		#
+dflowfm_LDFLAGS=-static
 libdflowfm_la_LIBADD=\
         $(EXTRALIBS)

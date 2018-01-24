@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2017.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: unstruc_api.F90 52266 2017-09-02 11:24:11Z klecz_ml $
-! $HeadURL: https://repos.deltares.nl/repos/ds/branches/dflowfm/20161017_dflowfm_codecleanup/engines_gpl/dflowfm/packages/dflowfm_kernel/src/unstruc_api.F90 $
+! $Id: unstruc_api.F90 54191 2018-01-22 18:57:53Z dam_ar $
+! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/unstruc_api.F90 $
 module unstruc_api
  use m_flowtimes
  use m_timer
@@ -47,9 +47,10 @@ use network_data
 use m_polygon
 use m_landboundary
 use M_splines
-use m_crosssections
+use m_monitoring_crosssections
 use unstruc_files
 use unstruc_version_module, only : unstruc_basename
+use gridoperations
 
 !if (.not. allocated(xk)) then 
     !   allocate( xk (1), yk (1), zk (1) , NOD (1) , KC (1) , NMK (1) , RNOD(1)   ) 
@@ -185,6 +186,8 @@ end subroutine dodfm
        call warn_flush()
     end if
 
+    call writesomefinaloutput()
+    
     if (jastop == 0 .and. jaGUI == 0) then
        call flowfinalize()
     endif   
@@ -213,7 +216,7 @@ end subroutine api_loadmodel
    use m_wind
    use dfm_error
    use m_partitioninfo, only: jampi
-   use m_flowparameters, only: jahisbal
+   use m_flowparameters, only: jahisbal, jatekcd
 
    integer, external :: flow_modelinit
 
@@ -249,7 +252,7 @@ end subroutine api_loadmodel
        call updateValuesOnCrossSections_mpi(time1)
     endif
   
-    if (jawind > 0) then 
+    if (jawind > 0 .and. jatekcd.eq.1) then             ! only if wanted
        call writeCdcoeffs()
     endif   
     
@@ -273,8 +276,6 @@ integer                   :: ndraw
    
    jastop = 0
    iresult = DFM_GENERICERROR
-
-   call klok(cpuall(1))
     
    if ( jatimer.eq.1 ) call starttimer(ITOTAL)
    
@@ -314,9 +315,6 @@ integer                   :: ndraw
     
 1234  if ( jatimer.eq.1 ) call stoptimer(ITOTAL)
 
-   call klok(cpuall(2))
-   cpuall(3) = cpuall(3) + cpuall(2) - cpuall(1)
-
    iresult = DFM_NOERR
    return ! Return with success
 
@@ -338,7 +336,6 @@ use m_meteo, only: ecInstancePtr
  !!   call klok(cpuall(2))
  !!   cpuall(3) = cpuall(2) - cpuall0
 
-    call writesomefinaloutput()
     if (.not.ecFreeInstance(ecInstancePtr)) then
        continue     
     end if

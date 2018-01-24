@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2017.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: calibration.f90 52266 2017-09-02 11:24:11Z klecz_ml $
-! $HeadURL: https://repos.deltares.nl/repos/ds/branches/dflowfm/20161017_dflowfm_codecleanup/engines_gpl/dflowfm/packages/dflowfm_kernel/src/calibration.f90 $
+! $Id: calibration.f90 54191 2018-01-22 18:57:53Z dam_ar $
+! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/calibration.f90 $
 
 !> This module reads and handles the computation of calibration factors.
 !!
@@ -117,7 +117,7 @@ subroutine read_cldfile(md_cldfile, clddata, phase)
  use m_missing,       only : dmiss, intmiss
  use unstruc_files,   only : mdia
  use system_utils,    only : exifil
- use m_crosssections, only: crs, ncrs
+ use m_monitoring_crosssections, only: crs, ncrs
  use m_observations,  only: namobs, numobs
  
     character(len=*),         intent(in)    :: md_cldfile
@@ -455,10 +455,12 @@ subroutine read_cllfile(md_cllfile, clddata, phase)
  use m_missing,       only : dmiss, intmiss
  use unstruc_files,   only : mdia
  use system_utils,    only : exifil
- use m_crosssections, only : crs, ncrs
+ use m_monitoring_crosssections, only : crs, ncrs
  use m_observations,  only : namobs, numobs
  use network_data,    only : lnn, numl 
- use m_kdtree2
+ use kdtree2Factory
+ use m_sferic,        only: jsferic
+ use geometry_module, only: dbdistance
 
    character(len=*),         intent(in)    :: md_cllfile
    integer,                  intent(in)    :: phase
@@ -660,7 +662,7 @@ subroutine read_cllfile(md_cllfile, clddata, phase)
         ! z=rfield(3) (not used).
 
         ! fill query vector
-        call make_queryvector_kdtree(treeglob,x,y)
+        call make_queryvector_kdtree(treeglob,x,y, jsferic)
 
         ! find nearest link
         call kdtree2_n_nearest(treeglob%tree,treeglob%qv,1,treeglob%results)
@@ -732,7 +734,7 @@ end subroutine read_cllfile
 
 subroutine update_clddata() 
     use unstruc_messages
-    use m_crosssections
+    use m_monitoring_crosssections
     use m_observations, only: numobs, valobs, IPNT_S1
     
     !integer, intent(in) :: update_mode

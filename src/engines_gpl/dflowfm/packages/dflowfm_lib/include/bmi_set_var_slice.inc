@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2015.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -143,6 +143,10 @@
 
      call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
      rain(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
+  case("evap")
+
+     call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
+     evap(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
   case("rnveg")
 
      call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
@@ -151,6 +155,14 @@
 
      call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
      diaveg(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
+  case("cfuveg")
+
+     call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
+     cfuveg(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
+  case("alfaveg")
+
+     call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
+     alfaveg(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
   case("stemdens")
 
      call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
@@ -371,6 +383,9 @@
 
      call c_f_pointer(xptr, x_2d_int_ptr, (/c_count(1), c_count(2)/))
      kn(c_start(1)+1:(c_start(1)+c_count(1)),c_start(2)+1:(c_start(2)+c_count(2))) = x_2d_int_ptr
+  case("numk")
+     ! Does not apply to scalar variables
+     continue
   case("zbnd1d2d1")
 
      call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))

@@ -1,6 +1,7 @@
 !----- AGPL --------------------------------------------------------------------
 !
-!  Copyright (C)  Stichting Deltares, 2017-2018.!
+!  Copyright (C)  Stichting Deltares, 2017.
+!
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).
 !
 !  Delft3D is free software: you can redistribute it and/or modify
@@ -26,8 +27,8 @@
 !
 !-------------------------------------------------------------------------------
 
-! $Id: unstruc_bmi.F90 52266 2017-09-02 11:24:11Z klecz_ml $
-! $HeadURL: https://repos.deltares.nl/repos/ds/branches/dflowfm/20161017_dflowfm_codecleanup/engines_gpl/dflowfm/packages/dflowfm_lib/src/unstruc_bmi.F90 $
+! $Id: unstruc_bmi.F90 54191 2018-01-22 18:57:53Z dam_ar $
+! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/unstruc_bmi.F90 $
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -48,9 +49,12 @@ module bmi
   use m_partitioninfo
   use m_sobekdfm
   use m_transport
+  use m_xbeach_data
   use dfm_error
   use m_vegetation
+  use m_sediment
   use m_integralstats
+  use gridoperations
 
   implicit none
 
@@ -155,7 +159,7 @@ end subroutine get_attribute
   !! that are to take place before entering the model's time loop.
   integer(c_int) function initialize(c_config_file) result(c_iresult) bind(C, name="initialize")
     !DEC$ ATTRIBUTES DLLEXPORT :: initialize
-
+    
     use iso_c_binding, only: c_char
 
     use unstruc_model
@@ -175,7 +179,7 @@ end subroutine get_attribute
     integer(c_int), target, allocatable, save :: x(:,:)
     type(c_ptr) :: xptr
     integer :: i,j,k
-
+    
     c_iresult = 0 ! TODO: is this return value BMI-compliant?
 #ifdef HAVE_MPI
     call mpi_initialized(mpi_initd, inerr)
@@ -204,10 +208,6 @@ end subroutine get_attribute
     numranks=1
 #endif
 
-#ifdef HAVE_PETSC
-   call startpetsc()
-#endif
-
     ! do this until default has changed
     jaGUI = 0
 
@@ -227,16 +227,20 @@ end subroutine get_attribute
     MAXPOL = MAXLAN
 
 
-    ! call start()
-    ! call resetFullFlowModel()
+    !call start()
+    !call resetFullFlowModel()
     !call loadmodel(config_file)
     call inidia(config_file(1:(len_trim(config_file)-len_trim('.mdu'))))
 
     CALL INIDAT()
     call api_loadmodel(config_file)
+
+    !PETSC must be called AFTER reading the mdu file, so the icgsolver option is known to startpetsc 
+#ifdef HAVE_PETSC
+   call startpetsc()
+#endif
+
     c_iresult = flowinit()
-
-
 
     time_user = tstart_user
 
@@ -434,10 +438,11 @@ end function dfm_finalize_computational_timestep
 !        finalize before exit
       call partition_finalize()
     end if
-
+    
     call flowfinalize()
 
     finalize = 0
+
   end function finalize
 
   ! Attributes
@@ -488,7 +493,7 @@ end function dfm_finalize_computational_timestep
   end subroutine dfm_compute_1d2d_coefficients
 
   subroutine get_time_units(unit)  bind(C, name="get_time_units")
-    ! returns unit string for model time, e.g. \91days since 1970-01-01'
+    ! returns unit string for model time, e.g. ‘days since 1970-01-01'
     character(kind=c_char), intent(in) :: unit(*)
   end subroutine get_time_units
 
@@ -826,7 +831,7 @@ end function dfm_finalize_computational_timestep
     use m_flowgeom
     use network_data
     use m_observations, only: numobs, nummovobs, MAXNUMVALOBS2D, MAXNUMVALOBS3D, MAXNUMVALOBS3Dw
-    use m_crosssections, only: ncrs, maxnval
+    use m_monitoring_crosssections, only: ncrs, maxnval
 
     character(kind=c_char), intent(in) :: c_var_name(*)
     integer(c_int), intent(inout) :: shape(MAXDIMS)
@@ -1173,6 +1178,7 @@ subroutine set_var(c_var_name, xptr) bind(C, name="set_var")
 
   include "bmi_set_var.inc"
 
+  ! custom overrides
   if (numconst > 0) then
      iconst = findname(numconst, const_names, var_name)
   endif
@@ -1183,6 +1189,13 @@ subroutine set_var(c_var_name, xptr) bind(C, name="set_var")
      end do
      return
   end if
+  !select case(var_name)
+  !case('debugLevel')
+  !        call c_f_pointer(xptr, x_1d_double_ptr, (/ 1 /))
+  !        call setMessageHandling(thresholdLevel = nint(x_1d_double_ptr(1)), prefix_logging = "dflow1d")
+  !end select
+  
+       
 
 
 end subroutine set_var
@@ -1301,7 +1314,7 @@ function dfm_add_features(c_feat_name, xpli_ptr, ypli_ptr, zpli_ptr, npli_ptr, n
    use unstruc_messages
    use m_polygon
    use dfm_error
-   use m_kdtree2
+   use kdtree2Factory
    
    character(kind=c_char), intent(in) :: c_feat_name(*)  !< Name/type of the features set, e.g., 'thindams'
    type(c_ptr), value,     intent(in) :: xpli_ptr        !< Pointer (by value) to the C-compatible x-coordinates of all features's polyline (one long array).
@@ -1415,7 +1428,7 @@ subroutine get_compound_field(c_var_name, c_item_name, c_field_name, x) bind(C, 
   use iso_c_utils
   use m_flowexternalforcings
   use m_observations
-  use m_crosssections
+  use m_monitoring_crosssections
 
   character(kind=c_char), intent(in) :: c_var_name(*)   !< Name of the set variable, e.g., 'pumps'
   character(kind=c_char), intent(in) :: c_item_name(*)  !< Name of a single item's index/location, e.g., 'Pump01'
@@ -1509,6 +1522,8 @@ subroutine get_compound_field(c_var_name, c_item_name, c_field_name, x) bind(C, 
         return
      end if
 
+     call updateValuesOnObervationStations()
+
      select case(field_name)
      case("water_level")
         x = c_loc(valobs(IPNT_S1, item_index))
@@ -1529,6 +1544,11 @@ subroutine get_compound_field(c_var_name, c_item_name, c_field_name, x) bind(C, 
      if (item_index == 0) then
         return
      end if
+
+    call updateValuesOnCrossSections(time1)
+    if (jampi == 1) then
+       call updateValuesOnCrossSections_mpi(time1)
+    endif
 
      select case(field_name)
      case("discharge")
@@ -2178,197 +2198,207 @@ end function get_flow_elem_max_nbs
 
 ! Geometry dll functions
 
-subroutine triang(cptr_sx, cptr_sy, cptr_sv, c_numS, cptr_dx, cptr_dy, c_numD, cptr_res) bind(C, name="triang")
-    !DEC$ ATTRIBUTES DLLEXPORT :: triang
-    use iso_c_binding, only: c_double, c_char, c_loc, c_f_pointer
-    use unstruc_model
-    use m_samples
-    use m_missing
+!LC: TODO REMOVE
+!subroutine triang(cptr_sx, cptr_sy, cptr_sv, c_numS, cptr_dx, cptr_dy, c_numD, cptr_res) bind(C, name="triang")
+!    !DEC$ ATTRIBUTES DLLEXPORT :: triang
+!    use iso_c_binding, only: c_double, c_char, c_loc, c_f_pointer
+!    use unstruc_model
+!    use m_samples
+!    use m_sferic, only: jsferic
+!    use m_missing, only: dmiss, JINS
+!    use m_polygon, only: NPL, xpl, ypl, zpl
+!    use m_ec_basic_interpolation, only: triinterp2
+!
+!    implicit none
+!
+!    ! parameters
+!    type(c_ptr), intent(in)                 :: cptr_sx      ! samples x, y, values
+!    type(c_ptr), intent(in)                 :: cptr_sy
+!    type(c_ptr), intent(in)                 :: cptr_sv
+!    integer(c_int), intent(in)              :: c_numS       ! num samples
+!    type(c_ptr), intent(in)                 :: cptr_dx      ! destinations x, y
+!    type(c_ptr), intent(in)                 :: cptr_dy
+!    integer(c_int), intent(in)              :: c_numD       ! num destination points
+!    type(c_ptr), intent(inout)              :: cptr_res     ! return values (ptr to double array)
+!
+!    ! local variables
+!    integer                                 :: numS
+!    integer                                 :: numD
+!    integer                                 :: jdla = 1
+!    real(c_double), pointer                 :: ptr(:)
+!    real(c_double), pointer                 :: dx(:)
+!    real(c_double), pointer                 :: dy(:)
+!    real(c_double), pointer                 :: dRes(:)
+!
+!    numS = c_numS
+!    numD = c_numD
+!
+!    ! (re)allocate sample arrays
+!    if (allocated(XS)) then
+!        deallocate(XS,YS,ZS)
+!    end if
+!    allocate(XS(numS), YS(numS), ZS(numS))
+!
+!    ! copy ptr's to fortran arrays
+!    call c_f_pointer(cptr_sx, ptr, (/numS/))
+!    XS(:) = ptr
+!
+!    call c_f_pointer(cptr_sy, ptr, (/numS/))
+!    YS(:) = ptr
+!
+!    call c_f_pointer(cptr_sv, ptr, (/numS/))
+!    ZS(:) = ptr
+!
+!    call c_f_pointer(cptr_dx, dx, (/numD/))
+!    call c_f_pointer(cptr_dy, dy, (/numD/))
+!    call c_f_pointer(cptr_res, dRes, (/numD/))
+!
+!    ! set max stuff
+!    NS = numS
+!    NSMAX = numS
+!
+!    ! assign 'missing value' to all elements of dRes
+!    dRes = DMISS
+!
+!    ! call triangulate
+!    call triinterp2(dx, dy, dRes, numD, jdla, XS, YS, ZS, NS, dmiss, jsferic, jins, NPL, MXSAM, MYSAM, xpl, ypl, zpl)
+!
+!end subroutine triang
 
-    implicit none
-
-    ! parameters
-    type(c_ptr), intent(in)                 :: cptr_sx      ! samples x, y, values
-    type(c_ptr), intent(in)                 :: cptr_sy
-    type(c_ptr), intent(in)                 :: cptr_sv
-    integer(c_int), intent(in)              :: c_numS       ! num samples
-    type(c_ptr), intent(in)                 :: cptr_dx      ! destinations x, y
-    type(c_ptr), intent(in)                 :: cptr_dy
-    integer(c_int), intent(in)              :: c_numD       ! num destination points
-    type(c_ptr), intent(inout)              :: cptr_res     ! return values (ptr to double array)
-
-    ! local variables
-    integer                                 :: numS
-    integer                                 :: numD
-    integer                                 :: jdla = 1
-    real(c_double), pointer                 :: ptr(:)
-    real(c_double), pointer                 :: dx(:)
-    real(c_double), pointer                 :: dy(:)
-    real(c_double), pointer                 :: dRes(:)
-
-    numS = c_numS
-    numD = c_numD
-
-    ! (re)allocate sample arrays
-    if (allocated(XS)) then
-        deallocate(XS,YS,ZS)
-    end if
-    allocate(XS(numS), YS(numS), ZS(numS))
-
-    ! copy ptr's to fortran arrays
-    call c_f_pointer(cptr_sx, ptr, (/numS/))
-    XS(:) = ptr
-
-    call c_f_pointer(cptr_sy, ptr, (/numS/))
-    YS(:) = ptr
-
-    call c_f_pointer(cptr_sv, ptr, (/numS/))
-    ZS(:) = ptr
-
-    call c_f_pointer(cptr_dx, dx, (/numD/))
-    call c_f_pointer(cptr_dy, dy, (/numD/))
-    call c_f_pointer(cptr_res, dRes, (/numD/))
-
-    ! set max stuff
-    NS = numS
-    NSMAX = numS
-
-    ! assign 'missing value' to all elements of dRes
-    dRes = DMISS
-
-    ! call triangulate
-    call triinterp2(dx, dy, dRes, numD, jdla)
-
-end subroutine triang
-
-subroutine averaging(cptr_sx, cptr_sy, cptr_sv, c_nums, cptr_cx, cptr_cy, cptr_cxx, cptr_cyy, cptr_cnp, c_numc, c_n6, cptr_res, cptr_meth, cptr_nmin, cptr_csize) bind(C, name="averaging")
-    !DEC$ ATTRIBUTES DLLEXPORT :: averaging
-    use iso_c_binding, only: c_double, c_char, c_loc, c_f_pointer
-    use unstruc_model
-    use m_missing
-    use M_INTERPOLATIONSETTINGS
-    use m_kdtree2
-
-    implicit none
-
-    ! parameters
-    type(c_ptr),    intent(in)                 :: cptr_sx      ! samples x, y, values
-    type(c_ptr),    intent(in)                 :: cptr_sy
-    type(c_ptr),    intent(in)                 :: cptr_sv
-    integer(c_int), intent(in)                 :: c_nums       ! number of samples
-    type(c_ptr),    intent(in)                 :: cptr_cx      ! destination cell center x, y
-    type(c_ptr),    intent(in)                 :: cptr_cy
-    type(c_ptr),    intent(in)                 :: cptr_cxx     ! destination cell corner x, y
-    type(c_ptr),    intent(in)                 :: cptr_cyy
-    type(c_ptr),    intent(in)                 :: cptr_cnp     ! destination cell corner array lengths
-    integer(c_int), intent(in)                 :: c_numc       ! number of destination cells
-    integer(c_int), intent(in)                 :: c_n6         ! max. cell corner array length
-    type(c_ptr),    intent(inout)              :: cptr_res     ! return values (ptr to double array)
-    integer(c_int), intent(in)                 :: cptr_meth    ! averaging method
-    integer(c_int), intent(in)                 :: cptr_nmin    ! minimum nr of samples for avaraging
-    real(c_double), intent(in)                 :: cptr_csize   ! relative search cell size
-
-    ! local variables
-    real(c_double), pointer                 :: sx(:)
-    real(c_double), pointer                 :: sy(:)
-    real(c_double), pointer                 :: svtmp(:)
-    integer                                 :: nums
-    real(c_double), pointer                 :: cx(:)
-    real(c_double), pointer                 :: cy(:)
-    real(c_double), pointer                 :: cxtmp(:)
-    real(c_double), pointer                 :: cytmp(:)
-    integer, pointer                        :: cnp(:)
-    integer                                 :: numc
-    integer                                 :: n6
-    real(c_double), pointer                 :: res(:)
-    double precision, allocatable           :: sv(:,:)
-    integer, allocatable                    :: ipsam(:)
-    double precision, allocatable           :: cz(:,:)
-    double precision, allocatable           :: cxx(:,:)
-    double precision, allocatable           :: cyy(:,:)
-    integer                                 :: meth
-    integer                                 :: nmin
-    double precision                        :: csize
-    integer                                 :: i, j, k, IAVtmp, NUMMINtmp, INTTYPEtmp, ierr
-    double precision                        :: RCELtmp
-
-    ! cache interpolation settings
-    IAVtmp = IAV
-    NUMMINtmp = NUMMIN
-    INTTYPEtmp = INTERPOLATIONTYPE
-    RCELtmp = RCEL
-
-    ! assign ranges and settings
-    nums = c_nums
-    numc = c_numc
-    n6 = c_n6
-    meth = cptr_meth
-    nmin = cptr_nmin
-    csize = cptr_csize
-
-    !assign pointers
-    call c_f_pointer(cptr_sx, sx, (/nums/))
-    call c_f_pointer(cptr_sy, sy, (/nums/))
-    call c_f_pointer(cptr_sv, svtmp, (/nums/))
-    call c_f_pointer(cptr_cx, cx, (/numc/))
-    call c_f_pointer(cptr_cy, cy, (/numc/))
-    call c_f_pointer(cptr_cxx, cxtmp, (/n6*numc/))
-    call c_f_pointer(cptr_cyy, cytmp, (/n6*numc/))
-    call c_f_pointer(cptr_cnp, cnp, (/numc/))
-    call c_f_pointer(cptr_res, res, (/numc/))
-
-    !allocate & copy to 2d arrays
-    allocate(sv(1, nums), ipsam(nums), cz(1,numc), cxx(n6, numc), cyy(n6, numc))
-
-    sv(1,:) = svtmp(:)
-    ipsam(:) = 1
-    k = 1
-    do i = 1, numc
-       cz(1,i) = DMISS
-       do j=1,n6
-          cxx(j, i) = cxtmp(k)
-          cyy(j, i) = cytmp(k)
-          k = k + 1
-       enddo
-    enddo
-
-    if(meth > 0 .and. meth < 8) then
-       IAV = meth
-    else
-       goto 1234
-    endif
-
-    if(nmin > 0) then
-       NUMMIN = nmin
-    else
-       goto 1234
-    endif
-
-    if(csize > 0 .and. csize < 10) then
-       RCEL = csize
-    else
-       goto 1234
-    endif
-
-    INTERPOLATIONTYPE = 2
-
-    call build_kdtree(treeglob, nums, sx, sy, ierr)
-    call averaging2(1, nums, sx, sy, sv, ipsam, cx, cy, cz, numc, cxx, cyy, n6, cnp, 1)
-    call delete_kdtree2(treeglob)
-
-    !copy values back
-    res(:) = cz(1,:)
-
-1234 continue
-
-    !unroll & cleanup
-    IAV = IAVtmp
-    NUMMIN = NUMMINtmp
-    INTERPOLATIONTYPE = INTTYPEtmp
-    RCEL = RCELtmp
-    deallocate(sv, ipsam, cz, cxx, cyy)
-
-end subroutine averaging
+!LC: TODO REMOVE
+!subroutine averaging(cptr_sx, cptr_sy, cptr_sv, c_nums, cptr_cx, cptr_cy, cptr_cxx, cptr_cyy, cptr_cnp, c_numc, c_n6, cptr_res, cptr_meth, cptr_nmin, cptr_csize) bind(C, name="averaging")
+!    !DEC$ ATTRIBUTES DLLEXPORT :: averaging
+!    use iso_c_binding, only: c_double, c_char, c_loc, c_f_pointer
+!    use unstruc_model
+!    use m_sferic, only: jsferic, jasfer3D
+!    use m_missing
+!    use m_ec_interpolationsettings
+!    use kdtree2Factory
+!    use m_polygon, only: NPL, xpl, ypl, zpl
+!    use m_ec_basic_interpolation, only: AVERAGING2
+!
+!    implicit none
+!
+!    ! parameters
+!    type(c_ptr),    intent(in)                 :: cptr_sx      ! samples x, y, values
+!    type(c_ptr),    intent(in)                 :: cptr_sy
+!    type(c_ptr),    intent(in)                 :: cptr_sv
+!    integer(c_int), intent(in)                 :: c_nums       ! number of samples
+!    type(c_ptr),    intent(in)                 :: cptr_cx      ! destination cell center x, y
+!    type(c_ptr),    intent(in)                 :: cptr_cy
+!    type(c_ptr),    intent(in)                 :: cptr_cxx     ! destination cell corner x, y
+!    type(c_ptr),    intent(in)                 :: cptr_cyy
+!    type(c_ptr),    intent(in)                 :: cptr_cnp     ! destination cell corner array lengths
+!    integer(c_int), intent(in)                 :: c_numc       ! number of destination cells
+!    integer(c_int), intent(in)                 :: c_n6         ! max. cell corner array length
+!    type(c_ptr),    intent(inout)              :: cptr_res     ! return values (ptr to double array)
+!    integer(c_int), intent(in)                 :: cptr_meth    ! averaging method
+!    integer(c_int), intent(in)                 :: cptr_nmin    ! minimum nr of samples for avaraging
+!    real(c_double), intent(in)                 :: cptr_csize   ! relative search cell size
+!
+!    ! local variables
+!    real(c_double), pointer                 :: sx(:)
+!    real(c_double), pointer                 :: sy(:)
+!    real(c_double), pointer                 :: svtmp(:)
+!    integer                                 :: nums
+!    real(c_double), pointer                 :: cx(:)
+!    real(c_double), pointer                 :: cy(:)
+!    real(c_double), pointer                 :: cxtmp(:)
+!    real(c_double), pointer                 :: cytmp(:)
+!    integer, pointer                        :: cnp(:)
+!    integer                                 :: numc
+!    integer                                 :: n6
+!    real(c_double), pointer                 :: res(:)
+!    double precision, allocatable           :: sv(:,:)
+!    integer, allocatable                    :: ipsam(:)
+!    double precision, allocatable           :: cz(:,:)
+!    double precision, allocatable           :: cxx(:,:)
+!    double precision, allocatable           :: cyy(:,:)
+!    integer                                 :: meth
+!    integer                                 :: nmin
+!    double precision                        :: csize
+!    integer                                 :: i, j, k, IAVtmp, NUMMINtmp, INTTYPEtmp, ierr
+!    double precision                        :: RCELtmp
+!
+!    ! cache interpolation settings
+!    IAVtmp = IAV
+!    NUMMINtmp = NUMMIN
+!    INTTYPEtmp = INTERPOLATIONTYPE
+!    RCELtmp = RCEL
+!
+!    ! assign ranges and settings
+!    nums = c_nums
+!    numc = c_numc
+!    n6 = c_n6
+!    meth = cptr_meth
+!    nmin = cptr_nmin
+!    csize = cptr_csize
+!
+!    !assign pointers
+!    call c_f_pointer(cptr_sx, sx, (/nums/))
+!    call c_f_pointer(cptr_sy, sy, (/nums/))
+!    call c_f_pointer(cptr_sv, svtmp, (/nums/))
+!    call c_f_pointer(cptr_cx, cx, (/numc/))
+!    call c_f_pointer(cptr_cy, cy, (/numc/))
+!    call c_f_pointer(cptr_cxx, cxtmp, (/n6*numc/))
+!    call c_f_pointer(cptr_cyy, cytmp, (/n6*numc/))
+!    call c_f_pointer(cptr_cnp, cnp, (/numc/))
+!    call c_f_pointer(cptr_res, res, (/numc/))
+!
+!    !allocate & copy to 2d arrays
+!    allocate(sv(1, nums), ipsam(nums), cz(1,numc), cxx(n6, numc), cyy(n6, numc))
+!
+!    sv(1,:) = svtmp(:)
+!    ipsam(:) = 1
+!    k = 1
+!    do i = 1, numc
+!       cz(1,i) = DMISS
+!       do j=1,n6
+!          cxx(j, i) = cxtmp(k)
+!          cyy(j, i) = cytmp(k)
+!          k = k + 1
+!       enddo
+!    enddo
+!
+!    if(meth > 0 .and. meth < 8) then
+!       IAV = meth
+!    else
+!       goto 1234
+!    endif
+!
+!    if(nmin > 0) then
+!       NUMMIN = nmin
+!    else
+!       goto 1234
+!    endif
+!
+!    if(csize > 0 .and. csize < 10) then
+!       RCEL = csize
+!    else
+!       goto 1234
+!    endif
+!
+!    INTERPOLATIONTYPE = 2
+!
+!    call build_kdtree(treeglob, nums, sx, sy, ierr, jsferic, dmiss)
+!    call averaging2(1, nums, sx, sy, sv, ipsam, cx, cy, cz, numc, cxx, cyy, n6, cnp, 1, &
+!                    dmiss, jsferic, jasfer3D, JINS, NPL, xpl, ypl, zpl)
+!    
+!    call delete_kdtree2(treeglob)
+!
+!    !copy values back
+!    res(:) = cz(1,:)
+!
+!1234 continue
+!
+!    !unroll & cleanup
+!    IAV = IAVtmp
+!    NUMMIN = NUMMINtmp
+!    INTERPOLATIONTYPE = INTTYPEtmp
+!    RCEL = RCELtmp
+!    deallocate(sv, ipsam, cz, cxx, cyy)
+!
+!end subroutine averaging
 
 ! Further custom api functions
 
@@ -2514,7 +2544,7 @@ subroutine write_netgeom(c_net_file) bind(C, name="write_netgeom")
    if ( netstat.ne.NETSTAT_OK ) then
       call findcells(0)
    end if
-   call unc_write_net(netgeom_file, 1, 0)
+   call unc_write_net(netgeom_file, 1, 0, 0, 2)
 end subroutine write_netgeom
 
 subroutine write_partition_metis(c_netfile_in, c_netfile_out, c_npart, c_jacontiguous) bind(C, name="write_partition_metis")
@@ -2537,6 +2567,7 @@ subroutine write_partition_metis(c_netfile_in, c_netfile_out, c_npart, c_jaconti
    integer                                  :: npart
    integer                                  :: jacontiguous
    integer                                  :: istat
+   integer                                  :: ierror
    
    netfile_in = char_array_to_string(c_netfile_in, strlen(c_netfile_in))
    numfiles=1
@@ -2566,16 +2597,18 @@ subroutine write_partition_metis(c_netfile_in, c_netfile_out, c_npart, c_jaconti
 
    ndomains = npart
 
-   call generate_partition_pol_from_idomain()
+   call generate_partition_pol_from_idomain(ierror)
 
    netfile_out = char_array_to_string(c_netfile_out, strlen(c_netfile_out))
 
    if(ndomains > 1) then
-      call partition_write_domains(netfile_out,6)
+      call partition_write_domains(netfile_out,6,1,0)
    endif
 
 end subroutine write_partition_metis
 
+
+! SPvdP: 1D, dry points not accounted for
 subroutine write_partition_pol(c_netfile_in, c_netfile_out, c_polfile) bind(C, name="write_partition_pol")
    !DEC$ ATTRIBUTES DLLEXPORT :: write_partition_pol
 
@@ -2620,7 +2653,7 @@ subroutine write_partition_pol(c_netfile_in, c_netfile_out, c_polfile) bind(C, n
    netfile_out = char_array_to_string(c_netfile_out, strlen(c_netfile_out))
 
    if(ndomains > 1) then
-      call partition_write_domains(netfile_out,6)
+      call partition_write_domains(netfile_out,6,1,0)
    endif
 
 end subroutine write_partition_pol

@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2017.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: xbeach_wave_boundary_main.f90 52266 2017-09-02 11:24:11Z klecz_ml $
-! $HeadURL: https://repos.deltares.nl/repos/ds/branches/dflowfm/20161017_dflowfm_codecleanup/engines_gpl/dflowfm/packages/dflowfm_kernel/src/xbeach_wave_boundary_main.f90 $
+! $Id: xbeach_wave_boundary_main.f90 54191 2018-01-22 18:57:53Z dam_ar $
+! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/xbeach_wave_boundary_main.f90 $
 module wave_boundary_main_module
    implicit none
    private
@@ -79,7 +79,7 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
 !
-subroutine create_incident_waves_surfbeat(np,xb,yb,ntheta,dtheta,theta,t, &
+subroutine create_incident_waves_surfbeat(np,ibnd,xb,yb,ntheta,dtheta,theta,t, &
                                            bctype,bcfile, &
                                            x0,y0,hboundary, &
                                            randomseed, &
@@ -87,7 +87,7 @@ subroutine create_incident_waves_surfbeat(np,xb,yb,ntheta,dtheta,theta,t, &
                                            Hbc,Tbc,Dbc,isRecomputed, &
                                            nonhspectrum, &
                                            sprdthr,trepfac,nmax,fcutoff,rho, &
-                                           Tm01switch,nspr)
+                                           Tm01switch,nspr, swkhmin)
    ! This subroutine handles all calls for surf-beat wave boundary conditions.
    ! The subroutine automatically initialises all variables if needed, and returns
    ! boundary condition information at all offshore points at the required point
@@ -95,6 +95,7 @@ subroutine create_incident_waves_surfbeat(np,xb,yb,ntheta,dtheta,theta,t, &
    ! 
    ! Input variables
    ! np              : number of offshore grid points (-)
+   ! ibnd            : boundary section number (-)
    ! xb,yb           : vectors of x and y coordinates of offshore grid points (m)
    ! ntheta          : number of computational wave bins in directional space (-)
    ! dtheta          : (constant) grid size of wave direction bins (rad)
@@ -157,88 +158,91 @@ subroutine create_incident_waves_surfbeat(np,xb,yb,ntheta,dtheta,theta,t, &
    implicit none
    !
    ! Input variables
-   integer,intent(in)                     :: np,ntheta,bctype
-   real*8,intent(in)                      :: t,x0,y0,hboundary,dtheta
-   character(len=*),intent(in)            :: bcfile
-   real*8,dimension(np),intent(in)        :: xb,yb
-   real*8,dimension(ntheta),intent(in)    :: theta
-   integer,intent(in)                     :: randomseed
+   integer                    ,intent(in)     :: np,ibnd,ntheta,bctype
+   real*8                     ,intent(in)     :: t,x0,y0,hboundary,dtheta
+   character(len=*)           ,intent(in)     :: bcfile
+   real*8,dimension(np)       ,intent(in)     :: xb,yb
+   real*8,dimension(ntheta)   ,intent(in)     :: theta
+   integer                    ,intent(in)     :: randomseed
+   
    ! output variables
-   real*8,intent(out)                     :: Hbc,Tbc,Dbc
-   logical,intent(out)                    :: isRecomputed
-   real*8,dimension(np),intent(out)       :: qxbc,qybc
-   real*8,dimension(np,ntheta),intent(out):: eebc
+   real*8                     ,intent(out)    :: Hbc,Tbc,Dbc
+   logical                    ,intent(out)    :: isRecomputed
+   real*8,dimension(np)       ,intent(out)    :: qxbc,qybc
+   real*8,dimension(np,ntheta),intent(out)    :: eebc
+   
    ! Optional variables
-   logical,optional,intent(in)            :: nonhspectrum
-   real*8,optional,intent(in)             :: sprdthr,trepfac,nmax,rho,fcutoff
-   integer,optional,intent(in)            :: Tm01switch,nspr
+   logical   ,optional        ,intent(in)     :: nonhspectrum
+   real*8    ,optional        ,intent(in)     :: sprdthr,trepfac,nmax,rho,fcutoff,swkhmin
+   integer   ,optional        ,intent(in)     :: Tm01switch,nspr
+   
    ! internal variables
-   integer                                :: i,itheta,l,dummy
-   real*8                                 :: durationlength
+   integer                                    :: i,itheta,l,dummy
+   real*8                                     :: durationlength
+   real*8    ,dimension(:)    ,allocatable    :: inttemp 
    !
    !
    ! Check function input arguments and set defaults
    if(.not.present(nonhspectrum)) then
-      waveBoundaryParameters%nonhspectrum = .false.
+      waveBoundaryParameters(ibnd)%nonhspectrum = .false.
    else
-      waveBoundaryParameters%nonhspectrum = nonhspectrum
+      waveBoundaryParameters(ibnd)%nonhspectrum = nonhspectrum
    endif
    if(.not.present(sprdthr)) then
-      waveBoundaryParameters%sprdthr = 0.08d0
+      waveBoundaryParameters(ibnd)%sprdthr = 0.08d0
    else
-      waveBoundaryParameters%sprdthr = sprdthr
+      waveBoundaryParameters(ibnd)%sprdthr = sprdthr
    endif
    if(.not.present(trepfac)) then
-      waveBoundaryParameters%trepfac = 0.01d0
+      waveBoundaryParameters(ibnd)%trepfac = 0.01d0
    else
-      waveBoundaryParameters%trepfac = trepfac
+      waveBoundaryParameters(ibnd)%trepfac = trepfac
    endif
    if(.not.present(Tm01switch)) then
-      waveBoundaryParameters%Tm01switch = 0
+      waveBoundaryParameters(ibnd)%Tm01switch = 0
    else
-      waveBoundaryParameters%Tm01switch = Tm01switch
+      waveBoundaryParameters(ibnd)%Tm01switch = Tm01switch
    endif
    if(.not.present(nspr)) then
-      waveBoundaryParameters%nspr = 0
+      waveBoundaryParameters(ibnd)%nspr = 0
    else
-      waveBoundaryParameters%nspr = nspr
+      waveBoundaryParameters(ibnd)%nspr = nspr
    endif
    if(.not.present(nmax)) then
-      waveBoundaryParameters%nmax = 0.8d0
+      waveBoundaryParameters(ibnd)%nmax = 0.8d0
    else
-      waveBoundaryParameters%nmax = nmax
+      waveBoundaryParameters(ibnd)%nmax = nmax
    endif
    if(.not.present(fcutoff)) then
-      waveBoundaryParameters%fcutoff = 0.0d0
+      waveBoundaryParameters(ibnd)%fcutoff = 0.0d0
    else
-      waveBoundaryParameters%fcutoff = fcutoff
+      waveBoundaryParameters(ibnd)%fcutoff = fcutoff
    endif
    if(.not.present(rho)) then
-      waveBoundaryParameters%rho = 1025.d0
+      waveBoundaryParameters(ibnd)%rho = 1025.d0
    else
-      waveBoundaryParameters%rho = rho
+      waveBoundaryParameters(ibnd)%rho = rho                        ! JRE TO DO: accomodate varying rho
    endif
-   !
-   !
-   ! Check if the wave boundary conditions have been initialised
-   !if (.not.waveBoundaryAdministration%initialized) then
-!     responsibility of unstruc     
-   !endif ! initialized
+   if (.not.present(swkhmin)) then
+      waveboundaryParameters(ibnd)%swkhmin = -0.01d0
+   else
+      waveboundaryParameters(ibnd)%swkhmin = swkhmin
+   end if
    !
    !
    ! Generate or interpolate boundary condition time series
-   if (t>=waveBoundaryAdministration%startComputeNewSeries) then
+   if (t>=waveBoundaryAdministration(ibnd)%startComputeNewSeries) then
       ! The start of the current boundary condition should be the end of the previous
       ! boundary condition
-      waveBoundaryAdministration%startCurrentSeries = waveBoundaryAdministration%startComputeNewSeries
+      waveBoundaryAdministration(ibnd)%startCurrentSeries = waveBoundaryAdministration(ibnd)%startComputeNewSeries
       ! Call subroutine to generate wave boundary condition time series from spectral
       ! input
-      call generate_wave_boundary_surfbeat(durationlength)
+      call generate_wave_boundary_surfbeat(ibnd, durationlength)
       !
       !
       ! Update time administration
-      waveBoundaryAdministration%startComputeNewSeries = waveBoundaryAdministration%startComputeNewSeries + &
-                                                         durationlength
+      waveBoundaryAdministration(ibnd)%startComputeNewSeries = waveBoundaryAdministration(ibnd)%startComputeNewSeries + &
+                                                                durationlength
       
 
       isRecomputed = .true.
@@ -246,23 +250,28 @@ subroutine create_incident_waves_surfbeat(np,xb,yb,ntheta,dtheta,theta,t, &
    
    ! Interpolate energy and discharge at all locations in time
 
-   l = size(waveBoundaryTimeSeries%tbc)
+   l = size(waveBoundaryTimeSeries(ibnd)%tbc)
+   allocate(inttemp(l))
+   !
    do itheta=1,ntheta
       do i=1,np
-         call linear_interp(waveBoundaryTimeSeries%tbc,waveBoundaryTimeSeries%eebct(i,:,itheta),l,&
+         inttemp = waveBoundaryTimeSeries(ibnd)%eebct(i,:,itheta)
+         call linear_interp(waveBoundaryTimeSeries(ibnd)%tbc,inttemp,l,&
                             t,eebc(i,itheta),dummy)
       enddo
    enddo
    do i=1,np
-      call linear_interp(waveBoundaryTimeSeries%tbc,waveBoundaryTimeSeries%qxbct(i,:),l,&
+      inttemp = waveBoundaryTimeSeries(ibnd)%qxbct(i,:)
+      call linear_interp(waveBoundaryTimeSeries(ibnd)%tbc,inttemp,l,&
                             t,qxbc(i),dummy)
-      call linear_interp(waveBoundaryTimeSeries%tbc,waveBoundaryTimeSeries%qybct(i,:),l,&
+      inttemp = waveBoundaryTimeSeries(ibnd)%qybct(i,:)
+      call linear_interp(waveBoundaryTimeSeries(ibnd)%tbc,inttemp,l,&
                             t,qybc(i),dummy)
    enddo
 
-   Hbc = waveSpectrumAdministration%Hbc
-   Tbc = waveSpectrumAdministration%Tbc
-   Dbc = waveSpectrumAdministration%Dbc
+   Hbc = waveSpectrumAdministration(ibnd)%Hbc
+   Tbc = waveSpectrumAdministration(ibnd)%Tbc
+   Dbc = waveSpectrumAdministration(ibnd)%Dbc
 
 end subroutine create_incident_waves_surfbeat
                                            

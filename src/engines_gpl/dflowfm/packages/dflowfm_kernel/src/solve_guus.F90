@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2017.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -27,15 +27,15 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: solve_guus.F90 52266 2017-09-02 11:24:11Z klecz_ml $
-! $HeadURL: https://repos.deltares.nl/repos/ds/branches/dflowfm/20161017_dflowfm_codecleanup/engines_gpl/dflowfm/packages/dflowfm_kernel/src/solve_guus.F90 $
+! $Id: solve_guus.F90 54199 2018-01-23 13:21:44Z zhao $
+! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/solve_guus.F90 $
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif 
 
  subroutine inireduce()
  use m_reduce
-
+ use m_flowparameters, only: jajipjan
  use m_flowgeom
  use m_partitioninfo
  use m_flowparameters, only: icgsolver, ipre
@@ -112,6 +112,10 @@ else
       call qnerror('inireduce: inappropriate Krylov solver', ' ', ' ')
    end if
 end if
+
+if (icgsolver .ne. 4) then 
+   jajipjan = 0
+endif   
 
 ! set preconditioner
  if ( icgsolver.eq.7 ) then
@@ -526,6 +530,7 @@ end if
  
  if ( jatimer.eq.1 ) call starttimer(ICG)
  
+ 
   
  if (icgsolver == 1) then
     call conjugategradient_omp            (s1,ndx,ipre)  ! ipre = 0,1    ! faster, solution depends on thread sequence 
@@ -565,7 +570,9 @@ end if
 #endif
  else if ( icgsolver.eq.9 .or. icgsolver.gt.90 ) then
     call testsolver(Ndx, s1, nocgiter, ierror)
- else
+ else if (icgsolver == 10) then
+    call solve_jacobi(s1, ndx, nocgiter)
+ else 
     call qnerror('no valid solver', ' ', ' ')
  endif
  
@@ -610,6 +617,7 @@ end if
  use m_flowgeom, only: kfs
  use MessageHandling
  use m_flowparameters, only : jajipjan
+ use m_partitioninfo, only : jampi, sdmn, my_rank
 
  implicit none
  integer                                       :: ndx, ipre, its
@@ -716,7 +724,7 @@ end if
                       ao (na) =  ccr(jj) 
                       jao(na) =  ngs(i) ! saad row
                    else ! internal boundary: add to right-hand side
-                      rhs(nn) = rhs(nn) - ccr(jj)*s1(i)
+!                      rhs(nn) = rhs(nn) - ccr(jj)*s1(i)
                    end if
                 endif
              enddo
@@ -748,7 +756,7 @@ end if
                       ao (na) =  ccr(jj) 
                       jao(na) =  ngs(i) ! saad row
                    else ! internal boundary: add to right-hand side
-                      rhs(nn) = rhs(nn) - ccr(jj)*s1(i)
+!                      rhs(nn) = rhs(nn) - ccr(jj)*s1(i)
                    end if
                 endif
              enddo  
@@ -777,7 +785,7 @@ end if
                     i  = row(ndn)%j(j)
                     if ( kfs(i).eq.1 ) then
                     else ! internal boundary: add to right-hand side
-                       rhs(nn) = rhs(nn) - ccr(jj)*s1(i)
+!                       rhs(nn) = rhs(nn) - ccr(jj)*s1(i)
                     end if
                  endif
               enddo
@@ -801,7 +809,7 @@ end if
                    i = jrow(m)
                    if ( kfs(i).eq.1 ) then
                    else ! internal boundary: add to right-hand side
-                      rhs(nn) = rhs(nn) - ccr(jj)*s1(i)
+!                      rhs(nn) = rhs(nn) - ccr(jj)*s1(i)
                    end if
                 endif   
              enddo
@@ -832,8 +840,6 @@ end if
        
  if ( nn.gt.0 ) then
     call cgsaad(its,na,nn,jaini,1,ierror,res)  ! nocg ipv nn
-    !call cgsaad(its,na,nn,jaini,ierror,res)  ! nocg ipv nn
-
     !write (6,*) res
     
 !    check error
@@ -845,34 +851,39 @@ end if
           call qnerror('conjugategradientSAAD: error', ' ', ' ')
           call mess(LEVEL_WARN, 'conjugategradientSAAD: error')
        end if
-       call newfil(matr, 'saadmatrix.m')
        
-       nocg = nn
-       write(matr,'(a)') 'data = [ ...'   
-       do i=1,nocg
-          do j=iao(i),iao(i+1)-1
-             dum = ao(j)
-             if ( abs(dum).lt.1d-99 ) dum = 0d0
-             write(matr,'(2I10,E20.5)') i, jao(j), dum
-          end do
-       end do
-       write(matr,'(a)') '];'
-       
-       write(matr,'("A=sparse(data(:,1),data(:,2),data(:,3));")')
-       
-       write(matr,'(a)') 'b=[ ...'   
-       do i=1,nocg
-          write(matr,'(E17.5)') rhs(i) 
-       end do
-       write(matr,'(a)') '];'
-      
-       write(matr,'(a)') 'sol=[ ...'   
-       do i=1,nocg
-          write(matr,'(E17.5)') sol(i) 
-       end do
-       write(matr,'(a)') '];'
-       
-       call doclose(matr)
+       !if ( jampi.eq.0 ) then
+       !   call newfil(matr, 'saadmatrix.m')
+       !else
+       !   call newfil(matr, 'saadmatrix_' // sdmn // '.m')
+       !end if
+       !
+       !nocg = nn
+       !write(matr,'(a)') 'data = [ ...'   
+       !do i=1,nocg
+       !   do j=iao(i),iao(i+1)-1
+       !      dum = ao(j)
+       !      if ( abs(dum).lt.1d-99 ) dum = 0d0
+       !      write(matr,'(2I10,E20.5)') i, jao(j), dum
+       !   end do
+       !end do
+       !write(matr,'(a)') '];'
+       !
+       !write(matr,'("A=sparse(data(:,1),data(:,2),data(:,3));")')
+       !
+       !write(matr,'(a)') 'b=[ ...'   
+       !do i=1,nocg
+       !   write(matr,'(E17.5)') rhs(i) 
+       !end do
+       !write(matr,'(a)') '];'
+       !
+       !write(matr,'(a)') 'sol=[ ...'   
+       !do i=1,nocg
+       !   write(matr,'(E17.5)') sol(i) 
+       !end do
+       !write(matr,'(a)') '];'
+       !
+       !call doclose(matr)
     else
 !      write(message,*) 'Solver converged in ', its,' iterations'
 !      call mess(LEVEL_INFO, message)
@@ -1435,7 +1446,7 @@ subroutine conjugategradient_omp(s1,ndx,ipre)
    
  subroutine jipjanini()
  use m_reduce
- use m_flow, only: jajipjan 
+ use m_flowparameters, only: jajipjan 
  implicit none
 
  integer m,n,np, Ltot, j, iftot, k
@@ -1720,6 +1731,12 @@ subroutine gauss_eliminationjipjan
  nogauss0=nogauss
  nocg0=nocg
  noel0=noel
+ 
+#ifndef HAVE_PETSC
+ if ( icgsolver.eq.6 ) then
+    icgsolver = 7
+ end if
+#endif
  
  if (jajipjan >= 1) then 
     call jipjanini()
@@ -2222,15 +2239,135 @@ integer :: mout, n, i, jj, j, ntot
  
  subroutine initestsolver()
     use m_reduce
+    use m_flowgeom, only: Ndx, Lnx, ln, xu, yu, xz, yz
     use m_partitioninfo
     use m_alloc
+    use unstruc_messages
+    use m_plotdots
     implicit none
+    
+    integer, dimension(:), allocatable :: imask
+    
+    integer                            :: i, ip1, k, k1, k2, L
+    integer                            :: iglev1, iglev2
+    integer                            :: n
+    integer                            :: jawritten
+    
+    if ( my_rank.eq.0 ) then
+       continue
+    end if
+    
+!   check if maxghostlev_s = minghostlev_s + 1
+    if ( maxghostlev_s .ne. minghostlev_s+1 ) then
+       call mess(LEVEL_ERROR, 'initestsolver: maxghostlev_s.ne.minghostlev_s+1')
+    end if
     
     if ( allocated(s1_ghost) ) deallocate(s1_ghost)
     allocate(s1_ghost(numghost_s))
     s1_ghost = 0d0
     
+    allocate(imask(Ndx))
+    
     call inisaad(epscg,maxmatvecs,1d0)
+    
+!   mark ghostcells in ighostlist_s
+    imask = 0
+    do n=1,nghostlist_s(ndomains-1)
+       imask(ighostlist_s(n)) = 1
+    end do
+    
+!   make interface administration
+    
+!   count interface ghost cells and links
+    nbndint = 0
+    do L=1,Lnx
+       do i=1,2
+          ip1 = i+1; if ( ip1.gt.2 ) ip1=ip1-2
+          k1 = ln(i,L)
+          k2 = ln(ip1,L)
+          
+          if ( ighosttype_s .eq. IGHOSTTYPE_CELLBASED ) then
+             iglev1 = ighostlev_cellbased(k1)
+             iglev2 = ighostlev_cellbased(k2)
+          else if ( ighosttype_s .eq. IGHOSTTYPE_NODEBASED ) then
+             iglev1 = ighostlev_nodebased(k1)
+             iglev2 = ighostlev_nodebased(k2)
+          else
+             iglev1 = ighostlev(k1)
+             iglev2 = ighostlev(k2)
+          end if
+          
+          if ( iglev1.eq.minghostlev_s .and. iglev2.eq.maxghostlev_s ) then
+!            check if both nodes are in ighostlist_s
+             if ( imask(k1).ne.1 .or. imask(k2).ne.1 ) then
+                call mess(LEVEL_ERROR, 'initestsolver: ghostcell error')
+             end if
+             
+             nbndint = nbndint + 1
+          end if
+       end do
+    end do
+    
+!   allocate
+    if ( allocated(kbndint) ) deallocate(kbndint)
+    allocate(kbndint(3,nbndint))
+    kbndint = 0
+    if ( allocated(zbndint) ) deallocate(zbndint)
+    allocate(zbndint(2,nbndint))
+    zbndint = 0d0
+    
+!   store interface ghost cells and links
+    nbndint = 0
+    do L=1,Lnx
+       do i=1,2
+          ip1 = i+1; if ( ip1.gt.2 ) ip1=ip1-2
+          k1 = ln(i,L)
+          k2 = ln(ip1,L)
+          
+          if ( ighosttype_s .eq. IGHOSTTYPE_CELLBASED ) then
+             iglev1 = ighostlev_cellbased(k1)
+             iglev2 = ighostlev_cellbased(k2)
+          else if ( ighosttype_s .eq. IGHOSTTYPE_NODEBASED ) then
+             iglev1 = ighostlev_nodebased(k1)
+             iglev2 = ighostlev_nodebased(k2)
+          else
+             iglev1 = ighostlev(k1)
+             iglev2 = ighostlev(k2)
+          end if
+          
+          if ( iglev1.eq.minghostlev_s .and. iglev2.eq.maxghostlev_s ) then
+             nbndint = nbndint + 1
+             kbndint(1,nbndint) = k2
+             kbndint(2,nbndint) = k1
+             kbndint(3,nbndint) = L
+          end if
+       end do
+    end do
+    
+!   check if nodes on both sides of interface links are found
+    do n=1,nbndint
+       k1 = kbndint(1,n)
+       k2 = kbndint(2,n)
+       L = kbndint(3,n)
+       if ( k1.eq.0 .or. k2.eq.0 .or. L.eq.0 ) then
+          call mess(LEVEL_ERROR, 'initestsolver: interface error')
+       end if
+    end do
+    
+!   BEGIN DEBUG
+    numdots = 0
+    do n=1,nbndint
+       k1 = kbndint(1,n)
+       k2 = kbndint(2,n)
+       L = kbndint(3,n)
+       call adddot(xz(k1),yz(k1),1d0)
+       call adddot(xz(k2),yz(k2),2d0)
+       call adddot(xu(L),yu(L),3d0)
+    end do
+    call write_dots('Lbndint_' // sdmn // '.xyz', jawritten)
+!   END DEBUG
+    
+    if ( allocated(imask) ) deallocate(imask)
     
     return
  end subroutine initestsolver
@@ -2240,9 +2377,13 @@ integer :: mout, n, i, jj, j, ntot
     use m_flowparameters
     use m_reduce
     USE m_saad
-    use m_flowgeom, only: kfs
+    use m_flowgeom, only: kfs, dxi, Lnx
+    use m_flow, only: u1
+    use m_flowtimes, only: dts
     use unstruc_messages
     use m_timer
+    use network_data, only: xzw
+    use mpi
     implicit none
     
     integer,                          intent(in)     :: ndx
@@ -2254,29 +2395,67 @@ integer :: mout, n, i, jj, j, ntot
     
 !    double precision, dimension(:), allocatable      :: bdum, cdum, ddum
  
-    double precision                                 :: maxdiff, resloc, maxresloc
+    double precision                                 :: maxdiff, resloc, maxresloc, diff
     double precision                                 :: res       ! residual
     double precision                                 :: dum
+    double precision                                 :: beta, val
+
     
     integer                                          :: maxits ! maxinum number of matrix-vector multiplications in Saad solver
     
-    integer, parameter                               :: MAXITER = 1000
+    integer, parameter                               :: MAXITER = 100
     integer                                          :: iter, its
     integer                                          :: j, jj, n, na, ntot
     integer                                          :: iout
+    integer                                          :: ki, kb, L, k
     
-    integer, parameter                               :: javerbose=0
- 
+    integer, parameter                               :: javerbose=1
+    
+    double precision, dimension(:), allocatable      :: bbr_sav, ddr_sav
+    double precision, dimension(1)                   :: res_global
+    double precision                                 :: res_global0, tolDD
     if (nocg<=0) return
     
     ierror = 0
     itsol  = 0
     
-!   initialize Saad solver and compute preconditioner    
+!   set beta              
+    beta = sbeta
+    tol  = prectol
+    !beta=0.5d0
+    
+!   save original matrix and rhs entries at the interface
+    allocate(bbr_sav(nbndint))
+    allocate(ddr_sav(nbndint))
+    
+    do n=1,nbndint
+       ki = kbndint(2,n)
+       bbr_sav(n) = bbr(ki)
+       ddr_sav(n) = ddr(ki)
+    end do
+    
+    !ccrsav = ccr
+!   insert interface conditions to set matrix
+    do n=1,nbndint
+       kb = kbndint(1,n) ! boundary flownode, will be eliminated for the system
+       ki = kbndint(2,n)
+       L  = kbndint(3,n) ! flowlink
+       jj = Lv2(L)       ! row number in the system
+       
+       if ( kfs(kb).ne.0 .or. kfs(ki).ne.1 ) then ! make sure kb is the boundary flownode
+          call mess(LEVEL_ERROR, 'testsolver: kfs error')
+       end if
+          
+       !beta = abs(u1(L))*dts * Dxi(L)   ! CFL number in normal direcion
+       !beta = 0.5d0
+       bbr(ki) = bbr(ki) - ccr(jj)*(0.5d0-beta)/(0.5d0+beta)
+    end do
+       
+!   initialize Saad solver and compute preconditioner, get row numbering
     call conjugategradientSAAD(ddr,s1,ndx,itsol,-1,1,ierror)
     
 !   overwrite maximum number op iterations
-    ipar(6) = 1
+    ipar(6) = Nsubiters
     
 !   overwrite tolerance
     fpar(2) = epscg
@@ -2290,39 +2469,67 @@ integer :: mout, n, i, jj, j, ntot
 
 !   Schwarz iterations
     do iter=1,MAXITER
-!      make rhs (eliminate ghostcells)
-       do n=nogauss+1,nogauss+nocg
-          nn  = n - nogauss  ! saad index
-          ndn = noel(n)      ! guus 
-          if (ndn > 0) then
-              rhs(nn)   = ddr(ndn)
+!      flownode-to-rownumber
+       !do n=nogauss+1,nogauss+nocg
+       !   nn  = n - nogauss  ! saad index
+       !   ndn = noel(n)      ! guus 
+       !   if (ndn > 0) then
+       !      ngs(ndn) = nn
+       !   end if
+       !end do
        
-              ntot=row(ndn)%l 
-              do j=1,ntot
-                 i  = row(ndn)%j(j)
-                 jj = row(ndn)%a(j)
-                 if (ccr(jj) .ne. 0d0) then
-                    if ( kfs(i).eq.1 ) then
-                    else ! internal boundary: add to right-hand side
-                       rhs(nn) = rhs(nn) - ccr(jj)*s1(i)
-                    end if
-                 endif
-              enddo
+!      insert interface conditions
+       do n=1,nbndint
+          ki = kbndint(2,n)
+          ddr(ki) = ddr_sav(n)
+       end do
+       
+       do n=1,nbndint
+          kb = kbndint(1,n) ! boundary flownode, will be eliminated for the system
+          ki = kbndint(2,n)
+          !L  = kbndint(3,n) ! flowlink
+          jj = Lv2(L)       ! row number in the system
+          
+          if ( kfs(kb).ne.0 .or. kfs(ki).ne.1 ) then ! make sure kb is the boundary flownode
+             call mess(LEVEL_ERROR, 'testsolver: kfs error')
           end if
-       enddo
+          !   
+          !beta = abs(u1(L))*dts * Dxi(L)   ! CFL number in normal direcion
+          !!beta = 0.5d0
+          !beta = 10d0
+          val = (0.5d0-beta) * s1(ki) + (0.5d0+beta) * s1(kb)
+          ddr(ki) = ddr(ki) - ccr(jj)*val/(0.5d0+beta)   !s1(\kb)
+        !  bbr(ki) = bbr_sav(n) - ccr(jj)*(0.5d0-beta)/(0.5d0+beta)
+          
+          !zbndint(1,n) = beta
+          zbndint(2,n) = val
+       end do
        
+      
+             
        nn = nocg          ! number of rows
        na = iao(nn+1)-1   ! total number of non-zeros
        
 !      solve system, 
 !      do not reinitialize Saad solver and do not compute preconditioner again
-       call cgsaad(its,na,nn,0,1,ierror,res)
-       ! call cgsaad(its,na,nn,0,ierror,res)
+       nn = 0
+       do n=nogauss+1,nogauss+nocg
+          ndn = noel(n)       ! guus index
+          if (ndn > 0) then
+             nn  = nn + 1     ! n - nogauss   ! saad index
+          
+             sol(nn)   = s1 (ndn)
+!            rhs(nn)   = ddr(ndn)  ! input argument
+             rhs(nn)   = ddr(ndn)
+          endif
+       enddo
        
-       
-!      copy solution vector to s1
+       ipar(6) = Nsubiters
+       call cgsaad(its, na, nn, 0, jabicgstab, ierror, res)
        nn = 0 
        do n   = nogauss+1, nogauss+nocg
+          
+          ! nn  = n - nogauss  ! saad index
           ndn = noel(n)      ! guus index
           if (ndn > 0) then
              nn = nn + 1   
@@ -2333,7 +2540,54 @@ integer :: mout, n, i, jj, j, ntot
              s1(ndn) = ddr(ndn) / bbr(ndn) 
           endif    
        enddo
-    
+        !call cgsaad(its,na,nn,0,ierror,res)
+       
+       
+!      BEGIN DEBUG      
+         !call writematrix_matlab() 
+       
+          !call conjugategradientSAAD(ddr,s1,ndx,its,1,1,ierror)
+          
+!         reset ccr          
+          !ccr = ccrsav
+!      END DEBUG
+       
+!!      copy solution vector to s1
+!       nn = 0 
+!       do n   = nogauss+1, nogauss+nocg
+!          ndn = noel(n)      ! guus index
+!          if (ndn > 0) then
+!             nn = nn + 1   
+!             s1(ndn) = sol(nn)  ! en hier zet men thee en over
+!          else
+!             ndn = -ndn
+!             noel(n) = ndn
+!             s1(ndn) = ddr(ndn) / bbr(ndn) 
+!          endif    
+!       enddo
+!      set interface ghost values       
+       do n=1,nbndint
+          kb = kbndint(1,n)
+          ki = kbndint(2,n)
+          
+          !beta = zbndint(1,n)
+          val  = zbndint(2,n)
+          s1(kb) = (val - (0.5d0-beta)*s1(ki))/(0.5d0+beta)
+       end do
+!      compute global residual
+       res_global = fpar(3)**2
+       call reduce_sum(1, res_global)
+       !call mpi_allreduce(res_s2, res_global,1, mpi_double_precision, mpi_sum,DFM_COMM_DFMWORLD, ierror)
+       res_global = sqrt(res_global)
+       if (iter == 1) then
+         res_global0 = res_global(1)
+         tolDD = max(epscg*res_global0, epscg)
+       endif
+       
+       if ( res_global(1) < tolDD) then!.and. res.lt.epscg ) then
+          exit
+       end if
+       
 !      store s1 in ghost cells before update
        do i=1,nghostlist_s(ndomains-1)
           s1_ghost(i) = s1(ighostlist_s(i))
@@ -2343,13 +2597,23 @@ integer :: mout, n, i, jj, j, ntot
        if ( jatimer.eq.1 ) call starttimer(IMPICOMM)
        call update_ghosts(ITYPE_S, 1, Ndx, s1, ierror)
        if ( jatimer.eq.1 ) call stoptimer(IMPICOMM)
-    
-       maxdiff = 0d0
-!      compute maximum difference
-       do i=1,nghostlist_s(ndomains-1)
-          maxdiff = max(maxdiff, abs(s1_ghost(i)-s1(ighostlist_s(i))))
-       end do
        
+!       maxdiff = 0d0
+!!      compute maximum difference
+!       do i=1,nghostlist_s(ndomains-1)
+!          diff = s1_ghost(i)-s1(ighostlist_s(i))
+!          if ( abs(diff).gt.1d-6 .and. iter.ge.MAXITER-1 .and. my_rank.eq.0 ) then
+!             k = ighostlist_s(i)
+!             write(6,*) my_rank, i, k, iglobal_s(k), diff
+!          end if
+!          maxdiff = max(maxdiff, abs(diff))
+!       end do
+!!      compute err_ex
+!       err_ex = maxval(abs(xzw-s1))
+!       if (my_rank==0) then
+!       diff1(iter) = maxdiff
+!       err_1(iter) = err_ex
+!       endif
 !!      compute maximum redisual
 !       maxresloc = 0d0
 !       do n=nogauss+1,nogauss+nocg
@@ -2375,22 +2639,39 @@ integer :: mout, n, i, jj, j, ntot
        its = int(dum)
        
        if ( my_rank.eq.0 .and. javerbose.eq.1 ) then
-          write(6,*) 'iter=', iter, 'maxdiff=', maxdiff, 'its=', its, 'res=', res
-          write(iout,"(I8, E15.5, I8, E15.5, E15.5)") iter, maxdiff, its, res
+          write(6,*) 'iter=', iter, 'maxdiff=', maxdiff, 'its=', its, 'res=', res, 'ini_res=', fpar(3), 'global_res=', res_global(1)
+           !write(6,*) 'iter=', iter, 'res_global=', res_global, 'its=', its, 'sub res=', res, 'coupling res=', fpar(3)
        end if
               
        nocgiter = nocgiter+its
        
-       if ( maxdiff.lt.epsdiff .and. res.lt.epscg ) then
-          exit
-       end if
+       !if ( maxdiff.lt.epsdiff .and. res.lt.epscg ) then
+       !   exit
+       !end if
        
-       if ( iter.eq.1 ) then
-          fpar(2) = max(epscg,0.1d0*maxdiff)
-       else
-          fpar(2) = min(fpar(2),max(epscg,0.1d0*maxdiff))
-       end if
-       ipar(6) = maxmatvecs
+       !if (err_ex .lt. 1d-8) then
+       !   exit
+       !endif
+       
+       
+       !if ( iter.eq.1 ) then
+       !   fpar(2) = max(epscg,stoptol*maxdiff)
+       !else
+       !   fpar(2) = min(fpar(2),max(epscg,stoptol*maxdiff))
+       !end if
+       !if ( iter.eq.1 ) then
+       !   fpar(2) = max(epscg,stoptol*res_global(1))
+       !else
+       !   fpar(2) = min(fpar(2),max(epscg,stoptol*res_global(1)))
+       !end if
+       !ipar(6) = maxmatvecs
+!       write(6,*) "number of matvecs=", ipar(7)
+!       
+!!      BEGIN DEBUG
+       !fpar(2) = epscg
+!!      END DEBUG
+       
+       
     end do
     
     if ( my_rank.eq.0 ) then
@@ -2398,7 +2679,11 @@ integer :: mout, n, i, jj, j, ntot
        call mess(LEVEL_INFO, message)
     end if
     
-      
+   
+1234 continue
+
+    if ( allocated(bbr_sav) ) deallocate(bbr_sav)
+    if ( allocated(ddr_sav) ) deallocate(ddr_sav)
     
     return
  end subroutine testsolver

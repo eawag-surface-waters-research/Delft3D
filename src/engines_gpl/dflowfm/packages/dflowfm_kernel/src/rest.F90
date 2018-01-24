@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2017.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -27,118 +27,13 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: rest.F90 52266 2017-09-02 11:24:11Z klecz_ml $
-! $HeadURL: https://repos.deltares.nl/repos/ds/branches/dflowfm/20161017_dflowfm_codecleanup/engines_gpl/dflowfm/packages/dflowfm_kernel/src/rest.F90 $
-      !> Checks whether lines 1-2 and 3-4 intersect.
-      !! @param[in] x1,y1,x2,y2,x3,y3,x4,y4 x- and y-coords of line endpoints.
-      !! @param[out] jacros 1 if lines cross (intersect), 0 if not.
-      !! @param[out] sl lambda in [0,1] on line segment 1-2 (outside [0,1] if no intersection). Unchanged if no intersect!!
-      !! @param[out] sm lambda in [0,1] on line segment 3-4 (outside [0,1] if no intersection). Unchanged if no intersect!!
-      !! @param[out] xcr,ycr x-coord. of intersection point.
-      SUBROUTINE CROSS(x1, y1, x2, y2, x3, y3, x4, y4, JACROS,SL,SM,XCR,YCR,CRP)
-      use m_missing
-      implicit none
-      double precision, intent(inout) :: crp !< crp (in)==-1234 will make crp (out) non-dimensional
-      double precision :: det
-      double precision :: eps
-      integer :: jacros, jamakenondimensional 
-      double precision :: sl
-      double precision :: sm
-      double precision, intent(in) :: x1, y1, x2, y2, x3, y3, x4, y4
-      double precision :: x21, y21, x31, y31, x43, y43, xcr, ycr
-      double precision, external :: getdx, getdy
-
-
-     
-!     safety check on crp (in)
-      if ( isnan(crp) ) then
-         crp = 0d0
-      end if
-
-      ! Set defaults for no crossing at all:
-      jamakenondimensional = 0
-      if ( abs(crp+1234d0).lt.0.5d0 ) then
-         jamakenondimensional = 1
-         crp = 0d0
-      endif
-      
-      JACROS = 0
-      EPS    = 0.00001d0
-      SL     = DMISS
-      SM     = DMISS
-!     SL     = LABDA TUSSEN 0 EN 1 OP EERSTE PAAR
-!     Sm     = LABDA TUSSEN 0 EN 1 OP TWEEDE PAAR
-      
-      call getdxdy(x1,y1,x2,y2,x21,y21)
-      call getdxdy(x3,y3,x4,y4,x43,y43)
-      call getdxdy(x1,y1,x3,y3,x31,y31)
-
-      !X21 =  getdx(x1,y1,x2,y2)
-      !Y21 =  getdy(x1,y1,x2,y2)
-      !X43 =  getdx(x3,y3,x4,y4)
-      !Y43 =  getdy(x3,y3,x4,y4)
-      !X31 =  getdx(x1,y1,x3,y3)
-      !Y31 =  getdy(x1,y1,x3,y3)
-
-      DET =  X43*Y21 - Y43*X21
-
-!     SPvdP: make eps have proper dimension
-      EPS = max(EPS*MAXVAL((/ X21,Y21,X43,Y43,X31,Y31 /)), tiny(0d0))
-      IF (ABS(DET) .LT. EPS) THEN
-         RETURN
-      ELSE
-         SM = (Y31*X21 - X31*Y21) / DET
-         IF (ABS(X21) .GT. EPS) THEN
-            SL = (SM*X43 + X31) / X21
-         ELSE IF (ABS(Y21) .GT. EPS) THEN
-            SL = (SM*Y43 + Y31) / Y21
-         ELSE
-            SL   = 0d0
-         ENDIF
-         IF (SM .GE. 0d0 .AND. SM .LE. 1d0 .AND. &
-             SL .GE. 0d0 .AND. SL .LE. 1d0) THEN
-            JACROS = 1
-         ENDIF
-         XCR    = X1 + SL*(X2-X1)
-         YCR    = Y1 + SL*(Y2-Y1)
-         if ( jamakenondimensional.eq.1 ) then  ! make crp non-dimensional (for spline2curvi)
-            CRP    = -DET / ( sqrt(x21**2+y21**2) * sqrt(x43**2 + y43**2) + 1d-8 )
-         else
-            CRP    = -DET
-         end if
-      ENDIF
-      RETURN
-      END
-   
-      SUBROUTINE CROSSinbox (x1, y1, x2, y2, x3, y3, x4, y4, JACROS,SL,SM,XCR,YCR,CRP)  ! only if overlap   
-      use m_missing
-      implicit none
-      double precision, intent(inout) :: crp ! crp (in)==-1234 will make crp (out) non-dimensional
-      integer                         :: jacros
-      double precision, intent(in)    :: x1, y1, x2, y2, x3, y3, x4, y4
-      double precision, intent(out)   :: SL,SM,XCR,YCR
-      double precision                :: x1min, x1max, y1min, y1max, x3min, x3max, y3min, y3max
-     
-      ! Set defaults for no crossing at all:
-      JACROS = 0
-
-      x1min = min(x1,x2); x1max = max(x1,x2) 
-      y1min = min(y1,y2); y1max = max(y1,y2) 
-      x3min = min(x3,x4); x3max = max(x3,x4) 
-      y3min = min(y3,y4); y3max = max(y3,y4) 
-
-      if (x1max < x3min) return
-      if (x1min > x3max) return
-      if (y1max < y3min) return
-      if (y1min > y3max) return
-
-      call CROSS (x1, y1, x2, y2, x3, y3, x4, y4, JACROS,SL,SM,XCR,YCR,CRP)
-
-      RETURN
-      END
+! $Id: rest.F90 54131 2018-01-18 14:02:31Z carniato $
+! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/rest.F90 $
 
       SUBROUTINE dCROSS(X1,Y1,X2,Y2,X3,Y3,X4,Y4,JACROS,SL,SM,XCR,YCR,CRP) ! liggen 3 en 4 aan weerszijden van lijn 12
       use m_sferic
+      use geometry_module, only: getdxdy, sphertoCart3D, Cart3Dtospher, crossinbox
+      use m_missing, only: dmiss
       implicit none
       double precision           :: det
       double precision           :: eps
@@ -157,7 +52,6 @@
       double precision           :: det2
       double precision           :: xxcr, yycr, zzcr
       
-      double precision, external :: getdx, getdy
 
       JACROS = 0
       EPS    = 0.00001d0
@@ -208,9 +102,9 @@
          end if
          
       else
-         call getdxdy(x1,y1,x2,y2,x21,y21)
-         call getdxdy(x3,y3,x4,y4,x43,y43)
-         call getdxdy(x1,y1,x3,y3,x31,y31)
+         call getdxdy(x1,y1,x2,y2,x21,y21,jsferic)
+         call getdxdy(x3,y3,x4,y4,x43,y43,jsferic)
+         call getdxdy(x1,y1,x3,y3,x31,y31,jsferic)
          
          !X21 =  getdx(x1,y1,x2,y2)
          !Y21 =  getdy(x1,y1,x2,y2)
@@ -243,7 +137,12 @@
       END subroutine dcross
 
       double precision FUNCTION DISLIN(X,Y,N,XX,YY,TV)
+      
 !     AFSTAND VAN PUNT XX,YY TOT LIJN MET PARM TV
+      use geometry_module, only: dbdistance
+      use m_missing, only: dmiss
+      use m_sferic, only: jsferic, jasfer3D
+      
       implicit none
       integer :: n
       double precision :: tv
@@ -251,11 +150,11 @@
       double precision :: xx
       double precision :: yv
       double precision :: yy
-      double precision :: dbdistance
+
       double precision :: X(N), Y(N)
       TV   = MAX(0d0,MIN(TV,N-1d0))
       CALL LINT(X,Y,N,TV,XV,YV)
-      dislin = dbDISTANCE(XV,YV,XX,YY )
+      dislin = dbdistance(XV,YV,XX,YY,jsferic, jasfer3D, dmiss)
       RETURN
       END function dislin
 
@@ -627,12 +526,12 @@ end subroutine read_land_boundary_netcdf
       integer :: nrow
       integer :: nmiss
       double precision :: xx, yy, zz, dz1, dz2
-      double precision :: hcrest,sillup, silldown, crestl,taludl, taludr, veg
+      double precision :: zcrest,sillup, silldown, crestl,taludl, taludr, veg
       character(len=1) :: weirtype
       
       CHARACTER(len=5) :: CHARMC
       character(len=64) :: MATR
-      character(len=132) :: REC
+      character(len=256) :: REC
       
       janampl = 0
       if (index (filenames(mpol),'crs' ) > 0) then 
@@ -705,11 +604,11 @@ end subroutine read_land_boundary_netcdf
                 READ(MPOL,'(A)',END = 999) REC
                 ZZ = DMISS ; dz1 = dmiss; dz2 = dmiss
                 if (nkol == 10) then 
-                    READ(REC,*,ERR=777) XX,YY,hcrest, sillup, silldown, crestl, taludl, taludr, veg, weirtype  ! read weir data from Baseline format plus weirtype 
-                    ZZ = hcrest ! dummy value for zz to guarantee that ZPL will be filled
+                    READ(REC,*,ERR=777) XX,YY,zcrest, sillup, silldown, crestl, taludl, taludr, veg, weirtype  ! read weir data from Baseline format plus weirtype 
+                    ZZ = zcrest ! dummy value for zz to guarantee that ZPL will be filled
                 else if (nkol == 9) then 
-                    READ(REC,*,ERR=777) XX,YY,hcrest, sillup, silldown, crestl, taludl, taludr, veg  ! read weir data from Baseline format 
-                    ZZ = hcrest ! dummy value for zz to guarantee that ZPL will be filled
+                    READ(REC,*,ERR=777) XX,YY,zcrest, sillup, silldown, crestl, taludl, taludr, veg  ! read weir data from Baseline format 
+                    ZZ = zcrest ! dummy value for zz to guarantee that ZPL will be filled
                 else if (nkol == 5) then 
                     READ(REC,*,ERR=777) XX,YY,ZZ,dz1,dz2
                 else if (nkol == 4) then 
@@ -1216,40 +1115,11 @@ end subroutine read_land_boundary_netcdf
       RETURN
       END
 
-      LOGICAL FUNCTION INVIEW(X,Y)
-      USE M_MISSING
-      use m_wearelt
-      implicit none
-      double precision :: x
-      double precision :: y
-!     ZIT IK IN ZOOMGEBIED? NULLEN EN DEFAULTS NIET
-
-      IF (               X .NE. dmiss .AND.     &
-                         X .GT. X1 .AND. X .LT. X2 .AND.             &
-                         Y .GT. Y1 .AND. Y .LT. Y2     ) THEN
-         INVIEW = .TRUE.
-      ELSE
-         INVIEW = .FALSE.
-      ENDIF
-      RETURN
-      END
-
-      LOGICAL FUNCTION DINVIEW(XD,YD,ZD)
-      implicit none
-      double precision :: x
-      double precision :: y
-      double precision :: z
-      LOGICAL INVIEW
-      DOUBLE PRECISION XD,YD,ZD
-      CALL DRIETWEE(XD,YD,ZD,X,Y,Z)
-      DINVIEW = INVIEW(X,Y)
-      RETURN
-      END
-
       SUBROUTINE ZEROLAN( KEY)
-      use M_landboundary
-      use M_polygon
-      USE M_MISSING
+      use m_landboundary
+      use m_polygon
+      use m_missing
+      use geometry_module, only: dbpinpol
       implicit none
       integer :: i
       integer :: inhul
@@ -1279,7 +1149,7 @@ end subroutine read_land_boundary_netcdf
 !     CALL SAVESAM()
       INHUL = -1
       DO 10 I = 1,MXLAN
-            CALL DBPINPOL( XLAN(I), YLAN(I), INHUL)
+            CALL DBPINPOL( XLAN(I), YLAN(I), INHUL, dmiss, JINS, NPL, xpl, ypl, zpl)
             IF (INHUL .EQ. 1) THEN
                XLAN(I)  = dmiss
                YLAN(I)  = dmiss
@@ -2741,7 +2611,7 @@ end subroutine read_land_boundary_netcdf
     SUBROUTINE SETCLASSFILE()
     implicit none
     integer :: minp
-    CHARACTER FILNAM*76
+    CHARACTER FILNAM*86
     FILNAM = '*.cls'
     MINP   = 0
     CALL FILEMENU(MINP,FILNAM)
@@ -2857,845 +2727,7 @@ end subroutine read_land_boundary_netcdf
       RETURN
       END
 
-      subroutine triinterp2(XZ,YZ,BL,NDX,JDLA)
-      use m_samples
-      use m_polygon
-      USE M_MISSING
-      implicit none
-      integer :: jdla
-      integer :: jakdtree
-      integer :: k
-      integer :: ndx
-      DOUBLE PRECISION  :: XZ(ndx), YZ(ndx), BL(ndx)
-
-      if (ndx < 1) return
-      
-      jakdtree = 1
-
-      if ( MXSAM.gt.0 .and. MYSAM.gt. 0 ) then  ! bi-linear interpolation
-         call bilin_interp(NDX, XZ, YZ, BL)
-      else  ! Delauny
-         call TRIINTfast(XS,YS,ZS,NS,1,XZ,YZ,BL,Ndx,Xpl,Ypl,Npl,JDLA,jakdtree)
-      end if
-
-      end subroutine triinterp2
-
-      SUBROUTINE TRIINTfast(XS,YS,ZS,NS,NDIM,X,Y,Z,NXY,XH,YH,NH,JDLA,jakdtree)
-      USE M_TRIANGLE
-      USE M_MISSING
-      use unstruc_colors
-      use m_interpolationsettings
-!      use m_kdtree2, only: ITREE_EMPTY, ITREE_DIRTY
-      use m_sferic,  only: jsferic
-      use m_kdtree2
-      use m_flowexternalforcings , only: transformcoef
-      
-      implicit none
-      integer, intent(inout) :: jakdtree !< use kdtree (1) or not (0)
-      double precision :: af
-      integer :: i, IERR, k, inhul, intri, jdla, jslo
-      integer :: n, in, nxx, nxy
-      integer :: NDIM  !< sample vector dimension
-      integer :: naf
-      integer :: nbf
-      integer :: ncf
-      integer :: ncol
-      integer :: ndraw
-      integer :: nh
-      integer :: nrfind
-      integer :: ns, n2
-      integer :: idim
-
-      double precision :: rd
-      double precision :: slo(NDIM)
-      double precision :: xmaxs
-      double precision :: xmins
-      double precision :: xp, yp, zp(NDIM), xpmin, xpmax,ypmin, ypmax
-      double precision :: ymaxs
-      double precision :: ymins
-      double precision :: XS(ns), YS(ns), ZS(NDIM,ns), X(nxy), Y(nxy), Z(NDIM,nxy)
-      double precision :: XH(nh), YH(nh), XL(3),YL(3)
-      double precision, allocatable :: xx(:), yy(:) , zz(:,:)
-      integer         , allocatable :: ind(:)
-
-      double precision, dimension(:),   allocatable :: xs1, ys1      ! for store/restore of xs, ys
-      double precision, dimension(:,:), allocatable :: zs1           ! for store/restore of zs
-
-      double precision                              :: xsmin, ysmin, xsmax, ysmax  ! bounding box corner coordinates
-
-      integer                                       :: indf(3) 
-      double precision                              :: wf(3)
-      
-      integer                                       :: NS1           ! for store/restore of NS
-      
-      integer                                       :: jadum, ierror
-
-      logical                                       :: Ldeleteddata  ! for store/restore of xs, ys and zs
-
-      type(kdtree_instance) :: sampletree
-
-      COMMON /DRAWTHIS/  ndraw(50)
-      
-      integer                        :: numsam, ii, k1, jakdtree2    
-      double precision               :: R2Search, dist2, cof1, cof2
-      
-      jakdtree2 = jakdtree
-
-      if ( jakdtree.eq.1 ) then
-!       enforce generation of kdtree
-        treeglob%itreestat = ITREE_EMPTY
-      end if
-
-!     JSLO=1, OOK SLOPES RD4
-      IF (NS .LE. 2) RETURN
-      JSLO = 0
-
-      Ldeleteddata = .false.
-
-      jdla = 1   ! later, maybe remove this if you want to avoid dlauny every time. This is not working now.
-      IF (JDLA == 1) THEN
-
-         IF (Nh > 2) THEN ! polygon size reduction
-
-            xpmin = minval(xh(1:nh)) ; xpmax = maxval(xh(1:nh))
-            ypmin = minval(yh(1:nh)) ; ypmax = maxval(yh(1:nh))
-            rd = 0.2*(xpmax-xpmin)   ; xpmin = xpmin - rd ; xpmax = xpmax + rd
-            rd = 0.2*(ypmax-ypmin)   ; ypmin = ypmin - rd ; ypmax = ypmax + rd
-
-!            CALL SAVESAM()   ! xs, ys, zs not necessarilly sample data
-
-!           store original data
-            allocate(xs1(NS), ys1(NS), zs1(NDIM,NS))
-            NS1 = NS
-            do i=1,NS
-               xs1(i) = xs(i)
-               ys1(i) = ys(i)
-               do k=1,NDIM
-                  zs1(k,i) = zs(k,i)
-               end do
-            end do   
-            Ldeleteddata = .true.
-                    
-            n2   = 0
-            idim = 1 ! DMISS check on first sample dimension only
-            in   = -1
-            DO K = 1,Ns
-               if (jins == 1) then 
-                  if ( xs(k) > xpmin .and. xs(k) < xpmax .and. ys(k) > ypmin .and. ys(k) < ypmax .and. zs(idim,k).ne.DMISS ) then
-                      n2 = n2 + 1; xs(n2) = xs(k) ; ys(n2) = ys(k) ; zs(1:NDIM,n2) = zs(1:NDIM,k)
-                  endif
-               else 
-                  if (zs(idim,k).ne.DMISS ) then
-                      n2 = n2 + 1; xs(n2) = xs(k) ; ys(n2) = ys(k) ; zs(1:NDIM,n2) = zs(1:NDIM,k)
-                  endif
-               endif   
-            ENDDO
-         
-
-            nxx  = 0        ! count net/grid size 
-            DO K = 1,Nxy
-               if (jins == 1) then 
-                  if ( x(k) > xpmin .and. x(k) < xpmax .and. y(k) > ypmin .and. y(k) < ypmax ) then
-                      nxx = nxx + 1
-                  endif
-               else 
-                  nxx = nxx + 1
-               endif   
-            ENDDO
-            allocate (xx (nxx), yy(nxx), zz(NDIM,nxx) )
-            allocate (ind(nxx)) ; ind = 0
-
-            nxx  = 0 ; in = -1  ! net/grid size reduction
-            DO K = 1,Nxy
-               call dbpinpol(x(k), y(k), in)
-               if (in == 1) then
-                   nxx = nxx + 1
-                   ind(nxx) = k
-                   xx (nxx) = x(k); yy(nxx) = y(k); zz(1:NDIM,nxx) = z(1:NDIM,k)
-               endif
-            ENDDO
-         ELSE 
-            NXX = NXY; N2 = NS 
-         ENDIF
-            
-!        determine sample bounding box
-         xsmin = minval(xs,mask=xs.ne.DMISS)
-         xsmax = maxval(xs,mask=xs.ne.DMISS)
-         ysmin = minval(ys,mask=ys.ne.DMISS)
-         ysmax = maxval(ys,mask=ys.ne.DMISS)
-
-         ierr = 1
-         if ( jakdtree.ne.1 ) then
-            CALL DLAUN(XS,YS,N2,1,IERR)
-         else
-            call dlaun(xs,ys,N2,3,ierr)   ! generate edgeindex and triedge
-         end if
-         if ( IERR.ne.0 ) then
-            goto 1234
-         end if
-         JDLA = 0
-      ENDIF
-
-      IF (NUMTRI .LT. 1) THEN
-         RETURN
-      ENDIF
-      
-      !if ( numtri.lt.40 ) then
-      !   jakdtree=0
-      !end if
-      
-      NCOL = 14
-      IF (Jtekinterpolationprocess .NE. 0) THEN
-         DO I = 1,NUMTRI
-
-            NAF   = INDX(1,I)
-            NBF   = INDX(2,I)
-            NCF   = INDX(3,I)
-            XL(1) = XS(NAF)
-            XL(2) = XS(NBF)
-            XL(3) = XS(NCF)
-
-            YL(1) = YS(NAF)
-            YL(2) = YS(NBF)
-            YL(3) = YS(NCF)
-
-            CALL TEKTRI(XL,YL,NCOLDN)
-         ENDDO
-      ENDIF
-      
-      R2search = 0d0
-      if( transformcoef(6) /= dmiss ) R2search = transformcoef(6)**2
-      if ( jakdtree2 == 1 .and. R2search.gt.0d0 ) then             ! build kd-tree for sample points
-         sampletree%itreestat = ITREE_EMPTY
-         call build_kdtree(sampletree, n2,xs,ys,ierror)
-         if ( ierror /= 0 ) then
-            if ( sampletree%itreestat /= ITREE_EMPTY ) call delete_kdtree2(sampletree)
-            jakdtree2 = 0
-         end if
-      end if
-      
-      KMOD = MAX(1,NXX/100)
-      DO N = 1,NXx
-      
-         IF (Jtekinterpolationprocess == 0 .AND. MOD(N,KMOD) == 0 ) THEN
-            AF = dble(N-1) / dble(NXX)
-            CALL READYY('TRIANGLE INTERPOLATION',AF)
-         ENDIF
-
-
-         idim = 1 ! DMISS check on first sample dimension only
-         if (nh > 2) then  
-            XP = xx(N)
-            YP = yy(N)
-            RD = zz(idim,N)
-         else 
-            XP = x(N)
-            YP = y(N)
-            RD = z(idim,N)
-         endif
-         
-     
-         INTRI = 0
-         ! For triangulation, only consider points that are inside the sample bounding box
-         if ( xp.ge.xsmin .and. xp.le.xsmax .and. yp.ge.ysmin .and. yp.le.ysmax ) then
-            IF (RD .EQ. dmiss) then
-               if ( jakdtree.eq.1 ) then
-                  jadum = 0
-                  !if ( N.eq.974271 ) jadum = 1
-                  !if ( N.eq.21 ) jadum = 1
-                  !if ( N.eq.263 ) jadum = 1
-                  !if ( N.eq.5839 .or. N.eq.5935 ) jadum = 1
-                  !if ( N.eq.31 .or. N.eq.169 .or. N.eq.360 ) jadum = 1
-                  !if ( N.eq.8081 ) jadum = 1
-                  !if ( N.eq.7797 ) jadum = 1
-                  !if ( N.eq.341 ) jadum = 
-                  !if ( N.eq.9 ) jadum = 1
-                  call findtri_kdtree(XP,YP,ZP,XS,YS,ZS,N2,NDIM, &
-                             NRFIND,INTRI,JSLO,SLO,Jtekinterpolationprocess,jadum,ierror,indf,wf)
-                  if ( ierror.ne.0 ) then
-!                    deallocate
-                     if ( treeglob%itreestat.ne.ITREE_EMPTY ) call delete_kdtree2(treeglob)
-                     if ( allocated(imask) ) deallocate(imask)
-                     if ( allocated(LNtri) ) deallocate(LNtri)
-!                    disable kdtree
-                     jakdtree = 0
-                  end if
-               end if
-
-             if ( jakdtree.ne.1 ) then
-                CALL FINDTRI(XP,YP,ZP,XS,YS,ZS,N2,NDIM,     &
-                             NRFIND,INTRI,JSLO,SLO,Jtekinterpolationprocess,indf,wf)
-             end if
-             
-             IF (INTRI .EQ. 1) THEN
-                if (nh > 2) then 
-                   Zz(:,N) = ZP
-                else 
-                   z(:,n) = zp
-                endif   
-
-                if (jagetwf == 1) then 
-                   indxx(1:3,n) = indf(1:3) 
-                   wfxx (1:3,n) = wf (1:3) 
-                endif
-             
-             ENDIF ! (INTRI .EQ. 1)
-            ENDIF ! (XP .NE. XYMIS .AND. ... .AND. YP .LE. YMAXS )
-         endif
-
-
-         !!!!!!!!!! give it another try with nearest neighbour opr inverse distance.
-         if (intri == 0 .and. R2search.gt.0d0) then 
-            if (RD == dmiss) then           
-               if( jakdtree2 == 1 ) then
-                  call make_queryvector_kdtree(sampletree, xp, yp )
-                  numsam = kdtree2_r_count( sampletree%tree, sampletree%qv, R2search )
-                  if ( numsam.gt.0 ) then
-                     call realloc_results_kdtree(sampletree, numsam)
-                     call kdtree2_n_nearest(sampletree%tree,sampletree%qv,numsam,sampletree%results)
-                  end if
-            
-                  do i = 1,idim
-                     ii = 0
-                     cof1 = 0d0
-                     cof2 = 0d0
-                     do k = 1,numsam
-                        k1 = sampletree%results(k)%idx
-                        if( abs( xp - xs(k1) ) < 1d-6 .and. abs( yp - ys(k1) ) < 1d-6 ) then
-                           ii = 1
-                           z(i,n) = zs(i,k1)
-                           exit
-                        endif
-                        dist2 = ( xp - xs(k1) )**2 +  ( yp - ys(k1) )**2
-                        cof1 = cof1 + zs(i,k1) / dist2
-                        cof2 = cof2 + 1d0 / dist2
-                     enddo
-                     if( ii == 0 .and. numsam > 0 ) then
-                        z(i,n) = cof1 / cof2
-                     end if
-                  enddo
-                  
-               else
-                  do i = 1,idim
-                     ii = 0
-                     cof1 = 0d0
-                     cof2 = 0d0
-                     do k = 1,n2
-                        if( abs( xp - xs(k) ) < 1d-6 .and. abs( yp - ys(k) ) < 1d-6 ) then
-                           ii = 1
-                           z(i,n) = zs(i,k)
-                           exit
-                        endif
-                        dist2 = ( xp - xs(k) )**2 +  ( yp - ys(k) )**2
-                        cof1 = cof1 + zs(i,k) / dist2
-                        cof2 = cof2 + 1d0 / dist2
-                     enddo
-                     if( ii == 0 ) then
-                        z(i,n) = cof1 / cof2
-                     end if
-                  enddo  
-               endif
-            endif ! RDMISS
-
-         end if ! intri ==0
-
-      ENDDO ! DO N = 1,NXx
-
-      IF (Jtekinterpolationprocess == 0) CALL READYY('TRIANGLE INTERPOLATION',-1d0)
-
-      if (nh > 2) then
-         do k = 1,nxx
-            do idim=1,NDIM
-               z(idim,ind(k)) = zz(idim,k)
-            end do
-         enddo
-         deallocate (xx, yy, zz, ind)
-!         CALL RESTORESAM()
-      endif
-      
- 1234 continue
- 
-!     deallocate
-      if ( jakdtree.eq.1 ) then
-         if ( treeglob%itreestat   .ne. ITREE_EMPTY ) call delete_kdtree2(treeglob  )
-         if ( sampletree%itreestat .ne. ITREE_EMPTY ) call delete_kdtree2(sampletree)
-         if ( allocated(imask) ) deallocate(imask)
-         if ( allocated(LNtri) ) deallocate(LNtri)
-         if ( allocated(edgeindx) ) deallocate(edgeindx)
-         if ( allocated(triedge) ) deallocate(triedge)
-         if ( allocated(indx) ) deallocate(indx)
-      end if
-
-!     restore original data
-      if ( Ldeleteddata ) then
-         NS = NS1
-         do i=1,NS
-            xs(i) = xs1(i)
-            ys(i) = ys1(i)
-            do k=1,NDIM
-               zs(k,i) = zs1(k,i)
-            end do
-         end do   
-         deallocate(xs1, ys1, zs1)
-      end if
-
-      RETURN
-      END subroutine triintfast
-
-
-      SUBROUTINE FINDTRI(XP,YP,ZP,XS,YS,ZS,NS,NDIM,NRFIND,INTRI,JSLO,SLO,JATEK, ind, wf)
-      USE M_MISSING
-      USE M_TRIANGLE
-      implicit none
-      integer :: intri, jatek, jslo
-      integer :: k, k1, k2, numit
-      integer :: nrfind, nroldfind, interval
-      integer :: ns
-      integer :: NDIM   !< sample vector dimension
-      integer :: idim, ind(3)
-      double precision :: slo(NDIM)
-      double precision :: xp
-      double precision :: xtmax
-      double precision :: xtmin
-      double precision :: yp
-      double precision :: ytmax
-      double precision :: ytmin
-      double precision :: zp(NDIM)
-      double precision :: XS(NS), YS(NS), ZS(NDIM,NS), XT(3),YT(3),ZT(NDIM,3), wf(3)
-      
-      integer          :: ik1, ik2, ik3
-
-      DATA NROLDFIND /0/
-
-      ZP       = dmiss
-      INTRI    = 0
-      interval = 2 ; numit = 0; nrfind = 0
-    5 CONTINUE
-      numit    = numit + 1
-      interval = 5*interval
-
-      K1 = MAX(1     ,NROLDFIND-interval)
-      K2 = MIN(NUMTRI,NROLDFIND+interval)
-
-      DO K = K1,K2
-         ik1 = INDX(1,K)
-         ik2 = INDX(2,K)
-         ik3 = INDX(3,K)
-         XT(1) = XS(ik1)
-         XT(2) = XS(ik2)
-         XT(3) = XS(ik3)
-         YT(1) = YS(ik1)
-         YT(2) = YS(ik2)
-         YT(3) = YS(ik3)
-         XTMAX = MAX(XT(1),MAX( XT(2),XT(3) ) )
-         YTMAX = MAX(YT(1),MAX( YT(2),YT(3) ) )
-         XTMIN = MIN(XT(1),MIN( XT(2),XT(3) ) )
-         YTMIN = MIN(YT(1),MIN( YT(2),YT(3) ) )
-         IF (XP .GE. XTMIN .AND. XP .LE. XTMAX .AND.   &
-             YP .GE. YTMIN .AND. YP .LE. YTMAX) THEN
-            CALL PINPOK(XP,YP,3,XT,YT,INTRI)
-            IF (INTRI .EQ. 1) THEN
-               NRFIND    = K
-               NROLDFIND = NRFIND
-               do idim=1,NDIM
-                  ZT(idim,1) = ZS(idim,INDX(1,K))
-                  ZT(idim,2) = ZS(idim,INDX(2,K))
-                  ZT(idim,3) = ZS(idim,INDX(3,K))
-               end do
-               CALL LINEAR (XT, YT, ZT, NDIM, XP, YP, ZP, JSLO, SLO, JATEK, wf)
-               ind(1) = ik1  
-               ind(2) = ik2  
-               ind(3) = ik3  
-               RETURN
-            ENDIF
-         ENDIF
-      ENDDO
-      if (k1 == 1 .and. k2 == numtri) then
-         NROLDFIND = numtri / 2
-         return
-      endif
-      IF (NRfind == 0) THEN
-         GOTO 5
-      ENDIF
-      RETURN
-      END
-      
-
-!>    find triangle for interpolation with kdtree
-!>       will initialize kdtree and triangulation connectivity
-      subroutine findtri_kdtree(XP,YP,ZP,XS,YS,ZS,NS,NDIM,NRFIND,INTRI,JSLO,SLO,JATEK,jadum,ierror,ind,wf)
-         use m_missing
-         use m_triangle
-         use m_kdtree2
-         use MessageHandling
-         use m_sferic
-         use m_alloc
-         implicit none
-         
-         double precision, intent(in)                :: xp, yp    !< node coordinates
-         double precision, intent(out)               :: zp(NDIM)  !< node values
-         integer,          intent(in)                :: NS        !< number of samples
-         integer,          intent(in)                :: NDIM      !< sample vector dimension
-         double precision, intent(in)                :: xs(NS), ys(NS), zs(NDIM,NS) !< sample coordinates and values
-         integer,          intent(out)               :: NRFIND    !< triangle index
-         integer,          intent(out)               :: intri     !< in triangle (1) or not (0)
-         integer,          intent(in)                :: jslo      !< get slope (1) or not (0)
-         double precision, intent(out)               :: slo(NDIM) !< slope
-         integer,          intent(in)                :: JATEK     !< draw to screen (1) or not (0)
-         integer,          intent(in)                :: jadum     !< debug (1) or not (0)
-         integer,          intent(out)               :: ierror    !< error (1) or not (0)
-         integer,          intent(out)               :: ind(3)    !< 
-         double precision, intent(out)               :: wf(3)     !< 
-
-         
-         double precision, dimension(:), allocatable :: xx, yy !< triangle circumcenter coordinates, dim(numtri)
-         
-         double precision, dimension(3)      :: xv, yv    ! triangle node coordinates
-         double precision, dimension(NDIM,3) :: zv        ! triangle node vectors
-         
-         
-         double precision                    :: xz, yz    ! triangle circumcenter
-         double precision                    :: SL,SM,XCR,YCR,CRP
-         
-         integer                             :: NN        ! number of nearest points
-         integer                             :: IDIM      ! dimensionality
-         
-         integer                             :: i, inod, inod1, inod2, inod3, inod4, ii, iii, iip1, inext, j, k
-         integer                             :: iothertri, iiothertri, inodother, numtrisnew, jacros, iothertriangle
-         integer                             :: jsferic_store, ierr
-         integer                             :: iedge, k1, k2, numsearched
-
-         double precision, parameter         :: dtol = 1d-8
-         integer,          parameter         :: MAXTRICON=100
-         integer,          parameter         :: INIT_TRIS_PER_NODE=6
-         
-         double precision, external          :: dcosphi
-
-         ierror = 1     
-         
-         NRFIND = 0
-
-         if ( numtri.le.1 ) then
-!            call qnerror('findtri_kdtree: numtri<=1', ' ', ' ')
-            goto 1234
-         end if
-
-!        store jsferic
-         jsferic_store = jsferic
-         
-         if ( treeglob%itreestat /= ITREE_OK ) then
-
-!           INITIALIZE kdetree2
-            call mess(LEVEL_INFO,'Determining triangle connectivity and computing polygons and circumcenters...')
-            
-            allocate(xx(numtri), yy(numtri), stat=ierr)
-            call aerr('xx(numtri), yy(numtri)', ierr, 2*numtri)
-            allocate(imask(numtri), stat=ierr)
-            call aerr('imask(numtri)', ierr, numtri)
-            imask = 0
-            IDENT = 0
-
-            allocate(LNtri(2,numedge), stat=ierr)
-            call aerr('LNtri(2,numedge)', ierr, 2*numedge)
-            LNtri = 0
-         
-!           dlaun is not spherical proof: set global jsferic for circumcenter
-            jsferic = 0
-            
-            do i=1,numtri
-               do ii=1,3
-!                 generate edge-triangle connectivity
-                  iedge = triedge(ii,i)
-                  if ( LNtri(1,iedge).eq.0 ) then
-                     LNtri(1,iedge) = i
-                  else
-                     LNtri(2,iedge) = i
-                  end if
-
-                  inod = indx(ii,i)
-                  
-!                 get triangle polygon
-                  xv(ii) = xs(inod)
-                  yv(ii) = ys(inod)
-                  zv(1:NDIM,ii) = zs(1:NDIM,inod)
-               end do
-
-!              compute triangle circumcenter
-               !call circumcenter3(3, xv, yv, xx(i), yy(i))
-               xx(i) = sum(xv(1:3)) / 3d0
-               yy(i) = sum(yv(1:3)) / 3d0
-            end do
-    
-   !        restore jsferic
-            jsferic = jsferic_store
-
-            call mess(LEVEL_INFO, 'done')
-
-            call build_kdtree(treeglob, numtri, xx, yy, ierror)
-
-!           deallocate
-            deallocate(xx, yy)
-
-            if ( ierror.ne.0 ) then
-               goto 1234
-            end if
-         end if
-
-         if ( jadum.eq.1 ) then
-            continue
-         end if
-
-!        update identifier
-         IDENT=IDENT+1
-        
-!        fill query vector
-         call make_queryvector_kdtree(treeglob,xp,yp)
-
-!        get first triangle
-         call kdtree2_n_nearest(treeglob%tree,treeglob%qv,1,treeglob%results)
-         inext = treeglob%results(1)%idx
-
-!        perform a line search
-         numsearched = 1
-         i = 0
-         
- mainloop:do while ( NRFIND.eq.0 .and. numsearched.le.2*NUMTRI .and. numsearched.gt.0 )
-         
-         inext = treeglob%results(1)%idx
-         
-         numsearched = 0
-         
-!        check current triangle
-         do ii=1,3
-            inod = indx(ii,inext)
-            xv(ii) = xs(inod)
-            yv(ii) = ys(inod)
-            zv(1:NDIM,ii) = zs(1:NDIM,inod)
-         end do
-
-!        get cell centroid
-         xz = sum(xv(1:3)) / 3d0
-         yz = sum(yv(1:3)) / 3d0
-
-         do while ( inext.gt.0 .and. inext.le.numtri .and. numsearched.le.2*NUMTRI )   ! numsearched: safety
-            i = inext
-
-!           check current triangle
-            do ii=1,3
-               inod = indx(ii,i)
-               xv(ii) = xs(inod)
-               yv(ii) = ys(inod)
-               zv(1:NDIM,ii) = zs(1:NDIM,inod)
-            end do
-
-            if ( jadum.eq.1 ) then
-               call tektri(xv,yv,31)
-               xz = sum(xv(1:3)) / 3d0
-               yz = sum(yv(1:3)) / 3d0
-               call cirr(xz,yz,31)
-            end if
-            
-            if ( imask(i).eq.IDENT ) then
-               intri = 0
-            else
-               numsearched = numsearched+1
-               call pinpok(xp,yp,3,xv,yv,intri)
-               imask(i) = IDENT
-            end if
-
-            if ( intri.eq.1 ) then
-               NRFIND = i
-               exit mainloop
-            end if
-
-!           dlaun is not spherical proof: set global jsferic
-            jsferic = 0
-
-!           proceed to next triangle, which is adjacent to the edge that is cut by the line from the current triangle to the query point
-            xz = sum(xv(1:3)) / 3d0
-            yz = sum(yv(1:3)) / 3d0
-            inext = 0
-
-            if ( jadum.eq.1 ) then
-               call setcol(221)
-               call movabs(xz,yz)
-               call lnabs(xp,yp)
-               call setcol(31)
-            end if
-
-            do ii=1,3
-               iedge=triedge(ii,i)
-               if ( LNtri(2,iedge).eq.0 ) cycle
-
-               iothertriangle = LNtri(1,iedge) + LNtri(2,iedge) - i
-               if ( imask(iothertriangle).eq.IDENT ) then
-                  cycle
-               end if
-
-               k1 = edgeindx(1,iedge)
-               k2 = edgeindx(2,iedge)
-               call CROSS(xz, yz, xp, yp, xs(k1), ys(k1), xs(k2), ys(k2), JACROS,SL,SM,XCR,YCR,CRP)
-
-!              use tolerance
-               if ( jacros.eq.0 ) then
-                  if ( sm.eq.dmiss .or. sl.eq.dmiss ) then
-!                    triangle with small area: sm and sl have not been computed                  
-                     jacros = 1
-                  else IF (SM .GE. 0d0-dtol .AND. SM .LE. 1d0+dtol .AND. &
-                      SL .GE. 0d0-dtol .AND. SL .LE. 1d0+dtol) THEN
-                     JACROS = 1
-                  ENDIF
-               end if
-
-               if ( jadum.eq.1 .and. jacros.eq.1 ) then
-                  call movabs(xs(k1),ys(k1))
-                  call lnabs(xs(k2),ys(k2))
-                  call qnerror(' ', ' ', ' ')
-               end if
-
-               if ( jacros.eq.1 ) then  ! only select this edge if it has a second adjacent triangle
-                  inext = iothertriangle
-                  exit
-               end if
-            end do
-
-   !        restore jsferic
-            jsferic = jsferic_store
-
-            !if ( jadum.eq.1 ) then
-            !   call tektri(xv,yv,0)
-            !end if
-            
-         end do
-         
-         end do mainloop
-
-         if ( intri.eq.0 .and. inext.gt.0 ) then
-            if ( numsearched.gt.10 ) write(6,"('numsearched= ', I0)") numsearched
-!            call qnerror('findtri_kdtree: error', ' ', ' ')
-         end if
-         
-         if (intri .eq. 1) then
-            call linear(xv, yv, zv, NDIM, xp, yp, zp, JSLO, SLO, JATEK, wf)
-            do k = 1,3  
-               ind(k) = indx(k,nrfind)
-            enddo
-            
-         endif
-         
-         ierror = 0
-    1234 continue
-     
-         return
-      end subroutine findtri_kdtree
-
-      SUBROUTINE LINEAR ( X, Y, Z, NDIM, XP, YP, ZP, JSLO, SLO, JATEK, wf)
-      USE M_MISSING
-      ! use unstruc_colors
-      implicit none
-      double precision :: a11
-      double precision :: a12
-      double precision :: a21
-      double precision :: a22
-      double precision :: a31
-      double precision :: a32
-      double precision :: b1
-      double precision :: b2
-      double precision :: det
-      double precision :: dum
-      integer :: jatek
-      integer :: jslo
-      integer :: ncol
-      integer :: ndraw
-      double precision :: r3
-      double precision :: rlam
-      double precision :: rmhu
-      double precision :: x1
-      double precision :: x2
-      double precision :: x3
-      double precision :: xmax
-      double precision :: xmin
-      double precision :: xn
-      double precision :: xp
-      double precision :: xy
-      double precision :: y1
-      double precision :: y2
-      double precision :: y3
-      double precision :: ymax
-      double precision :: ymin
-      double precision :: yn
-      double precision :: yp
-      double precision :: z3
-      double precision :: zn
-      
-      integer          :: idim
-      integer          :: NDIM   !< sample vector dimension
-      double precision :: X(3),Y(3),Z(NDIM,3), wf(3)
-      double precision :: zp(NDIM)
-      double precision :: slo(NDIM)
-
-      COMMON /DRAWTHIS/  ndraw(50)
-
-      double precision :: getdx, getdy
-
-
-      ZP  = dmiss
-      A11 = getdx(x(1),y(1),x(2),y(2))   ! X(2) - X(1)
-      A21 = getdy(x(1),y(1),x(2),y(2))   ! Y(2) - Y(1)
-      A12 = getdx(x(1),y(1),x(3),y(3))   ! X(3) - X(1)
-      A22 = getdy(x(1),y(1),x(3),y(3))   ! Y(3) - Y(1)
-      B1  = getdx(x(1),y(1),xp  ,yp  )   ! XP   - X(1)
-      B2  = getdy(x(1),y(1),xp  ,yp  )   ! YP   - Y(1)
-
-      DET  =   A11 * A22 - A12 * A21
-      IF (ABS(DET) .LT. 1E-12) THEN		! Jan Mooiman 07-01-2015
-         RETURN
-      ENDIF
-
-      RLAM = ( A22 * B1  - A12 * B2) / DET
-      RMHU = (-A21 * B1  + A11 * B2) / DET
-      wf(3) = rmhu
-      wf(2) = rlam
-      wf(1) = 1d0 - rlam - rmhu
-      
-      ZP   = Z(:,1) + RLAM * (Z(:,2) - Z(:,1)) + RMHU * (Z(:,3) - Z(:,1))
-      
-      IF (JATEK .EQ. 1) THEN
-         CALL ISOCOL(ZP(1),NCOL)
-         CALL KCIR(XP,YP,ZP(1))
-         CALL TEKTRI(X,Y,NCOL)
-         IF (MAX(ABS(A21),ABS(A22)) .GT. 500) THEN
-            DUM = 0
-         ENDIF
-      ENDIF
-
-      IF (JSLO .EQ. 1) THEN
-         do idim = 1,NDIM
-            A31 = Z(idim,2) - Z(idim,1)
-            A32 = Z(idim,3) - Z(idim,1)
-            X3 =  (A21*A32 - A22*A31)
-            Y3 = -(A11*A32 - A12*A31)
-            Z3 =  (A11*A22 - A12*A21)
-            R3 =  SQRT(X3*X3 + Y3*Y3 + Z3*Z3)
-            IF (R3 .NE. 0) THEN
-               XN = X3/R3
-               YN = Y3/R3
-               ZN = Z3/R3
-               XY = SQRT(XN*XN + YN*YN)
-               IF (ZN .NE. 0) THEN
-                  SLO(idim) = ABS(XY/ZN)
-               ELSE
-                  SLO(idim) = dmiss
-               ENDIF
-            ELSE
-               SLO(idim) = dmiss
-            ENDIF
-         end do
-      ENDIF
-      RETURN
-      END
-
-subroutine read_samples_from_dem(filnam, jadoorladen)
+      subroutine read_samples_from_dem(filnam, jadoorladen)
     use dem
     use m_missing
     use m_samples
@@ -4078,8 +3110,8 @@ end subroutine read_samples_from_arcinfo
       !> Increase size of global polyline array.
       !! Specify new size and whether existing points need to be maintained.
       SUBROUTINE INCREASEPOL(N, jaKeepExisting)
-      USE M_POLYGON
-      USE M_MISSING
+      use m_polygon
+      use m_missing
       use m_alloc
       implicit none
       integer :: n              !< Desired new minimum size
@@ -4185,6 +3217,7 @@ end subroutine read_samples_from_arcinfo
       END
 
       SUBROUTINE TIDYSAMPLES(XS,YS,ZS,IPSAM,NS,MXSAM,MYSAM)
+      use sorting_algorithms, only: indexx
       implicit none
       integer :: ns
       double precision :: XS(NS), YS(NS), ZS(NS)   !< sample coordinates
@@ -4234,6 +3267,7 @@ end subroutine read_samples_from_arcinfo
       end subroutine get_samples_boundingbox
       
       SUBROUTINE RSORT3new (X, Y, Z, N) ! 1 !!  second faster than   
+      use sorting_algorithms, only: indexx
       implicit none
       double precision              :: X(N), Y(N), Z(N)
       integer, allocatable          :: ind(:)
@@ -4366,10 +3400,11 @@ end subroutine read_samples_from_arcinfo
       END
 
       SUBROUTINE RMDOUBLE(XS,YS,ZS,IPSAM,NS)
-      USE M_MISSING
-      use m_kdtree2
+      use m_missing
       use m_sferic
       use unstruc_messages
+      use kdtree2Factory
+      
       implicit none
 
       integer :: i
@@ -4442,7 +3477,7 @@ end subroutine read_samples_from_arcinfo
          end do
 
 !        initialize kdtree
-         call build_kdtree(treeglob,num,xx,yy,ierror)
+         call build_kdtree(treeglob,num,xx,yy,ierror, jsferic, dmiss)
 
 !        deallocate arrays with non-missing node coordinates
          deallocate(xx)
@@ -4474,7 +3509,7 @@ end subroutine read_samples_from_arcinfo
             if ( i.eq.0 ) cycle   ! already merged
 
 !           fill query vector
-            call make_queryvector_kdtree(treeglob,xs(i),ys(i))
+            call make_queryvector_kdtree(treeglob,xs(i),ys(i), jsferic)
 
 !           count number of points in search area
             NN = kdtree2_r_count(treeglob%tree,treeglob%qv,dtol2)
@@ -4592,79 +3627,6 @@ end subroutine read_samples_from_arcinfo
       RETURN
       END
 
-      SUBROUTINE DLAUN(XS,YS,NS,jatri,ierr)
-      USE M_TRIANGLE
-      use m_sferic
-      use m_alloc
-      use unstruc_messages
-      implicit none
-      integer, intent(out) :: ierr
-      integer              :: maxtri
-      integer              :: nh
-      integer              :: ns
-      integer, intent(in)  :: jatri !< Type of DLaun triangulation: 1: just triangulate,
-                                    !! 3: also produce node-edge-triangle mapping tables
-                                    !! for use in Triangulatesamplestonetwork.
-      integer :: nsm
-      double precision :: trisize
-
-      PARAMETER (NH = 1)   ! SPvdP: too small if jatri.eq.0
-      double precision :: XS(ns), YS(ns)
-
-      double precision :: XH(NH), YH(NH)
-      
-      integer, allocatable, dimension(:) :: idum
-
-      call mess(LEVEL_INFO,'Starting Delaunay triangulation...')
-      
-!     check memory
-      allocate ( idum(50*Ns) ,stat=ierr)     ! probably not enough
-      call aerr('idum(50*Ns)',ierr,-50*Ns)
-      
-      if ( ierr.ne.0 ) then
-         call qnerror('dlaun: out of memory', ' ', ' ')
-!         if ( allocated(idum) ) deallocate(idum)  ! gives an error
-         return
-      end if
-      
-      deallocate(idum)
-
-
-      NUMTRI = 0
-      NUMEDGE = 0
-      IF (NS .LT. 3) RETURN
-
-      if (jatri /= 1 .and. jatri /= 3) then
-        call mess(LEVEL_INFO, 'Invalid jatri value in DLAUN:', jatri)
-        return
-      end if
-
-      numtri = -1
-      do while ( numtri.lt.0 )
-         NSM    = 6*NS + 10
-         IF (ALLOCATED (INDX) ) DEALLOCATE (INDX)
-         ALLOCATE   (INDX(3,NSM),STAT=IERR)
-         CALL AERR ('INDX(3,NSM)',IERR,INT(3*NSM))
-         
-         if (jatri==3) then
-           call realloc(EDGEINDX, (/ 2,2*NSM /), keepExisting=.false., fill=0, stat=ierr)
-           call aerr('edgeindx(2,NSM)', ierr, int(2*NSM))
-           call realloc(TRIEDGE, (/ 3,NSM /), keepExisting=.false., fill=0, stat=ierr)
-           call aerr('triedge(3,NSM)', ierr, int(3*NSM))
-         else
-           call realloc(EDGEINDX, (/ 2,1 /), keepExisting=.false., fill=0, stat=ierr)
-           call realloc(TRIEDGE, (/ 3,1 /), keepExisting=.false., fill=0, stat=ierr)
-         end if
-         MAXTRI = NSM !?
-
-         numtri = NSM ! Input value should specify max nr of triangles in indx.
-         CALL TRICALL(jatri,XS,YS,NS,INDX,NUMTRI,EDGEINDX,NUMEDGE,TRIEDGE,XH,YH,NH,trisize)
-         if ( numtri.lt.0 ) nsm = -numtri
-      end do
-
-      call mess(LEVEL_INFO,'done')
-      
-      END SUBROUTINE DLAUN
 
       SUBROUTINE MAKEPLOTAREAS(NUMROW,NUMCOL,nsize)
       implicit none
@@ -4847,81 +3809,17 @@ end subroutine read_samples_from_arcinfo
       return
       end
 
-double precision function getdx(x1,y1,x2,y2)
- use m_sferic
- implicit none
- double precision :: x1, y1, x2, y2
- double precision :: xx1, yy1, xx2, yy2
- double precision :: diff1, diff2, dy, r, dx2
- double precision, external :: getdy
+
  
- if (jsferic == 1) then
-
-! fix for poles
-    diff1 = abs(abs(y1)-90d0)
-    diff2 = abs(abs(y2)-90d0)
-    if ( (diff1.le.dtol_pole .and. diff2.gt.dtol_pole) .or. &
-         (diff1.gt.dtol_pole .and. diff2.le.dtol_pole) ) then
-       getdx = 0d0
-       return
-    end if
-
-    xx1   = x1
-    xx2   = x2
-    if      (xx1 - xx2 >  180d0) then
-       xx1 = xx1 - 360d0
-    else if (xx1 - xx2 < -180d0) then
-       xx1 = xx1 + 360d0
-    endif
-    xx1   = xx1*dg2rd
-    xx2   = xx2*dg2rd
-    yy1   = y1 *dg2rd
-    yy2   = y2 *dg2rd
-    csphi = dcos(0.5d0*(yy1+yy2))
-    getdx = ra*csphi*(xx2-xx1)
- else
-    getdx = x2-x1
- endif
- end function getdx
-
- double precision function getdy(x1,y1,x2,y2)
- use m_sferic
- implicit none
- double precision :: x1, y1, x2, y2
- double precision :: xx1, yy1,yy2
-
- if (jsferic == 1) then
-    yy1   = y1*dg2rd
-    yy2   = y2*dg2rd
-    getdy = ra*(yy2-yy1)
- else
-    getdy = y2-y1
- endif
- end function getdy
- 
- subroutine getdxdy(x1,y1,x2,y2,dx,dy)
- use m_sferic
- implicit none
- double precision :: x1, y1, x2, y2, dx, dy, dx2, dy2, dum
- double precision, external :: getdx, getdy
- if (Jsferic == 1) then 
-    dx = getdx(x1,y1,x2,y2)  
-    dy = getdy(x1,y1,x2,y2) 
- else
-    dx = x2-x1
-    dy = y2-y1
- endif
- 
- end subroutine getdxdy
  
  
  double precision function dprodin(x1,y1,x2,y2,x3,y3,x4,y4)    ! inner product of two segments
  use m_missing
  use m_sferic
+ use geometry_module, only: getdx, getdy, sphertoCart3D
  implicit none
  double precision :: x1,y1,x2,y2,x3,y3,x4,y4
  double precision :: dx1,dy1,dx2,dy2
- double precision :: getdx, getdy
  
  double precision, dimension(4) :: xx, yy, zz
  double precision               :: dz1, dz2
@@ -4943,11 +3841,11 @@ double precision function getdx(x1,y1,x2,y2)
     dprodin = dx1*dx2 + dy1*dy2 + dz1*dz2
  else
 
-    dx1 = getdx(x1,y1,x2,y2)
-    dx2 = getdx(x3,y3,x4,y4)
+    dx1 = getdx(x1,y1,x2,y2,jsferic)
+    dx2 = getdx(x3,y3,x4,y4,jsferic)
     
-    dy1 = getdy(x1,y1,x2,y2)
-    dy2 = getdy(x3,y3,x4,y4)
+    dy1 = getdy(x1,y1,x2,y2,jsferic)
+    dy2 = getdy(x3,y3,x4,y4,jsferic)
     
     dprodin = (dx1*dx2 + dy1*dy2)
  end if
@@ -4957,13 +3855,14 @@ double precision function getdx(x1,y1,x2,y2)
 
  subroutine sincosdis(x1,y1,x2,y2,s,c,d)    ! get sin, cos, length of a line segment
  use m_missing
+ use m_sferic, only: jsferic
+ use geometry_module, only: getdx, getdy
  implicit none
  double precision :: x1,y1,x2,y2,s,c,d
  double precision :: dx1,dy1,dx2,dy2
- double precision :: getdx, getdy
 
- dx1 = getdx(x1,y1,x2,y2)
- dy1 = getdy(x1,y1,x2,y2)
+ dx1 = getdx(x1,y1,x2,y2,jsferic)
+ dy1 = getdy(x1,y1,x2,y2,jsferic)
  d   = sqrt(dx1*dx1 + dy1*dy1)
  if (d > 0d0) then 
     s  = dy1/d
@@ -4974,146 +3873,14 @@ double precision function getdx(x1,y1,x2,y2)
  endif
  end subroutine sincosdis 
 
- double precision function dprodout(x1,y1,x2,y2,x3,y3,x4,y4)    ! out product of two segments
- use m_missing
- use m_sferic
- implicit none
- double precision :: x1,y1,x2,y2,x3,y3,x4,y4
- double precision :: dx1,dy1,dx2,dy2
- double precision :: xx1, yy1, zz1
- double precision :: xx2, yy2, zz2
- double precision :: xx3, yy3, zz3
- double precision :: xx4, yy4, zz4
- double precision :: vxx, vyy, vzz
- double precision :: getdx, getdy
-
- if ( jsferic.eq.1 .and. jasfer3D.eq.1 ) then
-    call sphertocart3D(x1,y1,xx1,yy1,zz1)
-    call sphertocart3D(x2,y2,xx2,yy2,zz2)
-    call sphertocart3D(x3,y3,xx3,yy3,zz3)
-    call sphertocart3D(x4,y4,xx4,yy4,zz4)
-    
-    vxx = (yy2-yy1) * (zz4-zz3) - (zz2-zz1) * (yy4-yy3)
-    vyy = (zz2-zz1) * (xx4-xx3) - (xx2-xx1) * (zz4-zz3)
-    vzz = (xx2-xx1) * (yy4-yy3) - (yy2-yy1) * (xx4-xx3)
-    
-    dprodout = sqrt(vxx**2 + vyy**2 + vzz**2 )
-    
-!   check if vector is pointing outwards of earth    
-    if ( vxx*xx1 + vyy*yy1 + vzz*zz1 .lt. 0d0 ) then
-       dprodout = -dprodout
-    end if
- else
-    dx1 = getdx(x1,y1,x2,y2)
-    dx2 = getdx(x3,y3,x4,y4)
-    
-    dy1 = getdy(x1,y1,x2,y2)
-    dy2 = getdy(x3,y3,x4,y4)
-    
-    dprodout = (dx1*dy2 - dy1*dx2)
- end if
-
- return
- end function dprodout
-
- !> Normalized inner product of two segments
- !! NOTE that parallel lines may produce abs(dcosphi)=1+O(10^-16) > 1
- !! in Debug builds, crashes subsequent acos calls! (not in Release)
- double precision function dcosphi(x1,y1,x2,y2,x3,y3,x4,y4)
- use m_missing
- use m_sferic
- implicit none
- double precision :: x1,y1,x2,y2,x3,y3,x4,y4
- double precision :: dx1,dy1,dx2,dy2,r1,r2
- 
- double precision, dimension(4) :: xx, yy, zz
- double precision                :: dz1, dz2
-
- double precision, external :: getdx, getdy
- 
- if ( jsferic.eq.1 .and. jasfer3D.eq.1 ) then
-    call sphertocart3D(x1, y1, xx(1), yy(1), zz(1))
-    call sphertocart3D(x2, y2, xx(2), yy(2), zz(2))
-    call sphertocart3D(x3, y3, xx(3), yy(3), zz(3))
-    call sphertocart3D(x4, y4, xx(4), yy(4), zz(4))
- 
-    dx1 = xx(2)-xx(1)
-    dy1 = yy(2)-yy(1)
-    dz1 = zz(2)-zz(1)
-    r1  = dx1**2 + dy1**2 + dz1**2
-    
-    dx2 = xx(4)-xx(3)
-    dy2 = yy(4)-yy(3)
-    dz2 = zz(4)-zz(3)
-    r2  = dx2**2 + dy2**2 + dz2**2
-    
-    if ( r1.eq.0d0 .or. r2.eq.0d0 ) then
-       dcosphi = dxymis
-    else
-       dcosphi = (dx1*dx2 + dy1*dy2 + dz1*dz2)/sqrt(r1*r2)
-    endif
- else
-    !call getdxdy(x1,y1,x2,y2,dx1,dy1)
-    !call getdxdy(x3,y3,x4,y4,dx2,dy2)
-
-    dx1 = getdx(x1,y1,x2,y2)
-    dx2 = getdx(x3,y3,x4,y4)
-    
-    dy1 = getdy(x1,y1,x2,y2)
-    dy2 = getdy(x3,y3,x4,y4)
-    
-    r1  = dx1*dx1+dy1*dy1
-    r2  = dx2*dx2+dy2*dy2
-    
-    if (r1 == 0d0 .or. r2 == 0d0) then
-       dcosphi = dxymis
-    else
-       dcosphi = (dx1*dx2 + dy1*dy2)/sqrt(r1*r2)
-    endif
- 
- end if
-    
- dcosphi = max( min(dcosphi,1d0) , -1d0)
-  
- return
- end function dcosphi
-
-!> compute distance from (x1,y1) to (x2,y2) 
-double precision function dbdistance(x1,y1,x2,y2)                  ! distance point 1 -> 2
- use m_missing
- use m_sferic
- implicit none
- double precision, intent(in) :: x1, y1, x2, y2
- ! locals
- double precision             :: ddx, ddy, rr
- double precision             :: xx1, yy1, zz1, xx2, yy2, zz2
- double precision, external   :: getdx, getdy
- 
- if ( x1.eq.DMISS .or. x2.eq.DMISS .or. y1.eq.DMISS .or. y2.eq.DMISS ) then
-    dbdistance = 0d0
-    return
- end if
-
- if ( jsferic.eq.1 .and. jasfer3D.eq.1 ) then
-    call sphertocart3D(x1,y1,xx1,yy1,zz1)
-    call sphertocart3D(x2,y2,xx2,yy2,zz2)
-    dbdistance = sqrt( (xx2-xx1)**2 + (yy2-yy1)**2 + (zz2-zz1)**2 )
- else
-    ddx = getdx(x1,y1,x2,y2)
-    ddy = getdy(x1,y1,x2,y2)
-    rr  = ddx*ddx + ddy*ddy
-    if (rr == 0d0) then
-       dbdistance = 0d0
-    else
-       dbdistance = sqrt(rr)
-    endif
- endif    
-    
-end function dbdistance
 
      !> Computes the perpendicular distance from point 3 to a line 1-2.
       SUBROUTINE dLINEDIS(X3,Y3,X1,Y1,X2,Y2,JA,DIS,XN,YN)
       use m_sferic
+      use geometry_module, only: dbdistance, getdx, getdy, sphertoCart3D, cart3Dtospher
+      use m_missing, only: dmiss
+      use m_sferic, only: jsferic, jasfer3D
+      
       implicit none
       DOUBLE PRECISION, intent(in   ) :: X1,Y1,X2,Y2 !< x,y coordinates of the line between point 1 and 2.
       DOUBLE PRECISION, intent(in   ) :: X3,Y3       !< x,y coordinates of the point for which to compute the distance.
@@ -5124,17 +3891,15 @@ end function dbdistance
       DOUBLE PRECISION :: R2,RL,X21,Y21,Z21,X31,Y31,Z31
       DOUBLE PRECISION :: xx1,xx2,xx3,yy1,yy2,yy3,zz1,zz2,zz3,xxn,yyn,zzn
 
-      DOUBLE PRECISION, external :: getdx,getdy,dbdistance
-
 !     korste afstand tot lijnelement tussen eindpunten
       JA  = 0
       
       if ( jsferic.eq.0 .or. jasfer3D.eq.0 ) then
-         X21 = getdx(x1,y1,x2,y2)
-         Y21 = getdy(x1,y1,x2,y2)
-         X31 = getdx(x1,y1,x3,y3)
-         Y31 = getdy(x1,y1,x3,y3)
-         R2  = dbdistance(x2,y2,x1,y1)
+         X21 = getdx(x1,y1,x2,y2,jsferic)
+         Y21 = getdy(x1,y1,x2,y2,jsferic)
+         X31 = getdx(x1,y1,x3,y3,jsferic)
+         Y31 = getdy(x1,y1,x3,y3,jsferic)
+         R2  = dbdistance(x2,y2,x1,y1,jsferic, jasfer3D, dmiss)
          R2  = R2*R2
 !         IF (R2 .NE. 0) THEN
          IF (R2 .GT. 1D-8) THEN
@@ -5153,9 +3918,9 @@ end function dbdistance
             end if
             
             YN  = Y1 + RL*(y2-y1)
-            DIS = dbdistance(x3,y3,xn,yn)
+            DIS = dbdistance(x3,y3,xn,yn,jsferic, jasfer3D, dmiss)
          ELSE  ! node 1 -> node 2
-            DIS = dbdistance(x3,y3,x1,y1)
+            DIS = dbdistance(x3,y3,x1,y1,jsferic, jasfer3D, dmiss)
          ENDIF
       else
          call sphertocart3D(x1,y1,xx1,yy1,zz1)
@@ -5185,7 +3950,7 @@ end function dbdistance
             
             call Cart3Dtospher(xxn,yyn,zzn,xn,yn,maxval((/x1,x2,x3/)))
          else   
-            DIS = dbdistance(x3,y3,x1,y1)
+            DIS = dbdistance(x3,y3,x1,y1, jsferic, jasfer3D, dmiss)
          endif   
       end if
       
@@ -5194,24 +3959,25 @@ end function dbdistance
 
       SUBROUTINE dLINEDIS2(X3,Y3,X1,Y1,X2,Y2,JA,DIS,XN,YN,rl)
       use m_sferic
+      use geometry_module, only: getdx, getdy, dbdistance, sphertoCart3D, cart3Dtospher
+      use m_missing, only: dmiss
+      
       implicit none
       integer          :: ja
       DOUBLE PRECISION :: X1,Y1,X2,Y2,X3,Y3,DIS,XN,YN,ZN, d2
       DOUBLE PRECISION :: R2,RL,X21,Y21,Z21,X31,Y31,Z31
       DOUBLE PRECISION :: xx1,xx2,xx3,yy1,yy2,yy3,zz1,zz2,zz3,xxn,yyn,zzn
-      DOUBLE PRECISION, external :: getdx,getdy,dbdistance
-
       !     korste afstand tot lijnelement
 
       JA  = 0 
       
       if (jsferic == 0 .or. jasfer3D == 0) then 
          
-         X21 = getdx(x1,y1,x2,y2)
-         Y21 = getdy(x1,y1,x2,y2)
-         X31 = getdx(x1,y1,x3,y3)
-         Y31 = getdy(x1,y1,x3,y3)
-         R2  = dbdistance(x2,y2,x1,y1)
+         X21 = getdx(x1,y1,x2,y2,jsferic)
+         Y21 = getdy(x1,y1,x2,y2,jsferic)
+         X31 = getdx(x1,y1,x3,y3,jsferic)
+         Y31 = getdy(x1,y1,x3,y3,jsferic)
+         R2  = dbdistance(x2,y2,x1,y1,jsferic, jasfer3D, dmiss)
          R2  = R2*R2
          IF (R2 .NE. 0) THEN
             RL  = (X31*X21 + Y31*Y21) / R2
@@ -5220,9 +3986,9 @@ end function dbdistance
             endif
             XN  = X1 + RL*(x2-x1)
             YN  = Y1 + RL*(y2-y1)
-            DIS = dbdistance(x3,y3,xn,yn)
+            DIS = dbdistance(x3,y3,xn,yn,jsferic, jasfer3D, dmiss)
          else 
-            DIS = dbdistance(x3,y3,x1,y1)
+            DIS = dbdistance(x3,y3,x1,y1,jsferic, jasfer3D, dmiss)
          ENDIF
       
       else 
@@ -5254,73 +4020,59 @@ end function dbdistance
             
             call Cart3Dtospher(xxn,yyn,zzn,xn,yn,maxval((/x1,x2,x3/)))
          else   
-            DIS = dbdistance(x3,y3,x1,y1)
+            DIS = dbdistance(x3,y3,x1,y1, jsferic, jasfer3D, dmiss)
          endif   
          
       endif   
       
       RETURN
       END subroutine DLINEDIS2
-
-      subroutine sphertocart3D(x1,y1,xx1,yy1,zz1) ! from spherical 2D to Cartesian 3D coordinates
-      use m_sferic
+      
+      subroutine dlinedis3D(xx3,yy3,zz3,xx1,yy1,zz1,xx2,yy2,zz2,JA,DIS,xxn,yyn,zzn,rl)
       implicit none
-      double precision :: x1,y1,xx1,yy1,zz1,rr
+      integer          :: ja
+      DOUBLE PRECISION :: DIS,XN,YN,ZN, d2
+      DOUBLE PRECISION :: R2,RL,X21,Y21,Z21,X31,Y31,Z31
+      DOUBLE PRECISION :: xx1,xx2,xx3,yy1,yy2,yy3,zz1,zz2,zz3,xxn,yyn,zzn
+
+      !     korste afstand tot lijnelement
+
+      JA  = 0 
+         
+      x21 = xx2-xx1
+      y21 = yy2-yy1
+      z21 = zz2-zz1
+      x31 = xx3-xx1
+      y31 = yy3-yy1
+      z31 = zz3-zz1
       
-      if ( jsferic.eq.1 ) then
-         zz1 = ra*sin(y1*dg2rd)
-         rr  = ra*cos(y1*dg2rd)
-         xx1 = rr*cos(x1*dg2rd)
-         yy1 = rr*sin(x1*dg2rd)
-      else
-         zz1 = 0d0
-         xx1 = x1
-         yy1 = y1
-      end if
+      r2  = x21*x21 + y21*y21 + z21*z21      
+      if (r2 .ne. 0d0) then 
+         RL = (X31*X21 + Y31*Y21 + Z31*Z21) / R2
+         IF (0d0 .LE. RL .AND. RL .LE. 1d0) then
+            JA = 1
+         endif
+         XXN  = xx1 + RL*x21 
+         YYN  = yy1 + RL*y21
+         ZZN  = zz1 + RL*z21
+         x31 = xxn-xx3
+         y31 = yyn-yy3
+         z31 = zzn-zz3
+         DIS = sqrt(x31*x31 + y31*y31 + z31*z31)
+      else   
+         DIS = 0d0
+      endif   
       
-      end subroutine sphertocart3D
+      RETURN
       
- !    transform 3D Cartesian coordinates to 2D spherical (jsferic=1) or 2D Cartesian (jsferic=0) coordinates
-!        x1 will be close to xref in spherical coordinates
-      subroutine Cart3Dtospher(xx1,yy1,zz1,x1,y1,xref)
-         use m_sferic
-         use m_missing
-         implicit none
-         
-         double precision, intent(in)  :: xx1   !< 3D x-coordinate
-         double precision, intent(in)  :: yy1   !< 3D y-coordinate
-         double precision, intent(in)  :: zz1   !< 3D z-coordinate
-         double precision, intent(out) :: x1    !< longitude (spherical) or x-coordinate (2D Cartesian)
-         double precision, intent(out) :: y1    !< lattitude (spherical) or y-coordinate (2D Cartesian)
-         double precision, intent(in)  :: xref  !< reference point longitude
-         
-         double precision              :: xx1_, yy1a
-         
-         double precision, parameter   :: dtol=1d-16
-         
-         if ( jsferic.eq.1 ) then
-            xx1_ = xx1
-!            yy1a = abs(yy1)
-!            if ( xx1.gt.-dtol*yy1a .and. xx1.lt.dtol*yy1a ) then
-!               xx1_ = 0d0
-!            end if
-            x1 = atan2(yy1,xx1)*rd2dg
-            y1 = atan2(zz1,sqrt(xx1**2+yy1**2))*rd2dg
-            
-            if ( x1.ne.DMISS ) then
-               x1 = x1 + nint((xref-x1)/360d0) * 360d0
-            end if
-         else
-            x1 = xx1
-            y1 = yy1
-         end if
-         
-         return
-      end subroutine Cart3Dtospher
+      end subroutine dlinedis3D
+
       
 !>    transform global spherical coordinates (xglob,yglob) to local coordinates (xloc,yloc) around reference point (xref,yref)
       subroutine spher2loc(xref,yref,N,xglob,yglob,xloc,yloc)
          use m_sferic
+         use m_missing, only: dmiss
+         use geometry_module, only: sphertocart3D, cart3Dtospher
          implicit none
          
          double precision,               intent(in)  :: xref,  yref    !< global coordinates of reference point (longitude, latitude)
@@ -5374,6 +4126,8 @@ end function dbdistance
 !>    transform local spherical coordinates (xloc,yloc) around reference point (xref,yref) to global spherical coordinates (xglob,yglob)
       subroutine loc2spher(xref,yref,N,xloc,yloc,xglob,yglob)
          use m_sferic
+         use m_missing, only: dmiss
+         use geometry_module, only: sphertocart3D, cart3Dtospher
          implicit none
          
          double precision,               intent(in)  :: xref,  yref    !< global coordinates of reference point (longitude, latitude)
@@ -5427,94 +4181,7 @@ end function dbdistance
          return
       end subroutine loc2spher
       
-      
-!>    transform vector with componentis in global spherical coordinate directions (xglob,yglob) to local coordinate directions (xloc,yloc) around reference point (xref,yref)
-      subroutine spher2locvec(xref,yref,N,xglob,yglob,vxglob,vyglob,vxloc,vyloc)
-         use m_sferic
-         implicit none
-         
-         double precision,               intent(in)  :: xref,  yref     !< global coordinates of reference point (longitude, latitude)
-         integer,                        intent(in)  :: N               !< number of global coordinates
-         double precision, dimension(N), intent(in)  :: xglob, yglob    !< global coordinates, (longitude, latitude)
-         double precision, dimension(N), intent(in)  :: vxglob, vyglob !< vector components in global coordinates
-         double precision, dimension(N), intent(out) :: vxloc,  vyloc   !< vector components in local coordinates
-         
-         double precision, dimension(3)              :: exxp, eyyp, ezzp   ! base vectors of rotated 3D Cartesian reference frame
-         double precision, dimension(3)              :: elambda, ephi
-         double precision, dimension(3)              :: elambdap, ephip
-         double precision, dimension(3)              :: elambdaloc, ephiloc
-         double precision                            :: vxx, vyy, vzz
-         
-         double precision                            :: xx, yy, zz     !  3D Cartesian coordinates
-         double precision                            :: xxp, yyp, zzp  !  3D Cartesian coordinates in rotated frame
-         double precision                            :: xloc, yloc
-         
-         double precision                            :: lambda0, phi0
-         double precision                            :: lambda, phi
-         double precision                            :: lambdap, phip
-         
-         integer                                     :: i
-         
-         if ( jsferic.eq.0 .or. jasfer3D.eq.0 ) then
-            do i=1,N
-               vxloc(i) = vxglob(i)
-               vyloc(i) = vyglob(i)
-            end do
-            
-         else
-            phi0 = yref*dg2rd
-            lambda0 = xref*dg2rd
-            
-!           compute base vectors
-            exxp = (/  cos(phi0) * cos(lambda0),  cos(phi0) * sin(lambda0), sin(phi0) /)
-            eyyp = (/             -sin(lambda0),              cos(lambda0), 0d0       /)
-            ezzp = (/ -sin(phi0) * cos(lambda0), -sin(phi0) * sin(lambda0), cos(phi0) /)
-            
-            do i=1,N
-               lambda = xglob(i)*dg2rd
-               phi    = yglob(i)*dg2rd
-               
-!              get 3d-coordinates
-               call sphertocart3d(xglob(i),yglob(i),xx,yy,zz)
-               
-!              project to rotated frame
-               xxp = exxp(1) * xx + exxp(2) * yy + exxp(3) * zz
-               yyp = eyyp(1) * xx + eyyp(2) * yy + eyyp(3) * zz
-               zzp = ezzp(1) * xx + ezzp(2) * yy + ezzp(3) * zz
-               
-!              tranform to local spherical coordinates
-               call Cart3Dtospher(xxp,yyp,zzp,xloc,yloc,xref)
-               
-               lambdap = xloc*dg2rd
-               phip    = yloc*dg2rd
-               
-!              compute global base vectors at other point in 3D (xx,yy,zz) frame
-               elambda = (/          -sin(lambda),           cos(lambda), 0d0 /)
-               ephi    = (/ -sin(phi)*cos(lambda), -sin(phi)*sin(lambda), cos(phi) /)
-               
-!              compute vector in 3D (xx,yy,zz) frame
-               vxx = vxglob(i) * elambda(1) + vyglob(i) * ephi(1)
-               vyy = vxglob(i) * elambda(2) + vyglob(i) * ephi(2)
-               vzz = vxglob(i) * elambda(3) + vyglob(i) * ephi(3)
-               
-!              compute base vectors at other point in rotated 3D (xxp,yyp,zzp) frame
-               elambdap = (/           -sin(lambdap),            cos(lambdap), 0d0 /)
-               ephip    = (/ -sin(phip)*cos(lambdap), -sin(phip)*sin(lambdap), cos(phip) /)
-               
-!              compute local base vectors in (xx,yy,zz) frame
-               elambdaloc = exxp * elambdap(1) + eyyp * elambdap(2) + ezzp * elambda(3)
-               ephiloc    = exxp * ephip(1)    + eyyp * ephip(2)    + ezzp * ephip(3)
-               
-!              compute vectors in other point in local base (elambdaloc,ephiloc)
-               vxloc = elambdaloc(1) * vxx + elambdaloc(2) * vyy + elambdaloc(3) * vzz
-               vyloc = ephiloc(1)    * vxx + ephiloc(2)    * vyy + ephiloc(3)    * vzz
-            end do
-         
-         end if
-      
-         return
-      end subroutine spher2locvec
-      
+   
       
 !>    return x-component in link coordinate frame of vector in node coordinate frame
       double precision function nod2linx(L,i12,ux,uy)
@@ -5525,7 +4192,6 @@ end function dbdistance
          integer,          intent(in) :: L   !< flowlink number
          integer,          intent(in) :: i12 !< left (1) or right (2) neighboring cell
          double precision, intent(in) :: ux, uy !< vector components in flowlnode coordinate frame
-
          
          if ( jsferic.ne.1 .or. jasfer3D.ne.1 ) then
             nod2linx = ux
@@ -5704,7 +4370,6 @@ end function dbdistance
          integer,          intent(in) :: L   !< flowlink number
          integer,          intent(in) :: i12 !< left (1) or right (2) neighboring corner (netnode)
          double precision, intent(in) :: ux, uy !< vector components in corner coordinate frame
-
          
          if ( jsferic.ne.1 .or. jasfer3D.ne.1 ) then
             cor2liny = uy
@@ -5748,7 +4413,7 @@ end function dbdistance
             wall2liny = uy
          else
             wall2liny =  snbw(i12,nw) * ux + csbw(i12,nw) * uy
-         end if
+         end if 
          
          return
       end function wall2liny
@@ -5771,7 +4436,7 @@ end function dbdistance
             nod2wallx =  csbwn(nw) * ux + snbwn(nw) * uy
          end if
          
-         return
+         return 
       end function nod2wallx
       
       
@@ -5792,34 +4457,29 @@ end function dbdistance
          
          return
       end function nod2wally
-      
-   
-      subroutine cart3Dtosfer(xx1,yy1,zz1,x1,y1) ! from Cartesian 3D coordinates to 2Dspherical
-      use m_sferic
-      implicit none
-      double precision :: x1,y1,xx1,yy1,zz1,rr
-      y1  = asin (zz1/ra) *rd2dg
-      x1  = atan2(yy1,xx1)*rd2dg
-      end subroutine cart3Dtosfer
    
       SUBROUTINE dLINEDIS3(X3,Y3,X1,Y1,X2,Y2,JA,DIS,XN,YN, RLOUT)  ! 3: SORRY
       use m_sferic
+      use geometry_module, only: getdx, getdy, dbdistance, sphertocart3D, Cart3Dtospher
+      use m_missing, only: dmiss
+      use m_sferic, only: jsferic, jasfer3D
+
       implicit none
       integer          :: ja
       DOUBLE PRECISION :: X1,Y1,X2,Y2,X3,Y3,DIS,XN,YN
       DOUBLE PRECISION :: xx1,xx2,xx3,yy1,yy2,yy3,zz1,zz2,zz3,xxn,yyn,zzn
-      DOUBLE PRECISION :: R2,RL,X21,Y21,Z21,X31,Y31,Z31,getdx,getdy,dbdistance
+      DOUBLE PRECISION :: R2,RL,X21,Y21,Z21,X31,Y31,Z31
 
       double precision :: RLout  ! needed in orthogonalisenet/projection of boundary nodes
                                  ! korste afstand tot lijnelement tussen eindpunten
       JA  = 0
       
       if ( jsferic.eq.0 .or. jasfer3D.eq.0 ) then
-         X21 = getdx(x1,y1,x2,y2)
-         Y21 = getdy(x1,y1,x2,y2)
-         X31 = getdx(x1,y1,x3,y3)
-         Y31 = getdy(x1,y1,x3,y3)
-         R2  = dbdistance(x2,y2,x1,y1)
+         X21 = getdx(x1,y1,x2,y2,jsferic)
+         Y21 = getdy(x1,y1,x2,y2,jsferic)
+         X31 = getdx(x1,y1,x3,y3,jsferic)
+         Y31 = getdy(x1,y1,x3,y3,jsferic)
+         R2  = dbdistance(x2,y2,x1,y1,jsferic, jasfer3D, dmiss)
          R2  = R2*R2
          RLout = 0d0
          IF (R2 .NE. 0) THEN
@@ -5829,7 +4489,7 @@ end function dbdistance
             JA  = 1
             XN  = X1 + RL*(x2-x1)
             YN  = Y1 + RL*(y2-y1)
-            DIS = dbdistance(x3,y3,xn,yn)
+            DIS = dbdistance(x3,y3,xn,yn,jsferic, jasfer3D, dmiss)
          ENDIF
       else
          
@@ -5867,197 +4527,15 @@ end function dbdistance
       END subroutine DLINEDIS3
 
 
- !> Normalized vector in direction 1 -> 2, in the orientation of (xu,yu)
- subroutine normalin(x1,y1,x2,y2,xn,yn,xu,yu)
- use m_sferic
- use m_missing
- implicit none
- double precision :: x1, y1, x2, y2, xn, yn, xu, yu
- ! locals
- double precision :: ddx, ddy, rr
- double precision :: getdx, getdy
- 
- double precision, dimension(3) :: xx1
- double precision, dimension(3) :: xx2
- double precision, dimension(3) :: xxu
- double precision, dimension(3) :: elambda
- double precision, dimension(3) :: ephi
- 
- double precision :: lambda, phi
- 
- if ( jsferic.eq.1 .and. jasfer3D.eq.1 ) then
-!    call qnerror('normalin: reference probably not set', ' ', ' ')
- 
-!   compute 3D coordinates
-    call sphertoCart3D(x1,y1,xx1(1),xx1(2),xx1(3))
-    call sphertoCart3D(x2,y2,xx2(1),xx2(2),xx2(3))
-    
-!   compute base vectors in reference point
-    lambda = xu*dg2rd
-    phi    = yu*dg2rd
-    elambda = (/ -sin(lambda),                    cos(lambda), 0d0 /)
-    ephi    = (/ -sin(phi)*cos(lambda), -sin(phi)*sin(lambda), cos(phi) /)
-    
-!   project vector in local base
-    ddx = sum((xx2-xx1)*elambda)
-    ddy = sum((xx2-xx1)*ephi)
- else
-    ddx = getdx(x1,y1,x2,y2)
-    ddy = getdy(x1,y1,x2,y2)
- end if
- 
- rr  = ddx*ddx + ddy*ddy
- if (rr == 0d0) then
-    xn  = dxymis
-    yn  = dxymis
- else
-    rr  = sqrt(rr)
-    xn  = ddx / rr
-    yn  = ddy / rr
- endif
- end subroutine normalin
-
- !> Creates the relative unit normal vector to edge 1->2
- !!
- !! Vector is of unit length in Cartesian world.
- !! Vector is almost unit length in spherical world, but its
- !! x-component is scaled 1/cos(phi) such that in later uses:
- !! (theta_B, theta_A) = (theta_A, phi_A) + alpha*(theta_n, phi_n)
- !! the vectors 1->2 and A->B are perpendicular in Cartesian world,
- !! not in spherical world. NOTE: the LENGTH of A->B in Cartesian
- !! world implictly contains the earth radius and dg2rd already,
- !! so make sure your alpha is in degrees.
- subroutine normalout(x1,y1,x2,y2,xn,yn)             ! normals out edge 1  2
- use m_missing
- use m_sferic
- implicit none
- double precision :: x1, y1, x2, y2, xn, yn
- ! locals
- double precision :: ddx, ddy, rr
- double precision :: getdx, getdy
- 
- double precision, dimension(3) :: xx1
- double precision, dimension(3) :: xx2
- double precision, dimension(3) :: xxu
- double precision, dimension(3) :: elambda
- double precision, dimension(3) :: ephi
- 
- double precision :: xu, yu
- double precision :: lambda, phi
- 
- if ( jsferic.eq.1 .and. jasfer3D.eq.1 ) then
-!   get local coordinates w.r.t. (xn,yn)
-    call half(x1,y1,x2,y2,xn,yn)
-    
-!   compute 3D coordinates
-    call sphertoCart3D(x1,y1,xx1(1),xx1(2),xx1(3))
-    call sphertoCart3D(x2,y2,xx2(1),xx2(2),xx2(3))
-    
-!   compute midpoint
-    xxu = 0.5d0*(xx1+xx2)
-    call Cart3Dtospher(xxu(1),xxu(2),xxu(3),xu,yu,max(x1,x2))
-    
-!   compute base vectors at midpoint
-    lambda = xu*dg2rd
-    phi    = yu*dg2rd
-    elambda = (/ -sin(lambda),                    cos(lambda), 0d0 /)
-    ephi    = (/ -sin(phi)*cos(lambda), -sin(phi)*sin(lambda), cos(phi) /)
-    
-!   project vector in local base
-    ddx = sum((xx2-xx1)*elambda)
-    ddy = sum((xx2-xx1)*ephi)
- else
-    ddx = getdx(x1,y1,x2,y2)
-    ddy = getdy(x1,y1,x2,y2)
- end if
- 
- rr  = ddx*ddx + ddy*ddy
- if (rr == 0d0) then
-    xn  = dxymis
-    yn  = dxymis
- else
-    rr  =  sqrt(rr)
-    xn  =  ddy / rr
-    yn  = -ddx / rr
- endif
- if (jsferic == 1 .and. jasfer3D.eq.0) then
-    xn = xn / cos(dg2rd*0.5d0*(y1+y2) )
-    yn = yn
- endif
-
- end subroutine normalout
-
-
- !> Computes the normal vector to a line 1-2, which is *outward* w.r.t.
- !! an 'inside' point 3. Similar to normalout, except that the normal
- !! vector may be flipped based on the 'inside' point.
- subroutine normaloutchk(x1, y1, x2, y2, x3, y3, xn, yn, jaflip)
- use m_sferic
- implicit none
- double precision, intent(in)  :: x1, y1 !< First point of line
- double precision, intent(in)  :: x2, y2 !< Second point of line
- double precision, intent(in)  :: x3, y3 !< Point that is considered 'inside'.
- double precision, intent(out) :: xn, yn !< Output normal vector
- integer,          intent(out) :: jaflip !< Indicates whether normal was flipped (1) or not (0).
- double precision :: din
- double precision, external :: dprodin, dprodout
- 
- double precision, dimension(1) :: xnloc, ynloc
- double precision               :: xref, yref
- double precision               :: x4, y4
-
- call normalout(x1,y1,x2,y2,xn,yn)
- jaflip = 0
- !din  = dprodin(x1, y1, x1+xn, y1+yn, x1, y1, x3, y3)
- !if (din > 0d0) then   ! Check whether normal vector points really outward
- !   xn = -xn           ! Using the previously stored internal point x4.
- !   yn = -yn
- !end if
- 
- if ( jsferic.eq.1 .and. jasfer3D.eq.1 ) then
-!   x4 = x1+xn 
-    call half(x1,y1,x2,y2,xref,yref)
-    call spher2locvec(x1,y1,1,(/xref/),(/yref/),(/xn/),(/yn/),xnloc,ynloc)
-    call xpav(x1,y1,Ra*dg2rd,xnloc(1),ynloc(1),x4,y4)  ! 1 degree "distance"
- else
-    x4 = x1+xn
-    y4 = y1+yn
- end if
-
- if ( dprodout(x1, y1, x4, y4, x1, y1, x2, y2)*dprodout(x1, y1, x3, y3, x1, y1, x2, y2) > 0d0 ) then
-      xn = -xn           ! Using the previously stored internal point x4.
-      yn = -yn
-      jaflip = 1
- else
-      jaflip = 0
- endif
-
-
- end subroutine normaloutchk
-
-
- SUBROUTINE DUITPL(X1,Y1,X2,Y2,X3,Y3,X4,Y4,RU)
- implicit none
- double precision :: X1,Y1,X2,Y2,X3,Y3,X4,Y4,RU
- double precision :: X12, y12, x34, y34
- double precision :: GETDX, GETDY
- X12 = GETDX(X1,Y1,X2,Y2)
- Y12 = GETDY(X1,Y1,X2,Y2)
- X34 = GETDX(X3,Y3,X4,Y4)
- Y34 = GETDY(X3,Y3,X4,Y4)
- RU  = X12*Y34 - Y12*X34
- RU  = SIGN(1d0,RU)
- RETURN
- END SUBROUTINE DUITPL
-
-
  !> Computes the enclosed area and length of a polygon.
  !!
  !! Only the first polygon is considered; whenever a missing value
  !! is encountered, the polygon is 'closed'.
  SUBROUTINE dAREAN( XX, YY, N, DAREA, DLENGTH, DLENMX )
- USE M_MISSING
+ USE m_missing
  use m_sferic
+ use geometry_module, only: dbdistance, get_startend, comp_masscenter
+ 
  implicit none
  double precision, intent(in)  :: XX(N), YY(N) !< Polygon points.
  double precision, intent(out) :: DAREA   !< Area enclosed within polygon.
@@ -6066,7 +4544,7 @@ end function dbdistance
  integer,          intent(in)  :: n       !< Nr. of polygon points.
 
  integer :: i, iu, nend, jstart, jend
- double precision :: DX, DY, Y0, DBDISTANCE, DLE, Y
+ double precision :: DX, DY, Y0, DLE, Y
  double precision :: xcg, ycg
  integer :: jacounterclockwise
    DAREA   = 0d0
@@ -6075,11 +4553,11 @@ end function dbdistance
    NEND    = 0
    DLENMX  = 0.D0
 
-   call get_startend(N,XX,YY,jstart,jend)
+   call get_startend(N,XX,YY,jstart,jend,dmiss)
    
    if ( jend.le.jstart ) return
    
-   call comp_masscenter(jend-jstart+1, xx(jstart), yy(jstart), xcg, ycg, darea, jacounterclockwise)
+   call comp_masscenter(jend-jstart+1, xx(jstart), yy(jstart), xcg, ycg, darea, jacounterclockwise, jsferic, jasfer3D, dmiss)
 
    !DO I  = jstart,jend
    !   IF (XX(I) .NE.  dXYMIS) THEN
@@ -6106,7 +4584,7 @@ end function dbdistance
  !        Y     = RA*DG2RD*(0.5d0*( YY(IU) + YY(I) )-Y0)
  !     ENDIF
  !     DAREA    = DAREA - DX*Y
-      DLE      = DBDISTANCE( XX(I), YY(I), XX(IU), YY(IU) )
+      DLE      = DBDISTANCE( XX(I), YY(I), XX(IU), YY(IU), jsferic, jasfer3D, dmiss)
       DLENGTH  = DLENGTH + DLE
       DLENMX   = MAX (DLENMX, DLE)
    
@@ -6214,88 +4692,6 @@ end function dbdistance
    
 end subroutine tecplot_out
 
-  SUBROUTINE GAUSSJ(A,N,NP,B,M,MP)
-  
-  implicit none
-
-      integer          :: n,np,m,mp
-      double precision :: a,b
-
-      integer          :: ipiv, indxr, indxc, i, j, k, L, LL, irow, icol
-      double precision :: big, dum, pivinv
-      
-!      PARAMETER (NMAX=50)
-!      DIMENSION A(NP,NP),B(NP,MP),IPIV(NMAX),INDXR(NMAX),INDXC(NMAX)
-
-      DIMENSION A(NP,NP),B(NP,MP),IPIV(NP),INDXR(NP),INDXC(NP) ! SPvdP: set NMAX to N
-      DO 11 J=1,N
-        IPIV(J)=0
-11    CONTINUE
-      DO 22 I=1,N
-        BIG=0.
-        DO 13 J=1,N
-          IF(IPIV(J).NE.1)THEN
-            DO 12 K=1,N
-              IF (IPIV(K).EQ.0) THEN
-                IF (ABS(A(J,K)).GE.BIG)THEN
-                  BIG=ABS(A(J,K))
-                  IROW=J
-                  ICOL=K
-                ENDIF
-              ELSE IF (IPIV(K).GT.1) THEN
-                WRITE(*,*) 'Singular matrix'
-              ENDIF
-12          CONTINUE
-          ENDIF
-13      CONTINUE
-        IPIV(ICOL)=IPIV(ICOL)+1
-        IF (IROW.NE.ICOL) THEN
-          DO 14 L=1,N
-            DUM=A(IROW,L)
-            A(IROW,L)=A(ICOL,L)
-            A(ICOL,L)=DUM
-14        CONTINUE
-          DO 15 L=1,M
-            DUM=B(IROW,L)
-            B(IROW,L)=B(ICOL,L)
-            B(ICOL,L)=DUM
-15        CONTINUE
-        ENDIF
-        INDXR(I)=IROW
-        INDXC(I)=ICOL
-        IF (A(ICOL,ICOL).EQ.0.) WRITE(*,*) 'Singular matrix'
-        PIVINV=1./A(ICOL,ICOL)
-        A(ICOL,ICOL)=1.
-        DO 16 L=1,N
-          A(ICOL,L)=A(ICOL,L)*PIVINV
-16      CONTINUE
-        DO 17 L=1,M
-          B(ICOL,L)=B(ICOL,L)*PIVINV
-17      CONTINUE
-        DO 21 LL=1,N
-          IF(LL.NE.ICOL)THEN
-            DUM=A(LL,ICOL)
-            A(LL,ICOL)=0.
-            DO 18 L=1,N
-              A(LL,L)=A(LL,L)-A(ICOL,L)*DUM
-18          CONTINUE
-            DO 19 L=1,M
-              B(LL,L)=B(LL,L)-B(ICOL,L)*DUM
-19          CONTINUE
-          ENDIF
-21      CONTINUE
-22    CONTINUE
-      DO 24 L=N,1,-1
-        IF(INDXR(L).NE.INDXC(L))THEN
-          DO 23 K=1,N
-            DUM=A(K,INDXR(L))
-            A(K,INDXR(L))=A(K,INDXC(L))
-            A(K,INDXC(L))=DUM
-23        CONTINUE
-        ENDIF
-24    CONTINUE
-      RETURN
-      END
 subroutine timdat(julday, timsec, idatum, itijd)
 !!--copyright-------------------------------------------------------------------
 ! Copyright (c) 2006, WL | Delft Hydraulics. All rights reserved.
@@ -6388,6 +4784,7 @@ end subroutine timdat
     use m_missing
     use unstruc_messages
     use network_data
+    use gridoperations
     use unstruc_display, only:minmxns
     use m_wearelt, only: rcir
    
@@ -6577,6 +4974,8 @@ end subroutine timdat
     character(len=1), external   :: get_dirsep
     integer                      :: istat
     logical                      :: l_exist
+    integer                      :: i
+    character(len=256)           :: dirnamewin
 
 !    write(6,"('Creating directory ', A128)") trim(dirname)
     
@@ -6595,7 +4994,11 @@ end subroutine timdat
       command = "mkdir -p "//trim(dirname)
     else
 !     windows
-       command = "mkdir "//trim(dirname)
+       dirnamewin = trim(dirname)
+       do i = 1,len(dirnamewin)
+          if( dirnamewin(i:i) == '/' ) dirnamewin(i:i) = '\'
+       enddo
+       command = "mkdir "//trim(dirnamewin)
        ! call iosDirMAKE(dirname)
     end if
 
@@ -6632,14 +5035,17 @@ end subroutine timdat
    
 !> find links crossed by polyline with kdtree2
    subroutine find_crossed_links_kdtree2(treeinst,NPL,xpl,ypl,itype,nLinks,jaboundarylinks,numcrossedLinks, iLink, iPol, dSL, ierror)
+      
       !use m_polygon
       use network_data, only: nump, numL, kn, xk, yk, lnn,lne
       use m_flowgeom
-      use m_kdtree2
+      use kdtree2Factory
       use m_sferic
       use unstruc_messages
       use m_missing
       use m_alloc
+      use geometry_module, only: dbdistance, crossinbox
+      
       implicit none
       
       type(kdtree_instance),               intent(inout) :: treeinst
@@ -6668,10 +5074,7 @@ end subroutine timdat
       integer                                            :: i, k, L, N1, N2, NN, numnew
       integer                                            :: jacros, kint
       integer                                            :: LnxiORLnx
-      integer                                            :: isactive
-         
-      double precision, external                         :: dbdistance
-      
+      integer                                            :: isactive      
       double precision                                   :: dtol
 
       if ( janeedfix.eq.1 ) then
@@ -6709,7 +5112,7 @@ end subroutine timdat
          if ( xpl(i).ne.DMISS .and. xpl(i+1).ne.DMISS ) then
             num = num+1
             ipolsection(num) = i
-            dmaxpollen = max(dmaxpollen, dbdistance(xpl(i),ypl(i),xpl(i+1),ypl(i+1)))
+            dmaxpollen = max(dmaxpollen, dbdistance(xpl(i),ypl(i),xpl(i+1),ypl(i+1),jsferic, jasfer3D, dmiss))
          end if
       end do
 
@@ -6743,7 +5146,7 @@ end subroutine timdat
          end do
       end if
 
-      call build_kdtree(treeinst,num, x, y, ierror)
+      call build_kdtree(treeinst,num, x, y, ierror, jsferic, dmiss)
       if ( ierror.ne.0 ) then
          goto 1234
       end if
@@ -6780,10 +5183,10 @@ end subroutine timdat
          end if
          
 !        fill query vector
-         call make_queryvector_kdtree(treeinst,xa,ya)
+         call make_queryvector_kdtree(treeinst,xa,ya, jsferic)
          
 !        compute flowlink length
-         dlinlen = dbdistance(xa,ya,xb,yb)
+         dlinlen = dbdistance(xa,ya,xb,yb, jsferic, jasfer3D, dmiss)
          
 !        determine square search radius
          if ( jsferic.eq.0 ) then
@@ -6806,7 +5209,7 @@ end subroutine timdat
          jacros = 0
          do i=1,NN
             k = ipolsection(treeinst%results(i)%idx)
-            CALL CROSSinbox (XPL(k), YPL(k), XPL(k+1), YPL(k+1), Xa, Ya, Xb, Yb, jacros, SL, SM, XCR, YCR, CRP)
+            CALL crossinbox (XPL(k), YPL(k), XPL(k+1), YPL(k+1), Xa, Ya, Xb, Yb, jacros, SL, SM, XCR, YCR, CRP, jsferic, dmiss)
                
             if ( jacros.eq.1 ) then
                numcrossedLinks = numcrossedLinks + 1
@@ -6839,243 +5242,22 @@ end subroutine timdat
    end subroutine find_crossed_links_kdtree2
 
 
-!> build kdtree
-subroutine build_kdtree(treeinst, N, x, y, ierror)
-   use m_kdtree2
-   use m_sferic
-   use unstruc_messages
-   use m_missing
-   use m_alloc
-   implicit none
-   type(kdtree_instance) :: treeinst
-   integer                        :: N       !< number of entries
-   double precision, dimension(N) :: x, y    !< coordinates
-
-   integer,          intent(out)  :: ierror  !< error (1) or not (0)
-
-   integer                        :: k, num, ierr
-   
-
-   ierror = 1
-
-   if ( N.eq.0 ) then
-      treeinst%itreestat = ITREE_EMPTY
-      goto 1234   ! nothing to do
-   end if
-
-!  build tree
-   call mess(LEVEL_INFO, 'Building kdtree...')
- 
-!  check for spherical coordinates
-   if ( jsferic.eq.0 ) then
-!     Cartesian coordinates: 2D space
-      NTREEDIM = 2
-   else
-!      spherical coordinates: 3D space
-      NTREEDIM = 3
-   end if
-
-   if ( treeinst%itreestat.ne.ITREE_EMPTY ) call delete_kdtree2(treeinst)
-
-   allocate(treeinst%sample_coords(NTREEDIM,N),stat=ierr)
-   call aerr('sample_coords(NTREEDIM,N)', ierr, NTREEDIM*N)
-   treeinst%sample_coords = 0d0
-   
-!  fill coordinates
-   num = 0
-   do k=1,N
-      if ( x(k).eq.DMISS .or. y(k).eq.DMISS ) then
-         cycle
-      end if
-
-      num = num+1
-
-      if ( jsferic.eq.0 ) then
-!        Cartesian coordinates: 2D space
-         treeinst%sample_coords(1,k) = x(k)
-         treeinst%sample_coords(2,k) = y(k)
-      else
-!        spherical coordinates: 3D space
-         treeinst%sample_coords(1,k) = Ra * cos(y(k)*dg2rd) * cos(x(k)*dg2rd)
-         treeinst%sample_coords(2,k) = Ra * cos(y(k)*dg2rd) * sin(x(k)*dg2rd)
-         treeinst%sample_coords(3,k) = Ra * sin(y(k)*dg2rd)
-      end if
-   end do
-
-   treeinst%tree => kdtree2_create(treeinst%sample_coords, rearrange=.true., sort=.true., dim=NTREEDIM)
-!  error handling
-   if ( kdtree2_ierror.ne.0 ) then
-     ! call mess(LEVEL_DEBUG, 'kdtree error: kdtree2_ierror=', kdtree2_ierror)
-      call mess(LEVEL_info, 'kdtree error: kdtree2_ierror=', kdtree2_ierror)
-      goto 1234
-   end if
-
-   call mess(LEVEL_INFO, 'done')
-
-!  allocate query vector
-   allocate(treeinst%qv(NTREEDIM))
-
-!  allocate results array
-   IRESULTSIZE = INIRESULTSIZE
-   allocate(treeinst%results(IRESULTSIZE))
-   
-   treeinst%itreestat = ITREE_OK
-
-   ierror = 0
-1234 continue
-
-   return
-end subroutine build_kdtree
 
 
-!> make query vector for kdtree2
-subroutine make_queryvector_kdtree(treeinst,x,y)
-   use m_sferic
-   use m_kdtree2
-   implicit none
 
-   double precision, intent(in) :: x, y   !< coordinates
-   type(kdtree_instance) :: treeinst
-
-!  fill query vector
-   if ( jsferic.eq.0 ) then
-      treeinst%qv(1) = x
-      treeinst%qv(2) = y
-   else
-      treeinst%qv(1) = Ra * cos(y*dg2rd) * cos(x*dg2rd)
-      treeinst%qv(2) = Ra * cos(y*dg2rd) * sin(x*dg2rd)
-      treeinst%qv(3) = Ra * sin(y*dg2rd)
-   end if
-
-   return
-end subroutine
-
-
-!> resize results array
-subroutine realloc_results_kdtree(treeinst,NN)
-   use m_kdtree2
-   implicit none
-
-   integer, intent(in) :: NN  !< array size
-   type(kdtree_instance) :: treeinst
-
-   if ( .not.allocated(treeinst%results) ) then
-      IRESULTSIZE = INIRESULTSIZE
-      allocate(treeinst%results(IRESULTSIZE))
-   else
-      if ( NN.gt.IRESULTSIZE ) then
-         IRESULTSIZE = max(int(1.2d0*dble(NN))+1,INIRESULTSIZE)
-         deallocate(treeinst%results)
-         allocate(treeinst%results(IRESULTSIZE))
-      end if
-   end if
-   return
-end subroutine
-
-
-! delete kdtree  
-subroutine delete_kdtree2(treeinst)
-   use m_kdtree2
-   use unstruc_messages
-   implicit none
-   type(kdtree_instance) :: treeinst
-   
-   if ( treeinst%itreestat.eq.ITREE_EMPTY ) return
-     
-   call kdtree2_destroy(treeinst%tree)
-
-   if ( associated(treeinst%sample_coords) ) deallocate(treeinst%sample_coords)
-   if ( associated(treeinst%qv) )            deallocate(treeinst%qv)
-   if ( allocated(treeinst%results) )        deallocate(treeinst%results)
-     
-   treeinst%itreestat = ITREE_EMPTY
-   IRESULTSIZE = 0
-   
-   call mess(LEVEL_INFO, 'Delete kdtree...')
-   return
-end subroutine delete_kdtree2
-
-
-!> find nearest sample with kdtree2
-  subroutine find_nearest_sample_kdtree(treeinst,Ns,Ndim,xs,ys,zs,xk,yk,NN,isam,ierror)
-     use m_missing
-     use m_kdtree2
-     use m_alloc
-     use unstruc_messages
-     implicit none
-     
-     integer,                                           intent(in)    :: Ns      !< number of samples
-     integer,                                           intent(in)    :: Ndim    !< dimension of sample vector
-     double precision,     dimension(Ns),               intent(in)    :: xs, ys  !< sample coordinates
-     double precision,     dimension(Ndim,Ns),          intent(in)    :: zs      !< sample values
-     double precision,                                  intent(in)    :: xk, yk  !< query point coordinates
-     integer,                                           intent(in)    :: NN      !< number of nearest samples
-     integer,              dimension(NN),               intent(out)   :: isam    !< nearest sample points
-     integer,                                           intent(out)   :: ierror  !< error (>0), or not (0)
-
-     double precision,     dimension(:), allocatable                  :: xx, yy
-     
-     integer, parameter                                               :: Nquerydim = 2 !< query vector length
-     
-     integer                                                          :: i, num
-     type(kdtree_instance), intent(in)                                :: treeinst
-     
-     ierror = 0     
-
-!    build tree if necessary
-     if ( treeinst%itreestat.ne.ITREE_OK ) then
-     
-        if ( treeinst%itreestat.ne.ITREE_EMPTY ) then
-           call delete_kdtree2(treeinst)
-        end if
-
-!!       fill sample coordinates
-!        allocate(xx(NS), yy(NS))
-!        num = 0
-!        do i=1,NS
-!           if ( zs(1,i).ne.DMISS ) then   ! check first dimension only
-!              num = num+1
-!              xx(num) = xs(i)
-!              yy(num) = ys(i)
-!           end if
-!        end do
-!
-!        call build_kdtree(num,xx,yy,ierror)
-
-!       save memory by inserting samples directly (can give problems with DMISS-valued samples)
-        call build_kdtree(treeinst,NS,xs,ys,ierror)
-
-        !if ( allocated(xx) ) deallocate(xx)
-        !if ( allocated(yy) ) deallocate(yy)
-     end if
-     
-     if ( ierror.eq.0 ) then
-!       fill query vector
-        call make_queryvector_kdtree(treeinst,xk,yk)
-     
-   !    reallocate if necessary
-        call realloc_results_kdtree(treeinst,NN)
-     
-   !    find nearest sample points
-        call kdtree2_n_nearest(treeinst%tree,treeinst%qv,NN,treeinst%results)
-     
-   !    copy to output
-        do i=1,NN
-           isam(i) = treeinst%results(i)%idx
-        end do
-     end if
-  
-     return
-  end subroutine find_nearest_sample_kdtree
 
 
 !> find flow cells with kdtree2
   subroutine find_flowcells_kdtree(treeinst,Ns,xs,ys,inod,jaoutside,ierror)
+
      use m_missing
      use m_flowgeom
-     use m_kdtree2
+     use kdtree2Factory
      use m_sferic
      use unstruc_messages
+     use gridoperations
+     use geometry_module, only: dbdistance, pinpok
+
      implicit none
      
      type(kdtree_instance),           intent(inout) :: treeinst
@@ -7103,8 +5285,6 @@ end subroutine delete_kdtree2
      integer                                      :: in3D, j, fid
      
      logical                                      :: jadouble
-
-     double precision,                external    :: dbdistance
      double precision                             :: dist_old, dist_new    
 
      ierror = 1
@@ -7147,9 +5327,9 @@ end subroutine delete_kdtree2
         end do
            
 !       build kdtree
-        call build_kdtree(treeinst, num, xx, yy, ierror)
+        call build_kdtree(treeinst, num, xx, yy, ierror, jsferic, dmiss)
      else
-        call build_kdtree(treeinst, Ns, xs, ys, ierror)
+        call build_kdtree(treeinst, Ns, xs, ys, ierror, jsferic, dmiss)
      end if
      
      if ( ierror.ne.0 ) then
@@ -7161,14 +5341,14 @@ end subroutine delete_kdtree2
 !    loop over flownodes
      do k=1,Ndx
 !       fill query vector
-        call make_queryvector_kdtree(treeinst,xz(k),yz(k))
+        call make_queryvector_kdtree(treeinst,xz(k),yz(k), jsferic)
         
 !       compute maximum flowcell dimension
         dmaxsize = 0d0
         N = size(nd(k)%x)
         do i=1,N
            ip1=i+1; if ( ip1.gt.N ) ip1=ip1-N
-           dmaxsize = max(dmaxsize, dbdistance(nd(k)%x(i),nd(k)%y(i),nd(k)%x(ip1),nd(k)%y(ip1)))
+           dmaxsize = max(dmaxsize, dbdistance(nd(k)%x(i),nd(k)%y(i),nd(k)%x(ip1),nd(k)%y(ip1), jsferic, jasfer3D, dmiss))
         end do
         
 !       determine square search radius
@@ -7208,7 +5388,7 @@ end subroutine delete_kdtree2
            if ( k>ndx2D .and. k<ndxi+1 .and. jaoutside.eq.1 ) then  ! For 1D nodes, skip point-in-cell check
               in = 1                           ! These are always accepted if closest. 
            else
-              call pinpok(xs(isam), ys(isam), N, xloc, yloc, in)
+              call pinpok(xs(isam), ys(isam), N, xloc, yloc, in, jins, dmiss)
               
 !!             BEGIN DEBUG              
 !              if ( jsferic.eq.1 .and. jasfer3D.eq.1 ) then
@@ -7246,8 +5426,8 @@ end subroutine delete_kdtree2
                  call mess(LEVEL_INFO, mesg  )
 !                goto 1234
                  if ( k>ndx2D .and. k<ndxi+1 .and. jaoutside.eq.1 ) then  ! ONLY in case of a 1D node, consider replacing, if the 1D node is closer
-                    dist_old = dbdistance(xs(isam),ys(isam),xz(inod(isam)), yz(inod(isam)))
-                    dist_new = dbdistance(xs(isam),ys(isam),xz(k), yz(k))            
+                    dist_old = dbdistance(xs(isam),ys(isam),xz(inod(isam)), yz(inod(isam)),jsferic, jasfer3D, dmiss)
+                    dist_new = dbdistance(xs(isam),ys(isam),xz(k), yz(k),jsferic, jasfer3D, dmiss)            
                     if (dist_new<dist_old) then            ! if the new candidate is nearer to the observation station  ... 
                        inod(isam) = k                      ! ... adopt the new candidate as primary candidate 
                     endif 
@@ -7294,7 +5474,7 @@ end subroutine delete_kdtree2
 
 !---------------------------------------------------------------
 module m_snappol  ! intentionally a module (for assumed size)
-use m_kdtree2
+use kdtree2Factory
 implicit none
 contains
 !> snap polygon to mesh
@@ -7304,6 +5484,7 @@ contains
      use m_alloc
      use m_flowgeom
      use network_data, only: xk, yk, kn
+     use sorting_algorithms, only: indexxi
      implicit none
 
      integer,                                     intent(in)  :: Nin          !< thin-dyke polyline size
@@ -7996,6 +6177,7 @@ subroutine make_matrix(CFL, s1)
       
       integer, external :: flow_modelinit
       
+      jarenumber = 0
       CFL = 10d0
 !      maxdge = 0d0
 !      icgsolver = 4
@@ -8407,15 +6589,20 @@ subroutine updateBalance()
    voltot(IDX_GravInput) = voltot(IDX_GravInput) + cumvolcur(IDX_GravInput)
    voltot(IDX_SALInput)  = voltot(IDX_SALInput)  + cumvolcur(IDX_SALInput)
    voltot(IDX_SALInput2) = voltot(IDX_SALInput2) + cumvolcur(IDX_SALInput2)
+   voltot(IDX_GRWIN )  = voltot(IDX_GRWIN )  + cumvolcur(IDX_GRWIN ) 
+   voltot(IDX_GRWOUT)  = voltot(IDX_GRWOUT)  + cumvolcur(IDX_GRWOUT) 
+   voltot(IDX_GRWTOT)  = voltot(IDX_GRWTOT)  + cumvolcur(IDX_GRWTOT) 
 
    cumvolcur = 0d0
 end subroutine updateBalance
    
 subroutine find_flownodesorlinks_merge(n, x, y, n_loc, n_own, iloc_own, iloc_merge, janode)
-   use m_kdtree2
+   use kdtree2Factory
    use unstruc_messages
    use m_flowgeom
    use network_data
+   use m_missing, only: dmiss
+   use m_sferic, only: jsferic
    
    implicit none
    type(kdtree_instance)                           :: treeinst
@@ -8448,7 +6635,7 @@ subroutine find_flownodesorlinks_merge(n, x, y, n_loc, n_own, iloc_own, iloc_mer
    endif
    
    !build kdtree
-   call build_kdtree(treeinst, n, x, y, ierror)
+   call build_kdtree(treeinst, n, x, y, ierror, jsferic, dmiss)
    if ( ierror.ne.0 ) then
       goto 1234
    end if
@@ -8458,7 +6645,7 @@ subroutine find_flownodesorlinks_merge(n, x, y, n_loc, n_own, iloc_own, iloc_mer
    do k = 1, n_own
         !  fill query vector
         kk = iloc_own(k)
-        call make_queryvector_kdtree(treeinst, x_tmp(kk), y_tmp(kk))
+        call make_queryvector_kdtree(treeinst, x_tmp(kk), y_tmp(kk), jsferic)
         !  count number of points in search area
         NN = kdtree2_r_count(treeinst%tree, treeinst%qv, R2search)
         if ( NN.eq.0 ) then
@@ -8572,10 +6759,14 @@ end subroutine generatePartitionMDUFile
 
 !> create samples in triangle
 subroutine create_samples_in_triangle()
+   
    use m_polygon
    use m_samples
    use network_data, only: cornercos
    use m_missing
+   use m_sferic, only: jsferic, jasfer3D
+   use geometry_module, only: dbdistance, dcosphi
+
    implicit none
    
    double precision, dimension(:,:), allocatable :: xx
@@ -8590,8 +6781,6 @@ subroutine create_samples_in_triangle()
    integer                                       :: i, j
    integer                                       :: jL, jR
    
-   double precision, external                    :: dcosphi
-   double precision, external                    :: dbdistance
    
    if ( NPL.lt.2 ) return
    
@@ -8610,11 +6799,11 @@ subroutine create_samples_in_triangle()
    n2 = n1+1
    if ( n2.ge.NPL ) goto 1234
    
-   dcos = dcosphi(xpl(n2-1),ypl(n2-1),xpl(n2),ypl(n2),xpl(n2),ypl(n2),xpl(n2+1),ypl(n2+1))
+   dcos = dcosphi(xpl(n2-1),ypl(n2-1),xpl(n2),ypl(n2),xpl(n2),ypl(n2),xpl(n2+1),ypl(n2+1), jsferic, jasfer3D, dxymis)
    do while ( dcos.gt.cornercos )
       n2 = n2+1
       if ( n2.eq.NPL ) goto 1234
-      dcos = dcosphi(xpl(n2-1),ypl(n2-1),xpl(n2),ypl(n2),xpl(n2),ypl(n2),xpl(n2+1),ypl(n2+1))
+      dcos = dcosphi(xpl(n2-1),ypl(n2-1),xpl(n2),ypl(n2),xpl(n2),ypl(n2),xpl(n2+1),ypl(n2+1), jsferic, jasfer3D, dxymis)
    end do
    if ( dcos.gt.cornercos ) goto 1234
    
@@ -8622,11 +6811,11 @@ subroutine create_samples_in_triangle()
    n3 = n2+1
    if ( n3.ge.NPL ) goto 1234
    
-   dcos = dcosphi(xpl(n3-1),ypl(n3-1),xpl(n3),ypl(n3),xpl(n3),ypl(n3),xpl(n3+1),ypl(n3+1))
+   dcos = dcosphi(xpl(n3-1),ypl(n3-1),xpl(n3),ypl(n3),xpl(n3),ypl(n3),xpl(n3+1),ypl(n3+1), jsferic, jasfer3D, dxymis)
    do while ( dcos.gt.cornercos )
       n3 = n3+1
       if ( n3.eq.NPL ) exit
-      dcos =  dcosphi(xpl(n3-1),ypl(n3-1),xpl(n3),ypl(n3),xpl(n3),ypl(n3),xpl(n3+1),ypl(n3+1))
+      dcos =  dcosphi(xpl(n3-1),ypl(n3-1),xpl(n3),ypl(n3),xpl(n3),ypl(n3),xpl(n3+1),ypl(n3+1), jsferic, jasfer3D, dxymis)
    end do
    
 !  determine dimensions
@@ -8658,16 +6847,16 @@ subroutine create_samples_in_triangle()
    xs(1) = xpl(n1)
    ys(1) = ypl(n1)
    
-   RL = dbdistance(xpl(n1),ypl(n1),xpl(n2),ypl(n2))
-   RR = dbdistance(xpl(n1),ypl(n1),xpl(n3),ypl(n3))
+   RL = dbdistance(xpl(n1),ypl(n1),xpl(n2),ypl(n2),jsferic, jasfer3D, dmiss)
+   RR = dbdistance(xpl(n1),ypl(n1),xpl(n3),ypl(n3),jsferic, jasfer3D, dmiss)
    
    do i=2,M-1
       
       xi = dble(i-1)/dble(M-1)
       Nxi = floor(xi*(N-1)+1)
          
-      dfacL = dbdistance(xpl(n1),ypl(n1),xpl(n1)+xx(i,1),ypl(n1)+yy(i,1))/RL
-      dfacR = dbdistance(xpl(n1),ypl(n1),xpl(n1)+xx(i,3),ypl(n1)+yy(i,3))/RR
+      dfacL = dbdistance(xpl(n1),ypl(n1),xpl(n1)+xx(i,1),ypl(n1)+yy(i,1),jsferic, jasfer3D, dmiss)/RL
+      dfacR = dbdistance(xpl(n1),ypl(n1),xpl(n1)+xx(i,3),ypl(n1)+yy(i,3),jsferic, jasfer3D, dmiss)/RR
 
       do j=2,Nxi-1
          eta = dble(j-1)/dble(Nxi-1)
@@ -8783,33 +6972,11 @@ subroutine inipole(japole)
 end subroutine inipole
 
 
-! compute coordinates (xu, yu) halfway between (x1,y1) and (x2,y2)
-subroutine half(x1,y1,x2,y2,xu,yu)
-   use m_sferic
-   implicit none
-   
-   double precision, intent(in)  :: x1, y1
-   double precision, intent(in)  :: x2, y2
-   double precision, intent(out) :: xu, yu
-   
-   double precision              :: xx1, yy1, zz1, xx2, yy2, zz2
-   
-   if ( jsferic.eq.1 .and. jasfer3D.eq.1 ) then
-      call sphertoCart3D(x1,y1,xx1,yy1,zz1)
-      call sphertoCart3D(x2,y2,xx2,yy2,zz2)
-      call Cart3Dtospher(0.5d0*(xx1+xx2),0.5d0*(yy1+yy2),0.5d0*(zz1+zz2),xu,yu,max(x1,x2))
-   else
-      xu = 0.5d0*(x1+x2)
-      yu = 0.5d0*(y1+y2)
-   end if
-   
-   return
-end subroutine half
-
 ! compute coordinates (xu, yu) from (x1,y1) and (x2,y2) with
 !    weights alpha1 and alpha2
 subroutine a1x1a2x2(x1,y1,x2,y2,alpha1,alpha2,xu,yu)
    use m_sferic
+   use geometry_module, only: sphertocart3D, Cart3Dtospher
    implicit none
    
    double precision, intent(in)  :: x1, y1
@@ -8835,48 +7002,6 @@ subroutine a1x1a2x2(x1,y1,x2,y2,alpha1,alpha2,xu,yu)
    
    return
 end subroutine a1x1a2x2
-
-! compute coordinates (xu, yu) from coordinates (x,y) and vector (vx,vy) with
-!    xu = x + alpha v, with v in reference frame of x
-subroutine xpav(x,y,alpha,vx,vy,xu,yu)
-   use m_sferic
-   use unstruc_messages
-   implicit none
-   
-   double precision, intent(in)  :: x, y
-   double precision, intent(in)  :: alpha
-   double precision, intent(in)  :: vx, vy
-   double precision, intent(out) :: xu, yu
-   
-   double precision, dimension(3) :: elambda
-   double precision, dimension(3) :: ephi
-   
-   double precision               :: vxx, vyy, vzz
-   double precision               :: xx, yy, zz
-   double precision               :: xxu, yyu, zzu
-   double precision               :: lambda, phi
-   
-   if ( jsferic.eq.1 .and. jasfer3D.eq.1 ) then
-!     compute global base vectors at other point in 3D (xx,yy,zz) frame
-      lambda = x*dg2rd
-      phi    = y*dg2rd
-      elambda = (/          -sin(lambda),           cos(lambda), 0d0 /)
-      ephi    = (/ -sin(phi)*cos(lambda), -sin(phi)*sin(lambda), cos(phi) /)
-      vxx = (vx*elambda(1) + vy*ephi(1))
-      vyy = (vx*elambda(2) + vy*ephi(2))
-      vzz = (vx*elambda(3) + vy*ephi(3))
-      
-      call sphertoCart3D(x,y,xx,yy,zz)
-      xxu = xx + alpha*vxx
-      yyu = yy + alpha*vyy
-      zzu = zz + alpha*vzz
-      call Cart3Dtospher(xxu,yyu,zzu,xu,yu,x)
-   else
-      call mess(LEVEL_ERROR, 'xpav: not supported')   
-   end if
-   
-   return
-end subroutine xpav
 
 
 !> generate curvilinear mesh in polygon, based on three polygon nodes that define two sides 1-2 and 2-3
@@ -9256,6 +7381,9 @@ end subroutine pol2curvi_tri
 subroutine interpolate_zpl_in_polylines()
    use m_polygon
    use m_missing
+   use geometry_module, only: dbdistance, get_startend
+   use m_sferic, only: jsferic, jasfer3D
+
    implicit none
    
    double precision, dimension(:), allocatable :: wfromLeft       ! arc length from left
@@ -9269,9 +7397,6 @@ subroutine interpolate_zpl_in_polylines()
    integer                                     :: i, iL, iR
    
    integer                                     :: ierror
-   
-   double precision, external                  :: dbdistance
-   
    double precision, parameter                 :: dtol = 1d-8
    
    ierror = 1
@@ -9288,7 +7413,7 @@ subroutine interpolate_zpl_in_polylines()
    do while ( jpoint.lt.NPL )
    
 !     get subpolyline 
-      call get_startend(NPL-jpoint+1,xpl(jpoint:NPL),ypl(jpoint:NPL),jstart,jend)
+      call get_startend(NPL-jpoint+1,xpl(jpoint:NPL),ypl(jpoint:NPL),jstart,jend, dmiss)
 
       jstart = jstart+jpoint-1
       jend   = jend+jpoint-1
@@ -9296,7 +7421,7 @@ subroutine interpolate_zpl_in_polylines()
 !     compute arc lengths from left
       wfromLeft(jstart) = 0d0
       do i=jstart, jend-1
-         wfromLeft(i+1) = wfromLeft(i) + dbdistance(xpl(i),ypl(i),xpl(i+1),ypl(i+1))
+         wfromLeft(i+1) = wfromLeft(i) + dbdistance(xpl(i),ypl(i),xpl(i+1),ypl(i+1), jsferic, jasfer3D, dmiss)
       end do
       
 !     get left nodes for interpolation
@@ -9363,89 +7488,3 @@ subroutine interpolate_zpl_in_polylines()
    
    return
 end subroutine interpolate_zpl_in_polylines
-    
-    
-!> This subroutine processes command line options (before these options were in in net_main)
-subroutine processCommandLineOptions(finalizeProgram)   
-   use unstruc_model, only: md_pressakey, md_jatest, md_soltest, md_convnetcells, md_jagridgen, md_jarefine, md_CFL, &
-                            md_icgsolver, md_maxmatvecs,md_epsdiff, md_epscg, md_netfile, md_japartition,md_ident,   &
-                            md_ndomains, md_jacontiguous,md_pmethod
-   use unstruc_netcdf,only: unc_write_net 
-   use m_timer,       only: IAXPY, IAXPY, gettimer, initimer
-   use m_flowgeom,    only: jabatch
-   use unstruc_api,   only: dobatch
-   
-   implicit none
-   
-   integer, intent(inout) :: finalizeProgram  
-
-   finalizeProgram = 0
-   
-   if ( md_pressakey.eq.1 ) then
-      call pressakey()
-   end if
-    
-   if ( md_jatest.eq.1 ) then
-      call initimer()
-!      output timings  
-      write(6,'(a,E8.2,a,E8.2)') ' WC-time Axpy test [s]: ' , gettimer(1,IAXPY), ' CPU-time Axpy test [s]: ' , gettimer(0,IAXPY)
-       
-      finalizeProgram = 1
-      return
-   end if
-
-   if ( md_soltest.eq.1 ) then
-      ! call for solver only testing
-      call soltest(md_CFL,md_icgsolver,md_maxmatvecs,md_epsdiff,md_epscg)
-       
-      finalizeProgram = 1
-      return
-   end if
-    
-   if ( md_convnetcells.eq.1 ) then
-      ! call soltest(md_CFL,md_icgsolver,md_maxmatvecs,md_epsdiff,md_epscg)
-      ! read net, write net ... md_netfile
-      call findcells(0)
-      call find1dcells()
-      call unc_write_net(md_netfile, janetcell = 1, janetbnd = 0, jaidomain = 0)
-       
-      finalizeProgram = 1
-      return
-   end if
-    
-   if (jabatch == 1) then
-      ! batch mode to run many different tests one after another
-      call dobatch() 
-   endif      
-
-   if ( md_japartition.eq.1 ) then        
-      if ( len_trim(md_ident) > 0 ) then 
-         ! mdu filed passed on the command line to partition
-         call partition_mdu()
-      else
-         ! network file passed on the command line to partition
-         call partition_from_commandline(md_netfile,md_ndomains,md_jacontiguous,md_icgsolver, md_pmethod)
-      end if
-
-      finalizeProgram = 1
-      return
-   end if
-
-   if ( md_jagridgen.eq.1 ) then
-      call makenet(0)
-      call gridtonet()
-      call unc_write_net('out_net.nc')
-       
-      finalizeProgram = 1
-      return
-   end if
-
-   if ( md_jarefine.eq.1 ) then
-      call refine_from_commandline()
-       
-      finalizeProgram = 1
-      return
-   end if
-   
-end subroutine processCommandLineOptions
-    

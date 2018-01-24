@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2017.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -27,14 +27,75 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: xbeach_netcdf.f90 52266 2017-09-02 11:24:11Z klecz_ml $
-! $HeadURL: https://repos.deltares.nl/repos/ds/branches/dflowfm/20161017_dflowfm_codecleanup/engines_gpl/dflowfm/packages/dflowfm_kernel/src/xbeach_netcdf.f90 $
+! $Id: xbeach_netcdf.f90 54191 2018-01-22 18:57:53Z dam_ar $
+! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/xbeach_netcdf.f90 $
 module m_xbeach_netcdf
 !! xbeach time-averaged spatial output
 !! to do for the future: add flexibility to add variables using mnemonics
+   use io_ugrid
+   use netcdf
    implicit none
+   
+   type t_unc_wavids
+   !
+   ! Toplevel
+   !
+   integer            :: ncid = 0 !< NetCDF data set id (typically NetCDF file pointer)
+   type(t_ug_mesh) :: meshids1d
+   type(t_ug_mesh) :: meshids2d
+   type(t_ug_mesh) :: meshids3d
+
+   !
+   ! Dimensions
+   !
+   integer :: id_timedim = -1 !< Time dimension (the only nf90_unlimited in file).
+   !
+   ! Data variables
+   !
+   integer :: id_flowelemba(3)     = -1 !< Variable ID for flow node bottom area (on 1D, 2D, 3D grid parts resp.).
+   integer :: id_flowelembl(3)     = -1 !< Variable ID for flow node bed level (on 1D, 2D, 3D grid parts resp.).
+   integer :: id_netnodez(3)       = -1 !< Variable ID for net node bed level. TODO: AvD: UNST-1318: consider removing here.
+   integer :: id_time      = -1 !< Variable ID for 
+
+   !
+   ! Other
+   !
+   integer :: idx_curtime  = 0  !< Index of current time (typically of latest snapshot being written).
+end type t_unc_wavids
 
 contains
+
+subroutine xbeach_write_stats(tim)
+   use m_flowparameters, only: jawave, jaavgwavquant, eps10
+   use m_flowtimes, only: ti_wav, ti_wavs, ti_wave, tstop_user, time_wav   
+   use precision_basics
+   
+   implicit none
+   
+   double precision, intent(in)      :: tim
+   integer                           :: ierr
+   
+   ierr = 1
+   if ((jawave.eq.4) .and. (ti_wav > 0) .and. (jaavgwavquant .eq. 1)) then
+      if (comparereal(tim, time_wav, eps10) >= 0) then
+         call unc_write_wav(tim)
+         call xbeach_clearaverages()
+         if (ti_wav > 0) then
+             time_wav = max(ti_wavs + (floor((tim-ti_wavs)/ti_wav)+1)*ti_wav,ti_wavs)
+         else
+             time_wav = tstop_user
+         endif
+         if (comparereal(time_wav, ti_wave, eps10) == 1) then
+             time_wav = tstop_user
+         endif
+      endif
+   end if
+   
+   ierr = 0
+   
+1234 continue
+   return
+end subroutine
 
 subroutine unc_write_wav(tim)
     use m_flow
@@ -46,26 +107,35 @@ subroutine unc_write_wav(tim)
 
     double precision, intent(in) :: tim
 
-    integer, save      :: iwavfile = 0
-    integer            :: ierr
-    character(len=256) :: filnam
+    type(t_unc_wavids), save :: wavids
+    integer           , save :: iwavfile = 0
+    integer                  :: ierr
+    character(len=256)       :: filnam
 
     if (iwavfile /= 0 .and. it_wav == 0) then
+    !if ( md_mapformat.eq.IFORMAT_NETCDF .or. md_mapformat == IFORMAT_UGRID) then   !   NetCDF output
+       !if (wavids%ncid /= 0 .and. ((md_unc_conv == UNC_CONV_UGRID .and. wavids%idx_curtime == 0) .or. (md_unc_conv == UNC_CONV_CFOLD .and. it_wav == 0))) then
           ierr = unc_close(iwavfile)
           iwavfile = 0
+       !end if
     end if
 
     if (iwavfile == 0) then
         filnam = defaultFilename('avgwavquant')
         ierr = unc_create(filnam , 0, iwavfile)
         if (ierr /= nf90_noerr) then
-            call mess(LEVEL_WARN, 'Could not create time-averaged wave output file.')
+            call mess(LEVEL_WARN, 'Could not create file containing time-averaged wave output.')
             iwavfile = 0
         end if
     endif
 
     if (iwavfile .ne. 0) then
         call unc_write_wav_filepointer(iwavfile,tim)
+        !if (md_unc_conv == UNC_CONV_UGRID) then
+           !call unc_write_wav_filepointer_ugrid(wavids,tim)
+        !else
+           !call unc_write_map_filepointer(wavids%ncid,tim)
+        !endif
     endif
 
     ierr = nf90_sync(iwavfile) ! Flush file
@@ -87,11 +157,10 @@ subroutine unc_write_wav_filepointer(imapfile, tim,  jaseparate)
     integer,           intent(in) :: imapfile
     real(kind=hp),     intent(in) :: tim
 
-    integer                       :: idims(2), ndim
-
+    integer                       :: idims(2)
     logical, save                 :: firststep  = .true.
     
-    integer, save :: ierr, &
+    integer, save :: ierr, ndim, &
                      id_flowelemdim, &
                      id_flowlinkdim, &
                      id_timedim,     &
@@ -114,8 +183,11 @@ subroutine unc_write_wav_filepointer(imapfile, tim,  jaseparate)
                      id_thetamean_mean, id_thetamean_var, id_thetamean_min, id_thetamean_max, &
                      id_sigmwav_mean, id_sigmwav_var, id_sigmwav_min, id_sigmwav_max
 
-    integer                :: itim
+    integer                :: itim, k
     integer,optional       :: jaseparate
+    
+    double precision, allocatable    :: temp(:)
+    allocate(temp(1:lnx), stat=ierr)
 
     ! Use nr of dimensions in netCDF file a quick check whether vardefs were written
     ! before in previous calls.
@@ -126,7 +198,7 @@ subroutine unc_write_wav_filepointer(imapfile, tim,  jaseparate)
     if (ndim == 0) then
        call unc_write_flowgeom_filepointer(imapfile) ! UNC_CONV_CFOLD ! Write time-independent flow geometry data
        
-       ierr = nf90_inq_dimid(imapfile, 'nFlowElem', id_flowelemdim)  !! only flow elements needed
+       ierr = nf90_inq_dimid(imapfile, 'nFlowElem', id_flowelemdim)
        ierr = nf90_inq_dimid(imapfile, 'nFlowLink', id_flowlinkdim)
        
        ! Time
@@ -141,10 +213,10 @@ subroutine unc_write_wav_filepointer(imapfile, tim,  jaseparate)
        idims(2) = id_timedim 
        
        ! Flow data on centres
-       call definencvar(imapfile,id_H_mean  ,nf90_double,idims,2, 'H_mean'  , 'mean significant wave height', 'm', 'FlowElem_xcc FlowElem_ycc')
-       call definencvar(imapfile,id_H_var   ,nf90_double,idims,2, 'H_var'  , 'variance significant wave height', 'm2', 'FlowElem_xcc FlowElem_ycc')
-       call definencvar(imapfile,id_H_min   ,nf90_double,idims,2, 'H_min'  , 'min significant wave height', 'm', 'FlowElem_xcc FlowElem_ycc')
-       call definencvar(imapfile,id_H_max   ,nf90_double,idims,2, 'H_max'  , 'max significant wave height', 'm', 'FlowElem_xcc FlowElem_ycc')
+       call definencvar(imapfile,id_H_mean  ,nf90_double,idims,2, 'H_mean'  , 'mean rms wave height', 'm', 'FlowElem_xcc FlowElem_ycc')
+       call definencvar(imapfile,id_H_var   ,nf90_double,idims,2, 'H_var'  , 'variance rms wave height', 'm2', 'FlowElem_xcc FlowElem_ycc')
+       call definencvar(imapfile,id_H_min   ,nf90_double,idims,2, 'H_min'  , 'min rms wave height', 'm', 'FlowElem_xcc FlowElem_ycc')
+       call definencvar(imapfile,id_H_max   ,nf90_double,idims,2, 'H_max'  , 'max rms wave height', 'm', 'FlowElem_xcc FlowElem_ycc')
        
        call definencvar(imapfile,id_E_mean  ,nf90_double,idims,2, 'E_mean'  , 'mean bulk wave energy', 'J m-2', 'FlowElem_xcc FlowElem_ycc')
        call definencvar(imapfile,id_E_var   ,nf90_double,idims,2, 'E_var'  , 'variance bulk wave energy', 'J2 m-4', 'FlowElem_xcc FlowElem_ycc')
@@ -176,20 +248,20 @@ subroutine unc_write_wav_filepointer(imapfile, tim,  jaseparate)
        call definencvar(imapfile,id_cgwav_min   ,nf90_double,idims,2, 'cgwav_min'  , 'min wave group velocity', 'm s-1', 'FlowElem_xcc FlowElem_ycc')
        call definencvar(imapfile,id_cgwav_max   ,nf90_double,idims,2, 'cgwav_max'  , 'max wave group velocity', 'm s-1', 'FlowElem_xcc FlowElem_ycc')
 
-       call definencvar(imapfile,id_sigmwav_mean  ,nf90_double,idims,2, 's1_mean'  , 'mean water level on present timestep', 'm', 'FlowElem_xcc FlowElem_ycc')
-       call definencvar(imapfile,id_sigmwav_var   ,nf90_double,idims,2, 's1_var'  , 'variance water level on present timestep', 'm2', 'FlowElem_xcc FlowElem_ycc')
-       call definencvar(imapfile,id_sigmwav_min   ,nf90_double,idims,2, 's1_min'  , 'min water level on present timestep', 'm', 'FlowElem_xcc FlowElem_ycc')
-       call definencvar(imapfile,id_sigmwav_max   ,nf90_double,idims,2, 's1_max'  , 'max water level on present timestep', 'm', 'FlowElem_xcc FlowElem_ycc')
+       call definencvar(imapfile,id_s1_mean  ,nf90_double,idims,2, 's1_mean'  , 'mean water level on present timestep', 'm', 'FlowElem_xcc FlowElem_ycc')
+       call definencvar(imapfile,id_s1_var   ,nf90_double,idims,2, 's1_var'  , 'variance water level on present timestep', 'm2', 'FlowElem_xcc FlowElem_ycc')
+       call definencvar(imapfile,id_s1_min   ,nf90_double,idims,2, 's1_min'  , 'min water level on present timestep', 'm', 'FlowElem_xcc FlowElem_ycc')
+       call definencvar(imapfile,id_s1_max   ,nf90_double,idims,2, 's1_max'  , 'max water level on present timestep', 'm', 'FlowElem_xcc FlowElem_ycc')
        
        call definencvar(imapfile,id_sigmwav_mean  ,nf90_double,idims,2, 'sigmwav_mean'  , 'mean of mean frequency', 'rad s-1', 'FlowElem_xcc FlowElem_ycc')
        call definencvar(imapfile,id_sigmwav_var   ,nf90_double,idims,2, 'sigmwav_var'  , 'variance mean frequency', 'rad2 s-2', 'FlowElem_xcc FlowElem_ycc')
        call definencvar(imapfile,id_sigmwav_min   ,nf90_double,idims,2, 'sigmwav_min'  , 'min mean frequency', 'rad s-1', 'FlowElem_xcc FlowElem_ycc')
        call definencvar(imapfile,id_sigmwav_max   ,nf90_double,idims,2, 'sigmwav_max'  , 'max mean frequency', 'rad s-1', 'FlowElem_xcc FlowElem_ycc')
        
-       call definencvar(imapfile,id_sigmwav_mean  ,nf90_double,idims,2, 'thetamean_mean'  , 'mean of mean wave angle', 'rad', 'FlowElem_xcc FlowElem_ycc')
-       call definencvar(imapfile,id_sigmwav_var   ,nf90_double,idims,2, 'thetamean_var'  , 'variance mean wave angle', 'rad2', 'FlowElem_xcc FlowElem_ycc')
-       call definencvar(imapfile,id_sigmwav_min   ,nf90_double,idims,2, 'thetamean_min'  , 'min mean wave angle', 'rad', 'FlowElem_xcc FlowElem_ycc')
-       call definencvar(imapfile,id_sigmwav_max   ,nf90_double,idims,2, 'thetamean_max'  , 'max mean wave angle', 'rad', 'FlowElem_xcc FlowElem_ycc')
+       call definencvar(imapfile,id_thetamean_mean  ,nf90_double,idims,2, 'thetamean_mean'  , 'mean of mean wave angle', 'rad', 'FlowElem_xcc FlowElem_ycc')
+       call definencvar(imapfile,id_thetamean_var   ,nf90_double,idims,2, 'thetamean_var'  , 'variance mean wave angle', 'rad2', 'FlowElem_xcc FlowElem_ycc')
+       call definencvar(imapfile,id_thetamean_min   ,nf90_double,idims,2, 'thetamean_min'  , 'min mean wave angle', 'rad', 'FlowElem_xcc FlowElem_ycc')
+       call definencvar(imapfile,id_thetamean_max   ,nf90_double,idims,2, 'thetamean_max'  , 'max mean wave angle', 'rad', 'FlowElem_xcc FlowElem_ycc')
        
        ! These go over links
 
@@ -383,6 +455,7 @@ subroutine unc_write_wav_filepointer(imapfile, tim,  jaseparate)
        firststep = .false. 
        !
        ierr = nf90_inq_dimid(imapfile, 'nFlowElem', id_flowelemdim)
+       ierr = nf90_inq_dimid(imapfile, 'nFlowLink', id_flowlinkdim)
        !
        ! Time
        ierr = nf90_inq_dimid(imapfile, 'time', id_timedim)
@@ -480,107 +553,135 @@ subroutine unc_write_wav_filepointer(imapfile, tim,  jaseparate)
     end if    
     
     ! -- Start data writing (flow data) ------------------------
-    it_map   = it_map+1
-    itim     = it_map ! Increment time dimension index   ! TODO: AvD: JR: I think this is a bug, shouldn't it be it_wav??
+    it_wav   = it_wav+1
+    itim     = it_wav ! Increment time dimension index  
 
     ! Time
-    ierr = nf90_put_var(imapfile, id_time    , tim, (/ itim /))
-    !ierr = nf90_put_var(imapfile, id_timestep, dts, (/ itim /))
+    ierr = nf90_put_var(imapfile, id_time    , tim, (/  itim /))
 
     ! Data on flow nodes
-    ierr = nf90_put_var(imapfile, id_E_mean, E_mean, (/ 1, itim /), (/ ndxi, 1 /)) 
-    ierr = nf90_put_var(imapfile, id_E_var, E_var, (/ 1, itim /), (/ ndxi, 1 /)) 
-    ierr = nf90_put_var(imapfile, id_E_max, E_max, (/ 1, itim /), (/ ndxi, 1 /)) 
-    ierr = nf90_put_var(imapfile, id_E_min, E_min, (/ 1, itim /), (/ ndxi, 1 /))
+    ierr = nf90_put_var(imapfile, id_E_mean, E_mean(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
+    ierr = nf90_put_var(imapfile, id_E_var, E_var(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
+    ierr = nf90_put_var(imapfile, id_E_max, E_max(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
+    ierr = nf90_put_var(imapfile, id_E_min, E_min(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /))
 
-    ierr = nf90_put_var(imapfile, id_H_mean, sqrt(H_varsquare), (/ 1, itim /), (/ ndxi, 1 /)) 
-    ierr = nf90_put_var(imapfile, id_H_var, H_var, (/ 1, itim /), (/ ndxi, 1 /)) 
-    ierr = nf90_put_var(imapfile, id_H_max, H_max, (/ 1, itim /), (/ ndxi, 1 /)) 
-    ierr = nf90_put_var(imapfile, id_H_min, H_min, (/ 1, itim /), (/ ndxi, 1 /))
+    do k = 1, ndx   ! stack
+       ierr = nf90_put_var(imapfile, id_H_mean, sqrt(H_varsquare(k:k)), (/ 1, itim /), (/ 1, 1 /)) 
+    end do
+    ierr = nf90_put_var(imapfile, id_H_var, H_var(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
+    ierr = nf90_put_var(imapfile, id_H_max, H_max(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
+    ierr = nf90_put_var(imapfile, id_H_min, H_min(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /))
 
-    ierr = nf90_put_var(imapfile, id_R_mean, R_mean, (/ 1, itim /), (/ ndxi, 1 /)) 
-    ierr = nf90_put_var(imapfile, id_R_var, R_var, (/ 1, itim /), (/ ndxi, 1 /)) 
-    ierr = nf90_put_var(imapfile, id_R_max, R_max, (/ 1, itim /), (/ ndxi, 1 /)) 
-    ierr = nf90_put_var(imapfile, id_R_min, R_min, (/ 1, itim /), (/ ndxi, 1 /))
+    ierr = nf90_put_var(imapfile, id_R_mean, R_mean(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
+    ierr = nf90_put_var(imapfile, id_R_var, R_var(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
+    ierr = nf90_put_var(imapfile, id_R_max, R_max(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
+    ierr = nf90_put_var(imapfile, id_R_min, R_min(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /))
 
-    ierr = nf90_put_var(imapfile, id_D_mean, D_mean, (/ 1, itim /), (/ ndxi, 1 /)) 
-    ierr = nf90_put_var(imapfile, id_D_var, D_var, (/ 1, itim /), (/ ndxi, 1 /)) 
-    ierr = nf90_put_var(imapfile, id_D_max, D_max, (/ 1, itim /), (/ ndxi, 1 /)) 
-    ierr = nf90_put_var(imapfile, id_D_min, D_min, (/ 1, itim /), (/ ndxi, 1 /))
+    ierr = nf90_put_var(imapfile, id_D_mean, D_mean(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
+    ierr = nf90_put_var(imapfile, id_D_var, D_var(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
+    ierr = nf90_put_var(imapfile, id_D_max, D_max(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
+    ierr = nf90_put_var(imapfile, id_D_min, D_min(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /))
 
-    ierr = nf90_put_var(imapfile, id_DR_mean, DR_mean, (/ 1, itim /), (/ ndxi, 1 /)) 
-    ierr = nf90_put_var(imapfile, id_DR_var, DR_var, (/ 1, itim /), (/ ndxi, 1 /)) 
-    ierr = nf90_put_var(imapfile, id_DR_max, DR_max, (/ 1, itim /), (/ ndxi, 1 /)) 
-    ierr = nf90_put_var(imapfile, id_DR_min, DR_min, (/ 1, itim /), (/ ndxi, 1 /))
+    ierr = nf90_put_var(imapfile, id_DR_mean, DR_mean(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
+    ierr = nf90_put_var(imapfile, id_DR_var, DR_var(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
+    ierr = nf90_put_var(imapfile, id_DR_max, DR_max(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
+    ierr = nf90_put_var(imapfile, id_DR_min, DR_min(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /))
 
-    ierr = nf90_put_var(imapfile, id_cwav_mean, cwav_mean, (/ 1, itim /), (/ ndxi, 1 /)) 
-    ierr = nf90_put_var(imapfile, id_cwav_var, cwav_var, (/ 1, itim /), (/ ndxi, 1 /)) 
-    ierr = nf90_put_var(imapfile, id_cwav_max, cwav_max, (/ 1, itim /), (/ ndxi, 1 /)) 
-    ierr = nf90_put_var(imapfile, id_cwav_min, cwav_min, (/ 1, itim /), (/ ndxi, 1 /))
+    ierr = nf90_put_var(imapfile, id_cwav_mean, cwav_mean(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
+    ierr = nf90_put_var(imapfile, id_cwav_var, cwav_var(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
+    ierr = nf90_put_var(imapfile, id_cwav_max, cwav_max(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
+    ierr = nf90_put_var(imapfile, id_cwav_min, cwav_min(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /))
 
-    ierr = nf90_put_var(imapfile, id_cgwav_mean, cgwav_mean, (/ 1, itim /), (/ ndxi, 1 /)) 
-    ierr = nf90_put_var(imapfile, id_cgwav_var, cgwav_var, (/ 1, itim /), (/ ndxi, 1 /)) 
-    ierr = nf90_put_var(imapfile, id_cgwav_max, cgwav_max, (/ 1, itim /), (/ ndxi, 1 /)) 
-    ierr = nf90_put_var(imapfile, id_cgwav_min, cgwav_min, (/ 1, itim /), (/ ndxi, 1 /))
+    ierr = nf90_put_var(imapfile, id_cgwav_mean, cgwav_mean(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
+    ierr = nf90_put_var(imapfile, id_cgwav_var, cgwav_var(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
+    ierr = nf90_put_var(imapfile, id_cgwav_max, cgwav_max(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
+    ierr = nf90_put_var(imapfile, id_cgwav_min, cgwav_min(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /))
 
-    ierr = nf90_put_var(imapfile, id_thetamean_mean, &
-           mod(2.d0*pi + atan2(nint(thetamean_mean)/1d7, &
-                       mod(thetamean_mean,1.d0)*1d1), 2.d0*pi), &
-           (/ 1, itim /), (/ ndxi, 1 /)) 
-    ierr = nf90_put_var(imapfile, id_thetamean_var, thetamean_var, (/ 1, itim /), (/ ndxi, 1 /)) 
-    ierr = nf90_put_var(imapfile, id_thetamean_max, thetamean_max, (/ 1, itim /), (/ ndxi, 1 /)) 
-    ierr = nf90_put_var(imapfile, id_thetamean_min, thetamean_min, (/ 1, itim /), (/ ndxi, 1 /))
+    do k = 1, ndx ! stack
+        ierr = nf90_put_var(imapfile, id_thetamean_mean, &
+                            mod(2.d0*pi + atan2(nint(thetamean_mean(k:k))/1d7, &
+                            mod(thetamean_mean(k:k),1.d0)*1d1), 2.d0*pi), &
+                            (/ 1, itim /), (/ 1, 1 /))
+    end do
+    ierr = nf90_put_var(imapfile, id_thetamean_var, thetamean_var(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
+    ierr = nf90_put_var(imapfile, id_thetamean_max, thetamean_max(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
+    ierr = nf90_put_var(imapfile, id_thetamean_min, thetamean_min(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /))
 
-    ierr = nf90_put_var(imapfile, id_sigmwav_mean, sigmwav_mean, (/ 1, itim /), (/ ndxi, 1 /)) 
-    ierr = nf90_put_var(imapfile, id_sigmwav_var, sigmwav_var, (/ 1, itim /), (/ ndxi, 1 /)) 
-    ierr = nf90_put_var(imapfile, id_sigmwav_max, sigmwav_max, (/ 1, itim /), (/ ndxi, 1 /)) 
-    ierr = nf90_put_var(imapfile, id_sigmwav_min, sigmwav_min, (/ 1, itim /), (/ ndxi, 1 /))
+    ierr = nf90_put_var(imapfile, id_sigmwav_mean, sigmwav_mean(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
+    ierr = nf90_put_var(imapfile, id_sigmwav_var, sigmwav_var(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
+    ierr = nf90_put_var(imapfile, id_sigmwav_max, sigmwav_max(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
+    ierr = nf90_put_var(imapfile, id_sigmwav_min, sigmwav_min(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /))
  
-    ierr = nf90_put_var(imapfile, id_s1_mean, s1_mean, (/ 1, itim /), (/ ndxi, 1 /)) 
-    ierr = nf90_put_var(imapfile, id_s1_var, s1_var, (/ 1, itim /), (/ ndxi, 1 /)) 
-    ierr = nf90_put_var(imapfile, id_s1_max, s1_max, (/ 1, itim /), (/ ndxi, 1 /)) 
-    ierr = nf90_put_var(imapfile, id_s1_min, s1_min, (/ 1, itim /), (/ ndxi, 1 /))
+    ierr = nf90_put_var(imapfile, id_s1_mean, s1_mean(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
+    ierr = nf90_put_var(imapfile, id_s1_var, s1_var(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
+    ierr = nf90_put_var(imapfile, id_s1_max, s1_max(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
+    ierr = nf90_put_var(imapfile, id_s1_min, s1_min(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /))
 
     ! Data on flow links
-    ierr = nf90_put_var(imapfile, id_Fx_mean, Fx_mean, (/ 1, itim /), (/ lnx, 1 /)) 
-    ierr = nf90_put_var(imapfile, id_Fx_var, Fx_var, (/ 1, itim /), (/ lnx, 1 /)) 
-    ierr = nf90_put_var(imapfile, id_Fx_max, Fx_max, (/ 1, itim /), (/ lnx, 1 /)) 
-    ierr = nf90_put_var(imapfile, id_Fx_min, Fx_min, (/ 1, itim /), (/ lnx, 1 /))
+    ierr = nf90_put_var(imapfile, id_Fx_mean, Fx_mean(1:lnx), (/ 1, itim /), (/ lnx, 1 /)) 
+    ierr = nf90_put_var(imapfile, id_Fx_var, Fx_var(1:lnx), (/ 1, itim /), (/ lnx, 1 /)) 
+    ierr = nf90_put_var(imapfile, id_Fx_max, Fx_max(1:lnx), (/ 1, itim /), (/ lnx, 1 /)) 
+    ierr = nf90_put_var(imapfile, id_Fx_min, Fx_min(1:lnx), (/ 1, itim /), (/ lnx, 1 /))
 
-    ierr = nf90_put_var(imapfile, id_Fy_mean, Fy_mean, (/ 1, itim /), (/ lnx, 1 /)) 
-    ierr = nf90_put_var(imapfile, id_Fy_var, Fy_var, (/ 1, itim /), (/ lnx, 1 /)) 
-    ierr = nf90_put_var(imapfile, id_Fy_max, Fy_max, (/ 1, itim /), (/ lnx, 1 /)) 
-    ierr = nf90_put_var(imapfile, id_Fy_min, Fy_min, (/ 1, itim /), (/ lnx, 1 /))
+    ierr = nf90_put_var(imapfile, id_Fy_mean, Fy_mean(1:lnx), (/ 1, itim /), (/ lnx, 1 /)) 
+    ierr = nf90_put_var(imapfile, id_Fy_var, Fy_var(1:lnx), (/ 1, itim /), (/ lnx, 1 /)) 
+    ierr = nf90_put_var(imapfile, id_Fy_max, Fy_max(1:lnx), (/ 1, itim /), (/ lnx, 1 /)) 
+    ierr = nf90_put_var(imapfile, id_Fy_min, Fy_min(1:lnx), (/ 1, itim /), (/ lnx, 1 /))
 
-    ierr = nf90_put_var(imapfile, id_ust_mean, ust_mean, (/ 1, itim /), (/ lnx, 1 /)) 
-    ierr = nf90_put_var(imapfile, id_ust_var, ust_var, (/ 1, itim /), (/ lnx, 1 /)) 
-    ierr = nf90_put_var(imapfile, id_ust_max, ust_max, (/ 1, itim /), (/ lnx, 1 /)) 
-    ierr = nf90_put_var(imapfile, id_ust_min, ust_min, (/ 1, itim /), (/ lnx, 1 /))
+    ierr = nf90_put_var(imapfile, id_ust_mean, ust_mean(1:lnx), (/ 1, itim /), (/ lnx, 1 /)) 
+    ierr = nf90_put_var(imapfile, id_ust_var, ust_var(1:lnx), (/ 1, itim /), (/ lnx, 1 /)) 
+    ierr = nf90_put_var(imapfile, id_ust_max, ust_max(1:lnx), (/ 1, itim /), (/ lnx, 1 /)) 
+    ierr = nf90_put_var(imapfile, id_ust_min, ust_min(1:lnx), (/ 1, itim /), (/ lnx, 1 /))
 
-    ierr = nf90_put_var(imapfile, id_vst_mean, vst_mean, (/ 1, itim /), (/ lnx, 1 /)) 
-    ierr = nf90_put_var(imapfile, id_vst_var,  vst_var, (/ 1, itim /), (/ lnx, 1 /)) 
-    ierr = nf90_put_var(imapfile, id_vst_max,  vst_max, (/ 1, itim /), (/ lnx, 1 /)) 
-    ierr = nf90_put_var(imapfile, id_vst_min,  vst_min, (/ 1, itim /), (/ lnx, 1 /))
+    ierr = nf90_put_var(imapfile, id_vst_mean, vst_mean(1:lnx), (/ 1, itim /), (/ lnx, 1 /)) 
+    ierr = nf90_put_var(imapfile, id_vst_var,  vst_var(1:lnx), (/ 1, itim /), (/ lnx, 1 /)) 
+    ierr = nf90_put_var(imapfile, id_vst_max,  vst_max(1:lnx), (/ 1, itim /), (/ lnx, 1 /)) 
+    ierr = nf90_put_var(imapfile, id_vst_min,  vst_min(1:lnx), (/ 1, itim /), (/ lnx, 1 /))
 
-    ierr = nf90_put_var(imapfile, id_urms_mean, sqrt(urms_varsquare), (/ 1, itim /), (/ lnx, 1 /)) 
-    ierr = nf90_put_var(imapfile, id_urms_var, urms_var, (/ 1, itim /), (/ lnx, 1 /)) 
-    ierr = nf90_put_var(imapfile, id_urms_max, urms_max, (/ 1, itim /), (/ lnx, 1 /)) 
-    ierr = nf90_put_var(imapfile, id_urms_min, urms_min, (/ 1, itim /), (/ lnx, 1 /))
+    temp = sqrt(urms_varsquare)
+    ierr = nf90_put_var(imapfile, id_urms_mean, temp, (/ 1, itim /), (/ lnx, 1 /))
+    ierr = nf90_put_var(imapfile, id_urms_var, urms_var(1:lnx), (/ 1, itim /), (/ lnx, 1 /)) 
+    ierr = nf90_put_var(imapfile, id_urms_max, urms_max(1:lnx), (/ 1, itim /), (/ lnx, 1 /)) 
+    ierr = nf90_put_var(imapfile, id_urms_min, urms_min(1:lnx), (/ 1, itim /), (/ lnx, 1 /))
 
-    ierr = nf90_put_var(imapfile, id_u_mean, u_mean, (/ 1, itim /), (/ lnx, 1 /)) 
-    ierr = nf90_put_var(imapfile, id_u_var,  u_var, (/ 1, itim /), (/ lnx, 1 /)) 
-    ierr = nf90_put_var(imapfile, id_u_max,  u_max, (/ 1, itim /), (/ lnx, 1 /)) 
-    ierr = nf90_put_var(imapfile, id_u_min,  u_min, (/ 1, itim /), (/ lnx, 1 /)) 
+    ierr = nf90_put_var(imapfile, id_u_mean, u_mean(1:lnx), (/ 1, itim /), (/ lnx, 1 /)) 
+    ierr = nf90_put_var(imapfile, id_u_var,  u_var(1:lnx), (/ 1, itim /), (/ lnx, 1 /)) 
+    ierr = nf90_put_var(imapfile, id_u_max,  u_max(1:lnx), (/ 1, itim /), (/ lnx, 1 /)) 
+    ierr = nf90_put_var(imapfile, id_u_min,  u_min(1:lnx), (/ 1, itim /), (/ lnx, 1 /)) 
 
-    ierr = nf90_put_var(imapfile, id_v_mean, v_mean, (/ 1, itim /), (/ lnx, 1 /)) 
-    ierr = nf90_put_var(imapfile, id_v_var,  v_var, (/ 1, itim /), (/ lnx, 1 /)) 
-    ierr = nf90_put_var(imapfile, id_v_max,  v_max, (/ 1, itim /), (/ lnx, 1 /)) 
-    ierr = nf90_put_var(imapfile, id_v_min,  v_min, (/ 1, itim /), (/ lnx, 1 /)) 
+    ierr = nf90_put_var(imapfile, id_v_mean, v_mean(1:lnx), (/ 1, itim /), (/ lnx, 1 /)) 
+    ierr = nf90_put_var(imapfile, id_v_var,  v_var(1:lnx), (/ 1, itim /), (/ lnx, 1 /)) 
+    ierr = nf90_put_var(imapfile, id_v_max,  v_max(1:lnx), (/ 1, itim /), (/ lnx, 1 /)) 
+    ierr = nf90_put_var(imapfile, id_v_min,  v_min(1:lnxi), (/ 1, itim /), (/ lnx, 1 /)) 
  
 end subroutine unc_write_wav_filepointer
 
+
+!subroutine unc_write_wav_filepointer_ugrid(wavids, tim)
+!   use unstruc_netcdf
+!   implicit none
+!   
+!   type(t_unc_wavids), intent(inout) :: wavids   !< Set of file and variable ids for this map-type file.
+!   real(kind=hp),      intent(in)    :: tim
+!   
+!   integer                       :: idims(2)
+!   logical, dimension(2), save   :: firststep = .true.
+!
+!   integer, save                 :: ierr, ndim
+!   
+!   ndim = 0
+!   ierr = nf90_inquire(wavids%ncid, nDimensions=ndim)
+!
+!   if (ndim == 0) then
+!      ierr = ug_addglobalatts(wavids%ncid, ug_meta_fm)
+!      call unc_write_wavgeom_filepointer_ugrid(wavids, 0)
+!      
+!   end if
+!
+!end subroutine unc_write_wav_filepointer_ugrid
+
 !! Construct averages for netcdf output
-!! (Re)allocation in flow_allocflow
+!! (Re)allocation in flow_waveinit
 subroutine xbeach_makeaverages(dt)
    use m_flow
    use m_flowgeom
@@ -593,7 +694,7 @@ subroutine xbeach_makeaverages(dt)
 
    double precision, intent(in)              :: dt                         ! timestep
    double precision                          :: mult, fill
-   integer                                   :: ierr
+   integer                                   :: ierr, result1, result2
 
    double precision, allocatable                  :: tvar_sin(:)
    double precision, allocatable                  :: tvar_cos(:)
@@ -607,15 +708,17 @@ subroutine xbeach_makeaverages(dt)
    call realloc(uy, lnx, stat=ierr, keepExisting = .false., fill = 0d0)
 
    mult = max(dt/ti_wav,0.d0)
+   !multcum = multcum + mult
+   !write(*,*) 'Multiplier: ', mult, ', cumulative proportion: ', multcum
    
    !! Data on flow nodes
    ! H
    oldmean = H_mean
-   where (oldmean<tiny(0.d0) .and. oldmean>=0.d0)
-      oldmean=tiny(0.d0)
+   where (oldmean<epsilon(0.d0) .and. oldmean>=0.d0)
+      oldmean=epsilon(0.d0)
    endwhere
-   where (oldmean>-1.d0*tiny(0.d0) .and. oldmean<0.d0)
-      oldmean=-1.d0*tiny(0.d0)
+   where (oldmean>-1.d0*epsilon(0.d0) .and. oldmean<0.d0)
+      oldmean=-1.d0*epsilon(0.d0)
    endwhere
    H_mean = H_mean + mult*H
    H_varcross = H_varcross/oldmean*H_mean + mult*2.d0*H*H_mean
@@ -626,11 +729,11 @@ subroutine xbeach_makeaverages(dt)
 
    ! E
    oldmean = E_mean
-   where (oldmean<tiny(0.d0) .and. oldmean>=0.d0)
-      oldmean=tiny(0.d0)
+   where (oldmean<epsilon(0.d0) .and. oldmean>=0.d0)
+      oldmean=epsilon(0.d0)
    endwhere
-   where (oldmean>-1.d0*tiny(0.d0) .and. oldmean<0.d0)
-      oldmean=-1.d0*tiny(0.d0)
+   where (oldmean>-1.d0*epsilon(0.d0) .and. oldmean<0.d0)
+      oldmean=-1.d0*epsilon(0.d0)
    endwhere
    E_mean = E_mean + mult*E
    E_varcross = E_varcross/oldmean*E_mean + mult*2.d0*E*E_mean
@@ -641,11 +744,11 @@ subroutine xbeach_makeaverages(dt)
 
    !R
    oldmean = R_mean
-   where (oldmean<tiny(0.d0) .and. oldmean>=0.d0)
-      oldmean=tiny(0.d0)
+   where (oldmean<epsilon(0.d0) .and. oldmean>=0.d0)
+      oldmean=epsilon(0.d0)
    endwhere
-   where (oldmean>-1.d0*tiny(0.d0) .and. oldmean<0.d0)
-      oldmean=-1.d0*tiny(0.d0)
+   where (oldmean>-1.d0*epsilon(0.d0) .and. oldmean<0.d0)
+      oldmean=-1.d0*epsilon(0.d0)
    endwhere
    R_mean = R_mean + mult*R
    R_varcross = R_varcross/oldmean*R_mean + mult*2.d0*R*R_mean
@@ -656,11 +759,11 @@ subroutine xbeach_makeaverages(dt)
 
    ! D
    oldmean = D_mean
-   where (oldmean<tiny(0.d0) .and. oldmean>=0.d0)
-      oldmean=tiny(0.d0)
+   where (oldmean<epsilon(0.d0) .and. oldmean>=0.d0)
+      oldmean=epsilon(0.d0)
    endwhere
-   where (oldmean>-1.d0*tiny(0.d0) .and. oldmean<0.d0)
-      oldmean=-1.d0*tiny(0.d0)
+   where (oldmean>-1.d0*epsilon(0.d0) .and. oldmean<0.d0)
+      oldmean=-1.d0*epsilon(0.d0)
    endwhere
    D_mean = D_mean + mult*D
    D_varcross = D_varcross/oldmean*D_mean + mult*2.d0*D*D_mean
@@ -671,11 +774,11 @@ subroutine xbeach_makeaverages(dt)
 
    ! DR
    oldmean = DR_mean
-   where (oldmean<tiny(0.d0) .and. oldmean>=0.d0)
-      oldmean=tiny(0.d0)
+   where (oldmean<epsilon(0.d0) .and. oldmean>=0.d0)
+      oldmean=epsilon(0.d0)
    endwhere
-   where (oldmean>-1.d0*tiny(0.d0) .and. oldmean<0.d0)
-      oldmean=-1.d0*tiny(0.d0)
+   where (oldmean>-1.d0*epsilon(0.d0) .and. oldmean<0.d0)
+      oldmean=-1.d0*epsilon(0.d0)
    endwhere
 
    !< DEBUG
@@ -689,11 +792,11 @@ subroutine xbeach_makeaverages(dt)
 
   ! cwav
    oldmean = cwav_mean
-   where (oldmean<tiny(0.d0) .and. oldmean>=0.d0)
-      oldmean=tiny(0.d0)
+   where (oldmean<epsilon(0.d0) .and. oldmean>=0.d0)
+      oldmean=epsilon(0.d0)
    endwhere
-   where (oldmean>-1.d0*tiny(0.d0) .and. oldmean<0.d0)
-      oldmean=-1.d0*tiny(0.d0)
+   where (oldmean>-1.d0*epsilon(0.d0) .and. oldmean<0.d0)
+      oldmean=-1.d0*epsilon(0.d0)
    endwhere
    cwav_mean = cwav_mean + mult*cwav
    cwav_varcross = cwav_varcross/oldmean*cwav_mean + mult*2.d0*cwav*cwav_mean
@@ -704,11 +807,11 @@ subroutine xbeach_makeaverages(dt)
 
   ! cgwav
    oldmean = cgwav_mean
-   where (oldmean<tiny(0.d0) .and. oldmean>=0.d0)
-      oldmean=tiny(0.d0)
+   where (oldmean<epsilon(0.d0) .and. oldmean>=0.d0)
+      oldmean=epsilon(0.d0)
    endwhere
-   where (oldmean>-1.d0*tiny(0.d0) .and. oldmean<0.d0)
-      oldmean=-1.d0*tiny(0.d0)
+   where (oldmean>-1.d0*epsilon(0.d0) .and. oldmean<0.d0)
+      oldmean=-1.d0*epsilon(0.d0)
    endwhere
    cgwav_mean = cgwav_mean + mult*cgwav
    cgwav_varcross = cgwav_varcross/oldmean*cgwav_mean + mult*2.d0*cgwav*cgwav_mean
@@ -719,11 +822,11 @@ subroutine xbeach_makeaverages(dt)
 
   ! sigmwav
    oldmean = sigmwav_mean
-   where (oldmean<tiny(0.d0) .and. oldmean>=0.d0)
-      oldmean=tiny(0.d0)
+   where (oldmean<epsilon(0.d0) .and. oldmean>=0.d0)
+      oldmean=epsilon(0.d0)
    endwhere
-   where (oldmean>-1.d0*tiny(0.d0) .and. oldmean<0.d0)
-      oldmean=-1.d0*tiny(0.d0)
+   where (oldmean>-1.d0*epsilon(0.d0) .and. oldmean<0.d0)
+      oldmean=-1.d0*epsilon(0.d0)
    endwhere
    sigmwav_mean = sigmwav_mean + mult*sigmwav
    sigmwav_varcross = sigmwav_varcross/oldmean*sigmwav_mean + mult*2.d0*sigmwav*sigmwav_mean
@@ -734,11 +837,11 @@ subroutine xbeach_makeaverages(dt)
 
   ! thetamean: unsure whether all this is correct
    oldmean = thetamean_mean
-   where (oldmean<tiny(0.d0) .and. oldmean>=0.d0)
-      oldmean=tiny(0.d0)
+   where (oldmean<epsilon(0.d0) .and. oldmean>=0.d0)
+      oldmean=epsilon(0.d0)
    endwhere
-   where (oldmean>-1.d0*tiny(0.d0) .and. oldmean<0.d0)
-      oldmean=-1.d0*tiny(0.d0)
+   where (oldmean>-1.d0*epsilon(0.d0) .and. oldmean<0.d0)
+      oldmean=-1.d0*epsilon(0.d0)
    endwhere
    thetamean_sin = thetamean_sin + mult*sin(thetamean)
    thetamean_cos = thetamean_cos + mult*cos(thetamean)
@@ -748,18 +851,34 @@ subroutine xbeach_makeaverages(dt)
    thetamean_var = thetamean_varsquare - thetamean_varcross + thetamean_mean**2
    thetamean_max = max(thetamean_max,thetamean)
    thetamean_min = min(thetamean_min,thetamean)
+   
+   ! s1
+   oldmean = s1_mean
+   where (oldmean<epsilon(0.d0) .and. oldmean>=0.d0)
+      oldmean=epsilon(0.d0)
+   endwhere
+   where (oldmean>-1.d0*epsilon(0.d0) .and. oldmean<0.d0)
+      oldmean=-1.d0*epsilon(0.d0)
+   endwhere
+   s1_mean = s1_mean + mult*s1
+   s1_varcross = s1_varcross/oldmean*s1_mean + mult*2.d0*s1*s1_mean
+   s1_varsquare = s1_varsquare + mult*(s1)**2
+   s1_var = s1_varsquare - s1_varcross + s1_mean**2
+   s1_max = max(s1_max,s1)
+   s1_min = min(s1_min,s1)
 
 !! Data on flow links
+!! JRE Port to cell centres using ucx, ucy 
    call realloc(oldmean, lnx, stat=ierr, keepExisting = .false., fill = 0d0)
    call aerr('oldmean  (lnx)', ierr, lnx)
 
    ! u: x-component
    oldmean = u_mean
-   where (oldmean<tiny(0.d0) .and. oldmean>=0.d0)
-      oldmean=tiny(0.d0)
+   where (oldmean<epsilon(0.d0) .and. oldmean>=0.d0)
+      oldmean=epsilon(0.d0)
    endwhere
-   where (oldmean>-1.d0*tiny(0.d0) .and. oldmean<0.d0)
-      oldmean=-1.d0*tiny(0.d0)
+   where (oldmean>-1.d0*epsilon(0.d0) .and. oldmean<0.d0)
+      oldmean=-1.d0*epsilon(0.d0)
    endwhere
    ux = u1*csu - v*snu
    u_mean = u_mean + mult*ux
@@ -771,11 +890,11 @@ subroutine xbeach_makeaverages(dt)
 
    ! v: y-component
    oldmean = v_mean
-   where (oldmean<tiny(0.d0) .and. oldmean>=0.d0)
-      oldmean=tiny(0.d0)
+   where (oldmean<epsilon(0.d0) .and. oldmean>=0.d0)
+      oldmean=epsilon(0.d0)
    endwhere
-   where (oldmean>-1.d0*tiny(0.d0) .and. oldmean<0.d0)
-      oldmean=-1.d0*tiny(0.d0)
+   where (oldmean>-1.d0*epsilon(0.d0) .and. oldmean<0.d0)
+      oldmean=-1.d0*epsilon(0.d0)
    endwhere
    uy = u1*snu + v*csu
    v_mean = v_mean + mult*uy
@@ -787,11 +906,11 @@ subroutine xbeach_makeaverages(dt)
 
    ! Fx: y-component
    oldmean = Fx_mean
-   where (oldmean<tiny(0.d0) .and. oldmean>=0.d0)
-      oldmean=tiny(0.d0)
+   where (oldmean<epsilon(0.d0) .and. oldmean>=0.d0)
+      oldmean=epsilon(0.d0)
    endwhere
-   where (oldmean>-1.d0*tiny(0.d0) .and. oldmean<0.d0)
-      oldmean=-1.d0*tiny(0.d0)
+   where (oldmean>-1.d0*epsilon(0.d0) .and. oldmean<0.d0)
+      oldmean=-1.d0*epsilon(0.d0)
    endwhere
    Fx_mean = Fx_mean + mult*Fx
    Fx_varcross = Fx_varcross/oldmean*Fx_mean + mult*2.d0*Fx*Fx_mean
@@ -802,11 +921,11 @@ subroutine xbeach_makeaverages(dt)
 
    ! Fy
    oldmean = Fy_mean
-   where (oldmean<tiny(0.d0) .and. oldmean>=0.d0)
-      oldmean=tiny(0.d0)
+   where (oldmean<epsilon(0.d0) .and. oldmean>=0.d0)
+      oldmean=epsilon(0.d0)
    endwhere
-   where (oldmean>-1.d0*tiny(0.d0) .and. oldmean<0.d0)
-      oldmean=-1.d0*tiny(0.d0)
+   where (oldmean>-1.d0*epsilon(0.d0) .and. oldmean<0.d0)
+      oldmean=-1.d0*epsilon(0.d0)
    endwhere
    Fy_mean = Fy_mean + mult*Fy
    Fy_varcross = Fy_varcross/oldmean*Fy_mean + mult*2.d0*Fy*Fy_mean
@@ -817,11 +936,11 @@ subroutine xbeach_makeaverages(dt)
 
    ! ust
    oldmean = ust_mean
-   where (oldmean<tiny(0.d0) .and. oldmean>=0.d0)
-      oldmean=tiny(0.d0)
+   where (oldmean<epsilon(0.d0) .and. oldmean>=0.d0)
+      oldmean=epsilon(0.d0)
    endwhere
-   where (oldmean>-1.d0*tiny(0.d0) .and. oldmean<0.d0)
-      oldmean=-1.d0*tiny(0.d0)
+   where (oldmean>-1.d0*epsilon(0.d0) .and. oldmean<0.d0)
+      oldmean=-1.d0*epsilon(0.d0)
    endwhere
    ux = csu*ust - snu*vst
    ust_mean = ust_mean + mult*ux
@@ -833,11 +952,11 @@ subroutine xbeach_makeaverages(dt)
 
    ! vst
    oldmean = vst_mean
-   where (oldmean<tiny(0.d0) .and. oldmean>=0.d0)
-      oldmean=tiny(0.d0)
+   where (oldmean<epsilon(0.d0) .and. oldmean>=0.d0)
+      oldmean=epsilon(0.d0)
    endwhere
-   where (oldmean>-1.d0*tiny(0.d0) .and. oldmean<0.d0)
-      oldmean=-1.d0*tiny(0.d0)
+   where (oldmean>-1.d0*epsilon(0.d0) .and. oldmean<0.d0)
+      oldmean=-1.d0*epsilon(0.d0)
    endwhere
    uy = snu*ust + csu*uy
    vst_mean = vst_mean + mult*uy
@@ -849,11 +968,11 @@ subroutine xbeach_makeaverages(dt)
 
    ! urms
    oldmean = urms_mean
-   where (oldmean<tiny(0.d0) .and. oldmean>=0.d0)
-      oldmean=tiny(0.d0)
+   where (oldmean<epsilon(0.d0) .and. oldmean>=0.d0)
+      oldmean=epsilon(0.d0)
    endwhere
-   where (oldmean>-1.d0*tiny(0.d0) .and. oldmean<0.d0)
-      oldmean=-1.d0*tiny(0.d0)
+   where (oldmean>-1.d0*epsilon(0.d0) .and. oldmean<0.d0)
+      oldmean=-1.d0*epsilon(0.d0)
    endwhere
    urms_mean = urms_mean + mult*urms
    urms_varcross = urms_varcross/oldmean*urms_mean + mult*2.d0*urms*urms_mean
@@ -861,7 +980,7 @@ subroutine xbeach_makeaverages(dt)
    urms_var = urms_varsquare - urms_varcross + urms_mean**2
    urms_max = max(urms_max,urms)
    urms_min = min(urms_min,urms)
-   
+     
    ierr = 0
 1234 continue
    deallocate(ux, uy, tvar_sin,tvar_cos,oldmean, stat=ierr)
@@ -876,6 +995,7 @@ subroutine xbeach_clearaverages()
    integer               :: ierr
 
    ierr = 1
+   !multcum = 0d0
    H_mean = 0d0; H_var  = 0d0; H_min  = huge(0d0); H_max  = -1d0*huge(0d0); H_varcross = 0d0; H_varsquare = 0d0
    E_mean = 0d0; E_var  = 0d0; E_min  = huge(0d0); E_max  = -1d0*huge(0d0); E_varcross = 0d0; E_varsquare = 0d0
    R_mean = 0d0; R_var  = 0d0; R_min  = huge(0d0); R_max  = -1d0*huge(0d0); R_varcross = 0d0; R_varsquare = 0d0
@@ -899,6 +1019,5 @@ subroutine xbeach_clearaverages()
    return
 
 end subroutine xbeach_clearaverages
-
 
 end module m_xbeach_netcdf

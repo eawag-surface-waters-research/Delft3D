@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2015.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -89,10 +89,16 @@
        shape(1) = lnx
     case("rain")
        shape(1) = ndx
+    case("evap")
+       shape(1) = ndx
     case("rnveg")
        shape(1) = ndkx
     case("diaveg")
        shape(1) = ndkx
+    case("cfuveg")
+       shape(1) = lnx
+    case("alfaveg")
+       shape(1) = lnx
     case("stemdens")
        shape(1) = ndx
     case("stemdiam")
@@ -211,6 +217,8 @@
     case("kn")
        shape(2) = 3
        shape(1) = numl
+    case("numk")
+       shape(1) = 0
     case("zbnd1d2d1")
        shape(1) = nbnd1d2d
     case("zbnd1d2d0")

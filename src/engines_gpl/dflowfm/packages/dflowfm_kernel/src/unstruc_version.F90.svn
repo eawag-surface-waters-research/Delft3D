@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: unstruc_version.F90.svn 52266 2017-09-02 11:24:11Z klecz_ml $
-! $HeadURL: https://repos.deltares.nl/repos/ds/branches/dflowfm/20161017_dflowfm_codecleanup/engines_gpl/dflowfm/packages/dflowfm_kernel/src/unstruc_version.F90.svn $
+! $Id: unstruc_version.F90.svn 53886 2017-12-20 17:03:27Z dam_ar $
+! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/unstruc_version.F90.svn $
 module unstruc_version_module
 implicit none
 
@@ -45,6 +45,7 @@ implicit none
     character(*),  public, parameter :: unstruc_version      = unstruc_major//'.'//unstruc_minor//'.'//unstruc_revision//'.'//unstruc_build_number
     character(*),  public, parameter :: unstruc_version_full = 'Deltares, '//unstruc_program//' Version '//unstruc_version//', '//__DATE__//', '//__TIME__
     character(*),  public, parameter :: unstruc_version_id   = '@(#)'//unstruc_version_full
+    character(*),  public, parameter :: unstruc_source_code  = '@(#) $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/unstruc_version.F90.svn $'//char(0)
 
 contains
     

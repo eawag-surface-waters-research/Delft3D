@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2017.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: solve_petsc.F90 52266 2017-09-02 11:24:11Z klecz_ml $
-! $HeadURL: https://repos.deltares.nl/repos/ds/branches/dflowfm/20161017_dflowfm_codecleanup/engines_gpl/dflowfm/packages/dflowfm_kernel/src/solve_petsc.F90 $
+! $Id: solve_petsc.F90 53608 2017-12-01 10:00:34Z carniato $
+! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/solve_petsc.F90 $
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -89,6 +89,8 @@ end module m_petsc
          call PetscLogBegin(ierr)
       end if
 #endif
+ 
+      
       return
    end subroutine startpetsc
    
@@ -120,6 +122,7 @@ end module m_petsc
       use m_petsc
       use MessageHandling
       use m_flowgeom, only: xz, yz, wu, nd
+      use sorting_algorithms, only: indexxi
 
       implicit none
 

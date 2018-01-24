@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2017.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: wrwaq.F90 52266 2017-09-02 11:24:11Z klecz_ml $
-! $HeadURL: https://repos.deltares.nl/repos/ds/branches/dflowfm/20161017_dflowfm_codecleanup/engines_gpl/dflowfm/packages/dflowfm_kernel/src/wrwaq.F90 $
+! $Id: wrwaq.F90 54191 2018-01-22 18:57:53Z dam_ar $
+! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/wrwaq.F90 $
 module wrwaq
 
 !include preprocessing flags from autotools
@@ -745,7 +745,9 @@ end subroutine waq_write_waqgeom_ugrid
 !> Writes the (possibly aggregated) unstructured network and edge type to an already opened netCDF dataset for DelWAQ.
 subroutine waq_write_waqgeom_filepointer_ugrid(igeomfile)
     use io_ugrid
+    use m_flowgeom, only: ndxi
     use unstruc_netcdf, only: check_error, ug_meta_fm
+    use m_partitioninfo, only: jampi, idomain, iglobal_s
     use m_alloc
 
     implicit none
@@ -797,7 +799,7 @@ subroutine waq_write_waqgeom_filepointer_ugrid(igeomfile)
     end if
     
     
-    ! Write mesh geometry.
+    ! Write mesh geometry.    
     ierr = ug_write_mesh_struct(igeomfile, meshids, networkids, crs, meshgeom)
     call check_error(ierr)
 
@@ -805,7 +807,13 @@ subroutine waq_write_waqgeom_filepointer_ugrid(igeomfile)
     call write_edge_type_variable(igeomfile, meshids, meshgeom%meshName, edge_type)
     deallocate(edge_type)
 
-    !TODO deallocate meshgeom, meshids
+    ! when in mpi mode, add face domain numbers and global face numbers
+    if ( jampi.eq.1 ) then  
+       ! face domain numbers 
+       call write_face_domain_number_variable(igeomfile, meshids, meshgeom%meshName, idomain(1:ndxi))
+       ! global face numbers 
+       call write_face_global_number_variable(igeomfile, meshids, meshgeom%meshName, iglobal_s(1:ndxi))
+    end if
 
 end subroutine waq_write_waqgeom_filepointer_ugrid
 
@@ -863,7 +871,7 @@ function create_ugrid_geometry(meshgeom, edge_type) result(ierr)
     call reallocP(meshgeom%edgey, meshgeom%numEdge, fill=dmiss)
     call realloc(edge_mapping_table, meshgeom%numEdge, fill=missing_value)
     call realloc(reverse_edge_mapping_table, meshgeom%numEdge, fill=missing_value)
-    call get_2d_edge_data(meshgeom%edge_nodes, edge_type, meshgeom%edgex, meshgeom%edgey, edge_mapping_table, reverse_edge_mapping_table)
+    call get_2d_edge_data(meshgeom%edge_nodes, null(), edge_type, meshgeom%edgex, meshgeom%edgey, edge_mapping_table, reverse_edge_mapping_table)
     ! Edge z coordinates are unknown.
 
     ! Get edge faces connectivity.
@@ -934,7 +942,7 @@ function add_layers_to_meshgeom(meshgeom) result(ierr)
 
    implicit none
 
-   type(t_ug_meshgeom), intent(out) :: meshgeom  !< The mesh geometry to add layer information to.
+   type(t_ug_meshgeom), intent(inout) :: meshgeom  !< The mesh geometry to add layer information to.
 
    integer :: layer_count, layer_type
    real(kind=dp), dimension(:), allocatable :: layer_zs, interface_zs
@@ -981,8 +989,12 @@ end function add_layers_to_meshgeom
 !! NOTE: do not pass already filled output mesh geometries to this function,
 !! since array pointers will become disassociated, possibly causing memory leaks.
 function aggregate_ugrid_geometry(input, output, input_edge_type, output_edge_type, face_mapping_table) result(success)
+    
     use io_ugrid
     use m_alloc
+    use m_sferic, only: jsferic, jasfer3D
+    use m_missing, only : dmiss
+    use geometry_module, only: comp_masscenter
 
     implicit none
 
@@ -1191,7 +1203,7 @@ function aggregate_ugrid_geometry(input, output, input_edge_type, output_edge_ty
 
         ! Note that passed xs and ys arrays are larger than the passed polygon size (extra elements are not used in subroutine comp_masscenter).
         call comp_masscenter(node_count, output%nodex(nodes(1:node_count)), output%nodey(nodes(1:node_count)), &
-                output%facex(output_face), output%facey(output_face), area, counterclockwise)
+                output%facex(output_face), output%facey(output_face), area, counterclockwise, jsferic, jasfer3D, dmiss)
         ! Face z coordinates are unknown.
     end do
 
@@ -1436,10 +1448,15 @@ end subroutine swap
 
 !> Write boundary information for use in WAQ-GUI.
 subroutine waq_wri_bnd()
+
     use m_flowgeom
     use network_data
     use m_flowexternalforcings
     use unstruc_files
+    use m_sferic, only: jsferic, jasfer3D
+    use m_missing, only : dmiss, dxymis
+    use geometry_module, only: normalout
+    
     implicit none
 !
 !           Local variables
@@ -1484,7 +1501,7 @@ subroutine waq_wri_bnd()
                     n2 = abs(ln(2,Lf))             ! internal 1D flow node
 
                     !   For 1D links: produce fictious 'cross/netlink'
-                    call normalout(xz(n1), yz(n1), xz(n2), yz(n2), xn, yn)
+                    call normalout(xz(n1), yz(n1), xz(n2), yz(n2), xn, yn, jsferic, jasfer3D, dmiss, dxymis)
                     xn = wu(Lf)*xn
                     yn = wu(Lf)*yn
 
@@ -1683,6 +1700,7 @@ end subroutine waq_wri_couple_files
 !! Currently, default: one-to-one.
 subroutine waq_prepare_aggr()
     use m_flowgeom
+    use m_partitioninfo, only: jampi
     use m_flow
     use m_flowexternalforcings
     use m_alloc
@@ -1699,12 +1717,15 @@ subroutine waq_prepare_aggr()
 
 ! Is there a DIDO aggregation? Otherwise set default aggregation
     inquire (file = "waqtest.dwq", exist = test_aggr)! no interface supported yet
-    if (test_aggr) then ! Change to true to test DIDO aggregation
+    if (test_aggr .and. jampi.eq.0 ) then ! Change to true to test DIDO aggregation
         waqpar%aggre = 1
         waqpar%flaggr = "waqtest.dwq"
         call waq_read_dwq(ndxi, ndx, waqpar%iapnt, waqpar%flaggr)
         waqpar%nosegl = maxval(waqpar%iapnt)
     else
+        if (test_aggr .and. jampi.ne.0 ) then
+            call mess(LEVEL_WARN, 'Horizontal aggregation of WAQ output was found (waqtest.dwq), but is not supported in MPI simulations! Aggregation is ignored.')
+        end if
 ! no aggregation, create default one to one aggregation
         waqpar%aggre = 0
         waqpar%flaggr = " "
@@ -2449,6 +2470,7 @@ subroutine waq_wri_tem(itim, filenametem, luntem)
     use m_flowgeom
     use m_flow
     use wrwaq
+    use m_transport, only : constituents, itemp
     implicit none
 !
 !           Global variables
@@ -2467,7 +2489,7 @@ subroutine waq_wri_tem(itim, filenametem, luntem)
     if (waqpar%aggre == 0 .and. waqpar%kmxnxa == 1) then
         do i=1,ndxi
             if ( vol1(i) > 1d-25 ) then
-                waqpar%tem(i) = tem1(i)
+                waqpar%tem(i) = constituents(itemp,i) !  tem1(i)
             end if
         end do
     else if (waqpar%aggre == 0 .and. waqpar%aggrel == 0) then
@@ -2475,7 +2497,7 @@ subroutine waq_wri_tem(itim, filenametem, luntem)
             call getkbotktopmax(k,kb,ktx)
             do kk = kb, ktx
                 if ( vol1(kk) > 1d-25 ) then
-                    waqpar%tem(waqpar%isaggr(kk)) = tem1(kk)
+                    waqpar%tem(waqpar%isaggr(kk)) = constituents(itemp,kk)
                 end if
             end do
         end do
@@ -2485,7 +2507,7 @@ subroutine waq_wri_tem(itim, filenametem, luntem)
             call getkbotktopmax(k,kb,ktx)
             do kk = kb, ktx
                 if ( vol1(kk) > 1d-25 ) then
-                    waqpar%tem(waqpar%isaggr(kk)) = waqpar%tem(waqpar%isaggr(kk)) + tem1(kk) * vol1(kk)
+                    waqpar%tem(waqpar%isaggr(kk)) = waqpar%tem(waqpar%isaggr(kk)) + constituents(itemp,kk) * vol1(kk)
                 end if
             end do
         end do

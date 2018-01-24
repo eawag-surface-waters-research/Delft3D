@@ -46,6 +46,8 @@
 		<File RelativePath="..\..\res\version_number.ini"/></Filter>
 		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
 		<File RelativePath="src\advec.f90"/>
+      <File RelativePath="src\bedform_data.f90"/>
+		<File RelativePath="src\bedform_io.f90"/>
 		<File RelativePath="src\calibration.f90"/>
 		<File RelativePath="src\d3ddimens.f90"/>
 		<File RelativePath="src\d_flooding.f90"/>
@@ -59,7 +61,11 @@
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
+		<File RelativePath="src\dredge_data.f90"/>
+		<File RelativePath="src\dredgepolygon.f90"/>
 		<File RelativePath="src\filez.f90"/>
+		<File RelativePath="src\fm_bedform.f90"/>
+		<File RelativePath="src\fm_dredge.f90"/>
 		<File RelativePath="src\fm_erosed.f90"/>
 		<File RelativePath="src\fm_thahbc.f90"/>
 		<File RelativePath="src\fourier_analysis.f90"/>
@@ -88,7 +94,7 @@
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
 		<File RelativePath="src\network.f90"/>
-		<File RelativePath="src\network_data.f90"/>
+		<File RelativePath="src\oned_functions.f90"/>
 		<File RelativePath="src\part.f90"/>
 		<File RelativePath="src\partition.F90">
 			<FileConfiguration Name="Debug|Win32">
@@ -100,7 +106,6 @@
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
 		<File RelativePath="src\partition_utilities.f90"/>
-		<File RelativePath="src\polygon.f90"/>
 		<File RelativePath="src\rcm.f90"/>
 		<File RelativePath="src\removedcode.f90">
 			<FileConfiguration Name="Debug|Win32" ExcludedFromBuild="true"/>
@@ -250,6 +255,7 @@
 		<File RelativePath="src\xbeach_interp.F90"/>
 		<File RelativePath="src\xbeach_math_tools.F90"/>
 		<File RelativePath="src\xbeach_netcdf.f90"/>
+		<File RelativePath="src\xbeach_paramsconst.f90"/>
 		<File RelativePath="src\xbeach_readkey.F90"/>
 		<File RelativePath="src\xbeach_typesandkinds.F90"/>
 		<File RelativePath="src\xbeach_wave_boundary_datastore.f90"/>

@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2017.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: unstruc_boundaries.f90 52266 2017-09-02 11:24:11Z klecz_ml $
-! $HeadURL: https://repos.deltares.nl/repos/ds/branches/dflowfm/20161017_dflowfm_codecleanup/engines_gpl/dflowfm/packages/dflowfm_kernel/src/unstruc_boundaries.f90 $
+! $Id: unstruc_boundaries.f90 54191 2018-01-22 18:57:53Z dam_ar $
+! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/unstruc_boundaries.f90 $
 module unstruc_boundaries
 implicit none
 
@@ -53,6 +53,7 @@ subroutine findexternalboundarypoints()             ! find external boundary poi
  use m_ec_magic_number
  use m_transport
  use m_sobekdfm
+ use m_sediment
  use m_partitioninfo
 
  implicit none
@@ -66,12 +67,14 @@ subroutine findexternalboundarypoints()             ! find external boundary poi
  logical               :: ext_force_bnd_used
  integer               :: ierr, method
  double precision      :: return_time
- integer               :: numz, numu, nums, numtm, numsd, numt, numuxy, numn, num1d2d, numqh, numw, numtr
+ integer               :: numz, numu, nums, numtm, numsd, numt, numuxy, numn, num1d2d, numqh, numw, numtr, numsf
  integer               :: nx
  integer               :: ierror
  integer               :: num_bc_ini_blocks
-
+ integer               :: ifrac
+ 
  jatimespace = 1 
+
  return_time = 0
  ja_ext_force = 0
  ext_force_bnd_used = .false.
@@ -142,15 +145,18 @@ subroutine findexternalboundarypoints()             ! find external boundary poi
     ! If flow_geominit was called separately from a flow_modelinit:
     deallocate (             kez,     keu,     kes,     ketm,     kesd,     keuxy,     ket,     ken,     ke1d2d,     keg,     ked,     kep,     keklep,     kegs,     kegen,     itpez,     itpenz,     itpeu,      itpenu,     kew)
  end if
- allocate ( kce(nx), ke(nx), kez(nx), keu(nx), kes(nx), ketm(nx), kesd(nx), keuxy(nx), ket(nx), ken(nx), ke1d2d(nx), keg(nx), ked(nx), kep(nx), keklep(nx), kegs(nx), kegen(nx), itpez(nx), itpenz(nx), itpeu(nx) , itpenu(nx), kew(nx) , stat=ierr )
- call aerr('kce(nx), ke(nx), kez(nx), keu(nx), kes(nx), ketm(nx), kesd(nx), keuxy(nx), ket(nx), ken(nx), ke1d2d(nx), keg(nx), ked(nx), kep(nx), keklep(nx), kegs(nx), kegen(nx), itpez(nx), itpenz(nx), itpeu(nx) , itpenu(nx) , kew(nx)',ierr, 17*nx)
-            kce = 0; ke = 0; kez = 0; keu = 0; kes = 0; ketm = 0; kesd = 0; keuxy = 0; ket = 0; ken = 0; ke1d2d = 0; keg = 0; ked = 0; kep=  0; keklep=  0; kegen= 0; itpez = 0; itpenz = 0; itpeu = 0 ; itpenu = 0 ; kew = 0
+ if (allocated(ftpet) ) then
+    deallocate(ftpet)
+ end if
+ allocate ( kce(nx), ke(nx), kez(nx), keu(nx), kes(nx), ketm(nx), kesd(nx), keuxy(nx), ket(nx), ken(nx), ke1d2d(nx), keg(nx), ked(nx), kep(nx), keklep(nx), kegs(nx), kegen(nx), itpez(nx), itpenz(nx), itpeu(nx) , itpenu(nx), kew(nx), ftpet(nx), stat=ierr )
+ call aerr('kce(nx), ke(nx), kez(nx), keu(nx), kes(nx), ketm(nx), kesd(nx), keuxy(nx), ket(nx), ken(nx), ke1d2d(nx), keg(nx), ked(nx), kep(nx), keklep(nx), kegs(nx), kegen(nx), itpez(nx), itpenz(nx), itpeu(nx) , itpenu(nx) , kew(nx), ftpet(nx)',ierr, 17*nx)
+            kce = 0; ke = 0; kez = 0; keu = 0; kes = 0; ketm = 0; kesd = 0; keuxy = 0; ket = 0; ken = 0; ke1d2d = 0; keg = 0; ked = 0; kep=  0; keklep=  0; kegen= 0; itpez = 0; itpenz = 0; itpeu = 0 ; itpenu = 0 ; kew = 0; ftpet = 1d6
 
  if (allocated(ketr) ) deallocate(ketr)          
  allocate ( ketr(1,nx), stat = ierr )
  call aerr('ketr(1,nx)', ierr, nx)
             ketr = 0
-            
+
  if ( allocated(nbndtr) ) deallocate(nbndtr)
  allocate ( nbndtr(1), stat = ierr )
  call aerr('nbndtr(1)', ierr, 1 )
@@ -161,7 +167,30 @@ subroutine findexternalboundarypoints()             ! find external boundary poi
  call aerr('trnames(1)', ierr, 1 )
             trnames(1) = ''
  numtracers = 0
+ 
+ ! JRE DEBUG sedfrac 
+ 
+    if (allocated(kesf) ) deallocate(kesf)          
+    allocate ( kesf(1,nx), stat = ierr )   ! would have been nice to have stmpar%lsedsus,
+    call aerr('kesf(1,nx)', ierr, nx)      ! but no can do, jammer de bammer...
+               kesf = 0
+               
+    if ( allocated(nbndsf) ) deallocate(nbndsf)
+    allocate ( nbndsf(1), stat = ierr )
+    call aerr('nbndsf(1)', ierr, 1 )
+               nbndsf = 0
+               
+    if ( allocated(sfnames) ) deallocate(sfnames)
+    allocate ( sfnames(1), stat = ierr )
+    call aerr('sfnames(1)', ierr, 1 )
+    sfnames = ''
+    numfracs = 0
+    !do ifrac = 1, stmpar%lsedsus
+    !   sfnames(ifrac) = stmpar%sedpar%NAMSED(sedtot2sedsus(ifrac))
+    !end do
 
+ !\DEBUG sedfrac 
+      
  call make_mirrorcells(Nx, xe, ye, xyen, kce, ke, ierror) 
  
  if ( jampi.eq.1 ) then
@@ -196,7 +225,7 @@ subroutine findexternalboundarypoints()             ! find external boundary poi
  if (ext_force_bnd_used) then
     ! first read the bc file (new file format for boundary conditions)
     call readlocationfilesfromboundaryblocks(trim(md_extfile_new), filetype, nx, kce, num_bc_ini_blocks, &
-                                         numz, numu, nums, numtm, numsd, numt, numuxy, numn, num1d2d, numqh, numw, numtr)
+                                         numz, numu, nums, numtm, numsd, numt, numuxy, numn, num1d2d, numqh, numw, numtr, numsf)
  endif
  
  do while (ja_ext_force .eq. 1)                      ! read *.ext file
@@ -214,7 +243,7 @@ subroutine findexternalboundarypoints()             ! find external boundary poi
 
         jatimespace = 1                              ! module is to be used
 
-        call processexternalboundarypoints(qid, filename, filetype, return_time,  nx, kce, numz, numu, nums, numtm, numsd, numt, numuxy, numn, num1d2d, numqh, numw, numtr, 1d0)
+        call processexternalboundarypoints(qid, filename, filetype, return_time,  nx, kce, numz, numu, nums, numtm, numsd, numt, numuxy, numn, num1d2d, numqh, numw, numtr, numsf, 1d0, transformcoef)
     
     endif
 
@@ -233,7 +262,7 @@ end subroutine findexternalboundarypoints
 
 
 subroutine readlocationfilesfromboundaryblocks(filename, filetype, nx, kce, num_bc_ini_blocks, &
-                                                numz, numu, nums, numtm, numsd, numt, numuxy, numn, num1d2d, numqh, numw, numtr)
+                                                numz, numu, nums, numtm, numsd, numt, numuxy, numn, num1d2d, numqh, numw, numtr, numsf)
  use properties
  use tree_data_types
  use tree_structures
@@ -247,7 +276,7 @@ subroutine readlocationfilesfromboundaryblocks(filename, filetype, nx, kce, num_
  integer               , intent(in)    :: nx
  integer, dimension(nx), intent(inout) :: kce
  integer               , intent(out)   :: num_bc_ini_blocks
- integer               , intent(inout) :: numz, numu, nums, numtm, numsd, numt, numuxy, numn, num1d2d, numqh, numw, numtr
+ integer               , intent(inout) :: numz, numu, nums, numtm, numsd, numt, numuxy, numn, num1d2d, numqh, numw, numtr, numsf
 
  type(tree_data), pointer     :: bnd_ptr             !< tree of extForceBnd-file's [boundary] blocks
  type(tree_data), pointer     :: node_ptr            !
@@ -319,9 +348,9 @@ subroutine readlocationfilesfromboundaryblocks(filename, filetype, nx, kce, num_
 
        if (group_ok) then
           if (rrtolb > 0d0) then
-             call processexternalboundarypoints(quantity, locationfile, filetype, return_time, nx, kce, numz, numu, nums, numtm, numsd, numt, numuxy, numn, num1d2d, numqh, numw, numtr, rrtolrel = (1+2*rrtolb)/(1+2*rrtol))
+             call processexternalboundarypoints(quantity, locationfile, filetype, return_time, nx, kce, numz, numu, nums, numtm, numsd, numt, numuxy, numn, num1d2d, numqh, numw, numtr, numsf, rrtolrel = (1+2*rrtolb)/(1+2*rrtol))
           else
-             call processexternalboundarypoints(quantity, locationfile, filetype, return_time, nx, kce, numz, numu, nums, numtm, numsd, numt, numuxy, numn, num1d2d, numqh, numw, numtr, rrtolrel = 1d0)
+             call processexternalboundarypoints(quantity, locationfile, filetype, return_time, nx, kce, numz, numu, nums, numtm, numsd, numt, numuxy, numn, num1d2d, numqh, numw, numtr, numsf, rrtolrel = 1d0)
           end if
           num_bc_ini_blocks = num_bc_ini_blocks + 1
        endif
@@ -374,7 +403,7 @@ end subroutine appendrettime
 !! This routine is based upon the network admin only, not on the flow admin.
 subroutine processexternalboundarypoints(qid, filename, filetype, return_time, nx, kce, &
                                          numz, numu, nums, numtm, numsd, numt, numuxy, numn, num1d2d, &
-                                         numqh, numw, numtr, rrtolrel)
+                                         numqh, numw, numtr, numsf, rrtolrel, tfc) ! helper for findin external boundary points
  use m_netw
  use m_flow, qid_flow => qid, filetype_flow => filetype
  use m_flowgeom                                        
@@ -387,8 +416,12 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
  use properties
  use m_ec_magic_number
  use m_transport
+ use m_sediment, only: stm_included, stmpar, sedtot2sedsus
+ use sediment_basics_module, only: SEDTYP_NONCOHESIVE_SUSPENDED, SEDTYP_COHESIVE
  use m_meteo, qid_meteo => qid, filetype_meteo => filetype 
  use m_sobekdfm
+ use m_flowparameters, only: jawave
+ use string_module
  
  implicit none
 
@@ -399,13 +432,15 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
  integer, dimension(nx), intent(inout) :: kce                                 !
  double precision      , intent(in)    :: return_time
  integer               , intent(inout) :: numz, numu, nums, numtm, numsd, &   !
-                                          numt, numuxy, numn, num1d2d, numqh, numw, numtr      !
+                                          numt, numuxy, numn, num1d2d, numqh, numw, numtr, numsf      !
  double precision      , intent(in)    :: rrtolrel !< To enable a more strict rrtolerance value than the global rrtol. Measured w.r.t. global rrtol.
-
+ 
+ double precision, dimension(25), optional, intent(in) :: tfc
+ 
  character(len=256)                    :: qidfm                               !
  integer                               :: itpbn
- character (len=NAMTRACLEN)            :: tracnam, qidnam
- integer                               :: itrac
+ character (len=NAMTRACLEN)            :: tracnam, sfnam, qidnam
+ integer                               :: itrac, isf
  integer, external                     :: findname
  
  integer                               :: iconst
@@ -421,7 +456,12 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
 
      if (qidfm == 'waterlevelbnd')  itpbn = 1
      if (qidfm == 'neumannbnd'   )  itpbn = 2
-     if (qidfm == 'riemannbnd'  )   itpbn = 5
+     if (qidfm == 'riemannbnd'  )   then 
+        itpbn = 5
+        if (present(tfc)) then
+           ftpet(nbndz+1:nbndz+numz) = tfc(7)    ! relaxation time riemann from ext file
+        end if
+     end if
      if (qidfm == 'outflowbnd'   )  itpbn = 6
 
      
@@ -444,11 +484,13 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
      itpenz(nbndz+1:nbndz+numz) = nopenbndsect
      nbndz = nbndz + numz
      
-  else if (qidfm == 'velocitybnd' .or. qidfm == 'dischargebnd' .or. qidfm == 'riemann_velocitybnd' .or. qidfm == 'qhubnd'.or. &
-           qidfm == 'criticaloutflowbnd' .or. qidfm == 'weiroutflowbnd') then
+  else if (qidfm == 'velocitybnd' .or. qidfm == 'dischargebnd' .or. qidfm == 'qhubnd'.or. &
+           qidfm == 'criticaloutflowbnd' .or. qidfm == 'weiroutflowbnd' .or. qidfm == 'absgenbnd') then
      call selectelset( filename, filetype, xe, ye, xyen, kce, nx, keu(nbndu+1:nx), numu, usemask=.true., rrtolrel=rrtolrel)
      WRITE(msgbuf,'(3a,i8,a)') trim (qid), ' ', trim( filename), numu, ' nr of open bndcells' ; call msg_flush()
 
+     nubnd = nubnd + 1
+     
      if (qidfm == 'velocitybnd' ) then 
         itpbn = 3
      else if (qidfm == 'dischargebnd') then      
@@ -461,8 +503,14 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
         call realloc(wwssav_all,(/2,nqbnd/), keepExisting=.true., fill=0d0)
         call realloc(wwssav_sum,(/2,nqbnd/), keepExisting=.true., fill=0d0)
         call realloc(huqbnd,L2qbnd(nqbnd)); huqbnd(L1qbnd(nqbnd):L2qbnd(nqbnd)) = 0d0
-     else if ( qidfm == 'riemann_velocitybnd') then
-        itpbn = 5 
+     else if ( qidfm == 'absgenbnd') then
+        if (.not. (jawave.eq.4)) then                 ! Safety to avoid allocation errors later on
+           call qnerror( 'Absorbing-generating boundary defined without activating XBeach wave driver. Please set Wavemodelnr=4, or change the boundary condition type.', '  ', ' ')
+           write(msgbuf, '(a)') 'Absorbing-generating boundary defined without activating XBeach wave driver. Please set Wavemodelnr=4, or change the boundary condition type.'
+           call err_flush()
+        end if
+        itpbn = 5
+        !ftpet(nbndu+1:nbndu+numu) = tfc(7)   ! riemann relaxation
      else if ( qidfm == 'qhubnd') then
         itpbn = 6 
      else if ( qidfm == 'criticaloutflowbnd') then
@@ -497,9 +545,12 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
      call selectelset( filename, filetype, xe, ye, xyen, kce, nx, kew(nbndw+1:nx), numw, usemask=.false., rrtolrel=rrtolrel)
      WRITE(msgbuf,'(2a,i8,a)') trim(qid), trim(filename), numw, 'nr of wave energy bndcells' ; call msg_flush()
 
-     nbndw = nbndw + numw
-
      nwbnd = nwbnd + 1
+
+     call realloc(L1wbnd,nwbnd) ; L1wbnd(nwbnd) = nbndw + 1
+     call realloc(L2wbnd,nwbnd) ; L2wbnd(nwbnd) = nbndw + numw
+     
+     nbndw = nbndw + numw
      call realloc(fnamwbnd,nwbnd,fill='')
      fnamwbnd(nwbnd) = trim(filename)
 
@@ -526,12 +577,12 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
   else if (qidfm(1:9) == 'tracerbnd' ) then
      
      kce   = abs(kce) ! switch kce back on, but only for all net boundaries (some of which may have been set to -1 by a flow boundary)
-     call get_tracername(qidfm, tracnam, qidnam)          ! RL: moet dit de FM     
+     call get_tracername(qidfm, tracnam, qidnam)
      itrac = findname(numtracers, trnames, tracnam)
      
 !    add tracer name  if it does not already exist
      if ( itrac.eq.0 ) then
-        
+     
         numtracers = numtracers+1    
 !       realloc
         call realloc(ketr, (/ Nx, numtracers /), keepExisting=.true., fill=0 )
@@ -566,6 +617,34 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
 
         trnames(numtracers) = trim(tracnam)
      end if
+     
+  ! DEBUG JRE sedfrac
+  else if (qidfm(1:10) == 'sedfracbnd' ) then
+     
+     kce = 1     
+     call get_sedfracname(qidfm, sfnam, qidnam)    
+     isf = findname(numfracs, sfnames, sfnam)
+
+     if ( isf.eq.0 ) then   ! add 
+     
+        numfracs = numfracs+1    
+!       realloc
+        call realloc(kesf, (/Nx, numfracs/), keepExisting=.true., fill=0 )
+        call realloc(nbndsf, numfracs, keepExisting=.true., fill=0 )
+        call realloc(sfnames, numfracs, keepExisting=.true., fill='')
+
+        sfnames(numfracs) = trim(sfnam)
+        isf = numfracs
+        
+     end if
+
+     call selectelset( filename, filetype, xe, ye, xyen, kce, nx, kesf(nbndsf(isf)+1:,isf), numsf, usemask=.false.)
+     WRITE(msgbuf,'(3a,i8,a)') trim(qid), ' ', trim(filename) , numsf, ' nr of sedfrac bndcells' ; call msg_flush()
+     call appendrettime(qidfm, nbndsf(isf) + 1, return_time)
+     nbndsf(isf) = nbndsf(isf) + numsf
+     nbndsf_all = maxval(nbndsf(1:numfracs))
+     
+  !\ JRE DEBUG sedfrac
      
   else if (qidfm == 'tangentialvelocitybnd' ) then
 
@@ -634,8 +713,8 @@ function addtimespacerelation_boundaries(qid, filename, filetype, method, operan
    character(len=*),  optional, intent(in)    :: forcingfile !< Optional forcings file, if it differs from the filename (i.e., if filename=*.pli, and forcingfile=*.bc)
 
    logical                       :: success
-   character(len=256)            :: tracnam, qidnam
-   integer                       :: itrac, iconst
+   character(len=256)            :: tracnam, sfnam, qidnam
+   integer                       :: itrac, isf, iconst
    integer, external             :: findname
    double precision, dimension(:), pointer     :: pzmin, pzmax
 
@@ -670,29 +749,47 @@ function addtimespacerelation_boundaries(qid, filename, filetype, method, operan
          success = ec_addtimespacerelation(qid, xbndz, ybndz, kdz, kx, filename, filetype, method, operand, xy2bndz, dtnodal=dt_nodal)
       end if             ! kan iemand mij uitleggen wat dtnodal en een qhbnd met elkaar te maken hebben
            
-   else if (nbndu > 0 .and. (qid == 'velocitybnd'  .or. qid == 'dischargebnd' .or. qid == 'riemann_velocitybnd' .or. &
-                             qid == 'criticaloutflowbnd' .or. qid == 'weiroutflowbnd' ) ) then
-        
-      if ( qid.eq.'riemann_velocitybnd' ) then  ! JRE
-         jawave = 4                             ! hk, dit moet eigenlijk eerst gedebugged worden want bij mij doet ie het nu niet
+   else if (nbndu > 0 .and. (qid == 'dischargebnd' .or. &
+                             qid == 'criticaloutflowbnd' .or. qid == 'weiroutflowbnd' .or. qid == 'absgenbnd' ) ) then
+      if ( qid.eq.'absgenbnd' ) then
+         jawave = 4
       end if
 
-      !qid   = 'velocitybnd'
       if (present(forcingfile)) then
          success = ec_addtimespacerelation(qid, xbndu, ybndu, kdu, kx, filename, filetype, method, operand, xy2bndu, forcingfile=forcingfile)
       else
          success = ec_addtimespacerelation(qid, xbndu, ybndu, kdu, kx, filename, filetype, method, operand, xy2bndu)
       end if
 
+   else if (nbndu > 0 .and. qid == 'velocitybnd' ) then
+
+      if (kmx == 0) then
+         if (present(forcingfile)) then
+            success = ec_addtimespacerelation(qid, xbndu, ybndu, kdu, kx, filename, filetype, method, operand, xy2bndu, forcingfile=forcingfile)
+         else
+            success = ec_addtimespacerelation(qid, xbndu, ybndu, kdu, kx, filename, filetype, method, operand, xy2bndu)
+         end if
+      else
+         pzmin => zminmaxu(1:nbndu)
+         pzmax => zminmaxu(nbndu+1:2*nbndu)
+         if (present(forcingfile)) then
+            success = ec_addtimespacerelation(qid, xbndu, ybndu, kdu, kx, filename, filetype, method, operand, xy2bndu,    &
+                                              z=sigmabndu, pzmin=pzmin, pzmax=pzmax, forcingfile=forcingfile)
+         else
+            success = ec_addtimespacerelation(qid, xbndu, ybndu, kdu, kx, filename, filetype, method, operand, xy2bndu,    &
+                                              z=sigmabndu, pzmin=pzmin, pzmax=pzmax)
+         end if
+      endif
+
    else if (nbnds > 0 .and. qid == 'salinitybnd' ) then ! 2D
 
-      if (kmx == 0) then   
+      if (kmx == 0) then
          if (present(forcingfile)) then
             success = ec_addtimespacerelation(qid, xbnds, ybnds, kds, kx, filename, filetype, method, operand, xy2bnds, forcingfile=forcingfile)
          else
             success = ec_addtimespacerelation(qid, xbnds, ybnds, kds, kx, filename, filetype, method, operand, xy2bnds)
          end if
-      else        
+      else
          pzmin => zminmaxs(1:nbnds)
          pzmax => zminmaxs(nbnds+1:2*nbnds)
          if (present(forcingfile)) then
@@ -766,6 +863,35 @@ function addtimespacerelation_boundaries(qid, filename, filetype, method, operan
          end if
       else
          success = .true.
+      end if
+
+! JRE DEBUG sedfrac
+   else if ( numfracs > 0 .and. (qid(1:10) == 'sedfracbnd') .and. stm_included) then
+
+      call get_sedfracname(qid, sfnam, qidnam)
+      isf = findname(numfracs, sfnames, sfnam)
+
+      if (isf > 0) then
+         if ( nbndsf(isf).gt.0 ) then
+            if ( kmx.eq.0 ) then
+               if (present(forcingfile)) then
+                  success = ec_addtimespacerelation(qid, bndsf(isf)%x, bndsf(isf)%y, bndsf(isf)%kd, kx, filename, filetype, method, operand, bndsf(isf)%xy2, forcingfile=forcingfile)
+               else
+                  success = ec_addtimespacerelation(qid, bndsf(isf)%x, bndsf(isf)%y, bndsf(isf)%kd, kx, filename, filetype, method, operand, bndsf(isf)%xy2)
+               end if
+            else
+               if (present(forcingfile)) then
+                  success = ec_addtimespacerelation(qid, bndsf(isf)%x, bndsf(isf)%y, bndsf(isf)%kd, kx, filename, filetype, method, operand, bndsf(isf)%xy2, bndsf(isf)%sigma, forcingfile=forcingfile)
+               else
+                  success = ec_addtimespacerelation(qid, bndsf(isf)%x, bndsf(isf)%y, bndsf(isf)%kd, kx, filename, filetype, method, operand, bndsf(isf)%xy2, bndsf(isf)%sigma)
+               end if
+            end if
+         else
+            success = .true.
+         end if
+      else
+         call mess(LEVEL_WARN, 'Initializing boundary block for file '''//trim(filename)//''', getting unknown sediment fraction '''//trim(sfnam)//''' from QUANTITY '''//trim(qid)//'''.')
+         call qnerror('Initializing boundary block for file '''//trim(filename)//''', getting unknown sediment fraction '''//trim(sfnam)//''' from QUANTITY '''//trim(qid)//'''.',' ',' ')
       end if
 
    else if (nbndt > 0 .and. (qid == 'tangentialvelocitybnd')) then
@@ -1000,13 +1126,14 @@ subroutine init_threttimes()
  use m_flowgeom
  use m_flowexternalforcings
  use m_transport
+ use m_sediment, only: stm_included
  use unstruc_messages
  use m_missing
  
  implicit none
  
- integer             :: thrtlen, i, j, nseg, itrac, iconst, n, ierr
- character(len=256)  :: qidfm, tracnam, qidnam
+ integer             :: thrtlen, i, j, nseg, itrac, ifrac, iconst, n, ierr
+ character(len=256)  :: qidfm, tracnam, sedfracnam, qidnam
  integer, external   :: findname
  
  if(jatransportmodule == 0) then
@@ -1046,7 +1173,7 @@ subroutine init_threttimes()
           cycle
        endif
        threttim(ITEMP,nseg) = thrtt(i)
-    else if(qidfm == 'sedimentbnd' .and. allocated(kbndsd)) then
+    else if(qidfm == 'sedimentbnd' .and. allocated(kbndsd) .and. .not. stm_included) then
        nseg = kbndsd(5,thrtn(i))
        if (nseg /=i) cycle
        if (nseg == 0 .or. nseg > nopenbndsect) then
@@ -1069,6 +1196,16 @@ subroutine init_threttimes()
           iconst = itrac2const(itrac)
           threttim(iconst,nseg) = thrtt(i)
        endif
+    else if(qidfm(1:10) == 'sedfracbnd') then
+       call get_sedfracname(qidfm, sedfracnam, qidnam)
+       ifrac = findname(numfracs, sfnames, sedfracnam)
+       nseg = bndsf(ifrac)%k(5,thrtn(i))
+       if (nseg == 0 .or. nseg > nopenbndsect) then
+          write(msgbuf,'(i8,a)') thrtn(i), ' sedfrac boundary point is assigned to incorrect boundary segment' ; call err_flush()
+          cycle
+       endif
+       iconst = ifrac2const(ifrac)
+       threttim(iconst,nseg) = thrtt(i)
     endif
  enddo
  
@@ -1112,6 +1249,22 @@ subroutine init_threttimes()
        enddo
     enddo
  endif
+ 
+ do ifrac = 1, numfracs
+    if(allocated(bndsf(ifrac)%tht)) deallocate(bndsf(ifrac)%tht)
+    if(allocated(bndsf(ifrac)%thz)) deallocate(bndsf(ifrac)%thz)
+    
+    n = nbndsf(ifrac)
+    
+    allocate(bndsf(ifrac)%tht(n), bndsf(ifrac)%thz(n*kmxd), stat=ierr)
+    call aerr('bndsf(ifrac)%tht(n), bndsf(ifrac)%thz(n*kmxd)', ierr, n*(kmxd+1))
+
+    ! mapping to constituents, just in case fracs do not map sequentially to ised1 and so on
+    iconst = ifrac2const(ifrac)
+    do i = 1,n
+      bndsf(ifrac)%tht(i) = threttim(iconst,bndsf(ifrac)%k(5,i))
+    enddo
+ enddo
        
 end subroutine
 
@@ -1174,7 +1327,7 @@ function flow_initwaveforcings_runtime() result(retval)              ! This is t
  endif
  !
  if (jatpwav == TPWAVSMOOTH) then
-    ! take smoothed peak wave period. Arjen: "Deze parameter is better"
+    ! take smoothed peak wave period. Arjen: "Deze parameter is beter"
     qid_l = 'tps'
  elseif (jatpwav == TPWAVRELATIVE) then
     ! take relative peak wave period. Bas; scale factor required!!
@@ -1268,7 +1421,7 @@ use m_alloc
 use m_flowgeom
 use m_netw
 use unstruc_messages
-!use unstruc_channel_flow
+use unstruc_channel_flow
 use m_structures ! Jan's channel_flow for Sobek's generalstructure (TODO)
 use m_strucs     ! Herman's generalstructure
 use tree_structures
@@ -1278,7 +1431,7 @@ use m_missing
 ! use m_ship
 ! use m_alloc
 use m_meteo
-!use m_readstructures
+use m_readstructures
 
 implicit none
 character(len=256)    :: plifile
@@ -1442,8 +1595,8 @@ do i=1,nstr
          end select
       !endif
    case ('generalstructuresobek') ! TODO: AvD: not hooked up yet.
-      call mess(LEVEL_ERROR, 'Programming error: structure type '''//trim(strtype)//''' not supported yet.')
-      cycle
+      !call mess(LEVEL_ERROR, 'Programming error: structure type '''//trim(strtype)//''' not supported yet.')
+      !cycle
       !call selectelset_internal_links( plifile, POLY_TIM, xz, yz, ln, lnx, kegs(ngs+1:numl), numgs )
       !do LL=ngs+1,ngs+numgs
       !   L = kegs(LL)
@@ -1585,7 +1738,7 @@ end do
          hulp(8, n) = -huge(1d0) ! levelrightZbsr=0.0
          hulp(9, n) = huge(1d0)  ! widthrightW2=10
          hulp(10,n) = -huge(1d0) ! levelrightZb2=0.0
-         hulp(11,n) = 10d10  ! gateheight=11
+         hulp(11,n) = 1d10! gateheight=11
          hulp(12,n) = 12  ! gateheightintervalcntrl=12
          hulp(13,n) = 1   ! pos_freegateflowcoeff=1
          hulp(14,n) = 1   ! pos_drowngateflowcoeff=1
@@ -1599,7 +1752,7 @@ end do
          hulp(22,n) = 0.6 ! neg_contrcoeffreegate=0.6
          hulp(23,n) = 0   ! extraresistance=0
          hulp(24,n) = 1.  ! dynstructext=1.
-         hulp(25,n) = 10d10  ! gatedoorheight
+         hulp(25,n) = 1d10! gatedoorheight
       end if
 
 
@@ -1633,6 +1786,7 @@ end do
             end if
          else
             zcgen((n-1)*kx+1) = tmpval ! Constant value for always, set it now already.
+            hulp(6, n)        = tmpval
          end if
 
          tmpval = dmiss
@@ -1674,6 +1828,7 @@ end do
             end if
          else
             zcgen((n-1)*kx+1) = tmpval ! Constant value for always, set it now already.
+            hulp(6, n)        = tmpval
          end if
 
          tmpval = dmiss
@@ -1722,6 +1877,7 @@ end do
             end if
          else
             zcgen((n-1)*kx+2) = tmpval ! Constant value for always, set it now already.
+            hulp(11, n)       = tmpval
          end if
 
          rec = ' '
@@ -1750,6 +1906,7 @@ end do
                end if
             else
                zcgen((n-1)*kx+3) = tmpval ! Constant value for always, set it now already.
+               hulp(5, n)       = tmpval
             end if
          end if
 
@@ -1809,6 +1966,11 @@ end do
                hulp(k,n) = tmpval ! Constant value for always, set it now already.
             end if
          end do
+
+         ! Set some zcgen values to their initial scalar values (for example, zcgen((n-1)*3+1) is quickly need for updating bobs.)
+         zcgen((n-1)*3+1) = hulp( 6, n) ! levelcenter 
+         zcgen((n-1)*3+2) = hulp(11, n) ! gateheight  == 'gateloweredgelevel', really a level
+         zcgen((n-1)*3+3) = hulp( 5, n) ! widthcenter 
 
          ngenstru = ngenstru+1
          genstru2cgen(ngenstru) = n ! Mapping from 1:ngenstru to underlying generalstructure --> (1:ncgensg)
@@ -2108,7 +2270,7 @@ subroutine getStructureIndex(strtypename, strname, index)
          if (trim(cgen_ids(icgen)) == trim(strname)) then
             if (L2cgensg(icgen) - L1cgensg(icgen) >= 0) then
                ! Only return this structure index if structure is active in flowgeom (i.e., at least 1 flow link associated)
-               index = i
+               index = icgen
                exit
             end if
          end if

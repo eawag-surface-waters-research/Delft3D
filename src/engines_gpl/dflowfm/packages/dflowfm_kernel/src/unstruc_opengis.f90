@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2017.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: unstruc_opengis.f90 52266 2017-09-02 11:24:11Z klecz_ml $
-! $HeadURL: https://repos.deltares.nl/repos/ds/branches/dflowfm/20161017_dflowfm_codecleanup/engines_gpl/dflowfm/packages/dflowfm_kernel/src/unstruc_opengis.f90 $
+! $Id: unstruc_opengis.f90 54131 2018-01-18 14:02:31Z carniato $
+! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/unstruc_opengis.f90 $
 
 !> @file unstruc_opengis.f90
 !! Output Unstruc data in KML format.
@@ -60,10 +60,12 @@ contains
 !!
 !! Export parameters are taken from the m_kml_parameters module.
 subroutine kml_write_net(filename)
-use network_data, only: numl, numl1d, numk, xk, yk, zk, kn, tnod, nod, nmk, nump, netcell
-use m_missing, only: dmiss
-use m_sferic
-use m_kml_parameters
+   
+   use network_data, only: numl, numl1d, numk, xk, yk, zk, kn, tnod, nod, nmk, nump, netcell
+   use m_missing, only: dmiss
+   use m_sferic
+   use m_kml_parameters
+   use gridoperations
 
     character(len=*), intent(in) :: filename
 

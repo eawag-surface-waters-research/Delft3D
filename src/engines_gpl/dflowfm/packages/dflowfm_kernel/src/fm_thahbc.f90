@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2017.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: fm_thahbc.f90 52266 2017-09-02 11:24:11Z klecz_ml $
-! $HeadURL: https://repos.deltares.nl/repos/ds/branches/dflowfm/20161017_dflowfm_codecleanup/engines_gpl/dflowfm/packages/dflowfm_kernel/src/fm_thahbc.f90 $
+! $Id: fm_thahbc.f90 54191 2018-01-22 18:57:53Z dam_ar $
+! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/fm_thahbc.f90 $
 !!--description-----------------------------------------------------------------
 ! FROM DELFT3D
 ! computes boundary values at open boundaries,
@@ -54,11 +54,12 @@
    
    use m_flowexternalforcings
    use m_flowparameters
-   use m_transport, only: NUMCONST, ISALT, ITEMP, ISED1, ITRA1, itrac2const
+   use m_transport, only: NUMCONST, ISALT, ITEMP, ISED1, ISEDN, ITRA1, itrac2const
+   use m_sediment
    
    implicit none
 
-   integer :: i, iconst
+   integer :: i, iconst, ised
    
    if(jasal > 0 .and. nbnds>0) then
    call thconst(ISALT, nbnds, zbnds, kbnds, thtbnds, thzbnds)
@@ -68,7 +69,7 @@
    call thconst(ITEMP, nbndtm, zbndtm, kbndtm, thtbndtm, thzbndtm)
    endif
 
-   if(jased > 0 .and. nbndsd>0) then
+   if(jased > 0 .and. nbndsd>0 .and. .not. stm_included) then
    call thconst(ISED1, nbndsd, zbndsd, kbndsd, thtbndsd, thzbndsd)
    endif
    
@@ -78,6 +79,11 @@
          call thconst(iconst, nbndtr(i), bndtr(i)%z, bndtr(i)%k, bndtr(i)%tht, bndtr(i)%thz)
       enddo
    endif
+   if (jased > 0 .and. stm_included .and. allocated(bndsf)) then
+      do i = 1, numfracs
+         call thconst(i+ISED1-1, nbndsf(i), bndsf(i)%z, bndsf(i)%k, bndsf(i)%tht, bndsf(i)%thz)
+      end do
+   end if
    
    end subroutine fm_thahbc
    

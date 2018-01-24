@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2017.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: manholes.f90 52266 2017-09-02 11:24:11Z klecz_ml $
-! $HeadURL: https://repos.deltares.nl/repos/ds/branches/dflowfm/20161017_dflowfm_codecleanup/engines_gpl/dflowfm/packages/dflowfm_kernel/src/manholes.f90 $
+! $Id: manholes.f90 53959 2018-01-03 16:06:27Z dam_ar $
+! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/manholes.f90 $
 
 !> Manholes connect 1D networks with 2D/3D grids or other 1D networks.
 !!
@@ -1890,26 +1890,6 @@ do ng = 1, ncgensg      ! loop over generalstruc signals, sethu
    enddo
 enddo   
 
-do ng = 1, ngatesg
-   zup = zgate(ng)
-   do n = L1gatesg(ng), L2gatesg(ng)
-      L   = kgate(3,n)   
-      if (hu(L) > 0d0) then 
-         bup    = min(bob(1,L), bob(2,L) )
-         a      = zup - bup
-         fac    = min (1d0, max(1d-2, a*huvli(L) ) )
-         fu(L)  = fac*fu(L) 
-      endif      
-      if (kmx > 0) then 
-         call getLbotLtop(L,Lb,Lt)
-         do LL = Lb, Lt
-            fu(LL) = fu(L) ; ru(LL) = ru(L) 
-            au(LL) = au(L)*( hu(LL)-hu(LL-1) ) / ( hu(Lt)-hu(Lb-1) )
-         enddo   
-      endif   
-   enddo
-enddo     
-
 end subroutine furusobekstructures
 
 !> Computes and sets the widths and gate lower edge levels on each of the flow links
@@ -1930,6 +1910,9 @@ integer :: ng, L, L0, Lf
 
 do ng=1,ncgensg ! Loop over general structures
 
+   ! Crest level is the same across all crossed flow links. Possibly time-dependent:
+   generalstruc(ng)%levelcenter = zcgen((ng-1)*3+1)
+
    ! 1: First determine total width of all genstru links (TODO: AvD: we should not recompute this every user time step)
    totalWidth = 0d0
    if (generalstruc(ng)%numlinks == 0) then
@@ -1947,17 +1930,18 @@ do ng=1,ncgensg ! Loop over general structures
    !     Also: only for gates, the desired door opening width for this overall structure
    !           (should be smaller than crestwidth, and for this portion the open gate door is emulated by dummy very high lower edge level)
    if (cgen_type(ng) == ICGENTP_WEIR) then
-      crestwidth = zcgen((ng-1)*3+3)
+      crestwidth = zcgen((ng-1)*3+3) ! TODO: AvD: this is probably always 1d10, weir has no crest_width attribute yet.
       closedGateWidthL = 0d0
       closedGateWidthR = 0d0
    else if (cgen_type(ng) == ICGENTP_GENSTRU) then
-      crestwidth = totalWidth ! No crest/sill-width setting for true general structure yet (not old ext, nor new ext)
-      closedGateWidthL = max(0d0, .5d0*(totalWidth - zcgen((ng-1)*3+3))) ! Default symmetric opening
-      closedGateWidthR = max(0d0, .5d0*(totalWidth - zcgen((ng-1)*3+3)))
+      !crestwidth = totalWidth ! No crest/sill-width setting for true general structure yet (not old ext, nor new ext)
+      crestwidth = zcgen((ng-1)*3+3) ! NOTE: AvD: this now comes from scalar attribute 'widthcenter', no timeseries yet.
+      closedGateWidthL = 0d0 ! max(0d0, .5d0*(totalWidth - zcgen((ng-1)*3+3))) ! Default symmetric opening
+      closedGateWidthR = 0d0 ! max(0d0, .5d0*(totalWidth - zcgen((ng-1)*3+3)))
    else if (cgen_type(ng) == ICGENTP_GATE) then
       ! For a gate: zcgen(3,ng) is limited to the door opening width, but we want to open all links
       ! *underneath* the two doors as well, (if lower_edge_level is still high enough above sill_level)
-      crestwidth = gates(cgen2str(ng))%sill_width
+      crestwidth = min(totalWidth, gates(cgen2str(ng))%sill_width)
       if (gates(cgen2str(ng))%opening_direction == IOPENDIR_FROMLEFT) then
          closedGateWidthL = max(0d0, totalWidth - zcgen((ng-1)*3+3))
          closedGateWidthR = 0d0
@@ -1972,9 +1956,12 @@ do ng=1,ncgensg ! Loop over general structures
    end if
 
 
-   ! 2a: Determine the width that needs to be closed on 'left' side
+   ! 2b: Determine the width that needs to be fully closed on 'left' side
    ! close the line structure from the outside to the inside: first step increasing increments
-   closedWidth = max(0d0, totalWidth - crestwidth)/2d0
+   ! NOTE: closed means: fully closed because sill_width (crest_width) is smaller that totalwidth.
+   !       NOT because of gate door closing: that is handled by closedGateWidthL/R and may still
+   !       have flow underneath doors if they are up high enough.
+   closedWidth = max(0d0, totalWidth - crestwidth)/2d0 ! Intentionally symmetric: if crest/sill_width < totalwidth. Only gate door motion may have a direction, was already handled above.
     
    do L=L1cgensg(ng),L2cgensg(ng)
       L0 = L-L1cgensg(ng)+1
@@ -1984,6 +1971,8 @@ do ng=1,ncgensg ! Loop over general structures
          help = min (wu(Lf), closedWidth)
          generalstruc(ng)%widthcenteronlink(L0) = wu(Lf) - help ! 0d0 if closed
          closedWidth = closedWidth - help
+      else
+         generalstruc(ng)%widthcenteronlink(L0) = wu(Lf)
       end if
 
       if (cgen_type(ng) == ICGENTP_GATE .and. closedGateWidthL > 0d0 .or. cgen_type(ng) == ICGENTP_GENSTRU ) then
@@ -2002,18 +1991,22 @@ do ng=1,ncgensg ! Loop over general structures
       endif
    enddo
 
-   ! 2b: Determine the width that needs to be closed on 'right' side
-   ! second step decreasing increments
-   closedWidth = max(0d0, totalWidth - crestwidth)/2d0
+   ! 2c: Determine the width that needs to be fully closed on 'right' side
+   ! close the line structure from the outside to the inside: first step increasing increments
+   ! NOTE: closed means: fully closed because sill_width (crest_width) is smaller that totalwidth.
+   !       NOT because of gate door closing: that is handled by closedGateWidthL/R and may still
+   !       have flow underneath doors if they are up high enough.
+   closedWidth = max(0d0, totalWidth - crestwidth)/2d0 ! Intentionally symmetric: if crest/sill_width < totalwidth. Only gate door motion may have a direction, was already handled above.
    do L=L2cgensg(ng),L1cgensg(ng),-1
       L0 = L-L1cgensg(ng)+1
       Lf = kcgen(3,L)
 
       if (closedWidth > 0d0) then
          help = min (wu(Lf), closedWidth)
-!         generalstruc(ng)%widthcenteronlink(L0) = wu(Lf) - help ! 0d0 if closed
-         generalstruc(ng)%widthcenteronlink(L0) = generalstruc(ng)%widthcenteronlink(L0) - help ! 0d0 if closed
+         generalstruc(ng)%widthcenteronlink(L0) = wu(Lf) - help ! 0d0 if closed
          closedWidth = closedWidth - help
+      else
+         generalstruc(ng)%widthcenteronlink(L0) = wu(Lf)
       end if
 
       if (cgen_type(ng) == ICGENTP_GATE .and. closedGateWidthR > 0d0 .or. cgen_type(ng) == ICGENTP_GENSTRU) then
@@ -2040,7 +2033,7 @@ subroutine enloss(ag        ,d1        ,eweir     ,hkruin    ,hov       , &
                 & crestl    ,rmpbov    ,rmpben    ,veg      )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2018.                                
+!  Copyright (C)  Stichting Deltares, 2011-2014.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -2287,7 +2280,7 @@ end subroutine enloss
 double precision function tabellenboek(d1        ,eweir     ,qunit     ,qvolk     )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2018.                                
+!  Copyright (C)  Stichting Deltares, 2011-2014.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -2311,7 +2304,7 @@ double precision function tabellenboek(d1        ,eweir     ,qunit     ,qvolk   
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id: manholes.f90 52266 2017-09-02 11:24:11Z klecz_ml $
+!  $Id: manholes.f90 53959 2018-01-03 16:06:27Z dam_ar $
 !   Original URL: https://svn.oss.deltares.nl/repos/delft3d/trunk/src/engines_gpl/flow2d3d/packages/kernel/src/compute/tabel.f90
 !!--description-----------------------------------------------------------------
 !

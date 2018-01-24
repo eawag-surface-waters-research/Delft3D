@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2017.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: transport.f90 52266 2017-09-02 11:24:11Z klecz_ml $
-! $HeadURL: https://repos.deltares.nl/repos/ds/branches/dflowfm/20161017_dflowfm_codecleanup/engines_gpl/dflowfm/packages/dflowfm_kernel/src/transport.f90 $
+! $Id: transport.f90 54200 2018-01-23 18:28:48Z dam_ar $
+! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/transport.f90 $
 !> This subroutine transports an array of scalars.
 !> In light of future vectorization, the aim is to:
 !>   -use as few module variables as possible,
@@ -51,6 +51,8 @@ subroutine update_constituents(jarhoonly)
    use m_partitioninfo
    use m_timer
    use unstruc_messages
+   use m_flowwave,   only: fwx
+   use m_sediment,   only: jatranspvel, jased, stmpar, stm_included, mtd
    implicit none
 
    integer :: jarhoonly 
@@ -61,7 +63,7 @@ subroutine update_constituents(jarhoonly)
    double precision                                      :: dvoli
    double precision                                      :: dt, dts_store
 
-   integer                                               :: k, L, j, numconst_store
+   integer                                               :: k, LL, L, j, numconst_store
    integer                                               :: istep
    integer                                               :: numstepssync
    
@@ -109,6 +111,7 @@ subroutine update_constituents(jarhoonly)
    
    fluxhor = 0d0  ! not necessary
    sumhorflux = 0d0
+   fluxhortot = 0d0
    
    do istep=0,nsubsteps-1
       if ( kmx.gt.0 ) then
@@ -130,12 +133,40 @@ subroutine update_constituents(jarhoonly)
       end if
       
 !     compute horizontal fluxes, explicit part
-      call comp_fluxhor3D(NUMCONST, limtyp, Ndkx, Lnkx, u1, q1, au, sqi, vol1, kbot, Lbot, Ltop,  kmxn, kmxL, constituents, difsedu, sigdifi, viu, vicouv, nsubsteps, jaupdate, jaupdatehorflux, ndeltasteps, fluxhor, dsedx, dsedy)
+      if (.not. stm_included) then     ! just do the normal stuff
+         call comp_fluxhor3D(NUMCONST, limtyp, Ndkx, Lnkx, u1, q1, au, sqi, vol1, kbot, Lbot, Ltop,  kmxn, kmxL, constituents, difsedu, sigdifi, viu, vicouv, nsubsteps, jaupdate, jaupdatehorflux, ndeltasteps, jaupdateconst,fluxhor, dsedx, dsedy)   
+      else
+         ! TO DO: 3D stokes drift, velocity asymmetry
+         if ( jatranspvel.eq.0 .or. jatranspvel.eq.1 ) then       ! Lagrangian approach
+            ! only add velocity asymmetry
+            do LL=1,Lnx
+               do L=Lbot(LL),Ltop(LL)
+                  u1sed(L) = u1(L)+mtd%uau(L)  
+                  q1sed(L) = q1(L)+mtd%uau(L)*Au(L)
+               end do
+            end do
+         else if (jatranspvel .eq. 2) then                        ! Eulerian approach
+!           stokes+asymmetry
+            do LL=1,Lnx
+               do L=Lbot(LL),Ltop(LL)
+                  u1sed(L) = u1(L)-fwx%ustokes(L)+mtd%uau(L)  
+                  q1sed(L) = q1(L)+(mtd%uau(L)-fwx%ustokes(L))*Au(L)
+               end do
+            end do
+         end if
+         call comp_fluxhor3D(NUMCONST, limtyp, Ndkx, Lnkx, u1sed, q1sed, au, sqi, vol1, kbot, Lbot, Ltop,  kmxn, kmxL, constituents, difsedu, sigdifi, viu, vicouv, nsubsteps, jaupdate, jaupdatehorflux, ndeltasteps, noupdateconst,fluxhor, dsedx, dsedy)         
+!        water advection velocity
+         call comp_fluxhor3D(NUMCONST, limtyp, Ndkx, Lnkx, u1,    q1,    au, sqi, vol1, kbot, Lbot, Ltop,  kmxn, kmxL, constituents, difsedu, sigdifi, viu, vicouv, nsubsteps, jaupdate, jaupdatehorflux, ndeltasteps, jaupdateconst,fluxhor, dsedx, dsedy)
+      end if   
       
       call starttimer(IDEBUG)
       call comp_sumhorflux(NUMCONST, kmx, Lnkx, Ndkx, Lbot, Ltop, fluxhor, sumhorflux)
       call stoptimer(IDEBUG)
       
+      if( jased == 4 .and. stmpar%lsedsus > 0 ) then  ! at moment, this function is only required by suspended sediment. Can be extended to other fluxes if necessary
+         call comp_horfluxtot()
+      endif
+
 !     determine which cells need to be updated
       if ( nsubsteps.gt.1 ) then
          call get_jaupdate(istep,nsubsteps,Ndxi,Ndx,ndeltasteps,jaupdate)
@@ -168,6 +199,11 @@ subroutine update_constituents(jarhoonly)
    
    end do
    
+   if( jased == 4 .and. stmpar%lsedsus > 0 ) then
+      do j = ISED1,ISEDN
+         fluxhortot(j,:) = fluxhortot(j,:) / dts_store
+      enddo
+   endif
 
 !!  communicate
 !   if ( jampi.gt.0 ) then
@@ -196,7 +232,7 @@ subroutine update_constituents(jarhoonly)
 end subroutine update_constituents
 
 !> compute horizontal transport fluxes at flowlink
-subroutine comp_fluxhor3D(NUMCONST, limtyp, Ndkx, Lnkx, u1, q1, au, sqi, vol1, kbot, Lbot, Ltop, kmxn, kmxL, sed, difsed, sigdifi, viu, vicouv, nsubsteps, jaupdate, jaupdatehorflux, ndeltasteps, flux, dsedx, dsedy)
+subroutine comp_fluxhor3D(NUMCONST, limtyp, Ndkx, Lnkx, u1, q1, au, sqi, vol1, kbot, Lbot, Ltop, kmxn, kmxL, sed, difsed, sigdifi, viu, vicouv, nsubsteps, jaupdate, jaupdatehorflux, ndeltasteps, jaupdateconst, flux, dsedx, dsedy)
    use m_flowgeom,  only: Ndx, Lnx, Lnxi, ln, nd, klnup, slnup, dxi, acl, csu, snu, wcx1, wcx2, wcy1, wcy2, Dx  ! static mesh information
    use m_flowtimes, only: dts, dnt
    use m_flowparameters, only: cflmx
@@ -229,6 +265,7 @@ subroutine comp_fluxhor3D(NUMCONST, limtyp, Ndkx, Lnkx, u1, q1, au, sqi, vol1, k
    integer,          dimension(Ndx),           intent(in)    :: jaupdate !< cell updated (1) or not (0)
    integer,          dimension(Lnx),           intent(in)    :: jaupdatehorflux  !< update horizontal flux (1) or not (0)
    integer,          dimension(Ndx),           intent(in)    :: ndeltasteps !< number of substeps between updates
+   integer,          dimension(NUMCONST),      intent(in)    :: jaupdateconst   !< update constituent (1) or not (0)
    double precision, dimension(NUMCONST,Lnkx), intent(inout) :: flux     !< adds horizontal advection and diffusion fluxes
    double precision, dimension(NUMCONST,ndkx), intent(inout) :: dsedx    !< grrx 
    double precision, dimension(NUMCONST,ndkx), intent(inout) :: dsedy    !< grry 
@@ -239,7 +276,6 @@ subroutine comp_fluxhor3D(NUMCONST, limtyp, Ndkx, Lnkx, u1, q1, au, sqi, vol1, k
                                                              
    double precision                                          :: fluxL, fluxR
    double precision                                          :: sedL, sedR
-   double precision                                          :: sumdiffusion
    double precision                                          :: fluxfac, fluxfacMaxL, fluxfacMaxR
    double precision                                          :: dfac1, dfac2
    double precision                                          :: difcoeff, QL, QR, diuspL, ds1, ds2, dsedn, half
@@ -289,6 +325,8 @@ subroutine comp_fluxhor3D(NUMCONST, limtyp, Ndkx, Lnkx, u1, q1, au, sqi, vol1, k
          else
             dt_loc = dts * min(ndeltasteps(ln(1,LL)),ndeltasteps(ln(2,LL)))
          end if
+      else
+         dt_loc = dts
       end if
    
       Lb = Lbot(LL)
@@ -387,6 +425,8 @@ subroutine comp_fluxhor3D(NUMCONST, limtyp, Ndkx, Lnkx, u1, q1, au, sqi, vol1, k
          QR = min(q1(L),0d0)
 
          do j=1,NUMCONST
+            if ( jaupdateconst(j).ne.1 ) cycle
+            
             sedL   = sed(j,k1)
             sedR   = sed(j,k2)
  
@@ -431,8 +471,7 @@ subroutine comp_fluxhor3D(NUMCONST, limtyp, Ndkx, Lnkx, u1, q1, au, sqi, vol1, k
 !  END DEBUG
 
 !  diffusion
-   sumdiffusion = sum(difsed(1:NUMCONST))
-   if ( sumdiffusion.gt.0d0 .and. dicouv >= 0d0) then
+   if (dicouv >= 0d0) then
       
       !$OMP PARALLEL DO                             &
       !$OMP PRIVATE(LL,dfac1,dfac2,Lb,Lt,L,k1,k2,fluxfacMaxL,fluxfacMaxR,j,difcoeff,fluxfac,diuspL) &
@@ -444,6 +483,8 @@ subroutine comp_fluxhor3D(NUMCONST, limtyp, Ndkx, Lnkx, u1, q1, au, sqi, vol1, k
             else
                dt_loc = dts * min(ndeltasteps(ln(1,LL)),ndeltasteps(ln(2,LL)))
             end if
+         else
+            dt_loc = dts
          end if
       
          !monotinicity criterion, safe for triangles, quad and pentagons, but not for hexahedrons
@@ -454,7 +495,7 @@ subroutine comp_fluxhor3D(NUMCONST, limtyp, Ndkx, Lnkx, u1, q1, au, sqi, vol1, k
          dfac2 = 1d0/dble(nd(ln(2,LL))%lnx)
 
          if (jadiusp == 1) then 
-             diuspl = diusp(LL)
+             diuspL = diusp(LL)
          else
              diuspL = dicouv
          endif 
@@ -467,6 +508,8 @@ subroutine comp_fluxhor3D(NUMCONST, limtyp, Ndkx, Lnkx, u1, q1, au, sqi, vol1, k
             fluxfacMaxL  = dfac1*vol1(k1)/dt_loc - sqi(k1)
             fluxfacMaxR  = dfac2*vol1(k2)/dt_loc - sqi(k2)
             do j=1,NUMCONST
+               if ( jaupdateconst(j).ne.1 ) cycle
+               
                difcoeff  = sigdifi(j)*viu(L) + difsed(j) + diuspL  ! without smagorinsky, viu is 0 , 
                                                                    ! difsed only contains molecular value, 
                                                                    ! so then you only get user specified value  
@@ -508,7 +551,9 @@ subroutine comp_fluxver(NUMCONST, limtyp, thetavert, Ndkx, kmx, zws, qw, kbot, k
    use m_flowgeom, only: Ndx, ba, kfs  ! static mesh information
    use m_flowtimes, only: dts
    use m_flowparameters, only: cflmx
-   use m_flow, only : hs, epshs, s1, epshsdif, cffacver  ! do not use m_flow, please put this in the argument list
+   use m_flow, only : hs, epshs, s1, epshsdif, cffacver, a1  ! do not use m_flow, please put this in the argument list
+   use m_transport, only : ISED1, ISEDN   ! preferably in argument list
+   use m_sediment,  only: mtd
    use unstruc_messages
    use m_sediment, only : jased, ws
    use m_transport, only: Ised1, isedn
@@ -533,6 +578,7 @@ subroutine comp_fluxver(NUMCONST, limtyp, thetavert, Ndkx, kmx, zws, qw, kbot, k
                                                             
    double precision                                          :: sedL, sedR, ds1L, ds2L, ds1R, ds2R, sl3L, sl3R, cf, dum
    double precision                                          :: dt_loc
+   double precision                                          :: qw_loc
                                                             
    integer                                                   :: kk, k, kb, kt, kL, kR, kLL, kRR
    integer                                                   :: j
@@ -550,7 +596,7 @@ subroutine comp_fluxver(NUMCONST, limtyp, thetavert, Ndkx, kmx, zws, qw, kbot, k
    dt_loc = dts
 
    !$OMP PARALLEL DO                                                                       &
-   !$OMP PRIVATE(kk,kb,kt,dz,k,cf,kL,kR,j,sedL,sedR,kLL,kRR,sl3L,sl3R,ds1L,ds1R,ds2L,ds2R) &
+   !$OMP PRIVATE(kk,kb,kt,dz,k,cf,kL,kR,j,sedL,sedR,kLL,kRR,sl3L,sl3R,ds1L,ds1R,ds2L,ds2R,qw_loc) &
    !$OMP FIRSTPRIVATE(dt_loc)
    do kk=1,Ndx
       if (kfs(kk) == 0) cycle
@@ -561,6 +607,8 @@ subroutine comp_fluxver(NUMCONST, limtyp, thetavert, Ndkx, kmx, zws, qw, kbot, k
          else
             dt_loc = dts * ndeltasteps(kk)
          end if
+      else
+         dt_loc = dts
       end if
 
       kb = kbot(kk)
@@ -574,16 +622,29 @@ subroutine comp_fluxver(NUMCONST, limtyp, thetavert, Ndkx, kmx, zws, qw, kbot, k
       ! dz = max(dz,dtol)  !     fix for zero-thickness layer
 
        do k=kb,kt-1
-         if (cffacver > 0d0) then  
-            cf = cffacver*dt_loc*abs(qw(k))/(ba(kk)*dz(k-kb+2))  ! courant nr
-            cf = max(0d0,1d0-cf)                                 ! use high order only for small courant 
-         else
-            cf = 1d0                                             ! or always use it, is MUSCL = default
-         endif 
+         ! cf = dt_loc*qw(k)/(ba(kk)*dz(k-kb+2))
+      
+         qw_loc = qw(k)
+  
          kL = k   ! max(k,kb)
          kR = k+1 ! min(k+1,kt)
          
          do j=1,NUMCONST
+            if ( j.ge.ISED1 .and. j.le.ISEDN ) then  
+               qw_loc = qw_loc-mtd%ws(k,ISED1+j-1)*a1(kk)
+            end if
+
+            cf = cffacver*dt_loc*abs(qw_loc)/(ba(kk)*dz(k-kb+2))
+            if (cffacver > 0d0) then  
+               cf = cffacver*dt_loc*abs(qw_loc)/(ba(kk)*dz(k-kb+2))  ! courant nr
+               cf = max(0d0,1d0-cf)                                 ! use high order only for small courant 
+            else
+               cf = 1d0                                             ! or always use it, is MUSCL = default
+            endif 
+
+            !if ( cf.gt.cflmx ) then
+            !   continue
+            !end if
              
             if ( thetavert(j).eq.1d0 ) cycle
 
@@ -591,10 +652,10 @@ subroutine comp_fluxver(NUMCONST, limtyp, thetavert, Ndkx, kmx, zws, qw, kbot, k
             sedR = sed(j,kR)
             
             if ( thetavert(j).gt.0d0 ) then ! semi-explicit, use central scheme
-               flux(j,k) = flux(j,k) + qw(k)*0.5d0*(sedL+sedR)
+               flux(j,k) = flux(j,k) + qw_loc*0.5d0*(sedL+sedR)
             else     ! fully explicit 
              !  if (limtyp.ne.0  ) then
-                  if ( k.gt.kb-1 .and. qw(k).gt.0d0 ) then
+                  if ( k.gt.kb-1 .and. qw_loc.gt.0d0 ) then
                      kLL  = max(k-1,kb)
                      sL3L = dz(k-kb+2)/dz(k-kb+1)
                      ! if ( abs(sL3L-1d0).gt.1d-4 ) then
@@ -606,8 +667,8 @@ subroutine comp_fluxver(NUMCONST, limtyp, thetavert, Ndkx, kmx, zws, qw, kbot, k
                      sedL = sedL + 0.5d0 * cf * dlimiter(ds1L,ds2L,limtyp)
                   end if
                   
-                  if ( k.lt.kt .and. qw(k).lt.0d0 .and. s1(kk)-zws(kb-1) > epshsdif ) then
-                     kRR  = min(k+2,kt)
+                  if ( k.lt.kt .and. qw_loc.lt.0d0 .and. s1(kk)-zws(kb-1) > epshsdif ) then
+                     kRR = min(k+2,kt)
                      sL3R = dz(k-kb+2)/dz(k-kb+3)
                     ! if ( abs(sL3R-1d0).gt.1d-4 ) then
                     !    continue
@@ -618,8 +679,8 @@ subroutine comp_fluxver(NUMCONST, limtyp, thetavert, Ndkx, kmx, zws, qw, kbot, k
                      sedR = sedR + 0.5d0 * cf * dlimiter(ds1R,ds2R,limtyp)
                   end if
               !  end if
-                  
-               flux(j,k) = flux(j,k) + max(qw(k),0d0)*sedL + min(qw(k),0d0)*sedR
+               
+               flux(j,k) = flux(j,k) + max(qw_loc,0d0)*sedL + min(qw_loc,0d0)*sedR
             end if
             !if (jased > 0 .and. jased < 4) then   
             !   if (j >= ised1 .and. j <= isedn) then 
@@ -816,6 +877,8 @@ subroutine solve_2D(NUMCONST, Ndkx, Lnkx, vol1, kbot, ktop, Lbot, Ltop, sumhorfl
          else
             dt_loc = dts*ndeltasteps(k)
          end if
+      else
+         dt_loc = dts
       end if
       
       do j=1,NUMCONST
@@ -837,7 +900,7 @@ subroutine solve_vertical(NUMCONST, ISED1, ISEDN, limtyp, thetavert, Ndkx, Lnkx,
                           a, b, c, d, e, sol, rhs)
    use m_flowgeom,  only: Ndxi, Ndx, Lnx, Ln, ba, kfs, bl  ! static mesh information
    use m_flowtimes, only: dts
-   use m_flow,      only: epshsdif, s1, kmxn, xlozmidov, rhomean, rho, ag   ! do not use m_flow, please put this in the argument list
+   use m_flow,      only: epshsdif, s1, kmxn, xlozmidov, rhomean, rho, ag, a1  ! do not use m_flow, please put this in the argument list
    use m_sediment,  only: mtd, jased, ws
    
    implicit none
@@ -862,7 +925,7 @@ subroutine solve_vertical(NUMCONST, ISED1, ISEDN, limtyp, thetavert, Ndkx, Lnkx,
    double precision, dimension(NUMCONST,Ndkx), intent(in)    :: fluxver     !< vertical fluxes
    double precision, dimension(NUMCONST,Ndkx), intent(in)    :: source      !< sources
    double precision, dimension(NUMCONST,Ndkx), intent(in)    :: sink        !< sinks
-   double precision, dimension(NUMCONST),      intent(in)    :: difsed      !< scalar-specific diffusion coefficent (dicoww+difmod)
+   double precision, dimension(NUMCONST,Ndkx), intent(in)    :: difsed      !< scalar-specific diffusion coefficent (dicoww+difmod)
    double precision, dimension(Ndkx),          intent(in)    :: vicwws      !< vertical eddy viscosity, NOTE: real, not double
    double precision, dimension(NUMCONST),      intent(in)    :: sigdifi     !< 1/(Prandtl number) for heat, 1/(Schmidt number) for mass
    integer,                                    intent(in)    :: nsubsteps   !< number of substeps
@@ -881,6 +944,7 @@ subroutine solve_vertical(NUMCONST, ISED1, ISEDN, limtyp, thetavert, Ndkx, Lnkx,
    integer                                                   :: k1, k2, i, j, n, kkk
    
    double precision                                          :: dt_loc
+   double precision                                          :: qw_loc
                                                             
    double precision, parameter                               :: dtol=1d-8
    
@@ -892,7 +956,7 @@ subroutine solve_vertical(NUMCONST, ISED1, ISEDN, limtyp, thetavert, Ndkx, Lnkx,
 
    ! construct and solve system
    !$OMP PARALLEL DO                                                 &
-   !$OMP PRIVATE(kk,kb,ktx,kt,a,b,c,sol,j,d,k,n,dvol1i,dvol2i,fluxfac,e,dtbazi,dtba,ozmid,bruns) &
+   !$OMP PRIVATE(kk,kb,ktx,kt,a,b,c,sol,j,d,k,n,dvol1i,dvol2i,fluxfac,e,dtbazi,dtba,ozmid,bruns,qw_loc) &
    !$OMP FIRSTPRIVATE(dt_loc)
    do kk=1,Ndxi
       if ( nsubsteps.gt.1 ) then
@@ -901,6 +965,8 @@ subroutine solve_vertical(NUMCONST, ISED1, ISEDN, limtyp, thetavert, Ndkx, Lnkx,
          else
             dt_loc = dts * ndeltasteps(kk)
          end if
+      else
+         dt_loc = dts
       end if
       
       kb  = kbot(kk) 
@@ -952,7 +1018,7 @@ subroutine solve_vertical(NUMCONST, ISED1, ISEDN, limtyp, thetavert, Ndkx, Lnkx,
             if (jased > 3 .and. j >= ISED1 .and. j <= ISEDN) then  ! sediment d3d
                fluxfac = (mtd%seddif(j-ISED1+1,k))*dtbazi
             else                     
-               fluxfac = (sigdifi(j)*vicwws(k) + difsed(j) + ozmid)*dtbazi
+               fluxfac = (sigdifi(j)*vicwws(k) + difsed(j,k) + ozmid)*dtbazi
             end if
             
 !           BEGIN DEBUG
@@ -970,7 +1036,14 @@ subroutine solve_vertical(NUMCONST, ISED1, ISEDN, limtyp, thetavert, Ndkx, Lnkx,
                 ! BEGIN DEBUG
                 ! if ( .false. .and. thetavert(j).gt.0d0 ) then ! semi-implicit, use central scheme
                 ! END DEBUG
-                fluxfac  = qw(k)*0.5d0*thetavert(j)*dt_loc
+            
+                qw_loc = qw(k)
+                if ( j.ge.ISED1 .and. j.le.ISEDN ) then  ! sediment
+                   qw_loc = qw_loc-mtd%ws(k,ISED1+j-1)*a1(kk)
+                end if
+                
+                fluxfac  = qw_loc*0.5d0*thetavert(j)*dt_loc
+                
                 a(n+1,j) = a(n+1,j) - fluxfac*dvol2i
                 b(n+1,j) = b(n+1,j) - fluxfac*dvol2i
             
@@ -1089,14 +1162,18 @@ subroutine ini_transport()
    use m_flowparameters
    use m_sediment
    use m_physcoef
-   use m_flowexternalforcings, only: numtracers, trnames
-    
+   use m_flowexternalforcings
+   use string_module
+   use Messagehandling
+   use m_flow, only: kmx
+
    implicit none
    
    character(len=8) :: str
    
-   integer :: i, itrace, ised
-  
+   integer            :: i, itrace, ised, isf, ifrac
+   integer, external  :: findname
+
    NUMCONST  = 0
    ISALT = 0
    ITEMP = 0
@@ -1116,15 +1193,17 @@ subroutine ini_transport()
       ITEMP = NUMCONST
    end if
    
-   if ( jased.ne.0 ) then
-      NUMCONST  = NUMCONST+1
-      ISED1 = NUMCONST
-      
-      NUMCONST  = NUMCONST+mxgr-1
-      ISEDN = NUMCONST
+   if ( jased.ne.0) then
+      if( mxgr.gt.0 ) then
+         NUMCONST  = NUMCONST+1
+         ISED1 = NUMCONST
+
+         NUMCONST  = NUMCONST+mxgr-1
+         ISEDN = NUMCONST
+      end if
    end if
 
-   if ( jasecf > 0 ) then
+   if ( jasecflow > 0 .and. jaequili == 0 .and. kmx == 0 ) then
       NUMCONST  = NUMCONST+1
       ISPIR     = NUMCONST
    endif 
@@ -1162,14 +1241,39 @@ subroutine ini_transport()
       else
          thetavert(ISED1:ISEDN) = tetav
       end if
-      do i=ISED1,ISEDN
-         ised = i-ISED1+1
-         write(str,"(I0)") ised
-         const_names(i) = 'sediment_'//trim(str)
-      end do
-   end if
+      if (.not. stm_included) then   ! Andere naamgeving in flow_sedmorinit, fracties van sed file
+         do i=ISED1,ISEDN
+            ised = i-ISED1+1
+            write(str,"(I0)") ised
+            const_names(i) = 'sediment_'//trim(str)
+         end do
+      else
+         !
+         ! Map fraction names from sed to constituents (moved from ini_transport)
+         !
+         do i=ISED1,ISEDN
+           ised = i-ISED1+1                                             
+           const_names(i) = trim(stmpar%sedpar%NAMSED(sedtot2sedsus(ised)))   ! JRE - netcdf output somehow does not tolerate spaces in varnames?
+           !call remove_all_spaces(const_names(i))                             ! see whether this fix works
+           !const_names(i) = trim(const_names(i))
+         end do
+         !
+         !   Map sfnames to const_names
+         !
+         if (numfracs > 0) then
+            do isf = 1, stmpar%lsedsus        ! dimension of sed constituents
+               ifrac = findname(numfracs,sfnames,trim(const_names(isf+ISED1-1)))
+               if ( ifrac.gt.0 ) then
+                  ifrac2const(ifrac) = isf+ISED1-1
+               else
+                  call mess(LEVEL_ERROR, 'ini_transport(): fraction '//trim(const_names(isf+ISED1-1))//' does not have a concentration bnd assigned.')
+               end if
+            end do
+         end if    ! numfracs
+      end if       ! stm_included
+   end if          ! ised
    
-   if ( jasecf > 0 ) then
+   if ( jasecflow > 0 .and. jaequili == 0 .and. kmx == 0 ) then
       const_names(ISPIR) = 'secondary_flow_intensity'
    end if
 
@@ -1201,6 +1305,19 @@ subroutine ini_transport()
    jaupdatehorflux = 1
    numnonglobal = 0
    
+!  sediment advection velocity
+   jaupdateconst = 1
+   
+   if ( stm_included ) then
+      if (stmpar%lsedsus>0) then
+         noupdateconst = 0
+         do i=ISED1,ISEDN
+            jaupdateconst(i) = 0
+            noupdateconst(i) = 1
+         end do
+      end if
+   end if
+   
    return
 end subroutine ini_transport
 
@@ -1211,9 +1328,9 @@ subroutine alloc_transport()
    use m_flow, only: Lnkx, Ndkx, kmx, sigdifi
    use m_transport
    use m_alloc
-   use m_meteo, only: numtracers
+   use m_meteo, only: numtracers, numfracs
    use m_flowexternalforcings, only: numsrc, qcsrc, vcsrc
-  
+   use m_sediment, only: stm_included, jasedtranspveldebug
    implicit none
    
 !  allocate and initialize fluxes
@@ -1221,8 +1338,10 @@ subroutine alloc_transport()
    call realloc(fluxhor, (/ NUMCONST, Lnkx /), keepExisting=.true., fill=0d0)
    call realloc(fluxver, (/ NUMCONST, Ndkx /), keepExisting=.true., fill=0d0)
    
+   call realloc(fluxhortot, (/ NUMCONST, Lnkx /), keepExisting=.true., fill=0d0)
+   
    call realloc(difsedu, NUMCONST, keepExisting=.true., fill=0d0)
-   call realloc(difsedw, NUMCONST, keepExisting=.true., fill=0d0)
+   call realloc(difsedw, (/ NUMCONST, ndkx /), keepExisting=.true., fill=0d0)
    call realloc(sigdifi, NUMCONST, keepExisting=.true., fill=0d0)
  
    call realloc(constituents, (/ NUMCONST, Ndkx /), keepExisting=.true., fill=0d0)
@@ -1245,6 +1364,25 @@ subroutine alloc_transport()
    call realloc(jaupdatehorflux, Lnx, keepExisting=.false., fill=1)
    call realloc(dtmax,       Ndx, keepExisting=.false., fill=0d0)
    
+   call realloc(jaupdateconst, NUMCONST, keepExisting=.false., fill=1)
+   if ( stm_included ) then
+      call realloc(noupdateconst, NUMCONST, keepExisting=.false., fill=0)
+      
+      !IF (jasedtranspveldebug>0) then
+         ! DEBUG
+         call realloc(u1sed, Lnkx, keepExisting=.false., fill=0d0)
+         call realloc(q1sed, Lnkx, keepExisting=.false., fill=0d0)
+         call realloc(ucxsed, ndx, keepExisting=.false., fill=0d0)
+         call realloc(ucysed, ndx, keepExisting=.false., fill=0d0)
+         call realloc(qcxsed, ndx, keepExisting=.false., fill=0d0)
+         call realloc(qcysed, ndx, keepExisting=.false., fill=0d0)
+         call realloc(xsedflux,(/NUMCONST, ndx/), keepExisting=.false., fill=0d0)
+         call realloc(ysedflux,(/NUMCONST, ndx/), keepExisting=.false., fill=0d0)
+         ! \DEBUG
+      !end if
+      
+   end if
+   
 !  work arrays
    if ( allocated(rhs) ) deallocate(rhs)
    allocate(rhs(NUMCONST,Ndkx))
@@ -1260,7 +1398,8 @@ subroutine alloc_transport()
    end if
    
 !  tracer boundary condition
-   call realloc(itrac2const, numtracers, keepExisting=.true., fill=0)
+   call realloc(itrac2const, numtracers, keepExisting=.true., fill=0)   
+   call realloc(ifrac2const, numfracs, keepExisting=.true., fill=0)
    
    call realloc(qcsrc, (/   NUMCONST, numsrc /), keepExisting=.false., fill=0d0)
    call realloc(vcsrc, (/ 2*NUMCONST, numsrc /), keepExisting=.false., fill=0d0)
@@ -1276,15 +1415,18 @@ subroutine fill_constituents(jas) ! if jas == 1 do sources
    use m_flow
    use m_sediment
    use m_transport
-   use m_sferic
-   use m_flowtimes , only : dnt
+   use m_sferic, only: jsferic, fcorio
+   use m_flowtimes , only : dnt, dts
+   use unstruc_messages
    use m_flowparameters, only: janudge
    use m_missing
    implicit none
    
+   character(len=128)          :: message
+   
    double precision            :: dvoli   
    integer, intent(in)         :: jas 
-   integer                     :: i, iconst, j, kk, k, kb, kt, n, kk2, L   
+   integer                     :: i, iconst, j, kk, kkk, k, kb, kt, n, kk2, L 
    double precision, parameter :: dtol=1d-8   
    double precision            :: spir_ce, spir_be, spir_e, alength_a, time_a, alpha, fcoriocof, qsrck, qsrckk, dzss
    
@@ -1298,11 +1440,11 @@ subroutine fill_constituents(jas) ! if jas == 1 do sources
          constituents(ISALT,k) = sa1(k)
       end if
    
-      if ( ITEMP.ne.0 ) then
-         constituents(ITEMP,k) = tem1(k)
-      end if
+      !if ( ITEMP.ne.0 ) then
+      !    constituents(ITEMP,k) = t em1(k)
+      !end if
    
-      if( JASECF > 0 ) then
+      if( jasecflow > 0 .and. jaequili == 0 .and. kmx == 0 ) then
          constituents(ISPIR,k) = spirint(k)
       endif
    
@@ -1323,7 +1465,7 @@ subroutine fill_constituents(jas) ! if jas == 1 do sources
           difsedu(ISALT) =          difmolsal
       endif 
       if (dicoww .ge. 0d0) then 
-          difsedw(ISALT) = dicoww + difmolsal
+          difsedw(ISALT,:) = dicoww + difmolsal
           sigdifi(ISALT) = 1d0/sigsal
       endif
    end if
@@ -1333,22 +1475,32 @@ subroutine fill_constituents(jas) ! if jas == 1 do sources
           difsedu(ITEMP) =          difmoltem
       endif 
       if (dicoww .ge. 0d0) then 
-          difsedw(ITEMP) = dicoww + difmoltem
+          difsedw(ITEMP,:) = dicoww + difmoltem
           sigdifi(ITEMP) = 1d0/sigtem
       endif
    end if
    
-   if( jasecf > 0 ) then
+   if( jasecflow > 0 .and. jaequili == 0 .and. kmx == 0 ) then
       difsedu(ISPIR) = 0d0
-      difsedw(ISPIR) = 0d0 !dicoww + difmoltem
+      difsedw(ISPIR,:) = 0d0 !dicoww + difmoltem
       sigdifi(ISPIR) = 0d0 !/sigspi 
    endif 
 
-   if ( ISED1.ne.0 ) then
+   if ( ISED1.ne.0 .and. stm_included) then
       do i=1,mxgr
          iconst = ISED1+i-1
          if (dicouv .ge. 0d0) difsedu(iconst) = 0d0
-         if (dicoww .ge. 0d0) difsedw(iconst) = dicoww
+         !if (dicoww .ge. 0d0) difsedw(iconst,:) = dicoww
+         difsedw(iconst,:) = mtd%seddif(i,:)
+         sigdifi(iconst) = 1d0/sigsed
+      end do
+   end if
+   
+   if ( ISED1.ne.0 .and. .not. stm_included) then
+      do i=1,mxgr
+         iconst = ISED1+i-1
+         if (dicouv .ge. 0d0) difsedu(iconst) = 0d0
+         if (dicoww .ge. 0d0) difsedw(iconst,:) = dicoww
          sigdifi(iconst) = 1d0/sigsed
       end do
    end if
@@ -1356,7 +1508,7 @@ subroutine fill_constituents(jas) ! if jas == 1 do sources
    if ( ITRA1.gt.0 ) then
       do i=ITRA1,ITRAN
          difsedu(i) =          difmoltr
-         difsedw(i) = dicoww + difmoltr 
+         difsedw(i,:) = dicoww + difmoltr 
          sigdifi(i) = 1d0
       end do
    end if
@@ -1372,7 +1524,7 @@ subroutine fill_constituents(jas) ! if jas == 1 do sources
             if (heatsrc(k) > 0d0) then
                const_sour(ITEMP,k) =  heatsrc(k)*dvoli
             else if (heatsrc(k) < 0d0) then  
-               const_sink(ITEMP,k) = -heatsrc(k)*dvoli / max(tem1(k),0.001)
+               const_sink(ITEMP,k) = -heatsrc(k)*dvoli / max(constituents(itemp, k),0.001)
             endif
          endif
          
@@ -1401,7 +1553,7 @@ subroutine fill_constituents(jas) ! if jas == 1 do sources
 !     Note: from now on, only _add_ to sources      
          
 !     spiral flow source term
-      if ( jasecf > 0 .and. kmx.eq.0 ) then
+      if ( jasecflow > 0 .and. jaequili == 0 .and. kmx == 0 ) then
          if( spirucm(kk) < 1d-3 .or. hs(kk) < epshu ) then
             ! const_sour(ISPIR,kk) = 0d0
             ! const_sink(ISPIR,kk) = 0d0
@@ -1411,7 +1563,7 @@ subroutine fill_constituents(jas) ! if jas == 1 do sources
             spir_ce = fcorio * hs(kk) * 0.5d0
             spir_be = hs(kk) * spircrv(kk) * spirucm(kk)
             spir_e  = spir_be - spir_ce
-            alength_a = ( 1.0d0 - 2.0d0 * alpha ) * hs(kk) / ( 2.0d0 * vonkar * vonkar * alpha )
+            alength_a = ( 1.0d0 - 2.0d0 * alpha ) * hs(kk) / ( 2.0d0 * vonkar * vonkar * alpha )  !TO DO: this term should be expanded to prevent negative alength_a for alpha > 0.5
             time_a    = alength_a / spirucm(kk)
             !const_sour(ISPIR,kk) =  ( spir_e - spirint(kk) ) / time_a !* dvoli    ! S=(I_eq - I)/Ta
             const_sour(ISPIR,kk) = const_sour(ISPIR,kk) + spir_e / time_a
@@ -1420,12 +1572,30 @@ subroutine fill_constituents(jas) ! if jas == 1 do sources
       end if
       
 !     sediment (2D sources, also in 3D)
-      if ( stm_included ) then ! 2D only
+!          
+      if ( stm_included ) then
          if ( ISED1.gt.0 .and. kk.le.Ndxi ) then
             do i=1,mxgr
-               iconst = i+ISED1-1
-               const_sour(iconst,kb) = const_sour(iconst,kb) + sedtra%sourse(kk,i)
-               const_sink(iconst,kb) = const_sink(iconst,kb) + sedtra%sinkse(kk,i)
+               kkk = sedtra%kmxsed(kk,i)
+               if ( kkk.gt.0 ) then
+                  iconst = i+ISED1-1
+                  if (const_sour(iconst,kkk).lt.0d0 .or. const_sink(iconst,kkk).lt.0d0) then
+                      continue
+                  end if
+                  const_sour(iconst,kkk) = const_sour(iconst,kkk)+sedtra%sourse(kk,i)
+                  const_sink(iconst,kkk) = const_sink(iconst,kkk)+sedtra%sinkse(kk,i)
+                  if (stmpar%morpar%flufflyr%iflufflyr .gt. 0) then
+                     const_sour(iconst,kkk) = const_sour(iconst,kkk) + stmpar%morpar%flufflyr%sourf(i,kk)
+                     const_sink(iconst,kkk) = const_sink(iconst,kkk) + stmpar%morpar%flufflyr%sinkf(i,kk)
+                  end if
+                  
+!                 BEGIN DEBUG
+                  !if ( constituents(iconst,kb)+dts*const_sour(iconst,kb).lt.0d0 ) then
+                  !   write(message, "('const. source < -const/dt, iconst=', I0, ', kk=', I0)") iconst, kk
+                  !   call mess(LEVEL_WARN, trim(message))
+                  !end if
+!                 END DEBUG
+               end if
             end do
          end if
       end if
@@ -1485,7 +1655,11 @@ subroutine fill_constituents(jas) ! if jas == 1 do sources
       endif  
 
    enddo
-      
+   ! NOTE: apply_tracer_bc has been moved earlier to transport() routine,
+   !       but apply_sediment_bc must still be done here, since above the boundary
+   !       nodes's constituents(kb,:) = sed(kb,:) has reset it to 0.
+   if ( stm_included ) call apply_sediment_bc()
+
    return
 end subroutine fill_constituents
 
@@ -1538,11 +1712,11 @@ subroutine extract_constituents()
          sa1(k) = constituents(ISALT,k)
       end if
    
-      if ( ITEMP.ne.0 ) then
-         tem1(k) = constituents(ITEMP,k)
-      end if
+      !if ( ITEMP.ne.0 ) then
+         ! t em1(k) = constituents(ITEMP,k)
+      !end if
    
-      if( jasecf > 0 ) then
+      if( jasecflow > 0 .and. jaequili == 0 .and. kmx == 0 ) then
          spirint(k) = constituents(ISPIR,k)
       endif
    
@@ -1558,9 +1732,9 @@ subroutine extract_constituents()
       if (tempmax .ne. dmiss) then ! tem is now positive
          limmax = 0 
          do k = 1, Ndkx
-            if (tem1(k) > tempmax) then 
-               tem1(k)  = tempmax
-               limmax   = limmax + 1
+            if (constituents(itemp,k) > tempmax) then 
+                constituents(itemp,k) = tempmax
+                limmax   = limmax + 1
             endif     
          enddo
          if (limmax .ne. 0) then 
@@ -1595,12 +1769,9 @@ subroutine extract_constituents()
       endif   
   endif
    
-  if (jasal > 0) then  
-     call doforester(sa1 , maxitverticalforestersal, 1)    ! only if maxit > 0   
-  endif
-  if (jatem > 0) then 
-     call doforester(tem1, maxitverticalforestertem,-1)    ! only if maxit > 0            
-  endif
+  if (jasal > 0 .and. maxitverticalforestersal > 0 .or. jatem > 0 .and. maxitverticalforestertem > 0) then  
+     call doforester()
+  endif 
      
   return
 end subroutine extract_constituents
@@ -1650,7 +1821,7 @@ subroutine add_tracer(tracer_name, iconst)
       end if
    end if
    
-!  apend tracer
+!  append tracer
    if ( ITRA1.eq.0) then
       NUMCONST = NUMCONST+1
       ITRA1    = NUMCONST
@@ -1680,8 +1851,8 @@ subroutine add_tracer(tracer_name, iconst)
       const_names(ITRAN) = 'tracer_'//trim(str)
    end if
    
-   if ( numtracers.gt.0 ) then   ! number of tracers
-!     generate tracer to constituent
+   if ( numtracers.gt.0 ) then   ! number of tracers with boundary conditions
+!     generate tracer (boundary condition) to constituent
       itrac = findname(numtracers,trnames,trim(tracer_name))
       if ( itrac.gt.0 ) then
          itrac2const(itrac) = iconst
@@ -1767,6 +1938,8 @@ subroutine droptracer(xp, yp, dval)
    use m_flowgeom
    use m_flow, only: kmxn, kbot
    use m_polygon
+   use m_missing, only: dmiss, JINS
+   use geometry_module, only: dbpinpol
    
    implicit none
    
@@ -1807,7 +1980,7 @@ subroutine droptracer(xp, yp, dval)
       in = -1
       do kk=1,Ndx
          N = size(nd(kk)%x)
-         call dbpinpol(xz(kk), yz(kk), in)
+         call dbpinpol(xz(kk), yz(kk), in, dmiss, JINS, NPL, xpl, ypl, zpl)
          if ( in.eq.1 ) then
             Ncells = Ncells+1
             icelllist(Ncells) = kk
@@ -1844,7 +2017,7 @@ integer function findname(N, snames, sname)
    integer :: i
    
    findname = 0
-   
+
    do i=1,N
       if ( trim(sname).eq.trim(snames(i)) ) then
          findname = i
@@ -2247,24 +2420,59 @@ subroutine get_jaupdatehorflux(nsubsteps, limtyp, jaupdate,jaupdatehorflux)
    return
 end subroutine get_jaupdatehorflux
    
-subroutine doforester(temp,maxit,ip) 
-use m_flow    ,   only : vol1, ndkx, kbot, ktop, kmxn, ndkx 
+subroutine doforester() 
+use m_flow    ,   only : sa1, vol1, ndkx, kbot, ktop, kmxn, ndkx, maxitverticalforestersal, maxitverticalforestertem 
 use m_flowgeom,   only : ndx, ndxi  
-use m_turbulence, only : kmxx  
+use m_turbulence, only : kmxx
+use m_transport,  only : constituents, numconst, itemp
 
 implicit none
-double precision    :: temp(ndkx)  
-integer, intent(in) :: maxit, ip
 
-integer          :: kk, km 
+integer          :: kk, km, kb 
 double precision :: a(kmxx), d(kmxx)
 
 do kk = 1,ndxi  
    km = ktop(kk) - kbot(kk) + 1
-   call foresterpoint(temp(kbot(kk):), vol1(kbot(kk):), a, d, km, kmxn(kk), maxit, ip) ! foresterpoint
+   if (maxitverticalforestersal > 0) then 
+      call foresterpoint(sa1(kbot(kk):), vol1(kbot(kk):), a, d, km, kmxn(kk), maxitverticalforestersal, 1) ! foresterpoint
+   endif
+   if (maxitverticalforestertem > 0) then 
+      call foresterpoint2(constituents, numconst, ndkx, itemp, vol1(kb:), a, d, km, kmxn(kk), kb, maxitverticalforestertem, -1)
+   endif   
 enddo   
    
 end subroutine doforester
+
+subroutine comp_horfluxtot()
+   use m_flowgeom, only: Lnx
+   use m_flow, only: Lbot, Ltop, kmx, Lnkx 
+   use m_transport, only: ISED1, ISEDN, fluxhor, fluxhortot
+   use m_flowtimes, only: dts
+   implicit none
+   
+  
+   integer :: LL, L, Lb, Lt
+   integer :: j
+   
+   if ( kmx<1 ) then
+      do L=1,Lnx
+         do j=ISED1, ISEDN
+            fluxhortot(j,L) = fluxhortot(j,L) + fluxhor(j,L) * dts
+         end do
+      end do
+   else
+      do LL=1,Lnx
+         Lb = Lbot(LL)
+         Lt = Ltop(LL)
+         do L=Lb,Lt
+            do j=ISED1, ISEDN
+               fluxhortot(j,L) = fluxhortot(j,L) + fluxhor(j,L) * dts
+            end do
+         end do
+      end do
+   end if
+
+end subroutine comp_horfluxtot
 
 !subroutine update_constituents_RK3
 !   use m_flowgeom,   only: Ndx, Ndxi, Lnxi, Lnx, ln, nd  ! static mesh information

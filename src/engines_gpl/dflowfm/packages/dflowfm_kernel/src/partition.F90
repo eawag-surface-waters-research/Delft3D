@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2017.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: partition.F90 52266 2017-09-02 11:24:11Z klecz_ml $
-! $HeadURL: https://repos.deltares.nl/repos/ds/branches/dflowfm/20161017_dflowfm_codecleanup/engines_gpl/dflowfm/packages/dflowfm_kernel/src/partition.F90 $
+! $Id: partition.F90 54199 2018-01-23 13:21:44Z zhao $
+! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/partition.F90 $
    
 !------------------------------------------------------------------------
 !  THOUGHTS:
@@ -45,48 +45,10 @@
 #include "config.h"
 #endif 
 
-!> the following parameters and enumeraters are taken from
+!> the parameters and enumeraters are taken from
 !>   ../third_party_open/metis-<version>/include/metis.h
 module m_metis
    integer, parameter :: METIS_NOPTIONS=40
-   
-   integer, parameter :: METIS_OK              = 1    !,    /*!< Returned normally */
-   integer, parameter :: METIS_ERROR_INPUT     = -2   !,   /*!< Returned due to erroneous inputs and/or options */
-   integer, parameter :: METIS_ERROR_MEMORY    = -3   !,   /*!< Returned due to insufficient memory */
-   integer, parameter :: METIS_ERROR           = -4   !    /*!< Some other errors */
-   
-   integer, parameter :: METIS_OPTION_PTYPE     = 1
-   integer, parameter :: METIS_OPTION_OBJTYPE   = 2
-   integer, parameter :: METIS_OPTION_CTYPE     = 3
-   integer, parameter :: METIS_OPTION_IPTYPE    = 4
-   integer, parameter :: METIS_OPTION_RTYPE     = 5
-   integer, parameter :: METIS_OPTION_DBGLVL    = 6
-   integer, parameter :: METIS_OPTION_NITER     = 7
-   integer, parameter :: METIS_OPTION_NCUTS     = 8
-   integer, parameter :: METIS_OPTION_SEED      = 9
-   integer, parameter :: METIS_OPTION_MINCONN   = 10
-   integer, parameter :: METIS_OPTION_CONTIG    = 11
-   integer, parameter :: METIS_OPTION_COMPRESS  = 12
-   integer, parameter :: METIS_OPTION_CCORDER   = 13
-   integer, parameter :: METIS_OPTION_PFACTOR   = 14
-   integer, parameter :: METIS_OPTION_NSEPS     = 15
-   integer, parameter :: METIS_OPTION_UFACTOR   = 16
-   integer, parameter :: METIS_OPTION_NUMBERING = 17
-
-!     /* Used for command-line parameter purposes */
-   integer, parameter :: METIS_OPTION_HELP      = 18
-   integer, parameter :: METIS_OPTION_TPWGTS    = 19
-   integer, parameter :: METIS_OPTION_NCOMMON   = 20
-   integer, parameter :: METIS_OPTION_NOOUTPUT  = 21
-   integer, parameter :: METIS_OPTION_BALANCE   = 22
-   integer, parameter :: METIS_OPTION_GTYPE     = 23
-   integer, parameter :: METIS_OPTION_UBVEC     = 24
-   
-   integer, parameter :: METIS_PTYPE_RB    = 0       
-   integer, parameter :: METIS_PTYPE_KWAY  = 1       
-   
-   integer, parameter :: METIS_GTYPE_DUAL  = 0
-   integer, parameter :: METIS_GTYPE_NODAL = 1
    
    integer, dimension(METIS_NOPTIONS) :: opts
 end module
@@ -125,7 +87,6 @@ use m_tpoly
    
    character(len=4)                        :: sdmn               !< domain number string
 
-   integer                                 :: md_genpolygon = 0  !< no polygon is needed. If not 0, then generate and use polygon for parallel run.
    type(tpoly), allocatable                :: partition_pol(:)   !< polygons that define the partition
    integer                                 :: npartition_pol     !< number of partition polygons
 
@@ -144,6 +105,8 @@ use m_tpoly
    integer, parameter                      :: ITYPE_Sall3D = 5   !< 3D water-level communcation identifier, all ghost levels
    integer, parameter                      :: ITYPE_SallTheta = 6 !< water-level communcation identifier, all ghost levels, theta-grid (for XBeach waves)
    integer, parameter                      :: ITYPE_Snonoverlap = 7  !< non-overlappling ghost nodes (for solver)
+   integer, parameter                      :: ITYPE_U3DW        = 8  !< 3D flow link communication identifier, starting at 0, for interfaces
+
    
    integer, parameter                      :: IGHOSTTYPE_CELLBASED = 0  !< cell-based ghostlevels
    integer, parameter                      :: IGHOSTTYPE_NODEBASED = 1  !< node-based ghostlevels
@@ -155,7 +118,7 @@ use m_tpoly
    
    integer                                 :: minghostlev_s=0    !< minimum ghost-cell layer level of water-level nodes, used for overlap in solver
    integer                                 :: maxghostlev_s=0    !< maximum ghost-cell layer level of water-level nodes, used for overlap in solver
-   integer, parameter                      :: ighosttype_s=IGHOSTTYPE_CELLBASED
+   integer                                 :: ighosttype_s=IGHOSTTYPE_CELLBASED
    
    integer                                 :: minghostlev_u=0    !< minimum ghost-cell layer level of links
    integer                                 :: maxghostlev_u=0    !< maximum ghost-cell layer level of links
@@ -204,6 +167,7 @@ use m_tpoly
    
    integer, dimension(:), allocatable         :: iglobal            !< [-] unique flow node numbers for matrix solver, does not exactly correspond with the original unpartitioned cell/flow node numbers! (duplicate boundary cells cause some addtional cell number increments.)
    integer, dimension(:), allocatable, target :: iglobal_s          !< [-] global flow node numbers to help output aggregation later. Should exactly correspond with the original unpartitioned flow node numbers! (as opposed to iglobal) {"shape": ["ndx"]}
+   integer                                    :: Nglobal_s          !< total number of global net cells, equals unpartitioned nump1d2d, Ndxi
    integer, dimension(:), allocatable         :: numcells           !< number of active cells per domain, dim(0:ndomains-1)
    
    double precision, dimension(:), allocatable :: work, workrec  !< work array
@@ -220,6 +184,9 @@ use m_tpoly
    
    integer, dimension(:), allocatable      :: nghostlist_u_3D
    integer, dimension(:), allocatable      :: nsendlist_u_3D
+   
+   integer, dimension(:), allocatable      :: nghostlist_u_3Dw
+   integer, dimension(:), allocatable      :: nsendlist_u_3Dw
    
    integer, dimension(:), allocatable      :: nghostlist_sall_theta
    integer, dimension(:), allocatable      :: nsendlist_sall_theta
@@ -259,7 +226,16 @@ use m_tpoly
 !         integer :: kt  !< index of top layer
 !      end subroutine
 !   end interface
-
+   
+!   for test solver:  Schwarz method with Robin-Robin coupling
+   integer                                       :: nbndint   ! number of interface links
+   integer,          dimension(:,:), allocatable :: kbndint   ! interface administration, similar to kbndz, etc., dim(3,nbndint)
+   double precision, dimension(:,:), allocatable :: zbndint   ! (1,:): beta value, (2,:): interface value, dim(2,nbndint)
+   double precision :: stoptol =1d-4  ! parameter of stopping criteria for subsolver of Schwarz method
+   double precision :: sbeta = 10d0 ! beta value in Robin-Robin coupling for Schwarz iterations
+   double precision :: prectol = 0.50D-2 ! tolerance for drop of preconditioner
+   integer          :: jabicgstab = 1 ! 
+   integer          :: Nsubiters  = 1000
    contains
 
 !> generate partition numbering from partition polygons and
@@ -275,10 +251,12 @@ use m_tpoly
 !! For a single partition, polygons may also overlap (partially or fully),
 !! to allow 'holes' inside the outer region or even 'islands' inside 'holes'.
    subroutine partition_pol_to_idomain(janet,jafindcells)
+      
       use network_data
       use m_flowgeom, only: Ndx, Ndxi, xz, yz
       use m_missing
       use m_alloc
+      use gridoperations
 
       implicit none
       
@@ -313,6 +291,8 @@ use m_tpoly
          else if ( janet.eq.2 ) then   ! add 1D net
             call find1dcells()
          end if
+         
+         call delete_drypoints_from_netgeom(dryptsfile, 0, 0)
       end if
       
 !     determine number of cells
@@ -473,12 +453,18 @@ use m_tpoly
       if ( icgsolver.eq.9 .or. icgsolver.gt.90 ) then
          numlay_cellbased = 4
          numlay_nodebased = 3
+         ighosttype_s = IGHOSTTYPE_NODEBASED
       
          if ( icgsolver.gt.90 ) then
             minghostlev_s = icgsolver-90
             maxghostlev_s = minghostlev_s
             
-            numlay_cellbased = max(numlay_cellbased,maxghostlev_s)
+!           for Robin-Robin interface conditions
+            ighosttype_s = IGHOSTTYPE_NODEBASED
+            minghostlev_s = max(minghostlev_s - 1,1)
+            
+!            numlay_cellbased = max(numlay_cellbased,maxghostlev_s)           
+            numlay_nodebased = max(numlay_nodebased,maxghostlev_s)
          else
             minghostlev_s = numlay_cellbased
             maxghostlev_s = numlay_cellbased
@@ -508,7 +494,7 @@ use m_tpoly
 
 
 !> initialize partitioning
-   subroutine partition_init_1D2D(md_ident, japolygon, ierror)
+   subroutine partition_init_1D2D(md_ident, ierror)
 !      use unstruc_model, only: md_ident  !<---- circular dependency
       use network_data, only : xzw, yzw, nump1d2d
       use m_flowgeom,   only : xu, yu, Ndx, Ndxi
@@ -521,7 +507,6 @@ use m_tpoly
       implicit none
 
       character(len=*),           intent(in)  :: md_ident
-      integer,                    intent(in)  :: japolygon
       integer,                    intent(out) :: ierror
 
       integer                                 :: idmn
@@ -533,7 +518,7 @@ use m_tpoly
       call partition_setghost_params(icgsolver)
       
 !     the following subroutine will determine the number of domains and generate the domain numbering
-     if (japolygon == 0) then ! If do not use polygon (the domain numbers have been read from the partition nc file)
+     if ( npartition_pol.lt.1 ) then ! If do not use polygon (the domain numbers have been read from the partition nc file)
 !        get fictitious boundary cells in own domain
          if (Ndx > nump1d2d) then
             call realloc(idomain, Ndx, keepExisting=.true.)
@@ -587,7 +572,7 @@ use m_tpoly
 !      if ( ierror.ne.0 ) goto 1234
 
 !     begin DEBUG
-!      call write_ghosts(trim(md_ident)//'_gst.pli')
+         call write_ghosts(trim(md_ident)//'_gst.pli')
 !     end DEBUG
 
 !     determine overlapping nodes in solver
@@ -623,27 +608,31 @@ use m_tpoly
 
 !> make a domain, including the ghostcells, by removing the other parts of the network
 !>   based on combined ghostlevels
-   subroutine partition_make_domain(idmn, numlay_cell, numlay_node, japolygon, lned, ierror)
+   subroutine partition_make_domain(idmn, numlay_cell, numlay_node, jacells, ierror)
       use network_data
       use MessageHandling
       use dfm_error
       use m_polygon
       use m_missing, only: dmiss, intmiss
+      use network_data, only: xzw, yzw, cellmask
+      use m_alloc
+      use gridoperations
 
       implicit none
 
-      integer, intent(in)  :: idmn   !< domain number
-      integer, intent(in)  :: numlay_cell !< number of cell-based ghostcell layers
-      integer, intent(in)  :: numlay_node !< number of node-based ghostcell layers
-      integer, intent(in)  :: japolygon
-      integer, intent(in)  :: lned(:,:)    !< (2, numl), subdomain indices of cells that are related to link j
-      integer, intent(out) :: ierror
+      integer,                 intent(in)  :: idmn   !< domain number
+      integer,                 intent(in)  :: numlay_cell !< number of cell-based ghostcell layers
+      integer,                 intent(in)  :: numlay_node !< number of node-based ghostcell layers
+      integer,                 intent(in)  :: jacells     !< generate partition domain and cell numbers
+      integer,                 intent(out) :: ierror
 
-      integer              :: ic1, ic2, k1, k2, L
-      integer              :: L1, L2, JA, K3, LL, c1, c2, c3, c4, L_old, i, n
-      integer, allocatable :: trLink(:)    !< trLink(j) is the global link index of the link that is numbered as j in one partition
-      integer, allocatable :: trLink2(:)
-      integer              :: nLink2Dhang  ! number of hanging 2D links found
+      integer                              :: ic1, ic2, k1, k2, L
+      integer                              :: L1, L2, JA, K3, LL, c1, c2, c3, c4, L_old, i, n
+      integer, dimension(:,:), allocatable :: lne_org(:,:)
+      integer                              :: nLink2Dhang  ! number of hanging 2D links found
+      
+      
+      integer              :: i_old
       
       character(len=128)   :: message
 
@@ -683,7 +672,7 @@ use m_tpoly
                !kc(kn(2,L)) = 1
                Lc(L) = 1
             end if
-         else if ( kn(3,L).eq.1 .or. kn(3,L).eq.3 .or. kn(3,L).eq.4 ) then ! 1D link
+         else if ( kn(3,L).ne.0 ) then    ! kn(3,L).eq.1 .or. kn(3,L).eq.3 .or. kn(3,L).eq.4 ) then ! 1D link
 !           need to check connected netcells, since the netnode may not be associated with a 1D netcell (1D-2D coupling)
             k1 = kn(1,L)
             k2 = kn(2,L)
@@ -712,44 +701,24 @@ use m_tpoly
          end if
       end do
       
-   if (japolygon == 0) then
-!    generate trLink (used to generate idomain). link j in the current subdomain corresponds to the global link trLink(j)
-      if (allocated(trLink)) deallocate(trLink)
-      allocate(trLink(numl));  trLink  = 0
-      allocate(trLink2(numl)); trLink2 = 0
-      L2 = 0 ; L1 = 0
-      DO L=1,NUML                                                   ! LINKS AANSCHUIVEN, 1d EERST
-         K1 = KN(1,L)  ; K2 = KN(2,L) ; K3 = KN(3,L)
-         IF (K1 .NE. 0 .AND. K2 .NE. 0 .AND. K1 .NE. K2 ) THEN
-            JA = 1
-            IF (XK(K1) == DMISS .OR. XK(K2) == DMISS) THEN          ! EXTRA CHECK: ONE MISSING
-               JA = 0
-            ELSE IF (XK(K1) == XK(K2) .AND. YK(K1) == YK(K2) ) THEN !            : OR BOTH EQUAL
-              JA = 0
-            ENDIF
-            IF (JA == 1) THEN
-               IF (K3 == 0 .or. K3 == 2) THEN
-                  L2 = L2 + 1
-                  trLink2(L2) = L
-               ELSE IF (K3 == 1 .OR. K3 > 2) THEN
-                  L1 = L1 + 1
-                  trLink(L1) = L
-               ENDIF
-            ENDIF
-         ENDIF
-      ENDDO
-      do L = 1, L2
-         LL = L1 + L
-         trLink(LL) = trLink2(L)
-      enddo
-      deallocate(trLink2)
-   endif      
+      if ( jacells.eq.1 ) then
+         Nglobal_s = nump1d2d
+         
+!        save lne
+         allocate(lne_org(2, numL))
+         lne_org = 0
+         do i = 1, numL
+            lne_org(1,i) = abs(lne(1,i))
+            lne_org(2,i) = abs(lne(2,i))
+         enddo
+      endif      
 
 !     physically remove nodes and links from network
-     ! call setnodadm(0) 
-      npl = 0           ! number of polygon points, we set no polygon
-      call findcells(0)
+      NPL = 0           ! number of polygon points, we set no polygon
+      call findcells(100000)  ! output link permutation array "Lperm" (only used if jacells.eq.1)
       call find1dcells()
+   
+      call delete_drypoints_from_netgeom(dryptsfile, 0, 0)
   
       if (numk == 0 .or. numl == 0) then
          write(message,"('While making partition domain #', I0, ': empty domain (', I0, ' net nodes, ', I0, ' net links).')") idmn, numk, numl
@@ -766,70 +735,146 @@ use m_tpoly
          end if
       end if
 
-      if (japolygon == 0) then
-      !  generate idomain for the current subdomain so that idomain can be written to the partition file
-         do i = 1, nump                    ! First for 2D cells
-           L = netcell(i)%LIN(1)          ! one link L of cell i
-           L_old = trLink(L)              ! this link is L_old link in the global mesh
-           c1 = lned(1, L_old)            ! subdomain index of one cell that relates to link L_old
-           c2 = lned(2, L_old)
-            
-           L = netcell(i)%LIN(2)          ! Another link L of cell i
-           L_old = trLink(L)              
-           c3 = lned(1, L_old)
-           c4 = lned(2, L_old)
-           if ((c1 == c3 .or. c1 == c4) .and. c1 /= intmiss) idomain(i) = c1  
-           if ((c2 == c3 .or. c2 == c4) .and. c2 /= intmiss) idomain(i) = c2
-         enddo
-         if (nump < nump1d2d) then         ! for 1D cells
-           do i = nump+1, nump1d2d
-              n = netcell(i)%NOD(1)       ! node index of cell i
-              if (nmk(n) .ge. 2) then     ! if this nod has 2 or more than 2 links    
-                 L = nod(n)%LIN(1)        ! one link L that relates to node n
-                 L_old = trLink(L)        ! this link is L_old link in the global mesh
-                 c1 = lned(1, L_old)      ! subdomain index of one cell that relates to link L_old
-                 c2 = lned(2, L_old)
+      if ( jacells.eq.1 ) then
+!        allocate cellmask array (used to flag illegal cells)
+         call realloc(cellmask, nump1d2d, keepExisting=.false., fill=0)
          
-                 L = nod(n)%LIN(2)        ! Another link L of cell i
-                 L_old = trLink(L)
-                 c3 = lned(1, L_old)
-                 c4 = lned(2, L_old)
-                 if ((c1 == c3 .or. c1 == c4) .and. c1 /= intmiss) then
-                    idomain(i) = c1
-                 else if ((c2 == c3 .or. c2 == c4) .and. c2 /= intmiss) then
-                    idomain(i) = c2
-                 else 
-                    write(6,*) 'errors in building idomain array for one subdomain'
-                 endif
-               
-              else                        ! else this node(cell) is an end node(cell)
-                 L = nod(n)%LIN(1)         
-                 L_old = trLink(L)
-                 c1 = lned(1, L_old)      
-                 c2 = lned(2, L_old)
-                 if (c1 == c2) then       ! if this node is in the same subdomain with its neighbor, i.e.
-                    idomain(i) = c1       ! they both have the same domain number c1
-                 else                     ! else this node is in different subdomain with its neighbor
-                    c3 = lne0(1, L_old)   ! the following goes to the global indices. One cell c3 that relates to global link L_old
-                    c3 = abs(c3)          ! c3 is negative for 1d cell, so convert it to positive
-                    k1 = netcell0(c3)%nod(1)      ! the corresponding node is k1
-                    if (nmk0(k1)==1) then         ! if k1 is the end node 
-                       idomain(i) = idomain0(c3)
-                    else                          ! else the other cell is the end cell, i.e. the current cell
-                       c4 = lne0(2, L_old)
-                       c4 = abs(c4)
-                       idomain(i) = idomain0(c4)
-                    endif
-                 endif
-              endif
-            enddo   
-         endif
+!        (re)allocate global cell numbers array
+         call realloc(iglobal_s, nump1d2d, keepExisting=.false., fill=0)
+         
+!        find original cell numbers
+         call find_original_cell_numbers(Lperm, Lne_org, iglobal_s)
+      
+      !  generate idomain for the current subdomain so that idomain can be written to the partition file
+         do i = 1, nump1d2d 
+            i_old = iglobal_s(i)
+            
+            if ( i_old.gt.0 ) then
+               idomain(i) = idomain0(i_old)
+               iglobal_s(i) = i_old
+            else
+!              cell was created by partitioning, "level-five" cell, mark it for removal
+               netcell(i)%N = 0
+               idomain(i) = -999 ! not necessary, safety
+               iglobal_s(i) = -999 ! not necessary, safety
+!              mask illegal cell
+               cellmask(i) = 1
+            end if
+         enddo
+         
+!        remove masked netcells
+         call remove_masked_netcells()
       endif
       ierror = DFM_NOERR
  1234 continue
 
+      if ( allocated(lne_org)  ) deallocate(lne_org)
+
       return
    end subroutine partition_make_domain
+   
+   
+!> find original cell numbers
+   subroutine find_original_cell_numbers(L2Lorg, Lne_org, iorg)
+      use unstruc_messages
+      use network_data, only: nump1d2d, numL, lnn, lne
+      implicit none
+      
+      integer,  intent(in)  :: L2Lorg(:)   !< original Link numbers
+      integer,  intent(in)  :: Lne_org(:,:)  !< original Lne
+      integer,  intent(out) :: iorg(:)     !< original cell numbers
+
+      integer, dimension(:,:),      allocatable :: icandidate  ! two original cell number candidates, dim(nump1d2d)
+      
+      integer                                   :: i, k, kother, L, L_org
+      integer                                   :: k1, k2
+      integer                                   :: ic1, ic2, ic3, ic4
+      integer                                   :: nump1d2d_org
+     
+!     get original number of cells
+      nump1d2d_org = 0
+      do L=1,numL
+         L_org = L2Lorg(L)
+         ic3 = iabs(lne_org(1,L_org))
+         ic4 = iabs(lne_org(2,L_org))
+         nump1d2d_org = max(max( nump1d2d_org, ic3), ic4)
+      end do
+      
+      allocate(icandidate(2,nump1d2d_org))
+      
+      icandidate = -1
+      do L=1,numL
+         L_org = L2Lorg(L)
+         ic3 = iabs(lne_org(1,L_org))  ! first new candidate
+         ic4 = iabs(lne_org(2,L_org))  ! second new candiate, can be 0 if lnn_org==1
+         do i=1,2
+            k = iabs(lne(i,L))     ! this cell number
+            if ( k.eq.0 ) cycle
+            ic1 = icandidate(1,k)  ! first stored candidate
+            ic2 = icandidate(2,k)  ! second stored candidate
+            
+            if ( ic1.eq.-1 .and. ic2.eq.-1 ) then  ! initialization: accept both new candidates
+               icandidate(1,k) = ic3
+               icandidate(2,k) = ic4
+            else   ! compare two new candidates (ic3,ic4) with the two stored ones (ic1,ic2)
+               if ( ic3.ne.ic1 .and. ic4.ne.ic1 ) then  ! compare with c1
+                  ! it's not ic1
+                  icandidate(1,k) = 0
+               end if
+               
+               if ( ic3.ne.ic2 .and. ic4.ne.ic2 ) then
+                  ! it's not ic2
+                  icandidate(2,k) = 0
+               end if
+            end if
+         end do
+      end do
+      
+!     retrieve original cell numbers, 0 if no cell found
+      iorg = 0
+      do k=1,nump1d2d
+         if ( icandidate(1,k).gt.0 .and. icandidate(2,k).gt.0 .and. icandidate(1,k).ne.icandidate(2,k) ) then
+!           cell is endnode on a branch
+         else if ( icandidate(1,k).gt.0 )then
+            iorg(k) = icandidate(1,k)
+         else if ( icandidate(2,k).gt.0 ) then
+            iorg(k) = icandidate(2,k)
+         end if
+      end do
+      
+!     set cells connected through one link/edge      
+      do L=1,numL
+         do i=1,2
+            k = iabs(lne(i,L))     ! this cell number
+            kother = iabs(lne(3-i,L))  ! other cell number
+            
+            if ( k.eq.0 .or. kother.eq.0 ) cycle
+            
+            if ( iorg(k).eq.0 .and. iorg(kother).gt.0 ) then   ! unassigned original cell number
+               ic1 = icandidate(1,k)
+               ic2 = icandidate(2,k)
+               if ( ic1.eq.iorg(kother) ) then
+                  iorg(k) = ic2
+               else if ( ic2.eq.iorg(kother) ) then
+                  iorg(k) = ic1
+               end if
+            end if
+            
+         end do
+      end do
+      
+!!     check if all orginal cell number are assigned
+!      do k=1,nump1d2d
+!         if ( iorg(k).eq.0 ) then
+!            continue
+!         end if
+!      end do
+      
+!     deallocate
+      if ( allocated(icandidate) ) deallocate(icandidate)
+      
+      return
+   end subroutine find_original_cell_numbers
    
    
 !>  combine cell-based ghostlevels with node-based ghostlevels
@@ -1231,6 +1276,9 @@ use m_tpoly
          
          if ( allocated(nghostlist_u_3d) ) deallocate(nghostlist_u_3d)
          if ( allocated(nsendlist_u_3d)  ) deallocate(nsendlist_u_3d)
+         
+         if ( allocated(nghostlist_u_3dw) ) deallocate(nghostlist_u_3dw)
+         if ( allocated(nsendlist_u_3dw)  ) deallocate(nsendlist_u_3dw)
       else
          ierror = 1
       end if
@@ -1624,9 +1672,13 @@ use m_tpoly
 
 !> fill sendghostlist
    subroutine partition_fill_sendlist(idmn, idmn_other, itype, N, x, y, ghost, isendlist, nsendlist, ierror)
+      
       use m_alloc
       use network_data, only: xzw, yzw
       use m_flowgeom,   only: xu, yu
+      use geometry_module, only: dbdistance
+      use m_missing, only: dmiss
+      use m_sferic, only: jsferic, jasfer3D
 
       implicit none
 
@@ -1648,9 +1700,6 @@ use m_tpoly
       integer                                                    :: numdomains, idum
       
       integer                                                    :: jafound
-
-      double precision, external                                 :: dbdistance
-
       double precision, parameter                                :: dtol=1d-4
 
       ierror = 1
@@ -1677,7 +1726,7 @@ use m_tpoly
                   goto 1234
                end if
 
-               dis = dbdistance(x(j),y(j),xi,yi)
+               dis = dbdistance(x(j),y(j),xi,yi, jsferic, jasfer3D, dmiss)
                if ( dis.lt.dtol ) then ! found
                   num = num+1
                   ilist(num) = i
@@ -2377,11 +2426,19 @@ use m_tpoly
       allocate(nghostlist_u_3d(-1:ndomains-1))
       allocate(nsendlist_u_3d(-1:ndomains-1))
       
+      if ( allocated(nghostlist_u_3dw) ) deallocate(nghostlist_u_3dw)
+      if ( allocated(nsendlist_u_3dw) )  deallocate(nsendlist_u_3dw)
+      allocate(nghostlist_u_3dw(-1:ndomains-1))
+      allocate(nsendlist_u_3dw(-1:ndomains-1))
+      
       call partition_fill_ghostsendlist_3d(nghostlist_sall(ndomains-1), ighostlist_sall, nghostlist_sall, Ndx, kbot, kmxn, nghostlist_sall_3d)
       call partition_fill_ghostsendlist_3d(nsendlist_sall(ndomains-1),  isendlist_sall,  nsendlist_sall,  Ndx, kbot, kmxn, nsendlist_sall_3d)
       
       call partition_fill_ghostsendlist_3d(nghostlist_u(ndomains-1), ighostlist_u, nghostlist_u, Lnx, Lbot, kmxL, nghostlist_u_3d)
       call partition_fill_ghostsendlist_3d(nsendlist_u(ndomains-1),  isendlist_u,  nsendlist_u,  Lnx, Lbot, kmxL, nsendlist_u_3d)
+      
+      call partition_fill_ghostsendlist_3d(nghostlist_u(ndomains-1), ighostlist_u, nghostlist_u, Lnx, Lbot, kmxL+1, nghostlist_u_3dw)
+      call partition_fill_ghostsendlist_3d(nsendlist_u(ndomains-1),  isendlist_u,  nsendlist_u,  Lnx, Lbot, kmxL+1, nsendlist_u_3dw)
       
       ierror = 0
  1234 continue
@@ -2442,7 +2499,7 @@ use m_tpoly
       nsendlist_snonoverlap = 0
      
 !     check for overlap (in solver)      
-      if ( minghostlev_s.eq.1 ) then
+      if ( maxghostlev_s.eq.1 ) then
           jaoverlap = 0
           
           ierror = 0
@@ -2476,8 +2533,10 @@ use m_tpoly
                iglev = ighostlev(k)
             end if
             
-!           only add ghost nodes with ghostlevel >= minghostlev_s 
-            if ( iglev.ge.minghostlev_s .or. iglev.eq.0 ) then
+!!           only add ghost nodes with ghostlevel >= minghostlev_s            
+!           only add ghost nodes with ghostlevel >= maxghostlev_s 
+!            if ( iglev.ge.minghostlev_s .or. iglev.eq.0 ) then
+            if ( iglev.ge.maxghostlev_s .or. iglev.eq.0 ) then
                nghostlist_snonoverlap(idmn) = nghostlist_snonoverlap(idmn) + 1
                inum = inum+1
                ighostlist_snonoverlap(inum) = k
@@ -2619,7 +2678,13 @@ use m_tpoly
          end if
 !         call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_u(ndomains-1), ighostlist_u, nghostlist_u, nsendlist_u(ndomains-1), isendlist_u, nsendlist_u, itag_u, ierror, nghost3d=nghostlist_u_3D, nsend3d=nsendlist_u_3D, kmxnL=kmxL, kbot=Lbot)
          call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_u(ndomains-1), ighostlist_u, nghostlist_u, nsendlist_u(ndomains-1), isendlist_u, nsendlist_u, itag_u, ierror, nghostlist_u_3D, nsendlist_u_3D, kmxL, Lbot)
-         
+       else if ( itype.eq.ITYPE_U3DW ) then
+         if ( N.ne.Lnkx) then
+            call qnerror('update_ghosts, ITYPE_U3DW: numbering error', ' ', ' ')
+            goto 1234
+         end if
+         call update_ghost_loc(ndomains, NDIM, N, var, nghostlist_u(ndomains-1), ighostlist_u, nghostlist_u, nsendlist_u(ndomains-1), isendlist_u, nsendlist_u, itag_u, ierror, nghostlist_u_3Dw, nsendlist_u_3Dw, kmxL+1, Lbot-1)
+                 
 !     overlap
       else if ( itype.eq.ITYPE_Snonoverlap ) then
          if ( N.ne.Ndx ) then
@@ -3008,6 +3073,7 @@ use m_tpoly
 !! partitioned output files.
 subroutine partition_make_globalnumbers(ierror)
    use m_flowgeom, only: Ndxi, Ndx, Ln, Lnxi, Lnx
+   use m_alloc
    use unstruc_messages
    implicit none
 
@@ -3038,19 +3104,26 @@ subroutine partition_make_globalnumbers(ierror)
 
 ! Get global numbers for this domain's own internal flow nodes
 
-!  set internal numbers (non-boundary nodes)
-   numlist = 0
-   do k=1,Ndxi
-      if ( idomain(k).eq.my_rank ) then
-         numlist = numlist+1
-         inums(numlist)  = k
-      end if
-   end do
-   
-   call get_global_numbers(numlist, inums(1:Ndxi), iglobal_s, numcells_s, 0)
-   
-!  get the number of global cells (global Ndxi)
-   Ndxi_glob = sum(numcells_s(0:ndomains-1))
+   if ( .not.allocated(iglobal_s) ) then
+!     set internal numbers (non-boundary nodes)
+      numlist = 0
+      do k=1,Ndxi
+         if ( idomain(k).eq.my_rank ) then
+            numlist = numlist+1
+            inums(numlist)  = k
+         end if
+      end do
+      
+      call get_global_numbers(numlist, inums(1:Ndxi), iglobal_s, numcells_s, 0)
+      
+!     get the number of global cells (global Ndxi)
+      Ndxi_glob = sum(numcells_s(0:ndomains-1))
+   else
+!     interal (2D) cells already read from file
+      Ndxi_glob = Nglobal_s
+      
+      call realloc(iglobal_s, Ndx, keepExisting=.true., fill=0)
+   end if
    
    
 !  set boundary numbers
@@ -3544,6 +3617,28 @@ end subroutine partition_make_globalnumbers
 #endif      
       return
    end subroutine reduce_int_max
+     
+
+!> reduce an integer, take global min
+   subroutine reduce_int_min(var)
+#ifdef HAVE_MPI
+      use mpi
+#endif
+      implicit none
+      
+      integer, intent(inout) :: var !< array with values to be summed over the subdomains (not an array summation)
+      
+      integer                :: dum
+      
+      integer                :: ierror
+      
+#ifdef HAVE_MPI
+      call MPI_allreduce(var,dum,1,mpi_integer,mpi_min,DFM_COMM_DFMWORLD,ierror)
+      var = dum
+#endif      
+      return
+   end subroutine reduce_int_min
+   
    
 !> reduce observation stations
 !>   in principle only one subdomain may own the observation station
@@ -3563,6 +3658,9 @@ end subroutine partition_make_globalnumbers
    subroutine reduce_kobs(N, kobs, xobs, yobs, jaoutside)
       use m_flowgeom, only: xz, yz, nd
       use unstruc_messages
+      use geometry_module, only: pinpok, dbdistance
+      use m_missing, only: jins, dmiss
+      use m_sferic, only: jsferic, jasfer3D
 #ifdef HAVE_MPI
       use mpi
 #endif
@@ -3586,8 +3684,6 @@ end subroutine partition_make_globalnumbers
       double precision, parameter                   :: DPENALTY = 1d10  ! should be smaller than DREJECT
       double precision, parameter                   :: DREJECT  = 2d99  ! should be larger than DPENALTY
       
-      double precision, external                    :: dbdistance
-      
       if ( N.lt.1 ) return
       
       allocate(dist(N))
@@ -3601,7 +3697,7 @@ end subroutine partition_make_globalnumbers
          if ( k1.eq.0 ) cycle
          
 !        check if the observation station is inside the cell
-         call pinpok(xobs(i), yobs(i), size(nd(k1)%x), nd(k1)%x, nd(k1)%y, in)
+         call pinpok(xobs(i), yobs(i), size(nd(k1)%x), nd(k1)%x, nd(k1)%y, in, jins, dmiss)
       
 !        determine preference
          if ( in.eq.1 ) then
@@ -3614,7 +3710,7 @@ end subroutine partition_make_globalnumbers
             if ( idomain(k1).eq.my_rank ) then
                xp = xz(k1)
                yp = yz(k1)
-               dist(i) = DPENALTY + dbdistance(xobs(i),yobs(i),xp,yp)
+               dist(i) = DPENALTY + dbdistance(xobs(i),yobs(i),xp,yp, jsferic, jasfer3D, dmiss)
             else
                dist(i) = DREJECT
             end if
@@ -3893,12 +3989,11 @@ end subroutine partition_make_globalnumbers
 #ifdef HAVE_MPI
       use mpi
 #endif
-
       implicit none
       
       integer,                                   intent(in)    :: ncrs                !< number of cross-sections
       integer,                                   intent(in)    :: numvals             !< which values to sum (1=discharge)
-      double precision, dimension(numvals,ncrs), intent(inout) :: resu  !< cross-section data, note: ncrs from module m_crosssections
+      double precision, dimension(numvals,ncrs), intent(inout) :: resu  !< cross-section data, note: ncrs from module m_monitoring_crosssections
       
       double precision, dimension(:,:),          allocatable   :: resu_all
       
@@ -3926,7 +4021,7 @@ end subroutine partition_make_globalnumbers
       implicit none
       
       integer :: i
-      integer :: k, L, LL
+      integer :: k, L, LL, n
       
       if ( jaoverlap.eq.0 ) then 
          do i=1,nghostlist_sall(ndomains-1)
@@ -3998,6 +4093,7 @@ end subroutine partition_make_globalnumbers
       use network_data
       use m_missing
       use m_sferic, only: pi
+      use geometry_module, only: dbdistance
 #ifdef HAVE_MPI
       use mpi
 #endif
@@ -4043,7 +4139,7 @@ end subroutine partition_make_globalnumbers
       
       logical                                       :: Lleftfound, Lrightfound
       
-      double precision, external                    :: dbdistance, dlinklength
+      double precision, external                    :: dlinklength
       
       double precision, parameter                   :: dtol=1d-8
       
@@ -4328,15 +4424,15 @@ end subroutine partition_make_globalnumbers
       
 !>    gives link angle, changes sign when link has negative number      
       double precision function dLinkangle(L)
+         use m_sferic, only: jsferic
+         use geometry_module, only: getdxdy 
+         
          implicit none
          
          integer,          intent(in) :: L  !< link number
-         
-         double precision              :: dx, dy
-         
+         double precision              :: dx, dy       
          integer                       :: k1, k2
          
-         double precision, external    :: getdx, getdy
          
          if ( L.gt.0 ) then
             k1 = kn(1,L)
@@ -4346,7 +4442,7 @@ end subroutine partition_make_globalnumbers
             k2 = kn(1,-L)
          end if
          
-         call getdxdy(xk(k1), yk(k1), xk(k2), yk(k2),dx,dy)
+         call getdxdy(xk(k1), yk(k1), xk(k2), yk(k2),dx,dy,jsferic)
          !dx = getdx(xk(k1), yk(k1), xk(k2), yk(k2))
          !dy = getdy(xk(k1), yk(k1), xk(k2), yk(k2))
          
@@ -4360,6 +4456,11 @@ end subroutine partition_make_globalnumbers
 !> find the global branch connectivity
 !>    sets ibr_glob_left, ibr_glob_right, Lother_left, Lother_right
       subroutine find_branch_conn(ibr_glob_left, ibr_glob_right, Lother_left, Lother_right, ierror)
+         
+         use m_missing, only: dmiss
+         use m_sferic, only: jsferic, jasfer3D
+         use geometry_module, only: dbdistance
+         
          implicit none
          
          integer, dimension(:), intent(out) :: ibr_glob_left, ibr_glob_right, Lother_left, Lother_right
@@ -4391,7 +4492,7 @@ end subroutine partition_make_globalnumbers
                         La = iabs(L)
                         xloc = 0.5d0*(xk(kn(1,La))+xk(kn(2,La)))
                         yloc = 0.5d0*(yk(kn(1,La))+yk(kn(2,La)))               
-                        if ( dbdistance(xloc,yloc,xyL_all(1,ibr_other),xyL_all(2,ibr_other)).lt.dtol ) then
+                        if ( dbdistance(xloc,yloc,xyL_all(1,ibr_other),xyL_all(2,ibr_other),jsferic, jasfer3D, dmiss).lt.dtol ) then
    !                       left match found
                            Lleftfound = .true.
                            Lother_left(ibr_other) = L
@@ -4411,7 +4512,7 @@ end subroutine partition_make_globalnumbers
                            end if
                         end if      
                      
-                        if ( dbdistance(xloc,yloc,xyR_all(1,ibr_other),xyR_all(2,ibr_other)).lt.dtol ) then
+                        if ( dbdistance(xloc,yloc,xyR_all(1,ibr_other),xyR_all(2,ibr_other),jsferic, jasfer3D, dmiss).lt.dtol ) then
    !                       right match found
                            Lrightfound = .true.
                            Lother_right(ibr_other) = L
@@ -4746,7 +4847,7 @@ end subroutine partition_make_globalnumbers
    
 !> generate partition numbering with METIS
 !!   1D links are supported now
-   subroutine partition_METIS_to_idomain(Nparts, jacontiguous, i_metism)
+   subroutine partition_METIS_to_idomain(Nparts, jacontiguous, method)
       use network_data
       use m_partitioninfo
       use m_metis
@@ -4756,7 +4857,7 @@ end subroutine partition_make_globalnumbers
       implicit none
       
       integer,                         intent(in) :: Nparts          !< number of partitions
-      integer,                         intent(in) :: i_metism        !< partition method. 1: K-Way, 0,2: Recursive
+      integer,                         intent(in) :: method         !< partition method. 1: K-Way, 0,2: Recursive
       integer,                         intent(in) :: jacontiguous    !< enforce contiguous domains (1) or not (0)
       
       integer                                     :: ierror
@@ -4770,13 +4871,20 @@ end subroutine partition_make_globalnumbers
       real, allocatable,             dimension(:) :: tpwgts          ! target weight of partitions, dim(Nparts)
       integer                                     :: objval          ! edgecut or total communication volume
       integer,          allocatable, dimension(:) :: npart           ! node    partition number, dim(Nn)                                                 
-      integer                                     :: ic, k, N, ipoint, icursize
-      integer,          allocatable, dimension(:) :: xadj, adjncy    ! Adjacency structure of a graph, using compressed storage format (CSR)
+ !     integer                                     :: ic, k, N, ipoint, icursize
+ !     integer,          allocatable, dimension(:) :: xadj, adjncy    ! Adjacency structure of a graph, using compressed storage format (CSR)
       integer,          allocatable, dimension(:) :: ncon            ! number of balancing constrains, at least 1
       real,             allocatable, dimension(:) :: ubvec           ! specify the allowed load imbalance tolerance for each constraint.=1.001 when ncon=1
-      integer,         allocatable, dimension(:)  :: adjwgt          ! weights of edges
-      integer                                     :: c_xadj, c_adjncy, nod_j, edgej_k, nlinkj, icellj, cellk, ilink, ncellj ! these variables are used when build dual graph for 1d network
-      integer                                     :: j, kk, i, length, n0, ierr, L, nc1, nc2, k1, k2
+!      integer,          allocatable, dimension(:) :: adjwgt          ! weights of edges
+!      integer                                     :: c_xadj, c_adjncy, nod_j, edgej_k, nlinkj, icellj, cellk, ilink, ncellj ! these variables are used when build dual graph for 1d network
+!      integer                                     :: j, kk, i, length, n0, ierr, L, nc1, nc2, k1, k2
+      
+      integer,          allocatable, dimension(:)  :: iadj_tmp
+      integer,          allocatable, dimension(:)  :: iadj, jadj, adjw
+      integer                                      :: i, k, k1, k2, L, LL
+      
+      integer,                       external      :: metisopts
+    
       ierror = 1
       
 !     check validity of objected number of subdomains
@@ -4793,9 +4901,9 @@ end subroutine partition_make_globalnumbers
       !   call find1dcells()
       !endif
       
-      Ne = nump
-      if (nump < nump1d2d) Ne = nump1d2d   ! if 1d netlink exists
-      Nn = numk
+      Ne = nump1d2d
+!      if (nump < nump1d2d) Ne = nump1d2d   ! if 1d netlink exists
+!      Nn = numk
       
 !     deallocate
       if ( allocated(idomain) ) deallocate(idomain)
@@ -4811,26 +4919,31 @@ end subroutine partition_make_globalnumbers
       allocate(vsize(Ne))
       allocate(tpwgts(Nparts))
       allocate(npart(Ne))     
-      allocate(adjwgt(10*Ne))
+!      allocate(adjwgt(10*Ne))
       allocate(ncon(1))
       allocate(ubvec(1))
       
 !     set default options
       call METIS_SetDefaultOptions(opts)
       
-!     set options (CHECK METIS HEADER FILE for enumerator)
-      if ( jacontiguous.eq.1 .and. i_metism .eq. 1) then
-         opts(METIS_OPTION_CONTIG) = 1   ! enforce contiguous domains, observation: number of cells per domain becomes less homogeneous
+      if ( jacontiguous.eq.1 .and. method .eq. 1) then
+         ierror = metisopts(opts,"CONTIG",1)   ! enforce contiguous domains, observation: number of cells per domain becomes less homogeneous
+         if ( ierror.ne.0 ) goto 1234
       endif
-!     opts(METIS_OPTION_NCUTS)  = 10
-      opts(METIS_OPTION_DBGLVL) = 1      ! output
-      opts(METIS_OPTION_UFACTOR)= 1      ! allowed load imbalance TODO, MJ: should be an integer x, and tolerance is (1+x)/1000 according to manual, but 1+x/1000 according to us and "macros.h"
-      opts(METIS_OPTION_NITER)  = 100    ! observation: increasing this number will visually improve the partitioning
+!      i = metisopts(opts,"NCUTS",10)
+      ierror = metisopts(opts,"DBGLVL",1)     ! output
+      if ( ierror.ne.0 ) goto 1234
+      
+      ierror = metisopts(opts,"UFACTOR",1)    ! allowed load imbalance TODO, MJ: should be an integer x, and tolerance is (1+x)/1000 according to manual, but 1+x/1000 according to us and "macros.h"
+      if ( ierror.ne.0 ) goto 1234
+      
+      ierror = metisopts(opts,"NITER",100)    ! observation: increasing this number will visually improve the partitioning
+      if ( ierror.ne.0 ) goto 1234
       
       vwgt   = 1                         ! weights of vertices
       vsize  = 1                         ! size of vertices for computing the total communication volume
-      tpwgts = 1d0/dble(Nparts)          ! desired weight for each parition
-      adjwgt = 1                         ! weight of edges
+      tpwgts = 1d0/dble(Nparts)          ! desired weight for each partition
+!      adjwgt = 1                         ! weight of edges
       ncon = 1                           ! number of balancing constraints
       ubvec = 1.001                      ! allowed load imbalance tolerance
 
@@ -4855,80 +4968,62 @@ end subroutine partition_make_globalnumbers
 !!     make mesh arrays zero-based
 !      eptr = eptr-1
 !      eind = eind-1
-
-!     Build (dual) graph, based on fortran type numbering
-!     allocate
-      allocate(xadj(Ne+1))      
-      allocate(adjncy(10*Nn))                            ! Do not know how many edges yet
       
-!     Build xadj and adjncy for Metis
-      c_xadj   = 1
-      c_adjncy = 1
-      xadj(c_xadj) = 1
       
-!     2d cell first
-      if (nump > 0) then                                 ! If 2d network exists
-         do j=1, nump                                    ! Loop on each 2d cell
-            nod_j = netcell(j)%N                         ! There are "nod_j" edges (nodes) for cell j
-            do kk=1, nod_j                               ! Loop on each edge of cell j
-               edgej_k = netcell(j)%LIN(kk)              ! Edge index in "edge_jk"
-               nlinkj  = lnn(edgej_k)                    ! There are "nlinkj" cells related to edgej_k   
-               if (nlinkj .ne. 1) then                   ! When nlinkj==1, it means that this link is at the boundary
-                  do i=1, nlinkj                         ! Loop on each cells that are related to edgej_k
-                     icellj=lne(i,edgej_k)               ! Cell index 
-                     if (icellj < 0) icellj = - icellj   ! A 1d cell has a negative index, we make it positive here
-                     if ((icellj .ne. 0) .and. (icellj .ne. j)) then  ! if the cell is not 0 (outside the domain) and if it is not cell j  
-                        adjncy(c_adjncy) = icellj
-                        c_adjncy = c_adjncy +1
-                     endif  
-                  end do
-               endif
-            enddo
-            c_xadj = c_xadj + 1
-            xadj(c_xadj)=c_adjncy
-         enddo
-      endif
       
-!     If 1d network exists
-      if (nump < nump1d2d) then
-         do j=nump+1, nump1d2d                           ! Loop on each 1d cell (node) 
-            nod_j = netcell(j)%NOD(1)                    ! Convert cell j to node "nod_j"
-            nlinkj= size(nod(nod_j)%LIN,1)               ! There are "nlinkj" links related to node nod_j
-            do i=1, nlinkj                               ! Loop on each link
-               ilink = nod(nod_j)%LIN(i)                 ! Link index
-               ncellj= lnn(ilink)                        ! There are "ncellj" cells related to the link "ilink"
-               do kk=1, ncellj                           ! Loop on each cell
-                  cellk = lne(kk,ilink)                  ! Cell index (in 1d, it is negative)
-                  if (cellk < 0) then
-                     cellk = -cellk                      ! Make cell index positive
-                  endif
-                  if ((cellk .ne. 0)  .and. (cellk .ne. j)) then     ! if the cell is not 0 (outside the domain) and if it is not cell j 
-                     adjncy(c_adjncy) = cellk
-                     c_adjncy = c_adjncy +1
-                  endif
-               enddo
-            enddo
-            c_xadj = c_xadj + 1
-            xadj(c_xadj)=c_adjncy
-         enddo
-      endif
       
-      call realloc(adjncy, c_adjncy-1, keepExisting=.true.)
-      call realloc(adjwgt, c_adjncy-1, keepExisting=.true.)
-   
-!     Make graph arrays zero-based
-      adjncy = adjncy -1
-      xadj   = xadj -1
+!     generate adjacency structure in CSR format 
+      allocate(iadj(nump1d2d+1))
+      allocate(iadj_tmp(nump1d2d+1))
       
-!     deallocate netcell arrays to clear memory for METIS
+!     count number of connection per vertex
+      iadj_tmp = 0
+      do L=1,numL
+         if ( lnn(L).gt.1 ) then
+            k1 = iabs(lne(1,L))
+            k2 = iabs(lne(2,L))
+            iadj_tmp(k1) = iadj_tmp(k1) + 1
+            iadj_tmp(k2) = iadj_tmp(k2) + 1
+         end if
+      end do
+      
+!     set startpointers
+      iadj(1) = 1
+      do k=1,nump1d2d
+         iadj(k+1) = iadj(k) + iadj_tmp(k)
+      end do
+      
+!     set connections      
+      allocate(jadj(iadj(nump1d2d+1)-1))
+      
+      iadj_tmp = iadj
+      do L=1,numL
+         if ( lnn(L).gt.1 ) then
+            k1 = iabs(lne(1,L))
+            k2 = iabs(lne(2,L))
+            jadj(iadj_tmp(k1)) = k2
+            jadj(iadj_tmp(k2)) = k1
+            iadj_tmp(k1) = iadj_tmp(k1)+1
+            iadj_tmp(k2) = iadj_tmp(k2)+1
+         end if
+      end do
+      
+!     make CSR arrays zero-based
+      iadj = iadj-1
+      jadj = jadj-1
+      
+!     edge weights
+      allocate(adjw(iadj(nump1d2d+1)-1))
+      adjw = 1
+      
       netstat = NETSTAT_CELLS_DIRTY
-      
-      !call METIS_PARTMESHDUAL(Ne, Nn, eptr, eind, vwgt, vsize, ncommon, Nparts, tpwgts, opts, objval, idomain, npart)
-      
-      if (i_metism == 1) then
-         call METIS_PartGraphKway(Ne, ncon, xadj, adjncy, vwgt, vsize, adjwgt, Nparts, tpwgts, ubvec, opts, objval, idomain)
+!      
+!      !call METIS_PARTMESHDUAL(Ne, Nn, eptr, eind, vwgt, vsize, ncommon, Nparts, tpwgts, opts, objval, idomain, npart)
+!      
+      if ( method.eq.1 ) then
+         call METIS_PartGraphKway(Ne, Ncon, iadj, jadj, vwgt, vsize, adjw, Nparts, tpwgts, ubvec, opts, objval, idomain)
       else
-         call METIS_PartGraphRecursive(Ne, ncon, xadj, adjncy, vwgt, vsize, adjwgt, Nparts, tpwgts, ubvec, opts, objval, idomain)
+         call METIS_PartGraphRecursive(Ne, Ncon, iadj, jadj, vwgt, vsize, adjw, Nparts, tpwgts, ubvec, opts, objval, idomain)
       endif
       
 !     deallocate
@@ -4937,10 +5032,17 @@ end subroutine partition_make_globalnumbers
       if ( allocated(vwgt)   ) deallocate(vwgt)
       if ( allocated(vsize)  ) deallocate(vsize)
       if ( allocated(tpwgts) ) deallocate(tpwgts)
-      if ( allocated(xadj)   ) deallocate(xadj)
-      if ( allocated(adjncy) ) deallocate(adjncy)
-      if ( allocated(adjwgt)) deallocate(adjwgt)
-      !if ( allocated(npart) ) deallocate(npart)
+ !     if ( allocated(xadj)   ) deallocate(xadj)
+ !     if ( allocated(adjncy) ) deallocate(adjncy)
+      if ( allocated(npart) ) deallocate(npart)
+      if ( allocated(Ncon)  ) deallocate(ncon)
+      if ( allocated(ubvec) ) deallocate(ubvec)
+      
+      if ( allocated(iadj) )     deallocate(iadj)
+      if ( allocated(iadj_tmp) ) deallocate(iadj_tmp)
+      if ( allocated(jadj) )     deallocate(jadj)
+      if ( allocated(adjw) )     deallocate(adjw)
+      
 #else
       idomain = 0
       call mess(LEVEL_ERROR, 'This version was built without the METIS mesh partitioner support, '&
@@ -4953,53 +5055,95 @@ end subroutine partition_make_globalnumbers
       return
    end subroutine partition_METIS_to_idomain
    
+!  set METIS options, returns error (1) or no error (0)   
+   integer function metisopts(opts,optionname,optionval)
+      implicit none
+      
+      integer,            intent(inout) :: opts(*)         ! options array
+      character(len=*),   intent(in)    :: optionname   ! option name
+      integer,            intent(in)    :: optionval       ! option value
+#ifdef HAVE_METIS      
+      integer           :: i
+      
+      integer, external :: metisoptions
+      
+      i = metisoptions(opts,trim(optionname)//char(0),optionval)
+      
+      metisopts = i
+#else
+      metisopts = 1
+#endif
+   end function metisopts
+   
    
 !> generate partition numbers from polygons, or with METIS of no polygons are present
    subroutine partition_to_idomain()
+      
       use m_polygon
       use m_partitioninfo
       use MessageHandling
+      use gridoperations
+      use network_data, only: dryptsfile
+      
       implicit none
    
       integer             :: japolygon
-      integer             :: i, jacontiguous, i_metism
+      integer             :: i, jacontiguous, method
+      integer             :: NPL_save
+      integer             :: ierror
       
       character(len=100)  :: message
+      
+!     save polygons
+      NPL_save = NPL
+      
+!     disable polygons
+      NPL = 0
       
       call findcells(0)
       call find1dcells()
       
+!     reenable polygons
+      NPL = NPL_save
+   
+      call delete_drypoints_from_netgeom(dryptsfile, 0, 0)
+      
       if ( NPL.gt.1 ) then ! use the polygons
          call generate_partitioning_from_pol()
-         md_genpolygon = 1
       else  ! use metis
-         call getint('Number of domains', Ndomains)
-         i_metism = -1
-         do while (i_metism .ne. 0 .and. i_metism .ne. 1 .and. i_metism .ne. 2)
-             i_metism = 0
-             call getint('Partition method? (0:default, 1: K-Way, 2: Recursive bisection)', i_metism) ! default method is Recursive
+         Ndomains = 0
+         do while ( Ndomains.lt.1 )
+            call getint('Number of domains', Ndomains)
+         end do
+         method = -1
+         do while ( method.lt.0 .or. method.gt.2 )
+             method = 0
+             call getint('Partition method? (0:default, 1: K-Way, 2: Recursive bisection)', method) ! default method is Recursive
          enddo
          jacontiguous = -1
-         if (i_metism == 1) then ! K-Way enables contiguous
+         if ( method.eq.1 ) then ! K-Way enables contiguous
              do while ( jacontiguous.ne.0 .and. jacontiguous.ne.1 )
                 jacontiguous = 0
                 call getint('Enforce contiguous domains? (0:no, 1:yes)', jacontiguous)
              enddo
          endif
-         call partition_METIS_to_idomain(Ndomains, jacontiguous, i_metism)
+         call partition_METIS_to_idomain(Ndomains, jacontiguous, method)
       
          japolygon = -1
          do while (japolygon.ne.1 .and. japolygon.ne.0)
              japolygon = 0
              call getint('Generate polygon? (0: no, 1: yes)', japolygon)
          enddo
-         md_genpolygon = japolygon
-         if (md_genpolygon == 1) then
-!        generate partitioning polygons
-             call generate_partition_pol_from_idomain()
+         if ( japolygon.eq.1 ) then
+!            generate partitioning polygons
+             call generate_partition_pol_from_idomain(ierror)
          
-!        get 1D domain numbers from polygons
-             call partition_pol_to_idomain(2)
+             if ( ierror.eq.0 ) then
+!               get 1D domain numbers from polygons
+                call partition_pol_to_idomain(2)
+             else
+                japolygon = 0
+             end if
          endif 
       end if   
       
@@ -5028,13 +5172,17 @@ end subroutine partition_make_globalnumbers
    
    
 !> generate partitioning polygons   
-   subroutine generate_partition_pol_from_idomain()
+   subroutine generate_partition_pol_from_idomain(ierror)
       use m_partitioninfo
       use network_data
       use m_polygon
       use m_tpoly
       use m_sferic
+      use unstruc_messages
+      use gridoperations
       implicit none
+      
+      integer,               intent(out) :: ierror
       
       integer, dimension(:), allocatable :: lnn_sav
       
@@ -5042,8 +5190,20 @@ end subroutine partition_make_globalnumbers
       
       integer                            :: jabound
       
+      ierror = 1
       
-      if ( netstat.eq.NETSTAT_CELLS_DIRTY ) call findcells(0)
+      if ( netstat.eq.NETSTAT_CELLS_DIRTY ) then
+         call findcells(0)
+         call find1Dcells()
+         
+         call delete_drypoints_from_netgeom(dryptsfile, 0, 0)
+      end if
+      
+!     check for 1D cells (not supported)
+      if ( nump1d2d.gt.nump ) then
+         call mess(LEVEL_WARN, 'generate_partition_pol_from_idomain: 1D not supported')
+         goto 1234
+      end if
       
 !     allocate
       allocate(lnn_sav(numL))
@@ -5061,7 +5221,7 @@ end subroutine partition_make_globalnumbers
       call dealloc_tpoly(partition_pol)
       npartition_pol = 0   ! current number
       do idmn=1,Ndomains-1
-         do L=1,numL
+         do L=numL1D+1,numL   ! only 2D supported
 !           check if this netlink is a domain boundary
             jabound = 0 ! default
             icL = lne(1,L)
@@ -5122,6 +5282,10 @@ end subroutine partition_make_globalnumbers
       
 !     fix polygon for spheric, periodic coordinates
       call fix_global_polygons(0,1)
+      
+      ierror = 0
+      
+1234  continue
       
 !     deallocate
       if ( allocated(lnn_sav) ) deallocate(lnn_sav)
@@ -5220,7 +5384,7 @@ end subroutine partition_make_globalnumbers
       implicit none
       
       integer,                                   intent(in)    :: numidx             !< which values to sum (1=discharge)
-      double precision, dimension(numidx),       intent(inout) :: voltotal  !< cross-section data, note: ncrs from module m_crosssections
+      double precision, dimension(numidx),       intent(inout) :: voltotal  !< cross-section data, note: ncrs from module m_monitoring_crosssections
       double precision, dimension(:),            allocatable   :: voltot_all
       integer                                                  :: ierror
       
@@ -5248,6 +5412,10 @@ end subroutine partition_make_globalnumbers
       use m_alloc
       use unstruc_messages
       use m_flowgeom, only: ndx, ndxi
+      use geometry_module, only: dbdistance
+      use m_missing, only: dmiss
+      use m_sferic, only: jsferic, jasfer3D
+      
 #ifdef HAVE_MPI
       use mpi
 #endif
@@ -5291,8 +5459,6 @@ end subroutine partition_make_globalnumbers
       
       double precision, parameter                      :: dtol = 1d-4
       
-      double precision, external                       :: dbdistance
-      
       call klok(t0)
       
       ierror = 1
@@ -5300,7 +5466,7 @@ end subroutine partition_make_globalnumbers
       itag = 2
       
 !     get subdomain numbers in netcell  
-      if (md_genpolygon .ne. 0) then
+      if ( npartition_pol.gt.0 ) then
          call partition_pol_to_idomain(1,jafindcells=0)
       endif
       
@@ -5414,7 +5580,7 @@ end subroutine partition_make_globalnumbers
                yL = 0.5d0*(yk(k3)+yk(k4))
                
 !              measure distance
-               dis = dbdistance(xL,yL,xyrec(1,i),xyrec(2,i))
+               dis = dbdistance(xL,yL,xyrec(1,i),xyrec(2,i),jsferic, jasfer3D, dmiss)
                if ( dis.lt.dtol ) then ! found
                   kcesnd(istart-1+i)  = 1
                   jafound(i) = 1

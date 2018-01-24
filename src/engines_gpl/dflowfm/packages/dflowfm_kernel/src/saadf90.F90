@@ -31,8 +31,8 @@
 ! 
 ! For more information contact saad@cs.umn.edu
 
-! $Id: saadf90.F90 52266 2017-09-02 11:24:11Z klecz_ml $
-! $HeadURL: https://repos.deltares.nl/repos/ds/branches/dflowfm/20161017_dflowfm_codecleanup/engines_gpl/dflowfm/packages/dflowfm_kernel/src/saadf90.F90 $
+! $Id: saadf90.F90 53893 2017-12-20 18:54:12Z zhao $
+! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/saadf90.F90 $
 
 !! BLAS routines come either from Intel MKL, or standard BLAS from SPARSKIT. Select at compile time.
 !#if defined __INTEL_COMPILER && __INTEL_COMPILER > 1000
@@ -111,7 +111,7 @@
  subroutine inisaad(epscg_loc,maxmatvecs_loc,alpha_loc)
  use m_reduce
  use m_saad
- use m_flow, only: jajipjan
+ use m_flowparameters, only: jajipjan
  
  implicit none
  

@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2017.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: unstruc_shapefile.F90 52266 2017-09-02 11:24:11Z klecz_ml $
-! $HeadURL: https://repos.deltares.nl/repos/ds/branches/dflowfm/20161017_dflowfm_codecleanup/engines_gpl/dflowfm/packages/dflowfm_kernel/src/unstruc_shapefile.F90 $
+! $Id: unstruc_shapefile.F90 54191 2018-01-22 18:57:53Z dam_ar $
+! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/unstruc_shapefile.F90 $
 
 !> Write shape files 
 module unstruc_shapefile
@@ -45,7 +45,7 @@ contains
 
 !> Write a shape file for cross sections
 subroutine unc_write_shp_crs()
-use m_crosssections
+use m_monitoring_crosssections
 implicit none
 
 integer, parameter          :: lencharattr = 256, tshp = shpt_arc ! arcs (Polylines, possible in parts)
@@ -628,7 +628,7 @@ double precision            :: tmp_x(2), tmp_y(2)
 end subroutine unc_write_shp_gate
 
 !> Write a shape file for embankments
-subroutine unc_write_shp_ebm()
+subroutine unc_write_shp_emb()
 use m_sobekdfm
 use m_flowexternalforcings
 use network_data, only: kn, xk, yk
@@ -648,7 +648,7 @@ double precision            :: tmp_x(2), tmp_y(2)
    endif
 
    ! create a new shapefile object with data of type tshp and associate it to a file, filename does not include extension
-   filename = defaultFilename('shpebm')
+   filename = defaultFilename('shpemb')
    shphandle = shpcreate(trim(filename), tshp)
    ! error check
    if (shpfileisnull(shphandle) .OR. dbffileisnull(shphandle)) then
@@ -726,7 +726,7 @@ double precision            :: tmp_x(2), tmp_y(2)
    ! close the shapefile object
    call shpclose(shphandle)
 
-end subroutine unc_write_shp_ebm
+end subroutine unc_write_shp_emb
 
 !> Write a shape file for fixed weirs
 subroutine unc_write_shp_fxw()

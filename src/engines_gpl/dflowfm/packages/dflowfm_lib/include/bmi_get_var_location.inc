@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2015.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -86,9 +86,15 @@ select case(var_name)
     location_name = "edge"
   case("rain")
     location_name = "face"
+  case("evap")
+    location_name = "face"
   case("rnveg")
     location_name = "face"
   case("diaveg")
+    location_name = "face"
+  case("cfuveg")
+    location_name = "face"
+  case("alfaveg")
     location_name = "face"
   case("stemdens")
     location_name = "face"
@@ -203,6 +209,8 @@ select case(var_name)
   case("zk")
     location_name = ""
   case("kn")
+    location_name = ""
+  case("numk")
     location_name = ""
   case("zbnd1d2d1")
     location_name = ""

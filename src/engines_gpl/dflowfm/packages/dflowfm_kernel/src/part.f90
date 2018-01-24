@@ -1,69 +1,3 @@
-module m_particles
-   integer                                      :: japart       !< particles (1) or not (0)
-                   
-   integer                                      :: Npart        !< number of particles
-   double precision,  dimension(:), allocatable :: xpart, ypart !< coordinates of particles, dim(Npart)
-   double precision,  dimension(:), allocatable :: dtremaining  !< remaining time, dim(Npart)
-   integer,           dimension(:), allocatable :: kpart        !< cell (flownode) number, dim(Npart)
-!   integer,           dimension(:), allocatable :: Lpart        !< edge (netlink)  number, dim(Npart)
-!   character(len=40), dimension(:), allocatable :: namepart     !< name of particle, dim(Npart)
-   
-   integer,           dimension(:), allocatable :: numzero      !< number of consecutive (sub)times a particle was not displaces within a time-step
-   
-   integer                                      :: jatracer     !< add tracer with particle concentration (1) or not (0)
-   double precision                             :: starttime    !< start time
-   double precision                             :: timestep     !< time step (>0) or every computational timestep
-   double precision                             :: timelast     !< last time of particle update
-   double precision                             :: timenext     !< next time of particle update
-   character(len=22), parameter                 :: PART_TRACERNAME = 'particle_concentration' !< particle tracer name
-   integer                                      :: part_iconst  !< particle tracer constituent number
-   
-   double precision, dimension(:), allocatable  :: sbegin      !< water level at begin of time interval, dim(Ndx)
-   double precision, dimension(:), allocatable  :: qpart       !< cummulative fluxes from begin of time interval, dim(Lnx)
-end module m_particles
-
-module m_partrecons
-   double precision,  dimension(:), allocatable :: qe           !< fluxes at all edges, including internal
-   double precision,  dimension(:), allocatable :: u0x, u0y, alpha !< reconstruction of velocity fiels in cells, dim(numcells)   
-end module m_partrecons
-   
-module m_partfluxes
-   integer,          dimension(:),   allocatable :: iflux2link   !< sparse storage of edge-based flux to flowlink-based flux (prescribed), flowlinks, dim(jflux2link(numedges+1)-1)
-   integer,          dimension(:),   allocatable :: jflux2link   !< sparse storage of edge-based flux to flowlink-based flux (prescribed), startpointer, dim(numedges+1)
-   double precision, dimension(:),   allocatable :: Aflux2link   !< sparse storage of edge-based flux to flowlink-based flux (prescribed), coefficients, dim(jflux2link(numedges+1)-1)
-end module m_partfluxes
-
-module m_partmesh
-!  mesh data
-   integer                                       :: numnodes    !< number of nodes, >= numk
-   integer                                       :: numedges    !< number of edges, >= numL
-   integer                                       :: numcells    !< number of cells, >= nump
-   integer                                       :: numorigedges  !< number of original "non-internal" edges (numL)
-                                                 
-   integer,          dimension(:,:), allocatable :: edge2node   !< edge-to-node, dim(2,numedges)
-   integer,          dimension(:,:), allocatable :: edge2cell   !< edge-to-cell, dim(2,numedges)
-
-   double precision, dimension(:),   allocatable :: xnode       !< x-coordinate of nodes, dim(numnodes)
-   double precision, dimension(:),   allocatable :: ynode       !< y-coordinate of nodes, dim(numnodes)
-                                                 
-   double precision, dimension(:),   allocatable :: xzwcell     !< x-coordinate of cell c/g, dim(numcells)
-   double precision, dimension(:),   allocatable :: yzwcell     !< y-coordinate of cell c/g, dim(numcells)
-   double precision, dimension(:),   allocatable :: areacell    !< area of cell, dim(numcells)
-   
-   integer,          dimension(:),   allocatable :: icell2edge   !< sparse storage of cell-to-edge, data, dim(jcell2edge(numcells+1)-1)
-   integer,          dimension(:),   allocatable :: jcell2edge   !< sparse storage of cell-to-edge, startpointer, dim(numcells+1)
-   
-   integer,          dimension(:),   allocatable :: edge2link    !< edge to "flowlink" (>0), no flowlink (0), or new inner link (<0), dim(numedges)
-!   integer,          dimension(:),   allocatable :: nod2cell     !< "flownode" to cell (>0), first new "inner" triangle (<0), dim(numcells), note: numcells can be too large for array dimension
-   integer,          dimension(:),   allocatable :: cell2nod     !< cell to "flownode" (>0), new triangle (<0), dim(numcells), note: numcells can be too large for array dimension
-   
-   double precision, dimension(:),   allocatable :: dnx          !< x-coordinate of edge normal vector (positive outward for edge2cell(1,:), positive inward for edge2cell(2,:)), dim(numedges)
-   double precision, dimension(:),   allocatable :: dny          !< y-coordinate of edge normal vector (positive outward for edge2cell(1,:), positive inward for edge2cell(2,:)), dim(numedges)
-   double precision, dimension(:),   allocatable :: w            !< edge width, dim(numedges)
-   
-   integer,                            parameter :: MAXSUBCELLS=10
-end module m_partmesh
-
 !> update positions of particles
 subroutine update_particles(q,s0,s1,Dt)
 !   use m_flow
@@ -71,7 +5,6 @@ subroutine update_particles(q,s0,s1,Dt)
    use m_wearelt
 !   use m_flowtimes, only: dts, time1
    use m_flowgeom, only: Ndx, Lnx
-   use m_transport, only: numconst, constituents
    implicit none
    
    double precision, dimension(Lnx), intent(in) :: q  !< fluxes
@@ -125,11 +58,6 @@ subroutine update_particles(q,s0,s1,Dt)
       goto 1234
    end if
    
-   if ( jatracer.eq.1 ) then
-!     udpate particle concentration   
-      call comp_concentration(s1,numconst,part_iconst,constituents)
-   end if
-   
    ierror = 0
 1234 continue
    
@@ -141,6 +69,7 @@ subroutine update_particles_in_cells(numremaining, ierror)
    use m_particles
    use m_partrecons
    use m_partmesh
+   use m_sferic, only: jsferic
    implicit none
    
    integer,        intent(out) :: numremaining !< number of remaining particles to be updated
@@ -153,9 +82,11 @@ subroutine update_particles_in_cells(numremaining, ierror)
    
    double precision            :: d, d1, un
    double precision            :: t, tex, dt
-   double precision            :: ux0, uy0, cs, sn
-   double precision            :: xn, yn, rl
-   double precision            :: dvar
+   double precision            :: ux0, uy0, uz0, cs, sn
+   double precision            :: xn, yn, zn, rl
+   double precision            :: dvar, dis, dn
+   
+   double precision, dimension(3) :: ddn
    
    logical                     :: isboundary
    
@@ -183,6 +114,9 @@ subroutine update_particles_in_cells(numremaining, ierror)
  !    compute velocity at current position     
       ux0 = u0x(k) + alpha(k)*(xpart(ipart)-xzwcell(k))
       uy0 = u0y(k) + alpha(k)*(ypart(ipart)-yzwcell(k))
+      if ( jsferic.ne.0 ) then
+         uz0 = u0z(k) + alpha(k)*(zpart(ipart)-zzwcell(k))
+      end if
       
 !     loop over edges (netlinks) of cells
       do i=jcell2edge(k),jcell2edge(k+1)-1
@@ -191,25 +125,60 @@ subroutine update_particles_in_cells(numremaining, ierror)
          k1 = edge2node(1,L)
          k2 = edge2node(2,L)
         
-         cs = dnx(L)
-         sn = dny(L)
-         if ( edge2cell(2,L).eq.k ) then
-            cs = -cs
-            sn = -sn
+         if ( jsferic.eq.0 ) then
+            cs = dnx(1,L)
+            sn = dny(1,L)
+            if ( edge2cell(2,L).eq.k ) then
+               cs = -cs
+               sn = -sn
+            end if
+         else
+            if ( edge2cell(1,L).eq.k ) then
+               ddn = (/ dnx(1,L), dny(1,L), dnz(1,L) /)
+            else
+               ddn = (/ dnx(2,L), dny(2,L), dnz(2,L) /)
+            end if
          end if
          
 !        check for boundary edge
          isboundary = ( edge2cell(1,L).eq.0 .or. edge2cell(2,L).eq.0 )
          
 !        compute normal distance to edge
-         if ( isboundary ) then ! boundary: add tolerance
-            call dlinedis2(xpart(ipart),ypart(ipart),xnode(k1)+cs*DTOLd,ynode(k1)+sn*DTOLd,xnode(k2)+cs*DTOLd,ynode(k2)+sn*DTOLd,ja,d,xn,yn,rl)
+         if ( jsferic.eq.0 ) then
+            if ( isboundary ) then ! boundary: add tolerance
+               call dlinedis2(xpart(ipart),ypart(ipart),xnode(k1)+cs*DTOLd,ynode(k1)+sn*DTOLd,xnode(k2)+cs*DTOLd,ynode(k2)+sn*DTOLd,ja,d,xn,yn,rl)
+            else
+               call dlinedis2(xpart(ipart),ypart(ipart),xnode(k1),ynode(k1),xnode(k2),ynode(k2),ja,d,xn,yn,rl)
+            end if
+            dis = (xn-xpart(ipart))*cs + (yn-ypart(ipart))*sn
          else
-            call dlinedis2(xpart(ipart),ypart(ipart),xnode(k1),ynode(k1),xnode(k2),ynode(k2),ja,d,xn,yn,rl)
+            if ( isboundary ) then ! boundary: add tolerance
+               call dlinedis3D(xpart(ipart),ypart(ipart),zpart(ipart),xnode(k1)+DTOLd*ddn(1),  &
+                                                                      ynode(k1)+DTOLd*ddn(2),  &
+                                                                      znode(k1)+DTOLd*ddn(3),  &
+                                                                      xnode(k2)+DTOLd*ddn(1),   &
+                                                                      ynode(k2)+DTOLd*ddn(2),   &
+                                                                      znode(k2)+DTOLd*ddn(3),   &
+                                                                      ja,d,xn,yn,zn,rl)
+            else
+               call dlinedis3D(xpart(ipart),ypart(ipart),zpart(ipart),xnode(k1),ynode(k1),znode(k1),xnode(k2),ynode(k2),znode(k2),ja,d,xn,yn,zn,rl)
+            end if
+            dis = (xn-xpart(ipart))*ddn(1) + (yn-ypart(ipart))*ddn(2) + (zn-zpart(ipart))*ddn(3)
          end if
          
+         
+!        BEGIN DEBUG
+!         if ( ipart.eq.1 .and. kpart(ipart).eq.5298 ) then
+!            write(6,*) i, ':', d, rL, dis
+!         end if
+!         
+!         if ( abs(dis-d).gt.1d-1 ) then
+!            write(6,*) i, dis, d
+!         end if
+!        END DEBUG
+         
 !        check inside or outside triangle 
-         if ( (xn-xpart(ipart))*cs + (yn-ypart(ipart))*sn.lt.-DTOLd .and. rL.ge.0d0 .and. rL.le.1d0 .and. .not.isboundary ) then
+         if ( dis.lt.-DTOLd .and. rL.ge.0d0 .and. rL.le.1d0 .and. .not.isboundary ) then
 !           outside triangle
             tex = 0d0
             Lexit = L
@@ -218,7 +187,21 @@ subroutine update_particles_in_cells(numremaining, ierror)
 !           inside triangle
 
    !        compute normal velocity to edge (outward positive)
-            un =  ux0*cs + uy0*sn
+            if ( jsferic.eq.0 ) then
+               un =  ux0*cs + uy0*sn
+            else
+               un =  ux0*ddn(1) + uy0*ddn(2) + uz0*ddn(3)
+            end if
+            
+!!           BEGIN DEBUG
+!!           check normal velocity at closed boundary
+!            if ( edge2cell(1,L).eq.0 .or. edge2cell(2,L).eq.0 ) then
+!               dvar = (u0x(k) + alpha(k)* (xn-xzwcell(k)))*ddn(1) + (u0y(k) + alpha(k)*(yn-yzwcell(k)))*ddn(2) + (u0z(k) + alpha(k)*(zn-zzwcell(k)))*ddn(3)
+!               if ( abs(dvar) .gt. 1d-4 ) then
+!                  continue
+!               end if
+!            end if
+!!           END DEBUG
          
             if ( un.gt.DTOLun*d ) then   ! normal velocity does not change sign: sufficient to look at u0.n
    !           compute exit time for this edge: ln(1+ d/un alpha) / alpha
@@ -244,7 +227,7 @@ subroutine update_particles_in_cells(numremaining, ierror)
          end if
       end do
          
-       if ( dtremaining(ipart).eq.0d0 ) then
+      if ( dtremaining(ipart).eq.0d0 ) then
          continue
       end if
          
@@ -260,6 +243,22 @@ subroutine update_particles_in_cells(numremaining, ierror)
       
       xpart(ipart) = xpart(ipart) + dvar * ux0
       ypart(ipart) = ypart(ipart) + dvar * uy0
+      
+      if ( jsferic.ne.0 ) then
+         zpart(ipart) = zpart(ipart) + dvar * uz0
+      end if
+      
+!!     BEGIN DEBUG
+!      if ( jsferic.eq.1 ) then
+!!        project node on triangle
+!         dn = (xpart(ipart) - xzwcell(k)) * dnn(1,k) +  &
+!              (ypart(ipart) - yzwcell(k)) * dnn(2,k) +  &
+!              (zpart(ipart) - zzwcell(k)) * dnn(3,k)
+!         xpart(ipart) = xpart(ipart) - dn * dnn(1,k)
+!         ypart(ipart) = ypart(ipart) - dn * dnn(2,k)
+!         zpart(ipart) = zpart(ipart) - dn * dnn(3,k)
+!      end if
+!!     END DEBUG
       
       dtremaining(ipart) = dtremaining(ipart) - dt
 !      Lpart(ipart) = Lexit
@@ -280,8 +279,28 @@ subroutine update_particles_in_cells(numremaining, ierror)
          if ( edge2cell(1,Lexit).gt.0 .and. edge2cell(2,Lexit).gt.0 ) then   ! internal edge (netlink)
             kpart(ipart) = edge2cell(1,Lexit) + edge2cell(2,Lexit) - k
             
+!            if ( kpart(ipart).eq.5298 ) then
+!               call qnerror(' ', ' ', ' ')
+!            end if
+            
             if ( kpart(ipart).eq.0 ) then
                continue
+            else
+               if ( jsferic.eq.1 ) then
+!                 project node on triangle
+                  k = kpart(ipart)
+                  k1 = edge2node(1,Lexit)
+                  k2 = edge2node(2,Lexit)
+                  xn = 0.5d0*(xnode(k1)+xnode(k2))
+                  yn = 0.5d0*(ynode(k1)+ynode(k2))
+                  zn = 0.5d0*(znode(k1)+znode(k2))
+                  dn = (xpart(ipart) - xn) * dnn(1,k) +  &
+                       (ypart(ipart) - yn) * dnn(2,k) +  &
+                       (zpart(ipart) - zn) * dnn(3,k)
+                  xpart(ipart) = xpart(ipart) - dn * dnn(1,k)
+                  ypart(ipart) = ypart(ipart) - dn * dnn(2,k)
+                  zpart(ipart) = zpart(ipart) - dn * dnn(3,k)
+               end if
             end if
          else  ! on boundary
             kpart(ipart) = 0
@@ -304,46 +323,57 @@ subroutine update_particles_in_cells(numremaining, ierror)
 end subroutine update_particles_in_cells
 
 
+
 !> reconstruct velocity in cells
-subroutine reconst_vel(q, s0, s1, ierror)
+subroutine reconst_vel_coeffs()
+   
    use m_flowgeom, only: Ndx, Lnx, bl  !, lne2ln  !, csu, snu, wu  !, xu, yu
    use m_flowparameters, only: epshs
    use m_partrecons
    use m_partmesh
+   use m_alloc
+   use m_sferic
+   use geometry_module, only: dbdistance, gaussj
+   
    implicit none
    
-   double precision, dimension(Lnx), intent(in)  :: q    ! flowlink-based discharge (m3/s)
-   double precision, dimension(Ndx), intent(in)  :: s0   ! flownode-based water level (m) at begin of interval
-   double precision, dimension(Ndx), intent(in)  :: s1   ! flownode-based water level (m) at end of interval
-   
-   integer,                          intent(out) :: ierror
-   
-   integer,                          parameter   :: N = 3
+   integer,                          parameter   :: N = 4
    
    double precision, dimension(N,N)              :: Amat ! matrix
    double precision, dimension(N)                :: rhs
    
-   integer                                       :: i, icell, j, k, L, Lf
+   double precision                              :: cs, sn
+   
+   integer                                       :: i, icell, j, jj, k, L, NN
    integer                                       :: k1, k2
-   integer                                       :: ja
-   
-   double precision                              :: cs, sn, wwu, h0, h1, h, dfac
-   
-   double precision, parameter                   :: DTOL=1d-10
-   
-   double precision, external                    :: dbdistance
+   integer                                       :: i12, isign
+   integer                                       :: ierror
    
    ierror = 1
    
-!  get fluxes at all edges, including internal
-   call set_fluxes(Lnx, q, qe)
+!  allocate startpointers
+   call realloc(jreconst, numcells+1, keepExisting=.false., fill=0)
    
-!  initialize   
-   u0x = 0d0
-   u0y = 0d0
-   alpha = 0d0
-
+!  set startpointers
+   jreconst(1) = 1
+   do icell=1,numcells
+      jreconst(icell+1) = jcell2edge(icell) + jcell2edge(icell+1)-jcell2edge(icell)
+   end do
+  
+!  allocate column indices and matrix entries   
+   NN = jreconst(numcells+1)-1
+   call realloc(ireconst, NN, keepExisting=.false., fill=0)
+   if ( jsferic.eq.0 ) then
+      call realloc(Areconst, (/3, NN /), keepExisting=.false., fill=0d0)
+   else
+      call realloc(Areconst, (/4, NN /), keepExisting=.false., fill=0d0)
+   end if
+      
+!  dummy rhs
+   rhs = 0d0
+ 
 !  loop over internal cells
+   jj = 0
    do icell=1,numcells
 !     check for triangles
 !      if ( jcell2edge(k+1)-jcell2edge(k).ne.3 ) then
@@ -364,51 +394,269 @@ subroutine reconst_vel(q, s0, s1, ierror)
          k1 = edge2node(1,L)
          k2 = edge2node(2,L)
          
-         cs = dnx(L)
-         sn = dny(L)
-         
-         wwu = w(L)
-            
-!        add to system
-         Amat(i,1) = cs
-         Amat(i,2) = sn
-         Amat(i,3) = (0.5d0*(xnode(k1)+xnode(k2))-xzwcell(icell))*cs + (0.5d0*(ynode(k1)+ynode(k2))-yzwcell(icell))*sn
-         
-!        u.n = q / ( h wu )
-         h0 = s0(k)-bl(k)
-         h1 = s1(k)-bl(k)
-         if ( abs(h1-h0).gt.DTOL ) then
-            if ( h0.gt.epshs .or. h1.gt.epshs ) then
-               h = (h1-h0)/(log(h1)-log(h0))
-            else
-               h = 0d0
+         if ( jsferic.eq.0 ) then
+            cs = dnx(1,L)
+            sn = dny(1,L)
+               
+!           add to system
+            Amat(i,1) = cs
+            Amat(i,2) = sn
+            Amat(i,3) = (0.5d0*(xnode(k1)+xnode(k2))-xzwcell(icell))*cs + (0.5d0*(ynode(k1)+ynode(k2))-yzwcell(icell))*sn
+         else
+            i12 = 1
+            isign = 1
+            if ( edge2cell(2,L).eq.icell ) then
+              i12 = 2
+              isign = -1d0
             end if
-         else
-            h = 0.5d0*(h0+h1)
+            
+            Amat(i,1) = dnx(i12,L)*isign
+            Amat(i,2) = dny(i12,L)*isign
+            Amat(i,3) = dnz(i12,L)*isign
+            Amat(i,4) = ( (0.5d0*(xnode(k1)+xnode(k2))-xzwcell(icell))*dnx(i12,L) + &
+                          (0.5d0*(ynode(k1)+ynode(k2))-yzwcell(icell))*dny(i12,L) + &
+                          (0.5d0*(znode(k1)+znode(k2))-zzwcell(icell))*dnz(i12,L) ) * isign
          end if
          
-         if ( h.gt.epshs ) then
-            rhs(i) = qe(L) / ( h*wwu )
-         else
-         
-            rhs(i) = 0d0
-         end if
+         jj = jj+1
+         ireconst(jj) = L
       end do
       
-!     solve system
-      call gaussj(Amat,3,N,rhs,1,1)
-      
-      u0x(icell)   = rhs(1)
-      u0y(icell)   = rhs(2)
-      alpha(icell) = rhs(3)
-      
-!     BEGIN DEBUG
-!      if ( k.eq.16 ) then
-!         write(6,*) (u0x(k) + alpha(k)*(xu(Lf)-xz(k))) * csu(Lf) +  &
-!            (u0y(k) + alpha(k)*(yu(Lf)-yz(k))) * snu(Lf), q(Lf) / ( (s(k)-bl(k))*wu(Lf) )
-!      end if
-!     END DEBUG
+      if ( jsferic.eq.0 ) then
+!        solve system
+         call gaussj(Amat,3,N,rhs,1,1)
+         
+         do i=1,3
+            L = icell2edge(jcell2edge(icell)+i-1)
+            Areconst(1:3,jreconst(icell)+i-1) = Amat(1:3,i)
+         end do
+      else
+!        impose zero cell normal velocity
+         Amat(4,1:3) = dnn(:,icell)
+         Amat(4,4) = 0d0
+         
+!        solve system
+         call gaussj(Amat,4,N,rhs,1,1)
+         
+         do i=1,3
+            L = icell2edge(jcell2edge(icell)+i-1)
+            Areconst(1:4,jreconst(icell)+i-1) = Amat(1:4,i)
+         end do
+
+      end if
    end do
+   
+   ierror = 0
+!  error handling
+1234 continue
+
+   return
+end subroutine reconst_vel_coeffs
+
+
+!> reconstruct velocity in cells
+subroutine reconst_vel(q, s0, s1, ierror)
+   use m_flowgeom, only: Ndx, Lnx, bl  !, lne2ln  !, csu, snu, wu  !, xu, yu
+   use m_flowparameters, only: epshs
+   use m_partrecons
+   use m_partmesh
+   use m_sferic
+   use geometry_module, only: dbdistance
+   
+   implicit none
+   
+   double precision, dimension(Lnx), intent(in)  :: q    ! flowlink-based discharge (m3/s)
+   double precision, dimension(Ndx), intent(in)  :: s0   ! flownode-based water level (m) at begin of interval
+   double precision, dimension(Ndx), intent(in)  :: s1   ! flownode-based water level (m) at end of interval
+   
+   integer,                          intent(out) :: ierror
+   
+   integer,                          parameter   :: N = 4
+   
+   double precision, dimension(N,N)              :: Amat ! matrix
+   double precision, dimension(N)                :: rhs
+   
+   integer                                       :: i, icell, j, k, L, Lf
+   integer                                       :: k1, k2
+   integer                                       :: ja
+   integer                                       :: i12, isign
+   
+   double precision                              :: cs, sn, wwu, h0, h1, h, dfac, un
+
+   double precision, parameter                   :: DTOL=1d-10
+   
+   ierror = 1
+   
+!  get fluxes at all edges, including internal
+   call set_fluxes(Lnx, q, qe)
+   
+!  initialize   
+   u0x = 0d0
+   u0y = 0d0
+   if ( jsferic.eq.1 ) then
+      u0z = 0d0
+   end if
+   alpha = 0d0
+   
+   do icell=1,numcells
+!     get flownode number (for s, bl)
+      k = iabs(cell2nod(icell))
+      
+!     get water depth
+      h0 = s0(k)-bl(k)
+      h1 = s1(k)-bl(k)
+      if ( abs(h1-h0).gt.DTOL ) then
+         if ( h0.gt.epshs .and. h1.gt.epshs ) then
+            h = (h1-h0)/(log(h1)-log(h0))
+         else if ( h0.gt.epshs .or. h1.gt.epshs ) then
+            h = 0.5d0*(h0+h1)
+         else
+            h = 0d0
+         end if
+      else
+         h = 0.5d0*(h0+h1)
+      end if
+      
+      if ( h.le.epshs ) cycle
+      
+      if ( jsferic.eq.0 ) then
+         do j=jreconst(icell),jreconst(icell+1)-1
+            L = ireconst(j)
+            un = qe(L)/(h*w(L))
+            u0x(icell)   = u0x(icell)   + Areconst(1,j)*un
+            u0y(icell)   = u0y(icell)   + Areconst(2,j)*un
+            alpha(icell) = alpha(icell) + Areconst(3,j)*un
+         end do
+      else
+         do j=jreconst(icell),jreconst(icell+1)-1
+            L = ireconst(j)
+            un = qe(L)/(h*w(L))
+            u0x(icell)   = u0x(icell)   + Areconst(1,j)*un
+            u0y(icell)   = u0y(icell)   + Areconst(2,j)*un
+            u0z(icell)   = u0z(icell)   + Areconst(3,j)*un
+            alpha(icell) = alpha(icell) + Areconst(4,j)*un
+         end do
+      end if
+   end do
+   
+   
+   
+   
+   
+   
+   
+
+!!  loop over internal cells
+!   do icell=1,numcells
+!!     check for triangles
+!!      if ( jcell2edge(k+1)-jcell2edge(k).ne.3 ) then
+!!         cycle
+!!      end if
+!   
+!!     get flownode number (for s, bl)
+!      k = iabs(cell2nod(icell))
+!
+!!     fill system for (ux,uy) = (ux0, uy0) + alpha (x-x0, y-y0)
+!      
+!!     loop over edges (netlinks)
+!      i = 0
+!      do j=jcell2edge(icell),jcell2edge(icell+1)-1
+!         i = i+1
+!         L = icell2edge(j) ! netlink
+!         
+!         k1 = edge2node(1,L)
+!         k2 = edge2node(2,L)
+!         
+!         wwu = w(L)
+!         
+!         if ( jsferic.eq.0 ) then
+!            cs = dnx(1,L)
+!            sn = dny(1,L)
+!               
+!!           add to system
+!            Amat(i,1) = cs
+!            Amat(i,2) = sn
+!            Amat(i,3) = (0.5d0*(xnode(k1)+xnode(k2))-xzwcell(icell))*cs + (0.5d0*(ynode(k1)+ynode(k2))-yzwcell(icell))*sn
+!         else
+!            i12 = 1
+!            isign = 1
+!            if ( edge2cell(2,L).eq.icell ) then
+!              i12 = 2
+!              isign = -1d0
+!            end if
+!            
+!            Amat(i,1) = dnx(i12,L)*isign
+!            Amat(i,2) = dny(i12,L)*isign
+!            Amat(i,3) = dnz(i12,L)*isign
+!            Amat(i,4) = ( (0.5d0*(xnode(k1)+xnode(k2))-xzwcell(icell))*dnx(i12,L) + &
+!                          (0.5d0*(ynode(k1)+ynode(k2))-yzwcell(icell))*dny(i12,L) + &
+!                          (0.5d0*(znode(k1)+znode(k2))-zzwcell(icell))*dnz(i12,L) ) * isign
+!         end if
+!         
+!!        u.n = q / ( h wu )
+!         h0 = s0(k)-bl(k)
+!         h1 = s1(k)-bl(k)
+!         if ( abs(h1-h0).gt.DTOL ) then
+!            if ( h0.gt.epshs .and. h1.gt.epshs ) then
+!               h = (h1-h0)/(log(h1)-log(h0))
+!            else if ( h0.gt.epshs .or. h1.gt.epshs ) then
+!               h = 0.5d0*(h0+h1)
+!            else
+!               h = 0d0
+!            end if
+!         else
+!            h = 0.5d0*(h0+h1)
+!         end if
+!         
+!         if ( h.gt.epshs ) then
+!            rhs(i) = qe(L) / ( h*wwu )
+!         else
+!         
+!            rhs(i) = 0d0
+!         end if
+!      end do
+!      
+!      if ( jsferic.eq.0 ) then
+!!        solve system
+!         call gaussj(Amat,3,N,rhs,1,1)
+!         
+!         if ( sqrt( (u0x(icell)-rhs(1))**2 + (u0y(icell)-rhs(2))**2 ).gt.1d-16 ) then
+!            continue
+!         else if ( abs(alpha(icell)-rhs(3)).gt.1d-16 ) then
+!            continue
+!         end if
+!         
+!!         u0x(icell)   = rhs(1)
+!!         u0y(icell)   = rhs(2)
+!!         alpha(icell) = rhs(3)
+!      else
+!!        impose zero cell normal velocity
+!         Amat(4,1:3) = dnn(:,icell)
+!         Amat(4,4) = 0d0
+!         rhs(4) = 0d0
+!         
+!!        solve system
+!         call gaussj(Amat,4,N,rhs,1,1)
+!         
+!!         u0x(icell)   = rhs(1)
+!!         u0y(icell)   = rhs(2)
+!!         u0z(icell)   = rhs(3)
+!!         alpha(icell) = rhs(4)
+!         
+!         if ( sqrt( (u0x(icell)-rhs(1))**2 + (u0y(icell)-rhs(2))**2 + (u0z(icell)-rhs(3))**2 ).gt.1d-16 ) then
+!            continue
+!         else if ( abs(alpha(icell)-rhs(4)).gt.1d-16 ) then
+!            continue
+!         end if
+!      end if
+!      
+!!     BEGIN DEBUG
+!!      if ( k.eq.16 ) then
+!!         write(6,*) (u0x(k) + alpha(k)*(xu(Lf)-xz(k))) * csu(Lf) +  &
+!!            (u0y(k) + alpha(k)*(yu(Lf)-yz(k))) * snu(Lf), q(Lf) / ( (s(k)-bl(k))*wu(Lf) )
+!!      end if
+!!     END DEBUG
+!   end do
    
    ierror = 0
 !  error handling
@@ -423,17 +671,42 @@ subroutine tekpart()
    use m_particles
    use m_wearelt
    use unstruc_display
+   use m_sferic, only: jsferic
+   use m_missing, only: dmiss
+   use geometry_module, only : cart3Dtospher
    implicit none
+   
+   double precision :: x, y
    
    integer :: i
    
    if ( Npart.lt.1 .or. ndrawpart.eq.1 ) return
+   
+!  safety check
+   if ( jsferic.eq.1 .and. .not.(allocated(zpart)) ) then
+      call dealloc_partmesh()
+      call dealloc_partfluxes()
+      call dealloc_partrecons()
+      call dealloc_particles()
+      call dealloc_auxfluxes()
+      japart = 0
+      return
+   end if
 
    call setcol(31)
-   do i=1,Npart
-      call movabs(xpart(i),ypart(i))
-      call cir(rcir)
-   end do
+   
+   if ( jsferic.eq.0 ) then
+      do i=1,Npart
+         call movabs(xpart(i),ypart(i))
+         call cir(rcir)
+      end do
+   else
+       do i=1,Npart
+         call Cart3Dtospher(xpart(i),ypart(i),zpart(i),x,y,0d0)
+         call movabs(x,y)
+         call cir(rcir)
+      end do
+   end if
    
    return
 end subroutine tekpart
@@ -445,20 +718,23 @@ subroutine part_setmesh()
    use m_alloc
    use m_missing
    use m_partmesh
+   use m_sferic, only: jsferic, jasfer3D 
+   use geometry_module, only: dbdistance, sphertocart3D, normaloutchk, comp_masscenter
+   
    implicit none
    
    integer                        :: i, node1, node2, icell, j, k, L, N
-   integer                        :: im1, ip1, Lm1, Lp1
+   integer                        :: im1, ip1, Lm1, Lp1, L1, L2
    integer                        :: newnode, newedge
-   integer                        :: isign, ja, k1, k2
+   integer                        :: isign, ja, k1, k2, k3, kL, kR
    integer                        :: jaswap
                                   
    integer                        :: numnontris
    integer                        :: numaddedges
    
-   double precision, dimension(3) :: xv, yv
-                                  
-   double precision, external     :: dbdistance
+   double precision, dimension(3) :: xv, yv   
+   double precision, dimension(3) :: t, t1, t2    ! edge tangential vector
+
    
    numnodes = numk
    numedges = numL
@@ -483,11 +759,17 @@ subroutine part_setmesh()
 !  (re)allocate   
    call realloc_partmesh()
    
-!  nodes   
-   do k=1,numk
-      xnode(k) = xk(k)
-      ynode(k) = yk(k)
-   end do
+!  nodes
+   if ( jsferic.eq.0 ) then
+      do k=1,numk
+         xnode(k) = xk(k)
+         ynode(k) = yk(k)
+      end do
+   else
+      do k=1,numk
+         call sphertocart3D(xk(k),yk(k),xnode(k),ynode(k),znode(k))
+      end do
+   end if
 
 !  edges
    do L=1,numL
@@ -542,14 +824,22 @@ subroutine part_setmesh()
             L = netcell(k)%lin(i)
             icell2edge(j) = L
          end do
-         xzwcell(icell) = xzw(k)
-         yzwcell(icell) = yzw(k)
+         if ( jsferic.eq.0 ) then
+            xzwcell(icell) = xzw(k)
+            yzwcell(icell) = yzw(k)
+         else
+            call sphertocart3D(xzw(k),yzw(k),xzwcell(icell),yzwcell(icell),zzwcell(icell))
+         end if
          areacell(icell) = ba(k)
       else
 !        add node
          newnode = newnode+1
-         xnode(newnode) = xzw(k)
-         ynode(newnode) = yzw(k)
+         if ( jsferic.eq.0 ) then
+            xnode(newnode) = xzw(k)
+            ynode(newnode) = yzw(k)
+         else
+            call sphertocart3D(xzw(k),yzw(k),xnode(newnode),ynode(newnode),znode(newnode))
+         end if
          
          xv(1) = xzw(k)
          yv(1) = yzw(k)
@@ -582,7 +872,13 @@ subroutine part_setmesh()
             yv(2) = yk(node1)
             xv(3) = xk(node2)
             yv(3) = yk(node2)
-            call comp_masscenter(3, xv, yv, xzwcell(icell), yzwcell(icell), areacell(icell), ja)
+            call comp_masscenter(3, xv, yv, xzwcell(icell), yzwcell(icell), areacell(icell), ja, jsferic, jasfer3D, dmiss)
+            
+            if ( jsferic.eq.1 ) then
+               xv(1) = xzwcell(icell)  ! reuse xv
+               yv(1) = yzwcell(icell)   ! reuse yv
+               call sphertocart3D(xv(1), yv(1),xzwcell(icell),yzwcell(icell),zzwcell(icell))
+            end if
             
  !           call cirr(xzwcell(k), yzwcell(k), 31)
          end do
@@ -624,12 +920,39 @@ subroutine part_setmesh()
       end if
    end do
    
+   if ( jsferic.ne.0 ) then
+!     compute cell normal vectors from first two edges
+      do k=1,numcells
+         L1 = icell2edge(jcell2edge(k))
+         L2 = icell2edge(jcell2edge(k)+1)
+         k1 = edge2node(1,L1)
+         k2 = edge2node(2,L1)
+         k3 = edge2node(1,L2)
+         if ( k3.eq.k1 .or. k3.eq.k2 ) then
+            k3 = edge2node(2,L2)
+         end if
+         t1 = (/ xnode(k2)-xnode(k1), ynode(k2)-ynode(k1), znode(k2)-znode(k1)/)
+         t2 = (/ xnode(k3)-xnode(k2), ynode(k3)-ynode(k2), znode(k3)-znode(k2)/)
+         
+         dnn(:,k) = (/ t1(2)*t2(3) - t1(3)*t2(2), t1(3)*t2(1) - t1(1)*t2(3), t1(1)*t2(2) - t1(2)*t2(1) /)
+         dnn(:,k) = dnn(:,k) / sqrt( dnn(1,k)**2 + dnn(2,k)**2 + dnn(3,k)**2 )
+         
+!        fix orientation
+         if ( dnn(1,k)*xnode(k1) + dnn(2,k)*ynode(k1) + dnn(3,k)*znode(k1) .lt. 0d0 ) then
+            dnn(:,k) = -dnn(:,k)
+         end if
+      end do
+   end if
+   
 !  nx, ny, w
    do L=1,numedges
       k1 = edge2node(1,L)
       k2 = edge2node(2,L)
       
-      k = edge2cell(1,L)   ! outward positive
+      kL = edge2cell(1,L)
+      kR = edge2cell(2,L)
+      
+      k = kL   ! outward positive
       
       isign = 1
       if ( k.le.0 ) then
@@ -640,15 +963,50 @@ subroutine part_setmesh()
       if ( k.eq.0 ) cycle  ! isolated edge
       
 !     compute normal vector (outward positive)
-      call normaloutchk(xnode(k1),ynode(k1),xnode(k2),ynode(k2),xzwcell(k),yzwcell(k),dnx(L),dny(L),ja)
-      
-      if ( isign.eq.-1 ) then
-         dnx(L) = -dnx(L)
-         dny(L) = -dny(L)
+      if ( jsferic.eq.0 ) then
+         call normaloutchk(xnode(k1),ynode(k1),xnode(k2),ynode(k2),xzwcell(k),yzwcell(k),dnx(1,L),dny(1,L),ja, jsferic, jasfer3D, dmiss, dxymis)
+         
+         if ( isign.eq.-1 ) then
+            dnx(1,L) = -dnx(1,L)
+            dny(1,L) = -dny(1,L)
+         end if
+         
+         w(L) = dbdistance(xnode(k1),ynode(k1),xnode(k2),ynode(k2),jsferic, jasfer3D, dmiss)
+      else
+!        compute outward normal with respect to the left cell
+         t = (/ xnode(k2)-xnode(k1), ynode(k2)-ynode(k1), znode(k2)-znode(k1) /)
+         w(L) = sqrt( t(1)**2 + t(2)**2 + t(3)**2)
+         
+         t = t/w(L)
+         
+         if ( kL.gt.0 ) then
+!           left cell normal : nn X t
+            dnx(1,L) = dnn(2,kL) * t(3) - dnn(3,kL) * t(2)
+            dny(1,L) = dnn(3,kL) * t(1) - dnn(1,kL) * t(3)
+            dnz(1,L) = dnn(1,kL) * t(2) - dnn(2,kL) * t(1)
+            
+!           fix orientation
+            if ( (xnode(k1)-xzwcell(kL))*dnx(1,L) + (ynode(k1)-yzwcell(kL))*dny(1,L) + (znode(k1)-zzwcell(kL))*dnz(1,L) .lt. 0d0 ) then
+               dnx(1,L) = -dnx(1,L)
+               dny(1,L) = -dny(1,L)
+               dnz(1,L) = -dnz(1,L)
+            end if
+         end if
+         
+         if ( kR.gt.0 ) then
+!           left cell normal : nn X t
+            dnx(2,L) = dnn(2,kR) * t(3) - dnn(3,kR) * t(2)
+            dny(2,L) = dnn(3,kR) * t(1) - dnn(1,kR) * t(3)
+            dnz(2,L) = dnn(1,kR) * t(2) - dnn(2,kR) * t(1)
+            
+!           fix orientation
+            if ( (xnode(k1)-xzwcell(kR))*dnx(2,L) + (ynode(k1)-yzwcell(kR))*dny(2,L) + (znode(k1)-zzwcell(kR))*dnz(2,L) .lt. 0d0 ) then
+               dnx(2,L) = -dnx(2,L)
+               dny(2,L) = -dny(2,L)
+               dnz(2,L) = -dnz(2,L)
+            end if        
+         end if
       end if
-      
-!     compute width of edge (netlink)
-      w(L) = dbdistance(xnode(k1),ynode(k1),xnode(k2),ynode(k2))
    end do
    
    
@@ -807,6 +1165,7 @@ subroutine comp_fluxcoeffs()
    use m_partfluxes
    use m_alloc
    use unstruc_messages
+   use geometry_module, only: gaussj
    implicit none
    
    integer                                  :: N         ! number of subtriangles
@@ -998,11 +1357,13 @@ subroutine tekpartmesh()
    use m_partrecons
    use m_wearelt
    use unstruc_display
+   use m_sferic, only: jsferic
+   use geometry_module, only: Cart3Dtospher
    implicit none
    
    character(len=32) :: text
    
-   double precision :: xL, yL, xL1, yL1
+   double precision :: xL, yL, xL1, yL1, x, y, dfac
    
    integer          :: i, k, k1, k2, L
    
@@ -1013,32 +1374,64 @@ subroutine tekpartmesh()
       k1 = edge2node(1,L)
       k2 = edge2node(2,L)
       
-      xL = 0.5d0*(xnode(k1)+xnode(k2))
-      yL = 0.5d0*(ynode(k1)+ynode(k2))
-      xL1 = xL + rcir*dnx(L)
-      yL1 = yL + rcir*dny(L)
+      if ( jsferic.eq.0 ) then
+         xL = 0.5d0*(xnode(k1)+xnode(k2))
+         yL = 0.5d0*(ynode(k1)+ynode(k2))
+         xL1 = xL + rcir*dnx(1,L)
+         yL1 = yL + rcir*dny(1,L)
+      else
+         dfac = 0.1d0*w(L)
+         call Cart3Dtospher(0.5d0*(xnode(k1)+xnode(k2)), 0.5d0*(ynode(k1)+ynode(k2)), 0.5d0*(znode(k1)+znode(k2)), xL, yL, 0d0)
+         if( edge2cell(1,L).gt.0 ) then
+            call Cart3Dtospher(0.5d0*(xnode(k1)+xnode(k2))+dfac*dnx(1,L), 0.5d0*(ynode(k1)+ynode(k2))+dfac*dny(1,L), 0.5d0*(znode(k1)+znode(k2))+dfac*dnz(1,L), xL1, yL1, 0d0)
+         else
+            call Cart3Dtospher(0.5d0*(xnode(k1)+xnode(k2))-dfac*dnx(2,L), 0.5d0*(ynode(k1)+ynode(k2))-dfac*dny(2,L), 0.5d0*(znode(k1)+znode(k2))-dfac*dnz(2,L), xL1, yL1, 0d0)
+         end if
+      end if
       
-      call movabs(xnode(k1),ynode(k1))
-      call lnabs(xnode(k2),ynode(k2))
+      if ( jsferic.eq.0 ) then
+         call movabs(xnode(k1),ynode(k1))
+         call lnabs(xnode(k2),ynode(k2))
       
-      call movabs(xL,yL)
-      call lnabs(xL1,yl1)
-!      call hitext(L,xL1,yL1)
-      write(text,"(I0, '(', F0.1, ')')") L, qe(L)
-      call drawtext(real(xL1),real(yL1),trim(text))
+         call movabs(xL,yL)
+         call lnabs(xL1,yl1)
+!         call hitext(L,xL1,yL1)
+         write(text,"(I0, '(', F0.1, ')')") L, qe(L)
+         call drawtext(real(xL1),real(yL1),trim(text))
+      else
+         call Cart3Dtospher(xnode(k1),ynode(k1), znode(k1), x, y, 0d0)
+         call movabs(x,y)
+         call Cart3Dtospher(xnode(k2),ynode(k2), znode(k2), x, y, 0d0)
+         call lnabs(x,y)
+      
+         call movabs(xL,yL)
+         call lnabs(xL1,yl1)
+      end if
    end do
    
 !  cells
-   do k=1,numcells
-      call hitext(k,xzwcell(k),yzwcell(k))
-   end do
+   if ( jsferic.eq.0 ) then
+      do k=1,numcells
+         call hitext(k,xzwcell(k),yzwcell(k))
+      end do
+   else
+      do k=1,numcells
+         call cart3Dtospher(xzwcell(k),yzwcell(k),zzwcell(k),x,y,0d0)
+         call hitext(k,x,y)
+      end do
+   end if
    
 !  particle cell numbers
    do i=1,Npart
 !      call hitext(i,xpart(i)+rcir,ypart(i))
 !      call hitext(kpart(i),xpart(i)+rcir,ypart(i))
       write(text,"(I0, '(', I0, ')')") i, kpart(i)
-      call drawtext(real(xpart(i)+rcir),real(ypart(i)),trim(text))
+      if ( jsferic.eq.0 ) then
+         call drawtext(real(xpart(i)+rcir),real(ypart(i)),trim(text))
+      else
+         call cart3Dtospher(xpart(i),ypart(i),zpart(i),x,y,0d0)
+         call drawtext(real(x+rcir),real(y),trim(text))
+      end if
    end do
    
    return
@@ -1056,8 +1449,12 @@ end function get_japart
 !> add particles
 subroutine add_particles(Nadd, xadd, yadd, jareplace)
    use m_particles
+   use m_partmesh
    use m_alloc
    use m_wearelt
+   use m_sferic, only: jsferic
+   use geometry_module, only: sphertocart3D
+
    implicit none
    
    integer,                           intent(in)  :: Nadd       !< number of particles to be added
@@ -1071,6 +1468,9 @@ subroutine add_particles(Nadd, xadd, yadd, jareplace)
    integer                                        :: ierror
    integer                                        :: Npartnew
    integer                                        :: Nreplace
+   
+   double precision                               :: xn, yn, zn, dn
+   integer                                        :: k, k1
    
    if ( japart.ne.1 ) return
    
@@ -1122,15 +1522,40 @@ subroutine add_particles(Nadd, xadd, yadd, jareplace)
          end do
       end if
       
-      xpart(ipoint) = xadd(i)
-      ypart(ipoint) = yadd(i)
+      if ( jsferic.eq.0 ) then
+         xpart(ipoint) = xadd(i)
+         ypart(ipoint) = yadd(i)
+      else
+         call sphertocart3D(xadd(i),yadd(i),xpart(ipoint),ypart(ipoint),zpart(ipoint))
+         
+         
+         
+         if ( jsferic.eq.1 ) then
+!           project particle on triangle
+            k = kadd(i)
+            if ( k.gt.0 ) then
+               k1 = edge2node(1,icell2edge(jcell2edge(k)))
+               xn = xnode(k1)
+               yn = ynode(k1)
+               zn = znode(k1)
+               dn = (xpart(i) - xn) * dnn(1,k) +  &
+                    (ypart(i) - yn) * dnn(2,k) +  &
+                    (zpart(i) - zn) * dnn(3,k)
+               xpart(i) = xpart(i) - dn * dnn(1,k)
+               ypart(i) = ypart(i) - dn * dnn(2,k)
+               zpart(i) = zpart(i) - dn * dnn(3,k)
+            end if
+         end if
+         
+      end if
       kpart(ipoint) = kadd(i)
 !      write(namepart(ipoint), "('added_particle ', I0)") i
       Npart = Npart+1
       
 !     plot      
       call setcol(31)
-      call movabs(xpart(ipoint),ypart(ipoint))
+!      call movabs(xpart(ipoint),ypart(ipoint))
+      call movabs(xadd(i), yadd(i))
       call cir(rcir)
       
 !     advance pointer
@@ -1146,15 +1571,18 @@ end subroutine add_particles
 
 
 !> find in which cells particles are located
-subroutine part_findcell(Npart, xpart, ypart, kpart, ierror)
+subroutine part_findcell(Npart, xxpart, yypart, kpart, ierror)
    use m_partmesh
    use unstruc_messages
-   use m_kdtree2
+   use kdtree2Factory
+   use m_sferic, only: jsferic, jasfer3D
+   use m_missing, only: jins, dmiss
+   use geometry_module, only: pinpok, dbdistance, pinpok3D, cart3Dtospher
    implicit none
    
    integer,                            intent(in)  :: Npart    !< number of particles
-   double precision, dimension(Npart), intent(in)  :: xpart    !< particle x-coordinates
-   double precision, dimension(Npart), intent(in)  :: ypart    !< particle x-coordinates
+   double precision, dimension(Npart), intent(in)  :: xxpart   !< particle x-coordinates, 2D Cartexsion or spherical coordinates (not 3D Cartesian)
+   double precision, dimension(Npart), intent(in)  :: yypart   !< particle x-coordinates, 2D Cartexsion or spherical coordinates (not 3D Cartesian)
    integer,          dimension(Npart), intent(out) :: kpart    !< cell numbers
                                                    
    integer                           , intent(out) :: ierror   !< error (1) or not (0)
@@ -1165,16 +1593,15 @@ subroutine part_findcell(Npart, xpart, ypart, kpart, ierror)
    
    double precision                                :: dmaxsize
    double precision                                :: R2search
+   double precision                                :: xx, yy
    
    integer                                         :: i, ip1, j, k, knode, L, Lp1, N, NN
    integer                                         :: inside
    
-   double precision, external                      :: dbdistance
-   
    ierror = 1
    
 !  build kdtree   
-   call build_kdtree(kdtree, Npart, xpart, ypart, ierror)
+   call build_kdtree(kdtree, Npart, xxpart, yypart, ierror, jsferic, dmiss)
    if ( ierror.ne.0 ) then
       goto 1234
    end if
@@ -1210,18 +1637,27 @@ subroutine part_findcell(Npart, xpart, ypart, kpart, ierror)
          else  ! should not happen
             continue
          end if
-         xv(i) = xnode(knode)
-         yv(i) = ynode(knode)
+         if ( jsferic.eq.0 ) then
+            xv(i) = xnode(knode)
+            yv(i) = ynode(knode)
+         else
+            call Cart3Dtospher(xnode(knode),ynode(knode),znode(knode),xv(i),yv(i),0d0)
+         end if
       end do
       
 !     fill query vector
-      call make_queryvector_kdtree(kdtree,xzwcell(k),yzwcell(k))
+      if ( jsferic.eq.0 ) then
+         call make_queryvector_kdtree(kdtree,xzwcell(k),yzwcell(k), jsferic)
+      else
+         call cart3Dtospher(xzwcell(k),yzwcell(k),zzwcell(k),xx,yy,0d0)
+         call make_queryvector_kdtree(kdtree,xx,yy, jsferic)
+      end if
       
 !     compute maximum flowcell dimension
       dmaxsize = 0d0
       do i=1,N
          ip1=i+1; if ( ip1.gt.N ) ip1=ip1-N
-         dmaxsize = max(dmaxsize, dbdistance(xv(i),yv(i),xv(ip1),yv(ip1)))
+         dmaxsize = max(dmaxsize, dbdistance(xv(i),yv(i),xv(ip1),yv(ip1),jsferic, jasfer3D, dmiss))
       end do
       
 !     determine square search radius
@@ -1241,7 +1677,11 @@ subroutine part_findcell(Npart, xpart, ypart, kpart, ierror)
 !     check if samples are in cell
       do i=1,NN
          j = kdtree%results(i)%idx
-         call pinpok(xpart(j), ypart(j), 3, xv, yv, inside)
+         if ( jsferic.eq.0 ) then
+            call pinpok(xxpart(j), yypart(j), 3, xv, yv, inside, jins, dmiss)
+         else
+            call pinpok3D(xxpart(j), yypart(j), 3, xv, yv, inside, dmiss, jins, jsferic, jasfer3D)
+         end if
          
          if ( inside.eq.1 ) then
             if ( kpart(j).eq.0 ) then
@@ -1276,7 +1716,7 @@ subroutine copy_sam2part()
    
    if ( japart.ne.1 ) then
       dum = ' '
-      call ini_part(0, dum, 0,0d0,0d0)
+      call ini_part(0, dum, 0,0d0,0d0,0)
    end if
    
    call add_particles(Ns, xs, ys, 0)
@@ -1291,6 +1731,7 @@ subroutine realloc_particles(Nsize, LkeepExisting, ierror)
    use m_particles
    use m_alloc
    use m_missing
+   use m_sferic, only: jsferic
    implicit none
    
    integer, intent(in)  :: Nsize          !< array sizes
@@ -1302,6 +1743,9 @@ subroutine realloc_particles(Nsize, LkeepExisting, ierror)
 !  reallocate   
    call realloc(xpart, Nsize, keepExisting=LkeepExisting, fill=DMISS)
    call realloc(ypart, Nsize, keepExisting=LkeepExisting, fill=DMISS)
+   if ( jsferic.eq.1 ) then
+      call realloc(zpart, Nsize, keepExisting=LkeepExisting, fill=DMISS)
+   end if
    call realloc(dtremaining, Nsize, keepExisting=LkeepExisting, fill=0d0)
    call realloc(kpart, Nsize, keepExisting=LkeepExisting, fill=0)
 !   call realloc(Lpart, Nsize, keepExisting=LkeepExisting, fill=0)
@@ -1323,6 +1767,7 @@ subroutine dealloc_particles()
    
    if ( allocated(xpart)       ) deallocate(xpart)
    if ( allocated(ypart)       ) deallocate(ypart)
+   if ( allocated(zpart)       ) deallocate(zpart)
    if ( allocated(dtremaining) ) deallocate(dtremaining)
    if ( allocated(kpart)       ) deallocate(kpart)
 !   if ( allocated(Lpart)       ) deallocate(Lpart)
@@ -1341,6 +1786,7 @@ subroutine realloc_partmesh()
    use m_partmesh
    use m_alloc
    use m_missing
+   use m_sferic, only: jsferic
    implicit none
    
    integer :: N
@@ -1349,13 +1795,26 @@ subroutine realloc_partmesh()
    call realloc(edge2cell, (/2, numedges/), fill=0, keepExisting=.false.)
    call realloc(xnode, numnodes, fill=0d0, keepExisting=.false.)
    call realloc(ynode, numnodes, fill=0d0, keepExisting=.false.)
+   if ( jsferic.eq.1 ) then
+      call realloc(znode, numnodes, fill=0d0, keepExisting=.false.)
+   end if
    
    call realloc(xzwcell, numcells, fill=DMISS, keepExisting=.false.)
    call realloc(yzwcell, numcells, fill=DMISS, keepExisting=.false.)
+   if ( jsferic.eq.1 ) then
+      call realloc(zzwcell, numcells, fill=DMISS, keepExisting=.false.)
+   end if
    call realloc(areacell, numcells, fill=DMISS, keepExisting=.false.)
    
-   call realloc(dnx, numedges, fill=DMISS, keepExisting=.false.)
-   call realloc(dny, numedges, fill=DMISS, keepExisting=.false.)
+   if ( jsferic.eq.0 ) then
+      call realloc(dnx, (/1, numedges/), fill=DMISS, keepExisting=.false.)
+      call realloc(dny, (/1, numedges/), fill=DMISS, keepExisting=.false.)
+   else
+      call realloc(dnx, (/2, numedges/), fill=DMISS, keepExisting=.false.)
+      call realloc(dny, (/2, numedges/), fill=DMISS, keepExisting=.false.)
+      call realloc(dnz, (/2, numedges/), fill=DMISS, keepExisting=.false.)
+      call realloc(dnn, (/3, numcells/), fill=DMISS, keepExisting=.false.)
+   end if
    call realloc(w, numedges, fill=DMISS, keepExisting=.false.)
    
    call realloc(edge2link, numedges, fill=0, keepExisting=.false.)
@@ -1378,13 +1837,17 @@ subroutine dealloc_partmesh()
    if ( allocated(edge2cell ) ) deallocate(edge2cell )
    if ( allocated(xnode     ) ) deallocate(xnode     )
    if ( allocated(ynode     ) ) deallocate(ynode     )
+   if ( allocated(znode     ) ) deallocate(znode     )
    
    if ( allocated(xzwcell   ) ) deallocate(xzwcell   )
    if ( allocated(yzwcell   ) ) deallocate(yzwcell   )
+   if ( allocated(zzwcell   ) ) deallocate(zzwcell   )
    if ( allocated(areacell  ) ) deallocate(areacell  )
    
+   if ( allocated(dnn       ) ) deallocate(dnn       )
    if ( allocated(dnx       ) ) deallocate(dnx       )
    if ( allocated(dny       ) ) deallocate(dny       )
+   if ( allocated(dnz       ) ) deallocate(dnz       )
    if ( allocated(w         ) ) deallocate(w         )
    
    if ( allocated(edge2link ) ) deallocate(edge2link )
@@ -1433,13 +1896,19 @@ subroutine realloc_partrecons()
    use m_partrecons
    use m_alloc
    use m_missing
+   use m_sferic, only: jsferic
    implicit none
    
    call realloc(qe, numedges, keepExisting=.false., fill=DMISS)
    
    call realloc(u0x, numcells, keepExisting=.false., fill=DMISS)
    call realloc(u0y, numcells, keepExisting=.false., fill=DMISS)
+   if ( jsferic.eq.1 ) then
+      call realloc(u0z, numcells, keepExisting=.false., fill=DMISS)
+   end if
    call realloc(alpha, numcells, keepExisting=.false., fill=DMISS)
+   
+   call realloc(ireconst, numcells+1, keepExisting=.false., fill=0)
    return
 end subroutine realloc_partrecons
 
@@ -1452,18 +1921,23 @@ subroutine dealloc_partrecons()
    
    if ( allocated(u0x) ) deallocate(u0x)
    if ( allocated(u0y) ) deallocate(u0y)
+   if ( allocated(u0z) ) deallocate(u0z)
    if ( allocated(alpha) ) deallocate(alpha)
+   
+   if ( allocated(ireconst) ) deallocate(ireconst)
+   if ( allocated(jreconst) ) deallocate(jreconst)
+   if ( allocated(Areconst) ) deallocate(Areconst)
    
    return
 end subroutine dealloc_partrecons
 
 !> initialize particles
-subroutine ini_part(japartfile, partfile, jatracer_loc, starttime_loc, timestep_loc)
+subroutine ini_part(japartfile, partfile, jatracer_loc, starttime_loc, timestep_loc, threeDtype_loc)
    use m_particles
    use m_samples
-   use m_flow, only: s1
+   use m_flow, only: s1, kmx
    use m_transport, only: constituents, numconst
-   use m_flowtimes, only: time1
+   use m_flowtimes, only: tstart_user
    use m_missing
    implicit none
    
@@ -1472,6 +1946,7 @@ subroutine ini_part(japartfile, partfile, jatracer_loc, starttime_loc, timestep_
    integer,            intent(in) :: jatracer_loc  !< add tracer (1) or not (0)
    double precision,   intent(in) :: starttime_loc !< start time (>0) or not (0)
    double precision,   intent(in) :: timestep_loc  !< time step (>0) or every computational time step (0)
+   integer,            intent(in) :: threeDtype_loc    !< depth averaged (0) or free surface (1)
    
    integer             :: minp
    logical             :: lexist
@@ -1483,10 +1958,12 @@ subroutine ini_part(japartfile, partfile, jatracer_loc, starttime_loc, timestep_
    call dealloc_partfluxes()
    call dealloc_partrecons()
    call dealloc_particles()
-   call dealloc_summedfluxes()
+   call dealloc_auxfluxes()
    
    timenext = 0d0
    timelast = DMISS
+   
+   jatracer = 0
       
 !  add particle tracer (when tracers are initialized)
    if ( jatracer_loc.eq.1 ) then
@@ -1502,6 +1979,13 @@ subroutine ini_part(japartfile, partfile, jatracer_loc, starttime_loc, timestep_
 !  time step
    if ( timestep_loc.gt.0d0 ) then
       timestep = timestep_loc
+   end if
+   
+!  3D type
+   if ( kmx.gt.0 ) then
+      threeDtype = threeDtype_loc
+   else  ! 2D
+      threeDtype = 0
    end if
    
    if ( japartfile.eq.1 ) then
@@ -1529,8 +2013,11 @@ subroutine ini_part(japartfile, partfile, jatracer_loc, starttime_loc, timestep_
       
       call realloc_partrecons()
       
+      call reconst_vel_coeffs()
+      
       if ( Ns.gt.0 ) then
          call add_particles(Ns, xs, ys, 0)
+         timepart = tstart_user
          
          call delsam(0)
       else
@@ -1544,9 +2031,7 @@ subroutine ini_part(japartfile, partfile, jatracer_loc, starttime_loc, timestep_
          call comp_concentration(s1,numconst,part_iconst,constituents)
       end if
    
-      if ( timestep.gt.0d0 ) then
-         call alloc_summedfluxes()
-      end if
+      call alloc_auxfluxes()
    end if
    
    return
@@ -1557,8 +2042,10 @@ subroutine comp_concentration(s, nconst, iconst, c)
    use m_particles
    use m_partmesh
    use m_flowgeom, only : Ndx, ba, bl
+   use m_flowparameters, only: epshs
+   use m_flow, only: Ndkx
    implicit none
-   
+
    double precision, dimension(Ndx),        intent(in)  :: s      !< water level
    integer,                                 intent(in)  :: nconst !< number of constituents
    integer,                                 intent(in)  :: iconst !< particle tracer constituent number
@@ -1580,45 +2067,58 @@ subroutine comp_concentration(s, nconst, iconst, c)
       c(iconst,k) = c(iconst,k) + 1
    end do
    
-!  compute depth concentration (parts per unit volume)
+!  compute concentration (parts per unit volume)
    do k=1,Ndx
-      c(iconst,k) = c(iconst,k) / (ba(k)*(s(k)-bl(k)))
+      if ( s(k)-bl(k) .gt. epshs ) then
+         c(iconst,k) = c(iconst,k) / (ba(k)*(s(k)-bl(k)))
+      else
+         c(iconst,k) = 0d0
+      end if
    end do
    
    return
 end subroutine comp_concentration
 
-!> allocate summed fluxes
-subroutine alloc_summedfluxes()
+!> allocate auxiliary fluxes
+subroutine alloc_auxfluxes()
    use m_particles
    use m_flowgeom, only: Ndx, Lnx
    use m_alloc
    implicit none
    
-   call realloc(sbegin, Ndx, fill=0d0, keepExisting=.false.)
-   call realloc(qpart, Lnx, fill=0d0, keepExisting=.false.)
+   if ( timestep.gt.0d0 ) then
+      call realloc(sbegin, Ndx, fill=0d0, keepExisting=.false.)
+      call realloc(qpart, Lnx, fill=0d0, keepExisting=.false.)
+   end if
+   
+   if ( threeDtype.eq.1 ) then
+      call realloc(qfreesurf, Lnx, fill=0d0, keepExisting=.false.)
+   end if
    
    return
-end subroutine alloc_summedfluxes
+end subroutine alloc_auxfluxes
 
-!> deallocate summed fluxes
-subroutine dealloc_summedfluxes()
+!> deallocate auxiliary fluxes
+subroutine dealloc_auxfluxes()
    use m_particles
    implicit none
    
    if ( allocated(sbegin) ) deallocate(sbegin)
    if ( allocated(qpart)  ) deallocate(qpart)
    
+   if ( allocated(qfreesurf) ) deallocate(qfreesurf)
+   
    return
-end subroutine dealloc_summedfluxes
+end subroutine dealloc_auxfluxes
 
-subroutine part_sumfluxes()
+subroutine part_sumfluxes(q1,Dts)
    use m_particles
    use m_partmesh
    use m_flowgeom, only: Lnx
-   use m_flow, only: q1
-   use m_flowtimes, only: dts
    implicit none
+   
+   double precision, dimension(Lnx), intent(in) :: q1  !< fluxes
+   double precision,                 intent(in) :: Dts !< time interval
    
    integer :: L
    
@@ -1633,16 +2133,43 @@ end subroutine part_sumfluxes
 subroutine update_part()
    use m_particles
    use m_flowtimes
+   use m_flowgeom, only: Lnx, wu, bl
    use m_flow
+   use m_transport, only: numconst, constituents
    use m_missing
    implicit none
    
+   integer                                     :: LL, Lb, Lt
+   
+   logical                     :: Lsurface
+   
+   double precision, parameter :: huni=1d0
+   
    if ( japart.ne.1 ) return
+   
+   Lsurface = ( threeDtype.eq.1 )
+   
+   if ( Lsurface ) then
+      do LL=1,Lnx
+         call getLbotLtop(LL,Lb,Lt)
+         qfreesurf(LL) = u1(Lt)*huni*wu(LL)
+      end do
+   end if
 
    if ( time0.ge.starttime ) then
    
       if ( timestep.le.0d0 ) then   ! update particles every computational time step
-         call update_particles(q1,s0,s1,dts)
+         if ( .not.Lsurface ) then
+            call update_particles(q1,s0,s1,dts)
+         else
+            call update_particles(qfreesurf,bl+huni,bl+huni,dts)
+         end if
+         timepart = time1
+         
+         if ( jatracer.eq.1 ) then
+!           udpate particle concentration   
+            call comp_concentration(s1,numconst,part_iconst,constituents)
+         end if
       else
       
 !        check if timestep has been started
@@ -1654,22 +2181,51 @@ subroutine update_part()
             qpart = 0d0
          end if
          
-!        sum fluxes of this computational time step         
-         call part_sumfluxes()
+!        sum fluxes of this computational time step
+         if ( .not.Lsurface ) then
+            call part_sumfluxes(q1,Dts)
+         else
+            call part_sumfluxes(qfreesurf,Dts)
+         end if
          
          if ( time1.ge.timenext ) then
 !           finish particle timestep         
             qpart = qpart/(time1-timelast)
-            call update_particles(qpart, sbegin, s1, time1-timelast)
+            if ( .not.Lsurface ) then
+               call update_particles(qpart, sbegin, s1, time1-timelast)
+            else
+               call update_particles(qfreesurf, bl+huni, bl+huni, time1-timelast)
+            end if
+            timepart = time1
             
 !           start new particle timestep
             timelast = time1
             timenext = time1 + timestep
             sbegin = s1
             qpart = 0d0
+   
+            if ( jatracer.eq.1 ) then
+!              udpate particle concentration   
+               call comp_concentration(s1,numconst,part_iconst,constituents)
+            end if
+            
          end if
       end if
    end if
    
    return
 end subroutine update_part
+
+subroutine finalize_part()
+   use m_particles
+   implicit none
+   
+   call dealloc_partmesh()
+   call dealloc_partfluxes()
+   call dealloc_partrecons()
+   call dealloc_particles()
+   call dealloc_auxfluxes()
+   japart = 0
+      
+   return
+end subroutine finalize_part

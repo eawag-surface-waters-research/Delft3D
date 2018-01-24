@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2017.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: model_specific.f90 52266 2017-09-02 11:24:11Z klecz_ml $
-! $HeadURL: https://repos.deltares.nl/repos/ds/branches/dflowfm/20161017_dflowfm_codecleanup/engines_gpl/dflowfm/packages/dflowfm_kernel/src/model_specific.f90 $
+! $Id: model_specific.f90 54191 2018-01-22 18:57:53Z dam_ar $
+! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/model_specific.f90 $
 !> @file model_specific.f90
 !! A set of predefined routines that may contain model-specific actions.
 !! Selection is based on global md_ident, and subroutines are automatically
@@ -51,7 +51,7 @@ subroutine textflowspecific()
     use unstruc_colors
     use m_equatorial, only : ampliforced, amplifreeL, amplitotal, ndxforced, ndxfreeL, ndtforced, ndtfreeL, cflforced, cflfreeL, tforce, tfreeL, amplicomp
     use m_statistics
-    use m_crosssections
+    use m_monitoring_crosssections
     implicit none
 
     double precision, external :: znod
@@ -181,14 +181,55 @@ subroutine textflowspecific()
     CALL SETTEXTSIZEFAC(1D0)
 end subroutine textflowspecific 
 
+subroutine update_turkin_modelspecific(Lf)
+use m_flowgeom
+use m_flow
+use m_flowtimes
+use unstruc_model, only: md_specific
+implicit none
+   integer, intent(in) :: Lf !< 2D flow link number
+
+   double precision, save :: zw1(kmxx)
+   double precision :: dummy
+   integer :: L, Lb, Lt, kxL
+  
+   Lb  = Lbot(Lf)                                   ! bed layer index
+   Lt  = Ltop(Lf)                                   ! surface layer index = surface interface index
+   kxL = Lt-Lb+1                                    ! nr of layers
+
+   if (trim(md_specific) == 'splitter') then        ! Model: Splitter plate
+      if (u1(Lt) > 0d0 .and. Lf > lnxi) then        ! Boundary: velocity inflow side
+
+         ! Prepare z/interface coords at link position.
+         if (dnt <= 1d0 .and. Lf >= lnxi) then
+            zw1(1) = 0d0
+            do L = Lb,Lt
+               zw1(L-Lb+2) = min(hu(L), hu(Lt))
+            enddo
+         endif
+
+         do L = Lb-1,Lt
+            call ENTRYFLOW( zw1, L-Lb+2, dummy, dummy, turkin1(L), tureps1(L), dummy, dummy)
+         end do
+      end if ! boundary links only
+   ! else other models...
+   end if ! model selection
+
+end subroutine update_turkin_modelspecific
 
 ! AvD: TODO: cleanup below
 subroutine equatorial(t)
+
 use m_flowgeom
 use m_flow
+use sorting_algorithms, only:indexx
+use geometry_module, only: dbdistance
+use m_missing, only: dmiss
+use m_sferic, only: jsferic, jasfer3D
+
 implicit none
 
-double precision                    :: t, deltax, dbdistance
+double precision                    :: t, deltax
 double precision, allocatable, save :: uexa(:),zexa(:), xexa(:)
 integer         , allocatable, save :: iexa(:)
 integer                             :: L, k1, k2, n, i
@@ -201,7 +242,7 @@ if (t == 0d0) then
 endif
 
 k1 = ln(1,1) ; k2 = ln(2,1)
-deltax = dbdistance(xz(k1),yz(k1),xz(k2),yz(k2))
+deltax = dbdistance(xz(k1),yz(k1),xz(k2),yz(k2),jsferic, jasfer3D, dmiss)
 call equatorialexact(t,xz,uexa,zexa,ndx,deltax)
 
 if (t == 0d0) then
@@ -336,7 +377,7 @@ use m_flow
 use m_flowgeom
 use unstruc_colors
 use m_flowtimes
-use m_crosssections
+use m_monitoring_crosssections
 implicit none
 character(len=132):: tex
 
@@ -384,7 +425,7 @@ use m_flow
 use m_flowgeom
 use unstruc_colors
 use m_observations
-use m_crosssections
+use m_monitoring_crosssections
 use m_flowtimes
 implicit none
 integer, intent(in) :: j12
@@ -412,6 +453,7 @@ endif
 slinks      = s1(kobs(1))           
 srechts     = s1(kobs(3))
 bedlev      = bl(kobs(1)) 
+crestlev    = 1d0
 
 if (ncgen <= 0) then 
    do L = 1,lnx
@@ -624,10 +666,14 @@ subroutine poiseuille(init)
  use m_flow
  use m_flowtimes
  use unstruc_model
- use m_crosssections
+ use m_monitoring_crosssections
  use m_alloc
  use unstruc_colors, only: ncolana 
  use m_statistics, only: avedif 
+ use sorting_algorithms, only: indexx
+ use geometry_module, only: dbdistance
+ use m_missing, only: dmiss
+ use m_sferic, only: jsferic, jasfer3D
 
  implicit none
 
@@ -655,8 +701,6 @@ subroutine poiseuille(init)
  logical                                       :: Lwritetime
 
  integer,          parameter                   :: fid = 666
-
- double precision, external                    :: dbdistance
 
  character (len=40)                            :: tex
  double precision                              :: sumba
@@ -927,7 +971,7 @@ else
             yR = yz(kR)
 
    !        weight factor
-            alpha = dbdistance(xL,yL,x1,y1)/dbdistance(xL,yL,xR,yR)
+            alpha = dbdistance(xL,yL,x1,y1, jsferic, jasfer3D, dmiss)/dbdistance(xL,yL,xR,yR,jsferic, jasfer3D, dmiss)
 
             ux1 = ucx(kL) + alpha*(ucx(kR)-ucx(kL))
             uy1 = ucy(kL) + alpha*(ucy(kR)-ucy(kL))

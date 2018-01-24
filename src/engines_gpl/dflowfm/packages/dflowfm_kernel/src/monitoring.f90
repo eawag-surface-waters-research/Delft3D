@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2017.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -27,12 +27,12 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: monitoring.f90 52266 2017-09-02 11:24:11Z klecz_ml $
-! $HeadURL: https://repos.deltares.nl/repos/ds/branches/dflowfm/20161017_dflowfm_codecleanup/engines_gpl/dflowfm/packages/dflowfm_kernel/src/monitoring.f90 $
+! $Id: monitoring.f90 54191 2018-01-22 18:57:53Z dam_ar $
+! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/monitoring.f90 $
 
 !> @file monitoring.f90
 !! Monitoring modules (data+routines).
-!! m_observations and m_crosssections
+!! m_observations and m_monitoring_crosssections
 !<
 
 !> Observation stations can be used to monitor flow data at fixed points
@@ -64,6 +64,8 @@ implicit none
     integer                           :: mxls           !< Unit nr hisdump to excel
     integer                           :: jafahrenheit=0 !< Output in Celsius, otherwise Fahrenheit 
     
+
+    double precision                  :: tlastupd_valobs !< Time at which the valobs array was last updated.
     double precision, dimension(:,:), allocatable, target :: valobs     !< work array with 2d and 3d values stored at observation stations, dim(MAXNUMVALOBS2D+MAXNUMVALOBS3D*max(kmx,1)+MAXNUMVALOBS3Dw*(max(kmx,1)+1),numobs+nummovobs)
     double precision, dimension(:,:), allocatable         :: valobs_all !< work array with 2d and 3d values stored at observation stations, dim(MAXNUMVALOBS2D+MAXNUMVALOBS3D*max(kmx,1)+MAXNUMVALOBS3Dw*(max(kmx,1)+1),numobs+nummovobs)
     
@@ -72,6 +74,7 @@ implicit none
     integer                           :: MAXNUMVALOBS3Dw  ! maximum number of outputted values at observation stations, 3D layer interfaces (e.g. zws)
     integer                           :: IVAL_S1          ! 2D first
     integer                           :: IVAL_HS
+    integer                           :: IVAL_BL
     integer                           :: IVAL_SMX
     integer                           :: IVAL_CMX
     integer                           :: IVAL_WX  
@@ -87,12 +90,18 @@ implicit none
     integer                           :: IVAL_TEM1
     integer                           :: IVAL_TRA1
     integer                           :: IVAL_TRAN
-    integer                           :: IVAL_SED
+    integer                           :: IVAL_SED ! HK code
+    integer                           :: IVAL_SF1 ! stm code
+    integer                           :: IVAL_SFN
     integer                           :: IVAL_ZCS
     integer                           :: IVAL_ZWS         ! 3D, layer interfaces after layer centered
     integer                           :: IVAL_TKIN
     integer                           :: IVAL_TEPS
     integer                           :: IVAL_VICWW
+    integer                           :: IVAL_WS1
+    integer                           :: IVAL_WSN
+    integer                           :: IVAL_SEDDIF1
+    integer                           :: IVAL_SEDDIFN
     integer                           :: IVAL_RICH
     integer                           :: IVAL_TAIR
     integer                           :: IVAL_WIND
@@ -105,9 +114,11 @@ implicit none
     integer                           :: IVAL_QFRE
     integer                           :: IVAL_QFRC
     integer                           :: IVAL_QTOT
+    integer                           :: IVAL_RHO
     
     integer                           :: IPNT_S1            ! pointers in valobs work array
     integer                           :: IPNT_HS
+    integer                           :: IPNT_BL
     integer                           :: IPNT_SMX
     integer                           :: IPNT_CMX
     integer                           :: IPNT_WX
@@ -124,12 +135,18 @@ implicit none
     integer                           :: IPNT_TRA1
     integer                           :: IPNT_TRAN
 !    integer                           :: IPNT_SPIR1
+    integer                           :: IPNT_SF1
+    integer                           :: IPNT_SFN
     integer                           :: IPNT_SED
     integer                           :: IPNT_ZCS
     integer                           :: IPNT_ZWS
     integer                           :: IPNT_TKIN
     integer                           :: IPNT_TEPS
     integer                           :: IPNT_VICWW
+    integer                           :: IPNT_WS1
+    integer                           :: IPNT_WSN
+    integer                           :: IPNT_SEDDIF1
+    integer                           :: IPNT_SEDDIFN
     integer                           :: IPNT_RICH
     integer                           :: IPNT_TAIR
     integer                           :: IPNT_WIND
@@ -143,12 +160,14 @@ implicit none
     integer                           :: IPNT_QFRC
     integer                           :: IPNT_QTOT
     integer                           :: IPNT_NUM
+    integer                           :: IPNT_RHO
 contains
 
 !> (re)initialize valobs and set pointers for observation stations
 subroutine init_valobs()
    implicit none
    
+   tlastupd_valobs = dmiss
    call init_valobs_pointers()
    
    call alloc_valobs()
@@ -188,7 +207,8 @@ end subroutine alloc_valobs
 subroutine init_valobs_pointers()
    use m_flowparameters
    use m_flow, only: iturbulencemodel, idensform, kmx
-   use m_transport, only: ITRA1, ITRAN
+   use m_transport, only: ITRA1, ITRAN, ISED1, ISEDN
+   use m_sediment, only: stm_included
    implicit none
    
    integer             :: i, i0
@@ -200,6 +220,7 @@ subroutine init_valobs_pointers()
 !  initialize
    IVAL_S1         = 0
    IVAL_HS         = 0
+   IVAL_BL         = 0
    IVAL_SMX        = 0
    IVAL_CMX        = 0
    IVAL_WX         = 0
@@ -214,6 +235,8 @@ subroutine init_valobs_pointers()
    IVAL_TEM1       = 0
    IVAL_TRA1       = 0
    IVAL_TRAN       = 0
+   IVAL_SF1        = 0
+   IVAL_SFN        = 0
    IVAL_SED        = 0
    IVAL_ZCS        = 0
    IVAL_ZWS        = 0
@@ -221,6 +244,10 @@ subroutine init_valobs_pointers()
    IVAL_TEPS       = 0
    IVAL_VICWW      = 0
    IVAL_RICH       = 0
+   IVAL_WS1        = 0
+   IVAL_WSN        = 0
+   IVAL_SEDDIF1    = 0
+   IVAL_SEDDIFN    = 0
    IVAL_TAIR       = 0
    IVAL_WIND       = 0
    IVAL_RHUM       = 0
@@ -233,12 +260,14 @@ subroutine init_valobs_pointers()
    IVAL_QFRC       = 0
    IVAL_QTOT       = 0
    IVAL_RAIN       = 0
+   IVAL_RHO        = 0
    
 !  2D
    i=0
    i0=i;
    i=i+1;               IVAL_S1         = i
    i=i+1;               IVAL_HS         = i
+   i=i+1;               IVAL_BL         = i
    i=i+1;               IVAL_SMX        = i
    i=i+1;               IVAL_CMX        = i
    if ( jawind.gt.0 ) then
@@ -293,12 +322,19 @@ subroutine init_valobs_pointers()
       i=i+1;            IVAL_TRA1       = i
       i=i+ITRAN-ITRA1;  IVAL_TRAN       = i  !< All tracers (NOT only the ones with bnd)
    end if
-   if ( jased.gt.0 ) then
+   if ( stm_included .and. ISED1.gt.0 ) then
+      i=i+1;              IVAL_SF1       = i
+      i=i+ISEDN-ISED1;    IVAL_SFN       = i 
+   end if
+   if ( jased.gt.0 .and. .not. stm_included) then
       i=i+1;            IVAL_SED        = i
    end if
    if ( kmx.gt.0 ) then
       i=i+1;            IVAL_ZCS        = i
    end if
+   if( jasal > 0 .or. jatem > 0 .or. jased > 0 ) then
+      i=i+1;            IVAL_RHO        = i
+   endif
    MAXNUMVALOBS3D                       = i-i0
 
 !  3D, layer interfaces
@@ -313,12 +349,19 @@ subroutine init_valobs_pointers()
       if ( idensform.gt.0 ) then
          i=i+1;         IVAL_RICH       = i
       end if
+      if ( stm_included .and. ISED1.gt.0 ) then
+         i=i+1;                   IVAL_WS1        = i
+         i=i+ISEDN-ISED1;         IVAL_WSN        = i
+         i=i+1;                   IVAL_SEDDIF1    = i
+         i=i+ISEDN-ISED1;         IVAL_SEDDIFN    = i
+      end if
    end if
    MAXNUMVALOBS3Dw                      = i-i0
    
 !  set pointers in valobs array   
    IPNT_S1    = ivalpoint(IVAL_S1,    kmx)  ! kmx > 1 for non 3D quantitites?  antwoord: nee, omdat bijv. IVAL_S1 <= MAXNUMVALOBS2D
    IPNT_HS    = ivalpoint(IVAL_HS,    kmx)
+   IPNT_BL    = ivalpoint(IVAL_BL,    kmx)
    IPNT_SMX   = ivalpoint(IVAL_SMX,   kmx)
    IPNT_CMX   = ivalpoint(IVAL_CMX,   kmx)
    IPNT_UCX   = ivalpoint(IVAL_UCX,   kmx)
@@ -328,6 +371,8 @@ subroutine init_valobs_pointers()
    IPNT_TEM1  = ivalpoint(IVAL_TEM1,  kmx)
    IPNT_TRA1  = ivalpoint(IVAL_TRA1,  kmx)
    IPNT_TRAN  = ivalpoint(IVAL_TRAN,  kmx)
+   IPNT_SF1   = ivalpoint(IVAL_SF1,   kmx)
+   IPNT_SFN   = ivalpoint(IVAL_SFN,   kmx)
 !   IPNT_SPIR1 = ivalpoint(IVAL_SPIR1, kmx)
    IPNT_SED   = ivalpoint(IVAL_SED,   kmx)
    IPNT_WX    = ivalpoint(IVAL_WX ,   kmx)
@@ -341,6 +386,11 @@ subroutine init_valobs_pointers()
    IPNT_TEPS  = ivalpoint(IVAL_TEPS,  kmx)
    IPNT_VICWW = ivalpoint(IVAL_VICWW, kmx)
    IPNT_RICH  = ivalpoint(IVAL_RICH,  kmx)
+   IPNT_RHO   = ivalpoint(IVAL_RHO,   kmx)
+   IPNT_WS1   = ivalpoint(IVAL_WS1,   kmx)
+   IPNT_WSN   = ivalpoint(IVAL_WSN,   kmx)
+   IPNT_SEDDIF1 = ivalpoint(IVAL_SEDDIF1,   kmx)
+   IPNT_SEDDIFN = ivalpoint(IVAL_SEDDIFN,   kmx)
    
    IPNT_TAIR  = ivalpoint(IVAL_TAIR,  kmx)
    IPNT_WIND  = ivalpoint(IVAL_WIND,  kmx)
@@ -580,6 +630,7 @@ subroutine deleteObservations()
 
     numobs = 0
     nummovobs = 0
+    tlastupd_valobs = dmiss
     call doclose(mxls)
 end subroutine deleteObservations
 
@@ -877,20 +928,24 @@ end subroutine increaseCRSPaths
 !! This routine can be used with 'network geometry' (e.g. for thin dams)
 !! and 'flow geometry' (e.g. for cross sections and fixed weirs).
 subroutine crspath_on_singlelink(path, linknr, xk3, yk3, xk4, yk4, xza, yza, xzb, yzb)
-implicit none
-    type(tcrspath),   intent(inout) :: path   !< Path that is checked for link crossing, will be updated with link info.
+   
+   use geometry_module, only: crossinbox
+   use m_sferic, only: jsferic
+   use m_missing, only : dmiss
+   implicit none
+   
+   type(tcrspath),   intent(inout) :: path   !< Path that is checked for link crossing, will be updated with link info.
     integer,          intent(in)    :: linknr !< Number of link that is being checked, will be stored in path%ln
     double precision, intent(in)    :: xk3, yk3, xk4, yk4 !< Net node coordinates of this link (or fictious coords for a 1D link)
     double precision, intent(in)    :: xza, yza, xzb, yzb !< cell circum. coordinates of this link.
 
-    double precision, external :: dbdistance
     integer :: ip, jacros
     double precision :: SL, SM, XCR, YCR, CRP
 
 !   Check whether flow link intersects with a polyline segment of this cross section path.
     do ip=1,path%np-1
         crp = 0d0
-        CALL CROSSinbox(path%XP(ip), path%YP(ip), path%XP(ip+1), path%YP(ip+1), xza, yza, xzb, yzb, jacros, SL, SM, XCR, YCR, CRP)
+        CALL CROSSinbox(path%XP(ip), path%YP(ip), path%XP(ip+1), path%YP(ip+1), xza, yza, xzb, yzb, jacros, SL, SM, XCR, YCR, CRP, jsferic, dmiss)
         if (jacros == 1) then
             if (SM == 1d0) then
                if (crp > 0d0) then
@@ -936,8 +991,9 @@ end module m_crspath
 !! over time. The definition of crs is by a crspath, which is a polyline
 !! with all flow links (1D and 2D, including orientation) that cross it.
 !! Given a norhtward crs, the positive  transport direction is eastward.
-module m_crosssections
+module m_monitoring_crosssections
 use m_crspath
+use m_missing
 implicit none
 
 type tcrs
@@ -962,6 +1018,7 @@ integer                              :: ncrs = 0, maxcrs = 2, maxnval = 5
 
 integer, private                     :: iUniq_ = 1
 character(len=*), parameter, private :: defaultName_ = 'Crs'
+double precision                     :: tlastupd_sumval        !< Time at which the sumval* arrays were last updated.
 double precision, allocatable        :: sumvalcur_tmp(:,:)     !< Store the temporary values for MPI communication of partial sums across cross sections monitoring.
 double precision, allocatable        :: sumvalcumQ_mpi(:)      !< Store the time-integrated discharge in each history output interval, only used for parallel run
 
@@ -983,10 +1040,13 @@ subroutine getCrosssectionIndex(crsname, index)
       end if
    end do
 end subroutine getCrosssectionIndex
- 
+
 !> Allocates an array of cross sections, deallocating any existing memory.
 subroutine allocCrossSections(cs, n)
+
+use m_transport , only: NUMCONST
 implicit none
+
     type(tcrs), allocatable, intent(inout) :: cs(:)   !< Array of cross sections
     integer,                 intent(in)    :: n       !< Desired nr of cross sections
     
@@ -998,12 +1058,22 @@ end subroutine allocCrossSections
 subroutine ReallocCrosssectionSums(cs)
 use m_transport , only: NUMCONST
 use m_alloc
+use m_sediment, only: jased, stmpar
 implicit none
     type(tcrs), allocatable, intent(inout) :: cs(:)   !< Array of cross sections
     integer :: i
     integer                                :: maxnval
    
-   maxnval = 5 + NUMCONST
+    maxnval = 5 + NUMCONST
+        
+    if( jased == 4 .and. stmpar%lsedtot > 0 ) then
+       maxnval = maxnval + 1
+       if( stmpar%lsedsus > 0 ) then
+          maxnval = maxnval + 1
+       endif
+    endif
+    
+    
     do i=1,size(cs)
         call realloc(cs(i)%sumvalcur, maxnval, fill=0.0d0, keepExisting=.True.)
         call realloc(cs(i)%sumvalcum, maxnval, fill=0.0d0, keepExisting=.True.)
@@ -1095,9 +1165,6 @@ subroutine addCrossSection(name, xp, yp)
     ncrs           = ncrs + 1
     call setCrossSectionPathPolyline(crs(ncrs)%path, xp, yp)
     crs(ncrs)%path%lnx  = 0
-    !crs(ncrs)%sumvalcur = 0d0
-    !crs(ncrs)%sumvalcum = 0d0
-    !crs(ncrs)%sumvalavg = 0d0
 
     ! Set name (or generate one)
     m = len_trim(name)
@@ -1122,6 +1189,7 @@ subroutine delCrossSections()
     if (allocated(sumvalcur_tmp)) then
        deallocate(sumvalcur_tmp)
     end if
+    tlastupd_sumval = dmiss
 
     ! Do not reset crs data, just let it be overwritten later.
 end subroutine delCrossSections
@@ -1175,7 +1243,7 @@ subroutine pol_to_crosssections(xpl, ypl, npl, names)
 end subroutine pol_to_crosssections
 
 
-end module m_crosssections
+end module m_monitoring_crosssections
 
 !> Module for maintaining (time-integral) statistics on flow quantities.
 !! NOTE: could be the successor of Fourier analysis. Just maintain some first max/avg quantities for now.
@@ -1327,13 +1395,13 @@ module m_fixedweirs
     integer, allocatable            :: nfxwL(:)              ! fixed weirs on links   (dim=Lnx) 
     double precision, allocatable   :: csfxw(:)              ! fixed weir direction 
     double precision, allocatable   :: snfxw(:)              ! fixed weir direction
-    double precision, allocatable   :: hcrestxw(:)           ! crest heigth of a weir
     double precision, allocatable   :: crestlxw(:)           ! crest length of a weir
     double precision, allocatable   :: shlxw(:)              ! sill height left of a weir
     double precision, allocatable   :: shrxw(:)              ! sill height right of a weir
     double precision, allocatable   :: taludlxw(:)           ! talud left of a weir
     double precision, allocatable   :: taludrxw(:)           ! talud right of a weir
     double precision, allocatable   :: vegxw(:)              ! vegetation code on a weir
+    double precision, allocatable   :: weirdte(:)            ! loss coeff
 
     double precision                :: sillheightmin    = 0.5d0 ! waqua dams with both sillheights > sillheightmin go to fixedweirs.pli
                                                                 ! the rest goes to

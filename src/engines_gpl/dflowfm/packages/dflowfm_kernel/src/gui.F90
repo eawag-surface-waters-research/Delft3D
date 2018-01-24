@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2017.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: gui.F90 52266 2017-09-02 11:24:11Z klecz_ml $
-! $HeadURL: https://repos.deltares.nl/repos/ds/branches/dflowfm/20161017_dflowfm_codecleanup/engines_gpl/dflowfm/packages/dflowfm_kernel/src/gui.F90 $
+! $Id: gui.F90 54200 2018-01-23 18:28:48Z dam_ar $
+! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/gui.F90 $
 ! Copyright notice:
 ! Several of the graphical user interface routines below make use of the INTERACTER libraries
 ! (only when run on Windows platforms with display mode on).
@@ -46,7 +46,8 @@
    use unstruc_display
    use m_polygon
    use m_partitioninfo
-   use m_interpolationsettings
+   use m_ec_interpolationsettings
+   use gridoperations
 
    implicit none
    integer :: ja, L, n12, ikey, mnx
@@ -54,11 +55,12 @@
    integer :: MODE,NUM,NWHAT,KEY,nwhat2
    integer :: JDEMO
    integer :: irerun          ! orthogonalisenet: rerun
+
    COMMON /DRAWTHIS/  ndraw(50)
    COMMON /DEMO/ JDEMO
    integer :: maxexp
    integer :: maxopt, ierr
-   integer, parameter :: MAXOP = 50
+   integer, parameter :: MAXOP = 64
    CHARACTER*40 OPTION(MAXOP),EXP(MAXOP)
    integer, external :: flow_modelinit
 
@@ -139,7 +141,7 @@
          call findcells(100)        ! include folded cells
          call find1dcells()
 !         call findcells(0)          ! do not include folded cells
-         call delete_drypoints_from_netgeom(dryptsfile,0)
+         call delete_drypoints_from_netgeom(dryptsfile,0,0)
          call makenetnodescoding()  ! killcell relies on node codes
       ELSE IF (NWHAT .EQ. 22) THEN
          call interpdivers(2) ! Network zk flow bathy
@@ -152,7 +154,7 @@
          endif
          call setbobs()
       ELSE IF (NWHAT .EQ. 24) THEN
-         call make1D2Dinternalnetlinks()
+          ierr = make1D2Dinternalnetlinks()
       ELSE IF (NWHAT .EQ. 25) THEN
 
          !call flow_initfloodfill()
@@ -220,7 +222,7 @@
       ELSE IF (NWHAT .EQ. 2) THEN
          CALL DELNET(KEY,0, 1)
       ELSE IF (NWHAT .EQ. 3) THEN
-         CALL DELNET(KEY,1, 1)
+         CALL DELNET(KEY,2, 1)
       ELSE IF (NWHAT .EQ. 4) THEN
          CALL deleteSelectedSplines()
       ELSE IF (NWHAT .EQ. 5) THEN
@@ -248,10 +250,13 @@
          mnx  = mmax*nmax
          call PLUSABSD(XC,YC,ZC,mnx,KEY,zc)
       ELSE IF (NWHAT .EQ. 16) THEN              !****     **
+         CALL SAVENET()
          CALL PLUSABSD(XK,YK,ZK,NUMK,KEY,XK)
       ELSE IF (NWHAT .EQ.17) THEN              !****     **
+         CALL SAVENET()
          CALL PLUSABSD(XK,YK,ZK,NUMK,KEY,YK)
       ELSE IF (NWHAT .EQ.18) THEN              !****     **
+         CALL SAVENET()
          CALL PLUSABSD(XK,YK,ZK,NUMK,KEY,ZK)
       ELSE IF (NWHAT .EQ.19) THEN              !****     **
          CALL PLUSABSD(Xs,Ys,Zs,NS,KEY,Zs)
@@ -440,7 +445,7 @@
    integer :: NUM, NWHAT
    integer :: maxexp
    integer :: maxopt
-   integer, parameter :: MAXOP = 50
+   integer, parameter :: MAXOP = 64
    CHARACTER*40 OPTION(MAXOP),EXP(MAXOP)
    integer :: MODE,NFLD, NFO
    integer :: jdemo
@@ -591,6 +596,7 @@
          MAXOPT = MAXOPT+1
          OPTION(MAXOPT) = 'particles                               '
       end if
+
    ELSE IF (NUM .EQ. 4) THEN
       EXP(1)    = 'MENU 4                                  '
       EXP(2)    = 'Edit data                               '
@@ -682,7 +688,7 @@
    use m_netw
    use m_grid
    use m_observations
-   use m_crosssections
+   use m_monitoring_crosssections
    use m_thindams
    USE M_SPLINES, notinusenump => nump
    use unstruc_model
@@ -699,6 +705,7 @@
    use m_sferic
    use m_flowtimes
    use dfm_error
+   use gridoperations
 
    implicit none
    integer :: MODE, NUM,  NWHAT,  KEY
@@ -712,7 +719,7 @@
 
    COMMON /DRAWTHIS/ ndraw(50)
    COMMON /BACKGROUND/ SCREENFILE
-   CHARACTER FILNAM*76, SCREENFILE*76
+   CHARACTER FILNAM*86, SCREENFILE*86
 
    KEY    = 0
 
@@ -1139,7 +1146,7 @@
                   call findcells(0)
                   call find1dcells()
                end if
-               call unc_write_net(filnam, janetcell = 1, janetbnd = 1)
+               call unc_write_net(filnam, janetcell = 1, janetbnd = 1) ! wrinet
 !               !call unc_write_net_ugrid2(filnam, janetcell = 0, janetbnd = 0)
 
                !origial call unc_write_net(filnam, janetcell = 1, janetbnd = 0)
@@ -1422,7 +1429,7 @@
          ENDIF
       ENDIF
    ELSE IF (NWHAT .EQ. 37 ) THEN    ! partition files
-      if ( npartition_pol.lt.1 .and. md_genpolygon == 1 ) then
+      if ( ndomains.lt.1 ) then
          call qnerror('no partitions found', ' ', ' ')
       else
 !         FILNAM = '*_net.nc'
@@ -1433,7 +1440,7 @@
             NUM = 1
          ELSE
             call doclose(mtek)
-            call partition_write_domains(filnam,6) ! make subdomains for default solver
+            call partition_write_domains(filnam,6,1,1) ! make subdomains for default solver
             CALL MESSAGE('YOU SAVED ' , filnam, ' partitions')
             md_netfile = ' '
             md_netfile = filnam
@@ -1498,15 +1505,17 @@
       RETURN
    ENDIF
 
-   IF (METDRAW .EQ. 1)   CALL FULLSCREEN()
-   IF (NDRAW(1) .EQ. 1 .and. jaOpenGL.eq.0 )  CALL CLS1()
-   IF (NDRAW(26) .EQ. 1) CALL SHOWBITMAP(0)
-   IF (METDRAW .EQ. 1)   CALL SMALLSCREEN()
+   if (jaOpengl == 0) then 
+      IF (METDRAW .EQ. 1)   CALL FULLSCREEN()
+      IF (NDRAW(1) .EQ. 1 .and. jaOpenGL.eq.0 )  CALL CLS1()
+      IF (NDRAW(26) .EQ. 1) CALL SHOWBITMAP(0)
+      IF (METDRAW .EQ. 1)   CALL SMALLSCREEN()
+   else 
+      CALL BEGINRENDER()
+   endif
 
-   METDRAW = NDRAW(9)
-
-   CALL BEGINRENDER()
    
+   METDRAW = NDRAW(9)
  ! ndraw(28)= show what on nodes   ndraw(19)=how to show on nodes , NDRAW(8) = SHOW WHAT ON NETNODES
  ! ndraw(29)= show what on links   ndraw(11)=how to show on links , NDRAW(7) = SHOW WHAT ON NETLINKS
 
@@ -1571,11 +1580,6 @@
       endif
       
       call plotdots()
-
-      ! WARNING: Anything drawn up to this point with something other than OpenGL, is overwritten! 
-      ! So make sure you use OpenGL for any rendering up to this point, move EndRender up, or place 
-      ! that graphics code after EndRender.
-      CALL ENDRENDER() 
             
    ELSE IF (METDRAW .EQ. 2) THEN
 
@@ -1583,6 +1587,12 @@
 
    ENDIF
 
+   ! WARNING: Anything drawn up to this point with something other than OpenGL, is overwritten! 
+   ! So make sure you use OpenGL for any rendering up to this point, move EndRender up, or place 
+   ! that graphics code after EndRender.
+   
+   CALL ENDRENDER()
+   
    IF (METDRAW .EQ. 1) CALL FULLSCREEN()
    CALL ISOSCALE()
    CALL ISOSCALE2()
@@ -1594,7 +1604,7 @@
    CALL DISPOS()
 
    CALL TEXTFLOW()
-
+  
    CALL IMouseCursorShow()
 
    IF (NDRAW(10) .EQ. 2) THEN
@@ -1614,9 +1624,9 @@
    use m_polygon
    use unstruc_display
    use m_missing
+   use gridoperations
 
    implicit none
-   logical, external :: inview
 
    integer           :: k,ncol,kk, key,k2
    double precision  :: a,b,f,x,y,z,s,c,d,dx,dy,dz
@@ -1787,6 +1797,8 @@
    use unstruc_model, only: md_netfile
    use unstruc_messages
    use m_sferic, only: jsferic, dg2rd
+   use gridoperations
+   
    implicit none
 
    integer, intent (in)          :: netwhat, jahalt, jacol
@@ -1803,7 +1815,6 @@
 
    double precision, external    :: znetcell
    double precision, external    :: coarsening_info
-   logical,          external    :: inview
 
    COMMON /VFAC/ VFAC,VFACFORCE,NVEC
    COMMON /DRAWTHIS/                ndraw(50)
@@ -1893,15 +1904,15 @@
                      rlin(k) = dble(ighostlev_cellbased(k))
                   else
                      rlin(k) = dble(ighostlev_nodebased(k))
-      end if
+                  end if
                end do
             end if
          end if
       else if ( netwhat.eq.20 ) then   ! global cell number
-         if ( allocated(iglobal) ) then
-            if ( size(iglobal).gt.numcellstoplot ) then
+         if ( allocated(iglobal_s) ) then
+            if ( size(iglobal_s).ge.numcellstoplot ) then
                do k=1,numcellstoplot
-                  rlin(k) = dble(iglobal(k))
+                  rlin(k) = dble(iglobal_s(k))
                end do
             end if
           end if
@@ -1990,15 +2001,15 @@
    use m_netw
    use m_flowgeom
    use m_missing
+   use geometry_module, only: dbdistance
+   use m_sferic, only: jsferic, jasfer3D
 
    implicit none
 
-   integer        ::  k, k1, k2, k3, n, ja
-
+   integer          :: k, k1, k2, k3, n, ja
    double precision :: uu1, vv1, uu2, vv2 ! not used here
    double precision :: xdum, ydum, area, phimin, phimax
    double precision :: xx1,yy1,zz1,xx2,yy2,zz2,xx3, yy3, zz3, xy, rn, R3, XN, YN, ZN, DEPTH, TSIG, SLOPE, RK
-   double precision, external :: dbdistance
 
    COMMON /DRAWTHIS/  ndraw(50)
    integer        ::  ndraw
@@ -2015,7 +2026,7 @@
        znetcell = dble( netcell(k)%n )
    else if ( ndraw(33)==9 ) then  ! cell normalised centre of gravity - circumcentre distance
        if (ba(k) > 0) then
-           znetcell = dbdistance(xz(k),yz(k), xzw(k), yzw(k)) / sqrt(ba(k))
+           znetcell = dbdistance(xz(k),yz(k), xzw(k), yzw(k), jsferic, jasfer3D, dmiss) / sqrt(ba(k))
        else
            znetcell = 0d0
        endif
@@ -2076,6 +2087,8 @@
    use m_sediment
    use m_plotdots
    use m_transport
+   use m_waves, only: waveparopt, numoptwav
+   use gridoperations
    
    implicit none
    integer :: maxexp, ium
@@ -2088,8 +2101,9 @@
    character(len=255) :: filnam
    integer :: mfil
    integer :: i
+   integer :: numopt
 
-   integer, parameter :: MAXOP = 128   ! 54
+   integer, parameter :: MAXOP = 64
 
    COMMON /DRAWTHIS/  ndraw(50)
    CHARACTER*40 OPTION(MAXOP),EXP(MAXOP)
@@ -2402,11 +2416,6 @@
       OPTION(33)= 'Total head                         (m  )'
       OPTION(34)= 'Volume error                       (m3 )'
 
-      
-      OPTION(35)= 'Fetchlength                        (m  )'
-      OPTION(36)= 'Fetchdepth                         (m  )'
-      OPTION(37)= 'Significant waveheight             (m  )'
-
       OPTION(35)= 'Rho                              (kg/m3)'
       OPTION(36)= 'cflmx*vol1(k)/squ(k)               (   )'
       
@@ -2428,55 +2437,47 @@
       
       OPTION(45)= 'Constituents                            '
 
-      if( jasecf > 0 ) then
-         OPTION(46)= 'Streamlines curvature              (1/m)'
-      else if (jagrw > 0) then 
-         OPTION(46)= 'ground water pressure                (m)'
-      else if (jawave > 0) then 
-         OPTION(46)= 'Significant wave height              (m)'
-      else
-         OPTION(46)= '                                        '
-      endif
+      OPTION(46)= 'bz'
       
-      if( jasecf > 0 ) then
-         OPTION(47)= 'Spiral flow intensity              (m/s)'
-      else if (nonlin == 2) then
-         OPTION(47)= 'a1m                                 (m2)'
-      else if (jawave > 0) then 
-         OPTION(47)= 'Significant wave period              (s)'
-      else
-         OPTION(47)= '                                        '
+         
+      if (jagrw > 0) then 
+         OPTION(47)= 'ground water pressure                (m)'
       endif
+         
+      if (nonlin == 2) then
+         OPTION(48)= 'a1m                                 (m2)'
+      endif
+         
+      if (nshiptxy > 0) then 
+         OPTION(49)= 'zspc                                 (m)'
+      endif
+      if (janudge > 0) then 
+         OPTION(50)= 'Nudge time                           (s)'
+      endif
+      numopt=50
+      numoptwav=-999
+      numoptsf=-999
+      numoptsed=-999
+      if ( jawave.gt.0 ) then
+         numopt = numopt+1
+         numoptwav = numopt
+         OPTION(numoptwav)= 'Wave parameters                         '
+      end  if
+      
+      if ( jasecflow.gt.0 ) then
+         numopt = numopt+1
+         numoptsf = numopt
+         OPTION(numoptsf)= 'Spiral flow parameters                  '
+      end  if
+      
+      if ( stm_included ) then
+         numopt = numopt + 1
+         numoptsed = numopt
+         OPTION(numoptsed)= 'Sediment transport parameters           '
+      end  if
 
-      if( jasecf > 0 ) then
-         OPTION(48)= 'Spiral flow angle                  (rad)'
-      else if (nshiptxy > 0) then 
-         OPTION(48)= 'zspc                                 (m)'
-      else if (jawave > 0) then 
-         OPTION(48)= 'Wave Orbital velocity uorb         (m/s)'
-      else
-         OPTION(48)= '                                        '
-      endif
-   
-      if( jasecf > 0 ) then
-         OPTION(49)= 'Dispersion stress by spiral flow  (m/s2)'
-      else if (jawave == 1 .or. jawave == 2) then 
-         OPTION(49)= 'Fetch lenght dir1                    (m)'
-      else 
-         OPTION(49)= 'bz                                   (m)'
-      endif
+      MAXOPT    = numopt !53
       
-      !do i= 1,NUMCONST
-      !   OPTION(40+i) = const_names(i)
-      !end do
-      
-      iconst_cur = 1
-
-      !   OPTION(51)= 'Taucurrent                        (N/m2)'
-      !   OPTION(52)= 'Tauwave                           (N/m2)'
-      !   OPTION(53)= 'Ustokes                           (m/s )'
-  
-      MAXOPT    = 49
       NWHAT2    = NDRAW(28)
       CALL MENUV3(NWHAT2,OPTION,MAXOPT,EXP,MAXEXP)
       ! Set default display mode to numbers for nodenums/codes, etc.
@@ -2493,6 +2494,7 @@
 
       IF (NWHAT2 .NE. NDRAW(28) ) KEY = 3
       NDRAW(28) = NWHAT2
+      
       if (ndraw(28) == 24 .and. jaceneqtr == 2) then  ! transfer to net node drawing
           ndraw(28) = 0
           ndraw(8) = 8
@@ -2505,7 +2507,32 @@
          else
             ndraw(28) = 0
          end if
-      endif
+
+      else if (ndraw(28).eq.numoptwav) then
+         if (jawave>0) then
+            ndraw(28) = 1
+            nwhat     = 41 ! WAVE submenu
+            goto 1234
+         else
+            ndraw(28) = 0
+         end if
+      else if (ndraw(28).eq.numoptsf) then
+         if (jasecflow>0) then
+            ndraw(28) = 1
+            nwhat     = 42 ! SECF submenu
+            goto 1234
+         else
+            ndraw(28) = 0
+         end if
+      else if (ndraw(28).eq.numoptsed) then
+         if (stm_included) then
+            ndraw(28) = 1
+            nwhat     = 44 ! STM flow nodes submenu
+            goto 1234
+         else
+            ndraw(28) = 0
+         end if
+      end if
 
    ELSE IF (NWHAT .EQ. 11) THEN ! flow links
       EXP(1)    = 'MENU                                    '
@@ -2563,8 +2590,14 @@
       OPTION(45)= 'womegu                           (m/s  )'
       OPTION(46)= 'Layer Thickness at u             (m    )'
       OPTION(47)= 'Linear friction coefficient      (m/s  )'
-
-      MAXOPT    = 47
+      numopt = 47
+      if ( stm_included ) then
+         numopt = numopt+1
+         numoptsed = numopt
+         OPTION(numopt)= 'Sediment transport parameters           '
+      endif
+      
+      MAXOPT    = numopt
       NWHAT2    = NDRAW(29)
       CALL MENUV3(NWHAT2,OPTION,MAXOPT,EXP,MAXEXP)
       IF (NWHAT2 .NE. NDRAW(29) ) KEY = 3
@@ -2576,6 +2609,15 @@
          CALL PARAMTEXT(OPTION(NWHAT2),2)
       ENDIF
       NDRAW(29) = NWHAT2
+      if (ndraw(29).eq.numoptsed) then
+         if (stm_included) then
+            ndraw(29) = 1
+            nwhat     = 43 ! STM flow links submenu
+            goto 1234
+         else
+            ndraw(28) = 0
+         end if
+      end if
    ELSE IF (NWHAT .EQ. 12) THEN ! show values at net cell
       EXP(1)    = 'MENU                                    '
       EXP(2)    = 'SHOW net cells                          '
@@ -2637,7 +2679,8 @@
       OPTION(1) = 'Do NOt show flow links                  '
       OPTION(2) = 'Show All flow links                     '
       OPTION(3) = 'Show All flow link directions           '
-      MAXOPT    = 3
+      OPTION(4) = 'Show All dry flow links                 '
+      MAXOPT    = 4
       NWHAT2    = NDRAW(30)
       CALL MENUV3(NWHAT2,OPTION,MAXOPT,EXP,MAXEXP)
       IF (NWHAT2 .NE. NDRAW(30) ) KEY = 3
@@ -2928,7 +2971,7 @@
          NDRAWDOTS = NWHAT2
       end if
       KEY = 3
-   ELSE
+   ELSE IF (NWHAT .EQ. 40 ) THEN
       EXP(1)    = 'MENU                                    '
       EXP(2)    = 'SHOW PARTICLES YES/NO                   '
       OPTION(1) = 'DO NOT SHOW PARTICLES                   '
@@ -2938,6 +2981,110 @@
       CALL MENUV3(NWHAT2,OPTION,MAXOPT,EXP,MAXEXP)
       NDRAWPART = NWHAT2
       KEY = 3
+   ELSE IF (NWHAT.EQ.41) THEN          ! wave stuff
+      EXP(1)     = 'MENU                                    '
+      EXP(2)     = 'SHOW WAVEPARS YES/NO                    '
+      OPTION(1)  = 'Peak waveperiod                      (s)'
+      OPTION(2)  = 'Total shear stress (c+w)          (N/m2)'
+      OPTION(3)  = 'Wave force, magnitude             (N/m2)'
+      OPTION(4)  = 'Ustokes, magnitude                 (m/s)'
+      OPTION(5)  = 'RMS wave height                      (m)'
+      OPTION(6)  = 'Wave force, X component              (N)'
+      OPTION(7)  = 'Wave force, Y component              (N)'
+      OPTION(8)  = 'Bottom stress, X component        (N/m2)'
+      OPTION(9)  = 'Bottom stress, Y component        (N/m2)'
+      OPTION(10) = 'Stokes drift, X component          (m/s)'
+      OPTION(11) = 'Stokes drift, Y component          (m/s)'
+      OPTION(12) = 'Wave energy                          (J)'
+      OPTION(13) = 'Roller energy                        (J)'
+      OPTION(14) = 'RMS orbital velocity               (m/s)'
+      OPTION(15) = 'Wave dissipation                  (W/m2)'
+      OPTION(16) = 'Roller dissipation                (W/m2)'
+      OPTION(17) = 'Bulk roller energy                   (J)'
+      OPTION(18) = 'Radiation stress, X component     (N/m2)'
+      OPTION(19) = 'Radiation stress, Y component     (N/m2)'
+      OPTION(20) = 'Radiation stress, XY component    (N/m2)'
+      OPTION(21) = 'Wave number                      (rad/m)'
+      OPTION(22) = 'Wave direction              (deg from N)'
+      OPTION(23) = 'Depth gradient, X component          (-)'
+      OPTION(24) = 'Depth gradient, Y component          (-)'
+      OPTION(25) = 'Wind source term                   (J/s)'
+      if (jawave == 1 .or. jawave == 2) then
+         OPTION(26)= 'Fetch lenght dir1                    (m)'
+      else
+         OPTION(26)= ''
+      end if
+      MAXOPT     = 26
+      NWHAT2     = NDRAW(28)
+      CALL MENUV3(NWHAT2,OPTION,MAXOPT,EXP,MAXEXP)
+      NDRAW(28) = NWHAT2
+      KEY = 3
+      waveparopt = nwhat2
+      if ( nwhat2.gt.0 ) then
+         CALL PARAMTEXT(option(nwhat2),1)
+      end if
+      NDRAW(28) = numoptwav
+      
+   ELSE IF (NWHAT .EQ. 42) THEN     ! Spiral flow parameters
+      EXP(1)    = 'MENU                                    '
+      EXP(2)    = 'SHOW Spiral Flow Parameters YES/NO      '
+      OPTION(1) = 'Streamlines curvature              (1/m)'
+      OPTION(2) = 'Spiral flow intensity              (m/s)'
+      OPTION(3) = 'Dispersion stress by spiral flow  (m/s2)'
+      
+      MAXOPT    = 3
+      NWHAT2    = NDRAW(28)
+      CALL MENUV3(NWHAT2,OPTION,MAXOPT,EXP,MAXEXP)
+      NDRAW(28) = NWHAT2
+      KEY = 3
+      ispirparopt = nwhat2
+      
+      NDRAW(28) = numoptsf
+      if ( nwhat2.gt.0 ) then
+         CALL PARAMTEXT(option(nwhat2),1)
+      end if
+      
+   ELSE IF (NWHAT .EQ. 43) THEN     ! Sed trsp on flow links
+      EXP(1)    = 'MENU                                    '
+      EXP(2)    = 'SHOW Mophology Parameters YES/NO        '
+      OPTION(1) = 'Curr. rel. bedload transport    (kg/s/m)'
+      OPTION(2) = 'Curr. rel. suspended transport  (kg/s/m)'
+      OPTION(3) = 'Wave  rel. bedload transport    (kg/s/m)'
+      OPTION(4) = 'Wave  rel. susp. transport      (kg/s/m)'
+      OPTION(5) = 'Total transport                 (kg/s/m)'
+      
+      MAXOPT    = 5
+      NWHAT2    = NDRAW(29)
+      CALL MENUV3(NWHAT2,OPTION,MAXOPT,EXP,MAXEXP)
+      NDRAW(29) = NWHAT2
+      KEY = 3
+      sedparopt = nwhat2
+      
+      NDRAW(29) = numoptsed
+      if ( nwhat2.gt.0 ) then
+         CALL PARAMTEXT(option(nwhat2),2)
+      end if
+
+   ELSE IF (NWHAT .EQ. 44) THEN     ! Sed trsp on flow nodes
+      EXP(1)    = 'MENU                                    '
+      EXP(2)    = 'SHOW Mophology Parameters YES/NO        '
+      OPTION(1) = 'Bottom level change in last timestep (m)'
+      OPTION(2) = 'Sediment source adv. eq.       (kg/m3/s)'
+      OPTION(3) = 'Sediment sink   adv. eq.           (1/s)'
+      !OPTION(4) = 'Wave  rel. susp. transport      (kg/s/m)'
+      !OPTION(5) = 'Total transport                 (kg/s/m)'
+      
+      MAXOPT    = 3
+      NWHAT2    = NDRAW(28)
+      CALL MENUV3(NWHAT2,OPTION,MAXOPT,EXP,MAXEXP)
+      NDRAW(28) = NWHAT2
+      KEY = 3
+      sedparopt = nwhat2
+      
+      NDRAW(28) = numoptsed
+      if ( nwhat2.gt.0 ) then
+         CALL PARAMTEXT(option(nwhat2),1)
+      end if
    ENDIF
    RETURN
    END SUBROUTINE NDISPLAY
@@ -2947,7 +3094,7 @@
    SUBROUTINE changenetworkPARAMETERS()
    use m_netw
    use unstruc_display
-   USE M_TRIANGLE
+   use m_ec_triangle
    use m_missing
    use unstruc_version_module, only : unstruc_company, unstruc_program
 
@@ -4072,12 +4219,6 @@
    MP     = NPL
    L1     = 0
 
-   !call newfil( mout,'rightlev_0001.tim')
-   !do k = 1,40
-   !   write(mout,*) (k-1)*1440d0
-   !enddo
-   !call doclose (mout)
-
 
    CALL SAVEPOL()
 
@@ -4337,7 +4478,7 @@
 !        delete mode
          NPUT = -2
       ELSE IF (KEY .EQ. 81) THEN ! .OR. KEY .EQ. 81+32) THEN                      ! Q-key
-!         call split_pol(2,2,10,1)
+!         call split_pol(2,2,100,100)
       
           NPUT= 62
           L1 = 0
@@ -5103,22 +5244,26 @@ subroutine getktoplot(kk,k)
 
 
      SUBROUTINE KPLOTPLUSMIN(IPM)
-     USE M_FLOWGEOM
-     USE M_FLOW
-     implicit none
-     integer :: IP, IPM, NRLAY
+      USE M_FLOWGEOM
+      USE M_FLOW
+      use m_xbeach_data, only: itheta_view
+      implicit none
+      integer :: IP, IPM, NRLAY
 
-     if (kmx < 1) return
-      
-     ip = ipm
-     if (kplotfrombedorsurface .ne. 1) then 
-        ip = -1*ipm
-     endif   
+      if (kmx >= 1) then
 
-     KPLOT = KPLOT+ip
-     kplot = max(1,min(kplot,kmx))
+         ip = ipm
+         if (kplotfrombedorsurface .ne. 1) then 
+            ip = -1*ipm
+         endif   
+
+         KPLOT = KPLOT+ip
+         kplot = max(1,min(kplot,kmx))
       
-     CALL TEXTFLOW()
+         CALL TEXTFLOW()
+      else if ( jawave.eq.4 ) then
+         itheta_view = max(min(itheta_view + sign(1,ipm), ntheta), 1)
+      end if
      END SUBROUTINE KPLOTPLUSMIN
 
      SUBROUTINE nPLOTPLUSMIN(IPM)
@@ -5403,6 +5548,7 @@ subroutine getktoplot(kk,k)
       use unstruc_api
       use dfm_error
       use unstruc_messages
+      use gridoperations
       implicit none
       integer :: MODE, KEY
 
@@ -5785,6 +5931,12 @@ subroutine getktoplot(kk,k)
              kn(3,LL) = 5
              CALL TEKLINK(LL,1)
          ENDIF
+      ELSE IF (KEY .EQ. 38 .or. KEY .EQ. 54) THEN       ! 6, 1d branch 
+         CALL ISLINK(LL, XP, YP, ZP)
+         IF (LL /= 0) THEN
+             kn(3,LL) = 6
+             CALL TEKLINK(LL,1)
+         ENDIF
       ELSE IF (KEY .EQ. 71 .OR. KEY .EQ. 71+32) THEN    ! G-key  netw2curv
          CALL NETW2CURV(XP,YP)
          KEY = 3
@@ -5906,6 +6058,7 @@ subroutine getktoplot(kk,k)
       use m_snappol
       use dfm_error
       use unstruc_messages
+      use gridoperations
       implicit none
       integer :: MODE, KEY, kb , kt ,k
       integer :: newmode
@@ -6108,7 +6261,7 @@ subroutine getktoplot(kk,k)
       USE M_GRID
       implicit none
       integer :: nfld
-      integer, PARAMETER :: MAXOP = 50
+      integer, PARAMETER :: MAXOP = 64
       integer :: nwhat2, maxexp, maxopt, i
       CHARACTER*40 OPTION(MAXOP),EXP(MAXOP),FIELDOP
       EXP(1)    = 'MENU 10                                 '
@@ -6839,12 +6992,15 @@ subroutine getktoplot(kk,k)
 
 
       SUBROUTINE TEKNET(NCOL,ja)
+      
       use m_netw
       use unstruc_colors
+      use geometry_module, only: dbdistance
+      use gridoperations
+      
       implicit none
       integer :: ncol, ja
 
-      logical :: inview
       integer :: k, LMOD
       integer :: k0
       integer :: k1
@@ -6854,7 +7010,6 @@ subroutine getktoplot(kk,k)
       integer :: L, LL
       integer :: n
       integer :: ndraw
-      double precision, external :: dbdistance
       double precision :: d1, d2, x, y
 !      double precision :: t0, t1
       integer :: is, ie, ip
@@ -7035,8 +7190,12 @@ subroutine getktoplot(kk,k)
 
 
       SUBROUTINE TEKFACES()
+      
       use unstruc_colors
       use m_netw
+      use sorting_algorithms, only: indexx
+      use gridoperations
+      
       implicit none
       integer :: ierr
       integer :: k
@@ -7070,7 +7229,7 @@ subroutine getktoplot(kk,k)
             ZZ = ZZ/netcell(N)%N
             CALL DRIETWEE(XX,YY,ZZ,XP,YP,ZP(N))
          ENDDO
-         CALL INDEXX(NUMP,ZP,NP)
+         call indexx(NUMP,ZP,NP)
 
          DO L  = NUMP, 1, -1
             N  = NP(L)
@@ -7223,11 +7382,15 @@ SUBROUTINE DISPFLOWNODEVALS(KP)
 
 
   SUBROUTINE NETLINKVALS(MET,NCOL)
-  USE m_flowgeom, ONLY : XZ, YZ, lne2ln
-  USE M_MISSING
+  
+  use m_flowgeom, ONLY : XZ, YZ, lne2ln
+  use m_missing
   use network_data
   use m_alloc
   use m_flow, only: cftrt
+  use geometry_module, only: dbdistance, dcosphi
+  use m_sferic, only: jsferic, jasfer3D
+  use gridoperations
 
   implicit none
 
@@ -7258,7 +7421,7 @@ SUBROUTINE DISPFLOWNODEVALS(KP)
   double precision :: vmax
   double precision :: vmin
   double precision :: VV, WW, X3, Y3, X4, Y4
-  double precision :: xd, YD, ZD, DBDISTANCE, DCOSPHI
+  double precision :: xd, YD, ZD
   double precision :: areaL, areaR, xc, yc, aa
 
   double precision, external :: topo_info
@@ -7282,6 +7445,7 @@ SUBROUTINE DISPFLOWNODEVALS(KP)
   if ( netstat /= NETSTAT_OK ) then
      call findcells(100)
      call find1dcells()
+     netstat = NETSTAT_OK
   endif
 
   IF (MET .EQ. 15 .or. MET.EQ.16) THEN  ! topology information
@@ -7309,7 +7473,7 @@ SUBROUTINE DISPFLOWNODEVALS(KP)
                  X4 = XZ(iabs(LNE(2,L)))
                  Y3 = YZ(iabs(LNE(1,L)))
                  Y4 = YZ(iabs(LNE(2,L)))
-                 V  = DCOSPHI(XK(K1), YK(K1), XK(K2), YK(K2), X3, Y3, X4, Y4 )
+                 V  = DCOSPHI(XK(K1), YK(K1), XK(K2), YK(K2), X3, Y3, X4, Y4, jsferic, jasfer3D, dxymis)
                  if (v /= dmiss) then
                     v = abs(v)
                  end if
@@ -7338,7 +7502,7 @@ SUBROUTINE DISPFLOWNODEVALS(KP)
               V = 0d0 ! TODO: AvD: Mag weg
            ENDIF
         ELSE IF (MET .EQ. 10) THEN
-           V = DBDISTANCE( XK(K1), YK(K1), XK(K2), YK(K2) )
+           V = DBDISTANCE( XK(K1), YK(K1), XK(K2), YK(K2), jsferic, jasfer3D, dmiss)
         ELSE IF (MET .EQ. 11) THEN
            V = KN(3,L)
         ELSE IF (MET .EQ. 12) THEN
@@ -7375,7 +7539,7 @@ SUBROUTINE DISPFLOWNODEVALS(KP)
               if ( areaL.lt.1d-12 .or. areaR.lt.1d-12 ) cycle
               k1 = kn(1,L)
               k2 = kn(2,L)
-              aa = dbdistance(xk(k1), yk(k1), xk(k2), yk(k2) ) * dbdistance(xz(kL), yz(kL), xz(kR), yz(kR) )
+              aa = dbdistance(xk(k1), yk(k1), xk(k2), yk(k2), jsferic, jasfer3D, dmiss) * dbdistance(xz(kL), yz(kL), xz(kR), yz(kR), jsferic, jasfer3D, dmiss)
               V  = aa  / (areaR+areaL)
            end if
         ELSE IF (MET .EQ. 18) THEN 
@@ -7494,8 +7658,11 @@ SUBROUTINE DISPFLOWNODEVALS(KP)
   END SUBROUTINE NETNODEVALS
 
   SUBROUTINE MINMXNETLINS()
+  
   use m_netw
-  USE M_MISSING
+  use m_missing
+  use gridoperations
+  
   implicit none
   double precision :: dv
   integer :: i
@@ -7520,7 +7687,6 @@ SUBROUTINE DISPFLOWNODEVALS(KP)
   double precision :: zp1
   double precision :: zp2
   ! BEPAAL MINIMUM EN MAXIMUM VAN WAARDES BINNEN VIEWING AREA
-  LOGICAL DINVIEW
   COMMON /DEPMAX2/ VMAX,VMIN,DV,VAL(256),NCOLS(256),NV,NIS,NIE,JAAUTO
 
   IF (JAAUTO .EQ. 1) THEN
@@ -7567,11 +7733,12 @@ SUBROUTINE DISPFLOWNODEVALS(KP)
   SUBROUTINE MINMXNETNODS()
   use m_netw
   use m_missing
+  use gridoperations
+  
   implicit none
 
   integer          :: i, k
   double precision :: rd, rmax, rmin
-  LOGICAL DINVIEW
 
   double precision :: VMAX, VMIN, DV, VAL
   integer          :: NCOLS,NV,NIS,NIE,JAAUTO
@@ -7612,9 +7779,11 @@ SUBROUTINE DISPFLOWNODEVALS(KP)
   END SUBROUTINE MINMXNETNODS
 
 SUBROUTINE MINMXNETCELLS()
+  
   use m_netw
   use m_flowgeom
   use m_missing
+  use gridoperations 
 
   implicit none
 
@@ -7636,7 +7805,6 @@ SUBROUTINE MINMXNETCELLS()
   double precision, external :: znetcell
 
   ! BEPAAL MINIMUM EN MAXIMUM VAN DIEPTES BINNEN VIEWING AREA
-  LOGICAL DINVIEW
   COMMON /DEPMAX/ VMAX,VMIN,DV,VAL(256),NCOLS(256),NV,NIS,NIE,JAAUTO
 
   IF (JAAUTO .EQ. 1) THEN
@@ -7673,9 +7841,13 @@ SUBROUTINE MINMXNETCELLS()
 
 
   SUBROUTINE TEKNODEVALS(MET)
-  USE M_MISSING
+  USE m_missing
   use m_netw
+  use geometry_module, only: getdxdy, getdx, getdy 
+  use m_sferic, only: jsferic
   use unstruc_colors ! , ONLY :NCOLWARN1, ncolhl
+  use gridoperations
+  
   implicit none
   integer :: MET
 
@@ -7694,8 +7866,8 @@ SUBROUTINE MINMXNETCELLS()
 
   DOUBLE PRECISION XD,YD,ZD,DX,DY,DZ,XX1,YY1,ZZ1,XX2,YY2,ZZ2,X3,Y3,Z3,H
   double precision :: X(4), Y(4), Z(4)
-  double precision :: getrcir, getdx, getdy
-  LOGICAL INVNOD, inview
+  double precision :: getrcir
+  LOGICAL INVNOD
 
   COMMON /HOWTOVIEW/ JVIEW, JAV, XYZ ! 1,2,3 OF 4
 
@@ -7761,7 +7933,7 @@ SUBROUTINE MINMXNETCELLS()
                ELSE IF (MET .EQ. 4 .OR. MET .EQ. 7) THEN
                   ! XD = getdx (XX1, yy1, xx2, yy2)
                   ! YD = getdy (XX1, yy1, xx2, yy2)
-                  call getdxdy(XX1, yy1, xx2, yy2, xd, yd)
+                  call getdxdy(XX1, yy1, xx2, yy2, xd, yd, jsferic)
                   RD = SQRT(XD*XD + YD*YD)
                   IF (RD .NE. 0) THEN
                      IF (JVIEW .EQ. 1 .OR. JVIEW .EQ. 4) THEN
@@ -7864,9 +8036,13 @@ SUBROUTINE MINMXNETCELLS()
   END SUBROUTINE TEKNODENUMS
 
   SUBROUTINE TEKLINKVALS(MET)
-  USE M_MISSING
+  USE m_missing
   use m_netw
   use unstruc_colors, only: ncolhl
+  use geometry_module, only: getdx, getdy, getdxdy
+  use m_sferic, only: jsferic
+  use gridoperations
+  
   implicit none
   integer :: MET
 
@@ -7882,8 +8058,9 @@ SUBROUTINE MINMXNETCELLS()
   double precision :: xyz
 
   DOUBLE PRECISION XD,YD,ZD,DX,DY,DZ,XX1,YY1,ZZ1,XX2,YY2,ZZ2,X3,Y3,Z3
-  double precision :: X(4), Y(4), Z(4), GETRCIR, getdx, getdy, dbdistance
+  double precision :: X(4), Y(4), Z(4), GETRCIR
   logical :: invnod
+  
 
   integer :: NCOLS,NV,NIS,NIE,JAAUTO
   double precision :: VMAX,VMIN,DV,VAL
@@ -7922,7 +8099,7 @@ SUBROUTINE MINMXNETCELLS()
               ELSE IF (MET .EQ. 4 .OR. MET .EQ. 7) THEN
                  !XD = getdx (XX1, yy1, xx2, yy2)
                  !YD = getdy (XX1, yy1, xx2, yy2)
-                 call getdxdy(XX1, yy1, xx2, yy2, xd, yd)
+                 call getdxdy(XX1, yy1, xx2, yy2, xd, yd, jsferic)
                  RD = sqrt(xd*xd + yd*yd)
                  IF (RD .NE. 0) THEN
                     IF (JVIEW .EQ. 1 .OR. JVIEW .EQ. 4) THEN
@@ -8045,6 +8222,8 @@ SUBROUTINE MINMXNETCELLS()
         NCL = NCOLRN 
      else IF (KN(3,L) == 5) THEN ! 1d2d internal pipe
         NCL = NCOLSP 
+     else IF (KN(3,L) == 6) THEN ! 1d mainbranch
+        NCL = KLSAM 
      ENDIF
   ELSE
      NCL = NCOL
@@ -8155,6 +8334,7 @@ end subroutine highlight_nodesnlinks
 
 
       SUBROUTINE D1ARROWS(X,Y,Z,U,V,W,PSI0,VFAC)
+      use gridoperations
       implicit none
       double precision :: psi0
       double precision :: vfac
@@ -8503,9 +8683,12 @@ end subroutine highlight_nodesnlinks
 
 
    SUBROUTINE TEKSAM( XS,YS,ZS,NS,MET)
+      
       use unstruc_colors
       use m_missing, only: DMISS
       use unstruc_opengl, only: jaopengl
+      use gridoperations
+      
       implicit none
       double precision :: deltx, RC
       double precision :: delty
@@ -8531,7 +8714,6 @@ end subroutine highlight_nodesnlinks
       integer :: NS,MET
       double precision :: XS(NS), YS(NS), ZS(NS)
 !     TEKEN SAMPLES
-      LOGICAL INVIEW
       COMMON /PERSPX/ WPQR,DELTX,DELTY,DELTZ,ZFAC,DSCR,ZUPW
       COMMON /DRAWTHIS/ ndraw(50)
       COMMON /SAMPLESADM/  MCS,NCS,NS1
@@ -8626,7 +8808,10 @@ end subroutine highlight_nodesnlinks
 
 
    SUBROUTINE JGRLINE8(X,Y,N) ! TEKEN LIJN, INCL XYMISSEN, GEBRUIK VAN INVIEW EN PROJECTIE
-   USE M_MISSING
+   
+   use m_missing
+   use gridoperations
+   
    implicit none
    double precision   :: X(N), Y(N)
    integer            :: n
@@ -8639,7 +8824,6 @@ end subroutine highlight_nodesnlinks
    double precision   :: ya
    integer, parameter :: KMAX=4096     ! BEPERKING VAN INTERACTER
    real               :: XX(KMAX), YY(KMAX)
-   LOGICAL, EXTERNAL  :: INVIEW
 
    K  = 0
    L  = 0
@@ -9194,9 +9378,11 @@ end subroutine change_kml_parameters
 
       SUBROUTINE PLUSABSD(XK,YK,ZK,NUMK,KEY,EA)
       use m_polygon
-      USE M_MISSING
+      use m_missing
+      use geometry_module, only: dpinpok
+
       implicit none
-      INTEGER, PARAMETER     :: MAXOP = 50
+      INTEGER, PARAMETER     :: MAXOP = 64
       CHARACTER*40           :: OPTION(MAXOP),EXP(MAXOP)
       INTEGER                :: NUMK, KEY
       DOUBLE PRECISION       :: XK(NUMK), YK(NUMK), ZK(NUMK), EA(NUMK)
@@ -9205,19 +9391,21 @@ end subroutine change_kml_parameters
       INTEGER                :: ichange, inhul, ja, k, maxexp, maxopt, nwhat, kk
       DOUBLE PRECISION, SAVE :: A   = 1D0
 
-      JA        = 0
-      EXP(1)    = 'MENU TIG                                '
-      EXP(2)    = 'HOW TO REPLACE THE VALUES               '
-      OPTION(1) = 'FIELD = UNIFORM VALUE, only missings    '
-      OPTION(2) = 'FIELD = UNIFORM VALUE, all points       '
-      OPTION(3) = 'FIELD = MAX(FIELD,UNIFORM VALUE)        '
-      OPTION(4) = 'FIELD = MIN(FIELD,UNIFORM VALUE)        '
-      OPTION(5) = 'FIELD = FIELD + UNIFORM VALUE           '
-      OPTION(6) = 'FIELD = FIELD * UNIFORM VALUE           '
-      OPTION(7) = 'FIELD = MISSING VALUE -999.             '
-      OPTION(8) = 'SPECIFY UNIFORM VALUE                   '
-      MAXOPT    = 8
-      ICHANGE   = 1
+      JA         = 0
+      EXP(1)     = 'MENU TIG                                '
+      EXP(2)     = 'HOW TO REPLACE THE VALUES               '
+      OPTION(1)  = 'FIELD = UNIFORM VALUE, only missings    '
+      OPTION(2)  = 'FIELD = UNIFORM VALUE, all points       '
+      OPTION(3)  = 'FIELD = MAX(FIELD,UNIFORM VALUE)        '
+      OPTION(4)  = 'FIELD = MIN(FIELD,UNIFORM VALUE)        '
+      OPTION(5)  = 'FIELD = FIELD + UNIFORM VALUE           '
+      OPTION(6)  = 'FIELD = FIELD * UNIFORM VALUE           '
+      OPTION(7)  = 'FIELD = MISSING VALUE -999.             '
+      OPTION(8)  = 'FIELD = MISSING VALUE ABOVE UNIF VALUE  '
+      OPTION(9)  = 'FIELD = MISSING VALUE BELOW UNIF VALUE  '
+      OPTION(10) = 'SPECIFY UNIFORM VALUE                   '
+      MAXOPT     = 10
+      ICHANGE    = 1
    10 CONTINUE
       NWHAT = ICHANGE
       CALL SHOWREAL('UNIFORM VALUE = ',A)
@@ -9227,7 +9415,7 @@ end subroutine change_kml_parameters
          KEY = 0
          RETURN
       ELSE
-         IF (NWHAT .LE. 6) THEN
+         IF (NWHAT .LE. 8) THEN
             ICHANGE = NWHAT
             IF (A .EQ. dmiss) THEN
                CALL GETREAL('FIRST SPECIFY UNIFORM VALUE = ',A)
@@ -9236,9 +9424,9 @@ end subroutine change_kml_parameters
             ELSE
                JA = 1
             ENDIF
-         ELSE IF (NWHAT == 7) THEN
+         ELSE IF (NWHAT == 9) THEN
             ICHANGE = NWHAT
-         ELSE IF (NWHAT == 8) THEN
+         ELSE IF (NWHAT == 10) THEN
             CALL GETREAL('SPECIFY UNIFORM VALUE = ',A)
             IF (A .NE. dmiss) JA = 1
             GOTO 10
@@ -9266,30 +9454,34 @@ end subroutine change_kml_parameters
          RD = EA(K)
          JA = 0
          IF (NPL .GE. 3) THEN
-            CALL DPINPOK( XI, YI, ZI, NPL, XPL, YPL, INHUL)
+            CALL DPINPOK( XI, YI, ZI, NPL, XPL, YPL, INHUL, jins, dmiss)
             IF (INHUL .EQ. 1) JA = 1
          ELSE
             JA = 1
          ENDIF
            IF (JA .EQ. 1) THEN
-            DA = A
-            IF (ICHANGE .EQ. 1) THEN
-               IF (RD == dmiss) THEN
-                  EA(K) = DA
-               ENDIF
-            ELSE IF (ICHANGE .EQ. 2) THEN
-                  EA(K) = DA
-            ELSE IF (ICHANGE .EQ. 3) THEN
-               IF (RD /= dmiss) EA(K) = MAX(EA(K),DA)
-            ELSE IF (ICHANGE .EQ. 4) THEN
-               IF (RD /= dmiss) EA(K) = MIN(EA(K),DA)
-            ELSE IF (ICHANGE .EQ. 5) THEN
-               IF (RD /= dmiss) EA(K) = EA(K) + DA
-            ELSE IF (ICHANGE .EQ. 6) THEN
-               IF (RD /= dmiss) EA(K) = EA(K) * DA
-            ELSE IF (ICHANGE .EQ. 7) THEN
-               EA(K) = dmiss
-            ENDIF
+              DA = A
+              IF (ICHANGE .EQ. 1) THEN
+                 IF (RD == dmiss) THEN
+                    EA(K) = DA
+                 ENDIF
+              ELSE IF (ICHANGE .EQ. 2) THEN
+                    EA(K) = DA
+              ELSE IF (ICHANGE .EQ. 3) THEN
+                 IF (RD /= dmiss) EA(K) = MAX(EA(K),DA)
+              ELSE IF (ICHANGE .EQ. 4) THEN
+                 IF (RD /= dmiss) EA(K) = MIN(EA(K),DA)
+              ELSE IF (ICHANGE .EQ. 5) THEN
+                 IF (RD /= dmiss) EA(K) = EA(K) + DA
+              ELSE IF (ICHANGE .EQ. 6) THEN
+                 IF (RD /= dmiss) EA(K) = EA(K) * DA
+              ELSE IF (ICHANGE .EQ. 7) THEN
+                 EA(K) = dmiss
+              ELSE IF (ICHANGE .EQ. 8) THEN
+                 IF (RD /= dmiss .AND. EA(K) > DA) EA(K) = DMISS 
+              ELSE IF (ICHANGE .EQ. 9) THEN
+                 IF (RD /= dmiss .AND. EA(K) < DA) EA(K) = DMISS 
+              ENDIF
            ENDIF
    20 CONTINUE
       CALL READYY('CHANGE FIELD VALUES', -1d0)
@@ -9300,10 +9492,12 @@ end subroutine change_kml_parameters
 
       SUBROUTINE PLUSABSI(XK,YK,ZK,KN,NUMK,NUML,KEY,kndefault)
       use M_polygon
-      USE M_MISSING
+      USE m_missing
       use network_data, only: kn3typ
+      use geometry_module, only: dpinpok
+      use gridoperations
       implicit none
-      integer, parameter :: MAXOP = 50
+      integer, parameter :: MAXOP = 64
       integer :: NUMK, NUML, KEY
       DOUBLE PRECISION XK(NUMK), YK(NUMK), ZK(NUMK), XI, YI, ZI
       INTEGER KN(3,NUML)
@@ -9394,7 +9588,7 @@ end subroutine change_kml_parameters
          RD = kn(3,L)
          JA = 0
          IF (NPL .GE. 3) THEN
-            CALL DPINPOK( XI, YI, ZI, NPL, XPL, YPL, INHUL)
+            CALL DPINPOK( XI, YI, ZI, NPL, XPL, YPL, INHUL, jins, dmiss)
             IF (INHUL .EQ. 1) JA = 1
          ELSE
             JA = 1
@@ -9433,19 +9627,18 @@ end subroutine change_kml_parameters
   USE M_LANDBOUNDARY
   use m_wearelt
   USE unstruc_colors
+  use gridoperations
 
   implicit none
   integer :: NCOL
   integer :: NDRAW
   COMMON /DRAWTHIS/ ndraw(50)
 
-
   integer :: j1
   integer :: k
   integer :: ncl
   integer :: ncold
   double precision :: rh
-  logical :: inview
 
   IF (NDRAW(3) .EQ. 0) return
   
@@ -9846,9 +10039,11 @@ end subroutine change_samples_refine_param
 
 !> plot the ridges
 subroutine plot_ridges(ierror)
+   
    use m_samples
    use m_samples_refine
    use m_missing
+   use geometry_module, only: dbdistance
 
    implicit none
 
@@ -9858,7 +10053,7 @@ subroutine plot_ridges(ierror)
 
    double precision :: Dx, Dy, dum, Dh, x0, y0, x1, y1, x2, y2
 
-   double precision, external :: dbdistance, comp_sampleDh
+   double precision, external :: comp_sampleDh
 
    ierror = 1
 
@@ -10397,6 +10592,7 @@ end subroutine plot_ridges
       END
 
       SUBROUTINE DTEKTRI(X1,Y1,Z1,X2,Y2,Z2,X3,Y3,Z3,NCOL,NCOLR)
+      use gridoperations
       implicit none
       integer :: ncol
       integer :: ncolr
@@ -10411,6 +10607,7 @@ end subroutine plot_ridges
       END
 
       SUBROUTINE DTEKPENTA(X1,Y1,Z1,X2,Y2,Z2,X3,Y3,Z3,X4,Y4,Z4,X5,Y5,Z5,NCOL,NCOLR)
+      use gridoperations
       implicit none
       integer :: ncol
       integer :: ncolr
@@ -10427,6 +10624,7 @@ end subroutine plot_ridges
       END
 
       SUBROUTINE DPFILLER(X,Y,Z,N,NCOL,NCOLR)
+      use gridoperations
       implicit none
       integer :: k
       integer :: n
@@ -10443,7 +10641,8 @@ end subroutine plot_ridges
       END
 
       SUBROUTINE DMOVABS(XD,YD,ZD)
-      USE M_OLDZ
+      use m_oldz
+      use gridoperations
       implicit none
       double precision :: x
       double precision :: y
@@ -10455,8 +10654,9 @@ end subroutine plot_ridges
       END
 
       SUBROUTINE DLNABS(XD,YD,ZD)
-      USE M_OLDZ
-      USE M_MISSING
+      USE m_oldz
+      USE m_missing
+      use gridoperations
       implicit none
       double precision :: x
       double precision :: y
@@ -10470,6 +10670,7 @@ end subroutine plot_ridges
       END
 
       SUBROUTINE DPTABS(XD,YD,ZD)
+      use gridoperations
       implicit none
       double precision :: x
       double precision :: y
@@ -10703,13 +10904,13 @@ end subroutine plot_ridges
 
 !
       SUBROUTINE DISP2C(X,Y,N,RCIR,NCOL)
-      USE M_MISSING
+      use m_missing
+      use gridoperations
       implicit none
       integer          :: n, ncol
       double precision :: X(N), Y(N), rcir
 
       integer          :: i, istart, key, in
-      logical          :: inview
 !     LAAT EEN TWEEDIMENSIONALE FUNCTIE ZIEN MET CIRKELS
 
       IF (N .LE. 0) RETURN
@@ -11035,6 +11236,7 @@ end subroutine plot_ridges
       END
 
       SUBROUTINE DKCIR(XD,YD,ZD,V)
+      use gridoperations
       implicit none
       double precision :: v
       double precision :: x
@@ -11085,6 +11287,7 @@ end subroutine plot_ridges
       END
 
       SUBROUTINE DRCIRC(XD,YD,ZD)
+      use gridoperations
       implicit none
       double precision :: x
       double precision :: y
@@ -11133,6 +11336,7 @@ end subroutine plot_ridges
       END
    
       SUBROUTINE DCIRR(XD,YD,ZD,NCOL)
+      use gridoperations
       implicit none
       integer :: ncol
       double precision :: x
@@ -11170,6 +11374,40 @@ end subroutine plot_ridges
     yr(1:N) = y(1:N)
 
     CALL PFILLERCORE(xr,yr,N)
+
+    IF (.NOT. InOpenGLRendering .AND. (NCLR .NE. NCOL .or. ndraw(10) .ne. 0)) then
+        CALL realPolygon(Xr,Yr,N,NCLR)
+    ENDIF
+
+    RETURN
+   END
+   
+    SUBROUTINE PFILLERconcave(X,Y,N_,NCOL,NCLR)
+    use unstruc_opengl
+    implicit none
+    integer :: N_
+    integer :: nclr
+    integer :: ncol
+    integer :: ncolnow
+    integer :: ndraw
+    double precision :: X(N_), Y(N_)
+    COMMON /DRAWTHIS/ ndraw(50)
+    COMMON /COLNOW/ NCOLNOW
+    
+    integer :: N
+    
+    integer, parameter :: NMAX = 128
+    real xr(NMAX), yr(NMAX)
+
+    CALL SETCOL(NCOL)
+    
+!   safety
+    N = min(N_, NMAX)
+
+    xr(1:N) = x(1:N)
+    yr(1:N) = y(1:N)
+
+    CALL IGrPolygoncomplex(Xr,Yr,N) 
 
     IF (.NOT. InOpenGLRendering .AND. (NCLR .NE. NCOL .or. ndraw(10) .ne. 0)) then
         CALL realPolygon(Xr,Yr,N,NCLR)
@@ -11252,20 +11490,20 @@ end subroutine plot_ridges
 
       LOGICAL FUNCTION INVNOD(K)
       use m_netw
+      use gridoperations
       implicit none
       integer :: k
-      LOGICAL INVIEW
       INVNOD = INVIEW( XK(K), YK(K) )
       RETURN
       END
 
       LOGICAL FUNCTION INVLIN(L)
       use m_netw
+      use gridoperations
       implicit none
       integer :: k1
       integer :: k2
       integer :: l
-      LOGICAL INVIEW
       K1 = KN(1,L)
       K2 = KN(2,L)
 	  INVLIN = INVIEW( XK(K1), YK(K1) ) .OR. INVIEW( XK(K2), YK(K2) )
@@ -12764,6 +13002,7 @@ end subroutine plot_ridges
       END
 
       SUBROUTINE DGTEXT(TEX,XD,YD,ZD,NCOL)
+      use gridoperations
       implicit none
       integer :: ncol
       double precision :: x
@@ -12806,6 +13045,7 @@ end subroutine plot_ridges
     END SUBROUTINE
 
     SUBROUTINE DHTEXT(VAL,XD,YD,ZD)
+      use gridoperations
       implicit none
       double precision :: val
       double precision :: x
@@ -12847,6 +13087,7 @@ end subroutine plot_ridges
       END
 
       SUBROUTINE DHITEXT(IVAL,XD,YD,ZD)
+      use gridoperations
       implicit none
       integer :: ival
       double precision :: x
@@ -13115,7 +13356,7 @@ end subroutine plot_ridges
 
       SUBROUTINE XYDISFORMAT ()
       use m_sferic
-      USE M_WEARELT
+      use m_wearelt 
       implicit none
 
       double precision :: dv
@@ -13139,7 +13380,7 @@ end subroutine plot_ridges
       double precision :: val
       double precision :: vmax, XLC,YLC,XA,YA
       double precision :: vmin
-      double precision :: dlen, dbdistance
+      double precision :: dlen
 
 
       COMMON /DEPMAX/ VMAX,VMIN,DV,VAL(256),NCOLS(256),NV,NIS,NIE,JAAUTO
@@ -13413,9 +13654,14 @@ end subroutine plot_ridges
       END
 
       SUBROUTINE DISDIS()
+      
       use m_devices
+      use geometry_module, only: dbdistance
+      use m_missing, only: dmiss
+      use m_sferic, only: jsferic, jasfer3D
+
       implicit none
-      double precision :: dbdistance
+      
       double precision :: dis
       integer :: jashow
       integer :: jmouse
@@ -13432,7 +13678,7 @@ end subroutine plot_ridges
       CHARACTER DISTAN*24
 
       DISTAN = 'DIS:'
-      DIS    = dbdistance(xa,ya,xlc,ylc)
+      DIS    = dbdistance(xa,ya,xlc,ylc, jsferic, jasfer3D, dmiss)
       WRITE(DISTAN(6:),'(F17.5)') min(DIS,1d9)
       CALL KTEXT(DISTAN,IWS-22,3,15)
 
@@ -13476,7 +13722,6 @@ end subroutine plot_ridges
       YTOP   = MAX(0.95d0,1 - YBOT)
       XRIGHT = MAX(0.90d0,1 - XLEFT)
       call viewport(real(XLEFT),real(YBOT),real(XRIGHT),real(YTOP))
-!      call IPGAREA(real(XLEFT),real(YBOT),real(XRIGHT),real(YTOP))
 
       RETURN
       END
@@ -13705,6 +13950,10 @@ end subroutine plot_ridges
       NPY    = INFOSCREEN(5)
       NCOLR  = INFOSCREENMODE(6,MODE)
       NDEV   = MODE
+      
+     CALL ISCREENMODEOPTIONS(1,iws)
+     CALL ISCREENMODEOPTIONS(2,ihs)
+      
 !     IF (NOPSYS .EQ. 1) THEN
 
 !     ENDIF
@@ -13743,8 +13992,8 @@ end subroutine plot_ridges
       COMMON /LOCATORA/  XLC,YLC,XA,YA,JMOUSE,JASHOW
 
       JSFERIC = 0
-      CALL ISCREENMODEOPTIONS(1,NTXCOLS)
-      CALL ISCREENMODEOPTIONS(2,NTXROWS)
+     ! CALL ISCREENMODEOPTIONS(1,NTXCOLS)
+     ! CALL ISCREENMODEOPTIONS(2,NTXROWS)
       CALL ISCREENMODEOPTIONS(6,1)
       CALL ISCREENMODEOPTIONS(9,1)
       NOPSYS = INFOOPSYSTEM(1)
@@ -14804,7 +15053,7 @@ double precision :: value
       integer :: maxop
       integer :: maxopt
       integer :: nlevel
-      PARAMETER (MAXOP = 50)
+      PARAMETER (MAXOP = 20)
       CHARACTER*10 OPTION(MAXOP)
       CHARACTER WRDKEY*40
       COMMON /HELPNOW/ WRDKEY,NLEVEL
@@ -14827,7 +15076,7 @@ double precision :: value
    20 CONTINUE
       IF (JA .EQ. 1) THEN
          CALL TIMLIN()
-          CALL BOTLIN(0,1,KEY)
+         CALL BOTLIN(0,1,KEY)
          IF (NOPSYS .EQ. 1) THEN
             CALL ITEXTCOLOUR('BBLUE','BWHITE')
          ELSE
@@ -14885,7 +15134,7 @@ double precision :: value
       integer :: nlevel
       integer :: nstart
       integer :: nwhat
-      PARAMETER (MAXOP = 50)
+      PARAMETER (MAXOP = 64)
       CHARACTER*40 OPTION(MAXOP),EXP(MAXOP),WRDKEY
       COMMON /HELPNOW/ WRDKEY,NLEVEL
 !     Keuzemenu verticaal
@@ -14953,7 +15202,7 @@ double precision :: value
       integer :: nlevel
       integer :: nstart
       integer :: nwhat
-      PARAMETER (MAXOP = 50)
+      PARAMETER (MAXOP = 64)
       CHARACTER*40 OPTION(MAXOP),EXP(MAXOP),WRDKEY
       COMMON /HELPNOW/ WRDKEY,NLEVEL
 !     Keuzemenu verticaal
@@ -15659,7 +15908,7 @@ double precision :: value
       integer :: nput
       integer :: numb
       integer :: nwhat
-      PARAMETER (MAXOP = 50)
+      PARAMETER (MAXOP = 64)
       CHARACTER*14 OPTION(MAXOP), TEX*14
       CHARACTER WRDKEY*40
       COMMON /HELPNOW/ WRDKEY,NLEVEL
@@ -15719,7 +15968,7 @@ double precision :: value
          OPTION(10)=  'N=TONE '
          OPTION(11)=  'w/W=wat '
          OPTION(12)=  'b/B=lnd '
-         maxopt    = 6
+         maxopt    = min(12,iws/12) 
          endif
       ELSE IF (NUMB .EQ. 3) THEN
          OPTION(1) =  'A   = ANCHOR ;'
@@ -16062,42 +16311,17 @@ double precision :: value
       SUBROUTINE FILEMENU(MRGF,FILNAM)
       use unstruc_display
       use unstruc_version_module, only : unstruc_company, unstruc_program
-implicit none
-integer :: ih
-integer :: ihl
-integer :: imenuscroll
-integer :: imp
-integer :: infoinput
-integer :: inp
-integer :: iw
-integer :: ixp
-integer :: iyp
-integer :: jatab
-integer :: jazekr
-integer :: keepstartdir
-integer :: key
-integer :: l
-integer :: len
-integer :: maxfil
-integer :: maxhlp
-integer :: mrgf
-integer :: nahead
-integer :: nbut
-integer :: nlevel
-integer :: numdir
-integer :: numf
-integer :: numfil
-integer :: numtop
-integer :: numtxi
-integer :: numtxt
+      implicit none
+      integer :: ih, ihl, imenuscroll, imp, infoinput, inp, iw, ixp, iyp, jatab, jazekr, keepstartdir, key, l, len
+      integer :: maxfil, maxhlp, mrgf, nahead, nbut, nlevel, numdir, numf, numfil, numtop, numtxi, numtxt
 
 !     Gives menu with files filnam
 !     call with mrgf = 0 means LOAD, mrgf = 1  means SAVE, mrgf = 2 means get filename only
 !     return value -2 = old files not found, -1 = ESC
       PARAMETER (MAXHLP = 2000, MAXFIL = 2000)
       INTEGER IFDATE(MAXFIL), IFSIZE(MAXFIL)
-      CHARACTER  HLPTXT(MAXHLP)*80,FILIST(MAXFIL)*76,FILNAM*76,WRDKEY*40
-      CHARACTER  DIR*76, CURDIR*76, DIR2*76,FILNAM2*76
+      CHARACTER  HLPTXT(MAXHLP)*80,FILIST(MAXFIL)*86,FILNAM*86,WRDKEY*40
+      CHARACTER  DIR*86, CURDIR*86, DIR2*86,FILNAM2*86
       LOGICAL JA
       COMMON /HELPC/     HLPTXT,NUMTXT
       COMMON /STARTDIR/  KEEPSTARTDIR
@@ -16110,6 +16334,7 @@ integer :: numtxt
          jaopen = 0
       end if
 
+      
 !     Initialise
       CALL IWinWordWrap('OFF')
       CALL ITEXTCOLOURN(HLPFOR, HLPBCK)
@@ -16150,7 +16375,7 @@ integer :: numtxt
       CALL IWinOpen(IXP,IYP+3,IW,IH)
 !
       CALL ITEXTCOLOURN(LBLFOR,LBLBCK)
-      CALL IWinOutStringXY(2,7,'NAME / DIRECTORY                                     SIZE        DATE   TIME')
+      CALL IWinOutStringXY(2,7,'NAME / DIRECTORY                                               SIZE        DATE   TIME')
 !
 
       IF (MRGF .EQ. 0) THEN
@@ -16261,14 +16486,14 @@ integer :: numtxt
 
          IF (JATAB .EQ. 0) THEN
             IF (NUMF .LE. NUMDIR) THEN
-               CALL IOSDIRCHANGE( FILIST(NUMF)(1:44) )
+               CALL IOSDIRCHANGE( FILIST(NUMF)(1:54) )
                DIR = ' '
                CALL IOSDIRNAME(DIR)
                CALL ITEXTCOLOUR('BWHITE','BLU')
                CALL IOutStringXY(IXP+1,IYP+7, DIR)
                GOTO 20
             ELSE
-               WRITE(FILNAM,'(A)') FILIST(NUMF)(1:44)
+               WRITE(FILNAM,'(A)') FILIST(NUMF)(1:54)
             ENDIF
          ENDIF
 
@@ -16337,10 +16562,10 @@ integer :: numtxt
       integer :: numfil
       PARAMETER (MAXFIL = 2000)
       INTEGER IFDATE(MAXFIL), IFSIZE(MAXFIL)
-      CHARACTER FILIST(MAXFIL)*76,FILNAM*76
+      CHARACTER FILIST(MAXFIL)*86,FILNAM*(*)
       ! Work arrays for merging+sorting two file lists
       ! when multiple wildcard patterns are used in filnam.
-      character filistt(maxfil)*76
+      character filistt(maxfil)*86
       integer ifdatet(maxfil), ifsizet(maxfil)
 
       NUMFIL = MAXFIL
@@ -16454,23 +16679,23 @@ integer :: numtxt
                CALL IUPPERCASE( FILIST(I)(1:44) )
             ENDIF
             IF (FILIST(I)(1:3) .EQ. '.. ') THEN
-               WRITE(FILIST(I)(46:57),'(A12)') '      UP-DIR'
+               WRITE(FILIST(I)(56:67),'(A12)') '      UP-DIR'
             ELSE
-               WRITE(FILIST(I)(46:57),'(A12)') '     SUB-DIR'
+               WRITE(FILIST(I)(56:67),'(A12)') '     SUB-DIR'
             ENDIF
          ELSE
             IF (NOPSYS .NE. 4) THEN
-               CALL ILOWERCASE( FILIST(I)(1:44) )
+               CALL ILOWERCASE( FILIST(I)(1:54) )
             ENDIF
-            WRITE(FILIST(I)(46:57),'(I12)') IFSIZE(I)
+            WRITE(FILIST(I)(56:67),'(I12)') IFSIZE(I)
          ENDIF
 
          CALL IOsFileDate(IFDATE(I),IYEAR,IMONTH,IDAY)
-         WRITE(FILIST(I)(60:69),'(I2,A1,I2,A1,I4)') IDAY ,'-',IMONTH,'-',IYEAR
-         IF (IMONTH .LE. 9) WRITE(FILIST(I)(63:63),'(A1)') '0'
+         WRITE(FILIST(I)(70:79),'(I2,A1,I2,A1,I4)') IDAY ,'-',IMONTH,'-',IYEAR
+         IF (IMONTH .LE. 9) WRITE(FILIST(I)(73:73),'(A1)') '0'
          CALL IOsFileTime(IFDATE(I),IHOUR,MINUTE,ISECND)
-         WRITE(FILIST(I)(72:76),'(I2,A1,I2)') IHOUR,':',MINUTE
-         IF (MINUTE .LE. 9) WRITE(FILIST(I)(75:75),'(A1)') '0'
+         WRITE(FILIST(I)(82:86),'(I2,A1,I2)') IHOUR,':',MINUTE
+         IF (MINUTE .LE. 9) WRITE(FILIST(I)(85:85),'(A1)') '0'
    30 CONTINUE
       CALL ITEXTCOLOUR('WHITE','BLU')
       CALL IOUTMenuScroll(FILIST,NUMFIL,IXP,IYP+10,' ',IH-7,0,1)
@@ -17114,7 +17339,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
     integer, parameter  :: mxq = 1, mxclass = 1
     COMMON /DEPMAX/ VMAX,VMIN,DV,VAL(256),NCOLS(256),NV,NIS,NIE,JAAUTO
     COMMON /DEPMAX2/ VMAX2,VMIN2,DV2,VAL2(256),NCOLS2(256),NV2,NIS2,NIE2,JAAUTO2
-    CHARACTER FILNAM*(*), FOLNAM*76
+    CHARACTER FILNAM*(*), FOLNAM*86
     FOLNAM = FILNAM
     IF (FILNAM(1:5) .EQ. '*.hls') THEN
        MINP   = 0
@@ -17892,13 +18117,14 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
    
    SUBROUTINE CHANGENUMERICALPARAMETERS4()
    USE M_FLOW
+   use m_flowgeom
    use unstruc_display
    use unstruc_version_module, only : unstruc_company, unstruc_program
    use unstruc_messages
    implicit none
 
    integer :: numpar, numfld, numparactual, numfldactual
-   PARAMETER  (NUMPAR = 1, NUMFLD = 2*NUMPAR)
+   PARAMETER  (NUMPAR = 6, NUMFLD = 2*NUMPAR)
    INTEGER  IX(NUMFLD),IY(NUMFLD),IS(NUMFLD),IT(NUMFLD)
    CHARACTER WRDKEY*40, OPTION(NUMPAR)*40, HELPM(NUMPAR)*60
    integer :: nlevel
@@ -17911,13 +18137,23 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
 
    NLEVEL     = 4
    OPTION( 1) = 'vicouv_filter                    (m2/s)' ; it(2* 1) = 6
+   OPTION( 2) = 'wu1DUNI                          (m)   ' ; it(2* 2) = 6
+   OPTION( 3) = 'hh1DUNI                          (m)   ' ; it(2* 3) = 6
+   OPTION( 4) = 'wu1DUNI5                         (m)   ' ; it(2* 4) = 6
+   OPTION( 5) = 'hh1DUNI5                         (m)   ' ; it(2* 5) = 6
+   OPTION( 6) = 'japiaczek33                      ( )   ' ; it(2* 6) = 2
 
    
 !   123456789012345678901234567890123456789012345678901234567890
 !            1         2         3         4         5         6
 
    HELPM ( 1) = 'Distance coeff (0.8)                                    ( ) '
-   
+   HELPM ( 2) = 'Uniform 1D width                                        ( ) '
+   HELPM ( 3) = 'Uniform 1D height                                       ( ) '
+   HELPM ( 4) = 'Uniform width  of 1D2D connection type 5 for drains     ( ) '
+   HELPM ( 5) = 'Uniform height of 1D2D connection type 5 for drains     ( ) '
+   HELPM ( 6) = '0=no, 1 = yes                                           ( ) '
+
    
    CALL SAVEKEYS()
    NUMPARACTUAL = NUMPAR
@@ -17986,6 +18222,11 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
    ENDDO
 
    CALL IFORMputdouble  (2* 1 ,vicouv_filter, '(F7.3)' )       
+   CALL IFORMputdouble  (2* 2 ,wu1DUNI , '(F7.3)' )       
+   CALL IFORMputdouble  (2* 3 ,hh1DUNI , '(F7.3)' )       
+   CALL IFORMputdouble  (2* 4 ,wu1DUNI5, '(F7.3)' )       
+   CALL IFORMputdouble  (2* 5 ,hh1DUNI5, '(F7.3)' )       
+   CALL IFORMputinteger (2* 6 ,japiaczek33 )       
 
    
    !  Display the form with numeric fields left justified
@@ -18026,6 +18267,11 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
        IF (KEY .EQ. 22) THEN
 
           CALL IFORMGETdouble  (2* 1 ,vicouv_filter)   
+          CALL IFORMgetdouble  (2* 2 ,wu1DUNI  )       
+          CALL IFORMgetdouble  (2* 3 ,hh1DUNI  )       
+          CALL IFORMgetdouble  (2* 4 ,wu1DUNI5 )       
+          CALL IFORMgetdouble  (2* 5 ,hh1DUNI5 ) 
+          CALL IFORMgetinteger (2* 6 ,japiaczek33 )       
           
        ENDIF
        CALL IWinClose(1)
@@ -18359,7 +18605,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
    OPTION(10) = 'Initial timestep                    (s) ' ; it(2*10) = 6
    OPTION(11) = 'Current time                        (s) ' ; it(2*11) = 6
    OPTION(12) = 'Smoothing time boundaries Tlfsmo    (s) ' ; it(2*12) = 6
-   OPTION(13) = 'Dtfacmax                            ( ) ' ; it(2*12) = 6
+   OPTION(13) = 'Dtfacmax                            ( ) ' ; it(2*13) = 6
 
    
 !   123456789012345678901234567890123456789012345678901234567890
@@ -18446,19 +18692,19 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
       CALL IFORMATTRIBUTEN(IR,0,0,7)
    ENDDO
 
-   CALL IFormPutDouble  (2* 1 ,dt_user          , '(F8.2)')
-   CALL IFormPutDouble  (2* 2 ,dt_max           , '(F8.2)')
+   CALL IFormPutDouble  (2* 1 ,dt_user          ,'(F10.3)')
+   CALL IFormPutDouble  (2* 2 ,dt_max           ,'(F10.3)')
    CALL IFORMPUTINTEGER (2* 3 ,ja_timestep_auto           )
    CALL IFormPutDouble  (2* 4 ,tstart_user      ,'(F10.0)')
    CALL IFormPutDouble  (2* 5 ,tstop_user       ,'(F10.0)')
-   CALL IFormPutDouble  (2* 6 ,ti_his           ,'(F10.2)')
-   CALL IFormPutDouble  (2* 7 ,ti_map           ,'(F10.2)')
-   CALL IFormPutDouble  (2* 8 ,ti_rst           ,'(F10.2)')
-   CALL IFormPutDouble  (2* 9 ,ti_waq           ,'(F10.2)')
-   CALL IFormPutDouble  (2*10 ,dt_init          ,'(F10.0)')
-   CALL IFormPutDouble  (2*11 ,time1            ,'(F10.0)')
-   CALL IFormPutDouble  (2*12 ,Tlfsmo           ,'(F10.2)')
-   CALL IFormPutDouble  (2*13 ,Dtfacmax         ,'(F10.2)')
+   CALL IFormPutDouble  (2* 6 ,ti_his           ,'(F10.3)')
+   CALL IFormPutDouble  (2* 7 ,ti_map           ,'(F10.3)')
+   CALL IFormPutDouble  (2* 8 ,ti_rst           ,'(F10.3)')
+   CALL IFormPutDouble  (2* 9 ,ti_waq           ,'(F10.3)')
+   CALL IFormPutDouble  (2*10 ,dt_init          ,'(F10.3)')
+   CALL IFormPutDouble  (2*11 ,time1            ,'(F10.3)')
+   CALL IFormPutDouble  (2*12 ,Tlfsmo           ,'(F10.3)')
+   CALL IFormPutDouble  (2*13 ,Dtfacmax         ,'(F10.3)')
    
    ! Display the form with numeric fields left justified
    ! and set the initial field to number 2
@@ -18578,7 +18824,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
 !            1         2         3         4         5         6
 
    HELPM ( 1) = 'uniform friction coefficient                                '
-   HELPM ( 2) = ' 0=Chz, 1=Mann, 2=White-Col, 3=z0, 10=Glass                 '
+   HELPM ( 2) = ' 0=Chz, 1=Mann, 2=White-Col, 3=White-Col-Waqua, 10=Glass    '
    HELPM ( 3) = '                                                            '
    HELPM ( 4) = '                                                            '
    HELPM ( 5) = 'background horizontal viscosity                             '
@@ -18792,7 +19038,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
    OPTION( 4)= 'anglat                            (deg) ' ; it(2* 4) = 6
    OPTION( 5)= 'ibedlevtyp                          ( ) ' ; it(2* 5) = 2
    OPTION( 6)= 'Kmx, nr of Vertical sigma layers    ( ) ' ; it(2* 6) = 2
-   OPTION( 7)= 'Jahazlayer                          ( ) ' ; it(2* 7) = 2
+   OPTION( 7)= 'Jazlayercenterbedvel                ( ) ' ; it(2* 7) = 2
    OPTION( 8)= 'Jasfer3D                            ( ) ' ; it(2* 8) = 2
    OPTION( 9)= 'Jalimnor                            ( ) ' ; it(2* 9) = 2
    OPTION(10)= 'minimum 1D link length,            (m ) ' ; it(2*10) = 6
@@ -18914,7 +19160,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
    CALL IFormPutDouble  (2*4 ,anglat,   '(F8.3)')
    CALL IFORMPUTINTEGER (2*5 ,ibedlevtyp        )
    CALL IFORMPUTINTEGER (2*6 ,kmx               )
-   CALL IFORMPUTINTEGER (2*7 ,Jahazlayer        )
+   CALL IFORMPUTINTEGER (2*7 ,Jazlayercenterbedvel)
    CALL IFORMPUTINTEGER (2*8 ,jasfer3D          )
    CALL IFORMPUTinteger (2*9 ,jalimnor          )
    CALL IFORMPUTdouble  (2*10,dxmin1D,   '(F8.3)' )
@@ -18974,7 +19220,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
            CALL IFormGetDouble  (2*4 ,anglat      )
            CALL IFORMgeTINTEGER (2*5 ,ibedlevtyp  )
            CALL IFORMgeTINTEGER (2*6 ,kmx         ) 
-           CALL IFORMgeTINTEGER (2*7 ,Jahazlayer  )
+           CALL IFORMgeTINTEGER (2*7 ,Jazlayercenterbedvel  )
            CALL IFORMgeTINTEGER (2*8 ,jasfer3D    )
            CALL IFORMgetinteger (2*9 ,jalimnor    )
            CALL IFORMgetdouble  (2*10,dxmin1D        )
@@ -19257,13 +19503,15 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
       END SUBROUTINE CHANGEGRIDPARAMETERS
 
    SUBROUTINE CHANGEINTERPOLATIONPARAMETERS()
-   use m_INTERPOLATIONsettings
+   use m_ec_interpolationsettings
+   use M_SAMPLES, only : mxsam
+   use m_arcinfo, only : mca
    use unstruc_display
    use unstruc_version_module, only : unstruc_company, unstruc_program
 
    implicit none
    integer :: numpar, numfld, numparactual, numfldactual
-   PARAMETER  (NUMPAR = 7, NUMFLD = 2*NUMPAR)
+   PARAMETER  (NUMPAR = 8, NUMFLD = 2*NUMPAR)
    INTEGER  IX(NUMFLD),IY(NUMFLD),IS(NUMFLD),IT(NUMFLD)
    CHARACTER WRDKEY*40, OPTION(NUMPAR)*45, HELPM(NUMPAR)*60
    integer :: nlevel
@@ -19282,7 +19530,9 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
    OPTION( 5) = 'RCEL, RELATIVE SEARCH CELL SIZE            ' ; it(2* 5) = 6
    OPTION( 6) = 'Interpolate_to , 1=bathy, 2=ZK, 3=S1, 4=ZC ' ; it(2* 6) = 2
    OPTION( 7) = 'Percentileminmax, average min or max Perc %' ; it(2* 7) = 6
+   OPTION( 8) = 'Mxsam                                      ' ; it(2* 8) = 2
 
+   
 !   123456789012345678901234567890123456789012345678901234567890
 !            1         2         3         4         5         6
 
@@ -19293,7 +19543,9 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
    HELPM ( 5) = 'DEFAULT 1.0 = ACTUAL CELL SIZE, 2.0 = TWICE AS LARGE        '
    HELPM ( 6) = '1=? , 2=network, 3=waterlevels, 4=curvigrid                 '
    HELPM ( 7) = 'if Perc>0, for iav == 3 or iav==4, av of hih or low percenti'
+   HELPM ( 8) = 'if >0, use bilin instead of triinterp                      '
 
+   
    CALL SAVEKEYS()
 
    NUMPARACTUAL = NUMPAR
@@ -19368,6 +19620,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
    CALL IFormPutDouble  (2* 5 , RCEL            ,'(F8.3)')
    CALL IFormPutINTEGER (2* 6 , Interpolate_to           )
    CALL IFormPutDouble  (2* 7 , percentileminmax,'(F8.3)')
+   CALL IFormPutINTEGER (2* 8 , Mxsam                    )
 
    !  Display the form with numeric fields left justified
    !  and set the initial field to number 2
@@ -19412,7 +19665,10 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
           CALL IFormGEtDouble  (2* 5 , RCEL                     )
           CALL IFormGEtINTEGER (2* 6 , Interpolate_to           )
           CALL IFormGEtDouble  (2* 7 , Percentileminmax         )
-      ENDIF
+          CALL IFormGEtinteger (2* 8 , Mxsam                    )
+          if (mxsam == 0) mca = 0
+
+       ENDIF
        CALL IWinClose(1)
        CALL IWinClose(1)
        CALL IWinClose(1)
@@ -19988,10 +20244,12 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
       use m_polygon
       use m_missing
       use unstruc_display
+      use geometry_module, only: dbpinpol
+      use gridoperations
+
       implicit none
       integer          :: i,j,n,ncol,jatel,in,k,im,jm,mxnum
       double precision :: xx(4),yy(4),x,y,z
-      logical          :: inview
 
       double precision :: vmax, vmin, dv, val
       integer          :: ncols, nv, nis, nie, jaauto
@@ -20055,7 +20313,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
                 if (jatel == 1) then
                    in = -1
                    do k = 1,nump
-                      call dbpinpol( xzw(k), yzw(k), in)
+                      call dbpinpol( xzw(k), yzw(k), in,  dmiss, JINS, NPL, xpl, ypl, zpl)
                       ijyes(i,j) = ijyes(i,j) + in
                    enddo
                 else
@@ -20318,6 +20576,9 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
  use m_flow
  use m_wind
  use m_reduce
+ use m_sferic, only: jsferic
+ use geometry_module, only: getdx, getdy, getdxdy
+ use gridoperations
 
  use m_observations
 
@@ -20342,11 +20603,9 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
  double precision :: zn, x(4), y(4), z(4), zl
  integer          :: jview = 1                       ! for now fix regular
  integer          :: model24 = 0                     ! colourmodel 0/1
- logical          :: inview
  double precision :: ux, uy                          ! x-y velocity components
 
- double precision :: rt, rr0, dddx, dddy, uux, uuy
- double precision :: getdx, getdy                    ! ja, externals
+ double precision :: rt, rr0, dddx, dddy, uux, uuy 
  integer          :: n, ja, ja2, nsiz
 
  ! ndraw(28)= show what on nodes   ndraw(19)=how to show on nodes , NDRAW(8) = SHOW WHAT ON NETNODES
@@ -20496,7 +20755,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
     enddo
  endif
 
- if (ndraw(30) .ge. 2) then                          ! show links
+ if (ndraw(30) .ge. 2) then                          ! show links in white
     call setcol(221)  ! NCOLRG)
     do L = 1,lnx
        k1 = ln(1,L)
@@ -20508,41 +20767,38 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
           XX2 = XZ(K2)
           YY2 = YZ(K2)
           ZZ2 = Bob(2,L)
-          if (ndraw(30) .eq. 2 .or. ndraw(30) .eq. 4) then
+          if (ndraw(30) .eq. 2) then
              call dmovabs( Xx1, Yy1, Zz1 )
              call dlnabs ( Xx2, Yy2, Zz2 )
              call dcirr  ( Xx1, Yy1, Zz1, 221 )
              call dcirr  ( Xx2, Yy2, Zz2, 221 )
           else if (ndraw(30) .eq. 3) then
-              if (L > lnx1D) then
+             if (L > lnx1D) then
                 k3  = lncn(1,L)
                 k4  = lncn(2,L)
                 X3  = 0.5d0*(Xk(k3)+Xk(k4))
-                Y3 = 0.5d0*(Yk(k3)+Yk(k4))
+                Y3  = 0.5d0*(Yk(k3)+Yk(k4))
               else ! Arrows for 1D links
-                X3 = X1
-                Y3=Y1
+                X3=XX1
+                Y3=YY1
               end if
               call arrowrcir(x3, y3, csu(L), snu(L) )
+          else if (ndraw(30) .eq. 4) then
+              if (hu(L) < epshs) then 
+                 if (abs(kcu(L)) == 2) then
+                    k3  = lncn(1,L)
+                    k4  = lncn(2,L)
+                    call movabs(xk(k3), yk(k3)) 
+                    call  lnabs(xk(k4), yk(k4)) 
+                 else 
+                    call movabs(xx1, yy1) 
+                    call  lnabs(xx2, yy2) 
+                 endif  
+              endif   
           endif
        endif
     enddo
-
-    if (ndraw(30) .eq. 4) then
-       do k = 1,ndx
-          rt = 0
-          do n = 1,nd(k)%lnx
-             dddx = getdx( xz(k), nd(k)%x(n), yz(k), nd(k)%y(n) )
-             dddy = getdy( xz(k), nd(k)%x(n), yz(k), nd(k)%y(n) )
-             call getdxdy( xz(k), nd(k)%x(n), yz(k), nd(k)%y(n), dddx, dddy )
-             rr0  = sqrt(dddx*dddx + dddy*dddy)
-             rt   = rt + rr0
-          enddo
-          rt = rt /dble(nd(k)%lnx)
-          call hkcircle(xz(k), yz(k),Rt)
-       enddo
-    endif
-
+  
  endif
 
 
@@ -20628,10 +20884,10 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
  use unstruc_display
  use m_flowgeom
  use m_flow
+ use gridoperations
  implicit none
  integer :: nodemode, nodewhat,ndraw
  integer :: k, ja, nn, ncol
- logical :: inview
  double precision :: znod, zn
  common /drawthis/ ndraw(50)
 
@@ -20697,10 +20953,10 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
  use m_flow
  use m_sferic
  use m_missing
+ use gridoperations
  implicit none
  integer :: nodemode, nodewhat,ndraw(50)
  integer :: k, L, ja, ja2, k1, k2, nn, ncol, linkmode
- logical :: inview
  double precision :: zlin, zL
  double precision :: xcl, ycl, zcl                   ! help only
  double precision :: xx1, yy1, Zz1                   ! help only
@@ -20822,10 +21078,10 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
  use m_flow
  use m_missing
  use m_transport
+ use gridoperations
  implicit none
  integer :: nodemode, nodewhat,ndraw(50)
  integer :: k, ja, ja2, nn, ncol
- logical :: inview
  double precision :: znod, zn, x(8), y(8)
  common /drawthis/ ndraw
 
@@ -20949,6 +21205,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
  use m_sediment
  use m_strucs
  use m_flowexternalforcings
+ use gridoperations
  
  implicit none
 
@@ -20974,7 +21231,6 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
  double precision :: xp(4), yp(4), zp(4), xxmn, xxmx, zn, dlay, dl, xp1, yp1, qsrck
  integer          :: mx, kb, kt, Lb, Lt, LL
  double precision, external    :: znod, zlin
- logical, external             :: inview
 
  double precision, allocatable ::   plotlin2(:)
  integer         , allocatable :: ip(:), ip2(:)
@@ -21325,7 +21581,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
 
  call tekrailinesbathy(31,ymn,zmn,0,1) ! bl
 
- if (jased > 0 .and. jased < 4) then
+ if (jased > 0 .and. jased < 4 .and. .not. stm_included) then
     do j = 1,mxgr
        call tekrailinesbathy(15,ymn,zmn,0,1+j) ! grainlay 1,2 etc
     enddo
@@ -21376,7 +21632,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
     do n  = L1gatesg(ng), L2gatesg(ng)
        L  = kgate(3,n) ; k1 = ln(1,L) ; k2 = ln(2,L) 
        bup = min( bob(1,L), bob(2,L) )
-       call fbox(xz(k1),zgaten,xz(k2),zgaten+10d0)
+       call fbox(xz(k1),zgaten,xz(k2),zgaten+20d0)
        ! call fbox(xz(k1),bup   ,xz(k2),bup-10d0)
     enddo
  enddo
@@ -21390,7 +21646,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
 
        bup = min( bob(1,L), bob(2,L) )
        doorh = 10d0
-       if (generalstruc(ng)%gatedoorheight < 10d10 .and. generalstruc(ng)%gatedoorheight < 10d10) then
+       if (generalstruc(ng)%gatedoorheight < 1d10 .and. generalstruc(ng)%gatedoorheight < 1d10) then
          if (generalstruc(ng)%gatedoorheight > 0d0) doorh = generalstruc(ng)%gatedoorheight 
          call fbox(xz(k1),zgaten,xz(k2),zgaten+doorh)
        end if
@@ -22019,7 +22275,7 @@ subroutine isosmoothflownode2(k) ! smooth isolines in flow cells use depmax2
  implicit none
  double precision,external :: znod, zlin
  double precision :: cpuperstep, solrest, znn, dtav
- integer :: nn, LL, nnn
+ integer :: nn, LL, nl
 
  CHARACTER TEX*210
  character, save :: TEX1*210 = '@'
@@ -22052,7 +22308,7 @@ subroutine isosmoothflownode2(k) ! smooth isolines in flow cells use depmax2
 
  TEX =  ' '
  solrest = 0
- if (cpusteps(3)-cpusol(3) .ne. 0) solrest = cpusol(3)/ (cpusteps(3)-cpusol(3))
+ if (cpusteps(3)-cpusol(3) .ne. 0) solrest = cpusol(3)/ (cpusteps(3)-cpusol(3) )
  cpuperstep = max(0d0, min(100d0,  (cpusteps(2) - cpusteps(1)) ) )
 
  call maketime(tex,time1)
@@ -22073,13 +22329,12 @@ subroutine isosmoothflownode2(k) ! smooth isolines in flow cells use depmax2
  TEX =  ' '
  if (ndraw(29) <2) then
     znn = znod(nn)
-    WRITE (TEX,'(A,I3,I6,A,e14.8,A,e14.8,A,e14.8,A,I6,A,I10,A,I5)') &
+    WRITE (TEX,'(A,I3,I6,A,e14.8,A,e14.8,A,e14.8,A,I6,A,I10,A,I10)') &
     'k/nplot: ', KPLOT, nplot, ' znod(nn): ', znn, ' Vol1: ', vol1tot,  ' Vler: ', volerrcum,  &
     ' #setb: ', int(dsetb), ' #dt: ', int(dnt), ' #itsol: ', itsol
  else
-    nnn = nn 
-    call getlink1(nnn,nn) 
-    znn = zlin(nn)
+    call getlink1(nn,nl) 
+    znn = zlin(nl)
     WRITE (TEX,'(A9,I3,1X,I6,1X,A,e14.8,1X,A10,e14.8,1X,A8,e14.8,1X,A7,I6,1X,A5,I10,1X,A8,I5)') &
     'k/nplot: ', KPLOT, nplot, 'zlin(nn): ', znn, 'Vol1: ', vol1tot,  'Vler: ', volerrcum,  &
     '#setb: ', int(dsetb), '#dt: ', int(dnt), '#itsol: ', itsol
@@ -22139,6 +22394,7 @@ subroutine isosmoothflownode2(k) ! smooth isolines in flow cells use depmax2
   USE UNSTRUC_DISPLAY
   use m_waves, only : ustokes
   use m_sediment, only : jased, sed
+  use m_transport, only : constituents, numconst, itemp, iconst_cur, const_names, NUMCONST, ISED1, ISEDN
   implicit none
 
 
@@ -22152,6 +22408,7 @@ subroutine isosmoothflownode2(k) ! smooth isolines in flow cells use depmax2
 
   double precision :: VMAX2,VMIN2,DV2,VAL2
   integer          :: NCOLS2,NV2,NIS2,NIE2,JAAUTO2, is, Ls, LLs, Lbs, Lts
+  integer          :: iconst
 
   integer          :: ndraw
   COMMON /DRAWTHIS/ ndraw(50)
@@ -22423,6 +22680,28 @@ subroutine isosmoothflownode2(k) ! smooth isolines in flow cells use depmax2
      endif
      call TEKFN(6,11, 1, dijdij(0:km), hwref  , Lm1, vmin, vmax, zmin, zmax, KLPROF, 'Bruva'      , 0, 2 , 0d0,kplot+1)
      
+  else if ( iconst_cur.gt.0 .and. iconst_cur.le.NUMCONST ) then
+      
+      
+      vmin = 1d2
+      vmax = -1d2
+      vmin = min(vmin, minval(constituents(iconst_cur,kb:kt)) )
+      vmax = max(vmax, maxval(constituents(iconst_cur,kb:kt)), vmin+1d-5 )
+      
+      call TEKFN(6,11, 1, constituents(iconst_cur,kb:kt)  , hcref  , km, vmin, vmax, zmin, zmax, 221, trim(const_names(iconst_cur)) , 1, 2 , 0d0,kplot)
+  
+      !vmin = 1d2
+      !vmax = -1d2
+      !do iconst=ISED1,ISEDN
+      !   vmin = min(vmin, minval(constituents(iconst,kb:kt)) )
+      !   vmax = max(vmax, maxval(constituents(iconst,kb:kt)), vmin+1d-5 )
+      !end do
+      !
+      !do iconst=ISED1,ISEDN
+      !   call TEKFN(6,11, 1, constituents(iconst,kb:kt)  , hcref  , km, vmin, vmax, zmin, zmax, 221, 'all seds', 1, 2 , 0d0,kplot)
+      !end do
+  
+ 
   else
 
    if (frcuni > 0 .and. ndraw(35) == 1 ) then
@@ -22441,13 +22720,13 @@ subroutine isosmoothflownode2(k) ! smooth isolines in flow cells use depmax2
 
   if (jatem > 0) then 
      if (jafahrenheit > 0) then 
-        dijdij(1:km) = 32d0 + tem1(kb:kt)*1.8d0
-        call getvminmax(7,vmin,vmax,dijdij, km) 
+        dijdij(1:km) = 32d0 + constituents(itemp, kb:kt)*1.8d0
         vmin = 70d0 ; vmax = 90d0
-        call TEKFN(7, 13, 1, dijdij(1:km) , hcref   , km, vmin, vmax, zmin, zmax, KLPROF, 'TFahrenheit' , 0, 2 , 0d0,kplot)
+        call TEKFN(7, 13, 1, dijdij(1:km) , hcref   , km, vmin, vmax, zmin, zmax, KLPROF, 'Temp (F)' , 0, 2 , 0d0,kplot)
      else   
-       call getvminmax(7,vmin,vmax,tem1(kb:), km) 
-       call TEKFN(7, 13, 1, tem1(kb:kt) , hcref   , km, vmin, vmax, zmin, zmax, KLPROF, 'temperature' , 0, 2 , 0d0,kplot)
+        dijdij(1:km) = constituents(itemp, kb:kt)    
+        call getvminmax(7,vmin,vmax,dijdij(1:km), km) 
+        call TEKFN(7, 13, 1, dijdij(1:km) , hcref   , km, vmin, vmax, zmin, zmax, KLPROF, 'Temp (C)' , 0, 2 , 0d0,kplot)
      endif   
   else if (jased > 0 .and. jased < 4) then 
      vmin = 1d2 ; vmax = -1d2  
@@ -22648,7 +22927,7 @@ subroutine isosmoothflownode2(k) ! smooth isolines in flow cells use depmax2
       use unstruc_display, only: jaGUI
       implicit none
 
-      CHARACTER TEXT*(*), BALK*200
+      CHARACTER TEXT*(*), BALK*400
       double precision :: af
 
       integer, save :: ih
@@ -22683,7 +22962,7 @@ subroutine isosmoothflownode2(k) ! smooth isolines in flow cells use depmax2
          RETURN
       ENDIF
       RETURN
-      END
+      END SUBROUTINE READYY
 
 
       SUBROUTINE CONFRM(TEXT,JAZEKR)
@@ -22924,13 +23203,14 @@ subroutine isosmoothflownode2(k) ! smooth isolines in flow cells use depmax2
          return
       end subroutine
 
-subroutine teksorsin() ! teksrc
+subroutine teksorsin()      ! teksrc
 use m_flowexternalforcings
 use unstruc_display
+use m_transport, only: isalt, itemp 
+use gridoperations
 COMMON /DRAWTHIS/  ndraw(50)
 integer           :: n, k, kb, kt, n2
 character*40      :: tex
-logical, external :: inview
 double precision  :: znod, temb, temt, xp, yp
 
 if (ndraw(41) <= 1 .or. numsrc == 0) return
@@ -22954,14 +23234,14 @@ do n = 1,numsrc ! teksorsin
           else if (ndraw(41) == 4) then 
              write(tex,'(f10.3)') -qsrc(n)
              call gtext(trim(tex)//' (m3/s)', xp, yp , klsrc)
-          else if (ndraw(41) == 5) then 
+          else if (ndraw(41) == 5.and. isalt > 0) then 
              if (qsrc(n) < 0d0) then 
-                write(tex,'(f10.3)') sasrc(n)
+                write(tex,'(f10.3)') ccsrc(isalt,n)
                 call gtext(trim(tex)//' (ppt)', xp, yp , klsrc)
              endif   
-          else if (ndraw(41) == 6) then 
+          else if (ndraw(41) == 6 .and. itemp > 0) then 
              if (qsrc(n) < 0d0) then 
-                write(tex,'(f10.3)') tmsrc(n)
+                write(tex,'(f10.3)') ccsrc(itemp,n)
                 call gtext(trim(tex)//' (degC)', xp, yp , klsrc)
              endif   
           endif   
@@ -22982,14 +23262,14 @@ do n = 1,numsrc ! teksorsin
           else if (ndraw(41) == 4) then 
              write(tex,'(f10.3)') qsrc(n)
              call gtext(trim(tex)//' (m3/s)', xp, yp , klsrc)
-          else if (ndraw(41) == 5) then 
+          else if (ndraw(41) == 5 .and. isalt > 0) then 
              if (qsrc(n) > 0d0) then 
-                write(tex,'(f10.3)') sasrc(n)
+                write(tex,'(f10.3)') ccsrc(isalt,n)
                 call gtext(trim(tex)//' (ppt)', xp, yp , klsrc)
              endif   
-          else if (ndraw(41) == 6) then 
+          else if (ndraw(41) == 6 .and. itemp > 0) then 
              if (qsrc(n) > 0d0) then 
-                write(tex,'(f10.3)') tmsrc(n)
+                write(tex,'(f10.3)') ccsrc(itemp,n)
                 call gtext(trim(tex)//' (degC)', xp, yp , klsrc)
              endif   
           endif   
@@ -22997,42 +23277,4 @@ do n = 1,numsrc ! teksorsin
    endif   
 enddo
 
-    end subroutine teksorsin 
-    
-subroutine editGui(MODE, NFLD,KEY,lastmode)
-    use network_data, only: netflow
-    implicit none
-    integer :: MODE,NFLD, KEY, lastmode
-    
-   10 CONTINUE
-      IF (MODE .EQ. 1) THEN
-         CALL EDITPOL(MODE,KEY,NETFLOW)
-      ELSE IF (MODE .EQ. 2) THEN
-         CALL EDITNETW(MODE,KEY)
-      ELSE IF (MODE .EQ. 3) THEN
-         CALL EDITSPLINES(MODE,KEY)
-      ELSE IF (MODE .EQ. 4) THEN
-         IF (NFLD .EQ. 1 .OR. NFLD .EQ. 2) THEN
-            CALL EDITGRID(MODE,NFLD,KEY)
-         ELSE IF (NFLD .GE. 4 .AND. NFLD .LE. 12) THEN
-            CALL EDITGRIDLINEBLOK(MODE,NFLD,KEY)
-         ELSE IF (NFLD .GE. 14 .AND. NFLD .LE. 17)  THEN
-            CALL EDITGRIDBLOK(MODE,NFLD,KEY)
-         ELSE
-            NFLD = 1
-         ENDIF
-      ELSE IF (MODE .EQ. 5) THEN
-         CALL EDITSAM(MODE,KEY)
-      ELSE IF (MODE .EQ. 6) THEN
-         CALL EDITFLOW(MODE,KEY)
-      ENDIF
-      ! Catch invalid modes return from edit*-routines.
-      ! Set back to last valid mode if necessary.
-      if (mode >= 1 .and. mode <= 6) then
-          lastmode = mode ! is a good mode
-      else
-          mode = lastmode ! return to last known good mode
-      end if
-      GOTO 10
-      
-    end subroutine editgui
+end subroutine teksorsin 

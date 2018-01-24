@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2015.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -86,10 +86,16 @@
      x = c_loc(wmag)
   case("rain") !<  [mm/day] rain at xz,yz {"location": "face", "shape": ["ndx"]}
      x = c_loc(rain)
+  case("evap") !<  [m/s] evaporation at xz,yz {"location": "face", "shape": ["ndx"]}
+     x = c_loc(evap)
   case("rnveg") !<  [1/m2] 3D plant density , 2D part is basis input (1/m2) {"location": "face", "shape": ["ndkx"]}
      x = c_loc(rnveg)
   case("diaveg") !<  [m] 3D plant diameter, 2D part is basis input (m) {"location": "face", "shape": ["ndkx"]}
      x = c_loc(diaveg)
+  case("cfuveg") !<  [ ] 2D only, g/C2 in 2D such that bedstress is computed correctly {"location": "face", "shape": ["lnx"]}
+     x = c_loc(cfuveg)
+  case("alfaveg") !<  [1/m] 2D only, stem contribution {"location": "face", "shape": ["lnx"]}
+     x = c_loc(alfaveg)
   case("stemdens") !<  [1/m2] TEMP 2D plant density (1/m2) {"location": "face", "shape": ["ndx"]}
      x = c_loc(stemdens)
   case("stemdiam") !<  [m] TEMP 2D plant diameters (m) {"location": "face", "shape": ["ndx"]}
@@ -204,6 +210,8 @@
      x = c_loc(zk)
   case("kn") !<  [-] Net links: kn(1,:)=from-idx, kn(2,:)=to-idx, kn(3,:)=net link type (0/1/2/3/4) {"shape": [3, "numl"]}
      x = c_loc(kn)
+  case("numk") !<  [-] Nr. of net nodes. {"shape": []}
+     x = c_loc(numk)
   case("zbnd1d2d1") !<  [m] 1d2d boundary points 1d water level at new time level {"shape": ["nbnd1d2d"]}
      x = c_loc(zbnd1d2d1)
   case("zbnd1d2d0") !<  [m] 1d2d boundary points 1d water level at previous time level {"shape": ["nbnd1d2d"]}

@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2017.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: xbeach_readkey.F90 52266 2017-09-02 11:24:11Z klecz_ml $
-! $HeadURL: https://repos.deltares.nl/repos/ds/branches/dflowfm/20161017_dflowfm_codecleanup/engines_gpl/dflowfm/packages/dflowfm_kernel/src/xbeach_readkey.F90 $
+! $Id: xbeach_readkey.F90 54191 2018-01-22 18:57:53Z dam_ar $
+! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/xbeach_readkey.F90 $
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
 ! Copyright (C) 2007 UNESCO-IHE, WL|Delft Hydraulics and Delft University !
 ! Dano Roelvink, Ap van Dongeren, Ad Reniers, Jamie Lescinski,            !
@@ -60,22 +60,31 @@
 
 module m_xbeach_readkey
   use m_xbeach_typesandkinds
+  
   implicit none
+
+  integer, parameter, private                   :: maxnames = 20
+  character(slen), dimension(maxnames), private :: allowednames
+  character(slen), dimension(maxnames), private :: oldnames
+  character(slen), private                      :: varname
+  integer,         dimension(maxnames), private :: intvalues
+  integer, private                              :: numallowednames
+  integer, private                              :: numoldnames
 
 contains
 
-  real*8 function readkey_dbl(fname,key,defval,mnval,mxval,bcast,required)
+  real*8 function readkey_dbl(fname,key,defval,mnval,mxval,bcast,required, strict)
     use m_xbeach_errorhandling
     use m_xbeach_filefunctions
     implicit none
     character(len=*)  :: fname,key
     character(slen)     :: printkey
     real*8            :: defval,mnval,mxval
-    logical, intent(in), optional :: bcast,required
+    logical, intent(in), optional :: bcast,required, strict
 
     character(slen)   :: value,tempout
     real*8         :: value_dbl
-    logical        :: lbcast,lrequired
+    logical        :: lbcast,lrequired, lstrict
     character(slen)  :: fmt
     integer          :: ier
 
@@ -92,6 +101,12 @@ contains
     else
        lrequired = .false.
     endif
+    
+    if (present(strict)) then
+         lstrict = strict
+      else
+         lstrict = .false.
+    endif
 
     printkey = ' '
     printkey(2:24)=trim(key)
@@ -106,7 +121,12 @@ contains
              tempout = trim(fname)//' (value of '''//trim(printkey)//''' cannot be interpreted)'
              call report_file_read_error(tempout)
           endif
-          if (value_dbl>mxval) then
+          if(lstrict .and. (value_dbl>mxval .or. value_dbl<mnval)) then
+               call writelog('sle','(a,a,a,f0.4)','Value of ',trim(printkey),' is ',value_dbl)
+               call writelog('sle','(a,a,f0.4,a,f0.4)',trim(printkey),' must be set between ',mnval,' and ',mxval)
+               call writelog('sle','','Terminating simulation')
+               call xbeach_errorhandler()
+          else if (value_dbl>mxval) then
              call writelog('lw','(a12,a,f0.4,a,f0.4)',(printkey),' = ',value_dbl,' Warning: value > recommended value of ',mxval)
              call writelog('s','(a12,a,a,f0.4)','Warning: ',trim(printkey),' > recommended value of ',mxval)
           elseif (value_dbl<mnval) then
@@ -128,7 +148,7 @@ contains
     readkey_dbl=value_dbl
   end function readkey_dbl
 
-  function readkey_int(fname,key,defval,mnval,mxval,bcast,required) result (value_int)
+  function readkey_int(fname,key,defval,mnval,mxval,bcast,required,strict) result (value_int)
     use m_xbeach_errorhandling
     use m_xbeach_filefunctions
     implicit none
@@ -137,8 +157,8 @@ contains
     character(slen)  :: value
     integer*4      :: value_int
     integer*4      :: defval,mnval,mxval,ier
-    logical, intent(in), optional :: bcast, required
-    logical        :: lbcast,lrequired
+    logical, intent(in), optional :: bcast, required, strict
+    logical        :: lbcast,lrequired,lstrict
     character(slen)  :: fmt,tempout
 
     fmt = '(a,a,a,i0,a,i0)'
@@ -154,6 +174,12 @@ contains
     else
        lrequired = .false.
     endif
+    
+    if (present(strict)) then
+       lstrict = strict
+    else
+       lstrict = .false.
+    end if
     printkey = ' '
     printkey(2:24)=trim(key)
     printkey(1:1)=' '
@@ -165,8 +191,13 @@ contains
           if (ier .ne. 0) then
              tempout = trim(fname)//' (value of '''//trim(printkey)//''' cannot be interpreted)'
              call report_file_read_error(tempout)
-          endif
-          if (value_int>mxval) then
+          endif  
+          if(lstrict .and. (value_int>mxval .or. value_int<mnval)) then
+               call writelog('sle','(a,a,a,f0.4)','Value of ',trim(printkey),' is ',value_int)
+               call writelog('sle','(a,a,f0.4,a,f0.4)',trim(printkey),' must be set between ',mnval,' and ',mxval)
+               call writelog('sle','','Terminating simulation')
+               call xbeach_errorhandler()
+          elseif (value_int>mxval) then
              call writelog('lw',fmt,'Warning: variable ',(printkey),' ',value_int,' > recommended value of ',mxval)
              call writelog('s','(a12,a,a,i0)','Warning: ',trim(printkey),' > recommended value of ',mxval)
           elseif (value_int<mnval) then
@@ -186,6 +217,80 @@ contains
        endif
   end function readkey_int
 
+     
+  function readkey_intvec(fname,key,vlength,tlength,defval,mnval,mxval,bcast,required,silent) result (value_vec)
+      use m_xbeach_errorhandling
+      use m_xbeach_filefunctions
+      
+      implicit none
+      character*(*)  :: fname,key
+      integer, intent(in) :: vlength,tlength
+      integer,dimension(tlength)  :: value_vec
+      integer           :: defval,mnval,mxval
+      logical, intent(in), optional :: bcast,required,silent
+      logical        :: lbcast,lrequired,lsilent
+
+      integer          :: i, ioerr
+      character(slen)   :: value
+      character(slen)  :: printkey
+
+      printkey(2:slen)=key
+      printkey(1:1)=' '
+
+      if (present(bcast)) then
+         lbcast = bcast
+      else
+         lbcast = .true.
+      endif
+
+      if (present(required)) then
+         lrequired = required
+      else
+         lrequired = .false.
+      endif
+
+      if (present(silent)) then
+         lsilent = silent
+      else
+         lsilent = .false.
+      endif
+
+         call readkey(fname,key,value)
+         if (value/=' ') then
+            read(value,*,IOSTAT=ioerr)value_vec(1:vlength)
+            if (ioerr < 0) then
+               call writelog('lse','','Error reading value for parameter ',printkey)
+               call writelog('lse','','Check whether parameter is given sufficient number of input values')
+               call xbeach_errorhandler()
+            endif
+            do i=1,vlength
+               if (value_vec(i)>mxval) then
+                  call writelog('lw','(a24,a,i0,a,i0)',(printkey),' = ',value_vec(i), &
+                  ' Warning: value > recommended value of ',mxval)
+                  call writelog('s','(a24,a,a,i0)','Warning: ',trim(printkey),' > recommended value of ',mxval)
+               elseif (value_vec(i)<mnval) then
+                  call writelog('lw','(a24,a,i0,a,i0)',(printkey),' = ',value_vec(i), &
+                  ' Warning: value < recommended value of ',mnval)
+                  call writelog('s','(a24,a,a,i0)','Warning: ',trim(printkey),' < recommended value of ',mnval)
+               else
+                  call writelog('l','(a24,a,i0)',(printkey),' = ',value_vec(i))
+               endif
+            enddo
+         else
+            if (lrequired) then
+               call writelog('lse','','Error: missing required value for parameter ',printkey)
+               call xbeach_errorhandler
+            else
+               value_vec(1:vlength)=defval
+               do i=1,vlength
+                  if (.not. lsilent) call writelog('l','(a,a,i0,a)',(printkey),' = ', &
+                  value_vec(i),' (no record found, default value used)')
+               enddo
+            endif
+         endif
+
+   end function readkey_intvec
+  
   function readkey_str(fname,key,defval,nv,nov,allowed,old,bcast,required) result (value_str)
     use m_xbeach_filefunctions
     use m_xbeach_errorhandling
@@ -553,7 +658,240 @@ contains
     RETURN
 
   END SUBROUTINE LOWERCASE
+  
+  subroutine setallowednames(a1,v1,a2,v2,a3,v3,a4,v4,a5,v5,a6,v6,a7,v7,a8,v8, &
+                               a9,v9,a10,v10,a11,v11,a12,v12,a13,v13,a14,v14,   &
+                               a15,v15,a16,v16,a17,v17,a18,v18,a19,v19,a20,v20)
+    character(*), intent(in) :: a1
+    character(*), intent(in), optional :: a2,a3,a4,a5,a6,a7,a8,a9,a10 &
+                    ,a11,a12,a13,a14,a15,a16,a17,a18,a19,a20
+    integer   ,   intent(in) :: v1
+    integer   ,   intent(in), optional :: v2,v3,v4,v5,v6,v7,v8,v9,v10 &
+                    ,v11,v12,v13,v14,v15,v16,v17,v18,v19,v20
+    numoldnames = 0
+    allowednames(1) = a1
+    intvalues(1)    = v1
+    numallowednames = 1
+    if (present(a2)) then
+      allowednames(2) = a2
+      intvalues(2)    = v2
+      numallowednames = 2
+    endif
+    if (present(a3)) then
+      allowednames(3) = a3
+      intvalues(3)    = v3
+      numallowednames = 3
+    endif
+    if (present(a4)) then
+      allowednames(4) = a4
+      intvalues(4)    = v4
+      numallowednames = 4
+    endif
+    if (present(a5)) then
+      allowednames(5) = a5
+      intvalues(5)    = v5
+      numallowednames = 5
+    endif
+    if (present(a6)) then
+      allowednames(6) = a6
+      intvalues(6)    = v6
+      numallowednames = 6
+    endif
+    if (present(a7)) then
+      allowednames(7) = a7
+      intvalues(7)    = v7
+      numallowednames = 7
+    endif
+    if (present(a8)) then
+      allowednames(8) = a8
+      intvalues(8)    = v8
+      numallowednames = 8
+    endif
+    if (present(a9)) then
+      allowednames(9) = a9
+      intvalues(9)    = v9
+      numallowednames = 9
+    endif
+    if (present(a10)) then
+      allowednames(10) = a10
+      intvalues(10)    = v10
+      numallowednames = 10
+    endif
+    if (present(a11)) then
+      allowednames(11) = a11
+      intvalues(11)    = v11
+      numallowednames = 11
+    endif
+    if (present(a12)) then
+      allowednames(12) = a12
+      intvalues(12)    = v12
+      numallowednames = 12
+    endif
+    if (present(a13)) then
+      allowednames(13) = a13
+      intvalues(13)    = v13
+      numallowednames = 13
+    endif
+    if (present(a14)) then
+      allowednames(14) = a14
+      intvalues(14)    = v14
+      numallowednames = 14
+    endif
+    if (present(a15)) then
+      allowednames(15) = a15
+      intvalues(15)    = v15
+      numallowednames = 15
+    endif
+    if (present(a16)) then
+      allowednames(16) = a16
+      intvalues(16)    = v16
+      numallowednames = 16
+    endif
+    if (present(a17)) then
+      allowednames(17) = a17
+      intvalues(17)    = v17
+      numallowednames = 17
+    endif
+    if (present(a18)) then
+      allowednames(18) = a18
+      intvalues(18)    = v18
+      numallowednames = 18
+    endif
+    if (present(a19)) then
+      allowednames(19) = a19
+      intvalues(19)    = v19
+      numallowednames = 19
+    endif
+    if (present(a20)) then
+      allowednames(20) = a20
+      intvalues(20)    = v20
+      numallowednames = 20
+    endif
 
-  ! End of code taken from CHCASE
+    end subroutine setallowednames
+
+    subroutine setoldnames(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10 &
+                       ,a11,a12,a13,a14,a15,a16,a17,a18,a19,a20)
+    character(*), intent(in) :: a1
+    character(*), intent(in), optional :: a2,a3,a4,a5,a6,a7,a8,a9,a10 &
+                    ,a11,a12,a13,a14,a15,a16,a17,a18,a19,a20
+    oldnames(1) = a1
+    numoldnames = 1
+    if (present(a2)) then
+      oldnames(2) = a2
+      numoldnames = 2
+    endif
+    if (present(a3)) then
+      oldnames(3) = a3
+      numoldnames = 3
+    endif
+    if (present(a4)) then
+      oldnames(4) = a4
+      numoldnames = 4
+    endif
+    if (present(a5)) then
+      oldnames(5) = a5
+      numoldnames = 5
+    endif
+    if (present(a6)) then
+      oldnames(6) = a6
+      numoldnames = 6
+    endif
+    if (present(a7)) then
+      oldnames(7) = a7
+      numoldnames = 7
+    endif
+    if (present(a8)) then
+      oldnames(8) = a8
+      numoldnames = 8
+    endif
+    if (present(a9)) then
+      oldnames(9) = a9
+      numoldnames = 9
+    endif
+    if (present(a10)) then
+      oldnames(10) = a10
+      numoldnames = 10
+    endif
+    if (present(a11)) then
+      oldnames(11) = a11
+      numoldnames = 11
+    endif
+    if (present(a12)) then
+      oldnames(12) = a12
+      numoldnames = 12
+    endif
+    if (present(a13)) then
+      oldnames(13) = a13
+      numoldnames = 13
+    endif
+    if (present(a14)) then
+      oldnames(14) = a14
+      numoldnames = 14
+    endif
+    if (present(a15)) then
+      oldnames(15) = a15
+      numoldnames = 15
+    endif
+    if (present(a16)) then
+      oldnames(16) = a16
+      numoldnames = 16
+    endif
+    if (present(a17)) then
+      oldnames(17) = a17
+      numoldnames = 17
+    endif
+    if (present(a18)) then
+      oldnames(18) = a18
+      numoldnames = 18
+    endif
+    if (present(a19)) then
+      oldnames(19) = a19
+      numoldnames = 19
+    endif
+    if (present(a20)) then
+      oldnames(20) = a20
+      numoldnames = 20
+    endif
+
+    end subroutine setoldnames
+    
+   subroutine parmapply(vname,idefname,parm,parm_str,bcast,required)
+      use m_xbeach_typesandkinds
+      use unstruc_model
+ 
+      implicit none
+      character(*), intent(in)            :: vname
+      integer,      intent(in)            :: idefname
+      integer,      intent(out)           :: parm
+      character(*), intent(out), optional :: parm_str
+      logical,      intent(in), optional  :: bcast,required
+
+      character(slen)                     :: d
+      integer                             :: i
+      logical                             :: lbcast
+
+      d = readkey_str(md_surfbeatfile,vname,allowednames(idefname), &
+                      numallowednames,numoldnames,allowednames,oldnames, &
+                      bcast, required)
+
+      if (present(bcast)) then
+        lbcast = bcast
+      else
+        lbcast = .true.
+      endif
+
+
+      do i=1,numallowednames
+        if (d .eq. allowednames(i)) then
+          parm = intvalues(i)
+          if (present(parm_str)) then
+            parm_str = d
+          endif
+          exit
+        endif
+      enddo
+
+    end subroutine parmapply
 
 end module m_xbeach_readkey

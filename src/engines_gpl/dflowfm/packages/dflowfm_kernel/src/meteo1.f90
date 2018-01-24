@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2017.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: meteo1.f90 52266 2017-09-02 11:24:11Z klecz_ml $
-! $HeadURL: https://repos.deltares.nl/repos/ds/branches/dflowfm/20161017_dflowfm_codecleanup/engines_gpl/dflowfm/packages/dflowfm_kernel/src/meteo1.f90 $
+! $Id: meteo1.f90 54191 2018-01-22 18:57:53Z dam_ar $
+! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/meteo1.f90 $
 module m_itdate
    character(len=8) :: refdat
    integer          :: itdate      !< should be user specified for (asc routines)
@@ -91,6 +91,7 @@ module m_meteo
    use m_flowtimes, only : tzone
    use m_wind
    use m_nudge
+   use m_flow
    use m_waves
    use m_ship
    use m_flowexternalforcings
@@ -98,6 +99,7 @@ module m_meteo
    use time_module
    use m_observations
    use string_module
+   use m_sediment, only: stm_included, stmpar
    
    implicit none
    
@@ -105,7 +107,8 @@ module m_meteo
    character(maxMessageLen) :: message !< EC's message, to be passed to FM's log.
    !
    integer, dimension(:), allocatable, target :: item_tracerbnd              !< dim(numtracers)
-   !
+   integer, dimension(:), allocatable, target :: item_sedfracbnd             !< dim(numfracs)   ! JRE DEBUG sedfrac
+
    integer, target :: item_windx                                             !< Unique Item id of the ext-file's 'windx' quantity's x-component.
    integer, target :: item_windy                                             !< Unique Item id of the ext-file's 'windy' quantity's y-component.
    integer, target :: item_windxy_x                                          !< Unique Item id of the ext-file's 'windxy' quantity's x-component.
@@ -123,6 +126,7 @@ module m_meteo
    integer, target :: item_uxuyadvectionvelocitybnd                          !< Unique Item id of the ext-file's 'uxuyadvectionvelocitybnd'
    integer, target :: item_normalvelocitybnd                                 !< Unique Item id of the ext-file's 'normalvelocitybnd' quantity
    integer, target :: item_rainfall                                          !< Unique Item id of the ext-file's 'rainfall' quantity
+   integer, target :: item_rainfall_rate                                     !< Unique Item id of the ext-file's 'rainfall_rate' quantity
    integer, target :: item_qhbnd                                             !< Unique Item id of the ext-file's 'qhbnd' quantity
    integer, target :: item_shiptxy                                           !< Unique Item id of the ext-file's 'shiptxy' quantity
    integer, target :: item_movingstationtxy                                  !< Unique Item id of the ext-file's 'movingstationtxy' quantity
@@ -202,6 +206,7 @@ module m_meteo
       item_uxuyadvectionvelocitybnd              = ec_undef_int      
       item_normalvelocitybnd                     = ec_undef_int
       item_rainfall                              = ec_undef_int
+      item_rainfall_rate                         = ec_undef_int
       item_qhbnd                                 = ec_undef_int
       item_shiptxy                               = ec_undef_int
       item_movingstationtxy                      = ec_undef_int
@@ -244,6 +249,14 @@ module m_meteo
       if ( allocated(item_tracerbnd) ) deallocate(item_tracerbnd)
       allocate(item_tracerbnd(numtracers))
       item_tracerbnd = ec_undef_int
+      !
+      ! JRE DEBUG sedfrac bnd
+      if ( allocated(item_sedfracbnd) ) deallocate(item_sedfracbnd)
+      allocate(item_sedfracbnd(numfracs))
+      item_sedfracbnd = ec_undef_int
+      ! TO ADD: initial concentration field?
+      
+      !\ DEBUG sedfrac
    end subroutine init_variables
 
    ! ==========================================================================
@@ -303,11 +316,27 @@ module m_meteo
             ec_method = interpolate_spacetime
          case (3)
             ec_method = interpolate_spacetimeSaveWeightFactors
-         case (4)
-            ec_method = interpolate_space
+         case (4) ! TODO: EB: FM's 4 is inside_polygon method, does EC handle this correctly if FM filetype=10?
+            ec_method = interpolate_space     ! only spatial, inside polygon
+
+         ! TODO: EB: FM does note have an interpolate_time equivalent in its method, only via filetype=uniform
+         !case (5)
+         !   ec_method = interpolate_time
+
          case (5)
-            ec_method = interpolate_time
-         case (7)
+            ec_method = interpolate_triangle  ! only spatial, triangulation
+         case (6)
+            ec_method = interpolate_unknown   ! Not yet supported: only spatial, averaging
+         !case (7) ! TODO: EB+AvD: index triangulation (for spatial sedmor fields) may be needed later,
+                   ! but now overlaps with interpolate_time_extrapolation_ok (for wave coupling) below.
+         !   ec_method = interpolate_unknown   ! Not yet supported: only spatial, index triangulation
+         case (8)
+            ec_method = interpolate_unknown   ! Not yet supported: only spatial, smoothing
+         case (9)
+            ec_method = interpolate_unknown   ! Not yet supported: only spatial, internal diffusion
+         case (10)
+            ec_method = interpolate_unknown   ! Not yet supported: only initial vertical profiles
+         case (7) ! TODO: EB: FM method 7, where does this come from? ! see hrms method 7
             ec_method = interpolate_time_extrapolation_ok
          case default
             ec_method = interpolate_unknown
@@ -354,7 +383,7 @@ module m_meteo
          case (provFile_curvi)
             convtype = convType_curvi
          case (provFile_samples)
-            convtype = convType_undefined ! not yet implemented
+            convtype = convType_samples
          case (provFile_triangulationmagdir)
             convtype = convType_undefined ! not yet implemented
          case (provFile_poly_tim)
@@ -396,17 +425,18 @@ module m_meteo
    
    !> Translate EC's ext.force-file's item name to the integer EC item handle and to
    !> the data pointer(s), i.e. the array that will contain the values of the target item
-   function fm_ext_force_name_to_ec_item(trname, qidname,                        &
+   function fm_ext_force_name_to_ec_item(trname, sfname, qidname,                        &
                                          itemPtr1, itemPtr2, itemPtr3, itemPtr4, &
                                          dataPtr1, dataPtr2, dataPtr3, dataPtr4  ) result(success)
       logical                               :: success
-      character(len=NAMTRACLEN), intent(in) :: trname
+      character(len=NAMTRACLEN), intent(in) :: trname, sfname
+
       character(len=NAMTRACLEN), intent(in) :: qidname
       integer,                   pointer    :: itemPtr1, itemPtr2, itemPtr3, itemPtr4
       real(hp), dimension(:),    pointer    :: dataPtr1, dataPtr2, dataPtr3, dataPtr4
       
       ! for tracers:      
-      integer           :: itrac
+      integer           :: itrac, isf
       integer, external :: findname
       
       success = .true.
@@ -441,7 +471,7 @@ module m_meteo
          case ('waterlevelbnd', 'neumannbnd', 'riemannbnd', 'outflowbnd')
             itemPtr1 => item_waterlevelbnd
             dataPtr1 => zbndz
-         case ('velocitybnd', 'dischargebnd', 'riemann_velocitybnd','criticaloutflowbnd','weiroutflowbnd')
+         case ('velocitybnd', 'dischargebnd', 'criticaloutflowbnd','weiroutflowbnd', 'absgenbnd')
             itemPtr1 => item_velocitybnd
             dataPtr1 => zbndu
          case ('salinitybnd')
@@ -462,11 +492,14 @@ module m_meteo
         case ('normalvelocitybnd')
             itemPtr1 => item_normalvelocitybnd
             dataPtr1 => zbndn
-         case ('atmosphericpressure')
+         case ('airpressure','atmosphericpressure')
             itemPtr1 => item_atmosphericpressure
             dataPtr1 => patm
          case ('rainfall')
             itemPtr1 => item_rainfall
+            dataPtr1 => rain
+         case ('rainfall_rate')
+            itemPtr1 => item_rainfall_rate
             dataPtr1 => rain
          case ('qhbnd')
             itemPtr1 => item_qhbnd
@@ -567,6 +600,12 @@ module m_meteo
             itrac = findname(numtracers, trnames, trname)
             itemPtr1 => item_tracerbnd(itrac)
             dataPtr1 => bndtr(itrac)%z
+         case ('sedfracbnd') 
+            ! get sediment fraction (boundary) number
+            isf = findname(numfracs, sfnames, sfname)
+            itemPtr1 => item_sedfracbnd(isf)
+            dataPtr1 => bndsf(isf)%z
+            
          case default
             call mess(LEVEL_FATAL, 'm_meteo::fm_ext_force_name_to_ec_item: Unsupported quantity specified in ext-file (construct target field): '//qidname)
             success = .false.
@@ -740,7 +779,7 @@ module m_meteo
       
       logical                   :: success
       logical                   :: quiet_
-      character(len=NAMTRACLEN) :: trname, qidname
+      character(len=NAMTRACLEN) :: trname, sfname, qidname
       integer, external         :: findname
       type (tEcMask)            :: srcmask
       logical                   :: exist, opened
@@ -758,17 +797,23 @@ module m_meteo
       ! ========================================================
       call filetype_fm_to_ec(filetype, ec_filetype)
       if (ec_filetype == provFile_undefined) then
-         call mess(LEVEL_FATAL, 'm_meteo::ec_addtimespacerelation: Unsupported filetype.')
+         write (msgbuf, '(a,i0,a)') 'm_meteo::ec_addtimespacerelation: Unsupported filetype ''', filetype, &
+                                    ''' for quantity '''//trim(name)//''' and file '''//trim(filename)//'''.'
+         call err_flush()
          return
       end if
       call method_fm_to_ec(method, ec_method)
       if (ec_method == interpolate_unknown) then
-         call mess(LEVEL_FATAL, 'm_meteo::ec_addtimespacerelation: Unsupported method.')
+         write (msgbuf, '(a,i0,a)') 'm_meteo::ec_addtimespacerelation: Unsupported method ''', method, &
+                                    ''' for quantity '''//trim(name)//''' and file '''//trim(filename)//'''.'
+         call err_flush()
          return
       end if
       call operand_fm_to_ec(operand, ec_operand)
       if (ec_operand == operand_undefined) then
-         call mess(LEVEL_FATAL, 'm_meteo::ec_addtimespacerelation: Unsupported operand.')
+         write (msgbuf, '(a,a,a)') 'm_meteo::ec_addtimespacerelation: Unsupported operand ''', operand, &
+                                    ''' for quantity '''//trim(name)//''' and file '''//trim(filename)//'''.'
+         call err_flush()
          return
       end if
       
@@ -776,7 +821,9 @@ module m_meteo
       ! Convert ext file names to accepted Unstruc names.
       ! =================================================
       ! Name conversion: (targetname=qidname==name for all names, except name=tracerbndfoo --> qidname=tracerbnd)
+      qidname = name
       call get_tracername(name, trname, qidname)
+      call get_sedfracname(name, sfname, qidname)
       target_name = qidname
 
       call clearECMessage()
@@ -867,7 +914,7 @@ module m_meteo
          if (success) success = ecSetElementSetXyen(ecInstancePtr, elementSetId, xyen)
       end if
       
-      if (present(z)) then ! 3D      
+      if (present(z)) then ! 3D
          if (present(pzmin) .and. present(pzmax)) then       ! implicitly means: target elt z-type == SIGMA
             if (success) success = ecSetElementSetZArray(ecInstancePtr, elementSetId, z, pzmin=pzmin, pzmax=pzmax, Lpointer_=.true.)
             if (success) success = ecSetElementSetvptyp(ecInstancePtr, elementSetID, BC_VPTYP_PERCBED) ! sigma layers
@@ -880,7 +927,7 @@ module m_meteo
          end if
 
          ! add 3D settings if needed
-         if (ec_filetype == provFile_poly_tim .and. (target_name == 'salinitybnd' .or. target_name == 'temperaturebnd' .or. target_name == 'tracerbnd')) then
+         if (ec_filetype == provFile_poly_tim .and. (target_name == 'salinitybnd' .or. target_name == 'temperaturebnd' .or. target_name == 'tracerbnd')) then   ! TODO JRE sediment    
             if (success) success = ecSetElementSetMaskArray(ecInstancePtr, elementSetId, mask)
             if (success) success = ecSetElementSetNumberOfCoordinates(ecInstancePtr, elementSetId, size(x))
          end if
@@ -894,7 +941,8 @@ module m_meteo
       ! Construct the target field and the target item
       ! ==============================================
       ! determine which target item (id) will be created, and which FM data array has to be used
-      if (.not. fm_ext_force_name_to_ec_item(trname, qidname,                                                &
+      ! JRE DEBUG sedfrac
+      if (.not. fm_ext_force_name_to_ec_item(trname, sfname, qidname,                                                &
                                              targetItemPtr1, targetItemPtr2, targetItemPtr3, targetItemPtr4, &
                                              dataPtr1      , dataPtr2      , dataPtr3      , dataPtr4        )) then
          return
@@ -960,7 +1008,7 @@ module m_meteo
          ! Each qhbnd polytim file replaces exactly one element in the target data array.
          ! Converter will put qh value in target_array(n_qhbnd)
          if (success) success = ecSetConverterElement(ecInstancePtr, converterId, n_qhbnd)
-      case ('windx', 'windy', 'windxy', 'atmosphericpressure', 'airpressure_windx_windy')
+      case ('windx', 'windy', 'windxy', 'airpressure', 'atmosphericpressure', 'airpressure_windx_windy')
          if (present(srcmaskfile)) then 
             if (ec_filetype == provFile_arcinfo .or. ec_filetype == provFile_curvi) then
                if (.not.ecParseARCinfoMask(srcmaskfile, srcmask, fileReaderPtr)) then
@@ -1043,9 +1091,9 @@ module m_meteo
             if (.not.ecAddConnectionTargetItem(ecInstancePtr, connectionId, targetItemPtr1)) return 
             if (.not.ecAddItemConnection(ecInstancePtr, targetItemPtr1, connectionId)) return 
          case ('velocitybnd', 'dischargebnd', 'waterlevelbnd', 'salinitybnd', 'tracerbnd',           &
-               'neumannbnd', 'riemannbnd', 'riemann_velocitybnd', 'outflowbnd',                      &
+               'neumannbnd', 'riemannbnd', 'absgenbnd', 'outflowbnd',                      &
                'temperaturebnd', 'sedimentbnd', 'tangentialvelocitybnd', 'uxuyadvectionvelocitybnd', & 
-               'normalvelocitybnd', 'qhbnd','criticaloutflowbnd','weiroutflowbnd')
+               'normalvelocitybnd', 'qhbnd','criticaloutflowbnd','weiroutflowbnd', 'sedfracbnd')    !JRE DEBUG sedfrac
             if (.not. checkFileType(ec_filetype, provFile_poly_tim, target_name)) then
                return
             end if
@@ -1063,10 +1111,22 @@ module m_meteo
                call mess(LEVEL_FATAL, 'm_meteo::ec_addtimespacerelation: Unsupported filetype for quantity rainfall.')
                return
             end if
+         case ('rainfall_rate')
+            ! the name of the source item depends on the file reader
+            if (ec_filetype == provFile_uniform) then
+               sourceItemName = 'uniform_item'
+            else if (ec_filetype == provFile_netcdf) then
+               sourceItemName = 'rainfall_rate'
+            else if (ec_filetype == provFile_curvi) then
+               sourceItemName = 'curvi_source_item_1'
+            else
+               call mess(LEVEL_FATAL, 'm_meteo::ec_addtimespacerelation: Unsupported filetype for quantity rainfall_rate.')
+               return
+            end if
          case ('hrms', 'tp', 'tps', 'rtp', 'dir', 'fx', 'fy', 'wsbu', 'wsbv', 'mx', 'my', 'dissurf','diswcap')
             ! the name of the source item created by the file reader will be the same as the ext.force. quant name
             sourceItemName = target_name
-         case ('atmosphericpressure')
+         case ('airpressure', 'atmosphericpressure')
             if (ec_filetype == provFile_arcinfo) then
                sourceItemName = 'wind_p'
             else if (ec_filetype == provFile_curvi) then
@@ -1345,6 +1405,11 @@ module m_meteo
          if (.not. initializeConnection(ecInstancePtr, connectionId, sourceItemId , targetItemPtr1)) then
             goto 1234
          end if
+         if (present(targetIndex)) then
+            if (.not. checkVectorMax(ecInstancePtr, sourceItemId , targetItemPtr1)) then
+               goto 1234
+            endif
+         endif
       end if
 
       ec_addtimespacerelation = .true.
@@ -1368,7 +1433,29 @@ module m_meteo
    end function ec_addtimespacerelation
    
    ! ==========================================================================
+   function checkVectorMax(ecInstancePtr, sourceItemId , targetItemId) result (success)
+      logical                       :: success       !< function result
+      type(tEcInstance), pointer    :: ecInstancePtr !< the instance pointer
+      integer,           intent(in) :: sourceItemId  !< the source item ID
+      integer,           intent(in) :: targetItemId  !< the target item ID
 
+      type(tEcItem),       pointer :: itemPtrSrc     !< Item corresponding to sourceItemId
+      type(tEcItem),       pointer :: itemPtrTrg     !< Item corresponding to targetItemId
+      integer                      :: vectorMaxSrc   !< vectorMax for source item
+      integer                      :: vectorMaxTrg   !< vectorMax for target item
+
+      success = .true.
+      itemPtrSrc => ecSupportFindItem(ecInstancePtr, sourceItemId)
+      itemPtrTrg => ecSupportFindItem(ecInstancePtr, targetItemId)
+      vectorMaxSrc = itemPtrSrc%quantityPtr%vectorMax
+      vectorMaxTrg = itemPtrTrg%quantityPtr%vectorMax
+      if (vectorMaxSrc /= vectorMaxTrg) then
+         success = .false.
+         call mess(LEVEL_ERROR, "Vector max differs for " // trim(itemPtrTrg%quantityPtr%name) &
+                    // " values (resp. source, target): ", vectorMaxSrc, vectorMaxTrg)
+      endif
+   end function checkVectorMax
+   
    ! ==========================================================================
    function ec_gettimeseries_by_itemID(instancePtr, itemId, t0, t1, dt, target_array) result(success)
       logical                                                 :: success      !< function status
@@ -1443,6 +1530,9 @@ module m_meteo
          ! Now you change the unit in 2017. 
          ! I give a course this Thursday, please no surprises 
          end if
+      if (trim(group_name) == 'rainfall_rate') then
+         if (.not.ec_gettimespacevalue_by_itemID(instancePtr, item_rainfall_rate  , timesteps)) return
+      end if
       if (trim(group_name) == 'humidity_airtemperature_cloudiness') then
          if (.not.ec_gettimespacevalue_by_itemID(instancePtr, item_hac_humidity  , timesteps)) return
       end if
@@ -1788,6 +1878,12 @@ contains
          read (rec,*) transformcoef(6) 
      end if 
 
+     keywrd = 'PERCENTILEMINMAX'
+     call zoekopt(minp, rec, trim(keywrd), jaopt)
+     if (jaopt == 1) then
+         read (rec,*) transformcoef(7)
+     end if
+     
      ! constant keywrd = 'DISCHARGE'/'SALINITY'/'TEMPERATURE' removed, now always via time series, in future also via new ext [discharge]
 
      keywrd = 'AREA' ! Area for source-sink pipe
@@ -1796,12 +1892,19 @@ contains
          read (rec,*) transformcoef(4)
      end if
      
-!     keywrd = 'TREF' ! relaxation time
-!     call zoekopt(minp, rec, trim(keywrd), jopt)
-!     if (jaopt == 1) then
-!        read (rec,*) transformcoef(7)
-!     end if
+     keywrd = 'TREF' ! relaxation time for riemann boundary
+     call zoekopt(minp, rec, trim(keywrd), jaopt)
+     if (jaopt == 1) then
+        read (rec,*) transformcoef(7)
+     end if
 !
+     
+     keywrd = 'NUMMIN' ! minimum number of points in averaging
+     call zoekopt(minp, rec, trim(keywrd), jaopt)
+     if (jaopt == 1) then
+        read (rec,*) transformcoef(8)
+     end if
+     
      if (qid == 'generalstructure') then 
         generalkeywrd( 1)  = 'widthleftW1'         !< ! generalstructure  this and following: see Sobek manual
         generalkeywrd( 2)  = 'levelleftZb1'
@@ -2092,7 +2195,7 @@ contains
    use m_flow
    use m_flowgeom
    use m_partitioninfo
-   use m_kdtree2
+   use kdtree2Factory
    use unstruc_messages
    implicit none
    integer          :: i1, i2, j1, j2, k, k1, LL, i, j, iL, iR, ierr
@@ -5979,6 +6082,9 @@ contains
    subroutine triint_z1D( xss, yss, zss, kcsss, nss,                       &
                           x  , y  , z  , kcs  , kx , mnx, jdla, indxn, wfn )
    
+       
+       use m_ec_basic_interpolation, only: dlaun
+   
        implicit none
    
    
@@ -6748,7 +6854,9 @@ contains
    !! segments are checked, not the closest based on dbdistance of pli points.
    subroutine polyindexweight( xe, ye, xen, yen, xs, ys, kcs, ns, kL, wL, kR, wR)
    
-   USE M_sferic 
+    use m_sferic 
+    use geometry_module, only: dbdistance, cross
+    use m_missing, only: dmiss
    
     ! Global variables
     integer         , intent(in)  :: ns       !< Dimension of polygon OR LINE BOUNDARY
@@ -6762,8 +6870,6 @@ contains
     integer         , intent(out) :: kR       !< Index of right nearest polyline point (with kcs==1!)
     double precision, intent(out) :: wR       !< Relative weight of right nearest polyline point.
    
-   
-   double precision, external :: dbdistance
    
    integer          :: k, km, JACROS
    double precision :: dis, disM, disL, disR !, rl1, rl2,
@@ -6781,9 +6887,11 @@ contains
    DEPS = 1d-3
    
    do k = 1, ns-1
-       call CROSS(xe, ye, xen, yen, xs(k), ys(k), xs(k+1), ys(k+1), JACROS,SL,SM,XCR,YCR,CRP)
+      
+       call cross(xe, ye, xen, yen, xs(k), ys(k), xs(k+1), ys(k+1), JACROS,SL,SM,XCR,YCR,CRP,jsferic, dmiss)
+       
        if (SL >= 0d0 .AND. SL <= 1D0 .AND. SM > -DEPS .AND. SM < 1.0D0+DEPS) then ! instead of jacros==1, solves firmijn's problem  
-           DIS = DBDISTANCE(XE,YE, XCR, YCR) 
+           DIS = DBDISTANCE(XE,YE, XCR, YCR, jsferic, jasfer3D, dmiss) 
            if (DIS < DISM) then ! Found a better intersection point
                DISM = DIS
                km   = k
@@ -6795,7 +6903,7 @@ contains
    enddo
     
    if (km > 0) then
-       dis  = dbdistance(xs(km), ys(km), xs(km+1), ys(km+1)) ! Length of this segment.
+       dis  = dbdistance(xs(km), ys(km), xs(km+1), ys(km+1), jsferic, jasfer3D, dmiss) ! Length of this segment.
    
        ! Find nearest valid polyline point left of the intersection (i.e.: kcs(kL) == 1)
        disL = SMM*dis
@@ -6804,7 +6912,7 @@ contains
                kL = k
                exit ! Valid point on the left (distance was already included in disL)
            else if (k > 1) then
-               disL = disL + dbdistance(xs(k-1), ys(k-1), xs(k), ys(k)) ! Add entire length of this segment.
+               disL = disL + dbdistance(xs(k-1), ys(k-1), xs(k), ys(k), jsferic, jasfer3D, dmiss) ! Add entire length of this segment.
            end if
        end do
    
@@ -6815,7 +6923,7 @@ contains
                kR = k
                exit ! Valid point on the left (distance was already included in disL)
            else if (k < ns) then
-               disR = disR + dbdistance(xs(k), ys(k), xs(k+1), ys(k+1)) ! Add entire length of this segment.
+               disR = disR + dbdistance(xs(k), ys(k), xs(k+1), ys(k+1), jsferic, jasfer3D, dmiss) ! Add entire length of this segment.
            end if
        end do
    end if
@@ -6834,31 +6942,35 @@ contains
    !
    ! ==========================================================================
    !> 
-   SUBROUTINE LINEDISq(X3,Y3,X1,Y1,X2,Y2,JA,DIS,XN,YN,rl) ! = dlinesdis2
-   integer          :: ja
-   DOUBLE PRECISION :: X1,Y1,X2,Y2,X3,Y3,DIS,XN,YN
-   DOUBLE PRECISION :: R2,RL,X21,Y21,X31,Y31,dbdistance
-   ! korste afstand tot lijnelement tussen eindpunten
-   JA  = 0
-   !X21 = getdx(x1,y1,x2,y2)
-   !Y21 = getdy(x1,y1,x2,y2)
-   call getdxdy(x1,y1,x2,y2,x21,y21)  
-   !X31 = getdx(x1,y1,x3,y3)
-   !Y31 = getdy(x1,y1,x3,y3)
-   call getdxdy(x1,y1,x3,y3,x31,y31)
-   R2  = dbdistance(x2,y2,x1,y1)
-   R2  = R2*R2
-   IF (R2 .NE. 0) THEN
-      RL  = (X31*X21 + Y31*Y21) / R2
-      IF (0d0 .LE. RL .AND. RL .LE. 1d0) then
-         JA = 1
-      end if
-      XN  = X1 + RL*(x2-x1)
-      YN  = Y1 + RL*(y2-y1)
-      DIS = dbdistance(x3,y3,xn,yn)
-   end if
-   RETURN
-   END subroutine LINEDISq
+!LC: TODO remove
+!   SUBROUTINE LINEDISq(X3,Y3,X1,Y1,X2,Y2,JA,DIS,XN,YN,rl) ! = dlinesdis2
+!
+!   
+!   integer          :: ja
+!   DOUBLE PRECISION :: X1,Y1,X2,Y2,X3,Y3,DIS,XN,YN
+!   DOUBLE PRECISION :: R2,RL,X21,Y21,X31,Y31,dbdistance
+!
+!   ! korste afstand tot lijnelement tussen eindpunten
+!   JA  = 0
+!   !X21 = getdx(x1,y1,x2,y2)
+!   !Y21 = getdy(x1,y1,x2,y2)
+!   call getdxdy(x1,y1,x2,y2,x21,y21)  
+!   !X31 = getdx(x1,y1,x3,y3)
+!   !Y31 = getdy(x1,y1,x3,y3)
+!   call getdxdy(x1,y1,x3,y3,x31,y31)
+!   R2  = dbdistance(x2,y2,x1,y1)
+!   R2  = R2*R2
+!   IF (R2 .NE. 0) THEN
+!      RL  = (X31*X21 + Y31*Y21) / R2
+!      IF (0d0 .LE. RL .AND. RL .LE. 1d0) then
+!         JA = 1
+!      end if
+!      XN  = X1 + RL*(x2-x1)
+!      YN  = Y1 + RL*(y2-y1)
+!      DIS = dbdistance(x3,y3,xn,yn)
+!   end if
+!   RETURN
+!   END subroutine LINEDISq
 end module timespace_triangle                           ! met leading dimensions 3 of 4
 !
 !
@@ -6941,7 +7053,12 @@ contains
    !! to xyen(1,) to xyen(2,). Generally, the points in xyen are endpoints of
    !! rrtol times a perpendicular vector to edge links.
    subroutine selectelset( filename, filetype, x, y, xyen, kc, mnx, ki, num, usemask, rrtolrel)
+     
      use MessageHandling
+     use geometry_module, only: cross
+     use m_missing, only: dmiss
+     use m_sferic, only: jsferic
+     
      implicit none
 
    
@@ -6993,7 +7110,7 @@ contains
                  if (present(rrtolrel)) then
                     ! x,y -> xyen =approx D + 2*rrtol * D
                     ! This bnd requests a more strict tolerance than the global rrtol, namely: D + 2*rrtolb * D, so:
-                    call CROSS(x(m), y(m),  xyen(1,m), xyen(2,m), xs(kL), ys(kL), xs(kR), ys(kR), JACROS,SL,SM,XCR,YCR,CRP)
+                    call CROSS(x(m), y(m),  xyen(1,m), xyen(2,m), xs(kL), ys(kL), xs(kR), ys(kR), JACROS,SL,SM,XCR,YCR,CRP, jsferic, dmiss)
                     if (SL > rrtolrel) then
                        ! More strict rrtolrel check failed, so do not accept this node.
                        cycle
@@ -7107,16 +7224,21 @@ contains
    !> 
    function timespaceinitialfield(xu, yu, zu, nx, filename, filetype, method, operand, transformcoef, iprimpos) result(success)  ! 
       
-   use m_kdtree2
+   use kdtree2Factory
    use m_samples
    use m_netw
    use m_flowgeom, only : xz, yz, ln2lne, Ln, Lnx 
    use m_partitioninfo  
    use unstruc_netcdf
    use m_flowexternalforcings, only: qid
-   use M_INTERPOLATIONSETTINGS
+   use m_ec_interpolationsettings
+   use m_flowparameters
    use m_missing
-   use m_sferic, only: jsferic
+   use m_sferic, only: jsferic, jasfer3D
+   use m_polygon, only: NPL, xpl, ypl, zpl
+   use m_ec_basic_interpolation, only: triinterp2, averaging2
+   use geometry_module, only: dbpinpol
+   use gridoperations
    
    implicit none
    
@@ -7154,6 +7276,9 @@ contains
    integer                         :: n6 , L, Lk, n, nn, n1, n2, i
    integer                         :: ierror
    integer                         :: jakdtree=1
+   
+   double precision                :: rcel_store, percentileminmax_store
+   integer                         :: iav_store, nummin_store
 
    character(len=1), external      :: get_dirsep
    character(len=5)                :: sd
@@ -7182,7 +7307,8 @@ contains
              
       inside = -1
       do k=1,nx
-         call dbpinpol(xu(k), yu(k), inside)  
+         call dbpinpol(xu(k), yu(k), inside, &
+                       dmiss, JINS, NPL, xpl, ypl, zpl)  
          if (inside == 1) then
             call operate(zu(k), transformcoef(1), operand)
             zh(k) = zu(k) 
@@ -7202,14 +7328,28 @@ contains
          
       if (method == 5) then
           jdla = 1 
-          call triinterp2(xu,yu,zh,nx,jdla)
+          call triinterp2(xu,yu,zh,nx,jdla, &
+                          XS, YS, ZS, NS, dmiss, jsferic, jins, jasfer3D, NPL, MXSAM, MYSAM, XPL, YPL, ZPL, transformcoef)
+      
       else if (method == 6) then                ! and this only applies to flow-link data
+      
+!         store settings
+          iav_store = iav
+          rcel_store = rcel
+          percentileminmax_store = percentileminmax
+          nummin_store = nummin
             
           if ( transformcoef(4).ne.DMISS ) then
               iav  = int(transformcoef(4)) 
           end if
           if ( transformcoef(5).ne.DMISS ) then
               rcel = transformcoef(5)             
+          end if
+          if ( transformcoef(7).ne.DMISS ) then
+              percentileminmax = transformcoef(7)
+          end if
+          if ( transformcoef(8).ne.DMISS ) then
+             nummin = int(transformcoef(8))
           end if
              
           if (iprimpos == 1) then                ! primitime position = velocitypoint, cellfacemid 
@@ -7263,7 +7403,7 @@ contains
                 
           if ( jakdtree.eq.1 ) then
 !              initialize kdtree
-               call build_kdtree(treeglob,Ns,xs,ys,ierror)
+               call build_kdtree(treeglob,Ns,xs,ys,ierror, jsferic, dmiss)
                if ( ierror.ne.0 ) then
 !                 disable kdtree
                   call delete_kdtree2(treeglob)
@@ -7271,15 +7411,19 @@ contains
                end if
           end if
                    
-          call averaging2(1,ns,xs,ys,zs,ipsam,xu,yu,zh,nx,xx,yy,n6,nnn,jakdtree)
+          call averaging2(1,ns,xs,ys,zs,ipsam,xu,yu,zh,nx,xx,yy,n6,nnn,jakdtree,&
+                          dmiss, jsferic, jasfer3D, JINS, NPL, xpl, ypl, zpl)
           deallocate(xx,yy,nnn)
           if ( iprimpos.eq.2 ) then
              if ( allocated(LnnL) ) deallocate(LnnL)
              if ( allocated(Lorg) ) deallocate(Lorg)
           end if
           
-          iav  = 1
-          rcel = RCEL_DEFAULT
+!         restore settings
+          iav  = iav_store
+          rcel = rcel_store
+          percentileminmax = percentileminmax_store
+          nummin = nummin_store
             
           if ( jakdtree.eq.1 ) then
               call delete_kdtree2(treeglob)
@@ -7321,15 +7465,17 @@ contains
        n2 = n2 -1
    end if
       
-   call newfil(mout, 'DFM_interpreted_values_'//trim(filename(n1+1:n2))//trim(sd)//'.xyz')
+   if (jawriteDFMinterpretedvalues > 0) then 
+      call newfil(mout, 'DFM_interpreted_values_'//trim(filename(n1+1:n2))//trim(sd)//'.xyz')
           
-   do k = 1,nx
-      if (zh(k) .ne. dmiss_default) then 
-         write(mout,*) xu(k), yu(k), zu(k)
-      end if
-   enddo
-   call doclose(mout)
-   
+      do k = 1,nx
+         if (zh(k) .ne. dmiss_default) then 
+            write(mout,*) xu(k), yu(k), zu(k)
+         end if
+      enddo
+      call doclose(mout)
+   endif
+      
    if (allocated (zh) ) deallocate(zh) 
    
    end function timespaceinitialfield

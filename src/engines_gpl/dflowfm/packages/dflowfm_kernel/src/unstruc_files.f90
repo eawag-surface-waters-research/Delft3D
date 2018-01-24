@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2017.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: unstruc_files.f90 52266 2017-09-02 11:24:11Z klecz_ml $
-! $HeadURL: https://repos.deltares.nl/repos/ds/branches/dflowfm/20161017_dflowfm_codecleanup/engines_gpl/dflowfm/packages/dflowfm_kernel/src/unstruc_files.f90 $
+! $Id: unstruc_files.f90 54191 2018-01-22 18:57:53Z dam_ar $
+! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/unstruc_files.f90 $
 
 module unstruc_files
 !! Centralizes unstruc file management (formerly in REST.F90)
@@ -63,10 +63,13 @@ end subroutine init_unstruc_files
 !! Use this instead of directly writing in the list (automatic realloc).
 !! The actual open is not performed here.
 subroutine reg_file_open(mfil, filename)
-    use m_alloc
-    integer,          intent(in) :: mfil     !< File unit number (e.g., from numuni)
-    character(len=*), intent(in) :: filename
- 
+
+   use m_alloc
+
+   integer,          intent(in) :: mfil     !< File unit number (e.g., from numuni)
+   character(len=*), intent(in) :: filename
+
+
     if (mfil > maxnum) then
         MAXNUM = MFIL + 50
         call realloc(filenames, maxnum, fill=' ')
@@ -90,15 +93,16 @@ subroutine close_all_files()
     integer :: mfil
 
     do mfil = maxnum,1,-1
-        if ( mfil.ne.mdia) then ! SPvdP: need to close dia-file last
+       if (mfil .ne. mdia) then ! SPvdP: need to close dia-file last
           close(mfil) ! No need to check file status, just attempt to close.
           if (filenames(mfil) /= ' ') then
              call mess(LEVEL_INFO, 'Closed file : ', filenames(mfil))
           end if
-        end if
+       end if
     end do
     
-    if ( allocated(filenames) ) deallocate(filenames)
+    if (allocated(filenames)) deallocate(filenames)
+
     maxnum = 0
 end subroutine close_all_files
 
@@ -120,6 +124,8 @@ function defaultFilename(filecat, timestamp, prefixWithDirectory, allowWildcard)
 
     character(len=255) :: activeFile
     character(len=255) :: basename
+    character(len=255) :: shapeOutputDir
+    character(1), external :: get_dirsep
     character(len=16)  :: suffix
     character(len=255) :: defaultFilename
     character(len=16)  :: dateandtime
@@ -211,6 +217,9 @@ function defaultFilename(filecat, timestamp, prefixWithDirectory, allowWildcard)
         activeFile = md_comfile
         suffix     = '_com.nc'
 
+    !---------------------------------------------------------!
+    ! Shape files
+    !---------------------------------------------------------!    
     case ('shpcrs')
         activeFile = ''
         suffix     = '_snapped_crs' ! .shp extension will be added automatically (and .shx/.dbf)
@@ -220,28 +229,32 @@ function defaultFilename(filecat, timestamp, prefixWithDirectory, allowWildcard)
         suffix     = '_snapped_obs' ! .shp extension will be added automatically (and .shx/.dbf)
         
     case ('shpweir')
-    activeFile = ''
-    suffix     = '_snapped_weir' ! .shp extension will be added automatically (and .shx/.dbf)
+        activeFile = ''
+        suffix     = '_snapped_weir' ! .shp extension will be added automatically (and .shx/.dbf)
     
     case ('shpthd')
-    activeFile = ''
-    suffix     = '_snapped_thd' ! .shp extension will be added automatically (and .shx/.dbf)
+        activeFile = ''
+        suffix     = '_snapped_thd' ! .shp extension will be added automatically (and .shx/.dbf)
     
     case ('shpgate')
-    activeFile = ''
-    suffix     = '_snapped_gate' ! .shp extension will be added automatically (and .shx/.dbf)
+        activeFile = ''
+        suffix     = '_snapped_gate' ! .shp extension will be added automatically (and .shx/.dbf)
     
-    case ('shpebm')
-    activeFile = ''
-    suffix     = '_snapped_ebm' ! .shp extension will be added automatically (and .shx/.dbf)
+    case ('shpemb')
+        activeFile = ''
+        suffix     = '_snapped_emb' ! .shp extension will be added automatically (and .shx/.dbf)
     
     case ('shpfxw')
-    activeFile = ''
-    suffix     = '_snapped_fxw' ! .shp extension will be added automatically (and .shx/.dbf)
+        activeFile = ''
+        suffix     = '_snapped_fxw' ! .shp extension will be added automatically (and .shx/.dbf)
     
     case ('shpsrc')
-    activeFile = ''
-    suffix     = '_snapped_src' ! .shp extension will be added automatically (and .shx/.dbf)
+        activeFile = ''
+        suffix     = '_snapped_src' ! .shp extension will be added automatically (and .shx/.dbf)
+        
+    !---------------------------------------------------------!
+    ! Shape files
+    !---------------------------------------------------------!
 
     ! Delwaq files: filecat is identical to file extension
     case ('hyd','vol','are','flo','poi','len','srf','tau','vdf','tem','sal','atr','bnd')
@@ -274,13 +287,18 @@ function defaultFilename(filecat, timestamp, prefixWithDirectory, allowWildcard)
             defaultFilename = '*'//suffix
         end if
     end if
-
+    
     ! Output files are generally stored in a subfolder, so prefix them here with that.
     select case (trim(filecat))
-    case ('his', 'map', 'rstold', 'rst', 'bal', 'histek', 'inc_s1', 'tec', 'map.plt', 'net.plt', 'avgwavquant', 'com', 'shpcrs', &
-          'shpobs', 'shpweir', 'shpthd', 'shpgate', 'shpebm', 'shpfxw', 'shpsrc')                             !! JRE
+    case ('his', 'map', 'rstold', 'rst', 'bal', 'histek', 'inc_s1', 'tec', 'map.plt', 'net.plt', 'avgwavquant', 'com')                             !! JRE
         if (prefix_dir) then
             defaultFilename = trim(getoutputdir())//trim(defaultFilename)
+        end if
+    case ('shpcrs','shpobs', 'shpweir', 'shpthd', 'shpgate', 'shpemb', 'shpfxw', 'shpsrc')
+        if (prefix_dir) then        
+            shapeOutputDir = trim(getoutputdir())//'snapped'
+            call makedir(shapeOutputDir)
+            defaultFilename = trim(shapeOutputDir)//get_dirsep()//trim(defaultFilename)
         end if
     end select
     

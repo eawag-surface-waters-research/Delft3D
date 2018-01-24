@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2017.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: d_flooding.f90 52266 2017-09-02 11:24:11Z klecz_ml $
-! $HeadURL: https://repos.deltares.nl/repos/ds/branches/dflowfm/20161017_dflowfm_codecleanup/engines_gpl/dflowfm/packages/dflowfm_kernel/src/d_flooding.f90 $
+! $Id: d_flooding.f90 54191 2018-01-22 18:57:53Z dam_ar $
+! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/d_flooding.f90 $
 
 module m_sobekdfm   ! 
    implicit none
@@ -223,7 +223,7 @@ end subroutine reset_sobekdfm
       use m_flowparameters
       use m_flowexternalforcings
       use network_data
-      use m_sferic
+      use m_GlobalParameters, only: pi
       
       integer :: k
       integer :: L
@@ -312,6 +312,7 @@ end subroutine reset_sobekdfm
       use m_flowgeom
       use m_flow
       use m_flowtimes
+      use m_GlobalParameters
       
       implicit none
       
@@ -342,7 +343,7 @@ end subroutine reset_sobekdfm
       use m_flowgeom
       use m_flow
       use m_flowtimes
-      use m_physcoef
+      use m_GlobalParameters
       
       implicit none
       
@@ -429,7 +430,7 @@ end subroutine reset_sobekdfm
             case(4)
                u_c = max(sbkdfm_umin, abs(u_2d1d))
             end select
- 
+
             s_cI = dir
             if (s0_up < zs + dryingAccur) then
                ! no flow condition
@@ -447,7 +448,7 @@ end subroutine reset_sobekdfm
             elseif ( (s0_2d(ibnd) -zs >= 3d0/2d0 * (s0_1d(ibnd) - zs)) .or. ( s0_1d(ibnd) -  zs > 3d0/2d0*(s0_2d(ibnd)-zs) ) ) then
                ! Free flow condition
                b_i(ibnd) = au(L)**2*u_c/((2d0/3d0)**3*dx_ui*(dx_i*ce*cw*(s0_up - zs))**2)
-               f = (3d0*dx_1d2d/dx_ui + dts*b_i(ibnd))*dx_ui/(ag*dts)
+               f = (3d0*dx_1d2d/dx_ui + dts*b_i(ibnd))*dx_ui/(gravity*dts)
             
                if (s0_2d(ibnd) -zs >= 3d0/2d0 * (s0_1d(ibnd) - zs)) then
                   ! Free flow from 2d to 1d (situation 2.1, 2.2)
@@ -485,7 +486,7 @@ end subroutine reset_sobekdfm
                alfa_2d = 1d0
                b_i(ibnd) = au(L)**2*u_c/(2d0*dx_ui*(dx_i*ce*cw*(s0_down - zs))**2)
 !               b_i(ibnd) = au(L)**2*(sbkdfm_umin + abs(u_2d1d))/(2d0*dx_ui*(dx_i*ce*cw*(s0_down - zs))**2)
-               f = (dx_1d2d/dx_ui + dts*b_i(ibnd))*dx_ui/(ag*dts)
+               f = (dx_1d2d/dx_ui + dts*b_i(ibnd))*dx_ui/(gravity*dts)
                
                beta_1d = f * fu(L) + sqrt(1d0+4d0*(sin(kdx_I_1d/2d0)*CFL(ibnd))**2 + 4d0*CFL(ibnd)**2) /    &
                         (2d0*sqrt(1d0+4d0*(sin(kdx_I_1d/2d0)*CFL(ibnd))**2))
@@ -499,7 +500,7 @@ end subroutine reset_sobekdfm
                d_2dv(ibnd) = 0d0
             else
                d_2dv(ibnd) = alfa_2d * s1_1d + beta_2d  / (teta(L)*au(L)*fu(L)) * Q_1d2d + &
-                       alfa_2d * s_cI * ( f*ru(L) - (dx_1d2d * u0(L))/(alfa_sf * ag * dts)) + &
+                       alfa_2d * s_cI * ( f*ru(L) - (dx_1d2d * u0(L))/(alfa_sf * gravity * dts)) + &
                        beta_2d *s_cI/(teta(L)*fu(L)) * (teta(L) * ru(L) + (1d0-teta(L)) * u0(L) ) 
             endif
             !
@@ -511,7 +512,7 @@ end subroutine reset_sobekdfm
             else
                b1dq(ibnd) = -beta_1d/(teta(L)*fu(L)*au(L))
                d1d(ibnd)  = alfa_1d*s1_2d(ibnd) + (beta_1d - alfa_1d * f *fu(L))*(s1(k2) - s1(kb))  &
-                      - alfa_1d *s_cI * (f*ru(L) - dx_1d2d/(ag*dts*alfa_sf)*u0(L)) + beta_1d * s_cI /(teta(L)*fu(L)) * (teta(L)*ru(L) + (1d0-teta(L))*u0(L))
+                      - alfa_1d *s_cI * (f*ru(L) - dx_1d2d/(gravity*dts*alfa_sf)*u0(L)) + beta_1d * s_cI /(teta(L)*fu(L)) * (teta(L)*ru(L) + (1d0-teta(L))*u0(L))
             endif
          
             qzeta_1d2d(ibnd) = -b1ds(ibnd)/b1dq(ibnd)

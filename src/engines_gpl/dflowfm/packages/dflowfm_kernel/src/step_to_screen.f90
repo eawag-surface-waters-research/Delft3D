@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2017.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: step_to_screen.f90 52266 2017-09-02 11:24:11Z klecz_ml $
-! $HeadURL: https://repos.deltares.nl/repos/ds/branches/dflowfm/20161017_dflowfm_codecleanup/engines_gpl/dflowfm/packages/dflowfm_kernel/src/step_to_screen.f90 $
+! $Id: step_to_screen.f90 52966 2017-10-26 15:42:54Z kernkam $
+! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/step_to_screen.f90 $
 ! Copied and modified from: https://svn.oss.deltares.nl/repos/delft3d/trunk/src/engines_gpl/flow2d3d/packages/kernel/src/general/step_to_screen.f90
 ! Original file distributed  GNU General Public License <http://www.gnu.org/licenses/>.
 
@@ -91,8 +91,8 @@ subroutine step_to_screen()
     !
     ! determine total seconds remaining from timer_simulation
     !
-    sec2go_long   = nint(cpuall(3) * real(nst2go,hp) / real(max(int(dnt_user)-itstrt,1),hp),long)
-    if (cpuall(3) <= 0.0) then
+    sec2go_long   = nint(cpusteps(3) * real(nst2go,hp) / real(max(int(dnt_user)-itstrt,1),hp),long)
+    if (cpusteps(3) <= 0.0) then
         sec2go_long = -1
     end if
     !
@@ -156,7 +156,7 @@ subroutine step_to_screen()
     write(msgbuf, '(4(1x,a16),i11,f8.1,a1,f12.5)') &
         seconds_to_dhms(nint(time_user-tstart_user, long)), &
         seconds_to_dhms(nint(tstop_user-time_user, long)), &
-        seconds_to_dhms(nint(cpuall(3), long)), &
+        seconds_to_dhms(nint(cpusteps(3), long)), &
         seconds_to_dhms(sec2go_long), &
         nst2go, &
         perc_compl, &

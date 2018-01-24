@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2017.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -27,12 +27,10 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: unstruc_display.F90 52266 2017-09-02 11:24:11Z klecz_ml $
-! $HeadURL: https://repos.deltares.nl/repos/ds/branches/dflowfm/20161017_dflowfm_codecleanup/engines_gpl/dflowfm/packages/dflowfm_kernel/src/unstruc_display.F90 $
+! $Id: unstruc_display.F90 54191 2018-01-22 18:57:53Z dam_ar $
+! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/unstruc_display.F90 $
 
-module m_WEARELT
-   double precision :: XMIN,YMIN,XMAX,YMAX,X1,Y1,X2,Y2,RCIR,CR,DSIX
-END module m_WEARELT
+! m_WEARELT movet to gridgeom
 
 MODULE M_DEVICES
   INTEGER           :: NPX,NPY,NCOLR,NDEV,NOPSYS,IWS,IHS
@@ -115,7 +113,7 @@ module unstruc_display
 !! Handles all display settings and screen plotting for Unstruc
 !! (Not yet, a lot is still in REST.F90 [AvD])
 
-! $Id: unstruc_display.F90 52266 2017-09-02 11:24:11Z klecz_ml $
+! $Id: unstruc_display.F90 54191 2018-01-22 18:57:53Z dam_ar $
 
 use unstruc_colors
 implicit none
@@ -590,12 +588,14 @@ end subroutine save_displaysettings
 
 !> Plots all observation points in the current viewport
 subroutine plotObservations() ! TEKOBS
+    
     use m_observations
-    USE M_FLOWGEOM
+    use M_FLOWGEOM
     use m_flow
+    use gridoperations
+    use m_transport, only: NUMCONST, itemp, ITRA1, ITRAN, constituents
     integer      :: n, NN, K, kb, kt
     character*40 :: tex
-    logical, external :: inview
     double precision  :: znod, temb, temt
 
     if (ndrawobs == 1 ) return
@@ -647,16 +647,16 @@ subroutine plotObservations() ! TEKOBS
              if (kmx > 0) then 
                 call getkbotktop(k,kb,kt)
                 if (jaFahrenheit == 0) then 
-                   temt = tem1(kt) 
-                   temb = tem1(kb)
+                   temt = constituents(itemp,kt) 
+                   temb = constituents(itemp,kb)
                 else
-                   temt = 32d0 + (9d0/5d0)*tem1(kt)
-                   temb = 32d0 + (9d0/5d0)*tem1(kb)
+                   temt = 32d0 + (9d0/5d0)*constituents(itemp,kt)
+                   temb = 32d0 + (9d0/5d0)*constituents(itemp,kb)
                 endif     
                 write (tex,'(2f6.1)') temt, temb
                 call gtext(tex(1:14), xobs(n), yobs(n), ncolblack)
              else 
-                write (tex,'(2f6.1)') tem1(k)
+                write (tex,'(2f6.1)') constituents(itemp,k)
                 call gtext(tex(1:14), xobs(n), yobs(n), ncolblack)
              endif   
           endif
@@ -670,10 +670,11 @@ end subroutine plotObservations
 !> Plots all manholes in the current viewport
 subroutine plotManholes()
     use m_manholes
-    USE M_FLOWGEOM
+    use m_flowgeom
     use m_flow
+    use gridoperations
+    
     integer      :: n
-    logical, external :: inview
     if (ndrawmanholes == 1 ) return
 
     call setcol(klobs)
@@ -831,7 +832,7 @@ end subroutine plotSpline
 
 
 subroutine plotCrossSections() ! tekcrs
-    use m_crosssections
+    use m_monitoring_crosssections
 
     integer :: i, met, jaArrow
     character :: tex*40
@@ -1005,6 +1006,11 @@ end subroutine plotFixedWeirs
 subroutine plotCrossSectionPath(path, met, ncol, jaArrow, label)
     use m_crspath
     use m_wearelt
+    use geometry_module, only: normalout
+    use m_missing, only : dmiss, dxymis
+    use m_sferic, only: jsferic, jasfer3D
+    use gridoperations
+    
     type(tcrspath),   intent(in) :: path    !< Path definition
     integer,          intent(in) :: met     !< Method: 1=plot polyline, 2=plot crossed net/flow links (as stored in path%xk)
     integer,          intent(in) :: ncol    !< Drawing color
@@ -1013,7 +1019,6 @@ subroutine plotCrossSectionPath(path, met, ncol, jaArrow, label)
 
     integer :: j, jj, jmin, jmax
     double precision :: xt, yt, rn, rt, xx1, yy1, xx2, yy2, xx, yy
-    logical :: inview
 
 
     call setcol(ncol)
@@ -1068,7 +1073,7 @@ subroutine plotCrossSectionPath(path, met, ncol, jaArrow, label)
         if (jaArrow == 1) then
             xt = .5d0*(path%xk(1,jmin) + path%xk(2,jmin))
             yt = .5d0*(path%yk(1,jmin) + path%yk(2,jmin))
-            call normalout(path%xk(1,jmin), path%yk(1,jmin), path%xk(2,jmin), path%yk(2,jmin), rn, rt)
+            call normalout(path%xk(1,jmin), path%yk(1,jmin), path%xk(2,jmin), path%yk(2,jmin), rn, rt, jsferic, jasfer3D, dmiss, dxymis)
             call arrowsxy(xt,yt,rn,rt,4d0*rcir)
         endif
 
@@ -1110,8 +1115,8 @@ SUBROUTINE MINMXNS()
       double precision :: dy
       integer :: n
       integer :: ndraw
-      double precision :: xcmax, xcmin, xlmax, xlmin, xpmax, xpmin, xsmax, xsmin, xspmax, xspmin
-      double precision :: ycmax, ycmin, ylmax, ylmin, ypmax, ypmin, ysmax, ysmin, yspmax, yspmin
+      double precision :: xcmax, xcmin, xlmax, xlmin, xplmax, xplmin, xsmax, xsmin, xspmax, xspmin
+      double precision :: ycmax, ycmin, ylmax, ylmin, yplmax, yplmin, ysmax, ysmin, yspmax, yspmin
       double precision :: xm, ym
       double precision ::  XH(10), YH(10)
       COMMON /DRAWTHIS/ ndraw(50)
@@ -1127,8 +1132,8 @@ SUBROUTINE MINMXNS()
       CALL DMINMAX(  XSP  ,   mcS*MAXSPLEN,  XSPMIN, XSPMAX,  mcS*MAXSPLEN) ! SPLINES
       CALL DMINMAX(  YSP  ,   mcS*MAXSPLEN,  YSPMIN, YSPMAX,  mcS*MAXSPLEN)
 
-      CALL  DMINMAX(  XPL ,  NPL  ,  XPMIN,   XPMAX, MAXPOL)
-      CALL  DMINMAX(  YPL ,  NPL  ,  YPMIN,   YPMAX, MAXPOL)
+      CALL  DMINMAX(  XPL ,  NPL  ,  XPLMIN,   XPLMAX, MAXPOL)
+      CALL  DMINMAX(  YPL ,  NPL  ,  YPLMIN,   YPLMAX, MAXPOL)
 
       if ( NS.gt.0 ) then
          CALL  DMINMAX(  XS  ,  NS   ,  XSMIN,   XSMAX, NS    )
@@ -1166,13 +1171,13 @@ SUBROUTINE MINMXNS()
          YH(N) = YLMIN
       ENDIF
 
-      IF (XPMAX .NE. XPMIN .OR. YPMAX .NE. YPMIN) THEN
+      IF (XPLMAX .NE. XPLMIN .OR. YPLMAX .NE. YPLMIN) THEN
          N     = N+1
-         XH(N) = XPMAX
-         YH(N) = YPMAX
+         XH(N) = XPLMAX
+         YH(N) = YPLMAX
          N     = N+1
-         XH(N) = XPMIN
-         YH(N) = YPMIN
+         XH(N) = XPLMIN
+         YH(N) = YPLMIN
       ENDIF
 
       IF (XSMAX .NE. XSMIN .OR. YSMAX .NE. YSMIN) THEN
@@ -1335,6 +1340,8 @@ subroutine tekwindvector()
  use m_flow ! , only : qinrain, jatem, a1tot, vol1tot, volgrw, vinraincum, jagrw, vinbndcum, voutbndcum, a1ini, vol1ini, volgrwini, qouteva, voutraincum
  use m_flowgeom
  use m_wind
+ use m_xbeach_data, only: csx, snx, itheta_view
+ use m_flowparameters, only: jawave
  use m_missing
  implicit none
  COMMON /DRAWTHIS/   ndraw(50)
@@ -1394,17 +1401,27 @@ subroutine tekwindvector()
     ncol = ncoltx
     call thicklinetexcol(ncol)  
     
-    if (vinbndcum > 0) then 
+    if (vinbndcum > 0 .or. voutbndcum > 0) then 
        yp  = yp - dyp                 
        tex = 'Hinbnd :               (m)'
-       write(tex(10:20), '(F11.4)') vinbndcum/a1ini   
+       write(tex(10:20), '(F11.4)')  vinbndcum/a1ini   
        call GTEXT(tex, xp, yp, ncol)
-    endif
-    
-    if (voutbndcum > 0) then 
+   
        yp  = yp - dyp                 
        tex = 'Houtbnd:               (m)'
        write(tex(10:20), '(F11.4)') -voutbndcum/a1ini   
+       call GTEXT(tex, xp, yp, ncol)
+    endif
+    
+    if (vingrwcum > 0 .or. voutgrwcum > 0) then 
+       yp  = yp - dyp                 
+       tex = 'Hingrw :               (m)'
+       write(tex(10:20), '(F11.4)')  vingrwcum/a1ini   
+       call GTEXT(tex, xp, yp, ncol)
+       
+       yp  = yp - dyp                 
+       tex = 'Houtgrw:               (m)'
+       write(tex(10:20), '(F11.4)') -voutgrwcum/a1ini   
        call GTEXT(tex, xp, yp, ncol)
     endif
        
@@ -1413,7 +1430,7 @@ subroutine tekwindvector()
     write(tex(10:20), '(F11.4)') (vol1tot-vol1ini)/a1ini   
     call GTEXT(tex, xp, yp, ncol)
     
-    if (jagrw > 0) then 
+    if ( jagrw > 0 ) then 
        yp  = yp - dyp 
        tex = 'Hgrw   :               (m)'
        write(tex(10:20), '(F11.4)') (volgrw-volgrwini)/a1ini   
@@ -1499,7 +1516,16 @@ subroutine tekwindvector()
        
  endif   
  
+ if ( jawave.eq.4 ) then
+    xp = 0.90*x1 + 0.10*x2
+    yp = 0.85*y1 + 0.15*y2
+
+    call thicklinetexcol(ncolln)  
+    call arrowsxy( xp, yp, csx(itheta_view), snx(itheta_view), 0.1d0*(x2-x1))
+ end if
+ 
  call resetlinesizesetc()
+ 
   
  !double precision                  :: QSUNav          ! Solar influx              (W/m2)
  !double precision                  :: QEVAav          ! Evaporative heat loss     (W/m2)

@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2017.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: rcm.f90 52266 2017-09-02 11:24:11Z klecz_ml $
-! $HeadURL: https://repos.deltares.nl/repos/ds/branches/dflowfm/20161017_dflowfm_codecleanup/engines_gpl/dflowfm/packages/dflowfm_kernel/src/rcm.f90 $
+! $Id: rcm.f90 49641 2017-01-27 16:35:52Z spee $
+! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/rcm.f90 $
 !> @file rcm.f90
 !! Reverse-Cuthill-Mckee algorithm + helpers.
 !! Used for network-node renumbering to improve cache efficiency

@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2017.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: net_main.F90 52266 2017-09-02 11:24:11Z klecz_ml $
-! $HeadURL: https://repos.deltares.nl/repos/ds/branches/dflowfm/20161017_dflowfm_codecleanup/engines_gpl/dflowfm/packages/dflowfm-cli_exe/src/net_main.F90 $
+! $Id: net_main.F90 54131 2018-01-18 14:02:31Z carniato $
+! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/net_main.F90 $
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -52,31 +52,59 @@
 !! \li \b WAQ-output: waq.f90, wrwaq.f90
 !! \li \b More: see file list
    PROGRAM unstruc
+   USE M_GRID
+   USE M_POLYGON
+   USE M_LANDBOUNDARY
+   USE M_BOAT
+   use m_netw
    use unstruc_startup
    use unstruc_model
+   use netcdf
+   use properties
+   use m_observations
+   use unstruc_netcdf
    use unstruc_messages
    USE UNSTRUC_DISPLAY
+   USE M_WEARELT
+   use m_flowparameters
    use unstruc_api
-   use network_data, only: network_ini 
-   use dfm_error   
+   use dfm_error
+   use gridoperations
+   
    use m_partitioninfo
 #ifdef HAVE_MPI
    use mpi
 #endif
    
+   !use ifcore  !nanrelease
+
+   
+!   use ftnunit
+!   use unstruc_tests
    implicit none
 
    integer :: MODE,NFLD, KEY
    integer :: JQN
    integer :: JDEMO
-   integer :: finalizeProgram
 
    COMMON /MODENOW/ MODE,NFLD
    COMMON /QNRGF/ JQN
    COMMON /DEMO/ JDEMO
    integer :: ierr, lastmode, IDUM
    LOGICAL :: JAWEL
-
+   character*4 domain 
+   
+   integer                   :: i, L, istat, n12
+   integer                   :: Lrst = 0, Lmap = 0, L_merge = 0, jamergedrst = 0, Lmap1 = 0
+   integer, parameter        :: numlen=4        !< number of digits in domain number string/filename
+   integer, parameter        :: maxnamelen=256  !< number of digits in filename 
+   character(len=numlen)     :: sdmn_loc        !< domain number string
+   character(len=maxnamelen) :: filename        
+   character(len=maxnamelen) :: restartfile     !< storing the name of the restart files
+   character(len=maxnamelen) :: md_mapfile_base !< storing the user-defined map file
+   character(len=maxnamelen) :: md_flowgeomfile_base !< storing the user-defined flowgeom file
+    
+   integer, external         :: iget_jaopengl
    integer, external         :: read_commandline
    integer, external         :: flow_modelinit
 
@@ -86,7 +114,7 @@
 ! All kernel code does not need to be recompiled, because there is only
 ! two places that preprocess HAVE_DISPLAY at *compiletime*, all the rest
 ! is done by `if (jaGUI .. )`
-   jaGUI = 0          !< GUI (1) or not (0)
+    jaGUI = 0          !< GUI (1) or not (0)
 #endif
 
 #ifdef HAVE_MPI
@@ -104,15 +132,42 @@
    
 !  make domain number string as soon as possible
    write(sdmn, '(I4.4)') my_rank
-
+   !write(6,*) 'my_rank =', my_rank
+   
+!   call pressakey()
 #else
    numranks=1
+   !write(6,*) 'NO MPI'
+!  call pressakey()
 #endif
 
+
+
+   !INTEGER*4 OLD_FPE_FLAGS, NEW_FPE_FLAGS                                ! nanrelease
+   !NEW_FPE_FLAGS = FPE_M_TRAP_OVF + FPE_M_TRAP_DIV0 + FPE_M_TRAP_INV     ! nanrelease
+   !OLD_FPE_FLAGS = FOR_SET_FPE (NEW_FPE_FLAGS)                           ! nanrelease
+ 
+
+    ! Only run in test mode
+!    call runtests_init
+!    call runtests( unstruc_test_all )
+!    call runtests_final
+   !               1        1         2         3         4         5          6
+!   WHATST       = '@(#)   | Kernkamp Herman  ,      NETWORK, Version 1.0000; 04-07-2001'//char(0)
+!   WHATST       = '@(#)WL | Deltares,               Unstruc, Version 1.0000; 20-03-2007'//char(0)   ! Starting date
+!   WHATST       = '@(#)WL | Deltares,               Unstruc, Version 1.0011; 01-06-2009'//char(0)
    JDEMO        = 0
    JQN          = 2
-   
-   call network_ini() ! initialize of the network variables
+
+   MMAX   = 0
+   NMAX   = MMAX
+   KMAX   = MMAX*NMAX
+   KNX    = 8
+   MXB    = 10
+   LMAX   = (MMAX-1)*NMAX + (NMAX-1)*MMAX + 2*(MMAX-1)*(NMAX-1)
+   MAXLAN = 500
+   MAXPOL = MAXLAN
+   MAXBOAT = MAXLAN
  
     md_jaopenGL = -1 ! no commandline option read for OpenGL (yet)
   
@@ -129,7 +184,7 @@
 
 !   set jaopengl from commandline option (if available)
     call iset_jaopengl(md_jaopengl)
-    CALL START()  ! start of the actual initialisation for the program
+    CALL START()
     call resetFullFlowModel()
     CALL INIDAT()
     CALL RESETB(0)
@@ -144,12 +199,113 @@
     NFLD = 1
     KEY  = 3
     
-    call processCommandLineOptions(finalizeProgram)
+    if ( md_pressakey.eq.1 ) then
+       call pressakey()
+    end if
     
-    if (finalizeProgram.eq.1) then
-        goto 1234
-    endif
+    if ( md_jatest.eq.1 ) then
+       call initimer()
+       do i=1,md_Nruns
+     !     call axpy(md_M, md_N)
+       end do
+!      output timings  
+       write(6,'(a,E8.2,a,E8.2)') ' WC-time Axpy test [s]: ' , gettimer(1,IAXPY), ' CPU-time Axpy test [s]: ' , gettimer(0,IAXPY)
+       
+       goto 1234
+    end if
+    
+    if ( md_soltest.eq.1 ) then
+       call soltest(md_CFL,md_icgsolver,md_maxmatvecs,md_epsdiff,md_epscg)
+       
+       goto 1234
+    end if
 
+    if ( md_convnetcells.eq.1 ) then
+       ! call soltest(md_CFL,md_icgsolver,md_maxmatvecs,md_epsdiff,md_epscg)
+       ! read net, write net ... md_netfile
+       call findcells(0)
+       call find1dcells()
+       call unc_write_net(md_netfile, janetcell = 1, janetbnd = 0, jaidomain = 0)
+       goto 1234
+    end if
+
+    if (jabatch == 1) then 
+       call dobatch()
+    endif 
+    
+
+    if ( md_japartition.eq.1 ) then
+        
+       if ( len_trim(md_ident) > 0 ) then ! partitionmduparse
+          icgsolver = md_icgsolver
+          call partition_from_commandline(md_netfile, md_Ndomains, md_jacontiguous, icgsolver, md_pmethod, md_dryptsfile, md_genpolygon)
+          L    = index(md_netfile, '_net')-1
+          md_mdu = md_ident
+          if (len_trim(md_restartfile) > 0) then ! If there is a restart file
+             L_merge = index(md_restartfile, '_merged')
+             if (L_merge > 0) then
+                jamergedrst = 1
+             else ! restart file is not a merged map file, then provide _rst or _map file of each subdomain
+                restartfile = md_restartfile
+                Lrst = index(restartfile, '_rst.nc')
+                Lmap = index(restartfile, '_map.nc')
+            endif   
+          endif
+          
+          md_mapfile_base = md_mapfile
+          md_flowgeomfile_base = md_flowgeomfile
+          do i = 0,  Ndomains - 1
+             write(sdmn_loc, '(I4.4)') i
+             md_netfile = trim(md_netfile(1:L)//'_'//sdmn_loc//'_net.nc')
+             if (md_genpolygon .eq. 1) then
+                md_partitionfile = trim(md_netfile(1:L))//'_part.pol' 
+             endif
+             if (jamergedrst == 0) then ! restart file is not a merged map file, then provide _rst or _map file of each subdomain 
+               if (Lrst > 0) then      ! If the restart file is a rst file
+                  md_restartfile = trim(restartfile(1:Lrst-16)//sdmn_loc//'_'//restartfile(Lrst-15: Lrst+7))
+               else if (Lmap > 0) then ! If the restart file is a map file
+                  md_restartfile = trim(restartfile(1:Lmap)//sdmn_loc//'_map.nc')
+               endif
+             endif
+             if (len_trim(md_mapfile_base)>0) then
+                Lmap1 = index(md_mapfile_base, '_map.nc')
+                if (Lmap1 == 0) then    ! Customized map-file name
+                   md_mapfile = md_mapfile_base(1:index(trim(md_mapfile_base)//'.','.')-1)//'_'//sdmn_loc//".nc"
+                else
+                   md_mapfile = md_mapfile_base(1:index(trim(md_mapfile_base)//'.','_map')-1)//'_'//sdmn_loc//"_map.nc"
+                endif
+             endif
+             if (len_trim(md_flowgeomfile_base)>0) then
+                md_flowgeomfile = md_flowgeomfile_base(1:index(md_flowgeomfile_base,'.nc',back=.true.)-1)//'_'//sdmn_loc//".nc"
+             endif
+             call generatePartitionMDUFile(trim(md_ident)//'.mdu', trim(md_mdu)//'_'//sdmn_loc//'.mdu')
+          enddo   
+       else
+          call partition_from_commandline(md_netfile,md_ndomains,md_jacontiguous,md_icgsolver, md_pmethod, md_dryptsfile, md_genpolygon)
+       end if
+
+       goto 1234  !      stop
+    end if
+
+    if ( md_jagridgen.eq.1 ) then
+       call makenet(0)
+       call gridtonet()
+       call unc_write_net('out_net.nc')
+       goto 1234
+    end if
+
+    if ( md_jarefine.eq.1 ) then
+       call refine_from_commandline()
+       goto 1234
+    end if
+    
+    if ( md_cutcells.eq.1 ) then
+       n12 = 3
+       call findcells(0)
+       call cutcell_list(n12, '*.cut',5, 0)
+       call unc_write_net('out_net.nc')
+    end if
+    
     if ( jagui.eq.1 .and. len_trim(md_cfgfile).gt.0 ) then
        call load_displaysettings(md_cfgfile)
     end if
@@ -181,12 +337,43 @@
     end if
     
    if ( jaGUI.eq.1 ) then
-       call editGui(MODE, NFLD,KEY,lastmode)
+
+   10 CONTINUE
+      IF (MODE .EQ. 1) THEN
+         CALL EDITPOL(MODE,KEY,NETFLOW)
+      ELSE IF (MODE .EQ. 2) THEN
+         CALL EDITNETW(MODE,KEY)
+      ELSE IF (MODE .EQ. 3) THEN
+         CALL EDITSPLINES(MODE,KEY)
+      ELSE IF (MODE .EQ. 4) THEN
+         IF (NFLD .EQ. 1 .OR. NFLD .EQ. 2) THEN
+            CALL EDITGRID(MODE,NFLD,KEY)
+         ELSE IF (NFLD .GE. 4 .AND. NFLD .LE. 12) THEN
+            CALL EDITGRIDLINEBLOK(MODE,NFLD,KEY)
+         ELSE IF (NFLD .GE. 14 .AND. NFLD .LE. 17)  THEN
+            CALL EDITGRIDBLOK(MODE,NFLD,KEY)
+         ELSE
+            NFLD = 1
+         ENDIF
+      ELSE IF (MODE .EQ. 5) THEN
+         CALL EDITSAM(MODE,KEY)
+      ELSE IF (MODE .EQ. 6) THEN
+         CALL EDITFLOW(MODE,KEY)
+      ENDIF
+      ! Catch invalid modes return from edit*-routines.
+      ! Set back to last valid mode if necessary.
+      if (mode >= 1 .and. mode <= 6) then
+          lastmode = mode ! is a good mode
+      else
+          mode = lastmode ! return to last known good mode
+      end if
+      GOTO 10
    end if
    
 1234 continue
 
 !  finalize before exit
    call partition_finalize()
-   
+
+
    end program unstruc

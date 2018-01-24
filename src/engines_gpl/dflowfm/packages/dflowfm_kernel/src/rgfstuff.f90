@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2017.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: rgfstuff.f90 52266 2017-09-02 11:24:11Z klecz_ml $
-! $HeadURL: https://repos.deltares.nl/repos/ds/branches/dflowfm/20161017_dflowfm_codecleanup/engines_gpl/dflowfm/packages/dflowfm_kernel/src/rgfstuff.f90 $
+! $Id: rgfstuff.f90 54131 2018-01-18 14:02:31Z carniato $
+! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/rgfstuff.f90 $
      MODULE M_MAPPROPARAMETERS
      implicit none
       double precision :: XCE,YCE,DELTX,DELTY,XF,YF,FI, XCSTEREO, YCSTEREO
@@ -38,7 +38,9 @@
       
      
       SUBROUTINE ANDERSOM(X,N)
+      
       use m_alloc
+      
       implicit none
       integer :: n
       double precision              :: X(N)
@@ -292,14 +294,19 @@
 
 
       SUBROUTINE ABREL2(X,Y,D,NN,T)
+      
+      use geometry_module, only: dbdistance
+      use m_missing, only: dmiss
+      use m_sferic, only: jsferic, jasfer3D
+      
       implicit none
       integer :: j
       integer :: nn
       double precision :: X(NN), Y(NN), D(NN)
-      DOUBLE PRECISION :: DBDISTANCE, T
+      DOUBLE PRECISION :: T
       D(1) = 0
       DO 10 J = 2,NN
-         D(J) = D(J-1) + DBDISTANCE( X(J-1),Y(J-1), X(J), Y(J) )
+         D(J) = D(J-1) + DBDISTANCE( X(J-1),Y(J-1), X(J), Y(J), jsferic, jasfer3D, dmiss)
     10 CONTINUE
       T = D(NN)
 
@@ -3120,7 +3127,11 @@
 !>    compute the intersection of two splines
       SUBROUTINE SECT3R(     XI,     YI,     XJ,     YJ,    mmax, nmax, imax, CRP,   &
                           NUMPI,  NUMPJ, NUMCRO,    TIV,    TJV,  XP,     YP)
+      
       use m_missing
+      use geometry_module, only: dbdistance, cross
+      use m_sferic, only: jsferic, jasfer3D
+      
       implicit none
 !     BEPAAL HET SNYPUNT VAN DE 2 SPLINES NR I EN J      USE DIMENS
       
@@ -3148,8 +3159,6 @@
       integer :: i, j, jo, jacros, k
       
       double precision :: sdist, sdistmin
-      
-      double precision, external :: dbdistance
 
 
       NUMCRO = 0
@@ -3175,7 +3184,7 @@
            YC(4) = YJ(J+1)
            CRP = -1234d0
            CALL CROSS(XC(1),YC(1),XC(2),YC(2),XC(3),YC(3),XC(4),YC(4), &
-                      JACROS,SL,SM,XCR,YCR,CRP)
+                      JACROS,SL,SM,XCR,YCR,CRP, jsferic, dmiss)
           IF (JACROS .EQ. 1) THEN
              if ( numpi.eq.2 ) then
                 sdist = min(sdistmin, abs(SL-0.5d0))
@@ -3223,7 +3232,7 @@
               YC(4) = YJ(J+1)
               SL = dmiss; SM = dmiss
               CALL CROSS(XC(1),YC(1),XC(2),YC(2),XC(3),YC(3),XC(4),YC(4), &
-                         JACROS,SL,SM,XCR,YCR,CRP)
+                         JACROS,SL,SM,XCR,YCR,CRP,jsferic, dmiss)
                          
 !             BIJ NIEUW ZOEKEN MAG JE OOK NET BUITEN DE RECHTE LIJNSTUKKEN VALLEN 20-5-2003
               IF (SL .GT. -0.2 .AND. SL .LT. 1.2 .AND. SM .GT. -0.2 .AND. SM .LT. 1.2 ) THEN
@@ -3293,7 +3302,7 @@
 !        CALL  LNABS(XC(2),YC(2))
 !        CALL MOVABS(XC(3),YC(3))
 !        CALL  LNABS(XC(4),YC(4))
-!
+
 !        CALL RCIRC(XC(1),YC(1))
 !        CALL RCIRC(XC(2),YC(2))
 !        CALL RCIRC(XC(3),YC(3))
@@ -3305,7 +3314,7 @@
          SL = dmiss; SM = dmiss
          CRS = -1234d0
          CALL CROSS(XC(1),YC(1),XC(2),YC(2),XC(3),YC(3),XC(4),YC(4), &
-                      JACROS,SL,SM,XCR,YCR,CRS)
+                      JACROS,SL,SM,XCR,YCR,CRS, jsferic, dmiss)
          IF (SL .GT. -2.  .AND. SL .LT. 3.0 .AND. SM .GT. -2.  .AND. SM .LT. 3.0 ) THEN
             TIO = TI
             TJO = TJ
@@ -3324,7 +3333,7 @@
             IF (K .LT. 20) THEN
               IF (ABS(TI-TIO) .GT. EPS .OR. ABS(TJ-TJO) .GT. EPS) THEN
 !                DIS = SQRT((XCR-XO)*(XCR-XO)+(YCR-YO)*(YCR-YO))
-                dis = dbdistance(xo,yo,xcr,ycr)
+                dis = dbdistance(xo,yo,xcr,ycr, jsferic, jasfer3D, dmiss)
                 IF (DIS .GT. EPS2) GOTO 20 ! NIET VERDER VERKLEINEN ALS PUNTEN AL BIJNA IDENTIEK
                ENDIF
             ENDIF
@@ -3571,8 +3580,13 @@
       RETURN
       END subroutine makessq
 
-          SUBROUTINE GETDIS(X,Y,X2,Y2,N,TS,SS,H)
-          implicit none
+      SUBROUTINE GETDIS(X,Y,X2,Y2,N,TS,SS,H)
+      
+      use geometry_module, only: dbdistance
+      use m_missing, only: dmiss
+      use m_sferic, only: jsferic, jasfer3D
+      
+      implicit none
 !     Bereken de afstand SS van punt TS in X,Y, tov punt met TS = 0, ofwel N=1
       double precision ::  X(N), Y(N), X2(N), Y2(N)
       double precision :: ts, ss
@@ -3583,8 +3597,6 @@
       
       double precision :: curv
       logical          :: Lcurv
-      
-      double precision, external :: dbdistance
       
       Lcurv = ( H.gt.1d-8 )
       
@@ -3605,9 +3617,9 @@
       ENDIF
       if ( .not.Lcurv ) then
 !         SS  = SS + SQRT( (XT1-XT0)**2 + (YT1-YT0)**2 )
-         SS  = SS + dbdistance(xt0,yt0,xt1,yt1)
+         SS  = SS + dbdistance(xt0,yt0,xt1,yt1,jsferic, jasfer3D, dmiss)
       else
-         SS  = SS + dbdistance(xt0,yt0,xt1,yt1)*(1d0+H*curv)
+         SS  = SS + dbdistance(xt0,yt0,xt1,yt1,jsferic, jasfer3D, dmiss)*(1d0+H*curv)
       end if
       
       T0  = T1
@@ -4694,9 +4706,12 @@
 
       !> Operates on active grid from m_grid directly!
       SUBROUTINE SHIFXY(IS,     JS,     MP,     NP        )
+      
       !     XH,     YH,     mmax, nmax, MC,     NC, IS,     JS,     MP,     NP        )
       use m_missing
       use m_grid
+      use geometry_module, only: pinpok
+      
       implicit none
       integer :: is, js, mp, np
 
@@ -4737,6 +4752,7 @@
 
       SUBROUTINE FINDNM( XL, YL, X, Y, mmax, nmax, MC, NC, INSIDE, MV, NV, IN, JN, wf )
       use m_missing
+      use geometry_module, only: pinpok
       implicit none
 
       integer :: mmax, nmax, mc, nc, inside, mv, nv, in, jn
@@ -4792,7 +4808,7 @@
             YY(4) = Y(I,J+1)
             IF (XX(1) .NE. XYMIS .AND. XX(2) .NE. XYMIS .AND.   &
                 XX(3) .NE. XYMIS .AND. XX(4) .NE. XYMIS) THEN
-               CALL PINPOK(XL, YL, 4, XX, YY, INSIDE)
+               CALL PINPOK(XL, YL, 4, XX, YY, INSIDE, jins, dmiss)
                IF (INSIDE .EQ. 1) THEN
                   
                   call bilin5( xx, yy, xL, yL ,wf , ier)
@@ -4814,7 +4830,7 @@
                      YK(2) = YY(I2)
                      XK(3) = XXC
                      YK(3) = YYC
-                     CALL PINPOK(XL, YL, 3, XK, YK, INSIDET)
+                     CALL PINPOK(XL, YL, 3, XK, YK, INSIDET, jins, dmiss)
                      IF (INSIDET .EQ. 1) THEN
                         IF ( I1 .EQ. 1) JN = -1
                         IF ( I1 .EQ. 2) IN =  1
@@ -4947,6 +4963,7 @@
       use m_gridsettings
       use m_sferic
       use m_wearelt
+      use geometry_module, only: dbdistance
       implicit none
       integer :: mmax, nmax, mc, nc, nump, ja
       double precision :: X(MMAX,NMAX), Y(MMAX,NMAX), XH(MMAX,NMAX), YH(MMAX,NMAX)
@@ -4955,8 +4972,6 @@
       integer :: MB,NB,MB2,NB2,NPT,NPT2,NPUTO,ITYPE
       COMMON /BLOK/ MB(6),NB(6),MB2(6),NB2(6),NPT,NPT2,NPUTO,ITYPE
 !     ATTRACTIE, REPULSIE
-
-      double precision :: dbDistance
 
       integer :: M1, N1, M2, N2, IN, JN, I, J, II, JJ, ii1, ii2, jj1, jj2, JANU, numpi, numpj
       double precision :: rsx, teken, dx, dy, dxy, dxy0, x0, y0, xn, yn, rn, fr
@@ -4972,7 +4987,7 @@
       NUMPI = IN*NUMP
       NUMPJ = JN*NUMP
 !     RSX   = DSIX
-      RSX = dbDISTANCE(X1,Y1,X2,Y2)
+      RSX = dbDISTANCE(X1,Y1,X2,Y2, jsferic, jasfer3D, dmiss)
       RSX = RSX/6
       JANU  = JA
       DO 10 I = M1,M2
@@ -4997,7 +5012,7 @@
                      IF (XN .NE. XYMIS .AND. .NOT. (II .EQ. I .AND. JJ .EQ. J) ) THEN
                         YN = Y(II,JJ)
                         IF (NPT .LE. 2) THEN
-                           RN = dbDISTANCE(XN,YN,X0,Y0)
+                           RN = dbDISTANCE(XN,YN,X0,Y0, jsferic, jasfer3D, dmiss)
 !                          RN = SQRT( (XN - X0)**2 + (YN - Y0)**2 )
                            IF (RN .LT. RSX) THEN
                               FR = (RSX - RN)/RSX
@@ -5125,13 +5140,15 @@
                             NC,     II,     JJ,     IN,                &
                             JN,   DXY0                )
       use m_missing
+      use geometry_module, only: dbdistance
+      use m_sferic, only: jsferic, jasfer3D
+      
       implicit none
       integer :: mmax, nmax, mc, nc, ii, jj, in, jn
       double precision :: dxy0
       double precision :: X(MMAX,NMAX), Y(MMAX,NMAX)
 
       integer :: num
-      double precision :: dbDistance
       double precision :: XU, YU, XD, YD, dxy1
       NUM  = 0
       DXY0 = 0
@@ -5140,7 +5157,7 @@
          XU = X(II+IN,JJ+JN)
          IF (XU .NE. XYMIS) THEN
             YU   = Y(II+IN,JJ+JN)
-            dxy0 = dbDISTANCE(X(II,JJ),Y(II,JJ),XU,YU)
+            dxy0 = dbdistance(X(II,JJ),Y(II,JJ),XU,YU,jsferic, jasfer3D, dmiss)
             NUM  = NUM + 1
          ENDIF
       ENDIF
@@ -5149,7 +5166,7 @@
          XD = X(II-IN,JJ-JN)
          IF (XD .NE. XYMIS) THEN
             YD   = Y(II-IN,JJ-JN)
-            dxy1 = dbDISTANCE(X(II,JJ),Y(II,JJ),XD,YD)
+            dxy1 = dbdistance(X(II,JJ),Y(II,JJ),XD,YD,jsferic, jasfer3D, dmiss)
             NUM  = NUM + 1
             DXY0 = (DXY0 + DXY1) / dble(NUM)
          ENDIF
@@ -5824,6 +5841,7 @@
       use m_netw  ! vanwege zkuni
       use unstruc_model
       USE M_ARCINFO
+      
       implicit none
 
       CHARACTER (LEN=*)  :: FILNAM
@@ -6109,12 +6127,14 @@
      subroutine gridtonet()
       use m_netw
       use m_grid
-      USE M_MISSING
+      use m_missing
+      use gridoperations
+
       implicit none
       double precision :: af
 
       integer, allocatable :: mn(:,:)
-      double precision XX(8), YY(8), ZZ(8), tooclose0, length, dbdistance
+      double precision XX(8), YY(8), ZZ(8), tooclose0, length
       integer :: k0, l0, ja, jadoorladen, i, j, k, l, method, ierr, key
 
       jadoorladen = 1
@@ -6236,7 +6256,10 @@
 !    delete grid
      use m_grid
      use m_polygon
-     USE M_MISSING
+     use m_missing
+     use m_polygon, only: NPL, xpl, ypl, zpl
+     use geometry_module, only: dbpinpol
+     
      implicit none
      integer                :: inhul, ja, i, j
      integer, intent(in)    :: jasave, jadelpol
@@ -6264,7 +6287,7 @@
      DO 10 I = 1,MC
         DO 10 J = 1,NC
            IF (Xc(I,J) .NE. DXYMIS) THEN
-              CALL dbpinpol(Xc(i,j), yc(i,j), INHUL)
+              CALL dbpinpol(Xc(i,j), yc(i,j), INHUL, dmiss, JINS, NPL, xpl, ypl, zpl)
               IF (INHUL .EQ. 1) Xc(I,J) = XYMIS
            ENDIF
    10 CONTINUE

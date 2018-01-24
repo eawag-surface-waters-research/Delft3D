@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2017.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: tecplot.F90 52266 2017-09-02 11:24:11Z klecz_ml $
-! $HeadURL: https://repos.deltares.nl/repos/ds/branches/dflowfm/20161017_dflowfm_codecleanup/engines_gpl/dflowfm/packages/dflowfm_kernel/src/tecplot.F90 $
+! $Id: tecplot.F90 54161 2018-01-19 13:58:36Z carniato $
+! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/tecplot.F90 $
 !> for Tecplot output
 module m_tecplot
 implicit none
@@ -55,8 +55,8 @@ implicit none
    
    character                       :: NULLCHR
                                  
-   POINTER                           (NullPtr,Null)
-   Integer                         :: Null(*)
+   POINTER                           (NullPtr,Nulli)
+   Integer                         :: Nulli(*)
                                  
    integer                         :: ifileformat = 0 ! 0: .plt, 1: .szplt
    integer                         :: ifiletype   = 1 ! 0: full, 1: grid, 2: solution
@@ -181,7 +181,7 @@ end module m_tecplot
          ierr = teczne142('polygonal zone'//NULLCHR, izonetype, numnodes, nump, numfaces, &
                            icellmax, jcellmax, kcellmax, soltime, istrandid, iparentzn, jablock, &
                            nfconns, ifnmode, numfacenodes, numbfaces, numbconnections, &
-                           NULL, NULL, NULL, ishrconn)
+                           NULLi, NULLi, NULLi, ishrconn)
       else
          ValueLocation = (/ 1, 1, 1, 0 /) 
          ierr = tecini142('test'//NULLCHR, 'x y z imask'//NULLCHR, trim(FNAM)//NULLCHR,   &
@@ -192,7 +192,7 @@ end module m_tecplot
          ierr = teczne142('polygonal zone'//NULLCHR, izonetype, numnodes, nump, numfaces, &
                            icellmax, jcellmax, kcellmax, soltime, istrandid, iparentzn, jablock, &
                            nfconns, ifnmode, numfacenodes, numbfaces, numbconnections, &
-                           NULL, ValueLocation, NULL, ishrconn)
+                           NULLi, ValueLocation, NULLi, ishrconn)
       end if
       
       if ( ierr.ne.0 ) goto 1234
@@ -215,7 +215,7 @@ end module m_tecplot
       end if
       
 !     write connectivity
-      ierr = tecpolyface142(numfaces, NULL, ifacenodes, ifaceleftelems, ifacerightelems)
+      ierr = tecpolyface142(numfaces, NULLi, ifacenodes, ifaceleftelems, ifacerightelems)
       
       if ( ierr.ne.0 ) goto 1234
       
@@ -247,6 +247,7 @@ end module m_tecplot
       use network_data, only: nump
       use m_flowtimes,  only: time1
       use unstruc_messages
+      use gridoperations
       
       implicit none
       
@@ -294,7 +295,7 @@ end module m_tecplot
       ierr = teczne142('polygonal zone'//NULLCHR, izonetype, numnodes, nump, numfaces, &
                         icellmax, jcellmax, kcellmax, soltime, istrandid, iparentzn, jablock, &
                         nfconns, ifnmode, numfacenodes, numbfaces, numbconnections, &
-                        NULL, (/ 0, 0, 0, 0, 0/), NULL , ishrconn)
+                        NULLi, (/ 0, 0, 0, 0, 0/), NULLi , ishrconn)
       
 !     write cell-centered data  
       call tecdat(Ndx,s1,ierr,kmask=cellmask)
@@ -323,6 +324,7 @@ end module m_tecplot
    subroutine ini_tecplot()
       use m_tecplot
       use network_data
+      use gridoperations
       implicit none
       
 #ifdef HAVE_TECPLOT      

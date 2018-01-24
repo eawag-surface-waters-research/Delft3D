@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2015-2018.                                
+!  Copyright (C)  Stichting Deltares, 2015.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: solve_parms.F90 52266 2017-09-02 11:24:11Z klecz_ml $
-! $HeadURL: https://repos.deltares.nl/repos/ds/branches/dflowfm/20161017_dflowfm_codecleanup/engines_gpl/dflowfm/packages/dflowfm_kernel/src/solve_parms.F90 $
+! $Id: solve_parms.F90 54191 2018-01-22 18:57:53Z dam_ar $
+! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/solve_parms.F90 $
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -383,8 +383,8 @@ subroutine conjugategradient_parms(s1,Ndx,its)
    
 !  print residual norm   
    if ( my_rank.eq.0 ) then
-      write(message,*) 'Solver converged in ',its,' iterations, res=', res
-      call mess(LEVEL_INFO, message)
+   write(message,*) 'Solver converged in ',its,' iterations, res=', res
+   call mess(LEVEL_INFO, message)
    end if
    
 !  reset matrix to be re-used

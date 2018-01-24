@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2017.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: fourier_analysis.f90 52266 2017-09-02 11:24:11Z klecz_ml $
-! $HeadURL: https://repos.deltares.nl/repos/ds/branches/dflowfm/20161017_dflowfm_codecleanup/engines_gpl/dflowfm/packages/dflowfm_kernel/src/fourier_analysis.f90 $
+! $Id: fourier_analysis.f90 51400 2017-06-29 11:45:28Z leander $
+! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/fourier_analysis.f90 $
 !-------------------------------------------------------------------------------------------------------
 !  Origin: 
 !     URL: https://svn.oss.deltares.nl/repos/delft3d/trunk/src/engines_gpl/flow2d3d/packages/data/include/fourier.igs
@@ -37,8 +37,8 @@
 module m_fourier_analysis
    
 !-------------------------------------------------------------------------------
-!  $Id: fourier_analysis.f90 52266 2017-09-02 11:24:11Z klecz_ml $
-!  $HeadURL: https://repos.deltares.nl/repos/ds/branches/dflowfm/20161017_dflowfm_codecleanup/engines_gpl/dflowfm/packages/dflowfm_kernel/src/fourier_analysis.f90 $
+!  $Id: fourier_analysis.f90 51400 2017-06-29 11:45:28Z leander $
+!  $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/fourier_analysis.f90 $
 !-------------------------------------------------------------------------------
 ! TODO:
 !     * finalizing 
@@ -143,8 +143,8 @@ module m_fourier_analysis
 
    subroutine alloc_fourier_analysis_arrays(gdfourier,gddimens,nofou)
    !-------------------------------------------------------------------------------
-   !  $Id: fourier_analysis.f90 52266 2017-09-02 11:24:11Z klecz_ml $
-   !  $HeadURL: https://repos.deltares.nl/repos/ds/branches/dflowfm/20161017_dflowfm_codecleanup/engines_gpl/dflowfm/packages/dflowfm_kernel/src/fourier_analysis.f90 $
+   !  $Id: fourier_analysis.f90 51400 2017-06-29 11:45:28Z leander $
+   !  $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/fourier_analysis.f90 $
    !!--description-----------------------------------------------------------------
    !
    !!--declarations----------------------------------------------------------------
@@ -231,8 +231,8 @@ module m_fourier_analysis
                    & lstsc    ,lsal      ,ltem     ,&
                    & tstart   ,tstop     ,dt       ,success)
    !-------------------------------------------------------------------------------
-   !  $Id: fourier_analysis.f90 52266 2017-09-02 11:24:11Z klecz_ml $
-   !  $HeadURL: https://repos.deltares.nl/repos/ds/branches/dflowfm/20161017_dflowfm_codecleanup/engines_gpl/dflowfm/packages/dflowfm_kernel/src/fourier_analysis.f90 $
+   !  $Id: fourier_analysis.f90 51400 2017-06-29 11:45:28Z leander $
+   !  $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/fourier_analysis.f90 $
    !!--description-----------------------------------------------------------------
    !
    !    Function: - Read fourier input file and stores the
@@ -901,8 +901,8 @@ end subroutine setfouunit
    subroutine fouana( ifou      ,kfs       ,kfst0     ,nst      , rarray    , &
                    &   dps       ,gdfourier ,gddimens  ,umean, vmean)
    !-------------------------------------------------------------------------------
-   !  $Id: fourier_analysis.f90 52266 2017-09-02 11:24:11Z klecz_ml $
-   !  $HeadURL: https://repos.deltares.nl/repos/ds/branches/dflowfm/20161017_dflowfm_codecleanup/engines_gpl/dflowfm/packages/dflowfm_kernel/src/fourier_analysis.f90 $
+   !  $Id: fourier_analysis.f90 51400 2017-06-29 11:45:28Z leander $
+   !  $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/fourier_analysis.f90 $
    !!--description-----------------------------------------------------------------
    !
    !    Function: - performs fourier analysis i.e. computes suma
@@ -1109,8 +1109,8 @@ end subroutine setfouunit
                    
    subroutine fouini(lunfou, success, ag)
    !-------------------------------------------------------------------------------
-   !  $Id: fourier_analysis.f90 52266 2017-09-02 11:24:11Z klecz_ml $
-   !  $HeadURL: https://repos.deltares.nl/repos/ds/branches/dflowfm/20161017_dflowfm_codecleanup/engines_gpl/dflowfm/packages/dflowfm_kernel/src/fourier_analysis.f90 $
+   !  $Id: fourier_analysis.f90 51400 2017-06-29 11:45:28Z leander $
+   !  $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/fourier_analysis.f90 $
    !!--description-----------------------------------------------------------------
    !
    !    Function: - Checks if fourier analysis are requested
@@ -1447,8 +1447,8 @@ end subroutine setfouunit
     !  Stichting Deltares. All rights reserved.                                     
     !                                                                               
     !-------------------------------------------------------------------------------
-    !  $Id: fourier_analysis.f90 52266 2017-09-02 11:24:11Z klecz_ml $
-    !  $HeadURL: https://repos.deltares.nl/repos/ds/branches/dflowfm/20161017_dflowfm_codecleanup/engines_gpl/dflowfm/packages/dflowfm_kernel/src/fourier_analysis.f90 $
+    !  $Id: fourier_analysis.f90 51400 2017-06-29 11:45:28Z leander $
+    !  $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/fourier_analysis.f90 $
     !!--description-----------------------------------------------------------------
     !
     !    Function: - open fourier analysis output file
@@ -1793,8 +1793,8 @@ end subroutine setfouunit
     subroutine fouvecmax(mmax       ,nmaxus      ,nofou     , &
                        & ifou       ,nst         ,gdfourier  ,gddimens      )
     !-------------------------------------------------------------------------------
-    !  $Id: fourier_analysis.f90 52266 2017-09-02 11:24:11Z klecz_ml $
-    !  $HeadURL: https://repos.deltares.nl/repos/ds/branches/dflowfm/20161017_dflowfm_codecleanup/engines_gpl/dflowfm/packages/dflowfm_kernel/src/fourier_analysis.f90 $
+    !  $Id: fourier_analysis.f90 51400 2017-06-29 11:45:28Z leander $
+    !  $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/fourier_analysis.f90 $
     !!--description-----------------------------------------------------------------
     !
     !    Function: - Determines the maximum of the different vector parameters
@@ -1895,10 +1895,10 @@ end subroutine setfouunit
 
    subroutine wrfous(ifou   ,dtsec   ,namcon  ,hdt  ,tzone  ,gdfourier  ,gddimens  ,fileids, iloc   )
    !----- GPL ---------------------------------------------------------------------
-   !  Copyright (C)  Stichting Deltares, 2011-2018.                                
+   !  Copyright (C)  Stichting Deltares, 2011-2015.                                
    !-------------------------------------------------------------------------------
-   !  $Id: fourier_analysis.f90 52266 2017-09-02 11:24:11Z klecz_ml $
-   !  $HeadURL: https://repos.deltares.nl/repos/ds/branches/dflowfm/20161017_dflowfm_codecleanup/engines_gpl/dflowfm/packages/dflowfm_kernel/src/fourier_analysis.f90 $
+   !  $Id: fourier_analysis.f90 51400 2017-06-29 11:45:28Z leander $
+   !  $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/fourier_analysis.f90 $
    !!--description-----------------------------------------------------------------
    !
    !    Function: - writes results of fourier analysis to output

@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2015.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -86,9 +86,15 @@
      rank = 1
   case("rain")
      rank = 1
+  case("evap")
+     rank = 1
   case("rnveg")
      rank = 1
   case("diaveg")
+     rank = 1
+  case("cfuveg")
+     rank = 1
+  case("alfaveg")
      rank = 1
   case("stemdens")
      rank = 1
@@ -204,6 +210,8 @@
      rank = 1
   case("kn")
      rank = 2
+  case("numk")
+     rank = 0
   case("zbnd1d2d1")
      rank = 1
   case("zbnd1d2d0")

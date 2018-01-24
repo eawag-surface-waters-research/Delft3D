@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2017.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: xbeach_wave_boundary_datastore.f90 52266 2017-09-02 11:24:11Z klecz_ml $
-! $HeadURL: https://repos.deltares.nl/repos/ds/branches/dflowfm/20161017_dflowfm_codecleanup/engines_gpl/dflowfm/packages/dflowfm_kernel/src/xbeach_wave_boundary_datastore.f90 $
+! $Id: xbeach_wave_boundary_datastore.f90 54191 2018-01-22 18:57:53Z dam_ar $
+! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/xbeach_wave_boundary_datastore.f90 $
 module wave_boundary_datastore
    ! The module stores essential information for wave boundary conditions in the following
    ! derived types:
@@ -58,11 +58,12 @@ module wave_boundary_datastore
       real*8                           :: rho
       real*8                           :: nmax
       real*8                           :: fcutoff
+      real*8                           :: swkhmin
    end type waveBoundaryParametersType
    !
    !
    ! Define derived type to store information on boundary condition file (only required for
-   ! spectral wave boundary conditions
+   ! spectral wave boundary conditions)
    type filenames
       character(1024)                        :: fname  ! file name of boundary condition file
       integer                                :: listline ! read position in FILELIST files
@@ -81,6 +82,7 @@ module wave_boundary_datastore
    ! Define derived type to store spectral boundary administration information
    type waveSpectrumAdministrationType
       integer                                  :: nspectra        ! number of input spectrs, set in init spectrum
+      integer,        dimension(:),allocatable :: ispectra
       type(filenames),dimension(:),allocatable :: bcfiles         ! input wave spectrum files
       logical                                  :: repeatwbc       ! switch to repeat all of the wave boundary conditions
       integer                                  :: bccount         ! number of times boundary conditions have been generated, set in init spectrum
@@ -105,9 +107,9 @@ module wave_boundary_datastore
    !
    !   
    ! Declare variables of type above
-   type(waveBoundaryParametersType), save       :: waveBoundaryParameters
-   type(waveBoundaryAdministrationType), save   :: waveBoundaryAdministration
-   type(waveBoundaryTimeSeriesType), save       :: waveBoundaryTimeSeries
-   type(waveSpectrumAdministrationType),save    :: waveSpectrumAdministration
-   
+   type(waveBoundaryParametersType),     allocatable, save   :: waveBoundaryParameters(:)
+   type(waveBoundaryAdministrationType), allocatable, save   :: waveBoundaryAdministration(:)
+   type(waveBoundaryTimeSeriesType),     allocatable, save   :: waveBoundaryTimeSeries(:)
+   type(waveSpectrumAdministrationType), allocatable, save    :: waveSpectrumAdministration(:)
+      
 end module wave_boundary_datastore

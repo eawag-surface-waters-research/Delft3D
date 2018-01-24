@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2017.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: dfm_signals.F90 52266 2017-09-02 11:24:11Z klecz_ml $
-! $HeadURL: https://repos.deltares.nl/repos/ds/branches/dflowfm/20161017_dflowfm_codecleanup/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dfm_signals.F90 $
+! $Id: dfm_signals.F90 49641 2017-01-27 16:35:52Z spee $
+! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/dfm_signals.F90 $
 
 !> DFM_SIGNALS - Respond to process signals (POSIX-style).
 !! Lets the program watch signals such as Control-C and Control-Z, and
