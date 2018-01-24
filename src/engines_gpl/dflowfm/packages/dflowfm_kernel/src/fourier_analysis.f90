@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017.                                     
+!  Copyright (C)  Stichting Deltares, 2017-2018.                                
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -1895,7 +1895,7 @@ end subroutine setfouunit
 
    subroutine wrfous(ifou   ,dtsec   ,namcon  ,hdt  ,tzone  ,gdfourier  ,gddimens  ,fileids, iloc   )
    !----- GPL ---------------------------------------------------------------------
-   !  Copyright (C)  Stichting Deltares, 2011-2015.                                
+   !  Copyright (C)  Stichting Deltares, 2011-2018.                                
    !-------------------------------------------------------------------------------
    !  $Id: fourier_analysis.f90 51400 2017-06-29 11:45:28Z leander $
    !  $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/fourier_analysis.f90 $
