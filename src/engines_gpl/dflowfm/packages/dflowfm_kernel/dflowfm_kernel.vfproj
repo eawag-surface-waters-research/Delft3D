@@ -5,7 +5,7 @@
 		<Platform Name="x64"/></Platforms>
 	<Configurations>
 		<Configuration Name="Debug|Win32" IntermediateDirectory="$(PlatformName)" DeleteExtensionsOnClean="*.obj;*.mod;*.pdb;*.asm;*.map;*.dyn;*.dpi;*.tmp;*.log;*.ilk;*.exe;$(TargetPath)" BuildLogFile="$(IntDir)\$(ProjectName)-BuildLog.htm" ConfigurationType="typeStaticLibrary">
-				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="$(SolutionDir)third_party_open\mpich2\include" PreprocessorDefinitions="WIN32;HAVE_METIS;HAVE_OPENGL;HAVE_MPI=$(HAVE_MPI);HAVE_POLYPACK;HAVE_PROJ;HAVE_SHAPELIB" OpenMP="OpenMPParallelCode" ParallelizerDiagLevel="parallelizerDiagLevel0" VectorizerDiagLevel="vectorizerDiagLevel0" WarnDeclarations="true" WarnUnusedVariables="true" WarnInterfaces="true" FloatingPointExceptionHandling="fpe0" ModulePath="$(INTDIR)/" ObjectFile="$(INTDIR)/" Traceback="true" RuntimeChecks="rtChecksAll" BoundsCheck="true" UninitializedVariablesCheck="true" RuntimeLibrary="rtMultiThreadedDebugDLL" UseMkl="mklParallel"/>
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="$(SolutionDir)engines_gpl\dflowfm\packages\dflowfm_kernel\include;$(SolutionDir)third_party_open\mpich2\include" PreprocessorDefinitions="WIN32;HAVE_METIS;HAVE_OPENGL;HAVE_MPI=$(HAVE_MPI);HAVE_POLYPACK;HAVE_PROJ;HAVE_SHAPELIB" OpenMP="OpenMPParallelCode" ParallelizerDiagLevel="parallelizerDiagLevel0" VectorizerDiagLevel="vectorizerDiagLevel0" WarnDeclarations="true" WarnUnusedVariables="true" WarnInterfaces="true" FloatingPointExceptionHandling="fpe0" ModulePath="$(INTDIR)/" ObjectFile="$(INTDIR)/" Traceback="true" RuntimeChecks="rtChecksAll" BoundsCheck="true" UninitializedVariablesCheck="true" RuntimeLibrary="rtMultiThreadedDebugDLL" UseMkl="mklParallel"/>
 				<Tool Name="VFLibrarianTool"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
@@ -14,7 +14,7 @@
 				<Tool Name="VFPreBuildEventTool" CommandLine="call ..\..\..\..\scripts_lgpl\win32\update_version.cmd src\unstruc_version.F90 $(SolutionDir) $(SolutionDir)res\version_number.ini --onlyifmissing" Description="Expand unstruc_version.F90.svn and version_number.rc.svn to unstruc_version.F90 and version_number.rc"/>
 				<Tool Name="VFPostBuildEventTool"/></Configuration>
 		<Configuration Name="Release|Win32" DeleteExtensionsOnClean="*.obj;*.mod;*.pdb;*.asm;*.map;*.dyn;*.dpi;*.tmp;*.log;*.ilk;*.exe;$(TargetPath)" BuildLogFile="$(IntDir)\$(ProjectName)-BuildLog.htm" ConfigurationType="typeStaticLibrary">
-				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" AdditionalIncludeDirectories="$(SolutionDir)third_party_open\mpich2\include" PreprocessorDefinitions="WIN32;HAVE_METIS;HAVE_OPENGL;HAVE_MPI=$(HAVE_MPI);HAVE_POLYPACK;HAVE_PROJ;HAVE_SHAPELIB" OpenMP="OpenMPParallelCode" ParallelizerDiagLevel="parallelizerDiagLevel0" VectorizerDiagLevel="vectorizerDiagLevel0" ModulePath="$(INTDIR)/" ObjectFile="$(INTDIR)/" Traceback="true" UseMkl="mklParallel"/>
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" AdditionalIncludeDirectories="$(SolutionDir)engines_gpl\dflowfm\packages\dflowfm_kernel\include;$(SolutionDir)third_party_open\mpich2\include" PreprocessorDefinitions="WIN32;HAVE_METIS;HAVE_OPENGL;HAVE_MPI=$(HAVE_MPI);HAVE_POLYPACK;HAVE_PROJ;HAVE_SHAPELIB" OpenMP="OpenMPParallelCode" ParallelizerDiagLevel="parallelizerDiagLevel0" VectorizerDiagLevel="vectorizerDiagLevel0" ModulePath="$(INTDIR)/" ObjectFile="$(INTDIR)/" Traceback="true" UseMkl="mklParallel"/>
 				<Tool Name="VFLibrarianTool"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
@@ -23,7 +23,7 @@
 				<Tool Name="VFPreBuildEventTool" CommandLine="call ..\..\..\..\scripts_lgpl\win32\update_version.cmd src\unstruc_version.F90 $(SolutionDir) $(SolutionDir)res\version_number.ini" Description="Expand unstruc_version.F90.svn and version_number.rc.svn to unstruc_version.F90 and version_number.rc"/>
 				<Tool Name="VFPostBuildEventTool"/></Configuration>
 		<Configuration Name="Debug|x64" DeleteExtensionsOnClean="*.obj;*.mod;*.pdb;*.asm;*.map;*.dyn;*.dpi;*.tmp;*.log;*.ilk;*.exe;$(TargetPath)" BuildLogFile="$(IntDir)\$(ProjectName)-BuildLog.htm" ConfigurationType="typeStaticLibrary">
-				<Tool Name="VFFortranCompilerTool" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="$(SolutionDir)third_party_open\mpich2\$(PlatformName)\include;$(SolutionDir)\third_party_open\Tecplot\include" PreprocessorDefinitions="WIN32;HAVE_METIS;HAVE_OPENGL;HAVE_MPI=$(HAVE_MPI);HAVE_TECPLOT;HAVE_POLYPACK;HAVE_PROJ;HAVE_SHAPELIB" ParallelizerDiagLevel="parallelizerDiagLevel0" VectorizerDiagLevel="vectorizerDiagLevel0" WarnDeclarations="true" WarnInterfaces="true" FloatingPointExceptionHandling="fpe0" ModulePath="$(INTDIR)/" ObjectFile="$(INTDIR)/" Traceback="true" BoundsCheck="true" UninitializedVariablesCheck="true" DescriptorDataTypeCheck="true" DescriptorDataSizeCheck="true" StackFrameCheck="true" RuntimeLibrary="rtMultiThreadedDebugDLL" UseMkl="mklParallel"/>
+				<Tool Name="VFFortranCompilerTool" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="$(SolutionDir)engines_gpl\dflowfm\packages\dflowfm_kernel\include;$(SolutionDir)third_party_open\mpich2\$(PlatformName)\include;$(SolutionDir)\third_party_open\Tecplot\include" PreprocessorDefinitions="WIN32;HAVE_METIS;HAVE_OPENGL;HAVE_MPI=$(HAVE_MPI);HAVE_TECPLOT;HAVE_POLYPACK;HAVE_PROJ;HAVE_SHAPELIB" ParallelizerDiagLevel="parallelizerDiagLevel0" VectorizerDiagLevel="vectorizerDiagLevel0" WarnDeclarations="true" WarnInterfaces="true" FloatingPointExceptionHandling="fpe0" ModulePath="$(INTDIR)/" ObjectFile="$(INTDIR)/" Traceback="true" BoundsCheck="true" UninitializedVariablesCheck="true" DescriptorDataTypeCheck="true" DescriptorDataSizeCheck="true" StackFrameCheck="true" RuntimeLibrary="rtMultiThreadedDebugDLL" UseMkl="mklParallel"/>
 				<Tool Name="VFLibrarianTool"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
@@ -32,7 +32,7 @@
 				<Tool Name="VFPreBuildEventTool" CommandLine="call ..\..\..\..\scripts_lgpl\win32\update_version.cmd src\unstruc_version.F90 $(SolutionDir) $(SolutionDir)res\version_number.ini --onlyifmissing" Description="Expand unstruc_version.F90.svn and version_number.rc.svn to unstruc_version.F90 and version_number.rc"/>
 				<Tool Name="VFPostBuildEventTool"/></Configuration>
 		<Configuration Name="Release|x64" DeleteExtensionsOnClean="*.obj;*.mod;*.pdb;*.asm;*.map;*.dyn;*.dpi;*.tmp;*.log;*.ilk;*.exe;$(TargetPath)" BuildLogFile="$(IntDir)\$(ProjectName)-BuildLog.htm" ConfigurationType="typeStaticLibrary">
-				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" AdditionalIncludeDirectories="$(SolutionDir)third_party_open\mpich2\$(PlatformName)\include;$(SolutionDir)\third_party_open\Tecplot\include" PreprocessorDefinitions="WIN32;HAVE_METIS;HAVE_OPENGL;HAVE_MPI=$(HAVE_MPI);HAVE_TECPLOT;HAVE_POLYPACK;HAVE_PROJ;HAVE_SHAPELIB" OpenMP="OpenMPParallelCode" ParallelizerDiagLevel="parallelizerDiagLevel0" VectorizerDiagLevel="vectorizerDiagLevel0" ModulePath="$(INTDIR)/" ObjectFile="$(INTDIR)/" Traceback="true" UseMkl="mklParallel"/>
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" AdditionalIncludeDirectories="$(SolutionDir)engines_gpl\dflowfm\packages\dflowfm_kernel\include;$(SolutionDir)third_party_open\mpich2\$(PlatformName)\include;$(SolutionDir)\third_party_open\Tecplot\include" PreprocessorDefinitions="WIN32;HAVE_METIS;HAVE_OPENGL;HAVE_MPI=$(HAVE_MPI);HAVE_TECPLOT;HAVE_POLYPACK;HAVE_PROJ;HAVE_SHAPELIB" OpenMP="OpenMPParallelCode" ParallelizerDiagLevel="parallelizerDiagLevel0" VectorizerDiagLevel="vectorizerDiagLevel0" ModulePath="$(INTDIR)/" ObjectFile="$(INTDIR)/" Traceback="true" UseMkl="mklParallel"/>
 				<Tool Name="VFLibrarianTool"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
@@ -46,7 +46,7 @@
 		<File RelativePath="..\..\res\version_number.ini"/></Filter>
 		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
 		<File RelativePath="src\advec.f90"/>
-      <File RelativePath="src\bedform_data.f90"/>
+		<File RelativePath="src\bedform_data.f90"/>
 		<File RelativePath="src\bedform_io.f90"/>
 		<File RelativePath="src\calibration.f90"/>
 		<File RelativePath="src\d3ddimens.f90"/>
@@ -105,7 +105,6 @@
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
-		<File RelativePath="src\partition_utilities.f90"/>
 		<File RelativePath="src\rcm.f90"/>
 		<File RelativePath="src\removedcode.f90">
 			<FileConfiguration Name="Debug|Win32" ExcludedFromBuild="true"/>
