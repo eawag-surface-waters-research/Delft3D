@@ -13105,7 +13105,7 @@ numka:DO K0 = 1,NUMK                 ! ATTRACTION PARAMETERS
       logical :: Ldoit
       double precision :: xa,ya,xb,yb,dis,xn,yn,rL, rLdum
 
-      integer, parameter                 :: IMISS = -999999
+      integer, parameter                 :: IMISS_local = -999999 ! TO DO: use imiss from m_missing module 
 
       integer, external :: OMP_GET_THREAD_NUM
 
@@ -13117,7 +13117,7 @@ numka:DO K0 = 1,NUMK                 ! ATTRACTION PARAMETERS
       IF (MXLAN == 0) RETURN
 
       DISMIN = 9E+33
-      inb = IMISS
+      inb = IMISS_local
 
 
 !     note to self: parallel only if jend-jstart+1 > number
@@ -15054,7 +15054,7 @@ subroutine netw2curv(xp,yp)
 
  integer, dimension(:), allocatable :: ic, jc       ! indices (i,j) of the nodes
 
- integer, parameter                 :: IMISS = -999999
+ integer, parameter                 :: IMISS_local = -999999 ! TO DO: use imiss from m_missing module
 
  integer                            :: in, link, iexit
 
@@ -15074,8 +15074,8 @@ subroutine netw2curv(xp,yp)
  allocate(jc(numk), stat=ierr)
  call aerr('jc(numk)', ierr, numk)
 
- ic = IMISS
- jc = IMISS
+ ic = IMISS_local
+ jc = IMISS_local
  in = 0
 
 maindo:do
@@ -15086,7 +15086,7 @@ maindo:do
 
 ! allocate and initialize ijc array
     if ( allocated(ijc) ) deallocate(ijc)
-    call realloc(ijc, (/ 3, 3 /), (/ 0, 0 /), fill=IMISS)
+    call realloc(ijc, (/ 3, 3 /), (/ 0, 0 /), fill=IMISS_local)
 
 !---------------------------------------------------------
 ! assigns node-based indices (ic,jc)
@@ -15152,7 +15152,7 @@ subroutine assign_icjc(xp,yp, ic, jc, iexit)
 
  double precision                   :: xh(4), yh(4)
 
- integer, parameter                 :: IMISS = -999999
+ integer, parameter                 :: IMISS_local = -999999 ! TO DO: use imiss from m_missing module
 
  integer                            :: knode, ik, lowold(2), uppold(2)
 
@@ -15163,8 +15163,8 @@ subroutine assign_icjc(xp,yp, ic, jc, iexit)
 !---------------------------------------------------------
 ! allocate and initialize indices arrays
 !---------------------------------------------------------
- ic = IMISS
- jc = IMISS
+ ic = IMISS_local
+ jc = IMISS_local
  in = 0
 
 ! allocate and initialize cellmask array
@@ -15172,7 +15172,7 @@ subroutine assign_icjc(xp,yp, ic, jc, iexit)
 
 ! allocate and initialize ijc array
  if ( allocated(ijc) ) deallocate(ijc)
- call realloc(ijc, (/ 3, 3 /), (/ 0, 0 /), fill=IMISS)
+ call realloc(ijc, (/ 3, 3 /), (/ 0, 0 /), fill=IMISS_local)
 
  if ( nump.lt.1 ) return
 
@@ -15273,7 +15273,7 @@ subroutine grow_ijc(lowold, uppold, lowobj, uppobj, init)
 
  integer, dimension(2)                :: lownew, uppnew
  integer                              :: i
- integer, parameter                   :: IMISS = -999999
+ integer, parameter                   :: IMISS_local = -999999 ! TO DO: use imiss from m_missing module
  integer, parameter                   :: IJCBLOCK = 100    ! block size in ijc
 
  logical                              :: ldoit
@@ -15310,7 +15310,7 @@ subroutine grow_ijc(lowold, uppold, lowobj, uppobj, init)
           blockupp(i) = ceiling( dble(blockupp(i)) * FAC )
     end do
 
-    call realloc(ijc, uppnew, lownew, fill=IMISS)
+    call realloc(ijc, uppnew, lownew, fill=IMISS_local)
 
     lowold = lownew
     uppold = uppnew
@@ -15330,18 +15330,18 @@ subroutine find_common_node(L1, L2, node)
  integer, intent(out)  :: node             !< common node
 
  integer, dimension(4) :: a                ! dummy array with nodes of L1 and L2
- integer, parameter    :: IMISS = -999999
+ integer, parameter    :: IMISS_local = -999999
 
  a(1:2)    = kn(1:2, L1)
  a(3:4)    = kn(1:2, L2)
 
  do
-    node = IMISS
+    node = IMISS_local
 
     if ( a(1).eq.a(3) .or. a(1).eq.a(4) ) node = a(1)
     if ( a(2).eq.a(3) .or. a(2).eq.a(4) ) node = a(2)
 
-    if ( node.ne.IMISS ) exit
+    if ( node.ne.IMISS_local ) exit
 
     write(6,*) 'find_common_node: no common node found'
     exit
@@ -15454,7 +15454,7 @@ subroutine assignijgrid(k, ic, jc)
  integer                  :: kcell, kneighbor, kdir, kdirdum
  integer                  :: icount, iter, lowold(2), uppold(2)
  integer, parameter       :: MAXITER = 1000000
- integer, parameter       :: IMISS   = -999999
+ integer, parameter       :: IMISS_local   = -999999 ! TO DO: use imiss from m_missing module
 
  integer                  :: i, numiter_guess
 !---------------------------------------------------------
@@ -15503,8 +15503,8 @@ subroutine assignijgrid(k, ic, jc)
 
 ! only one layer of cells will be added during the next iteration at maximum
     call grow_ijc( lowold, uppold,                                                     &
-                         (/ minval(ic, ic.ne.IMISS)-1, minval(jc, jc.ne.IMISS)-1 /),   &
-                         (/ maxval(ic, ic.ne.IMISS)+1, maxval(jc, jc.ne.IMISS)+1 /), 0)
+                         (/ minval(ic, ic.ne.IMISS_local)-1, minval(jc, jc.ne.IMISS_local)-1 /),   &
+                         (/ maxval(ic, ic.ne.IMISS_local)+1, maxval(jc, jc.ne.IMISS_local)+1 /), 0)
 
     if ( icount .eq.0 ) exit
  end do
@@ -15551,7 +15551,7 @@ subroutine assignij(kcell, kdir, kneighbor, ic, jc)
  integer                           :: icell, jcell, nodes(4)
  integer                           :: ilink, link
  integer                           :: node1, node2, othernode
- integer, parameter                :: IMISS = -999999
+ integer, parameter                :: IMISS_local = -999999 ! TO DO: use imiss from m_missing module
 
  logical                           :: lconflict
 
@@ -15629,10 +15629,10 @@ subroutine assignij(kcell, kdir, kneighbor, ic, jc)
 !---------------------------------------------------------
 ! check for conflicts
 !---------------------------------------------------------
- if ( (ic(k1).ne.IMISS .and. ic(k1).ne.icnew1) .or. &
-      (jc(k1).ne.IMISS .and. jc(k1).ne.jcnew1) .or. &
-      (ic(k2).ne.IMISS .and. ic(k2).ne.icnew2) .or. &
-      (jc(k2).ne.IMISS .and. jc(k2).ne.jcnew2) ) then
+ if ( (ic(k1).ne.IMISS_local .and. ic(k1).ne.icnew1) .or. &
+      (jc(k1).ne.IMISS_local .and. jc(k1).ne.jcnew1) .or. &
+      (ic(k2).ne.IMISS_local .and. ic(k2).ne.icnew2) .or. &
+      (jc(k2).ne.IMISS_local .and. jc(k2).ne.jcnew2) ) then
     lconflict = .true.
  else
     lconflict = .false.
@@ -15680,13 +15680,13 @@ subroutine makecurvgrid(ic, jc)
 
  integer                    :: i, j, node
 
- integer, parameter         :: IMISS = -999999
+ integer, parameter         :: IMISS_local = -999999 ! TO DO: use imiss from m_missing module
 
 !---------------------------------------------------------
 ! compute grid sizes and renumber
 !---------------------------------------------------------
- imin  = minval(ic, ic.ne.IMISS)
- jmin  = minval(jc, jc.ne.IMISS)
+ imin  = minval(ic, ic.ne.IMISS_local)
+ jmin  = minval(jc, jc.ne.IMISS_local)
 
  ic    = ic   - imin + 1
  jc    = jc   - jmin + 1
@@ -15976,7 +15976,7 @@ SUBROUTINE ORTHOGONALISENET(jarerun)
 
    double precision, external                    :: getDx, getDy
 
-   integer,          parameter                   :: IMISS = -999999
+   integer,          parameter                   :: IMISS_local = -999999 ! TO DO: use imiss from m_missing module
    double precision, parameter                   :: EPS   = 1D-4
 
    double precision                              :: mu, mumin, mumax, mumat, wwx, wwy
@@ -16170,15 +16170,15 @@ SUBROUTINE ORTHOGONALISENET(jarerun)
 !  get the netnode indices ic and jc in the curvi-grid
 !   if ( Ns.lt.0 ) then
 !      allocate(ic(numk), jc(numk))
-!      ic = IMISS
-!      jc = IMISS
+!      ic = IMISS_local
+!      jc = IMISS_local
 !
 !      do k1=1,numk
 !         if ( kc(k1).ne.1 ) cycle
 !         x0 = xk(k1)
 !         y0 = yk(k1)
 !         call assign_icjc(x0,y0, ic, jc, iexit)
-!         if ( ic(k1).ne.IMISS .and. jc(k1).ne.IMISS ) exit
+!         if ( ic(k1).ne.IMISS_local .and. jc(k1).ne.IMISS_local ) exit
 !      end do
 !   end if
 !-------------------------------------------------
@@ -19347,7 +19347,7 @@ subroutine orthonet_prescribe_aspect(smp_mu, idir, aspect, ic, jc)
    double precision, dimension(2)     :: orient    ! prescribed orientation
 
 
-   integer, parameter                 :: IMISS = -999999
+   integer, parameter                 :: IMISS_local = -999999 ! TO DO: use imiss from m_missing module
 
    double precision                   :: x1,y1, x2,y2, x3,y3
    double precision                   :: R01, cosphi, cos2phi, sin2phi
@@ -19358,8 +19358,8 @@ subroutine orthonet_prescribe_aspect(smp_mu, idir, aspect, ic, jc)
 !   orient = (/ 0d0, 1d0 /)
 !   orient = orient / sqrt(sum(orient**2))
 !
-!   imin  = minval(ic, ic.ne.IMISS)
-!   jmin  = minval(jc, jc.ne.IMISS)
+!   imin  = minval(ic, ic.ne.IMISS_local)
+!   jmin  = minval(jc, jc.ne.IMISS_local)
 !
 !   ic    = ic   - imin + 1
 !   jc    = jc   - jmin + 1
@@ -19421,7 +19421,7 @@ subroutine orthonet_prescribe_aspect_net(smp_mu, idir, aspect)
    double precision, dimension(2)     :: orient    ! prescribed orientation
 
 
-   integer, parameter                 :: IMISS = -999999
+   integer, parameter                 :: IMISS_local = -999999 ! TO DO: use imiss from m_missing module
 
    double precision                   :: x1,y1, x2,y2, x3,y3
    double precision                   :: R01, cosphi, cos2phi, sin2phi
@@ -22585,7 +22585,7 @@ subroutine find_nearest_meshline(jasnap)
    double precision                                  :: xn, yn, ddis, rL, ddismin   ! in toland
    double precision                                  :: xn_prev, yn_prev, ddis_prev, rL_prev
 
-   integer, parameter                                :: IMISS = -999
+   !integer, parameter                                :: IMISS = -999 ! in m_missing this has the same value
 
    double precision, parameter                       :: DISNEAREST = 2d0
 

@@ -1,11 +1,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2015
+# Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "deltares_common", "utils_lgpl\deltares_common\packages\deltares_common\deltares_common.vfproj", "{2D6BCBCA-CC6C-49FE-A6AA-61AF62529118}"
-	ProjectSection(ProjectDependencies) = postProject
-		{1ED7D7C9-ACA9-4A50-8217-0901E12B1D70} = {1ED7D7C9-ACA9-4A50-8217-0901E12B1D70}
-	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "triangle_c_2012", "third_party_open\triangle\triangle_c_2012.vcxproj", "{A5638E14-9D2D-49ED-ACA3-A73833756311}"
 EndProject
@@ -23,6 +20,7 @@ EndProject
 Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "morphology_io", "utils_gpl\morphology\packages\morphology_io\morphology_io.vfproj", "{7DC83DF4-B1C3-4107-A6D9-92A0FB4BF1A9}"
 	ProjectSection(ProjectDependencies) = postProject
 		{2D6BCBCA-CC6C-49FE-A6AA-61AF62529118} = {2D6BCBCA-CC6C-49FE-A6AA-61AF62529118}
+		{62E2E1DA-4AFA-4880-A508-1C4F217C93B1} = {62E2E1DA-4AFA-4880-A508-1C4F217C93B1}
 		{07B2B1F8-A388-4446-B2AC-C9AA6414CBB0} = {07B2B1F8-A388-4446-B2AC-C9AA6414CBB0}
 		{5F3AF3FA-1CF3-4D3D-A105-8859BE35B757} = {5F3AF3FA-1CF3-4D3D-A105-8859BE35B757}
 	EndProjectSection
@@ -635,6 +633,7 @@ Global
 		{F8DB0933-F02C-49B3-8C4A-1C05688BC246}.Debug|x86.Build.0 = Debug|Win32
 		{F8DB0933-F02C-49B3-8C4A-1C05688BC246}.Release|Win32.ActiveCfg = Release|Win32
 		{F8DB0933-F02C-49B3-8C4A-1C05688BC246}.Release|x64.ActiveCfg = Release|x64
+		{F8DB0933-F02C-49B3-8C4A-1C05688BC246}.Release|x64.Build.0 = Release|x64
 		{F8DB0933-F02C-49B3-8C4A-1C05688BC246}.Release|x86.ActiveCfg = Release|Win32
 		{F8DB0933-F02C-49B3-8C4A-1C05688BC246}.Release|x86.Build.0 = Release|Win32
 		{9249B679-366D-4838-ADCE-A9A8E6EAEAB4}.Debug|Win32.ActiveCfg = Debug|Win32
