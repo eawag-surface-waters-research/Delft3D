@@ -81,12 +81,12 @@ workdir=`pwd`
 if [ -z "${D3D_HOME}" ]; then
     scriptdirname=`readlink \-f \$0`
     scriptdir=`dirname $scriptdirname`
-    D3D_HOME=$scriptdir/../..
+    D3D_HOME=$scriptdir/..
 else
     # D3D_HOME is passed through via argument --D3D_HOME
-    # Commonly its value is "/some/path/lnx64/scripts/../.."
-    # Remove "/../.." at the end of the string
-    scriptdir=${D3D_HOME%"/../.."}
+    # Commonly its value is "/some/path/bin/.."
+    # Remove "/.." at the end of the string
+    scriptdir=${D3D_HOME%"/.."}
 fi
 if [ ! -d $D3D_HOME ]; then
     echo "ERROR: directory $D3D_HOME does not exist"
@@ -94,15 +94,9 @@ if [ ! -d $D3D_HOME ]; then
 fi
 export D3D_HOME
  
-    # find ARCH from scriptdir path
-pth=( $( echo $scriptdir | tr "/" "\n" ) )
-a=${#pth[@]}-2
-export ARCH=${pth[a]}
-
 echo "    Water config file: $waterconfigfile"
 echo "    Mud   config file: $mudconfigfile"
 echo "    D3D_HOME         : $D3D_HOME"
-echo "    ARCH             : $ARCH"
 echo "    Working directory: $workdir"
 echo 
 
@@ -110,8 +104,8 @@ echo
     # Set the directories containing the binaries
     #
 
-flow2d3dexedir=$D3D_HOME/$ARCH/dflow2d3d/bin
-shareddir=$D3D_HOME/$ARCH/shared
+bindir=$D3D_HOME/bin
+libdir=$D3D_HOME/lib
 
 
     #
@@ -119,10 +113,10 @@ shareddir=$D3D_HOME/$ARCH/shared
     #
 
     # Run
-export LD_LIBRARY_PATH=$shareddir:$flow2d3dexedir
+export LD_LIBRARY_PATH=$bindir:$libdir:$LD_LIBRARY_PATH
 
     # Create shared memory block
-esmContext=`$flow2d3dexedir/esm_create 2> /dev/null`
+esmContext=`$bindir/esm_create 2> /dev/null`
 if [ $? -eq 0 ]; then
     # use context
     DIO_SHM_ESM=$esmContext
@@ -130,30 +124,30 @@ if [ $? -eq 0 ]; then
     echo "ESM context created: $esmContext"
 else
     echo "Cannot create ESM context:"
-    $flow2d3dexedir/esm_create
+    $bindir/esm_create
 fi 
 
     echo "executing in background:"
-    echo "$flow2d3dexedir/d_hydro.exe $waterconfigfile &"
+    echo "$bindir/d_hydro $waterconfigfile &"
     echo 
-$flow2d3dexedir/d_hydro.exe $waterconfigfile &
+$bindir/d_hydro $waterconfigfile &
 
 echo waiting 5 seconds
 sleep 5
 
     echo "executing in foreground:"
-    echo "$flow2d3dexedir/d_hydro.exe $mudconfigfile"
+    echo "$bindir/d_hydro $mudconfigfile"
     echo 
-$flow2d3dexedir/d_hydro.exe $mudconfigfile
+$bindir/d_hydro $mudconfigfile
 
 
     # Wait until all child processes are finished
 wait
 
-$flow2d3dexedir/esm_delete $esmContext 2> /dev/null
+$bindir/esm_delete $esmContext 2> /dev/null
 if [ $? -ne 0 ]; then
     echo "Cannot delete ESM context $esmContext:"
-    $flow2d3dexedir/esm_delete $esmContext
+    $bidir/esm_delete $esmContext
 else
     echo "ESM context deleted: $esmContext"
 fi 

@@ -76,12 +76,12 @@ workdir=`pwd`
 if [ -z "${D3D_HOME}" ]; then
     scriptdirname=`readlink \-f \$0`
     scriptdir=`dirname $scriptdirname`
-    D3D_HOME=$scriptdir/../..
+    D3D_HOME=$scriptdir/..
 else
     # D3D_HOME is passed through via argument --D3D_HOME
-    # Commonly its value is "/some/path/lnx64/scripts/../.."
-    # Remove "/../.." at the end of the string
-    scriptdir=${D3D_HOME%"/../.."}
+    # Commonly its value is "/some/path/bin/.."
+    # Scriptdir: remove "/.." at the end of the string
+    scriptdir=${D3D_HOME%"/.."}
 fi
 if [ ! -d $D3D_HOME ]; then
     echo "ERROR: directory $D3D_HOME does not exist"
@@ -89,17 +89,6 @@ if [ ! -d $D3D_HOME ]; then
 fi
 export D3D_HOME
  
-    # find ARCH from scriptdir path
-pth=( $( echo $scriptdir | tr "/" "\n" ) )
-a=${#pth[@]}-2
-export ARCH=${pth[a]}
-
-    # Not sure if this is still needed
-export HOSTNAME=$HOSTNAME
-
-if [ -z "$scriptfile" ]; then
-    scriptfile=$D3D_HOME/$ARCH/dflow2d3d/scripts/mormerge.tcl
-fi
 if [ ! -f $scriptfile ]; then
     echo "ERROR: scriptfile $scriptfile does not exist"
     print_usage_info
@@ -108,13 +97,14 @@ fi
 echo "    mm-file          : $mmfile"
 echo "    scriptfile       : $scriptfile"
 echo "    D3D_HOME         : $D3D_HOME"
-echo "    ARCH             : $ARCH"
 echo "    Working directory: $workdir"
 echo 
 
+bindir=$D3D_HOME/bin
+libdir=$D3D_HOME/libdir
 
     # Run
-export LD_LIBRARY_PATH=$shareddir:$flow2d3dexedir
+export LD_LIBRARY_PATH=$bindir:$libdir:$LD_LIBRARY_PATH
 
 
     echo "executing:"

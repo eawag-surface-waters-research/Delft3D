@@ -87,12 +87,12 @@ workdir=`pwd`
 if [ -z "${D3D_HOME}" ]; then
     scriptdirname=`readlink \-f \$0`
     scriptdir=`dirname $scriptdirname`
-    D3D_HOME=$scriptdir/../..
+    D3D_HOME=$scriptdir/..
 else
     # D3D_HOME is passed through via argument --D3D_HOME
-    # Commonly its value is "/some/path/lnx64/scripts/../.."
-    # Remove "/../.." at the end of the string
-    scriptdir=${D3D_HOME%"/../.."}
+    # Commonly its value is "/some/path/bin/.."
+    # Scriptdir: remove "/.." at the end of the string
+    scriptdir=${D3D_HOME%"/.."}
 fi
 if [ ! -d $D3D_HOME ]; then
     echo "ERROR: directory $D3D_HOME does not exist"
@@ -100,15 +100,9 @@ if [ ! -d $D3D_HOME ]; then
 fi
 export D3D_HOME
  
-    # find ARCH from scriptdir path
-pth=( $( echo $scriptdir | tr "/" "\n" ) )
-a=${#pth[@]}-2
-export ARCH=${pth[a]}
-
 echo "    Configfile       : $configfile"
 echo "    mdw-file         : $mdwfile"
 echo "    D3D_HOME         : $D3D_HOME"
-echo "    ARCH             : $ARCH"
 echo "    Working directory: $workdir"
 echo "    nr of parts      : $NPART"
 echo 
@@ -117,15 +111,12 @@ echo
     # Set the directories containing the binaries
     #
 
-flow2d3dexedir=$D3D_HOME/$ARCH/dflow2d3d/bin
-swanexedir=$D3D_HOME/$ARCH/swan/bin
-swanbatdir=$D3D_HOME/$ARCH/swan/scripts
-shareddir=$D3D_HOME/$ARCH/shared
-waveexedir=$D3D_HOME/$ARCH/dwaves/bin
+bindir=$D3D_HOME/bin
+libdir=$D3D_HOME/libdir
 
 
 
-export LD_LIBRARY_PATH=$shareddir:$flow2d3dexedir:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=$bindir:$libdir:$LD_LIBRARY_PATH
 export PATH="/opt/mpich2/bin:${PATH}"
 export NHOSTS=1
 
@@ -144,16 +135,14 @@ done
 
     # Run
     echo "executing in the background:"
-    echo "mpirun -np $NPART $flow2d3dexedir/d_hydro.exe $configfile &"
+    echo "mpirun -np $NPART $bindir/d_hydro $configfile &"
     echo 
-mpirun -np $NPART $flow2d3dexedir/d_hydro.exe $configfile &
+mpirun -np $NPART $bindir/d_hydro $configfile &
 
-export LD_LIBRARY_PATH=$swanbatdir:$swanexedir:$waveexedir
-export PATH=$swanbatdir:$PATH
     echo "executing in the foreground:"
-    echo "$waveexedir/wave.exe $mdwfile 1"
+    echo "$bindir/wave $mdwfile 1"
     echo
-$waveexedir/wave.exe $mdwfile 1
+$bindir/wave $mdwfile 1
 
 rm -f log*.irlog
 mpdallexit

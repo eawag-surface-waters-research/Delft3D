@@ -1632,6 +1632,7 @@ src/engines_gpl/flow2d3d/packages/plugin_user/src/urdbcc.f90 -text
 src/engines_gpl/flow2d3d/packages/plugin_user/src/urdrgs.f90 -text
 src/engines_gpl/flow2d3d/packages/plugin_user/src/usrdef.f90 -text
 src/engines_gpl/flow2d3d/packages/plugin_user/src/usrptr.f90 -text
+src/engines_gpl/flow2d3d/scripts/Makefile.am -text
 src/engines_gpl/flow2d3d/scripts/cleantemp_d3dflow.tcl -text
 src/engines_gpl/flow2d3d/scripts/ddb2ddd.sh -text
 src/engines_gpl/flow2d3d/scripts/fluidmud_run.sh -text
