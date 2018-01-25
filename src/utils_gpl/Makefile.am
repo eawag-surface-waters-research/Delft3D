@@ -1,4 +1,6 @@
 include $(top_srcdir)/common.am
 SUBDIRS = \
-         morphology \
-		 trachytopes
+	flow1d \
+	morphology \
+	trachytopes
+

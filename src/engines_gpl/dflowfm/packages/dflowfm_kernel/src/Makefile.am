@@ -6,7 +6,7 @@ include $(top_srcdir)/common.am
 
 INCLUDES = \
     -I$(builddir)/../include \
-    -I$(builddir)/../../dflowfm_lib/include 
+    -I$(builddir)/../../dflowfm_lib/include
 
 
 # these are generated using:
@@ -172,6 +172,7 @@ FMODULES += \
     -I$(top_builddir)/utils_gpl/morphology/packages/morphology_kernel/src \
     -I$(top_builddir)/utils_gpl/trachytopes/packages/trachytopes_io/src \
     -I$(top_builddir)/utils_gpl/trachytopes/packages/trachytopes_kernel/src \
+    -I$(top_builddir)/utils_gpl/flow1d/packages/flow1d_core/src \
     -I$(top_builddir)/utils/flow1d/packages/flow1d_core/src \
     -I$(top_builddir)/utils/flow1d/packages/flow1d_io/src \
     -I$(top_builddir)/third_party_open/kdtree2/src-f90 \
