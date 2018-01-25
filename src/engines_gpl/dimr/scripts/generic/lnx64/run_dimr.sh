@@ -78,7 +78,7 @@ case $key in
     D3D_HOME="$1"
     shift
     ;;
-	--NNODES)
+    --NNODES)
     NNODES="$1"
     shift
     ;;
@@ -119,12 +119,12 @@ workdir=`pwd`
 if [ -z "${D3D_HOME}" ]; then
     scriptdirname=`readlink \-f \$0`
     scriptdir=`dirname $scriptdirname`
-    export D3D_HOME=$scriptdir/../..
+    export D3D_HOME=$scriptdir/..
 else
     # D3D_HOME is passed through via argument --D3D_HOME
-    # Commonly its value is "/some/path/lnx64/scripts/../.."
-    # Remove "/../.." at the end of the string
-    scriptdir=${D3D_HOME%"/../.."}
+    # Commonly its value is "/some/path/bin/.."
+    # To obtain scriptdir: remove "/.." at the end of the string
+    scriptdir=${D3D_HOME%"/.."}
 fi
 if [ ! -d $D3D_HOME ]; then
     echo "ERROR: directory $D3D_HOME does not exist"
@@ -132,14 +132,8 @@ if [ ! -d $D3D_HOME ]; then
 fi
 export D3D_HOME
  
-    # find ARCH from scriptdir path
-pth=( $( echo $scriptdir | tr "/" "\n" ) )
-a=${#pth[@]}-2
-export ARCH=${pth[a]}
-
 echo "    Configfile       : $configfile"
 echo "    D3D_HOME         : $D3D_HOME"
-echo "    ARCH             : $ARCH"
 echo "    Working directory: $workdir"
 echo "    Number of slots  : $NSLOTS"
 echo 
@@ -148,29 +142,17 @@ echo
     # Set the directories containing the binaries
     #
 
-delwaqexedir=$D3D_HOME/$ARCH/dwaq/bin
-dflowfmexedir=$D3D_HOME/$ARCH/dflowfm/lib
-dimrexedir=$D3D_HOME/$ARCH/dimr/bin
-esmfexedir=$D3D_HOME/$ARCH/esmf/bin
-esmfbatdir=$D3D_HOME/$ARCH/esmf/scripts
-flow1dexedir=$D3D_HOME/$ARCH/dflow1d/bin
-flow1d2dexedir=$D3D_HOME/$ARCH/dflow1d2d/bin
-rrexedir=$D3D_HOME/$ARCH/drr/bin
-rtcexedir=$D3D_HOME/$ARCH/drtc/bin
-swanexedir=$D3D_HOME/$ARCH/swan/bin
-swanbatdir=$D3D_HOME/$ARCH/swan/scripts
-shareddir=$D3D_HOME/$ARCH/shared
-waveexedir=$D3D_HOME/$ARCH/dwaves/bin
-
+bindir=$D3D_HOME/bin
+libdir=$D3D_HOME/lib
 
     #
     # No adaptions needed below
     #
 
     # Run
-export LD_LIBRARY_PATH=$shareddir:$dimrexedir:$dflowfmexedir:$flow1dexedir:$flow1d2dexedir:$delwaqexedir:$rtcexedir:$rrexedir:$waveexedir:$swanbatdir:$swanexedir:$esmfbatdir:$esmfexedir
-export PATH=$swanbatdir:$esmfbatdir:$PATH
-export LD_PRELOAD=$shareddir/libmkl_core.so
+export LD_LIBRARY_PATH=$bindir:$libdir:$LD_LIBRARY_PATH
+export PATH=$bindir:$PATH
+# export LD_PRELOAD=$shareddir/libmkl_core.so
 
 # For debugging only (should be related to debuglevel?)
 # if [ 1 ]; then
@@ -180,28 +162,28 @@ if [  ]; then
     echo =========================================================
     echo " "
     echo === ldd DFlowFM =========================================
-    ldd $dflowfmexedir/libdflowfm.so
+    ldd $libdir/libdflowfm.so
     echo =========================================================
     echo " "
     echo ===  DFlowFM -v =========================================
-    $dflowfmexedir/../bin/dflowfm -v
+    $bindir/dflowfm -v
     echo =========================================================
     echo " "
     echo ===  ldd Dimr =========================================
-    ldd $dimrexedir/dimr.exe
+    ldd $bindir/dimr
     echo ========================================================
     echo " "
     echo ===  ldd libDimr =======================================
-    ldd $dimrexedir/libdimr.so
+    ldd $libdir/libdimr.so
     echo =========================================================
 fi
 
 
 if [ $NSLOTS -eq 1 ]; then
     echo "executing:"
-    echo "$dimrexedir/dimr.exe $configfile -d $debuglevel"
+    echo "$bindir/dimr $configfile -d $debuglevel"
     echo 
-    $dimrexedir/dimr.exe $configfile -d $debuglevel
+    $bindir/dimr $configfile -d $debuglevel
 else
     #
     # Create machinefile using $PE_HOSTFILE
@@ -230,8 +212,8 @@ else
        ln -s /dev/null log$node_number.irlog
     done
 
-    echo "/opt/mpich2/1.4.1_intel14.0.3/bin/mpiexec -np $NSLOTS $dimrexedir/dimr.exe $configfile -d $debuglevel"
-          /opt/mpich2/1.4.1_intel14.0.3/bin/mpiexec -np $NSLOTS $dimrexedir/dimr.exe $configfile -d $debuglevel
+    echo "/opt/mpich2/1.4.1_intel14.0.3/bin/mpiexec -np $NSLOTS $bindir/dimr $configfile -d $debuglevel"
+          /opt/mpich2/1.4.1_intel14.0.3/bin/mpiexec -np $NSLOTS $bindir/dimr $configfile -d $debuglevel
 
 
     rm -f log*.irlog
