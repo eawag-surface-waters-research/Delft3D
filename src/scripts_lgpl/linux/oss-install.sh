@@ -4,7 +4,7 @@ globalErrorLevel=0
 
 
 
-echo "The script 'oss-install.sh' is disabled; 'make install' should do (almost) everything
+echo "The script 'oss-install.sh' is disabled; 'make install' should do (almost) everything"
 exit $globalErrorLevel
 
 
