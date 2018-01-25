@@ -16,7 +16,7 @@ dnl Look up target and host info (java needs this, should be called before init 
 AC_CANONICAL_SYSTEM
 
 dnl Initialise automake
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([subdir-objects])
 
 # c, c++ and c preprocessor
 # Problems may occur when mixing a C-compiler from one vendor (Gnu) with a F-compiler from another (Intel).
@@ -501,9 +501,9 @@ engines_gpl/dimr/packages/dimr/Makefile
 engines_gpl/dimr/packages/dimr/src/Makefile
 engines_gpl/dimr/packages/dimr_lib/Makefile
 engines_gpl/dimr/packages/dimr_lib/src/Makefile
-engines_gpl/dimr/scripts/Makefile.am
-engines_gpl/dimr/scripts/generic/Makefile.am
-engines_gpl/dimr/scripts/generic/lnx64/Makefile.am
+engines_gpl/dimr/scripts/Makefile
+engines_gpl/dimr/scripts/generic/Makefile
+engines_gpl/dimr/scripts/generic/lnx64/Makefile
 engines_gpl/flow2d3d/Makefile
 engines_gpl/flow2d3d/packages/data/Makefile
 engines_gpl/flow2d3d/packages/data/src/allocation/Makefile

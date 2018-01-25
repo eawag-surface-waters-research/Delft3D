@@ -101,7 +101,7 @@ libdflowfm_la_SOURCES=\
         partition_utilities.f90 \
         gui.F90 \
         saadf.F \
-        saadf90.F90 \ 
+        saadf90.F90 \
         calibration.f90
 # Ok now we can't include $(PETSOURCES) here, the reason why is hard to explain......
 # http://www.gnu.org/software/automake/manual/html_node/Conditional-Sources.html
@@ -175,7 +175,7 @@ FMODULES += \
     -I$(top_builddir)/utils/flow1d/packages/flow1d_core/src \
     -I$(top_builddir)/utils/flow1d/packages/flow1d_io/src \
     -I$(top_builddir)/third_party_open/kdtree2/src-f90 \
-    -I$(top_builddir)/third_party_open/libsigwatch \ 
+    -I$(top_builddir)/third_party_open/libsigwatch \
     -I$(top_builddir)/utils_lgpl/kdtree_wrapper/packages/kdtree_wrapper/src
 
 # NOTE:
@@ -225,11 +225,11 @@ LIBS+=${MKL_LIBS}
 AM_FCFLAGS+=${MKL_FCFLAGS}
 endif
 
-if USEESMF
-ESMFSOURCES=unstruc_esmf.F90
-else
-ESMFSOURCES=
-endif
+# if USEESMF
+# ESMFSOURCES=unstruc_esmf.F90
+# else
+# ESMFSOURCES=
+# endif
 
 
 
@@ -244,7 +244,7 @@ EXTRALIBS=\
         $(top_builddir)/utils_gpl/trachytopes/packages/trachytopes_io/src/libTrachytopesIO.la \
         $(top_builddir)/utils_lgpl/kdtree_wrapper/packages/kdtree_wrapper/src/libkdtreewrapper.la \
         $(top_builddir)/utils_lgpl/ec_module/packages/ec_module/src/libECModule.la \
-        $(top_builddir)/utils_lgpl/io_netcdf/packages/io_netcdf/src/libIONetcdf.la \  
+        $(top_builddir)/utils_lgpl/io_netcdf/packages/io_netcdf/src/libIONetcdf.la \
         $(top_builddir)/utils_lgpl/gridgeom/packages/gridgeom/src/libgridgeom.la \
         $(top_builddir)/utils_lgpl/metistools/packages/metisoptions/src/libmetisoptions.la \
         $(top_builddir)/utils/flow1d/packages/flow1d/src/libflow1d.la \
@@ -257,8 +257,8 @@ EXTRALIBS=\
         $(top_builddir)/third_party_open/libsigwatch/libsigwatch.la \
         $(CCLIBS)
 
-dflowfm_LDADD = \
-        libdflowfm.la		#
-dflowfm_LDFLAGS=-static
+# dflowfm_LDADD = \
+#         libdflowfm.la		#
+# dflowfm_LDFLAGS=-static
 libdflowfm_la_LIBADD=\
         $(EXTRALIBS)
