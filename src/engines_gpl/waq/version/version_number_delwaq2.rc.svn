@@ -52,7 +52,7 @@ BEGIN
             VALUE "FileDescription", "Processor Water Quality Modelling Engine (1D,2D,3D)\0"
             VALUE "FileVersion", "VN_MAJOR.VN_MINOR.VN_REVISION.VN_BUILD_NUMBER\0"
             VALUE "InternalName", "DELWAQ\0"
-            VALUE "LegalCopyright", "Copyright © 1981-2016\0"
+            VALUE "LegalCopyright", "Copyright © 1981-2018\0"
             VALUE "LegalTrademarks", "Copyright Deltares\0"
             VALUE "OriginalFilename", "delwaq2.exe\0"
             VALUE "PrivateBuild", "-\0"

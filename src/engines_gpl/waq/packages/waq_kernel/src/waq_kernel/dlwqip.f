@@ -105,8 +105,8 @@
       CHARACTER*10  PRONAM(*)
 !
 !     Local declarations
-!
-      PARAMETER   ( VERSI1 = 5.06  , VERSI2 = 5.06 )
+!   
+      PARAMETER   ( VERSI1 = 5.07  , VERSI2 = 5.07 )
       INTEGER       NIPMSD, NPROCD, NOLOCD, NFLUXD, NODEFD,
      +              NOTOTD, IOFF
       REAL          VERSIO
