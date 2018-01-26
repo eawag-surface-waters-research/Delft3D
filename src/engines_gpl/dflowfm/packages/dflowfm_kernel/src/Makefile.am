@@ -234,24 +234,24 @@ endif
 
 
 EXTRALIBS=\
-        $(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/libDeltaresCommon.la \
-        $(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common_mpi/src/libDeltaresCommonMpi.la \
+        $(top_builddir)/utils_gpl/flow1d/packages/flow1d/src/libflow1d.la \
+        $(top_builddir)/utils_gpl/flow1d/packages/flow1d_core/src/libflow1d_core.la \
+        $(top_builddir)/utils_gpl/flow1d/packages/flow1d_io/src/libflow1d_io.la \
         $(top_builddir)/utils_gpl/morphology/packages/morphology_plugins_c/src/libMorphologyPluginsC.la \
         $(top_builddir)/utils_gpl/morphology/packages/morphology_kernel/src/libMorphologyKernel.la \
         $(top_builddir)/utils_gpl/morphology/packages/morphology_io/src/libMorphologyIO.la \
         $(top_builddir)/utils_gpl/morphology/packages/morphology_data/src/libMorphologyData.la \
         $(top_builddir)/utils_gpl/trachytopes/packages/trachytopes_kernel/src/libTrachytopesKernel.la \
         $(top_builddir)/utils_gpl/trachytopes/packages/trachytopes_io/src/libTrachytopesIO.la \
+        $(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/libDeltaresCommon.la \
+        $(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common_mpi/src/libDeltaresCommonMpi.la \
         $(top_builddir)/utils_lgpl/kdtree_wrapper/packages/kdtree_wrapper/src/libkdtreewrapper.la \
         $(top_builddir)/utils_lgpl/ec_module/packages/ec_module/src/libECModule.la \
         $(top_builddir)/utils_lgpl/io_netcdf/packages/io_netcdf/src/libIONetcdf.la \
         $(top_builddir)/utils_lgpl/gridgeom/packages/gridgeom/src/libgridgeom.la \
         $(top_builddir)/utils_lgpl/metistools/packages/metisoptions/src/libmetisoptions.la \
-        $(top_builddir)/utils/flow1d/packages/flow1d/src/libflow1d.la \
-        $(top_builddir)/utils/flow1d/packages/flow1d_core/src/libflow1d_core.la \
-        $(top_builddir)/utils/flow1d/packages/flow1d_io/src/libflow1d_io.la \
         $(top_builddir)/third_party_open/triangle/libtriangle_c.la \
-        $(top_builddir)/third_party/interacter/src/libintstub.la \
+        $(top_builddir)/third_party/interacter_stub/src/libintstub.la \
         $(top_builddir)/third_party_open/kdtree2/src-f90/libkdtree2f.la \
         $(top_builddir)/third_party_open/polypack/src/libpolypack.la \
         $(top_builddir)/third_party_open/libsigwatch/libsigwatch.la \

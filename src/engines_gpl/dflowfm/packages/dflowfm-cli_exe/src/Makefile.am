@@ -8,8 +8,9 @@ include $(top_srcdir)/common.am
 include_HEADERS=
 
 INCLUDES = \
-    -I$(builddir)/../../dflowfm_kernel/src \
-	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src
+	-I$(builddir)/../../dflowfm_kernel/src \
+	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src \
+	-I$(top_builddir)/utils_lgpl/gridgeom/packages/gridgeom/src
 
 # For source distributions: the tar.gz will contain the correct version numbers in the generated *version.F90
 # So, just before packaging the .tar.gz dist, disable version number REgeneration parts of this Makefile.am.
