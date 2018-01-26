@@ -582,6 +582,8 @@ function gatherDependencies () {
     cp -u `$gatherScript $prefix/bin/* | eval grep -v $gatherExcludeFilter` $prefix/lib
     cp -u `$gatherScript $prefix/bin/* | eval grep $gatherIncludeFilter` $prefix/lib
 
+    return
+}
 
 
 # ============

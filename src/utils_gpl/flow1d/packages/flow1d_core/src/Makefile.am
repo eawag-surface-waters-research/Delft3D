@@ -1,12 +1,6 @@
 #-------------------------------------------------------------------------------
-#   Makefile for delftflow
 #
-#   Irv.Elshoff@deltares.nl
-#   Adri.Mourits@deltares.nl
-#   Fedor.Baart@deltares.nl
-#   11 sep 10
-#
-#   Copyright (C) 2007-2010, Deltares
+#   Copyright (C) 2007-2018, Deltares
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
@@ -15,7 +9,7 @@ noinst_LTLIBRARIES = libflow1d_core.la
 #-------------------------------------------------------------------------------
 #Includes
 FINCLUDES += \
-    -I$(top_builddir)/utils/flow1d/include
+    -I$(top_builddir)/utils_gpl/flow1d/include
 
 FMODULES += \
   -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src

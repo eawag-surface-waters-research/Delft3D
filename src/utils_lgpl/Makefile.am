@@ -11,4 +11,5 @@ SUBDIRS = \
          kdtree_wrapper \
          ec_module \
          d_hydro_lib \
+         gridgeom \
          ods

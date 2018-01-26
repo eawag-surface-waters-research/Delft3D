@@ -23,7 +23,7 @@ EXTRA_DIST = \
 	$(builddir)/../../dflowfm_lib/include/bmi_get_var_type.inc \
 	$(builddir)/../../dflowfm_lib/include/bmi_set_var.inc \
 	$(builddir)/../../dflowfm_lib/include/bmi_set_var_slice.inc \
-   $(builddir)/../include/RF.inc
+	$(builddir)/../include/RF.inc
 
 EXTRA_DIST += $(builddir)/../../dflowfm_lib/templates 
 
@@ -98,7 +98,6 @@ libdflowfm_la_SOURCES=\
         xbeach_wave_boundary_main.f90 \
         xbeachwaves.f90 \
         net.F90 \
-        partition_utilities.f90 \
         gui.F90 \
         saadf.F \
         saadf90.F90 \
@@ -159,7 +158,8 @@ MOSTLYCLEANFILES = *.mod
 #-------------------------------------------------------------------------------
 #   Fortran flags
 
-FINCLUDES +=
+FINCLUDES += \
+	-I$(builddir)/../include
 
 FMODULES += \
     -I$(top_builddir)/utils_lgpl/ec_module/packages/ec_module/src \
@@ -173,8 +173,7 @@ FMODULES += \
     -I$(top_builddir)/utils_gpl/trachytopes/packages/trachytopes_io/src \
     -I$(top_builddir)/utils_gpl/trachytopes/packages/trachytopes_kernel/src \
     -I$(top_builddir)/utils_gpl/flow1d/packages/flow1d_core/src \
-    -I$(top_builddir)/utils/flow1d/packages/flow1d_core/src \
-    -I$(top_builddir)/utils/flow1d/packages/flow1d_io/src \
+    -I$(top_builddir)/utils_gpl/flow1d/packages/flow1d_io/src \
     -I$(top_builddir)/third_party_open/kdtree2/src-f90 \
     -I$(top_builddir)/third_party_open/libsigwatch \
     -I$(top_builddir)/utils_lgpl/kdtree_wrapper/packages/kdtree_wrapper/src
