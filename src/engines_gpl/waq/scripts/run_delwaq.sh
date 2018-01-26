@@ -70,25 +70,20 @@ workdir=`pwd`
 if [ -z "${D3D_HOME}" ]; then
     scriptdirname=`readlink \-f \$0`
     scriptdir=`dirname $scriptdirname`
-    D3D_HOME=$scriptdir/../..
+    D3D_HOME=$scriptdir/..
 else
     # D3D_HOME is passed through via argument --D3D_HOME
-    # Commonly its value is "/some/path/lnx64/scripts/../.."
-    # Remove "/../.." at the end of the string
-    scriptdir=${D3D_HOME%"/../.."}
+    # Commonly its value is "/some/path/bin/.."
+    # Scriptdir: remove "/.." at the end of the string
+    scriptdir=${D3D_HOME%"/.."}
 fi
 if [ ! -d $D3D_HOME ]; then
     echo "ERROR: directory $D3D_HOME does not exist"
     print_usage_info
 fi
 export D3D_HOME
- 
-    # find ARCH from scriptdir path
-pth=( $( echo $scriptdir | tr "/" "\n" ) )
-a=${#pth[@]}-2
-export ARCH=${pth[a]}
 
-procfile=$D3D_HOME/$ARCH/dwaq/default/proc_def
+procfile=$D3D_HOME/share/delft3d/proc_def
 if [ ! -f $configfile ]; then
     echo "ERROR: procfile $procfile does not exist"
     print_usage_info
@@ -97,7 +92,6 @@ fi
 echo "    Configfile       : $configfile"
 echo "    Procfile         : $procfile"
 echo "    D3D_HOME         : $D3D_HOME"
-echo "    ARCH             : $ARCH"
 echo "    Working directory: $workdir"
 echo 
 
@@ -105,8 +99,8 @@ echo
     # Set the directories containing the binaries
     #
 
-waqexedir=$D3D_HOME/$ARCH/dwaq/bin
-shareddir=$D3D_HOME/$ARCH/shared
+bindir=$D3D_HOME/bin
+libdir=$D3D_HOME/libdir
 
 
     #
@@ -114,13 +108,13 @@ shareddir=$D3D_HOME/$ARCH/shared
     #
 
     # Run
-export LD_LIBRARY_PATH=$waqexedir:$shareddir:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=$bindir:$libdir:$LD_LIBRARY_PATH
 
 
     echo "executing:"
-    echo "$waqexedir/delwaq1 $configfile -p $procfile"
+    echo "$bindir/delwaq1 $configfile -p $procfile"
     echo 
-$waqexedir/delwaq1 $configfile -p "$procfile"
+$bindir/delwaq1 $configfile -p "$procfile"
 
     #
     # Wait for any key to run delwaq 2
@@ -135,8 +129,8 @@ if [ $? == 0 ]
     # Run delwaq 2
     #
     echo "executing:"
-    echo "$waqexedir/delwaq2 $configfile"
-$waqexedir/delwaq2 $configfile
+    echo "$bindir/delwaq2 $configfile"
+$bindir/delwaq2 $configfile
 
     if [ $? -eq 0 ]
       then

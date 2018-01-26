@@ -1,5 +1,13 @@
 #!/bin/bash
 
+#
+# Use this script to start ESMF_RegridWeightGen in Delft3D
+# Assumptions: 
+# - The ESMF_RegridWeightGen binary is located in the same directory as this script
+# - The name of the ESMF_RegridWeightGen binary is hard-coded in this script
+# - All needed so-files are in directory ./../lib
+#
+
 if [ -f "esmf_sh.log" ]; then
   rm -rf esmf_sh.log
 fi
@@ -39,12 +47,12 @@ echo     ************************************************************** >>esmf_s
 
 
 
-    # Get the location of this script and ESMF_RegridWeightGen.exe
+    # Get the location of this script and ESMF_RegridWeightGen
 workdir=`pwd`
 scriptdirname=`readlink \-f \$0`
 scriptdir=`dirname $scriptdirname`
-exedir=$scriptdir/../bin
-regridexec=$exedir/ESMF_RegridWeightGen
+D3D_HOME=$scriptdir/..
+regridexec=$D3D_HOME/bin/ESMF_RegridWeightGen
 
 echo Executing batchscript "ESMF_RegridWeightGen_in_Delft3D-WAVE.sh" for Delft3D-WAVE >>esmf_sh.log
 echo This script is located in directory $scriptdir >>esmf_sh.log
@@ -71,8 +79,6 @@ fi
 
 defaultflags=--ignore_unmapped
 arguments="$defaultflags $addflags -s $srcfile -d $destfile -w $wfile"
-
-set PATH=$exedir:$PATH
 
     # Remove output file
 if [ -f $wfile ]; then

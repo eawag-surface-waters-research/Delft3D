@@ -8,8 +8,4 @@ include $(top_srcdir)/common.am
 #-------------------------------------------------------------------------------
 #Includes
 dist_bin_SCRIPTS = \
-	run_dimr.sh \
-	submit_dimr.sh
-
-dist_pkgdata_DATA = \
-	dimr_config_example.xml
+	run_delwaq.sh

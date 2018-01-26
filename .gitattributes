@@ -1753,6 +1753,7 @@ src/engines_gpl/part/packages/utils_f/src/skip_comments.f90 -text
 src/engines_gpl/part/packages/utils_f/src/stop_exit.f90 -text
 src/engines_gpl/part/packages/utils_f/src/strip_inputfile.f90 -text
 src/engines_gpl/part/packages/utils_f/src/write_version.f90 -text
+src/engines_gpl/part/scripts/Makefile.am -text
 src/engines_gpl/part/scripts/run_dpart.bat -text
 src/engines_gpl/part/scripts/run_dpart.sh -text
 src/engines_gpl/part/version/part.ico -text
@@ -2745,6 +2746,7 @@ src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/wrwrk3.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/zero.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/zoek.f -text
 src/engines_gpl/waq/packages/waq_utils_f/waq_utils_f.vfproj -text
+src/engines_gpl/waq/scripts/Makefile.am -text
 src/engines_gpl/waq/scripts/run_delwaq.bat -text
 src/engines_gpl/waq/scripts/run_delwaq.sh -text
 src/engines_gpl/waq/tree.f -text
@@ -2861,6 +2863,7 @@ src/engines_gpl/wave/packages/wave/src/wave_bmi.f90 -text
 src/engines_gpl/wave/packages/wave/src/wave_exe.f90 -text
 src/engines_gpl/wave/packages/wave/wave.vfproj -text
 src/engines_gpl/wave/packages/wave/wave_exe.vfproj -text
+src/engines_gpl/wave/scripts/Makefile.am -text
 src/engines_gpl/wave/scripts/run_dwaves.bat -text
 src/engines_gpl/wave/scripts/run_dwaves.sh -text
 src/install.cmd -text
@@ -3008,7 +3011,10 @@ src/third_party_open/commandline/bin/win32/libintl3.dll -text
 src/third_party_open/commandline/bin/win32/pscp.exe -text
 src/third_party_open/commandline/bin/win32/sed.exe -text
 src/third_party_open/commandline/sed_license_info.txt -text
+src/third_party_open/esmf/Makefile.am -text
+src/third_party_open/esmf/lnx64/Makefile.am -text
 src/third_party_open/esmf/lnx64/bin/ESMF_RegridWeightGen -text
+src/third_party_open/esmf/lnx64/bin/Makefile.am -text
 src/third_party_open/esmf/lnx64/bin/libcilkrts.so.5 -text
 src/third_party_open/esmf/lnx64/bin/libdl.so.2 -text
 src/third_party_open/esmf/lnx64/bin/libesmf.so -text
@@ -3031,6 +3037,7 @@ src/third_party_open/esmf/lnx64/bin/libz.so.1 -text
 src/third_party_open/esmf/lnx64/doc/build_h5.sh -text
 src/third_party_open/esmf/lnx64/doc/readme.txt -text
 src/third_party_open/esmf/lnx64/scripts/ESMF_RegridWeightGen_in_Delft3D-WAVE.sh -text
+src/third_party_open/esmf/lnx64/scripts/Makefile.am -text
 src/third_party_open/esmf/win64/bin/ESMF_RegridWeightGen.exe -text
 src/third_party_open/esmf/win64/bin/cygcom_err-2.dll -text
 src/third_party_open/esmf/win64/bin/cygcrypto-1.0.0.dll -text
@@ -4940,6 +4947,9 @@ src/third_party_open/subversion/bin/win32/svnversion.exe -text
 src/third_party_open/subversion/bin/win32/uninst.exe -text
 src/third_party_open/subversion/bin/win32/zlib1.dll -text
 src/third_party_open/subversion/subversion_license_info.txt -text
+src/third_party_open/swan/Makefile.am -text
+src/third_party_open/swan/bin/Makefile.am -text
+src/third_party_open/swan/bin/linux/Makefile.am -text
 src/third_party_open/swan/bin/linux/libifcore.so.5 -text
 src/third_party_open/swan/bin/linux/libimf.so -text
 src/third_party_open/swan/bin/linux/libintlc.so.5 -text
@@ -4956,11 +4966,10 @@ src/third_party_open/swan/bin/win32/libifportmd.dll -text
 src/third_party_open/swan/bin/win32/libiomp5md.dll -text
 src/third_party_open/swan/bin/win32/libmmd.dll -text
 src/third_party_open/swan/bin/win32/swan_4072ABCDE_del_w32_i11_omp.exe -text
+src/third_party_open/swan/scripts/Makefile.am -text
 src/third_party_open/swan/scripts/swan.bat -text
 src/third_party_open/swan/scripts/swan.sh -text
 src/third_party_open/swan/scripts/swan_install.bat -text
-src/third_party_open/swan/scripts/swan_install.sh -text
-src/third_party_open/swan/scripts/swan_install_PRINT_for_debugging.sh -text
 src/third_party_open/swan/scripts/swan_install_x64.bat -text
 src/third_party_open/swan/swan_license_info.txt -text
 src/third_party_open/tcl/bin/win64/tclkitsh852.exe -text

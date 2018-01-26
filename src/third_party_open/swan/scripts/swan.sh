@@ -1,7 +1,15 @@
 #!/bin/sh
 
 #
-# Use this script only in the Delft3D open source directory structure
+# Use this script to start SWAN in Delft3D
+# Assumptions: 
+# - The SWAN binary is located in the same directory as this script
+# - The name of the SWAN binary is hard-coded in this script
+# - All needed so-files are in directory ./../lib
+# - OMP version:
+#   - Use OMP_NUM_THREADS_SWAN if defined: OMP_NUM_THREADS is stored at the start and reset at the end
+#   - If OMP_NUM_THREADS_SWAN is not defined: unset OMP_NUM_THREADS
+#   - To overrule this: see comments in this script
 #
 
 if [ -f "swan_sh.log" ]; then
@@ -26,9 +34,6 @@ echo >>swan_sh.log
 ## USAGE examples                                                             ##
 ################################################################################
 #
-# be sure that wave uses this swan.sh file via environment parameters
-# D3D_HOME and ARCH
-#
 #
 ################################################################################
 ## SETTINGS                                                                   ##
@@ -50,9 +55,9 @@ else
   mpirun=0
 fi
 
-if [ -z "$ARCH" ]; then
-  export ARCH=intel
-fi
+scriptdirname=`readlink \-f \$0`
+scriptdir=`dirname $scriptdirname`
+D3D_HOME=$scriptdir/..
 #
 #
 #
@@ -63,17 +68,17 @@ MACHINE_TYPE=`uname -m`
  
 if [ $mpirun -eq 1 ]; then
   if [ ${MACHINE_TYPE} = 'x86_64' ]; then
-    SWANEXEC=${D3D_HOME}/third_party_open/swan/bin/linux/swan_4072ABCDE_del_l64_i11_mpi.exe
+    SWANEXEC=${D3D_HOME}/bin/swan_4072ABCDE_del_l64_i11_mpi.exe
   elif [ ${MACHINE_TYPE} = 'i686' ]; then
-    SWANEXEC=${D3D_HOME}/third_party_open/swan/bin/linux/swan_4072ABCDE_del_l32_i11_mpi.exe
+    SWANEXEC=${D3D_HOME}/bin/swan_4072ABCDE_del_l32_i11_mpi.exe
   else
     echo "Error \"uname -m\" does not return x86_64 or i686" >>swan_sh.log
   fi
 else
   if [ ${MACHINE_TYPE} = 'x86_64' ]; then
-    SWANEXEC=${D3D_HOME}/third_party_open/swan/bin/linux/swan_4072ABCDE_del_l64_i11_omp.exe
+    SWANEXEC=${D3D_HOME}/bin/swan_4072ABCDE_del_l64_i11_omp.exe
   elif [ ${MACHINE_TYPE} = 'i686' ]; then
-    SWANEXEC=${D3D_HOME}/third_party_open/swan/bin/linux/swan_4072ABCDE_del_l32_i11_omp.exe
+    SWANEXEC=${D3D_HOME}/bin/swan_4072ABCDE_del_l32_i11_omp.exe
   else
     echo "Error \"uname -m\" does not return x86_64 or i686" >>swan_sh.log
   fi
@@ -129,7 +134,7 @@ if [ "${D3D_HOME:-0}" = "0" ]; then
   # ready=1
 fi
 #
-# Check swan.bat argument(s)
+# Check swan.sh argument(s)
 #
 if [ "${1:-0}" = "0" ]; then
   echo " " >>swan_sh.log

@@ -69,12 +69,12 @@ workdir=`pwd`
 if [ -z "${D3D_HOME}" ]; then
     scriptdirname=`readlink \-f \$0`
     scriptdir=`dirname $scriptdirname`
-    D3D_HOME=$scriptdir/../..
+    D3D_HOME=$scriptdir/..
 else
     # D3D_HOME is passed through via argument --D3D_HOME
-    # Commonly its value is "/some/path/lnx64/scripts/../.."
-    # Remove "/../.." at the end of the string
-    scriptdir=${D3D_HOME%"/../.."}
+    # Commonly its value is "/some/path/bin/.."
+    # Scriptdir: remove "/.." at the end of the string
+    scriptdir=${D3D_HOME%"/.."}
 fi
 if [ ! -d $D3D_HOME ]; then
     echo "ERROR: directory $D3D_HOME does not exist"
@@ -82,14 +82,8 @@ if [ ! -d $D3D_HOME ]; then
 fi
 export D3D_HOME
  
-    # find ARCH from scriptdir path
-pth=( $( echo $scriptdir | tr "/" "\n" ) )
-a=${#pth[@]}-2
-export ARCH=${pth[a]}
-
 echo "    mdw-file         : $mdwfile"
 echo "    D3D_HOME         : $D3D_HOME"
-echo "    ARCH             : $ARCH"
 echo "    Working directory: $workdir"
 echo 
 
@@ -97,10 +91,8 @@ echo
     # Set the directories containing the binaries
     #
 
-swanexedir=$D3D_HOME/$ARCH/swan/bin
-swanbatdir=$D3D_HOME/$ARCH/swan/scripts
-shareddir=$D3D_HOME/$ARCH/shared
-waveexedir=$D3D_HOME/$ARCH/dwaves/bin
+bindir=$D3D_HOME/bin
+libdir=$D3D_HOME/libdir
 
 
     #
@@ -108,12 +100,11 @@ waveexedir=$D3D_HOME/$ARCH/dwaves/bin
     #
 
     # Run
-export LD_LIBRARY_PATH=$swanbatdir:$swanexedir:$waveexedir
-export PATH=$swanbatdir:$PATH
+export LD_LIBRARY_PATH=$bindir:$libdir:$LD_LIBRARY_PATH
     echo "executing:"
-    echo "$waveexedir/wave.exe $mdwfile 0"
+    echo "$bindir/wave $mdwfile 0"
     echo 
-$waveexedir/wave.exe $mdwfile 0 
+$bindir/wave $mdwfile 0 
 
 
     # Wait until all child processes are finished

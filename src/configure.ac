@@ -570,6 +570,7 @@ engines_gpl/part/packages/kernel_f/src/Makefile
 engines_gpl/part/packages/Makefile
 engines_gpl/part/packages/utils_f/Makefile
 engines_gpl/part/packages/utils_f/src/Makefile
+engines_gpl/part/scripts/Makefile
 engines_gpl/waq/Makefile
 engines_gpl/waq/packages/delwaq1/Makefile
 engines_gpl/waq/packages/delwaq1/src/Makefile
@@ -609,6 +610,7 @@ engines_gpl/waq/packages/waq_utils_f/src/Makefile
 engines_gpl/waq/packages/waq_utils_f/src/mod_couplib/Makefile
 engines_gpl/waq/packages/waq_utils_f/src/mod_timings/Makefile
 engines_gpl/waq/packages/waq_utils_f/src/waq_utils/Makefile
+engines_gpl/waq/scripts/Makefile
 engines_gpl/wave/Makefile
 engines_gpl/wave/packages/data/Makefile
 engines_gpl/wave/packages/data/src/Makefile
@@ -621,6 +623,7 @@ engines_gpl/wave/packages/manager/Makefile
 engines_gpl/wave/packages/manager/src/Makefile
 engines_gpl/wave/packages/wave/Makefile
 engines_gpl/wave/packages/wave/src/Makefile
+engines_gpl/wave/scripts/Makefile
 plugins_lgpl/Makefile
 plugins_lgpl/plugin_culvert/Makefile
 plugins_lgpl/plugin_culvert/src/Makefile
@@ -631,6 +634,10 @@ scripts_lgpl/Makefile
 third_party/interacter_stub/Makefile
 third_party/interacter_stub/src/Makefile
 third_party/Makefile
+third_party_open/esmf/lnx64/bin/Makefile
+third_party_open/esmf/lnx64/Makefile
+third_party_open/esmf/lnx64/scripts/Makefile
+third_party_open/esmf/Makefile
 third_party_open/fortrangis/doc/Makefile
 third_party_open/fortrangis/libfortranc/Makefile
 third_party_open/fortrangis/libfortrangis/Makefile
@@ -643,6 +650,10 @@ third_party_open/polypack/Makefile
 third_party_open/polypack/src/Makefile
 third_party_open/proj4/Makefile
 third_party_open/proj4/src/Makefile
+third_party_open/swan/bin/linux/Makefile
+third_party_open/swan/bin/Makefile
+third_party_open/swan/Makefile
+third_party_open/swan/scripts/Makefile
 third_party_open/triangle/Makefile
 third_party_open/version_number/Makefile
 third_party_open/version_number/packages/Makefile
