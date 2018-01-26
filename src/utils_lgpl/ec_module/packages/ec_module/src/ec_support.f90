@@ -852,7 +852,7 @@ end subroutine ecInstanceListSourceItems
          ! Determine the reference date.
          i = index(string, 'since') + 6
          if (present(ref_date)) then
-            if (i /= 0) then
+            if (i /= 6) then
                ! Date
                read(string(i : i+4), '(I4)') temp
                yyyymmdd = yyyymmdd + 10000*temp
