@@ -3,15 +3,6 @@
 globalErrorLevel=0
 
 
-
-echo "The script 'oss-install.sh' is disabled; 'make install' should do (almost) everything"
-exit $globalErrorLevel
-
-
-
-
-
-
 # This script uses the command ldd to collect all dynamic libraries used:
 gatherScript=scripts_lgpl/linux/gatherlibraries.rb
 # The following libraries must be removed from the list created by gatherScript:
@@ -19,6 +10,7 @@ gatherScript=scripts_lgpl/linux/gatherlibraries.rb
 # - libraries generated in the oss tree itself
 gatherExcludeFilter="-e '^/lib/' -e '^/lib64/' -e 'flow2d3d' -e 'DelftOnline'"
 gatherIncludeFilter="-e 'expat' -e 'libssl' -e 'libcrypto'"
+
 
 # ===============================
 # === copyFile: handles error ===
@@ -575,6 +567,23 @@ function shared () {
 
 
 
+# =======================
+# === INSTALL_SHARED ====
+# =======================
+function gatherDependencies () {
+    echo "Gathering dependent libraries . . ."
+
+    echo "Gathering libraries for lib/* ..."
+    cp -u `$gatherScript $prefix/lib/* | eval grep -v $gatherExcludeFilter` $prefix/lib
+    cp -u `$gatherScript $prefix/lib/* | eval grep $gatherIncludeFilter` $prefix/lib
+
+
+    echo "Gathering libraries for bin/* ..."
+    cp -u `$gatherScript $prefix/bin/* | eval grep -v $gatherExcludeFilter` $prefix/lib
+    cp -u `$gatherScript $prefix/bin/* | eval grep $gatherIncludeFilter` $prefix/lib
+
+
+
 # ============
 # === MAIN ===
 # ============
@@ -589,7 +598,7 @@ echo oss-install...
 prefix=$1
 dest_main=$2
 project=$3
-srcdir=
+curdir=`pwd`
 
 if [ "$prefix" == '' ]; then
     echo "ERROR: No prefix directory specified as argument of oss-install.sh"
@@ -606,21 +615,16 @@ if [ "$project" == '' ]; then
     project=install_all
 fi
 
-echo Prefix          : $prefix
-echo Target directory: $dest_main
-echo Project         : $project
+echo Prefix            : $prefix
+echo Target directory  : $dest_main
+echo Project           : $project
+echo Current directory : $curdir
 
 
-# Change to directory tree where this batch file resides (necessary when oss-install.sh is called from outside of oss/trunk/src)
-scriptdirname=`readlink \-f \$0`
-scriptdir=`dirname $scriptdirname`
-cd $scriptdir/../..
-srcdir=`pwd`
-
-$project
+gatherDependencies
 
 # Set executable bit
-cd $dest_main/lnx64
+cd $prefix/bin
 chmod a+x `find . -type f -exec file {} \; | grep executable | grep -v "\.svn" | cut -d ":" -f 1 | xargs`
 
 cd $srcdir
