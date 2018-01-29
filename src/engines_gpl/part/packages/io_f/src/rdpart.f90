@@ -70,6 +70,7 @@
       character( 32)                 cwork           ! small character workstring
       character(256)                 cbuffer         ! character buffer
       integer  ( ip)                 i, k            ! loop variables
+      integer  ( ip)                 ios             ! help variable io-status
       integer  ( ip)                 nodac           ! help variable nodye + nocont
       integer  ( ip)                 ifract          ! help variable oil fractions
       integer  ( ip)                 isb, jsub       ! help variables for substances
@@ -117,6 +118,7 @@
          i = 1
       else                              ! add delpar to the delwaq read-stack
          do i = 1 , lstack              ! at the first free entry
+            if ( ilun(i) .ne. 0 .and. lch (i) .eq. lnam1) exit
             if ( ilun(i) .ne. 0 ) cycle
             ilun(i) =  900 + i
             lch (i) =  lnam1
@@ -133,7 +135,13 @@
       npos    = 200
       iposr   =   0
       close ( lun1 )
-      open  ( ilun(i), file=lch(i) )
+      open  ( ilun(i), file=lch(i), iostat=ios) ! File might already be open
+      if (ios.ne.0 .and. ios.ne.5004) then
+         write ( lun2, * ) ' Error opening PART input file'
+         write ( *   , * ) ' Error opening PART input file'
+         call stop_exit(1)
+      endif
+      rewind (ilun(i))                          ! Be sure to rewind!
       write ( lun2, * )
 
 !       check the file version
