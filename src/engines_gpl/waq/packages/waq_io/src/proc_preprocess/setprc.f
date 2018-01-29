@@ -33,7 +33,7 @@
 !
 !     CREATED:            : februari 2002 by Jan van Beek
 !
-!     FUNCTION            : Sets io list for statistical routine STAGEO
+!     FUNCTION            : Sets io list for statistical routine STAPRC
 !
 !     SUBROUTINES CALLED  : SRSTOP, stops execution
 !                           ZOEK  , finds string in character array
