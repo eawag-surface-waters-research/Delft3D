@@ -121,11 +121,14 @@ module m_ec_support
       
       !> Read and convert the timesteps to seconds.
       !! Takes a string of format: TIME = 0 hours since 2006-01-01 00:00:00 +00:00
+      !! or /* TIME (HRS)      6.0 20000101 6
       function ecGetTimesteps(rec, time_steps, convert) result(success)
          logical                                :: success    !< function status
          character(len=maxNameLen), intent(in)  :: rec        !< time information string
          real(hp),                  intent(out) :: time_steps !< timesteps in seconds
          logical, optional,         intent(in)  :: convert    !< convert to seconds or leave unconverted
+
+         integer :: posSince !< position in string of 'since'
          !
          success = .false.
          !
@@ -133,7 +136,13 @@ module m_ec_support
             call setECMessage("ERROR: ec_provider::ecGetTimesteps: Input string is empty.")
             return
          end if
-         read(rec(index(rec, '=')+1 : index(rec, 'since')-1), *) time_steps
+         posSince = index(rec, 'since')
+         if (posSince > 0) then
+            read(rec(index(rec, '=')+1 : posSince-1), *) time_steps
+         else if ( .not. ecSupportTimestringArcInfo(rec, time_steps=time_steps)) then
+            call setECMessage("ERROR: ec_provider::ecGetTimesteps: can not find time step in: " // trim(rec) // ".")
+            return
+         endif
          call str_lower(rec)
          if (present(convert)) then
             if (.not. convert) then
@@ -828,6 +837,8 @@ end subroutine ecInstanceListSourceItems
          integer :: minsize  !< helper index for time zone
          integer :: temp     !< helper variable
          integer :: yyyymmdd !< reference date as Gregorian yyyymmdd
+         integer :: jdn      !< julian day number
+         logical :: ok       !< check of refdate is found
          !
          success = .false.
          yyyymmdd = 0
@@ -860,18 +871,27 @@ end subroutine ecInstanceListSourceItems
                yyyymmdd = yyyymmdd + 100*temp
                read(string(i+8 : i+10), '(I2)') temp
                yyyymmdd = yyyymmdd + temp
-!              ref_date = real(ymd2jul(yyyymmdd)) - 2400001.0_hp ! Julian Day to Modified Julian Date (exact)
-               ref_date = real(ymd2jul(yyyymmdd)) - 2400000.5_hp ! Julian Day to Reduced Julian Date (exact)
-               ! Time
-               if(len_trim(string)>=i+18) then
-                  read(string(i+11 : i+12), *) temp
-                  ref_date = ref_date + dble(temp) / 24.0_hp
-                  read(string(i+14 : i+15), *) temp
-                  ref_date = ref_date + dble(temp) / 24.0_hp / 60.0_hp
-                  read(string(i+17 : i+18), *) temp
-                  ref_date = ref_date + dble(temp) / 24.0_hp / 60.0_hp / 60.0_hp
-               end if
+               jdn = ymd2jul(yyyymmdd)
+               if (jdn /= 0) then
+                  ref_date = real(jdn, hp) - 2400000.5_hp ! Julian Day to Reduced Julian Date (exact)
+                  ! Time
+                  if(len_trim(string)>=i+18) then
+                     read(string(i+11 : i+12), *) temp
+                     ref_date = ref_date + dble(temp) / 24.0_hp
+                     read(string(i+14 : i+15), *) temp
+                     ref_date = ref_date + dble(temp) / 24.0_hp / 60.0_hp
+                     read(string(i+17 : i+18), *) temp
+                     ref_date = ref_date + dble(temp) / 24.0_hp / 60.0_hp / 60.0_hp
+                  end if
+                  ok = .true.
+               else
+                  ref_date = -999.0_hp
+                  ok = .false.
+               endif
             else
+               ok = ecSupportTimestringArcInfo(string, ref_date)
+            endif
+            if (.not. ok) then
                call setECMessage("ERROR: ec_support::ecSupportTimestringToUnitAndRefdate: Unable to identify keyword: since.")
                return
             end if
@@ -903,6 +923,75 @@ end subroutine ecInstanceListSourceItems
          end if
          !
       end function ecSupportTimestringToUnitAndRefdate
+
+      !> Extracts time unit and reference date from a time string in Arc Info format.
+      !! example: /* TIME (HRS)     18.0 20000101 18
+      function ecSupportTimestringArcInfo(rec, ref_date, time_steps) result (success)
+         character(len=*)       , intent(in)  :: rec        !< input string
+         real(kind=hp), optional, intent(out) :: ref_date   !< reference date found
+         real(kind=hp), optional, intent(out) :: time_steps !< time step found
+         logical                              :: success    !< function result
+
+         integer       :: yyyymmdd    !< reference date as Gregorian yyyymmdd
+         integer       :: posHrs      !< position in a string of '(HRS)', 'hrs', 'hours'
+         integer       :: posNumbers  !< first position of the numbers in a string (actually, the first space after '(HRS)')
+         integer       :: posTime     !< position in a string of 'TIME' or 'time'
+         integer       :: ierr        !< error code
+         integer       :: i           !< loop counter
+         integer       :: jdn         !< julian day number
+         real(kind=hp) :: time        !< time found
+         integer       :: hh          !< hour in refdate found
+
+         success = .false.
+         posNumbers = 0
+
+         posTime = max(index(rec, 'TIME'), index(rec, 'time'))
+
+         if (posTime > 0) then
+            posHrs = max(index(rec, '(HRS)'), index(rec, 'hrs'), index(rec, 'hours'))
+            do i = posHrs+3, len_trim(rec)
+               if (rec(i:i) == ' ') then
+                  posNumbers = i
+                  exit
+               endif
+            enddo
+         endif
+
+         if (present(ref_date)) then
+            ref_date = -999.0_hp   ! initialize
+
+            if (posNumbers > 0) then
+               read(rec(posNumbers:), *, iostat=ierr) time, yyyymmdd, hh
+               if (ierr /= 0) then
+                  ! may be hh is missing, try again:
+                  read(rec(posNumbers:), *, iostat=ierr) time, yyyymmdd
+                  hh = 0
+               endif
+            endif
+
+            if (ierr == 0) then
+               jdn = ymd2jul(yyyymmdd)
+               if (jdn /= 0) then
+                  ref_date = real(jdn, hp) - 2400000.5_hp + real(hh, hp) / 24.0_hp
+                  success = .true.
+               endif
+            endif
+         endif
+
+         if (present(time_steps)) then
+            time_steps = -999.0_hp   ! initialize
+
+            if (posNumbers > 0) then
+               read(rec(posNumbers:), *, iostat=ierr) time
+            endif
+
+            if (ierr == 0) then
+               time_steps = time
+               success = .true.
+            endif
+         endif
+
+      end function ecSupportTimestringArcInfo
 
       ! =======================================================================
 
