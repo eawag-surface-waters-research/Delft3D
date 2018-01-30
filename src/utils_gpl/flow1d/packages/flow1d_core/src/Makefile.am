@@ -52,7 +52,6 @@ libflow1d_core_la_SOURCES = \
          c_structures.f90 \
          callback_functions.F90 \
          cf_timers.f90 \
-         computation_1d.F90 \
          cross_helper.f90 \
          flow1d_core.F90 \
          initialize_1d.F90 \
