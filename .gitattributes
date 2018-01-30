@@ -1762,6 +1762,7 @@ src/engines_gpl/part/version/resource.h -text
 src/engines_gpl/part/version/version_number.ini -text
 src/engines_gpl/part/version/version_number.rc.svn -text
 src/engines_gpl/waq/Makefile.am -text
+src/engines_gpl/waq/default/Makefile.am -text
 src/engines_gpl/waq/default/bloom.spe -text
 src/engines_gpl/waq/default/bloominp.d09 -text
 src/engines_gpl/waq/default/proc_def.dat -text

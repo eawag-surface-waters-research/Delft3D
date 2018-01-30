@@ -100,7 +100,7 @@ echo
     #
 
 bindir=$D3D_HOME/bin
-libdir=$D3D_HOME/libdir
+libdir=$D3D_HOME/lib
 
 
     #
