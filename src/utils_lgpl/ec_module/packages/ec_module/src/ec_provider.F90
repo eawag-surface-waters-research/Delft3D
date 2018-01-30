@@ -878,7 +878,8 @@ module m_ec_provider
          integer  :: field0Id     !< helper variable 
          integer  :: field1Id     !< helper variable 
          integer  :: itemId       !< helper variable
-         type(tEcItem), pointer :: item
+         type(tEcItem), pointer :: item  !< ec item
+         character(len=maxFileNameLen) :: lc_filename !< filename (lowercase)
          !
          success = .true.
          item => null()
@@ -893,34 +894,39 @@ module m_ec_provider
                success = .false.
             end if
             !
-            if (index(fileReaderPtr%fileName, '.amu') /= 0) then
+            lc_filename = fileReaderPtr%fileName
+            call str_lower(lc_filename, maxFileNameLen)
+            if (index(lc_filename, '.amu') /= 0) then
                ! ===== quantity: wind component u (usually == x) =====
                quantityId = ecInstanceCreateQuantity(instancePtr)
                if (.not. (ecQuantitySet(instancePtr, quantityId, name='wind_u', &
                                                                 units=trim(ecSpiderwebAndCurviFindInFile(fileReaderPtr%fileHandle, 'unit1'))))) then
                   success = .false.
                end if
-            else if (index(fileReaderPtr%fileName, '.amv') /= 0) then
+            else if (index(lc_filename, '.amv') /= 0) then
                ! ===== quantity: wind component v (usually == y) =====
                quantityId = ecInstanceCreateQuantity(instancePtr)
                if (.not. (ecQuantitySet(instancePtr, quantityId, name='wind_v', &
                                                                 units=trim(ecSpiderwebAndCurviFindInFile(fileReaderPtr%fileHandle, 'unit1'))))) then
                   success = .false.
                end if
-            else if (index(fileReaderPtr%fileName, '.amp') /= 0) then
+            else if (index(lc_filename, '.amp') /= 0) then
                ! ===== quantity: wind component p =====
                quantityId = ecInstanceCreateQuantity(instancePtr)
                if (.not. (ecQuantitySet(instancePtr, quantityId, name='wind_p', &
                                                                 units=trim(ecSpiderwebAndCurviFindInFile(fileReaderPtr%fileHandle, 'unit1'))))) then
                   success = .false.
                end if
-            else if (index(fileReaderPtr%fileName, '.amr') /= 0) then
-               ! ===== quantity: wind component p =====
+            else if (index(lc_filename, '.amr') /= 0) then
+               ! ===== quantity: rainfall =====
                quantityId = ecInstanceCreateQuantity(instancePtr)
                if (.not. (ecQuantitySet(instancePtr, quantityId, name='rainfall', &
                                                                 units=trim(ecSpiderwebAndCurviFindInFile(fileReaderPtr%fileHandle, 'unit1'))))) then
                   success = .false.
                end if
+            else
+                call setECMessage('extension not recoqnized in ' // trim(fileReaderPtr%fileName))
+                success = .false.
             end if
             field0Id = ecInstanceCreateField(instancePtr)
             if (.not. (ecFieldCreate1dArray(instancePtr, field0Id, n_cols*n_rows) .and. &
