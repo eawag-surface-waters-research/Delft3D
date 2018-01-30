@@ -16,7 +16,7 @@ if [%1] EQU [/hp] (
 )
   
   rem Quiet removal of output file build.log. Do not report any problems with this deletion
-del /F/Q build.log > del.log 2>&1
+del /F/Q build*.log > del.log 2>&1
 del /F/Q del.log
 
 
@@ -24,9 +24,13 @@ del /F/Q del.log
 call "%VS140COMNTOOLS%..\..\VC\vcvarsall.bat" amd64
 
   rem The path to devenv.exe is now added to PATH: no full path specificitation needed on next line.
-devenv.exe delft3d_open.sln /Build "Release|x64" /Out build.log
-devenv.exe io_netcdf.sln /Build "Release|x64" /Out build.log
-devenv.exe nefis.sln /Build "Release|x64" /Out build.log
+devenv.exe delft3d_open.sln /Build "Release|x64" /Out build_delft3d_open.log
+devenv.exe dflowfm_open.sln /Build "Release|x64" /Out build_dflowfm_open.log
+devenv.exe io_netcdf.sln /Build "Release|x64" /Out build_io_netcdf.log
+devenv.exe nefis.sln /Build "Release|x64" /Out build_nefis.log
 
   rem In build.log, replace "error" by TeamCity messages
-third_party_open\commandline\bin\win32\sed.exe -e "/[Ee]rror[\:\ ]/s/^/\#\#teamcity\[buildStatus status\=\'FAILURE\' text\=\' /g;/buildStatus/s/$/\'\]/g" build.log 
+third_party_open\commandline\bin\win32\sed.exe -e "/[Ee]rror[\:\ ]/s/^/\#\#teamcity\[buildStatus status\=\'FAILURE\' text\=\' /g;/buildStatus/s/$/\'\]/g" build_delft3d_open.log 
+third_party_open\commandline\bin\win32\sed.exe -e "/[Ee]rror[\:\ ]/s/^/\#\#teamcity\[buildStatus status\=\'FAILURE\' text\=\' /g;/buildStatus/s/$/\'\]/g" build_dflowfm_open.log 
+third_party_open\commandline\bin\win32\sed.exe -e "/[Ee]rror[\:\ ]/s/^/\#\#teamcity\[buildStatus status\=\'FAILURE\' text\=\' /g;/buildStatus/s/$/\'\]/g" build_io_netcdf.log 
+third_party_open\commandline\bin\win32\sed.exe -e "/[Ee]rror[\:\ ]/s/^/\#\#teamcity\[buildStatus status\=\'FAILURE\' text\=\' /g;/buildStatus/s/$/\'\]/g" build_nefis.log 
