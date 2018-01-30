@@ -44,7 +44,7 @@ rem last directory will be the architecture directory
 for %%f in ("%D3DT%") do set ARCH=%%~nxf
 
 set dflow2d3ddir=%D3D_HOME%\%ARCH%\dflow2d3d\bin
-set shareddir=%D3D_HOME%\%ARCH%\shared\bin
+set sharedir=%D3D_HOME%\%ARCH%\share\bin
 
 
     rem
@@ -52,9 +52,9 @@ set shareddir=%D3D_HOME%\%ARCH%\shared\bin
     rem
 
     rem Run
-set PATH=%dflow2d3ddir%;%shareddir%
-echo executing: "%shareddir%\mpiexec.exe" -n %numpar% -localonly "%dflow2d3ddir%\d_hydro.exe" %argfile%
-"%shareddir%\mpiexec.exe" -n %numpar% -localonly "%dflow2d3ddir%\d_hydro.exe" %argfile%
+set PATH=%dflow2d3ddir%;%sharedir%
+echo executing: "%sharedir%\mpiexec.exe" -n %numpar% -localonly "%dflow2d3ddir%\d_hydro.exe" %argfile%
+"%sharedir%\mpiexec.exe" -n %numpar% -localonly "%dflow2d3ddir%\d_hydro.exe" %argfile%
 
 goto end
 

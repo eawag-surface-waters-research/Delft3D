@@ -38,7 +38,7 @@ set D3DT=%D3D_HOME:~0,-23%
 rem last directory will be the architecture directory
 for %%f in ("%D3DT%") do set ARCH=%%~nxf
 
-set shareddir=%D3D_HOME%\%ARCH%\shared\bin
+set sharedir=%D3D_HOME%\%ARCH%\share\bin
 set partdir=%D3D_HOME%\%ARCH%\dpart\bin
 
 
@@ -47,7 +47,7 @@ set partdir=%D3D_HOME%\%ARCH%\dpart\bin
     rem
 
     rem Run
-set PATH=%partdir%;%shareddir%;%~dp0
+set PATH=%partdir%;%sharedir%;%~dp0
 echo executing in this window: "%partdir%\delpar.exe" "%argfile%"
 "%partdir%\delpar.exe" "%argfile%"
 

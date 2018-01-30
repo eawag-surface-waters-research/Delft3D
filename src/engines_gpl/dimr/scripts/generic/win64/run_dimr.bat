@@ -72,7 +72,7 @@ set rrexedir=%D3D_HOME%\%ARCH%\drr\bin
 set rtctoolsexedir=%D3D_HOME%\%ARCH%\drtc\bin
 set swanexedir=%D3D_HOME%\%ARCH%\swan\bin
 set swanbatdir=%D3D_HOME%\%ARCH%\swan\scripts
-set shareddir=%D3D_HOME%\%ARCH%\shared\bin
+set sharedir=%D3D_HOME%\%ARCH%\share\bin
 set waveexedir=%D3D_HOME%\%ARCH%\dwaves\bin
 
 
@@ -81,7 +81,7 @@ set waveexedir=%D3D_HOME%\%ARCH%\dwaves\bin
     rem
 
     rem Run
-set PATH=%dimrexedir%;%delwaqexedir%;%dflowfmexedir%;%flow1dexedir%;%flow1d2dexedir%;%rtctoolsexedir%;%rrexedir%;%waveexedir%;%swanbatdir%;%swanexedir%;%esmfbatdir%;%esmfexedir%;%shareddir%
+set PATH=%dimrexedir%;%delwaqexedir%;%dflowfmexedir%;%flow1dexedir%;%flow1d2dexedir%;%rtctoolsexedir%;%rrexedir%;%waveexedir%;%swanbatdir%;%swanexedir%;%esmfbatdir%;%esmfexedir%;%sharedir%
 echo executing: "%dimrexedir%\dimr.exe" -d %debuglevel% %argfile%
 "%dimrexedir%\dimr.exe" -d %debuglevel% %argfile%
 

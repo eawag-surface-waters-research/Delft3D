@@ -79,7 +79,7 @@ set rrexedir=%D3D_HOME%\%ARCH%\drr\bin
 set rtctoolsexedir=%D3D_HOME%\%ARCH%\drtc\bin
 set swanexedir=%D3D_HOME%\%ARCH%\swan\bin
 set swanbatdir=%D3D_HOME%\%ARCH%\swan\scripts
-set shareddir=%D3D_HOME%\%ARCH%\shared\bin
+set sharedir=%D3D_HOME%\%ARCH%\share\bin
 set waveexedir=%D3D_HOME%\%ARCH%\dwaves\bin
 
 
@@ -88,9 +88,9 @@ set waveexedir=%D3D_HOME%\%ARCH%\dwaves\bin
     rem
 
     rem Run
-set PATH=%dimrexedir%;%delwaqexedir%;%dflowfmexedir%;%flow1dexedir%;%flow1d2dexedir%;%rtctoolsexedir%;%rrexedir%;%waveexedir%;%swanbatdir%;%swanexedir%;%esmfbatdir%;%esmfexedir%;%shareddir%
-echo executing: "%shareddir%\mpiexec.exe" -n %numpar% -localonly "%dimrexedir%\dimr.exe" -d %debuglevel% %argfile%
-"%shareddir%\mpiexec.exe" -n %numpar% -localonly "%dimrexedir%\dimr.exe" -d %debuglevel% %argfile%
+set PATH=%dimrexedir%;%delwaqexedir%;%dflowfmexedir%;%flow1dexedir%;%flow1d2dexedir%;%rtctoolsexedir%;%rrexedir%;%waveexedir%;%swanbatdir%;%swanexedir%;%esmfbatdir%;%esmfexedir%;%sharedir%
+echo executing: "%sharedir%\mpiexec.exe" -n %numpar% -localonly "%dimrexedir%\dimr.exe" -d %debuglevel% %argfile%
+"%sharedir%\mpiexec.exe" -n %numpar% -localonly "%dimrexedir%\dimr.exe" -d %debuglevel% %argfile%
 
 goto end
 

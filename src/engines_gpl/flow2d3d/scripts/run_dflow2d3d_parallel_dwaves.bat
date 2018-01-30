@@ -66,7 +66,7 @@ rem last directory will be the architecture directory
 for %%f in ("%D3DT%") do set ARCH=%%~nxf
 
 set dflow2d3ddir=%D3D_HOME%\%ARCH%\dflow2d3d\bin
-set shareddir=%D3D_HOME%\%ARCH%\shared\bin
+set sharedir=%D3D_HOME%\%ARCH%\share\bin
 set swanexedir=%D3D_HOME%\%ARCH%\swan\bin
 set swanbatdir=%D3D_HOME%\%ARCH%\swan\scripts
 set waveexedir=%D3D_HOME%\%ARCH%\dwaves\bin
@@ -77,13 +77,13 @@ set waveexedir=%D3D_HOME%\%ARCH%\dwaves\bin
     rem
 
     rem Start FLOW
-set PATH=%dflow2d3ddir%;%shareddir%
-echo executing in separate window: "%shareddir%\mpiexec.exe" -n %numpar% -localonly "%dflow2d3ddir%\d_hydro.exe" %argfile%
-start "Delft3D-FLOW" "%shareddir%\mpiexec.exe" -n %numpar% -localonly "%dflow2d3ddir%\d_hydro.exe" %argfile%
+set PATH=%dflow2d3ddir%;%sharedir%
+echo executing in separate window: "%sharedir%\mpiexec.exe" -n %numpar% -localonly "%dflow2d3ddir%\d_hydro.exe" %argfile%
+start "Delft3D-FLOW" "%sharedir%\mpiexec.exe" -n %numpar% -localonly "%dflow2d3ddir%\d_hydro.exe" %argfile%
 
     rem Start WAVE
 title Delft3D-WAVE simulation
-set PATH=%swanbatdir%;%swanexedir%;%shareddir%;%waveexedir%
+set PATH=%swanbatdir%;%swanexedir%;%sharedir%;%waveexedir%
 echo executing in this window: "%waveexedir%\wave.exe" %mdwfile% 1
 "%waveexedir%\wave.exe" %mdwfile% 1
 title %CD%

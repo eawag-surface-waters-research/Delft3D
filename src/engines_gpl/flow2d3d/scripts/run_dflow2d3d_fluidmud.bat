@@ -71,7 +71,7 @@ rem last directory will be the architecture directory
 for %%f in ("%D3DT%") do set ARCH=%%~nxf
 
 set dflow2d3ddir=%D3D_HOME%\%ARCH%\dflow2d3d\bin
-set shareddir=%D3D_HOME%\%ARCH%\shared\bin
+set sharedir=%D3D_HOME%\%ARCH%\share\bin
 
 
     rem
@@ -79,13 +79,13 @@ set shareddir=%D3D_HOME%\%ARCH%\shared\bin
     rem
 
     rem Start FLOW for water phase
-set PATH=%dflow2d3ddir%;%shareddir%
+set PATH=%dflow2d3ddir%;%sharedir%
 echo executing in separate window: "%dflow2d3ddir%\d_hydro.exe" %waterconfigfile%
 start "Delft3D-FLOW water" "%dflow2d3ddir%\d_hydro.exe" %waterconfigfile%
 
     rem Start FLOW for mud phase
 title Delft3D-FLOW mud simulation
-set PATH=%dflow2d3ddir%;%shareddir%
+set PATH=%dflow2d3ddir%;%sharedir%
 echo executing in this window: "%dflow2d3ddir%\d_hydro.exe" %mudconfigfile%
 "%dflow2d3ddir%\d_hydro.exe" %mudconfigfile%
 title %CD%

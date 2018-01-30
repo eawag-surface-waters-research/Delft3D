@@ -152,7 +152,7 @@ libdir=$D3D_HOME/lib
     # Run
 export LD_LIBRARY_PATH=$bindir:$libdir:$LD_LIBRARY_PATH
 export PATH=$bindir:$PATH
-# export LD_PRELOAD=$shareddir/libmkl_core.so
+# export LD_PRELOAD=$libdir/libmkl_core.so
 
 # For debugging only (should be related to debuglevel?)
 # if [ 1 ]; then

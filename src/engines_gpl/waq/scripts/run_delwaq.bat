@@ -41,7 +41,7 @@ for %%f in ("%D3DT%") do set ARCH=%%~nxf
 
 set waqdir=%D3D_HOME%\%ARCH%\dwaq\bin
 set procfile=%D3D_HOME%\%ARCH%\dwaq\default\proc_def
-set shareddir=%D3D_HOME%\%ARCH%\shared\bin
+set sharedir=%D3D_HOME%\%ARCH%\share\bin
 
 
     rem
@@ -51,7 +51,7 @@ set shareddir=%D3D_HOME%\%ARCH%\shared\bin
     rem
     rem Run delwaq 1
     rem
-set PATH=%waqdir%;%shareddir%
+set PATH=%waqdir%;%sharedir%
 echo executing: "%waqdir%\delwaq1.exe" "%argfile%" -p "%procfile%"
 "%waqdir%\delwaq1.exe" "%argfile%" -p "%procfile%"
 
