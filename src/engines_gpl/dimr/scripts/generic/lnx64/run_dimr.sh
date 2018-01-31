@@ -187,24 +187,29 @@ if [ $NSLOTS -eq 1 ]; then
 else
     #
     # Create machinefile using $PE_HOSTFILE
-    if [ -n $corespernode ]; then
-        if [ -e $(pwd)/machinefile ]; then
-            rm -f machinefile
-        fi
-        for (( i = 1 ; i <= $corespernode; i++ )); do
-            awk '{print $1":"1}' $PE_HOSTFILE >> $(pwd)/machinefile
-        done
+    if [ $NNODES -eq 1 ]; then
+        echo " ">$(pwd)/machinefile
     else
-       awk '{print $1":"2}' $PE_HOSTFILE > $(pwd)/machinefile
+        if [ -n $corespernode ]; then
+            if [ -e $(pwd)/machinefile ]; then
+                rm -f machinefile
+            fi
+            for (( i = 1 ; i <= $corespernode; i++ )); do
+                awk '{print $1":"1}' $PE_HOSTFILE >> $(pwd)/machinefile
+            done
+        else
+           awk '{print $1":"2}' $PE_HOSTFILE > $(pwd)/machinefile
+        fi
     fi
     echo Contents of machinefile:
     cat $(pwd)/machinefile
     echo ----------------------------------------------------------------------
 
-    #if [ $NNODES -eq 1 ]; then
-    #    echo "Starting mpd..."
-    #    mpd &
-    #fi
+    if [ $NNODES -eq 1 ]; then
+        echo "Starting mpd..."
+        mpd &
+        mpdboot -n $NSLOTS
+    fi
 
     node_number=$NSLOTS
     while [ $node_number -ge 1 ]; do
@@ -219,6 +224,7 @@ else
     rm -f log*.irlog
 fi
 
+mpdallexit
 
 
     # Wait until all child processes are finished
