@@ -152,12 +152,6 @@ examples/06_delwaq/com-tut_fti_waq.vol -text
 examples/06_delwaq/com-tut_fti_waq.wlk -text
 examples/06_delwaq/run.bat -text
 examples/06_delwaq/run.sh -text
-examples/06_delwaq/run_delwaq.bat -text
-examples/06_delwaq/run_delwaq.sh -text
-examples/06_delwaq/run_delwaq_parallel.bat -text
-examples/06_delwaq/run_delwaq_parallel_with_pause.bat -text
-examples/06_delwaq/run_delwaq_with_pause.bat -text
-examples/06_delwaq/run_delwaq_with_pause.sh -text
 examples/07_wave/coastw.enc -text
 examples/07_wave/coastw.grd -text
 examples/07_wave/coastw20.dep -text
@@ -196,7 +190,6 @@ examples/08_part-tracer/fti_tracer.mdp -text
 examples/08_part-tracer/fti_tracer.ssn -text
 examples/08_part-tracer/run.bat -text
 examples/08_part-tracer/run.sh -text
-examples/08_part-tracer/run_part.sh -text
 examples/09_part-oil/com-tut_fti_part.are -text
 examples/09_part-oil/com-tut_fti_part.atr -text
 examples/09_part-oil/com-tut_fti_part.cco -text
@@ -224,7 +217,6 @@ examples/09_part-oil/fti_oil.mdp -text
 examples/09_part-oil/fti_oil.ssn -text
 examples/09_part-oil/run.bat -text
 examples/09_part-oil/run.sh -text
-examples/09_part-oil/run_part.sh -text
 examples/10_delwaq-part-tracer/com-tut_fti_part.are -text
 examples/10_delwaq-part-tracer/com-tut_fti_part.atr -text
 examples/10_delwaq-part-tracer/com-tut_fti_part.cco -text
@@ -255,10 +247,6 @@ examples/10_delwaq-part-tracer/fti_part.inp -text
 examples/10_delwaq-part-tracer/fti_part.mdp -text
 examples/10_delwaq-part-tracer/run.bat -text
 examples/10_delwaq-part-tracer/run.sh -text
-examples/10_delwaq-part-tracer/run_delwaq_part.bat -text
-examples/10_delwaq-part-tracer/run_delwaq_part.sh -text
-examples/10_delwaq-part-tracer/run_delwaq_part_with_pause.bat -text
-examples/10_delwaq-part-tracer/run_delwaq_with_pause.sh -text
 examples/10_delwaq-part-tracer/tracer.sub -text
 examples/11_standard_netcdf/config_d_hydro.xml -text
 examples/11_standard_netcdf/f34.bca -text
