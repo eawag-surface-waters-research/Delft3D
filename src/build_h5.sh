@@ -494,7 +494,7 @@ eval $command
 # Build D-Flow FM, only when not in singlePrecision mode
 if [ $useSp -eq 0 ]; then
     log='logs/make_dflowfm.log'
-    command="make -C engines_gpl/dflowfm &> $log"
+    command="make install -C engines_gpl/dflowfm &> $log"
 
     log "Running $command"
     eval $command
