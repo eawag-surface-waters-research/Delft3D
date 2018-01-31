@@ -93,7 +93,7 @@
 !     ELMDMS  INTEGER  6,NELEMS   LOCAL   dimension of elements
 !     NBYTSG  INTEGER  NELEMS     LOCAL   length of elements (bytes)
 !
-      INTEGER       NELEMS
+      INTEGER       NELEMS, INQNELEMS
       PARAMETER   ( NELEMS = 12 )
 !
       INTEGER       I               , IELM          ,
@@ -101,12 +101,14 @@
       INTEGER       ELMDMS(2,NELEMS), NBYTSG(NELEMS),
      +              UINDEX(3)
       CHARACTER*16  GRPNAM
-      CHARACTER*16  ELMNMS(NELEMS)  , ELMTPS(NELEMS)
+      CHARACTER*16  ELMNMS(NELEMS)  , INQELMNMS(NELEMS),  ELMTPS(NELEMS)
       CHARACTER*64  ELMDES(NELEMS)
+      LOGICAL       NETCDFSTD
 !
 !     External NEFIS Functions
 !
-      INTEGER   GETELS
+      INTEGER   INQCEL
+     +         ,GETELS 
      +         ,GETELT
       EXTERNAL  GETELS
      +         ,GETELT
@@ -129,6 +131,16 @@
      + 'WK'     ,'CHARACTER',  1,1,0,'active / inactive indication     ',
      + 'ITEM_SN','CHARACTER',100,1,0,'netcdf standard name             ',
      + 'ITEM_SU','CHARACTER', 40,1,0,'netcdf standard unit             '/
+!
+!     Check if netcdf standard names and units are present on the proc_def file
+!
+      INQNELEMS = 12
+      IERROR = INQCEL (DEFFDS , GRPNAM, INQNELEMS, INQELMNMS)
+      IF (INQNELEMS.EQ.NELEMS) THEN
+          NETCDFSTD = .TRUE.
+      ELSE
+          NETCDFSTD = .FALSE.
+      ENDIF
 !
 !     Read all elements
 !
@@ -259,6 +271,12 @@
          WRITE(LUNREP,*) 'ERROR number: ',IERROR
          GOTO 900
       ENDIF
+      IF (.NOT. NETCDFSTD) THEN
+         WRITE(LUNREP,'(\A\)') ' Info: This processes definition file does not contain standard names and units for NetCDF files.'
+         ITEM_SN = ' '
+         ITEM_SU = ' '
+         GOTO 900
+      ENDIF
 !     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(11)
       BUFLEN = NBYTSG(11)*ELMDMS(2,11)
       IERROR = GETELS (DEFFDS ,
@@ -266,13 +284,8 @@
      +                 UINDEX , 1         ,
      +                 BUFLEN , ITEM_SN  )
       IF ( IERROR .NE. 0 ) THEN
-         WRITE(LUNREP,*) 'WARNING reading element ',ELMNMS(11)
-         WRITE(LUNREP,*) 'Apparently this processes definition file has not been adapted for NetCDF'
-         WRITE(LUNREP,*) 'Ignoring standard names and units NetCDF'
-
-         IERROR = 0
-         ITEM_SN = ' '
-         ITEM_SU = ' '
+         WRITE(LUNREP,*) 'ERROR reading element ',ELMNMS(11)
+         WRITE(LUNREP,*) 'ERROR number: ',IERROR
          GOTO 900
       ENDIF
 !     WRITE(LUNREP,*) ' reading ELEMENT:',ELMNMS(12)

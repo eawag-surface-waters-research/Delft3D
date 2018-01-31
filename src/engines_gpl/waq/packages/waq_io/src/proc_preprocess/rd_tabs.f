@@ -97,10 +97,10 @@
          iend = len_trim(pdffil)
          if ( iend .eq. ilen ) iend = max(0,ilen-4)
 
-         pdffil(iend+1:) = '.dat'
-         fildat = pdffil
-         fildef = pdffil
-
+         fildat = trim(pdffil)//'.dat'
+         fildef = trim(pdffil)//'.def'
+         inquire ( file=fildef , exist = lexi )
+         if (.not.lexi) fildef = fildat
       endif
 
 
@@ -127,13 +127,13 @@
          endif
          if ( ierror .ne. 0 ) then
             nerror = nerror + 1
-            call dhpfil(lunrep,' error opening nefis file(s):',trim(pdffil))
+            call dhpfil(lunrep,' error opening nefis file(s):',trim(fildat))
             write(lunrep,*) 'error number:',ierror
             goto 900
          endif
       else
          nerror = nerror + 1
-         call dhpfil(lunrep,'error opening nefis file(s):',trim(pdffil))
+         call dhpfil(lunrep,'error opening nefis file(s):',trim(fildat))
          write(lunrep,*) 'files do not exist'
          goto 900
       endif
