@@ -572,6 +572,7 @@ engines_gpl/part/packages/utils_f/Makefile
 engines_gpl/part/packages/utils_f/src/Makefile
 engines_gpl/part/scripts/Makefile
 engines_gpl/waq/Makefile
+engines_gpl/waq/default/Makefile
 engines_gpl/waq/packages/delwaq1/Makefile
 engines_gpl/waq/packages/delwaq1/src/Makefile
 engines_gpl/waq/packages/delwaq2/Makefile
