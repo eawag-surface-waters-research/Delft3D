@@ -4,7 +4,7 @@
 		<Platform Name="Win32"/>
 		<Platform Name="x64"/></Platforms>
 	<Configurations>
-		<Configuration Name="Debug|Win32" OutputDirectory="$(SolutionDir)\bin\$(PlatformName)\$(ConfigurationName)" IntermediateDirectory="$(PlatformName)\$(ConfigurationName)">
+		<Configuration Name="Debug|Win32" OutputDirectory="$(SolutionDir)\bin\$(PlatformName)\dflowfm\bin" IntermediateDirectory="$(PlatformName)\$(ConfigurationName)">
 				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" Preprocess="preprocessYes" WarnInterfaces="true" Traceback="true" BoundsCheck="true" StackFrameCheck="true" RuntimeLibrary="rtMultiThreadedDebugDLL"/>
 				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="$(SolutionDir)third_party_open\netcdf\src\win32\2005\libsrc\$(ConfigurationName);$(SolutionDir)third_party_open\netcdf\src\win32\2005\f77_netcdf\$(ConfigurationName);$(SolutionDir)third_party_open\netcdf\src\win32\2005\f90_netcdf\$(ConfigurationName)" IgnoreDefaultLibraryNames="LIBCMTD.lib;libifcoremt.lib;LIBCMT.lib" GenerateDebugInformation="true" SubSystem="subSystemConsole" AdditionalDependencies="f90_netcdf.lib f77_netcdf.lib netcdf.lib"/>
 				<Tool Name="VFResourceCompilerTool"/>
@@ -14,7 +14,7 @@
 				<Tool Name="VFPreBuildEventTool" CommandLine="call ..\..\scripts_lgpl\win32\update_version.cmd src\dfmoutput_version.F90 .\ res\version_number.ini --onlyifmissing"/>
 				<Tool Name="VFPostBuildEventTool"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
-		<Configuration Name="Release|Win32" OutputDirectory="$(SolutionDir)\bin\$(PlatformName)\$(ConfigurationName)" IntermediateDirectory="$(PlatformName)\$(ConfigurationName)">
+		<Configuration Name="Release|Win32" OutputDirectory="$(SolutionDir)\bin\$(PlatformName)\dflowfm\bin" IntermediateDirectory="$(PlatformName)\$(ConfigurationName)">
 				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" Preprocess="preprocessYes" RuntimeLibrary="rtMultiThreadedDLL"/>
 				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="$(SolutionDir)third_party_open\netcdf\src\win32\2005\libsrc\$(ConfigurationName);$(SolutionDir)third_party_open\netcdf\src\win32\2005\f77_netcdf\$(ConfigurationName);$(SolutionDir)third_party_open\netcdf\src\win32\2005\f90_netcdf\$(ConfigurationName)" IgnoreDefaultLibraryNames="LIBCMT.lib;libifcoremt.lib" SubSystem="subSystemConsole" AdditionalDependencies="f90_netcdf.lib f77_netcdf.lib netcdf.lib"/>
 				<Tool Name="VFResourceCompilerTool"/>
@@ -24,7 +24,7 @@
 				<Tool Name="VFPreBuildEventTool" CommandLine="call ..\..\scripts_lgpl\win32\update_version.cmd src\dfmoutput_version.F90 .\ res\version_number.ini"/>
 				<Tool Name="VFPostBuildEventTool"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
-		<Configuration Name="Debug|x64" OutputDirectory="$(SolutionDir)\bin\$(PlatformName)\$(ConfigurationName)">
+		<Configuration Name="Debug|x64" OutputDirectory="$(SolutionDir)\bin\$(PlatformName)\dflowfm\bin">
 				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" Preprocess="preprocessYes" WarnInterfaces="true" Traceback="true" BoundsCheck="true" StackFrameCheck="true" RuntimeLibrary="rtMultiThreadedDebugDLL"/>
 				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="$(SolutionDir)third_party_open\netcdf\src\win32\2005\libsrc\$(PlatformName)\$(ConfigurationName);$(SolutionDir)third_party_open\netcdf\src\win32\2005\f77_netcdf\$(PlatformName)\$(ConfigurationName);$(SolutionDir)third_party_open\netcdf\src\win32\2005\f90_netcdf\$(PlatformName)\$(ConfigurationName)" IgnoreDefaultLibraryNames="LIBCMTD.lib;libifcoremt.lib;LIBCMT.lib" GenerateDebugInformation="true" SubSystem="subSystemConsole" AdditionalDependencies="f90_netcdf.lib f77_netcdf.lib netcdf.lib"/>
 				<Tool Name="VFResourceCompilerTool"/>
@@ -34,7 +34,7 @@
 				<Tool Name="VFPreBuildEventTool" CommandLine="call ..\..\scripts_lgpl\win32\update_version.cmd src\dfmoutput_version.F90 .\ res\version_number.ini --onlyifmissing"/>
 				<Tool Name="VFPostBuildEventTool"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
-		<Configuration Name="Release|x64" OutputDirectory="$(SolutionDir)\bin\$(PlatformName)\$(ConfigurationName)">
+		<Configuration Name="Release|x64" OutputDirectory="$(SolutionDir)\bin\$(PlatformName)\dflowfm\bin">
 				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" Preprocess="preprocessYes" RuntimeLibrary="rtMultiThreadedDLL"/>
 				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="$(SolutionDir)third_party_open\netcdf\src\win32\2005\libsrc\$(PlatformName)\$(ConfigurationName);$(SolutionDir)third_party_open\netcdf\src\win32\2005\f77_netcdf\$(PlatformName)\$(ConfigurationName);$(SolutionDir)third_party_open\netcdf\src\win32\2005\f90_netcdf\$(PlatformName)\$(ConfigurationName)" IgnoreDefaultLibraryNames="LIBCMT.lib;libifcoremt.lib" SubSystem="subSystemConsole" AdditionalDependencies="f90_netcdf.lib f77_netcdf.lib netcdf.lib"/>
 				<Tool Name="VFResourceCompilerTool"/>
