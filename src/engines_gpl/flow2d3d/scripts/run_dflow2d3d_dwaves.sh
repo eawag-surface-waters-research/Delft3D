@@ -115,6 +115,7 @@ libdir=$D3D_HOME/lib
 
     # Run
 export LD_LIBRARY_PATH=$bindir:$libdir:$LD_LIBRARY_PATH
+export PATH=$bindir:$PATH
     echo "executing in the background:"
     echo "$bindir/d_hydro $configfile &"
     echo 
