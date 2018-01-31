@@ -20,11 +20,6 @@ examples/01_standard/f34.wnd -text
 examples/01_standard/run.bat -text
 examples/01_standard/run.sh -text
 examples/01_standard/run_docker.sh -text
-examples/01_standard/run_flow2d3d.sh -text
-examples/01_standard/run_flow2d3d_parallel.sh -text
-examples/01_standard/run_flow2d3d_parallel_gnu4.6.2.log -text
-examples/01_standard/run_flow2d3d_parallel_intel11.1.log -text
-examples/01_standard/run_flow2d3d_parallel_sge.sh -text
 examples/01_standard/run_parallel.bat -text
 examples/01_standard/run_parallel.sh -text
 examples/02_domaindecomposition/bak_1.enc -text
@@ -36,7 +31,6 @@ examples/02_domaindecomposition/bak_3.grd -text
 examples/02_domaindecomposition/config_d_hydro.xml -text
 examples/02_domaindecomposition/run.bat -text
 examples/02_domaindecomposition/run.sh -text
-examples/02_domaindecomposition/run_flow2d3d.sh -text
 examples/02_domaindecomposition/zz1.bcc -text
 examples/02_domaindecomposition/zz1.bch -text
 examples/02_domaindecomposition/zz1.bnd -text
@@ -69,8 +63,6 @@ examples/03_flow-wave/r17.mdm -text
 examples/03_flow-wave/r17.mdw -text
 examples/03_flow-wave/run.bat -text
 examples/03_flow-wave/run.sh -text
-examples/03_flow-wave/run_flow2d3d.sh -text
-examples/03_flow-wave/run_flow2d3d_parallel_wave.sh -text
 examples/03_flow-wave/run_parallel.bat -text
 examples/03_flow-wave/run_parallel.sh -text
 examples/03_flow-wave/sedsand.sed -text
@@ -86,7 +78,6 @@ examples/04_fluidmud/mud.inp -text
 examples/04_fluidmud/mud.mdf -text
 examples/04_fluidmud/run.bat -text
 examples/04_fluidmud/run.sh -text
-examples/04_fluidmud/run_flow2d3d_flm.sh -text
 examples/04_fluidmud/sed.bcc -text
 examples/04_fluidmud/sed.bch -text
 examples/04_fluidmud/sed.bct -text
@@ -178,7 +169,6 @@ examples/07_wave/obw.pol -text
 examples/07_wave/points.xy -text
 examples/07_wave/run.bat -text
 examples/07_wave/run.sh -text
-examples/07_wave/run_wave.sh -text
 examples/07_wave/run_wave_via_dimr.bat -text
 examples/08_part-tracer/com-tut_fti_part.are -text
 examples/08_part-tracer/com-tut_fti_part.atr -text
@@ -290,7 +280,6 @@ examples/11_standard_netcdf/f34.thd -text
 examples/11_standard_netcdf/f34.wnd -text
 examples/11_standard_netcdf/run.bat -text
 examples/11_standard_netcdf/run.sh -text
-examples/11_standard_netcdf/run_flow2d3d.sh -text
 examples/12_dflowfm/matlab/archive/+unstruc/plotHis.m -text
 examples/12_dflowfm/matlab/archive/+unstruc/plotHisStations.m -text
 examples/12_dflowfm/matlab/archive/+unstruc/plotLdb.m -text
