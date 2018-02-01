@@ -250,7 +250,6 @@ contains
     integer, parameter               ::     MAXDIM = 10    !< max number of vector quantities in one vector
     character(len=maxNameLen)        ::     vectorquantities(MAXDIM)
     character(len=maxNameLen)        ::     vectordefinition, vectorstr
-    character(len=100)               ::     errorMessage
 
     success = .False.
     if (allocated(hdrkeys)) then
@@ -466,14 +465,71 @@ contains
 
     success = .True.
     if (bc%vptyp == BC_VPTYP_PERCBED) then
-       if (minval(bc%vp) < 0.0d0 .or. maxval(bc%vp) > 1.0d0) then
-          call setECMessage("sigma positions must be in range 0.0 - 1.0")
-          write(errorMessage,'(3a,f8.3,a,f8.3,a)') "range for ", trim(bc%quantity%name), " is ", minval(bc%vp), " - ", maxval(bc%vp), "."
-          call setECMessage(errorMessage)
-          success = .False.
-       endif
+       success = checkAndFixLayers(bc%vp, bc%quantity%name)
     endif
   end function processhdr
+
+  !> check if all layers are in range 0.0 - 1.0
+  !! if in range 0.0 - 100.0 convert percentages into fractions
+  function checkAndFixLayers(vp, name) result(success)
+     implicit none
+     real(hp),         intent(inout) :: vp(:)      !< vertical positions
+     character(len=*), intent(in)    :: name       !< quantity name, used in error messages
+     logical                         :: success    !< function result
+
+     real(kind=hp)   :: minvp                      !< lowest vertical position
+     real(kind=hp)   :: maxvp                      !< higest vertical position
+     integer         :: kmax                       !< number of layers
+     integer         :: k                          !< loop counter
+     logical, save   :: warningPrinted = .false.   !< flag to avoid printing the same warning many times
+
+     success = .true.
+
+     minvp = minval(vp)
+     maxvp = maxval(vp)
+     kmax = size(vp)
+
+     if (minvp >= 0.0d0 .and. maxvp <= 1.0d0) then
+        continue ! all layers oke
+     else if (minvp < 0.0d0 .or. maxvp > 100.0d0) then
+        ! negative or even in percentages too high
+        call printErrMessageLayers()
+        success = .False.
+     else
+        ! in range 0.0 - 100.0. probably percentages. extra check, increasing numbers?
+        do k = 2, kmax
+           if (vp(k) < vp(k-1)) then
+              success = .false.
+              exit
+           endif
+        enddo
+        if (success) then
+            if (.not. warningPrinted) then
+               call setECMessage("converting layer percentages in bc-file to fractions.")
+               warningPrinted = .true.
+            endif
+            vp = vp * 0.01_hp
+        else
+            call printErrMessageLayers()
+        endif
+     endif
+
+  contains
+
+  subroutine printErrMessageLayers()
+     character(len=8)              :: strMin   !< minvp converted to a string
+     character(len=8)              :: strMax   !< maxvp converted to a string
+     character(len=:), allocatable :: errorMessage
+
+     write(strMin,'(f8.3)') minvp
+     write(strMax,'(f8.3)') maxvp
+
+     call setECMessage("sigma positions must be in range 0.0 - 1.0")
+     errorMessage = "range for " // trim(name) // " is " // strMin // " - " // strMax // "."
+     call setECMessage(errorMessage)
+  end subroutine printErrMessageLayers
+
+  end function checkAndFixLayers
 
 
   !> Given a filled bc-object, scrutinize its content for completeness, validity and consistency
