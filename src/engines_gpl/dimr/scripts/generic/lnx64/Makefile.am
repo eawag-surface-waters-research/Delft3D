@@ -8,6 +8,8 @@ include $(top_srcdir)/common.am
 #-------------------------------------------------------------------------------
 #Includes
 dist_bin_SCRIPTS = \
+	libtool \
+	libtool_install.sh \
 	run_dimr.sh \
 	submit_dimr.sh
 

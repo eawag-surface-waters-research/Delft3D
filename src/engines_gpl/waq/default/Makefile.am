@@ -7,7 +7,7 @@
 include $(top_srcdir)/common.am
 #-------------------------------------------------------------------------------
 #Includes
-dist_bin_SCRIPTS = \
+dist_pkgdata_DATA = \
 	bloom.spe \
 	bloominp.d09 \
 	proc_def.dat \

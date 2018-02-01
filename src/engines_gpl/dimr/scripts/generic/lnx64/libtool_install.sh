@@ -9,7 +9,7 @@ function fcheck {
 
 scriptdirname=`readlink \-f \$0`
 scriptdir=`dirname $scriptdirname`
-cd $scriptdir/../dimr/bin
+cd $scriptdir/../lib
 workdir=`pwd`
 libtooldir=$scriptdir
 
