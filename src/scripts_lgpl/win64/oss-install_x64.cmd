@@ -140,6 +140,7 @@ rem ===============
     echo "installing all open source projects . . ."
 
     call :d_hydro
+    call :dflowfm
     call :dimr
     call :flow2d3d
     call :flow2d3d_openda
@@ -208,6 +209,42 @@ goto :endproc
 
 
 
+rem ====================
+rem === INSTALL_DFLOWFM
+rem ====================
+:dflowfm
+    echo "installing dflowfm . . ."
+
+    set dest_bin="!dest_main!\x64\dflowfm\bin"
+    set dest_default="!dest_main!\x64\dflowfm\default"
+    set dest_scripts="!dest_main!\x64\dflowfm\scripts"
+    set dest_plugins="!dest_main!\x64\plugins\bin"
+    set dest_share="!dest_main!\x64\share\bin"
+    
+    call :makeDir !dest_bin!
+    call :makeDir !dest_default!
+    call :makeDir !dest_scripts!
+    call :makeDir !dest_plugins!
+    call :makeDir !dest_share!
+
+    call :copyNetcdf                                                                !dest_share!
+    
+    rem
+    rem The following if-else statements MUST BE executed AFTER copying "third_party_open\intel_fortran" libraries.
+    rem Some (older) libraries will be overwritten.
+    rem
+    if !compiler_dir!=="" (
+        rem Compiler_dir not set
+    ) else (
+        rem "Compiler_dir:!compiler_dir!"
+        set localstring="!compiler_dir!*.dll"
+        rem Note the awkward usage of !-characters
+        call :copyFile !!localstring! !dest_bin!!
+    )
+goto :endproc
+
+
+
 rem ================
 rem === INSTALL_DIMR
 rem ================
@@ -226,10 +263,10 @@ rem ================
     
     call :copyFile engines_gpl\dimr\bin\x64\Release\dimr.exe             !dest_bin!
     call :copyFile engines_gpl\dimr\bin\x64\Release\dimr_dll.dll         !dest_bin!
-    call :copyFile "third_party_open\expat\x64\x64\Release\libexpat.dll" !dest_bin!
-    call :copyFile "third_party_open\pthreads\bin\x64\*.dll"             !dest_bin!
-    call :copyFile "third_party_open\mpich2\x64\bin\*.exe"               !dest_bin!
-    call :copyFile "third_party_open\mpich2\x64\lib\*.dll"               !dest_bin!
+    call :copyFile "third_party_open\expat\x64\x64\Release\libexpat.dll" !dest_share!
+    call :copyFile "third_party_open\pthreads\bin\x64\*.dll"             !dest_share!
+    call :copyFile "third_party_open\mpich2\x64\bin\*.exe"               !dest_share!
+    call :copyFile "third_party_open\mpich2\x64\lib\*.dll"               !dest_share!
 
     call :copyFile engines_gpl\d_hydro\scripts\create_config_xml.tcl     !dest_menu!
 
@@ -239,11 +276,7 @@ rem ================
     call :copyFile "third_party_open\vcredist\x64\Microsoft.VC110.CRT\*.dll"             !dest_share!
     call :copyFile "third_party_open\vcredist\x64\Microsoft.VC120.CRT\*.dll"             !dest_share!
     call :copyFile "third_party_open\vcredist\x64\Microsoft.VC140.CRT\*.dll"             !dest_share!
-    call :copyFile "third_party_open\intel_fortran\lib\x64\*.dll"                        !dest_share!
     call :copyNetcdf                                                                     !dest_share!
-    call :copyFile "third_party_open\mpich2\x64\lib\*.dll"                               !dest_share!
-    call :copyFile "third_party_open\mpich2\x64\bin\mpiexec.exe"                         !dest_share!
-    call :copyFile "third_party_open\mpich2\x64\bin\smpd.exe"                            !dest_share!
     call :copyFile "third_party_open\expat\x64\x64\Release\*.dll"                        !dest_share!
     call :copyFile "third_party_open\pthreads\bin\x64\*.dll"                             !dest_share!
     echo This directory is automatically created by script https://svn.oss.deltares.nl/repos/delft3d/trunk/src/scripts_lgpl/win64/oss-install_x64.cmd >!dest_share!\readme.txt
