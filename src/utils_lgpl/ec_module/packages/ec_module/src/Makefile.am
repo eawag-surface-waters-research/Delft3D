@@ -1,13 +1,13 @@
 #-------------------------------------------------------------------------------
 #   Makefile for ec-module
 #
-#   Irv.Elshoff@deltares.nl
+#   Irv Elshoff
 #   Adri.Mourits@deltares.nl
 #   Fedor.Baart@deltares.nl
 #   Edwin.Spee@deltares.nl
 #   9 nov 2009
 #
-#   Copyright (C)  Stichting Deltares, 2011-2013.
+#   Copyright (C)  Stichting Deltares, 2011-2018.
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
@@ -29,8 +29,7 @@ dist-hook:
 FMODULES += \
 	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src \
 	-I$(top_builddir)/third_party_open/kdtree2/src-f90 \
-	-I$(top_builddir)/utils_lgpl/kdtree_wrapper/packages/kdtree_wrapper/src \
-	-I$(NETCDF_FORTRAN_LIBS)
+	-I$(top_builddir)/utils_lgpl/kdtree_wrapper/packages/kdtree_wrapper/src
 
 #-------------------------------------------------------------------------------
 #   Fortran 90 flags

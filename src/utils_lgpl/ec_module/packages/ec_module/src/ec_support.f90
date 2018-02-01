@@ -925,7 +925,7 @@ end subroutine ecInstanceListSourceItems
       end function ecSupportTimestringToUnitAndRefdate
 
       !> Extracts time unit and reference date from a time string in Arc Info format.
-      !! example: /* TIME (HRS)     18.0 20000101 18
+      !! example: ... TIME (HRS)     18.0 20000101 18
       function ecSupportTimestringArcInfo(rec, ref_date, time_steps) result (success)
          character(len=*)       , intent(in)  :: rec        !< input string
          real(kind=hp), optional, intent(out) :: ref_date   !< reference date found
