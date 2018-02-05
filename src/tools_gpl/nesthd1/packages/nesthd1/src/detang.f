@@ -41,7 +41,7 @@
 !***********************************************************************
 
       integer m     ( nobnd ,   2   ), n     ( nobnd ,   2   ),
-     *        icom  ( mmax  ,  *  )
+     *        icom  ( mmax  , nmax  )
 
       real    pi
 
@@ -74,13 +74,8 @@
 !
 ! -------add 180 degr. for upper or lower boundary (n direction)
 !
-         if (n(ibnd,1) .eq. 1) then
-            angle (ibnd) = angle (ibnd) + 180
-            goto 10
-         endif
 
-         if ((icom (m(ibnd,1),n(ibnd,1) + 1) .eq. 1) .or.
-     *       (icom (m(ibnd,1),n(ibnd,1) - 1) .eq. 1) ) then
+         if (n(ibnd,1) .eq. n(ibnd,2)) then
             angle (ibnd) = angle (ibnd) + 180
          endif
 
