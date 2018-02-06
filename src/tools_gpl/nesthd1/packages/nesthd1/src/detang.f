@@ -1,5 +1,5 @@
       subroutine detang (x     , y     , angle , m     , n     ,
-     *                   icom  , mmax  , nmax  , maxbnd, nobnd )
+     *                   mmax  , nmax  , maxbnd, nobnd         )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2018.                                
@@ -40,9 +40,8 @@
 ! notes              :
 !***********************************************************************
 
-      integer m     ( nobnd ,   2   ), n     ( nobnd ,   2   ),
-     *        icom  ( mmax  , nmax  )
-
+      integer m     ( nobnd ,   2   ), n     ( nobnd ,   2   )
+    
       real    pi
 
       real    angle ( maxbnd)

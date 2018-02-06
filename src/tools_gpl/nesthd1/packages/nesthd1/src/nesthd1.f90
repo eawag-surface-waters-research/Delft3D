@@ -242,7 +242,7 @@
 !-----------------------------------------------------------------------
 
       call detang (xbnd     ,ybnd   ,angle    ,mcbsp    ,ncbsp    , &
-     &             icom2    ,mmax2  ,nmax2    ,maxbnd   ,nobnd )
+     &             mmax2    ,nmax2  ,maxbnd   ,nobnd              )
 
 !-----------------------------------------------------------------------
 !---- 9. Write weight factors/angles velocity boundary
