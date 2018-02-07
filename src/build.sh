@@ -33,12 +33,12 @@ compiler=''
 configureArgs=''
 debug=0
 noMake=0
-platform='64bit'
+platform='intel64'
 useSp=0
 
 #-------------------------------------------------------------------------------
 function usage {
-    echo "Usage: `basename $0` <compiler> [-debug] [-make] [-32bit|-64bit] [-sp] [-configure <args>] [-?]"
+    echo "Usage: `basename $0` <compiler> [-debug] [-make] [-64bit] [-sp] [-configure <args>] [-?]"
     echo "Compiler is one of:"
     echo "    -gnu"
     echo "    -intel10"
@@ -46,6 +46,7 @@ function usage {
     echo "    -intel11.1"
     echo "    -intel12"
     echo "    -intel14 (-intel14.0.3)"
+    echo "    -intel16 (-intel16.0.3)"
     }
 
 
@@ -87,9 +88,6 @@ function witch {
 
 while [ $# -gt 0 ]; do
     case $1 in
-        -32bit)
-            platform='ia32'
-            ;;
         -64bit)
             platform='intel64'
             ;;
@@ -117,6 +115,9 @@ while [ $# -gt 0 ]; do
             ;;
         -intel14|-intel14.0.3)
             compiler='intel14'
+            ;;
+        -intel16|-intel16.0.3)
+            compiler='intel16'
             ;;
         -m|-make)
             noMake=1
@@ -163,6 +164,12 @@ case $compiler in
         addpath PATH /opt/gcc/bin
         addpath LD_LIBRARY_PATH /opt/gcc/lib /opt/gcc/lib64
         echo "Using GNU compilers in `witch gfortran`"
+        ;;
+
+    intel16)
+        ifortInit=". /opt/intel/parallel_studio_cluster_2016_up3/bin/compilervars.sh $platform"
+        iccInit=""
+        echo "Using Intel 16.0.3 Fortran ($platform) compiler"
         ;;
 
     intel14)
@@ -222,7 +229,7 @@ esac
 if [ "$ifortInit" != '' ]; then
     eval $ifortInit
     if [ $? -ne 0 ]; then
-        echo 'Initialization of the Fortran compiler fails!'
+        echo 'ERROR: Initialization of the Fortran compiler fails!'
         cd $orgdir
         exit 1
     fi
@@ -231,7 +238,7 @@ fi
 if [ "$iccInit" != '' ]; then
     eval $iccInit
     if [ $? -ne 0 ]; then
-        echo 'Initialization of the C compiler fails!'
+        echo 'ERROR: Initialization of the C compiler fails!'
         cd $orgdir
         exit 1
     fi
@@ -336,18 +343,20 @@ fi
 #===============================================================================
 # autogen: sanity checks, libtoolize and autoreconf
 
-log='logs/autogen.log'
+log="`pwd`/logs/autogen.log"
 command="./autogen.sh --verbose &> $log"
-
-log "Running $command"
+log "Running $command in `pwd`"
 eval $command
+cd third_party_open/kdtree2
+log "Running $command in `pwd`"
+eval $command
+cd ../..
 
 if [ $? -ne 0 ]; then
-    log "Autogen fails!"
+    log "ERROR: Autogen fails!"
     cd $orgdir
     exit 1
 fi
-
 
 #===============================================================================
 # configure: Create makefiles
@@ -381,7 +390,7 @@ log "Running `echo $command | sed 's/ +/ /g'`"
 eval $command
 
 if [ $? -ne 0 ]; then
-    log "Configure fails!"
+    log "ERROR: Configure fails!"
     cd $orgdir
     exit 1
 fi
@@ -403,8 +412,17 @@ command="make ds-install &> $log"
 log "Running $command"
 eval $command
 
+# Build D-Flow FM, only when not in singlePrecision mode
+if [ $useSp -eq 0 ]; then
+    log='logs/make_dflowfm.log'
+    command="make ds-install -C engines_gpl/dflowfm &> $log"
+
+    log "Running $command"
+    eval $command
+fi
+
 if [ $? -ne 0 ]; then
-    log "Make fails!"
+    log "ERROR: Make fails!"
     cd $orgdir
     exit 1
 fi

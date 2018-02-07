@@ -18,6 +18,7 @@ mkdir tmp
 mkdir tmp/.libs
 cp libdimr.la tmp/
 mv libdimr.* tmp/.libs/
+cp ../share/delft3d/libdimr.lai tmp/.libs/
 cd tmp
 $libtooldir/libtool --mode=install install -c libdimr.la `pwd`/../libdimr.la
 $libtooldir/libtool --finish `pwd`/../libdimr.la
