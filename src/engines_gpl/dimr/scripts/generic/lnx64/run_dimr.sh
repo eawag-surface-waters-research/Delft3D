@@ -205,7 +205,7 @@ else
     cat $(pwd)/machinefile
     echo ----------------------------------------------------------------------
 
-    if [ $NNODES -eq 1 ]; then
+    if [ $NNODES -ne 1 ]; then
         echo "Starting mpd..."
         mpd &
         mpdboot -n $NSLOTS
@@ -224,7 +224,9 @@ else
     rm -f log*.irlog
 fi
 
-mpdallexit
+if [ $NNODES -ne 1 ]; then
+    mpdallexit
+fi
 
 
     # Wait until all child processes are finished
