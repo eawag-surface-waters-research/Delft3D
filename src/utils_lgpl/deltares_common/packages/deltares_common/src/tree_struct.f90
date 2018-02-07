@@ -74,9 +74,10 @@ module TREE_STRUCTURES
    !
    ! Auxiliary variable
    !
-   integer, parameter                            :: maxlen = 300
-   integer,save                                  :: traverse_level = 0
 
+   integer, public, save                              :: maxlen = 300          ! 300 default value
+   integer,save                                       :: traverse_level = 0     
+   ! character(len=1), allocatable, public, save      :: node_value_helper(:)  ! flow_io variable
    !
    ! Public routines, types and parameters
    !
@@ -101,13 +102,15 @@ contains
 !    The argument tree points to a new, empty tree structure or is
 !    not associated
 !
-subroutine tree_create( name, tree )
+subroutine tree_create( name, tree, maxlenpar )
    character(len=*), intent(in)    :: name
    type(TREE_DATA), pointer        :: tree
 
    integer                         :: error
    integer                         :: newsize
+   integer, optional               :: maxlenpar
 
+   if (present(maxlenpar)) maxlen  = maxlenpar
 !   GD: memory leak here
 !   if(associated(tree)) then
 !     deallocate(tree)
@@ -700,9 +703,9 @@ subroutine tree_get_data_string( tree, string, success )
          return
       endif
 
-      success          = .true.
-      length           = size(data_ptr)
-      string           = ' '
+      success               = .true.
+      length                = size(data_ptr)
+      string(1:len(string)) = ' '
       if (length <= maxlen) then
          length           = min(length,len(string))
          do i=1,length
