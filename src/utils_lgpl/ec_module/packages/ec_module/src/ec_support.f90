@@ -121,7 +121,7 @@ module m_ec_support
       
       !> Read and convert the timesteps to seconds.
       !! Takes a string of format: TIME = 0 hours since 2006-01-01 00:00:00 +00:00
-      !! or /* TIME (HRS)      6.0 20000101 6
+      !! or ... TIME (HRS)      6.0 20000101 6
       function ecGetTimesteps(rec, time_steps, convert) result(success)
          logical                                :: success    !< function status
          character(len=maxNameLen), intent(in)  :: rec        !< time information string
