@@ -4959,8 +4959,6 @@ src/third_party_open/swan/bin/win32/swan_4072ABCDE_del_w32_i11_omp.exe -text
 src/third_party_open/swan/scripts/Makefile.am -text
 src/third_party_open/swan/scripts/swan.bat -text
 src/third_party_open/swan/scripts/swan.sh -text
-src/third_party_open/swan/scripts/swan_install.bat -text
-src/third_party_open/swan/scripts/swan_install_x64.bat -text
 src/third_party_open/swan/swan_license_info.txt -text
 src/third_party_open/tcl/bin/win64/tclkitsh852.exe -text
 src/third_party_open/triangle/Makefile.am -text

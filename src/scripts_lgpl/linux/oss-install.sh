@@ -319,7 +319,7 @@ function wave () {
     copyFile "$prefix/bin/wave.exe"                                  $dest_bin
     copyFile "$srcdir/engines_gpl/flow2d3d/default/dioconfig.ini"    $dest_default
     copyFile "$srcdir/third_party_open/swan/bin/linux/*.*"           $dest_swan_bin
-    copyFile "$srcdir/third_party_open/swan/scripts/swan_install.sh" $dest_swan_scripts/swan.sh
+    copyFile "$srcdir/third_party_open/swan/scripts/swan.sh"         $dest_swan_scripts
     copyFile "$srcdir/third_party_open/esmf/lnx64/bin/*"             $dest_esmf_bin
     copyFile "$srcdir/third_party_open/esmf/lnx64/scripts/*.*"       $dest_esmf_scripts
     copyFile "$srcdir/engines_gpl/wave/scripts/run_*.sh"             $dest_scripts

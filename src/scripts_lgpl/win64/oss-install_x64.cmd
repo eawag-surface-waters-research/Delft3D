@@ -581,7 +581,7 @@ rem ================
     )
     call :copyFile engines_gpl\flow2d3d\default\dioconfig.ini         "!dest_default!"
     call :copyFile "third_party_open\swan\bin\w64_i11\*.*"            "!dest_swan_bin!"
-    call :copyFile third_party_open\swan\scripts\swan_install_x64.bat "!dest_swan_scripts!\swan.bat"
+    call :copyFile third_party_open\swan\scripts\swan.bat             "!dest_swan_scripts!"
     call :copyFile "third_party_open\esmf\win64\bin\*.*"              "!dest_esmf_bin!"
     call :copyFile "third_party_open\esmf\win64\scripts\*.*"          "!dest_esmf_scripts!"
     call :copyFile "engines_gpl\wave\scripts\run_*.bat"               "!dest_scripts!"

@@ -1,15 +1,11 @@
 @echo off
 
-rem
-rem Use this script only in the Delft3D open source directory structure
-rem
-
 if exist swan_bat.log del swan_bat.log
 @echo screen output of swan.bat is written to this file >swan_bat.log
 @echo and will be overwritten everytime that swan.bat is executed >>swan_bat.log
 @echo >>swan_bat.log
 
-set swanexec=%~dp0\..\bin\win32\swan_4072ABCDE_del_w32_i11_omp.exe
+set swanexec=%~dp0\..\bin\swan_4072ABCDE_del_w64_i11_omp.exe
 
 rem
 set OMP_NUM_THREADS_BACKUP=%OMP_NUM_THREADS%
