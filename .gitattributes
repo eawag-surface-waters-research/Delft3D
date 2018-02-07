@@ -3887,6 +3887,7 @@ src/third_party_open/metis/metis-5.1.0/programs/smbfactor.c -text
 src/third_party_open/metis/metis-5.1.0/programs/stat.c -text
 src/third_party_open/metis/metis-5.1.0/programs/struct.h -text
 src/third_party_open/metis/metis-5.1.0/vsgen.bat -text
+src/third_party_open/microsoft/xcopy.exe -text
 src/third_party_open/mpich2/COPYRIGHT.rtf -text
 src/third_party_open/mpich2/README.winbin.rtf -text
 src/third_party_open/mpich2/bin/mpiexec.exe -text
