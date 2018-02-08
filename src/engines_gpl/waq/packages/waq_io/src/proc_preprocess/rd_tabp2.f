@@ -272,7 +272,7 @@
          GOTO 900
       ENDIF
       IF (.NOT. NETCDFSTD) THEN
-         WRITE(LUNREP,'(\A\)') ' Info: This processes definition file does not contain standard names and units for NetCDF files.'
+         WRITE(LUNREP,'(/A/)') ' Info: This processes definition file does not contain standard names and units for NetCDF files.'
          ITEM_SN = ' '
          ITEM_SU = ' '
          GOTO 900
