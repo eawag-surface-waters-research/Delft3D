@@ -1269,7 +1269,7 @@ module m_ec_converter
                   wL = connection%converterPtr%indexWeight%weightFactors(1,i)
                   wR = connection%converterPtr%indexWeight%weightFactors(2,i)
                   select case(connection%converterPtr%operandType)
-                     case(operand_replace, operand_add)
+                     case(operand_replace_element, operand_replace, operand_add)
                         ! Are the subproviders 3D or 2D?
                         if (associated(connection%sourceItemsPtr(1)%ptr%elementSetPtr%z) .and. &     ! source has sigma
                                associated(connection%targetItemsPtr(1)%ptr%elementSetPtr%z)) then    ! target has sigma
@@ -1391,7 +1391,7 @@ module m_ec_converter
                                           return
                                     end select
                                     !
-                                    if (connection%converterPtr%operandType == operand_replace) then
+                                    if ((connection%converterPtr%operandType == operand_replace) .or. (connection%converterPtr%operandType == operand_replace_element)) then
                                        connection%targetItemsPtr(1)%ptr%targetFieldPtr%arr1dPtr((k-1)*vectormax+1:k*vectormax) = val(1:vectormax)
                                     else if (connection%converterPtr%operandType == operand_add) then
                                        connection%targetItemsPtr(1)%ptr%targetFieldPtr%arr1dPtr((k-1)*vectormax+1:k*vectormax)   &
@@ -1421,7 +1421,7 @@ module m_ec_converter
                               do k = 1,maxlay_tgt
                                  from = (i-1)*maxlay_tgt*vectormax+(k-1)*vectormax+1
                                  thru = (i-1)*maxlay_tgt*vectormax+k*vectormax
-                                 if (connection%converterPtr%operandType == operand_replace) then
+                                 if (connection%converterPtr%operandType == operand_replace .or. connection%converterPtr%operandType == operand_replace_element) then
                                      connection%targetItemsPtr(1)%ptr%targetFieldPtr%arr1dPtr(from:thru) = val(1:vectormax)
 
                                  else if (connection%converterPtr%operandType == operand_add) then
