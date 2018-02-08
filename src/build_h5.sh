@@ -491,6 +491,12 @@ command="make ds-install &> $log"
 log "Running $command"
 eval $command
 
+if [ $? -ne 0 ]; then
+    log "ERROR: Make fails!"
+    cd $orgdir
+    exit 1
+fi
+
 # Build D-Flow FM, only when not in singlePrecision mode
 if [ $useSp -eq 0 ]; then
     log='logs/make_dflowfm.log'
@@ -501,7 +507,7 @@ if [ $useSp -eq 0 ]; then
 fi
 
 if [ $? -ne 0 ]; then
-    log "ERROR: Make fails!"
+    log "ERROR: Make D-Flow FM fails!"
     cd $orgdir
     exit 1
 fi
