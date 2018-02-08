@@ -78,8 +78,10 @@ esac
 done
 
 if [ ! -f $configfile ]; then
-    echo "ERROR: configfile $configfile does not exist"
-    print_usage_info
+    if [ ! -f $configfile.inp ]; then
+        echo "ERROR: configfile $configfile does not exist"
+        print_usage_info
+    fi
 fi
 
 
