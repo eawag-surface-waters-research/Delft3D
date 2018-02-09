@@ -1084,6 +1084,8 @@ module m_meteo
                   if (.not.ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_2)) return 
                   if (.not.ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_3)) return 
                endif 
+            else if (checkFileType(ec_filetype, provFile_poly_tim, target_name)) then
+               sourceItemName = 'polytim_item'
             else 
                ! Add something to the EC message stack about mismatching filetype bla bla 
                return 
@@ -7320,6 +7322,11 @@ contains
    
       if (filetype == ncflow) then
           call read_flowsamples_from_netcdf(filename, qid, ierr)
+      elseif (filetype == ncgrid) then
+         ! TODO: support reading initial fields from NetCDF too
+         write (msgbuf, '(A)') 'timespace::timespaceinitialfield: Error while reading '''//qid//''' from file '''//trim(filename)//'''. File type not supported for initial fields.'
+         call warn_flush()
+         success = .false.
       else if (filetype == arcinfo) then
           call read_samples_from_arcinfo(filename, 0)
       else

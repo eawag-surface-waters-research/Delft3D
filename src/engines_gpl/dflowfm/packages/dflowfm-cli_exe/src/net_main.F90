@@ -313,7 +313,6 @@
    
     if (len_trim(md_ident) > 0) then
         ! An MDU file was read.
-        md_findcells = 0  ! try to bypass findcells
         ierr = flow_modelinit()
         if ( ierr /= DFM_NOERR ) goto 1234  ! error: finalize and stop
       

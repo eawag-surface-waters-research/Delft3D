@@ -56,7 +56,6 @@
  module m_physcoef
  implicit none
  double precision                  :: ag         !< 10.0   ! 9.81    ! (m/s2)
- double precision                  :: agp        !< value only used in pressure term (m/s2)
  double precision                  :: sag        !< sqrt(ag)
  integer                           :: jahelmert=0 !< 1=use Helmerts equation for agp only
  double precision                  :: vonkar     !< von Karman constant ()
@@ -1644,9 +1643,10 @@ end module m_flowexternalforcings
 module unstruc_channel_flow
 use m_network
 implicit none
-
-type(t_network) :: network
-
+type(t_network)              :: network
+!variables for pump with levels
+integer                      :: nPumpsWithLevels    !< nr of pump signals with levels (sobek format)
+integer, allocatable         :: pumpsWithLevels(:)  !< -1 = legacy, not 1 = new pump
 contains
 
 
@@ -2619,7 +2619,7 @@ subroutine default_flowparameters()
     jamaptidep = 1
     jamapIntTidesDiss = 1
     jamapNudge = 1
-    jatekcd = 0     ! wind cd coeffs on tek
+    jatekcd = 1     ! wind cd coeffs on tek
     jarstbnd = 1
     japartdomain = 1
     jashp_crs = 0
@@ -2978,7 +2978,8 @@ end module m_vegetation
  real            , allocatable     :: tidgs (:)   !< spatially variable earth tide potential at s point (m2/s2)
  double precision, allocatable     :: plotlin(:)  !< for plotting on u points
  integer         , allocatable     :: numlimdt(:) !< nr of times this point was the timestep limiting point
-
+ integer                           :: numlimdt_baorg = 0  
+ 
  double precision, allocatable     :: zn2rn (:)   !< weight from zn to rn, flownode to netnode
 
  double precision, allocatable, target :: taus  (:)   !< cell centre tau N/m2

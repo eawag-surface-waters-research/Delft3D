@@ -4659,6 +4659,73 @@ end subroutine partition_make_globalnumbers
 
       return
    end subroutine
+
+
+   !> Generic function for performing averaging of a cell quantity (e.g. the water levels hu) over links,
+   !> also across multiple MPI ranks
+   function getAverageQuantityFromLinks(startLinks, endLinks, links, cells, mask, & 
+                                        cellQuantity, weights, maskValue, results) result(ierr)
+
+   use mpi
+   use m_flowexternalforcings
+   use m_timer
+
+   !inputs
+   integer,intent(in),dimension(:)               :: startLinks, endLinks, links, cells        
+   double precision,intent(in),dimension(:)      :: mask, cellQuantity, weights          
+   double precision,intent(in)                   :: maskValue
+   
+   !locals
+   integer                                       :: ns, nsegments, nl, link, cell
+   double precision                              :: sumQuantitiesByWeight, sumWeights
+   double precision, allocatable                 :: resultsSum(:,:)
+
+   !outputs
+   double precision,dimension(:,:),intent(inout) :: results
+   integer                                       :: ierr
+
+   ierr = 0
+   nsegments = size(startLinks)
+   allocate(resultsSum(2,nsegments))
+
+   do ns = 1, nsegments
+      
+      sumQuantitiesByWeight = 0d0
+      sumWeights            = 0d0
+      
+      do nl  = startLinks(ns), endLinks(ns)
+
+         link  = abs(links(nl))
+         cell  = abs(cells(nl))
+
+         if ( jampi.eq.1 ) then
+            ! Exclude ghost nodes
+            if ( idomain(cell).ne.my_rank ) then
+               cycle
+            end if
+         end if
+
+         if ( mask(link) > maskValue ) then
+            sumQuantitiesByWeight   = sumQuantitiesByWeight + cellQuantity(cell)*weights(link)
+            sumWeights              = sumWeights + weights(link)
+         endif
+
+      enddo
+      results(1,ns) = sumQuantitiesByWeight
+      results(2,ns) = sumWeights
+   end do
+
+   if ( jampi.eq.1 .and. japartqbnd.eq.1 ) then
+      ! Here we reduce the results
+      if ( jatimer.eq.1 ) call starttimer(IMPIREDUCE)
+#ifdef HAVE_MPI
+      call MPI_allreduce(results,resultsSum,2*nsegments,mpi_double_precision,mpi_sum,DFM_COMM_DFMWORLD, ierr)
+      results = resultsSum
+#endif  
+      if ( jatimer.eq.1 ) call stoptimer(IMPIREDUCE)
+   end if
+
+   end function getAverageQuantityFromLinks
    
    end module m_partitioninfo
    

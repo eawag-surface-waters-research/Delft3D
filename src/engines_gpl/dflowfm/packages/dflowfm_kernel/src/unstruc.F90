@@ -9681,7 +9681,7 @@ end subroutine cosphiunetcheck
     msgbuf = ' ' ; call msg_flush()
  enddo
 
- if (mxls > 0) then
+ if (ti_xls > 0) then
     call wrirstfileold(time1)                        ! schrijf aan het einde     een ascii.rst-file weg
     call wrinumlimdt()                               ! number of limitating timesteps per node
  endif
@@ -9724,6 +9724,45 @@ end subroutine cosphiunetcheck
  call doclose(mlim)
 
  end subroutine wrinumlimdt
+   
+ subroutine reanumlimdt()
+ use m_flowgeom
+ use m_flow
+ use m_partitioninfo
+ use m_samples
+ implicit none
+ character(len=256)   :: name, nams
+ logical              :: jawel
+ integer              :: mlim, k, numlimdtk, kk, jakdtree=1, jaoutside=0
+ double precision     :: xdum, ydum
+ integer, allocatable :: knum(:) 
+
+ if ( jampi.eq.0 ) then
+    name = 'prev_numlimdt.xyz'
+ else
+    name = 'prev_numlimdt'//'_'//trim(sdmn)//'.xyz'
+ end if
+ inquire(file=name, exist = jawel) 
+ if (jawel) then 
+    call oldfil(mlim, trim(name))
+    call increasesam(ndx) 
+    kk = 0
+    do k = 1,ndx  
+       kk = kk + 1
+       read(mlim, *, end=999) xs(kk), ys(kk), zs(kk) 
+    enddo
+    999 continue    
+    call doclose(mlim)
+    allocate(knum(ndx)) ; knum = 0
+    kk = kk - 1
+    call find_flownode(kk, xs, ys, nams, knum, jakdtree, jaoutside)
+    do k = 1,kk
+       numlimdt(knum(k)) = zs(k) 
+    enddo   
+    
+ endif   
+ deallocate(xs,ys,zs,knum)  
+ end subroutine reanumlimdt  
 
 
  !subroutine wricir()
@@ -13471,6 +13510,10 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
    use m_bedform
    use dfm_error
    use m_calibration, only: calibration_backup_frcu
+   use unstruc_channel_flow
+   use m_pump
+   use m_flowexternalforcings
+   use m_partitioninfo 
 
    implicit none
 
@@ -13484,6 +13527,13 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
 
    logical, external :: flow_initwaveforcings_runtime
    character(len=255) :: tmpstr
+
+   
+   ! variables for processing the pump with levels, SOBEK style
+   integer                               :: n, ierr, istrpump, structInd
+   double precision, allocatable         :: results(:,:)
+   double precision, allocatable         :: waterLevelsDeliverySide(:),waterLevelsSuctionSide(:)
+   
    iresult = DFM_EXTFORCERROR
    call klok(cpuext(1))
 
@@ -13742,6 +13792,52 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
 
    !$OMP END PARALLEL SECTIONS
 
+   !Pump with levels, SOBEK style, outside OpenMP region
+   if (nPumpsWithLevels > 0) then
+   
+      ! Allocate
+      allocate(results(2,npumpsg), stat = ierr)
+      allocate(waterLevelsSuctionSide(npumpsg), stat = ierr)
+      allocate(waterLevelsDeliverySide(npumpsg), stat = ierr)
+      if (ierr.ne.0) success=.false.
+   
+      ! Initialize
+      results = 0.0d0
+      waterLevelsSuctionSide  = 0.0d0
+      waterLevelsDeliverySide = 0.0d0
+   
+      ! Compute sumQuantitiesByWeight and sumWeights for the suction side
+      ierr = getAverageQuantityFromLinks(L1pumpsg, L2pumpsg, kpump(3,:), kpump(1,:), hu, s1, wu, 0.0d0, results)
+      if (ierr.ne.0) success=.false.
+      
+      do n = 1, npumpsg
+         if (results(2,n)>0.0d0) then
+            waterLevelsSuctionSide(n)  = results(1,n)/results(2,n)
+         endif
+      enddo
+   
+      ! Compute sumQuantitiesByWeight and sumWeights for the delivery side
+      ierr = getAverageQuantityFromLinks(L1pumpsg, L2pumpsg, kpump(3,:), kpump(2,:), hu, s1, wu, 0.0d0, results)
+      if (ierr.ne.0) success=.false.
+      
+      do n = 1, npumpsg
+         if (results(2,n)>0.0d0) then
+            waterLevelsDeliverySide(n)  = results(1,n)/results(2,n)
+         endif
+      enddo
+   
+      do n = 1, npumpsg 
+         ! Retrive a valid index in the network%sts%struct
+         istrpump = pumpsWithLevels(n) 
+         ! Do not use PrepareComputePump to compute the legacy pumps discharges
+         if (istrpump.eq.-1) cycle 
+         if (associated(network%sts%struct(istrpump)%pump)) then
+            call PrepareComputePump(network%sts%struct(istrpump)%pump, waterLevelsSuctionSide(n), waterLevelsDeliverySide(n))
+            qpump(n) = network%sts%struct(istrpump)%pump%discharge
+         endif
+      enddo
+   endif
+   
    if (numsrc > 0) then
       success = success .and. ec_gettimespacevalue(ecInstancePtr, item_discharge_salinity_temperature_sorsin, tim)
    endif
@@ -14084,7 +14180,7 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
 
  implicit none
  integer, intent (in) :: L
- integer              :: k1, maxnit = 100, nit
+ integer              :: k1, maxnit = 100, nit, jalightwind = 0
  double precision     :: uwi, cd10, rk, hsurf = 10d0
  double precision     :: omw, cdL2, dkpz0, s, sold, eps = 1d-4, awin
  double precision     :: p = -12d0, pinv = -0.083333d0, A, A10log, bvis, bfit, balf, r
@@ -14161,21 +14257,24 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
        cd10 = 1d0/(s*s)
     endif
 
- else if (icdtyp == 5) then                  ! Whang 2005, wave frequency dependent
+ else if (icdtyp == 5) then                     ! Whang 2005, wave frequency dependent
 
+    ! (A.)=http://onlinelibrary.wiley.com/doi/10.1029/2005JC002912/full
+    
     k1    = ln(1,L)
-    if (twav(k1) < 0.1) then 
-       cd10 = 0.00063d0
+    if (uwi < 4d0) then 
+       awin  = max(0.1d0,uwi)
+       cd10  = 0.0044d0 / awin**1.15d0 
     else 
        omw   = twopi/twav(k1)                   ! wave frequency
-       cdL2  = 0.001289d0*(omw*uwi/ag)**0.815d0 ! Cd at half wavelength above surface(11a)
+       cdL2  = 0.001289d0*(omw*uwi/ag)**0.815d0 ! Cd at half wavelength above surface(11a)    (A7) 
 
-       dkpz0 = pi*exp(-vonkarw/sqrt(CdL2))      ! (5)
+       dkpz0 = pi*exp(-vonkarw/sqrt(CdL2))      ! (5)                                         (A2)
        call getwavenr(hs(k1),twav(k1),rk)
-       cd10  = vonkarw*vonkarw/ (log(10d0*rk/dkpz0))**2
+       cd10  = vonkarw*vonkarw/ (log(10d0*rk/dkpz0))**2                                     ! (A4b)
      endif 
        
- else if (icdtyp == 6) then                  ! Wuest 2003 & Smith en Banke, uit Rob's DPM
+ else if (icdtyp == 6) then                     ! Wuest 2003 & Smith en Banke, uit Rob's DPM
 
     if (uwi > 4d0) then
         cd10 = 0.00063d0 + 0.000066d0*uwi
@@ -14184,7 +14283,7 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
         cd10 = 0.0044d0 / awin**1.15d0
     endif
 
- else if (icdtyp == 7) then                  ! Hans Hersbach, July 2010, ECMWF fit (CHarnock plus viscous term)
+ else if (icdtyp == 7) then                     ! Hans Hersbach, July 2010, ECMWF fit (CHarnock plus viscous term)
 
     A      = ( cdb(1)*(vonkarw*uwi)**2 ) / (ag*hsurf)
     A10log = log(A)
@@ -14196,16 +14295,27 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
 
  endif
 
+ if (jalightwind == 1 .and. icdtyp .ne. 7 .and. icdtyp .ne. 5) then 
+    if (uwi < 4d0) then     ! for wind < 4 m/s use wuest anyway 
+        awin = max(0.1d0,uwi)
+        cd10 = max(cd10, 0.0044d0 / awin**1.15d0)
+    endif
+ endif    
  end subroutine setcdwcoefficient
 
  subroutine writeCdcoeffs()
  use unstruc_model
  use unstruc_files, only: getoutputdir
  use m_wind
+ use m_waves
+ use m_flow,     only : jawave
+ use m_flowgeom, only : ndx 
  implicit none
 
  integer          :: msgbu, k
- double precision :: uwi, Cd10
+ double precision :: uwi, Cd10, fetchL, fetchD, hsig, tsig
+ double precision, allocatable :: hwavsav(:), twavsav(:)  
+
 
  call newfil(msgbu, trim(getoutputdir())//trim(md_ident)//'_Cdwcoeff.tek')
 
@@ -14226,38 +14336,96 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
     write (msgbu, '(a)') '* Hans Hersbach, July 2010, ECMWF fit (CHarnock plus viscous term), (e.g. Charnock=0.018 and alfvisc=0.11)'
  endif
 
- write (msgbu, '(a)')  '* column 1 : Wind speed               (m/s) '
- write (msgbu, '(a)')  '* column 2 : Resulting Cd coefficient (   ) '
- write (msgbu, '(a)')  'BL01'
- write (msgbu, '(a)')  '61  2'
+ write (msgbu, '(a)')     '* column 1 : Wind speed               (m/s) '
+ write (msgbu, '(a)')     '* column 2 : Resulting Cd coefficient (   ) '
+ if (jawave > 0) then 
+    write (msgbu, '(a)')  '* column 3 : Hwav                     (m  ) '
+    write (msgbu, '(a)')  '* column 4 : Twav                     (s  ) '
+    write (msgbu, '(a)')  '61  4'
+ else 
+    write (msgbu, '(a)')  '61  2'
+ endif
+ 
+ if (jawave > 0) then 
+    fetchL = 20000d0
+    fetchD = 4d0
+    allocate ( hwavsav(ndx), twavsav(ndx) )
+    hwavsav = hwav ; twavsav = twav 
+ endif
 
  uwi = 0.1d0
+ if (jawave > 0) then 
+    call hurdlestive (Uwi, fetchL, fetchD, Hsig, Tsig)
+    hwav = hsig ; twav = tsig
+ endif
  call setcdwcoefficient(uwi, Cd10, 1)
- write(msgbu, '(2F14.6)') uwi, Cd10
-
+ if (jawave > 0) then 
+    write(msgbu, '(4F14.6)') uwi, Cd10, hsig, tsig
+ else
+    write(msgbu, '(2F14.6)') uwi, Cd10
+ endif
+ 
  uwi = 0.2d0
+ if (jawave > 0) then 
+    call hurdlestive (Uwi, fetchL, fetchD, Hsig, Tsig) 
+    hwav = hsig ; twav = tsig
+ endif   
  call setcdwcoefficient(uwi, Cd10, 1)
- write(msgbu, '(2F14.6)') uwi, Cd10
+ if (jawave > 0) then 
+    write(msgbu, '(4F14.6)') uwi, Cd10, hsig, tsig
+ else
+    write(msgbu, '(2F14.6)') uwi, Cd10
+ endif
 
  do k = 1, 28
     uwi = uwi + 0.2d0
+    if (jawave > 0) then 
+       call hurdlestive (Uwi, fetchL, fetchD, Hsig, Tsig)
+       hwav = hsig ; twav = tsig
+    endif
     call setcdwcoefficient(uwi, Cd10, 1)
-    write(msgbu, '(2F14.6)') uwi, Cd10
+    if (jawave > 0) then 
+       write(msgbu, '(4F14.6)') uwi, Cd10, hsig, tsig
+    else
+       write(msgbu, '(2F14.6)') uwi, Cd10
+    endif
  enddo
 
  do k = 1, 24
     uwi = uwi + 1.0d0
+    if (jawave > 0) then 
+       call hurdlestive (Uwi, fetchL, fetchD, Hsig, Tsig)   
+       hwav = hsig ; twav = tsig
+    endif
     call setcdwcoefficient(uwi, Cd10, 1)
-    write(msgbu, '(2F14.6)') uwi, Cd10
+    if (jawave > 0) then 
+       write(msgbu, '(4F14.6)') uwi, Cd10, hsig, tsig
+    else
+       write(msgbu, '(2F14.6)') uwi, Cd10
+    endif
  enddo
 
  do k = 1, 7
     uwi = uwi + 10d0
+    if (jawave > 0) then 
+       call hurdlestive (Uwi, fetchL, fetchD, Hsig, Tsig) 
+       hwav = hsig ; twav = tsig
+    endif   
     call setcdwcoefficient(uwi, Cd10, 1)
-    write(msgbu, '(2F14.6)') uwi, Cd10
+    if (jawave > 0) then 
+       write(msgbu, '(4F14.6)') uwi, Cd10, hsig, tsig
+    else
+       write(msgbu, '(2F14.6)') uwi, Cd10
+    endif
  enddo
 
  call doclose(msgbu)
+ 
+ if (jawave > 0) then 
+    hwav = hwavsav ; twav = twavsav 
+    deallocate (hwavsav, twavsav)  
+ endif
+ 
  end subroutine writeCdcoeffs
 
  subroutine flow_externalinput(tim)                  ! receive signals etc
@@ -17096,6 +17264,7 @@ end subroutine unc_write_shp
  use sorting_algorithms, only: indexx
  use m_flowtimes, only: ti_waq
  use gridoperations
+ use m_flow, only : numlimdt, numlimdt_baorg
  
  implicit none
 
@@ -17188,7 +17357,7 @@ end subroutine unc_write_shp
     jaiglobal_s = 1
  end if
 
- if (md_findcells == 0) then
+ if (md_findcells == 0 .or. jaidomain.eq.1 .or. jaiglobal_s.eq.1) then
     ! read cells from file, to avoid find cells
     ! and, ONLY read idomain from file if MPI is on AND no polygon enforced.
 !    call preparecells(md_netfile, min(jampi, 1-md_genpolygon), ierr)
@@ -17196,9 +17365,10 @@ end subroutine unc_write_shp
  end if
 
  if (md_findcells == 1 .or. ierr /= DFM_NOERR) then  ! Either force findcells, or if cells have not been found in file.
+     call mess(LEVEL_WARN, 'Domain numbers read from file, but overwriting cell numbering by enforcing findcells.', my_rank)
+ 
      call findcells(0)                               ! shortest walks in network (0 means: look for all shapes, tris, quads, pentas, hexas)
      call find1dcells()
-     md_findcells = 1
  endif
 
  if ( jaidomain.eq.1 .and. .not. allocated(idomain)) then
@@ -17876,10 +18046,16 @@ end subroutine unc_write_shp
 
  n12 = 5 ; fnam =  '*.cut'
  ! call message ('cutcell call 5',' ',' ')
+ 
+ if (allocated(numlimdt) ) deallocate(numlimdt)
+ allocate ( numlimdt(ndx) , stat = ierr) ; numlimdt = 0
+ call aerr('numlimdt(ndx)', ierr , ndx ) 
+ if (numlimdt_baorg > 0) then         ! if prev_numlimdt(k) > numlimdt_baorg then ba(k) = baorg(k) in cutcell           
+    call reanumlimdt() 
+ endif
  call cutcell_list(n12,'*.cut',5, 3 ) ! trim(fnam))       ! CUT CELLS, N12 = 5, WU AND BA ADAPTATION
+ numlimdt = 0
  deallocate(kfs) ; allocate(kfs(ndx))
-
-
 
  call readyy ('geominit',-1d0)
 
@@ -18091,7 +18267,7 @@ end subroutine unc_write_shp
     dx(L) = max(dx(L), dxmin2D)
  enddo
 
- if (Lnx1D > 0) then
+ if (Lnx1D < -1 ) then
     kc = 0 ! allocate(inodes(Ndxi-ndx2D)) ; inodes = 0
     call find_flowcells_kdtree(treeglob,Ndxi-ndx2D,xz(ndx2D+1),yz(ndx2D+1),kc,0,ierr)
     do k1 = ndx2D+1, ndxi
@@ -18108,9 +18284,7 @@ end subroutine unc_write_shp
 
  do n = 1, ndxi                                      ! after all metrics, maximise ba and dx for better conditioning
     if (n > ndx2D) then                              ! reset ba on strictly 1D nodes, to bamin1D or to specified manhole area's (todo)
-       ba(n) = max(ba(n), bamin1D)
-    else
-       ba(n) = max(ba(n), bamin)                     ! bai zit in Perot wegingen, die maxen we niet
+       ba(n) = max(ba(n), bamin1D)                   ! 2D handled in cutcelwu
     endif
  enddo
  do L = lnxi+1,Lnx
@@ -19870,11 +20044,6 @@ end do
  omega    = twopi/sidereal
  fcorio   = 2d0*omega*sin(anglat*dg2rd)
  dy2dg    = rd2dg/ra
- agp      = ag
- if (jahelmert > 0) then
-    st2 = sin(dg2rd*anglat)**2
-    agp = 9.7803253359*(1d0+0.00193185265241*st2)/sqrt(1d0-0.00669437999013*st2)
- endif
  end subroutine inisferic
 
  subroutine flow_allocflow()                             ! initialise flow model time independent parameters
@@ -20634,7 +20803,7 @@ endif
 
  ! link related
  if (allocated(cfuhi) ) then
-    deallocate(cfuhi, wdsu, u0,u1,q1,qa,v,ucxu,ucyu,hu, huvli, au, viu, vicLu, cflj, tetaj, suu, advi, adve, plotlin, numlimdt)
+    deallocate(cfuhi, wdsu, u0,u1,q1,u_to_umain, qa,v,ucxu,ucyu,hu, huvli, au, viu, vicLu, cflj, tetaj, suu, advi, adve, plotlin)
  endif
  
  if (allocated (rhou) ) deallocate(rhou)
@@ -20697,7 +20866,8 @@ endif
  allocate ( u1   (lnkx) , stat = ierr)
  call aerr('u1   (lnkx)', ierr , lnkx ) ; u1    = 0
  
- ! TODO alloceer u_to_main alleen bij sedmor 
+ ! TODO alloceer u_to_main alleen bij sedmor
+ if ( allocated(u_to_umain) ) deallocate(u_to_umain)
  allocate ( u_to_umain   (lnkx) , stat = ierr)
  call aerr('u_to_umain   (lnkx)', ierr , lnkx ) ; u_to_umain    = 1d0
 
@@ -20740,9 +20910,6 @@ endif
 
  allocate ( plotlin(max(lnkx,ndkx)) , stat = ierr)
  call aerr('plotlin(max(lnkx,ndkx))', ierr , lnkx ) ; plotlin = 0
-
- allocate ( numlimdt(ndx) , stat = ierr)
- call aerr('numlimdt(ndx)', ierr , ndx ) ; numlimdt = 0
 
  ! m_integralstats
  if (is_numndvals > 0) then
@@ -30558,7 +30725,7 @@ end subroutine setbobs_fixedweirs
  double precision :: slopec, hup, u1L, v2, frL, u1L0, rhof, zbndun, zbndu0n, bdmwrp, bdmwrs
  double precision :: qk0, qk1, dzb, hdzb, z00  !
  double precision :: as1, as2, qtotal, s_on_crest, width, st2
- double precision :: twot = 2d0/3d0, hb, h23, ustbLL
+ double precision :: twot = 2d0/3d0, hb, h23, ustbLL, agp
  double precision :: hminlwi
  logical          :: firstiter, jarea
  type(t_structure), pointer :: pstru
@@ -30610,11 +30777,12 @@ end subroutine setbobs_fixedweirs
              endif
           endif
 
+          agp = ag 
           if (jahelmert > 0 .and. jsferic > 0) then
              st2  = sin(dg2rd*yu(L))**2
              agp  = 9.7803253359*(1d0+0.00193185265241*st2)/sqrt(1d0-0.00669437999013*st2)
           endif
-          gdxi  = ag*dxi(L)
+          gdxi  = agp*dxi(L)
           cu    = gdxi*teta(L)
           du    = dti*u0(L) - adve(L) + gdxi*slopec
           ds    = s0(k2) - s0(k1)
@@ -33817,7 +33985,8 @@ end subroutine make_mirrorcells
  double precision, allocatable :: widths(:) ! hulp
  double precision, allocatable :: uxini(:), uyini(:) !< optional initial velocity fields on u points in x/y dir.
 
- integer                       :: iconst, itrac, idum, isf, isednum
+ integer                       :: iconst, itrac, idum, isf, isednum, ipumpsg
+
 
  integer, external             :: findname
  double precision,  external   :: ran0
@@ -35417,11 +35586,13 @@ if (mext > 0) then
     enddo
 
     ja = 1 ; rewind (mext); kx = 1
+    ipumpsg = 0
     do while (ja .eq. 1)                             ! for pumps again postponed read *.ext file
        call readprovider(mext,qid,filename,filetype,method,operand,transformcoef,ja)
        if (ja == 1 .and. ( qid == 'pump1D' .or. qid == 'pump') ) then
           qid = 'pump'
-          success = ec_addtimespacerelation(qid, xpump, ypump, kdp, kx, filename, filetype, method, operand, xy2pump)
+          ipumpsg = ipumpsg + 1
+          success = ec_addtimespacerelation(qid, xpump, ypump, kdp, kx, filename, filetype, method, operand, xy2pump, targetIndex=ipumpsg)
        endif
     enddo
 
@@ -37037,12 +37208,13 @@ subroutine getymxpar(modind,tauwav, taucur, fw, cdrag, abscos, ypar, ymxpar)
  use m_flowtimes
  use m_missing
  use m_waves
+ use m_sferic
  implicit none
  double precision   :: a(kmxx),b(kmxx),c(kmxx),d(kmxx),e(kmxx), dzu(kxL), womegu(kxL-1), dzv(kmxx)
  integer            :: Lb,Lt,kxL,LL
 
  integer            :: L, k, k1, k2
- double precision   :: dzLw, vstress, adv , adv1, tt, ustv
+ double precision   :: dzLw, vstress, adv , adv1, tt, ustv, st2, agp
 
  double precision   :: rhof, gdxi, gdxids, bui, du, cu, ac1, ac2, hup, twot = 0.666666666666d0, slopec
 
@@ -37188,11 +37360,12 @@ subroutine getymxpar(modind,tauwav, taucur, fw, cdrag, abscos, ypar, ymxpar)
 
  enddo
 
- !if (jahelmert > 0 .and. jsferic > 0) then      ! possibly operationalise later for now avoid the checks
- !    st2  = sin(dg2rd*yu(L))**2
- !    agp  = 9.7803253359*(1d0+0.00193185265241*st2)/sqrt(1d0-0.00669437999013*st2)
- !endif
- gdxi = ag*dxi(LL)
+ agp = ag
+ if (jahelmert > 0 .and. jsferic > 0) then      ! possibly operationalise later for now avoid the checks
+     st2  = sin(dg2rd*yu(L))**2
+     agp  = 9.7803253359*(1d0+0.00193185265241*st2)/sqrt(1d0-0.00669437999013*st2)
+ endif
+ gdxi = agp*dxi(LL)
 
  if (    jarhoxu == 2) then
     gdxi = gdxi*rhomean/rhou(L)

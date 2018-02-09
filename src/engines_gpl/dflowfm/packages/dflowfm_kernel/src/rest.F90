@@ -6205,7 +6205,6 @@ subroutine make_matrix(CFL, s1)
          maxmatvecs = maxsubmatvecs
       end if
       
-      md_findcells = 0  ! try to bypass findcells
       ierror = flow_modelinit()
       
 !!      call initimer()

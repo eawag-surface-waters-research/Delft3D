@@ -1072,9 +1072,7 @@ integer :: ndx1d, lnx2d, lnx2db, numl2d, Lf, L, i, n, k, kb, kt, nlayb, nrlay, L
 integer               :: ilocdim
 integer               :: lndim
 integer, dimension(3) :: dimids_var
-!TODO remove save and deallocate?
-double precision, allocatable, save :: workL(:)
-double precision, allocatable, save :: workS3D(:,:), workU3D(:,:), workW(:,:), workWU(:,:)
+double precision, allocatable :: work(:,:)
 
    ierr = DFM_NOERR
    if (present(locdim)) then
@@ -1090,18 +1088,30 @@ double precision, allocatable, save :: workS3D(:,:), workU3D(:,:), workW(:,:), w
       if (ndx1d > 0) then
          select case (ilocdim)
          case(1)
-            ierr = nf90_put_var(mapids%ncid, id_var(1), values(ndx2d+1:ndxi,:), start = (/ 1, 1, mapids%idx_curtime /))
+            allocate(work(ndxi-ndx2d,size(values,2)))
+            work = values(ndx2d+1:ndxi,:)
+            ierr = nf90_put_var(mapids%ncid, id_var(1), work, start = (/ 1, 1, mapids%idx_curtime /))
+            deallocate(work)
          case(2)
-            ierr = nf90_put_var(mapids%ncid, id_var(1), values(:,ndx2d+1:ndxi), start = (/ 1, 1, mapids%idx_curtime /))
+            allocate(work(size(values,1),ndxi-ndx2d))
+            work = values(:,ndx2d+1:ndxi)
+            ierr = nf90_put_var(mapids%ncid, id_var(1), work, start = (/ 1, 1, mapids%idx_curtime /))
+            deallocate(work)
          end select
       end if
       ! Internal 2d flownodes. Horizontal position: faces in 2d mesh.
       if (ndx2d > 0) then
          select case (ilocdim)
          case(1)
-            ierr = nf90_put_var(mapids%ncid, id_var(2), values(1:ndx2d,:), start = (/ 1, 1, mapids%idx_curtime /))
+            allocate(work(ndx2d,size(values,2)))
+            work = values(1:ndx2d,:)
+            ierr = nf90_put_var(mapids%ncid, id_var(2), work, start = (/ 1, 1, mapids%idx_curtime /))
+            deallocate(work)
          case(2)
-            ierr = nf90_put_var(mapids%ncid, id_var(2), values(:,1:ndx2d), start = (/ 1, 1, mapids%idx_curtime /))
+            allocate(work(size(values,1),ndx2d))
+            work = values(:,1:ndx2d)
+            ierr = nf90_put_var(mapids%ncid, id_var(2), work, start = (/ 1, 1, mapids%idx_curtime /))
+            deallocate(work)
          end select
       end if
 
@@ -1110,9 +1120,15 @@ double precision, allocatable, save :: workS3D(:,:), workU3D(:,:), workW(:,:), w
       if (lnx1d > 0) then
          select case (ilocdim)
          case(1)
-            ierr = nf90_put_var(mapids%ncid, id_var(1), values(1:lnx1d,:), start = (/ 1, 1, mapids%idx_curtime /))
+            allocate(work(lnx1d,size(values,2)))
+            work = values(1:lnx1d,:)
+            ierr = nf90_put_var(mapids%ncid, id_var(1), work, start = (/ 1, 1, mapids%idx_curtime /))
+            deallocate(work)
          case(2)
-            ierr = nf90_put_var(mapids%ncid, id_var(1), values(:,1:lnx1d), start = (/ 1, 1, mapids%idx_curtime /))
+            allocate(work(size(values,1),lnx1d))
+            work = values(:,1:lnx1d)
+            ierr = nf90_put_var(mapids%ncid, id_var(1), work, start = (/ 1, 1, mapids%idx_curtime /))
+            deallocate(work)
          end select
       end if
       lnx2d = lnxi - lnx1d
@@ -1120,9 +1136,15 @@ double precision, allocatable, save :: workS3D(:,:), workU3D(:,:), workW(:,:), w
       if (lnx2d > 0) then
          select case (ilocdim)
          case(1)
-            ierr = nf90_put_var(mapids%ncid, id_var(2), values(lnx1d+1:lnxi,:), start = (/ 1, 1, mapids%idx_curtime /))
+            allocate(work(lnxi-lnx1d,size(values,2)))
+            work = values(lnx1d+1:lnxi,:)
+            ierr = nf90_put_var(mapids%ncid, id_var(2), work, start = (/ 1, 1, mapids%idx_curtime /))
+            deallocate(work)
          case(2)
-            ierr = nf90_put_var(mapids%ncid, id_var(2), values(:,lnx1d+1:lnxi), start = (/ 1, 1, mapids%idx_curtime /))
+            allocate(work(size(values,1),lnxi-lnx1d))
+            work = values(:,lnx1d+1:lnxi)
+            ierr = nf90_put_var(mapids%ncid, id_var(2), work, start = (/ 1, 1, mapids%idx_curtime /))
+            deallocate(work)
          end select
       end if
       ! External 2d flowlinks. Horizontal position: edges in 2d mesh.
@@ -1130,9 +1152,15 @@ double precision, allocatable, save :: workS3D(:,:), workU3D(:,:), workW(:,:), w
       if (lnx2db > 0) then
          select case (ilocdim)
          case(1)
-            ierr = nf90_put_var(mapids%ncid, id_var(2), values(lnx1db+1:lnx,:), start = (/ lnx2d+1, 1, mapids%idx_curtime /))
+            allocate(work(lnx-lnx1db,size(values,2)))
+            work = values(lnx1db+1:lnx,:)
+            ierr = nf90_put_var(mapids%ncid, id_var(2), work, start = (/ lnx2d+1, 1, mapids%idx_curtime /))
+            deallocate(work)
          case(2)
-            ierr = nf90_put_var(mapids%ncid, id_var(2), values(:,lnx1db+1:lnx), start = (/ 1, lnx2d+1, mapids%idx_curtime /))
+            allocate(work(size(values,1),lnx-lnx1db))
+            work = values(:,lnx1db+1:lnx)
+            ierr = nf90_put_var(mapids%ncid, id_var(2), work, start = (/ 1, lnx2d+1, mapids%idx_curtime /))
+            deallocate(work)
          end select
       end if
       ! Default value is different from a fill value, use for example for zero velocities on closed edges.
@@ -1186,9 +1214,7 @@ integer :: ndx1d, lnx2d, lnx2db, numl2d, Lf, L, i, n, k, kb, kt, nlayb, nrlay, L
 integer               :: ilocdim
 integer               :: lndim1, lndim2
 integer, dimension(4) :: dimids_var
-!TODO remove save and deallocate?
-double precision, allocatable, save :: workL(:)
-double precision, allocatable, save :: workS3D(:,:), workU3D(:,:), workW(:,:), workWU(:,:)
+double precision, allocatable :: work(:,:,:)
 
    ierr = DFM_NOERR
    if (present(locdim)) then
@@ -1204,22 +1230,40 @@ double precision, allocatable, save :: workS3D(:,:), workU3D(:,:), workW(:,:), w
       if (ndx1d > 0) then
          select case (ilocdim)
          case(1)
-            ierr = nf90_put_var(mapids%ncid, id_var(1), values(ndx2d+1:ndxi,:,:), start = (/ 1, 1, 1, mapids%idx_curtime /))
+            allocate(work(ndxi-ndx2d,size(values,2),size(values,3)))
+            work = values(ndx2d+1:ndxi,:,:)
+            ierr = nf90_put_var(mapids%ncid, id_var(1), work, start = (/ 1, 1, 1, mapids%idx_curtime /))
+            deallocate(work)
          case(2)
-            ierr = nf90_put_var(mapids%ncid, id_var(1), values(:,ndx2d+1:ndxi,:), start = (/ 1, 1, 1, mapids%idx_curtime /))
+            allocate(work(size(values,1),ndxi-ndx2d,size(values,3)))
+            work = values(:,ndx2d+1:ndxi,:)
+            ierr = nf90_put_var(mapids%ncid, id_var(1), work, start = (/ 1, 1, 1, mapids%idx_curtime /))
+            deallocate(work)
          case(3)
-            ierr = nf90_put_var(mapids%ncid, id_var(1), values(:,:,ndx2d+1:ndxi), start = (/ 1, 1, 1, mapids%idx_curtime /))
+            allocate(work(size(values,1),size(values,2),ndxi-ndx2d))
+            work = values(:,:,ndx2d+1:ndxi)
+            ierr = nf90_put_var(mapids%ncid, id_var(1), work, start = (/ 1, 1, 1, mapids%idx_curtime /))
+            deallocate(work)
          end select
       end if
       ! Internal 2d flownodes. Horizontal position: faces in 2d mesh.
       if (ndx2d > 0) then
          select case (ilocdim)
          case(1)
-            ierr = nf90_put_var(mapids%ncid, id_var(2), values(1:ndx2d,:,:), start = (/ 1, 1, 1, mapids%idx_curtime /))
+            allocate(work(ndx2d,size(values,2),size(values,3)))
+            work = values(1:ndx2d,:,:)
+            ierr = nf90_put_var(mapids%ncid, id_var(2), work, start = (/ 1, 1, 1, mapids%idx_curtime /))
+            deallocate(work)
          case(2)
-            ierr = nf90_put_var(mapids%ncid, id_var(2), values(:,1:ndx2d,:), start = (/ 1, 1, 1, mapids%idx_curtime /))
+            allocate(work(size(values,1),ndx2d,size(values,3)))
+            work = values(:,1:ndx2d,:)
+            ierr = nf90_put_var(mapids%ncid, id_var(2), work, start = (/ 1, 1, 1, mapids%idx_curtime /))
+            deallocate(work)
          case(3)
-            ierr = nf90_put_var(mapids%ncid, id_var(2), values(:,:,1:ndx2d), start = (/ 1, 1, 1, mapids%idx_curtime /))
+            allocate(work(size(values,1),size(values,2),ndx2d))
+            work = values(:,:,1:ndx2d)
+            ierr = nf90_put_var(mapids%ncid, id_var(2), work, start = (/ 1, 1, 1, mapids%idx_curtime /))
+            deallocate(work)
          end select
       end if
 
@@ -1228,11 +1272,20 @@ double precision, allocatable, save :: workS3D(:,:), workU3D(:,:), workW(:,:), w
       if (lnx1d > 0) then
          select case (ilocdim)
          case(1)
-            ierr = nf90_put_var(mapids%ncid, id_var(1), values(1:lnx1d,:,:), start = (/ 1, 1, 1, mapids%idx_curtime /))
+            allocate(work(lnx1d,size(values,2),size(values,3)))
+            work = values(1:lnx1d,:,:)
+            ierr = nf90_put_var(mapids%ncid, id_var(1), work, start = (/ 1, 1, 1, mapids%idx_curtime /))
+            deallocate(work)
          case(2)
-            ierr = nf90_put_var(mapids%ncid, id_var(1), values(:,1:lnx1d,:), start = (/ 1, 1, 1, mapids%idx_curtime /))
+            allocate(work(size(values,1),lnx1d,size(values,3)))
+            work = values(:,1:lnx1d,:)
+            ierr = nf90_put_var(mapids%ncid, id_var(1), work, start = (/ 1, 1, 1, mapids%idx_curtime /))
+            deallocate(work)
          case(3)
-            ierr = nf90_put_var(mapids%ncid, id_var(1), values(:,:,1:lnx1d), start = (/ 1, 1, 1, mapids%idx_curtime /))
+            allocate(work(size(values,1),size(values,2),lnx1d))
+            work = values(:,:,1:lnx1d)
+            ierr = nf90_put_var(mapids%ncid, id_var(1), work, start = (/ 1, 1, 1, mapids%idx_curtime /))
+            deallocate(work)
          end select
       end if
       lnx2d = lnxi - lnx1d
@@ -1240,11 +1293,20 @@ double precision, allocatable, save :: workS3D(:,:), workU3D(:,:), workW(:,:), w
       if (lnx2d > 0) then
          select case (ilocdim)
          case(1)
-            ierr = nf90_put_var(mapids%ncid, id_var(2), values(lnx1d+1:lnxi,:,:), start = (/ 1, 1, 1, mapids%idx_curtime /))
+            allocate(work(lnxi-lnx1d,size(values,2),size(values,3)))
+            work = values(lnx1d+1:lnxi,:,:)
+            ierr = nf90_put_var(mapids%ncid, id_var(2), work, start = (/ 1, 1, 1, mapids%idx_curtime /))
+            deallocate(work)
          case(2)
-            ierr = nf90_put_var(mapids%ncid, id_var(2), values(:,lnx1d+1:lnxi,:), start = (/ 1, 1, 1, mapids%idx_curtime /))
+            allocate(work(size(values,1),lnxi-lnx1d,size(values,3)))
+            work = values(:,lnx1d+1:lnxi,:)
+            ierr = nf90_put_var(mapids%ncid, id_var(2), work, start = (/ 1, 1, 1, mapids%idx_curtime /))
+            deallocate(work)
          case(3)
-            ierr = nf90_put_var(mapids%ncid, id_var(2), values(:,:,lnx1d+1:lnxi), start = (/ 1, 1, 1, mapids%idx_curtime /))
+            allocate(work(size(values,1),size(values,2),lnxi-lnx1d))
+            work = values(:,:,lnx1d+1:lnxi)
+            ierr = nf90_put_var(mapids%ncid, id_var(2), work, start = (/ 1, 1, 1, mapids%idx_curtime /))
+            deallocate(work)
          end select
       end if
       ! External 2d flowlinks. Horizontal position: edges in 2d mesh.
@@ -1252,11 +1314,20 @@ double precision, allocatable, save :: workS3D(:,:), workU3D(:,:), workW(:,:), w
       if (lnx2db > 0) then
          select case (ilocdim)
          case(1)
-            ierr = nf90_put_var(mapids%ncid, id_var(2), values(lnx1db+1:lnx,:,:), start = (/ lnx2d+1, 1, 1, mapids%idx_curtime /))
+            allocate(work(lnx-lnx1db,size(values,2),size(values,3)))
+            work = values(lnx1db+1:lnx,:,:)
+            ierr = nf90_put_var(mapids%ncid, id_var(2), work, start = (/ lnx2d+1, 1, 1, mapids%idx_curtime /))
+            deallocate(work)
          case(2)
-            ierr = nf90_put_var(mapids%ncid, id_var(2), values(:,lnx1db+1:lnx,:), start = (/ 1, lnx2d+1, 1, mapids%idx_curtime /))
+            allocate(work(size(values,1),lnx-lnx1db,size(values,3)))
+            work = values(:,lnx1db+1:lnx,:)
+            ierr = nf90_put_var(mapids%ncid, id_var(2), work, start = (/ 1, lnx2d+1, 1, mapids%idx_curtime /))
+            deallocate(work)
          case(3)
-            ierr = nf90_put_var(mapids%ncid, id_var(2), values(:,:,lnx1db+1:lnx), start = (/ 1, 1, lnx2d+1, mapids%idx_curtime /))
+            allocate(work(size(values,1),size(values,2),lnx-lnx1db))
+            work = values(:,:,lnx1db+1:lnx)
+            ierr = nf90_put_var(mapids%ncid, id_var(2), work, start = (/ 1, 1, lnx2d+1, mapids%idx_curtime /))
+            deallocate(work)
          end select
       end if
       ! Default value is different from a fill value, use for example for zero velocities on closed edges.

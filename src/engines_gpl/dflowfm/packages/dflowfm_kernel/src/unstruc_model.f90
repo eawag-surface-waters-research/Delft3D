@@ -171,7 +171,7 @@ implicit none
     integer            :: md_epscg           = 0      !< -10log(epscg) (if > 0), tolerance in (inner) Krylov iterations
     integer            :: md_epsdiff         = 0      !< -10log(epsdiff) (if > 0), tolerance in (outer) Schwarz iterations
     integer            :: md_convnetcells    = 0      !< Convert _net.nc files with only netnodes/links into _net.nc files with netcell info.
-    integer            :: md_findcells       = 1      !< read netcell info from files and bypass findcells. If not 0, findcells are called.
+    integer            :: md_findcells       = 0      !< read netcell info from files and bypass findcells. If not 0, findcells are called.
     integer            :: md_pressakey       = 0      !< press a key (1) or not (0)
     character(len=128) :: md_cfgfile         = ' '    !< cfg-file
     integer            :: md_jasavenet       = 0      !< save network after initialization (1) or not (0)
@@ -804,6 +804,8 @@ subroutine readMDUFile(filename, istat)
     call prop_get_double (md_ptr, 'numerics', 'LocSaltLev'      , locsaltlev) 
     call prop_get_double (md_ptr, 'numerics', 'LocSaltMin'      , locsaltmin)
     call prop_get_double (md_ptr, 'numerics', 'LocSaltMax'      , locsaltmax) 
+  
+    call prop_get_integer(md_ptr, 'numerics', 'Numlimdt_baorg'  , Numlimdt_baorg) 
     
     ! Physics
     call prop_get_double (md_ptr, 'physics', 'UnifFrictCoef'  , frcuni)
@@ -1955,6 +1957,9 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     if (writeall .or. locsaltmax /= 10d0) then
        call prop_set (prop_ptr, 'numerics', 'LocSaltMax', locsaltmax, 'maximum salinity for case of lock exchange')
     endif
+    if (writeall .or. numlimdt_baorg > 0) then
+       call prop_set (prop_ptr, 'numerics', 'Numlimdt_baorg', Numlimdt_baorg, 'if previous numlimdt > Numlimdt_baorg keep original cell area ba in cutcell')
+    endif
     
 ! Physics                                                           
     call prop_set(prop_ptr, 'physics', 'UnifFrictCoef',     frcuni,      'Uniform friction coefficient (0: no friction)')
@@ -2051,6 +2056,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
 ! secondary flow
 ! output to mdu file
     call prop_set(prop_ptr, 'physics', 'SecondaryFlow'  , jasecflow, 'Secondary flow (0: no, 1: yes)')
+
     if (writeall .or. (jasecflow > 0)) then 
        call prop_set(prop_ptr, 'physics', 'BetaSpiral'     , spirbeta , 'Weight factor of the spiral flow intensity on flow dispersion stresses')   
     endif

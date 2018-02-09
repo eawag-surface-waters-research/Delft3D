@@ -237,6 +237,10 @@ end subroutine api_loadmodel
           call unc_write_net_flowgeom(trim(md_flowgeomfile))
        end if
        
+       if (jawind > 0 .and. jatekcD > 0) then 
+          call writeCdcoeffs()
+       endif   
+       
     end if
     if (ndx == 0) return                                ! No valid flow network was initialized
     
@@ -251,10 +255,6 @@ end subroutine api_loadmodel
     if (jampi == 1) then
        call updateValuesOnCrossSections_mpi(time1)
     endif
-  
-    if (jawind > 0 .and. jatekcd.eq.1) then             ! only if wanted
-       call writeCdcoeffs()
-    endif   
     
     call mess(LEVEL_INFO,'Writing initial output to file(s)...')
     call flow_externaloutput(time1)

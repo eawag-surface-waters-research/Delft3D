@@ -1689,7 +1689,7 @@
     ! note that sourse/sinkse and sourf/sinkf arrays are required for BOTT3D
     ! Happens in transport, subroutine fill_constituents()
     !
-    if (jatranspvel > 0 .and. jawave>0) then
+    if (jatranspvel > 0 .or. jawave>0) then
        u1 = u1ori; u0 = u0ori; v=vori
        call setucxucyucxuucyu()
     end if
@@ -2277,7 +2277,8 @@ subroutine fm_bott3d()
                          sumflux = sumflux - flux
                       end if
                    end do
-                   trndiv = trndiv + sumflux / max(vol1(nm),dtol)
+                   !trndiv = trndiv + sumflux / max(vol1(nm),dtol)
+                    trndiv = trndiv + sumflux * bai(nm) ! MvO & DR + dimensiecheck levert op * bai ipv /vol1 verandering gemaakt rond release 35807
                 else
                    !
                    ! mass balance includes entrainment and deposition

@@ -567,6 +567,11 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
             id_infile = tmpdimids(id)
             dimids_uses(id_infile) = dimids_uses(id_infile) - 1
          enddo
+         var_timdimpos(ivarcandidate)   = -1
+         var_spacedimpos(ivarcandidate) = -1
+         var_kxdimpos(ivarcandidate)    = -1
+         var_laydimpos(ivarcandidate)   = -1
+         var_wdimpos(ivarcandidate)     = -1
          isfound = .false.
       end if
    

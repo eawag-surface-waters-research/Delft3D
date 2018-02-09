@@ -2161,40 +2161,65 @@ if (npump > 0) then
          kpump(3,k)    = L ! f
       enddo
    end do
-
+   
+   nPumpsWithLevels = 0
+   allocate(pumpsWithLevels(npumpsg))
+   ! initialize
+   pumpsWithLevels = -1
    do n = 1, npumpsg ! and now add it (poly_tim xys have just been prepared in separate loop)
+
       str_ptr => strs_ptr%child_nodes(pumpidx(n))%node_ptr
 
+      ! read the id first
       strid = ' '
       call prop_get_string(str_ptr, '', 'id', strid, success)
       pump_ids(n) = strid
 
-      plifile = ' '
-      call prop_get_string(str_ptr, '', 'polylinefile', plifile)
+      ! read the type
+      strtype = ' '
+      call prop_get_string(str_ptr, '', 'type', strtype, success)
+      istrtype  = getStructype(strtype)
+      ! flow1d_io library: add and read SOBEK pump
+      ! just use the first link of the the structure (the network%sts%struct(istrtmp)%link_number  is not used in computations)
+      k = L1pumpsg(n)
+      istrtmp   = addStructure(network%sts, kpump(1,k), kpump(2,k), iabs(kpump(3,k)), -1, strid, istrtype)
+      call readPump(network%sts%struct(istrtmp)%pump, str_ptr, success)
+      
+      ! mapping for qpump array
+      if (success) then
+         nPumpsWithLevels   = nPumpsWithLevels + 1
+         pumpsWithLevels(n) = istrtmp
+      endif
 
-      rec = ' '
-      call prop_get(str_ptr, '', 'capacity', rec)
-      read(rec, *, iostat = ierr) tmpval
-      if (ierr /= 0) then ! No number, so check for timeseries filename
-         if (trim(rec) == 'REALTIME') then
-            success = .true.
-            ! zgate should be filled via DLL's API
-            write(msgbuf, '(a,a,a)') 'Control for pump ''', trim(strid), ''' set to REALTIME.'
-            call dbg_flush()
+      if (.not. success) then ! Original pump code, with only a capacity.
+
+         plifile = ' '
+         call prop_get_string(str_ptr, '', 'polylinefile', plifile)
+
+         rec = ' '
+         call prop_get(str_ptr, '', 'capacity', rec)
+         read(rec, *, iostat = ierr) tmpval
+         if (ierr /= 0) then ! No number, so check for timeseries filename
+            if (trim(rec) == 'REALTIME') then
+               success = .true.
+               ! zgate should be filled via DLL's API
+               write(msgbuf, '(a,a,a)') 'Control for pump ''', trim(strid), ''' set to REALTIME.'
+               call dbg_flush()
+            else
+               qid = 'pump'
+               fnam = trim(rec)
+               if (index(trim(fnam)//'|','.tim|')>0) then
+                  ! Time-interpolated value will be placed in qpump(n) when calling ec_gettimespacevalue.
+                  success  = ec_addtimespacerelation(qid, xdum, ydum, kdum, kx, fnam, uniform, spaceandtime, 'O', targetIndex=n)
+               endif
+               if (index(trim(fnam)//'|','.cmp|')>0) then
+                  ! Evaluated harmonic signals value will be placed in qpump(n) when calling ec_gettimespacevalue.
+                  success  = ec_addtimespacerelation(qid, xdum, ydum, kdum, kx, fnam, fourier, justupdate, 'O', targetIndex=n)
+               endif
+            end if
          else
-            qid = 'pump'
-            fnam = trim(rec)
-            if (index(trim(fnam)//'|','.tim|')>0) then 
-               ! Time-interpolated value will be placed in qpump(n) when calling ec_gettimespacevalue.
-               success  = ec_addtimespacerelation(qid, xdum, ydum, kdum, kx, fnam, uniform, spaceandtime, 'O', targetIndex=n)
-            endif 
-            if (index(trim(fnam)//'|','.cmp|')>0) then 
-               ! Evaluated harmonic signals value will be placed in qpump(n) when calling ec_gettimespacevalue.
-               success  = ec_addtimespacerelation(qid, xdum, ydum, kdum, kx, fnam, fourier, justupdate, 'O', targetIndex=n)
-            endif 
+            qpump(n) = tmpval ! Constant value for always, set it now already.
          end if
-      else
-         qpump(n) = tmpval ! Constant value for always, set it now already.
       end if
    enddo
 endif
