@@ -34,7 +34,7 @@ module m_readRetentions
    use m_Storage
    use m_tables
 
-   use flow1d_io_properties
+   use properties
    use m_hash_search
 
    implicit none
@@ -73,7 +73,7 @@ module m_readRetentions
       double precision, allocatable, dimension(:)   :: storLevels
       double precision, allocatable, dimension(:)   :: storAreas
 
-      call tree_create(trim(retentionFile), md_ptr)
+      call tree_create(trim(retentionFile), md_ptr, maxlenpar)
       call prop_file('ini',trim(retentionFile),md_ptr, istat)
       
       numstr = 0

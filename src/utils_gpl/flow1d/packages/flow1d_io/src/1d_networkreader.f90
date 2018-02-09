@@ -31,7 +31,7 @@ module m_1d_networkreader
    
    use MessageHandling
    use modelGlobalData
-   use flow1d_io_properties
+   use properties
    use m_hash_search
    use m_hash_list
    use m_network
@@ -61,7 +61,7 @@ module m_1d_networkreader
       integer :: numstr
       integer :: i
 
-      call tree_create(trim(networkFile), md_ptr)
+      call tree_create(trim(networkFile), md_ptr, maxlenpar)
       call prop_file('ini',trim(networkFile), md_ptr, istat)
 
       numstr = 0

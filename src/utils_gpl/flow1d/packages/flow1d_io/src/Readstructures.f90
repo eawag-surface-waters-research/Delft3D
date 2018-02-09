@@ -44,7 +44,7 @@ module m_readstructures
    use m_General_Structure
    use m_ExtraResistance
 
-   use flow1d_io_properties
+   use properties
    use m_hash_list
    use m_hash_search
    use m_tables
@@ -57,6 +57,7 @@ module m_readstructures
    public readStructures
    public read_structure_cache
    public write_structure_cache
+   public readPump
 
    contains
 
@@ -108,7 +109,7 @@ module m_readstructures
          return
       endif
 
-      call tree_create(trim(structurefile), md_ptr)
+      call tree_create(trim(structurefile), md_ptr, maxlenpar)
       call prop_file('ini',trim(structurefile),md_ptr,istat)
       
       numstr = 0

@@ -6081,8 +6081,6 @@ src/utils_gpl/flow1d/packages/flow1d_io/src/Makefile.am -text
 src/utils_gpl/flow1d/packages/flow1d_io/src/Readstructures.f90 -text
 src/utils_gpl/flow1d/packages/flow1d_io/src/flow1d_io.F90 -text
 src/utils_gpl/flow1d/packages/flow1d_io/src/flow1d_reader.F90 -text
-src/utils_gpl/flow1d/packages/flow1d_io/src/general/flow1d_io_properties.f90 -text
-src/utils_gpl/flow1d/packages/flow1d_io/src/general/flow1d_io_tree_struct.f90 -text
 src/utils_gpl/flow1d/packages/flow1d_io/src/hash_list_io.f90 -text
 src/utils_gpl/flow1d/packages/flow1d_io/src/readBoundaries.f90 -text
 src/utils_gpl/flow1d/packages/flow1d_io/src/readCrossSections.f90 -text

@@ -31,8 +31,6 @@ endif
 #-------------------------------------------------------------------------------
 #Sources
 libflow1d_io_la_SOURCES = \
-         general/flow1d_io_tree_struct.f90 \
-         general/flow1d_io_properties.f90 \
          hash_list_io.f90 \
          1d_networkreader.f90 \
          read_table.f90 \

@@ -46,8 +46,6 @@
 		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
 		<File RelativePath=".\src\1d_networkreader.f90"/>
 		<File RelativePath=".\src\flow1d_io.F90"/>
-		<File RelativePath=".\src\general\flow1d_io_properties.f90"/>
-		<File RelativePath=".\src\general\flow1d_io_tree_struct.f90"/>
 		<File RelativePath=".\src\flow1d_reader.F90"/>
 		<File RelativePath=".\src\hash_list_io.f90"/>
 		<File RelativePath=".\src\read_roughness.f90"/>

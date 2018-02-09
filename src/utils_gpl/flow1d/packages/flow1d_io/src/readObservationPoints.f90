@@ -34,7 +34,7 @@ module m_readObservationPoints
    use m_ObservationPoints
    use m_GlobalParameters
 
-   use flow1d_io_properties
+   use properties
    use m_hash_search
    use m_hash_list
    use string_module
@@ -100,7 +100,7 @@ module m_readObservationPoints
          return
       endif
 
-      call tree_create(trim(observationPointsFile), md_ptr)
+      call tree_create(trim(observationPointsFile), md_ptr, maxlenpar)
       call prop_file('ini',trim(observationPointsFile),md_ptr, istat)
       
       numstr = 0

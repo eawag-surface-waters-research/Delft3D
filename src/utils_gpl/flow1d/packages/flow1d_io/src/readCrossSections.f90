@@ -33,7 +33,7 @@ module m_readCrossSections
    use m_CrossSections
    use MessageHandling
    use modelGlobalData
-   use flow1d_io_properties
+   use properties
    use m_network
    use m_GlobalParameters
    use m_hash_search
@@ -97,7 +97,7 @@ module m_readCrossSections
          return
       endif
       
-      call tree_create(trim(CrossSectionfile), md_ptr)
+      call tree_create(trim(CrossSectionfile), md_ptr, maxlenpar)
       call prop_file('ini',trim(CrossSectionfile),md_ptr,istat)
       numstr = 0
       if (associated(md_ptr%child_nodes)) then
@@ -313,7 +313,7 @@ module m_readCrossSections
          return
       endif
 
-      call tree_create(trim(CrossSectionDefinitionFile), md_ptr)
+      call tree_create(trim(CrossSectionDefinitionFile), md_ptr, maxlenpar)
       call prop_file('ini',trim(CrossSectionDefinitionFile),md_ptr,istat)
 
       numstr = 0

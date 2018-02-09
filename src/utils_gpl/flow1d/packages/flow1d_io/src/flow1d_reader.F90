@@ -49,7 +49,7 @@ module m_flow1d_reader
    contains
    
    subroutine read_md1d(md_flow1d_file, network, nc_outputdir)
-      use flow1d_io_properties
+      use properties
       use ModelGlobalData
       use m_network
  
@@ -68,7 +68,7 @@ module m_flow1d_reader
       ! NO logging to log file yet
 
       ! Convert c string to fortran string and read md1d file into tree
-      call tree_create(trim(md_flow1d_file), md_ptr)
+      call tree_create(trim(md_flow1d_file), md_ptr, maxlenpar)
       call prop_inifile(trim(md_flow1d_file), md_ptr, istat)
       if (istat /= 0) then
          call setmessage(LEVEL_FATAL, 'Error opening ' // trim(md_flow1d_file))
@@ -98,7 +98,7 @@ module m_flow1d_reader
       use m_readLaterals
       use m_readObservationPoints
       use m_readRetentions
-      use flow1d_io_properties
+      use properties
       use cf_timers
 
       character(len=*), intent(inout) :: nc_outputdir

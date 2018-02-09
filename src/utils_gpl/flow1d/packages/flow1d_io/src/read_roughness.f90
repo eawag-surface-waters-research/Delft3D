@@ -38,7 +38,7 @@ module m_read_roughness
    use m_readSpatialData
    use m_Roughness
    use m_spatial_data
-   use flow1d_io_properties
+   use properties
    use messagehandling
 
    implicit none
@@ -206,7 +206,7 @@ contains
       integer, pointer, dimension(:)         :: fun_type
    
       ! create and fill tree
-      call tree_create(trim(inputfile), tree_ptr)
+      call tree_create(trim(inputfile), tree_ptr, maxlenpar)
       call prop_file('ini',trim(inputfile),tree_ptr,istat)
    
       ! Get section id

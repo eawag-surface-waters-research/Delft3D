@@ -34,7 +34,7 @@ module m_readSpatialData
    use m_spatial_data
    use m_tables
    use m_branch
-   use flow1d_io_properties
+   use properties
    use m_hash_search
    use m_read_table
 
@@ -90,7 +90,7 @@ contains
          pspData%quantity = -1
       endif
 
-      call tree_create(trim(inputfile), md_ptr)
+      call tree_create(trim(inputfile), md_ptr, maxlenpar)
       call prop_file('ini',trim(inputfile),md_ptr,istat)
       ! look for global value in spatial data file. If available use this value for 
       ! default, otherwise use default value as global value

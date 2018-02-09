@@ -32,7 +32,7 @@ module m_readModelParameters
    use MessageHandling
    use m_globalParameters
    use ModelParameters
-   use flow1d_io_properties
+   use properties
    use string_module
    use m_boundaryConditions
 

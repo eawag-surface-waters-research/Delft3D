@@ -32,7 +32,7 @@ module m_readSalinityParameters
    use MessageHandling
    use ModelParameters
    use m_network
-   use flow1d_io_properties
+   use properties
    use m_hash_search
 
    implicit none
@@ -75,7 +75,7 @@ module m_readSalinityParameters
          return
       endif
       
-      call tree_create(trim(salinityFile), md_ptr)
+      call tree_create(trim(salinityFile), md_ptr, maxlenpar)
       call prop_file('ini',trim(salinityFile),md_ptr, istat)
 
       ! read numerical options

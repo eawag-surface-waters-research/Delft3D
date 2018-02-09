@@ -33,7 +33,7 @@ module m_readLaterals
    use m_network
    use m_Laterals
 
-   use flow1d_io_properties
+   use properties
    use m_hash_search
 
    implicit none
@@ -65,7 +65,7 @@ module m_readLaterals
       integer                                       :: branchIdx
       type(t_lateral), pointer                      :: pLat
 
-      call tree_create(trim(lateralLocationFile), md_ptr)
+      call tree_create(trim(lateralLocationFile), md_ptr, maxlenpar)
       call prop_file('ini',trim(lateralLocationFile),md_ptr, istat)
       
       numstr = 0

@@ -34,7 +34,7 @@ module m_readBoundaries
    use m_network
    use m_boundaryConditions
 
-   use flow1d_io_properties
+   use properties
    use m_tables
    use m_hash_search
    use string_module
@@ -101,7 +101,7 @@ module m_readBoundaries
       boundaries => network%boundaries
       nds        => network%nds
 
-      call tree_create(trim(boundaryLocationFile), md_ptr)
+      call tree_create(trim(boundaryLocationFile), md_ptr, maxlenpar)
       call prop_file('ini',trim(boundaryLocationFile),md_ptr, istat)
       
       numstr = 0
