@@ -17,6 +17,18 @@ function print_usage_info {
     echo "Options:"
     echo "-h, --help"
     echo "       print this help message and exit"
+    echo
+    echo "-p <proc_def>"
+    echo "       use an alternative process library file instead of $D3D_HOME/share/delft3d/proc_def"
+    echo
+    echo "-np"
+    echo "       do not use any Delwaq processes (all substances will be seen as tracers)"
+    echo
+    echo "-eco [<bloom.spe>]"
+    echo "       use BLOOM, optionally using an alternative algea database for the default $D3D_HOME/share/delft3d/bloom.spe"
+    echo
+    echo "-*"
+    echo "       any other options are passed trough to the Delwaq to process"
     exit 1
 }
 
@@ -40,6 +52,12 @@ ulimit -s unlimited
 ## Start processing command line options:
 
 configfile=$1
+case $configfile in
+    -h|--help)
+    print_usage_info
+    ;;
+esac
+
 shift
 while [[ $# -ge 1 ]]
 do
@@ -76,6 +94,10 @@ case $key in
     ;;
 esac
 done
+
+    echo
+    echo "hier"
+    echo
 
 if [ ! -f $configfile ]; then
     if [ ! -f $configfile.inp ]; then
