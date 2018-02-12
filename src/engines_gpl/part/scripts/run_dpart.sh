@@ -36,6 +36,12 @@ ulimit -s unlimited
 ## Start processing command line options:
 
 configfile=$1
+case $configfile in
+    -h|--help)
+    print_usage_info
+    ;;
+esac
+
 shift
 while [[ $# -ge 1 ]]
 do
@@ -59,8 +65,10 @@ done
 
 
 if [ ! -f $configfile ]; then
+    if [ ! -f $configfile.inp ]; then
     echo "ERROR: configfile $configfile does not exist"
     print_usage_info
+fi
 fi
 
 
