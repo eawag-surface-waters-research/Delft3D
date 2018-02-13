@@ -50,6 +50,7 @@ type stmtype
     type(morpar_type)                        , pointer     :: morpar
     type(bedcomp_data)                       , pointer     :: morlyr
     type(trapar_type)                        , pointer     :: trapar
+    type(t_nodereldata)                      , pointer     :: nrd
     integer                                                :: lsedsus
     integer                                                :: lsedtot
     real(fp)      , dimension(:), allocatable              :: facdss
@@ -70,6 +71,7 @@ subroutine rdstm(stm, griddim, filsed, filmor, filtrn, &
 !!--declarations----------------------------------------------------------------
     use grid_dimens_module
     use properties ! includes tree_structures
+    use m_ini_noderel ! for node relation definitions
     !
     implicit none
 !
@@ -115,6 +117,7 @@ subroutine rdstm(stm, griddim, filsed, filmor, filtrn, &
     allocate(stm%morpar , stat = istat)
     allocate(stm%trapar , stat = istat)
     allocate(stm%morlyr , stat = istat)
+    allocate(stm%nrd    , stat = istat)
     !
     call nullsedpar(stm%sedpar)
     call nullmorpar(stm%morpar)
@@ -172,7 +175,11 @@ subroutine rdstm(stm, griddim, filsed, filmor, filtrn, &
                & stm%iopsus, nmlb, nmub, filsed, &
                & sedfil_tree, stm%sedpar, stm%trapar, griddim)
     if (error) goto 999
+    ! 
+    !  For 1D branches read the node relation definitions
     !
+    call ini_noderel(stm%nrd, stm%sedpar, stm%lsedtot)
+    !     
     ! Read morphology parameters
     !
     ! morpar filled by rdmor
