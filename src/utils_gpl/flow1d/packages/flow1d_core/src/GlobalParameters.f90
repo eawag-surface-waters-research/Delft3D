@@ -62,7 +62,7 @@ module m_GlobalParameters
    double precision, public         :: latitude                      = 52.25
    double precision, public         :: longitude                     = 0d0
    double precision, public         :: time_zone                     = 0d0
-   integer, public                  :: maxlenpar                     = 10000   
+   integer, public                  :: maxlenpar                     = 100000   
    !TODO temporary unit to be removed, when finished
    integer, public :: luntrans = 0
 

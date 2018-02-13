@@ -569,6 +569,10 @@ module m_readCrossSections
       logical          :: success
       double precision :: crestLevel
       double precision :: baseLevel
+      double precision :: maxFlowWidth
+      double precision :: Main
+      double precision :: FP1
+      double precision :: FP2
       double precision :: flowArea
       double precision :: totalArea
       double precision :: wintersect
@@ -642,46 +646,53 @@ module m_readCrossSections
       pCS%closed = .false.
             
       pCS%plains = 0.0d0
-      call prop_get_double(node_ptr, '', 'main', pCS%plains(1), success)
-      if (.not. success .or. pCS%Plains(1) <= 0.0d0) then
-         pCS%plains(1) = width(1)
-         do i = 2, numlevels
-            pCS%plains(1) = max(pCS%plains(1), width(1))
-         enddo  
+         
+      if (width(numLevels) >= ThresholdForPreismannLock) then
+      
+         maxFlowWidth = width(numlevels)
+
+         call prop_get_double(node_ptr, '', 'main', Main, success)
+         if (.not. success)  Main = 0.0d0
+         call prop_get_double(node_ptr, '', 'floodPlain1', FP1, success)
+         if (.not. success)  FP1 = 0.0d0
+         call prop_get_double(node_ptr, '', 'floodPlain2',FP2, success)
+         if (.not. success)  FP2 = 0.0d0
+
+         ! Check and Make Consistent if Needed
+         if ((Main + FP1 + FP2) < (maxFlowWidth) - 0.001d0) then
+             call SetMessage(LEVEL_ERROR, 'Sum of all Sections less than Flow Width for CrossSection ID: '//trim(pCS%id))
+         elseif (FP1 <= 0.0d0 .and. FP2 > 0) then
+             call SetMessage(LEVEL_ERROR, 'Floodplain2 only allowed when Floodplain1 exists for CrossSection ID: '//trim(pCS%id))
       else
          
-         if (width(numLevels) >= ThresholdForPreismannLock) then
-         
-            if (pCS%plains(1) > width(numLevels)) then
-               pCS%plains(1) = width(numLevels)
-            endif
-            
-            call prop_get_double(node_ptr, '', 'floodPlain1', pCS%plains(2), success)
-            if (.not. success .or. pCS%plains(2) <= 0.0d0) then
-               if (pCS%plains(1) < width(numLevels)) then
-                  pCS%plains(1) = width(numLevels)
-                  call SetMessage(LEVEL_WARN, 'Main Section Width not Consistent, set to Flow Width for CrossSection ID: '//trim(pCS%id))                  
+            ! Compensate for rounf off if needed
+            if ((Main + FP1 + FP2) < maxFlowWidth) then
+               Main = Main + 0.001d0
                endif 
+         
+            if (Main >= maxFlowWidth) then
+               Main = maxFlowWidth
+               FP1  = 0.0d0
+               FP2  = 0.0d0
+            elseif ((Main + FP1) >= maxFlowWidth) then
+               FP1 = maxFlowWidth - Main
+               FP2 = 0.0d0
             else
-               pCS%plains(3) = width(numLevels) - pCS%plains(2) - pCS%plains(1)
-               if (pCS%plains(3) <= 0.0d0) then
-                  pCS%plains(2) = width(numLevels) - pCS%plains(1)
-                  pCS%plains(3) = 0.0d0
+               FP2 = maxFlowWidth - Main - FP1
                endif
             endif                  
+            
+         pCS%plains(1) = Main
+         pCS%plains(2) = FP1
+         pCS%plains(3) = FP2
                   
          else
-            pCS%plains(1) = width(1)
-            do i = 2, numlevels
-               pCS%plains(1) = max(pCS%plains(1), width(1))
-            enddo  
+         pCS%plains(1) = maxval(width(1:numlevels))
             pCS%plains(2) = 0.0d0
             pCS%plains(3) = 0.0d0
          endif
          
-      endif
-      
-      if ( (pCS%plains(2) == 0d0) .and. (pCS%plains(3) == 0d0) ) then
+      if ( (pCS%plains(2) == 0.0d0) .and. (pCS%plains(3) == 0.0d0) ) then
          pCs%plainslocation(1) = numlevels
          pCs%plainslocation(2) = 0
          pCs%plainslocation(3) = 0
