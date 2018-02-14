@@ -234,7 +234,22 @@ struct dimr_logger
 {
 	const char        * workingDir;
 	const char        * outputFile;
-    netcdf_references * netcdfReferences;
+   netcdf_references * netcdfReferences;
+
+   // using std::string in entire dimr source code can simplify this function, 
+   // but also others
+   string GetLoggerFilename(const char * dimrWorkingDirectory, const char * dirSeparator)
+   {
+      auto loggerFileName = new char[MAXSTRING];
+      strcpy(loggerFileName, dimrWorkingDirectory);
+      strcat(loggerFileName, dirSeparator);
+      strcat(loggerFileName, workingDir);
+      strcat(loggerFileName, dirSeparator);
+      strcat(loggerFileName, outputFile);
+      string stringFileName{ loggerFileName };
+      delete[] loggerFileName;
+      return stringFileName;
+   }
 };
 
 // A coupler defines the communication between two components, one coupler for each direction
@@ -366,8 +381,6 @@ class Dimr {
         void           char_to_ints     (char *, int **, int *);
 
         map<string, int> ncfiles;
-
-        string GetLoggerFilename(dimr_logger* logger);
 
     };
 

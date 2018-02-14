@@ -920,9 +920,9 @@ void Dimr::runParallelInit (dimr_control_block * cb) {
 					// create netcdf logfiles
 					if (thisCoupler->logger != NULL)
 					{
-						// create netcdf file in workingdir
+                        // create netcdf file in workingdir
 
-                        string fileName = GetLoggerFilename(thisCoupler->logger);
+                        string fileName = thisCoupler->logger->GetLoggerFilename(thisDimr->dimrWorkingDirectory, thisDimr->dirSeparator);
 
                         // write NetCDF file
 
@@ -933,7 +933,7 @@ void Dimr::runParallelInit (dimr_control_block * cb) {
 
                         // write global attributes
 
-					    time_t now;
+                        time_t now;
                         time(&now);
                         char buf[sizeof("2017-10-10T16:57:32Z")+1];
                         strftime(buf, sizeof buf, "%Y-%m-%dT%H:%M:%SZ", gmtime(&now));
@@ -953,7 +953,7 @@ void Dimr::runParallelInit (dimr_control_block * cb) {
                         std::ostringstream title;
                         const char * version = "version";
                         char * sourceComponentVersion = new char[1024];
-					    char * targetComponentVersion = new char[1024];
+                        char * targetComponentVersion = new char[1024];
                         strcpy(sourceComponentVersion, "");
                         strcpy(targetComponentVersion, "");
                         if (thisCoupler->sourceComponent->dllGetAttribute != NULL) {
@@ -1163,7 +1163,7 @@ void Dimr::runParallelUpdate (dimr_control_block * cb, double tStep) {
                             // log netcdf time variable
                             int timeIndexCounter = static_cast<int>(floor(*currentTime / tStep));
                             if (thisCoupler->logger != NULL) {
-                                string fileName = GetLoggerFilename(thisCoupler->logger);
+                                string fileName = thisCoupler->logger->GetLoggerFilename(thisDimr->dimrWorkingDirectory, thisDimr->dirSeparator); 
 
                                 int ncid = ncfiles[fileName];
                                 size_t index[] = { timeIndexCounter };
@@ -1206,7 +1206,7 @@ void Dimr::runParallelUpdate (dimr_control_block * cb, double tStep) {
 
 
                                 if (thisCoupler->logger != NULL) {
-                                    string fileName = GetLoggerFilename(thisCoupler->logger);
+                                    string fileName = thisCoupler->logger->GetLoggerFilename(thisDimr->dimrWorkingDirectory, thisDimr->dirSeparator);
 
                                     int ncid = ncfiles[fileName];
                                     size_t indices[] = { timeIndexCounter, 0 };
@@ -1455,7 +1455,7 @@ void Dimr::runParallelFinish (dimr_control_block * cb) {
 				else { //coupler
 					dimr_coupler * thisCoupler = cb->subBlocks[i].subBlocks[j].unit.coupler;
 					if (thisCoupler->logger != NULL) {
-                        string fileName = GetLoggerFilename(thisCoupler->logger);
+                        string fileName = thisCoupler->logger->GetLoggerFilename(thisDimr->dimrWorkingDirectory, thisDimr->dirSeparator);  
                         int ncid = ncfiles[fileName];
                         if (ncid >= 0) {
                             // todo: what if the computation crashes - can we read the file?
@@ -2164,19 +2164,4 @@ void Dimr::char_to_ints(char * line, int ** iarr, int * count) {
         }
         np++;
     }
-}
-
-// using std::string in entire dimr source code can simplify this function, 
-// but also others
-string Dimr::GetLoggerFilename(dimr_logger* logger) 
-{
-   auto loggerFileName = new char[MAXSTRING];
-   strcpy(loggerFileName, thisDimr->dimrWorkingDirectory);
-   strcat(loggerFileName, thisDimr->dirSeparator);
-   strcat(loggerFileName, logger->workingDir);
-   strcat(loggerFileName, thisDimr->dirSeparator);
-   strcat(loggerFileName, logger->outputFile);
-   string stringFileName{ loggerFileName };
-   delete[] loggerFileName;
-   return stringFileName;
 }
