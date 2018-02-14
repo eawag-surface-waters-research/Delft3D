@@ -170,7 +170,7 @@ if [ ${ready} -eq 0 ]; then
          #
          ## General.
          #
-         mpirun -np $NSLOTS ${SWANEXEC}
+         mpirun -np $NSLOTS ${SWANEXEC} >>swan_sh.log
 
          #
          ## Specific for MPICH2, mpiexec offers more possibilities than mpirun (for
@@ -207,7 +207,7 @@ if [ ${ready} -eq 0 ]; then
          #
          # SWAN run on 1 node.
          #
-         ${SWANEXEC}
+         ${SWANEXEC} >>swan_sh.log
          #
          # Move PRINT file to output file
          #
