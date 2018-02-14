@@ -2725,7 +2725,7 @@ module m_ec_filereader_read
          mask%mmax = mask%mmin + mask%mrange - 1 
          mask%nmax = mask%nmin + mask%nrange - 1 
          success = .true. 
-         call doclose(fmask)
+         close(fmask)
       end function ecParseARCinfoMask
       
        subroutine strip_comment(rec)
