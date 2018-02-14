@@ -293,8 +293,8 @@ struct dimr_control_block {
 
 class Dimr {
     public:
-        Dimr (void);
-        ~Dimr (void);
+        Dimr ();
+        ~Dimr ();
         void           scanConfigFile(void);
         void           connectLibs(void);
 
@@ -335,8 +335,13 @@ class Dimr {
         char *               redirectFile;   // Name of file to redirect stdout/stderr to
                                              // Default: Off when started via dimr-exe, On otherwise
 		
-        // String constants; initialized below, outside class definition
-
+        char *               dimrWorkingDirectory; // File path where dimr configuration file is
+#if defined(HAVE_CONFIG_H)
+        const char *dirSeparator = "/";
+#else
+        const char *dirSeparator = "\\";
+#endif                                            
+      // String constants; initialized below, outside class definition
     private:
         double         transferValue;
 
@@ -361,6 +366,9 @@ class Dimr {
         void           char_to_ints     (char *, int **, int *);
 
         map<string, int> ncfiles;
+
+        string GetLoggerFilename(dimr_logger* logger);
+
     };
 
 

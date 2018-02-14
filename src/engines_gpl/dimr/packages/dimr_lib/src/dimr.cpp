@@ -179,13 +179,11 @@ extern "C" {
             char *fileBasename = new char[MAXSTRING];
 #if defined(HAVE_CONFIG_H)
             fileBasename = strdup(basename(thisDimr->redirectFile));
-            const char *dirSeparator = "/";
 #else
             char * ext = new char[5];
             _splitpath(thisDimr->redirectFile, NULL, NULL, fileBasename, ext);
             StringCbCatA(fileBasename, MAXSTRING, ext);
             delete[] ext;
-            const char *dirSeparator = "\\";
 #endif
             if (strcmp(thisDimr->redirectFile, fileBasename) == 0)
             {
@@ -200,7 +198,7 @@ extern "C" {
                   throw Exception(true, Exception::ERR_OS, "ERROR obtaining the current working directory (init)");
                }
 
-               strcat(thisDimr->redirectFile, dirSeparator);
+               strcat(thisDimr->redirectFile, thisDimr->dirSeparator);
                strcat(thisDimr->redirectFile, filenameCopy);
                delete[] filenameCopy;
             }
@@ -249,6 +247,14 @@ extern "C" {
          thisDimr->connectLibs();
          // Init the timers before calling the dllInitialize routines!
          thisDimr->timersInit();
+
+         // Store dimr absolute path
+         thisDimr->dimrWorkingDirectory = new char[MAXSTRING];
+         if (!getcwd(thisDimr->dimrWorkingDirectory, MAXSTRING))
+         {
+            thisDimr->log->Write(FATAL, thisDimr->my_rank, "Cannot get the current working directory");
+         }
+
          //
          // Initialize the components in the first controlBlock only
          if (thisDimr->control->subBlocks[0].type == CT_PARALLEL) 
@@ -563,15 +569,6 @@ BMI_API void set_var(const char * key, const void * value) {
 
 
 } // extern "C"
-
-
-//------------------------------------------------------------------------------
-string GetLoggerFilename(dimr_logger* logger) {
-    string fileName = logger->workingDir;
-    fileName += '/';
-    fileName += logger->outputFile;
-    return fileName;
-}
 
 
 //------------------------------------------------------------------------------
@@ -1549,11 +1546,6 @@ void Dimr::scanUnits(XmlTree * rootXml) {
 //------------------------------------------------------------------------------
 void Dimr::scanComponent(XmlTree * xmlComponent, dimr_component * newComp) {
     // Needed for path handling
-#if defined(HAVE_CONFIG_H)
-    const char *dirSeparator = "/";
-#else
-    const char *dirSeparator = "\\";
-#endif
     char *curPath = new char[MAXSTRING];
     if (!getcwd(curPath, MAXSTRING))
         throw Exception (true, Exception::ERR_OS, "ERROR obtaining the current working directory (scan)");
@@ -2174,3 +2166,17 @@ void Dimr::char_to_ints(char * line, int ** iarr, int * count) {
     }
 }
 
+// using std::string in entire dimr source code can simplify this function, 
+// but also others
+string Dimr::GetLoggerFilename(dimr_logger* logger) 
+{
+   auto loggerFileName = new char[MAXSTRING];
+   strcpy(loggerFileName, thisDimr->dimrWorkingDirectory);
+   strcat(loggerFileName, thisDimr->dirSeparator);
+   strcat(loggerFileName, logger->workingDir);
+   strcat(loggerFileName, thisDimr->dirSeparator);
+   strcat(loggerFileName, logger->outputFile);
+   string stringFileName{ loggerFileName };
+   delete[] loggerFileName;
+   return stringFileName;
+}
