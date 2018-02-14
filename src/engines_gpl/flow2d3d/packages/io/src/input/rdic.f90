@@ -323,8 +323,10 @@ subroutine rdic(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                 lerror = .false.
                 wrkini = rdef
              else
-                if (        comparereal(rval(1),misval) /= 0 &
-                    & .and. comparereal(rval(2),misval) == 0  ) then
+                if (kmax == 1) then
+                   wrkini = rval(1)
+                elseif (        comparereal(rval(1),misval) /= 0 &
+                        & .and. comparereal(rval(2),misval) == 0  ) then
                    !
                    ! One value to be used for all layers
                    !
@@ -370,8 +372,10 @@ subroutine rdic(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                 lerror = .false.
                 wrkini = rdef
              else
-                if (        comparereal(rval(1),misval) /= 0 &
-                    & .and. comparereal(rval(2),misval) == 0  ) then
+                if (kmax == 1) then
+                   wrkini = rval(1)
+                elseif (        comparereal(rval(1),misval) /= 0 &
+                        & .and. comparereal(rval(2),misval) == 0  ) then
                    !
                    ! One value to be used for all layers
                    !
@@ -429,8 +433,10 @@ subroutine rdic(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                    error  = .true.
                    lerror = .false.
                 else
-                   if (        comparereal(rval(1),misval) /= 0 &
-                       & .and. comparereal(rval(2),misval) == 0  ) then
+                   if (kmax == 1) then
+                      wrkini = rval(1)
+                   elseif (        comparereal(rval(1),misval) /= 0 &
+                           & .and. comparereal(rval(2),misval) == 0  ) then
                       !
                       ! One value to be used for all layers
                       !
@@ -484,8 +490,10 @@ subroutine rdic(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                 error  = .true.
                 lerror = .false.
              else
-                if (        comparereal(rval(1),misval) /= 0 &
-                    & .and. comparereal(rval(2),misval) == 0  ) then
+                if (kmax == 1) then
+                   wrkini = rval(1)
+                elseif (        comparereal(rval(1),misval) /= 0 &
+                        & .and. comparereal(rval(2),misval) == 0  ) then
                    !
                    ! One value to be used for all layers
                    !
@@ -548,8 +556,10 @@ subroutine rdic(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                    if (lerror) then
                       lerror = .false.
                    else
-                      if (        comparereal(rval(1),misval) /= 0 &
-                          & .and. comparereal(rval(2),misval) == 0  ) then
+                      if (kmax == 1) then
+                         wrkini = rval(1)
+                      elseif (        comparereal(rval(1),misval) /= 0 &
+                              & .and. comparereal(rval(2),misval) == 0  ) then
                          !
                          ! One value to be used for all layers
                          !
@@ -603,8 +613,10 @@ subroutine rdic(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
              if (lerror) then
                 lerror = .false.
              else
-                if (        comparereal(rval(1),misval) /= 0 &
-                    & .and. comparereal(rval(2),misval) == 0  ) then
+                if (kmax == 1) then
+                   wrkini = rval(1)
+                elseif (        comparereal(rval(1),misval) /= 0 &
+                        & .and. comparereal(rval(2),misval) == 0  ) then
                    !
                    ! One value to be used for all layers
                    !
