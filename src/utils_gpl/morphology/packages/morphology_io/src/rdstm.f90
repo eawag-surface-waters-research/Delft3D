@@ -243,6 +243,7 @@ function clrstm(stm) result(istat)
 !
 !!--declarations----------------------------------------------------------------
     use morphology_data_module
+    use m_ini_noderel
     implicit none
 !
 ! Call variables
@@ -272,6 +273,10 @@ function clrstm(stm) result(istat)
     if (associated(stm%morlyr) .and. istat==0) then
         istat = clrmorlyr(stm%morlyr)
         deallocate(stm%morlyr, STAT = istat)
+    endif
+    if (associated(stm%nrd) .and. istat==0) then
+        call clr_noderel(istat, stm%nrd)
+        deallocate(stm%nrd, STAT = istat)
     endif
 end function clrstm
 

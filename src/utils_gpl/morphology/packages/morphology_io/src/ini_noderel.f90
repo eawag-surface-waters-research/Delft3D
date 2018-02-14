@@ -31,6 +31,7 @@ module m_ini_noderel
 private
 public ini_noderel
 public get_noderel_idx
+public clr_noderel
 
 contains
 
@@ -132,7 +133,7 @@ subroutine ini_noderel(nrd, sedpar, lsedtot)
          
          ! Get Data from File
          
-         ! First Get Name of Table File, so it is availabe when needed
+         ! First Get Name of Table File, so it is available when needed
          do inod = 1, size(nrd_ptr%child_nodes)
             block_ptr => nrd_ptr%child_nodes(inod)%node_ptr
             block_name = tree_get_name(block_ptr )
@@ -319,6 +320,34 @@ integer function get_noderel_idx(iNod, pFrac, nodeID, branInID, nodbrt)
    endif
    
 end function get_noderel_idx
+
+subroutine clr_noderel(istat, nrd)
+
+!
+!    Function - Clear NodeRelation Data 
+!
+
+   use morphology_data_module, only : t_nodereldata, t_nodefraction, t_noderelation ! CHARLEN, , sedpar_type
+   use properties
+    
+   implicit none
+
+   ! Global variables
+   
+   type(t_nodereldata)                    , intent(inout)   :: nrd
+   integer                                , intent(out)   :: istat
+   
+   ! Local variables
+
+   
+!
+!! executable statements -------------------------------------------------------
+!
+   
+   if (associated(nrd%nodefractions))            deallocate(nrd%nodefractions   , STAT = istat)    ! do we need to traverse further down the tree?
+   if (istat==0 .and. associated(nrd%flnrd))     deallocate(nrd%flnrd           , STAT = istat)   
+
+end subroutine clr_noderel   
 
 subroutine GetAndCheckFileNames(nrd, sedpar, lsedtot)
 
