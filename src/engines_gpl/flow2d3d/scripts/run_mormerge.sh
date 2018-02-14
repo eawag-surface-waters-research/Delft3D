@@ -104,7 +104,7 @@ bindir=$D3D_HOME/bin
 libdir=$D3D_HOME/libdir
 
     # Run
-export LD_LIBRARY_PATH=$bindir:$libdir:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=$libdir:$LD_LIBRARY_PATH
 
 
     echo "executing:"

@@ -568,6 +568,15 @@ function shared () {
 
 
 # =======================
+# === INSTALL_ESMF ======
+# =======================
+function gatherESMF () {
+    cp $srcroot/third_party_open/esmf/lnx64/bin/libesmf.so $prefix/lib
+}
+
+
+
+# =======================
 # === INSTALL_SHARED ====
 # =======================
 function gatherDependencies () {
@@ -602,6 +611,11 @@ dest_main=$2
 project=$3
 curdir=`pwd`
 
+scriptdirname=`readlink \-f \$0`
+scriptdir=`dirname $scriptdirname`
+srcroot=$scriptdir/../..
+
+
 if [ "$prefix" == '' ]; then
     echo "ERROR: No prefix directory specified as argument of oss-install.sh"
     exit 1
@@ -612,16 +626,19 @@ if [ "$dest_main" == '' ]; then
     exit 1
 fi
 
-if [ "$project" == '' ]; then
-    # Install all engines
-    project=install_all
-fi
+# if [ "$project" == '' ]; then
+#     # Install all engines
+#     project=install_all
+# fi
 
 echo Prefix            : $prefix
 echo Target directory  : $dest_main
 echo Project           : $project
 echo Current directory : $curdir
+echo Source root dir   : $srcroot
 
+
+gatherESMF
 
 gatherDependencies
 

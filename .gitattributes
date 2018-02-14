@@ -662,7 +662,6 @@ src/engines_gpl/dimr/scripts/flow2d3d/run_dimr.bat -text
 src/engines_gpl/dimr/scripts/fm/dimr_config.xml -text
 src/engines_gpl/dimr/scripts/fm/fm_parameters_for_waves.txt -text
 src/engines_gpl/dimr/scripts/fm/run_dimr.bat -text
-src/engines_gpl/dimr/scripts/fm/run_dimr.sh -text
 src/engines_gpl/dimr/scripts/generic/Makefile.am -text
 src/engines_gpl/dimr/scripts/generic/lnx64/Makefile.am -text
 src/engines_gpl/dimr/scripts/generic/lnx64/dimr_config_example.xml -text

@@ -103,7 +103,7 @@ libdir=$D3D_HOME/libdir
 
 
 
-export LD_LIBRARY_PATH=$bindir:$libdir:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=$libdir:$LD_LIBRARY_PATH
 export PATH="/opt/mpich2/bin:$bindir:${PATH}"
 export NHOSTS=$NPART
 

@@ -113,7 +113,7 @@ libdir=$D3D_HOME/lib
     #
 
     # Run
-export LD_LIBRARY_PATH=$bindir:$libdir:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=$libdir:$LD_LIBRARY_PATH
 
     # Create shared memory block
 esmContext=`$bindir/esm_create 2> /dev/null`

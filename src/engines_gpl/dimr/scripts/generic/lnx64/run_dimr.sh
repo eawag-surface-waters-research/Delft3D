@@ -150,7 +150,7 @@ libdir=$D3D_HOME/lib
     #
 
     # Run
-export LD_LIBRARY_PATH=$bindir:$libdir:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=$libdir:$LD_LIBRARY_PATH
 export PATH=$bindir:$PATH
 # export LD_PRELOAD=$libdir/libmkl_core.so
 
