@@ -112,6 +112,11 @@ Dimr::Dimr(void) {
     redirectFile                 = (char *) malloc((len+1)*sizeof(char));
     strncpy(redirectFile, (const char*)filename, len);
     redirectFile[len]            = '\0';
+#if defined(HAVE_CONFIG_H)
+    dirSeparator = "/";
+#else
+    dirSeparator = "\\";
+#endif                                            
 }
 
 

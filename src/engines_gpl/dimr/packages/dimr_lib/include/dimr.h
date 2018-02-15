@@ -240,13 +240,13 @@ struct dimr_logger
    // but also others
    string GetLoggerFilename(const char * dimrWorkingDirectory, const char * dirSeparator)
    {
-      auto loggerFileName = new char[MAXSTRING];
+      char* loggerFileName = new char[MAXSTRING];
       strcpy(loggerFileName, dimrWorkingDirectory);
       strcat(loggerFileName, dirSeparator);
       strcat(loggerFileName, workingDir);
       strcat(loggerFileName, dirSeparator);
       strcat(loggerFileName, outputFile);
-      string stringFileName{ loggerFileName };
+      string stringFileName( loggerFileName );
       delete[] loggerFileName;
       return stringFileName;
    }
@@ -351,11 +351,7 @@ class Dimr {
                                              // Default: Off when started via dimr-exe, On otherwise
 		
         char *               dimrWorkingDirectory; // File path where dimr configuration file is
-#if defined(HAVE_CONFIG_H)
-        const char *dirSeparator = "/";
-#else
-        const char *dirSeparator = "\\";
-#endif                                            
+        const char *         dirSeparator;
       // String constants; initialized below, outside class definition
     private:
         double         transferValue;
