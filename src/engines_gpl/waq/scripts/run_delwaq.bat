@@ -97,7 +97,7 @@ set sharedir=%D3D_HOME%\%ARCH%\share\bin
     rem Run delwaq 1
     rem
 set PATH=%waqdir%;%sharedir%
-echo executing: "%waqdir%\delwaq1.exe" "%argfile%" -p "%procfile%"  %switches% 
+echo executing: "%waqdir%\delwaq1.exe" "%argfile%" -p "%procfile%" %switches% 
 "%waqdir%\delwaq1.exe" "%argfile%" -p "%procfile%" %switches%
 
 if %ERRORLEVEL% neq 0 (
@@ -111,8 +111,8 @@ echo.
 
     rem Run delwaq 2
     rem
-echo executing: "%waqdir%\delwaq2.exe" "%argfile%"
-"%waqdir%\delwaq2.exe" "%argfile%"
+echo executing: "%waqdir%\delwaq2.exe" "%argfile%" %switches% 
+"%waqdir%\delwaq2.exe" "%argfile%" %switches% 
 
 if %ERRORLEVEL% neq 0 (
     echo.
