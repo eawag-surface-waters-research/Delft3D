@@ -62,7 +62,7 @@
       integer  ispe       ! index number of bloom algae species
       real     deltat     ! time step
       real     rdcnt      ! time tracker
-      real     effi(30)   ! efficiencies per type
+      real     effi(30)   ! efficiencies per species group
 
       ipnt        = ipoint
 
