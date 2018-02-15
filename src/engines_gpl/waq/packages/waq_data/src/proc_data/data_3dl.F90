@@ -33,6 +33,7 @@
       INTEGER, SAVE ::  ISEG_3DL                  ! actual segment for which bloom is called
       INTEGER, SAVE ::  ILAY_3DL                  ! actual layer for which bloom is called
       LOGICAL, SAVE ::  ACTIVE_3DL                ! switch indicating if 3DL functionality is active
+      LOGICAL, SAVE ::  ACTIVE_EFFT               ! switch indicating if efficincy tracer functionality is active
 
       REAL, ALLOCATABLE, SAVE :: RADSURF_3DL(:)   ! radiation at segment surface, is updated with actual extinction from top to bottom after BLOOM call
       REAL, ALLOCATABLE, SAVE :: EFFIC_3DL(:,:)   ! efficiency per algae group, is using total extinction

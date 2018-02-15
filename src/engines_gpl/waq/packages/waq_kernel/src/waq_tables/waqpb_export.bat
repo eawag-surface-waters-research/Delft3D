@@ -1,6 +1,6 @@
 @echo off
-set version=5.07
-set serial=2018002501
+set version=5.08
+set serial=2018020101
 set toolfound=false
 set toolx64=false
 

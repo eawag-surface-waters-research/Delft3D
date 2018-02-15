@@ -21,6 +21,7 @@ FMODULES += \
 #Sources
 libwaq_process_la_SOURCES = \
        bottom_set.f \
+       get_effi.f \
        adspo4.f \
        advtra.f \
        apatit.f \
@@ -57,6 +58,8 @@ libwaq_process_la_SOURCES = \
        dsptra.f \
        dsurf.f \
        ebuch4.f \
+       effave.f \
+       effblo.f \
        emersi.f \
        extina.f \
        extinc.f \

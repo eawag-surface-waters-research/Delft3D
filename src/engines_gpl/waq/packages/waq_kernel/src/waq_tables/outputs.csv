@@ -251,6 +251,68 @@ outppr,outpit,outpnm,outpdo,outpsx
 "vtrans    ","FRACTIME98",  99,"x",1
 "vtrans    ","FRACTIME99", 100,"x",1
 "vtrans    ","FRACTIM100", 101,"x",1
+"EffMBlo_P ","EffMAlg   ",   1," ",1
+"EffMBlo   ","EffMALG01 ",   1," ",1
+"EffMBlo   ","EffMALG02 ",   2," ",1
+"EffMBlo   ","EffMALG03 ",   3," ",1
+"EffMBlo   ","EffMALG04 ",   4," ",1
+"EffMBlo   ","EffMALG05 ",   5," ",1
+"EffMBlo   ","EffMALG06 ",   6," ",1
+"EffMBlo   ","EffMALG07 ",   7," ",1
+"EffMBlo   ","EffMALG08 ",   8," ",1
+"EffMBlo   ","EffMALG09 ",   9," ",1
+"EffMBlo   ","EffMALG10 ",  10," ",1
+"EffMBlo   ","EffMALG11 ",  11," ",1
+"EffMBlo   ","EffMALG12 ",  12," ",1
+"EffMBlo   ","EffMALG13 ",  13," ",1
+"EffMBlo   ","EffMALG14 ",  14," ",1
+"EffMBlo   ","EffMALG15 ",  15," ",1
+"EffMBlo   ","EffMALG16 ",  16," ",1
+"EffMBlo   ","EffMALG17 ",  17," ",1
+"EffMBlo   ","EffMALG18 ",  18," ",1
+"EffMBlo   ","EffMALG19 ",  19," ",1
+"EffMBlo   ","EffMALG20 ",  20," ",1
+"EffMBlo   ","EffMALG21 ",  21," ",1
+"EffMBlo   ","EffMALG22 ",  22," ",1
+"EffMBlo   ","EffMALG23 ",  23," ",1
+"EffMBlo   ","EffMALG24 ",  24," ",1
+"EffMBlo   ","EffMALG25 ",  25," ",1
+"EffMBlo   ","EffMALG26 ",  26," ",1
+"EffMBlo   ","EffMALG27 ",  27," ",1
+"EffMBlo   ","EffMALG28 ",  28," ",1
+"EffMBlo   ","EffMALG29 ",  29," ",1
+"EffMBlo   ","EffMALG30 ",  30," ",1
+"EffABlo_P ","EffiAlg   ",   1,"x",1
+"EffABlo   ","EffiALG01 ",   1,"x",1
+"EffABlo   ","EffiALG02 ",   2,"x",1
+"EffABlo   ","EffiALG03 ",   3,"x",1
+"EffABlo   ","EffiALG04 ",   4,"x",1
+"EffABlo   ","EffiALG05 ",   5,"x",1
+"EffABlo   ","EffiALG06 ",   6,"x",1
+"EffABlo   ","EffiALG07 ",   7,"x",1
+"EffABlo   ","EffiALG08 ",   8,"x",1
+"EffABlo   ","EffiALG09 ",   9,"x",1
+"EffABlo   ","EffiALG10 ",  10,"x",1
+"EffABlo   ","EffiALG11 ",  11,"x",1
+"EffABlo   ","EffiALG12 ",  12,"x",1
+"EffABlo   ","EffiALG13 ",  13,"x",1
+"EffABlo   ","EffiALG14 ",  14,"x",1
+"EffABlo   ","EffiALG15 ",  15,"x",1
+"EffABlo   ","EffiALG16 ",  16,"x",1
+"EffABlo   ","EffiALG17 ",  17,"x",1
+"EffABlo   ","EffiALG18 ",  18,"x",1
+"EffABlo   ","EffiALG19 ",  19,"x",1
+"EffABlo   ","EffiALG20 ",  20,"x",1
+"EffABlo   ","EffiALG21 ",  21,"x",1
+"EffABlo   ","EffiALG22 ",  22,"x",1
+"EffABlo   ","EffiALG23 ",  23,"x",1
+"EffABlo   ","EffiALG24 ",  24,"x",1
+"EffABlo   ","EffiALG25 ",  25,"x",1
+"EffABlo   ","EffiALG26 ",  26,"x",1
+"EffABlo   ","EffiALG27 ",  27,"x",1
+"EffABlo   ","EffiALG28 ",  28,"x",1
+"EffABlo   ","EffiALG29 ",  29,"x",1
+"EffABlo   ","EffiALG30 ",  30,"x",1
 "BLOOM_P   ","ReqDin    ",   1,"x",1
 "BLOOM_P   ","FracUptNH4",   2,"x",1
 "BLOOM_P   ","Phyt_bl   ",   3," ",1

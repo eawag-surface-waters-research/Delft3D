@@ -67,41 +67,74 @@
 
       real   (4), parameter :: pi = 3.141593
       integer(4) ibnd             !  loop variable boundaries
+      integer(4) isub             !  loop variable (transported) substances
       integer(4) itlag            !  time lag for this boundary
       integer(4) iflow            !  flow number of this boundary (positive if towards boundary)
       real   (4) aflow            !  flow accross boundary, positive is 'out'
       real   (4) at               !  Tatcher Harleman half cosine value
       integer(4) iseg             !  active volume number associated with the boundary
       integer(4) ibtime           !  time since last outflow at this boundary
+
+      logical, save :: init = .true.
+      logical, save :: bndmirror = .false.
+      logical       :: lfound
+      character     :: cdummy
+      integer       :: idummy
+      real          :: rdummy
+      integer       :: ierr2
+      
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwq17", ithandl )
+
+      if (init) then
+         call getcom ( '-bndmirror', 0, lfound, idummy, rdummy, cdummy, ierr2)
+         if (lfound) then
+            write(*,*) 'Using mirroring boundaries'
+            bndmirror = .true.
+         else
+            bndmirror = .false.
+         endif
+         init = .false.
+      endif
 
       do ibnd = 1, nobnd
          itlag = ibpnt( 1, ibnd )
          if ( itlag .eq. 0 ) then                     !  time lag not used for this boundary
             bound( :, ibnd ) = bset( :, ibnd )
-            cycle
-         endif
-         iflow = ibpnt( 2, ibnd )
-         if ( iflow .eq. 0 ) then                     !  no flow associated with this boundary
-            bound( :, ibnd ) = bset( :, ibnd )
-            cycle
-         endif
-         aflow = isign(1,iflow)*flow(iabs(iflow))
-         if ( aflow .ge. 0.0 ) then                   !  outflow
-            ibpnt( 4, ibnd ) = 0
-            iseg = ibpnt( 3, ibnd )
-            bsave( :, ibnd ) = conc( 1:nosys, iseg )
-            bound( :, ibnd ) = conc( 1:nosys, iseg )
-         else                                         !  inflow
-            ibtime = ibpnt( 4, ibnd ) + idt
-            ibpnt( 4, ibnd ) = ibtime
-            if ( ibtime  .ge. itlag ) then
+         else
+            iflow = ibpnt( 2, ibnd )
+            if ( iflow .eq. 0 ) then                     !  no flow associated with this boundary
                bound( :, ibnd ) = bset( :, ibnd )
-            else
-               at = 0.5 * cos( float(ibtime)/itlag * pi )
-               bound( :, ibnd) = (0.5-at)*bset( :, ibnd) + (0.5+at)*bsave( :, ibnd)
+               cycle
             endif
+            aflow = isign(1,iflow)*flow(iabs(iflow))
+            if ( aflow .ge. 0.0 ) then                   !  outflow
+               ibpnt( 4, ibnd ) = 0
+               iseg = ibpnt( 3, ibnd )
+               bsave( :, ibnd ) = conc( 1:nosys, iseg )
+               bound( :, ibnd ) = conc( 1:nosys, iseg )
+            else                                         !  inflow
+               ibtime = ibpnt( 4, ibnd ) + idt
+               ibpnt( 4, ibnd ) = ibtime
+               if ( ibtime  .ge. itlag ) then
+                  bound( :, ibnd ) = bset( :, ibnd )
+               else
+                  at = 0.5 * cos( float(ibtime)/itlag * pi )
+                  bound( :, ibnd) = (0.5-at)*bset( :, ibnd) + (0.5+at)*bsave( :, ibnd)
+               endif
+            endif
+         endif
+
+         ! 'mirror' boundary for substances with negative boundary concentrations, initially for efficiency tracers
+         if (bndmirror) then
+            do isub = 1, nosys
+               if (bset (isub, ibnd) .lt. 0.0) then
+                  ! when a negative boundary concentration is set, use current internal segment concentration
+                  ! as a boundary instead of what was determined above
+                  iseg = ibpnt( 3, ibnd )
+                  bound( isub, ibnd ) = max(0.0, conc( isub, iseg ))
+               endif
+            enddo
          endif
       enddo
 

@@ -69,10 +69,14 @@
 !
 !  get average efficiency over the layers
 !
-      IF ( IFIX_3DL(IT2(J,1)) .LT. 0 ) THEN
-         EFFI = EFFIC_3DL(ISKMAX,ISEG_3DL)
+      IF ( ACTIVE_EFFT ) THEN
+         EFFI = AVEFFI(ISKMAX)
       ELSE
-         CALL EFFI_3DL(EFFI,ISKMAX)
+         IF ( IFIX_3DL(IT2(J,1)) .LT. 0 ) THEN
+            EFFI = EFFIC_3DL(ISKMAX,ISEG_3DL)
+         ELSE
+            CALL EFFI_3DL(EFFI,ISKMAX)
+         ENDIF
       ENDIF
 !
 !  Check whether ROOT(2) (UKmax) is larger than EXTTOT.

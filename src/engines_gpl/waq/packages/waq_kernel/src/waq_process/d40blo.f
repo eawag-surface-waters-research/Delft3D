@@ -40,8 +40,10 @@
 !     Name     Type   Library
 !     ------   -----  ------------
 
+! 3DL
       USE      DATA_3DL
       USE      DATA_VTRANS
+! END3DL
 
       IMPLICIT NONE
 
@@ -122,7 +124,7 @@
       PARAMETER ( NTYP_M = 30 )
 !     NIPFIX      Nr of input items independent of BLOOM types, preceding BLOOM types input
 !     NIPVAR      Nr of input items for BLOOM types
-      PARAMETER ( NIPFIX = 32 , NIPVAR= 26 )
+      PARAMETER ( NIPFIX = 32 , NIPVAR= 27 )
       PARAMETER ( NOPFIX = 29 )
       PARAMETER (NUNUCOM = 8)
       PARAMETER (NOUTLIM = NUNUCOM + 2 + 2*NTYP_M)
@@ -140,7 +142,7 @@
      J         EXTTOT, DEAT4 , NUPTAK, FRAMMO, FBOD5 , EXTALG,
      J         CHLORO, TOTNUT(4)     ,                 ALGDM ,
      J         THRNH4, THRNO3, THRPO4, THRSI , RCRESP, TCRESP,
-     M         BLDEP , CL    , TIC   , CO2   ,         CO2LIM,
+     M         BLDEP , CL    , TIC   , CO2   , CO2LIM, EFFIN,
      j         PPMCO2, DETN  , DETP  , RDCNT , SDMIXN, VOLUME
       REAL  :: LIMFAC(6)
       INTEGER  IP1 , IP2 , IP3 , IP4 , IP5 , IP6 , IP7 , IP8 , IP9 ,
@@ -322,41 +324,48 @@
 !     Initialize BLOOM (Unit conversions and filling of A-matrix)
 
          CALL BLINIT (LPRINO,LDUMPO)
+!     Check on availability of efficiency tracer
+         IOFF = NIPFIX + 26*NTYP_M
+         IP = IPOINT(IOFF+1) + (ISEG-1)*INCREM(IOFF+1)
+         EFFIN = PMSA(IP+1)
+         ACTIVE_EFFT = EFFIN .GE. 0.0
 
-!     initialise 3DLight data
-
-         IF ( NOQ3 .GT. 0 ) THEN
-            CALL DHNOSEG(NOSEGW)
-            CALL DHNOLAY(NOLAY)
-            NOSEGL = NOSEGW/NOLAY
-            IF ( NOSEGL*NOLAY .NE. NOSEGW ) THEN
-               CALL GETMLU(LUNREP)
-               WRITE(LUNREP,*) ' WARNING unstructured 3D application'
-               WRITE(LUNREP,*) ' BLOOM 3D light approach not possible'
+         IF (ACTIVE_EFFT) THEN
+            ACTIVE_3DL = .FALSE.
+         ELSE
+            IF ( NOQ3 .GT. 0 ) THEN
+               CALL DHNOSEG(NOSEGW)
+               CALL DHNOLAY(NOLAY)
+               NOSEGL = NOSEGW/NOLAY
+               IF ( NOSEGL*NOLAY .NE. NOSEGW ) THEN
+                  CALL GETMLU(LUNREP)
+                  WRITE(LUNREP,*) ' WARNING unstructured 3D application'
+                  WRITE(LUNREP,*) ' BLOOM 3D light approach not possible'
+                  ACTIVE_3DL = .FALSE.
+                  NOLAY = 1
+               ELSE
+                  ACTIVE_3DL = .TRUE.
+                  IF ( .NOT. ACTIVE_3DL ) THEN ! to trick something in the debugger, (don't) use the variables here
+                     NOSEG_3DL  = 0                ! number of segments, copy of NOSEG
+                     NOSEGL_3DL = 0                ! number of segments per layer
+                     NOLAY_3DL  = 0                ! number of layers
+                     NGRO_3DL   = 0                ! number of BLOOM algae groups, copy of NGRO_A
+                     ISEG_3DL   = 0                ! actual segment for which bloom is called
+                     ILAY_3DL   = 0                ! actual layer for which bloom is called
+                     ACTIVE_3DL = .FALSE.          ! switch indicating if 3DL functionality is active
+                     EFFIC_3DL  = 0.0
+                  ENDIF
+               ENDIF
+            ELSE
+               NOSEGW     = NOSEG
+               NOSEGL     = NOSEG
                ACTIVE_3DL = .FALSE.
                NOLAY = 1
-            ELSE
-               ACTIVE_3DL = .TRUE.
-               IF ( .NOT. ACTIVE_3DL ) THEN ! to trick something in the debugger, (don't) use the variables here
-                  NOSEG_3DL  = 0                ! number of segments, copy of NOSEG
-                  NOSEGL_3DL = 0                ! number of segments per layer
-                  NOLAY_3DL  = 0                ! number of layers
-                  NGRO_3DL   = 0                ! number of BLOOM algae groups, copy of NGRO_A
-                  ISEG_3DL   = 0                ! actual segment for which bloom is called
-                  ILAY_3DL   = 0                ! actual layer for which bloom is called
-                  ACTIVE_3DL = .FALSE.          ! switch indicating if 3DL functionality is active
-                  EFFIC_3DL  = 0.0
-               ENDIF
             ENDIF
-         ELSE
-            NOSEGW     = NOSEG
-            NOSEGL     = NOSEG
-            ACTIVE_3DL = .FALSE.
-            NOLAY = 1
+            CALL INIT_3DL( NOSEG, NOSEGW, NOSEGL, NOLAY, NGRO_A, NTYP_A )
+            ALLOCATE(IFIX_3DL(NTYP_A))
+            IFIX_3DL=IFIX
          ENDIF
-         CALL INIT_3DL( NOSEG, NOSEGW, NOSEGL, NOLAY, NGRO_A, NTYP_A )
-         ALLOCATE(IFIX_3DL(NTYP_A))
-         IFIX_3DL=IFIX
 
 !     Return after initialization
 
@@ -401,12 +410,14 @@
       ENDDO
 !
       ISWVTR = NINT(PMSA(IPOINT(24)))
+! 3DL
       IF ( ACTIVE_3DL .AND. ISWVTR .EQ. 0 ) THEN
          CALL GETMLU(LUNREP)
          WRITE(LUNREP,*) ' WARNING vertical distribution not active'
          WRITE(LUNREP,*) ' BLOOM 3D light approach not possible'
          ACTIVE_3DL = .FALSE.
       ENDIF
+! END3DL
 
       TIMMUL = PMSA(IP1 )
       DELTAT = PMSA(IP19)
@@ -424,91 +435,96 @@
       ENDIF
 
 !     First segment loop set efficiencies
-
-      DO ISEG = 1 , NOSEG
-         CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
-!!       IF (IKMRK1.EQ.1) THEN
-         IF (BTEST(IKNMRK(ISEG),0)) THEN
-            CALL DHKMRK(2,IKNMRK(ISEG),IKMRK2)
-            ISEG_3DL = ISEG
-            ILAY_3DL = (ISEG-1)/NOSEGL_3DL+1
-            EXTTOT = PMSA(IP2 )
-            EXTALG = PMSA(IP3 )
-            TEMPER = PMSA(IP4 )
-            RADIAT = PMSA(IP5 ) * 60.48
-            IF ( IKMRK1 .EQ. 3 ) THEN
-               RADIAT = 0.0                    ! WAQ-G bodem geen groei
-               CALL BL_NO_AUTOLYSE(ORG_AVAILN) ! WAQ-G bodem geen autolyse
-            ENDIF
-            DEPTH  = PMSA(IP6 )
-            BLDEP  = PMSA(IP7 )
-            DAYLEN = PMSA(IP8 ) * 24.
-            DEPTHW = DEPTH
-            IF (BLDEP.GT.0.) DEPTHW = BLDEP
-            CL     = PMSA(IP22)
-
-            DO IALG = 1,NTYP_A
-
-!jvb           set SDMIX for all types, time/space dependent
-!              SDMIXALG
-               IOFF = NIPFIX + 20*NTYP_M + IALG
-               IP = IPOINT(IOFF) + (ISEG-1)*INCREM(IOFF)
-               SDMIXN = PMSA(IP)
-               CALL BLSSDM(IALG,SDMIXN)
-!jvb
-               IF (IFIX(IALG).LT.0) THEN
-!
-!                 No PP for fixed ulva in non bottom segment, unless sdmix is set positive for this segment
-!
-                  IF ( SDMIXN .LT. -1.E-10 ) THEN
-                     IF ((IKMRK2.EQ.1).OR.(IKMRK2.EQ.2)) THEN
+!     This loop is only needed for the 3DL Efficiencies, not in 2D or with the light tracer
+! 3DL
+      IF (.NOT.ACTIVE_EFFT) THEN
+         DO ISEG = 1 , NOSEG
+            CALL DHKMRK(1,IKNMRK(ISEG),IKMRK1)
+!!          IF (IKMRK1.EQ.1) THEN
+            IF (BTEST(IKNMRK(ISEG),0)) THEN
+               CALL DHKMRK(2,IKNMRK(ISEG),IKMRK2)
+               ISEG_3DL = ISEG
+               ILAY_3DL = (ISEG-1)/NOSEGL_3DL+1
+               EXTTOT = PMSA(IP2 )
+               EXTALG = PMSA(IP3 )
+               TEMPER = PMSA(IP4 )
+               RADIAT = PMSA(IP5 ) * 60.48
+               IF ( IKMRK1 .EQ. 3 ) THEN
+                  RADIAT = 0.0                    ! WAQ-G bodem geen groei
+                  CALL BL_NO_AUTOLYSE(ORG_AVAILN) ! WAQ-G bodem geen autolyse
+               ENDIF
+               DEPTH  = PMSA(IP6 )
+               BLDEP  = PMSA(IP7 )
+               DAYLEN = PMSA(IP8 ) * 24.
+               DEPTHW = DEPTH
+               IF (BLDEP.GT.0.) DEPTHW = BLDEP
+               CL     = PMSA(IP22)
+         
+               DO IALG = 1,NTYP_A
+         
+!jvb              set SDMIX for all types, time/space dependent
+!                 SDMIXALG
+                  IOFF = NIPFIX + 20*NTYP_M + IALG
+                  IP = IPOINT(IOFF) + (ISEG-1)*INCREM(IOFF)
+                  SDMIXN = PMSA(IP)
+                  CALL BLSSDM(IALG,SDMIXN)
+!jvb     
+                  IF (IFIX(IALG).LT.0) THEN
+!        
+!                    No PP for fixed ulva in non bottom segment, unless sdmix is set positive for this segment
+!        
+                     IF ( SDMIXN .LT. -1.E-10 ) THEN
+                        IF ((IKMRK2.EQ.1).OR.(IKMRK2.EQ.2)) THEN
+                           CALL BLSPPM(IALG,0.0)
+                        ENDIF
+                     ELSEIF ( SDMIXN .LT. 1.E-10 ) THEN
                         CALL BLSPPM(IALG,0.0)
                      ENDIF
-                  ELSEIF ( SDMIXN .LT. 1.E-10 ) THEN
-                     CALL BLSPPM(IALG,0.0)
                   ENDIF
+         
+                  IOFF = NIPFIX + NTYP_M*22
+                  IP = IPOINT(IOFF+IALG) + (ISEG-1)*INCREM(IOFF+IALG)
+                  MRTM2 (IALG) = PMSA(IP)
+                  IOFF = NIPFIX + NTYP_M*23
+                  IP = IPOINT(IOFF+IALG) + (ISEG-1)*INCREM(IOFF+IALG)
+                  MRTB1 (IALG) = PMSA(IP)
+                  IOFF = NIPFIX + NTYP_M*24
+                  IP = IPOINT(IOFF+IALG) + (ISEG-1)*INCREM(IOFF+IALG)
+                  MRTB2 (IALG) = PMSA(IP)
+               ENDDO
+               CALL BLCLST (MRTM1,MRTM2,MRTB1,MRTB2,NTYP_A,CL)
+         
+               CALL SET_EFFI( TEMPER, RADIAT, EXTTOT, DEPTHW, DAYLEN,
+     +                        ID    )
+         
+               IF ( IKMRK1 .EQ. 3 ) THEN
+                  CALL BL_RESTORE_AUTOLYSE(ORG_AVAILN) ! WAQ-G restore autolyse
                ENDIF
-
-               IOFF = NIPFIX + NTYP_M*22
-               IP = IPOINT(IOFF+IALG) + (ISEG-1)*INCREM(IOFF+IALG)
-               MRTM2 (IALG) = PMSA(IP)
-               IOFF = NIPFIX + NTYP_M*23
-               IP = IPOINT(IOFF+IALG) + (ISEG-1)*INCREM(IOFF+IALG)
-               MRTB1 (IALG) = PMSA(IP)
-               IOFF = NIPFIX + NTYP_M*24
-               IP = IPOINT(IOFF+IALG) + (ISEG-1)*INCREM(IOFF+IALG)
-               MRTB2 (IALG) = PMSA(IP)
-            ENDDO
-            CALL BLCLST (MRTM1,MRTM2,MRTB1,MRTB2,NTYP_A,CL)
-
-            CALL SET_EFFI( TEMPER, RADIAT, EXTTOT, DEPTHW, DAYLEN,
-     +                     ID    )
-
-            IF ( IKMRK1 .EQ. 3 ) THEN
-               CALL BL_RESTORE_AUTOLYSE(ORG_AVAILN) ! WAQ-G restore autolyse
+               CALL BLCLRS (MRTM1,NTYP_A)
+!nt2           reset PPMAX anyhow
+               DO IALG = 1,NTYP_A
+                  CALL BLSPPM(IALG,ALGTYP(8,IALG))
+               ENDDO
             ENDIF
-            CALL BLCLRS (MRTM1,NTYP_A)
-!nt2        reset PPMAX anyhow
-            DO IALG = 1,NTYP_A
-               CALL BLSPPM(IALG,ALGTYP(8,IALG))
-            ENDDO
-         ENDIF
-         IP2  = IP2  + INCREM( 2)
-         IP3  = IP3  + INCREM( 3)
-         IP4  = IP4  + INCREM( 4)
-         IP5  = IP5  + INCREM( 5)
-         IP6  = IP6  + INCREM( 6)
-         IP7  = IP7  + INCREM( 7)
-         IP8  = IP8  + INCREM( 8)
-         IP22 = IP22 + INCREM(22)
-         IP25 = IP25 + INCREM(25)
-         IP26 = IP26 + INCREM(26)
-         IP27 = IP27 + INCREM(27)
-         IP28 = IP28 + INCREM(28)
-         IP30 = IP30 + INCREM(30)
-         IP31 = IP31 + INCREM(31)
-         IP32 = IP32 + INCREM(32)
-      ENDDO
+            IP2  = IP2  + INCREM( 2)
+            IP3  = IP3  + INCREM( 3)
+            IP4  = IP4  + INCREM( 4)
+            IP5  = IP5  + INCREM( 5)
+            IP6  = IP6  + INCREM( 6)
+            IP7  = IP7  + INCREM( 7)
+            IP8  = IP8  + INCREM( 8)
+            IP22 = IP22 + INCREM(22)
+            IP25 = IP25 + INCREM(25)
+            IP26 = IP26 + INCREM(26)
+            IP27 = IP27 + INCREM(27)
+            IP28 = IP28 + INCREM(28)
+            IP30 = IP30 + INCREM(30)
+            IP31 = IP31 + INCREM(31)
+            IP32 = IP32 + INCREM(32)
+         ENDDO
+      ENDIF
+! END3DL
+               
       IP2  = IPOINT( 2)
       IP3  = IPOINT( 3)
       IP4  = IPOINT( 4)
@@ -524,7 +540,6 @@
       IP30 = IPOINT(30)
       IP31 = IPOINT(31)
       IP32 = IPOINT(32)
-
 !     Second segment loop, actual bloom call
 
       IFLUX = 0
@@ -533,8 +548,12 @@
       IF (IKMRK1.EQ.1 .OR. IKMRK1.EQ.3) THEN
       CALL DHKMRK(2,IKNMRK(ISEG),IKMRK2)
 !
-      ISEG_3DL = ISEG
-      ILAY_3DL = (ISEG-1)/NOSEGL_3DL+1
+! 3DL
+      IF (.NOT.ACTIVE_EFFT) THEN
+         ISEG_3DL = ISEG
+         ILAY_3DL = (ISEG-1)/NOSEGL_3DL+1
+      ENDIF
+! END3DL
 !
       TIMMUL = PMSA(IP1 )
       EXTTOT = PMSA(IP2 )
@@ -641,6 +660,13 @@
           ENDIF
 
    20 CONTINUE
+
+      IOFF = NIPFIX + 26*NTYP_M
+      DO IGRO = 1, NGRO_A
+         IP = IPOINT(IOFF + IGRO) + (ISEG-1)*INCREM(IOFF + IGRO)
+         EFFIN = PMSA(IP)
+         CALL BLSAEF(IGRO,EFFIN)
+      ENDDO
 
       IFAUTO = IFLUX + 1
       IFDETR = IFLUX + 5

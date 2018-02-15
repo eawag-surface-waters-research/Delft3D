@@ -35,6 +35,53 @@ stocfl,stocsu,stocsc
 "dDumphsimp","ALKA      ",   0.00000
 "dDumphsimp","TIC       ",   0.00000
 "dDumspcarb","TIC       ",   0.00000
+"dEffTAlg  ","EffTFDIAT ",   1.00000
+"dEffTAlg  ","EffTFFLAE ",   1.00000
+"dEffTAlg  ","EffTGREEN ",   1.00000
+"dEffTAlg  ","EffTAPHAN ",   1.00000
+"dEffTAlg  ","EffTAPHNF ",   1.00000
+"dEffTAlg  ","EffTMICRO ",   1.00000
+"dEffTAlg  ","EffTOSCIL ",   1.00000
+"dEffTAlg  ","EffTBLUEG ",   1.00000
+"dEffTAlg  ","EffTMDIAT ",   1.00000
+"dEffTAlg  ","EffTMFLAE ",   1.00000
+"dEffTAlg  ","EffTDINOF ",   1.00000
+"dEffTAlg  ","EffTDINOM ",   1.00000
+"dEffTAlg  ","EffTPHAEO ",   1.00000
+"dEffTAlg  ","EffTULVAS ",   1.00000
+"dEffTAlg  ","EffTULVAF ",   1.00000
+"dEffTAlg  ","EffTNODUL ",   1.00000
+"dEffTAlg  ","EffTANABA ",   1.00000
+"dEffTALG01","EffTALG01 ",   1.00000
+"dEffTALG02","EffTALG02 ",   1.00000
+"dEffTALG03","EffTALG03 ",   1.00000
+"dEffTALG04","EffTALG04 ",   1.00000
+"dEffTALG05","EffTALG05 ",   1.00000
+"dEffTALG06","EffTALG06 ",   1.00000
+"dEffTALG07","EffTALG07 ",   1.00000
+"dEffTALG08","EffTALG08 ",   1.00000
+"dEffTALG09","EffTALG09 ",   1.00000
+"dEffTALG10","EffTALG10 ",   1.00000
+"dEffTALG11","EffTALG11 ",   1.00000
+"dEffTALG12","EffTALG12 ",   1.00000
+"dEffTALG13","EffTALG13 ",   1.00000
+"dEffTALG14","EffTALG14 ",   1.00000
+"dEffTALG15","EffTALG15 ",   1.00000
+"dEffTALG16","EffTALG16 ",   1.00000
+"dEffTALG17","EffTALG17 ",   1.00000
+"dEffTALG18","EffTALG18 ",   1.00000
+"dEffTALG19","EffTALG19 ",   1.00000
+"dEffTALG20","EffTALG20 ",   1.00000
+"dEffTALG21","EffTALG21 ",   1.00000
+"dEffTALG22","EffTALG22 ",   1.00000
+"dEffTALG23","EffTALG23 ",   1.00000
+"dEffTALG24","EffTALG24 ",   1.00000
+"dEffTALG25","EffTALG25 ",   1.00000
+"dEffTALG26","EffTALG26 ",   1.00000
+"dEffTALG27","EffTALG27 ",   1.00000
+"dEffTALG28","EffTALG28 ",   1.00000
+"dEffTALG29","EffTALG29 ",   1.00000
+"dEffTALG30","EffTALG30 ",   1.00000
 "dCaut     ","OXY       ",  -2.67000
 "dCaut     ","TIC       ",   1.00000
 "dCaut     ","H2O       ",   1.50000

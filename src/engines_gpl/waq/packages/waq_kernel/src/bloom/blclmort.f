@@ -154,3 +154,27 @@
 !
       RETURN
       END
+      SUBROUTINE BLSAEF (IGROUP  , EFFIN )
+!
+!     Set AVEFFI in BLOOM array for specific alg
+!
+!     Arguments
+!
+!     Name    Type  Length   I/O  Description
+!
+!     IALG    1     1        I    index alg involved
+!     EFFIN   R     1        I    EFFI value to be set
+!
+      INTEGER IGROUP
+      REAL    EFFIN
+!
+      include 'blmdim.inc'
+      include 'size.inc'
+      include 'phyt2.inc'
+!
+      DO ITYPE = IT2(IGROUP,1),IT2(IGROUP,2)
+         AVEFFI(ITYPE) = EFFIN
+      END DO
+!
+      RETURN
+      END

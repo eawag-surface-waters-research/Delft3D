@@ -188,7 +188,7 @@
 ! don't rerun, only write output. But do not do this for 3DL approach the
 ! efficiency can be obtained in other layers with light.
 !
-      IF (CSOL .LT. SOLMIN .AND. .NOT. ACTIVE_3DL) THEN
+      IF (CSOL .LT. SOLMIN .AND. .NOT. ACTIVE_3DL .AND. .NOT. ACTIVE_EFFT) THEN
          IRERUN = 0
          ERRIND = ' '
          NI = 0
@@ -228,7 +228,13 @@
       ISKMAX  = L1
       DO 160 K=L1,L2
       IF ( .NOT. ACTIVE_3DL ) THEN
-         CALL CONSTR(SURF(K),DEPEUF,EMIN(K),ROOT,J)
+         IF ( .NOT. ACTIVE_EFFT ) THEN
+            CALL CONSTR(SURF(K),DEPEUF,EMIN(K),ROOT,J)
+         ELSE
+            EFFI = AVEFFI(K)
+            ROOT(1) = 0.0
+            ROOT(2) = EFFI*EXTTOT/EMIN(K)
+         ENDIF
       ELSE
          IF ( IFIX_3DL(K) .LT. 0 ) THEN
             EFFI = EFFIC_3DL(K,ISEG_3DL)

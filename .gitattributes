@@ -2415,11 +2415,14 @@ src/engines_gpl/waq/packages/waq_kernel/src/waq_process/dredge.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/dsptra.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/dsurf.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/ebuch4.f -text
+src/engines_gpl/waq/packages/waq_kernel/src/waq_process/effave.f -text
+src/engines_gpl/waq/packages/waq_kernel/src/waq_process/effblo.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/emersi.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/extina.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/extinc.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/floceq.f90 -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/flxfrc.f90 -text
+src/engines_gpl/waq/packages/waq_kernel/src/waq_process/get_effi.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/grzmac.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/harves.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/hdisp.f -text
