@@ -486,7 +486,7 @@ if [ $noMake -eq 1 ]; then
 fi
 
 log='logs/make.log'
-command="make ds-install &> $log"
+command="FC=mpif90 make ds-install &> $log"
 
 log "Running $command"
 eval $command
@@ -500,7 +500,7 @@ fi
 # Build D-Flow FM, only when not in singlePrecision mode
 if [ $useSp -eq 0 ]; then
     log='logs/make_dflowfm.log'
-    command="make ds-install -C engines_gpl/dflowfm &> $log"
+    command="FC=mpif90 make ds-install -C engines_gpl/dflowfm &> $log"
 
     log "Running $command"
     eval $command
