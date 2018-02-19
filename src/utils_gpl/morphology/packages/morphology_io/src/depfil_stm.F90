@@ -1,3 +1,4 @@
+#include "global_config.inc"
 module m_depfil_stm
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
@@ -46,10 +47,12 @@ subroutine depfil_stm(lundia    ,error     ,fildep    ,fmttmp    , &
                     & errmsg    )
    use precision
    use grid_dimens_module
-   use m_ec_module ! NOTE: AvD: ds trunk cannot use this yet, as m_ec_module is still in branches/research/Deltares/20130912_12819_EC-module/
+! MOR_USE_ECMODULE macro used from global_config.h to enable/disable EC-module for space-varying input in sed/mor.
+#if MOR_USE_ECMODULE
+   use m_ec_module
    use m_ec_filereader_read, only: ecSampleReadAll
    use m_ec_basic_interpolation, only: triinterp2
-   use system_utils
+#endif
    ! 
    implicit none 
    ! 
@@ -101,16 +104,13 @@ subroutine depfil_stm(lundia    ,error     ,fildep    ,fmttmp    , &
    file = ' '
    ext  = ' ' 
    call split_filename(fildep, path, file, ext)
+#if MOR_USE_ECMODULE
    if (ext(1:3) == '.xy') then
       ! Assumption: if extension starts with 'xy' (to cover both xyz and xyb), then it is assumed to be an xyz file
       !
-      ! This part only works if fp==hp !!
-      !
-      ! some call to timespaceinitialfield in EC module
       ! TODO: AvD: test code below now works via EC module, but still needs some inconvenient additional 'dummy' arguments. Consider further refactoring.
       open (newunit=minp0, file = fildep, form = fmttmp, status = 'old') 
       success = ecSampleReadAll(minp0, fildep, xs, ys, zs, ns, kx)
-
       jdla = 1
       jsferic = 0
       jasfer3D = 0
@@ -141,12 +141,15 @@ subroutine depfil_stm(lundia    ,error     ,fildep    ,fmttmp    , &
       close(minp0)
       ! success = timespaceinitialfield(dims%xz, dims%yz, array(ifld, :, :), dims%nmmax, fildep, 7, 5,  'O', transformcoef, 1) ! zie meteo module
    else
+#endif
       ! No xyz file: depfile
       !
       call depfil(lundia    ,error     ,fildep    ,fmttmp    , &
                 & array     ,nfld      ,ifld      ,dims      )
       if (present(errmsg)) errmsg = 'Error reading QUICKIN file '//trim(fildep)
+#if MOR_USE_ECMODULE
    endif
+#endif
 end subroutine depfil_stm
 !
 !
@@ -157,11 +160,12 @@ subroutine depfil_stm_double(lundia    ,error     ,fildep    ,fmttmp    , &
                            & errmsg    )
    use precision 
    use grid_dimens_module
-   use m_ec_module ! NOTE: AvD: ds trunk cannot use this yet, as m_ec_module is still in branches/research/Deltares/20130912_12819_EC-module/
+#if MOR_USE_ECMODULE
+   use m_ec_module
    use m_ec_basic_interpolation, only: triinterp2
    use m_ec_filereader_read, only: ecSampleReadAll
+#endif
    use system_utils
-   !    use timespace ! TODO: AvD: replace by EC location and remove current temp extra include path
    ! 
    implicit none 
    ! 
@@ -211,10 +215,10 @@ subroutine depfil_stm_double(lundia    ,error     ,fildep    ,fmttmp    , &
    file = ' '
    ext  = ' ' 
    call split_filename(fildep, path, file, ext)
+#if MOR_USE_ECMODULE
    if (ext(1:3) == '.xy') then
       ! Assumption: if extension starts with 'xy' (to cover both xyz and xyb), then it is assumed to be an xyz file
       !
-      ! some call to timespaceinitialfield in EC module
       ! TODO: AvD: test code below now works via EC module, but still needs some inconvenient additional 'dummy' arguments. Consider further refactoring.
       open (newunit=minp0, file = fildep, form = fmttmp, status = 'old') 
       success = ecSampleReadAll(minp0, fildep, xs, ys, zs, ns, kx)
@@ -250,10 +254,13 @@ subroutine depfil_stm_double(lundia    ,error     ,fildep    ,fmttmp    , &
 
       ! success = timespaceinitialfield(dims%xz, dims%yz, array(ifld, :, :), dims%nmmax, fildep, 7, 5,  'O', transformcoef, 1) ! zie meteo module
    else
+#endif
       call depfil_double(lundia    ,error     ,fildep    ,fmttmp    , &
                        & array     ,nfld      ,ifld      ,dims      )
       if (present(errmsg)) errmsg = 'Error reading QUICKIN file '//trim(fildep)
+#if MOR_USE_ECMODULE
    endif
+#endif
 end subroutine depfil_stm_double
 
                            

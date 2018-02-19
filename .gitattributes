@@ -2858,6 +2858,7 @@ src/engines_gpl/wave/packages/wave/wave_exe.vfproj -text
 src/engines_gpl/wave/scripts/Makefile.am -text
 src/engines_gpl/wave/scripts/run_dwaves.bat -text
 src/engines_gpl/wave/scripts/run_dwaves.sh -text
+src/global_config.inc -text
 src/install.cmd -text
 src/install.sh -text
 src/logs/VS2010_Intel12_Release_Win32_Output.txt -text
