@@ -53,6 +53,7 @@ subroutine depfil_stm(lundia    ,error     ,fildep    ,fmttmp    , &
    use m_ec_filereader_read, only: ecSampleReadAll
    use m_ec_basic_interpolation, only: triinterp2
 #endif
+   use system_utils
    ! 
    implicit none 
    ! 
