@@ -60,18 +60,22 @@
       real                                   :: flow                  ! flow for one wasteload
       integer                                :: iwaste                ! wasteload index
       integer                                :: ibrk                  ! breakpoint index
-      character(len=20)                      :: ctime                 ! time in 2007/01/01-00:00:00 format
+      character(len=19)                      :: ctime                 ! time in 2007/01/01-00:00:00 format
       character(len=20)                      :: c20_name              ! time in 2007/01/01-00:00:00 format
       character(len=100)                     :: c100_name             ! time in 2007/01/01-00:00:00 format
       real                                   :: prev_flow             ! previous flow
       character(len=1), parameter            :: quote = ''''
 
-      integer                                :: itime
-                                             
-      real*8                                 :: time
-      integer                                :: iyear, imonth, iday
-      integer                                :: ihour, imin  , isec
-      integer                                :: ierr
+      real*8            :: time
+      real*8            :: time_ref
+      integer           :: iyear
+      integer           :: imonth
+      integer           :: iday
+      integer           :: ihour
+      integer           :: imin
+      real*8            :: rsec
+      integer           :: isec
+      integer           :: success
 
       call getmlu(lunrep)
 
@@ -161,13 +165,14 @@
                endif
 
                if ( abs(flow-prev_flow) .gt. 1.e-6 .or. ibrk .eq. nobrk ) then
-                  time = hyd%time_ref + hyd%wasteload_data%times(ibrk)/86400d0 + 0.1/86400d0
-                  call gregor (time, iyear , imonth, iday  , ihour , imin , isec  )
-                  ctime = datetime_to_string(iyear, imonth, iday, ihour, imin, isec, ierr)
+                  time = hyd%time_ref + hyd%wasteload_data%times(ibrk)/86400d0 + 0.1/86400d0 - 2400000.5d0 ! modified julian day
+                  success = mjd2date(time,iyear,imonth,iday,ihour,imin,rsec)
+                  isec = nint(rsec)
+                  write(ctime,2000) iyear ,imonth, iday  ,ihour ,imin ,isec
                   if ( flow .lt. 0.0 ) then
-                     write(lunrfl,'(a,'' '',e14.6,a)') trim(ctime),flow,' 0.0'
+                     write(lunrfl,'(a,'' '',e14.6,a)') ctime,flow,' 0.0'
                   else
-                     write(lunrfl,'(a,'' '',e14.6,a)') trim(ctime),flow,' 1.0'
+                     write(lunrfl,'(a,'' '',e14.6,a)') ctime,flow,' 1.0'
                   endif
                   prev_flow = flow
                endif
@@ -180,4 +185,5 @@
       hyd%file_rfl%status = FILE_STAT_UNOPENED
 
       return
+ 2000 format (i4.4,'/',i2.2,'/',i2.2,'-',i2.2,':',i2.2,':',i2.2)
       end
