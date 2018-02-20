@@ -30715,6 +30715,7 @@ end subroutine setbobs_fixedweirs
  use m_general_structure
  use m_flowwave, only: fwx
  use m_weir
+ use m_orifice
  use m_sferic
 
  implicit none
@@ -30905,11 +30906,17 @@ end subroutine setbobs_fixedweirs
           k1 = ln(1,L)
           k2 = ln(2,L)
        
-          if (network%sts%struct(istru)%ST_TYPE == ST_WEIR) then
+         select case(network%sts%struct(istru)%ST_TYPE) 
+             case (ST_WEIR)
                 call computeweir(pstru%weir, fu(L), ru(L), au(L), width, kfu, s1(k1), s1(k2), &
                                  q1(L), q1(L), u1(L), u0(L), dx(L), dts)
-             continue
-              !elseif (network%sts%struct(istru)%ST_TYPE == ST_GENERAL_ST) then
+             case (ST_ORIFICE)
+                call ComputeOrifice(pstru%orifice, fu(L), ru(L), au(L), width, kfu, s1(k1), s1(k2), q1(L), q1(L),   &
+                 & u1(L), u0(L), dx(L), dts)
+             case default
+                write(msgbuf,'(''Unsupported structure type'', i5)') network%sts%struct(istru)%ST_TYPE
+                call err_flush()
+          end select
              !   firstiter = .true.
              !   jarea = .false.
              !   as1 = wu(Lf)*(s1(k1)-bob(1,Lf))
@@ -30918,9 +30925,6 @@ end subroutine setbobs_fixedweirs
              !   call computeGeneralStructure(pstru%generalst, fu(Lf), ru(Lf), s_on_crest, &
              !          au(Lf), as1, as2, width, kfu, s1(k1), s1(k2), s1(k1), s1(k2), q1(Lf), & !s00(k1), s00(k2), q1(Lf), & ! TODO: find proper s00 or s2 iterand
              !          q1(Lf), qtotal, u1(Lf), u0(Lf), dx(Lf), dts, firstiter, jarea, flowdir = (L>0))
-          else
-                ! NOT supported error
-          endif
        endif 
     enddo
 
