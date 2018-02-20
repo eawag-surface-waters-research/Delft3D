@@ -244,12 +244,10 @@
                     write ( lunut , 2594 ) trim(dimname)
                     goto 800
                 endif
-
-
             endif
-            nolayid    = dimids(2)
+
             noseglmesh = dimsizes(noseglid)
-            nolaymesh  = dimsizes(nolayid)
+            nolaymesh  = nolay
          endif
 
          ! Update the timestamp
