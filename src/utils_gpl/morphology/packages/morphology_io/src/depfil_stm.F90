@@ -71,6 +71,7 @@ subroutine depfil_stm(lundia    ,error     ,fildep    ,fmttmp    , &
    ! 
    ! Local variables 
    ! 
+   real(fp), allocatable :: array1d(:)
    real(hp), allocatable :: xs(:)
    real(hp), allocatable :: ys(:)
    real(hp), allocatable :: zs(:,:)
@@ -81,6 +82,7 @@ subroutine depfil_stm(lundia    ,error     ,fildep    ,fmttmp    , &
    integer               :: minp0
    integer               :: jdla
    integer               :: ibnd
+   integer               :: ierror
    integer               :: nm
    integer               :: nm2
    logical               :: success
@@ -118,10 +120,13 @@ subroutine depfil_stm(lundia    ,error     ,fildep    ,fmttmp    , &
       jins = 1
       NPL = 0 ! Dummies, since STM is not aware of these yet.
 
-      array(ifld, :, :) = dmiss
+      allocate (array1d(dims%nmmax), stat=ierror)
+      array1d = dmiss
 
-      CALL triinterp2(dims%xz, dims%yz, array(ifld, :, :), dims%nmmax, jdla, & 
+      CALL triinterp2(dims%xz, dims%yz, array1d, dims%nmmax, jdla, & 
                       XS, YS, ZS(1,:), NS, dmiss, jsferic, jins, jasfer3D, NPL, 0, 0, XPL, YPL, ZPL, transformcoef)
+      array(ifld,:,1) = array1d
+      deallocate(array1d, stat=ierror)
       
       ! mirror boundary cells if undefined if equal to dmiss
       do ibnd = 1, size(dims%nmbnd,1)  ! loop over boundary flow links (TO DO: what about 3D?)
@@ -184,6 +189,7 @@ subroutine depfil_stm_double(lundia    ,error     ,fildep    ,fmttmp    , &
    ! 
    ! Local variables 
    ! 
+   real(hp), allocatable :: array1d(:)
    real(hp), allocatable :: xs(:)
    real(hp), allocatable :: ys(:)
    real(hp), allocatable :: zs(:,:)
@@ -194,6 +200,7 @@ subroutine depfil_stm_double(lundia    ,error     ,fildep    ,fmttmp    , &
    integer  :: minp0
    integer  :: jdla
    integer  :: ibnd
+   integer  :: ierror
    integer  :: nm
    integer  :: nm2
    logical  :: success
@@ -230,11 +237,13 @@ subroutine depfil_stm_double(lundia    ,error     ,fildep    ,fmttmp    , &
       jins = 1
       NPL = 0 ! Dummies, since STM is not aware of these yet.
 
-      array(ifld, :, :) = dmiss
+      allocate (array1d(dims%nmmax), stat=ierror)
+      array1d = dmiss
 
-      CALL triinterp2(dims%xz, dims%yz, array(ifld, :, :), dims%nmmax, jdla, & 
+      CALL triinterp2(dims%xz, dims%yz, array1d, dims%nmmax, jdla, & 
                       XS, YS, ZS(1,:), NS, dmiss, jsferic, jins, jasfer3D, NPL, 0, 0, XPL, YPL, ZPL, transformcoef)
-
+      array(ifld,:,1) = array1d
+      deallocate(array1d, stat=ierror)
       ! mirror boundary cells if undefined if equal to dmiss
       do ibnd = 1, size(dims%nmbnd,1)  ! loop over boundary flow links (TO DO: what about 3D?)
          nm  = dims%nmbnd(ibnd,1)      ! point outside net

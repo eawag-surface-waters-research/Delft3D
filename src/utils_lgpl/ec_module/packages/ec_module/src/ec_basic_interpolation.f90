@@ -77,16 +77,24 @@
    !---------------------------------------------------------------------------!
 
    module m_ec_basic_interpolation
+   
+   use precision
+
+   interface triinterp2
+      module procedure triinterp2_dbldbl
+      module procedure triinterp2_realdbl
+      module procedure triinterp2_realreal
+   end interface triinterp2
 
    private
    
-   public   ::  triinterp2
    public   ::  bilin_interp
    public   ::  TRIINTfast
    public   ::  AVERAGING2
    public   ::  dlaun
    public   ::  comp_x_dxdxi
    public   ::  bilin_interp_loc
+   public   ::  triinterp2
 
    contains
 
@@ -94,24 +102,44 @@
    !   Triinterp
    !---------------------------------------------------------------------------!
 
-   subroutine triinterp2(XZ, YZ, BL, NDX, JDLA,&
+   subroutine triinterp2_dbldbl(XZ, YZ, BL, NDX, JDLA,&
                         XS, YS, ZS, NS, dmiss, jsferic, jins, jasfer3D, NPL, MXSAM, MYSAM, XPL, YPL, ZPL, transformcoef)
    implicit none
+   !
+   ! Parameters
+   real(hp), intent(in)            :: XZ(:)
+   real(hp), intent(in)            :: YZ(:)
+   real(hp), intent(inout)         :: BL(NDX)
+   integer , intent(in)            :: NDX
+   integer , intent(in)            :: JDLA
+   integer , intent(in)            :: NS
+   integer , intent(in)            :: jins
+   integer , intent(in)            :: jasfer3D
+   integer , intent(in)            :: NPL
+   integer , intent(in)            :: MXSAM
+   integer , intent(in)            :: MYSAM
+   real(hp), intent(in)            :: XS(:)
+   real(hp), intent(in)            :: YS(:)
+   real(hp), intent(in)            :: ZS(:)
+   real(hp), intent(in)            :: dmiss
+   integer                         :: jakdtree
+   integer                         :: jsferic
    
-   double precision, intent(in)            :: XZ(NDX), YZ(NDX)
-   double precision, intent(inout)         :: BL(NDX)
-   integer, intent(in)                     :: NDX, JDLA, NS, jins, jasfer3D, NPL, MXSAM, MYSAM
-   double precision, intent(in)            :: XS(:), YS(:), ZS(:), dmiss
-   integer                                 :: jakdtree, jsferic
-   
-   double precision, intent(in)            :: XPL(:), YPL(:), ZPL(:), transformcoef(:)
-   
-   integer :: i, in_unit, out_unit 
-   
-!   jsferic = 0
+   real(hp), intent(in)            :: XPL(:)
+   real(hp), intent(in)            :: YPL(:)
+   real(hp), intent(in)            :: ZPL(:)
+   real(hp), intent(in)            :: transformcoef(:)
+   !
+   ! Locals
+   integer :: i
+   integer :: in_unit
+   integer :: out_unit
+   !
+   ! Body
+   !   jsferic = 0
   
-!   ! assign 'missing value' to all elements of dRes
-!   BL = -999d0
+   !   ! assign 'missing value' to all elements of dRes
+   !   BL = -999d0
 
    if (ndx < 1) return
 
@@ -139,7 +167,105 @@
       !
       !close (out_unit)
 
-   end subroutine triinterp2
+   end subroutine triinterp2_dbldbl
+
+
+
+   subroutine triinterp2_realdbl(XZ, YZ, BL, NDX, JDLA,&
+                        XS, YS, ZS, NS, dmiss, jsferic, jins, jasfer3D, NPL, MXSAM, MYSAM, XPL, YPL, ZPL, transformcoef)
+   implicit none
+   !
+   ! parameters
+   real(sp), intent(in)            :: XZ(NDX)
+   real(sp), intent(in)            :: YZ(NDX)
+   real(hp), intent(inout)         :: BL(NDX)
+   integer , intent(in)            :: NDX
+   integer , intent(in)            :: JDLA
+   integer , intent(in)            :: NS
+   integer , intent(in)            :: jins
+   integer , intent(in)            :: jasfer3D
+   integer , intent(in)            :: NPL
+   integer , intent(in)            :: MXSAM
+   integer , intent(in)            :: MYSAM
+   real(hp), intent(in)            :: XS(:)
+   real(hp), intent(in)            :: YS(:)
+   real(hp), intent(in)            :: ZS(:)
+   real(hp), intent(in)            :: dmiss
+   integer                         :: jakdtree
+   integer                         :: jsferic
+   real(hp), intent(in)            :: XPL(:)
+   real(hp), intent(in)            :: YPL(:)
+   real(hp), intent(in)            :: ZPL(:)
+   real(hp), intent(in)            :: transformcoef(:)
+   !
+   ! locals
+   integer                              :: ierror
+   real(hp), dimension (:), allocatable :: xz_dbl
+   real(hp), dimension (:), allocatable :: yz_dbl
+   !
+   ! body
+   allocate (xz_dbl(NDX), stat=ierror)
+   allocate (yz_dbl(NDX), stat=ierror)
+
+   xz_dbl = dble(xz)
+   yz_dbl = dble(yz)
+   call triinterp2_dbldbl(xz_dbl, yz_dbl, bl, NDX, JDLA,&
+                        XS, YS, ZS, NS, dmiss, jsferic, jins, jasfer3D, NPL, MXSAM, MYSAM, XPL, YPL, ZPL, transformcoef)
+   deallocate (xz_dbl, stat=ierror)
+   deallocate (yz_dbl, stat=ierror)
+   end subroutine triinterp2_realdbl
+
+
+
+   subroutine triinterp2_realreal(XZ, YZ, BL, NDX, JDLA,&
+                        XS, YS, ZS, NS, dmiss, jsferic, jins, jasfer3D, NPL, MXSAM, MYSAM, XPL, YPL, ZPL, transformcoef)
+   implicit none
+   !
+   ! parameters
+   real(sp), intent(in)            :: XZ(NDX)
+   real(sp), intent(in)            :: YZ(NDX)
+   real(sp), intent(inout)         :: BL(NDX)
+   integer , intent(in)            :: NDX
+   integer , intent(in)            :: JDLA
+   integer , intent(in)            :: NS
+   integer , intent(in)            :: jins
+   integer , intent(in)            :: jasfer3D
+   integer , intent(in)            :: NPL
+   integer , intent(in)            :: MXSAM
+   integer , intent(in)            :: MYSAM
+   real(hp), intent(in)            :: XS(:)
+   real(hp), intent(in)            :: YS(:)
+   real(hp), intent(in)            :: ZS(:)
+   real(hp), intent(in)            :: dmiss
+   integer                         :: jakdtree
+   integer                         :: jsferic
+   real(hp), intent(in)            :: XPL(:)
+   real(hp), intent(in)            :: YPL(:)
+   real(hp), intent(in)            :: ZPL(:)
+   real(hp), intent(in)            :: transformcoef(:)
+   !
+   ! locals
+   integer                              :: ierror
+   real(hp), dimension (:), allocatable :: xz_dbl
+   real(hp), dimension (:), allocatable :: yz_dbl
+   real(hp), dimension (:), allocatable :: bl_dbl
+   !
+   ! body
+   allocate (xz_dbl(NDX), stat=ierror)
+   allocate (yz_dbl(NDX), stat=ierror)
+   allocate (bl_dbl(NDX), stat=ierror)
+
+   xz_dbl = dble(xz)
+   yz_dbl = dble(yz)
+   bl_dbl = dble(bl)
+   call triinterp2_dbldbl(xz_dbl, yz_dbl, bl_dbl, NDX, JDLA,&
+                        XS, YS, ZS, NS, dmiss, jsferic, jins, jasfer3D, NPL, MXSAM, MYSAM, XPL, YPL, ZPL, transformcoef)
+   bl = real(bl_dbl)
+   deallocate (xz_dbl, stat=ierror)
+   deallocate (yz_dbl, stat=ierror)
+   deallocate (bl_dbl, stat=ierror)
+   end subroutine triinterp2_realreal
+
 
 
    SUBROUTINE TRIINTfast(XS, YS, ZS, NS,NDIM,X,Y,Z,NXY,JDLA,jakdtree, jsferic, NH, jins, dmiss, jasfer3D, &
@@ -1116,6 +1242,7 @@
                                                           
       double precision, parameter                         :: dtol = 0d0
       
+      slo = DMISS
       if ( jslo.eq.1 ) then
          call mess(LEVEL_ERROR, 'linear3D: jslo=1 not supported')
       end if
