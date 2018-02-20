@@ -63,6 +63,7 @@ if [%3] EQU [] (
 rem Change to directory tree where this batch file resides (necessary when oss-install.cmd is called from outside of oss/trunk/src)
 cd %~dp0\..\..
 
+call :generic
 call :!project!
 
 goto end
@@ -191,6 +192,33 @@ goto :endproc
 
 
 
+rem ====================
+rem === INSTALL_GENERIC
+rem ====================
+:generic
+    echo "installing generic . . ."
+
+    set dest_share="!dest_main!\x64\share\bin"
+    
+    call :makeDir !dest_share!
+
+    call :copyFile "third_party_open\expat\x64\x64\Release\libexpat.dll"        !dest_share!
+    call :copyFile "third_party_open\intel_fortran\lib\x64\*.dll"               !dest_share!
+    call :copyFile "third_party_open\mpich2\x64\bin\*.exe"                      !dest_share!
+    call :copyFile "third_party_open\mpich2\x64\lib\*.dll"                      !dest_share!
+    call :copyFile "third_party_open\pthreads\bin\x64\*.dll"                    !dest_share!
+    call :copyFile "third_party_open\vcredist\x64\Microsoft.VC100.CRT\*.dll"    !dest_share!
+    call :copyFile "third_party_open\vcredist\x64\Microsoft.VC110.CRT\*.dll"    !dest_share!
+    call :copyFile "third_party_open\vcredist\x64\Microsoft.VC120.CRT\*.dll"    !dest_share!
+    call :copyFile "third_party_open\vcredist\x64\Microsoft.VC140.CRT\*.dll"    !dest_share!
+    call :copyNetcdf                                                            !dest_share!
+    echo This directory is automatically created by script https://svn.oss.deltares.nl/repos/delft3d/trunk/src/scripts_lgpl/win64/oss-install_x64.cmd >!dest_share!\readme.txt
+    echo This script is executed via a post-build event >>!dest_share!\readme.txt
+    echo Further modifications can be done via a Python script executed via "DIMR_collector" projects in TeamCity >>!dest_share!\readme.txt
+goto :endproc
+
+
+
 rem ===================
 rem === INSTALL_D_HYDRO
 rem ===================
@@ -227,7 +255,6 @@ rem ====================
     call :makeDir !dest_plugins!
     call :makeDir !dest_share!
 
-    call :copyNetcdf                                                                !dest_share!
     
     rem
     rem The following if-else statements MUST BE executed AFTER copying "third_party_open\intel_fortran" libraries.
@@ -263,25 +290,11 @@ rem ================
     
     call :copyFile engines_gpl\dimr\bin\x64\Release\dimr.exe             !dest_bin!
     call :copyFile engines_gpl\dimr\bin\x64\Release\dimr_dll.dll         !dest_bin!
-    call :copyFile "third_party_open\expat\x64\x64\Release\libexpat.dll" !dest_share!
-    call :copyFile "third_party_open\pthreads\bin\x64\*.dll"             !dest_share!
-    call :copyFile "third_party_open\mpich2\x64\bin\*.exe"               !dest_share!
-    call :copyFile "third_party_open\mpich2\x64\lib\*.dll"               !dest_share!
 
     call :copyFile engines_gpl\d_hydro\scripts\create_config_xml.tcl     !dest_menu!
 
     call :copyFile "engines_gpl\dimr\scripts\generic\win64\*.*"     !dest_scripts!
 
-    call :copyFile "third_party_open\vcredist\x64\Microsoft.VC100.CRT\*.dll"             !dest_share!
-    call :copyFile "third_party_open\vcredist\x64\Microsoft.VC110.CRT\*.dll"             !dest_share!
-    call :copyFile "third_party_open\vcredist\x64\Microsoft.VC120.CRT\*.dll"             !dest_share!
-    call :copyFile "third_party_open\vcredist\x64\Microsoft.VC140.CRT\*.dll"             !dest_share!
-    call :copyNetcdf                                                                     !dest_share!
-    call :copyFile "third_party_open\expat\x64\x64\Release\*.dll"                        !dest_share!
-    call :copyFile "third_party_open\pthreads\bin\x64\*.dll"                             !dest_share!
-    echo This directory is automatically created by script https://svn.oss.deltares.nl/repos/delft3d/trunk/src/scripts_lgpl/win64/oss-install_x64.cmd >!dest_share!\readme.txt
-    echo This script is executed via a post-build event of https://svn.oss.deltares.nl/repos/delft3d/trunk/src/engines_gpl/dimr/packages/dimr/dimr_exe.vcxproj >>!dest_share!\readme.txt
-    echo Further modifications can be done via a Python script executed via "DIMR_collector" projects in TeamCity >>!dest_share!\readme.txt
 goto :endproc
 
 
@@ -321,7 +334,6 @@ rem ====================
     call :copyFile "engines_gpl\flow2d3d\default\*"                                 !dest_default!
     call :copyFile "utils_lgpl\delftonline\lib\x64\Release\dynamic\delftonline.dll" !dest_bin!
     call :copyFile "utils_lgpl\delftonline\lib\x64\Release\dynamic\delftonline.dll" !dest_plugins!
-    call :copyNetcdf                                                                !dest_share!
     call :copyFile "engines_gpl\flow2d3d\scripts\run_*.bat"                         !dest_scripts!
     call :copyFile "third_party_open\tcl\bin\win64\tclkitsh852.exe"                 !dest_share!
     
@@ -360,7 +372,6 @@ rem    )
 rem    rem One of these two dlls will not exist and cause an ErrorLevel=1. Reset it.
 rem    set ErrorLevel=0
 rem    call :copyFile "third_party_open\openda\core\native\lib\win64\*.dll"      !dest_bin!
-rem    call :copyNetcdf                                                          !dest_share!
 goto :endproc
 
 
@@ -427,7 +438,6 @@ rem ======================
     call :makeDir !dest_share!
     
     call :copyFile engines_gpl\waq\bin\x64\Release\delwaq.dll                  !dest_bin!
-    call :copyNetcdf                                                           !dest_share!
 
     call :copyFile engines_gpl\waq\default\bloom.spe                           !dest_default!
     call :copyFile engines_gpl\waq\default\bloominp.d09                        !dest_default!
@@ -471,7 +481,6 @@ rem
 rem    call :makeDir !dest_bin!
 rem    
 rem    call :copyFile engines_gpl\waq\bin\Release\delwaq2_openda_lib.dll          !dest_bin!
-rem    call :copyNetcdf                                                           !dest_share!
 rem	
 
 rem    rem
@@ -719,7 +728,6 @@ rem ===================
 
     call :makeDir !dest_bin!
 
-    call :copyFile "third_party_open\pthreads\bin\x64\*.dll"                  !dest_bin!
     call :copyFile tools_gpl\nesthd1\packages\nesthd1\x64\Release\nesthd1.exe !dest_bin!
 goto :endproc
 
@@ -735,7 +743,6 @@ rem ===================
 
     call :makeDir !dest_bin!
 
-    call :copyFile "third_party_open\pthreads\bin\x64\*.dll"                  !dest_bin!
     call :copyFile tools_gpl\nesthd2\packages\nesthd2\x64\Release\nesthd2.exe !dest_bin!
 goto :endproc
 
