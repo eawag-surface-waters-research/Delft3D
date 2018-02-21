@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: filez.f90 51585 2017-07-10 14:01:15Z kernkam $
-! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/filez.f90 $
+! $Id$
+! $HeadURL$
 !> Opens an existing file for reading.
 !!
 !! When file does not exist or is already open, program stops with

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: solve_guus.F90 54199 2018-01-23 13:21:44Z zhao $
-! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/solve_guus.F90 $
+! $Id$
+! $HeadURL$
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif 

@@ -26,8 +26,8 @@
 !
 !-------------------------------------------------------------------------------
 
-! $Id: modules.f90 54200 2018-01-23 18:28:48Z dam_ar $
-! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/modules.f90 $
+! $Id$
+! $HeadURL$
 
 !> @file modules.f90
 !! Modules with global data.

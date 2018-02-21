@@ -27,6 +27,9 @@
 !                                                                               
 !-------------------------------------------------------------------------------
  
+! $Id$
+! $HeadURL$
+
 !> Parition of an mdu file with proper settings modified and rest copied
 subroutine partition_mdu()   
    use unstruc_model, only:  md_netfile, md_Ndomains, md_jacontiguous, md_icgsolver, md_pmethod, md_mdu, md_ident, md_restartfile, md_mapfile, md_flowgeomfile, md_partitionfile

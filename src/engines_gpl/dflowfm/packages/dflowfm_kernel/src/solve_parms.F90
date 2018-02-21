@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: solve_parms.F90 54191 2018-01-22 18:57:53Z dam_ar $
-! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/solve_parms.F90 $
+! $Id$
+! $HeadURL$
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif

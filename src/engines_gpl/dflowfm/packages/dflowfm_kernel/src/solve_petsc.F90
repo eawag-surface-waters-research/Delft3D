@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: solve_petsc.F90 53608 2017-12-01 10:00:34Z carniato $
-! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/solve_petsc.F90 $
+! $Id$
+! $HeadURL$
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif

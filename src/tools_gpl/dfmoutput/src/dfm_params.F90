@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: dfm_params.F90 52271 2017-09-04 07:52:04Z klecz_ml $
-! $HeadURL: https://repos.deltares.nl/repos/ds/branches/dflowfm/20161017_dflowfm_codecleanup/tools_gpl/dfmoutput/src/dfm_params.F90 $
+! $Id$
+! $HeadURL$
 
 module dfm_params
 implicit none

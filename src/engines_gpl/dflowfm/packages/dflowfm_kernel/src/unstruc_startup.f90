@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: unstruc_startup.f90 51598 2017-07-11 07:28:16Z zeekant $
-! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/unstruc_startup.f90 $
+! $Id$
+! $HeadURL$
 
 module unstruc_startup
 !! Separates some startup/initialization procedures from the main program in net.f90

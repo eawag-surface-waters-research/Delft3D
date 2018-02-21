@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: dfmoutput_main.F90 52271 2017-09-04 07:52:04Z klecz_ml $
-! $HeadURL: https://repos.deltares.nl/repos/ds/branches/dflowfm/20161017_dflowfm_codecleanup/tools_gpl/dfmoutput/src/dfmoutput_main.F90 $
+! $Id$
+! $HeadURL$
 
 !> DFMOUTPUT - A postprocessing tool for output files from D-Flow Flexible Mesh.
 !! Combines several commands/operations into a single program.
@@ -38,7 +38,7 @@
 !! * extract  - (not implemented) Extract time series on certain locations from _his.nc files.
 !! * convert  - (not implemented) Convert old format map files into UGRID compliant map files.
 !!
-!! $Id: dfmoutput_main.F90 52271 2017-09-04 07:52:04Z klecz_ml $
+!! $Id$
 program dfmoutput
 use IR_Precision                                                        ! Integers and reals precision definition.
 use Data_Type_Command_Line_Interface, only: Type_Command_Line_Interface ! Definition of Type_Command_Line_Interface.

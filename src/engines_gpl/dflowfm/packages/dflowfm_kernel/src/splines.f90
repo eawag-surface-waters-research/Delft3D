@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: splines.f90 49641 2017-01-27 16:35:52Z spee $
-! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/splines.f90 $
+! $Id$
+! $HeadURL$
 module M_splines
 use m_missing, only: dxymis
 

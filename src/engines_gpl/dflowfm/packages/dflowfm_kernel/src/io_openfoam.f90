@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: io_openfoam.f90 42642 2015-10-21 11:34:20Z dam_ar $
-! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/io_openfoam.f90 $
+! $Id$
+! $HeadURL$
 module io_openfoam
     implicit none
 

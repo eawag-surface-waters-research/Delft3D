@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: rgfstuff.f90 54131 2018-01-18 14:02:31Z carniato $
-! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/rgfstuff.f90 $
+! $Id$
+! $HeadURL$
      MODULE M_MAPPROPARAMETERS
      implicit none
       double precision :: XCE,YCE,DELTX,DELTY,XF,YF,FI, XCSTEREO, YCSTEREO

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: unstruc_ini.f90 49641 2017-01-27 16:35:52Z spee $
-! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/unstruc_ini.f90 $
+! $Id$
+! $HeadURL$
 
 module unstruc_ini
 !! Some basic routines for reading an INI file.

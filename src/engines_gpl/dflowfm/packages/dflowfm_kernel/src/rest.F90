@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2017-2018.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: rest.F90 54131 2018-01-18 14:02:31Z carniato $
-! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/rest.F90 $
+! $Id$
+! $HeadURL$
 
       SUBROUTINE dCROSS(X1,Y1,X2,Y2,X3,Y3,X4,Y4,JACROS,SL,SM,XCR,YCR,CRP) ! liggen 3 en 4 aan weerszijden van lijn 12
       use m_sferic
@@ -516,6 +516,7 @@ end subroutine read_land_boundary_netcdf
       use m_alloc
       use unstruc_messages
       use unstruc_files
+      use m_flowparameters, only: ifixedweirscheme
  
       implicit none
       integer :: mpol
@@ -653,10 +654,19 @@ end subroutine read_land_boundary_netcdf
                       if (weirtype .eq. 't' .or. weirtype .eq. 'T') then
                           IWEIRT(NPL) = 1  
                       elseif (weirtype .eq. 'v' .or. weirtype .eq. 'V')  then
-                          IWEIRT(NPL) = 2  
-                      endif    
-                   else
-                      IWEIRT(NPL) = -999  ! if nkol=9 and no weirtype has been specified
+                          IWEIRT(NPL) = 2 
+                      else
+                         IWEIRT(NPL) = -999
+                      endif
+                   endif
+                   if (nkol == 9) then
+                      if (ifixedweirscheme == 8) then
+                         IWEIRT(NPL) = 1
+                      elseif (ifixedweirscheme == 9) then
+                         IWEIRT(NPL) = 2
+                      else
+                         IWEIRT(NPL) = -999  ! if nkol=9 and no weirtype has been specified
+                      endif
                    endif    
                 endif
             
@@ -5016,14 +5026,18 @@ end subroutine timdat
       END
  
       SUBROUTINE FIRSTLIN(MRGF)
-      use unstruc_version_module, only: unstruc_version_full
+      use unstruc_version_module, only: unstruc_version_full, get_unstruc_source
       implicit none
       integer :: mrgf
 
-      CHARACTER TEX*80, RUNDAT*20
+      CHARACTER TEX*255, RUNDAT*20
       CALL DATUM(RUNDAT)
+      WRITE(MRGF,'(A)') '* '//trim(unstruc_version_full)
+      call get_unstruc_source(TEX)
+      WRITE(MRGF,'(A)') '* Source: '//trim(TEX)
       TEX = '* File creation date: ' //RUNDAT
-      WRITE(MRGF,'(A/A)') '* '//trim(unstruc_version_full), TEX
+      WRITE(MRGF,'(A)') TEX
+
       RETURN
       END
 

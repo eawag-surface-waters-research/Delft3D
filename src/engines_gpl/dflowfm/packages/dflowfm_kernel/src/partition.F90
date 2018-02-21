@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: partition.F90 54199 2018-01-23 13:21:44Z zhao $
-! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/partition.F90 $
+! $Id$
+! $HeadURL$
    
 !------------------------------------------------------------------------
 !  THOUGHTS:

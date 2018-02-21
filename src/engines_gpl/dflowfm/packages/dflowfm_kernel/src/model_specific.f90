@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: model_specific.f90 54191 2018-01-22 18:57:53Z dam_ar $
-! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/model_specific.f90 $
+! $Id$
+! $HeadURL$
 !> @file model_specific.f90
 !! A set of predefined routines that may contain model-specific actions.
 !! Selection is based on global md_ident, and subroutines are automatically

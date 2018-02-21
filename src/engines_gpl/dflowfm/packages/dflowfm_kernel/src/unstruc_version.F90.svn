@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: unstruc_version.F90.svn 53886 2017-12-20 17:03:27Z dam_ar $
-! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/unstruc_version.F90.svn $
+! $Id$
+! $HeadURL$
 module unstruc_version_module
 implicit none
 
@@ -45,7 +45,7 @@ implicit none
     character(*),  public, parameter :: unstruc_version      = unstruc_major//'.'//unstruc_minor//'.'//unstruc_revision//'.'//unstruc_build_number
     character(*),  public, parameter :: unstruc_version_full = 'Deltares, '//unstruc_program//' Version '//unstruc_version//', '//__DATE__//', '//__TIME__
     character(*),  public, parameter :: unstruc_version_id   = '@(#)'//unstruc_version_full
-    character(*),  public, parameter :: unstruc_source_code  = '@(#) $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/unstruc_version.F90.svn $'//char(0)
+    character(*),  public, parameter :: unstruc_source_code  = '@(#) $HeadURL$'//char(0)
 
 contains
     
@@ -64,5 +64,15 @@ contains
         character(len=*), intent(out) :: stringout
         stringout = unstruc_version_full
     end subroutine get_full_versionstring_unstruc_full
+
+    !> Returns the root SVN URL of the D-FLow FM source code to reveal which code branch this is.
+    subroutine get_unstruc_source(stringout)
+        character(len=*), intent(out) :: stringout
+        integer :: L
+        ! '@(#) $HeadURL: http://.../rootdir/src/engines_gpl/...'
+        !  ^1   ^6        ^16:              ^L
+        L = index(unstruc_source_code, '/src/engines_gpl/dflowfm')
+        stringout = unstruc_source_code(16:L)
+    end subroutine get_unstruc_source
 
 end module unstruc_version_module

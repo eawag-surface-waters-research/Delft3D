@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: polygon.f90 52266 2017-09-02 11:24:11Z klecz_ml $
-! $HeadURL: https://repos.deltares.nl/repos/ds/branches/dflowfm/20161017_dflowfm_codecleanup/engines_gpl/dflowfm/packages/dflowfm_kernel/src/polygon.f90 $
+! $Id$
+! $HeadURL$
    module m_tpoly !< tpoly-type polygon/polyline
    implicit none
 

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: calibration.f90 54191 2018-01-22 18:57:53Z dam_ar $
-! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/calibration.f90 $
+! $Id$
+! $HeadURL$
 
 !> This module reads and handles the computation of calibration factors.
 !!

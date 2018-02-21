@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: unstruc_opengl.F90 53642 2017-12-04 15:33:06Z kernkam $
-! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/unstruc_opengl.F90 $
+! $Id$
+! $HeadURL$
 module unstruc_opengl
    use precision
 #ifdef HAVE_OPENGL

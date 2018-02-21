@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: xbeach_interp.F90 53524 2017-11-28 16:52:51Z carniato $
-! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/xbeach_interp.F90 $
+! $Id$
+! $HeadURL$
 
 module interp
 implicit none

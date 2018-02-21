@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: removedcode.f90 49641 2017-01-27 16:35:52Z spee $
-! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/removedcode.f90 $
+! $Id$
+! $HeadURL$
 !module unused_code_from_meteo1
 !   function reaspwtim(minp,d,mx,nx,tread,x0r,y0r) result(success)
 !   !

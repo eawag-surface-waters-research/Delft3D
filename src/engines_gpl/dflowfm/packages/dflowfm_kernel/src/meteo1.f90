@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: meteo1.f90 54191 2018-01-22 18:57:53Z dam_ar $
-! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/meteo1.f90 $
+! $Id$
+! $HeadURL$
 module m_itdate
    character(len=8) :: refdat
    integer          :: itdate      !< should be user specified for (asc routines)

@@ -26,8 +26,8 @@
 !
 !-------------------------------------------------------------------------------
 
-! $Id: unstruc_bmi.F90 54191 2018-01-22 18:57:53Z dam_ar $
-! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/unstruc_bmi.F90 $
+! $Id$
+! $HeadURL$
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif

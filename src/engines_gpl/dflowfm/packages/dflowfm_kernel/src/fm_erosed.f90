@@ -26,8 +26,8 @@
 !  Deltares, and remain the property of Stichting Deltares. All rights reserved.
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id: fm_erosed.f90 54200 2018-01-23 18:28:48Z dam_ar $
-!  $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/fm_erosed.f90 $
+!  $Id$
+!  $HeadURL$
 
 !>  pointer data
    module m_fm_erosed

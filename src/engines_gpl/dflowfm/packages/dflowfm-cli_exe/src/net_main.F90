@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: net_main.F90 54131 2018-01-18 14:02:31Z carniato $
-! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/net_main.F90 $
+! $Id$
+! $HeadURL$
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif

@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: step_to_screen.f90 52966 2017-10-26 15:42:54Z kernkam $
-! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/step_to_screen.f90 $
+! $Id$
+! $HeadURL$
 ! Copied and modified from: https://svn.oss.deltares.nl/repos/delft3d/trunk/src/engines_gpl/flow2d3d/packages/kernel/src/general/step_to_screen.f90
 ! Original file distributed  GNU General Public License <http://www.gnu.org/licenses/>.
 

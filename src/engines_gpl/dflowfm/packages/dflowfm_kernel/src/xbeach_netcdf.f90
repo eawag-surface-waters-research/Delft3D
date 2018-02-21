@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: xbeach_netcdf.f90 54191 2018-01-22 18:57:53Z dam_ar $
-! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/xbeach_netcdf.f90 $
+! $Id$
+! $HeadURL$
 module m_xbeach_netcdf
 !! xbeach time-averaged spatial output
 !! to do for the future: add flexibility to add variables using mnemonics

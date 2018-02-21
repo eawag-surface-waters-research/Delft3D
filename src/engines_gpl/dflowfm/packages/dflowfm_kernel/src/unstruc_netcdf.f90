@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: unstruc_netcdf.f90 54200 2018-01-23 18:28:48Z dam_ar $
-! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/unstruc_netcdf.f90 $
+! $Id$
+! $HeadURL$
 
 ! TODO: FB: #define NC_CHECK if(ierr .ne. 0 ) call mess(LEVEL_ERROR, nf90_strerror(ierr))
 
@@ -227,7 +227,10 @@ type t_unc_mapids
    integer :: id_nudge_Dtem(4) = -1 ! difference of nudging temperature with temperature
 ! particles
    integer :: id_depth_averaged_particle_concentration(4) = -1  ! depth-averaged particle concentration
-
+! for parallel
+   integer :: id_flowelemdomain(4) = -1 ! domain number of flow elem (face)
+   integer :: id_flowelemglobalnr(4) = -1 ! global flow element numbering
+   
    integer :: id_zb(4)     = -1 !< Variable ID for bed elevation
    integer :: id_u1s(4)    = -1 !< sediment advection velocities in trsnaport module; DEBUG
    integer :: id_q1s(4)    = -1
@@ -3283,7 +3286,7 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
                ierr = unc_def_var_map(mapids, mapids%id_ucxa, nf90_double, UNC_LOC_S, 'ucxa', 'eastward_sea_water_velocity', 'Flow element center depth-averaged velocity, x-component', 'm s-1')
                ierr = unc_def_var_map(mapids, mapids%id_ucya, nf90_double, UNC_LOC_S, 'ucya', 'northward_sea_water_velocity', 'Flow element center depth-averaged velocity, y-component', 'm s-1')
             end if
-            ierr = unc_def_var_map(mapids, mapids%id_ucmaga, nf90_double, iLocS, 'ucmaga', 'sea_water_speed', 'Flow element center depth-averaged velocity magnitude', 'm s-1')
+            ierr = unc_def_var_map(mapids, mapids%id_ucmaga, nf90_double, UNC_LOC_S, 'ucmaga', 'sea_water_speed', 'Flow element center depth-averaged velocity magnitude', 'm s-1')
          end if
       end if
       if (kmx > 0) then
@@ -3859,10 +3862,19 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
       ierr = unc_put_var_map(mapids, mapids%id_ucx, iLocS, workx)     ! JRE langrangian or eulerian, see write_map_filepointer
       ierr = unc_put_var_map(mapids, mapids%id_ucy, iLocS, worky)
 
-      call realloc(work1d, ndx, keepExisting = .false.)
-      do k=1,ndx
-         work1d(k) = sqrt(workx(k)**2 + worky(k)**2)
-      end do
+      call realloc(work1d, ndkx, keepExisting = .false.)
+      if ( kmx.gt.0 ) then
+         do kk=1,ndx
+            call getkbotktop(kk,kb,kt)
+            do k = kb,kt
+               work1d(k) = sqrt(workx(k)**2 + worky(k)**2) ! TODO: this does not include vertical/w-component now.
+            end do
+         end do
+      else
+         do kk = 1,ndx
+             work1d(kk) = sqrt(workx(kk)**2 + worky(kk)**2)
+         enddo     
+      end if
       ierr = unc_put_var_map(mapids, mapids%id_ucmag, iLocS, work1d)
 
       if (kmx > 0) then
@@ -3870,7 +3882,7 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
          ierr = unc_put_var_map(mapids, mapids%id_ucz, UNC_LOC_S3D, ucz)
          ierr = unc_put_var_map(mapids, mapids%id_ucxa, UNC_LOC_S, ucxq)
          ierr = unc_put_var_map(mapids, mapids%id_ucya, UNC_LOC_S, ucyq)
-         do k=1,ndx
+         do k=1,size(ucxq)
             work1d(k) = sqrt(ucxq(k)**2 + ucyq(k)**2) ! TODO: this does not include vertical/w-component now.
          end do
          ierr = unc_put_var_map(mapids, mapids%id_ucmaga, UNC_LOC_S, work1d)
@@ -3888,7 +3900,7 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
          do kk = 1,ndx
              workx(kk) = ucxq(kk)
              worky(kk) = ucyq(kk)
-         enddo        
+         enddo
       endif
       ierr = unc_put_var_map(mapids, mapids%id_ucxq, iLocS, workx)
       ierr = unc_put_var_map(mapids, mapids%id_ucyq, iLocS, worky)
@@ -10841,6 +10853,11 @@ subroutine unc_write_flowgeom_filepointer_ugrid(mapids, jabndnd)
       ierr = ug_def_mesh_contact(mapids%ncid, mapids%meshcontacts, 'contact', n1d2dcontacts, mapids%meshids2d, mapids%meshids1d, UG_LOC_NODE, UG_LOC_FACE)
    endif
 
+   ! Define domain numbers when it is a parallel run
+   if (jampi .eq. 1) then
+      ierr = unc_def_var_map(mapids, mapids%id_flowelemdomain(:), nf90_short, UNC_LOC_S, 'flowelem_domain', 'cell_domain_number', 'domain number of flow element', '', 0)
+      ierr = unc_def_var_map(mapids, mapids%id_flowelemglobalnr(:), nf90_short, UNC_LOC_S, 'flowelem_globalnr', 'cell_global_number', 'global flow element numbering', '', 0)
+   endif
    ierr = nf90_enddef(mapids%ncid)
 
    ! -- Start data writing (time-independent data) ------------
@@ -10873,7 +10890,17 @@ subroutine unc_write_flowgeom_filepointer_ugrid(mapids, jabndnd)
    ! * in WAVE: handle the obsolete 'nFlowElemWithBnd'/'nFlowElem' difference
    ! * for WAVE: add FlowElem_zcc back in com file.
    ! * for parallel: add 'FlowElemDomain', 'FlowLinkDomain', 'FlowElemGlobalNr'
-
+   ! domain numbers
+   if ( jampi.eq.1 ) then  
+      ! FlowElemDomain
+      if (ndx2d > 0) then
+         ierr = nf90_put_var(mapids%ncid, mapids%id_flowelemdomain(2), idomain(1:ndx2d))
+      endif
+      ! FlowElemGlobalNr
+      if (ndx2d > 0) then
+         ierr = nf90_put_var(mapids%ncid, mapids%id_flowelemglobalnr(2), iglobal_s(1:ndx2d))
+      endif
+   end if
    ! Leave the dataset in the same mode as we got it.
    if (jaInDefine == 1) then
       ierr = nf90_redef(mapids%ncid)

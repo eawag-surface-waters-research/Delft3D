@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: dem.f90 51598 2017-07-11 07:28:16Z zeekant $
-! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/dem.f90 $
+! $Id$
+! $HeadURL$
 
 !> This module reads files in USGS Digital Elevation Model (DEM) format.
 !!

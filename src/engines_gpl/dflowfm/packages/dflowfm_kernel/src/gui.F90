@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: gui.F90 54200 2018-01-23 18:28:48Z dam_ar $
-! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/gui.F90 $
+! $Id$
+! $HeadURL$
 ! Copyright notice:
 ! Several of the graphical user interface routines below make use of the INTERACTER libraries
 ! (only when run on Windows platforms with display mode on).

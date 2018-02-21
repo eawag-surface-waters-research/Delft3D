@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: xbeach_filefunctions.F90 51598 2017-07-11 07:28:16Z zeekant $
-! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/xbeach_filefunctions.F90 $
+! $Id$
+! $HeadURL$
 module m_xbeach_filefunctions
 !! Contains logging functions and file administration functions
 !! Merge of logging_module and filefunctions_module

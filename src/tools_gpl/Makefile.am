@@ -1,6 +1,7 @@
 include $(top_srcdir)/common.am
 SUBDIRS = \
 	datsel \
+	dfmoutput \
 	kubint \
 	lint \
 	mormerge \

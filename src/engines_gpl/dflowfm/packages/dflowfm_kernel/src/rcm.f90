@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: rcm.f90 49641 2017-01-27 16:35:52Z spee $
-! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/rcm.f90 $
+! $Id$
+! $HeadURL$
 !> @file rcm.f90
 !! Reverse-Cuthill-Mckee algorithm + helpers.
 !! Used for network-node renumbering to improve cache efficiency

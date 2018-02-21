@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: net.F90 54199 2018-01-23 13:21:44Z zhao $
-! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/net.F90 $
+! $Id$
+! $HeadURL$
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif 
@@ -33848,50 +33848,52 @@ function read_commandline() result(istat)
 
          case ('v', 'version')
             call get_full_versionstring_unstruc_full(msgbuf)
-            write (*,*) trim(msgbuf)
-            write (*,*) 'Compiled with support for:'
+            write (*,'(a)') trim(msgbuf)
+            call get_unstruc_source(msgbuf)
+            write (*,'(a)') 'Source: '//trim(msgbuf)
+            write (*,'(a)') 'Compiled with support for:'
             if (jaGUI == 1) then
-               write (*,*) 'IntGUI: yes'
+               write (*,'(a)') 'IntGUI: yes'
             else
                ! Cheap trick for fast compilation of dflowfm-cli executable: it never included linking of Interacter, nor OpenGL,
                ! but since we don't want to completely recompile the kernel with HAVE_DISPLAY=0, we simply detect it at runtime with jaGUI==0.
-               write (*,*) 'IntGUI: no'
+               write (*,'(a)') 'IntGUI: no'
             end if
 #ifdef HAVE_OPENGL
             if (jaGUI == 1) then
-               write (*,*) 'OpenGL: yes'
+               write (*,'(a)') 'OpenGL: yes'
             else
                ! Cheap trick for fast compilation of dflowfm-cli executable: it never included linking of Interacter, nor OpenGL,
                ! but since we don't want to completely recompile the kernel with HAVE_DISPLAY=0, we simply detect it at runtime with jaGUI==0.
-               write (*,*) 'OpenGL: no'
+               write (*,'(a)') 'OpenGL: no'
             end if
 #else
-            write (*,*) 'OpenGL: no'
+            write (*,'(a)') 'OpenGL: no'
 #endif
 #ifdef _OPENMP
-            write (*,*) 'OpenMP: yes'
+            write (*,'(a)') 'OpenMP: yes'
 #else
-            write (*,*) 'OpenMP: no'
+            write (*,'(a)') 'OpenMP: no'
 #endif
 #ifdef HAVE_MPI
-            write (*,*) 'MPI   : yes'
+            write (*,'(a)') 'MPI   : yes'
 #else
-            write (*,*) 'MPI   : no'
+            write (*,'(a)') 'MPI   : no'
 #endif
 #ifdef HAVE_PETSC
-            write (*,*) 'PETSc : yes'
+            write (*,'(a)') 'PETSc : yes'
 #else
-            write (*,*) 'PETSc : no'
+            write (*,'(a)') 'PETSc : no'
 #endif
 #ifdef HAVE_METIS
-            write (*,*) 'METIS : yes'
+            write (*,'(a)') 'METIS : yes'
 #else
-            write (*,*) 'METIS : no'
+            write (*,'(a)') 'METIS : no'
 #endif
 #ifdef HAVE_PROJ
-            write (*,*) 'PROJ : yes'
+            write (*,'(a)') 'PROJ : yes'
 #else
-            write (*,*) 'PROJ : no'
+            write (*,'(a)') 'PROJ : no'
 #endif
 
             istat = DFM_EXIT ! Exit without any error.

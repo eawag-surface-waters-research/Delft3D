@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: unstruc_display.F90 54191 2018-01-22 18:57:53Z dam_ar $
-! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/unstruc_display.F90 $
+! $Id$
+! $HeadURL$
 
 ! m_WEARELT movet to gridgeom
 
@@ -113,7 +113,7 @@ module unstruc_display
 !! Handles all display settings and screen plotting for Unstruc
 !! (Not yet, a lot is still in REST.F90 [AvD])
 
-! $Id: unstruc_display.F90 54191 2018-01-22 18:57:53Z dam_ar $
+! $Id$
 
 use unstruc_colors
 implicit none

@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !
-!  Copyright (C)  Stichting Deltares, 2017-2018.!
+!  Copyright (C)  Stichting Deltares, 2017-2018.
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).
 !
 !  Delft3D is free software: you can redistribute it and/or modify
@@ -26,8 +26,8 @@
 !
 !-------------------------------------------------------------------------------
 
-! $Id: unstruc.F90 54201 2018-01-23 18:48:43Z dam_ar $
-! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/unstruc.F90 $
+! $Id$
+! $HeadURL$
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -9759,9 +9759,9 @@ end subroutine cosphiunetcheck
     do k = 1,kk
        numlimdt(knum(k)) = zs(k) 
     enddo   
-    
- endif   
- deallocate(xs,ys,zs,knum)  
+
+    deallocate(xs,ys,zs,knum)  
+ endif
  end subroutine reanumlimdt  
 
 
@@ -12864,7 +12864,7 @@ endif
     end do
  end if
 
- if (jasal > 0 .and. kmx > 0 .and. inisal2D > 0 ) then
+ if (jasal > 0 .and. kmx > 0 .and. inisal2D > 0 .and. jarestart.eq.0 ) then
     do kk = 1,ndx
        call getkbotktop(kk,kb,kt)
        if (inisal2D == 1) then
@@ -25433,8 +25433,8 @@ end function rho_Unesco
 !  Stichting Deltares. All rights reserved.
 !
 !-------------------------------------------------------------------------------
-!  $Id: unstruc.F90 54201 2018-01-23 18:48:43Z dam_ar $
-!  $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/unstruc.F90 $
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !    Function: Computes water density from temperature and
@@ -38300,10 +38300,10 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
                  zh = taludd(L)  ; taludd(L)  = taludu(L)  ; taludu(L)  = zh
              endif
           else                                                       ! use global type definition 
-             if (ifixedweirscheme == 7) then     
+             if (ifixedweirscheme == 8) then     
                 iadv(L)    = 24    !  Tabellenboek
                 dzsillu(L) = zc - bl(n1) ; dzsilld(L) = zc - bl(n2)  ! if not specified then estimate   
-             else if (ifixedweirscheme == 8) then
+             else if (ifixedweirscheme == 9) then
                 iadv(L)    = 25    !  Villemonte
                 dzsillu(L) = zc - bl(n1) ; dzsilld(L) = zc - bl(n2)  ! if not specified then estimate 
              else     
@@ -38385,7 +38385,7 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
  enddo 
 
  deallocate(ihu, csh, snh, dzsillu, dzsilld, crestlen, taludu, taludd, vegetat)
- if (jatabellenboekorvillemonte == 0) then 
+ if (jatabellenboekorvillemonte == 0 .and. nfxw.gt.0) then 
     deallocate(shlxw, shrxw, crestlxw, taludlxw, taludrxw, vegxw)
  endif   
  

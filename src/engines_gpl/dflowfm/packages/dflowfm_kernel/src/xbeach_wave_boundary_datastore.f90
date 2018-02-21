@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: xbeach_wave_boundary_datastore.f90 54191 2018-01-22 18:57:53Z dam_ar $
-! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/xbeach_wave_boundary_datastore.f90 $
+! $Id$
+! $HeadURL$
 module wave_boundary_datastore
    ! The module stores essential information for wave boundary conditions in the following
    ! derived types:

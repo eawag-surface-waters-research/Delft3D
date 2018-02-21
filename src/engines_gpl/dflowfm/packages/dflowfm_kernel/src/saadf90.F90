@@ -31,8 +31,8 @@
 ! 
 ! For more information contact saad@cs.umn.edu
 
-! $Id: saadf90.F90 53893 2017-12-20 18:54:12Z zhao $
-! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/saadf90.F90 $
+! $Id$
+! $HeadURL$
 
 !! BLAS routines come either from Intel MKL, or standard BLAS from SPARSKIT. Select at compile time.
 !#if defined __INTEL_COMPILER && __INTEL_COMPILER > 1000

@@ -27,6 +27,6 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: xbeach_wave_boundary_init.f90 42642 2015-10-21 11:34:20Z dam_ar $
-! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/xbeach_wave_boundary_init.f90 $
+! $Id$
+! $HeadURL$
 

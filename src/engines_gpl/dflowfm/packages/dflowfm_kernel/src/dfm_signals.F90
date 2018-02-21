@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: dfm_signals.F90 49641 2017-01-27 16:35:52Z spee $
-! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/dfm_signals.F90 $
+! $Id$
+! $HeadURL$
 
 !> DFM_SIGNALS - Respond to process signals (POSIX-style).
 !! Lets the program watch signals such as Control-C and Control-Z, and

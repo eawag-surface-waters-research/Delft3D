@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: manholes.f90 53959 2018-01-03 16:06:27Z dam_ar $
-! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/manholes.f90 $
+! $Id$
+! $HeadURL$
 
 !> Manholes connect 1D networks with 2D/3D grids or other 1D networks.
 !!
@@ -2304,7 +2304,7 @@ double precision function tabellenboek(d1        ,eweir     ,qunit     ,qvolk   
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id: manholes.f90 53959 2018-01-03 16:06:27Z dam_ar $
+!  $Id$
 !   Original URL: https://svn.oss.deltares.nl/repos/delft3d/trunk/src/engines_gpl/flow2d3d/packages/kernel/src/compute/tabel.f90
 !!--description-----------------------------------------------------------------
 !

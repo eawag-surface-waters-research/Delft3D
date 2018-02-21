@@ -27,8 +27,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 
-! $Id: unstruc_model.f90 54191 2018-01-22 18:57:53Z dam_ar $
-! $HeadURL: https://repos.deltares.nl/repos/ds/trunk/additional/unstruc/src/unstruc_model.f90 $
+! $Id$
+! $HeadURL$
 
 !> Manages the unstruc model definition for the active problem.
 module unstruc_model
@@ -111,7 +111,7 @@ implicit none
     character(len=255) :: md_dredgefile    = ' ' !< File containing dredging settings (e.g., *.dad)
     character(len=255) :: md_bedformfile   = ' ' !< File containing bedform settings (e.g., *.bfm)
        
-    character(len=255) :: md_obsfile       = ' ' !< File containing observation points  (e.g., *_obs.xyn)
+    character(len=1024):: md_obsfile       = ' ' !< File containing observation points  (e.g., *_obs.xyn)
     character(len=255) :: md_crsfile       = ' ' !< File containing cross sections      (e.g., *_crs.pli)
     character(len=255) :: md_foufile       = ' ' !< File containing fourier modes to be analyzed
 
@@ -2480,6 +2480,8 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     call datum(rundat)
     write(mout, '(a,a)') '# Generated on ', trim(rundat)
     write(mout, '(a,a)') '# ', trim(unstruc_version_full)
+    call get_unstruc_source(msgbuf)
+    write(mout, '(a,a)') '# Source:', trim(msgbuf)
     call prop_write_inifile(mout, prop_ptr, istat)
     call tree_destroy(prop_ptr)    
 
