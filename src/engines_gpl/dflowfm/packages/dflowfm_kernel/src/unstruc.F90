@@ -28548,8 +28548,10 @@ end
 
     mnx = mmax*nmax
     IF (INTERPOLATIONTYPE == 1) THEN
-       CALL triinterp2(Xc,Yc,Zc,mnx,JDLA, &
-                          XS, YS, ZS, NS, dmiss, jsferic, jins, jasfer3D, NPL, MXSAM, MYSAM, XPL, YPL, ZPL,transformcoef)
+       ! TODO: UNST-1770: triinterp2 interface temporarily cannot be used for Interacter-interpolate to ZCcurvigrid values
+       ! Needs fix.
+       !CALL triinterp2(Xc,Yc,Zc,mnx,JDLA, &
+       !                   XS, YS, ZS, NS, dmiss, jsferic, jins, jasfer3D, NPL, MXSAM, MYSAM, XPL, YPL, ZPL,transformcoef)
     ELSE
        N6 = 4
        ALLOCATE( XX(N6,mnx), YY(N6,mnx), NNN(mnx) )
