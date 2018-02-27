@@ -116,7 +116,7 @@ integer                     :: id_objectid, id_flowlinknr
          endif
          
          ! write flowlink nr.
-         j = dbfwriteattribute(shphandle, ishape, id_flowlinknr, crs(n)%PATH%LN(ii))
+         if(allocated(crs)) j = dbfwriteattribute(shphandle, ishape, id_flowlinknr, crs(n)%PATH%LN(ii))
          if (j /= 1) then
            call mess(LEVEL_ERROR, 'SHAPEFILE: Could not write attribute "FLOWLINKNR" to shape'''//trim(objectid)//'''.')
            return
@@ -218,14 +218,14 @@ integer                     :: id_objectid, id_origx, id_origy, id_flownodenr
       endif
       
       ! write original x-coordinate
-      j = dbfwriteattribute(shphandle, ishp, id_origx, xobs(ii))
+      if(allocated(xobs)) j = dbfwriteattribute(shphandle, ishp, id_origx, xobs(ii))
       if (j /= 1) then
         call mess(LEVEL_ERROR, 'SHAPEFILE: Could not write attribute "ORIG_X" to shape'''//trim(namobs(ii))//'''.')
         return
       endif
       
       ! write original y-coordinate
-      j = dbfwriteattribute(shphandle, ishp, id_origy, yobs(ii))
+      if(allocated(yobs)) j = dbfwriteattribute(shphandle, ishp, id_origy, yobs(ii))
       if (j /= 1) then
         call mess(LEVEL_ERROR, 'SHAPEFILE: Could not write attribute "ORIG_Y" to shape'''//trim(namobs(ii))//'''.')
         return
@@ -335,7 +335,7 @@ double precision            :: tmp_x(2), tmp_y(2)
          endif
          
          ! write initial crest level
-         j = dbfwriteattribute(shphandle, ishape, id_weirgen_cresth, zcgen((igen-1)*3+1))
+         if (allocated(zcgen)) j = dbfwriteattribute(shphandle, ishape, id_weirgen_cresth, zcgen((igen-1)*3+1))
          if (j /= 1) then
            call mess(LEVEL_ERROR, 'SHAPEFILE: Could not write attribute "FLOWLINKNR" to shape'''//trim(objectid)//'''.')
            return
@@ -562,35 +562,35 @@ double precision            :: tmp_x(2), tmp_y(2)
          endif
          
          ! write SILLLEV
-         j = dbfwriteattribute(shphandle, ishape, id_silllev, zcgen((igen-1)*3+1))
+         if(allocated(zcgen)) j = dbfwriteattribute(shphandle, ishape, id_silllev, zcgen((igen-1)*3+1))
          if (j /= 1) then
            call mess(LEVEL_ERROR, 'SHAPEFILE: Could not write attribute "SILLLEV" to shape'''//trim(objectid)//'''.')
            return
          endif
          
          ! write SILLWIDTH
-         j = dbfwriteattribute(shphandle, ishape, id_sillwidth, min(1d10, gates(n)%sill_width))
+         if(allocated(gates)) j = dbfwriteattribute(shphandle, ishape, id_sillwidth, min(1d10, gates(n)%sill_width))
          if (j /= 1) then
            call mess(LEVEL_ERROR, 'SHAPEFILE: Could not write attribute "SILLWIDTH" to shape'''//trim(objectid)//'''.')
            return
          endif
          
          ! write OPENWIDTH
-         j = dbfwriteattribute(shphandle, ishape, id_openwidth, zcgen((igen-1)*3+3))
+         if(allocated(zcgen)) j = dbfwriteattribute(shphandle, ishape, id_openwidth, zcgen((igen-1)*3+3))
          if (j /= 1) then
            call mess(LEVEL_ERROR, 'SHAPEFILE: Could not write attribute "OPENWIDTH" to shape'''//trim(objectid)//'''.')
            return
          endif
          
          ! write LOWEREDGEL
-         j = dbfwriteattribute(shphandle, ishape, id_loweredgel, zcgen((igen-1)*3+2))
+         if(allocated(zcgen)) j = dbfwriteattribute(shphandle, ishape, id_loweredgel, zcgen((igen-1)*3+2))
          if (j /= 1) then
            call mess(LEVEL_ERROR, 'SHAPEFILE: Could not write attribute "LOWEREDGEL" to shape'''//trim(objectid)//'''.')
            return
          endif
          
          ! write DOORHEIGHT
-         j = dbfwriteattribute(shphandle, ishape, id_doorheight, gates(n)%door_height)
+         if(allocated(gates)) j = dbfwriteattribute(shphandle, ishape, id_doorheight, gates(n)%door_height)
          if (j /= 1) then
            call mess(LEVEL_ERROR, 'SHAPEFILE: Could not write attribute "DOORHEIGHT" to shape'''//trim(objectid)//'''.')
            return
@@ -598,14 +598,14 @@ double precision            :: tmp_x(2), tmp_y(2)
          
          ! write EFF_WU
          L0 = L-L1cgensg(igen)+1
-         j = dbfwriteattribute(shphandle, ishape, id_effwu, generalstruc(igen)%widthcenteronlink(L0))
+         if(allocated(generalstruc)) j = dbfwriteattribute(shphandle, ishape, id_effwu, generalstruc(igen)%widthcenteronlink(L0))
          if (j /= 1) then
            call mess(LEVEL_ERROR, 'SHAPEFILE: Could not write attribute "EFF_WU" to shape'''//trim(objectid)//'''.')
            return
          endif
          
          ! write EFF_LOWERE
-         j = dbfwriteattribute(shphandle, ishape, id_efflowere, generalstruc(igen)%gateheightonlink(L0))
+         if(allocated(generalstruc))j = dbfwriteattribute(shphandle, ishape, id_efflowere, generalstruc(igen)%gateheightonlink(L0))
          if (j /= 1) then
            call mess(LEVEL_ERROR, 'SHAPEFILE: Could not write attribute "EFF_LOWERE" to shape'''//trim(objectid)//'''.')
            return
@@ -712,7 +712,7 @@ double precision            :: tmp_x(2), tmp_y(2)
             endif
             
             ! write CRESTLEV
-            j = dbfwriteattribute(shphandle, ishape, id_crestlev, zcrest1d2d(Lb))
+            if(allocated(zcrest1d2d))j = dbfwriteattribute(shphandle, ishape, id_crestlev, zcrest1d2d(Lb))
             if (j /= 1) then
               call mess(LEVEL_ERROR, 'SHAPEFILE: Could not write attribute "CRESTLEV" to shape'''//trim(objectid)//'''.')
               return
@@ -1068,7 +1068,7 @@ double precision            :: tmp_x(2), tmp_y(2), snkx, snky, srcx, srcy, tmp_q
          endif
          
          ! write area
-         j = dbfwriteattribute(shphandle, ishape, id_area, arsrc(i))
+         if(allocated(arsrc)) j = dbfwriteattribute(shphandle, ishape, id_area, arsrc(i))
          if (j /= 1) then
            call mess(LEVEL_ERROR, 'SHAPEFILE: Could not write attribute "AREA" to shape'''//trim(objectid)//'''.')
            return
