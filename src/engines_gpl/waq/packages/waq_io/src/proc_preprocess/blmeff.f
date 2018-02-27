@@ -38,7 +38,7 @@
       integer, parameter :: maxtok=8
       integer, parameter :: maxnz=51
       integer ifnd (maxspe)
-      real*8 fun(51,maxspe), der(51,maxspe), zvec(51),
+      real*8 power(51), effic(51,maxspe), fun(51,maxspe), der(51,maxspe), zvec(51),
      &       daymul(24,maxspe), dl(24)
       character*8 token,                  spnam2 (maxspe)
       integer gets, posit, match, uprcas, stos, lenstr, wipe
@@ -96,6 +96,7 @@
 !
          read (lunblm,290) nz,tefcur
   290    format (i5,5x,f10.2)
+  291    format (i5,5x,f10.2,5x,a)
          read (lunblm,300) (zvec(i),i=1,nz)
   300    format (10(d15.8,3x))
   301    format (30(d15.8,3x))
@@ -108,7 +109,7 @@
 !
 !  Let bleffpro read the lightcurves, and calculate the efficiency database from that
 !
-         call bleffpro(lunrep, lunblm, numtyp, nz, zvec, fun, der) 
+         call bleffpro(lunrep, lunblm, numtyp, nz, power, effic, zvec, fun, der) 
       end if
 
       do 320 i=1,24
@@ -118,21 +119,46 @@
 !
 ! Write names of those groups and types that were selected.
 !
-      write (lunfrm,245)
-  245 format ('BLOOMFRM_VERSION_2.00')
+      if (verspe.lt.2.0) then
+          write (lunfrm,245)
+      else
+          write (lunfrm,246)
+      end if
+  245 format ('BLOOMFRM_VERSION_2.00') ! frm version 2.00: added a list of the selected group and type names
+  246 format ('BLOOMFRM_VERSION_2.01') ! frm version 2.01: added the light curves of the selected groups
       write (lunfrm,250) grname(1:nuecog)
       write (lunfrm,250) typnam(1:noalg)
   250 format (30(A10,X))
 !
+! Write the light curves the groups that were selected.
+!
+      if (verspe.ge.2.0) then
+          write (lunfrm,291) nz, tefcur, 'lightintensity_efficiency_curves'
+          do 335 i=1,nz
+             write (lunfrm,301) power(i), (effic(i,ifnd(j)),j=1,nuecog)
+  335     continue
+      end if
+!
 ! Write the efficiency data for those species that were selected.
 !
-      write (lunfrm,290) nz,tefcur
-      write (lunfrm,300) (zvec(i),i=1,nz)
-      write (lunfrm,290) nz
-      do 340 i=1,nz
-         write (lunfrm,301) (fun(i,ifnd(j)),j=1,nuecog)
-         write (lunfrm,301) (der(i,ifnd(j)),j=1,nuecog)
-  340 continue
+      if (verspe.ge.2.0) then
+          write (lunfrm,291) nz,tefcur, 'zvec_fun_lookuptable'
+          do i=1,nz
+             write (lunfrm,301) zvec(i), (fun(i,ifnd(j)),j=1,nuecog)
+          enddo
+          write (lunfrm,291) nz,tefcur, 'zvec_der_lookuptable'
+          do i=1,nz
+             write (lunfrm,301) zvec(i), (der(i,ifnd(j)),j=1,nuecog)
+          enddo
+      else    
+          write (lunfrm,290) nz,tefcur
+          write (lunfrm,300) (zvec(i),i=1,nz)
+          write (lunfrm,290) nz
+          do 340 i=1,nz
+             write (lunfrm,301) (fun(i,ifnd(j)),j=1,nuecog)
+             write (lunfrm,301) (der(i,ifnd(j)),j=1,nuecog)
+  340     continue
+      endif 
       do 350 i=1,24
          write (lunfrm,330) dl(i),(daymul(i,ifnd(j)),j=1,nuecog)
   350 continue

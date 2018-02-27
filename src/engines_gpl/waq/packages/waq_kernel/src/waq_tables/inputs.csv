@@ -728,14 +728,14 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "vtrans    ","XLenFrom  ",   8,"N","x",0
 "vtrans    ","XLenTo    ",   9,"N","x",0
 "vtrans    ","Disp3     ",  10,"Y","x",0
-"EffMBlo_P ","NAlgBloom ",   1,"Y"," ",1
+"EffMBlo_P ","SWBLMEffi ",   1,"Y"," ",1
 "EffMBlo_P ","Temp      ",   2,"Y","x",1
 "EffMBlo_P ","Rad       ",   3,"N","x",1
 "EffMBlo_P ","ExtVl     ",   4,"N","x",1
 "EffMBlo_P ","Depth     ",   5,"N","x",1
 "EffMBlo_P ","DayL      ",   6,"Y","x",1
 "EffMBlo_P ","DELT      ",   7,"N","x",1
-"EffMBlo   ","NAlgBloom ",   1,"Y"," ",1
+"EffMBlo   ","SWBLMEffi ",   1,"Y"," ",1
 "EffMBlo   ","Temp      ",   2,"Y","x",1
 "EffMBlo   ","Rad       ",   3,"N","x",1
 "EffMBlo   ","ExtVl     ",   4,"N","x",1

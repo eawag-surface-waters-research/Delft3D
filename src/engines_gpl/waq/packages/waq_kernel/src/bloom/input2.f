@@ -314,23 +314,42 @@
 !----------------------------------------------------------------------
 !  Input section for FORMATTED read of efficiency curves!
 !
+      VERFRM = 1.0
       READ ( INEFF    , '(A)' ) ALINE
-      IOFF =  INDEX(ALINE, 'BLOOMFRM_VERSION_2.00')
+      IOFF =  INDEX(ALINE, 'BLOOMFRM_VERSION')
       IF(IOFF.EQ.0) THEN
          REWIND( INEFF )
       ELSE
+         READ (ALINE(IOFF+17:IOFF+20),*) VERFRM
          READ (INEFF,199) (GRNAME(J),J=1,NUECOG)
          READ (INEFF,199) (SPNAME(I),I=1,NUSPEC)
+         IF(VERFRM.GT.2.00) THEN
+            READ (INEFF,*) NZ
+            DO I=1,NZ
+               READ (INEFF,*) POWER(I), (EFFIC(I,J),J=1,NUECOG)
+            END DO
+         ENDIF
+      ENDIF
+      IF(VERFRM.GT.2.00) THEN
+         READ (INEFF,200) NZ,TEFCUR
+         DO I=1,NZ
+            READ (INEFF,210) ZVEC(I), (FUN(I,J),J=1,NUECOG)
+         ENDDO
+         READ (INEFF,200) NZ,TEFCUR
+         DO I=1,NZ
+            READ (INEFF,210) ZVEC(I), (DER(I,J),J=1,NUECOG)
+         ENDDO 
+      ELSE
+         READ (INEFF,200) NZ,TEFCUR
+         READ (INEFF,210) (ZVEC(I),I=1,NZ)
+         READ (INEFF,200) NZ
+         DO 220 I=1,NZ
+         READ (INEFF,210) (FUN(I,J),J=1,NUECOG)
+  220    READ (INEFF,210) (DER(I,J),J=1,NUECOG)
       ENDIF
   199 FORMAT (30(A10,X))
-      READ (INEFF,200) NZ,TEFCUR
   200 FORMAT (I5,5X,F10.2)
-      READ (INEFF,210) (ZVEC(I),I=1,NZ)
   210 FORMAT (10(D15.8,3X))
-      READ (INEFF,200) NZ
-      DO 220 I=1,NZ
-      READ (INEFF,210) (FUN(I,J),J=1,NUECOG)
-  220 READ (INEFF,210) (DER(I,J),J=1,NUECOG)
       DO 230 I=1,24
   230 READ (INEFF,240) DL(I),(DAYMUL(I,J),J=1,NUECOG)
   240 FORMAT (11F5.0)

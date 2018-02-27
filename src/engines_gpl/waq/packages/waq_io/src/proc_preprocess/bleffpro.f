@@ -30,14 +30,13 @@
 ! * the user may specify the photosynthetic curves tablelized          *
 ! **********************************************************************
 !
-      subroutine bleffpro(lunrep, lunblm, nuecog, nz, zvec, fun, der) 
+      subroutine bleffpro(lunrep, lunblm, nuecog, nz, power, effic, zvec, fun, der) 
       
       implicit none 
-      dimension power(51),solvec(51),rho(51,30),fun(51,30),der(51,30),
+      dimension power(51),solvec(51),effic(51,30),fun(51,30),der(51,30),
      1          sfirst(51),solar(51),time(51),cdf(51),freq(51),
      2          dens(51),tsol(51),tden(51),domf(51),rfirst(51,30),
      3          gfun(51),gder(51),zvec(51),daymul(24,30),dl(24)
-      common/effcny/rho,power
       common/solrad/tsol,tden,freq,nval
       common/solval/delsol,solmax,day
       character*5 table
@@ -45,7 +44,7 @@
       character*265 outputfile
       integer lunblm, lunrep
       integer irc, npoint, i, j, k, nsp, nval, nz
-      real*8 power, rho, solvec, time, solar, cdf, dens, freq, tsol, tden, domf
+      real*8 power, effic, solvec, time, solar, cdf, dens, freq, tsol, tden, domf
       real*8 rfirst, zvec, done, dneg, sfirst, gfun, gder, fun, der
       real*8 daymul, dl, delsol, solmax, day
 !
@@ -60,7 +59,7 @@
 !
    15 continue
       do 20 i=1,npoint
-   20 read (lunblm,*) power(i),(rho(i,j),j=1,nuecog)
+   20 read (lunblm,*) power(i),(effic(i,j),j=1,nuecog)
 !
 !  Read, integrate, and transform diurnal intensity distribution
 !  Read number of points in solar radiation distribution
@@ -81,7 +80,7 @@
 !
 !  Transform efficiency data
 !
-      call inteff(npoint,nuecog,domf,rfirst)
+      call inteff(npoint,nuecog,domf,rfirst,effic,power)
 !
 !  Determine appropriate tabulation points for convolution
 !  nz is the number of points desired in the convolution (max 51)
@@ -112,10 +111,9 @@
 !  Subroutine to adjust lower end of efficiency data and transform it
 !  to a logarithmic form
 !
-      subroutine inteff(npoint,nuecog,domf,rfirst)
+      subroutine inteff(npoint,nuecog,domf,rfirst,effic,power)
       implicit none
       dimension effic(51,30),power(51),domf(51),rfirst(51,30),e(30)
-      common/effcny/effic,power
       integer npoint, nuecog, i, j, i1
       real*8 power, p, effic, e, rfirst, domf
 !

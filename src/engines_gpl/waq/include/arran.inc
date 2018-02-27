@@ -21,10 +21,10 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-      COMMON/ARRAN/FUN(51,MS),DER(51,MS),ZVEC(51),DAYMUL(24,MS),DL(24),
-     1             AROOT(2*MT),EULIGH,TEFCUR,NZ,LDAYEU
-      REAL*8       FUN,DER,ZVEC,DAYMUL,DL,
-     1             AROOT,EULIGH,TEFCUR
+      COMMON/ARRAN/FUN(51,MS),DER(51,MS),ZVEC(51),DAYMUL(24,MS),DL(24),VERFRM,
+     1             AROOT(2*MT),EULIGH,TEFCUR,NZ,LDAYEU,POWER(51),EFFIC(51,MS)
+      REAL*8       FUN,DER,ZVEC,DAYMUL,DL,VERFRM,
+     1             AROOT,EULIGH,TEFCUR,POWER,EFFIC
       INTEGER      NZ, LDAYEU
 C Section to be included in the following programs:
 C BLOOM

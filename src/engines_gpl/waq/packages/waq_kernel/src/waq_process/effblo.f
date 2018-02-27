@@ -50,6 +50,7 @@
 
 !     arguments
 
+      integer  sweff      ! input , Switch to use classic(1) or direct(2) BLOOM Efficiency calculation
       real     temper     ! input , temperature
       real     radiat     ! input , radiation
       real     ext        ! input , total extinction
@@ -73,6 +74,7 @@
 
          if ( btest(iknmrk(iseg),0) ) then
 
+            SWEff  = nint(pmsa( ipnt(  1) ))
             Temper = pmsa( ipnt(  2) )
             Radiat = pmsa( ipnt(  3) ) * 60.48  ! Conversion from W/m2 to J/cm2/7days
             Ext    = pmsa( ipnt(  4) )
@@ -81,7 +83,7 @@
 !     test for extinction and depth to prevent diff by zero!!
             effi = 0.0e0
             if(ext.gt.0.0e0 .and. depthw.gt.0.0e0) then
-               call get_effi( temper, radiat, ext   , depthw, daylen, nspe  , effi )
+               call get_effi( SWEff, temper, radiat, ext   , depthw, daylen, nspe  , effi )
             endif
             do ispe = 1, nspe
                pmsa( ipnt(7+ ispe)) = effi(ispe)

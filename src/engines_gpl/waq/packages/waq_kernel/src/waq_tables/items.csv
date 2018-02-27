@@ -11287,3 +11287,4 @@ itemid,itemse,itemex,itemde,itemun,itemnm,itemag,itemda,itemwk,itemgr
 "dEffTALG28","x"," ",   -999.000    ,"(-)                 ","change of efficiency tracer algae group 28        ","volume    ","volume    "," ","                              "
 "dEffTALG29","x"," ",   -999.000    ,"(-)                 ","change of efficiency tracer algae group 29        ","volume    ","volume    "," ","                              "
 "dEffTALG30","x"," ",   -999.000    ,"(-)                 ","change of efficiency tracer algae group 30        ","volume    ","volume    "," ","                              "
+"SWBLMEffi ","x"," ",    1.00000    ,"(-)                 ","Switch to use classic(1) or direct(2) BLOOM Eff   ","volume    ","volume    "," ","                              "
