@@ -873,49 +873,49 @@ double precision            :: tmp_x(2), tmp_y(2)
       endif
       
       ! write CRESTLEV
-      j = dbfwriteattribute(shphandle, ishape, id_crestlev, bob(1,La))
+      if (allocated(bob)) j = dbfwriteattribute(shphandle, ishape, id_crestlev, bob(1,La))
       if (j /= 1) then
         call mess(LEVEL_ERROR, 'SHAPEFILE: Could not write attribute "CRESTLEV" to shape'''//trim(objectid)//'''.')
         return
       endif
       
       ! write CRESTLEN
-      j = dbfwriteattribute(shphandle, ishape, id_crestlen, crestlxw(ii))
+      if (allocated(crestlxw)) j = dbfwriteattribute(shphandle, ishape, id_crestlen, crestlxw(ii))
       if (j /= 1) then
         call mess(LEVEL_ERROR, 'SHAPEFILE: Could not write attribute "CRESTLEN" to shape'''//trim(objectid)//'''.')
         return
       endif
       
       ! write SILLH_L
-      j = dbfwriteattribute(shphandle, ishape, id_sillhl, shlxw(ii))
+      if (allocated(shlxw)) j = dbfwriteattribute(shphandle, ishape, id_sillhl, shlxw(ii))
       if (j /= 1) then
         call mess(LEVEL_ERROR, 'SHAPEFILE: Could not write attribute "SILLH_L" to shape'''//trim(objectid)//'''.')
         return
       endif
       
       ! write SILLH_R
-      j = dbfwriteattribute(shphandle, ishape, id_sillhr, shrxw(ii))
+      if (allocated(shrxw))  j = dbfwriteattribute(shphandle, ishape, id_sillhr, shrxw(ii))
       if (j /= 1) then
         call mess(LEVEL_ERROR, 'SHAPEFILE: Could not write attribute "SILLH_R" to shape'''//trim(objectid)//'''.')
         return
       endif
       
       ! write TALUDSLP_L
-      j = dbfwriteattribute(shphandle, ishape, id_taludslpl, taludlxw(ii))
+      if (allocated(taludlxw)) j = dbfwriteattribute(shphandle, ishape, id_taludslpl, taludlxw(ii))
       if (j /= 1) then
         call mess(LEVEL_ERROR, 'SHAPEFILE: Could not write attribute "TALUDSLP_L" to shape'''//trim(objectid)//'''.')
         return
       endif
       
       ! write TALUDSLP_R
-      j = dbfwriteattribute(shphandle, ishape, id_taludslpr, taludrxw(ii))
+      if (allocated(taludrxw)) j = dbfwriteattribute(shphandle, ishape, id_taludslpr, taludrxw(ii))
       if (j /= 1) then
         call mess(LEVEL_ERROR, 'SHAPEFILE: Could not write attribute "TALUDSLP_R" to shape'''//trim(objectid)//'''.')
         return
       endif
       
       ! write VEGCOEF
-      j = dbfwriteattribute(shphandle, ishape, id_vegcoef, vegxw(ii))
+      if (allocated(vegxw)) j = dbfwriteattribute(shphandle, ishape, id_vegcoef, vegxw(ii))
       if (j /= 1) then
         call mess(LEVEL_ERROR, 'SHAPEFILE: Could not write attribute "VEGCOEF" to shape'''//trim(objectid)//'''.')
         return
@@ -933,14 +933,14 @@ double precision            :: tmp_x(2), tmp_y(2)
       endif
       
       ! write ADVTYPE
-      j = dbfwriteattribute(shphandle, ishape, id_advtype, iadv(La))
+      if (allocated(iadv)) j = dbfwriteattribute(shphandle, ishape, id_advtype, iadv(La))
       if (j /= 1) then
         call mess(LEVEL_ERROR, 'SHAPEFILE: Could not write attribute "ADVTYPE" to shape'''//trim(objectid)//'''.')
         return
       endif
       
       ! write EFF_WU
-      j = dbfwriteattribute(shphandle, ishape, id_effwu, wu(La))
+      if (allocated(wu)) j = dbfwriteattribute(shphandle, ishape, id_effwu, wu(La))
       if (j /= 1) then
         call mess(LEVEL_ERROR, 'SHAPEFILE: Could not write attribute "EFF_WU" to shape'''//trim(objectid)//'''.')
         return
