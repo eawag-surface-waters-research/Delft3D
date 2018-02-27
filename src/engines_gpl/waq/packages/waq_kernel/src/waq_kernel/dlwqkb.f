@@ -64,6 +64,8 @@
 !
 !     Local
 !
+      logical        stream_access                     ! help variable to detect the type of file access
+      character(20)  access                            ! help variable to detect the type of file access
       CHARACTER*16  MSGTXT(3)
       DATA          MSGTXT / ' REWIND ON      ' , ' WARNING READING' ,
      +                       ' REWIND ERROR   ' /
@@ -95,7 +97,13 @@
 !         normal rewind.
 !
    60 MESSGE = 1
-      REWIND LUNIN
+      inquire( lunin, access = access )
+      stream_access = access == 'STREAM'
+      if (stream_access) then
+         read( lunin, iostat = ierr, pos = 1 )
+      else
+         rewind lunin                            ! Start at the beginning again
+      endif
       IDTIME = IDTIME + ITIME1
       READ ( LUNIN , END=80 , ERR=80 ) ITIME1 , (IARRA1(K),K=1,NFTOT)
       READ ( LUNIN , END=80 , ERR=80 ) ITIME2 , (IARRA2(K),K=1,NFTOT)

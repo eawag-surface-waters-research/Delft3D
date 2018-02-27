@@ -61,6 +61,9 @@
       DIMENSION     ARRAY(NTOT) , RESULT(NOITM,*) ,
      *              IP1  (NOP1) , IP2   (NOP2)
       CHARACTER*(*) LTXT
+      logical        stream_access                     ! help variable to detect the type of file access
+      character(20)  access                            ! help variable to detect the type of file access
+
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwqt5", ithandl )
 !
@@ -70,7 +73,13 @@
 !         if we run with multiple instances, each must be able to
 !         read the file, so rewind it
 !
-      REWIND( LUNIN )
+      inquire( lunin, access = access )
+      stream_access = access == 'STREAM'
+      if (stream_access) then
+         read( lunin, iostat = ierr, pos = 1 )
+      else
+         rewind lunin                            ! Start at the beginning again
+      endif
 !
       ISET = 1
       DO 20 I2 = 1 , NOP2

@@ -60,6 +60,8 @@
 !
 !     Local
 !
+      logical        stream_access                     ! help variable to detect the type of file access
+      character(20)  access                            ! help variable to detect the type of file access
       CHARACTER*10  MSGTXT(3)
       DATA          MSGTXT /' REWIND   ' , ' CONSTANT ' , ' ERROR    '/
       integer(4) ithandl /0/
@@ -78,7 +80,13 @@
 !         normal rewind.
 !
    10 MESSGE = 1
-      REWIND  LUNIN
+      inquire( lunin, access = access )
+      stream_access = access == 'STREAM'
+      if (stream_access) then
+         read( lunin, iostat = ierr, pos = 1 )
+      else
+         rewind lunin                            ! Start at the beginning again
+      endif
       READ  ( LUNIN , END=40 , ERR=40 ) ITIME1 , IARRAY
       GOTO 50
 !
@@ -87,14 +95,26 @@
    20 CONTINUE
       READ  ( LUNIN , END=40 , ERR=40 ) ITIME1 , IARRAY
       READ  ( LUNIN , END=30 , ERR=40 ) ITIME1 , IARRAY
-      REWIND  LUNIN
+      inquire( lunin, access = access )
+      stream_access = access == 'STREAM'
+      if (stream_access) then
+         read( lunin, iostat = ierr, pos = 1 )
+      else
+         rewind lunin                            ! Start at the beginning again
+      endif
       READ  ( LUNIN , END=30 , ERR=40 ) ITIME1 , IARRAY
       goto 9999
 !
 !         file has only one record, array is constant
 !
    30 MESSGE =  2
-      REWIND  LUNIN
+      inquire( lunin, access = access )
+      stream_access = access == 'STREAM'
+      if (stream_access) then
+         read( lunin, iostat = ierr, pos = 1 )
+      else
+         rewind lunin                            ! Start at the beginning again
+      endif
       READ  ( LUNIN , END=40 , ERR=40 ) ITIME1 , IARRAY
       IFFLAG = -1
       GOTO 50

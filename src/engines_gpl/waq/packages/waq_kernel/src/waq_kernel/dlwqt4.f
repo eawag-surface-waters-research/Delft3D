@@ -179,10 +179,14 @@
          ELSE
 !               A steering file is NOT present, then fill the structures with one description
             if ( ipoint(1) .GT. 0 ) UseDefColl%intopt = 1   !   linear interpolation
-            REWIND LLUN                            ! Start at the beginning again
 
             inquire( llun, access = access )
             stream_access = access == 'STREAM'
+            if (stream_access) then
+               read( llun, iostat = ierr, pos = 1 )
+            else
+               rewind llun                            ! Start at the beginning again
+            endif
 
             Prop = FileProp ( LUNTXT(ilt), LLUN, 0, 0, 0, 0, 0, 0, -1, stream_access, NULL(), NULL() )
             iret = FilePropCollAdd( PropColl, Prop, nrftot )  ! UseDef endtime of zero means till end of simulation

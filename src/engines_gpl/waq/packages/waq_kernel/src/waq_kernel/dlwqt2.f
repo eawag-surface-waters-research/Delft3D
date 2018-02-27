@@ -58,6 +58,9 @@
       CHARACTER*(*) LUNTXT
       LOGICAL       ONLINE
       DATA          MSGTXT /' REWIND   ' , ' CONSTANT ' , ' ERROR    '/
+      logical        stream_access                     ! help variable to detect the type of file access
+      character(20)  access                            ! help variable to detect the type of file access
+
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwqt2", ithandl )
 
@@ -81,7 +84,13 @@
 !
    10 MESSGE = 1
       IF ( ONLINE ) STOP 'REWIND NOT POSSIBLE IN ON-LINE MODE'
-      REWIND  LUNIN
+      inquire( lunin, access = access )
+      stream_access = access == 'STREAM'
+      if (stream_access) then
+         read( lunin, iostat = ierr, pos = 1 )
+      else
+         rewind lunin                            ! Start at the beginning again
+      endif
       READ  ( LUNIN , END=40 , ERR=40 ) ITIME1 , RESULT
       GOTO 50
 !
@@ -90,14 +99,26 @@
    20 CONTINUE
       READ  ( LUNIN , END=40 , ERR=40 ) ITIME1 , RESULT
       READ  ( LUNIN , END=30 , ERR=40 ) ITIME1 , RESULT
-      REWIND  LUNIN
+      inquire( lunin, access = access )
+      stream_access = access == 'STREAM'
+      if (stream_access) then
+         read( lunin, iostat = ierr, pos = 1 )
+      else
+         rewind lunin                            ! Start at the beginning again
+      endif
       READ  ( LUNIN , END=30 , ERR=40 ) ITIME1 , RESULT
       goto 9999  !   RETURN
 !
 !         file has only one record, array is constant
 !
    30 MESSGE =  2
-      REWIND  LUNIN
+      inquire( lunin, access = access )
+      stream_access = access == 'STREAM'
+      if (stream_access) then
+         read( lunin, iostat = ierr, pos = 1 )
+      else
+         rewind lunin                            ! Start at the beginning again
+      endif
       READ  ( LUNIN , END=40 , ERR=40 ) ITIME1 , RESULT
       IFFLAG = -1
       GOTO 50

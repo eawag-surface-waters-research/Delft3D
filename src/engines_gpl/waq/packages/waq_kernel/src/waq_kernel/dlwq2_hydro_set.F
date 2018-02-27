@@ -334,7 +334,11 @@
 !
             if ( itFile .lt. aProp%itime1 ) then              ! aparently a remnant from earlier invokation
                UPDATE = .TRUE.                                ! reset everything in this file property
-               rewind ( aProp%ilun )
+               if (aProp%stream_access ) then
+                  read ( aProp%ilun, iostat = ierr, pos = 1 )
+               else
+                  rewind ( aProp%ilun )                       ! this is the standard rewind
+               endif
                read   ( aProp%ilun ) aProp%itime1, (aProp%array1(i2),i2=1,nrftot)
                read   ( aProp%ilun ) aProp%itime2, (aProp%array2(i2),i2=1,nrftot)
 
@@ -385,7 +389,11 @@
                idt = ( (itFile-aProp%istop)/(aProp%istop-aProp%istart) + 1 ) * (aProp%istop-aProp%istart)
                aProp%ioffset = aProp%ioffset + idt
                itFile        = itFile        - idt
-               rewind ( aProp%ilun )                          ! this is the standard rewind
+               if (aProp%stream_access ) then
+                  read ( aProp%ilun, iostat = ierr, pos = 1 )
+               else
+                  rewind ( aProp%ilun )                       ! this is the standard rewind
+               endif
                found = aProp%itime1                           ! save the time in file for the message to the user
 
                read   ( aProp%ilun ) aProp%itime1, (aProp%array1(i2),i2=1,nrftot)
@@ -411,7 +419,11 @@
                if ( itFile .le. aProp%itime2 )                ! only accept timings exactly on breakpoints
      *            call Flinterpol ( aProp, aUseDefColl%array1, aUseDefColl%nrftot,
      *                              aUseDefColl%intopt, aUseDef, itLocal, itFile, UPDATE )
-               rewind ( aProp%ilun )
+               if (aProp%stream_access ) then
+                  read ( aProp%ilun, iostat = ierr, pos = 1 )
+               else
+                  rewind ( aProp%ilun )                       ! this is the standard rewind
+               endif
                read   ( aProp%ilun ) aProp%itime1, (aProp%array1(i2),i2=1,nrftot)
                read   ( aProp%ilun ) aProp%itime2, (aProp%array2(i2),i2=1,nrftot)
 

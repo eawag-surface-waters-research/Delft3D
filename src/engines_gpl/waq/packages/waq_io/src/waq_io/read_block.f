@@ -694,7 +694,11 @@
       read ( lun , iostat = ierr ) strng
       if ( ierr .ne. 0 ) strng = 'x'
       if ( strng(1:14) .ne. 'Steering file ' ) then
-         rewind( lun )
+         if ( type == FILE_BINARY ) then
+            read( lun, iostat = ierr, pos = 1 )
+         else
+            rewind( lun )
+         endif
          !
          ! Determine the number of records - iostat does not seem to distinguish between partly fulfilled
          ! reads and end-of-file
@@ -713,7 +717,11 @@
          ! - Read all the records we have been able to read
          ! - Try reading an extra number (time). This should fail
          !
-         rewind( lun )
+         if ( type == FILE_BINARY ) then
+            read( lun, iostat = ierr, pos = 1 )
+         else
+            rewind( lun )
+         endif
          do i = 1,norcd
              read( lun, iostat = ierr ) time, data
          enddo
