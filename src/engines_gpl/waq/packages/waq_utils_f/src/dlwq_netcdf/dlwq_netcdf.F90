@@ -1136,7 +1136,11 @@ integer function dlwqnc_create_wqvariable( ncidout, mesh_name, wqname, longname,
         dlwqnc_create_wqvariable = ierror
         return
     else if ( ierror == nf90_enameinuse ) then
-        ierror = nf90_inq_varid( ncidout, name, wqid )
+        if ( nolayid /= dlwqnc_type2d ) then
+            ierror = nf90_inq_varid( ncidout, name, wqid )
+        else
+            ierror = nf90_inq_varid( ncidout, name2d, wqid )
+        endif
     endif
 
     ierror = nf90_put_att( ncidout, wqid, "long_name", longname )
