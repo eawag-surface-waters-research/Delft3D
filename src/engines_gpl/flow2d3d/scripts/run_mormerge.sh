@@ -101,7 +101,7 @@ echo "    Working directory: $workdir"
 echo 
 
 bindir=$D3D_HOME/bin
-libdir=$D3D_HOME/libdir
+libdir=$D3D_HOME/lib
 
     # Run
 export LD_LIBRARY_PATH=$libdir:$LD_LIBRARY_PATH
