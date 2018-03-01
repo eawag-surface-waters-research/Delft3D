@@ -1338,7 +1338,8 @@ module m_meteo
                sourceItemId_3 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'cloud_area_fraction')
                if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId)
                if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_2)
-               if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_3)      
+               if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_3)
+               if (.not. success) goto 1234
             else if (ec_filetype == provFile_uniform) then
                sourceItemId  = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'uniform_item')
                success = (sourceItemId /= ec_undef_int)

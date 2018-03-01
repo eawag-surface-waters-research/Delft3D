@@ -22933,6 +22933,7 @@ endif
    use unstruc_messages
    implicit none
    integer :: i
+   integer :: omp_numt
 
    integer :: maxlin
    PARAMETER (MAXLIN = 11)
@@ -22982,7 +22983,12 @@ endif
       WRITE(msgbuf,'(A)') TEX(I); call msg_flush()
    ENDDO
 
+   omp_numt = 0
+#ifdef _OPENMP
    WRITE(msgbuf,'(A,i8)') 'number of threads: ', omp_get_num_threads()  ; call msg_flush()
+#else
+   WRITE(msgbuf,'(A,i8)') 'number of threads: OMP disabled'  ; call msg_flush()
+#endif
 
 
    WRDKEY = 'ACTUAL AND MAXIMUM DIMENSIONS OF DATA'

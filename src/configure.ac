@@ -145,6 +145,18 @@ dnl Check for openmp for fortran 77
 AC_OPENMP
 dnl check if open(...shared) works
 ACX_F77_SHARED_SPECIFIER
+
+POLYPACK_FFLAGS=
+AX_CHECK_COMPILE_FLAG([-r8],
+        [
+        # Intel ifort
+        POLYPACK_FFLAGS=-r8
+        ],[
+        # GNU gfortran
+        POLYPACK_FFLAGS=-fdefault-real-8
+        ])
+AC_SUBST(POLYPACK_FFLAGS)
+
 AC_LANG_POP
 
 # NetCDF, for fortran 90...
