@@ -11108,7 +11108,7 @@ itemid,itemse,itemex,itemde,itemun,itemnm,itemag,itemda,itemwk,itemgr
 "PSedCAAP  ","x"," ",   -999.000    ,"(-)                 ","sedimentation probability <0-1> AAP               ","volume    ","volume    "," ","                              "
 "fSedCAAP  ","x"," ",   -999.000    ,"(gP/m2/d)           ","sedimentation flux AAP towards S1                 ","volume    ","volume    "," ","                              "
 "VxSedCAAP "," ","x",   -999.000    ,"(m/s)               ","sedimentation velocity AAP                        ","volume    ","volume    "," ","                              "
-"AttribIdx ","x"," ",    1.00000    ,"(-)                 ","index of the attribute                            ","volume    ","volume    "," ","                              "
+"AttribIdx ","x"," ",    1.00000    ,"(-)                 ","index of the attribute requested (0=all)          ","volume    ","volume    "," ","                              "
 "Attribute ","x"," ",   -999.000    ,"(-)                 ","value of the attribute                            ","volume    ","volume    "," ","                              "
 "Cascade1  ","x"," ",   -999.000    ,"(g/m3/d)            ","Cascade substance 1 (C1)                          ","volume    ","volume    ","x","DummyGroup                    "
 "Cascade2  ","x"," ",    0.00000    ,"(g/m3/d)            ","Cascade substance 2 (C2)                          ","volume    ","volume    ","x","DummyGroup                    "
