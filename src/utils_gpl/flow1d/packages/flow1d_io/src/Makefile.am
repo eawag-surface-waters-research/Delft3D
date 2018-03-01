@@ -17,8 +17,8 @@ noinst_LTLIBRARIES = libflow1d_io.la
 FMODULES += \
   -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src \
   -I$(top_builddir)/utils_lgpl/ec_module/packages/ec_module/src \
-  -I$(top_builddir)/utils_lgpl/io_netcdf/packages/io_netcdf/src \ 
-  -I$(top_builddir)/utils_lgpl/gridgeom/packages/gridgeom/src \ 
+  -I$(top_builddir)/utils_lgpl/io_netcdf/packages/io_netcdf/src \
+  -I$(top_builddir)/utils_lgpl/gridgeom/packages/gridgeom/src \
   -I$(builddir)/../../flow1d_core/src \
   -I$(NETCDF_FORTRAN_LIBS)
 
