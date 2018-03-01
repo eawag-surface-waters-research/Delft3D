@@ -89,6 +89,9 @@ if [ ! -d $D3D_HOME ]; then
 fi
 export D3D_HOME
  
+if [ -z "$scriptfile" ]; then
+    export scriptfile=$D3D_HOME/bin/mormerge.tcl
+fi
 if [ ! -f $scriptfile ]; then
     echo "ERROR: scriptfile $scriptfile does not exist"
     print_usage_info

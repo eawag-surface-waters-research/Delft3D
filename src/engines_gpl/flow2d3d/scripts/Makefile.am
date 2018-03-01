@@ -13,7 +13,6 @@ dist_bin_SCRIPTS = \
 	run_dflow2d3d_fluidmud.sh \
 	run_dflow2d3d_parallel.sh \
 	run_dflow2d3d_parallel_dwaves.sh \
-	run_mormerge.sh
-
-dist_pkgdata_DATA = \
+	run_mormerge.sh \
 	mormerge.tcl
+
