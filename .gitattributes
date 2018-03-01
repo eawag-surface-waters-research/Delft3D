@@ -120,7 +120,6 @@ examples/05_mormerge/merge/basin_linux.mm -text
 examples/05_mormerge/merge/basin_windows.mm -text
 examples/05_mormerge/merge/run.bat -text
 examples/05_mormerge/merge/run.sh -text
-examples/05_mormerge/merge/run_flow2d3d_wave_mormerge.bat -text
 examples/05_mormerge/merge/run_flow2d3d_wave_mormerge.sh -text
 examples/05_mormerge/merge/run_mormerge_alternative.bat -text
 examples/05_mormerge/merge/run_mormerge_alternative.sh -text
@@ -1656,6 +1655,7 @@ src/engines_gpl/flow2d3d/scripts/run_dflow2d3d_parallel.bat -text
 src/engines_gpl/flow2d3d/scripts/run_dflow2d3d_parallel.sh -text
 src/engines_gpl/flow2d3d/scripts/run_dflow2d3d_parallel_dwaves.bat -text
 src/engines_gpl/flow2d3d/scripts/run_dflow2d3d_parallel_dwaves.sh -text
+src/engines_gpl/flow2d3d/scripts/run_mormerge.bat -text
 src/engines_gpl/flow2d3d/scripts/run_mormerge.sh -text
 src/engines_gpl/part/Makefile.am -text
 src/engines_gpl/part/packages/Makefile.am -text
