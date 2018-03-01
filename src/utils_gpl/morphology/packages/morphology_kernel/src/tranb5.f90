@@ -205,7 +205,7 @@ subroutine tranb5(u         ,v         ,d50       ,d90       ,chezy     , &
     if (crstr) then
        call bailtr(h         ,hrms      ,t         ,theta     ,w         , &
                  & dzdx      ,dzdy      ,sbksi     ,sbeta     ,ssksi     , &
-                 & sseta     ,epssl     ,faca      ,facu      )
+                 & sseta     ,epssl     ,faca      ,facu      ,ag        )
     else
        sbksi = 0.
        sbeta = 0.

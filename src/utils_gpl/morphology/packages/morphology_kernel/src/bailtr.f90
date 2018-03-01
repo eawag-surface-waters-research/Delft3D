@@ -1,6 +1,6 @@
 subroutine bailtr(h         ,hrms      ,tp        ,thetaw    ,w         , &
                 & dzdx      ,dzdy      ,sbksi     ,sbeta     ,ssksi     , &
-                & sseta     ,epssl     ,faca      ,facu      )
+                & sseta     ,epssl     ,faca      ,facu      ,ag        )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2018.                                
@@ -55,6 +55,7 @@ subroutine bailtr(h         ,hrms      ,tp        ,thetaw    ,w         , &
     real(fp), intent(in)               :: epssl
     real(fp), intent(in)               :: faca
     real(fp), intent(in)               :: facu
+    real(fp), intent(in)               :: ag
 !
 !
 ! Local variables
@@ -67,7 +68,6 @@ subroutine bailtr(h         ,hrms      ,tp        ,thetaw    ,w         , &
     real(fp)                       :: even5b
     real(fp)                       :: facb
     real(fp)                       :: facs
-    real(fp)                       :: g
     real(fp)                       :: odd2b
     real(fp)                       :: odd3
     real(fp)                       :: odd3b
@@ -80,14 +80,13 @@ subroutine bailtr(h         ,hrms      ,tp        ,thetaw    ,w         , &
 !
 !! executable statements -------------------------------------------------------
 !
-    g = 9.81
     tanpsi = 0.63
     cr = 0.
     qbb = 0.
     !
     ! interpolate oscillating velocity moments from table
     !
-    call osmom(hrms      ,h         ,tp        ,g         ,cr        , &
+    call osmom(hrms      ,h         ,tp        ,ag        ,cr        , &
              & qbb       ,even1b    ,even2b    ,even3b    ,even5b    , &
              & odd2b     ,odd3b     ,odd4b     )
     !
