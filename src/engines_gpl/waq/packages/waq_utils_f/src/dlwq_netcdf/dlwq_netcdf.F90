@@ -647,7 +647,7 @@ end function dlwqnc_copy_associated
 !     otherwise we get an error "nf90_eedge"
 !
 integer function dlwqnc_copy_int_var( ncidin, ncidout, varin, varout, ndims, dimids, dimsizes )
-    use ISO_C_BINDING
+!   use ISO_C_BINDING
 
     integer, intent(in)                   :: ncidin, ncidout, varin, varout, ndims
     integer, intent(in), dimension(:)     :: dimids, dimsizes
@@ -659,53 +659,31 @@ integer function dlwqnc_copy_int_var( ncidin, ncidout, varin, varout, ndims, dim
     integer                               :: xtype, length, attnum
     integer                               :: oldvarid, newvarid
 
-    integer(kind=c_int), dimension(:), allocatable    :: value
-    integer,             dimension(:,:), allocatable  :: value2d
+!   integer(kind=c_int), dimension(:), allocatable    :: value
+    integer, dimension(:), allocatable    :: value
+    integer, dimension(:,:), allocatable  :: value2d
 
     integer                               :: start, count, chunk
 
-    ! Some systems gave problems when attempting to use the nf90_get_var function
-    interface
-        integer function nc_get_var_int( ncid, varid, ip ) bind(C, name = 'nc_get_var_int')
-            import c_int
-            integer(kind=c_int), value        :: ncid
-            integer(kind=c_int), value        :: varid
-            integer(kind=c_int), dimension(*) :: ip
-        end function nc_get_var_int
-    end interface
-
-
     dlwqnc_copy_int_var = -1
 
+    if ( ndims /= 2 ) then
+        sz = 1
+        do i = 1,ndims
+            sz = sz * dimsizes(dimids(i))
+        enddo
+        allocate( value(sz), stat = ierr )
+        ierror = nf90_get_var( ncidin, varin, value )
+    else
+        allocate( value2d(dimsizes(dimids(1)),dimsizes(dimids(2))), stat = ierr )
+        ierror = nf90_get_var( ncidin, varin, value2d )
+    endif
 
-!   if ( ndims /= 2 ) then
-!       sz = 1
-!       do i = 1,ndims
-!           sz = sz * dimsizes(dimids(i))
-!       enddo
-!       allocate( value(sz), stat = ierr )
-!       write(*,*) '    ERROR CODE (n):', ierr
-!       ierror = nf90_get_var( ncidin, varin, value )
-!   else
-!       allocate( value2d(dimsizes(dimids(1)),dimsizes(dimids(2))), stat = ierr )
-!       write(*,*) '    ERROR CODE (2):', ierr
-!       ierror = nf90_get_var( ncidin, varin, value2d )
-!   endif
-
-    sz = 1
-    do i = 1,ndims
-       sz = sz * dimsizes(dimids(i))
-    enddo
-    allocate( value(sz), stat = ierr )
-    ierror = nc_get_var_int( int(ncidin,kind=c_int), int(varin,kind=c_int), value )
-
-    ierror = nf90_put_var( ncidout, varout, value )
-
-!    if ( ndims /= 2 ) then
-!        ierror = nf90_put_var( ncidout, varout, value )
-!    else
-!        ierror = nf90_put_var( ncidout, varout, value2d )
-!    endif
+    if ( ndims /= 2 ) then
+        ierror = nf90_put_var( ncidout, varout, value )
+    else
+        ierror = nf90_put_var( ncidout, varout, value2d )
+    endif
 
     if ( ierror /= nf90_noerr ) then
         dlwqnc_copy_int_var = ierror
@@ -730,7 +708,6 @@ integer function dlwqnc_copy_real_var( ncidin, ncidout, varin, varout, ndims, di
     real, dimension(:,:), allocatable     :: value2d
 
     dlwqnc_copy_real_var = -1
-
 
     if ( ndims /= 2 ) then
         sz = 1
@@ -779,7 +756,6 @@ integer function dlwqnc_copy_double_var( ncidin, ncidout, varin, varout, ndims, 
     real(kind=kind(1.0d0)), dimension(:,:), allocatable :: value2d
 
     dlwqnc_copy_double_var = -1
-
 
     if ( ndims /= 2 ) then
         sz = 1
