@@ -114,7 +114,8 @@ module m_1d_networkreader
       integer                   :: istat
       integer                   :: ioncid
       integer                   :: numMesh
-      character(len=IdLen)      :: meshname
+      character(len=IdLen)      :: meshName
+      integer                   :: meshIndex
       integer                   :: nNodes
       integer                   :: nGeopoints
       integer                   :: nBranches
@@ -158,14 +159,18 @@ module m_1d_networkreader
       if (numMesh < 1) then
          call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Data Missing')
       endif
-      
-      ierr = ionc_get_mesh_name(ioncid, 1, meshname)
+
+      ! Get Index of 1D-Mesh
+      ierr = ionc_get_1d_mesh_id_ugrid(ioncid, meshIndex)
       if (ierr .ne. 0) then
-         call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error Reading Mesh Name')
+         call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error Reading Mesh ID')
       endif
-      
+      if (meshIndex <= 0) then
+         call SetMessage(LEVEL_FATAL, 'Network UGRID-File: No 1D-Mesh Found')
+      endif
+
       ! Get Number of Nodes
-      ierr = ionc_get_1d_network_nodes_count_ugrid(ioncid, 1, nNodes)
+      ierr = ionc_get_1d_network_nodes_count_ugrid(ioncid, meshIndex, nNodes)
       if (ierr .ne. 0) then
          call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error Reading Number of Nodes')
       endif
@@ -182,7 +187,7 @@ module m_1d_networkreader
       endif
 
       ! Retrieving Node Data
-      ierr = ionc_read_1d_network_nodes_ugrid(ioncid, 1, nodesX, nodesY, nodeids, nodelongnames)
+      ierr = ionc_read_1d_network_nodes_ugrid(ioncid, meshIndex, nodesX, nodesY, nodeids, nodelongnames)
       if (ierr .ne. 0) then
          call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error Reading Node Data')
       endif
@@ -191,7 +196,7 @@ module m_1d_networkreader
       call storeNodes(network%nds, nNodes, nodesX, nodesY, nodeids, nodelongnames)
 
       ! Get Number of Branches
-      ierr = ionc_get_1d_network_branches_count_ugrid(ioncid, 1, nBranches)
+      ierr = ionc_get_1d_network_branches_count_ugrid(ioncid, meshIndex, nBranches)
       if (ierr .ne. 0) then
          call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error Reading Number of Branches')
       endif
@@ -216,19 +221,20 @@ module m_1d_networkreader
       startIndex = 1
       
       ! Retrieving Branch Data
-      ierr = ionc_get_1d_network_branches_ugrid(ioncid, 1, sourcenodeindex, targetnodeindex, branchids, branchlengths, branchlongnames, nbranchgeometrypoints, startIndex)
+      ierr = ionc_get_1d_network_branches_ugrid(ioncid, meshIndex, sourcenodeindex, targetnodeindex, &
+                                                branchids, branchlengths, branchlongnames, nbranchgeometrypoints, startIndex)
       if (ierr .ne. 0) then
          call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error Reading Branch Data')
       endif
       
       ! Retrieving the Branch Order
-      ierr = ionc_get_1d_network_branchorder_ugrid(ioncid, 1, branchOrder)
+      ierr = ionc_get_1d_network_branchorder_ugrid(ioncid, meshIndex, branchOrder)
       if (ierr .ne. 0) then
          call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error Reading Branch Order Data')
       endif
 
       ! Get the number of geometry points 
-      ierr = ionc_get_1d_network_branches_geometry_coordinate_count_ugrid(ioncid, 1, nGeopoints)
+      ierr = ionc_get_1d_network_branches_geometry_coordinate_count_ugrid(ioncid, meshIndex, nGeopoints)
       if (ierr .ne. 0) then
          call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error Reading Number of Geometry Points')
       endif
@@ -243,13 +249,13 @@ module m_1d_networkreader
       endif
 
       ! Retrieving the Geometry Coordinates
-      ierr = ionc_read_1d_network_branches_geometry_ugrid(ioncid, 1, geoX, geoY)
+      ierr = ionc_read_1d_network_branches_geometry_ugrid(ioncid, meshIndex, geoX, geoY)
       if (ierr .ne. 0) then
          call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error Reading Branch Geometry Data')
       endif
       
       ! Get Number of Grid Points
-      ierr = ionc_get_1d_mesh_discretisation_points_count_ugrid(ioncid, 1, nGridPoints)
+      ierr = ionc_get_1d_mesh_discretisation_points_count_ugrid(ioncid, meshIndex, nGridPoints)
       if (ierr .ne. 0) then
          call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error Reading Number of Grid Points')
       endif
@@ -270,7 +276,7 @@ module m_1d_networkreader
       startIndex = 1
       
       ! Retrieve Grid Point Data
-      ierr = ionc_get_1d_mesh_discretisation_points_ugrid(ioncid, 1, gpsBranchIndex, gpsOffSet, startIndex)
+      ierr = ionc_get_1d_mesh_discretisation_points_ugrid(ioncid, meshIndex, gpsBranchIndex, gpsOffSet, startIndex)
       if (ierr .ne. 0) then
          call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error Reading Grid Point Data')
       endif
