@@ -121,7 +121,7 @@
 !        otherwise this is the last one
 !
       IACTION = 0
-      IF ( TIME >= TSTART-0.5*DELT ) THEN
+      IF ( TIME >= TSTART-0.5*DELT .AND. TIME <= TSTOP+0.5*DELT) THEN
          IACTION = 2
          IF ( TIME <= TSTART+0.5*DELT ) THEN
             DO ISEG=1,NOSEG
