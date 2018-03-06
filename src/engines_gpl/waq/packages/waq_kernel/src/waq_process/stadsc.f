@@ -162,6 +162,9 @@
             PMSA(IP6) = TCOUNT
 !
             IF ( TCOUNT .EQ. 1.0 ) THEN
+               PMSA(IP7)  = PMSA(IP1)
+               PMSA(IP8)  = PMSA(IP1)
+            ELSE
                PMSA(IP7)  = MAX( PMSA(IP7), PMSA(IP1) )
                PMSA(IP8)  = MIN( PMSA(IP8), PMSA(IP1) )
             ENDIF
