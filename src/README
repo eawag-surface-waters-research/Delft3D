@@ -24,15 +24,18 @@ Compiling on Linux
   1) In directory "src", do one of the following two options:
      Option A):
          ./autogen.sh
-	 cd third_party_open/kdtree2
-	 ./autogen.sh
-	 cd -
-	 CFLAGS='-O2' CXXFLAGS='-O2' FFLAGS='-O2' FCFLAGS='-O2' ./configure --prefix=`pwd` --with-netcdf --with-mpi --with-metis --with-petsc
+         cd third_party_open/kdtree2
+         ./autogen.sh
+         cd -
+         CFLAGS='-O2' CXXFLAGS='-O2' FFLAGS='-O2' FCFLAGS='-O2' ./configure --prefix=`pwd` --with-netcdf --with-mpi --with-metis --with-petsc
          make ds-install
      Option B):
          Use script build.sh. Executing "./build.sh" will show the usage. The following example line is used to create the latest fully tested version:
          ./build.sh -intel14
          WARNING: build.sh is system dependent. You have to modify it to fit to your site!
+  1b) OPTIONAL: the Delft3D-Flexible Mesh kernel is not built by default. You can do this
+     in a second step as follows. In directory "src", do:
+         FC=mpif90 make ds-install -C engines_gpl/dflowfm
   2) The binaries are installed in directory:
      - "src/bin", "src/lib" and "src/share" (due to "--prefix=`pwd`" and default "install")
        ready to be used by the examples
