@@ -384,12 +384,7 @@ module m_readCrossSections
                totalArea  = 0.0d0
 
                pCs%frictionSectionsCount = 1
-               
-               allocate(pCs%frictionSectionID  (pCs%frictionSectionsCount))      !< Friction Section Identification
-               allocate(pCs%frictionSectionFrom(pCs%frictionSectionsCount))    !<
-               allocate(pCs%frictionSectionTo  (pCs%frictionSectionsCount))      !<
-               pCs%frictionSectionID(1) = 'Main'
-               
+                   
                ! Ground Layer
                call prop_get_integer(md_ptr%child_nodes(i)%node_ptr, '', 'groundlayerUsed', hasGroundLayer, success)
                if (success) then
@@ -427,11 +422,6 @@ module m_readCrossSections
                width(2) = maximumFlowWidth
                 
                pCs%frictionSectionsCount = 1
-               
-               allocate(pCs%frictionSectionID  (pCs%frictionSectionsCount))      !< Friction Section Identification
-               allocate(pCs%frictionSectionFrom(pCs%frictionSectionsCount))    !<
-               allocate(pCs%frictionSectionTo  (pCs%frictionSectionsCount))      !<
-               pCs%frictionSectionID(1) = 'Main'
 
                plains     = 0.0d0
                crestLevel = 0.0d0
@@ -464,11 +454,6 @@ module m_readCrossSections
                endif
 
                pCs%frictionSectionsCount = 1
-               
-               allocate(pCs%frictionSectionID  (pCs%frictionSectionsCount))      !< Friction Section Identification
-               allocate(pCs%frictionSectionFrom(pCs%frictionSectionsCount))    !<
-               allocate(pCs%frictionSectionTo  (pCs%frictionSectionsCount))      !<
-               pCs%frictionSectionID(1) = 'Main'
             
                ! Ground Layer
                call prop_get_integer(md_ptr%child_nodes(i)%node_ptr, '', 'groundlayerUsed', hasGroundLayer, success)
@@ -492,8 +477,28 @@ module m_readCrossSections
                call SetMessage(LEVEL_ERROR, 'Incorrect CrossSection type for CrossSection with given type '//trim(typestr)//' and id: '//trim(id))
                success = .false.
                
-         end select
+            end select
+            
+            if (success .and. crossType /= CS_YZ_PROF) then
+               allocate(pCs%frictionSectionID  (pCs%frictionSectionsCount))      !< Friction Section Identification
+               allocate(pCs%frictionSectionFrom(pCs%frictionSectionsCount))    !<
+               allocate(pCs%frictionSectionTo  (pCs%frictionSectionsCount))      !<
+               
+               call prop_get_strings(md_ptr%child_nodes(i)%node_ptr, '', 'roughnessNames', pCs%frictionSectionsCount, pCS%frictionSectionID, success)
 
+               if (.not. success) then
+                  ! use defaults
+                  pCs%frictionSectionID(1) = 'Main'
+                  if (pCs%frictionSectionsCount >=2) then
+                     pCs%frictionSectionID(2) = 'FloodPlain1'
+                  endif
+                  if (pCs%frictionSectionsCount ==3) then
+                     pCs%frictionSectionID(3) = 'FloodPlain2'
+                  endif
+               endif
+               success = .true.
+            endif
+            
          if (success) then
             network%CSDefinitions%count = inext
          endif
@@ -757,18 +762,7 @@ module m_readCrossSections
       else
          pCs%frictionSectionsCount = 1
       endif
-      
-      allocate(pCs%frictionSectionID  (pCs%frictionSectionsCount))      !< Friction Section Identification
-      allocate(pCs%frictionSectionFrom(pCs%frictionSectionsCount))    !<
-      allocate(pCs%frictionSectionTo  (pCs%frictionSectionsCount))      !<
-      pCs%frictionSectionID(1) = 'Main'
-      if (pCs%frictionSectionsCount >=2) then
-         pCs%frictionSectionID(2) = 'FloodPlain1'
-      endif
-      if (pCs%frictionSectionsCount ==3) then
-         pCs%frictionSectionID(3) = 'FloodPlain2'
-      endif
-      
+            
       deallocate(height)
       deallocate(width)
       deallocate(TotalWidth)
