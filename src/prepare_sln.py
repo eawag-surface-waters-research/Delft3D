@@ -41,6 +41,7 @@ else:
 chooseIfort = 1
 
 vs = -999
+fw = -999
 ifort = -999
 
 #
@@ -140,13 +141,13 @@ toolsversion[2017] = "14.0"
 #
 # frameworkversion specifies the .Net frameworknumber
 frameworkversion = {}
-frameworkversion[2010] = "4.0"
-frameworkversion[2012] = "4.5"
-frameworkversion[2013] = "4.5"
-frameworkversion[2014] = "4.5"
-frameworkversion[2015] = "4.6"
-frameworkversion[2016] = "4.6"
-frameworkversion[2017] = "4.6"
+frameworkversion[42] = "4.2"
+frameworkversion[43] = "4.3"
+frameworkversion[44] = "4.4"
+frameworkversion[45] = "4.5"
+frameworkversion[46] = "4.6"
+frameworkversion[47] = "4.7"
+frameworkversion[48] = "4.8"
 
 #
 #
@@ -192,6 +193,7 @@ getucrtdir["2017"] = '"' + str(os.environ.get("VS140COMNTOOLS")) + "..\\..\\VC\\
 # files are in fixed locations (see below).
 def process_solution_file(sln, slntemplate):
     global vs
+    global fw
     global ifort
     global libdir
     global redistdir
@@ -231,37 +233,37 @@ def process_solution_file(sln, slntemplate):
             startpos = line.find("Microsoft Visual Studio Solution File, Format Version")
             if startpos == 0:
                 if vs == 2010:
-                    line = "Microsoft Visual Studio Solution File, Format Version 11.00\n"
+                    line = "Microsoft Visual Studio Solution File, Format Version 11.00\r\n"
                 elif vs == 2012:
-                    line = "Microsoft Visual Studio Solution File, Format Version 12.00\n"
+                    line = "Microsoft Visual Studio Solution File, Format Version 12.00\r\n"
                 elif vs == 2013:
-                    line = "Microsoft Visual Studio Solution File, Format Version 12.00\n"
+                    line = "Microsoft Visual Studio Solution File, Format Version 12.00\r\n"
                 elif vs == 2014:
-                    line = "Microsoft Visual Studio Solution File, Format Version 12.00\n"
+                    line = "Microsoft Visual Studio Solution File, Format Version 12.00\r\n"
                 elif vs == 2015:
-                    line = "Microsoft Visual Studio Solution File, Format Version 12.00\n"
+                    line = "Microsoft Visual Studio Solution File, Format Version 12.00\r\n"
                 elif vs == 2016:
-                    line = "Microsoft Visual Studio Solution File, Format Version 12.00\n"
+                    line = "Microsoft Visual Studio Solution File, Format Version 12.00\r\n"
                 elif vs == 2017:
-                    line = "Microsoft Visual Studio Solution File, Format Version 12.00\n"
+                    line = "Microsoft Visual Studio Solution File, Format Version 12.00\r\n"
                 # else:
                     # leave line unchanged
             startpos = line.find("# Visual Studio")
             if startpos == 0:
                 if vs == 2010:
-                    line = "# Visual Studio 2010\n"
+                    line = "# Visual Studio 2010\r\n"
                 elif vs == 2012:
-                    line = "# Visual Studio 2012\n"
+                    line = "# Visual Studio 2012\r\n"
                 elif vs == 2013:
-                    line = "# Visual Studio 2013\n"
+                    line = "# Visual Studio 2013\r\n"
                 elif vs == 2014:
-                    line = "# Visual Studio 2014\n"
+                    line = "# Visual Studio 2014\r\n"
                 elif vs == 2015:
-                    line = "# Visual Studio 2015\n"
+                    line = "# Visual Studio 2015\r\n"
                 elif vs == 2016:
-                    line = "# Visual Studio 2016\n"
+                    line = "# Visual Studio 2016\r\n"
                 elif vs == 2017:
-                    line = "# Visual Studio 2017\n"
+                    line = "# Visual Studio 2017\r\n"
                 # else:
                     # leave line unchanged
             filouthandle.write(line)
@@ -284,6 +286,7 @@ def process_solution_file(sln, slntemplate):
 # process a VisualStudio Project File
 def process_project_file(pfile):
     global vs
+    global fw
     global ifort
     global libdir
     global redistdir
@@ -335,11 +338,11 @@ def process_project_file(pfile):
                     line = '"'.join(parts)
             #
             # FrameworkVersion
-            # Skip this change when vs=0
-            if vs != 0:
+            # Skip this change when fw=0
+            if fw != 0:
                 startpos = line.find("<TargetFrameworkVersion>")
                 if startpos != -1:
-                    line = line[:startpos+25] + frameworkversion[vs] + line[startpos+28:]
+                    line = line[:startpos+25] + frameworkversion[fw] + line[startpos+28:]
             #
             # PlatformToolSet:
             # Skip this change when vs=0
@@ -352,7 +355,7 @@ def process_project_file(pfile):
                     # such that it will be added after the CharacterSet line
                     if platformtoolset[vs] != "":
                         filouthandle.write(line)
-                        line = platformtoolset[vs] + "\n"
+                        line = platformtoolset[vs] + "\r\n"
                 elif line.find("PlatformToolset") != -1:
                     #
                     # Remove the original PlatformToolset line (if present)
@@ -509,6 +512,7 @@ def exit_button_pressed():
 # Process the selected vs and intel version
 def do_work():
     global vs
+    global fw
     global ifort
     global libdir
     global redistdir
@@ -518,8 +522,10 @@ def do_work():
     if vs == -999 or ifort == -999:
         vs = vs_gui.get()
         ifort = ifort_gui.get()
-    sys.stdout.write("Visual Studio Version : " + str(vs) + "\n")
-    sys.stdout.write("Intel Fortran Version : " + str(ifort) + "\n")
+        fw = fw_gui.get()
+    sys.stdout.write("Visual Studio  Version : " + str(vs) + "\n")
+    sys.stdout.write(".Net Framework Version : " + str(fw) + "\n")
+    sys.stdout.write("Intel Fortran  Version : " + str(ifort) + "\n")
 
     # Needed for VS2015 and higher:
     getUCRTVersionNumber()
@@ -544,25 +550,39 @@ def do_work():
 # Create GUI
 def build_gui():
     global vs_gui
+    global fw_gui
     global ifort_gui
     global root
     global chooseIfort
 
     root = Tk(className="Choose IDE and compiler")
-    root.geometry("650x350")
+    root.geometry("750x350")
     
     vs_gui = IntVar()
+    fw_gui = IntVar()
     ifort_gui = IntVar()
     
     Label(text="Visual Studio Version:", relief=RIDGE, width=20).grid(row=0, column=0)
     
-    Radiobutton(root, text="VS 2017 (not tested yet)              ", variable=vs_gui, value=2017).grid(row=1, column=0, sticky=W)
-    Radiobutton(root, text="VS 2015, Update 3 + .Net Framework 4.6", variable=vs_gui, value=2015).grid(row=2, column=0, sticky=W)
-    Radiobutton(root, text="VS 2013           + .Net Framework 4.5", variable=vs_gui, value=2013).grid(row=3, column=0, sticky=W)
-    Radiobutton(root, text="VS 2012           + .Net Framework 4.5", variable=vs_gui, value=2012).grid(row=4, column=0, sticky=W)
-    Radiobutton(root, text="VS 2010           + .Net Framework 4.0", variable=vs_gui, value=2010).grid(row=5, column=0, sticky=W)
+    Radiobutton(root, text="VS 2017 (not tested yet) ", variable=vs_gui, value=2017).grid(row=1, column=0, sticky=W)
+    Radiobutton(root, text="VS 2015, Update 3        ", variable=vs_gui, value=2015).grid(row=2, column=0, sticky=W)
+    Radiobutton(root, text="VS 2013                  ", variable=vs_gui, value=2013).grid(row=3, column=0, sticky=W)
+    Radiobutton(root, text="VS 2012                  ", variable=vs_gui, value=2012).grid(row=4, column=0, sticky=W)
+    Radiobutton(root, text="VS 2010                  ", variable=vs_gui, value=2010).grid(row=5, column=0, sticky=W)
     # default value
     vs_gui.set(2015)
+    
+    Label(text=".Net Framwork Version:", relief=RIDGE, width=20).grid(row=0, column=1)
+    
+    Radiobutton(root, text=".Net Framework 4.8", variable=fw_gui, value=48).grid(row=1, column=1, sticky=W)
+    Radiobutton(root, text=".Net Framework 4.7", variable=fw_gui, value=47).grid(row=2, column=1, sticky=W)
+    Radiobutton(root, text=".Net Framework 4.6", variable=fw_gui, value=46).grid(row=3, column=1, sticky=W)
+    Radiobutton(root, text=".Net Framework 4.5", variable=fw_gui, value=45).grid(row=4, column=1, sticky=W)
+    Radiobutton(root, text=".Net Framework 4.4", variable=fw_gui, value=44).grid(row=5, column=1, sticky=W)
+    Radiobutton(root, text=".Net Framework 4.3", variable=fw_gui, value=43).grid(row=6, column=1, sticky=W)
+    Radiobutton(root, text=".Net Framework 4.2", variable=fw_gui, value=42).grid(row=7, column=1, sticky=W)
+    # default value
+    fw_gui.set(46)
     
     if chooseIfort == 1:
         Label(text="IFORT Version:", relief=RIDGE, width=20).grid(row=0, column=2)
@@ -580,7 +600,7 @@ def build_gui():
     
     Label(text=" ").grid(row=8)
     if chooseIfort == 1:
-        Label(text="Choose your Visual Studio version and IFORT version and click 'Apply'").grid(row=9, column=0, columnspan=3)
+        Label(text="Choose your Visual Studio version, .Net Framework version and IFORT version and click 'Apply'").grid(row=9, column=0, columnspan=3)
     else:
         Label(text="Choose your Visual Studio version and click 'Apply'").grid(row=9, column=0, columnspan=3)
     
@@ -599,11 +619,15 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Create sln file and change project files')
     parser.add_argument('-vs', '--visualstudio',
                               help='Specify VisualStudio version')
+    parser.add_argument('-fw', '--framework',
+                              help='Specify .Net Framework version')
     parser.add_argument('-ifort', '--ifort',
                               help='Specify Intel Visual Fortran version')
     args = parser.parse_args()
     if args.visualstudio:
         vs = int(args.visualstudio)
+    if args.framework:
+        fw = int(args.framework)
     if args.ifort:
         ifort = int(args.ifort)
     
