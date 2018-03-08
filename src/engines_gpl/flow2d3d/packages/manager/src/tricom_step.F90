@@ -340,6 +340,7 @@ subroutine tricom_step(olv_handle, gdp)
   
     integer                                       :: ierror        ! Value is non-zero when an error is encountered
     integer                                       :: istat
+    integer                                       :: nmaxddb
     integer                                       :: iofset        ! Shift of inner part of matrix to remove strips
     integer                                       :: lunfil
     integer                            , external :: modlen
@@ -624,6 +625,9 @@ subroutine tricom_step(olv_handle, gdp)
     sleepduringwave     => gdp%gdtricom%sleepduringwave
     !  
     call timer_start(timer_simulation, gdp)
+    !
+    nmaxddb = nmax + 2*gdp%d%ddbound
+    iofset  = 2*nmaxddb
     !
     error = .false.
     ifcore(1) = 0
