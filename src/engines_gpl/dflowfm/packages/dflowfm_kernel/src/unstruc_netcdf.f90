@@ -6892,8 +6892,8 @@ end subroutine unc_write_map_filepointer
 subroutine unc_write_net(filename, janetcell, janetbnd, jaidomain, jaiglobal_s, iconventions)
     character(len=*), intent(in) :: filename
 
-    integer, optional, intent(in) :: janetcell  !< write additional network cell information (1) or not (0). Default: 1.
-    integer, optional, intent(in) :: janetbnd   !< write additional network boundary information (1) or not (0). Default: 1.
+    integer, optional, intent(in) :: janetcell  !< write additional network cell information (1) or not (0). Default: 0.
+    integer, optional, intent(in) :: janetbnd   !< write additional network boundary information (1) or not (0). Default: 0.
     integer, optional, intent(in) :: jaidomain  !< write subdomain numbers (1) or not (0, default)
     integer, optional, intent(in) :: jaiglobal_s !< write global netcell number (1) or not (0, default)
     integer, optional, intent(in) :: iconventions
