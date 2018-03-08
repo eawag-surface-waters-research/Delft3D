@@ -95,10 +95,6 @@ case $key in
 esac
 done
 
-    echo
-    echo "hier"
-    echo
-
 if [ ! -f $configfile ]; then
     if [ ! -f $configfile.inp ]; then
         echo "ERROR: configfile $configfile does not exist"
