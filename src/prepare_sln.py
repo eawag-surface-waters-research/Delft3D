@@ -523,6 +523,14 @@ def do_work():
         vs = vs_gui.get()
         ifort = ifort_gui.get()
         fw = fw_gui.get()
+    if fw == -999:
+        # fw does not have to be set. Use a proper guess
+        if vs <= 2010:
+            fw = 40
+        elif vs <= 2014:
+            fw = 45
+        else:
+            fw = 46
     sys.stdout.write("Visual Studio  Version : " + str(vs) + "\n")
     sys.stdout.write(".Net Framework Version : " + str(fw) + "\n")
     sys.stdout.write("Intel Fortran  Version : " + str(ifort) + "\n")
