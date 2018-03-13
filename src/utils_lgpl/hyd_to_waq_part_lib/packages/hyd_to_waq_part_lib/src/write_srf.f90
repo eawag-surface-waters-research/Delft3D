@@ -86,7 +86,7 @@
 
       subroutine write_hsrf ( file_hsrf, noseg, surf  )
 !
-!     created             : michel jeuken
+!     created             : michelle jeuken
 !
 !     function            : writes horizontal surface file (new unstructured style).
 !

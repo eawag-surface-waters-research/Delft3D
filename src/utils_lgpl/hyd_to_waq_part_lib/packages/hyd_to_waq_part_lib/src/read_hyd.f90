@@ -34,6 +34,8 @@
       ! global declarations
 
       use hydmod
+      use rd_token       ! tokenized reading
+
       implicit none
 
       ! declaration of the arguments
@@ -42,7 +44,7 @@
 
       ! local declarations
 
-      integer, parameter  :: nokey   = 77           ! number of keywords in hyd file
+      integer, parameter  :: nokey   = 79           ! number of keywords in hyd file
       character(len=40)   :: key(nokey)             ! keywords in the hyd file
       integer             :: ikey                   ! index keyword (first level)
       integer             :: ikey2                  ! index keyword (second level)
@@ -62,13 +64,13 @@
       logical             :: token_used             ! token_used
       integer             :: platform               ! computer platform
       integer             :: ft_dat                 ! type of the data files
-      type(inputfilestack):: inpfil                 ! input file strucure with include stack
       integer             :: i_swap                 ! variable used in swapping values
       character(len=256)  :: filpath                ! path to hyd file
       integer             :: pathlen                ! lentgth of path to hyd file
       integer             :: idummy                 ! idummy
       real                :: rdummy                 ! rdummy
       character           :: cdummy                 ! cdummy
+      integer             :: itype                  ! itype
       integer             :: ierr2                  ! ierr2
       logical             :: lfound                 ! indication if command line argument was found
       integer             :: iy                     ! year
@@ -80,7 +82,8 @@
       integer             :: idate                  ! date
       integer             :: itime                  ! time
       real*8              :: julian                 ! julian function
-
+      logical, parameter  :: untileol = .true.      ! read until the end of the line
+      
       key(1)  = 'task'
       key(2)  = 'geometry'
       key(3)  = 'horizontal-aggregation'
@@ -158,27 +161,22 @@
       key(75) = 'waqgeom-file'
       key(76) = 'automatic'
       key(77) = 'walking'
+      key(78) = 'file-created-by'
+      key(79) = 'file-creation-date'
 
-      platform = dlwq_platform()
-      if ( platform .eq. fs_dos ) then
-         ft_dat = ft_bin
-      elseif ( platform .eq. FS_UNX ) then
-         ft_dat = ft_unf
-      elseif ( platform .eq. FS_ASC ) then
-         ft_dat = ft_asc
-      else
-         ft_dat = 0
-      endif
-
+      ft_dat = ft_bin
       call getmlu(lunrep)
 
-      inpfil%inputf = 0
-      call filestack_add(inpfil,hyd%file_hyd%name,ierr)
-      if ( ierr .ne. 0 ) then
-         write(lunrep,*) ' error opening hydrodynamic description file'
-         write(lunrep,*) ' file :',trim(hyd%file_hyd%name)
-      endif
-      inpfil%cchar  = '#'
+      hyd%file_hyd%type = ft_asc
+      call dlwqfile_open(hyd%file_hyd)
+
+      ! initialise tokenised reading
+      ilun    = 0
+      ilun(1) = hyd%file_hyd%unit_nr
+      lch (1) = hyd%file_hyd%name
+      npos   = 1000
+      cchar  = '#'
+      ierr = 0
 
       hyd%description = ' '
       call dhpath ( hyd%file_hyd%name, filpath, pathlen)
@@ -230,20 +228,17 @@
 
       do
 
-         call dlwq_read_token( inpfil, ctoken, ierr)
-
          ! if end of file the exit loop
-
-         if ( ierr .ne. 0 ) exit
-
+         if ( gettoken( ctoken, idummy, rdummy, itype, ierr) .ne. 0 ) exit
+         if (itype .ne. 1) then
+             goto 900
+         end if
+         
          call zoek ( ctoken, nokey , key , 30 , ikey )
          if ( ikey .eq. 1 ) then
 
             ! task
-
-            call dlwq_read_token( inpfil, ctoken, ierr)
-            if ( ierr .ne. 0 ) goto 900
-
+            if ( gettoken( ctoken, ierr) .ne. 0 ) goto 900
             call zoek ( ctoken, nokey , key , 30 , ikey2 )
             if ( ikey2 .eq. 61 ) then
                hyd%task = HYD_TASK_FULL
@@ -256,12 +251,8 @@
             endif
 
          elseif ( ikey .eq. 2 ) then
-
             ! geometry
-
-            call dlwq_read_token( inpfil, ctoken, ierr)
-            if ( ierr .ne. 0 ) goto 900
-
+            if ( gettoken( ctoken, ierr) .ne. 0 ) goto 900
             call zoek ( ctoken, nokey , key , 30 , ikey2 )
             if ( ikey2 .eq. 65 ) then
                hyd%geometry = HYD_GEOM_CURVI
@@ -274,87 +265,53 @@
             endif
 
          elseif ( ikey .eq. 6 ) then
-
             ! description
-
             i_desc = 0
             do
-
                ! look for end-description token
-
-               call dlwq_read_token( inpfil, ctoken, ierr)
-               if ( ierr .ne. 0 ) goto 900
+               if ( gettoken ( ctoken, ierr) .ne. 0 ) goto 900
                call zoek ( ctoken, nokey , key , 30 , ikey2 )
                if ( ikey2 .eq. 7 ) exit
-
                ! it is a description line, store up to three
-
                i_desc = i_desc + 1
                if ( i_desc .le. 3 ) hyd%description(i_desc) = ctoken
-
             enddo
 
          elseif ( ikey .eq. 8 ) then
-
             ! reference time
-
-            call dlwq_read_token( inpfil, hyd%hyd_ref, ierr)
-            if ( ierr .ne. 0 ) goto 900
-
+            if ( gettoken (hyd%hyd_ref, ierr) .ne. 0 ) goto 900
             ! convert to julian
-
             read (hyd%hyd_ref(1:8),'(i8)') idate
             read (hyd%hyd_ref(9:14),'(i6)') itime
             hyd%time_ref = julian ( idate , itime )
 
          elseif ( ikey .eq. 9 ) then
-
             ! hydrodynamic start
-
-            call dlwq_read_token( inpfil, hyd%hyd_start, ierr)
-            if ( ierr .ne. 0 ) goto 900
+            if ( gettoken(hyd%hyd_start, ierr) .ne. 0 ) goto 900
 
          elseif ( ikey .eq. 10) then
-
             ! hydrodynamic stop
-
-            call dlwq_read_token( inpfil, hyd%hyd_stop, ierr)
-            if ( ierr .ne. 0 ) goto 900
+            if ( gettoken(hyd%hyd_stop, ierr) .ne. 0 ) goto 900
 
          elseif ( ikey .eq. 11) then
-
             ! hydrodynamic step
-
-            call dlwq_read_token( inpfil, hyd%hyd_step, ierr)
-            if ( ierr .ne. 0 ) goto 900
+            if ( gettoken(hyd%hyd_step, ierr) .ne. 0 ) goto 900
 
          elseif ( ikey .eq. 12) then
-
             ! conversion reference time
-
-            call dlwq_read_token( inpfil, hyd%cnv_ref, ierr)
-            if ( ierr .ne. 0 ) goto 900
+            if ( gettoken(hyd%cnv_ref, ierr) .ne. 0 ) goto 900
 
          elseif ( ikey .eq. 13) then
-
             ! conversion start time
-
-            call dlwq_read_token( inpfil, hyd%cnv_start, ierr)
-            if ( ierr .ne. 0 ) goto 900
+            if ( gettoken(hyd%cnv_start, ierr) .ne. 0 ) goto 900
 
          elseif ( ikey .eq. 14) then
-
             ! conversion stop time
-
-            call dlwq_read_token( inpfil, hyd%cnv_stop, ierr)
-            if ( ierr .ne. 0 ) goto 900
+            if ( gettoken(hyd%cnv_stop, ierr) .ne. 0 ) goto 900
 
          elseif ( ikey .eq. 15) then
-
             ! conversion step time
-
-            call dlwq_read_token( inpfil, hyd%cnv_step, ierr)
-            if ( ierr .ne. 0 ) goto 900
+            if ( gettoken(hyd%cnv_step, ierr) .ne. 0 ) goto 900
             read(hyd%cnv_step,'(i4,i2,i2,i2,i2,i2)') iy,imo,id,ih,im,is
             if (iy .ne. 0 .or. imo .ne. 0 ) then
                write(lunrep,*) ' error conversion step has year or month, this is not supported'
@@ -363,150 +320,91 @@
             hyd%cnv_step_sec = id*86400+ih*3600+im*60+is
 
          elseif ( ikey .eq. 16) then
-
             ! grid cells first direction
-
-            call dlwq_read_token( inpfil, hyd%mmax, ierr)
-            if ( ierr .ne. 0 ) goto 900
+            if ( gettoken(hyd%mmax, ierr) .ne. 0 ) goto 900
 
          elseif ( ikey .eq. 17) then
-
             ! grid cells second direction
-
-            call dlwq_read_token( inpfil, hyd%nmax, ierr)
-            if ( ierr .ne. 0 ) goto 900
+            if ( gettoken(hyd%nmax, ierr) .ne. 0 ) goto 900
 
          elseif ( ikey .eq. 18) then
-
             ! number of hydrodynamic layers
-
-            call dlwq_read_token( inpfil, hyd%kmax, ierr)
-            if ( ierr .ne. 0 ) goto 900
+            if ( gettoken(hyd%kmax, ierr) .ne. 0 ) goto 900
 
          elseif ( ikey .eq. 19) then
-
             ! number of waq layers
-
-            call dlwq_read_token( inpfil, hyd%nolay, ierr)
-            if ( ierr .ne. 0 ) goto 900
+            if ( gettoken(hyd%nolay, ierr) .ne. 0 ) goto 900
 
          elseif ( ikey .eq. 70) then
-
             ! number of horizontal exchanges
-
-            call dlwq_read_token( inpfil, hyd%noq1, ierr)
-            if ( ierr .ne. 0 ) goto 900
+            if ( gettoken(hyd%noq1, ierr) .ne. 0 ) goto 900
 
          elseif ( ikey .eq. 71) then
-
             ! number of vertical exchanges
-
-            call dlwq_read_token( inpfil, hyd%noq3, ierr)
-
-            if ( ierr .ne. 0 ) goto 900
+            if ( gettoken(hyd%noq3, ierr) .ne. 0 ) goto 900
 
          elseif ( ikey .eq. 72) then
-
             ! number of water quality segments per layer
-
-            call dlwq_read_token( inpfil, hyd%nosegl, ierr)
-
-            if ( ierr .ne. 0 ) goto 900
+            if ( gettoken(hyd%nosegl, ierr) .ne. 0 ) goto 900
 
          elseif ( ikey .eq. 20) then
-
             ! com file
-
-            call dlwq_read_token( inpfil, hyd%file_com%name, ierr)
-            if ( ierr .ne. 0 ) goto 900
+            if ( gettoken(hyd%file_com%name, ierr) .ne. 0 ) goto 900
             hyd%file_com%name = trim(filpath)//hyd%file_com%name
 
          elseif ( ikey .eq. 21) then
-
             ! dwq file
-
-            call dlwq_read_token( inpfil, hyd%file_dwq%name, ierr)
-            if ( ierr .ne. 0 ) goto 900
+            if ( gettoken(hyd%file_dwq%name, ierr) .ne. 0 ) goto 900
             hyd%file_dwq%name = trim(filpath)//hyd%file_dwq%name
 
          elseif ( ikey .eq. 22) then
-
             ! lga file
-
-            call dlwq_read_token( inpfil, hyd%file_lga%name, ierr)
-            if ( ierr .ne. 0 ) goto 900
+            if ( gettoken(hyd%file_lga%name, ierr) .ne. 0 ) goto 900
             hyd%file_lga%name = trim(filpath)//hyd%file_lga%name
 
          elseif ( ikey .eq. 23) then
-
             ! cco file
-
-            call dlwq_read_token( inpfil, hyd%file_cco%name, ierr)
-            if ( ierr .ne. 0 ) goto 900
+            if ( gettoken(hyd%file_cco%name, ierr) .ne. 0 ) goto 900
             hyd%file_cco%name = trim(filpath)//hyd%file_cco%name
 
          elseif ( ikey .eq. 74) then
-
             ! bnd file (unstructured)
-
-            call dlwq_read_token( inpfil, hyd%file_bnd%name, ierr)
-            if ( ierr .ne. 0 ) goto 900
+            if ( gettoken(hyd%file_bnd%name, ierr) .ne. 0 ) goto 900
             hyd%file_bnd%name = trim(filpath)//hyd%file_bnd%name
 
          elseif ( ikey .eq. 75) then
-
             ! waqgeom file (unstructured)
-
-            call dlwq_read_token( inpfil, hyd%file_geo%name, ierr)
-            if ( ierr .ne. 0 ) goto 900
+            if ( gettoken(hyd%file_geo%name, ierr) .ne. 0 ) goto 900
             hyd%file_geo%name = trim(filpath)//hyd%file_geo%name
 
          elseif ( ikey .eq. 24) then
-
             ! vol file
-
-            call dlwq_read_token( inpfil, hyd%file_vol%name, ierr)
-            if ( ierr .ne. 0 ) goto 900
+            if ( gettoken(hyd%file_vol%name, ierr) .ne. 0 ) goto 900
             hyd%file_vol%name = trim(filpath)//hyd%file_vol%name
 
          elseif ( ikey .eq. 25) then
-
             ! are file
-
-            call dlwq_read_token( inpfil, hyd%file_are%name, ierr)
-            if ( ierr .ne. 0 ) goto 900
+            if ( gettoken(hyd%file_are%name, ierr) .ne. 0 ) goto 900
             hyd%file_are%name = trim(filpath)//hyd%file_are%name
 
          elseif ( ikey .eq. 26) then
-
             ! flo file
-
-            call dlwq_read_token( inpfil, hyd%file_flo%name, ierr)
-            if ( ierr .ne. 0 ) goto 900
+            if ( gettoken(hyd%file_flo%name, ierr) .ne. 0 ) goto 900
             hyd%file_flo%name = trim(filpath)//hyd%file_flo%name
 
          elseif ( ikey .eq. 27) then
-
             ! poi file
-
-            call dlwq_read_token( inpfil, hyd%file_poi%name, ierr)
-            if ( ierr .ne. 0 ) goto 900
+            if ( gettoken(hyd%file_poi%name, ierr) .ne. 0 ) goto 900
             hyd%file_poi%name = trim(filpath)//hyd%file_poi%name
 
          elseif ( ikey .eq. 28) then
-
             ! len file
-
-            call dlwq_read_token( inpfil, hyd%file_len%name, ierr)
-            if ( ierr .ne. 0 ) goto 900
+            if ( gettoken(hyd%file_len%name, ierr) .ne. 0 ) goto 900
             hyd%file_len%name = trim(filpath)//hyd%file_len%name
 
          elseif ( ikey .eq. 29) then
-
             ! sal file
-
-            call dlwq_read_token( inpfil, ctoken, ierr)
-            if ( ierr .ne. 0 ) goto 900
+            if ( gettoken(ctoken, ierr) .ne. 0 ) goto 900
             if ( ctoken.ne. 'none' ) then
                hyd%file_sal%name = trim(filpath)//ctoken
                hyd%sal_present = .true.
@@ -516,11 +414,8 @@
             endif
 
          elseif ( ikey .eq. 30) then
-
             ! tmp file
-
-            call dlwq_read_token( inpfil, ctoken, ierr)
-            if ( ierr .ne. 0 ) goto 900
+            if ( gettoken(ctoken, ierr) .ne. 0 ) goto 900
             if ( ctoken.ne. 'none' ) then
                hyd%file_tem%name = trim(filpath)//ctoken
                hyd%tem_present = .true.
@@ -530,11 +425,8 @@
             endif
 
          elseif ( ikey .eq. 31) then
-
             ! vdf file
-
-            call dlwq_read_token( inpfil, ctoken, ierr)
-            if ( ierr .ne. 0 ) goto 900
+            if ( gettoken(ctoken, ierr) .ne. 0 ) goto 900
             if ( ctoken.ne. 'none' ) then
                hyd%file_vdf%name = trim(filpath)//ctoken
                hyd%vdf_present = .true.
@@ -544,52 +436,33 @@
             endif
 
          elseif ( ikey .eq. 32) then
-
             ! srf file
-
-            call dlwq_read_token( inpfil, hyd%file_srf%name, ierr)
-            if ( ierr .ne. 0 ) goto 900
+            if ( gettoken(hyd%file_srf%name, ierr) .ne. 0 ) goto 900
             hyd%file_srf%name = trim(filpath)//hyd%file_srf%name
 
          elseif ( ikey .eq. 73) then
-
             ! hsrf file
-
-            call dlwq_read_token( inpfil, hyd%file_hsrf%name, ierr)
-            if ( ierr .ne. 0 ) goto 900
+            if ( gettoken(hyd%file_hsrf%name, ierr) .ne. 0 ) goto 900
             hyd%file_hsrf%name = trim(filpath)//hyd%file_hsrf%name
 
-
          elseif ( ikey .eq. 33) then
-
             ! lgt file
-
-            call dlwq_read_token( inpfil, hyd%file_lgt%name, ierr)
-            if ( ierr .ne. 0 ) goto 900
+            if ( gettoken(hyd%file_lgt%name, ierr) .ne. 0 ) goto 900
             hyd%file_lgt%name = trim(filpath)//hyd%file_lgt%name
 
          elseif ( ikey .eq. 34) then
-
             ! src file
-
-            call dlwq_read_token( inpfil, hyd%file_src%name, ierr)
-            if ( ierr .ne. 0 ) goto 900
+            if ( gettoken(hyd%file_src%name, ierr) .ne. 0 ) goto 900
             hyd%file_src%name = trim(filpath)//hyd%file_src%name
 
          elseif ( ikey .eq. 35) then
-
             ! chz file
-
-            call dlwq_read_token( inpfil, hyd%file_chz%name, ierr)
-            if ( ierr .ne. 0 ) goto 900
+            if ( gettoken(hyd%file_chz%name, ierr) .ne. 0 ) goto 900
             hyd%file_chz%name = trim(filpath)//hyd%file_chz%name
 
          elseif ( ikey .eq. 36) then
-
             ! tau file
-
-            call dlwq_read_token( inpfil, ctoken, ierr)
-            if ( ierr .ne. 0 ) goto 900
+            if ( gettoken(ctoken, ierr) .ne. 0 ) goto 900
             if ( ctoken.ne. 'none' ) then
                hyd%file_tau%name = trim(filpath)//ctoken
                hyd%tau_present = .true.
@@ -599,85 +472,58 @@
             endif
 
          elseif ( ikey .eq. 37) then
-
             ! wlk file
-
-            call dlwq_read_token( inpfil, hyd%file_wlk%name, ierr)
-            if ( ierr .ne. 0 ) goto 900
+            if ( gettoken(hyd%file_wlk%name, ierr) .ne. 0 ) goto 900
             hyd%file_wlk%name = trim(filpath)//hyd%file_wlk%name
 
          elseif ( ikey .eq. 63) then
-
             ! attrubutes file
-
-            call dlwq_read_token( inpfil, hyd%file_atr%name, ierr)
-            if ( ierr .ne. 0 ) goto 900
+            if ( gettoken(hyd%file_atr%name, ierr) .ne. 0 ) goto 900
             hyd%file_atr%name = trim(filpath)//hyd%file_atr%name
 
          elseif ( ikey .eq. 64) then
-
             ! depths file
-
-            call dlwq_read_token( inpfil, hyd%file_dps%name, ierr)
-            if ( ierr .ne. 0 ) goto 900
+            if ( gettoken(hyd%file_dps%name, ierr) .ne. 0 ) goto 900
             hyd%file_dps%name = trim(filpath)//hyd%file_dps%name
 
          elseif ( ikey .eq. 48) then
-
             ! hydrodynamic-layers
-
             allocate(hyd%hyd_layers(hyd%kmax))
             do ilay = 1 , hyd%kmax
-               call dlwq_read_token( inpfil, hyd%hyd_layers(ilay), ierr)
-               if ( ierr .ne. 0 ) goto 900
+               if ( gettoken(hyd%hyd_layers(ilay), ierr) .ne. 0 ) goto 900
             enddo
-
             ! end-hydrodynamic-layers
-
-            call dlwq_read_token( inpfil, ctoken, ierr)
+            if ( gettoken(ctoken, ierr) .ne. 0 ) goto 900
 
          elseif ( ikey .eq. 50) then
-
             ! water-quality-layers
-
             allocate(hyd%waq_layers(hyd%nolay))
             do ilay = 1 , hyd%nolay
-               call dlwq_read_token( inpfil, hyd%waq_layers(ilay), ierr)
-               if ( ierr .ne. 0 ) goto 900
+               if ( gettoken(hyd%waq_layers(ilay), ierr) .ne. 0 ) goto 900
             enddo
-
             ! end-water-quality-layers
-
-            call dlwq_read_token( inpfil, ctoken, ierr)
+            if ( gettoken(ctoken, ierr) .ne. 0 ) goto 900
 
          elseif ( ikey .eq. 52) then
-
             ! discharges
-
             token_used = .true.
             do
                if ( token_used ) then
-                  call dlwq_read_token( inpfil, ctoken, ierr)
-                  if ( ierr .ne. 0 ) goto 900
+                  if ( gettoken(ctoken, idummy, rdummy, itype, ierr) .ne. 0 ) goto 900
                endif
                call zoek ( ctoken, nokey , key , 30 , ikey2 )
                if ( ikey2 .eq. 53 ) exit
 
                ! a new wasteload
-
-               if ( inpfil%t_token .eq. TYPE_INT ) then
-                  wasteload%n    = inpfil%itoken
+               if ( itype .eq. TYPE_INT ) then
+                  wasteload%n    = idummy
                else
                   goto 900
                endif
-               call dlwq_read_token( inpfil, wasteload%m, ierr)
-               if ( ierr .ne. 0 ) goto 900
-               call dlwq_read_token( inpfil, wasteload%k, ierr)
-               if ( ierr .ne. 0 ) goto 900
-               call dlwq_read_token( inpfil, wasteload%name, ierr)
-               if ( ierr .ne. 0 ) goto 900
-               call dlwq_read_token( inpfil, ctoken, ierr)
-               if ( ierr .ne. 0 ) goto 900
+               if ( gettoken(wasteload%m, ierr) .ne. 0 ) goto 900
+               if ( gettoken(wasteload%k, ierr) .ne. 0 ) goto 900
+               if ( gettoken(wasteload%name, ierr) .ne. 0 ) goto 900
+               if ( gettoken(ctoken, ierr) .ne. 0 ) goto 900
                call zoek ( ctoken, nokey , key , 30 , ikey2 )
                if ( ikey2 .eq. 58 .or. ikey2 .eq. 59 .or. ikey2 .eq. 60 .or. ikey2 .eq. 77 ) then
                   token_used = .true.
@@ -697,66 +543,49 @@
                wasteload%waqtype = ' '
 
                ! add to wasteload collection
-
                i_wasteload = wasteload_coll_add(hyd%wasteload_coll, wasteload)
 
             enddo
 
          elseif ( ikey .eq. 54) then
-
             ! domains
-
             do
-               call dlwq_read_token( inpfil, ctoken, ierr)
-               if ( ierr .ne. 0 ) goto 900
-
+               if ( gettoken(ctoken, ierr) .ne. 0 ) goto 900
                ! look for end-domains keyword
-
                call zoek ( ctoken, nokey , key , 30 , ikey2 )
                if ( ikey2 .eq. 55 ) exit
 
                ! key is domain name , read mmax nmax and dido file do not store dido file
-
                domain%name = ctoken
-               call dlwq_read_token( inpfil, domain%mmax, ierr)
-               if ( ierr .ne. 0 ) goto 900
-               call dlwq_read_token( inpfil, domain%nmax, ierr)
-               if ( ierr .ne. 0 ) goto 900
-               call dlwq_read_token( inpfil, ctoken, ierr)
-               if ( ierr .ne. 0 ) goto 900
+               if ( gettoken(domain%mmax, ierr) .ne. 0 ) goto 900
+               if ( gettoken(domain%nmax, ierr) .ne. 0 ) goto 900
+               if ( gettoken(ctoken, ierr) .ne. 0 ) goto 900
 
                ! add to domains collection
-
                i_domain = domain_coll_add(hyd%domain_coll, domain)
-
             enddo
 
          elseif ( ikey .eq. 56) then
-
             ! dd-boundaries
-
             do
-               call dlwq_read_token( inpfil, ctoken, ierr)
-               if ( ierr .ne. 0 ) goto 900
+               if ( gettoken(ctoken, ierr) .ne. 0 ) goto 900
 
                ! look for end-dd-boundaries keyword
-
                call zoek ( ctoken, nokey , key , 30 , ikey2 )
                if ( ikey2 .eq. 57 ) exit
 
                ! ctokenis domain name 1 , read m_begin1, n_begin1, m_end1, n_end1, domain name 2, m_begin2, n_begin2, m_end2, n_end2
-
                dd_bound%name1 = ctoken
-               call dlwq_read_token( inpfil, dd_bound%m_begin1, ierr) ; if ( ierr .ne. 0 ) goto 900
-               call dlwq_read_token( inpfil, dd_bound%n_begin1, ierr) ; if ( ierr .ne. 0 ) goto 900
-               call dlwq_read_token( inpfil, dd_bound%m_end1, ierr)   ; if ( ierr .ne. 0 ) goto 900
-               call dlwq_read_token( inpfil, dd_bound%n_end1, ierr)   ; if ( ierr .ne. 0 ) goto 900
+               if (gettoken(dd_bound%m_begin1, ierr) .ne. 0 ) goto 900
+               if (gettoken(dd_bound%n_begin1, ierr) .ne. 0 ) goto 900
+               if (gettoken(dd_bound%m_end1, ierr)   .ne. 0 ) goto 900
+               if (gettoken(dd_bound%n_end1, ierr)   .ne. 0 ) goto 900
 
-               call dlwq_read_token( inpfil, dd_bound%name2, ierr)    ; if ( ierr .ne. 0 ) goto 900
-               call dlwq_read_token( inpfil, dd_bound%m_begin2, ierr) ; if ( ierr .ne. 0 ) goto 900
-               call dlwq_read_token( inpfil, dd_bound%n_begin2, ierr) ; if ( ierr .ne. 0 ) goto 900
-               call dlwq_read_token( inpfil, dd_bound%m_end2, ierr)   ; if ( ierr .ne. 0 ) goto 900
-               call dlwq_read_token( inpfil, dd_bound%n_end2, ierr)   ; if ( ierr .ne. 0 ) goto 900
+               if (gettoken(dd_bound%name2, ierr)    .ne. 0 ) goto 900
+               if (gettoken(dd_bound%m_begin2, ierr) .ne. 0 ) goto 900
+               if (gettoken(dd_bound%n_begin2, ierr) .ne. 0 ) goto 900
+               if (gettoken(dd_bound%m_end2, ierr)   .ne. 0 ) goto 900
+               if (gettoken(dd_bound%n_end2, ierr)   .ne. 0 ) goto 900
 
                ! make sure the numbering is always increasing
 
@@ -787,6 +616,20 @@
 
             enddo
 
+         elseif ( ikey .eq. 78) then
+            ! file-created-by string.
+            if (gettoken(line, untileol, ierr) .ne. 0 ) goto 900
+            hyd%created_by = line(1:80)
+             
+         elseif ( ikey .eq. 79) then
+            ! file-creation-date 
+            if (gettoken(line, untileol, ierr) .ne. 0 ) goto 900
+            hyd%creation_date = line(1:40)
+
+         else    
+            ! unknown keyword, ignore until the end of the line
+            if (gettoken(line, untileol, ierr) .ne. 0 ) goto 900
+
          endif
 
       enddo
@@ -805,5 +648,5 @@
       endif
 
       return
- 900  call dherrs('error reading hyd file ('//trim(key(ikey))//'), last line:'//trim(inpfil%linbuf(inpfil%inputf)),1)
+ 900  call dherrs('error reading hyd file ('//trim(key(ikey))//')')
       end subroutine read_hyd
