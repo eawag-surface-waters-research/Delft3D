@@ -35,6 +35,8 @@
 
       use filmod                   ! module contains everything for the files
       use hydmod                   ! module contains everything for the hydrodynamic description
+      use rd_token       ! tokenized reading
+
       implicit none
 
       ! declaration of the arguments
@@ -91,34 +93,31 @@
       enddo
 
       call dlwqfile_open(file_src_tmp)
-      inpfil%inplun(1) = file_src_tmp%unit_nr
-      inpfil%finame(1) = file_src_tmp%name
-      inpfil%cchar  = ';'
-      inpfil%iposr  = 0
-      inpfil%npos   = len(inpfil%linbuf(1))
-      inpfil%token_used = .true.
-      inpfil%inputf = 1
-      inpfil%nrepeat= 0
+      ilun    = 0
+      ilun(1) = file_src_tmp%unit_nr
+      lch (1) = file_src_tmp%name
+      npos   = 1000
+      cchar  = ';'
 
       ! first count the number of breakpoints in the file before first_time_current
       nobrk_waste_tmp = 0
       do
-         call dlwq_read_token( inpfil, int, ierr)
-         if(ierr.ne.0 .or. int.ge.first_itime_current) then
+         if( gettoken( int, ierr).ne.0) then
+            exit
+         end if
+         if(int.ge.first_itime_current) then
             exit
          end if
          ! dummy read the data
          do iwaste = 1 , no_flow
             do i = 1 , 3
-               call dlwq_read_token( inpfil, int, ierr)
-               if ( ierr .ne. 0 ) then
+               if ( gettoken( int, ierr) .ne. 0 ) then
                   write(lunrep,*) ' error reading sources file'
                   write(lunrep,*) ' expected integer for isrc, iseg, ilay'
                   goto 200
                endif
             enddo
-            call dlwq_read_token( inpfil, reel, ierr)
-            if ( ierr .ne. 0 ) then
+            if ( gettoken( reel, ierr) .ne. 0 ) then
                write(lunrep,*) ' error reading sources file'
                write(lunrep,*) ' expected real with concentration 1.0'
                goto 200
@@ -127,9 +126,7 @@
          nobrk_waste_tmp = nobrk_waste_tmp + 1
       enddo
       ierr = 0
-      rewind(inpfil%inplun(1))
-      inpfil%inputf = 1
-      inpfil%nrepeat= 0
+      rewind(file_src_tmp%unit_nr)
 
       ! then allocate number of break points + current number of breakpoints in wasteload_data_tmp
       nobrk_waste = nobrk_waste_tmp + wasteload_data%no_brk 
@@ -166,23 +163,20 @@
 
       ! read the data from the tmp-file into wasteload_data_tmp
       do ibrk = 1 , nobrk_waste_tmp
-         call dlwq_read_token( inpfil, wasteload_data_tmp%times(ibrk), ierr)
-         if ( ierr .ne. 0 ) then
+         if ( gettoken( wasteload_data_tmp%times(ibrk), ierr) .ne. 0 ) then
             write(lunrep,*) ' error reading sources file'
             write(lunrep,*) ' expected integer with breakpoint'
             goto 200
          endif
          do iwaste = 1 , no_flow
             do i = 1 , 3
-               call dlwq_read_token( inpfil, int, ierr)
-               if ( ierr .ne. 0 ) then
+               if ( gettoken( int, ierr) .ne. 0 ) then
                   write(lunrep,*) ' error reading sources file'
                   write(lunrep,*) ' expected integer for isrc, iseg, ilay'
                   goto 200
                endif
             enddo
-            call dlwq_read_token( inpfil, flow_data(1,iwaste,ibrk), ierr)
-            if ( ierr .ne. 0 ) then
+            if ( gettoken( flow_data(1,iwaste,ibrk), ierr) .ne. 0 ) then
                write(lunrep,*) ' error reading sources file'
                write(lunrep,*) ' expected real with wasteload flow'
                goto 200

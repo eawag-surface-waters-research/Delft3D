@@ -35,6 +35,8 @@
 
       use filmod                   ! module contains everything for the files
       use hydmod                   ! module contains everything for the hydrodynamic description
+      use rd_token       ! tokenized reading
+
       implicit none
 
       ! declaration of the arguments
@@ -55,7 +57,6 @@
       real                                   :: reel                   ! real token from input
       integer                                :: ierr                   ! error indication
       integer                                :: ierr_alloc             ! error indication
-      type(inputfilestack)                   :: inpfil                 ! input file strucure with include stack
       integer                                :: no_block               ! number of blocks of input
       integer                                :: i_block                ! index of attributes
       integer                                :: no_atr                 ! number of attributes
@@ -65,6 +66,8 @@
       integer                                :: atr_prev               ! previous read single attribute
       integer , allocatable                  :: atr_num(:)             ! attribute number
       integer , allocatable                  :: atr_ioff(:)            ! attribute offset in integer representation
+
+      character(256)                         :: line
 
       call getmlu(lunrep)
 
@@ -82,45 +85,36 @@
       ! check for the keyword DELWAQ_COMPLETE_ATTRIBUTES (on the first line!)
 
       atr_type = ATR_OLD
-      read(file_atr%unit_nr,'(a)') inpfil%linbuf(1)
+      read(file_atr%unit_nr,'(a)') line
       do i  = 1 , 256-25
-         if ( inpfil%linbuf(1)(i:i+25) .eq. 'DELWAQ_COMPLETE_ATTRIBUTES' ) then
+         if ( line(i:i+25) .eq. 'DELWAQ_COMPLETE_ATTRIBUTES' ) then
             atr_type = ATR_COMPLETE
             exit
          endif
       enddo
 
-      ! rewind, and initialise inputfilestack
+      ! rewind, and initialise tokenised reading
 
       rewind(file_atr%unit_nr)
-      inpfil%inplun(1) = file_atr%unit_nr
-      inpfil%finame(1) = file_atr%name
-      inpfil%cchar  = ';'
-      inpfil%iposr  = 0
-      inpfil%npos  = len(inpfil%linbuf(1))
-      inpfil%token_used = .true.
-      inpfil%inputf = 1
-      inpfil%nrepeat= 0
+      ilun    = 0
+      ilun(1) = file_atr%unit_nr
+      lch (1) = file_atr%name
+      npos   = 1000
+      cchar  = ';'
       ierr = 0
 
       ! read
 
       if ( atr_type .EQ. ATR_COMPLETE ) then
 
-         call dlwq_read_token( inpfil, no_block, ierr)
-         if ( ierr .ne. 0 ) then
+         if ( gettoken ( no_block, ierr) .ne. 0 ) then
             write(lunrep,*) ' error reading attributes file:',trim(file_atr%name)
             write(lunrep,*) ' expected integer with number of blocks'
-            write(lunrep,*) inpfil%ctoken
-            write(lunrep,*) inpfil%itoken
-            write(lunrep,*) inpfil%ierr
             goto 200
          endif
 
          do i_block = 1 , no_block
-
-            call dlwq_read_token( inpfil, no_atr, ierr)
-            if ( ierr .ne. 0 ) then
+            if ( gettoken (no_atr, ierr) .ne. 0 ) then
                write(lunrep,*) ' error reading attributes file:',trim(file_atr%name)
                write(lunrep,*) ' expected integer with number of attributes in this block'
                goto 200
@@ -139,12 +133,17 @@
                goto 200
             endif
             do i_atr = 1 , no_atr
-               call dlwq_read_token( inpfil, atr_num(i_atr), ierr)
+               if (gettoken ( atr_num(i_atr), ierr) .ne. 0) then
+                  write(lunrep,*) ' error reading attributes file:',trim(file_atr%name)
+                  write(lunrep,*) ' expected integer with attribute number in this block'
+                  goto 200
+               endif
                if ( atr_num(i_atr) .le. 0 .or. atr_num(i_atr) .gt. 8 ) then
-                  write(lunrep,*) ' warning attribute number out of range'
+                  ierr = 1
+                  write(lunrep,*) ' error attribute number out of range'
                   write(lunrep,*) ' follow number     :',i_atr
                   write(lunrep,*) ' attribute nummber :',atr_num(i_atr)
-                  write(lunrep,*) ' attribute not used'
+                  goto 200
                endif
                atr_ioff(i_atr) = 10**(atr_num(i_atr)-1)
                not_atr = max(not_atr,atr_num(i_atr))
@@ -152,26 +151,40 @@
 
             ! file option
 
-            call dlwq_read_token( inpfil, iopt, ierr)
+            if ( gettoken( iopt, ierr) .ne. 0) then
+               write(lunrep,*) ' error reading attributes file:',trim(file_atr%name)
+               write(lunrep,*) ' expected integer with file option'
+               goto 200
+            endif
             if ( iopt .ne. 1 ) then
                ierr = 1
                write(lunrep,*) ' error only file option 1 allowed for attributes'
                write(lunrep,*) ' file option :',iopt
+               goto 200
             endif
 
             ! default option
 
-            call dlwq_read_token( inpfil, iopt, ierr)
+            if ( gettoken( iopt, ierr) .ne. 0) then
+               write(lunrep,*) ' error reading attributes file:',trim(file_atr%name)
+               write(lunrep,*) ' expected integer with default option'
+               goto 200
+            endif
             if ( iopt .ne. 1 ) then
                ierr = 1
                write(lunrep,*) ' error only option data without defaults allowed for attributes'
                write(lunrep,*) ' defaults option :',iopt
+               goto 200
             endif
 
             ! read and merge attributes (overwrite earlier attribute with the same number = substract)
 
             do iseg = 1 , noseg
-               call dlwq_read_token( inpfil, atr, ierr)
+               if (gettoken ( atr, ierr) .ne. 0 ) then
+                  write(lunrep,*) ' error reading attributes file:',trim(file_atr%name)
+                  write(lunrep,*) ' expected integer with attribute in this block'
+                  goto 200
+               endif
                do i_atr = 1 , no_atr
                   call dhkmrk(i_atr,atr,atr_i_atr)
                   call dhkmrk(atr_num(i_atr),attributes(iseg),atr_prev)

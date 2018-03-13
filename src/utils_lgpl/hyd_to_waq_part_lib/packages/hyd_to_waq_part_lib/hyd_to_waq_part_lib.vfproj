@@ -46,12 +46,16 @@
 		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
 		<File RelativePath=".\src\agwaqgeom.f90"/>
 		<File RelativePath=".\src\copy_hyd_step.f90"/>
-		<File RelativePath=".\src\dlwqdata_mod.f90"/>
+		<File RelativePath=".\src\dlwq_hyd_data.f90"/>
 		<File RelativePath=".\src\dlwqgrid_mod.f90"/>
 		<File RelativePath=".\src\domain_mod.f90"/>
 		<File RelativePath=".\src\filmod.f90"/>
+		<File RelativePath=".\src\hyd_waqgeom_mod_old.f90"/>
+		<File RelativePath=".\src\hyd_waqgeom_old.f90"/>
 		<File RelativePath=".\src\hydmod.f90"/>
+		<File RelativePath=".\src\merge_domains.f90"/>
 		<File RelativePath=".\src\read_atr.f90"/>
+		<File RelativePath=".\src\read_bnd.f90"/>
 		<File RelativePath=".\src\read_cco.f90"/>
 		<File RelativePath=".\src\read_dwq.f90"/>
 		<File RelativePath=".\src\read_hyd.f90"/>
@@ -65,6 +69,7 @@
 		<File RelativePath=".\src\read_vag.f90"/>
 		<File RelativePath=".\src\set_hyd.f90"/>
 		<File RelativePath=".\src\write_atr.f90"/>
+		<File RelativePath=".\src\write_bnd.f90"/>
 		<File RelativePath=".\src\write_cco.f90"/>
 		<File RelativePath=".\src\write_data.f90"/>
 		<File RelativePath=".\src\write_ddp.f90"/>

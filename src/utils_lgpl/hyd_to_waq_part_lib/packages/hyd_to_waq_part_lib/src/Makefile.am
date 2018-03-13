@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-#   Makefile io_netcdf
+#   Makefile hyd_to_waq_part_lib
 #
 #   14 jun 2016
 #
@@ -15,21 +15,25 @@ AM_FCFLAGS += $(NETCDF_CFLAGS) $(NETCDF_FORTRAN_CFLAGS)
 
 FMODULES += \
     -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src \
+    -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/rd_token \
     -I$(top_builddir)/utils_lgpl/io_netcdf/packages/io_netcdf/src \
     -I$(NETCDF_FORTRAN_LIBS)
 
 #-------------------------------------------------------------------------------
 #Sources
 libHydToWaqPartLib_la_SOURCES = \
+         dlwq_hyd_data.f90 \
          agwaqgeom.f90 \
          wrwaqgeomcl.f90 \
          domain_mod.f90 \
          dlwqgrid_mod.f90 \
          filmod.f90 \
          wstmod.f90 \
-         dlwqdata_mod.f90 \
          hydmod.f90 \
+         hyd_waqgeom_mod_old.f90 \
+         hyd_waqgeom_old.f90 \
          read_atr.f90 \
+         read_bnd.f90 \
          read_cco.f90 \
          read_dwq.f90 \
          read_hyd.f90 \
@@ -42,8 +46,10 @@ libHydToWaqPartLib_la_SOURCES = \
          read_hyd_init.f90 \
          read_hyd_step.f90 \
          copy_hyd_step.f90 \
+         merge_domains.f90 \
          set_hyd.f90 \
          write_atr.f90 \
+         write_bnd.f90 \
          write_cco.f90 \
          write_data.f90 \
          write_ddp.f90 \

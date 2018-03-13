@@ -39,14 +39,11 @@
       use filmod                   ! module contains everything for the files
       use wstmod                   ! module contains everything for the wastloads discription
       use domain_mod               ! module contains everything for the domain discription
-      use dlwqdata_mod
+      use dlwq_hyd_data
       use io_ugrid
       implicit none
 
-      integer, parameter :: FILE_NAME_SIZE    = 256          ! length all names
-      integer, parameter :: NAME_SIZE         =  20          ! size of descriptive names
       integer, parameter :: TEXT_SIZE         =  40          ! descriptive text size
-      integer, parameter, private               :: MAX_NUM    =    5      ! allocated per bunch
 
       ! task types
 
@@ -97,6 +94,8 @@
 
       type t_hyd
          type(t_dlwqfile)                       :: file_hyd               ! name of hydrodynamic description file
+         character*80                           :: created_by             ! program and version that created the hyd-file
+         character*40                           :: creation_date          ! date and time of hyd-file creation
          integer                                :: task                   !
          integer                                :: geometry               !
          integer                                :: horizontal_aggregation !

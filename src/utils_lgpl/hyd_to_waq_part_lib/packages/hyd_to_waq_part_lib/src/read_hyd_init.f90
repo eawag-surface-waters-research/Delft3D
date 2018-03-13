@@ -34,6 +34,7 @@
       ! global declarations
 
       use hydmod
+      use hyd_waqgeom_old
       implicit none
 
       ! declaration of the arguments
@@ -58,12 +59,14 @@
 
       ! allocate and read or define grid table
 
-      allocate(hyd%lgrid(hyd%nmax,hyd%mmax),stat=ierr_alloc)
-      if ( ierr_alloc .ne. 0 ) goto 980
       if(hyd%geometry .eq. HYD_GEOM_CURVI) then
+         allocate(hyd%lgrid(hyd%nmax,hyd%mmax),stat=ierr_alloc)
+         if ( ierr_alloc .ne. 0 ) goto 980
          call read_lga(hyd%file_lga, hyd%mmax, hyd%nmax, hyd%nolay, hyd%nosegl, &
                        hyd%noq1    , hyd%noq2, hyd%noq3, hyd%lgrid)
       else
+         allocate(hyd%lgrid(1,hyd%nosegl),stat=ierr_alloc)
+         if ( ierr_alloc .ne. 0 ) goto 980
          do i = 1,hyd%nosegl
             hyd%lgrid(1,i) = i
          enddo
@@ -81,21 +84,28 @@
          if ( ierr_alloc .ne. 0 ) goto 980
          call read_cco(hyd%file_cco, hyd%mmax, hyd%nmax, hyd%xdepth, hyd%ydepth)
       elseif (hyd%geometry .eq. HYD_GEOM_UNSTRUC) then
-         ! allocate and read waqgeom file!?
+         ! read the waqgeom and bnd-file
+
+         call read_waqgeom(hyd)
+         hyd%openbndsect_coll%maxsize = 0
+         hyd%openbndsect_coll%cursize = 0
+         call read_bnd(hyd%file_bnd, hyd%openbndsect_coll)
+
       endif
 
       ! allocate and read pointer table
 
       allocate(hyd%ipoint(4,hyd%noq),stat=ierr_alloc)
       if ( ierr_alloc .ne. 0 ) goto 990
-      call read_poi(hyd%file_poi, hyd%noq, hyd%noq1, hyd%noq2, hyd%noq3, &
-                    hyd%ipoint  )
+      call read_poi(hyd%file_poi, hyd%noq, hyd%noq1, hyd%noq2, hyd%noq3, hyd%ipoint)
       hyd%nobnd  = -minval(hyd%ipoint)
       hyd%nobndl = hyd%nobnd/hyd%nolay
+      allocate(hyd%iglobal_bnd(hyd%nobnd))
+      hyd%iglobal_bnd = 0
 
       allocate(hyd%surf(hyd%noseg),stat=ierr_alloc)
       if ( ierr_alloc .ne. 0 ) goto 970
-      if(hyd%geometry .eq. HYD_GEOM_CURVI) then
+      if(hyd%file_hsrf%name .eq. ' ') then
          call read_srf(hyd%file_srf, hyd%mmax, hyd%nmax, hyd%nosegl, hyd%surf )
          do iseg = 1 , hyd%nosegl
             do ilay = 2 , hyd%nolay
@@ -141,6 +151,21 @@
 
       if ( hyd%file_atr%name .ne. ' ' ) then
          call read_atr(hyd%file_atr, hyd%atr_type, hyd%no_atr, hyd%noseg, hyd%attributes)
+      else if ( hyd%geometry .eq. HYD_GEOM_UNSTRUC ) then
+          ! default atributes (sigma-layers assumed)
+         hyd%atr_type = ATR_FM
+         if( hyd%nolay == 1) then
+             hyd%attributes = 1
+         else
+            do iseg = 1 , hyd%nosegl
+               do ilay = 1 , hyd%nolay
+                  isegl = (ilay-1)*hyd%nosegl + iseg
+                  hyd%attributes(isegl) = 21
+                  if (ilay == 1) hyd%attributes(isegl) = 11
+                  if (ilay == hyd%nolay) hyd%attributes(isegl) = 31
+               enddo
+            enddo
+         endif
       else
          hyd%atr_type = ATR_UNKNOWN
       endif

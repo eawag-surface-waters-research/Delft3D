@@ -7027,12 +7027,16 @@ src/utils_lgpl/hyd_to_waq_part_lib/packages/hyd_to_waq_part_lib/hyd_to_waq_part_
 src/utils_lgpl/hyd_to_waq_part_lib/packages/hyd_to_waq_part_lib/src/Makefile.am -text
 src/utils_lgpl/hyd_to_waq_part_lib/packages/hyd_to_waq_part_lib/src/agwaqgeom.f90 -text
 src/utils_lgpl/hyd_to_waq_part_lib/packages/hyd_to_waq_part_lib/src/copy_hyd_step.f90 -text
-src/utils_lgpl/hyd_to_waq_part_lib/packages/hyd_to_waq_part_lib/src/dlwqdata_mod.f90 -text
+src/utils_lgpl/hyd_to_waq_part_lib/packages/hyd_to_waq_part_lib/src/dlwq_hyd_data.f90 -text
 src/utils_lgpl/hyd_to_waq_part_lib/packages/hyd_to_waq_part_lib/src/dlwqgrid_mod.f90 -text
 src/utils_lgpl/hyd_to_waq_part_lib/packages/hyd_to_waq_part_lib/src/domain_mod.f90 -text
 src/utils_lgpl/hyd_to_waq_part_lib/packages/hyd_to_waq_part_lib/src/filmod.f90 -text
+src/utils_lgpl/hyd_to_waq_part_lib/packages/hyd_to_waq_part_lib/src/hyd_waqgeom_mod_old.f90 -text
+src/utils_lgpl/hyd_to_waq_part_lib/packages/hyd_to_waq_part_lib/src/hyd_waqgeom_old.f90 -text
 src/utils_lgpl/hyd_to_waq_part_lib/packages/hyd_to_waq_part_lib/src/hydmod.f90 -text
+src/utils_lgpl/hyd_to_waq_part_lib/packages/hyd_to_waq_part_lib/src/merge_domains.f90 -text
 src/utils_lgpl/hyd_to_waq_part_lib/packages/hyd_to_waq_part_lib/src/read_atr.f90 -text
+src/utils_lgpl/hyd_to_waq_part_lib/packages/hyd_to_waq_part_lib/src/read_bnd.f90 -text
 src/utils_lgpl/hyd_to_waq_part_lib/packages/hyd_to_waq_part_lib/src/read_cco.f90 -text
 src/utils_lgpl/hyd_to_waq_part_lib/packages/hyd_to_waq_part_lib/src/read_dwq.f90 -text
 src/utils_lgpl/hyd_to_waq_part_lib/packages/hyd_to_waq_part_lib/src/read_hyd.f90 -text
@@ -7046,6 +7050,7 @@ src/utils_lgpl/hyd_to_waq_part_lib/packages/hyd_to_waq_part_lib/src/read_srf.f90
 src/utils_lgpl/hyd_to_waq_part_lib/packages/hyd_to_waq_part_lib/src/read_vag.f90 -text
 src/utils_lgpl/hyd_to_waq_part_lib/packages/hyd_to_waq_part_lib/src/set_hyd.f90 -text
 src/utils_lgpl/hyd_to_waq_part_lib/packages/hyd_to_waq_part_lib/src/write_atr.f90 -text
+src/utils_lgpl/hyd_to_waq_part_lib/packages/hyd_to_waq_part_lib/src/write_bnd.f90 -text
 src/utils_lgpl/hyd_to_waq_part_lib/packages/hyd_to_waq_part_lib/src/write_cco.f90 -text
 src/utils_lgpl/hyd_to_waq_part_lib/packages/hyd_to_waq_part_lib/src/write_data.f90 -text
 src/utils_lgpl/hyd_to_waq_part_lib/packages/hyd_to_waq_part_lib/src/write_ddp.f90 -text

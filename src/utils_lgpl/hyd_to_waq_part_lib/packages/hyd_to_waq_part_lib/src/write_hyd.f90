@@ -58,7 +58,7 @@
       integer                   :: i_dd_bound             ! index in collection
       type(t_dd_bound),pointer  :: dd_bound               ! one dd_bound description
       character(len=256)  :: filename               ! filename without path
-      character(80)  version_full      !! Delft3D FLOW version information
+      character(*)   version_full      !! Delft3D FLOW version information
       character(20)  rundat            !! Current date and time containing a combination of DATE and TIME
       character(21)  datetime          !! Date/time to be filled in the header
 
@@ -291,7 +291,7 @@
       ! domains
 
       n_domain = hyd%domain_coll%cursize
-      if ( n_domain .gt. 0 ) then
+      if ( n_domain .gt. 0 .and. hyd%geometry .eq. HYD_GEOM_CURVI) then
          write(lunhyd,'(a)') key(54)
          do i_domain = 1 , n_domain
             write(lunhyd,'(3a,i8,a,i8,3a)') &

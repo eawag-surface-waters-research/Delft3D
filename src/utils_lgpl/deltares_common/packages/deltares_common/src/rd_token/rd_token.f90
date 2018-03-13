@@ -46,8 +46,10 @@
 
       interface gettoken
          module procedure get_char_tok
+         module procedure get_char_untileol_tok
          module procedure get_int_tok
          module procedure get_real_tok
+         module procedure get_double_tok
          module procedure get_nochar_tok
          module procedure get_noreal_tok
          module procedure get_all_tok
@@ -77,6 +79,30 @@
          ierr  = ierr2
 
       end function get_char_tok
+
+!          get a character string until the end of the line
+
+      function get_char_untileol_tok ( achar, untileol, ierr2 ) result ( ierr )
+
+         character*(*), intent(  out) :: achar
+         logical      , intent(in)    :: untileol
+         integer   (4), intent(inout) :: ierr2
+         integer   (4)                   ierr
+
+         if ( push ) then
+            achar = cdummy
+            ierr2 = 0                   ! this is always possible
+            push  = .false.
+         else
+            type = 4
+            call rdtok1 ( lunut  , ilun   , lch    , lstack , cchar  ,              &
+     &                    iposr  , npos   , cdummy , idummy , rdummy ,              &
+     &                    type   , ierr2  )
+            achar = cdummy
+         endif
+         ierr  = ierr2
+
+      end function get_char_untileol_tok
 
 !          get an integer
 
@@ -132,6 +158,31 @@
          ierr  = ierr2
 
       end function get_real_tok
+
+      function get_double_tok ( adouble, ierr2 ) result ( ierr )
+
+         real      (8), intent(  out) :: adouble
+         integer   (4), intent(inout) :: ierr2
+         integer                         ierr
+
+         if ( push ) then
+            if ( type .ne. 2 .and. type .ne. 3 ) then
+               ierr2 = 1                ! there is no number on the stack
+            else
+               adouble = rdummy
+               ierr2 = 0
+            endif
+            push  = .false.
+         else
+            type = 3
+            call rdtok1 ( lunut  , ilun   , lch    , lstack , cchar  ,              &
+     &                    iposr  , npos   , cdummy , idummy , rdummy ,              &
+     &                    type   , ierr2  )
+            adouble = rdummy
+         endif
+         ierr  = ierr2
+
+         end function get_double_tok
 
 !          get a number
 

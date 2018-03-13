@@ -93,5 +93,8 @@
          call srstop(1)
       endif
 
+      close(file_cco%unit_nr)
+      file_cco%status = FILE_STAT_UNOPENED
+
       return
       end

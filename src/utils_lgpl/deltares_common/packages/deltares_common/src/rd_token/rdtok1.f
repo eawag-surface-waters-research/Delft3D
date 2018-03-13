@@ -87,6 +87,14 @@ C
       CHARACTER  LINE*1000, LINE2*80 , CHULP*1000
       INTEGER, DIMENSION(100) :: CURLINE = 0 ! Line number in the current file
 
+      CHARACTER(  1) CTRLZ       !   Tab character
+      CHARACTER(  1) CHTAB       !   Cariage return character
+      CHARACTER(  1) CH_CR       !   Ctrl_Z character
+
+      CHTAB = CHAR(9)
+      CH_CR = CHAR(13)
+      CTRLZ = CHAR(26)
+
 C BEGIN ================================================================
 
 C
@@ -103,7 +111,27 @@ C
 C           Get the data
 C
       CHULP = ' '
+      CHULP2 = ' '
    10 IERR = 0
+
+      IF ( ITYPEX .EQ. 4) THEN
+C
+C           Return a string from the first non space caracter until the end of the line (could be empty)
+C
+         DO I = IPOSR+1 , NPOS
+         IPOSL = I
+         IF ( LINE(I:I) .NE. ' '   .AND.
+     &        LINE(I:I) .NE. CTRLZ .AND.
+     &        LINE(I:I) .NE. CH_CR .AND.
+     &        LINE(I:I) .NE. CHTAB      ) EXIT
+          ENDDO
+          IPOSR = MAX(IPOSL,LEN_TRIM(LINE))
+          CHULP2 = LINE(IPOSL:IPOSR)
+          IPOSL = 0
+          IPOSR = 0
+          RETURN
+      ENDIF
+
       CALL GETTOK ( LUNIN  , LINE   , CHULP  , IHULP  , RHULP   ,
      *              ITYPE  , IPOSL  , IPOSR  , NPOS   , CCHAR   ,
      *                       '#'    , CURLINE(IFL)    , IERR    )
