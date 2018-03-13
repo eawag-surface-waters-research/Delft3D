@@ -2330,7 +2330,7 @@
    
       subroutine getdim_dis ( lun      , dis_file , nrowsmax, lunlog   )
 !
-!     programmer : michel jeuken
+!     programmer : michelle jeuken
 !     credits    : derived from getdim_ini
 !     function   : get dimensions from dispersant-file
 !                  (only max. no. of rows per polygone)

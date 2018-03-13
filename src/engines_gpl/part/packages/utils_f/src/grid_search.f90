@@ -458,7 +458,7 @@ outer2:  do m = 2, mmax
 
 !     System administration : Antoon Koster
 
-!     created               : November 2013, by Michel Jeuken
+!     created by            : Michelle Jeuken
 
 !     logical unit numbers  : none.
 

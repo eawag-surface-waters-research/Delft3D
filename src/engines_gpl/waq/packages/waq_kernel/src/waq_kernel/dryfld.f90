@@ -41,10 +41,6 @@
 !>      time step is tested by the dryfle routine later in this file.
 
 !     Created             : September 2010 by Leo Postma
-!     Modified            : August    2011 by Leo Postma test the volume of the whole column
-!                           April     2013    Leo Postma integrated with hsurf routine
-!                           April     2014    Michel Jeuken introduction of constants for
-!                                             minimum values areas and volumes.
 
 !     Files               : none
 
@@ -151,7 +147,7 @@
 !     Created             : September 2010 by Leo Postma
 !     Modified            : August    2011 by Leo Postma: test the volume of the water column
 !                           April     2013    Leo Postma  integrated with hsurf routine
-!                           April     2014    Michel Jeuken introduction of constant for
+!                           April     2014    Michelle Jeuken introduction of constant for
 !                                             minimum value of volumes.
 
 !     Files               : none

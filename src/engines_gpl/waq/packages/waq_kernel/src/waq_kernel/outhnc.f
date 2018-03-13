@@ -28,8 +28,6 @@
 
 !     Function            : Writes history output to NetCDF
 
-!     Created             : March     2015 by Michel Jeuken
-
       use timers
 
       integer       iohis , itime , nodump, notot1, notot2,

@@ -24,7 +24,7 @@
       subroutine polpart( pol_file, nrowsmax, xpol, ypol, nrows, lunpr   )
 
 !
-!     programmer : michel jeuken
+!     programmer : michelle jeuken
 !     function   : read a single polygon from a file
 !     date       : september 2013
 !

@@ -29,8 +29,6 @@
 
 !     Function            : Writes map output to NetCDF
 
-!     Created             : March     2015 by Michel Jeuken
-
       use timers
       use dlwq_netcdf  !   read/write grid in netcdf
       implicit none
