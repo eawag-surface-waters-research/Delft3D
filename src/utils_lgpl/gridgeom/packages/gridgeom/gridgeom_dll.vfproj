@@ -34,7 +34,7 @@
 				<Tool Name="VFPreBuildEventTool" CommandLine="rem call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\version_number.rc .\ .\include\version_number.ini"/>
 				<Tool Name="VFPostBuildEventTool"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
-		<Configuration Name="Release|x64" OutputDirectory="dll\$(PlatformName)\$(ConfigurationName)" IntermediateDirectory="dll\$(PlatformName)\$(ConfigurationName)" ConfigurationType="typeDynamicLibrary">
+		<Configuration Name="Release|x64" OutputDirectory="$(SolutionDir)\bin\$(PlatformName)\share\bin" ConfigurationType="typeDynamicLibrary">
 				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" RuntimeLibrary="rtMultiThreadedDLL"/>
 				<Tool Name="VFLinkerTool" OutputFile="$(OutDir)\gridgeom.dll" SuppressStartupBanner="true" AdditionalLibraryDirectories="$(UniversalCRTSdkDir)Lib\10.0.15063.0\ucrt\x64" GenerateManifest="false" ProgramDatabaseFile="$(TargetDir)gridgeom_dll.pdb" ImportLibrary="$(TargetDir)gridgeom_dll.lib" LinkDLL="true"/>
 				<Tool Name="VFResourceCompilerTool"/>
