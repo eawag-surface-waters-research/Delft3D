@@ -40,9 +40,9 @@ module m_Orifice
       double precision         :: latcontrcoeff
       integer                  :: allowedflowdir
       double precision         :: openlevel
-      integer                  :: uselimitflowpos
+      logical                  :: uselimitflowpos
       double precision         :: limitflowpos
-      integer                  :: uselimitflowneg
+      logical                  :: uselimitflowneg
       double precision         :: limitflowneg
    end type
 
@@ -233,14 +233,14 @@ subroutine ComputeOrifice(orifice, fum, rum, aum, dadsm, kfum, s1m1, s1m2, qm, q
     qtm = aum*u1m
     !
     !     check for restriction on flow
-    if ((orifice%uselimitflowpos==1) .and. (qtm>0)) then
+    if ((orifice%uselimitflowpos) .and. (qtm>0)) then
        if (dabs(qtm)>orifice%limitflowpos ) then
           fum = 0.0
           rum = orifice%limitflowpos/max(aum, 1.0D-4)
           u1m = rum
           qm = orifice%limitflowpos
        endif
-    elseif ((orifice%uselimitflowneg==1) .and. (qtm<0)) then
+    elseif ((orifice%uselimitflowneg) .and. (qtm<0)) then
        if (dabs(qtm)>orifice%limitflowneg) then
           fum = 0.0
           rum = -1.0*orifice%limitflowneg/max(aum, 1.0D-4)

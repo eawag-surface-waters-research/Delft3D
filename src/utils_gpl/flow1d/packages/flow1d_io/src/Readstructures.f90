@@ -1220,10 +1220,10 @@ module m_readstructures
       if (success) call prop_get_double(md_ptr, 'structure', 'latcontrcoeff', orifice%latcontrcoeff, success)
       if (success) call prop_get_double(md_ptr, 'structure', 'openlevel', orifice%openlevel, success)
 
-      if (success) call prop_get_integer(md_ptr, 'structure', 'uselimitflowpos', orifice%uselimitflowpos, success)
+      if (success) call prop_get_logical(md_ptr, 'structure', 'uselimitflowpos', orifice%uselimitflowpos, success)
       if (success) call prop_get_double(md_ptr, 'structure', 'limitflowpos', orifice%limitflowpos, success)
 
-      if (success) call prop_get_integer(md_ptr, 'structure', 'uselimitflowneg', orifice%uselimitflowneg, success)
+      if (success) call prop_get_logical(md_ptr, 'structure', 'uselimitflowneg', orifice%uselimitflowneg, success)
       if (success) call prop_get_double(md_ptr, 'structure', 'limitflowneg', orifice%limitflowneg, success)
    
    end subroutine readOrifice
