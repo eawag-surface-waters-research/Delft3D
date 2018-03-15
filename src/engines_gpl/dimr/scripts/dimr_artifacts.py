@@ -34,6 +34,11 @@ def platformArtifacts(platform):
             del sharefiles_withpath[:]
             print "sharefiles:" + str(sharefiles)
             for (path, dirs, files) in os.walk(pltdir):
+                for afile in files:
+                    name, extension = os.path.splitext(afile)
+                    if extension == ".exp" or extension == ".lib":
+                        print "      To be removed: " + os.path.join(path,afile)
+                        os.remove(os.path.join(path,afile))
                 if str(path).find(sharedir) == -1:
                     print "    Checking directory " + path + " ..."
                     for afile in files:
