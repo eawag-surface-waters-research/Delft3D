@@ -67,7 +67,6 @@
       integer                                :: ierr                   ! error indication
       integer                                :: ierr_alloc             ! error indication
       real, allocatable                      :: flow_data(:,:,:)       ! array with the flows from file
-      type(inputfilestack)                   :: inpfil                 ! input file strucure with include stack
       logical                                :: time_in_seconds        ! Whether the time is given in seconds or not
       character(len=20)                      :: string                 ! String token
       character(len=40)                      :: ctime                  ! time token

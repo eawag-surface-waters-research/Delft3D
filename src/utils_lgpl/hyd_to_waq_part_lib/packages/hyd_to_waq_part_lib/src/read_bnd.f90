@@ -52,7 +52,6 @@
       real                                   :: reel                   ! real token from input
       integer                                :: ierr                   ! error indication
       integer                                :: ierr_alloc             ! error indication
-      type(inputfilestack)                   :: inpfil                 ! input file strucure with include stack
       integer                                :: no_sect                ! number of sections
       integer                                :: i_sect                 ! index of section
       integer                                :: no_bnd                 ! number of boundaries in section

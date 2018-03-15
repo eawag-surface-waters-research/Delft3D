@@ -158,18 +158,6 @@
       integer, parameter :: TYPE_NOINT  = -2                 ! no integer allowed
       integer, parameter :: TYPE_NOREAL = -3                 ! no real allowed
 
-      ! the remnant of old the implementation
-
-      type inputfilestack
-         logical             :: dtflg1          ! dtflg1
-         logical             :: dtflg2          ! dtflg2
-         logical             :: dtflg3          ! dtflg3
-         integer             :: itfact          ! itfact
-         integer             :: iblock          ! input block
-         real                :: vrsion          ! version of input
-         integer             :: ierr            ! error on inputfile
-      endtype inputfilestack
-
 !     overload the operations
 
       interface dlwq_init

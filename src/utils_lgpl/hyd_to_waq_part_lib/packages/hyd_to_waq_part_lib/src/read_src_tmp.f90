@@ -69,7 +69,6 @@
       integer                                :: ierr                   ! error indication
       integer                                :: ierr_alloc             ! error indication
       real, allocatable                      :: flow_data(:,:,:)       ! array with the flows from file
-      type(inputfilestack)                   :: inpfil                 ! input file strucure with include stack
       character(len=255)                     :: ctoken                 ! line buffer input file
 
       call getmlu(lunrep)
