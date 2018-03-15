@@ -39,7 +39,7 @@ subroutine write_waqgeom(hyd, version_full)
 
        character(len=256)            :: filename          !  Name of NetCDF file
        character(len=*), intent(in)  :: version_full
-       
+
        integer                       :: igeomfile         !  NetCDF file handle
        integer                       :: ierr              !  error indication
        integer                       :: i                 !  loop counter
@@ -857,9 +857,9 @@ subroutine wrwaqgeom (filename, version_full, sferic, epsg, nr_nodes, xk, yk, zk
           xcrd(i) = 0.0_hp
           ycrd(i) = 0.0_hp
 
+          nk = 0
           do j = 1,max_vertex
               k  = netelem(j,i)
-              nk = 0
               if ( k > 0 ) then
                   nk      = nk + 1
                   xcrd(i) = xcrd(i) + xk(k)
