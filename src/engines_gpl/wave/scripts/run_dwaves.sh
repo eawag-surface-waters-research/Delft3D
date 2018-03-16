@@ -101,6 +101,7 @@ libdir=$D3D_HOME/lib
 
     # Run
 export LD_LIBRARY_PATH=$libdir:$LD_LIBRARY_PATH
+export PATH=$bindir:$PATH
     echo "executing:"
     echo "$bindir/wave $mdwfile 0"
     echo 
