@@ -130,3 +130,5 @@ $bindir/wave $mdwfile 1
     # Wait until all child processes are finished
 wait
 
+    # D-Waves doesn't give write permission to the group bit of the dat/def-files
+chmod -R g+rw *.dat *.def
