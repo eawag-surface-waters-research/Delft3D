@@ -151,4 +151,4 @@ mpdallexit
 wait
 
     # D-Waves doesn't give write permission to the group bit of the dat/def-files
-chmod -R g+rw *.dat *.def
+chmod -R g+rw *.dat *.def &>/dev/null
