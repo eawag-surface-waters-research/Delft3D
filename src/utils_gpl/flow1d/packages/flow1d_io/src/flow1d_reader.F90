@@ -37,15 +37,20 @@ module m_flow1d_reader
    
    public read_1d_model
    
+   interface read_1d_model
+      module procedure read_md1d 
+      module procedure scan_md_ptr
+   end interface 
+
    logical :: files_have_been_read = .false. ! temporary flag (needed as long as WaterflowModel1D
    public files_have_been_read               ! calls 'ReadFiles' and d_hydro.exe does not)
    ! files_have_been_read also used to retrieve interpolated cross-section data by delta-shell!!
    
    contains
    
-   subroutine read_1d_mdu(md_flow1d_file, network, nc_outputdir)
+   subroutine read_md1d(md_flow1d_file, network, nc_outputdir)
       use properties
-  !    use ModelGlobalData
+      use ModelGlobalData
       use m_network
  
       implicit none
@@ -69,14 +74,14 @@ module m_flow1d_reader
          call setmessage(LEVEL_FATAL, 'Error opening ' // trim(md_flow1d_file))
       endif
       
-      call read_1d_model(md_flow1d_file, md_ptr, network, nc_outputdir)
+      call scan_md_ptr(md_flow1d_file, md_ptr, network, nc_outputdir)
       files_have_been_read = .true.
       
       call tree_destroy(md_ptr)
       
-   end subroutine read_1d_mdu
+   end subroutine read_md1d
 
-   subroutine read_1d_model(md_flow1d_file, md_ptr, network, nc_outputdir)
+   subroutine scan_md_ptr(md_flow1d_file, md_ptr, network, nc_outputdir)
    
       use string_module
       use m_globalParameters
@@ -506,7 +511,7 @@ module m_flow1d_reader
       
       call SetMessage(LEVEL_INFO, 'All Reading Done')
 
-   end subroutine read_1d_model
+   end subroutine scan_md_ptr
    
 end module m_flow1d_reader
     
