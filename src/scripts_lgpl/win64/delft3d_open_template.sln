@@ -565,9 +565,9 @@ Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "io_netcdf", "utils_lgpl\io_
 		{2D6BCBCA-CC6C-49FE-A6AA-61AF62529118} = {2D6BCBCA-CC6C-49FE-A6AA-61AF62529118}
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "hyd_to_waq_part_lib", "hyd_to_waq_part_lib", "{5EB7BBB6-2C9C-406D-A477-751D296902DE}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "io_hyd", "io_hyd", "{5EB7BBB6-2C9C-406D-A477-751D296902DE}"
 EndProject
-Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "hyd_to_waq_part_lib", "utils_lgpl\hyd_to_waq_part_lib\packages\hyd_to_waq_part_lib\hyd_to_waq_part_lib.vfproj", "{F3329356-5A5C-42F2-9134-5A29D0E1A7EC}"
+Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "io_hyd", "utils_lgpl\io_hyd\packages\io_hyd\io_hyd.vfproj", "{F3329356-5A5C-42F2-9134-5A29D0E1A7EC}"
 	ProjectSection(ProjectDependencies) = postProject
 		{5250F13E-C280-42FC-8CDF-74E96A500605} = {5250F13E-C280-42FC-8CDF-74E96A500605}
 		{C29AA190-5BE8-4674-AA8A-E858964D3C08} = {C29AA190-5BE8-4674-AA8A-E858964D3C08}

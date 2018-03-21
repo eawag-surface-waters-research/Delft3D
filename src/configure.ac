@@ -825,10 +825,10 @@ utils_lgpl/gridgeom/Makefile
 utils_lgpl/gridgeom/packages/gridgeom/Makefile
 utils_lgpl/gridgeom/packages/gridgeom/src/Makefile
 utils_lgpl/gridgeom/packages/Makefile
-utils_lgpl/hyd_to_waq_part_lib/Makefile
-utils_lgpl/hyd_to_waq_part_lib/packages/hyd_to_waq_part_lib/Makefile
-utils_lgpl/hyd_to_waq_part_lib/packages/hyd_to_waq_part_lib/src/Makefile
-utils_lgpl/hyd_to_waq_part_lib/packages/Makefile
+utils_lgpl/io_hyd/Makefile
+utils_lgpl/io_hyd/packages/io_hyd/Makefile
+utils_lgpl/io_hyd/packages/io_hyd/src/Makefile
+utils_lgpl/io_hyd/packages/Makefile
 utils_lgpl/io_netcdf/Makefile
 utils_lgpl/io_netcdf/packages/io_netcdf/Makefile
 utils_lgpl/io_netcdf/packages/io_netcdf/src/Makefile

@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-#   Makefile hyd_to_waq_part_lib
+#   Makefile io_hyd
 #
 #   14 jun 2016
 #
@@ -7,7 +7,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-noinst_LTLIBRARIES = libHydToWaqPartLib.la
+noinst_LTLIBRARIES = libIOHyd.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -21,7 +21,7 @@ FMODULES += \
 
 #-------------------------------------------------------------------------------
 #Sources
-libHydToWaqPartLib_la_SOURCES = \
+libIOHyd_la_SOURCES = \
          dlwq_hyd_data.f90 \
          agwaqgeom.f90 \
          wrwaqgeomcl.f90 \
