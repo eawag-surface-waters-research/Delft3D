@@ -2765,7 +2765,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     !
     return
 999 continue
-    call wavestop(1, "ERROR whil reading keyword based mdw file")
+    call wavestop(1, "ERROR while reading keyword based mdw file")
 end subroutine read_keyw_mdw
 !
 !
