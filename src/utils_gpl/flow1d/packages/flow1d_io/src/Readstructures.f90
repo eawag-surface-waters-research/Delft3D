@@ -30,6 +30,7 @@ module m_readstructures
 !-------------------------------------------------------------------------------
 
    use MessageHandling
+   use string_module
    use m_network
    use m_CrossSections
    use m_structure
@@ -73,6 +74,7 @@ module m_readstructures
       integer                                                :: istat
       integer                                                :: numstr
       integer                                                :: i
+      character(len=IdLen)                                   :: str_buf
 
       character(len=IdLen)                                   :: typestr
       character(len=IdLen)                                   :: structureID
@@ -81,10 +83,12 @@ module m_readstructures
       
       double precision                                       :: Chainage
       integer                                                :: branchIdx
-      integer                                                :: iCompound
       logical                                                :: isPillarBridge
       logical                                                :: isInvertedSiphon
 
+      integer                                                :: iCompound
+      character(len=IdLen)                                   :: compoundName
+      
       integer                                                :: iStrucType
       integer                                                :: istru
       type(t_branch), pointer                                :: pbr
@@ -133,6 +137,17 @@ module m_readstructures
       
             call prop_get_integer(md_ptr%child_nodes(i)%node_ptr, 'structure', 'compound', iCompound, success)
             if (.not. success) iCompound = 0
+            
+            if (iCompound > 0) then
+               call prop_get_string(md_ptr%child_nodes(i)%node_ptr, 'structure', 'compoundName', compoundName, success)
+               if (.not. success .or. len_trim(compoundName) <= 0) then
+                  write(str_buf, *) iCompound
+                  call remove_leading_spaces(str_buf)
+                  compoundName = 'Cmp'//trim(str_buf)
+               endif
+            else
+               compoundName = ' '
+            endif
             
             structureName = ' '
             call prop_get_string(md_ptr%child_nodes(i)%node_ptr, 'structure', 'name', structureName, success)
@@ -192,7 +207,7 @@ module m_readstructures
 
             end select
             
-            istru = Addstructure(network%sts, network%brs, branchIdx, Chainage, iCompound, structureId, iStrucType)
+            istru = Addstructure(network%sts, network%brs, branchIdx, Chainage, iCompound, compoundName, structureId, iStrucType)
                
             select case (iStrucType)
                

@@ -136,6 +136,7 @@ module m_structure
     !---------------------------------------------------------
    type, public :: t_structure
       character(IdLen)                 :: id
+      character(IdLen)                 :: st_name
       integer                          :: st_type
       integer                          :: ibran
       integer                          :: left_calc_point
@@ -144,6 +145,7 @@ module m_structure
       double precision                 :: x, y
       double precision                 :: distance
       integer                          :: compound
+      character(IdLen)                 :: compoundName
       type(t_weir), pointer            :: weir => null()
       type(t_orifice), pointer         :: orifice => null()
       type(t_pump), pointer            :: pump => null()
@@ -174,15 +176,20 @@ module m_structure
 
    type, public :: t_compound
       character(IdLen)               :: id
+      character(IdLen)               :: compoundName
       integer nrstruc
       !    integer, dimension(:), pointer :: struct ! vooralsnog niet nodig
       integer gridpoint1
       integer gridpoint2
-      integer istru                       !< help variable to remove compounds with one structure
+      integer istru               !< help variable to remove compounds with one structure
+      logical cleared             ! To Check if compound is still cleared
       double precision discharge
+      double precision velocity
+      double precision water_level_up
+      double precision water_level_down
+      double precision head
       double precision difu
       double precision area
-      double precision velocity
    end type t_compound
 
    type, public :: t_compoundSet
@@ -194,38 +201,39 @@ module m_structure
 
    contains
    
-   integer function AddStructure_short(sts, leftcalc, rightcalc, linknumber, icompound, id, structureType)
+   integer function AddStructure_short(sts, leftcalc, rightcalc, linknumber, icompound, compoundName, id, structureType)
       ! Modules
-
+   
       implicit none
-
+   
       ! Input/output parameters
       type(t_StructureSet) :: sts
       integer              :: leftcalc
       integer              :: rightcalc
       integer              :: linknumber
-      integer              ::  icompound
+      integer              :: icompound
+      character(*)         :: compoundName
       character(*)         :: id
       ! In 3Di branches have both xy and branchid, chainage
-
+   
       integer              :: structureType
-
+   
       ! Local variables
       integer :: ibranch
       double precision :: x
       double precision :: y
       double precision :: distcalc
       
-
+   
       ! Program code
       distcalc = 0d0
       x = 0d0
       y = 0d0
       ibranch = 0
-      AddStructure_short = AddStructureByCalcPoints(sts, leftcalc, rightcalc, linknumber, distcalc, icompound, id, structureType, x, y, ibranch)
+      AddStructure_short = AddStructureByCalcPoints(sts, leftcalc, rightcalc, linknumber, distcalc, icompound, compoundName, id, structureType, x, y, ibranch)
    end function AddStructure_short
 
-   integer function AddStructureByCalcPoints(sts, leftcalc, rightcalc, linknumber, distcalc, icompound, id, structureType, x, y, ibranch)
+   integer function AddStructureByCalcPoints(sts, leftcalc, rightcalc, linknumber, distcalc, icompound, compoundName, id, structureType, x, y, ibranch)
       ! Modules
 
       implicit none
@@ -236,7 +244,8 @@ module m_structure
       integer              :: rightcalc
       integer              :: linknumber
       double precision     :: distcalc
-      integer              ::  icompound
+      integer              :: icompound
+      character(*)         :: compoundName
       character(*)         :: id
       double precision, optional :: x
       double precision, optional :: y
@@ -264,6 +273,7 @@ module m_structure
       sts%struct(i)%link_number        = linknumber
       sts%struct(i)%distance           = distcalc
       sts%struct(i)%compound           = icompound
+      sts%struct(i)%compoundName       = compoundName
       sts%struct(i)%st_type            = structureType
       if (present(x) .and. present(y)) then
          sts%struct(i)%x = x
@@ -296,15 +306,19 @@ module m_structure
       AddStructureByCalcPoints = sts%count
    end function AddStructureByCalcPoints
 
-   integer function AddStructureByBranchLocation(sts, brs, ibranch, dist, icompound, id, structureType)
+   integer function AddStructureByBranchLocation(sts, brs, ibranch, dist, icompound, compoundName, id, structureType)
       ! Modules
 
       implicit none
 
       ! Input/output parameters
-      integer              :: ibranch, icompound
+      integer              :: ibranch
       double precision                 :: dist
       character(*)         :: id
+
+      integer              :: icompound
+      character(*)         :: compoundName
+      
       type(t_StructureSet) :: sts
       type(t_BranchSet)    :: brs
       integer              :: structureType
@@ -318,7 +332,8 @@ module m_structure
       ! Program code
       call getCalcPoints(brs, ibranch, dist, leftcalc, rightcalc, ilink, distcalc)
 
-      AddStructureByBranchLocation = AddStructureByCalcPoints(sts, leftcalc, rightcalc, ilink, distcalc, icompound, id, structureType, ibranch = ibranch)
+      AddStructureByBranchLocation = AddStructureByCalcPoints(sts, leftcalc, rightcalc, ilink, distcalc, &
+                                                              icompound, compoundName, id, structureType, ibranch = ibranch)
       
    end function AddStructureByBranchLocation
 
