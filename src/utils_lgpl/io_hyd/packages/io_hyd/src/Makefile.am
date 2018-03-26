@@ -23,10 +23,12 @@ FMODULES += \
 #Sources
 libIOHyd_la_SOURCES = \
          dlwq_hyd_data.f90 \
-         agwaqgeom.f90 \
-         wrwaqgeomcl.f90 \
          domain_mod.f90 \
          dlwqgrid_mod.f90 \
+         utils_waqgeom.f90 \
+         wrwaqgeomcl.f90 \
+         aggregate_waqgeom.f90 \
+         read_waqgeom.f90 \
          filmod.f90 \
          wstmod.f90 \
          hydmod.f90 \

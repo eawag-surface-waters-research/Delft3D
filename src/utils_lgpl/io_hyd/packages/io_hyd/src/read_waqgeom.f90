@@ -1,0 +1,167 @@
+!----- GPL ---------------------------------------------------------------------
+!                                                                               
+!  Copyright (C)  Stichting Deltares, 2011-2018.                                
+!                                                                               
+!  This program is free software: you can redistribute it and/or modify         
+!  it under the terms of the GNU General Public License as published by         
+!  the Free Software Foundation version 3.                                      
+!                                                                               
+!  This program is distributed in the hope that it will be useful,              
+!  but WITHOUT ANY WARRANTY; without even the implied warranty of               
+!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                
+!  GNU General Public License for more details.                                 
+!                                                                               
+!  You should have received a copy of the GNU General Public License            
+!  along with this program.  If not, see <http://www.gnu.org/licenses/>.        
+!                                                                               
+!  contact: delft3d.support@deltares.nl                                         
+!  Stichting Deltares                                                           
+!  P.O. Box 177                                                                 
+!  2600 MH Delft, The Netherlands                                               
+!                                                                               
+!  All indications and logos of, and references to, "Delft3D" and "Deltares"    
+!  are registered trademarks of Stichting Deltares, and remain the property of  
+!  Stichting Deltares. All rights reserved.                                     
+!                                                                               
+!-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
+
+module m_read_waqgeom
+    use m_alloc
+    use MessageHandling
+    use m_utils_waqgeom
+    
+    private
+    
+    public read_waqgeom_file
+    public read_grid_file_ugrid_netcdf
+    
+    contains 
+    
+    function read_waqgeom_file(file_waqgeom, waqgeom) result(success)
+
+    ! function : read a waqgeom file
+
+    ! global declarations
+
+    use filmod
+    use io_ugrid
+    use m_alloc
+
+    implicit none
+
+    type(t_dlwqfile)                       :: file_waqgeom
+    type(t_ug_meshgeom), intent(out)       :: waqgeom
+    logical                                :: success !< Result status, true if successful.
+      
+    success = .false.
+
+    ! Check if the file actualy exist
+    ! Check the ugrid version
+      
+    success = .true.
+      
+    return
+    end function
+
+
+    !> Reads an unstructured grid from UGRID file format.
+    !! Reads netnode coordinates, edges (netlinks), net boundary and elements (netelems).
+    function read_grid_file_ugrid_netcdf(filename, waqgeom, edge_type, conv_type, conv_version) result (success)
+        use netcdf
+        use io_netcdf
+        use io_ugrid ! for t_ug_file
+
+        implicit none
+
+        character(len=*)                       :: filename
+        type(t_ug_meshgeom), intent(out)       :: waqgeom
+        integer, pointer, intent(out)          :: edge_type (:)
+        integer                                :: conv_type 
+        real(8)                                :: conv_version
+        logical                                :: success !< Result status, true if successful.
+
+        character(len=260) :: msgtxt
+        type(t_ug_mesh),allocatable            :: meshids
+        
+        ! NetCDF variables
+        !> Dimensions   Node variables Link variables Link type Boundary variables Element variables Computational boundaries
+        integer :: ierr 
+        integer :: ioncid 
+        integer :: ncid 
+        integer :: nmesh 
+        integer :: epsg_code 
+        integer :: id_netnodez 
+        integer :: id_edgetypes
+        integer :: file_size
+        character(len=260) :: var_name
+
+        integer, dimension(:,:), pointer :: edge_nodes
+        integer, dimension(:,:), pointer :: face_nodes
+        integer :: i_mesh, varid, ifill
+        
+        success = .false.
+        
+        ! 0. Preparation (file, dimensions)
+
+        inquire(FILE=filename, SIZE=file_size)
+        if (file_size == 0) then
+            return
+        end if
+        
+        ierr = ionc_open(trim(filename) , nf90_nowrite, ioncid) 
+        if (ierr /= nf90_noerr) then
+            call mess(LEVEL_ERROR, 'File ' // trim(filename) // ' could not be opened.')
+            return
+        end if
+        !
+        ierr = ionc_inq_conventions(ioncid, conv_type, conv_version)
+        if ( (ierr == nf90_noerr .and. conv_type /= IONC_CONV_UGRID) .or. &
+             (ierr == nf90_noerr .and. conv_type == IONC_CONV_UGRID .and. conv_version<1.0)) then
+            ! read old format grid file
+            ierr = ionc_close(ioncid)
+!            call read_grid_file_unstruc_netcdf(filename, waqgeom)
+            return
+        end if
+        ! It is a valid UGRID file format
+        ierr = ionc_get_mesh_count(ioncid, nmesh) ! UGRID: required
+        if (nmesh==0) then
+            call mess(LEVEL_ERROR,'No mesh found in UGRID file: ' // trim(filename) )
+            return
+        end if
+        if (nmesh>1) then
+            call mess(LEVEL_ERROR,'More than one mesh found in UGRID file: ' // trim(filename) )
+            return
+        end if
+        i_mesh = 1
+        varid = 1
+        ! Read the mesh
+!        ug_init_mesh_topology(ioncid, varid, meshids) 
+!        ierr = ug_init_mesh_topology(ioncid, varid, meshids)
+        
+        ierr = ionc_get_meshgeom(ioncid, i_mesh, waqgeom, includeArrays=.true.)
+
+        call reallocP(waqgeom%face_nodes, (/waqgeom%maxnumfacenodes, waqgeom%numface/), keepExisting = .false.)
+        ierr = ionc_get_face_nodes(ioncid, i_mesh, waqgeom%face_nodes, ifill, startindex=1)
+
+        call reallocP(waqgeom%face_edges, (/waqgeom%maxnumfacenodes, waqgeom%numface/), keepExisting = .false.)
+        ierr = ionc_get_face_edges(ioncid, i_mesh, waqgeom%face_edges, ifill, startindex=1)
+
+        call reallocP(waqgeom%edge_faces,(/2, waqgeom%numedge/), keepExisting = .false.)
+        ierr = ionc_get_edge_faces(ioncid, i_mesh, waqgeom%edge_faces, ifill, startindex=1)
+
+        call reallocP(edge_type, waqgeom%numedge, keepExisting = .false.)
+        ierr = ionc_get_ncid(ioncid, ncid)
+        ierr = nf90_inq_varid(ncid, "mesh2d_edge_type", id_edgetypes)
+        ierr = nf90_get_var(ncid, id_edgetypes, edge_type, count=(/ waqgeom%numedge /))
+
+        call add_facexy_waqgeom(waqgeom)
+        call add_edgexy_waqgeom(waqgeom)
+        call add_facelinks_waqgeom(waqgeom)
+
+        success = .true.
+        
+    end function read_grid_file_ugrid_netcdf
+
+    end module    

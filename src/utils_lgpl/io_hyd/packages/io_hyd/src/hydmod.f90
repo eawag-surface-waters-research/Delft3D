@@ -212,6 +212,10 @@
          integer                                :: nv                     !< max nr of nodes describing an element
          integer                                :: nump                   !< number of elements
          integer, pointer                       :: netcellnod(:,:)        !< element nodes
+         type(t_ug_meshgeom)                    :: waqgeom                !< geometry
+         integer, pointer                       :: edge_type(:)           !< edge type
+         integer                                :: conv_type 
+         real(8)                                :: conv_version
          type(t_crs)                            :: crs                    !< Container for information about coordinate reference system
          
       end type t_hyd

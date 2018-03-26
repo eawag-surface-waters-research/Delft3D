@@ -7025,7 +7025,7 @@ src/utils_lgpl/io_hyd/packages/Makefile.am -text
 src/utils_lgpl/io_hyd/packages/io_hyd/Makefile.am -text
 src/utils_lgpl/io_hyd/packages/io_hyd/io_hyd.vfproj -text
 src/utils_lgpl/io_hyd/packages/io_hyd/src/Makefile.am -text
-src/utils_lgpl/io_hyd/packages/io_hyd/src/agwaqgeom.f90 -text
+src/utils_lgpl/io_hyd/packages/io_hyd/src/aggregate_waqgeom.f90 -text
 src/utils_lgpl/io_hyd/packages/io_hyd/src/copy_hyd_step.f90 -text
 src/utils_lgpl/io_hyd/packages/io_hyd/src/dlwq_hyd_data.f90 -text
 src/utils_lgpl/io_hyd/packages/io_hyd/src/dlwqgrid_mod.f90 -text
@@ -7048,7 +7048,9 @@ src/utils_lgpl/io_hyd/packages/io_hyd/src/read_src.f90 -text
 src/utils_lgpl/io_hyd/packages/io_hyd/src/read_src_tmp.f90 -text
 src/utils_lgpl/io_hyd/packages/io_hyd/src/read_srf.f90 -text
 src/utils_lgpl/io_hyd/packages/io_hyd/src/read_vag.f90 -text
+src/utils_lgpl/io_hyd/packages/io_hyd/src/read_waqgeom.f90 -text
 src/utils_lgpl/io_hyd/packages/io_hyd/src/set_hyd.f90 -text
+src/utils_lgpl/io_hyd/packages/io_hyd/src/utils_waqgeom.f90 -text
 src/utils_lgpl/io_hyd/packages/io_hyd/src/write_atr.f90 -text
 src/utils_lgpl/io_hyd/packages/io_hyd/src/write_bnd.f90 -text
 src/utils_lgpl/io_hyd/packages/io_hyd/src/write_cco.f90 -text

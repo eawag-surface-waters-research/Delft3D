@@ -114,7 +114,7 @@ contains
     integer , dimension(:,:)  , pointer :: face_nodes            ! nodes that define a face
     integer , dimension(:,:)  , pointer :: edge_faces            ! faces that this edge is part of
     integer , dimension(:)    , pointer :: edge_type             ! edge type variable to be written to the NetCDF file.
-    integer , dimension(:), allocatable, target :: aggr_edge_type(:)     ! aggregated edge type variable to be written to the NetCDF file.
+    integer , dimension(:)    , pointer :: aggr_edge_type(:)     ! aggregated edge type variable to be written to the NetCDF file.
 
     integer , dimension(:,:)  , pointer :: bnd_nr                ! boundary number
     integer                             :: nr_bnd_elm

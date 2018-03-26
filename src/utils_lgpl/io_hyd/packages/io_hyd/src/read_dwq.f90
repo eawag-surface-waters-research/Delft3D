@@ -60,11 +60,18 @@
          call srstop(1)
       endif
 
-      if (nmaxd.ne.nmax.or.mmaxd.ne.mmax.or.nmd.ne.nmax*mmax) then
-         write(*,*) ' dimensions grid on dido file differ from input hydrodynamics'
-         call srstop(1)
+!     If nmaxd or mmaxd is one, only check if nmd.ne.nmax*mmax
+      if (nmaxd.eq.1.or.mmaxd.eq.1) then
+        if (nmd.ne.nmax*mmax) then
+           write(*,*) ' dimensions grid on dido file differ from input hydrodynamics'
+           call srstop(1)
+        endif
+      else   
+        if (nmaxd.ne.nmax.or.mmaxd.ne.mmax) then
+           write(*,*) ' dimensions grid on dido file differ from input hydrodynamics'
+           call srstop(1)
+        endif
       endif
-
       read(file_dwq%unit_nr,*,iostat=ioerr) ((ipnt(n,m),n=1,nmax),m=1,mmax)
       if ( ioerr .ne. 0 ) then
          write(*,*) ' error reading dwq file'
