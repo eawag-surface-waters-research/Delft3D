@@ -145,7 +145,7 @@ module m_structure
       double precision                 :: x, y
       double precision                 :: distance
       integer                          :: compound
-      character(IdLen)                 :: compoundName
+      character(IdLen)                 :: compoundName = ' '
       type(t_weir), pointer            :: weir => null()
       type(t_orifice), pointer         :: orifice => null()
       type(t_pump), pointer            :: pump => null()

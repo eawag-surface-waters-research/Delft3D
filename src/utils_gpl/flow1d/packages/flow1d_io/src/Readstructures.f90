@@ -88,6 +88,7 @@ module m_readstructures
 
       integer                                                :: iCompound
       character(len=IdLen)                                   :: compoundName
+      character(len=IdLen), allocatable, dimension(:)        :: compoundNames
       
       integer                                                :: iStrucType
       integer                                                :: istru
@@ -139,8 +140,17 @@ module m_readstructures
             if (.not. success) iCompound = 0
             
             if (iCompound > 0) then
+            
                call prop_get_string(md_ptr%child_nodes(i)%node_ptr, 'structure', 'compoundName', compoundName, success)
-               if (.not. success .or. len_trim(compoundName) <= 0) then
+               if (success .and. len_trim(compoundName) > 0) then
+                  if (.not. allocated(compoundNames)) then
+                     allocate(compoundNames(numstr))
+                     compoundNames = ' '
+                  endif
+                  if (len_trim(compoundNames(iCompound)) <= 0) then
+                     compoundNames(iCompound) = compoundName
+                  endif
+               else
                   write(str_buf, *) iCompound
                   call remove_leading_spaces(str_buf)
                   compoundName = 'Cmp'//trim(str_buf)
@@ -255,6 +265,22 @@ module m_readstructures
 
       end do
       
+      ! Handle the Compound Names, if no names specified do nothing
+      if (allocated(compoundNames)) then
+      
+         do i = 1, network%sts%Count
+            if (network%sts%struct(i)%compound > 0) then
+               if (len_trim(compoundNames(network%sts%struct(i)%compound)) > 0) then
+                  network%sts%struct(i)%compoundName = compoundNames(network%sts%struct(i)%compound)
+               endif
+            endif
+         enddo
+         
+         deallocate(compoundNames)
+
+      endif
+         
+      
       call fill_hashtable(network%sts)
       
       if (.not. allocated(network%sts%restartData) .and. (network%sts%count > 0)) then
@@ -298,6 +324,7 @@ module m_readstructures
          read(ibin) pstr%y
          read(ibin) pstr%distance
          read(ibin) pstr%compound
+         read(ibin) pstr%compoundName
          
          select case(pstr%st_type)
             case(ST_WEIR)
@@ -525,6 +552,7 @@ module m_readstructures
          write(ibin) pstr%y
          write(ibin) pstr%distance
          write(ibin) pstr%compound
+         write(ibin) pstr%compoundName
          
          select case(pstr%st_type)
             case(ST_WEIR)
