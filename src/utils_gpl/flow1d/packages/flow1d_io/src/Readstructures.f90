@@ -78,7 +78,6 @@ module m_readstructures
 
       character(len=IdLen)                                   :: typestr
       character(len=IdLen)                                   :: structureID
-      character(len=IdLen)                                   :: structureName
       character(len=IdLen)                                   :: branchID
       
       double precision                                       :: Chainage
@@ -159,9 +158,6 @@ module m_readstructures
                compoundName = ' '
             endif
             
-            structureName = ' '
-            call prop_get_string(md_ptr%child_nodes(i)%node_ptr, 'structure', 'name', structureName, success)
-
             branchIdx = hashsearch(network%brs%hashlist, branchID)
             
             pbr => network%brs%branch(branchIdx)
@@ -265,7 +261,7 @@ module m_readstructures
 
       end do
       
-      ! Handle the Compound Names, if no names specified do nothing
+      ! Handle the Structure and Compound Names
       if (allocated(compoundNames)) then
       
          do i = 1, network%sts%Count
@@ -278,6 +274,13 @@ module m_readstructures
          
          deallocate(compoundNames)
 
+      else
+      
+         ! Copy ID'S to Names
+         do i = 1, network%sts%Count
+            network%sts%struct(i)%st_name = network%sts%struct(i)%id
+         enddo
+      
       endif
          
       
