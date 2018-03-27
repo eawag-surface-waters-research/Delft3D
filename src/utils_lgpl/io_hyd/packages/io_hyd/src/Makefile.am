@@ -26,14 +26,14 @@ libIOHyd_la_SOURCES = \
          domain_mod.f90 \
          dlwqgrid_mod.f90 \
          utils_waqgeom.f90 \
-         wrwaqgeomcl.f90 \
-         aggregate_waqgeom.f90 \
-         read_waqgeom.f90 \
          filmod.f90 \
          wstmod.f90 \
          hydmod.f90 \
          hyd_waqgeom_mod_old.f90 \
          hyd_waqgeom_old.f90 \
+         aggregate_waqgeom.f90 \
+         read_waqgeom.f90 \
+         wrwaqgeomcl.f90 \
          read_atr.f90 \
          read_bnd.f90 \
          read_cco.f90 \
