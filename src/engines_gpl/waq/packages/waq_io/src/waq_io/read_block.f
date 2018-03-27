@@ -658,6 +658,9 @@
       CONTAINS
 
       subroutine check_file_size( filename, nodata, type, ierr )
+
+      use iso_fortran_env, only: int64
+
       character(len=*), intent(in)    :: filename
       integer, intent(in)             :: nodata
       integer, intent(in)             :: type
@@ -669,9 +672,10 @@
       real, dimension(:), allocatable :: data
       character(14)                   :: strng
 
+      integer(kind=int64)             :: filesize, recordsize
+
       ierr = 0
 
-      allocate( data(nodata) )
 
       !
       ! Check that the file exists and can be opened
@@ -690,63 +694,64 @@
       !
       ! Check if this is a steering file
       !
-      
+
       read ( lun , iostat = ierr ) strng
       if ( ierr .ne. 0 ) strng = 'x'
       if ( strng(1:14) .ne. 'Steering file ' ) then
          if ( type == FILE_BINARY ) then
-            read( lun, iostat = ierr, pos = 1 )
+            inquire( lun, size = filesize )
+            close( lun )
+
+            recordsize = 4 * (nodata+1) ! single-precision reals occupy four bytes, also 4 bytes for the time
+            if ( mod(filesize,recordsize) /= 0 ) then
+                ierr = 1
+            endif
          else
             rewind( lun )
-         endif
-         !
-         ! Determine the number of records - iostat does not seem to distinguish between partly fulfilled
-         ! reads and end-of-file
-         !
-         norcd   = 0
-         do
-             read( lun, iostat = ierr ) time, data
-             if ( ierr /= 0 ) then
-                 exit
-             endif
-             norcd = norcd + 1
-         enddo
+            allocate( data(nodata) )
+            !
+            ! Determine the number of records - iostat does not seem to distinguish between partly fulfilled
+            ! reads and end-of-file
+            !
+            norcd   = 0
+            do
+               read( lun, iostat = ierr ) time, data
+               if ( ierr /= 0 ) then
+                   exit
+               endif
+               norcd = norcd + 1
+            enddo
 
-         !
-         ! The last record may have been too short, so try again:
-         ! - Read all the records we have been able to read
-         ! - Try reading an extra number (time). This should fail
-         !
-         if ( type == FILE_BINARY ) then
-            read( lun, iostat = ierr, pos = 1 )
-         else
+            !
+            ! The last record may have been too short, so try again:
+            ! - Read all the records we have been able to read
+            ! - Try reading an extra number (time). This should fail
+            !
             rewind( lun )
-         endif
-         do i = 1,norcd
-             read( lun, iostat = ierr ) time, data
-         enddo
+            do i = 1,norcd
+               read( lun, iostat = ierr ) time, data
+            enddo
 
-         read( lun, iostat = ierr ) time
+            read( lun, iostat = ierr ) time
 
-         !
-         ! If we have been able to read at least one record and the last read
-         ! let to and end-of-file condition, we accept the file. Otherwise return
-         ! an error.
-         !
-         if ( norcd > 0 .and. ierr < 0 ) then
-             ierr = 0
-         else
-             ierr = 1
+            !
+            ! If we have been able to read at least one record and the last read
+            ! let to and end-of-file condition, we accept the file. Otherwise return
+            ! an error.
+            !
+            if ( norcd > 0 .and. ierr < 0 ) then
+                ierr = 0
+            else
+                ierr = 1
+            endif
+            close( lun )
+            deallocate( data )
          endif
       else
          !
          ! No check yet if it is a steering file
          !
       endif
-
-      deallocate( data )
-
-      close( lun )
 
       end subroutine check_file_size
       END
