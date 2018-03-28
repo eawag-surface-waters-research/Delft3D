@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -112,7 +112,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PrecompiledHeader>
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
@@ -125,7 +125,7 @@
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention>
       </DataExecutionPrevention>
-      <AdditionalDependencies>..\lint_f\$(PlatformName)\$(ConfigurationName)\lint_f.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>..\lint_f\$(PlatformName)\$(Configuration)\lint_f.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>..\..\..\..\scripts_lgpl\win64\oss-install_debug_x64.cmd lint bin</Command>
@@ -174,7 +174,7 @@
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention>
       </DataExecutionPrevention>
-      <AdditionalDependencies>..\lint_f\$(PlatformName)\$(ConfigurationName)\lint_f.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>..\lint_f\$(PlatformName)\$(Configuration)\lint_f.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>..\..\..\..\scripts_lgpl\win64\oss-install_x64.cmd lint bin</Command>
