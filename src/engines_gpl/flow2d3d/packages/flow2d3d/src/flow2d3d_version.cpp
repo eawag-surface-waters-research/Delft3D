@@ -73,6 +73,14 @@ void STDCALL GETVERSIONIDSTRING(char * str, int length_str)
 	strncpy(str, modname_version_id, i);
 }
 
+void STDCALL GETURLSTRING(char * str, int length_str)
+{
+	int i;
+	for (i = 0; i<length_str; i++) { str[i] = ' '; }
+	i = min((int)length_str, (int)strlen(modname_url));
+	strncpy(str, modname_url, i);
+}
+
 void STDCALL GETCOMFILEVERSIONSTRING( char * str, int length_str )
 {
   int i;
