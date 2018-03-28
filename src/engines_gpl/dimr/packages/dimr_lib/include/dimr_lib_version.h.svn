@@ -20,12 +20,14 @@
 #define modname_company "Deltares"
 #define modname_company_url "http://www.deltares.nl"
 
+#define modname_sourcecode_url "@(#) $HeadURL$"
+
 /*=================================================== DO NOT MAKE CHANGES BELOW THIS LINE ===================================================================== */
 
 static char modname_version       [] = {modname_major "." modname_minor "." modname_revision "." modname_build};
 static char modname_version_short [] = {modname_major "." modname_minor};
 static char modname_version_full  [] = {modname_company ", " modname_program " Version " modname_major "." modname_minor "." modname_revision "." modname_build ", " __DATE__ ", " __TIME__ ""};
-static char modname_url           [] = {modname_company_url};
+static char modname_url           [] = {modname_sourcecode_url};
 
 char * getfullversionstring_dimr_lib(void);
 
