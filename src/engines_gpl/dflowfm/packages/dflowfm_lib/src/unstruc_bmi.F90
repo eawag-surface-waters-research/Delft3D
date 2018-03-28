@@ -433,6 +433,8 @@ end function dfm_finalize_computational_timestep
     !DEC$ ATTRIBUTES DLLEXPORT :: finalize
     use m_partitioninfo
 
+    call writesomefinaloutput()
+
     if ( jampi.eq.1 ) then
 !        finalize before exit
       call partition_finalize()
