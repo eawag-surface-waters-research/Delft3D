@@ -33,7 +33,6 @@ subroutine checklicense(success)
 ! NONE
 !!--declarations----------------------------------------------------------------
 use message_module
-use deltares_common_version_module
 !
 implicit none
 !
@@ -52,7 +51,7 @@ logical     , intent(out) :: success
 !
     ! get source code location
     !
-    txthlp = deltares_common_source_code
+    call getsourcecodelocation_WAVE(version_full)
     n = index(txthlp,'/src/utils_lgpl') ! regular checkout with src and examples level
     if (n==0) then
         n = index(txthlp,'/utils_lgpl') ! reduced checkout with src and examples level

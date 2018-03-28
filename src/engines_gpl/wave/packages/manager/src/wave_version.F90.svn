@@ -164,4 +164,18 @@ subroutine getdrofileversionstring_wave(stringout)
    length    = min(len_trim(dro_file_version),len(stringout))
    stringout = dro_file_version(1:length)
 end subroutine getdrofileversionstring_wave
+!
+!
+!===============================================================================
+subroutine getsourcecodelocation_wave(stringout)
+   character(*), intent(out) :: stringout
+   integer                   :: length
+
+   character(*), parameter :: deltares_common_source_code  = '@(#) $HeadURL$'//char(0)
+
+   !
+   ! body
+   length    = min(len_trim(deltares_common_source_code),len(stringout))
+   stringout = deltares_common_source_code(1:length)
+end subroutine getsourcecodelocation_wave
 
