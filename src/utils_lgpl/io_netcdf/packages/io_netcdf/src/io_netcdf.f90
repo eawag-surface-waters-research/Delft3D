@@ -157,6 +157,7 @@ public :: ionc_get_var_chars
 
 public :: ionc_getfullversionstring_io_netcdf
 
+public :: ionc_get_dimid
 
 private
 
@@ -441,6 +442,16 @@ function ionc_get_ncid(ioncid, ncid) result(ierr)
 
 end function ionc_get_ncid
 
+!> Gets dimension id
+function ionc_get_dimid(ioncid, im, idim, dimid) result(ierr)
+   integer,             intent(in)    :: ioncid   !< The IONC data set id.
+   integer,             intent(in)    :: im       !< mesh number
+   integer,             intent(in)    :: idim     !< Dim type (enumerator value)
+   integer,             intent(out)   :: dimid    !< Dimension ID 
+   integer                            :: ierr     !< Result status, ionc_noerr if successful.
+   ierr  = IONC_NOERR
+   dimid = datasets(ioncid)%ug_file%meshids(im)%dimids(idim)
+end function ionc_get_dimid
 
 !> Gets the number of mesh from a data set.
 function ionc_get_mesh_count(ioncid, nmesh) result(ierr)

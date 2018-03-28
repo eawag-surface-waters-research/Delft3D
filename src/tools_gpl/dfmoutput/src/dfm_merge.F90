@@ -32,6 +32,7 @@
 
 module netcdf_utils
 use netcdf
+use io_netcdf
 implicit none
 
 ! Copied from official NetCDF: typeSizes.f90
@@ -160,6 +161,8 @@ contains
 function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    use m_alloc
    use string_module
+   use io_netcdf
+   use io_ugrid, only: mdim_face, mdim_node, mdim_edge, mdim_maxfacenodes
    implicit none
 
    character(len=MAXNAMELEN), intent(inout) :: infiles(:) !< Input files names, will be sorted if not sorted already.
@@ -170,6 +173,9 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
 
    integer, dimension(nfiles+1) :: ncids, id_timedim, id_facedim, id_edgedim, id_laydim, id_wdim, id_nodedim, &
                                    id_netedgedim, id_netfacedim, id_netfacemaxnodesdim, id_time, id_timestep, id_bnddim !< dim and var ids, maintained for all input files + 1 output file.
+   double precision :: convversion
+   integer :: jaugrid, iconvtype, nmesh
+   integer, dimension(nfiles) :: jaugridi, ioncids
    integer, allocatable :: dimids(:,:) !< (nfiles+1:NF90_MAX_DIMS) Used for storing any remaining vectormax dimension IDs
    integer, dimension(nfiles+1), target :: ndx, lnx, ndxg, lnxg, kmx, numk, numl, nump, numkg, numlg, netfacemaxnodes, nt, ndxbnd !< counters, maintained for all input files + 1 output file.
    integer, dimension(:), pointer :: item_counts !< Generalized count pointer, will point to ndx, lnx, numl, or numk during var data reading + writing.
@@ -178,19 +184,30 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    integer,              pointer :: item_domain(:)
    integer, allocatable :: ln(:,:) !< Flow links
    integer, allocatable :: edgenodes(:,:) !< Net links
-   integer, allocatable :: netfacenodes(:,:) !< Net cell - to - net node mapping
+   integer, allocatable :: netedgefaces(:,:)  !< ElemLinks
+   integer, allocatable :: netfaceedges(:,:)  !< NetElemLinks
+   integer, allocatable :: netfacenodes(:,:)  !< Net cell - to - net node mapping
    integer, allocatable :: netfacenodesl(:,:) !< Net cell - to - net node mapping for local usage (per cell)
-   integer, allocatable :: face_c2g(:) !< Concatenated index - to - global index mapping.
+   integer, allocatable :: face_c2g(:), node_c2g(:), netedge_c2g(:), edge_c2g(:) !< Concatenated index - to - global index mapping.
    integer, allocatable :: node_g2c(:), edge_g2c(:), face_g2c(:), netedge_g2c(:) !< Global index - to - concatenated index mapping.
+   integer, allocatable :: node_faces(:,:) ! faces that surrounds the node
+   integer, allocatable :: nfaceedges(:)   ! total number of edges that surround a face
+   double precision, allocatable :: node_x(:), node_y(:), edge_x(:), edge_y(:) !< coordinates
+   double precision              :: xx, yy
+   integer :: im, ikk, ic, iii, k1c, g1, g2, nfaces, nedges, iedge, iface, tmpvarDim, jafound
+   integer :: ifacefile, ifacein, ifaceout, ifacec
+   integer :: id_nodex, id_nodey, id_edgex, id_edgey
+   integer :: intmiss = -2147483647 ! integer fillvlue
 !netface_g2c(:) 
-   integer :: id_facedomain, id_faceglobnr, id_edgefaces, id_netfacenodes, id_edgenodes
+   integer :: id_facedomain, id_faceglobnr, id_edgefaces, id_netfacenodes, id_edgenodes, id_netedgefaces, id_netfaceedges
    integer :: ierri
    integer :: maxlen, nlen, plen, mlen, ii, id, iv, it, ip, ik, is, ie, nvarsel, ntsel, nvars, ndims, nvardims, vartype, kmx1,i
-   integer :: netfacemaxnodesg, ndxc, lnxc, numkc, numlc,ndx_bndc
-   integer :: nfaceglob,    nfaceglob0,    nfacecount
-   integer :: nedgeglob,    nedgeglob0,    nedgecount
+   integer :: netfacemaxnodesg, netnodemaxface=10, ndxc, lnxc, numkc, numlc,ndx_bndc
+   integer :: nfaceglob,    nfaceglob0,    nfacecount, ifaceglob
+   integer :: nedgeglob,    nedgeglob0,    nedgecount, iedgeglob
    integer :: nnodeglob,    nnodeglob0,    nnodecount
    integer :: nbndglob,     nbndcount
+   integer :: netedgecount, inetedgeglob
 !   integer :: nnetfaceglob, nnetfaceglob0, nnetfacecount, numpg
    integer :: nnetedgeglob, nnetedgeglob0, nnetedgecount
    integer :: nitemglob, nitemglob0, nitemcount, maxitems
@@ -200,9 +217,12 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    integer :: tmpdimids(NF90_MAX_VAR_DIMS)
    double precision, allocatable, target  :: itmpvar1D(:) !< array buffer for a single global variable slice, size: (kmx1, max(ndx(noutfile),lnx(noutfile)))
    double precision, allocatable, target  :: itmpvar2D(:,:) !< array buffer for a single global variable slice, size: (kmx1, max(ndx(noutfile),lnx(noutfile)))
+   double precision, allocatable, target  :: itmpvar2D_tmp(:,:)
    double precision,              pointer :: itmpvarptr(:,:,:)
    double precision, allocatable, target  :: tmpvar1D(:) !< array buffer for a single global variable slice, size: (kmx1, max(ndx(noutfile),lnx(noutfile)))
+   double precision, allocatable, target  :: tmpvar1D_tmp(:)
    double precision, allocatable, target  :: tmpvar2D(:,:) !< array buffer for a single global variable slice, size: (kmx1, max(ndx(noutfile),lnx(noutfile)))
+   double precision, allocatable, target  :: tmpvar2D_tmp(:,:)
    double precision, allocatable, target  :: tmpvar3D(:,:,:) !< array buffer for a single global variable slice, size: (kmx1, max(ndx(noutfile),lnx(noutfile)))
    double precision,              pointer :: tmpvarptr(:,:,:)
    character(len=4) :: fmtstr
@@ -277,28 +297,48 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
 
    ierr = nf90_noerr
    do ii=1,nfiles
-      ierri = nf90_open(infiles(ii), NF90_NOWRITE, ncids(ii))
+      ierri = ionc_open(infiles(ii), NF90_NOWRITE, ioncids(ii), iconvtype, convversion)
       if (ierri /= nf90_noerr) then
          write (*,'(a)') 'Error: mapmerge: could not open file `'//trim(infiles(ii))//'''.'
          ierr = ierri
          ncids(ii) = -1
+      else
+         if (iconvtype == IONC_CONV_UGRID .and. convversion >= 1.0) then
+            jaugridi(ii) = 1
+         else
+            jaugridi(ii) = 0
+         endif
       end if
    end do
+
+   ! check if all the map files are the same format
+   jaugrid = jaugridi(1)
+   do ii=2,nfiles
+      if (jaugridi(ii) .ne. jaugrid) then
+         write (*,'(a)') 'Error: mapmerge: map files are not the same format.'
+         ierr = 1
+         ncids(ii) = -1
+         exit
+      endif
+   enddo
    if (ierr /= nf90_noerr .and. .not. verbose_mode) then
       goto 888
+   else
+      if (jaugrid == 1) then
+         write (*,'(a,i0,a)') 'Info: mapmerge: all map files are of UGRID format.'
+      else
+         write (*,'(a,i0,a)') 'Info: mapmerge: all map files are of old format.'
+      endif
    end if
 
-   ! Detect too new file format: mapmerge is almost UGRID-ready, but not quite yet.
-   tmpstr1 = ''
-   ierr = nf90_get_att(ncids(ifile), nf90_global, 'Conventions', tmpstr1)
-   if (ierr == nf90_noerr) then
-      if (index(tmpstr1(1:80), 'UGRID') > 0) then
-         write (*,'(a)') 'Warning: mapmerge: true UGRID-format not supported yet. Detected in `'//trim(infiles(ifile))//'''. Trying anyway.'
+   do ii = 1, nfiles
+      ierr = ionc_get_ncid(ioncids(ii), ncids(ii))
+      if (ierr /= nf90_noerr) then
+         write (*,'(a)') 'Error: mapmerge: could not get ncID for file: `'//trim(infiles(ii))//'''.'
+         if (.not. verbose_mode) goto 888
       end if
-   end if
+   enddo
 
-
-   
    !! 0b. Open output file
    if (len_trim(outfile) == 0) then
       nlen = len_trim(infiles(1))
@@ -378,72 +418,119 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
          cycle
       end if
 
-      do id=1,file_ndims(ii)
-         ierr = nf90_inquire_dimension(ncids(ii), id, name = dimname, len = nlen) ! NetCDF-F90 allows us to assume that the dim IDs are 1:ndims
-         if (ierr /= nf90_noerr) then
-            write (*,'(a,i0,a)') 'Error: mapmerge: unable to read dimension information from file `'//trim(infiles(ii))//''' for #', id,'.'
-            if (.not. verbose_mode) goto 888
-         end if
+      if (jaugrid == 1) then ! UGRID format
+         im = 1 ! only 2D mesh now, TODO: 1D mesh
+         ! find the mesh topology variables
+         ! face -netelem
+         ierr = ionc_get_dimid(ioncids(ii), im, mdim_face, id)
+         ierr = nf90_inquire_dimension(ncids(ii), id, name = dimname, len = nlen)
+         id_facedim(ii) = id
+         ndx(ii)        = nlen
+         nump(ii)       = nlen
+         ! net node
+         ierr = ionc_get_dimid(ioncids(ii), im, mdim_node, id)
+         ierr = nf90_inquire_dimension(ncids(ii), id, name = dimname, len = nlen)
+         id_nodedim(ii) = id
+         numk(ii)       = nlen
+         ! edge
+         ierr = ionc_get_dimid(ioncids(ii), im, mdim_edge, id)
+         ierr = nf90_inquire_dimension(ncids(ii), id, name = dimname, len = nlen)
+         id_netedgedim(ii) = id
+         numl(ii)          = nlen
+         ! max face node
+         ierr = ionc_get_dimid(ioncids(ii), im, mdim_maxfacenodes, id)
+         ierr = nf90_inquire_dimension(ncids(ii), id, name = dimname, len = nlen)
+         dimids(id, ii) = id
+         id_netfacemaxnodesdim(ii) = id
+         netfacemaxnodes(ii)       = nlen
 
-         if (trim(dimname) == 'nFlowElem') then
-         !! Flow nodes (face) dimension
-            id_facedim(ii) = id
-            ndx(ii)        = nlen
-
-         else if (trim(dimname) == 'nFlowLink') then
-         !! Flow links (edge) dimension
-            id_edgedim(ii) = id
-            lnx(ii)        = nlen
-
-         else if (trim(dimname) == 'laydim') then ! TODO: AvD: also wdim?
-            id_laydim(ii) = id
-            kmx(ii)       = nlen
-         else if (trim(dimname) == 'wdim') then
-            id_wdim(ii) = id
-
-      !! Now some Net* related dimensions (in addition to Flow*).
-
-         else if (trim(dimname) == 'nNetElem') then
-         !! Net cells (again face) dimension
-            id_netfacedim(ii) = id
-            nump(ii)          = nlen
-
-
-         else if (trim(dimname) == 'nNetElemMaxNode') then ! TODO: AvD: now we detect nNetElemMaxNode, but should be not change to nFlowElemMaxNode, now that facedim is the overall counter and netfacedim is hardly used anymore?
-            dimids(id, ii) = id ! Store this now, because later it is just a vectormax dim, so should be available in dim filter
-            id_netfacemaxnodesdim(ii) = id
-            netfacemaxnodes(ii)       = nlen
-
-         else if (trim(dimname) == 'nNetNode') then
-         !! Net nodes (node) dimension
-            id_nodedim(ii) = id
-            numk(ii)       = nlen
-
-         else if (trim(dimname) == 'nNetLink') then
-         !! Net links (again edge) dimension
-            id_netedgedim(ii) = id
-            numl(ii)          = nlen
-
-         else if (trim(dimname) == 'time') then
-         !! Time dimension
-            id_timedim(ii) = id
-            nt(ii)         = nlen
-         else if (trim(dimname) == 'nFlowElemBnd') then
-         !! Flow nodes (face) boundary points dimension
-            id_bnddim(ii) = id
-            ndxbnd(ii)   = nlen
-            if (verbose_mode) then
-               write (*,'(a)') 'Info: mapmerge: find dimension of boundary waterlevel points in file `'//trim(infiles(ii))//'''.'
+         ! other dimensions
+         do id = 1, nDims
+            ierr = nf90_inquire_dimension(ncids(ii), id, name = dimname, len = nlen)
+            if (ierr /= nf90_noerr) then
+               write (*,'(a,i0,a)') 'Error: mapmerge: unable to read dimension information from file `'//trim(infiles(ii))//''' for #', id,'.'
+               if (.not. verbose_mode) goto 888
+            end if
+            if (id /= id_facedim(ii) .and. id /= id_nodedim(ii) .and. id /= id_netedgedim(ii) .and. id /= id_netfacemaxnodesdim(ii)) then
+               if (trim(dimname) == 'time') then
+                  !! Time dimension
+                  id_timedim(ii) = id
+                  nt(ii)         = nlen
+               else
+                  ! No special dimension, so probably just some vectormax-type dimension that
+                  ! we may need later for some variables, so store it.
+                  dimids(id, ii) = id ! Only stored to filter on non-missing values in def_dim loop later
+               endif
             endif
-         else
-            ! No special dimension, so probably just some vectormax-type dimension that
-            ! we may need later for some variables, so store it.
-            dimids(id, ii) = id ! Only stored to filter on non-missing values in def_dim loop later
-         end if
-      end do ! id
+         enddo
+      else ! old format
+         do id=1,file_ndims(ii)
+            ierr = nf90_inquire_dimension(ncids(ii), id, name = dimname, len = nlen) ! NetCDF-F90 allows us to assume that the dim IDs are 1:ndims
+            if (ierr /= nf90_noerr) then
+               write (*,'(a,i0,a)') 'Error: mapmerge: unable to read dimension information from file `'//trim(infiles(ii))//''' for #', id,'.'
+               if (.not. verbose_mode) goto 888
+            end if
+
+            if (trim(dimname) == 'nFlowElem') then
+               !! Flow nodes (face) dimension
+               id_facedim(ii) = id
+               ndx(ii)        = nlen
+
+            else if (trim(dimname) == 'nFlowLink') then
+               !! Flow links (edge) dimension
+               id_edgedim(ii) = id
+               lnx(ii)        = nlen
+
+            else if (trim(dimname) == 'laydim') then ! TODO: AvD: also wdim?
+               id_laydim(ii) = id
+               kmx(ii)       = nlen
+            else if (trim(dimname) == 'wdim') then
+               id_wdim(ii) = id
+
+               !! Now some Net* related dimensions (in addition to Flow*).
+
+            else if (trim(dimname) == 'nNetElem') then
+               !! Net cells (again face) dimension
+               id_netfacedim(ii) = id
+               nump(ii)          = nlen
+
+
+            else if (trim(dimname) == 'nNetElemMaxNode') then ! TODO: AvD: now we detect nNetElemMaxNode, but should be not change to nFlowElemMaxNode, now that facedim is the overall counter and netfacedim is hardly used anymore?
+               dimids(id, ii) = id ! Store this now, because later it is just a vectormax dim, so should be available in dim filter
+               id_netfacemaxnodesdim(ii) = id
+               netfacemaxnodes(ii)       = nlen
+
+            else if (trim(dimname) == 'nNetNode') then
+               !! Net nodes (node) dimension
+               id_nodedim(ii) = id
+               numk(ii)       = nlen
+
+            else if (trim(dimname) == 'nNetLink') then
+               !! Net links (again edge) dimension
+               id_netedgedim(ii) = id
+               numl(ii)          = nlen
+
+            else if (trim(dimname) == 'time') then
+               !! Time dimension
+               id_timedim(ii) = id
+               nt(ii)         = nlen
+            else if (trim(dimname) == 'nFlowElemBnd') then
+               !! Flow nodes (face) boundary points dimension
+               id_bnddim(ii) = id
+               ndxbnd(ii)   = nlen
+               if (verbose_mode) then
+                  write (*,'(a)') 'Info: mapmerge: find dimension of boundary waterlevel points in file `'//trim(infiles(ii))//'''.'
+               endif
+            else
+               ! No special dimension, so probably just some vectormax-type dimension that
+               ! we may need later for some variables, so store it.
+               dimids(id, ii) = id ! Only stored to filter on non-missing values in def_dim loop later
+            end if
+         end do ! id
+      end if
    end do ! ii
 
-   
+
    !! 1b. Scan for variables in the file which has the most dimension (and variables).
    if (verbose_mode) then
       write (*,'(a)') 'Info: mapmerge: Scan for variables in file `'//trim(infiles(ifile))//'''.'
@@ -678,13 +765,22 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    call realloc(edge_domain, lnxc, keepExisting=.false., fill=-1)
    call realloc(ln, (/ 2, lnxc /), keepExisting=.false.)
    call realloc(edge_g2c,    lnxc, keepExisting=.false.)
+   call realloc(edge_c2g,    lnxc, keepExisting=.false., fill=-1)
 
    netfacemaxnodesg = maxval(netfacemaxnodes(1:nfiles))
    call realloc(netfacenodes, (/ netfacemaxnodesg, sum(nump(1:nfiles)) /), keepExisting=.false., fill=-1)
+   call realloc(netfaceedges, (/ netfacemaxnodesg, sum(nump(1:nfiles)) /), keepExisting=.false., fill=-1)
+   call realloc(nfaceedges, sum(nump(1:nfiles)), keepExisting=.false., fill=0)
 
    numkc = sum(numk(1:nfiles))
    call realloc(node_domain, numkc, keepExisting=.false., fill=huge(1))
    call realloc(node_g2c,    numkc, keepExisting=.false.)
+   call realloc(node_c2g,    numkc, keepExisting=.false., fill=-1)
+   call realloc(node_x, numkc, keepExisting=.false.)
+   call realloc(node_y, numkc, keepExisting=.false.)
+   call realloc(node_faces, (/ netnodemaxface+1, numkc/), keepExisting=.false., fill= -1)
+   ! Prepare node_faces array: the last value for each nodes is a counter of how many faces are surrounding this node
+   node_faces(netnodemaxface+1, 1: numkc) = 0
 
    numlc = sum(numl(1:nfiles))
    call realloc(netedge_domain, numlc, keepExisting=.false., fill=-1)
@@ -693,6 +789,10 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    
    ndx_bndc = sum(ndxbnd(1:nfiles))
    call realloc(facebnd_domain, ndx_bndc, keepExisting=.false., fill =-1)
+   call realloc(netedge_c2g,    numlc, keepExisting=.false., fill=-1)
+   call realloc(netedgefaces, (/2, numlc/), keepExisting=.false., fill=-1)
+   call realloc(edge_x, numlc, keepExisting=.false.)
+   call realloc(edge_y, numlc, keepExisting=.false.)
 
    if (verbose_mode) then
       write (*,'(a)') '## Scanning input files for dimensions...'
@@ -705,7 +805,11 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
       !! 3a.1: handle flow nodes (faces)
       nfaceglob0 = nfaceglob
       face_domain(nfacecount+1:nfacecount+ndx(ii)) = ii-1 ! Just set default domain if FlowElemDomain not present.
-      ierr = nf90_inq_varid(ncids(ii), 'FlowElemDomain', id_facedomain)
+      if (jaugrid == 0) then
+         ierr = nf90_inq_varid(ncids(ii), 'FlowElemDomain', id_facedomain)
+      else
+         ierr = nf90_inq_varid(ncids(ii), 'mesh2d_flowelem_domain', id_facedomain)
+      endif
       if (ierr == nf90_noerr) then
          ierr = nf90_get_var(ncids(ii), id_facedomain, face_domain(nfacecount+1:nfacecount+ndx(ii)), count=(/ ndx(ii) /))
          if (ierr /= nf90_noerr) then
@@ -717,7 +821,13 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
       end if
 
       if (ierr == nf90_noerr) then
-         ierr = nf90_inq_varid(ncids(ii), 'FlowElemGlobalNr', id_faceglobnr)
+         if (jaugrid == 0) then
+            ierr = nf90_inq_varid(ncids(ii), 'FlowElemGlobalNr', id_faceglobnr)
+         else
+            ierr = nf90_inq_varid(ncids(ii), 'mesh2d_flowelem_globalnr', id_faceglobnr)
+            ! TODO: UNST-1794: generalize to multiple meshes in the UGRID file, a bit like the following:
+            ! ierr = ionc_inq_varid(ncids(ii), meshid, 'flowelem_globalnr', id_faceglobnr)
+         endif
       end if
       if (ierr == nf90_noerr) then
          ierr = nf90_get_var(ncids(ii), id_faceglobnr, face_c2g(nfacecount+1:nfacecount+ndx(ii)), count=(/ ndx(ii) /))
@@ -736,64 +846,99 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
       do ip=1,ndx(ii)
          if (face_domain(nfacecount+ip) == ii-1) then
             nfaceglob = nfaceglob+1
-            face_g2c(nfaceglob) = nfacecount + ip
+            ifaceglob = face_c2g(nfacecount+ip)
+            face_g2c(ifaceglob) = nfacecount + ip
          end if
       end do
       ndxg(ii)   = nfaceglob-nfaceglob0
 
       !! 3a.2: handle flow links (edges)
-      nedgeglob0 = nedgeglob
-      ierr = nf90_inq_varid(ncids(ii), 'FlowLink', id_edgefaces)
-      if (ierr == nf90_noerr) then
-         ierr = nf90_get_var(ncids(ii), id_edgefaces, ln(:,nedgecount+1:nedgecount+lnx(ii)), count=(/ 2,lnx(ii) /))
-      end if
-      if (ierr /= nf90_noerr) then
-         write (*,'(a)') 'Error: mapmerge: could not retrieve FlowLink from `'//trim(infiles(ii))//'''. '
-         if (.not. verbose_mode) goto 888
-      end if
-
-      ! Count the actual unique flow links (to get rid of partition overlap, and also of duplicate boundary links)
-      do ip=1,lnx(ii)
-         ! For each link, take 2nd point (such that boundary links will be uniquely
-         ! owned by the domain who owns the internal flow node of that link.)
-         n1 = ln(1,nedgecount+ip) ! Could be a boundary point
-         n2 = ln(2,nedgecount+ip)
-         if (n1 > ndx(ii)) then
-            idom = ii - 1 ! Boundary mirrornodes are always owned by the domain itself.
-            isBndLink = 1 ! Mark the boundary link
+      if (jaugrid==0) then
+         nedgeglob0 = nedgeglob
+         ierr = nf90_inq_varid(ncids(ii), 'FlowLink', id_edgefaces)
+         if (ierr == nf90_noerr) then
+            ierr = nf90_get_var(ncids(ii), id_edgefaces, ln(:,nedgecount+1:nedgecount+lnx(ii)), count=(/ 2,lnx(ii) /))
          else
-            idom = face_domain(nfacecount+n1)
+            write (*,'(a)') 'Error: mapmerge: could not retrieve FlowLink from `'//trim(infiles(ii))//'''. '
+            if (.not. verbose_mode) goto 888
          end if
 
-         idom = min(idom, face_domain(nfacecount+n2))
+         ! Count the actual unique flow links (to get rid of partition overlap, and also of duplicate boundary links)
+         do ip=1,lnx(ii)
+            ! For each link, take 2nd point (such that boundary links will be uniquely
+            ! owned by the domain who owns the internal flow node of that link.)
+            n1 = ln(1,nedgecount+ip) ! Could be a boundary point
+            n2 = ln(2,nedgecount+ip)
+            if (n1 > ndx(ii)) then
+               idom = ii - 1 ! Boundary mirrornodes are always owned by the domain itself.
+               isBndLink = 1 ! Mark the boundary link
+            else
+               idom = face_domain(nfacecount+n1)
+            end if
 
-         if (isBndLink == 1 .and. face_domain(nfacecount+n2) .ne. ii-1) then
-         ! If this boundary link connects an interior flownode which does not belong to the current subdomain
-            idom = - 999
-         endif
-         edge_domain(nedgecount+ip) = idom
-         if (idom == ii-1) then
-            nedgeglob = nedgeglob+1
-            edge_g2c(nedgeglob) = nedgecount + ip
-         end if
-         isBndLink = 0
-      end do
-      lnxg(ii)   = nedgeglob-nedgeglob0
+            idom = min(idom, face_domain(nfacecount+n2))
+
+            if (isBndLink == 1 .and. face_domain(nfacecount+n2) .ne. ii-1) then
+               ! If this boundary link connects an interior flownode which does not belong to the current subdomain
+               idom = - 999
+            endif
+            edge_domain(nedgecount+ip) = idom
+            if (idom == ii-1) then
+               nedgeglob = nedgeglob+1
+               edge_g2c(nedgeglob) = nedgecount + ip
+               edge_c2g(nedgecount+ip) = nedgeglob
+            end if
+            isBndLink = 0
+         end do
+         lnxg(ii)   = nedgeglob-nedgeglob0
+      end if
 
       !! 3a.3: handle net nodes (nodes)
       nnodeglob0 = nnodeglob
-      ierr = nf90_inq_varid(ncids(ii), 'NetElemNode', id_netfacenodes)
+      if (jaugrid==0) then
+         ierr = nf90_inq_varid(ncids(ii), 'NetElemNode', id_netfacenodes)
+      else
+         ierr = nf90_inq_varid(ncids(ii), 'mesh2d_face_nodes', id_netfacenodes)
+      endif
       if (ierr == nf90_noerr) then
-!        ierr = nf90_get_var(ncids(ii), id_netfacenodes, netfacenodes(:,nnetfacecount+1:nnetfacecount+nump(ii)), count=(/ netfacemaxnodes(ii), nump(ii) /))
          ierr = ncu_inq_var_fill(ncids(ii), id_netfacenodes, nofill, ifill_value)
          call realloc (netfacenodesl, (/ netfacemaxnodes(ii), nump(ii) /), keepExisting = .false.)
          ierr = nf90_get_var(ncids(ii), id_netfacenodes, netfacenodesl(:,:), count=(/ netfacemaxnodes(ii), nump(ii) /))
+
          do ip=1,nump(ii)
            netfacenodes(1:netfacemaxnodes(ii),nfacecount+ip) = netfacenodesl(1:netfacemaxnodes(ii),ip)
+           ! generate node_faces: the faces that surround a node
+           do ik =1, netfacemaxnodes(ii) ! for its every node
+               k1 = netfacenodesl(ik,ip)
+               if (k1 .ne. -1 .and. k1 .ne. ifill_value) then
+                   nfaces = node_faces(netnodemaxface+1, nnodecount+k1) + 1
+                   node_faces(netnodemaxface+1, nnodecount+k1) = nfaces ! update the counter
+                   node_faces(nfaces,nnodecount+k1) = nfacecount+ip
+               end if
+           end do
          end do
-      end if
-      if (ierr /= nf90_noerr) then
-         write (*,'(a)') 'Error: mapmerge: could not retrieve NetElemNode from `'//trim(infiles(ii))//'''. '
+
+         ! read coordinates of net nodes
+         if (jaugrid==0) then
+            ierr = nf90_inq_varid(ncids(ii), 'NetNode_x', id_nodex)
+            ierr = nf90_inq_varid(ncids(ii), 'NetNode_y', id_nodey)
+            ierr = nf90_get_var(ncids(ii), id_nodex, node_x(nnodecount+1:nnodecount+numk(ii)))
+            ierr = nf90_get_var(ncids(ii), id_nodey, node_y(nnodecount+1:nnodecount+numk(ii)))
+         else
+            ierr = nf90_inq_varid(ncids(ii), 'mesh2d_node_x', id_nodex)
+            ierr = nf90_inq_varid(ncids(ii), 'mesh2d_node_y', id_nodey)
+            ierr = nf90_get_var(ncids(ii), id_nodex, node_x(nnodecount+1:nnodecount+numk(ii)))
+            ierr = nf90_get_var(ncids(ii), id_nodey, node_y(nnodecount+1:nnodecount+numk(ii)))
+         end if
+         if (ierr /= nf90_noerr) then
+            write (*,'(a)') 'Error: mapmerge: could not retrieve coordinates of net nodes from `'//trim(infiles(ii))//'''. '
+         end if
+      else
+         if (jaugrid==0) then
+            write (*,'(a)') 'Error: mapmerge: could not retrieve NetElemNode from `'//trim(infiles(ii))//'''. '
+         else
+            write (*,'(a)') 'Error: mapmerge: could not retrieve mesh2d_face_nodes from `'//trim(infiles(ii))//'''. '
+         end if
          if (.not. verbose_mode) goto 888
       end if
 
@@ -817,19 +962,81 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
          if (idom == ii-1) then ! Second check is to identify orphan nodes (in case no 1D netcells were available on file)
             nnodeglob = nnodeglob+1 ! TODO: orphan nodes are not handled correctly yet for 1D channel strings (duplicates?)
             node_g2c(nnodeglob) = nnodecount + ip
+            node_c2g(nnodecount + ip) = nnodeglob
          end if
       end do
       numkg(ii)   = nnodeglob-nnodeglob0
 
       !! 3a.4: handle net edges (also edges)
       nnetedgeglob0 = nnetedgeglob
-      ierr = nf90_inq_varid(ncids(ii), 'NetLink', id_edgenodes)
+      if (jaugrid==0) then
+         ierr = nf90_inq_varid(ncids(ii), 'NetLink', id_edgenodes)
+      else
+         ierr = nf90_inq_varid(ncids(ii), 'mesh2d_edge_nodes', id_edgenodes)
+      endif
+
       if (ierr == nf90_noerr) then
          ierr = nf90_get_var(ncids(ii), id_edgenodes, edgenodes(:,nnetedgecount+1:nnetedgecount+numl(ii)), count=(/ 2, numl(ii) /))
+      else
+         if (jaugrid==0) then
+            write (*,'(a)') 'Error: mapmerge: could not retrieve NetLink from `'//trim(infiles(ii))//'''. '
+         else
+            write (*,'(a)') 'Error: mapmerge: could not retrieve mesh2d_edge_nodes from `'//trim(infiles(ii))//'''. '
+         end if
+         if (.not. verbose_mode) goto 888
+      end if
+
+      if (jaugrid==0) then
+         ierr = nf90_inq_varid(ncids(ii), 'ElemLink', id_netedgefaces)
+      else
+         ierr = nf90_inq_varid(ncids(ii), 'mesh2d_edge_faces', id_netedgefaces)
+      end if
+      if (ierr == nf90_noerr) then
+         ierr = nf90_get_var(ncids(ii), id_netedgefaces, netedgefaces(:,nnetedgecount+1:nnetedgecount+numl(ii)), count=(/ 2, numl(ii) /))
+      else
+         if (jaugrid==0) then
+            write (*,'(a)') 'Error: mapmerge: could not retrieve ElemLink from `'//trim(infiles(ii))//'''. '
+         else
+            write (*,'(a)') 'Error: mapmerge: could not retrieve mesh2d_edge_faces from `'//trim(infiles(ii))//'''. '
+         end if
+         if (.not. verbose_mode) goto 888
+      end if
+
+      if (jaugrid==0) then
+         ierr = nf90_inq_varid(ncids(ii), 'NetElemLink', id_netfaceedges)
+         if (ierr == nf90_noerr) then
+            ierr = nf90_get_var(ncids(ii), id_netfaceedges, netfaceedges(:,nfacecount+1:nfacecount+nump(ii)), count=(/ netfacemaxnodesg, nump(ii) /))
+         else
+            write (*,'(a)') 'Error: mapmerge: could not retrieve NetElemLink from `'//trim(infiles(ii))//'''. '
+            if (.not. verbose_mode) goto 888
+         end if
+      else ! UGRID map file does not contain _face_edges, build it here: netfaceedges
+         do iedge = 1, numl(ii)
+            do ikk = 1, 2
+               ic = netedgefaces(ikk,iedge+nnetedgecount)
+               if (ic > 0) then
+                  iface = ic + nfacecount
+                  nfaceedges(iface) = nfaceedges(iface) +1
+                  netfaceedges(nfaceedges(iface), iface) = iedge
+               end if
+            end do
+         end do
+      end if
+
+      if (jaugrid ==0) then
+         ! read coordinates of NetLinks
+         ierr = nf90_inq_varid(ncids(ii), 'NetLink_xu', id_edgex)
+         ierr = nf90_inq_varid(ncids(ii), 'NetLink_yu', id_edgey)
+         ierr = nf90_get_var(ncids(ii), id_edgex, edge_x(nnetedgecount+1:nnetedgecount+numl(ii)))
+         ierr = nf90_get_var(ncids(ii), id_edgey, edge_y(nnetedgecount+1:nnetedgecount+numl(ii)))
+      else
+         ierr = nf90_inq_varid(ncids(ii), 'mesh2d_edge_x', id_edgex)
+         ierr = nf90_inq_varid(ncids(ii), 'mesh2d_edge_y', id_edgey)
+         ierr = nf90_get_var(ncids(ii), id_edgex, edge_x(nnetedgecount+1:nnetedgecount+numl(ii)))
+         ierr = nf90_get_var(ncids(ii), id_edgey, edge_y(nnetedgecount+1:nnetedgecount+numl(ii)))
       end if
       if (ierr /= nf90_noerr) then
-         write (*,'(a)') 'Error: mapmerge: could not retrieve NetLink from `'//trim(infiles(ii))//'''. '
-         if (.not. verbose_mode) goto 888
+         write (*,'(a)') 'Error: mapmerge: could not retrieve coordinates of net edges from `'//trim(infiles(ii))//'''. '
       end if
 
       ! Identify the net link node domain based on the already processed net nodes
@@ -845,6 +1052,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
          if (idom == ii-1) then
             nnetedgeglob = nnetedgeglob+1
             netedge_g2c(nnetedgeglob) = nnetedgecount + ip
+            netedge_c2g(nnetedgecount + ip) = nnetedgeglob
          end if
       end do
       numlg(ii)   = nnetedgeglob-nnetedgeglob0
@@ -876,7 +1084,100 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
             ' : ', (ndxg(ii)-ndx(ii)), (lnxg(ii)-lnx(ii)), (numkg(ii)-numk(ii)), (numlg(ii)-numl(ii))
       end if
    end do ! ii
-   
+
+   !! fulfill node_c2g, because in domain that is larger than 0000, there are nodes which are in this domain but 
+   !  their domain numbers are another domain.
+    do ii = 2, nfiles
+        nfacecount = sum(nump(1:ii-1))
+        nnodecount = sum(numk(1:ii-1))
+        do ik=1,numk(ii)
+            if (node_c2g(nnodecount+ik)==-1) then
+                jafound = 0
+                do ikk = 1, node_faces(netnodemaxface+1, nnodecount+ik)
+                    ic = node_faces(ikk,nnodecount+ik) ! index of one surrounding cell
+                    if (ic .ne. -1) then
+                       if (face_domain(ic) .ne. ii-1 .and. face_domain(ic) == node_domain(nnodecount+ik)) then ! cell ic is not in current domain, and is in the same domain with node ik
+                           ifaceglob = face_c2g(ic)
+                           ifacec = face_g2c(ifaceglob) ! and this is now from the OTHER domain.
+                           ! in which domain (iii) does iface belong
+                           do iii = 1, nfiles
+                               if (ifacec>sum(nump(1:iii-1)) .and. ifacec < sum(nump(1:iii))) then
+                                   ifacefile = iii
+                                   exit
+                               end if
+                           end do
+                           ! Loop on all the nodes of face ifacec, to find the node which has the same coordinates with node ik from file ii
+                           do im=1,netfacemaxnodesg
+                               k1 = netfacenodes(im, ifacec)
+                               if (k1 .ne. -1 .and. k1 .ne. ifill_value) then
+                                   k1c = k1 + sum(numk(1:ifacefile-1)) ! concatinated index of nodes
+                                   xx = node_x(k1c)
+                                   yy = node_y(k1c)
+                                   if (abs(node_x(ik+nnodecount)-xx)<1d-10 .and. abs(node_y(ik+nnodecount)-yy)<1d-10) then
+                                       node_c2g(ik+nnodecount) = node_c2g(k1c)
+                                       jafound = 1
+                                       exit
+                                   end if
+                               end if
+                           end do
+                       end if
+                    end if
+                end do
+                if (jafound == 0 .and. verbose_mode) then
+                    write (*,'(a,i0,a)') 'Warning: mapmerge: node_c2g: could not find global number for node # ', ik ,' of file `'//trim(infiles(ii))//'''. '
+                end if 
+            end if
+        end do
+    end do
+
+    !! fulfill netedge_c2g, because in domain larger than 0000, there are netedges which are in this domain 
+    !  but their domain numbers are another domain.
+    do ii = 2, nfiles
+        netedgecount = sum(numl(1:ii-1))
+        nfacecount = sum(nump(1:ii-1))
+        do ip = 1, numl(ii)
+            k1 = netedgefaces(1, netedgecount+ip)  ! flowelem that edge L connects
+            k2 = netedgefaces(2, netedgecount+ip)
+            if (k1.ne.0 .and. k2.ne. 0) then       ! When edge L is not on the boundary
+                g1 = face_domain(nfacecount+k1)    ! domain number of this flowelem
+                g2 = face_domain(nfacecount+k2)
+                if (g1 .ne. g2) then               ! if edge L lies on the boundary of two different domains
+                    if (g1==ii-1 .and. g1>g2) then ! decide which flowelem is in the current domain, which is not
+                        ifacein = k1
+                        ifaceout= k2
+                    else if (g2==ii-1 .and. g2>g1) then
+                        ifacein = k2
+                        ifaceout= k1
+                    else
+                        cycle
+                    end if
+
+                    ifaceglob = face_c2g(ifaceout+nfacecount) ! for the flowelem which is in another domain with smaller domain number
+                    ifacec = face_g2c(ifaceglob)              ! and this is now from the OTHER domain.
+                    ! in which domain (iii) does iface belong
+                    do iii = 1, nfiles
+                        if (ifacec>sum(nump(1:iii-1)) .and. ifacec < sum(nump(1:iii))) then
+                            ifacefile = iii
+                            exit
+                        end if
+                    end do
+                    ! Loop on all netedges of face ifacec
+                    do im = 1, netfacemaxnodesg
+                        k1 = netfaceedges(im, ifacec)
+                        if (k1 .ne. -1) then
+                            k1c= k1 + sum(numl(1:ifacefile-1))! concatinated index of the edge
+                            xx = edge_x(k1c)
+                            yy = edge_y(k1c)
+                            if (abs(edge_x(ip+netedgecount)-xx)<1d-10 .and. abs(edge_y(ip+netedgecount)-yy)<1d-10) then
+                                netedge_c2g(ip+netedgecount) = netedge_c2g(k1c)
+                                exit
+                            end if
+                        end if
+                    end do
+                end if
+            end if
+        end do
+    end do
    nkmxglob = kmx(1)
    do ii = 2,nfiles
       if (kmx(ii) .ne. nkmxglob) then
@@ -907,17 +1208,22 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    end if
 
    !! 3b. dimensions for merged flow nodes (faces) and flow links (edges), same for net nodes + links.
-   ierr = nf90_def_dim(ncids(noutfile), 'nNetElem', ndx(noutfile), id_netfacedim(noutfile)) ! UNST-1256: temp fix, pending proper UGRID support in UNST-1134.
-   ierr = nf90_def_dim(ncids(noutfile), 'nFlowElem', ndx(noutfile), id_facedim(noutfile))
-   ierr = nf90_def_dim(ncids(noutfile), 'nFlowLink', lnx(noutfile), id_edgedim(noutfile))
-   if (kmx(noutfile) > 0) then
-      ierr = nf90_def_dim(ncids(noutfile), 'laydim', kmx(noutfile), id_laydim(noutfile))
-      ierr = nf90_def_dim(ncids(noutfile), 'wdim', kmx(noutfile)+1, id_wdim(noutfile))
-   end if
-   ierr = nf90_def_dim(ncids(noutfile), 'nNetNode', numk(noutfile), id_nodedim(noutfile))
-   ierr = nf90_def_dim(ncids(noutfile), 'nNetLink', numl(noutfile), id_netedgedim(noutfile))
-   ierr = nf90_def_dim(ncids(noutfile), 'nFlowElemBnd', ndxbnd(noutfile), id_bnddim(noutfile))! TODO: Add if ndxbnd > 0
-
+   if (jaugrid==0) then
+      ierr = nf90_def_dim(ncids(noutfile), 'nNetElem', ndx(noutfile), id_netfacedim(noutfile)) ! UNST-1256: temp fix, pending proper UGRID support in UNST-1134.
+      ierr = nf90_def_dim(ncids(noutfile), 'nFlowElem', ndx(noutfile), id_facedim(noutfile))
+      ierr = nf90_def_dim(ncids(noutfile), 'nFlowLink', lnx(noutfile), id_edgedim(noutfile))
+      if (kmx(noutfile) > 0) then
+         ierr = nf90_def_dim(ncids(noutfile), 'laydim', kmx(noutfile), id_laydim(noutfile))
+         ierr = nf90_def_dim(ncids(noutfile), 'wdim', kmx(noutfile)+1, id_wdim(noutfile))
+      end if
+      ierr = nf90_def_dim(ncids(noutfile), 'nNetNode', numk(noutfile), id_nodedim(noutfile))
+      ierr = nf90_def_dim(ncids(noutfile), 'nNetLink', numl(noutfile), id_netedgedim(noutfile))
+      ierr = nf90_def_dim(ncids(noutfile), 'nFlowElemBnd', ndxbnd(noutfile), id_bnddim(noutfile))! TODO: Add if ndxbnd > 0
+   else
+      ierr = nf90_def_dim(ncids(noutfile), 'nmesh2d_face', ndx(noutfile),  id_facedim(noutfile))
+      ierr = nf90_def_dim(ncids(noutfile), 'nmesh2d_edge', numl(noutfile), id_netedgedim(noutfile))
+      ierr = nf90_def_dim(ncids(noutfile), 'nmesh2d_node', numk(noutfile), id_nodedim(noutfile))
+   endif
    !! 4. Define all variables (grid + data), including any remaining dimensions
    !! 4a. Simply copy all remaining dimensions (probably vectormax-like) to output file.
    do id=1,ndims
@@ -993,6 +1299,12 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
       end if
 
       ierr = ncu_copy_atts(ncids(ifile), ncids(noutfile), varids(ifile, iv), varids_out(iv))
+
+      ! For Variable 'FlowLink', the flowelem might be outside the domain, and there might be no info. about such flowelem 
+      ! in mapfiles, so they are denoted by _FillValue.
+      if (var_names(iv) .eq. 'FlowLink') then
+          ierr = nf90_put_att(ncids(noutfile), varids_out(iv), '_FillValue', intmiss)
+      end if
    end do
    
 
@@ -1044,6 +1356,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    maxitems = max(nedgecount, nfacecount, nnodecount, nnetedgecount, nbndcount) 
    call realloc( tmpvar1D, maxitems, keepExisting=.false.)
    call realloc(itmpvar1D, maxitems, keepExisting=.false.)
+   call realloc(tmpvar1D_tmp, maxitems, keepExisting=.false.)
    ! 2D/3D done in loop below
 
    do iv=1,nvarsel
@@ -1140,37 +1453,47 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
          else if (var_types(iv) == nf90_int .or. var_types(iv) == nf90_short) then
             itmpvarptr(1:1,1:1,1:maxitems) => itmpvar1D(:)
          end if
-
+         tmpvarDim = 1
       else if (var_kxdimpos(iv) /= -1) then
          if (var_laydimpos(iv) /= -1) then   ! Both a vectormax AND a laydim
             call realloc(tmpvar3D, (/  count_read(var_kxdimpos(iv)), count_read(var_laydimpos(iv)), maxitems /), keepExisting=.false.)
             ! use maxitems instead of items_count(noutfile) to try and have as few reallocs as possible.
             tmpvarptr => tmpvar3D
+            tmpvarDim = 3
          else                                ! Only a vectormax dim
             if (var_types(iv) == nf90_double) then
                call realloc( tmpvar2D, (/  count_read(var_kxdimpos(iv)), maxitems /), keepExisting=.false.)
                tmpvarptr(1:count_read(var_kxdimpos(iv)),1:1,1:maxitems)  =>  tmpvar2D(:,:)
+               call realloc( tmpvar2D_tmp, (/  count_read(var_kxdimpos(iv)), maxitems /), keepExisting=.false.)
             else if (var_types(iv) == nf90_int .or. var_types(iv) == nf90_short) then
                call realloc(itmpvar2D, (/  count_read(var_kxdimpos(iv)), maxitems /), keepExisting=.false.)
                itmpvarptr(1:count_read(var_kxdimpos(iv)),1:1,1:maxitems) => itmpvar2D(:,:)
+               call realloc(itmpvar2D_tmp, (/  count_read(var_kxdimpos(iv)), maxitems /), keepExisting=.false.)
             end if
+            tmpvarDim = 2
          end if
       else if (var_laydimpos(iv) /= -1) then ! Only a laydim
          if (var_types(iv) == nf90_double) then
             call    realloc(tmpvar2D, (/  kmx(noutfile), maxitems /), keepExisting=.false.)
             tmpvarptr(1:1,1:kmx(noutfile),1:maxitems)  =>  tmpvar2D(:,:)
+            call    realloc(tmpvar2D_tmp, (/  kmx(noutfile), maxitems /), keepExisting=.false.)
          else if (var_types(iv) == nf90_int .or. var_types(iv) == nf90_short) then
             call    realloc(itmpvar2D, (/  kmx(noutfile), maxitems /), keepExisting=.false.)
             itmpvarptr(1:1,1:kmx(noutfile),1:maxitems) => itmpvar2D(:,:)
+            call    realloc(itmpvar2D_tmp, (/  kmx(noutfile), maxitems /), keepExisting=.false.)
          end if
+         tmpvarDim = 2
       else if (var_wdimpos(iv) /= -1) then
          if (var_types(iv) == nf90_double) then
             call    realloc(tmpvar2D, (/  kmx(noutfile)+1, maxitems /), keepExisting=.false.)
             tmpvarptr(1:1,1:kmx(noutfile)+1,1:maxitems)  =>  tmpvar2D(:,:)
+            call    realloc(tmpvar2D_tmp, (/  kmx(noutfile)+1, maxitems /), keepExisting=.false.)
          else if (var_types(iv) == nf90_int .or. var_types(iv) == nf90_short) then
             call    realloc(itmpvar2D, (/  kmx(noutfile)+1, maxitems /), keepExisting=.false.)
             itmpvarptr(1:1,1:kmx(noutfile)+1,1:maxitems) => itmpvar2D(:,:)
+            call    realloc(itmpvar2D_tmp, (/  kmx(noutfile)+1, maxitems /), keepExisting=.false.)
          end if
+         tmpvarDim = 2
       end if
 
       do it=1,ntsel
@@ -1226,7 +1549,147 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
             end if
 
             ! Now shift all items (in space) that really belong to *current* domain ii to the left,
-            ! such that global item (face/edge/node) nrs form one increasing range in tmpvar.
+            ! such that global item (edge/node) nrs form one increasing range in tmpvar.
+            ! Faces related variables in the merged file are numbered by 'FlowElemGlobalNr'
+            ! Conectivity arrays are taken care seperately.
+            if (var_names(iv) .eq. 'NetLink' .or. var_names(iv) .eq. 'mesh2d_edge_nodes') then
+                nnetedgecount = sum(numl(1:ii-1))
+                nnodecount = sum(numk(1:ii-1))
+                do ip=1,item_counts(ii)
+                    if (item_domain(nnetedgecount+ip) == ii-1) then ! only for the NetLink which belongs to the current domain
+                        inetedgeglob = netedge_c2g(nnetedgecount+ip)
+                        if (inetedgeglob > 0) then
+                            nitemglob = nitemglob + 1               ! for later checking nitemglob
+                            itmpvar2D(:,inetedgeglob) = itmpvar2D(:,nitemglob0+ip)
+                            do ikk=1,2
+                                g1 = itmpvar2D(ikk, inetedgeglob)
+                                if (g1 > 0) then
+                                    g1 = g1 +nnodecount
+                                    itmpvar2D(ikk,inetedgeglob) = node_c2g(g1) ! mapping the nodes to global nodes
+                                end if
+                            end do
+                        end if
+                    end if
+                end do
+            else if (var_names(iv) .eq. 'NetElemNode' .or. var_names(iv) .eq. 'mesh2d_face_nodes') then
+                nfacecount = sum(nump(1:ii-1))
+                nnodecount = sum(numk(1:ii-1))
+                do ip=1, item_counts(ii)
+                    if (item_domain(nfacecount+ip) == ii-1) then
+                        ifaceglob = face_c2g(nfacecount+ip)
+                        if (ifaceglob > 0) then
+                            nitemglob = nitemglob + 1
+                            itmpvar2D_tmp(:,ifaceglob) = itmpvar2D(:,nitemglob0+ip)
+                            do ikk = 1, netfacemaxnodes(ii)
+                                g1 = itmpvar2D_tmp(ikk,ifaceglob)
+                                if (g1 > 0) then
+                                    g1 = g1 + nnodecount
+                                    itmpvar2D_tmp(ikk,ifaceglob) = node_c2g(g1)
+                                end if
+                            end do
+                        end if
+                    end if
+                end do
+                if (ii==nfiles) then ! When finished, copy to itmpvar2D for writting
+                    itmpvar2D(:,1:nitemglob) = itmpvar2D_tmp(:,1:nitemglob)
+                end if
+            else if (var_names(iv) .eq. 'NetElemLink') then
+                nfacecount = sum(nump(1:ii-1))
+                nnetedgecount = sum(numl(1:ii-1))
+                do ip =1, item_counts(ii)
+                    if (item_domain(nfacecount+ip) == ii-1) then
+                        ifaceglob = face_c2g(nfacecount+ip)
+                        if (ifaceglob > 0) then
+                            nitemglob = nitemglob + 1
+                            itmpvar2D_tmp(:,ifaceglob) = itmpvar2D(:,nitemglob0+ip)
+                            do ikk = 1, netfacemaxnodes(ii)
+                                g1 = itmpvar2D_tmp(ikk,ifaceglob)
+                                if (g1 > 0) then
+                                    g1 = g1 + nnetedgecount
+                                    itmpvar2D_tmp(ikk,ifaceglob) = netedge_c2g(g1)
+                                end if
+                            end do
+                        end if
+                    end if
+                end do
+                if (ii==nfiles) then
+                    itmpvar2D(:,1:nitemglob) = itmpvar2D_tmp(:,1:nitemglob)
+                end if
+            else if (var_names(iv) .eq. 'ElemLink' .or. var_names(iv) .eq. 'mesh2d_edge_faces') then
+                nnetedgecount = sum(numl(1:ii-1))
+                nfacecount = sum(nump(1:ii-1))
+                do ip=1,item_counts(ii)
+                    if (item_domain(nnetedgecount+ip) == ii-1) then
+                        inetedgeglob = netedge_c2g(nnetedgecount+ip)
+                        if (inetedgeglob > 0) then
+                            nitemglob = nitemglob + 1
+                            itmpvar2D(:,inetedgeglob) = itmpvar2D(:,nitemglob0+ip)
+                            do ikk=1,2
+                                g1 = itmpvar2D(ikk, inetedgeglob)
+                                if (g1 > 0) then
+                                    g1 = g1 +nfacecount
+                                    itmpvar2D(ikk,inetedgeglob) = face_c2g(g1)
+                                else if (g1 == 0) then
+                                    itmpvar2D(ikk,inetedgeglob) = 0
+                                end if
+                            end do
+                        end if
+                    end if
+                end do
+            else if (var_names(iv) .eq. 'FlowLink') then
+                nedgecount = sum(lnx(1:ii-1))
+                nfacecount = sum(nump(1:ii-1))
+                do ip=1,item_counts(ii)
+                    if (item_domain(nedgecount+ip) == ii-1) then
+                        iedgeglob = edge_c2g(nedgecount+ip)
+                        if (iedgeglob > 0) then
+                            nitemglob = nitemglob + 1
+                            itmpvar2D_tmp(:,iedgeglob) = itmpvar2D(:,nitemglob0+ip)
+                            do ikk=1,2
+                                g1 = itmpvar2D_tmp(ikk, iedgeglob)
+                                if (g1 > 0 .and. g1 <= nump(ii)) then
+                                    g1 = g1 +nfacecount
+                                    itmpvar2D_tmp(ikk,iedgeglob) = face_c2g(g1)
+                                else if (g1 > nump(ii)) then
+                                    itmpvar2D_tmp(ikk,iedgeglob) = intmiss
+                                end if
+                            end do
+                        end if
+                    end if
+                end do
+                if (ii==nfiles) then
+                    itmpvar2D(:,1:nitemglob) = itmpvar2D_tmp(:,1:nitemglob)
+                end if
+            else if (var_loctype(iv) == UNC_LOC_S) then ! variables that locate on faces
+               nfacecount = sum(nump(1:ii-1))
+               if (tmpvarDim == 1) then
+                  do ip=1, item_counts(ii)
+                     if (item_domain(nfacecount+ip) == ii-1) then
+                        ifaceglob = face_c2g(nfacecount+ip)
+                        if (ifaceglob > 0) then
+                           nitemglob = nitemglob + 1
+                           tmpvar1D_tmp(ifaceglob) = tmpvar1D(nitemglob0+ip)
+                        end if
+                     end if
+                  end do
+                  if (ii==nfiles) then
+                      tmpvar1D(1:nitemglob) = tmpvar1D_tmp(1:nitemglob)
+                  end if
+               else if (tmpvarDim == 2) then
+                  do ip=1, item_counts(ii)
+                     if (item_domain(nfacecount+ip) == ii-1) then
+                        ifaceglob = face_c2g(nfacecount+ip)
+                        if (ifaceglob > 0) then
+                           nitemglob = nitemglob + 1
+                           tmpvar2D_tmp(:,ifaceglob)=tmpvar2D(:,nitemglob0+ip)
+                        end if
+                     end if
+                  end do
+                  if (ii==nfiles) then
+                     tmpvar2D(:,1:nitemglob) = tmpvar2D_tmp(:,1:nitemglob)
+                  end if
+               end if
+            else
             needshift = .false. ! The get_var above started at the right place, so no shifting needed yet.
             if (var_types(iv) == nf90_double) then ! TODO: AvD: try to remove this ugly code-copy for just different types
                do ip=1,item_counts(ii)
@@ -1252,6 +1715,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                end do
             end if
             nitemcount = nitemcount + item_counts(ii)
+           end if
          end do ! ii
 
          if (item_counts(noutfile) /= nitemglob) then
@@ -1357,8 +1821,11 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    if (allocated(var_loctype))     deallocate(var_loctype)
    if (allocated(itmpvar1D))       deallocate(itmpvar1D)
    if (allocated(itmpvar2D))       deallocate(itmpvar2D)
+   if (allocated(itmpvar2D_tmp))   deallocate(itmpvar2D_tmp)
    if (allocated(tmpvar1D))        deallocate(tmpvar1D)
+   if (allocated(tmpvar1D_tmp))    deallocate(tmpvar1D_tmp)
    if (allocated(tmpvar2D))        deallocate(tmpvar2D)
+   if (allocated(tmpvar2D_tmp))    deallocate(tmpvar2D_tmp)
    if (allocated(tmpvar3D))        deallocate(tmpvar3D)
 end function dfm_merge_mapfiles
 
