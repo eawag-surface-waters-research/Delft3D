@@ -97,6 +97,8 @@ public :: ionc_put_face_coordinates
 public :: ionc_get_face_edges
 public :: ionc_get_face_nodes
 public :: ionc_get_coordinate_system
+public :: ionc_get_crs
+public :: ionc_get_meta_data
 public :: ionc_get_var_count
 public :: ionc_inq_varids
 public :: ionc_inq_varid
@@ -729,6 +731,72 @@ function ionc_get_coordinate_system(ioncid, epsg_code) result(ierr)
    !is_spherical = datasets(ioncid)%crs%is_spherical
 end function ionc_get_coordinate_system
 
+!> Gets the crs information from a data set.
+function ionc_get_crs(ioncid, crs) result(ierr)
+   integer,             intent(in)    :: ioncid  !< The IONC data set id.
+   type(t_crs),         intent(  out) :: crs     !< Map projection/coordinate transformation used for the coordinates of this mesh.
+   integer                            :: ierr    !< Result status, ionc_noerr if successful.
+
+   ierr = IONC_NOERR
+   if (ioncid < 1 .or. ioncid > ndatasets) then
+      ierr = IONC_EBADID
+      goto 999
+   end if
+
+   ierr = nf90_noerr 
+   crs = datasets(ioncid)%crs
+   ! Successful
+   return
+
+999 continue
+   ! Some error (status was set earlier)
+end function ionc_get_crs
+
+!> Get the meta data from the file/data set.
+function ionc_get_meta_data(ioncid, meta) result(ierr)
+   integer, intent(in)          :: ioncid    !< The IONC data set id.
+   type(t_ug_meta), intent(out) :: meta      !< The meta data of the dataset
+   integer                      :: ierr      !< Result status, ionc_noerr if successful.
+
+   ierr = IONC_NOERR
+   if (ioncid < 1 .or. ioncid > ndatasets) then
+      ierr = IONC_EBADID
+      goto 999
+   end if
+
+   meta%institution = ' '
+   meta%source      = ' '
+   meta%references  = ' '
+   meta%version     = ' '
+   meta%modelname   = ' '
+
+   ierr = nf90_get_att(datasets(ioncid)%ncid, nf90_global, 'institution', meta%institution)
+   if (ierr /= nf90_noerr) then
+      goto 999
+   end if
+   ierr = nf90_get_att(datasets(ioncid)%ncid, nf90_global, 'source',     meta%source)
+   if (ierr /= nf90_noerr) then
+      goto 999
+   end if
+   ierr = nf90_get_att(datasets(ioncid)%ncid, nf90_global, 'references', meta%references)
+   if (ierr /= nf90_noerr) then
+      goto 999
+   end if
+   ierr = nf90_get_att(datasets(ioncid)%ncid, nf90_global, 'version',    meta%version)
+   if (ierr /= nf90_noerr) then
+      goto 999
+   end if
+   ierr = nf90_get_att(datasets(ioncid)%ncid, nf90_global, 'modelname',  meta%modelname)
+   if (ierr /= nf90_noerr) then
+      goto 999
+   end if
+
+   ! Successful
+   return
+
+999 continue
+   ! Some error (status was set earlier)
+end function ionc_get_meta_data
 
 !> Returns the number of variables that are available in the specified dataset on the specified mesh.
 !! The location type allows to select on specific topological mesh locations
