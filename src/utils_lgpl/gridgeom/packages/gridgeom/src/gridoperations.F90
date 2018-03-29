@@ -2359,7 +2359,7 @@
          yv(i) = yk(k)
       end do
 
-      call comp_circumcenter3D(nn, xv, yv, xz, yz, jsferic, dmiss)
+      call comp_circumcenter3D(nn, xv, yv, xz, yz, jsferic, dmiss, dcenterinside)
    else
       !   get the cell polygon that is safe for periodic, spherical coordinates, inluding poles
       call get_cellpolygon(n,Mmax,nn,xv,yv,LnnL,Lorg,zz)
