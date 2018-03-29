@@ -70,7 +70,7 @@ function aggregate_ugrid_geometry(input, output, input_edge_type, output_edge_ty
     integer                                  :: counterclockwise !< Output of subroutine comp_masscenter (not used here).
 
     success = .false.
-
+    output%start_index = 1
 
     ! 1. Determine output edge_faces and edge_nodes.
     ! Apply face mapping table to edge faces.

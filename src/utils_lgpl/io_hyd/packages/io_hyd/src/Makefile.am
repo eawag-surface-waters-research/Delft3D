@@ -51,6 +51,7 @@ libIOHyd_la_SOURCES = \
          merge_domains.f90 \
          set_hyd.f90 \
          write_atr.f90 \
+         write_waqgeom.f90 \
          write_bnd.f90 \
          write_cco.f90 \
          write_data.f90 \

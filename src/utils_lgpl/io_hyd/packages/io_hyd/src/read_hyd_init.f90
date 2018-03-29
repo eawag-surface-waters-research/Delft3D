@@ -89,7 +89,7 @@
       elseif (hyd%geometry .eq. HYD_GEOM_UNSTRUC) then
          ! read the waqgeom and bnd-file
 
-         success = read_grid_file_ugrid_netcdf(hyd%file_geo%name, hyd%waqgeom, hyd%edge_type, hyd%conv_type, hyd%conv_version)
+         success = read_waqgeom_file(hyd%file_geo%name, hyd%meta, hyd%crs, hyd%waqgeom, hyd%edge_type, hyd%conv_type, hyd%conv_version)
 
          if(.not.success) then
             if (hyd%conv_type == IONC_CONV_UGRID .and. hyd%conv_version<1.0) then

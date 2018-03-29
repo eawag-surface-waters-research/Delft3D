@@ -35,51 +35,26 @@ module m_read_waqgeom
     private
     
     public read_waqgeom_file
-    public read_grid_file_ugrid_netcdf
     
     contains 
     
-    function read_waqgeom_file(file_waqgeom, waqgeom) result(success)
-
-    ! function : read a waqgeom file
-
-    ! global declarations
-
-    use filmod
-    use io_ugrid
-    use m_alloc
-
-    implicit none
-
-    type(t_dlwqfile)                       :: file_waqgeom
-    type(t_ug_meshgeom), intent(out)       :: waqgeom
-    logical                                :: success !< Result status, true if successful.
-      
-    success = .false.
-
-    ! Check if the file actualy exist
-    ! Check the ugrid version
-      
-    success = .true.
-      
-    return
-    end function
-
-
-    !> Reads an unstructured grid from UGRID file format.
+    !> Reads an unstructured waqgeom grid from UGRID file format.
     !! Reads netnode coordinates, edges (netlinks), net boundary and elements (netelems).
-    function read_grid_file_ugrid_netcdf(filename, waqgeom, edge_type, conv_type, conv_version) result (success)
+    function read_waqgeom_file(filename, meta, crs, waqgeom, edge_type, conv_type, conv_version) result (success)
         use netcdf
         use io_netcdf
-        use io_ugrid ! for t_ug_file
+        use io_ugrid
 
         implicit none
 
         character(len=*)                       :: filename
+        type(t_ug_meta), intent(out)           :: meta      
+        type(t_crs), intent(out)               :: crs
         type(t_ug_meshgeom), intent(out)       :: waqgeom
-        integer, pointer, intent(out)          :: edge_type (:)
+        integer, pointer, intent(out)          :: edge_type(:)
         integer                                :: conv_type 
         real(8)                                :: conv_version
+
         logical                                :: success !< Result status, true if successful.
 
         character(len=260) :: msgtxt
@@ -91,20 +66,14 @@ module m_read_waqgeom
         integer :: ioncid 
         integer :: ncid 
         integer :: nmesh 
-        integer :: epsg_code 
-        integer :: id_netnodez 
         integer :: id_edgetypes
         integer :: file_size
         character(len=260) :: var_name
 
-        integer, dimension(:,:), pointer :: edge_nodes
-        integer, dimension(:,:), pointer :: face_nodes
-        integer :: i_mesh, varid, ifill
+        integer :: i_mesh, ifill
         
         success = .false.
         
-        ! 0. Preparation (file, dimensions)
-
         inquire(FILE=filename, SIZE=file_size)
         if (file_size == 0) then
             return
@@ -116,6 +85,9 @@ module m_read_waqgeom
             return
         end if
         !
+        ierr = ionc_get_meta_data(ioncid, meta)
+        ierr = ionc_get_crs(ioncid, crs)
+
         ierr = ionc_inq_conventions(ioncid, conv_type, conv_version)
         if ( (ierr == nf90_noerr .and. conv_type /= IONC_CONV_UGRID) .or. &
              (ierr == nf90_noerr .and. conv_type == IONC_CONV_UGRID .and. conv_version<1.0)) then
@@ -135,11 +107,8 @@ module m_read_waqgeom
             return
         end if
         i_mesh = 1
-        varid = 1
+
         ! Read the mesh
-!        ug_init_mesh_topology(ioncid, varid, meshids) 
-!        ierr = ug_init_mesh_topology(ioncid, varid, meshids)
-        
         ierr = ionc_get_meshgeom(ioncid, i_mesh, waqgeom, includeArrays=.true.)
 
         call reallocP(waqgeom%face_nodes, (/waqgeom%maxnumfacenodes, waqgeom%numface/), keepExisting = .false.)
@@ -162,6 +131,6 @@ module m_read_waqgeom
 
         success = .true.
         
-    end function read_grid_file_ugrid_netcdf
+    end function read_waqgeom_file
 
     end module    

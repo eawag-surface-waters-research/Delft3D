@@ -7066,6 +7066,7 @@ src/utils_lgpl/io_hyd/packages/io_hyd/src/write_poi.f90 -text
 src/utils_lgpl/io_hyd/packages/io_hyd/src/write_rfl.f90 -text
 src/utils_lgpl/io_hyd/packages/io_hyd/src/write_src.f90 -text
 src/utils_lgpl/io_hyd/packages/io_hyd/src/write_srf.f90 -text
+src/utils_lgpl/io_hyd/packages/io_hyd/src/write_waqgeom.f90 -text
 src/utils_lgpl/io_hyd/packages/io_hyd/src/wrwaqgeomcl.f90 -text
 src/utils_lgpl/io_hyd/packages/io_hyd/src/wstmod.f90 -text
 src/utils_lgpl/io_netcdf/Makefile.am -text

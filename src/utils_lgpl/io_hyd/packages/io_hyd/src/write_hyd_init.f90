@@ -34,6 +34,8 @@
       ! global declarations
 
       use hydmod
+      use m_write_waqgeom
+
       implicit none
 
       ! declaration of the arguments
@@ -45,6 +47,7 @@
       integer             :: lunrep    ! report file
       integer             :: itime     ! time (dummy)
       character(len=20)   :: valnam(2) ! parameter name
+      logical             :: success
 
       ! some init
 
@@ -63,6 +66,9 @@
          ! cco file
          call write_cco ( hyd%file_cco, hyd%mmax  , hyd%nmax  , hyd%xdepth, hyd%ydepth, &
                           hyd%nolay   )
+      else if (hyd%geometry .eq. HYD_GEOM_UNSTRUC) then
+         success =  write_waqgeom_file(hyd%file_geo%name, hyd%meta, hyd%crs, hyd%waqgeom, &
+                                       hyd%edge_type, hyd%conv_type, hyd%conv_version)
       endif
 
       ! pointer table
