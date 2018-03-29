@@ -565,7 +565,7 @@ module geometry_module
       
       end subroutine CROSS
       
-      subroutine cross3D(x1, y1, x2, y2, x3, y3, x4, y4, jacros, sL, sm, jsferic, dmiss)    ! ,SL,SM,XCR,YCR,CRP, jsferic, dmiss)
+      subroutine cross3D(x1, y1, x2, y2, x3, y3, x4, y4, jacros, sL, sm, xcr, ycr, jsferic, dmiss)    ! ,SL,SM,XCR,YCR,CRP, jsferic, dmiss)
       
          implicit none
          
@@ -575,10 +575,12 @@ module geometry_module
          double precision, intent(in)   :: x4, y4 !< fourth point coordinates
          integer,          intent(out)  :: jacros !< line 1-2 crosses line 3-4 (1) or not (0)
          double precision, intent(out)  :: sL, sm
+         double precision, intent(out)  :: xcr, ycr
          integer,          intent(in)   :: jsferic
          double precision, intent(in)   :: dmiss
          
          double precision, dimension(3) :: xx1, xx2, xx3, xx4
+         double precision, dimension(3) :: xxcr
          
          double precision, dimension(3) :: n12, n34, n
          
@@ -624,6 +626,9 @@ module geometry_module
                SL .GE. 0d0 .AND. SL .LE. 1d0 ) THEN
             jacros = 1
          endif
+         
+         xxcr    = xx1 + SL*(xx2-xx1)
+         call Cart3Dtospher(xxcr(1),xxcr(2),xxcr(3),xcr,ycr,max(x1, x2))
          
          return
       end subroutine cross3D
@@ -1993,7 +1998,7 @@ module geometry_module
       ! comp_circumcenter3D
       !
       !> compute circumcenter using 3D coordinates
-      subroutine comp_circumcenter3D(N, xv, yv, xz, yz, jsferic, dmiss)
+      subroutine comp_circumcenter3D(N, xv, yv, xz, yz, jsferic, dmiss, dcenterinside)
 
       use physicalconsts, only: earth_radius
 
@@ -2029,6 +2034,12 @@ module geometry_module
 
       integer, intent(in)              :: jsferic
       double precision, intent(in)     :: dmiss
+      double precision, intent(in)     :: dcenterinside
+                                       
+      double precision                 :: xzw, yzw
+      double precision                 :: SL,SM,XCR,YCR,CRP
+      
+      integer                          :: jacros, in
 
       !  compute 3D coordinates and first iterate of circumcenter in 3D coordinates and Lagrange multiplier lambda
       xxc = 0d0
@@ -2044,6 +2055,8 @@ module geometry_module
       xxc = xxc/N
       yyc = yyc/N
       zzc = zzc/N
+      
+      call Cart3Dtospher(xxc,yyc,zzc,xzw,yzw,xv(1))
 
       !  compute tangential vectors and edge midpoints, edge i is from nodes i to i+1, and convergence tolerance
       do i=1,N
@@ -2155,6 +2168,27 @@ module geometry_module
 
       !  project circumcenter back to spherical coordinates
       call Cart3Dtospher(xxc,yyc,zzc,xz,yz,maxval(xv(1:N)))
+      
+!     check if circumcenter is inside cell
+      if ( dcenterinside .le. 1d0 .and. dcenterinside.ge.0d0 ) then
+         call pinpok3D(xz,yz,N,xv,yv,in, dmiss, 1, jsferic, 1)                    ! circumcentre may not lie outside cell
+         if (in == 0) then
+            do i  = 1,N
+               ip1 = i + 1; if ( ip1.gt.N ) ip1=ip1-N
+               call CROSS3D(xzw, yzw, xz, yz, xv(i), yv(i), xv(ip1), yv(ip1),&
+                  JACROS,SL,SM,xcr,ycr,jsferic, dmiss)
+
+               if (jacros == 1) then
+                  !               xz = 0.5d0*( xh(m) + xh(m2) ) ! xcr
+                  !               yz = 0.5d0*( yh(m) + yh(m2) ) ! ycr
+                  xz = xcr
+                  yz = ycr
+
+                  exit
+               endif
+            enddo
+         endif
+      endif
 
       return
       end subroutine comp_circumcenter3D
@@ -2268,7 +2302,7 @@ module geometry_module
                xccfo = xccf
                yccfo = yccf
                do m  = 1,nn
-                  if ( lnnl( m ) == 2 .or. nn.eq.3) then     ! nn.eq.3: always for triangles
+                  if ( lnnl( m ) == 2 .or. nn.eq.3 .or. lnnl(m).eq.1 ) then     ! nn.eq.3: always for triangles
                      xe1= xv(m)
                      ye1= yv(m)
                      m2 = m + 1; if (m == nn) m2 = 1
