@@ -46,6 +46,7 @@ MOSTLYCLEANFILES = *.mod
 FINCLUDES +=
 
 FMODULES += \
+    -I$(top_builddir)/utils_lgpl/io_netcdf/packages/io_netcdf/src \
     -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src \
     -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common_mpi/src \
     -I$(top_builddir)/third_party_open/FLAP/Test_Driver/mod
@@ -72,6 +73,7 @@ LIBS+=${MPILIBS}
 endif
 
 EXTRALIBS=\
+        $(top_builddir)/utils_lgpl/io_netcdf/packages/io_netcdf/src/libIONetcdf.la \
         $(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/libDeltaresCommon.la \
         $(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common_mpi/src/libDeltaresCommonMpi.la \
         $(top_builddir)/third_party_open/FLAP/Test_Driver/obj/ir_precision.o \
