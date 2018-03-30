@@ -118,3 +118,8 @@ export LD_LIBRARY_PATH=$libdir:$LD_LIBRARY_PATH
     # Wait until all child processes are finished
 wait
 
+    # Nefis files don't get write permission for the group bit
+    # Add it explicitly, only when stderr = 0
+if [ $? -eq 0 ]; then
+    chmod -R g+rw *.dat *.def &>/dev/null || true
+fi

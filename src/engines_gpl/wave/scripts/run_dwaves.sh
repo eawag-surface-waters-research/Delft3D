@@ -111,5 +111,8 @@ $bindir/wave $mdwfile 0
     # Wait until all child processes are finished
 wait
 
-    # D-Waves doesn't give write permission to the group bit of the dat/def-files
-chmod -R g+rw *.dat *.def &>/dev/null || true
+    # Nefis files don't get write permission for the group bit
+    # Add it explicitly, only when stderr = 0
+if [ $? -eq 0 ]; then
+    chmod -R g+rw *.dat *.def &>/dev/null || true
+fi
