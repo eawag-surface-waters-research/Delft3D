@@ -43,6 +43,7 @@ module m_network
    public realloc
    public dealloc
    public admin_network
+   public initialize_1dadmin
  
    interface realloc
       module procedure realloc_1dadmin
@@ -53,8 +54,6 @@ module m_network
       module procedure dealloc_1dadmin
    end interface dealloc
    
-   public initialize_1dadmin
-
    type, public :: t_offset2cross
       integer :: c1 = -1           !< cross section index 1
       integer :: c2 = -1           !< cross section index 2
@@ -298,8 +297,6 @@ contains
       !   inod = network%boundaries%tp(ityp)%bd(i)%node
       !   node(4,inod) = i
       !enddo
-
-      call initialize_1dadmin(network, network%gridpointsCount)
 
    end subroutine admin_network
 
