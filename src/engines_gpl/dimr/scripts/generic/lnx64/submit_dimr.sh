@@ -128,7 +128,7 @@ JOBNAME="${JOBNAME}_${numnode}x${corespernode}"
 
 scriptdirname=`readlink \-f \$0`
 scriptdir=`dirname $scriptdirname`
-D3D_HOME=$scriptdir/../..
+D3D_HOME=$scriptdir/..
 RUNSCRIPT=$scriptdir/run_dimr.sh
 
 runscript_opts="-m ${configfile} -d ${debuglevel} -c $corespernode --NNODES $numnode --D3D_HOME ${D3D_HOME}"
