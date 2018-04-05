@@ -318,6 +318,7 @@ module m_readstructures
          pstr => network%sts%struct(i)
          
          read(ibin) pstr%id
+         read(ibin) pstr%st_name
          read(ibin) pstr%st_type
          read(ibin) pstr%ibran
          read(ibin) pstr%left_calc_point
@@ -546,6 +547,7 @@ module m_readstructures
          pstr => sts%struct(i)
          
          write(ibin) pstr%id
+         write(ibin) pstr%st_name
          write(ibin) pstr%st_type
          write(ibin) pstr%ibran
          write(ibin) pstr%left_calc_point
@@ -1179,7 +1181,10 @@ module m_readstructures
 
       call prop_get_integer(md_ptr, 'structure', 'direction', pump%direction, success)
       if (success) call prop_get_integer(md_ptr, 'structure', 'nrstages', pump%nrstages, success)
-      if (.not. success) return
+      if (.not. success) then
+         pump%nrstages = 1
+         success = .true.
+      endif
       
       if (pump%nrstages < 1) then
          call setMessage(LEVEL_FATAL, "Error Reading Pump: No Stages Defined")
@@ -1194,11 +1199,17 @@ module m_readstructures
       if (istat == 0) allocate(pump%ds_trigger(pump%nrstages), stat=istat)
 
       
-      call prop_get_doubles(md_ptr, 'structure', 'capacity', pump%capacity, pump%nrstages, success)      
+      call prop_get_doubles(md_ptr, 'structure', 'capacity', pump%capacity, pump%nrstages, success)     
+      if (iabs(pump%direction) == 1 .or. iabs(pump%direction) == 3) then
       if (success) call prop_get_doubles(md_ptr, 'structure', 'startlevelsuctionside', pump%ss_onlevel, pump%nrstages, success)      
       if (success) call prop_get_doubles(md_ptr, 'structure', 'stoplevelsuctionside', pump%ss_offlevel, pump%nrstages, success)      
+      endif
+      
+      if (iabs(pump%direction) == 2 .or. iabs(pump%direction) == 3) then
       if (success) call prop_get_doubles(md_ptr, 'structure', 'startleveldeliveryside', pump%ds_onlevel, pump%nrstages, success)      
       if (success) call prop_get_doubles(md_ptr, 'structure', 'stopleveldeliveryside', pump%ds_offlevel, pump%nrstages, success)
+      endif
+      
       if (.not. success) return
 
       pump%ss_trigger = .true.
@@ -1221,6 +1232,7 @@ module m_readstructures
       if (.not. success .and. tabsize == 1) then
          head(1)   = 0.0d0
          redfac(1) = 1.0d0
+         success = .true.
       elseif (.not. success) then
          call SetMessage(LEVEL_FATAL, 'Error Reading Pump: No Proper Reduction Table')
       endif
@@ -1255,22 +1267,50 @@ module m_readstructures
       type(t_orifice), pointer, intent(inout)     :: orifice
       type(tree_data), pointer, intent(in)        :: md_ptr
       logical, intent(inout)                      :: success 
+      
+      double precision :: area, height
    
       allocate(orifice)
       
       call prop_get_double(md_ptr, 'structure', 'crestlevel', orifice%crestlevel, success)
-      if (success) call prop_get_double(md_ptr, 'structure', 'crestwidth', orifice%crestwidth, success)
+      if (success) then
+         call prop_get_double(md_ptr, 'structure', 'crestwidth', orifice%crestwidth, success)
+         if (success) call prop_get_double(md_ptr, 'structure', 'openlevel', orifice%openlevel, success)
+      else
+         success = .true.
+         orifice%crestlevel = 0d0
+         area = 0d0
+         call prop_get_double(md_ptr, 'structure', 'bottomlevel', orifice%crestlevel, success)
+         call prop_get_double(md_ptr, 'structure', 'area',         area, success)
+         height = sqrt(area)
+         orifice%crestwidth = height
+         orifice%openlevel = orifice%crestlevel+height
+      endif
+      
       if (success) call prop_get_integer(md_ptr, 'structure', 'allowedflowdir', orifice%allowedflowdir, success)
 
       if (success) call prop_get_double(md_ptr, 'structure', 'contractioncoeff', orifice%contrcoeff, success)
       if (success) call prop_get_double(md_ptr, 'structure', 'latcontrcoeff', orifice%latcontrcoeff, success)
-      if (success) call prop_get_double(md_ptr, 'structure', 'openlevel', orifice%openlevel, success)
 
-      if (success) call prop_get_logical(md_ptr, 'structure', 'uselimitflowpos', orifice%uselimitflowpos, success)
-      if (success) call prop_get_double(md_ptr, 'structure', 'limitflowpos', orifice%limitflowpos, success)
-
-      if (success) call prop_get_logical(md_ptr, 'structure', 'uselimitflowneg', orifice%uselimitflowneg, success)
-      if (success) call prop_get_double(md_ptr, 'structure', 'limitflowneg', orifice%limitflowneg, success)
+      if (success) then
+         call prop_get_logical(md_ptr, 'structure', 'uselimitflowpos', orifice%uselimitflowpos, success)
+         if (success) then
+            call prop_get_double(md_ptr, 'structure', 'limitflowpos', orifice%limitflowpos, success)
+         else
+            orifice%uselimitflowpos = .false.
+            success = .true.
+         endif
+      endif
+      
+      if (success) then
+         call prop_get_logical(md_ptr, 'structure', 'uselimitflowneg', orifice%uselimitflowneg, success)
+         if (success) then
+            call prop_get_double(md_ptr, 'structure', 'limitflowneg', orifice%limitflowneg, success)
+         else
+            orifice%uselimitflowneg = .false.
+            success = .true.
+         endif
+      endif
    
    end subroutine readOrifice
    
