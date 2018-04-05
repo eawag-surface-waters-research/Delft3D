@@ -523,6 +523,9 @@
          case ( 24 )     !      Local flexible time step method by Leonard Postma
             call dlwqnp ( a , j , c , lun , lchar, action, dlwqd, gridps )
 
+         case ( 25 )     !      Special for emission module
+            call dlwqnq ( a , j , c , lun , lchar, action, dlwqd, gridps )
+
          case default
             goto 990
 

@@ -131,7 +131,8 @@
       if ( nowst .lt. 0 ) then       !   it says that info comes from auxiliary file
          write ( lunut , 2000 ) nowst
          call opt1   ( -1     , lun    , 15     , lchar  , filtype,
-     &                 dtflg1 , dtflg3 , 0      , ierr2  , iwar   )
+     &                 dtflg1 , dtflg3 , 0      , ierr2  , iwar   ,
+     &                 .false.)
          if ( ierr2 .gt. 0 ) goto 20
          if ( gettoken( nowst, ierr2 ) .gt. 0 ) goto 20
       endif
@@ -324,7 +325,7 @@
      &                 notot+1, notot+1, nrftot(9), nrharm(9), 1    ,
      &                 dtflg1 , ldummy , ldummy   , iwidth   , lchar,
      &                 filtype, dtflg3 , vrsion   , ioutpt   , ierr2,
-     &                 iwar   )
+     &                 iwar   , .false.)
      &
       endif
       deallocate( wstid, wsttype )

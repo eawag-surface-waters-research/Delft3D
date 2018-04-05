@@ -56,7 +56,7 @@ C     NPOS    INTEGER     1       INPUT   nr of significant characters
 C     CCHAR   CHAR*1      1       INPUT   comment character
 C     IPOSR   INTEGER     1       IN/OUT  start position on line
 C     NPOS    INTEGER     1       INPUT   width of the input file
-C     CHULP   CHAR*(*)    1       OUTPUT  string  to be delivered
+C     CHULP   CHAR*(*)    1       OUTPUT  string  to be delivered (for ITYPEX=-1: input!)
 C     IHULP   INTEGER     1       OUTPUT  integer to be delivered
 C     RHULP   REAL*4      1       OUTPUT  real    to be delivered
 C     ITYPEX  INTEGER     1       INPUT   type expected
@@ -106,6 +106,27 @@ C
             LUNIN = ILUN(I)
          ENDIF
     5 CONTINUE
+
+C
+C           Force the opening of a new include file - special case
+C
+      IF ( ITYPEX .EQ. -1) THEN
+         WRITE ( LUNUT , 1040 ) CHULP2
+         IFL       = IFL + 1
+         LUNIN     = 800+IFL
+         OPEN ( LUNIN, FILE = CHULP2, STATUS = 'old', IOSTAT = IOERR)
+         IF ( IOERR .GT. 0 ) THEN
+            IFL = IFL - 1
+            WRITE ( LUNUT , 1050 )
+            IERR = 1
+            GOTO 20
+         ELSE
+            LCH (IFL) = CHULP2
+            ILUN(IFL) = LUNIN
+            IERR = 0
+            RETURN
+         ENDIF
+      ENDIF
 
 C
 C           Get the data

@@ -23,7 +23,8 @@
 
       subroutine dlwq03 ( lun    , lchar  , filtype, nrftot , nrharm ,
      &                    ivflag , dtflg1 , iwidth , dtflg3 , vrsion ,
-     &                    ioutpt , gridps , syname , ierr   , iwar   )
+     &                    ioutpt , gridps , syname , ierr   , iwar   ,
+     &                    has_hydfile     , nexch                    )
 
 !       Deltares Software Centre
 
@@ -87,6 +88,8 @@
       character(20), intent(in   ) :: syname (*)        !< array with substance names
       integer  ( 4), intent(inout) :: ierr              !< cumulative error   count
       integer  ( 4), intent(inout) :: iwar              !< cumulative warning count
+      logical      , intent(out)   :: has_hydfile       !< if true, much information comes from the hyd-file
+      integer  ( 4), dimension(3), intent(out) :: nexch !< number of exchanges as read via hyd-file
       type(GridPointerColl)           GridPs            !< Collection of grid pointers
 
       include 'sysn.inc'        !     common  /  sysn  /    System dimensions
@@ -122,6 +125,7 @@
       integer                 ivalk             !  return value dhknmrk
 
       character*255           ugridfile         !  name of the ugrid-file
+      character*255           hydfile           !  name of the hyd-file
       integer :: ncid, ncidout
       integer :: varid, varidout, meshid, meshidout, timeid, bndtimeid, ntimeid, wqid
       integer :: inc_error
@@ -140,18 +144,40 @@
       iwar2  = 0
       iposr  = 0
 
-!     Check if there is a keyword for the grid
+      nexch  = 0
+
+!     Check if there is a keyword for the grid or the hyd-file
       lncout     = .false.
       lchar (46) = ' '
       if ( gettoken( cdummy, idummy, itype, ierr2 ) .gt. 0 ) goto 240
-      if (cdummy .eq. 'UGRID') then
+      has_hydfile = .false.
+      if (cdummy .eq. 'HYD_FILE') then
+         if ( gettoken( hydfile, ierr2 ) .gt. 0 ) goto 240
+         !
+         ! Retrieve several file names:
+         ! - attributes
+         ! - volumes, areas, flows, lengths, ...
+         ! - UGRID-file
+         !
+         write ( lunut , 2450 )
+         write ( lunut , 2460 ) trim(hydfile)
+
+         call read_hydfile( lunut, hydfile, lchar, noseg, nexch, ierr2 )
+         if ( ierr2 /= 0 ) goto 240
+         has_hydfile = .true.
+         ugridfile   = lchar(46)
+      endif
+
+      if (cdummy .eq. 'UGRID' .or. (has_hydfile .and. ugridfile /= ' ') ) then
 
          ! Turn on debug info from dlwaqnc
          inc_error = dlwqnc_debug_status(.true.)
          ! Check if the UGRID file is suitable for Delwaq Output
          write ( lunut , 2500 )
 
-         if ( gettoken( ugridfile, ierr2 ) .gt. 0 ) goto 240
+         if ( .not. has_hydfile ) then
+             if ( gettoken( ugridfile, ierr2 ) .gt. 0 ) goto 240
+         endif
 
          write ( lunut , 2510 ) trim(ugridfile)
          lncout     = .True.
@@ -225,14 +251,19 @@
             ! Everything seems to be fine for now, switch on netcdf output
          endif
 
-!       Read number of computational volumes
-         if ( gettoken( noseg, ierr2 ) .gt. 0 ) goto 240
+!       Read number of computational volumes - if required
+         if ( .not. has_hydfile ) then
+            if ( gettoken( noseg, ierr2 ) .gt. 0 ) goto 240
+         endif
 
          ! TODO: check the number of segments with the information in the waqgeom-file
 
       else
 !       Or the number of computational volumes was already read
-         noseg = idummy
+
+         if ( .not. has_hydfile ) then
+            noseg = idummy
+         endif
       end if
 
       if ( noseg .gt. 0 ) then
@@ -281,7 +312,8 @@
             case default
 !                   call with record length 0 => IMOPT1 of -4 not allowed
                call opt1 ( imopt1  , lun     , 6       , lchar   , filtype ,
-     &                     dtflg1  , dtflg3  , 0       , ierr2   , iwar2   )
+     &                     dtflg1  , dtflg3  , 0       , ierr2   , iwar2   ,
+     &                     .false. )
                if ( ierr2 .gt. 0 ) goto 240
                if ( gettoken( nx, ierr2 ) .gt. 0 ) goto 240
                if ( gettoken( ny, ierr2 ) .gt. 0 ) goto 240
@@ -331,6 +363,11 @@
       iamerge = 0
       ikmerge = 0
 
+      if ( has_hydfile ) then
+         ierr2 = force_include_file( lchar(40) )
+         if ( ierr2 /= 0 ) goto 240
+      endif
+
       if ( vrsion .lt. 4.20 ) then                             !   attributes not supported
          nkopt = 0
       else
@@ -350,7 +387,8 @@
          if ( gettoken( ikopt1, ierr2 ) .gt. 0 ) goto 240      !   the file option for this info
          write ( lunut , 2130 ) ikopt1
          call opt1 ( ikopt1  , lun     , 40      , lchar   , filtype ,
-     &               dtflg1  , dtflg3  , 0       , ierr2   , iwar2   )
+     &               dtflg1  , dtflg3  , 0       , ierr2   , iwar2   ,
+     &               .false. )
          if ( ierr2  .gt. 0 ) goto 240
          if ( ikopt1 .eq. 0 ) then                             !   binary file
             call dhopnf  ( lun(40) , lchar(40) , 40 , 2 , ierr2 )
@@ -492,7 +530,8 @@
          if ( gettoken( ikopt1, ierr2 ) .gt. 0 ) goto 240
          write ( lunut , 2130 ) ikopt1
          call opt1 ( ikopt1  , lun     , 40      , lchar   , filtype ,
-     &               dtflg1  , dtflg3  , 0       , ierr2   , iwar2   )
+     &               dtflg1  , dtflg3  , 0       , ierr2   , iwar2   ,
+     &               .false. )
          if ( ierr2 .gt. 0 ) goto 240
          if ( ikopt1 .eq. 0 ) then
             write ( lunut , 2320 )
@@ -532,11 +571,12 @@
 
       write ( lunut , 2390 )
       ierr2 = 0
+
       call opt0   ( lun    , 7      , 0        , 0        , noseg  ,
      &              1      , 1      , nrftot(2), nrharm(2), ifact  ,
      &              dtflg1 , disper , volume   , iwidth   , lchar  ,
-     &              filtype, dtflg3 , vrsion   , ioutpt   , ierr2   ,
-     &              iwar2  )
+     &              filtype, dtflg3 , vrsion   , ioutpt   , ierr2  ,
+     &              iwar2  , has_hydfile       )
       if ( .not. alone ) then
          if ( lchar(7) .ne. fnamep(6) ) then
             write ( lunut , 2395 ) fnamep(6)
@@ -621,6 +661,8 @@
  2395 format ( / ' ERROR, volumes for Delpar from different file : ',A20 )
  2400 format ( / ' ERROR, end of file on unit:' ,I3, / ' Filename: ',A20 )
  2410 format ( / ' ERROR, reading file on unit:',I3, / ' Filename: ',A20 )
+ 2450 format ( / ' Found HYD_FILE keyword' )
+ 2460 format ( / ' Retrieving file names and grid parameters from: ', A )
  2500 format ( / ' Found UGRID keyword' )
  2510 format ( / ' File containing the grid: ', A )
  2520 format ( / ' NetCDF version: ', A )

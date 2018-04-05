@@ -130,12 +130,14 @@
       logical                        :: dtflg1                   ! first flag concerning time formats
       logical                        :: dtflg2                   ! second flag concerning time formats
       logical                        :: dtflg3                   ! third flag concerning time formats
+      logical                        :: has_hydfile              ! does the input file refer to a hyd file?
+      integer, dimension(3)          :: nexch                    ! number of exchanges in each direction from hyd file
       type(inputfilestack)           :: inpfil                   ! input file strucure with include stack and flags
 !
 !     variaous input-output structures
 !
       integer, parameter             :: noitm  = 11              ! number of items with time-functions
-      integer, parameter             :: noint  = 192             ! number of integration options implemented
+      integer, parameter             :: noint  = 200             ! number of integration options implemented
       integer, parameter             :: nooutp = 9               ! number of output files
       integer                        :: nrftot(noitm)            ! number of function per item
       integer                        :: nrharm(noitm)            ! number of harmoncs per item
@@ -241,7 +243,8 @@
      *              210 ,211 ,212 ,213 ,214 ,215 ,216 ,217 ,
      *              220 ,221 ,222 ,223 ,224 ,225 ,226 ,227 ,
      *              230 ,231 ,232 ,233 ,234 ,235 ,236 ,237 ,
-     *              240 ,241 ,242 ,243 ,244 ,245 ,246 ,247 /
+     *              240 ,241 ,242 ,243 ,244 ,245 ,246 ,247 ,
+     *              250 ,251 ,252 ,253 ,254 ,255 ,256 ,255 /
 
 !     Special system init
 
@@ -410,7 +413,8 @@
 
       call dlwq03 ( lun     , lchar   , filtype , nrftot  , nrharm  ,
      &              ivflag  , dtflg1  , iwidth  , dtflg3  , vrsion  ,
-     &              ioutpt  , gridps  , syname  , ierr    , iwar    )
+     &              ioutpt  , gridps  , syname  , ierr    , iwar    ,
+     &              has_hydfile       , nexch   )
 
       if ( nolic .and. noseg > 150 ) then
          write(*,'(//a)') 'Error: Authorisation problem'
@@ -426,7 +430,8 @@
       call dlwq04 ( lun     , lchar   , filtype , nrftot  , nrharm  ,
      &              ilflag  , dtflg1  , iwidth  , intsrt  , dtflg3  ,
      &              vrsion  , ioutpt  , nsegdmp , isegdmp , nexcraai,
-     &              iexcraai, ioptraai, gridps  , ierr    , iwar    )
+     &              iexcraai, ioptraai, gridps  , ierr    , iwar    ,
+     &              has_hydfile       , nexch   )
       if ( associated(nsegdmp)  ) deallocate(nsegdmp)
       if ( associated(isegdmp)  ) deallocate(isegdmp)
       if ( associated(nexcraai) ) deallocate(nexcraai)

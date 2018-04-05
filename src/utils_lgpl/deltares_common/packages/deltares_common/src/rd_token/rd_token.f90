@@ -57,6 +57,20 @@
 
       contains
 
+!          force the opening of a new include file
+
+      function force_include_file ( achar ) result ( ierr )
+
+         character*(*), intent(in   ) :: achar
+         integer   (4)                   ierr
+
+         type = -1
+         call rdtok1 ( lunut  , ilun   , lch    , lstack , cchar  ,              &
+     &                 iposr  , npos   , achar  , idummy , rdummy ,              &
+     &                 type   , ierr   )
+      end function force_include_file
+
+
 !          get a character string
 
       function get_char_tok ( achar, ierr2 ) result ( ierr )
