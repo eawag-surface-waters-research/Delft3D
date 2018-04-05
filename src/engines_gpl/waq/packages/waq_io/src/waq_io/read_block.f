@@ -510,8 +510,7 @@
                if ( ierr2 < 0 ) then
                    ierr2 = 1
                    write( lunut , 2320 ) ctoken
-               endif
-               if ( ierr2 > 0 ) then
+               elseif ( ierr2 > 0 ) then
                    write( lunut , 2330 ) ctoken, 4*(1+noits*noseg), noits, noseg
                endif
 
@@ -696,7 +695,10 @@
       !
 
       read ( lun , iostat = ierr ) strng
-      if ( ierr .ne. 0 ) strng = 'x'
+      if ( ierr .ne. 0 ) then
+         ierr  = 0
+         strng = 'x'
+      endif
       if ( strng(1:14) .ne. 'Steering file ' ) then
          if ( type == FILE_BINARY ) then
             inquire( lun, size = filesize )
