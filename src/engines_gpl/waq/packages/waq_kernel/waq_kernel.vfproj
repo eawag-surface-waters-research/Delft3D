@@ -220,6 +220,7 @@
 		<File RelativePath=".\src\waq_kernel\dlwq15.f"/>
 		<File RelativePath=".\src\waq_kernel\dlwq15a.f"/>
 		<File RelativePath=".\src\waq_kernel\dlwq16.f"/>
+		<File RelativePath=".\src\waq_kernel\dlwq16espace.f"/>
 		<File RelativePath=".\src\waq_kernel\dlwq17.f"/>
 		<File RelativePath=".\src\waq_kernel\dlwq18.f"/>
 		<File RelativePath=".\src\waq_kernel\dlwq19.f"/>
@@ -470,6 +471,7 @@
 				<Tool Name="VFFortranCompilerTool" OpenMP="OpenMPParallelCode"/></FileConfiguration></File>
 		<File RelativePath=".\src\waq_kernel\dlwqno.f"/>
 		<File RelativePath=".\src\waq_kernel\dlwqnp.f"/>
+		<File RelativePath=".\src\waq_kernel\dlwqnq.f"/>
 		<File RelativePath=".\src\waq_kernel\dlwqo0.f"/>
 		<File RelativePath=".\src\waq_kernel\dlwqo2.f"/>
 		<File RelativePath=".\src\waq_kernel\dlwqp0.f"/>
