@@ -1043,7 +1043,7 @@ end function ionc_add_global_attributes
 !! NOTE: File should still be in define mode.
 !! Does not write the actual data yet.
 function ionc_def_var(ioncid, meshid, id_var, itype, iloctype, var_name, standard_name, long_name, & ! id_dims, 
-                    unit, cell_method, crs, ifill, dfill) result(ierr)
+                    unit, cell_method, epsg, ifill, dfill) result(ierr)
    integer,                    intent(in)    :: ioncid    !< The IONC data set id.
    integer,                    intent(in)    :: meshid    !< The mesh id in the specified data set.
    integer,                    intent(  out) :: id_var        !< Created NetCDF variable id.
@@ -1055,7 +1055,7 @@ function ionc_def_var(ioncid, meshid, id_var, itype, iloctype, var_name, standar
    character(len=*),           intent(in)    :: long_name     !< Long name for 'long_name' attribute in this variable (use empty string if not wanted).
    character(len=*),           intent(in)    :: unit          !< Unit of this variable (CF-compliant) (use empty string for dimensionless quantities).
    character(len=*),           intent(in)    :: cell_method   !< Cell method for the spatial dimension (i.e., for edge/face/volume), value should be one of 'point', 'mean', etc. (See CF) (empty string if not relevant).
-   type(t_crs),      optional, intent(in)    :: crs           !< (Optional) Add grid_mapping attribute based on this coordinate reference system for independent coordinates
+   integer,      optional, intent(in)        :: epsg           !< (Optional) Add grid_mapping attribute based on this coordinate reference system for independent coordinates
    integer,          optional, intent(in)    :: ifill         !< (Optional) Integer fill value.
    double precision, optional, intent(in)    :: dfill         !< (Optional) Double precision fill value.
    integer                                :: ierr          !< Result status (UG_NOERR==NF90_NOERR) if successful.
@@ -1077,7 +1077,7 @@ function ionc_def_var(ioncid, meshid, id_var, itype, iloctype, var_name, standar
    end if
 
    ierr = ug_def_var(datasets(ioncid)%ncid, id_var, id_dims, itype, iloctype, datasets(ioncid)%ug_file%meshnames(meshid), var_name, standard_name, long_name, &
-                    unit, cell_method, crs, ifill, dfill)
+                    unit, cell_method, epsg, ifill, dfill)
 end function ionc_def_var
 
 
@@ -1089,7 +1089,7 @@ function ionc_write_mesh_struct(ioncid, meshids, networkids, meshgeom) result(ie
    type(t_ug_meshgeom), intent(in)    :: meshgeom !< The complete mesh geometry in a single struct.
    integer                            :: ierr     !< Result status, ionc_noerr if successful.
 
-   ierr = ug_write_mesh_struct(datasets(ioncid)%ncid, meshids, networkids, datasets(ioncid)%ug_file%crs, meshgeom)
+   ierr = ug_write_mesh_struct(datasets(ioncid)%ncid, meshids, networkids, meshgeom)
 end function ionc_write_mesh_struct
 
 !> Initializes the io_netcdf library, setting up the logger.

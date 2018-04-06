@@ -136,8 +136,8 @@ contains
 !
 !! executable statements -------------------------------------------------------
 !
-    ierr = ug_new_meshgeom(meshgeom)
-    ierr = ug_new_meshgeom(aggregated_meshgeom)
+    ierr = t_ug_meshgeom_destructor(meshgeom)
+    ierr = t_ug_meshgeom_destructor(aggregated_meshgeom)
     !
     ! Determine no-agregation segment pointer
     !
@@ -500,7 +500,7 @@ contains
     !
     crs%is_spherical = sferic
     
-    ierr = ug_new_meshgeom(meshgeom)
+    ierr = t_ug_meshgeom_destructor(meshgeom)
     
     meshgeom%meshName = 'mesh2d'
     meshgeom%dim = 2
@@ -548,7 +548,7 @@ contains
     !
     ! Write mesh as UGRID
     !
-    ierr = ug_write_mesh_struct(igeomfile, meshids, networkids, crs, meshgeom)
+    ierr = ug_write_mesh_struct(igeomfile, meshids, networkids, meshgeom)
     call nc_check_err(lundia, ierr, "writing mesh", geomfilename)
     !
     ! Write edge type variable (this is an extra variable that is not part of the UGRID standard).

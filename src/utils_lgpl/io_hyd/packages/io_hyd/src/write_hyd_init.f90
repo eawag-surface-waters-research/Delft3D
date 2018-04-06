@@ -67,7 +67,8 @@
          call write_cco ( hyd%file_cco, hyd%mmax  , hyd%nmax  , hyd%xdepth, hyd%ydepth, &
                           hyd%nolay   )
       else if (hyd%geometry .eq. HYD_GEOM_UNSTRUC) then
-         success =  write_waqgeom_file(hyd%file_geo%name, hyd%meta, hyd%crs, hyd%waqgeom, &
+         hyd%waqgeom%epsg = hyd%crs%epsg_code
+         success =  write_waqgeom_file(hyd%file_geo%name, hyd%meta, hyd%waqgeom, &
                                        hyd%edge_type, hyd%conv_type, hyd%conv_version)
       endif
 

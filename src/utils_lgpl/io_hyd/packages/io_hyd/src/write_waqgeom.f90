@@ -40,14 +40,13 @@ module m_write_waqgeom
     
     !> Write an unstructured waqgeom grid from UGRID file format.
     !! Write netnode coordinates, edges (netlinks), net boundary and elements (netelems).
-    function write_waqgeom_file(filename, meta, crs, waqgeom, edge_type, conv_type, conv_version) result (success)
+    function write_waqgeom_file(filename, meta, waqgeom, edge_type, conv_type, conv_version) result (success)
         use netcdf
         use io_netcdf
         use io_ugrid
 
         character(len=*)   , intent(in)        :: filename
         type(t_ug_meta)    , intent(in)        :: meta      
-        type(t_crs)        , intent(in)        :: crs
         type(t_ug_meshgeom), intent(in)        :: waqgeom
         integer            , intent(in)        :: edge_type(:)
         integer            , intent(in)        :: conv_type 
@@ -75,7 +74,7 @@ module m_write_waqgeom
 
 
         ! Write mesh as UGRID
-        ierr = ug_write_mesh_struct(igeomfile, meshids, networkids, crs, waqgeom)
+        ierr = ug_write_mesh_struct(igeomfile, meshids, networkids, waqgeom)
 !        call nc_check_err(lundia, ierr, "writing mesh", geomfilename)
         if (ierr/=0) goto 9999
 
