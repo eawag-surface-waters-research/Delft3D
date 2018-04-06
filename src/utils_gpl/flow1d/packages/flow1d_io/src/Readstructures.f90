@@ -392,7 +392,7 @@ module m_readstructures
                pstr%pump%ds_level          = 0.0d0
                pstr%pump%stage_capacity    = 0.0d0
             
-            case(ST_CULVERT)
+            case(ST_CULVERT, ST_SIPHON, ST_INV_SIPHON)
                allocate(pstr%culvert)
                read(ibin) pstr%culvert%culvertType
                read(ibin) pstr%culvert%leftlevel
@@ -597,7 +597,7 @@ module m_readstructures
             
                call write_table_cache(ibin, pstr%pump%reducfact)
             
-            case(ST_CULVERT)
+            case(ST_CULVERT, ST_SIPHON, ST_INV_SIPHON)
                write(ibin) pstr%culvert%culvertType
                write(ibin) pstr%culvert%leftlevel
                write(ibin) pstr%culvert%rightlevel
