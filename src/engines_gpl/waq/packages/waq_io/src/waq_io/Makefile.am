@@ -69,6 +69,7 @@ libwaq_io_la_SOURCES = bound.f \
        pointi.f \
        rdodef.f \
        rdpoin.f \
+       read_hydfile.f90 \
        readmp.f \
        rearaa.f \
        rwfunc.f \

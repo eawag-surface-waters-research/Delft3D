@@ -184,6 +184,7 @@
 		<File RelativePath=".\src\waq_io\read_data_ods.f"/>
 		<File RelativePath=".\src\waq_io\read_grid.f"/>
 		<File RelativePath=".\src\waq_io\read_header.f"/>
+		<File RelativePath=".\src\waq_io\read_hydfile.f90"/>
 		<File RelativePath=".\src\waq_io\read_initials.f"/>
 		<File RelativePath=".\src\waq_io\read_items.f"/>
 		<File RelativePath=".\src\waq_io\read_nobottomlay.f"/>
