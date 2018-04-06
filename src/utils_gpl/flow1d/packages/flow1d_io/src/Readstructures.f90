@@ -44,6 +44,7 @@ module m_readstructures
    use m_Orifice
    use m_General_Structure
    use m_ExtraResistance
+   use m_Dambreak
 
    use properties
    use m_hash_list
@@ -59,6 +60,7 @@ module m_readstructures
    public read_structure_cache
    public write_structure_cache
    public readPump
+   public readDambreak
 
    contains
 
@@ -1164,6 +1166,49 @@ module m_readstructures
       endif
       
    end subroutine readBridge
+   
+   subroutine readDambreak(dambr, md_ptr, success)
+
+      type(t_dambreak), pointer, intent(inout) :: dambr      
+      type(tree_data), pointer, intent(in)     :: md_ptr
+      logical, intent(inout)                   :: success
+
+      allocate(dambr)
+
+      call prop_get_double(md_ptr, 'structure', 'start_location_x',  dambr%start_location_x, success)
+      if (.not. success) return
+
+      call prop_get_double(md_ptr, 'structure', 'start_location_y',  dambr%start_location_y, success)
+      if (.not. success) return
+
+      call prop_get_integer(md_ptr, 'structure', 'algorithm', dambr%algorithm, success)
+      if (.not. success) return
+
+      call prop_get_double(md_ptr, 'structure', 'crestlevelini', dambr%crestlevelini, success)
+      if (.not. success) return
+
+      call prop_get_double(md_ptr, 'structure', 'breachwidthini', dambr%breachwidthini, success)
+      if (.not. success) return
+
+      call prop_get_double(md_ptr, 'structure', 'crestlevelmin', dambr%crestlevelmin, success)
+      if (.not. success) return
+
+      call prop_get_double(md_ptr, 'structure', 'dischargecoeff', dambr%dischargecoeff, success)
+      if (.not. success) return
+
+      call prop_get_double(md_ptr, 'structure', 'f1', dambr%f1, success)
+      if (.not. success) return
+
+      call prop_get_double(md_ptr, 'structure', 'f2', dambr%f2, success)
+      if (.not. success) return
+
+      call prop_get_double(md_ptr, 'structure', 'ucrit', dambr%ucrit, success)
+      if (.not. success) return
+      
+      call prop_get_double(md_ptr, 'structure', 't0', dambr%t0, success)
+      if (.not. success) return
+
+   end subroutine 
    
    subroutine readPump(pump, md_ptr, success)
    
