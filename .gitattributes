@@ -2293,6 +2293,7 @@ src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/dlwqnj.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/dlwqnm.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/dlwqno.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/dlwqnp.f -text
+src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/dlwqnq.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/dlwqo0.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/dlwqo2.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/dlwqp0.f -text
