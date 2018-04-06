@@ -107,9 +107,6 @@ if [ ${numnode} -ge 2 ] || [ ${corespernode} -ge 2 ]; then
 fi
 
 
-export OMP_NUM_THREADS=1
-
-
 if [ ! -f $configfile ]; then
     echo "ERROR: configfile $configfile does not exist"
     print_usage_info
