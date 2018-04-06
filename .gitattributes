@@ -2031,6 +2031,7 @@ src/engines_gpl/waq/packages/waq_io/src/waq_io/read_data.f -text
 src/engines_gpl/waq/packages/waq_io/src/waq_io/read_data_ods.f -text
 src/engines_gpl/waq/packages/waq_io/src/waq_io/read_grid.f -text
 src/engines_gpl/waq/packages/waq_io/src/waq_io/read_header.f -text
+src/engines_gpl/waq/packages/waq_io/src/waq_io/read_hydfile.f90 -text
 src/engines_gpl/waq/packages/waq_io/src/waq_io/read_initials.f -text
 src/engines_gpl/waq/packages/waq_io/src/waq_io/read_items.f -text
 src/engines_gpl/waq/packages/waq_io/src/waq_io/read_nobottomlay.f -text
