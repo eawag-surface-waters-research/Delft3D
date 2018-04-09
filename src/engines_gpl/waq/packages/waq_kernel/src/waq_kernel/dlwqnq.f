@@ -27,8 +27,7 @@
 !       Deltares Software Centre
 
 !>\file
-!>                         First order upwind in space and time (1)
-!>                         Special for emission module
+!>                         Special of first order upwind in space and time for emission module (25)
 !>
 !>                         Performs first order explicit time integration using
 !>                         upwind discretization in space. The method is explict
@@ -49,7 +48,7 @@
 !                          DLWQ13          , system postpro-dump routine
 !                          DLWQ14          , scales waterquality
 !                          DLWQ15          , wasteload routine
-!                          DLWQ16          , transport routine
+!                          DLWQ16a         , transport routine
 !                          DLWQ17          , boundary routine
 !                          DLWQ18          , integration step
 !                          DLWQ41          , updates volumes to new time level
@@ -423,7 +422,7 @@
 !        do the transport itself
 
          call timer_start(timer_transport)
-         call dlwq16e( nosys    , notot    , nosss    , noq1     , noq2     ,
+         call dlwq16a( nosys    , notot    , nosss    , noq1     , noq2     ,
      &                 noq3     , noqtt    , nddim    , nvdim    , a(idisp) ,
      &                 a(idnew) , a(ivnew) , a(iarea) , a(iflow) , a(ileng) ,
      &                 j(ixpnt) , iknmkv   , j(idpnw) , j(ivpnw) , a(iconc) ,

@@ -220,7 +220,7 @@
 		<File RelativePath=".\src\waq_kernel\dlwq15.f"/>
 		<File RelativePath=".\src\waq_kernel\dlwq15a.f"/>
 		<File RelativePath=".\src\waq_kernel\dlwq16.f"/>
-		<File RelativePath=".\src\waq_kernel\dlwq16espace.f"/>
+		<File RelativePath=".\src\waq_kernel\dlwq16a.f"/>
 		<File RelativePath=".\src\waq_kernel\dlwq17.f"/>
 		<File RelativePath=".\src\waq_kernel\dlwq18.f"/>
 		<File RelativePath=".\src\waq_kernel\dlwq19.f"/>

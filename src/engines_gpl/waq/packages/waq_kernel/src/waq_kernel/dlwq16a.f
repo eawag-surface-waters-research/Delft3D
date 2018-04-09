@@ -21,7 +21,7 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-      subroutine dlwq16e( nosys  , notot  , noseg  , noq1   , noq2   ,
+      subroutine dlwq16a( nosys  , notot  , noseg  , noq1   , noq2   ,
      &                    noq3   , noq    , nodisp , novelo , disp   ,
      &                    disper , velo   , area   , flow   , aleng  ,
      &                    ipoint , iknmrk , idpnt  , ivpnt  , conc   ,
@@ -33,6 +33,7 @@
 
 !>\file
 !>         Makes explicit upwind derivatives for the advection diffusion equation.
+!>         Special version of dlwq16 for first order upwind in space and time for emission module (25)
 !>
 !>         This routine makes for the nosys transported substaces the contribution of the advection and
 !>         the diffusion to the DERIV(notot,noseg) array. Notot is the total number of substances,
@@ -203,11 +204,6 @@
 
 !              upwinding
 
-            !if ( v .gt. 0.0 ) then
-            !   dq = (v+d)*conc(isys,ifrom) - d*conc(isys,ito  )
-            !else
-            !   dq = (v-d)*conc(isys,ito  ) + d*conc(isys,ifrom)
-            !endif
             dq = v
             deriv(isys,ifrom) = deriv(isys,ifrom) - dq
             deriv(isys,ito  ) = deriv(isys,ito  ) + dq
@@ -237,11 +233,6 @@
 
 !              upwinding
 
-            !if ( v .gt. 0.0 ) then
-            !   dq = (v+d)*bound(isys,-ifrom) - d*conc (isys, ito  )
-            !else
-            !   dq = (v-d)*conc (isys, ito  ) + d*bound(isys,-ifrom)
-            !endif
             dq = v
             deriv(isys,ito  ) = deriv(isys,ito  ) + dq
 
@@ -277,11 +268,6 @@
 
 !              upwinding
 
-            !if ( v .gt. 0.0 ) then
-            !   dq = (v+d)*conc (isys, ifrom) - d*bound(isys,-ito  )
-            !else
-            !   dq = (v-d)*bound(isys,-ito  ) + d*conc (isys, ifrom)
-            !endif
             dq = v
             deriv(isys,ifrom) = deriv(isys,ifrom) - dq
 

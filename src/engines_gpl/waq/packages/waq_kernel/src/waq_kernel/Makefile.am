@@ -72,6 +72,7 @@ libWaqKernel_la_SOURCES = \
        dlwq15.f \
        dlwq15a.f \
        dlwq16.f \
+       dlwq16a.f \
        dlwq17.f \
        dlwq18.f \
        dlwq19.f \
@@ -170,6 +171,7 @@ libWaqKernel_la_SOURCES = \
        dlwqnm.f \
        dlwqno.f \
        dlwqnp.f \
+       dlwqnq.f \
        dlwqo2.f \
        dlwqo0.f \
        dlwqpp.f \
