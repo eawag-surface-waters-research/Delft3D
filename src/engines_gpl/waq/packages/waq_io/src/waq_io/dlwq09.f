@@ -212,7 +212,8 @@
          write ( lunut , 2020 )
       else                             !        Handle option -1 and 1
          call opt1   ( iopt1  , lun    , 18     , lchar  , filtype,
-     &                 ldummy , ldummy , 0      , ierr2  , iwar   )
+     &                 ldummy , ldummy , 0      , ierr2  , iwar   ,
+     &                 .false.)
          if ( ierr2 .gt. 0 ) goto 100
       endif
 
@@ -283,7 +284,7 @@
       allocate( Outputs%names(nrvart), Outputs%pointers(nrvart), Outputs%stdnames(nrvart),
      &          Outputs%units(nrvart), Outputs%descrs(nrvart) )
       Outputs%cursize = nrvart
-      
+
       ivar = 0
       do i = 1 , noutp
          do iv = 1 , nrvar(i)

@@ -241,7 +241,8 @@
             ! handle file option, should we resolve the use of 17? = work file segment-functions
 
             call opt1( -4    , lun    , 17    , lchar  , filtype,
-     *                 dtflg1, dtflg3 , noseg , ierr2  , iwar   )
+     *                 dtflg1, dtflg3 , noseg , ierr2  , iwar   ,
+     *                 .false.)
             if ( ierr2 .ne. 0 ) exit
 
             ierr2 = puttoken(lchar(17))

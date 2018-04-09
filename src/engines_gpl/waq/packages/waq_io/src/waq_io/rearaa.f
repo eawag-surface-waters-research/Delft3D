@@ -107,7 +107,8 @@
          case ( -1 )                     ! old style <other ASCII file>
             write ( lunut, 2000 )  iropt1
             call opt1   ( iropt1  , lun     , 0       , lchar   , filtype ,
-     &                    ldummy  , ldummy  , 0       , ierr2   , iwar    )
+     &                    ldummy  , ldummy  , 0       , ierr2   , iwar    ,
+     &                    .false. )
             if ( ierr2 .gt. 0 ) goto 20
             if ( gettoken( noraai, ierr2 ) .gt. 0 ) goto 20
          case ( 0 )                      ! new style (October 2012) no dump transects

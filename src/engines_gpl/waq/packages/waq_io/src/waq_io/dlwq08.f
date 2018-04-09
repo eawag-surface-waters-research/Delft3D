@@ -163,7 +163,8 @@
 !        Get the input file name
 
       call opt1   ( icopt1  , lun     , 18      , lchar   , filtype ,
-     &              ldummy  , ldummy  , 0       , ierr2   , iwar    )
+     &              ldummy  , ldummy  , 0       , ierr2   , iwar    ,
+     &              .false. )
       if ( ierr2  .gt. 0 ) goto 10
       if ( icopt1 .eq. BINARY ) then
          ip = scan ( lchar(18), '.', back = .true. )              ! look for the file type
