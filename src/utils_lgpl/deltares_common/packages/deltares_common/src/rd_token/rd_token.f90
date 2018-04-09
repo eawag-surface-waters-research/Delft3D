@@ -64,7 +64,7 @@
          character*(*), intent(in   ) :: achar
          integer   (4)                   ierr
 
-         type = -1
+         type = -999
          call rdtok1 ( lunut  , ilun   , lch    , lstack , cchar  ,              &
      &                 iposr  , npos   , achar  , idummy , rdummy ,              &
      &                 type   , ierr   )

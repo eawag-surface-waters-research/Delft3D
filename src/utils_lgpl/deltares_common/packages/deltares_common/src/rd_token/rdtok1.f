@@ -110,7 +110,7 @@ C
 C
 C           Force the opening of a new include file - special case
 C
-      IF ( ITYPEX .EQ. -1) THEN
+      IF ( ITYPEX .EQ. -999) THEN
          WRITE ( LUNUT , 1040 ) CHULP2
          IFL       = IFL + 1
          LUNIN     = 800+IFL
