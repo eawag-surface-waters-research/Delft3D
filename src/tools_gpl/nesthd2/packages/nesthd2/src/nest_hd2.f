@@ -70,7 +70,7 @@
       integer       iwet  (nostat)
 
       double precision uu    (nostat,kmax  ,notims),
-     *                 vv    (nostat,kmax  ,notims,mincon)
+     *                 vv    (nostat,kmax  ,notims)
 
       double precision bndval(nobnd ,notims,kmax  ,mincon,2)
       double precision grdang
@@ -160,6 +160,7 @@
 
       call SIMHSH(lun(5), fout, extnef, kfs, wl, uu, vv,
      *            alfas, grdang, notims, nostat, kmax)
+     
       if (fout) goto 999
 
       call chkdry(iwet, kfs, notims, nostat)

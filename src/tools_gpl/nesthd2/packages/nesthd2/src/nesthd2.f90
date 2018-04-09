@@ -66,7 +66,7 @@ program nesthd2
       double precision, dimension(:)        , pointer :: thick
       double precision, dimension(:,:)      , pointer :: wl
       double precision, dimension(:,:,:)    , pointer :: uu
-      double precision, dimension(:,:,:,:)  , pointer :: vv
+      double precision, dimension(:,:,:)    , pointer :: vv
       double precision, dimension(:)        , pointer :: angle
       double precision, dimension(:,:,:,:,:), pointer :: bndva
       
@@ -124,7 +124,7 @@ program nesthd2
       allocate (thick(kmax))
       allocate (wl   (nostat, notims))
       allocate (uu   (nostat, kmax, notims))
-      allocate (vv   (nostat, kmax, notims, mincon))
+      allocate (vv   (nostat, kmax, notims))
       allocate (angle(nostat))
       allocate (bndva(nobnd, notims, kmax, mincon, 2))
 
