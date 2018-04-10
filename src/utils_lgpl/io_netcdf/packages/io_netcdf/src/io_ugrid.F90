@@ -1000,12 +1000,13 @@ end function ug_def_var
 !! The mesh geometry is the required starting point for all variables/data defined ON that mesh.
 !! This function accepts the mesh geometry derived type as input, for the arrays-based function, see ug_write_mesh_arrays
 !! This only writes the mesh variables, not the actual data variables that are defined ON the mesh.
-function ug_write_mesh_struct(ncid, meshids, networkids, meshgeom, nnodeids, nbranchids, nnodelongnames, nbranchlongnames, nodeids, nodelongnames, network1dname) result(ierr)
+function ug_write_mesh_struct(ncid, meshids, networkids, meshgeom, crs, nnodeids, nbranchids, nnodelongnames, nbranchlongnames, nodeids, nodelongnames, network1dname) result(ierr)
    integer,             intent(in   ) :: ncid     !< NetCDF dataset id, should be already open and ready for writing.
    type(t_ug_mesh),  intent(inout)    :: meshids  !< Set of NetCDF-ids for all mesh geometry arrays.
    type(t_ug_network),  intent(inout) :: networkids  !< Set of NetCDF-ids for all mesh geometry arrays.
    type(t_ug_meshgeom), intent(in   ) :: meshgeom !< The complete mesh geometry in a single struct.
    integer                            :: ierr     !< Result status (UG_NOERR==NF90_NOERR) if successful.
+   type(t_crs), optional, intent(in)  :: crs      !< Optional crs containing metadata of unsupported coordinate reference systems
    character(len=ug_idsLen), optional, allocatable           :: nnodeids(:), nbranchids(:), nodeids(:)    
    character(len=ug_idsLongNamesLen), optional, allocatable  :: nnodelongnames(:), nbranchlongnames(:), nodelongnames(:) 
    character(len=*), optional                               :: network1dname
@@ -1018,7 +1019,7 @@ function ug_write_mesh_struct(ncid, meshids, networkids, meshgeom, nnodeids, nbr
                                meshgeom%nedge_nodes(1,:), meshgeom%nedge_nodes(2,:), nbranchids, nbranchlongnames, meshgeom%nbranchlengths, meshgeom%nbranchgeometrynodes, meshgeom%nbranches, & 
                                meshgeom%ngeopointx, meshgeom%ngeopointy, meshgeom%ngeometry, &
                                meshgeom%nbranchorder, &
-                               nodeids, nodelongnames, meshgeom%branchidx, meshgeom%branchoffsets)
+                               nodeids, nodelongnames, meshgeom%branchidx, meshgeom%branchoffsets, crs)
 
 end function ug_write_mesh_struct
 
@@ -1033,7 +1034,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
                               sourceNodeId, targetNodeId, nbranchids, nbranchlongnames, nbranchlengths, nbranchgeometrynodes, nbranches, &
                               ngeopointx, ngeopointy, ngeometry, &
                               nbranchorder, &
-                              nodeids, nodelongnames, branchidx, branchoffsets) result(ierr)
+                              nodeids, nodelongnames, branchidx, branchoffsets, crs) result(ierr)
    use m_alloc
 
    implicit none
@@ -1074,6 +1075,8 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    ! Optional mesh1d variables for 1d UGrid
    integer, optional, pointer,intent(in)                 :: branchidx(:)
    double precision, optional, pointer,intent(in)        :: branchoffsets(:)
+   !< Optional crs containing metadata of unsupported coordinate reference systems 
+   type(t_crs), optional, intent(in)                     :: crs      
    
    integer                                               :: ierr !< Result status (UG_NOERR==NF90_NOERR) if successful.
       
@@ -1136,7 +1139,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
          ierr = nf90_def_dim(ncid, 'n'//prefix//'_interface', numLayer + 1, meshids%dimids(mdim_interface))
       end if
 
-      ierr = ug_add_coordmapping(ncid, epsg)
+      ierr = ug_add_coordmapping(ncid, epsg, crs)
 
       ! Nodes
       ! node x,y coordinates.
