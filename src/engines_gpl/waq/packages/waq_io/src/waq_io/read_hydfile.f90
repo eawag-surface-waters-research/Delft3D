@@ -61,10 +61,10 @@ subroutine read_hydfile( lunout, hydfile, lchar, noseg, nexch, ierr )
 !   number of items yet. So either we need to make that routine more complex
 !   or exploit the simple structure of the hyd-file.
 !
-    keyword(1:8) = ['volumes-file', 'areas-file',      'flows-file',        'pointers-file', &
-                    'lengths-file', 'attributes-file', 'grid-indices-file', 'waqgeom-file']
-    fileno(1:8)  = [7             , 10               , 11                 , 44             , &
-                    13            , 40               , 6                  , 46             ]
+    keyword(1:8) = ['volumes-file        ', 'areas-file          ', 'flows-file          ', 'pointers-file       ', &
+                    'lengths-file        ', 'attributes-file     ', 'grid-indices-file   ', 'waqgeom-file        ']
+    fileno(1:8)  = [7                     , 10                    , 11                    , 44                    , &
+                    13                    , 40                    , 6                     , 46                    ]
 
     idxlga  = -1
     idxgeom = -1
