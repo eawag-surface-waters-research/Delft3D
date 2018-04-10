@@ -758,7 +758,6 @@ subroutine waq_write_waqgeom_filepointer_ugrid(igeomfile)
     type(t_ug_meshgeom)                :: meshgeom, aggregated_meshgeom !< Mesh geometry to be written to the NetCDF file.
     type(t_ug_mesh)                    :: meshids  !< Set of NetCDF-ids for all mesh geometry variables.
     type(t_ug_network)                 :: networkids !< Set of NetCDF-ids for all network variables
-    type(t_crs)                        :: crs
     integer, dimension(:), allocatable :: edge_type, aggregated_edge_type !< Edge type array to be written to the NetCDF file.
     integer                            :: ierr     !< Result status (UG_NOERR==NF90_NOERR if successful).
     logical                            :: success  !< Helper variable.
@@ -777,7 +776,7 @@ subroutine waq_write_waqgeom_filepointer_ugrid(igeomfile)
     ! Aggregate mesh geometry, if needed.
     if (waqpar%aggre == 1) then
         ! Create empty meshgeom.
-        ierr = ug_new_meshgeom(aggregated_meshgeom)
+        ierr = t_ug_meshgeom_destructor(aggregated_meshgeom)
         call check_error(ierr)
 
         ! Aggregate.
@@ -800,7 +799,7 @@ subroutine waq_write_waqgeom_filepointer_ugrid(igeomfile)
     
     
     ! Write mesh geometry.    
-    ierr = ug_write_mesh_struct(igeomfile, meshids, networkids, crs, meshgeom)
+    ierr = ug_write_mesh_struct(igeomfile, meshids, networkids, meshgeom)
     call check_error(ierr)
 
     ! Write edge type variable (this is an extra variable that is not part of the UGRID standard).
@@ -825,7 +824,7 @@ function create_ugrid_geometry(meshgeom, edge_type) result(ierr)
     use network_data
     use m_flow
     use io_ugrid
-    use unstruc_netcdf, only: crs, check_error, get_2d_edge_data
+    use unstruc_netcdf, only: check_error, get_2d_edge_data
     use m_missing
     use m_alloc
 
@@ -843,7 +842,7 @@ function create_ugrid_geometry(meshgeom, edge_type) result(ierr)
 
 
     ! Create 2D (layered) mesh geometry that contains all 2D faces, edges and nodes.
-    ierr = ug_new_meshgeom(meshgeom)
+    ierr = t_ug_meshgeom_destructor(meshgeom)
     call check_error(ierr)
     meshgeom%meshName = 'mesh2d'
     meshgeom%dim = 2
