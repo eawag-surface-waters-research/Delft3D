@@ -71,6 +71,11 @@ module m_Storage
       module procedure GetVolumeByGridPoint
       module procedure GetVolumeByStorNode
    end interface GetVolume
+   
+   interface GetSurface
+      module procedure GetSurfaceByGridPoint
+      module procedure GetSurfaceByStorNode
+   end interface GetSurface
 
    interface fill_hashtable
       module procedure fill_hashtable_sto
@@ -93,6 +98,9 @@ module m_Storage
    type, public :: t_storage
       character(len=idlen)    :: id                      !< name of storage area
       integer                 :: gridPoint               !< gridpoint index
+      integer                 :: branch_index            !< branch index of the corresponding branch. (-1 when retention is connected to a node)
+      integer                 :: local_grid_index        !< location of retention on the corresponding branch. (-1 when retention is connected to a node)
+      integer                 :: node_index              !< node index in nds array
                                                          !> type of storage on street\n
                                                          !! 0: no storage \n
                                                          !! 2: reservoir storage \n
@@ -249,7 +257,7 @@ contains
    end subroutine
    
    
-   double precision function getSurface(storS, gridpoint, level)
+   double precision function getSurfaceByGridpoint(storS, gridpoint, level)
       ! Modules
    
       implicit none
@@ -266,24 +274,36 @@ contains
       istor = storS%mapping(gridpoint)
       if (istor/=0) then
          storage=>stors%stor(istor)
-         if (associated(storage%streetArea) ) then
-            ! check if water level is above street level
-            if (level > storage%streetArea%x(1) ) then
-               getSurface = interpolate(storage%streetArea, level)
-               ! finished
-               return
-            endif
-         endif
-         ! else : calculate well storage:
-         if (storage%storageType /= nt_None .and. level > getbedLevelStorage(storS, gridPoint, 0d0) ) then
-            getSurface = interpolate(storage%storageArea, level)
-         else
-            getSurface = 0d0
-         endif
+         getSurfaceByGridpoint = getSurfaceByStorNode(storage, level)
       else
-         getSurface = 0d0
+         getSurfaceByGridpoint = 0d0
       endif   
-   end function getSurface
+   end function getSurfaceByGridpoint
+   
+   double precision function getSurfaceByStorNode(storage, level)
+      ! Modules
+   
+      implicit none
+      ! Input/output parameters
+      type(t_storage), intent(in)            :: storage
+      double precision, intent(in)           :: level
+
+      if (associated(storage%streetArea) ) then
+         ! check if water level is above street level
+         if (level > storage%streetArea%x(1) ) then
+            getSurfaceByStorNode = interpolate(storage%streetArea, level)
+            ! finished
+            return
+         endif
+      endif
+      ! else : calculate well storage:
+      if (storage%storageType /= nt_None .and. level > storage%storageArea%x(1) ) then
+         getSurfaceByStorNode = interpolate(storage%storageArea, level)
+      else
+         getSurfaceByStorNode = 0d0
+      endif
+      
+   end function getSurfaceByStorNode
 
    
    double precision function getVolumeByGridPoint(storS, gridPoint, level)

@@ -373,11 +373,12 @@ module m_readModelParameters
       modelTimeStepData%endDate = iYear * 10000 + iMonth * 100 + iDay
       modelTimeStepData%endTime = iHour * 10000 + iMinute * 100 + iSecond
       
-      if (modelTimeStepData%julianEnd <= modelTimeStepData%julianStart) then
+      if (modelTimeStepData%julianEnd < modelTimeStepData%julianStart) then
          call SetMessage(LEVEL_FATAL, 'Error Reading Date Time Data: Stop Time must be after Start Time')
       endif
       
       ! Output Time Step
+      outputGrid = timeStep
       call prop_get_double(md_ptr, 'time', 'outtimestepgridpoints', outputGrid, success)
       if (success) then 
          if (mod(outputGrid, timeStep) > 0.0d0 .or. outputGrid < timeStep) then

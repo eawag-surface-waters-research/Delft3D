@@ -372,9 +372,9 @@ integer function GetCrossType(string)
       case ('trapezium')
          GetCrossType = CS_TRAPEZIUM
       case ('circle')
-         GetCrossType = CS_TABULATED
+         GetCrossType = CS_CIRCLE
       case ('egg')
-         GetCrossType = CS_TABULATED
+         GetCrossType = CS_EGG
       case ('yz')
          GetCrossType = CS_YZ_PROF
       case ('rectangle')
@@ -1286,8 +1286,9 @@ subroutine GetCSParsFlowInterpolate(cross1, cross2, f, dpt, u1, cz, flowArea, we
             crossi%crosstype          = cross1%crosstype   
             crossi%bedLevel           = (1.0d0 - f) * cross1%bedLevel + f * cross2%bedLevel
             crossi%surfaceLevel       = (1.0d0 - f) * cross1%surfaceLevel + f * cross2%surfaceLevel
-            crossi%bedFrictionType    = cross1%bedFrictionType
-            crossi%bedFriction        = (1.0d0 - f) * cross1%bedFriction + f * cross2%bedFriction
+            ! for circular cross sections there is only one roughness value set in bedfriction
+            crossi%bedFrictionType    = cross1%frictionTypePos(1)
+            crossi%bedFriction        = (1.0d0 - f) * cross1%frictionValuePos(1) + f * cross2%frictionValuePos(1)
             crossi%groundFriction     = (1.0d0 - f) * cross1%groundFriction + f * cross2%groundFriction
             crossi%groundFrictionType = cross1%groundFrictionType
             crossi%tabDef%diameter    = (1.0d0 - f) * cross1%tabDef%diameter + f * cross2%tabDef%diameter
@@ -2141,6 +2142,7 @@ end subroutine CircleProfile
 
 subroutine EggProfile(dpt, diameter, area, width, perimeter)
    use m_GlobalParameters
+   use precision_basics
 
    implicit none
 
@@ -2170,7 +2172,7 @@ subroutine EggProfile(dpt, diameter, area, width, perimeter)
          & + 10.11150997913956*r*r
       area = .11182380480168*r*r + e + sl*dpt
 
-   elseif ((dpt>2*r) .and. (dpt<3*r)) then
+   elseif ((dpt>2*r) .and. (comparereal(dpt,3*r, 1d-6) < 0)) then
       perimeter = 2.*r*(2.39415093538065 +                                         &
             & atan((dpt - 2*r)/(dsqrt( - 3.*r*r + 4*r*dpt - dpt*dpt))))
       width = 2*r*cos(atan((dpt - 2*r)/(dsqrt( - 3.*r*r + 4*dpt*r - dpt*dpt)))) + sl

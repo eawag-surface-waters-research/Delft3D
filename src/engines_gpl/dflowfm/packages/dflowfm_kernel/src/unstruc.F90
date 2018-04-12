@@ -37517,7 +37517,7 @@ endif
 
 if (network%brs%count > 0) then
    cz = 0d0
-   call getCrossFlowData_on_link(network, LL, hpr, CSH_DEPTH, flowArea=area, flowWidth=width, &
+   call getCrossFlowData_on_link(network, LL, hpr, flowArea=area, flowWidth=width, &
                    wetPerimeter = perim, conveyance=conv, cz = cz, af_sub = af_sub, &
                    perim_sub = perim_sub, cz_sub = cz_sub)
    

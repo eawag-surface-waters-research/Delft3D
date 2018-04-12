@@ -233,6 +233,29 @@ module m_branch
        endif
        
    end subroutine
+   
+   integer function getLinkNumber(brs, ibranch, dist)
+       type(t_branchSet)               :: brs       !< Current branche set
+       integer, intent(in)             :: ibranch   !< Current branch
+       double precision, intent(inout) :: dist      !< Distance along current branch
+
+       integer                         :: i
+       double precision                :: dist_in_b
+       type(t_branch), pointer         :: pbran
+       
+       pbran => brs%branch(ibranch)
+       
+       dist_in_b= 0.0
+       dist = max(0.2, min(dist, pbran%length-0.2)) !< JanM: Waarom is de afstand afgeknot en bestaat er een minSectionLength
+       do i = 2, pbran%gridPointsCount
+           if (pbran%gridPointsOffsets(i) > dist) then !found
+              getLinkNumber = pbran%lin(i-1)
+              return
+           endif
+       enddo
+       
+       getlinknumber = -1
+   end function getLinkNumber
 
    !> Get calculation point and/or segment number closest to given distance along branch
    integer function getCalcPoint(brs, ibranch, dist) 
