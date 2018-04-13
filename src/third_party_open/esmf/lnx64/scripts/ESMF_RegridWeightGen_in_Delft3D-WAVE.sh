@@ -53,6 +53,7 @@ scriptdirname=`readlink \-f \$0`
 scriptdir=`dirname $scriptdirname`
 D3D_HOME=$scriptdir/..
 regridexec=$D3D_HOME/bin/ESMF_RegridWeightGen
+export LD_LIBRARY_PATH=$D3D_HOME/lib:$LD_LIBRARY_PATH
 
 echo Executing batchscript "ESMF_RegridWeightGen_in_Delft3D-WAVE.sh" for Delft3D-WAVE >>esmf_sh.log
 echo This script is located in directory $scriptdir >>esmf_sh.log
