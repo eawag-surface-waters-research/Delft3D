@@ -680,14 +680,14 @@ module m_ec_filereader_read
          integer                                 :: times_index      !< Index in tEcTimeFrame's times array
          real(hp)                                :: netcdf_timesteps !< seconds since k_refdate
          integer                                 :: i, j, k          !< loop counters
-         real(hp), dimension(:,:), allocatable :: data_block       !< 2D slice of NetCDF variable's data
+         real(hp), dimension(:,:), allocatable :: data_block         !< 2D slice of NetCDF variable's data
          integer                                 :: istat            !< allocation status
          real(hp)                                :: dmiss_nc         !< local netcdf missing
 
-         real(hp)                                :: mintime, maxtime      !< range of kernel times that can be requested from this netcdf reader
+         real(hp)                                :: mintime, maxtime !< range of kernel times that can be requested from this netcdf reader
          logical                                 :: valid_field
-         character(len=300) :: str
-         
+         character(len=20)                       :: cnumber1         !< number converted to string for error message
+         character(len=20)                       :: cnumber2         !< idem
          !
          success = .false.
          fieldPtr => null()
@@ -738,8 +738,9 @@ module m_ec_filereader_read
          maxtime = ecSupportTimeToTimesteps(fileReaderPtr%tframe, int(fileReaderPtr%tframe%nr_timesteps))
 
          if (comparereal(fieldPtr%timesteps, maxtime) /= -1) then
-            write(str, '(a,f10.2,a,f10.2,a,f10.2)') '   Valid range: ',mintime,' to ',maxtime
-            call setECMessage(str)
+            call real2string(cnumber1, '(f12.2)', mintime)
+            call real2string(cnumber2, '(f12.2)', maxtime)
+            call setECMessage('   Valid range: ' // trim(cnumber1) // ' to ' // trim(cnumber2))
             call setECMessage("Data block requested outside valid time window in "//trim(fileReaderPtr%filename)//".")
             if (.True.) then                                       ! TODO : pass if extrapolation (constant value) is allowed here, now always allowed
                 fieldPtr%timesteps = huge(fieldPtr%timesteps)      ! set time to infinity

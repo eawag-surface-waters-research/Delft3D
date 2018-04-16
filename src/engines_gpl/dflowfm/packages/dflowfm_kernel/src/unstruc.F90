@@ -13572,7 +13572,11 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
 
       ! Retrieve wind's p-, x- and y-component for ext-file quantity 'airpressure_windx_windy'.
       if (item_apwxwy_p /= ec_undef_int .and. item_apwxwy_x /= ec_undef_int .and. item_apwxwy_y /= ec_undef_int) then
-         success = ec_gettimespacevalue(ecInstancePtr, 'airpressure_windx_windy', tim)
+         if (item_apwxwy_c /= ec_undef_int) then
+            success = ec_gettimespacevalue(ecInstancePtr, 'airpressure_windx_windy_charnock', tim)
+         else
+            success = ec_gettimespacevalue(ecInstancePtr, 'airpressure_windx_windy', tim)
+         endif
          if (.not. success) then
             goto 888
          end if
@@ -13581,6 +13585,9 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
             k1 = ln(1,L) ; k2 = ln(2,L)
             wx(L) = 0.5d0*( ec_pwxwy_x(k1) + ec_pwxwy_x(k2) )
             wy(L) = 0.5d0*( ec_pwxwy_y(k1) + ec_pwxwy_y(k2) )
+            if (allocated(ec_pwxwy_c)) then
+               wcharnock(L) = 0.5d0*( ec_pwxwy_c(k1) + ec_pwxwy_c(k2) )
+            endif
          enddo
       end if
 
@@ -13903,40 +13910,57 @@ end subroutine flow_setexternalforcings
  double precision :: uwi, cdw, tuwi, roro, wxL, wyL, uL, vL, uxL, uyL
  integer          :: L, numwav   ! windstuff
 
- wdsu   = 0
- roro   = rhoair/rhomean
+ windxav = 0d0
+ windyav = 0d0
 
- windxav = 0d0; windyav = 0d0; numwav = 0
- do L = 1, lnx
-    if ( wx(L) .ne. 0 .or. wy(L) .ne. 0 ) then ! only if some wind
-
-       wxL = wx(L)
-       wyL = wy(L)
-       if (jarelativewind == 1) then
-          uL  = U1(Ltop(L))
-          vL  =  v(Ltop(L))
-          uxL = uL*csu(L) - vL*snu(L)
-          uyL = uL*snu(L) + vL*csu(L)
-          wxL = wxL - uxL
-          wyL = wyL - uyL
-       endif
-       uwi    = sqrt( wxL*wxL + wyL*wyL )
-       call setcdwcoefficient(uwi,cdw,L)
-       if (jatem == 5) then
-          cdwcof(L) = cdw
-       endif
-       tuwi    = roro*cdw*uwi
-       if (kmx > 0) then
-           ustw(L) = sqrt(roro*cdw)*uwi
-       endif
-       wdsu(L) = tuwi*( wxL*csu(L) + wyL*snu(L) )
-       windxav = windxav + wxL
-       windyav = windyav + wyL
-       numwav  = numwav  + 1
+ roro = rhoair/rhomean
+ if (jawindstressgiven == 1) then
+    do L = 1, lnx
+       wdsu(L) = roro * ( wx(L)*csu(L) + wy(L)*snu(L) )
+    enddo
+    if (jatem == 5) then
+       do L = 1, lnx
+          cdwcof(L) = wdsu(L)
+       enddo
     endif
- enddo
- if (numwav > 0) then
-     windxav = windxav/numwav ; windyav = windyav/numwav
+ else
+    wdsu   = 0d0
+    numwav = 0
+    do L = 1, lnx
+       if ( wx(L) /= 0d0 .or. wy(L) /= 0d0 ) then ! only if some wind
+
+          wxL = wx(L)
+          wyL = wy(L)
+          if (jarelativewind == 1) then
+             uL  = U1(Ltop(L))
+             vL  =  v(Ltop(L))
+             uxL = uL*csu(L) - vL*snu(L)
+             uyL = uL*snu(L) + vL*csu(L)
+             wxL = wxL - uxL
+             wyL = wyL - uyL
+          endif
+          uwi    = sqrt( wxL*wxL + wyL*wyL )
+          if (jaspacevarcharn == 1) then
+             cdb(1) = wcharnock(L)
+          endif
+          call setcdwcoefficient(uwi,cdw,L)
+          if (jatem == 5) then
+             cdwcof(L) = cdw
+          endif
+          tuwi    = roro*cdw*uwi
+          if (kmx > 0) then
+              ustw(L) = sqrt(roro*cdw)*uwi
+          endif
+          wdsu(L) = tuwi*( wxL*csu(L) + wyL*snu(L) )
+          windxav = windxav + wxL
+          windyav = windyav + wyL
+          numwav  = numwav  + 1
+       endif
+    enddo
+    if (numwav > 0) then
+       windxav = windxav/numwav
+       windyav = windyav/numwav
+    endif
  endif
  end subroutine setwindstress
 
@@ -28833,6 +28857,7 @@ end subroutine setbedlevelfromnetfile
  integer            :: k, L, k1, k2
 
  character(len=256) :: filename
+ character(len=64)  :: varname
 ! character(len=1)   :: operand
 ! double precision   :: transformcoef(25) !< Transform coefficients a+b*x
 
@@ -28866,7 +28891,7 @@ end subroutine setbedlevelfromnetfile
 
     do while (ja .eq. 1)                                ! read *.ext file
        call delpol()                                    ! ook jammer dan
-       call readprovider(mext,qid,filename,filetype,method,operand,transformcoef,ja)
+       call readprovider(mext,qid,filename,filetype,method,operand,transformcoef,ja,varname)
        if (ja == 1 .and. qid == 'bedlevel') then
           call mess(LEVEL_INFO, 'setbedlevelfromextfile: Setting bedlevel from file '''//trim(filename)//'''.')
 
@@ -33967,6 +33992,7 @@ end subroutine make_mirrorcells
  character(len=256)            :: filename, sourcemask
  integer                       :: L, Lf, mout, kb, LL, Lb, Lt, ierr, k, k2, ja, method, n1, n2, kbi, Le, n, j, mx, n4, kk, kt, lenqidnam
  character (len=256)           :: fnam, rec, filename0
+ character (len=64)            :: varname
  character (len=NAMTRACLEN)    :: tracnam, qidnam
  ! JRE DEBUG
  character (len=NAMSFLEN)      :: sfnam, qidsfnam
@@ -34666,7 +34692,7 @@ if (mext > 0) then
 
  do while (ja .eq. 1)                                ! read *.ext file
     call delpol()                                    ! ook jammer dan
-    call readprovider(mext,qid,filename,filetype,method,operand,transformcoef,ja,sourcemask)
+    call readprovider(mext,qid,filename,filetype,method,operand,transformcoef,ja,varname,sourcemask)
     if (ja == 1) then
         call mess(LEVEL_INFO, 'External Forcing or Initialising '''//trim(qid)//''' from file '''//trim(filename)//'''.')
         ! Initialize success to be .false.
@@ -35069,39 +35095,62 @@ if (mext > 0) then
            endif
 
            if (len_trim(sourcemask)>0)  then
-              success = ec_addtimespacerelation(qid, xu(1:lnx), yu(1:lnx), kcw, kx, filename, filetype, method, operand, srcmaskfile=sourcemask)
+              success = ec_addtimespacerelation(qid, xu(1:lnx), yu(1:lnx), kcw, kx, filename, filetype, method, operand, srcmaskfile=sourcemask, varname=varname)
            else
-              success = ec_addtimespacerelation(qid, xu(1:lnx), yu(1:lnx), kcw, kx, filename, filetype, method, operand)
+              success = ec_addtimespacerelation(qid, xu(1:lnx), yu(1:lnx), kcw, kx, filename, filetype, method, operand, varname=varname)
            endif
 
            if (success) jawind = 1
 
-        else if (qid == 'airpressure_windx_windy') then
+        else if (qid == 'airpressure_windx_windy' .or. &
+                 qid == 'airpressure_stressx_stressy' .or. &
+                 qid == 'airpressure_windx_windy_charnock') then
 
-           if (.not. allocated(patm) ) then
-              allocate ( patm(ndx) , stat=ierr)  ; patm = 100000d0
-              call aerr('patm(ndx)', ierr, ndx)
-           endif
-           if (.not. allocated(wx) ) then
-              allocate ( wx(lnx), wy(lnx) , stat=ierr) ; wx = 0d0 ; wy = 0d0
-              call aerr('wx(lnx), wy(lnx)', ierr, 2*lnx)
-           endif
-           if (.not. allocated(ec_pwxwy_x) ) then
-              allocate ( ec_pwxwy_x(ndx) , ec_pwxwy_y(ndx)  , stat=ierr) ; ec_pwxwy_x = 0d0 ; ec_pwxwy_y = 0d0
-              call aerr('ec_pwxwy_x(ndx) , ec_pwxwy_y(ndx)' , ierr, 2*ndx)
-           endif
-           call realloc(kcw, ndx, stat=ierr)
-           call aerr('kcw(ndx)', ierr, ndx)
-           kcw = 1d0
+           jawindstressgiven = merge(1, 0, qid == 'airpressure_stressx_stressy')
+           jaspacevarcharn   = merge(1, 0, qid == 'airpressure_windx_windy_charnock')
 
-           if (len_trim(sourcemask)>0)  then
-              success = ec_addtimespacerelation(qid, xz(1:ndx), yz(1:ndx), kcw, kx, filename, filetype, method, operand, srcmaskfile=sourcemask)
-           else
-              success = ec_addtimespacerelation(qid, xz(1:ndx), yz(1:ndx), kcw, kx, filename, filetype, method, operand)
+           success = (.not. (jawindstressgiven == 1 .and. kmx > 0))
+
+           if (.not. success) then
+              msgbuf = "Quantity 'airpressure_stressx_stressy' not implemented for 3D (yet)"
+              call err_flush()
+           else 
+              if (.not. allocated(patm) ) then
+                 allocate ( patm(ndx) , stat=ierr)
+                 call aerr('patm(ndx)', ierr, ndx)
+                 patm = 100000d0
+              endif
+              if (.not. allocated(wx) ) then
+                 allocate ( wx(lnx), wy(lnx) , stat=ierr)
+                 call aerr('wx(lnx), wy(lnx)', ierr, 2*lnx)
+                 wx = 0d0 ; wy = 0d0
+              endif
+              if (.not. allocated(ec_pwxwy_x) ) then
+                 allocate ( ec_pwxwy_x(ndx) , ec_pwxwy_y(ndx)  , stat=ierr)
+                 call aerr('ec_pwxwy_x(ndx) , ec_pwxwy_y(ndx)' , ierr, 2*ndx)
+                 ec_pwxwy_x = 0d0 ; ec_pwxwy_y = 0d0
+              endif
+              if (jaspacevarcharn == 1) then
+                 if (.not. allocated(ec_pwxwy_c) ) then
+                    allocate ( ec_pwxwy_c(ndx) , wcharnock(lnx), stat=ierr)
+                    call aerr('ec_pwxwy_c(ndx), wcharnock(lnx)' , ierr, ndx+lnx)
+                    ec_pwxwy_c = 0d0
+                 endif
+              endif
+              call realloc(kcw, ndx, stat=ierr)
+              call aerr('kcw(ndx)', ierr, ndx)
+              kcw = 1
+
+              if (len_trim(sourcemask)>0)  then
+                 success = ec_addtimespacerelation(qid, xz(1:ndx), yz(1:ndx), kcw, kx, filename, filetype, method, operand, srcmaskfile=sourcemask, varname=varname)
+              else
+                 success = ec_addtimespacerelation(qid, xz(1:ndx), yz(1:ndx), kcw, kx, filename, filetype, method, operand, varname=varname)
+              endif
            endif
 
            if (success) then
-              jawind = 1 ;  japatm = 1
+              jawind = 1
+              japatm = 1
            endif
 
         else if (qid == 'humidity_airtemperature_cloudiness') then
@@ -35111,7 +35160,7 @@ if (mext > 0) then
            if (allocated (kcw) ) deallocate(kcw) ; allocate( kcw(ndx) ) ; kcw = 1
            jatair = 3 ; jarhum = 3 ; jaclou = 3 ; jasol = 2    ! flag all three in one line
 
-           success = ec_addtimespacerelation(qid, xz(1:ndx), yz(1:ndx), kcw, kx, filename, filetype, method, operand) ! vectormax=3
+           success = ec_addtimespacerelation(qid, xz(1:ndx), yz(1:ndx), kcw, kx, filename, filetype, method, operand, varname=varname) ! vectormax=3
 
         else if (qid == 'dewpoint_airtemperature_cloudiness') then
 
@@ -35124,7 +35173,7 @@ if (mext > 0) then
            !     jarhum = 5 means wetbulb is read directly and still needs conversion to RH
            ! The relative-humidity arrays is used as (temporary) storage for the input
 
-           success = ec_addtimespacerelation(qid, xz(1:ndx), yz(1:ndx), kcw, kx, filename, filetype, method, operand) ! vectormax = 3
+           success = ec_addtimespacerelation(qid, xz(1:ndx), yz(1:ndx), kcw, kx, filename, filetype, method, operand, varname=varname) ! vectormax = 3
 
 
         else if (qid == 'humidity_airtemperature_cloudiness_solarradiation') then
@@ -35134,7 +35183,7 @@ if (mext > 0) then
            if (allocated (kcw) ) deallocate(kcw) ; allocate( kcw(ndx) ) ; kcw = 1
            jatair = 3 ; jarhum = 3 ; jaclou = 3 ; jasol = 1    ! flag all four in one line
 
-           success = ec_addtimespacerelation(qid, xz(1:ndx), yz(1:ndx), kcw, kx, filename, filetype, method, operand) ! vectormax = 4
+           success = ec_addtimespacerelation(qid, xz(1:ndx), yz(1:ndx), kcw, kx, filename, filetype, method, operand, varname=varname) ! vectormax = 4
 
         else if (qid == 'dewpoint_airtemperature_cloudiness_solarradiation') then
 
@@ -35147,14 +35196,14 @@ if (mext > 0) then
            !     jarhum = 5 means wetbulb is read directly and still needs conversion to RH
            ! The relative-humidity arrays is used as (temporary) storage for the input
 
-           success = ec_addtimespacerelation(qid, xz(1:ndx), yz(1:ndx), kcw, kx, filename, filetype, method, operand) ! vectormax = 4
+           success = ec_addtimespacerelation(qid, xz(1:ndx), yz(1:ndx), kcw, kx, filename, filetype, method, operand, varname=varname) ! vectormax = 4
 
         else if (qid == 'nudge_salinity_temperature') then
            kx = 2
            pkbot => kbot
            pktop => ktop
 
-           success = ec_addtimespacerelation(qid, xz(1:ndx), yz(1:ndx), kcw, kx, filename, filetype, method, operand, z=zcs, pkbot=pkbot, pktop=pktop)
+           success = ec_addtimespacerelation(qid, xz(1:ndx), yz(1:ndx), kcw, kx, filename, filetype, method, operand, z=zcs, pkbot=pkbot, pktop=pktop, varname=varname)
 
            if ( success ) then
               janudge = 1
@@ -35172,7 +35221,7 @@ if (mext > 0) then
               call aerr('patm(ndx)', ierr, ndx)
            endif
 
-           success = ec_addtimespacerelation(qid, xz, yz, kcs, kx, filename, filetype, method, operand)
+           success = ec_addtimespacerelation(qid, xz, yz, kcs, kx, filename, filetype, method, operand, varname=varname)
 
            if (success) then
               japatm = 1
@@ -35185,7 +35234,7 @@ if (mext > 0) then
            endif
 
            ! TODO: AvD: consider adding mask to all quantities.
-           success = ec_addtimespacerelation(qid, xz, yz, kcs, kx, filename, filetype, method, operand)
+           success = ec_addtimespacerelation(qid, xz, yz, kcs, kx, filename, filetype, method, operand, varname=varname)
 
            if (success) then
                jarain = 1
@@ -35376,7 +35425,7 @@ if (mext > 0) then
     kx = 1
     ngatesg = 0
     do while (ja .eq. 1)                             ! for gates again postponed read *.ext file
-       call readprovider(mext,qid,filename,filetype,method,operand,transformcoef,ja)
+       call readprovider(mext,qid,filename,filetype,method,operand,transformcoef,ja,varname)
        if (ja == 1 .and. qid == 'gateloweredgelevel') then
           ngatesg = ngatesg + 1
           ! Prepare time series relation, if the .pli file has an associated .tim file.
@@ -35434,7 +35483,7 @@ if (mext > 0) then
     ja = 1 ; rewind (mext); kx = 1
     ncdamsg = 0
     do while (ja .eq. 1)                             ! for cdams again postponed read *.ext file
-       call readprovider(mext,qid,filename,filetype,method,operand,transformcoef,ja)
+       call readprovider(mext,qid,filename,filetype,method,operand,transformcoef,ja,varname)
        if (ja == 1 .and. qid == 'damlevel') then
           ncdamsg = ncdamsg + 1
           ! Prepare time series relation, if the .pli file has an associated .tim file.
@@ -35514,7 +35563,7 @@ if (mext > 0) then
     kx = 3
     ncgensg = 0
     do while (ja .eq. 1)                             ! for cgens again postponed read *.ext file
-       call readprovider(mext,qid,filename,filetype,method,operand,transformcoef,ja)
+       call readprovider(mext,qid,filename,filetype,method,operand,transformcoef,ja,varname)
        if (ja == 1 .and. qid == 'generalstructure') then
           ncgensg = ncgensg + 1
           ! Prepare time series relation, if the .pli file has an associated .tim file.
@@ -35596,7 +35645,7 @@ if (mext > 0) then
     ja = 1 ; rewind (mext); kx = 1
     ipumpsg = 0
     do while (ja .eq. 1)                             ! for pumps again postponed read *.ext file
-       call readprovider(mext,qid,filename,filetype,method,operand,transformcoef,ja)
+       call readprovider(mext,qid,filename,filetype,method,operand,transformcoef,ja,varname)
        if (ja == 1 .and. ( qid == 'pump1D' .or. qid == 'pump') ) then
           qid = 'pump'
           ipumpsg = ipumpsg + 1
@@ -35617,7 +35666,7 @@ if (mext > 0) then
     ! TODO: UNST-537/UNST-190: we now support timeseries, the constant values should come from new format ext file, not from transformcoef
     numsrc = 0
     do while (ja .eq. 1)                                 ! for sorsin again read *.ext file
-       call readprovider(mext,qid,filename,filetype,method,operand,transformcoef,ja)
+       call readprovider(mext,qid,filename,filetype,method,operand,transformcoef,ja,varname)
        if (ja == 1 .and. qid == 'discharge_salinity_temperature_sorsin') then
 
           numsrc = numsrc + 1

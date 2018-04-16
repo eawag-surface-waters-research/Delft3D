@@ -986,6 +986,8 @@ double precision, allocatable, target :: wy(:)    !< [m/s] wind y velocity   (m/
 double precision, allocatable, target :: wmag(:)  !< [m/s] wind magnitude    (m/s) at u point {"location": "edge", "shape": ["lnx"]}
 double precision, allocatable, target :: ec_pwxwy_x(:)  !< Temporary array, for comparing EC-module to Meteo1.
 double precision, allocatable, target :: ec_pwxwy_y(:)  !< Temporary array, for comparing EC-module to Meteo1.
+double precision, allocatable, target :: ec_pwxwy_c(:)  !< Temporary array, for comparing EC-module to Meteo1.
+double precision, allocatable, target :: wcharnock(:)   !< space var charnock (-) at u point {"location": "edge", "shape": ["lnx"]}
 
 double precision, allocatable, target :: patm(:)     !< atmospheric pressure user specified in (N/m2), internally reworked to (m2/s2)
                                                       !! so that it can be merged with tidep later and difpatm/dx = m/s2, saves 1 array , using mode = 'add'
@@ -1006,16 +1008,18 @@ double precision, allocatable         :: cdwcof(:)   !< wind stress cd coefficie
 
 integer         , allocatable         :: kcw (:)     !< mask array
 
-integer                           :: jawind          !< use wind yes or no
-integer                           :: japatm          !< use patm yes or no
-integer                           :: jarain          !< use rain yes or no
-integer                           :: jaevap          !< use evap yes or no
-integer                           :: jatair          !< use air temperature   yes or no
-integer                           :: jarhum          !< use relative humidity yes or no
-integer                           :: jaclou          !< use cloudiness        yes or no
-integer                           :: jasol           !< use 1 = use solrad, 2 = use cloudiness
-integer                           :: jaheat_eachstep = 0 !< if 1, do it each step, else in externalforcings (default) 
-integer                           :: jaqin           !< use qin , sum of all in fluxes
+integer                           :: jawind              !< use wind yes or no
+integer                           :: japatm              !< use patm yes or no
+integer                           :: jaspacevarcharn     !< use space and time varying Charnock coefficients yes or no
+integer                           :: jawindstressgiven   !< wind given as stress, no conversion needed
+integer                           :: jarain              !< use rain yes or no
+integer                           :: jaevap              !< use evap yes or no
+integer                           :: jatair              !< use air temperature   yes or no
+integer                           :: jarhum              !< use relative humidity yes or no
+integer                           :: jaclou              !< use cloudiness        yes or no
+integer                           :: jasol               !< use 1 = use solrad, 2 = use cloudiness
+integer                           :: jaheat_eachstep = 0 !< if 1, do it each step, else in externalforcings (default)
+integer                           :: jaqin               !< use qin , sum of all in fluxes
 
 double precision                  :: windxav, windyav  !< average wind for plotting
 
@@ -1075,8 +1079,10 @@ use m_physcoef, only : rhomean
    !> Resets only wind variables intended for a restart of flow simulation.
    !! Upon loading of new model/MDU, call default_wind() instead.
    subroutine reset_wind()
-   jawind  = 0         !< use wind yes or no
-   japatm  = 0         !< use patm yes or no
+   jawind  = 0           !< use wind yes or no
+   japatm  = 0           !< use patm yes or no
+   jaspacevarcharn = 0   !< use space varying Charnock coefficients
+   jawindstressgiven = 0 !< wind stress given in meteo file
    end subroutine reset_wind
 end module m_wind
 

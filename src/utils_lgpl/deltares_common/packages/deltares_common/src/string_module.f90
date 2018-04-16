@@ -57,6 +57,13 @@ module string_module
    public :: replace_char
    public :: splitstr
    public :: strsplit
+   public :: strip_quotes
+   public :: real2string
+
+   interface strip_quotes
+      module procedure strip_quotes1
+      module procedure strip_quotes2
+   end interface strip_quotes
 
    contains
 
@@ -631,11 +638,13 @@ module string_module
       !> The incoming string array must be unallocated
       recursive subroutine strsplit(tgt, ndx0, pcs, npc)
          implicit none
-         integer,          intent(in)                                 ::  npc
-         character(len=*), intent(inout)                              ::  tgt
-         integer, intent(in)                                          ::  ndx0
-         character(len=*), intent(inout), dimension(:), allocatable   ::  pcs
-         integer                          ::  ndx, ndx1
+         integer,          intent(in)                                 ::  npc   !< element index
+         character(len=*), intent(in)                                 ::  tgt   !< input string
+         integer, intent(in)                                          ::  ndx0  !< start position in string tgt
+         character(len=*), intent(inout), dimension(:), allocatable   ::  pcs   !< resulting array of strings
+
+         integer                          ::  ndx, ndx1    ! position in string
+
          ndx1 = ndx0
          call get_substr_ndx(tgt,ndx1,ndx)
          if (ndx<=len_trim(tgt)) then
@@ -643,9 +652,67 @@ module string_module
          else
             allocate(pcs(npc))
          endif
-         if (tgt(ndx1:ndx1)=='"' .or. tgt(ndx1:ndx1)=="'") ndx1 = ndx1 + 1
-         if (tgt(ndx-1:ndx-1)=='"' .or. tgt(ndx:ndx)=="'") ndx = ndx - 1
-         pcs(npc) = tgt(ndx1:ndx-1)
+
+         ndx = ndx - 1
+         call strip_quotes(tgt, ndx1, ndx)
+         pcs(npc) = tgt(ndx1 : ndx)
+
       end subroutine strsplit
+
+      !> check on single or double quotes at start or end
+      !! return (new) first and last positions
+      subroutine strip_quotes1(tgt, pos1, pos2)
+         character(len=*), intent(in)    :: tgt  !< input string
+         integer         , intent(inout) :: pos1 !< first position
+         integer         , intent(inout) :: pos2 !< last position
+
+         character  ::  ch     ! help character
+
+         ch = tgt(pos1:pos1)
+         if (ch == '"' .or. ch =="'") pos1 = pos1 + 1
+
+         ch = tgt(pos2:pos2)
+         if (ch =='"' .or. ch == "'") pos2 = pos2 - 1
+
+      end subroutine strip_quotes1
+
+      !> check on single or double quotes at start or end
+      !! returns cropped string
+      subroutine strip_quotes2(tgt)
+         character(len=:), allocatable, intent(inout) :: tgt  !< input string
+
+         integer         :: pos1     ! first position
+         integer         :: pos2     ! last position
+         integer         :: pos1orig ! original first position
+         integer         :: pos2orig ! original last position
+
+         pos1 = 1
+         pos2 = len(tgt)
+         pos1orig = pos1
+         pos2orig = pos2
+
+         call strip_quotes1(tgt, pos1, pos2)
+
+         if (pos1 /= pos1orig .or. pos2 /= pos2orig) then
+            tgt = tgt(pos1:pos2)
+         endif
+
+      end subroutine strip_quotes2
+
+      !> convert a real to a string with user defined format.
+      !! if it does not fit, fall back on a more general format
+      subroutine real2string(cnumber, formatReal, valueReal)
+         character(len=*), intent(in)  :: formatReal  !< format string to be used
+         real(kind=8), intent(in)      :: valueReal   !< number to be convert
+         character(len=*), intent(out) :: cnumber     !< output string
+
+         integer :: ierr
+
+         write(cnumber, formatReal, iostat=ierr) valueReal
+         if (ierr /= 0 .or. index(cnumber, '*') > 0) then
+             write(cnumber,'(ES14.5E3)') valueReal
+         endif
+
+      end subroutine real2string
 
 end module string_module

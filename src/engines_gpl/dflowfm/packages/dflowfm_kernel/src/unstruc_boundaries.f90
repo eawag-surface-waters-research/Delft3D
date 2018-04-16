@@ -72,7 +72,8 @@ subroutine findexternalboundarypoints()             ! find external boundary poi
  integer               :: ierror
  integer               :: num_bc_ini_blocks
  integer               :: ifrac
- 
+ character(len=64)     :: varname
+
  jatimespace = 1 
 
  return_time = 0
@@ -230,7 +231,7 @@ subroutine findexternalboundarypoints()             ! find external boundary poi
  
  do while (ja_ext_force .eq. 1)                      ! read *.ext file
 
-    call readprovider(mext,qid,filename,filetype,method,operand,transformcoef,ja_ext_force)
+    call readprovider(mext,qid,filename,filetype,method,operand,transformcoef,ja_ext_force,varname)
     
     if (num_bc_ini_blocks > 0 .and. qid(len_trim(qid)-2:len_trim(qid)) == 'bnd') then
        write(msgbuf, '(a)') 'Boundaries in BOTH external forcing and bound.ext.force file is not allowed'

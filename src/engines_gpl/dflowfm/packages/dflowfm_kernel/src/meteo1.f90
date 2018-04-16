@@ -116,6 +116,7 @@ module m_meteo
    integer, target :: item_apwxwy_p                                          !< Unique Item id of the ext-file's 'airpressure_windx_windy' quantity 'p'.
    integer, target :: item_apwxwy_x                                          !< Unique Item id of the ext-file's 'airpressure_windx_windy' quantity 'x'.
    integer, target :: item_apwxwy_y                                          !< Unique Item id of the ext-file's 'airpressure_windx_windy' quantity 'y'.
+   integer, target :: item_apwxwy_c                                          !< Unique Item id of the ext-file's 'space var Charnock' quantity 'C'.
    integer, target :: item_waterlevelbnd                                     !< Unique Item id of the ext-file's 'waterlevelbnd' quantity's ...-component.
    integer, target :: item_atmosphericpressure                               !< Unique Item id of the ext-file's 'atmosphericpressure' quantity
    integer, target :: item_velocitybnd                                       !< Unique Item id of the ext-file's 'velocitybnd' quantity
@@ -196,6 +197,7 @@ module m_meteo
       item_apwxwy_p                              = ec_undef_int
       item_apwxwy_x                              = ec_undef_int
       item_apwxwy_y                              = ec_undef_int
+      item_apwxwy_c                              = ec_undef_int
       item_waterlevelbnd                         = ec_undef_int
       item_atmosphericpressure                   = ec_undef_int
       item_velocitybnd                           = ec_undef_int
@@ -203,7 +205,7 @@ module m_meteo
       item_temperaturebnd                        = ec_undef_int
       item_sedimentbnd                           = ec_undef_int
       item_tangentialvelocitybnd                 = ec_undef_int
-      item_uxuyadvectionvelocitybnd              = ec_undef_int      
+      item_uxuyadvectionvelocitybnd              = ec_undef_int
       item_normalvelocitybnd                     = ec_undef_int
       item_rainfall                              = ec_undef_int
       item_rainfall_rate                         = ec_undef_int
@@ -461,13 +463,22 @@ module m_meteo
             dataPtr1 => wx
             itemPtr2 => item_windxy_y
             dataPtr2 => wy
-         case ('airpressure_windx_windy')
+         case ('airpressure_windx_windy', 'airpressure_stressx_stressy')
             itemPtr1 => item_apwxwy_p
             dataPtr1 => patm
             itemPtr2 => item_apwxwy_x
             dataPtr2 => ec_pwxwy_x
             itemPtr3 => item_apwxwy_y
             dataPtr3 => ec_pwxwy_y
+         case ('airpressure_windx_windy_charnock')
+            itemPtr1 => item_apwxwy_p
+            dataPtr1 => patm
+            itemPtr2 => item_apwxwy_x
+            dataPtr2 => ec_pwxwy_x
+            itemPtr3 => item_apwxwy_y
+            dataPtr3 => ec_pwxwy_y
+            itemPtr4 => item_apwxwy_c
+            dataPtr4 => ec_pwxwy_c
          case ('waterlevelbnd', 'neumannbnd', 'riemannbnd', 'outflowbnd')
             itemPtr1 => item_waterlevelbnd
             dataPtr1 => zbndz
@@ -718,7 +729,7 @@ module m_meteo
    ! ==========================================================================
    !> Replacement function for FM's meteo1 'addtimespacerelation' function.
    logical function ec_addtimespacerelation(name, x, y, mask, vectormax, filename, filetype, method, operand, &
-                                            xyen, z, pzmin, pzmax, pkbot, pktop, targetIndex, forcingfile, srcmaskfile, dtnodal, quiet)
+                                            xyen, z, pzmin, pzmax, pkbot, pktop, targetIndex, forcingfile, srcmaskfile, dtnodal, quiet, varname)
       use m_ec_module, only: ecFindFileReader ! TODO: Refactor this private data access (UNST-703).
       use m_ec_filereader_read, only: ecParseARCinfoMask
       use m_flow, only: kmx, kbot, ktop
@@ -745,6 +756,7 @@ module m_meteo
       character(len=*),       optional,         intent(in)    :: srcmaskfile  !< file containing mask applicable to the arcinfo source data 
       real(hp),               optional,         intent(in)    :: dtnodal      !< update interval for nodal factors
       logical,                optional,         intent(in)    :: quiet        !< When .true., in case of errors, do not write the errors to screen/dia at the end of the routine.
+      character(len=*),       optional,         intent(in)    :: varname      !< variable name within filename
       !
       integer :: ec_filetype !< EC-module's provFile_ enumeration.
       integer :: ec_convtype !< EC-module's convType_ enumeration.
@@ -782,7 +794,7 @@ module m_meteo
       character(len=NAMTRACLEN) :: trname, sfname, qidname
       integer, external         :: findname
       type (tEcMask)            :: srcmask
-      logical                   :: exist, opened
+      logical                   :: exist, opened, withCharnock, withStress
 
 
       ec_addtimespacerelation = .false.
@@ -864,9 +876,9 @@ module m_meteo
             end if
          else
             if (present(dtnodal)) then
-               success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, itdate, tzone, ec_second, name, dtnodal=dtnodal)
+               success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, itdate, tzone, ec_second, name, dtnodal=dtnodal, varname=varname)
             else
-               success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, itdate, tzone, ec_second, name)
+               success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, itdate, tzone, ec_second, name, varname=varname)
             end if
             if (.not. success) then
                ! message = ecGetMessage()
@@ -1008,7 +1020,8 @@ module m_meteo
          ! Each qhbnd polytim file replaces exactly one element in the target data array.
          ! Converter will put qh value in target_array(n_qhbnd)
          if (success) success = ecSetConverterElement(ecInstancePtr, converterId, n_qhbnd)
-      case ('windx', 'windy', 'windxy', 'airpressure', 'atmosphericpressure', 'airpressure_windx_windy')
+      case ('windx', 'windy', 'windxy', 'airpressure', 'atmosphericpressure', 'airpressure_windx_windy', &
+            'airpressure_windx_windy_charnock', 'airpressure_stressx_stressy')
          if (present(srcmaskfile)) then 
             if (ec_filetype == provFile_arcinfo .or. ec_filetype == provFile_curvi) then
                if (.not.ecParseARCinfoMask(srcmaskfile, srcmask, fileReaderPtr)) then
@@ -1210,7 +1223,9 @@ module m_meteo
             if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_windxy_y)
             if (success) success = ecAddItemConnection(ecInstancePtr, item_windxy_x, connectionId)
             if (success) success = ecAddItemConnection(ecInstancePtr, item_windxy_y, connectionId)
-         case ('airpressure_windx_windy')
+         case ('airpressure_windx_windy', 'airpressure_windx_windy_charnock', 'airpressure_stressx_stressy')
+            withCharnock = (target_name == 'airpressure_windx_windy_charnock')
+            withStress = (target_name == 'airpressure_stressx_stressy')
             ! special case: m:n converter, (for now) handle seperately
             if (ec_filetype == provFile_curvi) then
                sourceItemId   = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'curvi_source_item_1')
@@ -1222,10 +1237,19 @@ module m_meteo
                sourceItemId_3 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'p_drop')
             else if (ec_filetype == provFile_netcdf) then
                sourceItemId   = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'air_pressure')
-               sourceItemId_2 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'eastward_wind')
-               sourceItemId_3 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'northward_wind')
+               if ( .not. withStress) then
+                  sourceItemId_2 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'eastward_wind')
+                  sourceItemId_3 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'northward_wind')
+               else
+                  sourceItemId_2 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'surface_downward_eastward_stress')
+                  sourceItemId_3 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'surface_downward_northward_stress')
+               endif
+               if (withCharnock) then
+                  sourceItemId_4 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'charnock')
+                  if (sourceItemId_4 == ec_undef_int) goto 1234
+               endif
             else
-               call mess(LEVEL_FATAL, 'm_meteo::ec_addtimespacerelation: Unsupported filetype for quantity airpressure_windx_windy.')
+               call mess(LEVEL_FATAL, 'm_meteo::ec_addtimespacerelation: Unsupported filetype for quantity ' // trim(target_name) // '.')
                return
             end if
             if (sourceItemId == ec_undef_int .or. sourceItemId_2 == ec_undef_int .or. sourceItemId_3 == ec_undef_int) then
@@ -1234,6 +1258,9 @@ module m_meteo
             success              = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId)
             if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_2)
             if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_3)
+            if (success .and. withCharnock) then
+                         success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_4)
+            endif
             if (ec_filetype == provFile_curvi .or. ec_filetype == provFile_netcdf) then
                if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_apwxwy_p)
                if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_apwxwy_x)
@@ -1241,6 +1268,10 @@ module m_meteo
                if (success) success = ecAddItemConnection(ecInstancePtr, item_apwxwy_p, connectionId)
                if (success) success = ecAddItemConnection(ecInstancePtr, item_apwxwy_x, connectionId)
                if (success) success = ecAddItemConnection(ecInstancePtr, item_apwxwy_y, connectionId)
+               if (withCharnock) then
+                  if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_apwxwy_c)
+                  if (success) success = ecAddItemConnection(ecInstancePtr, item_apwxwy_c, connectionId)
+               endif
             else if (ec_filetype == provFile_spiderweb) then
                if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_apwxwy_x)
                if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_apwxwy_y)
@@ -1558,7 +1589,7 @@ module m_meteo
           ptm => tair
           call dewpt2rhum(ptd,ptm,prh)        ! convert dewpoint temperatures to relative humidity (percentage)
       end if
-      if (trim(group_name) == 'airpressure_windx_windy') then
+      if (index(group_name, 'airpressure_windx_windy') == 1) then
          if (.not.ec_gettimespacevalue_by_itemID(instancePtr, item_apwxwy_p, timesteps)) return
       end if
       success = .true.
@@ -1758,7 +1789,7 @@ contains
    !> Read the next quantity block that is found in a file.
    !! The (external forcing) file is opened elsewhere and read block-by-block
    !! by consecutive calls to this routine.
-   subroutine readprovider(minp,qid,filename,filetype,method,operand,transformcoef,ja,smask)
+   subroutine readprovider(minp,qid,filename,filetype,method,operand,transformcoef,ja,varname,smask)
      ! globals
      integer,           intent(in)  :: minp      !< File handle to already opened input file.
      integer,           intent(out) :: filetype  !< File type of current quantity.
@@ -1768,6 +1799,7 @@ contains
      character (len=1), intent(out) :: operand   !< Operand w.r.t. previous data ('O'verride or '+'Append)
      double precision,  intent(out) :: transformcoef(:) !< Transformation coefficients
      integer,           intent(out) :: ja        !< Whether a block was successfully read or not.
+     character (len=*), intent(out) :: varname   !< variable name within filename; only in case of NetCDF
      character (len=*), intent(out), optional :: smask  !< Name of mask-file applied to source arcinfo meteo-data 
    
      ! locals
@@ -1799,6 +1831,16 @@ contains
         read(rec(l2:),'(a)',err=990) filename
      else
         return
+     end if
+
+     keywrd = 'VARNAME'
+     call zoekopt(minp, rec, keywrd, ja)
+     if (ja == 1) then
+        l1 = index(rec,'=') + 1
+        call checkForSpacesInProvider(rec, l1, l2)               ! l2 = l1 + #spaces after the equal-sign
+        varname = rec(l2:)
+     else
+        varname = ' '
      end if
 
      if (present(smask)) then                                    ! todo: shouldn't this argument be compulsory ? ..... 

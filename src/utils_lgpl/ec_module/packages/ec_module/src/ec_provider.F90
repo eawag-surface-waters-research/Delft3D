@@ -57,6 +57,7 @@ module m_ec_provider
    private
    
    public :: ecSetFileReaderProperties
+   public :: ecProviderInitializeFileReader
    public :: ecProviderCreateUniformItems
    public :: ecProviderCreateQhtableItems
    public :: ecProviderCreateTimeInterpolatedItem
@@ -64,7 +65,7 @@ module m_ec_provider
    public :: items_from_bc_quantities
 
    
-   interface ecSetFileReaderProperties
+   interface ecSetFileReaderProperties                ! Kan weg
       module procedure ecProviderInitializeFileReader
    end interface ecSetFileReaderProperties
 
@@ -174,7 +175,7 @@ module m_ec_provider
       
       !> Initialize a new FileReader, by constructing the complete tree of source Items.
       !! On the opposite end of the EC-module is a kernel, which constructs the complete tree of target Items.
-      recursive function ecProviderInitializeFileReader(instancePtr, fileReaderId, fileType, fileName, refdat, tzone, tsunit, quantityName, forcingFile, bcBlockId, dtnodal) result(success)
+      recursive function ecProviderInitializeFileReader(instancePtr, fileReaderId, fileType, fileName, refdat, tzone, tsunit, quantityName, forcingFile, dtnodal, varname) result(success)
          logical                                :: success      !< function status
          type(tEcInstance),          pointer    :: instancePtr  !< intent(in)
          integer,                    intent(in) :: fileReaderId !< unique FileReader id
@@ -184,9 +185,9 @@ module m_ec_provider
          real(kind=hp),              intent(in) :: tzone        !< Kernel's timezone.
          integer,                    intent(in) :: tsunit       !< Kernel's timestep unit (1=sec 2=min 3=sec).
          character(len=*), optional, intent(in) :: quantityName !< name of quantity, needed for structured input files (NetCDF and BC)
-         character(len=*), optional, intent(in) :: forcingFile  !< name of quantity, needed for structured input files (NetCDF and BC)
-         integer,          optional, intent(in) :: bcBlockId    !< if this filereader needs to be connected to a BC header block
+         character(len=*), optional, intent(in) :: forcingFile  !< name of the forcing file (if quantityName is given)
          real(kind=hp),    optional, intent(in) :: dtnodal      !< Nodal factors update interval
+         character(len=*), optional, intent(in) :: varname      !< variable name within filename
          !
          type(tEcFileReader), pointer :: fileReaderPtr  !< FileReader corresponding to fileReaderId
          character(maxNameLen)        :: l_quantityName !< explicit length version of quantityName
@@ -224,11 +225,16 @@ module m_ec_provider
             fileReaderPtr%nItems = 0
 
             ! Create source Items and their contained types, based on file type and file header.
-            if (present(quantityName)) then
+            if (present(quantityName) .and. present(varname)) then
                l_quantityName = quantityName
-               if (.not. ecProviderCreateItems(instancePtr, fileReaderPtr, forcingFile, l_quantityName)) return 
+               if (.not. ecProviderCreateItems(instancePtr, fileReaderPtr, forcingFile, l_quantityName, varname)) return
+            else if (present(quantityName)) then
+               l_quantityName = quantityName
+               if (.not. ecProviderCreateItems(instancePtr, fileReaderPtr, forcingFile, l_quantityName)) return
+            else if (present(varname)) then
+               if (.not. ecProviderCreateItems(instancePtr, fileReaderPtr, varname=varname)) return
             else
-               if (.not. ecProviderCreateItems(instancePtr, fileReaderPtr)) return 
+               if (.not. ecProviderCreateItems(instancePtr, fileReaderPtr)) return
             end if
          end if
          success = .true.
@@ -238,13 +244,14 @@ module m_ec_provider
       ! =======================================================================
       
       !> Create source Items and their contained types, based on file type and file header.
-      function ecProviderCreateItems(instancePtr, fileReaderPtr, bctfilename, quantityname) result(success)
+      function ecProviderCreateItems(instancePtr, fileReaderPtr, bctfilename, quantityname, varname) result(success)
          logical                         :: success          !< function status
          type(tEcInstance),     pointer  :: instancePtr      !< intent(in)
          type(tEcFileReader),   pointer  :: fileReaderPtr    !< intent(inout)
          character(maxNameLen), optional :: quantityname     !< Names of the quantities read from file, needed for structured files (NetCDF),
                                                              !< but also for bct-file 
          character(maxNameLen), optional :: bctfilename      !< file name of bct-file with data
+         character(len=*),      optional :: varname          !< variable name within filename
          !
          success = .false.
          select case(fileReaderPtr%ofType)
@@ -288,18 +295,19 @@ module m_ec_provider
                if (present(quantityname)) then
                   select case(quantityname)
                      case ("ERA_Interim_Dataset")
-                        success = ecProviderCreateNetcdfItems(instancePtr, fileReaderPtr, quantityname)
-                     case ("rainfall",                                              &
-                           "rainfall_rate",                                         &
-                           "airpressure_windx_windy",                               &
-                           "windxy","windx","windy",                                &
-                           "nudge_salinity_temperature",                            &
-                           "airpressure","atmosphericpressure",                     &
-                           "humidity_airtemperature_cloudiness",                    &
-                           "humidity_airtemperature_cloudiness_solarradiation",     &
-                           "dewpoint_airtemperature_cloudiness",                    &
+                        success = ecProviderCreateNetcdfItems(instancePtr, fileReaderPtr, quantityname, varname)
+                     case ("rainfall",                                                    &
+                           "rainfall_rate",                                               &
+                           "airpressure_windx_windy", "airpressure_windx_windy_charnock", &
+                           "airpressure_stressx_stressy",                                 &
+                           "windxy","windx","windy",                                      &
+                           "nudge_salinity_temperature",                                  &
+                           "airpressure","atmosphericpressure",                           &
+                           "humidity_airtemperature_cloudiness",                          &
+                           "humidity_airtemperature_cloudiness_solarradiation",           &
+                           "dewpoint_airtemperature_cloudiness",                          &
                            "dewpoint_airtemperature_cloudiness_solarradiation")
-                        success = ecProviderCreateNetcdfItems(instancePtr, fileReaderPtr, quantityname)
+                        success = ecProviderCreateNetcdfItems(instancePtr, fileReaderPtr, quantityname, varname)
                      case ("hrms","tp", "tps", "rtp","dir","fx","fy","wsbu","wsbv","mx","my","dissurf","diswcap") 
                         success = ecProviderCreateWaveNetcdfItems(instancePtr, fileReaderPtr, quantityname)
                      case default
@@ -2289,17 +2297,18 @@ module m_ec_provider
       ! =======================================================================
       
       !> Create source Items and their contained types, based on a NetCDF file's header.
-      function ecProviderCreateNetcdfItems(instancePtr, fileReaderPtr, quantityName) result(success)
+      function ecProviderCreateNetcdfItems(instancePtr, fileReaderPtr, quantityName, varname) result(success)
       use transform_poleshift
       use m_ec_message
-      use m_alloc 
-      implicit none 
-         logical                           :: success           !< function status
-         type(tEcInstance),     pointer    :: instancePtr       !< intent(in)
-         type(tEcFileReader),   pointer    :: fileReaderPtr     !< intent(inout)
-         character(len=maxNameLen), intent(in) :: quantityName  !< name of quantity to read
-         character(len=maxMessageLen)          :: message
-         !
+      use m_alloc
+      implicit none
+         logical                                :: success        !< function status
+         type(tEcInstance),     pointer         :: instancePtr    !< intent(in)
+         type(tEcFileReader),   pointer         :: fileReaderPtr  !< intent(inout)
+         character(len=maxNameLen),  intent(in) :: quantityName   !< name of quantity to read
+         character(len=*), optional, intent(in) :: varname        !< name of variabele (ignored if = ' ')
+
+         !character(len=maxMessageLen)                            :: message
          integer                                                 :: ierror                !< return value of NetCDF function calls
          integer                                                 :: idvar
          integer                                                 :: ndims                 !< number of dimensions within NetCDF or for the current variable
@@ -2337,8 +2346,9 @@ module m_ec_provider
          character(len=NF90_MAX_NAME)                            :: coord_name            !< helper variable
          character(len=NF90_MAX_NAME), dimension(:), allocatable :: coord_names           !< helper variable
          character(len=NF90_MAX_NAME)                            :: name                  !< helper variable
-         character(len=NF90_MAX_NAME), dimension(15)             :: ncstdnames            !< helper variable : temp. list of standard names to search for in netcdf  
-         character(len=NF90_MAX_NAME), dimension(15)             :: ncvarnames            !< helper variable : temp. list of variable names to search for in netcdf  
+         character(len=NF90_MAX_NAME), dimension(4)              :: ncstdnames            !< helper variable : temp. list of standard names to search for in netcdf
+         character(len=NF90_MAX_NAME), dimension(:), allocatable :: ncvarnames            !< helper variable : temp. list of variable names to search for in netcdf
+         character(len=NF90_MAX_NAME), dimension(:), allocatable :: nccustomnames         !< helper variable : temp. list of user-defined variables names to search for
          integer                                                 :: quantityId            !< helper variable 
          integer                                                 :: elementSetId          !< helper variable 
          integer                                                 :: field0Id              !< helper variable 
@@ -2349,7 +2359,6 @@ module m_ec_provider
          logical                                                 :: dummy                 !< temp
          character(len=50)                                       :: attstr 
          logical                                                 :: rotate_pole
-         integer                                                 :: nvar                  !< number/loopvariable of varids in this netcdf file 
          integer                                                 :: lon_varid, lon_dimid, lat_varid, lat_dimid, tim_varid, tim_dimid
          integer                                                 :: grid_lon_varid, grid_lat_varid
          integer                                                 :: x_varid, x_dimid, y_varid, y_dimid, z_varid, z_dimid
@@ -2357,7 +2366,9 @@ module m_ec_provider
          integer, dimension(:), allocatable                      :: first_coordinate_dimids, second_coordinate_dimids, third_coordinate_dimids
          integer, dimension(:), allocatable                      :: first_coordinate_dimlen, second_coordinate_dimlen, third_coordinate_dimlen
          integer                                                 :: timeint
-
+         integer                                                 :: expectedLength
+         character(len=:), allocatable                           :: nameVar         ! variable name in error message
+         character(len=2)                                        :: cnum1, cnum2    ! 1st and 2nd number converted to string for error message
          !
          success = .false.
          itemPtr => null()
@@ -2386,56 +2397,73 @@ module m_ec_provider
          ! For now assuming the MATROOS-definitions of variables, listed at 
          ! https://publicwiki.deltares.nl/display/NETCDF/Matroos+Standard+names
          ncstdnames(:) = '' 
+         allocate(ncvarnames(4))  ! todo: error handling
          ncvarnames(:) = '' 
          idvar = -1 
          select case (trim(quantityName))
          case ('rainfall') 
-            ncvarnames(1) = '|rainfall|' 
+            ncvarnames(1) = 'rainfall' 
             ncstdnames(1) = 'precipitation_amount' 
          case ('rainfall_rate') 
-            ncvarnames(1) = '|rainfall|' 
+            ncvarnames(1) = 'rainfall' 
             ncstdnames(1) = 'rainfall_rate' 
          case ('windx') 
-            ncvarnames(1) = '|u10|'                            ! 10 meter eastward wind
+            ncvarnames(1) = 'u10'                            ! 10 meter eastward wind
             ncstdnames(1) = 'eastward_wind'
          case ('windy') 
-            ncvarnames(1) = '|v10|'                            ! 10 meter eastward wind
+            ncvarnames(1) = 'v10'                            ! 10 meter eastward wind
             ncstdnames(1) = 'northward_wind'
          case ('windxy') 
-            ncvarnames(1) = '|u10|'                            ! 10 meter eastward wind
+            ncvarnames(1) = 'u10'                            ! 10 meter eastward wind
             ncstdnames(1) = 'eastward_wind'
-            ncvarnames(2) = '|v10|'                            ! 10 meter eastward wind
+            ncvarnames(2) = 'v10'                            ! 10 meter eastward wind
             ncstdnames(2) = 'northward_wind'
          case ('airpressure','atmosphericpressure') 
-            ncvarnames(1) = '|msl|psl|'                            ! mean sea-level pressure
+            ncvarnames(1) = 'msl'                            ! mean sea-level pressure
             ncstdnames(1) = 'air_pressure'
          case ('airpressure_windx_windy') 
-            ncvarnames(1) = '|msl|'                            ! mean sea-level pressure
+            ncvarnames(1) = 'msl'                            ! mean sea-level pressure
             ncstdnames(1) = 'air_pressure'
-            ncvarnames(2) = '|u10|'                            ! 10 meter eastward wind
+            ncvarnames(2) = 'u10'                            ! 10 meter eastward wind
             ncstdnames(2) = 'eastward_wind'
-            ncvarnames(3) = '|v10|'                            ! 10 meter northward wind
+            ncvarnames(3) = 'v10'                            ! 10 meter northward wind
             ncstdnames(3) = 'northward_wind'
+         case ('airpressure_stressx_stressy')
+            ncvarnames(1) = 'msl'                            ! mean sea-level pressure
+            ncstdnames(1) = 'air_pressure'
+            ncvarnames(2) = 'tauu'                           ! eastward wind stress
+            ncstdnames(2) = 'surface_downward_eastward_stress'
+            ncvarnames(3) = 'tauv'                           ! northward wind stress
+            ncstdnames(3) = 'surface_downward_northward_stress'
+         case ('airpressure_windx_windy_charnock')
+            ncvarnames(1) = 'msl'                            ! mean sea-level pressure
+            ncstdnames(1) = 'air_pressure'
+            ncvarnames(2) = 'u10'                            ! 10 meter eastward wind
+            ncstdnames(2) = 'eastward_wind'
+            ncvarnames(3) = 'v10'                            ! 10 meter northward wind
+            ncstdnames(3) = 'northward_wind'
+            ncvarnames(4) = 'c'                              ! space varying Charnock coefficients
+            ncstdnames(4) = 'charnock'
          case ('dewpoint_airtemperature_cloudiness')
-            ncvarnames(1) = '|d2m|'                            ! dew-point temperature
+            ncvarnames(1) = 'd2m'                            ! dew-point temperature
             ncstdnames(1) = 'dew_point_temperature'
-            ncvarnames(2) = '|t2m|'                            ! 2-meter air temperature
+            ncvarnames(2) = 't2m'                            ! 2-meter air temperature
             ncstdnames(2) = 'air_temperature'
-            ncvarnames(3) = '|tcc|'                            ! cloud cover (fraction)
+            ncvarnames(3) = 'tcc'                            ! cloud cover (fraction)
             ncstdnames(3) = 'cloud_area_fraction'
          case ('dewpoint_airtemperature_cloudiness_solarradiation')
-            ncvarnames(1) = '|d2m|'                            ! dew-point temperature
+            ncvarnames(1) = 'd2m'                            ! dew-point temperature
             ncstdnames(1) = 'dew_point_temperature'
-            ncvarnames(2) = '|t2m|'                            ! 2-meter air temperature
+            ncvarnames(2) = 't2m'                            ! 2-meter air temperature
             ncstdnames(2) = 'air_temperature'
-            ncvarnames(3) = '|tcc|'                            ! cloud cover (fraction)
+            ncvarnames(3) = 'tcc'                            ! cloud cover (fraction)
             ncstdnames(3) = 'cloud_area_fraction'
-            ncvarnames(4) = '|ssr|'                            ! outgoing SW radiation at the top-of-the-atmosphere
+            ncvarnames(4) = 'ssr'                            ! outgoing SW radiation at the top-of-the-atmosphere
             ncstdnames(4) = 'surface_net_downward_shortwave_flux'
          case ('nudge_salinity_temperature')
-            ncvarnames(1) = '|thetao|'                        ! temperature
+            ncvarnames(1) = 'thetao'                         ! temperature
             ncstdnames(1) = 'sea_water_potential_temperature'
-            ncvarnames(2) = '|so|'                            ! salinity
+            ncvarnames(2) = 'so'                             ! salinity
             ncstdnames(2) = 'sea_water_salinity'
          case default                                        ! experiment: gather miscellaneous variables from an NC-file,
             ! we have faulty 
@@ -2456,23 +2484,37 @@ module m_ec_provider
              return
          end if
 
-         nvar = size(fileReaderPtr%standard_names,dim=1)
-         do i = 1, count(ncstdnames>' ')
-            do idvar = 1,nvar
-               if (ncstdnames(i).eq.fileReaderPtr%standard_names(idvar)) exit       ! Match standard names ...
-            enddo 
-            if (idvar>nvar) then                                                       ! Variable not found among standard names
-               ! ERROR: standard name not found in this filereader, Try the variable names
-               do idvar = 1,nvar
-                  if (index(ncvarnames(i),'|'//trim(fileReaderPtr%variable_names(idvar))//'|')>0) exit    ! Match variable names ...
-               enddo 
-               if (idvar>nvar) then                                                    ! Variable not found among variable names either
-                  ! ERROR: variable name not found in this filereader, TODO: handle exception 
-                  call setECMessage("Variable '"//trim(ncstdnames(i))//"' not found in NetCDF file '"//trim(fileReaderPtr%filename))
-                  return
+         expectedLength = count(ncstdnames>' ')
+
+         ! Fill a string array with user-defined variable names
+         if (len_trim(varname) > 0) then
+            if (index(trim(varname), ' ') > 0) then
+               call strsplit(varname, 1, nccustomnames, 1)
+            else
+               call realloc(nccustomnames, 1)
+               nccustomnames(1) = varname
+            endif
+
+            if (size(nccustomnames) /= expectedLength) then
+                write(cnum1, '(i2)') expectedLength
+                write(cnum2, '(i2)') size(ncvarnames)
+                call setECMessage("Quantity '" // trim(quantityName) // "' should have" // cnum1 // ' sub-names, but found' // cnum2 // ' in ext-file.')
+            endif
+         endif
+
+         do i = 1, expectedLength
+            call ecProviderSearchStdOrVarnames(fileReaderPtr, ncstdnames, ncvarnames, i, idvar, uservarnames = nccustomnames)
+            
+            if (idvar <= 0) then                              ! Variable not found among standard names and variable names either
+               if (allocated(nccustomnames)) then
+                  nameVar = trim(nccustomnames(i))
+               else
+                  nameVar = trim(ncvarnames(i))
                endif
-            endif 
-            fileReaderPtr%standard_names(idvar)=ncstdnames(i)                 ! overwrite the stanadardname by the one rquired
+               call setECMessage("Variable '" // nameVar // "' not found in NetCDF file '"//trim(fileReaderPtr%filename))
+               return
+            endif
+            fileReaderPtr%standard_names(idvar)=ncstdnames(i)                 ! overwrite the standardname by the one rquired
 
             ierror = nf90_inquire_variable(fileReaderPtr%fileHandle, idvar, ndims=ndims)  ! get the number of dimensions
             if (allocated(coordids)) deallocate(coordids)                                 ! allocate space for the variable id's 
@@ -2504,9 +2546,8 @@ module m_ec_provider
                   fgd_id = x_varid
                   sgd_id = y_varid
                else
-                  write (message,'(a)') "Variable '"//trim(ncstdnames(i))//"' in NetCDF file '"//trim(fileReaderPtr%filename)   &
-                      //' requires ''projected_x_coordinate'' and ''projected_y_coordinate''.'
-                  call setECMessage(message)
+                  call setECMessage("Variable '"//trim(ncstdnames(i))//"' in NetCDF file '"//trim(fileReaderPtr%filename)   &
+                      //' requires ''projected_x_coordinate'' and ''projected_y_coordinate''.')
                   return
                end if
             else if (instancePtr%coordsystem == EC_COORDS_SFERIC) then 
@@ -2545,9 +2586,8 @@ module m_ec_provider
                      endif 
                   endif 
                else
-                  write (message,'(a)') "Variable '"//trim(ncstdnames(i))//"' in NetCDF file '"//trim(fileReaderPtr%filename)   &
-                      //' either requires ''latitude'' and ''longitude'' or ''grid_latitude'' and ''grid_longitude''.'
-                  call setECMessage(message)
+                  call setECMessage("Variable '"//trim(ncstdnames(i))//"' in NetCDF file '"//trim(fileReaderPtr%filename)   &
+                      //' either requires ''latitude'' and ''longitude'' or ''grid_latitude'' and ''grid_longitude''.')
                   return
                end if
             end if
@@ -2567,8 +2607,7 @@ module m_ec_provider
                   !   of the requested variable 
                   ! Match these coordinate names to variables to fgd 
                else 
-                  write (message,'(a)') "Variable '"//trim(ncstdnames(i))//"' in NetCDF file '"//trim(fileReaderPtr%filename)//' requires a ''coordinates'' attribute.'
-                  call setECMessage(message)
+                  call setECMessage("Variable '"//trim(ncstdnames(i))//"' in NetCDF file '"//trim(fileReaderPtr%filename)//' requires a ''coordinates'' attribute.')
                   return
                end if
             end if
@@ -2807,6 +2846,48 @@ module m_ec_provider
          enddo !                i = 1, size(ncstdnames) quantities in requested set of quantities 
 
       end function ecProviderCreateNetcdfItems
+
+
+      !> search variabele index in standard name or variabele name
+      subroutine ecProviderSearchStdOrVarnames(fileReaderPtr, ncstdnames, ncvarnames, ncIndex, id, uservarnames)
+         type(tEcFileReader), intent(in)                :: fileReaderPtr  !< used for input standard and variable names
+         character(len=*)   , intent(in)                :: ncstdnames(:)  !< list with standard names to compare with
+         character(len=*)   , intent(in)                :: ncvarnames(:)  !< list with variable names to compare with
+         character(len=*)   , intent(in), allocatable   :: uservarnames(:)!< list with user-specified variable names to compare with
+         integer            , intent(in)                :: ncIndex        !< index in list
+         integer            , intent(out)               :: id             !< found index in list
+
+         integer  ::  idvar    ! loop counter
+         integer  ::  nvar     ! number/loopvariable of varids in this netcdf file 
+
+         id = -999
+
+         nvar = size(fileReaderPtr%standard_names, dim=1)
+
+         ! Match substituted variable names:
+         if (allocated(uservarnames)) then
+            do idvar = 1, nvar
+               if (uservarnames(ncIndex) == fileReaderPtr%variable_names(idvar)) then
+                  id = idvar
+                  return
+               endif
+            enddo
+         endif
+         ! Match standard names:
+         do idvar = 1, nvar
+            if (ncstdnames(ncIndex) == fileReaderPtr%standard_names(idvar)) then
+               id = idvar
+               return
+            endif
+        enddo
+         ! Match variable names:
+         do idvar = 1, nvar
+            if (ncvarnames(ncIndex) == fileReaderPtr%variable_names(idvar)) then
+               id = idvar
+               return
+            endif
+         enddo
+      end subroutine ecProviderSearchStdOrVarnames
 
       ! =======================================================================
       

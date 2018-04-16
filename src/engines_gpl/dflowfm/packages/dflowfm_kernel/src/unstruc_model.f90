@@ -2600,7 +2600,7 @@ implicit none
    character(len=256)       :: filename
    character(len=20)        :: rundat
    integer                  :: L1, L2, istat, method, mextold, mextnew, ja
-   character(len=64)        :: qtype
+   character(len=64)        :: qtype, varname
    logical                        :: jawel
 
    inquire (file = trim(extfileold), exist = jawel)
@@ -2617,7 +2617,7 @@ implicit none
    call tree_create(trim(extfileold), ext_ptr)
    do while (ja .eq. 1)                                ! read *.ext file
 
-      call readprovider(mextold,qid,filename,filetype,method,operand,transformcoef,ja)
+      call readprovider(mextold,qid,filename,filetype,method,operand,transformcoef,ja, varname)
 
       if (ja /= 1) then
          call mess(LEVEL_WARN, 'Failed to read provider.')
