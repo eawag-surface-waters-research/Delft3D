@@ -2264,12 +2264,13 @@ end subroutine default_turbulence
  integer                           :: jahissal                  !< Write salinity to his file, 0: no, 1: yes
  integer                           :: jahisrho                  !< Write density  to his file, 0: no, 1: yes
  integer                           :: jahiswatlev               !< Write water level to his file, 0: no, 1: yes
+ integer                           :: jahisbedlev               !< Write bed level to his file, 0: no, 1: yes
  integer                           :: jahiswatdep               !< Write waterd epth to his file, 0: no, 1: yes
  integer                           :: jahisvelvec               !< Write velocity vectors to his file, 0: no, 1: yes
  integer                           :: jahisww                   !< Write upward velocity to his file, 0: no, 1: yes
  integer                           :: jahissed                  !< Write sediment transport to his file, 0: no, 1: yes
  integer                           :: jahisconst                !< Write tracers to his file, 0: no, 1: yes
-
+ integer                           :: jahiszcor                 !< Write the vertical coordinate to his file, 0: no, 1: yes
  ! written to map file yes or no
  integer                           :: jamaps0                   !< previous step water levels to map file, 0: no, 1: yes
  integer                           :: jamaps1                   !< water levels to map file, 0: no, 1: yes
@@ -2593,11 +2594,13 @@ subroutine default_flowparameters()
     jahissal = 1
     jahisrho = 1
     jahiswatlev = 1
+    jahisbedlev = 0
     jahiswatdep = 0
     jahisvelvec = 1
     jahisww = 0
     jahissed = 1
     jahisconst = 1
+    jahiszcor  = 1
 
     jamaps0 = 1
     jamaps1 = 1

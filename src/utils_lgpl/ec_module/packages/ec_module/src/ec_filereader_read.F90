@@ -76,7 +76,7 @@ module m_ec_filereader_read
    
    ! Related to astronomic components
    integer, parameter                      :: kcmp = 1       !< 
-   integer, parameter                      :: mxkc = 234     !< 
+   integer, parameter                      :: mxkc = 235     !< 
    integer,           dimension(16*mxkc)   :: kb_values      !< Help var.
    character(len=8),  dimension(mxkc)      :: kb_keys = ''   !< Array with the names of all components
    character(len=128) :: message
@@ -1500,7 +1500,7 @@ module m_ec_filereader_read
       !> simulation of external kompbes-file
       !! meteo1 : kompbs
       subroutine kompbs(l)
-         character(80), dimension(234), intent(out) :: l !< Array with tidal components
+         character(80), dimension(235), intent(out) :: l !< Array with tidal components
          !
          l(1)   = 'SA                 1                            '
          l(2)   = 'SSA                2                            '
@@ -1736,6 +1736,7 @@ module m_ec_filereader_read
          l(232) = '5MS12    12-10    10    10-10         5 6       '
          l(233) = '3MNKS12  12 -9  1 10     8 -8   -11   4 6120    '
          l(234) = '4M2S12   12 -8     8     8 -8         4 6       '
+         l(235) = 'N4        4 -6  2  4     4 -4         2 6       '
       end subroutine kompbs
       
       ! =======================================================================

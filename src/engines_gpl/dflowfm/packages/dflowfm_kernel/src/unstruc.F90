@@ -14835,7 +14835,14 @@ subroutine unc_write_his(tim)            ! wrihis
     integer                      :: igen
     integer                      :: ndims
     character(len=255) :: tmpstr, tmpstr2, tmpstr3, unit1, unit2, unit3
+    integer                      :: jawrizc = 0
+    integer                      :: jawrizw = 0
 
+    if (jahiszcor > 0) then
+       jawrizc = 1
+       jawrizw = 1
+    endif
+    
     ! Another time-partitioned file needs to start, reset iteration count (and file).
     if (ti_split > 0d0 .and. curtime_split /= time_split0) then
         it_his       = 0
@@ -14893,8 +14900,13 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_def_dim(ihisfile, 'laydimw', kmx+1, id_laydimw)
             end if
 
-            ierr = nf90_def_var(ihisfile, 'station_x_coordinate', nf90_double, (/ id_statdim, id_timedim /), id_statx) ! TODO: AvD: decide on UNST-1606 (trajectory_id vs. timeseries_id)
-            ierr = nf90_def_var(ihisfile, 'station_y_coordinate', nf90_double, (/ id_statdim, id_timedim /), id_staty)
+            if (nummovobs > 0) then
+               ierr = nf90_def_var(ihisfile, 'station_x_coordinate', nf90_double, (/ id_statdim, id_timedim /), id_statx) ! TODO: AvD: decide on UNST-1606 (trajectory_id vs. timeseries_id)
+               ierr = nf90_def_var(ihisfile, 'station_y_coordinate', nf90_double, (/ id_statdim, id_timedim /), id_staty)
+            else
+               ierr = nf90_def_var(ihisfile, 'station_x_coordinate', nf90_double, id_statdim, id_statx)
+               ierr = nf90_def_var(ihisfile, 'station_y_coordinate', nf90_double, id_statdim, id_staty)
+            endif
             ierr = unc_addcoordatts(ihisfile, id_statx, id_staty, jsferic)
             ierr = nf90_put_att(ihisfile, id_statx, 'long_name', 'original x-coordinate of station (non-snapped)')
             ierr = nf90_put_att(ihisfile, id_staty, 'long_name', 'original y-coordinate of station (non-snapped)')
@@ -14915,12 +14927,14 @@ subroutine unc_write_his(tim)            ! wrihis
                ierr = nf90_put_att(ihisfile, id_vars, '_FillValue', dmiss)
             endif
 
-            ierr = nf90_def_var(ihisfile, 'bedlevel', nf90_double, (/ id_statdim, id_timedim /), id_varb)
-            ierr = nf90_put_att(ihisfile, id_varb, 'long_name', 'bottom level')
-            ierr = nf90_put_att(ihisfile, id_varb, 'units', 'm')
-            ierr = nf90_put_att(ihisfile, id_varb, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
-            ierr = nf90_put_att(ihisfile, id_varb, '_FillValue', dmiss)
-
+            if ( jahisbedlev > 0 ) then
+               ierr = nf90_def_var(ihisfile, 'bedlevel', nf90_double, (/ id_statdim, id_timedim /), id_varb)
+               ierr = nf90_put_att(ihisfile, id_varb, 'long_name', 'bottom level')
+               ierr = nf90_put_att(ihisfile, id_varb, 'units', 'm')
+               ierr = nf90_put_att(ihisfile, id_varb, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+               ierr = nf90_put_att(ihisfile, id_varb, '_FillValue', dmiss)
+            endif
+            
             idims(1) = id_statdim
             idims(2) = id_timedim
             if (jahiswatdep > 0) then
@@ -14930,53 +14944,67 @@ subroutine unc_write_his(tim)            ! wrihis
             if( jahisvelvec > 0 ) then
                if ( kmx.gt.0 ) then
                   ierr = nf90_def_var(ihisfile, 'x_velocity', nf90_double, (/ id_laydim, id_statdim, id_timedim /), id_varucx)
+                  ierr = nf90_put_att(ihisfile, id_varucx, 'coordinates', 'station_x_coordinate station_y_coordinate station_name zcoordinate_c')
                   ierr = nf90_def_var(ihisfile, 'y_velocity', nf90_double, (/ id_laydim, id_statdim, id_timedim /), id_varucy)
+                  ierr = nf90_put_att(ihisfile, id_varucy, 'coordinates', 'station_x_coordinate station_y_coordinate station_name zcoordinate_c')
                   ierr = nf90_def_var(ihisfile, 'z_velocity', nf90_double, (/ id_laydim, id_statdim, id_timedim /), id_varucz)
-               else
-                  ierr = nf90_def_var(ihisfile, 'x_velocity', nf90_double, (/ id_statdim, id_timedim /), id_varucx)
-                  ierr = nf90_def_var(ihisfile, 'y_velocity', nf90_double, (/ id_statdim, id_timedim /), id_varucy)
-               end if
-            endif
-
-            if ( kmx.gt.0 ) then
-               if( jahisww > 0 ) then
                   ierr = nf90_put_att(ihisfile, id_varucz, 'standard_name', 'upward_sea_water_velocity')
                   ierr = nf90_put_att(ihisfile, id_varucz, 'long_name', 'vertical/upward component of flow element center velocity vector') ! sorry for inland water people
                   ierr = nf90_put_att(ihisfile, id_varucz, 'units', 'm s-1')
                   ierr = nf90_put_att(ihisfile, id_varucz, 'coordinates', 'station_x_coordinate station_y_coordinate station_name zcoordinate_c')
                   ierr = nf90_put_att(ihisfile, id_varucz, '_FillValue', dmiss)
-               endif
+                  jawrizc = 1
+               else
+                  ierr = nf90_def_var(ihisfile, 'x_velocity', nf90_double, (/ id_statdim, id_timedim /), id_varucx)
+                  ierr = nf90_put_att(ihisfile, id_varucx, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+                  ierr = nf90_def_var(ihisfile, 'y_velocity', nf90_double, (/ id_statdim, id_timedim /), id_varucy)
+                  ierr = nf90_put_att(ihisfile, id_varucy, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+               end if
+               ierr = nf90_put_att(ihisfile, id_varucx, 'standard_name', 'sea_water_x_velocity')
+               ierr = nf90_put_att(ihisfile, id_varucx, 'long_name', 'x-component of flow element center velocity vector')
+               ierr = nf90_put_att(ihisfile, id_varucx, 'units', 'm s-1')
+               ierr = nf90_put_att(ihisfile, id_varucx, '_FillValue', dmiss)
+               ierr = nf90_put_att(ihisfile, id_varucy, 'standard_name', 'sea_water_y_velocity')
+               ierr = nf90_put_att(ihisfile, id_varucy, 'long_name', 'y-component of flow element center velocity vector')
+               ierr = nf90_put_att(ihisfile, id_varucy, 'units', 'm s-1')
+               ierr = nf90_put_att(ihisfile, id_varucy, '_FillValue', dmiss)
+            endif
 
-               idims(1) = id_laydim
-               idims(2) = id_statdim
-               idims(3) = id_timedim
-               call definencvar   (ihisfile, id_zcs, nf90_double, idims,3, 'zcoordinate_c' , 'vertical coordinate at center of flow element and layer'   , 'm',  'station_x_coordinate station_y_coordinate station_name zcoordinate_c')
-               ierr = nf90_put_att(ihisfile, id_zcs, 'positive' , 'up')
+            if ( kmx.gt.0 ) then
 
+               !idims(1) = id_laydim
+               !idims(2) = id_statdim
+               !idims(3) = id_timedim
+               !call definencvar   (ihisfile, id_zcs, nf90_double, idims,3, 'zcoordinate_c' , 'vertical coordinate at center of flow element and layer'   , 'm',  'station_x_coordinate station_y_coordinate station_name zcoordinate_c')
+               !ierr = nf90_put_att(ihisfile, id_zcs, 'positive' , 'up')
 
                idims(1) = id_laydimw
                idims(2) = id_statdim
                idims(3) = id_timedim
-               call definencvar   (ihisfile, id_zws, nf90_double, idims,3, 'zcoordinate_w' , 'vertical coordinate at center of flow element and at layer interface'   , 'm',  'station_x_coordinate station_y_coordinate station_name zcoordinate_w')
-               ierr = nf90_put_att(ihisfile, id_zws, 'positive' , 'up')
+               !call definencvar   (ihisfile, id_zws, nf90_double, idims,3, 'zcoordinate_w' , 'vertical coordinate at center of flow element and at layer interface'   , 'm',  'station_x_coordinate station_y_coordinate station_name zcoordinate_w')
+               !ierr = nf90_put_att(ihisfile, id_zws, 'positive' , 'up')
 
                if (iturbulencemodel >= 3 .and. jahistur > 0) then
                   call definencvar(ihisfile,id_turkin,nf90_double, idims,3, 'tke'   , 'turbulent kinetic energy'   , 'm2 s-2',  'station_x_coordinate station_y_coordinate station_name zcoordinate_w')
+                  jawrizw = 1
                endif
-               if (iturbulencemodel > 1) then
+               if (iturbulencemodel > 1 .and. jahistur > 0 ) then
                   call definencvar(ihisfile,id_vicwwu,nf90_double, idims,3, 'vicww' , 'turbulent vertical eddy viscosity'    , 'm2 s-1' ,  'station_x_coordinate station_y_coordinate station_name zcoordinate_w')
                   ierr = nf90_put_att(ihisfile, id_turkin, 'standard_name', 'specific_turbulent_kinetic_energy_of_sea_water')
+                  jawrizw = 1
                endif
                if (iturbulencemodel == 3 .and. jahistur > 0) then
                   call definencvar(ihisfile,id_tureps,nf90_double, idims,3, 'eps'   , 'turbulent energy dissipation', 'm2 s-3'  ,  'station_x_coordinate station_y_coordinate station_name zcoordinate_w')
                   ierr = nf90_put_att(ihisfile, id_tureps, 'standard_name', 'specific_turbulent_kinetic_energy_dissipation_in_sea_water')
+                  jawrizw = 1
                else if (iturbulencemodel == 4 .and. jahistur > 0) then
                   call definencvar(ihisfile,id_tureps,nf90_double, idims,3, 'tau'   , 'turbulent time scale', 's-1'  ,  'station_x_coordinate station_y_coordinate station_name zcoordinate_w')
+                  jawrizw = 1
                endif
-
 
                if (jarichardsononoutput > 0) then
                   call definencvar(ihisfile,id_rich,nf90_double, idims,3, 'rich' , 'Richardson Nr'    , '  ' ,  'station_x_coordinate station_y_coordinate station_name zcoordinate_w')
+                  jawrizw = 1
                end if
 
             end if
@@ -15013,6 +15041,7 @@ subroutine unc_write_his(tim)            ! wrihis
                if ( kmx.gt.0 ) then
                   ierr = nf90_def_var(ihisfile, 'salinity', nf90_double, (/ id_laydim, id_statdim, id_timedim /), id_varsal)
                   ierr = nf90_put_att(ihisfile, id_varsal, 'coordinates', 'station_x_coordinate station_y_coordinate station_name zcoordinate_c')
+                  jawrizc = 1
                else
                   ierr = nf90_def_var(ihisfile, 'salinity', nf90_double, (/ id_statdim, id_timedim /), id_varsal)
                   ierr = nf90_put_att(ihisfile, id_varsal, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
@@ -15092,6 +15121,7 @@ subroutine unc_write_his(tim)            ! wrihis
                if ( kmx.gt.0 ) then
                   ierr = nf90_def_var(ihisfile, 'temperature', nf90_double, (/ id_laydim, id_statdim, id_timedim /), id_vartem)
                   ierr = nf90_put_att(ihisfile, id_vartem, 'coordinates', 'station_x_coordinate station_y_coordinate station_name zcoordinate_c')
+                  jawrizc = 1
                else
                   ierr = nf90_def_var(ihisfile, 'temperature', nf90_double, (/ id_statdim, id_timedim /), id_vartem)
                   ierr = nf90_put_att(ihisfile, id_vartem, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
@@ -15126,6 +15156,7 @@ subroutine unc_write_his(tim)            ! wrihis
                if ( kmx.gt.0 ) then
                   ierr = nf90_def_var(ihisfile, 'density', nf90_double, (/ id_laydim, id_statdim, id_timedim /), id_varrho)
                   ierr = nf90_put_att(ihisfile, id_varrho, 'coordinates', 'station_x_coordinate station_y_coordinate station_name zcoordinate_c')
+                  jawrizc = 1
                else
                   ierr = nf90_def_var(ihisfile, 'density', nf90_double, (/ id_statdim, id_timedim /), id_varrho)
                   ierr = nf90_put_att(ihisfile, id_varrho, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
@@ -15146,6 +15177,7 @@ subroutine unc_write_his(tim)            ! wrihis
                   if ( kmx > 0 ) then
                      ierr = nf90_def_var(ihisfile, trim(tmpstr), nf90_double, (/ id_laydim, id_statdim, id_timedim /), id_tra(i))
                      ierr = nf90_put_att(ihisfile, id_tra(i), 'coordinates', 'station_x_coordinate station_y_coordinate station_name zcoordinate_c')
+                     jawrizc = 1
                   else
                      ierr = nf90_def_var(ihisfile, trim(tmpstr), nf90_double, (/ id_statdim, id_timedim /), id_tra(i))
                      ierr = nf90_put_att(ihisfile, id_tra(i), 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
@@ -15189,6 +15221,7 @@ subroutine unc_write_his(tim)            ! wrihis
                    ierr = nf90_put_att(ihisfile, id_ws(i), 'standard_name', 'ws_'//const_names(j))
                    ierr = nf90_put_att(ihisfile, id_seddif(i), 'standard_name', 'seddif_'//const_names(j))
                    ierr = nf90_put_att(ihisfile, id_sf(i), 'coordinates', 'station_x_coordinate station_y_coordinate station_name zcoordinate_c')
+                   jawrizc = 1
                enddo
             endif
 
@@ -15196,6 +15229,7 @@ subroutine unc_write_his(tim)            ! wrihis
                if ( kmx.gt.0 ) then
                   ierr = nf90_def_var(ihisfile, 'sediment_concentration', nf90_double, (/ id_laydim, id_statdim, id_timedim /), id_varsed)
                   ierr = nf90_put_att(ihisfile, id_varsed, 'coordinates', 'station_x_coordinate station_y_coordinate station_name zcoordinate_c')
+                  jawrizc = 1
                else
                   ierr = nf90_def_var(ihisfile, 'sediment_concentration', nf90_double, (/ id_statdim, id_timedim /), id_varsed)
                   ierr = nf90_put_att(ihisfile, id_varsed, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
@@ -15237,6 +15271,21 @@ subroutine unc_write_his(tim)            ! wrihis
                ierr = nf90_put_att(ihisfile, id_varrain, 'standard_name', 'precipitation_flux')
                ierr = nf90_put_att(ihisfile, id_varrain, 'long_name', 'precipitation depth per time unit')
             endif
+            
+            if (kmx.gt.0 .and. jawrizc == 1) then
+               idims(1) = id_laydim
+               idims(2) = id_statdim
+               idims(3) = id_timedim
+               call definencvar   (ihisfile, id_zcs, nf90_double, idims,3, 'zcoordinate_c' , 'vertical coordinate at center of flow element and layer'   , 'm',  'station_x_coordinate station_y_coordinate station_name zcoordinate_c')
+               ierr = nf90_put_att(ihisfile, id_zcs, 'positive' , 'up')
+            endif
+            if (kmx.gt.0 .and. jawrizw == 1) then
+               idims(1) = id_laydimw
+               idims(2) = id_statdim
+               idims(3) = id_timedim
+               call definencvar   (ihisfile, id_zws, nf90_double, idims,3, 'zcoordinate_w' , 'vertical coordinate at center of flow element and at layer interface'   , 'm',  'station_x_coordinate station_y_coordinate station_name zcoordinate_w')
+               ierr = nf90_put_att(ihisfile, id_zws, 'positive' , 'up')
+            endif
         end if
 
         if (ncrs > 0) then
@@ -15251,6 +15300,8 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_def_var(ihisfile, 'cross_section_x_coordinate', nf90_double, (/ id_crsptsdim, id_crsdim /), id_crsx)
             ierr = nf90_def_var(ihisfile, 'cross_section_y_coordinate', nf90_double, (/ id_crsptsdim, id_crsdim /), id_crsy)
             ierr = nf90_def_var(ihisfile, 'cross_section_name',         nf90_char,   (/ id_crslendim, id_crsdim /), id_crsname)
+            ierr = nf90_put_att(ihisfile, id_crsname,  'cf_role', 'timeseries_id')
+            ierr = nf90_put_att(ihisfile, id_crsname,  'long_name', 'cross section name'    )
             ierr = unc_addcoordatts(ihisfile, id_crsx, id_crsy, jsferic)
 
             ierr = nf90_def_var(ihisfile, 'cross_section_discharge',     nf90_double, (/ id_crsdim, id_timedim /), id_varQ)
@@ -15273,6 +15324,9 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_def_var(ihisfile, 'cross_section_velocity',     nf90_double, (/ id_crsdim, id_timedim /), id_varu)
             ierr = nf90_put_att(ihisfile, id_varu,    'units', 'm s-1')
             ierr = nf90_put_att(ihisfile, id_varu,    'coordinates', 'cross_section_name')
+            ! Disable writing cross_section_velocity_avg (see UNST-1148), because in a parallel run, it is impossible to compute
+            ! summation of area (denominator) at each computational time step in a cheap way, i.e. without communication between
+            ! partitions. @see subroutines: sumvalueOnCrossSections, updateValuesOnCrossSections
             !ierr = nf90_def_var(ihisfile, 'cross_section_velocity_avg', nf90_double, (/ id_crsdim, id_timedim /), id_varuavg)
             !ierr = nf90_put_att(ihisfile, id_varuavg, 'units', 'm s-1')
             !ierr = nf90_put_att(ihisfile, id_varuavg, 'coordinates', 'cross_section_name')
@@ -15292,11 +15346,11 @@ subroutine unc_write_his(tim)            ! wrihis
             
             if( jased == 4 .and. stmpar%lsedtot > 0 ) then
                ierr = nf90_def_var(ihisfile, 'cross_section_bedload_sediment_transport', nf90_double, (/ id_crsdim, id_timedim /), id_sedbtrans)
-               ierr = nf90_put_att(ihisfile, id_sedbtrans, 'long_name', 'Bed load sediment transport')
+               ierr = nf90_put_att(ihisfile, id_sedbtrans, 'long_name', 'cumulative bed load sediment transport')
                ierr = nf90_put_att(ihisfile, id_sedbtrans, 'units', 'kg s-1')
                if( stmpar%lsedsus > 0 ) then
                   ierr = nf90_def_var(ihisfile, 'cross_section_suspended_sediment_transport', nf90_double, (/ id_crsdim, id_timedim /), id_sedstrans)
-                  ierr = nf90_put_att(ihisfile, id_sedstrans, 'long_name', 'Suspended load sediment transport')
+                  ierr = nf90_put_att(ihisfile, id_sedstrans, 'long_name', 'cumulative suspended load sediment transport')
                   ierr = nf90_put_att(ihisfile, id_sedstrans, 'units', 'kg s-1')
                endif
                
@@ -15310,6 +15364,8 @@ subroutine unc_write_his(tim)            ! wrihis
 
            ierr = nf90_def_var(ihisfile, 'source_sink_name', nf90_char, (/ id_srclendim, id_srcdim/), id_srcname)
            ierr = nf90_put_att(ihisfile, id_srcname,  'cf_role', 'timeseries_id')
+           ierr = nf90_put_att(ihisfile, id_srcname,  'long_name', 'source and sink name'    )
+
            ierr = nf90_def_var(ihisfile, 'source_sink_x_coordinate', nf90_double, (/ id_srcdim, id_srcptsdim  /), id_srcx)
            ierr = nf90_def_var(ihisfile, 'source_sink_y_coordinate', nf90_double, (/ id_srcdim, id_srcptsdim /), id_srcy)
            ierr = unc_addcoordatts(ihisfile, id_srcx, id_srcy, jsferic)
@@ -15372,6 +15428,8 @@ subroutine unc_write_his(tim)            ! wrihis
 
             ierr = nf90_def_dim(ihisfile, 'general_structures', ntmp, id_genstrudim)
             ierr = nf90_def_var(ihisfile, 'general_structure_name',  nf90_char,   (/ id_strlendim, id_genstrudim /), id_genstruname)
+            ierr = nf90_put_att(ihisfile, id_genstruname,  'cf_role',   'timeseries_id')
+            ierr = nf90_put_att(ihisfile, id_genstruname,  'long_name', 'general structure name'    )
 
             ierr = nf90_def_var(ihisfile, 'general_structure_discharge',     nf90_double, (/ id_genstrudim, id_timedim /), id_genstru_dis)
             !ierr = nf90_put_att(ihisfile, id_genstru_dis, 'standard_name', 'integral_of_discharge_wrt_time') ! TODO: introduce time windows in nc
@@ -15421,6 +15479,8 @@ subroutine unc_write_his(tim)            ! wrihis
             !ierr = nf90_def_dim(ihisfile, 'pump_name_len', 64, id_pumplendim)
             ierr = nf90_def_var(ihisfile, 'pump_name',  nf90_char,   (/ id_strlendim, id_pumpdim /), id_pumpname)
             !ierr = nf90_put_att(ihisfile, id_pumpname,  'cf_role', 'timeseries_id')
+            ierr = nf90_put_att(ihisfile, id_pumpname,  'cf_role',   'timeseries_id')
+            ierr = nf90_put_att(ihisfile, id_pumpname,  'long_name', 'pump name'    )
 
             ierr = nf90_def_var(ihisfile, 'pump_discharge', nf90_double, (/ id_pumpdim, id_timedim /), id_pump_dis)
             !ierr = nf90_put_att(ihisfile, id_pump_dis, 'standard_name', 'pump_discharge')
@@ -15450,6 +15510,8 @@ subroutine unc_write_his(tim)            ! wrihis
         if(jahisgate > 0 .and. ngatesg > 0 ) then
             ierr = nf90_def_dim(ihisfile, 'gates', ngatesg, id_gatedim)
             ierr = nf90_def_var(ihisfile, 'gate_name',  nf90_char,   (/ id_strlendim, id_gatedim /), id_gatename)
+            ierr = nf90_put_att(ihisfile, id_gatename,  'cf_role',   'timeseries_id')
+            ierr = nf90_put_att(ihisfile, id_gatename,  'long_name', 'gate name'    )
 
             ierr = nf90_def_var(ihisfile, 'gate_discharge', nf90_double, (/ id_gatedim, id_timedim /), id_gate_dis)
             !ierr = nf90_put_att(ihisfile, id_gate_dis, 'standard_name', 'gate_discharge')
@@ -15479,6 +15541,8 @@ subroutine unc_write_his(tim)            ! wrihis
          if(jahisgate > 0 .and. ngategen > 0 ) then
             ierr = nf90_def_dim(ihisfile, 'gategens', ngategen, id_gategendim)
             ierr = nf90_def_var(ihisfile, 'gategen_name',  nf90_char,   (/ id_strlendim, id_gategendim /), id_gategenname)
+            ierr = nf90_put_att(ihisfile, id_gategenname,  'cf_role',   'timeseries_id')
+            ierr = nf90_put_att(ihisfile, id_gategenname,  'long_name', 'gate name'    )
 
             ierr = nf90_def_var(ihisfile, 'gategen_discharge',     nf90_double, (/ id_gategendim, id_timedim /), id_gategen_dis)
             !ierr = nf90_put_att(ihisfile, id_gategen_dis, 'standard_name', 'integral_of_discharge_wrt_time') ! TODO: introduce time windows in nc
@@ -15533,6 +15597,8 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_def_dim(ihisfile, 'dams', ncdamsg, id_cdamdim)
             !ierr = nf90_def_dim(ihisfile, 'cdam_name_len', 64, id_cdamlendim)
             ierr = nf90_def_var(ihisfile, 'cdam_name',  nf90_char,   (/ id_strlendim, id_cdamdim /), id_cdamname)
+            ierr = nf90_put_att(ihisfile, id_cdamname,  'cf_role',   'timeseries_id')
+            ierr = nf90_put_att(ihisfile, id_cdamname,  'long_name', 'controllable dam name'    )
 
             ierr = nf90_def_var(ihisfile, 'cdam_discharge',     nf90_double, (/ id_cdamdim, id_timedim /), id_cdam_dis)
             !ierr = nf90_put_att(ihisfile, id_cdam_dis, 'standard_name', 'cdam_discharge')
@@ -15562,7 +15628,9 @@ subroutine unc_write_his(tim)            ! wrihis
         if(jahisweir > 0 .and. nweirgen > 0 ) then
             ierr = nf90_def_dim(ihisfile, 'weirgens', nweirgen, id_weirgendim)
             ierr = nf90_def_var(ihisfile, 'weirgen_name',  nf90_char,   (/ id_strlendim, id_weirgendim /), id_weirgenname)
-
+            ierr = nf90_put_att(ihisfile, id_weirgenname,  'cf_role',   'timeseries_id')
+            ierr = nf90_put_att(ihisfile, id_weirgenname,  'long_name', 'weir name'    )
+            
             ierr = nf90_def_var(ihisfile, 'weirgen_discharge',     nf90_double, (/ id_weirgendim, id_timedim /), id_weirgen_dis)
             !ierr = nf90_put_att(ihisfile, id_weirgen_dis, 'standard_name', 'integral_of_discharge_wrt_time') ! TODO: introduce time windows in nc
             ierr = nf90_put_att(ihisfile, id_weirgen_dis, 'long_name', 'weir discharge (via general structure)')
@@ -15709,8 +15777,13 @@ subroutine unc_write_his(tim)            ! wrihis
        ierr = nf90_put_var(ihisfile,    id_vars,   valobsT(:,IPNT_S1),    start = (/ 1, it_his /), count = (/ ntot, 1 /))
        ierr = nf90_put_var(ihisfile,    id_hs  ,   valobsT(:,IPNT_HS),    start = (/ 1, it_his /), count = (/ ntot, 1 /))
        ierr = nf90_put_var(ihisfile,    id_varb,   valobsT(:,IPNT_BL),    start = (/ 1, it_his /), count = (/ ntot, 1 /))
-       ierr = nf90_put_var(ihisfile,    id_statx,  xobs(:),               start = (/ 1, it_his /), count = (/ ntot, 1 /))
-       ierr = nf90_put_var(ihisfile,    id_staty,  yobs(:),               start = (/ 1, it_his /), count = (/ ntot, 1 /))
+       if ( nummovobs > 0 ) then
+          ierr = nf90_put_var(ihisfile,    id_statx,  xobs(:),            start = (/ 1, it_his /), count = (/ ntot, 1 /))
+          ierr = nf90_put_var(ihisfile,    id_staty,  yobs(:),            start = (/ 1, it_his /), count = (/ ntot, 1 /))
+       else
+          ierr = nf90_put_var(ihisfile,    id_statx,  xobs(:),            start = (/ 1 /), count = (/ ntot /))
+          ierr = nf90_put_var(ihisfile,    id_staty,  yobs(:),            start = (/ 1 /), count = (/ ntot /))
+       endif
     endif
 
     if ( jawave.eq.4 ) then
@@ -15880,10 +15953,10 @@ subroutine unc_write_his(tim)            ! wrihis
           
           if( jased == 4 .and. stmpar%lsedtot > 0 ) then
              IP = IPNT_HUA + NUMCONST_MDU + 1
-             ierr = nf90_put_var(ihisfile, id_sedbtrans, crs(i)%sumvalcur(IP), (/ i, it_his /))
+             ierr = nf90_put_var(ihisfile, id_sedbtrans, crs(i)%sumvalcum(IP), (/ i, it_his /))
              if( stmpar%lsedsus > 0 ) then
                 IP = IP + 1
-                ierr = nf90_put_var(ihisfile, id_sedstrans, crs(i)%sumvalcur(IP), (/ i, it_his /))
+                ierr = nf90_put_var(ihisfile, id_sedstrans, crs(i)%sumvalcum(IP), (/ i, it_his /))
              endif
           endif
        end do

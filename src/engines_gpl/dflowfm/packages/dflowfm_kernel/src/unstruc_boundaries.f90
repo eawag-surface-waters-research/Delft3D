@@ -620,7 +620,7 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
      end if
      
   ! DEBUG JRE sedfrac
-  else if (qidfm(1:10) == 'sedfracbnd' ) then
+  else if (qidfm(1:10) == 'sedfracbnd' .and. jased > 0) then
      
      kce = 1     
      call get_sedfracname(qidfm, sfnam, qidnam)    
@@ -641,9 +641,11 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
 
      call selectelset( filename, filetype, xe, ye, xyen, kce, nx, kesf(nbndsf(isf)+1:,isf), numsf, usemask=.false.)
      WRITE(msgbuf,'(3a,i8,a)') trim(qid), ' ', trim(filename) , numsf, ' nr of sedfrac bndcells' ; call msg_flush()
-     call appendrettime(qidfm, nbndsf(isf) + 1, return_time)
-     nbndsf(isf) = nbndsf(isf) + numsf
-     nbndsf_all = maxval(nbndsf(1:numfracs))
+     if (numsf > 0) then
+        call appendrettime(qidfm, nbndsf(isf) + 1, return_time)
+        nbndsf(isf) = nbndsf(isf) + numsf
+        nbndsf_all = maxval(nbndsf(1:numfracs))
+     endif
      
   !\ JRE DEBUG sedfrac
      
@@ -1198,15 +1200,24 @@ subroutine init_threttimes()
           threttim(iconst,nseg) = thrtt(i)
        endif
     else if(qidfm(1:10) == 'sedfracbnd') then
+       ierr = 0
        call get_sedfracname(qidfm, sedfracnam, qidnam)
        ifrac = findname(numfracs, sfnames, sedfracnam)
-       nseg = bndsf(ifrac)%k(5,thrtn(i))
-       if (nseg == 0 .or. nseg > nopenbndsect) then
-          write(msgbuf,'(i8,a)') thrtn(i), ' sedfrac boundary point is assigned to incorrect boundary segment' ; call err_flush()
-          cycle
+       if (allocated(bndsf)) then
+          nseg = bndsf(ifrac)%k(5,thrtn(i))
+          if (nseg /=i) cycle
+          if (nseg == 0 .or. nseg > nopenbndsect) then
+             ierr = 1
+          endif
+          iconst = ifrac2const(ifrac)
+          threttim(iconst,nseg) = thrtt(i)
+       else
+           ierr = 1
        endif
-       iconst = ifrac2const(ifrac)
-       threttim(iconst,nseg) = thrtt(i)
+       if( ierr /= 0 ) then
+           write(msgbuf,'(i8,a)') thrtn(i), ' sedfrac boundary point is assigned to incorrect boundary segment' ; call err_flush()
+           cycle
+       endif
     endif
  enddo
  
