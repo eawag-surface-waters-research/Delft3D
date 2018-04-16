@@ -34,6 +34,7 @@ function datetime_to_string(date, time) result (dtstring)
 ! NONE
 !!--declarations----------------------------------------------------------------
 !
+use time_module, only : ymd2jul
 implicit none
 !
 ! Global variables
@@ -56,7 +57,7 @@ integer       :: julday
 !
 !! executable statements -------------------------------------------------------
 !
-   call juldat(date, julday)
+   julday = ymd2jul(date)
    call timdat(julday, time, idate, itime)
    iyear = idate/10000
    imon  = (idate - iyear*10000)/100

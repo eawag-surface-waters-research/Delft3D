@@ -37,7 +37,7 @@ module wrwaq
 #endif
 
   use unstruc_files
-  
+
   implicit none
 !!--copyright-------------------------------------------------------------------
 ! Copyright (c) 2007, Deltares. All rights reserved.
@@ -471,6 +471,7 @@ subroutine waq_wri_hyd()
     use m_flowexternalforcings
     use m_flowgeom
     use unstruc_model
+    use time_module
 
     implicit none
 !
@@ -517,7 +518,7 @@ subroutine waq_wri_hyd()
 
 !! Time block
     read (refdat, '(i8)') itdate
-    call juldat ( itdate, julday )
+    julday = ymd2jul( itdate )
     write ( lunhyd , '(A,I8,A )' ) 'reference-time              ''',itdate,'000000'''
     call timdat( julday, tstart_user, idatum, itijd )
     write ( lunhyd , '(A,I8,I6.6,A)') 'hydrodynamic-start-time     ''',idatum,itijd,''''

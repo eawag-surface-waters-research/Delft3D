@@ -43,6 +43,7 @@
 ! NONE
 !!--declarations----------------------------------------------------------------
       use precision
+      use time_module
       implicit none
 !
 !           Global variables
@@ -160,7 +161,7 @@
       write ( lunout2 , '(a      )' ) '''                                                            '''
       write ( lunout1 , '(a      )' ) 'end-description'
       write ( lunout2 , '(a      )' ) 'end-description'
-      call juldat ( itdate, julday )
+      julday = ymd2jul ( itdate )
       write ( lunout1 , '(a,i8,a )' ) 'reference-time           ''',itdate,'000000'''
       write ( lunout2 , '(a,i8,a )' ) 'reference-time           ''',itdate,'000000'''
       timsec = tstart*60.0

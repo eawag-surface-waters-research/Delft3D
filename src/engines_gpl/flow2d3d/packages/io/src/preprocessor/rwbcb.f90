@@ -39,6 +39,7 @@ subroutine rwbcb(lundia    ,lunrd     ,filinp    ,error     ,itstrt    , &
     use precision
     use globaldata
     use string_module
+    use time_module
     !
     implicit none
     !
@@ -317,7 +318,7 @@ subroutine rwbcb(lundia    ,lunrd     ,filinp    ,error     ,itstrt    , &
           !
           !---------Calculate Date and time for RTC
           !
-          call juldat(timref    ,julday    )
+          julday = ymd2jul(timref)
           call timdat(julday    ,timrd*60.0_fp,iacdat    ,iactim    )
           !
           !---------Re-define ITOLD

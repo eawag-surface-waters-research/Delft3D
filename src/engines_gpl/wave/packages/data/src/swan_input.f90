@@ -1120,6 +1120,7 @@ end subroutine scan_mdw
 subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     use properties
     use read_grids
+    use time_module
     implicit none
     !
     type(swan)                  :: sr
@@ -1298,7 +1299,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
        goto 999
     endif
     call setrefdate(wavedata%time,refdate)
-    call juldat(refdate ,sr%refjulday)
+    sr%refjulday = ymd2jul(refdate)
     !
     tscale = 60.0
     call prop_get_real   (mdw_ptr, 'General', 'TScale', tscale)

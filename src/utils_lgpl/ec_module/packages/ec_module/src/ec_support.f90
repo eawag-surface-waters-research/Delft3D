@@ -194,10 +194,11 @@ module m_ec_support
          integer,          intent(inout) :: minp     !< IO unit number
          character(len=*), intent(in)    :: filename !< relative path
          !
-         integer :: ierror   !< netcdf helper variable
-         integer :: i        !< loop counter
-         logical :: unitused !< IO unit number already in use
-         integer :: istat    !< status of file open operation
+         integer :: ierror         !< netcdf helper variable
+         integer :: i              !< loop counter
+         logical :: unitused       !< IO unit number already in use
+         integer :: istat          !< status of file open operation
+         integer :: chunkSizeHint  !< chunk size for NetCDF
          !
          success = .false.
          unitused = .false.
@@ -213,12 +214,9 @@ module m_ec_support
          endif
          ! Special case: NetCDF.
          if (index(filename, '.nc') > 0) then
-            ierror = nf90_open(filename, NF90_NOWRITE, minp)
-            if (ecSupportNetcdfCheckError(ierror, "opening file", filename)) then
-               success = .true.
-            else
-               success = .false.
-            end if
+            chunkSizeHint = 4096   ! maximum allowed value
+            ierror = nf90_open(trim(filename), NF90_NOWRITE, minp, chunkSizeHint)
+            success = ecSupportNetcdfCheckError(ierror, "opening file", filename)
             return
          endif
          ! Locate an unused file unit.
@@ -836,12 +834,9 @@ end subroutine ecInstanceListSourceItems
          integer :: jmin     !< helper index for location of '-' in time zone
          integer :: minsize  !< helper index for time zone
          integer :: temp     !< helper variable
-         integer :: yyyymmdd !< reference date as Gregorian yyyymmdd
-         integer :: jdn      !< julian day number
          logical :: ok       !< check of refdate is found
          !
          success = .false.
-         yyyymmdd = 0
          !
          call str_lower(string)
          ! Determine the time unit.
@@ -865,15 +860,7 @@ end subroutine ecInstanceListSourceItems
          if (present(ref_date)) then
             if (i /= 6) then
                ! Date
-               read(string(i : i+4), '(I4)') temp
-               yyyymmdd = yyyymmdd + 10000*temp
-               read(string(i+5 : i+7), '(I2)') temp
-               yyyymmdd = yyyymmdd + 100*temp
-               read(string(i+8 : i+10), '(I2)') temp
-               yyyymmdd = yyyymmdd + temp
-               jdn = ymd2jul(yyyymmdd)
-               if (jdn /= 0) then
-                  ref_date = real(jdn, hp) - 2400000.5_hp ! Julian Day to Reduced Julian Date (exact)
+               if (ymd2reduced_jul(string(i:i+10), ref_date)) then
                   ! Time
                   if(len_trim(string)>=i+18) then
                      read(string(i+11 : i+12), *) temp
@@ -938,7 +925,6 @@ end subroutine ecInstanceListSourceItems
          integer       :: posTime     !< position in a string of 'TIME' or 'time'
          integer       :: ierr        !< error code
          integer       :: i           !< loop counter
-         integer       :: jdn         !< julian day number
          real(kind=hp) :: time        !< time found
          integer       :: hh          !< hour in refdate found
 
@@ -970,11 +956,8 @@ end subroutine ecInstanceListSourceItems
             endif
 
             if (ierr == 0) then
-               jdn = ymd2jul(yyyymmdd)
-               if (jdn /= 0) then
-                  ref_date = real(jdn, hp) - 2400000.5_hp + real(hh, hp) / 24.0_hp
-                  success = .true.
-               endif
+               success = ymd2reduced_jul(yyyymmdd, ref_date)
+               ref_date = ref_date + real(hh, hp) / 24.0_hp
             endif
          endif
 

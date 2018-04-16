@@ -40,7 +40,9 @@ module meteo_read
 !!--declarations----------------------------------------------------------------
    use precision
    use meteo_data
+   use time_module
 
+   implicit none
 
 contains
 
@@ -217,8 +219,8 @@ function readtime(minp, meteoitem, flow_itdate, flow_tzone, tread) result(succes
    !
    ! Compare reference times of FLOW and METEO
    !
-   call juldat(meteo_itdate, meteo_julday)
-   call juldat(flow_itdate, flow_julday)
+   meteo_julday = ymd2jul(meteo_itdate)
+   flow_julday = ymd2jul(flow_itdate)
    !
    ! Determine difference between time zones of FLOW and METEO
    !

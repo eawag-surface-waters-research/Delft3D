@@ -44,6 +44,7 @@ subroutine tricom_init(olv_handle, gdp)
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use time_module
     use meteo
     use SyncRtcFlow
     use sync_flm
@@ -925,7 +926,7 @@ subroutine tricom_init(olv_handle, gdp)
     !
     ! Calculate Julian start day for use in TRISOL
     !
-    call juldat(itdate    ,julday    )
+    julday = ymd2jul(itdate)
     !
     ! Define start time and timesteps (in seconds)
     !

@@ -2940,13 +2940,17 @@ module m_ec_provider
          integer,             intent(in) :: k_timestep_unit  !< Kernel's time step unit (1=seconds, 2=minutes, 3=hours)
          real(hp), optional,  intent(in) :: dtnodal          !< Nodal factors update interval
          real(hp) :: defTimeZone
+         character(len=12) :: date  ! date in error message
          !
          success = .false.
          !
          if (k_refdate > -1) then
 
-!           fileReaderPtr%tframe%k_refdate = dble(ymd2jul(k_refdate) - 2400001.0_hp)         ! This EXACTLY yields MJD (epoch = 1858-11-17, 0 hours)
-            fileReaderPtr%tframe%k_refdate = dble(ymd2jul(k_refdate) - 2400000.5_hp)         ! This EXACTLY yields RJD (epoch = 1858-11-17, 12 hours)
+            if ( .not. ymd2reduced_jul(k_refdate, fileReaderPtr%tframe%k_refdate)) then
+               write(date,'(i0)') k_refdate
+               call setECMessage("WARNING: error converting date " // trim(date) // " into reduced Julian date")
+               fileReaderPtr%tframe%k_refdate = -1
+            endif
             fileReaderPtr%tframe%k_timezone = k_timezone
             fileReaderPtr%tframe%k_timestep_unit = k_timestep_unit
 

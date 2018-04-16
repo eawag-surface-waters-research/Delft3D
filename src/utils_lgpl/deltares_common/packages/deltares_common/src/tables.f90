@@ -36,6 +36,8 @@ module tables
 !!--declarations----------------------------------------------------------------
     use precision
     use string_module
+    use time_module
+    implicit none
     !
     public tablefiletype
     !
@@ -861,13 +863,13 @@ subroutine org_readtable_keyword()
                !
                ! <yyyymmdd>
                !
-               call juldat(ifield(2),table%refdate)
+               table%refdate = ymd2jul(ifield(2))
                table%reftime = 0.0_fp
              elseif (ntoken == 3 .and. itype(3) == INT_READ) then
                !
                ! <yyyymmdd> <hhmmss>
                !
-               call juldat(ifield(2),table%refdate)
+               table%refdate = ymd2jul(ifield(2))
                ihh = ifield(3) / 10000
                ifield(3) = ifield(3) - ihh * 10000
                imm = ifield(3) / 100
@@ -1055,7 +1057,7 @@ label_token: do i = 1, ntoken
                    ! always use the string value cfield(i)
                    !
                    read(cfield(i),'(I8,I2,I2,I2)') iyyyymmdd,ihh,imm,iss
-                   call juldat(iyyyymmdd,ijuldate)
+                   ijuldate = ymd2jul(iyyyymmdd)
                    table%times(irec) = real(ijuldate,hp) + &
                                      & real(ihh,hp) / 60.0_hp + &
                                      & real(imm,hp) / 1440.0_hp + &
