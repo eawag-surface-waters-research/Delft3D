@@ -70,6 +70,7 @@ module geometry_module
    public :: dprodout            ! line 3941
    public :: dcosphi             ! line 3986
    public :: spher2locvec        ! line 4391
+   public :: spher2locvec2       ! line 4391
    public :: normalin            ! line 4825
    public :: normalout           ! line 4884
    public :: normaloutchk        ! line 4948  
@@ -827,7 +828,6 @@ module geometry_module
 
          !         write(6,"('dbpinpol: ipoly=', I4, ', istart=', I16, ', iend=', I16)") ipoly, istart, iend
 
-
          if ( istart.ge.iend .or. iend.gt.NPL ) exit ! done
 
          if ( iselect.eq.-1 .and. (zpl(istart).eq.DMISS .or.  zpl(istart).ge.0) ) cycle
@@ -1369,8 +1369,101 @@ module geometry_module
       end if
 
       return
-      end subroutine spher2locvec
+      end subroutine spher2locvec 
 
+            subroutine spher2locvec2(xref,yref,N,xglob,yglob,vxglob,vyglob,vxloc,vyloc, jsferic, jasfer3D, dmiss)
+
+      use mathconsts, only: degrad_hp
+
+      implicit none
+
+      double precision,               intent(in)  :: xref,  yref     !< global coordinates of reference point (longitude, latitude)
+      integer,                        intent(in)  :: N               !< number of global coordinates
+      double precision, intent(in)  :: xglob, yglob    !< global coordinates, (longitude, latitude)
+      double precision, intent(in)  :: vxglob, vyglob !< vector components in global coordinates
+      double precision, dimension(N), intent(out) :: vxloc,  vyloc   !< vector components in local coordinates
+
+      double precision, dimension(3)              :: exxp, eyyp, ezzp   ! base vectors of rotated 3D Cartesian reference frame
+      double precision, dimension(3)              :: elambda, ephi
+      double precision, dimension(3)              :: elambdap, ephip
+      double precision, dimension(3)              :: elambdaloc, ephiloc
+      double precision                            :: vxx, vyy, vzz
+
+      double precision                            :: xx, yy, zz     !  3D Cartesian coordinates
+      double precision                            :: xxp, yyp, zzp  !  3D Cartesian coordinates in rotated frame
+      double precision                            :: xloc, yloc
+
+      double precision                            :: lambda0, phi0
+      double precision                            :: lambda, phi
+      double precision                            :: lambdap, phip
+
+      integer                                     :: i
+      integer, intent(in)                         :: jsferic
+      integer, intent(in)                         :: jasfer3D
+      double precision, intent(in)                :: dmiss
+
+
+      if ( jsferic.eq.0 .or. jasfer3D.eq.0 ) then
+         do i=1,N
+            vxloc(i) = vxglob
+            vyloc(i) = vyglob
+         end do
+
+      else
+         phi0 = yref*degrad_hp
+         lambda0 = xref*degrad_hp
+
+         !           compute base vectors
+         exxp = (/  cos(phi0) * cos(lambda0),  cos(phi0) * sin(lambda0), sin(phi0) /)
+         eyyp = (/             -sin(lambda0),              cos(lambda0), 0d0       /)
+         ezzp = (/ -sin(phi0) * cos(lambda0), -sin(phi0) * sin(lambda0), cos(phi0) /)
+
+         do i=1,N
+            lambda = xglob*degrad_hp
+            phi    = yglob*degrad_hp
+
+            !              get 3d-coordinates
+            call sphertocart3d(xglob,yglob,xx,yy,zz)
+
+            !              project to rotated frame
+            xxp = exxp(1) * xx + exxp(2) * yy + exxp(3) * zz
+            yyp = eyyp(1) * xx + eyyp(2) * yy + eyyp(3) * zz
+            zzp = ezzp(1) * xx + ezzp(2) * yy + ezzp(3) * zz
+
+            !              tranform to local spherical coordinates
+            call Cart3Dtospher(xxp,yyp,zzp,xloc,yloc,xref)
+
+            lambdap = xloc*degrad_hp
+            phip    = yloc*degrad_hp
+
+            !              compute global base vectors at other point in 3D (xx,yy,zz) frame
+            elambda = (/          -sin(lambda),           cos(lambda), 0d0 /)
+            ephi    = (/ -sin(phi)*cos(lambda), -sin(phi)*sin(lambda), cos(phi) /)
+
+            !              compute vector in 3D (xx,yy,zz) frame
+            vxx = vxglob * elambda(1) + vyglob * ephi(1)
+            vyy = vxglob * elambda(2) + vyglob * ephi(2)
+            vzz = vxglob * elambda(3) + vyglob * ephi(3)
+
+            !              compute base vectors at other point in rotated 3D (xxp,yyp,zzp) frame
+            elambdap = (/           -sin(lambdap),            cos(lambdap), 0d0 /)
+            ephip    = (/ -sin(phip)*cos(lambdap), -sin(phip)*sin(lambdap), cos(phip) /)
+
+            !              compute local base vectors in (xx,yy,zz) frame
+            elambdaloc = exxp * elambdap(1) + eyyp * elambdap(2) + ezzp * elambda(3)
+            ephiloc    = exxp * ephip(1)    + eyyp * ephip(2)    + ezzp * ephip(3)
+
+            !              compute vectors in other point in local base (elambdaloc,ephiloc)
+            vxloc = elambdaloc(1) * vxx + elambdaloc(2) * vyy + elambdaloc(3) * vzz
+            vyloc = ephiloc(1)    * vxx + ephiloc(2)    * vyy + ephiloc(3)    * vzz
+         end do
+
+      end if
+
+      return
+      end subroutine spher2locvec2
+
+      
       !
       ! normalin
       !
