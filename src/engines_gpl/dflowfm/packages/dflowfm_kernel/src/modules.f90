@@ -1484,6 +1484,17 @@ end module m_bnd
  integer         , allocatable     :: L2cdamsg(:)       !< second ncdam point in cdam signal ncdamsg
  integer                           :: ncdamsg           !< nr of cdam signals specified
  character(len=128), allocatable, target :: cdam_ids(:)
+ 
+ type pillar_type
+    integer                                     :: np    !< number of pillars
+    double precision, dimension(:), allocatable :: xcor  !< x-coordinates of pillars
+    double precision, dimension(:), allocatable :: ycor  !< y-coordinates of pillars
+    double precision, dimension(:), allocatable :: dia   !< radius od pillars
+    double precision, dimension(:), allocatable :: cd    !< Cd coefficient of pillars
+ end type pillar_type
+ type(pillar_Type), dimension(:), allocatable :: pillar
+ double precision,  dimension(:), allocatable :: Cpil
+ 
 
  integer                           :: ncgen             !< nr of controllable generalstr points
  double precision, allocatable     :: xcgen(:)          !< generalstr nodes xcor = xz(k1)
@@ -2032,7 +2043,9 @@ end subroutine default_turbulence
 
  integer                           :: jainirho          !< Initialise rho at start at flowinit (otherwise first step without barocl)
 
- integer                           :: jasecflow         !< 0: no, 1 : yes
+ integer                           :: jasecflow         !< 0: no, 1: yes
+
+ integer                           :: japillar          !< 0: no, 1: yes
 
  integer                           :: jaequili          !< secondary flow intensity gets calculated as equilibrium (0=no, 1=yes)
 
@@ -2385,7 +2398,8 @@ subroutine default_flowparameters()
     ! DOODSONSTART = 57.555D0 ; DOODSONSTOP = 275.555D0 ; Doodsoneps = .03D0    ! Delft3d
 
     jasecflow = 0     ! include secondary flow (0=no, 1=yes)
-    jasecflow    = 0
+
+    japillar  = 0     ! include pillar (0=no, 1=yes)
 
     jaequili  = 0     ! equilibrium secondary flow (0=no, 1=yes)
 

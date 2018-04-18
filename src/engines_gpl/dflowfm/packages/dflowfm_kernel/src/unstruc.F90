@@ -689,6 +689,10 @@ end subroutine flow_finalize_single_timestep
  if (kmx == 0 .and. javeg > 0) then                  ! overwrite cfuhi in 2D with veg in plant area's
     call setbaptist()
  endif
+ 
+ if( japillar == 1 ) then
+    call pillar_upd()
+ endif
 
  ! TIDAL TURBINES: Insert equivalent calls to updturbine and applyturbines here
 
@@ -736,13 +740,26 @@ end subroutine flow_finalize_single_timestep
 
  do L = 1,lnx
     k1  = ln(1,L) ; k2 = ln(2,L)
-    rnL = 0.5d0*(  rnveg(k1) +  rnveg(k2) )
+    if( rnveg(k1) > 0d0 .and. rnveg(k2) > 0d0 ) then
+       rnL = 0.5d0*(  rnveg(k1) +  rnveg(k2) )
+    else
+       rnL = max( rnveg(k1), rnveg(k2) )
+    endif
 
     if (hu(L) > 0 .and. rnL > densvegminbap) then  ! overwrite cfuhi on veg locations with 2D Baptist
         if (jaBaptist <= 2) then                   ! compute Baptist on board
            call getcz(hu(L), frcu(L), ifrcutp(L), Czb, L)      ! standard Chezy coeff
-           diaL     = 0.5d0*( diaveg(k1) + diaveg(k2) )
-           stemhL   = 0.5d0*( stemheight(k1) + stemheight(k2) )
+           if( diaveg(k1) > 0d0 .and. diaveg(k2) > 0d0 ) then
+              diaL     = 0.5d0*( diaveg(k1) + diaveg(k2) )
+           else
+              diaL     = max( diaveg(k1), diaveg(k2) )
+           endif
+           if( stemheight(k1) > 0d0 .and. stemheight(k2) > 0d0 ) then
+              stemhL   = 0.5d0*( stemheight(k1) + stemheight(k2) )
+           else
+              stemhL   = max( stemheight(k1), stemheight(k2) )
+           endif
+           stemhL   = min( stemhL, hu(L) )
            gamhg    = 0.5d0*Cdveg*rnL*diaL*stemhL/ag           ! gamma*h/g
            ap       = gamhg + 1d0/(Czb*Czb)
            ! ap     = gamhg + (1d0/Czb*Czb)                    ! old=wrong
@@ -2663,6 +2680,10 @@ subroutine getseg1D(hpr,wu2,dz,ai,frcn,ifrctyp, wid,ar,conv,perim,jaconv)  ! cop
  
  if (nbnd1d2d > 0) then       ! 1d2d boundary check for closed boundaries
     call sethu_1d2d()
+ endif
+ 
+ if (japillar > 0) then
+    call setpillars()
  endif
 
  if (javeg > 0) call setveg()
@@ -21646,7 +21667,8 @@ endif
        phi     = phiv(kk)  ! 0d0                                                                ! 1/s   stemphi
        phit    = phivt(kk) ! 0d0                                                                ! 1/s2  stemomega
        Pl      = stemheight(kk)                                                                 ! m       plantlength
-
+       Pl      = min( Pl, hs(kk) )
+       
        do i = 1, num
 
        stemcos = cos(phi) ; stemsin  = sin(phi)
@@ -35886,21 +35908,28 @@ endif ! read mext file
  if (allocated(uxini)) deallocate(uxini)
  if (allocated(uyini)) deallocate(uyini)
 
- if ( allocated(stemdiam) .and. allocated(stemdens) ) then
+ if (javeg > 0) then
     call realloc(  rnveg, Ndkx, keepExisting=.false., fill=0d0, stat=ierr)
     call aerr   (' rnveg (Ndkx)', ierr, Ndkx)
     call realloc( diaveg, Ndkx, keepExisting=.false., fill=0d0, stat=ierr)
     call aerr   ('diaveg (Ndkx)', ierr, Ndkx)
     javeg = 1
-    do k = 1,ndx
-       if (stemdens(k) > 0d0) then
-           rnveg(k) = stemdens(k)
-          diaveg(k) = stemdiam(k)
-       endif
-       if (stemheight(k) == dmiss) stemheight(k) = 0d0
-    enddo
-    deallocate (stemdiam, stemdens)
-
+    if (.not.allocated(stemheight) .and. japillar == 2) then
+       call realloc(  stemheight, Ndkx, keepExisting=.false., fill=0d0, stat=ierr)
+       call aerr   (' stemheight (Ndkx)', ierr, Ndkx)
+    endif
+        
+    if ( allocated(stemdiam) .and. allocated(stemdens) ) then
+       do k = 1,ndx
+          if (stemdens(k) > 0d0) then
+             rnveg(k) = stemdens(k)
+             diaveg(k) = stemdiam(k)
+          endif
+          if (stemheight(k) == dmiss) stemheight(k) = 0d0
+       enddo
+       deallocate (stemdiam, stemdens)
+    endif
+    
     if (kmx == 0) then
        if (jabaptist >= 3) then
           call realloc(  alfaveg, Lnx, keepExisting=.false., fill=0d0, stat=ierr)
@@ -40825,4 +40854,98 @@ end subroutine makethindamadmin
  allocate ( rr   (ndx) , stat=ierr )
  call aerr('rr   (ndx)', ierr, ndx )  ; rr  = 0    
 
- end subroutine alloc_jacobi
+end subroutine alloc_jacobi
+
+! =================================================================================================
+! =================================================================================================
+   subroutine setpillars()
+      use m_flowgeom            , only: ndx, ba
+      use m_flowexternalforcings, only: pillar, Cpil
+      use m_vegetation          , only: rnveg, diaveg, stemheight
+      use gridoperations
+      use m_flowparameters      , only: japillar
+      implicit none
+      integer          :: i, j, m
+      double precision :: pi
+      integer         , dimension(:), allocatable :: npil
+      double precision, dimension(:), allocatable :: cdeq
+      double precision, dimension(:), allocatable :: Aeff
+      
+      if( japillar == 1 ) then
+         if( .not. allocated(Cpil) ) allocate( Cpil(ndx) )
+      endif
+      pi = 4d0 * atan( 1d0 )
+
+      if( japillar == 2 ) then
+         if( allocated( cdeq ) ) deallocate( cdeq, npil )
+         allocate( cdeq(ndx), npil(ndx) )
+         cdeq = 0d0
+         npil = 0
+         do m = 1,size(pillar)
+            do i = 1,pillar(m)%np
+               if( pillar(m)%dia(i) == -999d0 .or. pillar(m)%cd(i) == -999d0 ) cycle
+               call incells( pillar(m)%xcor(i), pillar(m)%ycor(i), j )
+               if( j == 0 ) cycle
+               rnveg(j) = rnveg(j) + pillar(m)%dia(i)**2 * pi * 0.25d0 / ba(j)
+               cdeq(j)  = cdeq(j)  + pillar(m)%cd(i) * pillar(m)%dia(i)
+               npil(j) = npil(j) + 1
+            enddo
+         enddo
+         do j = 1,ndx
+            if( npil(j) == 0 ) cycle
+            diaveg(j)  = diaveg(j) + cdeq(j) / npil(j)
+            stemheight(j) = 1d30
+         enddo
+         deallocate( cdeq )
+         deallocate( npil )
+         
+      elseif( japillar == 1 ) then   ! Delft3D implimentation
+         if (allocated(Aeff) ) deallocate( Aeff, cdeq )
+         allocate( Aeff(ndx), cdeq(ndx) )
+         do j = 1,ndx
+            Aeff(j) = ba(j)
+         enddo
+         cdeq = 0d0
+         do m = 1,size(pillar)
+            do i = 1,pillar(m)%np
+               if( pillar(m)%dia(i) == -999d0 .or. pillar(m)%cd(i) == -999d0 ) cycle
+               call incells( pillar(m)%xcor(i), pillar(m)%ycor(i), j )
+               if( j == 0 ) cycle
+               cdeq(j) = cdeq(j) + pillar(m)%cd(i) * pillar(m)%dia(i)
+               Aeff(j) = Aeff(j) - pillar(m)%dia(i)**2 * pi * 0.25d0
+            enddo
+         enddo
+         Cpil = 0d0
+         do j = 1,ndx
+            if( cdeq(j) == 0 ) cycle
+            if( Aeff(j) <= 0d0 ) then
+               Cpil(j) = 1d30
+               cycle
+            endif
+            Cpil(j)  = cdeq(j) * 0.25d0 / Aeff(j) * sqrt( ba(j) * pi )
+         enddo
+         deallocate( Aeff )
+         deallocate( cdeq )
+      endif
+
+   end subroutine setpillars
+   
+! =================================================================================================
+! =================================================================================================
+   subroutine pillar_upd()
+      use m_flowexternalforcings, only: Cpil
+      use m_flowgeom            , only: lnx, ln, dx
+      use m_flow                , only: u1, v, advi
+      implicit none
+      integer :: L, k1, k2
+      double precision :: CpilL, uv
+       
+      do L = 1,lnx
+         k1 = ln(1,L)
+         k2 = ln(2,L)
+         CpilL = ( cpil(k1) + cpil(k2) ) * 0.5d0
+         uv = sqrt( u1(L) * u1(L) + v(L) * v(L) )
+         advi(L) = advi(L) + CpilL * uv / dx(L)
+      enddo
+    
+   end subroutine pillar_upd

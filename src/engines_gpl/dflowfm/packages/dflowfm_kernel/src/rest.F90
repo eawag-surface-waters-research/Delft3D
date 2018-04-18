@@ -641,9 +641,14 @@ end subroutine read_land_boundary_netcdf
                    DZL(NPL) = DZ1
                    DZR(NPL) = DZ2  
                 else if (jakol45 == 2) then
-                   IF (.NOT. ALLOCATED(DZL) ) THEN 
-                      ALLOCATE ( DZL(MAXPOL), DZR(MAXPOL), DCREST(MAXPOL), DTL(MAXPOL), DTR(MAXPOL), DVEG(MAXPOL), IWEIRT(MAXPOL) )
-                   ENDIF     
+                   if( allocated(DZL)    ) deallocate( DZL )
+                   if( allocated(DZR)    ) deallocate( DZR )
+                   if( allocated(DCREST) ) deallocate( DCREST )
+                   if( allocated(DTL)    ) deallocate( DTL )
+                   if( allocated(DTR)    ) deallocate( DTR )
+                   if( allocated(DVEG)   ) deallocate( DVEG )
+                   if( allocated(IWEIRT) ) deallocate( IWEIRT )
+                   ALLOCATE ( DZL(MAXPOL), DZR(MAXPOL), DCREST(MAXPOL), DTL(MAXPOL), DTR(MAXPOL), DVEG(MAXPOL), IWEIRT(MAXPOL) )
                    DZL(NPL) = sillup  
                    DZR(NPL) = silldown  
                    DCREST(NPL) = crestl  

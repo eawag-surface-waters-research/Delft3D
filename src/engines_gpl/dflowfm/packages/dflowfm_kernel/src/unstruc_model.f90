@@ -86,6 +86,7 @@ implicit none
     character(len=255) :: md_plifile       = ' ' !< polylinefile file     (show)      (e.g., *.pli)
     character(len=255) :: md_thdfile       = ' ' !< Thin dam file (polygons)          (e.g., *_thd.pli) (block flow)
     character(len=255) :: md_fixedweirfile = ' ' !< Fixed weir pliz's                 (e.g., *_fxw.pli), = pli with x,y, Z  column
+    character(len=255) :: md_pillarfile    = ' ' !< pillar pliz's                     (e.g., *_pillar.pli), = pli with x,y, diameter and Cd columns
     character(len=255) :: md_roofsfile     = ' ' !< Roof pliz's                      (e.g., *_roof.pli), = pli with x,y, Z  column
     character(len=255) :: md_gulliesfile   = ' ' !< gullies pliz's                    (e.g., *_gul.pli), = pli with x,y, Z  column
     character(len=255) :: md_vertplizfile  = ' ' !< Vertical layering pliz's          (e.g., *_vlay.pliz), = pliz with x,y, Z, first Z =nr of layers, second Z = laytyp
@@ -223,6 +224,7 @@ use unstruc_netcdf, only: UNC_CONV_UGRID
     md_ldbfile = ' '
     md_thdfile = ' '
     md_fixedweirfile = ' '
+    md_pillarfile = ' '
     md_roofsfile     = ' '
     md_gulliesfile   = ' '
     md_vertplizfile = ' '
@@ -323,6 +325,7 @@ subroutine loadModel(filename)
     use m_sediment
     use m_alloc
     use m_netw_flow1d
+    use m_flowexternalforcings, only: pillar
 
     character(*), intent(in)  :: filename !< Name of file to be read (in current directory or with full path).
 
@@ -331,6 +334,7 @@ subroutine loadModel(filename)
     character(1), external    :: get_dirsep
 
     integer :: istat, minp, ifil, jadoorladen
+    integer :: i
 
     call resetModel()
     
@@ -412,6 +416,29 @@ subroutine loadModel(filename)
         deallocate(fnames)
     end if
     
+    ! Load pillar polygons from file. 
+    if (len_trim(md_pillarfile) > 0) then
+        call strsplit(md_pillarfile,1,fnames,1)
+        i = size(fnames)
+        allocate( pillar(i) )
+        do ifil=1,size(fnames)
+           call oldfil(minp, fnames(ifil))
+           call reapol(minp, 1)
+           allocate( pillar(ifil)%xcor(npl) ) ; pillar(ifil)%xcor = dmiss
+           allocate( pillar(ifil)%ycor(npl) ) ; pillar(ifil)%ycor = dmiss
+           allocate( pillar(ifil)%dia(npl)  ) ; pillar(ifil)%dia  = dmiss
+           allocate( pillar(ifil)%cd(npl)   ) ; pillar(ifil)%cd   = dmiss
+           pillar(ifil)%np = npl
+           do i = 1,npl
+              pillar(ifil)%xcor(i) = xpl(i)
+              pillar(ifil)%ycor(i) = ypl(i)
+              pillar(ifil)%dia(i)  = zpl(i)
+              pillar(ifil)%cd(i)   = dzl(i)
+           enddo
+        enddo
+        deallocate(fnames)
+    end if
+
     ! Load cross sections polygons from file. 
     if (len_trim(md_crsfile) > 0) then
         call strsplit(md_crsfile,1,fnames,1)
@@ -574,7 +601,10 @@ subroutine readMDUFile(filename, istat)
     if (.not. success) then ! Backwards compatibility: read old ThindykeFile keyword.
        call prop_get_string ( md_ptr, 'geometry', 'ThindykeFile',     md_fixedweirfile, success)
     end if
-
+    call prop_get_string ( md_ptr, 'geometry', 'PillarFile',       md_pillarfile,   success)
+    if ( len_trim(md_pillarfile) > 0 ) then
+       japillar = 1
+    endif
     call prop_get_string ( md_ptr, 'geometry', 'GulliesFile',      md_gulliesfile,   success)
     call prop_get_string ( md_ptr, 'geometry', 'RoofsFile',        md_roofsfile,     success)
     
@@ -879,9 +909,12 @@ subroutine readMDUFile(filename, istat)
     call prop_get_double (md_ptr, 'physics', 'Backgroundwatertemperature', Backgroundwatertemperature) 
     
     call prop_get_integer(md_ptr, 'veg',     'Vegetationmodelnr', javeg) ! Vegetation model nr, (0=no, 1=Baptist DFM)
+    if( japillar == 2 ) then
+       javeg = 1
+    endif
     if (kmx == 0 .and. javeg > 0) then 
        jabaptist = javeg
-    endif   
+    endif
     call prop_get_double (md_ptr, 'veg'    , 'Clveg'          , Clveg)
     call prop_get_double (md_ptr, 'veg'    , 'Cdveg'          , Cdveg)
     call prop_get_double (md_ptr, 'veg'    , 'Cbveg'          , Cbveg)
@@ -1604,6 +1637,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     call prop_set(prop_ptr, 'geometry', 'LandBoundaryFile', trim(md_ldbfile),       'Land boundaries file *.ldb, used for visualization')
     call prop_set(prop_ptr, 'geometry', 'ThinDamFile',      trim(md_thdfile),       'Polyline file *_thd.pli, containing thin dams')
     call prop_set(prop_ptr, 'geometry', 'FixedWeirFile',    trim(md_fixedweirfile), 'Polyline file *_fxw.pliz, containing fixed weirs with rows x, y, crest level, left ground level, right ground level')
+    call prop_set(prop_ptr, 'geometry', 'PillarFile',       trim(md_pillarfile),    'Polyline file *_pillar.pliz, containing four colums with x, y, diameter and Cd coefficient')
     call prop_set(prop_ptr, 'geometry', 'Gulliesfile',      trim(md_gulliesfile), 'Polyline file *_gul.pliz, containing lowest bed level along talweg x, y, z level')
     call prop_set(prop_ptr, 'geometry', 'Roofsfile',        trim(md_roofsfile),   'Polyline file *_rof.pliz, containing roofgutter heights x, y, z level')
     call prop_set(prop_ptr, 'geometry', 'VertplizFile',     trim(md_vertplizfile),  'Vertical layering file *_vlay.pliz with rows x, y, Z, first Z, nr of layers, second Z, layer type') 
