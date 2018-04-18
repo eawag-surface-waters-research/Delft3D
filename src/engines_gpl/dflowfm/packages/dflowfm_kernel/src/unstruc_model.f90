@@ -1215,9 +1215,6 @@ subroutine readMDUFile(filename, istat)
       jamapheatflux = 0
       jahisheatflux = 0 
     endif
-    if ( stm_included .and. jahisbedlev /= 0 ) then
-       jahisbedlev = 1
-    endif
     
     call prop_get_integer(md_ptr, 'output', 'Wrishp_crs', jashp_crs, success)
     call prop_get_integer(md_ptr, 'output', 'Wrishp_obs', jashp_obs, success)

@@ -979,11 +979,9 @@ double precision            :: tmp_x(2), tmp_y(2)
       endif
       
       ! write WEIRTYPE
-      if (.not. allocated(iweirt)) then
-         allocate(iweirt(nfxw))
-         iweirt = -999  ! missing integer value
-      endif
-      j = dbfwriteattribute(shphandle, ishape, id_weirtype, iweirt(ii))
+      if (allocated(iweirtxw)) then
+         j = dbfwriteattribute(shphandle, ishape, id_weirtype, iweirtxw(ii))
+      end if
       if (j /= 1) then
         call mess(LEVEL_ERROR, 'SHAPEFILE: Could not write attribute "WEIRTYPE" to shape'''//trim(objectid)//'''.')
         return

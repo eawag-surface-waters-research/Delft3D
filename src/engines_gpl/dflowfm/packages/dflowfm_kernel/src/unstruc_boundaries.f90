@@ -1708,12 +1708,12 @@ end do
     hulp(14,1:ncgensg) = 1   ! pos_drowngateflowcoeff=1
     hulp(15,1:ncgensg) = 1   ! pos_freeweirflowcoeff=1
     hulp(16,1:ncgensg) = 1.0 ! pos_drownweirflowcoeff=1.0
-    hulp(17,1:ncgensg) = 0.6 ! pos_contrcoeffreegate=0.6
+    hulp(17,1:ncgensg) = 1.0 ! pos_contrcoeffreegate=0.6
     hulp(18,1:ncgensg) = 1   ! neg_freegateflowcoeff=1
     hulp(19,1:ncgensg) = 1   ! neg_drowngateflowcoeff=1
     hulp(20,1:ncgensg) = 1   ! neg_freeweirflowcoeff=1
     hulp(21,1:ncgensg) = 1.0 ! neg_drownweirflowcoeff=1.0
-    hulp(22,1:ncgensg) = 0.6 ! neg_contrcoeffreegate=0.6
+    hulp(22,1:ncgensg) = 1.0 ! neg_contrcoeffreegate=0.6
     hulp(23,1:ncgensg) = 0   ! extraresistance=0
     hulp(24,1:ncgensg) = 1.  ! dynstructext=1.
   
@@ -1756,12 +1756,12 @@ end do
          hulp(14,n) = 1   ! pos_drowngateflowcoeff=1
          hulp(15,n) = 1   ! pos_freeweirflowcoeff=1
          hulp(16,n) = 1.0 ! pos_drownweirflowcoeff=1.0
-         hulp(17,n) = 0.6 ! pos_contrcoeffreegate=0.6
+         hulp(17,n) = 1.0 ! pos_contrcoeffreegate=0.6
          hulp(18,n) = 1   ! neg_freegateflowcoeff=1
          hulp(19,n) = 1   ! neg_drowngateflowcoeff=1
          hulp(20,n) = 1   ! neg_freeweirflowcoeff=1
          hulp(21,n) = 1.0 ! neg_drownweirflowcoeff=1.0
-         hulp(22,n) = 0.6 ! neg_contrcoeffreegate=0.6
+         hulp(22,n) = 1.0 ! neg_contrcoeffreegate=0.6
          hulp(23,n) = 0   ! extraresistance=0
          hulp(24,n) = 1.  ! dynstructext=1.
          hulp(25,n) = 1d10! gatedoorheight
@@ -1804,7 +1804,18 @@ end do
          tmpval = dmiss
          call prop_get(str_ptr, '', 'lat_contr_coeff', tmpval)
          ! TODO: Herman/Jaco: this is not relevant anymore, using width (gate only)??
-
+         if (tmpval /= dmiss) then
+            hulp(13,n) = tmpval
+            hulp(14,n) = tmpval
+            hulp(15,n) = tmpval
+            hulp(16,n) = tmpval
+            hulp(17,n) = 1.0
+            hulp(18,n) = tmpval
+            hulp(19,n) = tmpval
+            hulp(20,n) = tmpval
+            hulp(21,n) = tmpval
+            hulp(22,n) = 1.0
+         endif
          nweirgen = nweirgen+1
          weir2cgen(nweirgen) = n ! Mapping from 1:nweirgen to underlying generalstructure --> (1:ncgensg)
          cgen2str(n)         = nweirgen ! Inverse mapping

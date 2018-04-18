@@ -14949,7 +14949,11 @@ subroutine unc_write_his(tim)            ! wrihis
             endif
 
             if ( jahisbedlev > 0 ) then
-               ierr = nf90_def_var(ihisfile, 'bedlevel', nf90_double, (/ id_statdim, id_timedim /), id_varb)
+               if( stm_included ) then
+                  ierr = nf90_def_var(ihisfile, 'bedlevel', nf90_double, (/ id_statdim, id_timedim /), id_varb)
+               else
+                  ierr = nf90_def_var(ihisfile, 'bedlevel', nf90_double, (/ id_statdim /), id_varb)
+               endif
                ierr = nf90_put_att(ihisfile, id_varb, 'long_name', 'bottom level')
                ierr = nf90_put_att(ihisfile, id_varb, 'units', 'm')
                ierr = nf90_put_att(ihisfile, id_varb, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
@@ -15260,8 +15264,8 @@ subroutine unc_write_his(tim)            ! wrihis
                ierr = nf90_put_att(ihisfile, id_varsed, 'long_name', 'sediment_concentration')
             endif
 
-            if (japatm > 0) then
-               call definencvar(ihisfile,id_varpatm   ,nf90_double,idims,2, 'patm'  , 'atmospheric pressure', 'N m-2', 'station_x_coordinate station_y_coordinate station_name')
+            if (japatm > 0 .and. jahiswind > 0) then
+               call definencvar(ihisfile,id_varpatm   ,nf90_double,(/ id_statdim, id_timedim /),2, 'patm'  , 'atmospheric pressure', 'N m-2', 'station_x_coordinate station_y_coordinate station_name')
             endif
 
             if (jawind > 0 .and. jahiswind > 0) then
@@ -15797,7 +15801,12 @@ subroutine unc_write_his(tim)            ! wrihis
     if (ntot > 0) then
        ierr = nf90_put_var(ihisfile,    id_vars,   valobsT(:,IPNT_S1),    start = (/ 1, it_his /), count = (/ ntot, 1 /))
        ierr = nf90_put_var(ihisfile,    id_hs  ,   valobsT(:,IPNT_HS),    start = (/ 1, it_his /), count = (/ ntot, 1 /))
-       ierr = nf90_put_var(ihisfile,    id_varb,   valobsT(:,IPNT_BL),    start = (/ 1, it_his /), count = (/ ntot, 1 /))
+       if( stm_included ) then
+          ierr = nf90_put_var(ihisfile,    id_varb,   valobsT(:,IPNT_BL),    start = (/ 1, it_his /), count = (/ ntot, 1 /))
+       else
+          ierr = nf90_put_var(ihisfile,    id_varb,   valobsT(:,IPNT_BL),    start = (/ 1 /) )
+       endif
+       
        if ( nummovobs > 0 ) then
           ierr = nf90_put_var(ihisfile,    id_statx,  xobs(:),            start = (/ 1, it_his /), count = (/ ntot, 1 /))
           ierr = nf90_put_var(ihisfile,    id_staty,  yobs(:),            start = (/ 1, it_his /), count = (/ ntot, 1 /))
@@ -38227,6 +38236,7 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
  integer         , allocatable :: iwu(:), ihu(:)
  double precision              :: SL, SM, XCR, YCR, CRP, Xa, Ya, Xb, Yb, zc, zh, af, dz1, dz2, xn, yn, adjacentbob, cosphi, sig
  double precision, allocatable :: csh(:), snh(:), zcrest(:), dzsillu(:), dzsilld(:), crestlen(:), taludu(:), taludd(:), vegetat(:)
+ integer         , allocatable :: iweirtyp(:)
 
  double precision, dimension(:), allocatable :: dSL
  integer,          dimension(:), allocatable :: iLink
@@ -38260,6 +38270,7 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
  allocate (taludu(lnx))   ; taludu = 4d0
  allocate (taludd(lnx))   ; taludd = 4d0
  allocate (vegetat(lnx))  ; vegetat = 0d0
+ allocate (iweirtyp(lnx)) ; iweirtyp = 0 
    
  call oldfil (minp, md_fixedweirfile)
 
@@ -38447,6 +38458,7 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
              taludu(L)   = (1d0-sl)*dtl(k)    + sl*dtl(k+1)      ! talud at ln(1,L) 
              taludd(L)   = (1d0-sl)*dtr(k)    + sl*dtr(k+1)      ! talud at ln(2,L) 
              vegetat(L)  = (1d0-sl)*dveg(k)   + sl*dveg(k+1)     ! vegetation on fixed weir
+             iweirtyp(L) = iweirt(k)                             ! type of weir
              if (iweirt(k) .eq. 1 ) then
                  iadv(L) = 24 ; jatabellenboekorvillemonte = 1   !  Tabellenboek
              else if (iweirt(k) .eq. 2 ) then
@@ -38526,6 +38538,8 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
     call aerr('taludrxw(nfxw)',ierr,nfxw)
     allocate ( vegxw(nfxw) ,stat=ierr)
     call aerr('vegxw(nfxw)',ierr,nfxw)
+    allocate ( iweirtxw(nfxw) ,stat=ierr)
+    call aerr('iweirtxw(nfxw)',ierr,nfxw)
  endif
  
  nfxw = 0
@@ -38540,12 +38554,14 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
        taludlxw(nfxw) = taludu(L)
        taludrxw(nfxw) = taludd(L)
        vegxw(nfxw)    = vegetat(L)
+       iweirtxw(nfxw) = iweirtyp(L)
     endif   
  enddo 
 
- deallocate(ihu, csh, snh, dzsillu, dzsilld, crestlen, taludu, taludd, vegetat)
+ deallocate(ihu, csh, snh, dzsillu, dzsilld, crestlen, taludu, taludd, vegetat, iweirtyp)
  if (jatabellenboekorvillemonte == 0 .and. jashp_fxw == 0 .and. nfxw.gt.0) then 
     deallocate(shlxw, shrxw, crestlxw, taludlxw, taludrxw, vegxw)
+    if(allocated(iweirtxw)) deallocate(iweirtxw)
  endif   
  
  do i = 1, nfxw

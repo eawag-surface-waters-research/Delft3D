@@ -1402,6 +1402,7 @@ module m_fixedweirs
     double precision, allocatable   :: taludrxw(:)           ! talud right of a weir
     double precision, allocatable   :: vegxw(:)              ! vegetation code on a weir
     double precision, allocatable   :: weirdte(:)            ! loss coeff
+    integer         , allocatable   :: iweirtxw(:)           ! weir type
 
     double precision                :: sillheightmin    = 0.5d0 ! waqua dams with both sillheights > sillheightmin go to fixedweirs.pli
                                                                 ! the rest goes to

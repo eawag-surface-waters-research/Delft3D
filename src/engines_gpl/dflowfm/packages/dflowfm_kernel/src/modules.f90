@@ -2608,7 +2608,7 @@ subroutine default_flowparameters()
     jahissal = 1
     jahisrho = 1
     jahiswatlev = 1
-    jahisbedlev = 0
+    jahisbedlev = 1
     jahiswatdep = 0
     jahisvelvec = 1
     jahisww = 0
