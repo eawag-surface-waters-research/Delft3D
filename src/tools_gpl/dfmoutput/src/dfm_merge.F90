@@ -216,6 +216,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    integer :: idom, n1, n2, n3, k1, k2
    integer :: tmpdimids(NF90_MAX_VAR_DIMS)
    double precision, allocatable, target  :: itmpvar1D(:) !< array buffer for a single global variable slice, size: (kmx1, max(ndx(noutfile),lnx(noutfile)))
+   integer,          allocatable, target  :: itmpvar1D_tmp(:)
    double precision, allocatable, target  :: itmpvar2D(:,:) !< array buffer for a single global variable slice, size: (kmx1, max(ndx(noutfile),lnx(noutfile)))
    double precision, allocatable, target  :: itmpvar2D_tmp(:,:)
    double precision,              pointer :: itmpvarptr(:,:,:)
@@ -1356,6 +1357,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    maxitems = max(nedgecount, nfacecount, nnodecount, nnetedgecount, nbndcount) 
    call realloc( tmpvar1D, maxitems, keepExisting=.false.)
    call realloc(itmpvar1D, maxitems, keepExisting=.false.)
+   call realloc(itmpvar1D_tmp,maxitems, keepExisting=.false.)
    call realloc(tmpvar1D_tmp, maxitems, keepExisting=.false.)
    ! 2D/3D done in loop below
 
@@ -1661,32 +1663,48 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                     itmpvar2D(:,1:nitemglob) = itmpvar2D_tmp(:,1:nitemglob)
                 end if
             else if (var_loctype(iv) == UNC_LOC_S) then ! variables that locate on faces
-               nfacecount = sum(nump(1:ii-1))
-               if (tmpvarDim == 1) then
+                if (var_types(iv) == nf90_int .or. var_types(iv) == nf90_short) then
+                  nfacecount = sum(nump(1:ii-1))
                   do ip=1, item_counts(ii)
                      if (item_domain(nfacecount+ip) == ii-1) then
                         ifaceglob = face_c2g(nfacecount+ip)
                         if (ifaceglob > 0) then
                            nitemglob = nitemglob + 1
-                           tmpvar1D_tmp(ifaceglob) = tmpvar1D(nitemglob0+ip)
+                           itmpvar1D_tmp(ifaceglob) = itmpvar1D(nitemglob0+ip)
                         end if
                      end if
                   end do
                   if (ii==nfiles) then
-                      tmpvar1D(1:nitemglob) = tmpvar1D_tmp(1:nitemglob)
+                      itmpvar1D(1:nitemglob) = itmpvar1D_tmp(1:nitemglob)
                   end if
-               else if (tmpvarDim == 2) then
-                  do ip=1, item_counts(ii)
-                     if (item_domain(nfacecount+ip) == ii-1) then
-                        ifaceglob = face_c2g(nfacecount+ip)
-                        if (ifaceglob > 0) then
-                           nitemglob = nitemglob + 1
-                           tmpvar2D_tmp(:,ifaceglob)=tmpvar2D(:,nitemglob0+ip)
+               else
+                  nfacecount = sum(nump(1:ii-1))
+                  if (tmpvarDim == 1) then
+                     do ip=1, item_counts(ii)
+                        if (item_domain(nfacecount+ip) == ii-1) then
+                           ifaceglob = face_c2g(nfacecount+ip)
+                           if (ifaceglob > 0) then
+                              nitemglob = nitemglob + 1
+                              tmpvar1D_tmp(ifaceglob) = tmpvar1D(nitemglob0+ip)
+                           end if
                         end if
+                     end do
+                     if (ii==nfiles) then
+                         tmpvar1D(1:nitemglob) = tmpvar1D_tmp(1:nitemglob)
                      end if
-                  end do
-                  if (ii==nfiles) then
-                     tmpvar2D(:,1:nitemglob) = tmpvar2D_tmp(:,1:nitemglob)
+                  else if (tmpvarDim == 2) then
+                     do ip=1, item_counts(ii)
+                        if (item_domain(nfacecount+ip) == ii-1) then
+                           ifaceglob = face_c2g(nfacecount+ip)
+                           if (ifaceglob > 0) then
+                              nitemglob = nitemglob + 1
+                              tmpvar2D_tmp(:,ifaceglob)=tmpvar2D(:,nitemglob0+ip)
+                           end if
+                        end if
+                     end do
+                     if (ii==nfiles) then
+                        tmpvar2D(:,1:nitemglob) = tmpvar2D_tmp(:,1:nitemglob)
+                     end if
                   end if
                end if
             else
