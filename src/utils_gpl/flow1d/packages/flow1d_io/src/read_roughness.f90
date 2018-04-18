@@ -39,7 +39,6 @@ module m_read_roughness
    use m_Roughness
    use m_spatial_data
    use properties
-   use  string_module
    use messagehandling
 
    implicit none
@@ -165,7 +164,6 @@ contains
          file = filestring(1:isemi-1)
          filestring = filestring(isemi+1:)
          file = trim(mapdir)//file
-         call remove_all_spaces(file)
          call read_roughnessfile(rgs, brs, spdata, file, default, def_type)
       enddo
    

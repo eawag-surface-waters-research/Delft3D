@@ -132,7 +132,6 @@ module m_GlobalParameters
    integer, public, parameter              :: ST_GENERAL_ST =  8
    integer, public, parameter              :: ST_EXTRA_RES  =  9
    integer, public, parameter              :: ST_UNI_WEIR   = 11
-   integer, public, parameter              :: ST_DAMBREAK   = 13
    integer, public, parameter              :: ST_CULVERT    = 21
    integer, public, parameter              :: ST_SIPHON     = 22
    integer, public, parameter              :: ST_INV_SIPHON = 23

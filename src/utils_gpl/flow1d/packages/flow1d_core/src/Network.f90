@@ -71,9 +71,9 @@ module m_network
       integer, allocatable          :: lin2point(:)                        !< indirection list, containing relative index of link on branch adm%lin2ibr(l)
                                                                            !> indirection list, containing local link index for 1d arrays. e.g. flow area of \n  
                                                                            !! link l is found by adm%au_1d(adm%lin2local(l))  
-      integer, allocatable          :: lin2local(:)
-      type(t_offset2cross), pointer :: line2cross(:) => null()             !< list containing cross section indices per u-location
-      type(t_offset2cross), pointer :: gpnt2cross(:) => null()             !< list containing cross section indices per gridpoint-location
+      integer, allocatable              :: lin2local(:)                        
+      type(t_offset2cross), allocatable :: line2cross(:)                   !< list containing cross section indices per u-location
+      type(t_offset2cross), allocatable :: gpnt2cross(:)                   !< list containing cross section indices per gridpoint-location
 
       double precision, allocatable :: au_1d(:)
       double precision, allocatable :: conv_1d(:)
@@ -87,8 +87,6 @@ module m_network
       integer                                   :: gridpointsCount         !< total number of gridpoints in network NDS%count - NDS%bndCount
       integer                                   :: l1dall                  !< total number of links (internal, boundary and compound links)
       integer                                   :: l1d                     !< total number of links (internal and boundary)
-      integer                                   :: numk                    !< total number of links (internal and boundary)
-      integer                                   :: numl                    !< total number of links (internal and boundary)
       type(t_administration_1d)                 :: adm                     !< network administration
       type(t_nodeSet)                           :: nds                     !< set of nodes
       type(t_branchSet)                         :: brs                     !< set of branches
@@ -119,8 +117,8 @@ contains
       if (.not. allocated(adm%lin2ibr)) allocate(adm%lin2ibr(all_links_count))   
       if (.not. allocated(adm%lin2point)) allocate(adm%lin2point(all_links_count)) 
       if (.not. allocated(adm%lin2local)) allocate(adm%lin2local(all_links_count)) 
-      if (.not. associated(adm%line2cross)) allocate(adm%line2cross(all_links_count))
-      if (.not. associated(adm%gpnt2cross)) allocate(adm%gpnt2cross(all_links_count))
+      if (.not. allocated(adm%line2cross)) allocate(adm%line2cross(all_links_count))
+      if (.not. allocated(adm%gpnt2cross)) allocate(adm%gpnt2cross(all_links_count))
       if (.not. allocated(adm%au_1d)) allocate(adm%au_1d(oned_links_count))
       if (.not. allocated(adm%conv_1d)) allocate(adm%conv_1d(oned_links_count))
       if (.not. allocated(adm%dpu_1d)) allocate(adm%dpu_1d(oned_links_count))
@@ -136,8 +134,8 @@ contains
       if (allocated(adm%lin2ibr))      deallocate(adm%lin2ibr)    
       if (allocated(adm%lin2point))    deallocate(adm%lin2point)  
       if (allocated(adm%lin2local))    deallocate(adm%lin2local)  
-      if (associated(adm%line2cross))  deallocate(adm%line2cross)
-      if (associated(adm%gpnt2cross))  deallocate(adm%gpnt2cross)
+      if (allocated(adm%line2cross))   deallocate(adm%line2cross) 
+      if (allocated(adm%gpnt2cross))   deallocate(adm%gpnt2cross) 
       if (allocated(adm%au_1d))        deallocate(adm%au_1d)
       if (allocated(adm%conv_1d))      deallocate(adm%conv_1d)
       if (allocated(adm%dpu_1d))       deallocate(adm%dpu_1d)
@@ -341,8 +339,6 @@ contains
       double precision                   :: xBeg
       double precision                   :: xEnd
       integer                            :: i
-      integer                            :: nstru
-      logical                            :: structure_found 
       logical                            :: interpolDone
 
       call realloc(network%adm, linall, network%gridpointsCount)
@@ -400,21 +396,6 @@ contains
                icrsBeg =lastAtBran(ibran - 1) + 1
             endif
             icrsEnd = lastAtBran(ibran)
-            
-            
-            if (icrsbeg > icrsend) then
-               
-               call setmessage(LEVEL_WARN, 'No cross sections found on branch '//trim(pbran%name)//'. Using default rectangular cross section')
-               do i = 1, pbran%uPointsCount
-                  ilnk = pbran%lin(i)
-                  adm%line2cross(ilnk)%c1 = -1
-                  adm%line2cross(ilnk)%c2 = -1
-                  adm%line2cross(ilnk)%f  = 1.0d0
-                  adm%line2cross(ilnk)%distance  = 0d0
-               enddo
-               
-               cycle
-            endif
             
             icrs1 = icrsBeg
             icrs2 = icrsBeg
@@ -529,17 +510,6 @@ contains
                icrsBeg =lastAtBran(ibran - 1) + 1
             endif
             icrsEnd = lastAtBran(ibran)
-            
-            if (icrsBeg > icrsEnd) then
-               ! branch without cross sections
-               do m = 1, 2
-                  igpt = pbran%grd(m)
-                  adm%gpnt2cross(igpt)%c1 = 0
-                  adm%gpnt2cross(igpt)%c2 = 0
-                  adm%gpnt2cross(igpt)%f  = 1.0d0
-               enddo
-               cycle   
-            endif
             
             icrs1 = icrsBeg
             icrs2 = icrsBeg
@@ -698,13 +668,6 @@ contains
    
    end subroutine set_network_pointers
 
-   !> In this subroutine arrays crossorder and lastAtBran are filled \n
-   !! crossorder contains the cross section indices, where the cross sections are ordered 
-   !! in ascending branchid and subsequently in offset.\n
-   !! crossorder(lastAtBran(ibr-1)+1) .. crossorder(lastAtBran(ibr)) contain the cross
-   !! sections on branch ibr, in ascending branch offset.
-   !! sections on branch ibr, in ascending branch offset.
-
    subroutine crossSectionsSort(crs, brs, crossOrder, lastAtBran)
 
       ! Ordering crs's on branches and x on branches
@@ -799,9 +762,6 @@ contains
          if ( ibran .eq. 1 ) then
             ifirst = 1
          else
-            if (lastAtBran(ibran - 1) == 0) then
-               lastAtBran(ibran-1) = lastAtBran(max(1,ibran-2))
-            endif
             ifirst = lastAtBran(ibran - 1) + 1
          endif
          ilast = lastAtBran(ibran)

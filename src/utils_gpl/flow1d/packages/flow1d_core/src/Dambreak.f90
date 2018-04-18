@@ -34,7 +34,7 @@ module m_Dambreak
 
    implicit none
 
-   public prepareComputeDambreak
+   public ComputeDambreak
 
  type, public :: t_dambreak
     double precision :: start_location_x   
@@ -59,7 +59,7 @@ module m_Dambreak
 
 contains
 
-subroutine prepareComputeDambreak(dambreak, s1m1, s1m2, u0, time0, time1, dt, dpu)
+subroutine ComputeDambreak(dambreak, s1m1, s1m2, u0, time0, time1, dt, dpu)
 
 
     type(t_dambreak), pointer      :: dambreak
@@ -151,6 +151,6 @@ subroutine prepareComputeDambreak(dambreak, s1m1, s1m2, u0, time0, time1, dt, dp
    dambreak%t0     = t0      ! hk: store t0 
    dambreak%struwi = struwi  ! gets the structure width 
 
-end subroutine prepareComputeDambreak
+end subroutine ComputeDambreak
 
 end 

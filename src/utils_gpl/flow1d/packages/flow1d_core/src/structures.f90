@@ -46,7 +46,6 @@ module m_structure
    use m_River_Weir
    use m_ExtraResistance
    use m_hash_search
-   use m_Dambreak
 
 
    implicit none
@@ -157,7 +156,6 @@ module m_structure
       type(t_advweir),pointer          :: advweir => null()
       type(t_GeneralStructure),pointer :: generalst => null()
       type(t_ExtraResistance),pointer  :: extrares => null()
-      type(t_dambreak),pointer         :: dambreak => null()
    end type
 
    type, public :: t_structureSet
@@ -837,8 +835,6 @@ end subroutine
          GetStrucType_from_string = ST_INV_SIPHON
       case ('universal_weir')
          GetStrucType_from_string = ST_UNI_WEIR
-      case ('dambreak')
-         GetStrucType_from_string = ST_DAMBREAK
       case ('bridge')
          GetStrucType_from_string = ST_BRIDGE
       case default
@@ -871,8 +867,6 @@ end subroutine
             GetStrucType_from_int = 'inverted_siphon'
          case (ST_UNI_WEIR)
             GetStrucType_from_int = 'universal_weir'
-         case (ST_DAMBREAK)
-            GetStrucType_from_int = 'dambreak'
          case (ST_BRIDGE)
             GetStrucType_from_int = 'bridge'
          case default

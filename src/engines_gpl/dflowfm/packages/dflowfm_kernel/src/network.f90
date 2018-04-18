@@ -409,13 +409,10 @@ subroutine load_network_from_flow1d(filename)
    type(t_node), pointer :: pnod
    integer :: istat, minp, ifil, inod, ibr, ngrd, k, L, k1, k2
    double precision, dimension(2) :: tempbob
-   logical                        :: found_1d_network
+   character(len=255) :: oned_outputdir
 
    ! MessageHandling has already been set up via initMessaging() earlier.
-   call read_1d_mdu(filename, network, found_1d_network)
-   if (.not. found_1d_network) then
-      return
-   endif
+   call read_1d_model(filename, network, oned_outputdir)
    call admin_network(network, numk, numl)
    numk = 0
    numl = 0

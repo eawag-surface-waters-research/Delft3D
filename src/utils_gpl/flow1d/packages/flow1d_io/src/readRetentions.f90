@@ -100,9 +100,17 @@ module m_readRetentions
             branchIdx = hashsearch(network%brs%hashlist, branchID)
             if (branchIdx <= 0) Then
                call SetMessage(LEVEL_ERROR, 'Error Reading Retention '''//trim(retentionID)//''': Branch: '''//trim(branchID)//''' not Found')
-               exit
             endif
 
+            ! Bcause of the complicated data structure of SOBEK storage in 'connection nodes'
+            ! must be separated from the ordinary gridpoints
+            gridPoint = getCalcPoint(network%brs, branchIdx, Chainage)
+            if (gridPoint == network%brs%branch(branchIdx)%points(1) ) then
+               gridPoint = -network%brs%branch(branchIdx)%fromNode%index
+            elseif (gridPoint == network%brs%branch(branchIdx)%points(2)) then
+               gridPoint = -network%brs%branch(branchIdx)%toNode%index
+            endif
+            
             network%storS%Count = network%storS%Count + 1
             if (network%storS%Count > network%storS%Size) then
                call realloc(network%storS)
@@ -112,28 +120,9 @@ module m_readRetentions
             nullify(pSto%storageArea)
             nullify(pSto%streetArea)
 
-            ! Bcause of the complicated data structure of SOBEK storage in 'connection nodes'
-            ! must be separated from the ordinary gridpoints
-            gridPoint = getCalcPoint(network%brs, branchIdx, Chainage)
-            if (gridPoint == network%brs%branch(branchIdx)%points(1) ) then
-               gridPoint = -network%brs%branch(branchIdx)%fromNode%index
-               psto%node_index = network%brs%branch(branchIdx)%fromNode%index
-               psto%local_grid_index = -1
-               branchIdx             = -1
-            elseif (gridPoint == network%brs%branch(branchIdx)%points(2)) then
-               gridPoint = -network%brs%branch(branchIdx)%toNode%index
-               psto%node_index = network%brs%branch(branchIdx)%toNode%index
-               branchIdx             = -1
-               psto%local_grid_index = -1
-            else
-               psto%local_grid_index = gridPoint - network%brs%branch(branchIdx)%points(1) + 1 
-            endif
-            
             pSto%id        = retentionID
             pSto%gridPoint = gridPoint
             network%storS%mapping(gridPoint) = network%storS%Count
-            psto%branch_index     = branchIdx
-
             if (storageType == 'Closed') then
                pSto%storageType = nt_Closed
             elseif (storageType == 'Loss') then
