@@ -2329,6 +2329,7 @@ end subroutine default_turbulence
  integer                           :: jashp_emb                 !< Write a shape file for Embankments
  integer                           :: jashp_fxw                 !< Write a shape file for fixed weirs
  integer                           :: jashp_src                 !< Write a shape file for source-sinks
+ integer                           :: jashp_pump                !< Write a shape file for pumps
  
  integer                           :: jawriteDFMinterpretedvalues = 0 !< Write interpretedvalues 
  
@@ -2653,6 +2654,7 @@ subroutine default_flowparameters()
     jashp_emb = 0
     jashp_fxw = 0
     jashp_src = 0
+    jashp_pump= 0
     
     ispirparopt = 1
 

@@ -1216,6 +1216,8 @@ subroutine readMDUFile(filename, istat)
       jahisheatflux = 0 
     endif
     
+    call prop_get_integer(md_ptr, 'output', 'Richardsononoutput', jaRichardsononoutput, success)
+ 
     call prop_get_integer(md_ptr, 'output', 'Wrishp_crs', jashp_crs, success)
     call prop_get_integer(md_ptr, 'output', 'Wrishp_obs', jashp_obs, success)
     call prop_get_integer(md_ptr, 'output', 'Wrishp_weir', jashp_weir, success)
@@ -1224,9 +1226,8 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'output', 'Wrishp_emb', jashp_emb, success)
     call prop_get_integer(md_ptr, 'output', 'Wrishp_fxw', jashp_fxw, success)
     call prop_get_integer(md_ptr, 'output', 'Wrishp_src', jashp_src, success)
+    call prop_get_integer(md_ptr, 'output', 'Wrishp_pump', jashp_pump, success)
     
-    call prop_get_integer(md_ptr, 'output', 'Richardsononoutput', jaRichardsononoutput, success)
- 
     call prop_get_integer(md_ptr, 'output', 'WriteDFMinterpretedvalues', jawriteDFMinterpretedvalues, success)
     
     ti_rst_array = 0d0
@@ -2477,12 +2478,6 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     if (jatem > 1 .and. (writeall .or. jamapheatflux > 0)) then
        call prop_set(prop_ptr, 'output', 'Wrimap_heat_fluxes', jamapheatflux, 'Write heat fluxes to map file (1: yes, 0: no)' )
     endif
-    if ((jasal > 0 .or. jatem > 0 .or. jased > 0) .and. (writeall .or. jaRichardsononoutput > 0)) then
-        call prop_set(prop_ptr, 'output', 'Richardsononoutput', jaRichardsononoutput, 'Write Richardson numbers (1: yes, 0: no)' )
-    endif
-    
-    call prop_set(prop_ptr, 'output', 'WriteDFMinterpretedvalues', jaWriteDFMinterpretedvalues, 'Write DFMinterpretedvalues (1: yes, 0: no)' )
-
     if (jatidep > 0 .and. (writeall .or. jamaptidep /= 1)) then
        call prop_set(prop_ptr, 'output', 'Wrimap_tidal_potential', jamaptidep, 'Write tidal potential to map file (1: yes, 0: no)')
     end if
@@ -2490,6 +2485,42 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     if (jaFrcInternalTides2D > 0 .and. (writeall .or. jamapIntTidesDiss /=1 )) then
        call prop_set(prop_ptr, 'output', 'Wrimap_internal_tides_dissipation', jamaptidep, 'Write tidal potential to map file (1: yes, 0: no)')
     end if
+
+    call prop_set(prop_ptr, 'output', 'Writepart_domain', japartdomain, 'Write partition domain info. for postprocessing')
+
+    if ((jasal > 0 .or. jatem > 0 .or. jased > 0) .and. (writeall .or. jaRichardsononoutput > 0)) then
+        call prop_set(prop_ptr, 'output', 'Richardsononoutput', jaRichardsononoutput, 'Write Richardson numbers (1: yes, 0: no)' )
+    endif
+    
+    if (writeall .or. jashp_crs /= 0) then
+       call prop_set(prop_ptr, 'output', 'Wrishp_crs', jashp_crs, success)
+    end if
+    if (writeall .or. jashp_obs /= 0) then
+       call prop_set(prop_ptr, 'output', 'Wrishp_obs', jashp_obs, success)
+    end if
+    if (writeall .or. jashp_weir /= 0) then
+       call prop_set(prop_ptr, 'output', 'Wrishp_weir', jashp_weir, success)
+    end if
+    if (writeall .or. jashp_thd /= 0) then
+       call prop_set(prop_ptr, 'output', 'Wrishp_thd', jashp_thd, success)
+    end if
+    if (writeall .or. jashp_gate /= 0) then
+       call prop_set(prop_ptr, 'output', 'Wrishp_gate', jashp_gate, success)
+    end if
+    if (writeall .or. jashp_emb /= 0) then
+       call prop_set(prop_ptr, 'output', 'Wrishp_emb', jashp_emb, success)
+    end if
+    if (writeall .or. jashp_fxw /= 0) then
+       call prop_set(prop_ptr, 'output', 'Wrishp_fxw', jashp_fxw, success)
+    end if
+    if (writeall .or. jashp_src /= 0) then
+       call prop_set(prop_ptr, 'output', 'Wrishp_src', jashp_src, success)
+    end if
+    if (writeall .or. jashp_pump /= 0) then
+       call prop_set(prop_ptr, 'output', 'Wrishp_pump', jashp_pump, success)
+    end if
+
+    call prop_set(prop_ptr, 'output', 'WriteDFMinterpretedvalues', jaWriteDFMinterpretedvalues, 'Write DFMinterpretedvalues (1: yes, 0: no)' )
 
     call prop_set(prop_ptr, 'output', 'MapOutputTimeVector',  trim(md_mptfile), 'File (*.mpt) containing fixed map output times (s) w.r.t. RefDate')
     call prop_set(prop_ptr, 'output', 'FullGridOutput', jafullgridoutput, 'Full grid output mode (0: compact, 1: full time-varying grid data)')
@@ -2503,8 +2534,35 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        ti_wav_array(3) = ti_wave
        call prop_set(prop_ptr, 'output', 'AvgWaveOutputInterval' , ti_wav_array,' ') 
     end if
+    
+    if( writeall .or. jashp_crs > 0 ) then
+       call prop_set(prop_ptr, 'output', 'Wrishp_crs', jashp_crs,   'Write a shape file for cress sections')
+    endif
+    if( writeall .or. jashp_obs > 0 ) then
+       call prop_set(prop_ptr, 'output', 'Wrishp_obs', jashp_obs,   'Write a shape file for observation points')
+    end if
+    if( writeall .or. jashp_weir > 0 ) then
+    call prop_set(prop_ptr, 'output', 'Wrishp_weir', jashp_weir, 'Write a shape file for weirs')
+    end if
+    if( writeall .or. jashp_thd > 0 ) then
+       call prop_set(prop_ptr, 'output', 'Wrishp_thd', jashp_thd,   'Write a shape file for thin dams')
+    end if
+    if( writeall .or. jashp_gate > 0 ) then
+       call prop_set(prop_ptr, 'output', 'Wrishp_gate', jashp_gate, 'Write a shape file for gates')
+    end if
+    if( writeall .or. jashp_emb > 0 ) then
+       call prop_set(prop_ptr, 'output', 'Wrishp_emb', jashp_emb,   'Write a shape file for embankments')
+    end if
+    if( writeall .or. jashp_fxw > 0 ) then
+       call prop_set(prop_ptr, 'output', 'Wrishp_fxw', jashp_fxw,   'Write a shape file for fixed weirs')
+    end if
+    if( writeall .or. jashp_src > 0 ) then
+       call prop_set(prop_ptr, 'output', 'Wrishp_src', jashp_src,   'Write a shape file for sourse-sinks')
+    end if
+    if( writeall .or. jashp_pump > 0 ) then
+       call prop_set(prop_ptr, 'output', 'Wrishp_pump', jashp_pump, 'Write a shape file for pumps')
+    end if
 
-    call prop_set(prop_ptr, 'output', 'Writepart_domain', japartdomain, 'Write partition domain info. for postprocessing')
     if ( get_japart() .or. writeall ) then
 !      particles
        call prop_set_string(prop_ptr, 'particles', 'ParticlesFile', md_partfile, ' ')

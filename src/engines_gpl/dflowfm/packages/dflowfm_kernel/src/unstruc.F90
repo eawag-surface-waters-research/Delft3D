@@ -16869,11 +16869,11 @@ end subroutine wribal
  !> Writes shapefiles, these shapefiles can be visulaized in geographic information system (GIS) software
 #ifdef HAVE_SHAPELIB
 subroutine unc_write_shp()
-    use m_flowparameters, only: jashp_crs, jashp_obs, jashp_weir, jashp_thd, jashp_gate, jashp_emb, jashp_fxw, jashp_src
+    use m_flowparameters, only: jashp_crs, jashp_obs, jashp_weir, jashp_thd, jashp_gate, jashp_emb, jashp_fxw, jashp_src, jashp_pump
     use unstruc_shapefile
     use m_monitoring_crosssections, only: ncrs, crs
     use m_observations, only: numobs, kobs
-    use m_flowexternalforcings, only: nweirgen, ngategen, numsrc, ksrc, gate2cgen, L1cgensg, L2cgensg
+    use m_flowexternalforcings, only: nweirgen, ngategen, numsrc, ksrc, gate2cgen, L1cgensg, L2cgensg, npumpsg, L1pumpsg, L2pumpsg
     use m_thindams
     use m_sobekdfm, only: nbnd1d2d
     use m_fixedweirs, only: nfxw
@@ -17060,6 +17060,33 @@ subroutine unc_write_shp()
              endif
           else
              call mess(LEVEL_WARN, 'SHAPEFILE: No shape file for source-sinks is written because no source-sink is found on subdomain:', my_rank)
+          endif
+       endif
+     endif
+
+     ! pumps
+    if (jashp_pump > 0) then
+       if (jampi .eq. 0) then
+          if (npumpsg > 0) then
+             call unc_write_shp_pump()
+          else
+             call mess(LEVEL_WARN, 'SHAPEFILE: No shape file for pumps is written because no pump is found.')
+          endif
+       else
+          if (npumpsg > 0) then
+             jawrite = npumpsg
+             do n = 1, npumpsg
+                if (L1pumpsg(n) > L2pumpsg(n)) then
+                   jawrite = jawrite - 1
+                endif
+             enddo
+             if (jawrite > 0) then
+                call unc_write_shp_pump()
+             else
+                call mess(LEVEL_WARN, 'SHAPEFILE: No shape file for pumps is written because no pump is found on subdomain:', my_rank)
+             endif
+          else
+             call mess(LEVEL_WARN, 'SHAPEFILE: No shape file for pumps is written because no pump is found on subdomain:', my_rank)
           endif
        endif
     endif

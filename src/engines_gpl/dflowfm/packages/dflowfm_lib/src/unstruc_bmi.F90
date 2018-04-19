@@ -2485,10 +2485,11 @@ subroutine get_snapped_feature(c_feature_type, c_Nin, cptr_xin, cptr_yin, c_Nout
 
    real(c_double), pointer                           :: ptr(:)                      ! temporary pointer
 
-   double precision, dimension(:), target, allocatable, save     :: xout, yout                  !< memory leak
-   integer,          dimension(:), target, allocatable, save     :: feature_ids                 !< memory leak
+   double precision, dimension(:), target, allocatable, save     :: xout, yout      !< memory leak
+   integer,          dimension(:), target, allocatable, save     :: feature_ids     !< memory leak
 
    double precision, dimension(:), allocatable       :: xin, yin
+   
 
    c_ierror = 1
 
@@ -2511,7 +2512,15 @@ subroutine get_snapped_feature(c_feature_type, c_Nin, cptr_xin, cptr_yin, c_Nout
       call snappol(c_Nin, xin, yin, DMISS, 2, c_Nout, xout, yout, feature_ids, c_ierror)
    case("obspoint")
       call snappnt(c_Nin, xin, yin, DMISS, c_Nout, xout, yout, feature_ids, c_ierror)
-   case DEFAULT
+   case("sourcesink")
+      ! is 1 point
+      if (size(xin) == 1) then
+         call snappnt(1, xin(1), yin(1), DMISS, c_Nout, xout, yout, feature_ids, c_ierror)   
+      ! is a polyline
+      else if (size(xin) > 2) then
+         call snappnt(2,(/xin(1), xin(size(xin)-1)/), (/yin(1), yin(size(xin)-1)/), DMISS, c_Nout, xout, yout, feature_ids, c_ierror) 
+      endif
+   case default
       call snapbnd(feature_type, c_Nin, xin, yin, DMISS, c_Nout, xout, yout, feature_ids, c_ierror)
    end select
    if ( c_ierror /= 0 .or. c_Nout == 0) goto 1234
