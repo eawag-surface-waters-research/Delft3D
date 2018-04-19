@@ -34255,7 +34255,7 @@ end subroutine rearrange_worldmesh
       ja2D = 1
       do i=1,NN
           L = nod(k)%lin(i)
-          if (kn(3,L) /= 2) ja2D = 0  
+          if (kn(3,L) /= 2 .and. kn(3,L).ne.0 ) ja2D = 0  
       enddo   
 
       if ( NN.gt.N ) then
