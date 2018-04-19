@@ -2493,31 +2493,31 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     endif
     
     if (writeall .or. jashp_crs /= 0) then
-       call prop_set(prop_ptr, 'output', 'Wrishp_crs', jashp_crs, success)
+       call prop_set(prop_ptr, 'output', 'Wrishp_crs', jashp_crs, 'Write grid-snapped cross sections to shapefile (1: yes, 0: no)')
     end if
     if (writeall .or. jashp_obs /= 0) then
-       call prop_set(prop_ptr, 'output', 'Wrishp_obs', jashp_obs, success)
+       call prop_set(prop_ptr, 'output', 'Wrishp_obs', jashp_obs, 'Write grid-snapped observation stations to shapefile (1: yes, 0: no)')
     end if
     if (writeall .or. jashp_weir /= 0) then
-       call prop_set(prop_ptr, 'output', 'Wrishp_weir', jashp_weir, success)
+       call prop_set(prop_ptr, 'output', 'Wrishp_weir', jashp_weir, 'Write grid-snapped weirs to shapefile (1: yes, 0: no)')
     end if
     if (writeall .or. jashp_thd /= 0) then
-       call prop_set(prop_ptr, 'output', 'Wrishp_thd', jashp_thd, success)
+       call prop_set(prop_ptr, 'output', 'Wrishp_thd', jashp_thd, 'Write grid-snapped thin dams to shapefile (1: yes, 0: no)')
     end if
     if (writeall .or. jashp_gate /= 0) then
-       call prop_set(prop_ptr, 'output', 'Wrishp_gate', jashp_gate, success)
+       call prop_set(prop_ptr, 'output', 'Wrishp_gate', jashp_gate, 'Write grid-snapped gates to shapefile (1: yes, 0: no)')
     end if
     if (writeall .or. jashp_emb /= 0) then
-       call prop_set(prop_ptr, 'output', 'Wrishp_emb', jashp_emb, success)
+       call prop_set(prop_ptr, 'output', 'Wrishp_emb', jashp_emb, 'Write grid-snapped 1d2d embankments to shapefile (1: yes, 0: no)')
     end if
     if (writeall .or. jashp_fxw /= 0) then
-       call prop_set(prop_ptr, 'output', 'Wrishp_fxw', jashp_fxw, success)
+       call prop_set(prop_ptr, 'output', 'Wrishp_fxw', jashp_fxw, 'Write grid-snapped fixed weirs to shapefile (1: yes, 0: no)')
     end if
     if (writeall .or. jashp_src /= 0) then
-       call prop_set(prop_ptr, 'output', 'Wrishp_src', jashp_src, success)
+       call prop_set(prop_ptr, 'output', 'Wrishp_src', jashp_src, 'Write grid-snapped source-sinks to shapefile (1: yes, 0: no)')
     end if
     if (writeall .or. jashp_pump /= 0) then
-       call prop_set(prop_ptr, 'output', 'Wrishp_pump', jashp_pump, success)
+       call prop_set(prop_ptr, 'output', 'Wrishp_pump', jashp_pump, 'Write grid-snapped pumps to shapefile (1: yes, 0: no)')
     end if
 
     call prop_set(prop_ptr, 'output', 'WriteDFMinterpretedvalues', jaWriteDFMinterpretedvalues, 'Write DFMinterpretedvalues (1: yes, 0: no)' )
