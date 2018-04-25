@@ -668,10 +668,16 @@
       itota = 0
       do i_rar = 1 , nr_rar
          arrlen(i_rar) = arrdm1(i_rar)*arrdm2(i_rar)*arrdm3(i_rar)
+         if ( arrlen(i_rar) .lt. 0 ) then
+            write(lunrep,2000)
+            write(lunrep,2010) arrnam(i_rar)
+            call srstop(1)
+         endif
          if ( .not. l_decl ) write ( 328, 2040 ) i_rar, arrnam(i_rar), arrlen(i_rar)
          itota = itota + arrlen(i_rar)
          if ( itota .lt. 0 ) then
             write(lunrep,2005)
+            write(lunrep,2010) arrnam(i_rar)
             call srstop(1)
          endif
       enddo
@@ -1160,6 +1166,7 @@
 
       return
 
+ 2000 format ( ' ERROR  : sub array of real array is too big. Unable to create pointer. ' )
  2005 format ( ' ERROR  : real array is too big. Unable to create pointer. ' )
  2010 format ( ' ERROR  : allocating real array. Name   : ',A )
  2020 format (/' Parallel processing with ',i3,' processor(s)'/)
