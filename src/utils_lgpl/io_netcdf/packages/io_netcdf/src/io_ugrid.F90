@@ -625,7 +625,7 @@ function ug_add_coordmapping(ncid, epsg, crs) result(ierr)
    varname = ' '
    if (epsg == 4326) then ! epsg 4326 is assumed spherical
       ierr_missing = UG_INVALID_CRS
-      varname = 'WGS84'
+      varname = 'wgs84'
    else 
       ierr_missing = UG_INVALID_CRS
       varname = 'projected_coordinate_system'
@@ -646,10 +646,10 @@ function ug_add_coordmapping(ncid, epsg, crs) result(ierr)
 
    !The meta info other than epsg code should be retrived from proj4 library, as done in Delta Shell
    !otherwise we will generate inconsistent information 
-   if (epsg == 4326 ) then 
+   if (epsg == 4326) then 
       ierr_missing = UG_INVALID_CRS
       write (epsgstring, '("EPSG:",I0)') epsg
-      ierr = nf90_put_att(ncid, id_crs, 'name',                       'WGS84'             ) ! CF
+      ierr = nf90_put_att(ncid, id_crs, 'name',                       'WGS 84'            ) ! CF
       ierr = nf90_put_att(ncid, id_crs, 'epsg',                        epsg               ) ! CF
       ierr = nf90_put_att(ncid, id_crs, 'grid_mapping_name',          'latitude_longitude') ! CF
       ierr = nf90_put_att(ncid, id_crs, 'longitude_of_prime_meridian', 0d0                ) ! CF
@@ -716,7 +716,7 @@ function ug_put_gridmapping_att(ncid, id_vars, epsg) result(ierr)
    ierr = UG_SOMEERR
    gridmappingvar = ' '
    if (epsg == 4326) then
-      gridmappingvar = 'WGS84'
+      gridmappingvar = 'wgs84'  ! should be the same as written in routine 'ug_add_coordmapping'
    else 
       gridmappingvar = 'projected_coordinate_system'
    end if

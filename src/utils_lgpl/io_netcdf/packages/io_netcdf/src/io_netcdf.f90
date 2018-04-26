@@ -98,6 +98,7 @@ public :: ionc_get_face_edges
 public :: ionc_get_face_nodes
 public :: ionc_get_coordinate_system
 public :: ionc_get_crs
+public :: ionc_set_crs
 public :: ionc_get_meta_data
 public :: ionc_get_var_count
 public :: ionc_inq_varids
@@ -752,6 +753,16 @@ function ionc_get_crs(ioncid, crs) result(ierr)
    ! Some error (status was set earlier)
 end function ionc_get_crs
 
+!> Set the coordinate system of a data set: this is needed to pass the metadata read with ionc_get_coordinate_reference_system.
+!> Note: currently io_netcdf only supports ONE crs for each file, not one for each grid.
+function ionc_set_crs(ioncid, crs) result(ierr)
+   integer,             intent(in)    :: ioncid  !< The IONC data set id.
+   type(t_crs),         intent(in)    :: crs     !< The crs
+   integer                            :: ierr    !< Result status, ionc_noerr if successful.
+   ierr = nf90_noerr 
+   datasets(ioncid)%crs = crs
+end function ionc_set_crs
+
 !> Get the meta data from the file/data set.
 function ionc_get_meta_data(ioncid, meta) result(ierr)
    integer, intent(in)          :: ioncid    !< The IONC data set id.
@@ -1180,6 +1191,9 @@ function detect_coordinate_system(ioncid) result(ierr)
    end if
    
    ierr = nf90_inq_varid(datasets(ioncid)%ncid, 'wgs84', id_crs)
+   if (ierr /= nf90_noerr) then
+       ierr = nf90_inq_varid(datasets(ioncid)%ncid, 'WGS84', id_crs)  ! needed for DIMR sets 2.0.6, 2.0.7 and 2.0.8
+   end if
     
    if (ierr /= nf90_noerr) then
       ierr = nf90_inq_varid(datasets(ioncid)%ncid, 'projected_coordinate_system', id_crs)
