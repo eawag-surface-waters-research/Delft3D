@@ -1714,7 +1714,11 @@ module geometry_module
       double precision               :: lambda, phi
       integer, intent(in)            :: jsferic, jasfer3D
 
-      if ( jsferic.eq.1 .and. jasfer3D.eq.1 ) then
+      if ( jsferic.eq.0 ) then
+         xu = x + alpha*vx
+         yu = y + alpha*vy
+      else
+         if ( jasfer3D.eq.1 ) then
          !     compute global base vectors at other point in 3D (xx,yy,zz) frame
          lambda = x*degrad_hp
          phi    = y*degrad_hp
@@ -1729,8 +1733,9 @@ module geometry_module
          yyu = yy + alpha*vyy
          zzu = zz + alpha*vzz
          call Cart3Dtospher(xxu,yyu,zzu,xu,yu,x)
-      else
-         ! LC to re-enable call mess(LEVEL_ERROR, 'xpav: not supported')
+         else
+            ! LC to re-enable call mess(LEVEL_ERROR, 'xpav: not supported')
+         end if
       end if
 
       return
