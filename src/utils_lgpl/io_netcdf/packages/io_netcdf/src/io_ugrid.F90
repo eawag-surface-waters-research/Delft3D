@@ -657,7 +657,7 @@ function ug_add_coordmapping(ncid, epsg, crs) result(ierr)
       ierr = nf90_put_att(ncid, id_crs, 'semi_minor_axis',             6356752.314245d0   ) ! CF
       ierr = nf90_put_att(ncid, id_crs, 'inverse_flattening',          298.257223563d0    ) ! CF
 !      ierr = nf90_put_att(ncid, id_crs, 'proj4_params',                ' '                ) ! ADAGUC
-      ierr = nf90_put_att(ncid, id_crs, 'epsg_code',                   trim(epsgstring)   ) ! ADAGUC
+      ierr = nf90_put_att(ncid, id_crs, 'EPSG_code',                   trim(epsgstring)   ) ! ADAGUC
 !      ierr = nf90_put_att(ncid, id_crs, 'projection_name',             ' '                ) ! ADAGUC
 !      ierr = nf90_put_att(ncid, id_crs, 'wkt',                         ' '                ) ! WKT
 !      ierr = nf90_put_att(ncid, id_crs, 'comment',                     ' '                )
