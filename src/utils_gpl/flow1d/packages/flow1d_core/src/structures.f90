@@ -603,7 +603,7 @@ end subroutine
             SetValueStruc = .false.
           endif
        case (ST_PUMP)
-          if (iparam==CFiSetpoint) then
+          if (iparam==CFiPumpCapacity) then
              if (sts%struct(istru)%pump%capacity(1)*value < -1e-6) then
                 ! The pump direction may not be changed.
                 line = 'The pumping direction of pump '//trim(sts%struct(istru)%id) //' is changed. This is not allowed.'
