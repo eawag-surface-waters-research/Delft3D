@@ -210,8 +210,10 @@ module m_readModelParameters
          if (.not. success) then
             call setmessage(LEVEL_ERROR, 'StorageOutputFile not found in md1d file')
          endif
-         tb_inc = 0.1
+         tb_inc = 0.1d0
          call prop_get_double(md_ptr, 'StorageTable', 'StorageTableIncrement', tb_inc, success)
+         tb_extra_height = 0d0
+         call prop_get_double(md_ptr, 'StorageTable', 'ExtraHeight', tb_extra_height, success)
       endif
       
       call prop_get_integer(md_ptr, 'Morphology', 'CalculateMorphology', iValue, success)

@@ -68,6 +68,7 @@ module m_GlobalParameters
 
    ! storage table controls
    double precision, public      :: tb_inc = 0.01
+   double precision, public      :: tb_extra_height = 0.0
    character(len=charln), public :: st_filename
    logical, public               :: write_tables
 
