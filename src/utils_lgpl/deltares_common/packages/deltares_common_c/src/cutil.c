@@ -518,8 +518,8 @@ CUTIL_GETMP (
     sprintf (buf, "%s..%cdefault", path_buffer, slash);
 
     if (!isdir(buf)) {
-        /*---- Try the (Windows) debug location way down in the source code tree itself */
-        sprintf (buf, "%s..%c..%c..%c..%cengines_gpl%cflow2d3d%cdefault", path_buffer, slash, slash, slash, slash, slash, slash);
+        /*---- Try the new (Linux) delivery location */
+        sprintf (buf, "%s..%cshare%cdelft3d", path_buffer, slash, slash);
         if (!isdir(buf)) {
             report_error ("Directory \"default\" does not exist");
             *result = FAILURE;

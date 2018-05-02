@@ -375,7 +375,7 @@ subroutine rdtrafrm0(lundia    ,error     ,iform     ,npar      ,par       , &
     use properties
     use string_module
     use message_module
-    use system_utils, only:SHARED_LIB_EXTENSION
+    use system_utils, only:SHARED_LIB_PREFIX, SHARED_LIB_EXTENSION
     !
     implicit none
 !
@@ -492,7 +492,7 @@ subroutine rdtrafrm0(lundia    ,error     ,iform     ,npar      ,par       , &
              call prop_get_string(tran_ptr,'TransportFormula','Name',name(l))
              !
              iform(l) = 15
-             rec(len_trim(rec)+1:) = SHARED_LIB_EXTENSION
+             write(rec,'(3a)') SHARED_LIB_PREFIX, trim(rec), SHARED_LIB_EXTENSION
              !
              ! Get handle to the DLL
              !

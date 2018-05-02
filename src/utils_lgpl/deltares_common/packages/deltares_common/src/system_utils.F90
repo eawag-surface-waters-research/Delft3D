@@ -35,9 +35,11 @@ module system_utils
 !
 
 #if (defined(HAVE_CONFIG_H))
+    character(3), parameter :: SHARED_LIB_PREFIX = 'lib'
     character(3), parameter :: SHARED_LIB_EXTENSION = '.so'
     character(1), parameter :: FILESEP = '/'
 #else
+    character(0), parameter :: SHARED_LIB_PREFIX = ''
     character(4), parameter :: SHARED_LIB_EXTENSION = '.dll'
     character(1), parameter :: FILESEP = '\'
 #endif
