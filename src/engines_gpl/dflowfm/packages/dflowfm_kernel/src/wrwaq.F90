@@ -779,6 +779,7 @@ subroutine waq_write_waqgeom_filepointer_ugrid(igeomfile)
         ! Create empty meshgeom.
         ierr = t_ug_meshgeom_destructor(aggregated_meshgeom)
         call check_error(ierr)
+        aggregated_meshgeom%start_index = 1
 
         ! Aggregate.
         call klok(startTime)
@@ -846,6 +847,7 @@ function create_ugrid_geometry(meshgeom, edge_type) result(ierr)
     ierr = t_ug_meshgeom_destructor(meshgeom)
     call check_error(ierr)
     meshgeom%meshName = 'mesh2d'
+    meshgeom%start_index = 1
     meshgeom%dim = 2
 
 
