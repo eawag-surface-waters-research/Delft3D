@@ -429,8 +429,8 @@ end function char_array_to_string
 pure function string_to_char_array(string, length)
   !
   ! Global
-  character(len=length), intent(in) :: string
   integer(c_int),intent(in) :: length
+  character(len=length), intent(in) :: string
   !
   ! Return value
   character(kind=c_char,len=1) :: string_to_char_array(length+1)
