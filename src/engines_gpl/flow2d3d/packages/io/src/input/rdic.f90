@@ -101,7 +101,6 @@ subroutine rdic(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)         :: v1     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax, lstsci) :: r1     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(lstsc)                                                  :: decay  !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(kmax)                                                   :: wrkini !!  Work array for reading initial conditions
     character(*)                                                                :: filic  !!  File name of initial condition file
     character(*)                                                                :: mdfrec !!  Standard rec. length in MD-file (300)
     character(*)                                                                :: restid !!  Run identification of the restart
@@ -118,32 +117,33 @@ subroutine rdic(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
 !
 ! Local variables
 !
-    integer                           :: k       ! Help var. 
-    integer                           :: l       ! Help var. 
-    integer                           :: lconc   ! Number of constituents defined by user (excl. Salinity, Temperature, Secondary flow and Quantities for the Turb. models) 
-    integer                           :: lenc    ! Help var. (length of var. cvar to be looked for in the MD-file) 
-    integer                           :: lkw     ! Length (in characters) of keyword 
-    integer                           :: ll      ! Help var. 
-    integer                           :: lnconc  ! Help var. for constituent 
-    integer                           :: nlook   ! Help var.: nr. of data to look for in the MD-file 
-    integer                           :: ntrec   ! Help. var to keep track of NRREC 
-    integer, dimension(:), allocatable:: coninit ! Flag indicating whether a constituent has been initialized (0 = not initialized, 1 = initialized)
-    logical                           :: defaul  ! Flag set to YES if default value may be applied in case var. read is empty (ier <= 0, or nrread < nlook) 
-    logical                           :: found   ! FOUND=TRUE if KEYW in the MD-file was found 
-    logical                           :: lerror  ! Flag=TRUE if a local error is encountered 
-    logical                           :: newkw   ! Logical var. specifying whether a new recnam should be read from the MD-file or just new data in the continuation line 
-    logical                           :: nodef   ! Flag set to YES if default value may NOT be applied in case var. read is empty (ier <= 0, or nrread < nlook) 
-    real(fp)                          :: daysec  ! Number of seconds in one day
-    real(fp)                          :: misval  ! Value for missing data
-    real(fp)                          :: rdef    ! Help var. containing default va- lue(s) for real variable 
-    real(fp)      , dimension(kmax)   :: rval    ! Help array (real) where the data, recently read from the MD-file, are stored temporarily 
-    character(11)                     :: fmtdef  ! Default file format (usually=blank) 
-    character(11)                     :: fmttmp  ! Help variable for file format 
-    character(12)                     :: fildef  ! Default file name (usually = blank) 
-    character(20)                     :: cdef    ! Default value when CHULP not found 
-    character(20)                     :: chulp   ! Help var. 
-    character(6)                      :: keyw    ! Name of record to look for in the MD-file (usually KEYWRD or RECNAM)
-    character(200)                    :: message
+    integer                             :: k       ! Help var. 
+    integer                             :: l       ! Help var. 
+    integer                             :: lconc   ! Number of constituents defined by user (excl. Salinity, Temperature, Secondary flow and Quantities for the Turb. models) 
+    integer                             :: lenc    ! Help var. (length of var. cvar to be looked for in the MD-file) 
+    integer                             :: lkw     ! Length (in characters) of keyword 
+    integer                             :: ll      ! Help var. 
+    integer                             :: lnconc  ! Help var. for constituent 
+    integer                             :: nlook   ! Help var.: nr. of data to look for in the MD-file 
+    integer                             :: ntrec   ! Help. var to keep track of NRREC 
+    integer , dimension(:), allocatable :: coninit ! Flag indicating whether a constituent has been initialized (0 = not initialized, 1 = initialized)
+    logical                             :: defaul  ! Flag set to YES if default value may be applied in case var. read is empty (ier <= 0, or nrread < nlook) 
+    logical                             :: found   ! FOUND=TRUE if KEYW in the MD-file was found 
+    logical                             :: lerror  ! Flag=TRUE if a local error is encountered 
+    logical                             :: newkw   ! Logical var. specifying whether a new recnam should be read from the MD-file or just new data in the continuation line 
+    logical                             :: nodef   ! Flag set to YES if default value may NOT be applied in case var. read is empty (ier <= 0, or nrread < nlook) 
+    real(fp)                            :: daysec  ! Number of seconds in one day
+    real(fp)                            :: misval  ! Value for missing data
+    real(fp)                            :: rdef    ! Help var. containing default va- lue(s) for real variable 
+    real(fp), dimension(:), allocatable :: rval    ! Help array (real) where the data, recently read from the MD-file, are stored temporarily 
+    real(fp), dimension(:), allocatable :: wrkini  ! Work array for reading initial conditions
+    character(11)                       :: fmtdef  ! Default file format (usually=blank) 
+    character(11)                       :: fmttmp  ! Help variable for file format 
+    character(12)                       :: fildef  ! Default file name (usually = blank) 
+    character(20)                       :: cdef    ! Default value when CHULP not found 
+    character(20)                       :: chulp   ! Help var. 
+    character(6)                        :: keyw    ! Name of record to look for in the MD-file (usually KEYWRD or RECNAM)
+    character(200)                      :: message
 !
 !! executable statements -------------------------------------------------------
 !
@@ -176,6 +176,13 @@ subroutine rdic(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     allocate(coninit(lstsci))
     coninit = 0
     lnconc  = 0
+    !
+    ! temporary work arrays
+    !
+    allocate(wrkini(kmax))
+    allocate(rval  (kmax))
+    wrkini = 0.0_fp
+    rval   = 0.0_fp
     !
     ! define name of salinity  (Sub1(1:1) = 'S')
     !
@@ -710,6 +717,8 @@ subroutine rdic(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        endif
     enddo
     deallocate(coninit)
+    deallocate(wrkini)
+    deallocate(rval)
 
     if (salin .and. .not. temp .and. lconc==0) then
     !  only salinity:
