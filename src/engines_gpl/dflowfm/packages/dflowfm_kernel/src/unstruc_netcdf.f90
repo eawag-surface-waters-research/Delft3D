@@ -7755,7 +7755,7 @@ subroutine unc_write_net_ugrid2(mapids, janetcell)
       ! TODO: AvD: lnx1d+1:lnx includes open bnd links, which may *also* be 1D boundaries (don't want that in mesh2d)
       ierr = ug_write_mesh_arrays(mapids%ncid, mapids%meshids2d, 'mesh2d', 2, UG_LOC_EDGE + UG_LOC_FACE, numk2d, numl2d, nump, nv, &
                                   edge_nodes, face_nodes, null(), null(), null(), xn, yn, xe, ye, xzw(1:nump), yzw(1:nump), &
-                                  crs%epsg_code, -999, dmiss, 1, layer_count, layer_type, layer_zs, interface_zs)
+                                  crs%epsg_code, -999, dmiss, 1)
 
       ! Add edge type variable (edge-flowlink relation)
       call write_edge_type_variable(mapids%ncid, mapids%meshids2d, 'mesh2d', edge_type)  
