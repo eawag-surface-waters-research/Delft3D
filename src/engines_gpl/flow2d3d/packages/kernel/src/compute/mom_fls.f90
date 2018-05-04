@@ -188,7 +188,7 @@ subroutine mom_fls &
           !
           du2 = (u0(nm,k)-u0(nmd,k)) * kfu(nm) * kfu(nmd)
           if (kspu(nm,0) > 0 .or. kspu(nmd,0) > 0) then
-             du2 = 0.0_sp
+             du2 = 0.0_fp
           endif
           if (qxk(nm,k)+qxk(nmd,k) > 0.0_fp) then
             du1      = (u0(nmd,k)-u0(nmdd,k)) * kfu(nmd) * kfu(nmdd) * kadu(nmd,k) * kadu(nmdd,k)
