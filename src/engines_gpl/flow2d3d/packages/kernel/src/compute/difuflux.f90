@@ -2,7 +2,8 @@ subroutine difuflux(stage     ,lundia    ,kmax      ,nmmax     ,nmmaxj    , &
                   & lstsci    ,r0        ,r1        ,qxk       ,qyk       , &
                   & dicuv     ,guv       ,gvu       ,areau     ,areav     , &
                   & kfu       ,kfv       ,kfs       ,kcs       ,timest    , &
-                  & icx       ,icy       ,lsed      ,gdp       )
+                  & icx       ,icy       ,lsed      ,s1        ,dps       , &
+                  & gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2018.                                
@@ -57,6 +58,7 @@ subroutine difuflux(stage     ,lundia    ,kmax      ,nmmax     ,nmmaxj    , &
     type (flwoutputtype)               , pointer :: flwoutput
     !
     logical                            , pointer :: massbal
+    real(fp)                           , pointer :: dryflc
 !
 ! Global variables
 !
@@ -78,6 +80,8 @@ subroutine difuflux(stage     ,lundia    ,kmax      ,nmmax     ,nmmaxj    , &
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         , intent(in) :: dicuv  !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in) :: guv    !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in) :: gvu    !  Description and declaration in esm_alloc_real.f90
+    real(prec), dimension(gdp%d%nmlb:gdp%d%nmub)             , intent(in) :: dps    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in) :: s1     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         , intent(in) :: qxk    !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         , intent(in) :: qyk    !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci) , intent(in) :: r0     !  Description and declaration in esm_alloc_real.f90
@@ -111,6 +115,7 @@ subroutine difuflux(stage     ,lundia    ,kmax      ,nmmax     ,nmmaxj    , &
     real(fp) :: flux1
     real(fp) :: qxu
     real(fp) :: qyv
+    real(fp) :: hmin
 !
 !! executable statements -------------------------------------------------------
 !
@@ -121,6 +126,7 @@ subroutine difuflux(stage     ,lundia    ,kmax      ,nmmax     ,nmmaxj    , &
     flwoutput      => gdp%gdflwpar%flwoutput
     !
     massbal        => gdp%gdmassbal%massbal
+    dryflc         => gdp%gdnumeco%dryflc
     !
     if (.not. flwoutput%difuflux .and. lsed==0 .and. .not. massbal) return
     !
@@ -193,10 +199,13 @@ subroutine difuflux(stage     ,lundia    ,kmax      ,nmmax     ,nmmaxj    , &
                 !
                 ! Explicit direction: diffusion
                 !
-                do l = 1,lstsci
-                   fluxu(nm,k,l) = fluxu(nm,k,l) + &
-                                 & flux1 * (r0(nm,k,l) - r0(nmu,k,l))
-                enddo
+                hmin = min(s1(nm) + real(dps(nm),fp), s1(nmu) + real(dps(nmu),fp))
+                if (hmin > dryflc) then
+                   do l = 1,lstsci
+                      fluxu(nm,k,l) = fluxu(nm,k,l) + &
+                                    & flux1 * (r0(nm,k,l) - r0(nmu,k,l))
+                   enddo
+                endif
              else
                 !
                 ! Implicit direction: advection
@@ -234,10 +243,13 @@ subroutine difuflux(stage     ,lundia    ,kmax      ,nmmax     ,nmmaxj    , &
                 !
                 ! Implicit direction: diffusion
                 !
-                do l = 1,lstsci
-                   fluxu(nm,k,l) = fluxu(nm,k,l) + &
-                                 & flux1 * (r1(nm,k,l) - r1(nmu,k,l))
-                enddo
+                hmin = min(s1(nm) + real(dps(nm),fp), s1(nmu) + real(dps(nmu),fp))
+                if (hmin > dryflc) then
+                   do l = 1,lstsci
+                      fluxu(nm,k,l) = fluxu(nm,k,l) + &
+                                    & flux1 * (r1(nm,k,l) - r1(nmu,k,l))
+                   enddo
+                endif
              endif    ! stage 2/1
           endif       ! kfu == 1 .and. kcs /=0
        enddo          ! nm
@@ -280,10 +292,13 @@ subroutine difuflux(stage     ,lundia    ,kmax      ,nmmax     ,nmmaxj    , &
                 !
                 ! Explicit direction: diffusion
                 !
-                do l = 1,lstsci
-                   fluxv(nm,k,l) = fluxv(nm,k,l) + &
-                                 & flux1 * (r0(nm,k,l) - r0(num,k,l))
-                enddo
+                hmin = min(s1(nm) + real(dps(nm),fp), s1(num) + real(dps(num),fp))
+                if (hmin > dryflc) then
+                   do l = 1,lstsci
+                      fluxv(nm,k,l) = fluxv(nm,k,l) + &
+                                    & flux1 * (r0(nm,k,l) - r0(num,k,l))
+                   enddo
+                endif
              else
                 !
                 ! Implicit direction: advection
@@ -321,10 +336,13 @@ subroutine difuflux(stage     ,lundia    ,kmax      ,nmmax     ,nmmaxj    , &
                 !
                 ! Implicit direction: diffusion
                 !
-                do l = 1,lstsci
-                   fluxv(nm,k,l) = fluxv(nm,k,l) + &
-                                 & flux1 * (r1(nm,k,l) - r1(num,k,l))
-                enddo
+                hmin = min(s1(nm) + real(dps(nm),fp), s1(num) + real(dps(num),fp))
+                if (hmin > dryflc) then
+                   do l = 1,lstsci
+                      fluxv(nm,k,l) = fluxv(nm,k,l) + &
+                                    & flux1 * (r1(nm,k,l) - r1(num,k,l))
+                   enddo
+                endif
              endif    ! stage 1/2
           endif       ! kfu == 1 .and. kcs /=0
        enddo          ! nm

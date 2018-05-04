@@ -98,6 +98,7 @@ subroutine difuvl(icreep    ,timest    ,lundia    ,nst       ,icx       , &
     real(fp), dimension(:,:,:)          , pointer :: fluxuc
     real(fp), dimension(:,:,:)          , pointer :: fluxv
     real(fp), dimension(:,:,:)          , pointer :: fluxvc
+    real(fp)                            , pointer :: dryflc
     real(fp)                            , pointer :: vicmol
     real(fp)                            , pointer :: xlo
     integer                             , pointer :: iro
@@ -237,6 +238,7 @@ subroutine difuvl(icreep    ,timest    ,lundia    ,nst       ,icx       , &
     real(fp)                                                        :: difl
     real(fp)                                                        :: difr
     real(fp)                                                        :: diz1
+    real(fp)                                                        :: fac
     real(fp)                                                        :: flux
     real(fp)                                                        :: h0
     real(fp)                                                        :: h0i
@@ -251,6 +253,7 @@ subroutine difuvl(icreep    ,timest    ,lundia    ,nst       ,icx       , &
     real(fp)                                                        :: tsg
     real(fp)                                                        :: uuu
     real(fp)                                                        :: vvv
+    real(fp)                                                        :: hmin
     integer                                                         :: nm_pos ! indicating the array to be exchanged has nm index at the 2nd place, e.g., dbodsd(lsedtot,nm)
 !
 !! executable statements -------------------------------------------------------
@@ -261,6 +264,7 @@ subroutine difuvl(icreep    ,timest    ,lundia    ,nst       ,icx       , &
     fluxv       => gdp%gdflwpar%fluxv
     fluxvc      => gdp%gdflwpar%fluxvc
     flwoutput   => gdp%gdflwpar%flwoutput
+    dryflc      => gdp%gdnumeco%dryflc
     vicmol      => gdp%gdphysco%vicmol
     dicoww      => gdp%gdphysco%dicoww
     iro         => gdp%gdphysco%iro
@@ -469,7 +473,8 @@ subroutine difuvl(icreep    ,timest    ,lundia    ,nst       ,icx       , &
              nmu = icx
              do nm = 1, nmmax
                 nmu = nmu + 1
-                if (kfu(nm)*kadu(nm, k) /= 0) then
+                hmin = min(s1(nm) + real(dps(nm),fp), s1(nmu) + real(dps(nmu),fp))
+                if (kfu(nm)*kadu(nm, k) /= 0 .and. hmin > dryflc) then
                    cl             = r0   (nm ,k,l)
                    difl           = dicuv(nm ,k)
                    cr             = r0   (nmu,k,l)
@@ -498,7 +503,8 @@ subroutine difuvl(icreep    ,timest    ,lundia    ,nst       ,icx       , &
              num = icy
              do nm = 1, nmmax
                 num = num + 1
-                if (kfv(nm)*kadv(nm, k) /= 0) then
+                hmin = min(s1(nm) + real(dps(nm),fp), s1(num) + real(dps(num),fp))
+                if (kfv(nm)*kadv(nm, k) /= 0 .and. hmin > dryflc) then
                    cl             = r0   (nm ,k,l)
                    difl           = dicuv(nm ,k)
                    cr             = r0   (num,k,l)
@@ -665,7 +671,7 @@ subroutine difuvl(icreep    ,timest    ,lundia    ,nst       ,icx       , &
     enddo
     !
     ! BOUNDARY CONDITIONS
-    !     On open boundary no secondarY flow (=> loop over LSTSC)
+    !     On open boundary no secondary flow (=> loop over LSTSC)
     !
     do ic = 1, norow
        n = irocol(1, ic)
@@ -746,7 +752,7 @@ subroutine difuvl(icreep    ,timest    ,lundia    ,nst       ,icx       , &
              enddo
           enddo
           !
-          ! set concentraties in dry points and in open boundary points
+          ! set concentrations in dry points and in open boundary points
           !
           do k = 1, kmax
              do nm = 1, nmmax

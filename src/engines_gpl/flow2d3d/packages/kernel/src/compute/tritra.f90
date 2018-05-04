@@ -336,7 +336,8 @@ subroutine tritra(stage     ,lundia    ,nst       ,icreep    , &
                          & lstsci    ,r0        ,r1        ,qxk       ,qyk       , &
                          & dicuv     ,guv       ,gvu       ,areau     ,areav     , &
                          & kfu       ,kfv       ,kfs       ,kcs       ,timest    , &
-                         & icx       ,icy       ,lsed      ,gdp       )
+                         & icx       ,icy       ,lsed      ,s1        ,dps       , &
+                         & gdp       )
              if (roller) then
                  call rolcor(hrms      ,tp        ,theta     ,hu        ,hv         , &
                            & guu       ,gvv       ,qxk       ,qyk       ,eulerisoglm, &
@@ -519,7 +520,8 @@ subroutine tritra(stage     ,lundia    ,nst       ,icreep    , &
                          & lstsci    ,r0        ,r1        ,qxk       ,qyk       , &
                          & dicuv     ,guv       ,gvu       ,areau     ,areav     , &
                          & kfu       ,kfv       ,kfs       ,kcs       ,timest    , &
-                         & icy       ,icx       ,lsed      ,gdp       )
+                         & icy       ,icx       ,lsed      ,s1        ,dps       , &
+                         & gdp       )
              if (roller) then
                  call rolcor(hrms      ,tp        ,theta     ,hu        ,hv         , &
                            & guu       ,gvv       ,qxk       ,qyk       ,eulerisoglm, &

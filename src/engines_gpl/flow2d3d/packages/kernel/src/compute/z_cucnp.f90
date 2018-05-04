@@ -10,7 +10,7 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                  & aak       ,bbk       ,cck       ,ddk       ,bbka      , &
                  & bbkc      ,vicuv     ,vnu2d     ,vicww     ,tgfsep    , &
                  & drhodx    ,wsu       ,wsbodyu   ,taubpu    ,taubsu    ,rxx       , &
-                 & rxy       ,windu     ,patm      ,fcorio    ,p0        , &
+                 & rxy       ,windsu    ,patm      ,fcorio    ,p0        , &
                  & tp        ,rlabda    ,dfu       ,deltau    ,fxw       , &
                  & ubrlsu    ,pship     ,diapl     ,rnpl      ,cfurou    , &
                  & qxk       ,qyk       ,umean     ,dps       ,s0        , &
@@ -163,7 +163,7 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                      :: tp      !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                      :: umean   !  Description and declaration in esm_alloc_real.f90    
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                      :: vnu2d   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: windu   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: windsu  !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                      :: wsu     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                      :: wsbodyu !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax), intent(in)  :: vicww   !  Description and declaration in esm_alloc_real.f90
@@ -535,7 +535,7 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
           ! Bottom and wind shear stress
           !
           cbot           = taubpu(nm)
-          qwind          = windu(nm)/max(dzu0(nm, kkmax),drytrsh)
+          qwind          = windsu(nm)/max(dzu0(nm, kkmax),drytrsh)
           bdmwrp         = cbot/max(dzu0(nm, kmin),drytrsh)
           bdmwrs         = taubsu(nm)/max(dzu0(nm, kmin),drytrsh)
           bbk(nm, kmin)  = bbk(nm, kmin) + bdmwrp

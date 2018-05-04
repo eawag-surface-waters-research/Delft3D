@@ -100,10 +100,12 @@ subroutine difu(icreep    ,timest    ,lundia    ,nst       ,icx       , &
     integer                , pointer :: nudge
     real(fp)               , pointer :: ad_epsabs
     real(fp)               , pointer :: ad_epsrel
+    real(fp)               , pointer :: dryflc
     real(fp)               , pointer :: ck
     real(fp)               , pointer :: dicoww
     real(fp)               , pointer :: eps
     real(fp)               , pointer :: hdt
+
     real(fp)               , pointer :: vicmol
     real(fp)               , pointer :: xlo
 !
@@ -269,11 +271,13 @@ real(fp)                :: difl
 real(fp)                :: difr
 real(fp)                :: diz1
 real(fp)                :: epsitr ! Maximum value of relative error and absolute error of iteration process
+real(fp)                :: fac
 real(fp)                :: flux
 real(fp)                :: h0
 real(fp)                :: h0i
 real(fp)                :: h0new
 real(fp)                :: h0old
+real(fp)                :: hmin
 real(fp), dimension(10) :: mu
 real(fp)                :: nudgefac
 real(fp)                :: qxu
@@ -304,6 +308,7 @@ integer                 :: nm_pos ! indicating the array to be exchanged has nm 
     ad_itrmax   => gdp%gdnumeco%ad_itrmax
     ad_epsabs   => gdp%gdnumeco%ad_epsabs
     ad_epsrel   => gdp%gdnumeco%ad_epsrel
+    dryflc      => gdp%gdnumeco%dryflc
     !
     ! INITIALISATION
     !
@@ -455,10 +460,11 @@ integer                 :: nm_pos ! indicating the array to be exchanged has nm 
           nmu = icx
           do nm = 1, nmmax
              nmu = nmu + 1
-             if (kfu(nm)*kadu(nm, k) /= 0) then
+             hmin = min(s1(nm) + real(dps(nm),fp), s1(nmu) + real(dps(nmu),fp))
+             if (kfu(nm)*kadu(nm, k) /= 0 .and. hmin > dryflc) then
                 difl    = dicuv(nm, k)
                 difr    = dicuv(nmu, k)
-                flux    = 0.5*(difl + difr)/(0.7*gvu(nm))
+                flux    = 0.5_fp*(difl + difr)/(0.7_fp*gvu(nm))
                 maskval = max(0, 2 - abs(kcs(nm)))
                 bbk(nm, k) = bbk(nm, k) + areau(nm, k)*flux*maskval
                 bux(nm, k) = bux(nm, k) - areau(nm, k)*flux*maskval
@@ -482,12 +488,13 @@ integer                 :: nm_pos ! indicating the array to be exchanged has nm 
              num = icy
              do nm = 1, nmmax
                 num = num + 1
-                if (kfv(nm)*kadv(nm, k) /= 0) then
+                hmin = min(s1(nm) + real(dps(nm),fp), s1(num) + real(dps(num),fp))
+                if (kfv(nm)*kadv(nm, k) /= 0 .and. hmin > dryflc) then
                    cl      = r0(nm, k, l)
                    difl    = dicuv(nm, k)
                    cr      = r0(num, k, l)
                    difr    = dicuv(num, k)
-                   flux    = 0.5_fp*(cr - cl)*(difl + difr)/(0.7*guv(nm))
+                   flux    = 0.5_fp*(cr - cl)*(difl + difr)/(0.7_fp*guv(nm))
                    maskval = max(0, 2 - abs(kcs(nm)))
                    ddkl(nm, k, l)  = ddkl(nm, k, l) + areav(nm, k)*flux*maskval
                    maskval         = max(0, 2 - abs(kcs(num)))
@@ -634,7 +641,7 @@ integer                 :: nm_pos ! indicating the array to be exchanged has nm 
     enddo
     !
     ! BOUNDARY CONDITIONS
-    !     On open boundary no seconday flow (=> loop over LSTSC)
+    !     On open boundary no secondary flow (=> loop over LSTSC)
     !
     do ic = 1, norow
        n    = irocol(1, ic)

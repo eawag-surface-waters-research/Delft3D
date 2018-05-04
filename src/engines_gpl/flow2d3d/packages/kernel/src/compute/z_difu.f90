@@ -1467,7 +1467,7 @@ subroutine z_difu_solv_impl( )
           if (kfsmx0(nm) > kfsmax(nm)) then
              do k = kmin + 1, kmax
                 r1(nm, k, l) = r0(nm, k, l)
-                   vvdwk(nm, k) = 0.0_fp
+                vvdwk(nm, k) = 0.0_fp
              enddo
           elseif (kfsmx0(nm) < kfsmax(nm)) then
              do k = kmin + 1, kmax

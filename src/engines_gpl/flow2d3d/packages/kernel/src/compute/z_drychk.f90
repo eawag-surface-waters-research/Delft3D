@@ -55,6 +55,7 @@ subroutine z_drychk(idry      ,j         ,nmmaxj    ,nmmax     ,kmax      , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
     integer  , pointer :: lundia
+    real(fp) , pointer :: drycrt
     real(fp) , pointer :: dzmin
 !
 ! Global variables
@@ -101,6 +102,7 @@ subroutine z_drychk(idry      ,j         ,nmmaxj    ,nmmax     ,kmax      , &
     integer, dimension(1)  :: nm_s1max2
     logical                :: flood
     logical                :: zmodel
+    real(fp)               :: drytrsh
     real(fp)               :: s1max1
     real(fp)               :: s1max2
     real(fp)               :: zdiff
@@ -109,11 +111,17 @@ subroutine z_drychk(idry      ,j         ,nmmaxj    ,nmmax     ,kmax      , &
 !! executable statements -------------------------------------------------------
 !
     lundia  => gdp%gdinout%lundia
+    drycrt  => gdp%gdnumeco%drycrt
     dzmin   => gdp%gdzmodel%dzmin
     !
     idry   = 0
     nm_pos = 1
     !
+    ! A drying treshold to avoid very thin layers in active cells
+    ! 0.1 * dryflc (0.2*drycrt), but limited between 10^(-5) and 10^(-3)
+    ! Such thin layers cause inaccuracies in the solution of the transport equation (in conservative formulation)
+    !
+    drytrsh = max(1.0e-5_fp, min(0.2_fp*drycrt, 1.0e-3_fp))
     do nm = 1, nmmax
        nmd = nm - icx
        ndm = nm - icy
@@ -121,9 +129,9 @@ subroutine z_drychk(idry      ,j         ,nmmaxj    ,nmmax     ,kmax      , &
           !
           ! Check on kfs(nm) == 1 is necessary, because when the last active cell edge of a cell
           ! was set dry in Z_SUD, all KFU/KFV are zero and this check would not be performed
-          !
+          ! 
           if (kfu(nm)==1 .or. kfu(nmd)==1 .or. kfv(nm)==1 .or. kfv(ndm)==1 .or. kfs(nm)==1) then
-             if ( s1(nm) <= -real(dps(nm),fp) ) then
+             if ( s1(nm) <= -real(dps(nm),fp)+drytrsh ) then
                 kfu(nm ) = 0
                 kfu(nmd) = 0
                 kfv(nm ) = 0

@@ -269,6 +269,7 @@ subroutine cucnp(dischy    ,icreep    ,dpdksi    ,s0        ,u0        , &
     real(fp)                   :: fxwl     ! local, modified fxw
     real(fp)                   :: gksi
     real(fp)                   :: h0i
+    real(fp)                   :: h0fac
     real(fp)                   :: hl
     real(fp)                   :: hr
     real(fp)                   :: hugsqs  ! HU(NM/NMD) * GSQS(NM) Depending on UMDIS the HU of point NM or NMD will be used
@@ -278,9 +279,11 @@ subroutine cucnp(dischy    ,icreep    ,dpdksi    ,s0        ,u0        , &
     real(fp)                   :: rn
     real(fp)                   :: rhou
     real(fp)                   :: svvv
+    real(fp)                   :: s_crit
     real(fp)                   :: tidegforce
     real(fp)                   :: tsg1
     real(fp)                   :: tsg2
+    real(fp)                   :: twothird
     real(fp)                   :: umod
     real(fp)                   :: uuu
     real(fp)                   :: uweir
@@ -354,6 +357,7 @@ subroutine cucnp(dischy    ,icreep    ,dpdksi    ,s0        ,u0        , &
     !
     facmax       = 0.25*sqrt(ag)*rhow*gammax**2
     drythreshold = 0.1_fp * dryflc
+    twothird = 2.0_fp / 3.0_fp
     !
     if (icx==1) then
        ff = -1.0
@@ -481,7 +485,7 @@ subroutine cucnp(dischy    ,icreep    ,dpdksi    ,s0        ,u0        , &
              if (kcs(nm)*kcs(nmu)==2) nbaroc = ibaroc
              !
              ! SUBSTITUTION IN COEFFICIENTS,  including in DDK
-             !    CORIOLIS, GRAVITY PRESSURE TERM and TIDE GENERATING FORCES
+             !    CORIOLIS, GRAVITY AND BAROCLINIC PRESSURE TERM and TIDE GENERATING FORCES
              !     remember this is not a closed gate layer
              !     KSPU(NM,0)*KSPU(NM,K)<>4, so initialisation
              !     test like in loop 100 of UZD is not necessary
@@ -492,19 +496,24 @@ subroutine cucnp(dischy    ,icreep    ,dpdksi    ,s0        ,u0        , &
              densforce  = - ag*(1. - icreep)/(gksi*rhow)*nbaroc*(sig(k)*rhou*(hr - hl) + (sumrho(nmu, k)*hr - sumrho(nm, k)*hl))
              !
              ! limit pressure term in case of drying/flooding on steep slopes
-             ! note correction explicit whereas actual pressure term is implicit here (see wlpres)
+             ! note barotropic correction is explicit whereas actual pressure term is implicit here (see wlpres)
+             ! explicit baroclinic pressure is set to zero in case of (supercritical) flow off the steep slope
              !
              if (slplim) then
                 dpsmax = max(-dps(nm),-dps(nmu))
                 if (s0(nm) < dpsmax) then
-                   pressure = - ag*rhofrac*(s0(nm) - dpsmax)/gksi
+                   s_crit     = twothird * max(0.0_fp, s0(nmu)-dpsmax) + dpsmax
+                   pressure   = - ag*rhofrac*(s0(nm) - s_crit)/gksi
+                   densforce  = 0.0_fp
                 elseif (s0(nmu) < dpsmax) then
-                   pressure = - ag*rhofrac*(dpsmax - s0(nmu))/gksi
+                   s_crit     = twothird * max(0.0_fp, s0(nm)-dpsmax) + dpsmax
+                   pressure   = - ag*rhofrac*(s_crit - s0(nmu))/gksi
+                   densforce  = 0.0_fp
                 else
-                   pressure = 0.0_fp
+                   pressure   = 0.0_fp
                 endif
              else
-                pressure = 0.0_fp
+                pressure   = 0.0_fp
              endif
              pressure   = pressure                                              &
                         & - (patm(nmu) - patm(nm))/(gksi*rhow)               &
@@ -548,12 +557,14 @@ subroutine cucnp(dischy    ,icreep    ,dpdksi    ,s0        ,u0        , &
     call timer_stop(timer_cucnp_eloss, gdp)
     !
     ndm = -icy
+    nmu =  icx
     kdo = max(1, kmax - 1)
     kup = min(kmax, 2)
     !
     call timer_start(timer_cucnp_stress, gdp)
     do nm = 1, nmmax
        ndm = ndm + 1
+       nmu = nmu  + 1
        if (kfu(nm)==1) then
           h0i = 1./hu(nm)
           !
@@ -578,8 +589,17 @@ subroutine cucnp(dischy    ,icreep    ,dpdksi    ,s0        ,u0        , &
           !
           ! WIND FRICTION AND BOTTOM STRESS DUE TO FLOW AND WAVES
           !
-
-          qwind  = h0i*windsu(nm)/thick(1)
+          ! Apply factor h0fac to reduce wind force from cells with small depth
+          ! Note that the direction of windsu is opposite to what is expected
+          ! This is due to the change in sign in windtogridc.f90
+          !
+          h0fac = 1.0_fp
+          if (windsu(nm) < 0.0_fp .and.  s0(nm)+real(dps(nm),fp) < 2.0_fp*dryflc) then
+             h0fac = (s0(nm)+real(dps(nm),fp)) / (2.0_fp*dryflc)
+          elseif (windsu(nm) > 0.0_fp .and.  s0(nmu)+real(dps(nmu),fp) < 2.0_fp*dryflc) then
+             h0fac = (s0(nmu)+real(dps(nmu),fp)) / (2.0_fp*dryflc)
+          endif
+          qwind  = h0fac*h0i*windsu(nm)/thick(1)
           if (mom_output) then
              mom_m_windforce(nm)     = mom_m_windforce(nm) - qwind/rhow
           else
