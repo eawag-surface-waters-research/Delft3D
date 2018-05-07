@@ -58,9 +58,12 @@ module m_cross_helper
    public getChezyFromYZ
    
    public getCrossFlowData_on_link
+   public getCrossTotalData_on_link
 
    integer, public, parameter :: CSH_DEPTH = 0
    integer, public, parameter :: CSH_LEVEL  = 1
+   
+   double precision, public :: default_width
    
    private
    
@@ -161,7 +164,7 @@ contains
          dpt = water
       endif
       
-      call GetCSParsTotal(cross1, cross2, factor, dpt, totalArea, totalWidth)
+      call GetCSParsTotal(cross1, cross2, factor, dpt, totalArea, totalWidth, CS_TYPE_PREISMAN)
       
       getWetTotalAreaGP = totalArea
 
@@ -244,7 +247,7 @@ contains
          dpt = water
       endif
       
-      call GetCSParsTotal(cross1, cross2, factor, dpt, totalArea, totalWidth)
+      call GetCSParsTotal(cross1, cross2, factor, dpt, totalArea, totalWidth, CS_TYPE_PREISMAN)
       
       getTotalWidthGP = totalWidth
 
@@ -341,12 +344,11 @@ contains
 
    end subroutine getCrossFlowDataGP
    
-   subroutine getCrossFlowData_on_link(network, ilink, water, DepthOrLevel, flowArea, flowWidth, wetPerimeter, conveyance, cz, af_sub, perim_sub, cz_sub)
+   subroutine getCrossFlowData_on_link(network, ilink, depth, flowArea, flowWidth, wetPerimeter, conveyance, cz, af_sub, perim_sub, cz_sub)
    
       type(t_network), intent(in)              :: network
       integer, intent(in)                      :: ilink
-      double precision, intent(in)             :: water
-      integer, optional, intent(in)            :: DepthOrLevel
+      double precision, intent(in)             :: depth
       double precision, optional, intent(out)  :: flowArea
       double precision, optional, intent(out)  :: flowWidth
       double precision, optional, intent(out)  :: wetPerimeter
@@ -360,8 +362,6 @@ contains
       type (t_CrossSection), pointer     :: cross2 
       double precision                   :: factor
 
-      double precision                   :: bob_grid_point
-      double precision                   :: dpt
       double precision                   :: area
       double precision                   :: width
       double precision                   :: perimeter
@@ -371,24 +371,38 @@ contains
       double precision                   :: perim_sub_local(3)
       double precision                   :: cz_sub_local(3)
 
+      if (network%adm%line2cross(ilink)%c1 <= 0) then
+         ! no cross section defined on branch, use default definition
+         area = default_width* depth
+         perimeter = default_width + 2*depth
+         cz = 60d0
+         if (present(flowArea))     flowArea = area
+         if (present(flowWidth))    flowWidth = default_width
+         if (present(wetPerimeter)) wetPerimeter = perimeter
+         if (present(conveyance))   conveyance = cz* area * sqrt(area/perimeter)
+         if (present(af_sub   )) then
+            af_sub    = 0d0
+            af_sub(1) = area
+         endif
+         if (present(perim_sub)) then
+            perim_sub    = 0d0
+            perim_sub(1) = perimeter
+         endif
+         if (present(cz_sub   )) then
+            cz_sub    = 0d0
+            cz_sub(1) = cz
+         endif
+         return
+      endif
+
       cross1 => network%crs%cross(network%adm%line2cross(ilink)%c1)
       cross2 => network%crs%cross(network%adm%line2cross(ilink)%c2)
       factor =  network%adm%line2cross(ilink)%f
                 
-      if (present(DepthOrLevel)) then
-         if (DepthOrLevel ==  CSH_LEVEL) then     
-            bob_grid_point = getBob(cross1, cross2, factor)
-            dpt = bob_grid_point + water
-         else
-            dpt = water
-         endif
-      else
-         dpt = water
-      endif
       
       czdum = 0d0
       
-      call GetCSParsFlow(cross1, cross2, factor, dpt, 0.0d0, czdum, area, perimeter, width, conv, &
+      call GetCSParsFlow(cross1, cross2, factor, depth, 0.0d0, czdum, area, perimeter, width, conv, &
                          af_sub_local, perim_sub_local, cz_sub_local)
       
       if (present(flowArea))          flowArea = area
@@ -398,8 +412,41 @@ contains
       if (present(af_sub   ))   af_sub    = af_sub_local   
       if (present(perim_sub))   perim_sub = perim_sub_local
       if (present(cz_sub   ))   cz_sub   = cz_sub_local   
+      if (present(cz       ))   cz        = czdum
 
    end subroutine getCrossFlowData_on_link
+   
+   subroutine getCrossTotalData_on_link(network, ilink, depth, totalArea, totalWidth, calculationOption)
+   
+      type(t_network), intent(in)              :: network
+      integer, intent(in)                      :: ilink
+      double precision, intent(in)             :: depth
+      double precision, intent(out)  :: totalArea
+      double precision, intent(out)  :: totalWidth
+                                                        !> type of total area computation, possible values:\n
+                                                        !! CS_TYPE_PREISMAN  Ordinary total area computation, with possible Preisman lock on top\n
+                                                        !! CS_TYPE_PLUS      Total area for only the expanding part of the cross section (Nested Newton method)\n
+                                                        !! CS_TYPE_MIN       Total area for only the narrowing part of the cross section (Nested Newton method)
+      integer, intent(in)               :: calculationOption 
+
+      type (t_CrossSection), pointer     :: cross1
+      type (t_CrossSection), pointer     :: cross2 
+      double precision                   :: factor
+
+      if (network%adm%line2cross(ilink)%c1 <= 0) then
+         ! no cross section defined on branch, use default definition
+         totalArea  = default_width* depth
+         totalWidth = default_width
+         return
+      endif
+      
+      cross1 => network%crs%cross(network%adm%line2cross(ilink)%c1)
+      cross2 => network%crs%cross(network%adm%line2cross(ilink)%c2)
+      factor =  network%adm%line2cross(ilink)%f
+ 
+      call GetCSParsTotal(cross1, cross2, factor, depth, TotalArea, TotalWidth, calculationOption)
+      
+   end subroutine getCrossTotalData_on_link
    
    function getbobs(network, ilink) result(res)
       type(t_network), intent(in) :: network
@@ -413,6 +460,12 @@ contains
       double precision :: distancelocal
       double precision :: factor
       double precision :: linkpos
+
+      if (network%adm%line2cross(ilink)%c1 < 0) then
+         ! no cross section on this branch
+         res = huge(1d0)
+         return
+      endif
 
       cross1 => network%crs%cross(network%adm%line2cross(ilink)%c1)
       cross2 => network%crs%cross(network%adm%line2cross(ilink)%c2)
@@ -476,7 +529,7 @@ contains
          dpt = water
       endif
       
-      call GetCSParsTotal(cross1, cross2, factor, dpt, area, width)
+      call GetCSParsTotal(cross1, cross2, factor, dpt, area, width, CS_TYPE_PREISMAN)
       
       if (present(totalArea))  totalArea = area
       if (present(totalWidth)) totalWidth = width

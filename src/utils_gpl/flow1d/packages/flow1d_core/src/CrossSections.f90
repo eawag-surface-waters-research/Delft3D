@@ -124,6 +124,10 @@ module m_CrossSections
    integer, public, parameter :: CS_RECTANGLE      =    4 ! TODO, placeholder, someone forgot to check in?
    integer, public, parameter :: CS_TRAPEZIUM      =    5
    integer, public, parameter :: CS_YZ_PROF        =   10
+   integer, public, parameter :: CS_TYPE_PREISMAN  =    1 !< Ordinary total area computation, with possible Preisman lock on top
+   integer, public, parameter :: CS_TYPE_PLUS      =    2 !< Total area for only the expanding part of the cross section (Nested Newton method)
+   integer, public, parameter :: CS_TYPE_MIN       =    3 !< Total area for only the narrowing part of the cross section (Nested Newton method)
+   
    integer, parameter         :: eps = 1d-3               !< accuracy parameter for determining wetperimeter == 0d0
 
    character (len=13), public, dimension(10) :: CSTypeName = (/&
@@ -372,9 +376,9 @@ integer function GetCrossType(string)
       case ('trapezium')
          GetCrossType = CS_TRAPEZIUM
       case ('circle')
-         GetCrossType = CS_TABULATED
+         GetCrossType = CS_CIRCLE
       case ('egg')
-         GetCrossType = CS_TABULATED
+         GetCrossType = CS_EGG
       case ('yz')
          GetCrossType = CS_YZ_PROF
       case ('rectangle')
@@ -817,7 +821,7 @@ subroutine setGroundLayerData(crossDef, thickness)
       case (CS_TABULATED)
          call GetTabulatedSizes(thickness, crossDef, .true., area, width, perimeter, af_sub, perim_sub)
       case (CS_CIRCLE)
-         call CircleProfile(thickness, crossDef%diameter, area, width, perimeter)
+         call CircleProfile(thickness, crossDef%diameter, area, width, perimeter, .true.)
       case (CS_EGG)
          call EggProfile(thickness, crossDef%diameter, area, width, perimeter)
       case default
@@ -1286,8 +1290,9 @@ subroutine GetCSParsFlowInterpolate(cross1, cross2, f, dpt, u1, cz, flowArea, we
             crossi%crosstype          = cross1%crosstype   
             crossi%bedLevel           = (1.0d0 - f) * cross1%bedLevel + f * cross2%bedLevel
             crossi%surfaceLevel       = (1.0d0 - f) * cross1%surfaceLevel + f * cross2%surfaceLevel
-            crossi%bedFrictionType    = cross1%bedFrictionType
-            crossi%bedFriction        = (1.0d0 - f) * cross1%bedFriction + f * cross2%bedFriction
+            ! for circular cross sections there is only one roughness value set in bedfriction
+            crossi%bedFrictionType    = cross1%frictionTypePos(1)
+            crossi%bedFriction        = (1.0d0 - f) * cross1%frictionValuePos(1) + f * cross2%frictionValuePos(1)
             crossi%groundFriction     = (1.0d0 - f) * cross1%groundFriction + f * cross2%groundFriction
             crossi%groundFrictionType = cross1%groundFrictionType
             crossi%tabDef%diameter    = (1.0d0 - f) * cross1%tabDef%diameter + f * cross2%tabDef%diameter
@@ -1497,7 +1502,7 @@ subroutine GetCSParsFlowCross(cross, dpt, u1, cz, flowArea, wetPerimeter, flowWi
          endif
          call TabulatedProfile(dpt, cross, .true., getSummerDikes, flowArea, flowWidth, wetPerimeter, af_sub_local, perim_sub_local)
       case (CS_CIRCLE)
-         call CircleProfile(dpt, crossDef%diameter, flowArea, flowWidth, wetPerimeter)
+         call CircleProfile(dpt, crossDef%diameter, flowArea, flowWidth, wetPerimeter, .true.)
       case (CS_EGG)
          call EggProfile(dpt, crossDef%diameter, flowArea, flowWidth, wetPerimeter)
       case (CS_YZ_PROF)
@@ -1583,7 +1588,7 @@ subroutine GetCSParsFlowCross(cross, dpt, u1, cz, flowArea, wetPerimeter, flowWi
    
 end subroutine GetCSParsFlowCross
 
-subroutine GetCSParsTotalInterpolate(cross1, cross2, f, dpt, totalArea, totalWidth)
+subroutine GetCSParsTotalInterpolate(cross1, cross2, f, dpt, totalArea, totalWidth, calculationOption)
 
    use m_GlobalParameters
    
@@ -1595,6 +1600,11 @@ subroutine GetCSParsTotalInterpolate(cross1, cross2, f, dpt, totalArea, totalWid
    double precision, intent(in)          :: dpt            !< water depth at cross section
    double precision, intent(out)         :: totalArea      !< total area for given DPT
    double precision, intent(out)         :: totalWidth     !< total width of water surface
+                                                           !> type of total area computation, possible values:\n
+                                                           !! CS_TYPE_PREISMAN  Ordinary total area computation, with possible Preisman lock on top\n
+                                                           !! CS_TYPE_PLUS      Total area for only the expanding part of the cross section (Nested Newton method)\n
+                                                           !! CS_TYPE_MIN       Total area for only the narrowing part of the cross section (Nested Newton method)
+   integer, intent(in)                   :: calculationOption 
 
    double precision                      :: totalArea1
    double precision                      :: totalArea2
@@ -1608,7 +1618,7 @@ subroutine GetCSParsTotalInterpolate(cross1, cross2, f, dpt, totalArea, totalWid
 
    if(cross1%crossIndx == cross2%crossIndx) then
       ! Same Cross-Section, no interpolation needed 
-      call GetCSParsTotalCross(cross1, dpt, totalArea, totalWidth)
+      call GetCSParsTotalCross(cross1, dpt, totalArea, totalWidth, calculationOption)
    else
       select case (cross1%crosstype)
       case (CS_CIRCLE, CS_EGG)
@@ -1629,12 +1639,12 @@ subroutine GetCSParsTotalInterpolate(cross1, cross2, f, dpt, totalArea, totalWid
          crossi%groundFrictionType = cross1%groundFrictionType
          crossi%tabDef%diameter    = (1.0d0 - f) * cross1%tabDef%diameter + f * cross2%tabDef%diameter
          
-         call GetCSParsTotalCross(crossi, dpt, totalArea, totalWidth)
+         call GetCSParsTotalCross(crossi, dpt, totalArea, totalWidth, calculationOption)
          
       case default                             ! Call GetCSParstotalCross twice and interpolate the results 
 
-         call GetCSParsTotalCross(cross1, dpt, totalArea1, totalWidth1, doSummerDike = .false.)
-         call GetCSParsTotalCross(cross2, dpt, totalArea2, totalWidth2, doSummerDike = .false.)
+         call GetCSParsTotalCross(cross1, dpt, totalArea1, totalWidth1, calculationOption, doSummerDike = .false.)
+         call GetCSParsTotalCross(cross2, dpt, totalArea2, totalWidth2, calculationOption, doSummerDike = .false.)
          
          ! Summer Dikes
          call interpolateSummerDike(cross1, cross2, f, dpt, sdArea, sdWidth, .false.)
@@ -1648,7 +1658,7 @@ subroutine GetCSParsTotalInterpolate(cross1, cross2, f, dpt, totalArea, totalWid
 
 end subroutine GetCSParsTotalInterpolate
 
-subroutine GetCSParsTotalCross(cross, dpt, totalArea, totalWidth, doSummerDike)
+subroutine GetCSParsTotalCross(cross, dpt, totalArea, totalWidth, calculationOption, doSummerDike)
 
    use m_GlobalParameters
    ! Global Variables
@@ -1656,6 +1666,11 @@ subroutine GetCSParsTotalCross(cross, dpt, totalArea, totalWidth, doSummerDike)
    double precision, intent(in)      :: dpt             !< water depth at cross section
    double precision, intent(out)     :: totalArea       !< total area for given DPT
    double precision, intent(out)     :: totalWidth      !< total width of water surface
+                                                        !> type of total area computation, possible values:\n
+                                                        !! CS_TYPE_PREISMAN  Ordinary total area computation, with possible Preisman lock on top\n
+                                                        !! CS_TYPE_PLUS      Total area for only the expanding part of the cross section (Nested Newton method)\n
+                                                        !! CS_TYPE_MIN       Total area for only the narrowing part of the cross section (Nested Newton method)
+   integer, intent(in)               :: calculationOption 
    logical, intent(in), optional     :: doSummerDike    !< Switch to calculate Summer Dikes or not
 
 
@@ -1686,7 +1701,7 @@ subroutine GetCSParsTotalCross(cross, dpt, totalArea, totalWidth, doSummerDike)
          endif
          call TabulatedProfile(dpt, cross, .false., getSummerDikes, totalArea, totalWidth, wetPerimeter, af_sub, perim_sub)
       case (CS_CIRCLE)
-         call CircleProfile(dpt, crossDef%diameter, totalArea, totalWidth, wetPerimeter)
+         call CircleProfile(dpt, crossDef%diameter, totalArea, totalWidth, wetPerimeter, .false.)
       case (CS_EGG)
          call EggProfile(dpt, crossDef%diameter, totalArea, totalWidth, wetPerimeter)
       case (CS_YZ_PROF)
@@ -2098,7 +2113,7 @@ subroutine trapez(dpt, d1, d2, w1, w2, area, width, perimeter)
    
 end subroutine trapez
 
-subroutine CircleProfile(dpt, diameter, area, width, perimeter)
+subroutine CircleProfile(dpt, diameter, area, width, perimeter, calculate_flow)
    use m_GlobalParameters
 
    implicit none
@@ -2108,6 +2123,7 @@ subroutine CircleProfile(dpt, diameter, area, width, perimeter)
    double precision, intent(out)       :: width
    double precision, intent(out)       :: area
    double precision, intent(out)       :: perimeter
+   logical, intent(in)                 :: calculate_flow
 
 !
 ! Local variables
@@ -2125,22 +2141,43 @@ subroutine CircleProfile(dpt, diameter, area, width, perimeter)
    !
    ra = 0.5*diameter
    !
+   !if (calc_perim == 0) then
+   !   if (dpt<ra) then
+   !      fi = dacos((ra-dpt)/ra)
+   !      sq = dsqrt(dpt*(diameter - dpt))
+   !      ! ARS 11041 removed as explained by Guus
+   !      area      = dabs(fi*ra*ra - sq*(ra-dpt)) + sl*dpt
+   !      perimeter = 2d0*fi*ra
+   !      width     = 2d0*sq + sl
+   !   else
+   !      area      = 0.5d0* pi*ra*ra + diameter*(dpt-ra)
+   !      perimeter = 2d0*pi*ra
+   !      width     = diameter
+   !   endif
+   !else
    if (dpt<diameter) then
       fi = dacos((ra-dpt)/ra)
       sq = dsqrt(dpt*(diameter - dpt))
       ! ARS 11041 removed as explained by Guus
-      area      = fi*ra*ra - sq*(ra-dpt) + sl*dpt
-      perimeter = 2d0*fi*ra
-      width     = 2d0*sq + sl
+         area      = dabs(fi*ra*ra - sq*(ra-dpt))
+         perimeter = dabs(2d0*fi*ra)
+         width     = 2d0*sq
    else
-      area      = pi*ra*ra + sl*dpt
+         area      = pi*ra*ra
       perimeter = 2d0*pi*ra
-      width     = sl
+         width     = 0d0
+      endif
+   !endif
+      
+   if (.not. calculate_flow) then
+      area = area + sl*dpt
+      width = width + sl
    endif
 end subroutine CircleProfile
 
 subroutine EggProfile(dpt, diameter, area, width, perimeter)
    use m_GlobalParameters
+   use precision_basics
 
    implicit none
 
@@ -2170,7 +2207,7 @@ subroutine EggProfile(dpt, diameter, area, width, perimeter)
          & + 10.11150997913956*r*r
       area = .11182380480168*r*r + e + sl*dpt
 
-   elseif ((dpt>2*r) .and. (dpt<3*r)) then
+   elseif ((dpt>2*r) .and. (comparereal(dpt,3*r, 1d-6) < 0)) then
       perimeter = 2.*r*(2.39415093538065 +                                         &
             & atan((dpt - 2*r)/(dsqrt( - 3.*r*r + 4*r*dpt - dpt*dpt))))
       width = 2*r*cos(atan((dpt - 2*r)/(dsqrt( - 3.*r*r + 4*dpt*r - dpt*dpt)))) + sl
