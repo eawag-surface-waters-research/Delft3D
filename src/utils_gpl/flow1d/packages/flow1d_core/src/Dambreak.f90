@@ -1,156 +1,176 @@
-module m_Dambreak
-!----- AGPL --------------------------------------------------------------------
-!                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
-!                                                                               
-!  This program is free software: you can redistribute it and/or modify              
-!  it under the terms of the GNU Affero General Public License as               
-!  published by the Free Software Foundation version 3.                         
-!                                                                               
-!  This program is distributed in the hope that it will be useful,                  
-!  but WITHOUT ANY WARRANTY; without even the implied warranty of               
-!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                
-!  GNU Affero General Public License for more details.                          
-!                                                                               
-!  You should have received a copy of the GNU Affero General Public License     
-!  along with this program.  If not, see <http://www.gnu.org/licenses/>.             
-!                                                                               
-!  contact: delft3d.support@deltares.nl                                         
-!  Stichting Deltares                                                           
-!  P.O. Box 177                                                                 
-!  2600 MH Delft, The Netherlands                                               
-!                                                                               
-!  All indications and logos of, and references to, "Delft3D" and "Deltares"
-!  are registered trademarks of Stichting Deltares, and remain the property of
-!  Stichting Deltares. All rights reserved.
-!                                                                               
-!-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
-!-------------------------------------------------------------------------------
+   module m_Dambreak
+   !----- AGPL --------------------------------------------------------------------
+   !
+   !  Copyright (C)  Stichting Deltares, 2017-2018.
+   !
+   !  This program is free software: you can redistribute it and/or modify
+   !  it under the terms of the GNU Affero General Public License as
+   !  published by the Free Software Foundation version 3.
+   !
+   !  This program is distributed in the hope that it will be useful,
+   !  but WITHOUT ANY WARRANTY; without even the implied warranty of
+   !  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   !  GNU Affero General Public License for more details.
+   !
+   !  You should have received a copy of the GNU Affero General Public License
+   !  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+   !
+   !  contact: delft3d.support@deltares.nl
+   !  Stichting Deltares
+   !  P.O. Box 177
+   !  2600 MH Delft, The Netherlands
+   !
+   !  All indications and logos of, and references to, "Delft3D" and "Deltares"
+   !  are registered trademarks of Stichting Deltares, and remain the property of
+   !  Stichting Deltares. All rights reserved.
+   !
+   !-------------------------------------------------------------------------------
+   !  $Id$
+   !  $HeadURL$
+   !-------------------------------------------------------------------------------
 
-    use m_GlobalParameters
-    use m_struc_helper
+   use m_GlobalParameters
+   use m_struc_helper
 
    implicit none
 
-   public ComputeDambreak
+   public prepareComputeDambreak
+   public setCoefficents
 
- type, public :: t_dambreak
-    double precision :: start_location_x   
-    double precision :: start_location_y    
-    integer          :: algorithm            
-    double precision :: crestlevelini       
-    double precision :: breachwidthini     
-    double precision :: crestlevelmin       
-    double precision :: dischargecoeff     
-    double precision :: f1                     
-    double precision :: f2                   
-    double precision :: ucrit                 
-    double precision :: t0 
+   type, public :: t_dambreak
+      double precision :: start_location_x
+      double precision :: start_location_y
+      integer          :: algorithm
+      double precision :: crestlevelini
+      double precision :: breachwidthini
+      double precision :: crestlevelmin
+      double precision :: timetobreachtomaximumdepth
+      double precision :: dischargecoeff
+      double precision :: f1
+      double precision :: f2
+      double precision :: ucrit
+      double precision :: t0
+      integer          :: hasTable
+      integer          :: materialtype
 
-    ! Stored values
-    double precision :: phase
-    double precision :: struwi
+      ! State variables, not to be read
+      integer          :: phase
+      double precision :: width
+      double precision :: crl
+      double precision :: aCoeff
+      double precision :: bCoeff
+      double precision :: maximumAllowedWidth
 
- end type
+   end type
 
    private
 
-contains
+   contains
 
-subroutine ComputeDambreak(dambreak, s1m1, s1m2, u0, time0, time1, dt, dpu)
-
-
-    type(t_dambreak), pointer      :: dambreak
-    double precision, intent(in)   :: s1m1
-    double precision, intent(in)   :: s1m2
-    double precision, intent(in)   :: u0
-    double precision, intent(in)   :: time0
-    double precision, intent(in)   :: time1
-    double precision, intent(in)   :: dt
-
-    !output
-    double precision, intent(inout):: dpu
-
-    !locals
-    double precision :: smax
-    double precision :: smin
-    double precision :: struwi
-    double precision :: crl
-    double precision :: eps = 1.0d-5
-    double precision :: t0
-    double precision :: width
+   subroutine prepareComputeDambreak(dambreak, s1m1, s1m2, u0, time0, time1, dt, maximumWidth)
 
 
-    double precision ::f1
-    double precision ::f2 
-    double precision ::uc
+   type(t_dambreak), pointer, intent(inout) :: dambreak
+   double precision, intent(in)             :: s1m1
+   double precision, intent(in)             :: s1m2
+   double precision, intent(in)             :: u0
+   double precision, intent(in)             :: time0
+   double precision, intent(in)             :: time1
+   double precision, intent(in)             :: dt
+   double precision, intent(in)             :: maximumWidth
 
-    double precision ::hmx
-    double precision ::hmn
-    double precision ::qkennelijkgeschat
+   !locals
+   double precision :: smax
+   double precision :: smin
+   double precision :: hmx
+   double precision :: hmn
+   double precision :: deltaLevel
+   double precision :: deltaWidth
+   double precision :: timeFromBreaching
+   double precision :: breachWidth
+   double precision :: actualMaximumWidth
 
-    t0 = dambreak%t0
-    dambreak%phase = max(0.0, dambreak%phase)
-    if (t0 == 0.0) then
-       t0 = -1
-    endif
+   timeFromBreaching = time1 - dambreak%t0
 
+   ! breaching not started
+   if (timeFromBreaching < 0d0) return
 
-    smax = max(s1m1, s1m2)
-    smin = min(s1m1, s1m2)
+   !vdKnaap(2000) formula: to do: implement table 
+   if(dambreak%algorithm == 1) then     
 
-    if (dambreak%algorithm == 1 .or. dambreak%algorithm == 0) then
+      ! The linear part
+      if (timeFromBreaching < dambreak%timetobreachtomaximumdepth ) then
+         dambreak%crl    = dambreak%crestlevelini - timeFromBreaching / dambreak%timetobreachtomaximumdepth * (dambreak%crestlevelini - dambreak%crestlevelmin)
+         breachWidth     = dambreak%breachwidthini
+      else
+      ! The logarithmic part, timeFromBreaching in seconds 
+         breachWidth = dambreak%aCoeff * dlog(timeFromBreaching/dambreak%bCoeff)
+      endif
+      
+      ! breach width must increase monotonically 
+      if (breachWidth > dambreak%width ) then
+         dambreak%width = breachWidth
+      endif
+      
+      ! in vdKnaap(2000) the maximum allowed branch width is limited (see sobek manual and setCoefficents subroutine below) 
+      actualMaximumWidth = min(dambreak%maximumAllowedWidth, maximumWidth)
+      
+   ! Verheij-vdKnaap(2002) formula
+   else if (dambreak%algorithm == 2) then  
 
-       crl    = max(dambreak%crestlevelmin,  &
-                    dambreak%crestlevelini -dpu/ dambreak%breachwidthini )  !hk: dpu = area??
-       struwi = dpu / (dambreak%crestlevelini - crl)                    !hk: Confirmed
+      ! phase 1: lowering
+      if (timeFromBreaching < dambreak%timetobreachtomaximumdepth) then
+         dambreak%crl    = dambreak%crestlevelini - timeFromBreaching / dambreak%timetobreachtomaximumdepth * (dambreak%crestlevelini - dambreak%crestlevelmin)
+         dambreak%width  = dambreak%breachwidthini
+         dambreak%phase  = 1
+      ! phase 2: widening
+      else
+         dambreak%crl = dambreak%crestlevelmin
+         smax = max(s1m1, s1m2)
+         smin = min(s1m1, s1m2)
+         hmx = max(0d0,smax - dambreak%crl)
+         hmn = max(0d0,smin - dambreak%crl)
+         deltaLevel = gravity*(hmx - hmn)**1.5d0
 
-   elseif (dambreak%algorithm == 2) then                             !.and. .not. infuru
+         if (dambreak%width < maximumWidth .and. (.not.isnan(u0)) .and. dabs(u0) > dambreak%ucrit) then
+            dambreak%width = dambreak%width  + (dambreak%f1*dambreak%f2/dlog(10D0)) * &
+                             (deltaLevel/(dambreak%ucrit*dambreak%ucrit)) * &
+                             (1.0/(1.0 + (dambreak%f2*gravity*timeFromBreaching/(3600.0d0*dambreak%ucrit)))) * &
+                             (dt/3600.0d0)
+         endif
+      endif
+      
+      ! in Verheij-vdKnaap(2002), there is no limitation for the maximum allowed branch width
+      actualMaximumWidth =  maximumWidth
+      
+   endif
 
-       crl    = max(dambreak%crestlevelmin, dambreak%crestlevelini - dpu/dambreak%breachwidthini )
+   !width cannot exceed the width of the snapped polyline
+   if(dambreak%width >= actualMaximumWidth) then
+      dambreak%width = actualMaximumWidth
+   endif
 
-       if (dambreak%phase <2) then
+   end subroutine prepareComputeDambreak
 
-          if (crl <=dambreak%crestlevelmin+eps) then 
-             t0 = time0
-             dambreak%phase = dambreak%phase + 1
-          endif 
-        
-       endif
+   
+   subroutine setCoefficents(dambreak)
 
-       if (crl>=(dambreak%crestlevelmin+eps) .and. dambreak%phase < 2 .and. ((dambreak%crestlevelini - crl).gt.eps)) then
-          struwi = dpu/(dambreak%crestlevelini - crl)
-       else
-          ! Use formula
-          f1 = dambreak%f1
-          f2 = dambreak%f2
-          uc = dambreak%ucrit
+   type(t_dambreak), pointer, intent(inout) :: dambreak
 
-
-          ! hk: nu af te vangen voor situatie geen stroming 19828
-          hmx = max(0d0,smax - crl)
-          hmn = max(0d0,smin - crl)
-          qkennelijkgeschat = (gravity*(hmx - hmn))**1.5d0
-          ! hk: nu af te vangen voor situatie geen stroming 19828
-
-          if (time1-T0 > 0 .and. (.not.isnan(u0)) .and. dabs(u0) > uc) then                                         ! width = delta width
-             width =  (f1*f2/dlog(10D0))*(qkennelijkgeschat/(uc*uc))          &
-                     *(1.0/(1.0 + (f2*gravity*(time1-T0)/(3600.0d0*uc))))        &   
-                     *(dt/3600.0d0)
-          else
-             width = 0.0d0
-          endif
-
-          struwi = dambreak%struwi + max(0.0, width)
-          dpu = struwi*(dambreak%crestlevelini - dambreak%crestlevelmin)
+   if (dambreak%algorithm == 1) then
+      ! clay
+      if (dambreak%materialtype == 1) then 
+         dambreak%aCoeff = 20
+         dambreak%bCoeff = 288
+         dambreak%maximumAllowedWidth = 75  !meters
+      ! sand
+      else if(dambreak%materialtype == 2) then 
+         dambreak%aCoeff = 67
+         dambreak%bCoeff = 522
+         dambreak%maximumAllowedWidth = 200 !meters
       endif
    endif
-    
-   dambreak%t0     = t0      ! hk: store t0 
-   dambreak%struwi = struwi  ! gets the structure width 
 
-end subroutine ComputeDambreak
+   end subroutine setCoefficents
 
-end 
+   end
