@@ -44,7 +44,7 @@
 
       ! local declarations
 
-      integer, parameter  :: nokey   = 79           ! number of keywords in hyd file
+      integer, parameter  :: nokey   = 81           ! number of keywords in hyd file
       character(len=40)   :: key(nokey)             ! keywords in the hyd file
       integer             :: ikey                   ! index keyword (first level)
       integer             :: ikey2                  ! index keyword (second level)
@@ -163,6 +163,8 @@
       key(77) = 'walking'
       key(78) = 'file-created-by'
       key(79) = 'file-creation-date'
+      key(80) = 'sink-sources'
+      key(81) = 'end-sink-sources'
 
       ft_dat = ft_bin
       call getmlu(lunrep)
@@ -625,6 +627,25 @@
             ! file-creation-date 
             if (gettoken(line, untileol, ierr) .ne. 0 ) goto 900
             hyd%creation_date = line(1:40)
+
+         elseif ( ikey .eq. 80) then
+            ! sink-sources
+            do
+               if ( gettoken(ctoken, idummy, rdummy, itype, ierr) .ne. 0 ) goto 900
+                  if(itype==1) then 
+                     ! look for end-domains keyword
+                     call zoek ( ctoken, nokey , key , 30 , ikey2 )
+                     if ( ikey2 .eq. 81 ) exit
+                  endif
+!               ! key is domain name , read mmax nmax and dido file do not store dido file
+!               domain%name = ctoken
+!               if ( gettoken(domain%mmax, ierr) .ne. 0 ) goto 900
+!               if ( gettoken(domain%nmax, ierr) .ne. 0 ) goto 900
+!               if ( gettoken(ctoken, ierr) .ne. 0 ) goto 900
+!
+!               ! add to domains collection
+!               i_domain = domain_coll_add(hyd%domain_coll, domain)
+            enddo
 
          else    
             ! unknown keyword, ignore until the end of the line
