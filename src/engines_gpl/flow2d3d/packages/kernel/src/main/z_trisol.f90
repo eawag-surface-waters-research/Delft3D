@@ -1647,18 +1647,18 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
                     & r(dzs1)   ,r(areau)  ,r(areav)  ,r(volum0) ,r(volum1) , &
                     & r(guu)    ,r(gvv)    ,r(bruvai) ,sedtyp    ,r(seddif) , &
                     & r(ws)     ,lsed      ,lsal      ,ltem      ,eqmbcsand , &
-                    & eqmbcmud  ,lsts      ,gdp       )
+                    & eqmbcmud  ,lsts      ,r(s1)     ,d(dps)    ,gdp       )
           !
           ! z_difu can be called again for correction
           !
           call timer_stop(timer_1stdifu, gdp)
           call z_difuflux(stage  ,lundia ,kmax      ,nmmax     ,nmmaxj    , &
                   & lstsci    ,r(r0)     ,r(r1)     ,r(qxk)    ,r(qyk)    , &
-                  & r(u0)     ,r(v0)     ,&
+                  & r(u0)     ,r(v0)     ,r(s1)     ,d(dps)    , &
                   & r(dicuv)  ,r(guv)    ,r(gvu)    ,r(areau)  ,r(areav)  , &
                   & i(kfuz1)  ,i(kfvz1)  ,i(kfsz1)  ,i(kcs)    ,i(kfs)    , &
-                  & i(kfu)    ,i(kfuz0)  ,i(kfv)    ,i(kfvz0)  ,&
-                  & i(kfsmx0) ,i(kfsmax) ,i(kfsz0)  ,&
+                  & i(kfu)    ,i(kfuz0)  ,i(kfv)    ,i(kfvz0)  , &
+                  & i(kfsmx0) ,i(kfsmax) ,i(kfsz0)  , &
                   & i(kfumn0) ,i(kfumx0) ,i(kfvmn0) ,i(kfvmx0) ,r(sigdif) , &
                   & hdt       ,icx       ,icy       ,gdp       )
           call timer_stop(timer_tritra, gdp)
@@ -2435,18 +2435,18 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
                     & r(dzs1)   ,r(areav)  ,r(areau)  ,r(volum0) ,r(volum1) , &
                     & r(gvv)    ,r(guu)    ,r(bruvai) ,sedtyp    ,r(seddif) , &
                     & r(ws)     ,lsed      ,lsal      ,ltem      ,eqmbcsand , &
-                    & eqmbcmud  ,lsts      ,gdp       )
+                    & eqmbcmud  ,lsts      ,r(s1)     ,d(dps)    ,gdp       )
           !
           ! z_difu can be called again for correction
           !
           call timer_stop(timer_2nddifu, gdp)
           call z_difuflux(stage  ,lundia ,kmax      ,nmmax     ,nmmaxj    , &
                   & lstsci    ,r(r0)     ,r(r1)     ,r(qyk)    ,r(qxk)    , &
-                  & r(v0)     ,r(u0)     ,&
+                  & r(v0)     ,r(u0)     ,r(s1)     ,d(dps)    , &
                   & r(dicuv)  ,r(gvu)    ,r(guv)    ,r(areav)  ,r(areau)  , &
                   & i(kfvz1)  ,i(kfuz1)  ,i(kfsz1)  ,i(kcs)    ,i(kfs)    , &
-                  & i(kfv)    ,i(kfvz0)  ,i(kfu)    ,i(kfuz0)  ,&
-                  & i(kfsmx0) ,i(kfsmax) ,i(kfsz0)  ,&
+                  & i(kfv)    ,i(kfvz0)  ,i(kfu)    ,i(kfuz0)  , &
+                  & i(kfsmx0) ,i(kfsmax) ,i(kfsz0)  , &
                   & i(kfvmn0) ,i(kfvmx0) ,i(kfumn0) ,i(kfumx0) ,r(sigdif) , &
                   & hdt       ,icx       ,icy       ,gdp       )
           call timer_stop(timer_tritra, gdp)
