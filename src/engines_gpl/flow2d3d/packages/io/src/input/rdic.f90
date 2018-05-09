@@ -117,6 +117,7 @@ subroutine rdic(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
 !
 ! Local variables
 !
+    integer                             :: ierr    ! Status variable for (de)allocation
     integer                             :: k       ! Help var. 
     integer                             :: l       ! Help var. 
     integer                             :: lconc   ! Number of constituents defined by user (excl. Salinity, Temperature, Secondary flow and Quantities for the Turb. models) 
@@ -173,14 +174,14 @@ subroutine rdic(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     !
     ! define or read names of constituents
     !
-    allocate(coninit(lstsci))
+    allocate(coninit(lstsci), stat = ierr)
     coninit = 0
     lnconc  = 0
     !
     ! temporary work arrays
     !
-    allocate(wrkini(kmax))
-    allocate(rval  (kmax))
+    allocate(wrkini(kmax), stat = ierr)
+    allocate(rval  (kmax), stat = ierr)
     wrkini = 0.0_fp
     rval   = 0.0_fp
     !
@@ -716,9 +717,9 @@ subroutine rdic(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           endif
        endif
     enddo
-    deallocate(coninit)
-    deallocate(wrkini)
-    deallocate(rval)
+    deallocate(coninit, stat = ierr)
+    deallocate(wrkini, stat = ierr)
+    deallocate(rval, stat = ierr)
 
     if (salin .and. .not. temp .and. lconc==0) then
     !  only salinity:
