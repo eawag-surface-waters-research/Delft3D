@@ -118,7 +118,7 @@ subroutine write_wave_his_netcdf (sg, sof, n_swan_grids, i_swan, wavedata)
     character(NAMLEN), dimension(:), allocatable, save :: statnam
     character(NAMLEN), dimension(:), allocatable, save :: statid
     character(100)                                     :: string
-    character(20)                                      :: tabfil
+    character(50)                                      :: tabfil
     character(256)                                     :: version_full
     logical                                            :: formatok
 !

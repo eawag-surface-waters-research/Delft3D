@@ -331,7 +331,7 @@ module swan_input
        character(15)                            :: writehottime  = '00000000.000000'       ! Time in the name of the hotfile that has to be written by SWAN
        character(15)                            :: keephottime   = '00000000.000000'       ! Time in the name of the hotfile that should not be deleted
        character(50), dimension(:), allocatable :: pntfilnam     ! Name of file containing locations for which output is requested
-       character(20), dimension(:), allocatable :: pntfilnamtab  ! Name of file containing output on locations
+       character(50), dimension(:), allocatable :: pntfilnamtab  ! Name of file containing output on locations
        !
        type(handletype)                         :: tseriesfile
        !
