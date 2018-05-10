@@ -335,6 +335,8 @@ subroutine loadModel(filename)
 
     integer :: istat, minp, ifil, jadoorladen
     integer :: i
+    
+    logical     :: found_1d_network
 
     call resetModel()
     
@@ -353,11 +355,13 @@ subroutine loadModel(filename)
     ! read and proces dflow1d model
     
     if (len_trim(md_1dnetworkfile) > 0) then
-       call load_network_from_flow1d(md_1dnetworkfile)
-       jadoorladen = 1
-    else
-       jadoorladen = 0
-    endif                         
+       call load_network_from_flow1d(md_1dnetworkfile, found_1d_network)
+       if (found_1d_network) then
+          jadoorladen = 1
+       else
+          jadoorladen = 0
+       endif        
+    endif
     
     call loadNetwork(   md_netfile, istat, jadoorladen)
         
