@@ -38,7 +38,7 @@
       logical                               :: lopen        ! opened indicator
 
       lun = 0
-      do ilun = istart, istart + 98
+      do ilun = istart, istart + 100000
          inquire(ilun,opened=lopen)
          if ( .not. lopen ) then
             lun = ilun

@@ -33,6 +33,7 @@
       ! global declarations
 
       use hydmod
+      use m_alloc
       implicit none
 
       ! declaration of the arguments
@@ -87,6 +88,10 @@
       integer                                :: nodelinkoffset         ! node link offset
       integer                                :: nv                     ! max node for element
       integer                                :: inv                    ! index countour node for element
+
+      integer, allocatable                   :: iglobal_active(:)      ! does a global segment actually exist
+      integer, allocatable                   :: iglobal_new(:)         ! what is the new iglobal for all old iglobal
+      integer                                :: inew                   ! new number
 
       ! allocate local arrays
 
@@ -147,6 +152,56 @@
          hyd%nv   = max(hyd%nv, domain_hyd%nv)
       enddo
 
+      if (hyd%nump.lt.nosegl) then
+         ! Apparently the highest iglobal is higher than the sum of the number of active cells of each domain.
+         ! We have to skip inactive cells, create a renumber list, and update the global segment numbers in each domain.
+         write (msgbuf, '(a)')  'Apparently the highest iglobal is higher than the sum of the number of active cells of each domain.'
+         call msg_flush()
+         write (msgbuf, '(a,i10,a,i10)') 'Highest iglobal:', nosegl, ', number of active cells:', hyd%nump
+         call msg_flush()
+         write (msgbuf, '(a)') 'We have to skip inactive cells, create a renumber list,'
+         call msg_flush()
+         write (msgbuf, '(a)') 'and update the global segment numbers in each domain.'
+         call msg_flush()
+         
+         call realloc (iglobal_active, nosegl, fill=0)
+         call realloc (iglobal_new, nosegl, fill=0)
+         do i_domain = 1, n_domain
+            idmn = i_domain - 1
+            domain_hyd => domain_hyd_coll%hyd_pnts(i_domain)
+            do iseg = 1, domain_hyd%nosegl
+               iglobal_active(domain_hyd%iglobal(iseg)) = 1
+            enddo
+         enddo
+         inew = 0
+         do iseg = 1, nosegl
+            if (iglobal_active(iseg).eq.1) then
+               inew = inew + 1
+               iglobal_new(iseg) = inew
+            endif
+         end do
+         if (inew.ne.hyd%nump) then
+            write (msgbuf, '(a)') 'Unfortunatly the renumbering went wrong!'
+            call msg_flush()
+            write (msgbuf, '(a,i10,a,i10)') 'Highest new global number: ', inew, ', number of active cells:', hyd%nump
+            call err_flush()
+            write(*,*) 
+            stop
+         end if
+         write (msgbuf, '(a)')  'New numbering is fine!'
+         call msg_flush()
+         write (msgbuf, '(a,i10,a,i10)')  'Highest new global number: ', inew, ', number of active cells:', hyd%nump
+         call msg_flush()
+         nosegl = hyd%nump
+         do i_domain = 1, n_domain
+            idmn = i_domain - 1
+            domain_hyd => domain_hyd_coll%hyd_pnts(i_domain)
+            do iseg = 1, domain_hyd%nosegl
+               domain_hyd%iglobal(iseg) = iglobal_new(domain_hyd%iglobal(iseg))
+            enddo
+         enddo
+      endif
+      
       ! sequentially fill in segment numbers in the third dimension (when hyd nolay > 1)
 
       if (hyd%nolay.gt.1) then

@@ -49,6 +49,8 @@ subroutine write_waqgeom(hyd, version_full)
        real*8, allocatable           :: xutmp(:)          ! xu
        real*8, allocatable           :: yutmp(:)          ! yu
        integer                       :: nobndl            !  number of boundary links per layer
+       integer                       :: len_geo           ! length of old waqgeom filename
+       character(len=255)            :: new_geom          ! name for new UGRID 1.1 _waqgeom file
 
        ! copy relevant dimensions
 
@@ -167,8 +169,11 @@ subroutine write_waqgeom(hyd, version_full)
 
        filename = hyd%file_geo%name
        call unc_write_waqgeom(filename, version_full)
+       
+       len_geo = len(trim(hyd%file_geo%name))
+       new_geom = hyd%file_geo%name(1:len_geo-11)//'_new'//hyd%file_geo%name(len_geo-10:len_geo)
 
-       call write_waqgeom_ugrid( "Dummy", hyd )
+       call write_waqgeom_ugrid(new_geom, hyd )
 
 end subroutine write_waqgeom
 
@@ -677,11 +682,8 @@ subroutine write_waqgeom_ugrid( filename, hyd )
     use wq_ugrid
     character(len=*)  :: filename
     type(t_hyd)       :: hyd
-    character(len=80) :: filename_dummy
 
-    filename_dummy = 'new_waqgeom.nc'
-
-    call wrwaqgeom( filename_dummy, "DDCOUPLEFM 1.1", sferic = .false., epsg = 0, nr_nodes = hyd%numk, &
+    call wrwaqgeom( filename, "DDCOUPLEFM 1.1", sferic = .false., epsg = 0, nr_nodes = hyd%numk, &
              xk = hyd%xk, yk = hyd%yk, zk = hyd%zk, max_vertex = hyd%nv, nr_elems = hyd%nump, &
              netelem = hyd%netcellnod, nr_edges = hyd%numl, netlink = kn, &
              nr_flowlinks = hyd%lnx, flowlink = ln, xu = hyd%xu, yu = hyd%yu )

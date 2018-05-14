@@ -414,10 +414,10 @@ function unc_open(filename, cmode, ncid)
         open_files_(nopen_files_)    = filename
         open_datasets_(nopen_files_) = ncid
         write (msgbuf, '(a,a,a,i10,a)') 'Opened ''', trim(filename), ''' as #', ncid, '.'
-        call dbg_flush()
+        call msg_flush()
     else
         call mess(LEVEL_ERROR, 'could not open '//trim(filename))
-        call dbg_flush()
+        call msg_flush()
 !        call qnerror('Failed to open: '//trim(filename), ' ', ' ')
     end if
 end function unc_open
@@ -438,7 +438,7 @@ function unc_create(filename, version_full, cmode, ncid)
         open_files_(nopen_files_)    = filename
         open_datasets_(nopen_files_) = ncid
         write (msgbuf, '(a,a,a,i10,a)') 'Opened NetCDF file ''', trim(filename), ''' as #', ncid, '.'
-        call dbg_flush()
+        call msg_flush()
     end if
 
     call unc_addglobalatts(ncid, version_full)
@@ -467,7 +467,7 @@ integer function unc_close(ncid)
     if (jafound) then
         unc_close = nf90_close(ncid)
         write (msgbuf, '(a,a,a)') 'Closed NetCDF file ''', trim(open_files_(nopen_files_)), '.'
-        call dbg_flush()
+        call msg_flush()
         do j=nopen_files_-1,-1,i
             open_files_(j)    = open_files_(j+1)
             open_datasets_(j) = open_datasets_(j+1)
@@ -477,7 +477,7 @@ integer function unc_close(ncid)
         nopen_files_ = nopen_files_ - 1
     else
         write (msgbuf, '(a,i3,a)') 'Tried to close NetCDF id ', ncid, ', not found.'
-        call dbg_flush()
+        call msg_flush()
     end if
 end function unc_close
 

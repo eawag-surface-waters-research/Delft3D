@@ -63,14 +63,14 @@
       call dlwqfile_open(hyd%file_are)
       read(hyd%file_are%unit_nr,iostat=ierr) itime,(hyd%area(i),i=1,hyd%noq)
       if ( ierr .ne. 0 ) then
-         write(*,*) 'ERROR: reading are file'
+         write(*,*) 'ERROR: reading are file: ', hyd%file_are%unit_nr, trim(hyd%file_are%name)
          call srstop(1)
       endif
 
       call dlwqfile_open(hyd%file_flo)
       read(hyd%file_flo%unit_nr,iostat=ierr) itime,(hyd%flow(i),i=1,hyd%noq)
       if ( ierr .ne. 0 ) then
-         write(*,*) 'ERROR: reading are file'
+         write(*,*) 'ERROR: reading flo file: ', hyd%file_flo%unit_nr, trim(hyd%file_flo%name)
          call srstop(1)
       endif
 
@@ -78,7 +78,7 @@
       call dlwqfile_open(hyd%file_sal)
          read(hyd%file_sal%unit_nr,iostat=ierr) itime,(hyd%sal(i),i=1,hyd%noseg)
          if ( ierr .ne. 0 ) then
-            write(*,*) 'ERROR: reading sal file'
+            write(*,*) 'ERROR: reading sal file: ', hyd%file_sal%unit_nr, trim(hyd%file_sal%name)
             call srstop(1)
          endif
       endif
@@ -87,7 +87,7 @@
       call dlwqfile_open(hyd%file_tem)
          read(hyd%file_tem%unit_nr,iostat=ierr) itime,(hyd%tem(i),i=1,hyd%noseg)
          if ( ierr .ne. 0 ) then
-            write(*,*) 'ERROR: reading tem file'
+            write(*,*) 'ERROR: reading tem file: ', hyd%file_tem%unit_nr, trim(hyd%file_tem%name)
             call srstop(1)
          endif
       endif
@@ -96,7 +96,7 @@
       call dlwqfile_open(hyd%file_tau)
          read(hyd%file_tau%unit_nr,iostat=ierr) itime,(hyd%tau(i),i=1,hyd%noseg)
          if ( ierr .ne. 0 ) then
-            write(*,*) 'ERROR: reading tau file'
+            write(*,*) 'ERROR: reading tau file: ', hyd%file_tau%unit_nr, trim(hyd%file_tau%name)
             call srstop(1)
          endif
       endif
@@ -105,7 +105,7 @@
       call dlwqfile_open(hyd%file_vdf)
          read(hyd%file_vdf%unit_nr,iostat=ierr) itime,(hyd%vdf(i),i=1,hyd%noseg)
          if ( ierr .ne. 0 ) then
-            write(*,*) 'ERROR: reading vdf file'
+            write(*,*) 'ERROR: reading vdf file: ', hyd%file_vdf%unit_nr, trim(hyd%file_vdf%name)
             call srstop(1)
          endif
       endif
