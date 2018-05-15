@@ -288,7 +288,7 @@ double precision function getFrictionValue(rgs, spData, ibranch, section, igrid,
     rad = max(r, 1.d-6)
     dep = max(d, 1.d-6)
     !
-    isec1 = section + 1
+    isec1 = section
     !
     !     Formulation = .not. Engelund
     !

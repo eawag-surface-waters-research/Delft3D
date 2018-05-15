@@ -1868,8 +1868,8 @@ subroutine GetTabulatedSizes(dpt, crossDef, doFlow, area, width, perimeter, af_s
             perim_sub(isec) = perim_sub(isec) + 2.0d0 * dsqrt(0.25d0 * (e2 - e1)**2 + (d2 - d1)**2)
             
             ! calculate decreasing area 
-            area_min = area_min + (width_min + 0.5d0*max(e2-e1,0d0))*(d2-d1)
-            width_min = width_min + max(e2-e1,0d0)
+            area_min = area_min + (width_min + 0.5d0*max(e1-e2,0d0))*(d2-d1)
+            width_min = width_min + max(e1-e2,0d0)
          elseif (dpt > d1) then
             call trapez(dpt, d1, d2, e1, e2, areal, w_section(isec), wll)
             af_sub(isec) = af_sub(isec) + areal
@@ -1877,7 +1877,7 @@ subroutine GetTabulatedSizes(dpt, crossDef, doFlow, area, width, perimeter, af_s
             
             ! calculate decreasing area 
             if (e2 < e1) then
-               call trapez(dpt, d1, d2, 0d0, e1-e2, areal, widthl, wll)
+               call trapez(dpt, d1, d2, 0d0, e2-e1, areal, widthl, wll)
                area_min = area_min - areal
                width_min = width_min + widthl
             endif
@@ -1980,6 +1980,7 @@ subroutine GetTabulatedSizes(dpt, crossDef, doFlow, area, width, perimeter, af_s
       area  = area_min
       width = width_min
    end select
+   
    
 end subroutine GetTabulatedSizes
 
