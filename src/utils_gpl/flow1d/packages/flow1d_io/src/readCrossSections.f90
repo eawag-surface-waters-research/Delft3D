@@ -454,7 +454,10 @@ module m_readCrossSections
                endif
 
                pCs%frictionSectionsCount = 1
-            
+               pCS%plains(1) = diameter
+               pCS%plains(2) = 0.0d0
+               pCS%plains(3) = 0.0d0
+
                ! Ground Layer
                call prop_get_integer(md_ptr%child_nodes(i)%node_ptr, '', 'groundlayerUsed', hasGroundLayer, success)
                if (success) then
@@ -467,7 +470,7 @@ module m_readCrossSections
                else
                   groundlayer = 0.0d0
                endif
-               
+               success = .true.
                inext = AddCrossSectionDefinition(network%CSDefinitions, id, diameter, crossType, groundlayerUsed, groundlayer)
             
             case(CS_YZ_PROF)
@@ -668,7 +671,7 @@ module m_readCrossSections
              call SetMessage(LEVEL_ERROR, 'Sum of all Sections less than Flow Width for CrossSection ID: '//trim(pCS%id))
          elseif (FP1 <= 0.0d0 .and. FP2 > 0) then
              call SetMessage(LEVEL_ERROR, 'Floodplain2 only allowed when Floodplain1 exists for CrossSection ID: '//trim(pCS%id))
-      else
+         else
          
             ! Compensate for rounf off if needed
             if ((Main + FP1 + FP2) < maxFlowWidth) then
@@ -687,12 +690,12 @@ module m_readCrossSections
                endif
             endif                  
             
-         pCS%plains(1) = Main
-         pCS%plains(2) = FP1
-         pCS%plains(3) = FP2
+            pCS%plains(1) = Main
+            pCS%plains(2) = FP1
+            pCS%plains(3) = FP2
                   
          else
-         pCS%plains(1) = maxval(width(1:numlevels))
+            pCS%plains(1) = maxval(width(1:numlevels))
             pCS%plains(2) = 0.0d0
             pCS%plains(3) = 0.0d0
          endif

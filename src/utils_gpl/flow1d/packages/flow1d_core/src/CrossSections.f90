@@ -124,9 +124,10 @@ module m_CrossSections
    integer, public, parameter :: CS_RECTANGLE      =    4 ! TODO, placeholder, someone forgot to check in?
    integer, public, parameter :: CS_TRAPEZIUM      =    5
    integer, public, parameter :: CS_YZ_PROF        =   10
-   integer, public, parameter :: CS_TYPE_PREISMAN  =    1 !< Ordinary total area computation, with possible Preisman lock on top
-   integer, public, parameter :: CS_TYPE_PLUS      =    2 !< Total area for only the expanding part of the cross section (Nested Newton method)
-   integer, public, parameter :: CS_TYPE_MIN       =    3 !< Total area for only the narrowing part of the cross section (Nested Newton method)
+   integer, public, parameter :: CS_TYPE_NORMAL    =    1 !< Ordinary total area computation, with possible Preisman lock on top
+   integer, public, parameter :: CS_TYPE_PREISMAN  =    2 !< Ordinary total area computation, with possible Preisman lock on top
+   integer, public, parameter :: CS_TYPE_PLUS      =    3 !< Total area for only the expanding part of the cross section (Nested Newton method)
+   integer, public, parameter :: CS_TYPE_MIN       =    4 !< Total area for only the narrowing part of the cross section (Nested Newton method)
    
    integer, parameter         :: eps = 1d-3               !< accuracy parameter for determining wetperimeter == 0d0
 
@@ -806,7 +807,6 @@ subroutine setGroundLayerData(crossDef, thickness)
    double precision                    :: perimeter
    double precision                    :: width
    double precision                    :: af_sub(3), perim_sub(3)
-
    
    if (Thickness <= 0.0d0) then
       crossDef%groundlayer%used      = .false.
@@ -819,9 +819,9 @@ subroutine setGroundLayerData(crossDef, thickness)
    
    select case(crossDef%crossType)
       case (CS_TABULATED)
-         call GetTabulatedSizes(thickness, crossDef, .true., area, width, perimeter, af_sub, perim_sub)
+         call GetTabulatedSizes(thickness, crossDef, .true., area, width, perimeter, af_sub, perim_sub, CS_TYPE_NORMAL)
       case (CS_CIRCLE)
-         call CircleProfile(thickness, crossDef%diameter, area, width, perimeter, .true.)
+         call CircleProfile(thickness, crossDef%diameter, area, width, perimeter, CS_TYPE_NORMAL)
       case (CS_EGG)
          call EggProfile(thickness, crossDef%diameter, area, width, perimeter)
       case default
@@ -1500,9 +1500,9 @@ subroutine GetCSParsFlowCross(cross, dpt, u1, cz, flowArea, wetPerimeter, flowWi
          else
             getSummerDikes = .true.
          endif
-         call TabulatedProfile(dpt, cross, .true., getSummerDikes, flowArea, flowWidth, wetPerimeter, af_sub_local, perim_sub_local)
+         call TabulatedProfile(dpt, cross, .true., getSummerDikes, flowArea, flowWidth, wetPerimeter, af_sub_local, perim_sub_local, CS_TYPE_NORMAL)
       case (CS_CIRCLE)
-         call CircleProfile(dpt, crossDef%diameter, flowArea, flowWidth, wetPerimeter, .true.)
+         call CircleProfile(dpt, crossDef%diameter, flowArea, flowWidth, wetPerimeter, CS_TYPE_NORMAL)
       case (CS_EGG)
          call EggProfile(dpt, crossDef%diameter, flowArea, flowWidth, wetPerimeter)
       case (CS_YZ_PROF)
@@ -1699,10 +1699,11 @@ subroutine GetCSParsTotalCross(cross, dpt, totalArea, totalWidth, calculationOpt
          else
             getSummerDikes = .true.
          endif
-         call TabulatedProfile(dpt, cross, .false., getSummerDikes, totalArea, totalWidth, wetPerimeter, af_sub, perim_sub)
+         call TabulatedProfile(dpt, cross, .false., getSummerDikes, totalArea, totalWidth, wetPerimeter, af_sub, perim_sub, calculationOption)
       case (CS_CIRCLE)
-         call CircleProfile(dpt, crossDef%diameter, totalArea, totalWidth, wetPerimeter, .false.)
+         call CircleProfile(dpt, crossDef%diameter, totalArea, totalWidth, wetPerimeter, calculationOption)
       case (CS_EGG)
+         !TODO:
          call EggProfile(dpt, crossDef%diameter, totalArea, totalWidth, wetPerimeter)
       case (CS_YZ_PROF)
          call YZProfile(dpt, u1, cz, cross%convtab, 1, totalArea, totalWidth, wetPerimeter, conv)
@@ -1712,25 +1713,26 @@ subroutine GetCSParsTotalCross(cross, dpt, totalArea, totalWidth, calculationOpt
 
 end subroutine GetCSParsTotalCross
 
-subroutine TabulatedProfile(dpt, cross, doFlow, getSummerDikes, area, width, perimeter, af_sub, perim_sub)
+subroutine TabulatedProfile(dpt, cross, doFlow, getSummerDikes, area, width, perimeter, af_sub, perim_sub, calculationOption)
 
    use m_GlobalParameters
 
    implicit none
 
-   double precision, intent(in)                 :: dpt
-   type (t_CrossSection), intent(in)            :: cross           
-   logical, intent(in)                          :: doFlow  !> True: Flow, otherwise Total
-   logical, intent(in)                          :: getSummerDikes                           
-   double precision, intent(out)                :: width
-   double precision, intent(out)                :: area
-   double precision, intent(out)                :: perimeter
-   double precision, intent(out)                :: af_sub(3)
-   double precision, intent(out)                :: perim_sub(3)
+   double precision, intent(in)      :: dpt
+   type (t_CrossSection), intent(in) :: cross           
+   logical, intent(in)               :: doFlow  !> True: Flow, otherwise Total
+   logical, intent(in)               :: getSummerDikes                           
+   double precision, intent(out)     :: width
+   double precision, intent(out)     :: area
+   double precision, intent(out)     :: perimeter
+   double precision, intent(out)     :: af_sub(3)
+   double precision, intent(out)     :: perim_sub(3)
+   integer, intent(in)               :: calculationOption 
 
    ! local parameters
-   type(t_CSType), pointer                      :: crossDef
-   type(t_summerdike), pointer                  :: summerdike
+   type(t_CSType), pointer           :: crossDef
+   type(t_summerdike), pointer       :: summerdike
   
    double precision  :: wlev
    double precision  :: sdArea
@@ -1738,9 +1740,9 @@ subroutine TabulatedProfile(dpt, cross, doFlow, getSummerDikes, area, width, per
 
    crossDef => cross%tabDef
    
-   call GetTabulatedSizes(dpt, crossDef, doFlow, area, width, perimeter, af_sub, perim_sub)   
+   call GetTabulatedSizes(dpt, crossDef, doFlow, area, width, perimeter, af_sub, perim_sub, calculationOption)   
    
-   if (associated(crossDef%summerdike) .and. getSummerDikes) then
+   if (associated(crossDef%summerdike) .and. getSummerDikes .and. calculationOption /= CS_TYPE_MIN) then
    
       wlev = cross%bedlevel + dpt
       
@@ -1775,7 +1777,7 @@ subroutine TabulatedProfile(dpt, cross, doFlow, getSummerDikes, area, width, per
 
 end subroutine TabulatedProfile
 
-subroutine GetTabulatedSizes(dpt, crossDef, doFlow, area, width, perimeter, af_sub, perim_sub)
+subroutine GetTabulatedSizes(dpt, crossDef, doFlow, area, width, perimeter, af_sub, perim_sub, calculationOption)
 
    use m_GlobalParameters
 
@@ -1789,6 +1791,7 @@ subroutine GetTabulatedSizes(dpt, crossDef, doFlow, area, width, perimeter, af_s
    double precision, intent(out)                :: perimeter
    double precision, intent(out)                :: af_sub(3)
    double precision, intent(out)                :: perim_sub(3)
+   integer, intent(in)                          :: calculationOption 
 
    double precision                :: width2
    double precision                :: area2
@@ -1811,6 +1814,9 @@ subroutine GetTabulatedSizes(dpt, crossDef, doFlow, area, width, perimeter, af_s
    double precision  :: areal
    double precision  :: wll
    integer           :: ilev, isec, istart
+   double precision  :: width_min
+   double precision  :: area_min
+   double precision  :: widthl
    
    levelsCount = crossDef%levelsCount
    heights => crossDef%height
@@ -1834,6 +1840,8 @@ subroutine GetTabulatedSizes(dpt, crossDef, doFlow, area, width, perimeter, af_s
    area = 0.0D0
    d2 = 0.0D0
    e2 = widths(1)
+   area_min  = 0d0
+   width_min = 0d0
    !
    istart = 1
    do isec = 1, 3
@@ -1858,10 +1866,21 @@ subroutine GetTabulatedSizes(dpt, crossDef, doFlow, area, width, perimeter, af_s
          if (dpt > d2) then
             af_sub(isec)    = af_sub(isec) + 0.5d0 * (d2 - d1) * (e1 + e2)
             perim_sub(isec) = perim_sub(isec) + 2.0d0 * dsqrt(0.25d0 * (e2 - e1)**2 + (d2 - d1)**2)
+            
+            ! calculate decreasing area 
+            area_min = area_min + (width_min + 0.5d0*max(e2-e1,0d0))*(d2-d1)
+            width_min = width_min + max(e2-e1,0d0)
          elseif (dpt > d1) then
             call trapez(dpt, d1, d2, e1, e2, areal, w_section(isec), wll)
             af_sub(isec) = af_sub(isec) + areal
             perim_sub(isec) = perim_sub(isec) + wll
+            
+            ! calculate decreasing area 
+            if (e2 < e1) then
+               call trapez(dpt, d1, d2, 0d0, e1-e2, areal, widthl, wll)
+               area_min = area_min - areal
+               width_min = width_min + widthl
+            endif
             exit
          endif
       enddo
@@ -1952,7 +1971,15 @@ subroutine GetTabulatedSizes(dpt, crossDef, doFlow, area, width, perimeter, af_s
    endif
    
    perimeter = wl
-   
+      
+   select case (calculationOption)
+   case(CS_TYPE_PLUS)
+      area  = area  + area_min
+      width = width + width_min
+   case(CS_TYPE_MIN)
+      area  = area_min
+      width = width_min
+   end select
    
 end subroutine GetTabulatedSizes
 
@@ -2113,7 +2140,7 @@ subroutine trapez(dpt, d1, d2, w1, w2, area, width, perimeter)
    
 end subroutine trapez
 
-subroutine CircleProfile(dpt, diameter, area, width, perimeter, calculate_flow)
+subroutine CircleProfile(dpt, diameter, area, width, perimeter, calculationOption)
    use m_GlobalParameters
 
    implicit none
@@ -2123,7 +2150,7 @@ subroutine CircleProfile(dpt, diameter, area, width, perimeter, calculate_flow)
    double precision, intent(out)       :: width
    double precision, intent(out)       :: area
    double precision, intent(out)       :: perimeter
-   logical, intent(in)                 :: calculate_flow
+   integer, intent(in)                 :: calculationOption
 
 !
 ! Local variables
@@ -2133,6 +2160,9 @@ subroutine CircleProfile(dpt, diameter, area, width, perimeter, calculate_flow)
    double precision               :: fi
    double precision               :: ra
    double precision               :: sq
+   double precision               :: areacircle
+   double precision               :: widthcircle
+   
 !
 !! executable statements -------------------------------------------------------
 !
@@ -2140,39 +2170,44 @@ subroutine CircleProfile(dpt, diameter, area, width, perimeter, calculate_flow)
    !
    !
    ra = 0.5*diameter
-   !
-   !if (calc_perim == 0) then
-   !   if (dpt<ra) then
-   !      fi = dacos((ra-dpt)/ra)
-   !      sq = dsqrt(dpt*(diameter - dpt))
-   !      ! ARS 11041 removed as explained by Guus
-   !      area      = dabs(fi*ra*ra - sq*(ra-dpt)) + sl*dpt
-   !      perimeter = 2d0*fi*ra
-   !      width     = 2d0*sq + sl
-   !   else
-   !      area      = 0.5d0* pi*ra*ra + diameter*(dpt-ra)
-   !      perimeter = 2d0*pi*ra
-   !      width     = diameter
-   !   endif
-   !else
+   fi = dacos((ra-dpt)/ra)
+   sq = dsqrt(dpt*(diameter - dpt))
+
+   ! normal circle profile
    if (dpt<diameter) then
-      fi = dacos((ra-dpt)/ra)
-      sq = dsqrt(dpt*(diameter - dpt))
-      ! ARS 11041 removed as explained by Guus
-         area      = dabs(fi*ra*ra - sq*(ra-dpt))
-         perimeter = dabs(2d0*fi*ra)
-         width     = 2d0*sq
+      areacircle      = dabs(fi*ra*ra - sq*(ra-dpt))
+      perimeter       = dabs(2d0*fi*ra)
+      widthcircle     = 2d0*sq
    else
-         area      = pi*ra*ra
-      perimeter = 2d0*pi*ra
-         width     = 0d0
-      endif
-   !endif
-      
-   if (.not. calculate_flow) then
-      area = area + sl*dpt
-      width = width + sl
+      areacircle      = pi*ra*ra
+      perimeter       = 2d0*pi*ra
+      widthcircle     = 0d0
    endif
+   select case(calculationOption)
+   case(CS_TYPE_NORMAL)
+      area = areacircle
+      width = widthcircle
+   case(CS_TYPE_PREISMAN)
+      area = areacircle    + sl*dpt
+      width = widthcircle  + sl
+   case(CS_TYPE_PLUS, CS_TYPE_MIN)
+      if (dpt<ra) then
+         ! half circle profile
+         area      = dabs(fi*ra*ra - sq*(ra-dpt)) + sl*dpt
+         perimeter = 2d0*fi*ra
+         width     = 2d0*sq + sl
+      else
+         area      = 0.5d0* pi*ra*ra + diameter*(dpt-ra)
+         perimeter = 2d0*pi*ra
+         width     = diameter
+      endif   
+   end select
+
+   if (calculationOption == CS_TYPE_MIN) then
+      area  = area  - areacircle
+      width = width - widthcircle
+   endif
+   
 end subroutine CircleProfile
 
 subroutine EggProfile(dpt, diameter, area, width, perimeter)
