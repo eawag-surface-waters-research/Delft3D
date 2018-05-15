@@ -266,7 +266,7 @@ module m_GlobalParameters
    integer, public, parameter :: CFimomAcceleration         = 103
    integer, public, parameter :: CFimomBedStress            = 104
    integer, public, parameter :: CFimomLosses               = 105
-   integer, public, parameter :: CFimomLateralCorrection          = 106
+   integer, public, parameter :: CFimomLateralCorrection    = 106
    integer, public, parameter :: CFimomWindStress           = 107
    integer, public, parameter :: CFiChangeArea              = 108
    integer, public, parameter :: CFiMeanBedLevelMain        = 109

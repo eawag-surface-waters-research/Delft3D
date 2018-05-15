@@ -74,7 +74,7 @@ module m_Pump
       logical                                 :: is_active
       double precision                        :: stage_capacity
       double precision                        :: reduction_factor
-      double precision                        ::  discharge
+      double precision                        :: discharge
 
    end type
 

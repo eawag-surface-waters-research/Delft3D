@@ -507,7 +507,13 @@ module m_readModelParameters
       call AddOrReplaceParameter(category, 'Waterleveloncrest', 'none', .true.)
 
       category = 'ResultsPumps'
-      call AddOrReplaceParameter(category, 'PumpResults', 'none', .true.)
+      call AddOrReplaceParameter(category, 'SuctionSideLevel', 'none', .true.)
+      call AddOrReplaceParameter(category, 'DeliverySideLevel', 'none', .true.)
+      call AddOrReplaceParameter(category, 'PumpHead', 'none', .true.)
+      call AddOrReplaceParameter(category, 'ActualPumpStage', 'none', .true.)
+      call AddOrReplaceParameter(category, 'PumpCapacity', 'none', .true.)
+      call AddOrReplaceParameter(category, 'ReductionFactor', 'none', .true.)
+      call AddOrReplaceParameter(category, 'PumpDischarge', 'none', .true.)
 
       category = 'ResultsWaterBalance'
       call AddOrReplaceParameter(category, '1d2dflows', 'none', .true.)
