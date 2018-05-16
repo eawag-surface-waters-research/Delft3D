@@ -2756,3 +2756,8 @@ stocfl,stocsu,stocsc
 "dTransC3C5","Cascade5  ",   1.00000
 "dTransC4C5","Cascade4  ",  -1.00000
 "dTransC4C5","Cascade5  ",   1.00000
+"dDecaydTR1","dTR1      ",  -1.00000
+"dDecaydTR2","dTR2      ",  -1.00000
+"dDecaydTR3","dTR3      ",  -1.00000
+"dDecaydTR4","dTR4      ",  -1.00000
+"dDecaydTR5","dTR5      ",  -1.00000

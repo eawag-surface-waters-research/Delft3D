@@ -14781,3 +14781,13 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "Cascade   ","Trans3to4 ",  18,"Y","x",1
 "Cascade   ","Trans3to5 ",  19,"Y","x",1
 "Cascade   ","Trans4to5 ",  20,"Y","x",1
+"Decay1    ","dTR1      ",   1,"N","x",1
+"Decay1    ","dDecdTR1  ",   2,"Y","x",1
+"Decay2    ","dTR2      ",   1,"N","x",1
+"Decay2    ","dDecdTR2  ",   2,"Y","x",1
+"Decay3    ","dTR3      ",   1,"N","x",1
+"Decay3    ","dDecdTR3  ",   2,"Y","x",1
+"Decay4    ","dTR4      ",   1,"N","x",1
+"Decay4    ","dDecdTR4  ",   2,"Y","x",1
+"Decay5    ","dTR5      ",   1,"N","x",1
+"Decay5    ","dDecdTR5  ",   2,"Y","x",1

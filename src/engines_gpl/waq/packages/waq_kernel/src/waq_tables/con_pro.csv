@@ -682,3 +682,8 @@
 "AtmDep_Ecl", , , , ,
 "AttribOut ", , , , ,
 "Cascade   ", , , , ,
+"Decay1    ",A,A,A,A,
+"Decay2    ",A,A,A,A,
+"Decay3    ",A,A,A,A,
+"Decay4    ",A,A,A,A,
+"Decay5    ",A,A,A,A,

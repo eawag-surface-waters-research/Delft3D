@@ -47,6 +47,7 @@ libwaq_process_la_SOURCES = \
        decbod.f \
        decdet.f \
        decpc5.f \
+       dectra.f \
        degmp.f \
        densed.f \
        denwat.f \
