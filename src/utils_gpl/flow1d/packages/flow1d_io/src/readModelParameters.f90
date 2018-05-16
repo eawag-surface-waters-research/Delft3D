@@ -279,16 +279,7 @@ module m_readModelParameters
             call str_lower(keyValue)
             
             call AddOrReplaceParameter(category, keyWord, keyValue, .true.)
-            
-            if (category == 'numericalparameters' .and. keyWord == 'thresholdvalueflooding') then
-               ! FloodingDividedByDrying and ThresholdValueDrying are not implemented yet into the File Writers
-               ! So here calculate and store ThresholdValueDrying
-               read (keyValue, *) thresholdDry 
-               thresholdDry  = thresholdDry  / 10.0d0
-               write(keyValue, '(f8.6)') thresholdDry 
-               call AddOrReplaceParameter('numericalparameters', 'thresholdvaluedrying', keyValue, .true.)
-            endif
-            
+                        
             ! Set CacheMode Switches
             if (category == 'advancedoptions' .and. keyWord == 'cachemode') then
             
