@@ -407,7 +407,7 @@ itemid,itemse,itemex,itemde,itemun,itemnm,itemag,itemda,itemwk,itemgr
 "SBC       ","x"," ",   0.567000E-07,"(W/m2/K-4)          ","StefanBolzman Constant                            ","volume    ","volume    "," ","                              "
 "fReflA    ","x"," ",   0.300000E-01,"(-)                 ","Reflection factor for Qa                          ","volume    ","volume    "," ","                              "
 "EmissWat  ","x"," ",   0.970000    ,"(-)                 ","Emissivity (colour factor) of surface water       ","volume    ","volume    "," ","                              "
-"NatTemp   ","x"," ",    15.0000    ,"(oC)                ","air temperature                                   ","volume    ","volume    ","x","                              "
+"NatTemp   ","x"," ",    15.0000    ,"(oC)                ","Background water temperature                      ","volume    ","volume    ","x","                              "
 "RhoWat0   ","x"," ",    1000.00    ,"(kg/m3)             ","density of water at 4oC                           ","volume    ","volume    "," ","                              "
 "CwindA    ","x"," ",    4.40000    ,"(-)                 ","Coefficient in wind function a                    ","volume    ","volume    "," ","                              "
 "CwindB    ","x"," ",    1.82000    ,"(-)                 ","Coefficient in wind function b                    ","volume    ","volume    "," ","                              "
