@@ -96,6 +96,11 @@ module m_Laterals
       type(t_table), pointer                       :: qh => null()
       logical                                      :: use_internal_discharge
       logical                                      :: use_internal_salinity
+      
+      ! Results Calculated when writing HIS-File, can be used when writing NetCDF-File
+      double precision                             :: actualDischarge
+      double precision                             :: definedDischarge
+      double precision                             :: differenceDischarge
    end type  
    
    !> Set of lateral discharges

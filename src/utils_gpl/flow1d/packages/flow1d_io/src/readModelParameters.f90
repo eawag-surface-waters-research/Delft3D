@@ -506,6 +506,12 @@ module m_readModelParameters
       call AddOrReplaceParameter(category, 'ReductionFactor', 'none', .true.)
       call AddOrReplaceParameter(category, 'PumpDischarge', 'none', .true.)
 
+      category = 'ResultsLateral'
+      call AddOrReplaceParameter(category, 'ActualDischarge', 'none', .true.)
+      call AddOrReplaceParameter(category, 'DefinedDischarge', 'none', .true.)
+      call AddOrReplaceParameter(category, 'LateralDifference', 'none', .true.)
+      call AddOrReplaceParameter(category, 'WaterLevel', 'none', .true.)
+
       category = 'ResultsWaterBalance'
       call AddOrReplaceParameter(category, '1d2dflows', 'none', .true.)
 
