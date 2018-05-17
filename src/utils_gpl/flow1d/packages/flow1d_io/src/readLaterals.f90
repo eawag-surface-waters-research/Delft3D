@@ -106,6 +106,12 @@ module m_readLaterals
             allocate(pLat%branch(1))
             allocate(pLat%beginOffset(1))
             allocate(pLat%endOffset(1))
+            
+            if (length > 0.0d0)  then
+               pLat%pointLateral = .false.
+            else
+               pLat%pointLateral = .true.
+            endif
       
             pLat%branch(1)       = branchIdx
             pLat%beginOffset(1)  = Chainage

@@ -86,7 +86,8 @@ module m_Laterals
                                                                    !> Indicates whether lateral is a fresh water source: \n
                                                                    !! - at inflow salinity concentration will be set to 0 \n
                                                                    !! - at outflow load will be set to 0.
-      logical                                      :: freshWater   
+      logical                                      :: freshWater
+      logical                                      :: pointLateral
      
       ! calculation info
       integer                                      :: pointsCount
