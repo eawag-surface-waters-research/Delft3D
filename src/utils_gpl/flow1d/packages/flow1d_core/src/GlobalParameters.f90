@@ -283,5 +283,6 @@ module m_GlobalParameters
    integer, public, parameter :: CFiMorVelocity             = 120
    integer, public, parameter :: CFiMorWidth                = 121
    integer, public, parameter :: CFiMorDepth                = 122
+   integer, public, parameter :: CFiPumpHead                = 123
    
 end module m_GlobalParameters                                 
