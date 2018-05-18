@@ -119,6 +119,7 @@
       REAL, DIMENSION(:), POINTER             :: A
       CHARACTER(LEN=*), DIMENSION(:), POINTER :: C
       LOGICAL                                 :: INIT
+      LOGICAL                                 :: exists
       INTEGER                                 :: ACTION
       TYPE(DELWAQ_DATA), TARGET               :: DLWQD
       type(GridPointerColl), pointer          :: GridPs               ! collection of all grid definitions
@@ -214,6 +215,22 @@
 !
          CALL DHGNAM(RUNID,'.mon')
          LCHAR(1) = TRIM(RUNID)//'-delwaq03.wrk'
+
+!
+!        produce a user-friendly message if the 03 work file is missing,
+!        an indication that DELWAQ1 was not able to complete its job properly.
+!
+         inquire( file = lchar(1), exist = exists )
+         if ( .not. exists ) then
+             write( *, '(a)'  ) 'DELWAQ2 cannot run - the system work file is missing'
+             write( *, '(2a)' ) '    File name: ', trim(lchar(1))
+             write( *, '(2a)' ) '    Please check if DELWAQ1 ran correctly'
+             call srstop( 1 )
+         endif
+
+!
+!        the file does exist, so continue processing
+!
          CALL DHOPNF ( LUNIN , LCHAR(1), 1     , 2     , IERR  )
          IF ( IERR .GT. 0 ) GOTO 999
          READ  ( LUNIN )   IN
