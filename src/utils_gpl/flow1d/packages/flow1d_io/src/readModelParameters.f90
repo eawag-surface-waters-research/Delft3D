@@ -506,7 +506,7 @@ module m_readModelParameters
       call AddOrReplaceParameter(category, 'ReductionFactor', 'none', .true.)
       call AddOrReplaceParameter(category, 'PumpDischarge', 'none', .true.)
 
-      category = 'ResultsLateral'
+      category = 'ResultsLaterals'
       call AddOrReplaceParameter(category, 'ActualDischarge', 'none', .true.)
       call AddOrReplaceParameter(category, 'DefinedDischarge', 'none', .true.)
       call AddOrReplaceParameter(category, 'LateralDifference', 'none', .true.)
