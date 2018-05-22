@@ -668,9 +668,9 @@ module m_readCrossSections
 
          ! Check and Make Consistent if Needed
          if ((Main + FP1 + FP2) < (maxFlowWidth) - 0.001d0) then
-             call SetMessage(LEVEL_ERROR, 'Sum of all Sections less than Flow Width for CrossSection ID: '//trim(pCS%id))
+             call SetMessage(LEVEL_ERROR, 'Sum of all Sections less than Flow Width for CrossSection Definition ID: '//trim(pCS%id))
          elseif (FP1 <= 0.0d0 .and. FP2 > 0) then
-             call SetMessage(LEVEL_ERROR, 'Floodplain2 only allowed when Floodplain1 exists for CrossSection ID: '//trim(pCS%id))
+             call SetMessage(LEVEL_ERROR, 'Floodplain2 only allowed when Floodplain1 exists for CrossSection Definition ID: '//trim(pCS%id))
          else
          
             ! Compensate for rounf off if needed
