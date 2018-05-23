@@ -2133,7 +2133,7 @@
    end subroutine sort_links_ccw
 
    !> get netcell polygon that is safe for periodic, spherical coordinates and poles
-   subroutine get_cellpolygon(n, Msize, nn, xv, yv, LnnL, Lorg, zz)
+   subroutine get_cellpolygon(n, Msize, nn, rcel, xv, yv, LnnL, Lorg, zz)
    use network_data
    use m_missing, only : dmiss
    use m_sferic
@@ -2142,6 +2142,7 @@
    integer,                            intent(in)  :: n      !< cell number
    integer,                            intent(in)  :: Msize  !< array size
    integer,                            intent(out) :: nn     !< polygon size
+   double precision,                   intent(in)  :: rcel   !< cell enlargement factor around cell center
    double precision, dimension(Msize), intent(out) :: xv, yv !< polygon coordinates
    integer,          dimension(Msize), intent(out) :: LnnL   !< original link LnnL
    integer,          dimension(Msize), intent(out) :: Lorg   !< original link number (>0) or added link (0)
@@ -2248,6 +2249,13 @@
       zz = zz / numz
    endif
 
+   if (rcel /= 1d0) then
+      do m=1,nn
+         xv(m) = xzw(n) + rcel*(xv(m) - xzw(n))
+         yv(m) = yzw(n) + rcel*(yv(m) - yzw(n))
+      end do
+   end if
+      
    !  check periodicity
    if ( jsferic.eq.1 ) then
       do m=1,nn
@@ -2257,6 +2265,7 @@
          else if ( xv(mp1)-xv(m).lt.-180d0 ) then
             xv(mp1) = xv(mp1) + 360d0
          end if
+         ! TODO: SvdP: need sferic check for y coord as well, after the above new RCEL addition? [AvD]
       end do
    end if
 
@@ -2323,7 +2332,7 @@
    double precision                  :: zz
    integer                           :: jaccw     ! counterclockwise (1) or not (0) (not used here)
 
-   call get_cellpolygon(n,Mmax,nn,xh,yh,LnnL,Lorg,zz)
+   call get_cellpolygon(n,Mmax,nn,1d0,xh,yh,LnnL,Lorg,zz)
    call comp_masscenter(nn, xh , yh, xzwr, yzwr, ba, jaccw,  jsferic, jasfer3D, dmiss)
 
    end subroutine getcellsurface
@@ -2362,7 +2371,7 @@
       call comp_circumcenter3D(nn, xv, yv, xz, yz, jsferic, dmiss, dcenterinside)
    else
       !   get the cell polygon that is safe for periodic, spherical coordinates, inluding poles
-      call get_cellpolygon(n,Mmax,nn,xv,yv,LnnL,Lorg,zz)
+      call get_cellpolygon(n,Mmax,nn,1d0,xv,yv,LnnL,Lorg,zz)
       call getcircumcenter(nn, xv, yv, lnnl, xz, yz, jsferic, jasfer3D, jglobe, jins, dmiss, dxymis, dcenterinside)
    end if
 
