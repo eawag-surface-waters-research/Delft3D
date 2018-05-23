@@ -119,7 +119,7 @@
 
          ! if concentration small then calculate fractions with 1.e-20
 
-         if ( feiiid .gt. 1.e-20 ) then
+         if ( feiiid .lt. 1.e-20 ) then
             cfe3dt     = 1.e-20/(56000.*poros)
          endif
 
@@ -147,7 +147,7 @@
 
          ! if concentration small then recalculate the concentrations of the fractions with original feiiid concentration
 
-         if ( feiiid .gt. 1.e-20 ) then
+         if ( feiiid .lt. 1.e-20 ) then
             cfe3dt     = feiiid/(56000.*poros)
             disfe3     = cfe3dt * frfe3d
             disfe3oh   = cfe3dt * frfe3ohd
