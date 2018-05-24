@@ -2651,7 +2651,6 @@ src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/DHSTOP.F -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/DHTIME.F -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/Makefile.am -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/SRSTOP.F -text
-src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/UNLOCK.F -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/avundf.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/avundf_linux.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/cnvper.f -text
@@ -2734,6 +2733,7 @@ src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/reptim.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/space.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/stasub.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/strip.f -text
+src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/unlock.f90 -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/usedcp.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/wapdef.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/waqmem.f90 -text

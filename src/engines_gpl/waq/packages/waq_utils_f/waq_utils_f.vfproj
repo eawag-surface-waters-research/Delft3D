@@ -294,7 +294,7 @@
 		<File RelativePath=".\src\waq_utils\SRSTOP.F"/>
 		<File RelativePath=".\src\waq_utils\stasub.f"/>
 		<File RelativePath=".\src\waq_utils\strip.f"/>
-		<File RelativePath=".\src\waq_utils\UNLOCK.F"/>
+		<File RelativePath=".\src\waq_utils\unlock.f90"/>
 		<File RelativePath=".\src\waq_utils\usedcp.f"/>
 		<File RelativePath=".\src\waq_utils\wapdef.f"/>
 		<File RelativePath=".\src\waq_utils\waqmem.f90"/>

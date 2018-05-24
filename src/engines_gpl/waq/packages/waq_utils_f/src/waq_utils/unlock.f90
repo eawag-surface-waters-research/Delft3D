@@ -42,26 +42,20 @@
       character*20  rundat
       character*120 idstr
       logical       first
-      character*3   os
       integer (4)   i, j
       save          first
-      character*75  opkom(13)
+      character*75  opkom(8)
 
       data     first /.true./
-      data     opkom  /
-     +'ÉÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ»',
-     +'ºÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛº',
-     +'ºÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ   D e l f t 3 D - D E L W A Q   ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛº',
-     +'ºÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛº',
-     +'ºÛÛÛÛÛÛÛÛÛ  D-Water Quality      ÛÛÛÛÛÛÛ  D-Ecology            ÛÛÛÛÛÛÛÛÛº',
-     +'ºÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛº',
-     +'º Version xx.xxxx  xx-xx-xxxx                                           º',
-     +'º Deltares, P.O. Box 177, 2600 MH Delft, The Netherlands                º',
-     +'º Sales          : sales@deltaressystems.nl     tel: +31 (0)88 335 8188 º',
-     +'º Support options: support@deltaressystems.nl   tel: +31 (0)88 335 8100 º',
-     +'º Open source website and forum: http://oss.delft3d.nl/                 º',
-     +'º Copyright (c) 1993-2018 Deltares                                      º',
-     +'ÈÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼'/
+      data     opkom  / &
+      '+-----------------------------------------------------------------------+', &
+      '|                      D e l f t 3 D - D E L W A Q                      |', &
+      '|                                                                       |', &
+      '| D-Water Quality         Water quality simulation in 1D/2D/3D models   |', &
+      '| D-Ecology               Algae simulation in 1D/2D/3D models           |', &
+      '|                                                                       |', &
+      '| Version xx.xxxx  xx-xx-xxxx                                           |', &
+      '+-----------------------------------------------------------------------+'/
      
       integer(4) ithndl /0/
       if ( timon ) call timstrt( "unlock", ithndl )
@@ -69,23 +63,12 @@
       nolic =.false.
       if ( first ) then
          first = .false.
-
          ! set idstr
-
          call getidentification(idstr)
-
-         call getenv('OS',os)
-         call dhucas(os,os,len(os))
-         
          do i = 1 , size(opkom)
             if ( opkom(i)(3:15) .eq. 'Version xx.xx' ) then
                write(opkom(i)(3:72),'(a)') idstr(1:70)
             end if
-            if ( os .ne. 'WIN' ) then
-               do j = 1,len(opkom(i))
-                  if ( ichar(opkom(i)(j:j)) > 127 ) opkom(i)(j:j) = '-'
-               enddo
-            endif
             write(*,*) opkom(i)
          enddo
       endif
