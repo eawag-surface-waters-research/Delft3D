@@ -516,7 +516,7 @@ module m_readModelParameters
       call AddOrReplaceParameter(category, '1d2dflows', 'none', .true.)
 
       category = 'ResultsGeneral'
-      call AddOrReplaceParameter(category, 'ActualValue', 'current', .true.)
+      call AddOrReplaceParameter(category, 'ActualValue', '1', .true.)
       call AddOrReplaceParameter(category, 'DelwaqNoStaggeredGrid', '0', .true.)
       call AddOrReplaceParameter(category, 'FlowAnalysisTimeSeries', '0', .true.)
       call AddOrReplaceParameter(category, 'MeanValue', '0', .true.)
