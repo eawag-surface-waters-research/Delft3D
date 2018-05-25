@@ -759,6 +759,7 @@ subroutine waq_write_waqgeom_filepointer_ugrid(igeomfile)
     type(t_ug_meshgeom)                :: meshgeom, aggregated_meshgeom !< Mesh geometry to be written to the NetCDF file.
     type(t_ug_mesh)                    :: meshids  !< Set of NetCDF-ids for all mesh geometry variables.
     type(t_ug_network)                 :: networkids !< Set of NetCDF-ids for all network variables
+    type(t_crs)                        :: crs
     integer, dimension(:), allocatable :: edge_type, aggregated_edge_type !< Edge type array to be written to the NetCDF file.
     integer                            :: ierr     !< Result status (UG_NOERR==NF90_NOERR if successful).
     logical                            :: success  !< Helper variable.
@@ -801,7 +802,7 @@ subroutine waq_write_waqgeom_filepointer_ugrid(igeomfile)
     
     
     ! Write mesh geometry.    
-    ierr = ug_write_mesh_struct(igeomfile, meshids, networkids, meshgeom)
+    ierr = ug_write_mesh_struct(igeomfile, meshids, networkids, crs, meshgeom)
     call check_error(ierr)
 
     ! Write edge type variable (this is an extra variable that is not part of the UGRID standard).

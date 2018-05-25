@@ -28939,7 +28939,7 @@ subroutine refinecellsandfaces2()
 !         end do
 
 !        get the cell polygon that is safe for periodic, spherical coordinates, inluding poles         
-         call get_cellpolygon(ic,M,N,xloc,yloc,LnnL,Lorg,zz)
+         call get_cellpolygon(ic,M,N,1d0,xloc,yloc,LnnL,Lorg,zz)
 
 !        compute orientation vectors of netcell
 !         call orthonet_compute_orientation(aspect, u(1), v(1), u(2), v(2), ic)
@@ -29427,7 +29427,7 @@ subroutine refinecellsandfaces2()
          end do
          
 !        fix for global. spherical coordinates
-         call get_cellpolygon(k,MMAX,nn,xv,yv,LnnL,Lorg,zz)
+         call get_cellpolygon(k,MMAX,nn,1d0,xv,yv,LnnL,Lorg,zz)
          
            
 !          BEGIN DEBUG

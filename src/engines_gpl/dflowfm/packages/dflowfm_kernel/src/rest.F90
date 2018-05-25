@@ -5372,7 +5372,7 @@ end subroutine timdat
         R2search = 1.1d0*dmaxsize**2  ! 1.1d0: safety
         
 !       get the cell polygon that is safe for periodic, spherical coordinates, inluding poles         
-        call get_cellpolygon(k,Msize,N,xloc,yloc,LnnL,Lorg,zz)
+        call get_cellpolygon(k,Msize,N,1d0,xloc,yloc,LnnL,Lorg,zz)
         
         if ( N.lt.1 ) then
            if ( k.le.Ndxi ) then

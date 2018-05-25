@@ -20037,7 +20037,7 @@ end do
 
     if ( nn.lt.1 ) return  ! safety
 
-    call get_cellpolygon(n, Msize, nn, xv, yv, LnnL, Lorg, zz)
+    call get_cellpolygon(n, Msize, nn, 1d0,xv, yv, LnnL, Lorg, zz)
     call getcircumcenter(nn, xv, yv, LnnL, xz, yz, jsferic, jasfer3D, jglobe, jins, dmiss, dxymis, dcenterinside)
 
  end subroutine GETCELLCIRCUMCENTER
@@ -28628,9 +28628,9 @@ end
           ALLOCATE( XX(N6,NDX), YY(N6,NDX), NNN(NDX) )
           DO N = 1,NDX
              NNN(N) = NETCELL(N)%N
-             DO NN = 1, NNN(N)
-                XX(NN,N) = XK(NETCELL(N)%NOD(NN))
-                YY(NN,N) = YK(NETCELL(N)%NOD(NN))
+             DO NN = 1, NNN(N) ! make search cells based on net cell contour + RCEL search radius factor
+                XX(NN,N) = xzw(N) + RCEL*(XK(NETCELL(N)%NOD(NN))-xzw(N))
+                YY(NN,N) = yzw(N) + RCEL*(YK(NETCELL(N)%NOD(NN))-yzw(N))
              ENDDO
           ENDDO
           call averaging2(1,NS,XS,YS,ZS,IPSAM,XZ,YZ,BL,NDX,XX,YY,N6,NNN,jakdtree, &
@@ -28690,8 +28690,8 @@ end
        ALLOCATE( XX(N6,Ndx), YY(N6,Ndx), NNN(Ndx) )
        do K = 1,Ndx
           NN = nd(k)%lnx
-          XX(1:nn,K) = nd(k)%x
-          yy(1:nn,K) = nd(k)%y
+          XX(1:nn,K) = xzw(k) + RCEL*(nd(k)%x-xzw(k))
+          yy(1:nn,K) = yzw(k) + RCEL*(nd(k)%y-yzw(k))
           nnn(K) = NN  ! array nnn
        enddo
        call averaging2(1,NS,XS,YS,ZS,IPSAM,Xz,Yz,s1,Ndx,XX,YY,N6,NNN,jakdtree, &
