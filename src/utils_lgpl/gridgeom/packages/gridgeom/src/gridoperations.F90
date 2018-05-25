@@ -2390,13 +2390,13 @@
    !-----------------------------------------------------------------!
    ! Library public functions
    !-----------------------------------------------------------------!
-   function make1D2Dinternalnetlinks() result(ierr)
+   function make1D2Dinternalnetlinks(xplLinks, yplLinks, zplLinks) result(ierr)
 
    use m_cell_geometry, only: xz, yz
   use network_data
   use m_alloc
-  use m_missing, only:  dmiss, dxymis, jadelnetlinktyp
-  use geometry_module, only: dbdistance, normalout
+  use m_missing, only:  dmiss, dxymis, jadelnetlinktyp, jins
+  use geometry_module, only: dbdistance, normalout, dbpinpol
   use m_sferic, only: jsferic, jasfer3D
 
    implicit none
@@ -2404,6 +2404,9 @@
    integer          :: K1, K2, K3, L, NC1, NC2, JA, KK2(2), KK, NML
    integer          :: i, ierr, k, kcell
    DOUBLE PRECISION :: XN, YN, XK2, YK2, WWU
+   ! optional polygons to reduce the area where the 1D2Dlinks are generated
+   double precision, optional, intent(in) :: xplLinks(:), yplLinks(:), zplLinks(:)
+   integer                                :: insidePolygons
 
    call SAVENET()
    call findcells(0)
@@ -2427,7 +2430,12 @@
 
       IF (NMK(K) > 0) THEN ! == 2 .or. ) THEN
 
-         IF (KC(K) == 1) THEN
+         IF (allocated(KC) .and. KC(K) == 1) THEN
+            if ( present(xplLinks) .and. present(yplLinks) .and. present(zplLinks)) then
+                insidePolygons = - 1 
+                call dbpinpol(XK(K), YK(K), insidePolygons, dmiss, jins, size(xplLinks), xplLinks, yplLinks, zplLinks) 
+                if (insidePolygons .ne. 1) cycle
+            endif
             NC1 = 0
             CALL INCELLS(XK(K), YK(K), NC1)
             IF (NC1 > 1) THEN

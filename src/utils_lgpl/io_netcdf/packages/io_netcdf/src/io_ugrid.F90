@@ -257,7 +257,6 @@ type t_ug_file
    integer                          :: nummesh
    integer                          :: numcontacts
    integer                          :: numnet
-   integer                          :: epsg               !< Move epsg to file 
    type(t_ug_mesh),allocatable      :: meshids(:)         !< The type with underlying variable IDs (one column for each mesh topology).
    type(t_ug_network),allocatable   :: netids(:)    
    type(t_ug_contacts),allocatable  :: contactids(:)      !< The array with underlying variable IDs, one column for each link topology.
@@ -511,7 +510,7 @@ end function ug_put_var_attset
 ! -- COORDINATES ------------
 !> Adds coordinate variables according to CF conventions.
 !! Non-standard attributes (such as bounds) should be set elsewhere.
-function ug_addcoordvars(ncid, id_varx, id_vary, id_dimension, name_varx, name_vary, longname_varx, longname_vary, mesh, location, epsg) result(ierr)
+function ug_addcoordvars(ncid, id_varx, id_vary, id_dimension, name_varx, name_vary, longname_varx, longname_vary, mesh, location, crs) result(ierr)
    integer,               intent(in)    :: ncid          !< NetCDF dataset id
    integer,               intent(inout) :: id_varx       !< NetCDF 'x' variable id
    integer,               intent(inout) :: id_vary       !< NetCDF 'y' variable id
@@ -522,14 +521,14 @@ function ug_addcoordvars(ncid, id_varx, id_vary, id_dimension, name_varx, name_v
    character(len=*),      intent(in)    :: longname_vary !< NetCDF 'y' variable long name
    character(len=*),      intent(in)    :: mesh          !< Name of the mesh that contains the coordinate variables to add
    character(len=*),      intent(in)    :: location      !< location on the mesh of the coordinate variables to add
-   integer,               intent(in)    :: epsg          !< Coordinate reference system for the x/y-coordinates variables.
+   type(t_crs),           intent(in)    :: crs           !< Coordinate reference system for the x/y-coordinates variables.
    integer                              :: ierr          !< Result status (UG_NOERR==NF90_NOERR) if successful.
 
    ierr = UG_NOERR
 
    ierr = nf90_def_var(ncid, name_varx, nf90_double, id_dimension, id_varx)
    ierr = nf90_def_var(ncid, name_vary, nf90_double, id_dimension, id_vary)
-   ierr = ug_addcoordatts(ncid, id_varx, id_vary, epsg)
+   ierr = ug_addcoordatts(ncid, id_varx, id_vary, crs)
    ierr = nf90_put_att(ncid, id_varx, 'mesh',      mesh)
    ierr = nf90_put_att(ncid, id_vary, 'mesh',      mesh)
    ierr = nf90_put_att(ncid, id_varx, 'location',  location)
@@ -568,16 +567,16 @@ end function ug_addlonlatcoordvars
 
 !> Adds coordinate attributes according to CF conventions, based on given coordinate projection type.
 !! Non-standard attributes (such as long_name) should be set elsewhere.
-function ug_addcoordatts(ncid, id_varx, id_vary, epsg) result(ierr)
+function ug_addcoordatts(ncid, id_varx, id_vary, crs) result(ierr)
    integer,      intent(in) :: ncid     !< NetCDF dataset id
    integer,      intent(in) :: id_varx  !< NetCDF 'x' variable id
    integer,      intent(in) :: id_vary  !< NetCDF 'y' variable id
-   integer,      intent(in) :: epsg     !< Coordinate reference system for the x/y-coordinates variables.
+   type(t_crs), intent(in)  :: crs           !< Coordinate reference system for the x/y-coordinates variables.
    integer                  :: ierr     !< Result status (UG_NOERR==NF90_NOERR) if successful.
 
    ierr = UG_NOERR
 
-   if (epsg == 4326) then ! epsg 4326 is assumed spherical, WGS84 system.
+   if (crs%epsg_code == 4326) then ! epsg 4326 is assumed spherical, WGS84 system.
       ierr = ug_addlonlatcoordatts(ncid, id_varx, id_vary)
    else ! If projected.
       ierr = nf90_put_att(ncid, id_varx, 'units',       'm')
@@ -608,11 +607,10 @@ end function ug_addlonlatcoordatts
 
 !> Adds coordinate mapping attributes according to CF conventions, based on jsferic.
 !! Attributes are put in a scalar integer variable.
-function ug_add_coordmapping(ncid, epsg, crs) result(ierr)
+function ug_add_coordmapping(ncid, crs) result(ierr)
    integer,      intent(in) :: ncid   !< NetCDF dataset id
-   integer,      intent(in) :: epsg   !< Coordinate reference system that was used for the coordinate mapping.
+   type(t_crs), intent(in)  :: crs   !< Coordinate reference system that was used for the coordinate mapping.
    integer                  :: ierr   !< Result status (UG_NOERR==NF90_NOERR) if successful.
-   type(t_crs), optional, intent(in) :: crs   !< Coordinate reference system that was used for the coordinate mapping.
    integer                  :: id_crs
    integer                  :: ierr_missing
    character(len=11)        :: epsgstring
@@ -623,18 +621,16 @@ function ug_add_coordmapping(ncid, epsg, crs) result(ierr)
 
    epsgstring = ' '
    varname = ' '
-   if (epsg == 4326) then ! epsg 4326 is assumed spherical
+   if (crs%epsg_code == 4326) then ! epsg 4326 is assumed spherical
       ierr_missing = UG_INVALID_CRS
       varname = 'wgs84'
+   else if (len_trim(crs%varname) > 0) then
+      varname = crs%varname
    else 
       ierr_missing = UG_INVALID_CRS
       varname = 'projected_coordinate_system'
    end if
 
-   ! for backward compatibility
-   if (present(crs)) then
-         if ((.not.crs%is_spherical).and.(len_trim(crs%varname) > 0)) varname = crs%varname
-   endif
    ierr = nf90_inq_varid(ncid, trim(varname), id_crs)
    if (ierr == nf90_noerr) then
       ! A variable with that name already exists. Return without error.
@@ -646,11 +642,11 @@ function ug_add_coordmapping(ncid, epsg, crs) result(ierr)
 
    !The meta info other than epsg code should be retrived from proj4 library, as done in Delta Shell
    !otherwise we will generate inconsistent information 
-   if (epsg == 4326) then 
+   if (crs%epsg_code == 4326 ) then 
       ierr_missing = UG_INVALID_CRS
-      write (epsgstring, '("EPSG:",I0)') epsg
+      write (epsgstring, '("EPSG:",I0)') crs%epsg_code
       ierr = nf90_put_att(ncid, id_crs, 'name',                       'WGS 84'            ) ! CF
-      ierr = nf90_put_att(ncid, id_crs, 'epsg',                        epsg               ) ! CF
+      ierr = nf90_put_att(ncid, id_crs, 'epsg',                        crs%epsg_code      ) ! CF
       ierr = nf90_put_att(ncid, id_crs, 'grid_mapping_name',          'latitude_longitude') ! CF
       ierr = nf90_put_att(ncid, id_crs, 'longitude_of_prime_meridian', 0d0                ) ! CF
       ierr = nf90_put_att(ncid, id_crs, 'semi_major_axis',             6378137d0          ) ! CF 
@@ -662,13 +658,13 @@ function ug_add_coordmapping(ncid, epsg, crs) result(ierr)
 !      ierr = nf90_put_att(ncid, id_crs, 'wkt',                         ' '                ) ! WKT
 !      ierr = nf90_put_att(ncid, id_crs, 'comment',                     ' '                )
       ierr = nf90_put_att(ncid, id_crs, 'value',                       'value is equal to EPSG code')
-   else if (present(crs).and.allocated(crs%attset)) then
+   else if (allocated(crs%attset)) then
       ierr = ug_put_var_attset(ncid, id_crs, crs%attset)
    else
       ierr_missing = UG_INVALID_CRS      ! TODO: remove hardcoded defaults below. Replace by cloning the crs%attset  into this new NetCDF var.
-      write (epsgstring, '("EPSG:",I0)') epsg      
+      write (epsgstring, '("EPSG:",I0)') crs%epsg_code      
       ierr = nf90_put_att(ncid, id_crs, 'name',                        'Unknown projected' ) ! CF
-      ierr = nf90_put_att(ncid, id_crs, 'epsg',                        epsg                ) ! CF
+      ierr = nf90_put_att(ncid, id_crs, 'epsg',                        crs%epsg_code       ) ! CF
       ierr = nf90_put_att(ncid, id_crs, 'grid_mapping_name',           'Unknown projected' ) ! CF
       ierr = nf90_put_att(ncid, id_crs, 'longitude_of_prime_meridian', 0d0                 ) ! CF
       ierr = nf90_put_att(ncid, id_crs, 'semi_major_axis',             6378137d0           ) ! CF
@@ -704,10 +700,10 @@ end function ug_add_coordmapping
 
 
 !> Add the grid mapping attribute to one or more NetCDF variables.
-function ug_put_gridmapping_att(ncid, id_vars, epsg) result(ierr)
+function ug_put_gridmapping_att(ncid, id_vars, crs) result(ierr)
    integer,               intent(in) :: ncid     !< NetCDF dataset id
    integer, dimension(:), intent(in) :: id_vars  !< Array of NetCDF variable ids
-   integer,               intent(in) :: epsg     !< TODO
+   type(t_crs),           intent(in) :: crs      !< Projection type that was used for the coordinate mapping.
    integer                           :: ierr     !< Result status (UG_NOERR==NF90_NOERR) if successful.
 
    integer :: i, n
@@ -715,8 +711,10 @@ function ug_put_gridmapping_att(ncid, id_vars, epsg) result(ierr)
 
    ierr = UG_SOMEERR
    gridmappingvar = ' '
-   if (epsg == 4326) then
-      gridmappingvar = 'wgs84'  ! should be the same as written in routine 'ug_add_coordmapping'
+   if (.true.) then
+      gridmappingvar = crs%varname
+   else if (crs%is_spherical) then
+      gridmappingvar = 'wgs84'
    else 
       gridmappingvar = 'projected_coordinate_system'
    end if
@@ -900,7 +898,7 @@ end function ug_write_meshtopology
 !> Defines a new variable in an existing dataset.
 !! Does not write the actual data yet.
 function ug_def_var(ncid, id_var, id_dims, itype, iloctype, mesh_name, var_name, standard_name, long_name, &
-                    unit, cell_method, epsg, ifill, dfill) result(ierr)
+                    unit, cell_method, crs, ifill, dfill) result(ierr)
    integer,                 intent(in)    :: ncid          !< NetCDF dataset id
    integer,                 intent(out)   :: id_var        !< Created NetCDF variable id.
    integer, dimension(:),   intent(in)    :: id_dims       !< NetCDF dimension ids for this variable. Example: (/ id_edgedim /) for scalar data on edges, or (/ id_twodim, id_facedim /) for vector data on faces.
@@ -912,7 +910,7 @@ function ug_def_var(ncid, id_var, id_dims, itype, iloctype, mesh_name, var_name,
    character(len=*),        intent(in)    :: long_name     !< Long name for 'long_name' attribute in this variable (use empty string if not wanted).
    character(len=*),        intent(in)    :: unit          !< Unit of this variable (CF-compliant) (use empty string for dimensionless quantities).
    character(len=*),        intent(in)    :: cell_method   !< Cell method for the spatial dimension (i.e., for edge/face/volume), value should be one of 'point', 'mean', etc. (See CF) (empty string if not relevant).
-   integer,       optional, intent(in)       :: epsg          !< 
+   type(t_crs), optional,   intent(in)       :: crs        !< (Optional) Add grid_mapping attribute based on this coordinate reference system for independent coordinates
    integer,          optional, intent(in)    :: ifill         !< (Optional) Integer fill value.
    double precision, optional, intent(in)    :: dfill         !< (Optional) Double precision fill value.
    integer                                :: ierr          !< Result status (UG_NOERR==NF90_NOERR) if successful.
@@ -967,8 +965,8 @@ function ug_def_var(ncid, id_var, id_dims, itype, iloctype, mesh_name, var_name,
    ierr = nf90_put_att(ncid, id_var, 'long_name'    , trim(long_name))
    ierr = nf90_put_att(ncid, id_var, 'units'        , trim(unit))
 
-   if (present(epsg)) then
-      ierr = ug_put_gridmapping_att(ncid, (/ id_var /), epsg)
+   if (present(crs)) then
+      ierr = ug_put_gridmapping_att(ncid, (/ id_var /), crs)
    endif
    if (itype == nf90_int .and. present(ifill)) then
       ierr = nf90_put_att(ncid, id_var, '_FillValue'   , ifill)
@@ -1000,13 +998,13 @@ end function ug_def_var
 !! The mesh geometry is the required starting point for all variables/data defined ON that mesh.
 !! This function accepts the mesh geometry derived type as input, for the arrays-based function, see ug_write_mesh_arrays
 !! This only writes the mesh variables, not the actual data variables that are defined ON the mesh.
-function ug_write_mesh_struct(ncid, meshids, networkids, meshgeom, crs, nnodeids, nbranchids, nnodelongnames, nbranchlongnames, nodeids, nodelongnames, network1dname) result(ierr)
+function ug_write_mesh_struct(ncid, meshids, networkids, crs, meshgeom, nnodeids, nbranchids, nnodelongnames, nbranchlongnames, nodeids, nodelongnames, network1dname) result(ierr)
    integer,             intent(in   ) :: ncid     !< NetCDF dataset id, should be already open and ready for writing.
    type(t_ug_mesh),  intent(inout)    :: meshids  !< Set of NetCDF-ids for all mesh geometry arrays.
    type(t_ug_network),  intent(inout) :: networkids  !< Set of NetCDF-ids for all mesh geometry arrays.
    type(t_ug_meshgeom), intent(in   ) :: meshgeom !< The complete mesh geometry in a single struct.
+   type(t_crs),           intent(in)  :: crs      !< Optional crs containing metadata of unsupported coordinate reference systems
    integer                            :: ierr     !< Result status (UG_NOERR==NF90_NOERR) if successful.
-   type(t_crs), optional, intent(in)  :: crs      !< Optional crs containing metadata of unsupported coordinate reference systems
    character(len=ug_idsLen), optional, allocatable           :: nnodeids(:), nbranchids(:), nodeids(:)    
    character(len=ug_idsLongNamesLen), optional, allocatable  :: nnodelongnames(:), nbranchlongnames(:), nodelongnames(:) 
    character(len=*), optional                               :: network1dname
@@ -1014,12 +1012,12 @@ function ug_write_mesh_struct(ncid, meshids, networkids, meshgeom, crs, nnodeids
    ierr = ug_write_mesh_arrays(ncid, meshids, meshgeom%meshName, meshgeom%dim, UG_LOC_ALL2D, meshgeom%numNode, meshgeom%numEdge, meshgeom%numFace, meshgeom%maxNumFaceNodes, &
                                meshgeom%edge_nodes, meshgeom%face_nodes, meshgeom%edge_faces, meshgeom%face_edges, meshgeom%face_links, meshgeom%nodex, meshgeom%nodey, & ! meshgeom%nodez, &
                                meshgeom%edgex, meshgeom%edgey, meshgeom%facex, meshgeom%facey, &
-                               meshgeom%epsg, -999, -999d0, meshgeom%start_index, meshgeom%numlayer, meshgeom%layertype, meshgeom%layer_zs, meshgeom%interface_zs, &
+                               crs, -999, -999d0, meshgeom%start_index, meshgeom%numlayer, meshgeom%layertype, meshgeom%layer_zs, meshgeom%interface_zs, &
                                networkids, network1dname, meshgeom%nnodex, meshgeom%nnodey, nnodeids, nnodelongnames, &
                                meshgeom%nedge_nodes(1,:), meshgeom%nedge_nodes(2,:), nbranchids, nbranchlongnames, meshgeom%nbranchlengths, meshgeom%nbranchgeometrynodes, meshgeom%nbranches, & 
                                meshgeom%ngeopointx, meshgeom%ngeopointy, meshgeom%ngeometry, &
                                meshgeom%nbranchorder, &
-                               nodeids, nodelongnames, meshgeom%branchidx, meshgeom%branchoffsets, crs)
+                               nodeids, nodelongnames, meshgeom%branchidx, meshgeom%branchoffsets)
 
 end function ug_write_mesh_struct
 
@@ -1029,12 +1027,12 @@ end function ug_write_mesh_struct
 !! This only writes the mesh variables, not the actual data variables that are defined ON the mesh.
 function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, numEdge, numFace, maxNumNodesPerFace, &
                               edge_nodes, face_nodes, edge_faces, face_edges, face_links, xn, yn, xe, ye, xf, yf, &
-                              epsg, imiss, dmiss, start_index, numLayer, layerType, layer_zs, interface_zs, &
+                              crs, imiss, dmiss, start_index, numLayer, layerType, layer_zs, interface_zs, &
                               networkids, network1dname, nnodex, nnodey, nnodeids, nnodelongnames, &
                               sourceNodeId, targetNodeId, nbranchids, nbranchlongnames, nbranchlengths, nbranchgeometrynodes, nbranches, &
                               ngeopointx, ngeopointy, ngeometry, &
                               nbranchorder, &
-                              nodeids, nodelongnames, branchidx, branchoffsets, crs) result(ierr)
+                              nodeids, nodelongnames, branchidx, branchoffsets) result(ierr)
    use m_alloc
 
    implicit none
@@ -1056,7 +1054,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    real(kind=dp),    intent(in) :: xn(:), yn(:) !< x,y-coordinates of the mesh nodes.
    real(kind=dp),    intent(in) :: xe(:), ye(:) !< representative x,y-coordinates of the mesh edges.
    real(kind=dp),    intent(in) :: xf(:), yf(:) !< representative x,y-coordinates of the mesh faces.
-   integer,          intent(in) :: epsg     !< epsg code that uniquely identifies the coordinate reference system  
+   type(t_crs),      intent(in) :: crs      !< Coordinate reference system for input coordinates
    integer,          intent(in) :: imiss    !< Fill value used for integer values (e.g. in edge/face_nodes arrays).
    real(kind=dp),    intent(in) :: dmiss    !< Fill value used for double precision values (e.g. in face_x_bnd variable).
    integer                             :: start_index     !< The base index of the provided arrays (0 if this function writes array from C/C++/C#, 1 for Fortran)
@@ -1075,8 +1073,6 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    ! Optional mesh1d variables for 1d UGrid
    integer, optional, pointer,intent(in)                 :: branchidx(:)
    double precision, optional, pointer,intent(in)        :: branchoffsets(:)
-   !< Optional crs containing metadata of unsupported coordinate reference systems 
-   type(t_crs), optional, intent(in)                     :: crs      
    
    integer                                               :: ierr !< Result status (UG_NOERR==NF90_NOERR) if successful.
       
@@ -1139,21 +1135,21 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
          ierr = nf90_def_dim(ncid, 'n'//prefix//'_interface', numLayer + 1, meshids%dimids(mdim_interface))
       end if
 
-      ierr = ug_add_coordmapping(ncid, epsg, crs)
+      ierr = ug_add_coordmapping(ncid, crs)
 
       ! Nodes
       ! node x,y coordinates.
       ierr = ug_addcoordvars(ncid, meshids%varids(mid_nodex), meshids%varids(mid_nodey), (/ meshids%dimids(mdim_node) /), prefix//'_node_x', prefix//'_node_y', &
-         'x-coordinate of mesh nodes', 'y-coordinate of mesh nodes', trim(meshName), 'node', epsg)
+         'x-coordinate of mesh nodes', 'y-coordinate of mesh nodes', trim(meshName), 'node', crs)
 #ifdef HAVE_PROJ
-      if (epsg /= 4326) then ! If x,y are not in WGS84 system, then add mandatory additional lon/lat coordinates.
+      if (crs%epgs_code /= 4326) then ! If x,y are not in WGS84 system, then add mandatory additional lon/lat coordinates.
          ierr = ug_addlonlatcoordvars(ncid, meshids%varids(mid_nodelon), meshids%varids(mid_nodelat), (/ meshids%dimids(mdim_node) /), prefix//'_node_lon', prefix//'_node_lat', &
             'longitude coordinate of mesh nodes', 'latitude coordinate of mesh nodes', trim(meshName), 'node')
       end if
 #endif
 
       ierr = ug_def_var(ncid, meshids%varids(mid_nodez), (/ meshids%dimids(mdim_node) /), nf90_double, UG_LOC_NODE, &
-         meshName, 'node_z', 'altitude', 'z-coordinate of mesh nodes', 'm', '', epsg, dfill=dmiss)
+         meshName, 'node_z', 'altitude', 'z-coordinate of mesh nodes', 'm', '', crs, dfill=dmiss)
 
       ! Edges
       if (dim == 1 .or. ug_checklocation(dataLocs, UG_LOC_EDGE))  then
@@ -1162,7 +1158,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
          ierr = nf90_put_att(ncid, meshids%varids(mid_edgenodes), 'mesh', trim(meshName))
          ierr = nf90_put_att(ncid, meshids%varids(mid_edgenodes), 'location', 'edge')
          ierr = nf90_put_att(ncid, meshids%varids(mid_edgenodes), 'long_name',  'Mapping from every edge to the two nodes that it connects')
-         if (start_index.ne.0) then
+         if (start_index.ne.-1) then
             ierr = nf90_put_att(ncid, meshids%varids(mid_edgenodes), 'start_index',  start_index)
          endif
          ierr = nf90_put_att(ncid, meshids%varids(mid_edgenodes), '_FillValue',  imiss)
@@ -1182,15 +1178,15 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    if (ug_checklocation(dataLocs, UG_LOC_EDGE)) then
       ! edge x,y coordinates.
       ierr = ug_addcoordvars(ncid, meshids%varids(mid_edgex), meshids%varids(mid_edgey), (/ meshids%dimids(mdim_edge) /), prefix//'_edge_x', prefix//'_edge_y', &
-                             'characteristic x-coordinate of the mesh edge (e.g. midpoint)', 'characteristic y-coordinate of the mesh edge (e.g. midpoint)', trim(meshName), 'edge', epsg)
+                             'characteristic x-coordinate of the mesh edge (e.g. midpoint)', 'characteristic y-coordinate of the mesh edge (e.g. midpoint)', trim(meshName), 'edge', crs)
       ierr = nf90_put_att(ncid, meshids%varids(mid_edgex), 'bounds',    prefix//'_edge_x_bnd')
       ierr = nf90_put_att(ncid, meshids%varids(mid_edgey), 'bounds',    prefix//'_edge_y_bnd')
       ! Add bounds.
       ierr = ug_addcoordvars(ncid, meshids%varids(mid_edgexbnd), meshids%varids(mid_edgeybnd), (/ meshids%dimids(mdim_two), meshids%dimids(mdim_edge) /), prefix//'_edge_x_bnd', prefix//'_edge_y_bnd', &
-                             'x-coordinate bounds of 2D mesh edge (i.e. end point coordinates)', 'y-coordinate bounds of 2D mesh edge (i.e. end point coordinates)', trim(meshName), 'edge', epsg)
+                             'x-coordinate bounds of 2D mesh edge (i.e. end point coordinates)', 'y-coordinate bounds of 2D mesh edge (i.e. end point coordinates)', trim(meshName), 'edge', crs)
 
 #ifdef HAVE_PROJ
-      if (epsg /= 4326) then ! If x,y are not in WGS84 system, then add mandatory additional lon/lat coordinates.
+      if (crs%epgs_code /= 4326) then ! If x,y are not in WGS84 system, then add mandatory additional lon/lat coordinates.
          ierr = ug_addlonlatcoordvars(ncid, meshids%varids(mid_edgelon), meshids%varids(mid_edgelat), (/ meshids%dimids(mdim_edge) /), prefix//'_edge_lon', prefix//'_edge_lat', &
                                       'characteristic longitude coordinate of the mesh edge (e.g. midpoint)', 'characteristic latitude coordinate of the mesh edge (e.g. midpoint)', trim(meshName), 'edge')
          ierr = nf90_put_att(ncid, meshids%varids(mid_edgelon), 'bounds',    prefix//'_edge_lon_bnd')
@@ -1220,7 +1216,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
       ierr = nf90_put_att(ncid, meshids%varids(mid_facenodes), 'mesh', trim(meshName))
       ierr = nf90_put_att(ncid, meshids%varids(mid_facenodes), 'location', 'face')
       ierr = nf90_put_att(ncid, meshids%varids(mid_facenodes), 'long_name',  'Mapping from every face to its corner nodes (counterclockwise)')
-      if (start_index.ne.0) then
+      if (start_index.ne.-1) then
             ierr = nf90_put_att(ncid, meshids%varids(mid_facenodes), 'start_index',  start_index)
       endif
       ierr = nf90_put_att(ncid, meshids%varids(mid_facenodes), '_FillValue',  imiss)
@@ -1230,8 +1226,8 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
          ierr = nf90_def_var(ncid, prefix//'_face_edges', nf90_int, (/ meshids%dimids(mdim_maxfacenodes), meshids%dimids(mdim_face) /) , meshids%varids(mid_faceedges))
          ierr = nf90_put_att(ncid, meshids%varids(mid_faceedges), 'cf_role',     'face_edge_connectivity')
          ierr = nf90_put_att(ncid, meshids%varids(mid_faceedges), 'long_name',   'Mapping from every face to its edges (in counterclockwise order)')
-         if (start_index.ne.0) then
-            ierr = nf90_put_att(ncid, meshids%varids(mid_faceedges), 'start_index', 1)
+         if (start_index.ne.-1) then
+            ierr = nf90_put_att(ncid, meshids%varids(mid_faceedges), 'start_index', start_index)
          endif
          ierr = nf90_put_att(ncid, meshids%varids(mid_faceedges), '_FillValue',  imiss)
       end if
@@ -1242,7 +1238,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
          ierr = nf90_put_att(ncid, meshids%varids(mid_facelinks), 'cf_role',     'face_face_connectivity')
          ierr = nf90_put_att(ncid, meshids%varids(mid_facelinks), 'mesh', trim(meshName))
          ierr = nf90_put_att(ncid, meshids%varids(mid_facelinks), 'long_name',   'Mapping from every face to its neighboring faces (in counterclockwise order)')
-         if (start_index.ne.0) then
+         if (start_index.ne.-1) then
             ierr = nf90_put_att(ncid, meshids%varids(mid_facelinks), 'start_index', start_index)
          endif
          ierr = nf90_put_att(ncid, meshids%varids(mid_facelinks), '_FillValue',  imiss)
@@ -1254,7 +1250,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
          ierr = nf90_def_var(ncid, prefix//'_edge_faces', nf90_int, (/ meshids%dimids(mdim_two), meshids%dimids(mdim_edge) /) , meshids%varids(mid_edgefaces))
          ierr = nf90_put_att(ncid, meshids%varids(mid_edgefaces), 'cf_role',     'edge_face_connectivity')
          ierr = nf90_put_att(ncid, meshids%varids(mid_edgefaces), 'long_name',   'Mapping from every edge to the two faces that it separates')
-         if (start_index.ne.0) then
+         if (start_index.ne.-1) then
             ierr = nf90_put_att(ncid, meshids%varids(mid_edgefaces), 'start_index', start_index)
          endif
          ierr = nf90_put_att(ncid, meshids%varids(mid_edgefaces), '_FillValue',  imiss)
@@ -1263,17 +1259,17 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    if (ug_checklocation(dataLocs, UG_LOC_FACE)) then
       ! face x,y coordinates.
       ierr = ug_addcoordvars(ncid, meshids%varids(mid_facex), meshids%varids(mid_facey), (/ meshids%dimids(mdim_face) /), prefix//'_face_x', prefix//'_face_y', &
-                             'Characteristic x-coordinate of mesh face', 'Characteristic y-coordinate of mesh face', trim(meshName), 'face', epsg)
+                             'Characteristic x-coordinate of mesh face', 'Characteristic y-coordinate of mesh face', trim(meshName), 'face', crs)
       ierr = nf90_put_att(ncid, meshids%varids(mid_facex), 'bounds',    prefix//'_face_x_bnd')
       ierr = nf90_put_att(ncid, meshids%varids(mid_facey), 'bounds',    prefix//'_face_y_bnd')
       ! Add bounds.
       ierr = ug_addcoordvars(ncid, meshids%varids(mid_facexbnd), meshids%varids(mid_faceybnd), (/ meshids%dimids(mdim_maxfacenodes), meshids%dimids(mdim_face) /), prefix//'_face_x_bnd', prefix//'_face_y_bnd', &
-                             'x-coordinate bounds of 2D mesh face (i.e. corner coordinates)', 'y-coordinate bounds of 2D mesh face (i.e. corner coordinates)', trim(meshName), 'face', epsg)
+                             'x-coordinate bounds of 2D mesh face (i.e. corner coordinates)', 'y-coordinate bounds of 2D mesh face (i.e. corner coordinates)', trim(meshName), 'face', crs)
       ierr = nf90_put_att(ncid, meshids%varids(mid_facexbnd), '_FillValue',  dmiss)
       ierr = nf90_put_att(ncid, meshids%varids(mid_faceybnd), '_FillValue',  dmiss)
 
 #ifdef HAVE_PROJ
-      if (epsg /= 4326) then ! If x,y are not in WGS84 system, then add mandatory additional lon/lat coordinates.
+      if (crs%epgs_code /= 4326) then ! If x,y are not in WGS84 system, then add mandatory additional lon/lat coordinates.
          ierr = ug_addlonlatcoordvars(ncid, meshids%varids(mid_facelon), meshids%varids(mid_facelat), (/ meshids%dimids(mdim_face) /), prefix//'_face_lon', prefix//'_face_lat', &
                                       'Characteristic longitude coordinate of mesh face', 'Characteristic latitude coordinate of mesh face', trim(meshName), 'face')
          ierr = nf90_put_att(ncid, meshids%varids(mid_facelon), 'bounds',    prefix//'_face_lon_bnd')
@@ -1385,7 +1381,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
       deallocate(edgexbnd, edgeybnd)
 
 #ifdef HAVE_PROJ
-      if (epsg /= 4326) then ! If x,y are not in WGS84 system, then add mandatory additional lon/lat coordinates.
+      if (crs%epsg_code /= 4326) then ! If x,y are not in WGS84 system, then add mandatory additional lon/lat coordinates.
          call realloc(lone, size(xe), fill=dmiss, keepExisting=.false.)
          call realloc(late, size(ye), fill=dmiss, keepExisting=.false.)
          call transform_coordinates(RIJKSDRIEHOEK_PROJ_STRING, WGS84_PROJ_STRING, xe, ye, lone, late)
@@ -1447,7 +1443,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
       deallocate(facexbnd, faceybnd)
 
 #ifdef HAVE_PROJ
-      if (epsg /= 4326) then ! If x,y are not in WGS84 system, then add mandatory additional lon/lat coordinates.
+      if (crs%epsg_code /= 4326) then ! If x,y are not in WGS84 system, then add mandatory additional lon/lat coordinates.
          ! corner point coordinates:
          allocate(facelonbnd(maxnv, numFace), facelatbnd(maxnv, numFace))
          facelonbnd = dmiss
@@ -1475,7 +1471,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
       ierr = nf90_put_var(ncid, meshids%varids(mid_facey),    yf(1:numFace))
 
 #ifdef HAVE_PROJ
-      if (epsg /= 4326) then ! If x,y are not in WGS84 system, then add mandatory additional lon/lat coordinates.
+      if (crs%epsg_code /= 4326) then ! If x,y are not in WGS84 system, then add mandatory additional lon/lat coordinates.
          call realloc(lonf, size(xf), fill=dmiss, keepExisting=.false.)
          call realloc(latf, size(yf), fill=dmiss, keepExisting=.false.)
          call transform_coordinates(RIJKSDRIEHOEK_PROJ_STRING, WGS84_PROJ_STRING, xf, yf, lonf, latf)
@@ -1774,8 +1770,8 @@ function ug_init_link_topology(ncid, varid, contactids) result(ierr)
    
    contactids%varids(cid_contacttopo) = varid  
    ierr = att_to_dimid(ncid,'link_dimension'  , contactids%dimids(cdim_ncontacts)      ,varid)
-   ierr = att_to_varid(ncid,'contacts_ids'       , contactids%varids(cid_contactids)      ,varid)
-   ierr = att_to_varid(ncid,'contacts_long_names', contactids%varids(cid_contactlongnames),varid)
+   ierr = att_to_varid(ncid,'contact_ids'       , contactids%varids(cid_contactids)      ,varid)
+   ierr = att_to_varid(ncid,'contact_long_names', contactids%varids(cid_contactlongnames),varid)
    ierr = att_to_varid(ncid,'contact_type', contactids%varids(cid_contacttype),varid)
 
    end function ug_init_link_topology
@@ -3025,9 +3021,9 @@ end subroutine write_face_global_number_variable
 !!
 !! NOTE: do not pass already filled mesh geometries to this function,
 !! since array pointers will become disassociated, possibly causing memory leaks.
-function ug_create_ugrid_geometry(meshgeom) result(ierr)   
+function ug_create_ugrid_geometry(meshgeom, crs) result(ierr)   
     type(t_ug_meshgeom), intent(out) :: meshgeom     !< The mesh geometry that is to be created and filled.
-        
+    type(t_crs), intent(inout) :: crs     
     ! TODO why need save here?
     integer, allocatable, target, save       :: edge_nodes(:,:), edge_faces(:,:), face_nodes(:,:), face_edges(:,:), face_links(:,:) !< Output arrays.
     
@@ -3047,6 +3043,10 @@ function ug_create_ugrid_geometry(meshgeom) result(ierr)
     meshgeom%dim = 2
     
     meshgeom%epsg = 4326
+
+    crs%is_spherical = .TRUE.
+    crs%varname = 'wgs84'
+    crs%epsg_code = 4326
 
     ! Nodes.
     meshgeom%numNode = 5
@@ -3183,9 +3183,10 @@ subroutine ug_create_ugrid_meta(meta)
 end subroutine ug_create_ugrid_meta
 
 !> Writes the unstructured network and edge type to an already opened netCDF dataset.
-function ug_write_geom_filepointer_ugrid(ncid, meshgeom, meshids, networkids) result(ierr)
+function ug_write_geom_filepointer_ugrid(ncid, meshgeom, crs, meshids, networkids) result(ierr)
     integer,             intent(in)     :: ncid !< file pointer to netcdf file to write to.
     type(t_ug_meshgeom), intent(in)     :: meshgeom !< Mesh geometry to be written to the NetCDF file.
+    type(t_crs), intent(in)             :: crs !< Mesh geometry to be written to the NetCDF file.
     type(t_ug_mesh), intent(inout)      :: meshids  !< Set of NetCDF-ids for all mesh geometry variables.
     type(t_ug_network), intent(inout)   :: networkids
     integer                             :: ierr     !< Result status (UG_NOERR==NF90_NOERR if successful).
@@ -3200,7 +3201,7 @@ function ug_write_geom_filepointer_ugrid(ncid, meshgeom, meshids, networkids) re
     ierr = ug_addglobalatts(ncid, meta)
     
     ! Write mesh geometry.
-    ierr = ug_write_mesh_struct(ncid, meshids, networkids, meshgeom)
+    ierr = ug_write_mesh_struct(ncid, meshids, networkids, crs, meshgeom)
 
 end function ug_write_geom_filepointer_ugrid
 
@@ -3214,6 +3215,7 @@ function ug_write_geom_ugrid(filename) result(ierr)
     type(t_ug_meshgeom) :: meshgeom !< Mesh geometry to be written to the NetCDF file.
     type(t_ug_mesh)     :: meshids          !< Set of NetCDF-ids for all mesh geometry variables.
     type(t_ug_network)  :: networkid        !< Set of NetCDF-ids for all network variables.
+    type(t_crs)         :: crs              !< Set of NetCDF-ids for all mesh geometry variables.
     integer :: ncid
     
     ierr = nf90_create(filename, 0, ncid)
@@ -3222,9 +3224,9 @@ function ug_write_geom_ugrid(filename) result(ierr)
     end if
     
     ! create mesh geometry
-    ierr = ug_create_ugrid_geometry(meshgeom)
+    ierr = ug_create_ugrid_geometry(meshgeom, crs)
 
-    ierr = ug_write_geom_filepointer_ugrid(ncid, meshgeom, meshids, networkid)
+    ierr = ug_write_geom_filepointer_ugrid(ncid, meshgeom, crs, meshids, networkid)
          
     ierr = nf90_close(ncid)
         
@@ -3241,6 +3243,7 @@ function ug_write_map_ugrid(filename) result(ierr)
     type(t_ug_meshgeom)               :: meshgeom    !< Mesh geometry to be written to the NetCDF file.
     type(t_ug_mesh)                   :: meshids     !< Set of NetCDF-ids for all mesh geometry variables.
     type(t_ug_network)                :: networkid   !< Set of NetCDF-ids for all mesh geometry variables.   
+    type(t_crs)                       :: crs     !< Set of NetCDF-ids for all mesh geometry variables.
     integer                           :: id_s1, id_s2, id_u1, id_zk, id_time, itim ! example: water levels, water depth, edge speed, bed level and a timer
     integer                           :: ncid, id_timedim
     double precision, allocatable     :: workf(:), worke(:), workn(:)
@@ -3255,9 +3258,9 @@ function ug_write_map_ugrid(filename) result(ierr)
     
     
     ! create mesh geometry
-    ierr = ug_create_ugrid_geometry(meshgeom)
+    ierr = ug_create_ugrid_geometry(meshgeom, crs)
 
-    ierr = ug_write_geom_filepointer_ugrid(ncid, meshgeom, meshids, networkid)
+    ierr = ug_write_geom_filepointer_ugrid(ncid, meshgeom, crs, meshids, networkid)
 
     ierr = nf90_def_dim(ncid, 'time', nf90_unlimited, id_timedim)
 
@@ -3266,16 +3269,16 @@ function ug_write_map_ugrid(filename) result(ierr)
     ierr = nf90_put_att(ncid, id_time, 'units'        , 'seconds since 2008-01-09 00:00:00')
 
     ierr = ug_def_var(ncid, id_s1, (/ meshids%dimids(mdim_face), id_timedim /), nf90_double, UG_LOC_FACE, meshgeom%meshname, "s1", "sea_surface_level_above_geoid", "Water level on cell centres", &
-                    "m", "average", meshgeom%epsg, -1, -999d0)
+                    "m", "average", crs, -1, -999d0)
     
     ierr = ug_def_var(ncid, id_s2, (/ meshids%dimids(mdim_face), id_timedim /), nf90_double, UG_LOC_FACE, meshgeom%meshname, "s2", "sea_floor_depth_below_geoid", "Water depth on cell centres", &
-                    "m", "average", meshgeom%epsg, -1, -999d0)
+                    "m", "average", crs, -1, -999d0)
     
     ierr = ug_def_var(ncid, id_u1, (/ meshids%dimids(mdim_edge), id_timedim /), nf90_double, UG_LOC_EDGE, meshgeom%meshname, "u1", "", "Normal velocity on cell edges", &
-                    "m s-1", "average", meshgeom%epsg, -1, -999d0)
+                    "m s-1", "average", crs, -1, -999d0)
     
     ierr = ug_def_var(ncid, id_zk, (/ meshids%dimids(mdim_node), id_timedim /), nf90_double, UG_LOC_NODE, meshgeom%meshname, "zk", "", "Bed level on cell corners", &
-                    "m", "point", meshgeom%epsg, -1, -999d0)
+                    "m", "point", crs, -1, -999d0)
     ! NOTE: zk is rarely time-dependent, but just as an example
 
     ierr = nf90_enddef(ncid)
@@ -3663,7 +3666,7 @@ function ug_put_mesh_contact(ncid, contactids, mesh1indexes, mesh2indexes, conta
    contacts(2,:) = mesh2indexes(:)
 
    !we have not defined the start_index, so when we put the variable it must be zero based   
-   if (present(startIndex) .and. startIndex.ne.0) then
+   if (present(startIndex) .and. startIndex.ne.-1) then
        ierr = ug_convert_start_index(contacts(1,:), startIndex, 0)
        ierr = ug_convert_start_index(contacts(2,:), startIndex, 0)
    endif
@@ -3764,7 +3767,7 @@ function ug_put_1d_network_branches(ncid,netids, sourceNodeId, targetNodeId, bra
    end do
    
    !we have not defined the start_index, so when we put the variable it must be zero based
-   if (startIndex.ne.0) then
+   if (startIndex.ne.-1) then
         ierr = ug_convert_start_index(sourcestargets(1,:), startIndex, 0)
         ierr = ug_convert_start_index(sourcestargets(2,:), startIndex, 0)
    endif
@@ -3838,8 +3841,7 @@ function ug_put_1d_mesh_discretisation_points(ncid, meshids, branchidx, offset, 
    allocate(shiftedBranchidx(size(branchidx)))
    allocate(shiftedEdgeNodes(size(edgenodes,1),size(edgenodes,2)))
    shiftedBranchidx = branchidx
-   shiftedEdgeNodes = edgenodes 
-   if (startIndex.ne.0) then
+   if (startIndex.ne.-1) then
        ierr = ug_convert_start_index(shiftedBranchidx, startIndex, 0)
        ierr = ug_convert_start_index(shiftedEdgeNodes(1,:), startIndex, 0)
        ierr = ug_convert_start_index(shiftedEdgeNodes(2,:), startIndex, 0)
@@ -3938,7 +3940,7 @@ function ug_get_1d_network_branches(ncid, netids, sourcenodeid, targetnodeid, br
    integer                                    :: ierr, n, k, bid, nmeshpoints, nbranches, varStartIndex
    integer,allocatable                        :: sourcestargets(:,:)
 
-   nbranches = size(sourceNodeId,1)
+   nbranches = size(sourceNodeId)
    allocate(sourcestargets(2, nbranches))
 
    ierr = nf90_get_var(ncid, netids%varids(ntid_1dedgenodes), sourcestargets)
@@ -4472,6 +4474,23 @@ function ug_get_mesh_ids(ncid, ug_file, meshType, meshids) result(ierr)
    endif
    
 end function ug_get_mesh_ids 
+
+
+function ug_get_contact_id(ncid, ug_file, contactid)  result(ierr)
+
+   integer, intent(in)           :: ncid   
+   type(t_ug_file), intent(in)   :: ug_file      
+   integer, intent(out)          :: contactid
+   integer                       :: ierr
+   
+   ierr = 0
+   contactid = -1
+   if (size(ug_file%contactids) > 0) then
+      contactid = 1
+   endif
+   
+end function ug_get_contact_id
+
 
 function ug_get_1d_network_id(ncid, ug_file, networkid) result(ierr)
 

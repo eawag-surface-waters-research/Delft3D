@@ -359,13 +359,14 @@ end function ionc_get_face_nodes_dll
 
 
 !> Gets the epsg code of coordinate system from a data set.
+!> TO do we should get the crs here!!
 function ionc_get_coordinate_system_dll(ioncid, epsg) result(ierr) bind(C, name="ionc_get_coordinate_system")
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_coordinate_system_dll
    integer(kind=c_int),             intent(in)    :: ioncid  !< The IONC data set id.
    integer(kind=c_int),             intent(  out) :: epsg    !< Number of epsg code.
    integer(kind=c_int)                            :: ierr    !< Result status, ionc_noerr if successful.
      
-   ierr = ionc_get_coordinate_system(ioncid, epsg)
+   ierr = ionc_get_epsg_code(ioncid, epsg)
 end function ionc_get_coordinate_system_dll
 
 
@@ -1236,6 +1237,18 @@ function ionc_get_3d_mesh_id_dll(ioncid, meshid)  result(ierr) bind(C, name="ion
    ierr = ionc_get_3d_mesh_id_ugrid(ioncid, meshid)
    
 end function ionc_get_3d_mesh_id_dll
+
+
+function ionc_get_contact_id_dll(ioncid, contactid)  result(ierr) bind(C, name="ionc_get_contact_id")
+!DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_contact_id_dll
+   integer, intent(in)    :: ioncid
+   integer, intent(inout) :: contactid
+   integer                :: ierr
+   
+   ! for now we are assuming that just 1 contact "mesh" exist
+   ierr = ionc_get_contact_id_ugrid(ioncid, contactid)
+   
+end function ionc_get_contact_id_dll
 
 function ionc_count_mesh_ids_from_network_id_dll(ioncid, networkid, nmeshids) result(ierr) bind(C, name="ionc_count_mesh_ids_from_network_id")
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_count_mesh_ids_from_network_id_dll

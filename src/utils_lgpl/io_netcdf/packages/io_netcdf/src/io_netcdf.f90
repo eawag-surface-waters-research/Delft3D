@@ -96,9 +96,9 @@ public :: ionc_get_face_coordinates
 public :: ionc_put_face_coordinates
 public :: ionc_get_face_edges
 public :: ionc_get_face_nodes
-public :: ionc_get_coordinate_system
-public :: ionc_get_crs
-public :: ionc_set_crs
+public :: ionc_get_coordinate_reference_system
+public :: ionc_get_epsg_code
+public :: ionc_set_coordinate_reference_system
 public :: ionc_get_meta_data
 public :: ionc_get_var_count
 public :: ionc_inq_varids
@@ -161,6 +161,8 @@ public :: ionc_get_var_chars
 public :: ionc_getfullversionstring_io_netcdf
 
 public :: ionc_get_dimid
+
+public :: ionc_get_contact_id_ugrid
 
 private
 
@@ -445,15 +447,15 @@ function ionc_get_ncid(ioncid, ncid) result(ierr)
 
 end function ionc_get_ncid
 
-!> Gets dimension id
-function ionc_get_dimid(ioncid, im, idim, dimid) result(ierr)
+!> Gets the NetCDF dimension id for a specific mesh and a specific topology dimension.
+function ionc_get_dimid(ioncid, meshid, idim, dimid) result(ierr)
    integer,             intent(in)    :: ioncid   !< The IONC data set id.
-   integer,             intent(in)    :: im       !< mesh number
-   integer,             intent(in)    :: idim     !< Dim type (enumerator value)
+   integer,             intent(in)    :: meshid   !< The mesh id in the specified data set.
+   integer,             intent(in)    :: idim     !< Mesh dimension (enumerator value), e.g. mdim_face, mdim_node
    integer,             intent(out)   :: dimid    !< Dimension ID 
    integer                            :: ierr     !< Result status, ionc_noerr if successful.
    ierr  = IONC_NOERR
-   dimid = datasets(ioncid)%ug_file%meshids(im)%dimids(idim)
+   dimid = datasets(ioncid)%ug_file%meshids(meshid)%dimids(idim)
 end function ionc_get_dimid
 
 !> Gets the number of mesh from a data set.
@@ -721,7 +723,16 @@ function ionc_get_face_nodes(ioncid, meshid, face_nodes, fillvalue, startIndex) 
 end function ionc_get_face_nodes
 
 !> Gets the coordinate system from a data set.
-function ionc_get_coordinate_system(ioncid, epsg_code) result(ierr)
+function ionc_get_coordinate_reference_system(ioncid, crs) result(ierr)
+   integer,             intent(in)    :: ioncid  !< The IONC data set id.
+   type(t_crs),         intent(out)   :: crs     !< The crs
+   integer                            :: ierr    !< Result status, ionc_noerr if successful.
+   ierr = nf90_noerr 
+   crs = datasets(ioncid)%crs
+end function ionc_get_coordinate_reference_system
+
+!> Gets the epsg code from a data set.
+function ionc_get_epsg_code(ioncid, epsg_code) result(ierr)
    integer,             intent(in)    :: ioncid  !< The IONC data set id.
    integer,             intent(  out) :: epsg_code   !< Number of epsg.
    integer                            :: ierr    !< Result status, ionc_noerr if successful.
@@ -729,39 +740,17 @@ function ionc_get_coordinate_system(ioncid, epsg_code) result(ierr)
    ! TODO: AvD: some error handling if ioncid is wrong   
    ierr = nf90_noerr 
    epsg_code = datasets(ioncid)%crs%epsg_code
-   !is_spherical = datasets(ioncid)%crs%is_spherical
-end function ionc_get_coordinate_system
-
-!> Gets the crs information from a data set.
-function ionc_get_crs(ioncid, crs) result(ierr)
-   integer,             intent(in)    :: ioncid  !< The IONC data set id.
-   type(t_crs),         intent(  out) :: crs     !< Map projection/coordinate transformation used for the coordinates of this mesh.
-   integer                            :: ierr    !< Result status, ionc_noerr if successful.
-
-   ierr = IONC_NOERR
-   if (ioncid < 1 .or. ioncid > ndatasets) then
-      ierr = IONC_EBADID
-      goto 999
-   end if
-
-   ierr = nf90_noerr 
-   crs = datasets(ioncid)%crs
-   ! Successful
-   return
-
-999 continue
-   ! Some error (status was set earlier)
-end function ionc_get_crs
+end function ionc_get_epsg_code
 
 !> Set the coordinate system of a data set: this is needed to pass the metadata read with ionc_get_coordinate_reference_system.
 !> Note: currently io_netcdf only supports ONE crs for each file, not one for each grid.
-function ionc_set_crs(ioncid, crs) result(ierr)
+function ionc_set_coordinate_reference_system(ioncid, crs) result(ierr)
    integer,             intent(in)    :: ioncid  !< The IONC data set id.
    type(t_crs),         intent(in)    :: crs     !< The crs
    integer                            :: ierr    !< Result status, ionc_noerr if successful.
    ierr = nf90_noerr 
    datasets(ioncid)%crs = crs
-end function ionc_set_crs
+end function ionc_set_coordinate_reference_system
 
 !> Get the meta data from the file/data set.
 function ionc_get_meta_data(ioncid, meta) result(ierr)
@@ -1054,7 +1043,7 @@ end function ionc_add_global_attributes
 !! NOTE: File should still be in define mode.
 !! Does not write the actual data yet.
 function ionc_def_var(ioncid, meshid, id_var, itype, iloctype, var_name, standard_name, long_name, & ! id_dims, 
-                    unit, cell_method, epsg, ifill, dfill) result(ierr)
+                    unit, cell_method, crs, ifill, dfill) result(ierr)
    integer,                    intent(in)    :: ioncid    !< The IONC data set id.
    integer,                    intent(in)    :: meshid    !< The mesh id in the specified data set.
    integer,                    intent(  out) :: id_var        !< Created NetCDF variable id.
@@ -1066,7 +1055,7 @@ function ionc_def_var(ioncid, meshid, id_var, itype, iloctype, var_name, standar
    character(len=*),           intent(in)    :: long_name     !< Long name for 'long_name' attribute in this variable (use empty string if not wanted).
    character(len=*),           intent(in)    :: unit          !< Unit of this variable (CF-compliant) (use empty string for dimensionless quantities).
    character(len=*),           intent(in)    :: cell_method   !< Cell method for the spatial dimension (i.e., for edge/face/volume), value should be one of 'point', 'mean', etc. (See CF) (empty string if not relevant).
-   integer,      optional, intent(in)        :: epsg           !< (Optional) Add grid_mapping attribute based on this coordinate reference system for independent coordinates
+   type(t_crs),      optional, intent(in)    :: crs           !< (Optional) Add grid_mapping attribute based on this coordinate reference system for independent coordinates
    integer,          optional, intent(in)    :: ifill         !< (Optional) Integer fill value.
    double precision, optional, intent(in)    :: dfill         !< (Optional) Double precision fill value.
    integer                                :: ierr          !< Result status (UG_NOERR==NF90_NOERR) if successful.
@@ -1088,7 +1077,7 @@ function ionc_def_var(ioncid, meshid, id_var, itype, iloctype, var_name, standar
    end if
 
    ierr = ug_def_var(datasets(ioncid)%ncid, id_var, id_dims, itype, iloctype, datasets(ioncid)%ug_file%meshnames(meshid), var_name, standard_name, long_name, &
-                    unit, cell_method, epsg, ifill, dfill)
+                    unit, cell_method, crs, ifill, dfill)
 end function ionc_def_var
 
 
@@ -1100,7 +1089,7 @@ function ionc_write_mesh_struct(ioncid, meshids, networkids, meshgeom) result(ie
    type(t_ug_meshgeom), intent(in)    :: meshgeom !< The complete mesh geometry in a single struct.
    integer                            :: ierr     !< Result status, ionc_noerr if successful.
 
-   ierr = ug_write_mesh_struct(datasets(ioncid)%ncid, meshids, networkids, meshgeom)
+   ierr = ug_write_mesh_struct(datasets(ioncid)%ncid, meshids, networkids, datasets(ioncid)%crs, meshgeom)
 end function ionc_write_mesh_struct
 
 !> Initializes the io_netcdf library, setting up the logger.
@@ -1761,6 +1750,17 @@ function ionc_get_3d_mesh_id_ugrid(ioncid, meshid) result(ierr)
    ierr = ug_get_mesh_id(datasets(ioncid)%ncid, datasets(ioncid)%ug_file, meshid, 3)
 
 end function ionc_get_3d_mesh_id_ugrid
+
+function ionc_get_contact_id_ugrid(ioncid, contactid) result(ierr)
+
+   integer, intent(in)    :: ioncid
+   integer, intent(inout) :: contactid
+   integer                :: ierr
+   
+   ierr = ug_get_contact_id(datasets(ioncid)%ncid, datasets(ioncid)%ug_file, contactid)
+
+end function ionc_get_contact_id_ugrid
+
 
 !< Count the number of meshes associated with a network
 function ionc_count_mesh_ids_from_network_id_ugrid(ioncid, netid, nmeshids) result(ierr)
