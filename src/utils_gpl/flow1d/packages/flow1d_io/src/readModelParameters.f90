@@ -554,7 +554,6 @@ module m_readModelParameters
       call AddOrReplaceParameter(category, 'Rho', '1000', .true.)
       call AddOrReplaceParameter(category, 'StructureInertiaDampingFactor', '1.0', .true.)
       call AddOrReplaceParameter(category, 'Theta', '1.0', .true.)
-      call AddOrReplaceParameter(category, 'ThresholdValueDrying', '0.001', .true.)
       call AddOrReplaceParameter(category, 'ThresholdValueFlooding', '0.01', .true.)
       call AddOrReplaceParameter(category, 'UseOmp', '0', .true.)
       call AddOrReplaceParameter(category, 'UseTimeStepReducerStructures', '0', .true.)
