@@ -68,7 +68,7 @@
                           hyd%nolay   )
       else if (hyd%geometry .eq. HYD_GEOM_UNSTRUC) then
          hyd%waqgeom%epsg = hyd%crs%epsg_code
-         success =  write_waqgeom_file(hyd%file_geo%name, hyd%meta, hyd%waqgeom, &
+         success =  write_waqgeom_file(hyd%file_geo%name, hyd%meta, hyd%crs, hyd%waqgeom, &
                                        hyd%edge_type, hyd%conv_type, hyd%conv_version)
       endif
 
