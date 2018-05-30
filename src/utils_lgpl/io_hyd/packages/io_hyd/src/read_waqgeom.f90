@@ -86,7 +86,7 @@ module m_read_waqgeom
         end if
         !
         ierr = ionc_get_meta_data(ioncid, meta)
-        ierr = ionc_get_crs(ioncid, crs)
+        ierr = ionc_get_coordinate_reference_system(ioncid, crs)
 
         ierr = ionc_inq_conventions(ioncid, conv_type, conv_version)
         if ( (ierr == nf90_noerr .and. conv_type /= IONC_CONV_UGRID) .or. &
