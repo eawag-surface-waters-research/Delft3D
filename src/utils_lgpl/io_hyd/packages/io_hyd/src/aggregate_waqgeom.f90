@@ -229,8 +229,9 @@ function aggregate_ugrid_geometry(input, output, input_edge_type, output_edge_ty
     call reallocP(output%face_nodes, (/ max_nodes_per_face, output_face_count /), fill=missing_value)
     do output_face = 1,output_face_count
         ! Sort edges for current output face.
-        call sort_edges(output_face, output%face_edges(1:face_edge_count(output_face), output_face), output%face_nodes(1:face_edge_count(output_face), output_face), &
+        success = sort_edges(output_face, output%face_edges(1:face_edge_count(output_face), output_face), output%face_nodes(1:face_edge_count(output_face), output_face), &
                 input%edge_nodes, input%face_nodes, input%edge_faces, face_mapping_table, reverse_edge_mapping_table, node_mapping_table, output%edge_nodes)
+        if (.not. success) return
     end do
 
 

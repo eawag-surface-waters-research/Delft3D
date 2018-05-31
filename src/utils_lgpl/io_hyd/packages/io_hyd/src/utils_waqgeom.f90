@@ -114,7 +114,8 @@ module m_utils_waqgeom
 !> Sorts the given edges of the current face in counter clockwise order.
 !! At the same time stores the sorted nodes of the current face in the given nodes array.
 !! In this subroutine input means "from the un-aggregated mesh" and output means "from the aggregated mesh".
-subroutine sort_edges(current_face, edges, nodes, input_edge_nodes, input_face_nodes, input_edge_faces, face_mapping_table, reverse_edge_mapping_table, node_mapping_table, output_edge_nodes)
+function sort_edges(current_face, edges, nodes, input_edge_nodes, input_face_nodes, input_edge_faces, face_mapping_table, &
+                    reverse_edge_mapping_table, node_mapping_table, output_edge_nodes) result(success)
 
     implicit none
 
@@ -123,11 +124,14 @@ subroutine sort_edges(current_face, edges, nodes, input_edge_nodes, input_face_n
     integer, dimension(:), intent(out)   :: nodes !< Array to store the nodes of the current face.
     integer, dimension(:,:), intent(in)  :: input_edge_nodes, input_face_nodes, input_edge_faces, output_edge_nodes !< Connectivity arrays.
     integer, dimension(:), intent(in)    :: face_mapping_table, reverse_edge_mapping_table, node_mapping_table !< Mapping tables.
+    logical                              :: success !< Result status, true if successful.
 
     character(len=255)    :: message !< Temporary variable for writing log messages.
     integer               :: first_node, current_node, number_of_edges, k, i !< Counters.
     integer, dimension(2) :: next_nodes !< Helper array.
     logical               :: found
+    
+    success = .false.
 
     ! Start with the edge that happens to be listed first, this will stay in the first position.
     ! First sort the two nodes of the first edge in CCW order, so that all subsequent edges will also be sorted in CCW order.
@@ -142,8 +146,11 @@ subroutine sort_edges(current_face, edges, nodes, input_edge_nodes, input_face_n
 
         ! Error if arrive at the first edge and there are still un-used edges leftover.
         if (current_node == first_node) then
-            write(message, *) 'For face ', current_face, ' there are unconnected edges in aggregated mesh. &
-                    &This can happen if the aggregated cell consists of cells that are not connected or if the aggregated cell is shaped like a ring. Mesh will not be aggregated.'
+            write(message, *) 'For face ', current_face, ' there are unconnected edges in aggregated mesh.' 
+            call mess(LEVEL_ERROR, trim(message))
+            write(message, *) 'This can happen if the aggregated cell consists of cells that are not connected,'
+            call mess(LEVEL_ERROR, trim(message))
+            write(message, *) 'or if the aggregated cell is shaped like a ring. Mesh will not be aggregated.'
             call mess(LEVEL_ERROR, trim(message))
             return
         end if
@@ -173,7 +180,9 @@ subroutine sort_edges(current_face, edges, nodes, input_edge_nodes, input_face_n
         end do ! i
 
         if (.not. found) then
-            write(message, *) 'For face ', current_face, ' cannot find edge connected to node ', current_node, ' of edge ', edges(k-1), ' in aggregated mesh. Mesh will not be aggregated.'
+            write(message, *) 'For face ', current_face, ' cannot find edge connected to node ', current_node
+            call mess(LEVEL_ERROR, trim(message))
+            write(message, *) 'of edge ', edges(k-1), ' in aggregated mesh. Mesh will not be aggregated.'
             call mess(LEVEL_ERROR, trim(message))
             return
         end if
@@ -181,13 +190,16 @@ subroutine sort_edges(current_face, edges, nodes, input_edge_nodes, input_face_n
 
     ! Error if last edge is not connected to first edge.
     if (current_node /= first_node) then
-        write(message, *) 'For face ', current_face, ' node ', current_node, ' of last edge ', edges(number_of_edges), &
-                ' is not connected to node ', first_node, ' of first edge ', edges(1), ' in aggregated mesh. Mesh will not be aggregated.'
+        write(message, *) 'For face ', current_face, ' node ', current_node, ' of last edge ', edges(number_of_edges)
+        call mess(LEVEL_ERROR, trim(message))
+        write(message, *) ' is not connected to node ', first_node, ' of first edge ', edges(1), ' in aggregated mesh. Mesh will not be aggregated.'
         call mess(LEVEL_ERROR, trim(message))
         return
     end if
 
-end subroutine sort_edges
+    success = .true.
+
+end function sort_edges
 
 !> The given edge in the aggregated mesh has two nodes. The returned array contains these two nodes sorted in CCW order,
 !! i.e. in the same order as these two nodes would be encountered when traversing the nodes of the given face in CCW order.
