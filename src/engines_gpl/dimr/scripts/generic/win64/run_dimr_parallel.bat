@@ -9,38 +9,57 @@ title run_dimr_parallel
     rem 
     rem
 setlocal enabledelayedexpansion
-    rem debuglevel=0:silent 8:major 32:detail
-set debuglevel=8
 
     rem
-    rem Set the config file
+    rem Read arguments
     rem
+set debuglevel=-1
+
+    rem No arguments:
 if [%1] EQU [] (
     set numpar=%NUMBER_OF_PROCESSORS%
     set argfile=dimr_config.xml
-) else (
-    if [%1] EQU [--help] (
-        goto usage
-    )
-    set numpar=%1
-    if [%2] EQU [] (
-        set argfile=dimr_config.xml
-    ) else (
-        if [%2] EQU [-d] (
-            set debuglevel=%3
-            set argfile=%4
-        ) else (
-            set argfile=%2
-            if [%3] EQU [-d] (
-                set debuglevel=%4
-            )
-        )
-    )
+    goto readyreading
 )
+
+    rem --help:
+if [%1] EQU [--help] ( goto usage )
+
+    rem number of partitions:
+set numpar=%1
+
+    rem debuglevel and or configfile
+if [%2] EQU [-d] (
+    set debuglevel=%3
+    if [%4] EQU [] (
+        set argfile=dimr_config.xml
+        goto readyreading
+    ) else (
+        set argfile=%4
+        goto readyreading
+    )
+) else (
+    set argfile=%2
+)
+if [%3] EQU [-d] (
+    set debuglevel=%4
+    goto readyreading
+)
+
+:readyreading
+
+    rem Check configfile
 echo Configfile:%argfile%
 if not exist %argfile% (
     echo ERROR: configfile "%argfile%" does not exist
     goto usage
+)
+
+    rem Check debuglevel, translate into argument for dimr
+if  %debuglevel% EQU -1 (
+    set debugarg=
+) else (
+    set debugarg=-d !debuglevel!
 )
 
 rem Sets the number of threads if it is not defined
@@ -49,8 +68,8 @@ echo OMP_NUM_THREADS is already defined
 ) else ( 
    rem Getting and setting the number of physical cores  
    for /F "tokens=2 delims==" %%C in ('wmic cpu get NumberOfCores /value ^| findstr NumberOfCores') do set NumberOfPhysicalCores=%%C
-   set /A OMP_NUM_THREADS=%NumberOfPhysicalCores%-2
-   if /I OMP_NUM_THREADS LEQ 2 set OMP_NUM_THREADS=2
+   set /A OMP_NUM_THREADS=!NumberOfPhysicalCores! - 2
+   if /I OMP_NUM_THREADS LEQ 2 ( set OMP_NUM_THREADS=2 )
 )
 echo OMP_NUM_THREADS is %OMP_NUM_THREADS%
 
@@ -89,8 +108,8 @@ set waveexedir=%D3D_HOME%\%ARCH%\dwaves\bin
 
     rem Run
 set PATH=%dimrexedir%;%delwaqexedir%;%dflowfmexedir%;%flow1dexedir%;%flow1d2dexedir%;%rtctoolsexedir%;%rrexedir%;%waveexedir%;%swanbatdir%;%swanexedir%;%esmfbatdir%;%esmfexedir%;%sharedir%
-echo executing: "%sharedir%\mpiexec.exe" -n %numpar% -localonly "%dimrexedir%\dimr.exe" -d %debuglevel% %argfile%
-"%sharedir%\mpiexec.exe" -n %numpar% -localonly "%dimrexedir%\dimr.exe" -d %debuglevel% %argfile%
+echo executing: "%sharedir%\mpiexec.exe" -n %numpar% -localonly "%dimrexedir%\dimr.exe" %debugarg% %argfile%
+"%sharedir%\mpiexec.exe" -n %numpar% -localonly "%dimrexedir%\dimr.exe" %debugarg% %argfile%
 
 goto end
 
@@ -99,8 +118,8 @@ echo Usage:
 echo run_dimr_parallel.bat [--help] [n] [-d debuglevel] [dimr_config.xml]
 echo     --help         : (Optional) show this usage
 echo     n              : (Optional) integer, number of partitions. Must match with the prepared D-Flow FM calculation.
-echo                      Default value: %NUMBER_OF_PROCESSORS%
-echo     -d debuglevel  : (optional) debuglevel=0:silent, 8:major(default), 32:detail
+echo                      Default value: NUMBER_OF_PROCESSORS
+echo     -d debuglevel  : (Optional) debuglevel=0:ALL, 6:SILENT
 echo     dimr_config.xml: (Optional) default: dimr_config.xml
 
 :end
