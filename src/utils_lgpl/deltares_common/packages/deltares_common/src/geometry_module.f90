@@ -2395,12 +2395,12 @@ module geometry_module
             endif
          enddo
 
-         if (nintlinks > 1 .or. nn.eq.3) then                ! nn.eq.3: always for triangles
+         if (nintlinks > 1 .or. nn == 3) then                ! nn == 3: always for triangles
             do k = 1,100                                     ! Zhang, Schmidt and Perot 2002, formula A3
                xccfo = xccf
                yccfo = yccf
                do m  = 1,nn
-                  if ( lnnl( m ) == 2 .or. nn.eq.3 .or. lnnl(m).eq.1 ) then     ! nn.eq.3: always for triangles
+                  if ( lnnl( m ) == 2 .or. nn == 3 ) then     ! nn == 3: always for triangles
                      xe1= xv(m)
                      ye1= yv(m)
                      m2 = m + 1; if (m == nn) m2 = 1
