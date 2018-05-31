@@ -128,7 +128,8 @@ subroutine windtostress(mmax      ,nmax      ,nmaxus    ,grdang    ,kcs       , 
              ! Wuest & Lorke (2003)
              !
              if(wslake == 1) then
-                 cdwl  = 0.0044_fp/wsp**1.15_fp
+                 ! Limit wsp to > 0.5. Stay on the safe side in case cd is copied to Stanton/Dalton, see code below
+                 cdwl  = 0.0044_fp/max(wsp,0.5_fp)**1.15_fp
              else
                  cdwl = 0.0_fp
              endif
