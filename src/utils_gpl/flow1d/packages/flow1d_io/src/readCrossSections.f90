@@ -533,24 +533,24 @@ module m_readCrossSections
       endif
       
       call realloc(pCS%height, numlevels)
-      call realloc(pCS%width, numlevels)
-      call realloc(pCS%TotalWidth, numlevels)
+      call realloc(pCS%flowWidth, numlevels)
+      call realloc(pCS%totalWidth, numlevels)
    !
       pCS%levelsCount = numlevels
       
       pCS%height(1) = 0.0d0
       call prop_get_double(node_ptr, '', 'height', pCS%height(2), success)
-      if (success) call prop_get_double(node_ptr, '', 'width', pCS%width(1), success)
+      if (success) call prop_get_double(node_ptr, '', 'width', pCS%flowWidth(1), success)
       if (.not. success) then
             call SetMessage(LEVEL_ERROR, 'Incorrect CrossSection input for CrossSection id: '//trim(pCS%id)//'. Invalid levels/widths.')
             return
       endif
-      pCS%width(2) = pCS%width(1)
+      pCS%flowWidth(2) = pCS%flowWidth(1)
       if (closed) then
-         pCS%height(3) = pCS%height(2)+1d-5
-         pCS%width(3) = 0.0d0
+         pCS%height(3)    = pCS%height(2)+1d-5
+         pCS%flowWidth(3) = 0.0d0
       endif
-      pCS%totalWidth = PCS%width
+      pCS%totalWidth = PCS%flowWidth
       
       ! Initialize groundlayer information of the newly added cross-section
       allocate(pCS%groundlayer)
@@ -750,13 +750,13 @@ module m_readCrossSections
       
       
       call realloc(pCS%height, numlevels)
-      call realloc(pCS%width, numlevels)
-      call realloc(pCS%TotalWidth, numlevels)
+      call realloc(pCS%flowWidth, numlevels)
+      call realloc(pCS%totalWidth, numlevels)
 
       pCs%levelsCount = numlevels
-      pCS%height     = height(1:numlevels)
-      pCS%width      = width(1:numlevels)
-      pCS%TotalWidth = TotalWidth(1:numlevels)
+      pCS%height      = height(1:numlevels)
+      pCS%flowWidth   = width(1:numlevels)
+      pCS%totalWidth  = totalwidth(1:numlevels)
       
       if (pCs%plains(3) > 0.0d0) then
          pCs%frictionSectionsCount = 3
@@ -861,8 +861,8 @@ module m_readCrossSections
          select case(pdef%crossType)
             case (CS_TABULATED) 
                write(ibin) (pdef%height(j), j = 1, pdef%levelscount)
-               write(ibin) (pdef%width(j), j = 1, pdef%levelscount)
-               write(ibin) (pdef%TotalWidth(j), j = 1, pdef%levelscount)
+               write(ibin) (pdef%flowWidth(j), j = 1, pdef%levelscount)
+               write(ibin) (pdef%totalWidth(j), j = 1, pdef%levelscount)
                write(ibin) (pdef%plains(j), j = 1, 3)
                write(ibin) (pdef%plainslocation(j), j = 1, 3)
             
@@ -925,11 +925,11 @@ module m_readCrossSections
          select case(pdef%crossType)
             case (CS_TABULATED) 
                allocate(pdef%height    (pdef%levelscount))
-               allocate(pdef%width     (pdef%levelscount))
-               allocate(pdef%TotalWidth(pdef%levelscount))
+               allocate(pdef%flowWidth     (pdef%levelscount))
+               allocate(pdef%totalWidth(pdef%levelscount))
                read(ibin) (pdef%height(j), j = 1, pdef%levelscount)
-               read(ibin) (pdef%width(j), j = 1, pdef%levelscount)
-               read(ibin) (pdef%TotalWidth(j), j = 1, pdef%levelscount)
+               read(ibin) (pdef%flowWidth(j), j = 1, pdef%levelscount)
+               read(ibin) (pdef%totalWidth(j), j = 1, pdef%levelscount)
                read(ibin) (pdef%plains(j), j = 1, 3)
                read(ibin) (pdef%plainslocation(j), j = 1, 3)
                
@@ -1238,8 +1238,8 @@ module m_readCrossSections
             case (CS_TABULATED)
                write(dmpUnit, *) '#################### TABULATED #######################'
                write(dmpUnit, *) (pCSDef%height(j), j = 1, pCSDef%levelscount)
-               write(dmpUnit, *) (pCSDef%width(j), j = 1, pCSDef%levelscount)
-               write(dmpUnit, *) (pCSDef%TotalWidth(j), j = 1, pCSDef%levelscount)
+               write(dmpUnit, *) (pCSDef%flowWidth(j), j = 1, pCSDef%levelscount)
+               write(dmpUnit, *) (pCSDef%totalWidth(j), j = 1, pCSDef%levelscount)
                write(dmpUnit, *) (pCSDef%plains(j), j = 1, 3)
             
                write(dmpUnit, *) associated(pCSDef%summerdike)

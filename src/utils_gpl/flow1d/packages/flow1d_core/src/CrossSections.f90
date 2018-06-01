@@ -175,8 +175,8 @@ module m_CrossSections
 
        !*** data for tabulated cross sections ***
        double precision, allocatable, dimension(:)   :: height       !< Specified height of the cross-section
-       double precision, allocatable, dimension(:)   :: width        !< Specified flow width of the cross-section
-       double precision, allocatable, dimension(:)   :: TotalWidth   !< Specified total width of the cross-section
+       double precision, allocatable, dimension(:)   :: flowWidth    !< Specified flow width of the cross-section
+       double precision, allocatable, dimension(:)   :: totalWidth   !< Specified total width of the cross-section
        logical                                       :: closed       !< Flag to determine if cross-section is closed
 
        !--- additional data for river profiles
@@ -277,8 +277,8 @@ subroutine deallocCrossDefinition(CrossDef)
 
    ! Local variables
    if (allocated(CrossDef%height))                   deallocate(CrossDef%height)
-   if (allocated(CrossDef%width))                    deallocate(CrossDef%width)
-   if (allocated(CrossDef%TotalWidth))               deallocate(CrossDef%TotalWidth)
+   if (allocated(CrossDef%flowWidth))                deallocate(CrossDef%flowWidth)
+   if (allocated(CrossDef%totalWidth))               deallocate(CrossDef%totalWidth)
    if (allocated(CrossDef%y))                        deallocate(CrossDef%y)
    if (allocated(CrossDef%z))                        deallocate(CrossDef%z)
    if (allocated(CrossDef%frictionSectionID))        deallocate(CrossDef%frictionSectionID)
@@ -489,8 +489,8 @@ integer function AddTabCrossSectionDefinition(CSDefinitions , id, numLevels, lev
       length = numLevels
    endif
    call realloc(CSDefinitions%CS(i)%height, length)
-   call realloc(CSDefinitions%CS(i)%width, length)
-   call realloc(CSDefinitions%CS(i)%TotalWidth, length)
+   call realloc(CSDefinitions%CS(i)%flowWidth, length)
+   call realloc(CSDefinitions%CS(i)%totalWidth, length)
 !
    CSDefinitions%CS(i)%id          = id 
    CSDefinitions%CS(i)%crossType   = cs_tabulated
@@ -498,13 +498,13 @@ integer function AddTabCrossSectionDefinition(CSDefinitions , id, numLevels, lev
    CSDefinitions%CS(i)%plains      = plains
    do j = 1, numlevels
       CSDefinitions%CS(i)%height(j)  = level(j)
-      CSDefinitions%CS(i)%width(j)   = flowWidth(j)
-      CSDefinitions%CS(i)%TotalWidth(j) = max(totalWidth(j), flowWidth(j))
+      CSDefinitions%CS(i)%flowWidth(j)   = flowWidth(j)
+      CSDefinitions%CS(i)%totalWidth(j) = max(totalWidth(j), flowWidth(j))
    enddo
    if (closed) then
       CSDefinitions%CS(i)%height(numLevels+1) = CSDefinitions%CS(i)%height(numLevels)+1d-5
-      CSDefinitions%CS(i)%width(numLevels+1) = 1d-5
-      CSDefinitions%CS(i)%TotalWidth(numLevels+1) = 1d-5
+      CSDefinitions%CS(i)%flowWidth(numLevels+1) = 1d-5
+      CSDefinitions%CS(i)%totalWidth(numLevels+1) = 1d-5
    endif
    CSDefinitions%CS(i)%closed = closed
 !
@@ -831,8 +831,8 @@ subroutine setGroundLayerData(crossDef, thickness)
    crossDef%groundlayer%used      = .true.
    crossDef%groundlayer%thickness = thickness
    crossDef%groundlayer%area      = area
-   crossDef%groundlayer%perimeter = width
-   crossDef%groundlayer%width     = perimeter
+   crossDef%groundlayer%perimeter = perimeter
+   crossDef%groundlayer%width     = width
 
 end subroutine setGroundLayerData
    
@@ -1770,8 +1770,8 @@ subroutine TabulatedProfile(dpt, cross, doFlow, getSummerDikes, area, width, per
       deallocate(summerdike)
       summerdike => null()
       
-         area  = area  + sdArea
-         width = width + sdWidth
+      area  = area  + sdArea
+      width = width + sdWidth
       
    endif
 
@@ -1801,7 +1801,7 @@ subroutine GetTabulatedSizes(dpt, crossDef, doFlow, area, width, perimeter, af_s
    integer                                      :: levelsCount
    double precision, dimension(:), pointer      :: heights
    double precision, dimension(:), pointer      :: widths
-   double precision, dimension(4)               :: widthplains
+   double precision, dimension(0:3)             :: widthplains
    double precision, dimension(3)               :: w_section
   
    double precision  :: d1
@@ -1819,63 +1819,124 @@ subroutine GetTabulatedSizes(dpt, crossDef, doFlow, area, width, perimeter, af_s
    double precision  :: widthl
    
    levelsCount = crossDef%levelsCount
-   heights => crossDef%height
+   heights => crossDef%height   
+   
    if (doFlow) then
+
+      widthplains = 0d0
+
       if (crossDef%plains(1) == 0d0) then
          crossDef%plains(1) = huge(1d0)
          crossDef%plainslocation(1) = crossDef%levelsCount
       endif
-      
-      widths => crossDef%width
-      widthplains(1) = 0d0
+      widths => crossDef%flowWidth
       do isec = 1, 3
-         widthplains(isec+1) = widthplains(isec) + crossDef%plains(isec)
+         widthplains(isec) = widthplains(isec-1) + crossDef%plains(isec)
       enddo
-   else
-      widths => crossDef%TotalWidth
-      widthplains(1) = 0d0
-      widthplains(2:4) = crossDef%TotalWidth(levelsCount)
-   endif
-
-   area = 0.0D0
-   d2 = 0.0D0
-   e2 = widths(1)
-   area_min  = 0d0
-   width_min = 0d0
-   !
-   istart = 1
-   do isec = 1, 3
-      af_sub(isec) = 0d0
-      w_section(isec) = 0d0
-      perim_sub(isec) = min(max(0d0, widths(1)-widthplains(isec)), widthplains(isec+1)-widthplains(isec))
-      if (doflow) then
+   
+      area = 0.0D0
+      d2 = 0.0D0
+      e2 = widths(1)
+      af_sub = 0.0d0
+      w_section = 0.0d0
+      perim_sub = 0.0d0
+  
+      istart = 1
+      do isec = 1, 3
+         af_sub(isec) = 0d0
+         w_section(isec) = 0d0
+         perim_sub(isec) = min(max(0d0, widths(1)-widthplains(isec-1)), widthplains(isec)-widthplains(isec-1))
          levelsCount = crossDef%plainslocation(isec)
-      elseif (isec>=2) then
-         ! total width is only first section
-         levelscount = 0
-      endif
-      if (levelsCount==0) then
-         cycle
-      endif
+
+         if (levelsCount==0) then
+            cycle
+         endif
+
+         do ilev = istart, levelsCount-1
+            d1 = heights(ilev) - heights(1)
+            d2 = heights(ilev + 1) - heights(1)
+            e1 = min(max(0d0, widths(ilev)-widthplains(isec-1)), widthplains(isec)-widthplains(isec-1))
+            e2 = min(max(0d0, widths(ilev + 1)-widthplains(isec-1)), widthplains(isec)-widthplains(isec-1))
+            if (dpt > d2) then
+               af_sub(isec)    = af_sub(isec) + 0.5d0 * (d2 - d1) * (e1 + e2)
+               perim_sub(isec) = perim_sub(isec) + 2.0d0 * dsqrt(0.25d0 * (e2 - e1)**2 + (d2 - d1)**2)
+            
+            elseif (dpt > d1) then
+               call trapez(dpt, d1, d2, e1, e2, areal, w_section(isec), wll)
+               af_sub(isec) = af_sub(isec) + areal
+               perim_sub(isec) = perim_sub(isec) + wll
+               exit
+            endif
+         enddo
+   
+         istart = levelsCount
+         ! Extend above table if necessary
+         dTop = heights(levelsCount) - heights(1)
+         if (dpt > dTop) then
       
-      do ilev = istart, levelsCount-1
+            eTop = min(max(0d0, widths(levelsCount)-widthplains(isec-1)), widthplains(isec)-widthplains(isec-1))
+
+            af_sub(isec) = af_sub(isec) + (dpt - dTop) * eTop
+
+            w_section(isec) = eTop
+
+         endif
+      enddo
+      
+      dTop = heights(crossDef%levelsCount) - heights(1)
+      if (dpt > dTop) then
+         eTop = widths(crossDef%levelsCount)
+         if ((eTop > ThresholdForPreismannLock)) then
+            if (af_sub(3) > 0d0) then
+               isec = 3
+            elseif (af_sub(2) > 0d0) then
+               isec = 2
+            else 
+               isec = 1
+            endif
+            perim_sub(isec) = perim_sub(isec) + 2.0d0 * (dpt - dTop)  !hk: add only when this part is meant to carry water
+         endif
+      endif
+
+      area2      = 0d0
+      width2     = 0d0   
+      perimeter2 = 0d0
+      do isec = 1, 3
+         area2      = area2      + af_sub(isec)
+         width2     = width2     + w_section(isec)
+         perimeter2 = perimeter2 + perim_sub(isec)
+      enddo
+      
+      area = area2
+      width = width2
+      perimeter = perimeter2
+
+   else
+
+      ! Calculation for Storage
+      widths => crossDef%totalWidth
+   
+      area = 0.0D0
+      wl = widths(1)
+      d2 = 0.0D0
+      e2 = widths(1)
+      area_min  = 0d0
+      width_min = 0d0
+   
+      do ilev = 1, levelsCount - 1
          d1 = heights(ilev) - heights(1)
          d2 = heights(ilev + 1) - heights(1)
-         e1 = min(max(0d0, widths(ilev)-widthplains(isec)), widthplains(isec+1)-widthplains(isec))
-         e2 = min(max(0d0, widths(ilev + 1)-widthplains(isec)), widthplains(isec+1)-widthplains(isec))
+         e1 = widths(ilev)
+         e2 = widths(ilev + 1)
          if (dpt > d2) then
-            af_sub(isec)    = af_sub(isec) + 0.5d0 * (d2 - d1) * (e1 + e2)
-            perim_sub(isec) = perim_sub(isec) + 2.0d0 * dsqrt(0.25d0 * (e2 - e1)**2 + (d2 - d1)**2)
-            
-            ! calculate decreasing area 
+            area = area + 0.5d0 * (d2 - d1) * (e1 + e2)
+            wl = wl + 2.0d0 * dsqrt(0.25d0 * (e2 - e1)**2 + (d2 - d1)**2)
             area_min = area_min + (width_min + 0.5d0*max(e1-e2,0d0))*(d2-d1)
             width_min = width_min + max(e1-e2,0d0)
-         elseif (dpt > d1) then
-            call trapez(dpt, d1, d2, e1, e2, areal, w_section(isec), wll)
-            af_sub(isec) = af_sub(isec) + areal
-            perim_sub(isec) = perim_sub(isec) + wll
-            
-            ! calculate decreasing area 
+         else
+            call trapez(dpt, d1, d2, e1, e2, areal, width, wll)
+            area = area + areal
+            wl = wl + wll
             if (e2 < e1) then
                call trapez(dpt, d1, d2, 0d0, e2-e1, areal, widthl, wll)
                area_min = area_min - areal
@@ -1885,102 +1946,33 @@ subroutine GetTabulatedSizes(dpt, crossDef, doFlow, area, width, perimeter, af_s
          endif
       enddo
    
-      istart = levelsCount
       ! Extend above table if necessary
       dTop = heights(levelsCount) - heights(1)
       if (dpt > dTop) then
       
-         eTop = min(max(0d0, widths(levelsCount)-widthplains(isec)), widthplains(isec+1)-widthplains(isec))
-
-         af_sub(isec) = af_sub(isec) + (dpt - dTop) * eTop
-
-         w_section(isec) = eTop
-
-      endif
-   enddo
+         eTop = widths(levelsCount)
    
-   levelsCount = crossDef%levelsCount
-   dTop = heights(levelsCount) - heights(1)
-   if (dpt > dTop) then
-      eTop = widths(levelsCount)
-      if ((eTop > ThresholdForPreismannLock)) then
-         if (af_sub(3) > 0d0) then
-            isec = 3
-         elseif (af_sub(2) > 0d0) then
-            isec = 2
-         else 
-            isec = 1
+         area = area + (dpt - dTop) * eTop
+   
+         if (eTop > ThresholdForPreismannLock) then
+            wl = wl + 2.0d0 * (dpt - dTop)  !hk: add only when this part is meant to carry water
          endif
-         perim_sub(isec) = perim_sub(isec) + 2.0d0 * (dpt - dTop)  !hk: add only when this part is meant to carry water
+   
+         width = eTop
+   
       endif
-   endif
-
-   area2      = 0d0
-   width2     = 0d0   
-   perimeter2 = 0d0
-   do isec = 1, 3
-      area2      = area2      + af_sub(isec)
-      width2     = width2     + w_section(isec)
-      perimeter2 = perimeter2 + perim_sub(isec)
-   enddo
-   !!!!!!!!
-   levelsCount = crossDef%levelsCount
-   heights => crossDef%height
-   if (doFlow) then
-      widths => crossDef%width
-   else
-      widths => crossDef%TotalWidth
-   endif
-
-   area = 0.0D0
-   wl = widths(1)
-   d2 = 0.0D0
-   e2 = widths(1)
-   !
-   do ilev = 1, levelsCount - 1
-      d1 = heights(ilev) - heights(1)
-      d2 = heights(ilev + 1) - heights(1)
-      e1 = widths(ilev)
-      e2 = widths(ilev + 1)
-      if (dpt > d2) then
-         area = area + 0.5d0 * (d2 - d1) * (e1 + e2)
-         wl = wl + 2.0d0 * dsqrt(0.25d0 * (e2 - e1)**2 + (d2 - d1)**2)
+   
+      perimeter = wl
+      
+      if (.not. calculationOption == CS_TYPE_MIN) then
+         area  = area + area_min
+         width = width + width_min
       else
-         call trapez(dpt, d1, d2, e1, e2, areal, width, wll)
-         area = area + areal
-         wl = wl + wll
-         perimeter = wl
-         exit
+         area  = area_min
+         width = width_min
       endif
-   enddo
-   
-   ! Extend above table if necessary
-   dTop = heights(levelsCount) - heights(1)
-   if (dpt > dTop) then
-      
-      eTop = widths(levelsCount)
-
-      area = area + (dpt - dTop) * eTop
-
-      if (eTop > ThresholdForPreismannLock) then
-         wl = wl + 2.0d0 * (dpt - dTop)  !hk: add only when this part is meant to carry water
-      endif
-
-      width = eTop
 
    endif
-   
-   perimeter = wl
-      
-   select case (calculationOption)
-   case(CS_TYPE_PLUS)
-      area  = area  + area_min
-      width = width + width_min
-   case(CS_TYPE_MIN)
-      area  = area_min
-      width = width_min
-   end select
-   
    
 end subroutine GetTabulatedSizes
 
@@ -2495,7 +2487,7 @@ type(t_CrossSection), intent(inout)       :: cross
    select case(cross%crosstype)
       case (CS_TABULATED)
             cross%charHeight = maxval(cross%tabDef%height) - minval(cross%tabDef%height)
-            cross%charWidth  = maxval(cross%tabDef%width)
+            cross%charWidth  = maxval(cross%tabDef%flowWidth)
       case (CS_CIRCLE)
             cross%charHeight = cross%tabDef%diameter
             cross%charWidth  = cross%tabDef%diameter
@@ -2561,13 +2553,13 @@ type(t_CSType) function CopyCrossDef(CrossDefFrom)
       allocate(CopyCrossDef%height(CopyCrossDef%levelsCount))
       CopyCrossDef%height = CrossDefFrom%height
    endif
-   if (allocated(CrossDefFrom%width)) then
-      allocate(CopyCrossDef%width(CopyCrossDef%levelsCount))
-      CopyCrossDef%width = CrossDefFrom%width
+   if (allocated(CrossDefFrom%flowWidth)) then
+      allocate(CopyCrossDef%flowWidth(CopyCrossDef%levelsCount))
+      CopyCrossDef%flowWidth = CrossDefFrom%flowWidth
    endif
-   if (allocated(CrossDefFrom%TotalWidth)) then
-      allocate(CopyCrossDef%TotalWidth(CopyCrossDef%levelsCount))
-      CopyCrossDef%TotalWidth = CrossDefFrom%TotalWidth
+   if (allocated(CrossDefFrom%totalWidth)) then
+      allocate(CopyCrossDef%totalWidth(CopyCrossDef%levelsCount))
+      CopyCrossDef%totalWidth = CrossDefFrom%totalWidth
    endif
    
    CopyCrossDef%plains = CrossDefFrom%plains
