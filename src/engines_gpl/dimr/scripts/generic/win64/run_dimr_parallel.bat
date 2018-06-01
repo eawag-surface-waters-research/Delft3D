@@ -4,16 +4,16 @@ title run_dimr_parallel
     rem This script runs dimr in parallel mode on Windows
     rem Adapt and use it for your own purpose
     rem
-    rem adri.mourits@deltares.nl
-    rem 03 Feb 2017
-    rem 
-    rem
+    rem Usage example:
+    rem Execute in the working directory:
+    rem path\to\delft3d\installation\x64\dimr\scripts\run_dimr_parallel.bat
+    rem More examples: check run scripts in https://svn.oss.deltares.nl/repos/delft3d/trunk/examples/*
+
 setlocal enabledelayedexpansion
+set debuglevel=-1
 
     rem
     rem Read arguments
-    rem
-set debuglevel=-1
 
     rem No arguments:
 if [%1] EQU [] (
@@ -62,7 +62,7 @@ if  %debuglevel% EQU -1 (
     set debugarg=-d !debuglevel!
 )
 
-rem Sets the number of threads if it is not defined
+    rem Sets the number of threads if it is not defined
 if defined OMP_NUM_THREADS (
 echo OMP_NUM_THREADS is already defined
 ) else ( 
@@ -82,9 +82,9 @@ echo Working directory: %workdir%
     rem
 set D3D_HOME=%~dp0..\..\..
 
-rem Remove "\dimr\scripts\..\..\.." from D3D_HOME
+    rem Remove "\dimr\scripts\..\..\.." from D3D_HOME
 set D3DT=%D3D_HOME:~0,-22%
-rem last directory will be the architecture directory
+    rem last directory will be the architecture directory
 for %%f in ("%D3DT%") do set ARCH=%%~nxf
 
 set delwaqexedir=%D3D_HOME%\%ARCH%\dwaq\bin
