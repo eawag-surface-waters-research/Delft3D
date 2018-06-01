@@ -179,6 +179,14 @@ module m_CrossSections
        double precision, allocatable, dimension(:)   :: totalWidth   !< Specified total width of the cross-section
        logical                                       :: closed       !< Flag to determine if cross-section is closed
 
+       ! Pre-Calculated Table for Tabulated/River Profiles
+       double precision, allocatable, dimension(:,:) :: af_sub        !< Flow Areas for Sub-Sections (Main, FP1 and FP2)
+       double precision, allocatable, dimension(:,:) :: perim_sub     !< Wetted Perimeter for Sub-Sections (Main, FP1 and FP2)
+       double precision, allocatable, dimension(:)   :: flowArea      !< Flow Areas
+       double precision, allocatable, dimension(:)   :: totalArea     !< Total Areas
+       double precision, allocatable, dimension(:)   :: area_min      !< Area for a narrowing part of a cross section (Nested Newton)
+       double precision, allocatable, dimension(:)   :: width_min     !< Width for a narrowing part of a cross section (Nested Newton)
+       
        !--- additional data for river profiles
        double precision                         :: plains(3) = 0.0d0  !< 1: main channel, 2: floopplain 1, 3: floodplain 2
        integer                                  :: plainslocation(3)
@@ -279,6 +287,14 @@ subroutine deallocCrossDefinition(CrossDef)
    if (allocated(CrossDef%height))                   deallocate(CrossDef%height)
    if (allocated(CrossDef%flowWidth))                deallocate(CrossDef%flowWidth)
    if (allocated(CrossDef%totalWidth))               deallocate(CrossDef%totalWidth)
+
+   if (allocated(CrossDef%af_sub))                   deallocate(CrossDef%af_sub)
+   if (allocated(CrossDef%perim_sub))                deallocate(CrossDef%perim_sub)
+   if (allocated(CrossDef%flowArea))                 deallocate(CrossDef%flowArea)
+   if (allocated(CrossDef%totalArea))                deallocate(CrossDef%totalArea)
+   if (allocated(CrossDef%area_min))                 deallocate(CrossDef%area_min)
+   if (allocated(CrossDef%width_min))                deallocate(CrossDef%width_min)
+
    if (allocated(CrossDef%y))                        deallocate(CrossDef%y)
    if (allocated(CrossDef%z))                        deallocate(CrossDef%z)
    if (allocated(CrossDef%frictionSectionID))        deallocate(CrossDef%frictionSectionID)
@@ -491,7 +507,14 @@ integer function AddTabCrossSectionDefinition(CSDefinitions , id, numLevels, lev
    call realloc(CSDefinitions%CS(i)%height, length)
    call realloc(CSDefinitions%CS(i)%flowWidth, length)
    call realloc(CSDefinitions%CS(i)%totalWidth, length)
-!
+
+   call realloc(CSDefinitions%CS(i)%af_sub, 3, length)
+   call realloc(CSDefinitions%CS(i)%perim_sub, 3, length)
+   call realloc(CSDefinitions%CS(i)%flowArea, length)
+   call realloc(CSDefinitions%CS(i)%totalArea, length)
+   call realloc(CSDefinitions%CS(i)%area_min, length)
+   call realloc(CSDefinitions%CS(i)%width_min, length)   
+   
    CSDefinitions%CS(i)%id          = id 
    CSDefinitions%CS(i)%crossType   = cs_tabulated
    CSDefinitions%CS(i)%levelsCount = length
@@ -2560,6 +2583,31 @@ type(t_CSType) function CopyCrossDef(CrossDefFrom)
    if (allocated(CrossDefFrom%totalWidth)) then
       allocate(CopyCrossDef%totalWidth(CopyCrossDef%levelsCount))
       CopyCrossDef%totalWidth = CrossDefFrom%totalWidth
+   endif
+   
+   if (allocated(CrossDefFrom%af_sub)) then
+      allocate(CopyCrossDef%af_sub(3, CopyCrossDef%levelsCount))
+      CopyCrossDef%af_sub = CrossDefFrom%af_sub
+   endif
+   if (allocated(CrossDefFrom%perim_sub)) then
+      allocate(CopyCrossDef%perim_sub(3, CopyCrossDef%levelsCount))
+      CopyCrossDef%perim_sub = CrossDefFrom%perim_sub
+   endif
+   if (allocated(CrossDefFrom%flowArea)) then
+      allocate(CopyCrossDef%flowArea(CopyCrossDef%levelsCount))
+      CopyCrossDef%flowArea = CrossDefFrom%flowArea
+   endif
+   if (allocated(CrossDefFrom%totalArea)) then
+      allocate(CopyCrossDef%totalArea(CopyCrossDef%levelsCount))
+      CopyCrossDef%totalArea = CrossDefFrom%totalArea
+   endif
+   if (allocated(CrossDefFrom%area_min)) then
+      allocate(CopyCrossDef%area_min(CopyCrossDef%levelsCount))
+      CopyCrossDef%area_min = CrossDefFrom%area_min
+   endif
+   if (allocated(CrossDefFrom%width_min)) then
+      allocate(CopyCrossDef%width_min(CopyCrossDef%levelsCount))
+      CopyCrossDef%width_min = CrossDefFrom%width_min
    endif
    
    CopyCrossDef%plains = CrossDefFrom%plains
