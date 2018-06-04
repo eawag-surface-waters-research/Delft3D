@@ -47,6 +47,7 @@ module m_CrossSections
    public AddCrossSection
    public AddCrossSectionDefinition
    public CalcConveyance
+   public createTablesForTabulatedProfile
    public fill_hashtable
    public getBob
    public GetCriticalDepth
@@ -183,6 +184,7 @@ module m_CrossSections
        double precision, allocatable, dimension(:,:) :: af_sub        !< Flow Areas for Sub-Sections (Main, FP1 and FP2)
        double precision, allocatable, dimension(:,:) :: perim_sub     !< Wetted Perimeter for Sub-Sections (Main, FP1 and FP2)
        double precision, allocatable, dimension(:)   :: flowArea      !< Flow Areas
+       double precision, allocatable, dimension(:)   :: wetPerimeter  !< Wet Perimeters
        double precision, allocatable, dimension(:)   :: totalArea     !< Total Areas
        double precision, allocatable, dimension(:)   :: area_min      !< Area for a narrowing part of a cross section (Nested Newton)
        double precision, allocatable, dimension(:)   :: width_min     !< Width for a narrowing part of a cross section (Nested Newton)
@@ -291,6 +293,7 @@ subroutine deallocCrossDefinition(CrossDef)
    if (allocated(CrossDef%af_sub))                   deallocate(CrossDef%af_sub)
    if (allocated(CrossDef%perim_sub))                deallocate(CrossDef%perim_sub)
    if (allocated(CrossDef%flowArea))                 deallocate(CrossDef%flowArea)
+   if (allocated(CrossDef%wetPerimeter))             deallocate(CrossDef%wetPerimeter)
    if (allocated(CrossDef%totalArea))                deallocate(CrossDef%totalArea)
    if (allocated(CrossDef%area_min))                 deallocate(CrossDef%area_min)
    if (allocated(CrossDef%width_min))                deallocate(CrossDef%width_min)
@@ -511,6 +514,7 @@ integer function AddTabCrossSectionDefinition(CSDefinitions , id, numLevels, lev
    call realloc(CSDefinitions%CS(i)%af_sub, 3, length)
    call realloc(CSDefinitions%CS(i)%perim_sub, 3, length)
    call realloc(CSDefinitions%CS(i)%flowArea, length)
+   call realloc(CSDefinitions%CS(i)%wetPerimeter, length)
    call realloc(CSDefinitions%CS(i)%totalArea, length)
    call realloc(CSDefinitions%CS(i)%area_min, length)
    call realloc(CSDefinitions%CS(i)%width_min, length)   
@@ -1940,7 +1944,7 @@ subroutine GetTabulatedSizes(dpt, crossDef, doFlow, area, width, perimeter, af_s
       widths => crossDef%totalWidth
    
       area = 0.0D0
-      wl = widths(1)
+      wl = 0.0d0
       d2 = 0.0D0
       e2 = widths(1)
       area_min  = 0d0
@@ -1953,13 +1957,11 @@ subroutine GetTabulatedSizes(dpt, crossDef, doFlow, area, width, perimeter, af_s
          e2 = widths(ilev + 1)
          if (dpt > d2) then
             area = area + 0.5d0 * (d2 - d1) * (e1 + e2)
-            wl = wl + 2.0d0 * dsqrt(0.25d0 * (e2 - e1)**2 + (d2 - d1)**2)
             area_min = area_min + (width_min + 0.5d0*max(e1-e2,0d0))*(d2-d1)
             width_min = width_min + max(e1-e2,0d0)
          else
             call trapez(dpt, d1, d2, e1, e2, areal, width, wll)
             area = area + areal
-            wl = wl + wll
             if (e2 < e1) then
                call trapez(dpt, d1, d2, 0d0, e2-e1, areal, widthl, wll)
                area_min = area_min - areal
@@ -1977,16 +1979,10 @@ subroutine GetTabulatedSizes(dpt, crossDef, doFlow, area, width, perimeter, af_s
    
          area = area + (dpt - dTop) * eTop
    
-         if (eTop > ThresholdForPreismannLock) then
-            wl = wl + 2.0d0 * (dpt - dTop)  !hk: add only when this part is meant to carry water
-         endif
-   
          width = eTop
    
       endif
    
-      perimeter = wl
-      
       if (.not. calculationOption == CS_TYPE_MIN) then
          area  = area + area_min
          width = width + width_min
@@ -2597,6 +2593,10 @@ type(t_CSType) function CopyCrossDef(CrossDefFrom)
       allocate(CopyCrossDef%flowArea(CopyCrossDef%levelsCount))
       CopyCrossDef%flowArea = CrossDefFrom%flowArea
    endif
+   if (allocated(CrossDefFrom%wetPerimeter)) then
+      allocate(CopyCrossDef%wetPerimeter(CopyCrossDef%levelsCount))
+      CopyCrossDef%wetPerimeter = CrossDefFrom%wetPerimeter
+   endif
    if (allocated(CrossDefFrom%totalArea)) then
       allocate(CopyCrossDef%totalArea(CopyCrossDef%levelsCount))
       CopyCrossDef%totalArea = CrossDefFrom%totalArea
@@ -2863,44 +2863,144 @@ double precision function GetCriticalDepth(q, cross)
    groundLayer = getGroundLayer(cross)
    GetCriticalDepth = depth - groundLayer
     
-   end function GetCriticalDepth
+end function GetCriticalDepth
 
-   subroutine admin_crs_def(definitions)
+subroutine admin_crs_def(definitions)
    
-      type(t_CSDefinitionSet), intent(inout), target :: Definitions
+   type(t_CSDefinitionSet), intent(inout), target :: Definitions
       
-      integer i
-      character(len=idlen), dimension(:), pointer :: ids
+   integer i
+   character(len=idlen), dimension(:), pointer :: ids
       
-      allocate(definitions%hashlist%id_list(definitions%Count))
-      definitions%hashlist%id_count = definitions%Count
-      ids => definitions%hashlist%id_list
+   allocate(definitions%hashlist%id_list(definitions%Count))
+   definitions%hashlist%id_count = definitions%Count
+   ids => definitions%hashlist%id_list
       
-      do i= 1, definitions%count
-         ids(i) = definitions%CS(i)%id
-      enddo
+   do i= 1, definitions%count
+      ids(i) = definitions%CS(i)%id
+   enddo
       
-      call hashfill(definitions%hashlist)
+   call hashfill(definitions%hashlist)
       
-   end subroutine admin_crs_def
+end subroutine admin_crs_def
  
-   subroutine fill_hashtable_csdef(definitions)
+subroutine fill_hashtable_csdef(definitions)
    
-      type(t_CSDefinitionSet), intent(inout), target :: definitions
+   type(t_CSDefinitionSet), intent(inout), target :: definitions
       
-      integer i
-      character(len=idlen), dimension(:), pointer :: ids
+   integer i
+   character(len=idlen), dimension(:), pointer :: ids
       
-      allocate(definitions%hashlist%id_list(definitions%Count))
-      definitions%hashlist%id_count = definitions%Count
-      ids => definitions%hashlist%id_list
+   allocate(definitions%hashlist%id_list(definitions%Count))
+   definitions%hashlist%id_count = definitions%Count
+   ids => definitions%hashlist%id_list
       
-      do i= 1, definitions%count
-         ids(i) = definitions%CS(i)%id
-      enddo
+   do i= 1, definitions%count
+      ids(i) = definitions%CS(i)%id
+   enddo
       
-      call hashfill(definitions%hashlist)
+   call hashfill(definitions%hashlist)
 
-   end subroutine fill_hashtable_csdef
+end subroutine fill_hashtable_csdef
+
+subroutine createTablesForTabulatedProfile(pCS)
+   
+   type(t_CStype), pointer, intent(inout) :: pCS
+   
+   ! local parameters
+   integer                                      :: levelsCount
+   double precision, dimension(:), pointer      :: heights
+   double precision, dimension(:), pointer      :: widths
+   double precision, dimension(0:3)             :: widthplains
+  
+   double precision  :: d1
+   double precision  :: d2
+   double precision  :: e1
+   double precision  :: e2
+   double precision  :: wl
+   integer           :: ilev, isec, istart
+   
+   levelsCount = pCS%levelsCount
+   heights => pCS%height   
+   
+   widthplains = 0d0
+
+   if (pCS%plains(1) == 0d0) then
+      pCS%plains(1) = huge(1d0)
+      pCS%plainslocation(1) = pCS%levelsCount
+   endif
+   widths => pCS%flowWidth
+   do isec = 1, 3
+      widthplains(isec) = widthplains(isec-1)  +pCS%plains(isec)
+   enddo
+   
+   d2 = 0.0D0
+   e2 = widths(1)
+   pCS%af_sub = 0.0d0
+   pCS%perim_sub = 0.0d0
+  
+   istart = 1
+   do isec = 1, 3
+      pCS%af_sub(isec, 1) = 0d0
+      pCS%perim_sub(isec, 1) = min(max(0d0, widths(1)-widthplains(isec-1)), widthplains(isec)-widthplains(isec-1))
+      levelsCount = pCS%plainslocation(isec)
+
+      if (levelsCount==0) then
+         cycle
+      endif
+
+      do ilev = istart, levelsCount - 1
+      
+         d1 = heights(ilev) - heights(1)
+         d2 = heights(ilev + 1) - heights(1)
+         e1 = min(max(0d0, widths(ilev)-widthplains(isec-1)), widthplains(isec)-widthplains(isec-1))
+         e2 = min(max(0d0, widths(ilev + 1)-widthplains(isec-1)), widthplains(isec)-widthplains(isec-1))
+
+         pCS%af_sub(isec, ilev + 1)    = pCS%af_sub(isec, ilev) + 0.5d0 * (d2 - d1) * (e1 + e2)
+         pCS%perim_sub(isec, ilev + 1) = pCS%perim_sub(isec, ilev) + 2.0d0 * dsqrt(0.25d0 * (e2 - e1)**2 + (d2 - d1)**2)
+            
+      enddo
+   
+      istart = levelsCount
+
+   enddo
+   
+   ! Totalize
+   do isec = 1, 3
+      do ilev = 1, pCS%levelsCount
+         pCS%flowArea(ilev)  = pCS%flowArea(ilev)  + pCS%af_sub(isec, ilev)
+         pCS%wetPerimeter(ilev) = pCS%wetPerimeter(ilev) + pCS%perim_sub(isec, ilev)
+      enddo
+   enddo
+      
+
+   ! Calculation of Total Area
+   levelsCount = pCS%levelsCount
+   heights => pCS%height   
+   widths => pCS%totalWidth
+   
+   wl = widths(1)
+   d2 = 0.0D0
+   e2 = widths(1)
+   
+   pCS%totalArea = 0.0d0
+   pCS%area_min  = 0.0d0
+   pCS%width_min = 0.0d0
+   
+   do ilev = 1, levelsCount - 1
+   
+      d1 = heights(ilev) - heights(1)
+      d2 = heights(ilev + 1) - heights(1)
+      e1 = widths(ilev)
+      e2 = widths(ilev + 1)
+
+      pCS%totalArea(ilev + 1) = pCS%totalArea(ilev) + 0.5d0 * (d2 - d1) * (e1 + e2)
+      
+      pCS%area_min(ilev + 1)  = pCS%area_min(ilev) + (pCS%width_min(ilev) + 0.5d0 * max(e1- e2, 0.0d0)) * (d2 - d1)
+      pCS%width_min(ilev + 1) = pCS%width_min(ilev) + max(e1 - e2, 0.0d0)
+
+   enddo
+   
+end subroutine createTablesForTabulatedProfile
 
 end module m_CrossSections
