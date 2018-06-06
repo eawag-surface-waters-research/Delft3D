@@ -129,7 +129,7 @@ rem =============================================================
     if not !ErrorLevel! EQU 0 (
         echo ERROR: while creating directory "!dest!"
     )
-    call :copyFile "third_party_open\netcdf\src\win32\2005\libsrc\x64\Release\netcdf.dll" !dest!
+    call :copyFile "third_party_open\netcdf\netCDF 4.6.1\bin\*" !dest!
 goto :endproc
 
 
