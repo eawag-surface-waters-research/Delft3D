@@ -5,7 +5,7 @@
     #
     # 
     #
-    # This script starts a single-domain Delft3D-FLOW computation on Linux
+    # This script starts a parallel Delft3D-FLOW computation on Linux
     #
 
     #
@@ -14,7 +14,13 @@
 argfile=config_d_hydro.xml
 
 
-
+export PATH=/usr/lib64/mpich/bin:$PATH
+    #
+    # Start mpich2
+    # mpd may already have been started
+mpd &
+    # mpdboot: optional: --ncpus=$processes_per_node (adapted machinefile needed)
+mpdboot -n 3 --rsh=/usr/bin/rsh 
 
     #
     # Set the directories containing the binaries here
@@ -30,7 +36,8 @@ flowexedir=$D3D_HOME/$ARCH/flow2d3d/bin
 export LD_LIBRARY_PATH=$flowexedir:$LD_LIBRARY_PATH 
 
     # Run
-$flowexedir/d_hydro.exe $argfile
+mpirun -np 3 $flowexedir/d_hydro.exe $argfile
 
     # Wait until all child processes are finished
 wait
+mpdallexit
