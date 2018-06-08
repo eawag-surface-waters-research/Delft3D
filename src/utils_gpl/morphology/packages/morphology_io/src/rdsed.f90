@@ -694,6 +694,13 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
                   & facdss    ,sedtyp    ,rhosol    ,sedd50    ,par_settle, &
                   & sdbuni    ,flsdbd    ,cdryb     ,sedpar%sedblock      , &
                   & version   ,error     )
+       !
+       ! nodal relations are not supported in older version sed files 
+       !
+       do l = 0, lsedtot       
+           sedpar%flnrd(l) = ' '
+       enddo
+       !
        close (luninp)
        if (error) return
        !
