@@ -106,7 +106,7 @@
 
             do i=nosys+1,notot
                amass(i,iseg) = amass(i,iseg) + idt*deriv(i,iseg)
-               conc (i,iseg) = amass(i,iseg) / surfac(iseg)
+               conc (i,iseg) = amass(i,iseg) / max(tiny(1.0),surfac(iseg))
                deriv(i,iseg) = 0.0
             enddo
          endif

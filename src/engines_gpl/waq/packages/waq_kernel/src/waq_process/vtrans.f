@@ -211,7 +211,7 @@
                LENFR = PMSA(IP8)
                LENTO = PMSA(IP9)
 !
-               AL = LENFR + LENTO
+               AL = MAX( TINY(1.0), LENFR + LENTO )
                E  = IDT*DISP*AREA/AL
                DO ISUB=1,NOSUB
 !

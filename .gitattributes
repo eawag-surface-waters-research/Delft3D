@@ -2380,6 +2380,7 @@ src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/wqparcom.F90 -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/xerbla.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/zercum.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/zlayer.f -text
+src/engines_gpl/waq/packages/waq_kernel/src/waq_process/ESpace.f90 -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/Makefile.am -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/adspo4.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_process/advtra.f -text
