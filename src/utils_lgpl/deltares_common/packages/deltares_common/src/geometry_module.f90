@@ -537,19 +537,12 @@ module geometry_module
 
       DET =  X43*Y21 - Y43*X21
 
-!     SPvdP: make eps have proper dimension
-      EPS = max(EPS*MAXVAL((/ X21,Y21,X43,Y43,X31,Y31 /)), tiny(0d0))
+      EPS = max(EPS*MAXVAL((/ X21,Y21,X43,Y43 /)), tiny(0d0))
       IF (ABS(DET) .LT. EPS) THEN
          RETURN
       ELSE
          SM = (Y31*X21 - X31*Y21) / DET
-         IF (ABS(X21) .GT. EPS) THEN
-            SL = (SM*X43 + X31) / X21
-         ELSE IF (ABS(Y21) .GT. EPS) THEN
-            SL = (SM*Y43 + Y31) / Y21
-         ELSE
-            SL   = 0d0
-         ENDIF
+         SL = (Y31*X43 - X31*Y43) / DET
          IF (SM .GE. 0d0 .AND. SM .LE. 1d0 .AND. &
              SL .GE. 0d0 .AND. SL .LE. 1d0) THEN
             JACROS = 1
