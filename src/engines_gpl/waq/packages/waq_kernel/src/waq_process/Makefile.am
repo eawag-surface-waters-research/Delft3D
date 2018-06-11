@@ -62,6 +62,7 @@ libwaq_process_la_SOURCES = \
        effave.f \
        effblo.f \
        emersi.f \
+       ESpace.f \
        extina.f \
        extinc.f \
        flxfrc.f90 \
