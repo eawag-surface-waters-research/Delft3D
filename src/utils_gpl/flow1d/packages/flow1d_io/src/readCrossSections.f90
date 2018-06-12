@@ -537,6 +537,7 @@ module m_readCrossSections
       call realloc(pCS%totalWidth, numlevels)
       
       call realloc(pCS%af_sub, 3, numlevels)
+      call realloc(pCS%width_sub, 3, numlevels)
       call realloc(pCS%perim_sub, 3, numlevels)
       call realloc(pCS%flowArea, numlevels)
       call realloc(pCS%wetPerimeter, numlevels)
@@ -574,7 +575,7 @@ module m_readCrossSections
       
    end function readRectangularCS
    
-    logical function readTabulatedCS(pCS, node_ptr)  
+   logical function readTabulatedCS(pCS, node_ptr)  
    
       use precision_basics
       
@@ -762,6 +763,7 @@ module m_readCrossSections
       call realloc(pCS%totalWidth, numlevels)
 
       call realloc(pCS%af_sub, 3, numlevels)
+      call realloc(pCS%width_sub, 3, numlevels)
       call realloc(pCS%perim_sub, 3, numlevels)
       call realloc(pCS%flowArea, numlevels)
       call realloc(pCS%wetPerimeter, numlevels)
@@ -883,6 +885,7 @@ module m_readCrossSections
                write(ibin) (pdef%flowWidth(j), j = 1, pdef%levelscount)
                write(ibin) (pdef%totalWidth(j), j = 1, pdef%levelscount)
                write(ibin) ((pdef%af_sub(j, k), j = 1, 3), k = 1, pdef%levelscount)
+               write(ibin) ((pdef%width_sub(j, k), j = 1, 3), k = 1, pdef%levelscount)
                write(ibin) ((pdef%perim_sub(j, k), j = 1, 3), k = 1, pdef%levelscount)
                write(ibin) (pdef%flowArea(j), j = 1, pdef%levelscount)
                write(ibin) (pdef%wetPerimeter(j), j = 1, pdef%levelscount)
@@ -954,6 +957,7 @@ module m_readCrossSections
                allocate(pdef%flowWidth(pdef%levelscount))
                allocate(pdef%totalWidth(pdef%levelscount))
                allocate(pdef%af_sub(3, pdef%levelscount))
+               allocate(pdef%width_sub(3, pdef%levelscount))
                allocate(pdef%perim_sub(3, pdef%levelscount))
                allocate(pdef%flowArea(pdef%levelscount))
                allocate(pdef%wetPerimeter(pdef%levelscount))
@@ -964,6 +968,7 @@ module m_readCrossSections
                read(ibin) (pdef%flowWidth(j), j = 1, pdef%levelscount)
                read(ibin) (pdef%totalWidth(j), j = 1, pdef%levelscount)
                read(ibin) ((pdef%af_sub(j, k), j = 1, 3), k = 1, pdef%levelscount)
+               read(ibin) ((pdef%width_sub(j, k), j = 1, 3), k = 1, pdef%levelscount)
                read(ibin) ((pdef%perim_sub(j, k), j = 1, 3), k = 1, pdef%levelscount)
                read(ibin) (pdef%flowArea(j), j = 1, pdef%levelscount)
                read(ibin) (pdef%wetPerimeter(j), j = 1, pdef%levelscount)
