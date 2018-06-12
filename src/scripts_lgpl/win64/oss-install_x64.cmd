@@ -203,7 +203,6 @@ rem ====================
     call :makeDir !dest_share!
 
     call :copyFile "third_party_open\expat\x64\x64\Release\libexpat.dll"        !dest_share!
-    call :copyFile "third_party_open\intel_fortran\lib\x64\*.dll"               !dest_share!
     call :copyFile "third_party_open\mpich2\x64\bin\*.exe"                      !dest_share!
     call :copyFile "third_party_open\mpich2\x64\lib\*.dll"                      !dest_share!
     call :copyFile "third_party_open\pthreads\bin\x64\*.dll"                    !dest_share!
@@ -255,11 +254,6 @@ rem ====================
     call :makeDir !dest_plugins!
     call :makeDir !dest_share!
 
-    
-    rem
-    rem The following if-else statements MUST BE executed AFTER copying "third_party_open\intel_fortran" libraries.
-    rem Some (older) libraries will be overwritten.
-    rem
     if !compiler_dir!=="" (
         rem Compiler_dir not set
     ) else (
@@ -337,10 +331,6 @@ rem ====================
     call :copyFile "engines_gpl\flow2d3d\scripts\run_*.bat"                         !dest_scripts!
     call :copyFile "third_party_open\tcl\bin\win64\tclkitsh852.exe"                 !dest_share!
     
-    rem
-    rem The following if-else statements MUST BE executed AFTER copying "third_party_open\intel_fortran" libraries.
-    rem Some (older) libraries will be overwritten.
-    rem
     if !compiler_dir!=="" (
         rem Compiler_dir not set
     ) else (
@@ -444,10 +434,6 @@ rem ======================
     call :copyFile engines_gpl\waq\default\proc_def.dat                        !dest_default!
     call :copyFile engines_gpl\waq\default\proc_def.def                        !dest_default!
 	
-    rem
-    rem The following if-else statements MUST BE executed AFTER copying "third_party_open\intel_fortran" libraries.
-    rem Some (older) libraries will be overwritten.
-    rem
     if !compiler_dir!=="" (
            rem Compiler_dir not set
        ) else (
@@ -483,10 +469,6 @@ rem
 rem    call :copyFile engines_gpl\waq\bin\Release\delwaq2_openda_lib.dll          !dest_bin!
 rem	
 
-rem    rem
-rem    rem The following if-else statements MUST BE executed AFTER copying "third_party_open\intel_fortran" libraries.
-rem    rem Some (older) libraries will be overwritten.
-rem    rem
 rem    if !compiler_dir!=="" (
 rem        rem Compiler_dir not set
 rem    ) else (
@@ -539,10 +521,6 @@ rem ================
     call :copyFile engines_gpl\part\bin\x64\release\delpar.exe !dest!
     call :copyFile "engines_gpl\part\scripts\run_*.bat"        !dest_scripts!
 
-    rem
-    rem The following if-else statements MUST BE executed AFTER copying "third_party_open\intel_fortran" libraries.
-    rem Some (older) libraries will be overwritten.
-    rem
     if !compiler_dir!=="" (
         rem Compiler_dir not set
     ) else (
@@ -594,10 +572,7 @@ rem ================
     call :copyFile "third_party_open\esmf\win64\bin\*.*"              "!dest_esmf_bin!"
     call :copyFile "third_party_open\esmf\win64\scripts\*.*"          "!dest_esmf_scripts!"
     call :copyFile "engines_gpl\wave\scripts\run_*.bat"               "!dest_scripts!"
-    rem
-    rem The following if-else statements MUST BE executed AFTER copying "third_party_open\intel_fortran" libraries.
-    rem Some (older) libraries will be overwritten.
-    rem
+
     if !compiler_dir!=="" (
         rem Compiler_dir not set
     ) else (
