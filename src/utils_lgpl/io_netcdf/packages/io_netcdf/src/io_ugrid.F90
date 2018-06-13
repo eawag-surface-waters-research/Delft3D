@@ -3642,7 +3642,8 @@ function ug_get_contacts_count(ncid, contactids, ncontacts) result(ierr)
        Call SetMessage(Level_Fatal, 'could not read the second dimension of the link mesh')
    endif
    
-   ncontacts = max(ncontactsDim1,ncontactsDim2)
+   ! ncontacts = max(ncontactsDim1,ncontactsDim2)
+   ncontacts = ncontactsDim2
    
 end function ug_get_contacts_count
 

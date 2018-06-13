@@ -2011,6 +2011,123 @@ namespace UGrid.tests
             Marshal.FreeCoTaskMem(c_arrayfrom);
             Marshal.FreeCoTaskMem(c_arrayto);
         }
+
+        // Test: get only 1d network using get mesh geom
+        [Test]
+        [NUnit.Framework.Category("Read1dNetworkUsingGetMeshGeom")]
+        public void Load1dNetworkUsingGetMeshGeom()
+        {
+            //1.Open a netcdf file
+            string c_path = TestHelper.TestDirectoryPath() + @"\write1dNetwork.nc";
+            Assert.IsTrue(File.Exists(c_path));
+            int ioncid = 0; //file variable 
+            int mode = 0; //create in read mode
+            var wrapper = new IoNetcdfLibWrapper();
+            var ierr = wrapper.ionc_open(c_path, ref mode, ref ioncid, ref iconvtype, ref convversion);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            //2. Get 1d mesh dimensions
+            var networkdim = new meshgeomdim();
+            int l_meshid = 0; //set an invalid index
+            int nnumNetworks = -1;
+            ierr = wrapper.ionc_get_number_of_networks(ref ioncid, ref nnumNetworks);
+            Assert.That(ierr, Is.EqualTo(0));
+            Assert.That(nnumNetworks, Is.EqualTo(1));
+            IntPtr c_networkids = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nnumNetworks);
+            
+            //3. Get a valid networkid
+            ierr = wrapper.ionc_get_network_ids(ref ioncid, ref c_networkids, ref nnumNetworks);
+            Assert.That(ierr, Is.EqualTo(0));
+            int[] l_networkid = new int[nnumNetworks];
+            Marshal.Copy(c_networkids, l_networkid, 0, nnumNetworks);
+
+            //4. Get network dimensions using meshgeom
+            ierr = wrapper.ionc_get_meshgeom_dim(ref ioncid, ref l_meshid, ref l_networkid[0], ref networkdim);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            //5. Allocate memory
+            var network = new meshgeom();
+            network.nnodex = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * networkdim.nnodes);
+            network.nnodey = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * networkdim.nnodes);
+            network.nedge_nodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * networkdim.nbranches);
+            network.nbranchlengths = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * networkdim.nbranches);
+            network.nbranchgeometrynodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * networkdim.nbranches);
+            network.ngeopointx = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * networkdim.ngeometry);
+            network.ngeopointy = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * networkdim.ngeometry);
+            network.nbranchorder = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * networkdim.nbranches);
+
+            var includeArrays = true;
+            int start_index = 1;
+            ierr = wrapper.ionc_get_meshgeom(ref ioncid, ref l_meshid, ref l_networkid[0], ref network, ref start_index, ref includeArrays);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            //2. Define the network
+            int l_nnodes = 2;
+            int l_nbranches = 1;
+            int l_nGeometry = 25;
+            double[] l_nodesX = new double[networkdim.nnodes];
+            double[] l_nodesY = new double[networkdim.nnodes];
+            int[] l_nedge_nodes = new int[networkdim.nbranches];
+            double[] l_nbranchlengths = new double[networkdim.nbranches];
+            double[] l_ngeopointx = new double[networkdim.ngeometry];
+            double[] l_ngeopointy = new double[networkdim.ngeometry];
+
+            Marshal.Copy(network.nnodex, l_nodesX, 0, networkdim.nnodes);
+            Marshal.Copy(network.nnodey, l_nodesY, 0, networkdim.nnodes);
+            Marshal.Copy(network.nedge_nodes, l_nedge_nodes, 0, networkdim.nbranches);
+            Marshal.Copy(network.nbranchlengths, l_nbranchlengths, 0, networkdim.nbranches);
+            Marshal.Copy(network.ngeopointx, l_ngeopointx, 0, networkdim.ngeometry);
+            Marshal.Copy(network.ngeopointy, l_ngeopointy, 0, networkdim.ngeometry);
+
+        }
+
+        //open a file test
+        [Test]
+        [NUnit.Framework.Category("UGRIDTests")]
+        public void openAfile()
+        {
+            var wrapper = new IoNetcdfLibWrapper();
+
+            // Open a file 
+            string c_path = @"D:\carniato\LUCA\ENGINES\FM\FMSource\vanRob\Custom_Ugrid.nc";
+            Assert.IsTrue(File.Exists(c_path));
+            int ioncid = -1; //file id 
+            int sourcetwomode = 0; //read mode
+            int ierr = wrapper.ionc_open(c_path, ref sourcetwomode, ref ioncid, ref iconvtype,
+                ref convversion);
+            Assert.That(ierr, Is.EqualTo(0));
+            
+            // test functions on costum file 
+            int meshid = 0;
+            ierr = wrapper.ionc_get_2d_mesh_id(ref ioncid, ref meshid);
+            Assert.That(ierr, Is.EqualTo(0));
+            int nmaxfacenodes = 0;
+
+            int nnodes = -1;
+            ierr = wrapper.ionc_get_node_count(ref ioncid, ref meshid, ref nnodes);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            int nedge = -1;
+            ierr = wrapper.ionc_get_edge_count(ref ioncid, ref meshid, ref nedge);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            int nface = -1;
+            ierr = wrapper.ionc_get_face_count(ref ioncid, ref meshid, ref nface);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            int maxfacenodes = -1;
+            ierr = wrapper.ionc_get_max_face_nodes(ref ioncid, ref meshid, ref maxfacenodes);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            IntPtr c_face_nodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * nface * maxfacenodes);
+
+            int fillvalue = -1;
+            int startIndex = 0;
+            ierr = wrapper.ionc_get_face_nodes(ref ioncid, ref meshid, ref c_face_nodes, ref nface, ref maxfacenodes, ref fillvalue, ref startIndex);
+
+            int[] rc_face_nodes = new int[nface * maxfacenodes];
+            Marshal.Copy(c_face_nodes, rc_face_nodes, 0, nface * maxfacenodes);
+        }
     }
 }
 
