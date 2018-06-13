@@ -1,7 +1,6 @@
       subroutine ESPACE     ( pmsa   , fl     , ipoint , increm, noseg , &
                               noflux , iexpnt , iknmrk , noq1  , noq2  , &
                               noq3   , noq4   )
-!DEC$ ATTRIBUTES DLLEXPORT, ALIAS: 'ESPACE' :: ESPACE
 !
 !*******************************************************************************
 !
@@ -33,18 +32,25 @@
 !     NOTE every receptor is a layer and that the numbering is the same
 !     NOTE all time is in seconds
 !
+!     June 2018: connection to downstream programmes has been made:
+!               one boundary file for active Stormwater segments
+!               SWB functionality not further developed
+!
 !     Type    Name         I/O Description                                        Unit
 !
 !     support variables
       integer,parameter  :: npmsamax = 200
       integer            :: ipnt(npmsamax)    !    Local work array for the pointering
-      integer            :: iseg, isegl, iflux, ip, isrc, irec, isubs, ioq, iatt1, npmsa, ipmsa
+      integer            :: iseg, isegl, iflux, ip, isrc, irec, isubs, ioq, iatt1, npmsa, ipmsa, isc
       real               :: emisvar, emisfac, sumlocator, drydep, rainconc, flux, ro_mmperday, ra_mmperday, roun_mmperday,&
                             in_mmperday, fwashoff, ferosion, froun, finf, fdisp
       real               :: fluxloss, conc, fluxbound, fluxunbound, fluxinf, fluxroun, fluxero, fluxwash, fluxleak, fluxstp,&
                             kpaved, kunpaved, kdunpaved, fluxexp
+      character*20       :: itemname
+      character*12       :: ddhhmmss1
 
       ! fixed quantities
+      integer,parameter   :: scu = 1
       integer,parameter   :: nrec = 5
       integer,parameter   :: nsubs = 5
       integer,parameter   :: rec_sew = 1
@@ -54,6 +60,10 @@
       integer,parameter   :: rec_sfw = 5
       integer,parameter   :: nopar_srca = 2
       integer,parameter   :: nopar_srcb = 1
+      integer,parameter   :: lu_loc = 1961
+      integer,parameter   :: lu_nod = 1962
+      integer,parameter   :: lu_ini = 1963
+      real   ,parameter   :: qmin = 1e-10
 
       ! PMSA admin
       integer             :: offset_srca
@@ -106,7 +116,9 @@
       integer,parameter   :: ip_ropaved = 13
       integer,parameter   :: ip_rounpaved = 14
       integer,parameter   :: ip_infilt = 15
-      integer,parameter   :: lastsingle = 15
+      integer,parameter   :: ip_totflow = 16
+      integer,parameter   :: ip_itime = 17
+      integer,parameter   :: lastsingle = 17
 
       ! input items
       integer             :: nsrca     ! # of sources type A
@@ -124,7 +136,12 @@
       real                :: ropaved    ! runoff from paved areas
       real                :: rounpaved  ! unpaved
       real                :: infilt     ! infiltration
+      integer             :: itime      ! actual time
+      real                :: totalflow  ! actual flow
 
+      ! specific other variables
+      integer             :: nsc        ! # of SCs per layer
+      integer             :: nswb       ! # of SWBs per layer
 
       ! work arrays
       real,allocatable    :: sc_losses(:,:,:,:) ! Type A static losses per SC
@@ -132,6 +149,7 @@
       real,allocatable    :: frac2rec(:)
       real,allocatable    :: locator(:)
       real,allocatable    :: totflxin(:,:) ! total losses per receptor and per substance in current SC/SWB
+      real,allocatable    :: boun(:)
 
       ! Prelim SRO model
       real,parameter :: ro_lothr = 2.
@@ -140,15 +158,20 @@
       real,parameter :: ra_hithr = 20.
       real,parameter :: disp_hithr = 7.
 
+      ! file names
+      character*255      :: file_out_nodes, file_in_names, file_usefor, file_subs
+
 !     other
       logical first
       data first /.true./
 
-      save sc_losses, losses, frac2rec, totflxin
+      integer :: ierr
+
+      save sc_losses, losses, frac2rec, totflxin, boun
       save first, npmsa, nsrca, nsrcb, nosegl, delt, &
-           offset_srca, offset_srcb, offset_decp, offset_decup, offset_kdup, &
-           offset_ef, offset_ef_srca, offset_ef_srcb, offset_rf_srca, offset_rf_srcb, &
-           offset_conc, lins, louts, offset_vel, fl0_atm, fl0_srca, fl0_srcb, fl0_dec
+            offset_srca, offset_srcb, offset_decp, offset_decup, offset_kdup, &
+            offset_ef, offset_ef_srca, offset_ef_srcb, offset_rf_srca, offset_rf_srcb, &
+            offset_conc, lins, louts, offset_vel, fl0_atm, fl0_srca, fl0_srcb, fl0_dec
 
 !
 !******************************************************************************* INITIAL PROCESSING
@@ -204,6 +227,7 @@
             ! prepare distribution according to locators of type A sources (CONSTANT IN TIME)
             allocate(sc_losses(nrec,nsubs,nosegl,nsrca))
             allocate(losses(nsubs))
+            allocate(boun(nsubs))
             allocate(frac2rec(nrec))
             allocate(locator(nosegl))
             allocate(totflxin(nsubs,nrec))
@@ -249,12 +273,66 @@
 
             enddo
 
+            ! pick up elements from STU file
+            open (lu_ini,file='espace.ini', iostat = ierr, status = 'old')
+            if ( ierr == 0 ) then
+                call gkwini(lu_ini,'Espace','file_in_names',file_in_names)
+                call gkwini(lu_ini,'Espace','file_out_nodes',file_out_nodes)
+                call gkwini(lu_ini,'Espace','file_usefor',file_usefor)
+                call gkwini(lu_ini,'Espace','file_subs',file_subs)
+            else
+                write(*,*) 'Note: ini-file "espace.ini" not found - using defaults'
+                file_in_names = ' '
+                file_out_nodes = 'espace.out'
+                file_usefor    = 'espace.use'
+                file_subs      = 'espace.sub'
+            endif
+
+            ! Headers of output files
+            open (lu_nod,file=file_out_nodes)
+
+            if ( ierr == 0 ) then
+                open (lu_loc,file=file_in_names)
+                read (lu_loc,*) nsc
+                write (lu_nod,'(''ITEM ;    '',2i10)') nsc,nsubs
+
+                ! one file for all boundaries
+                do isc = 1,nsc
+                    read (lu_loc,*) itemname
+                    write (lu_nod,1001) trim(itemname)
+                enddo
+                read (lu_loc,*) nswb
+            else
+                ! one file for all boundaries
+                nsc  = nosegl
+                nswb = 0
+                write (lu_nod,'(''ITEM ;    '',2i10)') nsc,nsubs
+                do isc = 1,nsc
+                    write(itemname, '(a,i0)') 'Boundary-', isc
+                    write (lu_nod,1001) trim(itemname)
+                enddo
+            endif
+            write (lu_nod,'(''CONCENTRATIONS'')')
+            write (lu_nod,1002) trim(file_usefor)
+            write (lu_nod,'(''TIME BLOCK'')')
+            write (lu_nod,'(''DATA'')')
+            write (lu_nod,1002) trim(file_subs)
+
+            if (nsc+nswb.ne.nosegl) call errsys('NSC+NSWB=/NOSEGL',1)
+            if (nswb.gt.0) call errsys('NSWB>0 not implemented',1)
+
       endif
 
 !******************************************************************************* PROCESSING in TIME LOOP
       do ipmsa = 1,npmsa
         ipnt(ipmsa) = ipoint(ipmsa)
       enddo
+
+      ! pick up time and copy to output
+      itime = nint(pmsa(ipoint(ip_itime)))
+      call ddhhmmss(itime,scu,ddhhmmss1)
+      write (lu_nod,*) ddhhmmss1, ' ; ddhhmmss'
+
       do isegl = 1 , nosegl
 
           totflxin = 0.0
@@ -313,6 +391,7 @@
           funpaved = pmsa(ipnt(ip_funpaved))
           fwater   = pmsa(ipnt(ip_fwater))
           rainfall = pmsa(ipnt(ip_rainfall)) *86400.    ! m3/s to m3/d
+          totalflow = max(qmin,pmsa(ipnt(ip_totflow)))
 
           ! total dep
           do isubs = 1,nsubs
@@ -453,10 +532,8 @@
           call dhkmrk(1,iknmrk(iseg),iatt1) ! pick up first attribute
           if (iatt1.gt.0) then
 
+          boun = 0.0
           do isubs = 1,nsubs
-              ! input
-              ip = offset_conc + isubs
-              conc = pmsa(ipoint(ip)+(iseg-1)*increm(ip))
               ! fluxes
               fluxexp = totflxin(isubs,rec_stw)
               ! output
@@ -464,7 +541,9 @@
               pmsa(ipoint(ip)+increm(ip)*(iseg-1)) = fluxexp
               ioq = (stw2exp-1)*nosegl + isegl
               pmsa(ipoint(offset_vel+isubs)+increm(offset_vel+isubs)*(ioq-1)) = fluxexp
+              boun(isubs) = fluxexp/totalflow
           enddo
+          write (lu_nod,1003) boun
 
           endif
 
@@ -475,9 +554,6 @@
           if (iatt1.gt.0) then
 
           do isubs = 1,nsubs
-              ! input
-              ip = offset_conc + isubs
-              conc = pmsa(ipoint(ip)+(iseg-1)*increm(ip))
               ! fluxes
               fluxexp = totflxin(isubs,rec_sfw)
               ! output
@@ -496,5 +572,23 @@
       enddo
       first = .false.
 
+      return
+1001  format ('''',a,'''')
+1002  format ('INCLUDE ''',a,'''')
+1003  format (6e15.6)
+      end
+      subroutine ddhhmmss(timeinscu,scu,ddhhmmss1)
+      integer timeinscu,scu
+      character*12 ddhhmmss1
+      integer dd,hh,mm,ss,timeinseconds
+      timeinseconds = timeinscu*scu
+      dd = timeinseconds/86400
+      timeinseconds = timeinseconds - dd*86400
+      hh = timeinseconds/3600
+      timeinseconds = timeinseconds - hh*3600
+      mm = timeinseconds/60
+      timeinseconds = timeinseconds - mm*60
+      ss = timeinseconds
+      write(ddhhmmss1,'(i6,3(i2.2))') dd,hh,mm,ss
       return
       end
