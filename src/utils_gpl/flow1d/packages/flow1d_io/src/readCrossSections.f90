@@ -448,31 +448,43 @@ module m_readCrossSections
                deallocate(level, width)            
             
             case(CS_CIRCLE, CS_EGG)
-               call prop_get_double(md_ptr%child_nodes(i)%node_ptr, '', 'diameter', diameter, success)
-               if (.not. success) then
-                  call SetMessage(LEVEL_ERROR, 'DIAMETER not found for CrossSection with type '//trim(typestr)//' and id: '//trim(id))
-               endif
-
-               pCs%frictionSectionsCount = 1
-               pCS%plains(1) = diameter
-               pCS%plains(2) = 0.0d0
-               pCS%plains(3) = 0.0d0
-
-               ! Ground Layer
-               call prop_get_integer(md_ptr%child_nodes(i)%node_ptr, '', 'groundlayerUsed', hasGroundLayer, success)
-               if (success) then
-                  groundlayerUsed = (hasgroundlayer == 1)
-               else 
-                  groundlayerUsed =  .false.
-               endif
-               if (groundlayerUsed) then
-                  call prop_get_double(md_ptr%child_nodes(i)%node_ptr, '', 'groundlayer', groundlayer, success)
-               else
-                  groundlayer = 0.0d0
-               endif
                success = .true.
-               inext = AddCrossSectionDefinition(network%CSDefinitions, id, diameter, crossType, groundlayerUsed, groundlayer)
-            
+               call prop_get_integer(md_ptr%child_nodes(i)%node_ptr, '', 'numLevels', numlevels, success)
+               
+               if (success) then
+                  ! also tabulated definition is available. Use this definition
+                  success = readTabulatedCS(pCS, md_ptr%child_nodes(i)%node_ptr) 
+                  pCS%crossType = CS_TABULATED
+               else
+                  success = .true.
+                  ! use analytical description of circle and egg profile
+                  call prop_get_double(md_ptr%child_nodes(i)%node_ptr, '', 'diameter', diameter, success)
+                  if (.not. success) then
+                     call SetMessage(LEVEL_ERROR, 'DIAMETER not found for CrossSection with type '//trim(typestr)//' and id: '//trim(id))
+                  endif
+
+                  pCs%frictionSectionsCount = 1
+                  pCS%plains(1) = diameter
+                  pCS%plains(2) = 0.0d0
+                  pCS%plains(3) = 0.0d0
+
+                  ! Ground Layer
+                  call prop_get_integer(md_ptr%child_nodes(i)%node_ptr, '', 'groundlayerUsed', hasGroundLayer, success)
+                  if (success) then
+                     groundlayerUsed = (hasgroundlayer == 1)
+                  else 
+                     groundlayerUsed =  .false.
+                  endif
+                  if (groundlayerUsed) then
+                     call prop_get_double(md_ptr%child_nodes(i)%node_ptr, '', 'groundlayer', groundlayer, success)
+                  else
+                     groundlayer = 0.0d0
+                  endif
+                  success = .true.
+                  inext = AddCrossSectionDefinition(network%CSDefinitions, id, diameter, crossType, groundlayerUsed, groundlayer)
+      
+               endif
+               
             case(CS_YZ_PROF)
                success = readYZCS(pCS, md_ptr%child_nodes(i)%node_ptr) 
                
