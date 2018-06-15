@@ -840,12 +840,6 @@ subroutine setGroundLayerData(crossDef, thickness)
    double precision                    :: width
    double precision                    :: af_sub(3), perim_sub(3)
    
-   double precision                    :: area_tst         = 0.0d0
-   double precision                    :: perimeter_tst    = 0.0d0
-   double precision                    :: width_tst        = 0.0d0
-   double precision                    :: af_sub_tst(3)    = 0.0d0
-   double precision                    :: perim_sub_tst(3) = 0.0d0
- 
    if (Thickness <= 0.0d0) then
       crossDef%groundlayer%used      = .false.
       crossDef%groundlayer%thickness = 0.0d0
@@ -857,7 +851,6 @@ subroutine setGroundLayerData(crossDef, thickness)
    
    select case(crossDef%crossType)
       case (CS_TABULATED)
-!         call GetTabulatedSizes(thickness, crossDef, .true., area_tst, width_tst, perimeter_tst, af_sub_tst, perim_sub_tst, CS_TYPE_NORMAL)
          call GetTabSizesFromTables(thickness, crossDef, .true., area, width, perimeter, af_sub, perim_sub, CS_TYPE_NORMAL)
       case (CS_CIRCLE)
          call CircleProfile(thickness, crossDef%diameter, area, width, perimeter, CS_TYPE_NORMAL)
@@ -1773,19 +1766,11 @@ subroutine TabulatedProfile(dpt, cross, doFlow, getSummerDikes, area, width, per
    type(t_CSType), pointer           :: crossDef
    type(t_summerdike), pointer       :: summerdike
   
-   double precision                    :: area_tst         = 0.0d0
-   double precision                    :: perimeter_tst    = 0.0d0
-   double precision                    :: width_tst        = 0.0d0
-   double precision                    :: af_sub_tst(3)    = 0.0d0
-   double precision                    :: perim_sub_tst(3) = 0.0d0
- 
    double precision  :: wlev
    double precision  :: sdArea
    double precision  :: sdWidth
 
    crossDef => cross%tabDef
-   
-!   call GetTabulatedSizes(dpt, crossDef, doFlow, area_tst, width_tst, perimeter_tst, af_sub_tst, perim_sub_tst, calculationOption)
    
    call GetTabSizesFromTables(dpt, crossDef, doFlow, area, width, perimeter, af_sub, perim_sub, calculationOption)
       
@@ -1824,204 +1809,6 @@ subroutine TabulatedProfile(dpt, cross, doFlow, getSummerDikes, area, width, per
 
 end subroutine TabulatedProfile
 
-!subroutine GetTabulatedSizes(dpt, crossDef, doFlow, area, width, perimeter, af_sub, perim_sub, calculationOption)
-!
-!   use m_GlobalParameters
-!
-!   implicit none
-!
-!   double precision, intent(in)                 :: dpt
-!   type (t_CSType), pointer, intent(in)         :: crossDef           
-!   logical, intent(in)                          :: doFlow  !> True: Flow, otherwise Total
-!   double precision, intent(out)                :: width
-!   double precision, intent(out)                :: area
-!   double precision, intent(out)                :: perimeter
-!   double precision, intent(out)                :: af_sub(3)
-!   double precision, intent(out)                :: perim_sub(3)
-!   integer, intent(in)                          :: calculationOption 
-!
-!   double precision                :: width2
-!   double precision                :: area2
-!   double precision                :: perimeter2
-!
-!   ! local parameters
-!   integer                                      :: levelsCount
-!   double precision, dimension(:), pointer      :: heights
-!   double precision, dimension(:), pointer      :: widths
-!   double precision, dimension(0:3)             :: widthplains
-!   double precision, dimension(3)               :: w_section
-!  
-!   double precision  :: d1
-!   double precision  :: d2
-!   double precision  :: dTop
-!   double precision  :: e1
-!   double precision  :: e2
-!   double precision  :: eTop
-!   double precision  :: wl
-!   double precision  :: areal
-!   double precision  :: wll
-!   integer           :: ilev, isec, istart
-!   double precision  :: width_min
-!   double precision  :: area_min
-!   double precision  :: widthl
-!   
-!   levelsCount = crossDef%levelsCount
-!   heights => crossDef%height   
-!   
-!   af_sub    = 0.0d0
-!   perim_sub = 0.0d0
-!   width     = 0.0d0
-!   area      = 0.0d0
-!   perimeter = 0.0d0
-!   
-!   if (doFlow) then
-!
-!      widthplains = 0d0
-!
-!      if (crossDef%plains(1) == 0d0) then
-!         crossDef%plains(1) = huge(1d0)
-!         crossDef%plainslocation(1) = crossDef%levelsCount
-!      endif
-!      widths => crossDef%flowWidth
-!      do isec = 1, 3
-!         widthplains(isec) = widthplains(isec-1) + crossDef%plains(isec)
-!      enddo
-!   
-!      area = 0.0D0
-!      d2 = 0.0D0
-!      e2 = widths(1)
-!      af_sub = 0.0d0
-!      w_section = 0.0d0
-!      perim_sub = 0.0d0
-!  
-!      istart = 1
-!      do isec = 1, 3
-!         af_sub(isec) = 0d0
-!         w_section(isec) = 0d0
-!         perim_sub(isec) = min(max(0d0, widths(1)-widthplains(isec-1)), widthplains(isec)-widthplains(isec-1))
-!         levelsCount = crossDef%plainslocation(isec)
-!
-!         if (levelsCount==0) then
-!            cycle
-!         endif
-!
-!         do ilev = istart, levelsCount-1
-!            d1 = heights(ilev) - heights(1)
-!            d2 = heights(ilev + 1) - heights(1)
-!            e1 = min(max(0d0, widths(ilev)-widthplains(isec-1)), widthplains(isec)-widthplains(isec-1))
-!            e2 = min(max(0d0, widths(ilev + 1)-widthplains(isec-1)), widthplains(isec)-widthplains(isec-1))
-!            if (dpt > d2) then
-!               af_sub(isec)    = af_sub(isec) + 0.5d0 * (d2 - d1) * (e1 + e2)
-!               perim_sub(isec) = perim_sub(isec) + 2.0d0 * dsqrt(0.25d0 * (e2 - e1)**2 + (d2 - d1)**2)
-!            
-!            elseif (dpt > d1) then
-!               call trapez(dpt, d1, d2, e1, e2, areal, w_section(isec), wll)
-!               af_sub(isec) = af_sub(isec) + areal
-!               perim_sub(isec) = perim_sub(isec) + wll
-!               exit
-!            endif
-!         enddo
-!   
-!         istart = levelsCount
-!         ! Extend above table if necessary
-!         dTop = heights(levelsCount) - heights(1)
-!         if (dpt > dTop) then
-!      
-!            eTop = min(max(0d0, widths(levelsCount)-widthplains(isec-1)), widthplains(isec)-widthplains(isec-1))
-!
-!            af_sub(isec) = af_sub(isec) + (dpt - dTop) * eTop
-!
-!            w_section(isec) = eTop
-!
-!         endif
-!      enddo
-!      
-!      dTop = heights(crossDef%levelsCount) - heights(1)
-!      if (dpt > dTop) then
-!         eTop = widths(crossDef%levelsCount)
-!         if ((eTop > ThresholdForPreismannLock)) then  !hk: add only when this part is meant to carry water
-!            if (af_sub(3) > 0d0) then
-!               isec = 3
-!            elseif (af_sub(2) > 0d0) then
-!               isec = 2
-!            else 
-!               isec = 1
-!            endif
-!            perim_sub(isec) = perim_sub(isec) + 2.0d0 * (dpt - dTop)
-!         endif
-!      endif
-!
-!      area2      = 0d0
-!      width2     = 0d0   
-!      perimeter2 = 0d0
-!      do isec = 1, 3
-!         area2      = area2      + af_sub(isec)
-!         width2     = width2     + w_section(isec)
-!         perimeter2 = perimeter2 + perim_sub(isec)
-!      enddo
-!      
-!      area = area2
-!      width = width2
-!      perimeter = perimeter2
-!
-!   else
-!
-!      ! Calculation for Storage
-!      widths => crossDef%totalWidth
-!   
-!      area = 0.0D0
-!      wl = 0.0d0
-!      d2 = 0.0D0
-!      e2 = widths(1)
-!      area_min  = 0d0
-!      width_min = 0d0
-!   
-!      do ilev = 1, levelsCount - 1
-!         d1 = heights(ilev) - heights(1)
-!         d2 = heights(ilev + 1) - heights(1)
-!         e1 = widths(ilev)
-!         e2 = widths(ilev + 1)
-!         if (dpt > d2) then
-!            area = area + 0.5d0 * (d2 - d1) * (e1 + e2)
-!            area_min = area_min + (width_min + 0.5d0*max(e1-e2,0d0))*(d2-d1)
-!            width_min = width_min + max(e1-e2,0d0)
-!         else
-!            call trapez(dpt, d1, d2, e1, e2, areal, width, wll)
-!            area = area + areal
-!            if (e2 < e1) then
-!               call trapez(dpt, d1, d2, 0d0, e2-e1, areal, widthl, wll)
-!               area_min = area_min - areal
-!               width_min = width_min + widthl
-!            endif
-!            exit
-!         endif
-!      enddo
-!   
-!      ! Extend above table if necessary
-!      dTop = heights(levelsCount) - heights(1)
-!      if (dpt > dTop) then
-!      
-!         eTop = widths(levelsCount)
-!
-!         if ((eTop > ThresholdForPreismannLock)) then  !hk: add only when this part is meant to carry water
-!            area = area + (dpt - dTop) * eTop
-!            width = eTop
-!         endif
-!   
-!      endif
-!   
-!      if (.not. calculationOption == CS_TYPE_MIN) then
-!         area  = area + area_min
-!         width = width + width_min
-!      else
-!         area  = area_min
-!         width = width_min
-!      endif
-!
-!   endif
-!   
-!end subroutine GetTabulatedSizes
-
 subroutine GetTabSizesFromTables(dpt, pCSD, doFlow, area, width, perimeter, af_sub, perim_sub, calculationOption)
 
    use m_GlobalParameters
@@ -2042,6 +1829,17 @@ subroutine GetTabSizesFromTables(dpt, pCSD, doFlow, area, width, perimeter, af_s
    integer                                      :: levelsCount
    double precision, dimension(:), pointer      :: heights
    double precision, dimension(:), pointer      :: widths
+   
+   ! Pre-Calculated Table for Tabulated/River Profiles
+   double precision, dimension(:,:), pointer    :: af_sub_tab        !< Flow Areas for Sub-Sections (Main, FP1 and FP2)
+   double precision, dimension(:,:), pointer    :: width_sub_tab     !< Width for Sub-Sections (Main, FP1 and FP2)
+   double precision, dimension(:,:), pointer    :: perim_sub_tab     !< Wetted Perimeter for Sub-Sections (Main, FP1 and FP2)
+   double precision, dimension(:), pointer      :: flowArea_tab      !< Flow Areas
+   double precision, dimension(:), pointer      :: wetPerimeter_tab  !< Wet Perimeters
+   double precision, dimension(:), pointer      :: totalArea_tab     !< Total Areas
+   double precision, dimension(:), pointer      :: area_min_tab      !< Area for a narrowing part of a cross section (Nested Newton)
+   double precision, dimension(:), pointer      :: width_min_tab     !< Width for a narrowing part of a cross section (Nested Newton)
+   
   
    double precision  :: d1
    double precision  :: d2
@@ -2066,15 +1864,21 @@ subroutine GetTabSizesFromTables(dpt, pCSD, doFlow, area, width, perimeter, af_s
 
    if (doFlow) then
       
+      af_sub_tab       => pCSD%af_sub
+      width_sub_tab    => pCSD%width_sub
+      perim_sub_tab    => pCSD%perim_sub
+      flowArea_tab     => pCSD%flowArea
+      wetPerimeter_tab => pCSD%wetPerimeter
+
       if (dpt > dTop) then
       
          do isec = 1,3
-            af_sub(isec) = pCSD%af_sub(isec, levelsCount) + (dpt - dTop) * pCSD%width_sub(isec, levelsCount)
-            perim_sub(isec) =  pCSD%perim_sub(isec, levelsCount)
+            af_sub(isec) = af_sub_tab(isec, levelsCount) + (dpt - dTop) * width_sub_tab(isec, levelsCount)
+            perim_sub(isec) =  perim_sub_tab(isec, levelsCount)
          enddo
          
-         area      = pCSD%flowArea(levelsCount)
-         perimeter = pCSD%wetPerimeter(levelsCount)
+         area      = flowArea_tab(levelsCount)
+         perimeter = wetPerimeter_tab(levelsCount)
          width     = pCSD%flowWidth(levelsCount)
          eTop      = pCSD%flowWidth(levelsCount)
 
@@ -2087,7 +1891,7 @@ subroutine GetTabSizesFromTables(dpt, pCSD, doFlow, area, width, perimeter, af_s
             else 
                isec = 1
             endif
-            perim_sub(isec) = pCSD%perim_sub(isec, levelsCount) + 2.0d0 * (dpt - dTop)
+            perim_sub(isec) = perim_sub_tab(isec, levelsCount) + 2.0d0 * (dpt - dTop)
 
             area = area + (dpt - dTop) * eTop
             perimeter = perimeter + 2.0d0 * (dpt - dTop)
@@ -2104,12 +1908,12 @@ subroutine GetTabSizesFromTables(dpt, pCSD, doFlow, area, width, perimeter, af_s
             if (dpt == d2) then
 
                do isec = 1,3
-                  af_sub(isec)    = pCSD%af_sub(isec, ilev)
-                  perim_sub(isec) = pCSD%perim_sub(isec, ilev)
+                  af_sub(isec)    = af_sub_tab(isec, ilev)
+                  perim_sub(isec) = perim_sub_tab(isec, ilev)
                enddo
                
-               area = pCSD%flowArea(ilev)
-               perimeter = pCSD%wetPerimeter(ilev)
+               area = flowArea_tab(ilev)
+               perimeter = wetPerimeter_tab(ilev)
                width = pCSD%flowWidth(ilev)
             
             elseif (dpt > d1) then
@@ -2125,35 +1929,35 @@ subroutine GetTabSizesFromTables(dpt, pCSD, doFlow, area, width, perimeter, af_s
                      
                      if (pCSD%plainslocation(isec) == 0) cycle
                      
-                     width = pCSD%width_sub(isec, ilev - 1) + (pCSD%width_sub(isec, ilev) - pCSD%width_sub(isec, ilev - 1)) * factor
+                     width = width_sub_tab(isec, ilev - 1) + (width_sub_tab(isec, ilev) - width_sub_tab(isec, ilev - 1)) * factor
                      
-                     area_plus = (pCSD%width_sub(isec, ilev - 1) + width) * (dpt - d1) * 0.5d0
-                     af_sub(isec)    = pCSD%af_sub(isec, ilev - 1) + area_plus
+                     area_plus = (width_sub_tab(isec, ilev - 1) + width) * (dpt - d1) * 0.5d0
+                     af_sub(isec)    = af_sub_tab(isec, ilev - 1) + area_plus
                      
-                     a = width - pCSD%width_sub(isec, ilev - 1)
+                     a = width - width_sub_tab(isec, ilev - 1)
                      b = dpt - d1
-                     perim_sub(isec) = pCSD%perim_sub(isec, ilev - 1) + 2.0d0 * dsqrt(0.25d0 * a * a + b * b)
+                     perim_sub(isec) = perim_sub_tab(isec, ilev - 1) + 2.0d0 * dsqrt(0.25d0 * a * a + b * b)
                      
                   enddo
                   
                   width = pCSD%flowWidth(ilev - 1) + (pCSD%flowWidth(ilev) - pCSD%flowWidth(ilev - 1)) * factor
                   
                   area_plus = (pCSD%flowWidth(ilev - 1) + width) * (dpt - d1) * 0.5d0
-                  area      = pCSD%flowArea(ilev - 1) + area_plus
+                  area      = flowArea_tab(ilev - 1) + area_plus
                   
                   a = width - pCSD%flowWidth(ilev - 1)
                   b = dpt - d1
-                  perimeter = pCSD%wetPerimeter(ilev - 1) + 2.0d0 * dsqrt(0.25d0 * a * a + b * b)
+                  perimeter = wetPerimeter_tab(ilev - 1) + 2.0d0 * dsqrt(0.25d0 * a * a + b * b)
                   
                else
                   
                   do isec = 1,3
-                     af_sub(isec)    = pCSD%af_sub(isec, ilev - 1)
-                     perim_sub(isec) = pCSD%perim_sub(isec, ilev - 1)
+                     af_sub(isec)    = af_sub_tab(isec, ilev - 1)
+                     perim_sub(isec) = perim_sub_tab(isec, ilev - 1)
                   enddo
 
-                  area = pCSD%flowArea(ilev - 1)
-                  perimeter = pCSD%wetPerimeter(ilev - 1)
+                  area = flowArea_tab(ilev - 1)
+                  perimeter = wetPerimeter_tab(ilev - 1)
                   width = pCSD%flowWidth(ilev - 1)
                   
                endif
@@ -2168,11 +1972,14 @@ subroutine GetTabSizesFromTables(dpt, pCSD, doFlow, area, width, perimeter, af_s
    else
 
       ! Calculation for Storage
-      widths => pCSD%totalWidth
+      widths        => pCSD%totalWidth
+      totalArea_tab => pCSD%totalArea
+      area_min_tab  => pCSD%area_min
+      width_min_tab => pCSD%width_min
    
       if (dpt > dTop) then
          
-         area  = pCSD%totalArea(levelsCount)
+         area  = totalArea_tab(levelsCount)
          width = pCSD%totalWidth(levelsCount)
          eTop  = pCSD%totalWidth(levelsCount)
 
@@ -2190,11 +1997,11 @@ subroutine GetTabSizesFromTables(dpt, pCSD, doFlow, area, width, perimeter, af_s
             if (dpt == d2) then
 
                if (.not. calculationOption == CS_TYPE_MIN) then               
-                  area = pCSD%totalArea(ilev)
+                  area = totalArea_tab(ilev)
                   width = pCSD%totalWidth(ilev)
                else
-                  area = pCSD%area_min(ilev)
-                  width = pCSD%width_min(ilev)
+                  area =area_min_tab(ilev)
+                  width = width_min_tab(ilev)
                endif
             
             elseif (dpt > d1) then
@@ -2210,26 +2017,27 @@ subroutine GetTabSizesFromTables(dpt, pCSD, doFlow, area, width, perimeter, af_s
                   area_plus = (pCSD%totalWidth(ilev - 1) + width) * (dpt - d1) * 0.5d0
                    
                   if (.not. calculationOption == CS_TYPE_MIN) then
-                     area = pCSD%totalArea(ilev - 1) + area_plus
+                     area = totalArea_tab(ilev - 1) + area_plus
                   else
                      
                      if (width < pCSD%totalWidth(ilev - 1)) then                       
-                        area = pCSD%area_min(ilev - 1) + area_plus
+                        area = area_min_tab(ilev - 1) + area_plus
                      else
-                        area = pCSD%area_min(ilev - 1)
+                        area = area_min_tab(ilev - 1)
                      endif
-                     width =  pCSD%width_min(ilev - 1) + pCSD%totalWidth(ilev - 1) - width
+                     
+                     width = width_min_tab(ilev - 1) + pCSD%totalWidth(ilev - 1) - width
                      
                   endif
                   
                else
                   
                   if (.not. calculationOption == CS_TYPE_MIN) then               
-                     area = pCSD%totalArea(ilev - 1)
+                     area = totalArea_tab(ilev - 1)
                      width = pCSD%totalWidth(ilev - 1)
                   else
-                     area = pCSD%area_min(ilev - 1)
-                     width = pCSD%width_min(ilev - 1)
+                     area = area_min_tab(ilev - 1)
+                     width = width_min_tab(ilev - 1)
                   endif
                   
                endif
