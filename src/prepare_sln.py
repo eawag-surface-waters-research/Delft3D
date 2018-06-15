@@ -418,6 +418,12 @@ def process_project_file(pfile):
                             i += 1
                     del parts[i:]
                     line = split_char.join(parts)
+                else:
+                    # Unclear context of using IFORT_COMPILER
+                    # Just replace the version number at the end
+                    startpos = startpos + 16
+                    endpos   = startpos + 2
+                    line = line[:startpos] + str(ifort) + line[endpos:]
             #
             # UCRTlibdir
             # Search string to be replaced: two options: "$(OSS_UCRTLIBDIR)" and "$(UniversalCRTSdkDir)lib\..."
