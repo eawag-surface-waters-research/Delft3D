@@ -5659,7 +5659,9 @@ src/utils_gpl/dhydrology/packages/dhydrology_kernel/dhydrology_kernel.vfproj -te
 src/utils_gpl/dhydrology/packages/dhydrology_kernel/src/Makefile.am -text
 src/utils_gpl/dhydrology/packages/dhydrology_kernel/src/interception.f90 -text
 src/utils_gpl/dhydrology/packages/dhydrology_kernel/src/wflowSbm.f90 -text
+src/utils_gpl/dhydrology/tests/Makefile.am -text
 src/utils_gpl/dhydrology/tests/dhydrology_test_exe.vfproj -text
+src/utils_gpl/dhydrology/tests/src/Makefile.am -text
 src/utils_gpl/dhydrology/tests/src/cmdlargs.f90 -text
 src/utils_gpl/dhydrology/tests/src/dhydrology_test.f90 -text
 src/utils_gpl/dhydrology/tests/test_data/wflow_sbm.ini -text
