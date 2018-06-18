@@ -1485,29 +1485,7 @@ module m_meteo
          it = it + 1
       end do
    end function ec_gettimeseries_by_itemID
-   
-   !> Replacement function for FM's meteo1 'gettimespacevalue' function.
-   function ec_gettimespacevalue_by_itemID(instancePtr, itemId, timesteps, target_array) result(success)
-      logical                                                 :: success      !< function status
-      type(tEcInstance),                        pointer       :: instancePtr  !< intent(in)
-      integer,                                  intent(in)    :: itemID       !< unique Item id
-      real(hp),                                 intent(in)    :: timesteps    !< get data corresponding to this number of timesteps since FM's refdate
-      real(hp), dimension(:), target, optional, intent(inout) :: target_array !< kernel's data array for the requested values
-
-      if (itemId == ec_undef_int) then       ! We isolate the case that itemId was uninitialized,
-         success = .true.                    ! in which case we simply ignore the Get-request
-         return
-      else
-         success = .false.
-         call clearECMessage()
-         if (.not. ecGetValues(instancePtr, itemId, timesteps, target_array)) then
-            message = dumpECMessageStack(LEVEL_WARN,callback_msg)
-            return
-         end if
-         success = .true.
-      end if
-   end function ec_gettimespacevalue_by_itemID
-   
+      
    ! ==========================================================================
    
    !> Convenience wrapper around ec_gettimespacevalue_by_itemID.
