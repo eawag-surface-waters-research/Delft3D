@@ -361,42 +361,7 @@ module m_meteo
             ec_operand = operand_undefined
       end select
    end subroutine operand_fm_to_ec
-   
-   ! ==========================================================================
-   
-   !> Translate EC's 'filetype' to EC's 'convType' enum.
-   subroutine ec_filetype_to_conv_type(filetype, convtype)
-      integer, intent(in)  :: filetype
-      integer, intent(out) :: convtype
-      !
-      select case (filetype)
-         case (provFile_uniform)
-            convtype = convType_uniform
-         case (provFile_fourier)
-            convtype = convType_fourier
-         case (provFile_unimagdir)
-            convtype = convType_unimagdir
-         case (provFile_svwp)
-            convtype = convType_undefined ! not yet implemented
-         case (provFile_arcinfo)
-            convtype = convType_arcinfo
-         case (provFile_spiderweb)
-            convtype = convType_spiderweb
-         case (provFile_curvi)
-            convtype = convType_curvi
-         case (provFile_samples)
-            convtype = convType_samples
-         case (provFile_triangulationmagdir)
-            convtype = convType_undefined ! not yet implemented
-         case (provFile_poly_tim)
-            convtype = convType_polytim
-         case (provFile_netcdf)
-            convtype = convType_netcdf
-         case default
-            convtype = convType_undefined
-      end select
-   end subroutine ec_filetype_to_conv_type
-   
+    
    ! ==========================================================================
    
    !> Convert quantity names as given in user input (ext file)
