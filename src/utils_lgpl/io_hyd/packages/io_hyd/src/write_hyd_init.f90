@@ -70,6 +70,7 @@
          hyd%waqgeom%epsg = hyd%crs%epsg_code
          success =  write_waqgeom_file(hyd%file_geo%name, hyd%meta, hyd%crs, hyd%waqgeom, &
                                        hyd%edge_type, hyd%conv_type, hyd%conv_version)
+         call write_bnd(hyd)
       endif
 
       ! pointer table
