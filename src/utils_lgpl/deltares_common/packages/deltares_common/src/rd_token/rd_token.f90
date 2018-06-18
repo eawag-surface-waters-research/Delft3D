@@ -42,7 +42,7 @@
       integer          , private   :: type    ! type to be expected from rdtok1
       character(lchmax), private   :: cdummy  ! character dummy argument
       integer          , private   :: idummy  ! integer dummy argument
-      real             , private   :: rdummy  ! real dummy argument
+      real*8           , private   :: rdummy  ! real dummy argument
 
       interface gettoken
          module procedure get_char_tok

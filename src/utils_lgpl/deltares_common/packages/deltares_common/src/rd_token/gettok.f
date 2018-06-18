@@ -51,7 +51,7 @@
       character(*), intent(inout) :: line              !< space to store line to read
       character(*), intent(  out) :: str               !< token if itype = 1
       integer  (4), intent(  out) :: int               !< token if itype = 2
-      real     (4), intent(  out) :: reel              !< token if itype = 3
+      real     (8), intent(  out) :: reel              !< token if itype = 3
       integer  (4), intent(  out) :: itype             !< type of the token ( 0 = none )
       integer  (4), intent(  out) :: iposl             !< left  position in LINE of token
       integer  (4), intent(  out) :: iposr             !< right position in LINE of token
@@ -71,7 +71,7 @@
       integer        itypes      !   Stored previous type
       character(128) strs        !   Stored previous string
       integer        ints        !   Stored previous integer
-      real     (  4) reels       !   Stored previous real
+      real     (  8) reels       !   Stored previous real
       integer        iposls      !   Stored previous left
       integer        iposrs      !   Stored previous right
       character(  1) ctrlz       !   Tab character

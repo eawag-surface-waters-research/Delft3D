@@ -58,7 +58,7 @@ C     IPOSR   INTEGER     1       IN/OUT  start position on line
 C     NPOS    INTEGER     1       INPUT   width of the input file
 C     CHULP   CHAR*(*)    1       OUTPUT  string  to be delivered (for ITYPEX=-1: input!)
 C     IHULP   INTEGER     1       OUTPUT  integer to be delivered
-C     RHULP   REAL*4      1       OUTPUT  real    to be delivered
+C     RHULP   REAL*8      1       OUTPUT  real    to be delivered
 C     ITYPEX  INTEGER     1       INPUT   type expected
 C     IERR    INTEGER     1       OUTPUT  Error code (see below)
 C
@@ -80,6 +80,7 @@ C DATA ---------------------------------------------------- Arguments --
       CHARACTER*1   CCHAR
       CHARACTER*(*) LCH  ( LSTACK ) , CHULP2
       DIMENSION     ILUN ( LSTACK )
+      REAL*8        RHULP
 C
 C DATA -------------------------------------------------------- Local --
 C
