@@ -460,7 +460,7 @@ module m_ec_module
          if (filetype == provFile_poly_tim) then
                res = ecElementSetSetType(instancePtr, elementSetId, elmSetType_polytim)
          else
-            if (jsferic==0) then
+            if (.not.jsferic) then
                res = ecElementSetSetType(instancePtr, elementSetId, elmSetType_cartesian)
             else
                res = ecElementSetSetType(instancePtr, elementSetId, elmSetType_spheric)
@@ -534,7 +534,7 @@ module m_ec_module
          if (filetype == provFile_poly_tim) then
             if (.not.ecSetElementSetType(instancePtr, elementSetId, elmSetType_polytim)) return
          else
-            if (jsferic==0) then
+            if (.not.jsferic) then
                if (.not.ecSetElementSetType(instancePtr, elementSetId, elmSetType_cartesian)) return
             else
                if (.not.ecSetElementSetType(instancePtr, elementSetId, elmSetType_spheric)) return
