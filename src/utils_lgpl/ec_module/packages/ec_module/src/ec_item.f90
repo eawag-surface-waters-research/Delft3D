@@ -59,6 +59,7 @@ module m_ec_item
    public :: ecItemGetProvider
    public :: ecItemGetArr1dPtr
    public :: ecItemGetQHtable
+   public :: ecItemEstimateResultSize
    
    contains
       
@@ -196,6 +197,30 @@ module m_ec_item
             end if
          end do
       end function ecItemGetValues
+      
+      
+      ! =======================================================================
+      !> Retrieve the id of the provider (filereader) that supplies this item
+      function ecItemEstimateResultSize(instancePtr, itemId) result(ressize)
+         implicit none
+         integer                    :: ressize
+         type(tEcInstance), pointer :: instancePtr  !< intent(in)
+         integer, intent(in)        :: itemId
+         type(tEcItem), pointer     :: itemPtr !< Item under consideration
+         integer :: i
+
+         ressize = -1
+         ! Find the Item.
+         do i=1, instancePtr%nItems ! TODO: This lookup loop of items may be expensive for large models, use a lookup table with ids.
+            itemPtr => instancePtr%ecItemsPtr(i)%ptr
+            if ((itemPtr%id == itemId) .and. (itemPtr%role == itemType_target)) then
+               ressize = itemPtr%quantityPtr%vectormax &
+                       * max(itemPtr%elementsetPtr%nCoordinates,1) &
+                       * max(1,itemPtr%elementsetPtr%n_layers)
+               exit
+            end if
+         end do
+      end function ecItemEstimateResultSize
       
 ! =======================================================================
       !> Retrieve the id of the provider (filereader) that supplies this item

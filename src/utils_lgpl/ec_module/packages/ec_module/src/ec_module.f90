@@ -295,6 +295,10 @@ module m_ec_module
       module procedure ecItemAddConnection
    end interface ecAddItemConnection
    
+   interface ecEstimateItemresultSize
+      module procedure ecItemEstimateResultSize
+   end interface ecEstimateItemresultSize
+   
    ! Converter
    
    interface ecSetConverterType
@@ -349,4 +353,330 @@ module m_ec_module
       module procedure ecSupportFindFileReader
       module procedure ecSupportFindFileReaderByFileName
    end interface ecFindFileReader
+   
+   
+   contains  
+   
+      ! ==========================================================================
+      !> Replacement function for FM's meteo1 'addtimespacerelation' function.
+      function ecModuleAddTimeSpaceRelation(instancePtr, name, x, y, vectormax, filename, filetype, &
+                                            method, operand, tgt_refdate, tgt_tzone, tgt_tunit, &
+                                            jsferic, missing_value, itemIDs, &
+                                            mask, xyen, z, pzmin, pzmax, pkbot, pktop, &
+                                            targetIndex, forcingfile, srcmaskfile, dtnodal, varname) &
+                                            result (success)
+   !     use m_ec_module, only: ecFindFileReader ! TODO: Refactor this private data access (UNST-703).
+         use m_ec_filereader_read, only: ecParseARCinfoMask
+         use m_ec_support
+   
+         type(tEcInstance), pointer :: instancePtr !< intent(in)
+         character(len=*),                         intent(inout) :: name         !< Name for the target Quantity, possibly compounded with a tracer name.
+         real(hp), dimension(:),                   intent(in)    :: x            !< Array of x-coordinates for the target ElementSet.
+         real(hp), dimension(:),                   intent(in)    :: y            !< Array of y-coordinates for the target ElementSet.
+         logical,                                  intent(in)    :: jsferic      !< Sferic coordinates
+         integer,                                  intent(in)    :: vectormax    !< Vector max (length of data values at each element location).
+         character(len=*),                         intent(in)    :: filename     !< File name of meteo data file.
+         integer,                                  intent(in)    :: filetype     !< filetype enumeration.
+         integer,                                  intent(in)    :: method       !< method enumeration.
+         integer,                                  intent(in)    :: operand      !< operand enumeration.
+         integer,                                  intent(in)    :: tgt_refdate
+         real(kind=hp),                            intent(in)    :: tgt_tzone
+         integer,                                  intent(in)    :: tgt_tunit
+         real(kind=hp),                            intent(in)    :: missing_value
+         integer, dimension(:),                    intent(inout) :: itemIDs      !<  Connection available outside to which one can connect target items
+   
+         integer,  dimension(:), optional,         intent(in)    :: mask         !< Array of masking values for the target ElementSet.
+         real(hp),               optional,         intent(in)    :: xyen(:,:)    !< distance tolerance / cellsize of ElementSet.
+         real(hp), dimension(:), optional, target, intent(in)    :: z            !< array of z/sigma coordinates
+         real(hp), dimension(:), optional, pointer               :: pzmin        !< array of minimal z coordinate
+         real(hp), dimension(:), optional, pointer               :: pzmax        !< array of maximum z coordinate
+         integer,  dimension(:), optional, pointer               :: pkbot  
+         integer,  dimension(:), optional, pointer               :: pktop  
+         integer,                optional,         intent(in)    :: targetIndex  !< target position or rank of (complete!) vector in target array
+         character(len=*),       optional,         intent(in)    :: forcingfile  !< file containing the forcing data for pli-file 'filename'
+         character(len=*),       optional,         intent(in)    :: srcmaskfile  !< file containing mask applicable to the arcinfo source data 
+         real(hp),               optional,         intent(in)    :: dtnodal      !< update interval for nodal factors
+         character(len=*),       optional,         intent(in)    :: varname      !< the variable name in the file
+         !
+         integer :: convtype !< EC-module's convType_ enumeration.
+         !
+         integer :: fileReaderId   !< Unique FileReader id.
+         integer :: quantityId     !< Unique Quantity id.
+         integer :: elementSetId   !< Unique ElementSet id.
+         integer :: converterId    !< Unique Converter id.
+         integer :: connectionId    !< Unique Converter id.
+         !
+         type(tEcFileReader)   , pointer :: fileReaderPtr  => null() !< 
+         
+         logical                   :: success
+         integer, external         :: findname
+         type (tEcMask)            :: srcmask
+         logical                   :: res
+         integer                   :: i, itgt
+         integer                   :: fieldId
+   
+         success = .False.
+   
+ ! ============================== Setting up the SOURCE side of the connection ===================================
+         ! Construct the FileReader, which constructs the source Items.
+         fileReaderPtr => ecSupportFindFileReaderByFileName(instancePtr, fileName)
+         if (associated(fileReaderPtr) .and. fileType==provFile_spiderweb) then                    ! double file access not allowed when using the Gnu compiler 
+            fileReaderId = fileReaderPtr%id 
+         else
+            fileReaderId = ecInstanceCreateFileReader(instancePtr)
+            fileReaderPtr => ecSupportFindFileReader(instancePtr, fileReaderId)
+            fileReaderPtr%vectormax = vectormax
+      
+            if (present(forcingfile)) then
+               if (present(dtnodal)) then
+                  res = ecProviderInitializeFileReader(instancePtr, fileReaderId, filetype, filename, tgt_refdate, tgt_tzone, tgt_tunit, name, forcingfile=forcingfile, dtnodal=dtnodal)
+                  res = ecProviderInitializeFileReader(instancePtr, fileReaderId, filetype, filename, tgt_refdate, tgt_tzone, tgt_tunit, name, forcingfile=forcingfile, dtnodal=dtnodal)
+               else
+                  res = ecProviderInitializeFileReader(instancePtr, fileReaderId, filetype, filename, tgt_refdate, tgt_tzone, tgt_tunit, name, forcingfile=forcingfile)
+               end if
+               if (.not. res) return
+               if (ecAtLeastOnePointIsCorrection) then       ! TODO: Refactor this shortcut (UNST-180).
+                     ecAtLeastOnePointIsCorrection = .false. ! TODO: Refactor this shortcut (UNST-180).
+                     success = .True.
+                     return
+               end if
+            else
+               if (present(dtnodal)) then
+                  res = ecProviderInitializeFileReader(instancePtr, fileReaderId, filetype, filename, tgt_refdate, tgt_tzone, tgt_tunit, name, dtnodal=dtnodal, varname= varname)
+               else
+                  res = ecProviderInitializeFileReader(instancePtr, fileReaderId, filetype, filename, tgt_refdate, tgt_tzone, tgt_tunit, name)
+               end if
+               if (.not. res) return
+            end if
+         end if
+
+         ! Construct the target Quantity.
+         quantityId = ecInstanceCreateQuantity(instancePtr)
+         if (.not. ecQuantitySet(instancePtr, quantityId, name=name, units=' ', vectormax=vectormax)) return
+   
+         ! Construct the target ElementSet.
+         elementSetId = ecInstanceCreateElementSet(instancePtr)
+   
+         if (filetype == provFile_poly_tim) then
+               res = ecElementSetSetType(instancePtr, elementSetId, elmSetType_polytim)
+         else
+            if (jsferic==0) then
+               res = ecElementSetSetType(instancePtr, elementSetId, elmSetType_cartesian)
+            else
+               res = ecElementSetSetType(instancePtr, elementSetId, elmSetType_spheric)
+            end if
+         end if
+         if (.not. res) return
+   
+         if (.not.ecElementSetSetXArray(instancePtr, elementSetId, x)) return
+         if (.not.ecElementSetSetYArray(instancePtr, elementSetId, y)) return
+         if (present(mask)) then
+            if(.not.ecElementSetSetMaskArray(instancePtr, elementSetId, mask))return
+         endif
+         if (.not.ecElementSetSetNumberOfCoordinates(instancePtr, elementSetId, size(x))) return
+         if (present(xyen)) then
+            if (.not.ecElementSetSetXyen(instancePtr, elementSetId, xyen)) return
+         end if
+         
+         if (present(z)) then ! 3D
+            if (present(pzmin) .and. present(pzmax)) then        ! implicitly means: target elt z-type == SIGMA
+               if (.not.ecElementSetSetZArray(instancePtr, elementSetId, z, pzmin=pzmin, pzmax=pzmax, Lpointer_=.true.)) return
+               if (.not.ecElementSetSetvptyp(instancePtr, elementSetID, BC_VPTYP_PERCBED)) return ! sigma layers
+            else if (present(pkbot) .and. present(pktop)) then   ! implicitly means: target elt z-type == Z WITH sparse kbot/ktop storage
+               if (.not.ecElementSetSetZArray(instancePtr, elementSetId, z, Lpointer_=.true.)) return
+               if (.not.ecElementSetSetKbotKtop(instancePtr, elementSetId, pkbot, pktop, Lpointer_=.true.)) return
+               if (.not.ecElementSetSetvptyp(instancePtr, elementSetID, BC_VPTYP_ZDATUM)) return ! z-layers
+            else
+               ! ERROR .. TODO: LR
+               continue
+            end if
+         end if
+         
+         ! Construct a new Converter.
+         call ec_filetype_to_conv_type(filetype, convtype)
+         if (convtype == convType_undefined) then
+            call setECMessage("Unsupported converter for file '"//filename//"'.")
+            return
+         end if
+         
+         converterId = ecInstanceCreateConverter(instancePtr)
+         if (present(srcmaskfile)) then 
+            if (filetype == provFile_arcinfo .or. filetype == provFile_curvi) then
+               if (.not.ecParseARCinfoMask(srcmaskfile, srcmask, fileReaderPtr)) then
+                  !LC: to substitute with setECMessage?
+                  !call setMessage("Error while reading mask file '"//trim(srcmaskfile)//"'.")
+                  return
+               endif 
+               if (.not.ecConverterInitialize(instancePtr, converterId, convtype, operand, method, srcmask=srcmask)) then 
+                  !LC: to substitute with setECMessage?
+                  !call setMessage("Error while setting mask to converter (file='"//trim(srcmaskfile)//      &
+                  !                "', associated with meteo file '"//trim(filename)//"'.")
+                  return
+               end if 
+            end if
+         else
+            if (.not.ecConverterInitialize(instancePtr, converterId, convtype, operand, method)) return
+         end if
+         
+         !! Construct a new Connection, and connect source Items to the connection. The connection is returned.
+         !call realloc(itemIDs,fileReaderPtr%nItems)
+         !do i = 1, fileReaderPtr%nItems
+         !   itemIDs(i) = fileReaderPtr%items(i)%ptr%id  ! THIS IS WRONG
+         !enddo   
+         
+ ! ============================== Setting up the TARGET side of the connection ===================================
+         
+         quantityId = ecCreateQuantity(instancePtr)
+         if (.not.ecSetQuantity(instancePtr, quantityId, name=name, units=' ', vectormax=vectormax)) return
+   
+         elementSetId = ecCreateElementSet(instancePtr)
+   
+         if (filetype == provFile_poly_tim) then
+            if (.not.ecSetElementSetType(instancePtr, elementSetId, elmSetType_polytim)) return
+         else
+            if (jsferic==0) then
+               if (.not.ecSetElementSetType(instancePtr, elementSetId, elmSetType_cartesian)) return
+            else
+               if (.not.ecSetElementSetType(instancePtr, elementSetId, elmSetType_spheric)) return
+            end if
+         end if
+         
+         if (.not.ecSetElementSetXArray(instancePtr, elementSetId, x)) return
+         if (.not.ecSetElementSetYArray(instancePtr, elementSetId, y)) return
+!        if (.not.ecSetElementSetMaskArray(instancePtr, elementSetId, mask)) return
+         if (.not.ecSetElementSetNumberOfCoordinates(instancePtr, elementSetId, size(x))) return
+
+         if (present(xyen)) then
+            if (.not.ecSetElementSetXyen(instancePtr, elementSetId, xyen)) return
+         end if
+         
+         if (present(z)) then ! 3D
+            if (present(pzmin) .and. present(pzmax)) then       ! implicitly means: target elt z-type == SIGMA
+               if (.not.ecSetElementSetZArray(instancePtr, elementSetId, z, pzmin=pzmin, pzmax=pzmax, Lpointer_=.true.)) return
+               if (.not.ecSetElementSetvptyp(instancePtr, elementSetID, BC_VPTYP_PERCBED)) return ! sigma layers
+            else if (present(pkbot) .and. present(pktop))  then ! implicitly means: target elt z-type == Z WITH sparse kbot/ktop storage
+               if (.not.ecSetElementSetZArray(instancePtr, elementSetId, z, Lpointer_=.true.)) return
+               if (.not.ecSetElementSetKbotKtop(instancePtr, elementSetId, pkbot, pktop, Lpointer_=.true.)) return
+               if (.not.ecSetElementSetvptyp(instancePtr, elementSetID, BC_VPTYP_ZDATUM)) return ! z-layers
+            else
+               ! ERROR .. TODO: LR
+            end if
+         
+            ! add 3D settings if needed
+            if (filetype == provFile_poly_tim) then 
+!            .and. (target_name == 'salinitybnd' .or. target_name == 'temperaturebnd' .or. target_name == 'tracerbnd')) then   ! TODO JRE sediment    
+               if (.not.ecSetElementSetMaskArray(instancePtr, elementSetId, mask)) return
+               if (.not.ecSetElementSetNumberOfCoordinates(instancePtr, elementSetId, size(x))) return
+            end if
+         end if
+         
+         do itgt = 1,size(itemIDs)
+            fieldId = ecCreateField(instancePtr)
+            if (.not.ecSetFieldMissingValue(instancePtr, fieldId, ec_undef_hp)) return
+
+            if (itemIDs(itgt) == ec_undef_int) then                ! if Target Item already exists, do NOT create a new one ... 
+               itemIDs(itgt) = ecCreateItem(instancePtr)
+               if (.not.ecSetItemRole(instancePtr, itemIDs(itgt), itemType_target)) return
+               if (.not.ecSetItemQuantity(instancePtr, itemIDs(itgt), quantityId)) return
+            end if
+            ! ... but we would like to use the newest targetFIELD for this item, since old targetFIELDs can refer to the 
+            ! wrong data location (Arr1DPtr). This happens in the case that the demand-side arrays are reallocated while 
+            ! building the targets! Same is done for the elementset, so we are sure to always connect the latest 
+            ! elementset to this target.
+            if (.not.ecSetItemElementSet(instancePtr, itemIDs(itgt), elementSetId)) return
+            if (.not.ecSetItemTargetField(instancePtr, itemIDs(itgt), fieldId)) return    
+         enddo
+         
+         converterId = ecCreateConverter(instancePtr)
+         if (.not.ecConverterSetType(instancePtr, converterId, convtype)) return
+         if (.not.ecConverterSetOperand(instancePtr, converterId, operand)) return
+         if (.not.ecConverterSetInterpolation(instancePtr, converterId, method)) return
+         
+         connectionId = ecCreateConnection(instancePtr)
+         if (.not. ecSetConnectionConverter(instancePtr, connectionId, converterId)) return
+
+         ! Connect the source items to the connector
+         do i=1,fileReaderPtr%nItems
+            if (.not.ecAddConnectionSourceItem(instancePtr, connectionId, fileReaderPtr%items(i)%ptr%id)) return
+         enddo
+
+         ! Connect the target items to the connector
+         do i=1,size(itemIDs)
+            if (.not.ecAddConnectionTargetItem(instancePtr, connectionId, itemIDs(i))) return
+            if (.not.ecAddItemConnection(instancePtr, itemIDs(i), connectionId)) return
+         enddo
+         success = .True.
+                                            end function ecModuleAddTimeSpaceRelation
+                                            
+                                                                                           
+   !> Replacement function for FM's meteo1 'gettimespacevalue' function.
+   function ec_gettimespacevalue_by_itemID(instancePtr, itemId, timesteps, target_array) result(success)
+      logical                                                 :: success      !< function status
+      type(tEcInstance),                        pointer       :: instancePtr  !< intent(in)
+      integer,                                  intent(in)    :: itemID       !< unique Item id
+      real(hp),                                 intent(in)    :: timesteps    !< time
+      real(hp), dimension(:), target, optional, intent(inout) :: target_array !< kernel's data array for the requested values
+      if (itemId == ec_undef_int) then       ! We isolate the case that itemId was uninitialized,
+         success = .true.                    ! in which case we simply ignore the Get-request
+         return
+      else
+         success = .false.
+         call clearECMessage()
+         if (.not. ecGetValues(instancePtr, itemId, timesteps, target_array)) then
+            return
+         end if
+         success = .true.
+      end if
+   end function ec_gettimespacevalue_by_itemID 
+                                               
+      ! =======================================================================
+      !> Helper function for initializing a Connection.
+      function ecModuleConnectItem(instancePtr, connectionId, sourceItemId, targetItemId) result(success)
+         logical                          :: success      !< function status
+         type(tEcInstance), pointer       :: instancePtr  !< 
+         integer,           intent(inout) :: connectionId !< 
+         integer,           intent(inout) :: sourceItemId !< 
+         integer,           intent(inout) :: targetItemId !< 
+         !
+         success              = ecConnectionAddSourceItem(instancePtr, connectionId, sourceItemId)
+         if (success) success = ecConnectionAddTargetItem(instancePtr, connectionId, targetItemId)
+         if (success) success = ecItemAddConnection(instancePtr, targetItemId, connectionId)
+      end function ecModuleConnectItem
+
+      ! ==========================================================================
+
+      !> Translate EC's 'filetype' to EC's 'convType' enum.
+      subroutine ec_filetype_to_conv_type(filetype, convtype)
+      integer, intent(in)  :: filetype
+      integer, intent(out) :: convtype
+      !
+      select case (filetype)
+      case (provFile_uniform)
+         convtype = convType_uniform
+      case (provFile_fourier)
+         convtype = convType_fourier
+      case (provFile_unimagdir)
+         convtype = convType_unimagdir
+      case (provFile_svwp)
+         convtype = convType_undefined ! not yet implemented
+      case (provFile_arcinfo)
+         convtype = convType_arcinfo
+      case (provFile_spiderweb)
+         convtype = convType_spiderweb
+      case (provFile_curvi)
+         convtype = convType_curvi
+      case (provFile_samples)
+         convtype = convType_samples
+      case (provFile_triangulationmagdir)
+         convtype = convType_undefined ! not yet implemented
+      case (provFile_poly_tim)
+         convtype = convType_polytim
+      case (provFile_netcdf)
+         convtype = convType_netcdf
+         case default
+         convtype = convType_undefined
+      end select
+      end subroutine ec_filetype_to_conv_type
+   
+   
 end module m_ec_module

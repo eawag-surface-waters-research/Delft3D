@@ -562,12 +562,10 @@ module m_ec_filereader
             if (nmissing>0) then 
                do icmp=1, kcmp
                   if (fileReaderPtr%items(1)%ptr%sourceT0FieldPtr%astro_kbnumber(icmp)<0) then
-                     call message('unknown component '     &
-                                 // trim(fileReaderPtr%items(1)%ptr%sourceT0FieldPtr%astro_components(icmp)),                      &
-                                      ' amplitude set to 0 ', ' ')
                      call setECMessage('unknown component '     &
                                  // trim(fileReaderPtr%items(1)%ptr%sourceT0FieldPtr%astro_components(icmp)),                      &
                                       ' amplitude set to 0 ')
+                     ! TODO: return the appropriate state
                   end if
                end do
             end if

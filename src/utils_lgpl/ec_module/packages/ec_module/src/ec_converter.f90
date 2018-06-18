@@ -45,6 +45,7 @@ module m_ec_converter
    private 
    
    public :: ecConverterCreate
+   public :: ecConverterInitialize
    public :: ecConverterFree1dArray
    public :: ecConverterSetType
    public :: ecConverterSetOperand
@@ -145,6 +146,24 @@ module m_ec_converter
       ! Set methods
       ! =======================================================================
       
+      !> Helper function for initializing a Converter.
+      function ecConverterInitialize(instancePtr, converterId, convtype, operand, method, srcmask) result(success)
+         logical                    :: success      !< function status
+         type(tEcInstance), pointer :: instancePtr  !< 
+         integer                    :: converterId  !< 
+         integer                    :: convtype     !< 
+         integer                    :: operand      !< 
+         integer                    :: method       !< 
+         type (tEcMask), optional   :: srcmask      !< 
+         !
+         success              = ecConverterSetType(instancePtr, converterId, convtype)
+         if (success) success = ecConverterSetOperand(instancePtr, converterId, operand)
+         if (success) success = ecConverterSetInterpolation(instancePtr, converterId, method)
+         if (present(srcmask)) then
+            if (success) success = ecConverterSetMask(instancePtr, converterId, srcmask)
+         end if
+      end function ecConverterInitialize
+            
       !> Attach a mask instance to the converter masking source points (used in case of arcinfo data)
       function ecConverterSetMask(instancePtr, converterId, srcmask) result(success)
          logical                               :: success     !< function status

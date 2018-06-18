@@ -314,6 +314,8 @@ module m_ec_provider
                         call setECMessage("ERROR: ec_provider::ecProviderCreateItems: Unsupported quantity name '"   &
                            //trim(quantityname)//"', file='"//trim(fileReaderPtr%filename)//"'.")
                         return
+                        ! TODO: user defined quantity name
+                        !success = ecProviderCreateNetcdfItems(instancePtr, fileReaderPtr, quantityname, varname)
                   end select
                else
                   call setECMessage("ERROR: ec_provider::ecProviderCreateItems: NetCDF requires a quantity name.")
@@ -2379,6 +2381,7 @@ module m_ec_provider
          coord_name  = ''
          name  = ''
          ndims = 0
+         rotate_pole = .false.
 
          ! =============================================================================
          ! Find the Quantity corresponding to quantityName. (configurable in the future)
@@ -2468,6 +2471,9 @@ module m_ec_provider
          case default                                        ! experiment: gather miscellaneous variables from an NC-file,
             ! we have faulty 
             call setECMessage("Quantity '"//trim(quantityName)//"', requested from file "//trim(fileReaderPtr%filename)//", unknown.")
+            !TODO: user defined quantity name
+            !ncvarnames(1) = varname
+            !ncstdnames(1) = varname
          end select 
 
          ! ------------------------------------------------------------------------------------------------
@@ -2551,7 +2557,6 @@ module m_ec_provider
                   return
                end if
             else if (instancePtr%coordsystem == EC_COORDS_SFERIC) then 
-               rotate_pole=.False. 
                grid_type = elmSetType_spheric
                if ((lon_varid>0) .and. (lat_varid>0)) then                                  ! First try absolute lon and lat ...
                   fgd_id = lon_varid
