@@ -102,7 +102,7 @@
     <Link>
       <AdditionalDependencies>..\..\..\..\utils_lgpl\d_hydro_lib\lib\$(ConfigurationName)\static\d_hydro_lib.lib;..\..\..\..\utils_lgpl\deltares_common\lib\$(ConfigurationName)\static\deltares_common.lib;pthreadVCE2.lib;libexpat.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)d_hydro.exe</OutputFile>
-      <AdditionalLibraryDirectories>$(UniversalCRTSdkDir)Lib\10.0.15063.0\ucrt\x86;..\..\..\..\third_party_open\expat\win32\bin\Release;..\..\..\..\third_party_open\pthreads\bin\win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\..\..\third_party_open\expat\win32\bin\Release;..\..\..\..\third_party_open\pthreads\bin\win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>LIBCMTD.lib;LIBCMT.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
@@ -134,7 +134,7 @@ echo "This file is overwritten by the post-build command of the project d_hydro"
     <Link>
       <AdditionalDependencies>..\..\..\..\utils_lgpl\d_hydro_lib\lib\$(PlatformName)\$(ConfigurationName)\static\d_hydro_lib.lib;..\..\..\..\utils_lgpl\deltares_common\lib\$(PlatformName)\$(ConfigurationName)\static\deltares_common.lib;pthreadVC2.lib;..\..\..\..\third_party_open\expat\x64\$(PlatformName)\$(ConfigurationName)\libexpat.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)d_hydro.exe</OutputFile>
-      <AdditionalLibraryDirectories>$(UniversalCRTSdkDir)Lib\10.0.15063.0\ucrt\x64;..\..\..\..\third_party_open\expat\x64\x64\Release;..\..\..\..\third_party_open\pthreads\bin\x64;..\..\..\..\utils_lgpl\d_hydro_lib\lib\x64\Release\static;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\..\..\third_party_open\expat\x64\x64\Release;..\..\..\..\third_party_open\pthreads\bin\x64;..\..\..\..\utils_lgpl\d_hydro_lib\lib\x64\Release\static;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>LIBCMTD.lib;LIBCMT.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
@@ -166,7 +166,7 @@ echo "This file is overwritten by the post-build command of the project d_hydro"
     <Link>
       <AdditionalDependencies>..\..\..\..\utils_lgpl\d_hydro_lib\lib\$(ConfigurationName)\static\d_hydro_lib.lib;..\..\..\..\utils_lgpl\deltares_common\lib\$(ConfigurationName)\static\deltares_common.lib;pthreadVCE2.lib;libexpat.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)d_hydro.exe</OutputFile>
-      <AdditionalLibraryDirectories>$(UniversalCRTSdkDir)Lib\10.0.15063.0\ucrt\x86;..\..\..\..\third_party_open\expat\win32\bin\Release;..\..\..\..\third_party_open\pthreads\bin\win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\..\..\third_party_open\expat\win32\bin\Release;..\..\..\..\third_party_open\pthreads\bin\win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>LIBCMTD.lib;LIBCMT.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
@@ -200,7 +200,7 @@ echo "This file is overwritten by the post-build command of the project d_hydro"
     <Link>
       <AdditionalDependencies>..\..\..\..\utils_lgpl\d_hydro_lib\lib\$(PlatformName)\$(ConfigurationName)\static\d_hydro_lib.lib;..\..\..\..\utils_lgpl\deltares_common\lib\$(PlatformName)\$(ConfigurationName)\static\deltares_common.lib;pthreadVC2.lib;..\..\..\..\third_party_open\expat\x64\$(PlatformName)\$(ConfigurationName)\libexpat.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)d_hydro.exe</OutputFile>
-      <AdditionalLibraryDirectories>$(UniversalCRTSdkDir)Lib\10.0.15063.0\ucrt\x64;..\..\..\..\third_party_open\expat\x64\x64\Release;..\..\..\..\third_party_open\pthreads\bin\x64;..\..\..\..\utils_lgpl\d_hydro_lib\lib\x64\Release\static;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\..\..\third_party_open\expat\x64\x64\Release;..\..\..\..\third_party_open\pthreads\bin\x64;..\..\..\..\utils_lgpl\d_hydro_lib\lib\x64\Release\static;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>LIBCMTD.lib;LIBCMT.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
