@@ -2485,10 +2485,11 @@ subroutine get_snapped_feature(c_feature_type, c_Nin, cptr_xin, cptr_yin, c_Nout
 
    real(c_double), pointer                           :: ptr(:)                      ! temporary pointer
 
-   double precision, dimension(:), target, allocatable, save     :: xout, yout      !< memory leak
-   integer,          dimension(:), target, allocatable, save     :: feature_ids     !< memory leak
-
-   double precision, dimension(:), allocatable       :: xin, yin
+   double precision, dimension(:), target, allocatable, save      :: xout, yout      !< memory leak
+   integer,          dimension(:), target, allocatable, save      :: feature_ids     !< memory leak  
+   double precision, dimension(:), allocatable                    :: xintemp, yintemp
+   integer                                                        :: ntemp, startIndex, i, oldSize
+   double precision, dimension(:), allocatable                    :: xin, yin
    
 
    c_ierror = 1
@@ -2513,13 +2514,60 @@ subroutine get_snapped_feature(c_feature_type, c_Nin, cptr_xin, cptr_yin, c_Nout
    case("obspoint")
       call snappnt(c_Nin, xin, yin, DMISS, c_Nout, xout, yout, feature_ids, c_ierror)
    case("sourcesink")
-      ! is 1 point
-      if (size(xin) == 1) then
-         call snappnt(1, xin(1), yin(1), DMISS, c_Nout, xout, yout, feature_ids, c_ierror)   
-      ! is a polyline
-      else if (size(xin) > 2) then
-         call snappnt(2,(/xin(1), xin(size(xin)-1)/), (/yin(1), yin(size(xin)-1)/), DMISS, c_Nout, xout, yout, feature_ids, c_ierror) 
+      startIndex = 1
+      i = 1
+      ntemp   = 0
+      oldSize = 0
+      if (allocated(xintemp)) deallocate(xintemp)
+      if (allocated(yintemp)) deallocate(yintemp)
+      do while (i <= size(xin))
+         if(xin(i) == dmiss) then
+            if (allocated(xintemp)) oldSize = size(xintemp)
+            if (i - startIndex > 1) then
+               ! it is a polyline with at least 2 vertexses
+               ntemp = oldSize + 3
+               call realloc(xintemp, ntemp, keepExisting = .true.)
+               call realloc(yintemp, ntemp, keepExisting = .true.)
+               xintemp(oldSize + 1) = xin(startIndex)
+               yintemp(oldSize + 1) = yin(startIndex)
+               xintemp(oldSize + 2) = xin(i - 1)
+               yintemp(oldSize + 2) = yin(i - 1)
+               xintemp(oldSize + 3) = dmiss
+               yintemp(oldSize + 3) = dmiss
+            elseif (i - startIndex == 1) then
+               ! just one point
+               ntemp = oldSize + 2
+               call realloc(xintemp, ntemp, keepExisting = .true.)
+               call realloc(yintemp, ntemp, keepExisting = .true.)
+               xintemp(oldSize + 1) = xin(startIndex)
+               yintemp(oldSize + 1) = yin(startIndex)
+               xintemp(oldSize + 2) = dmiss
+               yintemp(oldSize + 2) = dmiss
+            else if (i - startIndex < 0) then
+               startIndex =  i + 1
+               continue
+            end if
+           ! the next start index
+           startIndex =  i + 1
       endif
+      i = i + 1
+   enddo
+   if (ntemp > 0) then
+      call snappnt(ntemp, xintemp, yintemp, DMISS, c_Nout, xout, yout, feature_ids, c_ierror)
+   endif
+   ! re-map feature_ids array
+   i = 1
+   ntemp   = 1
+   do while (i <= size(xout))
+      feature_ids(i) = ntemp
+      if(xout(i) == dmiss) then
+         feature_ids(i) = 0
+         ntemp = ntemp + 1
+      else
+         feature_ids(i) = ntemp
+      endif
+      i = i + 1
+   enddo
    case default
       call snapbnd(feature_type, c_Nin, xin, yin, DMISS, c_Nout, xout, yout, feature_ids, c_ierror)
    end select
