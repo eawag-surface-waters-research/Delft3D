@@ -25,6 +25,24 @@ C ======================================================================
       SUBROUTINE RDTOK1 ( LUNUT  , ILUN   , LCH    , LSTACK , CCHAR  ,
      *                    IPOSR  , NPOS   , CHULP2 , IHULP  , RHULP  ,
      *                    ITYPEX , IERR   )
+
+      CHARACTER*1   CCHAR
+      CHARACTER*(*) LCH  ( LSTACK ) , CHULP2
+      DIMENSION     ILUN ( LSTACK )
+      REAL*8        RHULP8
+      
+      CALL RDTOK2 ( LUNUT  , ILUN   , LCH    , LSTACK , CCHAR  ,
+     *              IPOSR  , NPOS   , CHULP2 , IHULP  , RHULP8  ,
+     *              ITYPEX , IERR   )
+      
+      RHULP = REAL(RHULP8)
+      
+      RETURN
+      END
+      
+      SUBROUTINE RDTOK2 ( LUNUT  , ILUN   , LCH    , LSTACK , CCHAR  ,
+     *                    IPOSR  , NPOS   , CHULP2 , IHULP  , RHULP  ,
+     *                    ITYPEX , IERR   )
 C ----------------------------------------------------------------------
 C
 C

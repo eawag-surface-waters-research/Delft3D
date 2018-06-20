@@ -25,7 +25,7 @@
 
       implicit none
 
-!         publicly accessable ( this allows for mixed use with direct calls to rdtok1 )
+!         publicly accessable ( this allows for mixed use with direct calls to rdtok1/2 )
 
       integer  , parameter :: lstack = 6      ! size include files stack
       integer  , parameter :: lchmax = 255    ! string length file name variables
@@ -39,7 +39,7 @@
 
 !         private
 
-      integer          , private   :: type    ! type to be expected from rdtok1
+      integer          , private   :: type    ! type to be expected from rdtok1/2
       character(lchmax), private   :: cdummy  ! character dummy argument
       integer          , private   :: idummy  ! integer dummy argument
       real*8           , private   :: rdummy  ! real dummy argument
@@ -65,7 +65,7 @@
          integer   (4)                   ierr
 
          type = -999
-         call rdtok1 ( lunut  , ilun   , lch    , lstack , cchar  ,              &
+         call rdtok2 ( lunut  , ilun   , lch    , lstack , cchar  ,              &
      &                 iposr  , npos   , achar  , idummy , rdummy ,              &
      &                 type   , ierr   )
       end function force_include_file
@@ -85,7 +85,7 @@
             push  = .false.
          else
             type = 1
-            call rdtok1 ( lunut  , ilun   , lch    , lstack , cchar  ,              &
+            call rdtok2 ( lunut  , ilun   , lch    , lstack , cchar  ,              &
      &                    iposr  , npos   , cdummy , idummy , rdummy ,              &
      &                    type   , ierr2  )
             achar = cdummy
@@ -109,7 +109,7 @@
             push  = .false.
          else
             type = 4
-            call rdtok1 ( lunut  , ilun   , lch    , lstack , cchar  ,              &
+            call rdtok2 ( lunut  , ilun   , lch    , lstack , cchar  ,              &
      &                    iposr  , npos   , cdummy , idummy , rdummy ,              &
      &                    type   , ierr2  )
             achar = cdummy
@@ -136,7 +136,7 @@
             push  = .false.
          else
             type = 2
-            call rdtok1 ( lunut  , ilun   , lch    , lstack , cchar  ,              &
+            call rdtok2 ( lunut  , ilun   , lch    , lstack , cchar  ,              &
      &                    iposr  , npos   , cdummy , idummy , rdummy ,              &
      &                    type   , ierr2  )
             anint  = idummy
@@ -158,16 +158,16 @@
             if ( type .ne. 2 .and. type .ne. 3 ) then
                ierr2 = 1                ! there is no number on the stack
             else
-               areal = rdummy
+               areal = real(rdummy)
                ierr2 = 0
             endif
             push  = .false.
          else
             type = 3
-            call rdtok1 ( lunut  , ilun   , lch    , lstack , cchar  ,              &
+            call rdtok2 ( lunut  , ilun   , lch    , lstack , cchar  ,              &
      &                    iposr  , npos   , cdummy , idummy , rdummy ,              &
      &                    type   , ierr2  )
-            areal = rdummy
+            areal = real(rdummy)
          endif
          ierr  = ierr2
 
@@ -189,7 +189,7 @@
             push  = .false.
          else
             type = 3
-            call rdtok1 ( lunut  , ilun   , lch    , lstack , cchar  ,              &
+            call rdtok2 ( lunut  , ilun   , lch    , lstack , cchar  ,              &
      &                    iposr  , npos   , cdummy , idummy , rdummy ,              &
      &                    type   , ierr2  )
             adouble = rdummy
@@ -220,7 +220,7 @@
             push  = .false.
          else
             type = -1
-            call rdtok1 ( lunut  , ilun   , lch    , lstack , cchar  ,              &
+            call rdtok2 ( lunut  , ilun   , lch    , lstack , cchar  ,              &
      &                    iposr  , npos   , cdummy , idummy , rdummy ,              &
      &                    type   , ierr2  )
             anint = idummy
@@ -253,7 +253,7 @@
             push  = .false.
          else
             type = -3
-            call rdtok1 ( lunut  , ilun   , lch    , lstack , cchar  ,              &
+            call rdtok2 ( lunut  , ilun   , lch    , lstack , cchar  ,              &
      &                    iposr  , npos   , cdummy , idummy , rdummy ,              &
      &                    type   , ierr2  )
             achar = cdummy
@@ -284,7 +284,7 @@
             push  = .false.
          else
             type = 0
-            call rdtok1 ( lunut  , ilun   , lch    , lstack , cchar  ,              &
+            call rdtok2 ( lunut  , ilun   , lch    , lstack , cchar  ,              &
      &                    iposr  , npos   , cdummy , idummy , rdummy ,              &
      &                    type   , ierr2  )
             achar = cdummy
