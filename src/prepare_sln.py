@@ -355,7 +355,10 @@ def process_project_file(pfile):
                     # such that it will be added after the CharacterSet line
                     if platformtoolset[vs] != "":
                         filouthandle.write(line)
-                        line = platformtoolset[vs] + "\r\n"
+                        # Conserve line endings
+                        # Assumption: the ">" is the last character on this line, before the line ending character(s)
+                        lineEndingStart = str(line).rfind(">")
+                        line = platformtoolset[vs] + line[lineEndingStart+1:]
                 elif line.find("PlatformToolset") != -1:
                     #
                     # Remove the original PlatformToolset line (if present)
