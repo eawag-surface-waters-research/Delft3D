@@ -3788,7 +3788,11 @@ function ug_convert_start_index(sourcestargets, providedIndex, requestedIndex) r
     integer                ::shift, ierr
     
     shift = requestedIndex - providedIndex
-    sourcestargets= sourcestargets + shift
+    
+    ! do not apply shift is values are undefined. Note undefined values dmiss should be specified in deltares common
+    where(sourcestargets .ne. -999.0d0) 
+      sourcestargets= sourcestargets + shift   
+    end where
     ierr = 0
     
 end function 
