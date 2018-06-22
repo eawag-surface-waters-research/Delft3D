@@ -5,6 +5,8 @@ noinst_LTLIBRARIES = libmetisoptions.la
 
 .PHONY: .FORCE
 
+AM_CFLAGS+=${METIS_CFLAGS}
+
 #-------------------------------------------------------------------------------
 #Sources
 libmetisoptions_la_SOURCES = \
