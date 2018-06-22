@@ -102,10 +102,12 @@ subroutine drychk(idry      ,s1        ,qxk       ,qyk       ,icx       , &
     nm_pos = 1
     !
     ! A drying treshold to avoid very thin layers in active cells
-    ! 0.001 * dryflc (0.002*drycrt), but limited between 10^(-8) and 10^(-3)
+    ! 0.01 * dryflc (0.02*drycrt), but limited between 10^(-9) and 10^(-3)
     ! Such thin layers cause inaccuracies in the solution of the transport equation (in conservative formulation)
+    ! This choice of limits was chosen avoid too thin layers, but to simultaneously allow thin layers when 
+    ! demanded by the user through a small dryflc, e.g. for dry dambreak problems.
     !
-    drytrsh = max(1.0e-8_fp, min(0.002_fp*drycrt, 1.0e-3_fp))
+    drytrsh = max(1.0e-9_fp, min(0.02_fp*drycrt, 1.0e-3_fp))
     if (nfltyp/=0) then
        do nm = 1, nmmax
           if ( (kcs(nm)==1 .or. kcs(nm)==2) ) then
