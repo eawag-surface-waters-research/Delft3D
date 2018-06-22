@@ -196,6 +196,13 @@ rem ====================
 rem === INSTALL_GENERIC
 rem ====================
 :generic
+    rem
+    rem Put the newest version of generic dlls in dest_share.
+    rem When compiling a kernel, the actual generic dlls are place in the kernels bin folder.
+    rem The DIMRset collector runs script "...\src\engines_gpl\dimr\scripts\dimr_artifacts.py",
+    rem which removes duplicate dlls, assuming the version in dest_share must be kept,
+    rem assuming the newest version of the dll can be used in combination with kernels build with older versions.
+    rem
     echo "installing generic . . ."
 
     set dest_share="!dest_main!\x64\share\bin"
@@ -203,6 +210,7 @@ rem ====================
     call :makeDir !dest_share!
 
     call :copyFile "third_party_open\expat\x64\x64\Release\libexpat.dll"        !dest_share!
+    call :copyFile "third_party_open\intelredist\lib\x64\*.dll"                 !dest_share!
     call :copyFile "third_party_open\mpich2\x64\bin\*.exe"                      !dest_share!
     call :copyFile "third_party_open\mpich2\x64\lib\*.dll"                      !dest_share!
     call :copyFile "third_party_open\pthreads\bin\x64\*.dll"                    !dest_share!
