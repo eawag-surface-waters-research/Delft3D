@@ -2265,6 +2265,12 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
        ierr = nf90_put_att(irstfile, id_qa   ,'long_name',     'discharge used in advection')
        ierr = nf90_put_att(irstfile, id_qa   ,'units'        , 'm3 s-1')
        ierr = nf90_put_att(irstfile, id_qa   ,'coordinates'  , 'FlowLink_xu FlowLink_yu')
+       
+       ! Definition and attributes of cell center outcoming flux
+       ierr = nf90_def_var(irstfile, 'squ', nf90_double,   (/ id_flowelemdim, id_timedim /)  , id_squ)
+       ierr = nf90_put_att(irstfile, id_squ,  'coordinates'  , 'FlowElem_xcc FlowElem_ycc')
+       ierr = nf90_put_att(irstfile, id_squ,  'long_name'    , 'cell center outcoming flux')
+       ierr = nf90_put_att(irstfile, id_squ,  'units'        , 'm3 s-1')
     end if
 
     ! Definition and attributes of flow data on centres: salinity
@@ -2593,6 +2599,7 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
     ierr = nf90_inq_varid(irstfile, 'taus'    , id_taus)
     ierr = nf90_inq_varid(irstfile, 'czs'     , id_czs)
     ierr = nf90_inq_varid(irstfile, 'qa'      , id_qa)
+    ierr = nf90_inq_varid(irstfile, 'squ'     , id_squ)
     
     if ( kmx>0 ) then
        ierr = nf90_inq_varid(irstfile, 'ucz', id_ucz)
@@ -2814,6 +2821,7 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
        ierr = nf90_put_var(irstfile, id_u0   , u0 ,  (/ 1, itim /), (/ lnx , 1 /))
        ierr = nf90_put_var(irstfile, id_q1   , q1 ,  (/ 1, itim /), (/ lnx , 1 /))
        ierr = nf90_put_var(irstfile, id_qa   , qa ,  (/ 1, itim /), (/ lnx , 1 /))
+       ierr = nf90_put_var(irstfile, id_squ  , squ,  (/ 1, itim /), (/ ndxi, 1 /))
     end if
    
     if (jasal > 0) then  ! Write the data: salinity
@@ -9054,7 +9062,7 @@ subroutine unc_read_map(filename, tim, ierr)
                id_lyrfrac,                      &
                id_bodsed,                       &
                id_xzw, id_yzw, id_xu, id_yu,    &
-               id_bl, id_blbnd, id_s0bnd, id_s1bnd, id_xbnd, id_ybnd, id_dts, &
+               id_bl, id_blbnd, id_s0bnd, id_s1bnd, id_xbnd, id_ybnd, &
                id_unorma, id_vicwwu, id_tureps1, id_turkin1, id_qw, id_qa, id_hu
 
 
@@ -9688,6 +9696,7 @@ subroutine unc_read_map(filename, tim, ierr)
     ierr = nf90_inq_varid(imapfile, 'timestep', id_timestep)
     ierr = nf90_get_var(imapfile, id_timestep,  dt_init, start = (/   it_read/))
     call check_error(ierr, 'timestep')
+    dts = dt_init
     
     ! Read following variables no matter if it is the same or different partitions
     ! Read waterlevels (flow elem)
@@ -9728,10 +9737,6 @@ subroutine unc_read_map(filename, tim, ierr)
                              ilink_own, ilink_merge)
     call check_error(ierr, 'discharges')    
     call readyy('Reading map data',0.50d0)
-        
-    ! read timestep
-    ierr = nf90_inq_varid(imapfile, 'timestep', id_dts)
-    ierr = nf90_get_var(imapfile, id_dts, dts, start=(/ it_read/))
     
     if (jamergedmap_same == 1) then
        ! Read info. on waterlevel boundaries
@@ -9867,6 +9872,11 @@ subroutine unc_read_map(filename, tim, ierr)
             call check_error(ierr, 'turkin1_ghost_cells')
           endif
        endif
+    else
+       ! squ
+       ierr = get_var_and_shift(imapfile, 'squ', squ,  tmpvar1, UNC_LOC_W,   kmx, kstart, ndxi_own, it_read, jamergedmap, &
+                                inode_own, inode_merge)
+       call check_error(ierr, 'squ')
     endif
     call readyy('Reading map data', 0.80d0)
 
