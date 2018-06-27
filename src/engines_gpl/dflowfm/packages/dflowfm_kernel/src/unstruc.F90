@@ -3126,6 +3126,7 @@ subroutine setdt()
    use m_flow,           only: kkcflmx
    use m_timer
    use unstruc_display,  only: jaGUI
+   use m_sediment, only: jased, stm_included
    implicit none
    
    double precision :: dtsc_loc
@@ -3183,13 +3184,34 @@ subroutine setdt()
       call tekcflmx()
    endif
 
-   dti = 1d0/dts
+
 
    if ( jawave.eq.4 .and. swave.eq.1 ) then
       call xbeach_absgen_maxtimestep()
       call xbeach_wave_maxtimestep()
    end if
- end subroutine setdt
+   
+   if (jased .eq. 4 .and. stm_included) then
+     call setdtmaxavalan(dts)  
+   end if
+   
+   dti = 1d0/dts
+   
+end subroutine setdt
+    
+ subroutine setdtmaxavalan(dts)
+ use m_fm_erosed, only: duneavalan, avaltime
+ implicit none
+ 
+ double precision,    intent(inout) :: dts   !timestep to use
+ 
+ if (duneavalan) then
+    if (dts > avaltime / 2d0 - 1d0 ) then
+       dts = avaltime / 2d0 - 1d0 !make sure timestep is smaller than half the avaltime (e.g. with default avaltime 9 seconds)
+    end if 
+ end if
+ 
+ end subroutine setdtmaxavalan
 
  subroutine setdtorg(jareduced)                            ! set computational timestep dts
  use m_flowgeom
@@ -21678,8 +21700,7 @@ endif
        phi     = phiv(kk)  ! 0d0                                                                ! 1/s   stemphi
        phit    = phivt(kk) ! 0d0                                                                ! 1/s2  stemomega
        Pl      = stemheight(kk)                                                                 ! m       plantlength
-       Pl      = min( Pl, hs(kk) )
-       
+
        do i = 1, num
 
        stemcos = cos(phi) ; stemsin  = sin(phi)
