@@ -152,6 +152,7 @@ rem     call :delwaq2_openda_lib
     call :waq_plugin_wasteload
     call :part
     call :wave
+    call :waveexe
     call :plugin_culvert
     call :plugin_delftflow_traform
     call :datsel
@@ -539,11 +540,20 @@ rem ================
     )
 	
 goto :endproc
+
+
+
 rem ================
 rem === INSTALL_WAVE
 rem ================
 :wave
-    echo "installing wave . . ."
+    echo "installing wave . . .%1"
+    if [%1] EQU [exe] (
+        set binary=exe
+    ) else (
+        set binary=dll
+    )
+    rem echo "binary:%binary%
 
     set dest_bin=!dest_main!\x64\dwaves\bin
     set dest_default=!dest_main!\x64\dwaves\default
@@ -568,10 +578,9 @@ rem ================
     rem - once for wave.dll     (then wave_exe.exe might not be present yet)
     rem - once for wave_exe.exe (then wave.dll     might not be present yet)
     rem
-    if exist engines_gpl\wave\bin\x64\release\wave.dll (
+    if [%binary%] EQU [dll] (
         call :copyFile engines_gpl\wave\bin\x64\release\wave.dll          "!dest_bin!"
-    )
-    if exist engines_gpl\wave\bin\x64\release\wave_exe.exe (
+    ) else (
         call :copyFile engines_gpl\wave\bin\x64\release\wave_exe.exe      "!dest_bin!\wave.exe"
     )
     call :copyFile engines_gpl\flow2d3d\default\dioconfig.ini         "!dest_default!"
@@ -589,6 +598,16 @@ rem ================
         rem Note the awkward usage of !-characters
         call :copyFile !!localstring! !dest_bin!!
     )
+goto :endproc
+
+
+
+rem ===================
+rem === INSTALL_WAVEEXE
+rem ===================
+:waveexe
+    echo "installing waveexe . . ."
+    call :wave exe
 goto :endproc
 
 
