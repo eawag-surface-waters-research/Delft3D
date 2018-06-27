@@ -463,6 +463,8 @@
     use m_xbeach_data
     use m_waves
     use m_xbeach_paramsconst
+    use m_tables, only: interpolate
+    use m_partitioninfo
     !
     implicit none
     !
@@ -487,6 +489,8 @@
 !
     integer                       :: i
     integer                       :: istat
+    integer                       :: ierror
+    integer                       :: ised
     integer                       :: j
     integer                       :: k
     integer                       :: k2d
@@ -704,19 +708,13 @@
     sytot  = 0.0_fp
     rsedeq = 0.0_fp
 
-    !   MPI: Communicate hs  
-    !   call dfexchg( dps,1, 1, dfloat, nm_pos, gdp)
-    !   
     do nm = 1, ndx
-       if ((s1(nm) - bl(nm))*kfs(nm) > sedthr) then
-          kfsed(nm) = 1
-       else
-          kfsed(nm) = 0
-       endif
+        if ((s1(nm) - bl(nm)) > sedthr) then ! *kfs(nm): always compute sed, also in ghost nodes
+            kfsed(nm) = 1
+        else
+            kfsed(nm) = 0
+        endif
     enddo
-    !
-    ! MPI: communicate kfsed
-    ! call dfexchg( kfsed,1, 1, dfint, nm_pos, gdp)
     !
     ! Determine fractions of all sediments the top layer and
     ! compute the mud fraction.
@@ -1811,6 +1809,7 @@ subroutine fm_bott3d()
     use m_dredge, only: fm_dredge
     use m_dad   , only: dad_included
     use table_handles , only:handletype, gettabledata
+    use m_partitioninfo
     !
     implicit none
     !
@@ -1823,60 +1822,64 @@ subroutine fm_bott3d()
     type (bedbndtype)     , dimension(:) , pointer :: morbnd
 !    real(hp)              , dimension(:) , pointer :: mergebuf
     logical                              , pointer :: cmpupd
-!    logical                              , pointer :: multi
-!    logical                              , pointer :: wind
-!    logical                              , pointer :: temp
-!    logical                              , pointer :: const
-!    logical                              , pointer :: dredge
-!    logical                              , pointer :: struct
-!    logical                              , pointer :: sedim
-!    logical                              , pointer :: scour
-!    logical                              , pointer :: snelli
-!    real(fp), dimension(:)               , pointer :: factor
-!    real(fp)                             , pointer :: slope
-!    real(fp), dimension(:)               , pointer :: bc_mor_array
-!    real(fp), dimension(:)               , pointer :: dm
-!    real(fp), dimension(:)               , pointer :: dg
-!    real(fp), dimension(:,:)             , pointer :: fixfac
-!    real(fp), dimension(:,:)             , pointer :: frac
-!    integer , dimension(:,:)             , pointer :: kmxsed
-!    real(fp), dimension(:)               , pointer :: mudfrac
-!    real(fp), dimension(:,:)             , pointer :: sbuuc
-!    real(fp), dimension(:,:)             , pointer :: sbvvc
-!    real(fp), dimension(:,:)             , pointer :: ssuuc
-!    real(fp), dimension(:,:)             , pointer :: ssvvc
+    !    logical                              , pointer :: multi
+    !    logical                              , pointer :: wind
+    !    logical                              , pointer :: temp
+    !    logical                              , pointer :: const
+    !    logical                              , pointer :: dredge
+    !    logical                              , pointer :: struct
+    !    logical                              , pointer :: sedim
+    !    logical                              , pointer :: scour
+    !    logical                              , pointer :: snelli
+    !    real(fp), dimension(:)               , pointer :: factor
+    !    real(fp)                             , pointer :: slope
+    !    real(fp), dimension(:)               , pointer :: bc_mor_array
+    !    real(fp), dimension(:)               , pointer :: dm
+    !    real(fp), dimension(:)               , pointer :: dg
+    !    real(fp), dimension(:,:)             , pointer :: fixfac
+    !    real(fp), dimension(:,:)             , pointer :: frac
+    !    integer , dimension(:,:)             , pointer :: kmxsed
+    !    real(fp), dimension(:)               , pointer :: mudfrac
+    !    real(fp), dimension(:,:)             , pointer :: sbuuc
+    !    real(fp), dimension(:,:)             , pointer :: sbvvc
+    !    real(fp), dimension(:,:)             , pointer :: ssuuc
+    !    real(fp), dimension(:,:)             , pointer :: ssvvc
 
-!    integer                              , pointer :: nmudfrac
-!    real(fp)      , dimension(:)         , pointer :: rhosol
-!    integer                              , pointer :: ntstep
-!    real(fp), dimension(:,:,:)           , pointer :: fluxu
-!    real(fp), dimension(:,:,:)           , pointer :: fluxv
-!    real(fp), dimension(:)               , pointer :: duneheight
-!    integer                              , pointer :: iflufflyr
-!    real(fp), dimension(:,:)             , pointer :: mfluff
-!    real(fp), dimension(:,:)             , pointer :: sinkf
-!    real(fp), dimension(:,:)             , pointer :: sourf
-!!
-!! Local parameters
-!!
-   character(len=256)                               :: msg
-!!
-!! Global variables
-!!
-!!
-!! Local variables
-!!
-   logical                     :: bedload, error
-   integer                     :: l, nm, ii, ll, Lx, LLL, Lf, lstart, j, bedchangemesscount, k, k1, k2, knb, nb, kb, ki, mout
-   integer                     :: Lb, Lt, ka, kf1, kf2, kt, nto, n1, n2
-   real(fp)                    :: dsdnm, eroflx, sedflx, thick0, thick1, trndiv, flux, sumflux, dtmor
-   real(fp)                    :: dhmax, h1, totdbodsd, totfixfrac, bamin, thet, dv, zktop, cflux
-   
-   integer,          parameter :: bedchangemessmax = 50
-   double precision, parameter :: dtol = 1d-8
-   
-   double precision            :: sum1, sum2, taucurc, czc
-   double precision, dimension(lsedtot*2) :: bc_sed_distribution
+    !    integer                              , pointer :: nmudfrac
+    !    real(fp)      , dimension(:)         , pointer :: rhosol
+    !    integer                              , pointer :: ntstep
+    !    real(fp), dimension(:,:,:)           , pointer :: fluxu
+    !    real(fp), dimension(:,:,:)           , pointer :: fluxv
+    !    real(fp), dimension(:)               , pointer :: duneheight
+    !    integer                              , pointer :: iflufflyr
+    !    real(fp), dimension(:,:)             , pointer :: mfluff
+    !    real(fp), dimension(:,:)             , pointer :: sinkf
+    !    real(fp), dimension(:,:)             , pointer :: sourf
+    !!
+    !! Local parameters
+    !!
+    character(len=256)                               :: msg
+    !!
+    !! Global variables
+    !!
+    !!
+    !! Local variables
+    !!
+    logical                     :: bedload, error
+    integer                     :: ierror
+    integer                     :: l, nm, ii, ll, Lx, LLL, Lf, lstart, j, bedchangemesscount, k, k1, k2, knb, nb, kb, ki, mout
+    integer                     :: Lb, Lt, ka, kf1, kf2, kt, nto, n1, n2
+    real(fp)                    :: dsdnm, eroflx, sedflx, thick0, thick1, trndiv, flux, sumflux, dtmor
+    real(fp)                    :: dhmax, h1, totdbodsd, totfixfrac, bamin, thet, dv, zktop, cflux
+    integer                     :: jaghost, idmn_ghost
+
+    integer,          parameter :: bedchangemessmax = 50
+    
+    double precision, parameter :: dtol = 1d-8
+
+    double precision            :: tausum2(1)
+    double precision            :: sbsum, taucurc, czc
+    double precision, dimension(lsedtot) :: bc_sed_distribution
    
     integer  :: icond
 !    integer  :: idir_scalar
@@ -2117,12 +2120,7 @@ subroutine fm_bott3d()
 !          call dfexchg( e_scrt,   1, lsed, dfloat, nm_pos, gdp)
 !       endif
     endif           ! sus /= 0.0
-    !
-!    if (lsed > 0) then
-!       call dfexchg( ssuu,   1, lsed, dfloat, nm_pos, gdp)
-!       call dfexchg( ssvv,   1, lsed, dfloat, nm_pos, gdp)
-!    endif
-!
+
     do ll = 1, lsed
        j = lstart + ll   ! constituent index
        do L=1,lnx
@@ -2153,25 +2151,44 @@ subroutine fm_bott3d()
                   & morbnd(jb)%ibcmt(2) , morbnd(jb)%ibcmt(3) , &
                   & morbnd(jb)%ibcmt(4) , bc_mor_array        , &
                   & timhr      ,julrefdat  , msg        )
-             !
-             ! Prepare loop over boundary points
-             !
-             sum2 = 0d0
-             do ib = 1, morbnd(jb)%npnt
-                lm = morbnd(jb)%lm(ib)
-                call gettau(ln(2,lm),taucurc,czc)
-                sum2 = sum2 + taucurc**2                   ! sum of the shear stress squared
-             enddo                                         ! the distribution of bedload is scaled with square stress
-                                                           ! for avoiding instability on BC resulting from uniform bedload 
-                                                           ! in combination with non-uniform cells. 
-             do l = 1, lsedtot
-                sum1 = 0d0
+                !
+                ! Prepare loop over boundary points
+                !
+                tausum2(1) = 0d0
                 do ib = 1, morbnd(jb)%npnt
-                   lm = morbnd(jb)%lm(ib)
-                   sum1 = sum1 + bc_mor_array(l) * wu(lm)  ! sum the total bedload flux throughout boundary
+                    lm = morbnd(jb)%lm(ib)
+                    k2 = morbnd(jb)%nxmx(ib)
+                    if (jampi == 1) then 
+                       if (.not. (idomain(k2) == my_rank)) cycle    ! internal cells at boundary are in the same domain as the link
+                    endif    
+                    call gettau(k2,taucurc,czc)
+                    tausum2(1) = tausum2(1) + taucurc**2            ! sum of the shear stress squared
+                enddo                                         ! the distribution of bedload is scaled with square stress
+                
+                ! for avoiding instability on BC resulting from uniform bedload
+                ! in combination with non-uniform cells.
+                do l = 1, lsedtot
+                    sbsum = 0d0
+                    do ib = 1, morbnd(jb)%npnt
+                        lm = morbnd(jb)%lm(ib)
+                        k2 = morbnd(jb)%nxmx(ib)
+                        if (jampi == 1) then 
+                           if (.not. (idomain(k2) == my_rank)) cycle
+                        endif
+                        sbsum = sbsum + bc_mor_array(l) * wu(lm)  ! sum the total bedload flux throughout boundary
+                    enddo
+                    bc_sed_distribution(l) = sbsum        
                 enddo
-                bc_sed_distribution(l) = sum1 / sum2       ! find the distribution coefficient
-             enddo
+
+                ! do MPI reduce step for bc_sed_distribution and tausum2
+                if (jampi == 1) then 
+                    call reduce_sum(1, tausum2)
+                    call reduce_sum(lsedtot, bc_sed_distribution)
+                endif
+                
+                do l = 1, lsedtot
+                    bc_sed_distribution(l) = bc_sed_distribution(l)/tausum2(1)        ! find the distribution coefficient
+                enddo                     
 
              do ib = 1, morbnd(jb)%npnt
                 alfa_dist   = morbnd(jb)%alfa_dist(ib)
@@ -2238,9 +2255,6 @@ subroutine fm_bott3d()
              enddo    ! ib (boundary point)
           endif       ! icond = 4 or 5 (boundary with transport condition)
        enddo          ! jb (open boundary) 
-       !
-!       call dfexchg(sbuu, 1, lsedtot, dfloat, nm_pos, gdp)
-!       call dfexchg(sbvv, 1, lsedtot, dfloat, nm_pos, gdp)
        !
        ! Update quantity of bottom sediment
        !
@@ -2375,9 +2389,6 @@ subroutine fm_bott3d()
        !
        call fluff_burial(stmpar%morpar%flufflyr, dbodsd, lsed, lsedtot, 1, ndxi, dts, morfac)
        !
-!       call dfexchg(dbodsd, 1, lsedtot, dfloat, nm_pos, gdp)
-       !
-       ! JRE - dry cell erosion
        ! Re-distribute erosion near dry and shallow points to allow erosion
        ! of dry banks
        !
@@ -2474,6 +2485,9 @@ subroutine fm_bott3d()
              endif    ! totfixfrac > 1.0e-7
           endif       ! totdbodsd < 0.0
        enddo          ! nm
+       if ( jampi.gt.0 ) then
+          call update_ghosts(ITYPE_Sall, lsedtot, Ndx, dbodsd, ierror)
+       end if
        !
        ! Add transports to cumulative transports on links, only for output reasons
        !
