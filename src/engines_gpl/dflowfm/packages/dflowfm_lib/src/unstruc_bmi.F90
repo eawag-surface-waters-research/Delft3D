@@ -2559,11 +2559,10 @@ subroutine get_snapped_feature(c_feature_type, c_Nin, cptr_xin, cptr_yin, c_Nout
    i = 1
    ntemp   = 1
    do while (i <= size(xout))
-      feature_ids(i) = ntemp
-      if(xout(i) == dmiss) then
+      if(xout(i)==dmiss.and.xintemp(i)==dmiss) then
          feature_ids(i) = 0
          ntemp = ntemp + 1
-      else
+      else if (feature_ids(i)/= 0) then
          feature_ids(i) = ntemp
       endif
       i = i + 1
