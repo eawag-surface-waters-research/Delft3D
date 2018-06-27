@@ -1650,8 +1650,6 @@ subroutine default_flowexternalforcings()
     ngenstru = 0      ! nr of real general structures in the generalstructure set
     npump   = 0       ! npump dimension
     npumpsg = 0       ! nr of pump signals
-    ndambreak = 0     ! nr of dambreak links
-    ndambreaksg = 0   ! nr of dambreak signals 
     nklep   = 0       ! nr of kleps
     nqbnd   = 0       ! nr of q bnd's
     ! JRE
