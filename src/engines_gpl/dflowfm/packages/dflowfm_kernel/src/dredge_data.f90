@@ -181,10 +181,12 @@ module m_dredge_data
                                                                  ! lsedtot+1 used to store dredged "non-modelled subsoil sediment"
       real(fp)      , dimension(:)  , pointer :: voldune         ! (nmmax) volume to be dredged when considering dunes
       real(fp)      , dimension(:)  , pointer :: totvoldred      ! (nadred) total volume dredged
+      real(fp)      , dimension(:,:), pointer :: totvoldredfrac  ! (nadred+nasupl,lsedtot+1) total volume dredged per fraction
       real(fp)      , dimension(:)  , pointer :: globalareadred  ! (nadred) global area for dredging (over all domains)
       real(fp)      , dimension(:,:), pointer :: voldump         ! (nadump,lsedtot) volume dredged sediment at a timestep
       real(fp)      , dimension(:,:), pointer :: percsupl        ! (nasupl,lsedtot) percentage of sediment fraction for nourishment 
       real(fp)      , dimension(:)  , pointer :: totvoldump      ! (nadump) total volume dumped
+      real(fp)      , dimension(:,:), pointer :: totvoldumpfrac  ! (nadump,lsedtot+1) total volume dumped
       real(fp)      , dimension(:)  , pointer :: localareadump   ! (nadump) local area for dumping (only this domain)
       real(fp)      , dimension(:)  , pointer :: globalareadump  ! (nadump) global area for dumping (over all domains)
       real(fp)      , dimension(:)  , pointer :: globaldumpcap   ! (nadump) global dump capacity (over all domains)

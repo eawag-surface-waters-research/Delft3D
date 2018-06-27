@@ -28,10 +28,12 @@ contains
       nullify(dredgepar%refplane)
       nullify(dredgepar%voldred)
       nullify(dredgepar%totvoldred)
+      nullify(dredgepar%totvoldredfrac)
       nullify(dredgepar%globalareadred)
       nullify(dredgepar%voldune)
       nullify(dredgepar%percsupl)
       nullify(dredgepar%totvoldump)
+      nullify(dredgepar%totvoldumpfrac)
       nullify(dredgepar%localareadump)
       nullify(dredgepar%globalareadump)
       nullify(dredgepar%globaldumpcap)
@@ -84,10 +86,12 @@ contains
       if (associated(dredgepar%refplane))        deallocate (dredgepar%refplane       , STAT = istat)
       if (associated(dredgepar%voldred))         deallocate (dredgepar%voldred        , STAT = istat)
       if (associated(dredgepar%totvoldred))      deallocate (dredgepar%totvoldred     , STAT = istat)
+      if (associated(dredgepar%totvoldredfrac))      deallocate (dredgepar%totvoldred     , STAT = istat)
       if (associated(dredgepar%globalareadred))  deallocate (dredgepar%globalareadred , STAT = istat)
       if (associated(dredgepar%voldune))         deallocate (dredgepar%voldune        , STAT = istat)
       if (associated(dredgepar%percsupl))        deallocate (dredgepar%percsupl       , STAT = istat)
       if (associated(dredgepar%totvoldump))      deallocate (dredgepar%totvoldump     , STAT = istat)
+      if (associated(dredgepar%totvoldumpfrac))      deallocate (dredgepar%totvoldump     , STAT = istat)
       if (associated(dredgepar%localareadump))   deallocate (dredgepar%localareadump  , STAT = istat)
       if (associated(dredgepar%globalareadump))  deallocate (dredgepar%globalareadump , STAT = istat)
       if (associated(dredgepar%globaldumpcap))   deallocate (dredgepar%globaldumpcap  , STAT = istat)
@@ -158,6 +162,7 @@ contains
        use m_bedform
        use interp
        use m_depfil_stm
+       use m_partitioninfo
        !
        implicit none
        !
@@ -172,10 +177,12 @@ contains
        real(fp)      , dimension(:,:)   , pointer :: voldred
        real(fp)      , dimension(:)     , pointer :: voldune
        real(fp)      , dimension(:)     , pointer :: totvoldred
+       real(fp)      , dimension(:,:)   , pointer :: totvoldredfrac
        real(fp)      , dimension(:)     , pointer :: globalareadred
        real(fp)      , dimension(:,:)   , pointer :: voldump
        real(fp)      , dimension(:,:)   , pointer :: percsupl
        real(fp)      , dimension(:)     , pointer :: totvoldump
+       real(fp)      , dimension(:,:)   , pointer :: totvoldumpfrac
        real(fp)      , dimension(:)     , pointer :: localareadump
        real(fp)      , dimension(:)     , pointer :: globalareadump
        real(fp)      , dimension(:)     , pointer :: globaldumpcap
@@ -721,10 +728,12 @@ contains
        if (istat==0) allocate (dredgepar%dzdred          (1:ndx                          ), stat = istat)
        if (istat==0) allocate (dredgepar%voldred         (nadred+nasupl        ,lsedtot+1), stat = istat)
        if (istat==0) allocate (dredgepar%totvoldred      (nadred+nasupl                  ), stat = istat)
+       if (istat==0) allocate (dredgepar%totvoldredfrac  (nadred+nasupl        ,lsedtot+1), stat = istat)
        if (istat==0) allocate (dredgepar%globalareadred  (nadred+nasupl                  ), stat = istat)
        if (istat==0) allocate (dredgepar%voldune         (1:ndx                          ), stat = istat)
        if (istat==0) allocate (dredgepar%percsupl        (nasupl               ,lsedtot  ), stat = istat)
        if (istat==0) allocate (dredgepar%totvoldump      (nadump                         ), stat = istat)
+       if (istat==0) allocate (dredgepar%totvoldumpfrac  (nadump               ,lsedtot  ), stat = istat)
        if (istat==0) allocate (dredgepar%localareadump   (nadump                         ), stat = istat)
        if (istat==0) allocate (dredgepar%globalareadump  (nadump                         ), stat = istat)
        if (istat==0) allocate (dredgepar%globaldumpcap   (nadump                         ), stat = istat)
@@ -754,10 +763,12 @@ contains
        dzdred            => dredgepar%dzdred
        voldred           => dredgepar%voldred
        totvoldred        => dredgepar%totvoldred
+       totvoldredfrac    => dredgepar%totvoldredfrac
        globalareadred    => dredgepar%globalareadred
        voldune           => dredgepar%voldune
        percsupl          => dredgepar%percsupl
        totvoldump        => dredgepar%totvoldump
+       totvoldumpfrac    => dredgepar%totvoldumpfrac
        localareadump     => dredgepar%localareadump
        globalareadump    => dredgepar%globalareadump
        globaldumpcap     => dredgepar%globaldumpcap
@@ -801,10 +812,12 @@ contains
        dzdred          = 0.0_fp
        voldred         = 0.0_fp
        totvoldred      = 0.0_fp
+       totvoldredfrac  = 0.0_fp
        globalareadred  = 0.0_fp
        voldune         = 0.0_fp
        percsupl        = 0.0_fp
        totvoldump      = 0.0_fp
+       totvoldumpfrac  = 0.0_fp
        localareadump   = 0.0_fp
        globalareadump  = 0.0_fp
        globaldumpcap   = 0.0_fp
@@ -1846,6 +1859,9 @@ contains
           npnt           = 0
           ia             = ipdr(cntdred)
           do nm = 1, ndxi                            ! only internal points
+             if (jampi == 1) then 
+                 if (idomain(nm) /= my_rank) cycle
+             endif
              if (ba(nm) > 0.0_fp) then 
                 istat = 0
                 select case (dredge_prop(i)%ichkloc)
@@ -1943,6 +1959,9 @@ contains
           if (npdu(i) /= 0) then
              ia = ipdu(i)
              do nm = 1, ndxi
+                if (jampi == 1) then 
+                    if (idomain(nm) /= my_rank) cycle
+                endif                 
                 if (ba(nm) > 0.0_fp) then 
                    istat = 0
                    select case (dump_prop(i)%ichkloc)
@@ -2068,7 +2087,6 @@ subroutine fm_dredge(error)
     use properties 
     use table_handles    
     use message_module
-    use MessageHandling, only: LEVEL_INFO, mess
     use fm_polygon_module
     use bedcomposition_module
     use m_sediment, only: mtd, stmpar, sedtra
@@ -2082,6 +2100,12 @@ subroutine fm_dredge(error)
     use m_sediment, only: stmpar
     use unstruc_files, only: mdia
     use m_bedform
+    use m_partitioninfo, only: ndomains, my_rank, numranks   ! #TODOsedmorparallel    to check numranks or ndomains 
+
+!#TODOsedmorparallel   
+!* ghost cells in in polygon dredge ... if non ghost
+    
+    use messageHandling
     !
     implicit none
     !
@@ -2096,10 +2120,12 @@ subroutine fm_dredge(error)
     real(fp)      , dimension(:)   , pointer :: refplane
     real(fp)      , dimension(:,:) , pointer :: voldred
     real(fp)      , dimension(:)   , pointer :: totvoldred
+    real(fp)      , dimension(:,:) , pointer :: totvoldredfrac
     real(fp)      , dimension(:)   , pointer :: globalareadred
     real(fp)      , dimension(:,:) , pointer :: voldump
     real(fp)      , dimension(:,:) , pointer :: percsupl
     real(fp)      , dimension(:)   , pointer :: totvoldump
+    real(fp)      , dimension(:,:) , pointer :: totvoldumpfrac
     real(fp)      , dimension(:)   , pointer :: localareadump
     real(fp)      , dimension(:)   , pointer :: globalareadump
     real(fp)      , dimension(:)   , pointer :: globaldumpcap
@@ -2222,10 +2248,12 @@ subroutine fm_dredge(error)
     refplane            => dadpar%refplane
     voldred             => dadpar%voldred
     totvoldred          => dadpar%totvoldred
+    totvoldredfrac      => dadpar%totvoldredfrac
     globalareadred      => dadpar%globalareadred
     voldump             => dadpar%voldump
     percsupl            => dadpar%percsupl
     totvoldump          => dadpar%totvoldump
+    totvoldumpfrac      => dadpar%totvoldumpfrac
     localareadump       => dadpar%localareadump
     globalareadump      => dadpar%globalareadump
     globaldumpcap       => dadpar%globaldumpcap
@@ -2258,152 +2286,145 @@ subroutine fm_dredge(error)
     morhr = real(morft*24.0_hp,fp)
     if (firstdredge) then
        globalareadump = localareadump
-!       if (numdomains > 1 .or. parll) then
-!          !
-!          ! Start communication with other domains
-!          ! Determine number of domains that use dredging
-!          ! Determine "rank" of current domain (use 1-based number instead of
-!          ! the 0-based number returned by C routine)
-!          !
-!          if (parll) then
-!              dredge_domainnr = inode
-!              dredge_ndomains = nproc
-!          else
-!              call start_dd_dredgecommunication (dredge_domainnr, dredge_ndomains)
-!              dredge_domainnr = dredge_domainnr+1
-!          endif
-!          !
-!          ! For all dredge and dump areas count the global number of points
-!          ! Due to the way dredgecommunicate is implemented we need to
-!          ! communicate via floating point array.
-!          !
-!          allocate(numpoints(dredge_ndomains), stat = istat)
-!          !
-!          ! For each dredge area count the global number of points
-!          !
-!          do ia = 1, nadred+nasupl
-!             pdredge => dredge_prop(ia)
-!             !
-!             numpoints = 0.0_fp
-!             numpoints(dredge_domainnr) = real(pdredge%npnt,fp)
-!             !
-!             call dredgecommunicate(numpoints, dredge_ndomains, error, msgstr)
-!             if (error) goto 999
-!             !
-!             in_ndomains = 0
-!             globalnpnt = 0
-!             localoffset = 0
-!             do id = 1,  dredge_ndomains
-!                np = nint(numpoints(id))
-!                if (np>0) then
-!                   in_ndomains = in_ndomains + 1
-!                   globalnpnt = globalnpnt + np
-!                   if (id<dredge_domainnr) localoffset = localoffset + np
-!                endif
-!             enddo
-!             if (in_ndomains <= 1) then
-!                pdredge%in1domain = .true.
-!             else
-!                pdredge%npnt = globalnpnt
-!                !
-!                ! Reallocate and shift
-!                !
-!                istat = 0
-!                call reallocP(pdredge%area         ,globalnpnt,fill=0.0_fp,shift=localoffset,stat=istat)
-!                call dredgecommunicate(pdredge%area, pdredge%npnt, error, msgstr)
-!                if (error) goto 999
-!                !
-!                call reallocP(pdredge%hdune        ,globalnpnt       ,shift=localoffset,stat=istat)
-!                call reallocP(pdredge%dz_dredge    ,globalnpnt       ,shift=localoffset,stat=istat)
-!                call reallocP(pdredge%reflevel     ,globalnpnt       ,shift=localoffset,stat=istat)
-!                call reallocP(pdredge%dunetoplevel ,globalnpnt       ,shift=localoffset,stat=istat)
-!                call reallocP(pdredge%triggerlevel ,globalnpnt       ,shift=localoffset,stat=istat)
-!                call reallocP(pdredge%bedlevel     ,globalnpnt       ,shift=localoffset,stat=istat)
-!                call reallocP(pdredge%troughlevel  ,globalnpnt       ,shift=localoffset,stat=istat)
-!                call reallocP(pdredge%sedimentdepth,globalnpnt       ,shift=localoffset,stat=istat)
-!                call reallocP(pdredge%sortvar      ,globalnpnt       ,shift=localoffset,stat=istat)
-!                call reallocP(pdredge%inm          ,globalnpnt       ,shift=localoffset,stat=istat)
-!                ! nm(i)=0 for points outside this domain is used in this subroutine
-!                call reallocP(pdredge%nm           ,globalnpnt,fill=0,shift=localoffset,stat=istat)
-!                call reallocP(pdredge%triggered    ,globalnpnt       ,shift=localoffset,stat=istat)
-!                !
-!                if (istat/=0) then
-!                   call prterr(lundia, 'U021', 'Dredge: memory realloc error')
-!                   call d3stop(1, gdp)
-!                endif
-!                !
-!                globalareadred(ia) = 0.0_fp
-!                do i = 1,globalnpnt
-!                   pdredge%inm(i) = i
-!                   globalareadred(ia) = globalareadred(ia) + pdredge%area(i)
-!                enddo
-!             endif
-!          enddo
-!          !
-!          ! For each dump area count the global number of points
-!          !
-!          do ib = 1, nadump
-!             pdump => dump_prop(ib)
-!             !
-!             numpoints = 0.0_fp
-!             numpoints(dredge_domainnr) = real(pdump%npnt,fp)
-!             !
-!             call dredgecommunicate(numpoints, dredge_ndomains, error, msgstr)
-!             if (error) goto 999
-!             !
-!             in_ndomains = 0
-!             globalnpnt = 0
-!             localoffset = 0
-!             do id = 1,  dredge_ndomains
-!                np = nint(numpoints(id))
-!                if (np>0) then
-!                   in_ndomains = in_ndomains + 1
-!                   globalnpnt = globalnpnt + np
-!                   if (id<dredge_domainnr) localoffset = localoffset + np
-!                endif
-!             enddo
-!             if (in_ndomains <= 1) then
-!                pdump%in1domain = .true.
-!             else
-!                pdump%npnt = globalnpnt
-!                !
-!                ! Reallocate and shift
-!                !
-!                istat = 0
-!                call reallocP(pdump%area    ,globalnpnt,fill=0.0_fp,shift=localoffset,stat=istat)
-!                call dredgecommunicate(pdump%area, pdump%npnt, error, msgstr)
-!                if (error) goto 999
-!                !
-!                call reallocP(pdump%hdune   ,globalnpnt       ,shift=localoffset,stat=istat)
-!                call reallocP(pdump%reflevel,globalnpnt       ,shift=localoffset,stat=istat)
-!                call reallocP(pdump%bedlevel,globalnpnt       ,shift=localoffset,stat=istat)
-!                call reallocP(pdump%dz_dump ,globalnpnt       ,shift=localoffset,stat=istat)
-!                call reallocP(pdump%sortvar ,globalnpnt       ,shift=localoffset,stat=istat)
-!                call reallocP(pdump%inm     ,globalnpnt       ,shift=localoffset,stat=istat)
-!                ! nm(i)=0 for points outside this domain is used in this subroutine
-!                call reallocP(pdump%nm      ,globalnpnt,fill=0,shift=localoffset,stat=istat)
-!                !
-!                if (istat/=0) then
-!                   call prterr(lundia, 'U021', 'Dredge: memory realloc error')
-!                   call d3stop(1, gdp)
-!                endif
-!                !
-!                do i = 1,globalnpnt
-!                   pdump%inm(i) = i
-!                enddo
-!             endif
-!          enddo
-!          !
-!          deallocate(numpoints, stat = istat)
-!          !
-!          ! Communicate dump areas with other domains
-!          !
-!          call dredgecommunicate(globalareadump, nadump, error, msgstr)
-!          if (error) goto 999
-!       else
-!          !
-!          ! Only one domain, so no exchange needed for any dredge or dump area
-!          !
+       if (ndomains > 1) then
+          !
+          ! Start communication with other domains
+          ! Determine number of domains that use dredging
+          ! Determine "rank" of current domain (use 1-based number instead of
+          ! the 0-based number returned by C routine)
+          !
+          dredge_domainnr = my_rank + 1 
+          dredge_ndomains = numranks
+          !
+          ! For all dredge and dump areas count the global number of points
+          ! Due to the way dredgecommunicate is implemented we need to
+          ! communicate via floating point array.
+          !
+          allocate(numpoints(dredge_ndomains), stat = istat)
+          !
+          ! For each dredge area count the global number of points
+          !
+          do ia = 1, nadred+nasupl
+             pdredge => dredge_prop(ia)
+             !
+             numpoints = 0.0_fp
+             numpoints(dredge_domainnr) = real(pdredge%npnt,fp)
+             !
+             call fm_dredgecommunicate(numpoints, dredge_ndomains, error, msgstr)
+             if (error) goto 999
+             !
+             in_ndomains = 0
+             globalnpnt = 0
+             localoffset = 0
+             do id = 1,  dredge_ndomains
+                np = nint(numpoints(id))
+                if (np>0) then
+                   in_ndomains = in_ndomains + 1
+                   globalnpnt = globalnpnt + np
+                   if (id<dredge_domainnr) localoffset = localoffset + np
+                endif
+             enddo
+             if (in_ndomains <= 1) then
+                pdredge%in1domain = .true.
+             else
+                pdredge%npnt = globalnpnt
+                !
+                ! Reallocate and shift
+                !
+                istat = 0
+                call reallocP(pdredge%area         ,globalnpnt,fill=0.0_fp,shift=localoffset,stat=istat)
+                call fm_dredgecommunicate(pdredge%area, pdredge%npnt, error, msgstr)
+                if (error) goto 999
+                !
+                call reallocP(pdredge%hdune        ,globalnpnt       ,shift=localoffset,stat=istat)
+                call reallocP(pdredge%dz_dredge    ,globalnpnt       ,shift=localoffset,stat=istat)
+                call reallocP(pdredge%reflevel     ,globalnpnt       ,shift=localoffset,stat=istat)
+                call reallocP(pdredge%dunetoplevel ,globalnpnt       ,shift=localoffset,stat=istat)
+                call reallocP(pdredge%triggerlevel ,globalnpnt       ,shift=localoffset,stat=istat)
+                call reallocP(pdredge%bedlevel     ,globalnpnt       ,shift=localoffset,stat=istat)
+                call reallocP(pdredge%troughlevel  ,globalnpnt       ,shift=localoffset,stat=istat)
+                call reallocP(pdredge%sedimentdepth,globalnpnt       ,shift=localoffset,stat=istat)
+                call reallocP(pdredge%sortvar      ,globalnpnt       ,shift=localoffset,stat=istat)
+                call reallocP(pdredge%inm          ,globalnpnt       ,shift=localoffset,stat=istat)
+                ! nm(i)=0 for points outside this domain is used in this subroutine
+                call reallocP(pdredge%nm           ,globalnpnt,fill=0,shift=localoffset,stat=istat)
+                call reallocP(pdredge%triggered    ,globalnpnt       ,shift=localoffset,stat=istat)
+                !
+                if (istat/=0) then
+                   call mess(LEVEL_ERROR, 'fm_dredge:: Dredge: memory realloc error')
+                endif
+                !
+                globalareadred(ia) = 0.0_fp
+                do i = 1,globalnpnt
+                   pdredge%inm(i) = i
+                   globalareadred(ia) = globalareadred(ia) + pdredge%area(i)
+                enddo
+             endif
+          enddo
+          !
+          ! For each dump area count the global number of points
+          !
+          do ib = 1, nadump
+             pdump => dump_prop(ib)
+             !
+             numpoints = 0.0_fp
+             numpoints(dredge_domainnr) = real(pdump%npnt,fp)
+             !
+             call fm_dredgecommunicate(numpoints, dredge_ndomains, error, msgstr)
+             if (error) goto 999
+             !
+             in_ndomains = 0
+             globalnpnt = 0
+             localoffset = 0
+             do id = 1,  dredge_ndomains
+                np = nint(numpoints(id))
+                if (np>0) then
+                   in_ndomains = in_ndomains + 1
+                   globalnpnt = globalnpnt + np
+                   if (id<dredge_domainnr) localoffset = localoffset + np
+                endif
+             enddo
+             if (in_ndomains <= 1) then
+                pdump%in1domain = .true.
+             else
+                pdump%npnt = globalnpnt
+                !
+                ! Reallocate and shift
+                !
+                istat = 0
+                call reallocP(pdump%area    ,globalnpnt,fill=0.0_fp,shift=localoffset,stat=istat)
+                call fm_dredgecommunicate(pdump%area, pdump%npnt, error, msgstr)
+                if (error) goto 999
+                !
+                call reallocP(pdump%hdune   ,globalnpnt       ,shift=localoffset,stat=istat)
+                call reallocP(pdump%reflevel,globalnpnt       ,shift=localoffset,stat=istat)
+                call reallocP(pdump%bedlevel,globalnpnt       ,shift=localoffset,stat=istat)
+                call reallocP(pdump%dz_dump ,globalnpnt       ,shift=localoffset,stat=istat)
+                call reallocP(pdump%sortvar ,globalnpnt       ,shift=localoffset,stat=istat)
+                call reallocP(pdump%inm     ,globalnpnt       ,shift=localoffset,stat=istat)
+                ! nm(i)=0 for points outside this domain is used in this subroutine
+                call reallocP(pdump%nm      ,globalnpnt,fill=0,shift=localoffset,stat=istat)
+                !
+                if (istat/=0) then
+                   call mess(LEVEL_ERROR, 'fm_dredge:: Dredge: memory realloc error')
+                endif
+                !
+                do i = 1,globalnpnt
+                   pdump%inm(i) = i
+                enddo
+             endif
+          enddo
+          !
+          deallocate(numpoints, stat = istat)
+          !
+          ! Communicate dump areas with other domains
+          !
+          call fm_dredgecommunicate(globalareadump, nadump, error, msgstr)
+          if (error) goto 999
+       else
+          !
+          ! Only one domain, so no exchange needed for any dredge or dump area
+          !
           dredge_domainnr = 1
           do ia = 1, nadred+nasupl
              dredge_prop(ia)%in1domain = .true.
@@ -2411,8 +2432,8 @@ subroutine fm_dredge(error)
           do ib = 1, nadump
              dump_prop(ib)%in1domain = .true.
           enddo
-       !endif
-       !
+       endif
+       
        firstdredge = .false.
     endif
     !
@@ -2427,7 +2448,7 @@ subroutine fm_dredge(error)
     if (tsmortime) then
        ltimhr = morhr
     else
-       ltimhr = time1*60d0*24d0
+       ltimhr = time1/3600d0
     endif
     !
     do ia = 1,nadred+nasupl
@@ -2489,13 +2510,13 @@ subroutine fm_dredge(error)
        endif
     enddo
     !
-!    if (numdomains > 1 .or. parll) then
-!       !
-!       ! Communicate dump capacity with other domains
-!       !
-!       call dredgecommunicate(globaldumpcap, nadump, error, msgstr)
-!       if (error) goto 999
-!    endif
+    if (ndomains > 1) then
+       !
+       ! Communicate dump capacity with other domains
+       !
+       call fm_dredgecommunicate(globaldumpcap, nadump, error, msgstr)
+       if (error) goto 999
+    endif
     !
     ! For each dredging area carry out the dredging.
     !
@@ -2611,19 +2632,19 @@ subroutine fm_dredge(error)
           endif
        enddo
        !
-!       if (.not.pdredge%in1domain) then
-!          !
-!          ! communicate dredge data among domains
-!          !
-!          call dredgecommunicate(reflevel, pdredge%npnt, error, msgstr)
-!          if (error) goto 999
-!          call dredgecommunicate(bedlevel, pdredge%npnt, error, msgstr)
-!          if (error) goto 999
-!          call dredgecommunicate(hdune, pdredge%npnt, error, msgstr)
-!          if (error) goto 999
-!          call dredgecommunicate(sedimentdepth, pdredge%npnt, error, msgstr)
-!          if (error) goto 999
-!       endif
+       if (.not.pdredge%in1domain) then
+          !
+          ! communicate dredge data among domains
+          !
+          call fm_dredgecommunicate(reflevel, pdredge%npnt, error, msgstr)
+          if (error) goto 999
+          call fm_dredgecommunicate(bedlevel, pdredge%npnt, error, msgstr)
+          if (error) goto 999
+          call fm_dredgecommunicate(hdune, pdredge%npnt, error, msgstr)
+          if (error) goto 999
+          call fm_dredgecommunicate(sedimentdepth, pdredge%npnt, error, msgstr)
+          if (error) goto 999
+       endif
        !
        availvolume = 0.0_fp
        area => pdredge%area
@@ -3345,13 +3366,13 @@ subroutine fm_dredge(error)
        enddo
     enddo
     !
-!    if (numdomains > 1 .or. parll) then
-!       !
-!       ! Communicate dredged volumes with other domains
-!       !
-!       call dredgecommunicate(voldred, (nadred+nasupl)*(lsedtot+1), error, msgstr)
-!       if (error) goto 999
-!    endif
+    if (ndomains > 1) then
+       !
+       ! Communicate dredged volumes with other domains
+       !
+       call fm_dredgecommunicate(voldred, (nadred+nasupl)*(lsedtot+1), error, msgstr)
+       if (error) goto 999
+    endif
     !
     !--------------------------------------------------------------------------
     ! Distribute sediments over dump areas
@@ -3367,6 +3388,7 @@ subroutine fm_dredge(error)
           voldredged = voldredged + voldred(ia,lsed)
        enddo
        totvoldred(ia) = totvoldred(ia) + voldredged + voldred(ia,lsedtot+1)
+       totvoldredfrac(ia,:) = totvoldredfrac(ia,:) + voldred(ia,:)
        if (voldredged<=0.0_fp) cycle
        !
        select case (pdredge%dumpdistr)
@@ -3508,7 +3530,8 @@ subroutine fm_dredge(error)
        do lsed = 1, lsedtot
           voldumped = voldumped + voldump(ib, lsed)
        enddo
-       totvoldump(ib) = totvoldump(ib) + voldumped
+       totvoldump(ib)       = totvoldump(ib) + voldumped
+       totvoldumpfrac(ib,:) = totvoldumpfrac(ib,:) + voldump(ib,:)
        !
        ! Skip dump areas where nothing has to be dumped
        !
@@ -3543,17 +3566,17 @@ subroutine fm_dredge(error)
        enddo
        !
        area => pdump%area
-       !if (.not.pdump%in1domain) then
-       !   !
-       !   ! communicate dredge data among domains
-       !   !
-       !   call dredgecommunicate(reflevel, pdump%npnt, error, msgstr)
-       !   if (error) goto 999
-       !   call dredgecommunicate(bedlevel, pdump%npnt, error, msgstr)
-       !   if (error) goto 999
-       !   call dredgecommunicate(dz_dump, pdump%npnt, error, msgstr)
-       !   if (error) goto 999
-       !endif
+       if (.not.pdump%in1domain) then
+          !
+          ! communicate dredge data among domains
+          !
+          call fm_dredgecommunicate(reflevel, pdump%npnt, error, msgstr)
+          if (error) goto 999
+          call fm_dredgecommunicate(bedlevel, pdump%npnt, error, msgstr)
+          if (error) goto 999
+          call fm_dredgecommunicate(dz_dump, pdump%npnt, error, msgstr)
+          if (error) goto 999
+       endif
        !
        ! Go through dumping procedure only if some dump capacity is available
        ! locally
@@ -3830,4 +3853,18 @@ subroutine sortindices(nm     ,npnt   ,val    ,nmlb   ,nmub   ,increasing)
     !
 end subroutine sortindices
 
-
+subroutine fm_dredgecommunicate(a, n, error, msgstr)
+    use precision
+    use m_partitioninfo
+    implicit none
+    !
+    integer               , intent(in)    :: n      ! length of real array
+    real(fp), dimension(n), intent(inout) :: a      ! real array to be accumulated
+    logical               , intent(out)   :: error  ! error flag
+    character(*)          , intent(out)   :: msgstr ! string to pass message
+    !
+    error = .false. 
+    msgstr = ''
+    call reduce_sum(n, a)
+    
+end subroutine fm_dredgecommunicate

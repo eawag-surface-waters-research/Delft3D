@@ -5379,7 +5379,7 @@ if (ihorvic > 0 .or. NDRAW(29) == 37) then
              endif
              vicL = vicL + vicc
 
-             vicLu(L) = vicL                          ! horizontal eddy viscosity not limited
+             vicLu(L) = vicL              ! horizontal eddy viscosity not limited
 
              if (ja_timestep_auto_diff == 0) then 
                 dxiAu = dxi(L)*hu(L)*wu(L)
@@ -8368,7 +8368,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  endif   
  
 call flow_bedforminit(2)        ! bedforms  stage 2: parameter read and process
-call flow_dredgeinit()          ! dredging and dumping
+!  call flow_dredgeinit()          ! dredging and dumping
 
  !! Initialise Fourier Analysis
  !if (len_trim(md_foufile)>0) then
@@ -8436,6 +8436,8 @@ call flow_dredgeinit()          ! dredging and dumping
  if (iresult /= DFM_NOERR) then
     goto 1234
  end if
+ 
+ call flow_dredgeinit()          ! dredging and dumping. Moved here because julrefdate needed
 
  if (jawave .eq. 4) then
     call xbeach_wave_init()
@@ -8780,7 +8782,7 @@ subroutine flow_dredgeinit()
    call initdredge(dadpar)
    call rddredge(dadpar, md_dredgefile, error)
    if (error) then
-      call mess(LEVEL_FATAL, 'Error in initialisation of dredging module.')
+      call mess(LEVEL_FATAL, 'unstruc::flow_dredgeinit - Error in initialisation of dredging module.')
    end if
 
 end subroutine flow_dredgeinit
@@ -14827,7 +14829,8 @@ subroutine unc_write_his(tim)            ! wrihis
                      id_sedbtrans, id_sedstrans,&
                      id_srcdim, id_srclendim, id_srcname, id_qsrccur, id_vsrccum, id_qsrcavg, id_pred, id_presa, id_pretm, id_srcx, id_srcy, id_srcptsdim, &
                      id_partdim, id_parttime, id_partx, id_party, id_partz, &
-                     id_dredlinkdim, id_dreddim, id_dumpdim, id_dredlink_dis, id_dred_dis, id_dump_dis, id_dred_tfrac, id_plough_tfrac, id_lsedtot
+                     id_dredlinkdim, id_dreddim, id_dumpdim, id_dredlink_dis, id_dred_dis, id_dump_dis, id_dred_tfrac, id_plough_tfrac, id_lsedtot, id_dred_name, id_dump_name, id_frac_name !id_dump_dis_frac, id_dred_dis_frac
+
     integer, allocatable, save :: id_tra(:)
     integer, allocatable, save :: id_sf(:), id_ws(:), id_seddif(:)            ! sediment fractions 
     integer, allocatable, save :: id_const(:), id_voltot(:)
@@ -15665,12 +15668,21 @@ subroutine unc_write_his(tim)            ! wrihis
         
         if(dad_included) then  ! Output for dredging and dumping
             ierr = nf90_def_dim(ihisfile, 'ndredlink', dadpar%nalink, id_dredlinkdim)
-            ierr = nf90_def_dim(ihisfile, 'ndred', dadpar%nadred, id_dreddim)
+            ierr = nf90_def_dim(ihisfile, 'ndred', dadpar%nadred+dadpar%nasupl, id_dreddim)
             ierr = nf90_def_dim(ihisfile, 'ndump', dadpar%nadump, id_dumpdim)
-            ierr = nf90_def_dim(ihisfile, 'sedfrac', stmpar%lsedtot, id_lsedtot)
+            ierr = nf90_def_dim(ihisfile, 'nfrac', stmpar%lsedtot+1, id_lsedtot)
+            
+            ierr = nf90_def_var(ihisfile, 'dredge_area_name',         nf90_char,   (/ id_strlendim, id_dreddim /), id_dred_name)
+            ierr = nf90_put_att(ihisfile, id_dred_name,  'long_name'    , 'dredge area identifier') 
+            
+            ierr = nf90_def_var(ihisfile, 'dump_area_name',         nf90_char,   (/ id_strlendim, id_dumpdim /), id_dump_name)
+            ierr = nf90_put_att(ihisfile, id_dump_name,  'long_name'    , 'dump area identifier')
+            
+            ierr = nf90_def_var(ihisfile, 'sedfrac_name',         nf90_char,   (/ id_strlendim, id_lsedtot /), id_frac_name)
+            ierr = nf90_put_att(ihisfile, id_frac_name,  'long_name'    , 'sediment fraction identifier')
            
             ierr = nf90_def_var(ihisfile, 'dred_link_discharge',     nf90_double, (/ id_dredlinkdim, id_lsedtot, id_timedim /), id_dredlink_dis)
-            ierr = nf90_put_att(ihisfile, id_dredlink_dis, 'long_name', 'Cumulative dredged material transported via links')
+            ierr = nf90_put_att(ihisfile, id_dredlink_dis, 'long_name', 'Cumulative dredged material transported via links per fraction')
             ierr = nf90_put_att(ihisfile, id_dredlink_dis, 'units', 'm3') !link_sum
         
             ierr = nf90_def_var(ihisfile, 'dred_discharge',     nf90_double, (/ id_dreddim, id_timedim /), id_dred_dis)
@@ -15680,6 +15692,14 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_def_var(ihisfile, 'dump_discharge',     nf90_double, (/ id_dumpdim, id_timedim /), id_dump_dis)
             ierr = nf90_put_att(ihisfile, id_dump_dis, 'long_name', 'Cumulative dredged material for dump areas')
             ierr = nf90_put_att(ihisfile, id_dump_dis, 'units', 'm3') !totvoldump
+           
+            !ierr = nf90_def_var(ihisfile, 'dred_discharge_frac',     nf90_double, (/ id_dreddim, id_lsedtot, id_timedim /), id_dred_dis_frac)
+            !ierr = nf90_put_att(ihisfile, id_dred_dis_frac, 'long_name', 'Cumulative dredged material per fraction for dredge areas')
+            !ierr = nf90_put_att(ihisfile, id_dred_dis_frac, 'units', 'm3') !totvoldred
+           
+            !ierr = nf90_def_var(ihisfile, 'dump_discharge_frac',     nf90_double, (/ id_dumpdim, id_lsedtot, id_timedim /), id_dump_dis_frac)
+            !ierr = nf90_put_att(ihisfile, id_dump_dis_frac, 'long_name', 'Cumulative dumped material per fraction for dump areas')
+            !ierr = nf90_put_att(ihisfile, id_dump_dis_frac, 'units', 'm3') !totvoldump            
            
             ierr = nf90_def_var(ihisfile, 'dred_time_frac',     nf90_double, (/ id_dreddim, id_timedim /), id_dred_tfrac)
             ierr = nf90_put_att(ihisfile, id_dred_tfrac, 'long_name', 'Time fraction spent dredging')
@@ -15757,7 +15777,22 @@ subroutine unc_write_his(tim)            ! wrihis
                ierr = nf90_put_var(ihisfile, id_weirgenname,  trim(cgen_ids(igen)),      (/ 1, i /))
             end do
         end if
-
+        
+        if (dad_included) then
+           !
+           do i=1,stmpar%lsedtot
+              ierr = nf90_put_var(ihisfile, id_frac_name, trim(stmpar%sedpar%namsed(i)), (/ 1, i /))    
+           enddo
+           ierr = nf90_put_var(ihisfile, id_frac_name, 'subsoil sediment', (/ 1, stmpar%lsedtot+1 /))        ! rest category
+           !
+           do i=1,(dadpar%nadred+dadpar%nasupl)
+              ierr = nf90_put_var(ihisfile, id_dred_name, trim(dadpar%dredge_areas(i)), (/ 1, i /)) 
+           enddo 
+           !
+           do i=1,dadpar%nadump
+              ierr = nf90_put_var(ihisfile, id_dump_name, trim(dadpar%dump_areas(i)), (/ 1, i /))
+           enddo
+        endif
     endif
     ! Increment output counters in m_flowtimes.
     time_his = tim
@@ -16079,12 +16114,15 @@ subroutine unc_write_his(tim)            ! wrihis
       end if
 
     if( dad_included ) then  ! Output for dredging and dumping
-       ierr = nf90_put_var(ihisfile, id_dredlink_dis, dadpar%link_sum  , start = (/ 1, 1, it_his /), count = (/ dadpar%nalink, stmpar%lsedtot, 1 /))
-       ierr = nf90_put_var(ihisfile, id_dred_dis    , dadpar%totvoldred, start = (/ 1, it_his /), count = (/ dadpar%nadred, 1 /))
+       ierr = nf90_put_var(ihisfile, id_dredlink_dis, dadpar%link_sum  , start = (/ 1, 1, it_his /), count = (/ dadpar%nalink, stmpar%lsedtot+1, 1 /))
+       ierr = nf90_put_var(ihisfile, id_dred_dis    , dadpar%totvoldred, start = (/ 1, it_his /), count = (/ dadpar%nadred+dadpar%nasupl, 1 /))
        ierr = nf90_put_var(ihisfile, id_dump_dis    , dadpar%totvoldump, start = (/ 1, it_his /), count = (/ dadpar%nadump, 1 /))
+       !ierr = nf90_put_var(ihisfile, id_dred_dis_frac    , dadpar%totvoldredfrac, start = (/ 1, 1, it_his /), count = (/ dadpar%nadred+dadpar%nasupl, stmpar%lsedtot+1, 1 /))
+       !ierr = nf90_put_var(ihisfile, id_dump_dis_frac    , dadpar%totvoldumpfrac, start = (/ 1, 1, it_his /), count = (/ dadpar%nadump, stmpar%lsedtot, 1 /))
+       
        cof0 = 1d0 ; if( time_his > 0d0 ) cof0 = time_his 
-       ierr = nf90_put_var(ihisfile, id_dred_tfrac  , dadpar%ndredged/cof0  , start = (/ 1, it_his /), count = (/ dadpar%nadred, 1 /))
-       ierr = nf90_put_var(ihisfile, id_plough_tfrac, dadpar%nploughed/cof0 , start = (/ 1, it_his /), count = (/ dadpar%nadred, 1 /))
+       ierr = nf90_put_var(ihisfile, id_dred_tfrac  , dadpar%ndredged/cof0  , start = (/ 1, it_his /), count = (/ dadpar%nadred+dadpar%nasupl, 1 /))
+       ierr = nf90_put_var(ihisfile, id_plough_tfrac, dadpar%nploughed/cof0 , start = (/ 1, it_his /), count = (/ dadpar%nadred+dadpar%nasupl, 1 /))
     endif
 
     do num = 1,MAX_IDX
