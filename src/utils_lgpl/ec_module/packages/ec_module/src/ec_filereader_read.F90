@@ -1222,14 +1222,14 @@ module m_ec_filereader_read
       !> Read the file from the current line untill a line containing the keyword is found and read.
       !! meteo1.f90: reaspwheader
       function ecFindInFile(minp, keyword) result(rec)
-         character(maxNameLen)                 :: rec
-         integer                  , intent(in) :: minp    !< IO unit number
-         character(*)             , intent(in) :: keyword !< keyword to find
+         character(maxFileNameLen)                 :: rec
+         integer                      , intent(in) :: minp    !< IO unit number
+         character(*)                 , intent(in) :: keyword !< keyword to find
          !
          ! locals
-         integer               :: istat !< status of read operation
-         character(maxNameLen) :: rec_small
-         character(maxNameLen) :: keyword_small
+         integer                                   :: istat !< status of read operation
+         character(maxFileNameLen)                     :: rec_small
+         character(maxFileNameLen)                     :: keyword_small
          !
          ! body
          rec = ' '
@@ -1254,24 +1254,22 @@ module m_ec_filereader_read
             end if
          enddo
       end function ecFindInFile
-      
+            
       ! =======================================================================
       
       !> In a spiderweb or curvi file, find the value curresponding to the specified keyword.
       !! meteo1.f90: reaspwheader
       function ecSpiderwebAndCurviFindInFile(minp, keyword, do_rewind) result(answer)
-         character(len=20)                     :: answer
-         integer,                   intent(in) :: minp      !< IO unit number
-         character(len=*),          intent(in) :: keyword   !< keyword to find
-         logical, optional,         intent(in) :: do_rewind !< rewind file before search        
+         character(len=maxFileNameLen)                     :: answer
+         integer,                   intent(in)             :: minp      !< IO unit number
+         character(len=*),          intent(in)             :: keyword   !< keyword to find
+         logical, optional,         intent(in)             :: do_rewind !< rewind file before search
          !
-         character(len=maxNameLen) :: word
-         character(len=maxNameLen) :: rec     !< content of read line
-         integer                   :: istat   !< status of read operation
-         integer                   :: indx    !< helper index variable
+         character(len=maxFileNameLen+20)                  :: rec         !< content of read line
+         integer                                           :: indx        !< helper index variable
+         integer                                           :: indxComment !< position in string of comments
          !
          answer = ' '
-         word = keyword
          if (present(do_rewind)) then
             if (do_rewind) then
                rewind(unit = minp)
@@ -1280,19 +1278,23 @@ module m_ec_filereader_read
             rewind(unit = minp)
          end if
          !
-         rec = ecFindInFile(minp, word)
+         rec = ecFindInFile(minp, keyword)
          indx = index(rec, '=')
+         indxComment = index(rec, '#')
          if (indx /= 0) then
-            read(rec(indx+1:indx+20),"(A20)", iostat = istat) answer
-            if (istat /= 0) then
-               call setECMessage("ERROR: ec_filereader_read::ecSpiderwebAndCurviFindInFile: Failed to read an existing line.")
-               answer = '                    '
-            end if
+            if (indxComment /= 0) then
+               answer = rec(indx+1:indxComment - 1)
+            else
+               answer = rec(indx+1:)
+            endif
+         else
+            call setECMessage("ERROR: ec_filereader_read::ecSpiderwebAndCurviFindInFile: Failed to read an existing line.")
+            answer = ' '
          end if
       end function ecSpiderwebAndCurviFindInFile
       
       ! =======================================================================
-      
+     
       !> In a t3D file, find the list of values following the specified keyword.
       function ect3DFindInFile(minp, keyword, do_rewind) result(answer)
          character(len=1000)        :: answer

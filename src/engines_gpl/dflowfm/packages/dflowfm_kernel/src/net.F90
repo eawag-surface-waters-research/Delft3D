@@ -34226,6 +34226,7 @@ end subroutine rearrange_worldmesh
       use m_sferic
       use geometry_module, only: normalout, comp_masscenter
       use gridoperations
+      use unstruc_messages
       
       implicit none
 
@@ -34315,6 +34316,10 @@ end subroutine rearrange_worldmesh
          end do
 
       else ! 1D
+      
+         if ( jsferic.eq.1 ) then
+            call mess(LEVEL_ERROR, 'make_dual_cell: 1D not supported in spherical coordinates')
+         end if
       
          w   = Wu1Duni
          num = 0

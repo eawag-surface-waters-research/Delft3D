@@ -1193,6 +1193,8 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_velocity_component_u1', jamapu1, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_velocity_component_u0', jamapu0, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_velocity_vector', jamapucvec, success)
+    call prop_get_integer(md_ptr, 'output', 'Wrimap_velocity_magnitude', jamapucmag, success)
+    call prop_get_integer(md_ptr, 'output', 'Wrimap_velocity_vectorq', jamapucqvec, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_upward_velocity_component', jamapww1, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_density_rho', jamaprho, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_horizontal_viscosity_viu', jamapviu, success)
@@ -2431,6 +2433,12 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     endif
     if (writeall .or. jamapucvec /= 1) then
         call prop_set(prop_ptr, 'output', 'Wrimap_velocity_vector', jamapucvec, 'Write cell-center velocity vectors to map file (1: yes, 0: no)')
+    endif
+    if (writeall .or. jamapucmag /= 1) then
+        call prop_set(prop_ptr, 'output', 'Wrimap_velocity_magnitude', jamapucmag, 'Write cell-center velocity vector magnitude to map file (1: yes, 0: no)')
+    endif
+    if (writeall .or. jamapucqvec /= 1) then
+        call prop_set(prop_ptr, 'output', 'Wrimap_velocity_vectorq', jamapucqvec, 'Write cell-center velocity vectors (discharge-based) to map file (1: yes, 0: no)')
     endif
     if(writeall .or. jamapww1 /= 1) then
         call prop_set(prop_ptr, 'output', 'Wrimap_upward_velocity_component', jamapww1, 'Write upward velocity component on cell interfaces (1: yes, 0: no)')

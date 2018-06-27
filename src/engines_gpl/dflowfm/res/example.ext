@@ -64,6 +64,8 @@
 *         =6  : MINABS
 *         =7  : KDTREE (LIKE 1, BUT FAST AVERAGING)
 *
+* PERCENTILEMINMAX : Percentileminmax, average min or max Perc %
+* 
 * OPERAND =O  : Override at all points
 *         =+  : Add to previously specified value
 *         =*  : Multiply with previously specified value

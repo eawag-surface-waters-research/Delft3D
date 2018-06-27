@@ -56,6 +56,7 @@ implicit none
 integer            :: nerr_
 logical            :: err_firsttime_
 character(len=255) :: err_firstline_
+integer            :: err_level_
 
 !> All NetCDF files should be opened through unc_open or unc_create,
 !! such that all opened files are maintained and can be properly closed
@@ -3268,9 +3269,6 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
          if (jaeulervel==1 .and. jawave>0) then ! TODO: AvD:refactor such that yes<->no Eulerian velocities are in parameters below:
             ierr = unc_def_var_map(mapids, mapids%id_ucx, nf90_double, iLocS, 'ucx', 'sea_water_x_eulerian_velocity',      'Flow element center eulerian velocity vector, x-component', 'm s-1')
             ierr = unc_def_var_map(mapids, mapids%id_ucy, nf90_double, iLocS, 'ucy', 'sea_water_y_eulerian_velocity',      'Flow element center eulerian velocity vector, y-component', 'm s-1')
-            ierr = unc_def_var_map(mapids, mapids%id_ucxq, nf90_double, iLocS, 'ucxq', 'ucxq_eulerian_velocity', 'Flow element center eulerian velocity vector, ucxq-component', 'm s-1')
-            ierr = unc_def_var_map(mapids, mapids%id_ucyq, nf90_double, iLocS, 'ucyq', 'ucyq_eulerian_velocity', 'Flow element center eulerian velocity vector, ucyq-component', 'm s-1')
-            ierr = unc_def_var_map(mapids, mapids%id_ucmag, nf90_double, iLocS, 'ucmag', 'sea_water_eulerian_speed', 'Flow element center eulerian velocity magnitude', 'm s-1')
          else
             if (jsferic == 0) then
                ierr = unc_def_var_map(mapids, mapids%id_ucx, nf90_double, iLocS, 'ucx', 'sea_water_x_velocity',      'Flow element center velocity vector, x-component', 'm s-1')
@@ -3279,9 +3277,6 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
                ierr = unc_def_var_map(mapids, mapids%id_ucx, nf90_double, iLocS, 'ucx', 'eastward_sea_water_velocity',      'Flow element center velocity vector, x-component', 'm s-1')
                ierr = unc_def_var_map(mapids, mapids%id_ucy, nf90_double, iLocS, 'ucy', 'northward_water_velocity',      'Flow element center velocity vector, y-component', 'm s-1')
             end if
-            ierr = unc_def_var_map(mapids, mapids%id_ucmag, nf90_double, iLocS, 'ucmag', 'sea_water_speed', 'Flow element center velocity magnitude', 'm s-1')
-            ierr = unc_def_var_map(mapids, mapids%id_ucxq, nf90_double, iLocS, 'ucxq', 'ucxq_velocity', 'Flow element center velocity vector based discharge, x-component', 'm s-1')
-            ierr = unc_def_var_map(mapids, mapids%id_ucyq, nf90_double, iLocS, 'ucyq', 'ucyq_velocity', 'Flow element center velocity vector based discharge, y-component', 'm s-1')
          end if
          if (kmx > 0) then
             ierr = unc_def_var_map(mapids, mapids%id_ucz, nf90_double, UNC_LOC_S3D, 'ucz', 'upward_sea_water_velocity', 'Flow element center velocity vector, z-component', 'm s-1')
@@ -3293,7 +3288,25 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
                ierr = unc_def_var_map(mapids, mapids%id_ucxa, nf90_double, UNC_LOC_S, 'ucxa', 'eastward_sea_water_velocity', 'Flow element center depth-averaged velocity, x-component', 'm s-1')
                ierr = unc_def_var_map(mapids, mapids%id_ucya, nf90_double, UNC_LOC_S, 'ucya', 'northward_sea_water_velocity', 'Flow element center depth-averaged velocity, y-component', 'm s-1')
             end if
+         end if
+      end if
+      if(jamapucmag > 0) then
+         if (jaeulervel==1 .and. jawave>0) then ! TODO: AvD:refactor such that yes<->no Eulerian velocities are in parameters below:
+            ierr = unc_def_var_map(mapids, mapids%id_ucmag, nf90_double, iLocS, 'ucmag', 'sea_water_eulerian_speed', 'Flow element center eulerian velocity magnitude', 'm s-1')
+         else
+            ierr = unc_def_var_map(mapids, mapids%id_ucmag, nf90_double, iLocS, 'ucmag', 'sea_water_speed', 'Flow element center velocity magnitude', 'm s-1')
+         end if
+         if (kmx > 0) then
             ierr = unc_def_var_map(mapids, mapids%id_ucmaga, nf90_double, UNC_LOC_S, 'ucmaga', 'sea_water_speed', 'Flow element center depth-averaged velocity magnitude', 'm s-1')
+         end if
+      end if
+      if(jamapucqvec > 0) then
+         if (jaeulervel==1 .and. jawave>0) then ! TODO: AvD:refactor such that yes<->no Eulerian velocities are in parameters below:
+            ierr = unc_def_var_map(mapids, mapids%id_ucxq, nf90_double, iLocS, 'ucxq', 'ucxq_eulerian_velocity', 'Flow element center eulerian velocity vector, ucxq-component', 'm s-1')
+            ierr = unc_def_var_map(mapids, mapids%id_ucyq, nf90_double, iLocS, 'ucyq', 'ucyq_eulerian_velocity', 'Flow element center eulerian velocity vector, ucyq-component', 'm s-1')
+         else
+            ierr = unc_def_var_map(mapids, mapids%id_ucxq, nf90_double, iLocS, 'ucxq', 'ucxq_velocity', 'Flow element center velocity vector based discharge, x-component', 'm s-1')
+            ierr = unc_def_var_map(mapids, mapids%id_ucyq, nf90_double, iLocS, 'ucyq', 'ucyq_velocity', 'Flow element center velocity vector based discharge, y-component', 'm s-1')
          end if
       end if
       if (kmx > 0) then
@@ -3843,7 +3856,7 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
    end if
 
    ! TODO: AvD below: workx/y needs to be reset with miss/0 values before using.
-   if (jamapucvec == 1) then
+   if (jamapucvec == 1 .or. jamapucmag == 1 .or. jamapucqvec == 1) then
       !
       ! Copy ucx/ucy to workx/worky
       ! They will optionally be transformed into Eulerian velocities
@@ -3866,51 +3879,62 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
          call setucxucyeuler() ! TODO: JR: this does not work/is not relevant yet for 3D ucx velocities.
       endif
 
-      ierr = unc_put_var_map(mapids, mapids%id_ucx, iLocS, workx)     ! JRE langrangian or eulerian, see write_map_filepointer
-      ierr = unc_put_var_map(mapids, mapids%id_ucy, iLocS, worky)
-
-      call realloc(work1d, ndkx, keepExisting = .false.)
-      if ( kmx.gt.0 ) then
-         do kk=1,ndx
-            call getkbotktop(kk,kb,kt)
-            do k = kb,kt
-               work1d(k) = sqrt(workx(k)**2 + worky(k)**2) ! TODO: this does not include vertical/w-component now.
-            end do
-         end do
-      else
-         do kk = 1,ndx
-             work1d(kk) = sqrt(workx(kk)**2 + worky(kk)**2)
-         enddo     
+      if (jamapucvec == 1) then
+         ierr = unc_put_var_map(mapids, mapids%id_ucx, iLocS, workx)     ! JRE langrangian or eulerian, see write_map_filepointer
+         ierr = unc_put_var_map(mapids, mapids%id_ucy, iLocS, worky)
       end if
-      ierr = unc_put_var_map(mapids, mapids%id_ucmag, iLocS, work1d)
+
+      if (jamapucmag == 1) then
+         call realloc(work1d, ndkx, keepExisting = .false.)
+         if ( kmx.gt.0 ) then
+            do kk=1,ndx
+               call getkbotktop(kk,kb,kt)
+               do k = kb,kt
+                  work1d(k) = sqrt(workx(k)**2 + worky(k)**2) ! TODO: this does not include vertical/w-component now.
+               end do
+            end do
+         else
+            do kk = 1,ndx
+                work1d(kk) = sqrt(workx(kk)**2 + worky(kk)**2)
+            enddo     
+         end if
+         ierr = unc_put_var_map(mapids, mapids%id_ucmag, iLocS, work1d)
+      end if
 
       if (kmx > 0) then
          call reconstructucz(0)
-         ierr = unc_put_var_map(mapids, mapids%id_ucz, UNC_LOC_S3D, ucz)
-         ierr = unc_put_var_map(mapids, mapids%id_ucxa, UNC_LOC_S, ucxq)
-         ierr = unc_put_var_map(mapids, mapids%id_ucya, UNC_LOC_S, ucyq)
-         do k=1,size(ucxq)
-            work1d(k) = sqrt(ucxq(k)**2 + ucyq(k)**2) ! TODO: this does not include vertical/w-component now.
-         end do
-         ierr = unc_put_var_map(mapids, mapids%id_ucmaga, UNC_LOC_S, work1d)
+         if (jamapucvec == 1) then
+            ierr = unc_put_var_map(mapids, mapids%id_ucz, UNC_LOC_S3D, ucz)
+            ierr = unc_put_var_map(mapids, mapids%id_ucxa, UNC_LOC_S, ucxq)
+            ierr = unc_put_var_map(mapids, mapids%id_ucya, UNC_LOC_S, ucyq)
+         end if
+
+         if (jamapucmag == 1) then
+            do k=1,size(ucxq)
+               work1d(k) = sqrt(ucxq(k)**2 + ucyq(k)**2) ! TODO: this does not include vertical/w-component now.
+            end do
+            ierr = unc_put_var_map(mapids, mapids%id_ucmaga, UNC_LOC_S, work1d)
+         end if
       end if
 
-      if (kmx > 0) then
-         do kk = 1,ndx
-             call getkbotktop(kk,kb,kt)
-             do k = kb,kt
-                 workx(k) = ucxq(k)
-                 worky(k) = ucyq(k) 
-             enddo
-         enddo
-      else
-         do kk = 1,ndx
-             workx(kk) = ucxq(kk)
-             worky(kk) = ucyq(kk)
-         enddo
-      endif
-      ierr = unc_put_var_map(mapids, mapids%id_ucxq, iLocS, workx)
-      ierr = unc_put_var_map(mapids, mapids%id_ucyq, iLocS, worky)
+      if (jamapucqvec == 1) then
+         if (kmx > 0) then
+            do kk = 1,ndx
+                call getkbotktop(kk,kb,kt)
+                do k = kb,kt
+                    workx(k) = ucxq(k)
+                    worky(k) = ucyq(k) 
+                enddo
+            enddo
+         else
+            do kk = 1,ndx
+                workx(kk) = ucxq(kk)
+                worky(kk) = ucyq(kk)
+            enddo
+         endif
+         ierr = unc_put_var_map(mapids, mapids%id_ucxq, iLocS, workx)
+         ierr = unc_put_var_map(mapids, mapids%id_ucyq, iLocS, worky)
+      end if
 
    end if
    if (kmx > 0) then
@@ -10909,6 +10933,8 @@ subroutine unc_write_flowgeom_filepointer_ugrid(mapids, jabndnd)
    ierr = ug_inq_varid(mapids%ncid, mapids%meshids2d, 'node_z', mapids%id_netnodez(2))
    ! ierr = ug_inq_varid(mapids%ncid, mapids%meshids3d, 'node_z', mapids%id_netnodez(3)) ! TODO: AvD: 3D UGRID not yet
    
+!   ierr = unc_def_var_map(mapids, mapids%id_flowelemcontourx(:), nf90_double, UNC_LOC_S, 'FlowElemContour_x', '', '', 'm', (/ id_flowelemcontourptsdim, id_seddim, -1 /).
+
    ierr = unc_def_var_map(mapids, mapids%id_flowelemba(:), nf90_double, UNC_LOC_S, 'flowelem_ba', 'cell_area', '', 'm2', 0)
    ierr = unc_def_var_map(mapids, mapids%id_flowelembl(:), nf90_double, UNC_LOC_S, 'flowelem_bl', 'altitude', 'flow element center bedlevel (bl)', 'm', 0)
    ! ierr = nf90_put_att(igeomfile, id_flowelembl, 'positive',      'up') ! Not allowed for non-coordinate variables
@@ -11304,19 +11330,29 @@ end subroutine unc_write_flowgeom_filepointer
 !! errors. Generally called at start of any routine that wants to use
 !! routine check_error. The informative message is only shown/used when
 !! later check_error's indeed detect an error.
-subroutine prepare_error(firstline)
+subroutine prepare_error(firstline, level)
     character(len=*), intent(in) :: firstline !< Informative message for screen/log.
+    integer,          intent(in), optional :: level !< Error level (one from LEVEL_(FATAL|ERROR|WARN|INFO|DEBUG), default: LEVEL_WARN.)
 
     err_firstline_ = firstline
     err_firsttime_ = .true.
     nerr_          = 0
+    if (present(level)) then
+       err_level_ = level
+    else
+       err_level_ = LEVEL_WARN
+    end if
+
 end subroutine prepare_error
 
-subroutine check_error(ierr, info)
+!> Check a NetCDF error status and print a message when it is not nf90_noerr.
+subroutine check_error(ierr, info, level)
     integer, intent(in)        :: ierr
-    character(len=*), intent(in), optional :: info
+    character(len=*), intent(in), optional :: info  !< Caller's information string. Will be printed as prefix to the NetCDF error string.
+    integer,          intent(in), optional :: level !< Error level (one from LEVEL_(FATAL|ERROR|WARN|INFO|DEBUG), default: the level set by prepare_error.)
 
     character(len=255)         :: infostring
+    integer :: local_level
 
     if (ierr /= nf90_noerr) then
         nerr_ = nerr_ + 1
@@ -11334,8 +11370,14 @@ subroutine check_error(ierr, info)
             err_firsttime_ = .false.
         endif
 
+        if (present(level)) then
+           local_level = level
+        else
+           local_level = err_level_ ! from prepare_error()
+        end if
+
         ! Actual error line
-        call mess(LEVEL_WARN, 'NetCDF error: ', nf90_strerror(ierr), trim(infostring))
+        call mess(local_level, 'NetCDF error: ', nf90_strerror(ierr), trim(infostring))
     endif
 end subroutine check_error
 
@@ -11596,7 +11638,7 @@ subroutine readcells(filename, ierr, jaidomain, jaiglobal_s, jareinitialize)
     call readyy('Reading net data',0d0)
     ja_oldformatread = 0
 
-    call prepare_error('Could not read net cells from NetCDF file '''//trim(filename)//''' (is not critical). Details follow:')
+    call prepare_error('Could not read net cells from NetCDF file '''//trim(filename)//''' (is not critical). Details follow:', LEVEL_DEBUG)
 
     nerr_ = 0
 

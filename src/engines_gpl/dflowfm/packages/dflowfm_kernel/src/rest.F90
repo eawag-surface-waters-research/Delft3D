@@ -5811,7 +5811,7 @@ contains
      select case(trim(bndtype))
         case( 'boundary' )
            ioutput = INETLINKS
-        case( 'velocitybnd', 'dischargebnd' )
+        case( 'velocitybnd', 'dischargebnd', '1d2dbnd' )
            ioutput = IFLOWLINKS
         case DEFAULT
            ioutput = IFLOWNODES

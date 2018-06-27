@@ -3956,6 +3956,7 @@
    USE M_SFERIC
    USE M_DEVICES
    use network_data, only: kn3typ
+   use m_missing, only: JINS
    implicit none
    integer :: jav
    integer :: jview
@@ -4124,6 +4125,10 @@
   ! ELSE IF (JVIEW .EQ. 4) THEN
   !    CALL KTEXT(' PERSP-view ',IWS-11,IHS-1,15)
   ! ENDIF
+   IF (JINS /= 1) THEN
+      CALL KTEXT(' JINS=0',IWS-16,IHS-2,15)
+   END IF
+
    IF (JSFERIC == 1) THEN
       CALL KTEXT(' SPHERICAL',IWS-9,IHS-2,15)
    ELSE
@@ -6024,6 +6029,9 @@ subroutine getktoplot(kk,k)
       ELSE IF (KEY .EQ. 43 .OR. KEY .EQ. 43+32) THEN    ! +-key
 !        CHANGE ZK VALUE mode
          JADD = 12
+      ELSE IF (KEY .EQ. 44) THEN                        ! ,-key
+!        INVERT JINS
+         JINS = (1-JINS)
       ELSE IF (KEY .EQ. 86 .OR. KEY .EQ. 86+32) THEN    ! V-key
          CALL VIEWCYCLE(KEY)
       ELSE IF (KEY .EQ. 32) THEN

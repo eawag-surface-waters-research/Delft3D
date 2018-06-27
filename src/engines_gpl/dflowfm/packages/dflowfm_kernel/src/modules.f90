@@ -1650,6 +1650,8 @@ subroutine default_flowexternalforcings()
     ngenstru = 0      ! nr of real general structures in the generalstructure set
     npump   = 0       ! npump dimension
     npumpsg = 0       ! nr of pump signals
+    ndambreak = 0     ! nr of dambreak links
+    ndambreaksg = 0   ! nr of dambreak signals 
     nklep   = 0       ! nr of kleps
     nqbnd   = 0       ! nr of q bnd's
     ! JRE
@@ -2296,6 +2298,8 @@ end subroutine default_turbulence
  integer                           :: jamapu1                   !< velocities to map file, 0: no, 1: yes
  integer                           :: jamapu0                   !< previous step velocities to map file, 0: no, 1: yes
  integer                           :: jamapucvec                !< velocity vectors to map file, 0: no, 1: yes
+ integer                           :: jamapucmag                !< velocity vector magnitude to map file, 0: no, 1: yes
+ integer                           :: jamapucqvec               !< velocity vectors (discharge based) to map file, 0: no, 1: yes
  integer                           :: jamapww1                  !< upward velocity on flow link to map file, 0: no, 1: yes
  integer                           :: jamapnumlimdt             !< num limdt to map file, 0: no, 1: yes
  integer                           :: jamaptaucurrent           !< shear stress to map file, 0: no, 1: yes
@@ -2630,6 +2634,8 @@ subroutine default_flowparameters()
     jamapu0 = 1
     jamapu1 = 1
     jamapucvec = 1
+    jamapucmag = 1
+    jamapucqvec = 0
     jamapww1 = 1
     jamapnumlimdt = 1
     jamaptaucurrent = 1
