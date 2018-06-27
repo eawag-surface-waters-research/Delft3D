@@ -226,7 +226,7 @@
 
          ! read integer time as character to avoid overflow on ddhhmmss format
 
-         if ( gettoken( ctime, ierr) .ne. 0 ) then
+         if ( gettoken( itime, ierr) .ne. 0 ) then
             write(lunrep,*) ' error reading sources file'
             write(lunrep,*) ' expected integer with breakpoint'
             goto 200
@@ -235,23 +235,16 @@
          ! convert to seconds if needed using integer*8
 
          if ( .not. time_in_seconds ) then
-            read( ctime, * , iostat = ierr ) itime
-            if ( ierr .ne. 0 ) then
-               write(lunrep,*) ' error reading sources file'
-               write(lunrep,*) ' expected integer with breakpoint'
-               goto 200
-            endif
             iday  = itime/1000000
             ihour = mod(itime,1000000)/10000
             imin  = mod(itime,10000)/100
             isec  = mod(itime,100)
             itime = iday*86400 + ihour*3600 + imin*60 + isec
-            write(ctime,'(i40)') itime
          endif
 
          ! now make an integer
 
-         read( ctime, * , iostat = ierr ) wasteload_data%times(ibrk)
+         wasteload_data%times(ibrk) = itime
          if ( ierr .ne. 0 ) then
             write(lunrep,*) ' error reading sources file'
             write(lunrep,*) ' expected integer with breakpoint'
