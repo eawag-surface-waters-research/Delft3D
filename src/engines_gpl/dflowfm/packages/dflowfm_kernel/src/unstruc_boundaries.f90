@@ -1442,7 +1442,7 @@ use m_readstructures
 
 implicit none
 character(len=256)    :: plifile
-integer                       :: i, L, Lf, kb, LL, ierr, k, kbi, n
+integer                       :: i, L, Lf, kb, LL, ierr, k, kbi, n, ifld
 integer                       :: nstr
 character (len=256)           :: fnam, rec
 integer, allocatable          :: pumpidx(:), gateidx(:), cdamidx(:), cgenidx(:)             ! temp
@@ -1940,24 +1940,42 @@ end do
             read(rec, *, iostat = ierr) tmpval
             if (ierr /= 0) then ! No number, so check for timeseries filename
                if (trim(rec) == 'REALTIME') then
-                  success = .false.
-                  call mess(LEVEL_ERROR, 'Programming error: general structure via structures.ini file does not yet support realtime control for '//trim(generalkeywrd(k)))
-                  ! TODO: AvD: UNST-1583: hulp(:,n) or zcgen(1, 1+kx, ..) should be filled via DLL's API
-                  !write(msgbuf, '(a,a,a)') 'Control for generalstructure ''', trim(strid), ''', '//trim(generalkeywrd(k))//' set to REALTIME.'
-                  !call dbg_flush()
+                  select case (trim(generalkeywrd(k)))
+                  case ('levelcenter', 'gatedoorheight', 'gateheight', 'door_opening_width')
+                     success = .true.
+                     write(msgbuf, '(a,a,a)') 'Control for generalstructure ''', trim(strid), ''', '//trim(generalkeywrd(k))//' set to REALTIME.'
+                     call dbg_flush()
+                  case default
+                     success = .false.
+                     call mess(LEVEL_ERROR, 'Programming error: general structure via structures.ini file does not support REALTIME control for '//trim(generalkeywrd(k)))
+               end select
+                  
+                     
                else
                   success = .false.
-                  call mess(LEVEL_ERROR, 'Programming error: general structure via structures.ini file does not yet support timeseries for '//trim(generalkeywrd(k)))
-                  ! TODO: AvD: UNST-1583: hulp(:,n) or zcgen(1, 1+kx, ..) should be filled via addtimespacerelation
-                  !qid = 'generalstructure'
-                  !fnam = trim(rec)
-                  !! Time-interpolated value will be placed in zcgen((n-1)*3+1) when calling ec_gettimespacevalue.
-                  !if (index(trim(fnam)//'|','.tim|')>0) then 
-                  !   success  = ec_addtimespacerelation(qid, xdum, ydum, kdum, 1, fnam, uniform, spaceandtime, 'O', targetIndex=(n-1)*kx+1) ! Hook up 1 component at a time, even when target element set has kx=3
-                  !endif 
-                  !if (index(trim(fnam)//'|','.cmp|')>0) then 
-                  !   success  = ec_addtimespacerelation(qid, xdum, ydum, kdum, 1, fnam, fourier, justupdate, 'O', targetIndex=(n-1)*kx+1) ! Hook up 1 component at a time, even when target element set has kx=3
-                  !endif 
+                  select case (trim(generalkeywrd(k)))
+                  case ('levelcenter')
+                     ifld = 1
+                  case ('gateheight') ! TODO: UNST-1936
+                     ifld = 2
+                  case ('door_opening_width')
+                     ifld = 3
+                  case default
+                     success = .false.
+                     call mess(LEVEL_ERROR, 'Programming error: general structure via structures.ini file does not yet support timeseries for '//trim(generalkeywrd(k)))
+                     ifld = 0
+                  end select
+                  if (ifld > 0) then
+                     ! Time-interpolated value will be placed in zcgen((n-1)*3+...) when calling ec_gettimespacevalue.
+                     qid = 'generalstructure'
+                     fnam = trim(rec)
+                     if (index(trim(fnam)//'|','.tim|')>0) then 
+                         success  = ec_addtimespacerelation(qid, xdum, ydum, kdum, 1, fnam, uniform, spaceandtime, 'O', targetIndex=(n-1)*kx+ifld) ! Hook up 1 component at a time, even when target element set has kx=3
+                     endif 
+                     if (index(trim(fnam)//'|','.cmp|')>0) then 
+                         success  = ec_addtimespacerelation(qid, xdum, ydum, kdum, 1, fnam, fourier, justupdate, 'O', targetIndex=(n-1)*kx+ifld) ! Hook up 1 component at a time, even when target element set has kx=3
+                     endif 
+                  end if
                end if
             else
                hulp(k,n) = tmpval ! Constant value for always, set it now already.
