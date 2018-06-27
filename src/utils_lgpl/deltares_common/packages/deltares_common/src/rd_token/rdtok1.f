@@ -29,12 +29,14 @@ C ======================================================================
       CHARACTER*1   CCHAR
       CHARACTER*(*) LCH  ( LSTACK ) , CHULP2
       DIMENSION     ILUN ( LSTACK )
+      INTEGER*8     IHULP8
       REAL*8        RHULP8
       
       CALL RDTOK2 ( LUNUT  , ILUN   , LCH    , LSTACK , CCHAR  ,
-     *              IPOSR  , NPOS   , CHULP2 , IHULP  , RHULP8  ,
+     *              IPOSR  , NPOS   , CHULP2 , IHULP8 , RHULP8  ,
      *              ITYPEX , IERR   )
       
+      IHULP = IHULP8
       RHULP = REAL(RHULP8)
       
       RETURN
@@ -98,6 +100,7 @@ C DATA ---------------------------------------------------- Arguments --
       CHARACTER*1   CCHAR
       CHARACTER*(*) LCH  ( LSTACK ) , CHULP2
       DIMENSION     ILUN ( LSTACK )
+      INTEGER*8     IHULP
       REAL*8        RHULP
 C
 C DATA -------------------------------------------------------- Local --

@@ -41,13 +41,14 @@
 
       integer          , private   :: type    ! type to be expected from rdtok1/2
       character(lchmax), private   :: cdummy  ! character dummy argument
-      integer          , private   :: idummy  ! integer dummy argument
+      integer*8        , private   :: idummy  ! integer dummy argument
       real*8           , private   :: rdummy  ! real dummy argument
 
       interface gettoken
          module procedure get_char_tok
          module procedure get_char_untileol_tok
          module procedure get_int_tok
+         module procedure get_int8_tok
          module procedure get_real_tok
          module procedure get_double_tok
          module procedure get_nochar_tok
@@ -145,6 +146,34 @@
          ierr = ierr2
 
       end function get_int_tok
+
+!          get an integer
+
+      function get_int8_tok ( anint8, ierr2 ) result ( ierr )
+
+         integer   (8), intent(  out) :: anint8
+         integer   (4), intent(inout) :: ierr2
+         integer   (4)                   ierr
+
+         if ( push ) then
+            if ( type .ne. 2 ) then
+               ierr2 = 1                ! there is no integer on the stack
+            else
+               anint8 = idummy
+               ierr2 = 0
+            endif
+            push  = .false.
+         else
+            type = 2
+            call rdtok2 ( lunut  , ilun   , lch    , lstack , cchar  ,              &
+     &                    iposr  , npos   , cdummy , idummy , rdummy ,              &
+     &                    type   , ierr2  )
+            anint8 = idummy
+            rdummy = idummy
+         endif
+         ierr = ierr2
+
+         end function get_int8_tok
 
 !             get a real
 
