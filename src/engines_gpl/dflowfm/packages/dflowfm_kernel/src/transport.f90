@@ -51,8 +51,8 @@ subroutine update_constituents(jarhoonly)
    use m_partitioninfo
    use m_timer
    use unstruc_messages
-   use m_flowwave,   only: fwx
    use m_sediment,   only: jatranspvel, jased, stmpar, stm_included, mtd
+   use m_waves
    implicit none
 
    integer :: jarhoonly 
@@ -136,7 +136,6 @@ subroutine update_constituents(jarhoonly)
       if (.not. stm_included) then     ! just do the normal stuff
          call comp_fluxhor3D(NUMCONST, limtyp, Ndkx, Lnkx, u1, q1, au, sqi, vol1, kbot, Lbot, Ltop,  kmxn, kmxL, constituents, difsedu, sigdifi, viu, vicouv, nsubsteps, jaupdate, jaupdatehorflux, ndeltasteps, jaupdateconst,fluxhor, dsedx, dsedy)   
       else
-         ! TO DO: 3D stokes drift, velocity asymmetry
          if ( jatranspvel.eq.0 .or. jatranspvel.eq.1 ) then       ! Lagrangian approach
             ! only add velocity asymmetry
             do LL=1,Lnx
@@ -149,9 +148,11 @@ subroutine update_constituents(jarhoonly)
 !           stokes+asymmetry
             do LL=1,Lnx
                do L=Lbot(LL),Ltop(LL)
-                  u1sed(L) = u1(L)-fwx%ustokes(L)+mtd%uau(L)  
-                  q1sed(L) = q1(L)+(mtd%uau(L)-fwx%ustokes(L))*Au(L)
+                  u1sed(L) = u1(L)-ustokes(L)  
+                  q1sed(L) = q1(L)-ustokes(L)*Au(L)
                end do
+               u1sed(Lbot(LL)) = u1sed(Lbot(LL))+mtd%uau(LL)               ! TO DO: 3D for velocity asymmetry
+               q1sed(Lbot(LL)) = q1sed(Lbot(LL))+mtd%uau(LL)*Au(Lbot(LL))  ! VR2004 already has this effect
             end do
          end if
          call comp_fluxhor3D(NUMCONST, limtyp, Ndkx, Lnkx, u1sed, q1sed, au, sqi, vol1, kbot, Lbot, Ltop,  kmxn, kmxL, constituents, difsedu, sigdifi, viu, vicouv, nsubsteps, jaupdate, jaupdatehorflux, ndeltasteps, noupdateconst,fluxhor, dsedx, dsedy)         

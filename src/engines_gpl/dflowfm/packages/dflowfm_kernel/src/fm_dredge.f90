@@ -436,6 +436,11 @@ contains
        inquire (file = trim(filename), exist = ex)
        if (ex) then
           call readtable(tseriesfile, trim(filename), julrefdat, errmsg)
+          if (.not. (validtable(tseriesfile))) then
+             call write_error(errmsg, unit=mdia)
+             error = .true.
+             return
+          endif
        elseif (filename /= 'dummyname') then
           errmsg =  'ERROR rddredge: Missing time series file "'//trim(filename)//'"'
           call write_error(errmsg, unit=mdia)

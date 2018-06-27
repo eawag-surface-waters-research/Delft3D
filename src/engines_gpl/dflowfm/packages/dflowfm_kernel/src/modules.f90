@@ -276,29 +276,29 @@ module m_waves
  double precision, allocatable, target      :: vstokes(:)           !< wave induced velocity, link-based and link-oriented
 
  double precision, allocatable              :: rlabda(:)
- ! DEBUG
- !double precision, allocatable              :: phiu(:)
- !\DEBUG
- double precision, allocatable              :: hsu(:)
- double precision, allocatable              :: bluf(:)
+ 
  double precision, allocatable              :: taubxu(:)            !< Maximal bed shear stress
- double precision, allocatable              :: cvalu0(:)
  double precision, allocatable              :: ypar(:)
  double precision, allocatable              :: cfwavhi(:)
  double precision, allocatable              :: cfhi_vanrijn(:)
-
+ double precision, allocatable              :: wblt(:)
+ double precision, allocatable              :: taux_cc(:), tauy_cc(:)
  double precision                           :: facmax               !< maximum wave force
  
  ! for visualisation
  integer                                    :: waveparopt
  integer                                    :: numoptwav
  
+ double precision, allocatable              :: ust_mag(:)
+ double precision, allocatable              :: fwav_mag(:)
+ 
  ! parameters, may be overwritten by user in mdu-file
  double precision                           :: gammax               !< Maximum wave height/water depth ratio
  double precision                           :: alfdeltau = 20d0     !< coeff for thickness of wave bed boundary layer
- double precision                           :: hminlw               !< [m] minimum depth for wave forcing in flow momentum equation RHS. Compare with XBeach.
+ double precision                           :: hminlw               !< [m] minimum depth for wave forcing in flow momentum equation RHS. 
  integer                                    :: jatpwav=TPWAVDEFAULT !< TPWAV, TPWAVSMOOTH, TPWAVRELATIVE
- integer                                    :: jauorb             !< multiply with factor sqrt(pi)/2 (=0), or not (=1). Default 0, delft3d style
+ integer                                    :: jauorb               !< multiply with factor sqrt(pi)/2 (=0), or not (=1). Default 0, delft3d style
+ integer                                    :: jahissigwav             !< 1: sign wave height on his output; 0: hrms wave height on his output. 
 
 logical                                     :: extfor_wave_initialized !< is set to .true. when the "external forcing"-part that must be initialized for WAVE during running (instead of during initialization) has actually been initialized
 
@@ -309,9 +309,10 @@ contains
 subroutine default_waves()
    rouwav                  = 'FR84'
    gammax                  = 1.0d0        !< Maximum wave height/water depth ratio
-   hminlw                  = 0.2d0        !< [-] minimum depth for wave forcing in flow momentum equation RHS. Compare with XBeach.
+   hminlw                  = 0.2d0        !< [-] minimum depth for wave forcing in flow momentum equation RHS. 
    jatpwav                 = TPWAVDEFAULT !< TPWAV, TPWAVSMOOTH, TPWAVRELATIVE
    jauorb                  = 0
+   jahissigwav             = 1
 
    call reset_waves()
 end subroutine default_waves
@@ -477,7 +478,7 @@ module m_xbeach_data
       
    !  for plotting
    integer                                     :: itheta_view=5
-   double precision, allocatable               :: taux_cc(:), tauy_cc(:), ustx_cc(:),usty_cc(:)
+   double precision, allocatable               :: ustx_cc(:),usty_cc(:)
 
    !! Model parameters
    !! 1. DFLOW specific
@@ -685,7 +686,6 @@ module m_sediment
     real(fp), dimension(:,:), pointer      :: sed      !< sediment concentration                                         
     real(fp), dimension(:), pointer        :: blchg    !< bed level change  [m]
     real(fp), dimension(:), pointer        :: dzbdt    !< bed level change rate [m/s]
-    real(fp), dimension(:,:), pointer      :: diagnostic !< debug output
     type (message_stack)    , pointer      :: messages
  end type mortmpdummy
  !
@@ -2284,6 +2284,8 @@ end subroutine default_turbulence
  integer                           :: jahissed                  !< Write sediment transport to his file, 0: no, 1: yes
  integer                           :: jahisconst                !< Write tracers to his file, 0: no, 1: yes
  integer                           :: jahiszcor                 !< Write the vertical coordinate to his file, 0: no, 1: yes
+ integer                           :: jahiswav                  !< Write wave data to his file, 0: no, 1: yes
+
  ! written to map file yes or no
  integer                           :: jamaps0                   !< previous step water levels to map file, 0: no, 1: yes
  integer                           :: jamaps1                   !< water levels to map file, 0: no, 1: yes
@@ -2616,6 +2618,7 @@ subroutine default_flowparameters()
     jahissed = 1
     jahisconst = 1
     jahiszcor  = 1
+    jahiswav = 1
 
     jamaps0 = 1
     jamaps1 = 1
@@ -2991,9 +2994,7 @@ end module m_vegetation
  
  double precision, allocatable     :: wavfu (:)   !< wave force u point
  real            , allocatable     :: wdsu  (:)   !< windstress u point  (m2/s2)
- ! DEBUG
- !double precision, allocatable     :: wavmu (:)   !< wave-induced mass flux (full domain)
- ! /DEBUG
+
  double precision, allocatable     :: wavmubnd (:)   !< wave-induced mass flux (on open boundaries)
  real            , allocatable     :: viu   (:)   !< horizontal eddy viscosity coefficient at u point (m2/s), the modeled part, added to user defined part but limited for advection time step
  real            , allocatable     :: vicLu   (:) !< horizontal eddy viscosity coefficient at u point (m2/s), the modeled part, added to user defined part 
@@ -4757,30 +4758,7 @@ end type tuniversalstruc
 type(tuniversalstruc), allocatable       :: universalstruc(:)
 
 end module m_strucs
-    
-module m_flowwave ! TODO: [TRUNKMERGE] JR: This datatype will disappear, replace by trunk's m_waves arrays. Also consider map_flowwave_exchange.
-   use precision
 
-   implicit none
-
-   type tpflowwave
-      logical                              :: have_waves   
-      real(fp), dimension(:), allocatable  :: hrms     !< Exchange array for wave hrms
-      real(fp), dimension(:), allocatable  :: tp       !< Exchange array for wave tp
-      real(fp), dimension(:), allocatable  :: teta     !< Exchange array for wave teta
-      real(fp), dimension(:), allocatable  :: rlabda   !< Exchange array for wave rlabda
-      real(fp), dimension(:), allocatable  :: uorb_rms !< Exchange array for wave uorb
-      real(fp), dimension(:), allocatable  :: ustokes  !< Exchange array for wave stokes vels
-      real(fp), dimension(:), allocatable  :: vstokes
-      real(fp), dimension(:), allocatable  :: wblt      !< Exchange array for wave boundary layer thickness
-      real(fp), dimension(:), allocatable  :: ust_mag    !< Exchange array for cc stokes drift magnitude (output)  
-      real(fp), dimension(:), allocatable  :: fwav_mag    !< Exchange array for cc wave force magnitude (output)  
-   end type tpflowwave
-
-   type(tpflowwave), target                :: fwx
-
-end module m_flowwave
-    
 
 module m_plotdots
    implicit none

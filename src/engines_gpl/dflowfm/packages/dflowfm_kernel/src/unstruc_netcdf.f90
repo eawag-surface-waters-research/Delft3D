@@ -3128,7 +3128,6 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
    use m_wind
    use m_flowparameters, only: jatrt
    use m_xbeach_data
-   use m_flowwave, only: fwx
    use m_transport, only: NUMCONST, itemp, ITRA1, ITRAN, ISED1, ISEDN, constituents, const_names, id_const, u1sed, q1sed, ucxsed, ucysed, qcxsed, qcysed, xsedflux, ysedflux
    use m_particles, only: japart, jatracer, part_iconst
    use m_alloc
@@ -4530,29 +4529,42 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
    
    if (jawave .gt. 2) then
       if (allocated(wa)) deallocate(wa, stat = ierr)
-      ierr = unc_put_var_map(mapids, mapids%id_hwav        , UNC_LOC_S, fwx%hrms)
-      ierr = unc_put_var_map(mapids, mapids%id_uorb        , UNC_LOC_S, fwx%uorb_rms, 0d0)
+      ierr = unc_put_var_map(mapids, mapids%id_hwav        , UNC_LOC_S, hwav)
+      ierr = unc_put_var_map(mapids, mapids%id_uorb        , UNC_LOC_S, uorb, 0d0)
          
       allocate(wa(1:ndx), stat=ierr)
-      wa = mod(270d0 - fwx%teta, 360d0)
+      wa = mod(270d0 - phiwav, 360d0)
       ierr = unc_put_var_map(mapids, mapids%id_thetamean, UNC_LOC_S, wa)     ! JRE to check
       deallocate(wa)
       
       ! ustokes, vstokes
-      if (.not. allocated(ust_x)) allocate(ust_x(ndx), ust_y(ndx))
-      ust_x = 0d0; ust_y = 0d0
-      do L=1,lnx
-         k1 = ln(1,L); k2 = ln(2,L)
-         ust_x(k1) = ust_x(k1) + wcx1(L)*fwx%ustokes(L)
-         ust_x(k2) = ust_x(k2) + wcx2(L)*fwx%ustokes(L)
-         ust_y(k1) = ust_y(k1) + wcy1(L)*fwx%ustokes(L)
-         ust_y(k2) = ust_y(k2) + wcy2(L)*fwx%ustokes(L)
-      end do
+      if (.not. allocated(ust_x)) allocate(ust_x(ndkx), ust_y(ndkx))
+      ust_x = dmiss; ust_y = dmiss
+      if (kmx==0) then
+         do L=1,lnx
+            k1 = ln(1,L); k2 = ln(2,L)
+            ust_x(k1) = ust_x(k1) + wcx1(L)*ustokes(L)
+            ust_x(k2) = ust_x(k2) + wcx2(L)*ustokes(L)
+            ust_y(k1) = ust_y(k1) + wcy1(L)*ustokes(L)
+            ust_y(k2) = ust_y(k2) + wcy2(L)*ustokes(L)
+         enddo
+      else
+         do LL = 1,lnx
+            call getLbotLtopmax(LL, Lb, Lt)
+            do L = Lb,Lt
+               k1 = ln(1,L); k2 = ln(2,L)
+               ust_x(k1) = ust_x(k1) + wcx1(LL)*ustokes(L)
+               ust_x(k2) = ust_x(k2) + wcx2(LL)*ustokes(L)
+               ust_y(k1) = ust_y(k1) + wcy1(LL)*ustokes(L)
+               ust_y(k2) = ust_y(k2) + wcy2(LL)*ustokes(L)
+            end do  
+         end do
+      endif
+
       ! then write:
-      ierr = unc_put_var_map(mapids, mapids%id_ustokes      , UNC_LOC_S, ust_x)
-      ierr = unc_put_var_map(mapids, mapids%id_vstokes      , UNC_LOC_S, ust_y)
+      ierr = unc_put_var_map(mapids, mapids%id_ustokes      , iLocS, ust_x)
+      ierr = unc_put_var_map(mapids, mapids%id_vstokes      , iLocS, ust_y)
        
-      
       ! Wave forces
       if (jawave == 3) then
          ust_x = 0d0; ust_y = 0d0
@@ -5298,11 +5310,7 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
               ierr = nf90_put_att(imapfile, id_morbl(iid) ,  'coordinates'  , 'FlowElem_xcc FlowElem_ycc')
               ierr = nf90_put_att(imapfile, id_morbl(iid) ,  'long_name'    , 'Time-varying bottom level in flow cell center')
               ierr = nf90_put_att(imapfile, id_morbl(iid) ,  'units'        , 'm')
-              
-              ierr = nf90_def_var(imapfile, 'diagnostic' , nf90_double, (/ id_flowelemdim(iid) , id_sedtotdim(iid), id_timedim(iid) /) , id_diag(iid))
-              ierr = nf90_put_att(imapfile, id_diag(iid) ,  'coordinates'  , 'FlowElem_xcc FlowElem_ycc')
-              ierr = nf90_put_att(imapfile, id_diag(iid) ,  'long_name'    , 'Diagnostic output')
-              ierr = nf90_put_att(imapfile, id_diag(iid) ,  'units'        , '-')
+
               
               select case (stmpar%morlyr%settings%iunderlyr)
               case (1)
@@ -5961,8 +5969,6 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
            
            ierr = nf90_inq_varid(imapfile, 'mor_bl', id_morbl(iid))
            
-           ierr = nf90_inq_varid(imapfile, 'diagnostic', id_diag(iid))
-           
            select case (stmpar%morlyr%settings%iunderlyr)
            case (1)
               ierr = nf90_inq_varid(imapfile, 'bodsed', id_bodsed(iid))           
@@ -6620,9 +6626,7 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
           if (stmpar%morpar%bedupd) then
              ierr = nf90_put_var(imapfile, id_morbl(iid), bl(1:ndxi), (/ 1, itim /), (/ ndxndxi, 1 /))
           end if
-          
-          ierr = nf90_put_var(imapfile, id_diag(iid) , mtd%diagnostic(1:ndxi, :),  (/ 1, 1, itim /), (/ ndxi, stmpar%lsedtot, 1 /))
-       
+                 
           select case (stmpar%morlyr%settings%iunderlyr)
           case (1)
              ierr = nf90_put_var(imapfile, id_bodsed(iid), stmpar%morlyr%state%bodsed(:, 1:ndxi), (/ 1, 1, itim /), (/ stmpar%lsedtot, ndxi, 1 /))

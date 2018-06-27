@@ -1500,7 +1500,7 @@ subroutine nullmorpar(morpar)
     avaltime           = 86400.0_fp
     duneavalan         = .false.
     hswitch            = 0.1_fp
-    dzmaxdune          = 0.05_fp
+    dzmaxdune          = 100.0_fp           ! with Marlies, 20180417
     !
     ihidexp            = 1
     itmor              = 0

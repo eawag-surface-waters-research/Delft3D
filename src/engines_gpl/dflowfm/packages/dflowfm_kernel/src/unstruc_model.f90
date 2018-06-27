@@ -492,7 +492,7 @@ subroutine readMDUFile(filename, istat)
     use m_flowtimes
     use m_flowparameters
     !use m_xbeach_data,           only: limtypw
-    use m_waves,                 only: rouwav, gammax, hminlw, jauorb
+    use m_waves,                 only: rouwav, gammax, hminlw, jauorb, jahissigwav
     use m_wind ! ,                  only : icdtyp, cdb, wdb,
     use network_data,            only : zkuni, Dcenterinside, removesmalllinkstrsh, cosphiutrsh
     use m_sferic,                only : anglat, anglon, jasfer3D
@@ -1022,8 +1022,9 @@ subroutine readMDUFile(filename, istat)
     endif
     call prop_get_double (md_ptr, 'waves', 'Gammax'         , gammax)
     call prop_get_double (md_ptr, 'waves', 'hminlw'         , hminlw)
-    call prop_get_integer(md_ptr, 'waves', 'uorbfac'        , jauorb)  ! 0=delft3d4, sqrt(pi)/2 included in uorb calculation; >0: FM, factor not included; default: 0 
-
+    call prop_get_integer(md_ptr, 'waves', 'uorbfac'        , jauorb)    ! 0=delft3d4, sqrt(pi)/2 included in uorb calculation; >0: FM, factor not included; default: 0 
+    call prop_get_integer(md_ptr, 'waves', 'jahissigwav'       , jahissigwav)  ! 1: sign wave height on his output; 0: hrms wave height on his output. Default=1 
+    
     call prop_get_integer(md_ptr, 'grw'  , 'groundwater'        , jagrw)
 
     call prop_get_integer(md_ptr, 'grw'  , 'Infiltrationmodel'  , Infiltrationmodel) ; if (Infiltrationmodel == 1 .or. infiltrationmodel == 3) jagrw = 1 
@@ -1180,6 +1181,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'output', 'Wrihis_waterlevel_s1', jahiswatlev, success)
     call prop_get_integer(md_ptr, 'output', 'Wrihis_bedlevel', jahiswatlev, success)
     call prop_get_integer(md_ptr, 'output', 'Wrihis_waterdepth', jahiswatdep, success)
+    call prop_get_integer(md_ptr, 'output', 'Wrihis_waves', jahiswav, success)
     call prop_get_integer(md_ptr, 'output', 'Wrihis_velocity_vector', jahisvelvec, success)
     call prop_get_integer(md_ptr, 'output', 'Wrihis_upward_velocity_component', jahisww, success)
     call prop_get_integer(md_ptr, 'output', 'Wrihis_sediment', jahissed, success)
@@ -2198,6 +2200,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        call prop_set(prop_ptr, 'waves', 'Rouwav',              rouwav,         'Friction model for wave induced shear stress: FR84 (default) or: MS90, HT91, GM79, DS88, BK67, CJ85, OY88, VR04')
        call prop_set(prop_ptr, 'waves', 'Gammax',              gammax,         'Maximum wave height/water depth ratio')
        call prop_set(prop_ptr, 'waves', 'uorbfac',             jauorb,         'Orbital velocities: 0=D3D style; 1=Guza style')
+       call prop_set(prop_ptr, 'waves', 'jahissigwav',         jahissigwav,    '1: sign wave height on his output; 0: hrms wave height on his output')
        call prop_set(prop_ptr, 'waves', 'hminlw',              hminlw,         'Cut-off depth for application of wave forces in momentum balance')
        if (hwavuni .ne. 0d0) then 
           call prop_set(prop_ptr, 'waves', 'Hwavuni'  ,        hwavuni,        'root mean square wave height (m)')
@@ -2373,6 +2376,9 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     endif
     if (writeall .or. jahistem /= 1) then
        call prop_set(prop_ptr, 'output', 'Wrihis_temperature', jahistem, 'Write temperature to his file (1: yes, 0: no)' )
+    endif
+    if (writeall .or. jahiswav > 0) then
+       call prop_set(prop_ptr, 'output', 'Wrihis_waves', jahiswav, 'Write wave data to his file (1: yes, 0: no)' )
     endif
     if (writeall .or. jahisheatflux /= 1) then
        call prop_set(prop_ptr, 'output', 'Wrihis_heat_fluxes', jahisheatflux, 'Write heat fluxes to his file (1: yes, 0: no)' )

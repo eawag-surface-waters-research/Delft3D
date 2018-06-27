@@ -36,15 +36,8 @@
       use morphology_data_module
       use sediment_basics_module
       use m_sediment, only: stmpar, sedtra, stm_included, mtd
-      use m_flowwave
       implicit none
       
-      logical,                               pointer :: wave
-      real(fp), dimension(:),                pointer :: hrms
-      real(fp), dimension(:),                pointer :: tp
-      real(fp), dimension(:),                pointer :: teta
-      real(fp), dimension(:),                pointer :: rlabda
-      real(fp), dimension(:),                pointer :: uorb_rms
       real(fp), dimension(:),                pointer :: rhowat
       real(fp), dimension(:,:),              pointer :: seddif
       real(fp), dimension(:,:),              pointer :: sed
@@ -52,7 +45,6 @@
       real(fp), dimension(:),                pointer :: dzbdt         !< Bed level change time rate
       real(fp), dimension(:),                pointer :: uau         
       real(fp), dimension(:,:),              pointer :: ws
-      real(fp), dimension(:,:),              pointer :: diagnostic
       real(fp), dimension(:)               , pointer :: ucxq_mor
       real(fp), dimension(:)               , pointer :: ucyq_mor
       real(fp), dimension(:)               , pointer :: hs_mor
@@ -232,12 +224,6 @@
       if (.not.stm_included) return
       
 ! mtd: Pointer to dummies to fill later
-      wave                => fwx%have_waves
-      hrms                => fwx%hrms
-      tp                  => fwx%tp
-      teta                => fwx%teta
-      rlabda              => fwx%rlabda
-      uorb_rms            => fwx%uorb_rms
       dzbdt               => mtd%dzbdt
       rhowat              => mtd%rhowat
       seddif              => mtd%seddif
@@ -245,7 +231,6 @@
       sed                 => mtd%sed
       ws                  => mtd%ws
       uau                  => mtd%uau
-      diagnostic          => mtd%diagnostic
       
       ! stmpar
       lsed                => stmpar%lsedsus
@@ -459,7 +444,6 @@
     use m_flowparameters, only: jasal, jatem, jawave, epshs, jasecflow
     use m_fm_erosed
     use m_bedform
-    use m_flowwave
     use m_xbeach_data
     use m_waves
     use m_xbeach_paramsconst
@@ -472,7 +456,8 @@
     logical                                        :: scour = .false.
     logical                                        :: ubot_from_com = .true. !! promoted approach, so only option in FM
     logical                                        :: flmd2l = .false.
-    
+    logical                                        :: wave
+
     integer                              , pointer :: iunderlyr
     real(prec)       , dimension(:,:)    , pointer :: bodsed 
 !
@@ -609,6 +594,8 @@
     
     if (.not. allocated(u1ori)) allocate(u1ori(1:lnx), u0ori(1:lnx), vori(1:lnx), stat=ierr)
     !
+    wave = jawave>0
+    !
     if (varyingmorfac) then
        call updmorfac(stmpar%morpar, time1/3600.0_fp, julrefdat)
     endif
@@ -620,25 +607,16 @@
     !
     ! Use Eulerian velocities if jatranspvel > 0
     !
-    !! DEBUG
-    !call newfil(mout, 'lagrvels.txt')
-    !do k = 1, ndx
-    !   write(mout,'(4(f20.5, a))') xz(k), ' ', yz(k), ' ', ucxq(k), ' ',ucyq(k),' '
-    !end do
-    !close(mout)
-    !mout=0
-    !!\DEBUG
-   
     u1 = u1*u_to_umain
     if (jatranspvel > 0 .and. jawave > 0) then
-       !
-       u1 = u1 - fwx%ustokes
-       u0 = u0 - fwx%ustokes
-       v  = v  - fwx%vstokes
-       !
+        !
+        u1 = u1 - ustokes
+        u0 = u0 - ustokes
+        v  = v  - vstokes
+        !
     end if
     !   Calculate cell centre velocities ucxq, ucyq
-    call setucxucyucxuucyu()     ! This subroutine needs to go into the previous if bloack ? \TODO
+    call setucxucyucxuucyu()  
     call setucxqucyq()
 
     !
@@ -762,49 +740,49 @@
        end do
     endif
     !
-    if (kmx > 0) then            ! 3
-       deltas = 0d0
-       do L=1,lnx
-          k1=ln(1,L); k2=ln(2,L)
-          deltas(k1) =  deltas(k1) + wcl(1,L)*fwx%wblt(L)
-          deltas(k2) =  deltas(k2) + wcl(2,L)*fwx%wblt(L)
-       end do
-       maxdepfrac = 0.05                       !        cases where you want 2D velocity above the wbl
-       cc = 0d0
-       
-       do kk = 1, ndx
-         call getkbotktop(kk,kb,kt)
-         do k = kb, kt
-             cc  = 0.5d0*(zws(k-1)+zws(k))         ! cell centre position in vertical layer admin, using depth convention
-             kmxvel = k
-             if (cc>=-maxdepfrac*hs(kk) .or. cc>=(bl(kk)+deltas(kk))) then
-                exit
-             endif         
-         enddo
-       
-         uuu(kk)   = ucxq(kmxvel)                  ! discharge based cell centre velocities
-         vvv(kk)   = ucyq(kmxvel)
-         umod(kk)  = sqrt(uuu(kk)*uuu(kk) + vvv(kk)*vvv(kk))
-         zumod(kk) = cc-bl(kk)
-       end do
-       
-       ! If secondary flow, then we consider the bed shear stress magnitude as computed in 3D, 
-       ! but the direction as computed by the 1DV solution of the secondary flow. Here the 
-       ! near bed vector is projected back to the original depth averaged direction of the flow.
-       if (jasecflow > 0) then 
-           do kk = 1, ndx
-               uuu(kk) = spiratx(kk)*umod(kk)
-               vvv(kk) = spiraty(kk)*umod(kk)
-           enddo
-       end if     
-       
-    else 
-       do kk = 1, ndx
-           uuu(kk)   = ucxq_mor(kk)           
-           vvv(kk)   = ucyq_mor(kk)
-           umod(kk)  = sqrt(uuu(kk)*uuu(kk) + vvv(kk)*vvv(kk))
-           zumod(kk) = hs_mor(kk)/ee
-       enddo         
+    if (kmx > 0) then            ! 3D
+        deltas = 0d0
+        do L=1,lnx
+            k1=ln(1,L); k2=ln(2,L)
+            deltas(k1) =  deltas(k1) + wcl(1,L)*wblt(L)
+            deltas(k2) =  deltas(k2) + wcl(2,L)*wblt(L)
+        end do
+        maxdepfrac = 0.05                       !        cases where you want 2D velocity above the wbl
+        cc = 0d0
+
+        do kk = 1, ndx
+            call getkbotktop(kk,kb,kt)
+            do k = kb, kt
+                cc  = 0.5d0*(zws(k-1)+zws(k))         ! cell centre position in vertical layer admin, using depth convention
+                kmxvel = k
+                if (cc>=-maxdepfrac*hs(kk) .or. cc>=(bl(kk)+deltas(kk))) then
+                    exit
+                endif
+            enddo
+
+            uuu(kk)   = ucxq(kmxvel)                  ! discharge based cell centre velocities
+            vvv(kk)   = ucyq(kmxvel)
+            umod(kk)  = sqrt(uuu(kk)*uuu(kk) + vvv(kk)*vvv(kk))
+            zumod(kk) = cc-bl(kk)
+        end do
+
+        ! If secondary flow, then we consider the bed shear stress magnitude as computed in 3D,
+        ! but the direction as computed by the 1DV solution of the secondary flow. Here the
+        ! near bed vector is projected back to the original depth averaged direction of the flow.
+        if (jasecflow > 0) then
+            do kk = 1, ndx
+                uuu(kk) = spiratx(kk)*umod(kk)
+                vvv(kk) = spiraty(kk)*umod(kk)
+            enddo
+        end if
+
+    else
+        do kk = 1, ndx
+            uuu(kk)   = ucxq_mor(kk)
+            vvv(kk)   = ucyq_mor(kk)
+            umod(kk)  = sqrt(uuu(kk)*uuu(kk) + vvv(kk)*vvv(kk))
+            zumod(kk) = hs_mor(kk)/ee
+        enddo
     end if
     !
     ! set velocities to zero if not active point for transport
@@ -1027,7 +1005,7 @@
        endif
        !
        if (jawave > 0) then
-          ubot = fwx%uorb_rms(nm)        ! array uitgespaard
+          ubot = uorb(nm)        ! array uitgespaard
        else
           ubot = 0d0
        end if
@@ -1052,7 +1030,7 @@
           ! Compute bed stress resulting from skin friction
           !
           call compbsskin   (umean   , vmean     , h1      , wave    , &
-                           & uorb_rms(nm), tp  (nm)  , teta(nm), kssilt  , &
+                           & uorb(nm), twav  (nm)  , phiwav(nm), kssilt  , &
                            & kssand  , thcmud(nm), taub(nm)    , rhowat(kbed), &
                            & vismol  )
        else
@@ -1115,7 +1093,7 @@
        taks0 = max(aksfac*rc, 0.01_fp*h1)         
        !                                          
        if (jawave>0) then
-          if (tp(nm)>0.0_fp) then
+          if (twav(nm)>0.0_fp) then
              delr  = 0.025_fp
              taks0 = max(0.5_fp*delr, taks0)
           end if
@@ -1145,11 +1123,11 @@
        dll_reals(RP_DEPTH) = real(h1        ,hp)
        dll_reals(RP_CHEZY) = real(chezy     ,hp)
        if (wave) then
-          dll_reals(RP_HRMS ) = real(fwx%hrms(nm) ,hp)
-          dll_reals(RP_TPEAK) = real(fwx%tp(nm)                   ,hp)
-          dll_reals(RP_TETA ) = real(fwx%teta(nm)                 ,hp)
-          dll_reals(RP_RLAMB) = real(fwx%rlabda(nm)               ,hp)
-          dll_reals(RP_UORB ) = real(fwx%uorb_rms(nm)             ,hp)
+          dll_reals(RP_HRMS ) = real(hwav(nm)     ,hp)
+          dll_reals(RP_TPEAK) = real(twav(nm)     ,hp)
+          dll_reals(RP_TETA ) = real(phiwav(nm)   ,hp)
+          dll_reals(RP_RLAMB) = real(rlabda(nm)   ,hp)
+          dll_reals(RP_UORB ) = real(uorb(nm)     ,hp)
        else
           dll_reals(RP_HRMS ) = 0.0_hp
           dll_reals(RP_TPEAK) = 0.0_hp
@@ -3646,7 +3624,6 @@ subroutine reset_sedtra()
       deallocate(mtd%sed)
       deallocate(mtd%ws)
       deallocate(mtd%blchg)
-      deallocate(mtd%diagnostic)
       
       call clearstack (mtd%messages)
       deallocate(mtd%messages)
@@ -3788,7 +3765,7 @@ subroutine duneaval(sbn, error)
    do lsd = 1, lsedtot
       do L = 1, lnx
          k1 = ln(1,L); k2 = ln(2,L)
-         if (hs(k1)>hswitch .and. hs(k2)> hswitch) then
+         if (hs(k1)>hswitch .or. hs(k2)> hswitch) then
             slpmax = wetslope
          else
             slpmax = dryslope

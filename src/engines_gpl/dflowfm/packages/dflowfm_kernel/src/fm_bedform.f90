@@ -22,8 +22,8 @@ subroutine fm_bedform()
     use m_flowgeom, only: ndxi, ndx, lnx, lnxi, kfs, ln, wcl
     use m_flowparameters, only: epshs, jawave, epshu
     use m_flow, only: ucx, ucy, frcu, ifrcutp, hu, hs, u1, u0
-    use m_flowwave
     use m_flowtimes
+    use m_waves
     !
     implicit none
     !
@@ -107,7 +107,7 @@ subroutine fm_bedform()
     !
     if (jawave > 0) then
        u1ori = u1
-       u1 = u1-fwx%ustokes        ! now eulerian
+       u1 = u1-ustokes        ! now eulerian
     end if
     !
     call setucxucyucxuucyu()
@@ -608,7 +608,7 @@ subroutine fm_calksc()
     use m_bedform
     use m_rdtrt
     use m_trachy,               only: trachy_fl
-    use m_flowwave, only: fwx
+    use m_waves
     !
     implicit none
     !
@@ -681,8 +681,8 @@ subroutine fm_calksc()
     u1ori = u1; z0rou = 0d0
     !
     ! Calculate Eulerian velocities at old time level
-    if (fwx%have_waves) then
-       u1 = u0 - fwx%ustokes
+    if (jawave>0) then
+       u1 = u0 - ustokes
     endif
     call setucxucyucxuucyu()
     !
@@ -737,7 +737,7 @@ subroutine fm_calksc()
              call getkbotktop(k, kb, kt)
              kmaxx = kb
              !
-             if (v2dwbl>0 .and. fwx%have_waves .and. kmx>1) then    ! JRE to do: 3D
+             if (v2dwbl>0 .and. (jawave>0) .and. kmx>1) then    ! JRE to do: 3D
                 !
                 ! Determine representative 2Dh velocity based on velocities in first layer above wave boundary layer 
                 ! kmaxx is the first layer with its centre above the wave boundary layer
@@ -766,21 +766,21 @@ subroutine fm_calksc()
                 !u2dh = (umod/depth*((depth + z0rou)*log(1.0_fp + depth/z0rou) - depth)) &
                 !     & / log(1.0_fp + (1.0_fp + sig(kmaxx))*depth/z0rou)
              endif
-             if (fwx%have_waves) then
-                hh     = fwx%hrms(k) * sqrt(2.0_fp)
-                arg = 2.0_fp * pi * depth / max(fwx%rlabda(k),0.1)
+             if (jawave>0) then
+                hh     = hwav(k) * sqrt(2.0_fp)
+                arg = 2.0_fp * pi * depth / max(rlabda(k),0.1)
                 if (arg > 50.0_fp) then
                    uw = 0.0_fp
                 else
-                   uw = 2.0_fp * pi * hh / (2.0_fp * sinh(arg) * fwx%tp(k))
+                   uw = 2.0_fp * pi * hh / (2.0_fp * sinh(arg) * twav(k))
                 endif
                 rr    = -0.4_fp*hh/depth + 1.0_fp
                 umax  = rr * 2.0_fp * uw
-                t1    = fwx%tp(k) * (ag/depth)**0.5_fp
+                t1    = twav(k) * (ag/depth)**0.5_fp
                 uu    = umax / (ag*depth)**0.5_fp
                 a11   = -0.0049_fp*t1**2 - 0.069_fp*t1 + 0.2911_fp
                 raih  = max(0.5_fp  , -5.25_fp - 6.1_fp*tanh(a11*uu-1.76_fp))
-                rmax  = max(0.62_fp , min(0.75_fp , -2.5_fp*depth/fwx%rlabda(k)+0.85_fp))
+                rmax  = max(0.62_fp , min(0.75_fp , -2.5_fp*depth/rlabda(k)+0.85_fp))
                 uon   = umax * (0.5_fp+(rmax-0.5_fp)*tanh((raih-0.5_fp)/(rmax-0.5_fp)))
                 uoff  = umax - uon
                 uon   = max(1.0e-5_fp , uon)

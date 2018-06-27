@@ -1177,8 +1177,8 @@ subroutine traparams(iform     ,name      ,nparreq   ,nparopt   ,parkeyw   , &
        pardef(12)  = 30.0_fp
        parkeyw(13) = 'cmax'
        pardef(13)  = 0.1_fp 
-       parkeyw(15) = 'z0'
-       pardef(15)  = 0.006_fp
+       parkeyw(14) = 'z0'
+       pardef(14)  = 0.006_fp
     endif
 end subroutine traparams
 

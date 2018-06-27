@@ -796,7 +796,7 @@ subroutine xbeach_wave_init
 end subroutine dhsdxdhsdy
 
 subroutine xbeach_instationary()
-   use m_sferic, only:pi
+   use m_sferic, only:pi,rd2dg
    use m_physcoef, only: rhog, ag
    use m_flowgeom
    use m_flow, only: hs, epshu, vol1, rhomean, epshs, plotlin
@@ -807,6 +807,7 @@ subroutine xbeach_instationary()
    use m_partitioninfo
    use m_timer
    use m_alloc
+   use m_waves, only: hwav, twav, phiwav, ustokes, vstokes, rlabda, uorb
 
    implicit none
 
@@ -996,6 +997,17 @@ subroutine xbeach_instationary()
    if (roller.eq.1 .and. turb.ne.TURB_NONE) then
       call borecharacter()                   ! calculates BR and Tbore using Rieneck&Fenton approach   
    end if
+   
+   ! Debug
+   ! En voor de uniformiteit van de golfkoppelingetjes:
+   hwav = H
+   twav = 2.0*pi/sigmwav
+   phiwav = thetamean*rd2dg
+   rlabda = L1
+   uorb = urms_cc
+   ustokes = ust
+   vstokes = vst   
+   ! \Debug
 
    deallocate(hh, ddlok, wete, drr, stat = ierr)
    deallocate(ustw, ustr, uwf, vwf, urf, vrf, stat = ierr)
@@ -4211,7 +4223,7 @@ subroutine xbeach_waves()
 end subroutine xbeach_waves
 
 subroutine xbeach_stationary()
-   use m_sferic, only:pi
+   use m_sferic, only:pi, rd2dg
    use m_physcoef, only: rhog, ag
    use m_flowgeom
    use m_flow, only: hs, epshu, vol1, rhomean, epshs, plotlin, nplot
@@ -4223,6 +4235,7 @@ subroutine xbeach_stationary()
    use m_partitioninfo
    use m_timer
    use m_alloc
+   use m_waves, only: hwav, twav, phiwav, ustokes, vstokes, rlabda, uorb
    
    implicit none
    
@@ -4361,6 +4374,17 @@ subroutine xbeach_stationary()
    if (roller.eq.1 .and. turb.ne.TURB_NONE) then
       call borecharacter()                   ! calculates BR and Tbore using Rieneck&Fenton approach   
    end if
+   
+   ! Debug
+   ! En voor de uniformiteit van de golfkoppelingetjes:
+   hwav = H
+   twav = 2.0*pi/sigmwav
+   phiwav = thetamean*rd2dg
+   rlabda = L1
+   uorb = urms_cc
+   ustokes = ust
+   vstokes = vst   
+   ! \Debug
 
    deallocate(hh, Dbottom, ddlok, wete, drr, stat = ierr)
    deallocate(ustw, ustr, uwf, vwf, urf, vrf, stat = ierr)

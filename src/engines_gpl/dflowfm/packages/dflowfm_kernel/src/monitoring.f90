@@ -82,7 +82,11 @@ implicit none
     integer                           :: IVAL_PATM
     integer                           :: IVAL_RAIN
     integer                           :: IVAL_WAVEH
+    integer                           :: IVAL_WAVET
+    integer                           :: IVAL_WAVED
+    integer                           :: IVAL_WAVEL
     integer                           :: IVAL_WAVER
+    integer                           :: IVAL_WAVEU
     integer                           :: IVAL_UCX         ! 3D, layer centered after 2D
     integer                           :: IVAL_UCY
     integer                           :: IVAL_UCZ
@@ -126,7 +130,11 @@ implicit none
     integer                           :: IPNT_RAIN
     integer                           :: IPNT_PATM
     integer                           :: IPNT_WAVEH
+    integer                           :: IPNT_WAVET
+    integer                           :: IPNT_WAVEL
+    integer                           :: IPNT_WAVED
     integer                           :: IPNT_WAVER
+    integer                           :: IPNT_WAVEU
     integer                           :: IPNT_UCX
     integer                           :: IPNT_UCY
     integer                           :: IPNT_UCZ
@@ -227,7 +235,11 @@ subroutine init_valobs_pointers()
    IVAL_WY         = 0
    IVAL_PATM       = 0
    IVAL_WAVEH      = 0
+   IVAL_WAVET      = 0
+   IVAL_WAVED      = 0
+   IVAL_WAVEL      = 0
    IVAL_WAVER      = 0
+   IVAL_WAVEU      = 0
    IVAL_UCX        = 0
    IVAL_UCY        = 0
    IVAL_UCZ        = 0
@@ -279,7 +291,11 @@ subroutine init_valobs_pointers()
    end if
    if ( jawave.gt.0 ) then
       i=i+1;            IVAL_WAVEH      = i
+      i=i+1;            IVAL_WAVED      = i
+      i=i+1;            IVAL_WAVET      = i
+      i=i+1;            IVAL_WAVEL      = i
       i=i+1;            IVAL_WAVER      = i
+      i=i+1;            IVAL_WAVEU      = i
    end if
    if ( jatem.gt.1 ) then
       i=i+1;            IVAL_TAIR       = i
@@ -379,7 +395,11 @@ subroutine init_valobs_pointers()
    IPNT_WY    = ivalpoint(IVAL_WY ,   kmx)
    IPNT_PATM  = ivalpoint(IVAL_PATM,  kmx)
    IPNT_WAVEH = ivalpoint(IVAL_WAVEH, kmx)
+   IPNT_WAVET = ivalpoint(IVAL_WAVET, kmx)
+   IPNT_WAVED = ivalpoint(IVAL_WAVED, kmx)
+   IPNT_WAVEL = ivalpoint(IVAL_WAVEL, kmx)
    IPNT_WAVER = ivalpoint(IVAL_WAVER, kmx)
+   IPNT_WAVEU = ivalpoint(IVAL_WAVEU, kmx)
    IPNT_ZCS   = ivalpoint(IVAL_ZCS,   kmx)
    IPNT_ZWS   = ivalpoint(IVAL_ZWS,   kmx)
    IPNT_TKIN  = ivalpoint(IVAL_TKIN,  kmx)

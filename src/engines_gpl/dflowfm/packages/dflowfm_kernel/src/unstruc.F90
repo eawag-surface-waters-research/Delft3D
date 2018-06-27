@@ -1088,8 +1088,8 @@ if(q /= 0) then
     if (swave.eq.1 ) then
        call xbeach_waves()
     endif
-    call map_flowwave_exchange()
     call tauwave()
+    call wave_makeplotvars()
     call xbeach_mombalance()
  end if
 
@@ -6278,56 +6278,27 @@ end subroutine setucxucyucxuucyu
 subroutine setucxucyeuler()
  use m_flowgeom
  use m_flow
- use m_waves, only: Mxwav, Mywav, hminlw, ustokes
- use m_xbeach_data, only: ust
+ use m_waves, only: ustokes            ! available for all wave models
 
  implicit none
 
  integer          :: i, Lb, Lt, L, LL, k, k1, k2
  double precision :: u1l, wcxu, wcyu, ueul
 
- if (jawave > 0 .and. jawave <= 3) then
-    if (kmx == 0) then
-       workx(1:ndx) = ucx(1:ndx) ; worky(1:ndx) = ucy(1:ndx)
-       do k = 1,ndx
-          if (hs(k) > epshs) then
-             workx(k) = workx(k) - Mxwav(k)/max(hs(k),hminlw)
-          worky(k) = worky(k) - Mywav(k)/max(hs(k),hminlw)
+ if (jawave > 0) then
+    workx(1:ndkx) = ucx(1:ndkx) ; worky(1:ndkx) = ucy(1:ndkx)
+    do LL = 1,lnx
+       Lb = Lbot(LL) ; Lt = Lb - 1 + kmxL(LL)
+       do L = Lb, Lt
+          if (ustokes(L) .ne. 0d0) then                    ! link flows
+             k1 = ln(1,L)                                 ! use ln0 in reconstruction and in computing ucxu, use ln when fluxing
+             k2 = ln(2,L)
+             workx(k1) = workx(k1) - wcx1(LL)*ustokes(L)
+             worky(k1) = worky(k1) - wcy1(LL)*ustokes(L)
+             workx(k2) = workx(k2) - wcx2(LL)*ustokes(L)
+             worky(k2) = worky(k2) - wcy2(LL)*ustokes(L)
           endif
        enddo
-    else                ! 3D 
-       workx(1:ndkx) = ucx(1:ndkx) ; worky(1:ndkx) = ucy(1:ndkx)
-       do LL = 1,lnx
-          Lb = Lbot(LL) ; Lt = Lb - 1 + kmxL(LL)
-          do L = Lb, Lt
-             if (ustokes(L) .ne. 0d0) then                    ! link flows
-                k1 = ln0(1,L)                                 ! use ln0 in reconstruction and in computing ucxu, use ln when fluxing   
-                k2 = ln0(2,L)
-                workx(k1) = workx(k1) - wcx1(LL)*ustokes(L)
-                worky(k1) = worky(k1) - wcy1(LL)*ustokes(L)
-                workx(k2) = workx(k2) - wcx2(LL)*ustokes(L)
-                worky(k2) = worky(k2) - wcy2(LL)*ustokes(L)
-             endif
-          enddo
-       enddo
-   endif    
-
- elseif (jawave==4) then ! TODO: JRE: once fwx datastructures have been removed, is this surfbeat code then autoamtically 3D via the preceding block?
-   workx = 0.d0
-   worky = 0.d0
-   do L = lnx1D + 1,lnx
-      ueul=u1(L)-ust(L)
-      if (ueul .ne. 0d0) then                      ! link flows
-         k1 = ln(1,L) ; k2 = ln(2,L)
-         wcxu      = wcx1(L)*ueul
-         workx  (k1) = workx  (k1) + wcxu
-         wcyu      = wcy1(L)*ueul
-         worky  (k1) = worky  (k1) + wcyu
-         wcxu      = wcx2(L)*ueul
-         workx  (k2) = workx  (k2) + wcxu
-         wcyu      = wcy2(L)*ueul
-         worky  (k2) = worky  (k2) + wcyu
-      endif
     enddo
  endif
 end subroutine setucxucyeuler
@@ -8450,7 +8421,7 @@ call flow_dredgeinit()          ! dredging and dumping
     if ( trim(instat).eq.'stat' .or. trim(instat)=='stat_table') then   ! for stationary solver: initialize with stationary field
        call xbeach_stationary()
        newstatbc   = 0
-       call map_flowwave_exchange()
+       call wave_makeplotvars()
     end if
  end if
 
@@ -8656,7 +8627,6 @@ subroutine flow_sedmorinit()
        deallocate(mtd%sed)
        deallocate(mtd%ws)
        deallocate(mtd%blchg)
-       deallocate(mtd%diagnostic)
        
        call clearstack (mtd%messages)
        deallocate(mtd%messages)
@@ -8670,7 +8640,6 @@ subroutine flow_sedmorinit()
     allocate(mtd%sed(stmpar%lsedsus,ndkx))
     allocate(mtd%ws(ndkx,stmpar%lsedsus))
     allocate(mtd%blchg(Ndx))
-    allocate(mtd%diagnostic(ndkx, stmpar%lsedtot))
     allocate(mtd%messages)
     call initstack     (mtd%messages)
     !
@@ -8685,7 +8654,6 @@ subroutine flow_sedmorinit()
     mtd%sed         = 0.0_fp
     mtd%ws          = 0.0_fp
     mtd%blchg       = 0.0_fp
-    mtd%diagnostic  = 0.0_fp    !< debug purposes
     !
     ! Array for transport.f90
     mxgr = stmpar%lsedsus
@@ -11115,10 +11083,9 @@ end subroutine update_land
  use m_observations
  use bedcomposition_module
  use precision
- use m_flowwave
  use m_waves, only: waveparopt, numoptwav
  use m_flowparameters, only: ispirparopt
- use m_sferic, only:pi
+ use m_sferic, only:pi , rd2dg
  use m_wind, only: jawind
 
 
@@ -11323,15 +11290,15 @@ else if (nodval == 27) then
  else if (nodval == numoptwav .and. jawave > 0) then
     select case (waveparopt)
        case (1)
-          znod = fwx%tp(kk)
+          znod = twav(kk)
        case (2)
           znod = taus(kk)
        case (3)
-          znod = fwx%fwav_mag(kk)
+          znod = fwav_mag(kk)
        case (4)
-          znod = fwx%ust_mag(kk)
+          znod = ust_mag(k)
        case (5)
-          znod = fwx%hrms(kk)
+          znod = hwav(kk)
        case (6)
           if (jawave.ne.4) then
              znod = dmiss
@@ -11376,7 +11343,7 @@ else if (nodval == 27) then
           if (jawave.ne.4) then
              znod = dmiss
           else
-             znod = urms_cc(kk)
+             znod = uorb(kk)
           endif 
        case (15)
           if (jawave.ne.4) then
@@ -11424,7 +11391,7 @@ else if (nodval == 27) then
           if (jawave.ne.4) then
              znod = dmiss
           else
-             znod = 270d0 - thetamean(kk)*180d0/pi
+             znod = mod(270d0 - phiwav(kk),360d0)
           endif    
        case (23)
           if (jawave.ne.4) then
@@ -13756,9 +13723,9 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
       if( kmx == 0 ) then
          call wave_comp_stokes_velocities()
          call wave_uorbrlabda()                       ! hwav gets depth-limited here
-         call map_flowwave_exchange()
          call tauwave()
-      
+         call wave_makeplotvars()
+         
          ! wavfu: wave force at links, to be used in the advection equation
          call setwavfu()
          call setwavmubnd()
@@ -14825,8 +14792,7 @@ subroutine unc_write_his(tim)            ! wrihis
                      id_qsun, id_qeva, id_qcon, id_qlong, id_qfreva, id_qfrcon, id_qtot, &
                      id_turkin, id_tureps , id_vicwwu, id_rich, id_zcs, id_zws, &
                      id_wind, id_patm, id_tair, id_rhum, id_clou, &
-                     id_E, id_R, id_H, id_D, id_DR, id_thetamean, &
-                     id_cwav, id_cgwav, id_sigmwav, id_hs, &
+                     id_R, id_WH, id_WD, id_WL, id_WT, id_WU, id_hs, &
                      id_pumpdim,    id_pumpname,    id_pump_dis,    id_pump_cap,       id_pump_s1up,      id_pump_s1dn,    &                              ! id_pump_head,
                      id_gatedim,    id_gatename,    id_gate_dis,    id_gate_edgel,     id_gate_s1up,      id_gate_s1dn,    &                              ! id_gate_head,
                      id_cdamdim,    id_cdamname,    id_cdam_dis,    id_cdam_cresth,    id_cdam_s1up,      id_cdam_s1dn,    &                              ! id_cdam_head,
@@ -15076,71 +15042,58 @@ subroutine unc_write_his(tim)            ! wrihis
                ierr = nf90_put_att(ihisfile, id_varsal, 'standard_name', 'salinity')
             endif
 
-!           JRE XBeach
+!           JRE surfbeat
             if (jawave .eq. 4) then
-               !ierr = nf90_def_var(ihisfile, 'E',  nf90_double, ((/ id_statdim, id_timedim /)) , id_E)
-               !ierr = nf90_put_att(ihisfile, id_E,   'coordinates'  , 'station_x_coordinate station_y_coordinate station_name')
-               !ierr = nf90_put_att(ihisfile, id_E,   'standard_name', 'sea_surface_bulk_wave_energy')                          ! not CF
-               !ierr = nf90_put_att(ihisfile, id_E,   'long_name'    , 'wave energy per square meter')
-               !ierr = nf90_put_att(ihisfile, id_E,   'units'        , 'J m-2')
-               !ierr = nf90_put_att(ihisfile, id_E, '_FillValue', dmiss)
-               !
+
                ierr = nf90_def_var(ihisfile, 'R',  nf90_double, ((/ id_statdim, id_timedim /)) , id_R)
                ierr = nf90_put_att(ihisfile, id_R,   'coordinates'  , 'station_x_coordinate station_y_coordinate station_name')
                ierr = nf90_put_att(ihisfile, id_R,   'standard_name', 'sea_surface_bulk_roller_energy')                          ! not CF
                ierr = nf90_put_att(ihisfile, id_R,   'long_name'    , 'roller energy per square meter')
                ierr = nf90_put_att(ihisfile, id_R,   'units'        , 'J m-2')
                ierr = nf90_put_att(ihisfile, id_R, '_FillValue', dmiss)
-               !
-               !ierr = nf90_def_var(ihisfile, 'DR',  nf90_double, ((/ id_statdim, id_timedim /)) , id_DR)
-               !ierr = nf90_put_att(ihisfile, id_DR,   'coordinates'  , 'station_x_coordinate station_y_coordinate station_name')
-               !ierr = nf90_put_att(ihisfile, id_DR,   'standard_name', 'sea_surface_bulk_roller_dissipation')                          ! not CF
-               !ierr = nf90_put_att(ihisfile, id_DR,   'long_name'    , 'roller energy dissipation per square meter')
-               !ierr = nf90_put_att(ihisfile, id_DR,   'units'        , 'W m-2')
-               !ierr = nf90_put_att(ihisfile, id_DR, '_FillValue', dmiss)
-               !
-               !ierr = nf90_def_var(ihisfile, 'D',  nf90_double, ((/ id_statdim, id_timedim /)) , id_D)
-               !ierr = nf90_put_att(ihisfile, id_D,   'coordinates'  , 'station_x_coordinate station_y_coordinate station_name')
-               !ierr = nf90_put_att(ihisfile, id_D,   'standard_name', 'sea_surface_wave_breaking_dissipation')                          ! not CF
-               !ierr = nf90_put_att(ihisfile, id_D,   'long_name'    , 'wave breaking energy dissipation per square meter')
-               !ierr = nf90_put_att(ihisfile, id_D,   'units'        , 'W m-2')
-               !ierr = nf90_put_att(ihisfile, id_D, '_FillValue', dmiss)
-               !
-               ierr = nf90_def_var(ihisfile, 'H',  nf90_double, ((/ id_statdim, id_timedim /)) , id_H)
-               ierr = nf90_put_att(ihisfile, id_H,   'coordinates'  , 'station_x_coordinate station_y_coordinate station_name')
-               ierr = nf90_put_att(ihisfile, id_H,   'standard_name', 'sea_surface_wave_rms_height')   
-               ierr = nf90_put_att(ihisfile, id_H,   'long_name'    , 'Root mean square wave height based on wave energy')          
-               ierr = nf90_put_att(ihisfile, id_H,   'units'        , 'm')
-               ierr = nf90_put_att(ihisfile, id_H, '_FillValue', dmiss)
-               !
-               !ierr = nf90_def_var(ihisfile, 'thetamean',  nf90_double, ((/ id_statdim, id_timedim /)) , id_thetamean)
-               !ierr = nf90_put_att(ihisfile, id_thetamean,   'coordinates'  , 'station_x_coordinate station_y_coordinate station_name')
-               !ierr = nf90_put_att(ihisfile, id_thetamean,   'standard_name', 'sea_surface_wave_from_direction')                          ! not CF
-               !ierr = nf90_put_att(ihisfile, id_thetamean,   'long_name'    , 'mean wave angle')
-               !ierr = nf90_put_att(ihisfile, id_thetamean,   'units'        , 'rad')
-               !ierr = nf90_put_att(ihisfile, id_thetamean, '_FillValue', dmiss)
-               !
-               !ierr = nf90_def_var(ihisfile, 'cwav',  nf90_double, ((/ id_statdim, id_timedim /)) , id_cwav)
-               !ierr = nf90_put_att(ihisfile, id_cwav,   'coordinates'  , 'station_x_coordinate station_y_coordinate station_name')
-               !ierr = nf90_put_att(ihisfile, id_cwav,   'standard_name', 'sea_surface_wave_phase_velocity')                          ! not CF
-               !ierr = nf90_put_att(ihisfile, id_cwav,   'long_name'    , 'mean wave angle')
-               !ierr = nf90_put_att(ihisfile, id_cwav,   'units'        , 'm s-1')
-               !ierr = nf90_put_att(ihisfile, id_cwav, '_FillValue', dmiss)
-               !
-               !ierr = nf90_def_var(ihisfile, 'cgwav',  nf90_double, ((/ id_statdim, id_timedim /)) , id_cgwav)
-               !ierr = nf90_put_att(ihisfile, id_cgwav,   'coordinates'  , 'station_x_coordinate station_y_coordinate station_name')
-               !ierr = nf90_put_att(ihisfile, id_cgwav,   'standard_name', 'sea_surface_wave_group_velocity')                          ! not CF
-               !ierr = nf90_put_att(ihisfile, id_cgwav,   'long_name'    , 'mean wave angle')
-               !ierr = nf90_put_att(ihisfile, id_cgwav,   'units'        , 'm s-1')
-               !ierr = nf90_put_att(ihisfile, id_cgwav, '_FillValue', dmiss)
-               !
-               !ierr = nf90_def_var(ihisfile, 'sigmwav',  nf90_double, ((/ id_statdim, id_timedim /)) , id_sigmwav)
-               !ierr = nf90_put_att(ihisfile, id_sigmwav,   'coordinates'  , 'station_x_coordinate station_y_coordinate station_name')
-               !ierr = nf90_put_att(ihisfile, id_sigmwav,   'standard_name', 'sea_surface_wave_mean_frequency')                          ! not CF
-               !ierr = nf90_put_att(ihisfile, id_sigmwav,   'long_name'    , 'mean wave frequency')
-               !ierr = nf90_put_att(ihisfile, id_sigmwav,   'units'        , 'rad s-1')
-               !
+
             end if
+            
+            if (jawave > 0 .and. jahiswav > 0) then
+               ierr = nf90_def_var(ihisfile, 'hwav',  nf90_double, ((/ id_statdim, id_timedim /)) , id_WH)
+               ierr = nf90_put_att(ihisfile, id_WH,   'coordinates'  , 'station_x_coordinate station_y_coordinate station_name')
+               ierr = nf90_put_att(ihisfile, id_WH,   'standard_name', 'sea_surface_wave_significant_wave_height')     ! Default behaviour
+               ierr = nf90_put_att(ihisfile, id_WH,   'long_name'    , 'Significant wave height')
+               if (jahissigwav==0) then
+                  ierr = nf90_put_att(ihisfile, id_WH,   'standard_name', 'sea_surface_wave_rms_height')   
+                  ierr = nf90_put_att(ihisfile, id_WH,   'long_name'    , 'Root mean square wave height based on wave energy')  
+               end  if
+               ierr = nf90_put_att(ihisfile, id_WH,   'units'        , 'm')
+               ierr = nf90_put_att(ihisfile, id_WH, '_FillValue', dmiss)
+               
+               ierr = nf90_def_var(ihisfile, 'twav',  nf90_double, ((/ id_statdim, id_timedim /)) , id_WT)
+               ierr = nf90_put_att(ihisfile, id_WT,   'coordinates'  , 'station_x_coordinate station_y_coordinate station_name')
+               ierr = nf90_put_att(ihisfile, id_WT,   'standard_name', 'sea_surface_wave_period')   
+               ierr = nf90_put_att(ihisfile, id_WT,   'long_name'    , 'Wave period')          
+               ierr = nf90_put_att(ihisfile, id_WT,   'units'        , 's')
+               ierr = nf90_put_att(ihisfile, id_WT, '_FillValue', dmiss)
+               
+               ierr = nf90_def_var(ihisfile, 'phiwav',  nf90_double, ((/ id_statdim, id_timedim /)) , id_WD)
+               ierr = nf90_put_att(ihisfile, id_WD,   'coordinates'  , 'station_x_coordinate station_y_coordinate station_name')
+               ierr = nf90_put_att(ihisfile, id_WD,   'standard_name', 'sea_surface_wave_from_direction')   
+               ierr = nf90_put_att(ihisfile, id_WD,   'long_name'    , 'Wave from direction')          
+               ierr = nf90_put_att(ihisfile, id_WD,   'units'        , 'deg from N')
+               ierr = nf90_put_att(ihisfile, id_WD, '_FillValue', dmiss)
+               
+               ierr = nf90_def_var(ihisfile, 'rlabda',  nf90_double, ((/ id_statdim, id_timedim /)) , id_WL)
+               ierr = nf90_put_att(ihisfile, id_WL,   'coordinates'  , 'station_x_coordinate station_y_coordinate station_name')
+               ierr = nf90_put_att(ihisfile, id_WL,   'standard_name', 'sea_surface_wave_length')   
+               ierr = nf90_put_att(ihisfile, id_WL,   'long_name'    , 'Wave length')          
+               ierr = nf90_put_att(ihisfile, id_WL,   'units'        , 'm')
+               ierr = nf90_put_att(ihisfile, id_WL, '_FillValue', dmiss)
+               
+               ierr = nf90_def_var(ihisfile, 'uorb',  nf90_double, ((/ id_statdim, id_timedim /)) , id_WU)
+               ierr = nf90_put_att(ihisfile, id_WU,   'coordinates'  , 'station_x_coordinate station_y_coordinate station_name')
+               ierr = nf90_put_att(ihisfile, id_WU,   'standard_name', 'sea_surface_wave_orbital_velocity')   
+               ierr = nf90_put_att(ihisfile, id_WU,   'long_name'    , 'Orbital velocity')          
+               ierr = nf90_put_att(ihisfile, id_WU,   'units'        , 'm/s')
+               ierr = nf90_put_att(ihisfile, id_WU, '_FillValue', dmiss)
+            endif
 
             if (jatem > 0 .and. jahistem > 0) then
                if ( kmx.gt.0 ) then
@@ -15817,9 +15770,16 @@ subroutine unc_write_his(tim)            ! wrihis
     endif
 
     if ( jawave.eq.4 ) then
-       ierr = nf90_put_var(ihisfile, id_H,      valobsT(:,IPNT_WAVEH), start = (/ 1, it_his /), count = (/ ntot, 1 /))
        ierr = nf90_put_var(ihisfile, id_R,      valobsT(:,IPNT_WAVER), start = (/ 1, it_his /), count = (/ ntot, 1 /))
     end if
+    
+    if (jawave>0) then
+       ierr = nf90_put_var(ihisfile, id_WH,      valobsT(:,IPNT_WAVEH), start = (/ 1, it_his /), count = (/ ntot, 1 /))   
+       ierr = nf90_put_var(ihisfile, id_WD,      valobsT(:,IPNT_WAVED), start = (/ 1, it_his /), count = (/ ntot, 1 /))   
+       ierr = nf90_put_var(ihisfile, id_WL,      valobsT(:,IPNT_WAVEL), start = (/ 1, it_his /), count = (/ ntot, 1 /))   
+       ierr = nf90_put_var(ihisfile, id_WT,      valobsT(:,IPNT_WAVET), start = (/ 1, it_his /), count = (/ ntot, 1 /))   
+       ierr = nf90_put_var(ihisfile, id_WU,      valobsT(:,IPNT_WAVEU), start = (/ 1, it_his /), count = (/ ntot, 1 /))   
+    endif
 
     if (japatm > 0) then
        ierr = nf90_put_var(ihisfile, id_varpatm, valobsT(:,IPNT_patm), start = (/ 1, it_his /), count = (/ ntot, 1 /))
@@ -16269,17 +16229,27 @@ subroutine fill_valobs()
    use m_flowgeom
    use m_observations
    use m_sediment
-   use m_waves, only: mxwav, mywav
-   use m_xbeach_data, only: H, R
+   use m_waves, only: hwav, twav, phiwav, rlabda, uorb
+   use m_xbeach_data, only: R
    use m_ship
+   
    implicit none
 
    integer :: i, ii, j, kk, k, kb, kt, klay, L, LL, Lb, Lt, LLL, k1, k2, k3, LLa
    integer :: ipoint, ival, klayt, kmx_const
+   double precision :: wavfac
 
    kmx_const = kmx
    if (jaeulervel==1 .and. jawave > 0) then
       call setucxucyeuler()
+   endif
+   
+   if (jawave>0) then
+      if (jahissigwav==0) then
+         wavfac = 1d0
+      else
+         wavfac = sqrt(2d0)
+      end  if
    endif
 
    valobs = DMISS
@@ -16328,10 +16298,17 @@ subroutine fill_valobs()
             valobs(IPNT_PATM,i)  = PATM(k)
          ENDIF
 
-         if ( jawave.eq.4 .and. allocated(H) .and. allocated(R) ) then
-            valobs(IPNT_WAVEH,i) = H(k)
+         if ( jawave.eq.4 .and. allocated(R) ) then
             valobs(IPNT_WAVER,i) = R(k)
          end if
+         
+         if (jawave>0 .and. allocated(hwav)) then
+            valobs(IPNT_WAVEH,i) = hwav(k)*wavfac   
+            valobs(IPNT_WAVET,i) = twav(k)   
+            valobs(IPNT_WAVED,i) = phiwav(k)   
+            valobs(IPNT_WAVEL,i) = rlabda(k)   
+            valobs(IPNT_WAVEU,i) = uorb(k)   
+         endif
 
          do kk=kb,kt
             klay = kk-kb+1
@@ -16342,11 +16319,9 @@ subroutine fill_valobs()
 
             valobs(IPNT_UCX+klay-1,i) = ucx(kk)
             valobs(IPNT_UCY+klay-1,i) = ucy(kk)
-            if (jaeulervel==1 .and. hs(k) > epshu .and. jawave==3) then
-               valobs(IPNT_UCX+klay-1,i) = workx(kk) !valobs(IPNT_UCX+klay-1,i) - Mxwav(k)/hs(k)
-               valobs(IPNT_UCY+klay-1,i) = worky(kk) !valobs(IPNT_UCY+klay-1,i) - Mywav(k)/hs(k)
-            elseif (jaeulervel==1 .and. hs(k) > epshu .and. jawave==4) then
-               ! TODO: JR: correct his output of eulerian velocity in cell center; 
+            if (jaeulervel==1 .and. hs(k) > epshu .and. jawave>0) then
+               valobs(IPNT_UCX+klay-1,i) = workx(kk) 
+               valobs(IPNT_UCY+klay-1,i) = worky(kk) 
             endif
             if ( kmx>0 ) then
                valobs(IPNT_UCZ+klay-1,i) = ucz(kk)
@@ -26259,14 +26234,19 @@ end function setrho
 
  double precision :: tim
 
- double precision :: U10, fetchL, fetchd, hsig, tsig, tlim, rl, rl0, sqrt2, rk
+ double precision :: U10, fetchL, fetchd, hsig, tsig, tlim, rl, rl0, sqrt2, rk, ust
  double precision :: dir, uwin, vwin, prin, cs, sn, fetc, fetd, xn, yn, sumw, www , dsk2
  double precision :: SL,SM,XCR,YCR,CRP, alfa1, alfa2, wdep,  xzk, yzk, dist, distmin, celsiz
- integer          :: k, L, kk, kkk, k1, k2, kup, n, ndone, ierr, nup, nupf, jacros, nw1, nw2, nodenum, knw = 5
+ double precision :: sind, cosd, ustx1, ustx2, usty1, usty2
+ integer          :: k, L, kk, kkk, k1, k2, kup, n, ndone, ierr, nup, nupf, jacros, nw1, nw2, nodenum, LL, knw = 5
  INTEGER          :: NDIR, NWND, NSTAT, MOUT, ndoneprevcycle, kkmin, ndoner
+ double precision, allocatable :: ustk(:)
 
  integer :: ndraw
  COMMON /DRAWTHIS/ ndraw(50)
+ 
+ allocate ( ustk(ndx) , stat = ierr)
+ call aerr('ustk(ndx)', ierr ,  ndx); ustk=0d0
 
  if ( .not. allocated (fetch) .or. size (fetch,2) .ne. ndx) then
       nwf = 13
@@ -26421,7 +26401,7 @@ end function setrho
  sqrt2 = sqrt(2d0)
  do k = 1,ndx2d
 
-    uorb(k) = 0 ; Twav(k) = 0d0
+    uorb(k) = 0d0 ; Twav(k) = 0d0
     if ( hs(k) > 0.01d0 ) then
 
        call getlink1(k,L) ! het is maar voor wind
@@ -26454,15 +26434,37 @@ end function setrho
 
           Hwav(k) = Hsig / sqrt2          ! Hwav === hrms
           Twav(k) = Tsig
-          call tauwavehk(Hwav(k), Twav(k), hs(k), Uorb(k), rk)      ! basically now just a dispersion function
+          call tauwavehk(Hwav(k), Twav(k), hs(k), Uorb(k), rk, ust)      ! basically now just a dispersion function with 2DH stokes drift
           rlabda(k) = twopi / rk
+          ustk(k) = ust
        else
           Hwav(k) = 0d0
           Twav(k) = 0d0
           Uorb(k) = 0d0 
           rlabda(k) = 0d0
+          ustk(k) = 0d0
        endif   
     endif
+    
+    ! need something for 2D ustokes 
+    do LL = 1, lnx
+       if (hu(L)>epswav) then
+          k1 = ln(1,LL); k2 = ln(2,LL)
+          dir = atan2(wy(LL), wx(LL))
+          sind = sin(dir); cosd = cos(dir)
+          ustx1 = ustk(k1)*cosd
+          ustx2 = ustk(k2)*cosd
+          usty1 = ustk(k1)*sind
+          usty2 = ustk(k2)*sind
+          ustokes(LL) =      acL(LL) *(csu(LL)*ustx1 + snu(LL)*usty1) + &
+                        (1d0-acL(LL))*(csu(LL)*ustx2 + snu(LL)*usty2)
+          vstokes(LL) = acL(LL) *(-snu(LL)*ustx1 + csu(LL)*usty1) + &
+                        (1d0-acL(LL))*(-snu(L)*ustx2 + csu(L)*usty2)
+       else
+          ustokes(LL) = 0d0
+          vstokes(LL) = 0d0
+       endif
+    end do
 
     if (NDRAW(28) == 35) then
        plotlin(k) = fetchL
@@ -26549,7 +26551,7 @@ endif
 call getwavenr(hu(LL), Tsig ,rk)
 Hrms   = 0.5d0*( Hwav(k1)   + Hwav(k2) )
 Hrms   = min(hrms,gammax*hu(LL))
-asg    = 0.5d0*Hrms                           ! Wave amplitude = 0.5*Hrms
+asg    = 0.5d0*Hrms                              ! Wave amplitude = 0.5*Hrms
 shs    = sinhsafei(rk*hu(LL))
 if (shs > 0d0) then
    uorbu  = omeg*asg*shs                         ! Orbital velocity
@@ -26611,7 +26613,7 @@ end subroutine getustwav
 
 subroutine Swart(Tsig, uorbu, z00, fw)
 use m_flow,  only : rhomean
-use m_waves, only : ftauw
+
 implicit none
 double precision :: Tsig, uorbu, z00, fw
 double precision :: astar
@@ -26626,15 +26628,15 @@ endif
 end subroutine Swart
 
    
- subroutine tauwavehk(Hrms, Tsig, Depth, Uorbi, rk) 
+ subroutine tauwavehk(Hrms, Tsig, Depth, Uorbi, rk, ust) 
  use m_flow, only: plotlin, rhog, rhomean, jased
  use m_sferic
  use m_waves, only : gammax
 
  implicit none
- double precision           :: Hrms, Tsig, Depth, uorbi, Tauw, hrm
+ double precision           :: Hrms, Tsig, Depth, uorbi, Tauw, hrm, ust
  integer                    :: k, jatauw = 2
- double precision           :: hk, sh2hk,hksh2,rn,asg,ew,sxx,syy,sxy,syx,dtau,shs, h2k, cp, cg, omeg, ustokesbas
+ double precision           :: hk, sh2hk,hksh2,rn,asg,ew,sxx,syy,sxy,syx,dtau,shs, h2k, cp, cg, omeg
  double precision           :: dsk2, rk, rkx, rky, astar, fw, cgcp, rk2cgcp,  cgcp5
 
  double precision, external :: tanhsafe, sinhsafe, sinhsafei
@@ -26645,6 +26647,9 @@ end subroutine Swart
  hrm    = min( Hrms,gammax*depth )
  shs    = sinhsafei(rk*depth)
  uorbi  = pi*hrm*shs/tsig                       !omeg*(0.5*hsig)
+ omeg    = twopi/tsig
+ asg     = 0.5d0*hrms
+ ust     = 0.5d0*omeg*asg*asg/depth
  return
 
  if (ndraw(28) > 40) then
@@ -30877,7 +30882,6 @@ end subroutine setbobs_fixedweirs
  use unstruc_channel_flow
  use m_structure
  use m_general_structure
- use m_flowwave, only: fwx
  use m_weir
  use m_sferic
 
@@ -30890,7 +30894,7 @@ end subroutine setbobs_fixedweirs
  double precision :: qk0, qk1, dzb, hdzb, z00  !
  double precision :: as1, as2, qtotal, s_on_crest, width, st2
  double precision :: twot = 2d0/3d0, hb, h23, ustbLL, agp
- double precision :: hminlwi
+ double precision :: hminlwi,fsqrtt
  logical          :: firstiter, jarea
  type(t_structure), pointer :: pstru
 
@@ -30903,6 +30907,7 @@ end subroutine setbobs_fixedweirs
  double precision :: sqcfi
  
  hminlwi=1d0/hminlw
+ fsqrtt = sqrt(0.5d0)
  call klok(cpufuru(1))
  if (kmx < 1) then ! original 2D coding
 
@@ -30971,17 +30976,16 @@ end subroutine setbobs_fixedweirs
           itu1  = 0
           
 10        continue
-          !if (.false.) then
+
           if (jawave == 3 .or. (jawave.eq.4 .and. swave.eq.1)) then                ! Delft3D-Wave Stokes-drift correction
-              ! First trial SvdP, AM : frL = cfu(L)*sqrt((u1L-ustokes(L))**2 + (v(L)-vstokes(L))**2 )
-              ! Bas                  : frL = taubpu(L)/hu(L)
-              ! Quadratic Stokes corr: frL = ypar(L)*(cfu(L)+cfwavhi(L))*sqrt((u1L-ustokes(L))**2 + (v(L)-vstokes(L))**2 )
               ! D3D: Compare with taubsu computation (taubot.f90) and usage (cucnp.f90/uzd.f90)
               ! A3M:ok for c01-validation_3.1.6: frL = ypar(L)*(cfuhi(L)+cfwavhi(L))*wavmu(L)/hu(L)
               if (modind < 9) then
-                 frL = ypar(L)*(cfuhi(L)+cfwavhi(L)) * sqrt((u1L-fwx%ustokes(L))**2 + (v(L)-fwx%vstokes(L))**2)
+                 frL = ypar(L)*(cfuhi(L)+cfwavhi(L)) * sqrt((u1L-ustokes(L))**2 + (v(L)-vstokes(L))**2)
               elseif (modind==9) then
-                 frL = cfhi_vanrijn(L) * sqrt((u1L-fwx%ustokes(L))**2 + (v(L)-fwx%vstokes(L))**2)
+                 frL = cfhi_vanrijn(L) * sqrt((u1L-ustokes(L))**2 + (v(L)-vstokes(L))**2)
+              elseif (modind==10) then   ! Ruessink 2003
+                 frL = cfuhi(L)*sqrt((u1L-ustokes(L))**2 + (v(L)-vstokes(L))**2 + (1.16d0*uorb(L)*fsqrtt)**2)
               end if
           
               !bdmwrs = frL * wavmu(L)
@@ -30990,13 +30994,8 @@ end subroutine setbobs_fixedweirs
               ! Bed shear due to flow and waves:
               ! A3M:ok for c01-validation_3.1.6: du = du + frL * sqrt((u1L-ustokes(L))**2 + (v(L)-vstokes(L))**2)
               !du = du0 + frL*wavmu(L)*huvli(L)
-              du = du0 + frL*fwx%ustokes(L)
+              du = du0 + frL*ustokes(L)
 
-              !du = du + bdmwrs - bdmwrp * sqrt(u1L**2 + v(L)**2)
-
-          else if (.false.) then!( jawave.eq.4 .and. swave.eq.1 ) then         ! JRE: XBeach Stokes-drift correction
-              frL = cfuhi(L)*sqrt((u1L-ust(L))**2 + (v(L)-vst(L))**2 + (1.16d0*urms(L))**2)
-              du  = du0 + frL*ust(L)
           else if ( ifxedweirfrictscheme > 0) then
               if (iadv(L) == 21) then
                  call fixedweirfriction2D(L,k1,k2,frL)
@@ -37008,10 +37007,10 @@ subroutine update_verticalprofiles()
  use m_flow
  use m_flowgeom  , only : ln, dxi, csu, snu, acL
  use m_flowtimes , only : dti
- use m_waves     , only : ustokes, vstokes, taubxu
+ use m_waves     , only : ustokes, vstokes, taubxu, wblt
  use m_sediment  , only : stm_included
  use m_turbulence, only : tkepro
- use m_flowwave, only: fwx
+ 
  implicit none
  integer,          intent (in)  :: LL, Lb
  double precision, intent (out) :: ustbLL, cfuhiLL, hdzb, z00
@@ -37083,11 +37082,6 @@ subroutine update_verticalprofiles()
 
     if (jawaveStokes >= 1) then                                      ! ustokes correction at bed
        umod = sqrt( (u1Lb-ustokes(Lb))*(u1Lb-ustokes(Lb)) + (v(Lb)-vstokes(Lb))*(v(Lb)-vstokes(Lb)) )
-    ! TODO: the code below needs new checking when we move to 3D sedmor.
-    ! TODO: ustokes etc. now based on m_waves, not on m_flowwave
-    ! TODO: [TRUNKMERGE] JR: this code below was already disabled in sedmor. Can it go, or be reinstated?
-    !else if (jawave>0) then
-    !   umod = sqrt( (u1Lb-fwx%ustokes(LL))*(u1Lb-fwx%ustokes(LL)) + (v(Lb)-fwx%vstokes(LL))*(v(Lb)-fwx%vstokes(LL)) )
     else
         umod = sqrt( u1Lb*u1Lb + v(Lb)*v(Lb) )
     endif
@@ -37115,7 +37109,8 @@ subroutine update_verticalprofiles()
           if (stm_included .or. jawaveSwartDelwaq > 1)  then                                  ! For usage in coupled models 
              taubxu(LL) = taubxuLL
              z0ucur(LL) = z00                                           ! And, in case anybody needs these arrays : 
-             z0urou(LL) = dzb*exp(-vonkar/sqcf - 1d0)            ! inverse of jaustarint == 1 above 
+             z0urou(LL) = dzb*exp(-vonkar/sqcf - 1d0)            ! inverse of jaustarint == 1 above
+             wblt(LL) = deltau
              ! N.b., in Delft3D zourou is established upon velocities just outside the wave boundary layer, at L = Lbw1:
           endif
 
@@ -37360,7 +37355,6 @@ subroutine getymxpar(modind,tauwav, taucur, fw, cdrag, abscos, ypar, ymxpar)
  
  !subroutine getvanrijnwci(LL, z00, ustc2, ustw2, ustcw2, z0urou)
  !   use m_flow
- !   use m_flowwave
  !   use m_bedform
  !   
  !   implicit none
