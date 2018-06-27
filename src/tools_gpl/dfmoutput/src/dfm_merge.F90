@@ -254,6 +254,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    integer :: id_part_face_count, id_part_edge_count, id_part_node_count, id_part_facebnd_count !< Var IDs for storing count of unique items for each partition in the merged global arrays
    integer :: Lrst_m, ifile, max_nvars
    integer :: isBndLink = 0, id_infile
+   integer :: jamerge_cntv = 1 ! merge topology connectivity variables
    
    character(len=NF90_MAX_NAME) :: varname, dimname
    integer,                      allocatable :: itimsel(:)
@@ -351,6 +352,8 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
       if (Lrst_m > 0) then ! If they are _rst files
          n1 = index(infiles(1)(1:Lrst_m), '_0000_', .true.) 
          outfile = infiles(1)(1:n1) //'merged_'// infiles(1)(n1+6:Lrst_m)//'rst.nc'
+         jamerge_cntv = 0
+         write (*,'(a)') 'Info: mapmerge: for *_rst.nc files, topology connectivity variables are not merged.'
       else
       n2  = index(infiles(1)(1:n3), '_', .true.) - 1  ! pos of '_map'
       n1  = index(infiles(1)(1:n2), '_', .true.) - 1  ! pos of '_0000'
@@ -860,7 +863,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
          if (ierr == nf90_noerr) then
             ierr = nf90_get_var(ncids(ii), id_edgefaces, ln(:,nedgecount+1:nedgecount+lnx(ii)), count=(/ 2,lnx(ii) /))
          else
-            write (*,'(a)') 'Error: mapmerge: could not retrieve FlowLink from `'//trim(infiles(ii))//'''. '
+            write (*,'(a)') 'Warning: mapmerge: could not retrieve FlowLink from `'//trim(infiles(ii))//'''. '
             if (.not. verbose_mode) goto 888
          end if
 
@@ -932,13 +935,14 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
             ierr = nf90_get_var(ncids(ii), id_nodey, node_y(nnodecount+1:nnodecount+numk(ii)))
          end if
          if (ierr /= nf90_noerr) then
-            write (*,'(a)') 'Error: mapmerge: could not retrieve coordinates of net nodes from `'//trim(infiles(ii))//'''. '
+            jamerge_cntv = 0
+            write (*,'(a)') 'Warning: mapmerge: could not retrieve coordinates of net nodes from `'//trim(infiles(ii))//'''. '
          end if
       else
          if (jaugrid==0) then
-            write (*,'(a)') 'Error: mapmerge: could not retrieve NetElemNode from `'//trim(infiles(ii))//'''. '
+            write (*,'(a)') 'Warning: mapmerge: could not retrieve NetElemNode from `'//trim(infiles(ii))//'''. '
          else
-            write (*,'(a)') 'Error: mapmerge: could not retrieve mesh2d_face_nodes from `'//trim(infiles(ii))//'''. '
+            write (*,'(a)') 'Warning: mapmerge: could not retrieve mesh2d_face_nodes from `'//trim(infiles(ii))//'''. '
          end if
          if (.not. verbose_mode) goto 888
       end if
@@ -980,9 +984,9 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
          ierr = nf90_get_var(ncids(ii), id_edgenodes, edgenodes(:,nnetedgecount+1:nnetedgecount+numl(ii)), count=(/ 2, numl(ii) /))
       else
          if (jaugrid==0) then
-            write (*,'(a)') 'Error: mapmerge: could not retrieve NetLink from `'//trim(infiles(ii))//'''. '
+            write (*,'(a)') 'Warning: mapmerge: could not retrieve NetLink from `'//trim(infiles(ii))//'''. '
          else
-            write (*,'(a)') 'Error: mapmerge: could not retrieve mesh2d_edge_nodes from `'//trim(infiles(ii))//'''. '
+            write (*,'(a)') 'Warning: mapmerge: could not retrieve mesh2d_edge_nodes from `'//trim(infiles(ii))//'''. '
          end if
          if (.not. verbose_mode) goto 888
       end if
@@ -996,9 +1000,9 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
          ierr = nf90_get_var(ncids(ii), id_netedgefaces, netedgefaces(:,nnetedgecount+1:nnetedgecount+numl(ii)), count=(/ 2, numl(ii) /))
       else
          if (jaugrid==0) then
-            write (*,'(a)') 'Error: mapmerge: could not retrieve ElemLink from `'//trim(infiles(ii))//'''. '
+            write (*,'(a)') 'Warning: mapmerge: could not retrieve ElemLink from `'//trim(infiles(ii))//'''. '
          else
-            write (*,'(a)') 'Error: mapmerge: could not retrieve mesh2d_edge_faces from `'//trim(infiles(ii))//'''. '
+            write (*,'(a)') 'Warning: mapmerge: could not retrieve mesh2d_edge_faces from `'//trim(infiles(ii))//'''. '
          end if
          if (.not. verbose_mode) goto 888
       end if
@@ -1008,7 +1012,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
          if (ierr == nf90_noerr) then
             ierr = nf90_get_var(ncids(ii), id_netfaceedges, netfaceedges(:,nfacecount+1:nfacecount+nump(ii)), count=(/ netfacemaxnodesg, nump(ii) /))
          else
-            write (*,'(a)') 'Error: mapmerge: could not retrieve NetElemLink from `'//trim(infiles(ii))//'''. '
+            write (*,'(a)') 'Warning: mapmerge: could not retrieve NetElemLink from `'//trim(infiles(ii))//'''. '
             if (.not. verbose_mode) goto 888
          end if
       else ! UGRID map file does not contain _face_edges, build it here: netfaceedges
@@ -1037,7 +1041,8 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
          ierr = nf90_get_var(ncids(ii), id_edgey, edge_y(nnetedgecount+1:nnetedgecount+numl(ii)))
       end if
       if (ierr /= nf90_noerr) then
-         write (*,'(a)') 'Error: mapmerge: could not retrieve coordinates of net edges from `'//trim(infiles(ii))//'''. '
+         jamerge_cntv = 0
+         write (*,'(a)') 'Warning: mapmerge: could not retrieve coordinates of net edges from `'//trim(infiles(ii))//'''. '
       end if
 
       ! Identify the net link node domain based on the already processed net nodes
@@ -1086,6 +1091,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
       end if
    end do ! ii
 
+   if (jamerge_cntv == 1) then 
    !! fulfill node_c2g, because in domain that is larger than 0000, there are nodes which are in this domain but 
    !  their domain numbers are another domain.
     do ii = 2, nfiles
@@ -1179,6 +1185,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
             end if
         end do
     end do
+   end if
    nkmxglob = kmx(1)
    do ii = 2,nfiles
       if (kmx(ii) .ne. nkmxglob) then
@@ -1365,6 +1372,15 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
       if (verbose_mode) then
          write (tmpstr1, '(a,i0,a,i0,a)') 'Var #', iv, ' of ', nvarsel, ': '
       end if
+ 
+      ! Skip merging the connectivity variables when coordinates of netnodes or netedges are not read from the files 
+      if (jamerge_cntv == 0 .and. (var_names(iv) .eq. 'NetLink' .or. var_names(iv) .eq. 'NetElemNode' .or. &
+          var_names(iv) .eq. 'NetElemLink' .or. var_names(iv) .eq. 'ElemLink' .or. var_names(iv) .eq. 'FlowLink'.or. &
+          var_names(iv) .eq. 'mesh2d_edge_nodes' .or. var_names(iv) .eq. 'mesh2d_face_nodes' .or. var_names(iv) .eq. 'mesh2d_edge_faces')) then
+          write (*,'(a)') 'Warning: mapmerge: Skipping topology merging variable: `'//trim(var_names(iv))//'''. '
+          cycle     
+      end if
+
       if (var_ndims(iv) == 0) then  ! For instance, 'Mesh2D'
          cycle
       else if (var_spacedimpos(iv) == -1 .and. var_timdimpos(iv) == -1 .and. var_kxdimpos(iv) /= -1) then

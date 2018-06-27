@@ -9018,6 +9018,7 @@ subroutine unc_read_map(filename, tim, ierr)
     use m_alloc
     use m_timer
     use m_turbulence
+    use m_samples
 
     character(len=*),  intent(in)       :: filename   !< Name of NetCDF file.
     real(kind=hp),     intent(in)       :: tim        !< Desired time (snapshot) to be read from map file.
@@ -9096,9 +9097,11 @@ subroutine unc_read_map(filename, tim, ierr)
     integer, allocatable :: inode_own(:), ilink_own(:), inode_ghost(:), ilink_ghost(:) !< Mapping from unique flow nodes/links that are a domain's own to the actual index in 1:ndxi and 1:lnx
     integer, allocatable :: inode_merge(:), ilink_merge(:), ibnd_merge(:), inodeghost_merge(:), ilinkghost_merge(:) !< Mapping from subdomain flow nodes/links to merged map files
     integer :: ndxi_own, lnx_own, ndxi_ghost, lnx_ghost !< number of nodes/links that are a domain's own (if jampi==0, ndxi_own===ndxi, lnx_own===lnx)
+    integer :: ndxi_all, lnx_all !< total numbers of nodes/links among all partitions 
     integer :: ndxi_merge, lnx_merge, ndxbnd_merge
     integer :: numpart, jamergedmap, jaghost, idmn_ghost, jamergedmap_same, lmerge = 0, lugrid = 0, jafillghost
     integer :: kstart, lstart, kstart_bnd
+    integer :: MSAM
     
     character(len=8)::numformat
     character(len=2)::numtrastr, numsedfracstr
@@ -9319,7 +9322,8 @@ subroutine unc_read_map(filename, tim, ierr)
              ierr = nf90_get_var(imapfile, id_xzw, xmc)
              ierr = nf90_get_var(imapfile, id_yzw, ymc)
              
-             call find_flownodesorlinks_merge(ndxi_merge, xmc, ymc, ndxi, ndxi_ghost, inode_ghost, inodeghost_merge, 1)
+             Ns = 0
+             call find_flownodesorlinks_merge(ndxi_merge, xmc, ymc, ndxi, ndxi_ghost, inode_ghost, inodeghost_merge, 1, 1)
           
             ! read coordinates of flow links center
             ierr = nf90_inq_dimid(imapfile, 'nFlowLink', id_flowlinkdim)
@@ -9336,7 +9340,7 @@ subroutine unc_read_map(filename, tim, ierr)
             ierr = nf90_get_var(imapfile, id_yu, yuu)
             
             !call find_flownodesorlinks_merge(lnx_merge, xuu, yuu, lnx, lnx_own, ilink_own, ilink_merge, 0)
-            call find_flownodesorlinks_merge(lnx_merge, xuu, yuu, lnx, lnx_ghost, ilink_ghost, ilinkghost_merge, 0)
+            call find_flownodesorlinks_merge(lnx_merge, xuu, yuu, lnx, lnx_ghost, ilink_ghost, ilinkghost_merge, 0, 1)
           endif
        else     ! If the partitions in the model are different comparing with the rst file
           ndxi_own = 0
@@ -9360,6 +9364,7 @@ subroutine unc_read_map(filename, tim, ierr)
           if (jampi==0) then
              ! node
              ndxi_own = ndxi
+             ndxi_all = ndxi_own
              do kk=1,ndxi
                 inode_own(kk) = kk
              enddo
@@ -9372,6 +9377,7 @@ subroutine unc_read_map(filename, tim, ierr)
              endif
              ! link
              lnx_own = lnx
+             lnx_all = lnx_own
              do LL=1,lnx
                 ilink_own(LL) = LL
              enddo
@@ -9424,6 +9430,9 @@ subroutine unc_read_map(filename, tim, ierr)
                   end if
                end do
             endif
+            ! compute global number of nodes/lnx of all subdomains
+            call reduce_int_sum(ndxi_own, ndxi_all)
+            call reduce_int_sum(lnx_own,  lnx_all )
           endif
           
           
@@ -9433,6 +9442,15 @@ subroutine unc_read_map(filename, tim, ierr)
           call check_error(ierr, 'nFlowElem')
           ierr = nf90_inquire_dimension(imapfile, id_flowelemdim, len=ndxi_merge)
           call check_error(ierr, 'Flow Elem count')
+
+          ! Check if global number of nodes in the merged rst file is equal to that in the model
+          if (ndxi_all .ne. ndxi_merge) then
+             write (msgbuf, '(a,i0,a,i0,a)') 'Global number of nodes among all partitions: in the merged restart file ', ndxi_merge, ',  in model: ', ndxi_all, '.'
+             call warn_flush()
+             call qnerror('Global number of nodes read from the merged restart file unequal to global number of nodes in model,' &
+                           //' therefore some nodes may not be found',' ',' ')
+          end if
+
           ierr = nf90_inq_varid(imapfile, 'FlowElem_xzw', id_xzw)
           call check_error(ierr, 'center of mass x-coordinate')
           ierr = nf90_inq_varid(imapfile, 'FlowElem_yzw', id_yzw)
@@ -9470,16 +9488,23 @@ subroutine unc_read_map(filename, tim, ierr)
 
           if (nerr_ > 0) goto 999
 
-          call find_flownodesorlinks_merge(ndxi_merge, xmc, ymc, ndxi, ndxi_own, inode_own, inode_merge, 1)
+          call find_flownodesorlinks_merge(ndxi_merge, xmc, ymc, ndxi, ndxi_own, inode_own, inode_merge, 1, 1)
           if (ndxbnd_own>0 .and. jaoldrstfile == 0) then 
              ! For parallel run, 'ibnd_own' and 'ndxbnd_own' has been determined in function 'flow_initexternalforcings'
-             call find_flownodesorlinks_merge(ndxbnd_merge, xbnd_read, ybnd_read, ndx-ndxi, ndxbnd_own, ibnd_own, ibnd_merge, 2)
+             call find_flownodesorlinks_merge(ndxbnd_merge, xbnd_read, ybnd_read, ndx-ndxi, ndxbnd_own, ibnd_own, ibnd_merge, 2, 1)
           endif
           ! read coordinates of flow links center
           ierr = nf90_inq_dimid(imapfile, 'nFlowLink', id_flowlinkdim)
           call check_error(ierr, 'nFlowLink')
           ierr = nf90_inquire_dimension(imapfile, id_flowlinkdim, len=lnx_merge )
           call check_error(ierr, 'link count')
+          ! ! Check if global number of links in the merged rst file is equal to that in the model
+          if (lnx_all .ne. lnx_merge) then
+             write (msgbuf, '(a,i0,a,i0,a)') 'Global number of links among all partitions: in the merged restart file ', lnx_merge, ',  in model: ', lnx_all, '.'
+             call warn_flush()
+             call qnerror('Global number of links read from the merged restart file unequal to global number of links in model, '&
+                           //' therefore some links may not be found',' ',' ')
+          end if
           ierr = nf90_inq_varid(imapfile, 'FlowLink_xu', id_xu)
           ierr = nf90_inq_varid(imapfile, 'FlowLink_yu', id_yu)
           if (nerr_ > 0) goto 999
@@ -9489,12 +9514,39 @@ subroutine unc_read_map(filename, tim, ierr)
           ierr = nf90_get_var(imapfile, id_xu, xuu)
           ierr = nf90_get_var(imapfile, id_yu, yuu)
        
-          call find_flownodesorlinks_merge(lnx_merge, xuu, yuu, lnx, lnx_own, ilink_own, ilink_merge, 0)
+          call find_flownodesorlinks_merge(lnx_merge, xuu, yuu, lnx, lnx_own, ilink_own, ilink_merge, 0, 1)
           
           if (jafillghost==1) then
-             call find_flownodesorlinks_merge(ndxi_merge, xmc, ymc, ndxi, ndxi_ghost, inode_ghost, inodeghost_merge, 1)
-             call find_flownodesorlinks_merge(lnx_merge, xuu, yuu, lnx, lnx_ghost, ilink_ghost, ilinkghost_merge, 0)
+             call find_flownodesorlinks_merge(ndxi_merge, xmc, ymc, ndxi, ndxi_ghost, inode_ghost, inodeghost_merge, 1, 1)
+             call find_flownodesorlinks_merge(lnx_merge, xuu, yuu, lnx, lnx_ghost, ilink_ghost, ilinkghost_merge, 0, 1)
           endif
+          
+          
+          if ( jampi.eq.0 ) then
+             if ( NS.gt.0 ) then
+                call newfil(MSAM, 'rst_error.xyz')
+                call wrisam(MSAM)
+   !            delete samples
+                NS = 0
+                call mess(LEVEL_ERROR, 'restart error, unfound nodes/links are written to sample files rst_error.xyz')
+             end if
+          else
+             if ( NS.gt.0 ) then
+                call newfil(MSAM, 'rst_error_'// sdmn // '.xyz')
+                call wrisam(MSAM)
+                call mess(LEVEL_WARN, 'restart error, unfound nodes/links are written to sample files rst_error_'// sdmn // '.xyz')
+             end if
+             
+!            get maximum number of flownodes with error over all subdomains             
+             call reduce_key(Ns)
+             
+             if ( Ns.gt.0 ) then
+                call mess(LEVEL_ERROR, 'restart error, please check sample files rst_error_NNNN.xyz')
+             end if
+             
+   !         delete samples
+             NS = 0
+          end if
           
           deallocate(xmc, ymc, xuu, yuu)
           if(ndxbnd_own>0 .and. jaoldrstfile == 0)  deallocate(xbnd_read, ybnd_read)

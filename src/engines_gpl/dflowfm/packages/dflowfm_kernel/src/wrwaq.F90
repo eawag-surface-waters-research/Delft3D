@@ -1479,6 +1479,7 @@ subroutine waq_wri_bnd()
 
     write(lunbnd, '(i8)') nopenbndsect + waqpar%numsrcbnd             ! Nr of open boundary sections and sink sources.
     istart = 0
+    nopenbndsectnonempty = 0
     do i=1,nopenbndsect
         namelen = len_trim(openbndname(i))
         write(lunbnd, '(a)')  trim(openbndname(i)(1:min(namelen, waqmaxnamelen)))  ! Section name

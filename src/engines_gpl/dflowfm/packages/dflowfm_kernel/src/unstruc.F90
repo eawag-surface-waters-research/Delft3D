@@ -12625,6 +12625,7 @@ end if
  if (iuvfield > 0) call setvelocityfield()           ! only when testing
 
  ! remember initial waterlevels at the water-level boundaries
+ ! so that reading rst file won't influence it. This is used for restart a model with Riemann boundary conditions.
  do n=1,nbndz
     k2 = kbndz(2,n)
     zbndz0(n) = s1(k2)

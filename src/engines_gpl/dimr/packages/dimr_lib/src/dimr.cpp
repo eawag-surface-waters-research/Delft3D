@@ -1339,6 +1339,7 @@ void Dimr::getAddress(
             || compType == COMP_TYPE_RR
             || compType == COMP_TYPE_FLOW1D
             || compType == COMP_TYPE_FLOW1D2D
+            || compType == COMP_TYPE_FM // NOTE: pending new feature of specifying get_var by value/by reference, we now always get the new pointer from dflowfm (needed for UNST-1713).
             || *sourceVarPtr == NULL) {
             // These components only returns a new pointer to a copy of the double value, so call it each time.
             // sourceVarPtr=NULL: getVar not yet called for this parameter, probably because "send" is being called
