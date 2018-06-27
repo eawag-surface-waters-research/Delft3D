@@ -90,31 +90,32 @@ module m_ec_support
       end function ecTimeFrameRealHpTimestepsToModifiedJulianDate
       
       ! =======================================================================
-      
+
       !> Calculate a Gregorian date and hour-minutes-seconds integer since reference date
       function ecTimeFrameRealHpTimestepsToDateTime(timeFramePtr, steps, yyyymmdd, hhmmss) result(success)
+      use mathconsts, only : daysec_hp
          logical                                 :: success      !< function status
-         type(tEcTimeFrame), pointer             :: timeFramePtr !< intent(inout)
+         type(tEcTimeFrame),         intent(in)  :: timeFramePtr !< time frame pointer
          real(hp),                   intent(in)  :: steps        !< number of time steps
          integer,                    intent(out) :: yyyymmdd     !< calculated Gregorian date
-         integer,                    intent(out) :: hhmmss     !< time of the day
-         real(hp)                                :: jd           !< julian date helper variable
-         real(hp)                                :: spd          !< seconds per day helper variable
+         integer,                    intent(out) :: hhmmss       !< time of the day
          real(hp)                                :: ssm          !< seconds since midnight helper variable
          integer                                 :: hh, mm, ss   !< hours, minutes, seconds helper variables
+         integer                                 :: ierr         !< return code mjd2date
          !
-         success = .true.
-         !
-         spd = 60.0_hp * 60.0_hp * 24.0_hp
-!        jd = timeFramePtr%k_refdate + (steps / spd) + 2400001.0_hp  ! From Modified Jul day 
-         jd = timeFramePtr%k_refdate + (steps / spd) + 2400000.5_hp  ! From Reduced Jul day
-         call jul2ymd(int(jd), yyyymmdd)
-         ssm = mod(steps, spd)
-         hh = int(ssm) / 3600
-         mm = int(ssm) / 60 - hh * 60
-         ss = int(ssm) - hh * 3600 - mm * 60
-         hhmmss = hh*10000 + mm*100 + ss
-         
+         ierr = mjd2date(timeFramePtr%k_refdate  + (steps / daysec_hp), yyyymmdd)
+         success = (ierr == 1)
+
+         if (success) then
+            ssm = mod(steps, daysec_hp)
+            hh = int(ssm) / 3600
+            mm = int(ssm) / 60 - hh * 60
+            ss = int(ssm) - hh * 3600 - mm * 60
+            hhmmss = hh*10000 + mm*100 + ss
+         else
+            hhmmss = 0
+         endif
+
       end function ecTimeFrameRealHpTimestepsToDateTime
       
       ! =======================================================================
@@ -772,7 +773,7 @@ end subroutine ecInstanceListSourceItems
          type(tEcFileReader), pointer :: corrFileReaderPtr !< intent(inout)
          character(len=*)             :: qname             !< quantity name
          character(len=*)             :: bcname            !< point on poly name
-         integer, intent(in)          :: func              !< function type                  
+         integer, intent(in)          :: func              !< function type
 
          integer                      :: iFileReader
          type (tEcBCBlock), pointer   :: BCBlockptr 

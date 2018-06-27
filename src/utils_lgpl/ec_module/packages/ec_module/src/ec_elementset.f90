@@ -649,6 +649,7 @@ module m_ec_elementSet
          integer                        :: newSize       !< size of maskArray
          integer                        :: istat         !< reallocate status
          integer                        :: i             !< loop counter
+         logical, save                  :: isFirst = .true.
          !
          success = .true.
          elementSetPtr => null()
@@ -682,7 +683,10 @@ module m_ec_elementSet
                   elementSetPtr%mask => elementSetPtr%maskArray
                end if
             else
-               call setECMessage("WARNING: ec_elementSet::ecElementSetSetMaskArray: Won't set a mask for this ElementSet type.")
+               if (isFirst) then
+                  call setECMessage("WARNING: ec_elementSet::ecElementSetSetMaskArray: Won't set a mask for this ElementSet type.")
+                  isFirst = .false.
+               endif
             end if
          else
             call setECMessage("ERROR: ec_elementSet::ecElementSetSetMaskArray: Cannot find an ElementSet with the supplied id.")

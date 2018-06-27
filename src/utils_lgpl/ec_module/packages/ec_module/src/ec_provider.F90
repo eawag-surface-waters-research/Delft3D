@@ -1496,19 +1496,23 @@ module m_ec_provider
          if (.not. ecElementSetSetType(instancePtr, elementSetId, elmSetType_cartesian)) return
          if (.not. ecElementSetSetXArray(instancePtr, elementSetId, xs)) return
          if (.not. ecElementSetSetYArray(instancePtr, elementSetId, ys)) return
-         if (.not. ecElementSetSetNumberOfCoordinates(instancePtr, elementSetId, n_points)) return     
+         if (.not. ecElementSetSetNumberOfCoordinates(instancePtr, elementSetId, n_points)) return
 
          fieldId = ecInstanceCreateField(instancePtr)
          itemId = ecInstanceCreateItem(instancePtr)
          if (.not. ecItemSetRole(instancePtr, itemId, itemType_target)) return
-         if (.not. ecItemSetType(instancePtr, itemId, accessType_fileReader)) return 
+         if (.not. ecItemSetType(instancePtr, itemId, accessType_fileReader)) return
          if (.not. ecItemSetQuantity(instancePtr, itemId, quantityId)) return
          if (.not. ecItemSetElementSet(instancePtr, itemId, elementSetId)) return
          if (.not. ecItemSetTargetField(instancePtr, itemId, fieldId)) return
 
          itemPT => ecSupportFindItem(instancePtr, itemId)
-!        call jul2ymd(int(fileReaderPtr%tframe%k_refdate + 2400001.0_hp), k_yyyymmdd)     ! From Modified Jul day
-         call jul2ymd(int(fileReaderPtr%tframe%k_refdate + 2400000.5_hp), k_yyyymmdd)     ! From Reduced Jul day
+
+         istat = mjd2date(fileReaderPtr%tframe%k_refdate, k_yyyymmdd)
+         if (istat == 0) then
+             call setECMessage('Error with refdate in ' // fileReaderPtr%filename)
+             return
+         endif
 
          ! Init BCBlock for (global) qh-bound 
          is_qh = .false. 
@@ -1683,17 +1687,17 @@ module m_ec_provider
          integer                             :: vectormax
          logical                             :: is_tim, is_cmp, is_tim3d, is_qh
          type(tEcBCBlock), pointer           :: bcBlockPtr
-         logical :: all_points_are_corr
-         logical :: has_label
-         integer :: lblstart
+         logical                             :: all_points_are_corr
+         logical                             :: has_label
+         integer                             :: lblstart
          !
 
-!        initialization         
+!        initialization
          success = .false.
          itemPT => null()
          sourceItem => null()
          itemt3D => null()
-         maxlay = 0                 
+         maxlay = 0
          vectormax = 1
          !
          ! Skip the lead comment lines plus one additional line.
@@ -1715,7 +1719,7 @@ module m_ec_provider
          end if
          ! Sanity check
          if (n_points < 2) then
-            call setECMessage("ERROR: ec_provider::ecProviderCreatePolyTimItems: Less then two support points found.")            
+            call setECMessage("ERROR: ec_provider::ecProviderCreatePolyTimItems: Less then two support points found.")
             return
          end if
          ! Read the support point coordinate pairs.
@@ -1752,8 +1756,12 @@ module m_ec_provider
                read(rec(lblstart+6:len_trim(rec)),*,iostat=istat)  plipointlbls(i)
             endif
          enddo
-!        call jul2ymd(int(fileReaderPtr%tframe%k_refdate + 2400001.0_hp), k_yyyymmdd)  ! Conversion from MJD
-         call jul2ymd(int(fileReaderPtr%tframe%k_refdate + 2400000.5_hp), k_yyyymmdd)  ! Conversion from RJD
+
+         istat = mjd2date(fileReaderPtr%tframe%k_refdate, k_yyyymmdd)
+         if (istat == 0) then
+             call setECMessage('Error with refdate in ' // fileReaderPtr%filename)
+             return
+         endif
 
          ! Construct the poly_tim Item
          quantityId = ecInstanceCreateQuantity(instancePtr)
@@ -1763,7 +1771,7 @@ module m_ec_provider
          if (.not. ecElementSetSetType(instancePtr, elementSetId, elmSetType_cartesian)) return
          if (.not. ecElementSetSetXArray(instancePtr, elementSetId, xs)) return
          if (.not. ecElementSetSetYArray(instancePtr, elementSetId, ys)) return
-         if (.not. ecElementSetSetNumberOfCoordinates(instancePtr, elementSetId, n_points)) return     
+         if (.not. ecElementSetSetNumberOfCoordinates(instancePtr, elementSetId, n_points)) return
 
          fieldId = ecInstanceCreateField(instancePtr)
          itemId = ecInstanceCreateItem(instancePtr)

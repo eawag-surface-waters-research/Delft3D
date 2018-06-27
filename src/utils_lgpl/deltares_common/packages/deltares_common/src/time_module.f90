@@ -43,15 +43,15 @@ module time_module
    public :: datetime2sec
    public :: sec2ddhhmmss
    public :: ymd2jul, ymd2reduced_jul
-   public :: jul2ymd
    public :: mjd2jul
    public :: jul2mjd
-   public :: date2mjd
+   public :: date2mjd   ! obsolete, use ymd2reduced_jul
    public :: mjd2date
    public :: datetime_to_string
    public :: parse_ud_timeunit
 
    interface ymd2jul
+      ! obsolete, use ymd2reduced_jul
       module procedure CalendarDateToJulianDateNumber
       module procedure CalendarYearMonthDayToJulianDateNumber
    end interface ymd2jul
@@ -62,20 +62,8 @@ module time_module
       module procedure ymd2reduced_jul_int3
    end interface ymd2reduced_jul
 
-   interface jul2ymd
-      module procedure JulianDateNumberToCalendarDate
-      module procedure JulianDateNumberToCalendarYearMonthDay
-   end interface jul2ymd
-
-   interface date2mjd
-      module procedure ymd2mjd
-      module procedure ymdhms2mjd
-      module procedure datetime2mjd
-   end interface date2mjd
-
    interface mjd2date
       module procedure mjd2datetime
-      module procedure mjd2ymdhms
       module procedure mjd2ymd
    end interface mjd2date
 
@@ -340,7 +328,7 @@ module time_module
       !
       ! Calculate backwards to test if the assumption is correct
       !
-      call jul2ymd(jdn, y, m, d)
+      call JulianDateNumberToCalendarYearMonthDay(jdn, y, m, d)
       !
       ! Test if calculation is correct
       !
@@ -411,7 +399,7 @@ module time_module
          !
          ! Calculate backwards to test if the assumption is correct
          !
-         call jul2ymd(jdn, y, m, d)
+         call JulianDateNumberToCalendarYearMonthDay(jdn, y, m, d)
          !
          ! Test if calculation is correct
          !
@@ -729,38 +717,7 @@ module time_module
          endif
       end function leapYear
 
-!---------------------------------------------------------------------------------------------
-! implements interface date2mjd
-!---------------------------------------------------------------------------------------------
-      function ymd2mjd(ymd) result(days)
-         implicit none
-         integer, intent(in)       :: ymd
-         real(kind=hp)             :: days
-         integer       :: year, month, day, hour, minute
-         real(kind=hp) :: second
-         year   = int(ymd/10000)
-         month  = int(mod(ymd,10000)/100)
-         day    = mod(ymd,100)
-         days = datetime2mjd(year,month,day,0,0,0.d0)
-      end function
-
-      function ymdhms2mjd(ymd,hms) result(days)
-         implicit none
-         integer, intent(in)       :: ymd
-         real(kind=hp), intent(in) :: hms
-         real(kind=hp)             :: days
-         integer       :: year, month, day, hour, minute
-         real(kind=hp) :: second
-         year   = int(ymd/10000)
-         month  = int(mod(ymd,10000)/100)
-         day    = mod(ymd,100)
-         hour   = int(hms/10000)
-         minute = int(mod(hms,10000.d0)/100)
-         second = mod(hms,100.d0)
-         days = datetime2mjd(year,month,day,hour,minute,second)
-      end function
-
-      function datetime2mjd(year,month,day,hour,minute,second) result(days)
+      function date2mjd(year,month,day,hour,minute,second) result(days)
          implicit none
          integer, intent(in)   :: year, month, day
          integer, intent(in)   :: hour, minute
@@ -769,7 +726,7 @@ module time_module
          real(kind=hp) :: dayfrac
          dayfrac = (hour*3600+minute*60+second)/(24*3600)
          days = jul2mjd(CalendarYearMonthDayToJulianDateNumber(year,month,day),dayfrac)
-      end function datetime2mjd
+      end function date2mjd
 
 !---------------------------------------------------------------------------------------------
       function mjd2jul(days,frac) result(jul)
@@ -778,9 +735,9 @@ module time_module
          real(kind=hp), optional, intent(out) :: frac
          integer                              :: jul
 
-         jul = int(days+2400001.0_hp) ! should use 2400000.5_hp ?
+         jul = int(days+offset_reduced_jd)
          if (present(frac)) then
-             frac = mod(days,1.0_hp)  ! should use days + 0.5_hp ?
+             frac = mod(days,0.5_hp)
          endif
       end function mjd2jul
 
@@ -790,7 +747,7 @@ module time_module
          real(kind=hp), optional, intent(in)  :: frac
          real(kind=hp)                        :: days
 
-         days = real(jul,hp)-2400001.0_hp ! should use 2400000.5_hp ?
+         days = real(jul,hp)-offset_reduced_jd
          if (present(frac)) then
              days = days + frac
          endif
@@ -848,8 +805,10 @@ module time_module
          success = 1
       end function mjd2datetime
 
+      ! todo: move to unit test environment
       subroutine testConversion
-         integer :: jdn1, jdn2, jdn3, jdn4
+         integer :: jdn1, jdn2, jdn3, jdn4, yyyymmdd, yyyymmdd2, istat
+         real(kind=hp) :: mjd, mjd2
 
          jdn1 = CalendarYearMonthDayToJulianDateNumber(1, 1, 1)
          jdn2 = CalendarYearMonthDayToJulianDateNumber(1582, 10, 4)
@@ -860,6 +819,37 @@ module time_module
          if (jdn2 /= 2299160) write(*,*) 'error for 4-10-1582'
          if (jdn3 /= 2299161) write(*,*) 'error for 15-10-1582'
          if (jdn4 /= 2451911) write(*,*) 'error for 1-1-2001'
+
+         mjd = 55833.5
+         istat = mjd2date(mjd, yyyymmdd)
+         mjd2 = ymd2mjd(yyyymmdd)
+         if (mjd /= mjd2) write(*,*) 'error for mjd=55833.5'
+
+         yyyymmdd = 15821015
+         mjd = ymd2mjd(yyyymmdd)
+         istat = mjd2date(mjd, yyyymmdd2)
+         if (yyyymmdd /= yyyymmdd2) write(*,*) 'error for yyyymmdd = 15821015'
+
+         yyyymmdd = 15821004
+         mjd2 = ymd2mjd(yyyymmdd)
+         istat = mjd2date(mjd, yyyymmdd2)
+         if (yyyymmdd /= yyyymmdd2) write(*,*) 'error for yyyymmdd = 15821004'
+         if (abs(mjd - mjd2 - 1d0) > 1d-4) write(*,*) 'error for jump 15821004 -> 15821015'
+
+      contains
+      function ymd2mjd(ymd) result(days)
+         implicit none
+         integer, intent(in)       :: ymd
+         real(kind=hp)             :: days
+         integer       :: year, month, day, hour, minute
+         real(kind=hp) :: second
+         !year   = int(ymd/10000)
+         !month  = int(mod(ymd,10000)/100)
+         !day    = mod(ymd,100)
+         call splitDate(ymd, year, month, day)
+         days = date2mjd(year,month,day,0,0,0.d0)
+      end function
+
       end subroutine testConversion
 
 end module time_module
