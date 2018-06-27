@@ -22058,7 +22058,6 @@ endif
  double precision, allocatable :: wfn (:,:), zz(:)
   
  call reapol(mpol,0)
- call allocpoladm()
  
  call increasesam(npl+ndx)
 
@@ -38852,7 +38851,6 @@ subroutine setbobsonroofs( )      ! override bobs along pliz's
 
  call oldfil (minp, md_roofsfile)
  call reapol (minp, 0)
- call allocpoladm()
  
  inp  = -1 
  kc   = 0

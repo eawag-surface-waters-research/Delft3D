@@ -463,10 +463,19 @@ end module m_tpoly
     end if
     end subroutine polorientation
     
-   subroutine allocpoladm()
+   subroutine allocpoladm(N)
    use m_alloc
    use m_polygon
+   integer, intent(in) :: N !< Desired array capacity for polygon administration
+
+   integer :: maxpolycur
+   
+   maxpolycur = size(xpmin)
+   IF (N <= maxpolycur ) THEN 
+      RETURN
+   ENDIF
    maxpoly = ceiling(maxpoly*1.1)
+
    call realloc(xpmin, maxpoly, keepExisting=.true.)
    call realloc(xpmax, maxpoly, keepExisting=.true.)
    call realloc(ypmin, maxpoly, keepExisting=.true.)
@@ -508,11 +517,11 @@ end module m_tpoly
   
    !     initialization
    if ( in < 0 ) then
-      call allocpoladm()
       ipoint = 1
       ipoly = 0
-      do while ( ipoint.lt.NPL .and. ipoly.lt.MAXPOLY )
+      do while (ipoint.lt.NPL)
          ipoly = ipoly+1
+         call allocpoladm(ipoly)
 
          !           get polygon start and end pointer respectively
          call get_startend(NPL-ipoint+1,xpl(ipoint:NPL),ypl(ipoint:NPL), istart, iend, dmiss)
