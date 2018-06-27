@@ -88,6 +88,7 @@ subroutine depfil_stm(lundia    ,error     ,fildep    ,fmttmp    , &
    logical               :: success
    real(hp)              :: dmiss    = -999.0_hp
    integer               :: ns
+   integer               :: ngrid    
    integer               :: kx
    integer               :: npl
    integer               :: jsferic
@@ -119,8 +120,8 @@ subroutine depfil_stm(lundia    ,error     ,fildep    ,fmttmp    , &
       jasfer3D = 0
       jins = 1
       NPL = 0 ! Dummies, since STM is not aware of these yet.
-
-      allocate (array1d(dims%nmmax), stat=ierror)
+      ngrid = dims%nmmax + size(dims%nmbnd, 1)
+      allocate (array1d(ngrid), stat=ierror)
       array1d = dmiss
 
       CALL triinterp2(dims%xz, dims%yz, array1d, dims%nmmax, jdla, & 
@@ -206,6 +207,7 @@ subroutine depfil_stm_double(lundia    ,error     ,fildep    ,fmttmp    , &
    logical  :: success
    real(hp) :: dmiss    = -999.0_hp
    integer  :: ns, kx
+   integer  :: ngrid    
    integer  :: npl
    integer  :: jsferic
    integer  :: jasfer3D
@@ -237,7 +239,8 @@ subroutine depfil_stm_double(lundia    ,error     ,fildep    ,fmttmp    , &
       jins = 1
       NPL = 0 ! Dummies, since STM is not aware of these yet.
 
-      allocate (array1d(dims%nmmax), stat=ierror)
+      ngrid = dims%nmmax + size(dims%nmbnd, 1)
+      allocate (array1d(ngrid), stat=ierror)
       array1d = dmiss
 
       CALL triinterp2(dims%xz, dims%yz, array1d, dims%nmmax, jdla, & 
