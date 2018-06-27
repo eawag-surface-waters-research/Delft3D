@@ -57,6 +57,7 @@ module m_CrossSections
    public GetCSParsTotal
    public getGroundLayer
    public getHighest1dLevel
+   public GetTabFlowSectionFromTables
    public interpolateSummerDike
    public setGroundLayerData
    public SetParsCross
@@ -192,7 +193,7 @@ module m_CrossSections
        
        !--- additional data for river profiles
        double precision                         :: plains(3) = 0.0d0  !< 1: main channel, 2: floopplain 1, 3: floodplain 2
-       integer                                  :: plainslocation(3)
+       integer                                  :: plainsLocation(3)
        !--- information for Summerdikes
        type(t_summerdike),pointer               :: summerdike => null()
 
@@ -1916,10 +1917,7 @@ subroutine GetTabSizesFromTables(dpt, pCSD, doFlow, area, width, perimeter, af_s
                perimeter = wetPerimeter_tab(ilev)
                width = pCSD%flowWidth(ilev)
             
-            elseif (dpt > d1) then
-               
-               d1 = heights(ilev - 1) - heights(1)
-               d2 = heights(ilev) - heights(1)
+            elseif (dpt > d1 .and. dpt <= d2) then
                
                if ((d2 - d1) > 0.0d0) then
                   
@@ -1927,16 +1925,20 @@ subroutine GetTabSizesFromTables(dpt, pCSD, doFlow, area, width, perimeter, af_s
                   
                   do isec = 1,3
                      
-                     if (pCSD%plainslocation(isec) == 0) cycle
+                     if (pCSD%plainsLocation(isec) == 0) cycle
                      
                      width = width_sub_tab(isec, ilev - 1) + (width_sub_tab(isec, ilev) - width_sub_tab(isec, ilev - 1)) * factor
                      
                      area_plus = (width_sub_tab(isec, ilev - 1) + width) * (dpt - d1) * 0.5d0
                      af_sub(isec)    = af_sub_tab(isec, ilev - 1) + area_plus
                      
-                     a = width - width_sub_tab(isec, ilev - 1)
-                     b = dpt - d1
-                     perim_sub(isec) = perim_sub_tab(isec, ilev - 1) + 2.0d0 * dsqrt(0.25d0 * a * a + b * b)
+                     if (width_sub_tab(isec, ilev) > width_sub_tab(isec, ilev - 1)) then
+                        a = width - width_sub_tab(isec, ilev - 1)
+                        b = dpt - d1
+                        perim_sub(isec) = perim_sub_tab(isec, ilev - 1) + 2.0d0 * dsqrt(0.25d0 * a * a + b * b)
+                     else
+                        perim_sub(isec) = perim_sub_tab(isec, ilev - 1)
+                     endif
                      
                   enddo
                   
@@ -2051,6 +2053,140 @@ subroutine GetTabSizesFromTables(dpt, pCSD, doFlow, area, width, perimeter, af_s
    endif
    
 end subroutine GetTabSizesFromTables
+
+subroutine GetTabFlowSectionFromTables(dpt, pCross, isector, area, width, perimeter)
+
+   use m_GlobalParameters
+
+   implicit none
+
+   double precision, intent(in)                 :: dpt
+   type (t_CrossSection), pointer, intent(in)   :: pCross         
+   integer, intent(in)                          :: isector
+   double precision, intent(out)                :: width
+   double precision, intent(out)                :: area
+   double precision, intent(out)                :: perimeter
+
+   ! local parameters
+   integer                                      :: levelsCount
+   double precision, dimension(:), pointer      :: heights
+   integer, dimension(:), pointer               :: plainsLocation                              
+   type(t_CSType), pointer                      :: pCSD
+   
+   ! Pre-Calculated Table for Tabulated/River Profiles
+   double precision, dimension(:,:), pointer    :: af_sub_tab        !< Flow Areas for Sub-Sections (Main, FP1 and FP2)
+   double precision, dimension(:,:), pointer    :: width_sub_tab     !< Width for Sub-Sections (Main, FP1 and FP2)
+   double precision, dimension(:,:), pointer    :: perim_sub_tab     !< Wetted Perimeter for Sub-Sections (Main, FP1 and FP2)
+   double precision, dimension(:), pointer      :: flowArea_tab      !< Flow Areas
+   double precision, dimension(:), pointer      :: wetPerimeter_tab  !< Wet Perimeters
+   
+  
+   double precision  :: d1
+   double precision  :: d2
+   double precision  :: dTop
+   double precision  :: eTop
+   integer           :: ilev
+   
+   double precision  :: factor
+   double precision  :: area_plus
+   double precision  :: a
+   double precision  :: b
+   
+   pCSD => pCross%tabDef
+   
+   levelsCount    =  pCSD%levelsCount
+   heights        => pCSD%height
+   plainsLocation => pCSD%plainsLocation
+   dTop           =  heights(levelsCount) - heights(1)
+
+   width     = 0.0d0
+   area      = 0.0d0
+   perimeter = 0.0d0
+
+   af_sub_tab       => pCSD%af_sub
+   width_sub_tab    => pCSD%width_sub
+   perim_sub_tab    => pCSD%perim_sub
+   flowArea_tab     => pCSD%flowArea
+   wetPerimeter_tab => pCSD%wetPerimeter
+
+   if (dpt > dTop) then
+      
+      width     =  width_sub_tab(isector, levelsCount)
+         
+      eTop = pCSD%flowWidth(levelsCount)
+
+      if ((eTop > ThresholdForPreismannLock)) then  !hk: add only when this part is meant to carry water
+
+         area = af_sub_tab(isector, levelsCount) + (dpt - dTop) * width_sub_tab(isector, levelsCount)
+
+         if (levelsCount <= plainsLocation(isector)) then
+            perimeter = perim_sub_tab(isector, levelsCount) + 2.0d0 * (dpt - dTop)
+         else
+            perimeter = perim_sub_tab(isector, levelsCount)
+         endif
+
+      else
+         
+         area      = af_sub_tab(isector, levelsCount)
+         perimeter =  perim_sub_tab(isector, levelsCount)
+         
+      endif
+         
+   else
+
+      do ilev = 2, levelsCount
+         
+         d1 = heights(ilev - 1) - heights(1)
+         d2 = heights(ilev) - heights(1)
+            
+         if (dpt == d2) then
+
+            area      = af_sub_tab(isector, ilev)
+            perimeter = perim_sub_tab(isector, ilev)
+            width     = width_sub_tab(isector, ilev)
+               
+         elseif (dpt > d1 .and. dpt <= d2) then
+               
+            if ((d2 - d1) > 0.0d0) then
+                  
+               if (pCSD%plainsLocation(isector) > 0)then
+                     
+                  factor = (dpt - d1) / (d2 - d1)
+               
+                  width = width_sub_tab(isector, ilev - 1) + (width_sub_tab(isector, ilev) - width_sub_tab(isector, ilev - 1)) * factor
+                     
+                  area_plus = (width_sub_tab(isector, ilev - 1) + width) * (dpt - d1) * 0.5d0
+                  area      = af_sub_tab(isector, ilev - 1) + area_plus
+                  
+                  if (ilev <= plainsLocation(isector)) then
+                     a = width - width_sub_tab(isector, ilev - 1)
+                     b = dpt - d1
+                     perimeter = perim_sub_tab(isector, ilev - 1) + 2.0d0 * dsqrt(0.25d0 * a * a + b * b)
+                  else
+                     perimeter = perim_sub_tab(isector, ilev - 1)
+                  endif
+                  
+               else
+                  area      = 0.0d0
+                  perimeter = 0.0d0
+                  width     = 0.0d0
+               endif
+                  
+            else
+                  
+               area      = af_sub_tab(isector, ilev - 1)
+               perimeter = perim_sub_tab(isector, ilev - 1)
+               width     = width_sub_tab(isector, ilev - 1)
+
+            endif
+            
+         endif
+            
+      enddo
+         
+   endif
+   
+end subroutine GetTabFlowSectionFromTables
 
 subroutine GetSummerDikeFlow(summerdike, wlev, sdArea, sdWidth)
 
@@ -2998,7 +3134,7 @@ subroutine createTablesForTabulatedProfile(crossDef)
 
    if (crossDef%plains(1) == 0d0) then
       crossDef%plains(1) = huge(1d0)
-      crossDef%plainslocation(1) = crossDef%levelsCount
+      crossDef%plainsLocation(1) = crossDef%levelsCount
    endif
    widths = crossDef%flowWidth
    do isec = 1, 3
@@ -3027,7 +3163,7 @@ subroutine createTablesForTabulatedProfile(crossDef)
          crossDef%width_sub(isec, ilev) = e2
          crossDef%af_sub(isec, ilev)    = crossDef%af_sub(isec, ilev - 1) + 0.5d0 * (d2 - d1) * (e1 + e2)
          
-         if (crossDef%plainslocation(2) > 0) then
+         if (crossDef%plainsLocation(2) > 0) then
             if (widths(ilev - 1) < widthplains(isec - 1)) then
                crossDef%perim_sub(isec, ilev) = 0.0d0
             elseif (widths(ilev - 1) >= widthplains(isec)) then 

@@ -49,6 +49,7 @@ module m_cross_helper
    public getWetPerimeterGP
    
    public getCrossFlowDataGP
+   public getCrossFlowSectionGP
    public getCrossTotalDataGP
    
    public getSummerDikeGP
@@ -343,6 +344,63 @@ contains
       if (present(wetPerimeter)) wetPerimeter = perimeter
 
    end subroutine getCrossFlowDataGP
+   
+   subroutine getCrossFlowSectionGP(network, igrid, isec, water, DepthOrLevel, flowArea, flowWidth, wetPerimeter)
+   
+      type(t_network), intent(in)              :: network
+      integer, intent(in)                      :: igrid
+      integer, intent(in)                      :: isec
+      double precision, intent(in)             :: water
+      integer, optional, intent(in)            :: DepthOrLevel
+      double precision, optional, intent(out)  :: flowArea
+      double precision, optional, intent(out)  :: flowWidth
+      double precision, optional, intent(out)  :: wetPerimeter
+   
+      type (t_CrossSection), pointer           :: cross1
+      type (t_CrossSection), pointer           :: cross2 
+      double precision                         :: factor
+
+      double precision                   :: bob_grid_point
+      double precision                   :: dpt
+      
+      double precision                   :: area
+      double precision                   :: width
+      double precision                   :: perimeter
+
+      double precision                   :: area1
+      double precision                   :: width1
+      double precision                   :: perimeter1
+      double precision                   :: area2
+      double precision                   :: width2
+      double precision                   :: perimeter2
+
+      cross1 => network%crs%cross(network%adm%gpnt2cross(igrid)%c1)
+      cross2 => network%crs%cross(network%adm%gpnt2cross(igrid)%c2)
+      factor =  network%adm%gpnt2cross(igrid)%f
+      
+      if (present(DepthOrLevel)) then
+         if (DepthOrLevel ==  CSH_LEVEL) then     
+            bob_grid_point = getBob(cross1, cross2, factor)
+            dpt = bob_grid_point + water
+         else
+            dpt = water
+         endif
+      else
+         dpt = water
+      endif
+
+      call GetTabFlowSectionFromTables(dpt, cross1, isec, area1, width1, perimeter1)
+      call GetTabFlowSectionFromTables(dpt, cross2, isec, area2, width2, perimeter2)
+      
+      area      = (1.0d0 - factor) * area1      + factor * area2
+      width     = (1.0d0 - factor) * width1     + factor * width2
+      perimeter = (1.0d0 - factor) * perimeter1 + factor * perimeter2
+      
+      if (present(flowArea))     flowArea = area
+      if (present(flowWidth))    flowWidth = width
+      if (present(wetPerimeter)) wetPerimeter = perimeter
+
+   end subroutine getCrossFlowSectionGP
    
    subroutine getCrossFlowData_on_link(network, ilink, depth, flowArea, flowWidth, wetPerimeter, conveyance, cz, af_sub, perim_sub, cz_sub)
    

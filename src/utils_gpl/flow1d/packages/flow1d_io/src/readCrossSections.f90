@@ -722,9 +722,9 @@ module m_readCrossSections
          endif
          
       if ( (pCS%plains(2) == 0.0d0) .and. (pCS%plains(3) == 0.0d0) ) then
-         pCs%plainslocation(1) = numlevels
-         pCs%plainslocation(2) = 0
-         pCs%plainslocation(3) = 0
+         pCs%plainsLocation(1) = numlevels
+         pCs%plainsLocation(2) = 0
+         pCs%plainsLocation(3) = 0
       else
        
          ! make sure transitions main - floodplain1 and floodplain1 - floodplain2 are always in table
@@ -744,9 +744,9 @@ module m_readCrossSections
                if (j == 1) then
                   pCs%plains(1) = width(1)
                elseif ( abs(wintersect - width(level_index_intersect-1) ) < 1d-5 ) then
-                  pCs%plainslocation(i) = level_index_intersect-1
+                  pCs%plainsLocation(i) = level_index_intersect-1
                elseif ( abs(wintersect - width(level_index_intersect) ) < 1d-5 ) then
-                  pCs%plainslocation(i) = level_index_intersect
+                  pCs%plainsLocation(i) = level_index_intersect
                else
                   ! extra level needed.
                   factor = (wintersect - width(level_index_intersect-1))/(width(level_index_intersect) - width(level_index_intersect-1))
@@ -758,15 +758,15 @@ module m_readCrossSections
                   width(level_index_intersect)      = factor * width(level_index_intersect+1)      + (1d0-factor) * width(level_index_intersect)
                   height(level_index_intersect)     = factor * height(level_index_intersect+1)     + (1d0-factor) * height(level_index_intersect)
                   totalwidth(level_index_intersect) = factor * totalwidth(level_index_intersect+1) + (1d0-factor) * totalwidth(level_index_intersect)
-                  pCs%plainslocation(i) = level_index_intersect
+                  pCs%plainsLocation(i) = level_index_intersect
                   numlevels = numlevels+1
                endif
             elseif (comparerealdouble(wintersect, width(numlevels), eps) == 0) then
-                pCs%plainslocation(i) = numlevels
+                pCs%plainsLocation(i) = numlevels
             endif
          
          enddo
-         pCs%plainslocation(3) = numlevels
+         pCs%plainsLocation(3) = numlevels
       endif
       
       
@@ -905,7 +905,7 @@ module m_readCrossSections
                write(ibin) (pdef%area_min(j), j = 1, pdef%levelscount)
                write(ibin) (pdef%width_min(j), j = 1, pdef%levelscount)
                write(ibin) (pdef%plains(j), j = 1, 3)
-               write(ibin) (pdef%plainslocation(j), j = 1, 3)
+               write(ibin) (pdef%plainsLocation(j), j = 1, 3)
             
                write(ibin) associated(pdef%summerdike)
                if (associated(pdef%summerdike)) then
@@ -988,7 +988,7 @@ module m_readCrossSections
                read(ibin) (pdef%area_min(j), j = 1, pdef%levelscount)
                read(ibin) (pdef%width_min(j), j = 1, pdef%levelscount)
                read(ibin) (pdef%plains(j), j = 1, 3)
-               read(ibin) (pdef%plainslocation(j), j = 1, 3)
+               read(ibin) (pdef%plainsLocation(j), j = 1, 3)
                
                ! Summer Dike
                read(ibin) isAssociated
