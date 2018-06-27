@@ -4758,7 +4758,37 @@ type tgeneralstruc
 
 end type tgeneralstruc
 
-type(tgeneralstruc),   allocatable       :: generalstruc(:)
+integer, parameter :: numgeneralkeywrd = 26
+character(len=256) :: generalkeywrd(numgeneralkeywrd) = (/ character(len=256) :: &
+   'widthleftW1',             & ! ( 1)
+   'levelleftZb1',            & ! ( 2)
+   'widthleftWsdl',           & ! ( 3)
+   'levelleftZbsl',           & ! ( 4)
+   'widthcenter',             & ! ( 5)
+   'levelcenter',             & ! ( 6)
+   'widthrightWsdr',          & ! ( 7)
+   'levelrightZbsr',          & ! ( 8)
+   'widthrightW2',            & ! ( 9)
+   'levelrightZb2',           & ! (10)
+   'gateheight',              & ! (11)
+   'gateheightintervalcntrl', & ! (12)
+   'pos_freegateflowcoeff',   & ! (13)
+   'pos_drowngateflowcoeff',  & ! (14)
+   'pos_freeweirflowcoeff',   & ! (15)
+   'pos_drownweirflowcoeff',  & ! (16)
+   'pos_contrcoeffreegate',   & ! (17)
+   'neg_freegateflowcoeff',   & ! (18)
+   'neg_drowngateflowcoeff',  & ! (19)
+   'neg_freeweirflowcoeff',   & ! (20)
+   'neg_drownweirflowcoeff',  & ! (21)
+   'neg_contrcoeffreegate',   & ! (22)
+   'extraresistance',         & ! (23)
+   'dynstructext',            & ! (24)
+   'gatedoorheight',          & ! (25)
+   'door_opening_width'       & ! (26)
+   /)
+
+type(tgeneralstruc), allocatable, target :: generalstruc(:)
 
 
 type tuniversalstruc

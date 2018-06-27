@@ -1733,6 +1733,7 @@ contains
    !! The (external forcing) file is opened elsewhere and read block-by-block
    !! by consecutive calls to this routine.
    subroutine readprovider(minp,qid,filename,filetype,method,operand,transformcoef,ja,varname,smask)
+     use m_strucs, only: generalkeywrd, numgeneralkeywrd
      ! globals
      integer,           intent(in)  :: minp      !< File handle to already opened input file.
      integer,           intent(out) :: filetype  !< File type of current quantity.
@@ -1748,7 +1749,6 @@ contains
      ! locals
      character (len=maxnamelen)       :: rec, keywrd
      integer                          :: l1, l2, jaopt, k
-     character (len=maxnamelen)       :: generalkeywrd(26)
    
      if (minp == 0) then
         ja = 0
@@ -1894,34 +1894,7 @@ contains
      end if
      
      if (qid == 'generalstructure') then 
-        generalkeywrd( 1)  = 'widthleftW1'         !< ! generalstructure  this and following: see Sobek manual
-        generalkeywrd( 2)  = 'levelleftZb1'
-        generalkeywrd( 3)  = 'widthleftWsdl'
-        generalkeywrd( 4)  = 'levelleftZbsl'
-        generalkeywrd( 5)  = 'widthcenter'
-        generalkeywrd( 6)  = 'levelcenter'
-        generalkeywrd( 7)  = 'widthrightWsdr'
-        generalkeywrd( 8)  = 'levelrightZbsr'
-        generalkeywrd( 9)  = 'widthrightW2'
-        generalkeywrd(10)  = 'levelrightZb2'
-        generalkeywrd(11)  = 'gateheight'
-        generalkeywrd(12)  = 'gateheightintervalcntrl' 
-        generalkeywrd(13)  = 'pos_freegateflowcoeff'
-        generalkeywrd(14)  = 'pos_drowngateflowcoeff'
-        generalkeywrd(15)  = 'pos_freeweirflowcoeff'
-        generalkeywrd(16)  = 'pos_drownweirflowcoeff'
-        generalkeywrd(17)  = 'pos_contrcoeffreegate'
-        generalkeywrd(18)  = 'neg_freegateflowcoeff'
-        generalkeywrd(19)  = 'neg_drowngateflowcoeff'
-        generalkeywrd(20)  = 'neg_freeweirflowcoeff'
-        generalkeywrd(21)  = 'neg_drownweirflowcoeff'
-        generalkeywrd(22)  = 'neg_contrcoeffreegate'
-        generalkeywrd(23)  = 'extraresistance'
-        generalkeywrd(24)  = 'dynstructext'
-        generalkeywrd(25)  = 'gatedoorheight'
-        generalkeywrd(26)  = 'door_opening_width'
-     
-        do k = 1,26        ! generalstructure 
+        do k = 1,numgeneralkeywrd        ! generalstructure 
            call readandchecknextrecord(minp, rec, generalkeywrd(k), ja)
            if (ja == 1) then
                L1 = index(rec,'=') + 1

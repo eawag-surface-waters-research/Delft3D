@@ -1430,6 +1430,7 @@ subroutine get_compound_field(c_var_name, c_item_name, c_field_name, x) bind(C, 
   use m_flowexternalforcings
   use m_observations
   use m_monitoring_crosssections
+  use m_strucs
 
   character(kind=c_char), intent(in) :: c_var_name(*)   !< Name of the set variable, e.g., 'pumps'
   character(kind=c_char), intent(in) :: c_item_name(*)  !< Name of a single item's index/location, e.g., 'Pump01'
@@ -1461,6 +1462,7 @@ subroutine get_compound_field(c_var_name, c_item_name, c_field_name, x) bind(C, 
          x = c_loc(qpump(item_index))
          return
      end select
+
   ! WEIRS
   case("weirs")
      call getStructureIndex('weirs', item_name, item_index)
@@ -1475,6 +1477,7 @@ subroutine get_compound_field(c_var_name, c_item_name, c_field_name, x) bind(C, 
          ! TODO: RTC: AvD: get this from weir params
          return
      end select
+
   ! GATES
   case("gates")
      call getStructureIndex('gates', item_name, item_index)
@@ -1486,7 +1489,7 @@ subroutine get_compound_field(c_var_name, c_item_name, c_field_name, x) bind(C, 
          x = c_loc(zcgen((item_index-1)*3+1))
          return
      case("door_height")
-         ! TODO: RTC: AvD: get this from gate/genstru params.
+         x = c_loc(generalstruc(item_index)%gatedoorheight)
          return
      case("lower_edge_level")
          x = c_loc(zcgen((item_index-1)*3+2))
@@ -1498,6 +1501,31 @@ subroutine get_compound_field(c_var_name, c_item_name, c_field_name, x) bind(C, 
          ! TODO: RTC: AvD: get this from gate/genstru params
          return
      end select
+
+  ! GENERALSTRUCTURES
+  case("generalstructures")
+     call getStructureIndex('generalstructures', item_name, item_index)
+     if (item_index == 0) then
+         return
+     endif
+     select case(field_name)
+     case("levelcenter")
+         x = c_loc(zcgen((item_index-1)*3+1))
+         return
+     case("gatedoorheight")
+         x = c_loc(generalstruc(item_index)%gatedoorheight)
+         return
+     case("gateheight") ! Pending a new naming (in preparation by stout). This 'gateheight' is actually the gate_lower_edge_level
+         x = c_loc(zcgen((item_index-1)*3+2))
+         return
+     case("door_opening_width")
+         x = c_loc(zcgen((item_index-1)*3+3))
+         return
+     case("horizontal_opening_direction")
+         ! TODO: RTC: AvD: get this from gate/genstru params
+         return
+     end select
+
   ! SOURCE-SINKS
   case("sourcesinks")
      call getStructureIndex('sourcesinks', item_name, item_index)
@@ -1589,6 +1617,7 @@ subroutine set_compound_field(c_var_name, c_item_name, c_field_name, xptr) bind(
   use iso_c_binding, only: c_double, c_char, c_loc, c_f_pointer
   use iso_c_utils
   use unstruc_messages
+  use m_strucs
 
   character(kind=c_char), intent(in) :: c_var_name(*)   !< Name of the set variable, e.g., 'pumps'
   character(kind=c_char), intent(in) :: c_item_name(*)  !< Name of a single item's index/location, e.g., 'Pump01'
@@ -1617,6 +1646,9 @@ subroutine set_compound_field(c_var_name, c_item_name, c_field_name, xptr) bind(
   ! PUMPS
   case("pumps")
      call getStructureIndex('pumps', item_name, item_index)
+     if (item_index == 0) then
+         return
+     endif
      select case(field_name)
      case("capacity")
          call c_f_pointer(xptr, x_0d_double_ptr)
@@ -1627,6 +1659,9 @@ subroutine set_compound_field(c_var_name, c_item_name, c_field_name, xptr) bind(
   ! WEIRS
   case("weirs")
      call getStructureIndex('weirs', item_name, item_index)
+     if (item_index == 0) then
+         return
+     endif
      select case(field_name)
      case("crest_level")
          call c_f_pointer(xptr, x_0d_double_ptr)
@@ -1636,17 +1671,22 @@ subroutine set_compound_field(c_var_name, c_item_name, c_field_name, xptr) bind(
          ! TODO: RTC: AvD: set this in weir params
          return
      end select
+     call update_zcgen_widths_and_heights()
 
   ! GATES
   case("gates")
      call getStructureIndex('gates', item_name, item_index)
+     if (item_index == 0) then
+         return
+     endif
      select case(field_name)
      case("sill_level")
          call c_f_pointer(xptr, x_0d_double_ptr)
          zcgen((item_index-1)*3+1) = x_0d_double_ptr
          return
      case("door_height")
-         ! TODO: RTC: AvD: set this in gate/genstru params
+         call c_f_pointer(xptr, x_0d_double_ptr)
+         generalstruc(item_index)%gatedoorheight = x_0d_double_ptr ! Not time-controlled, set directly in generalstruc.
          return
      case("lower_edge_level")
          call c_f_pointer(xptr, x_0d_double_ptr)
@@ -1660,6 +1700,36 @@ subroutine set_compound_field(c_var_name, c_item_name, c_field_name, xptr) bind(
          ! TODO: RTC: AvD: set this once it's used
          return
      end select
+     call update_zcgen_widths_and_heights()
+
+  ! GENERAL STRUCTURES
+  case("generalstructures")
+     call getStructureIndex('generalstructures', item_name, item_index)
+     if (item_index == 0) then
+         return
+     endif
+     select case(field_name)
+     case("levelcenter")
+         call c_f_pointer(xptr, x_0d_double_ptr)
+         zcgen((item_index-1)*3+1) = x_0d_double_ptr
+         return
+     case("gatedoorheight")
+         call c_f_pointer(xptr, x_0d_double_ptr)
+         generalstruc(item_index)%gatedoorheight = x_0d_double_ptr ! Not time-controlled, set directly in generalstruc.
+         return
+     case("gateheight") ! Pending a new naming (in preparation by stout). This 'gateheight' is actually the gate_lower_edge_level
+         call c_f_pointer(xptr, x_0d_double_ptr)
+         zcgen((item_index-1)*3+2) = x_0d_double_ptr
+         return
+     case("door_opening_width")
+         call c_f_pointer(xptr, x_0d_double_ptr)
+         zcgen((item_index-1)*3+3) = x_0d_double_ptr
+         return
+     case("horizontal_opening_direction")
+         ! TODO: RTC: AvD: get this from gate/genstru params
+         return
+     end select
+     call update_zcgen_widths_and_heights()
 
   ! SOURCE-SINKS
   case("sourcesinks")
@@ -1739,6 +1809,22 @@ subroutine get_compound_field_name(c_var_name, c_field_index, c_field_name) bind
      case(5)
          field_name = "horizontal_opening_direction"
      end select
+
+  ! GENERALSTUCTURES
+  case("generalstructures")
+     select case(field_index)
+     case(1)
+        field_name = "levelcenter"
+     case(2)
+        field_name = "gatedoorheight"
+     case(3)
+        field_name = "gateheight" ! Pending a new naming (in preparation by stout). This 'gateheight' is actually the gate_lower_edge_level
+     case(4)
+        field_name = "door_opening_width"
+     case(5)
+        field_name = "horizontal_opening_direction"
+     end select
+
   ! SOURCE-SINKS
   case("sourcesinks")
      select case(field_index)

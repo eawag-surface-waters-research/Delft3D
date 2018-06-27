@@ -1319,7 +1319,7 @@ if (hulp(25) > 0d0) then
    generalstruc(ng)%gatedoorheight           = hulp(25) 
 endif
 generalstruc(ng)%dooropeningwidth        = hulp(26) 
-generalstruc(ng)%stabilitycounter        = 0d0 ! hulp(25)     
+generalstruc(ng)%stabilitycounter        = 0d0 
 
 call realloc(generalstruc(ng)%widthcenteronlink, ngen)
 generalstruc(ng)%widthcenteronlink(1:ngen) = widths(1:ngen)

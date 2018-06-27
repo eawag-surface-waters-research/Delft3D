@@ -423,6 +423,7 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
  use m_sobekdfm
  use m_flowparameters, only: jawave
  use string_module
+ use m_strucs, only: numgeneralkeywrd
  
  implicit none
 
@@ -436,7 +437,7 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
                                           numt, numuxy, numn, num1d2d, numqh, numw, numtr, numsf      !
  double precision      , intent(in)    :: rrtolrel !< To enable a more strict rrtolerance value than the global rrtol. Measured w.r.t. global rrtol.
  
- double precision, dimension(25), optional, intent(in) :: tfc
+ double precision, dimension(numgeneralkeywrd), optional, intent(in) :: tfc
  
  character(len=256)                    :: qidfm                               !
  integer                               :: itpbn
@@ -1459,7 +1460,6 @@ character(len=IdLen)          :: strtype ! TODO: where to put IdLen (now in Mess
                                     ! TODO: in readstruc* change incoming ids to len=*
 integer :: istrtmp
 double precision, allocatable :: hulp(:,:) ! hulp 
-character(len=256) :: generalkeywrd(26)
 
 !! if (jatimespace == 0) goto 888                      ! Just cleanup and close ext file.
 
@@ -1471,33 +1471,6 @@ else
    jaoldstr = 1 ; RETURN ! DEZE SUBROUTINE IS EEN KOPIE VAN MIJN CODE EN DAT BRENGT ME IN DE WAR
                          ! DAAROM VOORLOPIG UIT UNSTRUC.F90 VERPLAATST
 end if
-
-generalkeywrd( 1)  = 'widthleftW1'         !< ! generalstructure  this and following: see Sobek manual
-generalkeywrd( 2)  = 'levelleftZb1'
-generalkeywrd( 3)  = 'widthleftWsdl'
-generalkeywrd( 4)  = 'levelleftZbsl'
-generalkeywrd( 5)  = 'widthcenter'
-generalkeywrd( 6)  = 'levelcenter'
-generalkeywrd( 7)  = 'widthrightWsdr'
-generalkeywrd( 8)  = 'levelrightZbsr'
-generalkeywrd( 9)  = 'widthrightW2'
-generalkeywrd(10)  = 'levelrightZb2'
-generalkeywrd(11)  = 'gateheight'
-generalkeywrd(12)  = 'gateheightintervalcntrl' 
-generalkeywrd(13)  = 'pos_freegateflowcoeff'
-generalkeywrd(14)  = 'pos_drowngateflowcoeff'
-generalkeywrd(15)  = 'pos_freeweirflowcoeff'
-generalkeywrd(16)  = 'pos_drownweirflowcoeff'
-generalkeywrd(17)  = 'pos_contrcoeffreegate'
-generalkeywrd(18)  = 'neg_freegateflowcoeff'
-generalkeywrd(19)  = 'neg_drowngateflowcoeff'
-generalkeywrd(20)  = 'neg_freeweirflowcoeff'
-generalkeywrd(21)  = 'neg_drownweirflowcoeff'
-generalkeywrd(22)  = 'neg_contrcoeffreegate'
-generalkeywrd(23)  = 'extraresistance'
-generalkeywrd(24)  = 'dynstructext'
-generalkeywrd(25)  = 'gatedoorheight'
-generalkeywrd(26)  = 'door_opening_width'
 
 allocate(strnums(numl))
 allocate(widths(numl))
@@ -1686,7 +1659,7 @@ end do
 
     enddo
 
-    allocate( hulp(26,ncgensg) )
+    allocate( hulp(numgeneralkeywrd,ncgensg) )
     hulp(1,1:ncgensg)  = 10  ! widthleftW1=10
     hulp(2,1:ncgensg)  = 0.0 ! levelleftZb1=0.0
     hulp(3,1:ncgensg)  = 10  ! widthleftWsdl=10
@@ -1957,7 +1930,7 @@ end do
 
       !! GENERALSTRUCTURE !!
       case ('generalstructure')
-         do k = 1,26        ! generalstructure keywords
+         do k = 1,numgeneralkeywrd        ! generalstructure keywords
             tmpval = dmiss
             call prop_get(str_ptr, '', trim(generalkeywrd(k)), rec, success)
             if (.not. success .or. len_trim(rec) == 0) then
@@ -2307,7 +2280,7 @@ subroutine getStructureIndex(strtypename, strname, index)
       case('gates')
          cgen_mapping => gate2cgen
          nstr = ngategen
-      case('generalstructure')
+      case('generalstructures')
          cgen_mapping => genstru2cgen
          nstr = ngenstru
       case default
