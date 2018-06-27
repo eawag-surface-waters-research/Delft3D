@@ -479,9 +479,7 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
      end if    
      itpez(nbndz+1:nbndz+numz) =  itpbn
      
-     if (numz > 0) then
-        call addopenbndsection(numz, kez(nbndz+1:nbndz+numz), filename, IBNDTP_ZETA)
-     end if
+     call addopenbndsection(numz, kez(nbndz+1:nbndz+numz), filename, IBNDTP_ZETA)
      itpenz(nbndz+1:nbndz+numz) = nopenbndsect
      nbndz = nbndz + numz
      
@@ -522,9 +520,7 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
 
      itpeu(nbndu+1:nbndu+numu) = itpbn
 
-     if (numu > 0) then
-        call addopenbndsection(numu, keu(nbndu+1:nbndu+numu), filename, IBNDTP_U)
-     end if
+     call addopenbndsection(numu, keu(nbndu+1:nbndu+numu), filename, IBNDTP_U)
 
      itpenu(nbndu+1:nbndu+numu) = nopenbndsect
      nbndu = nbndu + numu
@@ -680,9 +676,7 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
      call selectelset( filename, filetype, xe, ye, xyen, kce, nx, ke1d2d(nbnd1d2d+1:nx), num1d2d, usemask=.true., rrtolrel=rrtolrel)
      WRITE(msgbuf,'(2a,i8,a)') trim(qid), trim(filename) , num1d2d, 'nr of SOBEK1D-FM2D bndcells' ; call msg_flush()
 
-     if (num1d2d > 0) then
-        call addopenbndsection(num1d2d, ke1d2d(nbnd1d2d+1:nbnd1d2d+num1d2d), filename, IBNDTP_1D2D)
-     end if
+     call addopenbndsection(num1d2d, ke1d2d(nbnd1d2d+1:nbnd1d2d+num1d2d), filename, IBNDTP_1D2D)
      nbnd1d2d = nbnd1d2d + num1d2d
 
   else if (qidfm == 'shiptxy' ) then

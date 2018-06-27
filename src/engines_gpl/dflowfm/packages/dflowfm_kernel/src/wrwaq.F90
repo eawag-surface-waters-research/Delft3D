@@ -1465,7 +1465,7 @@ subroutine waq_wri_bnd()
 !           Local variables
 !
     integer :: LL, L, Lf, n, i, istart, n1, n2
-    integer :: ibnd, isrc, kk
+    integer :: ibnd, isrc, kk, nopenbndsectnonempty
     integer :: lunbnd
     character(len=255) :: filename
     double precision :: x1, y1, x2, y2, xn, yn
@@ -1477,10 +1477,23 @@ subroutine waq_wri_bnd()
     filename = defaultFilename('bnd')
     call newfil(lunbnd, trim(filename))
 
-    write(lunbnd, '(i8)') nopenbndsect + waqpar%numsrcbnd             ! Nr of open boundary sections and sink sources.
+    ! Count how many bnd segments are truly open (# links/exchanges > 0)
     istart = 0
     nopenbndsectnonempty = 0
     do i=1,nopenbndsect
+       if (nopenbndlin(i) - istart == 0) then
+          cycle
+       end if
+       istart = nopenbndlin(i)
+       nopenbndsectnonempty = nopenbndsectnonempty+1
+    end do
+
+    write(lunbnd, '(i8)') nopenbndsectnonempty + waqpar%numsrcbnd             ! Nr of open boundary sections and sink sources.
+    istart = 0
+    do i=1,nopenbndsect
+        if (nopenbndlin(i) - istart == 0) then
+           cycle
+        end if
         namelen = len_trim(openbndname(i))
         write(lunbnd, '(a)')  trim(openbndname(i)(1:min(namelen, waqmaxnamelen)))  ! Section name
         write(lunbnd, '(i8)') nopenbndlin(i)-istart ! Nr of lins in section

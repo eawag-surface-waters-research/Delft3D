@@ -33802,8 +33802,6 @@ end subroutine make_mirrorcells
     integer, external :: get_dirsep
     integer :: maxopenbnd, istart, i, n1, n2
 
-    if (nbnd <= 0) return
-
     ! Start index (-1) of net link numbers for this net boundary section:
     if (nopenbndsect >= 1) then
         istart = nopenbndlin(nopenbndsect)
