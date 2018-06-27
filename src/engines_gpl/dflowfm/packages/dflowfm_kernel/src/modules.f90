@@ -1485,6 +1485,9 @@ end module m_bnd
  integer                           :: ncdamsg           !< nr of cdam signals specified
  character(len=128), allocatable, target :: cdam_ids(:)
  
+ integer         , allocatable     :: kdryarea(:)       !< dry area net links index array
+ integer                           :: nDryLinks         !< number of net linls of dry are
+ 
  type pillar_type
     integer                                     :: np    !< number of pillars
     double precision, dimension(:), allocatable :: xcor  !< x-coordinates of pillars
@@ -2332,6 +2335,7 @@ end subroutine default_turbulence
  integer                           :: jashp_fxw                 !< Write a shape file for fixed weirs
  integer                           :: jashp_src                 !< Write a shape file for source-sinks
  integer                           :: jashp_pump                !< Write a shape file for pumps
+ integer                           :: jashp_dry                 !< Write a shape file for dry areas
  
  integer                           :: jawriteDFMinterpretedvalues = 0 !< Write interpretedvalues 
  
@@ -2658,6 +2662,7 @@ subroutine default_flowparameters()
     jashp_fxw = 0
     jashp_src = 0
     jashp_pump= 0
+    jashp_dry = 0
     
     ispirparopt = 1
 

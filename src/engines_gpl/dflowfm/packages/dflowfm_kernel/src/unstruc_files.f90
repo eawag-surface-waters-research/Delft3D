@@ -256,6 +256,10 @@ function defaultFilename(filecat, timestamp, prefixWithDirectory, allowWildcard)
         activeFile = ''
         suffix     = '_snapped_pump' ! .shp extension will be added automatically (and .shx/.dbf)
         
+   case ('shpdry')
+        activeFile = ''
+        suffix     = '_snapped_dryarea' ! .shp extension will be added automatically (and .shx/.dbf)
+        
     !---------------------------------------------------------!
     ! Shape files
     !---------------------------------------------------------!
@@ -298,7 +302,7 @@ function defaultFilename(filecat, timestamp, prefixWithDirectory, allowWildcard)
         if (prefix_dir) then
             defaultFilename = trim(getoutputdir())//trim(defaultFilename)
         end if
-    case ('shpcrs','shpobs', 'shpweir', 'shpthd', 'shpgate', 'shpemb', 'shpfxw', 'shpsrc', 'shppump')
+    case ('shpcrs','shpobs', 'shpweir', 'shpthd', 'shpgate', 'shpemb', 'shpfxw', 'shpsrc', 'shppump', 'shpdry')
         if (prefix_dir) then        
             shapeOutputDir = trim(getoutputdir())//'snapped'
             call makedir(shapeOutputDir)

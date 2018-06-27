@@ -1233,6 +1233,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'output', 'Wrishp_fxw', jashp_fxw, success)
     call prop_get_integer(md_ptr, 'output', 'Wrishp_src', jashp_src, success)
     call prop_get_integer(md_ptr, 'output', 'Wrishp_pump', jashp_pump, success)
+    call prop_get_integer(md_ptr, 'output', 'Wrishp_dryarea', jashp_dry, success)
     
     call prop_get_integer(md_ptr, 'output', 'WriteDFMinterpretedvalues', jawriteDFMinterpretedvalues, success)
     
@@ -2571,6 +2572,9 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     end if
     if( writeall .or. jashp_pump > 0 ) then
        call prop_set(prop_ptr, 'output', 'Wrishp_pump', jashp_pump, 'Write a shape file for pumps')
+    end if
+    if( writeall .or. jashp_dry > 0 ) then
+       call prop_set(prop_ptr, 'output', 'Wrishp_dryarea', jashp_dry, 'Write a shape file for dry areas')
     end if
 
     if ( get_japart() .or. writeall ) then

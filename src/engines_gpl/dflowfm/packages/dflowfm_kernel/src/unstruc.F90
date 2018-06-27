@@ -16866,7 +16866,7 @@ end subroutine wribal
  !> Writes shapefiles, these shapefiles can be visulaized in geographic information system (GIS) software
 #ifdef HAVE_SHAPELIB
 subroutine unc_write_shp()
-    use m_flowparameters, only: jashp_crs, jashp_obs, jashp_weir, jashp_thd, jashp_gate, jashp_emb, jashp_fxw, jashp_src, jashp_pump
+    use m_flowparameters, only: jashp_crs, jashp_obs, jashp_weir, jashp_thd, jashp_gate, jashp_emb, jashp_fxw, jashp_src, jashp_pump, jashp_dry
     use unstruc_shapefile
     use m_monitoring_crosssections, only: ncrs, crs
     use m_observations, only: numobs, kobs
@@ -16876,6 +16876,7 @@ subroutine unc_write_shp()
     use m_fixedweirs, only: nfxw
     use unstruc_messages
     use m_partitioninfo, only: jampi, my_rank
+    use unstruc_model  , only: md_dryptsfile
     implicit none
     integer :: jawrite, igen, n
     
@@ -17084,6 +17085,20 @@ subroutine unc_write_shp()
              endif
           else
              call mess(LEVEL_WARN, 'SHAPEFILE: No shape file for pumps is written because no pump is found on subdomain:', my_rank)
+          endif
+       endif
+    endif
+    
+    ! dry area
+    if (jashp_dry > 0) then
+       if (len_trim(md_dryptsfile) > 0) then
+          call get_netlinks_of_dryarea()
+          call unc_write_shp_dry()
+       else
+          if (jampi .eq. 0) then
+             call mess(LEVEL_WARN, 'SHAPEFILE: No shape file for dry areas is written because no dry area is found.')
+          else
+             call mess(LEVEL_WARN, 'SHAPEFILE: No shape file for dry areas is written because no dry area is found on subdomain:', my_rank)
           endif
        endif
     endif
@@ -41007,3 +41022,26 @@ end subroutine alloc_jacobi
       enddo
     
    end subroutine pillar_upd
+   
+! =================================================================================================
+! =================================================================================================
+   subroutine get_netlinks_of_dryarea()
+      use network_data   , only: numl, lne
+      use m_flowexternalforcings, only: kdryarea, nDryLinks
+       
+      implicit none
+      integer :: L, k1, k2
+      
+      if (allocated(kdryarea) ) deallocate( kdryarea )
+      allocate( kdryarea(numl) ) ; kdryarea = 0
+      
+      nDryLinks = 0
+      do L = 1,numl
+         k1 = lne(1,L) ; k2 = lne(2,L)
+         if (k1 > 0 .and. k2 > 0) cycle
+         if (k1 <= 0 .and. k2 <= 0) cycle
+         nDryLinks = nDryLinks + 1
+         kdryarea(nDryLinks) = L
+      enddo
+       
+   end subroutine get_netlinks_of_dryarea

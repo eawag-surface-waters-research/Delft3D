@@ -694,7 +694,8 @@ subroutine loadObservations(filename, jadoorladen)
 
 889     call doclose(mobs)
     else
-        call mess(LEVEL_WARN, "Observation file '"//trim(filename)//"' not found! Skipping ...")
+        !call mess(LEVEL_WARN, "Observation file '"//trim(filename)//"' not found! Skipping ...")
+        call mess(LEVEL_ERROR, "Observation file '"//trim(filename)//"' not found!")
     endif
     return
 888 call readerror('reading x,y,nam but getting ',rec,mobs)

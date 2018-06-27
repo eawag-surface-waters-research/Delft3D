@@ -1234,7 +1234,7 @@ double precision            :: tmp_x(2), tmp_y(2)
       i = 0
       do L = L1pumpsg(n),L2pumpsg(n)
          write(lenobj_loc, '(I4.4)') i
-         objectid = trim(cgen_ids(n))//'_'//lenobj_loc
+         objectid = 'pump_'//lenobj_loc
          !call mess(LEVEL_INFO, 'SHAPEFILE: Creating shape: '''//trim(objectid)//'''.')
          
          ! create a shape object with the "simple" method, for each shape 2 components are added x, y
@@ -1281,6 +1281,106 @@ double precision            :: tmp_x(2), tmp_y(2)
 
 end subroutine unc_write_shp_pump
 
+!> Write a shape file for dry areas
+! =================================================================================================
+! =================================================================================================
+subroutine unc_write_shp_dry()
+use m_flowexternalforcings, only: nDryLinks, kdryarea
+use network_data, only: kn, xk, yk
+implicit none
+
+integer, parameter          :: lencharattr = 256, tshp = shpt_arc ! arcs (Polylines, possible in parts)
+type(shpfileobject)         :: shphandle
+type(shpobject)             :: shpobj
+integer                     :: i, j, n, ishape, igen, Lf, La, L, k, k1, k2
+character(len=lencharattr)  :: filename, objectid
+character(len=4)            :: lenobj_loc
+integer                     :: id_objectid, id_flowlinknr, id_linktype
+double precision            :: tmp_x(2), tmp_y(2)
+   if (jampi .eq. 0) then
+      call mess(LEVEL_INFO, 'SHAPEFILE: Writing a shape file for dry areas.')
+   else
+      call mess(LEVEL_INFO, 'SHAPEFILE: Writing a shape file for dry areas for subdomain:', my_rank)
+   endif
+   
+   ! create a new shapefile object with data of type tshp and associate it to a file, filename does not include extension
+   filename = defaultFilename('shpdry')
+   shphandle = shpcreate(trim(filename), tshp)
+   ! error check
+   if (shpfileisnull(shphandle) .OR. dbffileisnull(shphandle)) then
+     call mess(LEVEL_ERROR, 'SHAPEFILE: Could not open shape file '''//trim(filename)//''' for writing.')
+     return
+   endif
+   
+   ! add 3 dbf fields: ObjectID, FLOWLINKNR, LINKTYPE
+   id_objectid = dbfaddfield(shphandle, 'ObjectID', ftstring, lencharattr, 0)
+   if (id_objectid /= 0) then
+     call mess(LEVEL_ERROR, 'SHAPEFILE: Could not add field "ObjectID" to shape file '''//trim(filename)//'''.')
+     return
+   endif
+   
+   id_flowlinknr = dbfaddfield(shphandle, 'NETLINKNR', ftinteger, 10, 0)
+   if (id_flowlinknr /= 1) then
+     call mess(LEVEL_ERROR, 'SHAPEFILE: Could not add field "NETLINKNR" to shape file '''//trim(filename)//'''.')
+     return
+   endif
+   
+   id_linktype = dbfaddfield(shphandle, 'LINKTYPE', ftstring, 7, 0)
+   if (id_linktype /= 2) then
+     call mess(LEVEL_ERROR, 'SHAPEFILE: Could not add field "LINKTYPE" to shape file '''//trim(filename)//'''.')
+     return
+   endif
+
+   do L = 1,nDryLinks
+      write(lenobj_loc, '(I4.4)') L
+      objectid = 'dryarea_'//lenobj_loc
+      !call mess(LEVEL_INFO, 'SHAPEFILE: Creating shape: '''//trim(objectid)//'''.')
+         
+      ! create a shape object with the "simple" method, for each shape 2 components are added x, y
+      k = kdryarea(L)
+      k1 = kn(1,k)
+      k2 = kn(2,k)
+      tmp_x(1) = xk(k1); tmp_x(2) = xk(k2)
+      tmp_y(1) = yk(k1); tmp_y(2) = yk(k2)
+      shpobj = shpcreatesimpleobject(tshp, 2, tmp_x, tmp_y)
+      
+      ! write the shape object to the shapefile object as i-th element, -1 = append
+      ishape = shpwriteobject(shphandle, -1, shpobj)
+      if (ishape == -1) then
+         call mess(LEVEL_ERROR, 'SHAPEFILE: Could not write '''//trim(objectid)//'''shape object to shapefile object.')
+         return
+      endif
+         
+      ! destroy the shape object to avoid memory leaks
+      call shpdestroyobject(shpobj)
+         
+      ! write the attributes of different types for the i-th shape object to the shapefile object
+      ! write ObjectID
+      j = dbfwriteattribute(shphandle, ishape, id_objectid, trim(objectid))
+      if (j /= 1) then
+         call mess(LEVEL_ERROR, 'SHAPEFILE: Could not write attribute "ObjectID" to shape'''//trim(objectid)//'''.')
+         return
+      endif
+
+      ! write flowlink nr.
+      j = dbfwriteattribute(shphandle, ishape, id_flowlinknr, k)
+      if (j /= 1) then
+         call mess(LEVEL_ERROR, 'SHAPEFILE: Could not write attribute "NETLINKNR" to shape'''//trim(objectid)//'''.')
+         return
+      endif
+      
+      ! write LINKTYPE
+      j = dbfwriteattribute(shphandle, ishape, id_linktype, 'netlink')
+      if (j /= 1) then
+        call mess(LEVEL_ERROR, 'SHAPEFILE: Could not write attribute "LINKTYPE" to shape'''//trim(objectid)//'''.')
+        return
+      endif
+   enddo 
+
+   ! close the shapefile object
+   call shpclose(shphandle)
+
+end subroutine unc_write_shp_dry
 #endif
 
 end module unstruc_shapefile
