@@ -1459,7 +1459,7 @@ character(len=IdLen)          :: strtype ! TODO: where to put IdLen (now in Mess
                                     ! TODO: in readstruc* change incoming ids to len=*
 integer :: istrtmp
 double precision, allocatable :: hulp(:,:) ! hulp 
-character(len=256) :: generalkeywrd(25)
+character(len=256) :: generalkeywrd(26)
 
 !! if (jatimespace == 0) goto 888                      ! Just cleanup and close ext file.
 
@@ -1497,6 +1497,7 @@ generalkeywrd(22)  = 'neg_contrcoeffreegate'
 generalkeywrd(23)  = 'extraresistance'
 generalkeywrd(24)  = 'dynstructext'
 generalkeywrd(25)  = 'gatedoorheight'
+generalkeywrd(26)  = 'door_opening_width'
 
 allocate(strnums(numl))
 allocate(widths(numl))
@@ -1685,7 +1686,7 @@ end do
 
     enddo
 
-    allocate( hulp(25,ncgensg) )
+    allocate( hulp(26,ncgensg) )
     hulp(1,1:ncgensg)  = 10  ! widthleftW1=10
     hulp(2,1:ncgensg)  = 0.0 ! levelleftZb1=0.0
     hulp(3,1:ncgensg)  = 10  ! widthleftWsdl=10
@@ -1710,6 +1711,8 @@ end do
     hulp(22,1:ncgensg) = 1.0 ! neg_contrcoeffreegate=0.6
     hulp(23,1:ncgensg) = 0   ! extraresistance=0
     hulp(24,1:ncgensg) = 1.  ! dynstructext=1.
+    hulp(25,1:ncgensg) = 1d10! gatedoorheight
+    hulp(26,1:ncgensg) = 0.  ! door_opening_width=0
   
     if ( allocated(generalstruc) )   deallocate (generalstruc)
     allocate (generalstruc(ncgensg) )
@@ -1759,6 +1762,7 @@ end do
          hulp(23,n) = 0   ! extraresistance=0
          hulp(24,n) = 1.  ! dynstructext=1.
          hulp(25,n) = 1d10! gatedoorheight
+         hulp(26,n) = 0d0 ! door_opening_width
       end if
 
 
@@ -1857,7 +1861,7 @@ end do
          gates(ngategen+1)%sill_width = tmpval
 
          tmpval = dmiss
-         call prop_get(str_ptr, '', 'door_height', tmpval)
+         call prop_get(str_ptr, '', 'door_height', tmpval) ! Door height (from lower edge level to top, i.e. NOT a level/position)
          if (.not. success .or. tmpval == dmiss) then
             write(msgbuf, '(a,a,a)') 'Required field ''door_height'' missing in gate ''', trim(strid), '''.'
             call warn_flush()
@@ -1898,9 +1902,12 @@ end do
          end if
 
          rec = ' '
-         call prop_get(str_ptr, '', 'opening_width', rec, success)
+         call prop_get(str_ptr, '', 'opening_width', rec, success) ! Opening width between left and right doors. (If any. Otherwise set to 0 for a single gate door with under/overflow)
+         if (.not. success) then
+            call prop_get(str_ptr, '', 'door_opening_width', rec, success) ! Better keyword: door_opening_width instead of opening_width
+         end if
          if (len_trim(rec) == 0) then
-            zcgen((n-1)*kx+3) = dmiss   ! opening_width is optional
+            zcgen((n-1)*kx+3) = dmiss   ! door_opening_width is optional
             success = .true.
          else
             read(rec, *, iostat = ierr) tmpval
@@ -1950,7 +1957,7 @@ end do
 
       !! GENERALSTRUCTURE !!
       case ('generalstructure')
-         do k = 1,25        ! generalstructure keywords
+         do k = 1,26        ! generalstructure keywords
             tmpval = dmiss
             call prop_get(str_ptr, '', trim(generalkeywrd(k)), rec, success)
             if (.not. success .or. len_trim(rec) == 0) then
@@ -1987,7 +1994,7 @@ end do
          ! Set some zcgen values to their initial scalar values (for example, zcgen((n-1)*3+1) is quickly need for updating bobs.)
          zcgen((n-1)*3+1) = hulp( 6, n) ! levelcenter 
          zcgen((n-1)*3+2) = hulp(11, n) ! gateheight  == 'gateloweredgelevel', really a level
-         zcgen((n-1)*3+3) = hulp( 5, n) ! widthcenter 
+         zcgen((n-1)*3+3) = hulp(26, n) ! door_opening_width 
 
          ngenstru = ngenstru+1
          genstru2cgen(ngenstru) = n ! Mapping from 1:ngenstru to underlying generalstructure --> (1:ncgensg)

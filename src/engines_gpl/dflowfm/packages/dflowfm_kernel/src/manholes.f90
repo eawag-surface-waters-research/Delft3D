@@ -651,8 +651,10 @@ use m_flowgeom
           fusav(2,n) = fu(Lf) ; rusav(2,n) = ru(Lf) ; ausav(2,n) = au(Lf)         
  
           au(Lf) =  ausav(1,n)            +            ausav(2,n)  
-          fu(Lf) = (fusav(1,n)*ausav(1,n) + fusav(2,n)*ausav(2,n) ) / au(Lf)   
-          ru(Lf) = (rusav(1,n)*ausav(1,n) + rusav(2,n)*ausav(2,n) ) / au(Lf)   
+          if (au(Lf) >0d0) then
+             fu(Lf) = (fusav(1,n)*ausav(1,n) + fusav(2,n)*ausav(2,n) ) / au(Lf)
+             ru(Lf) = (rusav(1,n)*ausav(1,n) + rusav(2,n)*ausav(2,n) ) / au(Lf)
+          end if
        else 
           fusav(2,n) = 0d0 ; rusav(2,n) = 0d0 ; ausav(2,n) = 0d0   
        endif 
@@ -1213,7 +1215,7 @@ subroutine flgtarfm(ng, L0, wuL, bl1, bl2, teken, zs, wstr, w2, wsd, zb2, dg, ds
     !     Fetch parameters from structure info array
     !
     
-    if (generalstruc(ng)%numlinks <= 1) then ! Structure crosses just one link, use user-specified widths
+    if (generalstruc(ng)%numlinks <= 1) then ! Structure crosses just one link, use user-specified widths ! TODO: AvD: can this be merged with else block, also incase of timeseries and RTC (why only do that for numlinks>1 ?)
        w1   = min(wuL, generalstruc(ng)%widthleftW1)
        wsdl = min(wuL, generalstruc(ng)%widthleftWsdl)
 !    wstr = generalstruc(ng)%widthcenter
@@ -1285,7 +1287,7 @@ use m_strucs
 use m_alloc
 implicit none
 integer,          intent(in) :: ng        !< Index of this general structure in the generalstruc(:) array
-double precision, intent(in) :: hulp(25)  !< genstru params read from file
+double precision, intent(in) :: hulp(26)  !< genstru params read from file
 integer,          intent(in) :: ngen      !< Number of flow links crossed by this single general structure
 double precision, intent(in) :: widths(ngen) !< wu(L) values for all links crossed by this single general structure
 
@@ -1316,6 +1318,7 @@ generalstruc(ng)%dynstructext            = hulp(24)
 if (hulp(25) > 0d0) then 
    generalstruc(ng)%gatedoorheight           = hulp(25) 
 endif
+generalstruc(ng)%dooropeningwidth        = hulp(26) 
 generalstruc(ng)%stabilitycounter        = 0d0 ! hulp(25)     
 
 call realloc(generalstruc(ng)%widthcenteronlink, ngen)
@@ -1935,9 +1938,14 @@ do ng=1,ncgensg ! Loop over general structures
       closedGateWidthR = 0d0
    else if (cgen_type(ng) == ICGENTP_GENSTRU) then
       !crestwidth = totalWidth ! No crest/sill-width setting for true general structure yet (not old ext, nor new ext)
-      crestwidth = zcgen((ng-1)*3+3) ! NOTE: AvD: this now comes from scalar attribute 'widthcenter', no timeseries yet.
-      closedGateWidthL = 0d0 ! max(0d0, .5d0*(totalWidth - zcgen((ng-1)*3+3))) ! Default symmetric opening
-      closedGateWidthR = 0d0 ! max(0d0, .5d0*(totalWidth - zcgen((ng-1)*3+3)))
+      crestwidth = min(totalWidth, generalstruc(ng)%widthcenter)
+!      crestwidth = zcgen((ng-1)*3+3) ! NOTE: AvD: this now comes from scalar attribute 'widthcenter', no timeseries yet.
+      ! genstru: always IOPENDIR_SYMMETRIC
+      closedGateWidthL = max(0d0, .5d0*(totalWidth - zcgen((ng-1)*3+3)))
+      closedGateWidthR = max(0d0, .5d0*(totalWidth - zcgen((ng-1)*3+3)))
+      !closedGateWidthL = 0d0 ! max(0d0, .5d0*(totalWidth - zcgen((ng-1)*3+3))) ! Default symmetric opening
+      !closedGateWidthR = 0d0 ! max(0d0, .5d0*(totalWidth - zcgen((ng-1)*3+3)))
+      generalstruc(ng)%gateheightonlink(1:generalstruc(ng)%numlinks) = huge(1d0) ! As a start, gate door is open everywhere. Below, we will close part of the gate doors.
    else if (cgen_type(ng) == ICGENTP_GATE) then
       ! For a gate: zcgen(3,ng) is limited to the door opening width, but we want to open all links
       ! *underneath* the two doors as well, (if lower_edge_level is still high enough above sill_level)
@@ -1975,7 +1983,7 @@ do ng=1,ncgensg ! Loop over general structures
          generalstruc(ng)%widthcenteronlink(L0) = wu(Lf)
       end if
 
-      if (cgen_type(ng) == ICGENTP_GATE .and. closedGateWidthL > 0d0 .or. cgen_type(ng) == ICGENTP_GENSTRU ) then
+      if ((cgen_type(ng) == ICGENTP_GATE .or. cgen_type(ng) == ICGENTP_GENSTRU) .and. closedGateWidthL > 0d0 ) then
          !if (closedGateWidthL > .5d0*wu(Lf)) then
          generalstruc(ng)%gateheightonlink(L0) = zcgen((ng-1)*3+2)
          help = min (wu(Lf), closedGateWidthL)
@@ -2009,7 +2017,7 @@ do ng=1,ncgensg ! Loop over general structures
          generalstruc(ng)%widthcenteronlink(L0) = wu(Lf)
       end if
 
-      if (cgen_type(ng) == ICGENTP_GATE .and. closedGateWidthR > 0d0 .or. cgen_type(ng) == ICGENTP_GENSTRU) then
+      if ((cgen_type(ng) == ICGENTP_GATE .or. cgen_type(ng) == ICGENTP_GENSTRU) .and. closedGateWidthR > 0d0) then
          !if (closedGateWidthL > .5d0*wu(Lf)) then
          generalstruc(ng)%gateheightonlink(L0) = zcgen((ng-1)*3+2)
          help = min (wu(Lf), closedGateWidthR)

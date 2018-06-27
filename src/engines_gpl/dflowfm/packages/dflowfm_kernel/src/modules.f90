@@ -1283,7 +1283,7 @@ end module m_bnd
  character(len=256), allocatable   :: openbndname(:)    !< (nopenbndsec)
  character(len=256), allocatable   :: openbndfile(:)    !< (nopenbndsec)
 
- integer,          parameter       :: NTRANSFORMCOEF=25
+ integer,          parameter       :: NTRANSFORMCOEF=26
  double precision                  :: transformcoef(NTRANSFORMCOEF) !< Transform coefficients a+b*x
 
  integer         , allocatable     :: kez  (:)          !< temp (numl) edge oriented z lev
@@ -4752,6 +4752,7 @@ type tgeneralstruc
    double precision                      :: dynstrucfact
    double precision                      :: dynstructext
    double precision                      :: gatedoorheight
+   double precision                      :: dooropeningwidth
    double precision                      :: stabilitycounter
    double precision, allocatable         :: widthcenteronlink(:) !< For each crossed flow link the the center width portion of this genstr. (sum(widthcenteronlink(1:numlink)) should equal widthcenter)
    double precision, allocatable         :: gateheightonlink(:)  !< For each crossed flow link the the gate height portion of this genstr. (will be set to dummy high value in open part of sideways closing gates.)

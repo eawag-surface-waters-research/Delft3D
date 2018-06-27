@@ -1748,7 +1748,7 @@ contains
      ! locals
      character (len=maxnamelen)       :: rec, keywrd
      integer                          :: l1, l2, jaopt, k
-     character (len=maxnamelen)       :: generalkeywrd(25)
+     character (len=maxnamelen)       :: generalkeywrd(26)
    
      if (minp == 0) then
         ja = 0
@@ -1919,14 +1919,15 @@ contains
         generalkeywrd(23)  = 'extraresistance'
         generalkeywrd(24)  = 'dynstructext'
         generalkeywrd(25)  = 'gatedoorheight'
+        generalkeywrd(26)  = 'door_opening_width'
      
-        do k = 1,25        ! generalstructure 
+        do k = 1,26        ! generalstructure 
            call readandchecknextrecord(minp, rec, generalkeywrd(k), ja)
            if (ja == 1) then
                L1 = index(rec,'=') + 1
                read (rec(L1:),*) transformcoef(k)
            else
-              call qnerror('Looking for generalkeywrd(k), but getting ', rec, ' ')
+              call qnerror('Looking for '//trim(generalkeywrd(k))//', but getting ', rec, ' ')
            end if
         enddo
      endif   

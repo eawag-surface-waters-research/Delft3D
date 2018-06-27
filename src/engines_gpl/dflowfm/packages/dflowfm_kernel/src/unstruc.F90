@@ -35758,7 +35758,7 @@ if (mext > 0) then
 
     enddo
 
-    allocate( hulp(25,ncgensg) ) ; hulp = dmiss
+    allocate( hulp(26,ncgensg) ) ; hulp = dmiss
 
     ja = 1
     rewind (mext)
@@ -35799,7 +35799,7 @@ if (mext > 0) then
        ! Set some zcgen values to their initial scalar values (for example, zcgen((n-1)*3+1) is quickly need for updating bobs.)
        zcgen((n-1)*3+1) = hulp( 6, n) ! levelcenter 
        zcgen((n-1)*3+2) = hulp(11, n) ! gateheight  == 'gateloweredgelevel', really a level
-       zcgen((n-1)*3+3) = hulp( 5, n) ! widthcenter 
+       zcgen((n-1)*3+3) = hulp(26, n) ! door_opening_width
  
        call togeneral(n, hulp(:,n), L2cgensg(n)-L1cgensg(n)+1,widths(L1cgensg(n):L2cgensg(n))) ! orgcode
     enddo
