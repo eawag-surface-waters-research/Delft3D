@@ -70,7 +70,7 @@ rem =============================================================
 rem === copyNetcdf copy the appropriate netcdf.dll            ===
 rem =============================================================
 :copyNetcdf
-    call :copyFile "third_party_open\netcdf\netCDF 4.6.1\bin\*" !dest_bin!
+    call :copyFile "third_party_open\netcdf\src\win32\2005\libsrc\x64\Debug\netcdf.dll" !dest_bin!
 goto :endproc
 
 
@@ -197,6 +197,7 @@ rem    copy third_party_open\pthreads\bin\win32\pthreadvce.dll                  
 rem    copy third_party_open\mpich2\bin\*.exe                                               !dest_bin!
 rem    copy third_party_open\mpich2\lib\*.dll                                               !dest_bin!
 rem    copy third_party_open\expat\win32\bin\Release\libexpat.dll                           !dest_bin!
+rem    copy third_party_open\netcdf\lib\win32\release\netcdf.dll                            !dest_bin!
 rem    copy third_party_open\openda\core\native\lib\win32\*.dll                             !dest_bin!
 rem    copy utils_lgpl\delftonline\lib\Debug\dynamic\delftonline.dll                        !dest_bin!
 rem    call :copyNetcdf
