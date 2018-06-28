@@ -56,6 +56,13 @@ module time_module
       module procedure CalendarYearMonthDayToJulianDateNumber
    end interface ymd2jul
 
+   interface date2mjd
+      ! obsolete, use ymd2reduced_jul
+      module procedure ymd2mjd
+      module procedure datetime2mjd
+      module procedure ymdhms2mjd
+   end interface date2mjd
+
    interface ymd2reduced_jul
       module procedure ymd2reduced_jul_string
       module procedure ymd2reduced_jul_int
@@ -717,7 +724,36 @@ module time_module
          endif
       end function leapYear
 
-      function date2mjd(year,month,day,hour,minute,second) result(days)
+      ! implements (obsolete!) interface date2mjd
+      function ymd2mjd(ymd) result(days)
+         implicit none
+         integer, intent(in)       :: ymd
+         real(kind=hp)             :: days
+         integer       :: year, month, day, hour, minute
+         real(kind=hp) :: second
+         year   = int(ymd/10000)
+         month  = int(mod(ymd,10000)/100)
+         day    = mod(ymd,100)
+         days = datetime2mjd(year,month,day,0,0,0.d0)
+      end function ymd2mjd
+
+      function ymdhms2mjd(ymd,hms) result(days)
+         implicit none
+         integer, intent(in)       :: ymd
+         real(kind=hp), intent(in) :: hms
+         real(kind=hp)             :: days
+         integer       :: year, month, day, hour, minute
+         real(kind=hp) :: second
+         year   = int(ymd/10000)
+         month  = int(mod(ymd,10000)/100)
+         day    = mod(ymd,100)
+         hour   = int(hms/10000)
+         minute = int(mod(hms,10000.d0)/100)
+         second = mod(hms,100.d0)
+         days = datetime2mjd(year,month,day,hour,minute,second)
+      end function ymdhms2mjd
+
+      function datetime2mjd(year,month,day,hour,minute,second) result(days)
          implicit none
          integer, intent(in)   :: year, month, day
          integer, intent(in)   :: hour, minute
@@ -726,7 +762,7 @@ module time_module
          real(kind=hp) :: dayfrac
          dayfrac = (hour*3600+minute*60+second)/(24*3600)
          days = jul2mjd(CalendarYearMonthDayToJulianDateNumber(year,month,day),dayfrac)
-      end function date2mjd
+      end function datetime2mjd
 
 !---------------------------------------------------------------------------------------------
       function mjd2jul(days,frac) result(jul)
