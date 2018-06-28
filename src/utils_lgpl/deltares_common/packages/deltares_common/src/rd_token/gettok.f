@@ -50,7 +50,7 @@
       integer  (4), intent(in   ) :: lun               !< logical unitnumber input file
       character(*), intent(inout) :: line              !< space to store line to read
       character(*), intent(  out) :: str               !< token if itype = 1
-      integer  (4), intent(  out) :: int               !< token if itype = 2
+      integer  (8), intent(  out) :: int               !< token if itype = 2
       real     (8), intent(  out) :: reel              !< token if itype = 3
       integer  (4), intent(  out) :: itype             !< type of the token ( 0 = none )
       integer  (4), intent(  out) :: iposl             !< left  position in LINE of token
@@ -70,7 +70,7 @@
       integer        ntot        !   Repeat factor of a token
       integer        itypes      !   Stored previous type
       character(128) strs        !   Stored previous string
-      integer        ints        !   Stored previous integer
+      integer  (  8) ints        !   Stored previous integer
       real     (  8) reels       !   Stored previous real
       integer        iposls      !   Stored previous left
       integer        iposrs      !   Stored previous right
