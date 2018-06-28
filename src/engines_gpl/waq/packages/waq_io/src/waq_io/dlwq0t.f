@@ -89,7 +89,8 @@
       if (timon) call timstrt( "dlwq0t", ithndl )
 
       ierr = 0
-
+      ihulp = 0
+      
 !     search for presence of special keywords start and stop
 
       key = 'START'
