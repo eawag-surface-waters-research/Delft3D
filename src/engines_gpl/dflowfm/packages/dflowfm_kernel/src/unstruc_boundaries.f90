@@ -154,8 +154,8 @@ subroutine findexternalboundarypoints()             ! find external boundary poi
             kce = 0; ke = 0; kez = 0; keu = 0; kes = 0; ketm = 0; kesd = 0; keuxy = 0; ket = 0; ken = 0; ke1d2d = 0; keg = 0; ked = 0; kep=  0; keklep=  0; kegen= 0; itpez = 0; itpenz = 0; itpeu = 0 ; itpenu = 0 ; kew = 0; ftpet = 1d6
 
  if (allocated(ketr) ) deallocate(ketr)          
- allocate ( ketr(1,nx), stat = ierr )
- call aerr('ketr(1,nx)', ierr, nx)
+ allocate ( ketr(nx,1), stat = ierr )
+ call aerr('ketr(nx,1)', ierr, nx)
             ketr = 0
 
  if ( allocated(nbndtr) ) deallocate(nbndtr)
@@ -610,6 +610,7 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
         
         numtracers = numtracers+1    
 !       realloc
+        call realloc(ketr, (/ Nx, numtracers /), keepExisting=.true., fill=0 )
         call realloc(nbndtr, numtracers, keepExisting=.true., fill=0 )
         call realloc(trnames, numtracers, keepExisting=.true., fill='')
 

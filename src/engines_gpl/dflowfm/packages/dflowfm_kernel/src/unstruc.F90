@@ -3168,8 +3168,10 @@ subroutine setdt()
           ! dts = min (dts, dt_max) ! hk: commented out, already done this 15 lines above
       
           ! Fit timestep dts so that we will exactly reach time_user in future steps.
-          nsteps = max(1,ceiling((time_user-time0) / dts ) )
-          dts = ( time_user-time0 ) / dble(nsteps)
+          !if ( time0+dts.gt.time_user ) then
+             nsteps = max(1,ceiling((time_user-time0) / dts ) )
+             dts = ( time_user-time0 ) / dble(nsteps)
+          !end if
       endif
 
    else
