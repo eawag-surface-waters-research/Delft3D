@@ -297,12 +297,24 @@ subroutine write_wave_map (sg, sof, n_swan_grids, wavedata, casl, prevtime, gamm
 
     allocate( rbuf(size(sg%x,1),size(sg%x,2)) )
 
-    rbuf = real(sg%x,sp)
+    ! This statement causes a stack overflow on big models: rbuf = real(sg%x,sp)
+    ! So a double do-loop is necessary
+    do j = 1,size(sg%x,2)
+       do i = 1,size(sg%x,1)
+          rbuf(i,j) = real(sg%x(i,j),sp)
+       enddo
+    enddo
     call putgtr(filnam    ,grpnam(1) ,nelems    ,elmnms(1) ,elmdms(1, 1)         , &
               & elmqty(1) ,elmunt(1) ,elmdes(1) ,elmtps(1) ,nbytsg(1) , &
               & elmnms(17),celidt    ,wrswch    ,error     ,rbuf      )
 
-    rbuf = real(sg%y,sp)
+    ! This statement causes a stack overflow on big models: rbuf = real(sg%y,sp)
+    ! So a double do-loop is necessary
+    do j = 1,size(sg%y,2)
+       do i = 1,size(sg%y,1)
+          rbuf(i,j) = real(sg%y(i,j),sp)
+       enddo
+    enddo
     call putgtr(filnam    ,grpnam(1) ,nelems    ,elmnms(1) ,elmdms(1, 1)         , &
               & elmqty(1) ,elmunt(1) ,elmdes(1) ,elmtps(1) ,nbytsg(1) , &
               & elmnms(18),celidt    ,wrswch    ,error     ,rbuf      )
