@@ -6013,6 +6013,7 @@ src/utils_gpl/dhydrology/packages/dhydrology_kernel/Makefile.am -text
 src/utils_gpl/dhydrology/packages/dhydrology_kernel/dhydrology_kernel.vfproj -text
 src/utils_gpl/dhydrology/packages/dhydrology_kernel/src/Makefile.am -text
 src/utils_gpl/dhydrology/packages/dhydrology_kernel/src/interception.f90 -text
+src/utils_gpl/dhydrology/packages/dhydrology_kernel/src/snow.f90 -text
 src/utils_gpl/dhydrology/packages/dhydrology_kernel/src/wflowSbm.f90 -text
 src/utils_gpl/dhydrology/tests/Makefile.am -text
 src/utils_gpl/dhydrology/tests/dhydrology_test_exe.vfproj -text
