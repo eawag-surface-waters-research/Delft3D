@@ -24,7 +24,11 @@ module snow
 
     ! fraction of precipitation which falls as rain
     where (tti == 0.0)
-        rainfrac = temperature > tt
+        where (temperature > tt)
+            rainfrac = 1.0
+        elsewhere
+            rainfrac = 0.0
+        end where
     elsewhere
         rainfrac = min((temperature - (tt - tti / 2.0)) / tti, 1.0)
     end where
