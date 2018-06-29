@@ -1829,18 +1829,20 @@ subroutine GetTabSizesFromTables(dpt, pCSD, doFlow, area, width, perimeter, af_s
    ! local parameters
    integer                                      :: levelsCount
    double precision, dimension(:), pointer      :: heights
-   double precision, dimension(:), pointer      :: widths
    
    ! Pre-Calculated Table for Tabulated/River Profiles
    double precision, dimension(:,:), pointer    :: af_sub_tab        !< Flow Areas for Sub-Sections (Main, FP1 and FP2)
    double precision, dimension(:,:), pointer    :: width_sub_tab     !< Width for Sub-Sections (Main, FP1 and FP2)
    double precision, dimension(:,:), pointer    :: perim_sub_tab     !< Wetted Perimeter for Sub-Sections (Main, FP1 and FP2)
    double precision, dimension(:), pointer      :: flowArea_tab      !< Flow Areas
+   double precision, dimension(:), pointer      :: flowWidth_tab     !< Flow Widths
    double precision, dimension(:), pointer      :: wetPerimeter_tab  !< Wet Perimeters
    double precision, dimension(:), pointer      :: totalArea_tab     !< Total Areas
+   double precision, dimension(:), pointer      :: totalWidth_tab    !< Total Widths
    double precision, dimension(:), pointer      :: area_min_tab      !< Area for a narrowing part of a cross section (Nested Newton)
    double precision, dimension(:), pointer      :: width_min_tab     !< Width for a narrowing part of a cross section (Nested Newton)
    
+   integer, dimension(:), pointer               :: plainsLocation
   
    double precision  :: d1
    double precision  :: d2
@@ -1869,7 +1871,9 @@ subroutine GetTabSizesFromTables(dpt, pCSD, doFlow, area, width, perimeter, af_s
       width_sub_tab    => pCSD%width_sub
       perim_sub_tab    => pCSD%perim_sub
       flowArea_tab     => pCSD%flowArea
+      flowWidth_tab    => pCSD%flowWidth
       wetPerimeter_tab => pCSD%wetPerimeter
+      plainsLocation   => pCSD%plainsLocation
 
       if (dpt > dTop) then
       
@@ -1880,8 +1884,8 @@ subroutine GetTabSizesFromTables(dpt, pCSD, doFlow, area, width, perimeter, af_s
          
          area      = flowArea_tab(levelsCount)
          perimeter = wetPerimeter_tab(levelsCount)
-         width     = pCSD%flowWidth(levelsCount)
-         eTop      = pCSD%flowWidth(levelsCount)
+         width     = flowWidth_tab(levelsCount)
+         eTop      = flowWidth_tab(levelsCount)
 
          if ((eTop > ThresholdForPreismannLock)) then  !hk: add only when this part is meant to carry water
 
@@ -1915,7 +1919,7 @@ subroutine GetTabSizesFromTables(dpt, pCSD, doFlow, area, width, perimeter, af_s
                
                area = flowArea_tab(ilev)
                perimeter = wetPerimeter_tab(ilev)
-               width = pCSD%flowWidth(ilev)
+               width = flowWidth_tab(ilev)
             
             elseif (dpt > d1 .and. dpt <= d2) then
                
@@ -1925,7 +1929,7 @@ subroutine GetTabSizesFromTables(dpt, pCSD, doFlow, area, width, perimeter, af_s
                   
                   do isec = 1,3
                      
-                     if (pCSD%plainsLocation(isec) == 0) cycle
+                     if (plainsLocation(isec) == 0) cycle
                      
                      width = width_sub_tab(isec, ilev - 1) + (width_sub_tab(isec, ilev) - width_sub_tab(isec, ilev - 1)) * factor
                      
@@ -1942,12 +1946,12 @@ subroutine GetTabSizesFromTables(dpt, pCSD, doFlow, area, width, perimeter, af_s
                      
                   enddo
                   
-                  width = pCSD%flowWidth(ilev - 1) + (pCSD%flowWidth(ilev) - pCSD%flowWidth(ilev - 1)) * factor
+                  width = flowWidth_tab(ilev - 1) + (flowWidth_tab(ilev) - flowWidth_tab(ilev - 1)) * factor
                   
-                  area_plus = (pCSD%flowWidth(ilev - 1) + width) * (dpt - d1) * 0.5d0
+                  area_plus = (flowWidth_tab(ilev - 1) + width) * (dpt - d1) * 0.5d0
                   area      = flowArea_tab(ilev - 1) + area_plus
                   
-                  a = width - pCSD%flowWidth(ilev - 1)
+                  a = width - flowWidth_tab(ilev - 1)
                   b = dpt - d1
                   perimeter = wetPerimeter_tab(ilev - 1) + 2.0d0 * dsqrt(0.25d0 * a * a + b * b)
                   
@@ -1960,7 +1964,7 @@ subroutine GetTabSizesFromTables(dpt, pCSD, doFlow, area, width, perimeter, af_s
 
                   area = flowArea_tab(ilev - 1)
                   perimeter = wetPerimeter_tab(ilev - 1)
-                  width = pCSD%flowWidth(ilev - 1)
+                  width = flowWidth_tab(ilev - 1)
                   
                endif
             
@@ -1974,16 +1978,16 @@ subroutine GetTabSizesFromTables(dpt, pCSD, doFlow, area, width, perimeter, af_s
    else
 
       ! Calculation for Storage
-      widths        => pCSD%totalWidth
-      totalArea_tab => pCSD%totalArea
-      area_min_tab  => pCSD%area_min
-      width_min_tab => pCSD%width_min
+      totalWidth_tab => pCSD%totalWidth
+      totalArea_tab  => pCSD%totalArea
+      area_min_tab   => pCSD%area_min
+      width_min_tab  => pCSD%width_min
    
       if (dpt > dTop) then
          
          area  = totalArea_tab(levelsCount)
-         width = pCSD%totalWidth(levelsCount)
-         eTop  = pCSD%totalWidth(levelsCount)
+         width = totalWidth_tab(levelsCount)
+         eTop  = totalWidth_tab(levelsCount)
 
          if ((eTop > ThresholdForPreismannLock)) then  !hk: add only when this part is meant to carry water
             area = area + (dpt - dTop) * eTop
@@ -2000,7 +2004,7 @@ subroutine GetTabSizesFromTables(dpt, pCSD, doFlow, area, width, perimeter, af_s
 
                if (.not. calculationOption == CS_TYPE_MIN) then               
                   area = totalArea_tab(ilev)
-                  width = pCSD%totalWidth(ilev)
+                  width = totalWidth_tab(ilev)
                else
                   area =area_min_tab(ilev)
                   width = width_min_tab(ilev)
@@ -2015,20 +2019,20 @@ subroutine GetTabSizesFromTables(dpt, pCSD, doFlow, area, width, perimeter, af_s
                   
                   factor = (dpt - d1) / (d2 - d1)
                   
-                  width = pCSD%totalWidth(ilev - 1) + (pCSD%totalWidth(ilev) - pCSD%totalWidth(ilev - 1)) * factor
-                  area_plus = (pCSD%totalWidth(ilev - 1) + width) * (dpt - d1) * 0.5d0
+                  width = totalWidth_tab(ilev - 1) + (totalWidth_tab(ilev) - totalWidth_tab(ilev - 1)) * factor
+                  area_plus = (totalWidth_tab(ilev - 1) + width) * (dpt - d1) * 0.5d0
                    
                   if (.not. calculationOption == CS_TYPE_MIN) then
                      area = totalArea_tab(ilev - 1) + area_plus
                   else
                      
-                     if (width < pCSD%totalWidth(ilev - 1)) then                       
+                     if (width < totalWidth_tab(ilev - 1)) then                       
                         area = area_min_tab(ilev - 1) + area_plus
                      else
                         area = area_min_tab(ilev - 1)
                      endif
                      
-                     width = width_min_tab(ilev - 1) + pCSD%totalWidth(ilev - 1) - width
+                     width = width_min_tab(ilev - 1) + totalWidth_tab(ilev - 1) - width
                      
                   endif
                   
@@ -2036,7 +2040,7 @@ subroutine GetTabSizesFromTables(dpt, pCSD, doFlow, area, width, perimeter, af_s
                   
                   if (.not. calculationOption == CS_TYPE_MIN) then               
                      area = totalArea_tab(ilev - 1)
-                     width = pCSD%totalWidth(ilev - 1)
+                     width = totalWidth_tab(ilev - 1)
                   else
                      area = area_min_tab(ilev - 1)
                      width = width_min_tab(ilev - 1)
@@ -2077,7 +2081,6 @@ subroutine GetTabFlowSectionFromTables(dpt, pCross, isector, area, width, perime
    double precision, dimension(:,:), pointer    :: af_sub_tab        !< Flow Areas for Sub-Sections (Main, FP1 and FP2)
    double precision, dimension(:,:), pointer    :: width_sub_tab     !< Width for Sub-Sections (Main, FP1 and FP2)
    double precision, dimension(:,:), pointer    :: perim_sub_tab     !< Wetted Perimeter for Sub-Sections (Main, FP1 and FP2)
-   double precision, dimension(:), pointer      :: flowArea_tab      !< Flow Areas
    double precision, dimension(:), pointer      :: wetPerimeter_tab  !< Wet Perimeters
    
   
@@ -2106,7 +2109,6 @@ subroutine GetTabFlowSectionFromTables(dpt, pCross, isector, area, width, perime
    af_sub_tab       => pCSD%af_sub
    width_sub_tab    => pCSD%width_sub
    perim_sub_tab    => pCSD%perim_sub
-   flowArea_tab     => pCSD%flowArea
    wetPerimeter_tab => pCSD%wetPerimeter
 
    if (dpt > dTop) then
@@ -2149,7 +2151,7 @@ subroutine GetTabFlowSectionFromTables(dpt, pCross, isector, area, width, perime
                
             if ((d2 - d1) > 0.0d0) then
                   
-               if (pCSD%plainsLocation(isector) > 0)then
+               if (plainsLocation(isector) > 0)then
                      
                   factor = (dpt - d1) / (d2 - d1)
                
