@@ -10,8 +10,9 @@ module snow
     double precision, intent(in) :: precipitation(n), temperature(n), tti(n), tt(n)
     double precision, intent(in) :: ttm(n), cfmax(n), whc(n)
     double precision, intent(inout) :: snow(n), snowwater(n)
-    ! this would normally be out, but otherwise numpy doesn't
-    double precision, intent(out) :: snowmelt(n), rainfall(n), snowfall(n)
+    ! this would normally be out, but we use inout here to keep the right shape
+    ! in python, otherwise we get a 1D array back when we want a 2D array
+    double precision, intent(inout) :: snowmelt(n), rainfall(n), snowfall(n)
 
     double precision :: rfcf, cfr, sfcf
     double precision :: rainfrac(n), potsnowmelt(n), potrefreezing(n), refreezing(n)
