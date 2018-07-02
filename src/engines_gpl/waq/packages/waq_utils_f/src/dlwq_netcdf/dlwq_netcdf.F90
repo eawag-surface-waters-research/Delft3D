@@ -26,6 +26,7 @@
 !
 module dlwq_netcdf
     use netcdf
+    use output, only: ncopt
 
     implicit none
 
@@ -1091,20 +1092,23 @@ integer function dlwqnc_create_wqvariable( ncidout, mesh_name, wqname, longname,
         endif
     enddo
 
+    !
+    ! TODO: support for chunking - this requires an array of chunksizes per dimension
+    !
     if ( nolayid /= dlwqnc_type2d ) then
-#ifdef NetCDF4
-        ierror = nf90_def_var( ncidout, name, nf90_float, (/ noseglid, nolayid, ntimeid /), wqid, &
-                     deflate_level= dlwqnc_deflate )
-#else
-        ierror = nf90_def_var( ncidout, name, nf90_float, (/ noseglid, nolayid, ntimeid /), wqid)
-#endif
+        if ( ncopt(1) == 4 .and. ncopt(2) /= 0 ) then
+            ierror = nf90_def_var( ncidout, name, nf90_float, (/ noseglid, nolayid, ntimeid /), wqid, &
+                         deflate_level= ncopt(2) )
+        else
+            ierror = nf90_def_var( ncidout, name, nf90_float, (/ noseglid, nolayid, ntimeid /), wqid)
+        endif
     else
-#ifdef NetCDF4
-        ierror = nf90_def_var( ncidout, name2d, nf90_float, (/ noseglid, ntimeid /), wqid, &
-                     deflate_level= dlwqnc_deflate )
-#else
-        ierror = nf90_def_var( ncidout, name2d, nf90_float, (/ noseglid, ntimeid /), wqid)
-#endif
+        if ( ncopt(1) == 4 .and. ncopt(2) /= 0 ) then
+            ierror = nf90_def_var( ncidout, name2d, nf90_float, (/ noseglid, ntimeid /), wqid, &
+                         deflate_level= ncopt(2) )
+        else
+            ierror = nf90_def_var( ncidout, name2d, nf90_float, (/ noseglid, ntimeid /), wqid)
+        endif
     endif
 !    ierror = nf90_def_var( ncidout, name, nf90_float, (/ noseglid, nolayid, ntimeid /), wqid )
     if ( ierror /= 0 .and. ierror /= nf90_enameinuse ) then

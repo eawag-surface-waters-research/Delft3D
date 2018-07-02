@@ -124,6 +124,7 @@
       integer                 iknmrk            !  help variables merged attributes
       integer                 ivalk             !  return value dhknmrk
 
+      logical                 exist             !  whether a file exists or not
       character*255           ugridfile         !  name of the ugrid-file
       character*255           hydfile           !  name of the hyd-file
       integer :: ncid, ncidout
@@ -176,66 +177,74 @@
          write ( lunut , 2500 )
 
          if ( .not. has_hydfile ) then
-             if ( gettoken( ugridfile, ierr2 ) .gt. 0 ) goto 240
+            if ( gettoken( ugridfile, ierr2 ) .gt. 0 ) goto 240
          endif
 
          write ( lunut , 2510 ) trim(ugridfile)
-         lncout     = .True.
-         lchar (46) = ugridfile
+         inquire( file = ugridfile, exist = exist )
+         if ( .not. exist ) then
+            write ( lunut , 2511 )
+            lncout     = .false.
+         else
+            lncout     = .true.
+            lchar (46) = ugridfile
+         endif
 
-         ! Write the version of the netcdf library
-         write ( lunut , 2520 ) trim(nf90_inq_libvers())
+         if ( lncout ) then
+            ! Write the version of the netcdf library
+            write ( lunut , 2520 ) trim(nf90_inq_libvers())
 
-         ! Open the ugrid-file file
-         inc_error = nf90_open(ugridfile, nf90_nowrite, ncid )
-         if (inc_error /= nf90_noerr ) then
-            write ( lunut , 2530 ) trim(ugridfile)
-            write ( lunut , 2599 ) trim(nf90_strerror(inc_error))
-            ierr = ierr + 1
-            lncout    = .false.
+            ! Open the ugrid-file file
+            inc_error = nf90_open(trim(ugridfile), nf90_nowrite, ncid )
+            if (inc_error /= nf90_noerr ) then
+               write ( lunut , 2530 ) trim(ugridfile)
+               write ( lunut , 2599 ) trim(nf90_strerror(inc_error))
+               ierr = ierr + 1
+               lncout    = .false.
+            end if
          end if
 
-         ! Find the variable with the attribute "delwaq_role"
-         ! If that does not exist, try and find one with the attribute "cf_role"
-         ! that has the value "mesh_topology"
-         inc_error = dlwqnc_find_var_with_att( ncid, "delwaq_role", varid )
-         if ( inc_error == nf90_noerr ) then
-            ! Determine the mesh variable from that
-            mesh_name = ' '
-            inc_error = nf90_get_att( ncid, varid, "mesh", mesh_name )
-            if ( inc_error /= nf90_noerr ) then
-               write ( lunut , 2555 )
-               write ( lunut , 2599 ) trim(nf90_strerror(inc_error))
-               lncout    = .false.
-               lchar(46) = ' '
-               iwar = iwar + 1
-!               ierr = ierr + 1
-            endif
-         else
-            inc_error = dlwqnc_find_var_with_att( ncid, "cf_role", varid )
-
-            if ( inc_error /= nf90_noerr ) then
-               write ( lunut , 2540 )
-               write ( lunut , 2599 ) trim(nf90_strerror(inc_error))
-               lncout    = .false.
-               lchar(46) = ' '
-               iwar = iwar + 1
-!               ierr      = ierr + 1
+         if ( lncout ) then
+            ! Find the variable with the attribute "delwaq_role"
+            ! If that does not exist, try and find one with the attribute "cf_role"
+            ! that has the value "mesh_topology"
+            inc_error = dlwqnc_find_var_with_att( ncid, "delwaq_role", varid )
+            if ( inc_error == nf90_noerr ) then
+               ! Determine the mesh variable from that
+               mesh_name = ' '
+               inc_error = nf90_get_att( ncid, varid, "mesh", mesh_name )
+               if ( inc_error /= nf90_noerr ) then
+                  write ( lunut , 2555 )
+                  write ( lunut , 2599 ) trim(nf90_strerror(inc_error))
+                  lncout    = .false.
+                  lchar(46) = ' '
+                  iwar = iwar + 1
+    !              ierr = ierr + 1
+               endif
             else
-               ! Get the name of this variable
-               inc_error = nf90_inquire_variable( ncid, varid, name = mesh_name )
+               inc_error = dlwqnc_find_var_with_att( ncid, "cf_role", varid )
+
                if ( inc_error /= nf90_noerr ) then
                   write ( lunut , 2540 )
                   write ( lunut , 2599 ) trim(nf90_strerror(inc_error))
                   lncout    = .false.
                   lchar(46) = ' '
                   iwar = iwar + 1
-!                  ierr      = ierr + 1
+    !              ierr      = ierr + 1
+               else
+                  ! Get the name of this variable
+                  inc_error = nf90_inquire_variable( ncid, varid, name = mesh_name )
+                  if ( inc_error /= nf90_noerr ) then
+                     write ( lunut , 2540 )
+                     write ( lunut , 2599 ) trim(nf90_strerror(inc_error))
+                     lncout    = .false.
+                     lchar(46) = ' '
+                     iwar = iwar + 1
+    !                 ierr      = ierr + 1
+                  endif
                endif
             endif
-         endif
 
-         if (lncout) then
             write ( lunut , 2550 ) trim(mesh_name)
 
             ! Get the meshid
@@ -665,6 +674,7 @@
  2460 format ( / ' Retrieving file names and grid parameters from: ', A )
  2500 format ( / ' Found UGRID keyword' )
  2510 format ( / ' File containing the grid: ', A )
+ 2511 format ( / ' Warning: the file does not exist - turning NetCDF output off')
  2520 format ( / ' NetCDF version: ', A )
  2530 format ( / ' ERROR, opening NetCDF file. Filename: ',A )
  2540 format ( / ' WARNING, no variable found with required attribute "delwaq_role" or "cf_role"'
@@ -674,5 +684,5 @@
  2556 format ( / ' Getting the mesh ID failed - variable: ', A )
 
  2590 format ( / ' ERROR, closing NetCDF file. Filename: ',A )
- 2599 format ( / ' NetCDF error message: ', A60 )
+ 2599 format ( / ' NetCDF error message: ', A )
       end

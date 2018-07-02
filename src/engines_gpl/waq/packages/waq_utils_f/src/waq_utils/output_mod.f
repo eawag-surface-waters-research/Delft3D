@@ -67,9 +67,10 @@
       integer, parameter :: IHNC3             =  26          ! type of output file
       integer, parameter :: IHNC4             =  27          ! type of output file
 !
-!          use NetCDF output
+!          use NetCDF output and options
 !
-      logical            :: lncout
+      logical               :: lncout
+      integer, dimension(4) :: ncopt
 !
 !          this is the collection of the output pointers
 !

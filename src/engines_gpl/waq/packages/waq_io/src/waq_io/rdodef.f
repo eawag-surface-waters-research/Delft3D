@@ -51,7 +51,7 @@
       integer  ( 4), intent(in   ) :: nrvarm                !< Max. nr. of extra output var.
       integer  ( 4), intent(inout) :: isrtou(noutp )        !< Sort of output
       character(20), intent(  out) :: ounam (nrvarm,noutp)  !< Name extra output variables
-      logical      , intent(in   ) :: infile                !< Flag if default(f) or in file(t)
+      logical      , intent(inout) :: infile                !< Flag if default(f) or in file(t)
       integer  ( 4), intent(in   ) :: nx                    !< Width of grid
       integer  ( 4), intent(in   ) :: ny                    !< Depth of grid
       integer  ( 4), intent(in   ) :: nodump                !< Number of monitor points
@@ -77,6 +77,10 @@
       integer               ivar       !  loop variable
       integer               ioptf      !  option for a file
       character(255)        cdummy     !  dummy string
+      character(60)         keyword    !  keyword for tokenized reading
+      integer               keyvalue   !  value for tokenized reading
+      integer               itype      !  type of token for tokenized reading
+
       integer(4) :: ithndl = 0
       if (timon) call timstrt( "rdodef", ithndl )
 
@@ -284,11 +288,42 @@
                   ounam(ivar,7) = ounam(ivar,4)
                enddo
             case default
-               write (lunut,3010) ' NEFIS map file option =',ioptf
+               write (lunut,3010) ' NEFIS/NetCDF map file option =',ioptf
                write (lunut,3000) ' ERROR option out of range!'
                ierr = ierr + 1
          end select
 
+         ! Read the options for the NetCDF file:
+         ! ncFormat (4), ncDeflate (2), ncChunk (0), ncShuffle (0 = false)
+
+         ncopt = [4, 2, 0, 0]
+         do
+            if ( gettoken( keyword, ierr2 ) .gt. 0 ) exit
+            if ( keyword(1:1) == '#' ) exit
+
+            select case ( keyword )
+               case ('NCFORMAT' )
+                  if ( gettoken( keyvalue, ierr2 ) .gt. 0 ) exit
+                  ncopt(1) = merge( keyvalue, 4, keyvalue == 3 .or. keyvalue == 4 )
+               case ('NCDEFLATE' )
+                  if ( gettoken( keyvalue, ierr2 ) .gt. 0 ) exit
+                  ncopt(2) = merge( keyvalue, 2, keyvalue >= 0 .and. keyvalue <= 9 )
+               case ('NCCHUNK' )
+                  if ( gettoken( keyvalue, ierr2 ) .gt. 0 ) exit
+                  ncopt(3) = merge( keyvalue, 0, keyvalue >= 0 )
+               case ('NCSHUFFLE' )
+                  if ( gettoken( keyword, ierr2 ) .gt. 0 ) exit
+                  ncopt(4) = merge( 1, 0, keyword == 'YES' )
+               case default
+                  write (lunut,4010) ' ERROR: unknown option - ', trim(keyword), ' - ignored'
+            end select
+         enddo
+
+         if ( lncout ) then
+             write (lunut,4020) ncopt(1:3), merge('ON ', 'OFF', ncopt(4) == 1)
+         endif
+
+         infile = .false. ! We have already encountered the end-block marker
       endif
 
 !     Help variables bal file
@@ -434,5 +469,10 @@
  3030 format (    I8,11X,A20,2X,A20 )
  3040 format ( /,' Balance file set to old format' )
  3050 format ( /,' Balance file set to new format' )
-
+ 4010 format ( /,' ',3A)
+ 4020 format ( /,' NetCDF output options:',/,
+     &           '     NetCDF format:   ',I1,/,
+     &           '     Deflation level: ',I1,/,
+     &           '     Chunksize:       ',I0, ' - 0 means no chunking',/,
+     &           '     Shuffling:       ',A)
       end

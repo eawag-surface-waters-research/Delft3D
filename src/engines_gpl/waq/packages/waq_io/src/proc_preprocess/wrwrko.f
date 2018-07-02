@@ -55,13 +55,13 @@
       integer(4)                          :: ithndl = 0             ! handle for performance timer
       if (timon) call timstrt( "wrwrko", ithndl )
 
-      versio = 0.0
+      versio = 0.2
       nrvart = outputs%cursize
 
       ! write work file
 
       write ( lunwro ) versio
-      write ( lunwro ) noutp , nrvart, nbufmx
+      write ( lunwro ) noutp , nrvart, nbufmx, ncopt
       write ( lunwro ) ( ioutps(1,k) , k = 1 , noutp )
       write ( lunwro ) ( ioutps(2,k) , k = 1 , noutp )
       write ( lunwro ) ( ioutps(3,k) , k = 1 , noutp )

@@ -85,7 +85,7 @@
 !
 !     Local declarations
 !
-      PARAMETER   ( VERSI1 = 0.0 , VERSI2 = 0.1 )
+      PARAMETER   ( VERSI1 = 0.2 , VERSI2 = 0.2 )
       PARAMETER   ( LUOFF = 18 )
       PARAMETER   ( LUOFF2= 36 )
       INTEGER       NOUTPD, NRVARD, NBUFMD
@@ -112,7 +112,7 @@
 !
 !     read and check dimensions
 !
-      READ (LUNWRO, ERR=900, END=900) NOUTPD, NRVARD, NBUFMD
+      READ (LUNWRO, ERR=900, END=900) NOUTPD, NRVARD, NBUFMD, NCOPT
       IF ( NOUTPD .NE. NOUTP  ) THEN
          WRITE ( LUREP, 2020 ) NOUTPD, NOUTP
          IERR = IERR + 1
