@@ -1096,19 +1096,27 @@ integer function dlwqnc_create_wqvariable( ncidout, mesh_name, wqname, longname,
     ! TODO: support for chunking - this requires an array of chunksizes per dimension
     !
     if ( nolayid /= dlwqnc_type2d ) then
+#ifdef NetCDF4
         if ( ncopt(1) == 4 .and. ncopt(2) /= 0 ) then
             ierror = nf90_def_var( ncidout, name, nf90_float, (/ noseglid, nolayid, ntimeid /), wqid, &
                          deflate_level= ncopt(2) )
         else
+#endif
             ierror = nf90_def_var( ncidout, name, nf90_float, (/ noseglid, nolayid, ntimeid /), wqid)
+#ifdef NetCDF4
         endif
+#endif
     else
+#ifdef NetCDF4
         if ( ncopt(1) == 4 .and. ncopt(2) /= 0 ) then
             ierror = nf90_def_var( ncidout, name2d, nf90_float, (/ noseglid, ntimeid /), wqid, &
                          deflate_level= ncopt(2) )
         else
+#endif
             ierror = nf90_def_var( ncidout, name2d, nf90_float, (/ noseglid, ntimeid /), wqid)
+#ifdef NetCDF4
         endif
+#endif
     endif
 !    ierror = nf90_def_var( ncidout, name, nf90_float, (/ noseglid, nolayid, ntimeid /), wqid )
     if ( ierror /= 0 .and. ierror /= nf90_enameinuse ) then
