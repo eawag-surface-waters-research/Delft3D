@@ -145,6 +145,8 @@ module m_structure
       integer                          :: link_number
       double precision                 :: x, y
       double precision                 :: distance
+      double precision                 :: charHeight
+      double precision                 :: charWidth
       integer                          :: compound
       character(IdLen)                 :: compoundName = ' '
       type(t_weir), pointer            :: weir => null()

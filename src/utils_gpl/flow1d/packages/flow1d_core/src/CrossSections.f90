@@ -165,13 +165,8 @@ module m_CrossSections
    type, public :: t_CSType
         character(IdLen)            :: id                      !< unique identification
          
-        integer                     :: crossType        ! cross(3,*): Type of cross section
-                                                        !      1: Tabulated
-                                                        !      2: Circular
-                                                        !      3: Egg shaped
-                                                        !      4: Rectangular
-                                                        !     10: Y-Z cross section
-                                                        !     11: A-symmetrical
+        integer                     :: crossType        ! Type of cross section
+                                                       
        integer                      :: levelsCount = 0  !     number of levels in tabulated cross section
        integer                      :: reference
 
@@ -237,7 +232,7 @@ module m_CrossSections
                                                         !! To Prevent unecessary interpolations.
        logical                      :: IsCopy = .false. !< Flag to determine if Cross-Section is a copy
        
-       integer                      :: crossType        !< cross(3,*): Type of cross section
+       integer                      :: crossType        !< Type of cross section
 
        integer                      :: branchid = -1    !< integer branch id
        double precision             :: location         !< offset in meters along reach
