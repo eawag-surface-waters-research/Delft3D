@@ -41,7 +41,7 @@ implicit none
 
     character(*),  public, parameter :: dfmoutput_company      = 'Deltares'
     character(*),  public, parameter :: dfmoutput_company_url  = 'http://www.deltares.nl'
-    character(*),  public, parameter :: dfmoutput_program      = 'D-Flow FM'
+    character(*),  public, parameter :: dfmoutput_program      = 'dfmoutput'
     character(*),  public, parameter :: dfmoutput_basename     = 'dfmoutput'
 
     character(*),  public, parameter :: dfmoutput_version      = dfmoutput_major//'.'//dfmoutput_minor//'.'//dfmoutput_revision//'.'//dfmoutput_build_number
