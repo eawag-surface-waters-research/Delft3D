@@ -1101,7 +1101,7 @@ subroutine get_var(c_var_name, x) bind(C, name="get_var")
   call str_token(tmp_var_name, varset_name, DELIMS='/')
   ! Check for valid group/set name (e.g. 'observations')
   select case(varset_name)
-  case ("pumps", "weirs", "gates", "sourcesinks", "observations", "crosssections")
+  case ("pumps", "weirs", "gates", "generalstructures", "sourcesinks", "observations", "crosssections")
      ! A valid group name, now parse the location id first...
      call str_token(tmp_var_name, item_name, DELIMS='/')
      if (len_trim(item_name) > 0) then
