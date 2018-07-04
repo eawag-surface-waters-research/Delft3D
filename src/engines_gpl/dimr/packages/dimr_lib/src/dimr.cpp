@@ -1886,7 +1886,7 @@ void Dimr::connectLibs (void) {
         componentsList.components[i].libHandle = dllhandle;
         #define GETPROCADDRESS dlsym
         #define GetLastError dlerror
-        #define Sleep sleep
+        #define Sleep(msec) sleep((int)msec/1000)
 #else
         SetLastError(0); /* clear error code */
         HINSTANCE dllhandle = LoadLibrary (LPCSTR(lib));
