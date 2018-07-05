@@ -109,6 +109,7 @@ module MessageHandling
    public dbg_flush
    public warn_flush
    public err_flush
+   public fatal_flush
    public set_progress_callback
    public progress
    public stringtolevel
@@ -826,6 +827,11 @@ end subroutine warn_flush
 subroutine err_flush()
     call mess(LEVEL_ERROR, msgbuf)
 end subroutine err_flush
+
+!> Output the current message buffer as a 'fatal' message.
+subroutine fatal_flush()
+    call mess(LEVEL_FATAL, msgbuf)
+end subroutine fatal_flush
 
 !
 !
