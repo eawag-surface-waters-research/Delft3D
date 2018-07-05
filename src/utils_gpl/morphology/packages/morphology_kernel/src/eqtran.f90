@@ -810,4 +810,5 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
            sbcv = sbcv + sscv
        endif
     endif
+    dss = real(realpar(RP_DSS)  ,fp)
 end subroutine eqtran
