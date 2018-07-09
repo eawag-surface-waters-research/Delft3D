@@ -146,6 +146,7 @@ module MessageHandling
    module procedure message1char2int
    module procedure message1char3int
    module procedure message1char1double
+   module procedure message2double
    module procedure message2int1char
    module procedure message1char1int1double
    module procedure message1double1int1char
@@ -600,6 +601,17 @@ subroutine message1char1double(level, w1, d2)
 
     call SetMessage(level, rec)
 end subroutine message1char1double
+
+subroutine message2double(level, d1, d2)
+    double precision, intent(in) :: d1, d2
+    integer         :: level
+
+    character(MAXSTRINGLEN) :: rec
+
+    rec = ' '
+    write (rec,'(2F20.6)') d1,d2 
+    call SetMessage(level, rec)
+end subroutine message2double
 
 subroutine message1char1int(level, w1, i2)
     integer :: i2
