@@ -807,19 +807,16 @@ end subroutine error1char1int1double
 
 !> Output the current message buffer as a 'debug' message.
 subroutine dbg_flush()
-! We could check on empty buffer, but we omit this to stay lightweight. [AvD]
     call mess(LEVEL_DEBUG,  msgbuf)
 end subroutine dbg_flush
 
 !!> Output the current message buffer as an 'info' message.
 subroutine msg_flush()
-! We could check on empty buffer, but we omit this to stay lightweight. [AvD]
     call mess(LEVEL_INFO,  msgbuf)
 end subroutine msg_flush
 
 !> Output the current message buffer as a 'warning' message.
 subroutine warn_flush()
-! We could check on empty buffer, but we omit this to stay lightweight. [AvD]
     call mess(LEVEL_WARN,  msgbuf)
 end subroutine warn_flush
 
