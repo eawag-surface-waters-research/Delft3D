@@ -220,4 +220,64 @@ function exifil(name, unit)
     endif
 end function exifil
 
+function makedir(dirname) result(istat)
+!!--description-----------------------------------------------------------------
+!
+!    Function: An integer function that makes a directory (also for linux).
+!              Returns the error status from the 'system' command.
+!
+!!--declarations----------------------------------------------------------------
+
+#ifdef __INTEL_COMPILER
+    use ifport
+#endif
+    implicit none
+    character(len=*), intent(in) :: dirname
+
+    character(len=256)           :: command
+    character(len=1), external   :: get_dirsep
+    integer                      :: istat
+    logical                      :: l_exist
+    integer                      :: lslash
+    character(len=999)           :: pathstr
+    character(len=1)             :: slash
+!
+!! executable statements -------------------------------------------------------
+!
+    istat = 0
+
+    call get_environment_variable('PATH',pathstr)
+   
+    slash = char(47)
+    lslash = index (pathstr,slash)
+    if (lslash .eq. 0) then
+       slash = char(92)
+    endif
+
+#ifdef __INTEL_COMPILER
+    inquire(directory = trim(dirname), exist = l_exist)
+#else
+    ! GNU
+    inquire(file = trim(dirname)//get_dirsep()//".", exist = l_exist)
+#endif
+    if (l_exist) then
+       return
+    end if
+
+    if ( slash.eq.'/' ) then
+!      linux
+       command = "mkdir -p "//trim(dirname)
+    else
+!      windows
+       command = "mkdir "//trim(dirname)
+       ! call iosDirMAKE(dirname)
+    end if
+
+    istat = system(command)
+    ! Fortran2008, not available before Intel 15:
+    ! call execute_command_line(command)
+      
+    return
+end function
+
 end module system_utils
