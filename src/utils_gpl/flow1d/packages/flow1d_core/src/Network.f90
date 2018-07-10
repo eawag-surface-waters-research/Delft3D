@@ -343,8 +343,6 @@ contains
       double precision                   :: xBeg
       double precision                   :: xEnd
       integer                            :: i
-      integer                            :: nstru
-      logical                            :: structure_found 
       logical                            :: interpolDone
 
       call realloc(network%adm, linall, network%gridpointsCount)
