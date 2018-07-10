@@ -223,7 +223,8 @@ end function exifil
 function makedir(dirname) result(istat)
 !!--description-----------------------------------------------------------------
 !
-!    Function: An integer function that makes a directory (also for linux).
+!    Function: An integer function that creates a directory (also for linux)
+!              when it does not yet exist.
 !              Returns the error status from the 'system' command.
 !
 !!--declarations----------------------------------------------------------------
@@ -235,7 +236,6 @@ function makedir(dirname) result(istat)
     character(len=*), intent(in) :: dirname
 
     character(len=256)           :: command
-    character(len=1), external   :: get_dirsep
     integer                      :: istat
     logical                      :: l_exist
     integer                      :: lslash
@@ -258,19 +258,18 @@ function makedir(dirname) result(istat)
     inquire(directory = trim(dirname), exist = l_exist)
 #else
     ! GNU
-    inquire(file = trim(dirname)//get_dirsep()//".", exist = l_exist)
+    inquire(file = trim(dirname)//slash//".", exist = l_exist)
 #endif
     if (l_exist) then
        return
     end if
 
-    if ( slash.eq.'/' ) then
+    if ( slash .eq. char(47)) then
 !      linux
        command = "mkdir -p "//trim(dirname)
     else
 !      windows
        command = "mkdir "//trim(dirname)
-       ! call iosDirMAKE(dirname)
     end if
 
     istat = system(command)
