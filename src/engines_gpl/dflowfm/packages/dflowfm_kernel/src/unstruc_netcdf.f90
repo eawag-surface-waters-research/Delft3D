@@ -11620,6 +11620,7 @@ subroutine readcells(filename, ierr, jaidomain, jaiglobal_s, jareinitialize)
                                      id_idomain, id_iglobal_s
                
     integer                       :: ja_oldformatread, L, nv, k, s, jaidomain_, jaiglobal_s_, fillvalue, jareinitialize_
+    integer                       :: nerr_store
     integer, allocatable          :: netcellnod(:,:), netcelllin(:,:), kn_tmp(:,:), ltype_tmp(:)
     ierr = DFM_NOERR
 
@@ -11735,15 +11736,19 @@ subroutine readcells(filename, ierr, jaidomain, jaiglobal_s, jareinitialize)
     endif
     
     if ( jaiglobal_s_.eq.1 ) then
+!      store nerr_
+       nerr_store = nerr_
        ierr = nf90_inq_varid(inetfile, 'iglobal_s', id_iglobal_s)
        call check_error(ierr, 'iglobal_s')
        if ( ierr.eq.nf90_noerr ) then
           call realloc(iglobal_s, nump1d2d, stat = ierr, keepExisting = .false.)
           ierr = nf90_get_var(inetfile, id_iglobal_s, iglobal_s, count = (/ nump1d2d /))
           ierr = nf90_get_att(inetfile, id_iglobal_s, 'valid_max', Nglobal_s)
-       else  ! no global cell numbers in netfile
+       else  ! no global cell numbers in netfile (not a problem)
           Nglobal_s = 0
           if ( allocated(iglobal_s) ) deallocate(iglobal_s)
+!         restore nerr_
+          nerr_ = nerr_store
        end if
     end if
     
