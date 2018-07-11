@@ -1931,13 +1931,9 @@ subroutine GetTabSizesFromTables(dpt, pCSD, doFlow, area, width, perimeter, af_s
                      area_plus = (width_sub_tab(isec, ilev - 1) + width) * (dpt - d1) * 0.5d0
                      af_sub(isec)    = af_sub_tab(isec, ilev - 1) + area_plus
                      
-                     if (width_sub_tab(isec, ilev) > width_sub_tab(isec, ilev - 1)) then
-                        a = width - width_sub_tab(isec, ilev - 1)
-                        b = dpt - d1
-                        perim_sub(isec) = perim_sub_tab(isec, ilev - 1) + 2.0d0 * dsqrt(0.25d0 * a * a + b * b)
-                     else
-                        perim_sub(isec) = perim_sub_tab(isec, ilev - 1)
-                     endif
+                     a = width - width_sub_tab(isec, ilev - 1)
+                     b = dpt - d1
+                     perim_sub(isec) = perim_sub_tab(isec, ilev - 1) + 2.0d0 * dsqrt(0.25d0 * a * a + b * b)
                      
                   enddo
                   
