@@ -325,6 +325,10 @@
             ierr = ierr + 1
          endif
       endif
+      if ( itstrt .lt. 0 ) then
+         write ( lunut , 2155 ) itstrt
+         ierr = ierr+1
+      endif
       if ( itstrt .gt. itstop ) then
          write ( lunut , 2160 ) itstop, itstrt
          ierr = ierr+1
@@ -593,6 +597,9 @@
      &          ' Is your T0 setting in block #1 correct?'/,
      &          ' Allowed difference with T0 is usually ca. 68 years.' )
  2150 format ( /' ERROR: String is not a valid absolute timer :',A)
+ 2155 format (  ' ERROR: Start time (',I10,') absolute timer is less than zero',
+     &          ' or auxiliary timer is set before T0.'/
+     &          '        This is not supported!' )
  2160 format (  ' ERROR, Stop time (',I10,') smaller than start time(',
      &                                I10,').' )
  2170 format ( ' Start of simulation :',I2,'Y-',I3,'D-',I2,'H-',I2,
