@@ -788,7 +788,7 @@ subroutine SetParsCross(CrossDef, cross)
 
 
    if (Crossdef%crossType == cs_tabulated) then
-      cross%surfaceLevel = Crossdef%height(Crossdef%levelsCount)
+      cross%surfaceLevel = Crossdef%height(Crossdef%levelsCount) + cross%shift
       cross%bedLevel     = Crossdef%height(1) + cross%shift
    else
       surfLevel = -9999.0 !< JanM: TODO Parametriseer deze waarde, levelmiss toevoegen aan derived type CSDef

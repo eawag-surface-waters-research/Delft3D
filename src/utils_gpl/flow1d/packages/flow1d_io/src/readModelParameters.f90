@@ -490,12 +490,15 @@ module m_readModelParameters
       call AddOrReplaceParameter(category, 'CrestWidth', 'none', .true.)
       call AddOrReplaceParameter(category, 'Discharge', 'current', .true.)
       call AddOrReplaceParameter(category, 'GateLowerEdgeLevel', 'none', .true.)
+      call AddOrReplaceParameter(category, 'GateOpeningHeight', 'none', .true.)
       call AddOrReplaceParameter(category, 'Head', 'none', .true.)
       call AddOrReplaceParameter(category, 'OpeningsArea', 'none', .true.)
       call AddOrReplaceParameter(category, 'PressureDifference', 'none', .true.)
       call AddOrReplaceParameter(category, 'Velocity', 'none', .true.)
       call AddOrReplaceParameter(category, 'WaterLevel', 'none', .true.)
-      call AddOrReplaceParameter(category, 'Waterleveloncrest', 'none', .true.)
+      call AddOrReplaceParameter(category, 'WaterlevelAtCrest', 'none', .true.)
+      call AddOrReplaceParameter(category, 'WaterlevelDown', 'none', .true.)
+      call AddOrReplaceParameter(category, 'WaterlevelUp', 'none', .true.)
 
       category = 'ResultsPumps'
       call AddOrReplaceParameter(category, 'SuctionSideLevel', 'none', .true.)
