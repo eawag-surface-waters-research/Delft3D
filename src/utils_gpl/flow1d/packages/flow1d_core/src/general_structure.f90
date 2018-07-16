@@ -72,7 +72,7 @@ module m_General_Structure
 contains
 
    subroutine computeGeneralStructure(GenStr, fuL, ruL, s_on_crest, auL, as1, as2, dadsL, kfuL, s1m1, s1m2, s2m1, s2m2, qL, &
-                                      q0L, qtotalL, u1L, u0L, dxL, dt, firstiter, jarea)
+                                      q0L, qtotalL, u1L, u0L, dxL, dt, firstiter, jarea, state)
       ! modules
 
       ! Global variables
@@ -98,6 +98,7 @@ contains
       double precision, intent(in)                 :: dt
       logical, intent(in)                          :: firstiter
       logical, intent(in)                          :: jarea!    integer         :: il
+      integer, intent(inout)                       :: state
       
 !
 !
@@ -202,7 +203,7 @@ contains
       !
       call flqhgs(fum, rum, u1m, u0m, dxL, dt, dadsL, kfuL, auL, qm, q0m, flowDir, &
                   hu, hd, uu, zs, wstr, w2, wsd, zb2, ds1, ds2, dg,                &
-                  rhoast, cgf, cgd, cwf, cwd, mugf, lambda, strdamf, jarea, ds)
+                  rhoast, cgf, cgd, cwf, cwd, mugf, lambda, strdamf, jarea, ds, state)
       !
       !TEMP = laatste statement
       s_on_crest = ds + crest     ! waterlevel on crest
@@ -376,7 +377,7 @@ end subroutine flgtar
 subroutine flqhgs(fum, rum, u1m, u0m, dxm, dt, dadsm, kfum, aum, qm, q0m, flowDir, &
                   hu, hd, uu, zs, wstr, w2, wsd, zb2, ds1, ds2,   &
                   dg, rhoast, cgf, cgd, cwf, cwd, mugf, lambda, strdamf,    &
-                  jarea, ds)
+                  jarea, ds, state)
 !!--copyright-------------------------------------------------------------------
 ! Copyright (c) 2003, Deltares. All rights reserved.
 !!--disclaimer------------------------------------------------------------------
@@ -437,11 +438,11 @@ subroutine flqhgs(fum, rum, u1m, u0m, dxm, dt, dadsm, kfum, aum, qm, q0m, flowDi
     double precision               :: wstr
     double precision               :: zb2
     double precision               :: zs
+    integer, intent(out)           :: state
 !
 !
 ! Local variables
 !
-    integer                        :: formno
     logical                        :: imag
     double precision               :: cgd2
     double precision               :: cgda
@@ -525,7 +526,7 @@ subroutine flqhgs(fum, rum, u1m, u0m, dxm, dt, dadsm, kfum, aum, qm, q0m, flowDi
     !
     if (hs1<=0.0D0 .or. wstr<=0.0D0 .or. min(cgf, cgd, cwf, cwd)<=0. .or.       &
       & dg<.0001) then          !hk: or gate closed
-       formno = 0
+       state = 0
     else
        !
        !        Compute critical water depth at the
@@ -546,12 +547,12 @@ subroutine flqhgs(fum, rum, u1m, u0m, dxm, dt, dadsm, kfum, aum, qm, q0m, flowDi
              !
              !              - drowned weir -
              !
-             formno = 2
+             state = 2
           else
              !
              !              - gate flow -
              !
-             formno = 3
+             state = 3
              !
              !              adapt coefficients on basis of Ds & Cwd
              !
@@ -577,13 +578,13 @@ subroutine flqhgs(fum, rum, u1m, u0m, dxm, dt, dadsm, kfum, aum, qm, q0m, flowDi
              !
              !              - free weir -
              !
-             formno = 1
+             state = 1
              ds = dc
           else
              !
              !              - gate flow -
              !
-             formno = 3
+             state = 3
              !
              !              adapt coefficients on basis of Dc & Cwf
              !
@@ -594,7 +595,7 @@ subroutine flqhgs(fum, rum, u1m, u0m, dxm, dt, dadsm, kfum, aum, qm, q0m, flowDi
        !        In case of gate flow determine type of gate flow
        !        (drowned or free)
        !
-       if (formno==3) then
+       if (state==3) then
           dc = mugfa*dg
           !
           !           Cgd for second order equation = Cgd' * Mu'
@@ -608,13 +609,13 @@ subroutine flqhgs(fum, rum, u1m, u0m, dxm, dt, dadsm, kfum, aum, qm, q0m, flowDi
              !
              !              - free gate -
              !
-             formno = 3
+             state = 3
              ds = dc
           elseif (ds<=dc) then
              !
              !              - free gate -
              !
-             formno = 3
+             state = 3
              !
              !             Adapt coefficients
              !
@@ -632,23 +633,23 @@ subroutine flqhgs(fum, rum, u1m, u0m, dxm, dt, dadsm, kfum, aum, qm, q0m, flowDi
              !
              !             - drowned gate -
              !
-             formno = 4
+             state = 4
           endif
        endif
     !
     !
     endif
     !
-    !TEM    WRITE (11,*) 'formno,ds,dc,dg',formno,ds,dc,dg
+    !TEM    WRITE (11,*) 'state,ds,dc,dg',state,ds,dc,dg
     !
     !       The flowe condition is known so calculate
     !       the linearization coefficients FU and RU
     !
     if (jarea) then
-       call flgsarea(formno, kfum, aum, hu, velhght, zs, ds, dg, wstr)
+       call flgsarea(state, kfum, aum, hu, velhght, zs, ds, dg, wstr)
     !
     else
-       call flgsfuru(fum, rum, u1m, u0m, aum, qm, q0m, dxm, dt, dadsm, kfum, formno, &
+       call flgsfuru(fum, rum, u1m, u0m, aum, qm, q0m, dxm, dt, dadsm, kfum, state, &
                      flowDir, hu, hd, velhght, zs, ds, dg, dc, wstr,   &
                      cwfa, cwd, mugfa, cgfa, cgda, strdamf)
     endif
@@ -1096,13 +1097,13 @@ subroutine flgsd2(wsd, wstr, zs, w2, zb2, dg, ds1, ds2, elu, hd, rhoast,    &
     endif
 end subroutine flgsd2
 
-subroutine flgsarea(formno, kfum, aum, hu, velhght, zs, ds, dg, wstr)
+subroutine flgsarea(state, kfum, aum, hu, velhght, zs, ds, dg, wstr)
 
 implicit none
 !
 ! Global variables
 !
-    integer, intent(in)             :: formno
+    integer, intent(in)             :: state
     integer, intent(out)            :: kfum
     double precision, intent(inout) :: aum
     double precision, intent(in)    :: dg
@@ -1132,7 +1133,7 @@ implicit none
       ! NR NAME              IO DESCRIPTION
       !  7 dg                I  Gate opening height.
       !  6 ds                I  Water level immediately downstream the gate.
-      !  1 formno            I  Flow condition of general structure:
+      !  1 state            I  Flow condition of general structure:
       !                         0 : closed or dry
       !                         1 : free weir flow
       !                         2 : drowned weir flow
@@ -1148,7 +1149,7 @@ implicit none
       !     Declaration of parameters:
       !     Declaration of local variables:
       !
-      if (formno==0) then
+      if (state==0) then
          !        closed or dry
          aum = 0.0
          kfum = 0
@@ -1159,16 +1160,16 @@ implicit none
          hs1 = hu + velhght - zs
          kfum = 1
          !
-         if (formno==1) then
+         if (state==1) then
             !           free weir flow
             aum = wstr*hs1*2.0D0/3.0D0
-         elseif (formno==2) then
+         elseif (state==2) then
             !           drowned weir flow
             aum = wstr*ds
-         elseif (formno==3) then
+         elseif (state==3) then
             !           free gate flow
             aum = wstr*dg
-         elseif (formno==4) then
+         elseif (state==4) then
             !           drowned gate flow
             aum = wstr*dg
          else
@@ -1181,7 +1182,7 @@ implicit none
        !! The linearization coefficients FU and RU are
        !! calculated for the general structure.\n
        !! The stage of the flow was already determined.
-   subroutine flgsfuru(fum, rum, u1m, u0m, aum, qm, q0m, dxm, dt, dadsm, kfum, formno, &
+   subroutine flgsfuru(fum, rum, u1m, u0m, aum, qm, q0m, dxm, dt, dadsm, kfum, state, &
                        flowDir, hu, hd, velhght, zs, ds, dg, dc, wstr,&
                        cwfa, cwd, mugfa, cgfa, cgda, strdamf)
    !!--declarations----------------------------------------------------------------
@@ -1194,7 +1195,7 @@ implicit none
       double precision, parameter :: relax = 0.0D0, alfa = 0.9D0
       !  7 dg                I  Gate opening height.
       !  6 ds                I  Water level immediately downstream the gate.
-      !  1 formno            I  Flow condition of general structure:
+      !  1 state            I  Flow condition of general structure:
       !                         0 : closed or dry
       !                         1 : free weir flow
       !                         2 : drowned weir flow
@@ -1227,7 +1228,7 @@ implicit none
                                                    !! 2 : drowned weir flow\n
                                                    !! 3 : free gate flow\n
                                                    !! 4 : drowned gate flow\n
-      integer, intent(in)            :: formno     
+      integer, intent(in)            :: state     
       integer, intent(out)         :: kfum       !<
       double precision, intent(out)  :: fum        !<
       double precision, intent(out)  :: rum        !<
@@ -1274,7 +1275,7 @@ implicit none
    !! executable statements -------------------------------------------------------
    !
        !
-      if (formno==0) then
+      if (state==0) then
          !        closed or dry
          kfum = 0
          fum = 0.0
@@ -1291,21 +1292,21 @@ implicit none
       !
       dxdt = strdamf*dxm/dt
 
-         if (formno==1) then
+         if (state==1) then
             !           free weir flow
             cu = cwfa**2*gravity/1.5D0
             !TEM        WRITE (11,*) cu,cwfa
             aum = wstr*hs1*2.0D0/3.0D0
             ustru = cwfa*dsqrt(gravity*2.0D0/3.0D0*hs1)
             rhsc = cu*(hd + velhght - zs)*flowDir
-         elseif (formno==2) then
+         elseif (state==2) then
             !           drowned weir flow
             cu = cwd**2*2.0D0*gravity
             aum = wstr*ds
             dh = max(hs1 - ds, 0.D0)
             ustru = cwd*dsqrt(gravity*2.0D0*dh)
             rhsc = cu*(hd + velhght - (ds + zs))*flowDir
-         elseif (formno==3) then
+         elseif (state==3) then
             !           free gate flow
             mu = mugfa*cgfa
             cu = mu**2*2.0D0*gravity
@@ -1313,7 +1314,7 @@ implicit none
             dh = max(hs1 - dc, 0.D0)
             ustru = mu*dsqrt(gravity*2.0D0*dh)
             rhsc = cu*(hd + velhght - (dc + zs))*flowDir
-         elseif (formno==4) then
+         elseif (state==4) then
             !           drowned gate flow
             mu = mugfa*cgda
             cu = mu**2*2.0D0*gravity

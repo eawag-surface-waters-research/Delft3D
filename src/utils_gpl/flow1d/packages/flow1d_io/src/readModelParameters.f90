@@ -494,6 +494,7 @@ module m_readModelParameters
       call AddOrReplaceParameter(category, 'Head', 'none', .true.)
       call AddOrReplaceParameter(category, 'OpeningsArea', 'none', .true.)
       call AddOrReplaceParameter(category, 'PressureDifference', 'none', .true.)
+      call AddOrReplaceParameter(category, 'State', 'none', .true.)
       call AddOrReplaceParameter(category, 'Velocity', 'none', .true.)
       call AddOrReplaceParameter(category, 'WaterLevel', 'none', .true.)
       call AddOrReplaceParameter(category, 'WaterlevelAtCrest', 'none', .true.)

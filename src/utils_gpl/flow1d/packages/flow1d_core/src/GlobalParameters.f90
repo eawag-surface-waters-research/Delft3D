@@ -284,5 +284,6 @@ module m_GlobalParameters
    integer, public, parameter :: CFiMorWidth                = 121
    integer, public, parameter :: CFiMorDepth                = 122
    integer, public, parameter :: CFiPumpHead                = 123
+   integer, public, parameter :: CFiState                   = 124
    
 end module m_GlobalParameters                                 

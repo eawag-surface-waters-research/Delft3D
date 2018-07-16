@@ -49,7 +49,7 @@ module m_Orifice
 contains
 
 subroutine ComputeOrifice(orifice, fum, rum, aum, dadsm, kfum, s1m1, s1m2, qm, q0m,   &
-                 & u1m, u0m, dxm, dt)
+                 & u1m, u0m, dxm, dt, state)
 !!--copyright-------------------------------------------------------------------
 ! Copyright (c) 2003, Deltares. All rights reserved.
 !!--disclaimer------------------------------------------------------------------
@@ -113,6 +113,7 @@ subroutine ComputeOrifice(orifice, fum, rum, aum, dadsm, kfum, s1m1, s1m2, qm, q
     double precision, intent(in)    :: s1m2
     double precision, intent(in)    :: dxm
     double precision, intent(in)    :: dt
+    integer, intent(inout)          :: state
 !
 !
 ! Local variables
@@ -157,18 +158,19 @@ subroutine ComputeOrifice(orifice, fum, rum, aum, dadsm, kfum, s1m1, s1m2, qm, q
         (sop - scr<=.0)) then
        kfum = 0
     !           ARS 9698 .lt. is change to .le.
-    elseif (smax - scr<thresholdDry) then
+    elseif (smax - scr < thresholdDry) then
        kfum = 0
-    elseif ((smax - scr>thresholdFlood)) then
+    elseif (smax - scr > thresholdFlood) then
        kfum = 1
     else
     endif
-    if (kfum==0) then
-       fum = 0.0
-       rum = 0.0
-       u1m = 0.0
-       qm = 0.0
-       q0m = 0.0
+    if (kfum == 0) then
+       fum   = 0.0d0
+       rum   = 0.0d0
+       u1m   = 0.0d0
+       qm    = 0.0d0
+       q0m   = 0.0d0
+       state = 0
        return
     endif
 
@@ -182,6 +184,7 @@ subroutine ComputeOrifice(orifice, fum, rum, aum, dadsm, kfum, s1m1, s1m2, qm, q
        !        weir flow; 2/3 ( h_1 - z_s) < d_g = s_op - z_s
        if (smax - scr<=1.5*(smin - scr)) then
           !          submerged weir flow;  h_1 - z_s <= 3/2 (h_2 - z_s)
+          state = 2
           cu = cmu**2*2.0d0*gravity/(StructureDynamicsFactor*dxm)
           !          ARS 4681 improved wetted area computation
           !          ARS 3479 wetted area orifice limited to opening
@@ -193,6 +196,7 @@ subroutine ComputeOrifice(orifice, fum, rum, aum, dadsm, kfum, s1m1, s1m2, qm, q
           dadsm = swi
        else
           !          free weir flow;  h_1 - z_s > 3/2 (h_2 - z_s)
+          state = 1
           aum = (2.0d0/3.0d0)*(smax - scr)*swi
           cu = cmu**2*gravity/(1.5d0*(StructureDynamicsFactor*dxm))
           uweir = cmu*dsqrt(2.0d0/3.0d0*gravity*(smax - scr))
@@ -208,12 +212,14 @@ subroutine ComputeOrifice(orifice, fum, rum, aum, dadsm, kfum, s1m1, s1m2, qm, q
        !        orifice flow; 2/3 ( h_1 - z_s) >= d_g = s_op - z_s
        if (smin>sop) then
           !          submerged orifice flow;  h_2 > z_s + d_g = z_s + s_op - z_s = s_op
+          state = 4
           cu = cmu**2*2.0d0*gravity/(StructureDynamicsFactor*dxm)
           uweir = cmu*dsqrt(gravity*2.0d0*(smax - smin))
           fr = dabs(uweir)/(StructureDynamicsFactor*dxm)
           rhsc = 0.0
        else
           !          free orifice floww;  h_2 <= z_s + d_g = z_s + s_op - z_s = s_op
+          state = 3
           cu = cmu**2*2.0d0*gravity/(StructureDynamicsFactor*dxm)
           uweir = cmu*dsqrt(2.0d0*gravity*(smax - (scr + scf*(sop - scr))))
           fr = uweir/(StructureDynamicsFactor*dxm)
@@ -233,14 +239,14 @@ subroutine ComputeOrifice(orifice, fum, rum, aum, dadsm, kfum, s1m1, s1m2, qm, q
     qtm = aum*u1m
     !
     !     check for restriction on flow
-    if ((orifice%uselimitflowpos) .and. (qtm>0)) then
+    if ((orifice%uselimitflowpos) .and. (qtm > 0.0d0)) then
        if (dabs(qtm)>orifice%limitflowpos ) then
           fum = 0.0
           rum = orifice%limitflowpos/max(aum, 1.0D-4)
           u1m = rum
           qm = orifice%limitflowpos
        endif
-    elseif ((orifice%uselimitflowneg) .and. (qtm<0)) then
+    elseif ((orifice%uselimitflowneg) .and. (qtm < 0.0d0)) then
        if (dabs(qtm)>orifice%limitflowneg) then
           fum = 0.0
           rum = -1.0*orifice%limitflowneg/max(aum, 1.0D-4)

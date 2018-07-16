@@ -132,7 +132,7 @@ module m_structure
    integer, public, parameter :: CFiGateOpeningHeight  = 21
    integer, public, parameter :: CFiValveOpening       = 22
    integer, public, parameter :: CFiSetpoint           = 29
-   integer, public, parameter :: CFiHighestParameter   = 29
+   integer, public, parameter :: CFiHighestParameter   = 31
 
     !---------------------------------------------------------
    type, public :: t_structure
@@ -147,6 +147,12 @@ module m_structure
       double precision                 :: distance
       double precision                 :: charHeight
       double precision                 :: charWidth
+      integer                          :: state = 0    !< State of the Structure, so far only relevant for General Structure and Orifice
+                                                       !< 0 = Closed
+                                                       !< 1 = Free Weir Flow
+                                                       !< 2 = Drowned Weir Flow
+                                                       !< 3 = Free Gate Flow
+                                                       !< 4 = Drowned Gate Flow
       integer                          :: compound
       character(IdLen)                 :: compoundName = ' '
       type(t_weir), pointer            :: weir => null()
