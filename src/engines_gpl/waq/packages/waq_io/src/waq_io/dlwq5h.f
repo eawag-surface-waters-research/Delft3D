@@ -81,6 +81,7 @@
 !
 !       Look backwards
 !
+      I4 = 0
       DO 10 I1 = I,1,-1
          I2 = IAR(I1+IOFFC)
          IF ( I2 .GT. -100000 ) GOTO 20
