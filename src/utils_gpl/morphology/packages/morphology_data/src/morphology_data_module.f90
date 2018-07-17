@@ -460,9 +460,13 @@ end type morpar_type
 
 type t_noderelation
    character(len=CHARLEN)                         :: Node       = ' '
+   integer                                        :: NodeIdx    = -999    !< Cell centre index 
    character(len=CHARLEN)                         :: BranchIn   = ' '
+   integer                                        :: BranchInLn = -999    !< Link index 
    character(len=CHARLEN)                         :: BranchOut1 = ' '
+   integer                                        :: BranchOut1Ln = -999   !< Link index 
    character(len=CHARLEN)                         :: BranchOut2 = ' '
+   integer                                        :: BranchOut2Ln = -999   !< Link index 
    character(len=CHARLEN)                         :: tableName  = ' '
    character(len=CHARLEN)                         :: Method     = ' '
    real(fp)                                       :: expQ       = -1.0_fp
