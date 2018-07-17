@@ -1679,7 +1679,7 @@ function ug_init_dataset(ncid, ug_file) result(ierr)
    end if
    ug_file%nummesh = nmesh
    
-   allocate(ug_file%meshnames(nmesh))
+   allocate(ug_file%meshnames(nmesh)) ! TODO: LC: if allocated deallocate..
    allocate(ug_file%meshids(nmesh), stat=ierr) 
    if (ierr /= 0) then
        ierr = UG_SOMEERR
@@ -1729,21 +1729,21 @@ function ug_init_dataset(ncid, ug_file) result(ierr)
       end if
       !mesh topology case
       if (is_mesh_topo) then
-      im = im + 1
-      ierr = nf90_inquire_variable(ncid, iv, name = ug_file%meshnames(im))
-      ierr = ug_init_mesh_topology(ncid, iv, ug_file%meshids(im))
+         im = im + 1
+         ierr = nf90_inquire_variable(ncid, iv, name = ug_file%meshnames(im))
+         ierr = ug_init_mesh_topology(ncid, iv, ug_file%meshids(im))
       end if
       !network topology case
       if (is_network_topo) then
-      inet = inet + 1
-      ierr = nf90_inquire_variable(ncid, iv, name = ug_file%networksnames(inet))
-      ierr = ug_init_network_topology(ncid, iv, ug_file%netids(inet))
+         inet = inet + 1
+         ierr = nf90_inquire_variable(ncid, iv, name = ug_file%networksnames(inet))
+         ierr = ug_init_network_topology(ncid, iv, ug_file%netids(inet))
       end if
       !link topology case
       if (is_link_topo) then
-      il = il + 1
-      ierr = nf90_inquire_variable(ncid, iv, name = ug_file%contactsnames(il))
-      ierr = ug_init_link_topology(ncid, iv, ug_file%contactids(il))
+         il = il + 1
+         ierr = nf90_inquire_variable(ncid, iv, name = ug_file%contactsnames(il))
+         ierr = ug_init_link_topology(ncid, iv, ug_file%contactids(il))
       end if
      
       if (ierr /= UG_NOERR) then
@@ -1799,7 +1799,7 @@ function ug_init_network_topology(ncid, varid, netids) result(ierr)
    !branch variables ids
    ierr = att_to_varid(ncid,'edge_node_connectivity', netids%varids(ntid_1dedgenodes),varid)
    ierr = att_to_varid(ncid,'branch_ids'            , netids%varids(ntid_1dbranchids),varid)
-   ierr = att_to_varid(ncid,'branch_long_names'     , netids%varids(ntid_1dbranchlongnames),varid)
+   ierr = att_to_varid(ncid,'branch_long_names'     , netids%varids(ntid_1dbranchlongnames),varid) ! TODO: LC: error when not found
    ierr = att_to_varid(ncid,'branch_lengths'        , netids%varids(ntid_1dbranchlengths),varid)
    !get the number of geometric points for each branch
    ierr = att_to_varid(ncid,'part_node_count', netids%varids(ntid_1dgeopointsperbranch), netids%varids(ntid_1dgeometry))

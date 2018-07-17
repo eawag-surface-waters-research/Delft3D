@@ -1149,7 +1149,7 @@ function detect_conventions(ioncid) result(ierr)
    
    if (i > 0) then
       datasets(ioncid)%iconvtype = IONC_CONV_UGRID
-      read (convstring(i+6:), *) datasets(ioncid)%convversion
+      read (convstring(i+6:), *) datasets(ioncid)%convversion ! TODO: AvD: tokenize on ' ' or '/'
    else
       datasets(ioncid)%iconvtype = IONC_CONV_OTHER
    end if
