@@ -413,6 +413,7 @@ subroutine load_network_from_flow1d(filename, found_1d_network)
    type (t_structure), pointer :: pstru
    integer :: nstru, i
    double precision, dimension(2) :: tempbob
+   character(len=255) :: oned_outputdir
 
    ! This routine is still used for Morphology model with network in INI-File (Willem Ottevanger)
    
@@ -496,6 +497,27 @@ subroutine load_network_from_flow1d(filename, found_1d_network)
       zk(k2) = min(zk(k2),tempbob(2))           
    enddo
    
+   ! TODO: temporary solution for pipes without cross section
+   do k1 = ndx2D+1, ndxi
+      if (zk(k1) > 0.5d0*huge(1d0)) then
+         zk(k1) = zkUNI
+      endif
+   enddo
+   
+   
+   ! A branch without cross sections is allowed, when there is only 1 link on this branch
+   ! and a structure is available here
+   !nstru = network%sts%count
+   !do i = 1, nstru
+   !   pstru => network%sts%struct(i)
+   !   tempbob = get_crest_level(pstru)
+   !   l = pstru%link_number
+   !   k1 = kn(1,L)
+   !   k2 = kn(2,L)
+   !   zk(k1) = min(zk(k1),tempbob(1))
+   !   zk(k2) = min(zk(k2),tempbob(2))           
+   !enddo  
+
    ! TODO: Once dflowfm's own 1D and the flow1d code are aligned, the following switch should probably disappear.
    jainterpolatezk1D = 0
 

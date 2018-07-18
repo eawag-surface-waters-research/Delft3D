@@ -8450,8 +8450,11 @@ call flow_bedforminit(2)        ! bedforms  stage 2: parameter read and process
  !! flow1d -> dflowfm initialization
  call set_1d_roughnesses()
  call set_1d_indices_in_network()
- call save_1d_nrd_vars_in_stm()
- 
+
+ if (stm_included) then 
+    call save_1d_nrd_vars_in_stm()
+ end if
+
  if ( jatransportmodule.eq.1 ) then
     call ini_transport()
  end if
@@ -9897,6 +9900,8 @@ end subroutine cosphiunetcheck
     call default_waves()
 
     call default_sobekdfm()
+
+    call dealloc(network) ! flow1d
 
     call default_heatfluxes()
 

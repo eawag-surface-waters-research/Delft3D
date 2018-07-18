@@ -61,7 +61,25 @@ module m_oned_functions
    end subroutine set_1d_roughnesses
 
    subroutine set_1d_indices_in_network()
+      use m_sediment
+      use m_flowgeom
+      use m_cross_helper
+      
+      default_width = wu1DUNI
+      
+      call set_linknumbers_in_branches()
+      call set_retention_grid_numbers()
+      
+      if (jased > 0 .and. stm_included) then
+         ! 
+         call set_cross_sections_to_gridpoints()
+      endif
+      call set_structure_indices()
+      
+   end subroutine set_1d_indices_in_network
 
+   subroutine set_linknumbers_in_branches()
+   
       use unstruc_channel_flow
       use m_flowgeom
       use m_sediment
@@ -104,8 +122,35 @@ module m_oned_functions
          pbr%tonode%gridnumber = k2
          grd(upointscount+1) = k2
       enddo
+   end subroutine set_linknumbers_in_branches
 
       ! Retentions
+   subroutine set_retention_grid_numbers()
+   
+      use unstruc_channel_flow
+      use m_flowgeom
+      use m_sediment
+      use messageHandling
+
+      implicit none
+
+      integer :: L
+      integer :: ibr
+      integer :: nbr, upointscount, pointscount
+      integer :: storageCount
+      integer :: i, j, jpos, linkcount
+      integer :: k1, k2, igrid
+      integer :: c1, c2
+      integer :: storage_count
+      type(t_branch), pointer                 :: pbr
+      type(t_storage), pointer                :: pstor
+      integer, dimension(:), pointer          :: lin
+      integer, dimension(:), pointer          :: grd
+      double precision, dimension(:), pointer :: offset
+      type(t_offset2cross), pointer           :: gpnt2cross(:)                   !< list containing cross section indices per u-location
+      type (t_CrossSection), pointer          :: cross1, cross2
+      double precision, parameter             :: eps_crs = 1d0                      !< accuracy for determining a cross section lies on a grid point
+
 
       storageCount = network%storS%count
       do i = 1, storageCount
@@ -117,65 +162,96 @@ module m_oned_functions
             pstor%gridPoint = pbr%grd(pstor%local_grid_index)
          endif
       enddo
+   end subroutine set_retention_grid_numbers
+   
+   subroutine set_cross_sections_to_gridpoints()
+   
+      use unstruc_channel_flow
+      use m_flowgeom
+      use m_sediment
+      use messageHandling
 
-      !! cross sections (in case of sediment transport every gridpoint requires a unique
-      !! cross section)
-      !if (jased > 0 .and. stm_included) then
-      !   allocate(gridpoint2cross(ndxi))
-      !   gpnt2cross => network%adm%gpnt2cross
-      !   do i = 1, ndxi
-      !      gridpoint2cross(i)%num_cross_sections = 0
-      !   enddo
-      !
-      !   do i = 1, network%nds%count
-      !      k1 = network%nds%node(i)%gridNumber
-      !      linkcount = nd(k1)%lnx
-      !      allocate(gridpoint2cross(k1)%cross(linkcount))
-      !      gridpoint2cross(k1)%num_cross_sections = linkcount
-      !   enddo
-      !
-      !   igrid = 0
-      !   do ibr = 1, nbr
-      !      pbr => network%brs%branch(ibr)
-      !      lin => pbr%lin
-      !      grd => pbr%grd
-      !      offset => pbr%gridPointsOffsets
-      !      pointscount = pbr%gridPointsCount
-      !      do i = 1, pointscount
-      !         igrid = igrid+1
-      !         k1 = grd(i)
-      !         if (i==1 .or. i==pointscount) then
-      !            ! search for correct location
-      !            if (i==1) then
-      !               L = lin(1)
-      !            else
-      !               L = lin(pointscount-1)
-      !            endif
-      !            do j = 1,nd(k1)%lnx
-      !               if (L == iabs(nd(k1)%ln(j))) then
-      !                  jpos = j
-      !               endif
-      !            enddo
-      !         else
-      !            allocate(gridpoint2cross(k1)%cross(1))
-      !            jpos = 1
-      !         endif
-      !         cross1 => network%crs%cross(gpnt2cross(k1)%c1)
-      !         cross2 => network%crs%cross(gpnt2cross(k1)%c2)
-      !         if (abs(offset(i) - cross1%location) < eps_crs) then
-      !            gridpoint2cross(k1)%cross(jpos) = c1
-      !         elseif (abs(offset(i) - cross2%location) < eps_crs) then
-      !            gridpoint2cross(k1)%cross(jpos) = c2
-      !         else
-      !            msgbuf = 'Grid point '//trim(pbr%gridPointIDs(i))//' has no cross section. This is a requirement for sediment transport'
-      !            call err_flush()
-      !         endif
-      !      enddo
-      !   enddo
-      !endif
+      implicit none
 
-   end subroutine set_1d_indices_in_network
+      integer :: L
+      integer :: ibr
+      integer :: nbr, upointscount, pointscount
+      integer :: storageCount
+      integer :: i, j, jpos, linkcount
+      integer :: k1, k2, igrid
+      integer :: c1, c2
+      integer :: storage_count
+      type(t_branch), pointer                 :: pbr
+      type(t_storage), pointer                :: pstor
+      integer, dimension(:), pointer          :: lin
+      integer, dimension(:), pointer          :: grd
+      double precision, dimension(:), pointer :: offset
+      type(t_offset2cross), pointer           :: gpnt2cross(:)                   !< list containing cross section indices per u-location
+      type (t_CrossSection), pointer          :: cross1, cross2
+      double precision, parameter             :: eps_crs = 1d0                      !< accuracy for determining a cross section lies on a grid point
 
+
+      ! cross sections (in case of sediment transport every gridpoint requires a unique
+      ! cross section)
+      if (jased > 0 .and. stm_included) then
+         allocate(gridpoint2cross(ndxi))
+         gpnt2cross => network%adm%gpnt2cross
+         do i = 1, ndxi
+            gridpoint2cross(i)%num_cross_sections = 0
+         enddo
+
+         ! allocate space for local cross section numbers on connection nodes
+         do i = 1, network%nds%count
+            k1 = network%nds%node(i)%gridNumber
+            linkcount = nd(k1)%lnx
+            allocate(gridpoint2cross(k1)%cross(linkcount))
+            gridpoint2cross(k1)%num_cross_sections = linkcount
+         enddo
+         
+         igrid = 0
+         do ibr = 1, nbr
+            pbr => network%brs%branch(ibr)
+            lin => pbr%lin
+            grd => pbr%grd
+            offset => pbr%gridPointsOffsets
+            pointscount = pbr%gridPointsCount
+            do i = 1, pointscount
+               igrid = igrid+1
+               k1 = grd(i)
+               if (i==1 .or. i==pointscount) then
+                  ! search for correct location
+                  if (i==1) then 
+                     L = lin(1)
+                  else
+                     L = lin(pointscount-1)
+                  endif
+                  do j = 1,nd(k1)%lnx
+                     if (L == iabs(nd(k1)%ln(j))) then
+                        jpos = j
+                     endif
+                  enddo
+               else
+                  allocate(gridpoint2cross(k1)%cross(1))
+                  gridpoint2cross(k1)%num_cross_sections = 1
+                  jpos = 1
+               endif
+               c1 = gpnt2cross(igrid)%c1
+               c2 = gpnt2cross(igrid)%c2
+               cross1 => network%crs%cross(c1)
+               cross2 => network%crs%cross(c2)
+               if (abs(offset(i) - cross1%location) < eps_crs) then
+                  gridpoint2cross(k1)%cross(jpos) = c1
+               elseif (abs(offset(i) - cross2%location) < eps_crs) then
+                  gridpoint2cross(k1)%cross(jpos) = c2
+               else
+                  msgbuf = 'Grid point '//trim(pbr%gridPointIDs(i))//' has no cross section. This is a requirement for sediment transport'
+                  call err_flush()
+               endif
+            enddo
+         enddo
+      endif
+   end subroutine set_cross_sections_to_gridpoints
+      
    ! function to store variables related to the nodal relation variables
    subroutine save_1d_nrd_vars_in_stm
       use m_branch
@@ -234,5 +310,7 @@ module m_oned_functions
 
    end subroutine save_1d_nrd_vars_in_stm
 
+   subroutine set_structure_indices()
+   end subroutine set_structure_indices
 
 end module m_oned_functions
