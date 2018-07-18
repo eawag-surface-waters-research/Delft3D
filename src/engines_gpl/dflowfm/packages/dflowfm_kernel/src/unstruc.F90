@@ -2225,7 +2225,7 @@ subroutine getseg1D(hpr,wu2,dz,ai,frcn,ifrctyp, wid,ar,conv,perim,jaconv)  ! cop
  sl2 = slotw2D
 
  nstor = network%stors%count
- if (nstor > 0) then
+ if (japerim == 0 .and. nstor > 0) then
     stors => network%stors%stor
     do i = 1, nstor
        k1 = stors(i)%gridPoint
@@ -8447,6 +8447,11 @@ call flow_bedforminit(2)        ! bedforms  stage 2: parameter read and process
      call netlink_tree(1)
  endif  
  
+ !! flow1d -> dflowfm initialization
+ call set_1d_roughnesses()
+ call set_1d_indices_in_network()
+ call save_1d_nrd_vars_in_stm()
+ 
  if ( jatransportmodule.eq.1 ) then
     call ini_transport()
  end if
@@ -8479,8 +8484,6 @@ call flow_bedforminit(2)        ! bedforms  stage 2: parameter read and process
     call flow_trachyupdate()                         ! Perform a trachy update step to correctly set initial field quantities
  endif                                               ! Generally flow_trachyupdate() is called from flow_setexternalforcings()
 
- call set_1d_roughnesses()
- call set_1d_indices_in_network()
  call flow_initimestep(1, iresult)                   ! 1 also sets zws0
 
  call writesomeinitialoutput()

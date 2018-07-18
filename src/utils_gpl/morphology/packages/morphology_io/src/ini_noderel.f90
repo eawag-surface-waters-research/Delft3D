@@ -257,7 +257,7 @@ subroutine ini_noderel(nrd, sedpar, lsedtot)
    
 end subroutine ini_noderel
 
-integer function get_noderel_idx(iNod, pFrac, nodeID, branInID, nodbrt)
+integer function get_noderel_idx(iNod, pFrac, nodeIDIdx, branInIDLn, nodbrt)
 !
 !    Function: - Get the Nodal Point Relation for the Current Node/Branch
 !                If nothing Found return 0 (zero which means default)
@@ -268,8 +268,8 @@ integer function get_noderel_idx(iNod, pFrac, nodeID, branInID, nodbrt)
    ! Global variables
    integer                                :: iNod     !< Index of Actual Node
    type(t_nodefraction)                   :: pFrac
-   character(len=Charlen)                 :: nodeID
-   character(len=Charlen)                 :: branInID
+   integer                                :: nodeIDIdx
+   integer                                :: branInIDLn
    integer                                :: nodbrt
 
    ! Local variables
@@ -283,14 +283,14 @@ integer function get_noderel_idx(iNod, pFrac, nodeID, branInID, nodbrt)
    getFunctionRelation = .true.
    
    
-   if (branInID .ne. ' ' .and. branInID .ne. '#####' .and. nodbrt == 3) then
+   if (branInIDLn .ne. 0 .and. branInIDLn .ne. -444 .and. nodbrt == 3) then
       
       ! Only One Incoming Branch at a Real Bifurcation
       do iNodeRel = 1, pFrac%nNodeRelations
       
          pNodRel => pFrac%noderelations(iNodeRel)
          
-         if (pNodRel%Node == nodeID .and. pNodRel%BranchIn == branInID) then
+         if (pNodRel%NodeIdx == nodeIDIdx .and. pNodRel%BranchInLn == branInIDLn) then
          
             ! Found/Bingo
             get_noderel_idx = iNodeRel
@@ -308,7 +308,7 @@ integer function get_noderel_idx(iNod, pFrac, nodeID, branInID, nodbrt)
       
          pNodRel => pFrac%noderelations(iNodeRel)
          
-         if (pNodRel%Node == nodeID .and. pNodRel%BranchIn == ' ') then
+         if (pNodRel%NodeIdx == nodeIDIdx .and. pNodRel%BranchInLn == 0) then
          
             ! Found/Bingo
             get_noderel_idx = iNodeRel
