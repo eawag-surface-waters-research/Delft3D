@@ -106,9 +106,15 @@ module m_readRetentions
             ! must be separated from the ordinary gridpoints
             gridPoint = getCalcPoint(network%brs, branchIdx, Chainage)
             if (gridPoint == network%brs%branch(branchIdx)%points(1) ) then
+               branchIdx             = -1
                gridPoint = -network%brs%branch(branchIdx)%fromNode%index
+               psto%local_grid_index = -1
             elseif (gridPoint == network%brs%branch(branchIdx)%points(2)) then
                gridPoint = -network%brs%branch(branchIdx)%toNode%index
+               branchIdx             = -1
+               psto%local_grid_index = -1
+            else
+               psto%local_grid_index = gridPoint - network%brs%branch(branchIdx)%points(1) - 1 
             endif
             
             network%storS%Count = network%storS%Count + 1
@@ -123,6 +129,8 @@ module m_readRetentions
             pSto%id        = retentionID
             pSto%gridPoint = gridPoint
             network%storS%mapping(gridPoint) = network%storS%Count
+            psto%branch_index     = branchIdx
+
             if (storageType == 'Closed') then
                pSto%storageType = nt_Closed
             elseif (storageType == 'Loss') then
