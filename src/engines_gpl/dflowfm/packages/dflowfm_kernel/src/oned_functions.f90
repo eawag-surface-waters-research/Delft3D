@@ -1,4 +1,4 @@
-module m_oned_funcions
+module m_oned_functions
    private
    
    public set_1d_roughnesses
@@ -49,4 +49,4 @@ module m_oned_funcions
       
    end subroutine set_1d_roughnesses
    
-end module m_oned_funcions
+end module m_oned_functions
