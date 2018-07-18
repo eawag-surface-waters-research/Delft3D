@@ -1348,8 +1348,13 @@ if(q /= 0) then
  integer           :: L, n, k1, k2, k
  double precision  :: ha, hh
 
+ ! In this subrouitne VOL1_F contains the flow volume, whilst VOL1 contains the additional storage volume
+ ! At the end of this subroutine VOL1 will be set to VOL1 + VOL_F from this moment on VOL1 contains the total 
+ ! volume in a cell
  japerim = 0
 
+ vol1 = 0d0
+ 
 ! call sets01zbnd(1) ! set s1 on z-boundaries   SPvdP: not necessary, values at the boundaries were already properly filled in solve_matrix, as the boundary nodes are included in the solution vector
 
  if (nonlin2D == 0) then
@@ -1358,14 +1363,14 @@ if(q /= 0) then
    !$OMP PRIVATE(n,hh)
     do n = 1,ndx2d
        hh = max(0d0, s1(n)-bl(n) )
-       vol1(n) = ba(n)*hh
+       vol1_f(n) = ba(n)*hh
        a1(n)   = ba(n)
     enddo
    !$OMP END PARALLEL DO    !   TODO OMP|
 
  else
 
-    vol1(1:ndx2d) = 0d0
+    vol1_f(1:ndx2d) = 0d0
     a1  (1:ndx2d) = 0d0
 
  endif
@@ -1374,13 +1379,13 @@ if(q /= 0) then
 
     do n = ndx2d+1, ndxi
        hh = max(0d0, s1(n)-bl(n) )
-       vol1(n) = ba(n)*hh
+       vol1_f(n) = ba(n)*hh
        a1(n)   = ba(n)
     enddo
 
  else
 
-    vol1(ndx2D+1:ndxi) = 0d0
+    vol1_f(ndx2D+1:ndxi) = 0d0
     a1  (ndx2D+1:ndxi) = 0d0
 
  endif
@@ -1391,9 +1396,12 @@ if(q /= 0) then
 
  call VOL12D(japerim)                                   ! and add area's and volumes of 1D links
 
+ vol1 = vol1 + vol1_f
+ 
  do L = lnxi+1,Lnx
-    a1  (ln(1,L)) = a1  (ln(2,L))                       ! set bnd a1 to that of inside point
-    vol1(ln(1,L)) = vol1(ln(2,L))
+    a1  (ln(1,L))   = a1    (ln(2,L))                       ! set bnd a1 to that of inside point
+    vol1(ln(1,L))   = vol1  (ln(2,L))
+    vol1_f(ln(1,L)) = vol1_f(ln(2,L))
  enddo
 
  end subroutine volsur
@@ -1420,7 +1428,7 @@ if(q /= 0) then
        call getprof_1D(L, hpr, ar1, wid1, japerim)
            dx1  = dx(L)*acl(L)
          a1(k1) =   a1(k1) + dx1*wid1
-       vol1(k1) = vol1(k1) + dx1*ar1
+       vol1_f(k1) = vol1_f(k1) + dx1*ar1
     endif
 
     hpr = max(0d0,s1(k2)-bob(2,L))
@@ -1428,7 +1436,7 @@ if(q /= 0) then
        call getprof_1D(L, hpr, ar2, wid2, japerim)
            dx2  = dx(L)*(1d0-acl(L))
          a1(k2) =   a1(k2) + dx2*wid2
-       vol1(k2) = vol1(k2) + dx2*ar2
+       vol1_f(k2) = vol1_f(k2) + dx2*ar2
     endif
 
     if (nonlin == 2) then
@@ -1444,14 +1452,14 @@ if(q /= 0) then
              call getprof_1D_min(L, hpr, ar1, wid1)
              dx1      = dx(L)*acl(L)
              a1m(k1)  = a1m(k1)  + dx1*wid1
-             vol1(k1) = vol1(k1) - dx1*ar1
+             vol1_f(k1) = vol1_f(k1) - dx1*ar1
           endif
           hpr = max(0d0,s1m(k2)-bob(2,L))                   ! this statement is called most nr of times through waterlevel iteration
           if (hpr > 0.5d0*prof1D(2,LL) ) then
              call getprof_1D_min(L, hpr, ar1, wid1)
              dx1      = dx(L)*(1d0-acl(L))
              a1m(k2)  = a1m(k2)  + dx1*wid1
-             vol1(k2) = vol1(k2) - dx1*ar1
+             vol1_f(k2) = vol1_f(k2) - dx1*ar1
           endif
        endif
 
@@ -1486,7 +1494,7 @@ if(q /= 0) then
        call getprof_1D(L, hpr, ar1, wid1, japerim)
            dx1  = dx(L)*acl(L)
          a1(k1) =   a1(k1) + dx1*wid1
-       vol1(k1) = vol1(k1) + dx1*ar1
+       vol1_f(k1) = vol1_f(k1) + dx1*ar1
     endif
 
     hpr = max(0d0,s1(k2)-bl(k2))
@@ -1494,7 +1502,7 @@ if(q /= 0) then
        call getprof_1D(L, hpr, ar2, wid2, japerim)
            dx2  = dx(L)*(1d0-acl(L))
          a1(k2) =   a1(k2) + dx2*wid2
-       vol1(k2) = vol1(k2) + dx2*ar2
+       vol1_f(k2) = vol1_f(k2) + dx2*ar2
     endif
 
  else if (hu(L) > 0) then
@@ -1538,7 +1546,7 @@ if(q /= 0) then
        dx1   = 0.5d0*dx(L)*acl(L)
        if (k1 > ndx2D) dx1 = 2*dx1
        a1(k1)   = a1(k1)   + dx1*wid1
-       vol1(k1) = vol1(k1) + dx1*ar1
+       vol1_f(k1) = vol1_f(k1) + dx1*ar1
     endif
 
     hpr2 = s1(k2)-BL1                                                                              ! == 5,6: (ibedlevtyp=3), 2D conveyance, link or node
@@ -1547,7 +1555,7 @@ if(q /= 0) then
        dx2      = 0.5d0*dx(L)*(1d0-acl(L))
        if (k2 > ndx2D) dx2 = 2*dx2
        a1(k2)   = a1(k2)   + dx2*wid2
-       vol1(k2) = vol1(k2) + dx2*ar2
+       vol1_f(k2) = vol1_f(k2) + dx2*ar2
     endif
 
  else if (hu(L) > 0d0) then
@@ -1606,7 +1614,7 @@ if(q /= 0) then
        dx1   = 0.5d0*dx(L)*0.5d0 ! acl(L)
        !if (k1 > ndx2D) dx1 = 2*dx1
        a1(k1)   = a1(k1)   + dx1*wid1
-       vol1(k1) = vol1(k1) + dx1*ar1
+       vol1_f(k1) = vol1_f(k1) + dx1*ar1
     endif
 
     hpr2 = s1(k2)-BL1                                                                              ! == 5,6: (ibedlevtyp=3), 2D conveyance, link or node
@@ -1615,7 +1623,7 @@ if(q /= 0) then
        dx2      = 0.5d0*dx(L)*0.5d0 ! (1d0-acl(L))
        !if (k2 > ndx2D) dx2 = 2*dx2
        a1(k2)   = a1(k2)   + dx2*wid2
-       vol1(k2) = vol1(k2) + dx2*ar2
+       vol1_f(k2) = vol1_f(k2) + dx2*ar2
     endif
 
  else if (hu(L) > 0d0) then
@@ -1673,7 +1681,7 @@ if(q /= 0) then
        call getlinkareawid2D(L,wu2,b21,ai,hpr1,ar1,wid1)
        dx1      = 0.5d0*dx(L)*acl(L)
        a1(k1)   = a1(k1)   + dx1*wid1
-       vol1(k1) = vol1(k1) + dx1*ar1
+       vol1_f(k1) = vol1_f(k1) + dx1*ar1
     endif
 
     hpr2 = s1(k2)-BL1                                                                          ! == 5,6: (ibedlevtyp=3), 2D conveyance, link or node
@@ -1681,7 +1689,7 @@ if(q /= 0) then
        call getlinkareawid2D(L,wu2,b21,ai,hpr2,ar2,wid2)
        dx2      = 0.5d0*dx(L)*(1d0-acl(L))
        a1(k2)   = a1(k2)   + dx2*wid2
-       vol1(k2) = vol1(k2) + dx2*ar2
+       vol1_f(k2) = vol1_f(k2) + dx2*ar2
     endif
 
  else if (hu(L) > 0d0) then
@@ -1802,7 +1810,7 @@ if(q /= 0) then
           call getlinkareawid2D(L,wu2,b21,ai,hpr1,ar1,wid1)
           dx1      = 0.5d0*dx(L)*acl(L)
           a1m(k1)  = a1m(k1)  + dx1*wid1
-          vol1(k1) = vol1(k1) - dx1*ar1
+          vol1_f(k1) = vol1_f(k1) - dx1*ar1
        endif
 
        hpr2 = s1m(k2)-BL1
@@ -1810,7 +1818,7 @@ if(q /= 0) then
          call getlinkareawid2D(L,wu2,b21,ai,hpr2,ar2,wid2)
          dx2      = 0.5d0*dx(L)*(1d0-acl(L))
          a1m(k2)  = a1m(k2)  + dx2*wid2
-         vol1(k2) = vol1(k2) - dx2*ar2
+         vol1_f(k2) = vol1_f(k2) - dx2*ar2
        endif
     else if (hu(L) > 0) then
        hpr1 = 0.5d0*(s1(k1) + s1(k2)) - BL1
@@ -2196,6 +2204,9 @@ subroutine getseg1D(hpr,wu2,dz,ai,frcn,ifrctyp, wid,ar,conv,perim,jaconv)  ! cop
 
  subroutine VOL12D(japerim)                                 ! and add area's and volumes of 1D and 2D links, japerim=1: also set conveyance
  use m_flowgeom
+ use unstruc_channel_flow
+ use m_oned_functions
+ use m_storage
  use m_flow
  use m_missing
  use m_ship
@@ -2204,14 +2215,25 @@ subroutine getseg1D(hpr,wu2,dz,ai,frcn,ifrctyp, wid,ar,conv,perim,jaconv)  ! cop
 
  integer           :: japerim
 
- integer           :: L, k1, k2, K, n, kk, kb, kt, nl1 , nl2
+ integer           :: L, k1, k2, K, n, kk, kb, kt, nl1 , nl2, i, nstor
  double precision  :: hh, slotsav, sl1, sl2
+ type(t_storage), dimension(:), pointer :: stors
 
  nl1 = nonlin1D
  nl2 = nonlin2D
  sl1 = slotw1D
  sl2 = slotw2D
 
+ nstor = network%stors%count
+ if (nstor > 0) then
+    stors => network%stors%stor
+    do i = 1, nstor
+       k1 = stors(i)%gridPoint
+       vol1(k1) = vol1(k1) + getVolume(stors(i), s1(k1))
+       a1(k1)   = a1(k1)   + getSurface(stors(i), s1(k1))
+    enddo
+ endif
+ 
  do L   = 1,lnx1D                                  ! regular 1D links
     if (kcu(L) == 4) then
        if (japerim == 0 .and. nonlin == 0) cycle
@@ -2262,11 +2284,11 @@ subroutine getseg1D(hpr,wu2,dz,ai,frcn,ifrctyp, wid,ar,conv,perim,jaconv)  ! cop
           k1       = n1Dend(k)
           a1(k1)   = 2D0*a1(k1)
           if (kmx == 0) then
-             vol1(k1) = 2D0*vol1(k1)
+             vol1_f(k1) = 2D0*vol1_f(k1)
           else
              call getkbotktop(k1,kb,kt)
              do kk = kb,kt
-                vol1(kk) = 2D0*vol1(kk)
+                vol1_f(kk) = 2D0*vol1_f(kk)
              enddo
          endif
        enddo
@@ -2293,7 +2315,7 @@ subroutine getseg1D(hpr,wu2,dz,ai,frcn,ifrctyp, wid,ar,conv,perim,jaconv)  ! cop
     hh1 = s1(k1) - bl1
     a1(k1)  = a1(k1) + aa1
     if (hh1 > 0d0) then
-       vol1(k1) = vol1(k1) + aa1*hh1
+       vol1_f(k1) = vol1_f(k1) + aa1*hh1
     endif
  enddo
 
@@ -3267,8 +3289,8 @@ end subroutine setdt
                 if ( idomain(k).ne.my_rank ) cycle
              end if
              if (squ(k) > eps10) then                   ! outflow only
-                if (hs(k) > epshu .and. vol1(k) > 0.0 .and. squ(k) > 0.0) then
-                   dtsc = cflmx*vol1(k)/squ(k)
+                if (hs(k) > epshu .and. vol1_f(k) > 0.0 .and. squ(k) > 0.0) then
+                   dtsc = cflmx*vol1_f(k)/squ(k)
                    if (dtsc < dts) then
                       dts = dtsc  ; kkcflmx = k
                    endif
@@ -3288,7 +3310,7 @@ end subroutine setdt
              end if
              if (sqwave(k) > eps10) then                   ! outflow only
                 if (hs(k) > epshu) then
-                   dtsc = cflmx*vol1(k)/sqwave(k)
+                   dtsc = cflmx*vol1_f(k)/sqwave(k)
                    if (dtsc < dts) then
                       dts = dtsc  ; kkcflmx = k
                    endif
@@ -3306,8 +3328,8 @@ end subroutine setdt
              if ( idomain(k).ne.my_rank ) cycle
           end if
           if (squ(k) + sqi(k) > eps10) then                   ! outflow+inflow
-             if (hs(k) > epshu .and. vol1(k) > 0.0) then
-                dtsc = cflmx*vol1(k)/ (squ(k) + sqi(k))
+             if (hs(k) > epshu .and. vol1_f(k) > 0.0) then
+                dtsc = cflmx*vol1_f(k)/ (squ(k) + sqi(k))
                 if (dtsc < dts) then
                    dts = dtsc  ; kkcflmx = k
                 endif
@@ -3327,7 +3349,7 @@ end subroutine setdt
              call getkbotktop(kk,kb,kt)
              do k = kb,kt
                 if (squ2d(k) > eps10) then
-                   dtsc = cflmx*vol1(k)/squ2d(k)         ! outflow or outflow+inflow
+                   dtsc = cflmx*vol1_f(k)/squ2d(k)         ! outflow or outflow+inflow
                    if (dtsc < dts) then
                        dts = dtsc ; kkcflmx = kk ; kcflmx = k
                    endif
@@ -3352,8 +3374,8 @@ end subroutine setdt
              call getkbotktop(kk,kb,kt)
              do k=kb,kt
                    if ( squ(k).gt.eps10 .or. sqi(k).gt.eps10 ) then
-!                      dtsc = cflmx*vol1(k)/squ(k)
-                      dtsc = cflmx*vol1(k)/max(squ(k),sqi(k))
+!                      dtsc = cflmx*vol1_f(k)/squ(k)
+                      dtsc = cflmx*vol1_f(k)/max(squ(k),sqi(k))
                    if ( dtsc.lt.dts ) then
                       dts     = dtsc ; kkcflmx = kk
                    endif
@@ -3372,12 +3394,12 @@ end subroutine setdt
           if ( hs(kk).gt.epshu ) then
              dtsc2D = dt_max
              if ( squ(kk).gt.eps10 ) then
-                dtsc2D = cflmx*vol1(kk)/squ(kk)
+                dtsc2D = cflmx*vol1_f(kk)/squ(kk)
              endif
              call getkbotktop(kk,kb,kt)
              do k=kb,kt
                 if ( sqi(k).gt.eps10 ) then
-                   dtsc = cflmx*vol1(k)/sqi(k)
+                   dtsc = cflmx*vol1_f(k)/sqi(k)
                    dtsc = min(dtsc, dtsc2D)
                    if ( dtsc.lt.dts ) then
                       dts     = dtsc ; kkcflmx = kk
@@ -3416,7 +3438,7 @@ end subroutine setdt
              call getkbotktop(kk,kb,kt)
              do k = kb,kt
                 if ( squ(k).gt.eps10 ) then
-                   dtsc = cflmx*vol1(k)/ ( squ(k) + sqi(k) )
+                   dtsc = cflmx*vol1_f(k)/ ( squ(k) + sqi(k) )
                    if ( dtsc.lt.dts ) then
                       dts = dtsc  ; kkcflmx = kk
                    endif
@@ -3436,7 +3458,7 @@ end subroutine setdt
              call getkbotktop(kk,kb,kt)
              do k=kb,max(kb, kt-1)
                 if ( squ(k).gt.eps10 ) then
-                   dtsc = cflmx*vol1(k)/squ(k)
+                   dtsc = cflmx*vol1_f(k)/squ(k)
                    if ( dtsc.lt.dts ) then
                       dts     = dtsc ; kkcflmx = kk
                    endif
@@ -3461,11 +3483,11 @@ end subroutine setdt
                     dxiAu = dxi(L)*hu(L)*wu(L)
                     !   dt <  vol / dxiAu / N / vicL   ! see Tech Ref.: Limitation of Viscosity Coefficient
                     if ( dxiAu.gt.0d0 .and. vicLu(L).gt.0d0) then
-                        if (vol1(k1).gt.0d0) then
-                           dtsvisc = min(dtsvisc,0.2d0*vol1(k1)/dxiAu)
+                        if (vol1_f(k1).gt.0d0) then
+                           dtsvisc = min(dtsvisc,0.2d0*vol1_f(k1)/dxiAu)
                         end if     
-                        if (vol1(k2).gt.0d0) then
-                           dtsvisc = min(dtsvisc,0.2d0*vol1(k2)/dxiAu)
+                        if (vol1_f(k2).gt.0d0) then
+                           dtsvisc = min(dtsvisc,0.2d0*vol1_f(k2)/dxiAu)
                         end if     
                         if ( dtsvisc.lt.dts ) then
                            dts     = dtsvisc ; kkcflmx = k1
@@ -3488,11 +3510,11 @@ end subroutine setdt
                     dxiAu = dxi(L)*hu(L)*wu(L)
                     !   dt <  vol / dxiAu / N / vicL   ! see Tech Ref.: Limitation of Viscosity Coefficient
                     if ( dxiAu.gt.0d0 .and. vicLu(L).gt.0d0) then
-                        if (vol1(k1).gt.0d0) then
-                           dtsvisc = min(dtsvisc,0.2d0*vol1(k1)/dxiAu)
+                        if (vol1_f(k1).gt.0d0) then
+                           dtsvisc = min(dtsvisc,0.2d0*vol1_f(k1)/dxiAu)
                         end if     
-                        if (vol1(k2).gt.0d0) then
-                           dtsvisc = min(dtsvisc,0.2d0*vol1(k2)/dxiAu)
+                        if (vol1_f(k2).gt.0d0) then
+                           dtsvisc = min(dtsvisc,0.2d0*vol1_f(k2)/dxiAu)
                         end if                             
                         if ( dtsvisc.lt.dts ) then
                            dts     = dtsvisc ; kkcflmx = k1
@@ -3545,14 +3567,14 @@ end subroutine setdt
 ! if (jatimestepanalysis == 1) then
 !    if (mout == 0) then
 !       call newfil(mout, trim(md_ident)//'.steps')
-!       write(mout, '(A)')  'time0/60, dts, dtsc, kkcflmx, kcflmx-kbot(kkcflmx)+1, vol1(kcflmx), squ2D(kcflmx), squ(kcflmx), sqi(kcflmx) '
+!       write(mout, '(A)')  'time0/60, dts, dtsc, kkcflmx, kcflmx-kbot(kkcflmx)+1, vol1_f(kcflmx), squ2D(kcflmx), squ(kcflmx), sqi(kcflmx) '
 !    endif
 !    if (kkcflmx > 0) then
 !       if (kcflmx == 0) kcflmx = kkcflmx
 !       if (ja_timestep_auto == 3 .or. ja_timestep_auto == 4 ) then
-!          write(mout, '(3F14.4,2I8,4F14.4)')  time0/60d0, dts, dtsc, kkcflmx, kcflmx-kbot(kkcflmx)+1, vol1(kcflmx), squ2D(kcflmx), squ(kcflmx), sqi(kcflmx)
+!          write(mout, '(3F14.4,2I8,4F14.4)')  time0/60d0, dts, dtsc, kkcflmx, kcflmx-kbot(kkcflmx)+1, vol1_f(kcflmx), squ2D(kcflmx), squ(kcflmx), sqi(kcflmx)
 !       else
-!          write(mout, '(3F14.4,2I8,4F14.4)')  time0/60d0, dts, dtsc, kkcflmx, kcflmx-kbot(kkcflmx)+1, vol1(kcflmx), squ  (kcflmx), squ(kcflmx), sqi(kcflmx)
+!          write(mout, '(3F14.4,2I8,4F14.4)')  time0/60d0, dts, dtsc, kkcflmx, kcflmx-kbot(kkcflmx)+1, vol1_f(kcflmx), squ  (kcflmx), squ(kcflmx), sqi(kcflmx)
 !       endif
 !    else
 !       write(mout, '(3F14.4, I8)')         time0/60d0, dts, dtsc, kkcflmx
@@ -3586,14 +3608,14 @@ end subroutine setdt
     if (jatimestepanalysis == 1) then
        if (mout == 0) then
           call newfil(mout, trim(md_ident)//'.steps')
-          write(mout, '(A)')  'time0/60, dts, dtsc, kkcflmx, kcflmx-kbot(kkcflmx)+1, vol1(kcflmx), squ2D(kcflmx), squ(kcflmx), sqi(kcflmx) '
+          write(mout, '(A)')  'time0/60, dts, dtsc, kkcflmx, kcflmx-kbot(kkcflmx)+1, vol1_f(kcflmx), squ2D(kcflmx), squ(kcflmx), sqi(kcflmx) '
        endif
        if (kkcflmx > 0) then
           if (kcflmx == 0) kcflmx = kkcflmx
           if (ja_timestep_auto == 3 .or. ja_timestep_auto == 4 ) then
-             write(mout, '(3F14.4,2I8,4F14.4)')  time0/60d0, dts, dtsc, kkcflmx, kcflmx-kbot(kkcflmx)+1, vol1(kcflmx), squ2D(kcflmx), squ(kcflmx), sqi(kcflmx)
+             write(mout, '(3F14.4,2I8,4F14.4)')  time0/60d0, dts, dtsc, kkcflmx, kcflmx-kbot(kkcflmx)+1, vol1_f(kcflmx), squ2D(kcflmx), squ(kcflmx), sqi(kcflmx)
           else
-             write(mout, '(3F14.4,2I8,4F14.4)')  time0/60d0, dts, dtsc, kkcflmx, kcflmx-kbot(kkcflmx)+1, vol1(kcflmx), squ  (kcflmx), squ(kcflmx), sqi(kcflmx)
+             write(mout, '(3F14.4,2I8,4F14.4)')  time0/60d0, dts, dtsc, kkcflmx, kcflmx-kbot(kkcflmx)+1, vol1_f(kcflmx), squ  (kcflmx), squ(kcflmx), sqi(kcflmx)
           endif
        else
           write(mout, '(3F14.4, I8)')         time0/60d0, dts, dtsc, kkcflmx
@@ -3931,7 +3953,7 @@ end subroutine setdt
        else if (u0(L) > 0) then
            iadvL = 0                                 ! switch off advection for inflowing waterlevel bnd's, if not normalvelocitybnds
        endif
-       !vol1(k1) = 0d0
+       !vol1_f(k1) = 0d0
     endif
 
     if (iadvL == 33) then                       !
@@ -3945,9 +3967,9 @@ end subroutine setdt
        endif
 
        if (jarhoxu == 0) then
-          volu  = acl(L)*vol1(k1) + (1d0-acl(L))*vol1(k2)
+          volu  = acl(L)*vol1_f(k1) + (1d0-acl(L))*vol1_f(k2)
        else
-          volu  = acl(L)*vol1(k1)*rho(k1) + (1d0-acl(L))*vol1(k2)*rho(k2)
+          volu  = acl(L)*vol1_f(k1)*rho(k1) + (1d0-acl(L))*vol1_f(k2)*rho(k2)
        endif
 
        if (volu > 0) then
@@ -3965,36 +3987,36 @@ end subroutine setdt
 
     else if (iadvL == 44) then                       !
 
-       if (vol1(k1) > 0) then
+       if (vol1_f(k1) > 0) then
           if (jasfer3D == 1) then 
              qu1   = csu(L)*nod2linx(L,1,uqcx(k1),uqcy(k1)) + snu(L)*nod2liny(L,1,uqcx(k1),uqcy(k1)) - u1(L)*sqa(k1)
           else
              qu1   = csu(L)*uqcx(k1) + snu(L)*uqcy(k1) - u1(L)*sqa(k1)
           endif 
-          advel = advel + acl(L)*qu1/vol1(k1)
+          advel = advel + acl(L)*qu1/vol1_f(k1)
        endif
-       if (vol1(k2) > 0) then
+       if (vol1_f(k2) > 0) then
           if (jasfer3D == 1) then 
              qu2   = csu(L)*nod2linx(L,2,uqcx(k2),uqcy(k2)) + snu(L)*nod2liny(L,2,uqcx(k2),uqcy(k2)) - u1(L)*sqa(k2)
           else
              qu2   = csu(L)*uqcx(k2) + snu(L)*uqcy(k2) - u1(L)*sqa(k2)
           endif
-          advel = advel +  (1d0-acl(L))*qu2 / vol1(k2)
+          advel = advel +  (1d0-acl(L))*qu2 / vol1_f(k2)
        endif
 
     else if (iadvL == 3) then                             ! explicit first order mom conservative
                                                      ! based upon cell center excess advection velocity
        qu1 = 0                                       ! and Perot control volume
-       if (vol1(k1) > 0) then
+       if (vol1_f(k1) > 0) then
           qu1 = QucPer(1,L)                          ! excess momentum in/out u(L) dir. from k1
           qu1 = qu1*acl(L)                           ! Perot weigthing
        endif
        qu2 = 0
-       if (vol1(k2) > 0) then
+       if (vol1_f(k2) > 0) then
           qu2 = QucPer(2,L)                          ! excess momentum in/out u(L) dir. from k2
           qu2 = qu2*(1d0-acl(L))                     ! Perot weigthing
        endif
-       volu  = acl(L)*vol1(k1) + (1d0-acl(L))*vol1(k2)
+       volu  = acl(L)*vol1_f(k1) + (1d0-acl(L))*vol1_f(k2)
        if (volu > 0) then
           advel = (qu1 + qu2)/volu                   ! dimension: ((m4/s2) / m3) =   (m/s2)
        endif
@@ -4016,14 +4038,14 @@ end subroutine setdt
     else if (iadvL == 30) then                       ! Same as 3, now with alfa = 0.5 in volumes and advection
                                                      ! based upon cell center excess advection velocity
        qu1 = 0
-       if (vol1(k1) > 0) then
+       if (vol1_f(k1) > 0) then
           qu1 = QucPer(1,L)                          ! excess momentum in/out u(L) dir. from k1
        endif
        qu2 = 0
-       if (vol1(k2) > 0) then
+       if (vol1_f(k2) > 0) then
           qu2 = QucPer(2,L)                          ! excess momentum in/out u(L) dir. from k2
        endif
-       volu  = vol1(k1) + vol1(k2)
+       volu  = vol1_f(k1) + vol1_f(k2)
        if (volu > 0) then
           advel = (qu1 + qu2)/volu                   ! dimension: ((m4/s2) / m3) =   (m/s2)
        endif
@@ -4059,7 +4081,7 @@ end subroutine setdt
                                                      ! and Wenneker control volume, now with
                                                      ! uqcx and uqcy arrays instead of function call, (much faster than excess form)
 
-        volu      = vol1(k1) + vol1(k2)              ! Wennekers control volume
+        volu      = vol1_f(k1) + vol1_f(k2)              ! Wennekers control volume
                                                      ! qu1     = ( uqcx(k1)*cs + uqcy(k1)*sn )
                                                      ! qu2     = ( uqcx(k2)*cs + uqcy(k2)*sn )
        if (volu   > 0) then
@@ -4076,7 +4098,7 @@ end subroutine setdt
 
     else if (iadvL == 2) then                        ! explicit first order mom conservative
                                                      ! based upon cell center excess advection velocity
-       volu     = vol1(k1) + vol1(k2)                ! Wennekers control volume
+       volu     = vol1_f(k1) + vol1_f(k2)                ! Wennekers control volume
        if (volu > 0) then
           qu1   = QucWen(1,L)                        ! excess momentum in u(L) dir. out of k1
           qu2   = QucWen(2,L)                        ! out of k2
@@ -4086,17 +4108,17 @@ end subroutine setdt
    else if (iadvL == 4) then                         ! explicit first order mom conservative
 
        qu1 = 0                                       ! and Perot control volume
-       if (vol1(k1) > 0) then
+       if (vol1_f(k1) > 0) then
           qu1 = QucPeri(1,L)                         ! excess momentum in u(L) dir. from of k1
           qu1 = qu1*acl(L)                           ! Perot weigthing
        endif
        qu2 = 0
-       if (vol1(k2) > 0) then
+       if (vol1_f(k2) > 0) then
           qu2 = QucPeri(2,L)                         ! excess momentum in u(L) dir. from of k2
           qu2 = qu2*(1d0-acl(L))                     ! Perot weigthing
        endif
 
-       volu  = acl(L)*vol1(k1) + (1d0-acl(L))*vol1(k2)
+       volu  = acl(L)*vol1_f(k1) + (1d0-acl(L))*vol1_f(k2)
        if (volu > 0) then
           advel = (qu1 + qu2)/volu                   ! dimension: ((m4/s2) / m3) =   (m/s2)
        endif
@@ -4104,17 +4126,17 @@ end subroutine setdt
     else if (iadvL == 5 .or. iadvL ==6) then         ! 5,6 = advection like 3,4, now Piaczek teta
 
 
-       volu = acl(L)*vol1(k1) + (1d0-acl(L))*vol1(k2)
+       volu = acl(L)*vol1_f(k1) + (1d0-acl(L))*vol1_f(k2)
 
        if (volu > 0) then
           volui = 1d0/volu
-          if (vol1(k1) > 0) then
+          if (vol1_f(k1) > 0) then
              call QucPeripiaczekteta(1,L,ai,ae,volu,iadvL-2)   ! excess momentum in u(L) dir. out of k1, include own
              abh     = acl(L)*volui
              adveL   = adveL   + abh*ae
              advi(L) = advi(L) + abh*ai
           endif
-          if (vol1(k2) > 0) then
+          if (vol1_f(k2) > 0) then
              call QucPeripiaczekteta(2,L,ai,ae,volu,iadvL-2)   ! excess momentum in u(L) dir. out of k2
              abh = (1d0-acl(L))*volui
              adveL   = adveL   + abh*ae
@@ -4130,7 +4152,7 @@ end subroutine setdt
           iad = 4
        endif
 
-       volu = acl(L)*vol1(k1) + (1d0-acl(L))*vol1(k2)
+       volu = acl(L)*vol1_f(k1) + (1d0-acl(L))*vol1_f(k2)
 
        if (volu > 0) then
           volui = 1d0/volu
@@ -4187,12 +4209,12 @@ end subroutine setdt
     else if (iadvL == 38) then                       ! explicit first order mom conservative olga (17)
                                                      ! based upon cell center excess advection velocity
        qu1 = 0                                       ! and Perot control volume
-       if (vol1(k1) > 0) then
+       if (vol1_f(k1) > 0) then
           qu1 = QucPercu(1,L)                        ! excess momentum in/out uc(k1) dir. from k1
           qu1 = qu1*acl(L)/volau(k1)                 ! Perot weigthing
        endif
        qu2 = 0
-       if (vol1(k2) > 0) then
+       if (vol1_f(k2) > 0) then
           qu2 = QucPercu(2,L)                        ! excess momentum in/out uc(k2) dir. from k2
           qu2 = qu2*(1d0-acl(L))/volau(k2)           ! Perot weigthing
        endif
@@ -4201,12 +4223,12 @@ end subroutine setdt
     else if (iadvL == 34) then                       ! explicit first order mom conservative (stelling kramer)
                                                      ! based upon cell center excess advection velocity
        qu1 = 0                                       ! and Perot control volume
-       if (vol1(k1) > 0) then
+       if (vol1_f(k1) > 0) then
           qu1 = QucPer(1,L)                          ! excess momentum in/out u(L) dir. from k1
           qu1 = qu1*acl(L)*bai(k1)                   ! Perot weigthing
        endif
        qu2 = 0
-       if (vol1(k2) > 0) then
+       if (vol1_f(k2) > 0) then
           qu2 = QucPer(2,L)                          ! excess momentum in/out u(L) dir. from k2
           qu2 = qu2*(1d0-acl(L))*bai(k2)             ! Perot weigthing
        endif
@@ -4215,16 +4237,16 @@ end subroutine setdt
     else if (iadvL == 35) then                       ! explicit first order mom conservative (stelling kramer)
                                                      ! based upon cell center excess advection velocity
        qu1 = 0                                       ! and Perot control volume
-       if (vol1(k1) > 0) then
+       if (vol1_f(k1) > 0) then
           qu1 = QufPer(1,L)                          ! excess momentum in/out u(L) dir. from k1
           qu1 = qu1*acl(L)                           ! Perot weigthing
        endif
        qu2 = 0
-       if (vol1(k2) > 0) then
+       if (vol1_f(k2) > 0) then
           qu2 = QufPer(2,L)                          ! excess momentum in/out u(L) dir. from k2
           qu2 = qu2*(1d0-acl(L))                     ! Perot weigthing
        endif
-       volu  = acl(L)*vol1(k1) + (1d0-acl(L))*vol1(k2)
+       volu  = acl(L)*vol1_f(k1) + (1d0-acl(L))*vol1_f(k2)
        if (volu > 0) then
           advel = (qu1 + qu2)/volu                   ! dimension: ((m4/s2) / m3) =   (m/s2)
        endif
@@ -4232,24 +4254,24 @@ end subroutine setdt
     else if (iadvL == 36) then                       ! explicit first order mom conservative
                                                      ! based upon cell center excess advection velocity
        qu1 = 0                                       ! and Perot control volume
-       if (vol1(k1) > 0) then
+       if (vol1_f(k1) > 0) then
           qu1 = QucPerq1(1,L)                        ! excess momentum in/out uc(k1) dir. from k1
-          qu1 = qu1*acl(L)/vol1(k1)                  ! Perot weigthing
+          qu1 = qu1*acl(L)/vol1_f(k1)                  ! Perot weigthing
        endif
        qu2 = 0
-       if (vol1(k2) > 0) then
+       if (vol1_f(k2) > 0) then
           qu2 = QucPerq1(2,L)                        ! excess momentum in/out uc(k2) dir. from k2
-          qu2 = qu2*(1d0-acl(L))/vol1(k2)            ! Perot weigthing
+          qu2 = qu2*(1d0-acl(L))/vol1_f(k2)            ! Perot weigthing
        endif
        advel = qu1 + qu2                             ! dimension: ((m4/s2) / m3) =   (m/s2)
 
     else if (iadvL == 37) then                       ! Kramer Stelling
        qu1 = 0d0
-       if (vol1(k1) > 0) then
+       if (vol1_f(k1) > 0) then
           qu1 = acl(L)*QucPerq1(1,L)/ba(k1)          ! excess momentum in/out u(L) dir. from k1
        endif
        qu2 = 0d0
-       if (vol1(k2) > 0) then
+       if (vol1_f(k2) > 0) then
           qu2 = (1d0-acl(L))*QucPerq1(2,L)/ba(k2)    ! excess momentum in/out u(L) dir. from k1
        endif
        advel = huvli(L)*(qu1 + qu2)
@@ -4290,17 +4312,17 @@ end subroutine setdt
              advel = 0d0                                      ! advi (1/s), adve (m/s2)
              k1    = ln(1,L) ; k2 = ln(2,L)
              qu1   = 0d0
-             if (vol1(k1) > 0) then
+             if (vol1_f(k1) > 0) then
                 qu1 = quk1(1,L-Lb+1)*ac1                      ! Perot weigthing
              endif
              qu2    = 0d0
-             if (vol1(k2) > 0) then
+             if (vol1_f(k2) > 0) then
                 qu2 = quk2(1,L-Lb+1)*ac2                      ! Perot weigthing
              endif
              if (jarhoxu > 0) then
-                volu  = ac1*vol1(k1)*rho(k1) + ac2*vol1(k2)*rho(k2)
+                volu  = ac1*vol1_f(k1)*rho(k1) + ac2*vol1_f(k2)*rho(k2)
              else
-                volu  = ac1*vol1(k1)         + ac2*vol1(k2)
+                volu  = ac1*vol1_f(k1)         + ac2*vol1_f(k2)
              endif
              if (volu > 0) then
                 advel = (qu1 + qu2)/volu                      ! dimension: ((m4/s2) / m3) =   (m/s2)
@@ -4313,7 +4335,7 @@ end subroutine setdt
 
           ! qu1   = csu(L)*uqcx(k1) + snu(L)*uqcy(k1) - u1(L)*sqa(k1)
           ! qu2   = csu(L)*uqcx(k2) + snu(L)*uqcy(k2) - u1(L)*sqa(k2)
-          ! volu  = ac1*vol1(k1)    + ac2*vol1(k2)
+          ! volu  = ac1*vol1_f(k1)    + ac2*vol1_f(k2)
           ! if (volu > 0) then
           !    advel = (acl(L)*qu1 + (1d0-acl(L))*qu2) / volu
           ! endif
@@ -4355,9 +4377,9 @@ end subroutine setdt
                 endif
                    
                 if (jarhoxu > 0) then
-                   volu  = ac1*vol1(k1)*rho(k1) + ac2*vol1(k2)*rho(k2)
+                   volu  = ac1*vol1_f(k1)*rho(k1) + ac2*vol1_f(k2)*rho(k2)
                 else
-                   volu  = ac1*vol1(k1)         + ac2*vol1(k2)
+                   volu  = ac1*vol1_f(k1)         + ac2*vol1_f(k2)
                 endif
          
                 if (volu > 0) then
@@ -4384,23 +4406,23 @@ end subroutine setdt
              do L = Lb, Lt
                 k1    = ln(1,L) ; k2 = ln(2,L)
                 if (jarhoxu > 0) then
-                   volukk(L-Lb+1)  = volukk(L-Lb+1) + ac1*vol1(k1)*rho(k1) + ac2*vol1(k2)*rho(k2)
+                   volukk(L-Lb+1)  = volukk(L-Lb+1) + ac1*vol1_f(k1)*rho(k1) + ac2*vol1_f(k2)*rho(k2)
                 else
-                   volukk(L-Lb+1)  = volukk(L-Lb+1) + ac1*vol1(k1) + ac2*vol1(k2)
+                   volukk(L-Lb+1)  = volukk(L-Lb+1) + ac1*vol1_f(k1) + ac2*vol1_f(k2)
                 endif
              enddo
              do k = k1+1, ktop(ln(1,LL) )
                 if (jarhoxu > 0) then
-                   volukk(Lt-Lb+1) = volukk(Lt-Lb+1) + ac1*vol1(k)*rho(k)
+                   volukk(Lt-Lb+1) = volukk(Lt-Lb+1) + ac1*vol1_f(k)*rho(k)
                 else
-                   volukk(Lt-Lb+1) = volukk(Lt-Lb+1) + ac1*vol1(k)
+                   volukk(Lt-Lb+1) = volukk(Lt-Lb+1) + ac1*vol1_f(k)
                 endif
              enddo
              do k = k2+1, ktop(ln(2,LL) )
                 if (jarhoxu > 0) then
-                   volukk(Lt-Lb+1) = volukk(Lt-Lb+1) + ac2*vol1(k)*rho(k)
+                   volukk(Lt-Lb+1) = volukk(Lt-Lb+1) + ac2*vol1_f(k)*rho(k)
                 else
-                   volukk(Lt-Lb+1) = volukk(Lt-Lb+1) + ac2*vol1(k)
+                   volukk(Lt-Lb+1) = volukk(Lt-Lb+1) + ac2*vol1_f(k)
                 endif
              enddo
 
@@ -4440,15 +4462,15 @@ end subroutine setdt
 
              do L = Lb, Lt
                 k1    = ln(1,L) ; k2 = ln(2,L) ; L1 = L-Lb+1
-                volukk(L1) = volukk(L1) + ac1*vol1(k1) + ac2*vol1(k2)
+                volukk(L1) = volukk(L1) + ac1*vol1_f(k1) + ac2*vol1_f(k2)
              enddo
 
              do k = k1+1, kt1
-                volukk(Ltx) = volukk(Ltx) + ac1*vol1(k)
+                volukk(Ltx) = volukk(Ltx) + ac1*vol1_f(k)
              enddo
 
              do k = k2+1, kt2
-                volukk(Ltx) = volukk(Ltx) + ac2*vol1(k)
+                volukk(Ltx) = volukk(Ltx) + ac2*vol1_f(k)
              enddo
 
              do L = Lb, Lt
@@ -4479,7 +4501,7 @@ end subroutine setdt
 
              volk1(0) = 0d0 ; quuk1(0) = 0d0 ; sqak1(0) = 0d0 ; sigk1(0) = 0d0
              do k = kb1, kt1
-                volk1(k-kb1+1) = volk1(k-kb1) + vol1(k)
+                volk1(k-kb1+1) = volk1(k-kb1) + vol1_f(k)
                 if (jasfer3D == 1) then 
                    quuk1(k-kb1+1) = quuk1(k-kb1) + cs*nod2linx(LL,1,uqcx(k),uqcy(k)) + sn*nod2liny(LL,1,uqcx(k),uqcy(k))
                 else 
@@ -4491,7 +4513,7 @@ end subroutine setdt
 
              volk2(0) = 0d0 ; quuk2(0) = 0d0 ; sqak2(0) = 0d0 ; sigk2(0) = 0d0
              do k = kb2, kt2
-                volk2(k-kb2+1) = volk2(k-kb2) + vol1(k)
+                volk2(k-kb2+1) = volk2(k-kb2) + vol1_f(k)
                 if (jasfer3D == 1) then
                    quuk2(k-kb2+1) = quuk2(k-kb2) + cs*nod2linx(LL,2,uqcx(k),uqcy(k)) + sn*nod2liny(LL,2,uqcx(k),uqcy(k))
                 else
@@ -4543,7 +4565,7 @@ end subroutine setdt
              volukk(1:Ltx) = 0d0 ; quuk1(1:Ltx) = 0d0 ; sqak1(1:Ltx) = 0d0
 
              do k = kb1, ln(1,Lb) - 1                   ! below Lb n1
-                volukk(1) = volukk(1)     + ac1*vol1(k)
+                volukk(1) = volukk(1)     + ac1*vol1_f(k)
                 if (jasfer3D == 1) then 
                    quuk1(1) = quuk1(1) + ac1*(cs*nod2linx(LL,1,uqcx(k),uqcy(k)) + sn*nod2liny(LL,1,uqcx(k),uqcy(k)))
                 else
@@ -4553,7 +4575,7 @@ end subroutine setdt
              enddo
 
              do k = kb2, ln(2,Lb) - 1                   ! below Lb n2
-                volukk(1) = volukk(1)     + ac2*vol1(k)
+                volukk(1) = volukk(1)     + ac2*vol1_f(k)
                 if (jasfer3D == 1) then 
                    quuk1(1) = quuk1(1) + ac2*(cs*nod2linx(LL,2,uqcx(k),uqcy(k)) + sn*nod2liny(LL,2,uqcx(k),uqcy(k)))
                 else
@@ -4564,7 +4586,7 @@ end subroutine setdt
 
              do L = Lb, Lt                              ! intermediate
                 k1    = ln(1,L) ; k2 = ln(2,L) ; L1 = L-Lb+1
-                volukk(L1) = volukk(L1) + ac1*vol1(k1)                    + ac2*vol1(k2)
+                volukk(L1) = volukk(L1) + ac1*vol1_f(k1)                    + ac2*vol1_f(k2)
                 if (jasfer3D == 1) then 
                    quuk1 (L1) = quuk1(L1) + ac1*(cs*nod2linx(LL,1,uqcx(k1),uqcy(k1)) + sn*nod2liny(LL,1,uqcx(k1),uqcy(k1))) +   &
                                             ac2*(cs*nod2linx(LL,2,uqcx(k2),uqcy(k2)) + sn*nod2liny(LL,2,uqcx(k2),uqcy(k2)))
@@ -4575,7 +4597,7 @@ end subroutine setdt
              enddo
 
              do k = k1+1, ktx1                          ! above Lt n1
-                volukk(Ltx) = volukk(Ltx) + ac1*vol1(k)
+                volukk(Ltx) = volukk(Ltx) + ac1*vol1_f(k)
                 if (jasfer3D == 1) then 
                    quuk1 (Ltx) = quuk1(Ltx)  + ac1*(cs*nod2linx(LL,1,uqcx(k),uqcy(k)) + sn*nod2liny(LL,1,uqcx(k),uqcy(k)))
                 else   
@@ -4585,7 +4607,7 @@ end subroutine setdt
              enddo
 
              do k = k2+1, ktx2                          ! above Lt n2
-                volukk(Ltx) = volukk(Ltx) + ac2*vol1(k)
+                volukk(Ltx) = volukk(Ltx) + ac2*vol1_f(k)
                 if (jasfer3D == 1) then
                    quuk1 (Ltx) = quuk1(Ltx)  + ac2*(cs*nod2linx(LL,2,uqcx(k),uqcy(k)) + sn*nod2liny(LL,2,uqcx(k),uqcy(k)))
                 else
@@ -4617,11 +4639,11 @@ end subroutine setdt
              advel = 0                                        ! advi (1/s), adve (m/s2)
              k1    = ln(1,L) ; k2 = ln(2,L)
              qu1   = 0d0
-             if (vol1(k1) > 0) then
+             if (vol1_f(k1) > 0) then
                 qu1 = quk1(1,L-Lb+1)*ac1*baik1
              endif
              qu2    = 0
-             if (vol1(k2) > 0) then
+             if (vol1_f(k2) > 0) then
                 qu2 = quk2(1,L-Lb+1)*ac2*baik2            ! Perot weigthing
              endif
              huvL    = ac1*(zws(k1)-zws(k1-1)) + ac2*(zws(k2)-zws(k2-1))
@@ -4644,21 +4666,21 @@ end subroutine setdt
 
             do L = Lb, Lt
                k1    = ln(1,L) ; k2 = ln(2,L)
-               if (vol1(k1) > 0) then
+               if (vol1_f(k1) > 0) then
                   if (jasfer3D == 1) then 
                      qu1     = cs*nod2linx(LL,1,uqcx(k1),uqcy(k1)) + sn*nod2liny(LL,1,uqcx(k1),uqcy(k1)) - u1(L)*sqa(k1)
                   else
                      qu1     = cs*uqcx(k1)  + sn*uqcy(k1) - u1(L)*sqa(k1)
                   endif
-                  adve(L) = adve(L) + ac1*qu1/vol1(k1)
+                  adve(L) = adve(L) + ac1*qu1/vol1_f(k1)
                endif
-               if (vol1(k2) > 0) then
+               if (vol1_f(k2) > 0) then
                   if (jasfer3D == 1) then 
                      qu2    =  cs*nod2linx(LL,2,uqcx(k2),uqcy(k2)) + sn*nod2liny(LL,2,uqcx(k2),uqcy(k2)) - u1(L)*sqa(k2)
                   else
                      qu2     = cs*uqcx(k2)  + sn*uqcy(k2) - u1(L)*sqa(k2)
                   endif
-                  adve(L) = adve(L) + ac2*qu2/vol1(k2)
+                  adve(L) = adve(L) + ac2*qu2/vol1_f(k2)
                endif
             enddo
 
@@ -5386,7 +5408,7 @@ if (ihorvic > 0 .or. NDRAW(29) == 37) then
              if (ja_timestep_auto_diff == 0) then 
                 dxiAu = dxi(L)*hu(L)*wu(L)
                 if ( dxiAu.gt.0d0 ) then
-                   vicL = min(vicL, 0.2d0*dti*min( vol1(k1) , vol1(k2) )  / dxiAu )  ! see Tech Ref.: Limitation of Viscosity Coefficient
+                   vicL = min(vicL, 0.2d0*dti*min( vol1_f(k1) , vol1_f(k2) )  / dxiAu )  ! see Tech Ref.: Limitation of Viscosity Coefficient
                 endif
              endif   
 
@@ -5505,7 +5527,7 @@ if (ihorvic > 0 .or. NDRAW(29) == 37) then
              if (ja_timestep_auto_diff == 0) then 
                 dxiAu = dxi(LL)*Au(L) 
                 if ( dxiAu.gt.0d0 ) then
-                   vicL = min(vicL, 0.2d0*dti*min( vol1(k1) , vol1(k2) )  / dxiAu )
+                   vicL = min(vicL, 0.2d0*dti*min( vol1_f(k1) , vol1_f(k2) )  / dxiAu )
                 endif
              endif   
 
@@ -7622,7 +7644,7 @@ end subroutine update_waqfluxes
 
           if ( qa(Lk) .ne. 0) then                          ! include own link
              k1   = ln(1,Lb+Lk-Lb2)  ;  k2 = ln(2,Lb+Lk-Lb2)
-             volu = acL(LL)*vol1(k1) + (1d0-acl(LL))*vol1(k2)
+             volu = acL(LL)*vol1_f(k1) + (1d0-acl(LL))*vol1_f(k2)
              if (volu > 0d0) then
                 cfl  = abs(qa(Lk))*dts/volu
                 if (nd(k12)%lnx ==3) cfl=1.4d0*cfl
@@ -8242,7 +8264,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  use m_vegetation
  use m_integralstats
  use m_xbeach_data, only: instat, newstatbc
- use m_oned_funcions
+ use m_oned_functions
  ! 
  ! To raise floating-point invalid, divide-by-zero, and overflow exceptions:
  ! Activate the following line (See also statements below)
@@ -11251,7 +11273,7 @@ else if (nodval == 27) then
     znod = dt_max
     do k = kbot(kk), ktop(kk)
        if (squ(k) > eps10) then
-          znod = min(znod, cflmx*vol1(k)/squ(k))
+          znod = min(znod, cflmx*vol1_f(k)/squ(k))
        endif
     enddo
 
@@ -12870,6 +12892,7 @@ endif
 
  
  vol0    = vol1
+ vol0_f  = vol1_f
 
 
  ! initial velocity in 3D (needs Lbot, Ltop)
@@ -20773,7 +20796,7 @@ end do
  kmxd = max(1,kmx)
 
  if (allocated (ucx) ) then
-    deallocate (ucx,ucy,ucxq,ucyq,qin,vih,dvxc,dvyc,cfli,squ,sqi,sq,vol0,vol1,volerror)
+    deallocate (ucx,ucy,ucxq,ucyq,qin,vih,dvxc,dvyc,cfli,squ,sqi,sq,vol0,vol1,vol0_f, vol1_f, volerror)
  endif
 
  if (allocated (squ2D)) then
@@ -20939,6 +20962,10 @@ endif
  call aerr('vol0(ndkx)', ierr, ndkx)                ; vol0 = 0
  allocate ( vol1(ndkx) , stat = ierr)
  call aerr('vol1(ndkx)', ierr, ndkx)                ; vol1 = 0
+ allocate ( vol0_f(ndkx) , stat = ierr)
+ call aerr('vol0_f(ndkx)', ierr, ndkx)                ; vol0_f = 0
+ allocate ( vol1_f(ndkx) , stat = ierr)
+ call aerr('vol1_f(ndkx)', ierr, ndkx)                ; vol1_f = 0
  allocate ( volerror(ndkx) , stat = ierr)
  call aerr('volerror(ndkx)', ierr,   ndx)           ; volerror = 0
 
@@ -30608,7 +30635,7 @@ end subroutine setbobs_fixedweirs
        do k = 1,ndx
           if (zsp(k) .ne. 0d0) then
              h1      = s1m(k) + zsp(k)
-             vol1(k) = vol1(k) - ba(k)*h1
+             vol1_f(k) = vol1_f(k) - ba(k)*h1
              a1m(k)  = ba(k)
           endif
        enddo
@@ -32433,10 +32460,10 @@ end subroutine setbobs_fixedweirs
           if (squ(k) > 0d0) then
              voldhu(k) = ba(k)*voldhu(k) / squ(k)
           else
-             voldhu(k) = vol1(k)
+             voldhu(k) = vol1_f(k)
           endif
        enddo
-       voldhu(ndxi+1:ndx) = vol1(ndxi+1:ndx)
+       voldhu(ndxi+1:ndx) = vol1_f(ndxi+1:ndx)
     endif
 
     if (jaqin > 0) then
@@ -32888,7 +32915,7 @@ if (jahisbal > 0) then
     endif
  end if
 
-
+ vol0_f  = vol1_f
  vol0    = vol1                                      ! array
 
  vol0tot = vol1tot                                   ! scalar
@@ -33463,8 +33490,8 @@ subroutine reconstructucz(k)
        do k1 = 1,ndxi
           call getkbotktop(k1,kb,kt)
           do kk = kb, kt
-             if (vol1(kk) > 0d0) then
-                ucz(kk) = ucz(kk)/vol1(kk)   ! divide by volume
+             if (vol1_f(kk) > 0d0) then
+                ucz(kk) = ucz(kk)/vol1_f(kk)   ! divide by volume
              endif
           end do
        end do
@@ -33527,8 +33554,8 @@ subroutine reconstructucz(k)
           end do
        end do
        do kk = kb, kt
-          if (vol1(kk) > 0) then
-             ucz(kk) = ucz(kk)/vol1(kk)   ! divide by volume
+          if (vol1_f(kk) > 0) then
+             ucz(kk) = ucz(kk)/vol1_f(kk)   ! divide by volume
           endif
        end do
 
@@ -36393,7 +36420,7 @@ subroutine update_verticalprofiles()
          do n = 1,ndxi
             call getkbotktop(n,kb,kt)
             do k = kb,kt
-               tttctot = tttctot + tttc(k)*vol1(k)
+               tttctot = tttctot + tttc(k)*vol1_f(k)
             enddo
          enddo
          ttqc = 0d0
@@ -37058,7 +37085,7 @@ subroutine update_verticalprofiles()
     qsrck = qsrc(n)
 
     if (kk > 0) then                    ! FROM Point
-       k = ksrc(2,n) ; dvoli = 1d0/max(vol1(k),dtol)
+       k = ksrc(2,n) ; dvoli = 1d0/max(vol1_f(k),dtol)
        if (qsrck > 0) then              ! FROM k to k2
           turkinepsws(1,k) = turkinepsws(1,k) - dts*qsrck*dvoli*turkinepsws(1,k)
        else if  (qsrck  < 0) then       ! FROM k2 to k
@@ -37067,7 +37094,7 @@ subroutine update_verticalprofiles()
     endif
 
     if (kk2 > 0) then                   ! TO Point
-       k = ksrc(5,n) ; dvoli = 1d0/max(vol1(k),dtol)
+       k = ksrc(5,n) ; dvoli = 1d0/max(vol1_f(k),dtol)
        if (qsrck > 0) then
           turkinepsws(1,k) = turkinepsws(1,k) + dts*qsrck*dvoli*0.5D0*(qsrck/arsrc(n))**2
        else if  (qsrck  < 0) then
@@ -38152,6 +38179,8 @@ end subroutine pipemin
  call chknan(dd        , 'dd       ', ndx)
  call chknan(vol0      , 'vol0     ', ndx)
  call chknan(vol1      , 'vol1     ', ndx)
+ call chknan(vol0_f    , 'vol0_f   ', ndx)
+ call chknan(vol1_f    , 'vol1_f   ', ndx)
  call chknan(au        , 'au       ', ndx)
  call chknan(ba        , 'ba       ', ndx)
  call chknan(a1        , 'a1       ', ndx)

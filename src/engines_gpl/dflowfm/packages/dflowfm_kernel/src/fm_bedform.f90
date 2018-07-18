@@ -266,7 +266,7 @@ subroutine fm_calbf()
     use m_physcoef, only: ag
     use m_flowtimes, only: dts, dnt, time1, tfac, dt_user
     use m_flowgeom, only: ndxi, lnxi, ndx, lnx, kfs, wcx1, wcx2,wcy1,wcy2, ln, wu, nd, ba
-    use m_flow, only: hs, hu, u1, v, au, vol1, plotlin
+    use m_flow, only: hs, hu, u1, v, au, plotlin
     use m_flowparameters, only: epshu, epshs
     use unstruc_files, only: mdia
     use m_alloc
@@ -963,7 +963,7 @@ end subroutine fm_calksc
 subroutine fm_advecbedform(thevar, uadv, qadv, bedform_sour, bedform_sink, limityp, ierror)
    use m_transport
    use m_flowgeom,   only: Ndx, Ndxi, Lnxi, Lnx, ln, nd, ba, wu  ! static mesh information
-   use m_flow,       only: Ndkx, Lnkx, au, qw, zws, kbot, ktop, Lbot, Ltop,  kmxn, kmxL, kmx, viu, vicwws, plotlin, vol1
+   use m_flow,       only: Ndkx, Lnkx, au, qw, zws, kbot, ktop, Lbot, Ltop,  kmxn, kmxL, kmx, viu, vicwws, plotlin, vol1_f
    use m_flowtimes,  only: dts, ja_timestep_auto
    use m_physcoef,   only: dicoww, vicouv, difmolsal
    use m_transport
@@ -1057,7 +1057,7 @@ subroutine fm_advecbedform(thevar, uadv, qadv, bedform_sour, bedform_sink, limit
    end do
       
    do k=1,Ndx
-      dvoli = 1d0/max(vol1(k),dtol)
+      dvoli = 1d0/max(vol1_f(k),dtol)
       const_sourbf(1,k) = bedform_sour(k) - thevar(1,k)*bfsq(k)*dvoli
       const_sinkbf(1,k) = bedform_sink(k)
    end do

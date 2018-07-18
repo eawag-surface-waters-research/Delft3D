@@ -318,7 +318,7 @@
 !> construct matrix for first-order upwind discretization of advection
    subroutine fillsystem_advec(ierror)
       use m_flowgeom
-      use m_flow, only : vol1, qa, Au
+      use m_flow, only : vol1_f, qa, Au
       use m_advec
       use m_alloc
       implicit none
@@ -401,12 +401,12 @@
             end if
             
 !           x-component
-            aC(ipoint)     = aC(ipoint)     + (idir*dfluxfac(2,LL) - (1-idir)*dfluxfac(1,LL))/vol1(kk)
-            ac(ipointdiag) = aC(ipointdiag) + (idir*dfluxfac(1,LL) - (1-idir)*dfluxfac(2,LL))/vol1(kk)
+            aC(ipoint)     = aC(ipoint)     + (idir*dfluxfac(2,LL) - (1-idir)*dfluxfac(1,LL))/vol1_f(kk)
+            ac(ipointdiag) = aC(ipointdiag) + (idir*dfluxfac(1,LL) - (1-idir)*dfluxfac(2,LL))/vol1_f(kk)
             
 !           y-component
-            aC(ipoint    +ishift) = aC(ipoint    +ishift) + (idir*dfluxfac(2,LL) - (1-idir)*dfluxfac(1,LL))/vol1(kk)
-            ac(ipointdiag+ishift) = aC(ipointdiag+ishift) + (idir*dfluxfac(1,LL) - (1-idir)*dfluxfac(2,LL))/vol1(kk)
+            aC(ipoint    +ishift) = aC(ipoint    +ishift) + (idir*dfluxfac(2,LL) - (1-idir)*dfluxfac(1,LL))/vol1_f(kk)
+            ac(ipointdiag+ishift) = aC(ipointdiag+ishift) + (idir*dfluxfac(1,LL) - (1-idir)*dfluxfac(2,LL))/vol1_f(kk)
          end do
          
 !        shift to y-component
