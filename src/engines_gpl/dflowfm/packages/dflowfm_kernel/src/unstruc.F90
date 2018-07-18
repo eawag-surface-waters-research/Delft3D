@@ -8458,6 +8458,7 @@ call flow_bedforminit(2)        ! bedforms  stage 2: parameter read and process
  endif                                               ! Generally flow_trachyupdate() is called from flow_setexternalforcings()
 
  call set_1d_roughnesses()
+ call set_1d_indices_in_network()
  call flow_initimestep(1, iresult)                   ! 1 also sets zws0
 
  call writesomeinitialoutput()
