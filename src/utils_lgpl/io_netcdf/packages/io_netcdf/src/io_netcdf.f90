@@ -1516,9 +1516,9 @@ function  ionc_read_1d_network_branches_geometry_ugrid(ioncid, networkid, geopoi
 end function ionc_read_1d_network_branches_geometry_ugrid
 
 
-function ionc_create_1d_mesh_ugrid(ioncid, networkname, meshid, meshname, nmeshpoints, nmeshedges) result(ierr)
+function ionc_create_1d_mesh_ugrid(ioncid, networkname, meshid, meshname, nmeshpoints) result(ierr)
 
-   integer, intent(in)         :: ioncid, nmeshpoints, nmeshedges
+   integer, intent(in)         :: ioncid, nmeshpoints
    integer, intent (inout)     :: meshid
    character(len=*),intent(in) :: meshname, networkname 
    integer                     :: ierr
@@ -1528,7 +1528,7 @@ function ionc_create_1d_mesh_ugrid(ioncid, networkname, meshid, meshname, nmeshp
    ! set the meshname
    datasets(ioncid)%ug_file%meshnames(meshid) = meshname
    ! create mesh
-   ierr = ug_create_1d_mesh(datasets(ioncid)%ncid, networkname, datasets(ioncid)%ug_file%meshids(meshid), meshname, nmeshpoints, nmeshedges)
+   ierr = ug_create_1d_mesh(datasets(ioncid)%ncid, networkname, datasets(ioncid)%ug_file%meshids(meshid), meshname, nmeshpoints)
   
 end function ionc_create_1d_mesh_ugrid
 
@@ -1542,14 +1542,14 @@ function ionc_def_mesh_ids_ugrid(ioncid, meshid, locationType) result(ierr)
 
 end function ionc_def_mesh_ids_ugrid
 
-function ionc_put_1d_mesh_discretisation_points_ugrid(ioncid, networkid, branchidx, offset, edgenodes, startIndex) result(ierr) 
+function ionc_put_1d_mesh_discretisation_points_ugrid(ioncid, networkid, branchidx, offset, startIndex) result(ierr) 
 
   integer, intent(in)         :: ioncid, networkid, startIndex  
-  integer, intent(in)         :: branchidx(:), edgenodes(:,:)
+  integer, intent(in)         :: branchidx(:)
   double precision,intent(in) :: offset(:)
   integer                     :: ierr
   
-  ierr=ug_put_1d_mesh_discretisation_points(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(networkid), branchidx, offset, edgenodes, startIndex)  
+  ierr=ug_put_1d_mesh_discretisation_points(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(networkid), branchidx, offset, startIndex)  
   
 end function ionc_put_1d_mesh_discretisation_points_ugrid
 

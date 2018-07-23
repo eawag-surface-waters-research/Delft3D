@@ -68,7 +68,7 @@ namespace General.tests
             {
                 prefix = @"\x64";
             }
-            path = path + @"\third_party_open\" + libName + @"\lib" + prefix + @"\" + NativeLibrary.mode + @"\ifort12";
+            path = path + @"\third_party_open\" + libName + @"\src" + prefix + @"\2005\libsrc\" + NativeLibrary.mode;
             var envpath = Environment.GetEnvironmentVariable("PATH");
             if (envpath != null && envpath.Contains(path)) return;
 

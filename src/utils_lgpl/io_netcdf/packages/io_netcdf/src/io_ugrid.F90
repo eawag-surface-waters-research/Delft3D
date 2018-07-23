@@ -1166,7 +1166,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
 
    else if (dim == 1 .and. present(ngeopointx) .and. associated(ngeopointx)) then !1d UGRID 1.6
       ierr = ug_create_1d_network(ncid, networkids, network1dname, size(nnodex), nbranches, ngeometry)
-      ierr = ug_create_1d_mesh(ncid, network1dname, meshids, meshname, numNode, numEdge)
+      ierr = ug_create_1d_mesh(ncid, network1dname, meshids, meshname, numNode)
       ierr = ug_def_mesh_ids(ncid, meshids, meshname, UG_LOC_NODE)
    endif
    
@@ -1358,7 +1358,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
          ierr = ug_put_1d_network_branchorder(ncid, networkids, nbranchorder)
          ierr = ug_write_1d_network_branches_geometry(ncid, networkids, ngeopointx, ngeopointy)
          ! write mesh
-         ierr = ug_put_1d_mesh_discretisation_points(ncid, meshids, branchidx, branchoffsets, edge_nodes, start_index)
+         ierr = ug_put_1d_mesh_discretisation_points(ncid, meshids, branchidx, branchoffsets, start_index)
       else
          ierr = nf90_put_var(ncid, meshids%varids(mid_edgenodes), edge_nodes, count=(/ 2, numEdge /))
       endif
@@ -3430,9 +3430,9 @@ function ug_create_1d_network(ncid, netids, networkName, nNodes, nBranches,nGeom
 end function ug_create_1d_network
 
 !> This function creates a 1d mesh accordingly to the new 1d format. 
-function ug_create_1d_mesh(ncid, networkname, meshids, meshname, nmeshpoints, nmeshedges) result(ierr)
+function ug_create_1d_mesh(ncid, networkname, meshids, meshname, nmeshpoints) result(ierr)
    
-   integer, intent(in)                  :: ncid, nmeshpoints, nmeshedges
+   integer, intent(in)                  :: ncid, nmeshpoints
    type(t_ug_mesh), intent(inout)       :: meshids   
    integer                              :: ierr
    character(len=*),intent(in)          :: meshname, networkname
@@ -3454,18 +3454,13 @@ function ug_create_1d_mesh(ncid, networkname, meshids, meshname, nmeshpoints, nm
    if ( ierr /= UG_NOERR) then 
          ierr  = nf90_def_dim(ncid, 'n'//prefix//'_node', nmeshpoints, meshids%dimids(mdim_node))
    endif
-   ierr = nf90_inq_dimid(ncid, 'n'//prefix//'_edge', meshids%dimids(mdim_edge))
-   if ( ierr /= UG_NOERR) then 
-      ierr  = nf90_def_dim(ncid, 'n'//prefix//'_edge', nmeshedges, meshids%dimids(mdim_edge))
-   endif
-   
+   ierr = nf90_inq_dimid(ncid, 'n'//prefix//'_edge', meshids%dimids(mdim_edge))   
    
    !define mesh1d accordingly to the UGRID format
    ierr = nf90_def_var(ncid, prefix, nf90_int, meshids%varids(mid_meshtopo))
    ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'cf_role','mesh_topology')
    ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'topology_dimension', 1)
    ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'coordinate_space',  trim(networkname))
-   ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'edge_dimension', 'n'//prefix//'_edge')
    ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'edge_node_connectivity', prefix//'_edge_nodes')
    ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'node_dimension','n'//prefix//'_node')
    ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'node_coordinates', prefix//'_nodes_branch_id '//prefix//'_nodes_branch_offset')
@@ -3476,10 +3471,6 @@ function ug_create_1d_mesh(ncid, networkname, meshids, meshname, nmeshpoints, nm
    ! 2. mesh1D :assign the the offset from the starting node
    ierr = nf90_def_var(ncid, prefix//'_nodes_branch_offset', nf90_double, (/ meshids%dimids(mdim_node) /) , meshids%varids(mid_1doffset))
    ierr = nf90_put_att(ncid, meshids%varids(mid_1doffset), 'long_name', 'Offset along the branch at which the node is located')
-   ! 3. mesh1D : write edge_node_connectivity
-   ierr = nf90_def_var(ncid, prefix//'_edge_nodes', nf90_int, (/ meshids%dimids(mdim_two), meshids%dimids(mdim_edge) /) , meshids%varids(mid_edgenodes))
-   ierr = nf90_put_att(ncid, meshids%varids(mid_edgenodes), 'cf_role', 'edge_node_connectivity')
-   ierr = nf90_put_att(ncid, meshids%varids(mid_edgenodes), 'long_name', 'maps every edge to the two nodes that it connects')
    
    ierr = nf90_enddef(ncid)
 
@@ -3826,9 +3817,9 @@ function ug_write_1d_network_branches_geometry(ncid,netids, geopointsX, geopoint
 end function ug_write_1d_network_branches_geometry
 
 !> This function writes the mesh points
-function ug_put_1d_mesh_discretisation_points(ncid, meshids, branchidx, offset, edgenodes, startIndex) result(ierr)
+function ug_put_1d_mesh_discretisation_points(ncid, meshids, branchidx, offset, startIndex) result(ierr)
 
-   integer, intent(in)                :: ncid, branchidx(:), edgenodes(:,:), startIndex
+   integer, intent(in)                :: ncid, branchidx(:), startIndex
    double precision, intent(in)       :: offset(:)
    type(t_ug_mesh), intent(in)        :: meshids 
    integer,          allocatable      :: shiftedBranchidx(:), shiftedEdgeNodes(:,:)
@@ -3844,17 +3835,13 @@ function ug_put_1d_mesh_discretisation_points(ncid, meshids, branchidx, offset, 
    
    !we have not defined the start_index, so when we put the variable it must be zero based
    allocate(shiftedBranchidx(size(branchidx)))
-   allocate(shiftedEdgeNodes(size(edgenodes,1),size(edgenodes,2)))
    shiftedBranchidx = branchidx
-   if (startIndex.ne.-1) then
+   if (startIndex.ne.0) then
        ierr = ug_convert_start_index(shiftedBranchidx, startIndex, 0)
-       ierr = ug_convert_start_index(shiftedEdgeNodes(1,:), startIndex, 0)
-       ierr = ug_convert_start_index(shiftedEdgeNodes(2,:), startIndex, 0)
    endif
 
    ierr = nf90_put_var(ncid, meshids%varids(mid_1dmeshtobranch), shiftedBranchidx)
    ierr = nf90_put_var(ncid, meshids%varids(mid_1doffset), offset)
-   ierr = nf90_put_var(ncid, meshids%varids(mid_edgenodes), shiftedEdgeNodes)
 
 end function ug_put_1d_mesh_discretisation_points
 

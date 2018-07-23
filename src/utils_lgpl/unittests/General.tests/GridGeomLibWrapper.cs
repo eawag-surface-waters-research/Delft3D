@@ -41,6 +41,7 @@ namespace General.tests
             [In] ref IntPtr c_geopointsY,
             [In] ref IntPtr c_nbranchgeometrynodes,
             [In] ref IntPtr c_branchlengths,
+            [In] ref int jsferic,
             [In, Out] ref IntPtr c_meshXCoords,
             [In, Out] ref IntPtr c_meshYCoords,
             [In] ref int nbranches,
@@ -123,6 +124,7 @@ namespace General.tests
             ref IntPtr c_branchlengths,
             ref IntPtr c_meshXCoords,
             ref IntPtr c_meshYCoords,
+            ref int jsferic,
             ref int nbranches,
             ref int ngeopoints,
             ref int nmeshnodes
@@ -135,6 +137,7 @@ namespace General.tests
                 ref  c_geopointsY,
                 ref  c_nbranchgeometrynodes,
                 ref  c_branchlengths,
+                ref  jsferic,
                 ref  c_meshXCoords,
                 ref  c_meshYCoords,
                 ref  nbranches,

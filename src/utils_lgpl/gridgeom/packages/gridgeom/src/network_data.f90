@@ -295,27 +295,7 @@ module network_data
    if(allocated(LIB)) deallocate(LIB)
    if(allocated(K1BR)) deallocate(K1BR)  
    if(allocated(NRLB)) deallocate(NRLB)
-   
-   !if(allocated(KN))   deallocate(KN)
-   !if(allocated(LC))   deallocate(LC)
-   !if(allocated(RLIN)) deallocate(RLIN)
-   !
-   !if(allocated(XK)) deallocate(XK)
-   !if(allocated(YK)) deallocate(YK)
-   !if(allocated(ZK)) deallocate(ZK)
-   !
-   !if(allocated(RNOD)) deallocate(RNOD)
-   !
-   !if(allocated(XK0)) deallocate(XK0) 
-   !if(allocated(YK0)) deallocate(YK0)    
-   !if(allocated(ZK0)) deallocate(ZK0) 
-   !
-   !if(allocated(NMK))  deallocate(NMK)        
-   !if(allocated(KC))   deallocate(KC)       
-   !if(allocated(NMK0)) deallocate(NMK0)        
-   !if(allocated(KC0))  deallocate(KC0)       
-   !if(allocated(NB))   deallocate(NB)     
-   
+
    ! default initialize all variables
    NUMK0     = 0
    numk      = 0            

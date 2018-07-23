@@ -202,7 +202,7 @@
       CALL AERR('XK (KMAX), YK (KMAX), ZK (KMAX), KC (KMAX), NMK (KMAX), RNOD(KMAX)', IERR, 7*KMAX)
 
       DO K = 1,KMAX
-         IF (K .LE. SIZE(NMK0) ) THEN
+         IF ((allocated(NMK0)).and.(K .LE. SIZE(NMK0))) THEN
             KNXX = MAX(NMK0(K),KNX)
          ELSE
             KNXX = KNX
@@ -865,19 +865,19 @@
       ! We can safely ignore it here, but won't, because this saves some
       ! realloc costs for xz, yz in flow_geominit.
       numc = max(ndx,nump)
-      if (numc > size(xz)) then
+      if ((numc > size(xz)).or.(.not.allocated(xz))) then
          call realloc(xz, numc, stat=ierr, keepExisting=.false.)
          call aerr('xz(numc)',IERR, numc)
          call realloc(yz, numc, stat=ierr, keepExisting=.false.)
          call aerr('yz(numc)',IERR, numc)
       end if
-      if (numc > size(xzw)) then
+      if ((numc > size(xzw)).or.(.not.allocated(xzw))) then
          call realloc(xzw, numc, stat=ierr, keepExisting=.false.)
          call aerr('xzw(numc)',IERR, numc)
          call realloc(yzw, numc, stat=ierr, keepExisting=.false.)
          call aerr('yzw(numc)',IERR, numc)
       end if
-      if (numc > size(ba)) then
+      if ((numc > size(ba)).or.(.not.allocated(ba))) then
          call realloc(ba, numc, stat=ierr, keepExisting=.false.)
          call aerr('ba(numc)',IERR, numc)
       endif
@@ -2408,6 +2408,7 @@
    double precision, optional, intent(in) :: xplLinks(:), yplLinks(:), zplLinks(:)
    integer                                :: insidePolygons
 
+   ierr = 0
    call SAVENET()
    call findcells(0)
 

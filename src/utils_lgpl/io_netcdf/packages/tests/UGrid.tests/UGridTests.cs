@@ -383,7 +383,6 @@ namespace UGrid.tests
         {
             // Mesh variables
             IntPtr c_branchidx    = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int))    * l_nmeshpoints);
-            IntPtr c_edgenodes    = Marshal.AllocCoTaskMem(2* Marshal.SizeOf(typeof(int)) * l_nedgenodes);
             IntPtr c_sourcenodeid = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int))    * l_nBranches);
             IntPtr c_targetnodeid = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int))    * l_nBranches);
             IntPtr c_branchoffset = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * l_nmeshpoints);
@@ -398,7 +397,7 @@ namespace UGrid.tests
                 int meshid = -1;
 
                 //1. Create: the assumption here is that l_nedgenodes is known (we could move this calculation inside ionc_create_1d_mesh)
-                int ierr = wrapper.ionc_create_1d_mesh(ref ioncid, l_networkName.ToString(), ref meshid, l_meshname.ToString(), ref l_nmeshpoints, ref l_nedgenodes);
+                int ierr = wrapper.ionc_create_1d_mesh(ref ioncid, l_networkName.ToString(), ref meshid, l_meshname.ToString(), ref l_nmeshpoints);
                 Assert.That(ierr, Is.EqualTo(0));
 
                 //2. Create the edge nodes (the algorithm is in gridgeom.dll, not in ionetcdf.dll)
@@ -408,12 +407,8 @@ namespace UGrid.tests
                 Marshal.Copy(l_branchoffset, 0, c_branchoffset, l_nmeshpoints);
                 Marshal.Copy(l_branchlength, 0, c_branchlength, l_nBranches);
                 
-                var gridwrapper = new GridGeomLibWrapper();
-                ierr = gridwrapper.ggeo_create_edge_nodes(ref c_branchoffset, ref c_branchlength, ref c_branchidx, ref c_sourcenodeid, ref c_targetnodeid, ref c_edgenodes,ref l_nBranches, ref l_nmeshpoints, ref l_nedgenodes, ref l_startIndex);
-                Assert.That(ierr, Is.EqualTo(0));
-                
-                //4. Write the discretization points
-                ierr = wrapper.ionc_put_1d_mesh_discretisation_points(ref ioncid, ref meshid, ref c_branchidx, ref c_branchoffset, ref c_edgenodes, meshnodeidsinfo, ref l_nmeshpoints, ref l_nedgenodes, ref l_startIndex);
+                //3. Write the discretization points
+                ierr = wrapper.ionc_put_1d_mesh_discretisation_points(ref ioncid, ref meshid, ref c_branchidx, ref c_branchoffset, meshnodeidsinfo, ref l_nmeshpoints, ref l_startIndex);
                 Assert.That(ierr, Is.EqualTo(0));
             }
             finally
@@ -422,7 +417,6 @@ namespace UGrid.tests
                 Marshal.FreeCoTaskMem(c_branchoffset);
                 Marshal.FreeCoTaskMem(c_mesh1indexes);
                 Marshal.FreeCoTaskMem(c_mesh2indexes);
-                Marshal.FreeCoTaskMem(c_edgenodes);
                 Marshal.FreeCoTaskMem(c_sourcenodeid);
                 Marshal.FreeCoTaskMem(c_targetnodeid);
                 Marshal.FreeCoTaskMem(c_contacttype);
