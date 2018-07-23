@@ -59,10 +59,12 @@ function odu_get_xy_coordinates(branchids, branchoffsets, geopointsX, geopointsY
    double precision, allocatable     :: meshZCoords(:)
    double precision, allocatable     :: geopointsZ(:)  !returned by sphertocart3D 
    double precision                  :: totallength, previousLength, afac, fractionbranchlength, maxlat
+   integer                           :: nBranchSegments
 
    ierr = 0
    ! the number of geometry segments is always equal to number of geopoints - 1
-   allocate(branchSegmentLengths(size(geopointsX,1) - 1))
+   nBranchSegments = size(geopointsX,1) - 1
+   allocate(branchSegmentLengths(nBranchSegments))
    
    allocate(deltaX(size(geopointsX,1) - 1))
    allocate(deltaY(size(geopointsX,1) - 1))
@@ -125,8 +127,11 @@ function odu_get_xy_coordinates(branchids, branchoffsets, geopointsX, geopointsY
          totallength = totallength + branchSegmentLengths(i)
       enddo
       !correct for total segment length
-      afac = branchlengths(idxbr)/totallength
-      branchSegmentLengths(idxgeostart: idxgeoend -1) = branchSegmentLengths(idxgeostart: idxgeoend -1) * afac
+      if (totallength > epsilon(0.D0)) then
+         afac = branchlengths(idxbr)/totallength
+         branchSegmentLengths(idxgeostart: idxgeoend -1) = branchSegmentLengths(idxgeostart: idxgeoend -1) * afac
+      end if
+   
       !calculate the increments
       do i = idxgeostart, idxgeoend -1
          if (branchSegmentLengths(i) > epsilon(0.D0)) then
@@ -144,7 +149,8 @@ function odu_get_xy_coordinates(branchids, branchoffsets, geopointsX, geopointsY
       totallength = branchSegmentLengths(ind)
       previousLength = 0
       do i = idxstart, idxend
-         if(branchoffsets(i) > totallength) then
+         ! TODO: carniato: code below is wrong IF: the branchoffset(i) of some grid point is MORE THAN ONE geopoint segment ahead. The loop below should be a while loop.
+         if(branchoffsets(i) > totallength .and. ind < nBranchSegments) then
             previousLength = totallength
             ind = ind +1
             totallength = totallength + branchSegmentLengths(ind)
