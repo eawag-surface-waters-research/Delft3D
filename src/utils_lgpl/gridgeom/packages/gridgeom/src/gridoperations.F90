@@ -52,7 +52,7 @@
    
    ! unstruct.F90
    public :: getcellsurface
-   public :: getCellWeightedCenter
+   public :: getcellweightedcenter
 
    private
 
@@ -883,7 +883,7 @@
       endif
 
       do n = 1,nump                                      ! get cell center coordinates 2D
-         CALL getCellWeightedCenter(n, xz(n) , yz(n) , zzz)
+         CALL GETCELLWEIGHTEDCENTER(n, xz(n) , yz(n) , zzz)
          call getcellsurface(n, ba(n), xzw(n), yzw(n))
          ! call cirr( xzw(n), yzw(n), 211 )
       end do
@@ -2338,7 +2338,7 @@
    end subroutine getcellsurface
 
    !> computes the cell-weighted center
-   subroutine getCellWeightedCenter(n, xz, yz, zz)
+   subroutine getcellweightedcenter(n, xz, yz, zz)
 
    use m_ggeo_orthosettings
    use m_missing,  only: jins, dmiss, dxymis
@@ -2384,7 +2384,7 @@
    endif
    ! CALL CIRR(XZ,YZ,31)
 
-   end subroutine getCellWeightedCenter
+   end subroutine getcellweightedcenter
 
 
    !-----------------------------------------------------------------!
@@ -2487,7 +2487,6 @@
    ENDDO
 
    CALL SETNODADM(0)
-   ierr = 0  ! no errors, by default
 
    end function make1D2Dinternalnetlinks
 
