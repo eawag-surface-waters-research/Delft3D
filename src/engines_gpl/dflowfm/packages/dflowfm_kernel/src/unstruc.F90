@@ -37392,7 +37392,7 @@ subroutine getymxpar(modind,tauwav, taucur, fw, cdrag, abscos, ypar, ymxpar)
  integer         , intent(in)  :: modind
  double precision, intent(in)  :: tauwav, taucur, fw, cdrag, abscos
  double precision, intent(out) :: ypar, ymxpar
- real                          :: xpar       ! Variable x in in expression for parametrized models
+ double precision              :: xpar       ! Variable x in in expression for parametrized models
  real, dimension(8)            :: coeffi     ! Coefficient i in expression for parametrized models
  real, dimension(8)            :: coeffj     ! Coefficient j in expression for parametrized models
  real, dimension(8, 4)         :: aa         ! Coefficient a(i) in expression for parameter a
