@@ -45,9 +45,9 @@
 		<Filter Name="Resource Files" Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"/>
 		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
 		<File RelativePath=".\src\generalmodules.f90"/>
-		<File RelativePath=".\src\gridgeom.f90"/>
-		<File RelativePath=".\src\gridoperations.f90"/>
+		<File RelativePath=".\src\gridgeom.F90"/>
+		<File RelativePath=".\src\gridoperations.F90"/>
 		<File RelativePath=".\src\network_data.f90"/>
-		<File RelativePath=".\src\odugrid.f90"/>
+		<File RelativePath=".\src\odugrid.F90"/>
 		<File RelativePath=".\src\polygon.f90"/></Filter></Files>
 	<Globals/></VisualStudioProject>
