@@ -25,7 +25,7 @@
      &                    iimax  , iar    , irmax  , rar    , notot  ,
      &                    noseg  , sname  , nowst  , nowtyp , nrftot ,
      &                    nrharm , dtflg1 , dtflg3 , iwidth , vrsion ,
-     &                    ioutpt , ierr   , iwar   )
+     &                    ioutpt , chkpar , ierr   , iwar            )
 
 !       Deltares Software Centre
 
@@ -89,6 +89,7 @@
       integer  ( 4), intent(in   ) :: iwidth         !< width of the output file
       real     ( 4), intent(in   ) :: vrsion         !< Input file version number
       integer  ( 4), intent(in   ) :: ioutpt         !< Degree of output in report file
+      logical      , intent(out   ) :: chkpar(2)     !< Check for parameters SURF and LENGTH
       integer  ( 4), intent(inout) :: ierr           !< cumulative error count
       integer  ( 4), intent(inout) :: iwar           !< cumulative warning count
 
@@ -145,6 +146,7 @@
 !                                           names are 40 characters
 !                                           types are 20 characters
 
+      chkpar = .false.
       nowtyp = 0
       allocate ( wstid     (nowst), wsttype     (nowst), wstname(nowst),
      &           wstid_long(nowst), wsttype_long(nowst), iwstseg(nowst),
@@ -179,6 +181,13 @@
             if ( iwstseg(i) .eq. 0 ) then
                ierr2 = 1
                goto 20
+            endif
+
+            if ( iwstseg(i) == -1 .or. iwstseg(i) == -3 ) then
+                chkpar(1) = .true.
+            endif
+            if ( iwstseg(i) == -2 ) then
+                chkpar(2) = .true.
             endif
          endif
          if ( gettoken( wstid_long(i), ierr2 ) .gt. 0 ) goto 20
@@ -284,6 +293,16 @@
 
    10 continue
 
+!          provide information about the special parameters
+
+      if ( chkpar(1) ) then
+         write( lunut, 2210 )
+      endif
+      if ( chkpar(2) ) then
+         write( lunut, 2220 )
+      endif
+
+
 !          give list of all identified wasteload types and write info to system file
 
       write ( lunut ,   *  )
@@ -376,5 +395,9 @@
  2140 format (    ' ERROR: truncated wasteload ID is not unique:',A)
  2150 format (    ' ERROR: truncated wasteload type not unique:',A)
  2160 format (    ' ERROR: allocating wasteload arrays:',I8)
+ 2210 format (    ' Note: one or more special waste loads - parameter/se
+     &gment function SURF required' )
+ 2220 format (    ' Note: one or more special waste loads - parameter/se
+     &gment function LENGTH required' )
 
       end

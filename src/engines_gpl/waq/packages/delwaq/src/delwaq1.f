@@ -169,6 +169,7 @@
       integer( 4)                    :: ioutpt            !< flag for more or less output
       integer                           ierr                     ! cumulative number of errors
       integer                           iwar                     ! cumulative number of warnings
+      logical                        :: chkpar(2)                ! flags to check for parameters SURF and LENGTH (used for special waste loads)
       type(GridPointerColl) GridPs
       type(OutputColl     ) Outputs
       integer                           narg        ! nr of command line arguments
@@ -452,7 +453,7 @@
      &              imax   , iar    , rmax   , rar    , notot  ,
      &              nosss  , syname , nowst  , nowtyp , nrftot ,
      &              nrharm , dtflg1 , dtflg3 , iwidth , vrsion ,
-     &              ioutpt , ierr   , iwar   )
+     &              ioutpt , chkpar , ierr   , iwar   )
 !
       novec = 50
       inpfil%dtflg1 = dtflg1
@@ -470,8 +471,8 @@
          nrharm(10) = 0
          deltim     = otime
          call dlwq7a ( lun    , lchar  , filtype, inpfil   , syname ,
-     &                 iwidth , ioutpt , gridps , constants, ierr   ,
-     &                 iwar   )
+     &                 iwidth , ioutpt , gridps , constants, chkpar ,
+     &                 ierr   , iwar   )
       endif
 !
 !     Finish and close system file ( DLWQ09 can re-read it )
