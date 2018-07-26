@@ -92,7 +92,7 @@ contains
    end subroutine deallocCulvert
                               
    subroutine ComputeCulvert(culvert, fum, rum, aum, dadsm, kfum, cmustr, s1m1, s1m2, qm,  &
-                             q0m, u1m, u0m, dxm, dt, bobgrm1, bobgrm2, wetdown, infuru)
+                             q0m, u1m, u0m, dxm, dt, bobgrm1, bobgrm2, wetdown, state, infuru)
       
       implicit none
       !
@@ -116,6 +116,7 @@ contains
       double precision, intent(in)                 :: bobgrm1
       double precision, intent(in)                 :: bobgrm2
       double precision, intent(in)                 :: wetdown
+      integer, intent(inout)                       :: state
       logical, intent(in)                          :: infuru
          
       ! Local variables
@@ -201,13 +202,14 @@ contains
       if ((allowedFlowDir == 3) .or. &
           (dir == 1  .and. allowedFlowDir == 2) .or. &
           (dir == -1 .and. allowedFlowDir == 1)) then
-         kfum = 0
-         fum = 0.0d0
-         rum = 0.0d0
-         u1m = 0.0d0
-         u0m = 0.0d0
-         qm  = 0.0d0
-         q0m = 0.0d0
+         kfum  = 0
+         fum   = 0.0d0
+         rum   = 0.0d0
+         u1m   = 0.0d0
+         u0m   = 0.0d0
+         qm    = 0.0d0
+         q0m   = 0.0d0
+         state = 0
          return
       endif
 
@@ -216,13 +218,14 @@ contains
 
       ! Check on Valve
       if (culvert%has_valve .and. ((culvert%inivalveopen - gl_thickness) < thresholdDry)) then
-         kfum = 0
-         fum = 0.0
-         rum = 0.0
-         u1m = 0.0d0
-         u0m = 0.0d0
-         qm  = 0.0d0
-         q0m = 0.0d0
+         kfum  = 0
+         fum   = 0.0d0
+         rum   = 0.0d0
+         u1m   = 0.0d0
+         u0m   = 0.0d0
+         qm    = 0.0d0
+         q0m   = 0.0d0
+         state = 0
          return
       endif
 
@@ -259,12 +262,14 @@ contains
          endif
 
          if (kfum==0) then 
-            fum = 0.0
-            rum = 0.0
-            u1m = 0.0d0
-            u0m = 0.0d0
-            qm  = 0.0d0
-            q0m = 0.0d0
+            kfum  = 0
+            fum   = 0.0d0
+            rum   = 0.0d0
+            u1m   = 0.0d0
+            u0m   = 0.0d0
+            qm    = 0.0d0
+            q0m   = 0.0d0
+            state = 0
             return
          endif
       
@@ -284,11 +289,13 @@ contains
          endif
 
          if (IsInvertedSiphon .and. kfum == 0) then
-            fum = 0.0d0
-            rum = 0.0d0
-            u1m = 0.0d0
-            qm  = 0.0d0
-            q0m = 0.0d0
+            fum   = 0.0d0
+            rum   = 0.0d0
+            u1m   = 0.0d0
+            u0m   = 0.0d0
+            qm    = 0.0d0
+            q0m   = 0.0d0
+            state = 0
             return
          endif
 
@@ -470,6 +477,12 @@ contains
          fum = cu / bu
          rum = du / bu
          
+      endif
+      
+      if (isfreeflow) then
+         state = 5
+      else
+         state = 6
       endif
     
    end subroutine ComputeCulvert

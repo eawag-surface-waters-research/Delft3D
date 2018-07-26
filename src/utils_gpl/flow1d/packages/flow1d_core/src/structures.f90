@@ -147,12 +147,14 @@ module m_structure
       double precision                 :: distance
       double precision                 :: charHeight
       double precision                 :: charWidth
-      integer                          :: state = 0    !< State of the Structure, so far only relevant for General Structure and Orifice
-                                                       !< 0 = Closed
-                                                       !< 1 = Free Weir Flow
-                                                       !< 2 = Drowned Weir Flow
-                                                       !< 3 = Free Gate Flow
-                                                       !< 4 = Drowned Gate Flow
+      integer                          :: state = -1     !< State of the Structure for General Structure, Weir, Orifice and Culvert/Siphon
+                                                         !< 0 = No Flow
+                                                         !< 1 = Free Weir Flow
+                                                         !< 2 = Drowned Weir Flow
+                                                         !< 3 = Free Gate Flow
+                                                         !< 4 = Drowned Gate Flow
+                                                         !< 5 = Free Flow for Culvert and Siphons
+                                                         !< 6 = Drowned Flow for Culvert and Siphons
       integer                          :: compound
       character(IdLen)                 :: compoundName = ' '
       type(t_weir), pointer            :: weir => null()

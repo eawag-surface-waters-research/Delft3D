@@ -85,7 +85,7 @@ module m_GlobalParameters
    
    integer, parameter  :: DENS_ECKART_MODIFIED = 1
    integer, parameter  :: DENS_ECKART          = 2
-   integer, parameter  :: DENS_UNESCO           = 3
+   integer, parameter  :: DENS_UNESCO          = 3
    
    type t_constituent_helper
       integer              :: boundary_index

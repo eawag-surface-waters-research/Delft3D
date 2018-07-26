@@ -55,7 +55,7 @@ module m_Weir
 contains
 
    subroutine ComputeWeir(weir, fum, rum, aum, dadsm, kfum, s1m1, s1m2, &
-                          qm, q0m, u1m, u0m, dxm, dt)
+                          qm, q0m, u1m, u0m, dxm, dt, state)
    !!--copyright-------------------------------------------------------------------
    ! Copyright (c) 2003, Deltares. All rights reserved.
    !!--disclaimer------------------------------------------------------------------
@@ -118,6 +118,7 @@ contains
        double precision, intent(in)       :: s1m1
        double precision, intent(in)       :: dxm
        double precision, intent(in)       :: dt
+       integer, intent(inout)             :: state
    !
    !
    ! Local variables
@@ -170,6 +171,7 @@ contains
 
        if (smax + scr<=1.5d0*(smin + scr)) then
           !       submerged flow
+          state = 2
           cu    = 2*gravity/(StructureDynamicsFactor*dxm)
           !       ARS 4681 improved wetted area computation
           aum   = max(smax - u0m**2/(2d0*gravity) + scr, 2.0d0/3.0d0*(smax + scr))*swi
@@ -177,6 +179,7 @@ contains
           rhsc  = 0.0
        else
           !       free flow
+          state = 1
           cu    = gravity/(1.5*(StructureDynamicsFactor*dxm))
           aum   = 2./3.*(smax + scr)*swi
           uweir = dsqrt(2./3.*gravity*(smax + scr))
