@@ -13559,6 +13559,7 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
    use m_calibration, only: calibration_backup_frcu
    use unstruc_channel_flow
    use m_pump
+   use m_Dambreak
    use m_flowexternalforcings
    use m_partitioninfo 
 
@@ -13891,7 +13892,70 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
          endif
       enddo
    endif
+
+   ! Dambreak: 
+   ! TODO the code for waterLevelsLeft and waterLevelsRight can be grouped in one function shared by dambreak and pumps
+   if (ndambreak > 0) then
    
+      ! de-allocate
+      if(allocated(results)) deallocate(results)
+      
+      ! allocate
+      allocate(results(2,ndambreaksg), stat = ierr)
+      allocate(normalVelocity(ndambreaksg), stat = ierr)
+      if (ierr.ne.0) success=.false.
+   
+      ! Initialize
+      results = 0.0d0
+      waterLevelsDambreakUpStream = 0.0d0
+      waterLevelsDambreakDownStream = 0.0d0
+      
+      !1. compute width of each dambreak
+   
+      ! Compute sumQuantitiesByWeight upstream
+      ierr = getAverageQuantityFromLinks(L1dambreaksg, L2dambreaksg, kdambreak(3,:), kdambreak(1,:), hu, s1, wu, 0.0d0, results)
+      if (ierr.ne.0) success=.false.
+      
+      do n = 1, ndambreaksg
+         if (results(2,n)>0.0d0) then
+            waterLevelsDambreakUpStream(n)  = results(1,n)/results(2,n)
+         endif
+      enddo
+      
+      ! Compute sumQuantitiesByWeight downstream
+      ierr = getAverageQuantityFromLinks(L1dambreaksg, L2dambreaksg, kdambreak(3,:), kdambreak(2,:), hu, s1, wu, 0.0d0, results)
+      if (ierr.ne.0) success=.false.
+      
+      do n = 1, ndambreaksg
+         if (results(2,n)>0.0d0) then
+            waterLevelsDambreakDownStream(n)  = results(1,n)/results(2,n)
+         endif
+      enddo
+      
+      ! u0 velocity on the flowlinks (averaged by the wetted area). The mask is the water level itself 
+      ierr = getAverageQuantityFromLinks(L1dambreaksg, L2dambreaksg, kdambreak(3,:), kdambreak(3,:), hu, u1, au, 0.0d0, results)
+      if (ierr.ne.0) success=.false.
+      
+      do n = 1, ndambreaksg
+         if (results(2,n)>0.0d0) then
+            normalVelocity(n)  = results(1,n)/results(2,n)
+         endif
+      enddo
+         
+      !Compute dambreak widths
+      do n = 1, ndambreaksg
+         istru = dambreaks(n)    
+         if (associated(network%sts%struct(istru)%dambreak)) then         
+            ! Compute the breach width
+            call prepareComputeDambreak(network%sts%struct(istru)%dambreak, waterLevelsDambreakUpStream(n), waterLevelsDambreakDownStream(n), normalVelocity(n), time0, time1, dt_user, maximumDambreakWidths(n))
+            ! Store the current dambreak width
+            breachWidthDambreak(n) = network%sts%struct(istru)%dambreak%width
+            ! Store the current dambreak crest level 
+            breachDepthDambreak(n) = network%sts%struct(istru)%dambreak%crl
+         endif
+      enddo      
+   endif
+
    if (numsrc > 0) then
       success = success .and. ec_gettimespacevalue(ecInstancePtr, item_discharge_salinity_temperature_sorsin, tim)
    endif

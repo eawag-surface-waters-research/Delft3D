@@ -1186,29 +1186,41 @@ module m_readstructures
 
       call prop_get_double(md_ptr, 'structure', 'crestlevelini', dambr%crestlevelini, success)
       if (.not. success) return
+         
+      if (dambr%algorithm == 2) then
+         
+         call prop_get_double(md_ptr, 'structure', 'breachwidthini', dambr%breachwidthini, success)
+         if (.not. success) return
 
-      call prop_get_double(md_ptr, 'structure', 'breachwidthini', dambr%breachwidthini, success)
-      if (.not. success) return
+         call prop_get_double(md_ptr, 'structure', 'crestlevelmin', dambr%crestlevelmin, success)
+         if (.not. success) return
 
-      call prop_get_double(md_ptr, 'structure', 'crestlevelmin', dambr%crestlevelmin, success)
-      if (.not. success) return
+         call prop_get_double(md_ptr, 'structure', 'timetobreachtomaximumdepth', dambr%timetobreachtomaximumdepth, success)
+         if (.not. success) return
 
-      call prop_get_double(md_ptr, 'structure', 'dischargecoeff', dambr%dischargecoeff, success)
-      if (.not. success) return
+         call prop_get_double(md_ptr, 'structure', 'f1', dambr%f1, success)
+         if (.not. success) return
 
-      call prop_get_double(md_ptr, 'structure', 'f1', dambr%f1, success)
-      if (.not. success) return
+         call prop_get_double(md_ptr, 'structure', 'f2', dambr%f2, success)
+         if (.not. success) return
 
-      call prop_get_double(md_ptr, 'structure', 'f2', dambr%f2, success)
-      if (.not. success) return
-
-      call prop_get_double(md_ptr, 'structure', 'ucrit', dambr%ucrit, success)
-      if (.not. success) return
+         call prop_get_double(md_ptr, 'structure', 'ucrit', dambr%ucrit, success)
+         if (.not. success) return
       
+      endif
+      
+      ! get the name of the tim file 
+      if (dambr%algorithm == 3) then
+         call prop_get_string(md_ptr, 'structure', 'breachwidthandlevel', dambr%breachwidthandlevel, success)
+         if (.not. success) return         
+      endif
+
       call prop_get_double(md_ptr, 'structure', 't0', dambr%t0, success)
       if (.not. success) return
-
-   end subroutine 
+      
+      call setCoefficents(dambr)
+      
+   end subroutine
 
    subroutine readPump(pump, md_ptr, success)
    
