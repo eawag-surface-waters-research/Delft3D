@@ -391,7 +391,7 @@ function convert_cptr_to_meshgeom(c_meshgeom, c_meshgeomdim, meshgeom) result(ie
       
 end function convert_cptr_to_meshgeom
 
-!> by deallocating what is associated, no memory leaks
+
 function t_ug_meshgeom_destructor(meshgeom) result(ierr)
 
    type(t_ug_meshgeom) :: meshgeom
@@ -407,8 +407,7 @@ function t_ug_meshgeom_destructor(meshgeom) result(ierr)
    meshgeom%nnodes          = -1    
    meshgeom%nbranches       = -1    
    meshgeom%ngeometry       = -1    
-   meshgeom%start_index     = -1 
-   meshgeom%epsg            = -1 
+   meshgeom%start_index     = -1  
 
    ierr = 0
 
@@ -449,43 +448,6 @@ function t_ug_meshgeom_destructor(meshgeom) result(ierr)
    if(associated(meshgeom%layer_zs)) deallocate(meshgeom%layer_zs)
    if(associated(meshgeom%interface_zs)) deallocate(meshgeom%interface_zs)
    
-   
-   !nullify
-   meshgeom%edge_nodes => null()
-   meshgeom%face_nodes => null()
-   meshgeom%edge_faces => null()
-   meshgeom%face_edges => null()
-   meshgeom%face_links => null()
-
-   meshgeom%nnodex => null()
-   meshgeom%nnodey => null()
-   meshgeom%nnodeids => null()
-   meshgeom%nnodelongnames       => null()
-   meshgeom%nedge_nodes          => null()
-   meshgeom%nbranchids           => null()
-   meshgeom%nbranchlongnames     => null()
-   
-   meshgeom%nbranchlengths       => null()
-   meshgeom%nbranchgeometrynodes => null()
-   meshgeom%ngeopointx => null()
-   meshgeom%ngeopointy => null()
-   meshgeom%nbranchorder => null()
-   meshgeom%branchidx => null()
-   meshgeom%branchoffsets => null()
-   
-   meshgeom%nodex => null()
-   meshgeom%nodey => null()
-   meshgeom%nodez => null()
-   meshgeom%edgex => null()
-   meshgeom%edgey => null()
-   meshgeom%edgez => null()
-   meshgeom%facex => null()
-   meshgeom%facey => null()
-   meshgeom%facez => null()
-   
-   meshgeom%layer_zs     => null()
-   meshgeom%interface_zs => null()
-      
    end function t_ug_meshgeom_destructor
 
 end module meshdata
