@@ -409,8 +409,8 @@ contains
                call setmessage(LEVEL_WARN, 'No cross sections found on branch '//trim(pbran%name)//'. Using default rectangular cross section')
                do i = 1, pbran%uPointsCount
                   ilnk = pbran%lin(i)
-                  adm%line2cross(ilnk)%c1 = 0
-                  adm%line2cross(ilnk)%c2 = 0
+                  adm%line2cross(ilnk)%c1 = -1
+                  adm%line2cross(ilnk)%c2 = -1
                   adm%line2cross(ilnk)%f  = 1.0d0
                   adm%line2cross(ilnk)%distance  = 0d0
                enddo

@@ -14,7 +14,8 @@ module m_oned_functions
 
    contains
 
-   subroutine set_1d_roughnesses
+   !> IFRCUTP and FRCu are filled, using 1D roughness values from Network structure 
+   subroutine set_1d_roughnesses()
       use m_flow, only: frcu, ifrcutp
       use unstruc_channel_flow
       use m_spatial_data
@@ -60,6 +61,9 @@ module m_oned_functions
 
    end subroutine set_1d_roughnesses
 
+   !> Sets the flowgeom link and node numbers of the computational grid 
+   !! into the 1D network structure for branches, retention nodes, 
+   !! cross sections and structures, etc. 
    subroutine set_1d_indices_in_network()
       use m_sediment
       use m_flowgeom
@@ -78,6 +82,7 @@ module m_oned_functions
       
    end subroutine set_1d_indices_in_network
 
+   !> set the flowgeom linknumbers and node numbers in the branches
    subroutine set_linknumbers_in_branches()
    
       use unstruc_channel_flow
@@ -124,7 +129,7 @@ module m_oned_functions
       enddo
    end subroutine set_linknumbers_in_branches
 
-      ! Retentions
+   !> Set the node numbers from flowgeom in the retention structure
    subroutine set_retention_grid_numbers()
    
       use unstruc_channel_flow
@@ -164,6 +169,8 @@ module m_oned_functions
       enddo
    end subroutine set_retention_grid_numbers
    
+   !> For sediment transport on each node a cross section is required
+   !! This subroutine checks this requirement and generates a 
    subroutine set_cross_sections_to_gridpoints()
    
       use unstruc_channel_flow
@@ -310,6 +317,7 @@ module m_oned_functions
 
    end subroutine save_1d_nrd_vars_in_stm
 
+   !> 
    subroutine set_structure_indices()
    end subroutine set_structure_indices
 
