@@ -35,6 +35,7 @@ libflow1d_core_la_SOURCES = \
          universal_weir.f90 \
          river_weir.f90 \
          Pump.f90 \
+         Dambreak.f90 \
          Orifice.f90 \
          general_structure.f90 \
          culvert.f90 \
