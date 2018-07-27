@@ -5061,7 +5061,7 @@ subroutine borecharacter()
              k1 = ln(2,nb)   
              if (sql(k1) > eps10) then                   ! outflow only
                 if (hs(k1) > epshu) then
-                   dtsc = cflmx*vol1_f(k1)/sql(k1)
+                   dtsc = cflmx*vol1(k1)/sql(k1)
                    if (dtsc < dts) then
                       dts = dtsc
                    endif
