@@ -415,7 +415,7 @@ subroutine loadModel(filename)
               call oldfil(minp, fnames(ifil))
               call reapol(minp, 1)
            enddo
-           call pol_to_fixedweirs(xpl, ypl, zpl, npl)
+           call pol_to_flowlinks(xpl, ypl, zpl, npl, nfxw, fxw) 
         endif
         deallocate(fnames)
     end if

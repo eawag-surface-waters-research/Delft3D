@@ -85,7 +85,6 @@ integer                     :: id_objectid, id_flowlinknr
    
    do n = 1, ncrs
       !call mess(LEVEL_INFO, 'SHAPEFILE: Adding shapes for cross section: '''//trim(crs(n)%NAME)//'''.')
-      
       nshp = crs(n)%PATH%LNX ! Nr. links(shapes)
       !! add nshp shapes
       do i = 0, nshp - 1

@@ -6352,7 +6352,7 @@ SUBROUTINE CUTCELWU(n12, jamasks, ipoly)
   
   use m_missing, only: dmiss
   use m_sferic, only: jsferic, jasfer3D
-  use geometry_module, only: dbdistance
+  use geometry_module, only: dbdistance, dlinedis
 
   implicit none
   integer :: jac
@@ -6374,13 +6374,13 @@ SUBROUTINE CUTCELWU(n12, jamasks, ipoly)
   rm = 0.4d0*min(r1,r2)
   if (r1 <= r2) then
      xm = 0.5d0*(x1+x2) ; ym = 0.5d0*(y1+y2)
-     CALL DLINEDIS(Xm,Ym,X3,Y3,X4,Y4,JA1,DIS1,Xd,Yd)
+     CALL DLINEDIS(Xm,Ym,X3,Y3,X4,Y4,JA1,DIS1,Xd,Yd, jsferic, jasfer3D, dmiss)
      if (ja1 == 1 .and. dis1 < rm) then
         ja = 1
      endif
   else
      xm = 0.5d0*(x3+x4) ; ym = 0.5d0*(y3+y4)
-     CALL DLINEDIS(Xm,Ym,X1,Y1,X2,Y2,JA1,DIS1,Xd,Yd)
+     CALL DLINEDIS(Xm,Ym,X1,Y1,X2,Y2,JA1,DIS1,Xd,Yd, jsferic, jasfer3D, dmiss)
      if (ja1 == 1 .and. dis1 < rm) then
         ja = 1
      endif
@@ -9770,7 +9770,7 @@ end subroutine copySplinesToFinePol
    USE M_SFERIC
    use m_orthosettings
    use m_missing
-   use geometry_module, only: dbdistance, cross, normaloutchk, GETCIRCUMCENTER
+   use geometry_module, only: dbdistance, cross, normaloutchk, GETCIRCUMCENTER, dlinedis
    use gridoperations
 
    IMPLICIT NONE
@@ -10261,8 +10261,8 @@ numka:DO K0 = 1,NUMK                 ! ATTRACTION PARAMETERS
 
               ! Project the moved boundary point back onto the closest
               ! ORIGINAL edge (netlink) (either between 0 and 2 or 0 and 3)
-              CALL DLINEDIS(X0,Y0,XK0(K),YK0(K),X2,Y2,JA2,DIS2,X2,Y2)
-              CALL DLINEDIS(X0,Y0,XK0(K),YK0(K),X3,Y3,JA3,DIS3,X3,Y3)
+              CALL DLINEDIS(X0,Y0,XK0(K),YK0(K),X2,Y2,JA2,DIS2,X2,Y2,jsferic, jasfer3D, dmiss)
+              CALL DLINEDIS(X0,Y0,XK0(K),YK0(K),X3,Y3,JA3,DIS3,X3,Y3,jsferic, jasfer3D, dmiss)
               IF (DIS2 < DIS3) THEN
                  X0 = X2 ; Y0 = Y2
               ELSE
@@ -10398,7 +10398,7 @@ numka:DO K0 = 1,NUMK                 ! ATTRACTION PARAMETERS
    use m_netw                     ! 2 REMOVES SMALL TRIANGLES NEXT TO
    use M_FLOWGEOM
    use unstruc_messages
-   use geometry_module, only: dbdistance, dcosphi
+   use geometry_module, only: dbdistance, dcosphi, dlinedis
    use m_missing, only: dmiss, dxymis
    use m_sferic, only: jsferic, jasfer3D, dtol_pole
    use gridoperations
@@ -10511,7 +10511,7 @@ numka:DO K0 = 1,NUMK                 ! ATTRACTION PARAMETERS
                   ENDDO
 
                   IF (COSMIN < 0.2 .AND. LNN(LLC) == 1) THEN
-                     CALL dLINEDIS(XK(KH),YK(KH),XK(KA),YK(KA),XK(KB),YK(KB),JA,DIS,XN,YN)
+                     CALL dLINEDIS(XK(KH),YK(KH),XK(KA),YK(KA),XK(KB),YK(KB),JA,DIS,XN,YN, jsferic, jasfer3D, dmiss)
 
                      NW        = NW + 1
                      XNW  (NW) = XN
@@ -10638,18 +10638,19 @@ numka:DO K0 = 1,NUMK                 ! ATTRACTION PARAMETERS
 
 
    SUBROUTINE MIRRORLINEPOINT (X0,Y0,X3,Y3,X1,Y1,X2,Y2,JA,DIS,XN,YN)
-   use geometry_module, only: getdxdy
+   use geometry_module, only: getdxdy, dlinedis
    use m_sferic
+   use m_missing
    implicit none
    double precision :: X0,Y0,X3,Y3,X1,Y1,X2,Y2,DIS,XN,YN, dx0, dy0
    double precision :: getdx, getdy
    integer :: JA
 
-   CALL DLINEDIS(X0,Y0,X1,Y1,X2,Y2,JA,DIS,XN,YN)
+   CALL DLINEDIS(X0,Y0,X1,Y1,X2,Y2,JA,DIS,XN,YN,jsferic, jasfer3D, dmiss)
    !DX0 = GETDX(X0,Y0,XN,YN)
    !DY0 = GETDY(X0,Y0,XN,YN)
    call getdxdy(X0,Y0,XN,YN,dx0,dy0, jsferic)
-   CALL DLINEDIS(X3,Y3,X1,Y1,X2,Y2,JA,DIS,XN,YN)
+   CALL dlinedis(X3,Y3,X1,Y1,X2,Y2,JA,DIS,XN,YN,jsferic, jasfer3D, dmiss)
 
    XN = 2*XN-X3 + DX0
    YN = 2*YN-Y3 + DY0
@@ -10658,11 +10659,15 @@ numka:DO K0 = 1,NUMK                 ! ATTRACTION PARAMETERS
    END SUBROUTINE MIRRORLINEPOINT
 
    SUBROUTINE MIRRORLINE (X0,Y0,X1,Y1,X2,Y2,JA,DIS,XN,YN)
+   use geometry_module, only: dlinedis
+   use m_sferic
+   use m_missing
+   
    implicit none
    double precision :: X0,Y0,X1,Y1,X2,Y2,DIS,XN,YN
    integer :: JA
 
-   CALL dLINEDIS(X0,Y0,X1,Y1,X2,Y2,JA,DIS,XN,YN)
+   CALL dLINEDIS(X0,Y0,X1,Y1,X2,Y2,JA,DIS,XN,YN,jsferic, jasfer3D, dmiss)
 
    XN  = 2*XN - X0
    YN  = 2*YN - Y0
@@ -10671,11 +10676,16 @@ numka:DO K0 = 1,NUMK                 ! ATTRACTION PARAMETERS
    END SUBROUTINE MIRRORLINE
 
    SUBROUTINE MIRRORLINE2(X0,Y0,X1,Y1,X2,Y2,JA,DIS,XN,YN)  ! 2*ZO VER
+   
+   use geometry_module, only: dlinedis
+   use m_missing,       only: dmiss
+   use m_sferic,        only: jsferic, jasfer3D
+      
    implicit none
    double precision :: X0,Y0,X1,Y1,X2,Y2,DIS,XN,YN
    integer :: JA
 
-   CALL dLINEDIS(X0,Y0,X1,Y1,X2,Y2,JA,DIS,XN,YN)
+   CALL dLINEDIS(X0,Y0,X1,Y1,X2,Y2,JA,DIS,XN,YN,jsferic, jasfer3D, dmiss)
 
    XN  = 3*XN - 2*X0
    YN  = 3*YN - 2*Y0
@@ -12911,8 +12921,7 @@ numka:DO K0 = 1,NUMK                 ! ATTRACTION PARAMETERS
                                             ! misschien is dat soms wat streng
       use m_missing, only: dmiss
       use m_sferic, only: jsferic, jasfer3D
-      
-      use geometry_module, only: dbdistance
+      use geometry_module, only: dbdistance, dlinedis
       
       implicit none
       integer          :: n1
@@ -12933,7 +12942,7 @@ numka:DO K0 = 1,NUMK                 ! ATTRACTION PARAMETERS
              YA = YZ(K1)
              XB = XZ(K2)
              YB = YZ(K2)
-             CALL dLINEDIS(XP1,YP1,XA,YA,XB,YB,JA,DIS,XN,YN)
+             CALL dLINEDIS(XP1,YP1,XA,YA,XB,YB,JA,DIS,XN,YN, jsferic, jasfer3D, dmiss)
              IF (JA .EQ. 1) THEN
                 IF (DIS .LT. DISMIN) THEN
                    N1 = L
@@ -12983,6 +12992,10 @@ numka:DO K0 = 1,NUMK                 ! ATTRACTION PARAMETERS
       
       SUBROUTINE CLOSENETBNDLINK(XP1,YP1,N1)
       use m_netw
+      use geometry_module, only: dlinedis
+      use m_missing, only: dmiss
+      use m_sferic, only: jsferic, jasfer3D
+      
       implicit none
       integer :: n1
       double precision :: xp1
@@ -13004,7 +13017,7 @@ numka:DO K0 = 1,NUMK                 ! ATTRACTION PARAMETERS
             YA = YK(K1)
             XB = XK(K2)
             YB = YK(K2)
-            CALL dLINEDIS(XP1,YP1,XA,YA,XB,YB,JA,DIS,XN,YN)
+            CALL dLINEDIS(XP1,YP1,XA,YA,XB,YB,JA,DIS,XN,YN, jsferic, jasfer3D, dmiss)
             IF (JA .EQ. 1) THEN
                IF (DIS .LT. DISMIN) THEN
                   N1 = L
@@ -13019,7 +13032,9 @@ numka:DO K0 = 1,NUMK                 ! ATTRACTION PARAMETERS
       SUBROUTINE CLOSETO1Dnetlink(XP1,YP1,N1,XN1,YN1,DIST) !
       
       use m_netw
-      use geometry_module, only: dbdistance
+      use geometry_module, only: dbdistance, dlinedis
+      use m_missing, only: dmiss, imiss
+      use m_sferic, only: jsferic, jasfer3D
       
       implicit none
       integer          :: n1
@@ -13039,7 +13054,7 @@ numka:DO K0 = 1,NUMK                 ! ATTRACTION PARAMETERS
              YA = Yk(K1)
              XB = Xk(K2)
              YB = Yk(K2)
-             CALL dLINEDIS(XP1,YP1,XA,YA,XB,YB,JA,DIS,XN,YN)
+             CALL dLINEDIS(XP1,YP1,XA,YA,XB,YB,JA,DIS,XN,YN, jsferic, jasfer3D, dmiss)
              IF (JA .EQ. 1) THEN
                 IF (DIS .LT. DISMIN) THEN
                    N1     = L
@@ -23153,7 +23168,7 @@ contains
    subroutine shortest_path(numseg, jstart, jend, kstart, nodemask, netboundonly, klink)
       
       use network_data
-      use geometry_module, only: dbdistance
+      use geometry_module, only: dbdistance, dlinedis
       use m_missing, only: dmiss
       use m_sferic, only: jsferic, jasfer3D
 
@@ -23232,13 +23247,13 @@ contains
             ddmax = max(ddis1,ddis2) ! maximum distance to land boundary between n1 and n2
             if ( j1.lt.j2 ) then
                do j=j1+1,j2
-                  call dlinedis(xlan(j),ylan(j),x1,y1,x2,y2,ja,ddis3,xn3,yn3)
+                  call dlinedis(xlan(j),ylan(j),x1,y1,x2,y2,ja,ddis3,xn3,yn3, jsferic, jasfer3D, dmiss)
                   if ( ddis3.gt.ddmax) ddmax = ddis3
                end do
                dL = dL + dbdistance(xlan(j2),ylan(j2),xn2,yn2, jsferic, jasfer3D, dmiss)
             else if ( j1.gt.j2 ) then
                do j=j1,j2+1,-1
-                  call dlinedis(xlan(j),ylan(j),x1,y1,x2,y2,ja,ddis3,xn3,yn3)
+                  call dlinedis(xlan(j),ylan(j),x1,y1,x2,y2,ja,ddis3,xn3,yn3, jsferic, jasfer3D, dmiss)
                   if ( ddis3.gt.ddmax) ddmax = ddis3
                end do
             end if
@@ -27240,6 +27255,8 @@ end function comp_cross_time_1
 double precision function comp_cross_time_2(x1,x3,x4,v1,v3,v4,dclear)
    
    use m_missing
+   use geometry_module, only: dlinedis
+   use m_sferic, only: jsferic, jasfer3D
 
    implicit none
 
@@ -27263,7 +27280,7 @@ double precision function comp_cross_time_2(x1,x3,x4,v1,v3,v4,dclear)
 
    comp_cross_time_2 = 1d99
 
-   call dlinedis(x1(1),x1(2), x3(1),x3(2), x4(1),x4(2), ja, dnow, xc, yc)
+   call dlinedis(x1(1),x1(2), x3(1),x3(2), x4(1),x4(2), ja, dnow, xc, yc, jsferic, jasfer3D, dmiss)
 
    t2 = 1d99
 
@@ -27276,7 +27293,7 @@ double precision function comp_cross_time_2(x1,x3,x4,v1,v3,v4,dclear)
       if ( t2.lt.1d99 ) then
 !        check if distance is increasing
          dteps = 1d-2
-         call dlinedis(x1(1)+v1(1)*dteps, x1(2)+v1(2)*dteps, x3(1)+v3(1)*dteps, x3(2)+v3(2)*dteps, x4(1)+v4(1)*dteps, x4(2)+v4(2)*dteps, ja, deps, xc, yc)
+         call dlinedis(x1(1)+v1(1)*dteps, x1(2)+v1(2)*dteps, x3(1)+v3(1)*dteps, x3(2)+v3(2)*dteps, x4(1)+v4(1)*dteps, x4(2)+v4(2)*dteps, ja, deps, xc, yc, jsferic, jasfer3D, dmiss)
          DdDt = (deps-dnow)/dteps
          if ( DdDt.lt.-1d-4 ) then
 !            t2 = comp_cross_time_1(x1,x3,x4,v1,v3,v4,0d0)

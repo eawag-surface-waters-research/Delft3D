@@ -2374,10 +2374,19 @@ subroutine getseg1D(hpr,wu2,dz,ai,frcn,ifrctyp, wid,ar,conv,perim,jaconv)  ! cop
         bob(2,L) = max(zcdamn,blmx)
         call switchiadvnearlink(L)
     enddo
+    
+   !Adjust bobs for dambreak
+   do n = 1, ndambreaksg
+      istru = dambreaks(n)    
+      if (associated(network%sts%struct(istru)%dambreak)) then         
+         ! Update the bottom levels
+         call adjust_bobs_on_dambreak_breach(network%sts%struct(istru)%dambreak%width, network%sts%struct(istru)%dambreak%crl,  LStartBreach(n), L1dambreaksg(n), L2dambreaksg(n))
+      endif
+   enddo   
 
-    return
- end subroutine adjust_bobs_for_dams_and_structs
-
+   return
+   end subroutine adjust_bobs_for_dams_and_structs
+   
  subroutine sethu(jazws0)                            ! Set upwind waterdepth hu
  use m_flowgeom                                      ! Todo: higher order + limiter, see transport
  use m_flow
@@ -2438,8 +2447,8 @@ subroutine getseg1D(hpr,wu2,dz,ai,frcn,ifrctyp, wid,ar,conv,perim,jaconv)  ! cop
  !   s0(kb) = s0(k2)
  !enddo
 
-! adjust bobs for controllable dams
-  if ( ncdamsg.gt.0 .or. ncgensg.gt.0 ) then
+ !adjust bobs for controllable dams
+  if ( ncdamsg.gt.0 .or. ncgensg.gt.0 .or. ndambreaksg.gt.0) then
      call adjust_bobs_for_dams_and_structs()
   end if
 
@@ -13566,7 +13575,7 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
    implicit none
 
    double precision, intent(in)    :: tim !< Time in seconds
-   logical          :: l_initPhase
+   logical                         :: l_initPhase
    integer,          intent(out)   :: iresult !< Integer error status: DFM_NOERR==0 if succesful.
 
    double precision :: timmin
@@ -13578,9 +13587,9 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
 
    
    ! variables for processing the pump with levels, SOBEK style
-   integer                               :: n, ierr, istrpump, structInd
+   integer                               :: n, ierr, istru, structInd
    double precision, allocatable         :: results(:,:)
-   double precision, allocatable         :: waterLevelsDeliverySide(:),waterLevelsSuctionSide(:)
+   double precision, allocatable         :: waterLevelsLeft(:), waterLevelsRight(:),normalVelocity(:)
    
    iresult = DFM_EXTFORCERROR
    call klok(cpuext(1))
@@ -13848,112 +13857,57 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
    !$OMP END PARALLEL SECTIONS
 
    !Pump with levels, SOBEK style, outside OpenMP region
+   ! TODO: merge water level calculations with dambreak 
    if (nPumpsWithLevels > 0) then
    
-      ! Allocate
+      ! de-allocate
+      if(allocated(results)) deallocate(results)
+      if(allocated(waterLevelsLeft)) deallocate(waterLevelsLeft)
+      if(allocated(waterLevelsRight)) deallocate(waterLevelsRight)
+      
+      ! allocate
       allocate(results(2,npumpsg), stat = ierr)
-      allocate(waterLevelsSuctionSide(npumpsg), stat = ierr)
-      allocate(waterLevelsDeliverySide(npumpsg), stat = ierr)
+      allocate(waterLevelsLeft(npumpsg), stat = ierr)
+      allocate(waterLevelsRight(npumpsg), stat = ierr)
       if (ierr.ne.0) success=.false.
    
       ! Initialize
       results = 0.0d0
-      waterLevelsSuctionSide  = 0.0d0
-      waterLevelsDeliverySide = 0.0d0
+      waterLevelsLeft  = 0.0d0
+      waterLevelsRight = 0.0d0
    
       ! Compute sumQuantitiesByWeight and sumWeights for the suction side
-      ierr = getAverageQuantityFromLinks(L1pumpsg, L2pumpsg, kpump(3,:), kpump(1,:), hu, s1, wu, 0.0d0, results)
+      !LC: TODO, do the average only over open links
+      ierr = getAverageQuantityFromLinks(L1pumpsg, L2pumpsg, wu, kpump(3,:), s1, kpump(1,:), results)
       if (ierr.ne.0) success=.false.
       
       do n = 1, npumpsg
          if (results(2,n)>0.0d0) then
-            waterLevelsSuctionSide(n)  = results(1,n)/results(2,n)
+            waterLevelsLeft(n)  = results(1,n)/results(2,n)
          endif
       enddo
    
       ! Compute sumQuantitiesByWeight and sumWeights for the delivery side
-      ierr = getAverageQuantityFromLinks(L1pumpsg, L2pumpsg, kpump(3,:), kpump(2,:), hu, s1, wu, 0.0d0, results)
+      ierr = getAverageQuantityFromLinks(L1pumpsg, L2pumpsg, wu, kpump(3,:), s1, kpump(2,:), results)
       if (ierr.ne.0) success=.false.
       
       do n = 1, npumpsg
          if (results(2,n)>0.0d0) then
-            waterLevelsDeliverySide(n)  = results(1,n)/results(2,n)
+            waterLevelsRight(n)  = results(1,n)/results(2,n)
          endif
       enddo
    
+      !Compute pump discharges
       do n = 1, npumpsg 
          ! Retrive a valid index in the network%sts%struct
-         istrpump = pumpsWithLevels(n) 
+         istru = pumpsWithLevels(n) 
          ! Do not use PrepareComputePump to compute the legacy pumps discharges
-         if (istrpump.eq.-1) cycle 
-         if (associated(network%sts%struct(istrpump)%pump)) then
-            call PrepareComputePump(network%sts%struct(istrpump)%pump, waterLevelsSuctionSide(n), waterLevelsDeliverySide(n))
-            qpump(n) = network%sts%struct(istrpump)%pump%discharge
+         if (istru.eq.-1) cycle 
+         if (associated(network%sts%struct(istru)%pump)) then
+            call PrepareComputePump(network%sts%struct(istru)%pump, waterLevelsLeft(n), waterLevelsRight(n))
+            qpump(n) = network%sts%struct(istru)%pump%discharge
          endif
       enddo
-   endif
-
-   ! Dambreak: 
-   ! TODO the code for waterLevelsLeft and waterLevelsRight can be grouped in one function shared by dambreak and pumps
-   if (ndambreak > 0) then
-   
-      ! de-allocate
-      if(allocated(results)) deallocate(results)
-      
-      ! allocate
-      allocate(results(2,ndambreaksg), stat = ierr)
-      allocate(normalVelocity(ndambreaksg), stat = ierr)
-      if (ierr.ne.0) success=.false.
-   
-      ! Initialize
-      results = 0.0d0
-      waterLevelsDambreakUpStream = 0.0d0
-      waterLevelsDambreakDownStream = 0.0d0
-      
-      !1. compute width of each dambreak
-   
-      ! Compute sumQuantitiesByWeight upstream
-      ierr = getAverageQuantityFromLinks(L1dambreaksg, L2dambreaksg, kdambreak(3,:), kdambreak(1,:), hu, s1, wu, 0.0d0, results)
-      if (ierr.ne.0) success=.false.
-      
-      do n = 1, ndambreaksg
-         if (results(2,n)>0.0d0) then
-            waterLevelsDambreakUpStream(n)  = results(1,n)/results(2,n)
-         endif
-      enddo
-      
-      ! Compute sumQuantitiesByWeight downstream
-      ierr = getAverageQuantityFromLinks(L1dambreaksg, L2dambreaksg, kdambreak(3,:), kdambreak(2,:), hu, s1, wu, 0.0d0, results)
-      if (ierr.ne.0) success=.false.
-      
-      do n = 1, ndambreaksg
-         if (results(2,n)>0.0d0) then
-            waterLevelsDambreakDownStream(n)  = results(1,n)/results(2,n)
-         endif
-      enddo
-      
-      ! u0 velocity on the flowlinks (averaged by the wetted area). The mask is the water level itself 
-      ierr = getAverageQuantityFromLinks(L1dambreaksg, L2dambreaksg, kdambreak(3,:), kdambreak(3,:), hu, u1, au, 0.0d0, results)
-      if (ierr.ne.0) success=.false.
-      
-      do n = 1, ndambreaksg
-         if (results(2,n)>0.0d0) then
-            normalVelocity(n)  = results(1,n)/results(2,n)
-         endif
-      enddo
-         
-      !Compute dambreak widths
-      do n = 1, ndambreaksg
-         istru = dambreaks(n)    
-         if (associated(network%sts%struct(istru)%dambreak)) then         
-            ! Compute the breach width
-            call prepareComputeDambreak(network%sts%struct(istru)%dambreak, waterLevelsDambreakUpStream(n), waterLevelsDambreakDownStream(n), normalVelocity(n), time0, time1, dt_user, maximumDambreakWidths(n))
-            ! Store the current dambreak width
-            breachWidthDambreak(n) = network%sts%struct(istru)%dambreak%width
-            ! Store the current dambreak crest level 
-            breachDepthDambreak(n) = network%sts%struct(istru)%dambreak%crl
-         endif
-      enddo      
    endif
 
    if (numsrc > 0) then
@@ -14013,7 +13967,162 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
    tmpstr = dumpECMessageStack(LEVEL_WARN,callback_msg)
 end subroutine flow_setexternalforcings
 
+subroutine update_dambreak_breach(startTime, deltaTime)
 
+   use m_flowgeom
+   use m_flow
+   use m_missing
+   use m_structures
+   use unstruc_channel_flow
+   use m_Dambreak
+   use m_partitioninfo 
+   use m_meteo
+   use m_flowexternalforcings
+   
+   implicit none
+
+   double precision, intent(in)          :: startTime
+   double precision, intent(in)          :: deltaTime
+   
+   ! local variables for processing dambreak
+   integer                               :: n, ierr, istru, indexHeightsAndLevels
+
+   if (ndambreak > 0) then
+      
+      ! Initialize
+      dambreakAveraging             = 0.0d0
+      waterLevelsDambreakUpStream   = 0.0d0
+      waterLevelsDambreakDownStream = 0.0d0
+      normalVelocityDambreak        = 0.0d0
+   
+      ! Compute sumQuantitiesByWeight upstream
+      ierr = getAverageQuantityFromLinks(L1dambreaksg, L2dambreaksg, wu, kdambreak(3,:), s1, kdambreak(1,:), dambreakAveraging, hu, dmiss, activeDambreakLinks, 0)
+      if (ierr.ne.0) success=.false.
+      
+      do n = 1, ndambreaksg
+         if (dambreakAveraging(2,n)>0.0d0) then
+            waterLevelsDambreakUpStream(n)  = dambreakAveraging(1,n)/dambreakAveraging(2,n)
+         endif
+      enddo
+      
+      ! Compute sumQuantitiesByWeight downstream
+      ierr = getAverageQuantityFromLinks(L1dambreaksg, L2dambreaksg, wu, kdambreak(3,:), s1, kdambreak(2,:), dambreakAveraging, hu, dmiss, activeDambreakLinks, 0)
+      if (ierr.ne.0) success=.false.
+      
+      do n = 1, ndambreaksg
+         if (dambreakAveraging(2,n)>0.0d0) then
+            waterLevelsDambreakDownStream(n)  = dambreakAveraging(1,n)/dambreakAveraging(2,n)
+         endif
+      enddo
+      
+      ! u0 velocity on the flowlinks (averaged by the wetted area). The mask is the water level itself 
+      ierr = getAverageQuantityFromLinks(L1dambreaksg, L2dambreaksg, au, kdambreak(3,:), u1, kdambreak(3,:), dambreakAveraging, hu, dmiss, activeDambreakLinks, 0)
+      if (ierr.ne.0) success=.false.
+      
+      do n = 1, ndambreaksg
+         if (dambreakAveraging(2,n)>0.0d0) then
+            normalVelocityDambreak(n)  = dambreakAveraging(1,n)/dambreakAveraging(2,n)
+         endif
+      enddo
+
+      !Compute dambreak widths
+      do n = 1, ndambreaksg
+         istru = dambreaks(n)    
+         if (associated(network%sts%struct(istru)%dambreak)) then
+            if(network%sts%struct(istru)%dambreak%algorithm == 1 .or. network%sts%struct(istru)%dambreak%algorithm == 2) then
+               ! Compute the breach width
+               call prepareComputeDambreak(network%sts%struct(istru)%dambreak, waterLevelsDambreakUpStream(n), waterLevelsDambreakDownStream(n), normalVelocityDambreak(n), startTime, deltaTime, maximumDambreakWidths(n))
+            endif
+            if(network%sts%struct(istru)%dambreak%algorithm == 3 .and. startTime > network%sts%struct(istru)%dambreak%t0) then
+               !Time in the tim file is relative to the start time
+               success = ec_gettimespacevalue_by_itemID(ecInstancePtr, item_dambreakHeightsAndWidthsFromTable, startTime-network%sts%struct(istru)%dambreak%t0)
+               if (success)  then
+                  indexHeightsAndLevels = (n - 1) * 2 + 1 
+                  network%sts%struct(istru)%dambreak%crl = dambreakHeightsAndWidthsFromTable(indexHeightsAndLevels)
+                  network%sts%struct(istru)%dambreak%width = dambreakHeightsAndWidthsFromTable(indexHeightsAndLevels + 1 ) 
+               else
+                   return
+               endif
+            endif
+            ! Store the current dambreak width
+            breachWidthDambreak(n) = network%sts%struct(istru)%dambreak%width
+            ! Store the current dambreak crest level
+            breachDepthDambreak(n) = network%sts%struct(istru)%dambreak%crl
+         endif
+      enddo
+   endif
+end subroutine update_dambreak_breach
+   
+   
+ !> Calculate the links affected by the dam break and sets bobs accordingly
+subroutine adjust_bobs_on_dambreak_breach(width, crl, startingLink, L1, L2)
+
+   use m_flowgeom
+   use m_flowexternalforcings
+   
+   implicit none
+
+   !input
+   double precision, intent(in) :: width, crl
+   integer, intent(in)          :: startingLink, L1, L2
+   !local variables
+   integer                      :: k, Lf
+   double precision             :: leftBreachWidth, rightBreachWidth
+
+   !nothing is open
+   if (width<=0) return;
+   
+   !something is open
+   Lf = iabs(kdambreak(3,startingLink))
+   bob(1,Lf) = crl
+   bob(2,Lf) = crl
+   if ((width - dambreakLinksEffectiveLength(startingLink))<= 0) then
+      wu(Lf) = width
+      return
+   else
+      !left from the breach point: the breach width is larger
+      wu(Lf) = dambreakLinksEffectiveLength(startingLink)
+      leftBreachWidth = (width - dambreakLinksEffectiveLength(startingLink))/2.0d0
+      rightBreachWidth = leftBreachWidth
+        do k = startingLink - 1, L1, -1
+         Lf = iabs(kdambreak(3,k))
+         if (leftBreachWidth>=dambreakLinksEffectiveLength(k)) then
+            bob(1,Lf) = crl
+            bob(2,Lf) = crl
+            activeDambreakLinks(k) = 1
+            wu(Lf) = dambreakLinksEffectiveLength(k)
+            leftBreachWidth = leftBreachWidth - dambreakLinksEffectiveLength(k)
+         else
+            bob(1,Lf) = crl
+            bob(2,Lf) = crl
+            activeDambreakLinks(k) = 1
+            wu(Lf) = leftBreachWidth
+            exit
+         endif
+      enddo
+      !right from the breach point   
+      do k = startingLink + 1, L2
+         Lf = iabs(kdambreak(3,k))
+         if (rightBreachWidth>=dambreakLinksEffectiveLength(k)) then
+            bob(1,Lf) = crl
+            bob(2,Lf) = crl
+            activeDambreakLinks(k) = 1
+            wu(Lf) = dambreakLinksEffectiveLength(k)
+            rightBreachWidth = rightBreachWidth - dambreakLinksEffectiveLength(k)
+         else
+            bob(1,Lf) = crl
+            bob(2,Lf) = crl
+            activeDambreakLinks(k) = 1
+            wu(Lf) = rightBreachWidth
+            exit
+         endif
+      enddo
+   endif
+   
+   return
+
+end subroutine adjust_bobs_on_dambreak_breach
+ 
  subroutine setwindstress()
  use m_flowgeom
  use m_flow
@@ -14258,6 +14367,11 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
 
    if (ngatesg > 0) then
       success = success .and. ec_gettimespacevalue(ecInstancePtr, item_gateloweredgelevel, tim, zgate)
+   endif
+   
+   !dambreak 
+   if (ndambreak > 0) then
+      call update_dambreak_breach(tim, dts)
    endif
 
    call klok(cpuextbnd(2)) ; cpuextbnd(3) = cpuextbnd(3) + cpuextbnd(2) - cpuextbnd(1)
@@ -14893,7 +15007,8 @@ subroutine unc_write_his(tim)            ! wrihis
     use m_flowexternalforcings, only: numtracers, trnames
     use m_transport, only: NUMCONST_MDU, ITRA1, ITRAN, ISED1, ISEDN, const_names, NUMCONST, itemp, isalt
     use m_structures, only: valcgen, valgenstru, valpump, valgate, valcdam, valgategen, valweirgen, &
-                            jahiscgen, jahispump, jahisgate, jahiscdam, jahisweir, jaoldstr
+                            jahiscgen, jahispump, jahisgate, jahiscdam, jahisweir, jaoldstr, jahisdambreak, &
+                            valdambreak
     use m_particles, only: japart
     use string_module
     use m_dad
@@ -14927,7 +15042,9 @@ subroutine unc_write_his(tim)            ! wrihis
                      id_sedbtrans, id_sedstrans,&
                      id_srcdim, id_srclendim, id_srcname, id_qsrccur, id_vsrccum, id_qsrcavg, id_pred, id_presa, id_pretm, id_srcx, id_srcy, id_srcptsdim, &
                      id_partdim, id_parttime, id_partx, id_party, id_partz, &
-                     id_dredlinkdim, id_dreddim, id_dumpdim, id_dredlink_dis, id_dred_dis, id_dump_dis, id_dred_tfrac, id_plough_tfrac, id_lsedtot, id_dred_name, id_dump_name, id_frac_name !id_dump_dis_frac, id_dred_dis_frac
+                     id_dredlinkdim, id_dreddim, id_dumpdim, id_dredlink_dis, id_dred_dis, id_dump_dis, id_dred_tfrac, id_plough_tfrac, id_lsedtot, id_dred_name, id_dump_name, id_frac_name, & !id_dump_dis_frac, id_dred_dis_frac, &
+                     id_dambreakdim, id_dambreakname, id_dambreak_s1up, id_dambreak_s1dn, id_dambreak_breach_depth,id_dambreak_breach_width, id_dambreak_discharge, id_dambreak_cumulative_discharge 
+                  
 
     integer, allocatable, save :: id_tra(:)
     integer, allocatable, save :: id_sf(:), id_ws(:), id_seddif(:)            ! sediment fractions 
@@ -15763,6 +15880,48 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_att(ihisfile, id_weirgen_s1dn, 'units', 'm')
             ierr = nf90_put_att(ihisfile, id_weirgen_s1dn, 'coordinates', 'weirgen_name')
         endif
+        ! Dambreak
+        if (jahisdambreak > 0 .and. ndambreaksg > 0 ) then
+           
+            ierr = nf90_def_dim(ihisfile, 'dambreaks', ndambreaksg, id_dambreakdim)
+            ierr = nf90_def_var(ihisfile, 'dambreak_name',  nf90_char,   (/ id_strlendim, id_dambreakdim /), id_dambreakname)
+            ierr = nf90_put_att(ihisfile, id_dambreakname,  'cf_role',   'timeseries_id')
+            ierr = nf90_put_att(ihisfile, id_dambreakname,  'long_name', 'dambreak name')
+            
+            
+            ierr = nf90_def_var(ihisfile, 'dambreak_s1up', nf90_double, (/ id_dambreakdim, id_timedim /), id_dambreak_s1up)
+            ierr = nf90_put_att(ihisfile, id_dambreak_s1up, 'standard_name', 'sea_surface_height')
+            ierr = nf90_put_att(ihisfile, id_dambreak_s1up, 'long_name', 'dambreak water level up')
+            ierr = nf90_put_att(ihisfile, id_dambreak_s1up, 'units', 'm')
+            ierr = nf90_put_att(ihisfile, id_dambreak_s1up, 'coordinates', 'dambreak_name')
+
+            ierr = nf90_def_var(ihisfile, 'dambreak_s1dn',     nf90_double, (/ id_dambreakdim, id_timedim /), id_dambreak_s1dn)
+            ierr = nf90_put_att(ihisfile, id_dambreak_s1dn, 'standard_name', 'sea_surface_height')
+            ierr = nf90_put_att(ihisfile, id_dambreak_s1dn, 'long_name', 'dambreak water level down')
+            ierr = nf90_put_att(ihisfile, id_dambreak_s1dn, 'units', 'm')
+            ierr = nf90_put_att(ihisfile, id_dambreak_s1dn, 'coordinates', 'dambreak_name')
+            
+            ierr = nf90_def_var(ihisfile, 'dambreak_breach_depth', nf90_double, (/ id_dambreakdim, id_timedim /), id_dambreak_breach_depth)
+            ierr = nf90_put_att(ihisfile, id_dambreak_breach_depth, 'standard_name', 'dambreak_breach_depth')
+            ierr = nf90_put_att(ihisfile, id_dambreak_breach_depth, 'long_name', 'dambreak breach depth')
+            ierr = nf90_put_att(ihisfile, id_dambreak_breach_depth, 'units', 'm')
+            ierr = nf90_put_att(ihisfile, id_dambreak_breach_depth, 'coordinates', 'dambreak_name')
+            
+            ierr = nf90_def_var(ihisfile, 'dambreak_breach_width', nf90_double, (/ id_dambreakdim, id_timedim /), id_dambreak_breach_width)
+            ierr = nf90_put_att(ihisfile, id_dambreak_breach_width, 'standard_name', 'dambreak_breach_width')
+            ierr = nf90_put_att(ihisfile, id_dambreak_breach_width, 'long_name', 'dambreak breach width')
+            ierr = nf90_put_att(ihisfile, id_dambreak_breach_width, 'units', 'm')
+            ierr = nf90_put_att(ihisfile, id_dambreak_breach_width, 'coordinates', 'dambreak_name')
+            
+            ierr = nf90_def_var(ihisfile, 'dambreak_discharge', nf90_double, (/ id_dambreakdim, id_timedim /), id_dambreak_discharge)
+            ierr = nf90_put_att(ihisfile, id_dambreak_discharge, 'long_name', 'Instantaneous discharge through dambreaks')
+            ierr = nf90_put_att(ihisfile, id_dambreak_discharge, 'units', 'm3 s-1') !link_sum
+            
+            ierr = nf90_def_var(ihisfile, 'dambreak_cumulative_discharge', nf90_double, (/ id_dambreakdim, id_timedim /), id_dambreak_cumulative_discharge)
+            ierr = nf90_put_att(ihisfile, id_dambreak_cumulative_discharge, 'long_name', 'Cumulative discharge through dambreaks')
+            ierr = nf90_put_att(ihisfile, id_dambreak_cumulative_discharge, 'units', 'm3') !link_sum
+            
+        endif
         
         if(dad_included) then  ! Output for dredging and dumping
             ierr = nf90_def_dim(ihisfile, 'ndredlink', dadpar%nalink, id_dredlinkdim)
@@ -16208,6 +16367,18 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_var(ihisfile, id_weirgen_crestw, valweirgen(6,i), (/ i, it_his /)) ! changed TODO: AvD: is zcgen(3) to be interpreted as crestw or openw?
             ierr = nf90_put_var(ihisfile, id_weirgen_s1up  , valweirgen(3,i), (/ i, it_his /))
             ierr = nf90_put_var(ihisfile, id_weirgen_s1dn  , valweirgen(4,i), (/ i, it_his /))
+         end do
+      end if
+          
+      if (jahisdambreak > 0 .and. ndambreak > 0) then
+         do i = 1,ndambreaksg 
+            ierr = nf90_put_var(ihisfile, id_dambreakname, trim(dambreak_ids(i)),(/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_dambreak_s1up, waterLevelsDambreakUpStream(i),(/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_dambreak_s1dn, waterLevelsDambreakDownStream(i), (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_dambreak_breach_depth, breachDepthDambreak(i),(/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_dambreak_breach_width, breachWidthDambreak(i), (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_dambreak_discharge, valdambreak(1,i), (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_dambreak_cumulative_discharge, valdambreak(2,i), (/ i, it_his /))                        
          end do
       end if
 
@@ -17563,7 +17734,7 @@ end subroutine unc_write_shp
  use unstruc_messages
  use string_module
  use m_plotdots
- use geometry_module, only: getdx, getdy, dbdistance, normalin, normalout, half, duitpl
+ use geometry_module, only: getdx, getdy, dbdistance, normalin, normalout, half, duitpl, dlinedis
  use sorting_algorithms, only: indexx
  use m_flowtimes, only: ti_waq
  use gridoperations
@@ -18399,7 +18570,7 @@ end subroutine unc_write_shp
        walls(3,nw) = k4                             ! second wall corner
 
        call duitpl(xzw(k1), yzw(k1), xk(k3), yk(k3), xzw(k1), yzw(k1), xk(k4), yk(k4), sig, jsferic)
-       call dlinedis(xzw(k1), yzw(k1), xk(k3), yk(k3), xk(k4), yk(k4),JA,DIS,XN,YN)
+       call dlinedis(xzw(k1), yzw(k1), xk(k3), yk(k3), xk(k4), yk(k4),JA,DIS,XN,YN, jsferic, jasfer3D, dmiss)
 !
 !       dxx = getdx( xk(k3), yk(k3), xk(k4), yk(k4) )  ! xk(k4) - xk(k3)
 !       dyy = getdy( xk(k3), yk(k3), xk(k4), yk(k4) )  ! yk(k4) - yk(k3)
@@ -20204,7 +20375,7 @@ end do
  use m_flowgeom
  use m_sferic
  use m_missing, only: dmiss, dxymis
- use geometry_module, only: normaloutchk, duitpl, dprodout, half, spher2locvec, xpav
+ use geometry_module, only: normaloutchk, duitpl, dprodout, half, spher2locvec, xpav, dlinedis
  
  implicit none
  integer,          intent(in)  :: n !< cell number (in 1:nump)
@@ -20242,7 +20413,7 @@ end do
      x4 = x4 + nint( (xz(n)-x4)/360d0 ) * 360d0
  end if
 
- CALL DLINEDIS(Xz(n),Yz(n),X3,Y3,X4,Y4,JA,DIS,Xd,Yd)  ! dis is half cell size in boundary normal dir
+ CALL DLINEDIS(Xz(n),Yz(n),X3,Y3,X4,Y4,JA,DIS,Xd,Yd, jsferic, jasfer3D, dmiss)  ! dis is half cell size in boundary normal dir
  dis = max(dis,0.5d0*sqrt(ba(n)))
 
 ! (rx,ry) outward normal in reference frame of half(x3,y3,x4,y4)
@@ -20252,7 +20423,7 @@ end do
  yci  = yz(n)
 
  if ( jsferic.eq.1 .and. jasfer3D.eq.1 ) then
-    CALL DLINEDIS(Xci,Yci,X3,Y3,X4,Y4,JA,DIS2,Xd,Yd)  ! dis is half cell size in boundary normal dir
+    CALL DLINEDIS(Xci,Yci,X3,Y3,X4,Y4,JA,DIS2,Xd,Yd, jsferic, jasfer3D, dmiss)  ! dis is half cell size in boundary normal dir
 
 !   compute reference point coordinates
     call half(x3,y3,x4,y4,xref,yref, jsferic, jasfer3D)
@@ -20282,7 +20453,7 @@ end do
        dis = dis*rd2dg/ra
     endif
 
-    CALL DLINEDIS(Xci,Yci,X3,Y3,X4,Y4,JA,DIS2,Xd,Yd)  ! dis is half cell size in boundary normal dir
+    CALL DLINEDIS(Xci,Yci,X3,Y3,X4,Y4,JA,DIS2,Xd,Yd, jsferic, jasfer3D, dmiss)  ! dis is half cell size in boundary normal dir
 
     xcb  = xd + rx*dis
     ycb  = yd + ry*dis
@@ -29476,7 +29647,7 @@ end subroutine setbedlevelfromnetfile
 
  do L = 1,lnx1D                                       ! 1D
  
-    if (iadv(L) > 20 .and. iadv(L) < 30) cycle ! skip update of bobs for structures
+    if (iadv(L) > 20 .and. iadv(L) < 30) cycle        ! skip update of bobs for structures
  
     n1  = ln(1,L)   ; n2 = ln(2,L)                    ! flow ref
     k1  = lncn(1,L) ; k2 = lncn(2,L)                  ! net  ref
@@ -31238,15 +31409,17 @@ end subroutine setbobs_fixedweirs
     enddo
 
     do istru = 1, network%sts%count
+       !TODO: LC nstrucsg should not account for dambreak ! if(.not.allocated(L1strucsg)) cycle
        pstru => network%sts%struct(istru)
        L = pstru%link_number
        if (hu(l) > 0) then
           k1 = ln(1,L)
           k2 = ln(2,L)
-       
-          if (network%sts%struct(istru)%ST_TYPE == ST_WEIR) then
+
+          select case(network%sts%struct(istru)%ST_TYPE) 
+             case (ST_WEIR)
                 call computeweir(pstru%weir, fu(L), ru(L), au(L), width, kfu, s1(k1), s1(k2), &
-                                 q1(L), q1(L), u1(L), u0(L), dx(L), dts)
+                                 q1(L), q1(L), u1(L), u0(L), dx(L), dts, network%sts%struct(istru)%state)
              continue
               !elseif (network%sts%struct(istru)%ST_TYPE == ST_GENERAL_ST) then
              !   firstiter = .true.
@@ -31257,12 +31430,14 @@ end subroutine setbobs_fixedweirs
              !   call computeGeneralStructure(pstru%generalst, fu(Lf), ru(Lf), s_on_crest, &
              !          au(Lf), as1, as2, width, kfu, s1(k1), s1(k2), s1(k1), s1(k2), q1(Lf), & !s00(k1), s00(k2), q1(Lf), & ! TODO: find proper s00 or s2 iterand
              !          q1(Lf), qtotal, u1(Lf), u0(Lf), dx(Lf), dts, firstiter, jarea, flowdir = (L>0))
-          else
-                ! NOT supported error
-          endif
+             case (ST_DAMBREAK)
+                continue
+             case default
+                write(msgbuf,'(''Unsupported structure type'', i5)') network%sts%struct(istru)%ST_TYPE
+                call err_flush()
+          end select
        endif 
     enddo
-
  else                                                  ! 3D
 
     call update_verticalprofiles()
@@ -33001,31 +33176,40 @@ if (jahisbal > 0) then
 
 ! =================================================================================================
 ! =================================================================================================
-   subroutine structure_parameters()
+   subroutine structure_parameters
       use m_flowgeom , only : ln, wu
       use m_flow
-      use m_structures, only: valpump, valcgen, valgenstru, valgate, valcdam, valgategen, valweirgen,  &
+      use m_structures, only: valpump, valcgen, valgenstru, valgate, valcdam, valgategen, valweirgen, valdambreak,  &
                               NUMVALS_PUMP, NUMVALS_GATE, NUMVALS_CDAM, NUMVALS_CGEN, NUMVALS_GATEGEN, &
-                              NUMVALS_WEIRGEN, NUMVALS_GENSTRU
+                              NUMVALS_WEIRGEN, NUMVALS_GENSTRU, NUMVALS_DAMBREAK
       use m_flowexternalforcings, only: ngenstru
       use m_partitioninfo
       use m_flowtimes
       use m_missing, only: dmiss
       implicit none
-      integer          :: i, n, L, Lf, La, ierr, ntmp, k, ku, kd
-      double precision :: dir
-      integer          :: jaghost, idmn_ghost
+      integer                       :: i, n, L, Lf, La, ierr, ntmp, k, ku, kd
+      double precision              :: dir
+      integer                       :: jaghost, idmn_ghost
+      double precision, save        :: timprev = -1d0
+      double precision              :: timstep
 
       if (jampi > 0) then
          if( .not.allocated( reducebuf ) ) then
             nreducebuf = npumpsg*NUMVALS_PUMP + ngatesg*NUMVALS_GATE + ncdamsg*NUMVALS_CDAM + ncgensg*NUMVALS_CGEN &
-                       + ngategen*NUMVALS_GATEGEN + nweirgen*NUMVALS_WEIRGEN + ngenstru*NUMVALS_GENSTRU
+                       + ngategen*NUMVALS_GATEGEN + nweirgen*NUMVALS_WEIRGEN + ngenstru*NUMVALS_GENSTRU + ngenstru*NUMVALS_GENSTRU &
+                       + ndambreaksg * NUMVALS_DAMBREAK
             allocate ( reducebuf  ( nreducebuf ) , stat = ierr      )
             call aerr('reducebuf  ( nreducebuf )', ierr, nreducebuf ) ; reducebuf  = 0d0
          endif
       endif
 
       if (ti_his == 0) return
+      ! in order to compute the cumulative discharge, we have to compute the time step (see update updateValuesOnCrossSections)
+      if (timprev == -1d0) then
+        timstep  = 0d0
+      else
+        timstep  = time1 - timprev
+      end if       
       !
       ! === Pumps
       !
@@ -33263,6 +33447,27 @@ if (jahisbal > 0) then
          endif
       enddo
       !
+      ! ==dambreak
+      !
+      do n = 1, ndambreaksg
+         ! valdambreak(2,n) is the cumulative over time, we do not reset it to 0
+         valdambreak(1,n) = 0d0
+         do L = L1dambreaksg(n),L2dambreaksg(n)
+            Lf = kdambreak(3,L)
+            La = abs( Lf )
+            if( jampi > 0 ) then
+               call link_ghostdata(my_rank,idomain(ln(1,La)), idomain(ln(2,La)), jaghost, idmn_ghost)
+               if ( jaghost.eq.1 ) cycle
+            endif
+            dir = 1d0
+            if( Ln(1,La) /= kdambreak(1,L) ) then
+               dir = -1d0
+            end if
+            valdambreak(1,n) = valdambreak(1,n) + q1(La) * dir
+         enddo
+         valdambreak(2,n) = valdambreak(2,n) + valdambreak(1,n) * timstep
+      enddo   
+      !
       ! === General structures (from new ext file)
       !
       do n = 1,ngenstru
@@ -33340,6 +33545,10 @@ if (jahisbal > 0) then
             call fill_reduce_buffer( valgenstru, ngenstru*NUMVALS_GENSTRU )
             n = 1
          endif
+         if( ndambreaksg > 0 ) then
+            call fill_reduce_buffer( valdambreak, ndambreaksg*NUMVALS_DAMBREAK )
+            n = 1
+         endif
          if( n == 1 ) then
             call reduce_crs(reducebuf,nreducebuf,1)
             !call reduce_struc(reducebuf,nreducebuf)
@@ -33407,7 +33616,7 @@ if (jahisbal > 0) then
          endif
 
          if( ncgensg > 0 ) then
-            call subsitute_reduce_buffer( valcgen   , ncgensg*NUMVALS_CGEN     )
+            call subsitute_reduce_buffer( valcgen, ncgensg*NUMVALS_CGEN     )
             do n = 1,ncgensg
                if( valcgen(1,n) == 0d0 ) then
                   valcgen(2,n) = dmiss
@@ -33462,7 +33671,14 @@ if (jahisbal > 0) then
                endif
             enddo
          endif
+         ! === Dambreak
+         if( ndambreaksg > 0 ) then
+            call subsitute_reduce_buffer( valdambreak, ndambreaksg*NUMVALS_DAMBREAK )
+         endif
       endif
+      
+      !update timeprev
+      timprev = time1
 
  end subroutine structure_parameters
 
@@ -36008,8 +36224,8 @@ endif ! read mext file
  endif
 
  if (allocated(kez)) then  ! mext > 0 .or. len_trim(md_extfile_new) > 0) then
-    deallocate ( kez, keu, kes, ketm, kesd, ket, keuxy, ken, ke1d2d, keg, ked, kep, keklep, kegs, kegen, itpez, itpenz, itpeu, itpenu, kew, ketr)
- end if
+    deallocate ( kez, keu, kes, ketm, kesd, ket, keuxy, ken, ke1d2d, keg, ked, kep, kedb, keklep, kegs, kegen, itpez, itpenz, itpeu, itpenu, kew, ketr)
+end if
 
  if (mext > 0) then
     call doclose(mext) ! close ext file
@@ -38757,8 +38973,12 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
 
  deallocate(ihu, csh, snh, dzsillu, dzsilld, crestlen, taludu, taludd, vegetat, iweirtyp)
  if (jatabellenboekorvillemonte == 0 .and. jashp_fxw == 0 .and. nfxw.gt.0) then 
-    deallocate(shlxw, shrxw, crestlxw, taludlxw, taludrxw, vegxw)
-    if(allocated(iweirtxw)) deallocate(iweirtxw)
+    if(allocated(shlxw)) deallocate(shlxw)
+    if(allocated(shrxw)) deallocate(shrxw)
+    if(allocated(crestlxw)) deallocate(crestlxw)
+    if(allocated(taludlxw)) deallocate(taludlxw)
+    if(allocated(taludrxw)) deallocate(taludrxw)
+    if(allocated(vegxw)) deallocate(vegxw)
  endif   
  
  do i = 1, nfxw
@@ -39043,7 +39263,7 @@ subroutine setbobsonroofs( )      ! override bobs along pliz's
               enddo
    
            enddo iloop
-        else                                                  !       use kdtree to find nearest dike
+        else                                                  ! use kdtree to find nearest dike
            k      = iPol(iL)
            jacros = 1
            sL     = dSL(iL)
@@ -39135,7 +39355,7 @@ subroutine setbobsonroofs( )      ! override bobs along pliz's
            enddo
 
         enddo iloop2
-     else                                                  !       use kdtree to find nearest dike
+     else                                                  ! use kdtree to find nearest dike
         k      = iPol(iL)
         jacros = 1
         sL     = dSL(iL)
@@ -40769,8 +40989,9 @@ subroutine makethindamadmin()
    use m_flowgeom
    use network_data
    use m_alloc
-   use m_sferic, only: jsferic
-   use geometry_module, only: getdxdy, duitpl
+   use m_sferic, only: jsferic, jasfer3D
+   use geometry_module, only: getdxdy, duitpl, dlinedis
+   use m_missing, only: dmiss
 
    implicit none
    
@@ -40809,7 +41030,7 @@ subroutine makethindamadmin()
             thindam(3,nthd) = k4
 
             call duitpl(xzw(k1), yzw(k1), xk(k3), yk(k3), xzw(k1), yzw(k1), xk(k4), yk(k4), sig, jsferic)
-            call dlinedis(xzw(k1), yzw(k1), xk(k3), yk(k3), xk(k4), yk(k4),JA,DIS,XN,YN)
+            call dlinedis(xzw(k1), yzw(k1), xk(k3), yk(k3), xk(k4), yk(k4),JA,DIS,XN,YN, jsferic, jasfer3D, dmiss)
             a = 0d0; b = 0d0
             call getdxdy( xk(k3), yk(k3), xk(k4), yk(k4), a, b, jsferic)
             rrr = sqrt(a*a + b*b)

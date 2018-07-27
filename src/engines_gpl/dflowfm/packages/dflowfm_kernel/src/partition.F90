@@ -4661,23 +4661,34 @@ end subroutine partition_make_globalnumbers
    end subroutine
 
 
-   !> Generic function for performing averaging of a cell quantity (e.g. the water levels hu) over links,
-   !> also across multiple MPI ranks
-   function getAverageQuantityFromLinks(startLinks, endLinks, links, cells, mask, & 
-                                        cellQuantity, weights, maskValue, results) result(ierr)
+   !> Generic function for performing weighted average on a quantity defined on cells or links, also applying optional filters
+   !> optional firstFilter is defined on a global weights array
+   !> optional filter2 is defined on a local array
+   !> works also across multiple MPI ranks
+   function getAverageQuantityFromLinks(startLinks, endLinks, weights, indsWeight, quantity, indsQuantity, results, &
+      firstFilter, firstFilterValue, secondFilter, secondFilterValue) result(ierr)
 
    use mpi
    use m_flowexternalforcings
    use m_timer
 
    !inputs
-   integer,intent(in),dimension(:)               :: startLinks, endLinks, links, cells        
-   double precision,intent(in),dimension(:)      :: mask, cellQuantity, weights          
-   double precision,intent(in)                   :: maskValue
-   
+   integer,intent(in),dimension(:)               :: startLinks             !< start indexes [1,nsegments]
+   integer,intent(in),dimension(:)               :: endLinks               !< end   indexes [1,nsegments]
+   double precision,intent(in),dimension(:)      :: weights                !< global weights array
+   integer,intent(in),dimension(:)               :: indsWeight             !< local indexes on global weights array
+   double precision,intent(in),dimension(:)      :: quantity               !< global quantity array
+   integer,intent(in),dimension(:)               :: indsQuantity           !< local indexes on global quantity array
+
+   double precision,intent(in),dimension(:), optional :: firstFilter       !< filter to apply on the global weights array
+   double precision,intent(in), optional              :: firstFilterValue  !< value to activate the first filter (activated if larger than filter value)
+
+   integer,intent(in), dimension(:), optional    :: secondFilter           !< filter to apply on the local weights array
+   integer,intent(in), optional                  :: secondFilterValue      !< value to activate the second filter (activated if larger than filter value)
    !locals
-   integer                                       :: ns, nsegments, nl, link, cell
+   integer                                       :: ns, nsegments, nl, indWeight, indQuantity
    double precision                              :: sumQuantitiesByWeight, sumWeights
+   double precision                              :: quantitiesByWeight, weight
    double precision, allocatable                 :: resultsSum(:,:)
 
    !outputs
@@ -4687,28 +4698,46 @@ end subroutine partition_make_globalnumbers
    ierr = 0
    nsegments = size(startLinks)
    allocate(resultsSum(2,nsegments))
+   results = 0.0d0
 
    do ns = 1, nsegments
-      
+
       sumQuantitiesByWeight = 0d0
       sumWeights            = 0d0
-      
+
       do nl  = startLinks(ns), endLinks(ns)
 
-         link  = abs(links(nl))
-         cell  = abs(cells(nl))
+         indWeight    = abs(indsWeight(nl))
+         indQuantity  = abs(indsQuantity(nl))
+         quantitiesByWeight = 0.0d0
+         weight = 0.0d0
 
          if ( jampi.eq.1 ) then
             ! Exclude ghost nodes
-            if ( idomain(cell).ne.my_rank ) then
+            if ( idomain(indQuantity).ne.my_rank ) then
                cycle
             end if
          end if
 
-         if ( mask(link) > maskValue ) then
-            sumQuantitiesByWeight   = sumQuantitiesByWeight + cellQuantity(cell)*weights(link)
-            sumWeights              = sumWeights + weights(link)
+         quantitiesByWeight =  quantity(indQuantity)*weights(indWeight)
+         weight = weights(indWeight)
+
+         if ( present(firstFilter).and.present(firstFilterValue)) then
+            if ( firstFilter(indWeight) <= firstFilterValue ) then
+               quantitiesByWeight =  0.0d0
+               weight             =  0.0d0
+            endif
          endif
+
+         if ( present(secondFilter).and.present(secondFilterValue)) then
+            if ( secondFilter(nl) <= secondFilterValue ) then
+               quantitiesByWeight =  0.0d0
+               weight             =  0.0d0
+            endif
+         endif
+
+         sumQuantitiesByWeight   = sumQuantitiesByWeight + quantitiesByWeight
+         sumWeights              = sumWeights + weight
 
       enddo
       results(1,ns) = sumQuantitiesByWeight

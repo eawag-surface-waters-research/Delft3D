@@ -67,6 +67,7 @@ module geometry_module
    public :: ave3D
    !from rest.F90 
    public :: crossinbox          ! line 38
+   public :: dlinedis            ! line 3889 
    public :: dprodout            ! line 3941
    public :: dcosphi             ! line 3986
    public :: spher2locvec        ! line 4391
@@ -86,6 +87,7 @@ module geometry_module
    public :: GETCIRCUMCENTER     ! line 18653
    public :: dotp                ! line 18843
    public :: circumcenter3       ! line 18851
+   public :: comp_breach_point
    
    interface clockwise
       module procedure clockwise_sp
@@ -93,6 +95,55 @@ module geometry_module
    end interface clockwise
 
    contains
+
+   !> projects a point to a polyline and finds the closest link
+   subroutine comp_breach_point(start_location_x, start_location_y, xp, yp, np, xl, yl, Lstart, x_breach, y_breach, jsferic, jasfer3D, dmiss)
+
+   implicit none
+
+   !input
+   integer, intent(in)                       :: np, jsferic, jasfer3D
+   integer, intent(inout)                    :: Lstart
+   double precision, intent(in)              :: start_location_x, start_location_y, dmiss
+   double precision, allocatable, intent(in) :: xp(:), yp(:), xl(:), yl(:)
+   double precision, intent(inout)           :: x_breach, y_breach
+   
+   !locals
+   integer                                   :: k, ja, Lf, k1, k2
+   double precision                          :: dis, distemp, xn, yn, xntempa, yntempa, xc, yc
+
+   ! Project the start of the breach on the polyline, find xn and yn
+   !if(.not.allocated(xp)) return
+   !if(.not.allocated(yp)) return
+   xn = dmiss
+   yn = dmiss
+   dis = huge(dmiss)
+   do k  = 1, np - 1
+      call dlinedis(start_location_x, start_location_y, xp(k), yp(k), xp(k + 1), yp(k + 1), ja, distemp, xntempa, yntempa, jsferic, jasfer3D, dmiss)
+      if (distemp <= dis ) then
+         xn  = xntempa
+         yn  = yntempa
+         dis = distemp
+      endif
+   enddo
+
+   ! Assign the flow links and the starting link of the breach
+   dis = huge(dmiss)      
+   do k = 1, size(xl) - 1
+      ! compute the mid point of the segment
+      call half(xl(k), yl(k), xl(k+1), yl(k+1), xc, yc, jsferic, jasfer3D)
+      ! calculate the distance with projected start of the breach
+      distemp = dbdistance(xn, yn, xc, yc, jsferic, jasfer3D, dmiss)
+      ! identify the closest link to the projected point
+      if (distemp <= dis) then
+         Lstart   = k
+         x_breach = xc
+         y_breach = yc
+         dis      = distemp
+      endif
+   enddo
+   
+   end subroutine comp_breach_point   
 
       !> Checks orientation of a polygon in single precision.
       function clockwise_sp(x,y) result(cw)
@@ -1162,6 +1213,86 @@ module geometry_module
       RETURN
       end subroutine crossinbox
 
+      !> Computes the perpendicular distance from point 3 to a line 1-2.
+      subroutine dlinedis(X3,Y3,X1,Y1,X2,Y2,JA,DIS,XN,YN, jsferic, jasfer3D, dmiss)
+      
+      implicit none
+      DOUBLE PRECISION, intent(in   ) :: X1,Y1,X2,Y2 !< x,y coordinates of the line between point 1 and 2.
+      DOUBLE PRECISION, intent(in   ) :: X3,Y3       !< x,y coordinates of the point for which to compute the distance.
+      integer         , intent(  out) :: ja          !< Whether or not (1/0) the computation was possible. If line points 1 and 2 coincide, ja==0, and distance is just Euclidean distance between 3 and 1.
+      DOUBLE PRECISION, intent(  out) :: DIS         !< Perpendicular distance from point 3 and line 1-2.
+      DOUBLE PRECISION, intent(  out) :: XN, YN      !< Coordinates of the projected point from point 3 onto line 1-2.
+      integer,          intent(in   ) :: jsferic, jasfer3D
+      double precision, intent(in   ) :: dmiss
+      
+      DOUBLE PRECISION :: R2,RL,X21,Y21,Z21,X31,Y31,Z31
+      DOUBLE PRECISION :: xx1,xx2,xx3,yy1,yy2,yy3,zz1,zz2,zz3,xxn,yyn,zzn
+
+!     korste afstand tot lijnelement tussen eindpunten
+      JA  = 0
+      
+      if ( jsferic.eq.0 .or. jasfer3D.eq.0 ) then
+         X21 = getdx(x1,y1,x2,y2,jsferic)
+         Y21 = getdy(x1,y1,x2,y2,jsferic)
+         X31 = getdx(x1,y1,x3,y3,jsferic)
+         Y31 = getdy(x1,y1,x3,y3,jsferic)
+         R2  = dbdistance(x2,y2,x1,y1,jsferic, jasfer3D, dmiss)
+         R2  = R2*R2
+!         IF (R2 .NE. 0) THEN
+         IF (R2 .GT. 1D-8) THEN
+            RL  = (X31*X21 + Y31*Y21) / R2
+            RL  = MAX( MIN(1d0,RL) , 0d0)
+            JA  = 1
+            XN  = X1 + RL*(x2-x1)
+            
+!           fix for spherical, periodic coordinates
+            if ( jsferic.eq.1 ) then
+               if ( x2-x1.gt.180d0 ) then
+                  XN = XN - RL*360d0
+               else if ( x2-x1.lt.-180d0 ) then
+                  XN = XN + RL*360d0
+               end if
+            end if
+            
+            YN  = Y1 + RL*(y2-y1)
+            DIS = dbdistance(x3,y3,xn,yn,jsferic, jasfer3D, dmiss)
+         ELSE  ! node 1 -> node 2
+            DIS = dbdistance(x3,y3,x1,y1,jsferic, jasfer3D, dmiss)
+         ENDIF
+      else
+         call sphertocart3D(x1,y1,xx1,yy1,zz1)
+         call sphertocart3D(x2,y2,xx2,yy2,zz2)
+         call sphertocart3D(x3,y3,xx3,yy3,zz3)
+         
+         x21 = xx2-xx1
+         y21 = yy2-yy1
+         z21 = zz2-zz1
+         x31 = xx3-xx1
+         y31 = yy3-yy1
+         z31 = zz3-zz1
+
+         r2  = x21*x21 + y21*y21 + z21*z21      
+         if (R2 .GT. 1D-8) then
+            RL = (X31*X21 + Y31*Y21 + Z31*Z21) / R2
+            RL  = MAX( MIN(1d0,RL) , 0d0)
+            JA  = 1
+            
+            XXN  = xx1 + RL*x21 
+            YYN  = yy1 + RL*y21
+            ZZN  = zz1 + RL*z21
+            x31 = xxn-xx3
+            y31 = yyn-yy3
+            z31 = zzn-zz3
+            DIS = sqrt(x31*x31 + y31*y31 + z31*z31)      
+            
+            call Cart3Dtospher(xxn,yyn,zzn,xn,yn,maxval((/x1,x2,x3/)))
+         else   
+            DIS = dbdistance(x3,y3,x1,y1, jsferic, jasfer3D, dmiss)
+         endif   
+      end if
+      
+      RETURN
+      END subroutine dlinedis
 
       double precision function dprodout(x1,y1,x2,y2,x3,y3,x4,y4, jsferic, jasfer3D)    ! out product of two segments
       implicit none
@@ -2532,5 +2663,5 @@ module geometry_module
       endif
 
       end subroutine circumcenter3
- 
+
 end module geometry_module

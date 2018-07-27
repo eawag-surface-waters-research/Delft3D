@@ -169,6 +169,7 @@ module m_meteo
 
    integer, target :: item_nudge_tem                                         !< 3D temperature for nudging
    integer, target :: item_nudge_sal                                         !< 3D salinity for nudging
+   integer, target :: item_dambreakHeightsAndWidthsFromTable                 !< Dambreak heights and widths
    !
    integer :: n_qhbnd !< Number of already connected qh-boundaries.
    
@@ -244,6 +245,7 @@ module m_meteo
       item_my                                    = ec_undef_int
       item_dissurf                               = ec_undef_int
       item_diswcap                               = ec_undef_int
+      item_dambreakHeightsAndWidthsFromTable     = ec_undef_int                    
       !
       n_qhbnd = 0
       !
@@ -491,7 +493,9 @@ module m_meteo
             !dataPtr1      => qpump
          case ('damlevel')
             itemPtr1 => item_damlevel
-            !dataPtr1      => zcdam
+         case ('dambreakHeightsAndWidths')      
+            itemPtr1 => item_dambreakHeightsAndWidthsFromTable
+            dataPtr1 => dambreakHeightsAndWidthsFromTable
          case ('gateloweredgelevel')
             itemPtr1 => item_gateloweredgelevel
             dataPtr1 => zgate
@@ -969,7 +973,7 @@ module m_meteo
       converterId = ecCreateConverter(ecInstancePtr)
       
       select case(target_name)
-      case ('shiptxy', 'movingstationtxy', 'discharge_salinity_temperature_sorsin', 'pump', 'damlevel', 'gateloweredgelevel', 'generalstructure')
+      case ('shiptxy', 'movingstationtxy', 'discharge_salinity_temperature_sorsin', 'pump', 'damlevel', 'gateloweredgelevel', 'generalstructure', 'dambreakHeightsAndWidths')
          ! for the FM 'target' arrays, the index is provided by the caller
          if (.not. present(targetIndex)) then
             message = 'Internal program error: missing targetIndex for quantity '''//trim(target_name)
@@ -1042,7 +1046,7 @@ module m_meteo
             end if
             ! the file reader will have created an item called 'uniform_item'
             sourceItemName = 'uniform_item'
-         case ('pump','generalstructure','damlevel','gateloweredgelevel')
+         case ('pump','generalstructure','damlevel','gateloweredgelevel','dambreakHeightsAndWidths')
             if (checkFileType(ec_filetype, provFile_uniform, target_name)) then
                sourceItemId   = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'uniform_item')
                if (sourceItemId==ec_undef_int) then 
@@ -7103,9 +7107,10 @@ contains
    !
    ! ==========================================================================
    !> 
-   subroutine selectelset_internal_links( filename, filetype, xz, yz, ln, lnx, keg, numg ) ! find links cut by polyline filetype 9  
+   subroutine selectelset_internal_links( filename, filetype, xz, yz, ln, lnx, keg, numg, xps, yps, nps, lftopol) ! find links cut by polyline filetype 9  
      implicit none
-   
+     
+     !inputs
      character(len=*), intent(in)    :: filename   ! file name for meteo data file
      integer     ,     intent(in)    :: filetype   ! spw, arcinfo, uniuvp etc
      double precision, intent(in)    :: xz (:)
@@ -7115,13 +7120,19 @@ contains
      integer         , intent(out)   :: keg(:)
      integer         , intent(out)   :: numg
      integer                         :: isec
-      
-     integer                         :: minp, np, L, k1, k2, ja
-     double precision, allocatable   :: xp(:) , yp(:)  
-     double precision                :: xa, ya, xb, yb,xm, ym, CRPM 
+     
+     !optional inputs/outputs
+     double precision, allocatable, optional, dimension(:), intent(inout) :: xps(:), yps(:) 
+     integer, optional, intent(inout) :: nps
+     integer, optional, dimension(:), intent(inout) :: lftopol
+                                             
+     !locals 
+     integer :: minp, L, k1, k2, ja, np
+     double precision :: xa, ya, xb, yb,xm, ym, CRPM 
+     double precision, allocatable, dimension(:) :: xp, yp
+
      
      numg = 0 
-       
      if (filetype == poly_tim) then
    
         call realloc(xp,100000)
@@ -7139,6 +7150,7 @@ contains
     
            if (ja == 1) then   
               numg = numg + 1
+              lftopol(numg) = isec
               if (crpm > 0) then 
                  keg(numg) = -L
               else 
@@ -7146,8 +7158,19 @@ contains
               end if
            end if
         enddo
+
+        if(present(xps)) then
+           if(allocated(xps)) deallocate(xps)
+           if(allocated(yps)) deallocate(yps)
+           call realloc(xps,100000)
+           call realloc(yps,100000)
+           xps = xp
+           yps = yp
+           nps = np
+        endif
         deallocate(xp,yp)
-    end if
+
+     end if
    end subroutine selectelset_internal_links
    !
    !

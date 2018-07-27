@@ -1249,7 +1249,327 @@ implicit none
       return
    end subroutine dealloc_bndarr
 
-end module m_bnd
+   end module m_bnd
+   
+   
+!> A cross-section path is defined by a polyline.
+!! On the unstructured grid it then results in a set of flow links that
+!! cross the polyline (both 1D and 2D).
+!! Used for cross sections, and thin dams and dykes.
+module m_crspath
+implicit none
+
+!> Data type for storing the the polyline path and set of crossed flow
+!! links.
+type tcrspath
+    integer                       :: np            !< Nr of polyline points
+    integer                       :: lnx           !< Nr. of flow links that cross the crs path
+    integer, allocatable          :: ln(:)         !< Flow links (size=len) (sign defines orientation)
+    integer, allocatable          :: indexp(:)     !< Index of segment in xp by which each link is crossed.
+                                                   !! (between xp(i) and xp(i+1))
+    double precision, allocatable :: wfp(:)        !< Weightfactor of first point in crossed segment
+                                                   !! as indicated in indexp (between 0 and 1).
+    double precision, allocatable :: xp(:), yp(:), &
+                                     zp(:)         !< Polyline points that define the crs (size=np)
+    double precision, allocatable :: xk(:,:), yk(:,:) !< For plotting only (size=2,lnx).
+                                                   !! for all 'lnx' flow links, store both start
+                                                   !! and end point because segments will not be ordered
+                                                   !! nor connected.
+    integer,          allocatable :: iperm(:)      !! permutation array of crossed flow links in increasing arc length order along cross section polyline
+    double precision, allocatable :: sp(:)         !! polygon arclength of flow link, dim()
+    double precision, allocatable :: wfk1k2(:)     !! per-flowlink interpolation weight factor between k1 (1) and k2 (0), dim(lnx)
+end type tcrspath
+
+contains
+
+!> Allocates the internal data for one crs path.
+!! Based on polyline length and flow links upper limit.
+subroutine increaseCrossSectionPath(path, maxnp, maxlnx)
+use m_alloc
+    type(tcrspath), intent(inout) :: path   !< The path structure of a cross section.
+    integer,        intent(in)    :: maxnp  !< Max number of polyline points. If 0, nothing is done.
+    integer,        intent(in)    :: maxlnx !< Max number of crossed flow links. If 0, nothing is done.
+
+    integer :: m, mcur
+
+    mcur = 0
+    if (allocated(path%xp)) then
+        mcur = size(path%xp)
+    end if
+
+    if (maxnp > 0 .and. maxnp > mcur) then
+        m = max(2, int(1.5d0*maxnp))
+        call realloc(path%xp, m)
+        call realloc(path%yp, m)
+        call realloc(path%zp, m)
+    end if
+
+    mcur = 0
+    if (allocated(path%ln)) then
+        mcur = size(path%ln)
+    end if
+
+    if (maxlnx > 0 .and. maxlnx > mcur) then
+        m = max(5, int(1.5d0*maxlnx))
+        call realloc(path%ln,     m)
+
+
+! GD: memory problems with realloc
+     if (allocated(path%xk)) then
+        call realloc(path%xk, (/2,m/))
+        call realloc(path%yk, (/2,m/))
+     else   
+        allocate(path%xk(2,m))
+        allocate(path%yk(2,m))
+     end if
+
+        !if(allocated(path%xk)) deallocate(path%xk)
+        !allocate(path%xk(2,m))
+
+        !if(allocated(path%yk)) deallocate(path%yk)
+        !allocate(path%yk(2,m))
+
+
+
+        call realloc(path%indexp, m)
+        call realloc(path%wfp,    m)
+        call realloc(path%wfk1k2, m)
+        call realloc(path%sp,     m)
+        call realloc(path%iperm,  m)
+    end if
+end subroutine increaseCrossSectionPath
+
+
+!> Deallocates the internal data for one crs path.
+subroutine deallocCrossSectionPath(path)
+    type(tcrspath), intent(inout) :: path !< The path structure of a cross section
+
+    if (allocated(path%xp)) then
+        deallocate(path%xp)
+        deallocate(path%yp)
+        deallocate(path%zp)
+    end if
+    if (allocated(path%ln)) then
+        deallocate(path%ln)
+        deallocate(path%indexp)
+        deallocate(path%wfp)
+    end if
+    if (allocated(path%xk)) then
+        deallocate(path%xk, path%yk)
+    end if
+    if (allocated(path%sp)) then
+        deallocate(path%sp)
+    end if
+    if (allocated(path%wfk1k2)) then
+        deallocate(path%wfk1k2)
+    end if
+    if (allocated(path%iperm)) then
+        deallocate(path%iperm)
+    end if
+end subroutine deallocCrossSectionPath
+
+
+!> Sets the cross section definition path to specified polyline coordinates.
+subroutine setCrossSectionPathPolyline(path, xp, yp, zp)
+    type(tcrspath),   intent(inout) :: path         !< The crs path to be updated.
+    double precision, intent(in)    :: xp(:), yp(:) !< Polyline coordinates to define the crs path.
+    double precision, optional, intent(in) :: zp(:) !< Optional z-values at xp/yp coordinates.
+
+    integer :: i, n
+
+    n = size(xp)
+    if (n <= 0) return
+
+    call increaseCrossSectionPath(path, n, 0)
+    do i=1,n
+        path%xp(i) = xp(i)
+        path%yp(i) = yp(i)
+    end do
+
+    if (present(zp)) then
+        do i=1,n
+            path%zp(i) = zp(i)
+        end do
+    end if
+
+    path%np = n
+end subroutine setCrossSectionPathPolyline
+
+
+!> Copies a crspath into another, allocating memory for all points and links.
+! AvD: TODO: repeated copying will increase the xp and ln arrays (because of grow factor)
+subroutine copyCrossSectionPath(pfrom, pto)
+    type(tcrspath), intent(in)    :: pfrom
+    type(tcrspath), intent(inout) :: pto
+
+    !integer :: maxnp, maxlnx
+    !
+    !if (allocated(pfrom%xp)) then
+    !   maxnp  = size(pfrom%xp)
+    !else
+    !   maxnp = 0
+    !end if
+    !
+    !if (allocated(pfrom%ln)) then
+    !   maxlnx = size(pfrom%ln)
+    !else
+    !   maxlnx = 0
+    !end if
+    !
+    !call increaseCrossSectionPath(pto, maxnp, maxlnx)
+
+    ! Structures may directly be copied, including their allocatable components (F2003)
+    pto = pfrom
+end subroutine copyCrossSectionPath
+
+
+!> Increases the size of an *array* of crspath elements.
+!! All existing elements (up to #numcur) are copied.
+subroutine increaseCRSPaths(paths, numnew, numcur)
+    type(tcrspath), allocatable, intent(inout) :: paths(:)
+    integer,                     intent(inout) :: numnew !< Desired new size (may turn out larger).
+    integer,                     intent(in)    :: numcur !< Current nr of paths in array
+                                                         !! (will be copied, actual array size may be larger)
+
+
+    type(tcrspath), allocatable :: pathst(:)
+    integer :: i, numcurmax
+
+    if (allocated(paths)) then
+        numcurmax = size(paths)
+        if (numnew < numcurmax) then
+            return
+        end if
+    else
+        numcurmax = 0
+    end if
+    numnew    = max(numnew, int(numcurmax*1.2))
+
+    ! Allocate temp array of cross section paths.
+    allocate(pathst(numcur))
+
+    ! Fill temp paths and deallocate each original cross section path.
+    do i=1,numcurmax
+        if (i <= numcur) then
+            call copyCrossSectionPath(paths(i), pathst(i))
+        end if
+        call deallocCrossSectionPath(paths(i))
+    end do
+    ! Deallocate original crspath array
+    if (allocated(paths)) then
+        deallocate(paths)
+    end if
+
+    ! Re-allocate original crspath array at bigger size and fill it.
+    allocate(paths(numnew))
+    do i=1,numcur
+        call copyCrossSectionPath(pathst(i), paths(i))
+        call deallocCrossSectionPath(pathst(i))
+    end do
+    deallocate(pathst)
+end subroutine increaseCRSPaths
+
+
+!> Check for crossing of a (flow) link by a crs path.
+!! When crossed, the link info (its number and coordinates) are stored
+!! in the path structure. Any existing link info is preserved!
+!! This routine can be used with 'network geometry' (e.g. for thin dams)
+!! and 'flow geometry' (e.g. for cross sections and fixed weirs).
+subroutine crspath_on_singlelink(path, linknr, xk3, yk3, xk4, yk4, xza, yza, xzb, yzb)
+   
+   use geometry_module, only: crossinbox
+   use m_sferic, only: jsferic
+   use m_missing, only : dmiss
+   implicit none
+   
+   type(tcrspath),   intent(inout) :: path   !< Path that is checked for link crossing, will be updated with link info.
+    integer,          intent(in)    :: linknr !< Number of link that is being checked, will be stored in path%ln
+    double precision, intent(in)    :: xk3, yk3, xk4, yk4 !< Net node coordinates of this link (or fictious coords for a 1D link)
+    double precision, intent(in)    :: xza, yza, xzb, yzb !< cell circum. coordinates of this link.
+
+    integer :: ip, jacros
+    double precision :: SL, SM, XCR, YCR, CRP
+
+!   Check whether flow link intersects with a polyline segment of this cross section path.
+    do ip=1,path%np-1
+        crp = 0d0
+        CALL CROSSinbox(path%XP(ip), path%YP(ip), path%XP(ip+1), path%YP(ip+1), xza, yza, xzb, yzb, jacros, SL, SM, XCR, YCR, CRP, jsferic, dmiss)
+        if (jacros == 1) then
+            if (SM == 1d0) then
+               if (crp > 0d0) then
+                  cycle
+               end if
+            else if (SM == 0d0) then
+               if (crp < 0d0) then
+                  cycle
+               end if
+            end if
+
+            call increaseCrossSectionPath(path, 0, path%lnx+1)
+            path%lnx = path%lnx + 1
+
+            path%indexp(path%lnx) =  ip
+            path%wfp(path%lnx)    =  1d0-SL ! SL=rel.pos on segment. Weight of left points is 1-SL
+            path%wfk1k2(path%lnx) =  1d0-SM ! SM=rel.pos on flow link       of left points is 1-SM
+
+            if (crp < 0d0) then
+                path%ln(path%lnx)   =  linknr
+                path%xk(1,path%lnx) = xk3
+                path%yk(1,path%lnx) = yk3
+                path%xk(2,path%lnx) = xk4
+                path%yk(2,path%lnx) = yk4
+            else
+!               Flip flow link orientation, such that its flow direction is rightward through crs path polygon
+                path%ln(path%lnx) = -linknr
+                path%xk(1,path%lnx) = xk4
+                path%yk(1,path%lnx) = yk4
+                path%xk(2,path%lnx) = xk3
+                path%yk(2,path%lnx) = yk3
+            end if
+
+
+        endif
+    enddo
+end subroutine crspath_on_singlelink
+
+!> Converts a set of polylines into paths.
+!! The input arrays (xpl, ypl, zpl) have the structure of the global polygon:
+!! one or more polylines separated by dmiss values.
+subroutine pol_to_flowlinks(xpl, ypl, zpl, npl, ns, paths)
+    use m_missing
+
+    double precision, intent(in)    :: xpl(:), ypl(:), zpl(:) !< Long array with one or more polylines, separated by dmiss
+    integer,          intent(in)    :: npl                    !< Total number of polyline points
+    type (tcrspath),  allocatable   :: paths(:)
+    integer, intent(out)            :: ns
+    
+
+    integer :: i, i1, i2, maxfxw
+
+    ns = 0
+
+    i1 = 1 ! First possible start index
+    i2 = 0 ! No end index found yet.
+    do i = 1,npl
+        if (xpl(i) == dmiss .or. i == npl) then
+            if (i == npl .and. xpl(i) /= dmiss) then
+                i2 = i ! Last polyline, no dmiss separator, so also include last point #npl.
+            end if
+            if (i1 <= i2) then
+                maxfxw = ns+1
+                call increaseCRSPaths(paths, maxfxw, ns)
+                ns = ns+1
+                call setCrossSectionPathPolyline(paths(ns), xpl(i1:i2), ypl(i1:i2), zpl(i1:i2))
+            end if
+            i1 = i+1
+            cycle
+        else
+            i2 = i ! Advance end point by one.
+        end if
+    end do
+end subroutine pol_to_flowlinks
+
+end module m_crspath
 
 
 ! unstruc.f90
@@ -1304,6 +1624,7 @@ end module m_bnd
  integer         , allocatable     :: kew  (:)          !< temp (numl) edge oriented w waves
  integer         , allocatable     :: ketr (:,:)        !< temp (numl) edge oriented tracer
  integer         , allocatable     :: kesf (:,:)        !< temp (numl) edge oriented sedfrac
+ integer         , allocatable     :: kedb (:)          !< temp (numl) edge oriented dambreak
 
  integer,          allocatable     :: itpez(:)          !< temp (numl) edge oriented,
                                                         !! 1,*=boundary typ, see type indicator kbndz(4,*) below
@@ -1547,7 +1868,35 @@ end module m_bnd
  integer         , allocatable     :: L1pumpsg(:)       !< first  npump point in pump signal npumpsg
  integer         , allocatable     :: L2pumpsg(:)       !< second npump point in pump signal npumpsg
  integer                           :: npumpsg           !< nr of pump signals specified
- character(len=128), allocatable, target :: pump_ids(:)
+ character(len=128), allocatable, target :: pump_ids(:) !< the pumps ids
+
+ ! Dambreak 
+ !time varying
+ double precision, allocatable, target   :: waterLevelsDambreakUpStream(:)   !< the water levels computed each time step upstream
+ double precision, allocatable, target   :: waterLevelsDambreakDownStream(:) !< the water levels computed each time step downstream
+ double precision, allocatable, target   :: breachDepthDambreak(:)           !< the dambreak breach width (as a level)
+ double precision, allocatable, target   :: breachWidthDambreak(:)           !< the dambreak breach width (as a level)
+ double precision, allocatable           :: normalVelocityDambreak(:)                !< dambreak normal velocity
+ double precision, allocatable           :: dambreakAveraging(:,:)           !<to avoid allocations/deallocations
+ !constant in time
+ double precision, allocatable           :: maximumDambreakWidths(:)         !< the total dambreak width (from pli file)
+ double precision, allocatable           :: dambreakLinksEffectiveLength(:)  !< dambreak links index array
+ integer        , allocatable            :: dambreaks(:)                     !< store the dambreaks indexes among all structures 
+ integer                                 :: ndambreak                        !< nr of dambreak links
+ integer                                 :: ndambreaksg                      !< nr of dambreak signals 
+ integer         , allocatable           :: L1dambreaksg(:)                  !< first dambreak link for each signal
+ integer         , allocatable           :: L2dambreaksg(:)                  !< second dambreak link for each signal
+ integer         , allocatable           :: activeDambreakLinks(:)           !< activeDambreakLinks, open dambreak links
+ integer         , allocatable           :: LStartBreach(:)                  !< the starting link, the closest to the breach point
+ integer         , allocatable           :: kdambreak(:,:)                   !< dambreak links index array
+ double precision, allocatable, target   :: dambreakHeightsAndWidthsFromTable(:)  !< dambreak widths and heights 
+ character(len=128), allocatable, target :: dambreak_ids(:)                       !< the dambreak ids
+
+ type polygon
+   double precision, dimension(:), allocatable :: xp, yp 
+   integer :: np
+ end type polygon
+ type(polygon), dimension(:), allocatable :: dambreakPolygons
 
  integer                           :: nklep              !< nr of kleps
  integer         , allocatable     :: Lklep(:)           !< klep links index array, pos=allow 1->2, neg= allow 2->1
@@ -1701,6 +2050,7 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
                                                               !<                      (2,:) discharge through weir
  double precision, dimension(:,:), allocatable :: valcgen     !< Array for general structure (old ext), (1,:) discharge
  double precision, dimension(:,:), allocatable :: valgenstru  !< Array for general structure (new ext), (1,:) discharge
+ double precision, dimension(:,:), allocatable :: valdambreak !< Array for dambreak, (1,:) instantanuous, (2,:) cumulative
 
  integer                           :: NUMVALS_PUMP = 5        !< Number of variables for pump
  integer                           :: NUMVALS_GATE = 5        !< Number of variables for gate
@@ -1709,12 +2059,14 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
  integer                           :: NUMVALS_GATEGEN = 9     !< Number of variables for gate (new)
  integer                           :: NUMVALS_WEIRGEN = 7     !< Number of variables for weir
  integer                           :: NUMVALS_GENSTRU = 8     !< Number of variables for general structure( new exe file)
+ integer                           :: NUMVALS_DAMBREAK = 2    !< Number of variables for dambreak
 
  integer                           :: jahiscgen               !< Write structure parameters to his file, 0: n0, 1: yes
  integer                           :: jahispump               !< Write pump      parameters to his file, 0: n0, 1: yes
  integer                           :: jahisgate               !< Write gate      parameters to his file, 0: n0, 1: yes
  integer                           :: jahiscdam               !< Write dam       parameters to his file, 0: n0, 1: yes
  integer                           :: jahisweir               !< Write weir      parameters to his file, 0: n0, 1: yes
+ integer                           :: jahisdambreak           !< Write dambreak  parameters to his file, 0: n0, 1: yes
 
  integer, parameter :: IOPENDIR_FROMLEFT  = -1 !< Gate door opens/closes from left side.
  integer, parameter :: IOPENDIR_FROMRIGHT =  1 !< Gate door opens/closes from right side.
@@ -1736,7 +2088,7 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
 
 
    subroutine init_structure_hisvalues()
-      use m_flowexternalforcings , only: npumpsg, ncgensg, ngatesg, ncdamsg, ngategen, ngenstru, nweirgen
+      use m_flowexternalforcings , only: npumpsg, ncgensg, ngatesg, ncdamsg, ngategen, ngenstru, nweirgen, ndambreaksg
       !use m_structures, only: NUMVALS_PUMP, NUMVALS_GATE, NUMVALS_CDAM, NUMVALS_CGEN, &
       !                        NUMVALS_GATEGEN, NUMVALS_WEIRGEN, NUMVALS_GENSTRU
       use m_alloc
@@ -1748,6 +2100,7 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
       jahisgate = 1
       jahiscdam = 1
       jahisweir = 1
+      jahisdambreak = 1
 
       if( jahispump > 0 .and. npumpsg > 0) then
          if( allocated( valpump ) ) deallocate( valpump )
@@ -1780,6 +2133,10 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
       if( jahisweir > 0 .and. nweirgen > 0) then
          if( allocated( valweirgen) ) deallocate( valweirgen )
          allocate( valweirgen(NUMVALS_WEIRGEN,nweirgen) ) ; valweirgen = 0d0
+      endif
+      if( jahisdambreak > 0 .and. ndambreaksg > 0) then
+         if( allocated( valdambreak ) ) deallocate( valdambreak )
+         allocate( valdambreak(NUMVALS_DAMBREAK,ndambreaksg) ) ; valdambreak = 0d0
       endif
 
 ! TIDAL TURBINES: Insert init_turbines here

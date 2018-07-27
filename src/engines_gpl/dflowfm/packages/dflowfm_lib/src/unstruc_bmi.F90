@@ -1431,6 +1431,7 @@ subroutine get_compound_field(c_var_name, c_item_name, c_field_name, x) bind(C, 
   use m_observations
   use m_monitoring_crosssections
   use m_strucs
+  use m_structures, only: valdambreak
 
   character(kind=c_char), intent(in) :: c_var_name(*)   !< Name of the set variable, e.g., 'pumps'
   character(kind=c_char), intent(in) :: c_item_name(*)  !< Name of a single item's index/location, e.g., 'Pump01'
@@ -1541,6 +1542,32 @@ subroutine get_compound_field(c_var_name, c_item_name, c_field_name, x) bind(C, 
          return
      case("change_in_temperature")
          x = c_loc(qstss((item_index-1)*3+3))
+         return
+     end select
+  ! Dambreak
+  case("dambreak")
+     call getStructureIndex('dambreak', item_name, item_index)
+     if (item_index == 0) then
+         return
+     endif
+     select case(field_name)
+     case("dambreak_s1up")
+         x = c_loc(waterLevelsDambreakUpStream(item_index))
+         return
+     case("dambreak_s1dn")
+         x = c_loc(waterLevelsDambreakDownStream(item_index))
+         return
+     case("dambreak_breach_depth")
+         x = c_loc(breachDepthDambreak(item_index))
+         return
+     case("dambreak_breach_width")
+         x = c_loc(breachWidthDambreak(item_index))
+         return
+     case("dambreak_instantaneous_discharge")
+         x = c_loc(valdambreak(1, item_index))
+         return
+     case("dambreak_cumulative_discharge")
+         x = c_loc(valdambreak(2, item_index))
          return
      end select
 
@@ -2555,6 +2582,9 @@ subroutine get_snapped_feature(c_feature_type, c_Nin, cptr_xin, cptr_yin, c_Nout
    use iso_c_binding, only: c_int, c_double, c_char, c_ptr, c_f_pointer
    use m_snappol
    use m_missing
+   use m_sferic
+   use geometry_module, only: comp_breach_point
+   use m_alloc
    implicit none
 
    character(kind=c_char),             intent(in)    :: c_feature_type(MAXSTRLEN)   !< feature type ('thindam')
@@ -2574,10 +2604,15 @@ subroutine get_snapped_feature(c_feature_type, c_Nin, cptr_xin, cptr_yin, c_Nout
    double precision, dimension(:), target, allocatable, save      :: xout, yout      !< memory leak
    integer,          dimension(:), target, allocatable, save      :: feature_ids     !< memory leak  
    double precision, dimension(:), allocatable                    :: xintemp, yintemp
-   integer                                                        :: ntemp, startIndex, i, oldSize
+   integer                                                        :: ntemp
    double precision, dimension(:), allocatable                    :: xin, yin
    
-
+   ! Dambreak
+   integer                                                        :: startIndex, i, noutSnapped, lstart, oldSize
+   double precision, dimension(:), allocatable                    :: xoutTemp, youtTemp
+   double precision, dimension(:), target, allocatable            :: xSnapped, ySnapped 
+   double precision                                               :: start_location_x, start_location_y, x_breach, y_breach  
+   
    c_ierror = 1
 
 !     read feature type from c-ptr
@@ -2592,9 +2627,12 @@ subroutine get_snapped_feature(c_feature_type, c_Nin, cptr_xin, cptr_yin, c_Nout
    call c_f_pointer(cptr_yin, ptr, (/c_Nin/))
    yin(:) = ptr
 
+! xin, yin arrays store the coordinates of the feature and are terminated with a dmiss value. 
+! The last valid coordinate is thus stored at index size(xin)-1  
    select case( feature_type )
    case("thindam")
       call snappol(c_Nin, xin, yin, DMISS, 1, c_Nout, xout, yout, feature_ids, c_ierror)
+      !for testing call snappol(c_Nin, xin, yin, DMISS, 4, c_Nout, xout, yout, feature_ids, c_ierror)
    case("fixedweir", "crosssection", "gate", "weir", "pump")
       call snappol(c_Nin, xin, yin, DMISS, 2, c_Nout, xout, yout, feature_ids, c_ierror)
    case("obspoint")
@@ -2633,28 +2671,77 @@ subroutine get_snapped_feature(c_feature_type, c_Nin, cptr_xin, cptr_yin, c_Nout
                startIndex =  i + 1
                continue
             end if
-           ! the next start index
-           startIndex =  i + 1
+            ! the next start index
+            startIndex =  i + 1
+         endif
+         i = i + 1
+      enddo
+      if (ntemp > 0) then
+         call snappnt(ntemp, xintemp, yintemp, DMISS, c_Nout, xout, yout, feature_ids, c_ierror)
       endif
-      i = i + 1
-   enddo
-   if (ntemp > 0) then
-      call snappnt(ntemp, xintemp, yintemp, DMISS, c_Nout, xout, yout, feature_ids, c_ierror)
-   endif
-   ! re-map feature_ids array
-   i = 1
-   ntemp   = 1
-   do while (i <= size(xout))
-      if(xout(i)==dmiss.and.xintemp(i)==dmiss) then
-         feature_ids(i) = 0
-         ntemp = ntemp + 1
-      else if (feature_ids(i)/= 0) then
-         feature_ids(i) = ntemp
-      endif
-      i = i + 1
-   enddo
+      ! re-map feature_ids array
+      i = 1
+      ntemp   = 1
+      do while (i <= size(xout))
+         if(xout(i)==dmiss.and.xintemp(i)==dmiss) then
+            feature_ids(i) = 0
+            ntemp = ntemp + 1
+         else if (feature_ids(i)/= 0) then
+            feature_ids(i) = ntemp
+         endif
+         i = i + 1
+      enddo
+   case("dambreak")
+      ! Extract polygon and the breach point coordinates
+      startIndex = 1
+      c_Nout     = 0
+      i          = 1
+      oldSize    = 0
+      if (allocated(xout)) deallocate(xout)
+      if (allocated(yout)) deallocate(yout)
+      if (allocated(feature_ids)) deallocate(feature_ids)
+      do while (i <= size(xin))
+         if(xin(i) == dmiss) then
+            ntemp = i - startIndex  + 1
+            ! Deallocation of any previous result
+            noutSnapped = 0
+            if(allocated(xintemp))  deallocate(xintemp)
+            if(allocated(yintemp))  deallocate(yintemp)
+            if(allocated(xSnapped)) deallocate(xSnapped)
+            if(allocated(ySnapped)) deallocate(ySnapped)
+            ! Allocation and assignment: polyline, dimiss, breach point 
+            allocate(xintemp(ntemp))
+            allocate(yintemp(ntemp))
+            xintemp = xin(startIndex: i - 1)
+            yintemp = yin(startIndex: i - 1)
+            start_location_x = xin(i + 1)
+            start_location_y = yin(i + 1)
+            ! Determine the flow links intersected by the input polygon, save the coordinates in xSnapped, ySnapped      
+            call snappol(ntemp, xintemp, yintemp, dmiss, 2, noutSnapped, xSnapped, ySnapped, feature_ids, c_ierror)
+            ! Project the breach point into the input polygon, determines the flow link where the breach is starting and gives back the coordinates of the middle point (x_breach, y_breach)
+            ! note: default values for jsferic, jasfer3D and dmiss
+            call comp_breach_point(start_location_x, start_location_y, xintemp, yintemp, ntemp, xSnapped, ySnapped, lstart, x_breach, y_breach, jsferic, jasfer3D, dmiss)
+            ! Save the results (snapped line, dmiss, snapped point, dmiss)
+            if(allocated(xout)) oldSize = size(xout)
+            c_Nout = c_Nout + noutSnapped  + 2
+            call realloc(xout, c_Nout, keepExisting = .true.)
+            call realloc(yout, c_Nout, keepExisting = .true.)
+            xout(oldSize + 1 : oldSize + noutSnapped) = xSnapped
+            yout(oldSize + 1 : oldSize + noutSnapped) = ySnapped
+            xout(oldSize + noutSnapped + 1) = x_breach
+            yout(oldSize + noutSnapped + 1) = y_breach
+            xout(oldSize + noutSnapped + 2) = dmiss
+            yout(oldSize + noutSnapped + 2) = dmiss
+            call realloc(feature_ids,  c_Nout, keepExisting = .true.)
+            feature_ids(oldSize + noutSnapped + 1) = feature_ids(c_Nout - 3) + 1
+            feature_ids(oldSize + noutSnapped + 2) = 0
+            startIndex =  i  +  2
+            i = startIndex
+         endif
+         i = i + 1
+      enddo
    case default
-      call snapbnd(feature_type, c_Nin, xin, yin, DMISS, c_Nout, xout, yout, feature_ids, c_ierror)
+      call snapbnd(feature_type, c_Nin, xin, yin, dmiss, c_Nout, xout, yout, feature_ids, c_ierror)
    end select
    if ( c_ierror /= 0 .or. c_Nout == 0) goto 1234
 

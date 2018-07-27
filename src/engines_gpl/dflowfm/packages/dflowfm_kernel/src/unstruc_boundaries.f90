@@ -144,14 +144,14 @@ subroutine findexternalboundarypoints()             ! find external boundary poi
 
  if (allocated(kez)) then
     ! If flow_geominit was called separately from a flow_modelinit:
-    deallocate (             kez,     keu,     kes,     ketm,     kesd,     keuxy,     ket,     ken,     ke1d2d,     keg,     ked,     kep,     keklep,     kegs,     kegen,     itpez,     itpenz,     itpeu,      itpenu,     kew)
+    deallocate (             kez,     keu,     kes,     ketm,     kesd,     keuxy,     ket,     ken,     ke1d2d,     keg,     ked,     kep, kedb, keklep,     kegs,     kegen,     itpez,     itpenz,     itpeu,      itpenu,     kew)
  end if
  if (allocated(ftpet) ) then
     deallocate(ftpet)
  end if
- allocate ( kce(nx), ke(nx), kez(nx), keu(nx), kes(nx), ketm(nx), kesd(nx), keuxy(nx), ket(nx), ken(nx), ke1d2d(nx), keg(nx), ked(nx), kep(nx), keklep(nx), kegs(nx), kegen(nx), itpez(nx), itpenz(nx), itpeu(nx) , itpenu(nx), kew(nx), ftpet(nx), stat=ierr )
- call aerr('kce(nx), ke(nx), kez(nx), keu(nx), kes(nx), ketm(nx), kesd(nx), keuxy(nx), ket(nx), ken(nx), ke1d2d(nx), keg(nx), ked(nx), kep(nx), keklep(nx), kegs(nx), kegen(nx), itpez(nx), itpenz(nx), itpeu(nx) , itpenu(nx) , kew(nx), ftpet(nx)',ierr, 17*nx)
-            kce = 0; ke = 0; kez = 0; keu = 0; kes = 0; ketm = 0; kesd = 0; keuxy = 0; ket = 0; ken = 0; ke1d2d = 0; keg = 0; ked = 0; kep=  0; keklep=  0; kegen= 0; itpez = 0; itpenz = 0; itpeu = 0 ; itpenu = 0 ; kew = 0; ftpet = 1d6
+ allocate ( kce(nx), ke(nx), kez(nx), keu(nx), kes(nx), ketm(nx), kesd(nx), keuxy(nx), ket(nx), ken(nx), ke1d2d(nx), keg(nx), ked(nx), kep(nx), kedb(nx), keklep(nx), kegs(nx), kegen(nx), itpez(nx), itpenz(nx), itpeu(nx) , itpenu(nx), kew(nx), ftpet(nx), stat=ierr )
+ call aerr('kce(nx), ke(nx), kez(nx), keu(nx), kes(nx), ketm(nx), kesd(nx), keuxy(nx), ket(nx), ken(nx), ke1d2d(nx), keg(nx), ked(nx), kep(nx), kedb(nx), keklep(nx), kegs(nx), kegen(nx), itpez(nx), itpenz(nx), itpeu(nx) , itpenu(nx) , kew(nx), ftpet(nx)',ierr, 17*nx)
+            kce = 0; ke = 0; kez = 0; keu = 0; kes = 0; ketm = 0; kesd = 0; keuxy = 0; ket = 0; ken = 0; ke1d2d = 0; keg = 0; ked = 0; kep=  0; kedb=0; keklep=0; kegen= 0; itpez = 0; itpenz = 0; itpeu = 0 ; itpenu = 0 ; kew = 0; ftpet = 1d6
 
  if (allocated(ketr) ) deallocate(ketr)          
  allocate ( ketr(nx,1), stat = ierr )
@@ -1440,16 +1440,18 @@ use m_missing
 ! use m_alloc
 use m_meteo
 use m_readstructures
+use m_sferic
+use geometry_module
 
 implicit none
-character(len=256)    :: plifile
+character(len=256)            :: plifile
 integer                       :: i, L, Lf, kb, LL, ierr, k, kbi, n, ifld
 integer                       :: nstr
 character (len=256)           :: fnam, rec
-integer, allocatable          :: pumpidx(:), gateidx(:), cdamidx(:), cgenidx(:)             ! temp
+integer, allocatable          :: pumpidx(:), gateidx(:), cdamidx(:), cgenidx(:), dambridx(:) ! temp
 double precision              :: tmpval
 integer                       :: istru, istrtype
-integer                       :: numg, numd, npum, ngs, numgen, numgs, ilinstr
+integer                       :: numg, numd, npum, ngs, numgen, numgs, ilinstr, ndambr
 type(TREE_DATA), pointer      :: str_ptr
 double precision, allocatable :: widths(:)
 double precision              :: widthtot
@@ -1462,6 +1464,14 @@ character(len=IdLen)          :: strtype ! TODO: where to put IdLen (now in Mess
 integer :: istrtmp
 double precision, allocatable :: hulp(:,:) ! hulp 
 
+! dambreak
+double precision              :: x_breach, y_breach, distemp
+double precision              :: xc, yc, xn, yn   
+integer                       :: nDambreakCoordinates, k3, k4, kpol, indexInStructure, indexLink, ja, Lstart
+double precision              :: xpola, xpolb, ypola, ypolb
+integer, allocatable          :: lftopol(:)
+double precision, allocatable :: xl(:), yl(:)
+
 !! if (jatimespace == 0) goto 888                      ! Just cleanup and close ext file.
 
 ngs = 0 ! Local counter for all crossed flow liks by *all* general structures.
@@ -1473,9 +1483,29 @@ else
                          ! DAAROM VOORLOPIG UIT UNSTRUC.F90 VERPLAATST
 end if
 
+if (allocated(strnums)) deallocate(strnums)
+if (allocated(widths)) deallocate(widths)
+if (allocated(lftopol)) deallocate(lftopol)
+if (allocated(dambreakLinksEffectiveLength)) deallocate(dambreakLinksEffectiveLength)
+if (allocated(pumpidx)) deallocate(pumpidx)
+if (allocated(gateidx)) deallocate(gateidx)
+if (allocated(cdamidx)) deallocate(cdamidx)
+if (allocated(cgenidx)) deallocate(cgenidx)
+if (allocated(dambridx)) deallocate(dambridx)
+if (allocated(dambreakPolygons)) deallocate(dambreakPolygons)
+
 allocate(strnums(numl))
 allocate(widths(numl))
-allocate(pumpidx(nstr), gateidx(nstr), cdamidx(nstr), cgenidx(nstr))
+allocate(lftopol(numl))
+allocate(dambreakLinksEffectiveLength(numl))
+allocate(pumpidx(nstr))
+allocate(gateidx(nstr))
+allocate(cdamidx(nstr))
+allocate(cgenidx(nstr))
+allocate(dambridx(nstr))
+allocate(dambreakPolygons(nstr))
+!initialize the index
+dambridx = -1
 do i=1,nstr
    str_ptr => strs_ptr%child_nodes(i)%node_ptr
 
@@ -1535,9 +1565,6 @@ do i=1,nstr
       ncdam   = ncdam   + numd
 
    case ('pump')
-      !if (qid == 'pump1D') then
-      !   call selectelset_internal_links( filename, filetype, xz, yz, ln, lnx1D, kep(npump+1:numl), npum )
-      !else
          call selectelset_internal_links( plifile, POLY_TIM, xz, yz, ln, lnx, kep(npump+1:numl), npum )
       !endif
       success = .true.
@@ -1550,6 +1577,20 @@ do i=1,nstr
       call realloc(L2pumpsg,npumpsg) ; L2pumpsg(npumpsg) = npump + npum
 
       npump   = npump   + npum
+
+   case ('dambreak')
+
+      call selectelset_internal_links( plifile, POLY_TIM, xz, yz, ln, lnx, kedb(ndambreak+1:numl), ndambr, dambreakPolygons(i)%xp, dambreakPolygons(i)%yp, dambreakPolygons(i)%np, lftopol(ndambreak+1:numl))
+      success = .true.
+      WRITE(msgbuf,'(2a,i8,a)') trim(qid), trim(plifile) , ndambr, ' nr of dambreak links' ; call msg_flush()
+
+      ndambreaksg = ndambreaksg + 1
+      dambridx(ndambreaksg) = i
+      call realloc(L1dambreaksg,ndambreaksg) ; L1dambreaksg(ndambreaksg) = ndambreak + 1
+      call realloc(L2dambreaksg,ndambreaksg) ; L2dambreaksg(ndambreaksg) = ndambreak + ndambr
+
+      ndambreak   = ndambreak   + ndambr
+
 
    case ('gate', 'weir', 'generalstructure') !< The various generalstructure-based structures
       call selectelset_internal_links( plifile, POLY_TIM, xz, yz, ln, lnx, kegen(ncgen+1:numl), numgen )
@@ -2149,6 +2190,9 @@ if (ncdamsg > 0) then ! Old-style controllable damlevel
    enddo
 endif
 
+!
+! staged pump (SOBEK pump)
+!
 if (npump > 0) then
    if (allocated   (qpump)   ) deallocate( qpump)
    if (allocated   (kpump)   ) deallocate( kpump)
@@ -2278,8 +2322,23 @@ if (ndambreak > 0) then
    
    if (allocated(dambreak_ids)) deallocate(dambreak_ids)
    allocate(dambreak_ids(ndambreaksg))
-
-
+   
+   if(allocated(activeDambreakLinks)) deallocate(activeDambreakLinks)
+   allocate(activeDambreakLinks(ndambreak))
+   activeDambreakLinks = 0
+   
+   if(allocated(normalVelocityDambreak)) deallocate(normalVelocityDambreak)
+   allocate(normalVelocityDambreak(ndambreaksg))
+   normalVelocityDambreak = 0.0d0
+   
+   if(allocated(dambreakAveraging)) deallocate(dambreakAveraging)
+   allocate(dambreakAveraging(2,ndambreaksg))
+   dambreakAveraging = 0.0d0
+   
+   if(allocated(dambreakHeightsAndWidthsFromTable)) deallocate(dambreakHeightsAndWidthsFromTable)
+   allocate(dambreakHeightsAndWidthsFromTable(ndambreaksg*2))
+   dambreakHeightsAndWidthsFromTable = 0.0d0
+    
    do n = 1, ndambreaksg
       do k = L1dambreaksg(n), L2dambreaksg(n)
          L               = kedb(k)
@@ -2294,10 +2353,12 @@ if (ndambreak > 0) then
          ! kdambreak
          kdambreak(1,k) = kb
          kdambreak(2,k) = kbi
-         kdambreak(3,k) = L         
+         kdambreak(3,k) = L   
       end do
    enddo
    
+   ! number of columns in the dambreak hights and widths tim file
+   kx = 2
    do n = 1, ndambreaksg
 
       !The index of the structure
@@ -2318,7 +2379,7 @@ if (ndambreak > 0) then
       ! flow1d_io library: add and read SOBEK dambreak
       ! just use the first link of the the structure (the network%sts%struct(istrtmp)%link_number is not used in computations)
       k = L1dambreaksg(n)
-      istrtmp = addStructure(network%sts, kdambreak(1,k), kdambreak(2,k), iabs(kdambreak(3,k)), -1, strid, istrtype)
+      istrtmp = addStructure(network%sts, kdambreak(1,k), kdambreak(2,k), iabs(kdambreak(3,k)), -1, "", strid, istrtype)
       call readDambreak(network%sts%struct(istrtmp)%dambreak, str_ptr, success)
 
       if (success) then
@@ -2328,6 +2389,16 @@ if (ndambreak > 0) then
          network%sts%struct(istrtmp)%dambreak%phase  = 0
          network%sts%struct(istrtmp)%dambreak%width  = 0d0
          network%sts%struct(istrtmp)%dambreak%crl    = network%sts%struct(istrtmp)%dambreak%crestlevelini
+         if (network%sts%struct(istrtmp)%dambreak%algorithm == 3) then
+            ! Time-interpolated value will be placed in zcgen((n-1)*3+1) when calling ec_gettimespacevalue.
+            qid='dambreakHeightsAndWidths'
+            network%sts%struct(istrtmp)%dambreak%breachwidthandlevel = trim(network%sts%struct(istrtmp)%dambreak%breachwidthandlevel)
+            if (index(trim(network%sts%struct(istrtmp)%dambreak%breachwidthandlevel)//'|','.tim|')>0) then   
+               success  = ec_addtimespacerelation(qid, xdum, ydum, kdum, kx, network%sts%struct(istrtmp)%dambreak%breachwidthandlevel , uniform, spaceandtime, 'O', targetIndex=n) ! Hook up 1 component at a time, even when target element set has kx=3
+            else
+               success = .false.
+            endif            
+         endif
       else
          ! error in reading the structure, nothing can be done
          cycle
@@ -2336,68 +2407,60 @@ if (ndambreak > 0) then
       ! Project the start of the breach on the polyline, find xn and yn
       if(.not.allocated(dambreakPolygons(indexInStructure)%xp)) cycle
       if(.not.allocated(dambreakPolygons(indexInStructure)%yp)) cycle
-      start_location_x = network%sts%struct(istrtmp)%dambreak%start_location_x
-      start_location_y = network%sts%struct(istrtmp)%dambreak%start_location_y
-      xn = dmiss
-      yn = dmiss
-      dis = huge(dmiss)
-      do k  = 1, dambreakPolygons(indexInStructure)%np - 1
-         call dlinedis(start_location_x, start_location_y, &
-                       dambreakPolygons(indexInStructure)%xp(k), &
-                       dambreakPolygons(indexInStructure)%yp(k), & 
-                       dambreakPolygons(indexInStructure)%xp(k + 1),& 
-                       dambreakPolygons(indexInStructure)%yp(k + 1), &
-                       ja, distemp, xntempa, yntempa)
-         if (distemp <= dis ) then
-            xn  = xntempa
-            yn  = yntempa
-            dis = distemp
-         endif
-      enddo
-      
-      ! Assign the flow links and the starting link of the breach
-      dis = huge(dmiss)
+     
+      ! Create the array with the coordinates of the flow links
+      if(allocated(xl)) deallocate(xl)
+      if(allocated(yl)) deallocate(yl)
+      nDambreakCoordinates = L2dambreaksg(n) - L1dambreaksg(n)  + 2
+      allocate(xl(nDambreakCoordinates))
+      allocate(yl(nDambreakCoordinates))
+      indexLink = 0
       do k = L1dambreaksg(n), L2dambreaksg(n)
+         indexLink = indexLink + 1
          ! compute the mid point
          Lf = iabs(kdambreak(3,k))
-         k1 = ln(1,Lf) ; k2 = ln(2,Lf)
-         xa = xz(k1)  ; ya = yz(k1)
-         xb = xz(k2)  ; yb = yz(k2)
-         call half(xa, ya,  xb, yb, xc, yc, jsferic, jasfer3D)
-         ! calculate the distance with projected start of the breach
-         distemp = dbdistance(xn,yn,xc,yc, jsferic, jasfer3D, dmiss)
-         ! identify the closest link to the projected point
-         if (distemp <= dis) then
-            LStartBreach(n) = k
-            dis = distemp
-         endif
-         ! compute the normal projections of the start and endpoints of the flow links
-         k1 = lncn(1,Lf) ; k2 = lncn(2,Lf)
-         k3 = lftopol(k)
-         xa = xk(k1)  ; ya = yk(k1)
-         xb = xk(k2)  ; yb = yk(k2)
-         call dlinedis(xa, ya, &
-            dambreakPolygons(indexInStructure)%xp(k3), &
-            dambreakPolygons(indexInStructure)%yp(k3), & 
-            dambreakPolygons(indexInStructure)%xp(k3 + 1),& 
-            dambreakPolygons(indexInStructure)%yp(k3 + 1), &
-            ja, distemp, xntempa, yntempa)
-         call dlinedis(xb, yb, &
-            dambreakPolygons(indexInStructure)%xp(k3), &
-            dambreakPolygons(indexInStructure)%yp(k3), & 
-            dambreakPolygons(indexInStructure)%xp(k3 + 1),& 
-            dambreakPolygons(indexInStructure)%yp(k3 + 1), &
-            ja, distemp, xntempb, yntempb)
-         ! compute the distance between the normal projections and store it for later computations
-         distemp = dbdistance(xntempa,yntempa,xntempb,yntempb, jsferic, jasfer3D, dmiss)
-         dambreakLinksEffectiveLength(k) = distemp;
+         k3 = lncn(1,Lf) 
+         k4 = lncn(2,Lf)
+         xl(indexLink)     = xk(k3)
+         xl(indexLink + 1) = xk(k4)
+         yl(indexLink)     = yk(k3)
+         yl(indexLink + 1) = yk(k4)
       enddo
+   
+      ! comp_breach_point takes plain arrays to compute the breach point (also used in unstruct_bmi)      
+      call comp_breach_point(network%sts%struct(istrtmp)%dambreak%start_location_x, & 
+                             network%sts%struct(istrtmp)%dambreak%start_location_y, & 
+                             dambreakPolygons(indexInStructure)%xp, & 
+                             dambreakPolygons(indexInStructure)%yp, & 
+                             dambreakPolygons(indexInStructure)%np, & 
+                             xl, & 
+                             yl, & 
+                             Lstart, & 
+                             x_breach, & 
+                             y_breach, & 
+                             jsferic, & 
+                             jasfer3D,&
+                             dmiss)
       
-      ! Sum the length of the intersected flow links (required to bound maximum breach width)
+      LStartBreach(n) = L1dambreaksg(n) -  1  + Lstart 
+      activeDambreakLinks(LStartBreach(n)) = 1
+      
+      ! compute the normal projections of the start and endpoints of the flow links
       do k = L1dambreaksg(n), L2dambreaksg(n)
-          L                        = kedb(k)
-          Lf                       = iabs(L)
-          maximumDambreakWidths(n) = maximumDambreakWidths(n) + wu(Lf) 
+         Lf = iabs(kdambreak(3,k))
+         k3 = lncn(1,Lf)
+         k4 = lncn(2,Lf)
+         kpol = lftopol(k)
+         xpola = dambreakPolygons(indexInStructure)%xp(kpol)
+         xpolb = dambreakPolygons(indexInStructure)%xp(kpol + 1)
+         ypola = dambreakPolygons(indexInStructure)%yp(kpol)
+         ypolb = dambreakPolygons(indexInStructure)%yp(kpol + 1)
+         
+         call normalout( xpola, ypola, xpolb, ypolb, xn, yn, jsferic, jasfer3D, dmiss, dxymis)
+         dambreakLinksEffectiveLength(k) = dbdistance(xk(k3), yk(k3), xk(k4), yk(k4), jsferic, jasfer3D, dmiss)
+         dambreakLinksEffectiveLength(k) = dambreakLinksEffectiveLength(k) * abs( xn*csu(Lf) + yn*snu(Lf) )   
+         ! Sum the length of the intersected flow links (required to bound maximum breach width)
+         maximumDambreakWidths(n) = maximumDambreakWidths(n) + dambreakLinksEffectiveLength(k)
       enddo
       
       ! Now we can deallocate the polygon
@@ -2423,6 +2486,7 @@ endif
  if (allocated (cdamidx) ) deallocate (cdamidx)
  if (allocated (cgenidx) ) deallocate (cgenidx)
    end subroutine flow_init_structurecontrol
+ 
 
 !> Returns the index of a structure in the controllable value arrays.
 !! Structure is identified by strtypename, e.g. 'pumps', and structure name, e.g., 'Pump01'.
@@ -2455,6 +2519,16 @@ subroutine getStructureIndex(strtypename, strname, index)
          if (trim(srcname(i)) == trim(strname)) then
             index = i
             exit
+         end if
+      end do
+   else if (trim(strtypename) == 'dambreak') then
+      do i=1,ndambreaksg
+         if (trim(dambreak_ids(i)) == trim(strname)) then
+            if (L2dambreaksg(i) - L1dambreaksg(i) >= 0) then
+               ! Only return this dambreak index if dambreak is active in flowgeom (i.e., at least 1 flow link associated)
+               index = i
+               exit
+            end if
          end if
       end do
    else

@@ -1207,6 +1207,9 @@ end subroutine read_land_boundary_netcdf
       subroutine checkdislin()
       use m_polygon
       use m_sferic
+      use geometry_module, only: dlinedis
+      use m_missing, only: dmiss
+
       implicit none
       integer :: ja
       integer :: jashow
@@ -1219,21 +1222,21 @@ end subroutine read_land_boundary_netcdf
       double precision :: dis, xn, yn
 
       if (npl >= 2) then
-         call DLINEDIS(xlc, ylc ,Xpl(1),ypl(1), xpl(2), ypl(2) ,JA,DIS,XN,YN)
+         call DLINEDIS(xlc, ylc ,Xpl(1),ypl(1), xpl(2), ypl(2) ,JA,DIS,XN,YN,jsferic, jasfer3D, dmiss)
       endif
 
-      call DLINEDIS(1d0,0d0,0d0,0d0,1d0,1d0, JA, DIS,XN,YN)
+      call DLINEDIS(1d0,0d0,0d0,0d0,1d0,1d0, JA, DIS,XN,YN,jsferic, jasfer3D, dmiss)
 
       dis = 0.5d0*sqrt(2d0)
 
-      call DLINEDIS(1d0,0.5d0,0d0,0d0,1d0,1d0, JA, DIS,XN,YN)
+      call DLINEDIS(1d0,0.5d0,0d0,0d0,1d0,1d0, JA, DIS,XN,YN,jsferic, jasfer3D, dmiss)
 
       dis = 0.25d0*sqrt(2d0)
 
       jsferic = 1
-      call DLINEDIS(4d0,60d0,3d0,60d0,4d0,61d0, JA, DIS,XN,YN)
+      call DLINEDIS(4d0,60d0,3d0,60d0,4d0,61d0, JA, DIS,XN,YN,jsferic, jasfer3D, dmiss)
 
-      call DLINEDIS(4d0,60.8d0,3d0,60d0,4d0,61d0, JA, DIS,XN,YN)
+      call DLINEDIS(4d0,60.8d0,3d0,60d0,4d0,61d0, JA, DIS,XN,YN,jsferic, jasfer3D, dmiss)
       
       call rcirc( xn, yn )
       end subroutine checkdislin
@@ -3887,89 +3890,6 @@ end subroutine read_samples_from_arcinfo
  end subroutine sincosdis 
 
 
-     !> Computes the perpendicular distance from point 3 to a line 1-2.
-      SUBROUTINE dLINEDIS(X3,Y3,X1,Y1,X2,Y2,JA,DIS,XN,YN)
-      use m_sferic
-      use geometry_module, only: dbdistance, getdx, getdy, sphertoCart3D, cart3Dtospher
-      use m_missing, only: dmiss
-      use m_sferic, only: jsferic, jasfer3D
-      
-      implicit none
-      DOUBLE PRECISION, intent(in   ) :: X1,Y1,X2,Y2 !< x,y coordinates of the line between point 1 and 2.
-      DOUBLE PRECISION, intent(in   ) :: X3,Y3       !< x,y coordinates of the point for which to compute the distance.
-      integer         , intent(  out) :: ja          !< Whether or not (1/0) the computation was possible. If line points 1 and 2 coincide, ja==0, and distance is just Euclidean distance between 3 and 1.
-      DOUBLE PRECISION, intent(  out) :: DIS         !< Perpendicular distance from point 3 and line 1-2.
-      DOUBLE PRECISION, intent(  out) :: XN,YN       !< Coordinates of the projected point from point 3 onto line 1-2.
-
-      DOUBLE PRECISION :: R2,RL,X21,Y21,Z21,X31,Y31,Z31
-      DOUBLE PRECISION :: xx1,xx2,xx3,yy1,yy2,yy3,zz1,zz2,zz3,xxn,yyn,zzn
-
-!     korste afstand tot lijnelement tussen eindpunten
-      JA  = 0
-      
-      if ( jsferic.eq.0 .or. jasfer3D.eq.0 ) then
-         X21 = getdx(x1,y1,x2,y2,jsferic)
-         Y21 = getdy(x1,y1,x2,y2,jsferic)
-         X31 = getdx(x1,y1,x3,y3,jsferic)
-         Y31 = getdy(x1,y1,x3,y3,jsferic)
-         R2  = dbdistance(x2,y2,x1,y1,jsferic, jasfer3D, dmiss)
-         R2  = R2*R2
-!         IF (R2 .NE. 0) THEN
-         IF (R2 .GT. 1D-8) THEN
-            RL  = (X31*X21 + Y31*Y21) / R2
-            RL  = MAX( MIN(1d0,RL) , 0d0)
-            JA  = 1
-            XN  = X1 + RL*(x2-x1)
-            
-!           fix for spherical, periodic coordinates
-            if ( jsferic.eq.1 ) then
-               if ( x2-x1.gt.180d0 ) then
-                  XN = XN - RL*360d0
-               else if ( x2-x1.lt.-180d0 ) then
-                  XN = XN + RL*360d0
-               end if
-            end if
-            
-            YN  = Y1 + RL*(y2-y1)
-            DIS = dbdistance(x3,y3,xn,yn,jsferic, jasfer3D, dmiss)
-         ELSE  ! node 1 -> node 2
-            DIS = dbdistance(x3,y3,x1,y1,jsferic, jasfer3D, dmiss)
-         ENDIF
-      else
-         call sphertocart3D(x1,y1,xx1,yy1,zz1)
-         call sphertocart3D(x2,y2,xx2,yy2,zz2)
-         call sphertocart3D(x3,y3,xx3,yy3,zz3)
-         
-         x21 = xx2-xx1
-         y21 = yy2-yy1
-         z21 = zz2-zz1
-         x31 = xx3-xx1
-         y31 = yy3-yy1
-         z31 = zz3-zz1
-
-         r2  = x21*x21 + y21*y21 + z21*z21      
-         if (R2 .GT. 1D-8) then
-            RL = (X31*X21 + Y31*Y21 + Z31*Z21) / R2
-            RL  = MAX( MIN(1d0,RL) , 0d0)
-            JA  = 1
-            
-            XXN  = xx1 + RL*x21 
-            YYN  = yy1 + RL*y21
-            ZZN  = zz1 + RL*z21
-            x31 = xxn-xx3
-            y31 = yyn-yy3
-            z31 = zzn-zz3
-            DIS = sqrt(x31*x31 + y31*y31 + z31*z31)      
-            
-            call Cart3Dtospher(xxn,yyn,zzn,xn,yn,maxval((/x1,x2,x3/)))
-         else   
-            DIS = dbdistance(x3,y3,x1,y1, jsferic, jasfer3D, dmiss)
-         endif   
-      end if
-      
-      RETURN
-      END subroutine DLINEDIS
-
       SUBROUTINE dLINEDIS2(X3,Y3,X1,Y1,X2,Y2,JA,DIS,XN,YN,rl)
       use m_sferic
       use geometry_module, only: getdx, getdy, dbdistance, sphertoCart3D, cart3Dtospher
@@ -5493,7 +5413,8 @@ end subroutine timdat
 module m_snappol  ! intentionally a module (for assumed size)
 use kdtree2Factory
 implicit none
-contains
+   contains   
+   
 !> snap polygon to mesh
   subroutine snappol(Nin, Xin, Yin, dsep, itype, Nout, Xout, Yout, ipoLout, ierror)
      use m_polygon
@@ -5811,7 +5732,7 @@ contains
      select case(trim(bndtype))
         case( 'boundary' )
            ioutput = INETLINKS
-        case( 'velocitybnd', 'dischargebnd', '1d2dbnd' )
+        case( 'velocitybnd', 'dischargebnd', '1d2dbnd')
            ioutput = IFLOWLINKS
         case DEFAULT
            ioutput = IFLOWNODES
