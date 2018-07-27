@@ -734,7 +734,7 @@ contains
             if ( caltau ) then
                ubstar = sqrt(c2g*(vxr*vxr + vyr*vyr))  ! ubstar this is requiered for disersion
             else
-               ubstar = tau(n03d) / rhow
+               ubstar = sqrt(tau(n03d) / rhow)
             endif
             ubstar_b   = ubstar                     ! ubstar_bot is required for sedimentation and erosion
          else
