@@ -469,7 +469,8 @@ contains
       if (present(conveyance))        conveyance = conv
       if (present(af_sub   ))   af_sub    = af_sub_local   
       if (present(perim_sub))   perim_sub = perim_sub_local
-      if (present(cz_sub   ))   cz_sub   = cz_sub_local   
+      if (present(cz_sub   ))   cz_sub    = cz_sub_local   
+      if (present(cz       ))   cz        = czdum
       if (present(cz       ))   cz        = czdum
 
    end subroutine getCrossFlowData_on_link
