@@ -29,7 +29,6 @@ libflow1d_core_la_SOURCES = \
          wetcrs_modules.F90 \
          CrossSections.f90 \
          struc_helper.f90 \
-         Dambreak.f90 \
          ExtraResistance.f90 \
          weir.f90 \
          universal_weir.f90 \
