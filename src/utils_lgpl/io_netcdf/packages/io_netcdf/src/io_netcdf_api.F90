@@ -1288,15 +1288,15 @@ function ionc_get_network_id_from_mesh_id_dll(ioncid, meshid, networkid) result(
 end function ionc_get_network_id_from_mesh_id_dll
 
 
-function ionc_get_meshgeom_dim_dll(ioncid, meshid, c_meshgeomdim) result(ierr) bind(C, name="ionc_get_meshgeom_dim")
+function ionc_get_meshgeom_dim_dll(ioncid, meshid, networkid, c_meshgeomdim) result(ierr) bind(C, name="ionc_get_meshgeom_dim")
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_meshgeom_dim_dll
    integer, intent(in)                         :: ioncid
-   integer, intent(in)                         :: meshid  
+   integer, intent(in)                         :: meshid, networkid  
    type(c_t_ug_meshgeomdim), intent(inout)     :: c_meshgeomdim 
    type(t_ug_meshgeom)                         :: meshgeom
    integer                                     :: ierr, startIndex
    
-   ierr = ionc_get_meshgeom(ioncid, meshid, meshgeom)
+   ierr = ionc_get_meshgeom(ioncid, meshid, networkid, meshgeom)
    
    c_meshgeomdim%dim             = meshgeom%dim
    c_meshgeomdim%numnode         = meshgeom%numnode            
@@ -1311,10 +1311,10 @@ function ionc_get_meshgeom_dim_dll(ioncid, meshid, c_meshgeomdim) result(ierr) b
    
 end function ionc_get_meshgeom_dim_dll
 
-function ionc_get_meshgeom_dll(ioncid, meshid, c_meshgeom, start_index, includeArrays) result(ierr) bind(C, name="ionc_get_meshgeom")
+function ionc_get_meshgeom_dll(ioncid, meshid, networkid, c_meshgeom, start_index, includeArrays) result(ierr) bind(C, name="ionc_get_meshgeom")
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_meshgeom_dll
    use meshdata
-   integer, intent(in)                         :: ioncid, meshid, start_index
+   integer, intent(in)                         :: ioncid, meshid, networkid, start_index
    type (c_t_ug_meshgeom), intent(inout)       :: c_meshgeom
    logical, optional,   intent(in   )          :: includeArrays
    integer                                     :: ierr
@@ -1360,7 +1360,7 @@ function ionc_get_meshgeom_dll(ioncid, meshid, c_meshgeom, start_index, includeA
    if(associated(meshgeom%interface_zs)) deallocate(meshgeom%interface_zs)
 
    !get the mesh geometry
-   ierr = ionc_get_meshgeom(ioncid, meshid, meshgeom, start_index, includeArrays)
+   ierr = ionc_get_meshgeom(ioncid, meshid, networkid, meshgeom, start_index, includeArrays)
    !set the pointers in c_meshgeom
    ierr = convert_meshgeom_to_cptr(meshgeom, c_meshgeom)
    

@@ -877,8 +877,8 @@ namespace UGrid.tests
             }
         }
 
-        // Deltashell creates a new file to write the 1d geometry and mesh as in the first test create1dUGRIDNetcdf
-        // and clones the 2d mesh data read from a file produced by RGFgrid. 
+        //// Deltashell creates a new file to write the 1d geometry and mesh as in the first test create1dUGRIDNetcdf
+        //// and clones the 2d mesh data read from a file produced by RGFgrid. 
         [Test]
         [NUnit.Framework.Category("UGRIDTests")]
         public void Clones2dMesh()
@@ -1618,8 +1618,7 @@ namespace UGrid.tests
             Assert.IsTrue(File.Exists(sourcetwod_path));
             int sourcetwodioncid = -1; //file id 
             int sourcetwomode = 0; //read mode
-            int ierr = wrapperNetcdf.ionc_open(sourcetwod_path, ref sourcetwomode, ref sourcetwodioncid, ref iconvtype,
-                ref convversion);
+            int ierr = wrapperNetcdf.ionc_open(sourcetwod_path, ref sourcetwomode, ref sourcetwodioncid, ref iconvtype, ref convversion);
             Assert.That(ierr, Is.EqualTo(0));
 
             //2. Define the network
@@ -1885,7 +1884,8 @@ namespace UGrid.tests
 
             //13. Get 2d mesh dimensions
             var meshtwoddim = new meshgeomdim();
-            ierr = wrapperNetcdf.ionc_get_meshgeom_dim(ref targetioncid, ref mesh2d, ref meshtwoddim);
+            int l_networkid = 0;
+            ierr = wrapperNetcdf.ionc_get_meshgeom_dim(ref targetioncid, ref mesh2d, ref l_networkid, ref meshtwoddim);
             Assert.That(ierr, Is.EqualTo(0));
 
             //14. Get the 2d mesh arrays
@@ -1896,7 +1896,7 @@ namespace UGrid.tests
             meshtwod.edge_nodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshtwoddim.numedge * 2);
             bool includeArrays = true;
             int start_index = 1;
-            ierr = wrapperNetcdf.ionc_get_meshgeom(ref targetioncid, ref mesh2d, ref meshtwod, ref start_index, ref includeArrays);
+            ierr = wrapperNetcdf.ionc_get_meshgeom(ref targetioncid, ref mesh2d, ref l_networkid, ref meshtwod, ref start_index, ref includeArrays);
             Assert.That(ierr, Is.EqualTo(0));
 
             //15. Using the existing arrays in memory (delta shell scenario), convert 1d into herman datastructure
@@ -1933,7 +1933,7 @@ namespace UGrid.tests
                 ref l_startIndex
                 );
             Assert.That(ierr, Is.EqualTo(0));
-            ierr = wrapperGridgeom.ggeo_convert(ref meshtwod, ref meshtwoddim);
+            ierr = wrapperGridgeom.ggeo_convert(ref meshtwod, ref meshtwoddim, ref startIndex);
             Assert.That(ierr, Is.EqualTo(0));
 
             //17. make the links

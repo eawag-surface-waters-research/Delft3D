@@ -8477,20 +8477,33 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
    use m_alloc
    use gridoperations
 
-   character(len=*), intent(in)  :: filename  !< Name of NetCDF file.
-   integer,          intent(in)  :: numk_keep !< Number of netnodes to keep in existing net (0 to replace all).
-   integer,          intent(in)  :: numl_keep !< Number of netlinks to keep in existing net (0 to replace all).
-   integer,          intent(out) :: numk_read !< Number of new netnodes read from file.
-   integer,          intent(out) :: numl_read !< Number of new netlinks read from file.
-   integer,          intent(out) :: ierr      !< Return status (NetCDF operations)
-   integer                       :: epsg_code
+   use unstruc_channel_flow
+   use m_cross_helper
+   use m_1d_networkreader
+   use m_flow1d_reader
+   use m_profiles
 
-   integer :: ioncid, iconvtype, start_index
+   character(len=*), intent(in)    :: filename           !< Name of NetCDF file.
+   integer,          intent(inout) :: numk_keep          !< Number of netnodes to keep in existing net (0 to replace all).
+   integer,          intent(inout) :: numl_keep          !< Number of netlinks to keep in existing net (0 to replace all).
+   integer,          intent(out)   :: numk_read          !< Number of new netnodes read from file.
+   integer,          intent(out)   :: numl_read          !< Number of new netlinks read from file.
+   integer,          intent(out)   :: ierr               !< Return status (NetCDF operations)
+   integer                         :: epsg_code
+
+   integer :: ioncid, iconvtype, start_index, networkIndex
    integer :: im, nmesh, idim, i, iv, L, numk_last, numl_last
    integer :: ncid, id_netnodez, id_netlinktype
    integer, allocatable :: kn12(:,:), kn3(:) ! Placeholder arrays for the edge_nodes and edge_types
    double precision :: convversion
    type(t_ug_meshgeom) :: meshgeom
+   logical             :: dflowfm_1d
+   
+   type(t_branch), pointer :: pbr
+   type(t_node), pointer :: pnod
+   integer :: istat, minp, ifil, inod, ibr, ngrd, k, k1, k2
+   type (t_structure), pointer :: pstru
+   integer :: nstru
    
    ! 1d2d links
    integer                                   :: ncontacts, ncontactmeshes, koffset1dmesh
@@ -8507,6 +8520,7 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
    numk_last = numk_keep
    numl_last = numl_keep
    includeArrays = .true.
+   networkIndex = 0
 
    ierr = ionc_open(filename, NF90_NOWRITE, ioncid, iconvtype, convversion)
    if (ierr /= ionc_noerr .or. iconvtype /= IONC_CONV_UGRID .or. convversion < 1.0) then ! NOTE: no check on conventions version number (yet?)
@@ -8516,7 +8530,68 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
       goto 999
    end if
    
-   ierr = ionc_get_epsg_code(ioncid, epsg_code)
+   !! Read 1D from file
+   dflowfm_1d = .true.
+   call read_1d_ugrid(network, ioncid, dflowfm_1d)
+   
+   if (dflowfm_1d) then
+
+      ! Do this if 1D present
+      call admin_network(network, numk, numl)
+      numk = numk_last
+      numl = numl_last
+      do inod = 1, network%nds%Count
+         pnod => network%nds%node(inod)
+         numk = numk+1
+         pnod%gridNumber = numk
+         xk(numk) = pnod%x
+         yk(numk) = pnod%y
+         zk(numk) = dmiss
+      enddo
+       
+      do ibr = 1, network%brs%Count
+         pbr => network%brs%branch(ibr)
+          
+         ! first step add coordinates and bed levels to nodes
+         ngrd = pbr%gridPointsCount
+         pbr%grd(1) = pbr%FromNode%gridNumber
+         do k = 2, ngrd-1
+            numk = numk+1
+            pbr%grd(k) = numk
+            xk(numk) = pbr%Xs(k)
+            yk(numk) = pbr%Ys(k)
+            zk(numk) = dmiss
+         enddo
+         pbr%grd(ngrd) = pbr%toNode%gridNumber
+          
+         ! second step create links
+         do k = 1, ngrd-1
+            numl = numl+1
+            kn(1,numl) = pbr%grd(k)
+            kn(2,numl) = pbr%grd(k+1)
+            kn(3,numl) = 1
+         enddo
+          
+      enddo
+
+      network%numk = numk-numk_last
+      network%numl = numl-numl_last
+
+      numk_keep = numk
+      numl_keep = numl
+      
+      numk_last = numk
+      numl_last = numl
+       
+      ! TODO: Once dflowfm's own 1D and the flow1d code are aligned, the following switch should probably disappear.
+      jainterpolatezk1D = 0
+
+   else
+      network%numk = 0
+      network%numl = 0
+   endif
+   
+   ierr = ionc_get_epsg_code(ioncid, epsg_code)   
    ! ierr = ionc_get_crs(ioncid, crs) ! TODO: make this API routine.
    ! TODO: also get the %crs item from the ionc dataset, store it in unstruc, AND, use that one in unc_write_flowgeom_ugrid.
    if (ierr /= ionc_noerr) then
@@ -8547,26 +8622,20 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
    !------------------------------------------------------------!
    do im = 1, nmesh
       
-      ierr = ionc_get_meshgeom(ioncid, im, meshgeom)
+      ierr = ionc_get_meshgeom(ioncid, im, networkIndex, meshgeom)
+      
       if (meshgeom%dim == 1) then
-         !Save meshgeom for later writing of the 1d network
-         ierr = ionc_get_meshgeom(ioncid, im, meshgeom, start_index, includeArrays, nbranchids, nbranchlongnames, nnodeids, nnodelongnames, & 
-                                  nodeids, nodelongnames, network1dname, mesh1dname) 
-         meshgeom1d = meshgeom 
-      else
+         ! Skip 1D-mesh
+         cycle
+      elseif (meshgeom%dim == 2) then
          !Else 2d/3d mesh
-         ierr = ionc_get_meshgeom(ioncid, im, meshgeom, start_index, includeArrays) 
+         ierr = ionc_get_meshgeom(ioncid, im, networkIndex, meshgeom, start_index, includeArrays) 
          !Variable to store the coordinates of face centres
          allocate(xface(meshgeom%numface))
          allocate(yface(meshgeom%numface))
          ierr = ionc_get_face_coordinates(ioncid, nmesh, xface, yface)
-      endif
-      ! should get the nnodeids, nnodelongnames, nbranchids, nbranchlongnames 
-      if (ierr /= ionc_noerr .or. meshgeom%numnode <= 0) then
-         cycle
-      end if
-
-      if (meshgeom%dim /= 1 .and. meshgeom%dim /= 2) then ! Only support 1D network and 2D grid
+      else
+         ! Only support 1D network and 2D grid
          write(msgbuf, '(a,i0,a,i0,a)') 'unc_read_net_ugrid: unsupported topology dimension ', meshgeom%dim, &
             ' in file '''//trim(filename)//' for mesh #', im, '.'
          call warn_flush()
@@ -8575,16 +8644,7 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
       
       !increasenetw 
       call increasenetw(numk_last + meshgeom%numnode, numl_last + meshgeom%numedge) ! increases XK, YK, KN
-      if (meshgeom%dim.ne.1) then
-      ! not 1d
-         ierr = ionc_get_node_coordinates(ioncid, im, XK(numk_last+1:numk_last + meshgeom%numnode), YK(numk_last+1:numk_last + meshgeom%numnode))
-      else
-      ! 1d
-         koffset1dmesh = numk_last
-         ierr = odu_get_xy_coordinates(meshgeom%branchidx, meshgeom%branchoffsets, meshgeom%ngeopointx, meshgeom%ngeopointy, meshgeom%nbranchgeometrynodes, meshgeom%nbranchlengths, jsferic, meshgeom%nodeX, meshgeom%nodeY)
-         XK(numk_last+1:numk_last + meshgeom%numnode) = meshgeom%nodeX
-         YK(numk_last+1:numk_last + meshgeom%numnode) = meshgeom%nodeY       
-      endif
+      ierr = ionc_get_node_coordinates(ioncid, im, XK(numk_last+1:numk_last + meshgeom%numnode), YK(numk_last+1:numk_last + meshgeom%numnode))
 
       if (ierr /= ionc_noerr) then
          write (msgbuf, '(a,i0,a)') 'unc_read_net_ugrid: Could not read x/y node coordinates from mesh #', im, ' in UGRID net file '''//trim(filename)//'''.'
@@ -8717,12 +8777,12 @@ subroutine unc_read_net(filename, numk_keep, numl_keep, numk_read, numl_read, ie
     use dfm_error
     use gridoperations
     
-    character(len=*), intent(in)  :: filename  !< Name of NetCDF file.
-    integer,          intent(in)  :: numk_keep !< Number of netnodes to keep in existing net.
-    integer,          intent(in)  :: numl_keep !< Number of netlinks to keep in existing net.
-    integer,          intent(out) :: numk_read !< Number of new netnodes read from file.
-    integer,          intent(out) :: numl_read !< Number of new netlinks read from file.
-    integer,          intent(out) :: ierr      !< Return status (NetCDF operations)
+    character(len=*), intent(in)     :: filename  !< Name of NetCDF file.
+    integer,          intent(inout)  :: numk_keep !< Number of netnodes to keep in existing net.
+    integer,          intent(inout)  :: numl_keep !< Number of netlinks to keep in existing net.
+    integer,          intent(out)    :: numk_read !< Number of new netnodes read from file.
+    integer,          intent(out)    :: numl_read !< Number of new netlinks read from file.
+    integer,          intent(out)    :: ierr      !< Return status (NetCDF operations)
 
     logical :: stringsequalinsens
     

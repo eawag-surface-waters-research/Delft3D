@@ -512,23 +512,28 @@ function ionc_get_topology_dimension(ioncid, meshid, dim) result(ierr)
 
 end function ionc_get_topology_dimension
 
-!> Reads the actual mesh geometry from the specified mesh in a IONC/UGRID dataset.
-!! By default only reads in the dimensions (face/edge/node counts).
-!! Optionally, also all coordinate arrays + connectivity tables can be read.
-function ionc_get_meshgeom(ioncid, meshid, meshgeom, start_index, includeArrays, nbranchids, nbranchlongnames, nnodeids, nnodelongnames, nodeids, nodelongnames, network1dname, mesh1dname) result(ierr)
+!> Reads the actual mesh geometry and network from the specified mesh in a IONC/UGRID dataset.
+!! Can read separate parts, such as dimension AND/OR all coordinate arrays + connectivity tables AND/OR network geometry
+function ionc_get_meshgeom(ioncid, meshid, networkid, meshgeom, start_index, includeArrays, nbranchids, nbranchlongnames, nnodeids, nnodelongnames, nodeids, nodelongnames, network1dname, mesh1dname) result(ierr)
    integer,             intent(in   ) :: ioncid        !< The IONC data set id.
    integer,             intent(in   ) :: meshid        !< The mesh id in the specified data set.
+   integer                            :: networkid     !< The mesh id in the specified data set.
    type(t_ug_meshgeom), intent(out  ) :: meshgeom      !< Structure in which all mesh geometry will be stored.
    integer                            :: ierr          !< Result status, ionc_noerr if successful.
-   integer                            :: networkid 
    type(t_ug_network)                 :: netid 
    
    !Optional variables
-   logical, optional,   intent(in)    :: includeArrays !< (optional) Whether or not to include coordinate arrays and connectivity tables. Default: .false., i.e., dimension counts only.
-   integer, optional,   intent(in)    :: start_index   !< (optional) The start index   
+   logical, optional,   intent(in)                          :: includeArrays !< (optional) Whether or not to include coordinate arrays and connectivity tables. Default: .false., i.e., dimension counts only.
+   integer, optional,   intent(in)                          :: start_index   !< (optional) The start index   
    character(len=ug_idsLen), allocatable, optional          :: nbranchids(:), nnodeids(:), nodeids(:)       
    character(len=ug_idsLongNamesLen), allocatable, optional :: nbranchlongnames(:), nnodelongnames(:), nodelongnames(:) 
    character(len=*), optional, intent(inout)                :: network1dname, mesh1dname
+   
+
+   !locals
+   logical :: includeNames
+   !deduced start index
+   integer :: ded_start_index
 
    ! TODO: AvD: some error handling if ioncid or meshid is wrong
    if (datasets(ioncid)%iconvtype /= IONC_CONV_UGRID) then
@@ -536,33 +541,104 @@ function ionc_get_meshgeom(ioncid, meshid, meshgeom, start_index, includeArrays,
       goto 999
    end if
    
-   networkid = -1
-   ierr = ug_get_network_id_from_mesh_id(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), datasets(ioncid)%ug_file, networkid)
-   
-   if(present(start_index)) then
-      meshgeom%start_index = start_index
-   else
-      meshgeom%start_index = 1 !As requested by fortran applications
+   ! check for network 1d if a valid meshid and an invalid networkid is given
+   if (meshid > 0 .and. networkid <= 0) then
+      networkid = -1   
+      ierr = ug_get_network_id_from_mesh_id(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), datasets(ioncid)%ug_file, networkid)
    endif
    
-   if (present(includeArrays)) then
-      if(networkid /= -1 .and. present(nbranchids) .and. present(nbranchlongnames) .and. present(nnodeids) .and. present(nnodelongnames).and. &
-         present(nodeids) .and. present(nodelongnames) .and. present(network1dname) .and. present(mesh1dname)) then
-         ierr = ug_get_meshgeom(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), meshgeom, includeArrays, datasets(ioncid)%ug_file%netids(networkid), & 
-                                nbranchids, nbranchlongnames, nnodeids, nnodelongnames, nodeids, nodelongnames, network1dname, mesh1dname)  
-      else if (networkid /= -1) then
-         ierr = ug_get_meshgeom(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), meshgeom, includeArrays, datasets(ioncid)%ug_file%netids(networkid))
-      else
-         ierr = ug_get_meshgeom(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), meshgeom, includeArrays)
-      endif
+   !requested by the client
+   if(present(start_index)) then
+      ded_start_index = start_index
    else
-      if(networkid /= -1 ) then
-         ierr = ug_get_meshgeom(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), meshgeom, netid = datasets(ioncid)%ug_file%netids(networkid))
-      else
-         ierr = ug_get_meshgeom(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), meshgeom)
-      endif
-   end if
+      ded_start_index = 1 !As requested by fortran applications
+   endif
    
+   includeNames = .false.
+   includeNames = present(nbranchids) .and. present(nbranchlongnames) .and. present(nnodeids) .and. present(nnodelongnames).and. &
+      present(nodeids) .and. present(nodelongnames) .and. present(network1dname) .and. present(mesh1dname)
+   
+   ! we have the following switches
+   ! 1. includeArrays is present/not present
+   ! 2. includeNames is true/false
+   ! 3. networkid is valid(>0)/invalid(<=0)
+   ! 4. meshid is valid(>0)/invalid(<=0)
+   if (present(includeArrays).and. meshid >0 .and. networkid >0 .and. includeNames) then
+      ierr = ug_get_meshgeom(&
+      ncid             = datasets(ioncid)%ncid,&
+      meshgeom         = meshgeom,&
+      start_index      = ded_start_index,&
+      meshids          = datasets(ioncid)%ug_file%meshids(meshid),&
+      netid            = datasets(ioncid)%ug_file%netids(networkid),&
+      includeArrays    = includeArrays,&
+      nbranchids       = nbranchids,&
+      nbranchlongnames = nbranchlongnames,&
+      nnodeids         = nnodeids,&
+      nnodelongnames   = nnodelongnames,&
+      nodeids          = nodeids,&
+      nodelongnames    = nodelongnames,&
+      network1dname    = network1dname,&
+      mesh1dname       = mesh1dname)
+   else if (present(includeArrays).and. meshid <=0 .and. networkid >0 .and. includeNames) then
+      ierr = ug_get_meshgeom(&
+      ncid             = datasets(ioncid)%ncid,&
+      meshgeom         = meshgeom,&
+      start_index      = ded_start_index,&
+      netid            = datasets(ioncid)%ug_file%netids(networkid),&
+      includeArrays    = includeArrays,&
+      nbranchids       = nbranchids,&
+      nbranchlongnames = nbranchlongnames,&
+      nnodeids         = nnodeids,&
+      nnodelongnames   = nnodelongnames,&
+      nodeids          = nodeids,&
+      nodelongnames    = nodelongnames,&
+      network1dname    = network1dname)
+   else if (present(includeArrays).and. meshid > 0 .and. networkid > 0 .and. (.not.includeNames)) then
+      ierr = ug_get_meshgeom(&
+      ncid             = datasets(ioncid)%ncid,&
+      meshgeom         = meshgeom, &
+      start_index      = ded_start_index,&
+      meshids          = datasets(ioncid)%ug_file%meshids(meshid),&
+      netid            = datasets(ioncid)%ug_file%netids(networkid),&
+      includeArrays    = includeArrays)
+   else if (present(includeArrays).and. meshid > 0 .and. networkid <= 0 .and. (.not.includeNames)) then 
+      ierr = ug_get_meshgeom(&
+      ncid             = datasets(ioncid)%ncid,&
+      meshgeom         = meshgeom,&
+      start_index      = ded_start_index,&
+      meshids          = datasets(ioncid)%ug_file%meshids(meshid),&
+      includeArrays    = includeArrays)
+   else if (present(includeArrays).and. meshid <= 0 .and. networkid > 0 .and. (.not.includeNames)) then 
+      ierr = ug_get_meshgeom(&
+      ncid             = datasets(ioncid)%ncid,&
+      meshgeom         = meshgeom,&
+      start_index      = ded_start_index,&
+      netid            = datasets(ioncid)%ug_file%netids(networkid),&
+      includeArrays    = includeArrays)
+!
+! Ask only for dimensions
+!
+   else if (.not.present(includeArrays).and. meshid > 0 .and. networkid > 0 .and. (.not.includeNames)) then
+      ierr = ug_get_meshgeom(&
+      ncid             = datasets(ioncid)%ncid,&
+      meshgeom         = meshgeom, &
+      start_index      = ded_start_index,&
+      meshids          = datasets(ioncid)%ug_file%meshids(meshid),&
+      netid            = datasets(ioncid)%ug_file%netids(networkid))
+   else if (.not.present(includeArrays).and. meshid > 0 .and. networkid <= 0 .and. (.not.includeNames)) then
+      ierr = ug_get_meshgeom(&
+      ncid             = datasets(ioncid)%ncid,&
+      meshgeom         = meshgeom,&
+      start_index      = ded_start_index,&
+      meshids          = datasets(ioncid)%ug_file%meshids(meshid))
+   else if (.not.present(includeArrays).and. meshid <= 0 .and. networkid > 0 .and. (.not.includeNames)) then
+      ierr = ug_get_meshgeom(&
+      ncid             = datasets(ioncid)%ncid,&
+      meshgeom         = meshgeom,&
+      start_index      = ded_start_index,&
+      netid            = datasets(ioncid)%ug_file%netids(networkid) )
+   endif
+
    ! Successful
    return
 

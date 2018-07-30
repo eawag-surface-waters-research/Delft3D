@@ -636,10 +636,10 @@ namespace General.tests
         #endregion
 
         [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ionc_get_meshgeom", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ionc_get_meshgeom_dll([In] ref int ioncid, [In] ref int meshid, [In, Out] ref meshgeom meshgeom, [In] ref int start_index, [In] ref bool includeArrays);
+        public static extern int ionc_get_meshgeom_dll([In] ref int ioncid, [In] ref int meshid, [In] ref int networkid, [In, Out] ref meshgeom meshgeom, [In] ref int start_index, [In] ref bool includeArrays);
 
         [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ionc_get_meshgeom_dim", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ionc_get_meshgeom_dim_dll([In] ref int ioncid, [In] ref int meshid, [In, Out] ref meshgeomdim meshgeomdim);
+        public static extern int ionc_get_meshgeom_dim_dll([In] ref int ioncid, [In] ref int meshid, [In] ref int networkid, [In, Out] ref meshgeomdim meshgeomdim);
 
         [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ionc_def_mesh_ids", CallingConvention = CallingConvention.Cdecl)]
         public static extern int ionc_def_mesh_ids_dll([In] ref int ioncid, [In] ref int meshid, [In] ref int iloctype);
@@ -959,14 +959,14 @@ namespace General.tests
         }
         #endregion
 
-        public int ionc_get_meshgeom(ref int ioncid, ref int meshid, ref meshgeom meshgeom, ref int start_index, ref bool includeArrays)
+        public int ionc_get_meshgeom(ref int ioncid, ref int meshid, ref int networkid, ref meshgeom meshgeom, ref int start_index, ref bool includeArrays)
         {
-            return ionc_get_meshgeom_dll(ref  ioncid, ref  meshid, ref meshgeom, ref start_index, ref includeArrays);
+            return ionc_get_meshgeom_dll(ref ioncid, ref meshid, ref networkid, ref meshgeom, ref start_index, ref includeArrays);
         }
 
-        public int ionc_get_meshgeom_dim(ref int ioncid, ref int meshid, ref meshgeomdim meshgeomdim)
+        public int ionc_get_meshgeom_dim(ref int ioncid, ref int meshid, ref int networkid, ref meshgeomdim meshgeomdim)
         {
-            return ionc_get_meshgeom_dim_dll(ref  ioncid, ref  meshid, ref meshgeomdim);
+            return ionc_get_meshgeom_dim_dll(ref  ioncid, ref  meshid, ref networkid, ref meshgeomdim);
         }
 
         public int ionc_def_mesh_ids(ref int ioncid, ref int meshid, ref int iconvtype)

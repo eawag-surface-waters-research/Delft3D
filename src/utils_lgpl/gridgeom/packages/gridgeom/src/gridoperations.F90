@@ -965,7 +965,12 @@
    if ( jakeepmask.ne.1 ) then
       KC   =  0
       DO K = 1,NUMK
-         CALL DBPINPOL(xk(k), yk(k), ik, dmiss, JINS, NPL, xpl, ypl, zpl)
+         if (NPL > 0) then 
+            CALL DBPINPOL(xk(k), yk(k), ik, dmiss, JINS, NPL, xpl, ypl, zpl)
+         else
+            CALL DBPINPOL(xk(k), yk(k), ik, dmiss, JINS, NPL)
+         endif
+            
          IF (IK > 0) THEN
             KC(K) = IK
          ENDIF
@@ -1971,6 +1976,10 @@
    ELSE IF (JVIEW .EQ. 4) THEN
       !    CALL DVIEW(XD,YD,-ZD,X,Y,Z)
       CALL DVIEW(XD,YD,-ZD,X,Y,Z)
+   ELSE !In all other cases (e.g. when HOWTOVIEW is not set, e.g. in the gridgeom library)
+      x = xd
+      y = yd
+      z = zd
    ENDIF
    RETURN
    END SUBROUTINE DRIETWEE
@@ -1999,6 +2008,10 @@
       XD = X
       YD = Y
       ZD = XYZ
+   ELSE !In all other cases (e.g. when HOWTOVIEW is not set, e.g. in the gridgeom library)
+      xd = x
+      yd = y
+      zd = xyz
    ENDIF
 
    RETURN
@@ -2492,7 +2505,7 @@
    end function make1D2Dinternalnetlinks
 
    !< converter function
-   function ggeo_convert(meshgeom) result(ierr)
+   function ggeo_convert(meshgeom, start_index) result(ierr)
 
    use meshdata
    use network_data
@@ -2500,13 +2513,17 @@
 
    implicit none
    type(t_ug_meshgeom), intent(in)      :: meshgeom
-   integer                              :: numk_last, numl_last, ierr, numk_read, l
+   integer, intent(in)                  :: start_index   
+   integer                              :: numk_last, numl_last, ierr, numk_read, l, incrementIndex
 
+   incrementIndex = 0
    ierr = 0
 
    numk_last = LNUMK
    numl_last = LNUML
    numk_read = meshgeom%numnode
+   
+   if (start_index == 0) incrementIndex = 1;
 
    !Prepare net vars for new data and fill with values from file, increases nod, xk, yk, zk, kn if needed
 
@@ -2517,7 +2534,7 @@
 
    do l=1,meshgeom%numedge
       ! Append the netlink table, and also increment netnode numbers in netlink array to ensure unique ids.
-      kn(1:2,numl_last+l) = numk_last + meshgeom%edge_nodes(1:2,l) !to calculate in 1D!
+      kn(1:2,numl_last+l) = numk_last + meshgeom%edge_nodes(1:2,l) + incrementIndex !to calculate in 1D!
       kn(3,  numl_last+l) = meshgeom%dim
    end do
 
@@ -2551,7 +2568,7 @@
 
    ierr = 0
    nlinks = 0
-   do l=1,NUML
+   do l=1,numl1d + numl
       if(kn(3,l).eq.3) then
          nlinks = nlinks + 1
       end if
@@ -2570,7 +2587,7 @@
    ierr     = 0
    nlinks   = 0
 
-   do l=1,numl
+   do l=1,numl1d + numl
       if(kn(3,l).eq.3) then
          nlinks = nlinks + 1
          nc = 0

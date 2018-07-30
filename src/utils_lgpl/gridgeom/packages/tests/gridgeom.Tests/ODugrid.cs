@@ -255,8 +255,8 @@ namespace gridgeom.Tests
             int twodnumedge = 825;
             int twodnumface = 375;
             int twodmaxnumfacenodes = 4;
-            int twodnumlayer = 0;
-            int twodlayertype = 0;
+            int twodnumlayer = -1;
+            int twodlayertype = -1;
             int jsferic = 0;
 
             //mesh1d
@@ -265,8 +265,8 @@ namespace gridgeom.Tests
             int onednumedge = 24;
             int onednumface = 0;
             int onedmaxnumfacenodes = 0;
-            int onednumlayer = 0;
-            int onedlayertype = 0;
+            int onednumlayer = -1;
+            int onedlayertype = -1;
             int nt_nbranches = 1;
             int nt_ngeometry = 25;
 
@@ -284,9 +284,10 @@ namespace gridgeom.Tests
 
             int meshid = -1;
             int meshType = 2;
+            int l_networkid = 0; // invalid network, not really intrested in getting the networ
             var meshtwoddim = new meshgeomdim();
             getMeshid(ioncid, ref meshid, meshType, ref wrapperNetcdf);
-            ierr = wrapperNetcdf.ionc_get_meshgeom_dim(ref ioncid, ref meshid, ref meshtwoddim);
+            ierr = wrapperNetcdf.ionc_get_meshgeom_dim(ref ioncid, ref meshid, ref l_networkid, ref meshtwoddim);
             Assert.That(ierr, Is.EqualTo(0));
 
             Assert.That(meshtwoddim.dim, Is.EqualTo(twoddim));
@@ -307,7 +308,7 @@ namespace gridgeom.Tests
             //var gridGeomWrapper = new GridGeomLibWrapper();
             bool includeArrays = true;
             int start_index    = 1; //the base index of the arrays
-            ierr = wrapperNetcdf.ionc_get_meshgeom(ref ioncid, ref  meshid, ref meshtwod, ref start_index, ref includeArrays);
+            ierr = wrapperNetcdf.ionc_get_meshgeom(ref ioncid, ref  meshid, ref l_networkid, ref meshtwod, ref start_index, ref includeArrays);
             Assert.That(ierr, Is.EqualTo(0));
             double[] rc_twodnodex = new double[twodnumnode];
             double[] rc_twodnodey = new double[twodnumnode];
@@ -321,7 +322,7 @@ namespace gridgeom.Tests
             meshType = 1;
             int meshonedid = -1;
             getMeshid(ioncid, ref meshonedid, meshType, ref wrapperNetcdf);
-            ierr = wrapperNetcdf.ionc_get_meshgeom_dim(ref ioncid, ref meshonedid, ref meshoneddim);
+            ierr = wrapperNetcdf.ionc_get_meshgeom_dim(ref ioncid, ref meshonedid, ref l_networkid, ref meshoneddim);
             Assert.That(ierr, Is.EqualTo(0));
 
             Assert.That(meshoneddim.dim, Is.EqualTo(oneddim));
@@ -350,7 +351,7 @@ namespace gridgeom.Tests
             meshoned.nbranchorder = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshoneddim.nbranches);
 
             //need to produce a file with coordinate_space = string variable
-            ierr = wrapperNetcdf.ionc_get_meshgeom(ref ioncid, ref meshonedid, ref meshoned, ref start_index, ref includeArrays);
+            ierr = wrapperNetcdf.ionc_get_meshgeom(ref ioncid, ref meshonedid, ref meshonedid, ref meshoned, ref start_index, ref includeArrays);
             Assert.That(ierr, Is.EqualTo(0));
 
             double[] rc_onednodex = new double[onednumnode];
@@ -367,9 +368,10 @@ namespace gridgeom.Tests
             Assert.That(ierr, Is.EqualTo(0));
 
             //ggeo_convert to fill in kn matrix, so we can call make1D2Dinternalnetlinks_dll
-            ierr = wrapperGridgeom.ggeo_convert(ref meshoned, ref meshoneddim);
+            int startIndex = 0;
+            ierr = wrapperGridgeom.ggeo_convert(ref meshoned, ref meshoneddim, ref startIndex);
             Assert.That(ierr, Is.EqualTo(0));
-            ierr = wrapperGridgeom.ggeo_convert(ref meshtwod, ref meshtwoddim);
+            ierr = wrapperGridgeom.ggeo_convert(ref meshtwod, ref meshtwoddim, ref startIndex);
             Assert.That(ierr, Is.EqualTo(0));
             //convert ugrid to xy coordinates
             Assert.That(ierr, Is.EqualTo(0));
@@ -422,8 +424,8 @@ namespace gridgeom.Tests
             int twodnumedge = 24;
             int twodnumface = 9;
             int twodmaxnumfacenodes = 4;
-            int twodnumlayer = 0;
-            int twodlayertype = 0;
+            int twodnumlayer = -1;
+            int twodlayertype = -1;
             int startIndex = 1; // the indexes in the array are zero based
 
             //mesh1d
@@ -431,7 +433,7 @@ namespace gridgeom.Tests
             int nmeshpoints = 4;
             int nbranches = 1;
             int[] branchids = { 1, 1, 1, 1 };
-            double[] meshXCoords = { -6, 5, 23, 34 };
+            double[] meshXCoords = { -6, 5,  23, 34 };
             double[] meshYCoords = { 22, 16, 16, 7 };
             double[] branchoffset = { 0, 10, 20, 100 }; /// important are the first and last offset
             double[] branchlength = { 100 };
@@ -440,8 +442,8 @@ namespace gridgeom.Tests
 
 
             //links
-            int[] arrayfrom = { 2, 8 };
-            int[] arrayto   = { 2, 3 };
+            int[] arrayfrom = { 2, 8, 7 };
+            int[] arrayto   = { 2, 3, 4 };
 
             //1. open the file with the 2d mesh
             string c_path = TestHelper.TestFilesDirectoryPath() + @"\2d_ugrid_net.nc";
@@ -461,7 +463,8 @@ namespace gridgeom.Tests
 
             //3. get the dimensions of the 2d mesh
             var meshtwoddim = new meshgeomdim();
-            ierr = wrapperNetcdf.ionc_get_meshgeom_dim(ref ioncid, ref meshid, ref meshtwoddim);
+            int l_networkid = 0;
+            ierr = wrapperNetcdf.ionc_get_meshgeom_dim(ref ioncid, ref meshid, ref l_networkid, ref meshtwoddim);
             Assert.That(ierr, Is.EqualTo(0));
 
             Assert.That(meshtwoddim.dim, Is.EqualTo(twoddim));
@@ -482,7 +485,8 @@ namespace gridgeom.Tests
             //5. get the meshgeom arrays
             bool includeArrays = true;
             int start_index = 1;
-            ierr = wrapperNetcdf.ionc_get_meshgeom(ref ioncid, ref meshid, ref meshtwod, ref start_index, ref includeArrays);
+            int l_network1d = 0;
+            ierr = wrapperNetcdf.ionc_get_meshgeom(ref ioncid, ref meshid, ref l_network1d, ref meshtwod, ref start_index, ref includeArrays);
             Assert.That(ierr, Is.EqualTo(0));
             double[] rc_twodnodex = new double[twodnumnode];
             double[] rc_twodnodey = new double[twodnumnode];
@@ -514,7 +518,7 @@ namespace gridgeom.Tests
             ierr = wrapperGridgeom.ggeo_convert_1d_arrays(ref c_meshXCoords, ref c_meshYCoords, ref c_branchoffset, ref c_branchlength, ref c_branchids, ref c_sourcenodeid, ref c_targetnodeid, ref nbranches, ref nmeshpoints, ref startIndex);
             
             Assert.That(ierr, Is.EqualTo(0));
-            ierr = wrapperGridgeom.ggeo_convert(ref meshtwod, ref meshtwoddim);
+            ierr = wrapperGridgeom.ggeo_convert(ref meshtwod, ref meshtwoddim, ref startIndex);
             Assert.That(ierr, Is.EqualTo(0));
 
             //9. make the links
@@ -537,8 +541,8 @@ namespace gridgeom.Tests
             Assert.That(ierr, Is.EqualTo(0));
 
             //11. get the links: arrayfrom = 2d cell index, arrayto = 1d node index 
-            IntPtr c_arrayfrom = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * n1d2dlinks); //2d cell number
-            IntPtr c_arrayto = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * n1d2dlinks); //1d node
+            IntPtr c_arrayfrom = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * n1d2dlinks); //2d cell number
+            IntPtr c_arrayto = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * n1d2dlinks); //1d node
             ierr = wrapperGridgeom.ggeo_get_links(ref c_arrayfrom, ref c_arrayto, ref n1d2dlinks);
             Assert.That(ierr, Is.EqualTo(0));
 
@@ -585,8 +589,8 @@ namespace gridgeom.Tests
             int twodnumedge = 24;
             int twodnumface = 9;
             int twodmaxnumfacenodes = 4;
-            int twodnumlayer = 0;
-            int twodlayertype = 0;
+            int twodnumlayer = -1;
+            int twodlayertype = -1;
             int startIndex = 1;
 
             //mesh1d
@@ -621,7 +625,8 @@ namespace gridgeom.Tests
 
             //3. get the dimensions of the 2d mesh
             var meshtwoddim = new meshgeomdim();
-            ierr = wrapperNetcdf.ionc_get_meshgeom_dim(ref ioncid, ref meshid,ref meshtwoddim);
+            int l_networkid = 0; //sets an invalid network
+            ierr = wrapperNetcdf.ionc_get_meshgeom_dim(ref ioncid, ref meshid, ref l_networkid, ref meshtwoddim);
             Assert.That(ierr, Is.EqualTo(0));
 
             Assert.That(meshtwoddim.dim, Is.EqualTo(twoddim));
@@ -642,7 +647,8 @@ namespace gridgeom.Tests
             //5. get the meshgeom arrays
             bool includeArrays = true;
             int start_index = 1;
-            ierr = wrapperNetcdf.ionc_get_meshgeom(ref ioncid, ref meshid, ref meshtwod, ref start_index, ref includeArrays);
+            int l_network1d = 0;
+            ierr = wrapperNetcdf.ionc_get_meshgeom(ref ioncid, ref meshid, ref l_network1d, ref meshtwod, ref start_index, ref includeArrays);
             Assert.That(ierr, Is.EqualTo(0));
             double[] rc_twodnodex = new double[twodnumnode];
             double[] rc_twodnodey = new double[twodnumnode];
@@ -672,7 +678,7 @@ namespace gridgeom.Tests
             var wrapperGridgeom = new GridGeomLibWrapper();
             ierr = wrapperGridgeom.ggeo_convert_1d_arrays(ref c_meshXCoords, ref c_meshYCoords, ref c_branchoffset, ref c_branchlength, ref c_branchids, ref c_sourcenodeid, ref c_targetnodeid, ref nbranches, ref nmeshpoints, ref startIndex);
             Assert.That(ierr, Is.EqualTo(0));
-            ierr = wrapperGridgeom.ggeo_convert(ref meshtwod, ref meshtwoddim);
+            ierr = wrapperGridgeom.ggeo_convert(ref meshtwod, ref meshtwoddim, ref startIndex);
             Assert.That(ierr, Is.EqualTo(0));
 
             //9. make the links

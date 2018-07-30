@@ -19855,7 +19855,7 @@ subroutine readprofilesdef(ja)    ! in afwachting van een module die profieldefi
 
  endif
 
- end subroutine readprofilesdef
+   end subroutine readprofilesdef
 
  subroutine readyzprofnr(myzprofs, iprofnr, nyz, yy, zz, mx, width, height, zmin)
  use unstruc_messages
@@ -29210,7 +29210,7 @@ subroutine setbedlevelfromnetfile()
    use m_ec_interpolationsettings
    implicit none
 
-   integer :: ierr, ioncid, iconvtype, ncid, nmesh, im, id_bl
+   integer :: ierr, ioncid, iconvtype, ncid, nmesh, im, id_bl, networkid
    double precision :: bl_fillvalue
    double precision :: convversion
    integer :: nflownode
@@ -29235,7 +29235,8 @@ subroutine setbedlevelfromnetfile()
 
          ierr = ionc_get_mesh_count(ioncid, nmesh)
          do im=1,nmesh
-            ierr = ionc_get_meshgeom(ioncid, im, meshgeom)
+            networkid = 0
+            ierr = ionc_get_meshgeom(ioncid, im, networkid, meshgeom) !This call is only used to get the dimension (later on when we use UGrid format we might use other fields of the meshgeom structure) 
             if (ierr /= ionc_noerr) then
                cycle
             end if
@@ -36198,7 +36199,7 @@ endif ! read mext file
 
  if (allocated(kez)) then  ! mext > 0 .or. len_trim(md_extfile_new) > 0) then
     deallocate ( kez, keu, kes, ketm, kesd, ket, keuxy, ken, ke1d2d, keg, ked, kep, kedb, keklep, kegs, kegen, itpez, itpenz, itpeu, itpenu, kew, ketr)
-end if
+ end if
 
  if (mext > 0) then
     call doclose(mext) ! close ext file

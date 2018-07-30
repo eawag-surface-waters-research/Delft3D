@@ -55,14 +55,14 @@ namespace General.tests
         /// <param name="meshgeomdim">The data structure containing the mesh dimensions</param>
         /// <returns></returns>
         [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ggeo_convert", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ggeo_convert_dll([In, Out] ref meshgeom meshgeom, [In] ref meshgeomdim meshgeomdim);
+        public static extern int ggeo_convert_dll([In, Out] ref meshgeom meshgeom, [In] ref meshgeomdim meshgeomdim, [In] ref int startIndex);
 
         /// <summary>
         /// Makes the 1d/2d links (results are stored in memory)
         /// </summary>
         /// <returns></returns>
         [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ggeo_make1D2Dinternalnetlinks", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ggeo_make1D2Dinternalnetlinks_dll();
+        public static extern int ggeo_make1D2Dinternalnetlinks_dll(ref int c_jsferic, ref int c_jasfer3D, ref int c_jglobe);
 
         /// <summary>
         /// Use 1d array to fill kn matrix
@@ -147,15 +147,18 @@ namespace General.tests
         }
 
 
-        public int ggeo_convert(ref meshgeom c_meshgeom, ref meshgeomdim c_meshgeomdim )
+        public int ggeo_convert(ref meshgeom c_meshgeom, ref meshgeomdim c_meshgeomdim, ref int startIndex)
         {
-            int ierr = ggeo_convert_dll(ref  c_meshgeom, ref  c_meshgeomdim );
+            int ierr = ggeo_convert_dll(ref  c_meshgeom, ref  c_meshgeomdim, ref startIndex);
             return ierr;
         }
          
         public int ggeo_make1D2Dinternalnetlinks()
         {
-            int ierr = ggeo_make1D2Dinternalnetlinks_dll();
+            int c_jsferic = 0;
+            int c_jasfer3D = 0;
+            int c_jglobe = 0;
+            int ierr = ggeo_make1D2Dinternalnetlinks_dll(ref c_jsferic, ref c_jasfer3D, ref c_jglobe);
             return ierr;
         }
 

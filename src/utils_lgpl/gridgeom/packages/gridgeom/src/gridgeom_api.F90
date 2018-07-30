@@ -73,7 +73,7 @@ function ggeo_get_xy_coordinates_dll(c_branchids, c_branchoffsets, c_geopointsX,
    
 end function ggeo_get_xy_coordinates_dll
 
-function ggeo_convert_dll(c_meshgeom, c_meshgeomdim) result(ierr) bind(C, name="ggeo_convert")
+function ggeo_convert_dll(c_meshgeom, c_meshgeomdim, start_index) result(ierr) bind(C, name="ggeo_convert")
 !DEC$ ATTRIBUTES DLLEXPORT :: ggeo_convert_dll
 
    use gridoperations
@@ -83,10 +83,11 @@ function ggeo_convert_dll(c_meshgeom, c_meshgeomdim) result(ierr) bind(C, name="
    type(c_t_ug_meshgeom), intent(in)      :: c_meshgeom
    type(c_t_ug_meshgeomdim), intent(in)   :: c_meshgeomdim
    type(t_ug_meshgeom)                    :: meshgeom
+   integer, intent(in)                    :: start_index
    integer                                :: ierr
    
    ierr = convert_cptr_to_meshgeom(c_meshgeom, c_meshgeomdim, meshgeom)
-   ierr = ggeo_convert(meshgeom)
+   ierr = ggeo_convert(meshgeom, start_index)
    
 end function ggeo_convert_dll
 
@@ -166,10 +167,12 @@ function ggeo_convert_1d_arrays_dll(c_nodex, c_nodey, c_branchoffset, c_branchle
    call c_f_pointer(c_branchlength, branchlength, (/ nBranches /))
    call c_f_pointer(c_sourceNodeId, sourceNodeId, (/ nBranches /))
    call c_f_pointer(c_targetNodeId, targetNodeId, (/ nBranches /))
-      
+   
+   !ggeo_convert_1d_arrays gives back 1d based arrays
    ierr =  ggeo_convert_1d_arrays(nodex, nodey, branchoffset, branchlength, branchid, sourcenodeid, targetnodeid, meshgeom, startIndex)
     
-   ierr = ggeo_convert(meshgeom)
+   !1d based arrays are provided
+   ierr = ggeo_convert(meshgeom, 1)
 
 end function ggeo_convert_1d_arrays_dll
 

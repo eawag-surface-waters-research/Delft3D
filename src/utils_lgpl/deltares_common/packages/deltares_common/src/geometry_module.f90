@@ -769,9 +769,13 @@ module geometry_module
       integer                                         :: num
       double precision, intent(in)                    :: dmiss
       integer, intent(in)                             :: JINS, NPL
-      double precision, intent(in)                    :: xpl(NPL), ypl(NPL), zpl(NPL)
-
-      call dbpinpol_optinside_perpol(xp, yp, 0, 0, in, num, dmiss, JINS, NPL, xpl, ypl, zpl)
+      double precision, optional,intent(in)           :: xpl(:), ypl(:), zpl(:)
+      
+      if (NPL>0 .and. present(xpl)) then
+         call dbpinpol_optinside_perpol(xp, yp, 0, 0, in, num, dmiss, JINS, NPL, xpl, ypl, zpl)
+      else
+         call dbpinpol_optinside_perpol(xp, yp, 0, 0, in, num, dmiss, JINS, NPL)
+      endif
       end subroutine dbpinpol
 
       !> The original dbpinpol routine, extended with an optional per-polygon-specified inside-mode.
@@ -806,8 +810,8 @@ module geometry_module
       integer :: jins_opt !< The actual used jins-mode (either global, or per poly)
       double precision, intent(in)                    :: dmiss
       integer, intent(in)                             :: JINS, NPL
-      double precision, intent(in)                    :: xpl(NPL), ypl(NPL), zpl(NPL)
-
+      double precision, optional, intent(in)          :: xpl(NPL), ypl(NPL), zpl(NPL)
+      
       numselect = 0
 
       if ( NPL.eq.0 ) then

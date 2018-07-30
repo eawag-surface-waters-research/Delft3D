@@ -209,7 +209,7 @@ module m_1d_networkreader
       endif
       
       ! Get all data in one call: mesh and network
-      ierr =  ionc_get_meshgeom(ioncid, meshIndex, meshgeom, startIndex, .true., &             
+      ierr =  ionc_get_meshgeom(ioncid, meshIndex, networkIndex, meshgeom, startIndex, .true., &             
                                 branchids, branchlongnames, nodeids, nodelongnames, & !1d network character variables
                                 gpsID, gpsIDLongnames, network1dname, mesh1dname)     !1d grid character variables
 

@@ -324,19 +324,22 @@ subroutine loadModel(filename)
     use m_flowparameters , only: jatransportmodule
     use m_sediment
     use m_alloc
+    use  m_cross_helper
     use m_netw_flow1d
+    use m_flow1d_reader
     use m_flowexternalforcings, only: pillar
 
     character(*), intent(in)  :: filename !< Name of file to be read (in current directory or with full path).
 
     character(len=200), dimension(:), allocatable       :: fnames
+    double precision, dimension(2) :: tempbob
 
     character(1), external    :: get_dirsep
+    logical                   :: found_1d_network
 
     integer :: istat, minp, ifil, jadoorladen
     integer :: i
-    
-    logical     :: found_1d_network
+    integer :: L, k1, k2
 
     call resetModel()
     
@@ -353,17 +356,41 @@ subroutine loadModel(filename)
     end if
 
     ! read and proces dflow1d model
+    ! This routine is still used for Morphology model with network in INI-File (Willem Ottevanger)
+    call load_network_from_flow1d(md_1dnetworkfile, found_1d_network)
+    if (found_1d_network) then
+       jadoorladen = 1
+    else
+       jadoorladen = 0
+    endif                         
     
-    if (len_trim(md_1dnetworkfile) > 0) then
-       call load_network_from_flow1d(md_1dnetworkfile, found_1d_network)
-       if (found_1d_network) then
-          jadoorladen = 1
-       else
-          jadoorladen = 0
-       endif        
+    call loadNetwork(md_netfile, istat, jadoorladen)
+    
+    if (network%numk > 0 .and. network%numl > 0) then
+        
+       call read_1d_attributes(md_1dnetworkfile, network)
+   
+       call initialize_1dadmin(network, network%gridpointsCount)
+
+       ! fill bed levels from values based on links
+       do L = 1, network%numl
+          tempbob = getbobs(network, L)
+          if (tempbob(1) > 0.5d0* huge(1d0)) tempbob(1) = dmiss
+          if (tempbob(2) > 0.5d0* huge(1d0)) tempbob(2) = dmiss
+      
+          k1 = kn(1,L)
+          k2 = kn(2,L)
+          if (zk(k1) == dmiss) then
+             zk(k1) = tempbob(1)
+          endif
+          if (zk(k2) == dmiss) then
+             zk(k2) = tempbob(2)
+          endif
+          zk(k1) = min(zk(k1),tempbob(1))
+          zk(k2) = min(zk(k2),tempbob(2))           
+       enddo
+       
     endif
-    
-    call loadNetwork(   md_netfile, istat, jadoorladen)
         
     if (istat == 0) then 
        md_netfile = trim( md_netfile)

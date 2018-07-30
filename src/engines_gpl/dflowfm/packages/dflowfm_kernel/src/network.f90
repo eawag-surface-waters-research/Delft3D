@@ -52,6 +52,7 @@ subroutine loadNetwork(filename, istat, jadoorladen)
     character(*), intent(in)  :: filename !< Name of file to be read (in current directory or with full path).
     integer,      intent(out) :: istat    !< Return status (0=success)
     integer,      intent(in)  :: jadoorladen
+    character(len=255) :: data_file_1d
 
 
     ! double precision, allocatable, save :: zkold(:)
@@ -68,6 +69,9 @@ subroutine loadNetwork(filename, istat, jadoorladen)
         return
     end if
 
+    ! This if is needed as long routine load_network_from_flow1d is present for alternative
+    ! 1D-Network reading from INI-file (for Willem Ottevanger)
+
     IF (JADOORLADEN == 0) THEN
         K0 = 0
         L0 = 0
@@ -78,16 +82,6 @@ subroutine loadNetwork(filename, istat, jadoorladen)
 
     ! New NetCDF net file
     call unc_read_net(filename, K0, L0, NUMKN, NUMLN, istat)
-
-
-    !if (.not. allocated(zkold) ) then
-    !   allocate (zkold(numkn))
-    !   zkold = zk
-    !else
-    !   do k = 1,numkn
-    !      zk(k) = zk(k) - zkold(k)
-    !   enddo
-    !endif
 
     if (istat == 0) then
         NUMK = K0 + NUMKN
@@ -414,6 +408,14 @@ subroutine load_network_from_flow1d(filename, found_1d_network)
    integer :: nstru, i
    double precision, dimension(2) :: tempbob
    character(len=255) :: oned_outputdir
+
+   ! This routine is still used for Morphology model with network in INI-File (Willem Ottevanger)
+   
+   ! Check on Empty File Name
+   if (len_trim(filename) <= 0) then
+      found_1d_network = .false.
+      return
+   endif
 
    ! This routine is still used for Morphology model with network in INI-File (Willem Ottevanger)
    

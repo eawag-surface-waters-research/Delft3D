@@ -119,7 +119,7 @@ function odu_get_xy_coordinates(branchids, branchoffsets, geopointsX, geopointsY
       idxgeoend = idxgeostart + nsegments
       !calculate the branch lenghts
       totallength = 0.0D0
-      do i = idxgeostart, idxgeoend -1
+      do i = idxgeostart, idxgeoend - 1
          deltaX(i) = cartGeopointsX(i+1) - cartGeopointsX(i)
          deltaY(i) = cartGeopointsY(i+1) - cartGeopointsY(i)
          deltaZ(i) = cartGeopointsZ(i+1) - cartGeopointsZ(i)
@@ -127,14 +127,14 @@ function odu_get_xy_coordinates(branchids, branchoffsets, geopointsX, geopointsY
          totallength = totallength + branchSegmentLengths(i)
       enddo
       !correct for total segment length
-      if (totallength > epsilon(0.D0)) then
+      if (totallength > 1.0D-6) then
          afac = branchlengths(idxbr)/totallength
          branchSegmentLengths(idxgeostart: idxgeoend -1) = branchSegmentLengths(idxgeostart: idxgeoend -1) * afac
       end if
    
       !calculate the increments
       do i = idxgeostart, idxgeoend -1
-         if (branchSegmentLengths(i) > epsilon(0.D0)) then
+         if (branchSegmentLengths(i) > 1.0D-6) then
             xincrement(i)  = deltaX(i)/branchSegmentLengths(i)
             yincrement(i)  = deltaY(i)/branchSegmentLengths(i)
             zincrement(i)  = deltaZ(i)/branchSegmentLengths(i)
@@ -150,7 +150,7 @@ function odu_get_xy_coordinates(branchids, branchoffsets, geopointsX, geopointsY
       previousLength = 0
       do i = idxstart, idxend
          ! TODO: carniato: code below is wrong IF: the branchoffset(i) of some grid point is MORE THAN ONE geopoint segment ahead. The loop below should be a while loop.
-         if(branchoffsets(i) > totallength .and. ind < nBranchSegments) then
+         if(((branchoffsets(i) - totallength) > 1.0d-6) .and. (ind < nBranchSegments)) then
             previousLength = totallength
             ind = ind +1
             totallength = totallength + branchSegmentLengths(ind)
