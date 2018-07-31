@@ -761,35 +761,13 @@ module m_ec_provider
          success = .false.
          item => null()
          !
-         ! At this point fileReaderPtr%vectormax holds the vectormax requested from DEMAND side (toplevel), 
-         ! here inferring the vectormax from the SUPPLY side (bottomlevel)
          select case (fileReaderPtr%ofType)
             case (provFile_uniform, provFile_unimagdir)
                rec = ecUniReadFirstLine(fileReaderPtr)
                n_quantities = count_words(rec) - 1
-               ! RL: The check below fails because the higher-level vectormax tells nothing about the lower-level vectormax.
-               !     The latter can sometimes exceed the former (which became aparent in the case of unimagdir). The unimagdir converter
-               !     splits a vectormax=2 uniform source item into two separate vectormax=1 target items. TODO: define new criterium.  
-               !if (n_quantities<fileReaderPtr%vectormax) then 
-               !   write(msgbuf,'(a,i0,a,i0,a)') 'ERROR : Insufficient columns in file '//trim(fileReaderPtr%fileName)//'(',n_quantities,  &
-               !                        ', whereas ',fileReaderPtr%vectormax,' were requested).'
-               !   call setECMessage(trim(msgbuf))                        
-               !   return                                 ! TODO: error message: tim-file contains less columns than requested 
-               !else 
-               !   n_quantities=fileReaderPtr%vectormax   ! only use the requested number of columns, ignore the rest of them 
-               !endif 
             case (provFile_bc)
                n_quantities = fileReaderPtr%bc%quantity%vectormax
-               if (n_quantities/=fileReaderPtr%vectormax) then
-                  write(cnum1, '(i0)') fileReaderPtr%vectormax
-                  write(cnum2, '(i0)') n_quantities
-                  call setECMessage('ERROR : Mismatch between vectormax requested (' // trim(cnum1) // ') and supplied by file '   &
-                                    // trim(fileReaderPtr%bc%fname) // ', quantity '// trim(fileReaderPtr%bc%qname) // ' (' // trim(cnum2) // ').')
-                  return                                 ! TODO: error message: vector definition in the the bc-block with the requested quantity-name
-                                                         !       supplies a number of elements different from the demanded number of elements 
-               end if
          end select 
-
          ! time [minute], quantities, elementsetname
          quantityId = ecInstanceCreateQuantity(instancePtr)
          select case (fileReaderPtr%ofType)
@@ -1330,7 +1308,7 @@ module m_ec_provider
          !
          ! ===== single quantity: quant ===== (Further code in this sub independent of file type)
          quantityId = ecInstanceCreateQuantity(instancePtr)
-         if (.not.ecQuantitySet(instancePtr, quantityId, name='quant', units=' ', vectormax=vectormax))    return 
+         if (.not.ecQuantitySet(instancePtr, quantityId, name='uniform_item', units=' ', vectormax=vectormax))    return 
 
          elementSetId = ecInstanceCreateElementSet(instancePtr)
          if (.not.ecElementSetSetType(instancePtr, elementSetId, elmSetType_cartesian))  return
@@ -1999,27 +1977,31 @@ module m_ec_provider
             ! Determine the source Items.
             if (present(qname)) then 
                 magnitude = ecFileReaderFindItem(instancePtr, fileReaderId, trim(qname))
+               if (magnitude == ec_undef_int) then            ! new BC-format has items labelled with the quantity
+                  call setECMessage("ecProviderConnectSourceItemsToTargets: cannot find filereader item with quantity "//trim(qname)//".")
+                  magnitude = ecFileReaderFindItem(instancePtr, fileReaderId, 'uniform_item')
+               end if
             else 
                 magnitude = ecFileReaderFindItem(instancePtr, fileReaderId, 'uniform_item')
             end if
 
-            if (magnitude /= ec_undef_int) then
-               ! Initialize the new Converter.
-               if (.not. (ecConverterSetType(instancePtr, subconverterId, convType_uniform) .and. &
-                          ecConverterSetOperand(instancePtr, subconverterId, operand_replace_element) .and. &
-                          ecConverterSetInterpolation(instancePtr, subconverterId, interpolate_timespace) .and. &
-                          ecConverterSetElement(instancePtr, subconverterId, targetIndex))) return
-               ! Construct a new Connection.
-               connectionId = ecInstanceCreateConnection(instancePtr)
-               if (.not. ecConnectionSetConverter(instancePtr, connectionId, subconverterId)) return
-               ! Initialize the new Connection.
-               if (.not. ecConnectionAddSourceItem(instancePtr, connectionId, magnitude)) return
-               if (.not. ecConnectionAddTargetItem(instancePtr, connectionId, targetItemId)) return
-               if (.not. ecItemAddConnection(instancePtr, targetItemId, connectionId)) return
-               n_signals = n_signals + 1
-            else 
-                ! error handling
+            if (magnitude == ec_undef_int) then
+               call setECMessage("ecProviderConnectSourceItemsToTargets: cannot find filereader item with quantity 'uniform_item'.")
+               return
             end if
+            ! Initialize the new Converter.
+            if (.not. (ecConverterSetType(instancePtr, subconverterId, convType_uniform) .and. &
+                       ecConverterSetOperand(instancePtr, subconverterId, operand_replace_element) .and. &
+                       ecConverterSetInterpolation(instancePtr, subconverterId, interpolate_timespace) .and. &
+                       ecConverterSetElement(instancePtr, subconverterId, targetIndex))) return
+            ! Construct a new Connection.
+            connectionId = ecInstanceCreateConnection(instancePtr)
+            if (.not. ecConnectionSetConverter(instancePtr, connectionId, subconverterId)) return
+            ! Initialize the new Connection.
+            if (.not. ecConnectionAddSourceItem(instancePtr, connectionId, magnitude)) return
+            if (.not. ecConnectionAddTargetItem(instancePtr, connectionId, targetItemId)) return
+            if (.not. ecItemAddConnection(instancePtr, targetItemId, connectionId)) return
+            n_signals = n_signals + 1
             itemFound = .true.
          end if
          if (is_cmp) then
@@ -2048,8 +2030,23 @@ module m_ec_provider
          if (is_tim3d) then
             ! Construct a new Converter.
             subconverterId = ecInstanceCreateConverter(instancePtr)
+
             ! Determine the source Items.
-            magnitude = ecFileReaderFindItem(instancePtr, fileReaderId, 'quant')
+            if (present(qname)) then 
+                magnitude = ecFileReaderFindItem(instancePtr, fileReaderId, trim(qname))
+               if (magnitude == ec_undef_int) then            ! new BC-format has items labelled with the quantity
+                  call setECMessage("ecProviderConnectSourceItemsToTargets: cannot find filereader item with quantity "//trim(qname)//".")
+                  magnitude = ecFileReaderFindItem(instancePtr, fileReaderId, 'uniform_item')
+               end if
+            else 
+                magnitude = ecFileReaderFindItem(instancePtr, fileReaderId, 'uniform_item')
+            end if
+
+            if (magnitude == ec_undef_int) then
+               call setECMessage("ecProviderConnectSourceItemsToTargets: cannot find filereader item with quantity 'uniform_item'.")
+               return
+            end if
+
             ! update maximum number of layers
             Itemt3D => ecSupportFindItem(instancePtr, magnitude)
             maxlay = max(maxlay,size(Itemt3D%elementSetPtr%z))
