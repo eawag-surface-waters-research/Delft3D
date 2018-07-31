@@ -70,7 +70,7 @@ module m_read_waqgeom
         integer :: file_size
         character(len=260) :: var_name
 
-        integer :: i_mesh, ifill
+        integer :: i_mesh, i_netw, ifill
         
         success = .false.
         
@@ -107,9 +107,10 @@ module m_read_waqgeom
             return
         end if
         i_mesh = 1
+        i_netw = -1
 
         ! Read the mesh
-        ierr = ionc_get_meshgeom(ioncid, i_mesh, waqgeom, includeArrays=.true.)
+        ierr = ionc_get_meshgeom(ioncid, i_mesh, i_netw, waqgeom, includeArrays=.true.)
 
         call reallocP(waqgeom%face_nodes, (/waqgeom%maxnumfacenodes, waqgeom%numface/), keepExisting = .false.)
         ierr = ionc_get_face_nodes(ioncid, i_mesh, waqgeom%face_nodes, ifill, startindex=1)
