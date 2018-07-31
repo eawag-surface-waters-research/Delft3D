@@ -58,8 +58,8 @@ libECModule_la_SOURCES = \
          ec_field.f90 \
          ec_quantity.f90 \
          ec_elementset.f90 \
-         ec_converter.f90 \
          ec_spatial_extrapolation.f90 \
+         ec_converter.f90 \
          ec_filereader_read.F90 \
          ec_filereader.F90 \
          ec_item.f90 \
