@@ -710,7 +710,7 @@ contains
                vyr    = vy  * dyp
                ubstar_b = sqrt(c2g*(vxr*vxr + vyr*vyr))
             else
-               ubstar_b = tau(n0 + idep) / rhow
+               ubstar_b = sqrt(tau(n0 + idep) / rhow)
             endif
          endif
 
