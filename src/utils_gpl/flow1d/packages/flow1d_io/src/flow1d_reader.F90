@@ -300,6 +300,13 @@ module m_flow1d_reader
       call SetMessage(LEVEL_INFO, 'Reading Retentions Done')
       call timstop(timerReadRetentions)
 
+      call SetMessage(LEVEL_INFO, 'Reading Advanced Parameters ...')
+      call prop_get_double(md_ptr, 'advancedoptions', 'transitionheightsd', summerDikeTransitionHeight, success)
+      if (.not. success) then 
+         call SetMessage(LEVEL_FATAL, 'Error reading Advanced Parameters')
+      endif
+      call SetMessage(LEVEL_INFO, 'Reading Advanced Parameters Done')
+      
       ! log timings
       call timstop(timerRead)
       open(newunit=timerFileUnit, file='read-model-timings.log')

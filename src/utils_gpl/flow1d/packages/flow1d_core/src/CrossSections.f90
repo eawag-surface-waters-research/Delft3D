@@ -133,6 +133,7 @@ module m_CrossSections
    
    integer, parameter         :: eps = 1d-3               !< accuracy parameter for determining wetperimeter == 0d0
 
+   double precision           :: thresholdForSummerdike = 0.4d0
    character (len=13), public, dimension(10) :: CSTypeName = (/&
    '1:TABULATED ',&
    '2:CIRCLE    ',&
@@ -1765,6 +1766,7 @@ subroutine TabulatedProfile(dpt, cross, doFlow, getSummerDikes, area, width, per
    double precision  :: wlev
    double precision  :: sdArea
    double precision  :: sdWidth
+   integer           :: section
 
    crossDef => cross%tabDef
    
@@ -1800,9 +1802,15 @@ subroutine TabulatedProfile(dpt, cross, doFlow, getSummerDikes, area, width, per
       
       area  = area  + sdArea
       width = width + sdWidth
-      
+      if (sdArea > 0d0) then
+         do section = 3, 1, -1
+            if (af_sub(section) > thresholdForSummerdike) then
+               af_sub(section) = af_sub(section) + sdarea
+               exit
+            endif
+         enddo
+      endif
    endif
-
 end subroutine TabulatedProfile
 
 subroutine GetTabSizesFromTables(dpt, pCSD, doFlow, area, width, perimeter, af_sub, perim_sub, calculationOption)
