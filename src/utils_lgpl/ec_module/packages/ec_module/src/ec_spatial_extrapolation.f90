@@ -148,62 +148,70 @@ module m_ec_spatial_extrapolation
 
       end subroutine extrapolate_missing
 
-      !> search for nearest neighbor using a kdtree
+      !> search for nearest neighbour using a kdtree
       function nearest_sample_wrapper(kdtree, sourceItem, targetElementSet, targetElementID, field, jsferic, p, q) result(success)
          type(kdtree_instance), intent(inout) :: kdtree           !< kdtree instance
          type(tEcElementSet),   intent(in)    :: targetElementSet !< target element set
          type(tEcItem),         intent(in)    :: sourceItem       !< source item
          integer,               intent(in)    :: targetElementID  !< target element Id
          integer,               intent(in)    :: jsferic          !< flag is spherical (1) or not (0)
-         real(kind=hp), target, intent(in)    :: field(:)         !< source field
+         real(kind=hp),         intent(in)    :: field(:)         !< source field
          integer,               intent(out)   :: p                !< resulting m point
          integer,               intent(out)   :: q                !< resulting n point
          logical                              :: success          !< function result
 
          integer, parameter                 :: NN = 1 ! for the time being
          real(kind=hp)                      :: xk, yk, dmiss
-         real(kind=hp), allocatable, target :: xs2d(:,:), ys2d(:,:)
-         real(kind=hp), pointer             :: zs(:,:), xs(:), ys(:)
-         integer                            :: Ns, Ndim, ierror, isam(NN), dim1, dim2, i, j, isam2(2,NN)
+         real(kind=hp), allocatable         :: xs(:), ys(:)
+         integer                            :: Ns, ierror, dim1, dim2, i, j, ii
+
+         success = .true.
 
          xk = targetElementSet%x(targetElementID)
          yk = targetElementSet%y(targetElementID)
+
          dim1 = size(sourceItem%elementsetptr%x)
          dim2 = size(sourceItem%elementsetptr%y)
-         Ns = dim1 * dim2
-         Ndim = 1
-         dmiss = sourceItem%sourcet0fieldptr%missingvalue
-         zs(1:1, 1:Ns) => field
+
          if (kdtree%itreestat /= ITREE_OK) then
-            allocate(xs2d(dim1,dim2), ys2d(dim1,dim2), stat=ierror)
+            !
+            ! first time: preparations for call to build_kdtree
+            !
+            dmiss = sourceItem%sourcet0fieldptr%missingvalue
+            Ns = dim1 * dim2
+            allocate(xs(Ns), ys(Ns), stat=ierror)
             if (ierror /= 0) then
-                call setECMessage("Allocate error in nearest_sample_wrapper with size ", 2*dim1*dim2)
-                success = .false.
-                return
-            endif
-            do i = 1, dim1
+               call setECMessage("Allocate error in nearest_sample_wrapper with size ", 4*Ns)
+               success = .false.
+            else
+               ii = 0
                do j = 1, dim2
-                  xs2d(i,j) = sourceItem%elementsetPtr%x(i)
-                  ys2d(i,j) = sourceItem%elementsetPtr%y(j)
+                  do i = 1, dim1
+                     ii = ii + 1
+                     if (field(ii) == dmiss) then
+                        xs(ii) = dmiss
+                        ys(ii) = dmiss
+                     else
+                        xs(ii) = sourceItem%elementsetPtr%x(i)
+                        ys(ii) = sourceItem%elementsetPtr%y(j)
+                     endif
+                  enddo
                enddo
-            enddo
-            xs(1:Ns) => xs2d
-            ys(1:Ns) => ys2d
+               call build_kdtree(kdtree, NS, xs, ys, ierror, jsferic, dmiss)
+               deallocate(xs, ys)
+               success = (ierror == 0)
+            endif
          endif
 
-         call find_nearest_sample_kdtree(kdtree, Ns, Ndim, xs, ys, zs, xk, yk, NN, isam, ierror, jsferic, dmiss)
-
-         do i = 1, NN
-             isam2(1,i) = mod(isam(i), dim1)
-             isam2(2,i) = 1 + (isam(i)-1) / dim1
-         enddo
-         p = isam2(1,1)
-         q = isam2(2,1)
-
-         if (allocated(xs2d)) deallocate(xs2d)
-         if (allocated(ys2d)) deallocate(ys2d)
-
-         success = (ierror == 0)
+         if (success) then
+            call make_queryvector_kdtree(kdtree, xk, yk, jsferic)
+            !    find nearest sample points
+            call kdtree2_n_nearest(kdtree%tree, kdtree%qv, NN, kdtree%results)
+            !    copy to output
+            ii = kdtree%results(1)%idx
+            p = mod(ii, dim1)
+            q = 1 + (ii-1) / dim1
+         endif
 
       end function nearest_sample_wrapper
 

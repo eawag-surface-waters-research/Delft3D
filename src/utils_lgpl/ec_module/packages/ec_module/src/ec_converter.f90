@@ -2476,7 +2476,19 @@ module m_ec_converter
                      do j=1, n_points
                         mp = indexWeight%indices(1,j)
                         np = indexWeight%indices(2,j)
-                        if (mp > 0 .and. np > 0) then
+                        if (mp == 0 .and. np == 0 .and. connection%converterPtr%interpolationType == extrapolate_spacetimeSaveWeightFactors) then
+                           if (nearest_sample_wrapper(treeinst, sourceItem, targetElementSet, j, sourceT0Field%arr1d, 1, p, q)) then
+                              targetValues(j) = targetValues(j) + a0 * s2D_T0(p, q) + a1 * s2D_T1(p, q)
+                              indexWeight%indices(1,j) = p
+                              indexWeight%indices(2,j) = q
+                              indexWeight%weightFactors(1,j) = 1.0_hp
+                              indexWeight%weightFactors(2:4,j) = 0.0_hp
+                           else
+                              success = .false.
+                              return
+                           endif
+
+                        else if (mp > 0 .and. np > 0) then
                            if (connection%converterPtr%operandType==operand_replace) then
                               targetValues(j) = 0.0_hp
                            end if
@@ -2514,9 +2526,10 @@ module m_ec_converter
                            else
                               do jj=0,1
                                  do ii=0,1
-                                     weight = indexWeight%weightFactors(1+ii+2*jj,j)
-                                     targetValues(j) = targetValues(j) + a0 * weight * s2D_T0(mp+ii, np+jj)
-                                     targetValues(j) = targetValues(j) + a1 * weight * s2D_T1(mp+ii, np+jj)
+                                    weight = indexWeight%weightFactors(1+ii+2*jj,j)
+                                    if (weight == 0.0_hp) cycle ! to avoid array bound error (in case of extrapolation)
+                                    targetValues(j) = targetValues(j) + a0 * weight * s2D_T0(mp+ii, np+jj)
+                                    targetValues(j) = targetValues(j) + a1 * weight * s2D_T1(mp+ii, np+jj)
                                  end do
                               end do
                            end if
