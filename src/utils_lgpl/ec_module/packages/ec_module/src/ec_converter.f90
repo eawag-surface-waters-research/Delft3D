@@ -2250,13 +2250,16 @@ module m_ec_converter
          real(hp)                :: ztgt
          double precision        :: PI, phi, xtmp
          integer                 :: time_interpolation
-         
+         logical, dimension(:), allocatable  :: missing 
          real(hp), dimension(2,2,2,2) :: sourcevals
          real(hp), dimension(2,2)   :: val
          real(hp)                   :: weight, lastvalue
          integer                    :: ii, jj, kk, LL
          integer                    :: jamissing
+         integer                    :: ierr
+         integer                    :: jsferic
          type(kdtree_instance)      :: treeinst
+         real(hp), dimension(:), allocatable :: x_extrapolate    ! temporary array holding targetelementset x for setting up kdtree for interpolation
 
          !
          PI = datan(1.d0)*4.d0
@@ -2314,7 +2317,8 @@ module m_ec_converter
                   sourceItem => connection%sourceItemsPtr(i)%ptr
                   sourceT0Field => sourceItem%sourceT0FieldPtr
                   sourceT1Field => sourceItem%sourceT1FieldPtr
-                  sourceMissing = sourceT0Field%MISSINGVALUE
+!                 sourceMissing = sourceT0Field%MISSINGVALUE
+                  sourceMissing = sourceItem%quantityPtr%fillvalue
                   sourceElementSet => sourceItem%elementSetPtr
                   time_interpolation = sourceItem%quantityptr%timeint
 
@@ -2410,7 +2414,7 @@ module m_ec_converter
                                  kp = min(max(kp,1),n_layers-1)
                               end if
                               
-!                             fill source values
+                              ! fill source values
                               do kk=0,1
                                  do jj=0,1
                                     do ii=0,1
@@ -2426,7 +2430,7 @@ module m_ec_converter
                                  targetValues(k) = targetMissing
                               else
                               
-!                                horizontal interpolation 
+                                 ! horizontal interpolation 
                                  val = 0d0   ! (down-up,old-new)
                                  do ll=1,2
                                     do kk=1,2
@@ -2448,7 +2452,7 @@ module m_ec_converter
                               end if
                            end do
                            
-!                          fill missing values
+                           ! fill missing values
                            lastvalue = targetMissing
                            do k=ktop,kbot,-1
                               if ( targetValues(k).ne.targetMissing ) then
@@ -2468,87 +2472,69 @@ module m_ec_converter
                            end do
                         end if
                      end do
-                     deallocate(zsrc)
+                     if (allocated(zsrc)) deallocate(zsrc)
                   else
                      s2D_T0(1:n_cols,1:n_rows) => sourceT0Field%arr1d
                      s2D_T1(1:n_cols,1:n_rows) => sourceT1Field%arr1d
+                     if (connection%converterPtr%operandType==operand_replace) then
+                        targetValues = 0.0_hp
+                     end if
+                     if (connection%converterPtr%interpolationType == extrapolate_spacetimeSaveWeightFactors) then
+                        allocate(x_extrapolate(n_points))
+                        x_extrapolate = targetElementSet%x
+                     endif
+                     allocate(missing(n_points))
+                     missing = .False.
                      do j=1, n_points
                         mp = indexWeight%indices(1,j)
                         np = indexWeight%indices(2,j)
-                        if (mp <= 0 .and. np <= 0 .and. connection%converterPtr%interpolationType == extrapolate_spacetimeSaveWeightFactors) then
-                           if (connection%converterPtr%operandType==operand_replace) then
-                              targetValues(j) = 0.0_hp
-                           end if
-                           if (updateInterpolation(treeinst, sourceItem, targetElementSet, j, sourceT0Field%arr1d, indexWeight)) then
-                              call exterpolateValue(targetValues(j), indexWeight, j, a0, a1, s2D_T0, s2D_T1)
-                           else
-                              success = .false.
-                              return
-                           endif
-
-                        else
-                           if (connection%converterPtr%operandType==operand_replace) then
-                              targetValues(j) = 0.0_hp
-                           end if
-                           ! FM's 2D to EC's 1D array mapping requires np = np-1 from this point on.
-
-                           ! check missing values
+                        if (mp > 0 .and. np > 0) then ! if mp and np both valid, this is an interior point of the meteo domain, else ignore
+                                                      ! check missing values for points with valid mp and np
                            jamissing = 0
-                           if ( .not. connection%converterPtr%extrapolated) then
-                              if (mp > 0 .and. np > 0) then
-                     kloop2D: do jj=0,1
-                                 do ii=0,1
-                                    if ( comparereal(s2D_T0(mp+ii, np+jj), sourceMissing)==0 .or.   &
-                                         comparereal(s2D_T0(mp+ii, np+jj), sourceMissing)==0 ) then
-                                       jamissing = jamissing + 1
-                                       exit kloop2D
-                                    end if
-                                 end do
-                              end do kloop2D
-                              endif
-                           endif
-
-                           if ( jamissing>0 ) then
-                              if (connection%converterPtr%interpolationType == extrapolate_spacetimeSaveWeightFactors) then
-                                 if (updateInterpolation(treeinst, sourceItem, targetElementSet, j, sourceT0Field%arr1d, indexWeight)) then
-                                    call exterpolateValue(targetValues(j), indexWeight, j, a0, a1, s2D_T0, s2D_T1)
-                                 else
-                                    success = .false.
-                                    return
-                                 endif
-                              else
-                                 if (connection%converterPtr%operandType==operand_replace) then
-                                    targetValues(j) = targetMissing
-                                 else
-                                    continue ! just keep targetValues(j)
-                                 endif
-                              endif
+                  kloop2D: do jj=0,1
+                              do ii=0,1
+                                 if ( comparereal(s2D_T0(mp+ii, np+jj), sourceMissing)==0 .or.   &
+                                      comparereal(s2D_T1(mp+ii, np+jj), sourceMissing)==0 ) then
+                                    jamissing = jamissing + 1
+                                    exit kloop2D
+                                 end if
+                              end do
+                           end do kloop2D
+                           if (jamissing>0) then                                                                              ! if insufficient data for bi-linear interpolation
+                              missing(j) = .True.    ! Mark missings in the target grid in a temporary logical array  
+                              if (allocated(x_extrapolate)) x_extrapolate(j)=ec_undef_hp
                            else
-                              if (mp < 0) then
-                                 if (connection%converterPtr%interpolationType == extrapolate_spacetimeSaveWeightFactors) then
-                                    call exterpolateValue(targetValues(j), indexWeight, j, a0, a1, s2D_T0, s2D_T1)
-                                 else
-                                    if (connection%converterPtr%operandType==operand_replace) then
-                                       targetValues(j) = targetMissing
-                                    else
-                                       continue ! just keep targetValues(j)
-                                    endif
-                                 endif
-                              else
-                                 do jj=0,1
-                                    do ii=0,1
-                                       weight = indexWeight%weightFactors(1+ii+2*jj,j)
-                                       targetValues(j) = targetValues(j) + a0 * weight * s2D_T0(mp+ii, np+jj)
-                                       targetValues(j) = targetValues(j) + a1 * weight * s2D_T1(mp+ii, np+jj)
-                                    end do
+                              do jj=0,1
+                                 do ii=0,1
+                                    weight = indexWeight%weightFactors(1+ii+2*jj,j)
+                                    targetValues(j) = targetValues(j) + a0 * weight * s2D_T0(mp+ii, np+jj)
+                                    targetValues(j) = targetValues(j) + a1 * weight * s2D_T1(mp+ii, np+jj)
                                  end do
-                              endif
+                              end do
+                              if (allocated(x_extrapolate)) x_extrapolate(j)=targetElementSet%x(j)
                            end if
                         end if
-                     end do
+                     end do      ! points j
+                     if (connection%converterPtr%interpolationType == extrapolate_spacetimeSaveWeightFactors) then   ! if extrapolation permitted ... 
+                        do j=1, n_points             ! Loop over the grid for missing in the target grid  
+                           if (missing(j)) then
+                              ! Now kdtree over target locations which do NOT yet have a value ('missing'), find the first nearest neighbour
+                              if (treeinst%itreestat /= ITREE_OK) then
+                                 jsferic = merge(1,0,targetElementSet%ofType == elmSetType_spheric)
+                                 call build_kdtree(treeinst, n_points, x_extrapolate, targetElementSet%y, ierr, jsferic, ec_undef_hp)
+                              endif
+                              call make_queryvector_kdtree(treeinst, targetElementSet%x(j), targetElementSet%y(j), jsferic)
+                              call kdtree2_n_nearest(treeinst%tree, treeinst%qv, 1, treeinst%results)
+                              targetValues(j) = targetValues(treeinst%results(1)%idx)
+                           endif
+                        end do   ! points j
+                     endif
+                     if (allocated(missing)) deallocate(missing)
+                     if (allocated(x_extrapolate)) deallocate(x_extrapolate)
+                     call delete_kdtree2(treeinst)
                   end if
                   connection%targetItemsPtr(i)%ptr%targetFieldPtr%timesteps = timesteps
-               end do
+               end do   ! target items i
                if (connection%converterPtr%interpolationType == extrapolate_spacetimeSaveWeightFactors) then
                   connection%converterPtr%extrapolated = .true.
                endif
@@ -2618,7 +2604,6 @@ module m_ec_converter
                call setECMessage("ERROR: ec_converter::ecConverterNetcdf: Unsupported interpolation type requested.")
                return
          end select
-         call delete_kdtree2(treeinst)
          success = .true.
       end function ecConverterNetcdf
       

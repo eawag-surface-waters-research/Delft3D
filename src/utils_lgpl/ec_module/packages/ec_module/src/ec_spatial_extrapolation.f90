@@ -39,7 +39,7 @@ module m_ec_spatial_extrapolation
 
    private
 
-   public :: extrapolate_missing, init_spatial_extrapolation, updateInterpolation, exterpolateValue
+   public :: extrapolate_missing, init_spatial_extrapolation, updateInterpolation, extrapolateValue
 
    real(kind=hp) :: max_search_radius = 1.0e6_hp  !< in meter
    integer       :: jsferic           = 1
@@ -304,7 +304,7 @@ module m_ec_spatial_extrapolation
       end function resize
 
       !> get extrapolated value
-      subroutine exterpolateValue(targetValue, indexWeight, targetElementID, a0, a1, s2D_T0, s2D_T1)
+      subroutine extrapolateValue(targetValue, indexWeight, targetElementID, a0, a1, s2D_T0, s2D_T1)
          real(kind=hp),        intent(inout) :: targetValue      !< function result (extrapolated values are added)
          type(tEcIndexWeight), intent(in)    :: indexWeight      !< struct holding all indices and weights
          integer,              intent(in)    :: targetElementID  !< target element Id
@@ -328,7 +328,7 @@ module m_ec_spatial_extrapolation
             n = flexIndexW%indices(2,ii)
             targetValue = targetValue + weight* (a0 * s2D_T0(m, n) + a1 * s2D_T1(m, n))
          enddo
-      end subroutine exterpolateValue
+      end subroutine extrapolateValue
 
       !> update interpolation indices and weigth in case of extrapolation using a kdtree
       function updateInterpolation(kdtree, sourceItem, targetElementSet, targetElementID, field, indexWeight) result(success)
