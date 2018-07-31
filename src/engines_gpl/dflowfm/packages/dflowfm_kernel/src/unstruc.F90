@@ -38054,6 +38054,8 @@ double precision :: area_sbk, width_sbk ! second prof i.c. interpolation
 
 double precision :: frcn, cz, cf, conv, af_sub(3), perim_sub(3), cz_sub(3)
 integer          :: LL, ka, kb, itp, ifrctyp
+integer          :: k1, k2
+double precision :: u1L, q1L, s1L, dpt
 
 LL = L
 if (L > lnxi) then                      ! for 1D boundary links, refer to attached link
@@ -38065,6 +38067,13 @@ if (network%brs%count > 0) then
    call getCrossFlowData_on_link(network, LL, hpr, flowArea=area, flowWidth=width, &
                    wetPerimeter = perim, conveyance=conv, cz = cz, af_sub = af_sub, &
                    perim_sub = perim_sub, cz_sub = cz_sub)
+   u1L = u1(LL)
+   q1L = q1(LL)
+   k1 = ln(1,LL) ; k2 = ln(2,LL)
+   s1L = ( s1(k1) + s1(k2) ) * 0.5d0
+   dpt = hu(LL)
+   
+   call getconveyance(network, dpt, u1L, q1L, s1L, LL, perim_sub, af_sub, conv, cz_sub)
    
    ! Qmain/ QT = Kmain/KT -> u_main = Kmain/KT * (AT/Amain)
    u_to_umain(L) = area*cz_sub(1) * sqrt(af_sub(1)/perim_sub(1)) /  conv
