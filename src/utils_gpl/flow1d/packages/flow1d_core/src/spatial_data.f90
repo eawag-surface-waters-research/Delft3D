@@ -82,7 +82,7 @@ module m_spatial_data
       integer                                       :: size   = 0            !< current length of array quant
       integer                                       :: growsBy = 2000        !< used increment for extending array quant
       integer                                       :: count   = 0           !< number of registered quantial Conditions
-      type(t_spatial_data), pointer, dimension(:)   :: quant                
+      type(t_spatial_data), pointer, dimension(:)   :: quant   => null()             
       integer                                       :: level      = -1      !< index of level in quant array
       integer                                       :: depth      = -1      !< index of level in quant array
       integer                                       :: discharge  = -1      !< index of discharge in quant array
