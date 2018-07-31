@@ -348,13 +348,20 @@ module m_ec_typedefs
    !===========================================================================
    ! Support data types.
    !===========================================================================
-   
+
+   type tFlexibleIndexWeightFactor
+      integer,       pointer :: indices(:,:)
+      real(kind=hp), pointer :: weights(:)
+   end type tFlexibleIndexWeightFactor
    !> 
    type tEcIndexWeight
       ! FM: tdataprovider indxn
       integer , dimension(:,:),   pointer :: indices       => null() !< indices: ([row,column]:nCoordinates)
       ! FM: tdataprovider wfn
       real(hp), dimension(:,:),   pointer :: weightFactors => null() !< weightfactors: ([1,2,3,4]:nCoordinates)
+      ! for extrapolation with e.g. 4 nearest neighbours
+      type(tFlexibleIndexWeightFactor), pointer :: flexIndexWeights(:) => null()
+      integer                                   :: curSizeFlex = 0
    end type tEcIndexWeight
    
    ! ==========================================================================

@@ -34480,7 +34480,8 @@ end subroutine make_mirrorcells
  use dfm_error
  use m_sobekdfm
  use m_partitioninfo
- use m_ec_spatial_extrapolation, only : set_max_search_radius
+ use m_ec_spatial_extrapolation, only : init_spatial_extrapolation
+ use m_sferic, only: jsferic
  ! use m_vegetation
 
  implicit none
@@ -35206,7 +35207,7 @@ if (mext > 0) then
 
         kx  = 1                                      ! voorlopig vectormax = 1
 
-        call set_max_search_radius(maxSearchRadius)
+        call init_spatial_extrapolation(maxSearchRadius, jsferic)
 
         if (qid == 'frictioncoefficient') then
 

@@ -46,7 +46,7 @@ module kdtree2_priority_queue_module
   ! is the priority.
   !
   type kdtree2_result
-      ! a pair of distances, indexes
+      ! a pair of distances (squared !!!), indexes
       real(kdkind)    :: dis!=0.0
       integer :: idx!=-1   Initializers cause some bugs in compilers.
   end type kdtree2_result

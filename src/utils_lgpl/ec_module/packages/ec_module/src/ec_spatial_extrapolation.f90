@@ -31,30 +31,34 @@
 !! @author Edwin.Spee@deltares.nl
 module m_ec_spatial_extrapolation
    use precision, only : hp
-   use m_ec_typedefs, only : tEcField, tEcElementSet, tEcItem
+   use m_ec_typedefs, only : tEcField, tEcElementSet, tEcItem, tEcIndexWeight, tFlexibleIndexWeightFactor
    use m_ec_message, only : setECMessage
+
    use kdtree2Factory
    implicit none
 
    private
 
-   public :: extrapolate_missing, set_max_search_radius, nearest_sample_wrapper
+   public :: extrapolate_missing, init_spatial_extrapolation, updateInterpolation, exterpolateValue
 
-   real(kind=hp) :: max_search_radius = 3.0_hp   !< not used yet. always return nearest neighbor
+   real(kind=hp) :: max_search_radius = 1.0e6_hp  !< in meter
+   integer       :: jsferic           = 1
 
    contains
 
    ! =======================================================================
 
-       !> set the value of set_max_search_radius,
-       !! only if given value is positive
-       subroutine set_max_search_radius(value)
-          real(kind=hp) :: value      !< new value for max_search_radius
+       !> set the value of max_search_radius and jsferic,
+       !! max_search_radius is updated if given value > 0
+       subroutine init_spatial_extrapolation(rvalue, ivalue)
+          real(kind=hp), intent(in) :: rvalue      !< new value for max_search_radius
+          integer,       intent(in) :: ivalue      !< new value for jsferic
 
-          if (value > 0.0_hp) then
-             max_search_radius = value
+          if (rvalue > 0.0_hp) then
+             max_search_radius = rvalue
           endif
-       end subroutine set_max_search_radius
+          jsferic = ivalue
+       end subroutine init_spatial_extrapolation
 
 !> extrapolate missing values
       subroutine extrapolate_missing(vals, Missing, jamissing)
@@ -149,23 +153,25 @@ module m_ec_spatial_extrapolation
       end subroutine extrapolate_missing
 
       !> search for nearest neighbour using a kdtree
-      function nearest_sample_wrapper(kdtree, sourceItem, targetElementSet, targetElementID, field, jsferic, p, q) result(success)
+      function nearest_sample_wrapper(kdtree, sourceItem, targetElementSet, targetElementID, field, p, q, w) result(success)
          type(kdtree_instance), intent(inout) :: kdtree           !< kdtree instance
          type(tEcElementSet),   intent(in)    :: targetElementSet !< target element set
          type(tEcItem),         intent(in)    :: sourceItem       !< source item
          integer,               intent(in)    :: targetElementID  !< target element Id
-         integer,               intent(in)    :: jsferic          !< flag is spherical (1) or not (0)
          real(kind=hp),         intent(in)    :: field(:)         !< source field
-         integer,               intent(out)   :: p                !< resulting m point
-         integer,               intent(out)   :: q                !< resulting n point
+         integer,               intent(out)   :: p(:)             !< resulting m points
+         integer,               intent(out)   :: q(:)             !< resulting n points
+         real(kind=hp),         intent(out)   :: w(:)             !< resulting interpolation weights
          logical                              :: success          !< function result
 
-         integer, parameter                 :: NN = 1 ! for the time being
-         real(kind=hp)                      :: xk, yk, dmiss
+         integer                            :: NN
+         real(kind=hp)                      :: xk, yk, dmiss, sumw, distance
          real(kind=hp), allocatable         :: xs(:), ys(:)
          integer                            :: Ns, ierror, dim1, dim2, i, j, ii
 
          success = .true.
+
+         NN = size(w)
 
          xk = targetElementSet%x(targetElementID)
          yk = targetElementSet%y(targetElementID)
@@ -208,11 +214,141 @@ module m_ec_spatial_extrapolation
             !    find nearest sample points
             call kdtree2_n_nearest(kdtree%tree, kdtree%qv, NN, kdtree%results)
             !    copy to output
-            ii = kdtree%results(1)%idx
-            p = mod(ii, dim1)
-            q = 1 + (ii-1) / dim1
+            sumw = 0.0_hp
+            do i = 1, NN
+               ii = kdtree%results(i)%idx
+               p(i) = 1 + mod(ii-1, dim1)
+               q(i) = 1 + (ii-1) / dim1
+               distance = sqrt(kdtree%results(i)%dis)
+               if (i == 1 .or. distance < max_search_radius) then
+                  w(i) = 1.0_hp / distance
+                  sumw = sumw + w(i)
+               else
+                  w(i) = 0.0_hp
+               endif
+            enddo
+            do i = 1, NN
+               w(i) = w(i) / sumw
+            enddo
          endif
 
       end function nearest_sample_wrapper
+
+      !> add extrapolated indices and weights
+      function addExtrapolatedIndicesAndWeights(indexWeight, p, q, w, j) result(success)
+         type(tEcIndexWeight), intent(inout) :: indexWeight !< struct holding all indices and weights
+         integer,              intent(in)    :: j           !< source index
+         integer,              intent(in)    :: p(:)        !< first coordinate in 2D case
+         integer,              intent(in)    :: q(:)        !< second coordinate in 2D case
+         real(kind=hp),        intent(in)    :: w(:)        !< interpolation weights
+         logical                             :: success     !< function result
+
+         type(tFlexibleIndexWeightFactor) :: flexIndexWeight  !< temp. instance of tFlexibleIndexWeightFactor
+         integer                          :: NN               !< dimension of p, q and w
+         integer                          :: i                !< loop counter
+         integer                          :: ierror           !< error code of allocate
+         integer                          :: newIndex         !< index for new entry in indexWeight%flexIndexWeights
+
+         NN = count(w > 0.0_hp)
+         newIndex = indexWeight%curSizeFlex + 1
+
+         allocate(flexIndexWeight%indices(2, NN), flexIndexWeight%weights(NN), stat=ierror)
+         success = (ierror == 0)
+
+         if (size(indexWeight%flexIndexWeights) <= newIndex) then
+            success = success .and. resize(indexWeight%flexIndexWeights)
+         endif
+
+         if (success) then
+            do i = 1, NN
+               flexIndexWeight%indices(1, i) = p(i)
+               flexIndexWeight%indices(2, i) = q(i)
+               flexIndexWeight%weights(i)    = w(i)
+            enddo
+
+            indexWeight%indices(1,j)               = -newIndex   ! note the minus sign
+            indexWeight%indices(2,j)               =  NN         ! not used
+            indexWeight%weightFactors(1:4,j)       = -999.0_hp   ! not used
+            indexWeight%flexIndexWeights(newIndex) = flexIndexWeight
+            indexWeight%curSizeFlex                = newIndex
+         endif
+      end function addExtrapolatedIndicesAndWeights
+
+      !> helper function to resize the flexIndexWeights
+      function resize(flexIndexWeights) result (success)
+         type(tFlexibleIndexWeightFactor), pointer, intent(inout) :: flexIndexWeights(:)  !< the array to be resized
+         logical                                                  :: success              !< function result
+
+         type(tFlexibleIndexWeightFactor), pointer :: newFlexIndexWeights(:)  !< new array of type tFlexibleIndexWeightFactor
+         integer                                   :: oldSize                 !< size of input array flexIndexWeights
+         integer                                   :: newSize                 !< size of newFlexIndexWeights
+         integer                                   :: i                       !< loop counter
+         integer                                   :: ierror                  !< error code of allocate
+         integer, parameter                        :: startLength = 8         !< minimal length of newFlexIndexWeights
+
+         oldSize = size(flexIndexWeights)
+         newSize = max(startLength, oldSize * 2)
+
+         allocate(newFlexIndexWeights(newSize), stat=ierror)
+         success = (ierror == 0)
+
+         if (success) then
+            do i = 1, oldSize
+               newFlexIndexWeights(i) = flexIndexWeights(i)
+            enddo
+
+            if (oldSize > 0) deallocate(flexIndexWeights)
+
+            flexIndexWeights => newFlexIndexWeights
+         endif
+      end function resize
+
+      !> get extrapolated value
+      subroutine exterpolateValue(targetValue, indexWeight, targetElementID, a0, a1, s2D_T0, s2D_T1)
+         real(kind=hp),        intent(inout) :: targetValue      !< function result (extrapolated values are added)
+         type(tEcIndexWeight), intent(in)    :: indexWeight      !< struct holding all indices and weights
+         integer,              intent(in)    :: targetElementID  !< target element Id
+         real(kind=hp),        intent(in)    :: a0               !< weigth factor first time
+         real(kind=hp),        intent(in)    :: a1               !< weigth factor 2nd time
+         real(kind=hp),        intent(in)    :: s2D_T0(:,:)      !< field for first time
+         real(kind=hp),        intent(in)    :: s2D_T1(:,:)      !< field for 2nd time
+
+         integer                                   :: ii         !< loop counter
+         integer                                   :: m          !< first coordinate index
+         integer                                   :: n          !< 2nd coordinate index
+         integer                                   :: mp         !< index in flexIndexWeights array
+         type(tFlexibleIndexWeightFactor), pointer :: flexIndexW !< helper pointer to current flexIndexWeight
+         real(kind=hp)                             :: weight     !< interpolation weight
+
+         mp = indexWeight%indices(1, targetElementID)
+         flexIndexW => indexWeight%flexIndexWeights(-mp)
+         do ii = 1, size(flexIndexW%weights)
+            weight = flexIndexW%weights(ii)
+            m = flexIndexW%indices(1,ii)
+            n = flexIndexW%indices(2,ii)
+            targetValue = targetValue + weight* (a0 * s2D_T0(m, n) + a1 * s2D_T1(m, n))
+         enddo
+      end subroutine exterpolateValue
+
+      !> update interpolation indices and weigth in case of extrapolation using a kdtree
+      function updateInterpolation(kdtree, sourceItem, targetElementSet, targetElementID, field, indexWeight) result(success)
+         type(kdtree_instance), intent(inout) :: kdtree           !< kdtree instance
+         type(tEcElementSet),   intent(in)    :: targetElementSet !< target element set
+         type(tEcItem),         intent(in)    :: sourceItem       !< source item
+         integer,               intent(in)    :: targetElementID  !< target element Id
+         real(kind=hp),         intent(in)    :: field(:)         !< source field
+         type(tEcIndexWeight),  intent(inout) :: indexWeight      !< struct holding all indices and weights
+         logical                              :: success          !< function result
+
+         integer, parameter                   :: NN = 10          !< maximum number of results of search with kdtree
+         integer                              :: p(NN)            !< resulting m points
+         integer                              :: q(NN)            !< resulting n points
+         real(kind=hp)                        :: w(NN)            !< resulting interpolation weights
+
+         success = nearest_sample_wrapper(kdtree, sourceItem, targetElementSet, targetElementID, field, p, q, w)
+         if (success) then
+            success = addExtrapolatedIndicesAndWeights(indexWeight, p, q, w, targetElementID)
+         endif
+      end function updateInterpolation
 
 end module m_ec_spatial_extrapolation
