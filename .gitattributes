@@ -6902,6 +6902,8 @@ src/utils_lgpl/ec_module/packages/ec_module/src/meteo/numbersonline_m.f90 -text
 src/utils_lgpl/ec_module/packages/ec_module/src/meteo/openexistingfile_meteo.f90 -text
 src/utils_lgpl/ec_module/packages/ec_module/src/meteo/readmeteoheader.f90 -text
 src/utils_lgpl/ec_module/packages/ec_module/src/transform_shiftedpole.f90 -text
+src/utils_lgpl/ec_module/packages/test_data/inTestTriangleInterpolation.txt -text
+src/utils_lgpl/ec_module/packages/test_data/outTestTriangleInterpolation.txt -text
 src/utils_lgpl/ec_module/packages/tests/ec_module_tests/ECModule.tests.csproj -text
 src/utils_lgpl/ec_module/packages/tests/ec_module_tests/Properties/AssemblyInfo.cs -text
 src/utils_lgpl/ec_module/packages/tests/ec_module_tests/ec_module_tests.cs -text
