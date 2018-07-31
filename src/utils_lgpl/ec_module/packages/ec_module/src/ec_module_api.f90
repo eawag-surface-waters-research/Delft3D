@@ -10,6 +10,7 @@ function triang(cptr_sx, cptr_sy, cptr_sv, NS, cptr_dx, cptr_dy, numD, cptr_res,
 
     !from ec_module
     use m_ec_basic_interpolation, only: triinterp2
+    use precision_basics
 
     implicit none
 
@@ -24,7 +25,7 @@ function triang(cptr_sx, cptr_sy, cptr_sv, NS, cptr_dx, cptr_dy, numD, cptr_res,
 
     ! local variables
 
-    integer                                 :: jdla = 1  
+    integer                                 :: jdla = 1
     real(c_double), pointer                 :: ptr(:)
     real(c_double), pointer                 :: dx(:)
     real(c_double), pointer                 :: dy(:)
@@ -32,18 +33,27 @@ function triang(cptr_sx, cptr_sy, cptr_sv, NS, cptr_dx, cptr_dy, numD, cptr_res,
       
     !From other modules
     integer                                  :: ierr 
-    double precision, allocatable            :: XS(:), YS(:), ZS(:)
-    double precision, allocatable            :: XPL(:), YPL(:), ZPL(:)
-    double precision                         :: dmiss=-999d0
+    double precision, allocatable            :: XS(:), YS(:), ZS(:)    
+    real(hp), allocatable                    :: XPL(:)
+    real(hp), allocatable                    :: YPL(:)
+    real(hp), allocatable                    :: ZPL(:)
+    real(hp)                                 :: transformcoef(6)
+    double precision                         :: dmiss=-999.0d0
     
     ierr = 0
+    transformcoef = 0.0d0
 
     ! (re)allocate sample arrays
     if (allocated(XS)) then
         deallocate(XS,YS,ZS)
     end if
     allocate(XS(NS), YS(NS), ZS(NS))
+    allocate (XPL(1), YPL(1), ZPL(1))
 
+    XPL = dmiss;
+    YPL = dmiss;
+    ZPL = dmiss;
+    
     ! copy ptr's to fortran arrays
     call c_f_pointer(cptr_sx, ptr, (/NS/))
     XS(:) = ptr
@@ -57,10 +67,12 @@ function triang(cptr_sx, cptr_sy, cptr_sv, NS, cptr_dx, cptr_dy, numD, cptr_res,
     call c_f_pointer(cptr_dx, dx, (/numD/))
     call c_f_pointer(cptr_dy, dy, (/numD/))
     call c_f_pointer(cptr_res, dRes, (/numD/))
+    
+    dRes = dmiss;
       
     ! call triangulate (dres is the result)
-    ! call triinterp2(dx, dy, dRes, numD, jdla, XS, YS, ZS, NS, dmiss, jsferic, jins = 1, NPL = 0, MXSAM = 0, MYSAM= 0)    
-    
+    call triinterp2(XZ = dx, YZ = dy, BL = dRes, NDX = numD, JDLA = jdla, XS = XS, YS = YS, ZS = ZS, NS = NS, dmiss = dmiss, jsferic = jsferic, jins = 1, jasfer3D = 0, &
+       NPL = 0, MXSAM = 0, MYSAM =0, XPL = XPL, YPL = YPL, ZPL = ZPL, transformcoef = transformcoef)
 
 end function triang
 

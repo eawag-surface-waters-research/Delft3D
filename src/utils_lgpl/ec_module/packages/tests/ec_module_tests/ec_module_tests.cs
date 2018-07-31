@@ -29,9 +29,9 @@ namespace ECModuleTests
         public void TestInterpolation()
         {
             string tempPath = TestHelper.TestDirectoryPath();
-            string pathIn = TestHelper.TestFilesDirectoryPath() + @"\in.txt";
+            string pathIn = TestHelper.TestFilesDirectoryPath() + @"\inTestTriangleInterpolation.txt";
             Assert.IsTrue(File.Exists(pathIn));
-            string pathOut = TestHelper.TestFilesDirectoryPath() + @"\out.txt";
+            string pathOut = TestHelper.TestFilesDirectoryPath() + @"\outTestTriangleInterpolation.txt";
             Assert.IsTrue(File.Exists(pathOut));
 
             string[] pathInLines = File.ReadAllLines(pathIn);

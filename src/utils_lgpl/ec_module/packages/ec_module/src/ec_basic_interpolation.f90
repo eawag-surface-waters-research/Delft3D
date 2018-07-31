@@ -150,22 +150,21 @@
    else  ! Delauny
       call TRIINTfast(XS,YS,ZS,NS,1,XZ,YZ,BL,Ndx,JDLA, jakdtree, jsferic, Npl, jins, dmiss, jasfer3D, XPL, YPL, ZPL, transformcoef)
    end if
-   
-      !in_unit = 10 
-      !open (unit=in_unit,file="in.txt",action="write",status="replace")
-      !write (in_unit,*) NS
-      !do i=1, size(XS)
-      !   write (in_unit,*) XS(i),YS(i),ZS(i)
-      !end do 
-      !
-      !out_unit = 20
-      !open (unit=out_unit,file="out.txt",action="write",status="replace")      
-      !write (out_unit,*) NDX, JDLA 
-      !do i=1, size(XZ)
-      !   write (out_unit,*) XZ(i),YZ(i),BL(i)
-      !end do 
-      !
-      !close (out_unit)
+
+   !   in_unit = 10 
+   !   open (unit=in_unit,file="in.txt",action="write",status="replace")
+   !   write (in_unit,*) NS
+   !   do i=1, size(ZS)
+   !      write (in_unit,*) XS(i),YS(i),ZS(i)
+   !   end do 
+   !   
+   !   out_unit = 20
+   !   open (unit=out_unit,file="out.txt",action="write",status="replace")      
+   !   write (out_unit,*) NDX, JDLA 
+   !   do i=1, size(BL)
+   !      write (out_unit,*) XZ(i),YZ(i),BL(i)
+   !   end do 
+   ! close (out_unit)
 
    end subroutine triinterp2_dbldbl
 
