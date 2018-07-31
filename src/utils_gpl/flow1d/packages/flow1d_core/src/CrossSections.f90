@@ -126,12 +126,7 @@ module m_CrossSections
    integer, public, parameter :: CS_RECTANGLE      =    4 ! TODO, placeholder, someone forgot to check in?
    integer, public, parameter :: CS_TRAPEZIUM      =    5
    integer, public, parameter :: CS_YZ_PROF        =   10
-   integer, public, parameter :: CS_TYPE_NORMAL    =    1 !< Ordinary total area computation, with possible Preisman lock on top
-   integer, public, parameter :: CS_TYPE_PREISMAN  =    2 !< Ordinary total area computation, with possible Preisman lock on top
-   integer, public, parameter :: CS_TYPE_PLUS      =    3 !< Total area for only the expanding part of the cross section (Nested Newton method)
-   integer, public, parameter :: CS_TYPE_MIN       =    4 !< Total area for only the narrowing part of the cross section (Nested Newton method)
-   
-   integer, parameter         :: eps = 1d-3               !< accuracy parameter for determining wetperimeter == 0d0
+   double precision, parameter:: eps = 1d-3               !< accuracy parameter for determining wetperimeter == 0d0
 
    double precision           :: thresholdForSummerdike = 0.4d0
    character (len=13), public, dimension(10) :: CSTypeName = (/&

@@ -747,4 +747,52 @@ contains
       
    end subroutine resetSummerDike
 
+! =================================================================================================
+! =================================================================================================
+   subroutine getconveyance(network, dpt, u1L, q1L, s1L, L, perim_sub, flowarea_sub, conv, cz_sub)
+      use m_CrossSections     , only: t_CSType, CS_TABULATED
+      
+      implicit none
+      type(t_network), intent(in)       :: network
+      double precision :: dpt, u1L, q1L, s1L, conv
+      integer          :: i , L
+      double precision, dimension(3) :: flowarea_sub, cz_sub, perim_sub
+      type(t_CSType), pointer :: cross
+      integer         :: numsect
+      double precision :: cz
+      double precision, parameter   :: eps = 1d-3               !< accuracy parameter for determining wetperimeter == 0d0
+      double precision :: r
+      integer                       :: igrid
+      integer                       :: ibranch
+      
+      cross => network%crs%cross(L)%tabdef
+      igrid   = network%adm%lin2grid(L)
+      ibranch = network%adm%lin2ibr(L)
+      
+      if (cross%crosstype /= CS_TABULATED ) then
+         if (perim_sub(1)> 0.0d0) then
+            numsect = 0
+            do i = 1, 3
+               if (perim_sub(i) > eps) then
+                  r = flowarea_sub(i)/perim_sub(i)
+                  cz_sub(i) =  getFrictionValue(network%rgs, network%spData, ibranch, i, igrid, s1L, q1L, u1L, r, dpt)
+                  numsect = numsect+1
+               else
+                  cz_sub(i) = 0
+               endif
+            enddo
+      
+            do i = 1, numsect
+               if (perim_sub(i) > eps) then
+                  conv = conv + cz_sub(i) * flowarea_sub(i) * sqrt(flowarea_sub(i) / perim_sub(i))  ! extra_friction_depth
+                  cz_sub(i) = cz
+               else
+                  cz_sub(i) = 0d0
+               endif
+            enddo
+         endif
+      endif
+
+   end subroutine getconveyance
+
 end module m_cross_helper

@@ -73,6 +73,7 @@ module m_network
                                                                            !> indirection list, containing local link index for 1d arrays. e.g. flow area of \n  
                                                                            !! link l is found by adm%au_1d(adm%lin2local(l))  
       integer, allocatable          :: lin2local(:)
+      integer, allocatable          :: lin2grid(:)
       type(t_offset2cross), pointer :: line2cross(:) => null()             !< list containing cross section indices per u-location
       type(t_offset2cross), pointer :: gpnt2cross(:) => null()             !< list containing cross section indices per gridpoint-location
 
@@ -120,6 +121,7 @@ contains
       if (.not. allocated(adm%lin2ibr)) allocate(adm%lin2ibr(all_links_count))   
       if (.not. allocated(adm%lin2point)) allocate(adm%lin2point(all_links_count)) 
       if (.not. allocated(adm%lin2local)) allocate(adm%lin2local(all_links_count)) 
+      if (.not. allocated(adm%lin2grid)) allocate(adm%lin2grid(all_links_count)) 
       if (.not. associated(adm%line2cross)) allocate(adm%line2cross(all_links_count))
       if (.not. associated(adm%gpnt2cross)) allocate(adm%gpnt2cross(all_links_count))
       if (.not. allocated(adm%au_1d)) allocate(adm%au_1d(oned_links_count))
@@ -138,6 +140,7 @@ contains
       if (allocated(adm%lin2point))    deallocate(adm%lin2point)
       if (allocated(adm%lin2local))    deallocate(adm%lin2local)
       if (associated(adm%line2cross))  deallocate(adm%line2cross)
+      if (allocated(adm%lin2grid))    deallocate(adm%lin2grid)
       if (associated(adm%gpnt2cross))  deallocate(adm%gpnt2cross)
       if (allocated(adm%au_1d))        deallocate(adm%au_1d)
       if (allocated(adm%conv_1d))      deallocate(adm%conv_1d)
@@ -364,6 +367,7 @@ contains
       adm%lin2ibr = -huge(1)
       adm%lin2point = -huge(1)  
       adm%lin2local = -huge(1)
+      adm%lin2grid  = -huge(1)
       
       do ibran = 1, network%brs%Count
          pbran => network%brs%branch(ibran)
@@ -372,6 +376,7 @@ contains
                adm%lin2ibr(pbran%lin(m)) = ibran
                adm%lin2point(pbran%lin(m)) = m
                adm%lin2local(pbran%lin(m)) = pbran%lin(m)
+               adm%lin2grid(pbran%lin(m))  = pbran%grd(m)
             endif
          enddo
       enddo
