@@ -77,11 +77,14 @@ function triang(cptr_sx, cptr_sy, cptr_sv, NS, cptr_dx, cptr_dy, numD, cptr_res,
 end function triang
 
 
+! Because make_dual_cell(k, N, rcel, xx, yy, num) in net.F90 uses network_data, 
+! some more refactoring of net.f90 is needed to reduce coupling 
 subroutine averaging(cptr_sx, cptr_sy, cptr_sv, c_nums, cptr_cx, cptr_cy, cptr_cxx, cptr_cyy, cptr_cnp, c_numc, c_n6, cptr_res, cptr_meth, cptr_nmin, cptr_csize, jsferic, jasfer3D) bind(C, name="averaging")
     !DEC$ ATTRIBUTES DLLEXPORT :: averaging
     use kdtree2Factory
     use m_ec_interpolationsettings
     use m_ec_basic_interpolation, only: averaging2
+    use precision_basics
 
     implicit none
 
@@ -128,6 +131,12 @@ subroutine averaging(cptr_sx, cptr_sy, cptr_sv, c_nums, cptr_cx, cptr_cy, cptr_c
     integer                                 :: i, j, k, IAVtmp, NUMMINtmp, INTTYPEtmp, ierr
     double precision                        :: RCELtmp
     double precision                        :: dmiss=-999d0
+    
+    real(hp), allocatable                    :: XPL(:)
+    real(hp), allocatable                    :: YPL(:)
+    real(hp), allocatable                    :: ZPL(:)
+
+    allocate (XPL(1), YPL(1), ZPL(1))
 
     ! cache interpolation settings
     IAVtmp = IAV
@@ -190,7 +199,8 @@ subroutine averaging(cptr_sx, cptr_sy, cptr_sv, c_nums, cptr_cx, cptr_cy, cptr_c
     INTERPOLATIONTYPE = 2
 
     call build_kdtree(treeglob, nums, sx, sy, ierr, jsferic, dmiss)
-    !call averaging2(1, nums, sx, sy, sv, ipsam, cx, cy, cz, numc, cxx, cyy, n6, cnp, 1, dmiss, jsferic, jasfer3D, jins = 1, NPL = 0)
+    call averaging2(1, nums, sx, sy, sv, ipsam, cx, cy, cz, numc, cxx, cyy, n6, cnp, 1, dmiss, jsferic, jasfer3D, jins = 1, NPL = 0, &
+                   XPL = XPL, YPL = YPL, ZPL = ZPL)
     call delete_kdtree2(treeglob)
 
     !copy values back
