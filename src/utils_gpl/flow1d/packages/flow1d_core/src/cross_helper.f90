@@ -62,6 +62,7 @@ module m_cross_helper
    public getCrossTotalData_on_link
    
    public getConveyance
+   public getCrossDischarge
 
    integer, public, parameter :: CSH_DEPTH = 0
    integer, public, parameter :: CSH_LEVEL  = 1
@@ -791,4 +792,38 @@ contains
 
    end subroutine getConveyance
 
+   
+   subroutine getCrossDischarge(flowarea_sub, cz_sub, perim_sub, q1_local, q_sub)
+      ! Get discharges per reachsubsegment - based on plqsec() by J.Kuipers 
+      implicit none
+      double precision, dimension(3), intent(in) :: flowarea_sub, cz_sub, perim_sub
+      double precision,               intent(in) :: q1_local
+      double precision, dimension(3), intent(out) :: q_sub  
+      double precision, dimension(3)             :: r_sub  
+      integer                                    :: isec
+      double precision                           :: acrtot
+      double precision                           :: qacrtot
+      double precision, parameter                :: eps_perim = 1d-3               ! accuracy wetted perimeter == 0d0
+      double precision, parameter                :: eps_acrtot = 1d-10            ! accuracy weighted area parameter == 0d0
+      double precision, parameter                :: eps_area = 1d-6               ! accuracy area == 0d0
+      
+      acrtot = 0.d0
+      do isec = 1,3
+          if (perim_sub(isec) > eps_perim) then
+              r_sub(isec) = flowarea_sub(isec)/perim_sub(isec)
+              acrtot = acrtot+flowarea_sub(isec)*cz_sub(isec) * sqrt(r_sub(isec))
+          endif
+      enddo
+      if (acrtot > eps_acrtot) then
+         qacrtot = q1_local/acrtot
+         q_sub = 0.d0
+         do isec = 1, 3
+            if (flowarea_sub(isec) > eps_area) then
+               q_sub(isec) = flowarea_sub(isec)*cz_sub(isec) *sqrt(r_sub(isec))*qacrtot
+            endif
+         enddo
+      endif      
+   end subroutine getCrossDischarge
+   
+   
 end module m_cross_helper
