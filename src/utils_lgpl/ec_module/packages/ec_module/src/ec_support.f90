@@ -834,7 +834,7 @@ end subroutine ecInstanceListSourceItems
          integer :: jplus    !< helper index for location of '+' in time zone
          integer :: jmin     !< helper index for location of '-' in time zone
          integer :: minsize  !< helper index for time zone
-         integer :: temp     !< helper variable
+         real(hp):: temp     !< helper variable
          logical :: ok       !< check of refdate is found
          !
          success = .false.

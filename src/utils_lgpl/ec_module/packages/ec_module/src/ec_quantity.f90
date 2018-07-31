@@ -176,13 +176,14 @@ module m_ec_quantity
          scalefactor = 1.d0
          fillvalue = ec_undef_hp
          attriblen=0
-         ierr = nf90_inquire_attribute(ncid, varid, 'units', len=attriblen)
-         if (attriblen>0) then
-            allocate(character(len=attriblen) :: units) 
-            units(1:len(units)) = ''
-            if (nf90_get_att(ncid, varid, 'units', units)==NF90_NOERR) then 
-               call str_upper(units) ! make units attribute case-insensitive 
-               if (.not.(ecQuantitySet(instancePtr, quantityId, units=units))) return
+         if (nf90_inquire_attribute(ncid, varid, 'units', len=attriblen)==NF90_NOERR) then
+            if (attriblen>0) then
+               allocate(character(len=attriblen) :: units) 
+               units(1:len(units)) = ''
+               if (nf90_get_att(ncid, varid, 'units', units)==NF90_NOERR) then 
+                  call str_upper(units) ! make units attribute case-insensitive 
+                  if (.not.(ecQuantitySet(instancePtr, quantityId, units=units))) return
+               end if
             end if
          end if
          if (nf90_get_att(ncid, varid, '_FillValue', fillvalue)==NF90_NOERR) then                  ! RL: Possibly redundant: we store the missing value with the field

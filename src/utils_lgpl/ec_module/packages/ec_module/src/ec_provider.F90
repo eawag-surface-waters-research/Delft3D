@@ -3490,6 +3490,7 @@ module m_ec_provider
    ierror = nf90_inquire(fileReaderPtr%fileHandle, nvariables = nvar)
    if (ierror/=NF90_NOERR) then
       ! todo: error handling with message
+      call setECMessage('ecProviderNetcdfReadvars: '//nf90_strerror(ierror))
       return
    end if
 
