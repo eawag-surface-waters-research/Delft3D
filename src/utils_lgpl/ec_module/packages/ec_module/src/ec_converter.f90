@@ -2475,7 +2475,7 @@ module m_ec_converter
                      do j=1, n_points
                         mp = indexWeight%indices(1,j)
                         np = indexWeight%indices(2,j)
-                        if (mp == 0 .and. np == 0 .and. connection%converterPtr%interpolationType == extrapolate_spacetimeSaveWeightFactors) then
+                        if (mp <= 0 .and. np <= 0 .and. connection%converterPtr%interpolationType == extrapolate_spacetimeSaveWeightFactors) then
                            if (connection%converterPtr%operandType==operand_replace) then
                               targetValues(j) = 0.0_hp
                            end if
@@ -2495,6 +2495,7 @@ module m_ec_converter
                            ! check missing values
                            jamissing = 0
                            if ( .not. connection%converterPtr%extrapolated) then
+                              if (mp > 0 .and. np > 0) then
                      kloop2D: do jj=0,1
                                  do ii=0,1
                                     if ( comparereal(s2D_T0(mp+ii, np+jj), sourceMissing)==0 .or.   &
@@ -2504,6 +2505,7 @@ module m_ec_converter
                                     end if
                                  end do
                               end do kloop2D
+                              endif
                            endif
 
                            if ( jamissing>0 ) then
@@ -2515,11 +2517,23 @@ module m_ec_converter
                                     return
                                  endif
                               else
-                                 targetValues(j) = targetMissing
+                                 if (connection%converterPtr%operandType==operand_replace) then
+                                    targetValues(j) = targetMissing
+                                 else
+                                    continue ! just keep targetValues(j)
+                                 endif
                               endif
                            else
                               if (mp < 0) then
-                                 call exterpolateValue(targetValues(j), indexWeight, j, a0, a1, s2D_T0, s2D_T1)
+                                 if (connection%converterPtr%interpolationType == extrapolate_spacetimeSaveWeightFactors) then
+                                    call exterpolateValue(targetValues(j), indexWeight, j, a0, a1, s2D_T0, s2D_T1)
+                                 else
+                                    if (connection%converterPtr%operandType==operand_replace) then
+                                       targetValues(j) = targetMissing
+                                    else
+                                       continue ! just keep targetValues(j)
+                                    endif
+                                 endif
                               else
                                  do jj=0,1
                                     do ii=0,1
