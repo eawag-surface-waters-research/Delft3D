@@ -8497,7 +8497,8 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
    integer, allocatable :: kn12(:,:), kn3(:) ! Placeholder arrays for the edge_nodes and edge_types
    double precision :: convversion
    type(t_ug_meshgeom) :: meshgeom
-   logical             :: dflowfm_1d
+   
+   logical           :: dflowfm_1d
    
    type(t_branch), pointer :: pbr
    type(t_node), pointer :: pnod
@@ -8531,67 +8532,71 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
    end if
    
    !! Read 1D from file
-   dflowfm_1d = .true.
-   call read_1d_ugrid(network, ioncid, dflowfm_1d)
-   
-   if (dflowfm_1d) then
+   if (.not. network%loaded) then
+      dflowfm_1d = .true.
+      call read_1d_ugrid(network, ioncid, dflowfm_1d)
+      if (network%loaded) then
+      
+         call admin_network(network, numk, numl)
 
-      ! Do this if 1D present
-      call admin_network(network, numk, numl)
-      numk = numk_last
-      numl = numl_last
-      do inod = 1, network%nds%Count
-         pnod => network%nds%node(inod)
-         numk = numk+1
-         pnod%gridNumber = numk
-         xk(numk) = pnod%x
-         yk(numk) = pnod%y
-         zk(numk) = dmiss
-      enddo
-       
-      do ibr = 1, network%brs%Count
-         pbr => network%brs%branch(ibr)
-          
-         ! first step add coordinates and bed levels to nodes
-         ngrd = pbr%gridPointsCount
-         pbr%grd(1) = pbr%FromNode%gridNumber
-         do k = 2, ngrd-1
+         numk = 0
+         numl = 0
+         do inod = 1, network%nds%Count
+            pnod => network%nds%node(inod)
             numk = numk+1
-            pbr%grd(k) = numk
-            xk(numk) = pbr%Xs(k)
-            yk(numk) = pbr%Ys(k)
+            pnod%gridNumber = numk
+            xk(numk) = pnod%x
+            yk(numk) = pnod%y
             zk(numk) = dmiss
          enddo
-         pbr%grd(ngrd) = pbr%toNode%gridNumber
-          
-         ! second step create links
-         do k = 1, ngrd-1
-            numl = numl+1
-            kn(1,numl) = pbr%grd(k)
-            kn(2,numl) = pbr%grd(k+1)
-            kn(3,numl) = 1
-         enddo
-          
-      enddo
-
-      network%numk = numk-numk_last
-      network%numl = numl-numl_last
-
-      numk_keep = numk
-      numl_keep = numl
-      
-      numk_last = numk
-      numl_last = numl
        
-      ! TODO: Once dflowfm's own 1D and the flow1d code are aligned, the following switch should probably disappear.
-      jainterpolatezk1D = 0
+         do ibr = 1, network%brs%Count
+            pbr => network%brs%branch(ibr)
+          
+            ! first step add coordinates and bed levels to nodes
+            ngrd = pbr%gridPointsCount
+            pbr%grd(1) = pbr%FromNode%gridNumber
+            do k = 2, ngrd-1
+               numk = numk+1
+               pbr%grd(k) = numk
+               xk(numk) = pbr%Xs(k)
+               yk(numk) = pbr%Ys(k)
+               zk(numk) = dmiss
+            enddo
+            pbr%grd(ngrd) = pbr%toNode%gridNumber
+          
+            ! second step create links
+            do k = 1, ngrd-1
+               numl = numl+1
+               kn(1,numl) = pbr%grd(k)
+               kn(2,numl) = pbr%grd(k+1)
+               kn(3,numl) = 1
+            enddo
+            
+            ! Store dflowfm grd-values into buffer for later re-use.
+            pbr%grd_buf = pbr%grd
+          
+         enddo
 
-   else
-      network%numk = 0
-      network%numl = 0
+         network%numk = numk
+         network%numl = numl
+
+         numk_keep = numk
+         numl_keep = numl
+      
+         numk_last = numk
+         numl_last = numl
+       
+         ! TODO: Once dflowfm's own 1D and the flow1d code are aligned, the following switch should probably disappear.
+         jainterpolatezk1D = 0
+         
+      else
+         network%numk = 0
+         network%numl = 0
+      endif
    endif
-   
-   ierr = ionc_get_epsg_code(ioncid, epsg_code)   
+      
+   ierr = ionc_get_epsg_code(ioncid, epsg_code)
    ! ierr = ionc_get_crs(ioncid, crs) ! TODO: make this API routine.
    ! TODO: also get the %crs item from the ionc dataset, store it in unstruc, AND, use that one in unc_write_flowgeom_ugrid.
    if (ierr /= ionc_noerr) then
@@ -10941,6 +10946,23 @@ subroutine unc_write_flowgeom_filepointer_ugrid(mapids, jabndnd)
       ierr = nf90_redef(mapids%ncid)
 
       deallocate( work2 )
+      !
+! NOTE: AvD: merged from #8736 (JZ), but disabled because of missing other code parts
+!      if (jamd1dfile > 0) then
+!         pCS => network%CSDefinitions%CS
+!         j = 1
+!         do i = 1,size(pCS)
+!            j = max(j,pCS(i)%levelscount)
+!         enddo
+!         jmax = j
+!         ierr = nf90_def_dim(mapids%ncid, 'nmesh1d_crs_maxdim', jmax,    mapids%id_jmax)
+!         ierr = nf90_def_var(mapids%ncid, 'flowelem_crs_z', nf90_double, (/ mapids%id_jmax, mapids%meshids1d%dimids(mdim_node) /), mapids%id_flowelemcrsz(1))
+!         ierr = nf90_put_att(mapids%ncid, mapids%id_flowelemcrsz(1), 'long_name','cross-section points level')
+!         ierr = nf90_put_att(mapids%ncid, mapids%id_flowelemcrsz(1), 'unit', 'm')
+!         ierr = nf90_def_var(mapids%ncid, 'flowelem_crs_n', nf90_double, (/ mapids%id_jmax, mapids%meshids1d%dimids(mdim_node) /), mapids%id_flowelemcrsn(1))
+!         ierr = nf90_put_att(mapids%ncid, mapids%id_flowelemcrsn(1), 'long_name','cross-section points width')
+!         ierr = nf90_put_att(mapids%ncid, mapids%id_flowelemcrsn(1), 'unit', 'm')
+!      endif
 
       deallocate(x1dn)
       deallocate(y1dn)
@@ -11024,6 +11046,25 @@ subroutine unc_write_flowgeom_filepointer_ugrid(mapids, jabndnd)
       ierr = nf90_put_var(mapids%ncid, mapids%id_flowelembl(2), bl(1:ndx2d)) ! TODO: AvD: handle 1D/2D boundaries
       ierr = nf90_put_var(mapids%ncid, mapids%id_netnodez(2),   zk(1:numk))  ! NOTE: UNST-1318: backwards compatibility
    end if
+   !
+! NOTE: AvD: merged from #8736 (JZ), but disabled because of missing other code parts
+!   if (jamd1dfile > 0) then
+!      ndx1d = ndxi - ndx2d
+!      allocate( work1d_z(j,ndx1d), work1d_n(j,ndx1d) )
+!      work1d_z = dmiss
+!      work1d_n = dmiss
+!      do i = 1,ndx1d
+!          n = network%crs%cross(i)%itabdef
+!         if( n <= 0 ) cycle
+!         do j = 1,pCS(n)%levelscount
+!            work1d_z(j,i) = pCS(n)%height(j)
+!            work1d_n(j,i) = pCS(n)%width(j) * 0.5d0
+!         enddo
+!      enddo
+!      ierr = nf90_put_var(mapids%ncid, mapids%id_flowelemcrsz(1), work1d_z(1:jmax,1:ndx1d), start=(/ 1, 1 /), count=(/ jmax, ndx1d /) )
+!      ierr = nf90_put_var(mapids%ncid, mapids%id_flowelemcrsn(1), work1d_n(1:jmax,1:ndx1d), start=(/ 1, 1 /), count=(/ jmax, ndx1d /) )
+!      deallocate( work1d_z, work1d_n )
+!   endif
 
    ! Put the contacts
    if (n1d2dcontacts.gt.0) then

@@ -201,6 +201,7 @@ module m_oned_functions
       ! cross sections (in case of sediment transport every gridpoint requires a unique
       ! cross section)
       if (jased > 0 .and. stm_included) then
+      if (allocated(gridpoint2cross)) deallocate(gridpoint2cross)
          allocate(gridpoint2cross(ndxi))
          gpnt2cross => network%adm%gpnt2cross
          do i = 1, ndxi
@@ -211,6 +212,7 @@ module m_oned_functions
          do i = 1, network%nds%count
             k1 = network%nds%node(i)%gridNumber
             linkcount = nd(k1)%lnx
+            if (allocated(gridpoint2cross(k1)%cross)) deallocate(gridpoint2cross(k1)%cross)
             allocate(gridpoint2cross(k1)%cross(linkcount))
             gridpoint2cross(k1)%num_cross_sections = linkcount
          enddo
@@ -238,6 +240,7 @@ module m_oned_functions
                      endif
                   enddo
                else
+                  if (allocated(gridpoint2cross(k1)%cross)) deallocate(gridpoint2cross(k1)%cross)
                   allocate(gridpoint2cross(k1)%cross(1))
                   gridpoint2cross(k1)%num_cross_sections = 1
                   jpos = 1

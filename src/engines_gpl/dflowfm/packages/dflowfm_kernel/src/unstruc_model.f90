@@ -324,7 +324,7 @@ subroutine loadModel(filename)
     use m_flowparameters , only: jatransportmodule
     use m_sediment
     use m_alloc
-    use  m_cross_helper
+    use m_cross_helper
     use m_netw_flow1d
     use m_flow1d_reader
     use m_flowexternalforcings, only: pillar
@@ -340,6 +340,9 @@ subroutine loadModel(filename)
     integer :: istat, minp, ifil, jadoorladen
     integer :: i
     integer :: L, k1, k2
+    
+    integer      :: iDumk = 0
+    integer      :: iDuml = 0
 
     call resetModel()
     
@@ -366,11 +369,18 @@ subroutine loadModel(filename)
     
     call loadNetwork(md_netfile, istat, jadoorladen)
     
-    if (network%numk > 0 .and. network%numl > 0) then
-        
+    if (jadoorladen == 0 .and. network%numk > 0 .and. network%numl > 0) then
+    
+       call admin_network(network, iDumk, iDuml)
+       
        call read_1d_attributes(md_1dnetworkfile, network)
    
        call initialize_1dadmin(network, network%gridpointsCount)
+       
+       ! Set grd back to dflowfm-values
+       do i = 1, network%brs%count
+          network%brs%branch(i)%grd = network%brs%branch(i)%grd_buf
+       enddo
 
        ! fill bed levels from values based on links
        do L = 1, network%numl

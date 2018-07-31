@@ -498,7 +498,7 @@ subroutine load_network_from_flow1d(filename, found_1d_network)
       zk(k1) = min(zk(k1),tempbob(1))
       zk(k2) = min(zk(k2),tempbob(2))           
    enddo
-
+   
    ! TODO: Once dflowfm's own 1D and the flow1d code are aligned, the following switch should probably disappear.
    jainterpolatezk1D = 0
 
