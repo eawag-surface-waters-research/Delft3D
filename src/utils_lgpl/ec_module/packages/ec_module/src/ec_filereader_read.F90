@@ -796,15 +796,11 @@ module m_ec_filereader_read
                      ! copy data to source Field's 1D array, store (X1Y1, X1Y2, ..., X1Yn_rows, X2Y1, XYy2, ..., Xn_colsY1, ...)
                      do i=1, item%elementSetPtr%n_rows
                         do j=1, item%elementSetPtr%n_cols
-!                           if (data_block(j,i,1) == dmiss_nc) then 
-!                              fieldPtr%arr1dPtr( (i-1)*item%elementSetPtr%n_cols + j ) = 0d0
-!                           else                     
-                              fieldPtr%arr1dPtr( (i-1)*item%elementSetPtr%n_cols + j ) = data_block(j,i)
-                              valid_field = .True.
-!                           endif
+                           fieldPtr%arr1dPtr( (i-1)*item%elementSetPtr%n_cols + j ) = data_block(j,i)
                         end do
                      end do
-                  else                                                                                                                       
+                     valid_field = .True.
+                  else
                      ! copy data to source Field's 1D array, store (X1Y1, X1Y2, ..., X1Yn_rows, X2Y1, XYy2, ..., Xn_colsY1, ...)
                      do k=1, item%elementSetPtr%n_layers
                         ierror = nf90_get_var(fileReaderPtr%fileHandle, varid, data_block, start=(/1, 1, k, times_index/), count=(/item%elementSetPtr%n_cols, item%elementSetPtr%n_rows, 1, 1/))

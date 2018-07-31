@@ -58,7 +58,7 @@ module string_module
    public :: splitstr
    public :: strsplit
    public :: strip_quotes
-   public :: real2string
+   public :: real2string, real2stringLeft
 
    interface strip_quotes
       module procedure strip_quotes1
@@ -714,5 +714,18 @@ module string_module
          endif
 
       end subroutine real2string
+
+      !> convert a real to a string with user defined format.
+      !! if it does not fit, fall back on a more general format
+      !! align the string to the left (to allow printing with only trim())
+      subroutine real2stringLeft(cnumber, formatReal, valueReal)
+         character(len=*), intent(in)  :: formatReal  !< format string to be used
+         real(kind=8), intent(in)      :: valueReal   !< number to be convert
+         character(len=*), intent(out) :: cnumber     !< output string
+
+         call real2string(cnumber, formatReal, valueReal)
+         cnumber = adjustl(cnumber)
+
+      end subroutine real2stringLeft
 
 end module string_module

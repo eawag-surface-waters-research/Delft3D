@@ -34480,6 +34480,7 @@ end subroutine make_mirrorcells
  use dfm_error
  use m_sobekdfm
  use m_partitioninfo
+ use m_ec_spatial_extrapolation, only : set_max_search_radius
  ! use m_vegetation
 
  implicit none
@@ -34514,7 +34515,7 @@ end subroutine make_mirrorcells
  double precision, allocatable :: uxini(:), uyini(:) !< optional initial velocity fields on u points in x/y dir.
 
  integer                       :: iconst, itrac, idum, isf, isednum, ipumpsg
-
+ real(kind=hp)                 :: maxSearchRadius
 
  integer, external             :: findname
  double precision,  external   :: ran0
@@ -35186,7 +35187,8 @@ if (mext > 0) then
 
  do while (ja .eq. 1)                                ! read *.ext file
     call delpol()                                    ! ook jammer dan
-    call readprovider(mext,qid,filename,filetype,method,operand,transformcoef,ja,varname,sourcemask)
+    maxSearchRadius = -1
+    call readprovider(mext,qid,filename,filetype,method,operand,transformcoef,ja,varname,sourcemask,maxSearchRadius)
     if (ja == 1) then
         call mess(LEVEL_INFO, 'External Forcing or Initialising '''//trim(qid)//''' from file '''//trim(filename)//'''.')
         ! Initialize success to be .false.
@@ -35203,6 +35205,8 @@ if (mext > 0) then
         endif
 
         kx  = 1                                      ! voorlopig vectormax = 1
+
+        call set_max_search_radius(maxSearchRadius)
 
         if (qid == 'frictioncoefficient') then
 

@@ -201,6 +201,7 @@ module m_ec_typedefs
       integer                       :: targetIndex           !< Write to the target Item's Field's array element number targetIndex (vectormax (here called n_data) should already be accounted for, that offset is *not* recomputed in the converter).
       type(tEcIndexWeight), pointer :: indexWeight => null() !< 
       type(tEcMask)                 :: srcmask               !< Array with mask info on selection of gridpoints
+      logical                       :: extrapolated = .false. !< indexWeight is updated as a result of extrapolation
    end type tEcConverter
    
    type tEcConverterPtr
@@ -258,7 +259,7 @@ module m_ec_typedefs
    type tEcField
       integer                                 :: id                 !< unique Field number, set by ecInstanceCreateField
       real(hp)                                :: timesteps          !< Numer of seconds since tEcTimeFrame%k_refdate.
-      integer                                 :: timesndx = -1      !< index into file: used im general for random access fles (nc) to keep track of position
+      integer                                 :: timesndx = -1      !< index into file: used in general for random access files (nc) to keep track of position
       real(hp)                                :: missingValue       !< value to use for missing data in the data arrays
       real(hp), dimension(:),     pointer     :: arr1dPtr => null() !< points to a 1-dim array field, stored in arr1d OR in a kernel
       real(hp), dimension(:),     allocatable :: arr1d              !< 1-dim array field

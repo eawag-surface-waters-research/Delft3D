@@ -6874,6 +6874,7 @@ src/utils_lgpl/ec_module/packages/ec_module/src/ec_netcdf_timeseries.f90 -text
 src/utils_lgpl/ec_module/packages/ec_module/src/ec_parameters.f90 -text
 src/utils_lgpl/ec_module/packages/ec_module/src/ec_provider.F90 -text
 src/utils_lgpl/ec_module/packages/ec_module/src/ec_quantity.f90 -text
+src/utils_lgpl/ec_module/packages/ec_module/src/ec_spatial_extrapolation.f90 -text
 src/utils_lgpl/ec_module/packages/ec_module/src/ec_stringbuffer.f90 -text
 src/utils_lgpl/ec_module/packages/ec_module/src/ec_support.f90 -text
 src/utils_lgpl/ec_module/packages/ec_module/src/ec_typedefs.f90 -text

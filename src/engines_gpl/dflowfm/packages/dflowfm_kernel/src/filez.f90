@@ -643,7 +643,7 @@ implicit none
     if (index(rec, trim(key2) ) /= 0) then
         ja = 1
         l1 = index(rec,'=') + 1
-        read(rec(l1:),*) value
+        value = rec(l1:)
         ! call mess(LEVEL_INFO, 'Found optional keyword', trim(key) )
         return
     else

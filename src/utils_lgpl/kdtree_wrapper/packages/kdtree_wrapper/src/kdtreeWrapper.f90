@@ -1,15 +1,15 @@
 module kdtree2Factory
-   
+
    use kdtree2_module
-   
-   !! biuld_kdtree
+
+   !! build_kdtree
    integer, parameter     :: ITREE_EMPTY   = 0              ! tree not allocated
    integer, parameter     :: ITREE_DIRTY   = 1              ! tree allocated, dirty
    integer, parameter     :: ITREE_OK      = 2              ! tree clean
    integer                :: NTREEDIM                       ! dimensionality, 2 (jsferic=0), or 3 (jsferic=1)
    integer, parameter     :: INIRESULTSIZE = 10
    integer                :: IRESULTSIZE   = INIRESULTSIZE  ! size of results array
-   
+
    public                 :: kdtree2_ierror
 
    type kdtree_instance
@@ -29,15 +29,15 @@ module kdtree2Factory
    !! kdtree_query ... (... treetmp%qv ..)
    !! build_kdtree..( x, nx, ..)
    !! build_kdtree..(treeglob, x, nx, ..)
-   ! andf if theres more trees, then use them locally: (eg trininterpfast)
+   ! and if theres more trees, then use them locally: (eg trininterpfast)
    ! type(kdtree_instance) :: myowntree
    !! build_kdtree..(myowntree, x, nx, ..)
 
    integer :: janeedfix = 0  ! need to use fix (1) for duplicate data or not (0)
-   
-   
+
+
    contains
-   
+
    !----------------------------------------------------------------------------!
    !> 1. Build subroutine
    !----------------------------------------------------------------------------!

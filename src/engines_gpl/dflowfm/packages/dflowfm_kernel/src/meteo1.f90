@@ -340,6 +340,8 @@ module m_meteo
             ec_method = interpolate_unknown   ! Not yet supported: only spatial, internal diffusion
          case (10)
             ec_method = interpolate_unknown   ! Not yet supported: only initial vertical profiles
+         case (11)
+            ec_method = extrapolate_spacetimeSaveWeightFactors
          case (7) ! TODO: EB: FM method 7, where does this come from? ! see hrms method 7
             ec_method = interpolate_time_extrapolation_ok
          case default
@@ -698,7 +700,7 @@ module m_meteo
    ! ==========================================================================
    !> Replacement function for FM's meteo1 'addtimespacerelation' function.
    logical function ec_addtimespacerelation(name, x, y, mask, vectormax, filename, filetype, method, operand, &
-                                            xyen, z, pzmin, pzmax, pkbot, pktop, targetIndex, forcingfile, srcmaskfile, dtnodal, quiet, varname)
+                                            xyen, z, pzmin, pzmax, pkbot, pktop, targetIndex, forcingfile, srcmaskfile, dtnodal, quiet, varname, maxSearchRadius)
       use m_ec_module, only: ecFindFileReader ! TODO: Refactor this private data access (UNST-703).
       use m_ec_filereader_read, only: ecParseARCinfoMask
       use m_flow, only: kmx, kbot, ktop
@@ -720,12 +722,13 @@ module m_meteo
       real(hp), dimension(:), optional, pointer               :: pzmax         !< FM's array of maximum z coordinate
       integer, dimension(:), optional, pointer                :: pkbot  
       integer, dimension(:), optional, pointer                :: pktop  
-      integer,                optional,         intent(in)    :: targetIndex  !< target position or rank of (complete!) vector in target array
-      character(len=*),       optional,         intent(in)    :: forcingfile  !< file containing the forcing data for pli-file 'filename'
-      character(len=*),       optional,         intent(in)    :: srcmaskfile  !< file containing mask applicable to the arcinfo source data 
-      real(hp),               optional,         intent(in)    :: dtnodal      !< update interval for nodal factors
-      logical,                optional,         intent(in)    :: quiet        !< When .true., in case of errors, do not write the errors to screen/dia at the end of the routine.
-      character(len=*),       optional,         intent(in)    :: varname      !< variable name within filename
+      integer,                optional,         intent(in)    :: targetIndex     !< target position or rank of (complete!) vector in target array
+      character(len=*),       optional,         intent(in)    :: forcingfile     !< file containing the forcing data for pli-file 'filename'
+      character(len=*),       optional,         intent(in)    :: srcmaskfile     !< file containing mask applicable to the arcinfo source data 
+      real(hp),               optional,         intent(in)    :: dtnodal         !< update interval for nodal factors
+      logical,                optional,         intent(in)    :: quiet           !< When .true., in case of errors, do not write the errors to screen/dia at the end of the routine.
+      character(len=*),       optional,         intent(in)    :: varname         !< variable name within filename
+      real(hp),               optional,         intent(in)    :: maxSearchRadius !< max search radius in case method==11
       !
       integer :: ec_filetype !< EC-module's provFile_ enumeration.
       integer :: ec_convtype !< EC-module's convType_ enumeration.
@@ -1736,20 +1739,21 @@ contains
    !> Read the next quantity block that is found in a file.
    !! The (external forcing) file is opened elsewhere and read block-by-block
    !! by consecutive calls to this routine.
-   subroutine readprovider(minp,qid,filename,filetype,method,operand,transformcoef,ja,varname,smask)
+   subroutine readprovider(minp,qid,filename,filetype,method,operand,transformcoef,ja,varname,smask, maxSearchRadius)
      use m_strucs, only: generalkeywrd, numgeneralkeywrd
      ! globals
-     integer,           intent(in)  :: minp      !< File handle to already opened input file.
-     integer,           intent(out) :: filetype  !< File type of current quantity.
-     integer,           intent(out) :: method    !< Time-interpolation method for current quantity.
-     character (len=*), intent(out) :: filename  !< Name of data file for current quantity.
-     character (len=*), intent(out) :: qid       !< Identifier of current quantity (i.e., 'waterlevelbnd')
-     character (len=1), intent(out) :: operand   !< Operand w.r.t. previous data ('O'verride or '+'Append)
-     double precision,  intent(out) :: transformcoef(:) !< Transformation coefficients
-     integer,           intent(out) :: ja        !< Whether a block was successfully read or not.
-     character (len=*), intent(out) :: varname   !< variable name within filename; only in case of NetCDF
-     character (len=*), intent(out), optional :: smask  !< Name of mask-file applied to source arcinfo meteo-data 
-   
+     integer,           intent(in)            :: minp             !< File handle to already opened input file.
+     integer,           intent(out)           :: filetype         !< File type of current quantity.
+     integer,           intent(out)           :: method           !< Time-interpolation method for current quantity.
+     character (len=*), intent(out)           :: filename         !< Name of data file for current quantity.
+     character (len=*), intent(out)           :: qid              !< Identifier of current quantity (i.e., 'waterlevelbnd')
+     character (len=1), intent(out)           :: operand          !< Operand w.r.t. previous data ('O'verride or '+'Append)
+     real(kind=hp),     intent(out)           :: transformcoef(:) !< Transformation coefficients
+     integer,           intent(out)           :: ja               !< Whether a block was successfully read or not.
+     character (len=*), intent(out)           :: varname          !< variable name within filename; only in case of NetCDF
+     character (len=*), intent(out), optional :: smask            !< Name of mask-file applied to source arcinfo meteo-data
+     real(kind=hp),     intent(out), optional :: maxSearchRadius  !< max search radius for method == 11
+
      ! locals
      character (len=maxnamelen)       :: rec, keywrd
      integer                          :: l1, l2, jaopt, k
@@ -1783,9 +1787,7 @@ contains
      keywrd = 'VARNAME'
      call zoekopt(minp, rec, keywrd, ja)
      if (ja == 1) then
-        l1 = index(rec,'=') + 1
-        call checkForSpacesInProvider(rec, l1, l2)               ! l2 = l1 + #spaces after the equal-sign
-        varname = rec(l2:)
+        varname = adjustl(rec)
      else
         varname = ' '
      end if
@@ -1820,7 +1822,17 @@ contains
      else
         return
      end if
-   
+
+     if (present(maxSearchRadius)) then
+        keywrd = 'MAXSEARCHRADIUS'
+        call zoekopt(minp, rec, keywrd, ja)
+        if (ja == 1) then
+           read(rec,*,err=990) maxSearchRadius
+        else
+           maxSearchRadius = -1.0_hp
+        end if
+     end if
+
      keywrd  = 'OPERAND'
      OPERAND = 'O'  ! hk : default =O
      call zoekja(minp,rec,keywrd, ja)

@@ -118,6 +118,7 @@ module m_ec_parameters
    integer, parameter :: interpolate_smoothing                  = 11 !< Not yet supported: only spatial, smoothing
    integer, parameter :: interpolate_intdiffusion               = 12 !< Not yet supported: only spatial, internal diffusion
    integer, parameter :: interpolate_vertprofile                = 13 !< Not yet supported: only initial vertical profiles
+   integer, parameter :: extrapolate_spacetimeSaveWeightFactors = 14 !< inter/extra-polate in space, save the space weight factors, then interpolate in time
 
    ! enumeration for time interpolation types
    integer, parameter :: timeint_lin                           = 1   !< linear
@@ -164,7 +165,6 @@ module m_ec_parameters
    integer, parameter :: convType_qhtable = 15
    integer, parameter :: convType_sigma   = 16
    integer, parameter :: convType_samples = 17
-
 
    ! Error states, in addition to success=.true./.false. returns.
    integer, parameter :: EC_UNKNOWN_ERROR      = -1 !< Unknown error.

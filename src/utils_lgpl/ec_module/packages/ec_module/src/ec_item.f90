@@ -30,8 +30,10 @@
 !! @author arjen.markus@deltares.nl
 !! @author adri.mourits@deltares.nl
 !! @author stef.hummel@deltares.nl
-!! @author edwin.bos@deltares.nl
+!! @author edwin.spee@deltares.nl
+!! @author Edwin Bos
 module m_ec_item
+   use string_module
    use m_ec_typedefs
    use m_ec_parameters
    use m_ec_message
@@ -409,11 +411,13 @@ module m_ec_item
          real(hp),                  intent(in)    :: timesteps     !< objective: t0<=timesteps<=t1
          integer ,                  intent(in)    :: interpol_type !< interpolation
          !
-         integer                                  :: i             !< loop counter
-         integer                                  :: j             !< loop counter
-         type(tEcFileReader), pointer             :: fileReaderPtr !< helper pointer for a file reader
-         character(len=300)                       :: str           !< error message
-         character(len=maxFileNameLen), pointer   :: filename      !< file name in error message
+         integer                                  :: i                     !< loop counter
+         integer                                  :: j                     !< loop counter
+         type(tEcFileReader), pointer             :: fileReaderPtr         !< helper pointer for a file reader
+         character(len=22)                        :: strnum1               !< 1st number converted to string for error message
+         character(len=22)                        :: strnum2               !< 2nd number converted to string for error message
+         character(len=*), parameter              :: fmtBignum = '(f22.3)' !< format string also suitable for very big numbers
+         character(len=maxFileNameLen), pointer   :: filename              !< file name in error message
          !
          success = .false.
          fileReaderPtr => null()
@@ -440,7 +444,7 @@ module m_ec_item
          endif
          !
 
-         ! timesteps < t0 : not supported 
+         ! timesteps < t0 : not supported
          if (comparereal(timesteps, item%sourceT0FieldPtr%timesteps) == -1) then
             if (interpol_type /= interpolate_time_extrapolation_ok) then
                if (associated (fileReaderPtr)) then
@@ -451,13 +455,13 @@ module m_ec_item
                   endif
                   call setECMessage("       in file: '"//trim(filename)//"'.")
                endif
-               write(str, '(a,f13.3,a)') "             Requested: t=", timesteps, ' seconds'
-               call setECMessage(str)
-               write(str, '(a,f13.3,a)') "       Current EC-time: t=", item%sourceT0FieldPtr%timesteps,' seconds'
-               call setECMessage(str)
-               write(str, '(a,i0,a,f10.3,a)')    "Requested time preceeds current forcing EC-timelevel by ", &
-                   &        int(item%sourceT0FieldPtr%timesteps-timesteps)," seconds = ", (item%sourceT0FieldPtr%timesteps-timesteps)/86400.," days."
-               call setECMessage(str)
+               call real2stringLeft(strnum1, '(f22.3)', timesteps)
+               call setECMessage("             Requested: t= " // trim(strnum1) // ' seconds')
+               call real2stringLeft(strnum1, '(f22.3)', item%sourceT0FieldPtr%timesteps)
+               call setECMessage("       Current EC-time: t= " // trim(strnum1) // ' seconds')
+               call real2stringLeft(strnum1, '(f22.3)', item%sourceT0FieldPtr%timesteps-timesteps)
+               call real2stringLeft(strnum2, '(f22.3)', (item%sourceT0FieldPtr%timesteps-timesteps)/86400)
+               call setECMessage("Requested time preceeds current forcing EC-timelevel by " // trim(strnum1) // " seconds = " // trim(strnum2) // " days.")
             else
                success = .true.
             endif

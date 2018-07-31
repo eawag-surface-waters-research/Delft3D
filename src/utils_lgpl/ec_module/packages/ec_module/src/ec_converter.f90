@@ -39,6 +39,7 @@ module m_ec_converter
    use m_ec_alloc
    use m_ec_magic_number
    use m_ec_parameters
+   use m_ec_spatial_extrapolation
 
    implicit none
    
@@ -316,7 +317,8 @@ module m_ec_converter
          end if
          !
          ! Check whether there is anything to be done.
-         if (connection%converterPtr%interpolationType == interpolate_spacetimeSaveWeightFactors) then
+         if (connection%converterPtr%interpolationType == interpolate_spacetimeSaveWeightFactors .or. &
+             connection%converterPtr%interpolationType == extrapolate_spacetimeSaveWeightFactors) then
             if (associated(connection%converterPtr%indexWeight)) then
                success = .true.
                return
@@ -2207,6 +2209,7 @@ module m_ec_converter
       !! Converts source(i) to target(i).
       function ecConverterNetcdf(connection, timesteps) result (success)
       use m_alloc
+      use kdtree2Factory
       implicit none
          logical                            :: success    !< function status
          type(tEcConnection), intent(inout) :: connection !< access to Converter and Items
@@ -2253,7 +2256,9 @@ module m_ec_converter
          real(hp)                   :: weight, lastvalue
          integer                    :: ii, jj, kk, LL
          integer                    :: jamissing
-         
+         integer                    :: p, q
+         type(kdtree_instance)      :: treeinst
+
          !
          PI = datan(1.d0)*4.d0
          success = .false.
@@ -2304,7 +2309,7 @@ module m_ec_converter
          !
          ! ===== interpolation =====
          select case(connection%converterPtr%interpolationType)
-            case (interpolate_spacetimeSaveWeightFactors)
+            case (interpolate_spacetimeSaveWeightFactors, extrapolate_spacetimeSaveWeightFactors)
                ! bilinear interpolation in space
                do i=1, connection%nSourceItems
                   sourceItem => connection%sourceItemsPtr(i)%ptr
@@ -2479,18 +2484,33 @@ module m_ec_converter
 
                            ! check missing values
                            jamissing = 0
-                  kloop2D: do jj=0,1
-                              do ii=0,1
-                                 if ( comparereal(s2D_T0(mp+ii, np+jj), sourceMissing)==0 .or.   &
-                                      comparereal(s2D_T0(mp+ii, np+jj), sourceMissing)==0 ) then
-                                    jamissing = jamissing + 1
-                                    exit kloop2D
-                                 end if
-                              end do
-                           end do kloop2D
+                           if ( .not. connection%converterPtr%extrapolated) then
+                     kloop2D: do jj=0,1
+                                 do ii=0,1
+                                    if ( comparereal(s2D_T0(mp+ii, np+jj), sourceMissing)==0 .or.   &
+                                         comparereal(s2D_T0(mp+ii, np+jj), sourceMissing)==0 ) then
+                                       jamissing = jamissing + 1
+                                       exit kloop2D
+                                    end if
+                                 end do
+                              end do kloop2D
+                           endif
 
                            if ( jamissing>0 ) then
-                              targetValues(j) = targetMissing
+                              if (connection%converterPtr%interpolationType == extrapolate_spacetimeSaveWeightFactors) then
+                                 if (nearest_sample_wrapper(treeinst, sourceItem, targetElementSet, j, sourceT0Field%arr1d, 1, p, q)) then
+                                    targetValues(j) = targetValues(j) + a0 * s2D_T0(p, q) + a1 * s2D_T1(p, q)
+                                    indexWeight%indices(1,j) = p
+                                    indexWeight%indices(2,j) = q
+                                    indexWeight%weightFactors(1,j) = 1.0_hp
+                                    indexWeight%weightFactors(2:4,j) = 0.0_hp
+                                 else
+                                    success = .false.
+                                    return
+                                 endif
+                              else
+                                 targetValues(j) = targetMissing
+                              endif
                            else
                               do jj=0,1
                                  do ii=0,1
@@ -2499,12 +2519,15 @@ module m_ec_converter
                                      targetValues(j) = targetValues(j) + a1 * weight * s2D_T1(mp+ii, np+jj)
                                  end do
                               end do
-                           end if                              
+                           end if
                         end if
                      end do
                   end if
                   connection%targetItemsPtr(i)%ptr%targetFieldPtr%timesteps = timesteps
                end do
+               if (connection%converterPtr%interpolationType == extrapolate_spacetimeSaveWeightFactors) then
+                  connection%converterPtr%extrapolated = .true.
+               endif
             case (interpolate_time, interpolate_time_extrapolation_ok)
                ! linear interpolation in time
                do i=1, connection%nSourceItems
@@ -2571,7 +2594,8 @@ module m_ec_converter
                call setECMessage("ERROR: ec_converter::ecConverterNetcdf: Unsupported interpolation type requested.")
                return
          end select
-         success = .true.   
+         call delete_kdtree2(treeinst)
+         success = .true.
       end function ecConverterNetcdf
       
       ! =======================================================================
@@ -2756,100 +2780,5 @@ module m_ec_converter
             dbdistance = sqrt(rr)
          endif
       end function dbdistance
-      
-      
-!> extrapolate missing values
-      subroutine extrapolate_missing(vals, Missing, jamissing)
-         implicit none
-         
-         real(hp), dimension(2,2,2,2), intent(inout) :: vals   !< values
-         real(hp),                     intent(in)    :: Missing   !< missing values
-         integer,                      intent(out)   :: jamissing !< missing values left (1) or not (0)
-         
-         real(hp)                                    :: value
-         
-         integer, dimension(4)                       :: imiss, jmiss
-         integer                                     :: nummissing, n
-         
-         integer :: i, j, k, L
-         integer :: i1, j1, i2, j2
-         
-         jamissing = 0
 
-!        first two dimensions (horizontal)         
-         do L=1,2
-            do k=1,2
-            
-!              count number of missing values            
-               nummissing = 0
-               imiss = 0
-               jmiss = 0
-               n = 0
-               do j=1,2
-                  do i=1,2
-                     if ( vals(i,j,k,L)==Missing ) then
-                        nummissing = nummissing+1
-                        imiss(nummissing) = i
-                        jmiss(nummissing) = j
-                     else
-                        n = n+1
-                        imiss(5-n) = i
-                        jmiss(5-n) = j
-                     end if
-                  end do
-               end do
-              
-               if ( nummissing.eq.1 ) then
-!                 linear extrapolation
-                  i = imiss(1)
-                  j = jmiss(1)
-                  i1 = 3-i
-                  j1 = 3-j
-                  vals(i,j,k,L) = vals(i,j1,k,L) + vals(i1,j,k,L) - vals(i1,j1,k,L)
-               else if ( nummissing.eq.2 ) then
-!                 linear extrapolation in one direction, constant in other
-                  i1 = imiss(1)
-                  j1 = jmiss(1)
-                  i2 = imiss(2)
-                  j2 = jmiss(2)
-                  if ( i1.eq.i2 ) then
-                     vals(i1,:,k,L) = vals(3-i1,:,k,L)
-                  else if ( j1.eq.j2 ) then
-                     vals(:,j1,k,L) = vals(:,3-j1,k,L)
-                  else
-                     vals(i1,j1,k,L) = 0.5d0*(vals(i2,j1,k,L)+vals(i1,j2,k,L))
-                     vals(i2,j2,k,L) = vals(i1,j1,k,L)
-                  end if
-               else if ( nummissing.eq.3 ) then
-                  i = imiss(4)
-                  j = jmiss(4)
-                  value = vals(i,j,k,L)
-                  vals(:,:,k,L) = value
-               else if ( nummissing.eq.4 ) then
-!                 can not extrapolate   
-               end if
-            end do
-         end do
-         
-!        third dimension
-         do L=1,2
-            do j=1,2
-               do i=1,2
-                  if ( vals(i,j,1,L).eq.Missing .or. vals(i,j,2,L).eq.Missing ) then
-                     if ( vals(i,j,1,L).eq.Missing .and. vals(i,j,2,L).ne.Missing ) then
-                        vals(i,j,1,L) = vals(i,j,2,L)
-                     else if ( vals(i,j,2,L).eq.Missing .and. vals(i,j,1,L).ne.Missing ) then
-                        vals(i,j,2,L) = vals(i,j,1,L)
-                     else
-!                       can not extrapolate
-                        jamissing = 1
-                     end if
-                  end if
-               end do
-            end do
-         end do
-         
-         return
-      end subroutine extrapolate_missing
-      
 end module m_ec_converter
