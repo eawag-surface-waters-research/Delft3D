@@ -755,9 +755,8 @@ module m_ec_provider
          integer                :: field1Id     !< helper variable 
          integer                :: itemId       !< helper variable 
          type(tEcItem), pointer :: item         !< Item containing all components
-         character(len=300)     :: msgbuf 
+         character(len=16)      :: cnum1, cnum2 !< helper variable to convert an int to a string
          character(len=:), allocatable :: elementSetName
-         character(len=maxMessageLen)  :: message
          !
          success = .false.
          item => null()
@@ -781,10 +780,11 @@ module m_ec_provider
                !endif 
             case (provFile_bc)
                n_quantities = fileReaderPtr%bc%quantity%vectormax
-               if (n_quantities/=fileReaderPtr%vectormax) then 
-                  write(msgbuf,'(a,i0,a,i0,a)') 'ERROR : Mismatch between vectormax requested (',fileReaderPtr%vectormax,') and supplied by file '   &
-                                        // trim(fileReaderPtr%bc%fname) // ', quantity '// trim(fileReaderPtr%bc%qname),' (',n_quantities,').' 
-                  call setECMessage(trim(msgbuf))                        
+               if (n_quantities/=fileReaderPtr%vectormax) then
+                  write(cnum1, '(i0)') fileReaderPtr%vectormax
+                  write(cnum2, '(i0)') n_quantities
+                  call setECMessage('ERROR : Mismatch between vectormax requested (' // trim(cnum1) // ') and supplied by file '   &
+                                    // trim(fileReaderPtr%bc%fname) // ', quantity '// trim(fileReaderPtr%bc%qname) // ' (' // trim(cnum2) // ').')
                   return                                 ! TODO: error message: vector definition in the the bc-block with the requested quantity-name
                                                          !       supplies a number of elements different from the demanded number of elements 
                end if
@@ -844,9 +844,8 @@ module m_ec_provider
             case (provFile_bc)
                item%sourceT0FieldPtr%timesteps = 54321.0D+10
                if (.not. ecBCReadBlock(fileReaderPtr, item%sourceT0FieldPtr%timesteps, item%sourceT0FieldPtr%arr1dPtr)) then
-                  write (message,'(a)') "Failed reading timelevel 0 from file '"    &
-                     //trim(fileReaderPtr%bc%fname)//"', location:'"//trim(fileReaderPtr%bc%bcname)//"'."
-                  call setECMessage(message)
+                  call setECMessage("Failed reading timelevel 0 from file '"    &
+                     //trim(fileReaderPtr%bc%fname)//"', location:'"//trim(fileReaderPtr%bc%bcname)//"'.")
                   return
                endif
                item%sourceT1FieldPtr%arr1dPtr = item%sourceT0FieldPtr%arr1dPtr
@@ -854,9 +853,8 @@ module m_ec_provider
                   ! read second line for T1-Field
                   if (.not. ecBCReadBlock(fileReaderPtr, item%sourceT1FieldPtr%timesteps, item%sourceT1FieldPtr%arr1dPtr)) then
                      if (.not.fileReaderPtr%bc%timeint==BC_TIMEINT_LIN_EXTRAPOL) then 
-                        write (message,'(a)') "Failed reading timelevel 1 from file '"    &
-                           //trim(fileReaderPtr%bc%fname)//"', location:'"//trim(fileReaderPtr%bc%bcname)//"'."
-                        call setECMessage(message)
+                        call setECMessage("Failed reading timelevel 1 from file '"    &
+                           //trim(fileReaderPtr%bc%fname)//"', location:'"//trim(fileReaderPtr%bc%bcname)//"'.")
                         return
                      endif
                   endif
