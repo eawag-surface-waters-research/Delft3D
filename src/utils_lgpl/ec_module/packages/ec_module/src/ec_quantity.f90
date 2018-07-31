@@ -151,6 +151,7 @@ module m_ec_quantity
          if (present(timeint)) quantityPtr%timeint = timeint  
          if (present(ncid)) quantityPtr%ncid = ncid  
          success = .true.
+         
       end function ecQuantitySet
       
       !> Change the Units, Fillvalue, Scalefactor and Offset shift of the Quantity corresponding to quantityId
@@ -167,6 +168,7 @@ module m_ec_quantity
          integer,                   intent(in) :: varid       !< id of the variable
                                                               !< order: new = (old*scale) + offset
          character(len=:), allocatable  :: units
+         character(len=5)               :: quantidstr
          integer  :: ierr
          integer  :: attriblen
          real(hp) :: add_offset, scalefactor, fillvalue
@@ -186,14 +188,34 @@ module m_ec_quantity
                end if
             end if
          end if
-         if (nf90_get_att(ncid, varid, '_FillValue', fillvalue)==NF90_NOERR) then                  ! RL: Possibly redundant: we store the missing value with the field
-            if (.not.(ecQuantitySet(instancePtr, quantityId, fillvalue=fillvalue))) return         !     And not with the quantity. TODO: check if this can be removed
+
+         write(quantidstr,'(i5.5)') quantityId
+         ierr = nf90_get_att(ncid, varid, '_FillValue', fillvalue)
+         if (ierr==NF90_NOERR) then
+            if (.not.(ecQuantitySet(instancePtr, quantityId, fillvalue=fillvalue))) then
+               call setECMessage("Unable to set fillValue for quantity "//quantidstr)
+               return
+            end if
          end if
-         if ((nf90_get_att(ncid, varid, 'scale_factor', scalefactor)==NF90_NOERR)         &
-              .or. (nf90_get_att(ncid, varid, 'add_offset', add_offset)==NF90_NOERR)) then
-              if (.not.(ecQuantitySet(instancePtr, quantityId, factor=scalefactor, offset=add_offset))) return
+
+         ierr = nf90_get_att(ncid, varid, 'scale_factor', scalefactor)
+         if (ierr==NF90_NOERR) then
+            if (.not.(ecQuantitySet(instancePtr, quantityId, factor=scalefactor))) then
+               call setECMessage("Unable to set scale factor for quantity "//quantidstr)
+               return
+            end if
          end if
+
+         ierr = nf90_get_att(ncid, varid, 'add_offset', add_offset)
+         if (ierr==NF90_NOERR) then
+            if (.not.(ecQuantitySet(instancePtr, quantityId, offset=add_offset))) then
+               call setECMessage("Unable to set offset for quantity "//quantidstr)
+               return
+            end if
+         end if
+
          success = .true.
+         
       end function ecQuantitySetUnitsFillScaleOffsetFromNcidVarid
      
 end module m_ec_quantity

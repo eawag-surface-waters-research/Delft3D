@@ -2476,9 +2476,6 @@ module m_ec_converter
                   else
                      s2D_T0(1:n_cols,1:n_rows) => sourceT0Field%arr1d
                      s2D_T1(1:n_cols,1:n_rows) => sourceT1Field%arr1d
-                     if (connection%converterPtr%operandType==operand_replace) then
-                        targetValues = 0.0_hp
-                     end if
                      if (connection%converterPtr%interpolationType == extrapolate_spacetimeSaveWeightFactors) then
                         allocate(x_extrapolate(n_points))
                         x_extrapolate = targetElementSet%x
@@ -2488,9 +2485,12 @@ module m_ec_converter
                      do j=1, n_points
                         mp = indexWeight%indices(1,j)
                         np = indexWeight%indices(2,j)
+                        jamissing = 0
                         if (mp > 0 .and. np > 0) then ! if mp and np both valid, this is an interior point of the meteo domain, else ignore
                                                       ! check missing values for points with valid mp and np
-                           jamissing = 0
+                           if (connection%converterPtr%operandType==operand_replace) then ! Dit hoort in de loop beneden per target gridpunt!
+                              targetValues(j) = 0.0_hp
+                           end if
                   kloop2D: do jj=0,1
                               do ii=0,1
                                  if ( comparereal(s2D_T0(mp+ii, np+jj), sourceMissing)==0 .or.   &
