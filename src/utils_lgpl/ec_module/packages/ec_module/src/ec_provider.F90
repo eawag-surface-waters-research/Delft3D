@@ -814,6 +814,7 @@ module m_ec_provider
 
          ! ===== finish initialization of Fields =====
          ! Read the first two records into tEcItem%sourceT0FieldPtr and tEcItem%sourceT1FieldPtr.
+         
          select case (fileReaderPtr%ofType)
             case (provFile_uniform, provFile_unimagdir)
                rewind(unit=fileReaderPtr%fileHandle)
@@ -1211,7 +1212,7 @@ module m_ec_provider
          valueptr => null()
          vectormax = 1                    ! assumed scalar if vector dimensions not made explicit                      
          zInterpolationType = zinterpolate_unknown
-	      select case (fileReaderPtr%ofType)
+         select case (fileReaderPtr%ofType)
          case (provFile_t3D)
             zInterpolationType = zinterpolate_linear
             a = ec_undef_hp
@@ -1273,7 +1274,7 @@ module m_ec_provider
             zws = (/ (a(i), i=1,numlay) /)
             rewind(fileReaderPtr%fileHandle)          
 
-	      case (provFile_bc)
+         case (provFile_bc)
             ! Check if these are z-layers or sigma-layers
             if (.not.associated(fileReaderPtr%bc)) then 
                call setECMessage("BC-filetype, but no bc instance associated to filereader")
@@ -1304,10 +1305,11 @@ module m_ec_provider
          case default
             call setECMessage("ERROR: ec_provider::ecProviderCreatet3DItems: Unknown file type.")
             return 
-	      end select
+         end select
          !
          ! ===== single quantity: quant ===== (Further code in this sub independent of file type)
          quantityId = ecInstanceCreateQuantity(instancePtr)
+
          if (.not.ecQuantitySet(instancePtr, quantityId, name='uniform_item', units=' ', vectormax=vectormax))    return 
 
          elementSetId = ecInstanceCreateElementSet(instancePtr)
@@ -3455,12 +3457,11 @@ module m_ec_provider
    select case(bcPtr%func)
       case (BC_FUNC_TSERIES, BC_FUNC_CONSTANT)
          do ic = 1, nc
-            if (ic==bcPtr%timecolumn) then
-               print *, '   Quantity "',trim(bcPtr%quantities(ic)%name),'", (time)'
-            else
-               print *, '   Quantity "',trim(bcPtr%quantities(ic)%name),'"'
+            if (ic/=bcPtr%timecolumn) then
                bcPtr%quantity => bcPtr%quantities(ic)
-               if (.not.(ecProviderCreateUniformItems(instancePtr, fileReaderPtr))) return
+               if (.not.(ecProviderCreateUniformItems(instancePtr, fileReaderPtr))) then
+                  return
+               endif
             endif
          enddo
       case (BC_FUNC_QHTABLE)

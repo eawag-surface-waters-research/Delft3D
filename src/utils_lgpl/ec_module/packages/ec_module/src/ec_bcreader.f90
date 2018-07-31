@@ -117,7 +117,6 @@ contains
 
     do
        if (mf_eof(fhandle)) then
-          ! print *,'End of BC FILE'                            ! reached the end of the bc-file, but combination was not found
           iostat = EC_EOF
           return
        endif
@@ -340,6 +339,7 @@ contains
           posfs = index(vectorstr,':')
           if (posfs>0) then
              if (trim(vectorstr(1:posfs-1))==trim(bc%qname)) then           ! this vector defines the requested 'quantity'
+                bc%quantity%name=bc%qname
                 vectorquantities = ''
                 read (vectorstr(posfs+1:len_trim(vectorstr)),*,iostat=iostat)  (vectorquantities(idim),idim=1,MAXDIM)
                 vectordefinition = '|'
@@ -548,8 +548,6 @@ contains
     ! Check vectors
     if (bc%func==BC_FUNC_TSERIES .or. bc%func==BC_FUNC_TIM3D) then        ! in case of timeseries-like signal  ...
        if (bc%numcols-1/=bc%numlay*bc%quantity%vectormax) then           ! ... the number of columns minus 1 (time column) should equal ...
-          print *, 'vectormax = ', bc%quantity%vectormax
-          print *, 'numlay = ', bc%numlay
           call setECMessage("Number of selected column mismatch.")
           return                                                          ! ... the vectordimensionality * number of layers
        end if
@@ -605,7 +603,7 @@ contains
              select case (BCPtr%func)
              case (BC_FUNC_TSERIES, BC_FUNC_TIM3D, BC_FUNC_CONSTANT)
                 call setECMessage("   File: "//trim(bcPtr%fname)//", Location: "//trim(bcPtr%fname)//", Quantity: "//trim(bcPtr%qname))
-                call setECMessage("Datablock end (eof) has been reached.")
+                call setECMessage("Datablock end (eof) has been reached (READING BEYOND FINAL TIME).")
              end select
              if (present(eof)) then
                 eof = .true.
