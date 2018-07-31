@@ -134,14 +134,14 @@ module m_ec_support
          success = .false.
          !
          if (len(trim(rec)) == 0) then
-            call setECMessage("ERROR: ec_provider::ecGetTimesteps: Input string is empty.")
+            call setECMessage("ec_provider::ecGetTimesteps: Input string is empty.")
             return
          end if
          posSince = index(rec, 'since')
          if (posSince > 0) then
             read(rec(index(rec, '=')+1 : posSince-1), *) time_steps
          else if ( .not. ecSupportTimestringArcInfo(rec, time_steps=time_steps)) then
-            call setECMessage("ERROR: ec_provider::ecGetTimesteps: can not find time step in: " // trim(rec) // ".")
+            call setECMessage("ec_provider::ecGetTimesteps: can not find time step in: " // trim(rec) // ".")
             return
          endif
          call str_lower(rec)
@@ -158,7 +158,7 @@ module m_ec_support
          else if (index(rec, 'hours') /= 0 .or. index( rec, 'hrs') /= 0) then
             time_steps = time_steps * 60.0_hp * 60.0_hp
          else
-            call setECMessage("ERROR: ec_provider::ecGetTimesteps: Unable to identify the time unit.")
+            call setECMessage("ec_provider::ecGetTimesteps: Unable to identify the time unit.")
             return
          end if
          success = .true.
@@ -179,7 +179,7 @@ module m_ec_support
 
          minp = mf_open(filename)
          if (minp<=0) then 
-            call setECMessage("ERROR: ec_support::ecSupportOpenExistingFileGnu: Opening "//trim(filename)//" failed.")
+            call setECMessage("ec_support::ecSupportOpenExistingFileGnu: Opening "//trim(filename)//" failed.")
             return
          endif 
          success = .true.
@@ -205,12 +205,12 @@ module m_ec_support
          unitused = .false.
          ! Sanity checks.
          if (len_trim(filename) == 0) then
-            call setECMessage("ERROR: ec_support::ecSupportOpenExistingFile: Name is empty")
+            call setECMessage("ec_support::ecSupportOpenExistingFile: Name is empty")
             return
          endif
          inquire(file = trim(filename), exist = success)
          if (.not. success) then
-            call setECMessage("ERROR: ec_support::ecSupportOpenExistingFile: File does not exist: ", trim(filename))
+            call setECMessage("ec_support::ecSupportOpenExistingFile: File does not exist: ", trim(filename))
             return
          endif
          ! Special case: NetCDF.
@@ -226,7 +226,7 @@ module m_ec_support
             if (.not. unitused) exit
          enddo
          if (unitused) then
-            call setECMessage("ERROR: ec_support::ecSupportOpenExistingFile: No free unit number available")
+            call setECMessage("ec_support::ecSupportOpenExistingFile: No free unit number available")
             success = .false.
             return
          endif
@@ -236,7 +236,7 @@ module m_ec_support
          if (istat == 0) then
             success = .true.
          else
-            call setECMessage("ERROR: ec_support::ecSupportOpenExistingFile: opening file " // trim(filename) // " failed")
+            call setECMessage("ec_support::ecSupportOpenExistingFile: opening file " // trim(filename) // " failed")
          endif
       end function ecSupportOpenExistingFile
    
@@ -260,7 +260,7 @@ module m_ec_support
          lenArr = 0
       
          if (.not. associated(intArr)) then
-            call setECMessage("ERROR: ec_support::ecSupportAddUniqueInt: Dummy argument pointer intArr is not associated.")
+            call setECMessage("ec_support::ecSupportAddUniqueInt: Dummy argument pointer intArr is not associated.")
          else
             lenArr = size(intArr)
             do i=1, lenArr
@@ -273,7 +273,7 @@ module m_ec_support
             ! This integer is not yet in intArr, so add it.
             allocate(newIntArr(lenArr+1), STAT = istat)
             if (istat /= 0 ) then
-               call setECMessage("ERROR: ec_support::ecSupportAddUniqueInt: Unable to allocate additional memory.")
+               call setECMessage("ec_support::ecSupportAddUniqueInt: Unable to allocate additional memory.")
             else
                do i=1, lenArr
                   newIntArr(i) = intArr(i) ! Copy existing integers.
@@ -313,7 +313,7 @@ module m_ec_support
          !   if (istat == 0) then
          !      charArr(1) = aChar
          !   else
-         !      call setECMessage("ERROR: ec_support::ecSupportAddUniqueChar: Unable to allocate additional memory.")
+         !      call setECMessage("ec_support::ecSupportAddUniqueChar: Unable to allocate additional memory.")
          !   end if
          !   return
          !end if
@@ -332,7 +332,7 @@ module m_ec_support
          !   charArr(lenArr+1) = aChar
          !   success = .true.
          !else
-         !   call setECMessage("ERROR: ec_support::ecSupportAddUniqueChar: Unable to allocate additional memory.")
+         !   call setECMessage("ec_support::ecSupportAddUniqueChar: Unable to allocate additional memory.")
          !end if
       end function ecSupportAddUniqueChar
       
@@ -357,7 +357,7 @@ module m_ec_support
                end if
             end do
          else
-            call setECMessage("ERROR: ec_support::ecSupportFindQuantity: Dummy argument instancePtr is not associated.")
+            call setECMessage("ec_support::ecSupportFindQuantity: Dummy argument instancePtr is not associated.")
          end if
       end function ecSupportFindQuantity
       
@@ -400,7 +400,7 @@ module m_ec_support
                end if
             end do
          else
-            call setECMessage("ERROR: ec_support::ecSupportFindElementSet: Dummy argument instancePtr is not associated.")
+            call setECMessage("ec_support::ecSupportFindElementSet: Dummy argument instancePtr is not associated.")
          end if
       end function ecSupportFindElementSet
       
@@ -423,7 +423,7 @@ module m_ec_support
                end if
             end do
          else
-            call setECMessage("ERROR: ec_support::ecSupportFindField: Dummy argument instancePtr is not associated.")
+            call setECMessage("ec_support::ecSupportFindField: Dummy argument instancePtr is not associated.")
          end if
       end function ecSupportFindField
 
@@ -618,7 +618,7 @@ end subroutine ecInstanceListSourceItems
                end if
             end do
          else
-            call setECMessage("ERROR: ec_support::ecSupportFindItem: Dummy argument instancePtr is not associated.")
+            call setECMessage("ec_support::ecSupportFindItem: Dummy argument instancePtr is not associated.")
          end if
       end function ecSupportFindItem
       
@@ -641,7 +641,7 @@ end subroutine ecInstanceListSourceItems
                end if
             end do
          else
-            call setECMessage("ERROR: ec_support::ecSupportFindConnection: Dummy argument instancePtr is not associated.")
+            call setECMessage("ec_support::ecSupportFindConnection: Dummy argument instancePtr is not associated.")
          end if
       end function ecSupportFindConnection
       
@@ -664,7 +664,7 @@ end subroutine ecInstanceListSourceItems
                end if
             end do
          else
-            call setECMessage("ERROR: ec_support::ecSupportFindConverter: Dummy argument instancePtr is not associated.")
+            call setECMessage("ec_support::ecSupportFindConverter: Dummy argument instancePtr is not associated.")
          end if
       end function ecSupportFindConverter
       
@@ -687,7 +687,7 @@ end subroutine ecInstanceListSourceItems
                end if
             end do
          else
-            call setECMessage("ERROR: ec_support::ecSupportFindFileReader: Dummy argument instancePtr is not associated.")
+            call setECMessage("ec_support::ecSupportFindFileReader: Dummy argument instancePtr is not associated.")
          end if
       end function ecSupportFindFileReader
       
@@ -715,7 +715,7 @@ end subroutine ecInstanceListSourceItems
                end if
             end do
          else
-            call setECMessage("ERROR: ec_support::ecSupportFindFileReader: Dummy argument instancePtr is not associated.")
+            call setECMessage("ec_support::ecSupportFindFileReader: Dummy argument instancePtr is not associated.")
          end if
       end function ecSupportFindFileReaderByFilename
 
@@ -738,7 +738,7 @@ end subroutine ecInstanceListSourceItems
                end if
             end do
          else
-            call setECMessage("ERROR: ec_support::ecSupportFindBCBlock: Dummy argument instancePtr is not associated.")
+            call setECMessage("ec_support::ecSupportFindBCBlock: Dummy argument instancePtr is not associated.")
          end if
       end function ecSupportFindBCBlock
 
@@ -761,7 +761,7 @@ end subroutine ecInstanceListSourceItems
                end if
             end do
          else
-            call setECMessage("ERROR: ec_support::ecSupportFindNetCDF: Dummy argument instancePtr is not associated.")
+            call setECMessage("ec_support::ecSupportFindNetCDF: Dummy argument instancePtr is not associated.")
          end if
       end function ecSupportFindNetCDF
 
@@ -851,8 +851,8 @@ end subroutine ecInstanceListSourceItems
             else if (index(string, 'days') /= 0) then
                unit = ec_day
             else
-               call setECMessage("ERROR: unitstring = '"//trim(string)//"'.")
-               call setECMessage("ERROR: ec_support::ecSupportTimestringToUnitAndRefdate: Unable to identify the time unit.")
+               call setECMessage("unitstring = '"//trim(string)//"'.")
+               call setECMessage("ec_support::ecSupportTimestringToUnitAndRefdate: Unable to identify the time unit.")
                return
             end if
          end if
@@ -880,7 +880,7 @@ end subroutine ecInstanceListSourceItems
                ok = ecSupportTimestringArcInfo(string, ref_date)
             endif
             if (.not. ok) then
-               call setECMessage("ERROR: ec_support::ecSupportTimestringToUnitAndRefdate: Unable to identify keyword: since.")
+               call setECMessage("ec_support::ecSupportTimestringToUnitAndRefdate: Unable to identify keyword: since.")
                return
             end if
          end if
@@ -1027,7 +1027,7 @@ end subroutine ecInstanceListSourceItems
          endif
 
          success = (ierr == 0)
-         if (.not. success) call setECMessage("ERROR: ec_support::parseTimezone: error parsing time zone " // trim(string))
+         if (.not. success) call setECMessage("ec_support::parseTimezone: error parsing time zone " // trim(string))
       end function parseTimezone
 
       ! =======================================================================
@@ -1287,7 +1287,7 @@ module m_ec_alloc
          istat = 1
          !
          if (.not. associated(ptr)) then
-            call setECMessage("ERROR: ec_alloc::ecConnectionPtrArrayIncrease: Dummy argument ptr is not associated.")
+            call setECMessage("ec_alloc::ecConnectionPtrArrayIncrease: Dummy argument ptr is not associated.")
          else
             allocate(new_ptr(size(ptr)+10), STAT = istat)
             if (istat == 0) then
@@ -1299,7 +1299,7 @@ module m_ec_alloc
                new_ptr => null()
                success = .true.
             else
-               call setECMessage("ERROR: ec_alloc::ecConnectionPtrArrayIncrease: Unable to allocate additional memory.")
+               call setECMessage("ec_alloc::ecConnectionPtrArrayIncrease: Unable to allocate additional memory.")
             end if
          end if
       end function ecConnectionPtrArrayIncrease
@@ -1320,7 +1320,7 @@ module m_ec_alloc
          istat = 1
          !
          if (.not. associated(ptr)) then
-            call setECMessage("ERROR: ec_alloc::ecConverterPtrArrayIncrease: Dummy argument ptr is not associated.")
+            call setECMessage("ec_alloc::ecConverterPtrArrayIncrease: Dummy argument ptr is not associated.")
          else
             allocate(new_ptr(size(ptr)+10), STAT = istat)
             if (istat == 0) then
@@ -1332,7 +1332,7 @@ module m_ec_alloc
                new_ptr => null()
                success = .true.
             else
-               call setECMessage("ERROR: ec_alloc::ecConverterPtrArrayIncrease: Unable to allocate additional memory.")
+               call setECMessage("ec_alloc::ecConverterPtrArrayIncrease: Unable to allocate additional memory.")
             end if
          end if
       end function ecConverterPtrArrayIncrease
@@ -1353,7 +1353,7 @@ module m_ec_alloc
          istat = 1
          !
          if (.not. associated(ptr)) then
-            call setECMessage("ERROR: ec_alloc::ecElementSetPtrArrayIncrease: Dummy argument ptr is not associated.")
+            call setECMessage("ec_alloc::ecElementSetPtrArrayIncrease: Dummy argument ptr is not associated.")
          else
             allocate(new_ptr(size(ptr)+10), STAT = istat)
             if (istat == 0) then
@@ -1365,7 +1365,7 @@ module m_ec_alloc
                new_ptr => null()
                success = .true.
             else
-               call setECMessage("ERROR: ec_alloc::ecElementSetPtrArrayIncrease: Unable to allocate additional memory.")
+               call setECMessage("ec_alloc::ecElementSetPtrArrayIncrease: Unable to allocate additional memory.")
             end if
          end if
       end function ecElementSetPtrArrayIncrease
@@ -1386,7 +1386,7 @@ module m_ec_alloc
          istat = 1
          !
          if (.not. associated(ptr)) then
-            call setECMessage("ERROR: ec_alloc::ecFieldPtrArrayIncrease: Dummy argument ptr is not associated.")
+            call setECMessage("ec_alloc::ecFieldPtrArrayIncrease: Dummy argument ptr is not associated.")
          else
             allocate(new_ptr(size(ptr)+10), STAT = istat)
             if (istat == 0) then
@@ -1398,7 +1398,7 @@ module m_ec_alloc
                new_ptr => null()
                success = .true.
             else
-               call setECMessage("ERROR: ec_alloc::ecFieldPtrArrayIncrease: Unable to allocate additional memory.")
+               call setECMessage("ec_alloc::ecFieldPtrArrayIncrease: Unable to allocate additional memory.")
             end if
          end if
       end function ecFieldPtrArrayIncrease
@@ -1419,7 +1419,7 @@ module m_ec_alloc
          istat = 1
          !
          if (.not. associated(ptr)) then
-            call setECMessage("ERROR: ec_alloc::ecFileReaderPtrArrayIncrease: Dummy argument ptr is not associated.")
+            call setECMessage("ec_alloc::ecFileReaderPtrArrayIncrease: Dummy argument ptr is not associated.")
          else
             allocate(new_ptr(size(ptr)+10), STAT = istat)
             if (istat == 0) then
@@ -1431,7 +1431,7 @@ module m_ec_alloc
                new_ptr => null()
                success = .true.
             else
-               call setECMessage("ERROR: ec_alloc::ecFileReaderPtrArrayIncrease: Unable to allocate additional memory.")
+               call setECMessage("ec_alloc::ecFileReaderPtrArrayIncrease: Unable to allocate additional memory.")
             end if
          end if
       end function ecFileReaderPtrArrayIncrease
@@ -1452,7 +1452,7 @@ module m_ec_alloc
          istat = 1
          !
          if (.not. associated(ptr)) then
-            call setECMessage("ERROR: ec_alloc::ecBCBlockPtrArrayIncrease: Dummy argument ptr is not associated.")
+            call setECMessage("ec_alloc::ecBCBlockPtrArrayIncrease: Dummy argument ptr is not associated.")
          else
             allocate(new_ptr(size(ptr)+10), STAT = istat)
             if (istat == 0) then
@@ -1464,7 +1464,7 @@ module m_ec_alloc
                new_ptr => null()
                success = .true.
             else
-               call setECMessage("ERROR: ec_alloc::ecBCBlockPtrArrayIncrease: Unable to allocate additional memory.")
+               call setECMessage("ec_alloc::ecBCBlockPtrArrayIncrease: Unable to allocate additional memory.")
             end if
          end if
       end function ecBCBlockPtrArrayIncrease
@@ -1485,7 +1485,7 @@ module m_ec_alloc
          istat = 1
          !
          if (.not. associated(ptr)) then
-            call setECMessage("ERROR: ec_alloc::ecNetCDFPtrArrayIncrease: Dummy argument ptr is not associated.")
+            call setECMessage("ec_alloc::ecNetCDFPtrArrayIncrease: Dummy argument ptr is not associated.")
          else
             allocate(new_ptr(size(ptr)+10), STAT = istat)
             if (istat == 0) then
@@ -1497,7 +1497,7 @@ module m_ec_alloc
                new_ptr => null()
                success = .true.
             else
-               call setECMessage("ERROR: ec_alloc::ecNetCDFPtrArrayIncrease: Unable to allocate additional memory.")
+               call setECMessage("ec_alloc::ecNetCDFPtrArrayIncrease: Unable to allocate additional memory.")
             end if
          end if
       end function ecNetCDFPtrArrayIncrease
@@ -1518,7 +1518,7 @@ module m_ec_alloc
          istat = 1
          !
          if (.not. associated(ptr)) then
-            call setECMessage("ERROR: ec_alloc::ecItemPtrArrayIncrease: Dummy argument ptr is not associated.")
+            call setECMessage("ec_alloc::ecItemPtrArrayIncrease: Dummy argument ptr is not associated.")
          else
             allocate(new_ptr(size(ptr)+10), STAT = istat)
             if (istat == 0) then
@@ -1530,7 +1530,7 @@ module m_ec_alloc
                new_ptr => null()
                success = .true.
             else
-               call setECMessage("ERROR: ec_alloc::ecItemPtrArrayIncrease: Unable to allocate additional memory.")
+               call setECMessage("ec_alloc::ecItemPtrArrayIncrease: Unable to allocate additional memory.")
             end if
          end if
       end function ecItemPtrArrayIncrease
@@ -1551,7 +1551,7 @@ module m_ec_alloc
          istat = 1
          !
          if (.not. associated(ptr)) then
-            call setECMessage("ERROR: ec_alloc::ecQuantityPtrArrayIncrease: Dummy argument ptr is not associated.")
+            call setECMessage("ec_alloc::ecQuantityPtrArrayIncrease: Dummy argument ptr is not associated.")
          else
             allocate(new_ptr(size(ptr)+10), STAT = istat)
             if (istat == 0) then
@@ -1563,7 +1563,7 @@ module m_ec_alloc
                new_ptr => null()
                success = .true.
             else
-               call setECMessage("ERROR: ec_alloc::ecQuantityPtrArrayIncrease: Unable to allocate additional memory.")
+               call setECMessage("ec_alloc::ecQuantityPtrArrayIncrease: Unable to allocate additional memory.")
             end if
          end if
       end function ecQuantityPtrArrayIncrease
