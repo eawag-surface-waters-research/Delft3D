@@ -645,7 +645,7 @@ function ug_add_coordmapping(ncid, crs) result(ierr)
    if (crs%epsg_code == 4326 ) then 
       ierr_missing = UG_INVALID_CRS
       write (epsgstring, '("EPSG:",I0)') crs%epsg_code
-      ierr = nf90_put_att(ncid, id_crs, 'name',                       'WGS 84'            ) ! CF
+      ierr = nf90_put_att(ncid, id_crs, 'name',                       'WGS84'             ) ! CF
       ierr = nf90_put_att(ncid, id_crs, 'epsg',                        crs%epsg_code      ) ! CF
       ierr = nf90_put_att(ncid, id_crs, 'grid_mapping_name',          'latitude_longitude') ! CF
       ierr = nf90_put_att(ncid, id_crs, 'longitude_of_prime_meridian', 0d0                ) ! CF
@@ -2443,6 +2443,8 @@ function ug_get_meshgeom(ncid, meshgeom, start_index, meshids, netid, includeArr
             call reallocP(meshgeom%branchidx, meshgeom%numnode, keepExisting = .false., fill = -999)
             call reallocP(meshgeom%branchoffsets, meshgeom%numnode, keepExisting = .false., fill = -999d0)
             ierr = ug_get_1d_mesh_discretisation_points(ncid, meshids, meshgeom%branchidx, meshgeom%branchoffsets, meshgeom%start_index)
+            !here i can not use gridgeom to get xy coordinates of the mesh1d (grisgeom depends on io_netcdf)
+            
             if (present(network1dname)) then
                ierr = ug_get_network_name_from_mesh1d(ncid, meshids, network1dname)
             endif
@@ -3860,7 +3862,7 @@ function ug_put_1d_mesh_discretisation_points(ncid, meshids, branchidx, offset, 
    !we have not defined the start_index, so when we put the variable it must be zero based
    allocate(shiftedBranchidx(size(branchidx)))
    shiftedBranchidx = branchidx
-   if (startIndex.ne.0) then
+   if (startIndex.ne.-1) then
        ierr = ug_convert_start_index(shiftedBranchidx, startIndex, 0)
    endif
 
