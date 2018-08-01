@@ -93,4 +93,45 @@ function ggeo_make1D2Dinternalnetlinks(xplLinks, yplLinks, zplLinks, c_jsferic, 
 end function ggeo_make1D2Dinternalnetlinks
 
 
+function ggeo_make1D2Droofgutterpipes(xplRoofs, yplRoofs, zplRoofs, c_jsferic, c_jasfer3D, c_jglobe) result(ierr)
+
+   use gridoperations
+   use m_sferic
+   
+   integer :: ierr
+   double precision, intent(in) :: xplRoofs(:), yplRoofs(:), zplRoofs(:)
+   integer, intent(in)          :: c_jsferic
+   integer, intent(in)          :: c_jasfer3D
+   integer, intent(in)          :: c_jglobe
+
+   jsferic  = c_jsferic
+   jasfer3D = c_jasfer3D
+   jglobe   = c_jglobe
+
+   call make1D2Droofgutterpipes(xplRoofs, yplRoofs, zplRoofs)
+
+end function ggeo_make1D2Droofgutterpipes
+
+
+function ggeo_make1D2Dstreetinletpipes(xsStreetInletPipes, ysStreetInletPipes, c_jsferic, c_jasfer3D, c_jglobe) result(ierr)
+
+   use gridoperations
+   use m_sferic
+   
+   integer :: ierr
+   double precision, intent(in) :: xsStreetInletPipes(:), ysStreetInletPipes(:)
+   integer, intent(in)          :: c_jsferic
+   integer, intent(in)          :: c_jasfer3D
+   integer, intent(in)          :: c_jglobe
+
+   jsferic  = c_jsferic
+   jasfer3D = c_jasfer3D
+   jglobe   = c_jglobe
+
+   call make1D2Dstreetinletpipes(xsStreetInletPipes, ysStreetInletPipes)
+
+end function ggeo_make1D2Dstreetinletpipes
+
+
+
 end module gridgeom

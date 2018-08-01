@@ -114,33 +114,76 @@ function ggeo_make1D2Dinternalnetlinks_dll(c_nin, c_xpl, c_ypl, c_zpl, c_jsferic
    
 end function ggeo_make1D2Dinternalnetlinks_dll
 
+function ggeo_make1D2Droofgutterpipes_dll(c_nin, c_xpl, c_ypl, c_zpl, c_jsferic, c_jasfer3D, c_jglobe) result(ierr) bind(C, name="ggeo_make1D2Droofgutterpipes")
+!DEC$ ATTRIBUTES DLLEXPORT :: ggeo_make1D2Droofgutterpipes_dll
+   
+   use gridgeom
+   
+   integer, intent(in)          :: c_nin
+   type(c_ptr), intent(in)      :: c_xpl
+   type(c_ptr), intent(in)      :: c_ypl
+   type(c_ptr), intent(in)      :: c_zpl
+   integer, intent(in)          :: c_jsferic
+   integer, intent(in)          :: c_jasfer3D
+   integer, intent(in)          :: c_jglobe
+   integer                      :: ierr  
+   double precision, pointer    :: xplRoofs(:), yplRoofs(:), zplRoofs(:)   
 
-function ggeo_get_links_count_dll(nlinks) result(ierr) bind(C, name="ggeo_get_links_count")
+   call c_f_pointer(c_xpl, xplRoofs, (/c_nin/))
+   call c_f_pointer(c_ypl, yplRoofs, (/c_nin/))
+   call c_f_pointer(c_zpl, zplRoofs, (/c_nin/))
+   
+   ierr = ggeo_make1D2Droofgutterpipes(xplRoofs, yplRoofs, zplRoofs, c_jsferic, c_jasfer3D, c_jglobe)
+   
+end function ggeo_make1D2Droofgutterpipes_dll
+
+function ggeo_make1D2Dstreetinletpipes_dll(c_nin, c_xin, c_yin, c_jsferic, c_jasfer3D, c_jglobe) result(ierr) bind(C, name="ggeo_make1D2Dstreetinletpipes")
+!DEC$ ATTRIBUTES DLLEXPORT :: ggeo_make1D2Dstreetinletpipes_dll
+
+   use gridgeom
+   
+   integer, intent(in)          :: c_nin
+   type(c_ptr), intent(in)      :: c_xin
+   type(c_ptr), intent(in)      :: c_yin
+   integer, intent(in)          :: c_jsferic
+   integer, intent(in)          :: c_jasfer3D
+   integer, intent(in)          :: c_jglobe
+   integer                      :: ierr  
+   double precision, pointer    :: xsStreetInletPipes(:), ysStreetInletPipes(:)
+
+   call c_f_pointer(c_xin, xsStreetInletPipes, (/c_nin/))
+   call c_f_pointer(c_yin, ysStreetInletPipes, (/c_nin/))
+
+   ierr = ggeo_make1D2Dstreetinletpipes(xsStreetInletPipes, ysStreetInletPipes, c_jsferic, c_jasfer3D, c_jglobe)
+
+end function ggeo_make1D2Dstreetinletpipes_dll
+
+function ggeo_get_links_count_dll(nlinks, linkType) result(ierr) bind(C, name="ggeo_get_links_count")
 !DEC$ ATTRIBUTES DLLEXPORT :: ggeo_get_links_count_dll
    
    use gridoperations
    
-   integer(kind=c_int), intent(inout):: nlinks
+   integer(kind=c_int), intent(inout):: nlinks, linkType
    integer :: ierr
    
-   ierr =  ggeo_get_links_count(nlinks)
+   ierr =  ggeo_get_links_count(nlinks, linkType)
    
 end function ggeo_get_links_count_dll
 
 
-function ggeo_get_links_dll(c_arrayfrom, c_arrayto, nlinks) result(ierr) bind(C, name="ggeo_get_links")
+function ggeo_get_links_dll(c_arrayfrom, c_arrayto, nlinks, linkType) result(ierr) bind(C, name="ggeo_get_links")
 !DEC$ ATTRIBUTES DLLEXPORT :: ggeo_get_links_dll
    use gridoperations
    
    type(c_ptr), intent(in)                  :: c_arrayfrom, c_arrayto
-   integer(kind=c_int), intent(in)          :: nlinks
+   integer(kind=c_int), intent(in)          :: nlinks, linkType
    integer, pointer                         :: arrayfrom(:), arrayto(:)
    integer                                  :: ierr
    
    call c_f_pointer(c_arrayfrom, arrayfrom, (/ nlinks /))
    call c_f_pointer(c_arrayto, arrayto, (/ nlinks /))
    
-   ierr = ggeo_get_links(arrayfrom, arrayto)
+   ierr = ggeo_get_links(arrayfrom, arrayto, linkType)
    
 end function ggeo_get_links_dll
 
@@ -196,9 +239,7 @@ function ggeo_create_edge_nodes_dll(c_branchoffset, c_branchlength, c_branchids,
    call c_f_pointer(c_targetNodeId, targetNodeId, (/ nBranches /))
    call c_f_pointer(c_edgenodes, edgenodes, (/ 2, nEdgeNodes /))
    call c_f_pointer(c_branchoffset, branchoffset, (/ nNodes /))
-   
-   
-   
+
    ierr = ggeo_count_or_create_edge_nodes(branchids, branchoffset, sourcenodeid, targetnodeid, branchlength, startIndex, numedge, edgenodes)
 
 end function ggeo_create_edge_nodes_dll

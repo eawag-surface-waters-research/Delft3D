@@ -2572,14 +2572,14 @@
       !dfm might have already allocated xpl, ypl, zpl
       double precision, optional, intent(in)  :: xplRoofs(:), yplRoofs(:), zplRoofs(:)
       
-      integer                       :: inp, n, n1, ip, i, k1, k2, L
-      double precision              :: XN1, YN1, DIST
-      integer,          allocatable :: nodroof(:), nod1D(:)
-      double precision, allocatable :: dismin(:)
-      character(len=5)              :: sd
-      character(len=1), external    :: get_dirsep
-      integer                       :: ierr
-      integer                       :: nInputPolygon
+      integer                                 :: inp, n, n1, ip, i, k1, k2, L
+      double precision                        :: XN1, YN1, DIST
+      integer,          allocatable           :: nodroof(:), nod1D(:)
+      double precision, allocatable           :: dismin(:)
+      character(len=5)                        :: sd
+      character(len=1), external              :: get_dirsep
+      integer                                 :: ierr
+      integer                                 :: nInputPolygon
    
       call findcells(0)
       
@@ -2727,17 +2727,18 @@
    end function
 
    !< get the number of created links
-   function ggeo_get_links_count(nlinks) result(ierr)
+   function ggeo_get_links_count(nlinks, linkType) result(ierr)
 
    use network_data
 
    integer, intent(inout)  :: nlinks
    integer                 :: l, ierr
+   integer                 :: linkType
 
    ierr = 0
    nlinks = 0
    do l=1,numl1d + numl
-      if(kn(3,l).eq.3) then
+      if(kn(3,l).eq.linkType) then
          nlinks = nlinks + 1
       end if
    end do
@@ -2745,18 +2746,19 @@
    end function ggeo_get_links_count
 
    !< get the links
-   function ggeo_get_links(arrayfrom, arrayto)  result(ierr)
+   function ggeo_get_links(arrayfrom, arrayto, linkType)  result(ierr)
 
    use network_data
 
-   integer, intent(inout):: arrayfrom(:), arrayto(:)
-   integer :: ierr, nlinks, l, nc
+   integer, intent(inout)  :: arrayfrom(:), arrayto(:)
+   integer                 :: ierr, nlinks, l, nc
+   integer                 :: linkType
 
    ierr     = 0
    nlinks   = 0
 
    do l=1,numl1d + numl
-      if(kn(3,l).eq.3) then
+      if(kn(3,l).eq.linkType) then
          nlinks = nlinks + 1
          nc = 0
          call incells(xk(kn(1,l)), yk(kn(1,l)), nc)
