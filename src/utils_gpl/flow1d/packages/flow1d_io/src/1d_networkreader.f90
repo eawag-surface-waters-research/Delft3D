@@ -286,25 +286,11 @@ module m_1d_networkreader
       if (istat .ne. 0) then
          call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error Allocating Memory for Branches')
       endif
-      
-      do igridpoint = 1, meshgeom%numnode
- 
-         if (meshgeom%branchidx(igridpoint) > ibran) then
-            
-            ibran = meshgeom%branchidx(igridpoint)
-            
-            gpFirst(ibran) = igridpoint
-            
-            if (igridpoint > 2) then
-               gpLast(ibran - 1) = igridpoint - 1
-            endif
- 
-         endif
-         
-      enddo
-      
-      gpLast(meshgeom%nbranches) = meshgeom%numnode
-     
+   
+      ierr = ggeo_get_start_end_nodes_of_branches(meshgeom%branchidx, gpFirst, gpLast)
+      if (ierr .ne. 0) then
+         call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error Getting first and last nodes of the network branches')
+      endif 
       
       ! Store Branches
       do ibran = 1, meshgeom%nbranches
