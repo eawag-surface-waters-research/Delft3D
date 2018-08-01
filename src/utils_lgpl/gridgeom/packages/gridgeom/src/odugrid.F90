@@ -180,4 +180,31 @@ function odu_get_xy_coordinates(branchids, branchoffsets, geopointsX, geopointsY
 end function odu_get_xy_coordinates
 
 
+!Calculate the start and the end nodes of the branches
+function odu_get_start_end_nodes_of_branches(branchidx, branchStartNode, branchEndNode) result(ierr)
+
+   integer, dimension(:), intent(in)      :: branchidx
+
+   integer, dimension(:), intent(inout)   :: branchStartNode
+   integer, dimension(:), intent(inout)   :: branchEndNode
+   integer                                :: ierr, i, ibran, numnode, nbranches 
+
+   ! Get the starting and endig indexes of the grid points
+   ierr  =  0
+   ibran =  0
+   numnode = size(branchidx)
+   nbranches = size(branchStartNode)
+   do i = 1, numnode
+      if (branchidx(i) > ibran) then
+         ibran = branchidx(i)
+         branchStartNode(ibran) = i
+         if (i > 2) then
+            branchEndNode(ibran - 1) = i - 1
+         endif
+      endif
+   enddo
+   branchEndNode(nbranches) = numnode
+
+end function odu_get_start_end_nodes_of_branches
+
 end module odugrid

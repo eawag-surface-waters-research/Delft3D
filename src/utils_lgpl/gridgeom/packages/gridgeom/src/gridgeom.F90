@@ -56,6 +56,23 @@ function ggeo_get_xy_coordinates(branchids, branchoffsets, geopointsX, geopoints
 
 end function ggeo_get_xy_coordinates
 
+
+function ggeo_get_start_end_nodes_of_branches(branchidx, branchStartNode, branchEndNode) result(ierr)
+
+   use odugrid
+   
+   integer, dimension(:), intent(in)      :: branchidx
+   
+   integer, dimension(:), intent(inout)   :: branchStartNode
+   integer, dimension(:), intent(inout)   :: branchEndNode
+   integer                                :: ierr
+   
+   ierr = odu_get_start_end_nodes_of_branches(branchidx, branchStartNode, branchEndNode)
+
+end function ggeo_get_start_end_nodes_of_branches
+
+
+
 function ggeo_make1D2Dinternalnetlinks(xplLinks, yplLinks, zplLinks, c_jsferic, c_jasfer3D, c_jglobe) result(ierr)
 
    use gridoperations

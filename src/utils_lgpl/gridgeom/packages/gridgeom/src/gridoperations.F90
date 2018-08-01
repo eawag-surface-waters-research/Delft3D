@@ -9,9 +9,8 @@
    public :: ggeo_convert_1d_arrays
    public :: ggeo_get_links_count
    public :: ggeo_get_links
-   public :: ggeo_create_edge_nodes
+   public :: ggeo_count_or_create_edge_nodes
    public :: ggeo_deallocate
-   public :: ggeo_edge_nodes_count
 
    !from net.f90
    public :: RESTORE
@@ -2607,6 +2606,7 @@
    function ggeo_convert_1d_arrays(nodex, nodey, branchoffset, branchlength, branchidx, sourcenodeid, targetnodeid, meshgeom, startindex) result(ierr)
 
    use meshdata
+   use odugrid
    use m_alloc
 
    double precision, intent(in)         :: nodex(:), nodey(:), branchoffset(:), branchlength(:)
@@ -2622,7 +2622,8 @@
    allocate(meshgeom%nodey(meshgeom%numnode))
    allocate(meshgeom%branchidx(size(branchidx,1)))
 
-   ierr = ggeo_edge_nodes_count(sourcenodeid, targetnodeid, meshgeom%numnode, numedge)
+   ierr = ggeo_count_or_create_edge_nodes(meshgeom%branchidx, branchoffset, sourcenodeid, targetnodeid, branchlength, startindex, meshgeom%numedge) 
+   
    meshgeom%numedge = numedge
    allocate(meshgeom%edge_nodes(2, meshgeom%numedge))
 
@@ -2632,48 +2633,55 @@
    meshgeom%branchidx =  branchidx
 
    !Calculate the edge_nodes
-   ierr = ggeo_create_edge_nodes(meshgeom%branchidx, branchoffset, sourcenodeid, targetnodeid, meshgeom%edge_nodes, branchlength, startindex)
+   ierr = ggeo_count_or_create_edge_nodes(meshgeom%branchidx, branchoffset, sourcenodeid, targetnodeid, branchlength, startindex, meshgeom%numedge, meshgeom%edge_nodes)
 
    end function ggeo_convert_1d_arrays
+   
+   
+   function ggeo_connect_edges(startEdge, endEdge, connectionMask, numedege, edgenodes) result(ierr)
+   
+   
+   integer, intent(in)                    :: startEdge, endEdge
+   
+   integer, intent(inout)                 :: connectionMask(:)
+   integer, intent(inout)                 :: numedege
+   integer, optional, intent(inout)       :: edgenodes(:,:)
+   integer                                :: ierr
+   logical                                :: createEdgeNodes
+   
+   ierr = -1
+   createEdgeNodes = .false.
+   
+   if(present(edgenodes)) then
+      createEdgeNodes = .true. 
+   endif
 
-   function ggeo_edge_nodes_count(sourcenodeid, targetnodeid, numnode, numedge) result(ierr)
-
-   integer, intent(in)     :: sourcenodeid(:), targetnodeid(:), numnode
-   integer, intent(inout)  :: numedge
-   integer                 :: ierr, i, k, nnetworknodes, noverlaps, nbranches
-   integer, allocatable    :: connectedBranches(:)
-
+   if((connectionMask(startEdge).eq.0).or.(connectionMask(endEdge).eq.0)) then
+      numedege = numedege + 1 
+      connectionMask(startEdge) = connectionMask(startEdge) + 1
+      connectionMask(endEdge)   = connectionMask(endEdge) + 1
+      if (createEdgeNodes) then
+         edgenodes(1,numedege) = startEdge
+         edgenodes(2,numedege) = endEdge
+      endif
+   endif
+   
    ierr = 0
-   nbranches = size(sourcenodeid)
-   ! calculate the number of edge nodes, considering the overlaps
-   ! (if more nodes are shared, then we have less edge nodes)
-   nnetworknodes = max(maxval(sourcenodeid),maxval(targetnodeid))
-   allocate(connectedBranches(nnetworknodes))
-   connectedBranches = 0
-   do i = 1, nnetworknodes
-      !for each node count how many branches are sharing it
-      do k = 1, nbranches
-         if ((targetnodeid(k).eq.i).or.(sourcenodeid(k).eq.i)) then
-            connectedBranches(i) = connectedBranches(i) + 1
-         endif
-      enddo
-   enddo
-   noverlaps = sum(connectedBranches) - nnetworknodes
-   numedge = numnode - (nBranches - noverlaps)
-
-   end function ggeo_edge_nodes_count
+   
+   end function ggeo_connect_edges
 
 
    !< Algorithm to calculate the edgenodes array. The only assumption made here is that the mesh nodes are written consecutively,
    !< in the same direction indicated by the sourcenodeid and the targetnodeid arrays (e.g.
    !< 1  -a-b-c-> 2 and not 1 -c-a-b-> 2 where 1 and 2 are network nodes and a, b, c are mesh nodes )
-   function ggeo_create_edge_nodes(branchidx, branchoffset, sourcenodeid, targetnodeid, edgenodes, branchlength, startindex) result(ierr) !edge_nodes
+   function ggeo_count_or_create_edge_nodes(branchidx, branchoffset, sourcenodeid, targetnodeid, branchlength, startindex, numedege, edgenodes) result(ierr) !edge_nodes
 
-   integer, intent(in)          :: branchidx(:), sourcenodeid(:), targetnodeid(:), startindex
-   double precision, intent(in) :: branchoffset(:),branchlength(:)
-   integer, intent(inout)       :: edgenodes(:,:)
-   integer, allocatable         :: meshnodemapping(:),internalnodeindexses(:)
-   integer                      :: nnetworknodes, nBranches,nmeshnodes, ierr , k , n, br, st, en, kk, firstvalidarraypos
+   integer, intent(in)                    :: branchidx(:), sourcenodeid(:), targetnodeid(:), startindex
+   double precision, intent(in)           :: branchoffset(:),branchlength(:)
+   integer, intent(inout)                 :: numedege
+   integer, allocatable                   :: meshnodemapping(:,:), internalnodeindexses(:), connectionMask(:)
+   integer, optional, intent(inout)       :: edgenodes(:,:)
+   integer                                :: nnetworknodes, nBranches,nmeshnodes, ierr , k , n, br, st, en, kk, firstvalidarraypos
 
    ierr = 0
    firstvalidarraypos = 0
@@ -2686,55 +2694,59 @@
    nnetworknodes = max(maxval(sourcenodeid),maxval(targetnodeid)) + firstvalidarraypos
    nmeshnodes = size(branchidx)
    nbranches = size(sourcenodeid)
-   allocate(meshnodemapping(nnetworknodes))
+   allocate(meshnodemapping(2,nbranches))
    allocate(internalnodeindexses(nmeshnodes))
+   allocate(connectionMask(nmeshnodes)) !safety mask, to avoid generating too many nodes
 
    !map the mesh nodes
    meshnodemapping = -1
    do br = 1, nbranches
       do n=1, nmeshnodes
-         if ((abs(branchoffset(n)).le.1e-6).and.(branchidx(n)+firstvalidarraypos.eq.br)) then
-            meshnodemapping(sourcenodeid(br)+firstvalidarraypos) = n
+         if ((branchoffset(n).le.1e-6).and.(branchidx(n)+firstvalidarraypos.eq.br)) then
+            meshnodemapping(1,br) = n
+            cycle
          endif
-         if ((abs(branchoffset(n)-branchlength(br)).le.1e-6).and.(branchidx(n)+firstvalidarraypos.eq.br)) then
-            meshnodemapping(targetnodeid(br)+firstvalidarraypos) = n
+         if ((branchoffset(n).gt.branchlength(br)-1e-6).and.(branchidx(n)+firstvalidarraypos.eq.br)) then
+            meshnodemapping(2,br) = n
+            cycle
          endif
       enddo
    enddo
 
-   k = 0
+   numedege = 0
+   connectionMask  =  0
    do br = 1, nbranches
-      if ((meshnodemapping(sourcenodeid(br)+firstvalidarraypos).eq.-1).or.(meshnodemapping(targetnodeid(br)+firstvalidarraypos).eq.-1)) then
+      if ((meshnodemapping(1,br).eq.-1).or.(meshnodemapping(2,br).eq.-1)) then
          ierr = -1
          return
       endif
       ! starting and ending nodes
-      st =  meshnodemapping(sourcenodeid(br)+firstvalidarraypos)
-      en =  meshnodemapping(targetnodeid(br)+firstvalidarraypos)
+      st =  meshnodemapping(1,br)
+      en =  meshnodemapping(2,br)
       !the nodes between
       kk =  0
+      internalnodeindexses = 0
       do n=1, nmeshnodes
          if(branchidx(n)+firstvalidarraypos.eq.br.and.(n.ne.st).and.(n.ne.en)) then
             kk = kk + 1
             internalnodeindexses(kk) = n
          endif
       enddo
+      !if no internal nodes, connect and cycle
+      if (kk.eq.0) then
+         ierr = ggeo_connect_edges(st, en, connectionMask, numedege, edgenodes)
+         cycle
+      endif
       !connect the start node to the first internal node
-      k = k + 1
-      edgenodes(1,k) = st
-      edgenodes(2,k) = internalnodeindexses(1)
-      !connect end node to iternal
+      ierr = ggeo_connect_edges(st, internalnodeindexses(1), connectionMask, numedege, edgenodes)
+      !connect internal nodes
       do n =1, kk - 1
-         k = k +1
-         edgenodes(1,k) = internalnodeindexses(n)
-         edgenodes(2,k) = internalnodeindexses(n)  + 1
+         ierr = ggeo_connect_edges(internalnodeindexses(n), internalnodeindexses(n+1), connectionMask, numedege, edgenodes)
       enddo
       !connect the last internal node to the end node
-      k = k + 1
-      edgenodes(1,k) = internalnodeindexses(kk)
-      edgenodes(2,k) = en
+      ierr = ggeo_connect_edges(internalnodeindexses(kk), en, connectionMask, numedege, edgenodes)   
    enddo
-
-   end function ggeo_create_edge_nodes
+   
+   end function ggeo_count_or_create_edge_nodes
 
    end module gridoperations

@@ -185,7 +185,7 @@ function ggeo_create_edge_nodes_dll(c_branchoffset, c_branchlength, c_branchids,
    integer, intent(in)       :: nBranches, nNodes, nEdgeNodes, startIndex
    double precision, pointer :: branchoffset(:), branchlength(:)
    integer, pointer          :: branchids(:), edgenodes(:,:), sourceNodeId(:), targetNodeId(:) 
-   integer                   :: ierr
+   integer                   :: ierr,numedge
 
    
 
@@ -197,7 +197,9 @@ function ggeo_create_edge_nodes_dll(c_branchoffset, c_branchlength, c_branchids,
    call c_f_pointer(c_edgenodes, edgenodes, (/ 2, nEdgeNodes /))
    call c_f_pointer(c_branchoffset, branchoffset, (/ nNodes /))
    
-   ierr = ggeo_create_edge_nodes(branchids, branchoffset, sourcenodeid, targetnodeid, edgenodes, branchlength, startIndex)
+   
+   
+   ierr = ggeo_count_or_create_edge_nodes(branchids, branchoffset, sourcenodeid, targetnodeid, branchlength, startIndex, numedge, edgenodes)
 
 end function ggeo_create_edge_nodes_dll
 
