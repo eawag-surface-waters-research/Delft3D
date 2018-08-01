@@ -2463,11 +2463,13 @@
    function make1D2Dinternalnetlinks(xplLinks, yplLinks, zplLinks) result(ierr)
 
    use m_cell_geometry, only: xz, yz
-  use network_data
-  use m_alloc
-  use m_missing, only:  dmiss, dxymis, jadelnetlinktyp, jins
-  use geometry_module, only: dbdistance, normalout, dbpinpol
-  use m_sferic, only: jsferic, jasfer3D
+   use network_data
+   use m_alloc
+   use m_missing, only:  dmiss, dxymis, jadelnetlinktyp, jins
+   use geometry_module, only: dbdistance, normalout, dbpinpol
+   use m_sferic, only: jsferic, jasfer3D  
+  
+   implicit none
 
    implicit none
 
@@ -2513,7 +2515,7 @@
    NML  = NUML
    DO K = 1,NUMK
 
-      IF (NMK(K) > 0) THEN ! == 2 .or. ) THEN
+      IF (NMK(K) > 0) THEN ! == 2 .or. ) THEN ! Do not connect the extreme vertices of the 1d mesh
 
          IF (allocated(KC) .and. KC(K) == 1) THEN
             if ( present(xplLinks) .and. present(yplLinks) .and. present(zplLinks)) then
@@ -2524,7 +2526,7 @@
             NC1 = 0
             CALL INCELLS(XK(K), YK(K), NC1)
             IF (NC1 > 1) THEN
-               CALL SETNEWPOINT(XZ(NC1),YZ(NC1),ZK(K) ,NC2)
+               CALL SETNEWPOINT(XZ(NC1),YZ(NC1),ZK(K), NC2)
                call connectdbn(NC2, K, L)
                KN(3,L) = kn3typ
             ELSE
@@ -2865,6 +2867,8 @@
    !< in the same direction indicated by the sourcenodeid and the targetnodeid arrays (e.g.
    !< 1  -a-b-c-> 2 and not 1 -c-a-b-> 2 where 1 and 2 are network nodes and a, b, c are mesh nodes )
    function ggeo_count_or_create_edge_nodes(branchidx, branchoffset, sourcenodeid, targetnodeid, branchlength, startindex, numedege, edgenodes) result(ierr) !edge_nodes
+   
+   use odugrid
 
    integer, intent(in)                    :: branchidx(:), sourcenodeid(:), targetnodeid(:), startindex
    double precision, intent(in)           :: branchoffset(:),branchlength(:)
@@ -2890,18 +2894,7 @@
 
    !map the mesh nodes
    meshnodemapping = -1
-   do br = 1, nbranches
-      do n=1, nmeshnodes
-         if ((branchoffset(n).le.1e-6).and.(branchidx(n)+firstvalidarraypos.eq.br)) then
-            meshnodemapping(1,br) = n
-            cycle
-         endif
-         if ((branchoffset(n).gt.branchlength(br)-1e-6).and.(branchidx(n)+firstvalidarraypos.eq.br)) then
-            meshnodemapping(2,br) = n
-            cycle
-         endif
-      enddo
-   enddo
+   ierr = odu_get_start_end_nodes_of_branches(branchidx, meshnodemapping(1,:), meshnodemapping(2,:))
 
    numedege = 0
    connectionMask  =  0
@@ -2938,5 +2931,102 @@
    enddo
    
    end function ggeo_count_or_create_edge_nodes
+   
+   !> makes 1d2d embedded links: more than 1d2d link per 1d mesh node
+   function make1D2DEmbeddedLinks()  result(ierr)
 
+   use network_data
+   use m_missing,       only:  dmiss
+   use geometry_module, only: dbdistance, crossinbox
+   use m_sferic,        only: jsferic, jasfer3D
+   use kdtree2Factory
+
+   integer               :: k, kk, k1, k2, k3, k4, k5, k6, ncellsinSearchRadius, numberCellNetlinks, isCrossing, newPointIndex, newLinkIndex
+   integer               :: l, cellNetLink, cellId, kn3ty, numnetcells
+   double precision      :: searchRadiusSquared, ldistance, rdistance, maxdistance, sl, sm, xcr, ycr, crp
+   type(kdtree_instance) :: treeinst
+
+   !output
+   integer               :: ierr
+
+   ierr = 0
+   !LC: is this the right type?
+   kn3typ = 3
+   call SAVENET()
+   call findcells(0)
+
+   numnetcells = size(xzw(:))
+   if (numnetcells>0) then
+      call build_kdtree(treeinst, size(xzw(:)), xzw(:), yzw(:), ierr, jsferic, dmiss)
+   else
+      return
+   endif
+
+   kc = 0
+   do l = 1, numl1d
+      k1  = kn(1,l); k2  = kn(2,l); k3 = kn(3,l)
+      !get the left 1d mesh point
+      call make_queryvector_kdtree(treeinst, xk(k1), yk(k1), jsferic)
+
+      !compute the search radius
+      ldistance = 0d0
+      if (l>=2) then
+         k4 = kn(2,l-1)
+         ldistance = dbdistance(xk(k4),yk(k4),xk(k1),yk(k1), jsferic, jasfer3D, dmiss)
+      endif
+      rdistance = dbdistance(xk(k1),yk(k1),xk(k2),yk(k2), jsferic, jasfer3D, dmiss)
+      maxdistance = max(ldistance, rdistance)
+      !1.1d0: safety
+      searchRadiusSquared = 1.1d0*maxdistance**2
+      !count number of cells in the search area
+      nCellsInSearchRadius = kdtree2_r_count(treeinst%tree,treeinst%qv,searchRadiusSquared)
+      !no cells found
+      if ( nCellsInSearchRadius.eq.0 ) cycle
+      !reallocate if necessary
+      call realloc_results_kdtree(treeinst, nCellsInSearchRadius)
+      !find nearest cells
+      call kdtree2_n_nearest(treeinst%tree,treeinst%qv,nCellsInSearchRadius,treeinst%results)
+      !connection loop
+      isCrossing = 0
+      do k = 1, nCellsInSearchRadius
+         !check if one of the cell net link crosses the current 1d link
+         cellId= treeinst%results(k)%idx
+         !check if the cell is already connected
+         numberCellNetlinks = size(netcell(cellId)%lin)
+         !this cell has been already explored or is already connected 
+         if (kc(cellId).ne.0) cycle
+         do kk = 1, numberCellNetlinks
+            if (kc(cellId).ne.0) cycle
+            cellNetLink =  netcell(cellId)%lin(kk)
+            k5  = kn(1,cellNetLink); k6  = kn(2,cellNetLink);
+            call crossinbox (xk(k5), xk(k5), xk(k6), xk(k6), xk(k1), xk(k1), xk(k2), yk(k2), isCrossing, sl, sm, xcr, ycr, crp, jsferic, dmiss)
+            if (isCrossing == 1) then
+               call setnewpoint(xk(cellNetLink), yk(cellNetLink), zk(cellNetLink), newPointIndex)
+               ldistance = dbdistance(xk(k1),yk(k1),xk(cellId),yk(cellId), jsferic, jasfer3D, dmiss)
+               rdistance = dbdistance(xk(k2),yk(k2),xk(cellId),yk(cellId), jsferic, jasfer3D, dmiss)
+               if (ldistance>=rdistance) then
+                  !connect cell with left mesh point
+                  call connectdbn(newPointIndex, k1, newLinkIndex)
+               else
+                  !connect cell with right mesh point
+                  call connectdbn(newPointIndex, k2, newLinkIndex)
+               endif
+               kn(3,newLinkIndex) = kn3ty
+               !cell is connected, set kc mask and end cycling
+               kc(cellId) = 2
+            else
+               kc(cellId) = 3
+               endif
+         !loop over numberCellNetlinks
+         enddo
+      !loop over ncellsInSearchRadius
+      enddo
+   !loop over numl1d
+   enddo
+
+   call setnodadm(0)
+
+   end function make1D2DEmbeddedLinks
+
+   
    end module gridoperations
