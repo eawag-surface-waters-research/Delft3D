@@ -5,12 +5,15 @@
 
    !new functions
    public :: make1D2Dinternalnetlinks
+   public :: make1D2Droofgutterpipes
+   public :: make1D2Dstreetinletpipes
    public :: ggeo_convert
    public :: ggeo_convert_1d_arrays
    public :: ggeo_get_links_count
    public :: ggeo_get_links
    public :: ggeo_count_or_create_edge_nodes
    public :: ggeo_deallocate
+
 
    !from net.f90
    public :: RESTORE
@@ -2398,6 +2401,44 @@
 
    end subroutine getcellweightedcenter
 
+   SUBROUTINE CLOSETO1Dnetnode(XP1,YP1,N1,dist) !
+
+   use network_data
+   use geometry_module, only: dbdistance
+   use m_sferic
+   use m_missing
+
+   implicit none
+   double precision, intent(in)  :: XP1, YP1
+   double precision, intent(out) :: dist     ! find 1D point close to x,y:
+   integer         , intent(out) :: n1       ! 1D point found
+
+
+   double precision :: dismin
+   integer          :: ja, k, k1, k2, L
+   double precision :: dis,dis1,dis2
+
+   N1 = 0
+   DISMIN = 9E+33
+   DO L = 1,numl
+      IF (kn(3,L) == 1 .or. kn(3,L) == 6) then !  .or. kn(3,L) == 4) THEN
+         K1 = kn(1,L) ; K2 = kn(2,L)
+         dis1 = dbdistance(XP1,YP1,Xk(K1),Yk(K1),jsferic, jasfer3D, dmiss)
+         dis2 = dbdistance(XP1,YP1,Xk(K2),Yk(K2),jsferic, jasfer3D, dmiss)
+         if (dis1 < dis2) THEN
+            k = k1 ; dis = dis1
+         else
+            k = k2 ; dis = dis2
+         endif
+         IF (DIS .LT. DISMIN) THEN
+            N1 = k
+            DISMIN = DIS
+         ENDIF
+      ENDIF
+   ENDDO
+   dist = dismin
+   END SUBROUTINE CLOSETO1Dnetnode
+
 
    !-----------------------------------------------------------------!
    ! Library public functions
@@ -2516,7 +2557,121 @@
    CALL SETNODADM(0)
 
    end function make1D2Dinternalnetlinks
+   
+   subroutine make1D2Droofgutterpipes(xplRoofs, yplRoofs, zplRoofs)      !
+      
+      use m_missing
+      use m_polygon
+      use geometry_module
+      use m_alloc
+      use network_data
+      use m_cell_geometry
+      
+      implicit none
+   
+      !dfm might have already allocated xpl, ypl, zpl
+      double precision, optional, intent(in)  :: xplRoofs(:), yplRoofs(:), zplRoofs(:)
+      
+      integer                       :: inp, n, n1, ip, i, k1, k2, L
+      double precision              :: XN1, YN1, DIST
+      integer,          allocatable :: nodroof(:), nod1D(:)
+      double precision, allocatable :: dismin(:)
+      character(len=5)              :: sd
+      character(len=1), external    :: get_dirsep
+      integer                       :: ierr
+      integer                       :: nInputPolygon
+   
+      call findcells(0)
+      
+      !allocate and assign polygon if input arrays are present
+      !when called from DFM xpl, ypl, and zpl arrays are already allocated in m_polygon
+      if (present(xplRoofs)) then
+         nInputPolygon = size(xplRoofs)
+         call increasepol(nInputPolygon, 0)
+         xpl(1:nInputPolygon) = xplRoofs
+         ypl(1:nInputPolygon) = yplRoofs
+         zpl(1:nInputPolygon) = zplRoofs
+      endif
+      
+      kc   = 0
+      do n = 1,nump
+         call inwhichpolygon(xzw(n), yzw(n), inp)
+         if (inp > 0) then
+            kc(n) = inp
+         endif
+      enddo
+      
+      do i = 1,npoly
+         xpl(iiend(i)) = xpl(iistart(i))
+         ypl(iiend(i)) = ypl(iistart(i))
+         zpl(iiend(i)) = zpl(iistart(i))
+      enddo
+      
+      allocate( dismin(npoly), nodroof(npoly), nod1D(npoly) )
+      dismin = 9d9 ; nodroof = 0 ; nod1D = 0
+      do n  = 1,nump
+         if (kc(n) > 0) then
+            ip = kc(n)
+            call CLOSETO1Dnetnode(xzw(n), yzw(n), N1, DIST)
+            if (dist < dismin(ip)) then
+               dismin(ip) = dist ; nodroof(ip) = n; nod1D(ip) = n1
+            endif
+         endif
+      enddo
+      
+      do ip = 1,npoly
+         n1 = nodroof(ip)
+         CALL SETNEWPOINT(XZ(N1),YZ(N1),dmiss,k1)
+         k2 = nod1D(ip)
+         call CONNECTDBN(K1,K2,L)
+         kn(3,L) = 7
+      enddo
+      
+      deallocate( dismin, nodroof, nod1D )
+   
+   end subroutine make1D2Droofgutterpipes
 
+   subroutine make1D2Dstreetinletpipes(xsStreetInletPipes, ysStreetInletPipes)
+   
+       use m_missing
+       use m_polygon
+       use geometry_module
+       use m_alloc
+       use network_data
+       use m_cell_geometry
+       use m_samples
+
+       implicit none
+       
+      !allocate and assign samples if input arrays are present
+      !when called from DFM xs, ys are already allocated in m_samples
+       double precision, optional, intent(in)  :: xsStreetInletPipes(:), ysStreetInletPipes(:)
+       integer                :: n,k,n1,k1,L
+       double precision       :: DIST
+
+       call findcells(0)
+       if (present(xsStreetInletPipes)) then
+         ns = size(xsStreetInletPipes)
+         call INCREASESAM(ns)
+         Xs(1:ns) = xsStreetInletPipes
+         Ys(1:ns) = ysStreetInletPipes
+      endif
+
+       do n  = 1,ns
+          call INCELLS(Xs(n),Ys(n),K)
+          if (k > 0) then
+             call CLOSETO1Dnetnode(xzw(k), yzw(k), N1, DIST)
+             CALL SETNEWPOINT(xzw(k),yzw(k),dmiss,k1)
+             call CONNECTDBN(K1,N1,L)
+             kn(3,L) = 5
+          endif
+       enddo
+
+   end subroutine make1D2Dstreetinletpipes
+
+!----------------------------------------------------------------------!
+! 
+!----------------------------------------------------------------------! 
    !< converter function
    function ggeo_convert(meshgeom, start_index) result(ierr)
 

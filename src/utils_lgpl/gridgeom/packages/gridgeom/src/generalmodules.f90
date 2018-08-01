@@ -81,19 +81,114 @@
    end module m_sferic
 
    module m_polygon
-   implicit none
-   double precision, allocatable  :: XPL (:), YPL (:), ZPL (:), XPH(:), YPH(:), ZPH(:), DZL(:), DZR(:), DCREST(:), DTL(:), DTR(:), DVEG(:)
-   integer, allocatable           :: IWEIRT(:)
-   integer                        :: NPL, NPH, MAXPOL, MP, MPS, jakol45 = 0
-   character(len=64), allocatable :: nampli(:) ! Names of polylines, set in reapol,
-   ! not shifted/updated during editpol.
-   double precision               :: dxuni=40d0  ! uniform spacing
 
-   integer                        :: MAXPOLY=1000 ! will grow if needed
-   double precision, allocatable  :: xpmin(:), ypmin(:), xpmax(:), ypmax(:), zpmin(:), zpmax(:)
-   integer                        :: Npoly
-   integer,          allocatable  :: iistart(:), iiend(:)
-   integer,          allocatable  :: ipsection(:)
+      implicit none
+      
+      double precision, allocatable  :: XPL (:), YPL (:), ZPL (:), XPH(:), YPH(:), ZPH(:), DZL(:), DZR(:), DCREST(:), DTL(:), DTR(:), DVEG(:)
+      integer, allocatable           :: IWEIRT(:)
+      integer                        :: NPL, NPH, MAXPOL, MP, MPS, jakol45 = 0
+      character(len=64), allocatable :: nampli(:) ! Names of polylines, set in reapol,
+      ! not shifted/updated during editpol.
+      double precision               :: dxuni=40d0  ! uniform spacing
+      integer                        :: MAXPOLY=1000 ! will grow if needed
+      double precision, allocatable  :: xpmin(:), ypmin(:), xpmax(:), ypmax(:), zpmin(:), zpmax(:)
+      integer                        :: Npoly
+      integer,          allocatable  :: iistart(:), iiend(:)
+      integer,          allocatable  :: ipsection(:)
+   
+      contains
+      !> Increase size of global polyline array.
+      !! Specify new size and whether existing points need to be maintained.
+      subroutine increasepol(N, jaKeepExisting)
+         use m_missing
+         use m_alloc
+         implicit none
+         integer :: n              !< Desired new minimum size
+         integer :: jaKeepExisting !< Whether or not (1/0) to keep existing points.
+         logical :: jakeep
+         integer :: maxpolcur
+         integer :: ierr
+
+         maxpolcur = size(xpl)
+         !IF (N < maxpolcur ) THEN
+         !   RETURN
+         !ENDIF
+         MAXPOL = MAX(100000,INT(5d0*N))
+
+         jakeep = jaKeepExisting==1
+
+         call realloc(xpl, maxpol, keepExisting=jakeep, fill=dxymis, stat=ierr)
+         call realloc(ypl, maxpol, keepExisting=jakeep, fill=dxymis, stat=ierr)
+         call realloc(zpl, maxpol, keepExisting=jakeep, fill=dxymis, stat=ierr)
+
+         if (jakol45 == 1) then
+            call realloc(dzl, maxpol, keepExisting=jakeep, fill=dxymis, stat=ierr)
+            call realloc(dzr, maxpol, keepExisting=jakeep, fill=dxymis, stat=ierr)
+         else if (jakol45 == 2) then
+            call realloc(dcrest, maxpol, keepExisting=jakeep, fill=dxymis, stat=ierr)
+            call realloc(dzl, maxpol, keepExisting=jakeep, fill=dxymis, stat=ierr)
+            call realloc(dzr, maxpol, keepExisting=jakeep, fill=dxymis, stat=ierr)
+            call realloc(dtl, maxpol, keepExisting=jakeep, fill=dxymis, stat=ierr)
+            call realloc(dtr, maxpol, keepExisting=jakeep, fill=dxymis, stat=ierr)
+            call realloc(dveg, maxpol, keepExisting=jakeep, fill=dxymis, stat=ierr)
+            call realloc(iweirt, maxpol, keepExisting=jakeep, stat=ierr)
+         endif
+
+         !     make sure nampli is allocated
+         if ( .not.allocated(nampli) ) then
+            allocate(nampli(0))
+         end if
+
+      end subroutine increasepol
+      
+      !> Copies the global polygon into the backup polygon arrays.
+      subroutine SAVEPOL()
+
+         use m_alloc
+         use m_missing
+         implicit none
+
+         call realloc(xph, maxpol, keepExisting=.false.)
+         call realloc(yph, maxpol, keepExisting=.false.)
+         call realloc(zph, maxpol, keepExisting=.false.)
+
+         IF (NPL > 0) THEN
+            XPH(1:NPL) = XPL(1:NPL)
+            YPH(1:NPL) = YPL(1:NPL)
+            ZPH(1:NPL) = ZPL(1:NPL)
+         ENDIF
+
+         MPS = MP
+         NPH = NPL
+
+         return
+      end subroutine savepol
+
+
+      !> Puts back a previously saved backup polygon into the global polygon arrays.
+      subroutine RESTOREPOL()
+         use m_alloc
+         use m_missing
+         implicit none
+
+         maxpol = max(maxpol, nph)
+         call realloc(xpl, maxpol, keepExisting=.false.)
+         call realloc(ypl, maxpol, keepExisting=.false.)
+         call realloc(zpl, maxpol, keepExisting=.false.)
+
+         IF (NPH > 0) THEN
+            XPL(1:NPH) = XPH(1:NPH)
+            YPL(1:NPH) = YPH(1:NPH)
+            ZPL(1:NPH) = ZPH(1:NPH)
+         ENDIF
+
+         MP  = MPS
+         NPL = NPH
+
+         return
+      end subroutine restorepol
+      
+      
    end module m_polygon
 
    !
@@ -139,7 +234,119 @@
    double precision :: ortho_pure      = 0.5d0   !< curvi-linear-like (0d0) or pure (1d0) orthogonalisation
 
    end module m_ggeo_orthosettings
-
    module m_WEARELT
    double precision :: XMIN,YMIN,XMAX,YMAX,X1,Y1,X2,Y2,RCIR,CR,DSIX
-   END module m_WEARELT
+   end module m_WEARELT
+
+
+   !> Main sample set
+   module m_samples
+   implicit none
+   double precision, ALLOCATABLE  :: XS(:), YS(:), ZS(:)
+   INTEGER,          ALLOCATABLE  :: IPSAM(:)              !< permutation array (increasing x-coordinate)
+   integer,          parameter    :: IPSTAT_OK=0           !< permutation array is OK
+   integer,          parameter    :: IPSTAT_NOTOK=1        !< permutation array is out of date
+   integer                        :: IPSTAT=IPSTAT_NOTOK   !< permutation array status
+   INTEGER                        :: NS =0, NSMAX
+   integer                        :: MXSAM=0, MYSAM=0      !< structured block sizes (.gt.0), or not structured (0)
+   double precision               :: xsammin, ysammin, xsammax, ysammax   !< bounding box corner coordinates
+
+   !> Backup of main sample set
+   !! @see savesam()
+   double precision, ALLOCATABLE  :: XS2(:), YS2(:), ZS2(:)
+   integer                        :: NS2, MXSAM2=0, MYSAM2=0
+
+   !> Alternate sample set.
+   !! @see SWAPSAMPLES()
+   double precision, ALLOCATABLE  :: XS3(:), YS3(:), ZS3(:)
+   integer              :: NS3
+
+
+   contains
+   
+   subroutine increasesam(N)
+   USE M_MISSING
+   use m_alloc
+   implicit none
+   integer, intent(in) :: n !< New size for sample set #3.
+
+   integer :: ierr
+   IF (N < NSMAX) RETURN
+   NSMAX = MAX(10000,INT(1.2d0*N))
+
+   call realloc(xs, NSMAX, keepExisting=.true., fill = dmiss, stat=ierr)
+   !CALL AERR ('XS(NSMAX)',IERR,NSMAX)
+   call realloc(ys, NSMAX, keepExisting=.true., fill = dmiss, stat=ierr)
+   !CALL AERR ('YS(NSMAX)',IERR,NSMAX)
+   call realloc(zs, NSMAX, keepExisting=.true., fill = dmiss, stat=ierr)
+   !CALL AERR ('ZS(NSMAX)',IERR,NSMAX)
+   call realloc(ipsam, NSMAX, keepExisting=.false., fill=0, stat=ierr)
+   !CALL AERR ('IPSAM',IERR,NSMAX)
+
+   !User is editing samples: mark samples as unstructured
+   MXSAM = 0
+   MYSAM = 0
+   IPSTAT = IPSTAT_NOTOK
+
+   end subroutine increasesam
+
+   subroutine savesam()
+   USE M_MISSING
+   use m_alloc
+   implicit none
+   integer :: ierr
+   NS2 = NS
+   MXSAM2 = MXSAM
+   MYSAM2 = MYSAM
+   IF (NS .EQ. 0) return
+
+   call realloc(xs2, ns, keepExisting=.false., fill=dmiss, stat=ierr)
+   call realloc(ys2, ns, keepExisting=.false., fill=dmiss, stat=ierr)
+   call realloc(zs2, ns, keepExisting=.false., fill=dmiss, stat=ierr)
+
+   XS2(1:NS) = XS(1:NS)
+   YS2(1:NS) = YS(1:NS)
+   ZS2(1:NS) = ZS(1:NS)
+   return
+   end subroutine savesam
+
+   subroutine restoresam()
+
+   implicit none
+   MXSAM = 0   ! unstructured samples by default
+   MYSAM = 0
+   IPSTAT = IPSTAT_NOTOK
+   NS    = NS2
+   MXSAM = MXSAM2
+   MYSAM = MYSAM2
+
+   if (NS2 == 0) return
+
+   XS2(1:NS2) = XS(1:NS2)
+   YS2(1:NS2) = YS(1:NS2)
+   ZS2(1:NS2) = ZS(1:NS2)
+
+   end subroutine restoresam
+   
+   SUBROUTINE SWAPSAMPLES()
+      implicit none
+      integer :: i
+      integer :: nh
+      integer :: nn
+      DOUBLE PRECISION :: XH, YH, ZH
+
+      IF (NSMAX < NS3) THEN
+         CALL increasesam(NS3)
+      ELSE IF (NS3 < NS) THEN
+         CALL increasesam3(NS)
+      ENDIF
+      NN = MAX(NS,NS3)
+      NH = NS ; NS = NS3 ; NS3 = NH
+      DO I = 1, NN
+         XH = XS(I) ; XS(I) = XS3(I) ; XS3(I) = XH
+         YH = YS(I) ; YS(I) = YS3(I) ; YS3(I) = YH
+         ZH = ZS(I) ; ZS(I) = ZS3(I) ; ZS3(I) = ZH
+      ENDDO
+   END SUBROUTINE SWAPSAMPLES
+
+   end module m_samples
