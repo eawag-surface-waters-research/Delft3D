@@ -348,5 +348,26 @@
          ZH = ZS(I) ; ZS(I) = ZS3(I) ; ZS3(I) = ZH
       ENDDO
    END SUBROUTINE SWAPSAMPLES
+   
+   
+   SUBROUTINE INCREASESAM3(N)
+      USE M_MISSING
+      use m_alloc
+      implicit none
+      integer, intent(in) :: n !< New size for sample set #3.
+
+      integer :: ierr
+      integer :: nsmaxloc
+
+      nsmaxloc = SIZE(XS3)
+
+      IF (N < nsmaxloc) RETURN
+      nsmaxloc = MAX(10000,INT(1.2d0*N))
+      
+      call realloc(xs3, nsmaxloc, keepExisting=.true., fill = dmiss, stat=ierr)
+      call realloc(ys3, nsmaxloc, keepExisting=.true., fill = dmiss, stat=ierr)
+      call realloc(zs3, nsmaxloc, keepExisting=.true., fill = dmiss, stat=ierr)
+      !CALL AERR ('XS3(NSMAX),YS3(NSMAX),ZS3(NSMAX)',IERR,nsmaxloc)
+   END SUBROUTINE INCREASESAM3
 
    end module m_samples
