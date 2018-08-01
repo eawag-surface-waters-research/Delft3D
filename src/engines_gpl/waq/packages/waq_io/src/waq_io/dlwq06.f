@@ -125,6 +125,8 @@
 
       lunwr = lun( 2)
       iposr = 0
+      chkpar = .false.
+      nowtyp = 0
 
 !        Read number of waste loads
 
@@ -145,9 +147,6 @@
 !     read waste names, from version 4.9 on names are ID's
 !                                           names are 40 characters
 !                                           types are 20 characters
-
-      chkpar = .false.
-      nowtyp = 0
       allocate ( wstid     (nowst), wsttype     (nowst), wstname(nowst),
      &           wstid_long(nowst), wsttype_long(nowst), iwstseg(nowst),
      *           iwsttype  (nowst), iwstkind    (nowst), stat = ierr_alloc )
