@@ -796,7 +796,18 @@ rem =====================
     call :copyFile "utils_lgpl\io_netcdf\packages\io_netcdf\dll\x64\Release\io_netcdf.dll"                  !dest_bin!
 goto :endproc
 
+rem =====================
+rem === INSTALL GRIDGEOM
+rem =====================
+:gridgeom
+    echo "installing gridgeom . . ."
 
+    set dest_bin="!dest_main!\x64\share\bin"
+
+    call :makeDir !dest_bin!
+
+    call :copyFile "utils_lgpl\gridgeom\packages\gridgeom\dll\x64\Release\gridgeom.dll"                  !dest_bin!
+goto :endproc
 
 :end
 if NOT %globalErrorLevel% EQU 0 (
