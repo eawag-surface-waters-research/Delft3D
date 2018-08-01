@@ -93,7 +93,7 @@ function ggeo_make1D2Dinternalnetlinks(xplLinks, yplLinks, zplLinks, c_jsferic, 
 end function ggeo_make1D2Dinternalnetlinks
 
 
-function ggeo_make1D2Droofgutterpipes(xplRoofs, yplRoofs, zplRoofs, c_jsferic, c_jasfer3D, c_jglobe) result(ierr)
+function ggeo_make1D2Droofgutterpipes(xplRoofs, yplRoofs, zplRoofs, oneDmask, c_jsferic, c_jasfer3D, c_jglobe) result(ierr)
 
    use gridoperations
    use m_sferic
@@ -103,23 +103,26 @@ function ggeo_make1D2Droofgutterpipes(xplRoofs, yplRoofs, zplRoofs, c_jsferic, c
    integer, intent(in)          :: c_jsferic
    integer, intent(in)          :: c_jasfer3D
    integer, intent(in)          :: c_jglobe
+   integer, intent(in)          :: oneDmask(:)
 
    jsferic  = c_jsferic
    jasfer3D = c_jasfer3D
    jglobe   = c_jglobe
+   ierr     = 0
 
-   call make1D2Droofgutterpipes(xplRoofs, yplRoofs, zplRoofs)
+   call make1D2Droofgutterpipes(xplRoofs, yplRoofs, zplRoofs, oneDmask)
 
 end function ggeo_make1D2Droofgutterpipes
 
 
-function ggeo_make1D2Dstreetinletpipes(xsStreetInletPipes, ysStreetInletPipes, c_jsferic, c_jasfer3D, c_jglobe) result(ierr)
+function ggeo_make1D2Dstreetinletpipes(xsStreetInletPipes, ysStreetInletPipes, oneDmask, c_jsferic, c_jasfer3D, c_jglobe) result(ierr)
 
    use gridoperations
    use m_sferic
    
-   integer :: ierr
+   integer                      :: ierr
    double precision, intent(in) :: xsStreetInletPipes(:), ysStreetInletPipes(:)
+   integer, intent(in)          :: oneDmask(:)
    integer, intent(in)          :: c_jsferic
    integer, intent(in)          :: c_jasfer3D
    integer, intent(in)          :: c_jglobe
@@ -127,8 +130,9 @@ function ggeo_make1D2Dstreetinletpipes(xsStreetInletPipes, ysStreetInletPipes, c
    jsferic  = c_jsferic
    jasfer3D = c_jasfer3D
    jglobe   = c_jglobe
+   ierr     = 0
 
-   call make1D2Dstreetinletpipes(xsStreetInletPipes, ysStreetInletPipes)
+   call make1D2Dstreetinletpipes(xsStreetInletPipes, ysStreetInletPipes, oneDmask)
 
 end function ggeo_make1D2Dstreetinletpipes
 

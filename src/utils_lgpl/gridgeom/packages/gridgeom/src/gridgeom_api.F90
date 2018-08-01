@@ -113,48 +113,73 @@ function ggeo_make1D2Dinternalnetlinks_dll(c_nin, c_xpl, c_ypl, c_zpl, c_jsferic
    ierr = ggeo_make1D2Dinternalnetlinks(xplLinks, yplLinks, zplLinks, c_jsferic, c_jasfer3D, c_jglobe)
    
 end function ggeo_make1D2Dinternalnetlinks_dll
-
-function ggeo_make1D2Droofgutterpipes_dll(c_nin, c_xpl, c_ypl, c_zpl, c_jsferic, c_jasfer3D, c_jglobe) result(ierr) bind(C, name="ggeo_make1D2Droofgutterpipes")
+!> Make 1d-2d roofs connections
+!!
+!! c_nin       :: size of the array containing the polygon's coordinates
+!! c_xin       :: x coordinate of the polygon's points  
+!! c_yin       :: y coordinate of the polygon's points
+!! c_zpl       :: z coordinate of the polygon's points
+!! c_nOneDMask :: size of the 1d mask for mesh 1d
+!! c_oneDmask  :: mask for 1d mesh points (1 = potential connection, 0 = do not connect) 
+!! c_jsferic   :: 2d sferic flag (1 = spheric / 0 = cartesian)
+!! c_jasfer3D  :: 3d sferic flag (1 = spheric / 0 = cartesian)
+!! c_jglobe    :: to be detailed
+function ggeo_make1D2Droofgutterpipes_dll(c_nin, c_xpl, c_ypl, c_zpl, c_nOneDMask, c_oneDmask, c_jsferic, c_jasfer3D, c_jglobe) result(ierr) bind(C, name="ggeo_make1D2Droofgutterpipes")
 !DEC$ ATTRIBUTES DLLEXPORT :: ggeo_make1D2Droofgutterpipes_dll
    
    use gridgeom
    
-   integer, intent(in)          :: c_nin
+   integer, intent(in)          :: c_nin, c_nOneDMask
    type(c_ptr), intent(in)      :: c_xpl
    type(c_ptr), intent(in)      :: c_ypl
    type(c_ptr), intent(in)      :: c_zpl
+   type(c_ptr), intent(in)      :: c_oneDmask   
    integer, intent(in)          :: c_jsferic
    integer, intent(in)          :: c_jasfer3D
    integer, intent(in)          :: c_jglobe
    integer                      :: ierr  
    double precision, pointer    :: xplRoofs(:), yplRoofs(:), zplRoofs(:)   
+   integer, pointer             :: oneDmask(:) 
 
    call c_f_pointer(c_xpl, xplRoofs, (/c_nin/))
    call c_f_pointer(c_ypl, yplRoofs, (/c_nin/))
    call c_f_pointer(c_zpl, zplRoofs, (/c_nin/))
+   call c_f_pointer(c_oneDmask, oneDmask, (/c_nOneDMask/))
    
-   ierr = ggeo_make1D2Droofgutterpipes(xplRoofs, yplRoofs, zplRoofs, c_jsferic, c_jasfer3D, c_jglobe)
+   ierr = ggeo_make1D2Droofgutterpipes(xplRoofs, yplRoofs, zplRoofs, oneDmask, c_jsferic, c_jasfer3D, c_jglobe)
    
 end function ggeo_make1D2Droofgutterpipes_dll
-
-function ggeo_make1D2Dstreetinletpipes_dll(c_nin, c_xin, c_yin, c_jsferic, c_jasfer3D, c_jglobe) result(ierr) bind(C, name="ggeo_make1D2Dstreetinletpipes")
+!> Make 1d-2d gullies connections
+!!
+!! c_nin       :: size of the array containing the coordinates of the gullies
+!! c_xin       :: x coordinate of the gullies  
+!! c_yin       :: y coordinate of the gullies
+!! c_nOneDMask :: size of the 1d mask for mesh 1d
+!! c_oneDmask  :: mask for 1d mesh points (1 = potential connection, 0 = do not connect) 
+!! c_jsferic   :: 2d sferic flag (1 = spheric / 0 = cartesian)
+!! c_jasfer3D  :: 3d sferic flag (1 = spheric / 0 = cartesian)
+!! c_jglobe    :: to be detailed
+function ggeo_make1D2Dstreetinletpipes_dll(c_nin, c_xin, c_yin, c_nOneDMask, c_oneDmask, c_jsferic, c_jasfer3D, c_jglobe) result(ierr) bind(C, name="ggeo_make1D2Dstreetinletpipes")
 !DEC$ ATTRIBUTES DLLEXPORT :: ggeo_make1D2Dstreetinletpipes_dll
 
    use gridgeom
    
-   integer, intent(in)          :: c_nin
+   integer, intent(in)          :: c_nin, c_nOneDMask
    type(c_ptr), intent(in)      :: c_xin
    type(c_ptr), intent(in)      :: c_yin
+   type(c_ptr), intent(in)      :: c_oneDmask   
    integer, intent(in)          :: c_jsferic
    integer, intent(in)          :: c_jasfer3D
    integer, intent(in)          :: c_jglobe
    integer                      :: ierr  
    double precision, pointer    :: xsStreetInletPipes(:), ysStreetInletPipes(:)
+   integer, pointer             :: oneDmask(:) 
 
    call c_f_pointer(c_xin, xsStreetInletPipes, (/c_nin/))
    call c_f_pointer(c_yin, ysStreetInletPipes, (/c_nin/))
+   call c_f_pointer(c_oneDmask, oneDmask, (/c_nOneDMask/))
 
-   ierr = ggeo_make1D2Dstreetinletpipes(xsStreetInletPipes, ysStreetInletPipes, c_jsferic, c_jasfer3D, c_jglobe)
+   ierr = ggeo_make1D2Dstreetinletpipes(xsStreetInletPipes, ysStreetInletPipes, oneDmask, c_jsferic, c_jasfer3D, c_jglobe)
 
 end function ggeo_make1D2Dstreetinletpipes_dll
 

@@ -2287,7 +2287,7 @@
    return
    end subroutine get_cellpolygon
    
-   SUBROUTINE CLOSETO1Dnetnode(XP1,YP1,N1,dist) !
+   SUBROUTINE CLOSETO1Dnetnode(XP1,YP1,N1,dist,oneDMask) !
 
    use network_data
    use geometry_module, only: dbdistance
@@ -2298,6 +2298,7 @@
    double precision, intent(in)  :: XP1, YP1
    double precision, intent(out) :: dist     ! find 1D point close to x,y:
    integer         , intent(out) :: n1       ! 1D point found
+   integer, optional, intent(in) :: oneDMask(:)
 
 
    double precision :: dismin
@@ -2308,20 +2309,36 @@
    DISMIN = 9E+33
    DO L = 1,numl
       IF (kn(3,L) == 1 .or. kn(3,L) == 6) then !  .or. kn(3,L) == 4) THEN
-         K1 = kn(1,L) ; K2 = kn(2,L)
-         dis1 = dbdistance(XP1,YP1,Xk(K1),Yk(K1),jsferic, jasfer3D, dmiss)
-         dis2 = dbdistance(XP1,YP1,Xk(K2),Yk(K2),jsferic, jasfer3D, dmiss)
-         if (dis1 < dis2) THEN
+         K1 = kn(1,L) ; K2 = kn(2,L)         
+         ! If mask is present we check that the 1d nodes are the nodes I want to connect
+         if (present(oneDMask)) then
+            if (oneDMask(k1).eq.0) then !! Fortran does not support logical and
+               dis1 = DISMIN 
+            endif
+            if (oneDMask(k2).eq.0) then 
+               dis2 = DISMIN 
+            endif
+            if (oneDMask(k1).eq.1) then 
+               dis1 =  dbdistance(XP1,YP1,Xk(K1),Yk(K1),jsferic, jasfer3D, dmiss)    
+            endif
+            if (oneDMask(k2).eq.1) then 
+               dis2 =  dbdistance(XP1,YP1,Xk(K2),Yk(K2),jsferic, jasfer3D, dmiss)    
+            endif            
+         else
+            dis1 = dbdistance(XP1,YP1,Xk(K1),Yk(K1),jsferic, jasfer3D, dmiss)
+            dis2 = dbdistance(XP1,YP1,Xk(K2),Yk(K2),jsferic, jasfer3D, dmiss)    
+         endif
+         if (dis1 < dis2) then
             k = k1 ; dis = dis1
          else
             k = k2 ; dis = dis2
          endif
-         IF (DIS .LT. DISMIN) THEN
+         if (DIS .LT. DISMIN) then
             N1 = k
             DISMIN = DIS
-         ENDIF
-      ENDIF
-   ENDDO
+         endif
+      endif
+   enddo
    dist = dismin
    END SUBROUTINE CLOSETO1Dnetnode
 
@@ -2558,7 +2575,7 @@
 
    end function make1D2Dinternalnetlinks
    
-   subroutine make1D2Droofgutterpipes(xplRoofs, yplRoofs, zplRoofs)      !
+   subroutine make1D2Droofgutterpipes(xplRoofs, yplRoofs, zplRoofs, oneDmask)      !
       
       use m_missing
       use m_polygon
@@ -2571,6 +2588,7 @@
    
       !dfm might have already allocated xpl, ypl, zpl
       double precision, optional, intent(in)  :: xplRoofs(:), yplRoofs(:), zplRoofs(:)
+      integer, optional, intent(in)           :: oneDmask(:)
       
       integer                                 :: inp, n, n1, ip, i, k1, k2, L
       double precision                        :: XN1, YN1, DIST
@@ -2612,7 +2630,7 @@
       do n  = 1,nump
          if (kc(n) > 0) then
             ip = kc(n)
-            call CLOSETO1Dnetnode(xzw(n), yzw(n), N1, DIST)
+            call CLOSETO1Dnetnode(xzw(n), yzw(n), N1, DIST, oneDmask)
             if (dist < dismin(ip)) then
                dismin(ip) = dist ; nodroof(ip) = n; nod1D(ip) = n1
             endif
@@ -2631,7 +2649,7 @@
    
    end subroutine make1D2Droofgutterpipes
 
-   subroutine make1D2Dstreetinletpipes(xsStreetInletPipes, ysStreetInletPipes)
+   subroutine make1D2Dstreetinletpipes(xsStreetInletPipes, ysStreetInletPipes, oneDmask)
    
        use m_missing
        use m_polygon
@@ -2645,9 +2663,10 @@
        
       !allocate and assign samples if input arrays are present
       !when called from DFM xs, ys are already allocated in m_samples
-       double precision, optional, intent(in)  :: xsStreetInletPipes(:), ysStreetInletPipes(:)
-       integer                :: n,k,n1,k1,L
-       double precision       :: DIST
+      double precision, optional, intent(in)  :: xsStreetInletPipes(:), ysStreetInletPipes(:)
+      integer, optional, intent(in)           :: oneDmask(:) !< Masking array for 1d mesh points (1 connect, 0 do not connect)
+      integer                                 :: n,k,n1,k1,L
+      double precision                        :: DIST
 
        call findcells(0)
        if (present(xsStreetInletPipes)) then
@@ -2660,7 +2679,7 @@
        do n  = 1,ns
           call INCELLS(Xs(n),Ys(n),K)
           if (k > 0) then
-             call CLOSETO1Dnetnode(xzw(k), yzw(k), N1, DIST)
+             call CLOSETO1Dnetnode(xzw(k), yzw(k), N1, DIST, oneDmask)
              CALL SETNEWPOINT(xzw(k),yzw(k),dmiss,k1)
              call CONNECTDBN(K1,N1,L)
              kn(3,L) = 5
