@@ -2471,8 +2471,6 @@
   
    implicit none
 
-   implicit none
-
    integer          :: K1, K2, K3, L, NC1, NC2, JA, KK2(2), KK, NML, LL
    integer          :: i, ierr, k, kcell
    DOUBLE PRECISION :: XN, YN, XK2, YK2, WWU
