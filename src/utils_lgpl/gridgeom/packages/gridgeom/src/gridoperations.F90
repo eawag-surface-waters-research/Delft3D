@@ -2413,7 +2413,7 @@
 
    implicit none
 
-   integer          :: K1, K2, K3, L, NC1, NC2, JA, KK2(2), KK, NML
+   integer          :: K1, K2, K3, L, NC1, NC2, JA, KK2(2), KK, NML, LL
    integer          :: i, ierr, k, kcell
    DOUBLE PRECISION :: XN, YN, XK2, YK2, WWU
    ! optional polygons to reduce the area where the 1D2Dlinks are generated
@@ -2425,12 +2425,26 @@
    call findcells(0)
 
    KC = 2
-   DO L = 1,NUML  ! FLAG TO 1 ANY NODE TOUCHED BY SOMETHING 1D
+   do L = 1,NUML  ! FLAG TO 1 ANY NODE TOUCHED BY SOMETHING 1D
       K1  = KN(1,L) ; K2  = KN(2,L); K3 = KN(3,L)
       IF (K3 .NE. 4 .AND. K3 .NE. 2 .AND. K3 .NE. 0) THEN ! only for yet-isolated 1D channels with KN(3,L)==1
          KC(K1) = 1 ; KC(K2) = 1
-      ENDIF
-   ENDDO
+         if (jadelnetlinktyp == 5 .or. jadelnetlinktyp == 7) then 
+            do k  = 1,nmk(k1)
+               LL = nod(k1)%lin(k)
+               if (kn(3,LL) == 5 .or. kn(3,LL) == 7) then 
+                  kc(k1) = 2 ; exit  ! when already connected by pipe forget it
+               endif   
+            enddo   
+            do k  = 1,nmk(k2)
+               LL = nod(k2)%lin(k)
+               if (kn(3,LL) == 5 .or. kn(3,LL) == 7) then 
+                  kc(k2) = 2 ; exit  ! when already connected by pipe forget it
+               endif   
+            enddo   
+          endif           
+      endif
+   enddo
 
    if (jadelnetlinktyp .ne. 0) then
       kn3typ = jadelnetlinktyp
