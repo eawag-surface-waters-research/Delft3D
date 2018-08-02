@@ -2930,7 +2930,10 @@
    
    end function ggeo_count_or_create_edge_nodes
    
-   !> makes 1d2d embedded links: more than 1d2d link per 1d mesh node
+   !> Makes 1d2d embedded links: 1D is typically overlapping the 2D grid,
+   !! and potentially more than one 1d2d link per 1d mesh node is created.
+   !! 2D cells are connected if they are intersected by a 1D edge. They are
+   !! connected to the nearest of the two endpoints of each 1D edge.
    function make1D2DEmbeddedLinks()  result(ierr)
 
    use network_data
@@ -2939,13 +2942,13 @@
    use m_sferic,        only: jsferic, jasfer3D
    use kdtree2Factory
 
+   !output
+   integer               :: ierr !< Error status, 0 if success, nonzero in case of error.
+
    integer               :: k, kk, k1, k2, k3, k4, k5, k6, ncellsinSearchRadius, numberCellNetlinks, isCrossing, newPointIndex, newLinkIndex
    integer               :: l, cellNetLink, cellId, kn3ty, numnetcells
    double precision      :: searchRadiusSquared, ldistance, rdistance, maxdistance, sl, sm, xcr, ycr, crp
    type(kdtree_instance) :: treeinst
-
-   !output
-   integer               :: ierr
 
    ierr = 0
    !LC: is this the right type?
