@@ -285,5 +285,7 @@ module m_GlobalParameters
    integer, public, parameter :: CFiMorDepth                = 122
    integer, public, parameter :: CFiPumpHead                = 123
    integer, public, parameter :: CFiState                   = 124
+   integer, public, parameter :: CFiWindVelocity            = 125
+   integer, public, parameter :: CFiWindDirection           = 126
    
 end module m_GlobalParameters                                 

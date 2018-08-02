@@ -595,12 +595,13 @@ end subroutine LogAllParameters
       character(len=*) :: file
       
       integer                 :: ioStat
+      logical                 :: file_exist
       integer                 :: i
       integer                 :: errStat
       integer                 :: isPos
       integer                 :: help
       integer                 :: posEnd
-      character(len=Charln)      :: line
+      character(len=Charln)   :: line
       character(len=Charln)   :: category = ''
       character(len=Charln)   :: par
       character(len=Charln)   :: value
@@ -608,6 +609,9 @@ end subroutine LogAllParameters
       integer                 :: ifileunit
       
       if (file == ' ') return
+      
+      inquire(file=file, exist=file_exist)
+      if (.not. file_exist) return
     
       open (newunit=ifileunit, file = file,iostat=errStat)
       if (errStat /= 0) then
