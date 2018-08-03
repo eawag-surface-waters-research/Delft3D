@@ -4563,7 +4563,7 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
       
       ! ustokes, vstokes
       if (.not. allocated(ust_x)) allocate(ust_x(ndkx), ust_y(ndkx))
-      ust_x = dmiss; ust_y = dmiss
+      ust_x = 0d0; ust_y = 0d0
       if (kmx==0) then
          do L=1,lnx
             k1 = ln(1,L); k2 = ln(2,L)

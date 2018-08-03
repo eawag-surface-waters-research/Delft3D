@@ -1,4 +1,4 @@
-subroutine grmap_esmf(f1, n1, f2, mmax, nmax, f2s, f2g, adaptCovered)
+subroutine grmap_esmf(i1, f1, n1, f2, mmax, nmax, f2s, f2g, adaptCovered)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2018.                                
@@ -41,6 +41,7 @@ subroutine grmap_esmf(f1, n1, f2, mmax, nmax, f2s, f2g, adaptCovered)
 !
 ! Global variables
 !
+    integer                   , intent(in)  :: i1
     integer                   , intent(in)  :: n1
     integer                   , intent(in)  :: mmax
     integer                   , intent(in)  :: nmax
@@ -95,7 +96,7 @@ subroutine grmap_esmf(f1, n1, f2, mmax, nmax, f2s, f2g, adaptCovered)
     !
     do i=1, mmax
        do j=1, nmax
-          if (f2g%covered(i,j) == 1) then
+          if (f2g%covered(i,j) == i1) then
              f2(i,j) = 0.0_sp
           endif
        enddo
@@ -105,7 +106,7 @@ subroutine grmap_esmf(f1, n1, f2, mmax, nmax, f2s, f2g, adaptCovered)
        do n=1, f2s%n_s
           i       = floor(real(f2s%row(n)-1)/real(nmax)) + 1
           j       = f2s%row(n) - nmax*(i-1)
-          if (f2g%covered(i,j) == 1) then
+          if (f2g%covered(i,j) == i1) then
              f2(i,j) = f2(i,j) + f2s%s(n)*f1(f2s%col(n))
           endif
           !
@@ -117,9 +118,10 @@ subroutine grmap_esmf(f1, n1, f2, mmax, nmax, f2s, f2g, adaptCovered)
     else
        do n=1, f2s%n_s
           j       = floor(real(f2s%row(n)-1)/real(mmax)) + 1
-          i       = f2s%row(n) - mmax*(j-1)
-          if (f2g%covered(i,j) == 1) then
-             f2(i,j) = f2(i,j) + f2s%s(n)*f1(f2s%col(n))
+          i       = f2s%row(n) - mmax*(j-1)   
+          !
+          if (f2g%covered(i,j)== i1) then
+             f2(i,j) = f2(i,j) + f2s%s(n)*f1(f2s%col(n))    ! generate_partioning_pol_from_idomain
           endif
        enddo
        

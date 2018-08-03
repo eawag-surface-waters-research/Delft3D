@@ -201,7 +201,7 @@ subroutine write_swan_file (var1  , var2       , mmax   , nmax, covered, &
                 ! then covered == -1 and the value at i,j is not changed
                 !
                 if (covered(i, j) == 0 .and. closestPoint(i, j, iindex)>0) then
-                   if (covered(closestPoint(i, j, iindex), closestPoint(i, j, jindex)) == 1) then
+                   if (covered(closestPoint(i, j, iindex), closestPoint(i, j, jindex)) > 0) then    ! multi-domain: covered can be greater than 1
                       var1(i, j) = var1(closestPoint(i, j, iindex), closestPoint(i, j, jindex))
                    endif
                 endif
@@ -217,7 +217,7 @@ subroutine write_swan_file (var1  , var2       , mmax   , nmax, covered, &
                 ! then covered == -1 and the value at i,j is not changed
                 !
                 if (covered(i, j) == 0 .and. closestPoint(i, j, iindex)>0) then
-                   if (covered(closestPoint(i, j, iindex), closestPoint(i, j, jindex)) == 1) then
+                   if (covered(closestPoint(i, j, iindex), closestPoint(i, j, jindex)) > 0) then
                       var2(i, j) = var2(closestPoint(i, j, iindex), closestPoint(i, j, jindex))
                    endif
                 endif

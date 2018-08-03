@@ -572,7 +572,7 @@ end subroutine read_grd
 !
 !
 !==============================================================================
-subroutine read_netcdf_grd(i_grid, filename, xcc, ycc, codb, covered, mmax, nmax, kmax, sferic, xymiss, filename_tmp, flowLinkConnectivity)
+subroutine read_netcdf_grd(i_grid, filename, xcc, ycc, codb, covered, mmax, nmax, kmax, sferic, xymiss, bndx, bndy, numenclpts, filename_tmp, flowLinkConnectivity)
     use netcdf
     implicit none
 !
@@ -587,11 +587,14 @@ subroutine read_netcdf_grd(i_grid, filename, xcc, ycc, codb, covered, mmax, nmax
     integer                          , intent(out) :: mmax
     integer                          , intent(out) :: nmax
     integer                          , intent(out) :: kmax
+    integer                          , intent(out) :: numenclpts
     real                             , intent(out) :: xymiss
     integer , dimension(:,:), pointer              :: codb
     integer , dimension(:,:), pointer              :: covered
     real(hp), dimension(:,:), pointer              :: xcc
     real(hp), dimension(:,:), pointer              :: ycc
+    real(hp), dimension(:,:), pointer              :: bndx
+    real(hp), dimension(:,:), pointer              :: bndy    
     logical                                        :: sferic
     character(*)                                   :: filename_tmp
     logical                          , intent(in)  :: flowLinkConnectivity
@@ -604,6 +607,8 @@ subroutine read_netcdf_grd(i_grid, filename, xcc, ycc, codb, covered, mmax, nmax
     integer                                :: i
     integer                                :: idfile
     integer                                :: iddim_e
+    integer                                :: iddim_enclsp
+    integer                                :: iddim_numencpts
     integer                                :: iddim_laydim
     integer                                :: iddim_n
     integer                                :: iddim_mmax
@@ -624,6 +629,8 @@ subroutine read_netcdf_grd(i_grid, filename, xcc, ycc, codb, covered, mmax, nmax
     integer                                :: idvar_ny
     integer                                :: idvar_x
     integer                                :: idvar_y
+    integer                                :: idvar_encx
+    integer                                :: idvar_ency
     integer                                :: ierror
     integer                                :: ik
     integer                                :: irgf
@@ -642,6 +649,7 @@ subroutine read_netcdf_grd(i_grid, filename, xcc, ycc, codb, covered, mmax, nmax
     integer                                :: npareg
     integer, external                      :: nc_def_var
     integer                                :: numedge
+    integer                                :: numencl
     integer                                :: pos
     integer                                :: elt
     integer                                :: lc
@@ -731,17 +739,33 @@ subroutine read_netcdf_grd(i_grid, filename, xcc, ycc, codb, covered, mmax, nmax
           ierror = nf90_inq_varid(idfile, 'FlowLink'   , idvar_flowlink); call nc_check_err(ierror, "inq_varid FlowLink", filename)
     endif
     !
+    ! For the enclosure
+    !
+    ierror = nf90_inq_dimid(idfile, 'nmesh2d_EnclosureParts', iddim_enclsp        ); call nc_check_err(ierror, "inq_dimid nmesh2d_EnclosureParts", filename)
+    ierror = nf90_inquire_dimension(idfile, iddim_enclsp, string, numencl)         ; call nc_check_err(ierror, "inq_dim enclsp", filename)
+    if (numencl/=1) then
+       write(*,'(a,i0,a)') "ERROR nmesh2d_EnclosureParts = ", numencl, ". Expecting 1. Please make sure your (partition) domain has a single contiguous grid."
+       call wavestop(1, 'nmesh2d_EnclosureParts should be 1')
+    endif
+    ierror = nf90_inq_dimid(idfile, 'nmesh2d_EnclosurePoints', iddim_numencpts       ); call nc_check_err(ierror, "inq_dimid nmesh2d_EnclosurePoints", filename)
+    ierror = nf90_inquire_dimension(idfile, iddim_numencpts, string, numenclpts)      ; call nc_check_err(ierror, "inq_dim numencpts", filename)
+    !
+    ierror = nf90_inq_varid(idfile, 'mesh2d_enc_x', idvar_encx       ); call nc_check_err(ierror, "inq_varid encx", filename)
+    ierror = nf90_inq_varid(idfile, 'mesh2d_enc_y', idvar_ency       ); call nc_check_err(ierror, "inq_varid ency", filename)
+    !
     ! Allocate arrays
     ! xcc,ycc: +4 needed by subroutine tricall
     !
-    allocate (xcc        (mmax+4,nmax) , STAT=ierror)
-    allocate (ycc        (mmax+4,nmax) , STAT=ierror)
-    allocate (codb       (mmax,nmax)   , STAT=ierror)
-    allocate (covered    (mmax,nmax)   , STAT=ierror)
-    allocate (xnode      (nnodes)      , STAT=ierror)
-    allocate (ynode      (nnodes)      , STAT=ierror)
-    allocate (elemtonode (nemax,nelm)  , STAT=ierror)
-    allocate (nelmslice  (nelm)        , STAT=ierror)
+    allocate (xcc        (mmax+4,nmax)     , STAT=ierror)
+    allocate (ycc        (mmax+4,nmax)     , STAT=ierror)
+    allocate (bndx       (numenclpts,nmax) , STAT=ierror)
+    allocate (bndy       (numenclpts,nmax) , STAT=ierror)
+    allocate (codb       (mmax,nmax)       , STAT=ierror)
+    allocate (covered    (mmax,nmax)       , STAT=ierror)
+    allocate (xnode      (nnodes)          , STAT=ierror)
+    allocate (ynode      (nnodes)          , STAT=ierror)
+    allocate (elemtonode (nemax,nelm)      , STAT=ierror)
+    allocate (nelmslice  (nelm)            , STAT=ierror)
     if (sferic) then
        allocate (grid_corner(nemax,nelm), STAT=ierror)
        allocate (mask_area  (nelm)      , STAT=ierror)
@@ -772,11 +796,13 @@ subroutine read_netcdf_grd(i_grid, filename, xcc, ycc, codb, covered, mmax, nmax
     endif
     codb    = 1
     covered = 0
-    ierror = nf90_get_var(idfile, idvar_x       , xcc       , start=(/ 1 /)   , count=(/ mmax /)        ); call nc_check_err(ierror, "get_var x", filename)
-    ierror = nf90_get_var(idfile, idvar_y       , ycc       , start=(/ 1 /)   , count=(/ mmax /)        ); call nc_check_err(ierror, "get_var y", filename)
-    ierror = nf90_get_var(idfile, idvar_nx      , xnode     , start=(/ 1 /)   , count=(/ nnodes /)      ); call nc_check_err(ierror, "get_var xnode", filename)
-    ierror = nf90_get_var(idfile, idvar_ny      , ynode     , start=(/ 1 /)   , count=(/ nnodes /)      ); call nc_check_err(ierror, "get_var ynode", filename)
-    ierror = nf90_get_var(idfile, idvar_en      , elemtonode, start=(/ 1, 1 /), count=(/ nemax, nelm /) ); call nc_check_err(ierror, "get_var netelemnode", filename)
+    ierror = nf90_get_var(idfile, idvar_x       , xcc       , start=(/ 1 /)   , count=(/ mmax /)            ); call nc_check_err(ierror, "get_var x", filename)
+    ierror = nf90_get_var(idfile, idvar_y       , ycc       , start=(/ 1 /)   , count=(/ mmax /)            ); call nc_check_err(ierror, "get_var y", filename)
+    ierror = nf90_get_var(idfile, idvar_nx      , xnode     , start=(/ 1 /)   , count=(/ nnodes /)          ); call nc_check_err(ierror, "get_var xnode", filename)
+    ierror = nf90_get_var(idfile, idvar_ny      , ynode     , start=(/ 1 /)   , count=(/ nnodes /)          ); call nc_check_err(ierror, "get_var ynode", filename)
+    ierror = nf90_get_var(idfile, idvar_encx    , bndx      , start=(/ 1 /)   , count=(/ numenclpts /)      ); call nc_check_err(ierror, "get_var bndx", filename)
+    ierror = nf90_get_var(idfile, idvar_ency    , bndy      , start=(/ 1 /)   , count=(/ numenclpts /)      ); call nc_check_err(ierror, "get_var bndy", filename)
+    ierror = nf90_get_var(idfile, idvar_en      , elemtonode, start=(/ 1, 1 /), count=(/ nemax, nelm /)     ); call nc_check_err(ierror, "get_var netelemnode", filename)
     if (.not.sferic .and. flowLinkConnectivity) then
        ierror = nf90_get_var(idfile, idvar_flowlink, flowlink  , start=(/ 1, 1 /), count=(/ 2, nflowlink /)); call nc_check_err(ierror, "get_var flowlink", filename)
     endif

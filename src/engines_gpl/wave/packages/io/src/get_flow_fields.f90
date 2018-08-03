@@ -62,8 +62,9 @@ subroutine get_flow_fields (i_flow, sif, fg, sg, f2s, wavedata, sr, flowVelocity
    type(input_fields) :: fif                    ! input fields defined on flow grid
 
 interface
-   subroutine grmap_esmf(f1, n1, f2, mmax, nmax, f2s, f2g, adaptCovered)
+   subroutine grmap_esmf(i1, f1, n1, f2, mmax, nmax, f2s, f2g, adaptCovered)
     use swan_flow_grid_maps
+    integer                   , intent(in)  :: i1
     integer                   , intent(in)  :: n1
     integer                   , intent(in)  :: mmax
     integer                   , intent(in)  :: nmax
@@ -106,7 +107,7 @@ end interface
          ! Map depth to SWAN grid, using ESMF_Regrid weights
          !
          adaptCovered = .true.
-         call grmap_esmf (fif%dps       , fif%npts, &
+         call grmap_esmf (i_flow,         fif%dps , fif%npts, &
                         & sif%dps       , sif%mmax, sif%nmax, &
                         & f2s           , sg      , adaptCovered)
          adaptCovered = .false.
@@ -142,9 +143,9 @@ end interface
          !
          ! Map water level to SWAN grid, using ESMF_Regrid weights
          !
-         call grmap_esmf (fif%s1       , fif%npts, &
+         call grmap_esmf (i_flow       , fif%s1  , fif%npts, &
                         & sif%s1       , sif%mmax, sif%nmax, &
-                        & f2s          , sg)
+                        & f2s          , sg      )
       endif
    endif
    !
@@ -192,10 +193,10 @@ end interface
          !
          ! Map velocity components to SWAN grid, using ESMF_Regrid weights
          !
-         call grmap_esmf (fif%u1       , fif%npts, &
+         call grmap_esmf (i_flow, fif%u1       , fif%npts, &
                         & sif%u1       , sif%mmax, sif%nmax, &
                         & f2s          , sg)
-         call grmap_esmf (fif%v1       , fif%npts, &
+         call grmap_esmf (i_flow, fif%v1       , fif%npts, &
                         & sif%v1       , sif%mmax, sif%nmax, &
                         & f2s          , sg)
       endif
@@ -233,11 +234,11 @@ end interface
          !
          ! Map wind components to SWAN grid, using ESMF_Regrid weights
          !
-         call grmap_esmf (fif%windu    , fif%npts, &
-                        & sif%windu    , sif%mmax, sif%nmax, &
+         call grmap_esmf (i_flow       , fif%windu, fif%npts, &
+                        & sif%windu    , sif%mmax,  sif%nmax, &
                         & f2s          , sg)
-         call grmap_esmf (fif%windv    , fif%npts, &
-                        & sif%windv    , sif%mmax, sif%nmax, &
+         call grmap_esmf (i_flow       , fif%windv, fif%npts, &
+                        & sif%windv    , sif%mmax,  sif%nmax, &
                         & f2s          , sg)
       endif
    endif
