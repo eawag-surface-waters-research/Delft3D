@@ -1,4 +1,17 @@
    !modules from modules.f90
+   module m_missing
+   implicit none
+   double precision                  :: dmiss           = -999d0      !
+   double precision                  :: xymis           = -999d0      !
+   double precision                  :: dxymis          = -999d0
+   !double precision                 :: ieee_negative_inf = -1.7976931348623158e+308 ! IEEE standard for the maximum negative value
+   integer                           :: intmiss         = -2147483647 ! integer fillvlue
+   integer                           :: imiss           = -999        ! cf_dll missing value 
+   integer                           :: LMOD, KMOD                    ! TBV READDY, LC gui related variables can go to unstruc_display
+   integer                           :: jins            = 1
+   integer                           :: jadelnetlinktyp = 0
+   end module m_missing
+   
    module m_dimens
    implicit none
    integer                       :: MMAX_old = 3, NMAX_old = 3
@@ -43,20 +56,33 @@
    double precision                     :: DCLOSE = 1d0       ! close-to-landboundary tolerance, measured in number of meshwidths
 
    logical                              :: Ladd_land = .true. ! add land boundary between land boundary segments that are close to each other
+
+   contains
+
+   subroutine increaselan(n)
+   USE m_missing
+   !LC TO DO: introduce call back function use unstruc_messages
+   use m_alloc
+   integer :: n
+
+   integer :: ierr
+
+   IF (N < MAXLAN) RETURN
+   MAXLAN = MAX(50000,INT(1.2d0*N))
+
+   call realloc(xlan, MAXLAN, stat=ierr, fill=dxymis)
+   !CALL AERR('xlan(maxlan)', IERR, maxlan)
+   call realloc(ylan, MAXLAN, stat=ierr, fill=dxymis)
+   !CALL AERR('ylan(maxlan)', IERR, maxlan)
+   call realloc(zlan, MAXLAN, stat=ierr, fill=dxymis)
+   !CALL AERR('zlan(maxlan)', IERR, maxlan)
+   call realloc(nclan, MAXLAN, stat=ierr, fill=0)
+   !CALL AERR('nclan(maxlan)', IERR, maxlan/2)
+   end subroutine increaselan
+
    end module m_landboundary
 
-   module m_missing
-   implicit none
-   double precision                  :: dmiss           = -999d0      !
-   double precision                  :: xymis           = -999d0      !
-   double precision                  :: dxymis          = -999d0
-   !double precision                 :: ieee_negative_inf = -1.7976931348623158e+308 ! IEEE standard for the maximum negative value
-   integer                           :: intmiss         = -2147483647 ! integer fillvlue
-   integer                           :: imiss           = -999        ! cf_dll missing value 
-   integer                           :: LMOD, KMOD                    ! TBV READDY, LC gui related variables can go to unstruc_display
-   integer                           :: jins            = 1
-   integer                           :: jadelnetlinktyp = 0
-   end module m_missing
+
 
 
    module m_sferic

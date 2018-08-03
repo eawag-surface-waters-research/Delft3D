@@ -47,6 +47,7 @@
    public :: INCELLS
    public :: sort_links_ccw
    public :: get_cellpolygon
+   public :: make_dual_cell
    
    ! rest.f90
    public ::INVIEW
@@ -557,7 +558,8 @@
    double precision, dimension(:), allocatable :: Lperm_new
 
    integer :: jacrosscheck ! remove 2D crossing netlinks (1) or not (0)
-   integer :: japermout ! output permutation array (1) or not (0)
+   integer :: japermout    ! output permutation array (1) or not (0)
+   integer :: janodperm    ! output node permutation array (1) or not (0)
 
    jacrosscheck = jacrosscheck_
    japermout = 0
@@ -571,14 +573,15 @@
    E = 1E-6 ; E1 = 1-E
 
    if ( japermout.eq.1 ) then
-      !     allocate permutation array
+      ! allocate permutation array
       call realloc(Lperm, numL, keepExisting=.false., fill=0)
       do L=1,numL
          Lperm(L) = L
       end do
       allocate(Lperm_new(numL))
+      ! allocate permutation array for nodes
+      call realloc(nodePermutation, numk, keepExisting=.false., fill=0)
    end if
-
 
    IF (JACROSSCHECK == 1) THEN
       LL = 0
@@ -686,11 +689,13 @@
          YK (KK) = YK(K)
          ZK (KK) = ZK(K)
          KCK(KK) = KCK(K)               ! COPY ORG KC
-         KC2(K)  = KK                   ! EN HIER GAAT IE NAARTOE
+         KC2(K)  = KK                   ! EN HIER GAAT IE NAARTOE         
+         if ( japermout.eq.1 ) then
+            nodePermutation(k) = kk     ! k is old node number, kk is new number
+         end if
       ENDIF
    ENDDO
    NUMK = KK
-
 
    DO L   = 1,NUML
       K1  = KN(1,L)  ; K2  = KN(2,L) ; K3 = KN(3,L)
@@ -3028,6 +3033,263 @@
    call setnodadm(0)
 
    end function make1D2DEmbeddedLinks
+   
+   !> make dual cell polygon around netnode k
+   subroutine make_dual_cell(k, N, rcel, xx, yy, num, Wu1Duni)
+      
+      use network_data
+      use m_polygon
+      use m_missing
+      use m_sferic
+      use geometry_module, only: normalout, comp_masscenter, half, xpav, spher2locvec
+      
+      implicit none
+
+      integer,                        intent(in)  :: k         !< netnode number
+      integer,                        intent(in)  :: N         !< array size
+      double precision,               intent(in)  :: rcel      !< dual-cell enlargement factor around dual-cell center
+      double precision, dimension(N), intent(out) :: xx, yy    !< dual-cell polygon coordinates
+      integer,                        intent(out) :: num       !< polygon dimension
+      double precision,               intent(in)  :: Wu1Duni   !< 
+      
+      !locals
+      integer                                     :: ierror ! error (1) or not (0)
+      integer,          dimension(N)              :: iclist
+      double precision                            :: xc, yc, area, w, sn, cs, xh, yh, aa, cs2, cs3, sn2, sn3, f
+      double precision, dimension(1)              :: csloc, snloc, csloc2, snloc2, csloc3, snloc3
+      double precision                            :: xh2, yh2, xh3, yh3
+
+      integer                                     :: i, ic, k1, k2, L, NN, Nc, ja2D, Lp, k3, ip, is, ncol
+      integer                                     :: jacounterclockwise          ! counterclockwise (1) or not (0) (not used here)
+      
+      integer                                     :: jatolan ! copy cells to landboundary (useful for plotting)
+      
+      jatolan = 0
+
+      ierror = 1
+
+      !if ( k.eq.4399 ) then
+      !   continue
+      !end if
+
+      NN = nmk(k)
+
+      ja2D = 1
+      do i=1,NN
+          L = nod(k)%lin(i)
+          if (kn(3,L) /= 2 .and. kn(3,L).ne.0 ) ja2D = 0  
+      enddo   
+
+      if ( NN.gt.N ) then
+         !TODO: LC call qnerror('make_dual_cell: array size error', ' ', ' ')
+         goto 1234
+      end if
+
+      if (ja2D == 1) then  
+   !     get ordered cell list
+         call get_celllist(k, N, iclist)
+         
+   !     construct dual cell polygon
+         num = 0
+         do i=1,NN
+            num = num+1
+            L = nod(k)%lin(i)
+            k1 = k
+            k2 = kn(1,L)+kn(2,L)-k
+            xx(num) = 0.5d0*(xk(k1)+xk(k2))
+            yy(num) = 0.5d0*(yk(k1)+yk(k2))
+            
+!           fix for periodic, spherical coordinates   
+            if ( jsferic.eq.1 ) then
+               if ( xk(k2)-xk(k1).gt.180d0 ) then
+                  xx(num) = xx(num) - 180d0
+               else if ( xk(k2)-xk(k1).lt.-180d0 ) then
+                  xx(num) = xx(num) + 180d0
+               end if
+            end if
+         
+            num = num+1
+            ic = iclist(i)
+            if ( ic.ne.0 ) then
+               Nc = netcell(ic)%N
+               xx(num) = xzw(ic)
+               yy(num) = yzw(ic)
+            else
+               xx(num) = xk(k)
+               yy(num) = yk(k)
+            end if
+         end do
+         
+   !     compute dual cell center
+         call comp_masscenter(num, xx, yy, xc, yc, area, jacounterclockwise, jsferic, jasfer3D, dmiss)
+
+!        fix for periodic, spherical coordinates           
+         if ( xc-xk(k).gt.180d0 ) then
+            xc = xc - 360d0
+         else if ( xc-xk(k).lt.-180d0 ) then
+            xc = xc + 360d0
+         end if
+         
+   !     enlarge dual cell
+         do i=1,num
+            xx(i) = xc + RCEL*(xx(i)-xc)
+            yy(i) = yc + RCEL*(yy(i)-yc)
+         end do
+
+      else ! 1D
+      
+         w   = 0.5d0*Wu1Duni * RCEL ! RCEL a bit different in 1D
+         num = 0
+         
+         if (nn == 1) then 
+
+            L = nod(k)%lin(1) ; call othernode(k,L,k2)
+            
+            call normalout( xk(k), yk(k), xk(k2), yk(k2), cs, sn, jsferic, 1, dmiss, dxymis)
+            call half(xk(k), yk(k), xk(k2), yk(k2), xh, yh, jsferic, jasfer3D)
+            call spher2locvec(xk(k),yk(k),1,(/xh/),(/yh/),(/cs/),(/sn/),csloc,snloc, jsferic, 1, dmiss)
+    
+            num     = num + 1
+            call xpav(xk(k),yk(k),-w,csloc(1),snloc(1),xx(num),yy(num),jsferic,1)
+            
+            num     = num + 1
+            call xpav(xh,yh,-w,cs,sn,xx(num),yy(num),jsferic,1)
+            
+            num     = num + 1
+            call xpav(xh,yh,w,cs,sn,xx(num),yy(num),jsferic,1)
+            
+            num     = num + 1
+            call xpav(xk(k),yk(k),w,csloc(1),snloc(1),xx(num),yy(num),jsferic,1)
+            
+         else 
+            
+            if (nn == 2) then 
+               is =  1
+            else    
+               is = -1
+            endif  
+    
+            do i = 1,NN
+               L = nod(k)%lin(i) ; call othernode(k,L,k2)
+              
+               ip = i + 1 ; if (i == nn) ip = 1 
+               Lp = nod(k)%lin(ip) ; call othernode(k,Lp,k3)   
+
+               call normalout( xk(k2), yk(k2), xk(k), yk(k),  cs2, sn2, jsferic, 1, dmiss, dxymis) 
+               call half(xk(k), yk(k), xk(k2), yk(k2), xh2, yh2, jsferic, jasfer3D)
+               call spher2locvec(xk(k),yk(k),1,(/xh2/),(/yh2/),(/cs2/),(/sn2/),csloc2,snloc2, jsferic, 1, dmiss)
+               
+               call normalout( xk(k) , yk(k), xk(k3), yk(k3), cs3, sn3, jsferic, 1, dmiss, dxymis)
+               call half(xk(k), yk(k), xk(k3), yk(k3), xh3, yh3, jsferic, jasfer3D)
+               call spher2locvec(xk(k),yk(k),1,(/xh3/),(/yh3/),(/cs3/),(/sn3/),csloc3,snloc3, jsferic, 1, dmiss)
+               
+               f = w/(1d0+csloc2(1)*csloc3(1)+snloc2(1)*snloc3(1)) 
+               
+               num     = num + 1
+               call xpav(xh2,yh2,w,cs2,sn2,xx(num),yy(num),jsferic,1)
+
+               num     = num + 1
+               call xpav(xk(k),yk(k),f,csloc2(1)+csloc3(1),snloc2(1)+snloc3(1),xx(num),yy(num),jsferic,1)
+
+               num    = num + 1
+               call xpav(xh3,yh3,w,cs3,sn3,xx(num),yy(num),jsferic,1)
+
+            enddo   
+        
+                 
+         endif   
+         
+         if (num .ge. 3) then 
+             call random_number(aa)
+             ncol = 255*aa
+             !call DISPF2closed(xx,yy,num,num,ncol)
+             
+             if ( jatolan.eq.1 ) then
+                call INCREASELAN(MXLAN+num+2)
+                xlan(MXLAN+1) = dmiss
+                ylan(MXLAN+1) = dmiss
+                xlan(MXLAN+2:MXLAN+num+2) = (/ xx(1:num), xx(1) /)
+                ylan(MXLAN+2:MXLAN+num+2) = (/ yy(1:num), yy(1) /)
+                MXLAN = MXLAN+num+2
+             end if
+         endif   
+         
+      endif   
+         
+      ierror = 0
+   1234 continue
+      return
+   end subroutine make_dual_cell
+   
+   !net.f90, 34233
+   !> find netcells surrounding a netnode, order in link direction "nod()%cell"
+   !>   cell "0" is a fictious boundary-cell
+   subroutine get_celllist(k, N, iclist)
+      use network_data
+      implicit none
+
+      integer,               intent(in)  :: k         !< netnode
+      integer,               intent(in)  :: N         !< array size
+      integer, dimension(N), intent(out) :: iclist    !< list of netcells attached to the node
+
+      integer                            :: ierror    ! error (1) or not (0)
+
+      integer                            :: i, ip1, ic1, ic2, j, ja, L, Lp1, NN
+      integer                            :: ii, iim1
+
+      ierror = 1
+
+      NN = nmk(k)
+
+      if ( NN.gt.N ) then
+         !LC TODO: call back call qnerror('get_celllist: array size error', ' ', ' ')
+         goto 1234
+      end if
+
+      do i=1,NN
+   !     find cell between ith and (i+1)rst link, 0 indicates no cell (boundary)
+         L = nod(k)%lin(i)
+         ip1 = i+1; if ( ip1.gt.NN ) ip1=ip1-NN
+         Lp1 = nod(k)%lin(ip1)
+
+         ic1 = lne(1,L)
+         if ( lnn(L).gt.1) then
+            ic2 = lne(2,L)
+         else
+            ic2 = 0  ! boundary netlink
+         end if
+
+   !    check if cell ic1 contains link (i+1)
+        ja = 0
+        if ( lnn(L).gt.0 ) then
+!          find own link index
+           ii = 1
+           do while ( netcell(ic1)%lin(ii).ne.L .and. ii.lt.netcell(ic1)%N )
+              ii = ii+1
+           end do
+!          check if previous netlink in netcell ic1 is netlink (i+1)
+           iim1 = ii-1; if ( iim1.lt.1 ) iim1=iim1+netcell(ic1)%N
+
+              if ( netcell(ic1)%lin(iim1).eq.Lp1 ) then
+                 ja = 1
+              end if
+        end if
+
+        if (ja.eq.1 ) then
+   !       cell ic1 is between the ith and (i+1)rst link
+           iclist(i) = ic1
+        else
+   !    if cell ic1 does not contain link (i+1), use ic2 (0 for boundary, or isolated, or 1D links)
+           iclist(i) = ic2
+        end if
+      end do
+
+   !  determine if ic1 or ic2 
+
+      ierror = 0
+   1234 continue   
+      return
+   end subroutine get_celllist
 
    
    end module gridoperations

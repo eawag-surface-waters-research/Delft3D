@@ -1858,7 +1858,7 @@
     !out_unit = 20
     !open (unit=out_unit,file="out.txt",action="write",status="replace")
     !write (out_unit,*) NX
-    !do i=1, NX
+    !do i=1, size(XC)
     !   write (out_unit,*) XC(i),YC(i),ZC(1,i)
     !end do
 

@@ -5,23 +5,24 @@ module ec_module_api
 implicit none
    contains
    
-function triang(cptr_sx, cptr_sy, cptr_sv, NS, cptr_dx, cptr_dy, numD, cptr_res, jsferic) result(ierr) bind(C, name="triang")
-    !DEC$ ATTRIBUTES DLLEXPORT :: triang
+function triangulation(c_sampleX, c_sampleY, c_sampleValues, numSamples, c_targetX, c_targetY, c_targetValues, numTarget, jsferic) result(ierr) bind(C, name="triangulation")
+    !DEC$ ATTRIBUTES DLLEXPORT :: triangulation
 
     !from ec_module
     use m_ec_basic_interpolation, only: triinterp2
+    use m_missing
     use precision_basics
 
     implicit none
 
     ! parameters
-    type(c_ptr), intent(in)                 :: cptr_sx      ! samples x, y, values
-    type(c_ptr), intent(in)                 :: cptr_sy
-    type(c_ptr), intent(in)                 :: cptr_sv
-    type(c_ptr), intent(in)                 :: cptr_dx      ! destinations x, y
-    type(c_ptr), intent(in)                 :: cptr_dy
-    type(c_ptr), intent(inout)              :: cptr_res     ! return values (ptr to double array)
-    integer(kind=c_int), intent(in)         :: NS, numD, jsferic
+    type(c_ptr), intent(in)                 :: c_sampleX      ! samples x, y, values
+    type(c_ptr), intent(in)                 :: c_sampleY
+    type(c_ptr), intent(in)                 :: c_sampleValues
+    type(c_ptr), intent(in)                 :: c_targetX      ! destinations x, y
+    type(c_ptr), intent(in)                 :: c_targetY
+    type(c_ptr), intent(inout)              :: c_targetValues     ! return values (ptr to double array)
+    integer(kind=c_int), intent(in)         :: numSamples, numTarget, jsferic
 
     ! local variables
 
@@ -38,7 +39,6 @@ function triang(cptr_sx, cptr_sy, cptr_sv, NS, cptr_dx, cptr_dy, numD, cptr_res,
     real(hp), allocatable                    :: YPL(:)
     real(hp), allocatable                    :: ZPL(:)
     real(hp)                                 :: transformcoef(6)
-    double precision                         :: dmiss=-999.0d0
     
     ierr = 0
     transformcoef = 0.0d0
@@ -47,7 +47,7 @@ function triang(cptr_sx, cptr_sy, cptr_sv, NS, cptr_dx, cptr_dy, numD, cptr_res,
     if (allocated(XS)) then
         deallocate(XS,YS,ZS)
     end if
-    allocate(XS(NS), YS(NS), ZS(NS))
+    allocate(XS(numSamples), YS(numSamples), ZS(numSamples))
     allocate (XPL(1), YPL(1), ZPL(1))
 
     XPL = dmiss;
@@ -55,87 +55,103 @@ function triang(cptr_sx, cptr_sy, cptr_sv, NS, cptr_dx, cptr_dy, numD, cptr_res,
     ZPL = dmiss;
     
     ! copy ptr's to fortran arrays
-    call c_f_pointer(cptr_sx, ptr, (/NS/))
+    call c_f_pointer(c_sampleX, ptr, (/numSamples/))
     XS(:) = ptr
 
-    call c_f_pointer(cptr_sy, ptr, (/NS/))
+    call c_f_pointer(c_sampleY, ptr, (/numSamples/))
     YS(:) = ptr
 
-    call c_f_pointer(cptr_sv, ptr, (/NS/))
+    call c_f_pointer(c_sampleValues, ptr, (/numSamples/))
     ZS(:) = ptr
 
-    call c_f_pointer(cptr_dx, dx, (/numD/))
-    call c_f_pointer(cptr_dy, dy, (/numD/))
-    call c_f_pointer(cptr_res, dRes, (/numD/))
+    call c_f_pointer(c_targetX, dx, (/numTarget/))
+    call c_f_pointer(c_targetY, dy, (/numTarget/))
+    call c_f_pointer(c_targetValues, dRes, (/numTarget/))
     
     dRes = dmiss;
       
     ! call triangulate (dres is the result)
-    call triinterp2(XZ = dx, YZ = dy, BL = dRes, NDX = numD, JDLA = jdla, XS = XS, YS = YS, ZS = ZS, NS = NS, dmiss = dmiss, jsferic = jsferic, jins = 1, jasfer3D = 0, &
+    call triinterp2(XZ = dx, YZ = dy, BL = dRes, NDX = numTarget, JDLA = jdla, XS = XS, YS = YS, ZS = ZS, ns = numSamples, dmiss = dmiss, jsferic = jsferic, jins = 1, jasfer3D = 0, &
        NPL = 0, MXSAM = 0, MYSAM =0, XPL = XPL, YPL = YPL, ZPL = ZPL, transformcoef = transformcoef)
 
-end function triang
+end function triangulation
 
 
-! Because make_dual_cell(k, N, rcel, xx, yy, num) in net.F90 uses network_data, 
-! some more refactoring of net.f90 is needed to reduce coupling 
-subroutine averaging(cptr_sx, cptr_sy, cptr_sv, c_nums, cptr_cx, cptr_cy, cptr_cxx, cptr_cyy, cptr_cnp, c_numc, c_n6, cptr_res, cptr_meth, cptr_nmin, cptr_csize, jsferic, jasfer3D) bind(C, name="averaging")
+function averaging(meshtwoddim, meshtwod, startIndex, c_sampleX, c_sampleY, c_sampleValues, numSamples, c_targetValues, locType, Wu1Duni, method, minNumSamples, relativeSearchSize, jsferic, jasfer3D) result(ierr) bind(C, name="averaging")
     !DEC$ ATTRIBUTES DLLEXPORT :: averaging
     use kdtree2Factory
     use m_ec_interpolationsettings
     use m_ec_basic_interpolation, only: averaging2
+    use gridoperations
     use precision_basics
-
+    use m_missing
+    use meshdata
+    use network_data
+    use m_cell_geometry
+    
     implicit none
-
+    
     ! parameters
-    type(c_ptr),    intent(in)                 :: cptr_sx      !< samples x, y, values
-    type(c_ptr),    intent(in)                 :: cptr_sy
-    type(c_ptr),    intent(in)                 :: cptr_sv
-    integer(c_int), intent(in)                 :: c_nums       ! number of samples
-    type(c_ptr),    intent(in)                 :: cptr_cx      ! destination cell center x, y
-    type(c_ptr),    intent(in)                 :: cptr_cy
-    type(c_ptr),    intent(in)                 :: cptr_cxx     ! destination cell corner x, y
-    type(c_ptr),    intent(in)                 :: cptr_cyy
-    type(c_ptr),    intent(in)                 :: cptr_cnp     ! destination cell corner array lengths
-    integer(c_int), intent(in)                 :: c_numc       ! number of destination cells
-    integer(c_int), intent(in)                 :: c_n6         ! max. cell corner array length
-    type(c_ptr),    intent(inout)              :: cptr_res     ! return values (ptr to double array)
-    integer(c_int), intent(in)                 :: cptr_meth    ! averaging method
-    integer(c_int), intent(in)                 :: cptr_nmin    ! minimum nr of samples for avaraging
-    real(c_double), intent(in)                 :: cptr_csize   ! relative search cell size
-    integer(c_int), intent(in)                 :: jsferic
-    integer(c_int), intent(in)                 :: jasfer3D
+    type(c_t_ug_meshgeomdim), intent(in)    :: meshtwoddim         !< input 2d mesh dimensions
+    type(c_t_ug_meshgeom), intent(in)       :: meshtwod            !< input 2d mesh 
+    integer(c_int), intent(in)              :: startIndex          !< the start_index index of the arrays
+    type(c_ptr),    intent(in)              :: c_sampleX           !< samples x
+    type(c_ptr),    intent(in)              :: c_sampleY           !< sample  y
+    type(c_ptr),    intent(in)              :: c_sampleValues      !< sample values
+    integer(c_int), intent(in)              :: numSamples          !< number of samples
+    type(c_ptr),    intent(inout)           :: c_targetValues      !< return values (ptr to double array)
+    integer(c_int), intent(in)              :: locType             !< destination location type: 1: To flow nodes, 2: to zk net nodes
+    real(c_double), intent(in)              :: Wu1Duni
+    integer(c_int), intent(in)              :: method              !< averaging method
+    integer(c_int), intent(in)              :: minNumSamples       !< minimum nr of samples for avaraging
+    real(c_double), intent(in)              :: relativeSearchSize  !< relative search cell size
+    integer(c_int), intent(in)              :: jsferic
+    integer(c_int), intent(in)              :: jasfer3D
 
     ! local variables
-    real(c_double), pointer                 :: sx(:)
-    real(c_double), pointer                 :: sy(:)
-    real(c_double), pointer                 :: svtmp(:)
-    integer                                 :: nums
-    real(c_double), pointer                 :: cx(:)
-    real(c_double), pointer                 :: cy(:)
-    real(c_double), pointer                 :: cxtmp(:)
-    real(c_double), pointer                 :: cytmp(:)
-    integer, pointer                        :: cnp(:)
-    integer                                 :: numc
-    integer                                 :: n6
-    real(c_double), pointer                 :: res(:)
-    double precision, allocatable           :: sv(:,:)
+    type(t_ug_meshgeom)                     :: meshgeom            !< fortran meshgeom
+    real(c_double), pointer                 :: sampleX(:)
+    real(c_double), pointer                 :: sampleY(:)
+    real(c_double), pointer                 :: sampleValuesTemp(:)
+    real(c_double), pointer                 :: targetValues(:)
+    double precision, allocatable           :: sampleValues(:,:)
     integer, allocatable                    :: ipsam(:)
-    double precision, allocatable           :: cz(:,:)
+    double precision, allocatable           :: interpolationResults(:,:)
     double precision, allocatable           :: cxx(:,:)
     double precision, allocatable           :: cyy(:,:)
-    integer                                 :: meth
-    integer                                 :: nmin
-    double precision                        :: csize
-    integer                                 :: i, j, k, IAVtmp, NUMMINtmp, INTTYPEtmp, ierr
+    double precision, allocatable           :: targetX(:)
+    double precision, allocatable           :: targetY(:)
+    integer                                 :: k, IAVtmp, NUMMINtmp, INTTYPEtmp, ierr, i, jakdtree, numTargets
     double precision                        :: RCELtmp
-    double precision                        :: dmiss=-999d0
+    integer                                 :: nMaxNodesPolygon
+    real(hp), allocatable                   :: xx(:,:), yy(:,:), xxx(:), yyy(:)
+    integer, allocatable                    :: nnn(:), cellPermutation(:)
+       
+    !get and convert meshgeom to kn table
+    ierr = network_data_destructor()
+    ierr = convert_cptr_to_meshgeom(meshtwod, meshtwoddim, meshgeom)
+    ierr = ggeo_convert(meshgeom, startIndex)
     
-    real(hp), allocatable                    :: XPL(:)
-    real(hp), allocatable                    :: YPL(:)
-    real(hp), allocatable                    :: ZPL(:)
-
+    !determine number of numTargets
+    if (locType.eq.1) then
+      numTargets = size(meshgeom%facex)
+      allocate(targetX(numTargets))
+      allocate(targetY(numTargets))
+      targetX = meshgeom%facex
+      targetY = meshgeom%facey
+    else if (locType.eq.2) then
+      numTargets = size(meshgeom%nodex)
+      allocate(targetX(numTargets))
+      allocate(targetY(numTargets))
+      targetX = meshgeom%nodex
+      targetY = meshgeom%nodey
+    else
+      !not valid location
+      ierr = -1
+      goto 1234  
+    endif
+        
+    !allocate arrays and a dummy polygon for averaging2
     allocate (XPL(1), YPL(1), ZPL(1))
 
     ! cache interpolation settings
@@ -144,67 +160,112 @@ subroutine averaging(cptr_sx, cptr_sy, cptr_sv, c_nums, cptr_cx, cptr_cy, cptr_c
     INTTYPEtmp = INTERPOLATIONTYPE
     RCELtmp = RCEL
 
-    ! assign ranges and settings
-    nums = c_nums
-    numc = c_numc
-    n6 = c_n6
-    meth = cptr_meth
-    nmin = cptr_nmin
-    csize = cptr_csize
-
-    !assign pointers
-    call c_f_pointer(cptr_sx, sx, (/nums/))
-    call c_f_pointer(cptr_sy, sy, (/nums/))
-    call c_f_pointer(cptr_sv, svtmp, (/nums/))
-    call c_f_pointer(cptr_cx, cx, (/numc/))
-    call c_f_pointer(cptr_cy, cy, (/numc/))
-    call c_f_pointer(cptr_cxx, cxtmp, (/n6*numc/))
-    call c_f_pointer(cptr_cyy, cytmp, (/n6*numc/))
-    call c_f_pointer(cptr_cnp, cnp, (/numc/))
-    call c_f_pointer(cptr_res, res, (/numc/))
-
-    !allocate & copy to 2d arrays
-    allocate(sv(1, nums), ipsam(nums), cz(1,numc), cxx(n6, numc), cyy(n6, numc))
-
-    sv(1,:) = svtmp(:)
-    ipsam(:) = 1
-    k = 1
-    do i = 1, numc
-       cz(1,i) = DMISS
-       do j=1,n6
-          cxx(j, i) = cxtmp(k)
-          cyy(j, i) = cytmp(k)
-          k = k + 1
-       enddo
-    enddo
-
-    if(meth > 0 .and. meth < 8) then
-       IAV = meth
+    !sample arrays
+    allocate(sampleValues(1, numSamples), ipsam(numSamples), interpolationResults(1,numTargets))
+    call c_f_pointer(c_sampleX, sampleX, (/numSamples/))
+    call c_f_pointer(c_sampleY, sampleY, (/numSamples/))
+    call c_f_pointer(c_sampleValues, sampleValuesTemp, (/numSamples/))
+    call c_f_pointer(c_targetValues, targetValues, (/numTargets/))
+    
+    !assign values
+    sampleValues(1,:)          = sampleValuesTemp(:)
+    ipsam(:)                   = 1
+    interpolationResults(1,:)  = dmiss
+    
+    !set interpolation settings
+    if(method > 0 .and. method < 8) then
+       IAV = method
     else
        goto 1234
     endif
-
-    if(nmin > 0) then
-       NUMMIN = nmin
+    if(minNumSamples > 0) then
+       NUMMIN = minNumSamples
     else
        goto 1234
     endif
-
-    if(csize > 0 .and. csize < 10) then
-       RCEL = csize
+    if(relativeSearchSize > 0 .and. relativeSearchSize < 10) then
+       RCEL = relativeSearchSize
     else
        goto 1234
     endif
-
     INTERPOLATIONTYPE = 2
 
-    call build_kdtree(treeglob, nums, sx, sy, ierr, jsferic, dmiss)
-    call averaging2(1, nums, sx, sy, sv, ipsam, cx, cy, cz, numc, cxx, cyy, n6, cnp, 1, dmiss, jsferic, jasfer3D, jins = 1, NPL = 0, &
-                   XPL = XPL, YPL = YPL, ZPL = ZPL)
+    !build kdtree
+    jakdtree = 1
+    call build_kdtree(treeglob, numSamples, sampleX, sampleY, ierr, jsferic, dmiss)
+    
+    !find cells
+    ierr = 0
+    call findcells(100000)
+ 
+    if (locType.eq.1) then
+       
+       !to flow nodes
+       nMaxNodesPolygon = maxval(netcell%n)
+       allocate( xx(nMaxNodesPolygon,ndx), yy(nMaxNodesPolygon,ndx), nnn(ndx) )
+       do i = 1,ndx
+          nnn(i) = netcell(i)%n
+          do k = 1, nnn(k)
+             xx(k,i) = xzw(i) + rcel*(xk(netcell(i)%nod(k))-xzw(i))
+             yy(k,i) = yzw(i) + rcel*(yk(netcell(i)%nod(k))-yzw(i))
+          enddo
+       enddo
+       
+    elseif (locType.eq.2) then
+       
+       !to net nodes
+       nMaxNodesPolygon = 3*maxval(nmk)   ! 2: safe upper bound , 3 : even safer!
+       allocate( xx(nMaxNodesPolygon,numk), yy(nMaxNodesPolygon,numk), nnn(numk), xxx(nMaxNodesPolygon), yyy(nMaxNodesPolygon) )
+       do i = 1,numk
+          call make_dual_cell(i, nMaxNodesPolygon, rcel, xxx, yyy, nnn(i), Wu1Duni)
+          do k=1,nnn(i)
+             xx(k,i) = xxx(k)
+             yy(k,i) = yyy(k)
+          enddo
+       enddo
+       
+    endif
+
+    !interpolation 
+    call averaging2(1,&     !sample vector dimension
+    numSamples,&            !number of samples
+    sampleX,&               !sample x coordinate
+    sampleY,&               !sample y coordinate
+    sampleValues,&          !sample value
+    ipsam,&                 !sample permutation array (increasing x-coordinate)
+    targetX,&               !destination points x coordinates
+    targetY,&               !destination points y coordinates
+    interpolationResults,&  !interpolated values
+    numTargets,&            !number of destination points
+    xx,&                    !polygon points x coordinates
+    yy,&                    !polygon points y coordinates
+    nMaxNodesPolygon,&      !number of poligon vertices
+    nnn,&                   !output variable from make_dual_cell
+    jakdtree,&              !jakdtree
+    dmiss,&
+    jsferic,&
+    jasfer3D,&
+    jins = 1,&
+    NPL = 0,&
+    XPL = XPL,&
+    YPL = YPL,&
+    ZPL = ZPL)
+    
+    !delete kdtree
     call delete_kdtree2(treeglob)
 
     !copy values back
-    res(:) = cz(1,:)
+    if (locType.eq.1) then
+       !to flow nodes: calculate permutation array
+       allocate(cellPermutation(numTargets))
+       do i =1, numTargets
+           call incells(meshgeom%facex(i),meshgeom%facey(i),cellPermutation(i))
+       enddo
+       targetValues(:) = interpolationResults(1,cellPermutation(:))
+    elseif(locType.eq.2) then
+       !to net node: use the permutation array
+       targetValues(:) = interpolationResults(1,nodePermutation(:))
+    endif
 
 1234 continue
 
@@ -213,10 +274,17 @@ subroutine averaging(cptr_sx, cptr_sy, cptr_sv, c_nums, cptr_cx, cptr_cy, cptr_c
     NUMMIN = NUMMINtmp
     INTERPOLATIONTYPE = INTTYPEtmp
     RCEL = RCELtmp
-    deallocate(sv, ipsam, cz, cxx, cyy)
+    if (allocated(sampleValues)) deallocate(sampleValues)
+    if (allocated(ipsam)) deallocate(ipsam)
+    if (allocated(interpolationResults))  deallocate(interpolationResults)
+    if (allocated(cxx)) deallocate(cxx)
+    if (allocated(cyy)) deallocate(cyy)
+    if (allocated(xx))  deallocate(xx)
+    if (allocated(yy))  deallocate(yy)
+    if (allocated(nnn)) deallocate(nnn)
+    if (allocated(xxx)) deallocate(xxx)
+    if (allocated(yyy)) deallocate(yyy) 
 
-end subroutine averaging
-   
-
-   
+end function averaging
+      
 end module ec_module_api

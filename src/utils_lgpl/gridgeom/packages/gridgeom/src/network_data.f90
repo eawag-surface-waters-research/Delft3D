@@ -219,7 +219,9 @@ module network_data
      
 !  netlink permutation by setnodadm
    integer, dimension(:), allocatable :: Lperm  !< permuation of netlinks by setnodadm, dim(numL)
-   
+!  netnode permutation by setnodadm
+   integer, dimension(:), allocatable :: nodePermutation   !< permutation of netnodes by setnodadm, dim(numk)
+
    contains
    
    function network_data_destructor() result (ierr)
