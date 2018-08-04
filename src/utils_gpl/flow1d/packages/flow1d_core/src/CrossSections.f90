@@ -1257,7 +1257,7 @@ recursive subroutine findNeighbourAndAddCrossSection(brs, crs, branchid, cross, 
 
 end subroutine findNeighbourAndAddCrossSection
 
-subroutine GetCSParsFlowInterpolate(cross1, cross2, f, dpt, u1, cz, flowArea, wetPerimeter, flowWidth, conv, af_sub, perim_sub, cz_sub)
+subroutine GetCSParsFlowInterpolate(cross1, cross2, f, dpt, u1, cz, flowArea, wetPerimeter, flowWidth, conv, af_sub, perim_sub, cz_sub, doSummerDike)
 
    use m_GlobalParameters
    
@@ -1273,6 +1273,7 @@ subroutine GetCSParsFlowInterpolate(cross1, cross2, f, dpt, u1, cz, flowArea, we
    double precision, intent(out)           :: wetPerimeter   !< wet perimeter for given DPT
    double precision, intent(out)           :: flowWidth      !< flow width of water surface
    double precision, intent(out)           :: conv           !< conveyance
+   logical, intent(in), optional           :: doSummerDike   !< Switch to calculate Summer Dikes or not
    double precision, intent(out), optional :: af_sub(3)      
    double precision, intent(out), optional :: perim_sub(3)      
    double precision, intent(out), optional :: cz_sub(3)      
@@ -1337,17 +1338,18 @@ subroutine GetCSParsFlowInterpolate(cross1, cross2, f, dpt, u1, cz, flowArea, we
             cz1 = cz
             cz2 = cz
             call GetCSParsFlowCross(cross1, dpt, u1, cz1, flowArea1, wetPerimeter1, flowWidth1, conv1, af_sub_local1, &
-                     perim_sub_local1, cz_sub_local1, doSummerDike = .false.)
+                     perim_sub_local1, cz_sub_local1, doSummerDike = .true.)
             call GetCSParsFlowCross(cross2, dpt, u1, cz2, flowArea2, wetPerimeter2, flowWidth2, conv2, af_sub_local2, &
-                     perim_sub_local2, cz_sub_local2, doSummerDike = .false.)
+                     perim_sub_local2, cz_sub_local2, doSummerDike = .true.)
             
             ! Summer Dikes
-            call interpolateSummerDike(cross1, cross2, f, dpt, sdArea, sdWidth, .true.)
+            !call interpolateSummerDike(cross1, cross2, f, dpt, sdArea, sdWidth, .true.)
          
-            flowArea     = (1.0d0 - f) * flowArea1     + f * flowArea2  + sdArea
-            flowWidth    = (1.0d0 - f) * flowWidth1    + f * flowWidth2 + sdWidth
+            flowArea     = (1.0d0 - f) * flowArea1     + f * flowArea2   !+ sdArea
+            flowWidth    = (1.0d0 - f) * flowWidth1    + f * flowWidth2  !+ sdWidth
             wetPerimeter = (1.0d0 - f) * wetPerimeter1 + f * wetPerimeter2
 
+            ! compute average chezy 
             cz           = (1.0d0 - f) * cz1   + f * cz2
             conv         = (1.0d0 - f) * conv1 + f * conv2
             if (present(af_sub)) then
@@ -1617,7 +1619,7 @@ subroutine GetCSParsFlowCross(cross, dpt, u1, cz, flowArea, wetPerimeter, flowWi
    
 end subroutine GetCSParsFlowCross
 
-subroutine GetCSParsTotalInterpolate(cross1, cross2, f, dpt, totalArea, totalWidth, calculationOption)
+subroutine GetCSParsTotalInterpolate(cross1, cross2, f, dpt, totalArea, totalWidth, calculationOption, doSummerDike)
 
    use m_GlobalParameters
    
@@ -1634,16 +1636,13 @@ subroutine GetCSParsTotalInterpolate(cross1, cross2, f, dpt, totalArea, totalWid
                                                            !! CS_TYPE_PLUS      Total area for only the expanding part of the cross section (Nested Newton method)\n
                                                            !! CS_TYPE_MIN       Total area for only the narrowing part of the cross section (Nested Newton method)
    integer, intent(in)                   :: calculationOption 
-
+   logical, intent(in), optional         :: doSummerDike    !< Switch to calculate Summer Dikes or not
+   
    double precision                      :: totalArea1
    double precision                      :: totalArea2
    double precision                      :: totalWidth1   
    double precision                      :: totalWidth2   
    type (t_CrossSection), save           :: crossi         !< intermediate virtual crosssection     
-
-   double precision                      :: sdArea  = 0.0d0
-   double precision                      :: sdWidth = 0.0d0
-
 
    if(cross1%crossIndx == cross2%crossIndx) then
       ! Same Cross-Section, no interpolation needed 
@@ -1671,15 +1670,16 @@ subroutine GetCSParsTotalInterpolate(cross1, cross2, f, dpt, totalArea, totalWid
          call GetCSParsTotalCross(crossi, dpt, totalArea, totalWidth, calculationOption)
          
       case default                             ! Call GetCSParstotalCross twice and interpolate the results 
-
-         call GetCSParsTotalCross(cross1, dpt, totalArea1, totalWidth1, calculationOption, doSummerDike = .false.)
-         call GetCSParsTotalCross(cross2, dpt, totalArea2, totalWidth2, calculationOption, doSummerDike = .false.)
+         if (present(doSummerDike)) then
+             call GetCSParsTotalCross(cross1, dpt, totalArea1, totalWidth1, calculationOption, doSummerDike = doSummerDike)
+             call GetCSParsTotalCross(cross2, dpt, totalArea2, totalWidth2, calculationOption, doSummerDike = doSummerDike)
+         else    
+             call GetCSParsTotalCross(cross1, dpt, totalArea1, totalWidth1, calculationOption)
+             call GetCSParsTotalCross(cross2, dpt, totalArea2, totalWidth2, calculationOption)
+         endif         
          
-         ! Summer Dikes
-         call interpolateSummerDike(cross1, cross2, f, dpt, sdArea, sdWidth, .false.)
-         
-         totalArea     = (1.0d0 - f) * totalArea1     + f * totalArea2  + sdArea
-         totalWidth    = (1.0d0 - f) * totalWidth1    + f * totalWidth2 + sdWidth
+         totalArea     = (1.0d0 - f) * totalArea1     + f * totalArea2
+         totalWidth    = (1.0d0 - f) * totalWidth1    + f * totalWidth2
         
       end select
       

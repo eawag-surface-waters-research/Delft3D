@@ -464,7 +464,7 @@ contains
       czdum = 0d0
       
       call GetCSParsFlow(cross1, cross2, factor, depth, 0.0d0, czdum, area, perimeter, width, conv, &
-                         af_sub_local, perim_sub_local, cz_sub_local)
+                         af_sub_local, perim_sub_local, cz_sub_local, doSummerDike=.true.)
       
       if (present(flowArea))          flowArea = area
       if (present(flowWidth))         flowWidth = width
@@ -752,19 +752,22 @@ contains
 
 ! =================================================================================================
 ! =================================================================================================
-   subroutine getConveyance(network, dpt, u1L, q1L, s1L, L, perim_sub, flowarea_sub, conv, cz_sub)
+   subroutine getConveyance(network, dpt, u1L, q1L, s1L, L, perim_sub, flowarea_sub, conv, cz_sub, cz, flowArea, wetPerimeter)
       use m_CrossSections     , only: t_CSType, CS_TABULATED, CS_YZ_PROF
       
       implicit none
       type(t_network), intent(in)    :: network
-      double precision               :: dpt, u1L, q1L, s1L, conv
+      double precision               :: dpt, u1L, q1L, s1L
+      double precision, intent(out)  :: conv
       integer                        :: i , L, n
-      double precision, dimension(3) :: flowarea_sub, cz_sub, perim_sub
+      double precision, dimension(3), intent(in) :: flowarea_sub, perim_sub
+      double precision, dimension(3), intent(out) :: cz_sub
       type(t_CSType), pointer        :: cross
-      integer                        :: numsect
-      double precision               :: cz
+      double precision, intent(out)  :: cz
       double precision, parameter    :: eps = 1d-3               !< accuracy parameter for determining wetperimeter == 0d0
       double precision               :: r
+      double precision, intent(in)   :: flowArea
+      double precision, intent(in)   :: wetPerimeter
       integer                        :: igrid
       integer                        :: ibranch
       
@@ -776,18 +779,23 @@ contains
       if (cross%crosstype /= CS_YZ_PROF) then
          conv = 0d0
          if (perim_sub(1)> 0.0d0) then
-            numsect = 0
             do i = 1, 3
-               if (perim_sub(i) > eps) then
+               if (perim_sub(i) > eps .and. flowarea_sub(i) > 0.0d0) then
                   r = flowarea_sub(i)/perim_sub(i)
                   cz_sub(i) =  getFrictionValue(network%rgs, network%spData, ibranch, i, igrid, s1L, q1L, u1L, r, dpt)
                   conv = conv + cz_sub(i) * flowarea_sub(i) * sqrt(flowarea_sub(i) / perim_sub(i))
-                  numsect = numsect+1
                else
                   cz_sub(i) = 0
                endif
             enddo
          endif
+         ! compute average chezy 
+         cz = conv/(flowArea*sqrt(flowArea/wetPerimeter))
+         ! criteria to satisfy the criteria  in normup i.e cz(m)*cz(m)*wet
+         if (cz * cz * flowArea < 1.0d0) then
+            conv = sqrt(flowArea * flowArea / wetPerimeter)
+         endif
+      
       endif
 
    end subroutine getConveyance
