@@ -126,7 +126,8 @@ integer, parameter, public :: RP_D15MX = 50     ! same, d15
 integer, parameter, public :: RP_POROS = 51     ! same, porosity
 integer, parameter, public :: RP_DZDX  = 52     ! same, bottom slope x dir
 integer, parameter, public :: RP_DZDY  = 53     ! same, bottom slope y dir
-integer, parameter, public :: MAX_RP   = 53
+integer, parameter, public :: RP_DM    = 54     ! median sediment diameter
+integer, parameter, public :: MAX_RP   = 54
 !
 integer, parameter, public :: IP_NM    =  1
 integer, parameter, public :: IP_N     =  2
