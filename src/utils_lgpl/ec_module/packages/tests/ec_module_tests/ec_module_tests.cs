@@ -83,7 +83,7 @@ namespace ECModuleTests
             var sampleX = new double[numSamples];
             var sampleY = new double[numSamples];
             var sampleValues = new double[numSamples];
-           
+
             readPoints(pathIn, ref sampleX, ref sampleY, ref sampleValues, ref numSamples);
 
             int numTargets = 0;
@@ -96,30 +96,60 @@ namespace ECModuleTests
             IntPtr c_sampleX = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * numSamples);
             IntPtr c_sampleY = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * numSamples);
             IntPtr c_sampleValues = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * numSamples);
-
-            IntPtr c_targetX = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * numTargets);
-            IntPtr c_targetY = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * numTargets);
-            IntPtr c_targetValues = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * numTargets);
-
             Marshal.Copy(sampleX, 0, c_sampleX, numSamples);
             Marshal.Copy(sampleY, 0, c_sampleY, numSamples);
             Marshal.Copy(sampleValues, 0, c_sampleValues, numSamples);
 
-            Marshal.Copy(targetX, 0, c_targetX, numTargets);
-            Marshal.Copy(targetY, 0, c_targetY, numTargets);
+            IntPtr c_targetValues = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * numTargets);
+            Marshal.Copy(sampleValues, 0, c_sampleValues, numSamples);
 
+            int ioncid = 0; //file variable 
+            int mode = 0;   //open in read mode
+            var wrapperNetcdf = new IoNetcdfLibWrapper();
+            int iconvtype = 2;
+            double convversion = 0.0;
+            string pathNetFile = TestHelper.TestFilesDirectoryPath() + @"\simplebox_net_ugrid.nc";
+            Assert.IsTrue(File.Exists(pathIn));
+            int ierr = wrapperNetcdf.ionc_open(pathNetFile, ref mode, ref ioncid, ref iconvtype, ref convversion);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            int meshid = -1;
+            int meshType = 2;    //get the 2d
+            int l_networkid = 0; // invalid network, not really intrested in getting the networ
+            var meshtwoddim = new meshgeomdim();
+            getMeshid(ioncid, ref meshid, meshType, ref wrapperNetcdf);
+            ierr = wrapperNetcdf.ionc_get_meshgeom_dim(ref ioncid, ref meshid, ref l_networkid, ref meshtwoddim);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            //You need to know in advance the number of mesh points
+            var meshtwod = new meshgeom();
+            meshtwod.nodex = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshtwoddim.numnode);
+            meshtwod.nodey = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshtwoddim.numnode);
+            meshtwod.nodez = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshtwoddim.numnode);
+            meshtwod.edge_nodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshtwoddim.numedge * 2);
+
+            //var gridGeomWrapper = new GridGeomLibWrapper();
+            bool includeArrays = true;
+            int startIndex = 1; //the base index of the arrays
+            ierr = wrapperNetcdf.ionc_get_meshgeom(ref ioncid, ref meshid, ref l_networkid, ref meshtwod, ref startIndex, ref includeArrays);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            // default parameters for averaging
             int jsferic = 0;
+            int locType = 2;
+
             var wrapper = new Ec_ModuleLibWrapper();
-            int ierr = wrapper.triang(
-                ref c_sampleX,
-                ref c_sampleY,
-                ref c_sampleValues,
-                ref numSamples,
-                ref c_targetX,
-                ref c_targetY,
-                ref c_targetValues,
-                ref numTargets,
-                ref jsferic);
+            ierr = wrapper.triang(ref meshtwoddim,
+            ref meshtwod,
+            ref startIndex,
+            ref c_sampleX,
+            ref c_sampleY,
+            ref c_sampleValues,
+            ref numSamples,
+            ref c_targetValues,
+            ref locType,
+            ref jsferic);
+
             Assert.That(ierr, Is.EqualTo(0));
 
             //check the interpolation results
@@ -198,6 +228,7 @@ namespace ECModuleTests
             int startIndex = 1; //the base index of the arrays
             ierr = wrapperNetcdf.ionc_get_meshgeom(ref ioncid, ref meshid, ref l_networkid, ref meshtwod, ref startIndex, ref includeArrays);
             Assert.That(ierr, Is.EqualTo(0));
+
 
             // default parameters for averaging
             double Wu1Duni = 2.0;               // default value from flow_geom init
