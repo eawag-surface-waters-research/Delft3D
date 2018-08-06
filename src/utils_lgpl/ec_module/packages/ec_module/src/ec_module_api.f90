@@ -5,74 +5,104 @@ module ec_module_api
 implicit none
    contains
    
-function triangulation(c_sampleX, c_sampleY, c_sampleValues, numSamples, c_targetX, c_targetY, c_targetValues, numTarget, jsferic) result(ierr) bind(C, name="triangulation")
+function triangulation(meshtwoddim, meshtwod, startIndex, c_sampleX, c_sampleY, c_sampleValues, numSamples, c_targetValues, locType, jsferic) result(ierr) bind(C, name="triangulation")
     !DEC$ ATTRIBUTES DLLEXPORT :: triangulation
 
     !from ec_module
     use m_ec_basic_interpolation, only: triinterp2
     use m_missing
+    use meshdata
     use precision_basics
+    use network_data
 
     implicit none
 
-    ! parameters
-    type(c_ptr), intent(in)                 :: c_sampleX      ! samples x, y, values
+    ! inputs
+    type(c_t_ug_meshgeomdim), intent(in)    :: meshtwoddim         !< input 2d mesh dimensions
+    type(c_t_ug_meshgeom), intent(in)       :: meshtwod            !< input 2d mesh 
+    integer(c_int), intent(in)              :: startIndex          !< the start_index index of the arrays
+    type(c_ptr), intent(in)                 :: c_sampleX           ! samples x, y, values
     type(c_ptr), intent(in)                 :: c_sampleY
     type(c_ptr), intent(in)                 :: c_sampleValues
-    type(c_ptr), intent(in)                 :: c_targetX      ! destinations x, y
-    type(c_ptr), intent(in)                 :: c_targetY
-    type(c_ptr), intent(inout)              :: c_targetValues     ! return values (ptr to double array)
-    integer(kind=c_int), intent(in)         :: numSamples, numTarget, jsferic
+    integer(c_int), intent(in)              :: numSamples          !< number of samples
+    type(c_ptr),    intent(inout)           :: c_targetValues      !< return values (ptr to double array)
+    integer(c_int), intent(in)              :: locType             !< destination location type: 1: To flow nodes, 2: to zk net nodes
+    integer(c_int), intent(in)              :: jsferic
 
     ! local variables
-
-    integer                                 :: jdla = 1
-    real(c_double), pointer                 :: ptr(:)
-    real(c_double), pointer                 :: dx(:)
-    real(c_double), pointer                 :: dy(:)
-    real(c_double), pointer                 :: dRes(:)
+    type(t_ug_meshgeom)                      :: meshgeom            !< fortran meshgeom
+    real(c_double), pointer                  :: sampleX(:)
+    real(c_double), pointer                  :: sampleY(:)
+    real(c_double), pointer                  :: sampleValues(:)
+    real(c_double), pointer                  :: targetValues(:)
+    double precision, allocatable            :: targetX(:)
+    double precision, allocatable            :: targetY(:)
+    integer                                  :: numTargets
       
     !From other modules
     integer                                  :: ierr 
-    double precision, allocatable            :: XS(:), YS(:), ZS(:)    
-    real(hp), allocatable                    :: XPL(:)
-    real(hp), allocatable                    :: YPL(:)
-    real(hp), allocatable                    :: ZPL(:)
+    integer                                  :: jdla
     real(hp)                                 :: transformcoef(6)
     
+    !fill meshgeom
     ierr = 0
+    ierr = network_data_destructor()
+    ierr = convert_cptr_to_meshgeom(meshtwod, meshtwoddim, meshgeom)
+    
+    !determine number of numTargets
+    if (locType.eq.1) then
+      numTargets = size(meshgeom%facex)
+      allocate(targetX(numTargets))
+      allocate(targetY(numTargets))
+      targetX = meshgeom%facex
+      targetY = meshgeom%facey
+    else if (locType.eq.2) then
+      numTargets = size(meshgeom%nodex)
+      allocate(targetX(numTargets))
+      allocate(targetY(numTargets))
+      targetX = meshgeom%nodex
+      targetY = meshgeom%nodey
+    else
+      !not valid location
+      ierr = -1
+      goto 1234  
+    endif
+    
+    call c_f_pointer(c_sampleX, sampleX, (/numSamples/))
+    call c_f_pointer(c_sampleY, sampleY, (/numSamples/))
+    call c_f_pointer(c_sampleValues, sampleValues, (/numSamples/))
+    call c_f_pointer(c_targetValues, targetValues, (/numTargets/))
+
+    targetValues = dmiss
     transformcoef = 0.0d0
-
+    jdla = 1
+    
     ! (re)allocate sample arrays
-    if (allocated(XS)) then
-        deallocate(XS,YS,ZS)
-    end if
-    allocate(XS(numSamples), YS(numSamples), ZS(numSamples))
     allocate (XPL(1), YPL(1), ZPL(1))
-
-    XPL = dmiss;
-    YPL = dmiss;
-    ZPL = dmiss;
-    
-    ! copy ptr's to fortran arrays
-    call c_f_pointer(c_sampleX, ptr, (/numSamples/))
-    XS(:) = ptr
-
-    call c_f_pointer(c_sampleY, ptr, (/numSamples/))
-    YS(:) = ptr
-
-    call c_f_pointer(c_sampleValues, ptr, (/numSamples/))
-    ZS(:) = ptr
-
-    call c_f_pointer(c_targetX, dx, (/numTarget/))
-    call c_f_pointer(c_targetY, dy, (/numTarget/))
-    call c_f_pointer(c_targetValues, dRes, (/numTarget/))
-    
-    dRes = dmiss;
       
     ! call triangulate (dres is the result)
-    call triinterp2(XZ = dx, YZ = dy, BL = dRes, NDX = numTarget, JDLA = jdla, XS = XS, YS = YS, ZS = ZS, ns = numSamples, dmiss = dmiss, jsferic = jsferic, jins = 1, jasfer3D = 0, &
-       NPL = 0, MXSAM = 0, MYSAM =0, XPL = XPL, YPL = YPL, ZPL = ZPL, transformcoef = transformcoef)
+    call triinterp2(XZ = targetX,& 
+    YZ = targetY, &
+    BL = targetValues,& 
+    NDX = numTargets, &
+    JDLA = jdla,& 
+    XS = sampleX,& 
+    YS = sampleY,&
+    ZS = sampleValues,& 
+    ns = numSamples,& 
+    dmiss = dmiss,& 
+    jsferic = jsferic,& 
+    jins = 1,& 
+    jasfer3D = 0, &
+    NPL = 0,& 
+    MXSAM = 0,& 
+    MYSAM =0,& 
+    XPL = XPL,& 
+    YPL = YPL,& 
+    ZPL = ZPL,& 
+    transformcoef = transformcoef)
+    
+1234 continue
 
 end function triangulation
 
