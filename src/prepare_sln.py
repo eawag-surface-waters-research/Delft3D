@@ -553,6 +553,7 @@ def do_work():
     # TODO: Consider making this optional via cmdline args:
     process_solution_file("io_netcdf.sln",    os.path.join("scripts_lgpl", "win64", "io_netcdf_template.sln"))
     process_solution_file("nefis.sln",        os.path.join("scripts_lgpl", "win64", "nefis_template.sln"))
+    process_solution_file("utils_lgpl.sln",   os.path.join("scripts_lgpl", "win64", "utils_lgpl_template.sln"))
 
     # Force reading GUI parameters next run
     vs = -999
