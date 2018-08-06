@@ -16,14 +16,15 @@ namespace General.tests
 
         [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "triangulation", CallingConvention = CallingConvention.Cdecl)]
         public static extern int triang_dll(
+            [In] ref meshgeomdim meshtwoddim,
+            [In] ref meshgeom meshtwod,
+            [In] ref int startIndex,
             [In] ref IntPtr c_sampleX,
             [In] ref IntPtr c_sampleY,
             [In] ref IntPtr c_sampleValues,
             [In] ref int numSamples,
-            [In] ref IntPtr c_targetX,
-            [In] ref IntPtr c_targetY,
             [In, Out] ref IntPtr c_targetValues,
-            [In] ref int numTarget,
+            [In] ref int locType,
             [In] ref int jsferic);
 
         [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "averaging", CallingConvention = CallingConvention.Cdecl)]
@@ -47,26 +48,28 @@ namespace General.tests
         #endregion ec_module_functions_dll
 
         public int triang(
+            ref meshgeomdim meshtwoddim,
+            ref meshgeom meshtwod,
+            ref int startIndex,
             ref IntPtr c_sampleX,
             ref IntPtr c_sampleY,
             ref IntPtr c_sampleValues,
             ref int numSamples,
-            ref IntPtr c_targetX,
-            ref IntPtr c_targetY,
             ref IntPtr c_targetValues,
-            ref int numTarget,
+            ref int locType,
             ref int jsferic)
         {
             int ierr = triang_dll(
-                ref  c_sampleX,
-                ref  c_sampleY,
-                ref  c_sampleValues,
-                ref  numSamples,
-                ref  c_targetX,
-                ref  c_targetY,
-                ref  c_targetValues,
-                ref  numTarget,
-                ref  jsferic);
+            ref  meshtwoddim,
+            ref  meshtwod,
+            ref  startIndex,
+            ref  c_sampleX,
+            ref  c_sampleY,
+            ref  c_sampleValues,
+            ref  numSamples,
+            ref  c_targetValues,
+            ref  locType,
+            ref  jsferic);
             return ierr;
         }
 
