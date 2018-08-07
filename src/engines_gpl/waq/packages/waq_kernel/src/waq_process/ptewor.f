@@ -61,7 +61,7 @@
 !
 !     local declarations
 !
-      INTEGER  IKMRK1, IFLUX,ISEG,
+      INTEGER  IFLUX,ISEG,
      +         IP1, IP2, IP3, IP4, IP5, IP6, IP7, IP8, IP9, IP10
       REAL     FBOD, FBOD2, FBOD3, FCOD, FOXY, FORGN, FNH4, FNO3,
      +         FECOLI, FOON

@@ -528,6 +528,7 @@
       LOGICAL    SW_PARTHENIADES
 
 !     Resuspension submodel for DELWAQ-G, equals Restra, bug fixed ZRESLE
+!     AM (august 2018) ZRESLE is not actually used
 
 !.....Loop over water_sediment_exchanges in kolom
 !     note: more than 1 sediment water exchange may exist on top of
@@ -722,7 +723,7 @@
 !        IPSFLX and IPDM   point in the SEGMENT  space
 !
 !
-      INTEGER    IQ1   , IQ2
+      INTEGER    IQ1   , IQ2   ,
      J           IPSFLX, INSFLX, IPDM  , INDM  ,
      J           IPSVEL, INSVEL, IPSVOL, INSVOL
       INTEGER    IEXPNT( 4,* )
@@ -815,11 +816,11 @@
 
       LOGICAL          KOLOM
       logical, save :: FIRST
-      INTEGER  IK    , IQ    , ivan  , inaar , ikmrkv, ikmrkn, ik1   ,
+      INTEGER  IK    , IQ    , ivan  , inaar , ikmrkv, ikmrkn,
      j         lenkol , nkolom
       DATA FIRST / .true. /
       INTEGER lunrep, errorcode
-      
+
       call getmlu(lunrep)
       errorcode = 0
 

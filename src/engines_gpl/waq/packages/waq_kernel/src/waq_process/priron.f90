@@ -96,14 +96,7 @@
       real(8) fpfeco3     ! O  rate of iron(II) carbonate precipitation           (gFe/m3/d)
       real(8) fdfeco3     ! O  rate of iron(II) carbonate dissolution             (gFe/m3/d)
       real(8) fpyr        ! O  rate of pyrite formation                           (gFe/m3/d)
-      real(8) dpfe3       ! F  rate of amorphous iron(III) precipitat.            (gFe/m3/d)
-      real(8) ddfe3       ! F  rate of amorphous iron(III) dissolution            (gFe/m3/d)
       real(8) dafe3       ! F  rate of amorphous iron(III) aging                  (gFe/m3/d)
-      real(8) dpfes       ! F  rate of iron(II) sulphide precipitation            (gFe/m3/d)
-      real(8) ddfes       ! F  rate of iron(II) sulphide dissolution              (gFe/m3/d)
-      real(8) dpfeco3     ! F  rate of iron(II) carbonate precipitation           (gFe/m3/d)
-      real(8) ddfeco3     ! F  rate of iron(II) carbonate dissolution             (gFe/m3/d)
-      real(8) dpyr        ! F  rate of pyrite formation                           (gFe/m3/d)
       integer idpfe3      !    Pointer to the rate of amorphous iron(III) precipitat.
       integer iddfe3      !    Pointer to the rate of amorphous iron(III) dissolution
       integer idafe3      !    Pointer to the rate of amorphous iron(III) aging

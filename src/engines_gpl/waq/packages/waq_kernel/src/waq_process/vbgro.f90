@@ -75,7 +75,6 @@
       integer VBType      ! I  code of vegetation type for error and warnings      (-)
       integer SWiniVB1    !    0=no init, 1=init.
       integer SWregro     !    0=no regrowth, 1=regrowth allowed
-      logical, save       :: first = .true.      !
       integer             :: ikmrk2         ! second feature
       integer             :: ikmrk3         ! third feature
       integer ILUMON
@@ -259,7 +258,8 @@
                weighCP = F1VB*CPf1VB + F2VB*CPf2VB + F3VB*CPf3VB + F4VB*CPf4VB + F5VB*CPf5VB
                weighCS = F1VB*CSf1VB + F2VB*CSf2VB + F3VB*CSf3VB + F4VB*CSf4VB + F5VB*CSf5VB
 
-               dVB1MaxNL = FravailM * min( Navail  * weighCN, Pavail  * weighCP, Savail  * weighCS) * IniCovVB1 / volume * surf / delt
+               dVB1MaxNL = FravailM * min( Navail  * weighCN, Pavail  * weighCP, Savail  * weighCS) * &
+                                          IniCovVB1 / volume * surf / delt
                dVB1MaxNL = max(0.0,dVB1MaxNL)
 
             endif
@@ -277,7 +277,8 @@
                      IF ( (iniVB1/maxVB1) .lt. 0.99) THEN
                         ageVB1  = hlfAgeVB1 + LOG((minVB1-maxVB1) /(iniVB1-maxVB1) - 1 ) / sfVB1
                      ELSE
-                        WRITE (ILUMON, *) 'WARNING : Vegtype ',vbtype, ' init biom .ge. Max: ', iniVB1*dmcfVB1/100, '>=',maxVB1*dmcfVB1/100
+                        WRITE (ILUMON, *) 'WARNING : Vegtype ',vbtype, &
+                            ' init biom .ge. Max: ', iniVB1*dmcfVB1/100, '>=',maxVB1*dmcfVB1/100
 !                       age representing 99% of initial mass
                         ageVB1= hlfAgeVB1 + LOG((minVB1-maxVB1) /( (0.99 - 1) * maxVB1) - 1 ) / sfVB1
                      ENDIF

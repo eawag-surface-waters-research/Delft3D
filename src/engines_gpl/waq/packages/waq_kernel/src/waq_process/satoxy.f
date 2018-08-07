@@ -57,7 +57,7 @@
 !
 !     Local declarations
 !
-      INTEGER  SWITCH, LUNREP, IKMRK1, ISEG  , IP1   ,
+      INTEGER  SWITCH, LUNREP, ISEG  , IP1   ,
      +         IP2   , IP3   , IP4   , IP5
       REAL     CL    , TEMP  , SAL   , TEMP2 , PART1 ,
      +         PART2 , OXSAT , A1    , A2    , A3    ,

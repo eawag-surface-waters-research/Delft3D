@@ -163,7 +163,7 @@
       REAL     ::  CFOOD   (42),  CCFOOD (42),  Pref   (42),
      +             NCFOOD  (42),  PCFOOD (42),  SICFOOD(42),
      +             dFil    (42),  FFFOOD (42)
-      INTEGER  ::  BENFOOD (42), SwitchINI, SwitchV1
+      INTEGER  ::  BENFOOD (42),  SwitchV1
       INTEGER  ::  lunrep
 
       REAL     ::  POM(4), DETRIT(4), DETS1(4), DETBIO(4)
@@ -174,13 +174,12 @@
      +             dMor, dNMor, dPMor, Pra, rMor, rHrv,
      +             dRes, dNRes, dPRes, FoodPel, FoodBen,
      +             f_B, f_S, kappaI, kappaA, FF, FFBen, FFPel, dUpte,
-     +             Uptake, Nuptake, Puptake, SiUptake,
      +             UptakeC, NuptakeC, PuptakeC, LimUptake,
      +             Filtr, NFiltr, PFiltr, SiFiltr,
      +             GSI, GSI_upper, GSI_lower, MinSpTemp, DoSpawn,
      +             dSpw, dNSpw, dPSpw, rSpawn, fadult, fjuv,
-     +             Pa, Pc, Pj, Pr, Pg, Pm, Prj, Pjj, Pja, Pv,
-     +             Vd, Length, Onethird, kappa_G, foc, kT
+     +             Pa, Pc, Pr, Pg, Pm, Prj, Pjj, Pja, Pv,
+     +             Vd, Length, Onethird, kappa_G, kT
 
       REAL ::      Cin, Cuit, Cbal, Nin, Nuit, Pin, Puit,
      +             Siin, Siuit, Nbal, Pbal, Sibal,

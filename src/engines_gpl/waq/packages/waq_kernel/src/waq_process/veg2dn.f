@@ -58,23 +58,15 @@
       real(4) no3         ! i  no3                                         (g/m3)
       real(4) po4         ! i  po4                                         (g/m3)
       real(4) sud         ! i  sud                                         (g/m3)
-      real(4) vbxxnavail  ! o  available nitrogen                          (g/m2)
-      real(4) vbxxpavail  ! o  available p                                 (g/m2)
-      real(4) vbxxsavail  ! o  available s                                 (g/m2)
 
       ! local declarations
 
       integer iseg        !    local loop counter for computational element loop
       real(4) z2          !    height bottom segment from bottom              (m)
       real(4) z1          !    height top segment from bottom                 (m)
-      integer ikmrk2
       integer ikmrk3
       real(4) zm          !    watersurface to top macropyte                  (-)
       real(4) frlay       !    fraction witin layer                           (-)
-      integer iq          !    loop counter
-      integer ifrom       !    from segment
-      integer ito         !    from segment
-      integer iflux       !    index in the fl array
 
       integer, parameter           :: npnt = 16           ! number of pointers
       integer                      :: ipnt(npnt)          ! local work array for the pointering

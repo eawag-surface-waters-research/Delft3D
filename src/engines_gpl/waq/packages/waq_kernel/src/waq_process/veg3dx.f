@@ -66,9 +66,6 @@
       real(4) zm          !    watersurface to top macropyte                  (-)
       real(4) a           !    lineair factor a (ax + b)                      (-)
       real(4) b           !    lineair factor b (ax + b)                      (-)
-      integer iq          !    loop counter
-      integer ifrom       !    from segment
-      integer ito         !    from segment
       integer iflux       !    index in the fl array
 
       integer, parameter           :: nipfix =  8         ! first number of entries in pmsa independent of number of parameters
@@ -188,7 +185,7 @@
 
          pmsa(ipnt(nipfix+nivar*nvbxx+1)) = frbmlay
          do ivbxx = 1, nvbxx
-! alway calculate the fluxes, even in dry cells...            
+! alway calculate the fluxes, even in dry cells...
 !            if (ikmrk1.ne.0) then
                vb      = pmsa(ipoint(nipfix+ivbxx)+(ibotseg-1)*increm(nipfix+ivbxx))
                bmlayvb = frbmlay * vb

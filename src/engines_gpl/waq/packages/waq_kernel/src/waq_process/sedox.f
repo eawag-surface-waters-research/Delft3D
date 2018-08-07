@@ -238,8 +238,8 @@
 !**** FLUX equainput divided by depth , M/m2/d * 1/m = M/m3/d + decay SOD
 !********************************************************************
 
-               DSOD = ZFL / DEPTH + SOD * RCSOD * TFSOD / DEPTH 
-               
+               DSOD = ZFL / DEPTH + SOD * RCSOD * TFSOD / DEPTH
+
                DOXSOD = (ZFL+ZFLAUT)/DEPTH + SOD*RCSOD*TFSOD/DEPTH
 
 !              beveiliging(en) tegen deling door nul in sodch4
@@ -424,13 +424,13 @@
 ! single precision because of delwaq.
 !
 !
-      implicit real*8 (a-z)
+      implicit double precision (a-z)
       dimension x1(6)
 !
 ! RS: input variables must be single precision
 !     output is converted to single precision
 !
-      real*4 diagen,hsed,kapc20,thetak,temp,dep,
+      real :: diagen,hsed,kapc20,thetak,temp,dep,
      &        edwcsd,diamb,xox,kappad,x1real(6)
 
 !**************************************************************

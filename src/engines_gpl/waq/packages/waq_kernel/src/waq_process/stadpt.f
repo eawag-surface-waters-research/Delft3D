@@ -60,7 +60,7 @@
      +         IN1   , IN2   , IN3   , IN4   , IN5
       INTEGER  IPP2  , IPP3  , IPP4  , IPP5  , ISEGL , NOSEGL, LUNREP
       INTEGER  NOLAY , ILAY
-      INTEGER  IKMRK , IKMRK1, IKMRK2, ISEG  , IQ    , IFROM , ITO
+      INTEGER  IKMRK
       REAL     VOLUME
 
       IP1 = IPOINT(1)

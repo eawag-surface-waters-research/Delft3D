@@ -53,7 +53,7 @@
      J         POC2, PON2, POP2, POS2, DmPOC2, CN2, CP2, CS2,
      J         POC3, PON3, POP3, POS3, DmPOC3, CN3, CP3, CS3,
      J         POC4, PON4, POP4, POS4, DmPOC4, CN4, CP4, CS4
-      INTEGER  IFLUX, IKMRK1, ISEG
+      INTEGER  IFLUX, ISEG
       INTEGER  IP(80)
 !
       IP = IPOINT

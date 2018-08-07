@@ -61,7 +61,7 @@
      +         IEXPNT(4,*) , IKNMRK(*) , NOQ1, NOQ2, NOQ3, NOQ4
       integer  ip1 , ip2 , ip3 , ip4 , ip5 , ip6 , ip7 , ip8 ,
      j         ip9 , ip10, ip11, ip12, ip13,
-     j         iflux, iseg, ikmrk1, ikmrk2
+     j         iflux, iseg, ikmrk2
       real     FALG1,NCRAT1,PCRAT1,AUT1,DET1,FALG2,NCRAT2,PCRAT2,
      j         SICRAT,AUT2,DET2,DEPTH,SWITCH,AA,DC1,DC2
 

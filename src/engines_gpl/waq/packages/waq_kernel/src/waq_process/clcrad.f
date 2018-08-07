@@ -58,7 +58,6 @@
       REAL               :: SURF               ! 5  in  horizontal surface                            (m2)
       INTEGER            :: SWEMERSION         ! 6  in  switch indicating submersion(0) or emersion (1)(-)
       REAL               :: RADBOT             ! 7  loc/out 9 irradiation at the segment lower-boundary   (W/m2)
-      REAL               :: RAD                ! 8  out irradiation at the segment upper-boundary   (W/m2)
 
 !     local decalrations
 
@@ -68,7 +67,6 @@
       INTEGER            :: IKMRK1         ! first feature inactive(0)-active(1)-bottom(2) segment
       INTEGER            :: IK1VN          ! first feature inactive(0)-active(1)-bottom(2) VAN segment
       INTEGER            :: IK1NR          ! first feature inactive(0)-active(1)-bottom(2) NAAR segment
-      INTEGER            :: IKMRK2         ! second feature 2D(0)-surface(1)-middle(2)-bottom(3) segment
       INTEGER            :: IK2VN          ! second feature 2D(0)-surface(1)-middle(2)-bottom(3) VAN segment
       INTEGER            :: IK2NR          ! second feature 2D(0)-surface(1)-middle(2)-bottom(3) NAAR segment
       INTEGER            :: IK             ! loop counter bottom columns
@@ -83,7 +81,6 @@
       INTEGER            :: IBODEM         ! segment number bottom segment
       REAL               :: RADTOP         ! radiation at top
       REAL               :: TOTSURF        ! cummulated surface area
-      REAL               :: RTMP           ! RTMP
       REAL               :: REFLEC         ! Reflected fraction of incident sunlight
 
 

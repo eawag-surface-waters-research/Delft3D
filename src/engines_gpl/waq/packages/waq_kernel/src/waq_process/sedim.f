@@ -66,13 +66,7 @@
 
       REAL     MINDEP, MINDE2, DEPTH , DEPTH2
 
-      LOGICAL, SAVE :: FIRST = .TRUE.
-      LOGICAL       :: SW_PSEDMIN
-      INTEGER       :: IDUMMY
-      REAL   , SAVE :: PSEDMIN
-      CHARACTER     :: CDUMMY
-      INTEGER       :: IERR2
-      INTEGER       :: LUNREP
+      REAL     PSEDMIN
 
       IP1  = IPOINT( 1)
       IP2  = IPOINT( 2)

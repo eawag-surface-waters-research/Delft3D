@@ -50,17 +50,17 @@
      +         IEXPNT(4,*) , IKNMRK(*) , NOQ1, NOQ2, NOQ3, NOQ4
 
       INTEGER  IP(40)
-      REAL     FLX1  , FLX2  , FLX3  , FLX1S2  , FLX2S2  , FLX3S2  , 
+      REAL     FLX1  , FLX2  , FLX3  , FLX1S2  , FLX2S2  , FLX3S2  ,
      J         FLPOC , FLPOM , FLALGC,
      J         FLALGM, DMCF1 , DMCF2 , DMCF3 , TIMSED, TDMSED, POCSED,
      J         C1    , C2    , C3    , V1    , V2    , V3    , CTOT,
      J         FLPOC1, FLPOC2, FLPOC3, FLPOC4, DMPOC1, DMPOC2, DMPOC3,
-     J         DMPOC4, POC1  , POC2  , POC3  , POC4  , CPTOT ,
+     J         DMPOC4, CPTOT ,
      J         CP1   , VP1   ,
      J         CP2   , VP2   ,
      J         CP3   , VP3   ,
-     J         CP4   , VP4   
-      INTEGER  IFLUX , ISEG  , IKMRK1, IKMRK2, IQ    , IVAN  , INAAR
+     J         CP4   , VP4
+      INTEGER  IFLUX , ISEG  , IKMRK2, IQ    , IVAN  , INAAR
       INTEGER  IKMRKN, IKMRKV
 
       IP = IPOINT
@@ -103,7 +103,7 @@
      &         (FLX2 + FLX2S2) * DMCF2 +
      &         (FLX3 + FLX3S2) * DMCF3
       FLPOC  = FLPOC1 + FLPOC2 + FLPOC3 + FLPOC4
-      FLPOM  = FLPOC1*DMPOC1 + FLPOC2*DMPOC2 + FLPOC3*DMPOC3 
+      FLPOM  = FLPOC1*DMPOC1 + FLPOC2*DMPOC2 + FLPOC3*DMPOC3
      J                                       + FLPOC4*DMPOC4
 
       TDMSED = TIMSED + FLPOM + FLALGM
@@ -119,7 +119,7 @@
       ENDIF
       ENDIF
       IFLUX = IFLUX + NOFLUX
-      IP    = IP    + INCREM 
+      IP    = IP    + INCREM
 !
  9000 CONTINUE
 !
@@ -165,9 +165,9 @@
              VP4 = PMSA(IP(33))
              CTOT = C1 + C2 + C3
              CPTOT = CP1 + CP2 + CP3 + CP4
-             IF ( CTOT .GT. 0.0 ) 
+             IF ( CTOT .GT. 0.0 )
      J       PMSA(IP(39)) = ( C1*V1+C2*V2+C3*V3 ) / CTOT
-             IF ( CPTOT .GT. 0.0 ) 
+             IF ( CPTOT .GT. 0.0 )
      J       PMSA(IP(40)) = ( CP1*VP1+CP2*VP2+CP3*VP3+CP4*VP4 ) / CPTOT
          ENDIF
          ENDIF

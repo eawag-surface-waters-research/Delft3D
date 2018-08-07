@@ -105,7 +105,7 @@
      J         DISS  , DISHS , LKSOL , LKMES , LKMEHS, FSULF ,
      J         FDIS2 , CDISM , QUAL  , KDALL , VOLUME, IAP   ,
      J         FAC6C
-      INTEGER  IFLUX , ISEG  , IKMRK1, ISWOX , IGROUP
+      INTEGER  IFLUX , ISEG  , ISWOX , IGROUP
       LOGICAL  SEDIME
 !
       IP1  = IPOINT( 1)

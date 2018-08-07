@@ -82,16 +82,12 @@
 
       ! pointers in the pmsa array
 
-      integer ip_max_basin                     !
       integer ip_basin_no                      !
-      integer ip_no_basin                      !
       integer ip_actths1                       !
       integer ip_actths2                       !
       integer ip_volume                        !
       integer ip_surf                          !
       integer ip_delt                          !
-      integer ip_itime                         !
-      integer ip_idt                           !
       integer ip0_im1s1                        !
       integer ip0_im2s1                        !
       integer ip0_im3s1                        !
@@ -118,7 +114,7 @@
       integer ip_dredge_im2                    !
       integer ip_dredge_im3                    !
       integer ipoff                            !
-      
+
       integer lunrep                           ! unit number of output file
 
       ! pointers in the flux array

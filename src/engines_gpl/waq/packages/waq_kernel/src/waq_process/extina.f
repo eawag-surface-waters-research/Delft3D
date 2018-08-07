@@ -34,8 +34,8 @@
 !     Local declarations
 !
       INTEGER  NALG  , ISWFIX, NIPALG, IFLUX , ISEG  ,
-     +         IKMRK1, IALG  , IP    , IFIX
-      REAL     EXTALG, VOLUME, EXTCF , BIOMAS
+     +         IALG  , IP    , IFIX
+      REAL     EXTALG, EXTCF , BIOMAS
 !
       NALG  = NINT(PMSA(IPOINT(1)))
       ISWFIX= NINT(PMSA(IPOINT(2)))

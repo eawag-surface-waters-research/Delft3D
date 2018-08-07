@@ -51,7 +51,7 @@
      +         IEXPNT(4,*) , IKNMRK(*) , NOQ1, NOQ2, NOQ3, NOQ4
 !
       INTEGER  IP1, IP2, IP3, IN1, IN2, IN3
-      INTEGER  ISEG   , IKMRK1, IFLUX
+      INTEGER  ISEG   , IFLUX
 !
       REAL     PCH4   , CCH4S
       REAL     TEMP   , TEMP20

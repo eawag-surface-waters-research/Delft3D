@@ -81,7 +81,6 @@
       integer                      :: sw_water       ! emersion switch for the water segment
       integer                      :: ibodem         ! bottom segment number
       integer, save                :: opemersion = 2 ! option emersion 1 = all, 2 = one, 3 = average
-      integer                      :: ik1,ik2,ik3    ! seperate features
 
       ! initialise bottom if necessary
 

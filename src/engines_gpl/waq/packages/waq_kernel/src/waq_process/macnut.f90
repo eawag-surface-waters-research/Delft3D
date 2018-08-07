@@ -236,7 +236,7 @@
                limn = max(limnsm01w,limnsm01b)
                if ( cdinsm01w .gt. 1e-10 ) then
                   if ( cdinsm01b .gt. 1e-10 ) then
-                     frootuptn = .998/(1.+2.66*(cdinsm01b/cdinsm01w)**-0.83)
+                     frootuptn = .998/(1.+2.66*(cdinsm01b/cdinsm01w)**(-0.83))
                   else
                      frootuptn = 0.0
                   endif
@@ -264,7 +264,7 @@
                limp = max(limpsm01w,limpsm01b)
                if ( cpo4sm01w .gt. 1e-10 ) then
                   if ( cpo4sm01b .gt. 1e-10 ) then
-                     frootuptp = .998/(1.+2.66*(cpo4sm01b/cpo4sm01w)**-0.83)
+                     frootuptp = .998/(1.+2.66*(cpo4sm01b/cpo4sm01w)**(-0.83))
                   else
                      frootuptp = 0.0
                   endif

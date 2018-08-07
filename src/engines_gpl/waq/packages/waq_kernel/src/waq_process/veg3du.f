@@ -85,9 +85,6 @@
       integer ikmrk3
       real(4) zm          !    watersurface to top macropyte                  (-)
       real(4) frlay       !    fraction witin layer                           (-)
-      integer iq          !    loop counter
-      integer ifrom       !    from segment
-      integer ito         !    from segment
       integer iflux       !    index in the fl array
       real(4) pnvbxxup   !    2d uptake percentage n pool 1 and 2             (-)
       real(4) ppvbxxup   !    2d uptake percentage p pool 1 and 2             (-)

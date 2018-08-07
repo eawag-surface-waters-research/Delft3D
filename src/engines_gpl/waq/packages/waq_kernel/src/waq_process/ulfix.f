@@ -51,12 +51,9 @@
       real               :: fixgrad            ! I  gradient of fixation versus shear stress           (-)
       real               :: delt               ! I  timestep for processes                             (d)
       real               :: depth              ! I  depth of segment                                   (m)
-      real               :: bloomdepth         ! I  average depth over Bloom time step                 (m)
       real               :: volume             ! I  volume of computational cell                       (m3)
       real               :: bloomalg           ! I  algae concentration                                (gC/m3)
-      real               :: fixalg             ! I  benthic:<0, resuspended:>0, plankton:=0            (-)
       real               :: frfixedalg         ! O  fraction of algae fixed                            (-)
-      real               :: m2_alg             ! O  concentration of algae square metre                (gC/m2)
 
 !     fluxes
 

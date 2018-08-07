@@ -70,7 +70,7 @@
      +         IEXPNT(4,*) , IKNMRK(*) , NOQ1, NOQ2, NOQ3, NOQ4
 !
       INTEGER  IP(23)
-      INTEGER  IFLUX , ISEG  , IKMRK1
+      INTEGER  IFLUX , ISEG
       REAL     AH_380, EXT   , PAC  , SECCH, AIM1  , AIM2  , AIM3  ,
      J         POC1  , POC2  , POC3  , POC4  , CHLORP, DIEP1 , DIEP2 ,
      J         CORCHL, C_DET , C_GL1 , C_GL2 , HELHUM, TAU   , ANGLE ,

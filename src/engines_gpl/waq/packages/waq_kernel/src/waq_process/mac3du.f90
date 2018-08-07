@@ -55,7 +55,7 @@
       real(4) totaldepth  ! i  total depth water column                           (m)
       real(4) nh4s12      ! i  concentration of NH4 in S12 bottom (pores)         (g/m3)
       real(4) locseddept  ! i  sediment layer depth to bottom of segment          (m)
-      real(4) ibotseg     ! i  bottom segment number                              (-)
+      integer ibotseg     ! i  bottom segment number                              (-)
       real(4) FrBmLay     ! i  actual height sm                                   (m)
       real(4) rootdesm01  ! i  rooting depth sm01                                 (m)
       real(4) poros       ! i  volumetric porosity                                (-)

@@ -55,7 +55,7 @@
       integer ip1,ip2,ip3,ip4,ip5
       integer in1,in2,in3,in4,in5
       real    time, tref, auxsys
-      real    latitudeg, daynr
+      real    daynr
       double precision latitu, declin, temp, daylength
       double precision sin50m, e     , pi
       parameter ( sin50m = -1.454389765d-2 )

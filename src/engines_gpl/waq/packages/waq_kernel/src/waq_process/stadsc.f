@@ -63,7 +63,7 @@
      +         IP6   , IP7   , IP8   , IP9   , IP10  ,
      +         IN1   , IN2   , IN3   , IN4   , IN5   ,
      +         IN6   , IN7   , IN8   , IN9   , IN10
-      INTEGER  IKMRK , IKMRK1, IKMRK2, ISEG  , IQ    , IFROM , ITO
+      INTEGER  ISEG
       INTEGER  IACTION
       INTEGER  ATTRIB
       REAL     TSTART, TSTOP , TIME  , DELT  , TCOUNT

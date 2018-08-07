@@ -93,8 +93,7 @@
       INTEGER NTOGRZ,        NTONUT,          NTOALG,
      1        IFILSP,        I     ,          J     ,
      2        NIN   ,        NINGRZ,
-     3        IP    ,        IQ    ,          IPP   ,
-     4        IPV   ,        INV   ,          IFROM
+     3        IP
 
       PARAMETER (NTOGRZ =  5, NTONUT =  4, NTOALG = 32,
      1           NINGRZ = 25,
@@ -120,12 +119,12 @@
      D        GRZFLX(NTONUT), TOTFLX(NTONUT), VOLUME        ,
      E        TMPRE (NTOGRZ), FRDBOT(NTOGRZ), DETRIT(NTONUT),
      F        POC   (NTONUT),                 DEPTH         ,
-     G        DFLUX         , FRDBOT_SAVE(NTOGRZ)           ,
-     H        GRZMC (NTOGRZ) 
+     G        FRDBOT_SAVE(NTOGRZ)           ,
+     H        GRZMC (NTOGRZ)
       INTEGER BENTHS(NTOGRZ)
-      INTEGER IKMRK1, IKMRK2
+      INTEGER IKMRK2
       integer lunrep
-      REAL    GEM, MaxFiltration, MaxUptake, POSFLX, GrowthResp,
+      REAL    GEM, MaxFiltration, MaxUptake, GrowthResp,
      j        DetrGrazing
 
       LOGICAL INIT, active_grazer(ntogrz), problem

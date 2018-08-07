@@ -61,7 +61,7 @@
 
       INTEGER  IP1   , IP2   , IP3   , IP4   , IP5
       INTEGER  IN1   , IN2   , IN3   , IN4   , IN5
-      INTEGER  IKMRK , IKMRK1, IKMRK2, ISEG  , IFROM , ITO
+      INTEGER  IKMRK , ISEG  , IFROM , ITO
       INTEGER            :: IK                 ! loop counter bottom columns
       INTEGER            :: IQ                 ! loop counter exchanges
       INTEGER            :: IWA1               ! index first water exchange

@@ -138,9 +138,9 @@
 !
       INTEGER  IP(43)
       INTEGER  IN(43)
-      INTEGER  IFLUX  , ISEG   , IKMRK1, ILUMON
+      INTEGER  IFLUX  , ISEG   , ILUMON
 !
-      REAL     COX    , CNI    , CFEA   , CSU    , CCH4
+      REAL     COX    , CNI    , CFEA   , CSU
       REAL     RMIN1  , RMIN2  , RMIN3  , RMIN4  , RTMIN  , RDEN   ,
      +         RSRED  , RDMAX  , RSMAX  , DELT   , RMIN5  , RMIN6
       REAL     FOX    , FNI    , FSU    , FCH4   , FOX20  , FNI20  ,
@@ -261,14 +261,14 @@
 !           Calculate the sum of the mineralisation fluxes
 !
             RTMIN = RMIN1 + RMIN2 + RMIN3 + RMIN4 + RMIN5 + RMIN6
-            
+
             IF (ONLY_OX) THEN
               FROXC = 1.
               FRNIC = 0.
               FRFEC = 0.
               FRSUC = 0.
               FRCH4C = 0.
-              
+
             ELSE
 !
 !           Calculation of the temperature dependency coefficients
@@ -383,7 +383,7 @@
             ENDIF
 !
             FRCH4C = 1 - (FROXC + FRNIC + FRFEC + FRSUC)
-            
+
 !           endif ONLY_OX
             ENDIF
 !

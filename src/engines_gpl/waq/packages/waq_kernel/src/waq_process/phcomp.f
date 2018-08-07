@@ -44,7 +44,7 @@
       INTEGER  IPOINT( * ) , INCREM(*) , NOSEG , NOFLUX,
      +         IEXPNT(4,*) , IKNMRK(*) , NOQ1, NOQ2, NOQ3, NOQ4
 
-      INTEGER  ITEL  , ISEG  , IKMRK1, IKMRK2
+      INTEGER  ITEL  , ISEG
       INTEGER  NTYPE , ITYPE
       REAL     PHYT  , ALGN  , ALGP  , ALGSI , ALGDM , CHLFA , BIOMAS,
      J         NCRAT , PCRAT , SICRAT, DMCF  , CATOCL

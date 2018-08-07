@@ -66,7 +66,6 @@
 ! Qsn     R*4 1 L Non refl. (net) short wave rad. reaching water    [W/m2]
 ! Qsw     R*4 1 L Short wave radiation reaching water               [W/m2]
 ! Qt      R*4 1 L Total heat flux                                   [W/m2]
-! RatBow  R*4 1 L Bowens ratio                                         [-]
 ! RelHum  R*4 1 I Relative air humidity                                [%]
 ! Rho0    R*4 1 I Density of surface water at 4°C                  [kg/m3]
 ! RhoRef  R*4 1 L Density of surface water at reference temperature[kg/m3]
@@ -91,7 +90,7 @@
       REAL     PMSA  ( * ) , FL  (*)
       INTEGER  IPOINT( * ) , INCREM(*) , NOSEG , NOFLUX,
      +         IEXPNT(4,*) , IKNMRK(*) , NOQ1, NOQ2, NOQ3, NOQ4,
-     +         ISEG, IFLUX, IKMRK1, IKMRK2
+     +         ISEG, IFLUX, IKMRK2
       INTEGER  IP1, IP2, IP3, IP4, IP5, IP6, IP7, IP8, IP9, IP10,
      +         IP11, IP12, IP13, IP14, IP15, IP16, IP17, IP18, IP19,
      +         IP20, IP21, IP22, IP23, IP24, IP25, IP26, IP27, IP28,
@@ -101,7 +100,7 @@
       REAL     Qsw, Fsw, SunFac, Pvap, TempAt, SBC, Fa, EWater,
      j         TempWa, RhoWat, CWindA, CWindB, CWindC, VWindm, K,
      j         PvapWa, Cpa, Patm, Qsn, Cloud, Emiss, Qa, Qan, Qbr, C,
-     j         HTVap, Fwind, Ql, Beta, RatBow, Qsg, Qt, Qrb, Tref,
+     j         HTVap, Fwind, Ql, Beta, Qsg, Qt, Qrb, Tref,
      j         dTemp, cp, DEPTH, RelHum, Psvap, Hm, Ha, Vevap, Fwind2,
      j         VWinda, DeltaT, HtVRef, RhoRef, Rho0, MODTEMP, mindeptht
 

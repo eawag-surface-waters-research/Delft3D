@@ -72,7 +72,7 @@
 !
       INTEGER  IP1, IP2, IP3, IP4, IP5, IP6, IP7, IP8, IP9, IP10
       INTEGER  IN1, IN2, IN3, IN4, IN5, IN6, IN7, IN8, IN9, IN10
-      INTEGER  IFLUX  , ISEG   , IKMRK1
+      INTEGER  IFLUX  , ISEG
 !
       REAL     CSP    , CSD
       REAL     KDIS   , KPRC   , CSDE   , KTDIS  , KTPRC

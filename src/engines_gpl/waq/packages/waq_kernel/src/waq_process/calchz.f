@@ -56,7 +56,7 @@
 !
       REAL     ROUGH  , DEPTH , TOTDEP,    CHZ, ONESIX,
      +         MANCOF
-      INTEGER  IP1    , IP2   , IP3   , IKMRK1, IKMRK2,
+      INTEGER  IP1    , IP2   , IP3   , IKMRK2,
      +         ICHZTP , IP4   , IP5   , IP6   , ISEG
 
 

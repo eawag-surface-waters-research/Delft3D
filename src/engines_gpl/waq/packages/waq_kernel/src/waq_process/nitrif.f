@@ -91,7 +91,7 @@
      +         IP11, IP12, IP13, IP14, IP15, IP16, IP17, IP18, IP19
       INTEGER  IN1, IN2, IN3, IN4, IN5, IN6, IN7, IN8, IN9, IN10,
      +         IN11, IN12, IN13, IN14, IN15, IN16, IN17, IN18, IN19
-      INTEGER  IFLUX, ISEG, IKMRK1
+      INTEGER  IFLUX, ISEG
       REAL     TC     , O2FUNC , COX    , OOX    , CFL    , SKEWN  ,
      +         ZERO   , RC     , CONC
       INTEGER  IVERSN

@@ -49,9 +49,6 @@
       integer               :: nfrac       ! I  number of fractions
       real(4)               :: flx         ! I  flux to be split
       real(4)               :: rfrac_p     ! I  relative fraction to be used for positive flux
-      real(4)               :: rfrac_n     ! I  relative fraction to be used for negative flux
-      real(4)               :: sum         ! O  sum of the fractions
-      real(4)               :: rfrac       ! O  relative fraction
 
       ! local variables
 

@@ -43,7 +43,7 @@
       integer  ipoint( 2 ) , increm(2) , noseg , noflux,
      +         iexpnt(4,*) , iknmrk(*) , noq1, noq2, noq3, noq4
 
-      integer  ipnt(2), iflux, iseg, ikmrk1
+      integer  ipnt(2), iflux, iseg
       real     conctr, decayr, fdecay
 
       ipnt = ipoint

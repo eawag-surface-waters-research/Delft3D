@@ -88,7 +88,7 @@
       INTEGER  IN1, IN2, IN3, IN4, IN5, IN6, IN7, IN8, IN9, IN10,
      +         IN11, IN12, IN13, IN14, IN15, IN16, IN17, IN18, IN19, IN20,
      +         IN21, IN22, IN23, IN24, IN25
-      INTEGER  IFLUX  , ISEG  , IKMRK1, ILUMON
+      INTEGER  IFLUX  , ISEG  , ILUMON
 !
       REAL     CCH4   , COX    , CSU
       REAL     K0OXI1 , K0OXI2 , KOXI1  , KOXI2  , KSCH4  , KSOX   ,
@@ -96,7 +96,7 @@
      +         LIFUNC
       REAL     POROS  , CRTEMP , KTOXI1 , KTOXI2 , TEMP   , TEMPC  ,
      +         TEMP20 , KSRADFR, KSRADSH
-      REAL     DELT, RAD, RADINH, RADFR50INH
+      REAL     DELT, RAD, RADINH
       REAL     COX_RATIO
       REAL     CSU_RATIO
       REAL     FLCOX
@@ -260,7 +260,7 @@
 !
 !           Light inhibition function - analogue to salinity dependant mort function
             IF ( KSRADFR .GE. 0.0 .AND. KSRADFR .LE. 1.0
-     +		                              .AND. RADINH .GT. 0.1) THEN
+     +                            .AND. RADINH .GT. 0.1) THEN
                LIFUNC =-1/(1 + EXP(KSRADSh*(min(RAD/RADINH,1.0) - KSRADFR)))+ 1
             ELSE
                LIFUNC = 0.0

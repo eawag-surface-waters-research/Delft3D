@@ -81,21 +81,19 @@
       integer ipnt( 16)   !    local work array for the pointering
       integer iseg        !    local loop counter for computational element loop
 
-      real     im1s2, im2s2, im3s2
-
       integer iflux
       integer ikmrk2
-      real(4) dms1  
-      real(4) dms2  
-      real(4) zres  
-      real(4) vres  
-      real(4) tau   
+      real(4) dms1
+      real(4) dms2
+      real(4) zres
+      real(4) vres
+      real(4) tau
       real(4) tcrrs1
       real(4) tcrrs2
-      real(4) depth 
-      real(4) delt  
+      real(4) depth
+      real(4) delt
       real(4) mindep
-      real(4) surf 
+      real(4) surf
       integer isw_zf
       real(4) press1
       real(4) press2
@@ -197,7 +195,7 @@
 !
       iflux = iflux + noflux
       ipnt  = ipnt  + increm
-      
+
  9000 continue
 !
       return

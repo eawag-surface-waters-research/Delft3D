@@ -50,14 +50,6 @@
       integer iq          !    local loop counter for exchanges
       integer iseg1       !    segment number from
       integer iseg2       !    segment number to
-!
-!*******************************************************************************
-!
-!     type    name         i/o description                                        unit
-!
-      real(4) horzdispv   ! o  horizontal dispersion defined per segment          (m2/s)
-!
-!*******************************************************************************
 
       ipnt        = ipoint
 

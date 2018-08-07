@@ -111,17 +111,6 @@
       real(4) dMrtC2VB01  ! F  mortality foliage VB01                             (gC/m3/d)
       real(4) dMrtC5VB01  ! F  mortality fineroot VB01                            (gC/m3/d)
 
-
-      real(4) dMrtN1VB01  ! F  mortality stem VB01                                (gN/m3/d)
-      real(4) dMrtN3VB01  ! F  mortality branch VB01                              (gN/m3/d)
-      real(4) dMrtN4VB01  ! F  mortality root VB01                                (gN/m3/d)
-      real(4) dMrtP1VB01  ! F  mortality stem VB01                                (gP/m3/d)
-      real(4) dMrtP3VB01  ! F  mortality branch VB01                              (gP/m3/d)
-      real(4) dMrtP4VB01  ! F  mortality root VB01                                (gP/m3/d)
-      real(4) dMrtS1VB01  ! F  mortality stem VB01                                (gS/m3/d)
-      real(4) dMrtS3VB01  ! F  mortality branch VB01                              (gS/m3/d)
-      real(4) dMrtS4VB01  ! F  mortality root VB01                                (gS/m3/d)
-
       real(4) fMrtC1VB01  ! O  mortality stem VB01                                (gC/m3/d)
       real(4) fMrtC3VB01  ! O  mortality branch VB01                              (gC/m3/d)
       real(4) fMrtC4VB01  ! O  mortality root VB01                                (gC/m3/d)

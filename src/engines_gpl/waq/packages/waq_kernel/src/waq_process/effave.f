@@ -49,7 +49,6 @@
       integer  iseg, iflux, igro
       integer  nspe       ! number of bloom algae species
 
-      logical, save  ::  first  = .true.
       integer, save  ::  istep = 0
 
 !     this is in a module/include, so we might put a flag if it was read of not.
@@ -61,7 +60,7 @@
       delt     = pmsa(ipoint(1))
       navera   = nint(pmsa(ipoint(2)))
       rstep = real (istep,4)
-      
+
 !     Loop over segments
 
       ip = ipoint

@@ -67,8 +67,6 @@
       real(4) depth       ! i  segment depth                                      (m)
       real(4) xarea       ! i  exchange area                                      (m2)
       real(4) flow        ! i  flow rate                                          (m3/s)
-      real(4) ddir1       ! o  variable horizontal dispersion direction 1         (m2/s)
-      real(4) ddir2       ! o  variable horizontal dispersion direction 2         (m2/s)
       real(4) horzdispv   ! o  variable horizontal dispersion                     (m2/s)
 !
 !*******************************************************************************
