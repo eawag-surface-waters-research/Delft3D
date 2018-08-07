@@ -464,7 +464,7 @@ contains
       czdum = 0d0
       
       call GetCSParsFlow(cross1, cross2, factor, depth, 0.0d0, czdum, area, perimeter, width, conv, &
-                         af_sub_local, perim_sub_local, cz_sub_local, doSummerDike=.true.)
+                         af_sub_local, perim_sub_local, cz_sub_local)
       
       if (present(flowArea))          flowArea = area
       if (present(flowWidth))         flowWidth = width
