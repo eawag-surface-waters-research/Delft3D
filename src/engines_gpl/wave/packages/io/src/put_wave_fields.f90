@@ -666,7 +666,7 @@ subroutine crewav_netcdf(fg       ,itide    ,hrms     ,tp       ,dir      , &
 !tps  = 0.0
 !ubot = 0.0
 !wlen = 0.0
-
+!
 !hrms = 0.0
 !tp   = 0.0
 !dir  = 0.0

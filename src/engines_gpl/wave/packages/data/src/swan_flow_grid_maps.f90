@@ -446,7 +446,7 @@ subroutine make_grid_map(i1, i2, g1, g2, gm, external_mapper)
             i = gm%row(n) - g2%mmax*(j-1)
             testfield(i,j) = testfield(i,j) + gm%s(n)
             ncontrib(i,j)  = ncontrib(i,j) + 1
-         enddo
+         enddo    
          !
          ! Works with structured grids only:
          !do n3d=1, gm%n_s/4
@@ -473,52 +473,22 @@ subroutine make_grid_map(i1, i2, g1, g2, gm, external_mapper)
       do i=1, g2%mmax
          do j=1, g2%nmax
             ! This point is only covered when it is surrounded by at least msurpnts valid points
-            if (ncontrib(i,j) < gm%msurpnts) then
+            ! Also, check if the point was not covered by another partition
+            if (ncontrib(i,j) < gm%msurpnts .and. .not.(g2%covered(i,j)>0)) then
                g2%covered(i,j) = 0
             else
                !g2%covered(i,j) = nint(testfield(i,j))
                !endif
-               !  Point is covered when in convex hull
+               !  Point is covered when within domain edge of partition
+               ! This can probably be accelerated
                call point_in_polygon ( g1%numenclpts, g1%bndx, g1%bndy, g2%x(i,j), g2%y(i,j), b)
-               if (abs(b)>0) then
+               if (b) then
                   g2%covered(i,j) = i1
                endif
             endif
          enddo
       enddo
-      
-      ! For code review:
-      !open (unit=3, file='d:\coverage.txt')
-      !do i=1, g2%mmax
-      !  do j=1, g2%nmax
-      !      write(unit=3,fmt=*) g2%x(i,j), g2%y(i,j), g2%covered(i,j)
-      !  enddo
-      !enddo
-      !close(3)
-      !
-      !if (i1==1) then
-      !    open (unit=3, file='d:\conv.pol')
-      !    write(unit=3,fmt=*) i1
-      !    write(unit=3,fmt=*) g1%numenclpts, 3
-      !    
-      !    
-      !    do i=1, g1%numenclpts
-      !          write(unit=3,fmt=*) g1%bndx(i,1), g1%bndy(i,1), i
-      !    enddo
-      !    close(3)
-      !else
-      !    open (unit=3, file='d:\conv.pol', position='append', action='write')
-      !    write(unit=3,fmt=*) i1
-      !    write(unit=3,fmt=*) g1%numenclpts, 3
-      !    
-      !    
-      !    do i=1, g1%numenclpts
-      !          write(unit=3,fmt=*) g1%bndx(i,1), g1%bndy(i,1), i
-      !    enddo
-      !    close(3)
-      !endif
-      
-      
+      !     
       deallocate(testfield, stat=ierror)
       deallocate(ncontrib, stat=ierror)
    else
