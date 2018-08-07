@@ -61,8 +61,12 @@
 
       integer(4) iseg                   ! loop counter for segments
       integer(4) k                      ! loop counter for substances
+      integer    ierr
       real   (4) amiss   /-999.0/       ! missing value indicator
       integer(4) ithandl /0/
+
+      real(4), dimension(:,:), allocatable :: outconc
+
       if ( timon ) call timstrt ( "outmap", ithandl )
 
 !     Initialize file
@@ -74,16 +78,35 @@
          write (iomap)  synam1, synam2
       endif
 
-!     Perform output
+!     Perform output:
+!     Inactive segments should get missing values. For this, make
+!     a copy of the concentrations.
+!
+!     Note: this may fail, if there is not enough memory, so provide
+!     a slower alternative.
 
-      write (iomap) itime
-      do iseg = 1, noseg
-         if ( btest(iknmrk(iseg),0) ) then
-            write (iomap)   conc1(:,iseg), conc2(:,iseg)
-         else
-            write (iomap) ( amiss, k = 1, notot1), conc2(:,iseg)
-         endif
-      enddo
+      allocate( outconc, source = conc1, stat = ierr )
+
+      if ( ierr == 0 ) then
+         do iseg = 1, noseg
+            if ( .not. btest(iknmrk(iseg),0) ) then
+               outconc(:,iseg) = amiss
+            endif
+         enddo
+         write (iomap) itime, outconc, conc2
+
+         deallocate( outconc )
+      else
+         ! Slow alternative
+         write (iomap) itime
+         do iseg = 1, noseg
+            if ( btest(iknmrk(iseg),0) ) then
+               write (iomap) conc1(:,iseg), conc2(:,iseg)
+            else
+               write (iomap) ( amiss, k = 1, notot1), conc2(:,iseg)
+            endif
+         enddo
+      endif
 
       if ( timon ) call timstop ( ithandl )
       return
