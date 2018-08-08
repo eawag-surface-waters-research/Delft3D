@@ -43,6 +43,7 @@ chooseIfort = 1
 vs = -999
 fw = -999
 ifort = -999
+templateSolutionPath = ""
 
 #
 # libdir specifies the directory containing the ifort compiler libraries
@@ -195,6 +196,7 @@ def process_solution_file(sln, slntemplate):
     global vs
     global fw
     global ifort
+    global templateSolutionPath
     global libdir
     global redistdir
     global toolsversion
@@ -543,17 +545,22 @@ def do_work():
     sys.stdout.write("Visual Studio  Version : " + str(vs) + "\n")
     sys.stdout.write(".Net Framework Version : " + str(fw) + "\n")
     sys.stdout.write("Intel Fortran  Version : " + str(ifort) + "\n")
+    sys.stdout.write("Solution path : " + templateSolutionPath + "\n")
 
     # Needed for VS2015 and higher:
     getUCRTVersionNumber()
 
-    process_solution_file("delft3d_open.sln", os.path.join("scripts_lgpl", "win64", "delft3d_open_template.sln"))
-    process_solution_file("dflowfm_open.sln", os.path.join("engines_gpl", "dflowfm", "scripts", "template", "dflowfm_open_template.sln"))
+    if not templateSolutionPath:
+        process_solution_file("delft3d_open.sln", os.path.join("scripts_lgpl", "win64", "delft3d_open_template.sln"))
+        process_solution_file("dflowfm_open.sln", os.path.join("engines_gpl", "dflowfm", "scripts", "template", "dflowfm_open_template.sln"))
 
-    # TODO: Consider making this optional via cmdline args:
-    process_solution_file("io_netcdf.sln",    os.path.join("scripts_lgpl", "win64", "io_netcdf_template.sln"))
-    process_solution_file("nefis.sln",        os.path.join("scripts_lgpl", "win64", "nefis_template.sln"))
-    process_solution_file("utils_lgpl.sln",   os.path.join("scripts_lgpl", "win64", "utils_lgpl_template.sln"))
+        # TODO: Consider making this optional via cmdline args:
+        process_solution_file("io_netcdf.sln",    os.path.join("scripts_lgpl", "win64", "io_netcdf_template.sln"))
+        process_solution_file("nefis.sln",        os.path.join("scripts_lgpl", "win64", "nefis_template.sln"))
+        process_solution_file("utils_lgpl.sln",   os.path.join("scripts_lgpl", "win64", "utils_lgpl_template.sln"))
+    else:
+        slnName = os.path.basename(templateSolutionPath).replace("_template","")
+        process_solution_file(slnName, templateSolutionPath)
 
     # Force reading GUI parameters next run
     vs = -999
@@ -641,6 +648,8 @@ if __name__ == "__main__":
                               help='Specify .Net Framework version')
     parser.add_argument('-ifort', '--ifort',
                               help='Specify Intel Visual Fortran version')
+    parser.add_argument('-templatePath', '--templatePath',
+                              help='Specify the template solution path to prepare (if not specified => all solutions will be made)')
     args = parser.parse_args()
     if args.visualstudio:
         vs = int(args.visualstudio)
@@ -648,7 +657,9 @@ if __name__ == "__main__":
         fw = int(args.framework)
     if args.ifort:
         ifort = int(args.ifort)
-    
+    if args.templatePath:
+        templateSolutionPath = args.templatePath
+
     # Both vs and ifort defined via command line arguments: do_work
     # Else: Create GUI to select them
     if vs == -999 or ifort == -999:
