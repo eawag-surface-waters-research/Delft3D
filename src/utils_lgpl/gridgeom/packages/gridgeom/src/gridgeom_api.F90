@@ -279,4 +279,21 @@ function ggeo_deallocate_dll() result(ierr) bind(C, name="ggeo_deallocate")
 
 end function ggeo_deallocate_dll
 
+function find_cells_dll(jp, numCells, maxPerCell, netElemNode) result(ierr) bind(C, name="find_cells")
+!DEC$ ATTRIBUTES DLLEXPORT :: find_cells_dll
+   use gridoperations   
+   use m_cell_geometry
+   
+   integer(kind=c_int), intent(in)    :: jp
+   integer(kind=c_int), intent(inout) :: numCells,maxPerCell,netElemNode
+   integer                            :: ierr
+   
+   ierr = 0
+   call findcells(jp)
+   !numCells = ndx2d
+   !maxPerCell = 
+   !netElemNode = ndx
+end function find_cells_dll
+
+
 end module gridgeom_api

@@ -615,7 +615,7 @@ namespace UGrid.tests
             //1. Create a netcdf file 
             int ioncid = 0; //file variable 
             int mode = 1; //create in write mode
-            var ierr = -1;
+            var ierr= -1;
             string tmpstring; //temporary string for several operations
             string c_path = TestHelper.TestDirectoryPath() + @"\write1d.nc";
             TestHelper.DeleteIfExists(c_path);
@@ -748,7 +748,7 @@ namespace UGrid.tests
             try
             {
                 //1. Open a netcdf file 
-                string c_path = TestHelper.TestDirectoryPath() + @"\write1d.nc";
+                string c_path = TestHelper.TestFilesDirectoryPath() + @"\write1d.nc";
                 Assert.IsTrue(File.Exists(c_path));
                 int ioncid = 0; //file variable 
                 int mode = 0; //create in read mode
@@ -1233,8 +1233,8 @@ namespace UGrid.tests
         [NUnit.Framework.Category("UGRIDTests")]
         public void read1dNetwork()
         {
-            //1. Open a netcdf file 
-            string c_path = TestHelper.TestDirectoryPath() + @"\write1dNetwork.nc";
+            //1. Open a netcdf file (file from test data, but actually created previously)
+            string c_path = TestHelper.TestFilesDirectoryPath() + @"\write1dNetwork.nc";
             Assert.IsTrue(File.Exists(c_path));
             int ioncid = 0; //file variable 
             int mode = 0; //create in read mode
@@ -1937,7 +1937,11 @@ namespace UGrid.tests
             Assert.That(ierr, Is.EqualTo(0));
 
             //17. make the links
-            ierr = wrapperGridgeom.ggeo_make1D2Dinternalnetlinks();
+            int c_npl = 0;
+            IntPtr c_xpl = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * 0);
+            IntPtr c_ypl = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * 0);
+            IntPtr c_zpl = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * 0);
+            ierr = wrapperGridgeom.ggeo_make1D2Dinternalnetlinks(ref c_npl, ref c_xpl, ref c_ypl, ref c_zpl);
             Assert.That(ierr, Is.EqualTo(0));
 
             //18. get the number of links
@@ -2012,7 +2016,7 @@ namespace UGrid.tests
         public void Load1dNetworkUsingGetMeshGeom()
         {
             //1.Open a netcdf file
-            string c_path = TestHelper.TestDirectoryPath() + @"\write1dNetwork.nc";
+            string c_path = TestHelper.TestFilesDirectoryPath() + @"\write1dNetwork.nc";
             Assert.IsTrue(File.Exists(c_path));
             int ioncid = 0; //file variable 
             int mode = 0; //create in read mode
@@ -2083,7 +2087,7 @@ namespace UGrid.tests
             var wrapper = new IoNetcdfLibWrapper();
 
             // Open a file 
-            string c_path = @"D:\carniato\LUCA\ENGINES\FM\FMSource\vanRob\Custom_Ugrid.nc";
+            string c_path = TestHelper.TestFilesDirectoryPath() + @"\Custom_Ugrid_map.nc";
             Assert.IsTrue(File.Exists(c_path));
             int ioncid = -1; //file id 
             int sourcetwomode = 0; //read mode

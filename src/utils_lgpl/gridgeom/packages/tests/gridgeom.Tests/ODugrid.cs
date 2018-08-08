@@ -377,14 +377,22 @@ namespace gridgeom.Tests
             Assert.That(ierr, Is.EqualTo(0));
 
             //call make1d2dlinks, no argument needed (all in memory)
-            ierr = wrapperGridgeom.ggeo_make1D2Dinternalnetlinks();
+            // empty polygon
+            int c_npl = 0;
+            IntPtr c_xpl = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * 0);
+            IntPtr c_ypl = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * 0);
+            IntPtr c_zpl = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * 0);
+            ierr = wrapperGridgeom.ggeo_make1D2Dinternalnetlinks(ref c_npl, ref c_xpl, ref c_ypl, ref c_zpl);
             Assert.That(ierr, Is.EqualTo(0));
+
             //deallocate memory of gridgeom
             ierr = wrapperGridgeom.ggeo_deallocate();
             Assert.That(ierr, Is.EqualTo(0));
+            ierr = wrapperNetcdf.ionc_close(ref ioncid);
+            Assert.That(ierr, Is.EqualTo(0));
 
             //free arrays
-             //2d
+            //2d
             Marshal.FreeCoTaskMem(meshtwod.nodex);
             Marshal.FreeCoTaskMem(meshtwod.nodey);
             Marshal.FreeCoTaskMem(meshtwod.nodez);
@@ -522,7 +530,11 @@ namespace gridgeom.Tests
             Assert.That(ierr, Is.EqualTo(0));
 
             //9. make the links
-            ierr = wrapperGridgeom.ggeo_make1D2Dinternalnetlinks();
+            int c_npl = 0;
+            IntPtr c_xpl = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * 0);
+            IntPtr c_ypl = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * 0);
+            IntPtr c_zpl = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * 0);
+            ierr = wrapperGridgeom.ggeo_make1D2Dinternalnetlinks(ref c_npl, ref c_xpl, ref c_ypl, ref c_zpl);
             Assert.That(ierr, Is.EqualTo(0));
 
             //10. check if we can call ggeo_get_links_count two times: we  need to (1) deallocate the memory stored in network_ggeo_data and (2) reload the 1d and 2d arrays in memory
@@ -557,6 +569,9 @@ namespace gridgeom.Tests
                 Assert.That(rc_arrayto[i], Is.EqualTo(arrayto[i]));
             }
             //for writing the links look io_netcdf ionc_def_mesh_contact, ionc_put_mesh_contact 
+
+            ierr = wrapperNetcdf.ionc_close(ref ioncid);
+            Assert.That(ierr, Is.EqualTo(0));
 
             //Free 2d arrays
             Marshal.FreeCoTaskMem(meshtwod.nodex);
@@ -682,7 +697,11 @@ namespace gridgeom.Tests
             Assert.That(ierr, Is.EqualTo(0));
 
             //9. make the links
-            ierr = wrapperGridgeom.ggeo_make1D2Dinternalnetlinks();
+            int c_npl = 0;
+            IntPtr c_xpl = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * 0);
+            IntPtr c_ypl = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * 0);
+            IntPtr c_zpl = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * 0);
+            ierr = wrapperGridgeom.ggeo_make1D2Dinternalnetlinks(ref c_npl, ref c_xpl, ref c_ypl, ref c_zpl);
             Assert.That(ierr, Is.EqualTo(0));
 
             //10. get the number of links
@@ -701,8 +720,10 @@ namespace gridgeom.Tests
             int[] rc_arrayto = new int[n1d2dlinks];
             Marshal.Copy(c_arrayfrom, rc_arrayfrom, 0, n1d2dlinks);
             Marshal.Copy(c_arrayto, rc_arrayto, 0, n1d2dlinks);
-            
+
             //for writing the links look io_netcdf ionc_def_mesh_contact, ionc_put_mesh_contact 
+            ierr = wrapperNetcdf.ionc_close(ref ioncid);
+            Assert.That(ierr, Is.EqualTo(0));
 
             //Free 2d arrays
             Marshal.FreeCoTaskMem(meshtwod.nodex);

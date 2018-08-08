@@ -900,7 +900,7 @@
    !> Finds 2D cells in the unstructured net.
    !! Optionally within a polygon mask.
    ! Resets netcell data and also computes circumcenters in xz (flowgeom)
-   SUBROUTINE FINDCELLS(JP)
+   SUBROUTINE findcells(jp)
    
    use network_data
    use geometry_module, only: dbpinpol
@@ -1049,7 +1049,8 @@
    !  kc(1:numk) = kc_sav(1:numk)
    !  deallocate(kc_sav)
 
-   NDX2D = NUMP                                        ! NR OF 2d CELLS=NUMP
+   ! NR OF 2d CELLS=NUMP
+   NDX2D = NUMP                                        
 
    lasttopology = numk + numl
 
@@ -2816,16 +2817,15 @@
    allocate(meshgeom%nodex(meshgeom%numnode))
    allocate(meshgeom%nodey(meshgeom%numnode))
    allocate(meshgeom%branchidx(size(branchidx,1)))
-
-   ierr = ggeo_count_or_create_edge_nodes(meshgeom%branchidx, branchoffset, sourcenodeid, targetnodeid, branchlength, startindex, meshgeom%numedge) 
    
-   meshgeom%numedge = numedge
-   allocate(meshgeom%edge_nodes(2, meshgeom%numedge))
-
    !Assign the node coordinates
+   meshgeom%branchidx = branchidx
    meshgeom%nodex      =  nodex
    meshgeom%nodey      =  nodey
-   meshgeom%branchidx =  branchidx
+   
+   ierr = ggeo_count_or_create_edge_nodes(meshgeom%branchidx, branchoffset, sourcenodeid, targetnodeid, branchlength, startindex, meshgeom%numedge) 
+   
+   allocate(meshgeom%edge_nodes(2, meshgeom%numedge))
 
    !Calculate the edge_nodes
    ierr = ggeo_count_or_create_edge_nodes(meshgeom%branchidx, branchoffset, sourcenodeid, targetnodeid, branchlength, startindex, meshgeom%numedge, meshgeom%edge_nodes)
