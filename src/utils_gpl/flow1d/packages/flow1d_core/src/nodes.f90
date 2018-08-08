@@ -51,6 +51,7 @@ module m_node
    public dealloc
    public admin_nodes
    public fill_hashtable
+   public getnodeid
 
    interface fill_hashtable
       module procedure fill_hashtable_nds
@@ -197,5 +198,24 @@ contains
       call hashfill(nds%hashlist)
       
    end subroutine fill_hashtable_nds
+   
+   function getnodeId(nds, gridpoint) result(id)
+   
+      character(len=80)    :: id
+      type(t_nodeset), intent(in)      :: nds
+      integer        , intent(in)      :: gridpoint
+      
+      integer i
+      
+      do i = 1, nds%count
+         if (nds%node(i)%gridNumber == gridpoint) then
+            id  = nds%node(i)%id
+            return
+         endif
+         
+      enddo
+      
+      id = 'NODEID not found'
+   end function getnodeId
    
 end module m_node

@@ -841,5 +841,29 @@ contains
 
    end subroutine crossSectionsSort
    
+   function getRetentionId(network, gridpoint) result(id)
    
+      use m_Storage
+      use m_node
+   
+      character(len=80)              :: id
+      type(t_network), intent(in)    :: network
+      integer, intent(in)            :: gridpoint
+      
+      integer :: i
+      type(t_storage), pointer, dimension(:) :: stor
+      
+      stor => network%stors%stor
+      
+      do i = 1, network%stors%count
+         if (stor(i)%gridPoint == gridpoint) then
+            id = stor(i)%id
+            return
+         endif
+      enddo
+
+      id = 'No retention area assigned to node '//getnodeid(network%nds, gridpoint)
+      
+   end function getRetentionId
+
 end module m_network

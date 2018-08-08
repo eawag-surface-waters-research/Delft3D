@@ -770,14 +770,12 @@ module m_1d_networkreader
          if (node%nodeType == nt_NotSet) then
             ! probably end node (until proved otherwise
             node%nodeType = nt_endNode
-            node%numberOfConnections = 0
             node%gridNumber = gridIndex
          elseif (node%nodeType == nt_endNode) then
             ! Already one branch connected, so not an endNode
             node%nodeType = nt_LinkNode
             node%gridNumber = 0
          endif
-         node%numberOfConnections = node%numberOfConnections+1
          if (node%numberOfConnections > nds%maxNumberOfConnections) then
             nds%maxNumberOfConnections = node%numberOfConnections
          endif

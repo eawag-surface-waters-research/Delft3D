@@ -290,7 +290,7 @@ contains
 
       if (associated(storage%streetArea) ) then
          ! check if water level is above street level
-         if (level > storage%streetArea%x(1) ) then
+         if (level >= storage%streetArea%x(1) ) then
             getSurfaceByStorNode = interpolate(storage%streetArea, level)
             ! finished
             return
@@ -496,5 +496,6 @@ contains
          call printData(storage%streetArea, unit)
       endif
    end subroutine printStorage
+
    
 end module m_Storage
