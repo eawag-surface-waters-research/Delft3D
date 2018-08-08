@@ -418,7 +418,7 @@ contains
       double precision, optional, intent(out)  :: af_sub(3)
       double precision, optional, intent(out)  :: perim_sub(3)
       double precision, optional, intent(out)  :: cz_sub(3)
-
+      
       type (t_CrossSection), pointer     :: cross1
       type (t_CrossSection), pointer     :: cross2 
       double precision                   :: factor
@@ -558,7 +558,7 @@ contains
       getdeltax = network%brs%branch(ibr)%dx(ll)
    end function getdeltax
 
-   subroutine getCrossTotalDataGP(network, igrid, water, DepthOrLevel, totalArea, totalWidth)
+   subroutine getCrossTotalDataGP(network, igrid, water, DepthOrLevel, totalArea, totalWidth, calculationOption)
    
       type(t_network), intent(in)              :: network
       integer, intent(in)                      :: igrid
@@ -566,7 +566,8 @@ contains
       integer, optional, intent(in)            :: DepthOrLevel
       double precision, optional, intent(out)  :: totalArea
       double precision, optional, intent(out)  :: totalWidth
-   
+      integer, intent(in)                      :: calculationOption
+      
       type (t_CrossSection), pointer     :: cross1
       type (t_CrossSection), pointer     :: cross2 
       double precision                   :: factor

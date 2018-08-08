@@ -411,7 +411,7 @@ contains
             
             if (icrsbeg > icrsend) then
                
-               call setmessage(LEVEL_WARN, 'No cross sections found on branch '//trim(pbran%name)//'. Using default rectangular cross section')
+               call setmessage(LEVEL_WARN, 'No cross sections found on branch '//trim(pbran%id)//'. Using default rectangular cross section')
                do i = 1, pbran%uPointsCount
                   ilnk = pbran%lin(i)
                   adm%line2cross(ilnk)%c1 = -1

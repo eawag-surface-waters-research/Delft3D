@@ -260,7 +260,7 @@ module m_flow1d_reader
       endif
 
       if (network%crs%Count < 1) then
-         call SetMessage(LEVEL_FATAL, 'Not Any Cross Section Found')
+         call SetMessage(LEVEL_FATAL, 'No Cross Sections Found')
       endif
 
       call SetMessage(LEVEL_INFO, 'Reading Cross Section Locations Done')

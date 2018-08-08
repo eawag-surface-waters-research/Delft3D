@@ -1528,9 +1528,9 @@ subroutine GetCSParsFlowCross(cross, dpt, u1, cz, flowArea, wetPerimeter, flowWi
          else
             getSummerDikes = .true.
          endif
-         call TabulatedProfile(dpt, cross, .true., getSummerDikes, flowArea, flowWidth, wetPerimeter, af_sub_local, perim_sub_local, CS_TYPE_NORMAL)
+         call TabulatedProfile(dpt, cross, .true., getSummerDikes, flowArea, flowWidth, wetPerimeter, af_sub_local, perim_sub_local)
       case (CS_CIRCLE)
-         call CircleProfile(dpt, crossDef%diameter, flowArea, flowWidth, wetPerimeter, CS_TYPE_NORMAL)
+         call CircleProfile(dpt, crossDef%diameter, flowArea, flowWidth, wetPerimeter)
       case (CS_EGG)
          call EggProfile(dpt, crossDef%diameter, flowArea, flowWidth, wetPerimeter)
       case (CS_YZ_PROF)
@@ -1684,7 +1684,7 @@ subroutine GetCSParsTotalInterpolate(cross1, cross2, f, dpt, totalArea, totalWid
 
 end subroutine GetCSParsTotalInterpolate
 
-subroutine GetCSParsTotalCross(cross, dpt, totalArea, totalWidth, calculationOption, doSummerDike)
+subroutine GetCSParsTotalCross(cross, dpt, totalArea, totalWidth, doSummerDike)
 
    use m_GlobalParameters
    ! Global Variables
@@ -1698,7 +1698,6 @@ subroutine GetCSParsTotalCross(cross, dpt, totalArea, totalWidth, calculationOpt
                                                         !! CS_TYPE_MIN       Total area for only the narrowing part of the cross section (Nested Newton method)
    integer, intent(in)               :: calculationOption 
    logical, intent(in), optional     :: doSummerDike    !< Switch to calculate Summer Dikes or not
-
 
    ! Local Variables
    type(t_CSType), pointer           :: crossDef
@@ -2343,7 +2342,7 @@ subroutine trapez(dpt, d1, d2, w1, w2, area, width, perimeter)
    
 end subroutine trapez
 
-subroutine CircleProfile(dpt, diameter, area, width, perimeter, calculationOption)
+subroutine CircleProfile(dpt, diameter, area, width, perimeter)
    use m_GlobalParameters
 
    implicit none

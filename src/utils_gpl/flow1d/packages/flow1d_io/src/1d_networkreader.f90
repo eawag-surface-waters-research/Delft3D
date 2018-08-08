@@ -146,13 +146,14 @@ module m_1d_networkreader
       integer                   :: ibran
       integer                   :: igridpoint
       
-      integer                   :: ierr
+      integer                   :: ierr, i, j
       integer                   :: istat 
       integer                   :: numMesh
       integer                   :: meshIndex
       integer                   :: networkIndex
       integer                   :: gridPointsCount
       integer                   :: startIndex
+      type(t_node), dimension(:), pointer :: pnodes
 
       integer, allocatable, dimension(:)               :: gpFirst
       integer, allocatable, dimension(:)               :: gpLast
@@ -306,6 +307,15 @@ module m_1d_networkreader
 
       call adminBranchOrders(network%brs)
       call fill_hashtable(network%brs)
+      pnodes => network%nds%node  
+      do i = 1, network%nds%count
+         do j = i+1, network%nds%count
+            if (abs(pnodes(i)%x-pnodes(j)%x) + abs(pnodes(i)%y-pnodes(j)%y) < 1d0) then
+               pnodes(j)%x = pnodes(i)%x+0.5d0
+               pnodes(j)%y = pnodes(i)%y+0.5d0
+            endif
+         enddo
+      enddo
       
       network%loaded = .true.
       

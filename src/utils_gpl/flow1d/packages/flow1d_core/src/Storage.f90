@@ -300,7 +300,7 @@ contains
       if (storage%storageType /= nt_None .and. level >= storage%storageArea%x(1) ) then
          getSurfaceByStorNode = interpolate(storage%storageArea, level)
       else
-         getSurfaceByStorNode = 0d0
+         getSurfaceByStorNode = 0.1d0
       endif
       
    end function getSurfaceByStorNode
