@@ -162,7 +162,7 @@ module m_readRetentions
             if (success) then
                useTable = .true.
             else
-               nLevels  = 2
+               nLevels  = 1
                useTable = .false.
             endif
             
@@ -192,11 +192,11 @@ module m_readRetentions
                   call SetMessage(LEVEL_FATAL, 'Reading Retentions: Error in Level/Storage Data')
                endif
                
-               call prop_get_double(md_ptr%child_nodes(i)%node_ptr, 'retention', 'streetlevel', storLevels(2), success)
-               if (.not. success) storLevels(2) = storLevels(1) + 1.0d0
-               
-               call prop_get_double(md_ptr%child_nodes(i)%node_ptr, 'retention', 'streetlevelarea', storAreas(2), success)
-               if (.not. success) storLevels(2) = storLevels(1)
+               !call prop_get_double(md_ptr%child_nodes(i)%node_ptr, 'retention', 'streetlevel', storLevels(2), success)
+               !if (.not. success) storLevels(2) = storLevels(1) + 1.0d0
+               !
+               !call prop_get_double(md_ptr%child_nodes(i)%node_ptr, 'retention', 'streetlevelarea', storAreas(2), success)
+               !if (.not. success) storLevels(2) = storLevels(1)
                
                interPolate = 1
                
