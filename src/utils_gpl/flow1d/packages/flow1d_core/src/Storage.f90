@@ -297,7 +297,7 @@ contains
          endif
       endif
       ! else : calculate well storage:
-      if (storage%storageType /= nt_None .and. level > storage%storageArea%x(1) ) then
+      if (storage%storageType /= nt_None .and. level >= storage%storageArea%x(1) ) then
          getSurfaceByStorNode = interpolate(storage%storageArea, level)
       else
          getSurfaceByStorNode = 0d0

@@ -60,11 +60,14 @@ module m_readRetentions
 
       character(len=IdLen)                          :: retentionID
       character(len=IdLen)                          :: branchID
+      character(len=IdLen)                          :: nodeID
       character(len=IdLen)                          :: storageType
       logical                                       :: useTable
       
       double precision                              :: Chainage
       integer                                       :: branchIdx
+      integer                                       :: nodeIdx
+      integer                                       :: local_grid_index
       integer                                       :: gridPoint
       type(t_storage), pointer                      :: pSto
       
@@ -90,18 +93,45 @@ module m_readRetentions
             call prop_get_string(md_ptr%child_nodes(i)%node_ptr, 'retention', 'id', retentionID, success)
             if (success) call prop_get_string(md_ptr%child_nodes(i)%node_ptr, 'retention', 'branchid', branchID, success)
             if (success) call prop_get_double(md_ptr%child_nodes(i)%node_ptr, 'retention', 'chainage', Chainage, success)
-            if (.not. success) then
-               call SetMessage(LEVEL_FATAL, 'Error Reading Retention '''//trim(retentionID)//'''')
+            if (success) then
+               branchIdx = hashsearch(network%brs%hashlist, branchID)
+               if (branchIdx <= 0) Then
+                  call SetMessage(LEVEL_ERROR, 'Error Reading Retention '''//trim(retentionID)//''': Branch: '''//trim(branchID)//''' not Found')
+                  exit
+               endif
+               gridPoint = getCalcPoint(network%brs, branchIdx, Chainage)
+               if (gridPoint == network%brs%branch(branchIdx)%points(1) ) then
+                  gridPoint = network%brs%branch(branchIdx)%fromNode%index
+                  local_grid_index = -1
+                  branchIdx        = -1
+               elseif (gridPoint == network%brs%branch(branchIdx)%points(2)) then
+                  gridPoint = -network%brs%branch(branchIdx)%toNode%index
+                  branchIdx        = -1
+                  local_grid_index = -1
+               else
+                  local_grid_index = gridPoint - network%brs%branch(branchIdx)%points(1) + 1 
+               endif
+               
+            else
+               success = .true.
+               call prop_get_string(md_ptr%child_nodes(i)%node_ptr, 'retention', 'nodeId', nodeid, success)
+               if (.not. success) then
+                  call SetMessage(LEVEL_FATAL, 'Error Reading Retention '''//trim(retentionID)//'''')
+                  exit
+               endif
+               nodeIdx = hashsearch(network%nds%hashlist, nodeId)
+               if (nodeIdx <= 0) Then
+                  call SetMessage(LEVEL_ERROR, 'Error Reading Retention '''//trim(retentionID)//''': node: '''//trim(nodeID)//''' not Found')
+                  exit
+               endif
+               gridPoint        = network%nds%node(nodeIdx)%index
+               branchIdx        = -1
+               local_grid_index = -1
             endif
 
             call prop_get_string(md_ptr%child_nodes(i)%node_ptr, 'retention', 'storagetype', storageType, success)
             if (.not. success) storageType = 'Reservoir'
             
-            branchIdx = hashsearch(network%brs%hashlist, branchID)
-            if (branchIdx <= 0) Then
-               call SetMessage(LEVEL_ERROR, 'Error Reading Retention '''//trim(retentionID)//''': Branch: '''//trim(branchID)//''' not Found')
-               exit
-            endif
 
             network%storS%Count = network%storS%Count + 1
             if (network%storS%Count > network%storS%Size) then
@@ -114,26 +144,12 @@ module m_readRetentions
 
             ! Bcause of the complicated data structure of SOBEK storage in 'connection nodes'
             ! must be separated from the ordinary gridpoints
-            gridPoint = getCalcPoint(network%brs, branchIdx, Chainage)
-            if (gridPoint == network%brs%branch(branchIdx)%points(1) ) then
-               gridPoint = -network%brs%branch(branchIdx)%fromNode%index
-               psto%node_index = network%brs%branch(branchIdx)%fromNode%index
-               psto%local_grid_index = -1
-               branchIdx             = -1
-            elseif (gridPoint == network%brs%branch(branchIdx)%points(2)) then
-               gridPoint = -network%brs%branch(branchIdx)%toNode%index
-               psto%node_index = network%brs%branch(branchIdx)%toNode%index
-               branchIdx             = -1
-               psto%local_grid_index = -1
-            else
-               psto%local_grid_index = gridPoint - network%brs%branch(branchIdx)%points(1) + 1 
-            endif
-            
             pSto%id        = retentionID
             pSto%gridPoint = gridPoint
             network%storS%mapping(gridPoint) = network%storS%Count
             psto%branch_index     = branchIdx
-
+            psto%local_grid_index = local_grid_index
+            psto%node_index = gridpoint
             if (storageType == 'Closed') then
                pSto%storageType = nt_Closed
             elseif (storageType == 'Loss') then
