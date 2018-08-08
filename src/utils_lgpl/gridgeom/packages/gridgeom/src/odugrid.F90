@@ -50,7 +50,7 @@ function odu_get_xy_coordinates(branchids, branchoffsets, geopointsX, geopointsY
    double precision, intent(inout)   :: meshXCoords(:), meshYCoords(:)
    integer, intent(in)               :: jsferic
 
-   integer                           :: angle, i, ierr, ind, branchid, idxstart, idxend, idxbr, idxgeostart, idxgeoend, nsegments
+   integer                           :: angle, i, k, ierr, ind, branchid, nsegments
    double precision, allocatable     :: branchSegmentLengths(:)
    double precision, allocatable     :: xincrement(:), yincrement(:), zincrement(:)
    double precision, allocatable     :: deltaX(:), deltaY(:), deltaZ(:)
@@ -58,9 +58,12 @@ function odu_get_xy_coordinates(branchids, branchoffsets, geopointsX, geopointsY
    double precision, allocatable     :: cartGeopointsX(:), cartGeopointsY(:), cartGeopointsZ(:)
    double precision, allocatable     :: meshZCoords(:)
    double precision, allocatable     :: geopointsZ(:)  !returned by sphertocart3D 
-   double precision                  :: totallength, previousLength, afac, fractionbranchlength, maxlat
-   integer                           :: nBranchSegments
-
+   double precision                  :: totalLength, afac, fractionbranchlength, maxlat, previousLength
+   integer                           :: nBranchSegments, nbranches, br
+   integer                           :: startGeometryNode, endGeometryNode, nGeometrySegments
+   integer                           :: startMeshNode, endMeshNode 
+   integer, allocatable              :: meshnodemapping(:,:)
+      
    ierr = 0
    ! the number of geometry segments is always equal to number of geopoints - 1
    nBranchSegments = size(geopointsX,1) - 1
@@ -95,76 +98,72 @@ function odu_get_xy_coordinates(branchids, branchoffsets, geopointsX, geopointsY
       cartGeopointsZ(:) = 0
    endif
    
+   !map the mesh nodes
+   nbranches = size(branchlengths,1)
+   allocate(meshnodemapping(2,nbranches))
+   meshnodemapping = -1
+   ierr = odu_get_start_end_nodes_of_branches(branchids, meshnodemapping(1,:), meshnodemapping(2,:))
+   
    ! initialization
-   branchid       = branchids(1)
-   idxstart       = 1
-   idxend         = 1
-   idxbr          = 1
-   idxgeostart    = 1
-   idxgeoend      = 1
-   do while (idxbr<=size(branchlengths,1))
-      !calculate the starting and ending indexses of the mesh points
-      do i = idxstart + 1, size(branchoffsets,1)
-         if (branchids(i).ne.branchid) then
-            branchid = branchids(i)
-            idxend = i-1;
-            exit
-         endif
-         if (i ==  size(branchoffsets,1)) then
-         idxend = i;
-         endif
-      end do
+   startGeometryNode    = 1
+   do br = 1, nbranches
+      ! starting and ending nodes
+      startMeshNode         =  meshnodemapping(1,br)
+      endMeshNode           =  meshnodemapping(2,br)
       !number of geometry segments for the current branch
-      nsegments = nbranchgeometrynodes(idxbr) -1
-      idxgeoend = idxgeostart + nsegments
+      nGeometrySegments     = nbranchgeometrynodes(br) - 1
+      !ending geometry point
+      endGeometryNode       = startGeometryNode + nGeometrySegments
       !calculate the branch lenghts
-      totallength = 0.0D0
-      do i = idxgeostart, idxgeoend - 1
+      totalLength = 0.0d0
+      do i = startGeometryNode, endGeometryNode - 1
          deltaX(i) = cartGeopointsX(i+1) - cartGeopointsX(i)
          deltaY(i) = cartGeopointsY(i+1) - cartGeopointsY(i)
          deltaZ(i) = cartGeopointsZ(i+1) - cartGeopointsZ(i)
          branchSegmentLengths(i)= sqrt(deltaX(i)**2+deltaY(i)**2+deltaZ(i)**2)
-         totallength = totallength + branchSegmentLengths(i)
+         totalLength = totalLength + branchSegmentLengths(i)
       enddo
       !correct for total segment length
-      if (totallength > 1.0D-6) then
-         afac = branchlengths(idxbr)/totallength
-         branchSegmentLengths(idxgeostart: idxgeoend -1) = branchSegmentLengths(idxgeostart: idxgeoend -1) * afac
+      if (totalLength > 1.0d-6) then
+         afac = branchlengths(br)/totalLength
+         branchSegmentLengths(startGeometryNode: endGeometryNode - 1) = branchSegmentLengths(startGeometryNode: endGeometryNode - 1) * afac
       end if
    
       !calculate the increments
-      do i = idxgeostart, idxgeoend -1
-         if (branchSegmentLengths(i) > 1.0D-6) then
+      do i = startGeometryNode, endGeometryNode - 1
+         if (branchSegmentLengths(i) > 1.0d-6) then
             xincrement(i)  = deltaX(i)/branchSegmentLengths(i)
             yincrement(i)  = deltaY(i)/branchSegmentLengths(i)
             zincrement(i)  = deltaZ(i)/branchSegmentLengths(i)
          else
-            xincrement(i)  = 0.D0
-            yincrement(i)  = 0.D0   
-            zincrement(i)  = 0.D0   
+            xincrement(i)  = 0.d0
+            yincrement(i)  = 0.d0   
+            zincrement(i)  = 0.d0   
          endif
       enddo
       !now loop over the mesh points
-      ind = idxgeostart
-      totallength = branchSegmentLengths(ind)
-      previousLength = 0
-      do i = idxstart, idxend
-         ! TODO: carniato: code below is wrong IF: the branchoffset(i) of some grid point is MORE THAN ONE geopoint segment ahead. The loop below should be a while loop.
-         if(((branchoffsets(i) - totallength) > 1.0d-6) .and. (ind < nBranchSegments)) then
-            previousLength = totallength
-            ind = ind +1
-            totallength = totallength + branchSegmentLengths(ind)
-         endif
-            fractionbranchlength =  branchoffsets(i) - previousLength
-            cartMeshXCoords(i) = cartGeopointsX(ind) + fractionbranchlength * xincrement(ind)
-            cartMeshYCoords(i) = cartGeopointsY(ind) + fractionbranchlength * yincrement(ind)
-            !TODO: this function should also return meshZCoords (it is relevant if coordinates are spheric) 
-            cartMeshZCoords(i) = cartGeopointsZ(ind) + fractionbranchlength * zincrement(ind)
+      ind            = startGeometryNode
+      totallength    = 0.d0
+      previousLength = 0.d0 
+      do i = startMeshNode, endMeshNode         
+         !determine max and min lengths
+         totalLength = previousLength
+         do k = ind, endGeometryNode - 1
+            totalLength = totalLength + branchSegmentLengths(k)
+            if (totalLength > branchoffsets(i)) then
+                  previousLength = totalLength - branchSegmentLengths(k)
+                  ind = k
+               exit
+            endif
+         enddo
+         fractionbranchlength =  branchoffsets(i) - previousLength
+         cartMeshXCoords(i) = cartGeopointsX(ind) + fractionbranchlength * xincrement(ind)
+         cartMeshYCoords(i) = cartGeopointsY(ind) + fractionbranchlength * yincrement(ind)
+         !TODO: this function should also return meshZCoords (it is relevant if coordinates are spheric) 
+         cartMeshZCoords(i) = cartGeopointsZ(ind) + fractionbranchlength * zincrement(ind)
       enddo
-      !update indexses
-      idxgeostart = idxgeoend + 1
-      idxstart    = idxend + 1
-      idxbr       = idxbr + 1
+      !update geometry indexes
+      startGeometryNode = endGeometryNode + 1
    enddo
    
    if (jsferic == 1) then
