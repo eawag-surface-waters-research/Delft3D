@@ -93,7 +93,8 @@
                outconc(:,iseg) = amiss
             endif
          enddo
-         write (iomap) itime, outconc, conc2
+
+         write (iomap) itime, (outconc(:,iseg), conc2(:,iseg), iseg = 1,noseg)
 
          deallocate( outconc )
       else
