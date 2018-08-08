@@ -202,6 +202,10 @@ module m_readRetentions
                
             endif
 
+            if (storAreas(1) <= 0d0) then
+               call setMessage(LEVEL_ERROR, ' area at bed level for retention ' // trim(retentionID) // ' is equal to 0, please enter a positive value')
+            endif
+            
             call setTable(pSto%storageArea, interPolate, storLevels, storAreas, nLevels)
 
             ! Clear Arrays
