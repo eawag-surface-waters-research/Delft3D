@@ -37,6 +37,10 @@ module m_node
    
    private 
      
+   interface getnodeid
+      module procedure getnodeid_fun
+   end interface
+
    ! node types
    integer, public, parameter :: nt_BND       = -2
    integer, public, parameter :: nt_NotSet    = -1
@@ -199,7 +203,7 @@ contains
       
    end subroutine fill_hashtable_nds
    
-   function getnodeId(nds, gridpoint) result(id)
+   function getnodeId_fun(nds, gridpoint) result(id)
    
       character(len=80)    :: id
       type(t_nodeset), intent(in)      :: nds
@@ -216,6 +220,6 @@ contains
       enddo
       
       id = 'NODEID not found'
-   end function getnodeId
+   end function getnodeId_fun
    
 end module m_node
