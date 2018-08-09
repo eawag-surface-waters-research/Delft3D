@@ -848,7 +848,7 @@ subroutine setGroundLayerData(crossDef, thickness)
    
    select case(crossDef%crossType)
       case (CS_TABULATED)
-         call GetTabulatedSizes(thickness, crossDef, .true., area, width, perimeter, af_sub, perim_sub, CS_TYPE_NORMAL)
+         call GetTabSizesFromTables(thickness, crossDef, .true., area, width, perimeter, af_sub, perim_sub, CS_TYPE_NORMAL)
       case (CS_CIRCLE)
          call CircleProfile(thickness, crossDef%diameter, area, width, perimeter, CS_TYPE_NORMAL)
       case (CS_EGG)
@@ -1698,6 +1698,7 @@ subroutine GetCSParsTotalCross(cross, dpt, totalArea, totalWidth, calculationOpt
                                                         !! CS_TYPE_MIN       Total area for only the narrowing part of the cross section (Nested Newton method)
    integer, intent(in)               :: calculationOption 
    logical, intent(in), optional     :: doSummerDike    !< Switch to calculate Summer Dikes or not
+
 
    ! Local Variables
    type(t_CSType), pointer           :: crossDef
