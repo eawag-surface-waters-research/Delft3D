@@ -1360,11 +1360,11 @@ subroutine GetCSParsFlowInterpolate(cross1, cross2, f, dpt, u1, cz, flowArea, we
             if (cross1%crosstype .ne. CS_YZ_PROF) then
             
                ! Find out the conveyance value for interpolated non yz cross section
-               conv = cz * flowArea * sqrt(flowArea / wetPerimeter)  ! extra_friction_depth
+               conv = cz * flowArea * sqrt(flowArea / max(1d-6,wetPerimeter))  ! extra_friction_depth
             
                ! Criteria to satisfy the criteria  in normup i.e cz(m)*cz(m)*wet
                if (cz *cz * flowArea < 1.0d0) then
-                  conv = sqrt(flowArea *flowArea / wetPerimeter)
+                  conv = sqrt(flowArea *flowArea / max(1d-6,wetPerimeter))
                endif
             
                if (cross1%closed) then

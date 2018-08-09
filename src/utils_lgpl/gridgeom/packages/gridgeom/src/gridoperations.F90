@@ -731,7 +731,7 @@
       K1 = KN(1,L) ;
       K2 = KN(2,L) ;
       DO LL = 1,NMK(K1) ! Check all previously added links
-         if (KN(1,NOD(K1)%LIN(LL)) == K2 .or. KN(2,NOD(K1)%LIN(LL)) == K2) then
+         if ( (kn(3,L) /=1) .and. (KN(1,NOD(K1)%LIN(LL)) == K2 .or. KN(2,NOD(K1)%LIN(LL)) == K2)) then
             KN(1,L) = 0
             KN(2,L) = 0
             jDupLinks = 1

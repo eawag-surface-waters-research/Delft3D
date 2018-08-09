@@ -364,7 +364,7 @@ contains
          adm%lin2str(network%sts%struct(istru)%link_number) = istru
       enddo
       
-      adm%lin2ibr = -huge(1)
+      adm%lin2ibr   = -huge(1)
       adm%lin2point = -huge(1)  
       adm%lin2local = -huge(1)
       adm%lin2grid  = -huge(1)
