@@ -51,8 +51,10 @@
       double precision :: ucrit
       double precision :: t0
       integer          :: hasTable       
-      integer          :: materialtype      = -1
+      integer          :: materialtype           = -1
       double precision :: endTimeFirstPhase
+      double precision :: breachWidthDerivative  = -1.0d0
+      double precision :: waterLevelJumpDambreak = -1.0d0	
       character(Charln) :: breachwidthandlevel = ''
       
 
@@ -93,9 +95,13 @@
    double precision :: timeFromBreaching
    double precision :: timeFromFirstPhase
    double precision :: widthIncrement
+   double precision :: waterLevelJumpDambreak
+   double precision :: breachWidthDerivative
 
    ! form intial timestep
    timeFromBreaching = time1 - dambreak%t0
+   breachWidthDerivative = 0.d0
+   waterLevelJumpDambreak = 0.d0
 
    ! breaching not started
    if (timeFromBreaching < 0) return
@@ -133,19 +139,23 @@
          smin = min(s1m1, s1m2)
          hmx = max(0d0,smax - dambreak%crl)
          hmn = max(0d0,smin - dambreak%crl)
-         deltaLevel = (gravity*(hmx - hmn))**1.5d0
+         waterLevelJumpDambreak = hmx - hmn
+         deltaLevel = (gravity*waterLevelJumpDambreak)**1.5d0
          timeFromFirstPhase = time1 - dambreak%endTimeFirstPhase
 
          if (dambreak%width < maximumWidth .and. (.not.isnan(u0)) .and. dabs(u0) > dambreak%ucrit) then
-            widthIncrement = (dambreak%f1*dambreak%f2/dlog(10D0)) * &
+            breachWidthDerivative = (dambreak%f1*dambreak%f2/dlog(10D0)) * &
                              (deltaLevel/(dambreak%ucrit*dambreak%ucrit)) * &
-                             (1.0/(1.0 + (dambreak%f2*gravity*timeFromFirstPhase/dambreak%ucrit))) * dt
+                             (1.0/(1.0 + (dambreak%f2*gravity*timeFromFirstPhase/dambreak%ucrit))) 
+            widthIncrement = breachWidthDerivative * dt
             !ensure monotonically increasing dambreak%width 
             if (widthIncrement > 0) then 
                dambreak%width = dambreak%width  + widthIncrement
             endif
          endif
       endif
+      dambreak%breachWidthDerivative  = breachWidthDerivative
+      dambreak%waterLevelJumpDambreak = waterLevelJumpDambreak
    endif
 
    ! in vdKnaap(2000) the maximum allowed branch width is limited (see sobek manual and setCoefficents subroutine below)
