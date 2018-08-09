@@ -848,7 +848,7 @@ subroutine setGroundLayerData(crossDef, thickness)
    
    select case(crossDef%crossType)
       case (CS_TABULATED)
-         call GetTabSizesFromTables(thickness, crossDef, .true., area, width, perimeter, af_sub, perim_sub, CS_TYPE_NORMAL)
+         call GetTabulatedSizes(thickness, crossDef, .true., area, width, perimeter, af_sub, perim_sub, CS_TYPE_NORMAL)
       case (CS_CIRCLE)
          call CircleProfile(thickness, crossDef%diameter, area, width, perimeter, CS_TYPE_NORMAL)
       case (CS_EGG)
@@ -1528,9 +1528,9 @@ subroutine GetCSParsFlowCross(cross, dpt, u1, cz, flowArea, wetPerimeter, flowWi
          else
             getSummerDikes = .true.
          endif
-         call TabulatedProfile(dpt, cross, .true., getSummerDikes, flowArea, flowWidth, wetPerimeter, af_sub_local, perim_sub_local)
+         call TabulatedProfile(dpt, cross, .true., getSummerDikes, flowArea, flowWidth, wetPerimeter, af_sub_local, perim_sub_local, CS_TYPE_NORMAL)
       case (CS_CIRCLE)
-         call CircleProfile(dpt, crossDef%diameter, flowArea, flowWidth, wetPerimeter)
+         call CircleProfile(dpt, crossDef%diameter, flowArea, flowWidth, wetPerimeter, CS_TYPE_NORMAL)
       case (CS_EGG)
          call EggProfile(dpt, crossDef%diameter, flowArea, flowWidth, wetPerimeter)
       case (CS_YZ_PROF)
@@ -1684,7 +1684,7 @@ subroutine GetCSParsTotalInterpolate(cross1, cross2, f, dpt, totalArea, totalWid
 
 end subroutine GetCSParsTotalInterpolate
 
-subroutine GetCSParsTotalCross(cross, dpt, totalArea, totalWidth, doSummerDike)
+subroutine GetCSParsTotalCross(cross, dpt, totalArea, totalWidth, calculationOption, doSummerDike)
 
    use m_GlobalParameters
    ! Global Variables
@@ -2342,7 +2342,7 @@ subroutine trapez(dpt, d1, d2, w1, w2, area, width, perimeter)
    
 end subroutine trapez
 
-subroutine CircleProfile(dpt, diameter, area, width, perimeter)
+subroutine CircleProfile(dpt, diameter, area, width, perimeter, calculationOption)
    use m_GlobalParameters
 
    implicit none
