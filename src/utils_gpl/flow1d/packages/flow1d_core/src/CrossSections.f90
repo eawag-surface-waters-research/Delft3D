@@ -2373,8 +2373,8 @@ subroutine CircleProfile(dpt, diameter, area, width, perimeter, calculationOptio
    !
    !
    ra = 0.5*diameter
-   fi = dacos((ra-dpt)/ra)
-   sq = dsqrt(dpt*(diameter - dpt))
+   fi = dacos(max((ra-dpt)/ra, -1d0))
+   sq = dsqrt(max(dpt*(diameter - dpt),0d0))
 
    ! normal circle profile
    if (dpt<diameter) then
