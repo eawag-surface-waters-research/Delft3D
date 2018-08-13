@@ -73,6 +73,7 @@ module m_readRetentions
       
       integer                                       :: nLevels
       integer                                       :: interPolate
+      logical                                       :: useStreetStorage
       double precision, allocatable, dimension(:)   :: storLevels
       double precision, allocatable, dimension(:)   :: storAreas
 
@@ -84,12 +85,18 @@ module m_readRetentions
          numstr = size(md_ptr%child_nodes)
       end if
 
+      success = .true.
+      call prop_get_logical(md_ptr, 'general', 'useStreetStorage', useStreetStorage, success)
+      if (.not. success) then
+         useStreetStorage = .true.
+      endif
+      
       do i = 1, numstr
          
          if (tree_get_name(md_ptr%child_nodes(i)%node_ptr) .eq. 'retention') then
             
             ! Read Data
-            
+            success = .true.
             call prop_get_string(md_ptr%child_nodes(i)%node_ptr, 'retention', 'id', retentionID, success)
             if (success) call prop_get_string(md_ptr%child_nodes(i)%node_ptr, 'retention', 'branchid', branchID, success)
             if (success) call prop_get_double(md_ptr%child_nodes(i)%node_ptr, 'retention', 'chainage', Chainage, success)
@@ -189,14 +196,9 @@ module m_readRetentions
                call prop_get_double(md_ptr%child_nodes(i)%node_ptr, 'retention', 'bedlevel', storLevels(1), success)
                if (success) call prop_get_double(md_ptr%child_nodes(i)%node_ptr, 'retention', 'area', storAreas(1), success)
                if (.not. success) then
-                  call SetMessage(LEVEL_FATAL, 'Reading Retentions: Error in Level/Storage Data')
+                  call SetMessage(LEVEL_ERROR, 'Reading Retentions: Error in Level/Storage Data')
+                  cycle
                endif
-               
-               !call prop_get_double(md_ptr%child_nodes(i)%node_ptr, 'retention', 'streetlevel', storLevels(2), success)
-               !if (.not. success) storLevels(2) = storLevels(1) + 1.0d0
-               !
-               !call prop_get_double(md_ptr%child_nodes(i)%node_ptr, 'retention', 'streetlevelarea', storAreas(2), success)
-               !if (.not. success) storLevels(2) = storLevels(1)
                
                interPolate = 1
                
@@ -208,18 +210,28 @@ module m_readRetentions
             
             call setTable(pSto%storageArea, interPolate, storLevels, storAreas, nLevels)
 
-            ! Clear Arrays
-            istat = 0
-            if (allocated(storLevels)) deallocate(storLevels, stat=istat)
-            if (istat == 0 .and. allocated(storAreas)) deallocate(storAreas, stat=istat)
-            if (istat .ne. 0) then
-               call SetMessage(LEVEL_FATAL, 'Reading Retentions: Error Deallocating Arrays')
+            call prop_get_double(md_ptr%child_nodes(i)%node_ptr, 'retention', 'streetlevel', storLevels(1), success)
+            call prop_get_double(md_ptr%child_nodes(i)%node_ptr, 'retention', 'streetstoragearea', storAreas(1), success)
+            if (success .and. storAreas(1) > 0d0 .and. useStreetStorage) then
+               psto%useStreetStorage = .true.
+               call setTable(pSto%streetArea, interPolate, storLevels, storAreas, nLevels)
+            else 
+               psto%useStreetStorage = .false.
             endif
+
       
          endif
       
       end do
       
+      ! Clear Arrays
+      istat = 0
+      if (allocated(storLevels)) deallocate(storLevels, stat=istat)
+      if (istat == 0 .and. allocated(storAreas)) deallocate(storAreas, stat=istat)
+      if (istat .ne. 0) then
+         call SetMessage(LEVEL_ERROR, 'Reading Retentions: Error Deallocating Arrays')
+      endif
+
       call fill_hashtable(network%storS)
       
       call tree_destroy(md_ptr)

@@ -497,8 +497,8 @@ contains
 
       if (network%adm%line2cross(ilink)%c1 <= 0) then
          ! no cross section defined on branch, use default definition
-         totalArea  = default_width* depth
-         totalWidth = default_width
+         totalArea  = sl*depth
+         totalWidth = sl
          return
       endif
       

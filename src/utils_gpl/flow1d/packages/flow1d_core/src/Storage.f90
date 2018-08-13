@@ -109,6 +109,7 @@ module m_Storage
       integer                 :: storageType             
       type(t_table), pointer  :: storageArea             !< table containing storage area and levels
       type(t_table), pointer  :: streetArea              !< table containing storage area and levels on street level
+      logical                 :: useStreetStorage        !< flag indicating whether streetstorage is to be used
    end type
    
    type, public :: t_storageSet
@@ -288,7 +289,7 @@ contains
       type(t_storage), intent(in)            :: storage
       double precision, intent(in)           :: level
 
-      if (associated(storage%streetArea) ) then
+      if (storage%useStreetStorage ) then
          ! check if water level is above street level
          if (level >= storage%streetArea%x(1) ) then
             getSurfaceByStorNode = interpolate(storage%streetArea, level)
@@ -346,7 +347,7 @@ contains
       if (storage%storagetype/=nt_none) then
          level2 = level
          getVolumeByStorNode = 0d0
-         if (associated(storage%streetArea) ) then
+         if (storage%useStreetStorage ) then
             ! check if water level is above street level
             if (level > storage%streetArea%x(1)) then
                getVolumeByStorNode= integrate(storage%streetArea, level)
