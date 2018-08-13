@@ -876,6 +876,7 @@ function ug_write_meshtopology(ncid, meshids, meshName, dim, dataLocsCode, add_e
    if (add_layers) then
       ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'layer_dimension',     'n'//prefix//'_layer')
       ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'interface_dimension', 'n'//prefix//'_interface')
+      ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'vertical_dimensions', 'n'//prefix//'_layer: n'//prefix//'_interface (padding: none)')
    end if
 
    if (dim >= 3) then
