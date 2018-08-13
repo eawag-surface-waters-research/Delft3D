@@ -87,7 +87,7 @@
             ilow  = idiag(iseg-1) + 1
             ihigh = idiag(iseg)
             do jcol = ilow+iadd, ihigh
-               if ( imat(jcol) .ne. 0 .and. imat(jcol) .ne. iseg )
+               if ( imat(jcol) .gt. 0 .and. ( imat(jcol) .lt. iseg .or. imat(jcol) .ne. iseg ) )
      &                         x(iseg) = x(iseg) - amat(jcol) * x( imat(jcol) )
             enddo
          enddo
