@@ -819,7 +819,7 @@ subroutine point_in_polygon( n, x, y, x0, y0, b)
   j = n
 
   do i = 1, n
-     if ( ((y(i)>y0) .ne. (y(j)>y0)) .and. (x0 < (x(j)-x(i)) * (y0-y(i)) / (y(j)-y(i)) + x(i)) ) then
+     if ( ((y(i)>y0) .neqv. (y(j)>y0)) .and. (x0 < (x(j)-x(i)) * (y0-y(i)) / (y(j)-y(i)) + x(i)) ) then
         b = .not.b
      end if
      j = i
