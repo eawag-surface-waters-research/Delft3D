@@ -64,6 +64,7 @@ module m_readLaterals
       double precision                              :: length
       integer                                       :: branchIdx
       type(t_lateral), pointer                      :: pLat
+      type(t_branch), pointer                       :: pBranch
 
       call tree_create(trim(lateralLocationFile), md_ptr, maxlenpar)
       call prop_file('ini',trim(lateralLocationFile),md_ptr, istat)
@@ -90,7 +91,19 @@ module m_readLaterals
             if (.not. success) length = 0.0d0
             
             branchIdx = hashsearch(network%brs%hashlist, branchID)
-            if (branchIdx <= 0) Then
+            if (branchIdx > 0) Then
+               
+               pBranch => network%brs%branch(branchIdx)
+               
+               ! Check Chainages
+               if (Chainage < 0.0d0) then
+                  call SetMessage(LEVEL_ERROR, 'Negative Chainage for Lateral Location '''//trim(lateralID)//'''')
+               elseif (Chainage > pBranch%length) then
+                  call SetMessage(LEVEL_ERROR, 'Chainage > Branch Length for Lateral Location '''//trim(lateralID)//'''')
+               elseif ((Chainage + length) > pBranch%length) then
+                  call SetMessage(LEVEL_ERROR, 'Chainage + Length > Branch Length for Lateral Location '''//trim(lateralID)//'''')
+               endif
+            else
                call SetMessage(LEVEL_ERROR, 'Error Reading Lateral Location '''//trim(lateralID)//''': Branch: '''//trim(branchID)//''' not Found')
             endif
       
