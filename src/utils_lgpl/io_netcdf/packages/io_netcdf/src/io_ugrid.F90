@@ -932,8 +932,10 @@ function ug_def_var(ncid, id_var, id_dims, itype, iloctype, mesh_name, var_name,
    end if
 
    prefix = trim(mesh_name)
-   
-   ierr = nf90_def_var(ncid, prefix//'_'//trim(var_name), itype, id_dims, id_var)
+   ierr = nf90_def_var(ncid,prefix//'_'//trim(var_name), itype, id_dims, id_var)
+   if (ierr /= nf90_noerr) then
+      goto 888
+   end if
    ierr = nf90_put_att(ncid, id_var, 'mesh', trim(mesh_name))
    select case (iloctype)
    case (UG_LOC_NODE)
@@ -1107,17 +1109,18 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
       add_layers = numLayer >= 1
    end if
 
+   ! This dimension might already be defined, check first if it is present
+   ierr = nf90_inq_dimid(ncid, 'Two', meshids%dimids(mdim_two))
+   if ( ierr /= UG_NOERR) then
+      ierr = nf90_def_dim(ncid, 'Two', 2,  meshids%dimids(mdim_two))
+   endif
+      
    if (.not.present(ngeopointx) .or. (.not.associated(ngeopointx))) then !2d/3d and 1d not UGRID 1.6
       ierr = ug_write_meshtopology(ncid, meshids, meshName, dim, dataLocs, add_edge_face_connectivity, add_face_edge_connectivity, add_face_face_connectivity, add_layers)
       ! Dimensions
       ierr = nf90_def_dim(ncid, 'n'//prefix//'_edge',        numEdge,   meshids%dimids(mdim_edge))
       ierr = nf90_def_dim(ncid, 'n'//prefix//'_node',        numNode,   meshids%dimids(mdim_node))
 
-      ! This dimension might already be defined, check first if it is present
-      ierr = nf90_inq_dimid(ncid, 'Two', meshids%dimids(mdim_two))
-      if ( ierr /= UG_NOERR) then
-         ierr = nf90_def_dim(ncid, 'Two', 2,  meshids%dimids(mdim_two))
-      endif
 
       if (dim == 2 .or. ug_checklocation(dataLocs, UG_LOC_FACE)) then
          ! TODO: AvD: the new maxNumNodesPerFace dummy variable overlaps with this nv here, but they may be different. Remove one.
@@ -1152,20 +1155,10 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
       ierr = ug_def_var(ncid, meshids%varids(mid_nodez), (/ meshids%dimids(mdim_node) /), nf90_double, UG_LOC_NODE, &
          meshName, 'node_z', 'altitude', 'z-coordinate of mesh nodes', 'm', '', crs, dfill=dmiss)
 
-      ! Edges
-      if (dim == 1 .or. ug_checklocation(dataLocs, UG_LOC_EDGE))  then
-         ierr = nf90_def_var(ncid, prefix//'_edge_nodes', nf90_int, (/ meshids%dimids(mdim_two), meshids%dimids(mdim_edge) /) , meshids%varids(mid_edgenodes))
-         ierr = nf90_put_att(ncid, meshids%varids(mid_edgenodes), 'cf_role',   'edge_node_connectivity')
-         ierr = nf90_put_att(ncid, meshids%varids(mid_edgenodes), 'mesh', trim(meshName))
-         ierr = nf90_put_att(ncid, meshids%varids(mid_edgenodes), 'location', 'edge')
-         ierr = nf90_put_att(ncid, meshids%varids(mid_edgenodes), 'long_name',  'Mapping from every edge to the two nodes that it connects')
-         if (start_index.ne.-1) then
-            ierr = nf90_put_att(ncid, meshids%varids(mid_edgenodes), 'start_index',  start_index)
-         endif
-         ierr = nf90_put_att(ncid, meshids%varids(mid_edgenodes), '_FillValue',  imiss)
-      end if
 
    else if (dim == 1 .and. present(ngeopointx) .and. associated(ngeopointx)) then !1d UGRID 1.6
+      !some results might still be saved at the edges, also for 1d 
+      ierr = nf90_def_dim(ncid, 'n'//prefix//'_edge',        numEdge,   meshids%dimids(mdim_edge))   
       ierr = ug_create_1d_network(ncid, networkids, network1dname, size(nnodex), nbranches, ngeometry)
       ierr = ug_create_1d_mesh(ncid, network1dname, meshids, meshname, numNode)
       ierr = ug_def_mesh_ids(ncid, meshids, meshname, UG_LOC_NODE)
@@ -1210,6 +1203,19 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    !ierr = nf90_put_att(inetfile, id_netlinktype, 'flag_values',   (/ 0, 1, 2, 3, 4 /))
    !ierr = nf90_put_att(inetfile, id_netlinktype, 'flag_meanings', 'closed_link_between_2D_nodes link_between_1D_nodes link_between_2D_nodes embedded_1D2D_link 1D2D_link')
 
+   ! Edges
+   if (dim == 1 .or. ug_checklocation(dataLocs, UG_LOC_EDGE))  then
+      ierr = nf90_def_var(ncid, prefix//'_edge_nodes', nf90_int, (/ meshids%dimids(mdim_two), meshids%dimids(mdim_edge) /) , meshids%varids(mid_edgenodes))
+      ierr = nf90_put_att(ncid, meshids%varids(mid_edgenodes), 'cf_role',   'edge_node_connectivity')
+      ierr = nf90_put_att(ncid, meshids%varids(mid_edgenodes), 'mesh', trim(meshName))
+      ierr = nf90_put_att(ncid, meshids%varids(mid_edgenodes), 'location', 'edge')
+      ierr = nf90_put_att(ncid, meshids%varids(mid_edgenodes), 'long_name',  'Mapping from every edge to the two nodes that it connects')
+      if (start_index.ne.-1) then
+         ierr = nf90_put_att(ncid, meshids%varids(mid_edgenodes), 'start_index',  start_index)
+      endif
+      ierr = nf90_put_att(ncid, meshids%varids(mid_edgenodes), '_FillValue',  imiss)
+   end if
+   
    ! Faces
    if (dim == 2 .or. ug_checklocation(dataLocs, UG_LOC_FACE)) then
       ierr = nf90_def_var(ncid, prefix//'_face_nodes', nf90_int, (/ meshids%dimids(mdim_maxfacenodes), meshids%dimids(mdim_face) /) , meshids%varids(mid_facenodes))
@@ -1360,9 +1366,9 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
          ierr = ug_write_1d_network_branches_geometry(ncid, networkids, ngeopointx, ngeopointy)
          ! write mesh
          ierr = ug_put_1d_mesh_discretisation_points(ncid, meshids, branchidx, branchoffsets, start_index)
-      else
-         ierr = nf90_put_var(ncid, meshids%varids(mid_edgenodes), edge_nodes, count=(/ 2, numEdge /))
       endif
+        ! always write edge nodes
+        ierr = nf90_put_var(ncid, meshids%varids(mid_edgenodes), edge_nodes, count=(/ 2, numEdge /))
    end if
 
    if (ug_checklocation(dataLocs, UG_LOC_EDGE)) then
@@ -3354,7 +3360,10 @@ function ug_create_1d_network(ncid, netids, networkName, nNodes, nBranches,nGeom
    
    ierr = UG_SOMEERR
    wasInDefine = 0
-   ierr = nf90_redef(ncid) !open NetCDF in define mode
+   ierr = nf90_redef(ncid) 
+   if (ierr == nf90_eindefine) then
+      wasInDefine = 1 ! Was still in define mode.
+   endif
     
    !Dimensions
    ierr  = nf90_def_dim(ncid, 'n'//prefix//'_branch'    , nBranches, netids%dimids(ntdim_1dbranches))
@@ -3421,7 +3430,7 @@ function ug_create_1d_network(ncid, netids, networkName, nNodes, nBranches,nGeom
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dnodex), 'units', 'm')
    !3. Nodes: y coord
    ierr = nf90_def_var(ncid, prefix//'_nodes_y', nf90_double, (/ netids%dimids(ntdim_1dnodes) /) , netids%varids(ntid_1dnodey))
-   ierr = nf90_put_att(ncid, netids%varids(ntid_1dnodey), 'standard_name', 'projection_x_coordinate')
+   ierr = nf90_put_att(ncid, netids%varids(ntid_1dnodey), 'standard_name', 'projection_y_coordinate')
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dnodey), 'long_name', 'y coordinates of the network connection nodes')
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dnodey), 'units', 'm')
 
@@ -3452,7 +3461,9 @@ function ug_create_1d_network(ncid, netids, networkName, nNodes, nBranches,nGeom
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dbranchorder), 'mesh', prefix)
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dbranchorder), 'location', 'edge')
 
-   ierr = nf90_enddef(ncid)
+   if (wasInDefine==0) then
+      ierr = nf90_enddef(ncid)
+   endif
    
 end function ug_create_1d_network
 
@@ -3461,7 +3472,7 @@ function ug_create_1d_mesh(ncid, networkname, meshids, meshname, nmeshpoints) re
    
    integer, intent(in)                  :: ncid, nmeshpoints
    type(t_ug_mesh), intent(inout)       :: meshids   
-   integer                              :: ierr
+   integer                              :: ierr, wasInDefine
    character(len=*),intent(in)          :: meshname, networkname
    character(len=len_trim(meshname))    :: prefix
    character(len=nf90_max_name)         :: buffer
@@ -3469,7 +3480,11 @@ function ug_create_1d_mesh(ncid, networkname, meshids, meshname, nmeshpoints) re
    prefix=trim(meshname)
    
    ierr = UG_SOMEERR
-   ierr = nf90_redef(ncid) !open NetCDF in define mode
+   wasInDefine = 0
+   ierr = nf90_redef(ncid) 
+   if (ierr == nf90_eindefine) then
+      wasInDefine = 1 ! Was still in define mode.
+   endif
    
    !define dim
    ! This dimension might already be defined, check first if it is present 
@@ -3499,7 +3514,9 @@ function ug_create_1d_mesh(ncid, networkname, meshids, meshname, nmeshpoints) re
    ierr = nf90_def_var(ncid, prefix//'_nodes_branch_offset', nf90_double, (/ meshids%dimids(mdim_node) /) , meshids%varids(mid_1doffset))
    ierr = nf90_put_att(ncid, meshids%varids(mid_1doffset), 'long_name', 'Offset along the branch at which the node is located')
    
-   ierr = nf90_enddef(ncid)
+   if (wasInDefine==0) then
+      ierr = nf90_enddef(ncid)
+   endif
 
 end function ug_create_1d_mesh
 
@@ -3510,12 +3527,17 @@ function ug_def_mesh_ids(ncid, meshids, meshname, locationType) result(ierr)
    type(t_ug_mesh), intent(inout)       :: meshids
    character(len=*),intent(in)          :: meshname
    character(len=len_trim(meshname))    :: prefix
-   integer                              :: ierr
+   integer                              :: ierr, wasInDefine
 
    prefix=trim(meshname)
 
    ierr = UG_SOMEERR
-   ierr = nf90_redef(ncid) !open NetCDF in define mode
+   
+   wasInDefine = 0
+   ierr = nf90_redef(ncid) 
+   if (ierr == nf90_eindefine) then
+      wasInDefine = 1 ! Was still in define mode.
+   endif  
 
    ierr = nf90_inq_dimid(ncid, 'idstrlength', meshids%dimids(mdim_idstring))
    if ( ierr /= UG_NOERR) then 
@@ -3561,7 +3583,9 @@ function ug_def_mesh_ids(ncid, meshids, meshname, locationType) result(ierr)
       ierr = nf90_put_att(ncid, meshids%varids(mid_face_longnames), 'mesh', prefix)
    end if
 
-   ierr = nf90_enddef(ncid)
+   if (wasInDefine==0) then
+      ierr = nf90_enddef(ncid)
+   endif
  
 end function ug_def_mesh_ids
 
