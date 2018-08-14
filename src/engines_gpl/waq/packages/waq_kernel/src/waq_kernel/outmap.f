@@ -85,7 +85,7 @@
 !     Note: this may fail, if there is not enough memory, so provide
 !     a slower alternative.
 
-      allocate( outconc, source = conc1, stat = ierr )
+      allocate( outconc(notot1, noseg), source = conc1, stat = ierr )
 
       if ( ierr == 0 ) then
          do iseg = 1, noseg
