@@ -3598,12 +3598,16 @@ function ug_def_mesh_contact(ncid, contactids, linkmeshname, ncontacts, meshidfr
    character(len=len_trim(linkmeshname)) :: prefix
    type(t_ug_contacts), intent(inout)    :: contactids
    character(len=nf90_max_name)          :: locationType1, locationType2, mesh1, mesh2     
-   integer                               :: ierr 
-       
+   integer                               :: ierr, wasInDefine 
+
    ierr = UG_SOMEERR
-   prefix=trim(linkmeshname)   
-   ierr = nf90_redef(ncid) !open NetCDF in define mode
+   wasInDefine = 0
+   ierr = nf90_redef(ncid) 
+   if (ierr == nf90_eindefine) then
+      wasInDefine = 1 ! Was still in define mode.
+   endif
    
+   prefix=trim(linkmeshname)   
    !define dim
    ierr  = nf90_def_dim(ncid, 'n'//prefix//'_connections'       ,ncontacts ,contactids%dimids(cdim_ncontacts))
    !These dimensions might already be defined, check first if they are present 
@@ -3656,6 +3660,10 @@ function ug_def_mesh_contact(ncid, contactids, linkmeshname, ncontacts, meshidfr
    ierr = nf90_put_att(ncid, contactids%varids(cid_contacttype), 'valid_range',  (/ 3, 4/))
    ierr = nf90_put_att(ncid, contactids%varids(cid_contacttype), 'flag_values',  (/ 3, 4/))
    ierr = nf90_put_att(ncid, contactids%varids(cid_contacttype), 'flag_meanings', 'lateral_1d2d_link longitudinal_1d2d_link')
+   
+   if (wasInDefine==0) then
+      ierr = nf90_enddef(ncid)
+   endif
    
 end function ug_def_mesh_contact
 
