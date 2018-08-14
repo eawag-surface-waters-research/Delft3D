@@ -100,6 +100,8 @@ module m_readLaterals
                   call SetMessage(LEVEL_ERROR, 'Negative Chainage for Lateral Location '''//trim(lateralID)//'''')
                elseif (Chainage > pBranch%length) then
                   call SetMessage(LEVEL_ERROR, 'Chainage > Branch Length for Lateral Location '''//trim(lateralID)//'''')
+               elseif (length < 0.0d0) then
+                  call SetMessage(LEVEL_ERROR, 'Negative Length for Lateral Location '''//trim(lateralID)//'''')
                elseif ((Chainage + length) > pBranch%length) then
                   call SetMessage(LEVEL_ERROR, 'Chainage + Length > Branch Length for Lateral Location '''//trim(lateralID)//'''')
                endif
