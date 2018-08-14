@@ -741,12 +741,12 @@ subroutine read_netcdf_grd(i_grid, filename, xcc, ycc, codb, covered, mmax, nmax
     !
     ! For the enclosure
     !
-    ierror = nf90_inq_dimid(idfile, 'nmesh2d_EnclosureParts', iddim_enclsp        ); call nc_check_err(ierror, "inq_dimid nmesh2d_EnclosureParts", filename)
-    ierror = nf90_inquire_dimension(idfile, iddim_enclsp, string, numencl)         ; call nc_check_err(ierror, "inq_dim enclsp", filename)
-    if (numencl/=1) then
-       write(*,'(a,i0,a)') "ERROR nmesh2d_EnclosureParts = ", numencl, ". Expecting 1. Please make sure your (partition) domain has a single contiguous grid."
-       call wavestop(1, 'nmesh2d_EnclosureParts should be 1')
-    endif
+    !ierror = nf90_inq_dimid(idfile, 'nmesh2d_EnclosureParts', iddim_enclsp        ); call nc_check_err(ierror, "inq_dimid nmesh2d_EnclosureParts", filename)
+    !ierror = nf90_inquire_dimension(idfile, iddim_enclsp, string, numencl)         ; call nc_check_err(ierror, "inq_dim enclsp", filename)
+    !if (numencl/=1) then
+    !   write(*,'(a,i0,a)') "ERROR nmesh2d_EnclosureParts = ", numencl, ". Expecting 1. Please make sure your (partition) domain has a single contiguous grid."
+    !   call wavestop(1, 'nmesh2d_EnclosureParts should be 1')
+    !endif
     ierror = nf90_inq_dimid(idfile, 'nmesh2d_EnclosurePoints', iddim_numencpts       ); call nc_check_err(ierror, "inq_dimid nmesh2d_EnclosurePoints", filename)
     ierror = nf90_inquire_dimension(idfile, iddim_numencpts, string, numenclpts)      ; call nc_check_err(ierror, "inq_dim numencpts", filename)
     !
