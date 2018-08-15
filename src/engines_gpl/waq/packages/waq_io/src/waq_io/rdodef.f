@@ -304,7 +304,7 @@
             select case ( keyword )
                case ('NCFORMAT' )
                   if ( gettoken( keyvalue, ierr2 ) .gt. 0 ) exit
-                  ncopt(1) = merge( keyvalue, 4, keyvalue == 3 .or. keyvalue == 4 )
+                  ncopt(1) = merge( keyvalue, 3, keyvalue == 3 .or. keyvalue == 4 )
                case ('NCDEFLATE' )
                   if ( gettoken( keyvalue, ierr2 ) .gt. 0 ) exit
                   ncopt(2) = merge( keyvalue, 2, keyvalue >= 0 .and. keyvalue <= 9 )
