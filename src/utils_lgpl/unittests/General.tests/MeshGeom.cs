@@ -55,6 +55,7 @@ namespace General.tests
         public int nnodes;
         public int nbranches;
         public int ngeometry;
+        public int epgs;
     }
 
     #endregion meshgeom

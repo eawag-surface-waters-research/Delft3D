@@ -1696,10 +1696,10 @@ namespace UGrid.tests
             for (int i = 0; i < l_nnodes; i++)
             {
                 string tmpstring = "";
-                tmpstring = "nodesids";
+                tmpstring = "nodesids" + i ;
                 tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.idssize, ' ');
                 l_nodesinfo[i].ids = tmpstring.ToCharArray();
-                tmpstring = "nodeslongNames";
+                tmpstring = "nodeslongNames" + i;
                 tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.longnamessize, ' ');
                 l_nodesinfo[i].longnames = tmpstring.ToCharArray();
             }
@@ -1707,10 +1707,10 @@ namespace UGrid.tests
             for (int i = 0; i < l_nbranches; i++)
             {
                 string tmpstring = "";
-                tmpstring = "branchids";
+                tmpstring = "branchids" + i;
                 tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.idssize, ' ');
                 l_branchinfo[i].ids = tmpstring.ToCharArray();
-                tmpstring = "branchlongNames";
+                tmpstring = "branchlongNames" + i;
                 tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.longnamessize, ' ');
                 l_branchinfo[i].longnames = tmpstring.ToCharArray();
             }
@@ -1807,10 +1807,10 @@ namespace UGrid.tests
             for (int i = 0; i < l_nmeshpoints; i++)
             {
                 string tmpstring = "";
-                tmpstring = "meshnodeids";
+                tmpstring = "meshnodeids" + i;
                 tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.idssize, ' ');
                 meshnodeidsinfo[i].ids = tmpstring.ToCharArray();
-                tmpstring = "meshnodelongnames";
+                tmpstring = "meshnodelongnames" + i;
                 tmpstring = tmpstring.PadRight(IoNetcdfLibWrapper.longnamessize, ' ');
                 meshnodeidsinfo[i].longnames = tmpstring.ToCharArray();
             }

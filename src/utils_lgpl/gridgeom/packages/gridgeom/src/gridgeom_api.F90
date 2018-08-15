@@ -279,21 +279,84 @@ function ggeo_deallocate_dll() result(ierr) bind(C, name="ggeo_deallocate")
 
 end function ggeo_deallocate_dll
 
-function find_cells_dll(jp, numCells, maxPerCell, netElemNode) result(ierr) bind(C, name="find_cells")
-!DEC$ ATTRIBUTES DLLEXPORT :: find_cells_dll
+function ggeo_find_cells_dll(c_meshDimIn, c_meshIn, c_meshDimOut, c_meshOut, startIndex) result(ierr) bind(C, name="ggeo_find_cells")
+!DEC$ ATTRIBUTES DLLEXPORT :: ggeo_find_cells_dll
    use gridoperations   
    use m_cell_geometry
-   
-   integer(kind=c_int), intent(in)    :: jp
-   integer(kind=c_int), intent(inout) :: numCells,maxPerCell,netElemNode
-   integer                            :: ierr
+   use meshdata
+   use network_data
+   use m_missing
+   use m_alloc
+
+   type(c_t_ug_meshgeomdim), intent(in)       :: c_meshDimIn     !< input mesh dimensions, externally allocated
+   type(c_t_ug_meshgeom), intent(in)          :: c_meshIn        !< input mesh, externally allocated 
+   type(c_t_ug_meshgeomdim), intent(inout)    :: c_meshDimOut    !< input mesh dimensions, intenally allocated
+   type(c_t_ug_meshgeom), intent(inout)       :: c_meshOut       !< input mesh, intenally allocated 
+   integer(c_int), intent(in)                 :: startIndex      !< the start_index index of the arrays
+   !locals
+   type(t_ug_meshgeom)                        :: meshgeomIn                 !< fortran meshgeom
+   type(t_ug_meshgeom)                        :: meshgeomOut                !< fortran meshgeom
+   integer, allocatable, target               :: face_nodes(:,:)  !< Face-to-node mapping array.
+   double precision, allocatable, target      :: facex(:)
+   double precision, allocatable, target      :: facey(:)
+   integer                                    :: ierr, n, nn, maxNumNodes
    
    ierr = 0
-   call findcells(jp)
-   !numCells = ndx2d
-   !maxPerCell = 
-   !netElemNode = ndx
-end function find_cells_dll
+      
+   !get and convert meshgeom to kn table
+   ierr = network_data_destructor()
+   ierr = convert_cptr_to_meshgeom(c_meshIn, c_meshDimIn, meshgeomIn)
+   ierr = convert_cptr_to_meshgeom(c_meshOut, c_meshDimOut, meshgeomOut)
+   ierr = ggeo_convert(meshgeomIn, startIndex)
+   
+   call findcells(0)   
+
+   if (meshgeomIn%dim.eq.2) then
+      !get the max number of nodes for each face
+      maxNumNodes = 0
+      do n = 1, nump
+         maxNumNodes = max(maxNumNodes, size(netcell(n)%nod))
+      enddo
+      meshgeomOut%maxnumfacenodes = maxNumNodes
+      meshgeomOut%numface         = nump
+      allocate(face_nodes(maxNumNodes, nump))
+      meshgeomOut%face_nodes  =>face_nodes
+      allocate(facex(nump))
+      meshgeomOut%facex=>facex
+      allocate(facey(nump))
+      meshgeomOut%facey=>facey
+      do n = 1, nump
+         !fill face nodes
+         meshgeomOut%face_nodes(:,n) = dmiss;
+         nn = size(netcell(n)%nod)
+         meshgeomOut%face_nodes(1:nn,n) = netcell(n)%nod(1:nn)
+         !fill cell centers
+         meshgeomOut%facex(n) = xz(n)
+         meshgeomOut%facey(n) = yz(n)
+      end do
+   endif
+   
+   !convert the pointers back
+   ierr = convert_meshgeom_to_cptr(meshgeomOut, c_meshOut, c_meshDimOut)
+   
+end function ggeo_find_cells_dll
+
+!> Destroys the memory allocated by fortran 
+function ggeo_meshgeom_destructor_dll(c_meshDim, c_mesh) result(ierr) bind(C, name="ggeo_meshgeom_destructor")
+!DEC$ ATTRIBUTES DLLEXPORT :: ggeo_meshgeom_destructor_dll
+   use meshdata
+   
+   type(c_t_ug_meshgeomdim), intent(in)    :: c_meshDim     !< input mesh dimensions, externally allocated
+   type(c_t_ug_meshgeom), intent(in)       :: c_mesh    !< input mesh dimensions, intenally allocated
+   type(t_ug_meshgeom)                     :: meshgeom
+   integer                                 :: ierr
+
+   ierr = - 1
+   ierr = convert_cptr_to_meshgeom(c_mesh, c_meshDim, meshgeom)
+   ierr = t_ug_meshgeom_destructor(meshgeom) 
+   
+
+end function ggeo_meshgeom_destructor_dll
 
 
 end module gridgeom_api

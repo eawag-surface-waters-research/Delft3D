@@ -740,6 +740,87 @@ namespace gridgeom.Tests
             Marshal.FreeCoTaskMem(c_arrayfrom);
             Marshal.FreeCoTaskMem(c_arrayto);
         }
-        
+
+        [Test]
+        [NUnit.Framework.Category("findcells")]
+        public void testFindCells()
+        {
+            //mesh2d
+            int twoddim = 2;
+            int twodnumnode = 16;
+            int twodnumedge = 24;
+            int twodnumface = 9;
+            int twodmaxnumfacenodes = 4;
+            int twodnumlayer = -1;
+            int twodlayertype = -1;
+            int startIndex = 1;
+
+            //1. open the file with the 2d mesh
+            string c_path = TestHelper.TestFilesDirectoryPath() + @"\2d_ugrid_net.nc";
+            Assert.IsTrue(File.Exists(c_path));
+            int ioncid = 0; //file variable 
+            int mode = 0; //create in read mode
+            var wrapperNetcdf = new IoNetcdfLibWrapper();
+            int iconvtype = 2;
+            double convversion = 0.0;
+            var ierr = wrapperNetcdf.ionc_open(c_path, ref mode, ref ioncid, ref iconvtype, ref convversion);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            //2. get the 2d mesh id
+            int meshid = 1;
+            ierr = wrapperNetcdf.ionc_get_2d_mesh_id(ref ioncid, ref meshid);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            //3. get the dimensions of the 2d mesh
+            var meshDimIn = new meshgeomdim();
+            int l_networkid = 0; //sets an invalid network
+            ierr = wrapperNetcdf.ionc_get_meshgeom_dim(ref ioncid, ref meshid, ref l_networkid, ref meshDimIn);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            Assert.That(meshDimIn.dim, Is.EqualTo(twoddim));
+            Assert.That(meshDimIn.numnode, Is.EqualTo(twodnumnode));
+            Assert.That(meshDimIn.numedge, Is.EqualTo(twodnumedge));
+            Assert.That(meshDimIn.numface, Is.EqualTo(twodnumface));
+            Assert.That(meshDimIn.maxnumfacenodes, Is.EqualTo(twodmaxnumfacenodes));
+
+            //4. allocate meshgeom to pass to find_cells
+            var meshIn = new meshgeom();
+            meshIn.nodex = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * twodnumnode);
+            meshIn.nodey = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * twodnumnode);
+            meshIn.nodez = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * twodnumnode);
+            meshIn.edge_nodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshDimIn.numedge * 2);
+
+            //5. get the meshgeom arrays from file
+            bool includeArrays = true;
+            int start_index =  1;  //retrive as 1 based
+            int l_network1d = -1;  //no network present
+            ierr = wrapperNetcdf.ionc_get_meshgeom(ref ioncid, ref meshid, ref l_network1d, ref meshIn,
+            ref start_index, ref includeArrays);
+            Assert.That(ierr, Is.EqualTo(0));
+
+
+            //5. declare but do not allocate meshgeom allocated by gridgeom  
+            var meshOut = new meshgeom();
+            var meshDimOut = new meshgeomdim();
+            meshOut.face_nodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * 0); // IntPtr.Zero;
+            meshOut.facex = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * 0); //IntPtr.Zero;
+            meshOut.facey = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * 0); //IntPtr.Zero;
+
+            //6. call find cells  
+            var wrapperGridgeom = new GridGeomLibWrapper();
+            ierr = wrapperGridgeom.ggeo_find_cells(ref meshDimIn, ref meshIn, ref meshDimOut, ref meshOut, ref startIndex);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            //7. deallocate memory allocated by fortran
+            ierr = wrapperGridgeom.ggeo_meshgeom_destructor(ref meshDimOut, ref meshOut);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            //8. deallocate memory allocated by c#
+            Marshal.FreeCoTaskMem(meshIn.nodex);
+            Marshal.FreeCoTaskMem(meshIn.nodey);
+            Marshal.FreeCoTaskMem(meshIn.nodez);
+            Marshal.FreeCoTaskMem(meshIn.edge_nodes);
+
+        }
     }
 }

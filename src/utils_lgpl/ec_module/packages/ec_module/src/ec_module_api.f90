@@ -5,7 +5,7 @@ module ec_module_api
 implicit none
    contains
    
-function triangulation(meshtwoddim, meshtwod, startIndex, c_sampleX, c_sampleY, c_sampleValues, numSamples, c_targetValues, locType, jsferic) result(ierr) bind(C, name="triangulation")
+function triangulation(meshtwoddim, meshtwod, startIndex, c_sampleX, c_sampleY, c_sampleValues, numSamples, c_targetValues, locType, jsferic, jasfer3D) result(ierr) bind(C, name="triangulation")
     !DEC$ ATTRIBUTES DLLEXPORT :: triangulation
 
     !from ec_module
@@ -20,14 +20,15 @@ function triangulation(meshtwoddim, meshtwod, startIndex, c_sampleX, c_sampleY, 
     ! inputs
     type(c_t_ug_meshgeomdim), intent(in)    :: meshtwoddim         !< input 2d mesh dimensions
     type(c_t_ug_meshgeom), intent(in)       :: meshtwod            !< input 2d mesh 
-    integer(c_int), intent(in)              :: startIndex          !< the start_index index of the arrays
-    type(c_ptr), intent(in)                 :: c_sampleX           ! samples x, y, values
-    type(c_ptr), intent(in)                 :: c_sampleY
-    type(c_ptr), intent(in)                 :: c_sampleValues
+    type(c_ptr), intent(in)                 :: startIndex          !< start index of index based arrays (might be needed for 1d interpolation)
+    type(c_ptr), intent(in)                 :: c_sampleX           !< samples x
+    type(c_ptr), intent(in)                 :: c_sampleY           !< samples y 
+    type(c_ptr), intent(in)                 :: c_sampleValues      !< samples values
     integer(c_int), intent(in)              :: numSamples          !< number of samples
     type(c_ptr),    intent(inout)           :: c_targetValues      !< return values (ptr to double array)
     integer(c_int), intent(in)              :: locType             !< destination location type: 1: To flow nodes, 2: to zk net nodes
-    integer(c_int), intent(in)              :: jsferic
+    integer(c_int), intent(in)              :: jsferic             
+    integer(c_int), intent(in)              :: jasfer3D
 
     ! local variables
     type(t_ug_meshgeom)                      :: meshgeom            !< fortran meshgeom
@@ -93,7 +94,7 @@ function triangulation(meshtwoddim, meshtwod, startIndex, c_sampleX, c_sampleY, 
     dmiss = dmiss,& 
     jsferic = jsferic,& 
     jins = 1,& 
-    jasfer3D = 0, &
+    jasfer3D = jasfer3D, &
     NPL = 0,& 
     MXSAM = 0,& 
     MYSAM =0,& 

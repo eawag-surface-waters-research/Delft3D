@@ -114,10 +114,35 @@ namespace General.tests
         [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ggeo_create_edge_nodes", CallingConvention = CallingConvention.Cdecl)]
         public static extern int ggeo_create_edge_nodes_dll([In] ref IntPtr c_branchoffset, [In] ref IntPtr c_branchlength, [In] ref IntPtr c_branchids, [In] ref IntPtr c_sourceNodeId, [In] ref IntPtr c_targetNodeId, [In, Out] ref IntPtr c_edgenodes, [In] ref int nBranches, [In] ref int nNodes, [In] ref int nEdgeNodes, [In] ref int startIndex);
 
-
+        /// <summary>
+        /// Deallocation of library memory, but not of meshgeom structures used for dll communication
+        /// </summary>
+        /// <returns></returns>
         [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ggeo_deallocate",
             CallingConvention = CallingConvention.Cdecl)]
         public static extern int ggeo_deallocate_dll();
+
+        /// <summary>
+        /// Finds the cells and related quantities
+        /// </summary>
+        /// <param name="meshDimIn"> client defined dimensions</param>
+        /// <param name="meshIn"> client allocated meshgeom structure </param>
+        /// <param name="meshDimOut"> server defined dimension</param>
+        /// <param name="meshOut"> server allocated meshgeom structure </param>
+        /// <param name="startIndex"> for index based array, the start index </param>
+        /// <returns></returns>
+        [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ggeo_find_cells", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ggeo_find_cells_dll([In] ref meshgeomdim meshDimIn, [In] ref meshgeom meshIn, [In,Out] ref meshgeomdim meshDimOut, [In,Out] ref meshgeom meshOut, [In] ref int startIndex);
+
+
+        /// <summary>
+        /// Destroys the memory allocated by the server (fortran library)
+        /// </summary>
+        /// <param name="meshDimIn">server defined dimension</param>
+        /// <param name="meshIn">server allocated meshgeom structure, to destroy</param>
+        /// <returns></returns>
+        [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ggeo_meshgeom_destructor", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ggeo_meshgeom_destructor_dll([In, Out] ref meshgeomdim meshDimIn, [In, Out] ref meshgeom meshIn);
 
         #endregion ggeo_functions
 
@@ -199,6 +224,19 @@ namespace General.tests
             int ierr = ggeo_create_edge_nodes_dll(ref c_branchoffset, ref c_branchlength, ref c_branchids, ref c_sourceNodeId, ref c_targetNodeId, ref c_edgenodes, ref nBranches, ref nNodes, ref nEdgeNodes, ref startIndex);
             return ierr;
         }
+
+        public int ggeo_find_cells(ref meshgeomdim meshDimIn,  ref meshgeom meshIn, ref meshgeomdim meshDimOut,  ref meshgeom meshOut,  ref int startIndex)
+        {
+            int ierr = ggeo_find_cells_dll(ref meshDimIn, ref  meshIn, ref meshDimOut, ref meshOut, ref startIndex);
+            return ierr;
+        }
+
+        public int ggeo_meshgeom_destructor(ref meshgeomdim meshDimIn, ref meshgeom meshIn)
+        {
+            int ierr = ggeo_meshgeom_destructor_dll(ref meshDimIn, ref meshIn);
+            return ierr;
+        }
+
 
     }
 }

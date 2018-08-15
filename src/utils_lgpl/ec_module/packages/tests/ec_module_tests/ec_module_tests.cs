@@ -136,6 +136,7 @@ namespace ECModuleTests
 
             // default parameters for averaging
             int jsferic = 0;
+            int jsferic3D = 0;
             int locType = 2;
 
             var wrapper = new Ec_ModuleLibWrapper();
@@ -148,7 +149,8 @@ namespace ECModuleTests
             ref numSamples,
             ref c_targetValues,
             ref locType,
-            ref jsferic);
+            ref jsferic,
+            ref jsferic3D); 
 
             Assert.That(ierr, Is.EqualTo(0));
 

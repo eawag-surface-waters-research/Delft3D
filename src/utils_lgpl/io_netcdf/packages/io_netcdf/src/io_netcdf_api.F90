@@ -1319,50 +1319,15 @@ function ionc_get_meshgeom_dll(ioncid, meshid, networkid, c_meshgeom, start_inde
    logical, optional,   intent(in   )          :: includeArrays
    integer                                     :: ierr
    type(t_ug_meshgeom)                         :: meshgeom
+   type (c_t_ug_meshgeomdim)                   :: c_meshgeomDim !currently this is not an output argument, but it could be considered
    
    
-   if(associated(meshgeom%edge_nodes)) deallocate(meshgeom%edge_nodes)
-   if(associated(meshgeom%face_nodes)) deallocate(meshgeom%face_nodes)
-   if(associated(meshgeom%edge_faces)) deallocate(meshgeom%edge_faces)
-   if(associated(meshgeom%face_edges)) deallocate(meshgeom%face_edges)
-   if(associated(meshgeom%face_links)) deallocate(meshgeom%face_links)
-   
-   if(associated(meshgeom%nnodex)) deallocate(meshgeom%nnodex)
-   if(associated(meshgeom%nnodey)) deallocate(meshgeom%nnodey)
-   if(associated(meshgeom%nnodeids)) deallocate(meshgeom%nnodeids)
-   if(associated(meshgeom%nnodelongnames)) deallocate(meshgeom%nnodelongnames)
-   
-   if(associated(meshgeom%nedge_nodes)) deallocate(meshgeom%nedge_nodes)
-   if(associated(meshgeom%nbranchids)) deallocate(meshgeom%nbranchids)
-   if(associated(meshgeom%nbranchlongnames)) deallocate(meshgeom%nbranchlongnames) 
-   if(associated(meshgeom%nbranchlengths)) deallocate(meshgeom%nbranchlengths)
-   if(associated(meshgeom%nbranchgeometrynodes)) deallocate(meshgeom%nbranchgeometrynodes)
-   if(associated(meshgeom%ngeopointx)) deallocate(meshgeom%ngeopointx) 
-   if(associated(meshgeom%ngeopointy)) deallocate(meshgeom%ngeopointy) 
-   if(associated(meshgeom%nbranchorder)) deallocate(meshgeom%nbranchorder) 
-   
-   if(associated(meshgeom%branchidx)) deallocate(meshgeom%branchidx) 
-   if(associated(meshgeom%branchoffsets)) deallocate(meshgeom%branchoffsets) 
-   
-   if(associated(meshgeom%nodex)) deallocate(meshgeom%nodex)
-   if(associated(meshgeom%nodey)) deallocate(meshgeom%nodey)
-   if(associated(meshgeom%nodez)) deallocate(meshgeom%nodez)
-   
-   if(associated(meshgeom%edgex)) deallocate(meshgeom%edgex)
-   if(associated(meshgeom%edgey)) deallocate(meshgeom%edgey)
-   if(associated(meshgeom%edgez)) deallocate(meshgeom%edgez)
-   
-   if(associated(meshgeom%facex)) deallocate(meshgeom%facex)
-   if(associated(meshgeom%facey)) deallocate(meshgeom%facey)
-   if(associated(meshgeom%facez)) deallocate(meshgeom%facez)
-
-   if(associated(meshgeom%layer_zs)) deallocate(meshgeom%layer_zs)
-   if(associated(meshgeom%interface_zs)) deallocate(meshgeom%interface_zs)
-
+   !initialize meshgeom
+   ierr = t_ug_meshgeom_destructor(meshgeom)
    !get the mesh geometry
    ierr = ionc_get_meshgeom(ioncid, meshid, networkid, meshgeom, start_index, includeArrays)
    !set the pointers in c_meshgeom
-   ierr = convert_meshgeom_to_cptr(meshgeom, c_meshgeom)
+   ierr = convert_meshgeom_to_cptr(meshgeom, c_meshgeom, c_meshgeomDim)
    
 end function ionc_get_meshgeom_dll
 

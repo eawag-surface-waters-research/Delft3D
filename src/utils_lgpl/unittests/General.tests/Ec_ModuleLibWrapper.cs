@@ -25,7 +25,8 @@ namespace General.tests
             [In] ref int numSamples,
             [In, Out] ref IntPtr c_targetValues,
             [In] ref int locType,
-            [In] ref int jsferic);
+            [In] ref int jsferic,
+            [In] ref int jsferic3D);
 
         [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "averaging", CallingConvention = CallingConvention.Cdecl)]
         public static extern int averaging_dll(
@@ -57,7 +58,8 @@ namespace General.tests
             ref int numSamples,
             ref IntPtr c_targetValues,
             ref int locType,
-            ref int jsferic)
+            ref int jsferic,
+            ref int jsferic3D)
         {
             int ierr = triang_dll(
             ref  meshtwoddim,
@@ -69,7 +71,8 @@ namespace General.tests
             ref  numSamples,
             ref  c_targetValues,
             ref  locType,
-            ref  jsferic);
+            ref  jsferic,
+            ref  jsferic3D);
             return ierr;
         }
 

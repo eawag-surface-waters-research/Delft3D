@@ -222,8 +222,8 @@
    !
    module m_cell_geometry
    ! TODO: UNST-1705: LC: I want ndx2d and ndx back into m_flowgeom, as these are flowgeom and not netgeom. Only findcells and update_cell_circumcenters need a change first.
-   integer, target                       :: ndx2d          !< [-] Number of 2D flow cells (= NUMP). {"rank": 0}
-   integer, target                       :: ndx            !< [-] Number of flow nodes (internal + boundary). {"rank": 0}
+   integer, target                       :: ndx2d      !< [-] Number of 2D flow cells (= NUMP). {"rank": 0}
+   integer, target                       :: ndx        !< [-] Number of flow nodes (internal + boundary). {"rank": 0}
    double precision, allocatable, target :: xz (:)     !< [m/degrees_east] waterlevel point / cell centre, x-coordinate (m) {"location": "face", "shape": ["ndx"]}
    double precision, allocatable         :: xz0(:)     !< backup of xz
    double precision, allocatable, target :: yz (:)     !< [m/degrees_north] waterlevel point / cell centre, y-coordinate (m) {"location": "face", "shape": ["ndx"]}
