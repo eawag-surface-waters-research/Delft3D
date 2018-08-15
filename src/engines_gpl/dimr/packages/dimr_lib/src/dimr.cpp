@@ -1335,12 +1335,13 @@ void Dimr::getAddress(
    for (int m = 0; m < nProc; m++) {
       if (my_rank == processes[m]) {
          log->Write(ALL, my_rank, "Dimr::getAddress (%s)", name);
-         if (compType == COMP_TYPE_RTC
-            || compType == COMP_TYPE_RR
-            || compType == COMP_TYPE_FLOW1D
-            || compType == COMP_TYPE_FLOW1D2D
-            || compType == COMP_TYPE_FM // NOTE: pending new feature of specifying get_var by value/by reference, we now always get the new pointer from dflowfm (needed for UNST-1713).
-            || *sourceVarPtr == NULL) {
+         if ( compType == COMP_TYPE_DEFAULT_BMI ||
+              compType == COMP_TYPE_RTC ||
+              compType == COMP_TYPE_RR ||
+              compType == COMP_TYPE_FLOW1D ||
+              compType == COMP_TYPE_FLOW1D2D ||
+              compType == COMP_TYPE_FM || // NOTE: pending new feature of specifying get_var by value/by reference, we now always get the new pointer from dflowfm (needed for UNST-1713).
+              *sourceVarPtr == NULL) {
             // These components only returns a new pointer to a copy of the double value, so call it each time.
             // sourceVarPtr=NULL: getVar not yet called for this parameter, probably because "send" is being called
             //                    via the toplevel "get_var"
@@ -1591,8 +1592,10 @@ void Dimr::scanComponent(XmlTree * xmlComponent, dimr_component * newComp) {
     } else if (strstr(libNameLowercase, "dimr_testcomponent") != NULL){
        newComp->type = COMP_TYPE_TEST;
     }
-    else {
-        throw Exception (true, Exception::ERR_INVALID_INPUT, "Name of library, \"%s\", is not recognized", newComp->library);
+    else 
+    {
+       newComp->type = COMP_TYPE_DEFAULT_BMI;
+       log->Write(ALL, my_rank, "INFO: \"<process>\" Type for component \"%s\" is set to default value 0", newComp->name);
     }
     delete [] libNameLowercase;
 
@@ -1952,14 +1955,15 @@ void Dimr::connectLibs (void) {
 //          throw Exception (true,  Exception::ERR_METHOD_NOT_IMPLEMENTED, "Cannot find function \"%s\" in library \"%s\". Return code: %d", BmiGetAttributeEntryPoint, lib, GetLastError());
 //        }
 
-		if (   componentsList.components[i].type == COMP_TYPE_FM
-            || componentsList.components[i].type == COMP_TYPE_RTC 
-            || componentsList.components[i].type == COMP_TYPE_RR 
-            || componentsList.components[i].type == COMP_TYPE_FLOW1D 
-            || componentsList.components[i].type == COMP_TYPE_FLOW1D2D
-            || componentsList.components[i].type == COMP_TYPE_DELWAQ
-            || componentsList.components[i].type == COMP_TYPE_TEST
-            || componentsList.components[i].type == COMP_TYPE_WANDA) {
+		if ( componentsList.components[i].type == COMP_TYPE_DEFAULT_BMI ||
+           componentsList.components[i].type == COMP_TYPE_FM ||
+           componentsList.components[i].type == COMP_TYPE_RTC ||
+           componentsList.components[i].type == COMP_TYPE_RR ||
+           componentsList.components[i].type == COMP_TYPE_FLOW1D ||
+           componentsList.components[i].type == COMP_TYPE_FLOW1D2D ||
+           componentsList.components[i].type == COMP_TYPE_DELWAQ ||
+           componentsList.components[i].type == COMP_TYPE_TEST ||
+           componentsList.components[i].type == COMP_TYPE_WANDA) {
             // RTC-Tools: setVar is used
             componentsList.components[i].dllSetVar = (BMI_SETVAR) GETPROCADDRESS (dllhandle, BmiSetVarEntryPoint);
             if (componentsList.components[i].dllSetVar == NULL) {
