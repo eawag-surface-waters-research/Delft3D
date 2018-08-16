@@ -171,12 +171,13 @@
       do 10 i = 1 , nowst
 
          iwsttype(i)     =  0
+         iwstkind(i)     =  0
          if ( gettoken( chulp(1), iwstseg(i), itype, ierr2 ) .gt. 0 ) goto 20
          if ( itype .eq. 1 ) then                  !    character, either SURFACE, BANK or BOTTOM
             iwstseg(i) = 0
-            if ( chulp(1) .eq. "SURFACE" ) iwstseg(i) = -1      ! e.g. atmospheric deposition
-            if ( chulp(1) .eq. "BANK"    ) iwstseg(i) = -2      ! e.g. bank infiltration, 1D river systems
-            if ( chulp(1) .eq. "BED"     ) iwstseg(i) = -3      ! e.g. well and sink
+            if ( chulp(1) .eq. "SURFACE" ) iwstseg(i) = -1; iwstkind(i) = 2 ! e.g. atmospheric deposition
+            if ( chulp(1) .eq. "BANK"    ) iwstseg(i) = -2; iwstkind(i) = 2 ! e.g. bank infiltration, 1D river systems
+            if ( chulp(1) .eq. "BED"     ) iwstseg(i) = -3; iwstkind(i) = 2 ! e.g. well and sink
             if ( iwstseg(i) .eq. 0 ) then
                ierr2 = 1
                goto 20
@@ -203,8 +204,6 @@
             case ( "WELL" )
                iwstkind(i) = 4
                if ( gettoken( wstid_long(i), ierr2 ) .gt. 0 ) goto 20
-            case default
-               iwstkind(i) = 0
          end select
 
          if ( vrsion .ge. 4.90 ) then           ! read also name and type
