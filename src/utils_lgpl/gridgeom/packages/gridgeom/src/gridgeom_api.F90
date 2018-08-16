@@ -339,8 +339,8 @@ function ggeo_find_cells_dll(c_meshDimIn, c_meshIn, c_meshDimOut, c_meshOut, sta
    c_meshOut%face_nodes         = c_loc(face_nodes);
    c_meshOut%facex              = c_loc(facex);
    c_meshOut%facey              = c_loc(facey);
-   c_meshDimOut%numface         = maxNumNodes          
-   c_meshDimOut%maxnumfacenodes = nump   
+   c_meshDimOut%numface         = nump          
+   c_meshDimOut%maxnumfacenodes = maxNumNodes    
    
    
 end function ggeo_find_cells_dll
