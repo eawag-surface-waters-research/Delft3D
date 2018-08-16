@@ -337,7 +337,7 @@ function convert_meshgeom_to_cptr(meshgeom, c_meshgeom, c_meshgeomdim) result(ie
    endif
 
    !interface
-   if (associated(meshgeom%interface_zs) .and. allocated(meshgeom%interface_zs)) then
+   if (associated(meshgeom%interface_zs)) then
       call c_f_pointer(c_meshgeom%interface_zs, interface_zs, shape(meshgeom%interface_zs))
       interface_zs= meshgeom%interface_zs
    endif
