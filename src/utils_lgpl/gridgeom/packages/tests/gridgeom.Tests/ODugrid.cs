@@ -798,24 +798,27 @@ namespace gridgeom.Tests
             ref start_index, ref includeArrays);
             Assert.That(ierr, Is.EqualTo(0));
 
-
-            //5. declare but do not allocate meshgeom allocated by gridgeom  
+            //5. declare but do not allocate meshgeom. it will be allocated by gridgeom (fortran)
             var meshOut = new meshgeom();
             var meshDimOut = new meshgeomdim();
-            meshOut.face_nodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * 0); // IntPtr.Zero;
-            meshOut.facex = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * 0); //IntPtr.Zero;
-            meshOut.facey = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * 0); //IntPtr.Zero;
+            meshOut.face_nodes = IntPtr.Zero; 
+            meshOut.facex = IntPtr.Zero; 
+            meshOut.facey = IntPtr.Zero; 
 
             //6. call find cells  
             var wrapperGridgeom = new GridGeomLibWrapper();
             ierr = wrapperGridgeom.ggeo_find_cells(ref meshDimIn, ref meshIn, ref meshDimOut, ref meshOut, ref startIndex);
             Assert.That(ierr, Is.EqualTo(0));
 
-            //7. deallocate memory allocated by fortran
+            //7. copy face_nodes to array
+            int[] face_nodes = new int[meshDimOut.maxnumfacenodes * meshDimOut.numface];
+            Marshal.Copy(meshOut.face_nodes, face_nodes, 0, meshDimOut.maxnumfacenodes * meshDimOut.numface);
+
+            //8. deallocate memory allocated by fortran
             ierr = wrapperGridgeom.ggeo_meshgeom_destructor(ref meshDimOut, ref meshOut);
             Assert.That(ierr, Is.EqualTo(0));
 
-            //8. deallocate memory allocated by c#
+            //9. deallocate memory allocated by c#
             Marshal.FreeCoTaskMem(meshIn.nodex);
             Marshal.FreeCoTaskMem(meshIn.nodey);
             Marshal.FreeCoTaskMem(meshIn.nodez);

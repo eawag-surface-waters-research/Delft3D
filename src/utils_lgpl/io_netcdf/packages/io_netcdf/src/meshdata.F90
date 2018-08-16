@@ -369,45 +369,39 @@ function convert_cptr_to_meshgeom(c_meshgeom, c_meshgeomdim, meshgeom) result(ie
   
    ierr = 0
    
-   call c_f_pointer(c_meshgeom%edge_nodes, meshgeom%edge_nodes, (/ 2, c_meshgeomdim%numedge /)) 
-   call c_f_pointer(c_meshgeom%face_nodes, meshgeom%face_nodes, (/ c_meshgeomdim%maxnumfacenodes, c_meshgeomdim%numface /))
-   call c_f_pointer(c_meshgeom%edge_faces, meshgeom%edge_faces, (/ 2, c_meshgeomdim%numedge /))
-   call c_f_pointer(c_meshgeom%face_edges, meshgeom%face_edges, (/ c_meshgeomdim%maxnumfacenodes, c_meshgeomdim%numface /))
-   call c_f_pointer(c_meshgeom%face_links, meshgeom%face_links, (/ c_meshgeomdim%maxnumfacenodes, c_meshgeomdim%numface /))
+   if(c_associated(c_meshgeom%edge_nodes)) call c_f_pointer(c_meshgeom%edge_nodes, meshgeom%edge_nodes, (/ 2, c_meshgeomdim%numedge /)) 
+   if(c_associated(c_meshgeom%face_nodes)) call c_f_pointer(c_meshgeom%face_nodes, meshgeom%face_nodes, (/ c_meshgeomdim%maxnumfacenodes, c_meshgeomdim%numface /))
+   if(c_associated(c_meshgeom%edge_faces)) call c_f_pointer(c_meshgeom%edge_faces, meshgeom%edge_faces, (/ 2, c_meshgeomdim%numedge /))
+   if(c_associated(c_meshgeom%face_edges)) call c_f_pointer(c_meshgeom%face_edges, meshgeom%face_edges, (/ c_meshgeomdim%maxnumfacenodes, c_meshgeomdim%numface /))
+   if(c_associated(c_meshgeom%face_links)) call c_f_pointer(c_meshgeom%face_links, meshgeom%face_links, (/ c_meshgeomdim%maxnumfacenodes, c_meshgeomdim%numface /))
    
    !Network variables 
-   call c_f_pointer(c_meshgeom%nnodex, meshgeom%nnodex,(/c_meshgeomdim%nnodes/))
-   call c_f_pointer(c_meshgeom%nnodey, meshgeom%nnodey,(/c_meshgeomdim%nnodes/))
+   if(c_associated(c_meshgeom%nnodex)) call c_f_pointer(c_meshgeom%nnodex, meshgeom%nnodex,(/c_meshgeomdim%nnodes/))
+   if(c_associated(c_meshgeom%nnodey)) call c_f_pointer(c_meshgeom%nnodey, meshgeom%nnodey,(/c_meshgeomdim%nnodes/))
    !nodeids and nodelongnames are not communicated using meshgeom
-   call c_f_pointer(c_meshgeom%nedge_nodes, meshgeom%nedge_nodes, (/ 2, c_meshgeomdim%nbranches /))   
+   if(c_associated(c_meshgeom%nedge_nodes)) call c_f_pointer(c_meshgeom%nedge_nodes, meshgeom%nedge_nodes, (/ 2, c_meshgeomdim%nbranches /))   
    !branchids and branchlongnames are not communicated using meshgeom
-   call c_f_pointer(c_meshgeom%nbranchlengths, meshgeom%nbranchlengths, (/ c_meshgeomdim%nbranches /))
-   call c_f_pointer(c_meshgeom%nbranchgeometrynodes, meshgeom%nbranchgeometrynodes, (/ c_meshgeomdim%nbranches /))   
-   call c_f_pointer(c_meshgeom%ngeopointx, meshgeom%ngeopointx, (/ c_meshgeomdim%ngeometry/))
-   call c_f_pointer(c_meshgeom%ngeopointy, meshgeom%ngeopointy, (/ c_meshgeomdim%ngeometry/))   
-   call c_f_pointer(c_meshgeom%nbranchorder, meshgeom%nbranchorder, (/ c_meshgeomdim%nbranches/))   
+   if(c_associated(c_meshgeom%nbranchlengths)) call c_f_pointer(c_meshgeom%nbranchlengths, meshgeom%nbranchlengths, (/ c_meshgeomdim%nbranches /))
+   if(c_associated(c_meshgeom%nbranchgeometrynodes)) call c_f_pointer(c_meshgeom%nbranchgeometrynodes, meshgeom%nbranchgeometrynodes, (/ c_meshgeomdim%nbranches /))   
+   if(c_associated(c_meshgeom%ngeopointx)) call c_f_pointer(c_meshgeom%ngeopointx, meshgeom%ngeopointx, (/ c_meshgeomdim%ngeometry/))
+   if(c_associated(c_meshgeom%ngeopointy)) call c_f_pointer(c_meshgeom%ngeopointy, meshgeom%ngeopointy, (/ c_meshgeomdim%ngeometry/))   
+   if(c_associated(c_meshgeom%nbranchorder)) call c_f_pointer(c_meshgeom%nbranchorder, meshgeom%nbranchorder, (/ c_meshgeomdim%nbranches/))   
    
    !Mesh1d variables
-   call c_f_pointer(c_meshgeom%branchidx, meshgeom%branchidx, (/ c_meshgeomdim%numnode/))
-   call c_f_pointer(c_meshgeom%branchoffsets, meshgeom%branchoffsets, (/ c_meshgeomdim%numnode /))   
+   if(c_associated(c_meshgeom%branchidx)) call c_f_pointer(c_meshgeom%branchidx, meshgeom%branchidx, (/ c_meshgeomdim%numnode/))
+   if(c_associated(c_meshgeom%branchoffsets)) call c_f_pointer(c_meshgeom%branchoffsets, meshgeom%branchoffsets, (/ c_meshgeomdim%numnode /))   
    
-   call c_f_pointer(c_meshgeom%nodex, meshgeom%nodex,(/c_meshgeomdim%numnode/))
-   call c_f_pointer(c_meshgeom%nodey, meshgeom%nodey,(/c_meshgeomdim%numnode/))
-   call c_f_pointer(c_meshgeom%nodez, meshgeom%nodez,(/c_meshgeomdim%numnode/))
-   call c_f_pointer(c_meshgeom%edgex, meshgeom%edgex,(/c_meshgeomdim%numedge/))
-   call c_f_pointer(c_meshgeom%edgey, meshgeom%edgey,(/c_meshgeomdim%numedge/))
-   call c_f_pointer(c_meshgeom%edgez, meshgeom%edgez,(/c_meshgeomdim%numedge/)) 
-   call c_f_pointer(c_meshgeom%facex, meshgeom%facex,(/c_meshgeomdim%numface/))
-   call c_f_pointer(c_meshgeom%facey, meshgeom%facey,(/c_meshgeomdim%numface/))
-   call c_f_pointer(c_meshgeom%facez, meshgeom%facez,(/c_meshgeomdim%numface/))
-  
-   call c_f_pointer(c_meshgeom%layer_zs, meshgeom%layer_zs,(/c_meshgeomdim%numlayer/))
-   
-   if (c_meshgeomdim%numlayer >= 1) then
-      call c_f_pointer(c_meshgeom%interface_zs, meshgeom%interface_zs,(/c_meshgeomdim%numlayer + 1/))
-   else
-      call c_f_pointer(c_meshgeom%interface_zs, meshgeom%interface_zs,(/c_meshgeomdim%numlayer/))
-   endif
+   if(c_associated(c_meshgeom%nodex)) call c_f_pointer(c_meshgeom%nodex, meshgeom%nodex,(/c_meshgeomdim%numnode/))
+   if(c_associated(c_meshgeom%nodey)) call c_f_pointer(c_meshgeom%nodey, meshgeom%nodey,(/c_meshgeomdim%numnode/))
+   if(c_associated(c_meshgeom%nodez)) call c_f_pointer(c_meshgeom%nodez, meshgeom%nodez,(/c_meshgeomdim%numnode/))
+   if(c_associated(c_meshgeom%edgex)) call c_f_pointer(c_meshgeom%edgex, meshgeom%edgex,(/c_meshgeomdim%numedge/))
+   if(c_associated(c_meshgeom%edgey)) call c_f_pointer(c_meshgeom%edgey, meshgeom%edgey,(/c_meshgeomdim%numedge/))
+   if(c_associated(c_meshgeom%edgez)) call c_f_pointer(c_meshgeom%edgez, meshgeom%edgez,(/c_meshgeomdim%numedge/)) 
+   if(c_associated(c_meshgeom%facex)) call c_f_pointer(c_meshgeom%facex, meshgeom%facex,(/c_meshgeomdim%numface/))
+   if(c_associated(c_meshgeom%facey)) call c_f_pointer(c_meshgeom%facey, meshgeom%facey,(/c_meshgeomdim%numface/))
+   if(c_associated(c_meshgeom%facez)) call c_f_pointer(c_meshgeom%facez, meshgeom%facez,(/c_meshgeomdim%numface/))
+   if(c_associated(c_meshgeom%layer_zs)) call c_f_pointer(c_meshgeom%layer_zs, meshgeom%layer_zs,(/c_meshgeomdim%numlayer/))
+   if(c_associated(c_meshgeom%interface_zs)) call c_f_pointer(c_meshgeom%interface_zs, meshgeom%interface_zs,(/c_meshgeomdim%numlayer + 1/))
       
 end function convert_cptr_to_meshgeom
 
@@ -416,6 +410,44 @@ function t_ug_meshgeom_destructor(meshgeom) result(ierr)
 
    type(t_ug_meshgeom) :: meshgeom
    integer  :: ierr
+   
+   if(associated(meshgeom%edge_nodes)) deallocate(meshgeom%edge_nodes)
+   if(associated(meshgeom%face_nodes)) deallocate(meshgeom%face_nodes)
+   if(associated(meshgeom%edge_faces)) deallocate(meshgeom%edge_faces)
+   if(associated(meshgeom%face_edges)) deallocate(meshgeom%face_edges)
+   if(associated(meshgeom%face_links)) deallocate(meshgeom%face_links)
+   
+   
+   if(associated(meshgeom%nnodex)) deallocate(meshgeom%nnodex)
+   if(associated(meshgeom%nnodey)) deallocate(meshgeom%nnodey)
+   if(associated(meshgeom%nnodeids)) deallocate(meshgeom%nnodeids)
+   if(associated(meshgeom%nnodelongnames)) deallocate(meshgeom%nnodelongnames)
+   if(associated(meshgeom%nedge_nodes)) deallocate(meshgeom%nedge_nodes)
+   if(associated(meshgeom%nbranchids)) deallocate(meshgeom%nbranchids)
+   if(associated(meshgeom%nbranchlongnames)) deallocate(meshgeom%nbranchlongnames)
+   
+   if(associated(meshgeom%nbranchlengths)) deallocate(meshgeom%nbranchlengths)
+   if(associated(meshgeom%nbranchgeometrynodes)) deallocate(meshgeom%nbranchgeometrynodes)
+   if(associated(meshgeom%ngeopointx)) deallocate(meshgeom%ngeopointx)
+   if(associated(meshgeom%ngeopointy)) deallocate(meshgeom%ngeopointy)
+   if(associated(meshgeom%nbranchorder)) deallocate(meshgeom%nbranchorder)
+   
+   if(associated(meshgeom%branchidx)) deallocate(meshgeom%branchidx)
+   if(associated(meshgeom%branchoffsets)) deallocate(meshgeom%branchoffsets)
+   
+   if(associated(meshgeom%nodex)) deallocate(meshgeom%nodex)
+   if(associated(meshgeom%nodey)) deallocate(meshgeom%nodey)
+   if(associated(meshgeom%nodez)) deallocate(meshgeom%nodez)
+   if(associated(meshgeom%edgex)) deallocate(meshgeom%edgex)
+   if(associated(meshgeom%edgey)) deallocate(meshgeom%edgey)
+   
+   if(associated(meshgeom%edgez)) deallocate(meshgeom%edgez)
+   if(associated(meshgeom%facex)) deallocate(meshgeom%facex)
+   if(associated(meshgeom%facey)) deallocate(meshgeom%facey)
+   if(associated(meshgeom%facez)) deallocate(meshgeom%facez)
+   if(associated(meshgeom%layer_zs)) deallocate(meshgeom%layer_zs)
+   if(associated(meshgeom%interface_zs)) deallocate(meshgeom%interface_zs)
+   
    
    meshgeom%dim             = -1 
    meshgeom%numnode         = -1    
