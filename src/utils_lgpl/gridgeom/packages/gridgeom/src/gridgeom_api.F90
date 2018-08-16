@@ -87,6 +87,7 @@ function ggeo_convert_dll(c_meshgeom, c_meshgeomdim, start_index) result(ierr) b
    integer                                :: ierr
    
    ierr = convert_cptr_to_meshgeom(c_meshgeom, c_meshgeomdim, meshgeom)
+   ierr = ggeo_initialize()
    ierr = ggeo_convert(meshgeom, start_index)
    
 end function ggeo_convert_dll
@@ -145,7 +146,7 @@ function ggeo_make1D2Droofgutterpipes_dll(c_nin, c_xpl, c_ypl, c_zpl, c_nOneDMas
    call c_f_pointer(c_ypl, yplRoofs, (/c_nin/))
    call c_f_pointer(c_zpl, zplRoofs, (/c_nin/))
    call c_f_pointer(c_oneDmask, oneDmask, (/c_nOneDMask/))
-   
+
    ierr = ggeo_make1D2Droofgutterpipes(xplRoofs, yplRoofs, zplRoofs, oneDmask, c_jsferic, c_jasfer3D, c_jglobe)
    
 end function ggeo_make1D2Droofgutterpipes_dll
@@ -309,6 +310,7 @@ function ggeo_find_cells_dll(c_meshDimIn, c_meshIn, c_meshDimOut, c_meshOut, sta
    !convert c to fortran pointers
    ierr = convert_cptr_to_meshgeom(c_meshIn, c_meshDimIn, meshgeomIn)
    !set library state
+   ierr = ggeo_initialize() 
    ierr = ggeo_convert(meshgeomIn, startIndex)
    
    !find net cells

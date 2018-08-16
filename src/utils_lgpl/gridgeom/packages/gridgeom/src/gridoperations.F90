@@ -13,6 +13,7 @@
    public :: ggeo_get_links
    public :: ggeo_count_or_create_edge_nodes
    public :: ggeo_deallocate
+   public :: ggeo_initialize
 
 
    !from net.f90
@@ -2697,6 +2698,29 @@
 !----------------------------------------------------------------------!
 ! 
 !----------------------------------------------------------------------! 
+   function ggeo_initialize()  result(ierr)
+   
+   use network_data
+   integer :: ierr
+   
+   ierr = 0
+   
+   if (.not. allocated(xk)) then
+      allocate( xk (1), yk (1), zk (1) , NOD (1) , KC (1) , NMK (1) , RNOD(1)   )
+      allocate(nod(1)%lin(1))
+   endif
+   if (.not. allocated(xk0)) then
+      allocate( xk0(1), yk0(1), zk0(1) , NOD0(1) , KC0(1) , NMK0(1), KN0(1,1), LC0(1)  )
+      allocate(nod0(1)%lin(1))
+      nmk0 = 0
+   endif
+   KMAX = 2
+   LMAX = 2
+   CALL INCREASENETW(KMAX, LMAX)
+   
+   end function ggeo_initialize
+
+   
    !< converter function
    function ggeo_convert(meshgeom, start_index) result(ierr)
 
