@@ -330,7 +330,7 @@ function ggeo_find_cells_dll(c_meshDimIn, c_meshIn, c_meshDimOut, c_meshOut, sta
       allocate(meshgeomOut%face_nodes(maxNumNodes, nump))
       do n = 1, nump
          !fill face nodes
-         meshgeomOut%face_nodes(:,n) = dmiss;
+         meshgeomOut%face_nodes(:,n) = imiss;
          nn = size(netcell(n)%nod)
          meshgeomOut%face_nodes(1:nn,n) = netcell(n)%nod(1:nn)
          !fill cell centers
