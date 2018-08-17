@@ -13,10 +13,7 @@
     <description>EC module</description>
     <summary>EC module</summary>
     <copyright>Deltares 2018</copyright>
-    <language>en-US</language>
-	<dependencies>
-      <dependency id="GridGeom" version="[1.0.0]"/>      
-    </dependencies>
+    <language>en-US</language>	
   </metadata>
  
   <files>
