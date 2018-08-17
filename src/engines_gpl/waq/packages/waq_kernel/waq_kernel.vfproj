@@ -540,13 +540,13 @@
 		<File RelativePath=".\src\waq_kernel\outmap.f"/>
 		<File RelativePath=".\src\waq_kernel\outmnc.F">
 			<FileConfiguration Name="Debug|Win32">
-				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes" PreprocessorDefinitions="NetCDF3"/></FileConfiguration>
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes" PreprocessorDefinitions="NetCDF4"/></FileConfiguration>
 			<FileConfiguration Name="Release|x64">
-				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes" PreprocessorDefinitions="NetCDF3"/></FileConfiguration>
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes" PreprocessorDefinitions="NetCDF4"/></FileConfiguration>
 			<FileConfiguration Name="Debug|x64">
-				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes" PreprocessorDefinitions="NetCDF3"/></FileConfiguration>
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes" PreprocessorDefinitions="NetCDF4"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
-				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes" PreprocessorDefinitions="NetCDF3"/></FileConfiguration></File>
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes" PreprocessorDefinitions="NetCDF4"/></FileConfiguration></File>
 		<File RelativePath=".\src\waq_kernel\outmnf.f"/>
 		<File RelativePath=".\src\waq_kernel\outmo1.f"/>
 		<File RelativePath=".\src\waq_kernel\outmo2.f"/>

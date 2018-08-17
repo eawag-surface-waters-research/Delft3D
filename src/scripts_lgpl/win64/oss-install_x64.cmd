@@ -112,7 +112,7 @@ rem =============================================================
     rem
     rem "echo f |" is (only) needed when dest does not exist
     rem and does not harm in other cases
-    rem 
+    rem
     echo f | xcopy "%fileName%" %dest% /F /Y
     if NOT !ErrorLevel! EQU 0 (
         echo ERROR: while copying "!fileName!" to "!dest!"
@@ -129,7 +129,7 @@ rem =============================================================
     if not !ErrorLevel! EQU 0 (
         echo ERROR: while creating directory "!dest!"
     )
-    call :copyFile "third_party_open\netcdf\src\win32\2005\libsrc\x64\Release\netcdf.dll" !dest!
+    call :copyFile "third_party_open\netcdf\netCDF 4.6.1\bin\*" !dest!
 goto :endproc
 
 
@@ -207,7 +207,7 @@ rem ====================
     echo "installing generic . . ."
 
     set dest_share="!dest_main!\x64\share\bin"
-    
+
     call :makeDir !dest_share!
 
     call :copyFile "third_party_open\expat\x64\x64\Release\libexpat.dll"        !dest_share!
@@ -238,7 +238,7 @@ rem ===================
 
     call :makeDir !dest_bin!
     call :makeDir !dest_menu!
-    
+
     call :copyFile engines_gpl\d_hydro\bin\x64\Release\d_hydro.exe      !dest_bin!
     call :copyFile engines_gpl\d_hydro\scripts\create_config_xml.tcl    !dest_menu!
 goto :endproc
@@ -256,7 +256,7 @@ rem ====================
     set dest_scripts="!dest_main!\x64\dflowfm\scripts"
     set dest_plugins="!dest_main!\x64\plugins\bin"
     set dest_share="!dest_main!\x64\share\bin"
-    
+
     call :makeDir !dest_bin!
     call :makeDir !dest_default!
     call :makeDir !dest_scripts!
@@ -290,7 +290,7 @@ rem ================
     call :makeDir !dest_menu!
     call :makeDir !dest_scripts!
     call :makeDir !dest_share!
-    
+
     call :copyFile engines_gpl\dimr\bin\x64\Release\dimr.exe             !dest_bin!
     call :copyFile engines_gpl\dimr\bin\x64\Release\dimr_dll.dll         !dest_bin!
 
@@ -313,7 +313,7 @@ rem ====================
     set dest_scripts="!dest_main!\x64\dflow2d3d\scripts"
     set dest_plugins="!dest_main!\x64\plugins\bin"
     set dest_share="!dest_main!\x64\share\bin"
-    
+
     call :makeDir !dest_bin!
     call :makeDir !dest_default!
     call :makeDir !dest_scripts!
@@ -339,7 +339,7 @@ rem ====================
     call :copyFile "utils_lgpl\delftonline\lib\x64\Release\dynamic\delftonline.dll" !dest_plugins!
     call :copyFile "engines_gpl\flow2d3d\scripts\run_*.bat"                         !dest_scripts!
     call :copyFile "third_party_open\tcl\bin\win64\tclkitsh852.exe"                 !dest_share!
-    
+
     if !compiler_dir!=="" (
         rem Compiler_dir not set
     ) else (
@@ -382,7 +382,7 @@ rem ===================
     echo "installing delwaq1 . . ."
 
     set dest_bin="!dest_main!\x64\dwaq\bin"
-    
+
     call :makeDir !dest_bin!
 
     call :copyFile engines_gpl\waq\bin\x64\Release\delwaq1.exe                     !dest_bin!
@@ -397,7 +397,7 @@ rem ===================
     echo "installing delwaq2 . . ."
 
     set dest_bin="!dest_main!\x64\dwaq\bin"
-    
+
     call :makeDir !dest_bin!
 
     call :copyFile engines_gpl\waq\bin\x64\Release\delwaq2.exe               	   !dest_bin!
@@ -412,7 +412,7 @@ rem ============================
     echo "installing delwaq_dimr_test . . ."
 
     set dest_bin="!dest_main!\x64\dwaq\bin"
-    
+
     call :makeDir !dest_bin!
 
     call :copyFile engines_gpl\waq\bin\x64\Release\delwaq_dimr_test.exe               	   !dest_bin!
@@ -430,12 +430,12 @@ rem ======================
     set dest_default="!dest_main!\x64\dwaq\default"
     set dest_scripts="!dest_main!\x64\dwaq\scripts"
     set dest_share="!dest_main!\x64\share\bin"
-    
+
     call :makeDir !dest_bin!
     call :makeDir !dest_default!
     call :makeDir !dest_scripts!
     call :makeDir !dest_share!
-    
+
     call :copyFile engines_gpl\waq\bin\x64\Release\delwaq.dll                  !dest_bin!
 
     call :copyFile engines_gpl\waq\default\bloom.spe                           !dest_default!
@@ -472,9 +472,9 @@ rem ==============================
 rem    echo "installing delwaq2_openda_lib . . ."
 rem
 rem    set dest_bin="!dest_main!\x64\dwaq\bin"
-rem    
+rem
 rem    call :makeDir !dest_bin!
-rem    
+rem
 rem    call :copyFile engines_gpl\waq\bin\Release\delwaq2_openda_lib.dll          !dest_bin!
 rem	
 
@@ -505,9 +505,9 @@ rem ================================
     echo "installing waq_plugin_wasteload . . ."
 
     set dest_bin="!dest_main!\x64\dwaq\bin"
-    
+
     call :makeDir !dest_bin!
-    
+
     call :copyFile engines_gpl\waq\bin\x64\Release\waq_plugin_wasteload.dll        !dest_bin!
 goto :endproc
 
@@ -813,7 +813,7 @@ goto :endproc
 if NOT %globalErrorLevel% EQU 0 (
     rem
     rem Only jump to :end when the script is completely finished
-    rem 
+    rem
     echo An error occurred while executing this file
     echo Returning with error number %globalErrorLevel%
     exit %globalErrorLevel%

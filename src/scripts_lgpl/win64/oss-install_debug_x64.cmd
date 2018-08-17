@@ -58,7 +58,7 @@ rem =============================================================
     rem
     rem "echo f |" is (only) needed when dest does not exist
     rem and does not harm in other cases
-    rem 
+    rem
     echo f | xcopy "%fileName%" %dest% /F /Y
     if NOT !ErrorLevel! EQU 0 (
         echo ERROR: while copying "!fileName!" to "!dest!"
@@ -70,7 +70,7 @@ rem =============================================================
 rem === copyNetcdf copy the appropriate netcdf.dll            ===
 rem =============================================================
 :copyNetcdf
-    call :copyFile "third_party_open\netcdf\src\win32\2005\libsrc\x64\Debug\netcdf.dll" !dest_bin!
+    call :copyFile "third_party_open\netcdf\netCDF 4.6.1\bin\*" !dest_bin!
 goto :endproc
 
 
@@ -110,7 +110,7 @@ rem ==========================
     set dest_bin="engines_gpl\d_hydro\bin\x64\Debug"
 
     if not exist !dest_bin!     mkdir !dest_bin!
-    
+
 goto :endproc
 
 
@@ -129,7 +129,7 @@ rem ==========================
     copy third_party_open\mpich2\x64\bin\*.exe                                               !dest_bin!
     copy third_party_open\mpich2\x64\lib\*.dll                                               !dest_bin!
     copy third_party_open\expat\x64\x64\Debug\libexpat.dll                                   !dest_bin!
-    
+
 goto :endproc
 
 
@@ -232,7 +232,7 @@ rem ======================
     echo "installing delwaq dll . . ."
 
     set dest_bin="engines_gpl\waq\bin\x64\debug"
-    
+
     if not exist !dest_bin!     mkdir !dest_bin!
     call :copyNetcdf
 goto :endproc
@@ -363,7 +363,7 @@ goto :endproc
 if NOT %ErrorLevel% EQU 0 (
     rem
     rem Only jump to :end when the script is completely finished
-    rem 
+    rem
     exit %ErrorLevel%
 )
 

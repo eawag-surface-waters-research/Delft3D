@@ -132,7 +132,7 @@
          end if
 
          ! Copy the global attributes to a new file
-#ifdef NetCDF4
+#ifndef NetCDF3
          if ( ncopt(1) == 4 ) then
              inc_error = nf90_create( mncnam, ior(nf90_clobber,nf90_netcdf4), ncidmap )
          else
