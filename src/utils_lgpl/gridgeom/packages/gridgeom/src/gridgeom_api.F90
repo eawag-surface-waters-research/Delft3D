@@ -296,6 +296,7 @@ function ggeo_find_cells_dll(c_meshDimIn, c_meshIn, c_meshDimOut, c_meshOut, sta
    integer(c_int), intent(in)                 :: startIndex      !< the start_index index of the arrays
    !locals
    type(t_ug_meshgeom)                        :: meshgeomIn       !< fortran meshgeom
+   type(t_ug_meshgeom)                        :: meshgeomOut       !< fortran meshgeom
    integer, pointer                           :: face_nodes(:,:)  !< Face-to-node mapping array.
    double precision, pointer                  :: facex(:)
    double precision, pointer                  :: facey(:)
@@ -307,6 +308,7 @@ function ggeo_find_cells_dll(c_meshDimIn, c_meshIn, c_meshDimOut, c_meshOut, sta
    ierr = network_data_destructor()   
    ! initialize local meshgeomIn
    ierr = t_ug_meshgeom_destructor(meshgeomIn) 
+   ierr = t_ug_meshgeom_destructor(meshgeomOut) 
    !convert c to fortran pointers
    ierr = convert_cptr_to_meshgeom(c_meshIn, c_meshDimIn, meshgeomIn)
    !set library state
@@ -316,34 +318,38 @@ function ggeo_find_cells_dll(c_meshDimIn, c_meshIn, c_meshDimOut, c_meshOut, sta
    !find net cells
    call findcells(0)   
 
+   call reallocP(meshgeomOut%facex, nump, keepExisting = .false., fill = -999d0)
+   call reallocP(meshgeomOut%facey, nump, keepExisting = .false., fill = -999d0)
+   
    if (meshgeomIn%dim.eq.2) then
       !get the max number of nodes for each face
       maxNumNodes = 0
       do n = 1, nump
          maxNumNodes = max(maxNumNodes, size(netcell(n)%nod))
       enddo
-      !Now i got the dimension, reallocate the pointers
-      call reallocP(facex, nump, keepExisting = .false., fill = -999d0)
-      call reallocP(facey, nump, keepExisting = .false., fill = -999d0)
-      allocate(face_nodes(maxNumNodes, nump))
+      allocate(meshgeomOut%face_nodes(maxNumNodes, nump))
       do n = 1, nump
          !fill face nodes
-         face_nodes(:,n) = dmiss;
+         meshgeomOut%face_nodes(:,n) = dmiss;
          nn = size(netcell(n)%nod)
-         face_nodes(1:nn,n) = netcell(n)%nod(1:nn)
+         meshgeomOut%face_nodes(1:nn,n) = netcell(n)%nod(1:nn)
          !fill cell centers
-         facex(n) = xz(n)
-         facey(n) = yz(n)
+         meshgeomOut%facex(n) = xz(n)
+         meshgeomOut%facey(n) = yz(n)
       end do
    endif
    
+   !convert back to the start index
+   if (startIndex == 0) then
+      where(meshgeomOut%face_nodes.ne.imiss) meshgeomOut%face_nodes = meshgeomOut%face_nodes - 1;
+   endif
+   
    !assign c pointers to fortran pointers (memory will be deleted later)
-   c_meshOut%face_nodes         = c_loc(face_nodes);
-   c_meshOut%facex              = c_loc(facex);
-   c_meshOut%facey              = c_loc(facey);
+   c_meshOut%face_nodes         = c_loc(meshgeomOut%face_nodes);
+   c_meshOut%facex              = c_loc(meshgeomOut%facex);
+   c_meshOut%facey              = c_loc(meshgeomOut%facey);
    c_meshDimOut%numface         = nump          
    c_meshDimOut%maxnumfacenodes = maxNumNodes    
-   
    
 end function ggeo_find_cells_dll
 
