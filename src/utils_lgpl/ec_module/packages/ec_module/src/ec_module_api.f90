@@ -14,6 +14,7 @@ function triangulation(meshtwoddim, meshtwod, startIndex, c_sampleX, c_sampleY, 
     use meshdata
     use precision_basics
     use network_data
+    use m_alloc
 
     implicit none
 
@@ -78,8 +79,10 @@ function triangulation(meshtwoddim, meshtwod, startIndex, c_sampleX, c_sampleY, 
     transformcoef = 0.0d0
     jdla = 1
     
-    ! (re)allocate sample arrays
-    allocate (XPL(1), YPL(1), ZPL(1))
+    ! (re)allocate polygon to 1
+    call realloc(XPL, 1, keepExisting=.false.)
+    call realloc(YPL, 1, keepExisting=.false.)
+    call realloc(ZPL, 1, keepExisting=.false.)
       
     ! call triangulate (dres is the result)
     call triinterp2(XZ = targetX,& 
