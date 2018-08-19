@@ -345,9 +345,9 @@ function ggeo_find_cells_dll(c_meshDimIn, c_meshIn, c_meshDimOut, c_meshOut, sta
    endif
    
    !assign c pointers to fortran pointers (memory will be deleted later)
-   c_meshOut%face_nodes         = c_loc(meshgeomOut%face_nodes);
-   c_meshOut%facex              = c_loc(meshgeomOut%facex);
-   c_meshOut%facey              = c_loc(meshgeomOut%facey);
+   c_meshOut%face_nodes         = c_loc(meshgeomOut%face_nodes(1,1));
+   c_meshOut%facex              = c_loc(meshgeomOut%facex(1));
+   c_meshOut%facey              = c_loc(meshgeomOut%facey(1));
    c_meshDimOut%numface         = nump          
    c_meshDimOut%maxnumfacenodes = maxNumNodes    
    
