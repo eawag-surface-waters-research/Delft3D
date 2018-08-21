@@ -703,8 +703,12 @@ end subroutine
            if (iparam == CFiCrestWidth)         getValueStruc = sts%struct(istru)%orifice%crestwidth
            if (iparam == CFiGateLowerEdgeLevel) getValueStruc = sts%struct(istru)%orifice%openlevel
            if (iparam == CFiGateOpeningHeight)  getValueStruc = sts%struct(istru)%orifice%openlevel - sts%struct(istru)%orifice%crestlevel
-       case (ST_CULVERT, ST_SIPHON, ST_INV_SIPHON)
-           if (iparam == CFiValveOpening) getValueStruc = sts%struct(istru)%culvert%inivalveopen
+       case (ST_CULVERT)
+           if (iparam == CFiCrestLevel)         getValueStruc = sts%struct(istru)%orifice%crestlevel
+           if (iparam == CFiGateLowerEdgeLevel) getValueStruc = sts%struct(istru)%orifice%openlevel
+           if (iparam == CFiGateOpeningHeight)  getValueStruc = sts%struct(istru)%orifice%openlevel - sts%struct(istru)%orifice%crestlevel
+       case (ST_SIPHON, ST_INV_SIPHON)
+           if (iparam == CFiGateOpeningHeight)  getValueStruc = sts%struct(istru)%orifice%openlevel - sts%struct(istru)%orifice%crestlevel
        case (ST_PUMP)
            getValueStruc = sts%struct(istru)%pump%capacitySetpoint
            if (sts%struct(istru)%pump%capacity(1)*getValueStruc < -1e-6) then
