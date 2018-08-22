@@ -56,7 +56,7 @@ case $key in
     shift
     ;;
     *)
-    configfile="$*"
+    configfile="$key"
     break
     ;;
 esac
