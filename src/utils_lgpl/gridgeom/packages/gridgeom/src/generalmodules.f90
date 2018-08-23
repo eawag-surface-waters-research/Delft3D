@@ -87,8 +87,8 @@
 
    module m_sferic
    implicit none
-   integer                           :: jsferic = 0        ! xy pair is in : 0=cart, 1=sferic coordinates
-   integer                           :: jsfertek= 0        ! drawn in 0=cart, 1=stereografisch
+   integer                           :: jsferic = 0       ! xy pair is in : 0=cart, 1=sferic coordinates
+   integer                           :: jsfertek= 0       ! drawn in 0=cart, 1=stereografisch
    integer                           :: jasfer3D = 0      ! 0 = org, 1 = sqrt(dx2+dy2+dz2), 2= greatcircle
    integer                           :: jglobe  = 0       ! if (jsferic==1) do we need extra tests for 360-0 transgression
    double precision                  :: pi                ! pi

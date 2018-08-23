@@ -137,7 +137,7 @@ namespace ECModuleTests
             // default parameters for averaging
             int jsferic = 0;
             int jsferic3D = 0;
-            int locType = 2;
+            int locType = 1;
 
             var wrapper = new Ec_ModuleLibWrapper();
             ierr = wrapper.triang(ref meshtwoddim,
@@ -239,7 +239,7 @@ namespace ECModuleTests
             double relativeSearchSize = 1.01;
             int jsferic = 0;
             int jasfer3D = 0;
-            int locType = 2;
+            int locType = 1;
 
             var wrapper = new Ec_ModuleLibWrapper();
             ierr = wrapper.averaging(

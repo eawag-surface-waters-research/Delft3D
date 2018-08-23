@@ -52,13 +52,13 @@ function triangulation(meshtwoddim, meshtwod, startIndex, c_sampleX, c_sampleY, 
     ierr = convert_cptr_to_meshgeom(meshtwod, meshtwoddim, meshgeom)
     
     !determine number of numTargets
-    if (locType.eq.1) then
+    if (locType.eq.0) then
       numTargets = size(meshgeom%facex)
       allocate(targetX(numTargets))
       allocate(targetY(numTargets))
       targetX = meshgeom%facex
       targetY = meshgeom%facey
-    else if (locType.eq.2) then
+    else if (locType.eq.1) then
       numTargets = size(meshgeom%nodex)
       allocate(targetX(numTargets))
       allocate(targetY(numTargets))
@@ -134,7 +134,7 @@ function averaging(meshtwoddim, meshtwod, startIndex, c_sampleX, c_sampleY, c_sa
     type(c_ptr),    intent(in)              :: c_sampleValues      !< sample values
     integer(c_int), intent(in)              :: numSamples          !< number of samples
     type(c_ptr),    intent(inout)           :: c_targetValues      !< return values (ptr to double array)
-    integer(c_int), intent(in)              :: locType             !< destination location type: 1: To flow nodes, 2: to zk net nodes
+    integer(c_int), intent(in)              :: locType             !< destination location type: 0: To flow nodes, 1: to net nodes
     real(c_double), intent(in)              :: Wu1Duni
     integer(c_int), intent(in)              :: method              !< averaging method
     integer(c_int), intent(in)              :: minNumSamples       !< minimum nr of samples for avaraging
@@ -167,13 +167,13 @@ function averaging(meshtwoddim, meshtwod, startIndex, c_sampleX, c_sampleY, c_sa
     ierr = ggeo_convert(meshgeom, startIndex)
     
     !determine number of numTargets
-    if (locType.eq.1) then
+    if (locType.eq.0) then
       numTargets = size(meshgeom%facex)
       allocate(targetX(numTargets))
       allocate(targetY(numTargets))
       targetX = meshgeom%facex
       targetY = meshgeom%facey
-    else if (locType.eq.2) then
+    else if (locType.eq.1) then
       numTargets = size(meshgeom%nodex)
       allocate(targetX(numTargets))
       allocate(targetY(numTargets))
@@ -232,7 +232,7 @@ function averaging(meshtwoddim, meshtwod, startIndex, c_sampleX, c_sampleY, c_sa
     ierr = 0
     call findcells(100000)
  
-    if (locType.eq.1) then
+    if (locType.eq.0) then
        
        !to flow nodes
        nMaxNodesPolygon = maxval(netcell%n)
@@ -245,7 +245,7 @@ function averaging(meshtwoddim, meshtwod, startIndex, c_sampleX, c_sampleY, c_sa
           enddo
        enddo
        
-    elseif (locType.eq.2) then
+    elseif (locType.eq.1) then
        
        !to net nodes
        nMaxNodesPolygon = 3*maxval(nmk)   ! 2: safe upper bound , 3 : even safer!
@@ -289,14 +289,14 @@ function averaging(meshtwoddim, meshtwod, startIndex, c_sampleX, c_sampleY, c_sa
     call delete_kdtree2(treeglob)
 
     !copy values back
-    if (locType.eq.1) then
+    if (locType.eq.0) then
        !to flow nodes: calculate permutation array
        allocate(cellPermutation(numTargets))
        do i =1, numTargets
            call incells(meshgeom%facex(i),meshgeom%facey(i),cellPermutation(i))
        enddo
        targetValues(:) = interpolationResults(1,cellPermutation(:))
-    elseif(locType.eq.2) then
+    elseif(locType.eq.1) then
        !to net node: use the permutation array
        targetValues(:) = interpolationResults(1,nodePermutation(:))
     endif

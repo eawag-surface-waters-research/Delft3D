@@ -245,28 +245,48 @@ function ggeo_convert_1d_arrays_dll(c_nodex, c_nodey, c_branchoffset, c_branchle
 
 end function ggeo_convert_1d_arrays_dll
 
-function ggeo_create_edge_nodes_dll(c_branchoffset, c_branchlength, c_branchids, c_sourceNodeId, c_targetNodeId, c_edgenodes, nBranches, nNodes, nEdgeNodes, startIndex) result(ierr) bind(C, name="ggeo_create_edge_nodes")
+function ggeo_count_edge_nodes_dll(c_branchoffset, c_branchlength, c_branchids, c_nedge_nodes, nBranches, nNodes, nEdgeNodes, startIndex) result(ierr) bind(C, name="ggeo_count_edge_nodes")
+!DEC$ ATTRIBUTES DLLEXPORT :: ggeo_count_edge_nodes_dll
+
+   use gridoperations
+   
+   type(c_ptr), intent(in)   :: c_branchoffset, c_branchids, c_nedge_nodes, c_branchlength    
+   integer, intent(in)       :: nBranches, nNodes, startIndex
+   double precision, pointer :: branchoffset(:), branchlength(:)
+   integer, pointer          :: branchids(:), nedge_nodes(:,:)
+   integer, intent(inout)    :: nEdgeNodes
+   integer                   :: ierr
+
+   
+   call c_f_pointer(c_branchoffset, branchoffset, (/ nNodes /))
+   call c_f_pointer(c_branchlength, branchlength, (/ nBranches /))
+   call c_f_pointer(c_branchids, branchids, (/ nNodes /))
+   call c_f_pointer(c_nedge_nodes, nedge_nodes, (/ 2, nBranches /))
+
+   ierr = ggeo_count_or_create_edge_nodes(branchids, branchoffset, nedge_nodes(1,:), nedge_nodes(2,:), branchlength, startIndex, nEdgeNodes)
+
+end function ggeo_count_edge_nodes_dll
+
+
+function ggeo_create_edge_nodes_dll(c_branchoffset, c_branchlength, c_branchids, c_nedge_nodes, c_edgenodes, nBranches, nNodes, nEdgeNodes, startIndex) result(ierr) bind(C, name="ggeo_create_edge_nodes")
 !DEC$ ATTRIBUTES DLLEXPORT :: ggeo_create_edge_nodes_dll
 
    use gridoperations
    
-   type(c_ptr), intent(in)   :: c_branchoffset, c_branchids, c_edgenodes, c_sourceNodeId, c_targetNodeId, c_branchlength    
-   integer, intent(in)       :: nBranches, nNodes, nEdgeNodes, startIndex
+   type(c_ptr), intent(in)   :: c_branchoffset, c_branchids, c_edgenodes, c_nedge_nodes, c_branchlength    
+   integer, intent(in)       :: nBranches, nNodes, startIndex
    double precision, pointer :: branchoffset(:), branchlength(:)
-   integer, pointer          :: branchids(:), edgenodes(:,:), sourceNodeId(:), targetNodeId(:) 
-   integer                   :: ierr,numedge
-
-   
+   integer, pointer          :: branchids(:), edgenodes(:,:), nedge_nodes(:,:)
+   integer                   :: ierr
+   integer, intent(inout)    :: nEdgeNodes
 
    call c_f_pointer(c_branchlength, branchlength, (/ nBranches /))
-   
    call c_f_pointer(c_branchids, branchids, (/ nNodes /))
-   call c_f_pointer(c_sourceNodeId, sourceNodeId, (/ nBranches /))
-   call c_f_pointer(c_targetNodeId, targetNodeId, (/ nBranches /))
+   call c_f_pointer(c_nedge_nodes, nedge_nodes, (/ 2, nBranches /))
    call c_f_pointer(c_edgenodes, edgenodes, (/ 2, nEdgeNodes /))
    call c_f_pointer(c_branchoffset, branchoffset, (/ nNodes /))
 
-   ierr = ggeo_count_or_create_edge_nodes(branchids, branchoffset, sourcenodeid, targetnodeid, branchlength, startIndex, numedge, edgenodes)
+   ierr = ggeo_count_or_create_edge_nodes(branchids, branchoffset, nedge_nodes(1,:), nedge_nodes(2,:), branchlength, startIndex, nEdgeNodes, edgenodes)
 
 end function ggeo_create_edge_nodes_dll
 
