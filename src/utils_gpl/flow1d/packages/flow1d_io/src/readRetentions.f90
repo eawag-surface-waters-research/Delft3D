@@ -108,7 +108,7 @@ module m_readRetentions
                endif
                gridPoint = getCalcPoint(network%brs, branchIdx, Chainage)
                if (gridPoint == network%brs%branch(branchIdx)%points(1) ) then
-                  gridPoint = network%brs%branch(branchIdx)%fromNode%index
+                  gridPoint = -network%brs%branch(branchIdx)%fromNode%index
                   local_grid_index = -1
                   branchIdx        = -1
                elseif (gridPoint == network%brs%branch(branchIdx)%points(2)) then
