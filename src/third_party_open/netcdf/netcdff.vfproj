@@ -45,11 +45,12 @@
 		<File RelativePath=".\netcdf-fortran-4.4.4\libsrc\nfconfig.inc"/></Filter>
 		<Filter Name="Resource Files" Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"/>
 		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
+		<File RelativePath=".\netcdf-fortran-4.4.4\fortran\module_netcdf4_nc_interfaces.f90"/>
+		<File RelativePath=".\netcdf-fortran-4.4.4\fortran\module_netcdf4_nf_interfaces.F90"/>
 		<File RelativePath=".\netcdf-fortran-4.4.4\fortran\module_netcdf_nc_data.F90"/>
 		<File RelativePath=".\netcdf-fortran-4.4.4\fortran\module_netcdf_nc_interfaces.f90"/>
 		<File RelativePath=".\netcdf-fortran-4.4.4\fortran\module_netcdf_nf_data.F90"/>
-		<File RelativePath=".\netcdf-fortran-4.4.4\fortran\module_netcdf_nf_interfaces.F90"/>
-		<File RelativePath=".\netcdf-fortran-4.4.4\fortran\netcdf.f90"/>
+		<File RelativePath=".\netcdf-fortran-4.4.4\fortran\netcdf4.f90"/>
 		<File RelativePath=".\netcdf-fortran-4.4.4\fortran\nf_attio.F90"/>
 		<File RelativePath=".\netcdf-fortran-4.4.4\fortran\nf_control.F90"/>
 		<File RelativePath=".\netcdf-fortran-4.4.4\fortran\nf_dim.f90"/>
@@ -57,6 +58,8 @@
 		<File RelativePath=".\netcdf-fortran-4.4.4\fortran\nf_geninq.f90"/>
 		<File RelativePath=".\netcdf-fortran-4.4.4\fortran\nf_genvar.f90"/>
 		<File RelativePath=".\netcdf-fortran-4.4.4\fortran\nf_misc.f90"/>
+		<File RelativePath=".\netcdf-fortran-4.4.4\fortran\nf_nc4.f90"/>
+		<File RelativePath=".\netcdf-fortran-4.4.4\fortran\nf_par_dummy.f90"/>
 		<File RelativePath=".\netcdf-fortran-4.4.4\fortran\nf_var1io.F90"/>
 		<File RelativePath=".\netcdf-fortran-4.4.4\fortran\nf_varaio.F90"/>
 		<File RelativePath=".\netcdf-fortran-4.4.4\fortran\nf_varmio.F90"/>
