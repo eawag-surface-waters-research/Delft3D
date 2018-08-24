@@ -297,7 +297,11 @@ module network_data
    if(allocated(LIB)) deallocate(LIB)
    if(allocated(K1BR)) deallocate(K1BR)  
    if(allocated(NRLB)) deallocate(NRLB)
-
+   
+   if(allocated(XPL)) deallocate(XPL)
+   if(allocated(YPL)) deallocate(YPL)
+   if(allocated(ZPL)) deallocate(ZPL)
+   
    ! default initialize all variables
    NUMK0     = 0
    numk      = 0            
