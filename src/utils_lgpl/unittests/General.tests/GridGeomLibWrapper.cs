@@ -88,9 +88,10 @@ namespace General.tests
         /// Gets the number of 1d-2d links produced by ggeo_make1D2Dinternalnetlinks_dll
         /// </summary>
         /// <param name="nlinks">The number of links</param>
+        /// <param name="linkType">The link type</param>
         /// <returns></returns>
         [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ggeo_get_links_count", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ggeo_get_links_count_dll([In, Out] ref int nlinks);
+        public static extern int ggeo_get_links_count_dll([In, Out] ref int nlinks, [In] ref int linkType);
 
         /// <summary>
         /// Gets the number the 1d-2d links produced by ggeo_make1D2Dinternalnetlinks_dll
@@ -98,9 +99,10 @@ namespace General.tests
         /// <param name="arrayfrom">The cell indexes where the links start</param>
         /// <param name="arrayto">The node indexes where the links end</param>
         /// <param name="nlinks">The number of links</param>
+        /// <param name="linkType">The link type</param>
         /// <returns></returns>
         [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ggeo_get_links", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ggeo_get_links_dll([In, Out] ref IntPtr arrayfrom, [In, Out] ref IntPtr arrayto, [In] ref int nlinks);
+        public static extern int ggeo_get_links_dll([In, Out] ref IntPtr arrayfrom, [In, Out] ref IntPtr arrayto, [In] ref int nlinks, [In] ref int linkType);
 
         /// <summary>
         /// Algorithm to create the edge_nodes from the branchid
@@ -112,7 +114,24 @@ namespace General.tests
         /// <param name="nEdgeNodes"></param>
         /// <returns></returns>
         [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ggeo_create_edge_nodes", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ggeo_create_edge_nodes_dll([In] ref IntPtr c_branchoffset, [In] ref IntPtr c_branchlength, [In] ref IntPtr c_branchids, [In] ref IntPtr c_sourceNodeId, [In] ref IntPtr c_targetNodeId, [In, Out] ref IntPtr c_edgenodes, [In] ref int nBranches, [In] ref int nNodes, [In] ref int nEdgeNodes, [In] ref int startIndex);
+        public static extern int ggeo_create_edge_nodes_dll([In] ref IntPtr c_branchoffset, [In] ref IntPtr c_branchlength, [In] ref IntPtr c_branchids, [In] ref IntPtr c_nedge_nodes, [In, Out] ref IntPtr c_edgenodes, [In] ref int nBranches, [In] ref int nNodes, [In] ref int nEdgeNodes, [In] ref int startIndex);
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="c_branchoffset"></param>
+        /// <param name="c_branchlength"></param>
+        /// <param name="c_branchids"></param>
+        /// <param name="c_sourceNodeId"></param>
+        /// <param name="c_targetNodeId"></param>
+        /// <param name="nBranches"></param>
+        /// <param name="nNodes"></param>
+        /// <param name="nEdgeNodes"></param>
+        /// <param name="startIndex"></param>
+        /// <returns></returns>
+        [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ggeo_count_edge_nodes", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ggeo_count_edge_nodes_dll([In] ref IntPtr c_branchoffset, [In] ref IntPtr c_branchlength, [In] ref IntPtr c_branchids, [In] ref IntPtr c_nedge_nodes, [In] ref int nBranches, [In] ref int nNodes, [In,Out] ref int nEdgeNodes, [In] ref int startIndex);
 
         /// <summary>
         /// Deallocation of library memory, but not of meshgeom structures used for dll communication
@@ -206,22 +225,28 @@ namespace General.tests
             return ierr;
         }
 
-        public int ggeo_get_links_count(ref int nbranches)
+        public int ggeo_get_links_count(ref int nbranches, ref int linkType)
         {
-            int ierr = ggeo_get_links_count_dll(ref nbranches);
+            int ierr = ggeo_get_links_count_dll(ref nbranches, ref linkType);
             return ierr;
         }
 
-        public int ggeo_get_links(ref IntPtr arrayfrom, ref IntPtr arrayto, ref int nlinks)
+        public int ggeo_get_links(ref IntPtr arrayfrom, ref IntPtr arrayto, ref int nlinks, ref int linkType)
         {
-            int ierr = ggeo_get_links_dll(ref arrayfrom, ref arrayto, ref nlinks);
+            int ierr = ggeo_get_links_dll(ref arrayfrom, ref arrayto, ref nlinks, ref linkType);
             return ierr;
         }
 
 
-        public int ggeo_create_edge_nodes(ref IntPtr c_branchoffset, ref IntPtr c_branchlength, ref IntPtr c_branchids, ref IntPtr c_sourceNodeId, ref IntPtr c_targetNodeId, ref IntPtr c_edgenodes, ref int nBranches, ref int nNodes, ref int nEdgeNodes, ref int startIndex)
+        public int ggeo_create_edge_nodes(ref IntPtr c_branchoffset, ref IntPtr c_branchlength, ref IntPtr c_branchids, ref IntPtr c_nedge_nodes, ref IntPtr c_edgenodes, ref int nBranches, ref int nNodes, ref int nEdgeNodes, ref int startIndex)
         {
-            int ierr = ggeo_create_edge_nodes_dll(ref c_branchoffset, ref c_branchlength, ref c_branchids, ref c_sourceNodeId, ref c_targetNodeId, ref c_edgenodes, ref nBranches, ref nNodes, ref nEdgeNodes, ref startIndex);
+            int ierr = ggeo_create_edge_nodes_dll(ref c_branchoffset, ref c_branchlength, ref c_branchids, ref c_nedge_nodes, ref c_edgenodes, ref nBranches, ref nNodes, ref nEdgeNodes, ref startIndex);
+            return ierr;
+        }
+
+        public int ggeo_count_edge_nodes(ref IntPtr c_branchoffset, ref IntPtr c_branchlength, ref IntPtr c_branchids, ref IntPtr c_nedge_nodes, ref int nBranches, ref int nNodes, ref int nEdgeNodes, ref int startIndex)
+        {
+            int ierr = ggeo_count_edge_nodes_dll(ref c_branchoffset, ref c_branchlength, ref c_branchids, ref c_nedge_nodes, ref nBranches, ref nNodes, ref nEdgeNodes, ref startIndex);
             return ierr;
         }
 

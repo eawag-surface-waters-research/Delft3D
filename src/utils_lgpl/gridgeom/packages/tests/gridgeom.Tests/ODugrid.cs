@@ -550,13 +550,14 @@ namespace gridgeom.Tests
 
             //10. get the number of links
             int n1d2dlinks = 0;
-            ierr = wrapperGridgeom.ggeo_get_links_count(ref n1d2dlinks);
+            int linkType = 3;
+            ierr = wrapperGridgeom.ggeo_get_links_count(ref n1d2dlinks, ref linkType);
             Assert.That(ierr, Is.EqualTo(0));
 
             //11. get the links: arrayfrom = 2d cell index, arrayto = 1d node index 
             IntPtr c_arrayfrom = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * n1d2dlinks); //2d cell number
             IntPtr c_arrayto = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * n1d2dlinks); //1d node
-            ierr = wrapperGridgeom.ggeo_get_links(ref c_arrayfrom, ref c_arrayto, ref n1d2dlinks);
+            ierr = wrapperGridgeom.ggeo_get_links(ref c_arrayfrom, ref c_arrayto, ref n1d2dlinks, ref linkType);
             Assert.That(ierr, Is.EqualTo(0));
 
 
@@ -707,14 +708,15 @@ namespace gridgeom.Tests
 
             //10. get the number of links
             int n1d2dlinks = 0;
-            ierr = wrapperGridgeom.ggeo_get_links_count(ref n1d2dlinks);
+            int linkType = 3;
+            ierr = wrapperGridgeom.ggeo_get_links_count(ref n1d2dlinks, ref linkType);
             Assert.That(ierr, Is.EqualTo(0));
 
 
             //11. get the links: arrayfrom = 2d cell index, arrayto = 1d node index 
             IntPtr c_arrayfrom = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * n1d2dlinks); //2d cell number
             IntPtr c_arrayto = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * n1d2dlinks); //1d node
-            ierr = wrapperGridgeom.ggeo_get_links(ref c_arrayfrom, ref c_arrayto, ref n1d2dlinks);
+            ierr = wrapperGridgeom.ggeo_get_links(ref c_arrayfrom, ref c_arrayto, ref n1d2dlinks, ref linkType);
             Assert.That(ierr, Is.EqualTo(0));
 
             int[] rc_arrayfrom = new int[n1d2dlinks];
@@ -838,9 +840,7 @@ namespace gridgeom.Tests
         {
 
             //1. open the file with the 1d network, 1d mesh and 2d grid.
-            //string c_path = TestHelper.TestFilesDirectoryPath() + @"\1d2dModel.nc";
-            //string c_path = TestHelper.TestFilesDirectoryPath() + @"\river1_full_net.nc";
-            string c_path = @"D:\carniato\LUCA\ENGINES\nghsFlooding01\testModels\1dEmbedded.nc";
+            string c_path = TestHelper.TestFilesDirectoryPath() + @"\1dForEmbedded.nc";
             Assert.IsTrue(File.Exists(c_path));
             int ioncid = 0; //file variable 
             int mode = 0;   //create in read mode
@@ -908,7 +908,7 @@ namespace gridgeom.Tests
 
             //--------------------------------------------------------------------------------------//
             //3a. get mesh ids
-            c_path = @"D:\carniato\LUCA\ENGINES\nghsFlooding01\testModels\2dEmbedded.nc";
+            c_path = TestHelper.TestFilesDirectoryPath() + @"\2dForEmbedded.nc";
             ierr = wrapperNetcdf.ionc_open(c_path, ref mode, ref ioncid, ref iconvtype, ref convversion);
             Assert.That(ierr, Is.EqualTo(0));
 
@@ -958,7 +958,8 @@ namespace gridgeom.Tests
 
             //6. get the number of links
             int n1d2dlinks = 0;
-            ierr = wrapperGridgeom.ggeo_get_links_count(ref n1d2dlinks);
+            int linkType = 3;
+            ierr = wrapperGridgeom.ggeo_get_links_count(ref n1d2dlinks, ref linkType);
             Assert.That(ierr, Is.EqualTo(0));
 
             //7. deallocate memory of gridgeom

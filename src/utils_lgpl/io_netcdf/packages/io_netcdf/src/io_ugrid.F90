@@ -2450,13 +2450,13 @@ function ug_get_meshgeom(ncid, meshgeom, start_index, meshids, netid, includeArr
             call reallocP(meshgeom%branchidx, meshgeom%numnode, keepExisting = .false., fill = -999)
             call reallocP(meshgeom%branchoffsets, meshgeom%numnode, keepExisting = .false., fill = -999d0)
             ierr = ug_get_1d_mesh_discretisation_points(ncid, meshids, meshgeom%branchidx, meshgeom%branchoffsets, meshgeom%start_index)
-            !here i can not use gridgeom to get xy coordinates of the mesh1d (grisgeom depends on io_netcdf)
+            !Here i can not use gridgeom to get xy coordinates of the mesh1d (gridgeom depends on io_netcdf)
             
             if (present(network1dname)) then
                ierr = ug_get_network_name_from_mesh1d(ncid, meshids, network1dname)
             endif
             if(present(nodeids).and.present(nodelongnames)) then
-               if(allocated(nodeids)) deallocate(nodeids)
+               if(allocated(nodeids))      deallocate(nodeids)
                if(allocated(nodelongnames)) deallocate(nodelongnames)
                allocate(nodeids(meshgeom%numnode))
                allocate(nodelongnames(meshgeom%numnode))

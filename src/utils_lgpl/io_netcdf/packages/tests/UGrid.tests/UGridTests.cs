@@ -1946,13 +1946,14 @@ namespace UGrid.tests
 
             //18. get the number of links
             int n2dl1dinks = 0;
-            ierr = wrapperGridgeom.ggeo_get_links_count(ref n2dl1dinks);
+            int linkType = 3;
+            ierr = wrapperGridgeom.ggeo_get_links_count(ref n2dl1dinks, ref linkType);
             Assert.That(ierr, Is.EqualTo(0));
 
             //19. get the links: arrayfrom = 2d cell index, arrayto = 1d node index 
             IntPtr c_arrayfrom = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * n2dl1dinks); //2d cell number
             IntPtr c_arrayto = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * n2dl1dinks); //1d node
-            ierr = wrapperGridgeom.ggeo_get_links(ref c_arrayfrom, ref c_arrayto, ref n2dl1dinks);
+            ierr = wrapperGridgeom.ggeo_get_links(ref c_arrayfrom, ref c_arrayto, ref n2dl1dinks, ref linkType);
             Assert.That(ierr, Is.EqualTo(0));
 
             int[] rc_arrayfrom = new int[n2dl1dinks];
