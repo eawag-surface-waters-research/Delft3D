@@ -57,6 +57,7 @@
    ! unstruct.F90
    public :: getcellsurface
    public :: getcellweightedcenter
+   public :: getcellcircumcenter
 
    private
 
@@ -897,6 +898,35 @@
       end do
    end if
    end subroutine update_cell_circumcenters
+
+   !> Compute circumcenter of a netcell and its average depth value.
+   !! See also getcellcircumcenter
+   subroutine getcellcircumcenter( n, xz, yz, zz )     ! circumcenter etc, depending on celltype
+   use network_data
+   use geometry_module, only: getcircumcenter
+   use m_missing,       only: dmiss, jins,dxymis
+   use m_sferic,        only: jsferic, jasfer3D, jglobe
+
+   implicit none
+   integer,          intent(in)       :: n         !< Netcell number
+   double precision, intent(out)      :: xz, yz    !< Coordinates of circumcenter point, undefined for void cells.
+   double precision, intent(out)      :: zz        !< Depth value at cc point, undefined for void cells.   
+   integer,            parameter      :: Msize=10
+
+   double precision, dimension(Msize) :: xv, yv
+   integer, dimension(Msize)          :: Lorg
+   integer, dimension(Msize)          :: LnnL
+   integer                            :: i, k, L, nn
+
+   nn = netcell(n)%n
+
+   if ( nn.lt.1 ) return  ! safety
+
+   call get_cellpolygon(n, Msize, nn, 1d0, xv, yv, LnnL, Lorg, zz)
+   call getcircumcenter(nn, xv, yv, LnnL, xz, yz, jsferic, jasfer3D, jglobe, jins, dmiss, dxymis, dcenterinside)
+
+   end subroutine getcellcircumcenter
+
 
    !> Finds 2D cells in the unstructured net.
    !! Optionally within a polygon mask.

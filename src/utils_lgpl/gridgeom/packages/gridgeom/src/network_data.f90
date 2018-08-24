@@ -85,10 +85,10 @@ module network_data
   type (tface), allocatable         :: netcell_sav(:)  ! backup of netcell (for increasenetcells)
   integer,  allocatable             :: cellmask(:)     !< (nump) Mask array for net cells
 
-  double precision, allocatable, target :: xzw(:)  !< [m] centre of gravity {"shape": ["nump"]}
-  double precision, allocatable         :: xzw0(:)    ! Backup of xzw
-  double precision, allocatable, target :: yzw(:)  !< [m] centre of gravity {"shape": ["nump"]}
-  double precision, allocatable         :: yzw0(:)    ! Backup of yzw
+  double precision, allocatable, target :: xzw(:)      !< [m] centre of gravity {"shape": ["nump"]}
+  double precision, allocatable         :: xzw0(:)     ! Backup of xzw
+  double precision, allocatable, target :: yzw(:)      !< [m] centre of gravity {"shape": ["nump"]}
+  double precision, allocatable         :: yzw0(:)     ! Backup of yzw
 
 
   ! Net node related
