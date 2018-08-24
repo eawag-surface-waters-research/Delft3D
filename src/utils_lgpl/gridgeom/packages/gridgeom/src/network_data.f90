@@ -347,6 +347,8 @@ module network_data
    jaswan = 0
    netstat = NETSTAT_CELLS_DIRTY
    keepcircumcenters = 0
+   KMAX = 0
+   LMAX = 0
    
    ! return error
    ierr = 0
