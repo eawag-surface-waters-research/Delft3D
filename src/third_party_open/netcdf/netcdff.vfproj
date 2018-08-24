@@ -58,7 +58,9 @@
 		<File RelativePath=".\netcdf-fortran-4.4.4\fortran\nf_geninq.f90"/>
 		<File RelativePath=".\netcdf-fortran-4.4.4\fortran\nf_genvar.f90"/>
 		<File RelativePath=".\netcdf-fortran-4.4.4\fortran\nf_misc.f90"/>
-		<File RelativePath=".\netcdf-fortran-4.4.4\fortran\nf_nc4.f90"/>
+		<File RelativePath=".\netcdf-fortran-4.4.4\fortran\nf_nc4.f90">
+			<FileConfiguration Name="Debug|x64">
+				<Tool Name="VFFortranCompilerTool" WarnInterfaces="false"/></FileConfiguration></File>
 		<File RelativePath=".\netcdf-fortran-4.4.4\fortran\nf_par_dummy.f90"/>
 		<File RelativePath=".\netcdf-fortran-4.4.4\fortran\nf_var1io.F90"/>
 		<File RelativePath=".\netcdf-fortran-4.4.4\fortran\nf_varaio.F90"/>
