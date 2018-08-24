@@ -160,6 +160,7 @@ function averaging(meshtwoddim, meshtwod, startIndex, c_sampleX, c_sampleY, c_sa
     integer                                 :: nMaxNodesPolygon
     real(hp), allocatable                   :: xx(:,:), yy(:,:), xxx(:), yyy(:)
     integer, allocatable                    :: nnn(:), cellPermutation(:)
+    integer                                 :: nNetCells
        
     !get and convert meshgeom to kn table
     ierr = network_data_destructor()
@@ -231,15 +232,15 @@ function averaging(meshtwoddim, meshtwod, startIndex, c_sampleX, c_sampleY, c_sa
     !find cells
     ierr = 0
     call findcells(100000)
- 
+
     if (locType.eq.0) then
-       
+       nNetCells = size(xzw)
        !to flow nodes
        nMaxNodesPolygon = maxval(netcell%n)
-       allocate( xx(nMaxNodesPolygon,ndx), yy(nMaxNodesPolygon,ndx), nnn(ndx) )
-       do i = 1,ndx
+       allocate( xx(nMaxNodesPolygon,nNetCells), yy(nMaxNodesPolygon,nNetCells), nnn(nNetCells) , stat = ierr)
+       do i = 1,nNetCells
           nnn(i) = netcell(i)%n
-          do k = 1, nnn(k)
+          do k=1,nnn(i)
              xx(k,i) = xzw(i) + rcel*(xk(netcell(i)%nod(k))-xzw(i))
              yy(k,i) = yzw(i) + rcel*(yk(netcell(i)%nod(k))-yzw(i))
           enddo
