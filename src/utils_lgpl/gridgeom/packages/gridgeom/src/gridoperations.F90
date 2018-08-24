@@ -7,6 +7,7 @@
    public :: make1D2Dinternalnetlinks
    public :: make1D2Droofgutterpipes
    public :: make1D2Dstreetinletpipes
+   public :: ggeo_make1D2Dembeddedlinks
    public :: ggeo_convert
    public :: ggeo_convert_1d_arrays
    public :: ggeo_get_links_count
@@ -3250,12 +3251,11 @@
    !! and potentially more than one 1d2d link per 1d mesh node is created.
    !! 2D cells are connected if they are intersected by a 1D edge. They are
    !! connected to the nearest of the two endpoints of each 1D edge.
-   function make1D2DEmbeddedLinks()  result(ierr)
+   function ggeo_make1D2Dembeddedlinks( jsferic, jasfer3D)  result(ierr)
 
    use network_data
-   use m_missing,       only:  dmiss
+   use m_missing,       only: dmiss
    use geometry_module, only: dbdistance, crossinbox
-   use m_sferic,        only: jsferic, jasfer3D
    use kdtree2Factory
 
    !output
@@ -3264,6 +3264,8 @@
    integer               :: k, kk, k1, k2, k3, k4, k5, k6, ncellsinSearchRadius, numberCellNetlinks, isCrossing, newPointIndex, newLinkIndex
    integer               :: l, cellNetLink, cellId, kn3ty, numnetcells
    double precision      :: searchRadiusSquared, ldistance, rdistance, maxdistance, sl, sm, xcr, ycr, crp
+   integer, intent(in)   :: jsferic, jasfer3D 
+   
    type(kdtree_instance) :: treeinst
 
    ierr = 0
@@ -3343,6 +3345,6 @@
 
    call setnodadm(0)
 
-   end function make1D2DEmbeddedLinks
+   end function ggeo_make1D2Dembeddedlinks
 
    end module gridoperations

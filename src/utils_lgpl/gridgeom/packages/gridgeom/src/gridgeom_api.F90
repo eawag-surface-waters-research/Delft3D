@@ -184,6 +184,22 @@ function ggeo_make1D2Dstreetinletpipes_dll(c_nin, c_xin, c_yin, c_nOneDMask, c_o
 
 end function ggeo_make1D2Dstreetinletpipes_dll
 
+
+function ggeo_make1D2Dembeddedlinks_dll(c_jsferic, c_jasfer3D) result(ierr) bind(C, name="ggeo_make1D2Dembeddedlinks")
+!!DEC$ ATTRIBUTES DLLEXPORT :: ggeo_make1D2Dembeddedlinks_dll
+
+   use gridgeom
+   use gridoperations
+   
+   integer, intent(in)  :: c_jsferic
+   integer, intent(in)  :: c_jasfer3D
+   integer              :: ierr  
+   
+   ierr = ggeo_make1D2Dembeddedlinks(c_jsferic, c_jasfer3D)
+   
+end function ggeo_make1D2Dembeddedlinks_dll
+
+
 function ggeo_get_links_count_dll(nlinks, linkType) result(ierr) bind(C, name="ggeo_get_links_count")
 !DEC$ ATTRIBUTES DLLEXPORT :: ggeo_get_links_count_dll
    
