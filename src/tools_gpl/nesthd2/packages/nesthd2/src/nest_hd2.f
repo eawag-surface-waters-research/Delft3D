@@ -1,7 +1,7 @@
       subroutine nest_hd2 (lun   ,extnef,nostat,notims,kmax  ,lstci ,
      *                     nobnd ,mincon,
-     *                     thick ,wl    ,uu    ,vv    ,alfas ,bndval,
-     *                     kfs   ,mcbsp ,ncbsp ,mnstat,
+     *                     thick ,wl    ,uu    ,vv    ,conc, alfas ,
+     *                     bndval,kfs   ,mcbsp ,ncbsp ,mnstat,
      *                     typbnd,nambnd,namcon                     )
       implicit none
 !----- GPL ---------------------------------------------------------------------
@@ -70,7 +70,8 @@
       integer       iwet  (nostat)
 
       double precision uu    (nostat,kmax  ,notims),
-     *                 vv    (nostat,kmax  ,notims)
+     *                 vv    (nostat,kmax  ,notims),
+     *                 conc  (nostat,kmax  ,notims, mincon)
 
       double precision bndval(nobnd ,notims,kmax  ,mincon,2)
       double precision grdang
@@ -81,10 +82,10 @@
       integer nolay
       integer nocon
       integer nostat
-      integer notims
-      integer kmax
-      integer lstci
-      integer nobnd
+      integer notims, itim
+      integer kmax, k
+      integer lstci, iconc
+      integer nobnd, ibnd
       integer mincon
 
       character*  1 typbnd(nobnd )
@@ -190,13 +191,23 @@
       if (lstci .eq. 0) goto 999
 
       call SIMHSC(lun(5),fout  ,extnef,notims,nostat,kmax  ,lstci ,
-     *            vv                                              )
+     *            conc                                            )
       if (fout) goto 999
 
       bndval = 0.0d0
+      do ibnd = 1, nobnd
+          do itim = 1, notims
+              do k = 1, kmax
+                  do iconc = 1, lstci
+                      bndval(ibnd,itim,k,iconc,1)=0.0d0
+                      bndval(ibnd,itim,k,iconc,2)=0.0d0
+                  enddo
+              enddo
+          enddo
+      enddo
 
       call detcon (lun(5),fout  ,lun(2),bndval,mcbsp ,ncbsp ,
-     *             mnstat,vv    ,iwet  ,nobnd ,notims,nostat,
+     *             mnstat,conc  ,iwet  ,nobnd ,notims,nostat,
      *             kmax  ,lstci                             )
       if (fout) goto 999
 

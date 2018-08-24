@@ -546,8 +546,9 @@
 
       integer lundia, notims, nostat, kmax, lstci
 
-      real conc_sp   (nostat,kmax  ,lstci ,notims)
-      double precision conc   (nostat,kmax  ,lstci ,notims)
+      real*4 concsp   (nostat,kmax  ,lstci ,notims)
+      double precision conc   (nostat, kmax  ,lstci ,notims)
+      integer       istat, k, iconc, itim
 !
 !----------------------------------------------------------------------
 !     Nefis declarations
@@ -608,9 +609,9 @@
       write(*,'(a,a)') 
      * '     Reading transport data, element ', trim(elmnam)
       error    = GETELT(fdNef,grpnam    ,elmnam    ,
-     *                  uindex,usrord ,buflen    ,conc_sp      )
+     *                  uindex,usrord ,buflen    ,concsp      )
       if (error /= 0) then
-         buflen = 8 * nostat * kmax * lstci*notims
+         buflen = 8 * nostat * kmax * lstci * notims
          error    = GETELT(fdNef,grpnam    ,elmnam    ,
      *                     uindex,usrord ,buflen    ,conc      )
          if (error /= 0) then
@@ -620,7 +621,15 @@
             goto 999
          endif
       else
-          conc = dble(conc_sp)
+         do istat = 1, nostat
+            do k = 1, kmax
+               do iconc = 1, lstci
+                  do itim = 1, notims
+                     conc(istat,k,iconc,itim)=concsp(istat,k,iconc,itim)
+                  enddo
+               enddo
+            enddo
+         enddo
       endif
       
 !----------------------------------------------------------------------
