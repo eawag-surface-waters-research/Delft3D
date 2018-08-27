@@ -17,6 +17,7 @@ noinst_LTLIBRARIES = libflow1d_io.la
 FMODULES += \
   -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src \
   -I$(top_builddir)/utils_lgpl/ec_module/packages/ec_module/src \
+  -I$(top_builddir)/utils/flow1d/packages/flow1d_ec_temporary/src \
   -I$(top_builddir)/utils_lgpl/io_netcdf/packages/io_netcdf/src \
   -I$(top_builddir)/utils_lgpl/gridgeom/packages/gridgeom/src \
   -I$(builddir)/../../flow1d_core/src \
@@ -27,7 +28,7 @@ AM_FCFLAGS+=${NETCDF_CFLAGS} ${NETCDF_FORTRAN_CFLAGS}
 # Manualy add the netcdff (fortran dll), bug in pkg-config file is not fixed until in NetCDF 4.4 HEAD
 LIBS+=${NETCDF_LIBS} ${NETCDF_FORTRAN_LIBS} -lnetcdff
 endif
-  
+
 #-------------------------------------------------------------------------------
 #Sources
 libflow1d_io_la_SOURCES = \

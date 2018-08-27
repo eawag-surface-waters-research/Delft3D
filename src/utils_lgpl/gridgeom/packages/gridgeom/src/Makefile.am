@@ -7,7 +7,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libgridgeom.la
+noinst_LTLIBRARIES = libgridgeom.la
 
 # For source distributions: the tar.gz will contain the correct version numbers in the generated *version.F90
 # So, just before packaging the .tar.gz dist, disable version number REgeneration parts of this Makefile.am.
@@ -30,7 +30,7 @@ gridgeom_version.F90: gridgeom_version.F90.svn .FORCE
 gridgeom_version.F90:
  endif
 
-.FORCE: 
+.FORCE:
 
 .PHONY: .FORCE
 
@@ -55,7 +55,7 @@ libgridgeom_la_SOURCES = \
          gridoperations.F90 \
          gridgeom.F90 \
          gridgeom_api.F90
-         
+
 
 #-------------------------------------------------------------------------------
 #Libraries
