@@ -3270,7 +3270,7 @@
 
    ierr = 0
    !LC: is this the right type?
-   kn3typ = 3
+   kn3ty = 3
    call SAVENET()
    call findcells(0)
 
@@ -3290,7 +3290,7 @@
       !compute the search radius
       ldistance = 0d0
       if (l>=2) then
-         k4 = kn(2,l-1)
+         k4 = kn(1,l-1)
          ldistance = dbdistance(xk(k4),yk(k4),xk(k1),yk(k1), jsferic, jasfer3D, dmiss)
       endif
       rdistance = dbdistance(xk(k1),yk(k1),xk(k2),yk(k2), jsferic, jasfer3D, dmiss)
@@ -3310,10 +3310,10 @@
       do k = 1, nCellsInSearchRadius
          !check if one of the cell net link crosses the current 1d link
          cellId= treeinst%results(k)%idx
-         !check if the cell is already connected
-         numberCellNetlinks = size(netcell(cellId)%lin)
          !this cell has been already explored or is already connected 
          if (kc(cellId).ne.0) cycle
+         !check if the cell is already connected
+         numberCellNetlinks = size(netcell(cellId)%lin)
          do kk = 1, numberCellNetlinks
             if (kc(cellId).ne.0) cycle
             cellNetLink =  netcell(cellId)%lin(kk)
@@ -3323,7 +3323,7 @@
                call setnewpoint(xk(cellNetLink), yk(cellNetLink), zk(cellNetLink), newPointIndex)
                ldistance = dbdistance(xk(k1),yk(k1),xk(cellId),yk(cellId), jsferic, jasfer3D, dmiss)
                rdistance = dbdistance(xk(k2),yk(k2),xk(cellId),yk(cellId), jsferic, jasfer3D, dmiss)
-               if (ldistance>=rdistance) then
+               if (ldistance<=rdistance) then
                   !connect cell with left mesh point
                   call connectdbn(newPointIndex, k1, newLinkIndex)
                else
@@ -3335,10 +3335,10 @@
                kc(cellId) = 2
             else
                kc(cellId) = 3
-               endif
-         !loop over numberCellNetlinks
+            endif
+          !loop over numberCellNetlinks
          enddo
-      !loop over ncellsInSearchRadius
+       !loop over ncellsInSearchRadius
       enddo
    !loop over numl1d
    enddo

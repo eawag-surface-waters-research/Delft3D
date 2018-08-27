@@ -950,10 +950,7 @@ namespace gridgeom.Tests
 
             //5. make the links
             int c_npl = 0;
-            IntPtr c_xpl = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * 0);
-            IntPtr c_ypl = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * 0);
-            IntPtr c_zpl = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * 0);
-            ierr = wrapperGridgeom.ggeo_make1D2Dinternalnetlinks(ref c_npl, ref c_xpl, ref c_ypl, ref c_zpl);
+            ierr = wrapperGridgeom.ggeo_make1D2DEmbeddedLinks();
             Assert.That(ierr, Is.EqualTo(0));
 
             //6. get the number of links

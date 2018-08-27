@@ -186,7 +186,7 @@ end function ggeo_make1D2Dstreetinletpipes_dll
 
 
 function ggeo_make1D2Dembeddedlinks_dll(c_jsferic, c_jasfer3D) result(ierr) bind(C, name="ggeo_make1D2Dembeddedlinks")
-!!DEC$ ATTRIBUTES DLLEXPORT :: ggeo_make1D2Dembeddedlinks_dll
+!DEC$ ATTRIBUTES DLLEXPORT :: ggeo_make1D2Dembeddedlinks_dll
 
    use gridgeom
    use gridoperations
