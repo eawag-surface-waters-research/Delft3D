@@ -158,7 +158,7 @@ end function ggeo_make1D2Droofgutterpipes_dll
 !! c_nOneDMask :: size of the 1d mask for mesh 1d
 !! c_oneDmask  :: mask for 1d mesh points (1 = potential connection, 0 = do not connect) 
 !! c_jsferic   :: 2d sferic flag (1 = spheric / 0 = cartesian)
-!! c_jasfer3D  :: 3d sferic flag (1 = spheric / 0 = cartesian)
+!! c_jasfer3D  :: 3d sferic flag (1 = advacent spheric algorithm / 0 = default spheric algorithm )
 !! c_jglobe    :: to be detailed
 function ggeo_make1D2Dstreetinletpipes_dll(c_nin, c_xin, c_yin, c_nOneDMask, c_oneDmask, c_jsferic, c_jasfer3D, c_jglobe) result(ierr) bind(C, name="ggeo_make1D2Dstreetinletpipes")
 !DEC$ ATTRIBUTES DLLEXPORT :: ggeo_make1D2Dstreetinletpipes_dll
@@ -184,7 +184,11 @@ function ggeo_make1D2Dstreetinletpipes_dll(c_nin, c_xin, c_yin, c_nOneDMask, c_o
 
 end function ggeo_make1D2Dstreetinletpipes_dll
 
-
+!> Make 1d-2d internal connections. With this function multiple 2d cells can be connected to 1d mesh points. all the cell crossing the 1d links will be connected to the closest 1d point.
+!> Please note that the gridgeom library has to be initialized before this function can be called.
+!!
+!! c_jsferic   :: 2d sferic flag (1 = spheric / 0 = cartesian)
+!! c_jasfer3D  :: 3d sferic flag (1 = advanced spheric algorithm / 0 = default spheric algorithm )
 function ggeo_make1D2Dembeddedlinks_dll(c_jsferic, c_jasfer3D) result(ierr) bind(C, name="ggeo_make1D2Dembeddedlinks")
 !DEC$ ATTRIBUTES DLLEXPORT :: ggeo_make1D2Dembeddedlinks_dll
 
