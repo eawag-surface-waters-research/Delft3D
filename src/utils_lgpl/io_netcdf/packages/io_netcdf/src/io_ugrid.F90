@@ -710,14 +710,7 @@ function ug_put_gridmapping_att(ncid, id_vars, crs) result(ierr)
    character(len=30)  :: gridmappingvar           !< Name of grid mapping variable
 
    ierr = UG_SOMEERR
-   gridmappingvar = ' '
-   if (.true.) then
-      gridmappingvar = crs%varname
-   else if (crs%is_spherical) then
-      gridmappingvar = 'wgs84'
-   else 
-      gridmappingvar = 'projected_coordinate_system'
-   end if
+   gridmappingvar = crs%varname
 
    ierr = UG_NOERR
    n   = size(id_vars)
@@ -3077,7 +3070,6 @@ function ug_create_ugrid_geometry(meshgeom, crs) result(ierr)
     
     meshgeom%epsg = 4326
 
-    crs%is_spherical = .TRUE.
     crs%varname = 'wgs84'
     crs%epsg_code = 4326
 
