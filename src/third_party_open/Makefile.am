@@ -16,6 +16,7 @@ SUBDIRS = \
     triangle \
     version_number \
     libsigwatch \
+    FLAP \
     polypack \
     kdtree2 \
     swan
