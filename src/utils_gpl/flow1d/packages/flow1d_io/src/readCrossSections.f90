@@ -658,7 +658,6 @@ module m_readCrossSections
             pCS%summerdike%baseLevel  = baseLevel
             pCS%summerdike%flowArea   = flowArea
             pCS%summerdike%totalArea  = totalArea
-            pCS%summerdike%hysteresis = .true.
          endif
       endif
       
@@ -913,7 +912,6 @@ module m_readCrossSections
                   write(ibin) pdef%summerdike%baseLevel
                   write(ibin) pdef%summerdike%flowArea
                   write(ibin) pdef%summerdike%totalArea
-                  write(ibin) pdef%summerdike%hysteresis
                endif
             case (CS_YZ_PROF)
                write(ibin) (pdef%y(j), j = 1, pdef%levelscount)
@@ -999,7 +997,6 @@ module m_readCrossSections
                   read(ibin) pdef%summerdike%baseLevel
                   read(ibin) pdef%summerdike%flowArea
                   read(ibin) pdef%summerdike%totalArea
-                  read(ibin) pdef%summerdike%hysteresis
                endif
             case (CS_YZ_PROF)
                allocate(pdef%y(pdef%levelscount))
@@ -1306,7 +1303,6 @@ module m_readCrossSections
                   write(dmpUnit, *) pCSDef%summerdike%baseLevel
                   write(dmpUnit, *) pCSDef%summerdike%flowArea
                   write(dmpUnit, *) pCSDef%summerdike%totalArea
-                  write(dmpUnit, *) pCSDef%summerdike%hysteresis
                endif
             case (CS_YZ_PROF)
                write(dmpUnit, *) '##################### YZ #########################'

@@ -137,7 +137,7 @@ contains
    double precision function getWetTotalAreaGP(network, igrid, water, DepthOrLevel)
    
       ! Get Wetted Area at GridPoint
-      type(t_network), intent(in)        :: network
+      type(t_network), intent(inout)        :: network
       integer, intent(in)                :: igrid
       double precision, intent(in)       :: water
       integer, optional                  :: DepthOrLevel
@@ -150,6 +150,7 @@ contains
       double precision                   :: dpt
       double precision                   :: totalArea
       double precision                   :: totalWidth
+      logical                            :: hysteresis(2) 
 
       getWetTotalAreaGP = 0.0d0
       
@@ -167,8 +168,8 @@ contains
       else
          dpt = water
       endif
-      
-      call GetCSParsTotal(cross1, cross2, factor, dpt, totalArea, totalWidth, CS_TYPE_PREISMAN)
+      hysteresis = network%adm%hysteresis_for_summerdike(:,igrid)
+      call GetCSParsTotal(cross1, cross2, factor, dpt, totalArea, totalWidth, CS_TYPE_PREISMAN, hysteresis)
       
       getWetTotalAreaGP = totalArea
 
@@ -220,7 +221,7 @@ contains
 
    double precision function getTotalWidthGP(network, igrid, water, DepthOrLevel)
    
-      type(t_network), intent(in)        :: network
+      type(t_network), intent(inout)     :: network
       integer, intent(in)                :: igrid
       double precision, intent(in)       :: water
       integer, optional                  :: DepthOrLevel
@@ -233,6 +234,7 @@ contains
       double precision                   :: dpt
       double precision                   :: totalArea
       double precision                   :: totalWidth
+      logical                            :: hysteresis(2) 
 
       getTotalWidthGP = 0.0d0
       
@@ -251,7 +253,8 @@ contains
          dpt = water
       endif
       
-      call GetCSParsTotal(cross1, cross2, factor, dpt, totalArea, totalWidth, CS_TYPE_PREISMAN)
+      hysteresis = network%adm%hysteresis_for_summerdike(:,igrid)
+      call GetCSParsTotal(cross1, cross2, factor, dpt, totalArea, totalWidth, CS_TYPE_PREISMAN, hysteresis)
       
       getTotalWidthGP = totalWidth
 
@@ -480,7 +483,7 @@ contains
    
    subroutine getCrossTotalData_on_link(network, ilink, depth, totalArea, totalWidth, calculationOption)
    
-      type(t_network), intent(in)              :: network
+      type(t_network), intent(inout)           :: network
       integer, intent(in)                      :: ilink
       double precision, intent(in)             :: depth
       double precision, intent(out)  :: totalArea
@@ -506,7 +509,7 @@ contains
       cross2 => network%crs%cross(network%adm%line2cross(ilink)%c2)
       factor =  network%adm%line2cross(ilink)%f
  
-      call GetCSParsTotal(cross1, cross2, factor, depth, TotalArea, TotalWidth, calculationOption)
+      call GetCSParsTotal(cross1, cross2, factor, depth, TotalArea, TotalWidth, calculationOption, network%adm%hysteresis_for_summerdike(:,ilink))
       
    end subroutine getCrossTotalData_on_link
    
@@ -558,14 +561,15 @@ contains
       getdeltax = network%brs%branch(ibr)%dx(ll)
    end function getdeltax
 
-   subroutine getCrossTotalDataGP(network, igrid, water, DepthOrLevel, totalArea, totalWidth)
+   subroutine getCrossTotalDataGP(network, igrid, water, hysteresis, DepthOrLevel, totalArea, totalWidth)
    
-      type(t_network), intent(in)              :: network
+      type(t_network), intent(inout)              :: network
       integer, intent(in)                      :: igrid
       double precision, intent(in)             :: water
       integer, optional, intent(in)            :: DepthOrLevel
       double precision, optional, intent(out)  :: totalArea
       double precision, optional, intent(out)  :: totalWidth
+      logical, intent(inout)                   :: hysteresis(2)
       
       type (t_CrossSection), pointer     :: cross1
       type (t_CrossSection), pointer     :: cross2 
@@ -591,14 +595,14 @@ contains
          dpt = water
       endif
       
-      call GetCSParsTotal(cross1, cross2, factor, dpt, area, width, CS_TYPE_PREISMAN)
+      call GetCSParsTotal(cross1, cross2, factor, dpt, area, width, CS_TYPE_PREISMAN, hysteresis)
       
       if (present(totalArea))  totalArea = area
       if (present(totalWidth)) totalWidth = width
 
    end subroutine getCrossTotalDataGP
    
-   subroutine getSummerDikeGP(network, igrid, water, sdArea, sdWidth, doFlow, DepthOrLevel)
+   subroutine getSummerDikeGP(network, igrid, water, sdArea, sdWidth, doFlow, DepthOrLevel, hysteresis)
    
       ! Get Wetted Area at GridPoint
       type(t_network), intent(in)              :: network
@@ -608,6 +612,7 @@ contains
       double precision, intent(out)            :: sdWidth
       logical, intent(in)                      :: doFlow
       integer, optional, intent(in)            :: DepthOrLevel
+      logical, intent(inout)                   :: hysteresis 
    
       type (t_CrossSection), pointer     :: cross1
       type (t_CrossSection), pointer     :: cross2 
@@ -631,7 +636,7 @@ contains
          dpt = water
       endif
       
-      call interpolateSummerDike(cross1, cross2, factor, dpt, sdArea, sdWidth, doFlow)
+      call interpolateSummerDike(cross1, cross2, factor, dpt, sdArea, sdWidth, doFlow, hysteresis)
       
    end subroutine getSummerDikeGP  
 
@@ -731,23 +736,13 @@ contains
 
    subroutine resetSummerDike(network, igrid)
    
-      type(t_network), intent(in)        :: network
+      type(t_network), intent(inout)     :: network
       integer, intent(in)                :: igrid
 
-      type (t_CrossSection), pointer     :: cross1
-      type (t_CrossSection), pointer     :: cross2 
+      logical, pointer :: hysteresis(:)
 
-      cross1 => network%crs%cross(network%adm%gpnt2cross(igrid)%c1)
-      cross2 => network%crs%cross(network%adm%gpnt2cross(igrid)%c2)
-      
-      if (associated(cross1%tabDef%summerdike)) then
-         cross1%tabDef%summerdike%hysteresis = .true.
-      endif
+      network%adm%hysteresis_for_summerdike(:,igrid) = .true.
 
-      if (associated(cross2%tabDef%summerdike)) then
-         cross2%tabDef%summerdike%hysteresis = .true.
-      endif
-      
    end subroutine resetSummerDike
 
 ! =================================================================================================

@@ -76,6 +76,7 @@ module m_network
       integer, allocatable          :: lin2grid(:)
       type(t_offset2cross), pointer :: line2cross(:) => null()             !< list containing cross section indices per u-location
       type(t_offset2cross), pointer :: gpnt2cross(:) => null()             !< list containing cross section indices per gridpoint-location
+      logical, allocatable          :: hysteresis_for_summerdike(:,:)      !< array indicating for hysteresis in summerdikes
 
       double precision, allocatable :: au_1d(:)
       double precision, allocatable :: conv_1d(:)
@@ -124,6 +125,8 @@ contains
       if (.not. allocated(adm%lin2grid)) allocate(adm%lin2grid(all_links_count)) 
       if (.not. associated(adm%line2cross)) allocate(adm%line2cross(all_links_count))
       if (.not. associated(adm%gpnt2cross)) allocate(adm%gpnt2cross(all_links_count))
+      if (.not. allocated(adm%hysteresis_for_summerdike)) allocate(adm%hysteresis_for_summerdike(2,all_links_count))
+      adm%hysteresis_for_summerdike = .true.
       if (.not. allocated(adm%au_1d)) allocate(adm%au_1d(oned_links_count))
       if (.not. allocated(adm%conv_1d)) allocate(adm%conv_1d(oned_links_count))
       if (.not. allocated(adm%dpu_1d)) allocate(adm%dpu_1d(oned_links_count))
@@ -142,6 +145,7 @@ contains
       if (associated(adm%line2cross))  deallocate(adm%line2cross)
       if (allocated(adm%lin2grid))    deallocate(adm%lin2grid)
       if (associated(adm%gpnt2cross))  deallocate(adm%gpnt2cross)
+      if (allocated(adm%hysteresis_for_summerdike)) deallocate(adm%hysteresis_for_summerdike)
       if (allocated(adm%au_1d))        deallocate(adm%au_1d)
       if (allocated(adm%conv_1d))      deallocate(adm%conv_1d)
       if (allocated(adm%dpu_1d))       deallocate(adm%dpu_1d)

@@ -159,7 +159,6 @@ module m_CrossSections
       double precision :: baseLevel  = 0.0d0     !< Base level of the summerdike
       double precision :: flowArea   = 0.0d0     !< Flow area of the summerdike
       double precision :: totalArea  = 0.0d0     !< Total area, i.e. Flow area + storage area
-      logical          :: hysteresis = .true.    !< Remember Switch for Total Area (Hysteresis)
    end type t_summerdike
 
    !> Derived type for defining one cross-section type
@@ -783,7 +782,7 @@ subroutine SetParsCross(CrossDef, cross)
    type(t_CrossSection)             :: crossSection
    double precision                 :: cz
    double precision                 :: conv
-
+   
    cross%crossType = Crossdef%crossType
    cross%closed    = Crossdef%closed
 
@@ -1289,8 +1288,6 @@ subroutine GetCSParsFlowInterpolate(cross1, cross2, f, dpt, u1, cz, flowArea, we
    double precision                      :: conv2        
    type (t_CrossSection), save           :: crossi         !< intermediate virtual crosssection     
 
-   double precision                      :: sdArea  = 0.0d0
-   double precision                      :: sdWidth = 0.0d0
    double precision                      :: charHeight
 
    double precision                      :: af_sub_local1(3), af_sub_local2(3)      
@@ -1380,7 +1377,7 @@ subroutine GetCSParsFlowInterpolate(cross1, cross2, f, dpt, u1, cz, flowArea, we
 
 end subroutine GetCSParsFlowInterpolate
 
-subroutine interpolateSummerDike(cross1, cross2, f, dpt, sdArea, sdWidth, doFlow)
+subroutine interpolateSummerDike(cross1, cross2, f, dpt, sdArea, sdWidth, doFlow, hysteresis)
 
    use m_GlobalParameters
    
@@ -1393,6 +1390,7 @@ subroutine interpolateSummerDike(cross1, cross2, f, dpt, sdArea, sdWidth, doFlow
    double precision, intent(out)         :: sdArea         !< summer dike area
    double precision, intent(out)         :: sdWidth        !< summer dike width
    logical, intent(in)                   :: doFlow         !< flag, true = flow, false = total
+   logical, intent(inout)                :: hysteresis     !< Flag for hysteresis of summerdike
 
    type(t_summerdike), pointer           :: summerdike
    type(t_summerdike), pointer           :: summerdike1
@@ -1419,23 +1417,16 @@ subroutine interpolateSummerDike(cross1, cross2, f, dpt, sdArea, sdWidth, doFlow
       summerdike%baseLevel  = (1.0d0 - f) * (summerdike1%baseLevel + shift1)  + f * (summerdike2%baseLevel + shift2)
       summerdike%flowArea   = (1.0d0 - f) * summerdike1%flowArea   + f * summerdike2%flowArea
       summerdike%totalArea  = (1.0d0 - f) * summerdike1%totalArea   + f * summerdike2%totalArea
-      if (f <= 0.5d0) then
-         summerdike%hysteresis = summerdike1%hysteresis
-      else
-         summerdike%hysteresis = summerdike2%hysteresis
-      endif
    elseif (associated(summerdike1) .and. .not. associated(summerdike2)) then
       summerdike%crestLevel = (1.0d0 - f) * (summerdike1%crestLevel + shift1) + f * cross2%bedlevel
       summerdike%baseLevel  = (1.0d0 - f) * (summerdike1%baseLevel + shift1)  + f * cross2%bedlevel
       summerdike%flowArea   = (1.0d0 - f) * summerdike1%flowArea
       summerdike%totalArea  = (1.0d0 - f) * summerdike1%totalArea
-      summerdike%hysteresis = summerdike1%hysteresis
    elseif (.not. associated(summerdike1) .and. associated(summerdike2)) then
       summerdike%crestLevel = (1.0d0 - f) * cross1%bedlevel + f * (summerdike2%crestLevel + shift2)
       summerdike%baseLevel  = (1.0d0 - f) * cross1%bedlevel + f * (summerdike2%baseLevel + shift2)
       summerdike%flowArea   = f * summerdike2%flowArea
       summerdike%totalArea  = f * summerdike2%totalArea
-      summerdike%hysteresis = summerdike2%hysteresis
    else
       ! Not any Summer Dike Data
       deallocate(summerdike)
@@ -1454,19 +1445,7 @@ subroutine interpolateSummerDike(cross1, cross2, f, dpt, sdArea, sdWidth, doFlow
       else
       
          ! Get Summer Dike Total Data
-         call GetSummerDikeTotal(summerdike, wlev, sdArea, sdWidth)
-      
-         if (associated(summerdike1) .and. associated(summerdike2)) then
-            if (f <= 0.5d0) then
-               summerdike1%hysteresis = summerdike%hysteresis
-            else
-               summerdike2%hysteresis = summerdike%hysteresis
-            endif
-         elseif (associated(summerdike1) .and. .not. associated(summerdike2)) then
-            summerdike1%hysteresis = summerdike%hysteresis
-         elseif (.not. associated(summerdike1) .and. associated(summerdike2)) then
-            summerdike2%hysteresis = summerdike%hysteresis
-         endif
+         call GetSummerDikeTotal(summerdike, wlev, sdArea, sdWidth, hysteresis)
    
       endif
          
@@ -1508,6 +1487,7 @@ subroutine GetCSParsFlowCross(cross, dpt, u1, cz, flowArea, wetPerimeter, flowWi
    double precision                  :: cz_sub_local(3)   
    integer                           :: numsect
    integer                           :: i
+   logical                           :: hysteresis =.true.   ! hysteresis is a dummy variable at this location, since this variable is only used for total areas
   
    perim_sub_local = 0d0
    if (dpt <= 0.0d0) then
@@ -1528,7 +1508,7 @@ subroutine GetCSParsFlowCross(cross, dpt, u1, cz, flowArea, wetPerimeter, flowWi
          else
             getSummerDikes = .true.
          endif
-         call TabulatedProfile(dpt, cross, .true., getSummerDikes, flowArea, flowWidth, wetPerimeter, af_sub_local, perim_sub_local, CS_TYPE_NORMAL)
+         call TabulatedProfile(dpt, cross, .true., getSummerDikes, flowArea, flowWidth, wetPerimeter, af_sub_local, perim_sub_local, CS_TYPE_NORMAL, hysteresis)
       case (CS_CIRCLE)
          call CircleProfile(dpt, crossDef%diameter, flowArea, flowWidth, wetPerimeter, CS_TYPE_NORMAL)
       case (CS_EGG)
@@ -1616,7 +1596,7 @@ subroutine GetCSParsFlowCross(cross, dpt, u1, cz, flowArea, wetPerimeter, flowWi
    
 end subroutine GetCSParsFlowCross
 
-subroutine GetCSParsTotalInterpolate(cross1, cross2, f, dpt, totalArea, totalWidth, calculationOption, doSummerDike)
+subroutine GetCSParsTotalInterpolate(cross1, cross2, f, dpt, totalArea, totalWidth, calculationOption, hysteresis, doSummerDike)
 
    use m_GlobalParameters
    
@@ -1634,6 +1614,7 @@ subroutine GetCSParsTotalInterpolate(cross1, cross2, f, dpt, totalArea, totalWid
                                                            !! CS_TYPE_MIN       Total area for only the narrowing part of the cross section (Nested Newton method)
    integer, intent(in)                   :: calculationOption 
    logical, intent(in), optional         :: doSummerDike    !< Switch to calculate Summer Dikes or not
+   logical, intent(inout), optional      :: hysteresis(2)      !< Switch to calculate Summer Dikes or not
    
    double precision                      :: totalArea1
    double precision                      :: totalArea2
@@ -1643,7 +1624,7 @@ subroutine GetCSParsTotalInterpolate(cross1, cross2, f, dpt, totalArea, totalWid
 
    if(cross1%crossIndx == cross2%crossIndx) then
       ! Same Cross-Section, no interpolation needed 
-      call GetCSParsTotalCross(cross1, dpt, totalArea, totalWidth, calculationOption)
+      call GetCSParsTotalCross(cross1, dpt, totalArea, totalWidth, calculationOption, hysteresis(1))
    else
       select case (cross1%crosstype)
       case (CS_CIRCLE, CS_EGG)
@@ -1664,15 +1645,15 @@ subroutine GetCSParsTotalInterpolate(cross1, cross2, f, dpt, totalArea, totalWid
          crossi%groundFrictionType = cross1%groundFrictionType
          crossi%tabDef%diameter    = (1.0d0 - f) * cross1%tabDef%diameter + f * cross2%tabDef%diameter
          
-         call GetCSParsTotalCross(crossi, dpt, totalArea, totalWidth, calculationOption)
+         call GetCSParsTotalCross(crossi, dpt, totalArea, totalWidth, calculationOption, hysteresis(1))
          
       case default                             ! Call GetCSParstotalCross twice and interpolate the results 
          if (present(doSummerDike)) then
-             call GetCSParsTotalCross(cross1, dpt, totalArea1, totalWidth1, calculationOption, doSummerDike = doSummerDike)
-             call GetCSParsTotalCross(cross2, dpt, totalArea2, totalWidth2, calculationOption, doSummerDike = doSummerDike)
+             call GetCSParsTotalCross(cross1, dpt, totalArea1, totalWidth1, calculationOption, hysteresis(1), doSummerDike = doSummerDike)
+             call GetCSParsTotalCross(cross2, dpt, totalArea2, totalWidth2, calculationOption, hysteresis(2), doSummerDike = doSummerDike)
          else    
-             call GetCSParsTotalCross(cross1, dpt, totalArea1, totalWidth1, calculationOption)
-             call GetCSParsTotalCross(cross2, dpt, totalArea2, totalWidth2, calculationOption)
+             call GetCSParsTotalCross(cross1, dpt, totalArea1, totalWidth1, calculationOption, hysteresis(1))
+             call GetCSParsTotalCross(cross2, dpt, totalArea2, totalWidth2, calculationOption, hysteresis(2))
          endif         
          
          totalArea     = (1.0d0 - f) * totalArea1     + f * totalArea2
@@ -1684,7 +1665,7 @@ subroutine GetCSParsTotalInterpolate(cross1, cross2, f, dpt, totalArea, totalWid
 
 end subroutine GetCSParsTotalInterpolate
 
-subroutine GetCSParsTotalCross(cross, dpt, totalArea, totalWidth, calculationOption, doSummerDike)
+subroutine GetCSParsTotalCross(cross, dpt, totalArea, totalWidth, calculationOption, hysteresis, doSummerDike)
 
    use m_GlobalParameters
    ! Global Variables
@@ -1698,6 +1679,7 @@ subroutine GetCSParsTotalCross(cross, dpt, totalArea, totalWidth, calculationOpt
                                                         !! CS_TYPE_MIN       Total area for only the narrowing part of the cross section (Nested Newton method)
    integer, intent(in)               :: calculationOption 
    logical, intent(in), optional     :: doSummerDike    !< Switch to calculate Summer Dikes or not
+   logical, intent(inout)            :: hysteresis!< Switch to calculate Summer Dikes or not
 
 
    ! Local Variables
@@ -1725,7 +1707,7 @@ subroutine GetCSParsTotalCross(cross, dpt, totalArea, totalWidth, calculationOpt
          else
             getSummerDikes = .true.
          endif
-         call TabulatedProfile(dpt, cross, .false., getSummerDikes, totalArea, totalWidth, wetPerimeter, af_sub, perim_sub, calculationOption)
+         call TabulatedProfile(dpt, cross, .false., getSummerDikes, totalArea, totalWidth, wetPerimeter, af_sub, perim_sub, calculationOption, hysteresis)
       case (CS_CIRCLE)
          call CircleProfile(dpt, crossDef%diameter, totalArea, totalWidth, wetPerimeter, calculationOption)
       case (CS_EGG)
@@ -1739,7 +1721,7 @@ subroutine GetCSParsTotalCross(cross, dpt, totalArea, totalWidth, calculationOpt
 
 end subroutine GetCSParsTotalCross
 
-subroutine TabulatedProfile(dpt, cross, doFlow, getSummerDikes, area, width, perimeter, af_sub, perim_sub, calculationOption)
+subroutine TabulatedProfile(dpt, cross, doFlow, getSummerDikes, area, width, perimeter, af_sub, perim_sub, calculationOption, hysteresis)
 
    use m_GlobalParameters
 
@@ -1755,6 +1737,7 @@ subroutine TabulatedProfile(dpt, cross, doFlow, getSummerDikes, area, width, per
    double precision, intent(out)     :: af_sub(3)
    double precision, intent(out)     :: perim_sub(3)
    integer, intent(in)               :: calculationOption 
+   logical, intent(inout)            :: hysteresis     !< Flag for hysteresis of summerdike
 
    ! local parameters
    type(t_CSType), pointer           :: crossDef
@@ -1778,7 +1761,6 @@ subroutine TabulatedProfile(dpt, cross, doFlow, getSummerDikes, area, width, per
       summerdike%baseLevel  = crossDef%summerdike%baseLevel + cross%shift
       summerdike%flowArea   = crossDef%summerdike%flowArea
       summerdike%totalArea  = crossDef%summerdike%totalArea
-      summerdike%hysteresis = crossDef%summerdike%hysteresis
       
       ! Summerdike Adjusting
       if (doFlow) then
@@ -1789,8 +1771,7 @@ subroutine TabulatedProfile(dpt, cross, doFlow, getSummerDikes, area, width, per
       else
       
          ! Get Summer Dike Total Data
-         call GetSummerDikeTotal(summerdike, wlev, sdArea, sdWidth)
-         crossDef%summerdike%hysteresis = summerdike%hysteresis
+         call GetSummerDikeTotal(summerdike, wlev, sdArea, sdWidth, hysteresis)
       
       endif
       
@@ -2239,7 +2220,7 @@ subroutine GetSummerDikeFlow(summerdike, wlev, sdArea, sdWidth)
           
 end subroutine GetSummerDikeFlow
 
-subroutine GetSummerDikeTotal(summerdike, wlev, sdArea, sdWidth)
+subroutine GetSummerDikeTotal(summerdike, wlev, sdArea, sdWidth, hysteresis)
 
    implicit none
 
@@ -2247,9 +2228,9 @@ subroutine GetSummerDikeTotal(summerdike, wlev, sdArea, sdWidth)
    double precision, intent(in)                 :: wlev
    double precision, intent(out)                :: sdArea
    double precision, intent(out)                :: sdWidth
+   logical, intent(inout)                       :: hysteresis
 
    ! Local Parameters
-   logical                                      :: hysteresis
    double precision                             :: sdtr
    double precision                             :: atot
    double precision                             :: htop
@@ -2265,7 +2246,6 @@ subroutine GetSummerDikeTotal(summerdike, wlev, sdArea, sdWidth)
    sdtr = summerDikeTransitionHeight
    
    atot       = summerdike%totalArea
-   hysteresis = summerdike%hysteresis
    
    if (atot > 0.0d0) then
    
@@ -2278,7 +2258,6 @@ subroutine GetSummerDikeTotal(summerdike, wlev, sdArea, sdWidth)
          hysteresis = .true.
       else
       endif
-      summerdike%hysteresis = hysteresis
       
       if (hysteresis) then
       
