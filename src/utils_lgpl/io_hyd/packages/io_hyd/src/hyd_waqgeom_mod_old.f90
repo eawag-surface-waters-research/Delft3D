@@ -583,7 +583,7 @@ function unc_add_coordmapping(ncid, crs) result(ierr)
    varname = ' '
    if (len_trim(crs%varname) > 0) then
       varname = crs%varname
-   else if (crs%is_spherical) then
+   else if (crs%epsg_code == 4326) then
       ierr_missing = UG_INVALID_CRS
       varname = 'wgs84'
    else
@@ -602,7 +602,7 @@ function unc_add_coordmapping(ncid, crs) result(ierr)
 
    if (allocated(crs%attset)) then
       ierr = ug_put_var_attset(ncid, id_crs, crs%attset)
-   elseif (crs%is_spherical) then
+   elseif (crs%epsg_code == 4326) then
       ierr_missing = UG_INVALID_CRS
       epsg      = 4326
       epsgstring = 'EPSG:4326'
@@ -1442,7 +1442,7 @@ function ug_addcoordatts(ncid, id_varx, id_vary, crs) result(ierr)
 
    ierr = UG_NOERR
 
-   if (crs%is_spherical) then
+   if (crs%epsg_code == 4326) then
       ierr = nf90_put_att(ncid, id_varx, 'units',       'degrees_east')
       ierr = nf90_put_att(ncid, id_vary, 'units',       'degrees_north')
       ierr = nf90_put_att(ncid, id_varx, 'standard_name', 'longitude')
@@ -1484,7 +1484,7 @@ function ug_add_coordmapping(ncid, crs) result(ierr)
    varname = ' '
    if (len_trim(crs%varname) > 0) then
       varname = crs%varname
-   else if (crs%is_spherical) then
+   else if (crs%epsg_code == 4326) then
       ierr_missing = UG_INVALID_CRS
       varname = 'wgs84'
    else
@@ -1503,7 +1503,7 @@ function ug_add_coordmapping(ncid, crs) result(ierr)
 
    if (allocated(crs%attset)) then
       ierr = ug_put_var_attset(ncid, id_crs, crs%attset)
-   elseif (crs%is_spherical) then
+   elseif (crs%epsg_code == 4326) then
       ierr_missing = UG_INVALID_CRS
       epsg      = 4326
       epsgstring = 'EPSG:4326'
@@ -1575,7 +1575,7 @@ function ug_put_gridmapping_att(ncid, id_vars, crs) result(ierr)
    gridmappingvar = ' '
    if (.true.) then
       gridmappingvar = crs%varname
-   else if (crs%is_spherical) then
+   else if (crs%epsg_code == 4326) then
       gridmappingvar = 'wgs84'
    else
       gridmappingvar = 'projected_coordinate_system'

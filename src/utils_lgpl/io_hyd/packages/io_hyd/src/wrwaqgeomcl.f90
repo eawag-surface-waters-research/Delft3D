@@ -498,8 +498,10 @@ contains
     !
     ! Coordinates
     !
-    crs%is_spherical = sferic
-    
+    if (sferic) then
+       crs%epsg_code == 4326    
+    end if
+
     ierr = t_ug_meshgeom_destructor(meshgeom)
     
     meshgeom%meshName = 'mesh2d'

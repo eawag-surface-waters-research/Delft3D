@@ -792,7 +792,6 @@ subroutine wrwaqgeom (filename, version_full, sferic, epsg, nr_nodes, xk, yk, zk
       !
       ierr = nf90_def_var(igeomfile, 'NetNode_x', nf90_double, id_netnodedim, id_netnodex)
       ierr = nf90_def_var(igeomfile, 'NetNode_y', nf90_double, id_netnodedim, id_netnodey)
-      crs%is_spherical = sferic
       crs%epsg_code = epsg
       ierr = ug_addcoordatts(igeomfile, id_netnodex, id_netnodey, crs)
       !
