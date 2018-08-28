@@ -27,7 +27,7 @@ function triangulation(meshtwoddim, meshtwod, startIndex, c_sampleX, c_sampleY, 
     type(c_ptr), intent(in)                 :: c_sampleValues      !< samples values
     integer(c_int), intent(in)              :: numSamples          !< number of samples
     type(c_ptr),    intent(inout)           :: c_targetValues      !< return values (ptr to double array)
-    integer(c_int), intent(in)              :: locType             !< destination location type: 1: To flow nodes, 2: to zk net nodes
+    integer(c_int), intent(in)              :: locType             !< destination location type: 0: To flow nodes, 1: to zk net nodes, 2: to center of cell edges
     integer(c_int), intent(in)              :: jsferic             
     integer(c_int), intent(in)              :: jasfer3D
 
@@ -40,6 +40,7 @@ function triangulation(meshtwoddim, meshtwod, startIndex, c_sampleX, c_sampleY, 
     double precision, allocatable            :: targetX(:)
     double precision, allocatable            :: targetY(:)
     integer                                  :: numTargets
+    integer                                  :: i    
       
     !From other modules
     integer                                  :: ierr 
@@ -64,6 +65,14 @@ function triangulation(meshtwoddim, meshtwod, startIndex, c_sampleX, c_sampleY, 
       allocate(targetY(numTargets))
       targetX = meshgeom%nodex
       targetY = meshgeom%nodey
+    else if (locType.eq.2) then  
+      numTargets = size(meshgeom%edge_nodes,2)
+      allocate(targetX(numTargets))
+      allocate(targetY(numTargets))
+      do i=1,numTargets
+         targetX(i) = (meshgeom%nodex(meshgeom%edge_nodes(1,i)) + meshgeom%nodex(meshgeom%edge_nodes(2,i)))/2.0d0
+         targetY(i) = (meshgeom%nodey(meshgeom%edge_nodes(1,i)) + meshgeom%nodey(meshgeom%edge_nodes(2,i)))/2.0d0
+      enddo     
     else
       !not valid location
       ierr = -1
@@ -134,7 +143,7 @@ function averaging(meshtwoddim, meshtwod, startIndex, c_sampleX, c_sampleY, c_sa
     type(c_ptr),    intent(in)              :: c_sampleValues      !< sample values
     integer(c_int), intent(in)              :: numSamples          !< number of samples
     type(c_ptr),    intent(inout)           :: c_targetValues      !< return values (ptr to double array)
-    integer(c_int), intent(in)              :: locType             !< destination location type: 0: To flow nodes, 1: to net nodes
+    integer(c_int), intent(in)              :: locType             !< destination location type: 0: To flow nodes, 1: to net nodes, 2: to center of cell edges
     real(c_double), intent(in)              :: Wu1Duni
     integer(c_int), intent(in)              :: method              !< averaging method
     integer(c_int), intent(in)              :: minNumSamples       !< minimum nr of samples for avaraging
@@ -180,6 +189,14 @@ function averaging(meshtwoddim, meshtwod, startIndex, c_sampleX, c_sampleY, c_sa
       allocate(targetY(numTargets))
       targetX = meshgeom%nodex
       targetY = meshgeom%nodey
+    else if (locType.eq.2) then
+      !numTargets = size(meshgeom%edge_nodes,2)
+      !allocate(targetX(numTargets))
+      !allocate(targetY(numTargets))
+      !do i=1,numTargets
+      !   targetX(i) = (meshgeom%nodex(meshgeom%edge_nodes(1,i)) + meshgeom%nodex(meshgeom%edge_nodes(2,i)))/2.0d0
+      !   targetY(i) = (meshgeom%nodey(meshgeom%edge_nodes(1,i)) + meshgeom%nodey(meshgeom%edge_nodes(2,i)))/2.0d0
+      !enddo      
     else
       !not valid location
       ierr = -1
@@ -233,7 +250,7 @@ function averaging(meshtwoddim, meshtwod, startIndex, c_sampleX, c_sampleY, c_sa
     ierr = 0
     call findcells(100000)
 
-    if (locType.eq.0) then
+    if ((locType.eq.0).or.(locType.eq.2)) then
        nNetCells = size(xzw)
        !to flow nodes
        nMaxNodesPolygon = maxval(netcell%n)
