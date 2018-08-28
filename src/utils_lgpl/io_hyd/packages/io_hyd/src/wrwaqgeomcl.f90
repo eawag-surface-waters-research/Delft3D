@@ -499,7 +499,7 @@ contains
     ! Coordinates
     !
     if (sferic) then
-       crs%epsg_code == 4326    
+       crs%epsg_code = 4326    
     end if
 
     ierr = t_ug_meshgeom_destructor(meshgeom)
