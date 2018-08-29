@@ -61,9 +61,7 @@ if %d3d_open_only% EQU 1 (
 
 rem ===========================================================================
 rem dflowfm_open.sln
-echo INFO: dflowfm_open.sln temporarily disabled. Main FM line is ds closed trunk.
-echo INFO: dflowfm kernel via artifact dependencies in dimr collectors.
-REM devenv.exe dflowfm_open.sln /Build "Release|x64" /Out build_dflowfm_open.log
+devenv.exe dflowfm_open.sln /Build "Release|x64" /Out build_dflowfm_open.log
 if NOT %ErrorLevel% EQU 0 (
     echo "Error in compiling dflowfm_open.sln: %ErrorLevel%"
     set globalErrorLevel=%ErrorLevel%
