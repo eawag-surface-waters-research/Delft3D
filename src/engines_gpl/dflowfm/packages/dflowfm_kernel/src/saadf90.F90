@@ -4418,7 +4418,7 @@
            DO I = 1,N    
               DOTs = DOTs + DX(I)*DY(I)
            ENDDO                            
-            ddotXXX = dots
+           ddotXXX = dots
          end if
   
       ELSE 

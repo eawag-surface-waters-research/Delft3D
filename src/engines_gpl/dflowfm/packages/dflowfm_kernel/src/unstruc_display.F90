@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2017.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -156,6 +156,7 @@ implicit none
     integer :: jafullbottomline   = 0     !<larger bottomline with more complete description in screen 
     double precision :: profmax(20) = -999d0 !< minmax axes of tekprofiles 
     double precision :: profmin(20) = -999d0 
+    double precision :: ymn, zmn             ! for tekrailines  
     
 contains
 
@@ -168,7 +169,7 @@ subroutine load_displaysettings(filename)
     use m_wearelt
     use M_isoscaleunit
     use m_transport, only: iconst_cur
-    USE M_FLOW, only: kplot, nplot
+    USE M_FLOW, only: kplot, nplot, kplotfrombedorsurface
     use m_observations, only : jafahrenheit
 !   use unstruc_opengl    ! circular dependency
  
@@ -228,8 +229,8 @@ subroutine load_displaysettings(filename)
 
     numdraw = 41
     do i=1,numdraw
-        write (nrstring, '(I2)') i
-        call prop_get_integer(dis_ptr, '*', 'ndraw('//trim(adjustl(nrstring))//')', ndraw(i), success)
+       write (nrstring, '(I2)') i
+       call prop_get_integer(dis_ptr, '*', 'ndraw('//trim(adjustl(nrstring))//')', ndraw(i), success)
     end do
     
 !   load active constituent number
@@ -271,13 +272,18 @@ subroutine load_displaysettings(filename)
     call prop_Get_DOUBLE (dis_ptr, '*', 'VMIN         '  , VMIN            , success)
     call prop_Get_DOUBLE (dis_ptr, '*', 'VMAX         '  , VMAX            , success)
     call prop_Get_DOUBLE (dis_ptr, '*', 'DV           '  , DV              , success)
+    DO I = 1,NV
+       VAL(I) = VMIN + (I-1)*DV/(NV-1)
+    ENDDO
 
     call prop_Get_integer(dis_ptr, '*', 'JAAUTO2      '  , JAAUTO2         , success)
     call prop_Get_integer(dis_ptr, '*', 'NV2          '  , NV2             , success)
     call prop_Get_DOUBLE (dis_ptr, '*', 'VMIN2        '  , VMIN2           , success)
     call prop_Get_DOUBLE (dis_ptr, '*', 'VMAX2        '  , VMAX2           , success)
     call prop_Get_DOUBLE (dis_ptr, '*', 'DV2          '  , DV2             , success)
-
+    DO I = 1,NV2
+       VAL2(I) = VMIN2 + (I-1)*DV2/(NV2-1)
+    ENDDO
     
     call prop_Get_string (dis_ptr, '*', 'UNIT(1)      '  , UNIT(1)         , success)
     call prop_Get_string (dis_ptr, '*', 'PARAMTEX(1)  '  , PARAMTEX(1)     , success)
@@ -336,7 +342,8 @@ subroutine load_displaysettings(filename)
     call prop_get_integer (dis_ptr, '*', 'NREDP  ', NREDP   , success) 
     call prop_get_integer (dis_ptr, '*', 'NGREENP', NGREENP , success) 
     call prop_get_integer (dis_ptr, '*', 'NBLUEP ', NBLUEP  , success) 
-      
+
+    call prop_get_integer (dis_ptr, '*', 'kplotbedsur', kplotfrombedorsurface, success)
     call prop_get_integer (dis_ptr, '*', 'kplot', kplot, success)
     call prop_get_integer (dis_ptr, '*', 'nplot', nplot, success) 
     
@@ -371,6 +378,7 @@ subroutine load_displaysettings(filename)
         ndraw(10) = 1
     end if
 
+    
 end subroutine load_displaysettings
 
 
@@ -567,6 +575,7 @@ subroutine save_displaysettings(filename)
     call prop_set(dis_ptr, '*', 'NGREENP', NGREENP  )
     call prop_set(dis_ptr, '*', 'NBLUEP ', NBLUEP   )
 
+    call prop_set(dis_ptr, '*', 'kplotbedsur', kplotfrombedorsurface)
     call prop_set(dis_ptr, '*', 'kplot', kplot)
     call prop_set(dis_ptr, '*', 'nplot', nplot)
     
@@ -632,9 +641,11 @@ subroutine plotObservations() ! TEKOBS
                 call gtext(' '//trim(namobs(n)), xobs(n), yobs(n), 221)
              endif
           else if (ndrawobs == 6) then
+             tex = '           (m)' 
              write (tex,'(f10.4)') s1(k)
              call gtext(tex(1:14), xobs(n), yobs(n), ncolblack)
           else if (ndrawobs == 7) then
+             tex = '           (m)' 
              write (tex,'(f10.4)') s1(k) - bl(k)
              call gtext(tex(1:14), xobs(n), yobs(n), ncolblack)   
           else if (ndrawobs == 8) then
@@ -1403,15 +1414,28 @@ subroutine tekwindvector()
     
     if (vinbndcum > 0 .or. voutbndcum > 0) then 
        yp  = yp - dyp                 
-       tex = 'Hinbnd :               (m)'
+       tex = 'HinBnd :               (m)'
        write(tex(10:20), '(F11.4)')  vinbndcum/a1ini   
        call GTEXT(tex, xp, yp, ncol)
    
        yp  = yp - dyp                 
-       tex = 'Houtbnd:               (m)'
+       tex = 'HoutBnd:               (m)'
        write(tex(10:20), '(F11.4)') -voutbndcum/a1ini   
        call GTEXT(tex, xp, yp, ncol)
     endif
+
+    if (vinlatcum > 0 .or. voutlatcum > 0) then 
+       yp  = yp - dyp                 
+       tex = 'HinLat :               (m)'
+       write(tex(10:20), '(F11.4)')  vinlatcum/a1ini   
+       call GTEXT(tex, xp, yp, ncol)
+   
+       yp  = yp - dyp                 
+       tex = 'HoutLat:               (m)'
+       write(tex(10:20), '(F11.4)') -voutlatcum/a1ini   
+       call GTEXT(tex, xp, yp, ncol)
+    endif
+
     
     if (vingrwcum > 0 .or. voutgrwcum > 0) then 
        yp  = yp - dyp                 

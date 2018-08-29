@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2017.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -38,6 +38,7 @@ use MessageHandling
 implicit none
 
 logical, parameter, private :: printToStdout = .true.
+integer :: threshold_abort = level_error
 
 ! Verbosity levels for logging on screen and in diagnostics file.
 ! Configurable at runtime with '--verbose:...'-flag.

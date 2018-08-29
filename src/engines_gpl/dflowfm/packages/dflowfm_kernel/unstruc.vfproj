@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VisualStudioProject ProjectCreator="Intel Fortran" Keyword="Console Application" Version="11.0" ProjectIdGuid="{DDB199FE-9139-4589-821A-DDE86CBA53BB}">
+	<Platforms>
+		<Platform Name="Win32"/>
+		<Platform Name="x64"/></Platforms>
+	<Configurations>
+		<Configuration Name="Debug|Win32" OutputDirectory="$(SolutionDir)\bin\$(PlatformName)\$(ConfigurationName)" IntermediateDirectory="$(PlatformName)\$(ConfigurationName)" DeleteExtensionsOnClean="*.obj;*.mod;*.pdb;*.asm;*.map;*.dyn;*.dpi;*.tmp;*.log;*.ilk;*.exe;$(TargetPath)" BuildLogFile="$(IntDir)\$(ProjectName)-BuildLog.htm">
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="..\third_party\interacter\bin\win32;..\third_party_open\netcdf\lib\win32\$(ConfigurationName)\ifort13;..\third_party_open\metis\lib\win32\$(ConfigurationName);..\third_party_open\mpich2\include;..\third_party\Tecplot\include" PreprocessorDefinitions="WIN32 -Qopenmp;HAVE_OPENGL;HAVE_MPI=$(HAVE_MPI);HAVE_PARMS;HAVE_DISPLAY" ParallelizerDiagLevel="parallelizerDiagLevel0" VectorizerDiagLevel="vectorizerDiagLevel0" WarnDeclarations="true" WarnInterfaces="true" FloatingPointExceptionHandling="fpe0" ModulePath="$(INTDIR)/" ObjectFile="$(INTDIR)/" Traceback="true" RuntimeChecks="rtChecksAll" BoundsCheck="true" UninitializedVariablesCheck="true" RuntimeLibrary="rtMultiThreadedDebug"/>
+				<Tool Name="VFLinkerTool" OutputFile="../bin/$(PlatformName)/$(ConfigurationName)/dflowfm.exe" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="..\third_party_open\libsigwatch\$(ConfigurationName);..\third_party\interacter\bin\win32;..\third_party_open\netcdf\lib\win32\$(ConfigurationName)\ifort13;..\third_party_open\metis\lib\win32\$(ConfigurationName);..\third_party_open\pthreads\bin\$(PlatformName);..\third_party_open\mpich2\lib" IgnoreDefaultLibraryNames="LIBC.lib;LIBCMTD.lib;LIBCMT.lib" GenerateDebugInformation="true" ProgramDatabaseFile="$(OUTDIR)/unstruc.pdb" SubSystem="subSystemConsole" StackReserveSize="20000000" LargeAddressAware="addrAwareLarge" AdditionalDependencies="msvcrtd.lib f90_netcdf.lib f77_netcdf.lib netcdf.lib  intmwif8.lib wsock32.lib netapi32.lib comctl32.lib kernel32.lib   user32.lib Shlwapi.lib Gdi32.lib Winspool.lib pthreadVCE2.lib fmpich2.lib mpi.lib"/>
+				<Tool Name="VFResourceCompilerTool"/>
+				<Tool Name="VFMidlTool" SuppressStartupBanner="true" HeaderFileName="$(InputName).h" TypeLibraryName="$(IntDir)/$(InputName).tlb"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFPreLinkEventTool"/>
+				<Tool Name="VFPreBuildEventTool" CommandLine="call ..\scripts_lgpl\win32\update_version.cmd unstruc_version.F90 ..\ ..\res\version_number.ini --onlyifmissing&#xA;call ..\scripts_lgpl\win32\update_version.cmd ..\res\version_number.rc ..\ ..\res\version_number.ini --onlyifmissing" Description="Expand unstruc_version.F90.svn and version_number.rc.svn to unstruc_version.F90 and version_number.rc"/>
+				<Tool Name="VFPostBuildEventTool" CommandLine="&quot;$(SolutionDir)\build\xcopy.exe&quot; /D /Y /R &quot;$(SolutionDir)\third_party_open\netcdf\lib\win32\release\netcdf.dll&quot; &quot;$(OutDir)&quot;\ &gt; nul&#xA;&quot;$(SolutionDir)\build\xcopy.exe&quot; /D /Y /R &quot;$(SolutionDir)\third_party_open\intel\Win32\Release\*.*&quot; &quot;$(OutDir)&quot;\ &gt; nul&#xA;&quot;$(SolutionDir)\build\xcopy.exe&quot; /D /Y /R &quot;$(SolutionDir)\third_party_open\vcredist\x86\Microsoft.VC100.CRT\*.dll&quot; &quot;$(OutDir)&quot;\ &gt; nul&#xA;&quot;$(SolutionDir)\build\xcopy.exe&quot; /D /Y /R &quot;$(SolutionDir)\third_party_open\vcredist\x86\Microsoft.VC110.CRT\*.dll&quot; &quot;$(OutDir)&quot;\ &gt; nul&#xA;&quot;$(SolutionDir)\build\xcopy.exe&quot; /D /Y /R &quot;$(SolutionDir)\third_party_open\pthreads\bin\win32\*.dll&quot; &quot;$(OutDir)&quot;\ &gt; nul&#xA;&quot;$(SolutionDir)\build\xcopy.exe&quot; /D /Y /R &quot;$(SolutionDir)\third_party_open\mpich2\lib\*.dll&quot; &quot;$(OutDir)&quot;\ &gt; nul&#xA;&quot;$(SolutionDir)\build\xcopy.exe&quot; /D /Y /R &quot;$(SolutionDir)\res\interact.ini&quot; &quot;$(OutDir)&quot;\ &gt; nul&#xA;&quot;$(SolutionDir)\build\xcopy.exe&quot; /D /Y /R &quot;$(SolutionDir)\res\ISOCOLOUR.hls&quot; &quot;$(OutDir)&quot;\ &gt; nul&#xA;&quot;$(SolutionDir)\build\xcopy.exe&quot; /D /Y /R &quot;$(SolutionDir)\res\unstruc.*&quot; &quot;$(OutDir)&quot;\ &gt; nul&#xA;&quot;$(SolutionDir)\build\xcopy.exe&quot; /D /Y /R &quot;$(SolutionDir)\res\deltares_*.*&quot; &quot;$(OutDir)&quot;\ &gt; nul"/>
+				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
+		<Configuration Name="Release|Win32" OutputDirectory="$(SolutionDir)\bin\$(PlatformName)\$(ConfigurationName)" IntermediateDirectory="$(PlatformName)\$(ConfigurationName)" DeleteExtensionsOnClean="*.obj;*.mod;*.pdb;*.asm;*.map;*.dyn;*.dpi;*.tmp;*.log;*.ilk;*.exe;$(TargetPath)" BuildLogFile="$(IntDir)\$(ProjectName)-BuildLog.htm">
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" OmitFramePointers="false" AdditionalIncludeDirectories="..\third_party\interacter\bin\win32;..\third_party_open\netcdf\lib\win32\$(ConfigurationName);..\third_party_open\metis\lib\win32\$(ConfigurationName);..\third_party_open\mpich2\include;..\third_party\Tecplot\tecio\include" PreprocessorDefinitions="WIN32 -Qopenmp;HAVE_METIS;HAVE_OPENGL;HAVE_MPI=$(HAVE_MPI);HAVE_PARMS" ParallelizerDiagLevel="parallelizerDiagLevel0" VectorizerDiagLevel="vectorizerDiagLevel0" ModulePath="$(INTDIR)/" ObjectFile="$(INTDIR)/" Traceback="true"/>
+				<Tool Name="VFLinkerTool" OutputFile="../bin/$(PlatformName)/$(ConfigurationName)/dflowfm.exe" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="..\third_party_open\libsigwatch\$(ConfigurationName);..\third_party\interacter\bin\win32;..\third_party_open\netcdf\lib\win32\$(ConfigurationName);..\third_party_open\metis\lib\win32\$(ConfigurationName);..\third_party_open\pthreads\bin\$(PlatformName);..\third_party_open\mpich2\lib" IgnoreDefaultLibraryNames="LIBC.lib;LIBCMTD.lib;LIBCMT.lib" DelayLoadDLLs="comdlg32.dll;oleaut32.dll;winmm.dll;wsock32.dll;winspool.dll" SubSystem="subSystemConsole" LargeAddressAware="addrAwareLarge" AdditionalDependencies="libsigwatch.lib msvcrt.lib f90_netcdf.lib f77_netcdf.lib netcdf.lib  intmwif8.lib wsock32.lib netapi32.lib comctl32.lib kernel32.lib   user32.lib Shlwapi.lib Gdi32.lib Winspool.lib metis.lib pthreadVCE2.lib fmpich2.lib mpi.lib"/>
+				<Tool Name="VFResourceCompilerTool"/>
+				<Tool Name="VFMidlTool" SuppressStartupBanner="true" HeaderFileName="$(InputName).h" TypeLibraryName="$(IntDir)/$(InputName).tlb"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFPreLinkEventTool"/>
+				<Tool Name="VFPreBuildEventTool" CommandLine="call ..\scripts_lgpl\win32\update_version.cmd unstruc_version.F90 ..\ ..\res\version_number.ini&#xA;call ..\scripts_lgpl\win32\update_version.cmd ..\res\version_number.rc ..\ ..\res\version_number.ini" Description="Expand unstruc_version.F90.svn and version_number.rc.svn to unstruc_version.F90 and version_number.rc"/>
+				<Tool Name="VFPostBuildEventTool" CommandLine="&quot;$(SolutionDir)\build\xcopy.exe&quot; /D /Y /R &quot;$(SolutionDir)\third_party_open\netcdf\lib\win32\release\netcdf.dll&quot; &quot;$(OutDir)&quot;\ &gt; nul&#xA;&quot;$(SolutionDir)\build\xcopy.exe&quot; /D /Y /R &quot;$(SolutionDir)\third_party_open\intel\Win32\Release\*.*&quot; &quot;$(OutDir)&quot;\ &gt; nul&#xA;&quot;$(SolutionDir)\build\xcopy.exe&quot; /D /Y /R &quot;$(SolutionDir)\third_party_open\vcredist\x86\Microsoft.VC100.CRT\*.dll&quot; &quot;$(OutDir)&quot;\ &gt; nul&#xA;&quot;$(SolutionDir)\build\xcopy.exe&quot; /D /Y /R &quot;$(SolutionDir)\third_party_open\vcredist\x86\Microsoft.VC110.CRT\*.dll&quot; &quot;$(OutDir)&quot;\ &gt; nul&#xA;&quot;$(SolutionDir)\build\xcopy.exe&quot; /D /Y /R &quot;$(SolutionDir)\third_party_open\pthreads\bin\win32\*.dll&quot; &quot;$(OutDir)&quot;\ &gt; nul&#xA;&quot;$(SolutionDir)\build\xcopy.exe&quot; /D /Y /R &quot;$(SolutionDir)\third_party_open\mpich2\lib\*.dll&quot; &quot;$(OutDir)&quot;\ &gt; nul&#xA;&quot;$(SolutionDir)\build\xcopy.exe&quot; /D /Y /R &quot;$(SolutionDir)\res\interact.ini&quot; &quot;$(OutDir)&quot;\ &gt; nul&#xA;&quot;$(SolutionDir)\build\xcopy.exe&quot; /D /Y /R &quot;$(SolutionDir)\res\ISOCOLOUR.hls&quot; &quot;$(OutDir)&quot;\ &gt; nul&#xA;&quot;$(SolutionDir)\build\xcopy.exe&quot; /D /Y /R &quot;$(SolutionDir)\res\unstruc.*&quot; &quot;$(OutDir)&quot;\ &gt; nul&#xA;&quot;$(SolutionDir)\build\xcopy.exe&quot; /D /Y /R &quot;$(SolutionDir)\res\deltares_*.*&quot; &quot;$(OutDir)&quot;\ &gt; nul"/>
+				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
+		<Configuration Name="Debug|x64" OutputDirectory="$(SolutionDir)\bin\$(PlatformName)\$(ConfigurationName)" DeleteExtensionsOnClean="*.obj;*.mod;*.pdb;*.asm;*.map;*.dyn;*.dpi;*.tmp;*.log;*.ilk;*.exe;$(TargetPath)" BuildLogFile="$(IntDir)\$(ProjectName)-BuildLog.htm">
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="..\third_party\interacter\bin\win32;..\third_party_open\netcdf\lib\win32\$(PlatformName)\$(ConfigurationName);..\third_party_open\metis\lib\win32\$(PlatformName)\$(ConfigurationName);..\third_party_open\mpich2\$(PlatformName)\include;..\third_party\Tecplot\include" PreprocessorDefinitions="WIN32 -Qopenmp;HAVE_METIS;HAVE_OPENGL;HAVE_MPI=$(HAVE_MPI);HAVE_PARMS;HAVE_TECPLOT;HAVE_DISPLAY" ParallelizerDiagLevel="parallelizerDiagLevel0" VectorizerDiagLevel="vectorizerDiagLevel0" WarnDeclarations="true" FloatingPointExceptionHandling="fpe0" ModulePath="$(INTDIR)/" ObjectFile="$(INTDIR)/" Traceback="true" RuntimeChecks="rtChecksAll" BoundsCheck="true" UninitializedVariablesCheck="true" RuntimeLibrary="rtMultiThreadedDebug"/>
+				<Tool Name="VFLinkerTool" OutputFile="../bin/$(PlatformName)/$(ConfigurationName)/dflowfm.exe" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="..\third_party_open\libsigwatch\$(PlatformName)\$(ConfigurationName);..\third_party\interacter\bin\win32\$(PlatformName);..\third_party_open\netcdf\lib\win32\$(PlatformName)\$(ConfigurationName);..\third_party_open\metis\lib\win32\$(PlatformName)\$(ConfigurationName);..\third_party_open\pthreads\bin\$(PlatformName);..\third_party_open\mpich2\$(PlatformName)\lib;..\third_party\Tecplot\lib\$(PlatformName)" IgnoreDefaultLibraryNames="MSVCRTD.lib;LIBC.lib;LIBCMTD.lib;LIBCMT.lib" GenerateDebugInformation="true" ProgramDatabaseFile="$(OUTDIR)/unstruc-x64.pdb" SubSystem="subSystemConsole" LargeAddressAware="addrAwareLarge" AdditionalDependencies="libsigwatch.lib f90_netcdf.lib f77_netcdf.lib netcdf.lib  intmwi64.lib wsock32.lib netapi32.lib comctl32.lib kernel32.lib   user32.lib Shlwapi.lib Gdi32.lib Winspool.lib metis.lib pthreadVC2.lib fmpich2.lib mpi.lib tecio.lib"/>
+				<Tool Name="VFResourceCompilerTool"/>
+				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64" HeaderFileName="$(InputName).h" TypeLibraryName="$(IntDir)/$(InputName).tlb"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFPreLinkEventTool"/>
+				<Tool Name="VFPreBuildEventTool" CommandLine="call ..\scripts_lgpl\win32\update_version.cmd unstruc_version.F90 ..\ ..\res\version_number.ini --onlyifmissing&#xA;call ..\scripts_lgpl\win32\update_version.cmd ..\res\version_number.rc ..\ ..\res\version_number.ini --onlyifmissing" Description="Expand unstruc_version.F90.svn and version_number.rc.svn to unstruc_version.F90 and version_number.rc"/>
+				<Tool Name="VFPostBuildEventTool" CommandLine="&quot;$(SolutionDir)\build\xcopy.exe&quot; /D /Y /R &quot;$(SolutionDir)\third_party_open\netcdf\lib\win32\x64\release\netcdf.dll&quot; &quot;$(OutDir)&quot;\ &gt; nul&#xA;&quot;$(SolutionDir)\build\xcopy.exe&quot; /D /Y /R &quot;$(SolutionDir)\third_party_open\intel\x64\Release\*.*&quot; &quot;$(OutDir)&quot;\ &gt; nul&#xA;&quot;$(SolutionDir)\build\xcopy.exe&quot; /D /Y /R &quot;$(SolutionDir)\third_party_open\vcredist\x64\Microsoft.VC100.CRT\*.dll&quot; &quot;$(OutDir)&quot;\ &gt; nul&#xA;&quot;$(SolutionDir)\build\xcopy.exe&quot; /D /Y /R &quot;$(SolutionDir)\third_party_open\vcredist\x64\Microsoft.VC110.CRT\*.dll&quot; &quot;$(OutDir)&quot;\ &gt; nul&#xA;&quot;$(SolutionDir)\build\xcopy.exe&quot; /D /Y /R &quot;$(SolutionDir)\third_party_open\pthreads\bin\x64\*.dll&quot; &quot;$(OutDir)&quot;\ &gt; nul&#xA;&quot;$(SolutionDir)\build\xcopy.exe&quot; /D /Y /R &quot;$(SolutionDir)\third_party_open\mpich2\x64\lib\*.dll&quot; &quot;$(OutDir)&quot;\ &gt; nul&#xA;&quot;$(SolutionDir)\build\xcopy.exe&quot; /D /Y /R &quot;$(SolutionDir)\third_party\Tecplot\lib\x64\*.dll&quot; &quot;$(OutDir)&quot;\ &gt; nul&#xA;&quot;$(SolutionDir)\build\xcopy.exe&quot; /D /Y /R &quot;$(SolutionDir)\res\interact.ini&quot; &quot;$(OutDir)&quot;\ &gt; nul&#xA;&quot;$(SolutionDir)\build\xcopy.exe&quot; /D /Y /R &quot;$(SolutionDir)\res\ISOCOLOUR.hls&quot; &quot;$(OutDir)&quot;\ &gt; nul&#xA;&quot;$(SolutionDir)\build\xcopy.exe&quot; /D /Y /R &quot;$(SolutionDir)\res\unstruc.*&quot; &quot;$(OutDir)&quot;\ &gt; nul&#xA;&quot;$(SolutionDir)\build\xcopy.exe&quot; /D /Y /R &quot;$(SolutionDir)\res\deltares_*.*&quot; &quot;$(OutDir)&quot;\ &gt; nul"/>
+				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
+		<Configuration Name="Release|x64" OutputDirectory="$(SolutionDir)\bin\$(PlatformName)\$(ConfigurationName)" DeleteExtensionsOnClean="*.obj;*.mod;*.pdb;*.asm;*.map;*.dyn;*.dpi;*.tmp;*.log;*.ilk;*.exe;$(TargetPath)" BuildLogFile="$(IntDir)\$(ProjectName)-BuildLog.htm">
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeFull" AdditionalIncludeDirectories="..\third_party\interacter\bin\win32;..\third_party_open\netcdf\lib\$(PlatformName)\$(ConfigurationName)\ifort13;..\third_party_open\mpich2\$(PlatformName)\include;..\third_party\Tecplot\include" PreprocessorDefinitions="WIN32 -Qwpenmp;HAVE_METIS;HAVE_OPENGL;HAVE_MPI=$(HAVE_MPI);HAVE_PARMS;HAVE_TECPLOT;HAVE_DISPLAY" ParallelizerDiagLevel="parallelizerDiagLevel0" VectorizerDiagLevel="vectorizerDiagLevel0" ModulePath="$(INTDIR)/" ObjectFile="$(INTDIR)/"/>
+				<Tool Name="VFLinkerTool" OutputFile="../bin/$(PlatformName)/$(ConfigurationName)/dflowfm.exe" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="..\third_party_open\libsigwatch\$(PlatformName)\$(ConfigurationName);..\third_party\interacter\bin\win32\$(PlatformName);..\third_party_open\netcdf\lib\$(PlatformName)\$(ConfigurationName)\ifort13;..\third_party_open\metis\lib\win32\$(PlatformName)\$(ConfigurationName);..\third_party_open\pthreads\bin\$(PlatformName);..\third_party_open\mpich2\$(PlatformName)\lib;..\third_party\Tecplot\lib\$(PlatformName)" IgnoreDefaultLibraryNames="LIBCMT.lib" DelayLoadDLLs="comdlg32.dll;oleaut32.dll;winmm.dll;wsock32.dll;winspool.dll" GenerateDebugInformation="true" SubSystem="subSystemConsole" StackReserveSize="20000000" LargeAddressAware="addrAwareLarge" AdditionalDependencies="f90_netcdf.lib f77_netcdf.lib netcdf.lib  intmwi64.lib wsock32.lib netapi32.lib comctl32.lib kernel32.lib   user32.lib Shlwapi.lib Gdi32.lib Winspool.lib metis.lib pthreadVC2.lib fmpich2.lib mpi.lib tecio.lib"/>
+				<Tool Name="VFResourceCompilerTool"/>
+				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64" HeaderFileName="$(InputName).h" TypeLibraryName="$(IntDir)/$(InputName).tlb"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFPreLinkEventTool"/>
+				<Tool Name="VFPreBuildEventTool" CommandLine="call ..\scripts_lgpl\win32\update_version.cmd unstruc_version.F90 ..\ ..\res\version_number.ini&#xA;call ..\scripts_lgpl\win32\update_version.cmd ..\res\version_number.rc ..\ ..\res\version_number.ini" Description="Expand unstruc_version.F90.svn and version_number.rc.svn to unstruc_version.F90 and version_number.rc"/>
+				<Tool Name="VFPostBuildEventTool" CommandLine="&quot;$(SolutionDir)\build\xcopy.exe&quot; /D /Y /R &quot;$(SolutionDir)\third_party_open\netcdf\lib\win32\x64\release\netcdf.dll&quot; &quot;$(OutDir)&quot;\ &gt; nul&#xA;&quot;$(SolutionDir)\build\xcopy.exe&quot; /D /Y /R &quot;$(SolutionDir)\third_party_open\intel\x64\Release\*.*&quot; &quot;$(OutDir)&quot;\ &gt; nul&#xA;&quot;$(SolutionDir)\build\xcopy.exe&quot; /D /Y /R &quot;$(SolutionDir)\third_party_open\vcredist\x64\Microsoft.VC100.CRT\*.dll&quot; &quot;$(OutDir)&quot;\ &gt; nul&#xA;&quot;$(SolutionDir)\build\xcopy.exe&quot; /D /Y /R &quot;$(SolutionDir)\third_party_open\vcredist\x64\Microsoft.VC110.CRT\*.dll&quot; &quot;$(OutDir)&quot;\ &gt; nul&#xA;&quot;$(SolutionDir)\build\xcopy.exe&quot; /D /Y /R &quot;$(SolutionDir)\third_party_open\pthreads\bin\x64\*.dll&quot; &quot;$(OutDir)&quot;\ &gt; nul&#xA;&quot;$(SolutionDir)\build\xcopy.exe&quot; /D /Y /R &quot;$(SolutionDir)\third_party_open\mpich2\x64\lib\*.dll&quot; &quot;$(OutDir)&quot;\ &gt; nul&#xA;&quot;$(SolutionDir)\build\xcopy.exe&quot; /D /Y /R &quot;$(SolutionDir)\third_party\Tecplot\lib\x64\*.dll&quot; &quot;$(OutDir)&quot;\ &gt; nul&#xA;&quot;$(SolutionDir)\build\xcopy.exe&quot; /D /Y /R &quot;$(SolutionDir)\res\interact.ini&quot; &quot;$(OutDir)&quot;\ &gt; nul&#xA;&quot;$(SolutionDir)\build\xcopy.exe&quot; /D /Y /R &quot;$(SolutionDir)\res\ISOCOLOUR.hls&quot; &quot;$(OutDir)&quot;\ &gt; nul&#xA;&quot;$(SolutionDir)\build\xcopy.exe&quot; /D /Y /R &quot;$(SolutionDir)\res\unstruc.*&quot; &quot;$(OutDir)&quot;\ &gt; nul&#xA;&quot;$(SolutionDir)\build\xcopy.exe&quot; /D /Y /R &quot;$(SolutionDir)\res\deltares_*.*&quot; &quot;$(OutDir)&quot;\ &gt; nul"/>
+				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration></Configurations>
+	<Files>
+		<Filter Name="Header Files" Filter="fi;fd"/>
+		<Filter Name="Resource Files" Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe">
+		<File RelativePath="..\res\dflowfm_icon.rc"/>
+		<File RelativePath="..\res\version_number.ini"/>
+		<File RelativePath="..\res\version_number.rc"/>
+		<File RelativePath="..\res\version_number.rc.svn"/></Filter>
+		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
+		<File RelativePath=".\d3ddimens.f90"/>
+		<File RelativePath=".\d_flooding.f90"/>
+		<File RelativePath="dem.f90"/>
+		<File RelativePath=".\dfm_signals.F90">
+			<FileConfiguration Name="Debug|Win32">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Release|x64">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Debug|x64">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Release|Win32">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
+		<File RelativePath="filez.f90"/>
+		<File RelativePath=".\fm_erosed.f90"/>
+		<File RelativePath=".\fm_thahbc.f90"/>
+		<File RelativePath=".\fourier_analysis.f90"/>
+		<File RelativePath=".\gui.F90">
+			<FileConfiguration Name="Debug|Win32">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Release|x64">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Debug|x64">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Release|Win32">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
+		<File RelativePath=".\hrfft.f"/>
+		<File RelativePath="io_ugrid.f90"/>
+		<File RelativePath="manholes.f90"/>
+		<File RelativePath="meteo1.f90"/>
+		<File RelativePath="model_specific.f90"/>
+		<File RelativePath="modules.f90"/>
+		<File RelativePath="monitoring.f90"/>
+		<File RelativePath="net.F90">
+			<FileConfiguration Name="Debug|Win32">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Release|x64">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Debug|x64">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Release|Win32">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
+		<File RelativePath=".\net_main.F90">
+			<FileConfiguration Name="Debug|Win32">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Release|x64">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Debug|x64">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Release|Win32">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
+		<File RelativePath="network.f90"/>
+		<File RelativePath="network_data.f90"/>
+		<File RelativePath="partition.F90">
+			<FileConfiguration Name="Debug|Win32">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Release|x64">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Debug|x64">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Release|Win32">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
+		<File RelativePath=".\polygon.f90"/>
+		<File RelativePath="rcm.f90"/>
+		<File RelativePath="removedcode.f90">
+			<FileConfiguration Name="Debug|Win32" ExcludedFromBuild="true"/>
+			<FileConfiguration Name="Release|x64" ExcludedFromBuild="true"/>
+			<FileConfiguration Name="Debug|x64" ExcludedFromBuild="true"/>
+			<FileConfiguration Name="Release|Win32" ExcludedFromBuild="true"/></File>
+		<File RelativePath="rest.F90">
+			<FileConfiguration Name="Debug|Win32">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Release|x64">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Debug|x64">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Release|Win32">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
+		<File RelativePath="rgfstuff.f90"/>
+		<File RelativePath="saadf.f">
+			<FileConfiguration Name="Debug|Win32">
+				<Tool Name="VFFortranCompilerTool" WarnDeclarations="false"/></FileConfiguration>
+			<FileConfiguration Name="Release|x64">
+				<Tool Name="VFFortranCompilerTool" WarnDeclarations="false"/></FileConfiguration>
+			<FileConfiguration Name="Debug|x64">
+				<Tool Name="VFFortranCompilerTool" WarnDeclarations="false"/></FileConfiguration>
+			<FileConfiguration Name="Release|Win32">
+				<Tool Name="VFFortranCompilerTool" WarnDeclarations="false"/></FileConfiguration></File>
+		<File RelativePath="saadf90.f90">
+			<FileConfiguration Name="Debug|Win32">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes" WarnDeclarations="false"/></FileConfiguration>
+			<FileConfiguration Name="Release|x64">
+				<Tool Name="VFFortranCompilerTool" WarnDeclarations="false"/></FileConfiguration>
+			<FileConfiguration Name="Debug|x64">
+				<Tool Name="VFFortranCompilerTool" WarnDeclarations="false"/></FileConfiguration>
+			<FileConfiguration Name="Release|Win32">
+				<Tool Name="VFFortranCompilerTool" WarnDeclarations="false"/></FileConfiguration></File>
+		<File RelativePath=".\shaec.f"/>
+		<File RelativePath=".\shsec.f"/>
+		<File RelativePath="solve_guus.F90">
+			<FileConfiguration Name="Debug|Win32">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Release|x64">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Debug|x64">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Release|Win32">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
+		<File RelativePath=".\solve_parms.F90">
+			<FileConfiguration Name="Debug|Win32">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Release|x64">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Debug|x64">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Release|Win32">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
+		<File RelativePath="solve_petsc.F90">
+			<FileConfiguration Name="Debug|Win32" ExcludedFromBuild="true"/>
+			<FileConfiguration Name="Release|x64" ExcludedFromBuild="true"/>
+			<FileConfiguration Name="Debug|x64" ExcludedFromBuild="true"/>
+			<FileConfiguration Name="Release|Win32" ExcludedFromBuild="true"/></File>
+		<File RelativePath=".\sphcom.f"/>
+		<File RelativePath="splines.f90"/>
+		<File RelativePath="step_to_screen.f90"/>
+		<File RelativePath=".\tecplot.f90">
+			<FileConfiguration Name="Debug|Win32">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Release|x64">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Debug|x64">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Release|Win32">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
+		<File RelativePath=".\transport.f90"/>
+		<File RelativePath="unstruc.F90">
+			<FileConfiguration Name="Debug|Win32">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Release|x64">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Debug|x64">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Release|Win32">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
+		<File RelativePath="unstruc_api.F90">
+			<FileConfiguration Name="Debug|Win32">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Release|x64">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Debug|x64">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Release|Win32">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
+		<File RelativePath=".\unstruc_boundaries.f90">
+			<FileConfiguration Name="Debug|Win32">
+				<Tool Name="VFFortranCompilerTool" WarnUnusedVariables="true"/></FileConfiguration></File>
+		<File RelativePath="unstruc_display.F90">
+			<FileConfiguration Name="Debug|Win32">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Release|x64">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Debug|x64">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Release|Win32">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
+		<File RelativePath="unstruc_files.f90"/>
+		<File RelativePath="unstruc_ini.f90"/>
+		<File RelativePath="unstruc_messages.f90"/>
+		<File RelativePath="unstruc_model.f90"/>
+		<File RelativePath="unstruc_netcdf.f90"/>
+		<File RelativePath="unstruc_opengis.f90"/>
+		<File RelativePath=".\unstruc_opengl.F90">
+			<FileConfiguration Name="Debug|Win32">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Release|x64">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Debug|x64">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Release|Win32">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
+		<File RelativePath="unstruc_startup.f90"/>
+		<File RelativePath="unstruc_version.F90">
+			<FileConfiguration Name="Debug|Win32">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Release|x64">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Debug|x64">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Release|Win32">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
+		<File RelativePath="unstruc_version.F90.svn"/>
+		<File RelativePath=".\waves.f90"/>
+		<File RelativePath="wrwaq.F90">
+			<FileConfiguration Name="Debug|Win32">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Release|x64">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Debug|x64">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Release|Win32">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
+		<File RelativePath=".\xbeach_errorhandling.f90"/>
+		<File RelativePath=".\xbeach_filefunctions.F90">
+			<FileConfiguration Name="Debug|Win32">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Release|x64">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Debug|x64">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Release|Win32">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
+		<File RelativePath=".\xbeach_interp.F90"/>
+		<File RelativePath=".\xbeach_math_tools.F90"/>
+		<File RelativePath=".\xbeach_netcdf.f90"/>
+		<File RelativePath=".\xbeach_readkey.F90"/>
+		<File RelativePath=".\xbeach_typesandkinds.F90"/>
+		<File RelativePath=".\xbeach_wave_boundary_datastore.f90"/>
+		<File RelativePath=".\xbeach_wave_boundary_main.f90"/>
+		<File RelativePath=".\xbeach_wave_boundary_update.f90"/>
+		<File RelativePath=".\xbeachwaves.f90"/></Filter></Files>
+	<Globals/></VisualStudioProject>

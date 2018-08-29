@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2017.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -1941,7 +1941,7 @@ subroutine xbeach_wave_breaker_dissipation(dtmaxwav, break, deltaH, waveps, kwav
       endif
 
    elseif (trim(break) == 'roelvink_daly') then
-
+      H   = sqrt(8.d0*E/rhomean/ag)
       call advec_upw_bulk(thetamean, Qb,cwav,Qb_advec) ! first order upwind, with mean direction
       do k = 1, ndxi
          Qb(k) = Qb(k) - dtmaxwav * Qb_advec(k) * bai(k)
@@ -1960,6 +1960,7 @@ subroutine xbeach_wave_breaker_dissipation(dtmaxwav, break, deltaH, waveps, kwav
       endif
 
    elseif (break == 'janssen') then                 ! Dissipation according to Janssen and Battjes (2007)
+      H   = sqrt(8.d0*E/rhomean/ag)
       if (wci.ne.0) then
          f = sigmwav / 2.d0 / pi
          ka = km
@@ -4512,6 +4513,7 @@ subroutine xbeach_stationary()
             call xbeach_errorhandler
          end if
 
+         ! zbndu for absgen bc is a water level
          u1(Lb) = (1d0+sqrt(ag*hs(ki))/cgwav(ki))*uin_loc - sqrt(ag/hs(ki))*(s1(ki) - zbndu(n)) + umeanrm(numbnd)
          s1(kb) = s1(ki)
                   

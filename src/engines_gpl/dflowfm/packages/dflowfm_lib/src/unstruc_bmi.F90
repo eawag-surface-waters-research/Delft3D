@@ -1,6 +1,7 @@
 !----- AGPL --------------------------------------------------------------------
 !
-!  Copyright (C)  Stichting Deltares, 2017-2018.!
+!  Copyright (C)  Stichting Deltares, 2017.
+!
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).
 !
 !  Delft3D is free software: you can redistribute it and/or modify
@@ -965,6 +966,7 @@ subroutine get_var(c_var_name, x) bind(C, name="get_var")
   use m_sobekdfm
   use m_alloc
   use string_module
+  use m_cell_geometry ! TODO: UNST-1705: temp, replace by m_flowgeom
 
   character(kind=c_char), intent(in) :: c_var_name(*) !< Variable name. May be slash separated string "name/item/field": then get_compound_field is called.
   type(c_ptr), intent(inout) :: x
@@ -1195,9 +1197,6 @@ subroutine set_var(c_var_name, xptr) bind(C, name="set_var")
   !        call c_f_pointer(xptr, x_1d_double_ptr, (/ 1 /))
   !        call setMessageHandling(thresholdLevel = nint(x_1d_double_ptr(1)), prefix_logging = "dflow1d")
   !end select
-  
-       
-
 
 end subroutine set_var
 
@@ -1276,8 +1275,9 @@ subroutine set_var_slice(c_var_name, c_start, c_count, xptr) bind(C, name="set_v
       return
   case("zk")
       do i = 1, c_count(1)
-          call update_land(c_start(1), x_1d_double_ptr(i))
+          call update_land_nodes(c_start(1) + i-1, x_1d_double_ptr(i))
       enddo
+      call land_change_callback()
 
       !zkdropstep = value - zk(index + 1)
       !call dropland(xz(index + 1), yz(index + 1), 1)
@@ -1299,6 +1299,22 @@ subroutine set_var_slice(c_var_name, c_start, c_count, xptr) bind(C, name="set_v
 
 end subroutine set_var_slice
 
+
+subroutine on_land_change() bind(C, name="on_land_change")
+!DEC$ ATTRIBUTES DLLEXPORT :: on_land_change
+    implicit none
+    call land_change_callback()
+end subroutine on_land_change
+
+
+subroutine update_land(c_node_index, c_new_zk) bind(C, name="update_land")
+!DEC$ ATTRIBUTES DLLEXPORT :: update_land
+    implicit none
+    integer(c_int), intent(in) :: c_node_index
+    real(c_double), intent(in) :: c_new_zk    
+    
+    call update_land_nodes(c_node_index, c_new_zk)
+end subroutine update_land
 
 !> Adds model features to the active model.
 !!
@@ -2121,7 +2137,8 @@ subroutine set_1d_double_at_index(c_var_name, index, value)  bind(C, name="set_1
  case("unorm")
     u1(index + 1) = value
  case("zk")
-    call update_land(index + 1, value)
+    call update_land_nodes(index + 1, value)
+    call land_change_callback()
 
     !zkdropstep = value - zk(index + 1)
     !call dropland(xz(index + 1), yz(index + 1), 1)
@@ -2609,7 +2626,6 @@ subroutine get_snapped_feature(c_feature_type, c_Nin, cptr_xin, cptr_yin, c_Nout
    
    ! Dambreak
    integer                                                        :: startIndex, i, noutSnapped, lstart, oldSize
-   double precision, dimension(:), allocatable                    :: xoutTemp, youtTemp
    double precision, dimension(:), target, allocatable            :: xSnapped, ySnapped 
    double precision                                               :: start_location_x, start_location_y, x_breach, y_breach  
    
@@ -2630,9 +2646,8 @@ subroutine get_snapped_feature(c_feature_type, c_Nin, cptr_xin, cptr_yin, c_Nout
 ! xin, yin arrays store the coordinates of the feature and are terminated with a dmiss value. 
 ! The last valid coordinate is thus stored at index size(xin)-1  
    select case( feature_type )
-   case("thindam")
+   case("thindam","roofs")
       call snappol(c_Nin, xin, yin, DMISS, 1, c_Nout, xout, yout, feature_ids, c_ierror)
-      !for testing call snappol(c_Nin, xin, yin, DMISS, 4, c_Nout, xout, yout, feature_ids, c_ierror)
    case("fixedweir", "crosssection", "gate", "weir", "pump")
       call snappol(c_Nin, xin, yin, DMISS, 2, c_Nout, xout, yout, feature_ids, c_ierror)
    case("obspoint")
@@ -2671,26 +2686,27 @@ subroutine get_snapped_feature(c_feature_type, c_Nin, cptr_xin, cptr_yin, c_Nout
                startIndex =  i + 1
                continue
             end if
-            ! the next start index
-            startIndex =  i + 1
-         endif
-         i = i + 1
-      enddo
-      if (ntemp > 0) then
-         call snappnt(ntemp, xintemp, yintemp, DMISS, c_Nout, xout, yout, feature_ids, c_ierror)
+           ! the next start index
+           startIndex =  i + 1
       endif
-      ! re-map feature_ids array
-      i = 1
-      ntemp   = 1
-      do while (i <= size(xout))
-         if(xout(i)==dmiss.and.xintemp(i)==dmiss) then
-            feature_ids(i) = 0
-            ntemp = ntemp + 1
-         else if (feature_ids(i)/= 0) then
-            feature_ids(i) = ntemp
-         endif
-         i = i + 1
-      enddo
+      i = i + 1
+   enddo
+   if (ntemp > 0) then
+      call snappnt(ntemp, xintemp, yintemp, DMISS, c_Nout, xout, yout, feature_ids, c_ierror)
+   endif
+   ! re-map feature_ids array
+   i = 1
+   ntemp   = 1
+   do while (i <= size(xout))
+      feature_ids(i) = ntemp
+      if(xout(i) == dmiss) then
+         feature_ids(i) = 0
+         ntemp = ntemp + 1
+      else
+         feature_ids(i) = ntemp
+      endif
+      i = i + 1
+   enddo
    case("dambreak")
       ! Extract polygon and the breach point coordinates
       startIndex = 1
@@ -2774,7 +2790,7 @@ subroutine write_netgeom(c_net_file) bind(C, name="write_netgeom")
    if ( netstat.ne.NETSTAT_OK ) then
       call findcells(0)
    end if
-   call unc_write_net(netgeom_file, janetcell = 1, janetbnd = 0, jaidomain = 0, iconventions = 2)
+   call unc_write_net(netgeom_file, 1, 0, 0, 2)
 end subroutine write_netgeom
 
 subroutine write_partition_metis(c_netfile_in, c_netfile_out, c_npart, c_jacontiguous) bind(C, name="write_partition_metis")

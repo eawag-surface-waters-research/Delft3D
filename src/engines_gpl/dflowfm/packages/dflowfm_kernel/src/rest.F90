@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                     
+!  Copyright (C)  Stichting Deltares, 2017.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -252,36 +252,15 @@
       END
 
 
-    SUBROUTINE INCREASELAN(N)
-        USE M_MISSING
-        use unstruc_messages
-        use m_alloc
-        use m_landboundary
-        integer :: n
-
-        integer :: ierr
-
-        IF (N < MAXLAN) RETURN
-        MAXLAN = MAX(50000,INT(1.2d0*N))
-
-        call realloc(xlan, MAXLAN, stat=ierr, fill=dxymis)
-        CALL AERR('xlan(maxlan)', IERR, maxlan)
-        call realloc(ylan, MAXLAN, stat=ierr, fill=dxymis)
-        CALL AERR('ylan(maxlan)', IERR, maxlan)
-        call realloc(zlan, MAXLAN, stat=ierr, fill=dxymis)
-        CALL AERR('zlan(maxlan)', IERR, maxlan)
-        call realloc(nclan, MAXLAN, stat=ierr, fill=0)
-        CALL AERR('nclan(maxlan)', IERR, maxlan/2)
-    END subroutine increaselan
-
-
-      SUBROUTINE REALAN( MLAN)
+    SUBROUTINE REALAN( MLAN, ANTOT)
       use m_polygon
       use M_landboundary
       USE M_MISSING
       implicit none
+      integer, intent(inout)                ::  mlan
+      integer, intent(inout), optional      ::  antot
+
       integer :: i
-      integer :: mlan
       integer :: ncl
       integer :: newlin
       integer :: nkol
@@ -292,9 +271,15 @@
       CHARACTER CHARMC*5, MATR*4, REC*132
       DOUBLE PRECISION :: XL, YL, ZL
 
-
-      NTOT   = 0
-      call increaselan(10000)
+      if (present(antot)) then
+         NTOT   = antot
+      else
+         NTOT   = 0
+      endif
+      
+      if (ntot == 0) then
+         call increaselan(10000)
+      endif
 
       CALL READYY('READING land boundary',0d0)
    10 CONTINUE
@@ -361,6 +346,10 @@
       CALL READYY(' ',-1d0)
       call doclose (MLAN)
      
+      if (present(antot)) then
+         antot = NTOT
+      endif
+
       return
       
       n = 1                                    ! remove double points in lineseg oriented files  
@@ -653,22 +642,18 @@ end subroutine read_land_boundary_netcdf
                    DTL(NPL) = taludl
                    DTR(NPL) = taludr  
                    DVEG(NPL) = veg 
+                   IWEIRT(NPL) = -999  ! if no weirtype has been specified
                    if (nkol .eq. 10) then
                       if (weirtype .eq. 't' .or. weirtype .eq. 'T') then
                           IWEIRT(NPL) = 1  
                       elseif (weirtype .eq. 'v' .or. weirtype .eq. 'V')  then
-                          IWEIRT(NPL) = 2 
-                      else
-                         IWEIRT(NPL) = -999
-                      endif
-                   endif
-                   if (nkol == 9) then
+                          IWEIRT(NPL) = 2  
+                      endif    
+                   else if (nkol == 9) then
                       if (ifixedweirscheme == 8) then
                          IWEIRT(NPL) = 1
                       elseif (ifixedweirscheme == 9) then
                          IWEIRT(NPL) = 2
-                      else
-                         IWEIRT(NPL) = -999  ! if nkol=9 and no weirtype has been specified
                       endif
                    endif    
                 endif
@@ -3033,192 +3018,6 @@ end subroutine read_samples_from_arcinfo
       END
 
 
-      SUBROUTINE INCREASESAM(N)
-      USE M_SAMPLES
-      USE M_MISSING
-      use m_alloc
-      implicit none
-      integer, intent(in) :: n !< New size for sample set #3.
-
-      integer :: ierr
-      IF (N < NSMAX) RETURN
-      NSMAX = MAX(10000,INT(1.2d0*N))
-      
-      call realloc(xs, NSMAX, keepExisting=.true., fill = dmiss, stat=ierr)
-      CALL AERR ('XS(NSMAX)',IERR,NSMAX)
-      call realloc(ys, NSMAX, keepExisting=.true., fill = dmiss, stat=ierr)
-      CALL AERR ('YS(NSMAX)',IERR,NSMAX)
-      call realloc(zs, NSMAX, keepExisting=.true., fill = dmiss, stat=ierr)
-      CALL AERR ('ZS(NSMAX)',IERR,NSMAX)
-      call realloc(ipsam, NSMAX, keepExisting=.false., fill=0, stat=ierr)
-      CALL AERR ('IPSAM',IERR,NSMAX)
-
-!     user is editing samples: mark samples as unstructured
-      MXSAM = 0
-      MYSAM = 0
-      IPSTAT = IPSTAT_NOTOK
-      
-      END
-
-      SUBROUTINE INCREASESAM3(N)
-      USE M_SAMPLES3
-      USE M_MISSING
-      use m_alloc
-      implicit none
-      integer, intent(in) :: n !< New size for sample set #3.
-
-      integer :: ierr
-      integer :: nsmax
-
-      NSMAX = SIZE(XS3)
-
-      IF (N < NSMAX) RETURN
-      NSMAX = MAX(10000,INT(1.2d0*N))
-      
-      call realloc(xs3, NSMAX, keepExisting=.true., fill = dmiss, stat=ierr)
-      call realloc(ys3, NSMAX, keepExisting=.true., fill = dmiss, stat=ierr)
-      call realloc(zs3, NSMAX, keepExisting=.true., fill = dmiss, stat=ierr)
-      CALL AERR ('XS3(NSMAX),YS3(NSMAX),ZS3(NSMAX)',IERR,NSMAX)
-
-
-      END
-
-      SUBROUTINE SAVESAM()
-      USE M_SAMPLES2
-      USE M_SAMPLES
-      USE M_MISSING
-      use m_alloc
-      implicit none
-      integer :: ierr
-      NS2 = NS
-      MXSAM2 = MXSAM
-      MYSAM2 = MYSAM
-      IF (NS .EQ. 0) RETURN
-      
-      call realloc(xs2, ns, keepExisting=.false., fill=dmiss, stat=ierr)
-      call realloc(ys2, ns, keepExisting=.false., fill=dmiss, stat=ierr)
-      call realloc(zs2, ns, keepExisting=.false., fill=dmiss, stat=ierr)
-
-      CALL PUTAR(XS,XS2,NS)
-      CALL PUTAR(YS,YS2,NS)
-      CALL PUTAR(ZS,ZS2,NS)
-!      NS2 = NS
-      RETURN
-      END
-
-      SUBROUTINE RESTORESAM()
-      USE M_SAMPLES2
-      USE M_SAMPLES
-      implicit none
-      MXSAM = 0   ! unstructured samples by default
-      MYSAM = 0
-      IPSTAT = IPSTAT_NOTOK
-      NS    = NS2
-      MXSAM = MXSAM2
-      MYSAM = MYSAM2
-      IF (NS2 == 0) RETURN
-      CALL PUTAR(XS2,XS,NS2)
-      CALL PUTAR(YS2,YS,NS2)
-      CALL PUTAR(ZS2,ZS,NS2)
-      RETURN
-      END
-
-      !> Increase size of global polyline array.
-      !! Specify new size and whether existing points need to be maintained.
-      SUBROUTINE INCREASEPOL(N, jaKeepExisting)
-      use m_polygon
-      use m_missing
-      use m_alloc
-      implicit none
-      integer :: n              !< Desired new minimum size
-      integer :: jaKeepExisting !< Whether or not (1/0) to keep existing points.
-      logical :: jakeep
-      integer :: maxpolcur
-
-      integer :: ierr
-      
-      maxpolcur = size(xpl)
-      IF (N < maxpolcur ) THEN 
-         RETURN
-      ENDIF
-      MAXPOL = MAX(100000,INT(5d0*N))
-      
-      jakeep = jaKeepExisting==1
-
-      call realloc(xpl, maxpol, keepExisting=jakeep, fill=dxymis, stat=ierr)
-      call realloc(ypl, maxpol, keepExisting=jakeep, fill=dxymis, stat=ierr)
-      call realloc(zpl, maxpol, keepExisting=jakeep, fill=dxymis, stat=ierr)
-
-      if (jakol45 == 1) then 
-         call realloc(dzl, maxpol, keepExisting=jakeep, fill=dxymis, stat=ierr)
-         call realloc(dzr, maxpol, keepExisting=jakeep, fill=dxymis, stat=ierr)
-      else if (jakol45 == 2) then
-         call realloc(dcrest, maxpol, keepExisting=jakeep, fill=dxymis, stat=ierr)
-         call realloc(dzl, maxpol, keepExisting=jakeep, fill=dxymis, stat=ierr)
-         call realloc(dzr, maxpol, keepExisting=jakeep, fill=dxymis, stat=ierr)
-         call realloc(dtl, maxpol, keepExisting=jakeep, fill=dxymis, stat=ierr)
-         call realloc(dtr, maxpol, keepExisting=jakeep, fill=dxymis, stat=ierr)
-         call realloc(dveg, maxpol, keepExisting=jakeep, fill=dxymis, stat=ierr)
-         call realloc(iweirt, maxpol, keepExisting=jakeep, stat=ierr)
-     endif
-
-!     make sure nampli is allocated
-      if ( .not.allocated(nampli) ) then
-         allocate(nampli(0))
-      end if
-
-      end subroutine increasepol
-
-
-      !> Copies the global polygon into the backup polygon arrays.
-      SUBROUTINE SAVEPOL()
-      USE M_POLYGON
-      use m_alloc
-      use m_missing
-      implicit none
-
-      call realloc(xph, maxpol, keepExisting=.false.)
-      call realloc(yph, maxpol, keepExisting=.false.)
-      call realloc(zph, maxpol, keepExisting=.false.)
-
-      IF (NPL > 0) THEN
-         XPH(1:NPL) = XPL(1:NPL)
-         YPH(1:NPL) = YPL(1:NPL)
-         ZPH(1:NPL) = ZPL(1:NPL)
-      ENDIF
-
-      MPS = MP
-      NPH = NPL
-
-      RETURN
-      END subroutine savepol
-
-
-      !> Puts back a previously saved backup polygon into the global polygon arrays.
-      SUBROUTINE RESTOREPOL()
-      USE M_POLYGON
-      use m_alloc
-      use m_missing
-      implicit none
-
-      maxpol = max(maxpol, nph)
-      call realloc(xpl, maxpol, keepExisting=.false.)
-      call realloc(ypl, maxpol, keepExisting=.false.)
-      call realloc(zpl, maxpol, keepExisting=.false.)
-
-      IF (NPH > 0) THEN
-         XPL(1:NPH) = XPH(1:NPH)
-         YPL(1:NPH) = YPH(1:NPH)
-         ZPL(1:NPH) = ZPH(1:NPH)
-      ENDIF
-
-      MP  = MPS
-      NPL = NPH
-
-      RETURN
-      end subroutine restorepol
-
-
       SUBROUTINE XMISAR (X, MMAX)
       USE M_MISSING
       implicit none
@@ -4441,7 +4240,7 @@ end subroutine read_samples_from_arcinfo
          RLout = 0d0  
          if (r2 .ne. 0d0) then 
             RL = (X31*X21 + Y31*Y21 + Z31*Z21) / R2
-            RLout = 0d0
+            RLout = RL
             RL  = MAX( MIN(1d0,RL) , 0d0)
             JA = 1
             XXN  = xx1 + RL*x21 
@@ -5749,8 +5548,26 @@ implicit none
      call count_links(mx1Dend, Nx)
 
 !    allocate
-     allocate(xe(Nx), ye(Nx), xyen(2,Nx), kce(Nx), ke(Nin), ki(Nx))
-     allocate(kcs(Nin), xdum(Nin), ydum(Nin))
+     if(allocated(xe)) deallocate(xe, stat=ierror) 
+     if(allocated(ye)) deallocate(ye, stat=ierror) 
+     if(allocated(xyen)) deallocate(xyen, stat=ierror) 	 
+     if(allocated(kce)) deallocate(kce, stat=ierror) 
+     if(allocated(ke)) deallocate(ke, stat=ierror) 
+     if(allocated(ki)) deallocate(ki, stat=ierror) 
+     if(allocated(kcs)) deallocate(kcs, stat=ierror) 
+     if(allocated(xdum)) deallocate(xdum, stat=ierror) 
+     if(allocated(ydum)) deallocate(ydum, stat=ierror) 
+
+     allocate(xe(Nx), stat=ierror)
+     allocate(ye(Nx), stat=ierror)
+     allocate(xyen(2,Nx), stat=ierror)
+     allocate(kce(Nx), stat=ierror)
+     allocate(ke(Nx), stat=ierror)
+     allocate(ki(Nx), stat=ierror)
+
+     allocate(kcs(Nin), stat=ierror)
+     allocate(xdum(Nin), stat=ierror)
+     allocate(ydum(Nin), stat=ierror)
      
      kce = 0
      ke  = 0
@@ -6501,6 +6318,21 @@ implicit none
    timprev = tim1
 end subroutine updateValuesOnSourceSinks
 
+! update m_wind::vincum(:) with the realized inflow from m_wind::qinextreal(:)
+subroutine updateCumulativeInflow(deltat) 
+    use m_wind
+    use m_flowgeom, only : ndx
+    
+    integer :: k  
+    double precision, intent(in) :: deltat ! dt of current timestep
+    
+    do k = 1, ndx
+        vincum(k) = vincum(k) + qinextreal(k)*deltat
+    enddo
+    
+end subroutine updateCumulativeInflow
+    
+    
 subroutine updateBalance()
    use m_flow
    use m_partitioninfo
@@ -6529,6 +6361,9 @@ subroutine updateBalance()
    voltot(IDX_GRWIN )  = voltot(IDX_GRWIN )  + cumvolcur(IDX_GRWIN ) 
    voltot(IDX_GRWOUT)  = voltot(IDX_GRWOUT)  + cumvolcur(IDX_GRWOUT) 
    voltot(IDX_GRWTOT)  = voltot(IDX_GRWTOT)  + cumvolcur(IDX_GRWTOT) 
+   voltot(IDX_LATIN )  = voltot(IDX_LATIN )  + cumvolcur(IDX_LATIN ) 
+   voltot(IDX_LATOUT)  = voltot(IDX_LATOUT)  + cumvolcur(IDX_LATOUT) 
+   voltot(IDX_LATTOT)  = voltot(IDX_LATTOT)  + cumvolcur(IDX_LATTOT) 
 
    cumvolcur = 0d0
 end subroutine updateBalance
@@ -6589,7 +6424,7 @@ subroutine find_flownodesorlinks_merge(n, x, y, n_loc, n_own, iloc_own, iloc_mer
         !  count number of points in search area
         NN = kdtree2_r_count(treeinst%tree, treeinst%qv, R2search)
         if ( NN.eq.0 ) then
-           call mess(LEVEL_INFO, 'No flownode/flowlink is found')
+!           call mess(LEVEL_INFO, 'No flownode/flowlink is found')
            
            if ( jaerror2sam.eq.1 ) then
    !          add to samples
@@ -6608,7 +6443,6 @@ subroutine find_flownodesorlinks_merge(n, x, y, n_loc, n_own, iloc_own, iloc_mer
             
            !  find nearest NN samples
             if (NN > 1) then ! If we found more candidates within small search radius, then we should consider falling back to inside-polygon check of cell contour
-
 !               if (janode == 1) then
 !                  write (msgbuf, '(a,i0,a,i0,a)') 'Multiple flow nodes in merged restart file can be matched with current model''s node #', kk, '. Nr of candidates: ', NN, '. Picking last.'
 !               else

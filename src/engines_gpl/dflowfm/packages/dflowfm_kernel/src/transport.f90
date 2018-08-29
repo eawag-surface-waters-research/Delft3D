@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2017.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -1698,13 +1698,15 @@ end subroutine fill_rho
 subroutine extract_constituents()
    use m_transport
    use m_flow
+   use m_flowgeom
    use m_sediment
    use m_transport
    use messageHandling
    use m_missing
+   use m_plotdots
    implicit none
    
-   integer :: i, iconst, k, limmin, limmax
+   integer :: i, iconst, k, kk, limmin, limmax
    
    double precision :: dmin
    
@@ -1745,20 +1747,28 @@ subroutine extract_constituents()
    endif
 
    if (jasal .ne. 0) then  
-      limmax = 0 ; limmin = 0
+      limmax = 0 ; limmin = 0 ; numdots = 0
       dmin = huge(1d0)
-      do k = 1, Ndkx
+      do kk = 1, Ndxi
          if (salimax .ne. dmiss) then  
-            if (sa1(k) > salimax) then 
-               sa1(k)  = salimax
-               limmax  = limmax + 1
-            endif     
+            do k = kbot(kk),ktop(kk) 
+               if (sa1(k) > salimax) then 
+                  sa1(k)  = salimax
+                  limmax  = limmax + 1
+               endif     
+            enddo   
          endif
-         if (sa1(k) < salimin) then 
-            dmin    = min(dmin,sa1(k))
-            sa1(k)  = salimin
-            limmin  = limmin + 1
-         endif   
+ 
+         do k = kbot(kk),ktop(kk) 
+            if (sa1(k) < salimin) then 
+               !if (sa1(k) < -1d-4) then 
+               !   call adddot( xz(kk) , yz(kk), sa1(k) )  
+               !endif   
+               dmin    = min(dmin,sa1(k))
+               sa1(k)  = salimin
+               limmin  = limmin + 1
+            endif   
+         enddo   
       enddo   
       
       if (limmax .ne. 0) then 

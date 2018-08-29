@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2017.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -51,6 +51,7 @@ use m_monitoring_crosssections
 use unstruc_files
 use unstruc_version_module, only : unstruc_basename
 use gridoperations
+use m_samples
 
 !if (.not. allocated(xk)) then 
     !   allocate( xk (1), yk (1), zk (1) , NOD (1) , KC (1) , NMK (1) , RNOD(1)   ) 
@@ -254,6 +255,7 @@ end subroutine api_loadmodel
 
     if (jampi == 1) then
        call updateValuesOnCrossSections_mpi(time1)
+       call reduce_particles
     endif
     
     call mess(LEVEL_INFO,'Writing initial output to file(s)...')

@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2015-2018.                                
+!  Copyright (C)  Stichting Deltares, 2015.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -32,9 +32,15 @@
      rank = 0
   case("iglobal_s")
      rank = 1
+  case("hwav")
+     rank = 1
   case("twav")
      rank = 1
   case("Uorb")
+     rank = 1
+  case("infilt")
+     rank = 1
+  case("infiltcap")
      rank = 1
   case("shx")
      rank = 1
@@ -88,6 +94,22 @@
      rank = 1
   case("evap")
      rank = 1
+  case("numlatsg")
+     rank = 0
+  case("qplat")
+     rank = 1
+  case("qqlat")
+     rank = 1
+  case("balat")
+     rank = 1
+  case("nnlat")
+     rank = 1
+  case("qinext")
+     rank = 1
+  case("qinextreal")
+     rank = 1
+  case("vincum")
+     rank = 1
   case("rnveg")
      rank = 1
   case("diaveg")
@@ -138,11 +160,15 @@
      rank = 1
   case("satop")
      rank = 1
+  case("sabot")
+     rank = 1
   case("tem0")
      rank = 1
   case("tem1")
      rank = 1
   case("u1")
+     rank = 1
+  case("u_to_umain")
      rank = 1
   case("q1")
      rank = 1
@@ -156,25 +182,17 @@
      rank = 1
   case("diusp")
      rank = 1
-  case("ndx2d")
-     rank = 0
   case("ndxi")
      rank = 0
   case("ndx1db")
-     rank = 0
-  case("ndx")
      rank = 0
   case("kfs")
      rank = 1
   case("kfst0")
      rank = 1
-  case("ba")
+  case("bare")
      rank = 1
   case("bl")
-     rank = 1
-  case("xz")
-     rank = 1
-  case("yz")
      rank = 1
   case("lnx1D")
      rank = 0
@@ -236,6 +254,16 @@
      rank = 2
   case("is_dtint")
      rank = 0
+  case("ndx2d")
+     rank = 0
+  case("ndx")
+     rank = 0
+  case("xz")
+     rank = 1
+  case("yz")
+     rank = 1
+  case("ba")
+     rank = 1
   case default
      rank = 0
   end select

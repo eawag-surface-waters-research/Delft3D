@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2017.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -114,6 +114,7 @@ module m_fourier_analysis
     integer                   :: nofou  ! Number of fourier components to be analyzed
 
     real(fp)                  :: ag_fouana = 9.81d0  
+    real(fp)                  :: time_unit_factor
 
     public fouini
     public alloc_fourier_analysis_arrays
@@ -491,13 +492,14 @@ module m_fourier_analysis
        endif
        !
        read (columns(2), fmt) rstart
+       rstart = rstart * time_unit_factor           ! convert to kernel time unit
        !
        ftmstr(ifou) = nint(rstart/dt)
        !
        ! original code translates as : 'if abs(real(nint(rstart/dt)*dt-rstart) > (0.1_fp*dt)'         ! RL666
        if ( mod(real(rstart,fp),real(dt,fp)) > 0.1_fp*dt) then 
           ! call prterr(lundia, 'U044', errmsg)
-          write (msgbuf,*) 'Fourier sample interval start ',rstart,' not at an integer number of user timesteps, ',dt,'.'
+          write (msgbuf,*) 'Fourier sample interval start not at an integer number of user timesteps DtUser.'
           call warn_flush()
           goto 6666
        endif
@@ -505,7 +507,7 @@ module m_fourier_analysis
        !
        if (rstart<tstart) then
           ! call prterr(lundia, 'F005', ' ')
-          write (msgbuf,*) 'Fourier sample interval start ,',rstart,' preceeds simulation start, ',tstart,'.'
+          write (msgbuf,*) 'Fourier sample interval start preceeds simulation start TStart.'
           call warn_flush()
           goto 6666
        endif
@@ -521,12 +523,13 @@ module m_fourier_analysis
        endif
        !
        read (columns(3), fmt) rstop
+       rstop = rstop * time_unit_factor           ! convert to kernel time unit
        !
        ftmsto(ifou) = nint(rstop/dt)
        ! original code translates as : 'if abs(real(nint(rstop/dt)*dt-rstart) > (0.1_fp*dt)'         ! RL666
        if ( mod(real(rstop,fp),real(dt,fp)) > 0.1_fp*dt) then 
           ! call prterr(lundia, 'U044', errmsg)
-          write (msgbuf,*) 'Fourier sample interval stop ',rstop,' not at an integer number of user timesteps, ',dt,'.'
+          write (msgbuf,*) 'Fourier sample interval stop not at an integer number of user timesteps DtUser.'
           call warn_flush()
           goto 6666
        endif
@@ -534,7 +537,7 @@ module m_fourier_analysis
        !
        if (rstop>tstop) then
           ! call prterr(lundia, 'F006', ' ')
-          write (msgbuf,*) 'Fourier sample interval stop ,',rstop,' exceeds simulation end, ',tstop,'.'
+          write (msgbuf,*) 'Fourier sample interval stop exceeds simulation end TStop.'
           call warn_flush()
           goto 6666
        endif
@@ -1115,7 +1118,7 @@ end subroutine setfouunit
        endif
    end subroutine fouana
                    
-   subroutine fouini(lunfou, success, ag)
+   subroutine fouini(lunfou, success, ag, time_unit_user, time_unit_kernel)
    !-------------------------------------------------------------------------------
    !  $Id$
    !  $HeadURL$
@@ -1148,6 +1151,7 @@ end subroutine setfouunit
        integer , intent(in)            :: lunfou   !!  Unit number for fourier input file
        logical                         :: success  !!  Flag=True if no error is encountered
        real(fp), intent(in), optional  :: ag       !!  override gravitational constant 
+       character(len=*), intent(in)    :: time_unit_user, time_unit_kernel
 
    !
    ! Local variables
@@ -1160,6 +1164,29 @@ end subroutine setfouunit
    !
    !! executable statements -------------------------------------------------------
    !
+       time_unit_factor=1.0
+       select case (time_unit_user)
+       case('D')
+          time_unit_factor=3600.*24. 
+       case('H')
+          time_unit_factor=3600. 
+       case('M')
+          time_unit_factor=60. 
+       case('S')
+          time_unit_factor=1. 
+       end select
+
+       select case (time_unit_kernel)
+       case('D')
+          time_unit_factor=time_unit_factor/(3600.*24.)
+       case('H')
+          time_unit_factor=time_unit_factor/(3600.)
+       case('M')
+          time_unit_factor=time_unit_factor/(60.)
+       end select
+
+       ! The user specified times in the .fou files need to be multiplied by the time_unit_factor, to correspond with the kernel times
+
        if (present(ag)) then 
           ag_fouana = ag 
        endif 
@@ -1232,7 +1259,7 @@ end subroutine setfouunit
              nofouvar = nofouvar + 2
           endif
        !
-       ! requested fourier analysis cell-centred horizontal and vertical velocity
+       ! requested fourier analysis cell-centred eastward and northward velocity
        !
        elseif (columns(1)(1:2)=='ux' .or. columns(1)(1:2)=='uy') then
           nofou = nofou + 1
@@ -1662,14 +1689,14 @@ end subroutine setfouunit
                  ibluv = ibluv + 1
                  blnm = 'UX??'
                  write (blnm(3:4), '(i2.2)') ibluv
-                 namfun = 'horizontal velocity'
+                 namfun = 'X-component of cell-centre velocity'
               endif
               if (founam(ifou)(:2)=='uy') then
                  unc_loc = UNC_LOC_S
                  ibluv = ibluv + 1
                  blnm = 'UY??'
                  write (blnm(3:4), '(i2.2)') ibluv
-                 namfun = 'vertical velocity'
+                 namfun = 'Y-component of cell-centre velocity'
               endif
               if (founam(ifou)(:3)=='uxa') then
                  unc_loc = UNC_LOC_S
@@ -1903,7 +1930,7 @@ end subroutine setfouunit
 
    subroutine wrfous(ifou   ,dtsec   ,namcon  ,hdt  ,tzone  ,gdfourier  ,gddimens  ,fileids, iloc   )
    !----- GPL ---------------------------------------------------------------------
-   !  Copyright (C)  Stichting Deltares, 2011-2018.                                
+   !  Copyright (C)  Stichting Deltares, 2011-2015.                                
    !-------------------------------------------------------------------------------
    !  $Id$
    !  $HeadURL$

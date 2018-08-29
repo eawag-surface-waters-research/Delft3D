@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2017.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -1940,7 +1940,7 @@ do ng=1,ncgensg ! Loop over general structures
       !crestwidth = totalWidth ! No crest/sill-width setting for true general structure yet (not old ext, nor new ext)
       crestwidth = min(totalWidth, generalstruc(ng)%widthcenter)
 !      crestwidth = zcgen((ng-1)*3+3) ! NOTE: AvD: this now comes from scalar attribute 'widthcenter', no timeseries yet.
-      ! genstru: always IOPENDIR_SYMMETRIC
+      ! genstru: always IOPENDIR_SYMMETRIC (TODO: UNST-1935)
       closedGateWidthL = max(0d0, .5d0*(totalWidth - zcgen((ng-1)*3+3)))
       closedGateWidthR = max(0d0, .5d0*(totalWidth - zcgen((ng-1)*3+3)))
       !closedGateWidthL = 0d0 ! max(0d0, .5d0*(totalWidth - zcgen((ng-1)*3+3))) ! Default symmetric opening
@@ -2030,6 +2030,11 @@ do ng=1,ncgensg ! Loop over general structures
          exit
       endif
    enddo
+   
+   if ( L2cgensg(ng) == L1cgensg(ng) ) then 
+      generalstruc(ng)%widthcenteronlink(L0) = min( wu(Lf), zcgen((ng-1)*3+3) ) 
+   endif
+   
 end do ! 1,ngensg
 
 end subroutine update_zcgen_widths_and_heights
@@ -2041,7 +2046,7 @@ subroutine enloss(ag        ,d1        ,eweir     ,hkruin    ,hov       , &
                 & crestl    ,rmpbov    ,rmpben    ,veg      )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2018.                                
+!  Copyright (C)  Stichting Deltares, 2011-2014.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -2288,7 +2293,7 @@ end subroutine enloss
 double precision function tabellenboek(d1        ,eweir     ,qunit     ,qvolk     )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2018.                                
+!  Copyright (C)  Stichting Deltares, 2011-2014.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         

@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2017.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -46,12 +46,18 @@
    use unstruc_messages
    use M_splines, only: increasespl, maxspl, maxsplen, readsplines
    USE M_SAMPLES
-   USE M_SAMPLES2
    use m_commandline_option
    use dfm_signals
    use gridoperations
    use m_monitoring_crosssections, only: increaseCrossSections, maxcrs
    implicit none
+
+   interface
+      subroutine realan(mlan, antot)
+         integer, intent(inout)                ::  mlan
+         integer, intent(inout), optional      ::  antot
+      end subroutine realan
+   end interface
 
    double precision :: ag, cdflow, cfl, cfric, deltx, delty, deltz, dscr, dx, e0, eps, epsgs, fbouy, fdyn, gx, gy, gz
    integer :: ierr
@@ -452,7 +458,7 @@
       Te = 2*400/ue 
       
       !write(mxls,'(13f14.6)') tim/Te ,  ucx(kobs(1)) / ue !   , s1(kobs(1)) - bl(kobs(1))    
-      if (numobs > 0) then
+      if (numobs > 0 .and. kobs(1) > 0 ) then
          write(mxls,'(13f14.6)') tim/60d0,  s1(kobs(1)), s1(kobs(1)) - bl(kobs(1))   
       endif   
    endif  
@@ -1239,7 +1245,6 @@
 
       subroutine removewallfromsamples()
       use m_samples
-      use m_samples2
       use m_polygon
 
       implicit none
@@ -3607,7 +3612,7 @@ SUBROUTINE ISflowlink(XP, YP, LL) ! IS THIS A flow NODE OR A flow LINK ?
   SUBROUTINE GAANWESTARTEN(L,K1,KN316,JASTART)
   USE M_NETW
   IMPLICIT NONE
-  INTEGER :: L,K1,KN316,JASTART,J, JASTOP
+  INTEGER :: L,K1,K2,KN316,JASTART,J, JASTOP, J1, J2
 
   JASTART = 0
   IF (KN(3,L) /= KN316) RETURN 
@@ -3640,16 +3645,13 @@ SUBROUTINE ISflowlink(XP, YP, LL) ! IS THIS A flow NODE OR A flow LINK ?
         N1 = N1 + 1 
      ELSE IF (KN(3,L) == 6) THEN   
         N6 = N6 + 1
-     ELSE 
-        JASTOP = 1
-        RETURN
      ENDIF
   ENDDO
   IF (KN316 == 1) THEN 
      IF (N1 + N6 .NE. 2) THEN  ! altijd stoppen bij niet doorgaande node 
         JASTOP = 1 
      ENDIF  
-  ELSE IF (KN316 == 6) THEN 
+  ELSE IF (KN316 == 6) THEN    ! alleen stoppen bij aantal 6 jes ongelijk 2 
      IF (N6 .NE. 2) THEN 
         JASTOP = 1   
      ENDIF
@@ -3664,7 +3666,7 @@ SUBROUTINE ISflowlink(XP, YP, LL) ! IS THIS A flow NODE OR A flow LINK ?
   IMPLICIT NONE
 
   INTEGER :: NRL1D, NRL, NRLO, L, JONCE, K, K1, K2, K3, IBR, N, JASTOP, JASTART, IERR, IBX, KS, KK, KE, ja, JA1, JA2
-  INTEGER :: NRL1D6, KN316, NRL1D16, J
+  INTEGER :: NRL1D6, KN316, NRL1D16, NUM0, J
 
   call setnodadm(0)
 
@@ -3704,26 +3706,32 @@ SUBROUTINE ISflowlink(XP, YP, LL) ! IS THIS A flow NODE OR A flow LINK ?
      ENDIF   
   
      DO WHILE (NRL < NRL1D16)  
+        
+        NRLO = NRL
         DO L = 1,NUML
-            
            IF (LC(L) == 0) THEN  
               JASTART = 0
               CALL GAANWESTARTEN(L,K1,KN316,JASTART)
               IF (JASTART == 1) THEN 
                  IBR = IBR + 1
                  CALL WALK1D(K1,IBR,NRL,JASTOP,KN316)
-              !ELSE  
-              !   CALL GAANWESTARTEN(L,K2,KN316,JASTART)
-              !   IF (JASTART == 0) THEN 
-              !      IBR = IBR + 1
-              !      CALL WALK1D(K2,IBR,NRL,JASTOP,KN316)
-              !   ENDIF   
+                 ENDIF   
               ENDIF   
-           ENDIF   
+        ENDDO
         
-        ENDDO   
+        IF (NRL == NRLO) THEN ! REPAIR CODE, FILL IN ISOLATED BRANCHES
+           DO L = 1,NUML
+              IF ( LC(L) == 0 .AND. KN316 == KN(3,L) ) THEN  
+                 IBR = IBR + 1
+                 LC(L) = IBR ; NRL = NRL + 1
+                 LIB(NRL) = L ; K1BR(NRL) = KN(1,L) ; IBN(NRL) = IBR; NRLB(L) = NRL
+              ENDIF   
+           ENDDO   
+        ENDIF   
+         
      ENDDO   
-  
+
+     
   ENDDO   
 
   IBX = IBR ; MXNETBR = IBR
@@ -3788,7 +3796,7 @@ SUBROUTINE CUTCELWU(n12, jamasks, ipoly)
   use m_polygon, only: NPL, xpl, ypl, zpl
   use geometry_module, only: dbpinpol, dbdistance
   use m_sferic, only: jsferic, jasfer3D
-  use m_flow, only : numlimdt, numlimdt_baorg
+  use m_flow, only : numlimdt, numlimdt_baorg, baorgfracmin
 
   implicit none
   integer, intent(in) :: N12     ! 3: only mask nodes, 4: preparation for cut cells (set kfs), 5: actual cut cells (change wu, nd), 6: dry cells
@@ -4089,8 +4097,9 @@ SUBROUTINE CUTCELWU(n12, jamasks, ipoly)
 
                CALL dAREAN( XXC, YYC, IC, DAREA, DLENGTH, DLENMX ) ! AREA AND LENGTH OF POLYGON
                if (numlimdt(n) <= numlimdt_baorg) then  
-                  BA(N) = MAX(DAREA,BAMIN)  ! ; BAI(N) = 1D0/BA(N)    ! BAI ZIT IN ADVECTIEWEGING
+                  BA(N) = max( DAREA, Baorgfracmin*ba(n) )         
                endif
+               BA(N) = MAX(BA(N), BAMIN)  ! ; BAI(N) = 1D0/BA(N)    ! BAI ZIT IN ADVECTIEWEGING
                if (ic > 2) then
                   DEALLOCATE( ND(N)%X    , ND(N)%Y    )
                   ALLOCATE  ( ND(N)%X(IC), ND(N)%Y(IC))
@@ -4820,7 +4829,7 @@ SUBROUTINE CUTCELWU(n12, jamasks, ipoly)
   integer :: ku
   DOUBLE PRECISION :: XP1, YP1, XP2, YP2, SL, SM, XCR, YCR, CRP
 
-     isec = 0
+  isec = 0
   JA = 0
   DO K = 1,NPL - 1
      KU  = K + 1
@@ -4833,8 +4842,8 @@ SUBROUTINE CUTCELWU(n12, jamasks, ipoly)
         XM = XCR
         YM = YCR
         crpm = crp
-           isec = k
-           return ! SPvdP: added
+        isec = k
+        return ! SPvdP: added
      end if
   ENDDO
 
@@ -7319,7 +7328,7 @@ end subroutine checknetwork
 
       DO L  = 1, NUML
          K1 = KN(1,L) ; K2 = KN(2,L) ; K3 = KN(3,L)
-         IF (K3 >= 1 .and. K3 <= 6) THEN
+         IF (K3 >= 1 .and. K3 <= 7) THEN
             KC(K1) = 1 ; KC(K2) = 1
          ENDIF
       ENDDO
@@ -7899,6 +7908,7 @@ end subroutine checknetwork
   use m_tpoly
   use m_cutcells
   use gridoperations
+  use unstruc_model
   IMPLICIT NONE
 
   integer,             intent(in)  :: n12, lenf    !< type of operation (1, 2, 3, 4, 5), see docs below.
@@ -7926,10 +7936,10 @@ end subroutine checknetwork
 
   jastored = 0
   
-  INQUIRE (FILE = 'cutcellpolygons.lst', EXIST = JAWEL)   
+  INQUIRE (FILE = md_cutcelllist, EXIST = JAWEL)   
   NUMFIL = 0
   IF (JAWEL) THEN
-      CALL OLDFIL(MLIST, 'cutcellpolygons.lst')
+      CALL OLDFIL(MLIST, md_cutcelllist)
  777  READ (MLIST,*, END = 888) 
       NUMFIL = NUMFIL+1
       GOTO 777
@@ -8099,6 +8109,7 @@ end subroutine checknetwork
   if ( n12.eq.5 ) then
 !    SPvdP: disable flow-links that are associated to disabled net-links
      do Lf=1,Lnx
+        if (kcu(Lf) .ne. 2) cycle
         L = iabs(ln2lne(Lf))
         if ( L.gt.0 ) then
            if ( lnn(L).eq.0 ) then
@@ -8112,6 +8123,7 @@ end subroutine checknetwork
      call realloc(cellmask, nump, fill=1, keepExisting=.false.)
 !    disable cells with only "lnn<0" links
      do L=1,numL
+        if (kn(3,L) .ne. 2) cycle
         if ( lnn(L).gt.0 ) then
 !          unmask neighboring cell(s)
            cellmask(lne(1,L)) = 0
@@ -8428,7 +8440,7 @@ end subroutine checknetwork
   implicit none
   integer :: KEY, jacheckcells, JASAVE
 
-  integer :: inhul, inall, ip, ic, n, k, nn
+  integer :: inhul, inall, ip, ic, n, k, nn, nzero
   integer :: ja
   integer :: k1
   integer :: k2
@@ -8558,37 +8570,40 @@ end subroutine checknetwork
          endif
       enddo    
       
-      Lc    = 1
+      Lc    = 0
       do L  = 1,numL 
          k1 = kn(1,L) ; k2 = kn(2,L) 
          if (kc(k1) == 1 .and. kc(k2) == 1) then 
-            Lc(L) = 0 
+            Lc(L) = 1 
          endif   
       enddo   
       
-      allocate (LC2(numL) ) ; Lc2 = 0  
+      allocate (LC2(numL) ) ; Lc2(1:numL) = Lc(1:numL)   
       
       do n = 1, nump
          
-         inall = 0 
-         do nn = 1,size(nod(n)%lin)
-            L  = iabs(nod(n)%lin(nn))
-            k1 = kn(1,L) ; k2 = kn(2,L) 
-            if (Lc(L) == 1) then 
-               inall = 1
-            endif
+         nzero = 0 
+         do nn = 1,size(netcell(n)%lin)    ! check if any link should be kept for cell n
+            L  = iabs(netcell(n)%lin(nn))
+            if (L > 0) then 
+               if (Lc(L) == 0) then 
+                  nzero = 1 ; exit
+               endif
+            endif   
          enddo   
       
-         if (inall ==  1) then 
-            do nn = 1,size(nod(n)%lin)
-               L  = iabs(nod(n)%lin(nn))
-               LC2(L) = 1 
+         if (nzero == 1) then         ! if it should be kept, flag all links of that cell to be kept.
+            do nn = 1,size(netcell(n)%lin)
+               L  = iabs(netcell(n)%lin(nn))
+               if (L > 0) then
+                  LC2(L) = 0 
+               endif   
             enddo   
          endif
       enddo   
       
       do L  = 1,numL 
-         if (LC2(L) == 0) then 
+         if (LC2(L) == 1) then 
             kn(1,L) = 0 ; kn(2,L) = 0 
          endif   
       enddo   
@@ -8599,10 +8614,10 @@ end subroutine checknetwork
 
   CALL SETNODADM(0)
 
-  if ( jacheckcells == 0 .or. jacheckcells == 2) then 
+  if ( jacheckcells == 0  .or. jacheckcells == 2) then 
 
      do k = 1,numk
-        if ( nmk(k) == 1) then 
+        if ( nmk(k) == 1 ) then 
             L = nod(k)%lin(1)
             if (kn(3,L) == 2) then 
                 xk(k) = dmiss ; yk(k) = dmiss    
@@ -10763,7 +10778,7 @@ numka:DO K0 = 1,NUMK                 ! ATTRACTION PARAMETERS
       if (jaconfirm == -1) then
          if (nsmax > 0) then 
             nsmax = 0 ; ns = 0
-            deallocate (xs, ys, zs)
+            if ( allocated(xs)    ) deallocate (xs, ys, zs)
             if ( allocated(ipsam) ) deallocate(ipsam)
          endif 
          return
@@ -11192,29 +11207,6 @@ numka:DO K0 = 1,NUMK                 ! ATTRACTION PARAMETERS
       RETURN
 
    END SUBROUTINE deleteSelectedCrossSections
-
-   SUBROUTINE SWAPSAMPLES()
-   USE M_SAMPLES
-   USE M_SAMPLES3
-   implicit none
-   integer :: i
-   integer :: nh
-   integer :: nn
-   DOUBLE PRECISION :: XH, YH, ZH
-
-   IF (NSMAX < NS3) THEN
-      CALL increasesam(NS3)
-   ELSE IF (NS3 < NS) THEN
-      CALL increasesam3(NS)
-   ENDIF
-   NN = MAX(NS,NS3)
-   NH = NS ; NS = NS3 ; NS3 = NH
-   DO I = 1, NN
-      XH = XS(I) ; XS(I) = XS3(I) ; XS3(I) = XH
-      YH = YS(I) ; YS(I) = YS3(I) ; YS3(I) = YH
-      ZH = ZS(I) ; ZS(I) = ZS3(I) ; ZS3(I) = ZH
-   ENDDO
-   END SUBROUTINE SWAPSAMPLES
    
 !  copy dots to samples   
    subroutine copy_dots2sam()
@@ -11283,7 +11275,6 @@ numka:DO K0 = 1,NUMK                 ! ATTRACTION PARAMETERS
    SUBROUTINE Triangulatesamplestonetwork(JADOORLADEN)
    use m_netw
    USE M_SAMPLES
-   USE M_SAMPLES2
    use m_ec_triangle
    USE M_POLYGON
    USE M_ALLOC
@@ -11548,7 +11539,6 @@ numka:DO K0 = 1,NUMK                 ! ATTRACTION PARAMETERS
    SUBROUTINE REFINEPOLYGONUSINGNETWORK()
    use m_netw
    USE M_SAMPLES
-   USE M_SAMPLES2
    use m_ec_triangle
    USE M_POLYGON
    use m_ec_basic_interpolation, only: dlaun
@@ -13075,7 +13065,45 @@ numka:DO K0 = 1,NUMK                 ! ATTRACTION PARAMETERS
 
       DIST = DISMIN
 
-      END SUBROUTINE CLOSETO1Dnetlink
+   END SUBROUTINE CLOSETO1Dnetlink
+
+   SUBROUTINE CLOSETO1Dnetnode(XP1,YP1,N1,dist) !
+      
+      use m_netw
+      use geometry_module, only: dbdistance
+      use m_sferic
+      use m_missing
+      
+      implicit none
+      double precision, intent(in)  :: XP1, YP1
+      double precision, intent(out) :: dist     ! find 1D point close to x,y: 
+      integer         , intent(out) :: n1       ! 1D point found
+
+      
+      double precision :: dismin
+      integer          :: ja, k, k1, k2, L
+      double precision :: dis,dis1,dis2
+
+      N1 = 0
+      DISMIN = 9E+33
+      DO L = 1,numl
+         IF (kn(3,L) == 1 .or. kn(3,L) == 6) then !  .or. kn(3,L) == 4) THEN
+             K1 = kn(1,L) ; K2 = kn(2,L)
+             dis1 = dbdistance(XP1,YP1,Xk(K1),Yk(K1),jsferic, jasfer3D, dmiss)
+             dis2 = dbdistance(XP1,YP1,Xk(K2),Yk(K2),jsferic, jasfer3D, dmiss) 
+             if (dis1 < dis2) THEN
+                k = k1 ; dis = dis1 
+             else   
+                k = k2 ; dis = dis2 
+             endif
+             IF (DIS .LT. DISMIN) THEN
+                N1 = k
+                DISMIN = DIS
+             ENDIF
+          ENDIF
+      ENDDO
+      dist = dismin
+      END SUBROUTINE CLOSETO1Dnetnode
 
 
       SUBROUTINE POLTOLAND(L1,L2)               ! SHIFT POLYGON TO LANDBOUNDARY
@@ -14366,6 +14394,11 @@ implicit none
        endif
     endif
 
+    if (.not. allocated(sumvalcum_timescale)) then
+       allocate(sumvalcum_timescale(numvals))
+       sumvalcum_timescale = 1d0
+    endif   
+    
     if (.not. allocated(sumvalcur_tmp)) then
        allocate(sumvalcur_tmp(numvals,ncrs))
        sumvalcur_tmp = 0d0
@@ -14395,17 +14428,17 @@ implicit none
       do icrs=1,ncrs
          do iv = 1, numvals ! Nu nog "5+ Numconst" standaard grootheden, in buitenlus
             crs(icrs)%sumvalcur(iv) = sumvalcur_tmp(iv,icrs)
-            crs(icrs)%sumvalcum(iv) = crs(icrs)%sumvalcum(iv) + timstep*sumvalcur_tmp(iv,icrs)
+            crs(icrs)%sumvalcum(iv) = crs(icrs)%sumvalcum(iv) + sumvalcum_timescale(iv)*timstep*sumvalcur_tmp(iv,icrs)
             if (timtot > 0d0) then
-                crs(icrs)%sumvalavg(iv) = crs(icrs)%sumvalcum(iv)/timtot
+                crs(icrs)%sumvalavg(iv) = crs(icrs)%sumvalcum(iv)/timtot/sumvalcum_timescale(iv)
             else
                 crs(icrs)%sumvalavg(iv) = crs(icrs)%sumvalcur(iv)
             end if
           end do
       end do
     else
-       do icrs=1,ncrs ! Compute time-integrated discharge in current hisotry output interval
-          sumvalcumQ_mpi(icrs) = sumvalcumQ_mpi(icrs) + timstep*sumvalcur_tmp(IPNT_Q1C,icrs)
+       do icrs=1,ncrs ! Compute time-integrated discharge in current history output interval
+          sumvalcumQ_mpi(icrs) = sumvalcumQ_mpi(icrs) + sumvalcum_timescale(IPNT_Q1C)*timstep*sumvalcur_tmp(IPNT_Q1C,icrs)
        enddo
     endif
     
@@ -14480,9 +14513,17 @@ subroutine sumvalueOnCrossSections(resu, numvals)
                  enddo
               endif
            endif
-           
        end do
     end do   ! do icrs=1,ncrs
+    
+    if( jased == 4 .and. stmpar%lsedtot > 0 ) then 
+       IP = IPNT_HUA + NUMCONST_MDU + 1
+       sumvalcum_timescale(IP) = stmpar%morpar%morfac
+       if( stmpar%lsedsus > 0 ) then
+          IP = IP + 1; 
+          sumvalcum_timescale(IP) = stmpar%morpar%morfac
+       endif
+    endif
     
     if (jampi == 0 ) then
       ! NOTE: if jampi==1, it is incorrect to compute quantities that require division by AU values
@@ -14564,10 +14605,10 @@ subroutine updateValuesOnCrossSections_mpi(tim1)
             ! TODO: AvD/JZ: UNST-1281: cumulative Q fort MPI runs is now correct, but:
             ! * jampi==1 code is quite different from jampi==0 for the sumvalcum.
             ! * And: sumvalcum for all other quantities than Q1C are wrong:
-            crs(icrs)%sumvalcum(iv) = crs(icrs)%sumvalcum(iv) + ti_his*sumvalcur_tmp(iv, icrs)
+            crs(icrs)%sumvalcum(iv) = crs(icrs)%sumvalcum(iv) + sumvalcum_timescale(iv)*ti_his*sumvalcur_tmp(iv, icrs) 
          end if
          if (timtot > 0d0) then
-             crs(icrs)%sumvalavg(iv) = crs(icrs)%sumvalcum(iv)/timtot
+             crs(icrs)%sumvalavg(iv) = crs(icrs)%sumvalcum(iv)/timtot/sumvalcum_timescale(iv)
          else
              crs(icrs)%sumvalavg(iv) = crs(icrs)%sumvalcur(iv)
          endif
@@ -15169,7 +15210,7 @@ subroutine assign_icjc(xp,yp, ic, jc, iexit)
 
  double precision                   :: xh(4), yh(4)
 
-! integer, parameter                 :: IMISS = -999999
+ !integer, parameter                 :: IMISS = -999999
 
  integer                            :: knode, ik, lowold(2), uppold(2)
 
@@ -15280,6 +15321,7 @@ subroutine grow_ijc(lowold, uppold, lowobj, uppobj, init)
 
  use m_alloc
  use m_grid
+ use m_missing
 
  implicit none
 
@@ -15290,7 +15332,7 @@ subroutine grow_ijc(lowold, uppold, lowobj, uppobj, init)
 
  integer, dimension(2)                :: lownew, uppnew
  integer                              :: i
- integer, parameter                   :: IMISS = -999999
+! integer, parameter                   :: IMISS = -999999
  integer, parameter                   :: IJCBLOCK = 100    ! block size in ijc
 
  logical                              :: ldoit
@@ -15340,6 +15382,7 @@ end subroutine grow_ijc
 subroutine find_common_node(L1, L2, node)
 
  use m_netw
+ use m_missing
 
  implicit none
 
@@ -15347,7 +15390,7 @@ subroutine find_common_node(L1, L2, node)
  integer, intent(out)  :: node             !< common node
 
  integer, dimension(4) :: a                ! dummy array with nodes of L1 and L2
- integer, parameter    :: IMISS = -999999
+! integer, parameter    :: IMISS = -999999
 
  a(1:2)    = kn(1:2, L1)
  a(3:4)    = kn(1:2, L2)
@@ -15413,7 +15456,7 @@ end subroutine find_common_node
        CALL accumulateDistance(Xlan(k1:k2), Ylan(k1:k2), DLan(k1:k2), NL)
 
        DTOT = DLAN(K2)
-       NH   = DTOT / unidx1D + 1
+       NH   = max(1, ceiling(DTOT / unidx1D))
 
        IF (NH > SIZE(DH)) THEN
            DEALLOCATE (XH,YH,DH)
@@ -15461,6 +15504,7 @@ subroutine assignijgrid(k, ic, jc)
 
  use m_netw
  use m_grid
+ use m_missing
 
  implicit none
 
@@ -15471,7 +15515,7 @@ subroutine assignijgrid(k, ic, jc)
  integer                  :: kcell, kneighbor, kdir, kdirdum
  integer                  :: icount, iter, lowold(2), uppold(2)
  integer, parameter       :: MAXITER = 1000000
- integer, parameter       :: IMISS   = -999999
+! integer, parameter       :: IMISS   = -999999
 
  integer                  :: i, numiter_guess
 !---------------------------------------------------------
@@ -15545,6 +15589,7 @@ subroutine assignij(kcell, kdir, kneighbor, ic, jc)
  use m_netw
  use m_grid
  use unstruc_messages
+ use m_missing
 
  implicit none
 
@@ -15568,7 +15613,7 @@ subroutine assignij(kcell, kdir, kneighbor, ic, jc)
  integer                           :: icell, jcell, nodes(4)
  integer                           :: ilink, link
  integer                           :: node1, node2, othernode
- integer, parameter                :: IMISS = -999999
+! integer, parameter                :: IMISS = -999999
 
  logical                           :: lconflict
 
@@ -15739,6 +15784,7 @@ end subroutine makecurvgrid
 subroutine checkvalidnode(node, i, j, lconflict)
 
  use m_grid
+ use m_missing
 
  implicit none
 
@@ -15792,6 +15838,7 @@ subroutine checkgridline(node1, node2, lconflict)
 
  use m_netw
  use m_grid
+ use m_missing
 
  implicit none
 
@@ -15803,7 +15850,7 @@ subroutine checkgridline(node1, node2, lconflict)
 
  logical              :: doit                       ! determines whether the link neighbors a quad (.true.) or not (.false.)
 
- integer, parameter   :: IMISS = -999999
+! integer, parameter   :: IMISS = -999999
 
  lconflict = .true.                                 ! .false. if the (i,j)-connection is a valid connection
 
@@ -16235,7 +16282,7 @@ tp:do no = 1,itatp
       
 !     compute local coordinates
       if ( jsferic.eq.1 .and. jasfer3D.eq.1 ) then
-         call comp_local_coords(iloc,kk1,xk1,yk1,iloc(numk+1)-1,xloc,yloc)
+         call comp_local_coords(iloc,kk1,xk,yk,iloc(numk+1)-1,xloc,yloc)
       end if
 
       call readyy('Orthogonalising net',dble(no-1+.35d0)/itatp)
@@ -16328,7 +16375,7 @@ tp:do no = 1,itatp
       
          if ( jsferic.eq.1 .and. jasfer3D.eq.1 ) then
 !           compute local coordinates
-            call comp_local_coords(iloc,kk1,xk1,yk1,iloc(numk+1)-1,xloc,yloc)
+            call comp_local_coords(iloc,kk1,xk,yk,iloc(numk+1)-1,xloc,yloc)
          end if
              
          call orthonet_compweights_smooth(ops, smp_mu, ww2, ierror)
@@ -16365,18 +16412,11 @@ tp:do no = 1,itatp
 !-------------------------------------------------
 ! 3. Solve the 'Laplacian' for orthogonalization/Move all points in a few iteration steps.
 
-      relaxin = 1d0
+      relaxin = 0.75d0
       relax1  = 1d0-relaxin
 
       do i = 1,itbnd
-!        update local coordinates
          do n = 1,itin
-         
-             if ( jsferic.eq.1 .and. jasfer3D.eq.1 ) then
-!               compute local coordinates
-                call comp_local_coords(iloc,kk1,xk1,yk1,iloc(numk+1)-1,xloc,yloc)
-             end if
-
 !      !     determine atpf    ***INOPERATIVE***
 !            atpf_nodes = 1d0
 !            do k=1,numk
@@ -16470,8 +16510,8 @@ tp:do no = 1,itatp
                            DUM(1) = wwx * Ra * dg2rd
                            DUM(2) = wwy * Ra * dg2rd
                         else
-                           y1  = yk1(k1)
-                           DUM(1) = wwx * Ra * dg2rd * dcos(0.5d0*(y00+y1)*dg2rd)
+                           y1  = yk(k1)
+                           DUM(1) = wwx * dcos(0.5d0*(y00+y1)*dg2rd) * Ra * dg2rd
                            DUM(2) = wwy * Ra * dg2rd
                         end if
                      else
@@ -16484,8 +16524,8 @@ tp:do no = 1,itatp
                         Dx0 = Dx0 + DUM(1) * xloc(iloc(k)+kk-1) ! (xk(k1)-x0)
                         Dy0 = Dy0 + DUM(2) * yloc(iloc(k)+kk-1) ! (yk(k1)-y0)
                      else
-                        Dx0 = Dx0 + DUM(1) * ( xk(k1)-xk1(k)) ! (xk(k1)-x0)
-                        Dy0 = Dy0 + DUM(2) * ( yk(k1)-yk1(k)) ! (yk(k1)-y0)
+                        Dx0 = Dx0 + DUM(1) * ( xk(k1)-xk(k)) ! (xk(k1)-x0)
+                        Dy0 = Dy0 + DUM(2) * ( yk(k1)-yk(k)) ! (yk(k1)-y0)
                      end if
 !                  endif
                enddo
@@ -16499,12 +16539,15 @@ tp:do no = 1,itatp
                   Dy0 = (Dy0 + righthandside(2)) / w0(2)
                   
                   if ( jsferic.eq.1 .and. jasfer3D.eq.1 ) then
-                     dumx(1) = Dx0
-                     dumy(1) = Dy0
-                     call loc2spher(xk1(k),yk1(k),1,dumx,dumy,xk1(k),yk1(k))
+                     dumx(1) = relaxin*Dx0
+                     dumy(1) = relaxin*Dy0
+                     call loc2spher(xk(k),yk(k),1,dumx,dumy,xk1(k),yk1(k))
                   else
-                     xk1(k) = Dx0 + xk1(k)
-                     yk1(k) = Dy0 + yk1(k)
+                     x0 = xk(k) + Dx0
+                     y0 = yk(k) + Dy0
+            
+                     xk1(k) = relaxin * x0 + relax1 * xk(k)
+                     yk1(k) = relaxin * y0 + relax1 * yk(k)
                   end if
                else
                   call cirr(xk1(k), yk1(k), ncolhl)
@@ -16514,13 +16557,26 @@ tp:do no = 1,itatp
 !                  iexit = 1
                end if
             enddo ndki
-         enddo
+            
+            xk(1:numk) = xk1(1:numk)
+            yk(1:numk) = yk1(1:numk)
 
-!        project boundary nodes back to the boundary
-         if ( JAPROJECT.ge.1 ) then
-!            call adddot(xk1(11),yk1(11),dble(no))
-            call orthonet_project_on_boundary(nmkx, kk1, k_bc, xkb, ykb)
-         end if
+!           project boundary nodes back to the boundary
+            if ( JAPROJECT.ge.1 ) then
+!               call adddot(xk1(11),yk1(11),dble(no))
+               call orthonet_project_on_boundary(nmkx, kk1, k_bc, xkb, ykb)
+            end if
+            
+!           snap to nearest land boundary
+            if ( JAPROJECT.ge.2 ) call snap_to_landboundary() 
+
+!           update local coordinates
+            if ( jsferic.eq.1 .and. jasfer3D.eq.1 ) then
+!              compute local coordinates
+               call comp_local_coords(iloc,kk1,xk,yk,iloc(numk+1)-1,xloc,yloc)
+            end if
+         
+         enddo
 
 !  press left or middle mouse button to toggle net plotting on/off;
 !  press right mouse button to terminate orthogonizenet
@@ -16529,11 +16585,11 @@ tp:do no = 1,itatp
             ja1 = -1234
             call teknet(0,ja1)                        ! whipe out previous net image
 !            call teknetcells(NDRAW(33), -1234, 0)
-            xk(1:numk) = xk1(1:numk)
-            yk(1:numk) = yk1(1:numk)
+!            xk(1:numk) = xk1(1:numk)
+!            yk(1:numk) = yk1(1:numk)
 
    !        snap to nearest land boundary
-            if ( JAPROJECT.ge.2 ) call snap_to_landboundary() ! JAPROJECT)
+ !           if ( JAPROJECT.ge.2 ) call snap_to_landboundary() ! JAPROJECT)
 
             ja1 = -1234
             call teknet(ncolhl,ja1)
@@ -16541,11 +16597,11 @@ tp:do no = 1,itatp
             !NDRAW(10) = 1
             !CALL PLOT(NDRAW(10))
          else
-            xk(1:numk) = xk1(1:numk)
-            yk(1:numk) = yk1(1:numk)
+!            xk(1:numk) = xk1(1:numk)
+!            yk(1:numk) = yk1(1:numk)
 
    !        snap to nearest land boundary
-            if ( JAPROJECT.ge.2 ) call snap_to_landboundary() ! JAPROJECT)
+!            if ( JAPROJECT.ge.2 ) call snap_to_landboundary() ! JAPROJECT)
          end if
 
 
@@ -16772,8 +16828,8 @@ tp:do no = 1,itatp
 
          if ( (nb(k0) .ne. 1) .and. (nb(k0) .ne. 2)) cycle
 
-         x0 = xk1(k0)
-         y0 = yk1(k0)
+         x0 = xk(k0)
+         y0 = yk(k0)
 
    numkk:do kk = 1,nmk(k0)        ! loop over all links of node k0
             L   = nod(k0)%lin(kk) ! link number
@@ -16802,17 +16858,20 @@ tp:do no = 1,itatp
    !              find a point inside cell kL and compute outward normal
                   kL = lne(1,L)        ! left cell w.r.t. link L
                   nn = netcell(kL)%n
-                  x3 = SUM( xk(netcell(kL)%nod(1:nn)) ) / nn
-                  y3 = SUM( yk(netcell(kL)%nod(1:nn)) ) / nn
+!                  x3 = SUM( xk(netcell(kL)%nod(1:nn)) ) / nn
+!                  y3 = SUM( yk(netcell(kL)%nod(1:nn)) ) / nn
+                  
+                  x3 = xzw(kL)
+                  y3 = yzw(kL)
 
                   call normaloutchk(x0, y0, x1, y1, x3, y3, xn, yn, ja, jsferic, jasfer3D, dmiss, dxymis)
-                  if (JSFERIC.eq.1) xn = xn * cos(dg2rd*0.5d0*(y0+y1) ) ! normal vector needs to be in Cartesian coordinates
+                  if ( JSFERIC.eq.1 .and. jasfer3D.eq.0 ) xn = xn * cos(dg2rd*0.5d0*(y0+y1) ) ! normal vector needs to be in Cartesian coordinates
 
                   rhs(1,k0)    = rhs(1,k0) + (atpf  * R01 * xn  / 2 + &
                                               atpf1 * SLR * xn * 0.5d0/mu)
                   rhs(2,k0)    = rhs(2,k0) + (atpf  * R01 * yn  / 2 + &
                                               atpf1 * SLR * yn * 0.5d0/mu)
-
+                    
                   ww(kk,k0)    = atpf  * 0.5d0 * SfR + &
                                  atpf1 * 0.5d0 * mu
    !-------------------------------------------------------------------------
@@ -17135,6 +17194,8 @@ tp:do no = 1,itatp
 
       double precision                               :: alpha      ! used for monotonicity correction
       double precision                               :: beta       ! defines the mesh refinement concentration; 0<=beta<=1
+      
+      double precision                               :: dcosfac
 
       double precision,              dimension(4)    :: Gdum
       double precision,              dimension(4)    :: DGinvDxi, DGinvDeta
@@ -17158,6 +17219,11 @@ tp:do no = 1,itatp
       J = 0d0
 !     compute Jacobian matrices
       do k0=1,Numk
+         dcosfac = 1d0
+         if ( jsferic.eq.1 ) then
+            dcosfac = cos(yk(k0)*dg2rd)
+         end if
+      
 !         if ( nb(k0).ne.1 .and. nb(k0).ne.2 .and. nb(k0).ne.3 ) cycle
          if ( nb(k0).ne.1 .and. nb(k0).ne.2 .and. nb(k0).ne.4 ) cycle
          op = ops(ktopo(k0))
@@ -17172,9 +17238,9 @@ tp:do no = 1,itatp
              J(3,k0) = sum( op%Jeta(1:nmk2(k0)) * xloc(iloc(k0):iloc(k0+1)-1) )
              J(4,k0) = sum( op%Jeta(1:nmk2(k0)) * yloc(iloc(k0):iloc(k0+1)-1) )
           else
-             J(1,k0) = sum( op%Jxi( 1:nmk2(k0)) * xk(kk2(1:nmk2(k0),k0)) )
+             J(1,k0) = sum( op%Jxi( 1:nmk2(k0)) * xk(kk2(1:nmk2(k0),k0)) ) * dcosfac
              J(2,k0) = sum( op%Jxi( 1:nmk2(k0)) * yk(kk2(1:nmk2(k0),k0)) )
-             J(3,k0) = sum( op%Jeta(1:nmk2(k0)) * xk(kk2(1:nmk2(k0),k0)) )
+             J(3,k0) = sum( op%Jeta(1:nmk2(k0)) * xk(kk2(1:nmk2(k0),k0)) ) * dcosfac
              J(4,k0) = sum( op%Jeta(1:nmk2(k0)) * yk(kk2(1:nmk2(k0),k0)) )
           end if
       end do
@@ -17223,9 +17289,9 @@ tp:do no = 1,itatp
                J(3,k0) = sum( op%Jeta(1:nmk2(k0)) * xloc(iloc(k0):iloc(k0+1)-1) )
                J(4,k0) = sum( op%Jeta(1:nmk2(k0)) * yloc(iloc(k0):iloc(k0+1)-1) )
             else
-               J(1,k0) = sum( op%Jxi( 1:nmk2(k0)) * xk(kk2(1:nmk2(k0),k0)) )
+               J(1,k0) = sum( op%Jxi( 1:nmk2(k0)) * xk(kk2(1:nmk2(k0),k0)) ) * dcosfac
                J(2,k0) = sum( op%Jxi( 1:nmk2(k0)) * yk(kk2(1:nmk2(k0),k0)) )
-               J(3,k0) = sum( op%Jeta(1:nmk2(k0)) * xk(kk2(1:nmk2(k0),k0)) )
+               J(3,k0) = sum( op%Jeta(1:nmk2(k0)) * xk(kk2(1:nmk2(k0),k0)) ) * dcosfac
                J(4,k0) = sum( op%Jeta(1:nmk2(k0)) * yk(kk2(1:nmk2(k0),k0)) )
             end if
 
@@ -18861,13 +18927,13 @@ subroutine orthonet_project_on_boundary(nmkx, kk1, k_bc, xkb, ykb)
    double precision                  :: dis2, dis3, r2, r3
 
    integer                           :: k, kk, k0, kL, kR, nr, ja2, ja3
-
+   
    do k0 = 1,numk
       if ( nb(k0).eq.2 .and. nmk(k0).gt.0) then
          k  = k_bc(k0)        ! the nearest node in the original net, in previous iteration
          if ( nmk(k).eq.0 ) cycle
-         x0 = xk1(k0)
-         y0 = yk1(k0)
+         x0 = xk(k0)
+         y0 = yk(k0)
          nr = 0
          kr = -999
          do kk = 1,nmk(k)
@@ -18902,11 +18968,11 @@ subroutine orthonet_project_on_boundary(nmkx, kk1, k_bc, xkb, ykb)
             if ( (r3.gt.0.5d0) .and. (nb(kR).ne.3) ) k_bc(k0) = kR
          endif
 
-         xk1(k0) = x0 ; yk1(k0) = y0
+         xk(k0) = x0 ; yk(k0) = y0
 
       endif
    enddo
-
+   
 end subroutine orthonet_project_on_boundary
 
 
@@ -19189,11 +19255,11 @@ chsz:do         ! while array size not exceeded
          k1 = kn(1,kk)
          k2 = kn(2,kk)
 
-         x1 = xk1(k1)
-         y1 = yk1(k1)
+         x1 = xk(k1)
+         y1 = yk(k1)
 
-         x2 = xk1(k2)
-         y2 = yk1(k2)
+         x2 = xk(k2)
+         y2 = yk(k2)
 
    !     find neighboring link connected to node k1
          maxcosphi = COSMIN
@@ -19204,8 +19270,8 @@ chsz:do         ! while array size not exceeded
             k3  = sum( kn(1:2,L1) ) - k1
             if ( (k3.eq.k2)  .or. (kc(k3).eq.0) ) cycle
 
-            x3 = xk1(k3)
-            y3 = yk1(k3)
+            x3 = xk(k3)
+            y3 = yk(k3)
             cosphi = dcosphi(x2,y2, x1,y1, x1,y1, x3,y3, jsferic, jasfer3D, dxymis)
 
    !        find parallel links connected to node 1
@@ -19251,8 +19317,8 @@ chsz:do         ! while array size not exceeded
             k3 = sum( kn(1:2,L1) ) - k2
             if ( (k3.eq.k1) .or. (kc(k3).eq.0) ) cycle
 
-            x3 = xk1(k3)
-            y3 = yk1(k3)
+            x3 = xk(k3)
+            y3 = yk(k3)
             cosphi = dcosphi(x1,y1, x2,y2, x2,y2, x3,y3, jsferic, jasfer3D, dxymis)
 
    !        find parallel links connected to node 2
@@ -21235,6 +21301,7 @@ end subroutine sort_flowlinks_ccw
 subroutine comp_ntopo(L, jalandbound, k1, k2, kL, kR, icellL, icellR, ntopo)
    use m_netw
    use m_alloc
+   use m_missing
 
    implicit none
 
@@ -21251,7 +21318,7 @@ subroutine comp_ntopo(L, jalandbound, k1, k2, kL, kR, icellL, icellR, ntopo)
 
    logical               :: Lproceed
 
-   integer, parameter    :: IMISS = -999
+!   integer, parameter    :: IMISS = -999
 
    integer, external     :: nmk_opt
 
@@ -21535,15 +21602,15 @@ subroutine sortlinks()
             L1 = nod(k0)%lin(k1)
             knext = 0               ! next link
 
-   !        1D-links are fine: proceed
-            if ( lnn(L1).lt.1 .or. kn(3,L1).eq.1 .or. kn(3,L1).eq.3 .or. kn(3,L1).eq.4 ) cycle
+   !        1D-links are fine: proceed  ! is .or. necessary? all 1D has lnn==0
+            if ( lnn(L1).lt.1 .or. kn(3,L1).eq.1 .or. kn(3,L1).eq.3 .or. kn(3,L1).eq.4 .or. kn(3,L1).eq.5 .or. kn(3,L1).eq.6 .or. kn(3,L1).eq.7 ) cycle
 
    !        find the next link
    !        first try to find a link with a common cell
             i1 = min(lnn(L1), 2)
             do k2=k1+1,N            ! loop over remaining links
                L2 = nod(k0)%lin(k2)
-               if ( lnn(L2).lt.1 .or. kn(3,L2).eq.1  .or. kn(3,L2).eq.3  .or. kn(3,L2).eq.4 ) cycle  ! 1D-link
+               if ( lnn(L2).lt.1 .or. kn(3,L2).eq.1  .or. kn(3,L2).eq.3  .or. kn(3,L2).eq.4 .or. kn(3,L1).eq.5 .or. kn(3,L1).eq.6 .or. kn(3,L1).eq.7 ) cycle  ! 1D-link
                i2 = min(lnn(L2), 2)
 
                if ( i2.lt.1 ) then
@@ -21572,7 +21639,7 @@ subroutine sortlinks()
    !              find next non-internal link
                   do k2=k1+1,N
                      L2 = nod(k0)%lin(k2)
-                     if ( lnn(L2).lt.2 .or. kn(3,L2).eq.1  .or. kn(3,L2).eq.3  .or. kn(3,L2).eq.4) then  ! found
+                     if ( lnn(L2).lt.2 .or. kn(3,L2).eq.1  .or. kn(3,L2).eq.3  .or. kn(3,L2).eq.4 ) then ! .or. kn(3,L1).eq.5 .or. kn(3,L1).eq.6 .or. kn(3,L1).eq.7) then  ! found
                         knext = k2
                         exit
                      end if
@@ -22571,6 +22638,7 @@ subroutine find_nearest_meshline(jasnap)
    use m_landboundary
    use m_missing
    use m_alloc
+   use m_missing
 
    implicit none
 
@@ -22872,7 +22940,7 @@ contains
 !> mask the nodes that are considered in the shortest path algorithm
    subroutine masknodes(numseg)
    
-      use m_missing, only: dmiss, JINS
+      use m_missing
       use m_polygon, only: NPL, xpl, ypl, zpl
       use geometry_module, only: dbpinpol
       use geometry_module, only: pinpok
@@ -22894,7 +22962,7 @@ contains
 
       double precision                   :: dis, xn, yn, rL
 
-      integer, parameter                 :: IMISS = -999
+!      integer, parameter                 :: IMISS = -999
 
 !     clear nodemask
       nodemask = IMISS
@@ -23169,7 +23237,7 @@ contains
       
       use network_data
       use geometry_module, only: dbdistance, dlinedis
-      use m_missing, only: dmiss
+      use m_missing
       use m_sferic, only: jsferic, jasfer3D
 
       implicit none
@@ -23198,7 +23266,7 @@ contains
       double precision, parameter                                :: fsixth = 1d0/6d0
       integer,          parameter                                :: alpha  = 1
 
-      integer, parameter                                         :: IMISS = -999
+!      integer, parameter                                         :: IMISS = -999
 
       allocate(dist(numk))
 
@@ -23293,7 +23361,7 @@ contains
 !>  note: will use jleft, jright, rLleft and rLright
    subroutine get_kstartend(jstart, jend, kstart, kend)
    
-      use m_missing, only: dmiss, JINS
+      use m_missing, only: dmiss, imiss, JINS
       use m_polygon, only: NPL, xpl, ypl, zpl
       use geometry_module, only: dbpinpol, dbdistance
       use m_sferic, only: jsferic, jasfer3D
@@ -24121,7 +24189,7 @@ kklp:do kk=1,nmk(k)
    subroutine add_land()
    
       use geometry_module, only: dbdistance
-      use m_missing, only: dmiss
+      use m_missing, only: dmiss, imiss
       use m_sferic, only: jsferic, jasfer3D
       
       implicit none
@@ -33938,7 +34006,6 @@ function read_commandline() result(istat)
             end if
             
             return
-            
          case ('solvertest')
             md_soltest = 1
 !           key-value pairs
@@ -34163,278 +34230,7 @@ subroutine rearrange_worldmesh(xboundmin, xboundmax)
 end subroutine rearrange_worldmesh
 
 
-   !> find netcells surrounding a netnode, order in link direction "nod()%cell"
-   !>   cell "0" is a fictious boundary-cell
-   subroutine get_celllist(k, N, iclist)
-      use network_data
-      implicit none
 
-      integer,               intent(in)  :: k         !< netnode
-      integer,               intent(in)  :: N         !< array size
-      integer, dimension(N), intent(out) :: iclist    !< list of netcells attached to the node
-
-      integer                            :: ierror    ! error (1) or not (0)
-
-      integer                            :: i, ip1, ic1, ic2, j, ja, L, Lp1, NN
-      integer                            :: ii, iim1
-
-      ierror = 1
-
-      NN = nmk(k)
-
-      if ( NN.gt.N ) then
-         call qnerror('get_celllist: array size error', ' ', ' ')
-         goto 1234
-      end if
-
-      do i=1,NN
-   !     find cell between ith and (i+1)rst link, 0 indicates no cell (boundary)
-         L = nod(k)%lin(i)
-         ip1 = i+1; if ( ip1.gt.NN ) ip1=ip1-NN
-         Lp1 = nod(k)%lin(ip1)
-
-         ic1 = lne(1,L)
-         if ( lnn(L).gt.1) then
-            ic2 = lne(2,L)
-         else
-            ic2 = 0  ! boundary netlink
-         end if
-
-   !    check if cell ic1 contains link (i+1)
-        ja = 0
-        if ( lnn(L).gt.0 ) then
-!          find own link index
-           ii = 1
-           do while ( netcell(ic1)%lin(ii).ne.L .and. ii.lt.netcell(ic1)%N )
-              ii = ii+1
-           end do
-!          check if previous netlink in netcell ic1 is netlink (i+1)
-           iim1 = ii-1; if ( iim1.lt.1 ) iim1=iim1+netcell(ic1)%N
-
-              if ( netcell(ic1)%lin(iim1).eq.Lp1 ) then
-                 ja = 1
-              end if
-        end if
-
-        if (ja.eq.1 ) then
-   !       cell ic1 is between the ith and (i+1)rst link
-           iclist(i) = ic1
-        else
-   !    if cell ic1 does not contain link (i+1), use ic2 (0 for boundary, or isolated, or 1D links)
-           iclist(i) = ic2
-        end if
-      end do
-
-   !  determine if ic1 or ic2 
-
-      ierror = 0
-   1234 continue   
-      return
-   end subroutine get_celllist
-
-
-   !> make dual cell polygon around netnode k
-   subroutine make_dual_cell(k, N, rcel, xx, yy, num)
-      
-      use network_data
-      use m_flowgeom, only : Wu1Duni
-      use m_polygon
-      use m_missing
-      use m_sferic
-      use geometry_module, only: normalout, comp_masscenter
-      use gridoperations
-      use unstruc_messages
-      
-      implicit none
-
-      integer,                        intent(in)  :: k         !< netnode number
-      integer,                        intent(in)  :: N         !< array size
-      double precision,               intent(in)  :: rcel      !< dual-cell enlargement factor around dual-cell center
-      double precision, dimension(N), intent(out) :: xx, yy    !< dual-cell polygon coordinates
-      integer,                        intent(out) :: num       !< polygon dimension
-
-      integer                                     :: ierror ! error (1) or not (0)
-
-      integer,          dimension(N)              :: iclist
-
-      double precision                            :: xc, yc, area, w, sn, cs, xh, yh, aa, cs2, cs3, sn2, sn3, f
-
-      integer                                     :: i, ic, k1, k2, L, NN, Nc, ja2D, Lp, k3, ip, is, ncol
-      integer                                     :: jacounterclockwise          ! counterclockwise (1) or not (0) (not used here)
-
-      ierror = 1
-
-      !if ( k.eq.4399 ) then
-      !   continue
-      !end if
-
-      NN = nmk(k)
-
-      ja2D = 1
-      do i=1,NN
-          L = nod(k)%lin(i)
-          if (kn(3,L) /= 2 .and. kn(3,L).ne.0 ) ja2D = 0  
-      enddo   
-
-      if ( NN.gt.N ) then
-         call qnerror('make_dual_cell: array size error', ' ', ' ')
-         goto 1234
-      end if
-
-      if (ja2D == 1) then  
-   !     get ordered cell list
-         call get_celllist(k, N, iclist)
-         
-   !     construct dual cell polygon
-         num = 0
-         do i=1,NN
-            num = num+1
-            L = nod(k)%lin(i)
-            k1 = k
-            k2 = kn(1,L)+kn(2,L)-k
-            xx(num) = 0.5d0*(xk(k1)+xk(k2))
-            yy(num) = 0.5d0*(yk(k1)+yk(k2))
-            
-!           fix for periodic, spherical coordinates   
-            if ( jsferic.eq.1 ) then
-               if ( xk(k2)-xk(k1).gt.180d0 ) then
-                  xx(num) = xx(num) - 180d0
-               else if ( xk(k2)-xk(k1).lt.-180d0 ) then
-                  xx(num) = xx(num) + 180d0
-               end if
-            end if
-         
-            num = num+1
-            ic = iclist(i)
-            if ( ic.ne.0 ) then
-               Nc = netcell(ic)%N
-               xx(num) = xzw(ic)
-               yy(num) = yzw(ic)
-            else
-               xx(num) = xk(k)
-               yy(num) = yk(k)
-            end if
-         end do
-         
-   !     compute dual cell center
-         call comp_masscenter(num, xx, yy, xc, yc, area, jacounterclockwise, jsferic, jasfer3D, dmiss)
-
-!        fix for periodic, spherical coordinates           
-         if ( xc-xk(k).gt.180d0 ) then
-            xc = xc - 360d0
-         else if ( xc-xk(k).lt.-180d0 ) then
-            xc = xc + 360d0
-         end if
-         
-   !     enlarge dual cell
-         do i=1,num
-            xx(i) = xc + RCEL*(xx(i)-xc)
-            yy(i) = yc + RCEL*(yy(i)-yc)
-         end do
-
-      else ! 1D
-      
-         if ( jsferic.eq.1 ) then
-            call mess(LEVEL_ERROR, 'make_dual_cell: 1D not supported in spherical coordinates')
-         end if
-      
-         w   = Wu1Duni
-         num = 0
-         
-         !if ( jsferic.eq.1 ) then
-         !   w = rd2dg * 2d0*pi * Wu1Duni/(ra*cos(dg2rd*yk(k)))
-         !end
-         if (nn == 1) then 
-
-            L = nod(k)%lin(1) ; call othernode(k,L,k2)
-            xh      = 0.5d0*( xk(k) + xk(k2) )
-            yh      = 0.5d0*( yk(k) + yk(k2) )
-            call normalout( xk(k), yk(k), xk(k2), yk(k2), cs, sn, jsferic, jasfer3D, dmiss, dxymis) 
-            num     = num + 1
-            xx(num) = xk(k) - w*cs 
-            yy(num) = yk(k) - w*sn 
-            num     = num + 1
-            xx(num) = xh    - w*cs 
-            yy(num) = yh    - w*sn 
-            num     = num + 1
-            xx(num) = xh    + w*cs 
-            yy(num) = yh    + w*sn 
-            num     = num + 1
-            xx(num) = xk(k) + w*cs 
-            yy(num) = yk(k) + w*sn 
-            
-         else 
-            
-            if (nn == 2) then 
-               is =  1
-            else    
-               is = -1
-            endif  
-    
-            do i = 1,NN
-               L = nod(k)%lin(i) ; call othernode(k,L,k2)
-              
-               ip = i + 1 ; if (i == nn) ip = 1 
-               Lp = nod(k)%lin(ip) ; call othernode(k,Lp,k3)   
-
-               call normalout( xk(k2), yk(k2), xk(k), yk(k),  cs2, sn2, jsferic, jasfer3D, dmiss, dxymis) 
-               call normalout( xk(k) , yk(k), xk(k3), yk(k3), cs3, sn3, jsferic, jasfer3D, dmiss, dxymis)
-               f = w/(1d0+cs2*cs3+sn2*sn3) 
-               
-               num     = num + 1
-               xh      = 0.5d0*( xk(k) + xk(k2) )
-               yh      = 0.5d0*( yk(k) + yk(k2) )
-               xx(num) = xh + w*cs2 
-               yy(num) = yh + w*sn2  
-
-               num     = num + 1
-               xx(num) = xk(k) + f*(cs2+cs3)  
-               yy(num) = yk(k) + f*(sn2+sn3) 
-
-               num    = num + 1
-               xh      = 0.5d0*( xk(k) + xk(k3) )
-               yh      = 0.5d0*( yk(k) + yk(k3) )
-               xx(num) = xh + w*cs3 
-               yy(num) = yh + w*sn3 
-
-            enddo   
-        
-                 
-         endif   
-         
-         if (num .ge. 3) then 
-             call random_number(aa)
-             ncol = 255*aa
-             call DISPF2closed(xx,yy,num,num,ncol)
-         endif   
-         
-      endif   
-         
- 
-
-   !!  BEGIN DEBUG
-   !   !if ( k.eq.5 ) then
-   !      call increasepol(NPL+num+1, 1)
-   !      NPL = NPL+1
-   !      xpl(NPL) = DMISS
-   !      ypl(NPL) = DMISS
-   !      zpl(NPL) = 0d0
-   !      do i=1,num
-   !         NPL = NPL+1
-   !         xpl(NPL) = xx(i)
-   !         ypl(NPL) = yy(i)
-   !         zpl(NPL) = dble(k)
-   !      end do
-   !   !end if
-   !!  END DEBUG
-
-      ierror = 0
-   1234 continue
-      return
-   end subroutine make_dual_cell
-    
-    
-!    
    subroutine fix_global_polygons(jaalwayscopyleftright, japartpols)
       
       use m_sferic
@@ -35078,8 +34874,9 @@ subroutine delete_drypoints_from_netgeom(dryptsfilelist, jaconfirm, jinside)
    use unstruc_messages
    use m_sferic, only: jsferic
    use string_module
-   use m_polygon, only: NPL, ZPL
+   use m_polygon, only: NPL, ZPL, savepol, restorepol
    use m_tpoly
+   use m_samples
    implicit none
    
    character(*), intent(inout) :: dryptsfilelist
@@ -35235,7 +35032,7 @@ subroutine copysamtopol()
    
    use M_SAMPLES
    use m_missing, only: dmiss, JINS
-   use m_polygon, only: NPL, xpl, ypl, zpl
+   use m_polygon, only: NPL, xpl, ypl, zpl, increasepol, savepol
    use geometry_module, only: dbpinpol
 
    implicit none
@@ -35292,7 +35089,6 @@ subroutine samdif()
 
    use m_polygon
    use m_samples
-   use m_samples3
    use network_data, only: tooclose
    use kdtree2Factory
    use m_missing
@@ -35431,7 +35227,7 @@ subroutine preparecells(md_netfile, jaidomain, jaiglobal_s, ierr)
            lnn(L) = j
            lne(j, L) = -c
        endif
-       if (kn(3, L) == 3  .or. kn(3, L) == 4) then   ! If 1d link L enters a 2d cell
+       if (kn(3, L) == 3  .or. kn(3, L) == 4  .or. kn(3, L) == 5 .or. kn(3, L) == 7) then   ! If 1d link L enters a 2d cell
           k1 = kn(1, L)
           if (k1 == k) then
              k1 = kn(2, L)
@@ -36013,3 +35809,149 @@ ilp:do isplit=1,MAXSPLIT
        return
     end subroutine
  end subroutine split_pol_with_line
+
+ !> make structured triangular mesh from curvlinear grid
+ subroutine maketrigrid()
+    use m_grid
+    use m_sferic, only: jsferic, jasfer3D
+    use geometry_module, only :half
+    use m_missing
+    implicit none
+    
+    double precision, dimension(:,:), allocatable :: x, y ! original grid coordinates
+    
+    integer                                       :: i,j
+    integer                                       :: M, N ! original grid dimensions
+    integer                                       :: Mnew, Nnew ! new grid dimensions
+    
+    integer                                       :: orient
+    integer                                       :: ja
+    
+    if ( MC*NC.eq.0 ) return  ! nothing to do
+    
+    call savegrd()
+    
+    orient = 1
+    
+!   whip out grid
+    call cleargrid()
+    
+    do
+!      allocate and copy original grid
+       if ( orient.eq.1 ) then
+          M = MC
+          N = NC
+          allocate(x(M,N))
+          allocate(y(M,N))
+          do j=1,N
+             do i=1,M
+                x(i,j) = xc(i,j)
+                y(i,j) = yc(i,j)
+             end do
+          end do
+       else if ( orient.eq.2 ) then
+          M = NC
+          N = MC
+          allocate(x(M,N))
+          allocate(y(M,N))
+          do j=1,N
+             do i=1,M
+                x(i,j) = xc(MC-j+1,i)
+                y(i,j) = yc(MC-j+1,i)
+             end do
+          end do
+       else if ( orient.eq.3 ) then
+          M = MC
+          N = NC
+          allocate(x(M,N))
+          allocate(y(M,N))
+          do j=1,N
+             do i=1,M
+                x(i,j) = xc(MC-i+1,NC-j+1)
+                y(i,j) = yc(MC-i+1,NC-j+1)
+             end do
+          end do
+       else
+          M = NC
+          N = MC
+          allocate(x(M,N))
+          allocate(y(M,N))
+          do j=1,N
+             do i=1,M
+                x(i,j) = xc(j,NC-i+1)
+                y(i,j) = yc(j,NC-i+1)
+             end do
+          end do
+       end if
+       
+!      compute new grid dimensions
+       Mnew = 2*M-2
+       Nnew = N
+       
+!      increase grid
+       MC = Mnew
+       NC = Nnew
+       call increasegrid(MC,NC)
+       xc = DMISS
+       yc = DMISS
+       
+!      odd j-lines: copy
+       do j=1,N,2
+          do i=1,M-1
+!            odd i-lines                
+             xc(2*i-1,j) = x(i,j)
+             yc(2*i-1,j) = y(i,j)
+             
+!            even i-lines
+             xc(2*i,j) = x(i+1,j)
+             yc(2*i,j) = y(i+1,j)
+          end do
+       end do
+       
+!      even j-lines: shift
+       do j=2,N,2
+          do i=1,M-1
+!            odd i-lines
+             call half(x(i,j),y(i,j),x(i+1,j),y(i+1,j),xc(2*i-1,j),yc(2*i-1,j),jsferic,jasfer3D)
+             
+!            even i-lines               
+             xc(2*i,j) = xc(2*i-1,j)
+             yc(2*i,j) = yc(2*i-1,j)
+          end do
+       end do
+    
+!      deallocate
+       if ( allocated(x) ) deallocate(x)
+       if ( allocated(y) ) deallocate(y)
+       
+!      plot grid          
+       call tekgrid(i)
+       
+       ja = 0
+       call confrm('Shift orientation?', ja)
+       if ( ja.eq.1 ) then
+!         whip out grid
+          call cleargrid()
+          
+          call restoregrd()
+          
+          orient = orient+1; if ( orient.gt.4 ) orient=orient-4
+       else
+          exit
+       end if
+    
+    end do
+    
+    call confrm('Are you satisfied?', ja)
+    if ( ja.ne.1 ) then
+!      whip out grid
+       call cleargrid()
+       
+       call restoregrd()
+       
+!      plot grid          
+       call tekgrid(i)
+    end if
+    
+    return
+ end subroutine maketrigrid

@@ -1,6 +1,7 @@
 !----- AGPL --------------------------------------------------------------------
 !
-!  Copyright (C)  Stichting Deltares, 2017-2018.!
+!  Copyright (C)  Stichting Deltares, 2017.
+!
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).
 !
 !  Delft3D is free software: you can redistribute it and/or modify
@@ -62,8 +63,12 @@
  double precision                  :: vonkarw    !< von Karman constant used in wind formulations, on Firmijns request ()
  double precision                  :: frcuni     !< uniform friction coeff 2D
  double precision                  :: frcuni1D   !< uniform friction coeff 1D
- double precision                  :: frcuni1D2D !< uniform friction coeff 1D2D
- double precision                  :: frcmax     !< max friction coeff in frcu
+ double precision                  :: frcuni1D2D !< uniform friction coeff 1D2D 
+ double precision                  :: frcunistreetinlet    = 0.035
+ double precision                  :: frcuniroofgutterpipe = 0.035
+ double precision                  :: frcuniroof           = 0.030
+ double precision                  :: frcuni1Dgrounlay !< uniform friction coeff groundlayer
+ double precision                  :: frcmax           !< max friction coeff in frcu
 
  integer                           :: ifrctypuni !< 0=chezy, 1=manning, 2=white colebrook D3D, 3=white colebrook Waqua (now only 2D)
  double precision                  :: frcunilin  !<60.    ! 6      ! 66     ! uniform friction coeff
@@ -145,6 +150,7 @@ ee9         = 9d0*ee    !
 frcuni      = 0.023d0   ! 60.    ! 6      ! 66     ! uniform friction coeff
 frcuni1D    = 0.023d0   ! 60.    ! 6      ! 66     ! uniform friction coeff
 frcuni1D2D  = 0.023d0   ! 60.    ! 6      ! 66     ! uniform friction coeff
+frcuni1Dgrounlay  = 0.05d0   ! 60.    ! 6      ! 66     ! uniform friction coeff
 frcmax      = 0d0
 ifrctypuni  = 1         ! 0=chezy, 1=manning, 2=white colebrook (D3D), 3=white colebrook (WAQUA)
 frcunilin   = 0d0       !
@@ -247,6 +253,10 @@ module m_waves
  double precision, allocatable, target      :: twav(:)              !< [s] wave period {"location": "face", "shape": ["ndx"]}   
  double precision, allocatable, target      :: phiwav(:)            !< [degree] mean wave direction (degrees) from external source
  double precision, allocatable, target      :: Uorb(:)              !< [m/s] orbital velocity {"location": "face", "shape": ["ndx"]}
+ double precision, allocatable, target      :: ustokes(:)           !< wave induced velocity, link-based and link-oriented
+ double precision, allocatable, target      :: vstokes(:)           !< wave induced velocity, link-based and link-oriented
+ double precision, allocatable              :: rlabda(:)
+ 
  double precision, allocatable, target      :: dsurf(:)             !< [w/m2] wave energy dissipation rate due to breaking at the free surface, "DISSURF" in WAVE
  double precision, allocatable, target      :: dwcap(:)             !< [w/m2] wave energy dissipation rate due to white capping
  integer         , allocatable, target      :: kdismx(:)            !< help array to determine the layer of hrms effect
@@ -272,17 +282,13 @@ module m_waves
  double precision, allocatable, target      :: mxwav(:)             !< wave induced volume flux, in x-direction at flow-nodes
  double precision, allocatable, target      :: mywav(:)             !< wave induced volume flux, in y-direction at flow-nodes
 
- double precision, allocatable, target      :: ustokes(:)           !< wave induced velocity, link-based and link-oriented
- double precision, allocatable, target      :: vstokes(:)           !< wave induced velocity, link-based and link-oriented
-
- double precision, allocatable              :: rlabda(:)
- 
  double precision, allocatable              :: taubxu(:)            !< Maximal bed shear stress
  double precision, allocatable              :: ypar(:)
  double precision, allocatable              :: cfwavhi(:)
  double precision, allocatable              :: cfhi_vanrijn(:)
  double precision, allocatable              :: wblt(:)
  double precision, allocatable              :: taux_cc(:), tauy_cc(:)
+
  double precision                           :: facmax               !< maximum wave force
  
  ! for visualisation
@@ -298,7 +304,8 @@ module m_waves
  double precision                           :: hminlw               !< [m] minimum depth for wave forcing in flow momentum equation RHS. 
  integer                                    :: jatpwav=TPWAVDEFAULT !< TPWAV, TPWAVSMOOTH, TPWAVRELATIVE
  integer                                    :: jauorb               !< multiply with factor sqrt(pi)/2 (=0), or not (=1). Default 0, delft3d style
- integer                                    :: jahissigwav             !< 1: sign wave height on his output; 0: hrms wave height on his output. 
+ integer                                    :: jahissigwav          !< 1: sign wave height on his output; 0: hrms wave height on his output. 
+ integer                                    :: jamapsigwav          !< 1: sign wave height on map output; 0: hrms wave height on map output. 
 
 logical                                     :: extfor_wave_initialized !< is set to .true. when the "external forcing"-part that must be initialized for WAVE during running (instead of during initialization) has actually been initialized
 
@@ -307,12 +314,16 @@ contains
 !> Sets ALL (scalar) variables in this module to their default values.
 !! For a reinit prior to flow computation, only call reset_waves() instead.
 subroutine default_waves()
+   use m_physcoef
+   
    rouwav                  = 'FR84'
    gammax                  = 1.0d0        !< Maximum wave height/water depth ratio
    hminlw                  = 0.2d0        !< [-] minimum depth for wave forcing in flow momentum equation RHS. 
    jatpwav                 = TPWAVDEFAULT !< TPWAV, TPWAVSMOOTH, TPWAVRELATIVE
    jauorb                  = 0
    jahissigwav             = 1
+   jamapsigwav             = 0            ! Present behaviour
+   facmax                  = 0.25d0*sag*rhomean*gammax**2
 
    call reset_waves()
 end subroutine default_waves
@@ -854,8 +865,8 @@ end module m_bedform
  double precision, allocatable         :: h_unsat(:)           !< initial height unsaturated zone
  double precision, allocatable         :: bgrw(:)              !< initial height unsaturated zone
 
- double precision, allocatable         :: infilt(:)            !< [m3 s-1] Actual infiltration flux at current time {"location": "face", "shape": ["ndx"]}
- double precision, allocatable         :: infiltcap(:)         !< [m s-1] Maximum infiltration capacity on each cell {"location": "face", "shape": ["ndx"]}
+ double precision, allocatable, target :: infilt(:)            !< [m3 s-1] Actual infiltration flux at current time {"location": "face", "shape": ["ndx"]}
+ double precision, allocatable, target :: infiltcap(:)         !< [m s-1] Maximum infiltration capacity on each cell {"location": "face", "shape": ["ndx"]}
  double precision, allocatable         :: infiltcaproofs(:)    !< temporary of the same 
  
  integer                               :: jaintercept2D        !< 1 = uniform, 2 = spatially variable 
@@ -994,6 +1005,22 @@ double precision, allocatable, target :: patm(:)     !< atmospheric pressure use
 double precision, allocatable, target :: rain(:)     !< [mm/day] rain at xz,yz {"location": "face", "shape": ["ndx"]}
 double precision, allocatable, target :: evap(:)     !< [m/s] evaporation at xz,yz {"location": "face", "shape": ["ndx"]}
 
+!!
+!! Laterals
+!!
+integer                      , target :: numlatsg    !< [-] nr of lateral discharge providers  {"rank": 0}
+double precision, allocatable, target :: qplat(:)    !< [m3/s] Lateral discharge of provider {"location": "face", "shape": ["numlatsg"]}
+double precision, allocatable, target :: qqlat(:)    !< [m3/s] Lateral discharge at xz,yz {"location": "face", "shape": ["ndx"]}
+double precision, allocatable, target :: balat(:)    !< [m2] total area of all cells in provider numlatsg  {"location": "face", "shape": ["numlatsg"]}
+
+!! Lateral lookup table: nnlat(n1) == ilat
+integer,          allocatable, target :: nnlat(:)    !< [-] for each cell pointer to qplat/balat {"location": "face", "shape": ["ndx"]}
+integer,          allocatable         :: kclat(:)    !< for each cell: 0 when not accepting lateral discharge (e.g. pipe)
+
+double precision, allocatable, target :: qinext(:)      !< [m3/s] External discharge per cell {"location": "face", "shape": ["ndkx"]}
+double precision, allocatable, target :: qinextreal(:)  !< [m3/s] Realized external discharge per cell {"location": "face", "shape": ["ndkx"]}
+double precision, allocatable, target :: vincum(:)      !< [m3] Cumulative realized volume through qinext {"location": "face", "shape": ["ndkx"]}
+
 double precision, allocatable, target :: tair(:)     !< air temperature       (degC)
 double precision, allocatable, target :: rhum(:)     !< air relative humidity (%)
 double precision, allocatable, target :: clou(:)     !< air cloudiness        (%)
@@ -1036,7 +1063,7 @@ double precision                  :: patmfac         !< 100 if Mbar, 1 if Pascal
 
 double precision                  :: cdb(3)          !< breakpoints cd function cd coefficient
 double precision                  :: wdb(3)          !< breakpoints cd function windspeed
-integer                           :: ICdtyp          !< 1=Const; 2=Smith&Banke (2 pts); 3=S&B (3 pts); 4=Charnock 1955, 5=Whang 2005, 6=Wuest 2005
+integer                           :: ICdtyp          !< 1=Const; 2=Smith&Banke (2 pts); 3=S&B (3 pts); 4=Charnock 1955, 5=Hwang 2005, 6=Wuest 2005
 integer                           :: jarelativewind  !< 1 = relative, 0 not relative
 
 contains
@@ -1079,8 +1106,9 @@ use m_physcoef, only : rhomean
    !> Resets only wind variables intended for a restart of flow simulation.
    !! Upon loading of new model/MDU, call default_wind() instead.
    subroutine reset_wind()
-   jawind  = 0           !< use wind yes or no
-   japatm  = 0           !< use patm yes or no
+   jawind   = 0           !< use wind yes or no
+   japatm   = 0           !< use patm yes or no
+   numlatsg = 0           !< [] nr of lateral discharge providers
    jaspacevarcharn = 0   !< use space varying Charnock coefficients
    jawindstressgiven = 0 !< wind stress given in meteo file
    end subroutine reset_wind
@@ -1858,17 +1886,29 @@ end module m_crspath
  integer         , allocatable, target :: gate2cgen(:)      !< (1:ngategen) Mapping from gate number to underlying generalstructure number
  integer         , allocatable, target :: genstru2cgen(:)   !< (1:ngenstru) Mapping from true general structure number to underlying generalstructure number
 
- integer                           :: npump             !< nr of pump links
- double precision, allocatable     :: xpump(:)          !< pump nodes xcor = xz(k1)
- double precision, allocatable     :: ypump(:)          !< pump nodes ycor
- double precision, allocatable, target :: qpump(:)      !< pump discharge m3/s
- double precision, allocatable     :: xy2pump(:,:)      !< pump links second point xcor = xz(k2)
- integer         , allocatable     :: kpump(:,:)        !< pump links index array, see lines above
- integer         , allocatable, target :: kdp(:)        !< helper for multiple_uni_pump
- integer         , allocatable     :: L1pumpsg(:)       !< first  npump point in pump signal npumpsg
- integer         , allocatable     :: L2pumpsg(:)       !< second npump point in pump signal npumpsg
- integer                           :: npumpsg           !< nr of pump signals specified
- character(len=128), allocatable, target :: pump_ids(:) !< the pumps ids
+ ! Pumps and pumps with levels
+ integer                                 :: npump                    !< nr of pump links
+ double precision, allocatable           :: xpump(:)                 !< pump nodes xcor = xz(k1)
+ double precision, allocatable           :: ypump(:)                 !< pump nodes ycor
+ double precision, allocatable, target   :: qpump(:)                 !< pump discharge m3/s
+ double precision, allocatable           :: xy2pump(:,:)             !< pump links second point xcor = xz(k2)
+ integer         , allocatable           :: kpump(:,:)               !< pump links index array, see lines above
+ integer         , allocatable, target   :: kdp(:)                   !< helper for multiple_uni_pump
+ integer         , allocatable           :: L1pumpsg(:)              !< first  npump point in pump signal npumpsg
+ integer         , allocatable           :: L2pumpsg(:)              !< second npump point in pump signal npumpsg
+ double precision, allocatable     :: pumponoff(:,:)    !< 1=suct on, 2=suct off, 3=deliv on, 4=deliv off , *)
+ integer                                 :: npumpsg                  !< nr of pump signals specified
+ integer         , allocatable           :: L1strucsg(:)              !< first  nstru point in pump signal
+ integer         , allocatable           :: L2strucsg(:)              !< second nstru point in pump signal
+ !variables for pump with levels
+ ! time varying
+ double precision, allocatable           :: waterLevelsPumpLeft(:)   !< left considering flow direction
+ double precision, allocatable           :: waterLevelsPumpRight(:)  !< right considering flow direction
+ double precision, allocatable           :: pumpAveraging(:,:)       !< to avoid allocations/deallocations
+ ! constant in time
+ integer                                 :: nPumpsWithLevels         !< nr of pump signals with levels (sobek format)
+ integer, allocatable                    :: pumpsWithLevels(:)       !< -1 = legacy, not 1 = new pump 
+ character(len=128), allocatable, target :: pump_ids(:)              !< the pumps ids
 
  ! Dambreak 
  !time varying
@@ -1876,8 +1916,10 @@ end module m_crspath
  double precision, allocatable, target   :: waterLevelsDambreakDownStream(:) !< the water levels computed each time step downstream
  double precision, allocatable, target   :: breachDepthDambreak(:)           !< the dambreak breach width (as a level)
  double precision, allocatable, target   :: breachWidthDambreak(:)           !< the dambreak breach width (as a level)
- double precision, allocatable           :: normalVelocityDambreak(:)                !< dambreak normal velocity
- double precision, allocatable           :: dambreakAveraging(:,:)           !<to avoid allocations/deallocations
+ double precision, allocatable           :: normalVelocityDambreak(:)        !< dambreak normal velocity
+ double precision, allocatable           :: dambreakAveraging(:,:)           !< to avoid allocations/deallocations
+ double precision, allocatable           :: breachWidthDerivativeDambreak(:) !< breach width derivatives
+ double precision, allocatable           :: waterLevelJumpDambreak(:)        !< water level jumps
  !constant in time
  double precision, allocatable           :: maximumDambreakWidths(:)         !< the total dambreak width (from pli file)
  double precision, allocatable           :: dambreakLinksEffectiveLength(:)  !< dambreak links index array
@@ -1999,6 +2041,8 @@ subroutine default_flowexternalforcings()
     ngenstru = 0      ! nr of real general structures in the generalstructure set
     npump   = 0       ! npump dimension
     npumpsg = 0       ! nr of pump signals
+    ndambreak = 0     ! nr of dambreak links
+    ndambreaksg = 0   ! nr of dambreak signals 
     nklep   = 0       ! nr of kleps
     nqbnd   = 0       ! nr of q bnd's
     ! JRE
@@ -2013,9 +2057,6 @@ module unstruc_channel_flow
 use m_network
 implicit none
 type(t_network)              :: network
-!variables for pump with levels
-integer                      :: nPumpsWithLevels    !< nr of pump signals with levels (sobek format)
-integer, allocatable         :: pumpsWithLevels(:)  !< -1 = legacy, not 1 = new pump
 contains
 
 
@@ -2050,7 +2091,7 @@ integer :: jaoldstr !< tmp backwards comp: we cannot mix structures from EXT and
                                                               !<                      (2,:) discharge through weir
  double precision, dimension(:,:), allocatable :: valcgen     !< Array for general structure (old ext), (1,:) discharge
  double precision, dimension(:,:), allocatable :: valgenstru  !< Array for general structure (new ext), (1,:) discharge
- double precision, dimension(:,:), allocatable :: valdambreak !< Array for dambreak, (1,:) instantanuous, (2,:) cumulative
+ double precision, dimension(:,:), allocatable, target :: valdambreak !< Array for dambreak, (1,:) instantanuous, (2,:) cumulative
 
  integer                           :: NUMVALS_PUMP = 5        !< Number of variables for pump
  integer                           :: NUMVALS_GATE = 5        !< Number of variables for gate
@@ -2337,7 +2378,8 @@ end subroutine default_turbulence
                                                         !< 9 =Perot in uit, 10=Perot in, piaczek fully implicit, weir + factor
                                                         !< 11=Perot in uit, 12=Perot in, piaczek fully implicit, gate + factor
                                                         !< 20=Energy conserving compact, piaczek fully implicit, weir
-
+ integer                           :: maxNonlinearIterations!< maximal iterations in non linear iteration loop before a time step reduction is applied
+ integer                           :: maxNonlinearIterationsIncrement!< maximal iterations in non linear iteration loop before a time step reduction is applied
 
  integer                           :: iadvec1D          !< same, now for 1D links
 
@@ -2456,12 +2498,15 @@ end subroutine default_turbulence
  double precision                  :: upot0=-999d0      !<  : initial potential energy 
  
  integer                           :: jaupdbndbl        !< Update bl at boundary (1 = update, 0 = no update) 
-
+ integer                           :: jaupdbobbl1d     !< Update bl and bobs for 1d network (call to setbobs_1d only at initialization)
+ 
  integer                           :: nonlin            !< 1 : non-linear continuity , == max(nonlin, nonlin2D) , 2 == pressurized nonlin
  integer                           :: nonlin1D          !< 1 : non-linear continuity eq for 1D points, only for non-rectangles
  integer                           :: nonlin2D          !< 1 : non-linear continuity eq for 2D points, only for skewed bed, i.e. jaconveyance2D >= 1
 
- integer                           :: iproftypuni       !< 1 : circle, 2 : rectan
+ integer                           :: iproftypuni       !< 1 : circle, 2 : rectan, 3 = rectan R=H, negative = closed for rain and grw
+ integer                           :: iproftypuni5      !< idem, for streetinlets
+ integer                           :: iproftypuni7      !< idem for roofgutterpipes 
  double precision                  :: slotw2D           !< minimum slotwidth 2D
  double precision                  :: slotw1D           !< minimum slotwidth 1D
 
@@ -2580,7 +2625,7 @@ end subroutine default_turbulence
 
  integer                           :: jaZlayeratubybob=0  !< 0 = BL left/right based, 1: Linkbob based
 
- integer                           :: jaZlayercenterbedvel=0
+ integer                           :: jaZlayercenterbedvel=1
  
  integer                           :: jabaroctimeint    !< time integration baroclini pressure, 1 = Euler, abs() = 2; rho at n+1/2, 3: AdamsB
 
@@ -2612,6 +2657,10 @@ end subroutine default_turbulence
 
  double precision                  :: botlayminthick         !< minimum bot layer thickness (m)
 
+ double precision                  :: uniformsalinityabovez = -999d0 !< above this level uniform inisaltop (m) dmiss==do not use
+
+ double precision                  :: uniformsalinitybelowz = -999d0 !< below this level uniform inisal    (m) dmiss==do not use
+ 
  double precision                  :: s1incinterval          !< incremental interval. if > 0 write incremental
 
  integer                           :: jbasqbnddownwindhs        !< 0 : original hu on qbnd, 1 = downwind hs on qbnd
@@ -2671,10 +2720,12 @@ end subroutine default_turbulence
  integer                           :: jamapdiu                  !< horizontal diffusity to map file, 0: no, 1: yes
  integer                           :: jamaprho                  !< flow density to map file, 0: no, 1: yes
  integer                           :: jamapq1                   !< flow flux to map file, 0: no, 1: yes
+ integer                           :: jamapq1main               !< main channel flow flux to map file, 0: no, 1: yes
  integer                           :: jamapspir                 !< spiral flow to map file, 0: no, 1: yes
  integer                           :: jamaptidep                !< tidal potential to map file, 0: no, 1: yes
  integer                           :: jamapIntTidesDiss         !< internal tides dissipation to map file, 0: no, 1: yes
  integer                           :: jamapNudge                !< output nudging to map file, 0: no, 1: yes
+ integer                           :: jamapwav                  !< output waves to map file, 0: no, 1: yes
  integer                           :: jatekcd                   !< tek output with wind cd coefficients, 0=no (default), 1=yes
  integer                           :: jafullgridoutput          !< 0:compact, 1:full time-varying grid data
  integer                           :: jaeulervel                !< 0:GLM, 1:Euler velocities
@@ -2721,6 +2772,9 @@ end subroutine default_turbulence
  
  ! parameter for bed roughness and transport
  integer                                              :: v2dwbl 
+ 
+ ! determines whether md1d file exist
+ integer                                              :: jamd1dfile = 0
  
  ! parameter for secondary flow
  integer                                              :: ispirparopt ! for visualization
@@ -2836,15 +2890,18 @@ subroutine default_flowparameters()
 
     ibedlevtyp1D = 3  !< 1 : same, 1D, 1 = tiles, xz(flow)=zk(net), bob(1,2) = max(zkr,zkl) , 3=mean netnode based
 
-    izbndpos  = 0     !< 0 : waterlevel boundary location as in D3DFLOW, 1=on network boundary, 2=on specified boundary polyline
-    jaupdbndbl = 1    !< Update bl at boundary (1 = update, 0 = no update) 
+    izbndpos     = 0  !< 0 : waterlevel boundary location as in D3DFLOW, 1=on network boundary, 2=on specified boundary polyline
+    jaupdbndbl   = 1  !< Update bl at boundary (1 = update, 0 = no update) 
 
-    nonlin1D  = 0     !< 1 : non-linear continuity eq, now governed by iproftyp in volsur, 0 for rectan, else 1
-    nonlin2D  = 0     !< 1 : non-linear continuity eq in 2D, sets nonlin
+    nonlin1D     = 0  !< 1 : non-linear continuity eq, now governed by iproftyp in volsur, 0 for rectan, else 1
+    nonlin2D     = 0  !< 1 : non-linear continuity eq in 2D, sets nonlin
 
-    iproftypuni = 3      ! 1 : circle, 2 : rectan R=A/P , 3 = rectan, R=H, 4 = 3,nonlin
-    slotw2D     = 0d-3
-    slotw1D     = 1d-3
+    iproftypuni  = 3  !< 1 : circle, 2 : rectan R=A/P , 3 = rectan, R=H
+    iproftypuni5 = -2 !< 1 : circle, 2 : rectan R=A/P , 3 = rectan, R=H
+    iproftypuni7 = -2 !< 1 : circle, 2 : rectan R=A/P , 3 = rectan, R=H
+
+    slotw2D      = 0d-3
+    slotw1D      = 1d-3
     jafullgridoutput = 0 !output grid in compact manner or full manner
     jaeulervel       = 0 !GLM velocities
 
@@ -2852,7 +2909,7 @@ subroutine default_flowparameters()
 
     bedslope    = 0d0    ! bottom inclination testcases
     Slopedrop2D = 0d0    ! Apply droplosses only if local bottom slope > Slopedrop2D, negative = no droplosses
-    drop3D      = -999d0 ! Apply droplosses in 3D yes or no 1 or 0
+    drop3D      = 1d0    ! Apply droplosses in 3D yes or no 1 or 0
     jacstbnd    = 0
     jajre       = 0
 
@@ -2933,7 +2990,7 @@ subroutine default_flowparameters()
     javatem    = 6       !< vert. adv. tem1 : 0=No, 1=UpwexpL, 2=Centralexpl, 3=UpwimpL, 4=CentraLimpL, 5=switched to 3 for neg stratif.
     javased    = 6       !< vert. adv. suspended sediment concentrations : 0=No, 1=UpwexpL, 2=Centralexpl, 3=UpwimpL, 4=CentraLimpL, 5=switched to 3 for neg stratif., 6=higher-order upwind/explicit
     jahazlayer = 0       !<
-    JaZlayercenterbedvel = 0
+    JaZlayercenterbedvel = 1
 
     jabaroctimeint = -2  !< time integration baroclini pressure, 1 = explicit, abs() = 2; adams bashford , 3 = ab3, 5 = adv rho
     jabarocterm = 2      ! revised baroc term
@@ -3007,10 +3064,12 @@ subroutine default_flowparameters()
     jamapdiu = 1
     jamaprho = 1
     jamapq1  = 1
+    jamapq1main = 0
     jamapspir = 1
     jamaptidep = 1
     jamapIntTidesDiss = 1
     jamapNudge = 1
+    jamapwav = 1
     jatekcd = 1     ! wind cd coeffs on tek
     jarstbnd = 1
     japartdomain = 1
@@ -3130,6 +3189,7 @@ end module m_vegetation
  integer                           :: kplotfrombedorsurface = 1 !< up or down k   
  integer                           :: layertype         !< 1= all sigma, 2 = all z, 3 = left sigma, 4 = left z
  integer                           :: numtopsig = 0     !< number of top layers in sigma
+ integer                           :: CSCalculationOption = 2     !< calculation option for total area computation in 1d
  double precision                  :: Tsigma = 100      !< relaxation period density controlled sigma
  integer, parameter                :: LAYTP_SIGMA     = 1
  integer, parameter                :: LAYTP_Z         = 2
@@ -3222,8 +3282,9 @@ end module m_vegetation
  double precision, allocatable         :: s00(:)      !< waterlevel    (m ) for checking iteration in nonlin
  double precision, allocatable, target :: a0(:)       !< [m2] storage area at start of timestep {"location": "face", "shape": ["ndx"]}
  double precision, allocatable, target :: a1(:)       !< [m2] storage area at end of timestep {"location": "face", "shape": ["ndx"]}
- double precision, allocatable, target :: vol0(:)     !< [m3] volume at start of timestep {"location": "face", "shape": ["ndx"]}
- double precision, allocatable, target :: vol1(:)     !< [m3] volume at end of timestep {"location": "face", "shape": ["ndx"]}
+ double precision, allocatable, target :: vol0(:)     !< [m3] total volume at start of timestep {"location": "face", "shape": ["ndx"]}
+ double precision, allocatable, target :: vol1(:)     !< [m3] total volume at end of timestep {"location": "face", "shape": ["ndx"]}
+ double precision, allocatable, target :: vol1_f(:)     !< [m3] flow volume volume at end of timestep {"location": "face", "shape": ["ndx"]}
  double precision, allocatable         :: sq(:)       !< total  influx (m3/s) at s point
  double precision, allocatable         :: sqa(:)      !< total  out! flux (m3/s) at s point, u1 based, non-conservative for iadvec == 38
  double precision, allocatable, target :: hs(:)       !< [m] waterdepth at cell centre = s1 - bl  (m) {"location": "face", "shape": ["ndx"]}
@@ -3233,6 +3294,7 @@ end module m_vegetation
  double precision, allocatable         :: voldhu(:)   !< node volume based on downwind hu
 
  double precision, allocatable         :: s1m(:)      !< waterlevel   pressurized nonlin minus part
+ double precision, allocatable         :: s1mini(:)   !< initial of s1m 
  double precision, allocatable         :: a1m(:)      !< surface area pressurized nonlin minus part
 
 ! node related, dim = ndkx
@@ -3299,6 +3361,7 @@ end module m_vegetation
  double precision, allocatable, target     :: sa0(:)   !< [1e-3] salinity (ppt) at start of timestep {"location": "face", "shape": ["ndkx"]}
  double precision, allocatable, target     :: sa1(:)   !< [1e-3] salinity (ppt) at end   of timestep {"location": "face", "shape": ["ndkx"]}
  double precision, allocatable, target     :: satop(:)   !< [1e-3] salinity (ppt) help in initialise , deallocated {"location": "face", "shape": ["ndx"]}
+ double precision, allocatable, target     :: sabot(:)   !< [1e-3] salinity (ppt) help in initialise , deallocated {"location": "face", "shape": ["ndx"]}
  double precision, allocatable     :: supq  (:)   !< summed upwind salinity fluxes (ppt*m3/s)
  double precision, allocatable     :: qsho  (:)   !< higher order part of upwind salinity    fluxes (ppt*m3/s) (dim=lnkx)
  double precision, allocatable, target     :: tem0  (:)   !< [degC] water temperature at end of timestep {"location": "face", "shape": ["ndkx"]}
@@ -3327,6 +3390,7 @@ end module m_vegetation
  double precision, allocatable, target     :: u1(:)   !< [m/s]  flow velocity (m/s)  at   end of timestep {"location": "edge", "shape": ["lnkx"]}
  double precision, allocatable, target     :: u_to_umain(:)   !< [-]  Factor for translating general velocity to the flow velocity in the main channel at end of timestep (1d) {"location": "edge", "shape": ["lnkx"]}
  double precision, allocatable, target     :: q1(:)   !< [m3/s] discharge     (m3/s) at   end of timestep n, used as q0 in timestep n+1, statement q0 = q1 is out of code, saves 1 array {"location": "edge", "shape": ["lnkx"]}
+ double precision, allocatable     :: q1_main(:)   !< [m3/s] discharge     (m3/s) in main channel at {"location": "edge", "shape": ["lnkx"]}
  double precision, allocatable     :: qa    (:)   !< discharge (m3/s) used in advection, qa=au(n)*u1(n+1) instead of
  double precision, allocatable     :: cflj  (:)   !< courant nr link j to downwind volume i (    ) = Dt*Qj/Vi
  double precision, allocatable     :: tetaj (:)   !< 1-1/sum(upwind incoming courants)      (    )
@@ -3359,18 +3423,21 @@ end module m_vegetation
  double precision, allocatable     :: frcInternalTides2D(:) !< internal tides friction coefficient gamma, tau/rho = - gamma u.grad h grad h
  
  double precision, allocatable     :: wavfu (:)   !< wave force u point
+ double precision, allocatable     :: wavfv (:)   !< wave force u point
  real            , allocatable     :: wdsu  (:)   !< windstress u point  (m2/s2)
 
  double precision, allocatable     :: wavmubnd (:)   !< wave-induced mass flux (on open boundaries)
- real            , allocatable     :: viu   (:)   !< horizontal eddy viscosity coefficient at u point (m2/s), the modeled part, added to user defined part but limited for advection time step
- real            , allocatable     :: vicLu   (:) !< horizontal eddy viscosity coefficient at u point (m2/s), the modeled part, added to user defined part 
+ real            , allocatable     :: vicLu   (:) !< horizontal eddy viscosity coefficient at u point (m2/s)  (limited only if ja_timestep_auto_diff==0) 
+ real            , allocatable     :: viu   (:)   !< horizontal eddy viscosity coefficient at u point (m2/s), modeled part of viscosity = vicLu - viusp
  double precision, allocatable, target    :: viusp(:)   !< [m2/s] user defined spatial eddy viscosity coefficient at u point (m2/s) {"location": "edge", "shape": ["lnx"]}
  double precision, allocatable, target    :: diusp(:)   !< [m2/s] user defined spatial eddy diffusivity coefficient at u point (m2/s) {"location": "edge", "shape": ["lnx"]}
+                                                        !< so in transport, total diffusivity = viu*sigdifi + diusp  
  real            , allocatable     :: fcori (:)   !< spatially variable fcorio coeff at u point (1/s)
  real            , allocatable     :: tidgs (:)   !< spatially variable earth tide potential at s point (m2/s2)
  double precision, allocatable     :: plotlin(:)  !< for plotting on u points
  integer         , allocatable     :: numlimdt(:) !< nr of times this point was the timestep limiting point
- integer                           :: numlimdt_baorg = 0  
+ integer                           :: numlimdt_baorg = 0  !< nr of times limiting > numlimdt_baorg, keep org ba
+ double precision                  :: baorgfracmin   = 0  !< ba = max(cutarea, ba*baorgfracmin) 
  
  double precision, allocatable     :: zn2rn (:)   !< weight from zn to rn, flownode to netnode
 
@@ -3422,7 +3489,7 @@ end module m_vegetation
  double precision                  :: qoutgrw     !< total outflux groundwater                 (m3/s)
  double precision                  :: qinsrc      !< total influx local point sources          (m3/s)
  double precision                  :: qoutsrc     !< total outflux local pount sources         (m3/s)
-
+ 
  double precision                  :: vinrain     !< total volume in  rain                     (m3) in the last time step
  double precision                  :: vouteva     !< total volume out evaporation              (m3) "
  double precision                  :: vinlat      !< total volume in  diffuse laterals         (m3) "
@@ -3431,7 +3498,7 @@ end module m_vegetation
  double precision                  :: voutgrw     !< total volume out groundwater              (m3) "
  double precision                  :: vinsrc      !< total volume in  local point sources      (m3) "
  double precision                  :: voutsrc     !< total volume out local pount sources      (m3) "
-
+ 
  double precision                  :: vinraincum  !< total inflow from rain                    (m3) integrated over all time steps
  double precision                  :: voutevacum  !< total outflow to evaporation              (m3) "
  double precision                  :: vinlatcum   !< total inflow from diffuse laterals        (m3) "
@@ -3440,7 +3507,7 @@ end module m_vegetation
  double precision                  :: voutgrwcum  !< total outflow to groundwater              (m3) "
  double precision                  :: vinsrccum   !< total inflow from local point sources     (m3) "
  double precision                  :: voutsrccum  !< total outflow to local pount sources      (m3) "
-
+ 
  double precision                  :: DissInternalTides  !< total Internal Tides Dissipation (J/s)
  double precision, allocatable     :: DissInternalTidesPerArea(:)  !< internal tides dissipation / area (J/(m^2 s))
  double precision                  :: GravInput          !< total Gravitational Input (incl. SAL) (J/s)
@@ -3450,7 +3517,7 @@ end module m_vegetation
 
  double precision                  :: a0tot       !< total wet surface area start of timestep (m2)
  double precision                  :: a1tot       !< total wet surface area   end of timestep (m2)
- double precision                  :: a1ini       !< total model area                         (m2)
+ double precision                  :: a1ini       !< total model area rain evap               (m2)
  double precision                  :: ek1tot      !< volume averaged kin energy (m2/s2) end of timestep
  double precision                  :: ep1tot      !< volume averaged pot energy (m2/s2) end of timestep
  double precision                  :: ep1rela     !< time av ep1tot
@@ -3469,10 +3536,10 @@ end module m_vegetation
  double precision                  :: samoutbndcum !< Cumulative mass out boundaries          (m3ppt)
  double precision                  :: samerrcum    !< Mass error since start of computation   (m3ppt)
 
- double precision                  :: epsmaxvol    !< eps vol diff (m3) ! both not used now
- double precision                  :: difmaxlev    !< max lev diff (m)
- double precision                  :: epsmaxlev    !< eps lev diff (m)
- double precision                  :: epsmaxlevm   !< eps lev diff (m) minus part
+ double precision                  :: epsmaxvol       !< eps vol diff (m3) ! both not used now
+ double precision                  :: difmaxlev       !< max lev diff (m)
+ double precision                  :: epsmaxlev =1d-8 !< eps lev diff (m)
+ double precision                  :: epsmaxlevm=1d-8 !< eps lev diff (m) minus part
 
  logical                           :: debugon       !< texts  yes or no
  logical                           :: validateon    !< should we validate flow state yes or no (switched off at water drop)
@@ -3489,7 +3556,7 @@ end module m_vegetation
  integer                           :: Lnmin         !< link nr where min zlin is found in viewing area
  integer                           :: Lnmax         !< link nr where max zlin is found in viewing area
 
- integer, parameter :: MAX_IDX        = 18
+ integer, parameter :: MAX_IDX        = 21
  double precision, dimension(MAX_IDX)    :: volcur !< Volume totals in *current* timestep only (only needed for MPI reduction)
  double precision, dimension(MAX_IDX)    :: cumvolcur =0d0 !< Cumulative volume totals starting from the previous His output time, cumulate with volcur (only needed for MPI reduction)
  double precision, dimension(MAX_IDX)    :: voltot
@@ -3512,6 +3579,9 @@ end module m_vegetation
  integer, parameter :: IDX_GRWIN      = 16
  integer, parameter :: IDX_GRWOUT     = 17
  integer, parameter :: IDX_GRWTOT     = 18
+ integer, parameter :: IDX_LATIN      = 19
+ integer, parameter :: IDX_LATOUT     = 20
+ integer, parameter :: IDX_LATTOT     = 21
  
 
 ! Delft3D structure of grid dimensions
@@ -3580,11 +3650,13 @@ subroutine reset_flow()
     qouteva     = 0    ! total outflow evaporation               (m3/s)
     qinlat      = 0    ! total inflow diffuse laterals           (m3/s)
     qoutlat     = 0    ! total outflow diffuse laterals          (m3/s)
-    qingrw     = 0    ! total inflow from groundwater           (m3/s)
-    qoutgrw    = 0    ! total outflow to groundwater            (m3/s)
+    qingrw      = 0    ! total inflow from groundwater           (m3/s)
+    qoutgrw     = 0    ! total outflow to groundwater            (m3/s)
     qinsrc      = 0    ! total inflow local point sources        (m3/s)
     qoutsrc     = 0    ! total outflow local pount sources       (m3/s)
-
+    qinlat      = 0    ! 
+    qoutlat     = 0    !
+    
     vinrain     = 0    ! total volume in  rain                   (m3)
     vouteva     = 0    ! total volume out evaporation            (m3)
     vinlat      = 0    ! total volume in  diffuse laterals       (m3)
@@ -3615,8 +3687,8 @@ subroutine reset_flow()
 
     epsmaxvol   = 1d-9 ! eps vol diff (m3) ! both not used now
     difmaxlev   = 0    ! max lev diff (m3)
-    epsmaxlev   = 1d-8 ! eps lev diff (m)  ! max waterlevel difference in Newton iterations
-    epsmaxlevm  = 1d-8 ! eps lev diff (m)  ! max waterlevel difference in Newton iterations
+    !epsmaxlev   = 1d-8 ! eps lev diff (m)  ! max waterlevel difference in Newton iterations
+    !epsmaxlevm  = 1d-8 ! eps lev diff (m)  ! max waterlevel difference in Newton iterations
 
     debugon     = .false. ! texts  yes or no
     validateon  = .true.  ! validate flow state yes or no
@@ -3655,6 +3727,9 @@ subroutine reset_flow()
     voltotname(IDX_GRWIN  ) = 'groundwater_in'
     voltotname(IDX_GRWOUT ) = 'groundwater_out'
     voltotname(IDX_GRWTOT ) = 'groundwater_total'
+    voltotname(IDX_LATIN  ) = 'laterals_in'
+    voltotname(IDX_LATOUT ) = 'laterals_out'
+    voltotname(IDX_LATTOT ) = 'laterals_total'
 
     jacftrtfac  = 0   !< Whether or not (1/0) a multiplication factor field was specified for trachytopes's returned roughness values.
 
@@ -3721,9 +3796,11 @@ end module m_profiles
  double precision                  :: wu1DUNI        !< uniform 1D profile width
  double precision                  :: hh1DUNI        !< uniform 1D profile height
 
- double precision                  :: wu1DUNI5       !< uniform 1D profile width in drain or street inlet 
- double precision                  :: hh1DUNI5       !< uniform 1D profile height in drain or street inlet 
- 
+ double precision                  :: wu1DUNI5       !< uniform 1D profile width in  streetinlet kn(3,L) = 5
+ double precision                  :: hh1DUNI5       !< uniform 1D profile height in streetinlet 
+
+ double precision                  :: wu1DUNI7       !< uniform 1D profile width in  roofgutterpipe kn(3,L) = 7
+ double precision                  :: hh1DUNI7       !< uniform 1D profile height in roofgutterpipe 
  
  integer                           :: ja1D2Dinternallinktype = 1
 
@@ -3745,6 +3822,8 @@ end module m_profiles
  ! double precision, allocatable, target :: yz (:)     !< [m/degrees_north] waterlevel point / cell centre, y-coordinate (m) {"location": "face", "shape": ["ndx"]}
  ! double precision, allocatable         :: yz0(:)     !< backup of yz
  
+ 
+ 
  integer, target                   :: ndxi           !< [-] Number of internal flowcells  (internal = 2D + 1D ). {"rank": 0}
  integer, target                   :: ndx1db         !< [-] Number of flow nodes incl. 1D bnds (internal 2D+1D + 1D bnd). {"rank": 0}
  type (tnode),     allocatable     :: nd(:)          !< (ndx) flow node administration
@@ -3752,6 +3831,7 @@ end module m_profiles
  integer,          allocatable, target :: kfs(:)     !< [-] node code flooding {"shape": ["ndx"]}
  integer,          allocatable, target :: kfst0(:)   !< [-] node code flooding {"shape": ["ndx"]}
 
+ double precision, allocatable, target :: bare(:)         !< [m2] bottom area, for rain and evaporaton {"location": "face", "shape": ["ndx"]}
  double precision, allocatable     :: bai(:)         !< inv bottom area (m2), if < 0 use table in node type
  double precision, allocatable, target :: bl(:)      !< [m] bottom level (m) (positive upward) {"location": "face", "shape": ["ndx"]}
  double precision, allocatable     :: aif(:)         !< cell based skewness ai factor sqrt(1+(dz/dy)**2) = abed/asurface
@@ -3770,7 +3850,7 @@ end module m_profiles
  integer, target                   :: lnx            !< [-] nr of flow links (internal + boundary). First we have 1D links, next 2D links, next boundary links (first 1D, then 2D). {"rank": 0}
  integer,          allocatable, target   :: ln    (:,:)    !< [-] 1D link (2,*) node   administration, 1=nd1,  2=nd2   linker en rechter celnr {"shape": [2, "lnkx"]}
  integer,          allocatable, target   :: lncn  (:,:)    !< [-] 2D link (2,*) corner administration, 1=nod1, 2=nod2  linker en rechter netnr {"shape": [2, "lnkx"]}
- integer,          allocatable     :: kcu   (:)      !< link code, 1=1D link, 2=2D link, -1= bc 1D, -2=bc 2D, 3=2D parall wall, 4=1D2Dlink, 5=Pump
+ integer,          allocatable     :: kcu   (:)      !< link code, 1=1D link, 2=2D link, -1= bc 1D, -2=bc 2D, 3=2D parall wall, 4=1D2Dlink, 5=Pump, 7=1d2d internal link
  integer,          allocatable, target :: iadv(:)    !< [-] type of advection for this link {"location": "edge", "shape": ["lnx"]}
  double precision, allocatable     :: teta  (:)      !< link teta (m)
  integer,          allocatable     :: klnup (:,:)    !< link upwind cell pointer if q> 0 use (1:3,L), else (4:6,L)
@@ -3820,7 +3900,14 @@ end module m_profiles
  integer,          allocatable     :: ln2lne(:)      !< flowlink to netlink nr dim = lnx
  integer,          allocatable     :: lne2ln(:)      !< netlink to flowlink nr dim = numL
 
-
+ double precision, allocatable     :: grounlay(:)               !< spatially varying ground layer thickness    
+ double precision, allocatable     :: argr(:)                   !< spatially varying ground layer area    
+ double precision, allocatable     :: wigr(:)                   !< spatially varying ground layer top width    
+ double precision, allocatable     :: pergr(:)                  !< spatially varying ground layer perimeter     
+ 
+ double precision                  :: grounlayuni    = -999d0   !< used if >= 0, default = dmiss       
+ integer                           :: jagrounlay     = 0        !< use groundlayer 0/1
+  
  ! cell corner related, the links attached to a cell corner
  type tcorn                                          !< corner administration
    integer                         :: lnx            !< max nr of links attached to this corner
@@ -3920,8 +4007,12 @@ subroutine default_flowgeom()
     wu1DUNI  =  2d0   ! Uniform 1D profile width
     hh1DUNI  =  3d0   ! Uniform 1D profile height
 
-    wu1DUNI5 = 0.4d0  !< uniform 1D profile width in drain or street inlet 
+    wu1DUNI5 = 0.2d0  !< uniform 1D profile width in drain or street inlet 
     hh1DUNI5 = 0.1d0  !< uniform 1D profile height in drain or street inlet 
+
+    wu1DUNI7 = 0.1d0  !< uniform 1D profile width roofgutterpipe  
+    hh1DUNI7 = 0.1d0  !< uniform 1D profile height roofgutterpipe  
+
     
     ! useful parameters :
     rrtol      = 3d0 ! relative cellsize factor in search tolerance ()
@@ -4020,6 +4111,11 @@ end subroutine reset_flowgeom
  double precision                  :: ti_waq      !< Interval between output in delwaq files (s).
  double precision                  :: ti_waqs     !< Start of WAQ output period
  double precision                  :: ti_waqe     !< End   of WAQ output period
+ double precision                  :: ti_incr     !< increment interval (s)
+ double precision                  :: ti_incrs    !< Start of increment output period (as assigned in mdu-file) (s)
+ double precision                  :: ti_incre    !< End   of increment output period (as assigned in mdu-file) (s)
+ double precision, allocatable     :: incr_classes_wl(:)  !< incremental classes for water level
+ double precision, allocatable     :: incr_classes_wd(:)  !< incremental classes for water depth
  double precision                  :: ti_stat     !< Interval between simulation statistics output (s).
  double precision                  :: ti_timings  !< (parallel) timings output interval
  double precision                  :: ti_split    !< Time interval for time splitting: time after which new his/map file will be created (e.g. montly), see also the unit below.
@@ -4037,6 +4133,7 @@ end subroutine reset_flowgeom
  double precision                  :: time_his    !< Next time for his output
  double precision                  :: time_xls    !< Next time for his output
  double precision                  :: time_rst    !< Next time for restart output
+ double precision                  :: time_incr   !< Next time for incremental output
  double precision                  :: time_waq    !< Next time for delwaq output
  double precision                  :: time_waqset !< Next time to reset the quantitis for waq
  double precision                  :: time_stat   !< Next time for simulation statistics output
@@ -4145,6 +4242,7 @@ subroutine reset_flowtimes()
     time_his     = tstart_user       !< next time for his output
     time_xls     = tstart_user       !< next time for his output
     time_rst     = tstart_user       !< next time for restart output
+    time_incr    = tstart_user       !< next time for incremental output
     time_fetch   = tstart_user       !< next time for fetch establ.
 
     time_waq     = ti_waqs           !< next time for waq output, starting at the output start time
@@ -4316,37 +4414,6 @@ end module m_flowtimes
    double precision              :: X0=0, Y0=0, DXa=1d0, DYa=1d0, RMIS=-999d0
  END MODULE M_ARCINFO
 
- !> Main sample set
- MODULE M_SAMPLES
- implicit none
- double precision, ALLOCATABLE  :: XS(:), YS(:), ZS(:)
- INTEGER,          ALLOCATABLE  :: IPSAM(:)              !< permutation array (increasing x-coordinate)
- integer,          parameter    :: IPSTAT_OK=0           !< permutation array is OK
- integer,          parameter    :: IPSTAT_NOTOK=1        !< permutation array is out of date
- integer                        :: IPSTAT=IPSTAT_NOTOK   !< permutation array status
- INTEGER                        :: NS =0, NSMAX
- integer                        :: MXSAM=0, MYSAM=0      !< structured block sizes (.gt.0), or not structured (0)
-
- double precision               :: xsammin, ysammin, xsammax, ysammax   !< bounding box corner coordinates
- END MODULE M_SAMPLES
-
- !> Backup of main sample set
- !! @see savesam()
- MODULE M_SAMPLES2
- implicit none
- double precision, ALLOCATABLE  :: XS2(:), YS2(:), ZS2(:)
- INTEGER              :: NS2, MXSAM2=0, MYSAM2=0
- END MODULE M_SAMPLES2
-
-
- !> Alternate sample set.
- !! @see SWAPSAMPLES()
- MODULE M_SAMPLES3
- implicit none
- double precision, ALLOCATABLE  :: XS3(:), YS3(:), ZS3(:)
- INTEGER              :: NS3
- END MODULE M_SAMPLES3
-
 
 !---------------------------------------------------------------------------------------------------------------------------------
 !---------------------------------------------------------------------------------------------------------------------------------
@@ -4389,7 +4456,7 @@ end module m_boat
 
 MODULE M_ISOSCALEUNIT
   implicit none
-  CHARACTER (LEN=10)            :: UNIT(2)     = ' '
+  CHARACTER (LEN=12)            :: UNIT(2)     = ' '
   CHARACTER (LEN=20)            :: PARAMTEX(2) = ' '
 END MODULE M_ISOSCALEUNIT
 
@@ -4473,8 +4540,6 @@ character(len=120) :: xytexts(maxtxt)
 module m_roofs  
  double precision  :: roofheightuni        = 2.7d0                  ! if not dmiss, rooflevel = av gr
  double precision  :: roofedgeheight       = 0.1d0  
- double precision  :: frcuniroof           = 0.030
- double precision  :: frcuniroofgutterpipe = 0.035
  double precision  :: dxminroofgutterpipe  = 10.0d0
 end module m_roofs
 
@@ -4818,7 +4883,7 @@ contains
       integer,                  dimension(MAXKEYS), intent(out) :: ivals      !< values
       character(len=MAXSTRLEN), dimension(MAXKEYS), intent(out) :: svals
 
-      integer                                                   :: i, ipoint, ibegin, iend, iequal, Lenstr
+      integer                                                   :: ipoint, ibegin, iend, iequal, Lenstr
 
       Soption = ''
       Nkeys = 0
@@ -4827,12 +4892,11 @@ contains
 
       Lenstr = len_trim(str)
 
-   !  ignore trailing dashes
+   !  ignore leading dashes -/--/... (but dashes inside option names/values are allowed)
       ipoint=1
-      i=1
-      do while ( i.gt.0 .and. ipoint.lt.Lenstr )
-         i=index(str(ipoint:Lenstr),'-')
-         if ( i.gt.0 ) ipoint = ipoint+1
+      do while (ipoint <= Lenstr)
+         if (str(ipoint:ipoint) /= '-') exit
+         ipoint = ipoint+1
       end do
 
    !  proceed if argument is option only
@@ -5175,8 +5239,6 @@ module m_plotdots
 
       integer, intent(in) :: N
 
-      integer             :: Nnew
-
       if ( N.gt.NSIZE) then
          NSIZE = 1+int(1.2d0*dble(N))
 
@@ -5258,6 +5320,8 @@ module m_particles
    integer,           dimension(:),   allocatable :: kpart        !< cell (flownode) number, dim(Npart)
 !   integer,           dimension(:),   allocatable :: Lpart        !< edge (netlink)  number, dim(Npart)
 !   character(len=40), dimension(:),   allocatable :: namepart     !< name of particle, dim(Npart)
+   integer,           dimension(:),   allocatable :: iglob        !< global number, dim(Npart)
+   integer                                        :: Nglob        !< maximum global number
    
    integer,           dimension(:),   allocatable :: numzero      !< number of consecutive (sub)times a particle was not displaces within a time-step
                                      
@@ -5275,6 +5339,8 @@ module m_particles
    double precision, dimension(:),    allocatable :: qpart       !< cummulative fluxes from begin of time interval, dim(Lnx)
    
    double precision, dimension(:),    allocatable :: qfreesurf       !< free surface flux (for threeDtype=1)
+   
+!   integer :: mfile
 end module m_particles
 
 module m_partrecons
@@ -5326,7 +5392,30 @@ module m_partmesh
    double precision, dimension(:),     allocatable :: w            !< edge width, dim(numedges)
    
    integer,                            parameter :: MAXSUBCELLS=10
-   end module m_partmesh
+end module m_partmesh
+   
+module m_partparallel
+   double precision, dimension(:,:), allocatable :: worksnd, workrecv   ! work arrays for sending/receiving data
+   
+   integer,          dimension(:),   allocatable :: icellother   ! cell number in other domain
+   integer,          dimension(:),   allocatable :: isend, jsend ! send list in CRS-format
+   integer,          dimension(:),   allocatable :: jrecv        ! start pointers in receive list
+   integer,          dimension(:),   allocatable :: jpoint       ! work array
+   integer,          dimension(:),   allocatable :: irequest
+   
+   integer,          dimension(:), allocatable   :: numsendarr
+   integer,          dimension(:), allocatable   :: numrecvarr
+   
+   integer                                       :: NDIM         ! data dimension per particle in send/receive arrays
+   integer                                       :: INDX_XPART=1
+   integer                                       :: INDX_YPART=2
+   integer                                       :: INDX_DTREM=3
+   integer                                       :: INDX_IGLOB=4
+   integer                                       :: INDX_KPART=5
+   integer                                       :: INDX_ZPART=0
+   
+   integer                                       :: japartsaved   ! particles saved to work array (1) or not (safety)
+end module m_partparallel
    
    
    ! Save data for later writing of 1d Ugrid 

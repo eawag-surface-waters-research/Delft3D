@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2015-2018.                                
+!  Copyright (C)  Stichting Deltares, 2015.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -34,9 +34,15 @@
        shape(1) = 0
     case("iglobal_s")
        shape(1) = ndx
+    case("hwav")
+       shape(1) = ndx
     case("twav")
        shape(1) = ndx
     case("Uorb")
+       shape(1) = ndx
+    case("infilt")
+       shape(1) = ndx
+    case("infiltcap")
        shape(1) = ndx
     case("shx")
        shape(1) = nshiptxy
@@ -91,6 +97,22 @@
        shape(1) = ndx
     case("evap")
        shape(1) = ndx
+    case("numlatsg")
+       shape(1) = 0
+    case("qplat")
+       shape(1) = numlatsg
+    case("qqlat")
+       shape(1) = ndx
+    case("balat")
+       shape(1) = numlatsg
+    case("nnlat")
+       shape(1) = ndx
+    case("qinext")
+       shape(1) = ndkx
+    case("qinextreal")
+       shape(1) = ndkx
+    case("vincum")
+       shape(1) = ndkx
     case("rnveg")
        shape(1) = ndkx
     case("diaveg")
@@ -141,11 +163,15 @@
        shape(1) = ndkx
     case("satop")
        shape(1) = ndx
+    case("sabot")
+       shape(1) = ndx
     case("tem0")
        shape(1) = ndkx
     case("tem1")
        shape(1) = ndkx
     case("u1")
+       shape(1) = lnkx
+    case("u_to_umain")
        shape(1) = lnkx
     case("q1")
        shape(1) = lnkx
@@ -159,25 +185,17 @@
        shape(1) = lnx
     case("diusp")
        shape(1) = lnx
-    case("ndx2d")
-       shape(1) = 0
     case("ndxi")
        shape(1) = 0
     case("ndx1db")
-       shape(1) = 0
-    case("ndx")
        shape(1) = 0
     case("kfs")
        shape(1) = ndx
     case("kfst0")
        shape(1) = ndx
-    case("ba")
+    case("bare")
        shape(1) = ndx
     case("bl")
-       shape(1) = ndx
-    case("xz")
-       shape(1) = ndx
-    case("yz")
        shape(1) = ndx
     case("lnx1D")
        shape(1) = 0
@@ -246,4 +264,14 @@
        shape(1) = ndx
     case("is_dtint")
        shape(1) = 0
+    case("ndx2d")
+       shape(1) = 0
+    case("ndx")
+       shape(1) = 0
+    case("xz")
+       shape(1) = ndx
+    case("yz")
+       shape(1) = ndx
+    case("ba")
+       shape(1) = ndx
   end select

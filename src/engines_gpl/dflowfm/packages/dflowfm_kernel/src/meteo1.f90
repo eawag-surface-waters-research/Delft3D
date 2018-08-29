@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2017.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -78,8 +78,6 @@ module timespace_parameters
   integer, parameter :: weightfactors                  =  3  ! save weightfactors, intp space and time (getval)
                                                              ! keep 2 pointer- and weight sets in memory
 
-  integer, parameter :: spaceandtimeint                =  100 ! spaceinterpolation and time=t1 integrated values      
-                                                             
 end module timespace_parameters
 !> Module which constructs and connects the target Items for FM.
 !! This is the wrapper between FM and the EC-module.
@@ -135,7 +133,8 @@ module m_meteo
    integer, target :: item_damlevel                                          !< Unique Item id of the ext-file's 'damlevel' quantity
    integer, target :: item_gateloweredgelevel                                !< Unique Item id of the ext-file's 'gateloweredgelevel' quantity
    integer, target :: item_generalstructure                                  !< Unique Item id of the ext-file's 'generalstructure' quantity
-
+   integer, target :: item_lateraldischarge                                  !< Unique Item id of the ext-file's 'generalstructure' quantity
+   
    integer, target :: item_dacs_dewpoint                                     !< Unique Item id of the ext-file's 'dewpoint' quantity
    integer, target :: item_dacs_airtemperature                               !< Unique Item id of the ext-file's 'airtemperature' quantity
    integer, target :: item_dacs_cloudiness                                   !< Unique Item id of the ext-file's 'cloudiness' quantity
@@ -214,6 +213,7 @@ module m_meteo
       item_shiptxy                               = ec_undef_int
       item_movingstationtxy                      = ec_undef_int
       item_pump                                  = ec_undef_int
+      item_lateraldischarge                      = ec_undef_int
       item_damlevel                              = ec_undef_int
       item_gateloweredgelevel                    = ec_undef_int
       item_generalstructure                      = ec_undef_int
@@ -310,8 +310,13 @@ module m_meteo
    subroutine method_fm_to_ec(method, ec_method)
       integer, intent(in)  :: method
       integer, intent(out) :: ec_method
+
+      integer :: interpMethod, exterpMethod
+
+      interpMethod = mod(method, 100)
+      exterpMethod = method / 100
       !
-      select case (method)
+      select case (interpMethod)
          case (0)
             ec_method = interpolate_passthrough
          case (1)
@@ -319,7 +324,11 @@ module m_meteo
          case (2)
             ec_method = interpolate_spacetime
          case (3)
-            ec_method = interpolate_spacetimeSaveWeightFactors
+            if (exterpMethod == 0) then
+               ec_method = interpolate_spacetimeSaveWeightFactors
+            else
+               ec_method = extrapolate_spacetimeSaveWeightFactors
+            endif
          case (4) ! TODO: EB: FM's 4 is inside_polygon method, does EC handle this correctly if FM filetype=10?
             ec_method = interpolate_space     ! only spatial, inside polygon
 
@@ -340,8 +349,6 @@ module m_meteo
             ec_method = interpolate_unknown   ! Not yet supported: only spatial, internal diffusion
          case (10)
             ec_method = interpolate_unknown   ! Not yet supported: only initial vertical profiles
-         case (11)
-            ec_method = extrapolate_spacetimeSaveWeightFactors
          case (7) ! TODO: EB: FM method 7, where does this come from? ! see hrms method 7
             ec_method = interpolate_time_extrapolation_ok
          case default
@@ -365,8 +372,9 @@ module m_meteo
             ec_operand = operand_undefined
       end select
    end subroutine operand_fm_to_ec
-    
+   
    ! ==========================================================================
+   
    
    !> Convert quantity names as given in user input (ext file)
    !! to accepted Unstruc names (as used in Fortran code)
@@ -498,6 +506,9 @@ module m_meteo
          case ('dambreakHeightsAndWidths')      
             itemPtr1 => item_dambreakHeightsAndWidthsFromTable
             dataPtr1 => dambreakHeightsAndWidthsFromTable
+         case ('lateraldischarge')
+            itemPtr1 => item_lateraldischarge 
+            !dataPtr1      => zcdam
          case ('gateloweredgelevel')
             itemPtr1 => item_gateloweredgelevel
             dataPtr1 => zgate
@@ -976,7 +987,7 @@ module m_meteo
       converterId = ecCreateConverter(ecInstancePtr)
       
       select case(target_name)
-      case ('shiptxy', 'movingstationtxy', 'discharge_salinity_temperature_sorsin', 'pump', 'damlevel', 'gateloweredgelevel', 'generalstructure', 'dambreakHeightsAndWidths')
+      case ('shiptxy', 'movingstationtxy', 'discharge_salinity_temperature_sorsin', 'pump', 'damlevel', 'gateloweredgelevel', 'generalstructure', 'lateraldischarge','dambreakHeightsAndWidths')
          ! for the FM 'target' arrays, the index is provided by the caller
          if (.not. present(targetIndex)) then
             message = 'Internal program error: missing targetIndex for quantity '''//trim(target_name)
@@ -1049,7 +1060,7 @@ module m_meteo
             end if
             ! the file reader will have created an item called 'uniform_item'
             sourceItemName = 'uniform_item'
-         case ('pump','generalstructure','damlevel','gateloweredgelevel','dambreakHeightsAndWidths')
+         case ('pump','generalstructure','damlevel','gateloweredgelevel','lateraldischarge','dambreakHeightsAndWidths')
             if (checkFileType(ec_filetype, provFile_uniform, target_name)) then
                sourceItemId   = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'uniform_item')
                if (sourceItemId==ec_undef_int) then 
@@ -1431,11 +1442,13 @@ module m_meteo
          ! For now: Print the EC message stack here, and leave the rest to the caller.
          message = dumpECMessageStack(LEVEL_WARN, callback_msg)
          ! Leave this concluding message for the caller to print or not. (via getmeteoerror())
+         call setECMessage(message)
       end if
       message = 'm_meteo::ec_addtimespacerelation: Error while initializing '''//trim(name)//''' from file: '''//trim(filename)//''''
       if (present(forcingfile)) then
          message = trim(message)//' ('''//trim(forcingfile)//''')'
       endif
+     
    end function ec_addtimespacerelation
    
    ! ==========================================================================
@@ -1492,7 +1505,8 @@ module m_meteo
          it = it + 1
       end do
    end function ec_gettimeseries_by_itemID
-      
+   
+   
    ! ==========================================================================
    
    !> Convenience wrapper around ec_gettimespacevalue_by_itemID.
@@ -1705,9 +1719,10 @@ module timespace_data
 !
 !!--pseudo code and references--------------------------------------------------
 !
-! Stef.Hummel@WlDelft.nl
-! Herman.Kernkamp@WlDelft.nl
-! Adri.Mourits@WlDelft.nl
+! Stef.Hummel@deltares.nl
+! Herman.Kernkamp@deltares.nl
+! Adri.Mourits@deltares.nl
+! Edwin.Spee@deltares.nl
 !
 !!--declarations----------------------------------------------------------------
   use precision
@@ -1741,6 +1756,7 @@ contains
    !! by consecutive calls to this routine.
    subroutine readprovider(minp,qid,filename,filetype,method,operand,transformcoef,ja,varname,smask, maxSearchRadius)
      use m_strucs, only: generalkeywrd, numgeneralkeywrd
+     use MessageHandling, only : LEVEL_INFO, mess
      ! globals
      integer,           intent(in)            :: minp             !< File handle to already opened input file.
      integer,           intent(out)           :: filetype         !< File type of current quantity.
@@ -1756,14 +1772,14 @@ contains
 
      ! locals
      character (len=maxnamelen)       :: rec, keywrd
-     integer                          :: l1, l2, jaopt, k
-   
+     integer                          :: l1, l2, jaopt, k, extrapolation
+     logical, save                    :: alreadyPrinted = .false.  !< flag to avoid printing the same message many times
+
      if (minp == 0) then
         ja = 0
         return
      end if
-     
-   
+
      keywrd = 'QUANTITY'
      call zoekja(minp,rec,keywrd, ja)
      if (ja .eq. 1) then
@@ -1822,6 +1838,21 @@ contains
      else
         return
      end if
+
+     if (method == 11) then
+        if (.not. alreadyPrinted) then
+           call mess(LEVEL_INFO, 'METHOD=11 is obsolete; use METHOD=3 and EXTRAPOLATION_METHOD=1')
+           alreadyPrinted = .true.
+        endif
+        method = 100 + weightfactors
+     else
+        keywrd = 'EXTRAPOLATION_METHOD'
+        call zoekopt(minp, rec, keywrd, ja)
+        if (ja == 1) then
+           read(rec,*,err=990) extrapolation
+           method = method + 100 * extrapolation
+        endif
+     endif
 
      if (present(maxSearchRadius)) then
         keywrd = 'MAXSEARCHRADIUS'
@@ -1907,6 +1938,42 @@ contains
      call zoekopt(minp, rec, trim(keywrd), jaopt)
      if (jaopt == 1) then
         read (rec,*) transformcoef(8)
+     end if
+     
+     keywrd = 'startlevelsuctionside' 
+     call zoekopt(minp, rec, trim(keywrd), jaopt)
+     if (jaopt == 1) then
+        read (rec,*) transformcoef(4)
+     end if
+
+     keywrd = 'stoplevelsuctionside' 
+     call zoekopt(minp, rec, trim(keywrd), jaopt)
+     if (jaopt == 1) then
+        read (rec,*) transformcoef(5)
+     end if
+
+     keywrd = 'startleveldeliveryside' 
+     call zoekopt(minp, rec, trim(keywrd), jaopt)
+     if (jaopt == 1) then
+        read (rec,*) transformcoef(6)
+     end if
+
+     keywrd = 'stopleveldeliveryside' 
+     call zoekopt(minp, rec, trim(keywrd), jaopt)
+     if (jaopt == 1) then
+        read (rec,*) transformcoef(7)
+     end if
+     
+     keywrd = 'UNIFORMSALINITYABOVEZ'
+     call zoekopt(minp, rec, trim(keywrd), jaopt)
+     if (jaopt == 1) then
+         read (rec,*) transformcoef(3)
+     end if
+
+     keywrd = 'UNIFORMSALINITYBELOWZ'
+     call zoekopt(minp, rec, trim(keywrd), jaopt)
+     if (jaopt == 1) then
+         read (rec,*) transformcoef(3)
      end if
      
      if (qid == 'generalstructure') then 
@@ -7054,7 +7121,7 @@ contains
      integer     , intent(in)        :: filetype   ! spw, arcinfo, uniuvp etc
      logical,      intent(in)        :: usemask    !< Whether to use the mask array kc, or not (allows you to keep kc, but disable it for certain quantities, for example salinitybnd).
      double precision, intent(in), optional :: rrtolrel !< Optional, a more strict rrtolerance value than the global rrtol. selectelset will succeed if cross SL value <= rrtolrel
-   
+     
      ! locals
      double precision, allocatable   :: xs (:)     ! temporary array to hold polygon
      double precision, allocatable   :: ys (:)     !
@@ -7067,9 +7134,9 @@ contains
      num = 0
    
      ki  = 0
-   
+    
      if (filetype == poly_tim) then
-   
+
         call oldfil(minp, filename)
         call read1polylin(minp,xs,ys,ns)
    
@@ -7112,7 +7179,7 @@ contains
         call msg_flush()
 
         deallocate(xs, ys, kcs)
-     else ! en andere behandelmethodes voor andere mogelijkheden.
+        
      end if
    end subroutine selectelset
    !
@@ -7162,7 +7229,7 @@ contains
     
            if (ja == 1) then   
               numg = numg + 1
-              lftopol(numg) = isec
+              if(present(lftopol)) lftopol(numg) = isec
               if (crpm > 0) then 
                  keg(numg) = -L
               else 
@@ -7184,6 +7251,40 @@ contains
 
      end if
    end subroutine selectelset_internal_links
+   
+   subroutine selectelset_internal_nodes( filename, filetype, xz, yz, kc, nx, numprov, kp) ! find nodes contained inside polygon filetype 10
+   implicit none
+   
+   character(len=*), intent(in)    :: filename   ! file name for meteo data file
+   integer     ,     intent(in)    :: filetype   ! spw, arcinfo, uniuvp etc
+   integer         , intent(in)    :: nx         ! dim of nodes
+   double precision, intent(in)    :: xz(nx)     ! nodes coord
+   double precision, intent(in)    :: yz(nx)
+   integer         , intent(in)    :: kc(nx)     ! allow search in this node 1/0
+   integer         , intent(in)    :: numprov    ! this is provider nr so much
+
+   integer         , intent(out)   :: kp(nx)     ! point is found in provider nr so much 
+   
+   integer                         :: minp, inp, n
+   
+   
+   if (filetype == 10) then ! inside polygon 
+   
+        call oldfil(minp, filename)
+        call reapol (minp, 0)
+ 
+        inp  = -1 
+        do n = 1,nx
+           if (kc(n) > 0) then ! search allowed, (not allowed like closed pipes point etc) 
+              call inwhichpolygon(xz(n), yz(n), inp)
+              if (inp > 0) then
+                 kp(n) = numprov 
+              endif   
+           endif   
+        enddo   
+   endif
+   end subroutine selectelset_internal_nodes
+   
    !
    !
    ! ==========================================================================
@@ -7224,7 +7325,7 @@ contains
    use kdtree2Factory
    use m_samples
    use m_netw
-   use m_flowgeom, only : xz, yz, ln2lne, Ln, Lnx 
+   use m_flowgeom, only : xz, yz, ln2lne, Ln, Lnx, Wu1Duni
    use m_partitioninfo  
    use unstruc_netcdf
    use m_flowexternalforcings, only: qid
@@ -7376,6 +7477,7 @@ contains
                end if
                
                allocate( xx(n6,nx), yy(n6,nx), nnn(nx) )
+               
                allocate(LnnL(n6), Lorg(n6))  ! not used
                
                do n = 1,nx
@@ -7393,7 +7495,7 @@ contains
                allocate( xx(n6,numk), yy(n6,numk), nnn(numk), xxx(n6), yyy(n6) )
                do k = 1,numk
 !              get the celllist
-                  call make_dual_cell(k, n6, rcel, xxx, yyy, nnn(k))
+                  call make_dual_cell(k, n6, rcel, xxx, yyy, nnn(k), Wu1Duni)
                   do i=1,nnn(k)
                      xx(i,k) = xxx(i)
                      yy(i,k) = yyy(i)

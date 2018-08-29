@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2017.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -759,7 +759,7 @@ character(len=*), parameter, private :: defaultName_ = 'Crs'
 double precision                     :: tlastupd_sumval        !< Time at which the sumval* arrays were last updated.
 double precision, allocatable        :: sumvalcur_tmp(:,:)     !< Store the temporary values for MPI communication of partial sums across cross sections monitoring.
 double precision, allocatable        :: sumvalcumQ_mpi(:)      !< Store the time-integrated discharge in each history output interval, only used for parallel run
-
+double precision, allocatable        :: sumvalcum_timescale(:) !< Store the time-scale multiplication (e.g. morfac in the case of sediment).
 
 contains
 
@@ -926,6 +926,9 @@ subroutine delCrossSections()
 
     if (allocated(sumvalcur_tmp)) then
        deallocate(sumvalcur_tmp)
+    end if
+    if (allocated(sumvalcum_timescale)) then
+       deallocate(sumvalcum_timescale)
     end if
     tlastupd_sumval = dmiss
 

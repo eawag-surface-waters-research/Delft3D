@@ -266,7 +266,7 @@ subroutine fm_calbf()
     use m_physcoef, only: ag
     use m_flowtimes, only: dts, dnt, time1, tfac, dt_user
     use m_flowgeom, only: ndxi, lnxi, ndx, lnx, kfs, wcx1, wcx2,wcy1,wcy2, ln, wu, nd, ba
-    use m_flow, only: hs, hu, u1, v, au, vol1, plotlin
+    use m_flow, only: hs, hu, u1, v, au, plotlin
     use m_flowparameters, only: epshu, epshs
     use unstruc_files, only: mdia
     use m_alloc
@@ -871,12 +871,13 @@ subroutine fm_calksc()
              !
              if (depth>1.0_fp .and. par3>0.0_fp) then
                 if (psi <= 100.0_fp) then
-                   rksd0 = 0.0004_fp * psi * depth
+                   rksd0 = 0.0004_fp * psi * depth * fch2
                 elseif (psi < 600.0_fp) then
-                   rksd0 = (0.048_fp - 0.00008_fp*psi) * depth
+                   rksd0 = (0.048_fp - 0.00008_fp*psi) * depth * fch2
                 else
                    rksd0 = 0.0_fp
                 endif
+                rksd0 = rksd0 * par3
              else
                 rksd0 = 0.0_fp
              endif

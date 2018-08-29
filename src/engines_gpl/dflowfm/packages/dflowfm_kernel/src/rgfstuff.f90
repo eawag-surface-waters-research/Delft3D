@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2017.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -6322,6 +6322,7 @@
      use m_grid
      implicit none
      if (allocated (xch) ) then 
+        call increasegrid(mch,nch)
         xc = xch
         yc = ych
         zc = zch

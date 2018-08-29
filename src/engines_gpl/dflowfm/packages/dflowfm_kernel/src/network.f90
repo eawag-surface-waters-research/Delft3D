@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2017.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -397,7 +397,8 @@ subroutine load_network_from_flow1d(filename, found_1d_network)
    use m_flowgeom
    use m_globalParameters
    use m_cross_helper
-
+   use unstruc_messages
+   use messagehandling
    character(len=*), intent(inout) :: filename !< Name of a *.md1d file to read from.
    logical, intent(out)            :: found_1d_network
 
@@ -407,15 +408,6 @@ subroutine load_network_from_flow1d(filename, found_1d_network)
    type (t_structure), pointer :: pstru
    integer :: nstru, i
    double precision, dimension(2) :: tempbob
-   character(len=255) :: oned_outputdir
-
-   ! This routine is still used for Morphology model with network in INI-File (Willem Ottevanger)
-   
-   ! Check on Empty File Name
-   if (len_trim(filename) <= 0) then
-      found_1d_network = .false.
-      return
-   endif
 
    ! This routine is still used for Morphology model with network in INI-File (Willem Ottevanger)
    
@@ -426,6 +418,7 @@ subroutine load_network_from_flow1d(filename, found_1d_network)
    endif
 
    ! MessageHandling has already been set up via initMessaging() earlier.
+   threshold_abort = LEVEL_FATAL
    call read_1d_mdu(filename, network, found_1d_network)
    if (.not. found_1d_network) then 
       network%numk = 0

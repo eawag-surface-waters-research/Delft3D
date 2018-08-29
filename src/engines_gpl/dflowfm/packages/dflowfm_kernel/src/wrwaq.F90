@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2017.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -37,7 +37,7 @@ module wrwaq
 #endif
 
   use unstruc_files
-
+  
   implicit none
 !!--copyright-------------------------------------------------------------------
 ! Copyright (c) 2007, Deltares. All rights reserved.
@@ -780,7 +780,6 @@ subroutine waq_write_waqgeom_filepointer_ugrid(igeomfile)
         ! Create empty meshgeom.
         ierr = t_ug_meshgeom_destructor(aggregated_meshgeom)
         call check_error(ierr)
-        aggregated_meshgeom%start_index = 1
 
         ! Aggregate.
         call klok(startTime)
@@ -827,7 +826,7 @@ function create_ugrid_geometry(meshgeom, edge_type) result(ierr)
     use network_data
     use m_flow
     use io_ugrid
-    use unstruc_netcdf, only: check_error, get_2d_edge_data
+    use unstruc_netcdf, only: crs, check_error, get_2d_edge_data
     use m_missing
     use m_alloc
 
@@ -848,7 +847,6 @@ function create_ugrid_geometry(meshgeom, edge_type) result(ierr)
     ierr = t_ug_meshgeom_destructor(meshgeom)
     call check_error(ierr)
     meshgeom%meshName = 'mesh2d'
-    meshgeom%start_index = 1
     meshgeom%dim = 2
 
 
@@ -2335,6 +2333,8 @@ subroutine waq_wri_vol(itim, filenamevol, lunvol)
 !    
 !! executable statements -------------------------------------------------------
 !
+    ! waqpar%vol = 0d0
+
     if (waqpar%aggre == 0 .and. waqpar%kmxnxa == 1) then
         do i = 1, ndxi
             waqpar%vol(i) = vol1(i)
@@ -2354,6 +2354,7 @@ subroutine waq_wri_vol(itim, filenamevol, lunvol)
                    dv(kk) = vol1(kk) - waqpar%vol(waqpar%isaggr(kk)) 
                 end do
              enddo
+             waqpar%vol = 0d0
           
              dv1 = 0d0
              do L = 1, lnx
@@ -2387,8 +2388,7 @@ subroutine waq_wri_vol(itim, filenamevol, lunvol)
           endif
           num = 1
         endif 
-
-        waqpar%vol = 0d0
+        
         do k = 1, ndxi
             call getkbotktopmax(k,kb,ktx)
             do kk = kb, ktx
@@ -2397,7 +2397,7 @@ subroutine waq_wri_vol(itim, filenamevol, lunvol)
         end do
    
     else
-        waqpar%vol = 0d0
+           
         do k = 1, ndxi
             call getkbotktopmax(k,kb,ktx)
             do kk = kb, ktx
@@ -2408,6 +2408,8 @@ subroutine waq_wri_vol(itim, filenamevol, lunvol)
 
     ! Call the waq-vol file writer
      call wrwaqbin(itim, waqpar%vol, waqpar%noseg, filenamevol, waq_format_ascii, lunvol)   
+
+     
 end subroutine waq_wri_vol
 !
 !------------------------------------------------------------------------------
@@ -2944,7 +2946,7 @@ double precision, intent(out) :: czc     !< Chezy at flow node (taucurrent)
 !           Local variables
 !
 integer :: LL, nn                            !< Local link counters
-double precision ::  cf, cfn, cz, frcn, ar,  wa, ust, ust2, fw    !< Local intermediate variables
+double precision ::  cf, cfn, cz, frcn, ar,  wa, ust, ust2, ustw2, fw    !< Local intermediate variables
 
 taucurc = 0d0
 czc = 0d0
@@ -2965,7 +2967,7 @@ do nn = 1,nd(n)%lnx
          if (jawaveswartdelwaq <= 1) then 
             ust = ust + ustb(LL)*ar
          else
-            ust = ust + taubxu(LL)*ar
+            ust = ust+ taubxu(LL)*ar
          endif   
       endif
    endif 

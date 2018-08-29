@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2017.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -107,7 +107,7 @@ subroutine doclose(minp)
 use unstruc_files
 implicit none
     integer, intent(inout) :: minp
-    if (minp == 0) return
+    if (minp <= 0) return
     close (minp)
     call mess(LEVEL_INFO, 'Closed file : ', filenames(minp))
     call reg_file_close(minp)
@@ -676,8 +676,8 @@ subroutine unstruc_errorhandler(level)
 
     ierr=0
     
-    if (level >= LEVEL_ERROR) then
-        call close_all_files
+    if (level >= threshold_abort) then
+        call close_all_files()
         close(mdia)
 #ifdef HAVE_MPI
          call MPI_Abort(DFM_COMM_DFMWORLD, DFM_GENERICERROR, ierr)

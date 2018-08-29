@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2015-2018.                                
+!  Copyright (C)  Stichting Deltares, 2015.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -34,12 +34,21 @@
   case("iglobal_s")
      call c_f_pointer(xptr, x_1d_int_ptr, shape(iglobal_s))
      iglobal_s(:) = x_1d_int_ptr
+  case("hwav")
+     call c_f_pointer(xptr, x_1d_double_ptr, shape(hwav))
+     hwav(:) = x_1d_double_ptr
   case("twav")
      call c_f_pointer(xptr, x_1d_double_ptr, shape(twav))
      twav(:) = x_1d_double_ptr
   case("Uorb")
      call c_f_pointer(xptr, x_1d_double_ptr, shape(Uorb))
      Uorb(:) = x_1d_double_ptr
+  case("infilt")
+     call c_f_pointer(xptr, x_1d_double_ptr, shape(infilt))
+     infilt(:) = x_1d_double_ptr
+  case("infiltcap")
+     call c_f_pointer(xptr, x_1d_double_ptr, shape(infiltcap))
+     infiltcap(:) = x_1d_double_ptr
   case("shx")
      call c_f_pointer(xptr, x_1d_double_ptr, shape(shx))
      shx(:) = x_1d_double_ptr
@@ -118,6 +127,30 @@
   case("evap")
      call c_f_pointer(xptr, x_1d_double_ptr, shape(evap))
      evap(:) = x_1d_double_ptr
+  case("numlatsg")
+     call c_f_pointer(xptr, x_0d_int_ptr)
+     numlatsg = x_0d_int_ptr
+  case("qplat")
+     call c_f_pointer(xptr, x_1d_double_ptr, shape(qplat))
+     qplat(:) = x_1d_double_ptr
+  case("qqlat")
+     call c_f_pointer(xptr, x_1d_double_ptr, shape(qqlat))
+     qqlat(:) = x_1d_double_ptr
+  case("balat")
+     call c_f_pointer(xptr, x_1d_double_ptr, shape(balat))
+     balat(:) = x_1d_double_ptr
+  case("nnlat")
+     call c_f_pointer(xptr, x_1d_int_ptr, shape(nnlat))
+     nnlat(:) = x_1d_int_ptr
+  case("qinext")
+     call c_f_pointer(xptr, x_1d_double_ptr, shape(qinext))
+     qinext(:) = x_1d_double_ptr
+  case("qinextreal")
+     call c_f_pointer(xptr, x_1d_double_ptr, shape(qinextreal))
+     qinextreal(:) = x_1d_double_ptr
+  case("vincum")
+     call c_f_pointer(xptr, x_1d_double_ptr, shape(vincum))
+     vincum(:) = x_1d_double_ptr
   case("rnveg")
      call c_f_pointer(xptr, x_1d_double_ptr, shape(rnveg))
      rnveg(:) = x_1d_double_ptr
@@ -193,6 +226,9 @@
   case("satop")
      call c_f_pointer(xptr, x_1d_double_ptr, shape(satop))
      satop(:) = x_1d_double_ptr
+  case("sabot")
+     call c_f_pointer(xptr, x_1d_double_ptr, shape(sabot))
+     sabot(:) = x_1d_double_ptr
   case("tem0")
      call c_f_pointer(xptr, x_1d_double_ptr, shape(tem0))
      tem0(:) = x_1d_double_ptr
@@ -202,6 +238,9 @@
   case("u1")
      call c_f_pointer(xptr, x_1d_double_ptr, shape(u1))
      u1(:) = x_1d_double_ptr
+  case("u_to_umain")
+     call c_f_pointer(xptr, x_1d_double_ptr, shape(u_to_umain))
+     u_to_umain(:) = x_1d_double_ptr
   case("q1")
      call c_f_pointer(xptr, x_1d_double_ptr, shape(q1))
      q1(:) = x_1d_double_ptr
@@ -220,36 +259,24 @@
   case("diusp")
      call c_f_pointer(xptr, x_1d_double_ptr, shape(diusp))
      diusp(:) = x_1d_double_ptr
-  case("ndx2d")
-     call c_f_pointer(xptr, x_0d_int_ptr)
-     ndx2d = x_0d_int_ptr
   case("ndxi")
      call c_f_pointer(xptr, x_0d_int_ptr)
      ndxi = x_0d_int_ptr
   case("ndx1db")
      call c_f_pointer(xptr, x_0d_int_ptr)
      ndx1db = x_0d_int_ptr
-  case("ndx")
-     call c_f_pointer(xptr, x_0d_int_ptr)
-     ndx = x_0d_int_ptr
   case("kfs")
      call c_f_pointer(xptr, x_1d_int_ptr, shape(kfs))
      kfs(:) = x_1d_int_ptr
   case("kfst0")
      call c_f_pointer(xptr, x_1d_int_ptr, shape(kfst0))
      kfst0(:) = x_1d_int_ptr
-  case("ba")
-     call c_f_pointer(xptr, x_1d_double_ptr, shape(ba))
-     ba(:) = x_1d_double_ptr
+  case("bare")
+     call c_f_pointer(xptr, x_1d_double_ptr, shape(bare))
+     bare(:) = x_1d_double_ptr
   case("bl")
      call c_f_pointer(xptr, x_1d_double_ptr, shape(bl))
      bl(:) = x_1d_double_ptr
-  case("xz")
-     call c_f_pointer(xptr, x_1d_double_ptr, shape(xz))
-     xz(:) = x_1d_double_ptr
-  case("yz")
-     call c_f_pointer(xptr, x_1d_double_ptr, shape(yz))
-     yz(:) = x_1d_double_ptr
   case("lnx1D")
      call c_f_pointer(xptr, x_0d_int_ptr)
      lnx1D = x_0d_int_ptr
@@ -340,4 +367,19 @@
   case("is_dtint")
      call c_f_pointer(xptr, x_0d_double_ptr)
      is_dtint = x_0d_double_ptr
+  case("ndx2d")
+     call c_f_pointer(xptr, x_0d_int_ptr)
+     ndx2d = x_0d_int_ptr
+  case("ndx")
+     call c_f_pointer(xptr, x_0d_int_ptr)
+     ndx = x_0d_int_ptr
+  case("xz")
+     call c_f_pointer(xptr, x_1d_double_ptr, shape(xz))
+     xz(:) = x_1d_double_ptr
+  case("yz")
+     call c_f_pointer(xptr, x_1d_double_ptr, shape(yz))
+     yz(:) = x_1d_double_ptr
+  case("ba")
+     call c_f_pointer(xptr, x_1d_double_ptr, shape(ba))
+     ba(:) = x_1d_double_ptr
   end select

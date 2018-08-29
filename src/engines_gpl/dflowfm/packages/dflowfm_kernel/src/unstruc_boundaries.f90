@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2017.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -732,115 +732,62 @@ function addtimespacerelation_boundaries(qid, filename, filetype, method, operan
 
    kx = 1
    if (nbndz > 0 .and. (qid == 'waterlevelbnd' .or. qid == 'neumannbnd' .or. qid == 'riemannbnd' .or. qid == 'outflowbnd')) then
-
-      !qid = 'waterlevelbnd'
-      if (present(forcingfile)) then
-         success = ec_addtimespacerelation(qid, xbndz, ybndz, kdz, kx, filename, filetype, method, operand, xy2bndz, forcingfile=forcingfile, dtnodal=dt_nodal)
-      else
-         success = ec_addtimespacerelation(qid, xbndz, ybndz, kdz, kx, filename, filetype, method, operand, xy2bndz, dtnodal=dt_nodal)
-      end if
+      success = ec_addtimespacerelation(qid, xbndz, ybndz, kdz, kx, filename, filetype, method, operand, xy2bndz, forcingfile=forcingfile, dtnodal=dt_nodal)
 
    else if (nqhbnd > 0 .and. (qid == 'qhbnd')) then
-
-      if (present(forcingfile)) then
-         success = ec_addtimespacerelation(qid, xbndz, ybndz, kdz, kx, filename, filetype, method, operand, xy2bndz, forcingfile=forcingfile, dtnodal=dt_nodal)
-      else
-         success = ec_addtimespacerelation(qid, xbndz, ybndz, kdz, kx, filename, filetype, method, operand, xy2bndz, dtnodal=dt_nodal)
-      end if             ! kan iemand mij uitleggen wat dtnodal en een qhbnd met elkaar te maken hebben
+      success = ec_addtimespacerelation(qid, xbndz, ybndz, kdz, kx, filename, filetype, method, operand, xy2bndz, forcingfile=forcingfile)
            
-   else if (nbndu > 0 .and. (qid == 'dischargebnd' .or. &
-                             qid == 'criticaloutflowbnd' .or. qid == 'weiroutflowbnd' .or. qid == 'absgenbnd' ) ) then
+   else if (nbndu > 0 .and. (qid == 'dischargebnd' .or. qid == 'criticaloutflowbnd' .or. qid == 'weiroutflowbnd' .or. qid == 'absgenbnd' ) ) then
       if ( qid.eq.'absgenbnd' ) then
          jawave = 4
       end if
-
-      if (present(forcingfile)) then
-         success = ec_addtimespacerelation(qid, xbndu, ybndu, kdu, kx, filename, filetype, method, operand, xy2bndu, forcingfile=forcingfile)
-      else
-         success = ec_addtimespacerelation(qid, xbndu, ybndu, kdu, kx, filename, filetype, method, operand, xy2bndu)
-      end if
+      success = ec_addtimespacerelation(qid, xbndu, ybndu, kdu, kx, filename, filetype, method, operand, xy2bndu, forcingfile=forcingfile)
 
    else if (nbndu > 0 .and. qid == 'velocitybnd' ) then
-
       if (kmx == 0) then
-         if (present(forcingfile)) then
-            success = ec_addtimespacerelation(qid, xbndu, ybndu, kdu, kx, filename, filetype, method, operand, xy2bndu, forcingfile=forcingfile)
-         else
-            success = ec_addtimespacerelation(qid, xbndu, ybndu, kdu, kx, filename, filetype, method, operand, xy2bndu)
-         end if
+         success = ec_addtimespacerelation(qid, xbndu, ybndu, kdu, kx, filename, filetype, method, operand, xy2bndu, forcingfile=forcingfile)
       else
          pzmin => zminmaxu(1:nbndu)
          pzmax => zminmaxu(nbndu+1:2*nbndu)
-         if (present(forcingfile)) then
-            success = ec_addtimespacerelation(qid, xbndu, ybndu, kdu, kx, filename, filetype, method, operand, xy2bndu,    &
-                                              z=sigmabndu, pzmin=pzmin, pzmax=pzmax, forcingfile=forcingfile)
-         else
-            success = ec_addtimespacerelation(qid, xbndu, ybndu, kdu, kx, filename, filetype, method, operand, xy2bndu,    &
-                                              z=sigmabndu, pzmin=pzmin, pzmax=pzmax)
-         end if
+         success = ec_addtimespacerelation(qid, xbndu, ybndu, kdu, kx, filename, filetype, method, operand,   &
+                                           xy2bndu, z=sigmabndu, pzmin=pzmin, pzmax=pzmax, forcingfile=forcingfile)
       endif
 
    else if (nbnds > 0 .and. qid == 'salinitybnd' ) then ! 2D
-
       if (kmx == 0) then
-         if (present(forcingfile)) then
-            success = ec_addtimespacerelation(qid, xbnds, ybnds, kds, kx, filename, filetype, method, operand, xy2bnds, forcingfile=forcingfile)
-         else
-            success = ec_addtimespacerelation(qid, xbnds, ybnds, kds, kx, filename, filetype, method, operand, xy2bnds)
-         end if
+         success = ec_addtimespacerelation(qid, xbnds, ybnds, kds, kx, filename, filetype, method, operand, xy2bnds, forcingfile=forcingfile)
       else
          pzmin => zminmaxs(1:nbnds)
          pzmax => zminmaxs(nbnds+1:2*nbnds)
-         if (present(forcingfile)) then
-            success = ec_addtimespacerelation(qid, xbnds, ybnds, kds, kx, filename, filetype, method, operand, xy2bnds,    &
-                                              z=sigmabnds, pzmin=pzmin, pzmax=pzmax, forcingfile=forcingfile)
-         else
-            success = ec_addtimespacerelation(qid, xbnds, ybnds, kds, kx, filename, filetype, method, operand, xy2bnds,    &
-                                              z=sigmabnds, pzmin=pzmin, pzmax=pzmax)
-         end if
+         success = ec_addtimespacerelation(qid, xbnds, ybnds, kds, kx, filename, filetype, method, operand, xy2bnds,    &
+                                           z=sigmabnds, pzmin=pzmin, pzmax=pzmax, forcingfile=forcingfile)
       endif
               
    else if (nbndTM > 0 .and. qid == 'temperaturebnd') then
             
       if (kmx == 0) then ! 2D
-         if (present(forcingfile)) then
-            success = ec_addtimespacerelation(qid, xbndTM, ybndTM, kdtm, kx, filename, filetype, method, operand, xy2bndtm, forcingfile=forcingfile)
-         else
-            success = ec_addtimespacerelation(qid, xbndTM, ybndTM, kdtm, kx, filename, filetype, method, operand, xy2bndtm)
-         end if
+         success = ec_addtimespacerelation(qid, xbndTM, ybndTM, kdtm, kx, filename, filetype, method, operand, xy2bndtm, forcingfile=forcingfile)
       else               ! 3D
          pzmin => zminmaxtm(1:nbndTM)
          pzmax => zminmaxtm(nbndTM+1:2*nbndTM)
-         if (present(forcingfile)) then
-            success = ec_addtimespacerelation(qid, xbndTM, ybndTM, kdtm, kx, filename, filetype, method, operand, xy2bndtm,   &
-                                              z=sigmabndtm, pzmin=pzmin, pzmax=pzmax, forcingfile=forcingfile)
-         else
-            success = ec_addtimespacerelation(qid, xbndTM, ybndTM, kdtm, kx, filename, filetype, method, operand, xy2bndtm,   &
-                                              z=sigmabndtm, pzmin=pzmin, pzmax=pzmax)
-         end if
+         success = ec_addtimespacerelation(qid, xbndTM, ybndTM, kdtm, kx, filename, filetype, method, operand, xy2bndtm,   &
+                                           z=sigmabndtm, pzmin=pzmin, pzmax=pzmax, forcingfile=forcingfile)
       endif 
      
    else if (nbndsd > 0 .and. (qid == 'sedimentbnd')) then
          pzmin => zminmaxsd(1:nbndsd)
          pzmax => zminmaxsd(nbndsd+1:2*nbndsd)
-      if (present(forcingfile)) then
          success = ec_addtimespacerelation(qid, xbndsd, ybndsd, kdsd, kx, filename, filetype, method, operand, xy2bndsd,   &
                                            z=sigmabndsd, pzmin=pzmin, pzmax=pzmax, forcingfile=forcingfile)
-      else
-         success = ec_addtimespacerelation(qid, xbndsd, ybndsd, kdsd, kx, filename, filetype, method, operand, xy2bndsd,   &
-                                           z=sigmabndsd, pzmin=pzmin, pzmax=pzmax)
-      end if
 
    else if ( numtracers > 0 .and. (qid(1:9) == 'tracerbnd') ) then
       ! get tracer boundary condition number
       call get_tracername(qid, tracnam, qidnam)
       itrac = findname(numtracers, trnames, tracnam)
            
-      ! for parallel runs, we always need to add the tracer, even if this subdomain has no tracer boundary conditions defined
+! for parallel runs, we always need to add the tracer, even if this subdomain has no tracer boundary conditions defined
 !      call add_tracer(tracnam, iconst)
 !      update: all tracers are counted first and allocated later
-      
-      
 
       if ( nbndtr(itrac).gt.0 ) then
          if ( kmx.eq.0 ) then  ! 2D
@@ -873,17 +820,9 @@ function addtimespacerelation_boundaries(qid, filename, filetype, method, operan
       if (isf > 0) then
          if ( nbndsf(isf).gt.0 ) then
             if ( kmx.eq.0 ) then
-               if (present(forcingfile)) then
-                  success = ec_addtimespacerelation(qid, bndsf(isf)%x, bndsf(isf)%y, bndsf(isf)%kd, kx, filename, filetype, method, operand, bndsf(isf)%xy2, forcingfile=forcingfile)
-               else
-                  success = ec_addtimespacerelation(qid, bndsf(isf)%x, bndsf(isf)%y, bndsf(isf)%kd, kx, filename, filetype, method, operand, bndsf(isf)%xy2)
-               end if
+               success = ec_addtimespacerelation(qid, bndsf(isf)%x, bndsf(isf)%y, bndsf(isf)%kd, kx, filename, filetype, method, operand, bndsf(isf)%xy2, forcingfile=forcingfile)
             else
-               if (present(forcingfile)) then
-                  success = ec_addtimespacerelation(qid, bndsf(isf)%x, bndsf(isf)%y, bndsf(isf)%kd, kx, filename, filetype, method, operand, bndsf(isf)%xy2, bndsf(isf)%sigma, forcingfile=forcingfile)
-               else
-                  success = ec_addtimespacerelation(qid, bndsf(isf)%x, bndsf(isf)%y, bndsf(isf)%kd, kx, filename, filetype, method, operand, bndsf(isf)%xy2, bndsf(isf)%sigma)
-               end if
+               success = ec_addtimespacerelation(qid, bndsf(isf)%x, bndsf(isf)%y, bndsf(isf)%kd, kx, filename, filetype, method, operand, bndsf(isf)%xy2, bndsf(isf)%sigma, forcingfile=forcingfile)
             end if
          else
             success = .true.
@@ -894,41 +833,23 @@ function addtimespacerelation_boundaries(qid, filename, filetype, method, operan
       end if
 
    else if (nbndt > 0 .and. (qid == 'tangentialvelocitybnd')) then
-
-      if (present(forcingfile)) then
-         success = ec_addtimespacerelation(qid, xbndt, ybndt, kdt, kx, filename, filetype, method, operand, xy2bndt, forcingfile=forcingfile)
-      else
-         success = ec_addtimespacerelation(qid, xbndt, ybndt, kdt, kx, filename, filetype, method, operand, xy2bndt)
-      end if
+      success = ec_addtimespacerelation(qid, xbndt, ybndt, kdt, kx, filename, filetype, method, operand, xy2bndt, forcingfile=forcingfile)
 
    else if (nbnduxy > 0 .and. (qid == 'uxuyadvectionvelocitybnd')) then
 
       kx = 2
       if (kmx == 0) then ! 2D
-         if (present(forcingfile)) then
-            success = ec_addtimespacerelation(qid, xbnduxy, ybnduxy, kduxy, kx, filename, filetype, method, operand, xy2bnduxy, forcingfile=forcingfile)
-         else
-            success = ec_addtimespacerelation(qid, xbnduxy, ybnduxy, kduxy, kx, filename, filetype, method, operand, xy2bnduxy)
-         end if
+         success = ec_addtimespacerelation(qid, xbnduxy, ybnduxy, kduxy, kx, filename, filetype, method, operand, xy2bnduxy, forcingfile=forcingfile)
       else 
          pzmin => zminmaxuxy(1:nbnduxy)
          pzmax => zminmaxuxy(nbnduxy+1:2*nbnduxy)
-         if (present(forcingfile)) then
-            success = ec_addtimespacerelation(qid, xbnduxy, ybnduxy, kduxy, kx, filename, filetype, method, operand, xy2bnduxy,   &
-                                              z=sigmabnduxy, pzmin=pzmin, pzmax=pzmax, forcingfile=forcingfile)
-         else
-            success = ec_addtimespacerelation(qid, xbnduxy, ybnduxy, kduxy, kx, filename, filetype, method, operand, xy2bnduxy,   &
-                                              z=sigmabnduxy, pzmin=pzmin, pzmax=pzmax)
-         end if
+         success = ec_addtimespacerelation(qid, xbnduxy, ybnduxy, kduxy, kx, filename, filetype, method, operand, xy2bnduxy,   &
+                                           z=sigmabnduxy, pzmin=pzmin, pzmax=pzmax, forcingfile=forcingfile)
       endif 
 
    else if (nbndn > 0 .and. (qid == 'normalvelocitybnd')) then
+      success = ec_addtimespacerelation(qid, xbndn, ybndn, kdn, kx, filename, filetype, method, operand, xy2bndn, forcingfile=forcingfile)
 
-      if (present(forcingfile)) then
-         success = ec_addtimespacerelation(qid, xbndn, ybndn, kdn, kx, filename, filetype, method, operand, xy2bndn, forcingfile=forcingfile)
-      else
-         success = ec_addtimespacerelation(qid, xbndn, ybndn, kdn, kx, filename, filetype, method, operand, xy2bndn)
-      end if
    else !There is some boundary that is not detected or recognized
 !      success = .false.      
 ! SPvdP: this is not an error, especially for parallel runs
@@ -1032,7 +953,11 @@ logical function initboundaryblocksforcings(filename)
                    oper = '+'
                 endif
                 call register_quantity_pli_combination(quantity, locationfile)
-                retVal = addtimespacerelation_boundaries(quantity, locationfile, filetype=poly_tim, method=weightfactors, operand=oper, forcingfile = forcingfile)
+                if (forcingfile == '-') then
+                   retVal = addtimespacerelation_boundaries(quantity, locationfile, filetype=poly_tim, method=weightfactors, operand=oper)
+                else
+                   retVal = addtimespacerelation_boundaries(quantity, locationfile, filetype=poly_tim, method=weightfactors, operand=oper, forcingfile = forcingfile)
+                endif				   
                 initboundaryblocksforcings = initboundaryblocksforcings .and. retVal ! Remember any previous errors.
              else if (property_name == 'return_time') then
                 continue                   ! used elsewhere to set Thatcher-Harleman delay 
@@ -1442,7 +1367,7 @@ use m_meteo
 use m_readstructures
 use m_sferic
 use geometry_module
-
+ 
 implicit none
 character(len=256)            :: plifile
 integer                       :: i, L, Lf, kb, LL, ierr, k, kbi, n, ifld
@@ -1450,7 +1375,7 @@ integer                       :: nstr
 character (len=256)           :: fnam, rec
 integer, allocatable          :: pumpidx(:), gateidx(:), cdamidx(:), cgenidx(:), dambridx(:) ! temp
 double precision              :: tmpval
-integer                       :: istru, istrtype
+integer                       :: istru, istrtype, itmp
 integer                       :: numg, numd, npum, ngs, numgen, numgs, ilinstr, ndambr
 type(TREE_DATA), pointer      :: str_ptr
 double precision, allocatable :: widths(:)
@@ -1565,7 +1490,7 @@ do i=1,nstr
       ncdam   = ncdam   + numd
 
    case ('pump')
-         call selectelset_internal_links( plifile, POLY_TIM, xz, yz, ln, lnx, kep(npump+1:numl), npum )
+      call selectelset_internal_links( plifile, POLY_TIM, xz, yz, ln, lnx, kep(npump+1:numl), npum )
       !endif
       success = .true.
       WRITE(msgbuf,'(2a,i8,a)') trim(qid), trim(plifile) , npum, ' nr of pump links' ; call msg_flush()
@@ -2191,7 +2116,7 @@ if (ncdamsg > 0) then ! Old-style controllable damlevel
 endif
 
 !
-! staged pump (SOBEK pump)
+! pumps, including staged pumps
 !
 if (npump > 0) then
    if (allocated   (qpump)   ) deallocate( qpump)
@@ -2223,7 +2148,23 @@ if (npump > 0) then
    end do
    
    nPumpsWithLevels = 0
+   
+   if (allocated(pumpsWithLevels)) deallocate(pumpsWithLevels)
    allocate(pumpsWithLevels(npumpsg))
+   pumpsWithLevels = -1;
+   
+   if (allocated(waterLevelsPumpLeft)) deallocate(waterLevelsPumpLeft)
+   allocate(waterLevelsPumpLeft(npumpsg))
+   waterLevelsPumpLeft = 0d0;
+   
+   if (allocated(waterLevelsPumpRight)) deallocate(waterLevelsPumpRight)
+   allocate(waterLevelsPumpRight(npumpsg))
+   waterLevelsPumpRight = 0d0;
+   
+   if (allocated(pumpAveraging)) deallocate(pumpAveraging)
+   allocate(pumpAveraging(2,npumpsg))
+   pumpAveraging = 0d0;
+
    ! initialize
    pumpsWithLevels = -1
    do n = 1, npumpsg ! and now add it (poly_tim xys have just been prepared in separate loop)
@@ -2239,11 +2180,16 @@ if (npump > 0) then
       strtype = ' '
       call prop_get_string(str_ptr, '', 'type', strtype, success)
       istrtype  = getStructype(strtype)
-      ! flow1d_io library: add and read SOBEK pump
-      ! just use the first link of the the structure (the network%sts%struct(istrtmp)%link_number  is not used in computations)
-      k = L1pumpsg(n)
-      istrtmp   = addStructure(network%sts, kpump(1,k), kpump(2,k), iabs(kpump(3,k)), -1, ' ', strid, istrtype)
-      call readPump(network%sts%struct(istrtmp)%pump, str_ptr, success)
+
+      ! Do a try-read to determine whether this is a staged flow1d pump. If not, just continue (capacity is enough then).
+      call prop_get_integer(str_ptr, 'structure', 'nrstages', itmp, success)
+      if (success) then
+         ! flow1d_io library: add and read SOBEK pump
+         ! just use the first link of the the structure (the network%sts%struct(istrtmp)%link_number  is not used in computations)
+         k = L1pumpsg(n)
+         istrtmp   = addStructure(network%sts, kpump(1,k), kpump(2,k), iabs(kpump(3,k)), -1, "", strid, istrtype)
+         call readPump(network%sts%struct(istrtmp)%pump, str_ptr, success)
+      end if
       
       ! mapping for qpump array
       if (success) then
@@ -2270,15 +2216,22 @@ if (npump > 0) then
                fnam = trim(rec)
                if (index(trim(fnam)//'|','.tim|')>0) then
                   ! Time-interpolated value will be placed in qpump(n) when calling ec_gettimespacevalue.
-                  success  = ec_addtimespacerelation(qid, xdum, ydum, kdum, kx, fnam, uniform, spaceandtime, 'O', targetIndex=n)
+                  success  = ec_addtimespacerelation(qid, xdum, ydum, kdum, kx, fnam, uniform, spaceandtime, 'O', targetIndex=n) 
+                  if(.not.success) then
+                     call qnerror( getECMessage() , ' for ',strid)
+                  endif
                endif
                if (index(trim(fnam)//'|','.cmp|')>0) then
                   ! Evaluated harmonic signals value will be placed in qpump(n) when calling ec_gettimespacevalue.
                   success  = ec_addtimespacerelation(qid, xdum, ydum, kdum, kx, fnam, fourier, justupdate, 'O', targetIndex=n)
+                  if(.not.success) then
+                     call qnerror( getECMessage() , ' for ',strid)
+                  endif
                endif
             end if
          else
             qpump(n) = tmpval ! Constant value for always, set it now already.
+            success = .true.
          end if
       end if
    enddo
@@ -2338,6 +2291,14 @@ if (ndambreak > 0) then
    if(allocated(dambreakHeightsAndWidthsFromTable)) deallocate(dambreakHeightsAndWidthsFromTable)
    allocate(dambreakHeightsAndWidthsFromTable(ndambreaksg*2))
    dambreakHeightsAndWidthsFromTable = 0.0d0
+   
+   if(allocated(breachWidthDerivativeDambreak)) deallocate(breachWidthDerivativeDambreak)
+   allocate(breachWidthDerivativeDambreak(ndambreaksg))
+   breachWidthDerivativeDambreak = 0.0d0
+   
+   if(allocated(waterLevelJumpDambreak)) deallocate(waterLevelJumpDambreak)
+   allocate(waterLevelJumpDambreak(ndambreaksg))
+   waterLevelJumpDambreak = 0.0d0
     
    do n = 1, ndambreaksg
       do k = L1dambreaksg(n), L2dambreaksg(n)

@@ -33,16 +33,9 @@
 #include "config.h"
 #endif
 
-
-#ifdef USE_DEPRECATED_PETSC34
-! for backwards compatibility with PETSc 3.4 (UNST-573)
-#include "solve_petsc_v34.F90"
-#else
-
 module m_petsc
-#include <petsc/finclude/petscksp.h>
-
-  use petsc
+#include <finclude/petscdef.h>
+   use petsc
    integer                                                    :: numrows      ! number of rows in this domain
    integer                                                    :: numallrows   ! number of rows of whole system
    integer,          dimension(:), allocatable                :: rowtoelem    ! local row to local element list, dim(numrows)
@@ -93,7 +86,7 @@ end module m_petsc
      
       if ( icgsolver.eq.6 ) then
          call PetscInitialize(PETSC_NULL_CHARACTER,ierr)
-         call PetscLogDefaultBegin(ierr)
+         call PetscLogBegin(ierr)
       end if
 #endif
  
@@ -122,6 +115,7 @@ end module m_petsc
 !> allocate arrays for petsc matrix construction,
 !>   and get sparsity pattern in RCS format
    subroutine ini_petsc(Ndx,Ndxi,ierror)
+#include <finclude/petscdef.h>
       use m_reduce
       use m_partitioninfo
       use petsc
@@ -439,6 +433,7 @@ end module m_petsc
 !>  it is assumed that the global cell numbers iglobal, dim(Ndx) are available
 !>  NO GLOBAL RENUMBERING, so the matrix may contain zero rows
    subroutine setPETSCmatrixEntries()
+#include <finclude/petscdef.h>
       use m_reduce
       use m_partitioninfo
       use m_petsc
@@ -572,6 +567,7 @@ end module m_petsc
 !>  it is assumed that the global cell numbers iglobal, dim(Ndx) are available
 !>  NO GLOBAL RENUMBERING, so the matrix may contain zero rows
    subroutine createPETSCPreconditioner(iprecnd)
+#include <finclude/petscdef.h>
       use petsc
       use m_reduce
 !      use unstruc_messages
@@ -621,7 +617,8 @@ end module m_petsc
       end if
 
       if (ierr == PETSC_OK) call PCCreate(DFM_COMM_DFMWORLD,Preconditioner, ierr)
-      if (ierr == PETSC_OK) call PCSetOperators(Preconditioner, Amat, Amat, ierr)
+!      if (ierr == PETSC_OK) call PCSetOperators(Preconditioner, Amat, Amat, SAME_PRECONDITIONER,ierr)
+      if (ierr == PETSC_OK) call PCSetOperators(Preconditioner, Amat, Amat, DIFFERENT_NONZERO_PATTERN, ierr)
       if (ierr == PETSC_OK) call KSPSetPC(Solver, Preconditioner, ierr)
 
       ! Configure the preconditioner
@@ -654,6 +651,7 @@ end module m_petsc
 !>  it is assumed that the global cell numbers iglobal, dim(Ndx) are available
 !>  NO GLOBAL RENUMBERING, so the matrix may contain zero rows
    subroutine preparePETSCsolver(japipe)
+#include <finclude/petscdef.h>
 ! fix for missing definition of KSPPIPECG in finclude/petscdef.h:
 #define KSPPIPECG 'pipecg'
       use petsc
@@ -673,7 +671,7 @@ end module m_petsc
       PetscInt, parameter                                        :: maxits = 4000
       double precision, parameter                                :: RelTol = 1d-14
       double precision, parameter                                :: AbsTol = 1d-14
-      double precision, parameter                                :: dTol = PETSC_DEFAULT_REAL
+      double precision, parameter                                :: dTol = PETSC_DEFAULT_DOUBLE_PRECISION
       
       
       jasucces = 0
@@ -715,7 +713,7 @@ end module m_petsc
 !      call writemesg('RHS and SOL vector are filled')
 
       if (ierr == PETSC_OK) call KSPCreate(DFM_COMM_DFMWORLD, Solver, ierr)
-      if (ierr == PETSC_OK) call KSPSetOperators(Solver, Amat, Amat, ierr)
+      if (ierr == PETSC_OK) call KSPSetOperators(Solver, Amat, Amat, SAME_NONZERO_PATTERN, ierr)
       if (ierr == PETSC_OK) then
          if ( japipe.ne.1 ) then
             call KSPSetType(Solver, KSPCG, ierr)
@@ -1004,5 +1002,3 @@ end module m_petsc
       
       return
    end subroutine
-
-#endif ! matches #ifdef for compatibility with older petsc version (3.4)

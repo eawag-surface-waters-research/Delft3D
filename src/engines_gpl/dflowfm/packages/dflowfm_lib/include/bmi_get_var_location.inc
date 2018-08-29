@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2015-2018.                                
+!  Copyright (C)  Stichting Deltares, 2015.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -32,9 +32,15 @@ select case(var_name)
     location_name = ""
   case("iglobal_s")
     location_name = ""
+  case("hwav")
+    location_name = "face"
   case("twav")
     location_name = "face"
   case("Uorb")
+    location_name = "face"
+  case("infilt")
+    location_name = "face"
+  case("infiltcap")
     location_name = "face"
   case("shx")
     location_name = ""
@@ -88,6 +94,22 @@ select case(var_name)
     location_name = "face"
   case("evap")
     location_name = "face"
+  case("numlatsg")
+    location_name = ""
+  case("qplat")
+    location_name = "face"
+  case("qqlat")
+    location_name = "face"
+  case("balat")
+    location_name = "face"
+  case("nnlat")
+    location_name = "face"
+  case("qinext")
+    location_name = "face"
+  case("qinextreal")
+    location_name = "face"
+  case("vincum")
+    location_name = "face"
   case("rnveg")
     location_name = "face"
   case("diaveg")
@@ -138,11 +160,15 @@ select case(var_name)
     location_name = "face"
   case("satop")
     location_name = "face"
+  case("sabot")
+    location_name = "face"
   case("tem0")
     location_name = "face"
   case("tem1")
     location_name = "face"
   case("u1")
+    location_name = "edge"
+  case("u_to_umain")
     location_name = "edge"
   case("q1")
     location_name = "edge"
@@ -156,25 +182,17 @@ select case(var_name)
     location_name = "edge"
   case("diusp")
     location_name = "edge"
-  case("ndx2d")
-    location_name = ""
   case("ndxi")
     location_name = ""
   case("ndx1db")
-    location_name = ""
-  case("ndx")
     location_name = ""
   case("kfs")
     location_name = ""
   case("kfst0")
     location_name = ""
-  case("ba")
+  case("bare")
     location_name = "face"
   case("bl")
-    location_name = "face"
-  case("xz")
-    location_name = "face"
-  case("yz")
     location_name = "face"
   case("lnx1D")
     location_name = ""
@@ -236,6 +254,16 @@ select case(var_name)
     location_name = "face"
   case("is_dtint")
     location_name = ""
+  case("ndx2d")
+    location_name = ""
+  case("ndx")
+    location_name = ""
+  case("xz")
+    location_name = "face"
+  case("yz")
+    location_name = "face"
+  case("ba")
+    location_name = "face"
   case default
     location_name = ""
 end select

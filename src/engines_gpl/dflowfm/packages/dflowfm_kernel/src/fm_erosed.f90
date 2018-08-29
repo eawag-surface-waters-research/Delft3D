@@ -37,6 +37,7 @@
     use sediment_basics_module
     use m_sediment, only: stmpar, sedtra, stm_included, mtd
     use m_ini_noderel
+    
     implicit none
 
     real(fp), dimension(:),                pointer :: rhowat
@@ -215,6 +216,147 @@
     logical                              , pointer :: neglectentrainment
     real(fp)          , dimension(:,:)   , pointer :: rca
     end module m_fm_erosed
+    
+    module m_fm_update_crosssections
+    implicit none
+    contains
+    
+    subroutine fm_update_crosssections(blchg)
+    use precision
+    use m_cell_geometry, only: ba
+    use m_flowgeom, only: ndxi, kcs, dx, wu, nd
+    use m_oned_functions, only:gridpoint2cross
+    use unstruc_channel_flow, only: network
+    use m_CrossSections, only: t_CSType, CS_TABULATED
+    use m_flow, only: s1
+    use MessageHandling
+    
+    real(fp), dimension(:), intent(inout) :: blchg         !< Bed level change (> 0 = sedimentation, < 0 = erosion)
+
+    integer :: i
+    integer :: iref
+    integer :: l
+    integer :: nm
+    integer :: c
+    integer :: ctype
+    double precision :: aref
+    double precision :: da
+    double precision :: ds
+    double precision :: dvol
+    double precision :: fac
+    double precision :: href
+    double precision :: w_active
+    type(t_CSType), pointer :: cdef
+    !
+    ! upon entry blchg contains the bed level change averaged over the total cell area
+    !
+    do nm = 1, ndxi
+        if (kcs(nm)==1 .and. blchg(nm)/=0) then ! only for 1D nodes if the bed level change is non zero
+            if (gridpoint2cross(nm)%num_cross_sections==1) then
+                c = gridpoint2cross(nm)%cross(1)
+                cdef => network%crs%cross(c)%tabdef
+                ctype = cdef%crosstype
+                !
+                if (ctype== CS_TABULATED) then
+                    !
+                    ! determine the reference height href and the cross sectional area  below that level
+                    !
+                    aref = 0d0
+                    iref = cdef%levelscount
+                    do i = 2, cdef%levelscount
+                        aref = aref + (cdef%flowWidth(i) + cdef%flowWidth(i-1))*(cdef%height(i)-cdef%height(i-1))*0.5d0
+                        if (cdef%flowWidth(i) > cdef%plains(1)) then ! or cdef%height(i)>s1(nm) 
+                            iref = i
+                            exit
+                        endif
+                    enddo
+                    href = cdef%height(iref)
+                    w_active = cdef%flowWidth(iref)
+                    !
+                    ! use blchg as bed level change over the total cell area (can be partly dry)
+                    ! to compute the total volume deposited inside the cell
+                    !
+                    dvol = blchg(nm)*ba(nm)
+                    !
+                    ! compute the total cell length
+                    !
+                    ds   = 0
+                    do i = 1,nd(nm)%lnx
+                        L = iabs(nd(nm)%ln(i))
+                        ds = ds+dx(L)
+                    enddo
+                    ds = ds/dble(nd(nm)%lnx)
+                    !
+                    ! compute the deposited area per unit length, i.e. the area by which the cross section should be adjusted
+                    !
+                    da   = dvol/ds
+                    !
+                    ! compute the factor by which the cross sectional area changes
+                    !
+                    if (cdef%levelscount == 1) then
+                        !
+                        ! single level: horizontal bed, shift up/down uniformly
+                        !
+                        cdef%height(1) = href + (da/w_active)
+                    elseif (da<aref) then
+                        !
+                        ! raise/lower proportional to the depth relative to reference level
+                        !
+                        fac = 1d0 - (da/aref)
+                        do i = 1, iref-1
+                            cdef%height(i) = href - (href-cdef%height(i))*fac
+                        enddo
+                    else
+                        !
+                        ! fill uniformly above reference level
+                        !
+                        do i = iref, cdef%levelscount-1
+                           da = da - aref
+                           aref = (cdef%flowWidth(i+1) + cdef%flowWidth(i))*(cdef%height(i+1)-cdef%height(i))*0.5d0
+                           if (da<aref) then
+                               exit
+                           else
+                               iref = iref+1
+                               href = cdef%height(iref)
+                           endif
+                        enddo
+                        !
+                        ! remove obsolete levels
+                        !
+                        do i = iref, cdef%levelscount
+                            cdef%flowWidth(i-iref+1) = cdef%flowWidth(i)
+                            cdef%height(i-iref+1) = cdef%height(i)
+                        enddo
+                        cdef%levelscount = cdef%levelscount - iref + 1
+                        !
+                        ! fill proportional to the depth relative to reference level
+                        !
+                        fac = 1d0 - (da/aref)
+                        do i = 1, iref-1
+                            if (cdef%flowWidth(i) >= cdef%plains(1)) cycle
+                            cdef%height(i) = href - (href-cdef%height(i))*fac
+                        enddo
+                    endif
+                    !
+                    ! set blchg to bed level change for deepest point
+                    !
+                    blchg(nm) = cdef%height(1) - network%crs%cross(c)%bedLevel
+                    !
+                    network%crs%cross(c)%surfaceLevel = cdef%height(cdef%levelscount)
+                    network%crs%cross(c)%bedLevel     = cdef%height(1) !TODO: check if we need to include network%crs%cross(c)%shift
+                    network%crs%cross(c)%charheight   = network%crs%cross(c)%surfaceLevel - network%crs%cross(c)%bedLevel
+                else
+                    write(msgbuf,'(a,i5)') 'Bed level updating has not yet implemented for cross section type ',ctype
+                    call err_flush()
+                endif
+            endif
+        endif
+    enddo
+    !
+    ! upon exit blchg contains the bed level change for deepest point
+    !
+    end subroutine fm_update_crosssections
+    end module m_fm_update_crosssections
 
 
     subroutine inipointers_erosed()
@@ -232,7 +374,8 @@
     blchg               => mtd%blchg
     sed                 => mtd%sed
     ws                  => mtd%ws
-    uau                  => mtd%uau
+    uau                 => mtd%uau
+
 
     ! stmpar
     lsed                => stmpar%lsedsus
@@ -486,8 +629,8 @@
     integer                       :: iNodeRel
     integer                       :: inod
     integer                       :: istat
-    integer                       :: ierror
     integer                       :: ised
+    integer                       :: ierror
     integer                       :: j
     integer                       :: k
     integer                       :: k2d
@@ -703,7 +846,7 @@
         pnod => network%nds%node(inod)
         if (pnod%numberofconnections == 1) cycle
         k3 = pnod%gridnumber
-        if ((hs(k3) == 0.d0) .and. (width_in(inod) == 0.d0)) then 
+        if ((hs(k3) > 0.d0) .and. (width_in(inod) > 0.d0)) then 
             ucxq(k3) = ucxq(k3)/width_in(inod)/hs(k3)
             ucyq(k3) = ucyq(k3)/width_in(inod)/hs(k3)
         else
@@ -783,11 +926,11 @@
     rsedeq = 0.0_fp
 
     do nm = 1, ndx
-        if ((s1(nm) - bl(nm)) > sedthr) then ! *kfs(nm): always compute sed, also in ghost nodes
-            kfsed(nm) = 1
-        else
-            kfsed(nm) = 0
-        endif
+       if ((s1(nm) - bl(nm)) > sedthr) then ! *kfs(nm): always compute sed, also in ghost nodes
+          kfsed(nm) = 1
+       else
+          kfsed(nm) = 0
+       endif
     enddo
     !
     ! Determine fractions of all sediments the top layer and
@@ -1219,11 +1362,11 @@
         dll_reals(RP_DEPTH) = real(h1        ,hp)
         dll_reals(RP_CHEZY) = real(chezy     ,hp)
         if (wave) then
-            dll_reals(RP_HRMS ) = real(hwav(nm) ,hp)
-            dll_reals(RP_TPEAK) = real(twav(nm)                   ,hp)
-            dll_reals(RP_TETA ) = real(phiwav(nm)                 ,hp)
-            dll_reals(RP_RLAMB) = real(rlabda(nm)               ,hp)
-            dll_reals(RP_UORB ) = real(uorb(nm)             ,hp)
+            dll_reals(RP_HRMS ) = real(hwav(nm)     ,hp)
+            dll_reals(RP_TPEAK) = real(twav(nm)     ,hp)
+            dll_reals(RP_TETA ) = real(phiwav(nm)   ,hp)
+            dll_reals(RP_RLAMB) = real(rlabda(nm)   ,hp)
+            dll_reals(RP_UORB ) = real(uorb(nm)     ,hp)
         else
             dll_reals(RP_HRMS ) = 0.0_hp
             dll_reals(RP_TPEAK) = 0.0_hp
@@ -1249,6 +1392,7 @@
         dll_reals(RP_Z0CUR) = real(z0curk(nm)     ,hp) ! potentially with trachytopes
         dll_reals(RP_Z0ROU) = real(z0rou          ,hp)
         dll_reals(RP_DG   ) = real(dg(nm)         ,hp)
+        dll_reals(RP_DM   ) = real(dxx(nm,i50)    ,hp) ! d50 mixture, not dm; following Van Rijn 2007c
         dll_reals(RP_SNDFR) = real(sandfrac(nm)   ,hp)
         dll_reals(RP_DGSD ) = real(dgsd(nm)       ,hp)
         if (iturbulencemodel == 3 .and. kmx>0 ) then
@@ -1719,7 +1863,9 @@
 
             if (pnod%numberofconnections == 1) cycle
 
-            sb_in(inod, ised) = sb_in(inod, ised)/width_in(inod)
+            if (width_in(inod) > 0.d0) then 
+                sb_in(inod, ised) = sb_in(inod, ised)/width_in(inod)
+            endif
 
             ! loop over branches and determine redistribution of incoming sediment
             k3 = pnod%gridnumber
@@ -2005,7 +2151,7 @@
     use bedcomposition_module
     use sediment_basics_module
     use m_flow     , only: vol0, vol1, s0, s1, hs, u1, kmx, hu, au
-    use m_flowgeom , only: bai,ndxi,nd,wu,bl, ba, ln, dx, ndx, lnx, lnxi, acl, wcx1, wcy1, wcx2, wcy2,xz,yz
+    use m_flowgeom , only: bai, ndxi, nd, wu, bl, ba, ln, dx, ndx, lnx, lnxi, acl, wcx1, wcy1, wcx2, wcy2, xz, yz
     use m_flowexternalforcings, only: nbndz, nbndu, nopenbndsect
     use m_flowparameters, only: epshs, epshu, jawave
     use m_sediment,  only: stmpar, sedtra, mtd, sedtot2sedsus
@@ -2020,6 +2166,8 @@
     use m_dad   , only: dad_included
     use table_handles , only:handletype, gettabledata
     use m_partitioninfo
+    use m_fm_update_crosssections
+    use precision_basics
     !
     implicit none
     !
@@ -2081,7 +2229,6 @@
     integer                     :: Lb, Lt, ka, kf1, kf2, kt, nto, n1, n2
     real(fp)                    :: dsdnm, eroflx, sedflx, thick0, thick1, trndiv, flux, sumflux, dtmor
     real(fp)                    :: dhmax, h1, totdbodsd, totfixfrac, bamin, thet, dv, zktop, cflux
-    integer                     :: jaghost, idmn_ghost
 
     integer,          parameter :: bedchangemessmax = 50
     double precision, parameter :: dtol = 1d-8
@@ -2089,7 +2236,7 @@
     double precision            :: tausum2(1)
     double precision            :: sbsum, taucurc, czc
     double precision, dimension(lsedtot) :: bc_sed_distribution
-   
+
     integer  :: icond
     !    integer  :: idir_scalar
     integer  :: jb
@@ -2329,10 +2476,11 @@
         !          call dfexchg( e_scrt,   1, lsed, dfloat, nm_pos, gdp)
         !       endif
     endif           ! sus /= 0.0
+
     do ll = 1, lsed
         j = lstart + ll   ! constituent index
         do L=1,lnx
-            e_ssn(L, ll)  = fluxhortot(j,L)/max(wu(L), epshu) + e_scrn(L, ll)             ! timestep transports
+            e_ssn(L, ll)  = fluxhortot(j,L)/max(wu(L), epshu) + e_scrn(L, ll)             ! timestep transports  [kg/s/m]
         enddo
     enddo
     !
@@ -2367,24 +2515,32 @@
                     lm = morbnd(jb)%lm(ib)
                     k2 = morbnd(jb)%nxmx(ib)
                     if (jampi == 1) then 
-                       if (.not. (idomain(k2) == my_rank)) cycle    ! internal cells at boundary are in the same domain as the link
-                    endif    
+                        if (.not. (idomain(k2) == my_rank)) cycle    ! internal cells at boundary are in the same domain as the link
+                    endif
+                    if( u1(lm) < 0.0_fp ) cycle                     ! to do: 3d
                     call gettau(k2,taucurc,czc)
                     tausum2(1) = tausum2(1) + taucurc**2            ! sum of the shear stress squared
                 enddo                                         ! the distribution of bedload is scaled with square stress
                 ! for avoiding instability on BC resulting from uniform bedload
                 ! in combination with non-uniform cells.
+                li = 0
                 do l = 1, lsedtot
                     sbsum = 0d0
+                    !
+                    ! bed load transport always zero for mud fractions
+                    !
+                    if (sedtyp(l) == SEDTYP_COHESIVE) cycle
+                    li = li + 1
+                    !                    
                     do ib = 1, morbnd(jb)%npnt
                         lm = morbnd(jb)%lm(ib)
-                        k2 = morbnd(jb)%nxmx(ib)
-                        if (jampi == 1) then 
-                           if (.not. (idomain(k2) == my_rank)) cycle
-                        endif
-                        sbsum = sbsum + bc_mor_array(l) * wu(lm)  ! sum the total bedload flux throughout boundary
+                    k2 = morbnd(jb)%nxmx(ib)
+                    if (jampi == 1) then 
+                        if (.not. (idomain(k2) == my_rank)) cycle
+                    endif
+                    sbsum = sbsum + bc_mor_array(li) * wu(lm)  ! sum the total bedload flux throughout boundary
                     enddo
-                    bc_sed_distribution(l) = sbsum        
+                    bc_sed_distribution(li) = sbsum        
                 enddo
 
                 ! do MPI reduce step for bc_sed_distribution and tausum2
@@ -2392,10 +2548,6 @@
                     call reduce_sum(1, tausum2)
                     call reduce_sum(lsedtot, bc_sed_distribution)
                 endif
-                
-                do l = 1, lsedtot
-                    bc_sed_distribution(l) = bc_sed_distribution(l)/tausum2(1)        ! find the distribution coefficient
-                enddo                     
 
                 do ib = 1, morbnd(jb)%npnt
                     alfa_dist   = morbnd(jb)%alfa_dist(ib)
@@ -2432,7 +2584,11 @@
                         if (morbnd(jb)%ibcmt(3) == lsedbed) then
                             !rate = bc_mor_array(li)
                             call gettau( ln(2,lm), taucurc, czc )
-                            rate = bc_sed_distribution(li) * taucurc**2 / wu(lm)
+                            if ( tausum2(1) > 0d0 ) then 
+                                rate = bc_sed_distribution(li) * taucurc**2 / wu(lm) / tausum2(1)
+                            else
+                                rate = bc_mor_array(li)
+                            endif    
                         elseif (morbnd(jb)%ibcmt(3) == 2*lsedbed) then
                             rate = bc_mor_array(li) + &
                                 & alfa_dist * (bc_mor_array(li+lsedbed)-bc_mor_array(li))
@@ -2692,24 +2848,26 @@
                 endif    ! totfixfrac > 1.0e-7
             endif       ! totdbodsd < 0.0
         enddo          ! nm
-       if ( jampi.gt.0 ) then
-          call update_ghosts(ITYPE_Sall, lsedtot, Ndx, dbodsd, ierror)
-       end if
+
+        if ( jampi.gt.0 ) then
+            call update_ghosts(ITYPE_Sall, lsedtot, Ndx, dbodsd, ierror)
+        end if
+
         !
-        ! Add transports to cumulative transports on links, only for output reasons
+        ! Add transports to cumulative transports on links, only for output reasons (not used so commented out: WO, can be removed?)
         !
-        do ll = 1, lsedtot
-            do L=1,lnx
-                e_sbnc(L, ll) = e_sbnc(L, ll) + e_sbn(L, ll) * dtmor
-                e_sbtc(L, ll) = e_sbtc(L, ll) + e_sbt(L, ll) * dtmor
-            enddo
-        enddo
+        !do ll = 1, lsedtot
+        !    do L=1,lnx
+        !        e_sbnc(L, ll) = e_sbnc(L, ll) + e_sbn(L, ll) * dtmor
+        !        e_sbtc(L, ll) = e_sbtc(L, ll) + e_sbt(L, ll) * dtmor
+        !    enddo
+        !enddo
         !
-        do ll = 1, lsed
-            do L=1,lnx
-                e_ssnc(L, ll) = e_ssnc(L, ll) + e_ssn(L, ll) * dtmor
-            end do
-        end do
+        !do ll = 1, lsed
+        !    do L=1,lnx
+        !        e_ssnc(L, ll) = e_ssnc(L, ll) + e_ssn(L, ll) * dtmor
+        !    end do
+        !end do
         !
         ! Apply erosion and sedimentation to bookkeeping system
         !
@@ -2870,6 +3028,8 @@
     !
     if (bedupd) then
         !
+        call fm_update_crosssections(blchg)
+        !
         do nm = 1, Ndx
             !
             bl(nm) = bl(nm) + blchg(nm)
@@ -2925,7 +3085,7 @@
         endif
     endif
     end subroutine fm_bott3d
-
+    
     subroutine fm_fallve()
     !!--description-----------------------------------------------------------------
     !
