@@ -556,10 +556,8 @@ if [ $useSp -eq 0 ]; then
     log='logs/make_dflowfm.log'
     command="FC=mpif90 make ds-install -C engines_gpl/dflowfm &> $log"
 
-#    log "Running $command"
-#    eval $command
-    log "INFO: dflowfm temporarily disabled. Main FM line is ds closed trunk."
-    log "INFO: dflowfm kernel via artifact dependencies in dimr collectors."
+    log "Running $command"
+    eval $command
 fi
 
 if [ $? -ne 0 ]; then
