@@ -223,6 +223,9 @@ namespace ECModuleTests
             meshtwod.nodex = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshtwoddim.numnode);
             meshtwod.nodey = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshtwoddim.numnode);
             meshtwod.nodez = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshtwoddim.numnode);
+            meshtwod.facex = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshtwoddim.numface);
+            meshtwod.facey = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshtwoddim.numface);
+            meshtwod.facez = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshtwoddim.numface);
             meshtwod.edge_nodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshtwoddim.numedge * 2);
 
             //var gridGeomWrapper = new GridGeomLibWrapper();
@@ -230,7 +233,6 @@ namespace ECModuleTests
             int startIndex = 1; //the base index of the arrays
             ierr = wrapperNetcdf.ionc_get_meshgeom(ref ioncid, ref meshid, ref l_networkid, ref meshtwod, ref startIndex, ref includeArrays);
             Assert.That(ierr, Is.EqualTo(0));
-
 
             // default parameters for averaging
             double Wu1Duni = 2.0;               // default value from flow_geom init
@@ -269,6 +271,224 @@ namespace ECModuleTests
             {
                Assert.That(targetValuesResults[i], Is.EqualTo(targetValues[i]).Within(1e-6));
             }
+
+            //test averaging on the edges
+            Marshal.FreeCoTaskMem(c_targetValues);
+            numTargets = meshtwoddim.numedge;
+            //interpolate on edges
+            locType = 2; 
+            c_targetValues = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * numTargets);
+
+            ierr = wrapper.averaging(
+                ref meshtwoddim,
+                ref meshtwod,
+                ref startIndex,
+                ref c_sampleX,
+                ref c_sampleY,
+                ref c_sampleValues,
+                ref numSamples,
+                ref c_targetValues,
+                ref locType,
+                ref Wu1Duni,
+                ref method,
+                ref minNumSamples,
+                ref relativeSearchSize,
+                ref jsferic,
+                ref jasfer3D);
+
+            Assert.That(ierr, Is.EqualTo(0));
+
+        }
+
+
+        // Test averaging interpolation on location type 2 (middle points of edges)
+        [Test]
+        [NUnit.Framework.Category("TestAverageInterpolation")]
+        public void TestAverageInterpolationOnEdges()
+        {
+            //get the sample points
+            string pathIn = TestHelper.TestFilesDirectoryPath() + @"\inTestAveragingInterpolation.txt";
+            Assert.IsTrue(File.Exists(pathIn));
+
+            int numSamples = 0;
+            var sampleX = new double[numSamples];
+            var sampleY = new double[numSamples];
+            var sampleValues = new double[numSamples];
+
+            readPoints(pathIn, ref sampleX, ref sampleY, ref sampleValues, ref numSamples);
+
+            IntPtr c_sampleX = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * numSamples);
+            IntPtr c_sampleY = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * numSamples);
+            IntPtr c_sampleValues = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * numSamples);
+            Marshal.Copy(sampleX, 0, c_sampleX, numSamples);
+            Marshal.Copy(sampleY, 0, c_sampleY, numSamples);
+            Marshal.Copy(sampleValues, 0, c_sampleValues, numSamples);
+            
+            int ioncid = 0; //file variable 
+            int mode = 0;   //open in read mode
+            var wrapperNetcdf = new IoNetcdfLibWrapper();
+            int iconvtype = 2;
+            double convversion = 0.0;
+            string pathNetFile = TestHelper.TestFilesDirectoryPath() + @"\simplebox_net_ugrid.nc";
+            Assert.IsTrue(File.Exists(pathIn));
+            int ierr = wrapperNetcdf.ionc_open(pathNetFile, ref mode, ref ioncid, ref iconvtype, ref convversion);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            int meshid = -1;
+            int meshType = 2;     // get the 2d
+            int l_networkid = 0;  // invalid network, not intrested in 1d for now
+            var meshtwoddim = new meshgeomdim();
+            getMeshid(ioncid, ref meshid, meshType, ref wrapperNetcdf);
+            ierr = wrapperNetcdf.ionc_get_meshgeom_dim(ref ioncid, ref meshid, ref l_networkid, ref meshtwoddim);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            //You need to know in advance the number of mesh points
+            var meshtwod = new meshgeom();
+            meshtwod.nodex = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshtwoddim.numnode);
+            meshtwod.nodey = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshtwoddim.numnode);
+            meshtwod.nodez = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshtwoddim.numnode);
+            meshtwod.facex = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshtwoddim.numface);
+            meshtwod.facey = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshtwoddim.numface);
+            meshtwod.facez = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshtwoddim.numface);
+            meshtwod.edge_nodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshtwoddim.numedge * 2);
+
+            //var gridGeomWrapper = new GridGeomLibWrapper();
+            bool includeArrays = true;
+            int startIndex = 1; //the base index of the arrays
+            ierr = wrapperNetcdf.ionc_get_meshgeom(ref ioncid, ref meshid, ref l_networkid, ref meshtwod, ref startIndex, ref includeArrays);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            // default parameters for averaging
+            double Wu1Duni = 2.0;               // default value from flow_geom init
+            int method = 1;                     // averaging 
+            int minNumSamples = 1;
+            double relativeSearchSize = 1.01;
+            int jsferic = 0;
+            int jasfer3D = 0;
+            int locType = 2;
+
+            //test averaging on the edges
+            int numTargets = meshtwoddim.numedge;
+            IntPtr c_targetValues = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * numTargets);
+            Marshal.FreeCoTaskMem(c_targetValues);
+            
+            //interpolate on edges
+            c_targetValues = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * numTargets);
+
+            var wrapper = new Ec_ModuleLibWrapper();
+            ierr = wrapper.averaging(
+                ref meshtwoddim,
+                ref meshtwod,
+                ref startIndex,
+                ref c_sampleX,
+                ref c_sampleY,
+                ref c_sampleValues,
+                ref numSamples,
+                ref c_targetValues,
+                ref locType,
+                ref Wu1Duni,
+                ref method,
+                ref minNumSamples,
+                ref relativeSearchSize,
+                ref jsferic,
+                ref jasfer3D);
+
+            Assert.That(ierr, Is.EqualTo(0));
+
+        }
+
+
+
+        // Test averaging interpolation on location type 2 (middle points of edges)
+        [Test]
+        [NUnit.Framework.Category("TestTriangulationOnEdges")]
+        public void TestTriangulationOnEdges()
+        {
+            //get the sample points
+            string pathIn = TestHelper.TestFilesDirectoryPath() + @"\inTestAveragingInterpolation.txt";
+            Assert.IsTrue(File.Exists(pathIn));
+
+            int numSamples = 0;
+            var sampleX = new double[numSamples];
+            var sampleY = new double[numSamples];
+            var sampleValues = new double[numSamples];
+
+            readPoints(pathIn, ref sampleX, ref sampleY, ref sampleValues, ref numSamples);
+
+            IntPtr c_sampleX = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * numSamples);
+            IntPtr c_sampleY = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * numSamples);
+            IntPtr c_sampleValues = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * numSamples);
+            Marshal.Copy(sampleX, 0, c_sampleX, numSamples);
+            Marshal.Copy(sampleY, 0, c_sampleY, numSamples);
+            Marshal.Copy(sampleValues, 0, c_sampleValues, numSamples);
+
+            int ioncid = 0; //file variable 
+            int mode = 0;   //open in read mode
+            var wrapperNetcdf = new IoNetcdfLibWrapper();
+            int iconvtype = 2;
+            double convversion = 0.0;
+            string pathNetFile = TestHelper.TestFilesDirectoryPath() + @"\simplebox_net_ugrid.nc";
+            Assert.IsTrue(File.Exists(pathIn));
+            int ierr = wrapperNetcdf.ionc_open(pathNetFile, ref mode, ref ioncid, ref iconvtype, ref convversion);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            int meshid = -1;
+            int meshType = 2;     // get the 2d
+            int l_networkid = 0;  // invalid network, not intrested in 1d for now
+            var meshtwoddim = new meshgeomdim();
+            getMeshid(ioncid, ref meshid, meshType, ref wrapperNetcdf);
+            ierr = wrapperNetcdf.ionc_get_meshgeom_dim(ref ioncid, ref meshid, ref l_networkid, ref meshtwoddim);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            //You need to know in advance the number of mesh points
+            var meshtwod = new meshgeom();
+            meshtwod.nodex = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshtwoddim.numnode);
+            meshtwod.nodey = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshtwoddim.numnode);
+            meshtwod.nodez = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshtwoddim.numnode);
+            meshtwod.facex = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshtwoddim.numface);
+            meshtwod.facey = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshtwoddim.numface);
+            meshtwod.facez = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshtwoddim.numface);
+            meshtwod.edge_nodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshtwoddim.numedge * 2);
+
+            //var gridGeomWrapper = new GridGeomLibWrapper();
+            bool includeArrays = true;
+            int startIndex = 1; //the base index of the arrays
+            ierr = wrapperNetcdf.ionc_get_meshgeom(ref ioncid, ref meshid, ref l_networkid, ref meshtwod, ref startIndex, ref includeArrays);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            // default parameters for triangulation
+            int jsferic = 0;
+            int jasfer3D = 0;
+            //interpolate on edges
+            int locType = 2;
+
+            //test averaging on the edges
+            int numTargets = meshtwoddim.numedge;
+            IntPtr c_targetValues = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * numTargets);
+            Marshal.FreeCoTaskMem(c_targetValues);
+
+            //interpolate on edges
+            c_targetValues = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * numTargets);
+
+            var wrapper = new Ec_ModuleLibWrapper();
+            ierr = wrapper.triang(ref meshtwoddim,
+                ref meshtwod,
+                ref startIndex,
+                ref c_sampleX,
+                ref c_sampleY,
+                ref c_sampleValues,
+                ref numSamples,
+                ref c_targetValues,
+                ref locType,
+                ref jsferic,
+                ref jasfer3D);
+
+            Assert.That(ierr, Is.EqualTo(0));
+
+            //check the interpolation results
+            double[] targetValuesResults = new double[numTargets];
+            Marshal.Copy(c_targetValues, targetValuesResults, 0, numTargets);
+
         }
 
     }

@@ -164,7 +164,7 @@ function averaging(meshtwoddim, meshtwod, startIndex, c_sampleX, c_sampleY, c_sa
     double precision, allocatable           :: cyy(:,:)
     double precision, allocatable           :: targetX(:)
     double precision, allocatable           :: targetY(:)
-    double precision, allocatable           :: targetValuesAverages(:)
+    double precision, allocatable           :: rawTargetValues(:)
     integer                                 :: k, IAVtmp, NUMMINtmp, INTTYPEtmp, ierr, i, jakdtree, numTargets
     double precision                        :: RCELtmp, valFirstNode,valSecondNode
     integer                                 :: nMaxNodesPolygon
@@ -178,14 +178,14 @@ function averaging(meshtwoddim, meshtwod, startIndex, c_sampleX, c_sampleY, c_sa
     ierr = ggeo_convert(meshgeom, startIndex)
     
     !determine number of numTargets
-    if ((locType.eq.0).or.(locType.eq.2)) then
+    if (locType.eq.0) then
       !to net nodes and edges
       numTargets = size(meshgeom%facex)
       allocate(targetX(numTargets))
       allocate(targetY(numTargets))
       targetX = meshgeom%facex
       targetY = meshgeom%facey
-    else if (locType.eq.1) then
+    else if ((locType.eq.1).or.(locType.eq.2)) then
       !to flow nodes
        numTargets = size(meshgeom%nodex)
       allocate(targetX(numTargets))
@@ -212,7 +212,7 @@ function averaging(meshtwoddim, meshtwod, startIndex, c_sampleX, c_sampleY, c_sa
     call c_f_pointer(c_sampleX, sampleX, (/numSamples/))
     call c_f_pointer(c_sampleY, sampleY, (/numSamples/))
     call c_f_pointer(c_sampleValues, sampleValuesTemp, (/numSamples/))
-    call c_f_pointer(c_targetValues, targetValues, (/numTargets/))
+    
     
     !assign values
     sampleValues(1,:)          = sampleValuesTemp(:)
@@ -307,33 +307,35 @@ function averaging(meshtwoddim, meshtwod, startIndex, c_sampleX, c_sampleY, c_sa
        do i =1, numTargets
           call incells(meshgeom%facex(i),meshgeom%facey(i),cellPermutation(i))
        enddo
-       targetValues(:) = interpolationResults(1,cellPermutation(:))
-    else if(locType.eq.1) then
+       call c_f_pointer(c_targetValues, targetValues, (/numTargets/))
+       targetValues = interpolationResults(1,cellPermutation)
+    else if (locType.eq.1) then
        !to net node: use the permutation array
-       targetValues(:) = interpolationResults(1,nodePermutation(:))
-       if(locType.eq.2) then 
-         numTargets = size(meshgeom%edge_nodes,2);
-         allocate(targetValuesAverages(numTargets))
-         do i =1, numTargets
-            valFirstNode  = interpolationResults(1,meshgeom%edge_nodes(1,i))
-            valSecondNode = interpolationResults(1,meshgeom%edge_nodes(2,i))
-            targetValuesAverages = dmiss
-            if ((valFirstNode.ne.dmiss).and.(valSecondNode.ne.dmiss)) then
-               targetValuesAverages(i) = (valFirstNode + valSecondNode)/2.0d0
-            endif
-            if ((valFirstNode.eq.dmiss).and.(valSecondNode.ne.dmiss)) then
-               targetValuesAverages(i) = valSecondNode
-            endif
-            if ((valFirstNode.ne.dmiss).and.(valSecondNode.eq.dmiss)) then
-               targetValuesAverages(i) = valFirstNode
-            endif
-         enddo
-         !deallocate and re-assign targetValues
-         deallocate(targetValues)
-         allocate(targetValues(numTargets))
-         targetValues = targetValuesAverages
-      endif
-   endif
+       call c_f_pointer(c_targetValues, targetValues, (/numTargets/))
+       targetValues = interpolationResults(1,nodePermutation)
+    else if(locType.eq.2) then
+       ! if the node have been permuted by findcell, restore the original ordering, supposing is the same as 
+       ! the one in the edge_nodes
+       allocate(rawTargetValues(numTargets))
+       rawTargetValues = interpolationResults(1,nodePermutation)
+       !reset number of targets, associate c# and fortran pointers
+       numTargets = size(meshgeom%edge_nodes,2);
+       call c_f_pointer(c_targetValues, targetValues, (/numTargets/))
+       targetValues = dmiss
+       do i =1, numTargets
+          valFirstNode  = rawTargetValues(meshgeom%edge_nodes(1,i))
+          valSecondNode = rawTargetValues(meshgeom%edge_nodes(2,i))
+          if ((valFirstNode.ne.dmiss).and.(valSecondNode.ne.dmiss)) then
+             targetValues(i) = (valFirstNode + valSecondNode)/2.0d0
+          endif
+          if ((valFirstNode.eq.dmiss).and.(valSecondNode.ne.dmiss)) then
+             targetValues(i) = valSecondNode
+          endif
+          if ((valFirstNode.ne.dmiss).and.(valSecondNode.eq.dmiss)) then
+             targetValues(i) = valFirstNode
+          endif
+       enddo
+    endif
 
 1234 continue
 
