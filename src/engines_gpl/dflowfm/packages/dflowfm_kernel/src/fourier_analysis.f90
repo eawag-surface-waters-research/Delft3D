@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017.                                     
+!  Copyright (C)  Stichting Deltares, 2017-2018.                                
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -1930,7 +1930,7 @@ end subroutine setfouunit
 
    subroutine wrfous(ifou   ,dtsec   ,namcon  ,hdt  ,tzone  ,gdfourier  ,gddimens  ,fileids, iloc   )
    !----- GPL ---------------------------------------------------------------------
-   !  Copyright (C)  Stichting Deltares, 2011-2015.                                
+   !  Copyright (C)  Stichting Deltares, 2011-2018.                                
    !-------------------------------------------------------------------------------
    !  $Id$
    !  $HeadURL$
