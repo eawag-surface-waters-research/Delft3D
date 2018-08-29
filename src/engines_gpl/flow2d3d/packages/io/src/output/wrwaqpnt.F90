@@ -161,7 +161,7 @@
       if ( filex ) then                          ! the dido aggregation file
          if ( parll ) then
                write ( message , '(3A)' ) &
-     &          '*** ERROR: no aggregation allowed in parallel mode. Ignoring ''', &
+     &          '*** WARNING: no aggregation allowed in parallel mode. Ignoring ''', &
      &          trim(flaggr), '''. Coupling done with active only!'
                write( *      , '(A)' ) trim(message)
                write( lundia , '(A)' ) trim(message)
@@ -173,7 +173,7 @@
             read ( lunaggr , * , iostat=istat) n, m, k, i, j
             if ( istat /= 0) then
                write ( message , '(3A)' ) &
-     &          '*** ERROR: unable to read dimensions in aggregation file ''', &
+     &          '*** WARNING: unable to read dimensions in aggregation file ''', &
      &          trim(flaggr), '''. Coupling done with active only!'
                write( *      , '(A)' ) trim(message)
                write( lundia , '(A)' ) trim(message)
@@ -183,7 +183,7 @@
             endif
             if ( m .ne. mmax .or. n .ne. nmax ) then
                write ( message , '(A,I6,A,I6,A,I6,A,I6,A)' )                &
-     &          '*** ERROR: dimensions in aggregation file: (',             &
+     &          '*** WARNING: dimensions in aggregation file: (',             &
      &          m,',',n,') don''t match dimensions of model grid: (',          &
      &          mmax,',',nmax,') coupling done with active only!'
                write( *      , '(A)' ) trim(message)
