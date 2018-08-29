@@ -1,5 +1,5 @@
 * Example (old-style) external forcings file
-* $Id: example.ext 51038 2017-05-26 10:03:01Z dam_ar $
+* $Id$
 * QUANTITY    : waterlevelbnd, velocitybnd, dischargebnd, tangentialvelocitybnd, normalvelocitybnd  filetype=9         method=2,3
 *             : outflowbnd, neumannbnd, qhbnd, uxuyadvectionvelocitybnd                             filetype=9         method=2,3
 *             : salinitybnd                                                                         filetype=9         method=2,3
