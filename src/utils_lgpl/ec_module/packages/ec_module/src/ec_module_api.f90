@@ -164,8 +164,9 @@ function averaging(meshtwoddim, meshtwod, startIndex, c_sampleX, c_sampleY, c_sa
     double precision, allocatable           :: cyy(:,:)
     double precision, allocatable           :: targetX(:)
     double precision, allocatable           :: targetY(:)
+    double precision, allocatable           :: targetValuesAverages(:)
     integer                                 :: k, IAVtmp, NUMMINtmp, INTTYPEtmp, ierr, i, jakdtree, numTargets
-    double precision                        :: RCELtmp
+    double precision                        :: RCELtmp, valFirstNode,valSecondNode
     integer                                 :: nMaxNodesPolygon
     real(hp), allocatable                   :: xx(:,:), yy(:,:), xxx(:), yyy(:)
     integer, allocatable                    :: nnn(:), cellPermutation(:)
@@ -177,26 +178,20 @@ function averaging(meshtwoddim, meshtwod, startIndex, c_sampleX, c_sampleY, c_sa
     ierr = ggeo_convert(meshgeom, startIndex)
     
     !determine number of numTargets
-    if (locType.eq.0) then
+    if ((locType.eq.0).or.(locType.eq.2)) then
+      !to net nodes and edges
       numTargets = size(meshgeom%facex)
       allocate(targetX(numTargets))
       allocate(targetY(numTargets))
       targetX = meshgeom%facex
       targetY = meshgeom%facey
     else if (locType.eq.1) then
-      numTargets = size(meshgeom%nodex)
+      !to flow nodes
+       numTargets = size(meshgeom%nodex)
       allocate(targetX(numTargets))
       allocate(targetY(numTargets))
       targetX = meshgeom%nodex
-      targetY = meshgeom%nodey
-    else if (locType.eq.2) then
-      !numTargets = size(meshgeom%edge_nodes,2)
-      !allocate(targetX(numTargets))
-      !allocate(targetY(numTargets))
-      !do i=1,numTargets
-      !   targetX(i) = (meshgeom%nodex(meshgeom%edge_nodes(1,i)) + meshgeom%nodex(meshgeom%edge_nodes(2,i)))/2.0d0
-      !   targetY(i) = (meshgeom%nodey(meshgeom%edge_nodes(1,i)) + meshgeom%nodey(meshgeom%edge_nodes(2,i)))/2.0d0
-      !enddo      
+      targetY = meshgeom%nodey  
     else
       !not valid location
       ierr = -1
@@ -250,7 +245,7 @@ function averaging(meshtwoddim, meshtwod, startIndex, c_sampleX, c_sampleY, c_sa
     ierr = 0
     call findcells(100000)
 
-    if ((locType.eq.0).or.(locType.eq.2)) then
+    if (locType.eq.0) then
        nNetCells = size(xzw)
        !to flow nodes
        nMaxNodesPolygon = maxval(netcell%n)
@@ -262,9 +257,8 @@ function averaging(meshtwoddim, meshtwod, startIndex, c_sampleX, c_sampleY, c_sa
              yy(k,i) = yzw(i) + rcel*(yk(netcell(i)%nod(k))-yzw(i))
           enddo
        enddo
-       
-    elseif (locType.eq.1) then
-       
+
+    else if ((locType.eq.1).or.(locType.eq.2)) then
        !to net nodes
        nMaxNodesPolygon = 3*maxval(nmk)   ! 2: safe upper bound , 3 : even safer!
        allocate( xx(nMaxNodesPolygon,numk), yy(nMaxNodesPolygon,numk), nnn(numk), xxx(nMaxNodesPolygon), yyy(nMaxNodesPolygon) )
@@ -275,7 +269,7 @@ function averaging(meshtwoddim, meshtwod, startIndex, c_sampleX, c_sampleY, c_sa
              yy(k,i) = yyy(k)
           enddo
        enddo
-       
+
     endif
 
     !interpolation 
@@ -311,13 +305,35 @@ function averaging(meshtwoddim, meshtwod, startIndex, c_sampleX, c_sampleY, c_sa
        !to flow nodes: calculate permutation array
        allocate(cellPermutation(numTargets))
        do i =1, numTargets
-           call incells(meshgeom%facex(i),meshgeom%facey(i),cellPermutation(i))
+          call incells(meshgeom%facex(i),meshgeom%facey(i),cellPermutation(i))
        enddo
        targetValues(:) = interpolationResults(1,cellPermutation(:))
-    elseif(locType.eq.1) then
+    else if(locType.eq.1) then
        !to net node: use the permutation array
        targetValues(:) = interpolationResults(1,nodePermutation(:))
-    endif
+       if(locType.eq.2) then 
+         numTargets = size(meshgeom%edge_nodes,2);
+         allocate(targetValuesAverages(numTargets))
+         do i =1, numTargets
+            valFirstNode  = interpolationResults(1,meshgeom%edge_nodes(1,i))
+            valSecondNode = interpolationResults(1,meshgeom%edge_nodes(2,i))
+            targetValuesAverages = dmiss
+            if ((valFirstNode.ne.dmiss).and.(valSecondNode.ne.dmiss)) then
+               targetValuesAverages(i) = (valFirstNode + valSecondNode)/2.0d0
+            endif
+            if ((valFirstNode.eq.dmiss).and.(valSecondNode.ne.dmiss)) then
+               targetValuesAverages(i) = valSecondNode
+            endif
+            if ((valFirstNode.ne.dmiss).and.(valSecondNode.eq.dmiss)) then
+               targetValuesAverages(i) = valFirstNode
+            endif
+         enddo
+         !deallocate and re-assign targetValues
+         deallocate(targetValues)
+         allocate(targetValues(numTargets))
+         targetValues = targetValuesAverages
+      endif
+   endif
 
 1234 continue
 
