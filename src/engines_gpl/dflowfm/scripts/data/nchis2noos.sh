@@ -3,7 +3,7 @@
 ### This script converts the time series data for a single variable
 ### from a NetCDF his file into one time series file per station.
 ### Can be used for example to create noos-format files from a _his.nc
-### $Id: nchis2noos.sh 25611 2013-01-08 07:07:54Z dam_ar $
+### $Id$
 ###
 ### Usage:
 ### nchis2noos.sh HIS_NC_FILE VARIABLENAME [STATIONNAME]

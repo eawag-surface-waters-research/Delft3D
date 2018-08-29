@@ -24,13 +24,13 @@ set target=%4
 
 del build.log
 
-if "%VS110COMNTOOLS%" == "" (
+if "%VS140COMNTOOLS%" == "" (
     echo ##teamcity[buildStatus status='FAILURE' text='Visual Studio 2012 is missing.']
     exit /B 1
 ) 
 
 
-call "%VS110COMNTOOLS%\vsvars32.bat" 
+call "%VS140COMNTOOLS%\vsvars32.bat" 
 
 
 devenv.exe %solution% /%target% "%configuration%|%platform%" /Out build.log
