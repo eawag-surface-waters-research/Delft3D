@@ -27,13 +27,13 @@ REGENERATE_VN=yes
 # We're in a working copy build dir, so always update the *version.F90
 dfmoutput_version.F90: dfmoutput_version.F90.svn .FORCE
 	$(top_builddir)/scripts_lgpl/linux/update_version.sh \
-	$(builddir)/dfmoutput_version.F90 $(srcdir) $(srcdir)/../res/version_number.ini $(abs_top_builddir)
+	$(builddir)/dfmoutput_version.F90 $(srcdir) $(srcdir)/version_number.ini $(abs_top_builddir)
  else
 # Do not force regeneration of *version.F90, because it is already shipped in a source distribution archive.
 dfmoutput_version.F90:
  endif
 
-.FORCE: 
+.FORCE:
 
 .PHONY: .FORCE
 
@@ -73,9 +73,9 @@ LIBS+=${MPILIBS}
 endif
 
 EXTRALIBS=\
-        $(top_builddir)/utils_lgpl/io_netcdf/packages/io_netcdf/src/libIONetcdf.la \
         $(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/libDeltaresCommon.la \
         $(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common_mpi/src/libDeltaresCommonMpi.la \
+        $(top_builddir)/utils_lgpl/io_netcdf/packages/io_netcdf/src/libIONetcdf.la \
         $(top_builddir)/third_party_open/FLAP/Test_Driver/obj/ir_precision.o \
         $(top_builddir)/third_party_open/FLAP/Test_Driver/obj/data_type_command_line_interface.o \
         $(CCLIBS)
