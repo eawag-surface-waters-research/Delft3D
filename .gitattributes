@@ -458,8 +458,6 @@ src/engines_gpl/dflowfm/packages/dflowfm-cli_exe/Makefile.am -text
 src/engines_gpl/dflowfm/packages/dflowfm-cli_exe/dflowfm-cli.vfproj -text
 src/engines_gpl/dflowfm/packages/dflowfm-cli_exe/src/Makefile.am -text
 src/engines_gpl/dflowfm/packages/dflowfm-cli_exe/src/net_main.F90 -text
-src/engines_gpl/dflowfm/packages/dflowfm-cli_exe/src/unstruc_d_hydro.cpp -text
-src/engines_gpl/dflowfm/packages/dflowfm-cli_exe/src/unstruc_d_hydro.h -text
 src/engines_gpl/dflowfm/packages/dflowfm_esmf/src/unstruc_esmf.F90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/Makefile.am -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/dflowfm_kernel.vfproj -text
@@ -493,10 +491,7 @@ src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/net.F90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/network.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/oned_functions.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/part.F90 -text
-src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/part.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/partition.F90 -text
-src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/partition_utilities.f90 -text
-src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/polygon.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/rcm.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/removedcode.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/rest.F90 -text
@@ -544,7 +539,6 @@ src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/xbeach_wave_boundary_init.f9
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/xbeach_wave_boundary_main.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/xbeach_wave_boundary_update.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/xbeachwaves.f90 -text
-src/engines_gpl/dflowfm/packages/dflowfm_kernel/unstruc.vfproj -text
 src/engines_gpl/dflowfm/packages/dflowfm_lib/dflowfm_dll.vfproj -text
 src/engines_gpl/dflowfm/packages/dflowfm_lib/include/bmi_get_var.inc -text
 src/engines_gpl/dflowfm/packages/dflowfm_lib/include/bmi_get_var_count.inc -text
@@ -565,7 +559,6 @@ src/engines_gpl/dflowfm/packages/dflowfm_lib/templates/bmi_get_var_shape.f90 -te
 src/engines_gpl/dflowfm/packages/dflowfm_lib/templates/bmi_get_var_type.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_lib/templates/bmi_set_var.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_lib/templates/bmi_set_var_slice.f90 -text
-src/engines_gpl/dflowfm/packages/dflowfm_lib/unstruc_dll.vfproj -text
 src/engines_gpl/dflowfm/res/ISOCOLOUR.hls -text
 src/engines_gpl/dflowfm/res/deltares_secondary.rgb -text
 src/engines_gpl/dflowfm/res/deltares_whiteblue.rgb -text
