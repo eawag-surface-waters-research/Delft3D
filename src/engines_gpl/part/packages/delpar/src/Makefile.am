@@ -12,8 +12,9 @@ MYC_INCLUDES=$(top_srcdir)/include
 
 bin_PROGRAMS= delpar
 
-AM_FCFLAGS += $(OPENMP_FCFLAGS)
-AM_FFLAGS += $(OPENMP_FFLAGS)
+AM_FCFLAGS += -fopenmp $(OPENMP_FCFLAGS)
+AM_FFLAGS += -fopenmp $(OPENMP_FFLAGS)
+LDFLAGS += -fopenmp
 
 delpar_SOURCES= \
 	main.f

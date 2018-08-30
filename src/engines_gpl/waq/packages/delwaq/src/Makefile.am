@@ -6,6 +6,10 @@
 include $(top_srcdir)/common.am
 lib_LTLIBRARIES = libdelwaq.la
  
+AM_FCFLAGS += -fopenmp $(OPENMP_FCFLAGS)
+AM_FFLAGS += -fopenmp $(OPENMP_FFLAGS)
+LDFLAGS += -fopenmp
+
 #-------------------------------------------------------------------------------
 #Includes
 FMODULES += \

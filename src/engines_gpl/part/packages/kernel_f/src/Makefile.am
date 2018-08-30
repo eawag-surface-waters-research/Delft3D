@@ -10,8 +10,8 @@
 include $(top_srcdir)/common.am
 noinst_LTLIBRARIES = libkernel_f.la
 
-AM_FCFLAGS += $(OPENMP_FCFLAGS)
-AM_FFLAGS += $(OPENMP_FFLAGS)
+AM_FCFLAGS += -fopenmp $(OPENMP_FCFLAGS)
+AM_FFLAGS += -fopenmp $(OPENMP_FFLAGS)
 
 #-------------------------------------------------------------------------------
 #Includes

@@ -112,7 +112,7 @@ AC_PROG_FC([ifort gfortran])
 dnl Check the flags needed to link fc programs with ld (i.e. cc)
 AC_FC_LIBRARY_LDFLAGS
 dnl Check for openmp for fortran
-AC_OPENMP
+## AC_OPENMP
 
 dnl Check for underscoring of external names
 AC_FC_WRAPPERS
@@ -142,7 +142,7 @@ AC_PROG_F77([ifort gfortran g77])
 AC_F77_LIBRARY_LDFLAGS
 AC_F77_LINE_LENGTH([132])
 dnl Check for openmp for fortran 77
-AC_OPENMP
+## AC_OPENMP
 dnl check if open(...shared) works
 ACX_F77_SHARED_SPECIFIER
 

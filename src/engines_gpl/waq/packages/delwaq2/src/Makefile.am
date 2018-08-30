@@ -6,8 +6,9 @@
 include $(top_srcdir)/common.am
 bin_PROGRAMS = delwaq2
 
-AM_FCFLAGS += $(OPENMP_FCFLAGS)
-AM_FFLAGS += $(OPENMP_FFLAGS)
+AM_FCFLAGS += -fopenmp $(OPENMP_FCFLAGS)
+AM_FFLAGS += -fopenmp $(OPENMP_FFLAGS)
+LDFLAGS += -fopenmp
 
 #-------------------------------------------------------------------------------
 #Includes

@@ -8,8 +8,9 @@
 include $(top_srcdir)/common.am
 noinst_LTLIBRARIES = libWaqKernel.la
 
-AM_FCFLAGS += $(OPENMP_FCFLAGS) $(FINCLUDES) $(FMODULES) ${NETCDF_CFLAGS} ${NETCDF_FORTRAN_CFLAGS}
-AM_FFLAGS  += $(OPENMP_FFLAGS)  $(FINCLUDES) $(FMODULES) ${NETCDF_CFLAGS} ${NETCDF_FORTRAN_CFLAGS}
+AM_FCFLAGS += -fopenmp $(OPENMP_FCFLAGS) $(FINCLUDES) $(FMODULES) ${NETCDF_CFLAGS} ${NETCDF_FORTRAN_CFLAGS}
+AM_FFLAGS  += -fopenmp $(OPENMP_FFLAGS)  $(FINCLUDES) $(FMODULES) ${NETCDF_CFLAGS} ${NETCDF_FORTRAN_CFLAGS}
+
 
 #-------------------------------------------------------------------------------
 #Includes
