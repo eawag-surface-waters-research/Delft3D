@@ -94,7 +94,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>.;netCDF 4.6.1\include;..;$(SolutionDir);..\..\..\libsrc;..\..\..\fortran;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;.\netCDF 4.6.1-32\include;.\netcdf-fortran-4.4.4\libsrc;$(SolutionDir);..\..\..\libsrc;..\..\..\fortran;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;NETCDF_EXPORTS;DLL_NETCDF;VERSION=3.6.1-beta1;DLL_EXPORT;VISUAL_CPLUSPLUS;_FILE_OFFSET_BITS=64;NO_NETCDF_2;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
@@ -142,7 +142,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>.;netCDF 4.6.1\include;$(SolutionDir);..;..\..\..\libsrc;..\..\..\fortran;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;.\netCDF 4.6.1-32\include;.\netcdf-fortran-4.4.4\libsrc;$(SolutionDir);..;..\..\..\libsrc;..\..\..\fortran;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;NETCDF_EXPORTS;VERSION=3.6.1-beta1;DLL_NETCDF;DLL_EXPORT;VISUAL_CPLUSPLUS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>
