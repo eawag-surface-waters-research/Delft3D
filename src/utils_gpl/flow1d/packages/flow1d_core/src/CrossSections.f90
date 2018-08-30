@@ -778,6 +778,7 @@ subroutine SetParsCross(CrossDef, cross)
    type(t_CrossSection), intent(inout) :: Cross
       
    double precision                 :: surfLevel
+   double precision                 :: bedlevel
    integer :: j
    type(t_CrossSection)             :: crossSection
    double precision                 :: cz
@@ -790,16 +791,24 @@ subroutine SetParsCross(CrossDef, cross)
    if (Crossdef%crossType == cs_tabulated) then
       cross%surfaceLevel = Crossdef%height(Crossdef%levelsCount) + cross%shift
       cross%bedLevel     = Crossdef%height(1) + cross%shift
-   else
-      surfLevel = -9999.0 !< JanM: TODO Parametriseer deze waarde, levelmiss toevoegen aan derived type CSDef
+   elseif (Crossdef%crossType == CS_YZ_PROF) then
+      surfLevel = -huge(1d0)
+      bedlevel  = huge(1d0)
       do j = 1, Crossdef%levelsCount
          if (surfLevel < Crossdef%z(j)) then
             surfLevel = Crossdef%z(j)
          endif
+         if (bedlevel > Crossdef%z(j)) then
+            bedLevel = Crossdef%z(j)
+         endif
       enddo
-      cross%surfaceLevel = surflevel
+      cross%surfaceLevel = cross%shift + surflevel
+      cross%bedLevel     = cross%shift + bedlevel
+   else
+      cross%surfaceLevel = cross%shift + cross%tabDef%diameter
       cross%bedLevel     = cross%shift
    endif
+   
    ! Get Characteristic Height and Width
    call SetCharHeightWidth(cross)
    
