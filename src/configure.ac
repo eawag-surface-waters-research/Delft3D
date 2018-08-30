@@ -372,17 +372,31 @@ AC_DEFINE_UNQUOTED(D3D_PLUGIN_EXT, ["$pluginext"], [Delft3D plugin extension])
 ACX_MKL
 AM_CONDITIONAL([USEMKL], test "x$ax_mkl_ok" == "xyes")
 
-dnl Check for PETSc
-AC_ARG_WITH(petsc,[AS_HELP_STRING([--with-petsc],[Build with petsc support @<:@default=no@:>@])], [],[with_petsc=no])
+# Check for PETSc
+AC_MSG_CHECKING([if PETSc is wanted])
+AC_ARG_WITH(	    petsc,
+		    [AS_HELP_STRING([--with-petsc],[Build with petsc support  @<:@default=no@:>@])],
+		    [],
+		    [with_petsc=no])
+
 AS_IF([test "x$with_petsc" != "xno"],
-        [
-          PKG_CHECK_MODULES([PETSc], [PETSc < 3.5])
-          AC_DEFINE([HAVE_PETSC],1,[Defined if you have PETSc library.])
-        ],
-        [
-          AC_MSG_RESULT([no])
-        ]
-)
+	    	[
+			AC_MSG_RESULT([yes])			
+			# now supporting 3.8 onwards, and deprecated 3.4
+			PKG_CHECK_MODULES([PETSc], [PETSc > 3.4 PETSc < 3.5],
+			[
+				AC_MSG_WARN([PETSc 3.4 has been deprecated, please consider upgrading to version 3.8 or higher])
+				AC_DEFINE([USE_DEPRECATED_PETSC34], 1, [Defined for building with deprecated PETSc version 3.4])
+			],
+			[
+				PKG_CHECK_MODULES([PETSc], [PETSc >= 3.8])					
+			])
+			# do we need fortran cflags here??
+			AC_DEFINE([HAVE_PETSC],1,[Defined if you have PETSc library.]) 
+			  
+		],
+	    	AC_MSG_RESULT([no]))
+
 AM_CONDITIONAL([USEPETSC], test "x$with_petsc" != "xno")
 
 dnl Check for METIS
