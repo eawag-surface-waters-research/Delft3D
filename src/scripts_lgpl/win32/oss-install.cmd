@@ -123,7 +123,12 @@ rem =============================================================
 rem === copyNetcdf copy the appropriate netcdf.dll            ===
 rem =============================================================
 :copyNetcdf
-    call :copyFile "third_party_open\netcdf\src\win32\2005\libsrc\Release\netcdf.dll" !dest_bin!
+    set dest=%~1
+    if not exist !dest! mkdir !dest!
+    if not !ErrorLevel! EQU 0 (
+        echo ERROR: while creating directory "!dest!"
+    )
+    call :copyFile "third_party_open\netcdf\netCDF 4.6.1-32\bin\*" !dest!
 goto :endproc
 
 

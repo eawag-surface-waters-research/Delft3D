@@ -71,7 +71,7 @@ rem =============================================================
 rem === copyNetcdf copy the appropriate netcdf.dll            ===
 rem =============================================================
 :copyNetcdf
-    call :copyFile "third_party_open\netcdf\src\win32\2005\libsrc\Debug\netcdf.dll" !dest_bin!
+    call :copyFile "third_party_open\netcdf\netCDF 4.6.1-32\bin\*" !dest_bin!
 goto :endproc
 
 
