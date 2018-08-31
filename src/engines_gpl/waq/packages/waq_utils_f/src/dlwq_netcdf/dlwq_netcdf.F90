@@ -1144,7 +1144,7 @@ integer function dlwqnc_create_wqvariable( ncidout, mesh_name, wqname, longname,
     endif
 
     ierror = nf90_put_att( ncidout, wqid, "_FillValue", -999.0 )
-    if ( ierror /= 0 ) then
+    if ( ierror /= 0 .and. ierror /= nf90_elatefill ) then
         dlwqnc_create_wqvariable = ierror
         return
     endif
