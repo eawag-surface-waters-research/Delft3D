@@ -79,6 +79,7 @@
    module m_ec_basic_interpolation
    
    use precision
+   use MessageHandling, only: msgbox, mess, LEVEL_ERROR
 
    interface triinterp2
       module procedure triinterp2_dbldbl
@@ -670,7 +671,8 @@
    call aerr('idum(50*Ns)',ierr,-50*Ns)
 
    if ( ierr.ne.0 ) then
-      !LC gui related call qnerror('dlaun: out of memory', ' ', ' ')
+      call msgbox('', 'dlaun: out of memory', LEVEL_ERROR)
+      ! TODO: SvdP: consider adding 'call mess' to stop the simulation.
       !         if ( allocated(idum) ) deallocate(idum)  ! gives an error
       return
    end if
@@ -979,7 +981,8 @@
             if ( jadum.eq.1 .and. jacros.eq.1 ) then
                !LC call movabs(xs(k1),ys(k1))
                !LC call lnabs(xs(k2),ys(k2))
-               !LC call qnerror(' ', ' ', ' ')
+               call msgbox('', '', LEVEL_ERROR)
+               ! TODO: SvdP: consider adding 'call mess' to stop the simulation.
             end if
 
             if ( jacros.eq.1 ) then  ! only select this edge if it has a second adjacent triangle
@@ -1320,7 +1323,8 @@
    ierror = 1
 
    if ( MXSAM.eq.0 .or. MYSAM.eq.0 ) then
-      !LC call qnerror('bilin_interp: sample data is unstructured', ' ', ' ')
+      call msgbox('', 'bilin_interp: sample data is unstructured', LEVEL_ERROR)
+      ! TODO: SvdP: consider adding 'call mess' to stop the simulation.
       goto 1234
    end if
 
