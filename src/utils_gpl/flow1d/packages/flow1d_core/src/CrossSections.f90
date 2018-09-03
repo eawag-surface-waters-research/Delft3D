@@ -2632,7 +2632,7 @@ use M_newcross
    type(t_crsu), pointer   :: convTab
    convtab=>null()
    nc = crs%tabDef%levelsCount
-   call generateConvtab(convtab, crs%tabDef%levelsCount, crs%bedLevel, crs%tabDef%groundLayer%thickness, crs%tabDef%crossType, &
+   call generateConvtab(convtab, crs%tabDef%levelsCount, crs%shift, crs%tabDef%groundLayer%thickness, crs%tabDef%crossType, &
                         nc, crs%tabDef%frictionSectionsCount, crs%branchid, crs%bedFrictionType,                               &
                         crs%groundFriction, crs%tabdef%y, crs%tabdef%z,                                                        &
                         crs%frictionSectionFrom, crs%frictionSectionTo, crs%frictionTypePos,              &
