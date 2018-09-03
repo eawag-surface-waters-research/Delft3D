@@ -806,7 +806,7 @@ contains
    end subroutine getConveyance
 
    
-   subroutine getCrossDischarge(flowarea_sub, cz_sub, perim_sub, q1_local, q_sub)
+   subroutine getCrossDischarge(perim_sub, flowarea_sub, cz_sub, q1_local, q_sub)
       ! Get discharges per reachsubsegment - based on plqsec() by J.Kuipers 
       implicit none
       double precision, dimension(3), intent(in) :: flowarea_sub, cz_sub, perim_sub
