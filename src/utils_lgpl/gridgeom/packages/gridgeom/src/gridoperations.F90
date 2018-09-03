@@ -1,6 +1,7 @@
    !LC TO DO: PASS CALL-BACK  FUNCTION FOR INTERACTER MESSAGES
    module gridoperations
 
+   use MessageHandling, only: msgbox, mess, LEVEL_ERROR
    implicit none
 
    !new functions
@@ -2773,7 +2774,8 @@
       enddo   
 
       if ( NN.gt.N ) then
-         !TODO: LC call qnerror('make_dual_cell: array size error', ' ', ' ')
+         call msgbox('', 'make_dual_cell: array size error', LEVEL_ERROR)
+         ! TODO: SvdP: consider adding 'call mess' to stop the simulation.
          goto 1234
       end if
 
@@ -2934,7 +2936,8 @@
       NN = nmk(k)
 
       if ( NN.gt.N ) then
-         !LC TODO: call back call qnerror('get_celllist: array size error', ' ', ' ')
+         call msgbox('', 'get_celllist: array size error', LEVEL_ERROR)
+         ! TODO: SvdP: consider adding 'call mess' to stop the simulation.
          goto 1234
       end if
 
