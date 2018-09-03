@@ -35,6 +35,7 @@ module geometry_module
 ! NONE
 !!--declarations----------------------------------------------------------------
 
+   use MessageHandling, only: msgbox, mess, LEVEL_ERROR
    implicit none
 
    private
@@ -2180,7 +2181,7 @@ module geometry_module
 
       !  check convergence
       if ( iter.ge.MAXITER ) then
-         !LC this error message should be re-enabled call qnerror('comp_masscenter: no convergence', ' ', ' ')
+         call msgbox('', 'comp_masscenter: no convergence', LEVEL_ERROR)
          write(1234,*) 'L1'
          write(1234,*) N, 2
          do i=1,N
@@ -2389,7 +2390,8 @@ module geometry_module
 
       !  check convergence
       if ( iter.ge.MAXITER ) then
-         ! LC message error ro re-enable call qnerror('comp_circumcenter3D: no convergence', ' ', ' ')
+         call msgbox('', 'comp_circumcenter3D: no convergence', LEVEL_ERROR)
+         ! TODO: SvdP: consider adding 'call mess' to stop the simulation.
       end if
 
       !  project circumcenter back to spherical coordinates

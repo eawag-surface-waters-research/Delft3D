@@ -64,6 +64,16 @@ module MHCallBack
       end subroutine progress_c_iface
    end interface
 
+!> Shows a message in a GUI dialog.
+!! This interface is to be used by utility libraries that want to call back
+!! a GUI routine in the parent program to display a message box.
+   abstract interface
+      subroutine msgbox_callbackiface(title, msg, level)
+        character(len=*), intent(in) :: title !< Title string
+        character(len=*), intent(in) :: msg   !< Message string
+        integer,          intent(in) :: level !< Severity level (e.g., LEVEL_ERROR).
+      end subroutine msgbox_callbackiface
+   end interface
 
 end module MHCallBack
 
@@ -85,6 +95,10 @@ module MessageHandling
    procedure(progress_iface), pointer :: progress_callback => null()
    procedure(progress_c_iface), pointer :: progress_c_callback => null()
 
+   !> Callback routine invoked upon any mess/err (i.e. SetMessage)
+   procedure(msgbox_callbackiface), pointer :: msgbox_callback => null()
+
+
    integer, parameter, public    :: BUFLEN = 1024
    !> The message buffer allows you to write any number of variables in any
    !! order to a character string. Call msg_flush or err_flush to output
@@ -105,6 +119,8 @@ module MessageHandling
    public set_logger
    public set_progress_c_callback
    public set_mh_callback
+   public set_msgbox_callback
+   public msgbox
    public msg_flush
    public dbg_flush
    public warn_flush
@@ -312,6 +328,26 @@ subroutine set_logger(c_callback) bind(C, name="set_logger")
   call c_f_procpointer(c_callback, c_logger)
 end subroutine set_logger
 
+
+subroutine set_msgbox_callback(callback)
+  procedure(msgbox_callbackiface) :: callback
+  msgbox_callback => callback
+end subroutine set_msgbox_callback
+
+
+!> Displays a (GUI) message box by calling a subroutine in the parent program,
+!! IF a callback subroutine has been registered.
+subroutine msgbox(title, msg, level)
+   character(len=*), intent(in) :: title !< Title string
+   character(len=*), intent(in) :: msg   !< Message string
+   integer,          intent(in) :: level !< Severity level (e.g., LEVEL_ERROR).
+
+   ! call the registered msgbox
+   if (associated(msgbox_callback)) then
+      call msgbox_callback(title, msg, level)
+   end if
+
+end subroutine msgbox
 
 
 
