@@ -1030,7 +1030,7 @@ if(d0.lt.dz.or.d1.lt.dz) then   ! beta#0
       case (4)                   ! Manning (n)
          co = 1/(dcf*(1.0d0+bt**2)**s14)*(d0/2.0d0)**s53*(d0/bt)
       case (5)                   ! Strickler (kn)
-         co = 25.0d0*dcf**sixth/((1.0d0+bt**2)**s14)*(d0/2.0d0)**s53*(-d0/bt)
+         co = 25.0d0*dcf**sixth/((1.0d0+bt**2)**s14)*(d0/2.0d0)**s53*(d0/bt)
       case (6)                   ! Strickler (ks)
          co = dcf/((1.0d0+bt**2)**s14)*(d0/2.0d0)**s53*(d0/bt)
       case (7)                   ! White-Colebrook (kn)
@@ -1039,7 +1039,7 @@ if(d0.lt.dz.or.d1.lt.dz) then   ! beta#0
          else
             f1 = dlog10(6.0d0*d0/dcf)
          endif
-         co = 18.0d0/((1.0d0+bt**2)**s14)*f1*(-d0/bt)*(d0/2.0d0)**s32
+         co = 18.0d0/((1.0d0+bt**2)**s14)*f1*(d0/bt)*(d0/2.0d0)**s32
       case (9)                   ! Bos&Bijkerk 
          co = dcf/((1.0d0+bt**2)**s14)*(d0/2.0d0)**2*(d0/bt)
       end select
