@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2017.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -187,6 +187,8 @@ type t_unc_mapids
    integer :: id_l1(4)     = -1
    integer :: id_ctheta(4)   = -1
    integer :: id_sigmwav(4)  = -1 !< Variable ID for
+   integer :: id_SwE(4)      = -1 !< Variable ID for wind source term on E
+   integer :: id_SwT(4)      = -1 !< Variable ID for wind source term on T   
    integer :: id_ustokes(4)      = -1 !< Variable ID for 
    integer :: id_vstokes(4)      = -1 !< Variable ID for 
    integer :: id_Fx(4)       = -1 !< Variable ID for 
@@ -1072,6 +1074,274 @@ double precision, allocatable, save :: workS3D(:,:), workU3D(:,:), workW(:,:), w
 888 continue
     ! Some error occurred
 end function unc_put_var_map_dble
+
+!> copy of unc_put_var_map_dble for writing bytes
+!! TODO: use templating
+function unc_put_var_map_byte(mapids, id_var, iloc, values, default_value) result(ierr)
+use m_flowgeom
+use network_data, only: numk, numl, numl1d
+use m_flow, only: kmx
+use dfm_error
+use m_alloc
+use m_missing
+implicit none
+type(t_unc_mapids),         intent(in)  :: mapids        !< Map file and other NetCDF ids.
+integer,                    intent(in)  :: id_var(:)     !< Ids of variable to write values into, one for each submesh (1d/2d/3d if applicable).
+integer,                    intent(in)  :: iloc          !< Stagger location for this variable (one of UNC_LOC_CN, UNC_LOC_S, UNC_LOC_U, UNC_LOC_L, UNC_LOC_S3D, UNC_LOC_U3D, UNC_LOC_W).
+integer(kind=1),            intent(in)  :: values(:)     !< The data values to be written. Should in standard FM order (1d/2d/3d node/link conventions, @see m_flow).
+integer(kind=1), optional,  intent(in)  :: default_value !< Optional default value, used for writing dummy data on closed edges (i.e. netlinks with no flowlink). NOTE: is not a _FillValue!
+
+integer                         :: ierr          !< Result status, DFM_NOERR if successful.
+
+integer :: ndx1d, lnx2d, lnx2db, numl2d, Lf, L, i, n, k, kb, kt, nlayb, nrlay, LL, Lb, Ltx, nlaybL, nrlayLx
+!TODO remove save and deallocate?
+double precision, allocatable, save :: workL(:)
+double precision, allocatable, save :: workS3D(:,:), workU3D(:,:), workW(:,:), workWU(:,:)
+
+   ierr = DFM_NOERR
+
+   select case (iloc)
+   case(UNC_LOC_CN) ! Corner point location
+      ndx1d = ndxi - ndx2d
+      ! Internal 1d netnodes. Horizontal position: nodes in 1d mesh.
+      if (ndx1d > 0) then ! If there are 1d flownodes, then there are 1d netnodes.
+         ierr = UG_NOTIMPLEMENTED ! TODO: AvD putting data on 1D corners not implemented yet.
+         goto 888
+      end if
+      ! Internal 2d netnodes. Horizontal position: nodes in 2d mesh.
+      if (ndx2d > 0) then ! If there are 2d flownodes, then there are 2d netnodes.
+         ierr = nf90_put_var(mapids%ncid, id_var(2), values(1:numk), start = (/ 1, mapids%idx_curtime /))
+      end if
+
+   case(UNC_LOC_S) ! Pressure point location
+      ndx1d = ndxi - ndx2d
+      ! Internal 1d flownodes. Horizontal position: nodes in 1d mesh.
+      if (ndx1d > 0) then
+         ierr = nf90_put_var(mapids%ncid, id_var(1), values(ndx2d+1:ndxi), start = (/ 1, mapids%idx_curtime /))
+      end if
+      ! Internal 2d flownodes. Horizontal position: faces in 2d mesh.
+      if (ndx2d > 0) then
+         ierr = nf90_put_var(mapids%ncid, id_var(2), values(1:ndx2d), start = (/ 1, mapids%idx_curtime /))
+      end if
+
+   case(UNC_LOC_U) ! Horizontal velocity point location
+      ! Internal 1d flowlinks. Horizontal position: edges in 1d mesh.
+      if (lnx1d > 0) then
+         ! 1d mesh
+         if(size(mapids%edgetoln,1).gt.0) then
+            ierr = nf90_put_var(mapids%ncid, id_var(1), values(mapids%edgetoln(:)), start = (/ 1, mapids%idx_curtime /))
+         endif
+         ! 1d2d contacts
+         if(size(mapids%contactstoln,1).gt.0) then
+            ierr = nf90_put_var(mapids%ncid, id_var(4), values(mapids%contactstoln(:)), start = (/ 1, mapids%idx_curtime /))
+         endif
+      end if
+
+      lnx2d = lnxi - lnx1d
+      ! Internal 2d flowlinks. Horizontal position: edges in 2d mesh.
+      if (lnx2d > 0) then
+         ierr = nf90_put_var(mapids%ncid, id_var(2), values(lnx1d+1:lnxi), start = (/ 1, mapids%idx_curtime /))
+      end if
+      ! External 2d flowlinks. Horizontal position: edges in 2d mesh.
+      lnx2db = lnx - lnx1db
+      if (lnx2db > 0) then
+         ierr = nf90_put_var(mapids%ncid, id_var(2), values(lnx1db+1:lnx), start = (/ lnx2d+1, mapids%idx_curtime /))
+      end if
+      ! Default value is different from a fill value, use for example for zero velocities on closed edges.
+      if (present(default_value)) then
+         ! Number of netlinks can be > number of flowlinks, if there are closed edges.
+         numl2d = numl - numl1d
+         ! Write default_value on all closed edges.
+         if (numl2d - lnx2d - lnx2db > 0) then
+            ierr = nf90_put_var(mapids%ncid, id_var(2), (/ default_value /), start = (/ lnx2d+lnx2db+1, mapids%idx_curtime /), count = (/ numl2d - lnx2d - lnx2db, 1 /), map = (/ 0 /)) ! Use map = 0 to write a single value on multiple edges in file.
+         end if
+      end if
+
+   case(UNC_LOC_L) ! Horizontal net link location
+      ! NOTE: In the ugrid geometry, edges have been order based on flow link order. All non-flowlink net links are at the end of the edge array.
+
+      call realloc(workL, numl, keepExisting = .false.)
+
+      ! Permute the input values(:) from netlink ordering to flow link ordering.
+      ! TODO: AvD: cache this permutation for all future map writes in a flow() run.
+      do Lf=1,lnx1d
+         L = abs(ln2lne(Lf))
+         workL(Lf) = values(L)
+      end do
+
+      ! 1D: write all values on 1D flow links. ! TODO: AvD: for 1D I now assume that all net links are also a flow link. This is not always true (thin dams), so make code below equal to 2D code hereafter.
+      if (lnx1d > 0) then ! TODO: AvD: along with previous TODO, this should become numl1d
+         ierr = nf90_put_var(mapids%ncid, id_var(1), workL(1:lnx1d), start = (/ 1, mapids%idx_curtime /))
+      end if
+
+      ! 2D: permute all values on net links such that flow links come first, followed by remaining non-flowlink net links.
+      lnx2d = lnxi - lnx1d
+      lnx2db = lnx - lnx1db
+      i = lnx2d+lnx2db ! last position in permuted array of a written non-flowlink net link (none as a start, i.e., last 2d flow link)
+      do L=numl1d+1,numl ! Only 2D net links
+         Lf = lne2ln(L) ! If negative, then no flow link
+
+         if (Lf > lnx1db) then ! 2D open boundary flow link
+            ! Values on netlinks that are also flowlinks come first.
+            workL(Lf - lnx1db + lnx2d) = values(L)
+         else if (Lf > lnx1d) then ! 2D internal flow link. This intentionally excludes 2D net links that are 1D2D flow links.
+            ! Values on netlinks that are also flowlinks come first.
+            workL(Lf - lnx1d) = values(L)
+         else
+            ! Values on netlinks that are no flowlinks come as a last block (in remaining net link order).
+            i = i + 1
+            workL(i) = values(L)
+         end if
+      end do
+      if (numl - numl1d > 0) then
+         ierr = nf90_put_var(mapids%ncid, id_var(2), workL(1:(numl-numl1d)), start = (/ 1, mapids%idx_curtime /))
+      end if
+
+   case(UNC_LOC_S3D) ! Pressure point location in all layers.
+      ! Fill work array.
+      call realloc(workS3D, (/ kmx, ndxi /), keepExisting = .false.)
+      ! Loop over horizontal flownodes.
+      do n = 1,ndxi
+         ! Store missing values for inactive layers (i.e. z layers below bottomlevel or above waterlevel for current horizontal flownode n).
+         workS3D(:, n) = dmiss
+         ! The current horizontal flownode n has active layers nlayb:nlayb+nrlay-1.
+         call getlayerindices(n, nlayb, nrlay)
+         ! The current horizontal flownode n has indices kb:kt in values array (one value per active layer).
+         call getkbotktop(n, kb, kt)
+         ! The range kb:kt can have a different length for each flownode due to inactive layers.
+         ! Here kb corresponds to nlayb and kt corresponds to nlayb+nrlay-1
+         ! Loop over active layers.
+         do k = kb,kt
+            workS3D(k - kb + nlayb, n) = values(k)
+         end do
+      end do
+
+      ! Write work array.
+      ndx1d = ndxi - ndx2d
+      ! Internal 2dv flownodes. Horizontal position: nodes in 1d mesh. Vertical position: layer centers.
+      if (ndx1d > 0) then
+         ierr = nf90_put_var(mapids%ncid, id_var(1), workS3D(1:kmx, ndx2d+1:ndxi), start = (/ 1, 1, mapids%idx_curtime /), count = (/ kmx, ndx1d, 1 /))
+      end if
+      ! Internal 3d flownodes. Horizontal position: faces in 2d mesh. Vertical position: layer centers.
+      if (ndx2d > 0) then
+         ierr = nf90_put_var(mapids%ncid, id_var(2), workS3D(1:kmx, 1:ndx2d), start = (/ 1, 1, mapids%idx_curtime /), count = (/ kmx, ndx2d, 1 /))
+      end if
+
+      ! TODO: AvD: include flow link bug fix (Feb 15, 2017) from 1d/2D above also in U3D and WU code below.
+   case(UNC_LOC_U3D) ! Horizontal velocity point location in all layers.
+      ! Fill work array.
+      call realloc(workU3D, (/ kmx, lnx /), keepExisting = .false.)
+      ! Loop over horizontal flowlinks.
+      do LL = 1,lnx
+         ! Store missing values for inactive layers (i.e. z layers below bottomlevel or above waterlevel for current horizontal flowlink LL).
+         workU3D(:, LL) = dmiss
+         ! The current horizontal flowlink LL has active layers nlaybL:nlaybL+nrlayLx-1.
+         call getlayerindicesLmax(LL, nlaybL, nrlayLx)
+         ! The current horizontal flowlink LL has indices Lb:Ltx in values array (one value per active layer).
+         call getLbotLtopmax(LL, Lb, Ltx)
+         ! The range Lb:Ltx can have a different length for each flowlink due to inactive layers.
+         ! Here Lb corresponds to nlaybL and Ltx corresponds to nlaybL+nrlayLx-1
+         ! Loop over active layers.
+         do L = Lb,Ltx
+            workU3D(L - Lb + nlaybL, LL) = values(L)
+         end do
+      end do
+
+      ! Write work array.
+      ! Internal 2dv horizontal flowlinks. Horizontal position: edges in 1d mesh. Vertical position: layer centers.
+      if (lnx1d > 0) then
+         ierr = nf90_put_var(mapids%ncid, id_var(1), workU3D(1:kmx, 1:lnx1d), start = (/ 1, 1, mapids%idx_curtime /), count = (/ kmx, lnx1d, 1 /))
+      end if
+      lnx2d = lnx - lnx1d ! TODO: AvD: now also includes 1D bnds, dont want that.
+      ! Internal and external 3d horizontal flowlinks (and 2dv external flowlinks). Horizontal position: edges in 2d mesh. Vertical position: layer centers.
+      if (lnx2d > 0) then
+         ierr = nf90_put_var(mapids%ncid, id_var(2), workU3D(1:kmx, lnx1d+1:lnx), start = (/ 1, 1, mapids%idx_curtime /), count = (/ kmx, lnx2d, 1 /))
+      end if
+      ! Default value is different from a fill value, use for example for zero velocities on closed edges.
+      if (present(default_value)) then
+         ! Number of netlinks can be > number of flowlinks, if there are closed edges.
+         numl2d = numl - numl1d
+         ! Write default_value on all remaining edges in 2d mesh (i.e. closed edges).
+         ierr = nf90_put_var(mapids%ncid, id_var(2), (/ default_value /), start = (/ 1, lnx2d+1, mapids%idx_curtime /), count = (/ kmx, numl2d - lnx2d, 1 /), map = (/ 0 /)) ! Use map = 0 to write a single value on multiple edges in file.
+      end if
+
+   case(UNC_LOC_W) ! Vertical velocity point location on all layer interfaces.
+      ! Fill work array.
+      call realloc(workW, (/ kmx, ndxi /), lindex=(/ 0, 1 /), keepExisting = .false.)
+      ! Loop over horizontal flownodes.
+      do n = 1,ndxi
+         ! Store missing values for inactive layer interfaces (i.e. z layers below bottomlevel or above waterlevel for current horizontal flownode n).
+         workW(:, n) = dmiss
+         ! The current horizontal flownode n has active layers nlayb:nlayb+nrlay-1.
+         call getlayerindices(n, nlayb, nrlay)
+         ! The current horizontal flownode n has indices kb:kt in values array (one value per active layer).
+         call getkbotktop(n, kb, kt)
+         ! The range kb:kt can have a different length for each flownode due to inactive layers.
+         ! Here kb corresponds to nlayb and kt corresponds to nlayb+nrlay-1
+         ! Loop over active layer interfaces. First active layer interface has index of first active layer - 1.
+         do k = kb-1,kt
+            workW(k - kb + nlayb, n) = values(k)
+         end do
+      end do
+
+      ! Write work array.
+      ndx1d = ndxi - ndx2d
+      ! Internal 2dv vertical flowlinks. Horizontal position: nodes in 1d mesh. Vertical position: layer interfaces.
+      if (ndx1d > 0) then ! If there are 1d flownodes and layers, then there are 2dv vertical flowlinks.
+         ierr = nf90_put_var(mapids%ncid, id_var(1), workW(0:kmx, ndx2d+1:ndxi), start = (/ 1, 1, mapids%idx_curtime /), count = (/ kmx+1, ndx1d, 1 /))
+      end if
+      ! Internal 3d vertical flowlinks. Horizontal position: faces in 2d mesh. Vertical position: layer interfaces.
+      if (ndx2d > 0) then ! If there are 2d flownodes and layers, then there are 3d vertical flowlinks.
+         ierr = nf90_put_var(mapids%ncid, id_var(2), workW(0:kmx, 1:ndx2d), start = (/ 1, 1, mapids%idx_curtime /), count = (/ kmx+1, ndx2d, 1 /))
+      end if
+
+   case(UNC_LOC_WU) ! Vertical viscosity point location on all layer interfaces.
+      ! Fill work array.
+      call realloc(workWU, (/ kmx, lnx /), lindex=(/ 0, 1 /), keepExisting = .false.)
+      ! Loop over horizontal flowlinks.
+      do LL = 1,lnx
+         ! Store missing values for inactive layer interfaces (i.e. z layers below bottomlevel or above waterlevel for current horizontal flowlink LL).
+         workWU(:, LL) = dmiss
+         ! The current horizontal flowlink LL has active layers nlaybL:nlaybL+nrlayLx-1.
+         call getlayerindicesLmax(LL, nlaybL, nrlayLx)
+         ! The current horizontal flowlink LL has indices Lb:Ltx in values array (one value per active layer).
+         call getLbotLtopmax(LL, Lb, Ltx)
+         ! The range Lb:Ltx can have a different length for each flowlink due to inactive layers.
+         ! Here Lb corresponds to nlaybL and Ltx corresponds to nlaybL+nrlayLx-1
+         ! Loop over active layer interfaces. First active layer interface has index of first active layer - 1.
+         do L = Lb-1,Ltx
+            workWU(L - Lb + nlaybL, LL) = values(L)
+         end do
+      end do
+
+      ! Write work array.
+      ! Internal 2dv vertical viscosity points. Horizontal position: edges in 1d mesh. Vertical position: layer interfaces.
+      if (lnx1d > 0) then
+         ierr = nf90_put_var(mapids%ncid, id_var(1), workWU(0:kmx, 1:lnx1d), start = (/ 1, 1, mapids%idx_curtime /), count = (/ kmx+1, lnx1d, 1 /))
+      end if
+      lnx2d = lnx - lnx1d ! TODO: AvD: now also includes 1D bnds, dont want that.
+      ! Internal and external 3d vertical viscosity points (and 2dv external viscosity points). Horizontal position: edges in 2d mesh. Vertical position: layer interfaces.
+      if (lnx2d > 0) then
+         ierr = nf90_put_var(mapids%ncid, id_var(2), workWU(0:kmx, lnx1d+1:lnx), start = (/ 1, 1, mapids%idx_curtime /), count = (/ kmx+1, lnx2d, 1 /))
+      end if
+      ! Default value is different from a fill value, use for example for zero values on closed edges.
+      if (present(default_value)) then
+         ! Number of netlinks can be > number of flowlinks, if there are closed edges.
+         numl2d = numl - numl1d
+         ! Write default_value on all remaining edges in 2d mesh (i.e. closed edges).
+         ierr = nf90_put_var(mapids%ncid, id_var(2), (/ default_value /), start = (/ 1, lnx2d+1, mapids%idx_curtime /), count = (/ kmx+1, numl2d - lnx2d, 1 /), map = (/ 0 /)) ! Use map = 0 to write a single value on multiple edges in file.
+      end if
+
+   case default
+      ierr = UG_INVALID_DATALOCATION
+      goto 888
+   end select
+
+   return ! Successful return.
+
+888 continue
+    ! Some error occurred
+end function unc_put_var_map_byte
 
 function unc_put_var_map_dble2(mapids, id_var, iloc, values, default_value, locdim) result(ierr)
 use m_flowgeom
@@ -2207,7 +2477,7 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
        
        ! Definition and attributes of discharge used in advection qa
        ierr = nf90_def_var(irstfile, 'qa', nf90_double,   (/ id_laydim, id_flowlinkdim, id_timedim /)  , id_qa)
-       ierr = nf90_put_att(irstfile, id_qa,  'coordinates'  , 'FlowElem_xu FlowElem_yu')
+       ierr = nf90_put_att(irstfile, id_qa,  'coordinates'  , 'FlowLink_xu FlowLink_yu')
        ierr = nf90_put_att(irstfile, id_qa,  'long_name'    , 'discharge used in advection')
        ierr = nf90_put_att(irstfile, id_qa,  'units'        , 'm3 s-1')
        
@@ -2241,7 +2511,7 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
           
           ! Definition and attributes of energy_dissipation or turbulence_time_scale
           ierr = nf90_def_var(irstfile, 'tureps1', nf90_double,   (/ id_wdim, id_flowlinkdim, id_timedim /)  , id_tureps1)
-          ierr = nf90_put_att(irstfile, id_tureps1,  'coordinates'  , 'FlowElem_xu FlowElem_yu')
+          ierr = nf90_put_att(irstfile, id_tureps1,  'coordinates'  , 'FlowLink_xu FlowLink_yu')
           ierr = nf90_put_att(irstfile, id_tureps1,  '_FillValue'   , dmiss)
           if( iturbulencemodel == 3 ) then
              ierr = nf90_put_att(irstfile, id_tureps1,  'standard_name', 'specific_turbulent_kinetic_energy_dissipation_in_sea_water')
@@ -3802,8 +4072,12 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
          ierr = unc_def_var_map(mapids, mapids%id_kwav     , nf90_double, UNC_LOC_S, 'kwav'     , 'sea_surface_wave_wavenumber'          , 'Sea_surface_wave_wavenumber'                      , 'rad m-1') ! not CF
          ierr = unc_def_var_map(mapids, mapids%id_nwav     , nf90_double, UNC_LOC_S, 'nwav'     , 'sea_surface_wave_cg_over_c'           , 'Sea_surface_wave_ratio_group_phase_speed'         , '-') ! not CF
          ierr = unc_def_var_map(mapids, mapids%id_ctheta   , nf90_double, UNC_LOC_S, 'ctheta'   , 'sea_surface_wave_refraction_celerity' , 'Sea_surface_wave_refraction_celerity'             , 'rad s-1', dimids = (/ mapids%id_ntheta, -2,  -1 /)) ! not CF
+         if (windmodel.eq.0) then
          ierr = unc_def_var_map(mapids, mapids%id_l1       , nf90_double, UNC_LOC_S, 'L1'       , 'sea_surface_wave_wavelength'          , 'Sea_surface_wave_wavelength'                      , 'm'      ) ! not CF
-
+        elseif ( (windmodel .eq. 1) .and. (jawsource .eq. 1) ) then
+           ierr = unc_def_var_map(mapids, mapids%id_SwE  , nf90_double, UNC_LOC_S, 'SwE'  , 'source_term_wind_on_E'      , 'wind source term on wave energy'                  , 'J m-2 s-1') ! not CF        
+           ierr = unc_def_var_map(mapids, mapids%id_SwT  , nf90_double, UNC_LOC_S, 'SwT'  , 'source_term_wind_on_T'      , 'wind source term on wave period'                  , 's s-1') ! not CF        
+         endif
          if (jamombal==1) then
             ierr = unc_def_var_map(mapids, mapids%id_dsdx      , nf90_double, UNC_LOC_S, 'dsdx'      , ' ' , 'Water level gradient, x-component'          , 'm m-1') 
             ierr = unc_def_var_map(mapids, mapids%id_dsdy      , nf90_double, UNC_LOC_S, 'dsdy'      , ' ' , 'Water level gradient, y-component'          , 'm m-1') 
@@ -4766,7 +5040,12 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
       ierr = unc_put_var_map(mapids, mapids%id_cgwav    , UNC_LOC_S, cgwav)
       ierr = unc_put_var_map(mapids, mapids%id_kwav     , UNC_LOC_S, kwav)
       ierr = unc_put_var_map(mapids, mapids%id_nwav     , UNC_LOC_S, nwav)
+      if (windmodel.eq.0) then
       ierr = unc_put_var_map(mapids, mapids%id_l1       , UNC_LOC_S, L1)
+      elseif ( (windmodel.eq.1) .and. (jawsource.eq.1 ) ) then
+          ierr = unc_put_var_map(mapids, mapids%id_SwE      , UNC_LOC_S, SwE)      
+          ierr = unc_put_var_map(mapids, mapids%id_SwT      , UNC_LOC_S, SwT) 
+      endif
       
       if (jamombal==1) then
          ierr = unc_put_var_map(mapids, mapids%id_dsdx         , UNC_LOC_S, xbdsdx)
@@ -4956,7 +5235,8 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
     id_s1, id_taus, id_ucx, id_ucy, id_ucz, id_ucxa, id_ucya, id_unorm, id_ww1, id_sa1, id_tem1, id_sed, id_ero, id_s0, id_u0, id_cfcl, id_cftrt, id_czs, & 
     id_qsun, id_qeva, id_qcon, id_qlong, id_qfreva, id_qfrcon, id_qtot, &
     id_wind, id_patm, id_tair, id_rhum, id_clou, id_E, id_R, id_H, id_D, id_DR, id_urms, id_thetamean, &
-    id_cwav, id_cgwav, id_sigmwav, id_ust, id_Fx, id_Fy, id_vst, id_windx, id_windy, id_windxu, id_windyu, id_numlimdt, id_hs, id_bl, id_zk, &
+    id_cwav, id_cgwav, id_sigmwav, id_SwE, id_SwT, &
+    id_ust, id_Fx, id_Fy, id_vst, id_windx, id_windy, id_windxu, id_windyu, id_numlimdt, id_hs, id_bl, id_zk, &
     id_1d2d_edges, id_1d2d_zeta1d, id_1d2d_crest_level, id_1d2d_b_2di, id_1d2d_b_2dv, id_1d2d_d_2dv, id_1d2d_q_zeta, id_1d2d_q_lat, &
     id_1d2d_cfl, id_1d2d_flow_cond, id_1d2d_sb, id_1d2d_s1_2d, id_1d2d_s0_2d, id_tidep, id_salp, id_inttidesdiss, &
     id_rsi, id_dudx, id_dudy, id_dvdx, id_dvdy, & 
@@ -5956,6 +6236,22 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
              ierr = nf90_put_att(imapfile, id_sigmwav(iid),   'standard_name', 'sea_surface_wave_mean_frequency')                          ! not CF
              ierr = nf90_put_att(imapfile, id_sigmwav(iid),   'long_name'    , 'mean wave frequency')          
              ierr = nf90_put_att(imapfile, id_sigmwav(iid),   'units'        , 'rad s-1')
+             
+             if ( (windmodel.eq.1) .and. (jawsource.eq.1) ) then
+             
+                ierr = nf90_def_var(imapfile, 'SwE',  nf90_double, (/ id_flowelemdim(iid), id_timedim(iid) /) , id_SwE(iid))
+                ierr = nf90_put_att(imapfile, id_SwE(iid),   'coordinates'  , 'FlowElem_xcc FlowElem_ycc')
+                ierr = nf90_put_att(imapfile, id_SwE(iid),   'standard_name', 'source_term_wind_on_E')                          ! not CF
+                ierr = nf90_put_att(imapfile, id_SwE(iid),   'long_name'    , 'source term wind on wave energy')          
+                ierr = nf90_put_att(imapfile, id_SwE(iid),   'units'        , 'J m-2 s-1')             
+
+                ierr = nf90_def_var(imapfile, 'SwT',  nf90_double, (/ id_flowelemdim(iid), id_timedim(iid) /) , id_SwT(iid))
+                ierr = nf90_put_att(imapfile, id_SwT(iid),   'coordinates'  , 'FlowElem_xcc FlowElem_ycc')
+                ierr = nf90_put_att(imapfile, id_SwT(iid),   'standard_name', 'source_term_wind_on_T')                          ! not CF
+                ierr = nf90_put_att(imapfile, id_SwT(iid),   'long_name'    , 'source term wind on wave period')          
+                ierr = nf90_put_att(imapfile, id_SwT(iid),   'units'        , 's s-1')      
+                
+             endif
            endif
            
            if ( NUMCONST.eq.0 ) then
@@ -6115,7 +6411,7 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
            endif
            ierr = nf90_put_att(imapfile, id_windxu(iid),  'units'        , 'm s-1')
 
-           ierr = nf90_put_att(imapfile, id_windyu(iid),  'coordinates'  , 'FlowElem_xu FlowElem_yu')
+           ierr = nf90_put_att(imapfile, id_windyu(iid),  'coordinates'  , 'FlowLink_xu FlowLink_yu')
            if (jsferic == 0) then
               ierr = nf90_put_att(imapfile, id_windyu(iid),  'long_name'    , 'velocity of air on flow links, y-component')
               ierr = nf90_put_att(imapfile, id_windyu(iid),  'standard_name', 'y_velocity_wind')
@@ -6416,6 +6712,12 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
            ierr = nf90_inq_varid(imapfile, 'cwav'     , id_cwav(iid))
            ierr = nf90_inq_varid(imapfile, 'cgwav'    , id_cgwav(iid))
            ierr = nf90_inq_varid(imapfile, 'sigmwav'  , id_sigmwav(iid))
+           
+           if ( (windmodel .eq. 1) .and. (jawsource .eq. 1) ) then
+              ierr = nf90_inq_varid(imapfile, 'SwE'  , id_SwE(iid))           
+              ierr = nf90_inq_varid(imapfile, 'SwT'  , id_SwT(iid))   
+           endif
+           
         endif
 
         ! 1D2D boundaries
@@ -7300,6 +7602,10 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
        ierr = nf90_put_var(imapfile, id_cwav(iid), cwav, (/ 1, itim /), (/ ndxndxi, 1 /))
        ierr = nf90_put_var(imapfile, id_cgwav(iid), cgwav, (/ 1, itim /), (/ ndxndxi, 1 /))
        ierr = nf90_put_var(imapfile, id_thetamean(iid), 270d0 - thetamean*180d0/pi, (/ 1, itim /), (/ ndxndxi, 1 /))
+       if ( (windmodel .eq. 1) .and. (jawsource .eq. 1) ) then
+          ierr = nf90_put_var(imapfile, id_SwE(iid), SwE, (/ 1, itim /), (/ ndxndxi, 1 /))       
+          ierr = nf90_put_var(imapfile, id_SwT(iid), SwT, (/ 1, itim /), (/ ndxndxi, 1 /))  
+       endif
     endif
    
     
@@ -9547,7 +9853,7 @@ subroutine unc_read_map(filename, tim, ierr)
                id_bodsed,                       &
                id_xzw, id_yzw, id_xu, id_yu,    &
                id_bl, id_blbnd, id_s0bnd, id_s1bnd, id_xbnd, id_ybnd, &
-               id_unorma, id_vicwwu, id_tureps1, id_turkin1, id_qw, id_qa, id_hu
+               id_unorma, id_vicwwu, id_tureps1, id_turkin1, id_qw, id_qa, id_hu, id_flowlink
 
 
     double precision, allocatable :: xmc(:), ymc(:), xuu(:), yuu(:), xbnd_read(:), ybnd_read(:)
@@ -9575,6 +9881,10 @@ subroutine unc_read_map(filename, tim, ierr)
     real(fp), dimension(stmpar%lsedtot)  :: mfrac
     integer, allocatable :: inode_own(:), ilink_own(:), inode_ghost(:), ilink_ghost(:) !< Mapping from unique flow nodes/links that are a domain's own to the actual index in 1:ndxi and 1:lnx
     integer, allocatable :: inode_merge(:), ilink_merge(:), ibnd_merge(:), inodeghost_merge(:), ilinkghost_merge(:) !< Mapping from subdomain flow nodes/links to merged map files
+    integer, allocatable :: inode_merge2own(:) !< Mapping flownodes from merged file to subdomain own index
+    integer, allocatable :: inode_owninv(:)    !< Mapping from actual node index to its own index
+    integer, allocatable :: ln_read(:,:)       !< ln array read from the merged file
+    integer, allocatable :: itmp2D(:,:)
     integer :: ndxi_own, lnx_own, ndxi_ghost, lnx_ghost !< number of nodes/links that are a domain's own (if jampi==0, ndxi_own===ndxi, lnx_own===lnx)
     integer :: ndxi_all, lnx_all !< total numbers of nodes/links among all partitions 
     integer :: ndxi_merge, lnx_merge, ndxbnd_merge
@@ -9828,6 +10138,8 @@ subroutine unc_read_map(filename, tim, ierr)
           call realloc(inode_merge, ndxi, keepExisting=.false.)
           call realloc(ilink_own,    lnx, keepExisting=.false.)
           call realloc(ilink_merge,  lnx, keepExisting=.false.)
+          call realloc(inode_owninv,ndxi, keepExisting=.false., fill = -999)
+          
           if (jampi == 0) then ! Restart a sequential run with a merged rst file
              ndxbnd_own = ndx - ndxi
              if (ndxbnd_own>0 .and. jaoldrstfile == 0) then
@@ -9868,6 +10180,7 @@ subroutine unc_read_map(filename, tim, ierr)
                  if (idomain(kk) == my_rank) then
                     ndxi_own = ndxi_own + 1
                     inode_own(ndxi_own) = kk
+                    inode_owninv(kk) = ndxi_own
                  end if
               end do
               ! link
@@ -9891,6 +10204,7 @@ subroutine unc_read_map(filename, tim, ierr)
                   if (idomain(kk) == my_rank) then
                      ndxi_own = ndxi_own + 1
                      inode_own(ndxi_own) = kk
+                     inode_owninv(kk) = ndxi_own
                   else
                      ndxi_ghost = ndxi_ghost + 1
                      inode_ghost(ndxi_ghost) = kk
@@ -9967,7 +10281,10 @@ subroutine unc_read_map(filename, tim, ierr)
 
           if (nerr_ > 0) goto 999
 
-          call find_flownodesorlinks_merge(ndxi_merge, xmc, ymc, ndxi, ndxi_own, inode_own, inode_merge, 1, 1)
+          
+          call realloc(inode_merge2own, ndxi_merge, keepExisting=.false., fill=-999)
+          call find_flownodesorlinks_merge(ndxi_merge, xmc, ymc, ndxi, ndxi_own, inode_own, inode_merge, 1, 1, inode_merge2own)
+         
           if (ndxbnd_own>0 .and. jaoldrstfile == 0) then 
              ! For parallel run, 'ibnd_own' and 'ndxbnd_own' has been determined in function 'flow_initexternalforcings'
              call find_flownodesorlinks_merge(ndxbnd_merge, xbnd_read, ybnd_read, ndx-ndxi, ndxbnd_own, ibnd_own, ibnd_merge, 2, 1)
@@ -10100,6 +10417,49 @@ subroutine unc_read_map(filename, tim, ierr)
             goto 999
             endif
       endif
+      !! check if the flownodes/flowlinks numbering index is the same
+      ! Read coordinates of flownodes 
+      call realloc(xmc, ndxi_read, keepExisting=.false.)
+      call realloc(ymc, ndxi_read, keepExisting=.false.)
+      ierr = nf90_inq_varid(imapfile, 'FlowElem_xzw', id_xzw)
+      call check_error(ierr, 'center of mass x-coordinate')
+      ierr = nf90_inq_varid(imapfile, 'FlowElem_yzw', id_yzw)
+      call check_error(ierr, 'center of mass y-coordinate')
+      
+      ierr = nf90_get_var(imapfile, id_xzw, xmc)
+      ierr = nf90_get_var(imapfile, id_yzw, ymc)
+      
+      if (ierr == nf90_noerr) then
+         ! check flownodes numbering with rst file
+         call check_flownodesorlinks_numbering_rst(ndxi, 1, xmc, ymc, ierr)
+         if (ierr .ne. nf90_noerr) then
+            goto 999
+         end if
+      else
+         call mess(LEVEL_WARN, 'Skip checking flownodes numbering when restart, '&
+                    //'because flownodes coordinates are missing in rst file.')
+      end if      
+
+      ! Read coordinates of flowlinks
+      call realloc(xuu, lnx_read, keepExisting=.false.)
+      call realloc(yuu, lnx_read, keepExisting=.false.)
+      ierr = nf90_inq_varid(imapfile, 'FlowLink_xu', id_xu)
+      call check_error(ierr, 'velocity point x-coordinate')
+      ierr = nf90_inq_varid(imapfile, 'FlowLink_yu', id_yu)
+      call check_error(ierr, 'velocity point y-coordinate')
+      ierr = nf90_get_var(imapfile, id_xu, xuu)
+      ierr = nf90_get_var(imapfile, id_yu, yuu)
+      
+      if (ierr == nf90_noerr) then
+         ! Check flowlinks numbering with rst file
+         call check_flownodesorlinks_numbering_rst(lnx, 0, xuu, yuu, ierr)
+         if (ierr .ne. nf90_noerr) then
+            goto 999
+         end if
+      else
+         call mess(LEVEL_WARN, 'Skip checking flowlinks numbering when restart, '&
+                    //'because flowlinks coordinates are missing in rst file.')
+      end if   
     endif
     call readyy('Reading map data',0.05d0)
     
@@ -10836,7 +11196,26 @@ subroutine unc_read_map(filename, tim, ierr)
       call check_error(ierr, 'Thatcher-Harleman boundaries')
     endif
     call readyy('Reading map data',0.95d0)    
-
+   
+   ! Check if the orientation of each flowlink in the current model is the same with the link in the rst file
+   ! If not, reverse the velocity that is read from rst file
+   ! Check only when parallel restart with different partitions. ToDo: check for all the restart scenarios
+   if (jamergedmap_same == 0 .and. jampi == 1 ) then
+      ! Read link/interface between two flow elements (flow link) from the merged file
+      allocate(ln_read(2,lnx_own))
+      allocate(itmp2D(2,lnx_merge))
+      ierr = nf90_inq_varid(imapfile, 'FlowLink', id_flowlink)
+      ierr = nf90_get_var(imapfile, id_flowlink, itmp2D)
+      do L = 1, lnx_own
+         LL = ilink_merge(L)
+         ln_read(:,L) = itmp2D(:,LL)
+      end do
+      call check_error(ierr, 'FlowLink')
+      
+      ! check orientation
+      call check_flowlink_orientation(lnx_own, ln_read, ilink_own, lnx_merge, ndxi_merge, ndxi, inode_owninv, inode_merge2own)
+   end if
+   
    !-- Synchronisation to other domains, only for merged-map input
    if (jampi == 1 .and. jamergedmap == 1) then
       !-- S/S3D --
@@ -12307,4 +12686,292 @@ subroutine readcells(filename, ierr, jaidomain, jaiglobal_s, jareinitialize)
     nerr_ = 0
 end subroutine readcells
 
+!!> Check the orientations of flowlinks in the current model, comparing with flowlinks that are read from the rst file.
+!!> If the orientations are different, then reverse the orientation of the velociy that is read from rst file.
+subroutine check_flowlink_orientation(lnx_own, ln_read, ilink_own, lnx_merge, ndxi_merge, ndxi, inode_owninv, inode_merge2own)
+   use m_flowgeom,      only: ln
+   use m_flow,          only: u1, u0
+   use m_partitioninfo, only: my_rank, jampi
+   use unstruc_messages
+   implicit none
+
+   
+   integer,                        intent(in) :: lnx_own      ! Number of flowlinks (excluding ghosts) on the current model
+   integer, dimension(2,lnx_own),  intent(in) :: ln_read      ! FlowLink read from rst file
+   integer, dimension(lnx_own),    intent(in) :: ilink_own(:) ! index mapping from its own partition (excluding ghosts) to this partition(with ghosts) 
+   integer, optional,              intent(in) :: lnx_merge    ! Number of Flowlinks in the merged file
+   integer,                        intent(in) :: ndxi_merge   ! Number of Flownodes in the merged file
+   integer,                        intent(in) :: ndxi         ! Number of Flownodes (including ghosts) on the current model
+   integer, dimension(ndxi),       intent(in) :: inode_owninv ! Mapping from actual index (including ghosts) to the own index (excluding ghosts)
+   integer, dimension(ndxi_merge), intent(in) :: inode_merge2own ! Mapping from merged file to the own index
+   integer                                    :: L, LL, k1, k2, k1_read, k2_read, kk1, kk2, kk1_read, kk2_read, num=0, ierr=0
+   character(len=128)                         :: message
+    
+   
+   call mess(LEVEL_INFO, 'Check flowlink orientation when restart:')
+    
+   ! check orientation for flowlinks of its own
+   do L = 1, lnx_own
+      LL = ilink_own(L) ! L link is LL link when including ghost links
+      
+      ! on the curret model
+      k1 = ln(1,LL)     ! in the current model, ln array contains ghosts
+      k2 = ln(2,LL)
+      if (k1>ndxi) then
+         kk1 = 0
+      else
+         kk1 = max(inode_owninv(k1), 0) ! node index of its own
+      end if
+      if (k2>ndxi) then
+         kk1 = 0
+      else
+         kk2 = max(inode_owninv(k2), 0)
+      end if
+      
+      ! from rst file
+      k1_read = ln_read(1,L) ! node index in the merged file
+      k2_read = ln_read(2,L)
+      if (k1_read > 0) then
+         kk1_read = max(inode_merge2own(k1_read), 0 ) ! node index of its own 
+      else
+         ! the fill_value in ln_read from the merged file denotes a bnd flownodes. In this situation, the orientation of 
+         ! the flowlink is always pointing to the interior of the comp. domain. So we do not need to compare the coordinates of the 
+         ! bnd flownodes
+         kk1_read = 0
+      end if
+      
+      if (k2_read > 0) then
+         kk2_read = max(inode_merge2own(k2_read), 0)
+      else
+         kk2_read = 0
+      end if
+
+      if (kk1 .ne. kk1_read) then
+         if (kk1 .eq. kk2_read .and. kk2 .eq. kk1_read) then ! For the same link L, the orientation is differet
+            if (jampi==0) then
+               write(message, "('orientation mismatches for link=', I0, ', has been fixed.')") L
+               call mess(LEVEL_INFO, trim(message))
+            else
+               write(message, "('my_rank=', I0,': orientation mismatches for link=', I0, ', has been fixed.')") my_rank, L
+               call mess(LEVEL_INFO, trim(message))
+            end if         
+            
+            u1(LL) = -u1(LL)
+            u0(LL) = -u0(LL)
+            num   = num + 1
+         else ! It is not the same link
+            if (jampi==0) then
+               write(message, "('flowlink mismatches: link=', I0, '.')") L
+               call mess(LEVEL_ERROR, trim(message))
+            else
+               write(message, "('my_rank=', I0, ': flowlink mismatches: link=', I0,'.')") my_rank, L
+               call mess(LEVEL_ERROR, trim(message))
+            end if
+         end if
+      end if
+   end do
+         
+   if (num == 0) then
+      if (jampi == 0) then
+         call mess(LEVEL_INFO, 'No mismatched flowlink is found. Finish checking.')
+      else
+         write(message, "('my_rank=', I0,': no mismatched flowlink is found. Finish checking')") my_rank
+         call mess(LEVEL_INFO, trim(message))
+      end if
+   end if
+
+end subroutine check_flowlink_orientation
+
+subroutine find_flownodesorlinks_merge(n, x, y, n_loc, n_own, iloc_own, iloc_merge, janode, jaerror2sam, inode_merge2loc)
+   use kdtree2Factory
+   use unstruc_messages
+   use m_flowgeom
+   use network_data
+   use m_missing, only: dmiss
+   use m_sferic, only: jsferic
+   use m_samples
+   use m_alloc
+   
+   implicit none
+   type(kdtree_instance)                           :: treeinst
+   integer,                          intent(in)    :: n               !< number of flownodes in merged map file
+   double precision, dimension(n),   intent(in)    :: x, y            !< coordinates of flownode circumcenters or flowlink centers in merged map file
+   integer,                          intent(in)    :: n_loc           !< number of flownodes or flowlinks of the current subdomain (including ghosts)
+   integer,                          intent(in)    :: n_own           !< number of flownodes or flowlinks of the current subdomain (excluding ghosts)
+   integer,                          intent(in)    :: janode          !< if janode==1, find flow nodes, otherwise find flow links
+   integer, dimension(n_loc),        intent(inout) :: iloc_own        !< mapping to the actual index on the current subdomain 
+   integer, dimension(n_loc),        intent(inout) :: iloc_merge      !< mapping to the index in the merged map file    
+   integer, dimension(n), optional,  intent(inout) :: inode_merge2loc !< mapping from the index in the merged map file
+   integer,                          intent(in)    :: jaerror2sam  !< add unfound nodes to samples (1) or not (0)
+   integer                                         :: ierror = 1
+   integer                                         :: k, nn, i, jj, kk, jamerge2own
+   double precision                                :: R2search = 1d-8 !< Search radius
+   double precision                                :: t0, t1
+   character(len=128)                              :: mesg
+   double precision, allocatable                   :: x_tmp(:), y_tmp(:)
+
+   call klok(t0)
+   if (present(inode_merge2loc)) then
+      jamerge2own = 1
+   else
+      jamerge2own = 0
+   end if
+   
+   allocate(x_tmp(n_loc))
+   allocate(y_tmp(n_loc))
+   if(janode == 1) then
+      x_tmp = xzw
+      y_tmp = yzw
+   else if (janode == 2) then ! boundary waterlevel points
+      x_tmp = xz(ndxi+1:ndx)
+      y_tmp = yz(ndxi+1:ndx)
+   else
+      x_tmp = xu
+      y_tmp = yu
+   endif
+   
+   !build kdtree
+   call build_kdtree(treeinst, n, x, y, ierror, jsferic, dmiss)
+   if ( ierror.ne.0 ) then
+      goto 1234
+   end if
+   
+   call mess(LEVEL_INFO, 'Restart parallel run: Finding flow nodes/ flow links...')
+   
+!  clear samples
+   do k = 1, n_own
+        !  fill query vector
+        kk = iloc_own(k)
+        call make_queryvector_kdtree(treeinst, x_tmp(kk), y_tmp(kk), jsferic)
+        !  count number of points in search area
+        NN = kdtree2_r_count(treeinst%tree, treeinst%qv, R2search)
+        if ( NN.eq.0 ) then
+!           call mess(LEVEL_INFO, 'No flownode/flowlink is found')
+           
+           if ( jaerror2sam.eq.1 ) then
+   !          add to samples
+              call mess(LEVEL_INFO, 'copying unfound flownodes/links to samples')
+              call INCREASESAM(NS+1)
+              NS=NS+1
+              xs(Ns) = x_tmp(kk)
+              ys(NS) = y_tmp(kk)
+              zs(NS) = dble(NN)
+           end if
+           
+           cycle ! no points found
+        else
+           !  reallocate if necessary
+            call realloc_results_kdtree(treeinst, NN)
+            
+           !  find nearest NN samples
+            if (NN > 1) then ! If we found more candidates within small search radius, then we should consider falling back to inside-polygon check of cell contour
+!               if (janode == 1) then
+!                  write (msgbuf, '(a,i0,a,i0,a)') 'Multiple flow nodes in merged restart file can be matched with current model''s node #', kk, '. Nr of candidates: ', NN, '. Picking last.'
+!               else
+!                  write (msgbuf, '(a,i0,a,i0,a)') 'Multiple flow links in merged restart file can be matched with current model''s link #', kk, '. Nr of candidates: ', NN, '. Picking last.'
+!               end if
+!               call err_flush()
+!               ! TODO: AvD: return error code from this routine
+               
+               
+              if ( jaerror2sam.eq.1 ) then
+      !          add to samples
+!                 call mess(LEVEL_INFO, 'copying double or more found flownodes/links to samples')
+                 call INCREASESAM(NS+1)
+                 NS=NS+1
+                 xs(Ns) = x_tmp(kk)
+                 ys(NS) = y_tmp(kk)
+                 zs(NS) = dble(NN)
+              end if
+           
+            end if
+
+            call kdtree2_n_nearest(treeinst%tree, treeinst%qv, NN, treeinst%results)
+            do i=1,NN
+               jj = treeinst%results(i)%idx
+               iloc_merge(k) = jj 
+               if (jamerge2own > 0) then
+                  inode_merge2loc(jj) = k
+               end if
+            end do
+        endif
+   end do
+
+   call klok(t1)
+
+   write(mesg, "('done in ', F12.5, ' sec.')") t1-t0
+   call mess(LEVEL_INFO, trim(mesg))
+   ierror = 0
+1234 continue
+
+!    deallocate  
+   if ( treeinst%itreestat.ne.ITREE_EMPTY ) then 
+      call delete_kdtree2(treeinst)
+   endif
+
+   return  
+end subroutine find_flownodesorlinks_merge
+
+!! check if the flownodes or flowlinks in the current model have the same numbering with in the rst file
+subroutine check_flownodesorlinks_numbering_rst(n, janode, x_rst, y_rst, ierror)
+   use network_data, only: xzw, yzw
+   use m_flowgeom, only: xu, yu
+   use unstruc_messages
+   use m_missing, only: dmiss
+   use geometry_module, only: dbdistance
+   use m_sferic, only: jsferic, jasfer3D
+   use m_partitioninfo, only: jampi, my_rank
+   implicit none
+   
+   integer,                        intent(in) :: n            ! Number of flownodes/flowlinks to be checked
+   integer,                        intent(in) :: janode       !if janode==1, find flow nodes, otherwise find flow links
+   double precision, dimension(:), intent(in) :: x_rst, y_rst ! Coordinates read from rst file
+   integer,                        intent(out):: ierror
+    
+   double precision, allocatable              :: x_tmp(:), y_tmp(:)
+   integer                                    :: i
+   double precision                           :: dist, dtol = 1d-8
+   character(len=128)                         :: message
+ 
+   ierror = 0
+   
+   allocate(x_tmp(n))
+   allocate(y_tmp(n))
+   if (janode == 1) then
+      call mess(LEVEL_INFO, 'Check flownodes numbering when restart:')
+      x_tmp = xzw
+      y_tmp = yzw
+   else
+      call mess(LEVEL_INFO, 'Check flowlinks numbering when restart:')
+      x_tmp = xu
+      y_tmp = yu
+   endif
+
+   do i = 1, n
+      dist = dbdistance(x_tmp(i),y_tmp(i),x_rst(i),y_rst(i), jsferic, jasfer3D, dmiss)
+      if (dist > dtol) then
+         ierror = 1
+         if (janode == 1) then
+            if (jampi > 0) then
+               write(message, "('my_rank=', I0, ': flownode mismatches: node=', I0,'.')") my_rank, i
+               call mess(LEVEL_ERROR, trim(message))
+            else
+               write(message, "('flownode mismatches: node=', I0,'.')") i
+               call mess(LEVEL_ERROR, trim(message))
+            end if
+         else
+            if (jampi > 0) then
+               write(message, "('my_rank=', I0, ': flowlink mismatches: link=', I0,'.')") my_rank, i
+               call mess(LEVEL_ERROR, trim(message))
+            else
+               write(message, "('flowlink mismatches: link=', I0,'.')") i
+               call mess(LEVEL_ERROR, trim(message))
+            end if
+         end if
+         
+         exit
+      end if
+   end do
+   return
+end subroutine check_flownodesorlinks_numbering_rst
 end module unstruc_netcdf

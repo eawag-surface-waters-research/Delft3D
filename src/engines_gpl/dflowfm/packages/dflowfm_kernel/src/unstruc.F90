@@ -1,6 +1,7 @@
 !----- AGPL --------------------------------------------------------------------
 !
-!  Copyright (C)  Stichting Deltares, 2017-2018.!
+!  Copyright (C)  Stichting Deltares, 2017.
+!
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).
 !
 !  Delft3D is free software: you can redistribute it and/or modify
@@ -1532,7 +1533,6 @@ if (japerim == 0) then
                 call getprof_1D_min(L, hpr, ar1, wid1)
                 a1m(k1)  = a1m(k1)  + dx1*wid1
                 vol1(k1) = vol1(k1) - dx1*ar1
-                vol1_f(k1) = vol1_f(k1) - dx1*ar1
              endif
           endif
           if (kcs(k2) == 1) then
@@ -1541,7 +1541,6 @@ if (japerim == 0) then
                 call getprof_1D_min(L, hpr, ar2, wid2)
                 a1m(k2)  = a1m(k2)  + dx2*wid2
                 vol1(k2) = vol1(k2) - dx2*ar2
-                vol1_f(k2) = vol1_f(k2) - dx1*ar1
              endif
           endif
        endif
@@ -8477,7 +8476,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  use unstruc_files, only: mdia, getoutputdir
  use unstruc_netcdf
  use MessageHandling
- use m_flowparameters, only: jawave, jatrt, jacali, jacreep, jatransportmodule
+ use m_flowparameters, only: jawave, jatrt, jacali, jacreep, jatransportmodule, jamd1dfile
  use dfm_error
  use m_vegetation
  use m_integralstats
@@ -8486,6 +8485,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  use unstruc_display, only : ntek, jaGUI
  use m_alloc 
  use m_bedform 
+ use m_fm_update_crosssections, only: fm_update_main_width
  ! 
  ! To raise floating-point invalid, divide-by-zero, and overflow exceptions:
  ! Activate the following line (See also statements below)
@@ -8632,7 +8632,6 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
 
  !! flow1d -> dflowfm initialization
  call set_1d_roughnesses()
- call set_1d_indices_in_network()
  
  ! need number of fractions for allocation of sed array
  if ( len_trim(md_sedfile) > 0 ) then
@@ -8719,6 +8718,10 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
     goto 1234
  end if
  
+ if (stm_included) then 
+     call fm_update_main_width()
+ endif 
+ 
  if ( len_trim(md_dredgefile) > 0 .and. stm_included) then 
     call flow_dredgeinit()          ! dredging and dumping. Moved here because julrefdate needed
  endif
@@ -8745,6 +8748,13 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
     call flow_trachyupdate()                         ! Perform a trachy update step to correctly set initial field quantities
  endif                                               ! Generally flow_trachyupdate() is called from flow_setexternalforcings()
 
+ if ((jased>0) .and. stm_included) then
+    if (jamd1dfile == 0) then 
+       call set_frcu_mor(1)        !otherwise frcu_mor is set in getprof_1d()
+    endif
+    call set_frcu_mor(2)
+ endif 
+ 
  call flow_initimestep(1, iresult)                   ! 1 also sets zws0
 
  call writesomeinitialoutput()
@@ -9806,6 +9816,31 @@ subroutine calibration_update()
  end do
 
 end subroutine calibration_update
+
+subroutine set_frcu_mor(dim)
+    use m_flow, only: frcu, frcu_mor    
+    use m_flowgeom, only: lnx, lnxi, lnx1d, lnx1Db
+    integer, intent(in) :: dim
+    
+    integer :: L 
+    
+    if (dim == 1) then 
+       do L = 1, lnx1d  ! 1D int
+           frcu_mor(L) = frcu(L)
+       enddo 
+       do L = lnxi+1, lnx1Db ! 1D bnd 
+           frcu_mor(L) = frcu(L)
+       enddo 
+    endif
+    if (dim == 2) then 
+       do L = lnx1d+1, lnxi ! 2D int
+           frcu_mor(L) = frcu(L)
+       enddo 
+       do L = lnx1Db+1, lnx ! 2D bnd
+           frcu_mor(L) = frcu(L)
+       enddo 
+    endif
+end subroutine set_frcu_mor    
     
 subroutine cosphiunetcheck(jausererror)
  use m_flowgeom
@@ -11681,9 +11716,19 @@ else if (nodval == 27) then
  else if (nodval == numoptwav .and. jawave > 0) then
     select case (waveparopt)
        case (1)
-          znod = Hwav(kk) ! fwx%hrms(kk) 
+          if (jawave.ne.4) then
+             znod = Hwav(kk) ! fwx%hrms(kk) 
+          else
+             znod = H(kk)
+          endif 
        case (2)
-          znod = Twav(kk) ! fwx%tp(kk)
+          if (jawave.ne.4) then
+             znod = Twav(kk) ! fwx%tp(kk)
+          elseif (windmodel.eq.0) then
+             znod = Trep
+          else 
+             znod = tt1(itheta_view,kk)
+          endif
        case (3)
           znod = taus(kk)
        case (4)
@@ -11800,14 +11845,66 @@ else if (nodval == 27) then
           if (jawave .ne. 4) then
              znod = dmiss
           else if (jawind>0 .and. jawsource>0) then
-             znod = wsor(itheta_view, kk)
+             znod = wsorE(itheta_view, kk)
           end if 
        case(26)
+           if (jawave .ne. 4 ) then
+               znod = dmiss
+           else  
+               znod = sigt(itheta_view,kk)
+           end if              
+       case(27)
+           if (jawave .ne. 4 ) then
+               znod = dmiss
+           elseif (windmodel.eq.0) then
+               znod = cgwav(kk)
+           else
+               znod = cgwavt(itheta_view,kk)
+           end if       
+       case(28)
           if (jawave == 1 .or. jawave == 2) then
              znod = fetch(1,kk)
           else
              znod = dmiss
           end if
+       case(29)
+           if (jawave.ne.4) then
+               znod = dmiss
+           else
+               znod = dtheta * egradcg(itheta_view,kk)
+           endif
+       case(30)
+           if (jawave.ne.4) then
+               znod = dmiss
+           else
+               znod = SwT(kk)
+           endif
+       case(31)
+           if(jawave.ne.4) then
+               znod = dmiss
+           else
+               znod = SwE(kk)
+           endif
+       case(32)
+           if(jawave.ne.4) then
+               znod = dmiss
+           else
+               znod = horadvec(itheta_view,kk)
+           endif
+       case(33)
+           if(jawave.ne.4) then
+               znod = dmiss
+           else
+               znod = horadvec2(itheta_view,kk)
+           endif
+       case(34)
+           if(jawave.ne.4) then
+               znod = dmiss
+           else
+               znod = ma(itheta_view,kk)
+           endif           
+           
+           
     end select
     
  else if (nodval == numoptsf .and. jasecflow > 0) then
@@ -13989,6 +14086,7 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
    double precision :: timmin
    double precision :: ntrtsteps            !< variable to determine if trachytopes should be updated
    integer          :: k, L, i, k1, k2
+   logical          :: l_set_frcu_mor = .false.
 
    logical, external :: flow_initwaveforcings_runtime
    character(len=255) :: tmpstr
@@ -14308,14 +14406,25 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
        ntrtsteps = (time1 - tstart_user)/dt_max/itimtt
        if (abs(ntrtsteps - floor(ntrtsteps)) .lt. 1e-6 ) then
            call flow_trachyupdate()                            ! perform a trachy update step
+           l_set_frcu_mor = .true.
        end if
    end if
    
    if (jacali == 1) then
        ! update calibration definitions and factors on links 
        call calibration_update()
+       l_set_frcu_mor = .true.
    end if
 
+   if (stm_included) then 
+       if ((jased>0) .and. l_set_frcu_mor) then
+           if (jamd1dfile == 0) then 
+               call set_frcu_mor(1)     !otherwise frcu_mor is set in getprof_1d()
+           endif    
+           call set_frcu_mor(2)
+       endif    
+   endif 
+   
    ! Update nudging temperature (and salinity)
    if (item_nudge_tem /= ec_undef_int ) then ! .and. .not.l_initphase) then
       success = success .and. ec_gettimespacevalue(ecInstancePtr, item_nudge_tem, tim)
@@ -15208,7 +15317,7 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
 
     if (ti_incr > 0) then
        if (comparereal(tim, time_incr, eps10) >= 0) then
-         call write_incrementals(tim)
+         call write_incrementals_ugrid(m_incids, tim)
          if (comparereal(time_incr, ti_incre, eps10) == 0) then
             time_incr = tstop_user + 1
          else
@@ -18646,7 +18755,7 @@ end subroutine unc_write_shp
 
  call readyy ('geominit-NODELINKS         ',0.5d0)
 
- if (allocated (ln) ) deallocate(ln,lncn,bob,dx,dxi,wu,wui,kcu,csu,snu,acl,iadv,teta)
+ if (allocated (ln) ) deallocate(ln,lncn,bob,dx,dxi,wu,wui,kcu,csu,snu,acl,iadv,teta,wu_mor)
  if (allocated(ibot)) deallocate(ibot)
  allocate (  ln   (2,lnx) , stat=ierr  )
  call aerr( 'ln   (2,lnx)', ierr, 2*lnx)
@@ -18660,6 +18769,8 @@ end subroutine unc_write_shp
  call aerr( 'dxi  (  lnx)', ierr, lnx )
  allocate (  wu   (  lnx) , stat=ierr )
  call aerr( 'wu   (  lnx)', ierr, lnx )
+ allocate (  wu_mor (  lnx) , stat=ierr )
+ call aerr( 'wu_mor (  lnx)', ierr, lnx )
  allocate (  wui  (  lnx) , stat=ierr )
  call aerr( 'wui  (  lnx)', ierr, lnx )
  allocate (  kcu  (  lnx) , stat=ierr ); kcu = 0
@@ -19147,6 +19258,8 @@ end subroutine unc_write_shp
  else
     jaupdbobbl1d = 0
  endif    
+
+ call set_1d_indices_in_network()
 
  call setbobs()
  call setbobsonroofs()
@@ -21900,12 +22013,14 @@ endif
 
  ! link related
  if (allocated(cfuhi) ) then
-    deallocate(cfuhi,frcu,ifrcutp,wdsu,u0,u1,q1,qa,v,ucxu,ucyu,hu,huvli,au,viu,vicLu,suu,advi,adve,plotlin)
+    deallocate(cfuhi,frcu,ifrcutp,wdsu,u0,u1,q1,qa,v,ucxu,ucyu,hu,huvli,au,viu,vicLu,suu,advi,adve,plotlin,frcu_mor)
  endif
  allocate ( cfuhi(lnx)   , stat=ierr)            ! hk: hier stond + 1, heb ik weggehaald
  call aerr('cfuhi(lnx)'  , ierr, lnx)   ; cfuhi   = 0
  allocate ( frcu (lnx)   , stat = ierr)
  call aerr('frcu (lnx)'  , ierr,   ndx) ; frcu    = dmiss
+ allocate ( frcu_mor (lnx)   , stat = ierr)
+ call aerr('frcu_mor (lnx)'  , ierr,   ndx) ; frcu_mor    = dmiss
  allocate ( ifrcutp(lnx) , stat = ierr)
  call aerr('ifrcutp(lnx)', ierr,   ndx) ; ifrcutp = abs(ifrctypuni)
  allocate ( wdsu  (lnx)  , stat=ierr  )
@@ -26499,7 +26614,7 @@ end function rho_Unesco
  subroutine dens_unes(temp, salt, rhouns, rhods, rhodt)
 !----- GPL ---------------------------------------------------------------------
 !
-!  Copyright (C)  Stichting Deltares, 2011-2018.
+!  Copyright (C)  Stichting Deltares, 2011-2016.
 !
 !  This program is free software: you can redistribute it and/or modify
 !  it under the terms of the GNU General Public License as published by
@@ -37177,11 +37292,27 @@ end if
 !       end if
 
     end do
- else if (inivelx == 1 .or. inively == 1) then
-    call mess(LEVEL_WARN, 'Initial velocity field not loaded from ext-file. Make sure &
-         to specify both components ''initialvelocityx'' and ''initialvelocityy'', &
-         either that, or use ''initialvelocity''.')
- end if
+    
+ else if (inivelx == 1) then ! only x component imposed
+    do L=1,lnx
+       if (uxini(L) == dmiss) then
+          cycle
+       end if
+       
+       u1(L) = uxini(L)*csu(L)
+    end do  
+    
+ else if (inively == 1) then ! only y component imposed
+    do L=1,lnx
+       if (uyini(L) == dmiss) then
+          cycle
+       end if
+
+       u1(L) = uyini(L)*snu(L)
+    end do
+    
+  end if
+
  if (allocated(uxini)) deallocate(uxini)
  if (allocated(uyini)) deallocate(uyini)
 
@@ -39001,32 +39132,36 @@ hpr = hprL
 
 if (network%brs%count > 0) then
    cz = 0d0
-!   calc_perim = japerim
-   call getCrossFlowData_on_link(network, LL, hpr, flowArea=area, flowWidth=width, &
-                   wetPerimeter = perim, conveyance=conv, cz = cz, af_sub = af_sub, &
-                   perim_sub = perim_sub, cz_sub = cz_sub)
-   u1L = u1(L)
-   q1L = q1(L)
-   k1 = ln(1,L) ; k2 = ln(2,L)
-   s1L = ( s1(k1) + s1(k2) ) * 0.5d0  ! averaging  distance 
-   dpt = hu(L)
+   if (japerim == 0) then ! calculate total area and volume
+      call getCrossTotalData_on_link(network, LL, hpr, area, width, CSCalculationOption)
+   else ! japerim = 1: calculate flow area, conveyance and perimeter.
+      call getCrossFlowData_on_link(network, LL, hpr, flowArea=area, flowWidth=width, &
+                      wetPerimeter = perim, conveyance=conv, cz = cz, af_sub = af_sub, &
+                      perim_sub = perim_sub, cz_sub = cz_sub)
+      u1L = u1(LL)
+      q1L = q1(LL)
+      k1 = ln(1,LL) ; k2 = ln(2,LL)
+      s1L = acl(L)*s1(k1) + (1d0-acl(L))*s1(k2)
+      dpt = hu(LL)
    
-   if (japerim ==1) then
-      call getconveyance(network, dpt, u1L, q1L, s1L, LL, perim_sub, af_sub, conv, cz_sub, cz, area, perim)
+      if (japerim ==1) then
+         call getconveyance(network, dpt, u1L, q1L, s1L, LL, perim_sub, af_sub, conv, cz_sub, cz, area, perim)
       
-      ! Qmain/ QT = Kmain/KT -> u_main = Kmain/KT * (AT/Amain)
-      if (conv > 0d0) then
-         u_to_umain(L) = area*cz_sub(1) * sqrt(af_sub(1)/perim_sub(1)) /  conv
-         cfuhi(L) = ag/(conv/area)**2
-         frcu(L) = cz
-         call getCrossDischarge(perim_sub, af_sub, cz_sub, q1L, q_sub)
-         q1_main(L) = q_sub(1)
-      else
-         u_to_umain(L) = 1d0
-         cfuhi(L) = 0d0
+         ! Qmain/ QT = Kmain/KT -> u_main = Kmain/KT * (AT/Amain)
+         if (conv > 0d0) then
+            u_to_umain(L) = area*cz_sub(1) * sqrt(af_sub(1)/perim_sub(1)) /  conv
+            cfuhi(L) = ag/(conv/area)**2
+            frcu(L) = cz
+            frcu_mor(L) = cz_sub(1)
+            call getCrossDischarge(perim_sub, af_sub, cz_sub, q1L, q_sub)
+            q1_main(L) = q_sub(1)
+         else
+            u_to_umain(L) = 1d0
+            cfuhi(L) = 0d0
+         endif
       endif
+      wu(L) = width
    endif
-   wu(L) = width
    ! finished for 1d network from flow1d
    return
 endif
@@ -39146,6 +39281,11 @@ subroutine getprof_1D_min(L, hpr, area, width) ! pressurepipe
 use m_profiles
 use m_flow
 use m_flowgeom
+use unstruc_channel_flow
+use m_crosssections
+use m_cross_helper
+
+
 implicit none
 integer          :: L
 double precision :: hpr                  ! hoogte in profiel
@@ -39164,6 +39304,12 @@ LL = L
 if (L > lnxi) then                       ! for 1D boundary links, refer to attached link
    LL = LBND1D(L)
 endif
+
+
+if (network%brs%count > 0) then
+   call getCrossTotalData_on_link(network, LL, hpr, area, width, CS_TYPE_MIN)
+   return
+endif   	  
 
 if (prof1D(1,LL) > 0 ) then              ! direct profile based upon link value
     ka    = 0; kb = 0                    ! do not use profiles
@@ -39628,9 +39774,10 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
  integer                       :: jaweir, Lastfoundk, kf, kL, jarestorepol, Lnt, k1, nna, nnb, nl1, nl2, k3, k4
  integer         , allocatable :: iwu(:), ihu(:)
  double precision              :: SL, SM, XCR, YCR, CRP, Xa, Ya, Xb, Yb, zc, zh, af, dz1, dz2, xn, yn, adjacentbob, cosphi, sig, bobL
- double precision, allocatable :: csh(:), snh(:), zcrest(:), dzsillu(:), dzsilld(:), crestlen(:), taludu(:), taludd(:), vegetat(:)
+ double precision, allocatable :: csh(:), snh(:), dzcrest(:), dzsillu(:), dzsilld(:), crestlen(:), taludu(:), taludd(:), vegetat(:),dztoeu(:),dztoed(:)
  integer         , allocatable :: iweirtyp(:)
-
+ integer         , allocatable :: ifirstweir(:)
+ 
  double precision, dimension(:), allocatable :: dSL
  integer,          dimension(:), allocatable :: iLink
  integer,          dimension(:), allocatable :: iLcr ! link crossed yes no
@@ -39660,20 +39807,24 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
  call readyy('Setfixedweirs', 0d0)
   
  !if (allocated(csh) ) then
- !   deallocate(ihu, csh, snh, dzsillu, dzsilld, crestlen, taludu, taludd, vegetat) ! (10 arrays)
+ !   deallocate(ihu, csh, snh, dzcrest, dzsillu, dzsilld, crestlen, taludu, taludd, vegetat) ! (10 arrays)
  !endif 
  
  allocate (ihu(lnx))      ; ihu = 0
  allocate (csh(lnx))      ; csh = 0d0
  allocate (snh(lnx))      ; snh = 0d0
+ allocate (dzcrest(lnx))  ; dzcrest = -1000d0   ! starting from a low value
  allocate (dzsillu(lnx))  ; dzsillu = 0d0
  allocate (dzsilld(lnx))  ; dzsilld = 0d0
+ allocate (dztoeu(lnx))   ; dztoeu = 1000d0  ! starting from a high value
+ allocate (dztoed(lnx))   ; dztoed = 1000d0  ! starting from a high value
  allocate (crestlen(lnx)) ; crestlen = 3d0
  allocate (taludu(lnx))   ; taludu = 4d0
  allocate (taludd(lnx))   ; taludd = 4d0
  allocate (vegetat(lnx))  ; vegetat = 0d0
  allocate (iweirtyp(lnx)) ; iweirtyp = 0 
-   
+ allocate (ifirstweir(lnx)) ; ifirstweir = 0                       ! added to check whether fixed weir data is set for the first time at a net link
+ 
  ! Load fixed weirs polygons from file. 
  ! --------------------------------------------------------------------
  if (len_trim(md_fixedweirfile) > 0) then
@@ -39785,9 +39936,13 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
     else 
        bobL = max(bob(1,L), bob(2,L)) 
     endif
-       
-    if (zc > bobL ) then 
-    
+ 
+    if ( (zc > bobL .and. zc > dzcrest(L)) .or. ( (ifixedweirscheme == 8 .or. ifixedweirscheme == 9) .and. ifirstweir(L) == 0) ) then   ! For Villemonte and Tabellenboek fixed weirs under bed level are also possible
+
+       ! Set whether this is the first time that for this link weir values are set:
+       ! As a result, only the first fixed weir under the bed level is used
+       ifirstweir(L) = 1
+
        bob(1,L) = zc ; bob(2,L) = zc
        
        if (kcu(L) .ne. 2 .and. kcu(L) .ne. 1) then 
@@ -39802,6 +39957,9 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
           dz2   = sl*dzR(k+1) + (1d0-sl)*dzR(k)
           
           if (min (dz1,dz2) >= sillheightmin) then  ! weir if sufficiently high and regular link 
+             jaweir = 1
+          elseif (ifixedweirscheme == 8 .or. ifixedweirscheme == 9) then
+             ! For Villemonte and Tabellenboek weirs with low sills are also applied, in order to be consistent with Simona
              jaweir = 1
           endif
           
@@ -39869,8 +40027,22 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
           wu(L) = wu(L) * abs( xn*csu(L) + yn*snu(L) )           ! projected length of fixed weir
           
           if (jakol45 == 2) then                                 ! use local type definition
-             dzsillu(L)  = (1d0-sl)*dzl(k)    + sl*dzl(k+1)      ! sillheight at ln(1,L) 
-             dzsilld(L)  = (1d0-sl)*dzr(k)    + sl*dzr(k+1)      ! sillheight at ln(2,L) 
+             dzcrest(L)  = zc 
+             !
+             ! lowest toe is applied
+             !
+             zh = (1d0-sl)*dzl(k) + sl*dzl(k+1)
+             if (zc-zh .lt. dztoeu(L)) then
+                dztoeu(L)   = zc - zh
+                dzsillu(L)  = dzcrest(L) - dztoeu(L)
+             endif
+             zh = (1d0-sl)*dzr(k) + sl*dzr(k+1)
+             if (zc-zh .lt. dztoed(L)) then
+                dztoed(L)   = zc - zh
+                dzsilld(L)  = dzcrest(L) - dztoed(L)
+             endif
+             !! write (msgbuf,'(a,i5,4f10.3)') 'Crest and Toe level ', L, dzcrest(L), dztoeu(L), dztoed(L); call msg_flush()
+            
              crestlen(L) = (1d0-sl)*dcrest(k) + sl*dcrest(k+1)   ! crest length 
              taludu(L)   = (1d0-sl)*dtl(k)    + sl*dtl(k+1)      ! talud at ln(1,L) 
              taludd(L)   = (1d0-sl)*dtr(k)    + sl*dtr(k+1)      ! talud at ln(2,L) 
@@ -39887,6 +40059,7 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
                  zh = dzsilld(L) ; dzsilld(L) = dzsillu(L) ; dzsillu(L) = zh
                  zh = taludd(L)  ; taludd(L)  = taludu(L)  ; taludu(L)  = zh
              endif
+             !! write (msgbuf,'(a,2i5,7f10.3)') 'Projected fixed weir', L, iweirtyp(L), zc, bobL, dzsillu(L), dzsilld(L),crestlen(L),taludu(L),taludd(L); call msg_flush()
           else                                                       ! use global type definition 
              if (ifixedweirscheme == 7) then     
                 iadv(L)    = 23    !  Rajaratnam 
@@ -39920,7 +40093,36 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
        else 
           nh = nh + 1                                            ! just raised bobs
        endif
-
+    else
+       ! check for larger sill height values if at this link already a fixed weir exist
+        
+       if (xn*csu(L) + yn*snu(L) < 0d0) then  ! check left/right
+          zh = dzsilld(L) ; dzsilld(L) = dzsillu(L) ; dzsillu(L) = zh
+          zh = taludd(L)  ; taludd(L)  = taludu(L)  ; taludu(L)  = zh
+       endif
+        
+       zh =  (1d0-sl)*dzl(k) + sl*dzl(k+1)
+       !
+       ! check whether crestlevel is higher
+       !
+       if (zc > dzcrest(L)) then
+          dzcrest(L) = zc
+          !! write (msgbuf,'(a,i5,f10.3)') 'Higher crest level: ', L,  dzcrest(L); call msg_flush()
+       endif    
+       !
+       ! check whether toe is lower. If so, also adjust sill height 
+       !
+       if (zc-zh .lt. dztoeu(L)) then
+          dztoeu(L)   = zc - zh
+          dzsillu(L)  = dzcrest(L) - dztoeu(L)
+          !! write (msgbuf,'(a,i5,f10.3)') 'Larger sill up:     ', L,  dzsillu(L); call msg_flush()
+       endif 
+       zh =  (1d0-sl)*dzR(k) + sl*dzR(k+1)
+       if (zc-zh .lt. dztoed(L)) then
+          dztoed(L)   = zc - zh
+          dzsilld(L)  = dzcrest(L) - dztoed(L)
+          !! write (msgbuf,'(a,i5,f10.3)') 'Larger sill down:   ', L, dzsilld(L); call msg_flush()
+       endif 
     endif
 
  enddo
@@ -39939,6 +40141,7 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
     if (allocated (weirdte) ) deallocate(weirdte)
     if(allocated(shlxw)) deallocate(shlxw)
     if(allocated(shrxw)) deallocate(shrxw)
+    if(allocated(crestlevxw)) deallocate(crestlevxw)
     if(allocated(crestlxw)) deallocate(crestlxw)
     if(allocated(taludlxw)) deallocate(taludlxw)
     if(allocated(taludrxw)) deallocate(taludrxw)
@@ -39956,6 +40159,8 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
     call aerr('shlxw(nfxw)',ierr,nfxw)
     allocate ( shrxw(nfxw) ,stat=ierr)
     call aerr('shrxw(nfxw)',ierr,nfxw)
+    allocate ( crestlevxw(nfxw) ,stat=ierr)
+    call aerr('crestlevxw(nfxw)',ierr,nfxw)
     allocate ( crestlxw(nfxw) ,stat=ierr)
     call aerr('crestlxw(nfxw)',ierr,nfxw)
     allocate ( taludlxw(nfxw) ,stat=ierr)
@@ -39974,6 +40179,7 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
        nfxw = nfxw + 1
        lnfxw(nfxw)    = L
        nfxwL(L)       = nfxw
+       crestlevxw(nfxw) = dzcrest(L)
        shlxw(nfxw)    = dzsillu(L) ; shlxw(nfxw) = max (0.1d0, shlxw(nfxw) )    !  in Simona D1 is at least 0.1 m for application to the Tabellenboek
        shrxw(nfxw)    = dzsilld(L) ; shrxw(nfxw) = max (0.1d0, shrxw(nfxw) ) 
        crestlxw(nfxw) = crestlen(L)
@@ -39984,9 +40190,9 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
     endif   
  enddo 
 
- deallocate(ihu, csh, snh, dzsillu, dzsilld, crestlen, taludu, taludd, vegetat, iweirtyp)
+ deallocate(ihu, csh, snh, dzcrest, dzsillu, dzsilld, crestlen, taludu, taludd, vegetat, iweirtyp, dztoeu, dztoed)
  if (jatabellenboekorvillemonte == 0 .and. jashp_fxw == 0 .and. allocated(shlxw) ) then 
-    deallocate(shlxw, shrxw, crestlxw, taludlxw, taludrxw, vegxw, iweirtxw)
+    deallocate(shlxw, shrxw, crestlevxw, crestlxw, taludlxw, taludrxw, vegxw, iweirtxw)
  endif   
  
  do i = 1, nfxw
@@ -41427,8 +41633,12 @@ subroutine anticreep( L )
 !  update geometry data that may have been incorrectly computed in the ghost area
    subroutine update_geom(iphase)
       use m_partitioninfo
-      use m_flowgeom
-      implicit none
+use m_flowgeom
+use unstruc_channel_flow
+use m_crosssections
+use m_cross_helper
+
+implicit none
 
       integer, intent(in) :: iphase ! phase, 0 (all), 1 (first) or 2 (second)
       integer :: ierror

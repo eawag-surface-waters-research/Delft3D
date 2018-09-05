@@ -1,6 +1,7 @@
 !----- AGPL --------------------------------------------------------------------
 !
-!  Copyright (C)  Stichting Deltares, 2017-2018.!
+!  Copyright (C)  Stichting Deltares, 2017.
+!
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).
 !
 !  Delft3D is free software: you can redistribute it and/or modify
@@ -1191,7 +1192,7 @@ subroutine readMDUFile(filename, istat)
     ! Further reading is done in m_rdtrt, by passing just the [trachytopes] chapter as a separate trtdef_ptr to rdtrt.
     ! Mark [Trachytopes] section as read
     call tree_get_node_by_name( md_ptr, 'trachytopes', trtdef_ptr)
-    if (associated(trtdef_ptr)) call visit_tree(trtdef_ptr,1)
+    !if (associated(trtdef_ptr)) call visit_tree(trtdef_ptr,1)
     trtdef_ptr => null()
 
     call prop_get_string (md_ptr, 'trachytopes', 'TrtRou' , md_trtrfile, success)
@@ -1204,6 +1205,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_string(md_ptr, 'trachytopes', 'TrtDef', md_trtdfile, success)
     call prop_get_string(md_ptr, 'trachytopes', 'TrtL', md_trtlfile, success)
     call prop_get_double(md_ptr, 'trachytopes', 'DtTrt', dt_trach, success)
+    if (.not. success) dt_trach = dt_user
 
     call prop_get_integer(md_ptr, 'calibration', 'UseCalibration'   , jacali, success)
     call prop_get_string(md_ptr, 'calibration', 'DefinitionFile'   , md_cldfile,  success)

@@ -224,7 +224,7 @@
     subroutine fm_update_crosssections(blchg)
     use precision
     use m_cell_geometry, only: ba
-    use m_flowgeom, only: ndxi, kcs, dx, wu, nd
+    use m_flowgeom, only: ndxi, kcs, dx, wu, nd, wu_mor
     use m_oned_functions, only:gridpoint2cross
     use unstruc_channel_flow, only: network
     use m_CrossSections, only: t_CSType, CS_TABULATED
@@ -263,9 +263,9 @@
                     !
                     aref = 0d0
                     iref = cdef%levelscount
-                    do i = 2, cdef%levelscount
+                    do i = 2, cdef%levelscount - 1
                         aref = aref + (cdef%flowWidth(i) + cdef%flowWidth(i-1))*(cdef%height(i)-cdef%height(i-1))*0.5d0
-                        if (cdef%flowWidth(i) > cdef%plains(1)) then ! or cdef%height(i)>s1(nm) 
+                        if (cdef%flowWidth(i+1) > cdef%plains(1)) then ! or cdef%height(i)>s1(nm) 
                             iref = i
                             exit
                         endif
@@ -333,7 +333,6 @@
                         !
                         fac = 1d0 - (da/aref)
                         do i = 1, iref-1
-                            if (cdef%flowWidth(i) >= cdef%plains(1)) cycle
                             cdef%height(i) = href - (href-cdef%height(i))*fac
                         enddo
                     endif
@@ -356,6 +355,50 @@
     ! upon exit blchg contains the bed level change for deepest point
     !
     end subroutine fm_update_crosssections
+    
+    
+    subroutine fm_update_main_width()
+    use m_flowgeom, only: lnx, lnx1d, lnxi, lnx1Db, wu, wu_mor, LBND1D
+    use unstruc_channel_flow, only: network
+    use m_CrossSections, only: t_CSType, CS_TABULATED
+
+    type(t_CSType), pointer :: cdef1, cdef2
+    integer :: icrs1, icrs2 
+    integer :: L, LL
+    double precision :: factor
+    
+    ! Set all morphologically active widths to general flow width.
+    do L = 1, lnx
+        wu_mor(L) = wu(L)
+    enddo
+    
+    if (network%brs%Count > 0) then 
+        ! Replace morphologically active 1d widths by main channel width from cross-section.
+        ! This could also be chosen as the minimum of the main channel width and the 
+        ! flow width (this is apparently how it was implemented in Sobek-RE). 
+        do L = 1, lnx1d
+            factor = network%adm%line2cross(L)%f
+            icrs1 = network%adm%line2cross(L)%c1
+            icrs2 = network%adm%line2cross(L)%c2
+            cdef1 => network%crs%cross(icrs1)%tabdef
+            cdef2 => network%crs%cross(icrs2)%tabdef
+            if (cdef1%crosstype == CS_TABULATED .and. cdef2%crosstype == CS_TABULATED) then
+                wu_mor(L) = (1.0d0 - factor)*cdef1%plains(1) + factor*cdef2%plains(1)
+            else
+                wu_mor(L) = wu(L)
+            endif
+        enddo
+    
+        ! Overwrite boundary link morphologically active widths by morphologically active width on inside
+        do L = lnxi+1, lnx1Db
+            LL = LBND1D(L)
+            wu_mor(LL) = wu_mor(L)
+        enddo
+    endif
+    
+    end subroutine fm_update_main_width
+    
+    
     end module m_fm_update_crosssections
 
 
@@ -573,9 +616,9 @@
     use sediment_basics_module
     use m_physcoef, only: ag, vonkar, sag, ee, backgroundsalinity, backgroundwatertemperature,dicoww, rhomean
     use m_sediment, only: stmpar, sedtra, stm_included, mtd, vismol, jatranspvel
-    use m_flowgeom, only: ndxi, bl, kfs, lnxi, lnx, ln, dxi, ndx, csu, snu, wcx1, wcx2, wcy1, wcy2, acl, nd, csu, snu, wcl, xz, yz, xu, yu, wu
+    use m_flowgeom, only: ndxi, bl, kfs, lnxi, lnx, ln, dxi, ndx, csu, snu, wcx1, wcx2, wcy1, wcy2, acl, nd, csu, snu, wcl, xz, yz, xu, yu, wu, wu_mor
     use m_flow, only: s0, s1, u1, u0, v, ucx, ucy, kbot, ktop, kmx, kmxn, plotlin, sa1, tem1, zws, hs, ucxq, ucyq, layertype, &
-        iturbulencemodel, z0urou, frcu, ifrcutp, hu, spirint, spiratx, spiraty, u_to_umain, q1
+        iturbulencemodel, z0urou, frcu, ifrcutp, hu, spirint, spiratx, spiraty, u_to_umain, q1, frcu_mor
     use m_flowtimes, only: julrefdat, dts, time1
     use unstruc_files, only: mdia
     use unstruc_channel_flow, only: network, t_branch, t_node
@@ -815,7 +858,7 @@
                 L = iabs(nd(k3)%ln(j))
                 Ldir = -sign(1,nd(k3)%ln(j))     
                 !
-                wb1d = wu(L)
+                wb1d = wu_mor(L)
                 !
                 if (u1(L)*Ldir > 0d0) then
                     ! Outgoing discharge
@@ -956,7 +999,7 @@
             Lf = nd(k)%ln(LL)
             L = abs( Lf )
             if (frcu(L)>0) then
-                call getczz0(h1, frcu(L), ifrcutp(L), czu, z0u)
+                call getczz0(h1, frcu_mor(L), ifrcutp(L), czu, z0u)
             else
                 call getczz0(h1, frcuni, ifrctypuni, czu, z0u)
             end if
@@ -1835,7 +1878,7 @@
             L = iabs(nd(k3)%ln(j))
             Ldir = -sign(1,nd(k3)%ln(j))         
             !
-            wb1d = wu(L)            
+            wb1d = wu_mor(L)            
             do ised = 1, lsedtot
                 sb1d = (csu(L)*sbcx(k3,ised) + snu(L)*sbcy(k3,ised)) * Ldir  ! requires updating of velocity in node prior to sediment transport computation
                 ! this works for one incoming branch TO DO: WO
@@ -1874,7 +1917,7 @@
                 Ldir = -sign(1,nd(k3)%ln(j))         
                 !
                 qb1d = q1(L)
-                wb1d = wu(L)                 ! here and elsewhere: should be w main TO DO WO?
+                wb1d = wu_mor(L)                 ! here and elsewhere: should be w main TO DO WO?
 
                 ! Get Nodal Point Relation Data
                 nrd_idx = get_noderel_idx(inod, pFrac, pnod%gridnumber, branInIDLn(inod), pnod%numberofconnections)
@@ -2151,7 +2194,7 @@
     use bedcomposition_module
     use sediment_basics_module
     use m_flow     , only: vol0, vol1, s0, s1, hs, u1, kmx, hu, au
-    use m_flowgeom , only: bai, ndxi, nd, wu, bl, ba, ln, dx, ndx, lnx, lnxi, acl, wcx1, wcy1, wcx2, wcy2, xz, yz
+    use m_flowgeom , only: bai, ndxi, nd, wu, bl, ba, ln, dx, ndx, lnx, lnxi, acl, wcx1, wcy1, wcx2, wcy2, xz, yz, wu_mor
     use m_flowexternalforcings, only: nbndz, nbndu, nopenbndsect
     use m_flowparameters, only: epshs, epshu, jawave
     use m_sediment,  only: stmpar, sedtra, mtd, sedtot2sedsus
@@ -2538,7 +2581,7 @@
                     if (jampi == 1) then 
                         if (.not. (idomain(k2) == my_rank)) cycle
                     endif
-                    sbsum = sbsum + bc_mor_array(li) * wu(lm)  ! sum the total bedload flux throughout boundary
+                    sbsum = sbsum + bc_mor_array(li) * wu_mor(lm)  ! sum the total bedload flux throughout boundary
                     enddo
                     bc_sed_distribution(li) = sbsum        
                 enddo
@@ -2585,7 +2628,7 @@
                             !rate = bc_mor_array(li)
                             call gettau( ln(2,lm), taucurc, czc )
                             if ( tausum2(1) > 0d0 ) then 
-                                rate = bc_sed_distribution(li) * taucurc**2 / wu(lm) / tausum2(1)
+                                rate = bc_sed_distribution(li) * taucurc**2 / wu_mor(lm) / tausum2(1)
                             else
                                 rate = bc_mor_array(li)
                             endif    
@@ -2706,7 +2749,7 @@
                     do ii=1,nd(nm)%lnx
                         LL = nd(nm)%ln(ii)
                         Lf = iabs(LL)
-                        flux = e_sbn(Lf,l)*wu(Lf)
+                        flux = e_sbn(Lf,l)*wu_mor(Lf)
 
                         if ( LL>0 ) then  ! inward
                             sumflux = sumflux + flux
@@ -2841,7 +2884,7 @@
                                 dv              = thet * fixfac(knb, ll)*frac(knb, ll)
                                 dbodsd(ll, knb) = dbodsd(ll, knb) - dv*bai(knb)
                                 dbodsd(ll, nm)  = dbodsd(ll, nm)  + dv*bai(nm)
-                                e_sbn(L,ll)     = e_sbn(L,ll)     + dv/(dtmor*wu(L))
+                                e_sbn(L,ll)     = e_sbn(L,ll)     + dv/(dtmor*wu_mor(L))
                             end if
                         end do ! L
                     enddo ! ll
@@ -3621,7 +3664,7 @@
     use m_physcoef, only: ag
     use m_sferic, only: pi
     use m_flowparameters, only: epshs, epshu
-    use m_flowgeom, only: lnxi, lnx, ln, kcs, ba, bl, Dx, wu
+    use m_flowgeom, only: lnxi, lnx, ln, kcs, ba, bl, Dx, wu, wu_mor
     use m_flow, only: hu, hs
     use m_flowtimes
     use m_turbulence, only: rhou
@@ -3831,7 +3874,7 @@
                             if (slp>dzmax) then
                                 k1 = ln(1, Lf); k2 = ln(2,Lf)
                                 avflux = ba(k1)*ba(k2)/(ba(k1)+ba(k2)) * (bl(k2)-bl(k1) + dzmax*e_dzdn(Lf)/slp*Dx(Lf)) / avaltime !/ morfac   ! TO DO JRE: check with Maarten, Dano
-                                sbncor(Lf) = sbncor(Lf) + avflux*rhosol(l)/wu(Lf)
+                                sbncor(Lf) = sbncor(Lf) + avflux*rhosol(l)/wu_mor(Lf)
                             endif    ! slp
                         endif       ! avalan
                         !
@@ -4174,7 +4217,7 @@
                     end if
                 endif
 
-                sbn(L, lsd) = sbn(L,lsd) - avflux*rhosol(lsd)/wu(L)
+                sbn(L, lsd) = sbn(L,lsd) - avflux*rhosol(lsd)/wu_mor(L)
             end if
         end do
     end do

@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2017.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -54,9 +54,14 @@ contains
 !> Initializes the MessageHandling module with the mdia file pointer.
 subroutine initMessaging(mdia)
     integer, intent(in) :: mdia
-    external :: unstruc_errorhandler
+    external :: unstruc_errorhandler, unstruc_guimessage
+
     call SetMessagehandling(printToStdout, .false., mdia, unstruc_errorhandler, &
          thresholdLevel_stdout = loglevel_StdOut, thresholdLevel_file = loglevel_file)
+
+    ! Set the qnerror wrapper, for use in gridoperations, etc.
+    call set_msgbox_callback(unstruc_guimessage)
+
 end subroutine initMessaging
 
 subroutine callback_msg(lvl,msg)

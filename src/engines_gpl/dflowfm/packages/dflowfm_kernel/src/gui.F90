@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2017.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -2101,6 +2101,7 @@
    use m_plotdots
    use m_transport
    use m_waves, only: waveparopt, numoptwav
+   use m_xbeach_data,   only: windmodel
    use gridoperations
    
    implicit none
@@ -3021,13 +3022,21 @@
       OPTION(22) = 'Wave direction              (deg from N)'
       OPTION(23) = 'Depth gradient, X component          (-)'
       OPTION(24) = 'Depth gradient, Y component          (-)'
-      OPTION(25) = 'Wind source term                   (J/s)'
+      OPTION(25) = 'Wind source term             (J/rad/m/s)'
+      OPTION(26) = 'Wave frequency                   (rad/s)'
+      OPTION(27) = 'Wave group speed            (m/s in bin)'
       if (jawave == 1 .or. jawave == 2) then
-         OPTION(26)= 'Fetch lenght dir1                    (m)'
+         OPTION(28)= 'Fetch lenght dir1                    (m)'
       else
-         OPTION(26)= ''
+         OPTION(28)= ''
       end if
-      MAXOPT     = 26
+      OPTION(29) = 'egradcg                       (J/m/s) '
+      OPTION(30) = 'SwT                             (s/s) '
+      OPTION(31) = 'SwE                          (J/m2/s) '
+      OPTION(32) = 'horadvec                              '      
+      OPTION(33) = 'horadvec2                             '
+      OPTION(34) = 'ma                                    '      
+      MAXOPT     = 34
       NWHAT2     = NDRAW(28)
       CALL MENUV3(NWHAT2,OPTION,MAXOPT,EXP,MAXEXP)
       NDRAW(28) = NWHAT2
@@ -22970,13 +22979,29 @@ subroutine isosmoothflownode2(k) ! smooth isolines in flow cells use depmax2
   CALL GTEXT('fre',TDAY,Qfreeav ,221)
 
   RETURN
-  END
+   END
   
   
 !----------------------------------------------------------------------
 ! subroutines from either net.F90 or rest.F90 that are still needed
 !   without the GUI
 !----------------------------------------------------------------------
+
+!> Shows a message in a GUI dialog (Interacter only).
+!! This routine is supposed to be called from the utility modules,
+!! such as gridgeom, as a callback.
+!!
+!! NOTE: this subroutine is dflowfm's implementation of the MHCallBack::messagebox_iface interface.
+subroutine unstruc_guimessage(title, msg, level)
+    use unstruc_messages
+    implicit none
+    character(len=*)    :: title !< Title string
+    character(len=*)    :: msg   !< Message string
+    integer, intent(in) :: level !< Severity level, use values from the MessageHandling module (e.g., LEVEL_ERROR). Currently not used.
+
+    call qnerror(msg, ' ', ' ')
+
+end subroutine unstruc_guimessage
 
  !>   write an error-message to the log-file and GUI
       SUBROUTINE QNERROR(W1,W2,W3)

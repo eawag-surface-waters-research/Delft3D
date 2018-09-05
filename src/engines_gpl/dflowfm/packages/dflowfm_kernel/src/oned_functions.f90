@@ -20,7 +20,7 @@ module m_oned_functions
 
    !> IFRCUTP and FRCu are filled, using 1D roughness values from Network structure 
    subroutine set_1d_roughnesses()
-      use m_flow, only: frcu, ifrcutp
+      use m_flow, only: frcu, ifrcutp, frcu_mor
       use unstruc_channel_flow
       use m_spatial_data
       use m_branch
@@ -40,6 +40,9 @@ module m_oned_functions
       integer,          dimension(9)          :: rgh_mapping
       type(t_CrossSection), dimension(:), pointer :: crs
       
+      logical stop_warnings
+      
+      stop_warnings = .false.
       if (network%brs%Count > 0) then
          ! RGH_TYPE is similar to IFRCUTP, only with different type numbers
          ! Dflow1D also supports water level or discharge dependent roughness parameters (FUN_TYPE )
@@ -61,6 +64,7 @@ module m_oned_functions
                   L = pbr%lin(i)
                   ifrcutp(L) = 0
                   frcu(L) = 60d0
+                  frcu_mor(L) = frcu(L)
                enddo
             else
                iRough = hashsearch(network%rgs%hashlist, crs(cross)%frictionSectionID(1))
@@ -72,12 +76,17 @@ module m_oned_functions
                   k = pbr%points(1) -1 + i
                   ifrcutp(L) = rgh_mapping(rgh_type(ibr))
                   if (ifrcutp(L) >=0) then
-                     ! R_FunctionConstant, R_FunctionDischarge, R_FunctionLevel are computed as Chezy, frcu(L) is set in getprof_1D ! Why is there another chezy computaton, getcz exists?
+                     ! R_FunctionConstant, R_FunctionDischarge, R_FunctionLevel are computed as Chezy, frcu(L) and frcu_mor(L) are set in getprof_1D 
                      ifrcutp(L) = 0
                   else
-                     call setmessage(LEVEL_FATAL, '1D roughness type on branch '// trim(pbr%name) //', '//pbr%id//' is not available in D-FlowFM')
+                     if (.not. stop_warnings) then
+                        call setmessage(LEVEL_WARN, '1D roughness type on branch '//pbr%id//' is not available in D-FlowFM')
+                        stop_warnings = .true.
+                     endif
+                     
                      ifrcutp(L) = 0
                      frcu(L)    = 45d0
+                     frcu_mor(L) = frcu(L)
                   endif
                enddo
             endif
@@ -400,6 +409,7 @@ module m_oned_functions
    
    use m_network
    use m_flowgeom
+   use m_flowtimes
    use messagehandling
    use unstruc_messages
    use unstruc_channel_flow
@@ -437,19 +447,7 @@ module m_oned_functions
          bob(:,L) = getbobs(network, L)
          n1  = ln(1,L)
          n2 = ln(2,L)                    ! flow ref
-         if (bob(1,L) < bl(n1)) then
-            bl(n1) = bob(1,L)
-            write(msgbuf, '(f8.4)') bob(1,L)
-            msgbuf = 'Bed level of retention area: '//trim(getRetentionId(network, n1))//'. is above adjoining invertlevel of pipe (= '//trim(msgbuf)//')'
-            call warn_flush()
-         endif
-         if (bob(2,L) < bl(n2)) then
-            bl(n2) = bob(2,L)
-            write(msgbuf, '(f8.4)') bob(2,L)
-            msgbuf = 'Bed level of retention area: '//trim(getRetentionId(network, n2))//'. is above adjoining invertlevel of pipe (= '//trim(msgbuf)//')'
-            call warn_flush()
-         endif
-         
+         bl(n1) = min(bl(n1), bob(1,L))
          bl(n2) = min(bl(n2), bob(2,L))
       endif
    enddo
@@ -462,10 +460,6 @@ module m_oned_functions
          L = pstruc%link_number
          bob(1,L) = crest_level
          bob(2,L) = crest_level
-         !n1  = ln(1,L)
-         !n2 = ln(2,L)                    ! flow ref
-         !bl(n1) = min(bl(n1), bob(1,L))
-         !bl(n2) = min(bl(n2), bob(2,L))
       endif
    enddo
    
@@ -479,20 +473,23 @@ module m_oned_functions
       endif
    enddo
    
-   ! check if all manholes are lower than or equal to the invert level of all incoming pipes
-   nstor = network%storS%count
-   do i = 1, nstor
-      pstor => network%storS%stor(i)
-      n1 = pstor%gridPoint
-      if (bl(n1) < pstor%storageArea%x(1)) then
-         call setmessage(LEVEL_WARN, 'At node '//trim(network%nds%node(i)%id)//' the bedlevel is below the bedlevel of the assigned storage area.')
-         write(msgbuf, '(''The bedlevel (due to invert levels of incoming channels/pipes) = '', g14.2, '' and the bottom level of the storage area is '', g14.2)') &
-                     bl(n1), pstor%storageArea%x(1)
-         call setmessage(-LEVEL_WARN, msgbuf)
+   if (time_user<= tstart_user) then
+      ! check if all manholes are lower than or equal to the invert level of all incoming pipes
+      nstor = network%storS%count
+      do i = 1, nstor
+         pstor => network%storS%stor(i)
+         n1 = pstor%gridPoint
+         if (bl(n1) < pstor%storageArea%x(1)) then
+            call setmessage(LEVEL_WARN, 'At node '//trim(network%nds%node(i)%id)//' the bedlevel is below the bedlevel of the assigned storage area.')
+            write(msgbuf, '(''The bedlevel (due to invert levels of incoming channels/pipes) = '', g14.2, '' and the bottom level of the storage area is '', g14.2)') &
+                        bl(n1), pstor%storageArea%x(1)
+            call setmessage(-LEVEL_WARN, msgbuf)
          
-      endif
+         endif
       
-   enddo
+      enddo
+   endif
+   
 
    ! check for missing storage on nodes
    nnode = networK%nds%count

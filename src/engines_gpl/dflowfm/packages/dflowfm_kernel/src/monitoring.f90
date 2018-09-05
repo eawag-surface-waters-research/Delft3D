@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2017.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -1137,6 +1137,7 @@ module m_fixedweirs
     double precision, allocatable   :: csfxw(:)              ! fixed weir direction 
     double precision, allocatable   :: snfxw(:)              ! fixed weir direction
     double precision, allocatable   :: crestlxw(:)           ! crest length of a weir
+    double precision, allocatable   :: crestlevxw(:)         ! crest level of a weir
     double precision, allocatable   :: shlxw(:)              ! sill height left of a weir
     double precision, allocatable   :: shrxw(:)              ! sill height right of a weir
     double precision, allocatable   :: taludlxw(:)           ! talud left of a weir

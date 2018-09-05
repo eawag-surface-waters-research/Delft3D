@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2017.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -361,7 +361,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
          n1 = index(infiles(1)(1:Lrst_m), '_0000_', .true.) 
          outfile = infiles(1)(1:n1) //'merged_'// infiles(1)(n1+6:Lrst_m)//'rst.nc'
          jamerge_cntv = 0
-         write (*,'(a)') 'Info: mapmerge: for *_rst.nc files, topology connectivity variables are not merged.'
+         write (*,'(a)') 'Info: mapmerge: for *_rst.nc files, topology connectivity variables (except for "FlowLink") are not merged.'
       else
       n2  = index(infiles(1)(1:n3), '_', .true.) - 1  ! pos of '_map'
       n1  = index(infiles(1)(1:n2), '_', .true.) - 1  ! pos of '_0000'
@@ -1391,7 +1391,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
  
       ! Skip merging the connectivity variables when coordinates of netnodes or netedges are not read from the files 
       if (jamerge_cntv == 0 .and. (var_names(iv) .eq. 'NetLink' .or. var_names(iv) .eq. 'NetElemNode' .or. &
-          var_names(iv) .eq. 'NetElemLink' .or. var_names(iv) .eq. 'ElemLink' .or. var_names(iv) .eq. 'FlowLink'.or. &
+          var_names(iv) .eq. 'NetElemLink' .or. var_names(iv) .eq. 'ElemLink' .or. &
           var_names(iv) .eq. 'mesh2d_edge_nodes' .or. var_names(iv) .eq. 'mesh2d_face_nodes' .or. var_names(iv) .eq. 'mesh2d_edge_faces')) then
           write (*,'(a)') 'Warning: mapmerge: Skipping topology merging variable: `'//trim(var_names(iv))//'''. '
           cycle     

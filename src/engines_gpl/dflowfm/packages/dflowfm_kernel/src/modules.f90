@@ -1,6 +1,7 @@
 !----- AGPL --------------------------------------------------------------------
 !
-!  Copyright (C)  Stichting Deltares, 2017-2018.!
+!  Copyright (C)  Stichting Deltares, 2017.
+!
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).
 !
 !  Delft3D is free software: you can redistribute it and/or modify
@@ -419,7 +420,6 @@ module m_xbeach_data
    double precision, allocatable              :: rrthetaadvec(:,:) !< directional advection roller
    double precision, allocatable              :: rrhoradvec(:,:) !< horz advection roller
    double precision, allocatable              :: rr(:,:)         !< directional advection roller
-   double precision, allocatable              :: wsor(:,:)       !< wind source term
    double precision, allocatable              :: csx(:)
    double precision, allocatable              :: snx(:)
    double precision, allocatable              :: H(:)            !< hrms golfhoogte, onafh van instat
@@ -576,10 +576,55 @@ module m_xbeach_data
    double precision        :: Tbfac                      = -123    !  [-] (advanced) Calibration factor for bore interval Tbore: Tbore = Tbfac*Tbore
    !
    !
-   ![Section] Wind source numerics parameters
-   double precision        :: mwind                      = -123    !  [-] ideal distribution shape parameter wind source
-   integer                 :: jawsource                  = -123    !  [-] wind source term or not
+   ! [Section] Hydrodynamics for FI (frequency integrated) approach as opposed to FF (fixed frequency)
+   integer                 :: windmodel                  = -123    !   [-] Turns on (1) or off (0) the frequency integrated 2-equation approach
+   integer                 :: advecmod                   = -123    !   [-] advect moments m^E_{-1} an m^E_{0} (1) or moments m^E_{0} and m^E_{1}
+   double precision        :: Trepini                    = -123    !   [s] Initial fill value for Trep in entire domain
+   double precision        :: Eini                       = -123    !   [J/rad/m2] Initial fill value for ee1 in entire domain
+   !arrays                                                                 
+   double precision, allocatable              :: tt1(:,:)          !   [s] wave period per itheta-bin
+   double precision, allocatable              :: cwavt(:,:)        !   [m/s] phase speed  per itheta-bin
+   double precision, allocatable              :: cgwavt(:,:)       !   [m/s] wave group velocity per itheta-bin
+   double precision, allocatable              :: kwavt(:,:)        !   [rad/m] wavenumber k per itheta-bin
+   double precision, allocatable              :: nwavt(:,:)        !   [-] cg/c per itheta-bin
+   !double precision, allocatable             :: kmt(:,:)          !   [rad/m] wave number k with wci
+   double precision, allocatable              :: horadvec2(:,:)    !   [] horizontal advection 2nd moment
+   double precision, allocatable              :: thetaadvec2(:,:)  !   [] directional advection 2nd moment
 
+   double precision, allocatable              :: Ltempt(:,:)       !   [m] wave length temp per itheta-bin
+   double precision, allocatable              :: L1t(:,:)          !   [m] wave length end per itheta-bin
+   double precision, allocatable              :: L0t(:,:)          !   [m] wave length start per itheta-bin
+   
+   double precision, allocatable              :: ma(:,:)           !   [varying] pointer to moment a (depends on advecmod)
+   double precision, allocatable              :: mb(:,:)           !   [varying] pointer to moment b (depends on advecmod)
+ 
+   
+   ! [Section] Windmodel source numerics parameters
+   double precision        :: mwind                      = -123    !  [-] ideal distribution shape parameter wind source
+   double precision        :: ndissip                    = -123    !  [-] wave shape parameter in wavenumber spectrum (Booij (1999))
+   integer                 :: jawsource                  = -123    !  [-] switch wind source term or not
+   integer                 :: jagradcg                   = -123    !  [-] switch include grad(cg) in windsource term
+   double precision        :: coefdispT                  = -123    !  [-] taperfactor on wave period dissipation
+   double precision        :: coefdispk                  = -123    !  [-] shape factor on wave number limitation on wave period dissipation   
+   double precision        :: Eful                       = 0.0036d0!  [-] fully developed dimensionless wave energy (Pierson Moskowitz 1964)
+   double precision        :: Tful                       = 7.69d0  !  [-] fully developed dimensionless peak period (Pierson Moskowitz 1964)
+   double precision        :: aa1                        = 0.00288d0! [-] shape parameter wave growth curves (Kahma Calkoen (1992)) 
+   double precision        :: bb1                        = 0.45d0  !  [-] shape parameter wave growth curves (Kahma Calkoen (1992)) 
+   double precision        :: aa2                        = 0.459d0 !  [-] shape parameter wave growth curves (Kahma Calkoen (1992)) 
+   double precision        :: bb2                        = 0.27d0  !  [-] shape parameter wave growth curves (Kahma Calkoen (1992)) 
+   double precision        :: CE1                        = -123    !  [-] wind source term parameter (MSc thesis MvdL)
+   double precision        :: CE2                        = -123    !  [-] wind source term parameter (MSc thesis MvdL)
+   double precision        :: CT1                        = -123    !  [-] wind source term parameter (MSc thesis MvdL)
+   double precision        :: CT2                        = -123    !  [-] wind source term parameter (MSc thesis MvdL)
+   ! arrays
+   double precision, allocatable              :: wmagcc(:)           !  [m/s] wind speed magnitude cell centered
+   double precision, allocatable              :: windspreadfac(:,:)!  [-] distribution of inproducts thetabins per cell with wind direction
+   double precision, allocatable              :: SwE(:)            !  [-] nodal wind source term energy
+   double precision, allocatable              :: SwT(:)            !  [-] nodal wind source term period   
+   double precision, allocatable              :: wsorE(:,:)        !  [J/m2/s] wind source term for ee1
+   double precision, allocatable              :: wsorT(:,:)        !  [s/s] wind source term for tt1  
+   double precision, allocatable              :: egradcg(:,:)       !  [m/s/m] spatial gradient of cg
+   double precision, allocatable              :: ddT(:)             !  [s/s] dissipation of wave period
 end module m_xbeach_data
 
 module m_xbeach_avgoutput
@@ -3405,6 +3450,7 @@ end module m_vegetation
  double precision, allocatable     :: suu   (:)   !< stress u dir (m/s2)
  double precision, allocatable     :: cfuhi (:)   !< g/(hCC) u point (1/m)
  double precision, allocatable, target :: frcu(:) !< [TODO] friction coefficient set by initial fields {"location": "edge", "shape": ["lnx"]}
+ double precision, allocatable, target :: frcu_mor(:) !< friction coefficient in morphologically active region set by initial fields {"location": "edge", "shape": ["lnx"]}
  double precision, allocatable, target :: frcu_bkp(:) !< Backup of friction coefficient set by initial fields {"location": "edge", "shape": ["lnx"]}
  double precision, allocatable     :: cfclval(:)  !< array for calibration factor for friction coefficients
  double precision, allocatable     :: cftrt(:,:)  !< array for friction coefficients due to trachytopes
@@ -3856,6 +3902,7 @@ end module m_profiles
  double precision, allocatable, target :: dx    (:)      !< [m] link length (m) {"location": "edge", "shape": ["lnx"]}
  double precision, allocatable     :: dxi   (:)      !< inverse dx
  double precision, allocatable, target :: wu(:)      !< [m] link initial width (m), if < 0 pointer to convtab {"location": "edge", "shape": ["lnx"]}
+ double precision, allocatable, target :: wu_mor(:)  !< [m] morphologically active width (m), if < 0 pointer to convtab {"location": "edge", "shape": ["lnx"]}
  double precision, allocatable     :: wui   (:)      !< inverse link initial width (m), if < 0 pointer to convtab
  double precision, allocatable     :: prof1D (:,:)   !< dim = (3,lnx1D) 1= 1D prof width, 2=1D profile height, 3=proftyp, or: if 1,2< 0, pointers to prof 1,2, then 3=alfa1
  integer,          allocatable     :: jaduiktmp(:)  !< temparr

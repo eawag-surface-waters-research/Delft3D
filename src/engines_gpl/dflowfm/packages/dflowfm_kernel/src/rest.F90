@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2017.                                     
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -6368,124 +6368,7 @@ subroutine updateBalance()
    cumvolcur = 0d0
 end subroutine updateBalance
    
-subroutine find_flownodesorlinks_merge(n, x, y, n_loc, n_own, iloc_own, iloc_merge, janode, jaerror2sam)
-   use kdtree2Factory
-   use unstruc_messages
-   use m_flowgeom
-   use network_data
-   use m_missing, only: dmiss
-   use m_sferic, only: jsferic
-   use m_samples
-   
-   implicit none
-   type(kdtree_instance)                           :: treeinst
-   integer,                          intent(in)    :: n               !< number of flownodes in merged map file
-   double precision, dimension(n),   intent(in)    :: x, y            !< coordinates of flownode circumcenters or flowlink centers in merged map file
-   integer,                          intent(in)    :: n_loc           !< number of flownodes or flowlinks of the current subdomain (including ghosts)
-   integer,                          intent(in)    :: n_own           !< number of flownodes or flowlinks of the current subdomain (excluding ghosts)
-   integer,                          intent(in)    :: janode          !< if janode==1, find flow nodes, otherwise find flow links
-   integer, dimension(n_loc),        intent(inout) :: iloc_own        !< mapping to the actual index on the current subdomain 
-   integer, dimension(n_loc),        intent(inout) :: iloc_merge      !< mapping to the index in the merged map file
-   integer,                          intent(in)    :: jaerror2sam  !< add unfound nodes to samples (1) or not (0)
-   integer                                         :: ierror = 1
-   integer                                         :: k, nn, i, jj, kk
-   double precision                                :: R2search = 1d-8 !< Search radius
-   double precision                                :: t0, t1
-   character(len=128)                              :: mesg
-   double precision, allocatable                   :: x_tmp(:), y_tmp(:)
 
-   call klok(t0)
-   allocate(x_tmp(n_loc))
-   allocate(y_tmp(n_loc))
-   if(janode == 1) then
-      x_tmp = xzw
-      y_tmp = yzw
-   else if (janode == 2) then ! boundary waterlevel points
-      x_tmp = xz(ndxi+1:ndx)
-      y_tmp = yz(ndxi+1:ndx)
-   else
-      x_tmp = xu
-      y_tmp = yu
-   endif
-   
-   !build kdtree
-   call build_kdtree(treeinst, n, x, y, ierror, jsferic, dmiss)
-   if ( ierror.ne.0 ) then
-      goto 1234
-   end if
-   
-   call mess(LEVEL_INFO, 'Restart parallel run: Finding flow nodes/ flow links...')
-   
-!  clear samples
-   do k = 1, n_own
-        !  fill query vector
-        kk = iloc_own(k)
-        call make_queryvector_kdtree(treeinst, x_tmp(kk), y_tmp(kk), jsferic)
-        !  count number of points in search area
-        NN = kdtree2_r_count(treeinst%tree, treeinst%qv, R2search)
-        if ( NN.eq.0 ) then
-!           call mess(LEVEL_INFO, 'No flownode/flowlink is found')
-           
-           if ( jaerror2sam.eq.1 ) then
-   !          add to samples
-              call mess(LEVEL_INFO, 'copying unfound flownodes/links to samples')
-              call INCREASESAM(NS+1)
-              NS=NS+1
-              xs(Ns) = x_tmp(kk)
-              ys(NS) = y_tmp(kk)
-              zs(NS) = dble(NN)
-           end if
-           
-           cycle ! no points found
-        else
-           !  reallocate if necessary
-            call realloc_results_kdtree(treeinst, NN)
-            
-           !  find nearest NN samples
-            if (NN > 1) then ! If we found more candidates within small search radius, then we should consider falling back to inside-polygon check of cell contour
-!               if (janode == 1) then
-!                  write (msgbuf, '(a,i0,a,i0,a)') 'Multiple flow nodes in merged restart file can be matched with current model''s node #', kk, '. Nr of candidates: ', NN, '. Picking last.'
-!               else
-!                  write (msgbuf, '(a,i0,a,i0,a)') 'Multiple flow links in merged restart file can be matched with current model''s link #', kk, '. Nr of candidates: ', NN, '. Picking last.'
-!               end if
-!               call err_flush()
-!               ! TODO: AvD: return error code from this routine
-               
-               
-              if ( jaerror2sam.eq.1 ) then
-      !          add to samples
-!                 call mess(LEVEL_INFO, 'copying double or more found flownodes/links to samples')
-                 call INCREASESAM(NS+1)
-                 NS=NS+1
-                 xs(Ns) = x_tmp(kk)
-                 ys(NS) = y_tmp(kk)
-                 zs(NS) = dble(NN)
-              end if
-           
-            end if
-
-            call kdtree2_n_nearest(treeinst%tree, treeinst%qv, NN, treeinst%results)
-            do i=1,NN
-               jj = treeinst%results(i)%idx
-               iloc_merge(k) = jj 
-            end do
-        endif
-   end do
-
-   call klok(t1)
-
-   write(mesg, "('done in ', F12.5, ' sec.')") t1-t0
-   call mess(LEVEL_INFO, trim(mesg))
-   ierror = 0
-1234 continue
-
-!    deallocate  
-   if ( treeinst%itreestat.ne.ITREE_EMPTY ) then 
-      call delete_kdtree2(treeinst)
-   endif
-
-   return  
-   end subroutine find_flownodesorlinks_merge
 subroutine generatePartitionMDUFile(filename, filename_new)
    use unstruc_model
    use unstruc_messages
