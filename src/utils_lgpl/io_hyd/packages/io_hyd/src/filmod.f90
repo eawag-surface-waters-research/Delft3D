@@ -110,6 +110,17 @@
 
       end subroutine dlwqfile_open
 
+      subroutine dlwqfile_close(dlwqfile)
+
+      type(t_dlwqfile)                       :: dlwqfile               ! the file to be closed
+
+      if ( dlwqfile%status .ne. 0 ) then
+         close(dlwqfile%unit_nr)
+         dlwqfile%status = 0
+      endif
+
+      end subroutine dlwqfile_close
+
       function dlwq_platform() result(platform)
          integer                                :: platform               ! result platform type
          platform = PL_DOS

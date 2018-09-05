@@ -377,6 +377,275 @@
 
       end function dlwqdataRead
 
+      function dlwqdataEvaluate(dlwqdata,GridPs,itime,ndim1,ndim2,conc) result ( ierror )
+!
+         use dlwqgrid_mod
+         use timers
+!
+         type(t_dlwqdata)     , intent(in)       :: dlwqdata             ! data block to be used
+         type(GridPointerColl), intent(in)       :: GridPs               ! collection off all grid definitions
+         integer              , intent(in)       :: itime                ! system timer
+         integer              , intent(in)       :: ndim1                ! number of substances
+         integer              , intent(in)       :: ndim2                ! number of segments
+         real                 , intent(inout)    :: conc(ndim1,ndim2)    ! concentrations to be set
+         integer                                 :: ierror               !
+
+!        local
+
+         real                                    :: aa                   ! value at first breakpoint and final value
+         real                                    :: ab                   ! value at second breakpoint
+         real                                    :: factor               ! overall scale factor
+         real                                    :: loc_factor           ! location scale factor
+         real                                    :: param_factor         ! parameter scale factor
+         integer                                 :: notot                ! number of parameters in output array
+         integer                                 :: noseg                ! number of segments in output array
+         integer                                 :: iloc                 ! index locations
+         integer                                 :: ipar                 ! index parameters
+         integer                                 :: ibrk                 ! index breakpoints
+         integer                                 :: iseg, iseg2          ! index segments
+         integer                                 :: isys                 ! index substances
+         integer                                 :: itim1                ! first time
+         integer                                 :: itim2                ! second time
+         integer                                 :: itimf                ! time offset
+         integer                                 :: idt                  ! step between times
+         integer                                 :: it1c                 ! first time copy
+         integer                                 :: it2c                 ! second time copy
+         integer                                 :: idtc                 ! step copy
+         integer                                 :: i                    ! loop counter
+         real                                    :: amiss                ! missing value
+         real, allocatable                       :: tmp_conc(:,:)        ! store result on different grid in temp array
+         logical, allocatable                    :: iseg_set(:)          ! indicates if segment is set in temporary array
+         integer(4) ithandl /0/
+         if ( timon ) call timstrt ( "dlwqdataevaluate", ithandl )
+
+         ierror  = 0
+         amiss   = -999.0
+
+         if ( dlwqdata%subject .eq. SUBJECT_SEGFUNC ) then
+            notot = ndim2
+            noseg = ndim1
+         else
+            notot = ndim1
+            noseg = ndim2
+         endif
+
+         ! Get the right time in the block
+
+         if ( dlwqdata%no_brk .gt. 1 ) then
+            itim1 = dlwqdata%times(1)
+            itim2 = dlwqdata%times(dlwqdata%no_brk)
+            idt   = itim2 - itim1
+            if ( itime .lt. itim1 ) then
+               ibrk = 1
+               itim1 = 0
+               itim2 = 1
+               idt   = itim1+itim2
+            else
+               itimf = itime
+               if ( itime .ge. itim2 ) itimf = itime - ( (itime-itim2)/idt + 1 ) * idt
+
+               ! make interpolation constants if iopt = 2
+
+               do i = 2 , dlwqdata%no_brk
+                  if ( dlwqdata%times(i) .gt. itimf ) then
+                     if ( dlwqdata%functype .eq. FUNCTYPE_LINEAR ) then
+                        itim1 = itimf   - dlwqdata%times(i-1)
+                        itim2 = dlwqdata%times(i) - itimf
+                     else
+                        itim1 = 0
+                        itim2 = 1
+                     endif
+                     idt   = itim1+itim2
+                     ibrk  = i-1
+
+                     exit
+
+                  endif
+               enddo
+            endif
+         else
+            ibrk  = 1
+            itim2 = 1
+            itim1 = 0
+            idt   = 1
+         endif
+
+         ! to-do find out if isys or iseg can become zero and the data must not be used, in that case exit the relevant loop
+
+         if ( dlwqdata%scaled ) then
+            factor = dlwqdata%scale_factor
+         else
+            factor = 1.0
+         endif
+
+         if ( dlwqdata%loc_defaults ) then ! default, also in case of igrid .ne. 1 ?
+            iloc = 1
+            if ( dlwqdata%loc_scaled ) then
+               loc_factor = dlwqdata%factor_loc(iloc)*factor
+            else
+               loc_factor = factor
+            endif
+            do ipar = 1 , dlwqdata%no_param
+
+               if ( dlwqdata%param_pointered ) then
+                  isys = dlwqdata%param_pointers(ipar)
+                  if ( isys .le. 0 ) cycle
+               else
+                  isys = ipar
+               endif
+
+               if ( dlwqdata%param_scaled ) then
+                  param_factor = dlwqdata%factor_param(ipar)*factor
+               else
+                  param_factor = 1.0
+               endif
+
+               if ( dlwqdata%iorder .eq. ORDER_PARAM_LOC ) then
+                  aa = dlwqdata%values(ipar,iloc,ibrk)
+               else
+                  aa = dlwqdata%values(iloc,ipar,ibrk)
+               endif
+               if ( ibrk .lt. dlwqdata%no_brk ) then ! dlwqdata%nobrk can be 0 so use .lt. instead of .eq.
+                  if ( dlwqdata%iorder .eq. ORDER_PARAM_LOC ) then
+                     ab = dlwqdata%values(ipar,iloc,ibrk+1)
+                  else
+                     ab = dlwqdata%values(iloc,ipar,ibrk+1)
+                  endif
+               else
+                  ab = 0.0
+               endif
+
+               ! Dealing with missing values
+
+               it1c = itim1
+               it2c = itim2
+               idtc = idt
+               if ( aa .eq. amiss .or. ab .eq. amiss ) then
+                     call dlwqdataGetValueMiss ( dlwqdata, ipar, iloc, ibrk , amiss, &
+                                                 itimf   , it1c, it2c, idtc , aa   , &
+                                                 ab      )
+               endif
+
+               ! Make the wanted value
+
+               aa = ( it2c*aa + it1c*ab ) / idtc
+               aa = aa*param_factor*loc_factor
+
+               if ( dlwqdata%subject .eq. SUBJECT_SEGFUNC ) then
+                  conc(:,isys) = aa
+               else
+                  conc(isys,:) = aa
+               endif
+
+            enddo
+
+         else
+            if ( dlwqdata%igrid .ne. 1 ) then
+               allocate(tmp_conc(dlwqdata%no_param,dlwqdata%no_loc),iseg_set(dlwqdata%no_loc))
+               iseg_set = .false.
+            endif
+            do iloc = 1 , dlwqdata%no_loc
+
+               if ( dlwqdata%loc_scaled ) then
+                  loc_factor = dlwqdata%factor_loc(iloc)*factor
+               else
+                  loc_factor = factor
+               endif
+
+               if ( dlwqdata%loc_pointered ) then
+                  iseg = dlwqdata%loc_pointers(iloc)
+                  if ( iseg .le. 0 ) cycle
+               else
+                  iseg = iloc
+               endif
+
+               do ipar = 1 , dlwqdata%no_param
+
+                  if ( dlwqdata%param_pointered ) then
+                     isys = dlwqdata%param_pointers(ipar)
+                     if ( isys .le. 0 ) cycle
+                  else
+                     isys = ipar
+                  endif
+
+                  if ( dlwqdata%param_scaled ) then
+                     param_factor = dlwqdata%factor_param(ipar)*factor
+                  else
+                     param_factor = 1.0
+                  endif
+
+                  if ( dlwqdata%iorder .eq. ORDER_PARAM_LOC ) then
+                     aa = dlwqdata%values(ipar,iloc,ibrk)
+                  else
+                     aa = dlwqdata%values(iloc,ipar,ibrk)
+                  endif
+                  if ( ibrk .lt. dlwqdata%no_brk ) then ! dlwqdata%nobrk can be 0 so use .lt. instead of .eq.
+                     if ( dlwqdata%iorder .eq. ORDER_PARAM_LOC ) then
+                        ab = dlwqdata%values(ipar,iloc,ibrk+1)
+                     else
+                        ab = dlwqdata%values(iloc,ipar,ibrk+1)
+                     endif
+                  else
+                     ab = 0.0
+                  endif
+
+                  ! Dealing with missing values
+
+                  it1c = itim1
+                  it2c = itim2
+                  idtc = idt
+                  if ( aa .eq. amiss .or. ab .eq. amiss ) then
+                        call dlwqdataGetValueMiss ( dlwqdata, ipar, iloc, ibrk , amiss, &
+                                                    itimf   , it1c, it2c, idtc , aa   , &
+                                                    ab      )
+                  endif
+
+                  ! Make the wanted value
+
+                  aa = ( it2c*aa + it1c*ab ) / idtc
+                  aa = aa*param_factor*loc_factor
+
+                  if ( dlwqdata%igrid .eq. 1 ) then
+                     if ( dlwqdata%subject .eq. SUBJECT_SEGFUNC ) then
+                        conc(iseg,isys) = aa
+                     else
+                        conc(isys,iseg) = aa
+                     endif
+                  else
+                     iseg_set(iseg) = .true.
+                     tmp_conc(ipar,iseg) = aa
+                  endif
+
+               enddo
+            enddo
+            if ( dlwqdata%igrid .ne. 1 ) then
+               do iseg2 = 1 , noseg
+                  iseg = GridPs%Pointers(dlwqdata%igrid)%finalpointer(iseg2)
+                  if ( iseg .gt. 0 ) then
+                     if ( iseg_set(iseg) ) then
+                        do ipar = 1 , dlwqdata%no_param
+                           if ( dlwqdata%param_pointered ) then
+                              isys = dlwqdata%param_pointers(ipar)
+                              if ( isys .le. 0 ) cycle
+                           else
+                              isys = ipar
+                           endif
+                           if ( dlwqdata%subject .eq. SUBJECT_SEGFUNC ) then
+                              conc(iseg2,isys) = tmp_conc(ipar,iseg)
+                           else
+                              conc(isys,iseg2) = tmp_conc(ipar,iseg)
+                           endif
+                        enddo
+                     endif
+                  endif
+               enddo
+               deallocate(tmp_conc,iseg_set)
+            endif
+         endif
+
+         if ( timon ) call timstop ( ithandl )
+      end function dlwqdataEvaluate
+
       function dlwq_find_name( dlwq_namelist, name ) result ( iret )
 
 !        function to find a grid name in a collection of GridPointers
