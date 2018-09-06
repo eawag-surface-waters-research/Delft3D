@@ -103,6 +103,7 @@
    character(len=maxnamelen) :: restartfile     !< storing the name of the restart files
    character(len=maxnamelen) :: md_mapfile_base !< storing the user-defined map file
    character(len=maxnamelen) :: md_flowgeomfile_base !< storing the user-defined flowgeom file
+   character(len=maxnamelen) :: md_classmapfile_base !< storing the user-defined class map file
     
    integer, external         :: iget_jaopengl
    integer, external         :: read_commandline
@@ -249,11 +250,13 @@
                 restartfile = md_restartfile
                 Lrst = index(restartfile, '_rst.nc')
                 Lmap = index(restartfile, '_map.nc')
-            endif   
+            endif
           endif
-          
+
           md_mapfile_base = md_mapfile
           md_flowgeomfile_base = md_flowgeomfile
+          md_classmapfile_base = md_class_map_file
+
           do i = 0,  Ndomains - 1
              write(sdmn_loc, '(I4.4)') i
              md_netfile = trim(md_netfile(1:L)//'_'//sdmn_loc//'_net.nc')
@@ -278,8 +281,11 @@
              if (len_trim(md_flowgeomfile_base)>0) then
                 md_flowgeomfile = md_flowgeomfile_base(1:index(md_flowgeomfile_base,'.nc',back=.true.)-1)//'_'//sdmn_loc//".nc"
              endif
+             if (len_trim(md_classmapfile_base)>0) then
+                md_class_map_file = md_classmapfile_base(1:index(md_classmapfile_base,'.nc',back=.true.)-1)//'_'//sdmn_loc//".nc"
+             endif
              call generatePartitionMDUFile(trim(md_ident)//'.mdu', trim(md_mdu)//'_'//sdmn_loc//'.mdu')
-          enddo   
+          enddo
        else
           call partition_from_commandline(md_netfile,md_ndomains,md_jacontiguous,md_icgsolver, md_pmethod, md_dryptsfile, md_genpolygon)
        end if

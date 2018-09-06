@@ -29,16 +29,16 @@
 
 ! $Id$
 ! $HeadURL$
-module unstruc_netcdf_incremental
+module unstruc_netcdf_map_class
 use precision, only : hp
 use precision_basics, only : comparereal
 use m_flow, only : s1, hs
-use m_flowtimes, only : incr_classes_wl, incr_classes_wd, ti_incre, refdat
+use m_flowtimes, only : map_classes_wl, map_classes_wd, ti_classmape, refdat
 use m_flowgeom, only : ndx, ndxi
 use m_cell_geometry, only : ndx2d
-use unstruc_model, only : md_incrfile
+use unstruc_model, only : md_class_map_file
 use unstruc_netcdf, only : check_error, t_unc_mapids, unc_create, ug_meta_fm, unc_def_var_nonspatial, &
-       UNC_LOC_S, unc_def_var_map, unc_write_flowgeom_filepointer_ugrid, unc_put_var_map_byte
+       UNC_LOC_S, unc_def_var_map, unc_write_flowgeom_filepointer_ugrid, unc_put_var_map_byte, unc_put_var_map_byte_timebuffer
 use io_ugrid, only : ug_addglobalatts
 use netcdf
 use MessageHandling, only : mess, LEVEL_ERROR, LEVEL_INFO, LEVEL_FATAL
@@ -48,7 +48,7 @@ implicit none
 
 private
 
-public :: write_incrementals_ugrid
+public :: write_map_classes_ugrid
 type(t_unc_mapids), public :: m_incids
 
 integer, parameter :: int8 = 1     ! also local storage compact in 1 byte
@@ -57,11 +57,12 @@ integer, parameter :: type_very_compact       = 1  ! store -1, 0, -1 for whole g
 integer, parameter :: type_new_class          = 2  ! store new class for whole grid
 integer, parameter :: output_type             = type_new_class
 
-integer, parameter :: incremental_deflate = 5
-integer, parameter :: incremental_chunksize_ndx = 2000
-integer, parameter :: incremental_chunksize_time = 10
+integer, parameter :: mapclass_time_buffer_size =   10
+integer, parameter :: mapclass_deflate          =    5
+integer, parameter :: mapclass_chunksize_ndx    = 2000
+integer, parameter :: mapclass_chunksize_time   =  100
 
-integer :: id_nodeId = -1, id_incr_s1 = -1, id_incr_hs = -1
+integer :: id_nodeId = -1
 integer :: id_jumps_s1, id_jumps_hs
 integer :: id_class_dim_s1, id_class_dim_hs
 integer :: time_index = 0
@@ -77,23 +78,25 @@ character(len=*), parameter :: nc_file_type = 'NetCDF-3 (64bit)'
 integer(kind=int8), pointer, save :: previous_s1(:) => null()
 integer(kind=int8), pointer, save :: previous_hs(:) => null()
 integer(kind=int8), pointer :: current_s1(:), current_hs(:)
+integer(kind=int8), allocatable :: buffer_s1(:,:), buffer_hs(:,:)
 
 contains
 
-subroutine write_incrementals_ugrid(incids, tim)
+subroutine write_map_classes_ugrid(incids, tim)
    type(t_unc_mapids), intent(inout) :: incids   !< class file and other NetCDF ids.
    real(kind=hp), intent(in) :: tim
 
    integer :: ierr, ndim
    integer, parameter :: jabndnd_ = 0 !< Whether to include boundary nodes (1) or not (0). Default: no.
-   integer :: id_class_s1, id_class_hs
+   integer :: id_class_s1, id_class_hs, tl, var_ids(4)
    character(len=:), allocatable :: errmsg, tmpstr
+   logical :: isLast, need_flush
 
    ierr = nf90_noerr
 
    if (incids%ncid == 0) then
       ! opening NetCDF file:
-      ierr = unc_create(md_incrfile, open_mode, incids%ncid)
+      ierr = unc_create(md_class_map_file, open_mode, incids%ncid)
       call mess(LEVEL_INFO, 'opening incremental file as ' // nc_file_type // ' file.')
    endif
 
@@ -110,11 +113,11 @@ subroutine write_incrementals_ugrid(incids, tim)
       !
       ! define dimensions:
       ierr = nf90_def_dim(incids%ncid, 'time', nf90_unlimited, incids%id_timedim)
-      if (size(incr_classes_wl) > 0 .and. ierr == nf90_noerr) then
-         ierr = nf90_def_dim(incids%ncid, 'class_s1', size(incr_classes_wl), id_class_dim_s1)
+      if (size(map_classes_wl) > 0 .and. ierr == nf90_noerr) then
+         ierr = nf90_def_dim(incids%ncid, 'class_s1', size(map_classes_wl), id_class_dim_s1)
       endif
-      if (size(incr_classes_wd) > 0 .and. ierr == nf90_noerr) then
-         ierr = nf90_def_dim(incids%ncid, 'class_hs', size(incr_classes_wd), id_class_dim_hs)
+      if (size(map_classes_wd) > 0 .and. ierr == nf90_noerr) then
+         ierr = nf90_def_dim(incids%ncid, 'class_hs', size(map_classes_wd), id_class_dim_hs)
       endif
       call check_error(ierr, 'definition phase dimensions of incrementals')
 
@@ -122,10 +125,10 @@ subroutine write_incrementals_ugrid(incids, tim)
       tmpstr = 'seconds since '//refdat(1:4)//'-'//refdat(5:6)//'-'//refdat(7:8)//' 00:00:00'
       ierr = unc_def_var_nonspatial(incids%ncid, incids%id_time, nf90_double, [incids%id_timedim], 'time', 'time', ' ', tmpstr)
 
-      if (size(incr_classes_wl) > 0 .and. ierr == nf90_noerr) then
+      if (size(map_classes_wl) > 0 .and. ierr == nf90_noerr) then
          ierr = def_var_incremental_ugrid('s1', incids%ncid, id_class_s1, id_jumps_s1, incids)
       endif
-      if (size(incr_classes_wd) > 0 .and. ierr == nf90_noerr) then
+      if (size(map_classes_wd) > 0 .and. ierr == nf90_noerr) then
          ierr = def_var_incremental_ugrid('hs', incids%ncid, id_class_hs, id_jumps_hs, incids)
       endif
       if (ierr == nf90_noerr) ierr = nf90_enddef(incids%ncid)
@@ -135,51 +138,87 @@ subroutine write_incrementals_ugrid(incids, tim)
       time_index = time_index + 1
    endif
 
-   if (size(incr_classes_wl) > 0) then
+   if (size(map_classes_wl) > 0) then
       allocate(current_s1(ndx))
-      call put_in_classes(incr_classes_wl, s1, current_s1)
+      call put_in_classes(map_classes_wl, s1, current_s1)
    endif
-   if (size(incr_classes_wd) > 0) then
+   if (size(map_classes_wd) > 0) then
       allocate(current_hs(ndx))
-      call put_in_classes(incr_classes_wd, hs, current_hs)
+      call put_in_classes(map_classes_wd, hs, current_hs)
    endif
 
    if (ndim == 0) then
-      if (size(incr_classes_wl) > 0) then
-         if (ierr == nf90_noerr) ierr = nf90_put_var(incids%ncid, id_class_s1, incr_classes_wl)
-         if (ierr == nf90_noerr) ierr = write_initial_classes(incids, current_s1, 's1', id_jumps_s1)
+      if (mapclass_time_buffer_size > 1) then
+         if (size(map_classes_wl) > 0) then
+            if (allocated(buffer_s1)) deallocate(buffer_s1)
+            allocate(buffer_s1(ndx, mapclass_time_buffer_size))
+         endif
+         if (size(map_classes_wd) > 0) then
+            if (allocated(buffer_hs)) deallocate(buffer_hs)
+            allocate(buffer_hs(ndx, mapclass_time_buffer_size))
+         endif
+      endif
+
+      if (size(map_classes_wl) > 0) then
+         if (ierr == nf90_noerr) ierr = nf90_put_var(incids%ncid, id_class_s1, map_classes_wl)
+         if (ierr == nf90_noerr) ierr = write_initial_classes(incids, current_s1, buffer_s1, 's1', id_jumps_s1)
          previous_s1 => current_s1
       endif
-      if (size(incr_classes_wd) > 0) then
-         if (ierr == nf90_noerr) ierr = nf90_put_var(incids%ncid, id_class_hs, incr_classes_wd)
-         if (ierr == nf90_noerr) ierr = write_initial_classes(incids, current_hs, 'hs', id_jumps_hs)
+      if (size(map_classes_wd) > 0) then
+         if (ierr == nf90_noerr) ierr = nf90_put_var(incids%ncid, id_class_hs, map_classes_wd)
+         if (ierr == nf90_noerr) ierr = write_initial_classes(incids, current_hs, buffer_hs, 'hs', id_jumps_hs)
          previous_hs => current_hs
       endif
    else
-      if (size(incr_classes_wl) > 0) then
-         if (ierr == nf90_noerr) ierr = write_changed_classes_update_previous(incids, previous_s1, current_s1, 's1', id_jumps_s1)
+      if (size(map_classes_wl) > 0) then
+         if (ierr == nf90_noerr) ierr = write_changed_classes_update_previous(incids, previous_s1, current_s1, buffer_s1, 's1', id_jumps_s1)
       endif
-      if (size(incr_classes_wd) > 0) then
-         if (ierr == nf90_noerr) ierr = write_changed_classes_update_previous(incids, previous_hs, current_hs, 'hs', id_jumps_hs)
+      if (size(map_classes_wd) > 0) then
+         if (ierr == nf90_noerr) ierr = write_changed_classes_update_previous(incids, previous_hs, current_hs, buffer_hs, 'hs', id_jumps_hs)
       endif
    endif
    if (ierr == nf90_noerr) ierr = nf90_put_var(incids%ncid, incids%id_time, tim, start=[time_index])
    call check_error(ierr, 'actual writing of incrementals')
 
-   if (comparereal(tim, ti_incre, eps10) /= -1) then
+   isLast = comparereal(tim, ti_classmape, eps10) /= -1
+
+   ! check if buffer must be written:
+   need_flush = .false.
+   if (mapclass_time_buffer_size > 1) then
+      tl = mod(time_index-1, mapclass_time_buffer_size)+1
+      if (isLast .or. tl == mapclass_time_buffer_size) then
+         if (size(map_classes_wl) > 0 .and. ierr == nf90_noerr) then
+            var_ids = get_varids('s1', incids)
+            ierr = unc_put_var_map_byte_timebuffer(incids, var_ids, UNC_LOC_S, buffer_s1, 1, tl)
+         endif
+         if (size(map_classes_wd) > 0 .and. ierr == nf90_noerr) then
+            var_ids = get_varids('hs', incids)
+            ierr = unc_put_var_map_byte_timebuffer(incids, var_ids, UNC_LOC_S, buffer_hs, 1, tl)
+         endif
+         need_flush = .true.
+      endif
+   else
+      need_flush = .true.
+   endif
+
+   if (isLast) then
       if (ierr == nf90_noerr) ierr = nf90_close(incids%ncid)
       if (associated(previous_s1)) deallocate(previous_s1)
       if (associated(previous_hs)) deallocate(previous_hs)
+      if (allocated(buffer_s1)) deallocate(buffer_s1)
+      if (allocated(buffer_hs)) deallocate(buffer_hs)
    else
-      if (ierr == nf90_noerr) ierr = nf90_sync(incids%ncid)  ! flush output to file
+      if (ierr == nf90_noerr .and. need_flush) then
+         ierr = nf90_sync(incids%ncid)  ! flush output to file
+      endif
    endif
 
    if (ierr /= nf90_noerr) then
-      errmsg = 'error writing to incremental output file'
+      errmsg = 'error writing to class map output file'
       call check_error(ierr, errmsg)
       call mess(LEVEL_ERROR, errmsg)
    endif
-end subroutine write_incrementals_ugrid
+end subroutine write_map_classes_ugrid
 
 function def_var_incremental_ugrid(name, ncid, var_id_class_bnds, var_id_jumps, incids) result(ierr)
    type(t_unc_mapids), intent(inout) :: incids   !< class file and other NetCDF ids.
@@ -208,13 +247,13 @@ function def_var_incremental_ugrid(name, ncid, var_id_class_bnds, var_id_jumps, 
    ndims(2) = ndx2d
    do i = 1, 2
       if (ndims(i) > 0) then
-         actual_chunksize = min(incremental_chunksize_ndx, ndims(i))
-         if (ierr == nf90_noerr) ierr = nf90_def_var_deflate(ncid, ids(i), 0, 1, incremental_deflate)
-         if (ierr == nf90_noerr) ierr = nf90_def_var_chunking(ncid, ids(i), NF90_CHUNKED, [actual_chunksize, incremental_chunksize_time])
+         actual_chunksize = min(mapclass_chunksize_ndx, ndims(i))
+         if (ierr == nf90_noerr) ierr = nf90_def_var_deflate(ncid, ids(i), 0, 1, mapclass_deflate)
+         if (ierr == nf90_noerr) ierr = nf90_def_var_chunking(ncid, ids(i), NF90_CHUNKED, [actual_chunksize, mapclass_chunksize_time])
       endif
    enddo
    if (ierr == nf90_noerr) then
-      call mess(LEVEL_INFO, 'successfully defined incremental_' // name // ' with deflate_level and chunksizes =', incremental_deflate, actual_chunksize, incremental_chunksize_time)
+      call mess(LEVEL_INFO, 'successfully defined incremental_' // name // ' with deflate_level and chunksizes =', mapclass_deflate, actual_chunksize, mapclass_chunksize_time)
    endif
 #endif
    if (output_type == type_very_compact) then
@@ -241,32 +280,40 @@ subroutine put_in_classes(incr_classes, full_field, classes)
    enddo
 end subroutine put_in_classes
 
-function write_initial_classes(incids, classes, field, varid_jumps) result(ierr)
+function write_initial_classes(incids, classes, buffer, field, varid_jumps) result(ierr)
    integer, intent(in) :: varid_jumps
    integer(kind=int8), intent(in) :: classes(:)
+   integer(kind=int8), intent(inout) :: buffer(:,:)
    character(len=*), intent(in) :: field
    type(t_unc_mapids), intent(inout) :: incids
    integer :: ierr
 
    integer :: var_ids(4)
 
+   ierr = nf90_noerr
+
    incids%idx_curtime = 1
-   var_ids = get_varids(field, incids)
-   ierr = unc_put_var_map_byte(incids, var_ids, UNC_LOC_S, classes)
+   if (mapclass_time_buffer_size > 1) then
+      buffer(:,1) = classes
+   else
+      var_ids = get_varids(field, incids)
+      ierr = unc_put_var_map_byte(incids, var_ids, UNC_LOC_S, classes)
+   endif
 
    if (ierr == 0 .and. output_type == type_very_compact) then
       ierr = nf90_put_var(incids%ncid, varid_jumps, [0], [time_index])
    endif
 end function write_initial_classes
 
-function write_changed_classes_update_previous(incids, previous, current, field, varid_jumps) result(ierr)
+function write_changed_classes_update_previous(incids, previous, current, buffer, field, varid_jumps) result(ierr)
    integer, intent(in) :: varid_jumps
    integer(kind=int8), pointer, intent(inout) :: previous(:), current(:)
+   integer(kind=int8), intent(inout) :: buffer(:,:)
    character(len=*), intent(in) :: field
    type(t_unc_mapids), intent(inout) :: incids
    integer :: ierr
 
-   integer :: i, cnt, dim, var_ids(4)
+   integer :: i, cnt, dim, var_ids(4), ti
    integer(kind=int8), allocatable :: diff(:)
 
    dim = size(previous)
@@ -285,13 +332,22 @@ function write_changed_classes_update_previous(incids, previous, current, field,
    endif
 
    var_ids = get_varids(field, incids)
+   ti = mod(time_index-1, mapclass_time_buffer_size)+1
 
    incids%idx_curtime = time_index
    if (output_type == type_very_compact) then
-      ierr = unc_put_var_map_byte(incids, var_ids, UNC_LOC_S, diff)
+      if (mapclass_time_buffer_size > 1) then
+         buffer(:,ti) = diff
+      else
+         ierr = unc_put_var_map_byte(incids, var_ids, UNC_LOC_S, diff)
+      endif
       if (ierr == 0) ierr = nf90_put_var(incids%ncid, varid_jumps, [cnt], [time_index])
-   else
-      ierr = unc_put_var_map_byte(incids, var_ids, UNC_LOC_S, current)
+   else 
+      if (mapclass_time_buffer_size > 1) then
+         buffer(:,ti) = current
+      else
+         ierr = unc_put_var_map_byte(incids, var_ids, UNC_LOC_S, current)
+      endif
    endif
 
    if (output_type == type_very_compact) then
@@ -323,4 +379,4 @@ function get_varids(name, incids) result(var_ids)
    endif
 end function get_varids
 
-end module unstruc_netcdf_incremental
+end module unstruc_netcdf_map_class

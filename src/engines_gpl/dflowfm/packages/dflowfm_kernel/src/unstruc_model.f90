@@ -145,7 +145,7 @@ implicit none
     character(len=256) :: md_cllfile     = ' ' !< File containing distribution of calibration definitions area percentage
 
 ! incremental output
-    character(len=256) :: md_incrfile    = ' ' !< File for output of incremental (classes) output
+    character(len=256) :: md_class_map_file = ' ' !< File for output of classes output
 
     character(len=200) :: md_snapshotdir   = ' ' !< Directory where hardcopy snapshots should be saved.
                                                  !! Created if non-existent.
@@ -263,7 +263,7 @@ use unstruc_netcdf, only: UNC_CONV_UGRID
     md_trtdfile     = ' '
     md_trtlfile     = ' '
     md_mptfile = ' '
-    md_incrfile = ' '
+    md_class_map_file = ' '
 
     md_snapshotdir   = ' '
 
@@ -588,7 +588,7 @@ subroutine readMDUFile(filename, istat)
     integer :: ibuf, ifil, mptfile, warn
     integer :: i, n, j, je, iostat, readerr, ierror
     real(kind=hp) :: hkad
-    real(kind=hp) :: ti_rst_array(3), ti_map_array(3), ti_his_array(3), acc, ti_wav_array(3), ti_waq_array(3), ti_incr_array(3)
+    real(kind=hp) :: ti_rst_array(3), ti_map_array(3), ti_his_array(3), acc, ti_wav_array(3), ti_waq_array(3), ti_classmap_array(3)
     real(kind=sp) :: rtmp
     character(len=200), dimension(:), allocatable       :: fnames
 
@@ -794,11 +794,11 @@ subroutine readMDUFile(filename, istat)
        iadvec = 33 ; iadvec1D = 33
     endif
     call prop_get_integer(md_ptr, 'numerics', 'TimeStepType'    , itstep)
-    
+
     maxNonlinearIterations = 40
     call prop_get_integer(md_ptr, 'numerics', 'maxNonlinearIterations'    , maxNonlinearIterations)
     maxNonlinearIterationsIncrement = maxNonlinearIterations
-    
+
     call prop_get_integer(md_ptr, 'numerics', 'Icoriolistype'   , icorio)
     call prop_get_integer(md_ptr, 'numerics', 'Limtyphu'        , limtyphu)
     call prop_get_integer(md_ptr, 'numerics', 'Limtypmom'       , limtypmom)
@@ -1476,21 +1476,21 @@ subroutine readMDUFile(filename, istat)
 
     ! Incremental output
     charbuf = ' '
-    ti_incr_array = 0d0
-    call prop_get_string(md_ptr, 'output', 'IncrementalFile', charbuf, success)
+    ti_classmap_array = 0d0
+    call prop_get_string(md_ptr, 'output', 'ClassMapFile', charbuf, success)
     if (success) then
-        md_incrfile = charbuf
+        md_class_map_file = charbuf
 
-        call readClasses('WaterlevelClasses', incr_classes_wl)
-        call readClasses('WaterdepthClasses', incr_classes_wd)
+        call readClasses('WaterlevelClasses', map_classes_wl)
+        call readClasses('WaterdepthClasses', map_classes_wd)
 
-        if (size(incr_classes_wd) == 0 .and. size(incr_classes_wl) == 0) then
-            call mess(LEVEL_ERROR, 'IncrementalFile given, but no WaterlevelClasses or WaterdepthClasses defined.')
+        if (size(map_classes_wd) == 0 .and. size(map_classes_wl) == 0) then
+            call mess(LEVEL_ERROR, 'ClassMapFile given, but no WaterlevelClasses or WaterdepthClasses defined.')
         endif
 
-        call prop_get_doubles(md_ptr, 'output', 'IncrInterval', ti_incr_array, 3, success)
-        if (ti_incr_array(1) /= 0d0) ti_incr_array(1) = max(ti_incr_array(1) , dt_user)
-        call getOutputTimeArrays(ti_incr_array, ti_incrs, ti_incr, ti_incre, success)
+        call prop_get_doubles(md_ptr, 'output', 'ClassMapInterval', ti_classmap_array, 3, success)
+        if (ti_classmap_array(1) /= 0d0) ti_classmap_array(1) = max(ti_classmap_array(1) , dt_user)
+        call getOutputTimeArrays(ti_classmap_array, ti_classmaps, ti_classmap, ti_classmape, success)
     endif
 
     call prop_get_double ( md_ptr, 'equatorial', 'Ampfreeleft'     , amm)
@@ -1756,7 +1756,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     character(len=128)             :: helptxt
     character(len=256)             :: tmpstr
     integer                        :: i
-    real(kind=hp)                  :: ti_wav_array(3), ti_map_array(3), ti_rst_array(3), ti_his_array(3), ti_waq_array(3), ti_incr_array(3)
+    real(kind=hp)                  :: ti_wav_array(3), ti_map_array(3), ti_rst_array(3), ti_his_array(3), ti_waq_array(3), ti_classmap_array(3)
 
     logical, external              :: get_japart
 
@@ -2500,8 +2500,8 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     ti_waq_array(3) = ti_waqe
     call prop_set(prop_ptr, 'output', 'WaqInterval', ti_waq_array, 'DELWAQ output times, given as "interval" "start period" "end period" (s)')
 
-    ti_incr_array = [ti_incr, ti_incrs, ti_incre]
-    call prop_set(prop_ptr, 'output', 'IncrInterval', ti_incr_array, 'Incremental output times, given as "interval" "start period" "end period" (s)')
+    ti_classmap_array = [ti_classmap, ti_classmaps, ti_classmape]
+    call prop_set(prop_ptr, 'output', 'ClassMapInterval', ti_classmap_array, 'Class map output times, given as "interval" "start period" "end period" (s)')
 
     call prop_set(prop_ptr, 'output', 'StatsInterval', ti_stat,        'Screen step output interval in seconds simulation time, if negative in seconds wall clock time')
 

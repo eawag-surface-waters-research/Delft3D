@@ -6374,14 +6374,14 @@ subroutine generatePartitionMDUFile(filename, filename_new)
    use unstruc_messages
    use m_partitioninfo
    implicit none
-   character(*), intent(in)  :: filename, filename_new
-   integer                   :: k1, k2, k3, k4, k5, k6, n
-   character*500             :: string, string_c, string_tmp, string_v
+   character(len=*), intent(in)  :: filename, filename_new
+   integer                       :: k1, k2, k3, k4, k5, k6, k7, n
+   character(len=500)            :: string, string_c, string_tmp, string_v
 
    open(261, file = filename, status ="old", action="read", err=999)
    open(262, file = filename_new, status = "replace", action="write",err=999)
-  
-   k1 = 0; k2 = 0; k3 = 0; k4 = 0; k5 = 0; k6 = 0
+
+   k1 = 0; k2 = 0; k3 = 0; k4 = 0; k5 = 0; k6 = 0; k7 = 0
    do while (.true.)
       read(261, "(a)", err=999, end=1212) string
       n = index(string, '=')
@@ -6400,34 +6400,40 @@ subroutine generatePartitionMDUFile(filename, filename_new)
       if (len_trim(md_flowgeomfile) > 0) then
          k6 = index(string_c, 'FlowGeomFile')
       endif
-      
-      if(k1.eq.0 .and. k2.eq.0 .and. k3.eq.0 .and. k4.eq.0 .and. k5.eq.0 .and. k6.eq.0) then ! Copy the whole row
-         write(262, "(a)") trim(string)     
+      if (len_trim(md_class_map_file) > 0) then
+         k7 = index(string_c, 'ClassMapFile')
+      endif
+
+      if(k1==0 .and. k2==0 .and. k3==0 .and. k4==0 .and. k5==0 .and. k6==0 .and. k7==0) then ! Copy the whole row
+         write(262, "(a)") trim(string)
       else 
          if (k1 .ne. 0) then      ! modify NetFile
            string_tmp = trim(string_c)//" "//trim(md_netfile)//"        # *_net.nc"
            write(262, "(a)") trim(string_tmp)
-         else if (k2 .ne. 0) then ! Modify icgsolver
+         else if (k2 /= 0) then ! Modify icgsolver
             write(string_v, "(I5)") md_icgsolver
             string_tmp = trim(string_c)//" "//trim(adjustl(string_v))//"          # Solver type , 1 = sobekGS_OMP, 2 = sobekGS_OMPthreadsafe, 3 = sobekGS, 4 = sobekGS + Saadilud, 5 = parallel/global Saad, 6 = parallel/Petsc, 7 = parallel/GS"
             write(262, "(a)") trim(string_tmp)
-         else if (k3 .ne. 0) then ! Modify restart file name
+         else if (k3 /= 0) then ! Modify restart file name
             string_tmp = trim(string_c)//" "//trim(md_restartfile)//"       # Restart file, only from netcdf-file, hence: either *_rst.nc or *_map.nc"
             write(262, "(a)") trim(string_tmp)
-         else if (k4 .ne. 0) then ! Modify mapfile
+         else if (k7 /= 0) then ! Modify ClassMapFile. Must be before mapfile as we don't check on whole words
+            string_tmp = trim(string_c)//" "//trim(md_class_map_file)//"       # ClassMapFile name *.nc"
+            write(262, "(a)") trim(string_tmp)
+         else if (k4 /= 0) then ! Modify mapfile
             string_tmp = trim(string_c)//" "//trim(md_mapfile)//"       # MapFile name *_map.nc"
             write(262, "(a)") trim(string_tmp)
-         else if (k5 .ne. 0) then ! Modify Partitionfile
+         else if (k5 /= 0) then ! Modify Partitionfile
             string_tmp = trim(string_c)//" "//trim(md_partitionfile)//"          # *_part.pol, polyline(s) x,y"
             write(262, "(a)") trim(string_tmp)      
-         else if (k6 .ne. 0) then ! Modify FlowGeomFile
+         else if (k6 /= 0) then ! Modify FlowGeomFile
             string_tmp = trim(string_c)//" "//trim(md_flowgeomfile)//"       # FlowGeomFile name *.nc"
             write(262, "(a)") trim(string_tmp)
          endif
-      endif     
+      endif
    enddo
-   
-1212 continue  
+
+1212 continue
    close(261)
    close(262)
    return

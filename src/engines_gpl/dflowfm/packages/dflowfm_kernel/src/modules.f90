@@ -4157,11 +4157,11 @@ end subroutine reset_flowgeom
  double precision                  :: ti_waq      !< Interval between output in delwaq files (s).
  double precision                  :: ti_waqs     !< Start of WAQ output period
  double precision                  :: ti_waqe     !< End   of WAQ output period
- double precision                  :: ti_incr     !< increment interval (s)
- double precision                  :: ti_incrs    !< Start of increment output period (as assigned in mdu-file) (s)
- double precision                  :: ti_incre    !< End   of increment output period (as assigned in mdu-file) (s)
- double precision, allocatable     :: incr_classes_wl(:)  !< incremental classes for water level
- double precision, allocatable     :: incr_classes_wd(:)  !< incremental classes for water depth
+ double precision                  :: ti_classmap        !< class map interval (s)
+ double precision                  :: ti_classmaps       !< Start of class map output period (as assigned in mdu-file) (s)
+ double precision                  :: ti_classmape       !< End   of class map output period (as assigned in mdu-file) (s)
+ double precision, allocatable     :: map_classes_wl(:)  !< classes for water level
+ double precision, allocatable     :: map_classes_wd(:)  !< classes for water depth
  double precision                  :: ti_stat     !< Interval between simulation statistics output (s).
  double precision                  :: ti_timings  !< (parallel) timings output interval
  double precision                  :: ti_split    !< Time interval for time splitting: time after which new his/map file will be created (e.g. montly), see also the unit below.
@@ -4170,24 +4170,24 @@ end subroutine reset_flowgeom
  double precision, allocatable     :: ti_mpt(:)      !< times for writing map-files (s), possibly non-equidistant in time
  double precision, allocatable     :: ti_mpt_rel(:)  !< times for writing map-files (s) relative to current time, possibly non-equidistant in time
 
- double precision                  :: tmini       !< Initial time for updating map/his/rst
+ double precision                  :: tmini         !< Initial time for updating map/his/rst
 
- double precision                  :: time_choice !< Time consisting the next time_user / time_map
- double precision                  :: time_out    !< Next time for output in the most general sense (map, his, etc.)
- double precision                  :: time_map    !< Map output interval
- double precision                  :: time_wav    !< Time-avg'd output interval xb JRE
- double precision                  :: time_his    !< Next time for his output
- double precision                  :: time_xls    !< Next time for his output
- double precision                  :: time_rst    !< Next time for restart output
- double precision                  :: time_incr   !< Next time for incremental output
- double precision                  :: time_waq    !< Next time for delwaq output
- double precision                  :: time_waqset !< Next time to reset the quantitis for waq
- double precision                  :: time_stat   !< Next time for simulation statistics output
- double precision                  :: time_timings !< Next time for timings output
- double precision                  :: time_split  !< Next time for a new time-split output file.
- double precision                  :: time_split0 !< Start time for the current time-split output file.
- double precision                  :: time_fetch  !< next time fetchlength will be established
- double precision                  :: tifetch = 0 !< fetchlength comp. interval
+ double precision                  :: time_choice   !< Time consisting the next time_user / time_map
+ double precision                  :: time_out      !< Next time for output in the most general sense (map, his, etc.)
+ double precision                  :: time_map      !< Map output interval
+ double precision                  :: time_wav      !< Time-avg'd output interval xb JRE
+ double precision                  :: time_his      !< Next time for his output
+ double precision                  :: time_xls      !< Next time for his output
+ double precision                  :: time_rst      !< Next time for restart output
+ double precision                  :: time_classmap !< Next time for class map output
+ double precision                  :: time_waq      !< Next time for delwaq output
+ double precision                  :: time_waqset   !< Next time to reset the quantitis for waq
+ double precision                  :: time_stat     !< Next time for simulation statistics output
+ double precision                  :: time_timings  !< Next time for timings output
+ double precision                  :: time_split    !< Next time for a new time-split output file.
+ double precision                  :: time_split0   !< Start time for the current time-split output file.
+ double precision                  :: time_fetch    !< next time fetchlength will be established
+ double precision                  :: tifetch = 0   !< fetchlength comp. interval
 
 
  integer                           :: it_map      !< Nr of snapshots presently in map file
@@ -4288,7 +4288,7 @@ subroutine reset_flowtimes()
     time_his     = tstart_user       !< next time for his output
     time_xls     = tstart_user       !< next time for his output
     time_rst     = tstart_user       !< next time for restart output
-    time_incr    = tstart_user       !< next time for incremental output
+    time_classmap= tstart_user       !< next time for class map output
     time_fetch   = tstart_user       !< next time for fetch establ.
 
     time_waq     = ti_waqs           !< next time for waq output, starting at the output start time

@@ -1343,6 +1343,55 @@ double precision, allocatable, save :: workS3D(:,:), workU3D(:,:), workW(:,:), w
     ! Some error occurred
 end function unc_put_var_map_byte
 
+!> copy of unc_put_var_map_byte with buffered time
+!! TODO: only implemented for UNC_LOC_S
+function unc_put_var_map_byte_timebuffer(mapids, id_var, iloc, values, t1, tl) result(ierr)
+use m_flowgeom
+use network_data, only: numk, numl, numl1d
+use m_flow, only: kmx
+use dfm_error
+use m_alloc
+use m_missing
+implicit none
+type(t_unc_mapids),         intent(in)  :: mapids        !< Map file and other NetCDF ids.
+integer,                    intent(in)  :: id_var(:)     !< Ids of variable to write values into, one for each submesh (1d/2d/3d if applicable).
+integer,                    intent(in)  :: iloc          !< Stagger location for this variable (one of UNC_LOC_CN, UNC_LOC_S, UNC_LOC_U, UNC_LOC_L, UNC_LOC_S3D, UNC_LOC_U3D, UNC_LOC_W).
+integer(kind=1),            intent(in)  :: values(:,:)   !< The data values to be written. Should in standard FM order (1d/2d/3d node/link conventions, @see m_flow).
+integer,                    intent(in)  :: t1            !< first time in buffer to be written
+integer,                    intent(in)  :: tl            !< last time in buffer to be written
+
+integer                         :: ierr          !< Result status, DFM_NOERR if successful.
+
+integer                         :: tstart        !< time index of t1
+integer                         :: ndx1d         !< number of 1d node links
+
+   ierr = DFM_NOERR
+
+   select case (iloc)
+
+   case(UNC_LOC_S) ! Pressure point location
+      ndx1d = ndxi - ndx2d
+      tstart = mapids%idx_curtime - tl + t1
+      ! Internal 1d flownodes. Horizontal position: nodes in 1d mesh.
+      if (ndx1d > 0) then
+         ierr = nf90_put_var(mapids%ncid, id_var(1), values(ndx2d+1:ndxi, t1:tl), start = (/ 1, tstart /))
+      end if
+      ! Internal 2d flownodes. Horizontal position: faces in 2d mesh.
+      if (ndx2d > 0) then
+         ierr = nf90_put_var(mapids%ncid, id_var(2), values(1:ndx2d, t1: tl), start = (/ 1, tstart /))
+      end if
+
+   case default
+      ierr = UG_INVALID_DATALOCATION
+      goto 888
+   end select
+
+   return ! Successful return.
+
+888 continue
+    ! Some error occurred
+end function unc_put_var_map_byte_timebuffer
+
 function unc_put_var_map_dble2(mapids, id_var, iloc, values, default_value, locdim) result(ierr)
 use m_flowgeom
 use network_data, only: numk, numl, numl1d

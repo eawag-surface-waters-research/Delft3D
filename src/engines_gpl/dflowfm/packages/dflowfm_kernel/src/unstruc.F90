@@ -15242,7 +15242,7 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
  use m_flow
  use unstruc_model
  use unstruc_netcdf
- use unstruc_netcdf_incremental
+ use unstruc_netcdf_map_class
  use m_xbeach_netcdf
  use waq
  use m_timer
@@ -15315,23 +15315,23 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
      endif
    endif
 
-    if (ti_incr > 0) then
-       if (comparereal(tim, time_incr, eps10) >= 0) then
-         call write_incrementals_ugrid(m_incids, tim)
-         if (comparereal(time_incr, ti_incre, eps10) == 0) then
-            time_incr = tstop_user + 1
+    if (ti_classmap > 0) then
+       if (comparereal(tim, time_classmap, eps10) >= 0) then
+         call write_map_classes_ugrid(m_incids, tim)
+         if (comparereal(time_classmap, ti_classmape, eps10) == 0) then
+            time_classmap = tstop_user + 1
          else
-            tem_dif = (tim - ti_incrs)/ti_incr
-            time_incr = max(ti_incrs + (floor(tem_dif + 0.001d0) +1)*ti_incr,ti_incrs)
+            tem_dif = (tim - ti_classmaps)/ti_classmap
+            time_classmap = max(ti_classmaps + (floor(tem_dif + 0.001d0) +1)*ti_classmap,ti_classmaps)
             ti_mpt_rel   = ti_mpt - tim
             time_incr_mpt = tim + minval(ti_mpt_rel, mask=ti_mpt_rel.gt.0)
-            if (comparereal (time_incr, time_incr_mpt, eps10) == 1 .and. comparereal(tim, time_incr_mpt, eps10) == -1) then
-               time_incr = time_incr_mpt
+            if (comparereal (time_classmap, time_incr_mpt, eps10) == 1 .and. comparereal(tim, time_incr_mpt, eps10) == -1) then
+               time_classmap = time_incr_mpt
             endif
 
-            if (comparereal(time_incr, ti_incre, eps10) == 1) then
-            ! next time_incr would be beyond end of incr-window, write one last incr exactly at that end.
-                time_incr = ti_incre
+            if (comparereal(time_classmap, ti_classmape, eps10) == 1) then
+            ! next time_classmap would be beyond end of incr-window, write one last incr exactly at that end.
+                time_classmap = ti_classmape
             endif
          endif
        endif
