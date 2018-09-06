@@ -33,7 +33,7 @@ module unstruc_netcdf_map_class
 use precision, only : hp
 use precision_basics, only : comparereal
 use m_flow, only : s1, hs
-use m_flowtimes, only : map_classes_wl, map_classes_wd, ti_classmape, refdat
+use m_flowtimes, only : map_classes_wl, map_classes_wd, ti_classmape, ti_classmaps, ti_classmap, refdat
 use m_flowgeom, only : ndx, ndxi
 use m_cell_geometry, only : ndx2d
 use unstruc_model, only : md_class_map_file
@@ -70,6 +70,7 @@ integer :: time_index = 0
 #ifdef NetCDF4
 integer,          parameter :: open_mode = NF90_HDF5
 character(len=*), parameter :: nc_file_type = 'NetCDF-4'
+integer                     :: maxTimes, chunkSizeTime
 #else
 integer,          parameter :: open_mode = NF90_64BIT_OFFSET
 character(len=*), parameter :: nc_file_type = 'NetCDF-3 (64bit)'
@@ -124,6 +125,11 @@ subroutine write_map_classes_ugrid(incids, tim)
       ! define variables:
       tmpstr = 'seconds since '//refdat(1:4)//'-'//refdat(5:6)//'-'//refdat(7:8)//' 00:00:00'
       ierr = unc_def_var_nonspatial(incids%ncid, incids%id_time, nf90_double, [incids%id_timedim], 'time', 'time', ' ', tmpstr)
+#ifdef NetCDF4
+      maxTimes = 1 + nint( (ti_classmape - ti_classmaps) / ti_classmap)
+      chunkSizeTime = min(mapclass_chunksize_time, maxTimes)
+      if (ierr == nf90_noerr) ierr = nf90_def_var_chunking(incids%ncid, incids%id_time, NF90_CHUNKED, [chunkSizeTime])
+#endif
 
       if (size(map_classes_wl) > 0 .and. ierr == nf90_noerr) then
          ierr = def_var_incremental_ugrid('s1', incids%ncid, id_class_s1, id_jumps_s1, incids)
@@ -249,7 +255,7 @@ function def_var_incremental_ugrid(name, ncid, var_id_class_bnds, var_id_jumps, 
       if (ndims(i) > 0) then
          actual_chunksize = min(mapclass_chunksize_ndx, ndims(i))
          if (ierr == nf90_noerr) ierr = nf90_def_var_deflate(ncid, ids(i), 0, 1, mapclass_deflate)
-         if (ierr == nf90_noerr) ierr = nf90_def_var_chunking(ncid, ids(i), NF90_CHUNKED, [actual_chunksize, mapclass_chunksize_time])
+         if (ierr == nf90_noerr) ierr = nf90_def_var_chunking(ncid, ids(i), NF90_CHUNKED, [actual_chunksize, chunkSizeTime])
       endif
    enddo
    if (ierr == nf90_noerr) then
