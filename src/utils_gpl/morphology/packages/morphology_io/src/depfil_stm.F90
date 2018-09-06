@@ -1,4 +1,3 @@
-#include "global_config.inc"
 module m_depfil_stm
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
@@ -47,12 +46,9 @@ subroutine depfil_stm(lundia    ,error     ,fildep    ,fmttmp    , &
                     & errmsg    )
    use precision
    use grid_dimens_module
-! MOR_USE_ECMODULE macro used from global_config.h to enable/disable EC-module for space-varying input in sed/mor.
-#if MOR_USE_ECMODULE
    use m_ec_module
    use m_ec_filereader_read, only: ecSampleReadAll
    use m_ec_basic_interpolation, only: triinterp2
-#endif
    use system_utils
    ! 
    implicit none 
@@ -108,7 +104,6 @@ subroutine depfil_stm(lundia    ,error     ,fildep    ,fmttmp    , &
    file = ' '
    ext  = ' ' 
    call split_filename(fildep, path, file, ext)
-#if MOR_USE_ECMODULE
    if (ext(1:3) == '.xy') then
       ! Assumption: if extension starts with 'xy' (to cover both xyz and xyb), then it is assumed to be an xyz file
       !
@@ -148,15 +143,12 @@ subroutine depfil_stm(lundia    ,error     ,fildep    ,fmttmp    , &
       close(minp0)
       ! success = timespaceinitialfield(dims%xz, dims%yz, array(ifld, :, :), dims%nmmax, fildep, 7, 5,  'O', transformcoef, 1) ! zie meteo module
    else
-#endif
       ! No xyz file: depfile
       !
       call depfil(lundia    ,error     ,fildep    ,fmttmp    , &
                 & array     ,nfld      ,ifld      ,dims      )
       if (present(errmsg)) errmsg = 'Error reading QUICKIN file '//trim(fildep)
-#if MOR_USE_ECMODULE
    endif
-#endif
 end subroutine depfil_stm
 !
 !
@@ -167,11 +159,9 @@ subroutine depfil_stm_double(lundia    ,error     ,fildep    ,fmttmp    , &
                            & errmsg    )
    use precision 
    use grid_dimens_module
-#if MOR_USE_ECMODULE
    use m_ec_module
    use m_ec_basic_interpolation, only: triinterp2
    use m_ec_filereader_read, only: ecSampleReadAll
-#endif
    use system_utils
    ! 
    implicit none 
@@ -225,7 +215,6 @@ subroutine depfil_stm_double(lundia    ,error     ,fildep    ,fmttmp    , &
    file = ' '
    ext  = ' ' 
    call split_filename(fildep, path, file, ext)
-#if MOR_USE_ECMODULE
    if (ext(1:3) == '.xy') then
       ! Assumption: if extension starts with 'xy' (to cover both xyz and xyb), then it is assumed to be an xyz file
       !
@@ -267,13 +256,10 @@ subroutine depfil_stm_double(lundia    ,error     ,fildep    ,fmttmp    , &
 
       ! success = timespaceinitialfield(dims%xz, dims%yz, array(ifld, :, :), dims%nmmax, fildep, 7, 5,  'O', transformcoef, 1) ! zie meteo module
    else
-#endif
       call depfil_double(lundia    ,error     ,fildep    ,fmttmp    , &
                        & array     ,nfld      ,ifld      ,dims      )
       if (present(errmsg)) errmsg = 'Error reading QUICKIN file '//trim(fildep)
-#if MOR_USE_ECMODULE
    endif
-#endif
 end subroutine depfil_stm_double
 
                            
