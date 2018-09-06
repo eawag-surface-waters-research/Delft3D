@@ -22,9 +22,9 @@ FMODULES += \
 #-------------------------------------------------------------------------------
 #Sources
 libIOHyd_la_SOURCES = \
+         dlwqgrid_mod.f90 \
          dlwq_hyd_data.f90 \
          domain_mod.f90 \
-         dlwqgrid_mod.f90 \
          utils_waqgeom.f90 \
          filmod.f90 \
          wstmod.f90 \
