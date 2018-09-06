@@ -439,7 +439,7 @@ module m_flow1d_reader
          binfile = inputFile(1:posdot)//'cache'
          inquire(file=binfile, exist=file_exist)
          if (doReadCache .and. file_exist) then
-            open(newunit=ibin, file=binfile, status='old', form='binary', action='read', iostat=istat)
+            open(newunit=ibin, file=binfile, status='old', form='unformatted', access='stream', action='read', iostat=istat)
             if (istat /= 0) then
                call setmessage(LEVEL_FATAL, 'Error opening Network Cache file')
                ibin = 0
@@ -597,7 +597,7 @@ module m_flow1d_reader
       binfile = md_flow1d_file(1:posslash)//'SpatialData.cache'
       inquire(file=binfile, exist=file_exist)
       if (doReadCache .and. file_exist) then
-         open(newunit=ibin, file=binfile, status='old', form='binary', action='read', iostat=istat)
+         open(newunit=ibin, file=binfile, status='old', form='unformatted', access='stream', action='read', iostat=istat)
          if (istat /= 0) then
             call setmessage(LEVEL_FATAL, 'Error Opening Spatial Data Cache File: '//trim(binfile))
             ibin = 0

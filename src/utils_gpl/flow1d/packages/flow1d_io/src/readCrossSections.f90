@@ -86,7 +86,7 @@ module m_readCrossSections
       binfile = CrossSectionFile(1:pos)//'cache'
       inquire(file=binfile, exist=file_exist)
       if (doReadCache .and. file_exist) then
-         open(newunit=ibin, file=binfile, status='old', form='binary', action='read', iostat=istat)
+         open(newunit=ibin, file=binfile, status='old', form='unformatted', access='stream', action='read', iostat=istat)
          if (istat /= 0) then
             call setmessage(LEVEL_FATAL, 'Error opening Cross-Section Location Cache file')
             ibin = 0
@@ -301,7 +301,7 @@ module m_readCrossSections
       binfile = CrossSectionDefinitionFile(1:pos)//'cache'
       inquire(file=binfile, exist=file_exist)
       if (doReadCache .and. file_exist) then
-         open(newunit=ibin, file=binfile, status='old', form='binary', action='read', iostat=istat)
+         open(newunit=ibin, file=binfile, status='old', form='unformatted', access='stream', action='read', iostat=istat)
          if (istat /= 0) then
             call setmessage(LEVEL_FATAL, 'Error opening Cross-Section Definition Cache file')
             ibin = 0
