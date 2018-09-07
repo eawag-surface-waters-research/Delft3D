@@ -7157,6 +7157,7 @@ src/utils_lgpl/ods/packages/ods/src/m3hbuf.c -text
 src/utils_lgpl/ods/packages/ods/src/m3hbuf.h -text
 src/utils_lgpl/ods/packages/ods/src/mappix.c -text
 src/utils_lgpl/ods/packages/ods/src/mappix.h -text
+src/utils_lgpl/ods/packages/ods/src/mkods -text
 src/utils_lgpl/ods/packages/ods/src/morbagr.c -text
 src/utils_lgpl/ods/packages/ods/src/morbagr.h -text
 src/utils_lgpl/ods/packages/ods/src/morcom.c -text
@@ -7198,8 +7199,11 @@ src/utils_lgpl/ods/packages/ods/src/tekasc.c -text
 src/utils_lgpl/ods/packages/ods/src/tekasc.h -text
 src/utils_lgpl/ods/packages/ods/src/tekasc2d.c -text
 src/utils_lgpl/ods/packages/ods/src/tekasc2d.h -text
+src/utils_lgpl/ods/packages/ods/src/testods.c -text
 src/utils_lgpl/ods/packages/ods/src/tridro.c -text
 src/utils_lgpl/ods/packages/ods/src/tridro.h -text
+src/utils_lgpl/ods/packages/ods/src/trih-wheeler.dat -text
+src/utils_lgpl/ods/packages/ods/src/trih-wheeler.def -text
 src/utils_lgpl/ods/packages/ods/src/trinint.c -text
 src/utils_lgpl/ods/packages/ods/src/trinint.h -text
 src/utils_lgpl/ods/packages/ods/src/utils.c -text
