@@ -294,9 +294,9 @@
          end select
 
          ! Read the options for the NetCDF file:
-         ! ncFormat (4), ncDeflate (2), ncChunk (0), ncShuffle (0 = false)
+         ! ncFormat (3), ncDeflate (0), ncChunk (0), ncShuffle (0 = false)
 
-         ncopt = [4, 2, 0, 0]
+         ncopt = [3, 0, 0, 0]
          do
             if ( gettoken( keyword, ierr2 ) .gt. 0 ) exit
             if ( keyword(1:1) == '#' ) exit
@@ -318,6 +318,10 @@
                   write (lunut,4010) ' ERROR: unknown option - ', trim(keyword), ' - ignored'
             end select
          enddo
+
+         if ( ncopt(1) == 3 ) then
+             ncopt(2:) = 0
+         endif
 
          if ( lncout ) then
              write (lunut,4020) ncopt(1:3), merge('ON ', 'OFF', ncopt(4) == 1)
