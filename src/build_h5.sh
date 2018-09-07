@@ -401,7 +401,7 @@ else
         netcdfModule="netcdf/v4.3.2_v4.4.0_intel_14.0.3"
     else
         if [ "$compiler" = 'intel16' ]; then
-            netcdfModule="netcdf/v4.4.0_v4.4.4_intel_16.0.3"
+            netcdfModule="netcdf/v4.6.1_v4.4.0_intel_16.0.3"
         fi
     fi
 fi
