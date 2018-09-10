@@ -12,11 +12,7 @@
 
 include $(top_srcdir)/common.am
 SUBDIRS = \
-    esmf \
     triangle \
     version_number \
-    libsigwatch \
-    FLAP \
-    polypack \
-    kdtree2 \
-    swan
+    kdtree2
+
