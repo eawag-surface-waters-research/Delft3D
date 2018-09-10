@@ -61,6 +61,7 @@ subroutine grmap_esmf(i1, f1, n1, f2, mmax, nmax, f2s, f2g, adaptCovered)
 !
 !! executable statements -------------------------------------------------------
 !
+    if (.not.f2s%grids_linked) return
     n2 = mmax * nmax
     !if (present(adaptCovered)) then
     !    adaptCovered_ = adaptCovered

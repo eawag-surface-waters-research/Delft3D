@@ -37,6 +37,7 @@ module swan_flow_grid_maps
     type grid_map
        logical                                  :: sferic          ! spherical coordinate system (t/f)
        logical                                  :: ext_mapper      ! .true.: The mapping is done by an external program e.g. ESMF_RegridWeightGen
+       logical                                  :: grids_linked    ! .true.: flow maps to wave using ESMF
        integer                                  :: n_b             ! ext_mapper: n_b from ESMF_RegridWeight file: dimension of destination grid
        integer                                  :: n_s             ! ext_mapper: n_s from ESMF_RegridWeight file: dimension of weight vectors
        integer                                  :: n_surr_points   ! number of surrounding points (4 for curvilin., 3 for triangular grids)
@@ -345,6 +346,7 @@ subroutine make_grid_map(i1, i2, g1, g2, gm, external_mapper)
    endif
    gm%sferic = g1%sferic
    if (gm%ext_mapper) then
+      gm%grids_linked = .true.
       !
       ! The following weights filename will do as long as there is only one Flow-source file involved
       !
@@ -402,8 +404,11 @@ subroutine make_grid_map(i1, i2, g1, g2, gm, external_mapper)
          call wavestop(1, "Dimension n_b from ESMF_RegridWeight file does not match the WAVE grid dimension.")
       endif
       if (gm%n_s == 0) then
-         write(*,'(a)') "ERROR dimension n_s from ESMF_RegridWeight is zero."
-         call wavestop(1, "Dimension n_s from ESMF_RegridWeight is zero.")
+         !write(*,'(3a)') "ERROR dimension n_s from ESMF_RegridWeight is zero."
+         !call wavestop(1, "Dimension n_s from ESMF_RegridWeight is zero.")
+         write(*,'(a,i0,a,i0,a)') "WARNING Flow grid ", i1, " is not overlapping with WAVE grid ", i2,". Mapper not filled with weights."
+         gm%grids_linked = .false.
+         return
       endif
       allocate (gm%col   (gm%n_s), stat=ierror)
       allocate (gm%row   (gm%n_s), stat=ierror)
