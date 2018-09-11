@@ -80,10 +80,11 @@ integer(kind=int8), allocatable :: buffer_s1(:,:), buffer_hs(:,:)
 
    contains
 
-!> TODO: spee: apidocs
+!> write map class data in ugrid format to an NetCDF file
+!! the first time this module is initialized
    subroutine write_map_classes_ugrid(incids, tim)
    type(t_unc_mapids), intent(inout) :: incids   !< class file and other NetCDF ids.
-   real(kind=hp), intent(in) :: tim
+   real(kind=hp),      intent(in)    :: tim      !< simulation time
 
    integer :: ierr, ndim
    integer, parameter :: jabndnd_ = 0 !< Whether to include boundary nodes (1) or not (0). Default: no.
@@ -223,26 +224,28 @@ integer(kind=int8), allocatable :: buffer_s1(:,:), buffer_hs(:,:)
    endif
 end subroutine write_map_classes_ugrid
 
-!> TODO: spee: apidocs
+!> helper routine to define NetCDF variables
 function def_var_classmap_ugrid(name, ncid, var_id_class_bnds, var_id_jumps, incids) result(ierr)
-   type(t_unc_mapids), intent(inout) :: incids   !< class file and other NetCDF ids.
-   character(len=*), intent(in)      :: name     !< TODO: spee: apidocs
-   integer,          intent(in)      :: ncid
-   integer,          intent(out)     :: var_id_class_bnds, var_id_jumps
-   integer                           :: ierr
+   type(t_unc_mapids), intent(inout) :: incids             !< class file and other NetCDF ids.
+   character(len=*), intent(in)      :: name               !< name of the variable
+   integer,          intent(in)      :: ncid               !< the NetCDF file Id
+   integer,          intent(out)     :: var_id_class_bnds  !< variable Id for the class boundaries
+   integer,          intent(out)     :: var_id_jumps       !< variable Id for the jumps (only for type 1)
+   integer                           :: ierr               !< function result. 0=ok
 
    integer :: id_class, actual_chunksize, ids(4), ndims(2), i
+   double precision, pointer :: map_classes(:)
 
    if (name == 's1') then
       ierr = unc_def_var_map(incids, incids%id_s1, nf90_byte, UNC_LOC_S, 's1',         'sea_surface_height',                'Water level', 'm')
       id_class = id_class_dim_s1
       ids = incids%id_s1
-      ! TODO: add put_att calls to id_s1(:), to set :flag_values and :flag_meaning attributes for the classes
+      map_classes => map_classes_s1
    else if (name == 'hs') then
       ierr = unc_def_var_map(incids, incids%id_hs, nf90_byte, UNC_LOC_S, 'waterdepth', 'sea_floor_depth_below_sea_surface', 'Water depth at pressure points', 'm')
       id_class = id_class_dim_hs
       ids = incids%id_hs
-      ! TODO: add put_att calls to id_hs(:), to set :flag_values and :flag_meaning attributes for the classes
+      map_classes => map_classes_hs
    else
       call mess(LEVEL_FATAL, 'programming error in def_var_incremental_ugrid')
    endif
@@ -255,6 +258,9 @@ function def_var_classmap_ugrid(name, ncid, var_id_class_bnds, var_id_jumps, inc
          actual_chunksize = min(mapclass_chunksize_ndx, ndims(i))
          if (ierr == nf90_noerr) ierr = nf90_def_var_deflate(ncid, ids(i), 0, 1, mapclass_deflate)
          if (ierr == nf90_noerr) ierr = nf90_def_var_chunking(ncid, ids(i), NF90_CHUNKED, [actual_chunksize, chunkSizeTime])
+         if (ierr == nf90_noerr .and. output_type == type_new_class) then
+            ierr = put_flag_attributes(incids%ncid, ids(i), map_classes)
+         endif
       endif
    enddo
    if (ierr == nf90_noerr) then
@@ -265,10 +271,11 @@ function def_var_classmap_ugrid(name, ncid, var_id_class_bnds, var_id_jumps, inc
    endif
 end function def_var_classmap_ugrid
 
-!> TODO: spee: apidocs
+!> helper function to put the actual data in classes
 subroutine put_in_classes(incr_classes, full_field, classes)
-   real(kind=hp), intent(in) :: incr_classes(:), full_field(:) !< TODO: spee: apidocs
-   integer(kind=int8), intent(out) :: classes(:)
+   real(kind=hp),      intent(in)  :: incr_classes(:) !< list with class boundaries
+   real(kind=hp),      intent(in)  :: full_field(:)   !< actual data in doubles
+   integer(kind=int8), intent(out) :: classes(:)      !< converted data in byte with class number
 
    integer :: i, j, num_classes
 
@@ -285,14 +292,14 @@ subroutine put_in_classes(incr_classes, full_field, classes)
    enddo
 end subroutine put_in_classes
 
-!> TODO: spee: apidocs
+!> helper function to write the first class map
 function write_initial_classes(incids, classes, buffer, field, varid_jumps) result(ierr)
-   integer, intent(in) :: varid_jumps
-   integer(kind=int8), intent(in) :: classes(:)
-   integer(kind=int8), intent(inout) :: buffer(:,:)
-   character(len=*), intent(in) :: field
-   type(t_unc_mapids), intent(inout) :: incids
-   integer :: ierr
+   integer,            intent(in)    :: varid_jumps  !< variable Id for the jumps (only type 1)
+   integer(kind=int8), intent(in)    :: classes(:)   !< converted data in byte with class number
+   integer(kind=int8), intent(inout) :: buffer(:,:)  !< buffered data (if mapclass_time_buffer_size is set > 1)
+   character(len=*),   intent(in)    :: field        !< variable name
+   type(t_unc_mapids), intent(inout) :: incids       !< class file and other NetCDF ids.
+   integer                           :: ierr         !< function result. 0=OK.
 
    integer :: var_ids(4)
 
@@ -311,14 +318,17 @@ function write_initial_classes(incids, classes, buffer, field, varid_jumps) resu
    endif
 end function write_initial_classes
 
-!> TODO: spee: apidocs
+!> helper function to write all but the first class map data.
+!! pointers previous and current are updated.
+!! it can write to NetCDF or append to the buffer array
 function write_changed_classes_update_previous(incids, previous, current, buffer, field, varid_jumps) result(ierr)
-   integer, intent(in) :: varid_jumps
-   integer(kind=int8), pointer, intent(inout) :: previous(:), current(:)
-   integer(kind=int8), intent(inout) :: buffer(:,:)
-   character(len=*), intent(in) :: field
-   type(t_unc_mapids), intent(inout) :: incids
-   integer :: ierr
+   integer,                     intent(in)    :: varid_jumps  !< variable Id for the jumps (only type 1)
+   integer(kind=int8), pointer, intent(inout) :: previous(:)  !< converted data in byte with class number for previous time step
+   integer(kind=int8), pointer, intent(inout) :: current(:)   !< converted data in byte with class number for current time step
+   integer(kind=int8),          intent(inout) :: buffer(:,:)  !< buffered data (if mapclass_time_buffer_size is set > 1)
+   character(len=*),            intent(in)    :: field        !< variable name
+   type(t_unc_mapids),          intent(inout) :: incids       !< class file and other NetCDF ids.
+   integer                                    :: ierr         !< function result. 0=OK.
 
    integer :: i, cnt, dim, var_ids(4), ti
    integer(kind=int8), allocatable :: diff(:)
@@ -372,11 +382,54 @@ function write_changed_classes_update_previous(incids, previous, current, buffer
 
 end function write_changed_classes_update_previous
 
-!> TODO: spee: apidocs
+!> construct and write the attributes flag_values and flag_meanings to the NetCDF map class file
+function put_flag_attributes(ncid, varid, class_bnds) result (ierr)
+   integer,          intent(in) :: ncid          !< NetCDF file id
+   integer,          intent(in) :: varid         !< variable id
+   double precision, intent(in) :: class_bnds(:) !< class boundaries
+   integer                      :: ierr          !< function result; 0=OK
+
+   integer :: i, max_user_classes
+   character(len=:), allocatable :: values, meanings, meaning
+   character(len=3) :: value
+   character(len=12) :: meaning_p, meaning_c
+
+   ierr = nf90_noerr
+   max_user_classes = size(class_bnds)
+
+   ! construct the attributes flag_values and flag_meanings
+   do i = 1, max_user_classes + 1
+      write(value,'(i3)') i
+
+      if (i <= max_user_classes) then
+         write(meaning_c, '(f12.3)') class_bnds(i)
+      endif
+
+      if (i == 1) then
+         values = trim(adjustl(value))
+         meanings = 'below_' // trim(adjustl(meaning_c)) // 'm'
+      else if (i <= max_user_classes) then
+         values = values // ' ' // trim(adjustl(value))
+         meaning = trim(adjustl(meaning_p)) // 'm_to_' // trim(adjustl(meaning_c)) // 'm'
+         meanings = meanings // ' ' // meaning
+      else
+         values = values // ' ' // trim(adjustl(value))
+         meanings = meanings // ' ' // 'above_' // trim(adjustl(meaning_p)) // 'm'
+      endif
+
+      meaning_p = meaning_c
+   enddo
+
+   ! write the attributes flag_values and flag_meanings
+   if (ierr == nf90_noerr) ierr = nf90_put_att(ncid, varid, 'flag_values', values)
+   if (ierr == nf90_noerr) ierr = nf90_put_att(ncid, varid, 'flag_meanings', meanings)
+end function put_flag_attributes
+
+!> helper function to get the variable ids based on its name
 function get_varids(name, incids) result(var_ids)
-   character(len=*),   intent(in) :: name
-   type(t_unc_mapids), intent(in) :: incids
-   integer                        :: var_ids(4)
+   character(len=*),   intent(in) :: name        !< variable name
+   type(t_unc_mapids), intent(in) :: incids      !< class file and other NetCDF ids.
+   integer                        :: var_ids(4)  !< function result: the found variable ids
 
    if (name == 's1') then
       var_ids = incids%id_s1
