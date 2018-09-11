@@ -274,6 +274,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    if (nfiles <= 1) then
       write (*,'(a)') 'Error: mapmerge: At least two input files required.'
       ierr = 12
+      goto 888
    else
       if (verbose_mode) then
          write (*,'(a,i0,a)') 'Info: mapmerge: Starting merge of ', nfiles, ' files...'
