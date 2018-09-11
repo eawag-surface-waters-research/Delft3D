@@ -10466,49 +10466,54 @@ subroutine unc_read_map(filename, tim, ierr)
             goto 999
             endif
       endif
+      
+      if (jamergedmap == 0) then
       !! check if the flownodes/flowlinks numbering index is the same
-      ! Read coordinates of flownodes 
-      call realloc(xmc, ndxi_read, keepExisting=.false.)
-      call realloc(ymc, ndxi_read, keepExisting=.false.)
-      ierr = nf90_inq_varid(imapfile, 'FlowElem_xzw', id_xzw)
-      call check_error(ierr, 'center of mass x-coordinate')
-      ierr = nf90_inq_varid(imapfile, 'FlowElem_yzw', id_yzw)
-      call check_error(ierr, 'center of mass y-coordinate')
-      
-      ierr = nf90_get_var(imapfile, id_xzw, xmc)
-      ierr = nf90_get_var(imapfile, id_yzw, ymc)
-      
-      if (ierr == nf90_noerr) then
-         ! check flownodes numbering with rst file
-         call check_flownodesorlinks_numbering_rst(ndxi, 1, xmc, ymc, ierr)
-         if (ierr .ne. nf90_noerr) then
-            goto 999
+      ! only check when sequential restart and parallel restart with its own rst file.
+      ! TODO: check also for other restart situations
+         ! Read coordinates of flownodes 
+         call realloc(xmc, ndxi_read, keepExisting=.false.)
+         call realloc(ymc, ndxi_read, keepExisting=.false.)
+         ierr = nf90_inq_varid(imapfile, 'FlowElem_xzw', id_xzw)
+         call check_error(ierr, 'center of mass x-coordinate')
+         ierr = nf90_inq_varid(imapfile, 'FlowElem_yzw', id_yzw)
+         call check_error(ierr, 'center of mass y-coordinate')
+         
+         ierr = nf90_get_var(imapfile, id_xzw, xmc)
+         ierr = nf90_get_var(imapfile, id_yzw, ymc)
+         
+         if (ierr == nf90_noerr) then
+            ! check flownodes numbering with rst file
+            call check_flownodesorlinks_numbering_rst(ndxi, 1, xmc, ymc, ierr)
+            if (ierr .ne. nf90_noerr) then
+               goto 999
+            end if
+         else
+            call mess(LEVEL_WARN, 'Skip checking flownodes numbering when restart, '&
+                       //'because flownodes coordinates are missing in rst file.')
+         end if      
+         
+         ! Read coordinates of flowlinks
+         call realloc(xuu, lnx_read, keepExisting=.false.)
+         call realloc(yuu, lnx_read, keepExisting=.false.)
+         ierr = nf90_inq_varid(imapfile, 'FlowLink_xu', id_xu)
+         call check_error(ierr, 'velocity point x-coordinate')
+         ierr = nf90_inq_varid(imapfile, 'FlowLink_yu', id_yu)
+         call check_error(ierr, 'velocity point y-coordinate')
+         ierr = nf90_get_var(imapfile, id_xu, xuu)
+         ierr = nf90_get_var(imapfile, id_yu, yuu)
+         
+         if (ierr == nf90_noerr) then
+            ! Check flowlinks numbering with rst file
+            call check_flownodesorlinks_numbering_rst(lnx, 0, xuu, yuu, ierr)
+            if (ierr .ne. nf90_noerr) then
+               goto 999
+            end if
+         else
+            call mess(LEVEL_WARN, 'Skip checking flowlinks numbering when restart, '&
+                       //'because flowlinks coordinates are missing in rst file.')
          end if
-      else
-         call mess(LEVEL_WARN, 'Skip checking flownodes numbering when restart, '&
-                    //'because flownodes coordinates are missing in rst file.')
-      end if      
-
-      ! Read coordinates of flowlinks
-      call realloc(xuu, lnx_read, keepExisting=.false.)
-      call realloc(yuu, lnx_read, keepExisting=.false.)
-      ierr = nf90_inq_varid(imapfile, 'FlowLink_xu', id_xu)
-      call check_error(ierr, 'velocity point x-coordinate')
-      ierr = nf90_inq_varid(imapfile, 'FlowLink_yu', id_yu)
-      call check_error(ierr, 'velocity point y-coordinate')
-      ierr = nf90_get_var(imapfile, id_xu, xuu)
-      ierr = nf90_get_var(imapfile, id_yu, yuu)
-      
-      if (ierr == nf90_noerr) then
-         ! Check flowlinks numbering with rst file
-         call check_flownodesorlinks_numbering_rst(lnx, 0, xuu, yuu, ierr)
-         if (ierr .ne. nf90_noerr) then
-            goto 999
-         end if
-      else
-         call mess(LEVEL_WARN, 'Skip checking flowlinks numbering when restart, '&
-                    //'because flowlinks coordinates are missing in rst file.')
-      end if   
+      end if
     endif
     call readyy('Reading map data',0.05d0)
     
