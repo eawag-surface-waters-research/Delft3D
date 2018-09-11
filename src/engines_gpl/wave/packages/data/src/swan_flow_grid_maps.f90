@@ -344,7 +344,9 @@ subroutine make_grid_map(i1, i2, g1, g2, gm, external_mapper)
    else
       gm%ext_mapper = .false.
    endif
-   gm%sferic = g1%sferic
+   gm%sferic       = g1%sferic
+   gm%grids_linked = .false.
+   !
    if (gm%ext_mapper) then
       gm%grids_linked = .true.
       !
