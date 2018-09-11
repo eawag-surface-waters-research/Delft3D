@@ -133,9 +133,11 @@ module m_oned_functions
    subroutine set_1d_indices_in_network()
       use m_sediment
       use m_flowgeom
+      use m_flow
       use m_cross_helper
       use m_flowparameters
       use unstruc_channel_flow
+      
       
       implicit none
       
@@ -143,7 +145,12 @@ module m_oned_functions
       
       if (network%brs%count > 0) then
          ! nonlinear computation is required for 1d flow
-         if (nonlin1D == 0) nonLin1D = 1
+         if (nonlin1D == 0) then
+            nonLin1D = 1
+         elseif (nonlin1D == 2) then
+            CSCalculationOption = CS_TYPE_PLUS
+         endif
+         
          nonlin = max(nonlin, nonlin1D)
       endif
       
@@ -530,11 +537,11 @@ module m_oned_functions
       if (bl(n1) > 0.5d0*huge(1d0)) then
          call setmessage(LEVEL_ERROR, 'Storage is missing on node '//trim(network%nds%node(i)%id))
       endif
-      
-      if (getMaxErrorLevel() > LEVEL_ERROR) then
-         call setmessage(LEVEL_FATAL, 'Error(s) occurred in initialisation.')
-      endif
    enddo
+      
+   if (getMaxErrorLevel() > LEVEL_ERROR) then
+      call setmessage(LEVEL_FATAL, 'Error(s) occurred in initialisation.')
+   endif
          
    do i = ndx2D+1, ndxi
       if (bl(i) > 0.5d0*huge(1d0)) then
