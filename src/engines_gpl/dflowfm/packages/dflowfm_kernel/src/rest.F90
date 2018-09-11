@@ -6415,7 +6415,7 @@ subroutine generatePartitionMDUFile(filename, filename_new)
       if (len_trim(md_flowgeomfile) > 0) then
          k6 = index(string_c, 'FlowGeomFile')
       endif
-      if (len_trim(md_class_map_file) > 0) then
+      if (len_trim(md_classmap_file) > 0) then
          k7 = index(string_c, 'ClassMapFile')
       endif
 
@@ -6434,7 +6434,7 @@ subroutine generatePartitionMDUFile(filename, filename_new)
             string_tmp = trim(string_c)//" "//trim(md_restartfile)//"       # Restart file, only from netcdf-file, hence: either *_rst.nc or *_map.nc"
             write(262, "(a)") trim(string_tmp)
          else if (k7 /= 0) then ! Modify ClassMapFile. Must be before mapfile as we don't check on whole words
-            string_tmp = trim(string_c)//" "//trim(md_class_map_file)//"       # ClassMapFile name *.nc"
+            string_tmp = trim(string_c)//" "//trim(md_classmap_file)//"       # ClassMapFile name *.nc"
             write(262, "(a)") trim(string_tmp)
          else if (k4 /= 0) then ! Modify mapfile
             string_tmp = trim(string_c)//" "//trim(md_mapfile)//"       # MapFile name *_map.nc"

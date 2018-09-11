@@ -2705,8 +2705,6 @@ end subroutine default_turbulence
 
  double precision                  :: uniformsalinitybelowz = -999d0 !< below this level uniform inisal    (m) dmiss==do not use
  
- double precision                  :: s1incinterval          !< incremental interval. if > 0 write incremental
-
  integer                           :: jbasqbnddownwindhs        !< 0 : original hu on qbnd, 1 = downwind hs on qbnd
 
  integer                           :: maxitverticalforestersal  !< 100, max iterations vertical forester
@@ -3050,7 +3048,6 @@ subroutine default_flowparameters()
 
     toplayminthick            = 0.01d0 ! minimum top layer thickness (m)
 
-    s1incinterval=0                   !< incremental interval. if > 0 write incremental
     jbasqbnddownwindhs = 0            !< 0 : original hu on qbnd, 1 = downwind hs on qbnd
 
     maxitverticalforestersal  = 0     !< 100, max iterations vertical forester
@@ -4160,8 +4157,8 @@ end subroutine reset_flowgeom
  double precision                  :: ti_classmap        !< class map interval (s)
  double precision                  :: ti_classmaps       !< Start of class map output period (as assigned in mdu-file) (s)
  double precision                  :: ti_classmape       !< End   of class map output period (as assigned in mdu-file) (s)
- double precision, allocatable     :: map_classes_wl(:)  !< classes for water level
- double precision, allocatable     :: map_classes_wd(:)  !< classes for water depth
+ double precision, allocatable     :: map_classes_s1(:)  !< classes for water level
+ double precision, allocatable     :: map_classes_hs(:)  !< classes for water depth
  double precision                  :: ti_stat     !< Interval between simulation statistics output (s).
  double precision                  :: ti_timings  !< (parallel) timings output interval
  double precision                  :: ti_split    !< Time interval for time splitting: time after which new his/map file will be created (e.g. montly), see also the unit below.

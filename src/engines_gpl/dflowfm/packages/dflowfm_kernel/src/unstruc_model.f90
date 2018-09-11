@@ -118,7 +118,8 @@ implicit none
     character(len=255) :: md_foufile       = ' ' !< File containing fourier modes to be analyzed
 
     character(len=255) :: md_hisfile       = ' ' !< Output history file for monitoring  (e.g., *_his.nc)
-    character(len=255) :: md_mapfile       = ' ' !< Output map     file for monitoring  (e.g., *_map.nc)
+    character(len=255) :: md_mapfile       = ' ' !< Output map     file for full flow fields (e.g., *_map.nc)
+    character(len=255) :: md_classmapfile  = ' ' !< Output classmap file for full flow fields in classes (formerly: incremental file) (e.g., *_clm.nc)
     character(len=255) :: md_comfile       = ' ' !< Output com     file for communication (e.g., *_com.nc)
     character(len=255) :: md_timingsfile   = ' ' !< Output timings file (auto-set)
     character(len=255) :: md_avgwavquantfile = ' ' !< Output map file for time-averaged wave output (e.g., *_wav.nc)
@@ -145,7 +146,7 @@ implicit none
     character(len=256) :: md_cllfile     = ' ' !< File containing distribution of calibration definitions area percentage
 
 ! incremental output
-    character(len=256) :: md_class_map_file = ' ' !< File for output of classes output
+    character(len=256) :: md_classmap_file = ' ' !< File for output of classes output
 
     character(len=200) :: md_snapshotdir   = ' ' !< Directory where hardcopy snapshots should be saved.
                                                  !! Created if non-existent.
@@ -252,6 +253,7 @@ use unstruc_netcdf, only: UNC_CONV_UGRID
     md_foufile = ' '
     md_hisfile = ' '
     md_mapfile = ' '
+    md_classmapfile = ' '
     md_comfile = ' '
     md_timingsfile = ' '
     md_avgwavquantfile = ' '
@@ -263,7 +265,7 @@ use unstruc_netcdf, only: UNC_CONV_UGRID
     md_trtdfile     = ' '
     md_trtlfile     = ' '
     md_mptfile = ' '
-    md_class_map_file = ' '
+    md_classmap_file = ' '
 
     md_snapshotdir   = ' '
 
@@ -1326,8 +1328,6 @@ subroutine readMDUFile(filename, istat)
     call prop_get_doubles(md_ptr, 'output', 'RstInterval'   ,  ti_rst_array, 3, success)
     call getOutputTimeArrays(ti_rst_array, ti_rsts, ti_rst, ti_rste, success)
 
-    call prop_get_double(md_ptr, 'output', 'S1incinterval', S1incinterval, success)
-
 !    call prop_get_string(md_ptr, 'output', 'WaqFileBase', md_waqfilebase, success)
     ! Default basename of Delwaq files is model identifier:
     if (len_trim(md_waqfilebase) == 0) then
@@ -1474,23 +1474,22 @@ subroutine readMDUFile(filename, istat)
     !jasftesttype = -1
     !call prop_get_integer( md_ptr, 'output', 'SecFlowTestType', jasftesttype)
 
-    ! Incremental output
-    charbuf = ' '
+    ! Map classes output (formerly: incremental file)
     ti_classmap_array = 0d0
-    call prop_get_string(md_ptr, 'output', 'ClassMapFile', charbuf, success)
-    if (success) then
-        md_class_map_file = charbuf
+    call prop_get_doubles(md_ptr, 'output', 'ClassMapInterval', ti_classmap_array, 3, success)
+    if (ti_classmap_array(1) /= 0d0) ti_classmap_array(1) = max(ti_classmap_array(1) , dt_user)
+    call getOutputTimeArrays(ti_classmap_array, ti_classmaps, ti_classmap, ti_classmape, success)
 
-        call readClasses('WaterlevelClasses', map_classes_wl)
-        call readClasses('WaterdepthClasses', map_classes_wd)
+    if (ti_classmap > 0d0) then
+       call prop_get_string(md_ptr, 'output', 'ClassMapFile', md_classmap_file, success)
 
-        if (size(map_classes_wd) == 0 .and. size(map_classes_wl) == 0) then
-            call mess(LEVEL_ERROR, 'ClassMapFile given, but no WaterlevelClasses or WaterdepthClasses defined.')
-        endif
+       call readClasses('WaterlevelClasses', map_classes_s1)
+       call readClasses('WaterdepthClasses', map_classes_hs)
 
-        call prop_get_doubles(md_ptr, 'output', 'ClassMapInterval', ti_classmap_array, 3, success)
-        if (ti_classmap_array(1) /= 0d0) ti_classmap_array(1) = max(ti_classmap_array(1) , dt_user)
-        call getOutputTimeArrays(ti_classmap_array, ti_classmaps, ti_classmap, ti_classmape, success)
+       if (size(map_classes_s1) == 0 .and. size(map_classes_hs) == 0) then
+          call mess(LEVEL_ERROR, 'ClassMapInterval given, but no WaterlevelClasses nor WaterdepthClasses defined.')
+       endif
+
     endif
 
     call prop_get_double ( md_ptr, 'equatorial', 'Ampfreeleft'     , amm)
@@ -2490,10 +2489,6 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     ti_rst_array(3) = ti_rste
     call prop_set(prop_ptr, 'output', 'RstInterval', ti_rst_array, 'Restart file output times, given as "interval" "start period" "end period" (s)' )
 
-    if (writeall .or. s1incinterval > 0) then
-       call prop_set(prop_ptr, 'output', 'S1incinterval', s1incinterval,   'Interval (m) in incremental file for water levels S1')
-    endif
-
 !    call prop_set(prop_ptr, 'output', 'WaqFileBase', trim(md_waqfilebase), 'Basename (without extension) for all Delwaq files to be written.')
     ti_waq_array(1) = ti_waq
     ti_waq_array(2) = ti_waqs
@@ -2502,6 +2497,17 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
 
     ti_classmap_array = [ti_classmap, ti_classmaps, ti_classmape]
     call prop_set(prop_ptr, 'output', 'ClassMapInterval', ti_classmap_array, 'Class map output times, given as "interval" "start period" "end period" (s)')
+    call prop_set(prop_ptr, 'output', 'ClassMapFile',     trim(md_classmapfile), 'ClassMapFile name *_clm.nc')
+    if (allocated(map_classes_s1)) then
+       call prop_set(prop_ptr, 'output', 'WaterlevelClasses', map_classes_s1, 'Class map''s list of class values for water levels')
+    else if (writeall) then
+       call prop_set(prop_ptr, 'output', 'WaterlevelClasses', '', 'Class map''s list of class values for water levels')
+    end if
+    if (allocated(map_classes_hs)) then
+       call prop_set(prop_ptr, 'output', 'WaterDepthClasses', map_classes_hs, 'Class map''s list of class values for water depths')
+    else if (writeall) then
+       call prop_set(prop_ptr, 'output', 'WaterDepthClasses', '', 'Class map''s list of class values for water depths')
+    end if
 
     call prop_set(prop_ptr, 'output', 'StatsInterval', ti_stat,        'Screen step output interval in seconds simulation time, if negative in seconds wall clock time')
 

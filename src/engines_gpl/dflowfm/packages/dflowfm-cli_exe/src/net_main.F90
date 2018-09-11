@@ -255,7 +255,7 @@
 
           md_mapfile_base = md_mapfile
           md_flowgeomfile_base = md_flowgeomfile
-          md_classmapfile_base = md_class_map_file
+          md_classmapfile_base = md_classmap_file
 
           do i = 0,  Ndomains - 1
              write(sdmn_loc, '(I4.4)') i
@@ -282,7 +282,7 @@
                 md_flowgeomfile = md_flowgeomfile_base(1:index(md_flowgeomfile_base,'.nc',back=.true.)-1)//'_'//sdmn_loc//".nc"
              endif
              if (len_trim(md_classmapfile_base)>0) then
-                md_class_map_file = md_classmapfile_base(1:index(md_classmapfile_base,'.nc',back=.true.)-1)//'_'//sdmn_loc//".nc"
+                md_classmap_file = md_classmapfile_base(1:index(md_classmapfile_base,'.nc',back=.true.)-1)//'_'//sdmn_loc//".nc"
              endif
              call generatePartitionMDUFile(trim(md_ident)//'.mdu', trim(md_mdu)//'_'//sdmn_loc//'.mdu')
           enddo

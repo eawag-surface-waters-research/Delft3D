@@ -15258,7 +15258,6 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
 
  double precision, intent(in) :: tim !< Current time, should in fact be time1, since all writers use s1, q1, etc.
  double precision             :: time_map_int, time_map_mpt
- double precision             :: time_incr_int, time_incr_mpt
  double precision             :: runtime
  integer                      :: mpt_minval
  character(len=16)            :: filepostfix
@@ -15323,11 +15322,6 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
          else
             tem_dif = (tim - ti_classmaps)/ti_classmap
             time_classmap = max(ti_classmaps + (floor(tem_dif + 0.001d0) +1)*ti_classmap,ti_classmaps)
-            ti_mpt_rel   = ti_mpt - tim
-            time_incr_mpt = tim + minval(ti_mpt_rel, mask=ti_mpt_rel.gt.0)
-            if (comparereal (time_classmap, time_incr_mpt, eps10) == 1 .and. comparereal(tim, time_incr_mpt, eps10) == -1) then
-               time_classmap = time_incr_mpt
-            endif
 
             if (comparereal(time_classmap, ti_classmape, eps10) == 1) then
             ! next time_classmap would be beyond end of incr-window, write one last incr exactly at that end.

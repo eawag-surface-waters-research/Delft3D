@@ -158,6 +158,9 @@ function defaultFilename(filecat, timestamp, prefixWithDirectory, allowWildcard)
     case ('map')
         activeFile = md_mapfile
         suffix     = '_map.nc'
+    case ('clm')
+        activeFile = md_classmap_file
+        suffix     = '_clm.nc'
     case ('fou')
         activeFile = ''
         suffix     = '_fou.nc'
@@ -298,7 +301,7 @@ function defaultFilename(filecat, timestamp, prefixWithDirectory, allowWildcard)
     
     ! Output files are generally stored in a subfolder, so prefix them here with that.
     select case (trim(filecat))
-    case ('his', 'map', 'rstold', 'rst', 'bal', 'histek', 'inc_s1', 'tec', 'map.plt', 'net.plt', 'avgwavquant', 'com')                             !! JRE
+    case ('his', 'map', 'clm', 'rstold', 'rst', 'bal', 'histek', 'inc_s1', 'tec', 'map.plt', 'net.plt', 'avgwavquant', 'com')                             !! JRE
         if (prefix_dir) then
             defaultFilename = trim(getoutputdir())//trim(defaultFilename)
         end if
