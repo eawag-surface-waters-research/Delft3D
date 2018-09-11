@@ -518,7 +518,7 @@ src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/unstruc_ini.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/unstruc_messages.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/unstruc_model.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/unstruc_netcdf.f90 -text
-src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/unstruc_netcdf_incremental.F90 -text
+src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/unstruc_netcdf_incremental.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/unstruc_opengis.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/unstruc_opengl.F90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/unstruc_shapefile.F90 -text

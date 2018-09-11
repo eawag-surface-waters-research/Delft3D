@@ -71,7 +71,7 @@ libdflowfm_la_SOURCES=\
         meteo1.f90 \
         fourier_analysis.f90 \
         unstruc_model.f90 \
-        unstruc_netcdf_incremental.F90 \
+        unstruc_netcdf_incremental.f90 \
         unstruc_files.f90 \
         dredgepolygon.f90 \
         bedform_io.f90 \
