@@ -1216,7 +1216,7 @@ subroutine ini_transport()
       ITRAN = NUMCONST
    end if
    
-   call alloc_transport()
+   call alloc_transport(.false.)
    
    if ( ISALT.gt.0 ) then
       if ( javasal == 6) then
@@ -1324,7 +1324,7 @@ end subroutine ini_transport
 
 
 !> allocate transport arrays
-subroutine alloc_transport()
+subroutine alloc_transport(Keepexisting)
    use m_flowgeom, only: Ndx, Lnx
    use m_flow, only: Lnkx, Ndkx, kmx, sigdifi
    use m_transport
@@ -1334,30 +1334,32 @@ subroutine alloc_transport()
    use m_sediment, only: stm_included, jasedtranspveldebug
    implicit none
    
+   logical, intent(in) :: KeepExisting    !< keep existing data (true) or not (false)
+   
 !  allocate and initialize fluxes
    
-   call realloc(fluxhor, (/ NUMCONST, Lnkx /), keepExisting=.true., fill=0d0)
-   call realloc(fluxver, (/ NUMCONST, Ndkx /), keepExisting=.true., fill=0d0)
+   call realloc(fluxhor, (/ NUMCONST, Lnkx /), keepExisting=KeepExisting, fill=0d0)
+   call realloc(fluxver, (/ NUMCONST, Ndkx /), keepExisting=KeepExisting, fill=0d0)
    
-   call realloc(fluxhortot, (/ NUMCONST, Lnkx /), keepExisting=.true., fill=0d0)
+   call realloc(fluxhortot, (/ NUMCONST, Lnkx /), keepExisting=KeepExisting, fill=0d0)
    
-   call realloc(difsedu, NUMCONST, keepExisting=.true., fill=0d0)
-   call realloc(difsedw, (/ NUMCONST, ndkx /), keepExisting=.true., fill=0d0)
-   call realloc(sigdifi, NUMCONST, keepExisting=.true., fill=0d0)
+   call realloc(difsedu, NUMCONST, keepExisting=KeepExisting, fill=0d0)
+   call realloc(difsedw, (/ NUMCONST, ndkx /), keepExisting=KeepExisting, fill=0d0)
+   call realloc(sigdifi, NUMCONST, keepExisting=KeepExisting, fill=0d0)
  
-   call realloc(constituents, (/ NUMCONST, Ndkx /), keepExisting=.true., fill=0d0)
+   call realloc(constituents, (/ NUMCONST, Ndkx /), keepExisting=KeepExisting, fill=0d0)
    
-   call realloc(const_sour  , (/ NUMCONST, Ndkx /), keepExisting=.true., fill=0d0)
-   call realloc(const_sink  , (/ NUMCONST, Ndkx /), keepExisting=.true., fill=0d0)
+   call realloc(const_sour  , (/ NUMCONST, Ndkx /), keepExisting=KeepExisting, fill=0d0)
+   call realloc(const_sink  , (/ NUMCONST, Ndkx /), keepExisting=KeepExisting, fill=0d0)
    
-   call realloc(dsedx       , (/ NUMCONST, Ndkx /), keepExisting=.true., fill=0d0)
-   call realloc(dsedy       , (/ NUMCONST, Ndkx /), keepExisting=.true., fill=0d0)
+   call realloc(dsedx       , (/ NUMCONST, Ndkx /), keepExisting=KeepExisting, fill=0d0)
+   call realloc(dsedy       , (/ NUMCONST, Ndkx /), keepExisting=KeepExisting, fill=0d0)
    
-   call realloc(thetavert, NUMCONST, keepExisting=.true., fill=0d0)
+   call realloc(thetavert, NUMCONST, keepExisting=KeepExisting, fill=0d0)
    
-   call realloc(const_names, NUMCONST, keepExisting=.true., fill='')
+   call realloc(const_names, NUMCONST, keepExisting=KeepExisting, fill='')
    
-   call realloc(id_const, (/ 2, NUMCONST /), keepExisting=.true., fill = 0)
+   call realloc(id_const, (/ 2, NUMCONST /), keepExisting=KeepExisting, fill = 0)
    
    call realloc(sumhorflux, (/ NUMCONST, Ndkx /), keepExisting=.false., fill=0d0)
    call realloc(ndeltasteps, Ndx, keepExisting=.false., fill=1)
@@ -1399,8 +1401,8 @@ subroutine alloc_transport()
    end if
    
 !  tracer boundary condition
-   call realloc(itrac2const, numtracers, keepExisting=.true., fill=0)   
-   call realloc(ifrac2const, numfracs, keepExisting=.true., fill=0)
+   call realloc(itrac2const, numtracers, keepExisting=KeepExisting, fill=0)   
+   call realloc(ifrac2const, numfracs, keepExisting=KeepExisting, fill=0)
    
    call realloc(qcsrc, (/   NUMCONST, numsrc /), keepExisting=.false., fill=0d0)
    call realloc(vcsrc, (/ 2*NUMCONST, numsrc /), keepExisting=.false., fill=0d0)
@@ -1852,7 +1854,7 @@ subroutine add_tracer(tracer_name, iconst)
    iconst = ITRAN
    
 !  reallocate arrays
-   call alloc_transport()
+   call alloc_transport(.true.)
    
 !  set name
    if ( trim(tracer_name).ne.'' ) then

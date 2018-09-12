@@ -163,7 +163,8 @@ subroutine update_particles_in_cells(numremaining, ierror)
    
    double precision, parameter :: DTOL = 1d-4
    double precision, parameter :: DTOLd  = 1d-4
-   double precision, parameter :: DTOLun = 1d-4
+   double precision, parameter :: DTOLun_rel = 1d-4
+   double precision, parameter :: DTOLun = 1e-14
    
    integer,          parameter :: MAXNUMZERO = 10
    
@@ -274,7 +275,7 @@ subroutine update_particles_in_cells(numremaining, ierror)
 !            end if
 !!           END DEBUG
          
-            if ( un.gt.DTOLun*d ) then   ! normal velocity does not change sign: sufficient to look at u0.n
+            if ( un.gt.max(DTOLun_rel*d,DTOLun) ) then   ! normal velocity does not change sign: sufficient to look at u0.n
    !           compute exit time for this edge: ln(1+ d/un alpha) / alpha
                dvar = alpha(k)*d/un
                if ( dvar.gt.-1d0) then
@@ -342,10 +343,9 @@ subroutine update_particles_in_cells(numremaining, ierror)
 !        disable particle that is not moving
          kpart(ipart) = 0
          dtremaining(ipart) = 0d0
-      end if
          
 !     proceed to neighboring cell (if applicable)
-      if ( Lexit.gt.0 ) then
+      else if ( Lexit.gt.0 ) then
          numremaining = numremaining + 1  ! number of remaining particles for next substep
          if ( edge2cell(1,Lexit).gt.0 .and. edge2cell(2,Lexit).gt.0 ) then   ! internal edge (netlink)
             kpart(ipart) = edge2cell(1,Lexit) + edge2cell(2,Lexit) - k

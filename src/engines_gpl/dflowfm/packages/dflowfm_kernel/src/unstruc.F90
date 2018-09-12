@@ -1593,7 +1593,6 @@ if (japerim == 0) then
        dx1  = dx(L)*acl(L)
        a1(k1) =   a1(k1) + dx1*wid1
        vol1(k1)   = vol1(k1)   + dx1*ar1
-       vol1_f(k1) = vol1_f(k1) + dx1*ar1
     endif
 
     hpr = max(0d0,s1(k2)-bl(k2))
@@ -1602,7 +1601,6 @@ if (japerim == 0) then
        dx2  = dx(L)*(1d0-acl(L))
        a1(k2) =   a1(k2) + dx2*wid2
        vol1(k2)   = vol1(k2)   + dx2*ar2
-       vol1_f(k2) = vol1_f(k2) + dx2*ar2
     endif
 
  else if (hu(L) > 0) then
@@ -1646,7 +1644,6 @@ if (japerim == 0) then
        dx1   = 0.5d0*dx(L)*acl(L)
        if (k1 > ndx2D) dx1 = 2*dx1
        a1(k1)   = a1(k1)   + dx1*wid1
-       vol1_f(k1) = vol1_f(k1) + dx1*ar1
        vol1(k1)   = vol1(k1)   + dx1*ar1
     endif
 
@@ -1656,7 +1653,6 @@ if (japerim == 0) then
        dx2      = 0.5d0*dx(L)*(1d0-acl(L))
        if (k2 > ndx2D) dx2 = 2*dx2
        a1(k2)   = a1(k2)   + dx2*wid2
-       vol1_f(k2) = vol1_f(k2) + dx2*ar2
        vol1(k2)   = vol1(k2)   + dx2*ar2
     endif
 
@@ -1717,7 +1713,6 @@ if (japerim == 0) then
        !if (k1 > ndx2D) dx1 = 2*dx1
        a1(k1)   = a1(k1)   + dx1*wid1
        vol1(k1)   = vol1(k1)   + dx1*ar1
-       vol1_f(k1) = vol1_f(k1) + dx1*ar1
     endif
 
     hpr2 = s1(k2)-BL1                                                                              ! == 5,6: (ibedlevtyp=3), 2D conveyance, link or node
@@ -1727,7 +1722,6 @@ if (japerim == 0) then
        !if (k2 > ndx2D) dx2 = 2*dx2
        a1(k2)   = a1(k2)   + dx2*wid2
        vol1(k2)   = vol1(k2)   + dx2*ar2
-       vol1_f(k2) = vol1_f(k2) + dx2*ar2
     endif
 
  else if (hu(L) > 0d0) then
