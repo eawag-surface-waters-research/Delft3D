@@ -377,10 +377,11 @@ module m_ec_converter
                         if (np>0 .and. mp>0) then
                            wx = (targetElementSet%x(i) - sourceElementSet%x(mp))/(sourceElementSet%x(mp+1) - sourceElementSet%x(mp)) 
                            wy = (targetElementSet%y(i) - sourceElementSet%y(np))/(sourceElementSet%y(np+1) - sourceElementSet%y(np)) 
-                           weight%weightFactors(1,i) = (1.-wx)*(1-wy)                 ! 4        3
-                           weight%weightFactors(2,i) = (   wx)*(1-wy)
-                           weight%weightFactors(3,i) = (   wx)*(  wy)
-                           weight%weightFactors(4,i) = (1.-wx)*(  wy)                 ! 1        2
+                           do jj=0,1
+                              do ii=0,1
+                                 weight%weightFactors(1+ii+2*jj,i) = ((1.-wx)*(1-ii) + wx*ii) * ((1.-wy)*(1-jj) + wy*jj)
+                              enddo
+                           enddo
                         endif
 
                         weight%indices(1,i) = mp
@@ -1484,16 +1485,13 @@ module m_ec_converter
          type(tEcField),       pointer :: targetField      !< helper pointer
          type(tEcIndexWeight), pointer :: indexWeight      !< helper pointer, saved index weights
          type(tEcElementSet),  pointer :: sourceElementSet !< source ElementSet
-         real(hp), dimension(:), pointer   :: targetValues
-         integer                       :: ii, jj
-         integer                       :: nmiss
-         real(hp), dimension(:,:),   pointer :: s2D_T0, s2D_T1   !< 2D representation of linearly indexed array arr1D
-         integer :: n_cols, n_rows, n_points
+         integer :: n_cols, n_points
          integer :: mp, np
          integer :: i, j
          real(hp) :: a0, a1
          real(hp) :: t0, t1
          real(hp), dimension(4) :: wf_i !< helper containing indexWeight%weightFactors(1:4,i)
+         real(hp) :: tmp
          !
          success = .false.
          sourceT0Field    => null()
@@ -1513,7 +1511,6 @@ module m_ec_converter
             sourceElementSet => connection%sourceItemsPtr(1)%ptr%elementSetPtr
             n_points = connection%targetItemsPtr(1)%ptr%elementSetPtr%nCoordinates
             n_cols = sourceElementSet%n_cols
-            n_rows = sourceElementSet%n_rows
             !
             sourceT0Field => connection%sourceItemsPtr(1)%ptr%sourceT0FieldPtr
             sourceT1Field => connection%sourceItemsPtr(1)%ptr%sourceT1FieldPtr
@@ -1521,49 +1518,60 @@ module m_ec_converter
             t1 = sourceT1Field%timesteps
             call time_weight_factors(a0, a1, timesteps, t0, t1)
             !
-            ! TODO: Take care of the allocation of targetValues(n_point)
             do j=1, connection%nSourceItems
                sourceT0Field => connection%sourceItemsPtr(j)%ptr%sourceT0FieldPtr
                sourceT1Field => connection%sourceItemsPtr(j)%ptr%sourceT1FieldPtr
                targetField   => connection%targetItemsPtr(j)%ptr%targetFieldPtr
-               targetValues  => targetField%arr1dPtr
                !
-               s2D_T0(1:n_cols,1:n_rows) => sourceT0Field%arr1d
-               s2D_T1(1:n_cols,1:n_rows) => sourceT1Field%arr1d
-               do i=1, n_points
-                  mp = indexWeight%indices(1,i)
-                  np = indexWeight%indices(2,i)
-                  if (mp > 0 .and. np > 0) then
-                     nmiss = 0
-                     do jj=0,1
-                        do ii=0,1
-                           if ( comparereal(s2D_T0(mp+ii, np+jj), sourceT0Field%missingValue)==0 .or.   &
-                                comparereal(s2D_T1(mp+ii, np+jj), sourceT1Field%missingValue)==0 ) then
-                                nmiss = nmiss + 1
-                           end if
-                        end do
-                     end do
-
-                     if (nmiss>0) then     ! if insufficient data for bi-linear interpolation
-                        continue           ! TODO: fix or mark missings, for now skip
-                     else
-                        if (connection%converterPtr%operandType==operand_replace) then
-                           targetValues(j) = 0.0_hp
-                        end if
+               select case(connection%converterPtr%operandType)
+               case(operand_replace)                        
+                  do i=1, n_points
+                     mp = indexWeight%indices(1,i)
+                     np = indexWeight%indices(2,i)
+                     if (mp > 0 .and. np > 0) then
                         wf_i = indexWeight%weightFactors(1:4,i)
-                        targetValues(i) = targetValues(i)                                 &
-                            + a0 * (wf_i(1)*s2D_T0(mp  ,np)    + &
-                                    wf_i(2)*s2D_T0(mp+1,np)    + &
-                                    wf_i(3)*s2D_T0(mp+1,np+1)  + &
-                                    wf_i(4)*s2D_T0(mp  ,np+1))   &
-                            + a1 * (wf_i(1)*s2D_T1(mp  ,np)    + &
-                                    wf_i(2)*s2D_T1(mp+1,np)    + &
-                                    wf_i(3)*s2D_T1(mp+1,np+1)  + &
-                                    wf_i(4)*s2D_T1(mp  ,np+1))
+                        ! FM's 2D to EC's 1D array mapping requires np = np-1 from this point on.
+                        tmp = a0 * (wf_i(1)*sourceT0Field%arr1d(mp  +n_cols* (np-1))    + &
+                                    wf_i(2)*sourceT0Field%arr1d(mp+1+n_cols* (np-1))    + &
+                                    wf_i(3)*sourceT0Field%arr1d(mp+1+n_cols*((np-1)+1)) + &
+                                    wf_i(4)*sourceT0Field%arr1d(mp  +n_cols*((np-1)+1)))  &
+                              + &
+                              a1 * (wf_i(1)*sourceT1Field%arr1d(mp  +n_cols* (np-1))    + &
+                                    wf_i(2)*sourceT1Field%arr1d(mp+1+n_cols* (np-1))    + &
+                                    wf_i(3)*sourceT1Field%arr1d(mp+1+n_cols*((np-1)+1)) + &
+                                    wf_i(4)*sourceT1Field%arr1d(mp  +n_cols*((np-1)+1)))
+                     
+                        targetField%arr1dPtr(i) = tmp
+                     
                      end if
-                  end if
-               end do
-               targetField%timesteps = timesteps
+                  end do
+                  targetField%timesteps = timesteps
+               case(operand_add)                        
+                  do i=1, n_points
+                     mp = indexWeight%indices(1,i)
+                     np = indexWeight%indices(2,i)
+                     if (mp > 0 .and. np > 0) then
+                        wf_i = indexWeight%weightFactors(1:4,i)
+                        ! FM's 2D to EC's 1D array mapping requires np = np-1 from this point on.
+                        tmp =  a0 * (wf_i(1)*sourceT0Field%arr1d(mp  +n_cols* (np-1))    + &
+                                       wf_i(2)*sourceT0Field%arr1d(mp+1+n_cols* (np-1))    + &
+                                       wf_i(3)*sourceT0Field%arr1d(mp+1+n_cols*((np-1)+1)) + &
+                                       wf_i(4)*sourceT0Field%arr1d(mp  +n_cols*((np-1)+1)))  &
+                                 + &
+                                 a1 * (wf_i(1)*sourceT1Field%arr1d(mp  +n_cols* (np-1))    + &
+                                       wf_i(2)*sourceT1Field%arr1d(mp+1+n_cols* (np-1))    + &
+                                       wf_i(3)*sourceT1Field%arr1d(mp+1+n_cols*((np-1)+1)) + &
+                                       wf_i(4)*sourceT1Field%arr1d(mp  +n_cols*((np-1)+1)))
+                           
+                        targetField%arr1dPtr(i) = targetField%arr1dPtr(i) + tmp
+                           
+                     end if
+                  end do
+                  targetField%timesteps = timesteps
+               case default
+                  call setECMessage("ERROR: ec_converter::ecConverterCurvi: Unsupported operand type requested.")
+                  return
+               end select
                !
             end do
          case default
@@ -1573,6 +1581,17 @@ module m_ec_converter
          success = .true.   
       end function ecConverterCurvi
       
+      function ecConverterGlobal3D(connection, timesteps) result (success)
+         logical                            :: success 
+         type(tEcConnection), intent(inout) :: connection !< access to Converter and Items
+         real(hp),            intent(in)    :: timesteps  !< convert to this number of timesteps past the kernel's reference date
+         success = .True. 
+      end function
+
+
+   
+   
+   
    
       ! =======================================================================
       !> Perform the configured conversion, if supported, for a arcinfo FileReader.
@@ -2415,10 +2434,12 @@ module m_ec_converter
                                  val = 0d0   ! (down-up,old-new)
                                  do ll=1,2
                                     do kk=1,2
-                                       val(kk,ll) = val(kk,ll) + sourcevals(1, 1, kk, ll) * indexWeight%weightFactors(1,j)    !   4      3
-                                       val(kk,ll) = val(kk,ll) + sourcevals(2, 1, kk, ll) * indexWeight%weightFactors(2,j)
-                                       val(kk,ll) = val(kk,ll) + sourcevals(2, 2, kk, ll) * indexWeight%weightFactors(3,j)
-                                       val(kk,ll) = val(kk,ll) + sourcevals(1, 2, kk, ll) * indexWeight%weightFactors(4,j)    !   1      2
+                                       do jj=1,2
+                                          do ii=1,2
+                                              weight = indexWeight%weightFactors(ii+2*(jj-1),j)
+                                              val(kk,ll) = val(kk,ll) + weight * sourcevals(ii, jj, kk, ll)
+                                          end do
+                                       end do
                                     end do
                                  end do                                 
                                  ! get weights for vertical interpolation
@@ -2483,15 +2504,13 @@ module m_ec_converter
                               missing(j) = .True.    ! Mark missings in the target grid in a temporary logical array  
                               if (allocated(x_extrapolate)) x_extrapolate(j)=ec_undef_hp
                            else
-                              targetValues(j) = targetValues(j) + a0 * s2D_T0(mp  , np  ) * indexWeight%weightFactors(1,j)        !  4                 3
-                              targetValues(j) = targetValues(j) + a1 * s2D_T1(mp  , np  ) * indexWeight%weightFactors(1,j)
-                              targetValues(j) = targetValues(j) + a0 * s2D_T0(mp+1, np  ) * indexWeight%weightFactors(2,j)
-                              targetValues(j) = targetValues(j) + a1 * s2D_T1(mp+1, np  ) * indexWeight%weightFactors(2,j)
-                              targetValues(j) = targetValues(j) + a0 * s2D_T0(mp+1, np+1) * indexWeight%weightFactors(3,j)
-                              targetValues(j) = targetValues(j) + a1 * s2D_T1(mp+1, np+1) * indexWeight%weightFactors(3,j)
-                              targetValues(j) = targetValues(j) + a0 * s2D_T0(mp  , np+1) * indexWeight%weightFactors(4,j)
-                              targetValues(j) = targetValues(j) + a1 * s2D_T1(mp  , np+1) * indexWeight%weightFactors(4,j)        !  1                 2
-                           
+                              do jj=0,1
+                                 do ii=0,1
+                                    weight = indexWeight%weightFactors(1+ii+2*jj,j)
+                                    targetValues(j) = targetValues(j) + a0 * weight * s2D_T0(mp+ii, np+jj)
+                                    targetValues(j) = targetValues(j) + a1 * weight * s2D_T1(mp+ii, np+jj)
+                                 end do
+                              end do
                               if (allocated(x_extrapolate)) x_extrapolate(j)=targetElementSet%x(j)
                            end if
                         end if
