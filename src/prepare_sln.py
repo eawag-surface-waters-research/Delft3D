@@ -84,6 +84,10 @@ libdir["fortran1832"] = "$(IFORT_COMPILER18)\\compiler\\lib\\ia32"
 libdir["c1832"] = libdir["fortran1832"]
 libdir["fortran1864"] = "$(IFORT_COMPILER18)\\compiler\\lib\\intel64"
 libdir["c1864"] = libdir["fortran1864"]
+libdir["fortran1932"] = "$(IFORT_COMPILER19)\\compiler\\lib\\ia32"
+libdir["c1932"] = libdir["fortran1932"]
+libdir["fortran1964"] = "$(IFORT_COMPILER19)\\compiler\\lib\\intel64"
+libdir["c1964"] = libdir["fortran1964"]
 
 #
 #
@@ -125,6 +129,10 @@ redistdir["fortran1832"] = "$(IFORT_COMPILER18)redist\\ia32\\compiler\\&quot"
 redistdir["c1832"] = "$(IFORT_COMPILER18)redist\\ia32\\compiler\\"
 redistdir["fortran1864"] = "$(IFORT_COMPILER18)redist\\intel64\\compiler\\&quot"
 redistdir["c1864"] = "$(IFORT_COMPILER18)redist\\intel64\\compiler\\"
+redistdir["fortran1932"] = "$(IFORT_COMPILER19)redist\\ia32\\compiler\\&quot"
+redistdir["c1932"] = "$(IFORT_COMPILER19)redist\\ia32\\compiler\\"
+redistdir["fortran1964"] = "$(IFORT_COMPILER19)redist\\intel64\\compiler\\&quot"
+redistdir["c1964"] = "$(IFORT_COMPILER19)redist\\intel64\\compiler\\"
 
 #
 #
@@ -611,13 +619,14 @@ def build_gui():
     
     if chooseIfort == 1:
         Label(text="IFORT Version:", relief=RIDGE, width=20).grid(row=0, column=2)
-        Radiobutton(root, text="IFORT18: (not tested yet)                      ", variable=ifort_gui, value=18).grid(row=1, column=2, sticky=W)
-        Radiobutton(root, text="IFORT17: (NOT Recommended)                     ", variable=ifort_gui, value=17).grid(row=2, column=2, sticky=W)
-        Radiobutton(root, text="IFORT16: Intel Parallel Studio XE 2016 Update 4", variable=ifort_gui, value=16).grid(row=3, column=2, sticky=W)
-        Radiobutton(root, text="IFORT15: Intel Parallel Studio XE 2015 Update 6", variable=ifort_gui, value=15).grid(row=4, column=2, sticky=W)
-        Radiobutton(root, text="IFORT14: Intel Visual Fortran Composer XE 2014 ", variable=ifort_gui, value=14).grid(row=5, column=2, sticky=W)
-        Radiobutton(root, text="IFORT13: Intel Visual Fortran Composer XE 2013 ", variable=ifort_gui, value=13).grid(row=6, column=2, sticky=W)
-        Radiobutton(root, text="IFORT12: Intel Visual Fortran Composer XE 2011 ", variable=ifort_gui, value=12).grid(row=7, column=2, sticky=W)
+        Radiobutton(root, text="IFORT19: (not tested yet)                      ", variable=ifort_gui, value=19).grid(row=1, column=2, sticky=W)
+        Radiobutton(root, text="IFORT18: (not tested yet)                      ", variable=ifort_gui, value=18).grid(row=2, column=2, sticky=W)
+        Radiobutton(root, text="IFORT17: (Not Recommended)                     ", variable=ifort_gui, value=17).grid(row=3, column=2, sticky=W)
+        Radiobutton(root, text="IFORT16: Intel Parallel Studio XE 2016 Update 4", variable=ifort_gui, value=16).grid(row=4, column=2, sticky=W)
+        Radiobutton(root, text="IFORT15: Intel Parallel Studio XE 2015 Update 6", variable=ifort_gui, value=15).grid(row=5, column=2, sticky=W)
+        Radiobutton(root, text="IFORT14: Intel Visual Fortran Composer XE 2014 ", variable=ifort_gui, value=14).grid(row=6, column=2, sticky=W)
+        Radiobutton(root, text="IFORT13: Intel Visual Fortran Composer XE 2013 ", variable=ifort_gui, value=13).grid(row=7, column=2, sticky=W)
+        Radiobutton(root, text="IFORT12: Intel Visual Fortran Composer XE 2011 ", variable=ifort_gui, value=12).grid(row=8, column=2, sticky=W)
         # default value
         ifort_gui.set(16)
     else:
