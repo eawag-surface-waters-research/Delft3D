@@ -332,6 +332,7 @@ module m_flow1d_reader
 
    subroutine read_1d_model(md_flow1d_file, md_ptr, network, nc_outputdir)
    
+      use system_utils
       use string_module
       use m_globalParameters
       use messageHandling
@@ -385,6 +386,7 @@ module m_flow1d_reader
       integer                         :: timerReadRoughness = 0
       integer                         :: timerReadBoundData = 0
       integer                         :: timerFileUnit
+      integer                         :: res 
       
       call timini()
       timon = .true.
@@ -402,8 +404,9 @@ module m_flow1d_reader
       backslash = index(md_flow1d_file, '\', back = .true.)
       posslash = max(slash, backslash)
 
-      nc_outputdir = trim(md_flow1d_file(1:posslash))//'output/'
-      
+      nc_outputdir = trim(md_flow1d_file(1:posslash))//'output'
+      res = makedir(nc_outputdir)
+      nc_outputdir = trim(nc_outputdir)//'/'
       ! Model Parameters
       inputfile=''
       success = .true.

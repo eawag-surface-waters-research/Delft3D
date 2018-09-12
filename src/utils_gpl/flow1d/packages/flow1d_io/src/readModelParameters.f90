@@ -385,19 +385,20 @@ module m_readModelParameters
       modelTimeStepData%outputTimeStep = outputGrid
          
       ! restart data
-      call prop_get_string(md_ptr, 'restart', 'starttime', startTime, success)   
-      if (success) call prop_get_string(md_ptr, 'restart', 'stoptime', stopTime, success)   
+      call prop_get_string(md_ptr, 'restart', 'restartstarttime', startTime, success)   
+      if (success) call prop_get_string(md_ptr, 'restart', 'restartstoptime', stopTime, success)   
       if (success) call prop_get_double(md_ptr, 'restart', 'restarttimestep', timeStep, success)   
-   
-      if (success) then
+      if (success) call prop_get_logical(md_ptr, 'restart', 'writeRestart', modelTimeStepData%writerestart, success)   
       
+      if (success .and. modelTimeStepData%writerestart) then
+         
          if (timeStep <= 0.0d0) then
             call SetMessage(LEVEL_FATAL, 'Error Reading Date Time Data: Time Step must be > 0.0')
          endif
 
          read (startTime, '(I4,1X,I2,1X,I2,1X,I2,1X,I2,1X,I2)') iYear, iMonth, iDay, iHour, iMinute, iSecond
          julDate = julian(iYear, iMonth, iDay, iHour, iMinute, iSecond)
-         RestartTime = nint((juldate - modelTimeStepData%julianStart)*86400)
+         RestartTime = nint(max((juldate - modelTimeStepData%julianStart)*86400,0d0))
          modelTimeStepData%nextRestarttimestep =restartTime/modelTimeStepData%timeStep
          
          read (stopTime, '(I4,1X,I2,1X,I2,1X,I2,1X,I2,1X,I2)') iYear, iMonth, iDay, iHour, iMinute, iSecond
@@ -409,9 +410,25 @@ module m_readModelParameters
             call SetMessage(LEVEL_FATAL, 'Error Reading Date Time Data: Output Time Step must be multiple of Time Step')
          endif
          modelTimeStepData%restartInterval = nint(timeStep/modelTimeStepData%timeStep)
-      else 
+      elseif (.not. success) then
+         
+         ! TODO remove this part in due time, for now it stays compatibility reasons:
          modelTimeStepData%nextRestarttimestep = nint((modelTimeStepData%julianEnd - modelTimeStepData%julianStart) * 86400)
+
+         call prop_get_logical(md_ptr, 'SimulationOptions', 'WriteRestart', modelTimeStepData%writeRestart, success) 
+
       endif
+      
+      success = .true.
+      modelTimeStepData%restartFile =  '  '
+      call prop_get_string(md_ptr, 'restart', 'restartfile', modelTimeStepData%restartFile, success)   
+      modelTimeStepData%userestart = (len_trim(modelTimeStepData%restartFile)>0) .and. success
+      
+      if (.not. success) then
+         ! TODO remove this part in due time, for now it stays compatibility reasons:
+         call prop_get_logical(md_ptr, 'SimulationOptions', 'UseRestart',   modelTimeStepData%useRestart,   success) 
+      endif
+      
       
    end subroutine readDateTimeStepData
    
@@ -619,7 +636,6 @@ module m_readModelParameters
       call AddOrReplaceParameter(category, 'TimersOutputFrequency', '0', .true.)
       call AddOrReplaceParameter(category, 'use1d2dcoupling', '0', .true.)
       call AddOrReplaceParameter(category, 'UseEnergyHeadStructures', '0', .true.)
-      call AddOrReplaceParameter(category, 'UseRestart', '0', .true.)
       call AddOrReplaceParameter(category, 'UseTimers', '0', .true.)
       call AddOrReplaceParameter(category, 'Usevariableteta', '0', .true.)
       call AddOrReplaceParameter(category, 'UseWlevStateFile', '0', .true.)
@@ -627,7 +643,6 @@ module m_readModelParameters
       call AddOrReplaceParameter(category, 'VolumeCorrection', '0', .true.)
       call AddOrReplaceParameter(category, 'WaterQualityInUse', '0', .true.)
       call AddOrReplaceParameter(category, 'WriteNetCDF', '0', .true.)
-      call AddOrReplaceParameter(category, 'WriteRestart', '0', .true.)
 
       category = 'AdvancedOptions'
       call AddOrReplaceParameter(category, 'CacheMode', 'none', .true.)

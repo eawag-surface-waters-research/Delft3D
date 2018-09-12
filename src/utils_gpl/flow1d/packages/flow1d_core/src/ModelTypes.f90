@@ -1,4 +1,5 @@
 module ModelTypes
+   use messageHandling 
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2017-2018.                                
@@ -45,6 +46,10 @@ module ModelTypes
         integer          :: restartendTimestep
         integer          :: restartInterval            ! output timestep in seconds
         integer          :: nextRestarttimestep            ! output timestep in seconds
+        logical          :: writerestart
+        logical          :: userestart
+        
+        character(len=Charln) :: restartFile
         ! model state variables with dimension of number of points / cells
     end type
 end module
