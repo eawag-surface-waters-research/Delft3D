@@ -421,8 +421,9 @@ module m_readModelParameters
       
       success = .true.
       modelTimeStepData%restartFile =  '  '
-      call prop_get_string(md_ptr, 'restart', 'restartfile', modelTimeStepData%restartFile, success)   
-      modelTimeStepData%userestart = (len_trim(modelTimeStepData%restartFile)>0) .and. success
+      modelTimeStepData%useRestart = .false.
+      call prop_get_logical(md_ptr, 'restart', 'UseRestart',   modelTimeStepData%useRestart,   success) 
+      if (success) call prop_get_string (md_ptr, 'restart', 'restartfile', modelTimeStepData%restartFile, success)   
       
       if (.not. success) then
          ! TODO remove this part in due time, for now it stays compatibility reasons:
