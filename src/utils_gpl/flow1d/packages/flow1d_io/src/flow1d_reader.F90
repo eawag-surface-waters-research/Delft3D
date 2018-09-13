@@ -145,7 +145,7 @@ module m_flow1d_reader
       
    end subroutine read_1d_mdu
 
-   subroutine read_1d_attributes(md_flow1d_file, network)
+   subroutine read_1d_attributes(filenames, network)
 
       use string_module
       use m_globalParameters
@@ -168,8 +168,8 @@ module m_flow1d_reader
       implicit none
       
       ! Variables
-      character(len=*), intent(in)        :: md_flow1d_file
-      type(t_network), intent(inout)      :: network
+      type(t_filenames), intent(in)   :: filenames
+      type(t_network), intent(inout)  :: network
       
       type(tree_data), pointer        :: md_ptr
       character(len=charln)           :: inputfile
@@ -190,8 +190,12 @@ module m_flow1d_reader
       integer                         :: timerReadRetentions= 0
       integer                         :: timerReadRoughness = 0
       integer                         :: timerFileUnit
+      character(len=255)              :: md_flow1d_file
 
       ! Convert c string to fortran string and read md1d file into tree
+      
+      md_flow1d_file = filenames%onednetwork
+      
       call tree_create(trim(md_flow1d_file), md_ptr, maxlenpar)
       call prop_inifile(trim(md_flow1d_file), md_ptr, istat)
       if (istat /= 0) then
@@ -233,9 +237,14 @@ module m_flow1d_reader
       call SetMessage(LEVEL_INFO, 'Reading Cross Section Definitions ...')
       
       ! Read cross section definition file
-      inputfile=''
-      call prop_get_string(md_ptr, 'files', 'crossDefFile', inputfile, success)
-      inputfile = trim(folder)//inputfile
+      if (len_trim(filenames%cross_section_definitions) == 0) then
+         inputfile=''
+         call prop_get_string(md_ptr, 'files', 'crossDefFile', inputfile, success)
+         inputfile = trim(folder)//inputfile
+      else
+         inputfile = filenames%cross_section_definitions
+      endif
+      
       call remove_all_spaces(inputfile)
       if (success .and. len_trim(inputfile) > 0) then
          call readCrossSectionDefinitions(network, inputfile)

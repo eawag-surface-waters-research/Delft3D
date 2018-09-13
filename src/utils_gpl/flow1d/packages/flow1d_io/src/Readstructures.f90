@@ -201,7 +201,7 @@ module m_readstructures
                case ('pump')
                   iStrucType = ST_PUMP
                
-               case ('orifice')
+               case ('orifice', 'gate')
                   iStrucType = ST_ORIFICE
                
                case ('generalstructure')
