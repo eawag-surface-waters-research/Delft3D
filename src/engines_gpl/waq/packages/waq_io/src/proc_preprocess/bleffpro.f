@@ -30,7 +30,7 @@
 ! * the user may specify the photosynthetic curves tablelized          *
 ! **********************************************************************
 !
-      subroutine bleffpro(lunrep, lunblm, nuecog, nz, power, effic, zvec, fun, der) 
+      subroutine bleffpro(lunrep, lunblm, nuecog, npoint, power, effic, nz, zvec, fun, der) 
       
       implicit none 
       dimension power(51),solvec(51),effic(51,30),fun(51,30),der(51,30),

@@ -42,7 +42,7 @@
      &       daymul(24,maxspe), dl(24)
       character*8 token,                  spnam2 (maxspe)
       integer gets, posit, match, uprcas, stos, lenstr, wipe
-      integer numtyp, lentok, irc, i, j, lenspe, nfnd, nz
+      integer numtyp, lentok, irc, i, j, lenspe, nfnd, npoint, nz
       real    tefcur
       character*1000 line
       integer(4) :: ithndl = 0
@@ -109,7 +109,7 @@
 !
 !  Let bleffpro read the lightcurves, and calculate the efficiency database from that
 !
-         call bleffpro(lunrep, lunblm, numtyp, nz, power, effic, zvec, fun, der) 
+         call bleffpro(lunrep, lunblm, numtyp, npoint, power, effic, nz, zvec, fun, der) 
       end if
 
       do 320 i=1,24
@@ -133,8 +133,8 @@
 ! Write the light curves the groups that were selected.
 !
       if (verspe.ge.2.0) then
-          write (lunfrm,291) nz, tefcur, 'lightintensity_efficiency_curves'
-          do 335 i=1,nz
+          write (lunfrm,291) npoint, tefcur, 'lightintensity_efficiency_curves'
+          do 335 i=1,npoint
              write (lunfrm,301) power(i), (effic(i,ifnd(j)),j=1,nuecog)
   335     continue
       end if
