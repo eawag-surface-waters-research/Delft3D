@@ -45,7 +45,7 @@ module m_flow1d_reader
    
    contains
    
-   subroutine read_1d_mdu(md_flow1d_file, network, got_1d_network)
+   subroutine read_1d_mdu(filenames, network, got_1d_network)
 
       use string_module
       use m_globalParameters
@@ -68,7 +68,7 @@ module m_flow1d_reader
       implicit none
       
       ! Variables
-      character(len=*), intent(inout)     :: md_flow1d_file
+      type(t_filenames), intent(in)       :: filenames
       type(t_network), intent(inout)      :: network
       logical, intent(out)                :: got_1d_network
       
@@ -82,18 +82,21 @@ module m_flow1d_reader
       logical                         :: success
       
       integer                         :: istat
+      character(len=255)              :: md1d_flow1d_file
+
+      md1d_flow1d_file = filenames%onednetwork
 
       ! Check on Empty File Name
-      if (len_trim(md_flow1d_file) <= 0) then
+      if (len_trim(md1d_flow1d_file) <= 0) then
          got_1d_network = .false.
          return
       endif
 
       ! Convert c string to fortran string and read md1d file into tree
-      call tree_create(trim(md_flow1d_file), md_ptr, maxlenpar)
-      call prop_inifile(trim(md_flow1d_file), md_ptr, istat)
+      call tree_create(trim(md1d_flow1d_file), md_ptr, maxlenpar)
+      call prop_inifile(trim(md1d_flow1d_file), md_ptr, istat)
       if (istat /= 0) then
-            call setmessage(LEVEL_FATAL, 'Error opening md1d file ' // trim(md_flow1d_file))
+            call setmessage(LEVEL_FATAL, 'Error opening md1d file ' // trim(md1d_flow1d_file))
       endif
 
       success = .true.
@@ -103,8 +106,8 @@ module m_flow1d_reader
          numstr = size(md_ptr%child_nodes)
       end if
       
-      slash = index(md_flow1d_file, '/', back = .true.)
-      backslash = index(md_flow1d_file, '\', back = .true.)
+      slash = index(md1d_flow1d_file, '/', back = .true.)
+      backslash = index(md1d_flow1d_file, '\', back = .true.)
       posslash = max(slash, backslash)
 
       call SetMessage(LEVEL_INFO, 'Reading Network ...')
@@ -115,7 +118,7 @@ module m_flow1d_reader
          
          ! Try the INI-File due to Morphology 
          call prop_get_string(md_ptr, 'files', 'networkFile', inputfile, success)
-         inputfile = md_flow1d_file(1:posslash)//inputfile
+         inputfile = md1d_flow1d_file(1:posslash)//inputfile
          if (success .and. len_trim(inputfile) > 0) then
             call NetworkReader(network, inputfile)
             if (network%nds%Count < 2 .or. network%brs%Count < 1) then
@@ -190,16 +193,16 @@ module m_flow1d_reader
       integer                         :: timerReadRetentions= 0
       integer                         :: timerReadRoughness = 0
       integer                         :: timerFileUnit
-      character(len=255)              :: md_flow1d_file
+      character(len=255)              :: md1d_flow1d_file
 
       ! Convert c string to fortran string and read md1d file into tree
       
-      md_flow1d_file = filenames%onednetwork
+      md1d_flow1d_file = filenames%onednetwork
       
-      call tree_create(trim(md_flow1d_file), md_ptr, maxlenpar)
-      call prop_inifile(trim(md_flow1d_file), md_ptr, istat)
+      call tree_create(trim(md1d_flow1d_file), md_ptr, maxlenpar)
+      call prop_inifile(trim(md1d_flow1d_file), md_ptr, istat)
       if (istat /= 0) then
-            call setmessage(LEVEL_FATAL, 'Error opening md1d file ' // trim(md_flow1d_file))
+            call setmessage(LEVEL_FATAL, 'Error opening md1d file ' // trim(md1d_flow1d_file))
       endif
       
       call timini()
@@ -214,12 +217,12 @@ module m_flow1d_reader
          numstr = size(md_ptr%child_nodes)
       end if
       
-      slash = index(md_flow1d_file, '/', back = .true.)
-      backslash = index(md_flow1d_file, '\', back = .true.)
+      slash = index(md1d_flow1d_file, '/', back = .true.)
+      backslash = index(md1d_flow1d_file, '\', back = .true.)
       posslash = max(slash, backslash)
       
       if (posslash > 0) then
-         folder = md_flow1d_file(1:posslash)
+         folder = md1d_flow1d_file(1:posslash)
       else
          folder = ' '
  

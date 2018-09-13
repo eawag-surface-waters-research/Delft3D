@@ -32164,8 +32164,10 @@ end subroutine setbobs_fixedweirs
     enddo
 
     nstrucsg = network%sts%count
+    !do ns = 1, nstrucsg
     do ns = 1, nstrucsg
-       do istru = L1strucsg(ns), L2strucsg(ns)
+       !do istru = L1strucsg(ns), L2strucsg(ns)
+       istru = ns
           pstru => network%sts%struct(istru)
           L = pstru%link_number
           if (hu(l) > 0) then
@@ -32197,7 +32199,7 @@ end subroutine setbobs_fixedweirs
                    call err_flush()
              end select
           endif 
-       enddo
+       !enddo
     enddo
     
  else                                                  ! 3D

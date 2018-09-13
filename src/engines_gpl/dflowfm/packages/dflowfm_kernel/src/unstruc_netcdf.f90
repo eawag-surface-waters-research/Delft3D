@@ -9381,6 +9381,7 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
          if (meshgeom%numedge.eq.-1) then
             ierr = ggeo_count_or_create_edge_nodes(meshgeom%branchidx, meshgeom%branchoffsets, meshgeom%nedge_nodes(1,:), meshgeom%nedge_nodes(2,:), meshgeom%nbranchlengths, start_index, meshgeom%numedge)
             call reallocP(meshgeom%edge_nodes,(/ 2, meshgeom%numedge /), keepExisting = .false.)
+            meshgeom%edge_nodes = 0
             ierr = ggeo_count_or_create_edge_nodes(meshgeom%branchidx, meshgeom%branchoffsets, meshgeom%nedge_nodes(1,:), meshgeom%nedge_nodes(2,:), meshgeom%nbranchlengths, start_index, meshgeom%numedge, meshgeom%edge_nodes)
          endif
          network%numl = meshgeom%numedge
