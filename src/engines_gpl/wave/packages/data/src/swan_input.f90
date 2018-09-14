@@ -1121,6 +1121,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     use properties
     use read_grids
     use time_module
+    use string_module
     implicit none
     !
     type(swan)                  :: sr
@@ -1163,6 +1164,8 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     integer                     :: iter
     integer                     :: n_outpars
     integer                     :: par
+    integer                     :: slash_er
+    integer                     :: slash_ok
     integer, dimension(4)       :: def_ts_hs
     integer, dimension(4)       :: def_ts_tp
     integer, dimension(4)       :: def_ts_wd
@@ -2761,6 +2764,16 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
           enddo
        enddo
     endif
+    !
+    ! In paths:
+    ! Forward slash works fine on both Windows and Linux
+    ! Backward slash does not work on Linux
+    slash_ok = 47 ! /
+    slash_er = 92 ! \
+    call replace_char(sr%flowgridfile, slash_er, slash_ok)
+    do i = 1, sr%nloc
+       call replace_char(sr%pntfilnam(i), slash_er, slash_ok)
+    enddo
     !
     write(*,*) 'Done reading input'
     !
