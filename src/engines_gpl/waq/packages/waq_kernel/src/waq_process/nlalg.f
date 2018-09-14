@@ -91,12 +91,15 @@
       DIN = NO3 / AMOPRF + NH4
       IF ( (NO3 .LT. 0.0) .OR. (NH4 .LT. 0.0) ) DIN = 0.0
 
-      IF (ABS(DIN+KMDIN).LT.1E-20) CALL ERRSYS
-     &                     ('DIN+KMDIN zero in NLALG', 1 )
-      IF (ABS(PO4+KMP).LT.1E-20) CALL ERRSYS
-     &                     ('PO4+KMP zero in NLALG', 1 )
-      IF ( (KMSI .NE. -1.0) .AND. (ABS(SI+KMSI).LT.1E-20) ) CALL ERRSYS
-     &                     ('SI+KMSI zero in NLALG', 1 )
+!
+!     AM: These checks are suprefluous, as the limiting factor is set
+!         to zero anyway, if the concentration is negative.
+!     IF (ABS(DIN+KMDIN).LT.1E-20) CALL ERRSYS
+!    &                     ('DIN+KMDIN zero in NLALG', 1 )
+!     IF (ABS(PO4+KMP).LT.1E-20) CALL ERRSYS
+!    &                     ('PO4+KMP zero in NLALG', 1 )
+!     IF ( (KMSI .NE. -1.0) .AND. (ABS(SI+KMSI).LT.1E-20) ) CALL ERRSYS
+!    &                     ('SI+KMSI zero in NLALG', 1 )
 
 !     Nutrient limitation functions (MONOD)
       FN    = DIN / (DIN + KMDIN )
