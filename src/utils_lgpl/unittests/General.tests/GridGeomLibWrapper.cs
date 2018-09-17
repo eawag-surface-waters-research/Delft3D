@@ -64,12 +64,16 @@ namespace General.tests
         /// <param name="c_xpl"></param>
         /// <param name="c_ypl"></param>
         /// <param name="c_zpl"></param>
+        /// <param name="c_nOneDMask"></param>
+        /// <param name="c_oneDmask"></param>
         /// <param name="c_jsferic"></param>
         /// <param name="c_jasfer3D"></param>
         /// <param name="c_jglobe"></param>
         /// <returns></returns>
         [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ggeo_make1D2Dinternalnetlinks", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ggeo_make1D2Dinternalnetlinks_dll(ref int c_npl, [In] ref IntPtr c_xpl, [In] ref IntPtr c_ypl, [In] ref IntPtr c_zpl, ref int c_jsferic, ref int c_jasfer3D, ref int c_jglobe);
+        public static extern int ggeo_make1D2Dinternalnetlinks_dll(ref int c_npl, [In] ref IntPtr c_xpl, [In] ref IntPtr c_ypl, [In] ref IntPtr c_zpl, [In] ref int c_nOneDMask, [In] ref IntPtr c_oneDmask,  ref int c_jsferic, ref int c_jasfer3D, ref int c_jglobe);
+
+
 
         /// <summary>
         /// 
@@ -213,13 +217,13 @@ namespace General.tests
             return ierr;
         }
          
-        public int ggeo_make1D2Dinternalnetlinks(ref int c_nin, ref IntPtr c_xpl, ref IntPtr c_ypl, ref IntPtr c_zpl)
+        public int ggeo_make1D2Dinternalnetlinks(ref int c_nin, ref IntPtr c_xpl, ref IntPtr c_ypl, ref IntPtr c_zpl, ref int c_nOneDMask, ref IntPtr c_oneDmask)
         {
             // the following three variables might become part of the function api
             int c_jsferic = 0;
             int c_jasfer3D = 0;
             int c_jglobe = 0;
-            int ierr = ggeo_make1D2Dinternalnetlinks_dll(ref c_nin, ref c_xpl, ref c_ypl, ref c_zpl, ref c_jsferic, ref c_jasfer3D, ref c_jglobe);
+            int ierr = ggeo_make1D2Dinternalnetlinks_dll(ref c_nin, ref c_xpl, ref c_ypl, ref c_zpl, ref c_nOneDMask, ref c_oneDmask, ref c_jsferic, ref c_jasfer3D, ref c_jglobe);
             return ierr;
         }
 

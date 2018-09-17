@@ -383,7 +383,9 @@ namespace gridgeom.Tests
             IntPtr c_xpl = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * 0);
             IntPtr c_ypl = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * 0);
             IntPtr c_zpl = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * 0);
-            ierr = wrapperGridgeom.ggeo_make1D2Dinternalnetlinks(ref c_npl, ref c_xpl, ref c_ypl, ref c_zpl);
+            int c_nOneDMask = 0;
+            IntPtr c_oneDmask = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * 0);
+            ierr = wrapperGridgeom.ggeo_make1D2Dinternalnetlinks(ref c_npl, ref c_xpl, ref c_ypl, ref c_zpl, ref c_nOneDMask, ref c_oneDmask);
             Assert.That(ierr, Is.EqualTo(0));
 
             //deallocate memory of gridgeom
@@ -535,7 +537,9 @@ namespace gridgeom.Tests
             IntPtr c_xpl = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * 0);
             IntPtr c_ypl = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * 0);
             IntPtr c_zpl = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * 0);
-            ierr = wrapperGridgeom.ggeo_make1D2Dinternalnetlinks(ref c_npl, ref c_xpl, ref c_ypl, ref c_zpl);
+            int c_nOneDMask = 0;
+            IntPtr c_oneDmask = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * 0);
+            ierr = wrapperGridgeom.ggeo_make1D2Dinternalnetlinks(ref c_npl, ref c_xpl, ref c_ypl, ref c_zpl, ref c_nOneDMask, ref c_oneDmask);
             Assert.That(ierr, Is.EqualTo(0));
 
             //10. check if we can call ggeo_get_links_count two times: we  need to (1) deallocate the memory stored in network_ggeo_data and (2) reload the 1d and 2d arrays in memory
@@ -703,7 +707,9 @@ namespace gridgeom.Tests
             IntPtr c_xpl = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * 0);
             IntPtr c_ypl = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * 0);
             IntPtr c_zpl = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * 0);
-            ierr = wrapperGridgeom.ggeo_make1D2Dinternalnetlinks(ref c_npl, ref c_xpl, ref c_ypl, ref c_zpl);
+            int c_nOneDMask = 0;
+            IntPtr c_oneDmask = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * 0);
+            ierr = wrapperGridgeom.ggeo_make1D2Dinternalnetlinks(ref c_npl, ref c_xpl, ref c_ypl, ref c_zpl, ref c_nOneDMask, ref c_oneDmask);
             Assert.That(ierr, Is.EqualTo(0));
 
             //10. get the number of links

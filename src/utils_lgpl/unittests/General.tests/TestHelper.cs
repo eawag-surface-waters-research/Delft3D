@@ -65,11 +65,11 @@ namespace General.tests
             // If 64-bit process, load 64-bit DLL otherwise load the 32 bit dll 
             if (is64bit)
             {
-                path = path + @"\third_party_open\" + libName + @"\src\win32\2005\libsrc\x64\" + NativeLibrary.mode;
+                path = path + @"\third_party_open\" + libName + @"\netCDF 4.6.1\bin";
             }
             else
             {
-                path = path + @"\third_party_open\" + libName + @"\src\win32\2005\libsrc\" + NativeLibrary.mode;
+                path = path + @"\third_party_open\" + libName + @"\netCDF 4.6.1-32\bin";
             }
             var envpath = Environment.GetEnvironmentVariable("PATH");
             if (envpath != null && envpath.Contains(path)) return;
