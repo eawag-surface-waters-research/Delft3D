@@ -223,8 +223,7 @@
     
     subroutine fm_update_crosssections(blchg)
     use precision
-    use m_cell_geometry, only: ba
-    use m_flowgeom, only: ndxi, kcs, dx, wu, nd, wu_mor
+    use m_flowgeom, only: ndxi, kcs, dx, wu, nd, wu_mor, ba_mor
     use m_oned_functions, only:gridpoint2cross
     use unstruc_channel_flow, only: network
     use m_CrossSections, only: t_CSType, CS_TABULATED
@@ -278,7 +277,7 @@
                     ! use blchg as bed level change over the total cell area (can be partly dry)
                     ! to compute the total volume deposited inside the cell
                     !
-                    dvol = blchg(nm)*ba(nm)
+                    dvol = blchg(nm)*ba_mor(nm)
                     !
                     ! compute the total cell length
                     !
@@ -360,19 +359,26 @@
     end subroutine fm_update_crosssections
     
     
-    subroutine fm_update_main_width()
-    use m_flowgeom, only: lnx, lnx1d, lnxi, lnx1Db, wu, wu_mor, LBND1D
+    subroutine fm_update_mor_width_area()
+    use m_flowgeom, only: lnx, lnx1d, lnxi, lnx1Db, wu, wu_mor, LBND1D, bai, ba_mor, bai_mor, ndx, dx, ln, acl, ndx2D, ndx1Db
+    use m_cell_geometry, only: ba
     use unstruc_channel_flow, only: network
     use m_CrossSections, only: t_CSType, CS_TABULATED
 
     type(t_CSType), pointer :: cdef1, cdef2
     integer :: icrs1, icrs2 
-    integer :: L, LL
+    integer :: L, LL, k, k1, k2
     double precision :: factor
     
     ! Set all morphologically active widths to general flow width.
     do L = 1, lnx
         wu_mor(L) = wu(L)
+    enddo
+
+    ! Set all morphologically active areas to general flow area and similar for the inverse 
+    do k = 1, ndx
+        ba_mor(k) = ba(k)
+        bai_mor(k) = bai(k)
     enddo
     
     if (network%brs%Count > 0) then 
@@ -391,15 +397,39 @@
                 wu_mor(L) = wu(L)
             endif
         enddo
-    
+        
         ! Overwrite boundary link morphologically active widths by morphologically active width on inside
         do L = lnxi+1, lnx1Db
             LL = LBND1D(L)
-            wu_mor(LL) = wu_mor(L)
+            wu_mor(L) = wu_mor(LL)
         enddo
+
+        ! Compute morphologically active areas
+        ba_mor(ndx2D+1:ndx1Db) = 0d0 
+        
+        do L = 1, lnx1d
+            k1 = ln(1,L)
+            k2 = ln(2,L)
+            ba_mor(k1) = ba_mor(k1) + dx(L)*wu_mor(L)*acl(L)
+            ba_mor(k2) = ba_mor(k2) + dx(L)*wu_mor(L)*(1d0 - acl(L))
+        enddo 
+        
+        ! Compute morphologically active areas at boundary links
+        do L = lnxi+1, lnx1Db
+            k1 = ln(1,L)
+            k2 = ln(2,L)
+            ba_mor(k1) = dx(L)*wu_mor(L) ! area point outside
+            ba_mor(k2) = ba_mor(k2) + dx(L)*wu_mor(L)*(1d0 - acl(L)) ! area point inside (added to loop above)
+        enddo
+        
+        ! Compute inverse of morphologically active areas
+        do k = ndx2D+1, ndx1Db
+            bai_mor(k) = 1d0/ba_mor(k) 
+        enddo
+        
     endif
     
-    end subroutine fm_update_main_width
+    end subroutine fm_update_mor_width_area
     
     
     end module m_fm_update_crosssections
@@ -2197,7 +2227,7 @@
     use bedcomposition_module
     use sediment_basics_module
     use m_flow     , only: vol0, vol1, s0, s1, hs, u1, kmx, hu, au
-    use m_flowgeom , only: bai, ndxi, nd, wu, bl, ba, ln, dx, ndx, lnx, lnxi, acl, wcx1, wcy1, wcx2, wcy2, xz, yz, wu_mor
+    use m_flowgeom , only: bai, ndxi, nd, wu, bl, ba, ln, dx, ndx, lnx, lnxi, acl, wcx1, wcy1, wcx2, wcy2, xz, yz, wu_mor, ba_mor, bai_mor
     use m_flowexternalforcings, only: nbndz, nbndu, nopenbndsect
     use m_flowparameters, only: epshs, epshu, jawave
     use m_sediment,  only: stmpar, sedtra, mtd, sedtot2sedsus
@@ -2701,7 +2731,7 @@
                             end if
                         end do
                         !trndiv = trndiv + sumflux / max(vol1(nm),dtol)
-                        trndiv = trndiv + sumflux * bai(nm) ! MvO & DR + dimensiecheck levert op * bai ipv /vol1 verandering gemaakt rond release 35807
+                        trndiv = trndiv + sumflux * bai_mor(nm) ! MvO & DR + dimensiecheck levert op * bai ipv /vol1 verandering gemaakt rond release 35807
                     else
                         !
                         ! mass balance includes entrainment and deposition
@@ -2717,8 +2747,8 @@
                             call getkbotktop(nm, kb, kt)
                             k = kb
                         endif
-                        thick0 = vol0(k) * bai(nm)
-                        thick1 = vol1(k) * bai(nm)
+                        thick0 = vol0(k) * bai_mor(nm)
+                        thick1 = vol1(k) * bai_mor(nm)
                         sedflx = sinkse(nm,l) * constituents(j,k) * thick1
                         eroflx = sourse(nm,l)                     * thick0
                         !
@@ -2744,7 +2774,7 @@
                                 sumflux = sumflux - flux
                             end if
                         end do
-                        trndiv = trndiv + sumflux * bai(nm)
+                        trndiv = trndiv + sumflux * bai_mor(nm)
                     endif
                 endif
                 if (bed /= 0.0_fp) then
@@ -2760,7 +2790,7 @@
                             sumflux = sumflux - flux
                         end if
                     end do
-                    trndiv = trndiv + sumflux * bai(nm)
+                    trndiv = trndiv + sumflux * bai_mor(nm)
                 endif
                 !
                 dsdnm = (trndiv+sedflx-eroflx) * dtmor
@@ -2885,8 +2915,8 @@
                             end if
                             if (kfsed(knb)==0 .and. bl(knb)>bl(nm)) then
                                 dv              = thet * fixfac(knb, ll)*frac(knb, ll)
-                                dbodsd(ll, knb) = dbodsd(ll, knb) - dv*bai(knb)
-                                dbodsd(ll, nm)  = dbodsd(ll, nm)  + dv*bai(nm)
+                                dbodsd(ll, knb) = dbodsd(ll, knb) - dv*bai_mor(knb)
+                                dbodsd(ll, nm)  = dbodsd(ll, nm)  + dv*bai_mor(nm)
                                 e_sbn(L,ll)     = e_sbn(L,ll)     + dv/(dtmor*wu_mor(L))
                             end if
                         end do ! L

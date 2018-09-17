@@ -3875,6 +3875,8 @@ end module m_profiles
 
  double precision, allocatable, target :: bare(:)         !< [m2] bottom area, for rain and evaporaton {"location": "face", "shape": ["ndx"]}
  double precision, allocatable     :: bai(:)         !< inv bottom area (m2), if < 0 use table in node type
+ double precision, allocatable, target :: ba_mor (:) !< [m2] morphologically active bottom area, if < 0 use table in node type {"location": "face", "shape": ["ndx"]}
+ double precision, allocatable, target :: bai_mor(:) !< [m-2] inv morphologically active bottom area (m2)
  double precision, allocatable, target :: bl(:)      !< [m] bottom level (m) (positive upward) {"location": "face", "shape": ["ndx"]}
  double precision, allocatable     :: aif(:)         !< cell based skewness ai factor sqrt(1+(dz/dy)**2) = abed/asurface
                                                      !< so that cfu=g(Au/conveyance)**2 = g*aif*(Au/convflat)**2
