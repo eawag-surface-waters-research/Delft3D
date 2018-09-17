@@ -49,6 +49,9 @@
 		<Filter Name="Resource Files" Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe">
 		<File RelativePath="res\version_number.ini"/></Filter>
 		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
+		<File RelativePath="src\dfm_max25_getdata.f90"/>
+		<File RelativePath="src\dfm_max25_read_nc_histories.f90"/>
+		<File RelativePath="src\dfm_max25_write_extremes_his.f90"/>
 		<File RelativePath="src\dfm_merge.F90"/>
 		<File RelativePath="src\dfm_params.F90"/>
 		<File RelativePath="src\dfmoutput_main.F90"/>

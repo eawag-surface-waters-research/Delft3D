@@ -16,6 +16,9 @@ dfmoutput_SOURCES=\
 	dfmoutput_version.F90 \
 	dfm_params.F90 \
 	dfm_merge.F90 \
+	dfm_max25_read_nc_histories.f90
+	dfm_max25_write_extremes_his.f90
+	dfm_max25_getdata.f90
 	dfmoutput_main.F90
 
 # Version number generation (only when in SVN source dir, not for tar.gz dist)

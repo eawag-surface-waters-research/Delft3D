@@ -35,6 +35,7 @@
 !!
 !! Available commands:
 !! * mapmerge - Merge multiple _map.nc files into a single one, intended for merging partioned output files.
+!! * max25    - Filter for histories.
 !! * extract  - (not implemented) Extract time series on certain locations from _his.nc files.
 !! * convert  - (not implemented) Convert old format map files into UGRID compliant map files.
 !!
@@ -46,6 +47,7 @@ use dfmoutput_version_module
 use dfm_params
 use dfm_merge
 use m_alloc
+use dfm_max25_getdata
 !-----------------------------------------------------------------------------------------------------------------------------------
 
 !-----------------------------------------------------------------------------------------------------------------------------------
@@ -55,6 +57,8 @@ integer(I4P)                      :: ierr         !< Error trapping flag.
 character(len=MAXNAMELEN), allocatable :: infiles(:)  !< Input file name(s)
 character(len=MAXNAMELEN)              :: listfile    !< List file containing all input file name(s)
 character(len=MAXNAMELEN), allocatable :: outfiles(:) !< Output file name(s)
+character(len=32        )              :: filter_length  !< filter lengths given for max25
+character(len=32        )              :: var_name       !< variable name given for max25
 character(len=MAXNAMELEN)              :: rec
 integer :: ninfiles, n0
 integer :: i, fp
@@ -89,6 +93,12 @@ call cli%add(group='mapmerge',switch='--time',    switch_ab='-t', help='Only sel
                                                                        '   ''LAST''           last available time in input file.', &
              required=.false.,act='store',def='',valname='TIME[:TIME2]')
 
+!! Set up MAX25 command
+call cli%add_group(group='max25',description='Get max25 value and other derived properties from his file.')
+call cli%add(group='max25',switch='--infile',  switch_ab='-i', help='One input files.',required=.true.,act='store',def=char(0),valname='FILE')
+call cli%add(group='max25',switch='--filterlength', switch_ab='-l', help='Filter length. Default: 13,25',required=.false.,act='store',def='13,25',valname='FILTERLENGTH')
+call cli%add(group='max25',switch='--varname', switch_ab='-v', help='Variable name. Default: waterlevel',required=.false.,act='store',def='waterlevel',valname='WATERLEVEL')
+call cli%add(group='max25',switch='--outfile', switch_ab='-o', help='Write output to file OUTFILE. Default: max25.out',required=.false.,act='store',def='max25.out',valname='OUTFILE')
 
 !! Set up EXTRACT command
 !call cli%add_group(group='extract',description='Extract time series from a his file.')
@@ -176,6 +186,23 @@ if (cli%run_command('mapmerge')) then
    if (ierr /= 0) goto 888
 
    ierr = dfm_merge_mapfiles(infiles, ninfiles, outfiles(1), force)
+
+! MAX25 command for water levels
+else if (cli%run_command('max25')) then
+   call cli%get(group='max25', switch='-i', val = infiles(1), error=ierr)
+   if (ierr /= 0) goto 888
+   call cli%get(group='max25', switch='-o', val = outfiles(1), error=ierr)
+   if (ierr /= 0) goto 888
+   call cli%get(group='max25', switch='-v', val = var_name, error=ierr)
+   if (ierr /= 0) goto 888
+   call cli%get(group='max25', switch='-f', val = filter_length, error=ierr)
+   if (ierr /= 0) goto 888
+
+   if (verbose_mode) then
+      write(*,*) 'arguments for max25: ', trim(infiles(1)), ', ', trim(outfiles(1)), ', ', trim(var_name), ', ', trim(filter_length)
+   endif
+
+   call fmgetdata(trim(infiles(1)), trim(outfiles(1)), trim(var_name), trim(filter_length))
 
 ! EXTRACT command
 else if (cli%run_command('extract')) then
