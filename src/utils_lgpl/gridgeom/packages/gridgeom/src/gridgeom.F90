@@ -73,13 +73,14 @@ end function ggeo_get_start_end_nodes_of_branches
 
 
 
-function ggeo_make1D2Dinternalnetlinks(xplLinks, yplLinks, zplLinks, c_jsferic, c_jasfer3D, c_jglobe) result(ierr)
+function ggeo_make1D2Dinternalnetlinks(xplLinks, yplLinks, zplLinks, oneDmask, c_jsferic, c_jasfer3D, c_jglobe) result(ierr)
 
    use gridoperations
    use m_sferic
    
    integer :: ierr
    double precision, intent(in) :: xplLinks(:), yplLinks(:), zplLinks(:)
+   integer, intent(in)          :: oneDmask(:)
    integer, intent(in)          :: c_jsferic
    integer, intent(in)          :: c_jasfer3D
    integer, intent(in)          :: c_jglobe
@@ -88,7 +89,7 @@ function ggeo_make1D2Dinternalnetlinks(xplLinks, yplLinks, zplLinks, c_jsferic, 
    jasfer3D = c_jasfer3D
    jglobe   = c_jglobe
 
-   ierr = make1D2Dinternalnetlinks(xplLinks, yplLinks, zplLinks)
+   ierr = make1D2Dinternalnetlinks(xplLinks, yplLinks, zplLinks, oneDmask)
 
 end function ggeo_make1D2Dinternalnetlinks
 

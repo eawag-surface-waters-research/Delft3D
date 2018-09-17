@@ -92,7 +92,7 @@ function ggeo_convert_dll(c_meshgeom, c_meshgeomdim, start_index) result(ierr) b
    
 end function ggeo_convert_dll
 
-function ggeo_make1D2Dinternalnetlinks_dll(c_nin, c_xpl, c_ypl, c_zpl, c_jsferic, c_jasfer3D, c_jglobe) result(ierr) bind(C, name="ggeo_make1D2Dinternalnetlinks")
+function ggeo_make1D2Dinternalnetlinks_dll(c_nin, c_xpl, c_ypl, c_zpl, c_nOneDMask, c_oneDmask, c_jsferic, c_jasfer3D, c_jglobe) result(ierr) bind(C, name="ggeo_make1D2Dinternalnetlinks")
 !DEC$ ATTRIBUTES DLLEXPORT :: ggeo_make1D2Dinternalnetlinks_dll
    
    use gridgeom
@@ -101,17 +101,21 @@ function ggeo_make1D2Dinternalnetlinks_dll(c_nin, c_xpl, c_ypl, c_zpl, c_jsferic
    type(c_ptr), intent(in)      :: c_xpl
    type(c_ptr), intent(in)      :: c_ypl
    type(c_ptr), intent(in)      :: c_zpl
+   integer, intent(in)          :: c_nOneDMask
+   type(c_ptr), intent(in)      :: c_oneDmask  
    integer, intent(in)          :: c_jsferic
    integer, intent(in)          :: c_jasfer3D
    integer, intent(in)          :: c_jglobe
    integer                      :: ierr  
    double precision, pointer    :: xplLinks(:), yplLinks(:), zplLinks(:)   
+   integer, pointer             :: oneDmask(:) 
 
    call c_f_pointer(c_xpl, xplLinks, (/c_nin/))
    call c_f_pointer(c_ypl, yplLinks, (/c_nin/))
    call c_f_pointer(c_zpl, zplLinks, (/c_nin/))
+   call c_f_pointer(c_oneDmask, oneDmask, (/c_nOneDMask/))
    
-   ierr = ggeo_make1D2Dinternalnetlinks(xplLinks, yplLinks, zplLinks, c_jsferic, c_jasfer3D, c_jglobe)
+   ierr = ggeo_make1D2Dinternalnetlinks(xplLinks, yplLinks, zplLinks, oneDmask, c_jsferic, c_jasfer3D, c_jglobe)
    
 end function ggeo_make1D2Dinternalnetlinks_dll
 !> Make 1d-2d roofs connections

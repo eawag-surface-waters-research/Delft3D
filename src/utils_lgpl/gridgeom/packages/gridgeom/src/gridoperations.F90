@@ -2499,7 +2499,7 @@
    !-----------------------------------------------------------------!
    ! Library public functions
    !-----------------------------------------------------------------!
-   function make1D2Dinternalnetlinks(xplLinks, yplLinks, zplLinks) result(ierr)
+   function make1D2Dinternalnetlinks(xplLinks, yplLinks, zplLinks, oneDmask) result(ierr)
 
    use m_cell_geometry, only: xz, yz
    use network_data
@@ -2510,21 +2510,24 @@
   
    implicit none
 
-   integer          :: K1, K2, K3, L, NC1, NC2, JA, KK2(2), KK, NML, LL
-   integer          :: i, ierr, k, kcell
-   DOUBLE PRECISION :: XN, YN, XK2, YK2, WWU
-   ! optional polygons to reduce the area where the 1D2Dlinks are generated
-   double precision, optional, intent(in) :: xplLinks(:), yplLinks(:), zplLinks(:)
+   !input 
+   double precision, optional, intent(in) :: xplLinks(:), yplLinks(:), zplLinks(:) ! optional polygons to reduce the area where the 1D2Dlinks are generated
+   integer, optional, intent(in)          :: oneDmask(:)
+   
+   !locals
+   integer                                :: K1, K2, K3, L, NC1, NC2, JA, KK2(2), KK, NML, LL
+   integer                                :: i, ierr, k, kcell
+   double precision                       :: XN, YN, XK2, YK2, WWU
    integer                                :: insidePolygons
-
+   
    ierr = 0
-   call SAVENET()
+   call savenet()
    call findcells(0)
 
    KC = 2
    do L = 1,NUML  ! FLAG TO 1 ANY NODE TOUCHED BY SOMETHING 1D
       K1  = KN(1,L) ; K2  = KN(2,L); K3 = KN(3,L)
-      IF (K3 .NE. 4 .AND. K3 .NE. 2 .AND. K3 .NE. 0) THEN ! only for yet-isolated 1D channels with KN(3,L)==1
+      IF (K3 .NE. 4 .AND. K3 .NE. 2 .AND. K3 .NE. 0) THEN ! only for yet-isolated 1D channels with KN(3,L)==1         
          KC(K1) = 1 ; KC(K2) = 1
          if (jadelnetlinktyp == 5 .or. jadelnetlinktyp == 7) then 
             do k  = 1,nmk(k1)
@@ -2539,7 +2542,16 @@
                   kc(k2) = 2 ; exit  ! when already connected by pipe forget it
                endif   
             enddo   
-          endif           
+         endif
+         !Account for oneDmask if present. Assumption is that oneDmask contains 1/0 values
+         if (present(oneDmask)) then
+            if (oneDmask(k1).ne.1) then
+                kc(k1) = 2
+            endif
+            if (oneDmask(k2).ne.1) then
+                kc(k2) = 2
+            endif
+         endif 
       endif
    enddo
 
@@ -2548,7 +2560,7 @@
    else
       kn3typ = 3
    endif
-
+   
    NML  = NUML
    DO K = 1,NUMK
 
