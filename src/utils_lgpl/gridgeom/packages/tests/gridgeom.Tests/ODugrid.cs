@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using NUnit.Framework;
 using General.tests;
 using System.IO;
+using System.Linq;
 using System.Threading;
 
 //To compile and run this test you add NUnit to your visual studio solution and 
@@ -907,6 +908,11 @@ namespace gridgeom.Tests
                 ref meshoned.branchidx, ref meshoned.nedge_nodes, ref meshoned.edge_nodes, ref meshoneddim.nbranches, ref meshoneddim.nnodes,
                 ref meshoneddim.numedge, ref start_index);
             Assert.That(ierr, Is.EqualTo(0));
+
+            //Read the created edge nodes
+            int[] edge_nodes = new int[meshoneddim.numedge * 2];
+            Marshal.Copy(meshoned.edge_nodes, edge_nodes, 0, meshoneddim.numedge * 2);
+            Assert.That(edge_nodes.Contains(0),Is.EqualTo(false));
 
             //8. close file
             ierr = wrapperNetcdf.ionc_close(ref ioncid);
