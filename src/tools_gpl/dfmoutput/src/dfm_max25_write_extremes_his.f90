@@ -55,7 +55,7 @@ real, optional, intent(in)      :: threshold       ! threshold value (optional)
    if (is_above_threshold(val, threshold)) then
       if (abs(val) < 999999.999) then
          write(str(offset:), '(f12.4)') val        ! 'normal' print
-      else if (abs(val) <= 9999999999) then
+      else if (abs(val) <= 9999999999.0) then
          write(str(offset:), '(f12.0)') val        ! print format: big values
       else
          write(str(offset:), '(E12.4)') val        ! print format: very big values
