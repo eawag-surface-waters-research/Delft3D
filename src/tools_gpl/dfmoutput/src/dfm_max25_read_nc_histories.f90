@@ -126,7 +126,7 @@ module read_nc_histories
    end function read_station_names
 
    !> close file
-   function close_nc_his_file result(status)
+   function close_nc_his_file() result(status)
       integer :: status  !< function result
 
       status = nf90_close(ncid)
