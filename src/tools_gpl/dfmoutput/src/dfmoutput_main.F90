@@ -60,7 +60,7 @@ character(len=MAXNAMELEN), allocatable :: outfiles(:) !< Output file name(s)
 character(len=32        )              :: filter_length  !< filter lengths given for max25
 character(len=32        )              :: var_name       !< variable name given for max25
 character(len=MAXNAMELEN)              :: rec
-integer :: ninfiles, n0
+integer :: ninfiles
 integer :: i, fp
 logical :: exist
 logical :: force

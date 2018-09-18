@@ -134,6 +134,62 @@ function ncu_inq_var_fill_real8( ncid, varid, no_fill, fill_value) result(ierr)
    end if
 end function ncu_inq_var_fill_real8
 
+!> Copy all attributes from a variable or dataset into another variable/dataset.
+!! Returns:
+!     nf90_noerr if all okay, otherwise an error code
+!!
+!! Note: The variable in the output file must already exist.
+function ncu_copy_chunking_deflate( ncidin, ncidout, varidin, varidout, ndx ) result(ierr)
+   integer, intent(in)            :: ncidin   !< ID of the input NetCDF file
+   integer, intent(in)            :: ncidout  !< ID of the output NetCDF file
+   integer, intent(in)            :: varidin  !< ID of the variable in the input file, or NF90_GLOBAL for global attributes.
+   integer, intent(in)            :: varidout !< ID of the variable in the output file, or NF90_GLOBAL for global attributes.
+   integer, intent(in), optional  :: ndx      !< Number of flow nodes (internal + boundary) for output file
+
+   integer                        :: ierr
+
+   character(len=nf90_max_name)   :: name
+   integer                        :: storage, ndims, shuffle, deflate, deflate_level
+   integer, allocatable           :: chunksizes(:)
+
+   ierr = -1
+
+   if (varidin /= NF90_GLOBAL) then
+      !
+      ! copy chuncking settings, if available
+      !
+      ierr = nf90_inquire_variable( ncidin, varidin, nDims=ndims, name=name )
+      if (ierr == nf90_noerr .and. ndims > 0) then
+         allocate(chunksizes(ndims))
+         ierr = nf90_inq_var_chunking(ncidin, varidin, storage, chunksizes)
+         if (ierr == 0 .and. storage == nf90_chunked) then
+            !
+            ! chuncking is on for this variable
+            !
+            if (present(ndx)) then
+               !
+               ! first dimension is ndx, update with global ndx
+               !
+               chunksizes(1) = min(ndx, 2000)  ! must be equal to mapclass_chunksize_ndx
+            endif
+            ierr = nf90_def_var_chunking(ncidout, varidout, storage, chunksizes)
+            if (ierr /= 0) write(*,*) 'nf90_def_var_chunking failed for var ', trim(name)
+         endif
+         deallocate(chunksizes)
+      endif
+      !
+      ! copy deflation settings, if available
+      !
+      ierr = nf90_inq_var_deflate(ncidin, varidin, shuffle, deflate, deflate_level)
+      if (ierr == nf90_noerr .and. deflate == 1) then
+         ierr = nf90_def_var_deflate(ncidout, varidout, shuffle, deflate, deflate_level)
+         if (ierr /= 0) write(*,*) 'nf90_def_var_deflate failed for var ', trim(name)
+      endif
+   endif
+
+   ierr = nf90_noerr
+end function ncu_copy_chunking_deflate
+
 end module netcdf_utils
 
    
@@ -174,13 +230,14 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    integer, dimension(nfiles+1) :: ncids, id_timedim, id_facedim, id_edgedim, id_laydim, id_wdim, id_nodedim, &
                                    id_netedgedim, id_netfacedim, id_netfacemaxnodesdim, id_time, id_timestep, id_bnddim !< dim and var ids, maintained for all input files + 1 output file.
    double precision :: convversion
-   integer :: jaugrid, iconvtype, nmesh
+   integer :: jaugrid, iconvtype, formatCode
    integer, dimension(nfiles) :: jaugridi, ioncids
+   logical :: isNetCDF4
    integer, allocatable :: dimids(:,:) !< (nfiles+1:NF90_MAX_DIMS) Used for storing any remaining vectormax dimension IDs
    integer, dimension(nfiles+1), target :: ndx, lnx, ndxg, lnxg, kmx, numk, numl, nump, numkg, numlg, netfacemaxnodes, nt, ndxbnd !< counters, maintained for all input files + 1 output file.
    integer, dimension(:), pointer :: item_counts !< Generalized count pointer, will point to ndx, lnx, numl, or numk during var data reading + writing.
    integer:: noutfile !< array index/position of output file ids, by default the last, i.e., nfiles + 1.
-   integer, allocatable, target  :: face_domain(:), facebnd_domain(:), face_globnr(:), edge_domain(:), node_domain(:), netedge_domain(:) !< Global face/edge/node numbers and their domain number.
+   integer, allocatable, target  :: face_domain(:), facebnd_domain(:), edge_domain(:), node_domain(:), netedge_domain(:) !< Global face/edge/node numbers and their domain number.
    integer,              pointer :: item_domain(:)
    integer, allocatable :: ln(:,:) !< Flow links
    integer, allocatable :: edgenodes(:,:) !< Net links
@@ -194,15 +251,15 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    integer, allocatable :: nfaceedges(:)   ! total number of edges that surround a face
    double precision, allocatable :: node_x(:), node_y(:), edge_x(:), edge_y(:) !< coordinates
    double precision              :: xx, yy
-   integer :: im, ikk, ic, iii, k1c, g1, g2, nfaces, nedges, iedge, iface, tmpvarDim, jafound
+   integer :: im, ikk, ic, iii, k1c, g1, g2, nfaces, iedge, iface, tmpvarDim, jafound
    integer :: ifacefile, ifacein, ifaceout, ifacec
    integer :: id_nodex, id_nodey, id_edgex, id_edgey
-   integer :: intmiss = -2147483647 ! integer fillvlue
+   integer :: intmiss = -2147483647 ! integer fillvalue
    double precision :: dmiss = -999d0, intfillv
 !netface_g2c(:) 
    integer :: id_facedomain, id_faceglobnr, id_edgefaces, id_netfacenodes, id_edgenodes, id_netedgefaces, id_netfaceedges
    integer :: ierri
-   integer :: maxlen, nlen, plen, mlen, ii, id, iv, it, ip, ik, is, ie, nvarsel, ntsel, nvars, ndims, nvardims, vartype, kmx1,i
+   integer :: maxlen, nlen, plen, mlen, ii, id, iv, it, ip, ik, is, ie, nvarsel, ntsel, nvars, ndims, nvardims, vartype
    integer :: netfacemaxnodesg, netnodemaxface=10, ndxc, lnxc, numkc, numlc,ndx_bndc
    integer :: nfaceglob,    nfaceglob0,    nfacecount, ifaceglob
    integer :: nedgeglob,    nedgeglob0,    nedgecount, iedgeglob
@@ -265,7 +322,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    integer,                      allocatable :: itimsel(:)
    double precision,             allocatable :: times(:)
    double precision,             allocatable :: timestep(:)
-   logical :: is_timedep, isfound, needshift, exist
+   logical :: isfound, needshift, exist
    character(len=1) :: answer
    character*8  :: cdate
    character*10 :: ctime
@@ -304,6 +361,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    call dfm_order_by_partition(infiles, nfiles)
 
    ierr = nf90_noerr
+   isNetCDF4 = .false.
    do ii=1,nfiles
       ierri = ionc_open(infiles(ii), NF90_NOWRITE, ioncids(ii), iconvtype, convversion)
       if (ierri /= nf90_noerr) then
@@ -317,6 +375,9 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
             jaugridi(ii) = 0
          endif
       end if
+      ierri = ionc_get_ncid(ioncids(ii), ncids(ii))
+      ierri = nf90_inquire(ncids(ii), formatNum=formatCode)
+      isNetCDF4 = (isNetCDF4 .or. formatCode == nf90_format_netcdf4 .or. formatCode == nf90_format_netcdf4_classic)
    end do
 
    ! check if all the map files are the same format
@@ -386,8 +447,11 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
       end if
    end if
 
-
-   ierr = nf90_create(outfile, ior(NF90_CLOBBER, NF90_64BIT_OFFSET), ncids(noutfile))
+   if (isNetCDF4) then
+      ierr = nf90_create(outfile, NF90_HDF5, ncids(noutfile))
+   else
+      ierr = nf90_create(outfile, ior(NF90_CLOBBER, NF90_64BIT_OFFSET), ncids(noutfile))
+   endif
    if (ierr /= nf90_noerr) then
       write (*,'(a)') 'Error: mapmerge: could not open file for writing: `'//trim(outfile)//'''.'
       if (.not. verbose_mode) goto 888
@@ -751,9 +815,20 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    ierr = nf90_def_dim(ncids(noutfile), 'time', nf90_unlimited, id_timedim(noutfile))
    ierr = nf90_def_var(ncids(noutfile), 'time', nf90_double,    (/ id_timedim(noutfile) /), id_time   (noutfile))
    ierr = ncu_copy_atts(ncids(ifile), ncids(noutfile), id_time(ifile), id_time(noutfile))
+   if (isNetCDF4) then
+      ierr = ncu_copy_chunking_deflate(ncids(ifile), ncids(noutfile), id_time(ifile), id_time(noutfile))
+   endif
 
    ierr = nf90_def_var(ncids(noutfile), 'timestep', nf90_double,    (/ id_timedim(noutfile) /), id_timestep(noutfile))
    ierr = ncu_copy_atts(ncids(ifile), ncids(noutfile), id_timestep(ifile), id_timestep(noutfile))
+   if (isNetCDF4) then
+      ierr = ncu_copy_chunking_deflate(ncids(ifile), ncids(noutfile), id_timestep(ifile), id_timestep(noutfile))
+      if (id_timestep(ifile) < 0) then
+         ! avoid very large chuncksize on Linux for timestep
+         ierr = nf90_def_var_chunking(ncids(noutfile), id_timestep(noutfile), nf90_chunked, [512])
+         if (ierr /= 0) write(*,*) 'nf90_def_var_chunking failed for var timestep'
+      endif
+   endif
 
    !! 3. Construct merged flow geometry (using proper cellmasks, global numbers, etc.
    !! 3a. Count dimensions (removing partition overlap) for merged flow nodes (faces) and flow links (edges).
@@ -820,7 +895,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
       nfaceglob0 = nfaceglob
       face_domain(nfacecount+1:nfacecount+ndx(ii)) = ii-1 ! Just set default domain if FlowElemDomain not present.
       if (jaugrid == 0) then
-      ierr = nf90_inq_varid(ncids(ii), 'FlowElemDomain', id_facedomain)
+         ierr = nf90_inq_varid(ncids(ii), 'FlowElemDomain', id_facedomain)
       else
          ierr = nf90_inq_varid(ncids(ii), 'mesh2d_flowelem_domain', id_facedomain)
       endif
@@ -836,12 +911,12 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
 
       if (ierr == nf90_noerr) then
          if (jaugrid == 0) then
-         ierr = nf90_inq_varid(ncids(ii), 'FlowElemGlobalNr', id_faceglobnr)
+            ierr = nf90_inq_varid(ncids(ii), 'FlowElemGlobalNr', id_faceglobnr)
          else
             ierr = nf90_inq_varid(ncids(ii), 'mesh2d_flowelem_globalnr', id_faceglobnr)
             ! TODO: UNST-1794: generalize to multiple meshes in the UGRID file, a bit like the following:
             ! ierr = ionc_inq_varid(ncids(ii), meshid, 'flowelem_globalnr', id_faceglobnr)
-      end if
+         end if
       end if
       if (ierr == nf90_noerr) then
          ierr = nf90_get_var(ncids(ii), id_faceglobnr, face_c2g(nfacecount+1:nfacecount+ndx(ii)), count=(/ ndx(ii) /))
@@ -872,7 +947,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
       ierr = nf90_inq_varid(ncids(ii), 'FlowLink', id_edgefaces)
       if (ierr == nf90_noerr) then
          ierr = nf90_get_var(ncids(ii), id_edgefaces, ln(:,nedgecount+1:nedgecount+lnx(ii)), count=(/ 2,lnx(ii) /))
-         else
+      else
          write (*,'(a)') 'Warning: mapmerge: could not retrieve FlowLink from `'//trim(infiles(ii))//'''. '
          if (.not. verbose_mode) goto 888
       end if
@@ -910,7 +985,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
       !! 3a.3: handle net nodes (nodes)
       nnodeglob0 = nnodeglob
       if (jaugrid==0) then
-      ierr = nf90_inq_varid(ncids(ii), 'NetElemNode', id_netfacenodes)
+         ierr = nf90_inq_varid(ncids(ii), 'NetElemNode', id_netfacenodes)
       else
          ierr = nf90_inq_varid(ncids(ii), 'mesh2d_face_nodes', id_netfacenodes)
       endif
@@ -984,7 +1059,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
       !! 3a.4: handle net edges (also edges)
       nnetedgeglob0 = nnetedgeglob
       if (jaugrid==0) then
-      ierr = nf90_inq_varid(ncids(ii), 'NetLink', id_edgenodes)
+         ierr = nf90_inq_varid(ncids(ii), 'NetLink', id_edgenodes)
       else
          ierr = nf90_inq_varid(ncids(ii), 'mesh2d_edge_nodes', id_edgenodes)
       endif
@@ -1077,7 +1152,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
          facebnd_domain(nbndcount+1:nbndcount+ndxbnd(ii)) = ii-1
          nbndglob = nbndglob + ndxbnd(ii)
       else if (verbose_mode) then
-            write (*,'(a)') 'Info: mapmerge: no waterlevel boundary in `'//trim(infiles(ii))//'''. '
+         write (*,'(a)') 'Info: mapmerge: no waterlevel boundary in `'//trim(infiles(ii))//'''. '
       endif
       
       ! Intentional: all of these need to be done at very last instant:
@@ -1226,16 +1301,16 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
 
    !! 3b. dimensions for merged flow nodes (faces) and flow links (edges), same for net nodes + links.
    if (jaugrid==0) then
-   ierr = nf90_def_dim(ncids(noutfile), 'nNetElem', ndx(noutfile), id_netfacedim(noutfile)) ! UNST-1256: temp fix, pending proper UGRID support in UNST-1134.
-   ierr = nf90_def_dim(ncids(noutfile), 'nFlowElem', ndx(noutfile), id_facedim(noutfile))
-   ierr = nf90_def_dim(ncids(noutfile), 'nFlowLink', lnx(noutfile), id_edgedim(noutfile))
-   if (kmx(noutfile) > 0) then
-      ierr = nf90_def_dim(ncids(noutfile), 'laydim', kmx(noutfile), id_laydim(noutfile))
-      ierr = nf90_def_dim(ncids(noutfile), 'wdim', kmx(noutfile)+1, id_wdim(noutfile))
-   end if
-   ierr = nf90_def_dim(ncids(noutfile), 'nNetNode', numk(noutfile), id_nodedim(noutfile))
-   ierr = nf90_def_dim(ncids(noutfile), 'nNetLink', numl(noutfile), id_netedgedim(noutfile))
-   ierr = nf90_def_dim(ncids(noutfile), 'nFlowElemBnd', ndxbnd(noutfile), id_bnddim(noutfile))! TODO: Add if ndxbnd > 0
+      ierr = nf90_def_dim(ncids(noutfile), 'nNetElem', ndx(noutfile), id_netfacedim(noutfile)) ! UNST-1256: temp fix, pending proper UGRID support in UNST-1134.
+      ierr = nf90_def_dim(ncids(noutfile), 'nFlowElem', ndx(noutfile), id_facedim(noutfile))
+      ierr = nf90_def_dim(ncids(noutfile), 'nFlowLink', lnx(noutfile), id_edgedim(noutfile))
+      if (kmx(noutfile) > 0) then
+         ierr = nf90_def_dim(ncids(noutfile), 'laydim', kmx(noutfile), id_laydim(noutfile))
+         ierr = nf90_def_dim(ncids(noutfile), 'wdim', kmx(noutfile)+1, id_wdim(noutfile))
+      end if
+      ierr = nf90_def_dim(ncids(noutfile), 'nNetNode', numk(noutfile), id_nodedim(noutfile))
+      ierr = nf90_def_dim(ncids(noutfile), 'nNetLink', numl(noutfile), id_netedgedim(noutfile))
+      ierr = nf90_def_dim(ncids(noutfile), 'nFlowElemBnd', ndxbnd(noutfile), id_bnddim(noutfile))! TODO: Add if ndxbnd > 0
    else
       ierr = nf90_def_dim(ncids(noutfile), 'nmesh2d_face', ndx(noutfile),  id_facedim(noutfile))
       ierr = nf90_def_dim(ncids(noutfile), 'nmesh2d_edge', numl(noutfile), id_netedgedim(noutfile))
@@ -1324,6 +1399,9 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
       end if
 
       ierr = ncu_copy_atts(ncids(ifile), ncids(noutfile), varids(ifile, iv), varids_out(iv))
+      if (isNetCDF4) then
+         ierr = ncu_copy_chunking_deflate(ncids(ifile), ncids(noutfile), varids(ifile, iv), varids_out(iv), ndx(noutfile))
+      endif
 
       ! For Variable 'FlowLink', the flowelem might be outside the domain, and there might be no info. about such flowelem 
       ! in mapfiles, so they are denoted by _FillValue.
@@ -1476,17 +1554,17 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
       ! NOTE: AvD: below we assume that order is kx, kmx, ndx, nt, so not as generic anymore as the var_*dimpos analysis would allow.
       ! Allocate the proper memory space for nf90_get_var without risk of stack overflows in the netcdf lib
 
-      if (var_types(iv) /= nf90_double .and. var_types(iv) /= nf90_int .and. var_types(iv) /= nf90_short) then
+      if (var_types(iv) /= nf90_double .and. var_types(iv) /= nf90_int .and. var_types(iv) /= nf90_short .and. var_types(iv) /= nf90_byte) then
          write (*,'(a,i0,a)') 'Error: mapmerge: encountered unsupported data type ', var_types(iv), ' for variable `'//trim(var_names(iv))//'''.'
          if (.not. verbose_mode) goto 888
       end if
-      
+
       intfillv = dble(intmiss)
       if (var_kxdimpos(iv) == -1 .and. var_laydimpos(iv) == -1  .and. var_wdimpos(iv) == -1) then ! 1D array with no layers and no vectormax (possibly time-dep)
          ! Already allocated at max(lnx, ndx, numk, numl), no risk of stack overflow
          if (var_types(iv) == nf90_double) then
             tmpvarptr(1:1,1:1,1:maxitems)  =>  tmpvar1D(:)
-         else if (var_types(iv) == nf90_int .or. var_types(iv) == nf90_short) then
+         else if (var_types(iv) == nf90_int .or. var_types(iv) == nf90_short .or. var_types(iv) == nf90_byte) then
             itmpvarptr(1:1,1:1,1:maxitems) => itmpvar1D(:)
          end if
          tmpvarDim = 1
@@ -1573,7 +1651,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
             if (var_kxdimpos(iv) == -1 .and. var_laydimpos(iv) == -1  .and. var_wdimpos(iv) == -1) then ! 1D array with no layers and no vectormax (possibly time-dep)
                if (var_types(iv) == nf90_double) then
                   ierr = nf90_get_var(ncids(ii), varids(ii,iv), tmpvar1D(    nitemglob0+1:), count=count_read(is:ie), start=start_idx(is:ie))
-               else if (var_types(iv) == nf90_int .or. var_types(iv) == nf90_short) then
+               else if (var_types(iv) == nf90_int .or. var_types(iv) == nf90_short .or. var_types(iv) == nf90_byte) then
                   ierr = nf90_get_var(ncids(ii), varids(ii,iv), itmpvar1D(    nitemglob0+1:), count=count_read(is:ie), start=start_idx(is:ie))
                end if
             else if (var_kxdimpos(iv) /= -1 .neqv. var_laydimpos(iv) /= -1) then ! Either a vectormax OR a laydim
@@ -1725,7 +1803,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                     itmpvar2D(:,1:nitemglob) = itmpvar2D_tmp(:,1:nitemglob)
                 end if
             else if (var_loctype(iv) == UNC_LOC_S) then ! variables that locate on faces
-                if (var_types(iv) == nf90_int .or. var_types(iv) == nf90_short) then
+                if (var_types(iv) == nf90_int .or. var_types(iv) == nf90_short .or. var_types(iv) == nf90_byte) then
                   nfacecount = sum(nump(1:ii-1))
                   do ip=1, item_counts(ii)
                      if (item_domain(nfacecount+ip) == ii-1) then
@@ -1782,7 +1860,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                      needshift = .true. ! From now on, all points from this var/file need one or more shifts to the left.
                   end if
                end do
-            else if (var_types(iv) == nf90_int .or. var_types(iv) == nf90_short) then
+            else if (var_types(iv) == nf90_int .or. var_types(iv) == nf90_short .or. var_types(iv) == nf90_byte) then
                do ip=1,item_counts(ii)
                   if (item_domain(nitemcount+ip) == ii-1) then
                      nitemglob = nitemglob+1
@@ -1806,7 +1884,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
          if (var_kxdimpos(iv) == -1 .and. var_laydimpos(iv) == -1 .and. var_wdimpos(iv) == -1) then ! 1D array with no layers and no vectormax (possibly time-dep)
             if (var_types(iv) == nf90_double) then
                ierr = nf90_put_var(ncids(noutfile), varids_out(iv), tmpvar1D, count = count_write(is:ie), start = start_idx(is:ie))
-            else if (var_types(iv) == nf90_int .or. var_types(iv) == nf90_short) then
+            else if (var_types(iv) == nf90_int .or. var_types(iv) == nf90_short .or. var_types(iv) == nf90_byte) then
                ierr = nf90_put_var(ncids(noutfile), varids_out(iv), itmpvar1D, count = count_write(is:ie), start = start_idx(is:ie))
             end if
          else if (var_kxdimpos(iv) /= -1 .neqv. var_laydimpos(iv) /= -1) then ! Either a vectormax OR a laydim
@@ -1853,7 +1931,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
 
    nfacecount = 0
    nedgecount = 0
-   nnodecount = 0   
+   nnodecount = 0
 
    do ii=1,nfiles
       ierr = nf90_put_var(ncids(noutfile), id_part_face_start, nfacecount+1, start=(/ ii /))

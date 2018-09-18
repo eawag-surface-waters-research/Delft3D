@@ -155,7 +155,7 @@ module read_nc_histories
 
       character(len=20) :: cint
 
-      write(cint,'(i20)') cint
+      write(cint,'(i20)') size
       write(*,*) 'Allocation error in ' // subname // ' for variable ' // varname // ' with size ' // trim(adjustl(cint))
       stop -1
    end subroutine allocate_error
