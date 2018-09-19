@@ -17389,7 +17389,7 @@ subroutine fill_valobs()
             call getLbotLtop(LL,Lb,Lt)
             do L = Lb-1, Lt
                klay = L-Lb+2
-               valobs(IPNT_ZWS+klay-1,i) = zws(kb + L-Lb)
+               valobs(IPNT_ZWS+klay-1,i) = bob(1,LL) + hu(L)  !zws(kb + L-Lb)
                
                if ( IVAL_WS1.gt.0 ) then
                   do j=IVAL_WS1,IVAL_WSN
