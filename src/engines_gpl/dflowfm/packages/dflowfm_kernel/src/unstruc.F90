@@ -14562,6 +14562,13 @@ subroutine update_dambreak_breach(startTime, deltaTime)
             if(network%sts%struct(istru)%dambreak%algorithm == 3 .and. startTime > network%sts%struct(istru)%dambreak%t0) then
                !Time in the tim file is relative to the start time
                success = ec_gettimespacevalue_by_itemID(ecInstancePtr, item_dambreakHeightsAndWidthsFromTable, startTime-network%sts%struct(istru)%dambreak%t0)
+               ! NOTE: AvD: the code above works correctly, but is dangerous:
+               ! the addtimespace for dambreak has added each dambreak separately with a targetoffset.
+               ! The gettimespace above, however, gets the values for *all* dambreaks, but with the relative time
+               ! of the *current* dambreak #n.
+               ! This means that if t0 values for all dambreaks are different, then the dambreakHeightsAndWidthsFromTable(1:n-1) have become obsolete now.
+               ! It works, because in the previous loop iterations the values that were then still correct
+               ! have already been set into the %crl and %width values.
                if (success)  then
                   indexHeightsAndLevels = (n - 1) * 2 + 1 
                   network%sts%struct(istru)%dambreak%crl = dambreakHeightsAndWidthsFromTable(indexHeightsAndLevels)
