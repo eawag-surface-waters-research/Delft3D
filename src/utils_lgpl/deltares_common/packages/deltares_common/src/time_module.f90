@@ -212,7 +212,7 @@ module time_module
 
       !> calculates reduced Julian Date base on a integer yyyyddmm
       function ymd2reduced_jul_int(yyyymmdd, reduced_jul_date) result(success)
-         integer,       intent(in)  :: yyyymmdd          !< date as integer YYYYMMDD
+         integer,       intent(in)  :: yyyymmdd          !< date as integer yyyymmdd
          real(kind=hp), intent(out) :: reduced_jul_date  !< output reduced Julian Date number
          logical                    :: success           !< function result
 
