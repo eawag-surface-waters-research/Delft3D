@@ -1,198 +1,35 @@
 !----- AGPL --------------------------------------------------------------------
-!                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
-!                                                                               
-!  This file is part of Delft3D (D-Flow Flexible Mesh component).               
-!                                                                               
-!  Delft3D is free software: you can redistribute it and/or modify              
-!  it under the terms of the GNU Affero General Public License as               
-!  published by the Free Software Foundation version 3.                         
-!                                                                               
-!  Delft3D  is distributed in the hope that it will be useful,                  
-!  but WITHOUT ANY WARRANTY; without even the implied warranty of               
-!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                
-!  GNU Affero General Public License for more details.                          
-!                                                                               
-!  You should have received a copy of the GNU Affero General Public License     
-!  along with Delft3D.  If not, see <http://www.gnu.org/licenses/>.             
-!                                                                               
-!  contact: delft3d.support@deltares.nl                                         
-!  Stichting Deltares                                                           
-!  P.O. Box 177                                                                 
-!  2600 MH Delft, The Netherlands                                               
-!                                                                               
-!  All indications and logos of, and references to, "Delft3D",                  
-!  "D-Flow Flexible Mesh" and "Deltares" are registered trademarks of Stichting 
+!
+!  Copyright (C)  Stichting Deltares, 2017-2018.
+!
+!  This file is part of Delft3D (D-Flow Flexible Mesh component).
+!
+!  Delft3D is free software: you can redistribute it and/or modify
+!  it under the terms of the GNU Affero General Public License as
+!  published by the Free Software Foundation version 3.
+!
+!  Delft3D  is distributed in the hope that it will be useful,
+!  but WITHOUT ANY WARRANTY; without even the implied warranty of
+!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+!  GNU Affero General Public License for more details.
+!
+!  You should have received a copy of the GNU Affero General Public License
+!  along with Delft3D.  If not, see <http://www.gnu.org/licenses/>.
+!
+!  contact: delft3d.support@deltares.nl
+!  Stichting Deltares
+!  P.O. Box 177
+!  2600 MH Delft, The Netherlands
+!
+!  All indications and logos of, and references to, "Delft3D",
+!  "D-Flow Flexible Mesh" and "Deltares" are registered trademarks of Stichting
 !  Deltares, and remain the property of Stichting Deltares. All rights reserved.
-!                                                                               
+!
 !-------------------------------------------------------------------------------
 
 ! $Id$
 ! $HeadURL$
 
-module netcdf_utils
-use netcdf
-use io_netcdf
-implicit none
-
-! Copied from official NetCDF: typeSizes.f90
-integer, parameter ::   OneByteInt = selected_int_kind(2), &
-                        TwoByteInt = selected_int_kind(4), &
-                       FourByteInt = selected_int_kind(9), &
-                      EightByteInt = selected_int_kind(18)
-integer, parameter ::                                          &
-                      FourByteReal = selected_real_kind(P =  6, R =  37), &
-                     EightByteReal = selected_real_kind(P = 13, R = 307)
-
-!> Compatibility function: returns the fill settings for a variable in a netCDF-3 file. 
-interface ncu_inq_var_fill
-   module procedure ncu_inq_var_fill_int4
-   module procedure ncu_inq_var_fill_real8
-end interface ncu_inq_var_fill
-
-contains
-
-!function ncu
-
-
-!> Copy all attributes from a variable or dataset into another variable/dataset.
-!! Returns:
-!     nf90_noerr if all okay, otherwise an error code
-!!
-!! Note: The variable in the output file must already exist.
-function ncu_copy_atts( ncidin, ncidout, varidin, varidout ) result(ierr)
-   integer, intent(in)            :: ncidin   !< ID of the input NetCDF file
-   integer, intent(in)            :: ncidout  !< ID of the output NetCDF file
-   integer, intent(in)            :: varidin  !< ID of the variable in the input file, or NF90_GLOBAL for global attributes.
-   integer, intent(in)            :: varidout !< ID of the variable in the output file, or NF90_GLOBAL for global attributes.
-
-   integer                        :: ierr
-   integer                        :: i
-
-   character(len=nf90_max_name)   :: attname
-   integer                        :: natts
-
-   ierr = -1
-
-   ierr = nf90_inquire_variable( ncidin, varidin, nAtts=natts )
-   if ( ierr == nf90_enotvar ) then
-      ierr = nf90_inquire( ncidin, nAttributes=natts )
-   endif
-   if ( ierr /= nf90_noerr ) then
-      return
-   endif
-
-   do i = 1,natts
-      ierr = nf90_inq_attname( ncidin, varidin, i, attname )
-      if ( ierr /= nf90_noerr ) then
-         return
-      endif
-
-      ierr = nf90_copy_att( ncidin, varidin, attname, ncidout, varidout )
-      if ( ierr /= nf90_noerr ) then
-         return
-      endif
-   enddo
-
-   ierr = nf90_noerr
-end function ncu_copy_atts
-
-!> Compatibility function: returns the fill settings for a variable in a netCDF-3 file. 
-function ncu_inq_var_fill_int4( ncid, varid, no_fill, fill_value) result(ierr)
-   integer,                   intent(in)  :: ncid        !< ID of the NetCDF dataset
-   integer,                   intent(in)  :: varid       !< ID of the variable in the data set
-   integer,                   intent(out) :: no_fill     !< An integer that will always get 1 (for forward compatibility).
-   integer(kind=FourByteInt), intent(out) :: fill_value  !< This will get the fill value for this variable.
-
-   integer :: ierr ! Error status, nf90_noerr = if successful.
-
-   no_fill = 1
-
-   ierr = nf90_get_att(ncid, varid, '_FillValue', fill_value)
-   if (ierr /= nf90_noerr) then
-      fill_value = nf90_fill_int
-      ierr = nf90_noerr
-   end if
-end function ncu_inq_var_fill_int4
-
-
-!> Compatibility function: returns the fill settings for a variable in a netCDF-3 file. 
-function ncu_inq_var_fill_real8( ncid, varid, no_fill, fill_value) result(ierr)
-   integer,                   intent(in)  :: ncid        !< ID of the NetCDF dataset
-   integer,                   intent(in)  :: varid       !< ID of the variable in the data set
-   integer,                   intent(out) :: no_fill     !< An integer that will always get 1 (for forward compatibility).
-   real(kind=EightByteReal),  intent(out) :: fill_value  !< This will get the fill value for this variable.
-
-   integer :: ierr ! Error status, nf90_noerr = if successful.
-
-   no_fill = 1
-
-   ierr = nf90_get_att(ncid, varid, '_FillValue', fill_value)
-   if (ierr /= nf90_noerr) then
-      fill_value = nf90_fill_int
-      ierr = nf90_noerr
-   end if
-end function ncu_inq_var_fill_real8
-
-!> Copy all attributes from a variable or dataset into another variable/dataset.
-!! Returns:
-!     nf90_noerr if all okay, otherwise an error code
-!!
-!! Note: The variable in the output file must already exist.
-function ncu_copy_chunking_deflate( ncidin, ncidout, varidin, varidout, ndx ) result(ierr)
-   integer, intent(in)            :: ncidin   !< ID of the input NetCDF file
-   integer, intent(in)            :: ncidout  !< ID of the output NetCDF file
-   integer, intent(in)            :: varidin  !< ID of the variable in the input file, or NF90_GLOBAL for global attributes.
-   integer, intent(in)            :: varidout !< ID of the variable in the output file, or NF90_GLOBAL for global attributes.
-   integer, intent(in), optional  :: ndx      !< Number of flow nodes (internal + boundary) for output file
-
-   integer                        :: ierr
-
-   character(len=nf90_max_name)   :: name
-   integer                        :: storage, ndims, shuffle, deflate, deflate_level
-   integer, allocatable           :: chunksizes(:)
-
-   ierr = -1
-
-   if (varidin /= NF90_GLOBAL) then
-      !
-      ! copy chuncking settings, if available
-      !
-      ierr = nf90_inquire_variable( ncidin, varidin, nDims=ndims, name=name )
-      if (ierr == nf90_noerr .and. ndims > 0) then
-         allocate(chunksizes(ndims))
-         ierr = nf90_inq_var_chunking(ncidin, varidin, storage, chunksizes)
-         if (ierr == 0 .and. storage == nf90_chunked) then
-            !
-            ! chuncking is on for this variable
-            !
-            if (present(ndx)) then
-               !
-               ! first dimension is ndx, update with global ndx
-               !
-               chunksizes(1) = min(ndx, 2000)  ! must be equal to mapclass_chunksize_ndx
-            endif
-            ierr = nf90_def_var_chunking(ncidout, varidout, storage, chunksizes)
-            if (ierr /= 0) write(*,*) 'nf90_def_var_chunking failed for var ', trim(name)
-         endif
-         deallocate(chunksizes)
-      endif
-      !
-      ! copy deflation settings, if available
-      !
-      ierr = nf90_inq_var_deflate(ncidin, varidin, shuffle, deflate, deflate_level)
-      if (ierr == nf90_noerr .and. deflate == 1) then
-         ierr = nf90_def_var_deflate(ncidout, varidout, shuffle, deflate, deflate_level)
-         if (ierr /= 0) write(*,*) 'nf90_def_var_deflate failed for var ', trim(name)
-      endif
-   endif
-
-   ierr = nf90_noerr
-end function ncu_copy_chunking_deflate
-
-end module netcdf_utils
-
-   
 module dfm_merge
 use netcdf
 use netcdf_utils
@@ -230,7 +67,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    integer, dimension(nfiles+1) :: ncids, id_timedim, id_facedim, id_edgedim, id_laydim, id_wdim, id_nodedim, &
                                    id_netedgedim, id_netfacedim, id_netfacemaxnodesdim, id_time, id_timestep, id_bnddim !< dim and var ids, maintained for all input files + 1 output file.
    double precision :: convversion
-   integer :: jaugrid, iconvtype, formatCode
+   integer :: jaugrid, iconvtype, formatCode, new_ndx
    integer, dimension(nfiles) :: jaugridi, ioncids
    logical :: isNetCDF4
    integer, allocatable :: dimids(:,:) !< (nfiles+1:NF90_MAX_DIMS) Used for storing any remaining vectormax dimension IDs
@@ -256,7 +93,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    integer :: id_nodex, id_nodey, id_edgex, id_edgey
    integer :: intmiss = -2147483647 ! integer fillvalue
    double precision :: dmiss = -999d0, intfillv
-!netface_g2c(:) 
+!netface_g2c(:)
    integer :: id_facedomain, id_faceglobnr, id_edgefaces, id_netfacenodes, id_edgenodes, id_netedgefaces, id_netfaceedges
    integer :: ierri
    integer :: maxlen, nlen, plen, mlen, ii, id, iv, it, ip, ik, is, ie, nvarsel, ntsel, nvars, ndims, nvardims, vartype
@@ -270,7 +107,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    integer :: nnetedgeglob, nnetedgeglob0, nnetedgecount
    integer :: nitemglob, nitemglob0, nitemcount, maxitems
    integer :: nkmxglob
-   
+
    integer :: idom, n1, n2, n3, k1, k2
    integer :: tmpdimids(NF90_MAX_VAR_DIMS)
    ! TODO: Consider to change the type of the following i-variables from double precision to integer.
@@ -317,7 +154,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    integer :: isBndLink = 0, id_infile
    integer :: jamerge_cntv = 1 ! merge topology connectivity variables
    integer :: jaread_sep = 0   ! read the variable seperately
-   
+
    character(len=NF90_MAX_NAME) :: varname, dimname
    integer,                      allocatable :: itimsel(:)
    double precision,             allocatable :: times(:)
@@ -339,7 +176,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    end if
 
    noutfile = nfiles+1
-   ifile      = 1    ! Initially use the first input file as the reference file for merging 
+   ifile      = 1    ! Initially use the first input file as the reference file for merging
    nvars      = 0
    max_nvars  = 0
    ncids      = -1
@@ -410,7 +247,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    enddo
 
 
-   
+
    !! 0b. Open output file
    if (len_trim(outfile) == 0) then
       nlen = len_trim(infiles(1))
@@ -420,7 +257,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
       end if
       Lrst_m = index(infiles(1), '_rst.nc')
       if (Lrst_m > 0) then ! If they are _rst files
-         n1 = index(infiles(1)(1:Lrst_m), '_0000_', .true.) 
+         n1 = index(infiles(1)(1:Lrst_m), '_0000_', .true.)
          outfile = infiles(1)(1:n1) //'merged_'// infiles(1)(n1+6:Lrst_m)//'rst.nc'
          jamerge_cntv = 0
          write (*,'(a)') 'Info: mapmerge: for *_rst.nc files, topology connectivity variables (except for "FlowLink") are not merged.'
@@ -484,7 +321,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
       endif
    enddo
    nDims = file_ndims(ifile) ! nDims is equal to Nr. dimensions in ifile
-   
+
    allocate(dimids(nDims, nfiles+1))
    dimids = -999 ! missing
    do ii=1,nfiles
@@ -608,7 +445,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
       end if
    end do ! ii
 
-   
+
    !! 1b. Scan for variables in the file which has the most dimension (and variables).
    if (verbose_mode) then
       write (*,'(a)') 'Info: mapmerge: Scan for variables in file `'//trim(infiles(ifile))//'''.'
@@ -670,7 +507,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
             var_loctype(ivarcandidate) = UNC_LOC_S
             var_spacedimpos(ivarcandidate) = ifirstdim
          else if (tmpdimids(id) == id_netfacedim(ifile)) then
-            tmpdimids(id) = id_netfacedim(ifile) 
+            tmpdimids(id) = id_netfacedim(ifile)
             ifirstdim = ifirstdim-1
             var_loctype(ivarcandidate) = UNC_LOC_SN       ! UNST-1256: original UNST_LOC_S caused NetElemNode variable in merged file to be on nFlowElem dimension, whereas input is on nNetElem dimension.
             var_spacedimpos(ivarcandidate) = ifirstdim
@@ -696,7 +533,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
             !var_loctype(ivarcandidate) = UNC_LOC_W
             var_wdimpos(ivarcandidate) = ifirstdim
          else if (tmpdimids(id) == id_bnddim(ifile)) then
-            tmpdimids(id) = id_bnddim(ifile) 
+            tmpdimids(id) = id_bnddim(ifile)
             ifirstdim = ifirstdim-1
             var_loctype(ivarcandidate) = UNC_LOC_SBND
             var_spacedimpos(ivarcandidate) = ifirstdim
@@ -739,7 +576,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
          var_wdimpos(ivarcandidate)     = -1
          isfound = .false.
       end if
-   
+
       if (isfound) then
          nvarsel = nvarsel + 1 ! === ivarcandidate
          ! NOTE: Use variable ID from file #1 and assume that all input files contain the same variables, and as such the same consecutive variable IDs.
@@ -795,7 +632,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
       mlen = min(len(tmpstr1), len_trim(tmpstr1)+1)
       tmpstr1(mlen:mlen) = char(10) ! Prepare for our extra history line below by adding newline now already.
    end if
-   
+
    call get_command (tmpstr2, nlen, ierr)
    if (ierr < 0) then ! command did not fit into string, abbreviate it.
       tmpstr2(len(tmpstr2)-2:len(tmpstr2)) = '...'
@@ -875,7 +712,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    call realloc(netedge_domain, numlc, keepExisting=.false., fill=-1)
    call realloc(edgenodes, (/ 2, numlc /), keepExisting=.false.)
    call realloc(netedge_g2c,    numlc, keepExisting=.false.)
-   
+
    ndx_bndc = sum(ndxbnd(1:nfiles))
    call realloc(facebnd_domain, ndx_bndc, keepExisting=.false., fill =-1)
    call realloc(netedge_c2g,    numlc, keepExisting=.false., fill=-1)
@@ -1146,7 +983,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
          end if
       end do
       numlg(ii)   = nnetedgeglob-nnetedgeglob0
-      
+
       !! 3a.5: handle boundary waterlevel points
       if (ndxbnd(ii) > 0) then
          facebnd_domain(nbndcount+1:nbndcount+ndxbnd(ii)) = ii-1
@@ -1154,7 +991,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
       else if (verbose_mode) then
          write (*,'(a)') 'Info: mapmerge: no waterlevel boundary in `'//trim(infiles(ii))//'''. '
       endif
-      
+
       ! Intentional: all of these need to be done at very last instant:
       nedgecount    = nedgecount    + lnx(ii)
       nfacecount    = nfacecount    + ndx(ii)
@@ -1175,8 +1012,8 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
       end if
    end do ! ii
 
-   if (jamerge_cntv == 1) then 
-   !! fulfill node_c2g, because in domain that is larger than 0000, there are nodes which are in this domain but 
+   if (jamerge_cntv == 1) then
+   !! fulfill node_c2g, because in domain that is larger than 0000, there are nodes which are in this domain but
    !  their domain numbers are another domain.
     do ii = 2, nfiles
         nfacecount = sum(nump(1:ii-1))
@@ -1216,12 +1053,12 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                 end do
                 if (jafound == 0 .and. verbose_mode) then
                     write (*,'(a,i0,a)') 'Warning: mapmerge: node_c2g: could not find global number for node # ', ik ,' of file `'//trim(infiles(ii))//'''. '
-                end if 
+                end if
             end if
         end do
     end do
 
-    !! fulfill netedge_c2g, because in domain larger than 0000, there are netedges which are in this domain 
+    !! fulfill netedge_c2g, because in domain larger than 0000, there are netedges which are in this domain
     !  but their domain numbers are another domain.
     do ii = 2, nfiles
         netedgecount = sum(numl(1:ii-1))
@@ -1269,7 +1106,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
             end if
         end do
     end do
-   end if   
+   end if
    nkmxglob = kmx(1)
    do ii = 2,nfiles
       if (kmx(ii) .ne. nkmxglob) then
@@ -1280,7 +1117,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
          endif
       endif
    enddo
-   
+
    ndx (noutfile) = nfaceglob
    lnx (noutfile) = nedgeglob
    numk(noutfile) = nnodeglob
@@ -1326,13 +1163,13 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
             write (*,'(a)') 'Info: mapmerge: Dimension `'//trim(dimname)//''' is not merged because no merged variable uses it. '
             cycle
          endif
-         ! When one file has only triangular mesh and one file has only rectangular mesh, then a variable, e.g. 'NetElemNode' 
+         ! When one file has only triangular mesh and one file has only rectangular mesh, then a variable, e.g. 'NetElemNode'
          ! has dimension 3 and 4, respectively. Then this variable in the target merged map should have dimension nlen=4,
-         ! which is the maximum (UNST-1842). 
+         ! which is the maximum (UNST-1842).
          if (dimname == 'nNetElemMaxNode' .or. dimname == 'max_nmesh2d_face_nodes' .or. dimname=='nFlowElemContourPts') then
             nlen = maxval(netfacemaxnodes)
          end if
-         
+
          if (ierr == nf90_noerr) then
             ierr = nf90_def_dim(ncids(noutfile), trim(dimname), nlen, dimids(id, noutfile))
          end if
@@ -1400,16 +1237,17 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
 
       ierr = ncu_copy_atts(ncids(ifile), ncids(noutfile), varids(ifile, iv), varids_out(iv))
       if (isNetCDF4) then
-         ierr = ncu_copy_chunking_deflate(ncids(ifile), ncids(noutfile), varids(ifile, iv), varids_out(iv), ndx(noutfile))
+         new_ndx = min(ndx(noutfile), 2000)  ! ! must be equal to mapclass_chunksize_ndx
+         ierr = ncu_copy_chunking_deflate(ncids(ifile), ncids(noutfile), varids(ifile, iv), varids_out(iv), new_ndx)
       endif
 
-      ! For Variable 'FlowLink', the flowelem might be outside the domain, and there might be no info. about such flowelem 
+      ! For Variable 'FlowLink', the flowelem might be outside the domain, and there might be no info. about such flowelem
       ! in mapfiles, so they are denoted by _FillValue.
       if (var_names(iv) .eq. 'FlowLink') then
           ierr = nf90_put_att(ncids(noutfile), varids_out(iv), '_FillValue', intmiss)
       end if
    end do
-   
+
 
    ierr = nf90_put_att(ncids(noutfile), nf90_global, 'NumPartitionsInFile', nfiles)
    ierr = nf90_def_dim(ncids(noutfile), 'nPartitions', nfiles, id_npartdim)
@@ -1456,7 +1294,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    end if
 
    ! 1D tmp array: take largest of all topological position counts:
-   maxitems = max(nedgecount, nfacecount, nnodecount, nnetedgecount, nbndcount) 
+   maxitems = max(nedgecount, nfacecount, nnodecount, nnetedgecount, nbndcount)
    call realloc( tmpvar1D, maxitems, keepExisting=.false.)
    call realloc(itmpvar1D, maxitems, keepExisting=.false.)
    call realloc(itmpvar1D_tmp,maxitems, keepExisting=.false.)
@@ -1467,13 +1305,13 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
       if (verbose_mode) then
          write (tmpstr1, '(a,i0,a,i0,a)') 'Var #', iv, ' of ', nvarsel, ': '
       end if
- 
-      ! Skip merging the connectivity variables when coordinates of netnodes or netedges are not read from the files 
+
+      ! Skip merging the connectivity variables when coordinates of netnodes or netedges are not read from the files
       if (jamerge_cntv == 0 .and. (var_names(iv) .eq. 'NetLink' .or. var_names(iv) .eq. 'NetElemNode' .or. &
           var_names(iv) .eq. 'NetElemLink' .or. var_names(iv) .eq. 'ElemLink' .or. &
           var_names(iv) .eq. 'mesh2d_edge_nodes' .or. var_names(iv) .eq. 'mesh2d_face_nodes' .or. var_names(iv) .eq. 'mesh2d_edge_faces')) then
           write (*,'(a)') 'Warning: mapmerge: Skipping topology merging variable: `'//trim(var_names(iv))//'''. '
-          cycle     
+          cycle
       end if
 
       if (var_ndims(iv) == 0) then  ! For instance, 'Mesh2D'
@@ -1550,7 +1388,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
       end select
       count_write(var_spacedimpos(iv)) = item_counts(noutfile)
       endif
-      
+
       ! NOTE: AvD: below we assume that order is kx, kmx, ndx, nt, so not as generic anymore as the var_*dimpos analysis would allow.
       ! Allocate the proper memory space for nf90_get_var without risk of stack overflows in the netcdf lib
 
@@ -1635,19 +1473,19 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
             end if
 
             ! Do the actual reading
-            
-            ! When one file has only triangular mesh and one file has only rectangular mesh, then a variable, e.g. 'NetElemNode' 
+
+            ! When one file has only triangular mesh and one file has only rectangular mesh, then a variable, e.g. 'NetElemNode'
             ! in the target merged map has vectormax dimension nlen=4. To read such a variable from each file, the vectormax dimension
             ! should be consistent in the current file. If this dimension is smaller than the maximal nlen, then a seperate array
             ! "itmpvar2D_tmpmax" will be defined by the current vectormax dimension. We first read values into this new array and then
-            ! put them into array "itmpvar2D" (UNST-1842). 
+            ! put them into array "itmpvar2D" (UNST-1842).
             if (var_kxdimpos(iv) /= -1 .and. (dimname == 'nNetElemMaxNode' .or. dimname == 'max_nmesh2d_face_nodes' .or. dimname=='nFlowElemContourPts')) then
                count_read(is) = netfacemaxnodes(ii)
                if (netfacemaxnodes(ii) < nlen) then
                   jaread_sep = 1
                end if
             end if
-           
+
             if (var_kxdimpos(iv) == -1 .and. var_laydimpos(iv) == -1  .and. var_wdimpos(iv) == -1) then ! 1D array with no layers and no vectormax (possibly time-dep)
                if (var_types(iv) == nf90_double) then
                   ierr = nf90_get_var(ncids(ii), varids(ii,iv), tmpvar1D(    nitemglob0+1:), count=count_read(is:ie), start=start_idx(is:ie))
@@ -1926,7 +1764,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
 
    end do ! iv
 
-   
+
    ! 6. Write some useful meta info on all merged domains into the output file
 
    nfacecount = 0
@@ -1940,12 +1778,12 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
 
       nfacecount = nfacecount + ndxg (ii)
       nedgecount = nedgecount + lnxg (ii)
-      nnodecount = nnodecount + numkg(ii)  
+      nnodecount = nnodecount + numkg(ii)
    end do
    ierr = nf90_put_var(ncids(noutfile), id_part_face_count, ndxg (1:nfiles))
    ierr = nf90_put_var(ncids(noutfile), id_part_edge_count, lnxg (1:nfiles))
    ierr = nf90_put_var(ncids(noutfile), id_part_node_count, numkg(1:nfiles))
-   
+
    if (nbndglob>0) then
       nbndcount  = 0
       do ii=1,nfiles
@@ -1965,7 +1803,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
       ierr = nf90_close(ncids(ii))
    end do
    ierr = nf90_close(ncids(noutfile))
-   
+
    if (allocated(varids))          deallocate(varids)
    if (allocated(varids_out))      deallocate(varids_out)
    if (allocated(var_names))       deallocate(var_names)
@@ -2004,7 +1842,7 @@ subroutine dfm_order_by_partition(files, nfiles)
 
    allocate(idom(nfiles))
    allocate(filesorig(nfiles))
-   
+
    do ii=1,nfiles
       filesorig(ii) = files(ii)
       nlen = len_trim(files(ii))
@@ -2028,12 +1866,12 @@ subroutine dfm_order_by_partition(files, nfiles)
 
       files(idom(ii)+1) = filesorig(ii)
    end do
-   
+
    deallocate(idom, filesorig)
 
 end subroutine dfm_order_by_partition
 
-   
+
 subroutine progress(prefix, j)
   implicit none
   character(len=*),intent(in)  :: prefix
