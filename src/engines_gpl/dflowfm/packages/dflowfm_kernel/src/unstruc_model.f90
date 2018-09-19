@@ -1181,7 +1181,7 @@ subroutine readMDUFile(filename, istat)
     !
 ! Restart information
     call prop_get_string(md_ptr, 'restart', 'RestartFile', md_restartfile, success)
-    restartdatetime = 'yyyymmdd_HHMMSS'
+    restartdatetime = 'yyyymmddhhmmss'
     call prop_get_string(md_ptr, 'restart', 'RestartDateTime', restartdatetime, success)
 
 ! External forcings
@@ -2431,7 +2431,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
 
 ! Restart settings
     call prop_set(prop_ptr, 'restart', 'RestartFile',     trim(md_restartfile) ,  'Restart netcdf-file, either *_rst.nc or *_map.nc')
-    call prop_set(prop_ptr, 'restart', 'RestartDateTime', trim(restartdatetime),  'Restart date and time (YYYYMMDDHHMMSS) when restarting from *_map.nc')
+    call prop_set(prop_ptr, 'restart', 'RestartDateTime', trim(restartdatetime),  'Restart date and time (yyyymmddhhmmss) when restarting from *_map.nc')
 
 ! External forcings
     call prop_set(prop_ptr, 'external forcing', 'ExtForceFile',    trim(md_extfile),     'Old format for external forcings file *.ext, link with tim/cmp-format boundary conditions specification')
