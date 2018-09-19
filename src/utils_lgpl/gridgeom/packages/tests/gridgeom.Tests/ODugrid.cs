@@ -962,7 +962,9 @@ namespace gridgeom.Tests
 
             //5. make the links
             int c_npl = 0;
-            ierr = wrapperGridgeom.ggeo_make1D2DEmbeddedLinks();
+            int c_nOneDMask = 0;
+            IntPtr c_oneDmask = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * 0);
+            ierr = wrapperGridgeom.ggeo_make1D2DEmbeddedLinks(ref c_nOneDMask, ref c_oneDmask);
             Assert.That(ierr, Is.EqualTo(0));
 
             //6. get the number of links
