@@ -3146,7 +3146,7 @@
    allocate(meshgeom%branchidx(size(branchidx,1)))
    
    !Assign the node coordinates
-   meshgeom%branchidx = branchidx
+   meshgeom%branchidx  = branchidx
    meshgeom%nodex      =  nodex
    meshgeom%nodey      =  nodey
    
@@ -3266,7 +3266,7 @@
    !! and potentially more than one 1d2d link per 1d mesh node is created.
    !! 2D cells are connected if they are intersected by a 1D edge. They are
    !! connected to the nearest of the two endpoints of each 1D edge.
-   function ggeo_make1D2Dembeddedlinks( jsferic, jasfer3D)  result(ierr)
+   function ggeo_make1D2Dembeddedlinks(jsferic, jasfer3D, oneDMask)  result(ierr)
 
    use network_data
    use m_missing,       only: dmiss
@@ -3274,12 +3274,12 @@
    use kdtree2Factory
 
    !output
-   integer               :: ierr !< Error status, 0 if success, nonzero in case of error.
-
-   integer               :: k, kk, k1, k2, k3, k4, k5, k6, ncellsinSearchRadius, numberCellNetlinks, isCrossing, newPointIndex, newLinkIndex
-   integer               :: l, cellNetLink, cellId, kn3ty, numnetcells
-   double precision      :: searchRadiusSquared, ldistance, rdistance, maxdistance, sl, sm, xcr, ycr, crp
-   integer, intent(in)   :: jsferic, jasfer3D 
+   integer                       :: ierr !< Error status, 0 if success, nonzero in case of error.
+   integer                       :: k, kk, k1, k2, k3, k4, k5, k6, ncellsinSearchRadius, numberCellNetlinks, isCrossing, newPointIndex, newLinkIndex
+   integer                       :: l, cellNetLink, cellId, kn3ty, numnetcells
+   double precision              :: searchRadiusSquared, ldistance, rdistance, maxdistance, sl, sm, xcr, ycr, crp
+   integer, intent(in)           :: jsferic, jasfer3D 
+   integer, optional, intent(in) :: oneDMask(:)
    
    type(kdtree_instance) :: treeinst
 
@@ -3334,24 +3334,33 @@
             cellNetLink =  netcell(cellId)%lin(kk)
             k5  = kn(1,cellNetLink); k6  = kn(2,cellNetLink);
             call crossinbox (xk(k5), xk(k5), xk(k6), xk(k6), xk(k1), xk(k1), xk(k2), yk(k2), isCrossing, sl, sm, xcr, ycr, crp, jsferic, dmiss)
+            newLinkIndex = -1
             if (isCrossing == 1) then
                call setnewpoint(xk(cellNetLink), yk(cellNetLink), zk(cellNetLink), newPointIndex)
                ldistance = dbdistance(xk(k1),yk(k1),xk(cellId),yk(cellId), jsferic, jasfer3D, dmiss)
-               rdistance = dbdistance(xk(k2),yk(k2),xk(cellId),yk(cellId), jsferic, jasfer3D, dmiss)
+               rdistance = dbdistance(xk(k2),yk(k2),xk(cellId),yk(cellId), jsferic, jasfer3D, dmiss)     
                if (ldistance<=rdistance) then
-                  !connect cell with left mesh point
-                  call connectdbn(newPointIndex, k1, newLinkIndex)
+                  if (present(oneDMask)) then !again, Fortran does not have logical and so two if statement are needed
+                     if(oneDMask(k1)==1) call connectdbn(newPointIndex, k1, newLinkIndex)
+                  else
+                     call connectdbn(newPointIndex, k1, newLinkIndex)
+                  endif
                else
-                  !connect cell with right mesh point
-                  call connectdbn(newPointIndex, k2, newLinkIndex)
+                  if (present(oneDMask)) then !again, Fortran does not have logical and so two if statement are needed
+                     if(oneDMask(k2)==1) call connectdbn(newPointIndex, k2, newLinkIndex)
+                  else
+                     call connectdbn(newPointIndex, k2, newLinkIndex)
+                  endif
                endif
-               kn(3,newLinkIndex) = kn3ty
-               !cell is connected, set kc mask and end cycling
-               kc(cellId) = 2
+               if (newLinkIndex.ne.-1) then
+                  kn(3,newLinkIndex) = kn3ty
+                  !cell is connected, set kc mask and end cycle
+                  kc(cellId) = 2
+               endif
             else
                kc(cellId) = 3
             endif
-          !loop over numberCellNetlinks
+            !loop over numberCellNetlinks
          enddo
        !loop over ncellsInSearchRadius
       enddo

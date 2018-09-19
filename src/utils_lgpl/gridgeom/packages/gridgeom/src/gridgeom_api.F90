@@ -192,18 +192,25 @@ end function ggeo_make1D2Dstreetinletpipes_dll
 !> Please note that the gridgeom library has to be initialized before this function can be called.
 !!
 !! c_jsferic   :: 2d sferic flag (1 = spheric / 0 = cartesian)
-!! c_jasfer3D  :: 3d sferic flag (1 = advanced spheric algorithm / 0 = default spheric algorithm )
-function ggeo_make1D2Dembeddedlinks_dll(c_jsferic, c_jasfer3D) result(ierr) bind(C, name="ggeo_make1D2Dembeddedlinks")
+!! c_jasfer3D  :: 3d sferic flag (1 = advanced spheric algorithm, 0 = default spheric algorithm )
+!! c_nOneDMask :: size of the 1d mask for mesh 1d
+!! c_oneDmask  :: mask for 1d mesh points (1 = potential connection, 0 = do not connect) 
+function ggeo_make1D2Dembeddedlinks_dll(c_jsferic, c_jasfer3D, c_nOneDMask, c_oneDmask) result(ierr) bind(C, name="ggeo_make1D2Dembeddedlinks")
 !DEC$ ATTRIBUTES DLLEXPORT :: ggeo_make1D2Dembeddedlinks_dll
 
    use gridgeom
    use gridoperations
    
-   integer, intent(in)  :: c_jsferic
-   integer, intent(in)  :: c_jasfer3D
-   integer              :: ierr  
+   integer, intent(in)     :: c_jsferic
+   integer, intent(in)     :: c_jasfer3D
+   integer, intent(in)     :: c_nOneDMask
+   type(c_ptr), intent(in) :: c_oneDmask  
+   integer, pointer        :: oneDmask(:) 
+   integer                 :: ierr  
    
-   ierr = ggeo_make1D2Dembeddedlinks(c_jsferic, c_jasfer3D)
+   call c_f_pointer(c_oneDmask, oneDmask, (/c_nOneDMask/))
+   
+   ierr = ggeo_make1D2Dembeddedlinks(c_jsferic, c_jasfer3D, oneDmask)
    
 end function ggeo_make1D2Dembeddedlinks_dll
 
