@@ -74,7 +74,6 @@ namespace General.tests
         public static extern int ggeo_make1D2Dinternalnetlinks_dll(ref int c_npl, [In] ref IntPtr c_xpl, [In] ref IntPtr c_ypl, [In] ref IntPtr c_zpl, [In] ref int c_nOneDMask, [In] ref IntPtr c_oneDmask,  ref int c_jsferic, ref int c_jasfer3D, ref int c_jglobe);
 
 
-
         /// <summary>
         /// 
         /// </summary>
@@ -82,7 +81,7 @@ namespace General.tests
         /// <param name="c_jasfer3D"></param>
         /// <returns></returns>
         [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ggeo_make1D2Dembeddedlinks", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ggeo_make1D2Dembeddedlinks_dll(ref int c_jsferic, ref int c_jasfer3D);
+        public static extern int ggeo_make1D2Dembeddedlinks_dll(ref int c_jsferic, ref int c_jasfer3D, [In] ref int c_nOneDMask, [In] ref IntPtr c_oneDmask);
 
         /// <summary>
         /// Use 1d array to fill kn matrix
@@ -229,12 +228,12 @@ namespace General.tests
 
 
 
-        public int ggeo_make1D2DEmbeddedLinks()
+        public int ggeo_make1D2DEmbeddedLinks(ref int c_nOneDMask, ref IntPtr c_oneDmask)
         {
             // the following three variables might become part of the function api
             int c_jsferic  = 0;
             int c_jasfer3D = 0;
-            int ierr = ggeo_make1D2Dembeddedlinks_dll(ref c_jsferic, ref c_jasfer3D);
+            int ierr = ggeo_make1D2Dembeddedlinks_dll(ref c_jsferic, ref c_jasfer3D, ref c_nOneDMask, ref c_oneDmask);
             return ierr;
         }
 
