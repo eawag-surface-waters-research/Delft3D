@@ -16614,6 +16614,12 @@ subroutine unc_write_his(tim)            ! wrihis
             end do
         end if
         
+        if (jahisdambreak > 0 .and. ndambreak > 0) then
+            do i = 1,ndambreaksg 
+               ierr = nf90_put_var(ihisfile, id_dambreakname, trim(dambreak_ids(i)),(/ 1, i /))
+            end do
+        end if
+
         if (dad_included) then
            !
            do i=1,stmpar%lsedtot
@@ -16951,7 +16957,6 @@ subroutine unc_write_his(tim)            ! wrihis
           
       if (jahisdambreak > 0 .and. ndambreak > 0) then
          do i = 1,ndambreaksg 
-            ierr = nf90_put_var(ihisfile, id_dambreakname, trim(dambreak_ids(i)),(/ i, it_his /))
             ierr = nf90_put_var(ihisfile, id_dambreak_s1up, waterLevelsDambreakUpStream(i),(/ i, it_his /))
             ierr = nf90_put_var(ihisfile, id_dambreak_s1dn, waterLevelsDambreakDownStream(i), (/ i, it_his /))
             ierr = nf90_put_var(ihisfile, id_dambreak_breach_depth, breachDepthDambreak(i),(/ i, it_his /))
