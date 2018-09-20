@@ -64,6 +64,9 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    logical,                   intent(in)    :: force      !< Whether to disallow interactive user prompting (for file overwrite)
    integer                                  :: ierr       !< Result status (0 = success)
 
+   integer, parameter :: int8 = 1     ! also local storage compact in 1 byte
+   integer, parameter :: mapclass_time_buffer_size =   10
+
    integer, dimension(nfiles+1) :: ncids, id_timedim, id_facedim, id_edgedim, id_laydim, id_wdim, id_nodedim, &
                                    id_netedgedim, id_netfacedim, id_netfacemaxnodesdim, id_time, id_timestep, id_bnddim !< dim and var ids, maintained for all input files + 1 output file.
    double precision :: convversion
@@ -96,7 +99,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
 !netface_g2c(:)
    integer :: id_facedomain, id_faceglobnr, id_edgefaces, id_netfacenodes, id_edgenodes, id_netedgefaces, id_netfaceedges
    integer :: ierri
-   integer :: maxlen, nlen, plen, mlen, ii, id, iv, it, ip, ik, is, ie, nvarsel, ntsel, nvars, ndims, nvardims, vartype
+   integer :: maxlen, nlen, plen, mlen, ii, id, iv, it, itm, ip, ik, is, ie, nvarsel, ntsel, nvars, ndims, nvardims, vartype
    integer :: netfacemaxnodesg, netnodemaxface=10, ndxc, lnxc, numkc, numlc,ndx_bndc
    integer :: nfaceglob,    nfaceglob0,    nfacecount, ifaceglob
    integer :: nedgeglob,    nedgeglob0,    nedgecount, iedgeglob
@@ -117,6 +120,11 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    double precision, allocatable, target  :: itmpvar2D_tmp(:,:)
    double precision, allocatable, target  :: itmpvar2D_tmpmax(:,:)
    double precision,              pointer :: itmpvarptr(:,:,:)
+   ! for class map: store in 1 byte:
+   integer(kind=int8),allocatable,target  :: btmpvar1D(:,:) !< array buffer for a single global variable slice, size: (kmx1, max(ndx(noutfile),lnx(noutfile)))
+   integer(kind=int8),allocatable,target  :: btmpvar1D_tmp(:,:)
+   integer(kind=int8),            pointer :: btmpvarptr(:,:,:,:)
+   ! for others: double precision:
    double precision, allocatable, target  :: tmpvar1D(:) !< array buffer for a single global variable slice, size: (kmx1, max(ndx(noutfile),lnx(noutfile)))
    double precision, allocatable, target  :: tmpvar1D_tmp(:)
    double precision, allocatable, target  :: tmpvar2D(:,:) !< array buffer for a single global variable slice, size: (kmx1, max(ndx(noutfile),lnx(noutfile)))
@@ -1298,6 +1306,8 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    call realloc( tmpvar1D, maxitems, keepExisting=.false.)
    call realloc(itmpvar1D, maxitems, keepExisting=.false.)
    call realloc(itmpvar1D_tmp,maxitems, keepExisting=.false.)
+   call realloc(btmpvar1D, [ndx(3), mapclass_time_buffer_size], keepExisting=.false.)
+   call realloc(btmpvar1D_tmp, [ndx(3), mapclass_time_buffer_size], keepExisting=.false.)
    call realloc(tmpvar1D_tmp, maxitems, keepExisting=.false.)
    ! 2D/3D done in loop below
 
@@ -1402,8 +1412,10 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
          ! Already allocated at max(lnx, ndx, numk, numl), no risk of stack overflow
          if (var_types(iv) == nf90_double) then
             tmpvarptr(1:1,1:1,1:maxitems)  =>  tmpvar1D(:)
-         else if (var_types(iv) == nf90_int .or. var_types(iv) == nf90_short .or. var_types(iv) == nf90_byte) then
+         else if (var_types(iv) == nf90_int .or. var_types(iv) == nf90_short) then
             itmpvarptr(1:1,1:1,1:maxitems) => itmpvar1D(:)
+         else if (var_types(iv) == nf90_byte) then
+            btmpvarptr(1:1,1:1,1:maxitems,1:mapclass_time_buffer_size) => btmpvar1D(:,1:mapclass_time_buffer_size)
          end if
          tmpvarDim = 1
 
@@ -1450,6 +1462,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
       end if
 
       do it=1,ntsel
+         itm = mod(it-1, mapclass_time_buffer_size)+1
          if (verbose_mode) then
             call progress(tmpstr1, ceiling((it-1)*100.0/ntsel)) ! generate the progress bar.
          end if
@@ -1489,8 +1502,10 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
             if (var_kxdimpos(iv) == -1 .and. var_laydimpos(iv) == -1  .and. var_wdimpos(iv) == -1) then ! 1D array with no layers and no vectormax (possibly time-dep)
                if (var_types(iv) == nf90_double) then
                   ierr = nf90_get_var(ncids(ii), varids(ii,iv), tmpvar1D(    nitemglob0+1:), count=count_read(is:ie), start=start_idx(is:ie))
-               else if (var_types(iv) == nf90_int .or. var_types(iv) == nf90_short .or. var_types(iv) == nf90_byte) then
+               else if (var_types(iv) == nf90_int .or. var_types(iv) == nf90_short) then
                   ierr = nf90_get_var(ncids(ii), varids(ii,iv), itmpvar1D(    nitemglob0+1:), count=count_read(is:ie), start=start_idx(is:ie))
+               else if (var_types(iv) == nf90_byte) then
+                  ierr = nf90_get_var(ncids(ii), varids(ii,iv), btmpvar1D(    nitemglob0+1:,itm:itm), count=count_read(is:ie), start=start_idx(is:ie))
                end if
             else if (var_kxdimpos(iv) /= -1 .neqv. var_laydimpos(iv) /= -1) then ! Either a vectormax OR a laydim
                if (var_types(iv) == nf90_double) then
@@ -1641,7 +1656,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                     itmpvar2D(:,1:nitemglob) = itmpvar2D_tmp(:,1:nitemglob)
                 end if
             else if (var_loctype(iv) == UNC_LOC_S) then ! variables that locate on faces
-                if (var_types(iv) == nf90_int .or. var_types(iv) == nf90_short .or. var_types(iv) == nf90_byte) then
+                if (var_types(iv) == nf90_int .or. var_types(iv) == nf90_short) then
                   nfacecount = sum(nump(1:ii-1))
                   do ip=1, item_counts(ii)
                      if (item_domain(nfacecount+ip) == ii-1) then
@@ -1654,6 +1669,20 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                   end do
                   if (ii==nfiles) then
                       itmpvar1D(1:nitemglob) = itmpvar1D_tmp(1:nitemglob)
+                  end if
+               else if (var_types(iv) == nf90_byte) then
+                  nfacecount = sum(nump(1:ii-1))
+                  do ip=1, item_counts(ii)
+                     if (item_domain(nfacecount+ip) == ii-1) then
+                        ifaceglob = face_c2g(nfacecount+ip)
+                        if (ifaceglob > 0) then
+                           nitemglob = nitemglob + 1
+                           btmpvar1D_tmp(ifaceglob,itm:itm) = btmpvar1D(nitemglob0+ip,itm:itm)
+                        end if
+                     end if
+                  end do
+                  if (ii==nfiles) then
+                      btmpvar1D(1:nitemglob,itm:itm) = btmpvar1D_tmp(1:nitemglob,itm:itm)
                   end if
                else
                   nfacecount = sum(nump(1:ii-1))
@@ -1698,12 +1727,23 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                      needshift = .true. ! From now on, all points from this var/file need one or more shifts to the left.
                   end if
                end do
-            else if (var_types(iv) == nf90_int .or. var_types(iv) == nf90_short .or. var_types(iv) == nf90_byte) then
+            else if (var_types(iv) == nf90_int .or. var_types(iv) == nf90_short) then
                do ip=1,item_counts(ii)
                   if (item_domain(nitemcount+ip) == ii-1) then
                      nitemglob = nitemglob+1
                      if (needshift) then
                         itmpvarptr(:,:,nitemglob) = itmpvarptr(:,:,nitemglob0+ip)
+                     end if
+                  else
+                     needshift = .true. ! From now on, all points from this var/file need one or more shifts to the left.
+                  end if
+               end do
+            else if (var_types(iv) == nf90_byte) then
+               do ip=1,item_counts(ii)
+                  if (item_domain(nitemcount+ip) == ii-1) then
+                     nitemglob = nitemglob+1
+                     if (needshift) then
+                        btmpvarptr(:,:,nitemglob,itm:itm) = btmpvarptr(:,:,nitemglob0+ip,itm:itm)
                      end if
                   else
                      needshift = .true. ! From now on, all points from this var/file need one or more shifts to the left.
@@ -1722,8 +1762,12 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
          if (var_kxdimpos(iv) == -1 .and. var_laydimpos(iv) == -1 .and. var_wdimpos(iv) == -1) then ! 1D array with no layers and no vectormax (possibly time-dep)
             if (var_types(iv) == nf90_double) then
                ierr = nf90_put_var(ncids(noutfile), varids_out(iv), tmpvar1D, count = count_write(is:ie), start = start_idx(is:ie))
-            else if (var_types(iv) == nf90_int .or. var_types(iv) == nf90_short .or. var_types(iv) == nf90_byte) then
+            else if (var_types(iv) == nf90_int .or. var_types(iv) == nf90_short) then
                ierr = nf90_put_var(ncids(noutfile), varids_out(iv), itmpvar1D, count = count_write(is:ie), start = start_idx(is:ie))
+            else if (var_types(iv) == nf90_byte) then
+               if (itm == mapclass_time_buffer_size) then
+                  ierr = nf90_put_var(ncids(noutfile), varids_out(iv), btmpvar1D, count = [count_write(is), mapclass_time_buffer_size*count_write(ie)], start = [start_idx(is), start_idx(ie) + 1 - mapclass_time_buffer_size])
+               endif
             end if
          else if (var_kxdimpos(iv) /= -1 .neqv. var_laydimpos(iv) /= -1) then ! Either a vectormax OR a laydim
             if (var_types(iv) == nf90_double) then
@@ -1758,6 +1802,14 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
          end if
 
       end do ! it
+
+      ! if writing with time buffer, write remaining time steps:
+      if (var_types(iv) == nf90_byte) then
+         if (itm /= mapclass_time_buffer_size) then
+            ierr = nf90_put_var(ncids(noutfile), varids_out(iv), btmpvar1D(:,1:itm), count = [count_write(is), itm*count_write(ie)], start = [start_idx(is), start_idx(ie) + 1 - itm])
+         endif
+      endif
+
       if (verbose_mode) then
          call progress(tmpstr1, 100) ! generate the progress bar.
       end if
@@ -1825,6 +1877,9 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    if (allocated(tmpvar2D_tmp))    deallocate(tmpvar2D_tmp)
    if (allocated(tmpvar2D_tmpmax)) deallocate(tmpvar2D_tmpmax)
    if (allocated(tmpvar3D))        deallocate(tmpvar3D)
+   if (allocated(btmpvar1D))       deallocate(btmpvar1D)
+   if (allocated(btmpvar1D_tmp))   deallocate(btmpvar1D_tmp)
+
 end function dfm_merge_mapfiles
 
 !> Orders a filename list by increasing partition number.
