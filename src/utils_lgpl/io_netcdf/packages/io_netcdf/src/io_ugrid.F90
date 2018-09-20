@@ -1773,6 +1773,8 @@ function ug_init_link_topology(ncid, varid, contactids) result(ierr)
    ierr = att_to_varid(ncid,'contact_ids'       , contactids%varids(cid_contactids)      ,varid)
    ierr = att_to_varid(ncid,'contact_long_names', contactids%varids(cid_contactlongnames),varid)
    ierr = att_to_varid(ncid,'contact_type', contactids%varids(cid_contacttype),varid)
+   
+   ierr = UG_NOERR
 
    end function ug_init_link_topology
    
@@ -1784,6 +1786,8 @@ function ug_init_network_topology(ncid, varid, netids) result(ierr)
    character(len=nf90_max_name)      :: varname       !< char array  to hold the network name
    integer                           :: ierr          !< Result status (UG_NOERR if successful).
    integer                           :: dimids(2)
+   
+   ierr = UG_NOERR
    
    netids%varids(ntid_1dtopo) = varid
    ierr = att_to_dimid(ncid, 'edge_dimension',  netids%dimids(ntdim_1dbranches),varid)
@@ -1815,6 +1819,8 @@ function ug_init_network_topology(ncid, varid, netids) result(ierr)
    !read the branch order
    ierr = nf90_inquire_variable(ncid, varid, name = varname)
    ierr = nf90_inq_varid(ncid, trim(varname)//'_branch_order', netids%varids(ntid_1dbranchorder))
+   
+   ierr = UG_NOERR
 
 end function ug_init_network_topology
 
@@ -1831,6 +1837,9 @@ function ug_init_mesh_topology(ncid, varid, meshids) result(ierr)
    integer                           :: id
    integer                           :: dimids(2)
    integer                           :: isMappedMesh 
+   
+   ierr = UG_NOERR
+   
    !< Top-level variable ID for mesh topology, collects all related variable names via attributes.
    
    isMappedMesh = -1
@@ -1908,6 +1917,8 @@ function ug_init_mesh_topology(ncid, varid, meshids) result(ierr)
    ierr = att_to_varid(ncid,'node_long_names', meshids%varids(mid_node_longnames),varid) !< Variable ID for node ids
    ierr = att_to_varid(ncid,'edge_long_names', meshids%varids(mid_edge_longnames),varid) !< Variable ID for edge ids
    ierr = att_to_varid(ncid,'face_long_names', meshids%varids(mid_face_longnames),varid) !< Variable ID for face ids
+   
+   ierr = UG_NOERR
 
 end function ug_init_mesh_topology
 
@@ -2063,7 +2074,7 @@ function ug_is_network_topology(ncid, varid) result(is_mesh_topo)
    integer,        intent(in)  :: varid        !< NetCDF variable id
    logical                     :: is_mesh_topo !< Return value
 
-   integer :: cfrole, nodeidvar, nodeid, edgecoord
+   integer :: cfrole, nodeidvar, edgeGeometryId, edgecoord
    character(len=13) :: buffer
    character(len=nf90_max_name) :: nodeidsvar
    integer :: iworkaround1, iworkaround2
@@ -2083,8 +2094,8 @@ function ug_is_network_topology(ncid, varid) result(is_mesh_topo)
 
    buffer = ' '
    cfrole    = nf90_get_att(ncid, varid, 'cf_role', buffer)
-   nodeid    = nf90_get_att(iworkaround1, iworkaround2, 'branch_ids', nodeidsvar)
-   if (cfrole == nf90_noerr .and. nodeid == nf90_noerr ) then
+   edgeGeometryId    = nf90_get_att(iworkaround1, iworkaround2, 'edge_geometry', nodeidsvar)
+   if (cfrole == nf90_noerr .and. edgeGeometryId == nf90_noerr ) then
          is_mesh_topo = .true. !new ugrid format detected
    end if
 end function ug_is_network_topology   
@@ -2426,10 +2437,15 @@ function ug_get_meshgeom(ncid, meshgeom, start_index, meshids, netid, includeArr
          call reallocP(meshgeom%nodex, meshgeom%numnode, keepExisting = .false., fill = -999d0)
          call reallocP(meshgeom%nodey, meshgeom%numnode, keepExisting = .false., fill = -999d0)
          call reallocP(meshgeom%nodez, meshgeom%numnode, keepExisting = .false., fill = -999d0)
-         call reallocP(meshgeom%edge_nodes, (/ 2, meshgeom%numedge /), keepExisting=.false.)
 
-         ! Edge nodes
-         ierr = ug_get_edge_nodes(ncid, meshids, meshgeom%edge_nodes, meshgeom%start_index)
+         !
+         ! read mesh edge nodes only if numedge is present
+         !
+         if ( meshgeom%numedge.ne.-1 ) then
+            call reallocP(meshgeom%edge_nodes, (/ 2, meshgeom%numedge /), keepExisting=.false.)
+            ! Edge nodes
+            ierr = ug_get_edge_nodes(ncid, meshids, meshgeom%edge_nodes, meshgeom%start_index)
+         endif
 
          ! Get the node coordinates
          if (meshgeom%dim == 2) then
