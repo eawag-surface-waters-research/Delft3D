@@ -1941,7 +1941,9 @@ namespace UGrid.tests
             IntPtr c_xpl = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * 0);
             IntPtr c_ypl = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * 0);
             IntPtr c_zpl = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * 0);
-            ierr = wrapperGridgeom.ggeo_make1D2Dinternalnetlinks(ref c_npl, ref c_xpl, ref c_ypl, ref c_zpl);
+            int c_nOneDMask = 0;
+            IntPtr c_oneDmask = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * 0);
+            ierr = wrapperGridgeom.ggeo_make1D2Dinternalnetlinks(ref c_npl, ref c_xpl, ref c_ypl, ref c_zpl, ref c_nOneDMask, ref c_oneDmask);
             Assert.That(ierr, Is.EqualTo(0));
 
             //18. get the number of links
@@ -2123,6 +2125,7 @@ namespace UGrid.tests
             int fillvalue = -1;
             int startIndex = 0;
             ierr = wrapper.ionc_get_face_nodes(ref ioncid, ref meshid, ref c_face_nodes, ref nface, ref maxfacenodes, ref fillvalue, ref startIndex);
+            Assert.That(ierr, Is.EqualTo(0));
 
             int[] rc_face_nodes = new int[nface * maxfacenodes];
             Marshal.Copy(c_face_nodes, rc_face_nodes, 0, nface * maxfacenodes);

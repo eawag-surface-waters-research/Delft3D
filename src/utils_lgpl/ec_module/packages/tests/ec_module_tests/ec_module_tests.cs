@@ -24,6 +24,12 @@ namespace ECModuleTests
             filename = TestHelper.GetLibraryPath(IoNetcdfLibWrapper.LibDetails.LIB_NAME);
             __libionetcdf = TestHelper.LoadLibrary(filename);
             Assert.That(__libionetcdf, Is.Not.Null);
+
+            //load gridgeom (e.g. for finding the cells)
+            filename = TestHelper.GetLibraryPath(GridGeomLibWrapper.LibDetails.LIB_NAME);
+            _gridgeom_libptr = TestHelper.LoadLibrary(filename);
+            //we should chek the pointer is not null
+            Assert.That(_gridgeom_libptr, Is.Not.Null);
         }
 
         //some temp data used in the test
@@ -31,6 +37,7 @@ namespace ECModuleTests
         //pointer to the loaded dll
         public static IntPtr __libecmodule;
         public static IntPtr __libionetcdf;
+        public static IntPtr _gridgeom_libptr;
 
         public void readPoints(string pathIn,ref double[] x, ref double[] y, ref double[] values, ref int nSamples) 
         {
@@ -397,12 +404,10 @@ namespace ECModuleTests
 
         }
 
-
-
         // Test averaging interpolation on location type 2 (middle points of edges)
         [Test]
-        [NUnit.Framework.Category("TestTriangulationOnEdges")]
-        public void TestTriangulationOnEdges()
+        [NUnit.Framework.Category("TestAverageInterpolation")]
+        public void TestAverageInterpolationOnCellCenters()
         {
             //get the sample points
             string pathIn = TestHelper.TestFilesDirectoryPath() + @"\inTestAveragingInterpolation.txt";
@@ -428,7 +433,7 @@ namespace ECModuleTests
             int iconvtype = 2;
             double convversion = 0.0;
             string pathNetFile = TestHelper.TestFilesDirectoryPath() + @"\simplebox_net_ugrid.nc";
-            Assert.IsTrue(File.Exists(pathIn));
+            Assert.IsTrue(File.Exists(pathNetFile));
             int ierr = wrapperNetcdf.ionc_open(pathNetFile, ref mode, ref ioncid, ref iconvtype, ref convversion);
             Assert.That(ierr, Is.EqualTo(0));
 
@@ -442,12 +447,12 @@ namespace ECModuleTests
 
             //You need to know in advance the number of mesh points
             var meshtwod = new meshgeom();
-            meshtwod.nodex = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshtwoddim.numnode);
-            meshtwod.nodey = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshtwoddim.numnode);
-            meshtwod.nodez = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshtwoddim.numnode);
-            meshtwod.facex = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshtwoddim.numface);
-            meshtwod.facey = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshtwoddim.numface);
-            meshtwod.facez = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshtwoddim.numface);
+            meshtwod.nodex = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double))   * meshtwoddim.numnode);
+            meshtwod.nodey = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double))   * meshtwoddim.numnode);
+            meshtwod.nodez = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double))   * meshtwoddim.numnode);
+            meshtwod.facex = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double))   * meshtwoddim.numface);
+            meshtwod.facey = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double))   * meshtwoddim.numface);
+            meshtwod.facez = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double))   * meshtwoddim.numface);
             meshtwod.edge_nodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshtwoddim.numedge * 2);
 
             //var gridGeomWrapper = new GridGeomLibWrapper();
@@ -456,22 +461,36 @@ namespace ECModuleTests
             ierr = wrapperNetcdf.ionc_get_meshgeom(ref ioncid, ref meshid, ref l_networkid, ref meshtwod, ref startIndex, ref includeArrays);
             Assert.That(ierr, Is.EqualTo(0));
 
-            // default parameters for triangulation
-            int jsferic = 0;
-            int jasfer3D = 0;
-            //interpolate on edges
-            int locType = 2;
+            //5. declare but do not allocate meshgeom. it will be allocated by gridgeom (fortran)
+            var meshTwoOut        = new meshgeom();
+            var meshTwoDimOut     = new meshgeomdim();
+            meshTwoOut.face_nodes = IntPtr.Zero;
+            meshTwoOut.facex      = IntPtr.Zero;
+            meshTwoOut.facey      = IntPtr.Zero;
 
-            //test averaging on the edges
-            int numTargets = meshtwoddim.numedge;
+            //6. call find cells
+            var wrapperGridgeom = new GridGeomLibWrapper();
+            ierr = wrapperGridgeom.ggeo_find_cells(ref meshtwoddim, ref meshtwod, ref meshTwoDimOut, ref meshTwoOut, ref startIndex);
+            Assert.That(ierr, Is.EqualTo(0));
+            meshtwod.facex = meshTwoOut.facex;
+            meshtwod.facey = meshTwoOut.facey;
+
+            //// default parameters for averaging
+            double Wu1Duni = 2.0;               // default value from flow_geom init
+            int method = 1;                     // averaging 
+            int minNumSamples = 1;
+            double relativeSearchSize = 1.01;
+            int jsferic   = 0;
+            int jasfer3D  = 0;
+            int locType   = 0;                 // interpolate on the faces
+
+            //test averaging on the faces
+            int numTargets = meshTwoDimOut.numface;
             IntPtr c_targetValues = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * numTargets);
-            Marshal.FreeCoTaskMem(c_targetValues);
-
-            //interpolate on edges
-            c_targetValues = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * numTargets);
 
             var wrapper = new Ec_ModuleLibWrapper();
-            ierr = wrapper.triang(ref meshtwoddim,
+            ierr = wrapper.averaging(
+                ref meshtwoddim,
                 ref meshtwod,
                 ref startIndex,
                 ref c_sampleX,
@@ -480,16 +499,33 @@ namespace ECModuleTests
                 ref numSamples,
                 ref c_targetValues,
                 ref locType,
+                ref Wu1Duni,
+                ref method,
+                ref minNumSamples,
+                ref relativeSearchSize,
                 ref jsferic,
                 ref jasfer3D);
 
             Assert.That(ierr, Is.EqualTo(0));
 
-            //check the interpolation results
-            double[] targetValuesResults = new double[numTargets];
-            Marshal.Copy(c_targetValues, targetValuesResults, 0, numTargets);
+            //9. deallocate memory allocated by c#
+            Marshal.FreeCoTaskMem(meshtwod.nodex);
+            Marshal.FreeCoTaskMem(meshtwod.nodey);
+            Marshal.FreeCoTaskMem(meshtwod.nodez);
+            //Marshal.FreeCoTaskMem(meshtwod.facex);
+            //Marshal.FreeCoTaskMem(meshtwod.facey);
+            Marshal.FreeCoTaskMem(meshtwod.facez);
+            Marshal.FreeCoTaskMem(meshtwod.edge_nodes);
+            Marshal.FreeCoTaskMem(c_targetValues);
 
+            //8. deallocate memory allocated by fortran
+            //ierr = wrapperGridgeom.ggeo_meshgeom_destructor(ref meshTwoDimOut, ref meshTwoOut);
+            //Assert.That(ierr, Is.EqualTo(0));
         }
 
+
     }
+
+
+
 }

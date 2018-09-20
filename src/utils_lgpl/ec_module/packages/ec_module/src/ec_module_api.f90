@@ -169,7 +169,7 @@ function averaging(meshtwoddim, meshtwod, startIndex, c_sampleX, c_sampleY, c_sa
     double precision                        :: RCELtmp, valFirstNode,valSecondNode
     integer                                 :: nMaxNodesPolygon
     real(hp), allocatable                   :: xx(:,:), yy(:,:), xxx(:), yyy(:)
-    integer, allocatable                    :: nnn(:), cellPermutation(:)
+    integer, allocatable                    :: nnn(:)
     integer                                 :: nNetCells
        
     !get and convert meshgeom to kn table
@@ -302,13 +302,9 @@ function averaging(meshtwoddim, meshtwod, startIndex, c_sampleX, c_sampleY, c_sa
 
     !copy values back
     if (locType.eq.0) then
-       !to flow nodes: calculate permutation array
-       allocate(cellPermutation(numTargets))
-       do i =1, numTargets
-          call incells(meshgeom%facex(i),meshgeom%facey(i),cellPermutation(i))
-       enddo
+       !to flow nodes, we assume no re-mapping is needed
        call c_f_pointer(c_targetValues, targetValues, (/numTargets/))
-       targetValues = interpolationResults(1,cellPermutation)
+       targetValues = interpolationResults(1,:)
     else if (locType.eq.1) then
        !to net node: use the permutation array
        call c_f_pointer(c_targetValues, targetValues, (/numTargets/))
