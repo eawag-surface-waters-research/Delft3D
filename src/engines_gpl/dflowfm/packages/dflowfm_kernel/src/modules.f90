@@ -1090,6 +1090,7 @@ integer                           :: jarhum              !< use relative humidit
 integer                           :: jaclou              !< use cloudiness        yes or no
 integer                           :: jasol               !< use 1 = use solrad, 2 = use cloudiness
 integer                           :: jaheat_eachstep = 0 !< if 1, do it each step, else in externalforcings (default)
+integer                           :: jaQinext            !< use Qin externally provided yes or no
 integer                           :: jaqin               !< use qin , sum of all in fluxes
 
 double precision                  :: windxav, windyav  !< average wind for plotting
@@ -1142,6 +1143,7 @@ use m_physcoef, only : rhomean
     jarain  = 0         !< use rain yes or no
     jaevap  = 0         !< use evap yes or no
     jaqin   = 0         !< use qin , sum of all in fluxes
+    jaQinext= 0         !< use Qin externally provided yes or no
 
     ! Remaining of variables is handled in reset_wind()
     call reset_wind()

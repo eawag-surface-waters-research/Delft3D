@@ -6289,7 +6289,7 @@ use m_flowparameters, only: eps10
 implicit none
    double precision, intent(in) :: tim1 !< Current (new) time
 
-   double precision,                 save        :: timprev = -1d0
+   double precision,                 save        :: timprev = -1d0 ! TODO: save is unsafe, replace by using time1 and time0, also two other occurrences
    double precision                              :: timstep
    integer                                       :: i
 
@@ -6326,6 +6326,8 @@ subroutine updateCumulativeInflow(deltat)
     integer :: k  
     double precision, intent(in) :: deltat ! dt of current timestep
     
+    if (jaQinext == 0) return
+
     do k = 1, ndx
         vincum(k) = vincum(k) + qinextreal(k)*deltat
     enddo
