@@ -117,33 +117,53 @@ namespace General.tests
         public static extern int ggeo_get_links_dll([In, Out] ref IntPtr arrayfrom, [In, Out] ref IntPtr arrayto, [In] ref int nlinks, [In] ref int linkType);
 
         /// <summary>
-        /// Algorithm to create the edge_nodes from the branchid
+        /// This function fills the memory pointed by c_edgenodes
         /// </summary>
-        /// <param name="c_branchids"></param>
-        /// <param name="c_edgenodes"></param>
-        /// <param name="nBranches"></param>
-        /// <param name="nNodes"></param>
-        /// <param name="nEdgeNodes"></param>
+        /// <param name="c_branchoffset">mesh points offsets</param>
+        /// <param name="c_branchlength">network branches lengths</param>
+        /// <param name="c_branchids">mesh points branch ids</param>
+        /// <param name="c_nedge_nodes">network edges nodes</param>
+        /// <param name="c_edgenodes">mesh edge nodes</param>
+        /// <param name="num_branches">number of network branches</param>
+        /// <param name="num_nodes">mesh number of nodes</param>
+        /// <param name="num_edge_nodes">mesh number of edge nodes</param>
+        /// <param name="startIndex">start index</param>
         /// <returns></returns>
         [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ggeo_create_edge_nodes", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ggeo_create_edge_nodes_dll([In] ref IntPtr c_branchoffset, [In] ref IntPtr c_branchlength, [In] ref IntPtr c_branchids, [In] ref IntPtr c_nedge_nodes, [In, Out] ref IntPtr c_edgenodes, [In] ref int nBranches, [In] ref int nNodes, [In] ref int nEdgeNodes, [In] ref int startIndex);
-
+        public static extern int ggeo_create_edge_nodes_dll(
+            [In] ref IntPtr c_branchoffset, 
+            [In] ref IntPtr c_branchlength, 
+            [In] ref IntPtr c_branchids, 
+            [In] ref IntPtr c_nedge_nodes, 
+            [In, Out] ref IntPtr c_edgenodes, 
+            [In] ref int num_branches, 
+            [In] ref int num_nodes, 
+            [In] ref int num_edge_nodes, 
+            [In] ref int startIndex);
 
         /// <summary>
-        /// 
+        /// This function returns the number of mesh edge_nodes (num_edge_nodes) 
         /// </summary>
-        /// <param name="c_branchoffset"></param>
-        /// <param name="c_branchlength"></param>
-        /// <param name="c_branchids"></param>
-        /// <param name="c_sourceNodeId"></param>
-        /// <param name="c_targetNodeId"></param>
-        /// <param name="nBranches"></param>
-        /// <param name="nNodes"></param>
-        /// <param name="nEdgeNodes"></param>
-        /// <param name="startIndex"></param>
+        /// <param name="c_branchoffset">mesh points offsets</param>
+        /// <param name="c_branchlength">network branches lengths</param>
+        /// <param name="c_branchids">mesh points branch ids</param>
+        /// <param name="c_nedge_nodes">network edges nodes</param>
+        /// <param name="c_edgenodes">mesh edge nodes, 2 * num_edge_nodes</param>
+        /// <param name="num_branches">number of network branches</param>
+        /// <param name="num_nodes">mesh number of nodes</param>
+        /// <param name="num_edge_nodes">mesh number of edge nodes</param>
+        /// <param name="startIndex">start index</param>
         /// <returns></returns>
         [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ggeo_count_edge_nodes", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ggeo_count_edge_nodes_dll([In] ref IntPtr c_branchoffset, [In] ref IntPtr c_branchlength, [In] ref IntPtr c_branchids, [In] ref IntPtr c_nedge_nodes, [In] ref int nBranches, [In] ref int nNodes, [In,Out] ref int nEdgeNodes, [In] ref int startIndex);
+        public static extern int ggeo_count_edge_nodes_dll(
+            [In] ref IntPtr c_branchoffset, 
+            [In] ref IntPtr c_branchlength, 
+            [In] ref IntPtr c_branchids, 
+            [In] ref IntPtr c_nedge_nodes, 
+            [In] ref int num_branches, 
+            [In] ref int num_nodes, 
+            [In,Out] ref int num_edge_nodes, 
+            [In] ref int startIndex);
 
         /// <summary>
         /// Deallocation of library memory, but not of meshgeom structures used for dll communication
