@@ -34,6 +34,7 @@
 
 module read_nc_histories
    use netcdf
+   use dfm_params
    implicit none
 
    integer :: ncid, nTimes, nNameLength, nStations
@@ -63,7 +64,9 @@ module read_nc_histories
 
       nStat = nStations
 
-      if (status == nf90_noerr) write(*,*) 'dims are: ', nTimes, nNameLength, nStations
+      if (status == nf90_noerr .and. verbose_mode) then
+         write(*,*) 'dims are: ', nTimes, nNameLength, nStations
+      endif
    end function read_meta_data
 
    !> read data from an already opened NetCDF file
