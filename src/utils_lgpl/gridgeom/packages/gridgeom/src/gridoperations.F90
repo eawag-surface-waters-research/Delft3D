@@ -2655,11 +2655,11 @@
       !allocate and assign polygon if input arrays are present
       !when called from DFM xpl, ypl, and zpl arrays are already allocated in m_polygon
       if (present(xplRoofs)) then
-         nInputPolygon = size(xplRoofs)
-         call increasepol(nInputPolygon, 0)
-         xpl(1:nInputPolygon) = xplRoofs
-         ypl(1:nInputPolygon) = yplRoofs
-         zpl(1:nInputPolygon) = zplRoofs
+         NPL = size(xplRoofs)
+         call increasepol(NPL, 0)
+         xpl(1:NPL) = xplRoofs
+         ypl(1:NPL) = yplRoofs
+         zpl(1:NPL) = zplRoofs
       endif
       
       kc   = 0
