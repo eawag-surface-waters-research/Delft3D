@@ -325,6 +325,7 @@ module m_ec_provider
             case default
                call setECMessage("ERROR: ec_provider::ecProviderCreateItems: Unknown file type.")
          end select
+         if (.not. success) return
          success = .true. ! TODO: AvD: why is success always true here at the end, the above success states now get lost...
                           !       RL: ALL Ec routines should be refactored such that success=False on the first line, success=True on the last
                           !           Intermediate lines cannot modify success, only return to the call site. 
@@ -1833,6 +1834,7 @@ module m_ec_provider
          if (n_signals <= 0) then
             call setECMessage("    for polyline "//trim(polyline_name)//" and quantity "//trim(quantityname)//".")
             call setECMessage("No signals for polyline file "//trim(fileReaderPtr%filename)//" found in "//trim(bctfilename))
+            success = .false.
             return
          end if
 
