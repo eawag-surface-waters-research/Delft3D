@@ -2655,11 +2655,11 @@
       !allocate and assign polygon if input arrays are present
       !when called from DFM xpl, ypl, and zpl arrays are already allocated in m_polygon
       if (present(xplRoofs)) then
-         NPL = size(xplRoofs)
-         call increasepol(NPL, 0)
-         xpl(1:NPL) = xplRoofs
-         ypl(1:NPL) = yplRoofs
-         zpl(1:NPL) = zplRoofs
+         npl = size(xplRoofs)
+         call increasepol(npl, 0)
+         xpl(1:npl) = xplRoofs
+         ypl(1:npl) = yplRoofs
+         zpl(1:npl) = zplRoofs
       endif
       
       kc   = 0
@@ -3205,7 +3205,7 @@
    integer, intent(in)                    :: branchidx(:), sourcenodeid(:), targetnodeid(:), startindex
    double precision, intent(in)           :: branchoffset(:),branchlength(:)
    integer, intent(inout)                 :: numedege
-   integer, allocatable                   :: meshnodemapping(:,:), internalnodeindexses(:), connectionMask(:)
+   integer, allocatable                   :: meshnodemapping(:,:), internalnodeindexses(:), connectionMask(:), correctedBranchidx(:)
    integer, optional, intent(inout)       :: edgenodes(:,:)
    integer                                :: nnetworknodes, nBranches,nmeshnodes, ierr , k , n, br, st, en, kk, firstvalidarraypos
 
@@ -3220,13 +3220,15 @@
    nnetworknodes = max(maxval(sourcenodeid),maxval(targetnodeid)) + firstvalidarraypos
    nmeshnodes = size(branchidx)
    nbranches = size(sourcenodeid)
+   allocate(correctedBranchidx(nmeshnodes))
    allocate(meshnodemapping(2,nbranches))
    allocate(internalnodeindexses(nmeshnodes))
    allocate(connectionMask(nmeshnodes)) !safety mask, to avoid generating too many nodes
 
+   correctedBranchidx = branchidx + firstvalidarraypos
    !map the mesh nodes
    meshnodemapping = -1
-   ierr = odu_get_start_end_nodes_of_branches(branchidx, meshnodemapping(1,:), meshnodemapping(2,:))
+   ierr = odu_get_start_end_nodes_of_branches(correctedBranchidx, meshnodemapping(1,:), meshnodemapping(2,:))
 
    numedege = 0
    connectionMask  =  0
@@ -3242,7 +3244,7 @@
       kk =  0
       internalnodeindexses = 0
       do n=1, nmeshnodes
-         if(branchidx(n)+firstvalidarraypos.eq.br.and.(n.ne.st).and.(n.ne.en)) then
+         if(correctedBranchidx(n).eq.br.and.(n.ne.st).and.(n.ne.en)) then
             kk = kk + 1
             internalnodeindexses(kk) = n
          endif

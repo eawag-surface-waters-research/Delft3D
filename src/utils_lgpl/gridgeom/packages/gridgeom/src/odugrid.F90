@@ -197,7 +197,7 @@ function odu_get_start_end_nodes_of_branches(branchidx, branchStartNode, branchE
       if (branchidx(i) > ibran) then
          ibran = branchidx(i)
          branchStartNode(ibran) = i
-         if (i > 2) then
+         if (i > 2 .and. ibran >= 2) then
             branchEndNode(ibran - 1) = i - 1
          endif
       endif
