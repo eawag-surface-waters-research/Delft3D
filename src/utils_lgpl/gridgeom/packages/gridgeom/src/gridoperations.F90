@@ -2690,10 +2690,12 @@
       
       do ip = 1,npoly
          n1 = nodroof(ip)
-         CALL SETNEWPOINT(XZ(N1),YZ(N1),dmiss,k1)
-         k2 = nod1D(ip)
-         call CONNECTDBN(K1,K2,L)
-         kn(3,L) = 7
+         if (n1 > 0) then
+            call setnewpoint(xz(n1),yz(n1),dmiss,k1)
+            k2 = nod1D(ip) 
+            call connectdbn(k1,k2,l)
+            kn(3,l) = 7
+         endif
       enddo
       
       deallocate( dismin, nodroof, nod1D )
