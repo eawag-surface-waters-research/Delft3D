@@ -712,7 +712,7 @@ end subroutine flow_finalize_single_timestep
  end if
 
  if (nshiptxy > 0) then
-     call setship()                                   ! in initimestep
+     call setship()                                  ! in initimestep
  endif
 
  call advecdriver()                                  ! advec limiting for depths below chkadvdp, so should be called after all source terms such as spiralforce
@@ -985,7 +985,7 @@ if(q /= 0) then
  if ( itstep.ne.4 ) then                                ! implicit time-step
 
 222 if (nonlin == 2) then                               ! only for pressurised
-       s1m = bl ! s1mini
+       s1m = bl !  s1mini
        call volsur()    
        difmaxlevm = 0d0 ;  noddifmaxlevm = 0
     endif
@@ -1459,7 +1459,7 @@ if(q /= 0) then
  endif
 
  if (nonlin == 2) then
-    a1m = 0d0
+    a1m = 0d0 
  endif
 
  call VOL12D(japerim)                                   ! and add area's and volumes of 1D links
@@ -1467,7 +1467,7 @@ if(q /= 0) then
  do L = lnxi+1,Lnx
     k1 = ln(1,L) ; k2 = ln(2,L) 
     a1  (k1) = a1(k2)   ! ba(k2)                                   ! set bnd a1 to ba of inside point
-    vol1(k1) = vol1(k2) ! a1(k1)*(s1(k1) - bl(k1))
+    vol1(k1) = vol1(k2) ! a1(k1)*(s1(k1) - bl(k1)) ! TODO: HK: re-enable this code, and check red testcases.
     vol1_f(k1) = vol1_f(k2)
  enddo
 
@@ -1959,22 +1959,6 @@ if (japerim == 0) then
 
           v1ship(k1)  = v1ship(k1) + dx1*ar1
           v1ship(k2)  = v1ship(k2) + dx2*ar1
-
-          if (vos(1,L) .ne. 0) then
-             if ( abs(vos(1,L) - zspc(k3) ) > 1d-20) then
-                dum = 0d0
-             endif
-          endif
-
-          if (vos(2,L) .ne. 0) then
-             if ( abs(vos(2,L) - zspc(k4) ) > 1d-20) then
-                dum = 0d0
-             endif
-          endif
-
-          vos(1,L) = zspc(k3)
-          vos(2,L) = zspc(k4)
-
        endif
 
     endif
@@ -2370,6 +2354,11 @@ subroutine getseg1D(hpr,wu2,dz,ai,frcn,ifrctyp, wid,ar,conv,perim,jaconv)  ! cop
  if (nshiptxy > 0) then
     if (japerim == 1 .or. nonlin == 2 .and. japressurehull >= 2) then                     ! and nonlin == 2
        call addship2D(japerim)
+       if (japressurehull == 3 .and. japerim == 0) then 
+          do n = 1,ndx 
+             vol1(n) = vol1(n) - v1ship(n)
+          enddo   
+       endif   
     endif
  endif
 
@@ -2941,8 +2930,8 @@ end subroutine sethu
  end subroutine bathyupdate
 
  subroutine writesluices()
- integer          :: mgat = 0, mgat2 = 0
- double precision :: t(6), h(6), tim, zgt   
+ integer          :: mgat = 0, mgat2 = 0, k, j
+ double precision :: t(6), h(6), tim, zgt, bed   
  
  if (mgat .ne. 0) return
 
@@ -3212,7 +3201,8 @@ end subroutine sethu
  use unstruc_model, only: md_restartfile
  implicit none
  integer          :: n, kb, k2, itpbn, L, n01
- double precision :: zb, hh, dtgh, alf
+ double precision :: zb, hh, dtgh, alf, zcor
+ double precision, external :: barocpsteric  
 
  do n  = 1, nbndz                                    ! overrides for waterlevel boundaries
     kb      = kbndz(1,n)
@@ -3249,6 +3239,12 @@ end subroutine sethu
     if (japatm > 0 .and. PavBnd > 0) then
        zb = zb - ( patm(kb) - PavBnd )/(ag*rhomean)
     endif
+    
+    if (jasteric > 0) then 
+       zcor = barocpsteric(kb)/(ag*rhomean)
+       zb   = zb - zcor 
+    endif   
+    
 !    zb = max( zb, bl(kb) + 1d-3 )
 
     if (itpbn < 6 .or. itpbn == 7) then
@@ -3265,6 +3261,24 @@ end subroutine sethu
 
  end subroutine sets01zbnd
 
+ double precision function barocpsteric(kb)
+ use m_flowgeom
+ use m_flow
+
+ integer          :: kb
+ integer          :: kk  
+ double precision, external :: densfm 
+ double precision           :: rhokk
+ 
+ barocpsteric = 0d0
+ do kk = ktop(kb), kbot(kb), -1
+    rhokk        = densfm(steric(1,kk), steric(2,kk))
+    rhokk        = rhokk - rhosteric 
+    barocpsteric = barocpsteric + ag*rhokk*(zws(kk) - zws(kk-1))
+ enddo
+end function barocpsteric 
+ 
+   
 subroutine setdt()
    use m_partitioninfo
    use m_flowparameters, only: jawave
@@ -3317,14 +3331,14 @@ subroutine setdt()
           ! dts = min (dts, dt_max) ! hk: commented out, already done this 15 lines above
       
           ! Fit timestep dts so that we will exactly reach time_user in future steps.
-          !if ( time0+dts.ge.time_user ) then
-          !   dts = min(dts, time_user-time0)
-          !else
+          if ( time0+dts.ge.time_user ) then  !
+             dts = min(dts, time_user-time0)  !
+          else                                ! 
           ! NOTE: when the model has an extremely small timestep, nsteps gets an integer overflow,
           ! then becomes negative, so the max below sets nsteps=1, violating the dtmax requirement. (UNST-1926)
              nsteps = max(1,ceiling((time_user-time0) / dts ) )
              dts = ( time_user-time0 ) / dble(nsteps)
-          !end if
+          end if                              !
       endif
    else
       dts = dt_max
@@ -10206,6 +10220,7 @@ end subroutine cosphiunetcheck
  use unstruc_channel_flow
  use m_sobekdfm
  use m_waves, only: default_waves
+ use m_ship
  implicit none
 
     ! Only reset counters and other scalars, allocatables should be
@@ -11705,8 +11720,8 @@ else if (nodval == 27) then
  else if (nodval == 50) then
     if (janudge > 0) then
        znod = nudge_time(kk)
-    else
-       znod = dmiss
+    else if (nshiptxy > 0) then 
+       znod = v1ship(kk) 
     endif 
 
  else if (nodval == numoptwav .and. jawave > 0) then
@@ -12174,7 +12189,8 @@ else if (nodval == 27) then
  use m_monitoring_crosssections, only : crs, ReallocCrosssectionSums
  use string_module, only: str_lower
  use m_ship
- use geometry_module, only: dbdistance, normalout
+ use geometry_module ! , only: dbdistance, normalout, half 
+ use m_physcoef, only: backgroundwatertemperature
  implicit none
 
  ! locals
@@ -12190,7 +12206,7 @@ else if (nodval == 27) then
  double precision, allocatable:: u1_tmp(:)
 
  integer :: itest = 1, ispecials, ierr, mrst, kk, La, j, nq, ierror, N1, N2, Lb, Lt, nat, ntmp
- double precision :: psi, samp, ct, st, omeg, t, rr, rmx, x0, y0, dxx, dyy, blmn, blmx, dbl, bot, rms, ucmk
+ double precision :: psi, samp, ct, st, omeg, t, rr, rmx, x0, y0, dxx, dyy, blmn, blmx, dbl, bot, rms, ucmk, phi, dphi
  character(len=255) :: rstfile
  character(len=4)   :: EXT
  logical :: jawel, jawelrestart
@@ -12413,7 +12429,7 @@ end if
            call getkbotktop(k,kb,kt)
            do kk = kb,kt
               sa1(kk) = 10d0
-              rho1    = rho_Eckart(kk)
+              rho1    = rho_Eckart(sa1(kk), backgroundwatertemperature)
            enddo
        else
            !s1(k) = bl(k) + 0.5d0*( s1(k)-bl(k) )*sqrt(rho1/998.200)   ! rho = 1020 etc
@@ -12826,7 +12842,6 @@ end if
 
  else if (md_ident == 'leveque') then
 
-
      do L   = 1, lnx
           k1  = lncn(1,L) ; k2 = lncn(2,L)
           xx1 = xk(k1) ; yy1 =  yk(k1)
@@ -12862,7 +12877,56 @@ end if
      enddo
 
      itstep = 0
+ else if (md_ident(1:6) == 'teacup') then
 
+     CALL DMINMAX(   xk, numk, xkmin, xkmax, numk)
+     CALL DMINMAX(   yk, numk, ykmin, ykmax, numk)
+
+     call half(xkmin,ykmin,xkmax,ykmin, xx1,yy1,  jsferic, jasfer3D)
+     call half(xkmin,ykmax,xkmax,ykmax, xx2,yy2,  jsferic, jasfer3D)
+     rmx = 0.5d0*dbdistance(xx1,yy1,xx2,yy2, jsferic, jasfer3D, dmiss)  
+     ! rmx = 0.5d0*dbdistance(xkmin,ykmin,xkmax,ykmax, jsferic, jasfer3D, dmiss)  
+     call half(xx1,yy1,xx2,yy2,x0,y0,  jsferic, jasfer3D)
+
+     do L   = 1, lnx
+        k1  = lncn(1,L) ; k2 = lncn(2,L)
+        xx1 = xk(k1)-x0 ; yy1 =  yk(k1)-y0   
+        ux1 = yy1       ; uy1 = -xx1 
+        xx2 = xk(k2)-x0 ; yy2 =  yk(k2)-y0
+        ux2 = yy2       ; uy2 = -xx2
+
+        ux    = 0.5d0*(ux1+ux2)/rmx
+        uy    = 0.5d0*(uy1+uy2)/rmx
+        u1(L) = ux*csu(L) + uy*snu(L)
+        do LL = Lbot(L), Lbot(L) + kmxL(L) - 1
+           u1(LL) = u1(L) 
+        enddo   
+     enddo
+     u0 = u1
+     
+     do k = 1,numk 
+        rr    = dbdistance(xk(k),yk(k),x0,y0, jsferic, jasfer3D, dmiss) 
+        ux    = min(1d0, rr/rmx) 
+        zk(k) = zkuni*sqrt( 1d0 - ux**2)    
+     enddo  
+     
+     npl = 401 ; dphi = 1d0/ (npl-1) ; phi = 0d0 ; k = 0
+     k = k + 1 ; xpl(k) = x0 + 1.1*rmx ; ypl(k) = y0
+     do L = 1,npl
+        k      = k + 1
+        xpl(k) = x0  + rmx*cos(phi)
+        ypl(k) = y0  + rmx*sin(phi)
+        phi    = phi + dphi*twopi 
+     enddo
+     k = k + 1 ; xpl(k) = x0 + 1.1*rmx ; ypl(k) = y0
+     k = k + 1 ; xpl(k) = x0 + 1.1*rmx ; ypl(k) = y0 - 1.1*rmx
+     k = k + 1 ; xpl(k) = x0 - 1.1*rmx ; ypl(k) = y0 - 1.1*rmx
+     k = k + 1 ; xpl(k) = x0 - 1.1*rmx ; ypl(k) = y0 + 1.1*rmx
+     k = k + 1 ; xpl(k) = x0 + 1.1*rmx ; ypl(k) = y0 + 1.1*rmx
+     npl = k
+     call newfil(msam, 'teacup.pli')
+     call wripol(msam)
+     
  else if (index(md_ident,'horvic') > 0) then
 
     if (ibedlevtyp == 1) then
@@ -13305,6 +13369,13 @@ endif
  endif
  s1  = max(bl, s1)
 
+ nonlin = max(nonlin1D, nonlin2D)
+ if (nonlin == 2) then
+    if (allocated(s1m) ) deallocate (s1m, a1m)
+    allocate ( s1m(ndx), a1m(ndx) , STAT=ierr) ; s1m = s1
+    call aerr('s1m(ndx), a1m(ndx)', ierr, ndx) 
+ endif
+ 
  if (nshiptxy > 0) then
     call setship()                               ! in flowinit
     if (kmx > 0 .and. jasal > 0) then
@@ -13317,13 +13388,6 @@ endif
  endif
 
  s1  = max(bl, s1)
- 
- nonlin = max(nonlin1D, nonlin2D)
- if (nonlin == 2) then
-    if (allocated(s1m) ) deallocate (s1m, a1m)
-    allocate ( s1m(ndx), a1m(ndx) , STAT=ierr) ; s1m = s1
-    call aerr('s1m(ndx), a1m(ndx)', ierr, ndx) 
- endif
 
  call setkbotktop(1)
 
@@ -13393,7 +13457,7 @@ endif
        endif   
     enddo  
  endif
- 
+    
  call volsur()          ! flowinit
  call a1vol1tot()
  vol0tot = vol1tot
@@ -14446,6 +14510,8 @@ subroutine update_pumps_with_levels()
    use unstruc_channel_flow
    use m_pump
    use m_partitioninfo 
+   
+   integer :: ierr, n, istru
 
    !Pump with levels, SOBEK style, outside OpenMP region
    ! TODO: merge water level calculations with dambreak 
@@ -14520,8 +14586,8 @@ subroutine update_dambreak_breach(startTime, deltaTime)
       waterLevelsDambreakUpStream   = 0.0d0
       waterLevelsDambreakDownStream = 0.0d0
       normalVelocityDambreak        = 0.0d0
-	   breachWidthDerivativeDambreak  = 0.0d0
-	   waterLevelJumpDambreak         = 0.0d0
+      breachWidthDerivativeDambreak  = 0.0d0
+      waterLevelJumpDambreak         = 0.0d0
    
       ! Compute sumQuantitiesByWeight upstream
       ierr = getAverageQuantityFromLinks(L1dambreaksg, L2dambreaksg, wu, kdambreak(3,:), s1, kdambreak(1,:), dambreakAveraging, hu, dmiss, activeDambreakLinks, 0)
@@ -14591,7 +14657,7 @@ subroutine update_dambreak_breach(startTime, deltaTime)
                breachWidthDerivativeDambreak(n) = dmiss
             endif
             ! Store water level jump
-            tempValue = network%sts%struct(istru)%dambreak%waterLevelJumpDambreak	
+            tempValue = network%sts%struct(istru)%dambreak%waterLevelJumpDambreak   
             if (tempValue>0) then
                waterLevelJumpDambreak(n) = tempValue
             else
@@ -14892,7 +14958,7 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
    end if
 
    if (nshiptxy > 0) then
-       success = ec_gettimespacevalue(ecInstancePtr, item_shiptxy, tim)
+      success = ec_gettimespacevalue(ecInstancePtr, item_shiptxy, tim)
       if (.not. success) then
          goto 888
       endif
@@ -22131,6 +22197,16 @@ endif
     if (allocated (sam0) ) deallocate (sam0, sam1, same)
     allocate (sam0(ndkx), sam1(ndkx), same(ndkx) )  ; sam0 = 0 ; sam1 = 0 ; same = 0
 
+    if (jasteric > 0) then 
+       if (allocated (steric) ) deallocate (steric)
+       allocate ( steric(2,ndkx) , stat = ierr)
+       call aerr('steric(2,ndkx)', ierr, 2*ndkx) 
+       do n=1,ndkx
+          steric(1,n) = backgroundsalinity
+          steric(2,n) = backgroundwatertemperature 
+       enddo   
+    endif
+    
     if ( jatransportmodule == 0) then
        if ( allocated (supq) )  deallocate (supq, qsho)
        allocate ( supq(ndkx), qsho(lnkx)  , stat = ierr)
@@ -22310,24 +22386,42 @@ endif
     call aerr('vincum(ndkx)', ierr, ndkx)
  end if
 
- call realloc(shL, 2, keepExisting    = .false., fill = 0d0, stat = ierr)
- call aerr('shL(2)', ierr, 2)
- call realloc(shB, 2, keepExisting    = .false., fill = 0d0, stat = ierr)
- call aerr('shB(2)', ierr, 2)
- call realloc(shd, 2, keepExisting    = .false., fill = 0d0, stat = ierr)
- call aerr('shd(2)', ierr, 2)
- call realloc(stuw, 2, keepExisting   = .false., fill = 0d0, stat = ierr)
- call aerr('stuw(2)', ierr, 2)
- call realloc(fstuw, 2, keepExisting  = .false., fill = 0d0, stat = ierr)
- call aerr('fstuw(2)', ierr, 2)
- call realloc(stuwmx, 2, keepExisting = .false., fill = 0d0, stat = ierr)
- call aerr('stuwmx(2)', ierr, 2)
- call realloc(roer, 2, keepExisting   = .false., fill = 0d0, stat = ierr)
- call aerr('roer(2)', ierr, 2)
- call realloc(froer, 2, keepExisting  = .false., fill = 0d0, stat = ierr)
- call aerr('froer(2)', ierr, 2)
- call realloc(roermx, 2, keepExisting = .false., fill = 0d0, stat = ierr)
- call aerr('roermx(2)', ierr, 2)
+
+ if (nshiptxy > 0) then 
+    if (allocated( zsp0) ) deallocate(zsp0 )
+    allocate     ( zsp0(numk) , stat = ierr )
+    call aerr    ('zsp0(numk)', ierr, numk   ) ; zsp0 = 0d0
+
+    if (allocated( zspc) ) deallocate(zspc)
+    allocate     ( zspc(numk) , stat = ierr )
+    call aerr    ('zspc(numk)', ierr, numk  )  ; zspc = 0d0
+
+    if (allocated( zspc0) ) deallocate(zspc0)
+    allocate     ( zspc0(numk) , stat = ierr ) ; zspc0 = 0d0
+    call aerr    ('zspc0(numk)', ierr, numk  )
+
+    if (allocated(v0ship) ) deallocate(v0ship, v1ship, qinship)
+    allocate  ( v0ship(ndx), v1ship(ndx), qinship(ndx) , stat = ierr )  ; v0ship = 0d0; v1ship = 0d0; qinship = 0d0
+    call aerr ('v0ship(ndx), v1ship(ndx), qinship(ndx)', ierr, ndx   )
+    call realloc(shL, 2, keepExisting    = .false., fill = 0d0, stat = ierr)
+    call aerr('shL(2)', ierr, 2)
+    call realloc(shB, 2, keepExisting    = .false., fill = 0d0, stat = ierr)
+    call aerr('shB(2)', ierr, 2)
+    call realloc(shd, 2, keepExisting    = .false., fill = 0d0, stat = ierr)
+    call aerr('shd(2)', ierr, 2)
+    call realloc(stuw, 2, keepExisting   = .false., fill = 0d0, stat = ierr)
+    call aerr('stuw(2)', ierr, 2)
+    call realloc(fstuw, 2, keepExisting  = .false., fill = 0d0, stat = ierr)
+    call aerr('fstuw(2)', ierr, 2)
+    call realloc(stuwmx, 2, keepExisting = .false., fill = 0d0, stat = ierr)
+    call aerr('stuwmx(2)', ierr, 2)
+    call realloc(roer, 2, keepExisting   = .false., fill = 0d0, stat = ierr)
+    call aerr('roer(2)', ierr, 2)
+    call realloc(froer, 2, keepExisting  = .false., fill = 0d0, stat = ierr)
+    call aerr('froer(2)', ierr, 2)
+    call realloc(roermx, 2, keepExisting = .false., fill = 0d0, stat = ierr)
+    call aerr('roermx(2)', ierr, 2)
+ endif   
 
  if ( janudge.eq.1 ) then
     call realloc(nudge_tem, Ndkx, fill=DMISS)
@@ -24529,13 +24623,13 @@ endif ! kmx
 
 End subroutine sethigherorderadvectionvelocities
 
-Subroutine setequilibriumsedimentbnds(nbnd,kbnd,i01)
+Subroutine setequilibriumsedimentbnds(nbnd,n4,kbnd,kban,i01)
 use m_flow
 use m_flowgeom
 use m_sediment
 implicit none 
 
-integer           :: nbnd, kbnd(7,nbnd) , i01
+integer           :: nbnd, kban(2,nbnd) , kbnd(n4,nbnd), i01, n4
 
 integer           :: k, kb, ki, L, LL, Lb, Lt, j
 double precision  :: hsk
@@ -24546,7 +24640,7 @@ double precision  :: wse  (mxgr)                !< effective fall velocity (m/s)
 
 do k  = 1,nbnd                                  ! set equilibrium boundary conditions for open flow bnds, types z and u
    kb = kbnd(1,k)
-   ki = kbnd(2,k)
+   ki = kbnd(2,k)   
    LL = kbnd(3,k)
        
    if (q1(LL) < 0) then  
@@ -24561,7 +24655,7 @@ do k  = 1,nbnd                                  ! set equilibrium boundary condi
    if (jaceneqtr == 1) then
       call getequilibriumtransportrates(ki, seq, wse, mxgr, hsk)                            ! get based on cellcentre
    else
-      call getequilibriumtransportrates2(LL, kbnd(6,k), kbnd(7,k), seq, wse, mxgr, hsk, i01) ! get based on 2 netnodes
+      call getequilibriumtransportrates2(LL, kban(1,k), kban(2,k), seq, wse, mxgr, hsk, i01) ! get based on 2 netnodes
    endif
    call getLbotLtop(LL,Lb,Lt)
    do L  = Lb,Lt
@@ -24649,7 +24743,8 @@ subroutine transport()                           ! transport for now, advect sal
  end if
 
  if (jasal == 0) then
-    limtypsa = 0 ; maxitverticalforestersal = 0
+    ! limtypsa = 0 
+    maxitverticalforestersal = 0
  endif
  if (jatem == 0) then
     limtypTM = 0 ; maxitverticalforestertem = 0
@@ -24680,6 +24775,9 @@ subroutine transport()                           ! transport for now, advect sal
           else
               sa1(kb) = sa1(ki)                   ! outflow
           endif
+          if (jasteric > 0) then 
+             steric(1,kb) = zbnds(kk)
+          endif   
        enddo
 
        if ( kb.gt.0 ) then
@@ -24725,6 +24823,11 @@ subroutine transport()                           ! transport for now, advect sal
           else
               constituents(itemp, kb)  = constituents(itemp, ki)     ! outflow
           endif
+          
+          if (jasteric > 0) then 
+             steric(2,kb) = zbndTM(kk)
+          endif   
+
        enddo
 
        if ( kb.gt.0 ) then
@@ -24748,10 +24851,10 @@ subroutine transport()                           ! transport for now, advect sal
  if (jased > 0 .and. jased < 4) then
 
     if (nbndz > 0) then 
-       call setequilibriumsedimentbnds(nbndz,kbndz,0)
+       call setequilibriumsedimentbnds(nbndz,6,kbndz,kbanz,0)
     endif
     if (nbndu > 0) then 
-       call setequilibriumsedimentbnds(nbndu,kbndu,1)
+       call setequilibriumsedimentbnds(nbndu,6,kbndu,kbanu,1)
     endif 
        
     do k  = 1,nbndsd                                 ! set prescribed sediment boundary conditions
@@ -26552,28 +26655,13 @@ clam  = 1779.5d0 + 11.25d0*temp - 0.0745d0*temp*temp
 clam0 =    3.8d0 +  0.01d0*temp
 end subroutine inidensconstants
 
-double precision function rho_Eckart(k)
+double precision function rho_Eckart(sal, temp)
 ! use m_physcoef
-use m_flow,      only :  sa1, tem1,  jasal, jatem , backgroundsalinity , backgroundwatertemperature, zws
-use m_transport, only :  constituents, itemp  
 
 implicit none
-integer          :: k
-double precision :: cp1, clam1, temp2, saL, temp, dum
-
+double precision :: sal, temp
+double precision :: cp1, clam1, temp2, dum
 double precision :: cp0, clam0, clam, alph0
-
-if (jasal > 0) then
-   saL = max(0d0, sa1(k))
-else
-   saL = backgroundsalinity
-endif
-
-if (jatem > 0) then
-   temp  = max(0d0,  constituents(itemp,k))
-else
-   temp = backgroundwatertemperature
-endif
 
 temp2      = temp*temp
 cp0        = 5890.0d0 + 38.00d0*temp - 0.3750d0*temp2
@@ -26583,7 +26671,6 @@ cp1        = cp0  + 3.0d0*saL
 clam1      = clam - clam0*saL
 rho_Eckart = 1000.0d0*cp1/(0.698d0*cp1+clam1)  ! alph0
 
-
 ! rho_Eckart = 1000.0d0* ( cp1/(alph0*cp1+clam1) - 1d0)
 
 ! rho_Eckart = abs( 0.5d0*(zws(k)+zws(k-1)) )
@@ -26592,27 +26679,13 @@ rho_Eckart = 1000.0d0*cp1/(0.698d0*cp1+clam1)  ! alph0
 
 end function rho_Eckart
 
-double precision function rho_Unesco(k)
+double precision function rho_Unesco(sal, temp)
 ! use m_physcoef
-use m_flow,      only :  sa1, tem1,  jasal, jatem , backgroundsalinity , backgroundwatertemperature
-use m_transport, only : constituents, itemp 
 implicit none
-double precision :: saL, temp, rhods, rhodt
-integer          :: k
+double precision :: saL, temp
+double precision :: rhods, rhodt
 
-if (jasal > 0) then
-   saL = max(0d0, sa1(k))
-else
-   saL = backgroundsalinity
-endif
-
-if (jatem > 0) then
-   temp  = max(0d0, constituents(itemp,k))
-else
-   temp = backgroundwatertemperature
-endif
-
-call dens_unes(temp, sal, rho_unesco, rhods, rhodt)
+call dens_unes(temp, sal, rho_Unesco, rhods, rhodt)
 
 end function rho_Unesco
 
@@ -26723,25 +26796,26 @@ use m_physcoef
 use m_flow
 use m_sediment
 use sediment_basics_module, only: SEDTYP_NONCOHESIVE_TOTALLOAD
-use m_transport, only: constituents, ISED1, ISEDN
+use m_transport, only: constituents, itemp, ISED1, ISEDN
 
 implicit none
 integer :: k, j, l, lsed
-double precision, external :: rho_Eckart, rho_Unesco
-double precision           :: rhom
+double precision, external :: densfm
+double precision           :: rhom, sal, temp
 
-if (idensform == 0) then               ! Uniform density
-    setrho = rhomean
-    return
-else if (abs(idensform) == 1) then     ! Carl Henry Eckart, 1958
-    setrho = rho_Eckart(k)
-else if (abs(idensform) == 2) then     ! Unesco
-    setrho = rho_Unesco(k)
-else if (abs(idensform) == 3) then     ! Baroclinic instability
-    setrho = 1025d0 + 0.78d0*(sa1(k) - 33.73d0)
-else if (abs(idensform) == 4) then     ! Test baroclni pressure term 'dicht.mdu'
-     setrho = 2d0*rhomean
+if (jasal > 0) then
+   saL = max(0d0, sa1(k))
+else
+   saL = backgroundsalinity
 endif
+
+if (jatem > 0) then
+   temp  = max(0d0, constituents(itemp,k))
+else
+   temp = backgroundwatertemperature
+endif
+
+setrho = densfm(sal,temp)  
 
 if (jased > 0 .and. stm_included) then
    if (stmpar%morpar%densin) then     ! sediment effects
@@ -26765,6 +26839,27 @@ setrho = max(setrho,  990d0)           !
 
 end function setrho
 
+double precision function densfm(sal,temp)
+use m_physcoef
+use m_flow
+double precision           :: sal, temp
+double precision, external :: rho_Eckart, rho_Unesco
+
+if (idensform == 0) then               ! Uniform density
+    densfm = rhomean
+    return
+else if (abs(idensform) == 1) then     ! Carl Henry Eckart, 1958
+    densfm = rho_Eckart(sal,temp)
+else if (abs(idensform) == 2) then     ! Unesco
+    densfm = rho_Unesco(sal,temp)
+else if (abs(idensform) == 3) then     ! Baroclinic instability
+    densfm = 1025d0 + 0.78d0*(sal - 33.73d0)
+else if (abs(idensform) == 4) then     ! Test baroclni pressure term 'dicht.mdu'
+    densfm = 2d0*rhomean
+endif
+end function densfm
+   
+
  subroutine getequilibriumtransportrates2(L, kb1, kb2, seq, wse, mx, hsk, jamin) ! get equilibrium transportrateconc seq based on bans associated with bndlink L
  use m_netw
  use m_flowgeom
@@ -26781,10 +26876,14 @@ end function setrho
     do kk = 1,mxban
        n = nban(1,kk)      ! net node
        if (kb1 == 0) then
-          if (n == k1) kb1 = kk
+          if (n == k1) then 
+             kb1 = kk
+          endif   
        endif
        if (kb2 == 0) then
-          if (n == k2) kb2 = kk
+          if (n == k2) then 
+             kb2 = kk
+          endif   
        endif
        if (kb1 .ne. 0 .and. kb2 .ne. 0) then
            exit
@@ -26792,6 +26891,14 @@ end function setrho
     enddo
  endif
 
+ if (kb1 == 0) then 
+     kb1 = 0
+ endif   
+ if (kb2 == 0) then 
+     kb2 = 0
+ endif   
+ 
+ 
  call getequilibriumtransportrates(kb1, seq , wse, mx, hsk)
 
  call getequilibriumtransportrates(kb2, seq2, wse, mx, hsk)
@@ -26922,7 +27029,7 @@ end function setrho
  else
 
 
- ueff        = ucur ; beta = 1d0 ; twave = 0d0                      !
+ ueff        = ucur ; beta = 1d0 ; twave = 0d0                     !
  ustar2swart = sqcf*sqcf*Ueff*Ueff
  if (jawave > 0 .and. ueff > 0d0) then
     if (twav(k) > 1d-2) then
@@ -30463,10 +30570,18 @@ end subroutine setbedlevelfromnetfile
        bl(n1)    = min(bl(n1) , blv)
        bl(n2)    = min(bl(n2) , blv)
     else if (kcu(L) == 5 .or. kcu(L) == 7) then         ! keep 1D and 2D levels
-       bob(1,L)  = bl(n1)
-       bob(2,L)  = bl(n2) 
-    endif
-
+       if (bl(n1) .ne. 1d30 ) then 
+          bob(1,L) = bl(n1)
+       else    
+          bob(1,L) = zn1
+       endif   
+       if (bl(n1) .ne. 1d30 ) then 
+          bob(2,L) = bl(n2) 
+       else 
+          bob(2,L) = zn2 
+       endif
+    endif 
+       
     enddo
  endif
  
@@ -30851,9 +30966,8 @@ end subroutine setbobs_fixedweirs
     ymns = minval(yk (1:numk) ) + 20d0
 
     javiusp = 1
-    if (.not. allocated (viusp) ) then
-       allocate ( viusp(lnx) , stat=ierr ); viusp = 0d0
-    endif
+    if (allocated (viusp) ) deallocate(viusp) 
+    allocate ( viusp(lnx) , stat=ierr ); viusp = 0d0
 
     shu = 0d0
     shv = 0d0
@@ -30865,8 +30979,7 @@ end subroutine setbobs_fixedweirs
     shx(1) = xmns + 0.6d0*(xmxs-xmns)          ! 5850.
     shy(1) = ymns + 0.3d0*(ymxs-ymns)          ! 450.
     shi(1) = pi
-
-
+       
     fstuw   = 0d0 ; froer = 0d0
 
     stuwmx  = 120d0*rhog
@@ -30923,7 +31036,7 @@ end subroutine setbobs_fixedweirs
           shu(n) = ( xyship(2*(n-1)+1) - shx(n) ) /dts
           shv(n) = ( xyship(2*(n-1)+2) - shy(n) ) /dts
           if ( japhifromtxy == 1) then
-             rela   = exp(-dts/(10d0*Trelax) )    ! time relax for force
+             rela   = exp(-dts/Trelax )    ! time relax for force
              if ( .not. (abs(shv(n)) < 1d-8 .and. abs(shu(n)) < 1d-8) )  then
                 phi    = atan2( shv(n), shu(n) )
                 if (phi - shi(n) >= pi) phi = phi - twopi
@@ -30963,8 +31076,9 @@ end subroutine setbobs_fixedweirs
     call afhouwendammit()
  endif
 
- if ( japressurehull >= 0) then   ! compute pressure force
-    rela    = exp(-dts/Trelax)    ! time relax for force
+ if ( japressurehull >= 0 .and. iniship > 0) then   ! compute pressure force
+    rela  = exp(-dts/Trelax)      ! time relax for force 
+    shvol = 0d0
     do n = 1,nshiptxy
        fx  = 0d0 ; fy = 0d0; xm = 0d0; ym = 0d0
 
@@ -30972,14 +31086,16 @@ end subroutine setbobs_fixedweirs
           k1  = ln(1,L)            ; k2  = ln(2,L)
           if (zsp(k1) .ne. 0d0 .or. zsp(k2) .ne. 0d0) then
 
-             !  dp  = -rhog* ( (s1(k2)-zsp(k2)) -  (s1(k1)-zsp(k1)) )                !       /dx(L)    !
-               dp  = -rhog* ( s1(k2) -  s1(k1) )                                    !       /dx(L)    !
-
-               dvL   =  0.5d0*(zsp(k1) + zsp(k2) )*wu(L)                              !       *dx(L)    !
-               shvol = shvol + dvl
-
+               !dp  = -rhog* ( s1(k2) -  s1(k1) )                                    !       /dx(L)    !
+               !dvL =  0.5d0*(zsp(k1) + zsp(k2) )*wu(L)                              !       *dx(L)    !
+               !dpx = dp*csu(L)
+               !fxx = dpx*dvl
+               
+               dp  = -rhog* ( s1(k2) - zsp(k2) - s1(k1) + zsp(k2)) /dx(L)    
+               dvL =  0.5d0*( v1ship(k1) + v1ship(k2) )  
                dpx = dp*csu(L)
                fxx = dpx*dvl
+               
                fx  = fx + fxx
                xm  = xm - fxx*(yu(L) - shy(n) )
 
@@ -31037,7 +31153,7 @@ end subroutine setbobs_fixedweirs
           endif
        enddo
 
-    else if (abs(japressurehull) == 1 .or. abs(japressurehull) == 3) then    ! in zeta points
+    else if (abs(japressurehull) == 1) then    ! in zeta points
 
        if (ihullmethod == 0) then                                  ! analytic function in zeta point
 
@@ -31118,10 +31234,9 @@ end subroutine setbobs_fixedweirs
                else
                    zspc(k) = 0d0
                endif
-           enddo
+          enddo
 
-
-      else if (ihullmethod == 2 .or. ihullmethod == 4) then   ! arcinfo corner
+       else if (ihullmethod == 2 .or. ihullmethod == 4) then   ! arcinfo corner
 
            dxsa = 2d0*shL(n)/(mca-1)
            dysa = 2d0*shb(n)/(nca-1)
@@ -31294,8 +31409,9 @@ end subroutine setbobs_fixedweirs
                         D(i0,j1)*(1d0-dxx)*(    dyy) + &
                         D(i1,j1)*(    dxx)*(    dyy)
               zspc(k) = -zspc(k)
-           endif
+          endif
 
+                
            !if (zspc0(k) .ne. 0d0) then
            !   if (abs(zspc(k) -  zspc0(k)) > 1d-20) then
            !      j0 = 1
@@ -31303,6 +31419,14 @@ end subroutine setbobs_fixedweirs
            !endif
 
        enddo
+       
+       zsp = 0d0
+       do m  = 1, mxban                   ! transfer netnode node to net cell
+          k  = nban(1,m)
+          nn = nban(2,m)
+          zsp(nn) = zsp(nn) + banf(m)*zspc(k)
+       enddo
+       zsp = zsp/ba
 
     endif
 
@@ -31323,37 +31447,25 @@ end subroutine setbobs_fixedweirs
 
     if (iniship == 0) then
        if (jarestart == 0) then
-       s0 = s0 - zsp ; s1 = s0
+          s0 = s0 - zsp ; s1 = s0
        endif
-       do k = 1,ndx
-          checkdw(n) = checkdw(n) + zsp(k) * ba(k)
-       enddo
-    else
+     else
        call setpressurehull()
     endif
 
  else if (japressurehull == 2) then    ! nested newton
 
-    zsp = 0d0
-    do m  = 1, mxban                   ! transfer netnode node to net cell
-       k  = nban(1,m)
-       nn = nban(2,m)
-       zsp(nn) = zsp(nn) + banf(m)*zspc(k)
-    enddo
-    zsp = zsp/ba
+    call volship()
+    qinship = (v1ship-v0ship)/dts
+    v0ship  = v1ship
+    zspc0   = zspc
 
-    !call volship()
-    !if (iniship == 1) then
-    !   qinship = (v1ship-v0ship)/dts
-    !   do k = 1,ndx
-    !      if (abs(qinship(k)) > 1d-20) then
-    !          j0 = 1
-    !      endif
-    !   enddo
-    !endif
-    !v0ship = v1ship
-    zspc0  = zspc
+ else if (japressurehull == 3) then    ! nested newton
 
+    call addship2d(0)
+    qinship = (v1ship-v0ship)/dts
+    v0ship  = v1ship
+    
  endif
 
  do n = 1, nshiptxy
@@ -31448,7 +31560,7 @@ end subroutine setbobs_fixedweirs
                   vicushp(L) = abs(vicuship)
                endif
 
-               if (japrop == 1) then
+               if (japrop == 1 .and. iniship > 0) then 
                   prp = 0d0 ; prop = 0.5d0*shb(n)                                  ! add propellor
                   dss = sqrt( (-0.8*shL(n) - sxr)**2 + syr**2)
                   if (dss < prop) then
@@ -31631,17 +31743,135 @@ end subroutine setbobs_fixedweirs
  use m_ship
  use m_flowgeom
  use m_flow
+ use m_arcinfo
+ use m_sferic
+ use m_flowtimes
  implicit none
- integer :: k, L, k1, k2, japerim
- double precision :: slotsav, h1, h2
-
+ integer :: k, L, k1, k2, japerim, i0, i1, j0, j1, n, numi, kk
+ double precision :: slotsav, h1, h2, dx2d, d2, css, sns, dxsa, dysa, dxx, dyy, xx, yy, sxr, syr, sxrL, sxrR, alfa
+ double precision :: alf, alfy, dss, frb, yf, v1, v2, domp, omegadomp, za, zs1, zs2
+ 
  if (japressurehull == 2) then
+   
     slotsav = slotw2D
     slotw2D = 0d0
     do L = lnx1D + 1, lnxi
        call addlinkship2D(L,japerim)                   ! substract the ship
     enddo
     slotw2D = slotsav
+ 
+ else if (japressurehull == 3) then
+    
+    v1ship = 0d0 ; a1m = 0d0
+    
+
+    omegadomp = 1.0
+    domp      = 0d0 ! 0.01*sin(time1*omegadomp)
+    do n = 1,nshiptxy
+       css  = cos(shi(n)) 
+       sns  = sin(shi(n))
+       dxsa = 2d0*shL(n)/(mca-1)
+       dysa = 2d0*shb(n)/(nca-1)
+
+       do k = 1, ndx
+          dx2d = sqrt(ba(k)) ; d2 = 0.5d0*dx2d*css
+          syr  = (yz(k) - shy(n))*css - (xz(k) - shx(n))*sns
+          sxr  = (xz(k) - shx(n))*css + (yz(k) - shy(n))*sns
+          sxrL = (xz(k) - d2 - shx(n))*css + (yz(k) - shy(n))*sns
+          sxrR = (xz(k) + d2 - shx(n))*css + (yz(k) - shy(n))*sns
+          yf   = 1d0 - ( 0.1d0*abs( syr ) / shb(n) )
+          if ( syr  >  -shb(n) .and. syr  < shb(n) .and. &   ! within ship contours
+               sxrR >  -shL(n) .and. sxrL < shL(n)  ) then
+               
+               if (ihullmethod == -1) then                     ! constant
+                   zsp(k) = shd(n)
+               else if (ihullmethod == 0) then                 ! cosine
+                   zsp(k) = 0d0
+                   numi   = 2
+                   dxx    = dx2D/numsmo  
+                   do kk = 1,numsmo
+                      sxr  = sxrL + (kk - 0.5d0)*dxx    
+                      alf  = 1d0
+                      dss  = abs( sxr)  / (shL(n)*yf) ; frb = 0.40d0  ! 0.25d0
+                      if (dss > frb) then
+                          alf = 0.5d0*( cos(pi*(dss-frb)/(1d0-frb)) + 1d0)
+                      endif
+               
+                      alfy = 1d0
+                      dss  = abs(syr) / shb(n)
+                      if (icontroltyp(n) < 4 ) then
+                         frb = max(0.2d0, 0.8d0*alf)
+                       else
+                         frb = 0.6d0  ! relax man
+                      endif
+                      if (dss > frb) then
+                          alfy = 0.5d0*( cos(pi*(dss-frb)/(1d0-frb)) + 1d0)
+                      endif
+                      zsp(k) = zsp(k) + shd(n)*alf*alfy   ! 17d0    
+                   enddo   
+                   zsp(k) = zsp(k) / numsmo
+               else if (ihullmethod == 4) then                ! linear
+                   if (sxrL >= 0d0) then 
+                      zsp(k) = shd(n)*(1d0 - sxr/shL(n))      ! bow
+                   else if (sxrR <= 0d0) then 
+                      zsp(k) = shd(n)*(1d0 + sxr/shL(n))      ! stern 
+                   else
+                      za     = -sxrL / (sxrR - sxrL)
+                      zs1    =  shd(n)*(1d0 + 0.5d0*sxrL/shL(n)) ! stern
+                      zs2    =  shd(n)*(1d0 - 0.5d0*sxrR/shL(n)) ! bow
+                      zsp(k) = za*zs1 + (1d0-za)*zs2
+                   endif   
+               else if (ihullmethod == 5) then                ! linear
+                   if (sxr >= 0d0) then 
+                      zsp(k) = shd(n)*(1d0 - sxr/shL(n))      ! bow
+                   else  
+                      zsp(k) = shd(n)*(1d0 + sxr/shL(n))      ! stern 
+                   endif   
+               else                                           ! arcinfo
+                   xx  = sxr + shL(n)
+                   i0  = 1 + (mca-1)*xx/(2d0*shL(n)) ; i1 = i0 + 1
+                   dxx = (xx - (i0-1)*dxsa)/dxsa
+                   yy  = syr + shB(n)
+                   j0  = 1 + (nca-1)*yy/(2d0*shB(n)) ; j1 = j0 + 1
+                   dyy = (yy - (j0-1)*dysa)/dysa
+                   zsp(k)    = D(i0,j0)*(1d0-dxx)*(1d0-dyy) + &
+                               D(i1,j0)*(    dxx)*(1d0-dyy) + &
+                               D(i0,j1)*(1d0-dxx)*(    dyy) + &
+                               D(i1,j1)*(    dxx)*(    dyy)
+               endif    
+               alfa   = 1d0
+               if ( sxrL < -shL(n) ) then 
+                  alfa = ( SxrR  - - shL(n) ) / dx2d
+               else if (sxrR > shL(n) ) then 
+                  alfa = ( shL(n) - sxRL) / dx2d
+               endif   
+               a1m(k)    = ba(k)*alfa 
+               zsp(k)    = zsp(k) + domp
+               zsp(k)    = max(0.02d0*shd(n), zsp(k))
+               v1ship(k) = (s1m(k) + zsp(k))*a1m(k) 
+          endif
+       enddo
+    enddo
+  
+    if (japerim == 1) then 
+     
+       do L = lnx1D + 1, lnxi
+          k1 = ln(1,L) ; k2 = ln(2,L)
+          if (zsp(k1) .ne. 0d0 .or. zsp(k2) .ne. 0d0) then
+             !h1    = s1(k1) + zsp(k1)
+             !h2    = s1(k2) + zsp(k2)
+             !h1    = zsp(k1)
+             !h2    = zsp(k2)
+             !au(L) = au(L) - 0.5d0*( h1 + h2 )*wu(L)
+
+             v1    = v1ship(k1)
+             v2    = v1ship(k2)
+             au(L) = au(L) - 0.5d0*( v1 + v2 )/dx(L) 
+          endif
+       enddo
+    
+    endif   
+    
  else
     if (japerim == 0) then
        do k = 1,ndx
@@ -31745,7 +31975,6 @@ end subroutine setbobs_fixedweirs
     call zoekdouble  (minp, 'SHU'     , shu(n)     , ja)
     call zoekdouble  (minp, 'SHV'     , shv(n)     , ja)
     call zoekdouble  (minp, 'SHO'     , sho(n)     , ja)
-    call zoekdouble  (minp, 'DXCOG'   , dxcog(n)   , ja)
 
     if (ja == 1 .and. sho(n) .ne. 0d0) then
        sho(n) = twopi/sho(n)
@@ -31794,19 +32023,9 @@ end subroutine setbobs_fixedweirs
     call aerr ('vicushp(lnx)', ierr, lnx   )
  endif
 
- if (japressurehull == 2) then
+ if (japressurehull >= 2 ) then
     nonlin2D = 2
-    if (allocated(v0ship) ) deallocate(v0ship, v1ship, qinship)
-    allocate  ( v0ship(ndx), v1ship(ndx), qinship(ndx) , stat = ierr )  ; v0ship = 0d0; v1ship = 0d0; qinship = 0d0
-    call aerr ('v0ship(ndx), v1ship(ndx), qinship(ndx)', ierr, ndx   )
-
-    if (allocated(vos) ) deallocate(vos)
-    allocate  ( vos(2,lnx) , stat = ierr ) ; vos = 0d0
-    call aerr ('vos(2,lnx)', ierr, lnx   )
-
- else if (japressurehull == 3) then
-    nonlin2D = 2
- endif
+ endif   
 
  end subroutine readshipdef
 
@@ -32350,11 +32569,6 @@ end subroutine setbobs_fixedweirs
 
  integer, intent(in) :: n
  double precision, intent(in) :: s1k
- ! jaoldstr ==0, ext file format for old pumps, no stages
- if (jaoldstr <= 0) then 
-     ispumpon = 1 
-     return 
- endif
  ! this is for safety, check arrays before dereference
  if (.not.allocated(pumponoff)) then 
      ispumpon = 1 
@@ -32446,7 +32660,7 @@ end function ispumpon
 
  bb = 0 ; ccr = 0 ; dd = 0
 
- if (jagrw > 0 .or. numsrc > 0 .or. infiltrationmodel > 0) then
+ if (jagrw > 0 .or. numsrc > 0 .or. infiltrationmodel > 0 .or. nshiptxy > 0) then
     jaqin = 1
  endif
 
@@ -32547,6 +32761,10 @@ end function ispumpon
     if (numsrc > 0) then
        call setsorsin()                                      ! add sources and sinks
     endif
+    
+    if (nshiptxy > 0) then 
+       ! qin = qin - qinship 
+    endif   
 
     qincel = 0d0 ; qoutcel = 0d0
 
@@ -35380,8 +35598,6 @@ end subroutine make_mirrorcells
 
  double precision, allocatable :: xdum(:), ydum(:), xy2dum(:,:)
  integer, allocatable          :: kdum(:)
- double precision, allocatable :: xships(:), yships(:)
- integer, allocatable          :: kships(:)
  integer, dimension(:), pointer:: pkbot, pktop
 
  double precision, allocatable :: grainlayerthickness(:,:) ! help array grain layer thickness
@@ -35436,13 +35652,16 @@ end subroutine make_mirrorcells
 
  allocate(lnxbnd(lnx-lnxi))
 
- n4 = 6 ; if (jased > 0 .and. jased < 4) n4 = n4 + 2
+ n4 = 6 
  if (nbndz > 0) then                                 ! now you know the elementsets for the waterlevel bnds
     allocate ( xbndz(nbndz), ybndz(nbndz), xy2bndz(2,nbndz), zbndz(nbndz), kbndz(n4,nbndz), zbndz0(nbndz), kdz(nbndz) , stat=ierr     )
     call aerr('xbndz(nbndz), ybndz(nbndz), xy2bndz(2,nbndz), zbndz(nbndz), kbndz(n4,nbndz), zbndz0(nbndz), kdz(nbndz)', ierr, nbndz*10 )
     if (jased > 1 .and. jaceneqtr == 2 .and. .not. stm_included) then
+       if (allocated(zkbndz) ) deallocate (zkbndz, kbanz)
        allocate ( zkbndz(2,nbndz) ,stat= ierr    )
        call aerr('zkbndz(2,nbndz)',ierr, 2*nbndz )
+       allocate ( kbanz(2,nbndz) ,stat= ierr    ) ; kbanz = 0
+       call aerr('kban2(2,nbndz)',ierr, 2*nbndz )
     endif
 
     kbndz = 0 ; kdz = 1
@@ -35525,8 +35744,11 @@ end subroutine make_mirrorcells
     allocate ( xbndu(nbndu), ybndu(nbndu), xy2bndu(2,nbndu), kbndu(n4,nbndu), kdu(nbndu) , stat=ierr)
     call aerr('xbndu(nbndu), ybndu(nbndu), xy2bndu(2,nbndu), kbndu(n4,nbndu), kdu(nbndu)', ierr, nbndu*(n4+5) )
     if (jased > 1 .and. jaceneqtr == 2 .and. .not. stm_included) then
+       if (allocated (zkbndu) ) deallocate(zkbndu, kbanu)
        allocate ( zkbndu(2,nbndu) ,stat= ierr    )
        call aerr('zkbndu(2,nbndu)',ierr, 2*nbndu )
+       allocate ( kbanu(2,nbndu) ,stat= ierr    ) ; kbanu = 0
+       call aerr('kbanu(2,nbndu)',ierr, 2*nbndu )
     endif
     if (kmx >= 1) then
        allocate ( sigmabndu(kmx*nbndu) , stat=ierr )
@@ -36018,33 +36240,10 @@ end subroutine make_mirrorcells
     deallocate(lnxbnd)
  endif
 
-
-
  if (nshiptxy > 0) then
-    if (allocated(xships)) deallocate(xships, yships, kships)
-    allocate ( xships(nshiptxy), yships(nshiptxy), kships(nshiptxy) , stat=ierr)
-    call aerr('xships(nshiptxy), yships(nshiptxy), kships(nshiptxy)', ierr, 3)
-
     if (allocated(shx) )   deallocate ( xyship, shx, shy, shu, shv, shi, sho )
     allocate ( xyship(2*nshiptxy), shx(nshiptxy), shy(nshiptxy), shu(nshiptxy), shv(nshiptxy), shi(nshiptxy), sho(nshiptxy) , stat= ierr)
     call aerr('xyship(2*nshiptxy), shx(nshiptxy), shy(nshiptxy), shu(nshiptxy), shv(nshiptxy), shi(nshiptxy), sho(nshiptxy)', ierr, 4*nshiptxy)
-
-    if (allocated(zsp) ) deallocate(zsp )
-    allocate  ( zsp(ndx) , stat = ierr  )
-    call aerr ('zsp(ndx)', ierr, ndx    )      ; zsp  = 0d0
-
-    if (allocated( zsp0) ) deallocate(zsp0 )
-    allocate     ( zsp0(numk) , stat = ierr )
-    call aerr    ('zsp0(numk)', ierr, numk   ) ; zsp0 = 0d0
-
-    if (allocated( zspc) ) deallocate(zspc)
-    allocate     ( zspc(numk) , stat = ierr )
-    call aerr    ('zspc(numk)', ierr, numk  )  ; zspc = 0d0
-
-    if (allocated( zspc0) ) deallocate(zspc0)
-    allocate     ( zspc0(numk) , stat = ierr ) ; zspc0 = 0d0
-    call aerr    ('zspc0(numk)', ierr, numk  )
-
     iniship = 0 ; nshiptxy = 0 ; shx = 0d0 ; shy = 0d0; xyship = dmiss
  endif
 
@@ -36058,7 +36257,7 @@ end subroutine make_mirrorcells
  call setzminmax(); call setsigmabnds() ! our side of preparation for 3D ec module
 
  if (len_trim(md_extfile_new) > 0) then
-   success = initboundaryblocksforcings(md_extfile_new)
+    success = initboundaryblocksforcings(md_extfile_new)
     if (.not. success) then
       iresult = DFM_WRONGINPUT
       call mess(LEVEL_WARN, 'Error in external forcings file '''//trim(md_extfile_new)//'''.')
@@ -36621,6 +36820,7 @@ if (mext > 0) then
            end if
 
         else if (qidnam(max(1,lenqidnam-2):lenqidnam) == 'bnd') then ! All-in-one handler for boundary qids
+          
            success = addtimespacerelation_boundaries(qid, filename, filetype, method, operand)
 
         else if (qid == 'airpressure' .or. qid == 'atmosphericpressure') then
@@ -36774,7 +36974,7 @@ if (mext > 0) then
         else if (qid == 'shiptxy') then
            kx = 2
            nshiptxy = nshiptxy + 1
-           ! Converter will put 'x' in array(2*nshiptxy-1) and 'y' in array(2*nshiptxy).
+           ! Converter will put 'x' in array(2*nshiptxy-1) and 'y' in array(2*nshiptxy). en welke array is dat? 
            success  = ec_addtimespacerelation(qid, xdum, ydum, kdum, kx, filename, filetype, method, operand, targetIndex = nshiptxy)
 
         else if (qid == 'movingstationtxy') then
@@ -37225,10 +37425,6 @@ end if
  if (allocated (xy2cgen) ) deallocate (xy2cgen)
 
  if (allocated (xy2pump) ) deallocate (xy2pump)
-
- if (allocated (xships)  ) deallocate (xships)
- if (allocated (yships)  ) deallocate (yships)
- if (allocated (kships)  ) deallocate (kships)
 
  if (allocated (xdum)    ) deallocate( xdum, ydum, kdum, xy2dum)
 
@@ -38321,7 +38517,7 @@ subroutine update_verticalprofiles()
     ! If it is a restart simulation, spin up function is not allowed
     if (jarestart == 0) then
      if (  ( Tspinupturblogprof > 0d0 .and. Time1 < Tstart_user + Tspinupturblogprof )   .or. &
-          ( jaLogprofkepsbndin == 1   .and. LL    > lnxi .and. u1(LL) > 0d0          )        ) then
+          ( jaLogprofkepsbndin >= 1   .and. LL    > lnxi .and. u1(LL) >= 0d0         )        ) then
        alfaT = dmiss
        if (Tspinupturblogprof > 0d0) then
           alfaT = (Time1-Tstart_user) / Tspinupturblogprof
@@ -38355,8 +38551,9 @@ subroutine update_verticalprofiles()
           eps               = epsbot / ( hu(Lb) - hu(Lb-1) )
           tureps1(Lb-1)     = eps*(1d0-alfaT) + alfaT*tureps1(Lb-1)
 
-          if (jamodelspecific == 1) call update_turkin_modelspecific(LL) ! will update turkin1 and tureps1 for all layers of flow link LL.
-          ! please no character compaire in computational loop
+          if (jamodelspecific == 1) then
+             call update_turkin_modelspecific(LL) ! will update turkin1 and tureps1 for all layers of flow link LL.
+          endif
        endif
      endif
     endif
@@ -39318,7 +39515,7 @@ endif
 if (network%brs%count > 0) then
    call getCrossTotalData_on_link(network, LL, hpr, area, width, CS_TYPE_MIN)
    return
-endif   	  
+endif      
 
 if (prof1D(1,LL) > 0 ) then              ! direct profile based upon link value
     ka    = 0; kb = 0                    ! do not use profiles
@@ -40148,15 +40345,7 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
  if (nfxw > 0) then
     if (allocated (lnfxw) )   deallocate(nfxwL,lnfxw)
     if (allocated (weirdte) ) deallocate(weirdte)
-    if(allocated(shlxw)) deallocate(shlxw)
-    if(allocated(shrxw)) deallocate(shrxw)
-    if(allocated(crestlevxw)) deallocate(crestlevxw)
-    if(allocated(crestlxw)) deallocate(crestlxw)
-    if(allocated(taludlxw)) deallocate(taludlxw)
-    if(allocated(taludrxw)) deallocate(taludrxw)
-    if(allocated(vegxw)) deallocate(vegxw)
-    if(allocated(iweirtxw)) deallocate(iweirtxw)
-
+    if (allocated (shlxw) )   deallocate(shlxw,shrxw,crestlxw,taludlxw,taludrxw,vegxw,iweirtxw)
     allocate ( nfxwL(Lnx) ,stat=ierr)
     call aerr('nfxwL(Lnx)',ierr,lnx) 
     
@@ -40901,6 +41090,7 @@ else if (jatem == 5) then
 
       if (kmx > 0) then     ! distribute incoming radiation over water column
          ! zabs  = (min(0.5d0*hs(n) ,Secchidepth)) / 1.7d0
+         
          zabs  = Secchidepth / 1.7d0
          zlo   = 0d0
          explo = 1d0
@@ -42036,7 +42226,7 @@ implicit none
       if ( nbndz.gt.0 ) then
          do n=1,nbndz
             itpbn   = kbndz(4,n)
-            Tref    = dble(kbndz(6,n))  ! integer, but can get away with it, nobody uses fractional seconds..
+            Tref    = dble(kbndz(8,n))  ! integer, but can get away with it, nobody uses fractional seconds..
             dfac  = max(min(dts/Tref, 1d0), 0d0)
             dfac1 = 1d0 - dfac
             
@@ -42542,7 +42732,7 @@ end subroutine makethindamadmin
  subroutine alloc_jacobi(ndx,lnx)
  use m_jacobi
  use m_alloc
- integer :: ndx, lnx
+ integer :: ndx, lnx, ierr
 
  if (ndx == ndxjac .and. lnx == lnxjac) return
 

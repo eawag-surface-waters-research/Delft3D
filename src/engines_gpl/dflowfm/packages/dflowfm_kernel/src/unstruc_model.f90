@@ -596,7 +596,8 @@ subroutine readMDUFile(filename, istat)
     real(kind=hp) :: ti_rst_array(3), ti_map_array(3), ti_his_array(3), acc, ti_wav_array(3), ti_waq_array(3), ti_classmap_array(3)
     real(kind=sp) :: rtmp
     character(len=200), dimension(:), allocatable       :: fnames
-
+    double precision, external     :: densfm
+    
     hkad = -999
     istat = 0 ! Success
 
@@ -711,6 +712,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_double ( md_ptr, 'geometry', 'Cosphiutrsh' , Cosphiutrsh)
 
     call prop_get_double ( md_ptr, 'geometry', 'WaterLevIni' , sini)
+    call prop_get_double ( md_ptr, 'geometry', 'WaterdepthIni1D' , WaterdepthIni1D)
     call prop_get_double ( md_ptr, 'geometry', 'Uniformhu'   , uniformhu)
 
     call prop_get_double ( md_ptr, 'geometry', 'BotLevUni'   ,   zkuni)
@@ -1029,7 +1031,6 @@ subroutine readMDUFile(filename, istat)
     !    call mess(LEVEL_WARN, 'BedlevType = 1 should be used in combination with Sedimentmodelnr = 4')
     !endif
 
-
     if (jased*mxgr > 0 .and. .not. stm_included) then
 
       call allocgrains()
@@ -1087,6 +1088,10 @@ subroutine readMDUFile(filename, istat)
     call prop_get_double (md_ptr, 'wind' , 'Rhoair'             , rhoair )
     call prop_get_double (md_ptr, 'wind' , 'PavIni'             , PavIni )
     call prop_get_double (md_ptr, 'wind' , 'PavBnd'             , PavBnd )
+    call prop_get_integer(md_ptr, 'wind' , 'Stericcorrection'   , jasteric)
+    if (Jasteric > 0) then 
+       rhosteric = densfm(backgroundsalinity, backgroundwatertemperature) 
+    endif
 
     call prop_get_integer(md_ptr, 'waves', 'Wavemodelnr'    , jawave)
     call prop_get_double (md_ptr, 'waves', 'Tifetchcomp'    , Tifetch)
@@ -1768,7 +1773,6 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     real(kind=hp)                  :: ti_wav_array(3), ti_map_array(3), ti_rst_array(3), ti_his_array(3), ti_waq_array(3), ti_classmap_array(3)
 
     logical, external              :: get_japart
-
     istat = 0 ! Success
 
 ! Put settings for .mdu file into a property tree first
@@ -1856,6 +1860,10 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     endif
 
     call prop_set(prop_ptr, 'geometry', 'WaterLevIni',      sini,                   'Initial water level at missing s0 values')
+    if (waterdepthini1D .ne. dmiss) then
+       call prop_set(prop_ptr,'geometry','waterdepthini1D', waterdepthini1D,        'Initial waterdepth in 1D ')
+    endif
+
     if (uniformhu .ne. dmiss) then
        call prop_set(prop_ptr,'geometry','Uniformhu',       uniformhu,              'Waterdepth in rigid-lid-like solution')
     endif
@@ -2352,7 +2360,8 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     call prop_set(prop_ptr, 'wind', 'Rhoair',                  Rhoair,   'Air density (kg/m3)')
     call prop_set(prop_ptr, 'wind', 'PavBnd',                  PavBnd,   'Average air pressure on open boundaries (N/m2) (only applied if > 0)')
     call prop_set(prop_ptr, 'wind', 'Pavini',                  PavIni,   'Average air pressure for initial water level correction (N/m2) (only applied if > 0)')
-
+    call prop_set(prop_ptr, 'wind', 'Stericcorrection',      Jasteric, 'Steric correction on waterlevel bnds, for which sal + temp should be prescribed')
+    
     if (writeall .or. jagrw > 0 .or. Infiltrationmodel > 0) then
        call prop_set(prop_ptr, 'grw', 'groundwater'        , jagrw,             '0=No (horizontal) groundwater flow, 1=With groundwater flow')
        call prop_set(prop_ptr, 'grw', 'Infiltrationmodel'  , Infiltrationmodel, '0=No infiltration, 1=infiltration=interceptionlayer (with grw), 2=infiltration=Infiltrationcapacity, 3=model unsaturated/saturated (with grw) ( )' )

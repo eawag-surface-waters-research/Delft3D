@@ -969,41 +969,40 @@ end subroutine reset_grw
  end module
 
 module m_ship
- integer                               :: nshiptxy = 0, iniship                             !< nr of ships / initialised 0,1
- integer, allocatable                  :: kship(:)                                      !< index array
- double precision, target, allocatable :: xyship(:)                                     !< new position or velocity provided by module
- double precision, target, allocatable :: shx(:) !< [m] current position {"shape": ["nshiptxy"]}
- double precision, target, allocatable :: shy(:) !< [m] current position {"shape": ["nshiptxy"]}
- double precision, target, allocatable :: shi(:) !< [m] current position {"shape": ["nshiptxy"]}
- double precision, target, allocatable :: shu(:), shv(:), sho(:)                        !< current velocity
- double precision, target, allocatable :: zsp(:)     !< [m] ship depth at flownodes {"shape": ["ndx"]}
- double precision, target, allocatable :: zsp0(:)    !< [m] ship depth at flownodes prev step {"shape": ["ndx"]}
- double precision, target, allocatable :: zspc(:)    !< [m] ship depth at netnodes  {"shape": ["numk"]}
- double precision, target, allocatable :: zspc0(:)   !< [m] ship depth at netnodes  {"shape": ["numk"]}
- double precision, target, allocatable :: v0ship(:)  !< [m] ship 0 volume {"shape": ["ndx"]}
- double precision, target, allocatable :: v1ship(:)  !< [m] ship 1 volume {"shape": ["ndx"]}
- double precision, target, allocatable :: qinship(:) !< [m] ship flux (v1-v0)/dt  {"shape": ["ndx"]}
- double precision, target, allocatable :: vicushp(:) !< [m] eddyvisc ship {"shape": ["lnx"]}
- double precision, target, allocatable :: vos(:,:)   !< [m] ship link volume bob like {"shape": ["2","lnx"]}
+ integer                       :: nshiptxy = 0, iniship                             !< nr of ships / initialised 0,1
+ integer,          allocatable :: kship(:)                                      !< index array
+ double precision, allocatable, target :: xyship(:)                                     !< new position or velocity provided by module
+ double precision, allocatable :: shx(:) !< [m] current position {"shape": ["nshiptxy"]}
+ double precision, allocatable :: shy(:) !< [m] current position {"shape": ["nshiptxy"]}
+ double precision, allocatable :: shi(:) !< [m] current position {"shape": ["nshiptxy"]}
+ double precision, allocatable :: shu(:), shv(:), sho(:)                        !< current velocity
+ double precision, allocatable :: zsp(:)     !< [m] ship depth at flownodes {"shape": ["ndx"]}
+ double precision, allocatable :: zsp0(:)    !< [m] ship depth at flownodes prev step {"shape": ["ndx"]}
+ double precision, allocatable :: zspc(:)    !< [m] ship depth at netnodes  {"shape": ["numk"]}
+ double precision, allocatable :: zspc0(:)   !< [m] ship depth at netnodes  {"shape": ["numk"]}
+ double precision, allocatable :: v0ship(:)  !< [m] ship 0 volume {"shape": ["ndx"]}
+ double precision, allocatable :: v1ship(:)  !< [m] ship 1 volume {"shape": ["ndx"]}
+ double precision, allocatable :: qinship(:) !< [m] ship flux (v1-v0)/dt  {"shape": ["ndx"]}
+ double precision, allocatable :: vicushp(:) !< [m] eddyvisc ship {"shape": ["lnx"]}
 
- double precision, allocatable, target :: shL(:) !< [m] ship size L/2, B/2, D  ! for now, fixed max nr =2 {"shape": [2]}
- double precision, allocatable, target :: shB(:) !< [m] ship size L/2, B/2, D  ! for now, fixed max nr =2 {"shape": [2]}
- double precision, allocatable, target :: shd(:) !< [m] ship size L/2, B/2, D  ! for now, fixed max nr =2 {"shape": [2]}
- double precision          :: epsi=1d0
- double precision          :: fx2(2)   =0d0, fy2(2)    =0d0, fm2(2)   =0d0  !< pressure force in global coordinate sys (interacting with flow)
- double precision          :: squat(2) =0d0, squatbow(2) = 0d0              !< squat and squat bow (m)
- double precision          :: fricx (2)=0d0, fricy  (2)=0d0, fricm (2)=0d0  !< friction force in global coordinate sys (interacting with flow)
- double precision          :: fricxe(2)=0d0, fricye (2)=0d0, fricme(2)=0d0  !< friction force in global coordinate sys (interacting with flow) explicit
- double precision          :: fricxi(2)=0d0, fricyi (2)=0d0, fricmi(2)=0d0  !< friction force in global coordinate sys (interacting with flow) implicit
- double precision          :: fricxnet(2)=0d0, fricynet(2)=0d0, fricmnet(2)=0d0  !< net friction forces
- double precision          :: stuwx (2)=0d0, stuwy  (2)=0d0, stuwm (2)=0d0  !< thrust    force in global coordinate sys (interacting with flow)
- double precision          :: fextx (2)=0d0, fexty  (2)=0d0, fextm (2)=0d0  !< external  force in global coordinate sys (          not on flow)
- double precision, allocatable, target  :: stuw(:)   !< [N] actual thrust force in ship dir  {"shape": [2]}
- double precision, allocatable, target  :: fstuw(:)  !< [-] thrust setting 0-1 {"shape": [2]}
- double precision, allocatable, target  :: stuwmx(:) !< [N] max thrust {"shape": [2]}
- double precision, allocatable, target  :: roer(:)   !< [degree] actual rudder angle {"shape": [2]}
- double precision, allocatable, target  :: froer(:)  !< [degree] actual rudder setting 0-1 {"shape": [2]}
- double precision, allocatable, target  :: roermx(:) !< [degree] max rudder angle {"shape": [2]}
+ double precision, allocatable :: shL(:) !< [m] ship size L/2, B/2, D  ! for now, fixed max nr =2 {"shape": [2]}
+ double precision, allocatable :: shB(:) !< [m] ship size L/2, B/2, D  ! for now, fixed max nr =2 {"shape": [2]}
+ double precision, allocatable :: shd(:) !< [m] ship size L/2, B/2, D  ! for now, fixed max nr =2 {"shape": [2]}
+ double precision              :: epsi=1d0
+ double precision              :: fx2(2)   =0d0, fy2(2)    =0d0, fm2(2)   =0d0  !< pressure force in global coordinate sys (interacting with flow)
+ double precision              :: squat(2) =0d0, squatbow(2) = 0d0              !< squat and squat bow (m)
+ double precision              :: fricx (2)=0d0, fricy  (2)=0d0, fricm (2)=0d0  !< friction force in global coordinate sys (interacting with flow)
+ double precision              :: fricxe(2)=0d0, fricye (2)=0d0, fricme(2)=0d0  !< friction force in global coordinate sys (interacting with flow) explicit
+ double precision              :: fricxi(2)=0d0, fricyi (2)=0d0, fricmi(2)=0d0  !< friction force in global coordinate sys (interacting with flow) implicit
+ double precision              :: fricxnet(2)=0d0, fricynet(2)=0d0, fricmnet(2)=0d0  !< net friction forces
+ double precision              :: stuwx (2)=0d0, stuwy  (2)=0d0, stuwm (2)=0d0  !< thrust    force in global coordinate sys (interacting with flow)
+ double precision              :: fextx (2)=0d0, fexty  (2)=0d0, fextm (2)=0d0  !< external  force in global coordinate sys (          not on flow)
+ double precision, allocatable :: stuw(:)   !< [N] actual thrust force in ship dir  {"shape": [2]}
+ double precision, allocatable :: fstuw(:)  !< [-] thrust setting 0-1 {"shape": [2]}
+ double precision, allocatable :: stuwmx(:) !< [N] max thrust {"shape": [2]}
+ double precision, allocatable :: roer(:)   !< [degree] actual rudder angle {"shape": [2]}
+ double precision, allocatable :: froer(:)  !< [degree] actual rudder setting 0-1 {"shape": [2]}
+ double precision, allocatable :: roermx(:) !< [degree] max rudder angle {"shape": [2]}
  double precision          :: dxcog(2) = 0d0                                !< delta x c.o.g.
  double precision          :: powermx(2)   , speedmx(2)                     !< mx engine power (Hp on input, then Watts), max ship velocity (Knts on input, then m/s)
  double precision          :: deadw(2)     , deadwi (2), checkdw(2)         !< inertia (x,y), moment
@@ -1739,7 +1738,7 @@ end module m_crspath
                                                         !! 6,* = riemann relaxation time for this point (s)
  double precision, allocatable     :: zkbndz(:,:)       !< only for jaceneqtr == 2 : left and right vertical netnode zk levels
  double precision                  :: zbndzval1=-999d0, zbndzval2 = -999d0
- 
+ integer         , allocatable     :: kbanz(:,:)        !< ban pointer 2,*   
  
  integer                           :: nubnd             !< number of velocity boundary segments
  integer                           :: nbndu             !< velocity   boundary points dimension
@@ -1761,7 +1760,8 @@ end module m_crspath
  integer                           :: nqbnd             !<
  double precision                  :: qbndhutrs = 0.1d0 !< only discharge bnd here if hu>qbndhutrs
  double precision, allocatable     :: zkbndu(:,:)       !< only for jaceneqtr == 2 : left and right vertical netnode zk levels
-
+ integer         , allocatable     :: kbanu(:,:)        !< ban pointer 2,*   
+ 
  integer                           :: nbnds             !< salinity   boundary points dimension in 1D and 2D
  double precision, allocatable     :: xbnds(:)          !< salinity   boundary points xcor
  double precision, allocatable     :: ybnds(:)          !< salinity   boundary points ycor
@@ -1812,8 +1812,9 @@ end module m_crspath
  integer                           :: nbndtr_all          !< all tracer boundary points dimension (max(nbndtr))
  integer                           :: numtracers        !< number of tracers with boundary conditions
  integer,          parameter       :: NAMTRACLEN = 128
- character(len=NAMTRACLEN), allocatable :: trnames(:)!< tracer names (boundary conditions only, used for look-up)
+ character(len=NAMTRACLEN), allocatable :: trnames(:)   !< tracer names (boundary conditions only, used for look-up)
  type(bndtype),    allocatable, target  :: bndtr(:)
+ double precision, allocatable          :: wstracers(:) !< tracer fall velocity pos is downward (m/s)  
  
  ! JRE sedfracbnds
  integer,          allocatable          :: nbndsf(:)         !< sedfrac   boundary points dimension
@@ -2349,7 +2350,8 @@ end module m_structures
  double precision, allocatable     :: rhou     (:)      ! density at flow links   (kg/m3)
 
  double precision, allocatable     :: sigdifi  (:)      ! inverse prandtl schmidt nrs
-
+ double precision, allocatable     :: wsf      (:)      ! fall velocities of all numconst constituents 
+ 
  double precision, allocatable     :: turkinepsws (:,:) ! k and eps,1,2     at layer interface at c , horizontal transport of k and eps
  double precision, allocatable     :: tqcu(:)           ! sum of q*turkinws at layer interface at cupw , horizontal transport of k and eps
  double precision, allocatable     :: eqcu(:)           ! sum of q*turepsws at layer interface at cupw , horizontal transport of k and eps
@@ -2610,6 +2612,7 @@ end subroutine default_turbulence
 
 
  double precision                  :: sini              !< uniform initial waterlevel (m),     (uniform bottom level = zkuni)
+ double precision                  :: waterdepthini1D   !< uniform initial depth (m)  
  double precision                  :: uini              !< uniform initial velociy    (m/s),
  double precision                  :: salini            !< uniform initial sal        (ppt)
  double precision                  :: deltasalinity=-999d0    !< uniform initial sal        (ppt)
@@ -3420,8 +3423,11 @@ end module m_vegetation
  double precision, allocatable     :: qw    (:)   !< vertical flux through interface (m3/s)
  double precision, allocatable     :: tidep (:,:) !< tidal potential (m2/s2)
  double precision, allocatable     :: tidef (:)   !< tidal force (m/s2)
-
-
+ 
+ double precision, allocatable     :: steric(:,:) !< sal and temp for steric correction in 1,* and 2,*
+ double precision                  :: rhosteric   !< later maybe in spatial refdensity  
+ integer                           :: jasteric=0  !< use steric correction on open waterlevel bnds yes/no 
+ 
  double precision, allocatable     :: vih   (:)   !< horizontal eddy viscosity in cell center (m2/s)
  double precision, allocatable     :: qin   (:)   !< rain, evap, qlat and src netto inloop (m3/s)
 

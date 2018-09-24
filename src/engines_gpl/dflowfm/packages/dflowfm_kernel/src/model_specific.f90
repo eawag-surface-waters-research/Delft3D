@@ -189,16 +189,16 @@ use unstruc_model, only: md_specific
 implicit none
    integer, intent(in) :: Lf !< 2D flow link number
 
-   double precision, save :: zw1(kmxx)
+   double precision, save :: zw1(kmxx), uu(kmxx)
    double precision :: dummy
-   integer :: L, Lb, Lt, kxL
+   integer :: L, Lb, Lt, kxL, mout, j
   
    Lb  = Lbot(Lf)                                   ! bed layer index
    Lt  = Ltop(Lf)                                   ! surface layer index = surface interface index
    kxL = Lt-Lb+1                                    ! nr of layers
 
    if (trim(md_specific) == 'splitter') then        ! Model: Splitter plate
-      if (u1(Lt) > 0d0 .and. Lf > lnxi) then        ! Boundary: velocity inflow side
+      if (u1(Lt) >= 0d0 .and. Lf > lnxi) then       ! Boundary: velocity inflow side
 
          ! Prepare z/interface coords at link position.
          if (dnt <= 1d0 .and. Lf >= lnxi) then
@@ -207,10 +207,15 @@ implicit none
                zw1(L-Lb+2) = min(hu(L), hu(Lt))
             enddo
          endif
-
+         ! call newfil(mout,'uprof.txt')
          do L = Lb-1,Lt
-            call ENTRYFLOW( zw1, L-Lb+2, dummy, dummy, turkin1(L), tureps1(L), dummy, dummy)
+            call ENTRYFLOW( zw1, L-Lb+2, uu(L-Lb+2), dummy, turkin1(L), tureps1(L), dummy, dummy)
          end do
+         ! write(mout,'(100f6.3)') ( zw1(j)/zw1(kxl+1), j = 1,kxL+1 )
+         ! WRITE(MOUT,*) 'U'
+         ! write(mout,'(100f6.3)') (  uu(j), j = 1,kxL+1 )
+         ! call doclose  (mout)
+         
       end if ! boundary links only
    ! else other models...
    end if ! model selection

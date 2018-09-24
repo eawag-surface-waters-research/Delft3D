@@ -586,7 +586,9 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
         call realloc(ketr, (/ Nx, numtracers /), keepExisting=.true., fill=0 )
         call realloc(nbndtr, numtracers, keepExisting=.true., fill=0 )
         call realloc(trnames, numtracers, keepExisting=.true., fill='')
-
+        call realloc(wstracers, numtracers, keepExisting=.true., fill=0d0)
+        wstracers(numtracers) = transformcoef(4)
+                
         trnames(numtracers) = trim(tracnam)
         itrac = numtracers
         
@@ -613,7 +615,9 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
         call realloc(ketr, (/ Nx, numtracers /), keepExisting=.true., fill=0 )
         call realloc(nbndtr, numtracers, keepExisting=.true., fill=0 )
         call realloc(trnames, numtracers, keepExisting=.true., fill='')
-
+        call realloc(wstracers, numtracers, keepExisting=.true., fill=0d0)
+        wstracers(numtracers) = transformcoef(4)
+  
         trnames(numtracers) = trim(tracnam)
      end if
      

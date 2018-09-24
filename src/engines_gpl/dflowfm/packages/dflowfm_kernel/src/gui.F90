@@ -2467,6 +2467,8 @@
       endif
       if (janudge > 0) then 
          OPTION(50)= 'Nudge time                           (s)'
+      else if (nshiptxy > 0) then 
+         OPTION(50)= 'v1ship                              (m3)'
       endif
       numopt=50
       numoptwav=-999
