@@ -38,14 +38,15 @@ module ModelTypes
         integer          :: currentTimeStep
         double precision :: currentTime               ! current time in seconds
         double precision :: timeStep                  ! time step in seconds
-        double precision :: outputTimeStep            ! output timestep in seconds
+        double precision :: mapOutputTimeStep         ! output timestep in seconds for grid points and reach segments
+        double precision :: hisOutputTimeStep         ! output timestep in seconds for other data
         integer          :: startDate
         integer          :: endDate
         integer          :: startTime
         integer          :: endTime
         integer          :: restartendTimestep
-        integer          :: restartInterval            ! output timestep in seconds
-        integer          :: nextRestarttimestep            ! output timestep in seconds
+        integer          :: restartInterval 
+        integer          :: nextRestarttimestep
         logical          :: writerestart
         logical          :: userestart
         

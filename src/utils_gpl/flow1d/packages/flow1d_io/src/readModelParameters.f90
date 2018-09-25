@@ -313,7 +313,8 @@ module m_readModelParameters
       character(Len=40)                         :: startTime
       character(Len=40)                         :: stopTime
       double precision                          :: timeStep
-      double precision                          :: outputGrid
+      double precision                          :: mapOutput
+      double precision                          :: hisOutput
       logical                                   :: success
       
       integer                                   :: iYear
@@ -370,19 +371,47 @@ module m_readModelParameters
          call SetMessage(LEVEL_FATAL, 'Error Reading Date Time Data: Stop Time must be after Start Time')
       endif
       
-      ! Output Time Step
-      outputGrid = timeStep
-      call prop_get_double(md_ptr, 'time', 'outtimestepgridpoints', outputGrid, success)
+      ! Map Output Time Step
+      call prop_get_double(md_ptr, 'time', 'mapoutputtimestep', mapOutput, success)
       if (success) then 
-         if (mod(outputGrid, timeStep) > 0.0d0 .or. outputGrid < timeStep) then
-            call SetMessage(LEVEL_FATAL, 'Error Reading Date Time Data: Output Time Step must be multiple of Time Step')
+         if (mod(mapOutput, timeStep) > 0.0d0 .or. mapOutput < timeStep) then
+            call SetMessage(LEVEL_ERROR, 'Error Reading Date Time Data: Map Output Time Step must be multiple of Time Step')
          endif
       else
-         outputGrid = timeStep
+         ! Check for 'outtimestepgridpoints' can be removed after SOBEK3-1502
+         call prop_get_double(md_ptr, 'time', 'outtimestepgridpoints', mapOutput, success)
+         if (success) then 
+            if (mod(mapOutput, timeStep) > 0.0d0 .or. mapOutput < timeStep) then
+               call SetMessage(LEVEL_ERROR, 'Error Reading Date Time Data: Map Output Time Step must be multiple of Time Step')
+            endif
+         else
+            call SetMessage(LEVEL_WARN, 'No Map Output Time Step specified, will use Calculation Time Step')
+            mapOutput = timeStep
+         endif
       endif
       
-      modelTimeStepData%timeStep       = timeStep
-      modelTimeStepData%outputTimeStep = outputGrid
+      ! His Output Time Step
+      call prop_get_double(md_ptr, 'time', 'hisoutputtimestep', hisOutput, success)
+      if (success) then 
+         if (mod(hisOutput, timeStep) > 0.0d0 .or. hisOutput < timeStep) then
+            call SetMessage(LEVEL_ERROR, 'Error Reading Date Time Data: His Output Time Step must be multiple of Time Step')
+         endif
+      else
+         ! Check for 'outtimestepstructures' can be removed after SOBEK3-1502
+         call prop_get_double(md_ptr, 'time', 'outtimestepstructures', hisOutput, success)
+         if (success) then 
+            if (mod(hisOutput, timeStep) > 0.0d0 .or. hisOutput < timeStep) then
+               call SetMessage(LEVEL_ERROR, 'Error Reading Date Time Data: His Output Time Step must be multiple of Time Step')
+            endif
+         else
+            call SetMessage(LEVEL_WARN, 'No His Output Time Step specified, will use Calculation Time Step')
+            hisOutput = timeStep
+         endif
+      endif
+      
+      modelTimeStepData%timeStep          = timeStep
+      modelTimeStepData%mapOutputTimeStep = mapOutput
+      modelTimeStepData%hisOutputTimeStep = hisOutput
          
       ! restart data
       call prop_get_string(md_ptr, 'restart', 'restartstarttime', startTime, success)   
