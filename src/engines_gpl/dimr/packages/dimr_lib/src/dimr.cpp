@@ -983,9 +983,11 @@ void Dimr::runParallelInit (dimr_control_block * cb) {
                         nc_put_att_text(ncid, NC_GLOBAL, "title", titlestr.size(), titlestr.c_str());
                         delete[] sourceComponentVersion;
                         delete[] targetComponentVersion;
-                        const char conventions[] = "CF-1.6";
-                        nc_put_att_text(ncid, NC_GLOBAL, "conventions", strlen(conventions), conventions);
-                        
+                        const char conventions[] = "CF-1.7";
+                        nc_put_att_text(ncid, NC_GLOBAL, "Conventions", strlen(conventions), conventions);
+                        const char feature_type[] = "timeSeries";
+                        nc_put_att_text(ncid, NC_GLOBAL, "featureType", strlen(feature_type), feature_type);
+
                         // write dimensions
 
                         nc_def_dim(ncid, "strlen", 256, &thisCoupler->logger->netcdfReferences->strlenDim);
@@ -994,12 +996,12 @@ void Dimr::runParallelInit (dimr_control_block * cb) {
                         nc_def_var(ncid, "time", NC_DOUBLE, 1, &thisCoupler->logger->netcdfReferences->timeDim, &thisCoupler->logger->netcdfReferences->timeVar);
                         const char longnametime[] = "time";
                         nc_put_att_text(ncid, thisCoupler->logger->netcdfReferences->timeVar, "long_name", sizeof(longnametime), longnametime);
-                        const char units[] = "seconds since 1970-01-01T00:00:00"; // TODO: Get simulation reference time from one of the kernels
+                        const char units[] = "seconds since 1980-01-01T00:00:00"; // TODO: Get simulation reference time from one of the kernels
                         nc_put_att_text(ncid, thisCoupler->logger->netcdfReferences->timeVar, "units", sizeof(units), units);
                         const char axis[] = "T";
                         nc_put_att_text(ncid, thisCoupler->logger->netcdfReferences->timeVar, "axis", sizeof(axis), axis);
 
-                        // write variables
+                        // write variables/parameter
 
                         thisCoupler->logger->netcdfReferences->item_values = new int[thisCoupler->numItems];
                         thisCoupler->logger->netcdfReferences->item_variables = new int[thisCoupler->numItems];
@@ -1022,13 +1024,44 @@ void Dimr::runParallelInit (dimr_control_block * cb) {
 
                             std::ostringstream itemValuesLongName;
                             const string sourceName = string(thisCoupler->items[k].sourceName);
-                            itemValuesLongName << string(thisCoupler->sourceComponentName) << ":" << sourceName
-                                << " -> " << string(thisCoupler->targetComponentName) << ":" << string(thisCoupler->items[k].targetName);
+                            itemValuesLongName << sourceName
+                                << " -> " << string(thisCoupler->items[k].targetName);
                             const string itemvaluesstr(itemValuesLongName.str());
                             nc_put_att_text(ncid, thisCoupler->logger->netcdfReferences->item_variables[k], "long_name", itemvaluesstr.size(), itemvaluesstr.c_str());
+
+                            std::ostringstream itemValuesCoordinates;
+                            itemValuesCoordinates << "station_name";
+                            const string itemValuesCoordinatesstr(itemValuesCoordinates.str());
+                            nc_put_att_text(ncid, thisCoupler->logger->netcdfReferences->item_variables[k], "coordinates", itemValuesCoordinatesstr.size(), itemValuesCoordinatesstr.c_str());
+                        }
+
+                        // write location
+                        long nStations = 1;
+                        long name_strlen = 64;
+                        int id_nStations;
+                        int id_name_strlen;
+                        int station_var;
+                        {
+                            nc_def_dim(ncid, "nStations", nStations, &id_nStations);
+                            nc_def_dim(ncid, "name_strlen", name_strlen, &id_name_strlen);
+
+                            int dim_id[2];
+                            dim_id[0] = id_nStations;
+                            dim_id[1] = id_name_strlen;
+                            nc_def_var(ncid, "station_name", NC_CHAR, 2, dim_id, &station_var);
+                            const char timeseries_id[] = "timeseries_id";
+                            nc_put_att_text(ncid, station_var, "cf_role", strlen(timeseries_id), timeseries_id);
+                            const char longName[] = "Station name";
+                            nc_put_att_text(ncid, station_var, "long_name", strlen(longName), longName);
                         }
 
                         nc_enddef(ncid);
+
+                        // Add station name
+                        std::ostringstream varName;
+                        varName << sourceComponentName << " -> " << targetComponentName;
+                        const string varNamestr(varName.str());
+                        nc_put_var_text(ncid, station_var, varNamestr.c_str());
                     }
 
                     // Het hele spul MOET NAAR DELTARES_COMMON_C !!!
