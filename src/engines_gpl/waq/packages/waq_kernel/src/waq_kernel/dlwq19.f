@@ -246,7 +246,9 @@
          report = .false.
          call zoek ( 'Iteration report    ', nocons, coname, 20, i )
          if ( i .gt. 0 ) then
-            report = .true.
+            report = const(i) > 0
+         endif
+         if ( report ) then
             write ( lunut , '(A)' ) ' Iteration report          : switched on'
          else
             write ( lunut , '(A)' ) ' Iteration report          : switched off'
