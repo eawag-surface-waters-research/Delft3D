@@ -378,14 +378,15 @@ module m_readModelParameters
             call SetMessage(LEVEL_ERROR, 'Error Reading Date Time Data: Map Output Time Step must be multiple of Time Step')
          endif
       else
-         ! Check for 'outtimestepgridpoints' can be removed after SOBEK3-1502
+         ! Check for 'outtimestepgridpoints' can be removed in future
          call prop_get_double(md_ptr, 'time', 'outtimestepgridpoints', mapOutput, success)
          if (success) then 
+            call SetMessage(LEVEL_WARN, 'Keyword OutTimeStepGridPoints has been depreciated, better use MapOutputTimeStep')
             if (mod(mapOutput, timeStep) > 0.0d0 .or. mapOutput < timeStep) then
                call SetMessage(LEVEL_ERROR, 'Error Reading Date Time Data: Map Output Time Step must be multiple of Time Step')
             endif
          else
-            call SetMessage(LEVEL_WARN, 'No Map Output Time Step specified, will use Calculation Time Step')
+            call SetMessage(LEVEL_WARN, 'No Map Output Time Step specified, Calculation Time Step will be used')
             mapOutput = timeStep
          endif
       endif
@@ -397,14 +398,15 @@ module m_readModelParameters
             call SetMessage(LEVEL_ERROR, 'Error Reading Date Time Data: His Output Time Step must be multiple of Time Step')
          endif
       else
-         ! Check for 'outtimestepstructures' can be removed after SOBEK3-1502
+         ! Check for 'outtimestepstructures' can be removed in future
          call prop_get_double(md_ptr, 'time', 'outtimestepstructures', hisOutput, success)
-         if (success) then 
+         if (success) then
+            call SetMessage(LEVEL_WARN, 'Keyword OutTimeStepStructures has been depreciated, better use HisOutputTimeStep')
             if (mod(hisOutput, timeStep) > 0.0d0 .or. hisOutput < timeStep) then
                call SetMessage(LEVEL_ERROR, 'Error Reading Date Time Data: His Output Time Step must be multiple of Time Step')
             endif
          else
-            call SetMessage(LEVEL_WARN, 'No His Output Time Step specified, will use Calculation Time Step')
+            call SetMessage(LEVEL_WARN, 'No His Output Time Step specified, Calculation Time Step will be used')
             hisOutput = timeStep
          endif
       endif
