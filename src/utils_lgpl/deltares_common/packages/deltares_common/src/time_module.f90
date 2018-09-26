@@ -49,6 +49,7 @@ module time_module
    public :: mjd2date
    public :: datetime_to_string
    public :: parse_ud_timeunit
+   public :: split_date_time
 
    interface ymd2jul
       ! obsolete, use ymd2reduced_jul
@@ -198,15 +199,29 @@ module time_module
          real(kind=hp), intent(out)   :: reduced_jul_date !< returned date as reduced modified julian
          logical                      :: success          !< function result
 
-         integer :: year, month, day
+         integer :: year, month, day, ierr
+         character :: separator
+         logical :: has_separators
+         character(len=20) :: fmt
+
+         separator = date(5:5)
+         has_separators = (separator < '0' .or. separator > '9')
 
          if (len_trim(date) >= 10) then
-            read(date, '(i4,x,i2,x,i2)') year, month, day
+            fmt = '(i4,x,i2,x,i2)'
+         else if (has_separators) then
+            fmt = '(i4,x,i1,x,i1)'
          else
-            read(date, '(i4,i2,i2)') year, month, day
+            fmt = '(i4,i2,i2)'
          endif
 
-         success = ymd2reduced_jul_int3(year, month, day, reduced_jul_date)
+         read(date, fmt, iostat=ierr) year, month, day
+
+         if (ierr == 0) then
+            success = ymd2reduced_jul_int3(year, month, day, reduced_jul_date)
+         else
+            success  = .false.
+         endif
 
       end function ymd2reduced_jul_string
 
@@ -840,6 +855,22 @@ module time_module
          second = mod(dayfrac*24*60*60,60.d0)
          success = 1
       end function mjd2datetime
+
+      !> split a string in date and time part
+      subroutine split_date_time(string, date, time)
+         character(len=*), intent(in)  :: string  !< input string like 1950-01-01 00:00:00
+         character(len=*), intent(out) :: date    !< output date, in this case 1950-01-01
+         character(len=*), intent(out) :: time    !< output time, in this case 00:00:00
+
+         character(len=:), allocatable :: date_time
+         integer :: ipos
+
+         date_time = trim(adjustl(string))
+         ipos = index(date_time, ' ')
+
+         date = date_time(1:ipos-1)
+         time = adjustl(date_time(ipos+1:))
+      end subroutine split_date_time
 
       ! todo: move to unit test environment
       subroutine testConversion

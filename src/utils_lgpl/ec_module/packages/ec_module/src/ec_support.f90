@@ -836,6 +836,7 @@ end subroutine ecInstanceListSourceItems
          integer :: minsize  !< helper index for time zone
          real(hp):: temp     !< helper variable
          logical :: ok       !< check of refdate is found
+         character(len=20) :: date, time  !< parts of string for date and time
          !
          success = .false.
          !
@@ -858,17 +859,18 @@ end subroutine ecInstanceListSourceItems
          end if
          ! Determine the reference date.
          i = index(string, 'since') + 6
+         call split_date_time(string(i:), date, time)
          if (present(ref_date)) then
             if (i /= 6) then
                ! Date
-               if (ymd2reduced_jul(string(i:i+10), ref_date)) then
+               if (ymd2reduced_jul(date, ref_date)) then
                   ! Time
-                  if(len_trim(string)>=i+18) then
-                     read(string(i+11 : i+12), *) temp
+                  if(len_trim(time)>=8) then
+                     read(time(1 : 2), *) temp
                      ref_date = ref_date + dble(temp) / 24.0_hp
-                     read(string(i+14 : i+15), *) temp
+                     read(time(4 : 5), *) temp
                      ref_date = ref_date + dble(temp) / 24.0_hp / 60.0_hp
-                     read(string(i+17 : i+18), *) temp
+                     read(time(7 : 8), *) temp
                      ref_date = ref_date + dble(temp) / 24.0_hp / 60.0_hp / 60.0_hp
                   end if
                   ok = .true.
