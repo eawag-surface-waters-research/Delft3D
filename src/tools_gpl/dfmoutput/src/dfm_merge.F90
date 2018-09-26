@@ -65,7 +65,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    integer                                  :: ierr       !< Result status (0 = success)
 
    integer, parameter :: int8 = 1     ! also local storage compact in 1 byte
-   integer, parameter :: mapclass_time_buffer_size =   10
+   integer, parameter :: mapclass_time_buffer_size =   1
 
    integer, dimension(nfiles+1) :: ncids, id_timedim, id_facedim, id_edgedim, id_laydim, id_wdim, id_nodedim, &
                                    id_netedgedim, id_netfacedim, id_netfacemaxnodesdim, id_time, id_timestep, id_bnddim !< dim and var ids, maintained for all input files + 1 output file.
@@ -168,6 +168,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    double precision,             allocatable :: times(:)
    double precision,             allocatable :: timestep(:)
    logical :: isfound, needshift, exist
+   integer :: size_btmp
    character(len=1) :: answer
    character*8  :: cdate
    character*10 :: ctime
@@ -1306,8 +1307,9 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    call realloc( tmpvar1D, maxitems, keepExisting=.false.)
    call realloc(itmpvar1D, maxitems, keepExisting=.false.)
    call realloc(itmpvar1D_tmp,maxitems, keepExisting=.false.)
-   call realloc(btmpvar1D, [ndx(3), mapclass_time_buffer_size], keepExisting=.false.)
-   call realloc(btmpvar1D_tmp, [ndx(3), mapclass_time_buffer_size], keepExisting=.false.)
+   size_btmp = max(ndx(size(ndx)), sum(ndx(1:size(ndx)-1)))
+   call realloc(btmpvar1D, [size_btmp, mapclass_time_buffer_size], keepExisting=.false.)
+   call realloc(btmpvar1D_tmp, [ndx(size(ndx)), mapclass_time_buffer_size], keepExisting=.false.)
    call realloc(tmpvar1D_tmp, maxitems, keepExisting=.false.)
    ! 2D/3D done in loop below
 
