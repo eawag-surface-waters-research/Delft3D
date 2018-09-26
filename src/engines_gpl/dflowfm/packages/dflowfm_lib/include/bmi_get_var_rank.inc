@@ -64,8 +64,6 @@
      rank = 1
   case("vicushp")
      rank = 1
-  case("vos")
-     rank = 2
   case("shL")
      rank = 1
   case("shB")

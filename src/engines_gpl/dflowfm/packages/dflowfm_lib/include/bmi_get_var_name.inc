@@ -65,204 +65,202 @@
   case(17)
      var_name = "vicushp"
   case(18)
-     var_name = "vos"
-  case(19)
      var_name = "shL"
-  case(20)
+  case(19)
      var_name = "shB"
-  case(21)
+  case(20)
      var_name = "shd"
-  case(22)
+  case(21)
      var_name = "stuw"
-  case(23)
+  case(22)
      var_name = "fstuw"
-  case(24)
+  case(23)
      var_name = "stuwmx"
-  case(25)
+  case(24)
      var_name = "roer"
-  case(26)
+  case(25)
      var_name = "froer"
-  case(27)
+  case(26)
      var_name = "roermx"
-  case(28)
+  case(27)
      var_name = "wx"
-  case(29)
+  case(28)
      var_name = "wy"
-  case(30)
+  case(29)
      var_name = "wmag"
-  case(31)
+  case(30)
      var_name = "rain"
-  case(32)
+  case(31)
      var_name = "evap"
-  case(33)
+  case(32)
      var_name = "numlatsg"
-  case(34)
+  case(33)
      var_name = "qplat"
-  case(35)
+  case(34)
      var_name = "qqlat"
-  case(36)
+  case(35)
      var_name = "balat"
-  case(37)
+  case(36)
      var_name = "nnlat"
-  case(38)
+  case(37)
      var_name = "qinext"
-  case(39)
+  case(38)
      var_name = "qinextreal"
-  case(40)
+  case(39)
      var_name = "vincum"
-  case(41)
+  case(40)
      var_name = "rnveg"
-  case(42)
+  case(41)
      var_name = "diaveg"
-  case(43)
+  case(42)
      var_name = "cfuveg"
-  case(44)
+  case(43)
      var_name = "alfaveg"
-  case(45)
+  case(44)
      var_name = "stemdens"
-  case(46)
+  case(45)
      var_name = "stemdiam"
-  case(47)
+  case(46)
      var_name = "stemheight"
-  case(48)
+  case(47)
      var_name = "zws"
-  case(49)
+  case(48)
      var_name = "kbot"
-  case(50)
+  case(49)
      var_name = "ktop"
-  case(51)
+  case(50)
      var_name = "Lbot"
-  case(52)
+  case(51)
      var_name = "Ltop"
-  case(53)
+  case(52)
      var_name = "s0"
-  case(54)
+  case(53)
      var_name = "s1"
-  case(55)
+  case(54)
      var_name = "a0"
-  case(56)
+  case(55)
      var_name = "a1"
-  case(57)
+  case(56)
      var_name = "vol0"
-  case(58)
+  case(57)
      var_name = "vol1"
-  case(59)
+  case(58)
      var_name = "hs"
-  case(60)
+  case(59)
      var_name = "ucx"
-  case(61)
+  case(60)
      var_name = "ucy"
-  case(62)
+  case(61)
      var_name = "ucz"
-  case(63)
+  case(62)
      var_name = "sa0"
-  case(64)
+  case(63)
      var_name = "sa1"
-  case(65)
+  case(64)
      var_name = "satop"
-  case(66)
+  case(65)
      var_name = "sabot"
-  case(67)
+  case(66)
      var_name = "tem0"
-  case(68)
+  case(67)
      var_name = "tem1"
-  case(69)
+  case(68)
      var_name = "u1"
-  case(70)
+  case(69)
      var_name = "u_to_umain"
-  case(71)
+  case(70)
      var_name = "q1"
-  case(72)
+  case(71)
      var_name = "au"
-  case(73)
+  case(72)
      var_name = "hu"
-  case(74)
+  case(73)
      var_name = "frcu"
-  case(75)
+  case(74)
      var_name = "viusp"
-  case(76)
+  case(75)
      var_name = "diusp"
-  case(77)
+  case(76)
      var_name = "ndxi"
-  case(78)
+  case(77)
      var_name = "ndx1db"
-  case(79)
+  case(78)
      var_name = "kfs"
-  case(80)
+  case(79)
      var_name = "kfst0"
-  case(81)
+  case(80)
      var_name = "bare"
-  case(82)
+  case(81)
      var_name = "bl"
-  case(83)
+  case(82)
      var_name = "lnx1D"
-  case(84)
+  case(83)
      var_name = "lnxi"
-  case(85)
+  case(84)
      var_name = "lnx1Db"
-  case(86)
+  case(85)
      var_name = "lnx"
-  case(87)
+  case(86)
      var_name = "ln"
-  case(88)
+  case(87)
      var_name = "lncn"
-  case(89)
+  case(88)
      var_name = "iadv"
-  case(90)
+  case(89)
      var_name = "dx"
-  case(91)
+  case(90)
      var_name = "wu"
-  case(92)
+  case(91)
      var_name = "bob"
-  case(93)
+  case(92)
      var_name = "vort"
-  case(94)
+  case(93)
      var_name = "xzw"
-  case(95)
+  case(94)
      var_name = "yzw"
-  case(96)
+  case(95)
      var_name = "xk"
-  case(97)
+  case(96)
      var_name = "yk"
-  case(98)
+  case(97)
      var_name = "zk"
-  case(99)
+  case(98)
      var_name = "kn"
-  case(100)
+  case(99)
      var_name = "numk"
-  case(101)
+  case(100)
      var_name = "zbnd1d2d1"
-  case(102)
+  case(101)
      var_name = "zbnd1d2d0"
-  case(103)
+  case(102)
      var_name = "zcrest1d2d"
-  case(104)
+  case(103)
      var_name = "edgenumbers1d2d"
-  case(105)
+  case(104)
      var_name = "kbnd1d2d"
-  case(106)
+  case(105)
      var_name = "width_1d"
-  case(107)
+  case(106)
      var_name = "qzeta_1d2d"
-  case(108)
+  case(107)
      var_name = "qlat_1d2d"
-  case(109)
+  case(108)
      var_name = "qtotal_1d2d"
-  case(110)
+  case(109)
      var_name = "is_sumvalsnd"
-  case(111)
+  case(110)
      var_name = "is_maxvalsnd"
-  case(112)
+  case(111)
      var_name = "is_dtint"
-  case(113)
+  case(112)
      var_name = "ndx2d"
-  case(114)
+  case(113)
      var_name = "ndx"
-  case(115)
+  case(114)
      var_name = "xz"
-  case(116)
+  case(115)
      var_name = "yz"
-  case(117)
+  case(116)
      var_name = "ba"
   end select
 

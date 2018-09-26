@@ -64,8 +64,6 @@ select case(var_name)
     type_name = "double"
   case("vicushp")
     type_name = "double"
-  case("vos")
-    type_name = "double"
   case("shL")
     type_name = "double"
   case("shB")

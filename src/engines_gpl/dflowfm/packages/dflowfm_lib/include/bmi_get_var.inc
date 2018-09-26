@@ -64,8 +64,6 @@
      x = c_loc(qinship)
   case("vicushp") !<  [m] eddyvisc ship {"shape": ["lnx"]}
      x = c_loc(vicushp)
-  case("vos") !<  [m] ship link volume bob like {"shape": ["2","lnx"]}
-     x = c_loc(vos)
   case("shL") !<  [m] ship size L/2, B/2, D  ! for now, fixed max nr =2 {"shape": [2]}
      x = c_loc(shL)
   case("shB") !<  [m] ship size L/2, B/2, D  ! for now, fixed max nr =2 {"shape": [2]}

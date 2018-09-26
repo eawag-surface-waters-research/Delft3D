@@ -99,10 +99,6 @@
 
      call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
      vicushp(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
-  case("vos")
-
-     call c_f_pointer(xptr, x_2d_double_ptr, (/c_count(1), c_count(2)/))
-     vos(c_start(1)+1:(c_start(1)+c_count(1)),c_start(2)+1:(c_start(2)+c_count(2))) = x_2d_double_ptr
   case("shL")
 
      call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))

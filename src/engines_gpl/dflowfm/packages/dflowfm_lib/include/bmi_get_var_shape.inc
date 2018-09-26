@@ -66,9 +66,6 @@
        shape(1) = ndx
     case("vicushp")
        shape(1) = lnx
-    case("vos")
-       shape(2) = 2
-       shape(1) = lnx
     case("shL")
        shape(1) = 2
     case("shB")

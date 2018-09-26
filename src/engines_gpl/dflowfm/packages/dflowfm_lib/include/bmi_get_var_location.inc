@@ -64,8 +64,6 @@ select case(var_name)
     location_name = ""
   case("vicushp")
     location_name = ""
-  case("vos")
-    location_name = ""
   case("shL")
     location_name = ""
   case("shB")

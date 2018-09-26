@@ -82,9 +82,6 @@
   case("vicushp")
      call c_f_pointer(xptr, x_1d_double_ptr, shape(vicushp))
      vicushp(:) = x_1d_double_ptr
-  case("vos")
-     call c_f_pointer(xptr, x_2d_double_ptr, shape(vos))
-     vos(:,:) = x_2d_double_ptr
   case("shL")
      call c_f_pointer(xptr, x_1d_double_ptr, shape(shL))
      shL(:) = x_1d_double_ptr
