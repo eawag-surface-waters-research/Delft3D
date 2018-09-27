@@ -10862,30 +10862,33 @@ subroutine unc_read_map(filename, tim, ierr)
           call replace_char(tmpstr,32,95) 
           call replace_char(tmpstr,47,95) 
           ierr = nf90_inq_varid(imapfile, trim(tmpstr), id_tr1(i))
-          if(kmx > 0) then
-             ierr = nf90_get_var(imapfile, id_tr1(i), tmpvar(1:kmx,1:ndxi_own), start=(/ 1, kstart, it_read /), &
-                                 count=(/ kmx, ndxi_own, 1 /))
-             do kk = 1, ndxi_own
-                if (jamergedmap == 1) then
-                   kloc = inode_own(kk)
-                else
-                   kloc = kk
-                end if
+          if ( ierr.eq.NF90_NOERR ) then
+!            tracer exists in restart file             
+             if(kmx > 0) then
+                ierr = nf90_get_var(imapfile, id_tr1(i), tmpvar(1:kmx,1:ndxi_own), start=(/ 1, kstart, it_read /), &
+                                    count=(/ kmx, ndxi_own, 1 /))
+                do kk = 1, ndxi_own
+                   if (jamergedmap == 1) then
+                      kloc = inode_own(kk)
+                   else
+                      kloc = kk
+                   end if
 
-                call getkbotktop(kloc, kb, kt)
-                ! TODO: UNST-976, incorrect for Z-layers:
-                constituents(iconst,kb:kt) = tmpvar(1:kt-kb+1,kk)
-             enddo
-          else
-             ierr = nf90_get_var(imapfile, id_tr1(i), tmpvar(1,1:ndxi_own), start = (/ kstart, it_read/), count = (/ndxi,1/))
-             do kk = 1, ndxi
-                if (jamergedmap == 1) then
-                   kloc = inode_own(kk)
-                else
-                   kloc = kk
-                end if
-                constituents(iconst, kloc) = tmpvar(1,kk)
-             end do
+                   call getkbotktop(kloc, kb, kt)
+                   ! TODO: UNST-976, incorrect for Z-layers:
+                   constituents(iconst,kb:kt) = tmpvar(1:kt-kb+1,kk)
+                enddo
+             else
+                ierr = nf90_get_var(imapfile, id_tr1(i), tmpvar(1,1:ndxi_own), start = (/ kstart, it_read/), count = (/ndxi,1/))
+                do kk = 1, ndxi
+                   if (jamergedmap == 1) then
+                      kloc = inode_own(kk)
+                   else
+                      kloc = kk
+                   end if
+                   constituents(iconst, kloc) = tmpvar(1,kk)
+                end do
+             end if
           endif
           call check_error(ierr, const_names(iconst))
        enddo
