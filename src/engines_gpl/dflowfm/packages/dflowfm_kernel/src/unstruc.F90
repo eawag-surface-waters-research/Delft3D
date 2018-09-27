@@ -15663,7 +15663,7 @@ subroutine unc_write_his(tim)            ! wrihis
                      id_qsun, id_qeva, id_qcon, id_qlong, id_qfreva, id_qfrcon, id_qtot, &
                      id_turkin, id_tureps , id_vicwwu, id_rich, id_zcs, id_zws, &
                      id_wind, id_patm, id_tair, id_rhum, id_clou, &
-                     id_R, id_WH, id_WD, id_WL, id_WT, id_WU, id_hs, &
+                     id_R, id_WH, id_WD, id_WL, id_WT, id_WU, id_WTAU, id_hs, &
                      id_pumpdim,    id_pumpname,    id_pump_dis,    id_pump_cap,       id_pump_s1up,      id_pump_s1dn,    &                              ! id_pump_head,
                      id_gatedim,    id_gatename,    id_gate_dis,    id_gate_edgel,     id_gate_s1up,      id_gate_s1dn,    &                              ! id_gate_head,
                      id_cdamdim,    id_cdamname,    id_cdam_dis,    id_cdam_cresth,    id_cdam_s1up,      id_cdam_s1dn,    &                              ! id_cdam_head,
@@ -15967,6 +15967,13 @@ subroutine unc_write_his(tim)            ! wrihis
                ierr = nf90_put_att(ihisfile, id_WU,   'long_name'    , 'Orbital velocity')          
                ierr = nf90_put_att(ihisfile, id_WU,   'units'        , 'm/s')
                ierr = nf90_put_att(ihisfile, id_WU, '_FillValue', dmiss)
+               
+               ierr = nf90_def_var(ihisfile, 'tauwav',  nf90_double, ((/ id_statdim, id_timedim /)) , id_WTAU)
+               ierr = nf90_put_att(ihisfile, id_WTAU,   'coordinates'  , 'station_x_coordinate station_y_coordinate station_name')
+               ierr = nf90_put_att(ihisfile, id_WTAU,   'standard_name', 'sea_surface_wave_bottom_shear_stress')   
+               ierr = nf90_put_att(ihisfile, id_WTAU,   'long_name'    , 'Wave induced bottom shear stress')          
+               ierr = nf90_put_att(ihisfile, id_WTAU,   'units'        , 'Pa')
+               ierr = nf90_put_att(ihisfile, id_WTAU, '_FillValue', dmiss)
             endif
 
             if (jatem > 0 .and. jahistem > 0) then
@@ -16748,11 +16755,12 @@ subroutine unc_write_his(tim)            ! wrihis
     end if
     
     if (jawave>0) then
-       ierr = nf90_put_var(ihisfile, id_WH,      valobsT(:,IPNT_WAVEH), start = (/ 1, it_his /), count = (/ ntot, 1 /))   
-       ierr = nf90_put_var(ihisfile, id_WD,      valobsT(:,IPNT_WAVED), start = (/ 1, it_his /), count = (/ ntot, 1 /))   
-       ierr = nf90_put_var(ihisfile, id_WL,      valobsT(:,IPNT_WAVEL), start = (/ 1, it_his /), count = (/ ntot, 1 /))   
-       ierr = nf90_put_var(ihisfile, id_WT,      valobsT(:,IPNT_WAVET), start = (/ 1, it_his /), count = (/ ntot, 1 /))   
-       ierr = nf90_put_var(ihisfile, id_WU,      valobsT(:,IPNT_WAVEU), start = (/ 1, it_his /), count = (/ ntot, 1 /))   
+       ierr = nf90_put_var(ihisfile, id_WH,      valobsT(:,IPNT_WAVEH),   start = (/ 1, it_his /), count = (/ ntot, 1 /))   
+       ierr = nf90_put_var(ihisfile, id_WD,      valobsT(:,IPNT_WAVED),   start = (/ 1, it_his /), count = (/ ntot, 1 /))   
+       ierr = nf90_put_var(ihisfile, id_WL,      valobsT(:,IPNT_WAVEL),   start = (/ 1, it_his /), count = (/ ntot, 1 /))   
+       ierr = nf90_put_var(ihisfile, id_WT,      valobsT(:,IPNT_WAVET),   start = (/ 1, it_his /), count = (/ ntot, 1 /))   
+       ierr = nf90_put_var(ihisfile, id_WU,      valobsT(:,IPNT_WAVEU),   start = (/ 1, it_his /), count = (/ ntot, 1 /))   
+       ierr = nf90_put_var(ihisfile, id_WTAU,    valobsT(:,IPNT_WAVETAU), start = (/ 1, it_his /), count = (/ ntot, 1 /))   
     endif
 
     if (japatm > 0) then
@@ -17368,9 +17376,10 @@ subroutine fill_valobs()
          if (jawave>0 .and. allocated(hwav)) then
             valobs(IPNT_WAVEH,i) = hwav(k)*wavfac   
             valobs(IPNT_WAVET,i) = twav(k)   
-            valobs(IPNT_WAVED,i) = phiwav(k)   
+            valobs(IPNT_WAVED,i) = 270d0-phiwav(k)  ! Direction from 
             valobs(IPNT_WAVEL,i) = rlabda(k)   
             valobs(IPNT_WAVEU,i) = uorb(k)   
+            valobs(IPNT_WAVETAU,i) = taus(k)   
          endif
 
          do kk=kb,kt
