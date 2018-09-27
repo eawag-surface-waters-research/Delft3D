@@ -324,8 +324,8 @@
          READ (INEFF,199) (GRNAME(J),J=1,NUECOG)
          READ (INEFF,199) (SPNAME(I),I=1,NUSPEC)
          IF(VERFRM.GT.2.00) THEN
-            READ (INEFF,*) NZ
-            DO I=1,NZ
+            READ (INEFF,*) NPOINT
+            DO I=1,NPOINT
                READ (INEFF,*) POWER(I), (EFFIC(I,J),J=1,NUECOG)
             END DO
          ENDIF

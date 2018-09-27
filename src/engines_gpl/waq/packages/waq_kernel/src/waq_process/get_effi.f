@@ -152,10 +152,10 @@
 !
       if (rad .le. power(1)) then
          effi = effic(1,numgr)
-      else if (rad .ge. power(nz-1)) then
-         effi = effic(nz,numgr)
+      else if (rad .ge. power(npoint)) then
+         effi = effic(npoint,numgr)
       else
-         do i = 2,nz
+         do i = 2,npoint
             if (rad.ge.power(i-1).and.rad.le.power(i)) then
                interpol=(rad-power(i-1))/(power(i)-power(i-1))
                effi=effic(i-1,numgr)+interpol*(effic(i,numgr)-effic(i-1,numgr))
