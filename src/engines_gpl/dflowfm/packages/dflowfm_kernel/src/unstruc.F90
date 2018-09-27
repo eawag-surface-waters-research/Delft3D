@@ -6658,10 +6658,10 @@ end subroutine update_waqfluxes
  implicit none
 
  double precision       :: wud, wuL1, wuL2, wuk, cs, sn
- integer                :: k, L, ierr
+ integer                :: k, L, ierr, n, kk, n12
  integer                :: k1, k2, k3, k4, nn, LL, jaclosedcorner
 
- double precision       :: xloc, yloc, beta
+ double precision       :: xloc, yloc, beta, aa1, wwl(6), wcw, alf
 
  double precision, allocatable       :: wcxy (:,:)   ! center weight factors (2,ndx) , only for normalising
  double precision, allocatable       :: wc   (:)     ! center weight factors (ndx)   , only for normalising
@@ -6720,6 +6720,36 @@ end subroutine update_waqfluxes
     wcxy (1,k2) = wcxy (1,k2) + abs(wcx2(L))
     wcxy (2,k2) = wcxy (2,k2) + abs(wcy2(L))
  enddo
+ 
+ do n   = 1, mxwalls                                        ! wall contribution to scalar linktocenterweights 
+    k1  = walls(1,n)
+    aa1 = 2d0*walls(17,n)
+    wc(k1) = wc(k1) + aa1
+    wcw = 0d0 
+    do kk = 1,size(nd(k1)%ln) 
+       LL = iabs(nd(k1)%ln(kk))
+       n12 = 1 ; alf = acL(LL) 
+       if (k1 .ne. ln(1,LL) ) then 
+          n12 = 2 ; alf = 1d0-acL(LL) 
+       endif
+       wuL1    =  alf*dx(LL)*wu(LL)
+       cs      =  walls(8,n) ! outward positive
+       sn      = -walls(7,n)
+       wwL(kk) = abs(cs*csu(LL) + sn*snu(LL))
+       wwL(kk) = wwL(kk)*wuL1 
+       wcw     = wcw + wwL(kk) 
+    enddo   
+    if (wcw > 0d0) then 
+       do kk = 1,size(nd(k1)%ln) 
+          LL = iabs(nd(k1)%ln(kk))
+          n12 = 1 ; alf = acL(LL) 
+          if (k1 .ne. ln(1,LL) ) then 
+             n12 = 2 ; alf = 1d0-acL(LL) 
+          endif
+          wcL(n12,LL) = wcL(n12,LL) + wwL(kk)*aa1/wcw 
+       enddo
+    endif   
+ enddo   
 
  do L = 1, lnx
     k1 = ln(1,L) ; k2 = ln(2,L)
@@ -19282,7 +19312,7 @@ end subroutine unc_write_shp
 
  call setcentertolinkorientations()
 
- call setlinktocenterweights()
+ ! call setlinktocenterweights()
 
  call setcornertolinkorientations()
 
@@ -19431,7 +19461,7 @@ end subroutine unc_write_shp
  mxwalls   = nw
 
  call setwallorientations()
-
+ call setlinktocenterweights()
 
 !-------------------------------------------------- CELL CORNER RELATED -----------------------------------------------
 
@@ -37989,8 +38019,6 @@ subroutine update_verticalprofiles()
   endif
 
   tetm1     = 1d0-tetavkeps
-
-  pransmi   = 1d0 / sigtke                                ! 1 / Prandtl Schmidt number Tke
   dtiL      = 1d0 / dtprev                                ! turbulence transport in current velocity field => do not use new timestep but previous step
 
   !$xOMP PARALLEL DO                                                                  &
@@ -38049,13 +38077,13 @@ subroutine update_verticalprofiles()
      ck(0:kxL) = 0.d0
      dk(0:kxL) = dtiL*turkin0(Lb0:Lt)
 
-     vicu      = viskin+0.5d0*(vicwwu(Lb0)+vicwwu(Lb))*pransmi        !
+     vicu      = viskin+0.5d0*(vicwwu(Lb0)+vicwwu(Lb))*sigtkei        !
 
      do L  = Lb, Lt - 1                                               ! Loop over layer interfaces
         Lu    = L + 1
 
         vicd  = vicu
-        vicu  = viskin + 0.5d0*(vicwwu(L)+vicwwu(Lu))*pransmi
+        vicu  = viskin + 0.5d0*(vicwwu(L)+vicwwu(Lu))**sigtkei 
 
         k     = L - Lb + 1; ku = k + 1
 
@@ -38292,8 +38320,6 @@ subroutine update_verticalprofiles()
     !_____________________________________________________________________________________!
 
 
-     pransmi   = 1d0 / sigeps                              ! 1 / Prandtl Schmidt number Eps (=1.3)
-
      ak(0:kxL) = 0.d0                                      ! Matrix initialization eps, tau
      bk(0:kxL) = dtiL
      ck(0:kxL) = 0.d0
@@ -38301,13 +38327,13 @@ subroutine update_verticalprofiles()
                                                            ! Vertical diffusion; Neumann condition on surface;
                                                            ! Dirichlet condition on bed ; teta method:
 
-     vicu  = viskin+0.5d0*(vicwwu(Lb0)+vicwwu(Lb))*pransmi
+     vicu  = viskin+0.5d0*(vicwwu(Lb0)+vicwwu(Lb))*sigepsi
 
      do L  = Lb, Lt - 1
         Lu    = L + 1
 
         vicd  = vicu
-        vicu  = viskin + 0.5d0*(vicwwu(L)+vicwwu(Lu))*pransmi
+        vicu  = viskin + 0.5d0*(vicwwu(L)+vicwwu(Lu))*sigepsi
 
         k     = L - Lb + 1; ku = k + 1
 

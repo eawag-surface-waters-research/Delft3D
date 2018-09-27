@@ -2266,8 +2266,8 @@ end module m_structures
  double precision                  :: c1e
  double precision                  :: c2e
  double precision                  :: sigdif
- double precision                  :: sigtke
- double precision                  :: sigeps
+ double precision                  :: sigtke, sigtkei
+ double precision                  :: sigeps, sigepsi
  double precision                  :: sigsal, sigsali
  double precision                  :: sigtem, sigtemi
  double precision                  :: sigsed, sigsedi
@@ -2370,8 +2370,8 @@ use m_physcoef
 
 ! Coefficients of k-e model:
     sigdif    = 1d0
-    sigtke    = 1.0d0
-    sigeps    = 1.3d0
+    sigtke    = 1.0d0  ; sigtkei = 1d0/sigtke
+    sigeps    = 1.3d0  ; sigepsi = 1d0/sigeps
     sigrho    = 0.7d0  ! bouyancy
     sigsal    = 0.7d0  ; sigsali = 1d0/sigsal
     sigtem    = 0.7d0  ; sigtemi = 1d0/sigtem
