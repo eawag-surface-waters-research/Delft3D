@@ -971,22 +971,22 @@ module m_ship
  integer                       :: nshiptxy = 0, iniship                             !< nr of ships / initialised 0,1
  integer,          allocatable :: kship(:)                                      !< index array
  double precision, allocatable, target :: xyship(:)                                     !< new position or velocity provided by module
- double precision, allocatable :: shx(:) !< [m] current position {"shape": ["nshiptxy"]}
- double precision, allocatable :: shy(:) !< [m] current position {"shape": ["nshiptxy"]}
- double precision, allocatable :: shi(:) !< [m] current position {"shape": ["nshiptxy"]}
+ double precision, allocatable, target :: shx(:) !< [m] current position {"shape": ["nshiptxy"]}
+ double precision, allocatable, target :: shy(:) !< [m] current position {"shape": ["nshiptxy"]}
+ double precision, allocatable, target :: shi(:) !< [m] current position {"shape": ["nshiptxy"]}
  double precision, allocatable :: shu(:), shv(:), sho(:)                        !< current velocity
- double precision, allocatable :: zsp(:)     !< [m] ship depth at flownodes {"shape": ["ndx"]}
- double precision, allocatable :: zsp0(:)    !< [m] ship depth at flownodes prev step {"shape": ["ndx"]}
- double precision, allocatable :: zspc(:)    !< [m] ship depth at netnodes  {"shape": ["numk"]}
- double precision, allocatable :: zspc0(:)   !< [m] ship depth at netnodes  {"shape": ["numk"]}
- double precision, allocatable :: v0ship(:)  !< [m] ship 0 volume {"shape": ["ndx"]}
- double precision, allocatable :: v1ship(:)  !< [m] ship 1 volume {"shape": ["ndx"]}
- double precision, allocatable :: qinship(:) !< [m] ship flux (v1-v0)/dt  {"shape": ["ndx"]}
- double precision, allocatable :: vicushp(:) !< [m] eddyvisc ship {"shape": ["lnx"]}
+ double precision, allocatable, target :: zsp(:)     !< [m] ship depth at flownodes {"shape": ["ndx"]}
+ double precision, allocatable, target :: zsp0(:)    !< [m] ship depth at flownodes prev step {"shape": ["ndx"]}
+ double precision, allocatable, target :: zspc(:)    !< [m] ship depth at netnodes  {"shape": ["numk"]}
+ double precision, allocatable, target :: zspc0(:)   !< [m] ship depth at netnodes  {"shape": ["numk"]}
+ double precision, allocatable, target :: v0ship(:)  !< [m] ship 0 volume {"shape": ["ndx"]}
+ double precision, allocatable, target :: v1ship(:)  !< [m] ship 1 volume {"shape": ["ndx"]}
+ double precision, allocatable, target :: qinship(:) !< [m] ship flux (v1-v0)/dt  {"shape": ["ndx"]}
+ double precision, allocatable, target :: vicushp(:) !< [m] eddyvisc ship {"shape": ["lnx"]}
 
- double precision, allocatable :: shL(:) !< [m] ship size L/2, B/2, D  ! for now, fixed max nr =2 {"shape": [2]}
- double precision, allocatable :: shB(:) !< [m] ship size L/2, B/2, D  ! for now, fixed max nr =2 {"shape": [2]}
- double precision, allocatable :: shd(:) !< [m] ship size L/2, B/2, D  ! for now, fixed max nr =2 {"shape": [2]}
+ double precision, allocatable, target :: shL(:) !< [m] ship size L/2, B/2, D  ! for now, fixed max nr =2 {"shape": [2]}
+ double precision, allocatable, target :: shB(:) !< [m] ship size L/2, B/2, D  ! for now, fixed max nr =2 {"shape": [2]}
+ double precision, allocatable, target :: shd(:) !< [m] ship size L/2, B/2, D  ! for now, fixed max nr =2 {"shape": [2]}
  double precision              :: epsi=1d0
  double precision              :: fx2(2)   =0d0, fy2(2)    =0d0, fm2(2)   =0d0  !< pressure force in global coordinate sys (interacting with flow)
  double precision              :: squat(2) =0d0, squatbow(2) = 0d0              !< squat and squat bow (m)
@@ -996,12 +996,12 @@ module m_ship
  double precision              :: fricxnet(2)=0d0, fricynet(2)=0d0, fricmnet(2)=0d0  !< net friction forces
  double precision              :: stuwx (2)=0d0, stuwy  (2)=0d0, stuwm (2)=0d0  !< thrust    force in global coordinate sys (interacting with flow)
  double precision              :: fextx (2)=0d0, fexty  (2)=0d0, fextm (2)=0d0  !< external  force in global coordinate sys (          not on flow)
- double precision, allocatable :: stuw(:)   !< [N] actual thrust force in ship dir  {"shape": [2]}
- double precision, allocatable :: fstuw(:)  !< [-] thrust setting 0-1 {"shape": [2]}
- double precision, allocatable :: stuwmx(:) !< [N] max thrust {"shape": [2]}
- double precision, allocatable :: roer(:)   !< [degree] actual rudder angle {"shape": [2]}
- double precision, allocatable :: froer(:)  !< [degree] actual rudder setting 0-1 {"shape": [2]}
- double precision, allocatable :: roermx(:) !< [degree] max rudder angle {"shape": [2]}
+ double precision, allocatable, target :: stuw(:)   !< [N] actual thrust force in ship dir  {"shape": [2]}
+ double precision, allocatable, target :: fstuw(:)  !< [-] thrust setting 0-1 {"shape": [2]}
+ double precision, allocatable, target :: stuwmx(:) !< [N] max thrust {"shape": [2]}
+ double precision, allocatable, target :: roer(:)   !< [degree] actual rudder angle {"shape": [2]}
+ double precision, allocatable, target :: froer(:)  !< [degree] actual rudder setting 0-1 {"shape": [2]}
+ double precision, allocatable, target :: roermx(:) !< [degree] max rudder angle {"shape": [2]}
  double precision          :: dxcog(2) = 0d0                                !< delta x c.o.g.
  double precision          :: powermx(2)   , speedmx(2)                     !< mx engine power (Hp on input, then Watts), max ship velocity (Knts on input, then m/s)
  double precision          :: deadw(2)     , deadwi (2), checkdw(2)         !< inertia (x,y), moment
