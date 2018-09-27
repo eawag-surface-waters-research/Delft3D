@@ -10536,7 +10536,7 @@ subroutine unc_read_map(filename, tim, ierr)
     call maketimeinverse(restartdatetime(1:14),trefdat_rst,iostat)    ! result: refdatnew in seconds  w.r.t. absolute MDU refdat
     mdu_has_date = (iostat==0) 
     
-    ! Restart from *YYYYMMDD_HHMMSS_rst.nc
+    ! Restart from *yyyymmdd_hhmmss_rst.nc
     !              15    0 8  5   1^tok1      
     if (tok1 .gt. 0) then       
            
@@ -10554,12 +10554,12 @@ subroutine unc_read_map(filename, tim, ierr)
             
        if (.not.fname_has_date) then
           if (.not.mdu_has_date) then
-             call mess(LEVEL_WARN, 'No valid date-time-string in either the MDU-file or *YYYYMMDD_HHMMSS_rst.nc filename: '''// &
+             call mess(LEVEL_WARN, 'No valid date-time-string in either the MDU-file or *yyyymmdd_hhmmss_rst.nc filename: '''// &
                        trim(filename)//'''.')
              ierr = DFM_WRONGINPUT
              goto 999
           else 
-             call mess(LEVEL_INFO, 'No valid date-time-string in *YYYYMMDD_HHMMSS_rst.nc filename: '''//trim(filename)  &
+             call mess(LEVEL_INFO, 'No valid date-time-string in *yyyymmdd_hhmmss_rst.nc filename: '''//trim(filename)  &
                              //'''. MDU RestartDateTime of '//restartdatetime(1:14)//' will be used.')
           endif 
        endif 

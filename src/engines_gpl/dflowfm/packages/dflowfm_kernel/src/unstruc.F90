@@ -13192,7 +13192,7 @@ end if
             call rearst(mrst, jw)
             JAWEL = (jw == 1)
          endif
-     else ! Restart from *_YYYYMMDD_HHMMSS_rst.nc or from *_map.nc
+     else ! Restart from *_yyyymmdd_hhmmss_rst.nc or from *_map.nc
        call read_restart_from_map(md_restartfile, iresult) !TODO:JZ modify the name of this subroutine, since it also restarts from rst files.
        if (iresult /= DFM_NOERR) then
           goto 888
