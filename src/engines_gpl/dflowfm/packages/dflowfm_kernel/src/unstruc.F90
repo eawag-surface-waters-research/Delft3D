@@ -536,8 +536,10 @@ integer, intent(out) :: iresult
 
  ! call wriinc(time1)
 
-  call updateCumulativeInflow(dts)
- 
+  if (jaQinext > 0) then
+     call updateCumulativeInflow(dts)
+  end if
+
   call updateValuesOnCrossSections(time1)             ! Compute sum values across cross sections.
  if (jampi == 0 .or. (jampi == 1 .and. my_rank==0)) then
     if (numsrc > 0) then
@@ -14583,8 +14585,8 @@ subroutine update_dambreak_breach(startTime, deltaTime)
       waterLevelsDambreakUpStream   = 0.0d0
       waterLevelsDambreakDownStream = 0.0d0
       normalVelocityDambreak        = 0.0d0
-	   breachWidthDerivativeDambreak  = 0.0d0
-	   waterLevelJumpDambreak         = 0.0d0
+      breachWidthDerivativeDambreak  = 0.0d0
+      waterLevelJumpDambreak         = 0.0d0
    
       ! Compute sumQuantitiesByWeight upstream
       ierr = getAverageQuantityFromLinks(L1dambreaksg, L2dambreaksg, wu, kdambreak(3,:), s1, kdambreak(1,:), dambreakAveraging, hu, dmiss, activeDambreakLinks, 0)
@@ -14654,7 +14656,7 @@ subroutine update_dambreak_breach(startTime, deltaTime)
                breachWidthDerivativeDambreak(n) = dmiss
             endif
             ! Store water level jump
-            tempValue = network%sts%struct(istru)%dambreak%waterLevelJumpDambreak	
+            tempValue = network%sts%struct(istru)%dambreak%waterLevelJumpDambreak   
             if (tempValue>0) then
                waterLevelJumpDambreak(n) = tempValue
             else
@@ -22374,12 +22376,14 @@ endif
     call realloc(evap, ndx, keepExisting = .false., fill = 0d0, stat = ierr)
  end if
 
- call realloc(qinext, ndkx, keepExisting = .false., fill = 0d0, stat = ierr)
- call aerr('qinext(ndkx)', ierr, ndkx)
- call realloc(qinextreal, ndkx, keepExisting = .false., fill = 0d0, stat = ierr)
- call aerr('qinextreal(ndkx)', ierr, ndkx)
- call realloc(vincum, ndkx, keepExisting = .false., fill = 0d0, stat = ierr)
- call aerr('vincum(ndkx)', ierr, ndkx)
+ if (jaQinext > 0) then
+    call realloc(qinext, ndkx, keepExisting = .false., fill = 0d0, stat = ierr)
+    call aerr('qinext(ndkx)', ierr, ndkx)
+    call realloc(qinextreal, ndkx, keepExisting = .false., fill = 0d0, stat = ierr)
+    call aerr('qinextreal(ndkx)', ierr, ndkx)
+    call realloc(vincum, ndkx, keepExisting = .false., fill = 0d0, stat = ierr)
+    call aerr('vincum(ndkx)', ierr, ndkx)
+ end if
 
  if (nshiptxy > 0) then 
     if (allocated( zsp0) ) deallocate(zsp0 )
@@ -32699,17 +32703,19 @@ end function ispumpon
        enddo
     endif
     
-    do k = 1,ndxi    
-        if (qinext(k) > 0) then ! inflow is always possible            
-            Qext = qinext(k)   
-        else if (hs(k) > epshu) then
-            Qext = - min(0.5d0*vol1(k)/dts , -qinext(k))
-        else ! (almost) no water
-            Qext = 0.0d0
-        endif
-        qinextreal(k) = Qext
-        qin(k) = qin(k) + Qext
-    enddo
+    if (jaQinext > 0) then
+       do k = 1,ndxi    
+           if (qinext(k) > 0) then ! inflow is always possible            
+               Qext = qinext(k)   
+           else if (hs(k) > epshu) then
+               Qext = - min(0.5d0*vol1(k)/dts , -qinext(k))
+           else ! (almost) no water
+               Qext = 0.0d0
+           endif
+           qinextreal(k) = Qext
+           qin(k) = qin(k) + Qext
+       enddo
+    end if
 
     if (numlatsg > 0) then 
        do k = 1,ndxi
@@ -32727,7 +32733,7 @@ end function ispumpon
        enddo
     endif
     
-    if (jarain > 0 .or. jaevap > 0) then
+    if (jarain > 0 .or. jaevap > 0 .or. jaQinext > 0) then ! TODO: Qlat not here?
        do k  = 1,ndxi
           kt = ktop(k)
           if (kmx > 0) then
@@ -39508,7 +39514,7 @@ endif
 if (network%brs%count > 0) then
    call getCrossTotalData_on_link(network, LL, hpr, area, width, CS_TYPE_MIN)
    return
-endif   	  
+endif      
 
 if (prof1D(1,LL) > 0 ) then              ! direct profile based upon link value
     ka    = 0; kb = 0                    ! do not use profiles

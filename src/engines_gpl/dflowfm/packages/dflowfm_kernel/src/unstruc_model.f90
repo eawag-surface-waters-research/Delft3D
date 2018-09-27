@@ -1195,6 +1195,10 @@ subroutine readMDUFile(filename, istat)
     if (jarain > 0) then
        jaqin = 1
     end if
+    call prop_get_integer(md_ptr, 'external forcing', 'QinExt', jaQinext, success)
+    if (jaQinext > 0) then
+       jaqin = 1
+    end if
     call prop_get_integer(md_ptr, 'external forcing', 'Evaporation', jaevap, success)
     if (jaevap > 0) then
        jaqin = 1
@@ -2446,6 +2450,9 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     call prop_set(prop_ptr, 'external forcing', 'ExtForceFileNew', trim(md_extfile_new), 'New format for external forcings file *.ext, link with bc-format boundary conditions specification')
     if (writeall .or. jarain > 0) then
        call prop_set(prop_ptr, 'external forcing', 'Rainfall', jarain, 'Include rainfall, (0=no, 1=yes)')
+    end if
+    if (writeall .or. jaQinext > 0) then
+       call prop_set(prop_ptr, 'external forcing', 'QinExt', jaQinext, 'Include user Qin, externally provided, (0=no, 1=yes)')
     end if
     if (writeall .or. jaevap > 0) then
        call prop_set(prop_ptr, 'external forcing', 'Evaporation', jaevap, 'Include evaporation in water balance, (0=no, 1=yes)')
