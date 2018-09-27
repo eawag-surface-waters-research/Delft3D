@@ -2622,8 +2622,6 @@
 
    ENDDO
 
-   CALL SETNODADM(0)
-
    end function make1D2Dinternalnetlinks
    
    subroutine make1D2Droofgutterpipes(xplRoofs, yplRoofs, zplRoofs, oneDmask)      !
