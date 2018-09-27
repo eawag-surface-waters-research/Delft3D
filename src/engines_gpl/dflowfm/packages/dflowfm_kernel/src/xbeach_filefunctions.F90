@@ -273,7 +273,7 @@ subroutine start_logfiles(error)
  
        call writelog('ls','','**********************************************************')
        call writelog('ls','','                                                          ')
-       call writelog('ls','','Simulation started: YYYYMMDD    hh:mm:ss     time zone (UTC)')
+       call writelog('ls','','Simulation started: yyyymmdd    hh:mm:ss     time zone (UTC)')
        call writelog('ls','','                    '//date //'  '//time(1:2)//':'//time(3:4)//':'//time(5:6)//'     '//zone)
        call writelog('ls','','                                                          ')
 #ifdef HAVE_CONFIG_H
