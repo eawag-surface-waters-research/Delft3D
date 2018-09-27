@@ -570,7 +570,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
       if (var_spacedimpos(ivarcandidate) <= 0 .and. var_timdimpos(ivarcandidate) <= 0 .and. nvardims .ne. 0) then
          if (verbose_mode) then
             write (*,'(a)')           'Error: mapmerge: detected that variable `'//trim(varname)//''': is not defined on space' &
-               //'locations, and is not a speical time-related variable. Skipping this variable.'
+               //'locations, and is not a special time-related variable. Skipping this variable.'
          end if
          ! Make decrement -1 to all dimensions of the skipped variable, i.e. they are used one time less
          ! dimids_uses(id_infile) needs to be decremented -1 here for the kx dim
