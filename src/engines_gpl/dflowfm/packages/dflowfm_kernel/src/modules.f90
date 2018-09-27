@@ -4267,7 +4267,7 @@ subroutine default_flowtimes()
     ti_stat     = -60d0             !< simulation statistics interval (s) (Default: off, will later default to dt_user), <0: use wc-time
     ti_timings  = 0d0               !< timings output interval
     ti_split    = 0d0               !< Time interval for time splitting of output files.
-    ti_split_unit= 'X'              !< Unit for time partitioning interval
+    ti_split_unit= 's'              !< Unit for time partitioning interval
 
     tmini       = -1d9              !< initial time for updating the 4 above
 

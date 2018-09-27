@@ -1391,7 +1391,7 @@ subroutine readMDUFile(filename, istat)
         end if
         if (iostat /= 0) then
             ti_split = 0d0
-            ti_split_unit = 'X'
+            ti_split_unit = 's'
             call mess(LEVEL_WARN, 'TimeSplitInterval invalid, disabling time partitioning of output. Got: ', trim(charbuf))
         end if
     end if
@@ -2533,7 +2533,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
 
     call prop_set(prop_ptr, 'output', 'TimingsInterval', ti_timings, 'Timings statistics output interval')
     helptxt = ' '
-    write (helptxt,'(i0,a1)'), int(ti_split), ti_split_unit
+    write (helptxt,'(i0,a1,a1)'), int(ti_split), ' ', ti_split_unit
     call prop_set(prop_ptr, 'output', 'TimeSplitInterval', trim(helptxt), 'Time splitting interval, after which a new output file is started. value+unit, e.g. ''1 M'', valid units: Y,M,D,h,m,s.')
 
 
