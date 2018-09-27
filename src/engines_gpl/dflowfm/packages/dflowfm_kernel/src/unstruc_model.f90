@@ -376,7 +376,7 @@ subroutine loadModel(filename)
 
     ! read and proces dflow1d model
     ! This routine is still used for Morphology model with network in INI-File (Willem Ottevanger)
-    call load_network_from_flow1d(md_1dfiles%onednetwork, found_1d_network)
+    call load_network_from_flow1d(md_1dfiles, found_1d_network)
 
     if (found_1d_network) then
        jadoorladen = 1
