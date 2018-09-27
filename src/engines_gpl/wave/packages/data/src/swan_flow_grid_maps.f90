@@ -334,7 +334,7 @@ subroutine make_grid_map(i1, i2, g1, g2, gm, external_mapper)
    real(kind=hp)   , dimension(:)  , allocatable   :: xs
    real(kind=hp)   , dimension(:)  , allocatable   :: ys
    real            , dimension(:,:), allocatable   :: testfield
-   character(256)                                  :: command
+   character(1024)                                 :: command
    character(50)                                   :: searchstring
    character(NF90_MAX_NAME)                        :: string
    !
