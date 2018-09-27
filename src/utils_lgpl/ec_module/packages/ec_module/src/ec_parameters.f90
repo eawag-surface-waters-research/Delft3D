@@ -36,7 +36,7 @@ module m_ec_parameters
 
    implicit none
 
-   integer,  parameter :: maxNameLen           = 100
+   integer,  parameter :: maxNameLen           = 256
    integer,  parameter :: maxRecordLen         = 132
    integer,  parameter :: maxFileNameLen       = 256
    integer,  parameter :: maxFileReaderFiles   = 3
