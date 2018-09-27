@@ -6373,18 +6373,33 @@ subroutine generatePartitionMDUFile(filename, filename_new)
    use unstruc_model
    use unstruc_messages
    use m_partitioninfo
+   use string_module
    implicit none
    character(len=*), intent(in)  :: filename, filename_new
    integer                       :: k1, k2, k3, k4, k5, k6, k7, n
    character(len=500)            :: string, string_c, string_tmp, string_v
+   integer                       :: ja_innumerics, ja_icgsolverset
 
    open(261, file = filename, status ="old", action="read", err=999)
    open(262, file = filename_new, status = "replace", action="write",err=999)
-
-   k1 = 0; k2 = 0; k3 = 0; k4 = 0; k5 = 0; k6 = 0; k7 = 0
+  
+   k1 = 0; k2 = 0; k3 = 0; k4 = 0; k5 = 0; k6 = 0; k7 = 0; ja_innumerics = 0; ja_icgsolverset = 0
    do while (.true.)
       read(261, "(a)", err=999, end=1212) string
       n = index(string, '=')
+
+      !> In case icgsolver was not present in input MDU, find-and-replace impossible, so make sure to add it, because it's required.
+      if (strcmpi(string, '[numerics]', 10)) then
+         ja_innumerics = 1
+      elseif (string(1:1) == '[' .and. ja_innumerics == 1) then ! About to close [numerics]
+         if (ja_icgsolverset == 0) then
+            write(string_v, "(I5)") md_icgsolver
+            string_tmp = "Icgsolver = "//trim(adjustl(string_v))//"          # Solver type , 1 = sobekGS_OMP, 2 = sobekGS_OMPthreadsafe, 3 = sobekGS, 4 = sobekGS + Saadilud, 5 = parallel/global Saad, 6 = parallel/Petsc, 7 = parallel/GS"
+            write(262, "(a)") trim(string_tmp)
+         end if
+         ja_innumerics = 0
+      end if
+
       string_c = string(1:n)
       k1 = index(string_c, 'NetFile')
       k2 = index(string_c, 'Icgsolver')
@@ -6414,6 +6429,7 @@ subroutine generatePartitionMDUFile(filename, filename_new)
             write(string_v, "(I5)") md_icgsolver
             string_tmp = trim(string_c)//" "//trim(adjustl(string_v))//"          # Solver type , 1 = sobekGS_OMP, 2 = sobekGS_OMPthreadsafe, 3 = sobekGS, 4 = sobekGS + Saadilud, 5 = parallel/global Saad, 6 = parallel/Petsc, 7 = parallel/GS"
             write(262, "(a)") trim(string_tmp)
+            ja_icgsolverset = 1
          else if (k3 /= 0) then ! Modify restart file name
             string_tmp = trim(string_c)//" "//trim(md_restartfile)//"       # Restart file, only from netcdf-file, hence: either *_rst.nc or *_map.nc"
             write(262, "(a)") trim(string_tmp)
