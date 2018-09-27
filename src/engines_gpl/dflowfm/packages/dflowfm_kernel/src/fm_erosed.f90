@@ -258,97 +258,95 @@
                 cdef => network%crs%cross(c)%tabdef
                 ctype = cdef%crosstype
                 if (ctype== CS_TABULATED) then
-                    if (blchg(nm)/=0) then ! if the bed level change is non zero
-                        !
-                        ! determine the reference height href and the cross sectional area  below that level
-                        !
-                        iref = cdef%levelscount
-                        do i = 2, cdef%levelscount - 1
-                            if (cdef%flowWidth(i+1) > cdef%plains(1)) then ! or cdef%height(i)>s1(nm) 
-                                iref = i
-                                exit
-                            endif
-                        enddo
-                        aref = 0d0
-                        do i = 2, iref
-                            aref = aref + (cdef%flowWidth(i) + cdef%flowWidth(i-1))*(cdef%height(i)-cdef%height(i-1))*0.5d0
-                        enddo
-                        href = cdef%height(iref)
-                        w_active = cdef%flowWidth(iref)
-                        !
-                        ! use blchg as bed level change over the total cell area (can be partly dry)
-                        ! to compute the total volume deposited inside the cell
-                        !
-                        dvol = blchg(nm)*ba(nm)
-                        !
-                        ! compute the total cell length
-                        !
-                        ds   = 0
-                        do i = 1,nd(nm)%lnx
-                            L = iabs(nd(nm)%ln(i))
-                            ds = ds+dx(L)
-                        enddo
-                        ds = ds/dble(nd(nm)%lnx)
-                        !
-                        ! compute the deposited area per unit length, i.e. the area by which the cross section should be adjusted
-                        !
-                        da   = dvol/ds
-                        !
-                        ! compute the factor by which the cross sectional area changes
-                        !
-                        if (cdef%levelscount == 1) then
-                            !
-                            ! single level: horizontal bed, shift up/down uniformly
-                            !
-                            cdef%height(1) = href + (da/w_active)
-                        elseif (da<aref) then
-                            !
-                            ! raise/lower proportional to the depth relative to reference level
-                            !
-                            fac = 1d0 - (da/aref)
-                            do i = 1, iref-1
-                                cdef%height(i) = href - (href-cdef%height(i))*fac
-                            enddo
-                        else
-                            !
-                            ! fill uniformly above reference level
-                            !
-                            do i = iref, cdef%levelscount-1
-                               da = da - aref
-                               aref = (cdef%flowWidth(i+1) + cdef%flowWidth(i))*(cdef%height(i+1)-cdef%height(i))*0.5d0
-                               if (da<aref) then
-                                   exit
-                               else
-                                   iref = iref+1
-                                   href = cdef%height(iref)
-                               endif
-                            enddo
-                            !
-                            ! remove obsolete levels
-                            !
-                            do i = iref, cdef%levelscount
-                                cdef%flowWidth(i-iref+1) = cdef%flowWidth(i)
-                                cdef%height(i-iref+1) = cdef%height(i)
-                            enddo
-                            cdef%levelscount = cdef%levelscount - iref + 1
-                            !
-                            ! fill proportional to the depth relative to reference level
-                            !
-                            fac = 1d0 - (da/aref)
-                            do i = 1, iref-1
-                                cdef%height(i) = href - (href-cdef%height(i))*fac
-                            enddo
+                    !
+                    ! determine the reference height href and the cross sectional area  below that level
+                    !
+                    iref = cdef%levelscount
+                    do i = 2, cdef%levelscount - 1
+                        if (cdef%flowWidth(i+1) > cdef%plains(1)) then ! or cdef%height(i)>s1(nm) 
+                            iref = i
+                            exit
                         endif
+                    enddo
+                    aref = 0d0
+                    do i = 2, iref
+                        aref = aref + (cdef%flowWidth(i) + cdef%flowWidth(i-1))*(cdef%height(i)-cdef%height(i-1))*0.5d0
+                    enddo
+                    href = cdef%height(iref)
+                    w_active = cdef%flowWidth(iref)
+                    !
+                    ! use blchg as bed level change over the total cell area (can be partly dry)
+                    ! to compute the total volume deposited inside the cell
+                    !
+                    dvol = blchg(nm)*ba(nm)
+                    !
+                    ! compute the total cell length
+                    !
+                    ds   = 0
+                    do i = 1,nd(nm)%lnx
+                        L = iabs(nd(nm)%ln(i))
+                        ds = ds+dx(L)
+                    enddo
+                    ds = ds/dble(nd(nm)%lnx)
+                    !
+                    ! compute the deposited area per unit length, i.e. the area by which the cross section should be adjusted
+                    !
+                    da   = dvol/ds
+                    !
+                    ! compute the factor by which the cross sectional area changes
+                    !
+                    if (cdef%levelscount == 1) then
                         !
-                        ! set blchg to bed level change for deepest point
+                        ! single level: horizontal bed, shift up/down uniformly
                         !
-                        blchg(nm) = cdef%height(1) - network%crs%cross(c)%bedLevel
+                        cdef%height(1) = href + (da/w_active)
+                    elseif (da<aref) then
                         !
-                        network%crs%cross(c)%surfaceLevel = cdef%height(cdef%levelscount)
-                        network%crs%cross(c)%bedLevel     = cdef%height(1) !TODO: check if we need to include network%crs%cross(c)%shift
-                        network%crs%cross(c)%charheight   = network%crs%cross(c)%surfaceLevel - network%crs%cross(c)%bedLevel
-                        network%crs%cross(c)%updateTable = .true. 
-                    endif    
+                        ! raise/lower proportional to the depth relative to reference level
+                        !
+                        fac = 1d0 - (da/aref)
+                        do i = 1, iref-1
+                            cdef%height(i) = href - (href-cdef%height(i))*fac
+                        enddo
+                    else
+                        !
+                        ! fill uniformly above reference level
+                        !
+                        do i = iref, cdef%levelscount-1
+                           da = da - aref
+                           aref = (cdef%flowWidth(i+1) + cdef%flowWidth(i))*(cdef%height(i+1)-cdef%height(i))*0.5d0
+                           if (da<aref) then
+                               exit
+                           else
+                               iref = iref+1
+                               href = cdef%height(iref)
+                           endif
+                        enddo
+                        !
+                        ! remove obsolete levels
+                        !
+                        do i = iref, cdef%levelscount
+                            cdef%flowWidth(i-iref+1) = cdef%flowWidth(i)
+                            cdef%height(i-iref+1) = cdef%height(i)
+                        enddo
+                        cdef%levelscount = cdef%levelscount - iref + 1
+                        !
+                        ! fill proportional to the depth relative to reference level
+                        !
+                        fac = 1d0 - (da/aref)
+                        do i = 1, iref-1
+                            cdef%height(i) = href - (href-cdef%height(i))*fac
+                        enddo
+                    endif
+                    !
+                    ! set blchg to bed level change for deepest point
+                    !
+                    blchg(nm) = cdef%height(1) - network%crs%cross(c)%bedLevel
+                    !
+                    network%crs%cross(c)%surfaceLevel = cdef%height(cdef%levelscount)
+                    network%crs%cross(c)%bedLevel     = cdef%height(1) !TODO: check if we need to include network%crs%cross(c)%shift
+                    network%crs%cross(c)%charheight   = network%crs%cross(c)%surfaceLevel - network%crs%cross(c)%bedLevel
+                    network%crs%cross(c)%updateTable = .true. 
                 else
                     write(msgbuf,'(a,i5)') 'Bed level updating has not yet implemented for cross section type ',ctype
                     call err_flush()
