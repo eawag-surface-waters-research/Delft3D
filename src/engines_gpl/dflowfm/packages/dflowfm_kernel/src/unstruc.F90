@@ -8492,7 +8492,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  use unstruc_display, only : ntek, jaGUI
  use m_alloc 
  use m_bedform 
- use m_fm_update_crosssections, only: fm_update_main_width
+ use m_fm_update_crosssections, only: fm_update_mor_width_area
  ! 
  ! To raise floating-point invalid, divide-by-zero, and overflow exceptions:
  ! Activate the following line (See also statements below)
@@ -8726,7 +8726,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  end if
  
  if (stm_included) then 
-     call fm_update_main_width()
+     call fm_update_mor_width_area()
  endif 
  
  if ( len_trim(md_dredgefile) > 0 .and. stm_included) then 
@@ -18657,11 +18657,12 @@ end subroutine unc_write_shp
  call add_boundarynetcells()
 
  if ( allocated(kcs) )  then
-    deallocate ( nd, bl, bai, kcs)                   ! and allocate geometry related node arrays
+    deallocate ( nd, bl, bai, kcs, bai_mor, ba_mor)  ! and allocate geometry related node arrays
  endif
- allocate ( nd(ndx), bl(ndx), bai(ndx), kcs(ndx) , stat = ierr )
- call aerr('nd(ndx), bl(ndx), bai(ndx), kcs(ndx)', ierr, 8*ndx ) ; kcs = 1
+ allocate ( nd(ndx), bl(ndx), bai(ndx), bai_mor(ndx), ba_mor(ndx), kcs(ndx) , stat = ierr )
+ call aerr('nd(ndx), bl(ndx), bai(ndx), bai_mor(ndx), ba_mor(ndx), kcs(ndx)', ierr, 8*ndx ) ; kcs = 1
  bl = dmiss
+ ba_mor = 0d0
 
  if ( allocated (kfs) ) deallocate(kfs)
  allocate(kfs(ndx))   ;  kfs   = 0
