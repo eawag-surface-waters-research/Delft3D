@@ -37,6 +37,7 @@ use properties
 use tree_data_types
 use tree_structures
 use unstruc_messages
+use m_globalparameters, only : t_filenames
 
 implicit none
 
@@ -61,6 +62,8 @@ implicit none
     ! 1.01 (2014-11-10): Renamed ThindykeFile/Scheme/Contraction -> FixedWeirFile/Scheme/Contraction.
     ! 1.00 (2014-09-22): first version of new permissive checking procedure. All (older) unversioned input remains accepted.
 
+    
+
     integer, parameter :: MD_NOAUTOSTART   = 0   !< Do not autostart (nor stop) this model.
     integer, parameter :: MD_AUTOSTART     = 1   !< Autostart this model and then idle.
     integer, parameter :: MD_AUTOSTARTSTOP = 2   !< Autostart this model and then exit (batchmode)
@@ -74,8 +77,8 @@ implicit none
 
     character(len=4)   :: md_tunit         = ' ' !< Unit of tstart_user and tstop_user (only for read and write, while running these are always in seconds).
 
+    type(t_filenames)  :: md_1dfiles
     character(len=255) :: md_netfile       = ' ' !< Net definition                    (e.g., *_net.nc)
-    character(len=255) :: md_1dnetworkfile = ' ' !< 1d Network definition             (e.g., flow1d.md1d)
     character(len=255) :: md_flowgeomfile  = ' ' !< Storing flow geometry (output)    (e.g., *_flowgeom.nc)
     character(len=255) :: md_xybfile       = ' ' !< Bathymetry file                   (e.g., *.xyb)
     character(len=255) :: md_dryptsfile    = ' ' !< Dry points file                   (e.g., *.xyz, *.pol)
@@ -217,7 +220,7 @@ use unstruc_netcdf, only: UNC_CONV_UGRID
     md_specific = ' '
 
     md_netfile = ' '
-    md_1dnetworkfile = ' '
+    md_1dfiles%onednetwork = ' '
     md_flowgeomfile = ' '
     md_xybfile = ' '
     md_dryptsfile = ' '
@@ -373,7 +376,7 @@ subroutine loadModel(filename)
 
     ! read and proces dflow1d model
     ! This routine is still used for Morphology model with network in INI-File (Willem Ottevanger)
-    call load_network_from_flow1d(md_1dnetworkfile, found_1d_network)
+    call load_network_from_flow1d(md_1dfiles%onednetwork, found_1d_network)
 
     if (found_1d_network) then
        jadoorladen = 1
@@ -387,8 +390,8 @@ subroutine loadModel(filename)
 
        call admin_network(network, iDumk, iDuml)
 
-       if (len_trim(md_1dnetworkfile) > 0) then
-         call read_1d_attributes(md_1dnetworkfile, network)
+       if (len_trim(md_1dfiles%onednetwork) > 0) then
+         call read_1d_attributes(md_1dfiles, network)
        endif
 
        call initialize_1dadmin(network, network%gridpointsCount)
@@ -651,7 +654,10 @@ subroutine readMDUFile(filename, istat)
    call prop_get_string(md_ptr,  'model', 'ModelSpecific',  md_specific)
 
 ! Geometry
-    call prop_get_string ( md_ptr, 'geometry', 'OneDNetworkFile',  md_1dnetworkfile, success)
+    call prop_get_string ( md_ptr, 'geometry', 'OneDNetworkFile',  md_1dfiles%onednetwork,               success)
+    call prop_get_string ( md_ptr, 'geometry', 'CrossDefFile',     md_1dfiles%cross_section_definitions, success)
+    call prop_get_string ( md_ptr, 'geometry', 'CrossLocFile',     md_1dfiles%cross_section_locations,   success)
+    call prop_get_string ( md_ptr, 'geometry', 'NodeFile',         md_1dfiles%retentions,                success)
     call prop_get_string ( md_ptr, 'geometry', 'NetFile',          md_netfile,      success)
     call prop_get_string ( md_ptr, 'geometry', 'GridEnclosureFile',md_encfile,      success)
     call prop_get_string ( md_ptr, 'geometry', 'BathymetryFile',   md_xybfile,      success)
@@ -670,7 +676,7 @@ subroutine readMDUFile(filename, istat)
     if ( len_trim(md_pillarfile) > 0 ) then
        japillar = 1
     endif
-    if( len_trim(md_1dnetworkfile) > 0 ) then
+    if( len_trim(md_1dfiles%onednetwork) > 0 ) then
        jamd1dfile = 1
     endif
     call prop_get_string ( md_ptr, 'geometry', 'GulliesFile',      md_gulliesfile,   success)
