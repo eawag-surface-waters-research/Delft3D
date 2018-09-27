@@ -858,18 +858,23 @@ module time_module
 
       !> split a string in date and time part
       subroutine split_date_time(string, date, time)
-         character(len=*), intent(in)  :: string  !< input string like 1950-01-01 00:00:00
+         character(len=*), intent(in)  :: string  !< input string like 1950-01-01 00:00:00; with or without time
          character(len=*), intent(out) :: date    !< output date, in this case 1950-01-01
          character(len=*), intent(out) :: time    !< output time, in this case 00:00:00
 
          character(len=:), allocatable :: date_time
-         integer :: ipos
+         integer                       :: ipos
 
          date_time = trim(adjustl(string))
-         ipos = index(date_time, ' ')
+         ipos      = index(date_time, ' ')
 
-         date = date_time(1:ipos-1)
-         time = adjustl(date_time(ipos+1:))
+         if (ipos > 0) then
+            date = date_time(1:ipos-1)
+            time = adjustl(date_time(ipos+1:))
+         else
+            date = date_time
+            time = ' '
+         endif
       end subroutine split_date_time
 
       ! todo: move to unit test environment
