@@ -1,7 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !
-!  Copyright (C)  Stichting Deltares, 2017-2018.
-!
+!  Copyright (C)  Stichting Deltares, 2017-2018.!
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).
 !
 !  Delft3D is free software: you can redistribute it and/or modify
@@ -38,7 +37,6 @@ use properties
 use tree_data_types
 use tree_structures
 use unstruc_messages
-use m_globalparameters, only : t_filenames
 
 implicit none
 
@@ -63,8 +61,6 @@ implicit none
     ! 1.01 (2014-11-10): Renamed ThindykeFile/Scheme/Contraction -> FixedWeirFile/Scheme/Contraction.
     ! 1.00 (2014-09-22): first version of new permissive checking procedure. All (older) unversioned input remains accepted.
 
-    
-
     integer, parameter :: MD_NOAUTOSTART   = 0   !< Do not autostart (nor stop) this model.
     integer, parameter :: MD_AUTOSTART     = 1   !< Autostart this model and then idle.
     integer, parameter :: MD_AUTOSTARTSTOP = 2   !< Autostart this model and then exit (batchmode)
@@ -78,8 +74,8 @@ implicit none
 
     character(len=4)   :: md_tunit         = ' ' !< Unit of tstart_user and tstop_user (only for read and write, while running these are always in seconds).
 
-    type(t_filenames)  :: md_1dfiles
     character(len=255) :: md_netfile       = ' ' !< Net definition                    (e.g., *_net.nc)
+    character(len=255) :: md_1dnetworkfile = ' ' !< 1d Network definition             (e.g., flow1d.md1d)
     character(len=255) :: md_flowgeomfile  = ' ' !< Storing flow geometry (output)    (e.g., *_flowgeom.nc)
     character(len=255) :: md_xybfile       = ' ' !< Bathymetry file                   (e.g., *.xyb)
     character(len=255) :: md_dryptsfile    = ' ' !< Dry points file                   (e.g., *.xyz, *.pol)
@@ -221,7 +217,7 @@ use unstruc_netcdf, only: UNC_CONV_UGRID
     md_specific = ' '
 
     md_netfile = ' '
-    md_1dfiles%onednetwork = ' '
+    md_1dnetworkfile = ' '
     md_flowgeomfile = ' '
     md_xybfile = ' '
     md_dryptsfile = ' '
@@ -377,7 +373,7 @@ subroutine loadModel(filename)
 
     ! read and proces dflow1d model
     ! This routine is still used for Morphology model with network in INI-File (Willem Ottevanger)
-    call load_network_from_flow1d(md_1dfiles, found_1d_network)
+    call load_network_from_flow1d(md_1dnetworkfile, found_1d_network)
 
     if (found_1d_network) then
        jadoorladen = 1
@@ -391,8 +387,8 @@ subroutine loadModel(filename)
 
        call admin_network(network, iDumk, iDuml)
 
-       if (len_trim(md_1dfiles%onednetwork) > 0) then
-         call read_1d_attributes(md_1dfiles, network)
+       if (len_trim(md_1dnetworkfile) > 0) then
+         call read_1d_attributes(md_1dnetworkfile, network)
        endif
 
        call initialize_1dadmin(network, network%gridpointsCount)
@@ -655,10 +651,7 @@ subroutine readMDUFile(filename, istat)
    call prop_get_string(md_ptr,  'model', 'ModelSpecific',  md_specific)
 
 ! Geometry
-    call prop_get_string ( md_ptr, 'geometry', 'OneDNetworkFile',  md_1dfiles%onednetwork,               success)
-    call prop_get_string ( md_ptr, 'geometry', 'CrossDefFile',     md_1dfiles%cross_section_definitions, success)
-    call prop_get_string ( md_ptr, 'geometry', 'CrossLocFile',     md_1dfiles%cross_section_locations,   success)
-    call prop_get_string ( md_ptr, 'geometry', 'NodeFile',         md_1dfiles%retentions,                success)
+    call prop_get_string ( md_ptr, 'geometry', 'OneDNetworkFile',  md_1dnetworkfile, success)
     call prop_get_string ( md_ptr, 'geometry', 'NetFile',          md_netfile,      success)
     call prop_get_string ( md_ptr, 'geometry', 'GridEnclosureFile',md_encfile,      success)
     call prop_get_string ( md_ptr, 'geometry', 'BathymetryFile',   md_xybfile,      success)
@@ -677,7 +670,7 @@ subroutine readMDUFile(filename, istat)
     if ( len_trim(md_pillarfile) > 0 ) then
        japillar = 1
     endif
-    if( len_trim(md_1dfiles%onednetwork) > 0 ) then
+    if( len_trim(md_1dnetworkfile) > 0 ) then
        jamd1dfile = 1
     endif
     call prop_get_string ( md_ptr, 'geometry', 'GulliesFile',      md_gulliesfile,   success)
@@ -1186,7 +1179,7 @@ subroutine readMDUFile(filename, istat)
     !
 ! Restart information
     call prop_get_string(md_ptr, 'restart', 'RestartFile', md_restartfile, success)
-    restartdatetime = 'yyyymmddhhmmss'
+    restartdatetime = 'yyyymmdd_HHMMSS'
     call prop_get_string(md_ptr, 'restart', 'RestartDateTime', restartdatetime, success)
 
 ! External forcings
@@ -1194,10 +1187,6 @@ subroutine readMDUFile(filename, istat)
     call prop_get_string(md_ptr, 'external forcing', 'ExtForceFileNew', md_extfile_new, success)
     call prop_get_integer(md_ptr, 'external forcing', 'Rainfall', jarain, success)
     if (jarain > 0) then
-       jaqin = 1
-    end if
-    call prop_get_integer(md_ptr, 'external forcing', 'QinExt', jaQinext, success)
-    if (jaQinext > 0) then
        jaqin = 1
     end if
     call prop_get_integer(md_ptr, 'external forcing', 'Evaporation', jaevap, success)
@@ -1277,7 +1266,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'output', 'Wrihis_salinity', jahissal, success)
     call prop_get_integer(md_ptr, 'output', 'Wrihis_density', jahisrho, success)
     call prop_get_integer(md_ptr, 'output', 'Wrihis_waterlevel_s1', jahiswatlev, success)
-    call prop_get_integer(md_ptr, 'output', 'Wrihis_bedlevel', jahisbedlev, success)
+    call prop_get_integer(md_ptr, 'output', 'Wrihis_bedlevel', jahiswatlev, success)
     call prop_get_integer(md_ptr, 'output', 'Wrihis_waterdepth', jahiswatdep, success)
     call prop_get_integer(md_ptr, 'output', 'Wrihis_waves', jahiswav, success)
     call prop_get_integer(md_ptr, 'output', 'Wrihis_velocity_vector', jahisvelvec, success)
@@ -1396,7 +1385,7 @@ subroutine readMDUFile(filename, istat)
         end if
         if (iostat /= 0) then
             ti_split = 0d0
-            ti_split_unit = 's'
+            ti_split_unit = 'X'
             call mess(LEVEL_WARN, 'TimeSplitInterval invalid, disabling time partitioning of output. Got: ', trim(charbuf))
         end if
     end if
@@ -2444,16 +2433,13 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
 
 ! Restart settings
     call prop_set(prop_ptr, 'restart', 'RestartFile',     trim(md_restartfile) ,  'Restart netcdf-file, either *_rst.nc or *_map.nc')
-    call prop_set(prop_ptr, 'restart', 'RestartDateTime', trim(restartdatetime),  'Restart date and time (yyyymmddhhmmss) when restarting from *_map.nc')
+    call prop_set(prop_ptr, 'restart', 'RestartDateTime', trim(restartdatetime),  'Restart date and time (YYYYMMDDHHMMSS) when restarting from *_map.nc')
 
 ! External forcings
     call prop_set(prop_ptr, 'external forcing', 'ExtForceFile',    trim(md_extfile),     'Old format for external forcings file *.ext, link with tim/cmp-format boundary conditions specification')
     call prop_set(prop_ptr, 'external forcing', 'ExtForceFileNew', trim(md_extfile_new), 'New format for external forcings file *.ext, link with bc-format boundary conditions specification')
     if (writeall .or. jarain > 0) then
        call prop_set(prop_ptr, 'external forcing', 'Rainfall', jarain, 'Include rainfall, (0=no, 1=yes)')
-    end if
-    if (writeall .or. jaQinext > 0) then
-       call prop_set(prop_ptr, 'external forcing', 'QinExt', jaQinext, 'Include user Qin, externally provided, (0=no, 1=yes)')
     end if
     if (writeall .or. jaevap > 0) then
        call prop_set(prop_ptr, 'external forcing', 'Evaporation', jaevap, 'Include evaporation in water balance, (0=no, 1=yes)')
@@ -2541,7 +2527,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
 
     call prop_set(prop_ptr, 'output', 'TimingsInterval', ti_timings, 'Timings statistics output interval')
     helptxt = ' '
-    write (helptxt,'(i0,a1,a1)'), int(ti_split), ' ', ti_split_unit
+    write (helptxt,'(i0,a1)'), int(ti_split), ti_split_unit
     call prop_set(prop_ptr, 'output', 'TimeSplitInterval', trim(helptxt), 'Time splitting interval, after which a new output file is started. value+unit, e.g. ''1 M'', valid units: Y,M,D,h,m,s.')
 
 
@@ -2599,7 +2585,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     if (writeall .or. jahiswatlev /= 1) then
        call prop_set(prop_ptr, 'output', 'Wrihis_waterlevel_s1', jahiswatlev, 'Write water level to his file (1: yes, 0: no)' )
     endif
-    if (writeall .or. jahisbedlev /= 1) then
+    if (writeall .or. jahisbedlev == 0) then
        call prop_set(prop_ptr, 'output', 'Wrihis_bedlevel', jahiswatlev, 'Write bed level to his file (1: yes, 0: no)' )
     endif
     if (writeall .or. jahiswatdep /= 1) then

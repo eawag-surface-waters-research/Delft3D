@@ -4960,9 +4960,8 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
             work1d_n = dmiss
          endif
          do i = 1,ndx1d
-            k = ndx2d + i
-            if (gridpoint2cross(k)%num_cross_sections==1) then
-               n = gridpoint2cross(k)%cross(1)
+            if (gridpoint2cross(i)%num_cross_sections==1) then
+               n = gridpoint2cross(i)%cross(1)
                if (n==0) cycle
                pCS => network%crs%cross(n)%tabdef
                if (pCS%crosstype == CS_TABULATED) then
@@ -9382,7 +9381,6 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
          if (meshgeom%numedge.eq.-1) then
             ierr = ggeo_count_or_create_edge_nodes(meshgeom%branchidx, meshgeom%branchoffsets, meshgeom%nedge_nodes(1,:), meshgeom%nedge_nodes(2,:), meshgeom%nbranchlengths, start_index, meshgeom%numedge)
             call reallocP(meshgeom%edge_nodes,(/ 2, meshgeom%numedge /), keepExisting = .false.)
-            meshgeom%edge_nodes = 0
             ierr = ggeo_count_or_create_edge_nodes(meshgeom%branchidx, meshgeom%branchoffsets, meshgeom%nedge_nodes(1,:), meshgeom%nedge_nodes(2,:), meshgeom%nbranchlengths, start_index, meshgeom%numedge, meshgeom%edge_nodes)
          endif
          network%numl = meshgeom%numedge
@@ -10468,54 +10466,49 @@ subroutine unc_read_map(filename, tim, ierr)
             goto 999
             endif
       endif
-      
-      if (jamergedmap == 0) then
       !! check if the flownodes/flowlinks numbering index is the same
-      ! only check when sequential restart and parallel restart with its own rst file.
-      ! TODO: check also for other restart situations
-         ! Read coordinates of flownodes 
-         call realloc(xmc, ndxi_read, keepExisting=.false.)
-         call realloc(ymc, ndxi_read, keepExisting=.false.)
-         ierr = nf90_inq_varid(imapfile, 'FlowElem_xzw', id_xzw)
-         call check_error(ierr, 'center of mass x-coordinate')
-         ierr = nf90_inq_varid(imapfile, 'FlowElem_yzw', id_yzw)
-         call check_error(ierr, 'center of mass y-coordinate')
-         
-         ierr = nf90_get_var(imapfile, id_xzw, xmc)
-         ierr = nf90_get_var(imapfile, id_yzw, ymc)
-         
-         if (ierr == nf90_noerr) then
-            ! check flownodes numbering with rst file
-            call check_flownodesorlinks_numbering_rst(ndxi, 1, xmc, ymc, ierr)
-            if (ierr .ne. nf90_noerr) then
-               goto 999
-            end if
-         else
-            call mess(LEVEL_WARN, 'Skip checking flownodes numbering when restart, '&
-                       //'because flownodes coordinates are missing in rst file.')
-         end if      
-         
-         ! Read coordinates of flowlinks
-         call realloc(xuu, lnx_read, keepExisting=.false.)
-         call realloc(yuu, lnx_read, keepExisting=.false.)
-         ierr = nf90_inq_varid(imapfile, 'FlowLink_xu', id_xu)
-         call check_error(ierr, 'velocity point x-coordinate')
-         ierr = nf90_inq_varid(imapfile, 'FlowLink_yu', id_yu)
-         call check_error(ierr, 'velocity point y-coordinate')
-         ierr = nf90_get_var(imapfile, id_xu, xuu)
-         ierr = nf90_get_var(imapfile, id_yu, yuu)
-         
-         if (ierr == nf90_noerr) then
-            ! Check flowlinks numbering with rst file
-            call check_flownodesorlinks_numbering_rst(lnx, 0, xuu, yuu, ierr)
-            if (ierr .ne. nf90_noerr) then
-               goto 999
-            end if
-         else
-            call mess(LEVEL_WARN, 'Skip checking flowlinks numbering when restart, '&
-                       //'because flowlinks coordinates are missing in rst file.')
+      ! Read coordinates of flownodes 
+      call realloc(xmc, ndxi_read, keepExisting=.false.)
+      call realloc(ymc, ndxi_read, keepExisting=.false.)
+      ierr = nf90_inq_varid(imapfile, 'FlowElem_xzw', id_xzw)
+      call check_error(ierr, 'center of mass x-coordinate')
+      ierr = nf90_inq_varid(imapfile, 'FlowElem_yzw', id_yzw)
+      call check_error(ierr, 'center of mass y-coordinate')
+      
+      ierr = nf90_get_var(imapfile, id_xzw, xmc)
+      ierr = nf90_get_var(imapfile, id_yzw, ymc)
+      
+      if (ierr == nf90_noerr) then
+         ! check flownodes numbering with rst file
+         call check_flownodesorlinks_numbering_rst(ndxi, 1, xmc, ymc, ierr)
+         if (ierr .ne. nf90_noerr) then
+            goto 999
          end if
-      end if
+      else
+         call mess(LEVEL_WARN, 'Skip checking flownodes numbering when restart, '&
+                    //'because flownodes coordinates are missing in rst file.')
+      end if      
+
+      ! Read coordinates of flowlinks
+      call realloc(xuu, lnx_read, keepExisting=.false.)
+      call realloc(yuu, lnx_read, keepExisting=.false.)
+      ierr = nf90_inq_varid(imapfile, 'FlowLink_xu', id_xu)
+      call check_error(ierr, 'velocity point x-coordinate')
+      ierr = nf90_inq_varid(imapfile, 'FlowLink_yu', id_yu)
+      call check_error(ierr, 'velocity point y-coordinate')
+      ierr = nf90_get_var(imapfile, id_xu, xuu)
+      ierr = nf90_get_var(imapfile, id_yu, yuu)
+      
+      if (ierr == nf90_noerr) then
+         ! Check flowlinks numbering with rst file
+         call check_flownodesorlinks_numbering_rst(lnx, 0, xuu, yuu, ierr)
+         if (ierr .ne. nf90_noerr) then
+            goto 999
+         end if
+      else
+         call mess(LEVEL_WARN, 'Skip checking flowlinks numbering when restart, '&
+                    //'because flowlinks coordinates are missing in rst file.')
+      end if   
     endif
     call readyy('Reading map data',0.05d0)
     
@@ -10536,7 +10529,7 @@ subroutine unc_read_map(filename, tim, ierr)
     call maketimeinverse(restartdatetime(1:14),trefdat_rst,iostat)    ! result: refdatnew in seconds  w.r.t. absolute MDU refdat
     mdu_has_date = (iostat==0) 
     
-    ! Restart from *yyyymmdd_hhmmss_rst.nc
+    ! Restart from *YYYYMMDD_HHMMSS_rst.nc
     !              15    0 8  5   1^tok1      
     if (tok1 .gt. 0) then       
            
@@ -10554,12 +10547,12 @@ subroutine unc_read_map(filename, tim, ierr)
             
        if (.not.fname_has_date) then
           if (.not.mdu_has_date) then
-             call mess(LEVEL_WARN, 'No valid date-time-string in either the MDU-file or *yyyymmdd_hhmmss_rst.nc filename: '''// &
+             call mess(LEVEL_WARN, 'No valid date-time-string in either the MDU-file or *YYYYMMDD_HHMMSS_rst.nc filename: '''// &
                        trim(filename)//'''.')
              ierr = DFM_WRONGINPUT
              goto 999
           else 
-             call mess(LEVEL_INFO, 'No valid date-time-string in *yyyymmdd_hhmmss_rst.nc filename: '''//trim(filename)  &
+             call mess(LEVEL_INFO, 'No valid date-time-string in *YYYYMMDD_HHMMSS_rst.nc filename: '''//trim(filename)  &
                              //'''. MDU RestartDateTime of '//restartdatetime(1:14)//' will be used.')
           endif 
        endif 
@@ -10862,33 +10855,30 @@ subroutine unc_read_map(filename, tim, ierr)
           call replace_char(tmpstr,32,95) 
           call replace_char(tmpstr,47,95) 
           ierr = nf90_inq_varid(imapfile, trim(tmpstr), id_tr1(i))
-          if ( ierr.eq.NF90_NOERR ) then
-!            tracer exists in restart file             
-             if(kmx > 0) then
-                ierr = nf90_get_var(imapfile, id_tr1(i), tmpvar(1:kmx,1:ndxi_own), start=(/ 1, kstart, it_read /), &
-                                    count=(/ kmx, ndxi_own, 1 /))
-                do kk = 1, ndxi_own
-                   if (jamergedmap == 1) then
-                      kloc = inode_own(kk)
-                   else
-                      kloc = kk
-                   end if
+          if(kmx > 0) then
+             ierr = nf90_get_var(imapfile, id_tr1(i), tmpvar(1:kmx,1:ndxi_own), start=(/ 1, kstart, it_read /), &
+                                 count=(/ kmx, ndxi_own, 1 /))
+             do kk = 1, ndxi_own
+                if (jamergedmap == 1) then
+                   kloc = inode_own(kk)
+                else
+                   kloc = kk
+                end if
 
-                   call getkbotktop(kloc, kb, kt)
-                   ! TODO: UNST-976, incorrect for Z-layers:
-                   constituents(iconst,kb:kt) = tmpvar(1:kt-kb+1,kk)
-                enddo
-             else
-                ierr = nf90_get_var(imapfile, id_tr1(i), tmpvar(1,1:ndxi_own), start = (/ kstart, it_read/), count = (/ndxi,1/))
-                do kk = 1, ndxi
-                   if (jamergedmap == 1) then
-                      kloc = inode_own(kk)
-                   else
-                      kloc = kk
-                   end if
-                   constituents(iconst, kloc) = tmpvar(1,kk)
-                end do
-             end if
+                call getkbotktop(kloc, kb, kt)
+                ! TODO: UNST-976, incorrect for Z-layers:
+                constituents(iconst,kb:kt) = tmpvar(1:kt-kb+1,kk)
+             enddo
+          else
+             ierr = nf90_get_var(imapfile, id_tr1(i), tmpvar(1,1:ndxi_own), start = (/ kstart, it_read/), count = (/ndxi,1/))
+             do kk = 1, ndxi
+                if (jamergedmap == 1) then
+                   kloc = inode_own(kk)
+                else
+                   kloc = kk
+                end if
+                constituents(iconst, kloc) = tmpvar(1,kk)
+             end do
           endif
           call check_error(ierr, const_names(iconst))
        enddo

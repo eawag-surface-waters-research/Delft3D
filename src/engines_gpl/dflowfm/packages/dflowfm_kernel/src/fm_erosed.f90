@@ -223,7 +223,8 @@
     
     subroutine fm_update_crosssections(blchg)
     use precision
-    use m_flowgeom, only: ndxi, kcs, dx, wu, nd, wu_mor, ba_mor
+    use m_cell_geometry, only: ba
+    use m_flowgeom, only: ndxi, kcs, dx, wu, nd, wu_mor
     use m_oned_functions, only:gridpoint2cross
     use unstruc_channel_flow, only: network
     use m_CrossSections, only: t_CSType, CS_TABULATED
@@ -257,95 +258,97 @@
                 cdef => network%crs%cross(c)%tabdef
                 ctype = cdef%crosstype
                 if (ctype== CS_TABULATED) then
-                    !
-                    ! determine the reference height href and the cross sectional area  below that level
-                    !
-                    iref = cdef%levelscount
-                    do i = 2, cdef%levelscount - 1
-                        if (cdef%flowWidth(i+1) > cdef%plains(1)) then ! or cdef%height(i)>s1(nm) 
-                            iref = i
-                            exit
+                    if (blchg(nm)/=0) then ! if the bed level change is non zero
+                        !
+                        ! determine the reference height href and the cross sectional area  below that level
+                        !
+                        iref = cdef%levelscount
+                        do i = 2, cdef%levelscount - 1
+                            if (cdef%flowWidth(i+1) > cdef%plains(1)) then ! or cdef%height(i)>s1(nm) 
+                                iref = i
+                                exit
+                            endif
+                        enddo
+                        aref = 0d0
+                        do i = 2, iref
+                            aref = aref + (cdef%flowWidth(i) + cdef%flowWidth(i-1))*(cdef%height(i)-cdef%height(i-1))*0.5d0
+                        enddo
+                        href = cdef%height(iref)
+                        w_active = cdef%flowWidth(iref)
+                        !
+                        ! use blchg as bed level change over the total cell area (can be partly dry)
+                        ! to compute the total volume deposited inside the cell
+                        !
+                        dvol = blchg(nm)*ba(nm)
+                        !
+                        ! compute the total cell length
+                        !
+                        ds   = 0
+                        do i = 1,nd(nm)%lnx
+                            L = iabs(nd(nm)%ln(i))
+                            ds = ds+dx(L)
+                        enddo
+                        ds = ds/dble(nd(nm)%lnx)
+                        !
+                        ! compute the deposited area per unit length, i.e. the area by which the cross section should be adjusted
+                        !
+                        da   = dvol/ds
+                        !
+                        ! compute the factor by which the cross sectional area changes
+                        !
+                        if (cdef%levelscount == 1) then
+                            !
+                            ! single level: horizontal bed, shift up/down uniformly
+                            !
+                            cdef%height(1) = href + (da/w_active)
+                        elseif (da<aref) then
+                            !
+                            ! raise/lower proportional to the depth relative to reference level
+                            !
+                            fac = 1d0 - (da/aref)
+                            do i = 1, iref-1
+                                cdef%height(i) = href - (href-cdef%height(i))*fac
+                            enddo
+                        else
+                            !
+                            ! fill uniformly above reference level
+                            !
+                            do i = iref, cdef%levelscount-1
+                               da = da - aref
+                               aref = (cdef%flowWidth(i+1) + cdef%flowWidth(i))*(cdef%height(i+1)-cdef%height(i))*0.5d0
+                               if (da<aref) then
+                                   exit
+                               else
+                                   iref = iref+1
+                                   href = cdef%height(iref)
+                               endif
+                            enddo
+                            !
+                            ! remove obsolete levels
+                            !
+                            do i = iref, cdef%levelscount
+                                cdef%flowWidth(i-iref+1) = cdef%flowWidth(i)
+                                cdef%height(i-iref+1) = cdef%height(i)
+                            enddo
+                            cdef%levelscount = cdef%levelscount - iref + 1
+                            !
+                            ! fill proportional to the depth relative to reference level
+                            !
+                            fac = 1d0 - (da/aref)
+                            do i = 1, iref-1
+                                cdef%height(i) = href - (href-cdef%height(i))*fac
+                            enddo
                         endif
-                    enddo
-                    aref = 0d0
-                    do i = 2, iref
-                        aref = aref + (cdef%flowWidth(i) + cdef%flowWidth(i-1))*(cdef%height(i)-cdef%height(i-1))*0.5d0
-                    enddo
-                    href = cdef%height(iref)
-                    w_active = cdef%flowWidth(iref)
-                    !
-                    ! use blchg as bed level change over the total cell area (can be partly dry)
-                    ! to compute the total volume deposited inside the cell
-                    !
-                    dvol = blchg(nm)*ba_mor(nm)
-                    !
-                    ! compute the total cell length
-                    !
-                    ds   = 0
-                    do i = 1,nd(nm)%lnx
-                        L = iabs(nd(nm)%ln(i))
-                        ds = ds+dx(L)
-                    enddo
-                    ds = ds/dble(nd(nm)%lnx)
-                    !
-                    ! compute the deposited area per unit length, i.e. the area by which the cross section should be adjusted
-                    !
-                    da   = dvol/ds
-                    !
-                    ! compute the factor by which the cross sectional area changes
-                    !
-                    if (cdef%levelscount == 1) then
                         !
-                        ! single level: horizontal bed, shift up/down uniformly
+                        ! set blchg to bed level change for deepest point
                         !
-                        cdef%height(1) = href + (da/w_active)
-                    elseif (da<aref) then
+                        blchg(nm) = cdef%height(1) - network%crs%cross(c)%bedLevel
                         !
-                        ! raise/lower proportional to the depth relative to reference level
-                        !
-                        fac = 1d0 - (da/aref)
-                        do i = 1, iref-1
-                            cdef%height(i) = href - (href-cdef%height(i))*fac
-                        enddo
-                    else
-                        !
-                        ! fill uniformly above reference level
-                        !
-                        do i = iref, cdef%levelscount-1
-                           da = da - aref
-                           aref = (cdef%flowWidth(i+1) + cdef%flowWidth(i))*(cdef%height(i+1)-cdef%height(i))*0.5d0
-                           if (da<aref) then
-                               exit
-                           else
-                               iref = iref+1
-                               href = cdef%height(iref)
-                           endif
-                        enddo
-                        !
-                        ! remove obsolete levels
-                        !
-                        do i = iref, cdef%levelscount
-                            cdef%flowWidth(i-iref+1) = cdef%flowWidth(i)
-                            cdef%height(i-iref+1) = cdef%height(i)
-                        enddo
-                        cdef%levelscount = cdef%levelscount - iref + 1
-                        !
-                        ! fill proportional to the depth relative to reference level
-                        !
-                        fac = 1d0 - (da/aref)
-                        do i = 1, iref-1
-                            cdef%height(i) = href - (href-cdef%height(i))*fac
-                        enddo
-                    endif
-                    !
-                    ! set blchg to bed level change for deepest point
-                    !
-                    blchg(nm) = cdef%height(1) - network%crs%cross(c)%bedLevel
-                    !
-                    network%crs%cross(c)%surfaceLevel = cdef%height(cdef%levelscount)
-                    network%crs%cross(c)%bedLevel     = cdef%height(1) !TODO: check if we need to include network%crs%cross(c)%shift
-                    network%crs%cross(c)%charheight   = network%crs%cross(c)%surfaceLevel - network%crs%cross(c)%bedLevel
-                    network%crs%cross(c)%updateTable = .true. 
+                        network%crs%cross(c)%surfaceLevel = cdef%height(cdef%levelscount)
+                        network%crs%cross(c)%bedLevel     = cdef%height(1) !TODO: check if we need to include network%crs%cross(c)%shift
+                        network%crs%cross(c)%charheight   = network%crs%cross(c)%surfaceLevel - network%crs%cross(c)%bedLevel
+                        network%crs%cross(c)%updateTable = .true. 
+                    endif    
                 else
                     write(msgbuf,'(a,i5)') 'Bed level updating has not yet implemented for cross section type ',ctype
                     call err_flush()
@@ -359,26 +362,19 @@
     end subroutine fm_update_crosssections
     
     
-    subroutine fm_update_mor_width_area()
-    use m_flowgeom, only: lnx, lnx1d, lnxi, lnx1Db, wu, wu_mor, LBND1D, bai, ba_mor, bai_mor, ndx, dx, ln, acl, ndx2D, ndx1Db
-    use m_cell_geometry, only: ba
+    subroutine fm_update_main_width()
+    use m_flowgeom, only: lnx, lnx1d, lnxi, lnx1Db, wu, wu_mor, LBND1D
     use unstruc_channel_flow, only: network
     use m_CrossSections, only: t_CSType, CS_TABULATED
 
     type(t_CSType), pointer :: cdef1, cdef2
     integer :: icrs1, icrs2 
-    integer :: L, LL, k, k1, k2
+    integer :: L, LL
     double precision :: factor
     
     ! Set all morphologically active widths to general flow width.
     do L = 1, lnx
         wu_mor(L) = wu(L)
-    enddo
-
-    ! Set all morphologically active areas to general flow area and similar for the inverse 
-    do k = 1, ndx
-        ba_mor(k) = ba(k)
-        bai_mor(k) = bai(k)
     enddo
     
     if (network%brs%Count > 0) then 
@@ -397,39 +393,15 @@
                 wu_mor(L) = wu(L)
             endif
         enddo
-        
+    
         ! Overwrite boundary link morphologically active widths by morphologically active width on inside
         do L = lnxi+1, lnx1Db
             LL = LBND1D(L)
-            wu_mor(L) = wu_mor(LL)
+            wu_mor(LL) = wu_mor(L)
         enddo
-
-        ! Compute morphologically active areas
-        ba_mor(ndx2D+1:ndx1Db) = 0d0 
-        
-        do L = 1, lnx1d
-            k1 = ln(1,L)
-            k2 = ln(2,L)
-            ba_mor(k1) = ba_mor(k1) + dx(L)*wu_mor(L)*acl(L)
-            ba_mor(k2) = ba_mor(k2) + dx(L)*wu_mor(L)*(1d0 - acl(L))
-        enddo 
-        
-        ! Compute morphologically active areas at boundary links
-        do L = lnxi+1, lnx1Db
-            k1 = ln(1,L)
-            k2 = ln(2,L)
-            ba_mor(k1) = dx(L)*wu_mor(L) ! area point outside
-            ba_mor(k2) = ba_mor(k2) + dx(L)*wu_mor(L)*(1d0 - acl(L)) ! area point inside (added to loop above)
-        enddo
-        
-        ! Compute inverse of morphologically active areas
-        do k = ndx2D+1, ndx1Db
-            bai_mor(k) = 1d0/ba_mor(k) 
-        enddo
-        
     endif
     
-    end subroutine fm_update_mor_width_area
+    end subroutine fm_update_main_width
     
     
     end module m_fm_update_crosssections
@@ -2227,7 +2199,7 @@
     use bedcomposition_module
     use sediment_basics_module
     use m_flow     , only: vol0, vol1, s0, s1, hs, u1, kmx, hu, au
-    use m_flowgeom , only: bai, ndxi, nd, wu, bl, ba, ln, dx, ndx, lnx, lnxi, acl, wcx1, wcy1, wcx2, wcy2, xz, yz, wu_mor, ba_mor, bai_mor
+    use m_flowgeom , only: bai, ndxi, nd, wu, bl, ba, ln, dx, ndx, lnx, lnxi, acl, wcx1, wcy1, wcx2, wcy2, xz, yz, wu_mor
     use m_flowexternalforcings, only: nbndz, nbndu, nopenbndsect
     use m_flowparameters, only: epshs, epshu, jawave
     use m_sediment,  only: stmpar, sedtra, mtd, sedtot2sedsus
@@ -2731,7 +2703,7 @@
                             end if
                         end do
                         !trndiv = trndiv + sumflux / max(vol1(nm),dtol)
-                        trndiv = trndiv + sumflux * bai_mor(nm) ! MvO & DR + dimensiecheck levert op * bai ipv /vol1 verandering gemaakt rond release 35807
+                        trndiv = trndiv + sumflux * bai(nm) ! MvO & DR + dimensiecheck levert op * bai ipv /vol1 verandering gemaakt rond release 35807
                     else
                         !
                         ! mass balance includes entrainment and deposition
@@ -2747,8 +2719,8 @@
                             call getkbotktop(nm, kb, kt)
                             k = kb
                         endif
-                        thick0 = vol0(k) * bai_mor(nm)
-                        thick1 = vol1(k) * bai_mor(nm)
+                        thick0 = vol0(k) * bai(nm)
+                        thick1 = vol1(k) * bai(nm)
                         sedflx = sinkse(nm,l) * constituents(j,k) * thick1
                         eroflx = sourse(nm,l)                     * thick0
                         !
@@ -2774,7 +2746,7 @@
                                 sumflux = sumflux - flux
                             end if
                         end do
-                        trndiv = trndiv + sumflux * bai_mor(nm)
+                        trndiv = trndiv + sumflux * bai(nm)
                     endif
                 endif
                 if (bed /= 0.0_fp) then
@@ -2790,7 +2762,7 @@
                             sumflux = sumflux - flux
                         end if
                     end do
-                    trndiv = trndiv + sumflux * bai_mor(nm)
+                    trndiv = trndiv + sumflux * bai(nm)
                 endif
                 !
                 dsdnm = (trndiv+sedflx-eroflx) * dtmor
@@ -2915,8 +2887,8 @@
                             end if
                             if (kfsed(knb)==0 .and. bl(knb)>bl(nm)) then
                                 dv              = thet * fixfac(knb, ll)*frac(knb, ll)
-                                dbodsd(ll, knb) = dbodsd(ll, knb) - dv*bai_mor(knb)
-                                dbodsd(ll, nm)  = dbodsd(ll, nm)  + dv*bai_mor(nm)
+                                dbodsd(ll, knb) = dbodsd(ll, knb) - dv*bai(knb)
+                                dbodsd(ll, nm)  = dbodsd(ll, nm)  + dv*bai(nm)
                                 e_sbn(L,ll)     = e_sbn(L,ll)     + dv/(dtmor*wu_mor(L))
                             end if
                         end do ! L

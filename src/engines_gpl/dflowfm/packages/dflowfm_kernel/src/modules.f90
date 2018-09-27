@@ -1,7 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !
-!  Copyright (C)  Stichting Deltares, 2017-2018.
-!
+!  Copyright (C)  Stichting Deltares, 2017-2018.!
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).
 !
 !  Delft3D is free software: you can redistribute it and/or modify
@@ -1089,7 +1088,6 @@ integer                           :: jarhum              !< use relative humidit
 integer                           :: jaclou              !< use cloudiness        yes or no
 integer                           :: jasol               !< use 1 = use solrad, 2 = use cloudiness
 integer                           :: jaheat_eachstep = 0 !< if 1, do it each step, else in externalforcings (default)
-integer                           :: jaQinext            !< use Qin externally provided yes or no
 integer                           :: jaqin               !< use qin , sum of all in fluxes
 
 double precision                  :: windxav, windyav  !< average wind for plotting
@@ -1142,7 +1140,6 @@ use m_physcoef, only : rhomean
     jarain  = 0         !< use rain yes or no
     jaevap  = 0         !< use evap yes or no
     jaqin   = 0         !< use qin , sum of all in fluxes
-    jaQinext= 0         !< use Qin externally provided yes or no
 
     ! Remaining of variables is handled in reset_wind()
     call reset_wind()
@@ -2266,8 +2263,8 @@ end module m_structures
  double precision                  :: c1e
  double precision                  :: c2e
  double precision                  :: sigdif
- double precision                  :: sigtke, sigtkei
- double precision                  :: sigeps, sigepsi
+ double precision                  :: sigtke
+ double precision                  :: sigeps
  double precision                  :: sigsal, sigsali
  double precision                  :: sigtem, sigtemi
  double precision                  :: sigsed, sigsedi
@@ -2370,8 +2367,8 @@ use m_physcoef
 
 ! Coefficients of k-e model:
     sigdif    = 1d0
-    sigtke    = 1.0d0  ; sigtkei = 1d0/sigtke
-    sigeps    = 1.3d0  ; sigepsi = 1d0/sigeps
+    sigtke    = 1.0d0
+    sigeps    = 1.3d0
     sigrho    = 0.7d0  ! bouyancy
     sigsal    = 0.7d0  ; sigsali = 1d0/sigsal
     sigtem    = 0.7d0  ; sigtemi = 1d0/sigtem
@@ -3883,8 +3880,6 @@ end module m_profiles
 
  double precision, allocatable, target :: bare(:)         !< [m2] bottom area, for rain and evaporaton {"location": "face", "shape": ["ndx"]}
  double precision, allocatable     :: bai(:)         !< inv bottom area (m2), if < 0 use table in node type
- double precision, allocatable, target :: ba_mor (:) !< [m2] morphologically active bottom area, if < 0 use table in node type {"location": "face", "shape": ["ndx"]}
- double precision, allocatable, target :: bai_mor(:) !< [m-2] inv morphologically active bottom area (m2)
  double precision, allocatable, target :: bl(:)      !< [m] bottom level (m) (positive upward) {"location": "face", "shape": ["ndx"]}
  double precision, allocatable     :: aif(:)         !< cell based skewness ai factor sqrt(1+(dz/dy)**2) = abed/asurface
                                                      !< so that cfu=g(Au/conveyance)**2 = g*aif*(Au/convflat)**2
@@ -4270,7 +4265,7 @@ subroutine default_flowtimes()
     ti_stat     = -60d0             !< simulation statistics interval (s) (Default: off, will later default to dt_user), <0: use wc-time
     ti_timings  = 0d0               !< timings output interval
     ti_split    = 0d0               !< Time interval for time splitting of output files.
-    ti_split_unit= 's'              !< Unit for time partitioning interval
+    ti_split_unit= 'X'              !< Unit for time partitioning interval
 
     tmini       = -1d9              !< initial time for updating the 4 above
 

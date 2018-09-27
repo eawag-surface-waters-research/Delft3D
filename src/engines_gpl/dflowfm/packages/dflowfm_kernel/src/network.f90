@@ -392,14 +392,14 @@ implicit none
 
 contains
 
-subroutine load_network_from_flow1d(filenames, found_1d_network)
+subroutine load_network_from_flow1d(filename, found_1d_network)
    use m_flow1d_reader
    use m_flowgeom
    use m_globalParameters
    use m_cross_helper
    use unstruc_messages
    use messagehandling
-   type(t_filenames), intent(inout) :: filenames !< Name of 1d files to read from.
+   character(len=*), intent(inout) :: filename !< Name of a *.md1d file to read from.
    logical, intent(out)            :: found_1d_network
 
    type(t_branch), pointer :: pbr
@@ -408,11 +408,8 @@ subroutine load_network_from_flow1d(filenames, found_1d_network)
    type (t_structure), pointer :: pstru
    integer :: nstru, i
    double precision, dimension(2) :: tempbob
-   character(len=255) :: filename
 
    ! This routine is still used for Morphology model with network in INI-File (Willem Ottevanger)
-   
-   filename = filenames%onednetwork
    
    ! Check on Empty File Name
    if (len_trim(filename) <= 0) then
@@ -422,7 +419,7 @@ subroutine load_network_from_flow1d(filenames, found_1d_network)
 
    ! MessageHandling has already been set up via initMessaging() earlier.
    threshold_abort = LEVEL_FATAL
-   call read_1d_mdu(filenames, network, found_1d_network)
+   call read_1d_mdu(filename, network, found_1d_network)
    if (.not. found_1d_network) then 
       network%numk = 0
       network%numl = 0
@@ -434,7 +431,7 @@ subroutine load_network_from_flow1d(filenames, found_1d_network)
    
    call admin_network(network, numk, numl)
 
-   call read_1d_attributes(filenames, network)
+   call read_1d_attributes(filename, network)
    
    call initialize_1dadmin(network, network%gridpointsCount)
 

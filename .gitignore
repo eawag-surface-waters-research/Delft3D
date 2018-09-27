@@ -1,3 +1,4 @@
+src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/*.mod
 src/engines_gpl/dimr/packages/dimr_testcomponent/*.aps
 src/engines_gpl/dimr/packages/dimr_testcomponent/*.eto
 src/engines_gpl/dimr/packages/dimr_testcomponent/*.user

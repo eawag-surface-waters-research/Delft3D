@@ -1,7 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !
-!  Copyright (C)  Stichting Deltares, 2017-2018.
-!
+!  Copyright (C)  Stichting Deltares, 2017-2018.!
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).
 !
 !  Delft3D is free software: you can redistribute it and/or modify
@@ -537,10 +536,8 @@ integer, intent(out) :: iresult
 
  ! call wriinc(time1)
 
-  if (jaQinext > 0) then
-     call updateCumulativeInflow(dts)
-  end if
-
+  call updateCumulativeInflow(dts)
+ 
   call updateValuesOnCrossSections(time1)             ! Compute sum values across cross sections.
  if (jampi == 0 .or. (jampi == 1 .and. my_rank==0)) then
     if (numsrc > 0) then
@@ -1466,8 +1463,8 @@ if(q /= 0) then
    
  do L = lnxi+1,Lnx
     k1 = ln(1,L) ; k2 = ln(2,L) 
-    a1  (k1) = a1(k2)   ! ba(k2)                                   ! set bnd a1 to ba of inside point
-    vol1(k1) = vol1(k2) ! a1(k1)*(s1(k1) - bl(k1)) ! TODO: HK: re-enable this code, and check red testcases.
+    a1  (k1) = ba(k2)                                   ! set bnd a1 to ba of inside point
+    vol1(k1) = a1(k1)*(s1(k1) - bl(k1))
     vol1_f(k1) = vol1_f(k2)
  enddo
 
@@ -6658,10 +6655,10 @@ end subroutine update_waqfluxes
  implicit none
 
  double precision       :: wud, wuL1, wuL2, wuk, cs, sn
- integer                :: k, L, ierr, n, kk, n12
+ integer                :: k, L, ierr
  integer                :: k1, k2, k3, k4, nn, LL, jaclosedcorner
 
- double precision       :: xloc, yloc, beta, aa1, wwl(6), wcw, alf
+ double precision       :: xloc, yloc, beta
 
  double precision, allocatable       :: wcxy (:,:)   ! center weight factors (2,ndx) , only for normalising
  double precision, allocatable       :: wc   (:)     ! center weight factors (ndx)   , only for normalising
@@ -6720,36 +6717,6 @@ end subroutine update_waqfluxes
     wcxy (1,k2) = wcxy (1,k2) + abs(wcx2(L))
     wcxy (2,k2) = wcxy (2,k2) + abs(wcy2(L))
  enddo
- 
- do n   = 1, mxwalls                                        ! wall contribution to scalar linktocenterweights 
-    k1  = walls(1,n)
-    aa1 = 2d0*walls(17,n)
-    wc(k1) = wc(k1) + aa1
-    wcw = 0d0 
-    do kk = 1,size(nd(k1)%ln) 
-       LL = iabs(nd(k1)%ln(kk))
-       n12 = 1 ; alf = acL(LL) 
-       if (k1 .ne. ln(1,LL) ) then 
-          n12 = 2 ; alf = 1d0-acL(LL) 
-       endif
-       wuL1    =  alf*dx(LL)*wu(LL)
-       cs      =  walls(8,n) ! outward positive
-       sn      = -walls(7,n)
-       wwL(kk) = abs(cs*csu(LL) + sn*snu(LL))
-       wwL(kk) = wwL(kk)*wuL1 
-       wcw     = wcw + wwL(kk) 
-    enddo   
-    if (wcw > 0d0) then 
-       do kk = 1,size(nd(k1)%ln) 
-          LL = iabs(nd(k1)%ln(kk))
-          n12 = 1 ; alf = acL(LL) 
-          if (k1 .ne. ln(1,LL) ) then 
-             n12 = 2 ; alf = 1d0-acL(LL) 
-          endif
-          wcL(n12,LL) = wcL(n12,LL) + wwL(kk)*aa1/wcw 
-       enddo
-    endif   
- enddo   
 
  do L = 1, lnx
     k1 = ln(1,L) ; k2 = ln(2,L)
@@ -8525,7 +8492,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  use unstruc_display, only : ntek, jaGUI
  use m_alloc 
  use m_bedform 
- use m_fm_update_crosssections, only: fm_update_mor_width_area
+ use m_fm_update_crosssections, only: fm_update_main_width
  ! 
  ! To raise floating-point invalid, divide-by-zero, and overflow exceptions:
  ! Activate the following line (See also statements below)
@@ -8759,7 +8726,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  end if
  
  if (stm_included) then 
-     call fm_update_mor_width_area()
+     call fm_update_main_width()
  endif 
  
  if ( len_trim(md_dredgefile) > 0 .and. stm_included) then 
@@ -13225,7 +13192,7 @@ end if
             call rearst(mrst, jw)
             JAWEL = (jw == 1)
          endif
-     else ! Restart from *_yyyymmdd_hhmmss_rst.nc or from *_map.nc
+     else ! Restart from *_YYYYMMDD_HHMMSS_rst.nc or from *_map.nc
        call read_restart_from_map(md_restartfile, iresult) !TODO:JZ modify the name of this subroutine, since it also restarts from rst files.
        if (iresult /= DFM_NOERR) then
           goto 888
@@ -14616,8 +14583,8 @@ subroutine update_dambreak_breach(startTime, deltaTime)
       waterLevelsDambreakUpStream   = 0.0d0
       waterLevelsDambreakDownStream = 0.0d0
       normalVelocityDambreak        = 0.0d0
-      breachWidthDerivativeDambreak  = 0.0d0
-      waterLevelJumpDambreak         = 0.0d0
+	   breachWidthDerivativeDambreak  = 0.0d0
+	   waterLevelJumpDambreak         = 0.0d0
    
       ! Compute sumQuantitiesByWeight upstream
       ierr = getAverageQuantityFromLinks(L1dambreaksg, L2dambreaksg, wu, kdambreak(3,:), s1, kdambreak(1,:), dambreakAveraging, hu, dmiss, activeDambreakLinks, 0)
@@ -14660,13 +14627,6 @@ subroutine update_dambreak_breach(startTime, deltaTime)
             if(network%sts%struct(istru)%dambreak%algorithm == 3 .and. startTime > network%sts%struct(istru)%dambreak%t0) then
                !Time in the tim file is relative to the start time
                success = ec_gettimespacevalue_by_itemID(ecInstancePtr, item_dambreakHeightsAndWidthsFromTable, startTime-network%sts%struct(istru)%dambreak%t0)
-               ! NOTE: AvD: the code above works correctly, but is dangerous:
-               ! the addtimespace for dambreak has added each dambreak separately with a targetoffset.
-               ! The gettimespace above, however, gets the values for *all* dambreaks, but with the relative time
-               ! of the *current* dambreak #n.
-               ! This means that if t0 values for all dambreaks are different, then the dambreakHeightsAndWidthsFromTable(1:n-1) have become obsolete now.
-               ! It works, because in the previous loop iterations the values that were then still correct
-               ! have already been set into the %crl and %width values.
                if (success)  then
                   indexHeightsAndLevels = (n - 1) * 2 + 1 
                   network%sts%struct(istru)%dambreak%crl = dambreakHeightsAndWidthsFromTable(indexHeightsAndLevels)
@@ -14687,7 +14647,7 @@ subroutine update_dambreak_breach(startTime, deltaTime)
                breachWidthDerivativeDambreak(n) = dmiss
             endif
             ! Store water level jump
-            tempValue = network%sts%struct(istru)%dambreak%waterLevelJumpDambreak   
+            tempValue = network%sts%struct(istru)%dambreak%waterLevelJumpDambreak	
             if (tempValue>0) then
                waterLevelJumpDambreak(n) = tempValue
             else
@@ -15694,7 +15654,7 @@ subroutine unc_write_his(tim)            ! wrihis
                      id_qsun, id_qeva, id_qcon, id_qlong, id_qfreva, id_qfrcon, id_qtot, &
                      id_turkin, id_tureps , id_vicwwu, id_rich, id_zcs, id_zws, &
                      id_wind, id_patm, id_tair, id_rhum, id_clou, &
-                     id_R, id_WH, id_WD, id_WL, id_WT, id_WU, id_WTAU, id_hs, &
+                     id_R, id_WH, id_WD, id_WL, id_WT, id_WU, id_hs, &
                      id_pumpdim,    id_pumpname,    id_pump_dis,    id_pump_cap,       id_pump_s1up,      id_pump_s1dn,    &                              ! id_pump_head,
                      id_gatedim,    id_gatename,    id_gate_dis,    id_gate_edgel,     id_gate_s1up,      id_gate_s1dn,    &                              ! id_gate_head,
                      id_cdamdim,    id_cdamname,    id_cdam_dis,    id_cdam_cresth,    id_cdam_s1up,      id_cdam_s1dn,    &                              ! id_cdam_head,
@@ -15998,13 +15958,6 @@ subroutine unc_write_his(tim)            ! wrihis
                ierr = nf90_put_att(ihisfile, id_WU,   'long_name'    , 'Orbital velocity')          
                ierr = nf90_put_att(ihisfile, id_WU,   'units'        , 'm/s')
                ierr = nf90_put_att(ihisfile, id_WU, '_FillValue', dmiss)
-               
-               ierr = nf90_def_var(ihisfile, 'tauwav',  nf90_double, ((/ id_statdim, id_timedim /)) , id_WTAU)
-               ierr = nf90_put_att(ihisfile, id_WTAU,   'coordinates'  , 'station_x_coordinate station_y_coordinate station_name')
-               ierr = nf90_put_att(ihisfile, id_WTAU,   'standard_name', 'sea_surface_wave_bottom_shear_stress')   
-               ierr = nf90_put_att(ihisfile, id_WTAU,   'long_name'    , 'Wave induced bottom shear stress')          
-               ierr = nf90_put_att(ihisfile, id_WTAU,   'units'        , 'Pa')
-               ierr = nf90_put_att(ihisfile, id_WTAU, '_FillValue', dmiss)
             endif
 
             if (jatem > 0 .and. jahistem > 0) then
@@ -16726,12 +16679,6 @@ subroutine unc_write_his(tim)            ! wrihis
             end do
         end if
         
-        if (jahisdambreak > 0 .and. ndambreak > 0) then
-            do i = 1,ndambreaksg 
-               ierr = nf90_put_var(ihisfile, id_dambreakname, trim(dambreak_ids(i)),(/ 1, i /))
-            end do
-        end if
-
         if (dad_included) then
            !
            do i=1,stmpar%lsedtot
@@ -16786,12 +16733,11 @@ subroutine unc_write_his(tim)            ! wrihis
     end if
     
     if (jawave>0) then
-       ierr = nf90_put_var(ihisfile, id_WH,      valobsT(:,IPNT_WAVEH),   start = (/ 1, it_his /), count = (/ ntot, 1 /))   
-       ierr = nf90_put_var(ihisfile, id_WD,      valobsT(:,IPNT_WAVED),   start = (/ 1, it_his /), count = (/ ntot, 1 /))   
-       ierr = nf90_put_var(ihisfile, id_WL,      valobsT(:,IPNT_WAVEL),   start = (/ 1, it_his /), count = (/ ntot, 1 /))   
-       ierr = nf90_put_var(ihisfile, id_WT,      valobsT(:,IPNT_WAVET),   start = (/ 1, it_his /), count = (/ ntot, 1 /))   
-       ierr = nf90_put_var(ihisfile, id_WU,      valobsT(:,IPNT_WAVEU),   start = (/ 1, it_his /), count = (/ ntot, 1 /))   
-       ierr = nf90_put_var(ihisfile, id_WTAU,    valobsT(:,IPNT_WAVETAU), start = (/ 1, it_his /), count = (/ ntot, 1 /))   
+       ierr = nf90_put_var(ihisfile, id_WH,      valobsT(:,IPNT_WAVEH), start = (/ 1, it_his /), count = (/ ntot, 1 /))   
+       ierr = nf90_put_var(ihisfile, id_WD,      valobsT(:,IPNT_WAVED), start = (/ 1, it_his /), count = (/ ntot, 1 /))   
+       ierr = nf90_put_var(ihisfile, id_WL,      valobsT(:,IPNT_WAVEL), start = (/ 1, it_his /), count = (/ ntot, 1 /))   
+       ierr = nf90_put_var(ihisfile, id_WT,      valobsT(:,IPNT_WAVET), start = (/ 1, it_his /), count = (/ ntot, 1 /))   
+       ierr = nf90_put_var(ihisfile, id_WU,      valobsT(:,IPNT_WAVEU), start = (/ 1, it_his /), count = (/ ntot, 1 /))   
     endif
 
     if (japatm > 0) then
@@ -17070,6 +17016,7 @@ subroutine unc_write_his(tim)            ! wrihis
           
       if (jahisdambreak > 0 .and. ndambreak > 0) then
          do i = 1,ndambreaksg 
+            ierr = nf90_put_var(ihisfile, id_dambreakname, trim(dambreak_ids(i)),(/ i, it_his /))
             ierr = nf90_put_var(ihisfile, id_dambreak_s1up, waterLevelsDambreakUpStream(i),(/ i, it_his /))
             ierr = nf90_put_var(ihisfile, id_dambreak_s1dn, waterLevelsDambreakDownStream(i), (/ i, it_his /))
             ierr = nf90_put_var(ihisfile, id_dambreak_breach_depth, breachDepthDambreak(i),(/ i, it_his /))
@@ -17407,10 +17354,9 @@ subroutine fill_valobs()
          if (jawave>0 .and. allocated(hwav)) then
             valobs(IPNT_WAVEH,i) = hwav(k)*wavfac   
             valobs(IPNT_WAVET,i) = twav(k)   
-            valobs(IPNT_WAVED,i) = 270d0-phiwav(k)  ! Direction from 
+            valobs(IPNT_WAVED,i) = phiwav(k)   
             valobs(IPNT_WAVEL,i) = rlabda(k)   
             valobs(IPNT_WAVEU,i) = uorb(k)   
-            valobs(IPNT_WAVETAU,i) = taus(k)   
          endif
 
          do kk=kb,kt
@@ -17496,7 +17442,7 @@ subroutine fill_valobs()
             call getLbotLtop(LL,Lb,Lt)
             do L = Lb-1, Lt
                klay = L-Lb+2
-               valobs(IPNT_ZWS+klay-1,i) = bob(1,LL) + hu(L)  !zws(kb + L-Lb)
+               valobs(IPNT_ZWS+klay-1,i) = zws(kb + L-Lb)
                
                if ( IVAL_WS1.gt.0 ) then
                   do j=IVAL_WS1,IVAL_WSN
@@ -18711,12 +18657,11 @@ end subroutine unc_write_shp
  call add_boundarynetcells()
 
  if ( allocated(kcs) )  then
-    deallocate ( nd, bl, bai, kcs, bai_mor, ba_mor)  ! and allocate geometry related node arrays
+    deallocate ( nd, bl, bai, kcs)                   ! and allocate geometry related node arrays
  endif
- allocate ( nd(ndx), bl(ndx), bai(ndx), bai_mor(ndx), ba_mor(ndx), kcs(ndx) , stat = ierr )
- call aerr('nd(ndx), bl(ndx), bai(ndx), bai_mor(ndx), ba_mor(ndx), kcs(ndx)', ierr, 8*ndx ) ; kcs = 1
+ allocate ( nd(ndx), bl(ndx), bai(ndx), kcs(ndx) , stat = ierr )
+ call aerr('nd(ndx), bl(ndx), bai(ndx), kcs(ndx)', ierr, 8*ndx ) ; kcs = 1
  bl = dmiss
- ba_mor = 0d0
 
  if ( allocated (kfs) ) deallocate(kfs)
  allocate(kfs(ndx))   ;  kfs   = 0
@@ -19312,7 +19257,7 @@ end subroutine unc_write_shp
 
  call setcentertolinkorientations()
 
- ! call setlinktocenterweights()
+ call setlinktocenterweights()
 
  call setcornertolinkorientations()
 
@@ -19461,7 +19406,7 @@ end subroutine unc_write_shp
  mxwalls   = nw
 
  call setwallorientations()
- call setlinktocenterweights()
+
 
 !-------------------------------------------------- CELL CORNER RELATED -----------------------------------------------
 
@@ -22416,15 +22361,12 @@ endif
     call realloc(evap, ndx, keepExisting = .false., fill = 0d0, stat = ierr)
  end if
 
- if (jaQinext > 0) then
-    call realloc(qinext, ndkx, keepExisting = .false., fill = 0d0, stat = ierr)
-    call aerr('qinext(ndkx)', ierr, ndkx)
-    call realloc(qinextreal, ndkx, keepExisting = .false., fill = 0d0, stat = ierr)
-    call aerr('qinextreal(ndkx)', ierr, ndkx)
-    call realloc(vincum, ndkx, keepExisting = .false., fill = 0d0, stat = ierr)
-    call aerr('vincum(ndkx)', ierr, ndkx)
- end if
-
+ call realloc(qinext, ndkx, keepExisting = .false., fill = 0d0, stat = ierr)
+ call aerr('qinext(ndkx)', ierr, ndkx)
+ call realloc(qinextreal, ndkx, keepExisting = .false., fill = 0d0, stat = ierr)
+ call aerr('qinextreal(ndkx)', ierr, ndkx)
+ call realloc(vincum, ndkx, keepExisting = .false., fill = 0d0, stat = ierr)
+ call aerr('vincum(ndkx)', ierr, ndkx)
 
  if (nshiptxy > 0) then 
     if (allocated( zsp0) ) deallocate(zsp0 )
@@ -22442,6 +22384,7 @@ endif
     if (allocated(v0ship) ) deallocate(v0ship, v1ship, qinship)
     allocate  ( v0ship(ndx), v1ship(ndx), qinship(ndx) , stat = ierr )  ; v0ship = 0d0; v1ship = 0d0; qinship = 0d0
     call aerr ('v0ship(ndx), v1ship(ndx), qinship(ndx)', ierr, ndx   )
+ 
     call realloc(shL, 2, keepExisting    = .false., fill = 0d0, stat = ierr)
     call aerr('shL(2)', ierr, 2)
     call realloc(shB, 2, keepExisting    = .false., fill = 0d0, stat = ierr)
@@ -32439,10 +32382,8 @@ end subroutine setbobs_fixedweirs
     enddo
 
     nstrucsg = network%sts%count
-    !do ns = 1, nstrucsg
     do ns = 1, nstrucsg
-       !do istru = L1strucsg(ns), L2strucsg(ns)
-       istru = ns
+       do istru = L1strucsg(ns), L2strucsg(ns)
           pstru => network%sts%struct(istru)
           L = pstru%link_number
           if (hu(l) > 0) then
@@ -32474,7 +32415,7 @@ end subroutine setbobs_fixedweirs
                    call err_flush()
              end select
           endif 
-       !enddo
+       enddo
     enddo
     
  else                                                  ! 3D
@@ -32743,19 +32684,17 @@ end function ispumpon
        enddo
     endif
     
-    if (jaQinext > 0) then
-       do k = 1,ndxi    
-           if (qinext(k) > 0) then ! inflow is always possible            
-               Qext = qinext(k)   
-           else if (hs(k) > epshu) then
-               Qext = - min(0.5d0*vol1(k)/dts , -qinext(k))
-           else ! (almost) no water
-               Qext = 0.0d0
-           endif
-           qinextreal(k) = Qext
-           qin(k) = qin(k) + Qext
-       enddo
-    end if
+    do k = 1,ndxi    
+        if (qinext(k) > 0) then ! inflow is always possible            
+            Qext = qinext(k)   
+        else if (hs(k) > epshu) then
+            Qext = - min(0.5d0*vol1(k)/dts , -qinext(k))
+        else ! (almost) no water
+            Qext = 0.0d0
+        endif
+        qinextreal(k) = Qext
+        qin(k) = qin(k) + Qext
+    enddo
 
     if (numlatsg > 0) then 
        do k = 1,ndxi
@@ -32773,7 +32712,7 @@ end function ispumpon
        enddo
     endif
     
-    if (jarain > 0 .or. jaevap > 0 .or. jaQinext > 0) then ! TODO: Qlat not here?
+    if (jarain > 0 .or. jaevap > 0) then
        do k  = 1,ndxi
           kt = ktop(k)
           if (kmx > 0) then
@@ -38019,6 +37958,8 @@ subroutine update_verticalprofiles()
   endif
 
   tetm1     = 1d0-tetavkeps
+
+  pransmi   = 1d0 / sigtke                                ! 1 / Prandtl Schmidt number Tke
   dtiL      = 1d0 / dtprev                                ! turbulence transport in current velocity field => do not use new timestep but previous step
 
   !$xOMP PARALLEL DO                                                                  &
@@ -38077,13 +38018,13 @@ subroutine update_verticalprofiles()
      ck(0:kxL) = 0.d0
      dk(0:kxL) = dtiL*turkin0(Lb0:Lt)
 
-     vicu      = viskin+0.5d0*(vicwwu(Lb0)+vicwwu(Lb))*sigtkei        !
+     vicu      = viskin+0.5d0*(vicwwu(Lb0)+vicwwu(Lb))*pransmi        !
 
      do L  = Lb, Lt - 1                                               ! Loop over layer interfaces
         Lu    = L + 1
 
         vicd  = vicu
-        vicu  = viskin + 0.5d0*(vicwwu(L)+vicwwu(Lu))**sigtkei 
+        vicu  = viskin + 0.5d0*(vicwwu(L)+vicwwu(Lu))*pransmi
 
         k     = L - Lb + 1; ku = k + 1
 
@@ -38320,6 +38261,8 @@ subroutine update_verticalprofiles()
     !_____________________________________________________________________________________!
 
 
+     pransmi   = 1d0 / sigeps                              ! 1 / Prandtl Schmidt number Eps (=1.3)
+
      ak(0:kxL) = 0.d0                                      ! Matrix initialization eps, tau
      bk(0:kxL) = dtiL
      ck(0:kxL) = 0.d0
@@ -38327,13 +38270,13 @@ subroutine update_verticalprofiles()
                                                            ! Vertical diffusion; Neumann condition on surface;
                                                            ! Dirichlet condition on bed ; teta method:
 
-     vicu  = viskin+0.5d0*(vicwwu(Lb0)+vicwwu(Lb))*sigepsi
+     vicu  = viskin+0.5d0*(vicwwu(Lb0)+vicwwu(Lb))*pransmi
 
      do L  = Lb, Lt - 1
         Lu    = L + 1
 
         vicd  = vicu
-        vicu  = viskin + 0.5d0*(vicwwu(L)+vicwwu(Lu))*sigepsi
+        vicu  = viskin + 0.5d0*(vicwwu(L)+vicwwu(Lu))*pransmi
 
         k     = L - Lb + 1; ku = k + 1
 
@@ -39550,7 +39493,7 @@ endif
 if (network%brs%count > 0) then
    call getCrossTotalData_on_link(network, LL, hpr, area, width, CS_TYPE_MIN)
    return
-endif      
+endif   	  
 
 if (prof1D(1,LL) > 0 ) then              ! direct profile based upon link value
     ka    = 0; kb = 0                    ! do not use profiles

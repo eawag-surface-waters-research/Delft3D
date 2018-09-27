@@ -1382,7 +1382,7 @@ end subroutine setfouunit
     integer                              , pointer :: kmax
     double precision, pointer :: fieldptr1(:,:), fieldptr2(:,:)
 
-    integer    :: itdate   !<  Reference time in yyyymmdd as an integer 
+    integer    :: itdate   !<  Reference time in YYYYMMDD as an integer 
     
     read(refdat,*) itdate 
     
@@ -1543,7 +1543,7 @@ end subroutine setfouunit
     !
     ! Global variables
     !
-        integer                                                            , intent(in)  :: itdate  !< Reference time in yyyymmdd as an integer
+        integer                                                            , intent(in)  :: itdate  !< Reference time in YYYYMMDD
         real(fp)                                                           , intent(in)  :: dtsec   !< Integration time step [in seconds]
         character(20) , dimension(:)                                       , intent(in)  :: namcon  !< Description and declaration in esm_alloc_char.f90
         character(5)                                                       , intent(in)  :: versio  !< Version nr. of the current package
@@ -1748,7 +1748,7 @@ end subroutine setfouunit
               ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'long_name','Fourier analysis '//trim(namfunlong)//', '//trim(fouvarnamlong(ivar)))
               ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'units',fouvarunit(ivar))
               ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'layer_number', flayno(ifou))
-              ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'Reference_date_in_yyyymmdd', itdate)
+              ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'Reference_date_in_YYYYMMDD', itdate)
               ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'Starttime_fourier_analysis_in_minutes_since_reference_date', tfastr)
               ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'Stoptime_fourier_analysis_in_minutes_since_reference_date', tfasto)
               

@@ -1,35 +1,3 @@
-!----- AGPL --------------------------------------------------------------------
-!                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
-!                                                                               
-!  This file is part of Delft3D (D-Flow Flexible Mesh component).               
-!                                                                               
-!  Delft3D is free software: you can redistribute it and/or modify              
-!  it under the terms of the GNU Affero General Public License as               
-!  published by the Free Software Foundation version 3.                         
-!                                                                               
-!  Delft3D  is distributed in the hope that it will be useful,                  
-!  but WITHOUT ANY WARRANTY; without even the implied warranty of               
-!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                
-!  GNU Affero General Public License for more details.                          
-!                                                                               
-!  You should have received a copy of the GNU Affero General Public License     
-!  along with Delft3D.  If not, see <http://www.gnu.org/licenses/>.             
-!                                                                               
-!  contact: delft3d.support@deltares.nl                                         
-!  Stichting Deltares                                                           
-!  P.O. Box 177                                                                 
-!  2600 MH Delft, The Netherlands                                               
-!                                                                               
-!  All indications and logos of, and references to, "Delft3D",                  
-!  "D-Flow Flexible Mesh" and "Deltares" are registered trademarks of Stichting 
-!  Deltares, and remain the property of Stichting Deltares. All rights reserved.
-!                                                                               
-!-------------------------------------------------------------------------------
-
-! $Id$
-! $HeadURL$
-
 module m_oned_functions
 
    implicit none
@@ -133,11 +101,9 @@ module m_oned_functions
    subroutine set_1d_indices_in_network()
       use m_sediment
       use m_flowgeom
-      use m_flow
       use m_cross_helper
       use m_flowparameters
       use unstruc_channel_flow
-      
       
       implicit none
       
@@ -145,12 +111,7 @@ module m_oned_functions
       
       if (network%brs%count > 0) then
          ! nonlinear computation is required for 1d flow
-         if (nonlin1D == 0) then
-            nonLin1D = 1
-         elseif (nonlin1D == 2) then
-            CSCalculationOption = CS_TYPE_PLUS
-         endif
-         
+         if (nonlin1D == 0) nonLin1D = 1
          nonlin = max(nonlin, nonlin1D)
       endif
       
@@ -537,11 +498,11 @@ module m_oned_functions
       if (bl(n1) > 0.5d0*huge(1d0)) then
          call setmessage(LEVEL_ERROR, 'Storage is missing on node '//trim(network%nds%node(i)%id))
       endif
-   enddo
       
-   if (getMaxErrorLevel() > LEVEL_ERROR) then
-      call setmessage(LEVEL_FATAL, 'Error(s) occurred in initialisation.')
-   endif
+      if (getMaxErrorLevel() > LEVEL_ERROR) then
+         call setmessage(LEVEL_FATAL, 'Error(s) occurred in initialisation.')
+      endif
+   enddo
          
    do i = ndx2D+1, ndxi
       if (bl(i) > 0.5d0*huge(1d0)) then
