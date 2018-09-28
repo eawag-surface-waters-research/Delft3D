@@ -354,6 +354,8 @@ contains
       logical                            :: structure_found 
       logical                            :: interpolDone
 
+      character(20)                      :: offsetString
+      
       call realloc(network%adm, linall, network%gridpointsCount)
       
       adm = network%adm
@@ -626,6 +628,10 @@ contains
                         if (icrs1 == icrs2) then 
                            f = 1.0d0
                         else    
+                           if (offset1 == offset2) then 
+                               write(offsetString, '(F10.3)') offset1 
+                               call setmessage(LEVEL_ERROR, 'Mulitple cross sections defined at same chainage ('// trim(offsetString) //') on branch '//trim(pbran%id))
+                           endif
                            f = (offsetg - offset1) / (offset2 - offset1)
                         endif    
                         f = max(f, 0.0d0) 
