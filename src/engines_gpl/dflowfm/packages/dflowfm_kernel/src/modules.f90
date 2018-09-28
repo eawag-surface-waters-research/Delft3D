@@ -4725,6 +4725,7 @@ module m_samples_refine     ! used in refinecellsandfaces2 and in sample paths
 
    integer, parameter                              :: ITYPE_RIDGE       = 1     !< critetrion based on ridge-detection
    integer, parameter                              :: ITYPE_WAVECOURANT = 2     !< critetrion based on wave Courant number
+   integer, parameter                              :: ITYPE_MESHWIDTH   = 3     !< criterion based on maximum mesh width
    integer                                         :: irefinetype       = ITYPE_WAVECOURANT     !< refinement criterion type
    integer                                         :: jaconnect         = 1     !< connect hanging nodes (1) or not (0)
    double precision                                :: Dt_maxcour        = 0d0   !< maximum time-step in courant grid

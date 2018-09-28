@@ -29184,7 +29184,7 @@ subroutine refinecellsandfaces2()
       
       integer,          dimension(1)                    :: isam
       
-      double precision                                  :: depth, C, Courant, dlinklengthnew
+      double precision                                  :: dval, C, Courant, dlinklengthnew
 
       integer                                           :: ivar, k, kp1, num, ierror
       integer                                           :: jacounterclockwise          ! counterclockwise (1) or not (0) (not used here)
@@ -29253,23 +29253,24 @@ subroutine refinecellsandfaces2()
              jarefinelink = 0
           end if
       
-      else if ( irefinetype.eq.ITYPE_WAVECOURANT ) then
+      else if ( irefinetype.eq.ITYPE_WAVECOURANT .or. &
+                irefinetype.eq.ITYPE_MESHWIDTH ) then
 !------------------------------------------------------------------------
 !        wave Courant number
 !------------------------------------------------------------------------
 
-          if ( interpolationtype.ne.INTP_AVG .or. IAV.ne.3) then
-    !         call qnerror('Interpolation type is set to averaging and averaging type to maximum', ' ', ' ')
+          if ( interpolationtype.ne.INTP_AVG .or. IAV.ne.6) then
+    !         call qnerror('Interpolation type is set to averaging and averaging type to minabs', ' ', ' ')
              interpolationtype = 2
              IAV = 6    ! minabs
           end if
           
 !        only interpolate samples if necessary
-         if ( Dt_maxcour.gt.0d0 ) then
+         if ( Dt_maxcour.gt.0d0 .or. irefinetype.eq.ITYPE_MESHWIDTH ) then
             zc = DMISS
             call averaging2(1,NS,xs,ys,zs,ipsam,xc,yc,zc,1,x,y,N,nnn,jakdtree, &
                             dmiss, jsferic, jasfer3D, JINS, NPL, xpl, ypl, zpl)
-!           check if a depth is found, use nearest sample from cell center if not so
+!           check if a value is found, use nearest sample from cell center if not so
                if ( zc(1).eq.DMISS .and. jakdtree.eq.1 .and. jaoutsidecell.eq.1 ) then
                call find_nearest_sample_kdtree(treeglob,Ns,1,xs,ys,zs,xc(1),yc(1),1,isam,ierror, jsferic, dmiss)
                if ( ierror.ne.0 ) then
@@ -29278,16 +29279,12 @@ subroutine refinecellsandfaces2()
                   if ( isam(1).gt.0 .and. isam(1).lt.Ns+1 ) zc(1) = zs(isam(1))
                end if
             end if
-            depth = zc(1)
+            dval = zc(1)
          else
-            depth = 0d0
+            dval = 0d0
          end if
 
-          if ( depth.eq.DMISS ) goto 1234
-          
-!        compute wave speed
-         C = sqrt(AG*abs(depth))
-!         C = sqrt(AG*max(-depth,0d0))
+         if ( dval.eq.DMISS ) goto 1234
          
          jarefine = 0
 
@@ -29299,15 +29296,29 @@ subroutine refinecellsandfaces2()
                cycle
             end if
             
-!        compute wave Courant number
-            Courant = C * Dt_maxcour / dlinklength(k)
-            !if ( Courant.lt.1 .and. 0.5d0*dlinklength(k).gt.FAC*hmin ) then
             dlinklengthnew = 0.5d0*dlinklength(k)
-            if ( Courant.lt.1 .and. abs(dlinklengthnew-hmin).lt.abs(dlinklength(k)-hmin) ) then
-               num = num+1
-               jarefinelink(k) = 1
-            else
-               jarefinelink(k) = 0
+            
+            if ( irefinetype.eq.ITYPE_WAVECOURANT ) then
+!              compute wave speed
+               C = sqrt(AG*abs(dval))
+!               C = sqrt(AG*max(-dval,0d0))
+               
+!              compute wave Courant number
+               Courant = C * Dt_maxcour / dlinklength(k)
+               !if ( Courant.lt.1 .and. 0.5d0*dlinklength(k).gt.FAC*hmin ) then
+               if ( Courant.lt.1 .and. abs(dlinklengthnew-hmin).lt.abs(dlinklength(k)-hmin) ) then
+                  num = num+1
+                  jarefinelink(k) = 1
+               else
+                  jarefinelink(k) = 0
+               end if
+            else if ( irefinetype.eq.ITYPE_MESHWIDTH ) then
+               if ( dlinklength(k).gt.dval .and. dlinklengthnew.ge.hmin ) then
+                  num = num+1
+                  jarefinelink(k) = 1
+               else
+                  jarefinelink(k) = 0
+               end if
             end if
          end do
          
