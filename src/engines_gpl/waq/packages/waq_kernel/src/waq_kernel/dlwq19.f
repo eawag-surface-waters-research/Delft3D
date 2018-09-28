@@ -63,7 +63,7 @@
 
 !     Created             : October   2014 by Leo Postma
 !                           October   2016    Jos van Gils vertical transport added to calculation of baskets
-!                                                          optional upwind treatment of vertical 
+!                                                          optional upwind treatment of vertical
 
 !     Modified            :
 
@@ -253,6 +253,13 @@
          else
             write ( lunut , '(A)' ) ' Iteration report          : switched off'
          endif
+
+         if ( .not. disp0q0 ) then
+            write ( lunut , '(/3A)' )
+     &         ' WARNING: Dispersion allowed if flow rate is zero',
+     &         '          This is known to cause problems in some cases'
+         endif
+
          if ( noq3 .eq. 0 ) then         ! vertically integrated model
             do iseg = 1, noseg
                nvert(1,iseg) = iseg
@@ -594,11 +601,11 @@
          if2 = itf  (ibox)
          do i = if1, if2
             iq = iordf(i)
-            q  = flow(iq)*dt(ibox)             
+            q  = flow(iq)*dt(ibox)
             ifrom = ipoint(1,iq)               !  The diagonal now is the sum of the
             ito   = ipoint(2,iq)               !  new volume that increments with each step
             work(3,ifrom) = q                 ! flow through lower surface (central or upwind now arranged in one spot, further down)
-            work(1,ito  ) = q                 ! flow through upper surface                 
+            work(1,ito  ) = q                 ! flow through upper surface
          enddo
       enddo
       if ( timon ) call timstop ( ithand1 )
@@ -1331,7 +1338,7 @@
                   q     = flow(iq) * dt(ibox)                      ! This is the upwind differences version
                   if ( q .gt. 0. 0 ) then
                      do isys = 1, nosys
-                        dq = q * dconc2(isys,ifrom) 
+                        dq = q * dconc2(isys,ifrom)
                         dmpq(isys,ipb,1) = dmpq(isys,ipb,1) + dq
                      enddo
                   else
@@ -1492,7 +1499,7 @@
                   q1 = 0.0d0
                   q2 = q
                endif
-            else       
+            else
                if (vertical_upwind) then
                   if ( q .gt. 0.0d0 ) then  ! upwind
                      q1 = q
@@ -1595,7 +1602,7 @@
          enddo                              !  if not found, this was the
          if ( iq3 .eq. 0 ) cycle            !  the second and must be skipped
          do isys = 1, nosys
-            pivot = diag(isys,ito)
+            pivot = diag(isys,ito) + tiny(pivot)
             rhs (isys,ito) = rhs(isys,ito) / pivot
             diag(isys,ito) = 1.0
          enddo
@@ -1614,7 +1621,7 @@
          ito   = ipoint(2,iq)
          if ( ito   .le. 0 ) cycle
          do isys = 1, nosys
-            pivot = diag(isys,ito)
+            pivot = diag(isys,ito) + tiny(pivot)
             rhs (isys,ito) = rhs(isys,ito) / pivot
             diag(isys,ito) = 1.0
          enddo
@@ -1688,7 +1695,7 @@
                   q1 = 0.0d0
                   q2 = q
                endif
-            else              
+            else
                if (vertical_upwind) then
                   if ( q .gt. 0.0d0 ) then    ! Upwind
                      q1 = q
