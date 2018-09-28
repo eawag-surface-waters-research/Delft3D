@@ -97,6 +97,9 @@ subroutine depfil_stm(lundia    ,error     ,fildep    ,fmttmp    , &
    character(256)        :: path
    character(256)        :: file
    character(256)        :: ext
+   character(20)         :: xlocstring
+   character(20)         :: ylocstring
+   
    ! 
    !! executable statements ------------------------------------------------------- 
    ! 
@@ -142,7 +145,9 @@ subroutine depfil_stm(lundia    ,error     ,fildep    ,fmttmp    , &
       do nm = 1, size(array,1)  ! loop over flow nodes
          if (array(ifld, nm, 1) == dmiss) then
              error = .true.
-             if (present(errmsg)) errmsg = 'Error reading samples (not covering full grid) ' // trim(fildep) //' .'
+             write(xlocstring, '(F10.3)') dims%xz(nm)
+             write(ylocstring, '(F10.3)') dims%yz(nm)
+             if (present(errmsg)) errmsg = 'Error reading samples (not covering full grid) ' // trim(fildep) //' at location (x,y)=('// trim(xlocstring) //','//  trim(ylocstring) //').' 
          endif
       enddo    
       close(minp0)
@@ -215,6 +220,8 @@ subroutine depfil_stm_double(lundia    ,error     ,fildep    ,fmttmp    , &
    character(256)        :: path
    character(256)        :: file
    character(256)        :: ext
+   character(20)         :: xlocstring
+   character(20)         :: ylocstring
    ! 
    !! executable statements ------------------------------------------------------- 
    ! 
@@ -260,7 +267,9 @@ subroutine depfil_stm_double(lundia    ,error     ,fildep    ,fmttmp    , &
       do nm = 1, size(array,1)  ! loop over flow nodes
          if (array(ifld, nm, 1) == dmiss) then
              error = .true.
-             if (present(errmsg)) errmsg = 'Error reading samples (not covering full grid) ' // trim(fildep) //' .'
+             write(xlocstring, '(F10.3)') dims%xz(nm)
+             write(ylocstring, '(F10.3)') dims%yz(nm)
+             if (present(errmsg)) errmsg = 'Error reading samples (not covering full grid) ' // trim(fildep) //' at location (x,y)=('// trim(xlocstring) //','//  trim(ylocstring) //').' 
          endif    
       enddo    
       close(minp0)
