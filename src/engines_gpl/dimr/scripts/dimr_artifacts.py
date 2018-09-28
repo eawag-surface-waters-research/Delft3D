@@ -5,7 +5,7 @@ Copyright (C)  Stichting Deltares, 2018
 '''
 
 from __future__ import print_function   # if code has to work in python 2 and 3!
-import os, re, sys, glob, ntpath
+import os, re, sys, glob, ntpath, shutil
 
 def usage():
     print("Usage:")
@@ -21,6 +21,24 @@ def platformArtifacts(platform):
         libId = ".dll"
     root=os.getcwd()
     pltdir=os.path.join(root, platform)
+    #
+    # Remove/replace unwanted files
+    for (path, dirs, files) in os.walk(pltdir):
+        for afile in files:
+            name, extension = os.path.splitext(afile)
+            if extension == ".exp" or extension == ".lib" or extension == ".pdb" or extension == ".msm":
+                print("      To be removed: " + os.path.join(path,afile))
+                os.remove(os.path.join(path,afile))
+            if str(afile).find("libifcore.so") == 0:
+                ifcoremt_files_withpath = glob.glob(os.path.join(path, "libifcoremt*"))
+                print("      Removing: " + str(os.path.join(path,afile)))
+                os.remove(os.path.join(path,afile))
+                for afile in ifcoremt_files_withpath:
+                   newfilename = os.path.join(path, "libifcore" + ntpath.basename(afile)[11:])
+                   print("      Copying: " + afile + " to: " + newfilename)
+                   shutil.copyfile(afile, newfilename)
+    #
+    # Remove files that are in the share directory (currently only used on Windows)
     if os.path.isdir(pltdir):
         os.chdir(pltdir)
         sharedir=os.path.join(pltdir, "share", "bin")
@@ -35,11 +53,6 @@ def platformArtifacts(platform):
             del sharefiles_withpath[:]
             print("sharefiles:" + str(sharefiles))
             for (path, dirs, files) in os.walk(pltdir):
-                for afile in files:
-                    name, extension = os.path.splitext(afile)
-                    if extension == ".exp" or extension == ".lib":
-                        print("      To be removed: " + os.path.join(path,afile))
-                        os.remove(os.path.join(path,afile))
                 if str(path).find(sharedir) == -1:
                     print("    Checking directory " + path + " ...")
                     for afile in files:
