@@ -260,9 +260,9 @@ module m_ec_provider
             case (provFile_uniform, provFile_unimagdir)
                success = ecProviderCreateUniformItems(instancePtr, fileReaderPtr)
             case (provFile_svwp)
-               call setECMessage("ERROR: ec_provider::ecProviderCreateItems: Unsupported file type.")
+               call setECMessage("ERROR: ec_provider::ecProviderCreateItems: Unsupported file type: svwp.")
             case (provFile_svwp_weight)
-               call setECMessage("ERROR: ec_provider::ecProviderCreateItems: Unsupported file type.")
+               call setECMessage("ERROR: ec_provider::ecProviderCreateItems: Unsupported file type: svwp_weight.")
             case (provFile_arcinfo)
                success = ecProviderCreateArcinfoItems(instancePtr, fileReaderPtr)
             case (provFile_spiderweb)
@@ -270,11 +270,11 @@ module m_ec_provider
             case (provFile_curvi)
                success = ecProviderCreateCurviItems(instancePtr, fileReaderPtr)
             case (provFile_curvi_weight)
-               call setECMessage("ERROR: ec_provider::ecProviderCreateItems: Unsupported file type.")
+               call setECMessage("ERROR: ec_provider::ecProviderCreateItems: Unsupported file type: curvi_weight.")
             case (provFile_samples)
                success = ecProviderCreateSampleItems(instancePtr, fileReaderPtr)
             case (provFile_triangulationmagdir)
-               call setECMessage("ERROR: ec_provider::ecProviderCreateItems: Unsupported file type.")
+               call setECMessage("ERROR: ec_provider::ecProviderCreateItems: Unsupported file type: triangulation_magdir.")
             case (provFile_qhtable)
                success = ecProviderCreateQhtableItems(instancePtr, fileReaderPtr)
             case (provFile_poly_tim)
@@ -290,7 +290,7 @@ module m_ec_provider
             case (provFile_fourier)
                success = ecProviderCreateFourierItems(instancePtr, fileReaderPtr)
             case (provFile_grib)
-               call setECMessage("ERROR: ec_provider::ecProviderCreateItems: Unsupported file type.")
+               call setECMessage("ERROR: ec_provider::ecProviderCreateItems: Unsupported file type: grib.")
             case (provFile_netcdf)
                if (present(quantityname)) then
                   select case(quantityname)
@@ -325,7 +325,10 @@ module m_ec_provider
             case default
                call setECMessage("ERROR: ec_provider::ecProviderCreateItems: Unknown file type.")
          end select
-         if (.not. success) return
+         if (.not. success) then
+            return ! TODO: RL: Pending your refactoring, I (AvD) have now set this catch at the end to return .false. from above function calls (in case a failure occurred in there).
+         end if
+
          success = .true. ! TODO: AvD: why is success always true here at the end, the above success states now get lost...
                           !       RL: ALL Ec routines should be refactored such that success=False on the first line, success=True on the last
                           !           Intermediate lines cannot modify success, only return to the call site. 
