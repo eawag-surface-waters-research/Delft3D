@@ -38082,7 +38082,7 @@ subroutine update_verticalprofiles()
         Lu    = L + 1
 
         vicd  = vicu
-        vicu  = viskin + 0.5d0*(vicwwu(L)+vicwwu(Lu))**sigtkei 
+        vicu  = viskin + 0.5d0*(vicwwu(L)+vicwwu(Lu))*sigtkei
 
         k     = L - Lb + 1; ku = k + 1
 
