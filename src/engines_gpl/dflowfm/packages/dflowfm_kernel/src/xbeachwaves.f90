@@ -6270,7 +6270,7 @@ subroutine rollerturbulence(k)
    
    if (jawave .eq. 3) then
       disrol = dsurf(k)
-      cw     = rlabda(k)/twav(k)
+      cw     = rlabda(k)/max(1d-1,twav(k))
       rol    = disrol*cw/2d0/ag/0.10d0          ! assume something for roller slope
       Tw     = twav(k)
       Tb     = twav(k)
@@ -6300,7 +6300,7 @@ subroutine rollerturbulence(k)
    dcfin = exp(min(100.d0,hloc/max(ML,1d-2)))
    dcf = min(1.d0,1.d0/(dcfin-1.d0))
    !
-   ktb(k) = ktrb*dcf*Tw/Tb
+   ktb(k) = ktrb*dcf*Tw/max(1d-1,Tb)
 
 end subroutine rollerturbulence 
    
