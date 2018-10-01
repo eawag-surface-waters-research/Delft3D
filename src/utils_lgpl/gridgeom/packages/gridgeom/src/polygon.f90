@@ -470,10 +470,17 @@ end module m_tpoly
 
    integer :: maxpolycur
    
-   maxpolycur = size(xpmin)
-   IF (N <= maxpolycur ) THEN 
-      RETURN
-   ENDIF
+   !inquire for size only if allocated
+   if(allocated(xpmin)) then
+      maxpolycur = size(xpmin)
+   else
+      maxpolycur = 0
+   endif
+   
+   if (n <= maxpolycur ) then 
+      return
+   endif
+   
    maxpoly = ceiling(maxpoly*1.1)
 
    call realloc(xpmin, maxpoly, keepExisting=.true.)

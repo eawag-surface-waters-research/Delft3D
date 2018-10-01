@@ -215,6 +215,53 @@
       end subroutine restorepol
       
       
+      function m_polygon_destructor() result (ierr)
+
+      implicit none
+
+      integer :: ierr
+
+      ierr = 0
+
+      if(allocated(XPL).and.ierr==0) deallocate(XPL, stat = ierr)
+      if(allocated(YPL).and.ierr==0) deallocate(YPL, stat = ierr)
+      if(allocated(ZPL).and.ierr==0) deallocate(ZPL, stat = ierr)
+      if(allocated(XPH).and.ierr==0) deallocate(XPH, stat = ierr)
+
+      if(allocated(YPH).and.ierr==0) deallocate(YPH, stat = ierr)
+      if(allocated(ZPH).and.ierr==0) deallocate(ZPH, stat = ierr)
+      if(allocated(ZPH).and.ierr==0) deallocate(ZPH, stat = ierr)
+
+      if(allocated(DZL).and.ierr==0)    deallocate(DZL, stat = ierr)
+      if(allocated(DZR).and.ierr==0)    deallocate(DZR, stat = ierr)
+      if(allocated(DCREST).and.ierr==0) deallocate(DCREST, stat = ierr)
+      if(allocated(DTL).and.ierr==0)    deallocate(DTL, stat = ierr)
+      if(allocated(DTR).and.ierr==0)    deallocate(DTR, stat = ierr)
+      if(allocated(DVEG).and.ierr==0)   deallocate(DVEG, stat = ierr)
+      if(allocated(IWEIRT).and.ierr==0) deallocate(IWEIRT, stat = ierr)
+      
+      if(allocated(xpmin).and.ierr==0) deallocate(xpmin, stat = ierr)
+      if(allocated(ypmin).and.ierr==0) deallocate(ypmin, stat = ierr)
+      if(allocated(xpmax).and.ierr==0) deallocate(xpmax, stat = ierr)
+      if(allocated(ypmax).and.ierr==0) deallocate(ypmax, stat = ierr)
+      if(allocated(zpmin).and.ierr==0) deallocate(zpmin, stat = ierr)
+      if(allocated(zpmax).and.ierr==0) deallocate(zpmax, stat = ierr)
+      if(allocated(iistart).and.ierr==0)   deallocate(iistart, stat = ierr)
+      if(allocated(iiend).and.ierr==0)     deallocate(iiend, stat = ierr)
+      if(allocated(ipsection).and.ierr==0) deallocate(ipsection, stat = ierr)
+
+      jakol45 = 0
+      dxuni=40d0
+      MAXPOLY=1000
+      NPL = 0
+      NPH = 0
+      MAXPOL = 0
+      MP = 0
+      MPS = 0
+      Npoly = 0
+
+      end function m_polygon_destructor
+            
    end module m_polygon
 
    !

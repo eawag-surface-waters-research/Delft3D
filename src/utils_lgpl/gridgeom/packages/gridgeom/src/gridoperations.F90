@@ -2654,11 +2654,12 @@
       !when called from DFM xpl, ypl, and zpl arrays are already allocated in m_polygon
       if (present(xplRoofs)) then
          npl = size(xplRoofs)
-         call increasepol(npl, 0)
+         call increasepol(size(xplRoofs), 0)
          xpl(1:npl) = xplRoofs
          ypl(1:npl) = yplRoofs
          zpl(1:npl) = zplRoofs
-      endif
+         inp = -1
+      endif 
       
       kc   = 0
       do n = 1,nump
@@ -3071,10 +3072,12 @@
 
    use network_data
    use m_dimens
+   use m_polygon
 
    integer ierr
    ierr = network_data_destructor()
    ierr = m_dimens_destructor()
+   ierr = m_polygon_destructor()
 
    end function
 
