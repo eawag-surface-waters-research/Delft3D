@@ -40063,7 +40063,7 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
  allocate (taludd(lnx))   ; taludd = 4d0
  allocate (vegetat(lnx))  ; vegetat = 0d0
  allocate (iweirtyp(lnx)) ; iweirtyp = 0 
- allocate (ifirstweir(lnx)) ; ifirstweir = 0                       ! added to check whether fixed weir data is set for the first time at a net link
+ allocate (ifirstweir(lnx)) ; ifirstweir = 1                       ! added to check whether fixed weir data is set for the first time at a net link (1=true, 0=false)
  
  ! Load fixed weirs polygons from file. 
  ! --------------------------------------------------------------------
@@ -40177,11 +40177,11 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
        bobL = max(bob(1,L), bob(2,L)) 
     endif
  
-    if ( (zc > bobL .and. zc > dzcrest(L)) .or. ( (ifixedweirscheme == 8 .or. ifixedweirscheme == 9) .and. ifirstweir(L) == 0) ) then   ! For Villemonte and Tabellenboek fixed weirs under bed level are also possible
+    if ( (zc > bobL .and. zc > dzcrest(L)) .or. ( (ifixedweirscheme == 8 .or. ifixedweirscheme == 9) .and. ifirstweir(L) == 1) ) then   ! For Villemonte and Tabellenboek fixed weirs under bed level are also possible
 
        ! Set whether this is the first time that for this link weir values are set:
        ! As a result, only the first fixed weir under the bed level is used
-       ifirstweir(L) = 1
+       ifirstweir(L) = 0
 
        bob(1,L) = zc ; bob(2,L) = zc
        
@@ -40334,35 +40334,37 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
           nh = nh + 1                                            ! just raised bobs
        endif
     else
-       ! check for larger sill height values if at this link already a fixed weir exist
+       if ( ifirstweir(L) == 0  .and. (ifixedweirscheme == 8 .or. ifixedweirscheme == 9) ) then   !  only for fixed weirs under the bed level for Tabellenboek or Villemonte and not for the first time that a fixed weir is set on this link
+          ! check for larger sill height values if at this link already a fixed weir exist
         
-       if (xn*csu(L) + yn*snu(L) < 0d0) then  ! check left/right
-          zh = dzsilld(L) ; dzsilld(L) = dzsillu(L) ; dzsillu(L) = zh
-          zh = taludd(L)  ; taludd(L)  = taludu(L)  ; taludu(L)  = zh
-       endif
+          if (xn*csu(L) + yn*snu(L) < 0d0) then  ! check left/right
+             zh = dzsilld(L) ; dzsilld(L) = dzsillu(L) ; dzsillu(L) = zh
+             zh = taludd(L)  ; taludd(L)  = taludu(L)  ; taludu(L)  = zh
+          endif
         
-       zh =  (1d0-sl)*dzl(k) + sl*dzl(k+1)
-       !
-       ! check whether crestlevel is higher
-       !
-       if (zc > dzcrest(L)) then
-          dzcrest(L) = zc
-          !! write (msgbuf,'(a,i5,f10.3)') 'Higher crest level: ', L,  dzcrest(L); call msg_flush()
-       endif    
-       !
-       ! check whether toe is lower. If so, also adjust sill height 
-       !
-       if (zc-zh .lt. dztoeu(L)) then
-          dztoeu(L)   = zc - zh
-          dzsillu(L)  = dzcrest(L) - dztoeu(L)
-          !! write (msgbuf,'(a,i5,f10.3)') 'Larger sill up:     ', L,  dzsillu(L); call msg_flush()
-       endif 
-       zh =  (1d0-sl)*dzR(k) + sl*dzR(k+1)
-       if (zc-zh .lt. dztoed(L)) then
-          dztoed(L)   = zc - zh
-          dzsilld(L)  = dzcrest(L) - dztoed(L)
-          !! write (msgbuf,'(a,i5,f10.3)') 'Larger sill down:   ', L, dzsilld(L); call msg_flush()
-       endif 
+          zh =  (1d0-sl)*dzl(k) + sl*dzl(k+1)
+          !
+          ! check whether crestlevel is higher
+          !
+          if (zc > dzcrest(L)) then
+             dzcrest(L) = zc
+             !! write (msgbuf,'(a,i5,f10.3)') 'Higher crest level: ', L,  dzcrest(L); call msg_flush()
+         endif    
+         !
+         ! check whether toe is lower. If so, also adjust sill height 
+         !
+         if (zc-zh .lt. dztoeu(L)) then
+            dztoeu(L)   = zc - zh
+            dzsillu(L)  = dzcrest(L) - dztoeu(L)
+            !! write (msgbuf,'(a,i5,f10.3)') 'Larger sill up:     ', L,  dzsillu(L); call msg_flush()
+         endif 
+         zh =  (1d0-sl)*dzR(k) + sl*dzR(k+1)
+         if (zc-zh .lt. dztoed(L)) then
+            dztoed(L)   = zc - zh
+            dzsilld(L)  = dzcrest(L) - dztoed(L)
+            !! write (msgbuf,'(a,i5,f10.3)') 'Larger sill down:   ', L, dzsilld(L); call msg_flush()
+         endif
+       endif  
     endif
 
  enddo
