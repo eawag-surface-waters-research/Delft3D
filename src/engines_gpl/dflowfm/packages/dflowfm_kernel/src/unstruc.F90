@@ -3330,14 +3330,14 @@ subroutine setdt()
           ! dts = min (dts, dt_max) ! hk: commented out, already done this 15 lines above
       
           ! Fit timestep dts so that we will exactly reach time_user in future steps.
-          if ( time0+dts.ge.time_user ) then  !
-             dts = min(dts, time_user-time0)  !
-          else                                ! 
+          !if ( time0+dts.ge.time_user ) then
+          !   dts = min(dts, time_user-time0)
+          !else
           ! NOTE: when the model has an extremely small timestep, nsteps gets an integer overflow,
           ! then becomes negative, so the max below sets nsteps=1, violating the dtmax requirement. (UNST-1926)
              nsteps = max(1,ceiling((time_user-time0) / dts ) )
              dts = ( time_user-time0 ) / dble(nsteps)
-          end if                              !
+          !end if
       endif
    else
       dts = dt_max
