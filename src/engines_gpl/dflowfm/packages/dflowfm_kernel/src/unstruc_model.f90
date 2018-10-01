@@ -2598,8 +2598,8 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     if (writeall .or. jahiswatlev /= 1) then
        call prop_set(prop_ptr, 'output', 'Wrihis_waterlevel_s1', jahiswatlev, 'Write water level to his file (1: yes, 0: no)' )
     endif
-    if (writeall .or. jahisbedlev /= 1) then
-       call prop_set(prop_ptr, 'output', 'Wrihis_bedlevel', jahiswatlev, 'Write bed level to his file (1: yes, 0: no)' )
+    if (writeall .or. jahisbedlev == 0) then
+       call prop_set(prop_ptr, 'output', 'Wrihis_bedlevel', jahisbedlev, 'Write bed level to his file (1: yes, 0: no)' )
     endif
     if (writeall .or. jahiswatdep /= 1) then
        call prop_set(prop_ptr, 'output', 'Wrihis_waterdepth', jahiswatdep, 'Write waterd epth to his file (1: yes, 0: no)' )
