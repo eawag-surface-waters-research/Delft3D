@@ -1452,6 +1452,8 @@ if(q /= 0) then
 
  else
 
+    vol1_f(ndx2D+1:ndxi) = 0d0
+
     vol1  (ndx2D+1:ndxi) = 0d0
     a1    (ndx2D+1:ndxi) = 0d0
 
@@ -1466,7 +1468,7 @@ if(q /= 0) then
  do L = lnxi+1,Lnx
     k1 = ln(1,L) ; k2 = ln(2,L) 
     a1  (k1) = a1(k2)   ! ba(k2)                                   ! set bnd a1 to ba of inside point
-    vol1(k1) = vol1(k2) ! a1(k1)*(s1(k1) - bl(k1)) ! TODO: HK: re-enable this code, and check red testcases.
+    vol1(k1) = vol1(k2) ! a1(k1)*(s1(k1) - bl(k1))
     vol1_f(k1) = vol1_f(k2)
  enddo
 
@@ -1476,6 +1478,7 @@ if(q /= 0) then
  use m_flowgeom
  use m_flow
  use m_missing
+ use unstruc_channel_flow
 
  implicit none
 
@@ -1485,7 +1488,11 @@ if(q /= 0) then
  double precision  :: ar1, wid1, cf1, ar2, wid2, cf2, dx1, dx2, widu, diam, perim
  double precision  :: hpr
 
+ if (japerim == 0) then
+
  k1  = ln(1,L) ; k2 = ln(2,L)
+
+    !TODO discuss with Herman: use of ACL is skipped here, but is still used in ADVEC
 
  dx1 = 0.5d0*dx(L) ; dx2 = dx1
  if (kcu(L) == 1) then 
@@ -1497,7 +1504,6 @@ if(q /= 0) then
     endif 
  endif
  
-if (japerim == 0) then
 
     !TODO discuss with Herman: Checking wether a node is a 1d node seems superfluous
     if (kcs(k1) == 1) then
@@ -1506,7 +1512,14 @@ if (japerim == 0) then
           call getprof_1D(L, hpr, ar1, wid1, japerim, perim)
           a1(k1) =   a1(k1) + dx1*wid1
           vol1(k1) = vol1(k1) + dx1*ar1
+          ! flow volume
+          if(network%brs%count > 0) then
+             call getprof_1D(L, hpr, ar1, wid1, 1, perim)
+             vol1_f(k1) = vol1_f(k1) + dx1*ar1
+          else
+             vol1_f(k1) = vol1(k1)
        endif
+    endif
     endif
     
     !TODO discuss with Herman: Checking wether a node is a 1d node seems superfluous
@@ -1516,7 +1529,14 @@ if (japerim == 0) then
           call getprof_1D(L, hpr, ar2, wid2, japerim, perim)
           a1(k2) =   a1(k2) + dx2*wid2
           vol1(k2) = vol1(k2) + dx2*ar2
+          ! flow volume
+          if(network%brs%count > 0) then
+             call getprof_1D(L, hpr, ar2, wid2, 1, perim)
+             vol1_f(k2) = vol1_f(k2) + dx2*ar2
+          else
+             vol1_f(k2) = vol1(k2)
        endif
+    endif
     endif
 
     if (nonlin == 2) then
@@ -1534,6 +1554,7 @@ if (japerim == 0) then
                 call getprof_1D_min(L, hpr, ar1, wid1)
                 a1m(k1)  = a1m(k1)  + dx1*wid1
                 vol1(k1) = vol1(k1) - dx1*ar1
+                vol1_f(k1) = vol1_f(k1) - dx1*ar1
              endif
           endif
           if (kcs(k2) == 1) then
@@ -1542,6 +1563,7 @@ if (japerim == 0) then
                 call getprof_1D_min(L, hpr, ar2, wid2)
                 a1m(k2)  = a1m(k2)  + dx2*wid2
                 vol1(k2) = vol1(k2) - dx2*ar2
+                vol1_f(k2) = vol1_f(k2) - dx1*ar1
              endif
           endif
        endif
@@ -1550,25 +1572,11 @@ if (japerim == 0) then
 
  else if (hu(L) > 0) then
 
-    k1  = ln(1,L) 
-    k2 = ln(2,L)
 
     call getprof_1D(L, hu(L), au(L), widu, japerim, perim)  ! memory closeness of profiles causes this statement here instead of in setau
                                                             ! getprof1D sets cfu
-    hpr = max(0d0,s1(k1)-bob(1,L))                ! this statement is called most nr of times through waterlevel iteration
-    if (hpr > 0) then                             !
-       call getprof_1D(L, hpr, ar1, wid1, 1, perim)
-       vol1_f(k1) = vol1_f(k1) + dx1*ar1
-    endif
-    
-    hpr = max(0d0,s1(k2)-bob(2,L))
-    if (hpr > 0) then                             !
-       ! flow volume
-       call getprof_1D(L, hpr, ar2, wid2, 1, perim)
-       vol1_f(k1) = vol1_f(k1) + dx2*ar2
     endif
 
- endif
  end subroutine addlink1D
 
  subroutine addlink1Dkcu3(L,japerim)                        ! and add area's and volumes of 1D link kcu3
@@ -1594,6 +1602,7 @@ if (japerim == 0) then
        dx1  = dx(L)*acl(L)
        a1(k1) =   a1(k1) + dx1*wid1
        vol1(k1)   = vol1(k1)   + dx1*ar1
+       vol1_f(k1) = vol1_f(k1) + dx1*ar1
     endif
 
     hpr = max(0d0,s1(k2)-bl(k2))
@@ -1602,6 +1611,7 @@ if (japerim == 0) then
        dx2  = dx(L)*(1d0-acl(L))
        a1(k2) =   a1(k2) + dx2*wid2
        vol1(k2)   = vol1(k2)   + dx2*ar2
+       vol1_f(k2) = vol1_f(k2) + dx2*ar2
     endif
 
  else if (hu(L) > 0) then
@@ -1645,6 +1655,7 @@ if (japerim == 0) then
        dx1   = 0.5d0*dx(L)*acl(L)
        if (k1 > ndx2D) dx1 = 2*dx1
        a1(k1)   = a1(k1)   + dx1*wid1
+       vol1_f(k1) = vol1_f(k1) + dx1*ar1
        vol1(k1)   = vol1(k1)   + dx1*ar1
     endif
 
@@ -1654,6 +1665,7 @@ if (japerim == 0) then
        dx2      = 0.5d0*dx(L)*(1d0-acl(L))
        if (k2 > ndx2D) dx2 = 2*dx2
        a1(k2)   = a1(k2)   + dx2*wid2
+       vol1_f(k2) = vol1_f(k2) + dx2*ar2
        vol1(k2)   = vol1(k2)   + dx2*ar2
     endif
 
@@ -1714,6 +1726,7 @@ if (japerim == 0) then
        !if (k1 > ndx2D) dx1 = 2*dx1
        a1(k1)   = a1(k1)   + dx1*wid1
        vol1(k1)   = vol1(k1)   + dx1*ar1
+       vol1_f(k1) = vol1_f(k1) + dx1*ar1
     endif
 
     hpr2 = s1(k2)-BL1                                                                              ! == 5,6: (ibedlevtyp=3), 2D conveyance, link or node
@@ -1723,6 +1736,7 @@ if (japerim == 0) then
        !if (k2 > ndx2D) dx2 = 2*dx2
        a1(k2)   = a1(k2)   + dx2*wid2
        vol1(k2)   = vol1(k2)   + dx2*ar2
+       vol1_f(k2) = vol1_f(k2) + dx2*ar2
     endif
 
  else if (hu(L) > 0d0) then
@@ -2305,6 +2319,8 @@ subroutine getseg1D(hpr,wu2,dz,ai,frcn,ifrctyp, wid,ar,conv,perim,jaconv)  ! cop
  sl1 = slotw1D
  sl2 = slotw2D
 
+ if (japerim == 1 .or. nonlin > 0) then
+
  
 
     nstor = network%stors%count
@@ -2319,20 +2335,18 @@ subroutine getseg1D(hpr,wu2,dz,ai,frcn,ifrctyp, wid,ar,conv,perim,jaconv)  ! cop
  
  do L   = 1,lnx1D                                  ! regular 1D links
     if (kcu(L) == 4) then
-       if (japerim == 0 .and. nonlin == 0) cycle
        call addlink1D2D(L,japerim)                 ! 1D2D lateral inherits 2D
     else if (kcu(L) == 3) then
-       if (japerim == 0 .and. nonlin == 0) cycle
        if (ja1D2Dinternallinktype >= 1) then       ! testing one two...
           call addlink1D2Dinternal(L, japerim)
        else
           call addlink1Dkcu3(L,japerim)
        endif
     else
-       if (japerim == 0 .and. nonlin1D == 0) cycle
        call addlink1D(L,japerim)                   ! regular 1D link and original 1D2D internal links
     endif
  enddo
+ endif
 
  if (japerim == 1 .or. nonlin2D > 0) then
     do L = lnx1D + 1, lnxi
@@ -2445,6 +2459,11 @@ subroutine getseg1D(hpr,wu2,dz,ai,frcn,ifrctyp, wid,ar,conv,perim,jaconv)  ! cop
         end if
 
         L  = pstru%link_number
+        k1 = ln(1,L)
+        k2 = ln(2,L)
+        blmx     = max(bl(k1), bl(k2))
+        bob(1,L) = max(zcdamn,blmx)
+        bob(2,L) = max(zcdamn,blmx)
         call switchiadvnearlink(L)
     enddo
     
@@ -2985,7 +3004,6 @@ end subroutine sethu
 
  if (kmx == 0) then  
 
-    vol1_f(ndx2D+1:ndxi) = 0d0
 
     call vol12D(1)
 
@@ -3313,6 +3331,7 @@ subroutine setdt()
    if (ja_timestep_auto >= 1) then
       if (dts > dtfacmax*dtprev) then
           dts = dtfacmax*dtprev
+          nsteps = ceiling((time_user-time0) / dts)
           ! New timestep dts would be rounded down to same dtprev (undesired, so use nsteps-1)
           if (1000*dtprev > time_user-time0) then
              nsteps = ceiling((time_user-time0) / dts)
@@ -8671,6 +8690,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
 
  !! flow1d -> dflowfm initialization
  call set_1d_roughnesses()
+ call set_1d_indices_in_network()
  
  ! need number of fractions for allocation of sed array
  if ( len_trim(md_sedfile) > 0 ) then
