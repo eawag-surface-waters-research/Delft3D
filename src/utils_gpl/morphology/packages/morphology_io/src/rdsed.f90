@@ -420,7 +420,12 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
        else
           flspmc = ' '
           call prop_get(sed_ptr, 'SedimentOverall', 'PmCrit', pmcrit(1))
-          pmcrit = min(pmcrit(1), 1.0_fp)
+          !
+          ! Explicit loop because of stack overflow
+          !
+          do nm = 1, griddim%nmmax
+             pmcrit(nm) = min(pmcrit(1), 1.0_fp)
+          enddo
        endif
        !
        ! Get bed shear skin stress parameters
@@ -1472,7 +1477,12 @@ subroutine echosed(lundia    ,error     ,lsed      ,lsedtot   , &
                 dss(nm, 1) = sedd50fld(nm)*facdss(1)
              enddo
           else
-             dss(:, l) = sedd50(l)*facdss(l)
+             !
+             ! Explicit loop because of stack overflow
+             !
+             do nm = lbound(sedd50fld,1), ubound(sedd50fld,1)
+                dss(nm, l) = sedd50(l)*facdss(l)
+             enddo
           endif
        endif
        !
