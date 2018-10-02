@@ -3433,7 +3433,7 @@
    do l = 1, numl1d + 1
       !only check the left point
       if( l .eq. numl1d + 1) then
-         k1  = kn(1,l-1)
+         k1  = kn(2,l-1)
       else
          k1  = kn(1,l)
       endif
