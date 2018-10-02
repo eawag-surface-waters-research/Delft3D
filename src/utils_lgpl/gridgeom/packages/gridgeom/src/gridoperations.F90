@@ -16,6 +16,7 @@
    public :: ggeo_count_or_create_edge_nodes
    public :: ggeo_deallocate
    public :: ggeo_initialize
+   public :: ggeo_make1D2DRiverLinks
 
 
    !from net.f90
@@ -24,7 +25,7 @@
    public :: INCREASENETW
    public :: increasenetcells
    public :: alreadycell
-   public :: SETNEWPOINT
+   public :: setnewpoint
    public :: CROSSED2d_BNDCELL
    public :: OTHERNODE
    public :: OTHERNODECHK
@@ -3121,7 +3122,7 @@
             ierr = -1
             return
          endif
-         arrayfrom(nlinks) = nc  !2d cell
+         arrayfrom(nlinks) = nc       !2d cell
          arrayto(nlinks)   = kn(2,l)  !1dlink
       end if
    end do
@@ -3277,31 +3278,35 @@
    use m_missing,       only: dmiss
    use geometry_module, only: dbdistance, crossinbox
    use kdtree2Factory
+   use m_cell_geometry
 
+   implicit none
+   
+   integer, intent(in)           :: jsferic, jasfer3D 
+   integer, optional, intent(in) :: oneDMask(:)
+   
    !output
    integer                       :: ierr !< Error status, 0 if success, nonzero in case of error.
    integer                       :: k, kk, k1, k2, k3, k4, k5, k6, ncellsinSearchRadius, numberCellNetlinks, isCrossing, newPointIndex, newLinkIndex
    integer                       :: l, cellNetLink, cellId, kn3ty, numnetcells
    double precision              :: searchRadiusSquared, ldistance, rdistance, maxdistance, sl, sm, xcr, ycr, crp
-   integer, intent(in)           :: jsferic, jasfer3D 
-   integer, optional, intent(in) :: oneDMask(:)
    
    type(kdtree_instance) :: treeinst
 
    ierr = 0
    !LC: is this the right type?
    kn3ty = 3
-   call SAVENET()
+   call savenet()
    call findcells(0)
 
-   numnetcells = size(xzw(:))
+   numnetcells = size(xz(:))
    if (numnetcells>0) then
-      call build_kdtree(treeinst, size(xzw(:)), xzw(:), yzw(:), ierr, jsferic, dmiss)
+      call build_kdtree(treeinst, size(xz(:)), xz(:), yz(:), ierr, jsferic, dmiss)
    else
       return
    endif
 
-   kc = 0
+   cellmask = 0
    do l = 1, numl1d
       k1  = kn(1,l); k2  = kn(2,l); k3 = kn(3,l)
       !get the left 1d mesh point
@@ -3331,39 +3336,47 @@
          !check if one of the cell net link crosses the current 1d link
          cellId= treeinst%results(k)%idx
          !this cell has been already explored or is already connected 
-         if (kc(cellId).ne.0) cycle
+         if (cellmask(cellId).ne.0) cycle
          !check if the cell is already connected
          numberCellNetlinks = size(netcell(cellId)%lin)
          do kk = 1, numberCellNetlinks
-            if (kc(cellId).ne.0) cycle
+            if (cellmask(cellId).ne.0) cycle
             cellNetLink =  netcell(cellId)%lin(kk)
-            k5  = kn(1,cellNetLink); k6  = kn(2,cellNetLink);
+            k5  = kn(1,cellNetLink); 
+            k6  = kn(2,cellNetLink);
             call crossinbox (xk(k5), xk(k5), xk(k6), xk(k6), xk(k1), xk(k1), xk(k2), yk(k2), isCrossing, sl, sm, xcr, ycr, crp, jsferic, dmiss)
             newLinkIndex = -1
             if (isCrossing == 1) then
-               call setnewpoint(xk(cellNetLink), yk(cellNetLink), zk(cellNetLink), newPointIndex)
-               ldistance = dbdistance(xk(k1),yk(k1),xk(cellId),yk(cellId), jsferic, jasfer3D, dmiss)
-               rdistance = dbdistance(xk(k2),yk(k2),xk(cellId),yk(cellId), jsferic, jasfer3D, dmiss)     
+               ldistance = dbdistance(xk(k1), yk(k1), xz(cellId), yz(cellId), jsferic, jasfer3D, dmiss)
+               rdistance = dbdistance(xk(k2), yk(k2), xz(cellId), yz(cellId), jsferic, jasfer3D, dmiss)     
                if (ldistance<=rdistance) then
-                  if (present(oneDMask)) then !again, Fortran does not have logical and so two if statement are needed
-                     if(oneDMask(k1)==1) call connectdbn(newPointIndex, k1, newLinkIndex)
+                  if (present(oneDMask)) then !again, Fortran does not have logical and two nested if statement are needed
+                     if(oneDMask(k1)==1) then
+                        call setnewpoint(xz(cellId),yz(cellId),zk(cellId), newPointIndex)
+                        call connectdbn(newPointIndex, k1, newLinkIndex)
+                     endif
                   else
+                     call setnewpoint(xz(cellId),yz(cellId),zk(cellId), newPointIndex)
                      call connectdbn(newPointIndex, k1, newLinkIndex)
                   endif
                else
-                  if (present(oneDMask)) then !again, Fortran does not have logical and so two if statement are needed
-                     if(oneDMask(k2)==1) call connectdbn(newPointIndex, k2, newLinkIndex)
+                  if (present(oneDMask)) then !again, Fortran does not have logical and two nested if statement are needed
+                     if(oneDMask(k2)==1) then
+                        call setnewpoint(xz(cellId),yz(cellId),zk(cellId), newPointIndex)
+                        call connectdbn(newPointIndex, k2, newLinkIndex)
+                     endif
                   else
+                     call setnewpoint(xz(cellId),yz(cellId),zk(cellId), newPointIndex)
                      call connectdbn(newPointIndex, k2, newLinkIndex)
                   endif
                endif
                if (newLinkIndex.ne.-1) then
                   kn(3,newLinkIndex) = kn3ty
-                  !cell is connected, set kc mask and end cycle
-                  kc(cellId) = 2
+                  !cell is connected, set cellmask mask and end cycle
+                  cellmask(cellId) = 2
                endif
             else
-               kc(cellId) = 3
+               cellmask(cellId) = 3
             endif
             !loop over numberCellNetlinks
          enddo
@@ -3372,8 +3385,125 @@
    !loop over numl1d
    enddo
 
-   call setnodadm(0)
-
    end function ggeo_make1D2Dembeddedlinks
+
+   !> Makes 1d2d river links: 1D is typically a non-overlapping 2D grid,
+   !! and potentially more than one 1d2d link per 1d mesh node is created.
+   !! 2D cells are connected if they are at the boundary of the domain and inside the search radius.
+   !! They are connected to the nearest 1d point.
+   function ggeo_make1D2DRiverLinks(jsferic, jasfer3D, searchRadius, oneDMask) result(ierr)
+
+   use network_data
+   use m_missing,       only: dmiss
+   use geometry_module, only: dbdistance, crossinbox
+   use kdtree2Factory
+   use m_cell_geometry
+
+   implicit none
+
+   !input
+   integer, intent(in)              :: jsferic, jasfer3D
+   double precision, intent(in)     :: searchRadius
+   integer, optional, intent(in)    :: oneDMask(:)
+
+
+   !locals
+   integer                       :: ierr !< Error status, 0 if success, nonzero in case of error.
+   integer                       :: k, kk, k1, k2, k3, ncellsinSearchRadius, numberCellNetlinks, prevConnectedNetNode, newPointIndex
+   integer                       :: newLinkIndex
+   integer                       :: l, cellNetLink, cellId, kn3localType, numnetcells
+   double precision              :: searchRadiusSquared, maxdistance, prevDistance, currDistance
+   logical                       :: isBoundaryCell
+   type(kdtree_instance)         :: treeinst
+
+   ierr = 0
+   !LC: is this the right type for rivers
+   kn3localType = 3 
+   call savenet()
+   call findcells(0)
+
+   numnetcells = size(xz(:))
+   if (numnetcells>0) then
+      call build_kdtree(treeinst, size(xz(:)), xz(:), yz(:), ierr, jsferic, dmiss)
+   else
+      return
+   endif
+
+   cellmask = 0
+   do l = 1, numl1d + 1
+      !only check the left point
+      if( l .eq. numl1d + 1) then
+         k1  = kn(1,l-1)
+      else
+         k1  = kn(1,l)
+      endif
+      !get the left 1d mesh point
+      call make_queryvector_kdtree(treeinst, xk(k1), yk(k1), jsferic)
+      !the search radius
+      searchRadiusSquared = searchRadius**2
+      !count number of cells in the search area
+      nCellsInSearchRadius = kdtree2_r_count(treeinst%tree,treeinst%qv,searchRadiusSquared)
+      !no cells found
+      if ( nCellsInSearchRadius.eq.0 ) cycle
+      !reallocate if necessary
+      call realloc_results_kdtree(treeinst, nCellsInSearchRadius)
+      !find nearest cells
+      call kdtree2_n_nearest(treeinst%tree,treeinst%qv,nCellsInSearchRadius,treeinst%results)
+      !connection loop
+      do k = 1, nCellsInSearchRadius
+         !get the current cell id and the previously connected net node
+         cellId= treeinst%results(k)%idx
+         prevConnectedNetNode = cellmask(cellId)
+         !already not a boundary net node
+         if (prevConnectedNetNode.eq.-1) cycle
+         !check if it is a boundary cell
+         isBoundaryCell = .false.
+         do kk =1, size(netcell(cellId)%lin)
+            cellNetLink =  netcell(cellId)%lin(kk)
+            if(lnn(cellNetLink).eq.1) then
+               isBoundaryCell=.true.
+               exit
+            endif
+         enddo
+         !not a boundary cell
+         if (.not.isBoundaryCell) then
+            cellmask(cellId) = - 1
+            cycle
+         !a candidate connection already exist
+         else if(prevConnectedNetNode.ne.0) then
+            prevDistance = dbdistance(xk(prevConnectedNetNode),yk(prevConnectedNetNode),xz(cellId),yz(cellId), jsferic, jasfer3D, dmiss)
+            currDistance = dbdistance(xk(k1),yk(k2),xz(cellId),yz(cellId), jsferic, jasfer3D, dmiss)
+            if (currDistance<prevDistance) then
+               cellmask(cellId) = k1
+            endif
+         else if(prevConnectedNetNode.eq.0) then
+            cellmask(cellId) = k1
+         endif
+      enddo
+   enddo
+
+   !make the connections
+   do cellId = 1, size(cellmask)
+      newLinkIndex = -1
+      if (cellmask(cellId).ne.0) then
+         !check presence of oneDMask
+         if (present(oneDMask)) then !again, Fortran does not have logical and two nested if statement are needed
+            if(oneDMask(cellmask(cellId))==1) then
+               call setnewpoint(xz(cellId), yz(cellId), zk(cellId), newPointIndex)
+               call connectdbn(newPointIndex, cellmask(cellId), newLinkIndex)
+            endif
+         else
+            call setnewpoint(xz(cellId),yz(cellId),zk(cellId), newPointIndex)
+            call connectdbn(newPointIndex, cellmask(cellId), newLinkIndex)
+         endif
+         if (newLinkIndex.ne.-1) then
+            !cell is connected, set kn
+            kn(3,newLinkIndex) = kn3localType
+         endif
+      endif
+   enddo
+
+   end function ggeo_make1D2DRiverLinks
+
 
    end module gridoperations

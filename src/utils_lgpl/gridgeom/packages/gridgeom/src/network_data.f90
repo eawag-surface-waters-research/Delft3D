@@ -125,7 +125,7 @@ module network_data
   integer, allocatable             :: LNN(:)          !< (numl) Nr. of cells in which link participates (ubound for non-dummy values in lne(:,L))
   integer, allocatable             :: LNN0(:)
   integer                          :: NUMK0
-  integer,              target     :: numk            !< [-] Nr. of net nodes. {"shape": []}
+  integer, target                  :: numk            !< [-] Nr. of net nodes. {"shape": []}
   integer                          :: NUML0, NUML     !< Total nr. of net links. In link arrays: 1D: 1:NUML1D, 2D: NUML1D+1:NUML
   integer                          :: NUML1D          !< Nr. of 1D net links.
   integer                          :: NUMP0, NUMP     !< Nr. of 2d netcells.
