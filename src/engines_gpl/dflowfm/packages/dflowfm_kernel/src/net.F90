@@ -33745,7 +33745,7 @@ end subroutine make_dual_mesh
 
 
 !>  perform partitioning from command line
-subroutine partition_from_commandline(fnam, md_Ndomains, md_jacontiguous, md_icgsolver, md_pmethod, md_dryptsfile, md_genpolygon)
+subroutine partition_from_commandline(fnam, md_Ndomains, md_jacontiguous, md_icgsolver, md_pmethod, md_dryptsfile, md_encfile, md_genpolygon)
    
    use network_data
    use m_partitioninfo
@@ -33762,6 +33762,7 @@ subroutine partition_from_commandline(fnam, md_Ndomains, md_jacontiguous, md_icg
    integer,            intent(in) :: md_icgsolver     !< intended solver
    integer,            intent(in) :: md_pmethod       !< partition method: Recursive Bisection(=0 default), K-way (=1)
    character(len=255), intent(in) :: md_dryptsfile    !< dry points file
+   character(len=255), intent(in) :: md_encfile       !< Enclosure file to clip outer parts from the grid *.pol
    integer,            intent(in) :: md_genpolygon    !< make partition file (1) or not (0)
    
    integer                        :: jacells
@@ -33791,6 +33792,8 @@ subroutine partition_from_commandline(fnam, md_Ndomains, md_jacontiguous, md_icg
    
    call delete_drypoints_from_netgeom(dryptsfile, 0, 0)
 
+   gridencfile = md_encfile
+   call delete_drypoints_from_netgeom(gridencfile, 0, -1)
    if ( nump1d2d.lt.1 ) return
 
    if ( md_Ndomains.gt.0 ) then ! use METIS

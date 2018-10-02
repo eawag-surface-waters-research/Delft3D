@@ -293,6 +293,7 @@ use m_tpoly
          end if
          
          call delete_drypoints_from_netgeom(dryptsfile, 0, 0)
+         call delete_drypoints_from_netgeom(gridencfile, 0, -1)
       end if
       
 !     determine number of cells
@@ -718,6 +719,7 @@ use m_tpoly
       call find1dcells()
    
       call delete_drypoints_from_netgeom(dryptsfile, 0, 0)
+      call delete_drypoints_from_netgeom(gridencfile, 0, -1)
   
       if (numk == 0 .or. numl == 0) then
          write(message,"('While making partition domain #', I0, ': empty domain (', I0, ' net nodes, ', I0, ' net links).')") idmn, numk, numl
@@ -4820,6 +4822,7 @@ end subroutine partition_make_globalnumbers
          call find1Dcells()
          
          call delete_drypoints_from_netgeom(dryptsfile, 0, 0)
+         call delete_drypoints_from_netgeom(gridencfile, 0, -1)
       end if
       
 !     check for 1D cells (not supported)

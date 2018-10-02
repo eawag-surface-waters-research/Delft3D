@@ -239,7 +239,7 @@
         
        if ( len_trim(md_ident) > 0 ) then ! partitionmduparse
           icgsolver = md_icgsolver
-          call partition_from_commandline(md_netfile, md_Ndomains, md_jacontiguous, icgsolver, md_pmethod, md_dryptsfile, md_genpolygon)
+          call partition_from_commandline(md_netfile, md_Ndomains, md_jacontiguous, icgsolver, md_pmethod, md_dryptsfile, md_encfile, md_genpolygon)
           L    = index(md_netfile, '_net')-1
           md_mdu = md_ident
           if (len_trim(md_restartfile) > 0) then ! If there is a restart file
@@ -287,7 +287,7 @@
              call generatePartitionMDUFile(trim(md_ident)//'.mdu', trim(md_mdu)//'_'//sdmn_loc//'.mdu')
           enddo
        else
-          call partition_from_commandline(md_netfile,md_ndomains,md_jacontiguous,md_icgsolver, md_pmethod, md_dryptsfile, md_genpolygon)
+          call partition_from_commandline(md_netfile,md_ndomains,md_jacontiguous,md_icgsolver, md_pmethod, md_dryptsfile, md_encfile, md_genpolygon)
        end if
 
        goto 1234  !      stop
