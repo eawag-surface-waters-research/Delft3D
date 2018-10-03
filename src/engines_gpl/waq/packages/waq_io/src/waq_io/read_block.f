@@ -38,6 +38,8 @@
       use rd_token
       use timers       !   performance timers
 
+      use iso_fortran_env, only: int64
+
       implicit none
 
 !     declaration of arguments
@@ -91,6 +93,9 @@
       character(len=10)                     :: strng1       ! kind of item
       character(len=10)                     :: strng2       ! kind of item
       character(len=10)                     :: strng3       ! kind of item
+
+      integer(kind=int64)                   :: filesize     ! Reported size of the file
+
       logical       dtflg1 , dtflg2, dtflg3
       integer       chkflg , itfact
       integer                               :: nocol        ! number of columns in input
@@ -507,12 +512,15 @@
 
                ! Check the size of the file (if it is binary, otherwise this is not reliable)
 
-               call check_file_size( ctoken, noits*noseg, mod(data_block%filetype,10), ierr2 )
+               call check_file_size( ctoken, noits*noseg, mod(data_block%filetype,10), filesize, ierr2 )
                if ( ierr2 < 0 ) then
                    ierr2 = 1
                    write( lunut , 2320 ) ctoken
                elseif ( ierr2 > 0 ) then
-                   write( lunut , 2330 ) ctoken, 4*(1+noits*noseg), noits, noseg
+                   ierr2 = 0        ! It is a warning, proceed at your own peril
+                   iwar  = iwar + 1
+                   write( lunut , 2330 ) ctoken, filesize, 4*(1+noits*noseg), noits, noseg
+                   write( lunut , 2340 )
                endif
 
             else
@@ -651,20 +659,24 @@
  2300 FORMAT( ' Input will be given for ',I10,' segments.' )
  2310 FORMAT( ' ERROR: Input grid not defined :',A)
  2320 FORMAT( ' ERROR: Binary/unformatted file does not exist or could not be opened: ',A)
- 2330 FORMAT( ' ERROR: Binary/unformatted file does not have the correct size: ',A,/,
-     &        '        The size should not be zero and it should be a whole multiple of ',I0,
+ 2330 FORMAT( ' WARNING: Binary/unformatted file does not have the correct size: ',A,/,
+     &        '          The reported size is: ',I0,/,
+     &        '          The size should not be zero and it should be a whole multiple of ',I0,
      &        ' (= 4*(1+',I0,'*',I0,'))')
+ 2340 FORMAT( '          As on some file systems the reported size may be incorrect,',/,
+     &        '          this is treated as a warning')
 
       CONTAINS
 
-      subroutine check_file_size( filename, nodata, type, ierr )
+      subroutine check_file_size( filename, nodata, type, filesize, ierr )
 
       use iso_fortran_env, only: int64
 
-      character(len=*), intent(in)    :: filename
-      integer, intent(in)             :: nodata
-      integer, intent(in)             :: type
-      integer, intent(out)            :: ierr
+      character(len=*), intent(in)     :: filename
+      integer, intent(in)              :: nodata
+      integer, intent(in)              :: type
+      integer(kind=int64), intent(out) :: filesize
+      integer, intent(out)             :: ierr
 
       integer                         :: norcd, i
       integer                         :: lun
@@ -672,7 +684,7 @@
       real, dimension(:), allocatable :: data
       character(14)                   :: strng
 
-      integer(kind=int64)             :: filesize, recordsize
+      integer(kind=int64)             :: recordsize
 
       ierr = 0
 
