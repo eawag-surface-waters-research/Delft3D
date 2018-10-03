@@ -8690,7 +8690,6 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
 
  !! flow1d -> dflowfm initialization
  call set_1d_roughnesses()
- call set_1d_indices_in_network()
  
  ! need number of fractions for allocation of sed array
  if ( len_trim(md_sedfile) > 0 ) then
@@ -19310,7 +19309,7 @@ end subroutine unc_write_shp
 
  do L = 1,lnx
      ! the max func after setting dx1 fraction
-    dxi(L) = 1d0/dx(L)                               ! dxi to minimise nr. of divisions
+    dxi(L) = 1d0/max(0.1d0,dx(L))                               ! dxi to minimise nr. of divisions
     if (wu(L) > 0) then
        wui(L) = 1d0/wu(L)
     else
