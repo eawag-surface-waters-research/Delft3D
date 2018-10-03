@@ -9289,7 +9289,59 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
       dflowfm_1d = .true.
       call read_1d_ugrid(network, ioncid, dflowfm_1d)
       if (network%loaded) then
-         call admin_network(network, numk, numl)       
+         call admin_network(network, numk, numl)  
+	     
+         ! TODO: Start temporary fix, to be removed when 1d ugrid file is correct (at this point 
+         !       branches are not connected
+         numk = 0
+         numl = 0
+         do inod = 1, network%nds%Count
+            pnod => network%nds%node(inod)
+            numk = numk+1
+            pnod%gridNumber = numk
+            xk(numk) = pnod%x
+            yk(numk) = pnod%y
+            zk(numk) = dmiss
+         enddo
+       
+         do ibr = 1, network%brs%Count
+            pbr => network%brs%branch(ibr)
+          
+            ! first step add coordinates and bed levels to nodes
+            ngrd = pbr%gridPointsCount
+            pbr%grd(1) = pbr%FromNode%gridNumber
+            do k = 2, ngrd-1
+               numk = numk+1
+               pbr%grd(k) = numk
+               xk(numk) = pbr%Xs(k)
+               yk(numk) = pbr%Ys(k)
+               zk(numk) = dmiss
+            enddo
+            pbr%grd(ngrd) = pbr%toNode%gridNumber
+          
+            ! second step create links
+            do k = 1, ngrd-1
+               numl = numl+1
+               kn(1,numl) = pbr%grd(k)
+               kn(2,numl) = pbr%grd(k+1)
+               kn(3,numl) = 1
+            enddo
+            
+            ! Store dflowfm grd-values into buffer for later re-use.
+            pbr%grd_buf = pbr%grd
+          
+         enddo
+
+         network%numk = numk
+         network%numl = numl
+
+         numk_keep = numk
+         numl_keep = numl
+      
+         numk_last = numk
+         numl_last = numl
+         ! End temporary fix
+       
          ! TODO: Once dflowfm's own 1D and the flow1d code are aligned, the following switch should probably disappear.         
          jainterpolatezk1D = 0         
       else
@@ -9425,12 +9477,12 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
       if (allocated(kn3))  deallocate(kn3)
       allocate(kn3(meshgeom%numedge))
 
-      if (meshgeom%dim.ne.1) then 
+      !if (meshgeom%dim.ne.1) then 
          ierr = ionc_get_edge_nodes(ioncid, im, kn12, 1) !unstruct requires 1 based indexes
-      else
-         kn12 = meshgeom%edge_nodes
-         ierr = ionc_noerr
-      endif
+      !else
+      !   kn12 = meshgeom%edge_nodes
+      !   ierr = ionc_noerr
+      !endif
 
       if (ierr /= ionc_noerr) then
          write (msgbuf, '(a,i0,a)') 'unc_read_net_ugrid: Could not read edge-node connectivity from mesh #', im, ' in UGRID net file '''//trim(filename)//'''.'
@@ -9458,11 +9510,11 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
          kn(3,  numl_last+L) = kn3(L)
       end do
       
-      numk_read = numk_read + meshgeom%numnode 
-      numk_last = numk_last + meshgeom%numnode  
-
-      numl_read = numl_read + meshgeom%numedge
-      numl_last = numl_last + meshgeom%numedge
+      !numk_read = numk_read + meshgeom%numnode 
+      !numk_last = numk_last + meshgeom%numnode  
+      !
+      !numl_read = numl_read + meshgeom%numedge
+      !numl_last = numl_last + meshgeom%numedge
 
    end do
 
