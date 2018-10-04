@@ -9477,12 +9477,12 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
       if (allocated(kn3))  deallocate(kn3)
       allocate(kn3(meshgeom%numedge))
 
-      !if (meshgeom%dim.ne.1) then 
+      if (meshgeom%dim.ne.1) then 
          ierr = ionc_get_edge_nodes(ioncid, im, kn12, 1) !unstruct requires 1 based indexes
-      !else
-      !   kn12 = meshgeom%edge_nodes
-      !   ierr = ionc_noerr
-      !endif
+      else
+         kn12 = meshgeom%edge_nodes
+         ierr = ionc_noerr
+      endif
 
       if (ierr /= ionc_noerr) then
          write (msgbuf, '(a,i0,a)') 'unc_read_net_ugrid: Could not read edge-node connectivity from mesh #', im, ' in UGRID net file '''//trim(filename)//'''.'
@@ -9510,11 +9510,11 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
          kn(3,  numl_last+L) = kn3(L)
       end do
       
-      !numk_read = numk_read + meshgeom%numnode 
-      !numk_last = numk_last + meshgeom%numnode  
-      !
-      !numl_read = numl_read + meshgeom%numedge
-      !numl_last = numl_last + meshgeom%numedge
+      numk_read = numk_read + meshgeom%numnode 
+      numk_last = numk_last + meshgeom%numnode  
+
+      numl_read = numl_read + meshgeom%numedge
+      numl_last = numl_last + meshgeom%numedge
 
    end do
 
