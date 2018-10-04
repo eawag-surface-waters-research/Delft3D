@@ -154,8 +154,8 @@
       ! Prelim SRO model
       real,parameter :: ro_lothr = 2.
       real,parameter :: ro_hithr = 5.
-      real,parameter :: ra_lothr = 10.
-      real,parameter :: ra_hithr = 20.
+      real,parameter :: ra_lothr = 15.
+      real,parameter :: ra_hithr = 65.
       real,parameter :: disp_hithr = 7.
 
       ! file names
@@ -509,8 +509,8 @@
               conc = pmsa(ipoint(ip)+(iseg-1)*increm(ip))
               ! fluxes
               fluxloss = kunpaved * conc / 86400.
-              fluxbound = kdunpaved *(conc / delt + totflxin(isubs,rec_unp) - fluxloss) ! Unboud substance  flux
-              fluxunbound = (1-kdunpaved) * (conc / delt + totflxin(isubs,rec_unp) - fluxloss) ! Bound substance  flux
+              fluxbound = kdunpaved *(conc / delt + totflxin(isubs,rec_unp) - fluxloss) ! Bound substance  flux
+              fluxunbound = (1-kdunpaved) * (conc / delt + totflxin(isubs,rec_unp) - fluxloss) ! Unbound substance  flux
               fluxero = fluxbound * ferosion
               fluxinf = fluxunbound * fdisp * finf
               fluxroun = fluxunbound * fdisp * froun
