@@ -1489,23 +1489,23 @@ if(q /= 0) then
  double precision  :: hpr
 
  if (japerim == 0) then
-
- k1  = ln(1,L) ; k2 = ln(2,L)
-
-    !TODO discuss with Herman: use of ACL is skipped here, but is still used in ADVEC
-
- dx1 = 0.5d0*dx(L) ; dx2 = dx1
- if (kcu(L) == 1) then 
-    if ( nd(k1)%lnx == 1 ) then 
-       dx1 = 2d0*dx1
-    endif 
-    if ( nd(k2)%lnx == 1 ) then 
-       dx2 = 2d0*dx2
-    endif 
- endif
- 
-
-    !TODO discuss with Herman: Checking wether a node is a 1d node seems superfluous
+   
+    k1  = ln(1,L) ; k2 = ln(2,L)
+   
+       !TODO discuss with Herman: use of ACL is skipped here, but is still used in ADVEC
+   
+    dx1 = 0.5d0*dx(L) ; dx2 = dx1
+    if (kcu(L) == 1) then 
+       if ( nd(k1)%lnx == 1 ) then 
+          dx1 = 2d0*dx1
+       endif 
+       if ( nd(k2)%lnx == 1 ) then 
+          dx2 = 2d0*dx2
+       endif 
+    endif
+    
+   
+       !TODO discuss with Herman: Checking wether a node is a 1d node seems superfluous
     if (kcs(k1) == 1) then
        hpr = max(0d0,s1(k1)-bob(1,L))                ! this statement is called most nr of times through waterlevel iteration
        if (hpr > 0) then                             !
@@ -1518,8 +1518,8 @@ if(q /= 0) then
              vol1_f(k1) = vol1_f(k1) + dx1*ar1
           else
              vol1_f(k1) = vol1(k1)
+          endif
        endif
-    endif
     endif
     
     !TODO discuss with Herman: Checking wether a node is a 1d node seems superfluous
@@ -1535,8 +1535,8 @@ if(q /= 0) then
              vol1_f(k2) = vol1_f(k2) + dx2*ar2
           else
              vol1_f(k2) = vol1(k2)
+          endif
        endif
-    endif
     endif
 
     if (nonlin == 2) then
@@ -1546,15 +1546,28 @@ if(q /= 0) then
           LL = LBND1D(L)
        endif
 
-       !TODO discuss with Herman: What if a model contains closed and open 1d links?
-       if (prof1D(3,LL) < 0 ) then                          ! closed
+       if (network%brs%count > 0) then
+          hpr = max(0d0,s1m(k1)-bob(1,L))                   ! this statement is called most nr of times through waterlevel iteration
+          if (hpr > 0d0) then
+             call getprof_1D_min(L, hpr, ar1, wid1)
+             a1m(k1)  = a1m(k1)  + dx1*wid1
+             vol1(k1) = vol1(k1) - dx1*ar1
+          endif
+          
+          hpr = max(0d0,s1m(k2)-bob(2,L))                   ! this statement is called most nr of times through waterlevel iteration
+          if (hpr > 0d0) then
+             call getprof_1D_min(L, hpr, ar2, wid2)
+             a1m(k2)  = a1m(k2)  + dx2*wid2
+             vol1(k2) = vol1(k2) - dx2*ar2
+          endif
+          
+       elseif (prof1D(3,LL) < 0 ) then                          ! closed
           if (kcs(k1) == 1) then
              hpr = max(0d0,s1m(k1)-bob(1,L))                   ! this statement is called most nr of times through waterlevel iteration
              if (hpr > 0.5d0*prof1D(2,LL) ) then
                 call getprof_1D_min(L, hpr, ar1, wid1)
                 a1m(k1)  = a1m(k1)  + dx1*wid1
                 vol1(k1) = vol1(k1) - dx1*ar1
-                vol1_f(k1) = vol1_f(k1) - dx1*ar1
              endif
           endif
           if (kcs(k2) == 1) then
@@ -1563,7 +1576,6 @@ if(q /= 0) then
                 call getprof_1D_min(L, hpr, ar2, wid2)
                 a1m(k2)  = a1m(k2)  + dx2*wid2
                 vol1(k2) = vol1(k2) - dx2*ar2
-                vol1_f(k2) = vol1_f(k2) - dx1*ar1
              endif
           endif
        endif
