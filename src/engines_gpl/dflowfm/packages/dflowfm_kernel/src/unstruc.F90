@@ -39401,7 +39401,7 @@ endif
 
 hpr = hprL
 
-if (network%brs%count > 0) then !TODO: abs(kcu(l))==1 check does not work, flow1d used only for 1d channels and not for 1d2d roofs and gullies
+if (abs(kcu(ll)==1) .and. network%brs%count > 0) then !flow1d used only for 1d channels and not for 1d2d roofs and gullies
    cz = 0d0
    if (japerim == 0) then ! calculate total area and volume
       call getCrossTotalData_on_link(network, LL, hpr, area, width, CSCalculationOption)
