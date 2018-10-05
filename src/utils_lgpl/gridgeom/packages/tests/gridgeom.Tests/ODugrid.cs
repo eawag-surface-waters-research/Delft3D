@@ -976,6 +976,139 @@ namespace gridgeom.Tests
 
         }
 
+        [Test]
+        [TestCase("default")]
+        [NUnit.Framework.Category("make1D2DRiverLinks")]
+        public void make1D2DRiverLinks(string path)
+        {
+
+            //1. open the file with the 1d network, 1d mesh and 2d grid.
+            string c_path = TestHelper.TestFilesDirectoryPath() + @"\1d2dForEmbeddedRiverLinks.nc";
+            Assert.IsTrue(File.Exists(c_path));
+            int ioncid = 0; //file variable 
+            int mode = 0;   //create in read mode
+            var wrapperNetcdf = new IoNetcdfLibWrapper();
+            var wrapperGridgeom = new GridGeomLibWrapper();
+            int iconvtype = 2;
+            double convversion = 0.0;
+            var ierr = wrapperNetcdf.ionc_open(c_path, ref mode, ref ioncid, ref iconvtype, ref convversion);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            int meshid         = -1;
+            int networkid      = -1;
+            bool includeArrays = true;
+            int start_index    = 1;
+            int jsferic        = 0;
+            //--------------------------------------------------------------------------------------//
+            //2a. get network and mesh ids
+            ierr = wrapperNetcdf.ionc_get_1d_network_id(ref ioncid, ref networkid);
+            Assert.That(ierr, Is.EqualTo(0));
+            ierr = wrapperNetcdf.ionc_get_1d_mesh_id(ref ioncid, ref meshid);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            //2b. get dimensions
+            var meshoneddim = new meshgeomdim();
+            ierr = wrapperNetcdf.ionc_get_meshgeom_dim(ref ioncid, ref meshid, ref networkid, ref meshoneddim);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            //2c. allocate
+            var meshoned = new meshgeom();
+            //mesh variables
+            meshoned.nodex = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshoneddim.numnode);
+            meshoned.nodey = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshoneddim.numnode);
+            meshoned.nodez = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshoneddim.numnode);
+
+            //network variables
+            meshoned.nnodex = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshoneddim.nnodes);
+            meshoned.nnodey = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshoneddim.nnodes);
+            meshoned.branchidx = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshoneddim.numnode);
+            meshoned.nedge_nodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshoneddim.nnodes * 2);
+            meshoned.nbranchgeometrynodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshoneddim.nbranches);
+            meshoned.branchoffsets = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshoneddim.numnode);
+            meshoned.ngeopointx = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshoneddim.ngeometry);
+            meshoned.ngeopointy = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshoneddim.ngeometry);
+            meshoned.nbranchlengths = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshoneddim.nbranches);
+            meshoned.nbranchorder = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshoneddim.nbranches);
+
+            //2d. get 1d meshgeom array 
+            ierr = wrapperNetcdf.ionc_get_meshgeom(ref ioncid, ref meshid, ref networkid, ref meshoned, ref start_index, ref includeArrays);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            ierr = wrapperGridgeom.ggeo_count_edge_nodes(ref meshoned.branchoffsets, ref meshoned.nbranchlengths,
+                ref meshoned.branchidx, ref meshoned.nedge_nodes, ref meshoneddim.nbranches, ref meshoneddim.nnodes,
+                ref meshoneddim.numedge, ref start_index);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            meshoned.edge_nodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshoneddim.numedge * 2);
+            ierr = wrapperGridgeom.ggeo_create_edge_nodes(ref meshoned.branchoffsets, ref meshoned.nbranchlengths,
+                ref meshoned.branchidx, ref meshoned.nedge_nodes, ref meshoned.edge_nodes, ref meshoneddim.nbranches, ref meshoneddim.nnodes,
+                ref meshoneddim.numedge, ref start_index);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            //Read the created edge nodes
+            int[] edge_nodes = new int[meshoneddim.numedge * 2];
+            Marshal.Copy(meshoned.edge_nodes, edge_nodes, 0, meshoneddim.numedge * 2);
+            Assert.That(edge_nodes.Contains(0), Is.EqualTo(false));
+
+            
+            //--------------------------------------------------------------------------------------//
+            //3a. get mesh ids
+            ierr = wrapperNetcdf.ionc_get_2d_mesh_id(ref ioncid, ref meshid);
+            Assert.That(ierr, Is.EqualTo(0));
+            networkid = -1;
+
+            //3b. get dimensions
+            var meshtwoddim = new meshgeomdim();
+            ierr = wrapperNetcdf.ionc_get_meshgeom_dim(ref ioncid, ref meshid, ref networkid, ref meshtwoddim);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            //3c. allocate
+            var meshtwod = new meshgeom();
+            meshtwod.nodex = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshtwoddim.numnode);
+            meshtwod.nodey = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshtwoddim.numnode);
+            meshtwod.nodez = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshtwoddim.numnode);
+            meshtwod.edge_nodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshtwoddim.numedge * 2);
+
+            //3d. get meshgeom 
+            ierr = wrapperNetcdf.ionc_get_meshgeom(ref ioncid, ref meshid, ref networkid, ref meshtwod, ref start_index, ref includeArrays);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            //8. close file
+            ierr = wrapperNetcdf.ionc_close(ref ioncid);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            //--------------------------------------------------------------------------------------//
+            //4. Herman datastructure for creating the links.
+
+            ierr = wrapperGridgeom.ggeo_get_xy_coordinates(ref meshoned.branchidx, ref meshoned.branchoffsets, ref meshoned.ngeopointx,
+                ref meshoned.ngeopointy, ref meshoned.nbranchgeometrynodes, ref meshoned.nbranchlengths, ref meshoned.nodex, ref meshoned.nodey, ref jsferic, ref meshoneddim.nbranches, ref meshoneddim.ngeometry, ref meshoneddim.numnode);
+            Assert.That(ierr, Is.EqualTo(0));
+            ierr = wrapperGridgeom.ggeo_convert(ref meshoned, ref meshoneddim, ref start_index);
+
+            Assert.That(ierr, Is.EqualTo(0));
+            ierr = wrapperGridgeom.ggeo_convert(ref meshtwod, ref meshtwoddim, ref start_index);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            //5. make the links
+            int c_npl             = 0;
+            int c_nOneDMask       = 0;
+            double c_searchRadius = 100.0;
+            IntPtr c_oneDmask     = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * 0);
+            ierr                  = wrapperGridgeom.ggeo_make1D2DRiverLinks(ref c_nOneDMask, ref c_oneDmask, ref c_searchRadius);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            //6. get the number of links
+            int n1d2dlinks = 0;
+            int linkType = 3;
+            ierr = wrapperGridgeom.ggeo_get_links_count(ref n1d2dlinks, ref linkType);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            //7. deallocate memory of gridgeom
+            ierr = wrapperGridgeom.ggeo_deallocate();
+            Assert.That(ierr, Is.EqualTo(0));
+
+        }
+
         // Test Jan Mooiman ugrid files 
         //[Test]
         //[TestCase(@"D:\carniato\LUCA\ENGINES\delft3d\ossTest9\src\janm\ugrid_1d_network_mesh_1.nc")]
