@@ -75,13 +75,28 @@ namespace General.tests
 
 
         /// <summary>
-        /// 
+        /// Make 1D2D embedded links
         /// </summary>
         /// <param name="c_jsferic"></param>
         /// <param name="c_jasfer3D"></param>
+        /// <param name="c_nOneDMask"></param>
+        /// <param name="c_oneDmask"></param>
         /// <returns></returns>
         [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ggeo_make1D2Dembeddedlinks", CallingConvention = CallingConvention.Cdecl)]
         public static extern int ggeo_make1D2Dembeddedlinks_dll(ref int c_jsferic, ref int c_jasfer3D, [In] ref int c_nOneDMask, [In] ref IntPtr c_oneDmask);
+
+
+
+        /// <summary>
+        /// Make 1D2D embedded river links
+        /// </summary>
+        /// <param name="c_jsferic"></param>
+        /// <param name="c_jasfer3D"></param>
+        /// <param name="c_nOneDMask"></param>
+        /// <param name="c_oneDmask"></param>
+        /// <returns></returns>
+        [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ggeo_make1D2DRiverLinks", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ggeo_make1D2DRiverLinks_dll(ref int c_jsferic, ref int c_jasfer3D, ref double c_searchRadius, [In] ref int c_nOneDMask, [In] ref IntPtr c_oneDmask);
 
         /// <summary>
         /// Use 1d array to fill kn matrix
@@ -254,6 +269,16 @@ namespace General.tests
             int c_jsferic  = 0;
             int c_jasfer3D = 0;
             int ierr = ggeo_make1D2Dembeddedlinks_dll(ref c_jsferic, ref c_jasfer3D, ref c_nOneDMask, ref c_oneDmask);
+            return ierr;
+        }
+
+
+        public int ggeo_make1D2DRiverLinks(ref int c_nOneDMask, ref IntPtr c_oneDmask, ref double c_searchRadius)
+        {
+            // the following three variables might become part of the function api
+            int c_jsferic = 0;
+            int c_jasfer3D = 0;
+            int ierr = ggeo_make1D2DRiverLinks_dll(ref c_jsferic, ref c_jasfer3D, ref c_searchRadius, ref c_nOneDMask, ref c_oneDmask);
             return ierr;
         }
 
