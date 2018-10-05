@@ -3419,6 +3419,7 @@
    double precision              :: searchRadiusSquared, maxdistance, prevDistance, currDistance
    logical                       :: isBoundaryCell
    type(kdtree_instance)         :: treeinst
+   integer, allocatable          :: localCellmask(:)
 
    ierr = 0
    !LC: is this the right type for rivers
@@ -3433,7 +3434,8 @@
       return
    endif
 
-   cellmask = 0
+   allocate(localCellmask(nump))
+   localCellmask = 0
    do l = 1, numl1d + 1
       !only check the left point
       if( l .eq. numl1d + 1) then
@@ -3457,7 +3459,7 @@
       do k = 1, nCellsInSearchRadius
          !get the current cell id and the previously connected net node
          cellId= treeinst%results(k)%idx
-         prevConnectedNetNode = cellmask(cellId)
+         prevConnectedNetNode = localCellmask(cellId)
          !already not a boundary net node
          if (prevConnectedNetNode.eq.-1) cycle
          !check if it is a boundary cell
@@ -3471,34 +3473,34 @@
          enddo
          !not a boundary cell
          if (.not.isBoundaryCell) then
-            cellmask(cellId) = - 1
+            localCellmask(cellId) = - 1
             cycle
          !a candidate connection already exist
          else if(prevConnectedNetNode.ne.0) then
             prevDistance = dbdistance(xk(prevConnectedNetNode),yk(prevConnectedNetNode),xz(cellId),yz(cellId), jsferic, jasfer3D, dmiss)
             currDistance = dbdistance(xk(k1),yk(k2),xz(cellId),yz(cellId), jsferic, jasfer3D, dmiss)
             if (currDistance<prevDistance) then
-               cellmask(cellId) = k1
+               localCellmask(cellId) = k1
             endif
          else if(prevConnectedNetNode.eq.0) then
-            cellmask(cellId) = k1
+            localCellmask(cellId) = k1
          endif
       enddo
    enddo
 
    !make the connections
-   do cellId = 1, size(cellmask)
+   do cellId = 1, nump
       newLinkIndex = -1
-      if (cellmask(cellId).ne.0) then
+      if (localCellmask(cellId).ne.0) then
          !check presence of oneDMask
          if (present(oneDMask)) then !again, Fortran does not have logical and two nested if statement are needed
-            if(oneDMask(cellmask(cellId))==1) then
+            if(oneDMask(localCellmask(cellId))==1) then
                call setnewpoint(xz(cellId), yz(cellId), zk(cellId), newPointIndex)
-               call connectdbn(newPointIndex, cellmask(cellId), newLinkIndex)
+               call connectdbn(newPointIndex, localCellmask(cellId), newLinkIndex)
             endif
          else
             call setnewpoint(xz(cellId),yz(cellId),zk(cellId), newPointIndex)
-            call connectdbn(newPointIndex, cellmask(cellId), newLinkIndex)
+            call connectdbn(newPointIndex, localCellmask(cellId), newLinkIndex)
          endif
          if (newLinkIndex.ne.-1) then
             !cell is connected, set kn

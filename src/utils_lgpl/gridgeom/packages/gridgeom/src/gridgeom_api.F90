@@ -214,6 +214,33 @@ function ggeo_make1D2Dembeddedlinks_dll(c_jsferic, c_jasfer3D, c_nOneDMask, c_on
    
 end function ggeo_make1D2Dembeddedlinks_dll
 
+!> Make 1d-2d river connections connections. With this function multiple 2d boundary cells can be connected to 1d mesh points. 
+!> Please note that the gridgeom library has to be initialized before this function can be called.
+!!
+!! c_jsferic      :: 2d sferic flag (1 = spheric / 0 = cartesian)
+!! c_jasfer3D     :: 3d sferic flag (1 = advanced spheric algorithm, 0 = default spheric algorithm )
+!! c_searchRadius :: the search radius for making links
+!! c_nOneDMask    :: size of the 1d mask for mesh points
+!! c_oneDmask     :: mask for 1d mesh points (1 = potential connection, 0 = do not connect) 
+function ggeo_make1D2DRiverLinks_dll(c_jsferic, c_jasfer3D, c_searchRadius, c_nOneDMask, c_oneDMask) result(ierr) bind(C, name="ggeo_make1D2DRiverLinks")
+!DEC$ ATTRIBUTES DLLEXPORT :: ggeo_make1D2DRiverLinks_dll
+
+   use gridgeom
+   use gridoperations
+   
+   integer, intent(in)           :: c_jsferic
+   integer, intent(in)           :: c_jasfer3D
+   double precision, intent(in)  :: c_searchRadius
+   integer, intent(in)           :: c_nOneDMask   
+   type(c_ptr), intent(in)       :: c_oneDmask  
+   integer, pointer              :: oneDmask(:) 
+   integer                       :: ierr  
+   
+   call c_f_pointer(c_oneDmask, oneDmask, (/c_nOneDMask/))
+   
+   ierr = ggeo_make1D2DRiverLinks(c_jsferic, c_jasfer3D, c_searchRadius, oneDMask)
+   
+end function ggeo_make1D2DRiverLinks_dll
 
 function ggeo_get_links_count_dll(nlinks, linkType) result(ierr) bind(C, name="ggeo_get_links_count")
 !DEC$ ATTRIBUTES DLLEXPORT :: ggeo_get_links_count_dll
