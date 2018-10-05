@@ -456,7 +456,7 @@
                endif
             enddo
          endif
-         enddo
+      enddo
 
 !          1d: give each cell of a column the highest basket nr. of the column
 
@@ -1055,6 +1055,7 @@
                ifrom_1 = ipoint(3,iq)
                ito_1   = ipoint(4,iq)
                if ( ifrom .le. 0 .and. ito .le. 0 ) cycle
+               if ( ifrom .eq. 0 .or.  ito .eq. 0 ) cycle
                a = area(iq)
                q = flow(iq)
                if ( abs(q) .lt. 10.0d-25 .and. disp0q0 )  cycle   ! thin dam option, no dispersion at zero flow

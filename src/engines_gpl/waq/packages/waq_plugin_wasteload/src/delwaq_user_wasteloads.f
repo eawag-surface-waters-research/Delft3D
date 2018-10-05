@@ -261,6 +261,7 @@
       integer             :: ipin                             ! wasteload number inlet
       integer             :: ipout                            ! wasteload number outlet
       integer             :: iseg                             ! inlet segment number
+      integer             :: isego                            ! outlet segment number
       integer             :: iwst                             ! loop counter wasteloads
       integer             :: isys                             ! loop counter substances
       integer             :: icomb                            ! loop counter combinations
@@ -351,14 +352,26 @@
          ipin  = iwin(iinout)
          ipout = iwout(iinout)
          iseg  = wasteloads(ipin)%loc%segnr
+         isego = wasteloads(ipout)%loc%segnr
          flow  = wasteloads(ipin)%flow
-         wasteloads(ipout)%flow = 0.0
-         do isys = 1, nosys
-            wasteloads(ipout)%loads(isys) = -flow*conc(isys,iseg)
-         enddo
-         do isys = nosys + 1 , notot
-            wasteloads(ipout)%loads(isys) = 0.0
-         enddo
+         if ( flow <= 0.0 ) then
+            wasteloads(ipout)%flow = 0.0
+            do isys = 1, nosys
+               wasteloads(ipout)%loads(isys) = -flow*conc(isys,iseg)
+            enddo
+            do isys = nosys + 1 , notot
+               wasteloads(ipout)%loads(isys) = 0.0
+            enddo
+         else
+            ! Reversed flow - still using the flow rate at the inlet (!)
+            wasteloads(ipin)%flow = 0.0
+            do isys = 1, nosys
+               wasteloads(ipin)%loads(isys) = flow*conc(isys,isego)
+            enddo
+            do isys = nosys + 1 , notot
+               wasteloads(ipin)%loads(isys) = 0.0
+            enddo
+         endif
       enddo
 !
       return
