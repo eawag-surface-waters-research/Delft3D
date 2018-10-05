@@ -3287,9 +3287,12 @@
    
    !output
    integer                       :: ierr !< Error status, 0 if success, nonzero in case of error.
+   
+   !locals
    integer                       :: k, kk, k1, k2, k3, k4, k5, k6, ncellsinSearchRadius, numberCellNetlinks, isCrossing, newPointIndex, newLinkIndex
    integer                       :: l, cellNetLink, cellId, kn3ty, numnetcells
    double precision              :: searchRadiusSquared, ldistance, rdistance, maxdistance, sl, sm, xcr, ycr, crp
+   integer, allocatable          :: localCellmask(:)
    
    type(kdtree_instance) :: treeinst
 
@@ -3306,7 +3309,8 @@
       return
    endif
 
-   cellmask = 0
+   allocate(localCellmask(nump))
+   localCellmask = 0
    do l = 1, numl1d
       k1  = kn(1,l); k2  = kn(2,l); k3 = kn(3,l)
       !get the left 1d mesh point
@@ -3336,11 +3340,11 @@
          !check if one of the cell net link crosses the current 1d link
          cellId= treeinst%results(k)%idx
          !this cell has been already explored or is already connected 
-         if (cellmask(cellId).ne.0) cycle
+         if (localCellmask(cellId).ne.0) cycle
          !check if the cell is already connected
          numberCellNetlinks = size(netcell(cellId)%lin)
          do kk = 1, numberCellNetlinks
-            if (cellmask(cellId).ne.0) cycle
+            if (localCellmask(cellId).ne.0) cycle
             cellNetLink =  netcell(cellId)%lin(kk)
             k5  = kn(1,cellNetLink); 
             k6  = kn(2,cellNetLink);
@@ -3372,11 +3376,11 @@
                endif
                if (newLinkIndex.ne.-1) then
                   kn(3,newLinkIndex) = kn3ty
-                  !cell is connected, set cellmask mask and end cycle
-                  cellmask(cellId) = 2
+                  !cell is connected, set localCellmask mask and end cycle
+                  localCellmask(cellId) = 2
                endif
             else
-               cellmask(cellId) = 3
+               localCellmask(cellId) = 3
             endif
             !loop over numberCellNetlinks
          enddo
