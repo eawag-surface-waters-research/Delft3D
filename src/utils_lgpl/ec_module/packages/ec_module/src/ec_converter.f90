@@ -428,9 +428,9 @@ module m_ec_converter
                            do ii=1,n_rows-1
                                cx = (sx_2D(jj,ii)+sx_2D(jj+1,ii)+sx_2D(jj,ii+1)+sx_2D(jj+1,ii+1))/4.0
                                cy = (sy_2D(jj,ii)+sy_2D(jj+1,ii)+sy_2D(jj,ii+1)+sy_2D(jj+1,ii+1))/4.0
-                               r2 = max ( &
+                               r2 = (max ( &
                                    dbdistance(sx_2D(jj,ii),sy_2D(jj,ii),sx_2D(jj+1,ii+1),sy_2D(jj+1,ii+1)),          &
-                                   dbdistance(sx_2D(jj+1,ii),sy_2D(jj+1,ii),sx_2D(jj,ii+1),sy_2D(jj,ii+1))) / 2.     ! longest diagonal divided by 2 (jasfer3D on if jsferic)
+                                   dbdistance(sx_2D(jj+1,ii),sy_2D(jj+1,ii),sx_2D(jj,ii+1),sy_2D(jj,ii+1))) / 2.)**2     ! longest diagonal divided by 2 (jasfer3D on if jsferic)
                                call make_queryvector_kdtree(treeinst, cx, cy, jsferic)
                                nresult = kdtree2_r_count(treeinst%tree, treeinst%qv, r2)
                                call realloc_results_kdtree(treeinst, nresult)
@@ -465,26 +465,28 @@ module m_ec_converter
                            imin = weight%indices(1,i)
                            jmin = weight%indices(2,i)
                            
-                           do iii=imin,imin+1
-                              do jjj=jmin,jmin+1
-                                 idx = 1 + (jjj-jmin) + 2*(iii-imin)
-!                                 idx = 1 + (iii-imin) + 2*(jjj-jmin)
-                                 xfindpoly(idx) = sx_2D(jjj,iii)
-                                 yfindpoly(idx) = sy_2D(jjj,iii)
+                           if ( imin/=ec_undef_int .and. jmin/=ec_undef_int ) then
+                              do iii=imin,imin+1
+                                 do jjj=jmin,jmin+1
+                                    idx = 1 + (jjj-jmin) + 2*(iii-imin)
+   !                                 idx = 1 + (iii-imin) + 2*(jjj-jmin)
+                                    xfindpoly(idx) = sx_2D(jjj,iii)
+                                    yfindpoly(idx) = sy_2D(jjj,iii)
+                                 end do
                               end do
-                           end do
                            
-                           call findnm(targetElementSet%x(i), targetElementSet%y(i), xfindpoly, yfindpoly , &
-                                           2, 2, inside, mp, np, in, jn, wf)
+                              call findnm(targetElementSet%x(i), targetElementSet%y(i), xfindpoly, yfindpoly , &
+                                              2, 2, inside, mp, np, in, jn, wf)
                                            
-                           if ( inside.ne.1 ) then
-                              continue
+                              if ( inside.ne.1 ) then
+                                 continue
+                              end if
+                                           
+                              weight%weightFactors(1,i) = wf(1)
+                              weight%weightFactors(2,i) = wf(2)
+                              weight%weightFactors(3,i) = wf(3)
+                              weight%weightFactors(4,i) = wf(4)
                            end if
-                                           
-                           weight%weightFactors(1,i) = wf(1)
-                           weight%weightFactors(2,i) = wf(2)
-                           weight%weightFactors(3,i) = wf(3)
-                           weight%weightFactors(4,i) = wf(4)
                         end do
                      else                           ! old style, not using kdtree
                         allocate(edge_poly_x(2*n_cols+2*n_rows-2), edge_poly_y(2*n_cols+2*n_rows-2), stat=ierr)
