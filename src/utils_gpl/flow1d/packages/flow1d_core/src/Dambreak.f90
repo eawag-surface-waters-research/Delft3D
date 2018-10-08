@@ -67,6 +67,8 @@
       double precision :: maximumAllowedWidth = - 1.0D0
 
    end type
+   
+   double precision, parameter :: hoursToSeconds = 3600.0d0
 
    private
 
@@ -102,6 +104,7 @@
    timeFromBreaching = time1 - dambreak%t0
    breachWidthDerivative = 0.d0
    waterLevelJumpDambreak = 0.d0
+   widthIncrement =0.0d0
 
    ! breaching not started
    if (timeFromBreaching < 0) return
@@ -142,12 +145,12 @@
          waterLevelJumpDambreak = hmx - hmn
          deltaLevel = (gravity*waterLevelJumpDambreak)**1.5d0
          timeFromFirstPhase = time1 - dambreak%endTimeFirstPhase
-
+         
          if (dambreak%width < maximumWidth .and. (.not.isnan(u0)) .and. dabs(u0) > dambreak%ucrit) then
             breachWidthDerivative = (dambreak%f1*dambreak%f2/dlog(10D0)) * &
                              (deltaLevel/(dambreak%ucrit*dambreak%ucrit)) * &
-                             (1.0/(1.0 + (dambreak%f2*gravity*timeFromFirstPhase/dambreak%ucrit))) 
-            widthIncrement = breachWidthDerivative * dt
+                             (1.0/(1.0 + (dambreak%f2*gravity*timeFromFirstPhase/(dambreak%ucrit*hoursToSeconds)))) 
+            widthIncrement = breachWidthDerivative * (dt/hoursToSeconds)
             !ensure monotonically increasing dambreak%width 
             if (widthIncrement > 0) then 
                dambreak%width = dambreak%width  + widthIncrement
