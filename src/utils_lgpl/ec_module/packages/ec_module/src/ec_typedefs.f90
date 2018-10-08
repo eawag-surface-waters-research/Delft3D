@@ -267,6 +267,7 @@ module m_ec_typedefs
       real(hp)                                :: y_spw_eye          !< y-coordinate of spiderweb eye
       character(len=8), allocatable           :: astro_components(:)!< astronomical components labels
       integer, allocatable                    :: astro_kbnumber(:)  !< astronomical components KompBes numbers
+      integer, dimension(4)                   :: bbox = 1           !< bounding box of column- and row indices used from the complete source grid (only used when reading structured grid meteo fields from netCDF)
    end type tEcField
    
    type tEcFieldPtr
@@ -359,6 +360,7 @@ module m_ec_typedefs
       integer , dimension(:,:),   pointer :: indices       => null() !< indices: ([row,column]:nCoordinates)
       ! FM: tdataprovider wfn
       real(hp), dimension(:,:),   pointer :: weightFactors => null() !< weightfactors: ([1,2,3,4]:nCoordinates)
+      integer, dimension(:),      pointer :: substndx                !< substitutes target value j by target value [substndx(j)]
       ! for extrapolation with e.g. 4 nearest neighbours
       type(tFlexibleIndexWeightFactor), pointer :: flexIndexWeights(:) => null()
       integer                                   :: curSizeFlex = 0

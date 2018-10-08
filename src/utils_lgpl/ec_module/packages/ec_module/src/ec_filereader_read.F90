@@ -668,6 +668,7 @@ module m_ec_filereader_read
       !> Read the next record from a NetCDF file.
       function ecNetcdfReadNextBlock(fileReaderPtr, item, t0t1) result(success)
          use netcdf
+         use m_ec_field, only:ecFieldCreate1DArray, ecFieldSetMissingValue
          !
          logical                      :: success       !< function status
          type(tEcFileReader), pointer :: fileReaderPtr !< intent(in)
@@ -688,6 +689,10 @@ module m_ec_filereader_read
          logical                                 :: valid_field
          character(len=20)                       :: cnumber1         !< number converted to string for error message
          character(len=20)                       :: cnumber2         !< idem
+         integer                                 :: ncol, col0, col1 !< bounding box and bounding box extent use to restrict reading a patch from a meteo-field from netCDF
+         integer                                 :: nrow, row0, row1
+         integer                                 :: nlay
+         
          !
          success = .false.
          fieldPtr => null()
@@ -767,6 +772,28 @@ module m_ec_filereader_read
                return
             end if
             !
+            col0 = fieldPtr%bbox(1)
+            row0 = fieldPtr%bbox(2)
+            col1 = fieldPtr%bbox(3)
+            row1 = fieldPtr%bbox(4)
+            nrow = row1 - row0 + 1
+            ncol = col1 - col0 + 1
+            nlay = item%elementSetPtr%n_layers
+
+            ! Create storage for the field data if still unallocated and set to missing value
+            if (.not.allocated(fieldPtr%arr1d)) then 
+               allocate(fieldPtr%arr1d(ncol*nrow*max(nlay,1)), stat = istat)
+               if (istat /= 0) then
+                  call setECMessage("ERROR: ec_field::ecFieldCreate1dArray: Unable to allocate additional memory.")
+                  write(message,'(a,i0,a,i0,a,i0,a,i0,a)') 'Failed to create storage for item ',item%id,': (',ncol,'x',nrow,'x',nlay,').'
+                  call setECMessage(trim(message))
+                  return
+               else
+                  fieldPtr%arr1d = ec_undef_hp
+                  fieldPtr%arr1dPtr => fieldPtr%arr1d
+               end if
+            end if
+            
             valid_field = .False.
             do while (.not.valid_field)
                ! - 3 - Read a scalar data block.
@@ -782,9 +809,9 @@ module m_ec_filereader_read
                ! - 4 - Read a grid data block.
                valid_field = .False.
 
-               allocate(data_block( item%elementSetPtr%n_cols, item%elementSetPtr%n_rows), stat = istat)
+               allocate(data_block(ncol, nrow), stat = istat)
                if (istat/=0) then
-                  write(message,'(a,i0,a,i0,a)') 'Allocating temporary array of ',item%elementSetPtr%n_cols,' x ',item%elementSetPtr%n_rows,' elements.'
+                  write(message,'(a,i0,a,i0,a)') 'Allocating temporary array of ',ncol,' x ',nrow,' elements.'
                   call setECMessage(trim(message))
                   call setECMessage("Allocation of data_block (data from NetCDF) failed.")
                   return
@@ -792,30 +819,24 @@ module m_ec_filereader_read
 
                if (item%elementSetPtr%nCoordinates > 0) then
                   if (item%elementSetPtr%n_layers == 0) then                  ! 2D elementset
-                     ierror = nf90_get_var(fileReaderPtr%fileHandle, varid, data_block, start=(/1, 1, times_index/), count=(/item%elementSetPtr%n_cols, item%elementSetPtr%n_rows, 1/))
+!                    ierror = nf90_get_var(fileReaderPtr%fileHandle, varid, data_block, start=(/1, 1, times_index/), count=(/item%elementSetPtr%n_cols, item%elementSetPtr%n_rows, 1/))
+                     ierror = nf90_get_var(fileReaderPtr%fileHandle, varid, data_block, start=(/col0, row0, times_index/), count=(/ncol, nrow, 1/))
                      ! copy data to source Field's 1D array, store (X1Y1, X1Y2, ..., X1Yn_rows, X2Y1, XYy2, ..., Xn_colsY1, ...)
-                     do i=1, item%elementSetPtr%n_rows
-                        do j=1, item%elementSetPtr%n_cols
-                           fieldPtr%arr1dPtr( (i-1)*item%elementSetPtr%n_cols + j ) = data_block(j,i)
+                     do i=1, nrow
+                        do j=1, ncol
+                           fieldPtr%arr1dPtr( (i-1)*ncol +  j ) = data_block(j,i)
                         end do
                      end do
                      valid_field = .True.
                   else
                      ! copy data to source Field's 1D array, store (X1Y1, X1Y2, ..., X1Yn_rows, X2Y1, XYy2, ..., Xn_colsY1, ...)
                      do k=1, item%elementSetPtr%n_layers
-                        ierror = nf90_get_var(fileReaderPtr%fileHandle, varid, data_block, start=(/1, 1, k, times_index/), count=(/item%elementSetPtr%n_cols, item%elementSetPtr%n_rows, 1, 1/))
-                        do i=1, item%elementSetPtr%n_rows
-                           do j=1, item%elementSetPtr%n_cols
-!                              if (data_block(j,i,k) == dmiss_nc) then 
-!                                 fieldPtr%arr1dPtr( (k-1)*item%elementSetPtr%n_cols*item%elementSetPtr%n_rows        &
-!                                                  + (i-1)*item%elementSetPtr%n_cols                              &
-!                                                  +  j ) = 0d0
-!                              else                     
-                                 fieldPtr%arr1dPtr( (k-1)*item%elementSetPtr%n_cols*item%elementSetPtr%n_rows        &
-                                                  + (i-1)*item%elementSetPtr%n_cols                                &
-                                                  +  j ) = data_block(j,i)
-                                 valid_field = .True.
-!                              endif
+!                       ierror = nf90_get_var(fileReaderPtr%fileHandle, varid, data_block, start=(/1, 1, k, times_index/), count=(/item%elementSetPtr%n_cols, item%elementSetPtr%n_rows, 1, 1/))
+                        ierror = nf90_get_var(fileReaderPtr%fileHandle, varid, data_block, start=(/col0, row0, k, times_index/), count=(/ncol, nrow, 1, 1/))
+                        do i=row0, row1
+                           do j=col0, col1
+                              fieldPtr%arr1dPtr( (k-1)*ncol*nrow + (i-1)*ncol +  j ) = data_block(j,i)
+                              valid_field = .True.
                            end do
                         end do
                      end do

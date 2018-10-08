@@ -335,6 +335,10 @@ module m_ec_module
       module procedure ecConnectionAddTargetItem
    end interface ecAddConnectionTargetItem
    
+   interface ecSetConnectionIndexWeights
+      module procedure ecConnectionSetIndexWeights
+   end interface ecSetConnectionIndexWeights
+   
    ! FileReader
    interface ecAddItemToFileReader
       module procedure ecFileReaderAddItem

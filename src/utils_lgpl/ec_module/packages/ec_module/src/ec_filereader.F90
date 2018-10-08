@@ -377,6 +377,19 @@ module m_ec_filereader
                         fileReaderPtr%items(i)%ptr%sourceT1FieldPtr => fileReaderPtr%items(i)%ptr%sourceT0FieldPtr
                         fileReaderPtr%items(i)%ptr%sourceT0FieldPtr => fieldPtrA
                      endif
+                     ! Initially, both T0 and T1 refer to ec_undef_hp < 0
+                     ! At this point, after swapping, T0-field is still uninitialized
+                     ! In the next lines, 
+                     if (fileReaderPtr%items(i)%ptr%sourceT0FieldPtr%timesteps<0.0_hp) then
+                        fileReaderPtr%items(i)%ptr%sourceT0FieldPtr%timesteps = fileReaderPtr%items(i)%ptr%sourceT1FieldPtr%timesteps
+                        success = ecNetcdfReadNextBlock(fileReaderPtr, fileReaderPtr%items(i)%ptr, t0t1)
+                        if (t0t1 == 0) then
+                           ! flip t0 and t1
+                           fieldPtrA => fileReaderPtr%items(i)%ptr%sourceT1FieldPtr
+                           fileReaderPtr%items(i)%ptr%sourceT1FieldPtr => fileReaderPtr%items(i)%ptr%sourceT0FieldPtr
+                           fileReaderPtr%items(i)%ptr%sourceT0FieldPtr => fieldPtrA
+                        endif
+                     end if
                   end do
                end select
             case (provFile_svwp, provFile_svwp_weight, provFile_curvi_weight, provFile_samples, &

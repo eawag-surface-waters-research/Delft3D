@@ -2817,15 +2817,10 @@ module m_ec_provider
             end if
             !
             field0Id = ecInstanceCreateField(instancePtr)
-            if (.not. (ecFieldCreate1dArray(instancePtr, field0Id, fgd_size*sgd_size*max(tgd_size,1)) .and. &
-                       ecFieldSetMissingValue(instancePtr, field0Id, var_miss))) then
-                  return
-            end if
+            if (.not.ecFieldSetMissingValue(instancePtr, field0Id, var_miss)) return
             field1Id = ecInstanceCreateField(instancePtr)
-            if (.not. (ecFieldCreate1dArray(instancePtr, field1Id, fgd_size*sgd_size*max(tgd_size,1)) .and. &
-                       ecFieldSetMissingValue(instancePtr, field1Id, var_miss))) then
-                  return
-            end if
+            if (.not.ecFieldSetMissingValue(instancePtr, field1Id, var_miss)) return
+
             ! ==================
             ! Create source Item
             ! ==================
@@ -2841,18 +2836,16 @@ module m_ec_provider
                itemPtr => ecSupportFindItem(instancePtr, itemId)
             end if
             ! ===== finish initialization of Fields =====
-            ! Read the first two records into tEcItem%sourceT0FieldPtr and tEcItem%sourceT1FieldPtr.
-            ! Add successfully created source Item to the FileReader
-            success = ecNetcdfReadNextBlock(fileReaderPtr, itemPtr, 0)
-            if (success) then
-               ! trick: set fieldT1%timesteps to fieldT0%timesteps, so that T1 will be filled with the block after T0's block.
-               itemPtr%sourceT1FieldPtr%timesteps = itemPtr%sourceT0FieldPtr%timesteps
-               success = ecNetcdfReadNextBlock(fileReaderPtr, itemPtr, 1)
-            end if
-            ! Add successfully created source Items to the FileReader
-            if (success) success = ecFileReaderAddItem(instancePtr, fileReaderPtr%id, itemPtr%id)
+            itemPtr%sourceT0FieldPtr%timesteps = ec_undef_hp
+            itemPtr%sourceT1FieldPtr%timesteps = ec_undef_hp
 
+            ! Add successfully created source Item to the FileReader
+            if ( .not.ecFileReaderAddItem(instancePtr, fileReaderPtr%id, itemPtr%id) ) then
+               return
+            end if
          enddo !                i = 1, size(ncstdnames) quantities in requested set of quantities 
+         
+         success = .true.
 
       end function ecProviderCreateNetcdfItems
 

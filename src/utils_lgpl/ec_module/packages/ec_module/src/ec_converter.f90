@@ -282,6 +282,8 @@ module m_ec_converter
       
       !> Update the weight factors of a Converter.
       function ecConverterUpdateWeightFactors(instancePtr, connection) result (success)
+      use kdtree2Factory
+      implicit none
          logical                            :: success     !< function status
          type(tEcInstance), pointer         :: instancePtr !< intent(inout)
          type(tEcConnection), intent(inout) :: connection  !< access to Converter and Items
@@ -303,10 +305,23 @@ module m_ec_converter
          integer                              ::  nsx, nsy
          real(hp), allocatable, dimension(:)  ::  edge_poly_x
          real(hp), allocatable, dimension(:)  ::  edge_poly_y
+         real(hp), dimension(:,:),  pointer   ::  sY_2D, sX_2D   !< 2D representation of linearly indexed array arr1D
+         real(hp)                             ::  cx, cy, r2
+         integer                              ::  nresult, iresult, idx, jsferic
+         integer                              ::  iimin, iimax, jjmin, jjmax
+         type(kdtree_instance)                :: treeinst
+         
+         real(hp), dimension(4) :: xfindpoly, yfindpoly
+         integer                :: imin, jmin, iii, jjj
+
+         logical hasKDTree
          
          !
+         hasKDTree = .True.
          success = .false.
          sourceElementSet => null()
+         sourceElementSet => connection%sourceItemsPtr(1)%ptr%elementSetPtr
+         targetElementSet => connection%targetItemsPtr(1)%ptr%elementSetPtr
          !
          ! Safety check while interpolate_spacetimeSaveWeightFactors is still liberally used.
          if (.not. (connection%converterPtr%ofType == convType_curvi .or. &
@@ -338,8 +353,6 @@ module m_ec_converter
          select case(connection%converterPtr%ofType)
             case(convType_curvi, convType_netcdf)
                ! bilinear interpolation
-               sourceElementSet => connection%sourceItemsPtr(1)%ptr%elementSetPtr
-               targetElementSet => connection%targetItemsPtr(1)%ptr%elementSetPtr
                n_cols = sourceElementSet%n_cols
                n_rows = sourceElementSet%n_rows
                n_points = targetElementSet%nCoordinates
@@ -349,7 +362,13 @@ module m_ec_converter
                if (associated(weight%weightFactors)) deallocate(weight%weightFactors)
                allocate(weight%weightFactors(4, n_points))
                weight%weightFactors = ec_undef_hp
-
+               if (associated(weight%substndx)) deallocate(weight%substndx)
+               allocate(weight%substndx(n_points))
+               weight%substndx = 0
+               iimin=n_cols
+               jjmin=n_rows
+               iimax=0
+               jjmax=0    
                select case (sourceElementSet%ofType)
                   case (elmSetType_spheric_ortho, elmSetType_Cartesian_ortho)
                      src_x=>sourceElementSet%x
@@ -386,67 +405,163 @@ module m_ec_converter
 
                         weight%indices(1,i) = mp
                         weight%indices(2,i) = np
+                        iimin=min(weight%indices(1,idx),iimin)
+                        jjmin=min(weight%indices(2,idx),jjmin)
+                        iimax=max(weight%indices(1,idx)+1,iimax)
+                        jjmax=max(weight%indices(2,idx)+1,jjmax)
                      end do
-                  case (elmSetType_spheric_equidistant, elmSetType_Cartesian_equidistant)
                   case (elmSetType_spheric, elmSetType_Cartesian)
-                     allocate(edge_poly_x(2*n_cols+2*n_rows-2), edge_poly_y(2*n_cols+2*n_rows-2), stat=ierr)
-                     if (ierr /= 0) then
-                         call setECMessage("ERROR: ec_converter::ecConverterUpdateWeightFactors: Unable to allocate additional memory.")
-                         return
-                     endif
-                     j=1
-                     do i=1,n_cols
-                         edge_poly_x(j) = sourceElementSet%x(i) 
-                         edge_poly_y(j) = sourceElementSet%y(i) 
-                         j=j+1
-                     enddo
-                     do i=2,n_rows
-                         edge_poly_x(j) = sourceElementSet%x(i*n_cols) 
-                         edge_poly_y(j) = sourceElementSet%y(i*n_cols) 
-                         j=j+1
-                     enddo
-                     do i=1,n_cols-1
-                         edge_poly_x(j) = sourceElementSet%x(n_rows*n_cols-i) 
-                         edge_poly_y(j) = sourceElementSet%y(n_rows*n_cols-i) 
-                         j=j+1
-                     enddo
-                     do i=1,n_rows-1
-                         edge_poly_x(j) = sourceElementSet%x((n_rows-1-i)*n_cols+1) 
-                         edge_poly_y(j) = sourceElementSet%y((n_rows-1-i)*n_cols+1) 
-                         j=j+1
-                     enddo
-                     edge_poly_x(j) = edge_poly_x(1)
-                     edge_poly_y(j) = edge_poly_x(1)
- 
-                     do i=1, n_points
-                        call pinpok(targetElementSet%x(i), targetElementSet%y(i), 2*n_cols+2*n_rows-2, edge_poly_x, edge_poly_y, inside)                        
-                        if (inside == 1) then
-                           call findnm(targetElementSet%x(i), targetElementSet%y(i), sourceElementSet%x, sourceElementSet%y, &
-                                        n_cols, n_rows, n_cols, n_rows, inside, mp, np, in, jn, wf)
-                           if (inside == 1) then
-                              if (allocated(srcmask%msk)) then
-                                 fmask(1) = (srcmask%msk((np   -srcmask%nmin)*srcmask%mrange+mp   -srcmask%mmin+1))
-                                 fmask(2) = (srcmask%msk((np   -srcmask%nmin)*srcmask%mrange+mp+1 -srcmask%mmin+1))
-                                 fmask(3) = (srcmask%msk((np+1 -srcmask%nmin)*srcmask%mrange+mp+1 -srcmask%mmin+1))
-                                 fmask(4) = (srcmask%msk((np+1 -srcmask%nmin)*srcmask%mrange+mp   -srcmask%mmin+1))
-                                 fsum = sum((1.d0-fmask)*wf)            ! fmask = 1 for DISCARDED corners               
-                                 if (fsum>=1.0e-03) then         
-                                    wf = (wf*(1.d0-fmask))/fsum
-                                 endif
-                              endif 
-                              weight%weightFactors(1,i) = wf(1)    
-                              weight%weightFactors(2,i) = wf(2)    
-                              weight%weightFactors(3,i) = wf(3)    
-                              weight%weightFactors(4,i) = wf(4)    
-                              weight%indices(1,i) = mp
-                              weight%indices(2,i) = np
-                           endif
+                     if (hasKDTree) then            ! new style, using kdtree
+                        ! adopt the global jsferic setting of the EC-module instance
+                        !if (instancePtr%coordsystem==EC_COORDS_SFERIC) then
+                        !    jsferic = 1
+                        !else
+                        !    jsferic = 0
+                        !endif
+                        jsferic = 0                             ! For now, EC-converter consistently regards all coordinates as carthesian
+                        call build_kdtree(treeinst, n_points, targetElementSet%x, targetElementSet%y, ierr, jsferic, ec_undef_hp)
+                        n_cols = sourceElementSet%n_cols
+                        n_rows = sourceElementSet%n_rows
+                        sy_2D(1:n_cols,1:n_rows) => sourceElementSet%y
+                        sx_2D(1:n_cols,1:n_rows) => sourceElementSet%x
+                        do jj=1,n_cols-1
+                           do ii=1,n_rows-1
+                               cx = (sx_2D(jj,ii)+sx_2D(jj+1,ii)+sx_2D(jj,ii+1)+sx_2D(jj+1,ii+1))/4.0
+                               cy = (sy_2D(jj,ii)+sy_2D(jj+1,ii)+sy_2D(jj,ii+1)+sy_2D(jj+1,ii+1))/4.0
+                               r2 = max ( &
+                                   dbdistance(sx_2D(jj,ii),sy_2D(jj,ii),sx_2D(jj+1,ii+1),sy_2D(jj+1,ii+1)),          &
+                                   dbdistance(sx_2D(jj+1,ii),sy_2D(jj+1,ii),sx_2D(jj,ii+1),sy_2D(jj,ii+1))) / 2.     ! longest diagonal divided by 2 (jasfer3D on if jsferic)
+                               call make_queryvector_kdtree(treeinst, cx, cy, jsferic)
+                               nresult = kdtree2_r_count(treeinst%tree, treeinst%qv, r2)
+                               call realloc_results_kdtree(treeinst, nresult)
+                               call kdtree2_n_nearest(treeinst%tree, treeinst%qv, nresult, treeinst%results)
+                               ! loop over find results with pinpok
+                               do iresult = 1, nresult
+                                  idx = treeinst%results(iresult)%idx 
+                                  call pinpok(targetElementSet%x(idx), targetElementSet%y(idx), 5,                       &
+                                     (/sx_2D(jj,ii), sx_2D(jj,ii+1), sx_2D(jj+1,ii+1), sx_2D(jj+1,ii),  sx_2D(jj,ii)/),  &
+                                     (/sy_2D(jj,ii), sy_2D(jj,ii+1), sy_2D(jj+1,ii+1), sy_2D(jj+1,ii),  sy_2D(jj,ii)/),  &
+                                      inside)                        
+                                  if (inside == 1) then
+                                      ! [jj,ii] and [jj+1,ii] and [jj,ii+1] and [jj+1,ii+1] are used
+                                      ! Do stuff for a target point in a source cell     
+                                      weight%indices(1,idx) = ii 
+                                      weight%indices(2,idx) = jj 
+                                      iimin=min(weight%indices(1,idx),iimin)
+                                      jjmin=min(weight%indices(2,idx),jjmin)
+                                      iimax=max(weight%indices(1,idx)+1,iimax)
+                                      jjmax=max(weight%indices(2,idx)+1,jjmax)
+                                  end if
+                              end do
+                           end do
+                        end do
+                        call delete_kdtree2(treeinst)
+                        
+                        ! RL: The sourceElementset x and y arrays span the full meteo grid and should now also be deallocated !
+                        ! deallocate(sourceElementSet%x)
+                        ! deallocate(sourceElementSet%y)
+                        
+                        do i = 1, n_points
+                           imin = weight%indices(1,i)
+                           jmin = weight%indices(2,i)
+                           
+                           do iii=imin,imin+1
+                              do jjj=jmin,jmin+1
+                                 idx = 1 + (jjj-jmin) + 2*(iii-imin)
+!                                 idx = 1 + (iii-imin) + 2*(jjj-jmin)
+                                 xfindpoly(idx) = sx_2D(jjj,iii)
+                                 yfindpoly(idx) = sy_2D(jjj,iii)
+                              end do
+                           end do
+                           
+                           call findnm(targetElementSet%x(i), targetElementSet%y(i), xfindpoly, yfindpoly , &
+                                           2, 2, inside, mp, np, in, jn, wf)
+                                           
+                           if ( inside.ne.1 ) then
+                              continue
+                           end if
+                                           
+                           weight%weightFactors(1,i) = wf(1)
+                           weight%weightFactors(2,i) = wf(2)
+                           weight%weightFactors(3,i) = wf(3)
+                           weight%weightFactors(4,i) = wf(4)
+                        end do
+                     else                           ! old style, not using kdtree
+                        allocate(edge_poly_x(2*n_cols+2*n_rows-2), edge_poly_y(2*n_cols+2*n_rows-2), stat=ierr)
+                        if (ierr /= 0) then
+                            call setECMessage("ERROR: ec_converter::ecConverterUpdateWeightFactors: Unable to allocate additional memory.")
+                            return
                         endif
-                     end do
-                     deallocate(edge_poly_x)
-                     deallocate(edge_poly_y)
+                        j=1
+                        do i=1,n_cols
+                            edge_poly_x(j) = sourceElementSet%x(i) 
+                            edge_poly_y(j) = sourceElementSet%y(i) 
+                            j=j+1
+                        enddo
+                        do i=2,n_rows
+                            edge_poly_x(j) = sourceElementSet%x(i*n_cols) 
+                            edge_poly_y(j) = sourceElementSet%y(i*n_cols) 
+                            j=j+1
+                        enddo
+                        do i=1,n_cols-1
+                            edge_poly_x(j) = sourceElementSet%x(n_rows*n_cols-i) 
+                            edge_poly_y(j) = sourceElementSet%y(n_rows*n_cols-i) 
+                            j=j+1
+                        enddo
+                        do i=1,n_rows-1
+                            edge_poly_x(j) = sourceElementSet%x((n_rows-1-i)*n_cols+1) 
+                            edge_poly_y(j) = sourceElementSet%y((n_rows-1-i)*n_cols+1) 
+                            j=j+1
+                        enddo
+                        edge_poly_x(j) = edge_poly_x(1)
+                        edge_poly_y(j) = edge_poly_x(1)
+    
+                        do i=1, n_points
+                           call pinpok(targetElementSet%x(i), targetElementSet%y(i), 2*n_cols+2*n_rows-2, edge_poly_x, edge_poly_y, inside)                        
+                           if (inside == 1) then
+                              call findnm(targetElementSet%x(i), targetElementSet%y(i), sourceElementSet%x, sourceElementSet%y, &
+                                           n_cols, n_rows, inside, mp, np, in, jn, wf)
+                              if (inside == 1) then
+                                 if (allocated(srcmask%msk)) then
+                                    fmask(1) = (srcmask%msk((np   -srcmask%nmin)*srcmask%mrange+mp   -srcmask%mmin+1))
+                                    fmask(2) = (srcmask%msk((np   -srcmask%nmin)*srcmask%mrange+mp+1 -srcmask%mmin+1))
+                                    fmask(3) = (srcmask%msk((np+1 -srcmask%nmin)*srcmask%mrange+mp+1 -srcmask%mmin+1))
+                                    fmask(4) = (srcmask%msk((np+1 -srcmask%nmin)*srcmask%mrange+mp   -srcmask%mmin+1))
+                                    fsum = sum((1.d0-fmask)*wf)            ! fmask = 1 for DISCARDED corners               
+                                    if (fsum>=1.0e-03) then         
+                                       wf = (wf*(1.d0-fmask))/fsum
+                                    endif
+                                 endif 
+                                 weight%weightFactors(1,i) = wf(1)    
+                                 weight%weightFactors(2,i) = wf(2)    
+                                 weight%weightFactors(3,i) = wf(3)    
+                                 weight%weightFactors(4,i) = wf(4)    
+                                 iimin=min(weight%indices(1,idx),iimin)
+                                 jjmin=min(weight%indices(2,idx),jjmin)
+                                 iimax=max(weight%indices(1,idx)+1,iimax)
+                                 jjmax=max(weight%indices(2,idx)+1,jjmax)
+                                 weight%indices(1,i) = mp
+                                 weight%indices(2,i) = np
+                              endif
+                           endif
+                        end do
+                        deallocate(edge_poly_x)
+                        deallocate(edge_poly_y)
+                     endif                         ! old style, not using kdtree
                   case default
+                     call setECMessage("Unknown element type set for interpolation weights in NetCDF file.")
+                     return
                   end select
+                  ! Shift indices (m and n), to run from (1,1) to (iimax-iimin+1,jjmax-jjmin+1)
+                  do i = 1, n_points
+                     weight%indices(1,i) = weight%indices(1,i) - iimin + 1
+                     weight%indices(2,i) = weight%indices(2,i) - jjmin + 1
+                  end do
+                  ! Set bounding box for reading in the source T0 and T1 fields
+                  do i = 1, connection%nSourceItems
+                     connection%sourceItemsPtr(i)%ptr%sourceT0fieldPtr%bbox = (/jjmin,iimin,jjmax,iimax/)
+                     connection%sourceItemsPtr(i)%ptr%sourceT1fieldPtr%bbox = (/jjmin,iimin,jjmax,iimax/)
+                  end do
                success = .true.
             case(convType_polytim)
                sourceElementSet => connection%sourceItemsPtr(1)%ptr%elementSetPtr
@@ -480,10 +595,10 @@ module m_ec_converter
       
       ! =======================================================================
 
-      subroutine findnm(xl, yl, x, y, mmax, nmax, mc, nc, inside, mv, nv, in, jn, wf)
+      subroutine findnm(xl, yl, x, y, mc, nc, inside, mv, nv, in, jn, wf)
          real(hp),               intent(in)  :: xl, yl !< coordinates of point in target grid
-         real(hp), dimension(:), intent(in)  :: x, y !< coordinates of points in source grid
-         integer,                intent(in)  :: mmax, nmax, mc, nc !< maximum and actual dimensions
+         real(hp), dimension(:), intent(in)  :: x, y   !< coordinates of points in source grid
+         integer,                intent(in)  :: mc, nc !< maximum and actual dimensions
          integer,                intent(out) :: inside, mv, nv, in, jn
          real(hp),               intent(out) :: wf(4)
          !
@@ -1482,6 +1597,7 @@ module m_ec_converter
          !
          type(tEcField),       pointer :: sourceT0Field    !< helper pointer
          type(tEcField),       pointer :: sourceT1Field    !< helper pointer
+         real(hp)                      :: sourceMissing !< Source side missing value
          type(tEcField),       pointer :: targetField      !< helper pointer
          type(tEcIndexWeight), pointer :: indexWeight      !< helper pointer, saved index weights
          type(tEcElementSet),  pointer :: sourceElementSet !< source ElementSet
@@ -1526,6 +1642,7 @@ module m_ec_converter
             do j=1, connection%nSourceItems
                sourceT0Field => connection%sourceItemsPtr(j)%ptr%sourceT0FieldPtr
                sourceT1Field => connection%sourceItemsPtr(j)%ptr%sourceT1FieldPtr
+               sourceMissing =  connection%sourceItemsPtr(j)%ptr%quantityPtr%fillvalue
                targetField   => connection%targetItemsPtr(j)%ptr%targetFieldPtr
                targetValues  => targetField%arr1dPtr
                !
@@ -2224,7 +2341,6 @@ module m_ec_converter
          type(tEcItem), pointer  :: windxPtr ! pointer to item for windx     
          type(tEcItem), pointer  :: windyPtr ! pointer to item for windy
          logical :: has_x_wind, has_y_wind
-!        real(hp), dimension(:), allocatable :: targetValues
          real(hp), dimension(:), pointer     :: targetValues
          real(hp), dimension(:), allocatable :: zsrc
          real(hp)                :: ztgt
@@ -2240,6 +2356,7 @@ module m_ec_converter
          integer                    :: jsferic
          type(kdtree_instance)      :: treeinst
          real(hp), dimension(:), allocatable :: x_extrapolate    ! temporary array holding targetelementset x for setting up kdtree for interpolation
+         integer                    :: col0, row0, col1, row1    ! bounding box in meteo-space spanned by the target elementset
 
          !
          PI = datan(1.d0)*4.d0
@@ -2281,7 +2398,6 @@ module m_ec_converter
                   xtmp = windxPtr%SourceT0fieldptr%arr1dptr(ipt)*cos(phi) + windyPtr%SourceT0fieldptr%arr1dptr(ipt)*sin(phi)
                   windyPtr%SourceT0fieldptr%arr1dptr(ipt) = windxPtr%SourceT0fieldptr%arr1dptr(ipt)*(-sin(phi)) + windyPtr%SourceT0fieldptr%arr1dptr(ipt)*cos(phi)
                   windxPtr%SourceT0fieldptr%arr1dptr(ipt) = xtmp
-
                   xtmp = windxPtr%SourceT1fieldptr%arr1dptr(ipt)*cos(phi) + windyPtr%SourceT1fieldptr%arr1dptr(ipt)*sin(phi)
                   windyPtr%SourceT1fieldptr%arr1dptr(ipt) = windxPtr%SourceT1fieldptr%arr1dptr(ipt)*(-sin(phi)) + windyPtr%SourceT1fieldptr%arr1dptr(ipt)*cos(phi)
                   windxPtr%SourceT1fieldptr%arr1dptr(ipt) = xtmp
@@ -2310,9 +2426,16 @@ module m_ec_converter
                   targetMissing = targetField%MISSINGVALUE
                   targetElementSet => targetItem%elementSetPtr
 
+                  col0 = sourceItem%sourceT0FieldPtr%bbox(1)
+                  row0 = sourceItem%sourceT0FieldPtr%bbox(2)
+                  col1 = sourceItem%sourceT0FieldPtr%bbox(3)
+                  row1 = sourceItem%sourceT0FieldPtr%bbox(4)
+
                   n_points = targetElementSet%nCoordinates
-                  n_cols = sourceElementSet%n_cols
-                  n_rows = sourceElementSet%n_rows
+                  !n_cols = sourceElementSet%n_cols
+                  !n_rows = sourceElementSet%n_rows
+                  n_rows = row1 - row0 + 1
+                  n_cols = col1 - col0 + 1
                   n_layers = sourceElementSet%n_layers
                   t0 = sourceT0Field%timesteps
                   t1 = sourceT1Field%timesteps
@@ -2463,8 +2586,8 @@ module m_ec_converter
                      allocate(missing(n_points))
                      missing = .False.
                      do j=1, n_points
-                        mp = indexWeight%indices(1,j)
-                        np = indexWeight%indices(2,j)
+                        np = indexWeight%indices(1,j)
+                        mp = indexWeight%indices(2,j)
                         jamissing = 0
                         if (mp > 0 .and. np > 0) then ! if mp and np both valid, this is an interior point of the meteo domain, else ignore
                                                       ! check missing values for points with valid mp and np
@@ -2480,9 +2603,9 @@ module m_ec_converter
                                  end if
                               end do
                            end do kloop2D
-                           if (jamissing>0) then                                                                              ! if insufficient data for bi-linear interpolation
+                           if (jamissing>0) then                                                                        ! if insufficient data for bi-linear interpolation
                               missing(j) = .True.    ! Mark missings in the target grid in a temporary logical array  
-                              if (allocated(x_extrapolate)) x_extrapolate(j)=ec_undef_hp
+                              if (allocated(x_extrapolate)) x_extrapolate(j)=ec_undef_hp                                ! no-data -> unelectable for kdtree later
                            else
                               do jj=0,1
                                  do ii=0,1
@@ -2491,28 +2614,32 @@ module m_ec_converter
                                     targetValues(j) = targetValues(j) + a1 * weight * s2D_T1(mp+ii, np+jj)
                                  end do
                               end do
-                              if (allocated(x_extrapolate)) x_extrapolate(j)=targetElementSet%x(j)
+                              if (allocated(x_extrapolate)) x_extrapolate(j)=targetElementSet%x(j)                      ! x_extrapolate is a copy of the x with missing points marked by ec_undef_hp
                            end if
                         end if
                      end do      ! points j
-                     if (connection%converterPtr%interpolationType == extrapolate_spacetimeSaveWeightFactors) then   ! if extrapolation permitted ... 
-                        do j=1, n_points             ! Loop over the grid for missing in the target grid  
-                           if (missing(j)) then
-                              ! Now kdtree over target locations which do NOT yet have a value ('missing'), find the first nearest neighbour
-                              if (treeinst%itreestat /= ITREE_OK) then
-                                 jsferic = merge(1,0,targetElementSet%ofType == elmSetType_spheric)
-                                 call build_kdtree(treeinst, n_points, x_extrapolate, targetElementSet%y, ierr, jsferic, ec_undef_hp)
+                     if (connection%converterPtr%interpolationType == extrapolate_spacetimeSaveWeightFactors) then      ! if extrapolation permitted ... 
+                        do j=1, n_points                                                                                ! Loop over the grid for missing in the target grid  
+                           if (missing(j)) then                                                                         ! Can only be an interior point with ORIGINALLY valid mp and np
+                              if (indexWeight%substndx(j)==0) then                                                      ! if we had not yet searched for a replacement value in the target grid, do so.
+                                 if (treeinst%itreestat /= ITREE_OK) then
+!                                   jsferic = merge(1,0,targetElementSet%ofType == elmSetType_spheric)                  ! adopt the global jsferic setting of the EC-module instance
+                                    jsferic = 0                                                                         ! in EC-converter treat all coordinates as carthesian
+                                                                                                                        ! Now kdtree over target locations which do NOT yet have a value ('missing')
+                                    call build_kdtree(treeinst, n_points, x_extrapolate, targetElementSet%y, ierr, jsferic, ec_undef_hp)
+                                 endif
+                                 call make_queryvector_kdtree(treeinst, targetElementSet%x(j), targetElementSet%y(j), jsferic)
+                                 call kdtree2_n_nearest(treeinst%tree, treeinst%qv, 1, treeinst%results)                ! use the first nearest neighbour
+                                 indexWeight%substndx(j) = treeinst%results(1)%idx                                      ! store its index for for later use (in an array that is init to zero)
                               endif
-                              call make_queryvector_kdtree(treeinst, targetElementSet%x(j), targetElementSet%y(j), jsferic)
-                              call kdtree2_n_nearest(treeinst%tree, treeinst%qv, 1, treeinst%results)
-                              targetValues(j) = targetValues(treeinst%results(1)%idx)
+                              targetValues(j) = targetValues(indexWeight%substndx(j))                                   ! and copy its value as a target value for the target point with missing data.
                            endif
                         end do   ! points j
-                     endif
+                     endif   
                      if (allocated(missing)) deallocate(missing)
                      if (allocated(x_extrapolate)) deallocate(x_extrapolate)
                      call delete_kdtree2(treeinst)
-                  end if
+                  end if         ! 2d or 3d
                   connection%targetItemsPtr(i)%ptr%targetFieldPtr%timesteps = timesteps
                end do   ! target items i
                if (connection%converterPtr%interpolationType == extrapolate_spacetimeSaveWeightFactors) then
@@ -2607,7 +2734,8 @@ module m_ec_converter
          integer,                intent(out) :: kR       !< Index of right nearest polyline point (with kcs==1!)
          real(hp),               intent(out) :: wR       !< Relative weight of right nearest polyline point.
          !
-         integer      :: k, km, JACROS
+         integer  :: k, km, JACROS
+         integer  :: jsferic = 0                         !< Temporary: in future, jsferic should be passed as a parameter.
          real(hp) :: dis, disM, disL, disR
          real(hp) :: SL,SM,SMM,SLM,XCR,YCR,CRP,CRPM,DEPS
          !

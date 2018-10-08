@@ -1428,6 +1428,7 @@ module m_meteo
             endif
          endif
       end if
+      success = ecSetConnectionIndexWeights(ecInstancePtr, connectionId)
 
       ec_addtimespacerelation = .true.
       return
@@ -1460,19 +1461,19 @@ module m_meteo
       integer,           intent(in) :: targetItemId  !< the target item ID
 
       type(tEcItem),       pointer :: itemPtrSrc     !< Item corresponding to sourceItemId
-      type(tEcItem),       pointer :: itemPtrTrg     !< Item corresponding to targetItemId
+      type(tEcItem),       pointer :: itemPtrTgt     !< Item corresponding to targetItemId
       integer                      :: vectorMaxSrc   !< vectorMax for source item
-      integer                      :: vectorMaxTrg   !< vectorMax for target item
+      integer                      :: vectorMaxTgt   !< vectorMax for target item
 
       success = .true.
       itemPtrSrc => ecSupportFindItem(ecInstancePtr, sourceItemId)
-      itemPtrTrg => ecSupportFindItem(ecInstancePtr, targetItemId)
+      itemPtrTgt => ecSupportFindItem(ecInstancePtr, targetItemId)
       vectorMaxSrc = itemPtrSrc%quantityPtr%vectorMax
-      vectorMaxTrg = itemPtrTrg%quantityPtr%vectorMax
-      if (vectorMaxSrc /= vectorMaxTrg) then
+      vectorMaxTgt = itemPtrTgt%quantityPtr%vectorMax
+      if (vectorMaxSrc /= vectorMaxTgt) then
          success = .false.
-         call mess(LEVEL_ERROR, "Vector max differs for " // trim(itemPtrTrg%quantityPtr%name) &
-                    // " values (resp. source, target): ", vectorMaxSrc, vectorMaxTrg)
+         call mess(LEVEL_ERROR, "Vector max differs for " // trim(itemPtrTgt%quantityPtr%name) &
+                    // " values (resp. source, target): ", vectorMaxSrc, vectorMaxTgt)
       endif
    end function checkVectorMax
    
