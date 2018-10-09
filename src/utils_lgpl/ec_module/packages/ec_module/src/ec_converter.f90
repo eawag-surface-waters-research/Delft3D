@@ -403,12 +403,15 @@ module m_ec_converter
                            enddo
                         endif
 
-                        weight%indices(1,i) = mp
-                        weight%indices(2,i) = np
-                        iimin=min(weight%indices(1,idx),iimin)
-                        jjmin=min(weight%indices(2,idx),jjmin)
-                        iimax=max(weight%indices(1,idx)+1,iimax)
-                        jjmax=max(weight%indices(2,idx)+1,jjmax)
+                        weight%indices(1,i) = np
+                        weight%indices(2,i) = mp
+                        
+                        if ( np>0 .and. mp>0 ) then
+                           iimin=min(weight%indices(1,i),iimin)
+                           jjmin=min(weight%indices(2,i),jjmin)
+                           iimax=max(weight%indices(1,i)+1,iimax)
+                           jjmax=max(weight%indices(2,i)+1,jjmax)
+                        end if
                      end do
                   case (elmSetType_spheric, elmSetType_Cartesian)
                      if (hasKDTree) then            ! new style, using kdtree
@@ -447,10 +450,10 @@ module m_ec_converter
                                       ! Do stuff for a target point in a source cell     
                                       weight%indices(1,idx) = ii 
                                       weight%indices(2,idx) = jj 
-                                      iimin=min(weight%indices(1,idx),iimin)
-                                      jjmin=min(weight%indices(2,idx),jjmin)
-                                      iimax=max(weight%indices(1,idx)+1,iimax)
-                                      jjmax=max(weight%indices(2,idx)+1,jjmax)
+                                      iimin=min(ii,iimin)
+                                      jjmin=min(jj,jjmin)
+                                      iimax=max(ii+1,iimax)
+                                      jjmax=max(jj+1,jjmax)
                                   end if
                               end do
                            end do
@@ -538,10 +541,12 @@ module m_ec_converter
                                  weight%weightFactors(2,i) = wf(2)    
                                  weight%weightFactors(3,i) = wf(3)    
                                  weight%weightFactors(4,i) = wf(4)    
-                                 iimin=min(weight%indices(1,idx),iimin)
-                                 jjmin=min(weight%indices(2,idx),jjmin)
-                                 iimax=max(weight%indices(1,idx)+1,iimax)
-                                 jjmax=max(weight%indices(2,idx)+1,jjmax)
+                                 if ( mp>0 .and. np>0 ) then
+                                    iimin=min(weight%indices(1,i),iimin)
+                                    jjmin=min(weight%indices(2,i),jjmin)
+                                    iimax=max(weight%indices(1,i)+1,iimax)
+                                    jjmax=max(weight%indices(2,i)+1,jjmax)
+                                 end if
                                  weight%indices(1,i) = mp
                                  weight%indices(2,i) = np
                               endif
