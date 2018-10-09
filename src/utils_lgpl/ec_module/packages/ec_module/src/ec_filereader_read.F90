@@ -833,8 +833,8 @@ module m_ec_filereader_read
                      do k=1, item%elementSetPtr%n_layers
 !                       ierror = nf90_get_var(fileReaderPtr%fileHandle, varid, data_block, start=(/1, 1, k, times_index/), count=(/item%elementSetPtr%n_cols, item%elementSetPtr%n_rows, 1, 1/))
                         ierror = nf90_get_var(fileReaderPtr%fileHandle, varid, data_block, start=(/col0, row0, k, times_index/), count=(/ncol, nrow, 1, 1/))
-                        do i=row0, row1
-                           do j=col0, col1
+                        do i=1, nrow
+                           do j=1, ncol
                               fieldPtr%arr1dPtr( (k-1)*ncol*nrow + (i-1)*ncol +  j ) = data_block(j,i)
                               valid_field = .True.
                            end do

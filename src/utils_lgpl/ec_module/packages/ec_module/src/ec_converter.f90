@@ -318,6 +318,7 @@ module m_ec_converter
          
          !
          hasKDTree = .True.
+!         hasKDTree = .False.
          success = .false.
          sourceElementSet => null()
          sourceElementSet => connection%sourceItemsPtr(1)%ptr%elementSetPtr
@@ -2458,8 +2459,8 @@ module m_ec_converter
                      do j=1, n_points
                         kbot = targetElementSet%kbot(j)
                         ktop = targetElementSet%ktop(j)
-                        mp = indexWeight%indices(1,j)
-                        np = indexWeight%indices(2,j)
+                        np = indexWeight%indices(1,j)
+                        mp = indexWeight%indices(2,j)
                         if (mp > 0 .and. np > 0) then
                            if (connection%converterPtr%operandType==operand_replace) then
                               targetValues(kbot:ktop) = 0.0_hp
