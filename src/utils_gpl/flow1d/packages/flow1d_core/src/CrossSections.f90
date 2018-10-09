@@ -242,7 +242,6 @@ module m_CrossSections
        double precision             :: charHeight
        double precision             :: charWidth
        logical                      :: closed
-       logical                      :: updateTable = .false. !< Update tabulated profile based on update heights
        integer                      :: bedFrictionType
        double precision             :: bedFriction
        integer                      :: groundFrictionType
@@ -1760,7 +1759,7 @@ subroutine TabulatedProfile(dpt, cross, doFlow, getSummerDikes, area, width, per
 
    crossDef => cross%tabDef
    
-   if (cross%updateTable) then
+   if (updateTabulatedProfiles) then
       call GetTabulatedSizes(dpt, crossDef, doFlow, area, width, perimeter, af_sub, perim_sub, calculationOption)
    else
       call GetTabSizesFromTables(dpt, crossDef, doFlow, area, width, perimeter, af_sub, perim_sub, calculationOption)

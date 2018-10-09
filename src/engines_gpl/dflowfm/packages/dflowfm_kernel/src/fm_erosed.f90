@@ -253,7 +253,6 @@
         if (kcs(nm)==1) then ! only for 1D nodes 
             if (gridpoint2cross(nm)%num_cross_sections==1) then
                 c = gridpoint2cross(nm)%cross(1)
-                network%crs%cross(c)%updateTable = .false. 
                 cdef => network%crs%cross(c)%tabdef
                 ctype = cdef%crosstype
                 if (ctype== CS_TABULATED) then
@@ -345,7 +344,6 @@
                     network%crs%cross(c)%surfaceLevel = cdef%height(cdef%levelscount)
                     network%crs%cross(c)%bedLevel     = cdef%height(1) !TODO: check if we need to include network%crs%cross(c)%shift
                     network%crs%cross(c)%charheight   = network%crs%cross(c)%surfaceLevel - network%crs%cross(c)%bedLevel
-                    network%crs%cross(c)%updateTable = .true. 
                 else
                     write(msgbuf,'(a,i5)') 'Bed level updating has not yet implemented for cross section type ',ctype
                     call err_flush()
