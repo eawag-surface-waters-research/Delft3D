@@ -107,11 +107,14 @@
 
         subroutine mf_close(fptr)
         implicit none 
-        integer(kind=8),intent(in)  ::      fptr    
+        integer(kind=8),intent(inout)  ::      fptr    
         integer :: res 
         integer :: CUTIL_MF_CLOSE
         res = CUTIL_MF_CLOSE(fptr)
-        if (res==0) nfptr = nfptr - 1
+        if (res==0) then
+		   nfptr = nfptr - 1
+		   fptr  = 0
+		endif   
         end subroutine mf_close
 
 
