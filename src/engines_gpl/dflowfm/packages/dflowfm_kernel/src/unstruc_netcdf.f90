@@ -9383,6 +9383,7 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
       ierr = ionc_get_meshgeom(ioncid, im, networkIndex, meshgeom)
       
       if (meshgeom%dim == 1) then
+         cycle
          !Save meshgeom for later writing of the 1d network
          ierr = ionc_get_meshgeom(ioncid, im, networkIndex, meshgeom, start_index, includeArrays, nbranchids, nbranchlongnames, nnodeids, nnodelongnames, & 
                                   nodeids, nodelongnames, network1dname, mesh1dname) 
