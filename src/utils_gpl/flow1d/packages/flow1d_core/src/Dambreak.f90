@@ -64,7 +64,7 @@
       double precision :: crl
       double precision :: aCoeff
       double precision :: bCoeff
-      double precision :: maximumAllowedWidth = - 1.0D0
+      double precision :: maximumAllowedWidth = - 1.0d0
 
    end type
    
