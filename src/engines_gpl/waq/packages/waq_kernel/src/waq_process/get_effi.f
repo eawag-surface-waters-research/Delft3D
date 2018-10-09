@@ -52,12 +52,20 @@
       real*8   csol       ! radiation
       real*8   dsol       ! radiation
       real*8   radtop     ! radiation at the top of the segment
+      real*8   radmid     ! radiation at the middle of the segment
       real*8   radbot     ! radiation at the bottom of the segment
+      real*8   radlay     ! radiation at the current effi layer of the segment
       real*8   effitop    ! efficiency at the top of the segment
+      real*8   effimid    ! efficiency at the middle of the segment
       real*8   effibot    ! efficiency at the bottom of the segment
+      real*8   effilay    ! efficiency at the current effi layer of the segment
+      real*8   effitot    ! efficiency collector for calculation of the average
+      integer  neffilay   ! number of effi layers
+      integer  ilay       ! current effi layer number
       real*8   dep        ! depth
       real*8   exttot     ! total extinction
       real*8   day        ! daylength in hours
+      real*8   dayl       ! daylength in fraction
       real*8   tcorr      ! tcorr
       real*8   surf_typ   ! scaled, converted and corrected radiation for a type
       integer  ntyp       ! number of bloom algea types
@@ -76,6 +84,7 @@
       exttot = ext
       temp   = temper
       day    = daylen
+      dayl   = day/24.0d0
       nspe   = nuecog
       ntyp   = maxval(it2)
       effi = 0.0d0
@@ -110,28 +119,79 @@
                endif
             enddo
          enddo
-      else
-      ! direct effi lookup in light curve
-         if (SWEff == 2) then
-            radtop=radiat / 0.0168  ! conversion from J/cm2/7days to J/m2/hour (*3600.0/60.48 = /0.0168)
-         else
-            radtop=radiat * (day/24.0) / 0.0168 ! conversion from J/cm2/7days to J/m2/hour (*3600.0/60.48 = /0.0168) and daylength correction
-         endif
+      else if (SWEff == 2) then
+         ! direct effi lookup in light curve at top (SWEff == 2)
          do igroup = 1 , nuecog
             do itype = it2(igroup,1),it2(igroup,2)
                tcorr = pmax20(itype)/pmax(itype)
-               if (sdmixn(itype).eq.0.0) then
-                  radbot = radtop
-                  call lookupeffi(tcorr * radtop,effitop,igroup)
-                  effi(igroup) = effitop
+               if (sdmixn(itype).eq.0.0d0) then
+                  radtop = radiat / 0.0168d0  ! conversion from J/cm2/7days to J/m2/hour (*3600.0/60.48 = /0.0168)
                else
-                  radbot   = radtop * dexp (- exttot * sdmixn(itype) * dep)
-                  call lookupeffi(tcorr * radtop,effitop,igroup)
-                  call lookupeffi(tcorr * radbot,effibot,igroup)
-                  effi(igroup) = (effitop+effibot)/2.0
-               end if
+                  radtop = (radiat / 0.0168d0) * dexp (- exttot * abs(sdmixn(itype)) * dep)
+               endif
+               call lookupeffi(tcorr * radtop,effitop,igroup)
+               effi(igroup) = max(effi(igroup), effitop)
             enddo
          enddo
+      elseif (SWEff == 3) then
+         ! direct effi lookup in light curve at top and bottom and take average (SWEff == 3)
+         do igroup = 1 , nuecog
+            do itype = it2(igroup,1),it2(igroup,2)
+               tcorr = pmax20(itype)/pmax(itype)
+               if (sdmixn(itype).eq.0.0d0) then
+                  radtop = radiat / 0.0168d0  ! conversion from J/cm2/7days to J/m2/hour (*3600.0/60.48 = /0.0168)
+               else
+                  radtop = (radiat / 0.0168d0) * dexp (- exttot * abs(sdmixn(itype)) * dep)
+               endif
+               radbot = radtop * dexp (- exttot * abs(sdmix(itype)) * dep)
+               call lookupeffi(tcorr * radtop,effitop,igroup)
+               call lookupeffi(tcorr * radbot,effibot,igroup)
+               effi(igroup) = max(effi(igroup), (effitop+effibot)/2.0)
+            enddo
+         enddo
+      elseif (SWEff == 4) then
+         ! direct effi lookup in light curve at top, middle and bottom and take weighted average (SWEff == 4)
+         do igroup = 1 , nuecog
+            do itype = it2(igroup,1),it2(igroup,2)
+               tcorr = pmax20(itype)/pmax(itype)
+               if (sdmixn(itype).eq.0.0d0) then
+                  radtop = radiat / 0.0168d0  ! conversion from J/cm2/7days to J/m2/hour (*3600.0/60.48 = /0.0168)
+               else
+                  radtop = (radiat / 0.0168d0) * dexp (- exttot * abs(sdmixn(itype)) * dep)
+               endif
+               radmid = radtop * dexp (- exttot * 0.5d0 * abs(sdmix(itype)) * dep)
+               radbot = radtop * dexp (- exttot * abs(sdmix(itype)) * dep)
+               call lookupeffi(tcorr * radtop,effitop,igroup)
+               call lookupeffi(tcorr * radmid,effimid,igroup)
+               call lookupeffi(tcorr * radbot,effibot,igroup)
+               effi(igroup) = max(effi(igroup), (effitop+effimid+effimid+effibot)/4.0)
+            enddo
+         enddo
+      elseif (SWEff < 0) then 
+         ! direct effi lookup in light curve at top and abs(sweff) number of layers and take average (SWEff < 0)
+         neffilay = abs (SWEff)
+         do igroup = 1 , nuecog
+            do itype = it2(igroup,1),it2(igroup,2)
+               tcorr = pmax20(itype)/pmax(itype)
+               if (sdmixn(itype).eq.0.0d0) then
+                  radtop = radiat / 0.0168d0  ! conversion from J/cm2/7days to J/m2/hour (*3600.0/60.48 = /0.0168)
+               else
+                  radtop = (radiat / 0.0168d0) * dexp (- exttot * abs(sdmixn(itype)) * dep)
+               endif
+               call lookupeffi(tcorr * radtop,effitot,igroup)
+               do ilay = 1, neffilay-1
+                  radlay = radtop * dexp (- exttot * (1.0d0/real(neffilay,8)) * abs(sdmix(itype)) * dep)
+                  call lookupeffi(tcorr * radlay,effilay,igroup)
+                  effitot = effitot + effilay * 2
+                  radtop = radlay
+               enddo
+               radlay = radtop * dexp (- exttot * (1.0d0/real(neffilay,8)) * abs(sdmix(itype)) * dep)
+                  call lookupeffi(tcorr * radlay,effilay,igroup)
+               effitot = effitot + effilay
+               effi(igroup) = max(effi(igroup), (effitot/real(neffilay*2,8))/dayl)
+            enddo
+         enddo
+
       endif
       return
 
