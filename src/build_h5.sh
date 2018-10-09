@@ -566,6 +566,23 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+
+#===============================================================================
+# Post-install cleaning
+log "Executing python script 'dimr_artifacts.py' to clean up installation directory"
+log='logs/post-install.log'
+command="python $orgdir/engines_gpl/dimr/scripts/dimr_artifacts.py $orgdir &> $log"
+
+log "Running $command"
+eval $command
+
+if [ $? -ne 0 ]; then
+    log "ERROR: post-install fails!"
+    cd $orgdir
+    exit 1
+fi
+
 log "Build finished"
 cd $orgdir
 exit 0
+

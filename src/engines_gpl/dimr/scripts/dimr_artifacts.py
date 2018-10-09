@@ -39,7 +39,7 @@ def platformArtifacts(platform):
                    shutil.copyfile(afile, newfilename)
     #
     # Remove files that are in the share directory (currently only used on Windows)
-    if os.path.isdir(pltdir):
+    if (os.path.isdir(pltdir) and platform != "lib"):
         os.chdir(pltdir)
         sharedir=os.path.join(pltdir, "share", "bin")
         if os.path.isdir(sharedir):
@@ -72,6 +72,8 @@ if len(sys.argv) != 2:
     usage()
 os.chdir(sys.argv[1])
 platformArtifacts("lnx64")
+# Use platform "lib" to clean up subdir lib
+platformArtifacts("lib")
 platformArtifacts("x64")
 platformArtifacts("x32")
 # Take care of executable bit on binaries
