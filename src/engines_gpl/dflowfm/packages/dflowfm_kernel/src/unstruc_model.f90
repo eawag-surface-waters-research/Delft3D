@@ -2721,39 +2721,8 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        call prop_set(prop_ptr, 'output', 'Wrimap_tidal_potential', jamaptidep, 'Write tidal potential to map file (1: yes, 0: no)')
     end if
 
-    if( writeall .or. jashp_crs > 0 ) then
-       call prop_set(prop_ptr, 'output', 'Wrishp_crs', jashp_crs,   'Write a shape file for cress sections')
-    endif
-    if( writeall .or. jashp_obs > 0 ) then
-       call prop_set(prop_ptr, 'output', 'Wrishp_obs', jashp_obs,   'Write a shape file for observation points')
-    end if
-    if( writeall .or. jashp_weir > 0 ) then
-    call prop_set(prop_ptr, 'output', 'Wrishp_weir', jashp_weir, 'Write a shape file for weirs')
-    end if
-    if( writeall .or. jashp_thd > 0 ) then
-       call prop_set(prop_ptr, 'output', 'Wrishp_thd', jashp_thd,   'Write a shape file for thin dams')
-    end if
-    if( writeall .or. jashp_gate > 0 ) then
-       call prop_set(prop_ptr, 'output', 'Wrishp_gate', jashp_gate, 'Write a shape file for gates')
-    end if
-    if( writeall .or. jashp_emb > 0 ) then
-       call prop_set(prop_ptr, 'output', 'Wrishp_emb', jashp_emb,   'Write a shape file for embankments')
-    end if
-    if( writeall .or. jashp_fxw > 0 ) then
-       call prop_set(prop_ptr, 'output', 'Wrishp_fxw', jashp_fxw,   'Write a shape file for fixed weirs')
-    end if
-    if( writeall .or. jashp_src > 0 ) then
-       call prop_set(prop_ptr, 'output', 'Wrishp_src', jashp_src,   'Write a shape file for sourse-sinks')
-    end if
-    if( writeall .or. jashp_pump > 0 ) then
-       call prop_set(prop_ptr, 'output', 'Wrishp_pump', jashp_pump, 'Write a shape file for pumps')
-    end if
-
     if (jaFrcInternalTides2D > 0 .and. (writeall .or. jamapIntTidesDiss /=1 )) then
        call prop_set(prop_ptr, 'output', 'Wrimap_internal_tides_dissipation', jamaptidep, 'Write tidal potential to map file (1: yes, 0: no)')
-    end if
-    if( writeall .or. jashp_dry > 0 ) then
-       call prop_set(prop_ptr, 'output', 'Wrishp_dryarea', jashp_dry, 'Write a shape file for dry areas')
     end if
 
     call prop_set(prop_ptr, 'output', 'Writepart_domain', japartdomain, 'Write partition domain info. for postprocessing')
@@ -2789,7 +2758,10 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     if (writeall .or. jashp_pump /= 0) then
        call prop_set(prop_ptr, 'output', 'Wrishp_pump', jashp_pump, 'Write grid-snapped pumps to shapefile (1: yes, 0: no)')
     end if
-
+    if( writeall .or. jashp_dry > 0 ) then
+       call prop_set(prop_ptr, 'output', 'Wrishp_dryarea', jashp_dry, 'Write a shape file for dry areas')
+    end if
+    
     call prop_set(prop_ptr, 'output', 'WriteDFMinterpretedvalues', jaWriteDFMinterpretedvalues, 'Write DFMinterpretedvalues (1: yes, 0: no)' )
 
     call prop_set(prop_ptr, 'output', 'MapOutputTimeVector',  trim(md_mptfile), 'File (*.mpt) containing fixed map output times (s) w.r.t. RefDate')
