@@ -554,11 +554,13 @@ module m_ec_converter
                      call setECMessage("Unknown element type set for interpolation weights in NetCDF file.")
                      return
                   end select
-                  ! Shift indices (m and n), to run from (1,1) to (iimax-iimin+1,jjmax-jjmin+1)
-                  do i = 1, n_points
-                     weight%indices(1,i) = weight%indices(1,i) - iimin + 1
-                     weight%indices(2,i) = weight%indices(2,i) - jjmin + 1
-                  end do
+                  ! Shift indices (m and n), to run from (1,1) to (iimax-iimin+1,jjmax-jjmin+1), only for the netCDF type
+                  if (connection%converterPtr%ofType == convType_netcdf) then
+                     do i = 1, n_points
+                        weight%indices(1,i) = weight%indices(1,i) - iimin + 1
+                        weight%indices(2,i) = weight%indices(2,i) - jjmin + 1
+                     end do
+                  endif
                   ! Set bounding box for reading in the source T0 and T1 fields
                   do i = 1, connection%nSourceItems
                      connection%sourceItemsPtr(i)%ptr%sourceT0fieldPtr%bbox = (/jjmin,iimin,jjmax,iimax/)
@@ -1651,8 +1653,8 @@ module m_ec_converter
                s2D_T0(1:n_cols,1:n_rows) => sourceT0Field%arr1d
                s2D_T1(1:n_cols,1:n_rows) => sourceT1Field%arr1d
                do i=1, n_points
-                  mp = indexWeight%indices(1,i)
-                  np = indexWeight%indices(2,i)
+                  np = indexWeight%indices(1,i)
+                  mp = indexWeight%indices(2,i)
                   if (mp > 0 .and. np > 0) then
                      nmiss = 0
                      do jj=0,1
