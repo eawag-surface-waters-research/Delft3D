@@ -6088,8 +6088,8 @@ if (ihorvic > 0 .or. NDRAW(29) == 37) then
               ucy(k1) = ucy(k1) + wcy1(LL)*u1(Lb)
            enddo   
            do k2 = kbot(ln0(2,LL)), ln0(2,Lb) - 1
-              ucx(k2) = ucx(k2) + wcx1(LL)*u1(Lb)
-              ucy(k2) = ucy(k2) + wcy1(LL)*u1(Lb)
+              ucx(k2) = ucx(k2) + wcx2(LL)*u1(Lb)
+              ucy(k2) = ucy(k2) + wcy2(LL)*u1(Lb)
            enddo   
        endif   
        
