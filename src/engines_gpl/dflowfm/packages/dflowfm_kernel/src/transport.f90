@@ -1436,7 +1436,7 @@ subroutine fill_constituents(jas) ! if jas == 1 do sources
       end if
    
       !if ( ITEMP.ne.0 ) then
-      !    constituents(ITEMP,k) = t em1(k)
+      !    constituents(ITEMP,k) = tem1(k)
       !end if
    
       if( jasecflow > 0 .and. jaequili == 0 .and. kmx == 0 ) then
@@ -1740,6 +1740,19 @@ subroutine extract_constituents()
             write(msgbuf , *) 'Max. temperature limited, number of cells Limmax = ' , limmax  ; call msg_flush()
          endif   
       endif   
+      if (tempmin .ne. dmiss) then ! tem is now positive
+         limmin = 0 
+         do k = 1, Ndkx
+            if (constituents(itemp,k) < tempmin) then 
+                constituents(itemp,k) = tempmin
+                limmin   = limmin + 1
+            endif     
+         enddo
+         if (limmin .ne. 0) then 
+            write(msgbuf , *) 'Min. temperature limited, number of cells Limmin = ' , limmin  ; call msg_flush()
+         endif   
+      endif   
+
    endif
 
    if (jasal .ne. 0) then  
