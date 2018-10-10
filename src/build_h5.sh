@@ -571,7 +571,7 @@ fi
 # Post-install cleaning
 log "Executing python script 'dimr_artifacts.py' to clean up installation directory"
 log='logs/post-install.log'
-command="python $orgdir/engines_gpl/dimr/scripts/dimr_artifacts.py $orgdir &> $log"
+command="python $maindir/engines_gpl/dimr/scripts/dimr_artifacts.py $maindir &> $log"
 
 log "Running $command"
 eval $command
