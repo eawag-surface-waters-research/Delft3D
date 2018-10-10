@@ -1794,6 +1794,9 @@ subroutine extract_rho()
    
    do k=1,Ndkx
       rho(k) = constituents(1,k)
+      if ( ISALT.ne.0 ) then
+         constituents(ISALT,k) = sa1(k)
+      endif   
    enddo
    
    return
