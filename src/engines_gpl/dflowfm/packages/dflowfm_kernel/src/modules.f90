@@ -3038,7 +3038,7 @@ subroutine default_flowparameters()
     jahazlayer = 0       !<
     JaZlayercenterbedvel = 1
 
-    jabaroctimeint = -2  !< time integration baroclini pressure, 1 = explicit, abs() = 2; adams bashford , 3 = ab3, 5 = adv rho
+    jabaroctimeint = -3  !< time integration baroclini pressure, 1 = explicit, abs() = 2; adams bashford , 3 = ab3, 5 = adv rho
     jabarocterm = 2      ! revised baroc term
 
     jaanalytic = 0                    !< analytic solution available in black sideview => do not also show computed surface in black
@@ -4212,6 +4212,7 @@ end subroutine reset_flowgeom
  double precision                  :: cpufuru (3) !< cputime conj-grad (1)=start,(2)=stop,(3)=total
  double precision                  :: cpuall  (3) !< cputime steps + plots 1,2,3 idem
  double precision                  :: cpuinistep(3) !< cputime inistep 1,2,3 idem
+ double precision                  :: cpuiniext (3) !< cputime init externalforcings (1)=start,(2)=stop,(3)=total
  double precision                  :: cpuext    (3) !< cputime externalforcings      (1)=start,(2)=stop,(3)=total
  double precision                  :: cpuextbnd (3) !< cputime externalforcingsonbnd (1)=start,(2)=stop,(3)=total
  double precision                  :: cpuwri      !< cputime writing (s)
@@ -4331,6 +4332,7 @@ subroutine reset_flowtimes()
     cpusol    (3) = 0                !< cputime conj-grad (1)=start,(2)=stop,(3)=total
     cpuall    (3) = 0                !< cputime steps + plots 1,2,3 idem
     cpuinistep(3) = 0                !< cputime steps + plots 1,2,3 idem
+    cpuiniext (3) = 0                !< init external forcing
     cpuext    (3) = 0                !< external forcing
     cpuextbnd (3) = 0                !< external forcing bnd
     cpuwri        = 0                !< cputime writing (s)

@@ -363,11 +363,13 @@
       ELSE IF (MODE .EQ. 5) THEN
          CALL EDITSAM(MODE,KEY)
       ELSE IF (MODE .EQ. 6) THEN
-         CALL EDITFLOW(MODE,KEY)
+         CALL EDITFLOW(MODE,KEY,51)
+      ELSE IF (MODE .EQ. 7) THEN
+         CALL EDITFLOW(MODE,KEY,52)
       ENDIF
       ! Catch invalid modes return from edit*-routines.
       ! Set back to last valid mode if necessary.
-      if (mode >= 1 .and. mode <= 6) then
+      if (mode >= 1 .and. mode <= 7) then
           lastmode = mode ! is a good mode
       else
           mode = lastmode ! return to last known good mode

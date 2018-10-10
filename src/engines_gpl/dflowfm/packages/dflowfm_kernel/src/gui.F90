@@ -611,8 +611,9 @@
       OPTION(3) = 'Edit splines                            '
       OPTION(4) = 'Edit curvilinear grid                   '
       OPTION(5) = 'Edit samples                            '
-      OPTION(6) = 'Show flow nodes/links                   '
-      MAXOPT    = 6
+      OPTION(6) = 'Show flow nodes                         '
+      OPTION(7) = 'Show flow links                         '
+      MAXOPT    = 7
    ELSE IF (NUM .EQ. 5) THEN
       EXP(1)    = 'MENU 5                                  '
       EXP(2)    = 'ADDSUBDEL                               '
@@ -2452,7 +2453,7 @@
       
       OPTION(45)= 'Constituents                            '
 
-      OPTION(46)= 'bz'
+      OPTION(46)= 'turkinws                                '
          
       if (jagrw > 0) then 
          OPTION(47)= 'ground water pressure                (m)'
@@ -6080,7 +6081,7 @@ subroutine getktoplot(kk,k)
 !
       END SUBROUTINE EDITNETW
 
-     SUBROUTINE EDITflow(MODE,KEY)
+     SUBROUTINE EDITflow(MODE,KEY,NL)
       use m_netw
       use m_flowgeom, only : iadv
       use m_flow
@@ -6092,7 +6093,7 @@ subroutine getktoplot(kk,k)
       use unstruc_messages
       use gridoperations
       implicit none
-      integer :: MODE, KEY, kb , kt ,k
+      integer :: MODE, KEY, kb , kt ,k, NL
       integer :: newmode
       integer :: ncol, nput
       integer :: nlevel
@@ -6122,7 +6123,7 @@ subroutine getktoplot(kk,k)
       NLEVEL =  2
       NUM    =  0
       NWHAT  =  0
-      NPUT   =  51
+      NPUT   =  NL
       NUMB   =  16
       NCOL   =  NCOLDN
 

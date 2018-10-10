@@ -7232,9 +7232,9 @@ end subroutine update_waqfluxes
 
  vnod = 0d0
 
- if (kmx == 0) then
+if (kmx == 0) then
     do L   = 1,lnx
-       k1  = ln  (1,L) ; k2 = ln  (2,L)
+       k1  = ln(1,L) ; k2 = ln(2,L)
        vnod(k1) = vnod(k1) + vlin(L)*wcL(1,L)
        vnod(k2) = vnod(k2) + vlin(L)*wcL(2,L)
     enddo
@@ -7242,7 +7242,7 @@ end subroutine update_waqfluxes
     do LL  = 1,lnx
        call getLbotLtop(LL,Lb,Lt)
        do L = Lb,Lt
-          k1  = ln  (1,L) ; k2 = ln  (2,L)
+          k1  = ln(1,L) ; k2 = ln(2,L)
           vnod(k1) = vnod(k1) + vlin(L)*wcL(1,LL)
           vnod(k2) = vnod(k2) + vlin(L)*wcL(2,LL)
        enddo
@@ -10070,6 +10070,10 @@ end subroutine cosphiunetcheck
  msgbuf = ' ' ; call msg_flush()
  msgbuf = ' ' ; call msg_flush()
  
+ write(msgbuf,'(a,F25.10)') 'time iniexternalforc.  (s)  :' , cpuiniext(3)               ; call msg_flush()
+ 
+ msgbuf = ' ' ; call msg_flush()
+ 
  write(msgbuf,'(a,F25.10)') 'time inistep           (s)  :' , cpuinistep(3)              ; call msg_flush()
  write(msgbuf,'(a,F25.10)') 'time setumod           (s)  :' , cpuumod(3)                 ; call msg_flush()
  write(msgbuf,'(a,F25.10)') 'time furu              (s)  :' , cpufuru(3)                 ; call msg_flush()
@@ -11762,7 +11766,7 @@ else if (nodval == 27) then
        znod = constituents(iconst_cur,k)
     end if
  else if (nodval == 46) then
-    znod = bz(kk)
+    znod =  turkinepsws(1,k)         
  else if (nodval == 47) then
     if (jagrw > 0) then
        if (infiltrationmodel == 1) then 
@@ -13121,7 +13125,9 @@ end if
  call setkbotktop(1)                                 ! prior to correctblforzlayerpoints, setting kbot
 
  call mess(LEVEL_INFO, 'Start initializing external forcings...')
+ call klok(cpuiniext(1))
  iresult = flow_initexternalforcings()               ! this is the general hook-up to wind and boundary conditions
+ call klok(cpuiniext(2)) ; cpuiniext(3) = cpuiniext(3) + cpuiniext(2) - cpuiniext(1)  
  if (iresult /= DFM_NOERR) then
     call qnerror('Error occurred while running, please inspect your diagnostic output.',' ', ' ')
     goto 888
@@ -37837,7 +37843,7 @@ subroutine update_verticalprofiles()
 
  implicit none
 
- double precision :: tetm1, pransm, pransmi, dz0, dzc1, dzc2, zb1, zb2, tkedisL, tkeproL
+ double precision :: tetm1, dz0, dzc1, dzc2, zb1, zb2, tkedisL, tkeproL
  double precision :: vicu, vicd, difu, difd, fac, dzdz1, dzdz2, s2, sourtu, sinktu, bet, ybot, rhom, drhodz
 
  double precision :: uave, ustar, zz, sqcf, frcn, cz,z00, uave2, ac1, ac2, dzLw, sqcf3, ustar3, tkebot, tkesur, epsbot, epssur, volu
@@ -38436,7 +38442,7 @@ subroutine update_verticalprofiles()
            gradk  = gradd + gradu
            grad   = gradk - gradt                                                            ! D_kt - D_tt
 
-           grad   = -grad*pransmi*cmukep           ! This is positive advection, dc/dt + wdc/dz
+           grad   = -grad*sigtkei*cmukep           ! This is positive advection, dc/dt + wdc/dz
            grad   =  grad/dzw(k)                   ! dzw is receiving volume
            if (grad > 0d0) then
               bk(k) = bk(k) + grad
@@ -42295,7 +42301,7 @@ implicit none
       if ( nbndz.gt.0 ) then
          do n=1,nbndz
             itpbn   = kbndz(4,n)
-            Tref    = dble(kbndz(8,n))  ! integer, but can get away with it, nobody uses fractional seconds..
+            Tref    = dble(kbndz(6,n))  ! integer, but can get away with it, nobody uses fractional seconds..
             dfac  = max(min(dts/Tref, 1d0), 0d0)
             dfac1 = 1d0 - dfac
             
