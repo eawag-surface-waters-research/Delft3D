@@ -1511,23 +1511,24 @@ subroutine GetCSParsFlowCross(cross, dpt, u1, cz, flowArea, wetPerimeter, flowWi
    conv = 0.0d0
 
    select case(cross%crosstype)
-      case (CS_TABULATED)
-         if (present(doSummerDike))then
-            getSummerdikes = doSummerdike
-         else
-            getSummerDikes = .true.
-         endif
-         call TabulatedProfile(dpt, cross, .true., getSummerDikes, flowArea, flowWidth, wetPerimeter, af_sub_local, perim_sub_local, CS_TYPE_NORMAL, hysteresis)
-      case (CS_CIRCLE)
-         call CircleProfile(dpt, crossDef%diameter, flowArea, flowWidth, wetPerimeter, CS_TYPE_NORMAL)
-      case (CS_EGG)
-         call EggProfile(dpt, crossDef%diameter, flowArea, flowWidth, wetPerimeter)
-      case (CS_YZ_PROF)
-         call YZProfile(dpt, u1, cz, cross%convtab, 0, flowArea, flowWidth, wetPerimeter, conv)
-      case default
-         call SetMessage(LEVEL_ERROR, 'INTERNAL ERROR: Unknown type of cross section')
+   case (CS_TABULATED)
+      if (present(doSummerDike))then
+         getSummerdikes = doSummerdike
+      else
+         getSummerDikes = .true.
+      endif
+      call TabulatedProfile(dpt, cross, .true., getSummerDikes, flowArea, flowWidth, wetPerimeter, af_sub_local, perim_sub_local, CS_TYPE_NORMAL, hysteresis)
+   case (CS_CIRCLE)
+      call CircleProfile(dpt, crossDef%diameter, flowArea, flowWidth, wetPerimeter, CS_TYPE_NORMAL)
+   case (CS_EGG)
+      call EggProfile(dpt, crossDef%diameter, flowArea, flowWidth, wetPerimeter)
+   case (CS_YZ_PROF)
+      call YZProfile(dpt, u1, cz, cross%convtab, 0, flowArea, flowWidth, wetPerimeter, conv)
+   case default
+      call SetMessage(LEVEL_ERROR, 'INTERNAL ERROR: Unknown type of cross section')
    end select
 
+   flowWidth = max(flowWidth,sl)
    if (cross%crosstype /= CS_TABULATED ) then
       af_sub_local = 0d0
       af_sub_local(1) = flowArea
@@ -1758,7 +1759,7 @@ subroutine TabulatedProfile(dpt, cross, doFlow, getSummerDikes, area, width, per
    integer           :: section
 
    crossDef => cross%tabDef
-   
+
    if (updateTabulatedProfiles) then
       call GetTabulatedSizes(dpt, crossDef, doFlow, area, width, perimeter, af_sub, perim_sub, calculationOption)
    else
