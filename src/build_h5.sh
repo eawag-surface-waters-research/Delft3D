@@ -376,7 +376,7 @@ if [ "$compiler" = 'gnu' ]; then
     fflags=''
 else
     # Intel compilers
-    fflags='-threads'
+    fflags=''
 fi
 
 

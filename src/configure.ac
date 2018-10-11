@@ -186,7 +186,7 @@ if test "$enableval" = yes ; then
                 dnl no custom flags
                 ;;
                 *ifort*) dnl Intel 8.x Fortran compiler
-                        FFLAGS="$FFLAGS -recursive -reentrancy threaded -traceback"
+                        FFLAGS="$FFLAGS -recursive -traceback"
                 ;;
         esac
         case "$FC" in
@@ -194,7 +194,7 @@ if test "$enableval" = yes ; then
              dnl no custom flags
              ;;
              *ifort*) dnl Intel 8.x Fortran compiler
-                      FCFLAGS="$FCFLAGS -recursive -reentrancy threaded -traceback"
+                      FCFLAGS="$FCFLAGS -recursive -traceback"
              ;;
         esac
 else
@@ -255,17 +255,17 @@ AC_FUNC_VPRINTF
 ####fi
 
 # checks for pthreads
-ACX_PTHREAD([enable_threads="pthread"],[enable_threads="no"])
-
-if test $enable_threads != "pthread"; then
-    AC_MSG_ERROR([unable to find pthreads, currently this is required])
-else
-    AC_DEFINE(HAVE_PTHREAD,1,[Define if you have POSIX threads libraries and header files.])
-    LIBS="$PTHREAD_LIBS $LIBS"
-    FCLIBS="$PTHREAD_LIBS $FCLIBS"
-    CFLAGS="$PTHREAD_CFLAGS $CFLAGS"
-    CXXFLAGS="$PTHREAD_CFLAGS $CXXFLAGS"
-fi
+####ACX_PTHREAD([enable_threads="pthread"],[enable_threads="no"])
+####
+####if test $enable_threads != "pthread"; then
+####    AC_MSG_ERROR([unable to find pthreads, currently this is required])
+####else
+####    AC_DEFINE(HAVE_PTHREAD,1,[Define if you have POSIX threads libraries and header files.])
+####    LIBS="$PTHREAD_LIBS $LIBS"
+####    FCLIBS="$PTHREAD_LIBS $FCLIBS"
+####    CFLAGS="$PTHREAD_CFLAGS $CFLAGS"
+####    CXXFLAGS="$PTHREAD_CFLAGS $CXXFLAGS"
+####fi
 
 
 # Make sure we throw errors when using invalid architecture files (otherwise OSX version might get linked against linux libs)
