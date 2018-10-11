@@ -7057,9 +7057,8 @@ src/utils_lgpl/gridgeom/packages/gridgeom/src/network_data.f90 -text
 src/utils_lgpl/gridgeom/packages/gridgeom/src/odugrid.F90 -text
 src/utils_lgpl/gridgeom/packages/gridgeom/src/polygon.f90 -text
 src/utils_lgpl/gridgeom/packages/nuget/gridgeom.nuspec -text
+src/utils_lgpl/gridgeom/packages/test_data/1d2dForEmbedded.nc -text
 src/utils_lgpl/gridgeom/packages/test_data/1d2dForEmbeddedRiverLinks.nc -text
-src/utils_lgpl/gridgeom/packages/test_data/1dForEmbedded.nc -text
-src/utils_lgpl/gridgeom/packages/test_data/2dForEmbedded.nc -text
 src/utils_lgpl/gridgeom/packages/test_data/2d_ugrid_net.nc -text
 src/utils_lgpl/gridgeom/packages/test_data/river1_full_net.nc -text
 src/utils_lgpl/gridgeom/packages/tests/gridgeom.Tests/ODugrid.cs -text

@@ -3348,13 +3348,14 @@
             cellNetLink =  netcell(cellId)%lin(kk)
             k5  = kn(1,cellNetLink); 
             k6  = kn(2,cellNetLink);
-            call crossinbox (xk(k5), xk(k5), xk(k6), xk(k6), xk(k1), xk(k1), xk(k2), yk(k2), isCrossing, sl, sm, xcr, ycr, crp, jsferic, dmiss)
+            isCrossing = 0
+            call crossinbox (xk(k5), yk(k5), xk(k6), yk(k6), xk(k1), yk(k1), xk(k2), yk(k2), isCrossing, sl, sm, xcr, ycr, crp, jsferic, dmiss)
             newLinkIndex = -1
             if (isCrossing == 1) then
                ldistance = dbdistance(xk(k1), yk(k1), xz(cellId), yz(cellId), jsferic, jasfer3D, dmiss)
                rdistance = dbdistance(xk(k2), yk(k2), xz(cellId), yz(cellId), jsferic, jasfer3D, dmiss)     
                if (ldistance<=rdistance) then
-                  if (present(oneDMask)) then !again, Fortran does not have logical and two nested if statement are needed
+                  if (present(oneDMask) .and. size(oneDMask)>0) then !again, Fortran does not have logical and two nested if statement are needed
                      if(oneDMask(k1)==1) then
                         call setnewpoint(xz(cellId),yz(cellId),zk(cellId), newPointIndex)
                         call connectdbn(newPointIndex, k1, newLinkIndex)
@@ -3364,7 +3365,7 @@
                      call connectdbn(newPointIndex, k1, newLinkIndex)
                   endif
                else
-                  if (present(oneDMask)) then !again, Fortran does not have logical and two nested if statement are needed
+                  if (present(oneDMask) .and. size(oneDMask)>0) then !again, Fortran does not have logical and two nested if statement are needed
                      if(oneDMask(k2)==1) then
                         call setnewpoint(xz(cellId),yz(cellId),zk(cellId), newPointIndex)
                         call connectdbn(newPointIndex, k2, newLinkIndex)
