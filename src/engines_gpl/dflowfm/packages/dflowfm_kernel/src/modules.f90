@@ -2458,7 +2458,6 @@ end subroutine default_turbulence
                                                         !< 11=Perot in uit, 12=Perot in, piaczek fully implicit, gate + factor
                                                         !< 20=Energy conserving compact, piaczek fully implicit, weir
  integer                           :: maxNonlinearIterations!< maximal iterations in non linear iteration loop before a time step reduction is applied
- integer                           :: maxNonlinearIterationsIncrement!< maximal iterations in non linear iteration loop before a time step reduction is applied
 
  integer                           :: iadvec1D          !< same, now for 1D links
 

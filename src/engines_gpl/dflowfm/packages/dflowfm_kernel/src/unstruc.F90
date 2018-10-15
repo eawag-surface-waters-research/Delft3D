@@ -657,8 +657,6 @@ end subroutine flow_finalize_single_timestep
 
  tim1bnd = max(time0+dts, tim1bnd)
  
- maxNonlinearIterations = max(maxNonlinearIterations-maxNonlinearIterationsIncrement, maxNonlinearIterationsIncrement)
- 
  call flow_setexternalforcingsonboundaries(tim1bnd , iresult)  ! boundary forcings
 
  if (iresult /= DFM_NOERR) then
@@ -983,7 +981,7 @@ if(q /= 0) then
  
  if ( itstep.ne.4 ) then                                ! implicit time-step
 
-222 if (nonlin == 2) then                               ! only for pressurised
+ 222 if (nonlin == 2) then                               ! only for pressurised
        s1m = bl !  s1mini
        call volsur()    
        difmaxlevm = 0d0 ;  noddifmaxlevm = 0
@@ -1057,21 +1055,8 @@ if(q /= 0) then
     nums1it   = nums1it + 1
     
     if (nums1it > maxNonlinearIterations) then
-       write(msgbuf, '(''No convergence in nonlinear solver at time '', g10.5,'' (s), time step is reduced from '', f8.4, '' (s) into '', f8.4, '' (s)'')') time0, dts, 0.5d0*dts
-       call warn_flush()
-       dts = 0.5d0*dts
-
-       maxNonlinearIterations = maxNonlinearIterations + maxNonlinearIterationsIncrement
-       dsetb  = dsetb + 1                               ! total nr of setbacks
-       s1     = s0
-       if (dts .lt. dtmin) then
-           s1 = max(s1,bl)                              ! above bottom
-           call okay(0)
-           key = 1                                      ! for easier mouse interrupt
-           return
-       endif
-       call setkfs()
-       goto 111                                      ! redo with timestep reduction => 111 furu
+       write(msgbuf, '(''No convergence in nonlinear solver at time '', g10.5,'' (s)'')') time0
+       call fatal_flush()
     endif
 
     !if (nums1it > 10) then
@@ -7232,9 +7217,9 @@ end subroutine update_waqfluxes
 
  vnod = 0d0
 
-if (kmx == 0) then
+ if (kmx == 0) then
     do L   = 1,lnx
-       k1  = ln(1,L) ; k2 = ln(2,L)
+       k1  = ln  (1,L) ; k2 = ln  (2,L)
        vnod(k1) = vnod(k1) + vlin(L)*wcL(1,L)
        vnod(k2) = vnod(k2) + vlin(L)*wcL(2,L)
     enddo
@@ -7242,7 +7227,7 @@ if (kmx == 0) then
     do LL  = 1,lnx
        call getLbotLtop(LL,Lb,Lt)
        do L = Lb,Lt
-          k1  = ln(1,L) ; k2 = ln(2,L)
+          k1  = ln  (1,L) ; k2 = ln  (2,L)
           vnod(k1) = vnod(k1) + vlin(L)*wcL(1,LL)
           vnod(k2) = vnod(k2) + vlin(L)*wcL(2,LL)
        enddo
@@ -32743,7 +32728,7 @@ end function ispumpon
 
  buitje = 0.013d0/300d0                                      ! 13 mm in 5 minutes
 
- bb = 0 ; ccr = 0 ; dd = 0
+ bb = 0d0 ; ccr = 0d0 ; dd = 0d0
 
  if (jagrw > 0 .or. numsrc > 0 .or. infiltrationmodel > 0 .or. nshiptxy > 0) then
     jaqin = 1
@@ -35697,7 +35682,6 @@ end subroutine make_mirrorcells
 
  integer                       :: iconst, itrac, idum, isf, isednum, itp
  real(kind=hp)                 :: maxSearchRadius
-
 
  integer, external             :: findname
  double precision,  external   :: ran0
