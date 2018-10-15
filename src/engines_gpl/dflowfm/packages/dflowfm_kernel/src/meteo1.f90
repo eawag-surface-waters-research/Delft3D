@@ -778,6 +778,9 @@ module m_meteo
       integer, external         :: findname
       type (tEcMask)            :: srcmask
       logical                   :: exist, opened, withCharnock, withStress
+      
+      integer                   :: row0, row1, col0, col1, ncols, nrows
+      character(len=128)        :: txt
 
 
       ec_addtimespacerelation = .false.
@@ -1027,7 +1030,7 @@ module m_meteo
       
       if (.not. success) then
          goto 1234
-      end if
+      end if      
          
       ! ================================================================
       ! Construct a new Connection, and connect source and target Items.
@@ -1400,6 +1403,10 @@ module m_meteo
                sourceItemId_2 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'sea_water_salinity')
                if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId)
                if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_2)
+               
+               call ecConverterGetBbox(ecInstancePtr, SourceItemID, 0, col0, col1, row0, row1, ncols, nrows)
+               write(txt,"('nudge_salinity_temperature: bounding box, col0-col1 X row0-row1 = ', I0, '-', I0, ' X ', I0, '-', I0, ', ncols X nrows = ', I0, ' X ', I0)") col0, col1, row0, row1, ncols, nrows
+               call mess(LEVEL_INFO, trim(txt))
             else
                call mess(LEVEL_FATAL, 'm_meteo::ec_addtimespacerelation: Unsupported filetype for quantity '//trim(target_name)//'.')
                return

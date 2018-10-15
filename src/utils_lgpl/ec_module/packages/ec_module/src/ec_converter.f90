@@ -55,7 +55,7 @@ module m_ec_converter
    public :: ecConverterSetElement
    public :: ecConverterSetInterpolation
    public :: ecConverterSetMask
-   
+   public :: ecConverterGetBbox
    contains
       
       ! =======================================================================
@@ -2907,5 +2907,41 @@ module m_ec_converter
             dbdistance = sqrt(rr)
          endif
       end function dbdistance
+      
+!>    get field bounding box indices
+      subroutine ecConverterGetBbox(instancePtr, itemID, t01, col0, col1, row0, row1, ncols, nrows)
+         type(tEcInstance), pointer :: instancePtr  !< intent(in)
+         integer,       intent(in)  :: itemId       !< unique Item id
+         integer,       intent(in)  :: t01          !< field 0 (0) or 1 (other)
+         integer,       intent(out) :: col0,col1,row0,row1  !< boundix box start (0) and end (1) indices
+         integer,       intent(out) :: ncols, nrows
+         
+         type(tEcItem),     pointer :: itemPtr       !< Item corresponding to itemId
+         type(tEcField),    pointer :: FieldPtr
+         
+         col0 = 0
+         row0 = 0
+         col1 = 0
+         row1 = 0
+         
+         itemPtr => ecSupportFindItem(instancePtr, itemId)
+         
+         if ( associated(itemPtr) ) then
+            if ( t01.eq.0 ) then
+               FieldPtr => itemPtr%sourceT0FieldPtr
+            else
+               FieldPtr => itemPtr%sourceT1FieldPtr
+            end if
+            col0 = FieldPtr%bbox(1)
+            row0 = FieldPtr%bbox(2)
+            col1 = FieldPtr%bbox(3)
+            row1 = FieldPtr%bbox(4)
+            
+            ncols = itemPtr%elementSetPtr%n_cols
+            nrows = itemPtr%elementSetPtr%n_rows
+         end if
+         
+         return
+      end subroutine ecConverterGetBbox
 
 end module m_ec_converter
