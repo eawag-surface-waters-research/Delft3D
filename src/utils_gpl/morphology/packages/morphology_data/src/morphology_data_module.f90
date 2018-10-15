@@ -184,7 +184,9 @@ integer,parameter, public  :: MOR_STAT_MIN = 1
 integer,parameter, public  :: MOR_STAT_MAX = 2
 integer,parameter, public  :: MOR_STAT_MEAN= 4
 integer,parameter, public  :: MOR_STAT_STD = 8
-
+integer,parameter, public  :: MOR_STAT_CUM_X = 16
+integer,parameter, public  :: MOR_STAT_CUM_Y = 32
+!
 ! collection of morphology output options
 !
 type moroutputtype
@@ -200,6 +202,7 @@ type moroutputtype
     character(len=30), dimension(4) :: statunt = (/"m  ","m/s","   ","   "/)
     integer, dimension(5,4)         :: statflg  ! 1 = waterdepth, 2 = velocity, 3 = bedload, 4 = suspload
     integer                         :: nstatqnt ! number of quantities for morphology statistics output
+    real(fp), dimension(3)          :: avgintv  ! start, stop and interval for writing statistics (FM only)
     !
     logical :: aks
     logical :: cumavg
@@ -1087,8 +1090,8 @@ subroutine clrsedtra(istat, sedtra)
     if (associated(sedtra%sswy    ))   deallocate(sedtra%sswy    , STAT = istat)
     if (associated(sedtra%sxtot   ))   deallocate(sedtra%sxtot   , STAT = istat)
     if (associated(sedtra%sytot   ))   deallocate(sedtra%sytot   , STAT = istat)
-    if (associated(sedtra%sytot   ))   deallocate(sedtra%sscx    , STAT = istat)
-    if (associated(sedtra%sytot   ))   deallocate(sedtra%sscy    , STAT = istat)
+    if (associated(sedtra%sscx   ))   deallocate(sedtra%sscx    , STAT = istat)
+    if (associated(sedtra%sscy   ))   deallocate(sedtra%sscy    , STAT = istat)
     !
     if (associated(sedtra%srcmax  ))   deallocate(sedtra%srcmax  , STAT = istat)
     if (associated(sedtra%fixfac  ))   deallocate(sedtra%fixfac  , STAT = istat)
