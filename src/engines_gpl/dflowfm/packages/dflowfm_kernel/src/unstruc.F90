@@ -8906,7 +8906,7 @@ subroutine flow_sedmorinit()
     use unstruc_model ! including: md_tunit
     use unstruc_files
     use m_flowgeom
-    use m_flowtimes, only: julrefdat
+    use m_flowtimes
     use m_physcoef, only: rhomean, ag, backgroundwatertemperature
     use m_turbulence, only: rho
     use m_initsedtra, only: initsedtra 
@@ -8922,7 +8922,7 @@ subroutine flow_sedmorinit()
     
     implicit none
 
-    logical :: error, have_mudbnd, have_sandbnd, ex
+    logical :: error, have_mudbnd, have_sandbnd, ex, success
     character(20) , dimension(:), allocatable :: nambnd        !   TO DO nambnd: needed for morphological bc
     character     , dimension(200)            :: mes
     character(40)                             :: errstr
@@ -9156,6 +9156,11 @@ subroutine flow_sedmorinit()
        endif
     enddo
     !
+    ! Set output interval in case that moroutput%cumavg is set to true
+    !
+    if (stmpar%morpar%moroutput%cumavg) then
+       call getOutputTimeArrays(stmpar%morpar%moroutput%avgintv, ti_seds, ti_sed, ti_sede, success)
+    end if
     return
 end subroutine flow_sedmorinit
 
@@ -10286,6 +10291,7 @@ end subroutine cosphiunetcheck
  use unstruc_channel_flow
  use m_sobekdfm
  use m_waves, only: default_waves
+ use  m_xbeach_avgoutput, only: default_xbeach_avgoutput
  use m_ship
  implicit none
 
@@ -10332,6 +10338,8 @@ end subroutine cosphiunetcheck
     call default_flow()
 
     call default_interpolationsettings()
+    
+    call default_xbeach_avgoutput()
 
     !Reset samples:
     ns = 0
@@ -17792,14 +17800,14 @@ subroutine wrimap(tim)
 
     ! Another time-partitioned file needs to start, reset iteration count (and file).
     if (ti_split > 0d0 .and. curtime_split /= time_split0) then
-        mapids%idx_curtime = 0
+        mapids%id_tsp%idx_curtime = 0
         it_map       = 0
         it_map_tec   = 0
         curtime_split = time_split0
     end if
 
      if ( md_mapformat.eq.IFORMAT_NETCDF .or. md_mapformat.eq.IFORMAT_NETCDF_AND_TECPLOT .or. md_mapformat == IFORMAT_UGRID) then   !   NetCDF output
-       if (mapids%ncid /= 0 .and. ((md_unc_conv == UNC_CONV_UGRID .and. mapids%idx_curtime == 0) .or. (md_unc_conv == UNC_CONV_CFOLD .and. it_map == 0))) then
+       if (mapids%ncid /= 0 .and. ((md_unc_conv == UNC_CONV_UGRID .and. mapids%id_tsp%idx_curtime == 0) .or. (md_unc_conv == UNC_CONV_CFOLD .and. it_map == 0))) then
            ierr = unc_close(mapids%ncid)
            mapids%ncid = 0
        end if

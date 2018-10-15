@@ -1640,7 +1640,7 @@ end subroutine setfouunit
            ! Assumption: wrimap has already created the map-NetCDF file
            !
            ierr = ug_addglobalatts(fileids%ncid, ug_meta_fm) 
-           call unc_write_flowgeom_filepointer_ugrid(fileids, 1)
+           call unc_write_flowgeom_filepointer_ugrid(fileids%ncid, fileids%id_tsp, 1)
 
            !
            ifou  = 1
@@ -1743,7 +1743,7 @@ end subroutine setfouunit
               write(namfunlong,'(i3.3,2a)') fouref(ifou,1), ": ", trim(namfun)
               !
               idvar(:,ivar) = imissval 
-              ierr = unc_def_var_map(fileids, idvar(:,ivar), NF90_DOUBLE, unc_loc, trim(fouvarnam(ivar)), trim(fouvarnam(ivar)), &
+              ierr = unc_def_var_map(fileids%ncid,fileids%id_tsp, idvar(:,ivar), NF90_DOUBLE, unc_loc, trim(fouvarnam(ivar)), trim(fouvarnam(ivar)), &
                              'Fourier analysis '//trim(namfunlong)//', '//trim(fouvarnamlong(ivar)), fouvarunit(ivar),0)
               ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'long_name','Fourier analysis '//trim(namfunlong)//', '//trim(fouvarnamlong(ivar)))
               ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'units',fouvarunit(ivar))
@@ -2164,7 +2164,7 @@ end subroutine setfouunit
              enddo
           enddo
           fouvar = fouref(ifou,2)
-          ierror = unc_put_var_map(fileids, idvar(:,fouvar), iloc, glbarr2(1:nmaxus,1))
+          ierror = unc_put_var_map(fileids%ncid,fileids%id_tsp, idvar(:,fouvar), iloc, glbarr2(1:nmaxus,1))
           if (fouelp(ifou)=='x' .and. founam(ifou)=='s1') then
              !
              ! Write max waterdepth too
@@ -2182,7 +2182,7 @@ end subroutine setfouunit
              enddo
              fouvar = fouvar + 1
              !ierror = nf90_put_var(idfile, idvar(fouvar),glbarr2(1:nmaxus,1),start=(/ 1/), count = (/nmaxus/))           ! RL: split in flowlink and flownode quantities 
-             ierror = unc_put_var_map(fileids, idvar(:,fouvar), iloc, glbarr2(1:nmaxus,1))
+             ierror = unc_put_var_map(fileids%ncid,fileids%id_tsp, idvar(:,fouvar), iloc, glbarr2(1:nmaxus,1))
           endif
        else
           if (allocated(glbarr3)) deallocate(glbarr3, stat = ierror)
@@ -2237,8 +2237,8 @@ end subroutine setfouunit
                 endif
              enddo
           enddo
-          ierror = unc_put_var_map(fileids, idvar(:,fouvar),   iloc, glbarr3(1:nmaxus,1,1))          ! write amplitudes
-          ierror = unc_put_var_map(fileids, idvar(:,fouvar+1), iloc, glbarr3(1:nmaxus,1,2))          ! write phase
+          ierror = unc_put_var_map(fileids%ncid,fileids%id_tsp, idvar(:,fouvar),   iloc, glbarr3(1:nmaxus,1,1))          ! write amplitudes
+          ierror = unc_put_var_map(fileids%ncid,fileids%id_tsp, idvar(:,fouvar+1), iloc, glbarr3(1:nmaxus,1,2))          ! write phase
        endif
    end subroutine wrfous
 

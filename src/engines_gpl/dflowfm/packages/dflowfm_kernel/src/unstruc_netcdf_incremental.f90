@@ -109,11 +109,11 @@ integer(kind=int8), allocatable :: buffer_s1(:,:), buffer_hs(:,:)
    if (ndim == 0) then
 
       ierr = ug_addglobalatts(incids%ncid, ug_meta_fm)
-      call unc_write_flowgeom_filepointer_ugrid(incids, jabndnd_)
+      call unc_write_flowgeom_filepointer_ugrid(incids%ncid,incids%id_tsp, jabndnd_)
 
       !
       ! define dimensions:
-      ierr = nf90_def_dim(incids%ncid, 'time', nf90_unlimited, incids%id_timedim)
+      ierr = nf90_def_dim(incids%ncid, 'time', nf90_unlimited, incids%id_tsp%id_timedim)
       if (size(map_classes_s1) > 0 .and. ierr == nf90_noerr) then
          ierr = nf90_def_dim(incids%ncid, 'class_s1', size(map_classes_s1), id_class_dim_s1)
       endif
@@ -124,7 +124,7 @@ integer(kind=int8), allocatable :: buffer_s1(:,:), buffer_hs(:,:)
 
       ! define variables:
       tmpstr = 'seconds since '//refdat(1:4)//'-'//refdat(5:6)//'-'//refdat(7:8)//' 00:00:00'
-      ierr = unc_def_var_nonspatial(incids%ncid, incids%id_time, nf90_double, [incids%id_timedim], 'time', 'time', ' ', tmpstr)
+      ierr = unc_def_var_nonspatial(incids%ncid, incids%id_time, nf90_double, [incids%id_tsp%id_timedim], 'time', 'time', ' ', tmpstr)
       maxTimes = 1 + nint( (ti_classmape - ti_classmaps) / ti_classmap)
       chunkSizeTime = min(mapclass_chunksize_time, maxTimes)
       if (ierr == nf90_noerr) ierr = nf90_def_var_chunking(incids%ncid, incids%id_time, NF90_CHUNKED, [chunkSizeTime])
@@ -193,11 +193,11 @@ integer(kind=int8), allocatable :: buffer_s1(:,:), buffer_hs(:,:)
       if (isLast .or. tl == mapclass_time_buffer_size) then
          if (size(map_classes_s1) > 0 .and. ierr == nf90_noerr) then
             var_ids = get_varids('s1', incids)
-            ierr = unc_put_var_map_byte_timebuffer(incids, var_ids, UNC_LOC_S, buffer_s1, 1, tl)
+            ierr = unc_put_var_map_byte_timebuffer(incids%ncid, incids%id_tsp, var_ids, UNC_LOC_S, buffer_s1, 1, tl)
          endif
          if (size(map_classes_hs) > 0 .and. ierr == nf90_noerr) then
             var_ids = get_varids('hs', incids)
-            ierr = unc_put_var_map_byte_timebuffer(incids, var_ids, UNC_LOC_S, buffer_hs, 1, tl)
+            ierr = unc_put_var_map_byte_timebuffer(incids%ncid, incids%id_tsp, var_ids, UNC_LOC_S, buffer_hs, 1, tl)
          endif
          need_flush = .true.
       endif
@@ -237,12 +237,12 @@ function def_var_classmap_ugrid(name, ncid, var_id_class_bnds, var_id_jumps, inc
    double precision, pointer :: map_classes(:)
 
    if (name == 's1') then
-      ierr = unc_def_var_map(incids, incids%id_s1, nf90_byte, UNC_LOC_S, 's1',         'sea_surface_height',                'Water level', 'm')
+      ierr = unc_def_var_map(incids%ncid, incids%id_tsp, incids%id_s1, nf90_byte, UNC_LOC_S, 's1',         'sea_surface_height',                'Water level', 'm')
       id_class = id_class_dim_s1
       ids = incids%id_s1
       map_classes => map_classes_s1
    else if (name == 'hs') then
-      ierr = unc_def_var_map(incids, incids%id_hs, nf90_byte, UNC_LOC_S, 'waterdepth', 'sea_floor_depth_below_sea_surface', 'Water depth at pressure points', 'm')
+      ierr = unc_def_var_map(incids%ncid, incids%id_tsp, incids%id_hs, nf90_byte, UNC_LOC_S, 'waterdepth', 'sea_floor_depth_below_sea_surface', 'Water depth at pressure points', 'm')
       id_class = id_class_dim_hs
       ids = incids%id_hs
       map_classes => map_classes_hs
@@ -267,7 +267,7 @@ function def_var_classmap_ugrid(name, ncid, var_id_class_bnds, var_id_jumps, inc
       call mess(LEVEL_INFO, 'successfully defined classes_' // name // ' with deflate_level and chunksizes =', mapclass_deflate, actual_chunksize, mapclass_chunksize_time)
    endif
    if (output_type == type_very_compact) then
-      if (ierr == nf90_noerr) ierr = nf90_def_var(ncid, 'jumps_'//name , nf90_int, [incids%id_timedim] , var_id_jumps)
+      if (ierr == nf90_noerr) ierr = nf90_def_var(ncid, 'jumps_'//name , nf90_int, [incids%id_tsp%id_timedim] , var_id_jumps)
    endif
 end function def_var_classmap_ugrid
 
@@ -305,12 +305,12 @@ function write_initial_classes(incids, classes, buffer, field, varid_jumps) resu
 
    ierr = nf90_noerr
 
-   incids%idx_curtime = 1
+   incids%id_tsp%idx_curtime = 1
    if (mapclass_time_buffer_size > 1) then
       buffer(:,1) = classes
    else
       var_ids = get_varids(field, incids)
-      ierr = unc_put_var_map_byte(incids, var_ids, UNC_LOC_S, classes)
+      ierr = unc_put_var_map_byte(incids%ncid,incids%id_tsp, var_ids, UNC_LOC_S, classes)
    endif
 
    if (ierr == 0 .and. output_type == type_very_compact) then
@@ -351,19 +351,19 @@ function write_changed_classes_update_previous(incids, previous, current, buffer
    var_ids = get_varids(field, incids)
    ti = mod(time_index-1, mapclass_time_buffer_size)+1
 
-   incids%idx_curtime = time_index
+   incids%id_tsp%idx_curtime = time_index
    if (output_type == type_very_compact) then
       if (mapclass_time_buffer_size > 1) then
          buffer(:,ti) = diff
       else
-         ierr = unc_put_var_map_byte(incids, var_ids, UNC_LOC_S, diff)
+         ierr = unc_put_var_map_byte(incids%ncid, incids%id_tsp, var_ids, UNC_LOC_S, diff)
       endif
       if (ierr == 0) ierr = nf90_put_var(incids%ncid, varid_jumps, [cnt], [time_index])
    else 
       if (mapclass_time_buffer_size > 1) then
          buffer(:,ti) = current
       else
-         ierr = unc_put_var_map_byte(incids, var_ids, UNC_LOC_S, current)
+         ierr = unc_put_var_map_byte(incids%ncid, incids%id_tsp, var_ids, UNC_LOC_S, current)
       endif
    endif
 

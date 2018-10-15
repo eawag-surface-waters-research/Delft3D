@@ -574,6 +574,7 @@ subroutine readMDUFile(filename, istat)
     use m_sobekdfm,              only : sbkdfm_umin,sbkdfm_umin_method,minimal_1d2d_embankment, sbkdfm_relax
     use string_module
     use m_heatfluxes
+    use m_xbeach_avgoutput
     use unstruc_netcdf, only: UNC_CONV_CFOLD, UNC_CONV_UGRID
     use unstruc_version_module
     use dfm_error
@@ -1468,7 +1469,7 @@ subroutine readMDUFile(filename, istat)
        jaeulervel = 0
     endif
 
-    if (jawave .eq. 4) then ! only makes sense if xbeach wave driver is enabled
+    if (jawave .eq. 4) then    ! not for Delta Shell
        call prop_get_integer(md_ptr, 'output', 'AvgWaveQuantities'    , jaavgwavquant)
        call prop_get_string(md_ptr,  'output', 'AvgWaveQuantitiesFile', md_avgwavquantfile, success)
        call prop_get_doubles(md_ptr, 'output', 'AvgWaveOutputInterval'   ,  ti_wav_array, 3, success)
@@ -1485,7 +1486,25 @@ subroutine readMDUFile(filename, istat)
           call warn_flush()
        endif
 
-       call prop_get_integer(md_ptr, 'output', 'MomentumBalance'    , jamombal)
+       if (jaavgwavquant==1)  then
+           jaavgwriteall = 1            ! write all by default, unless explicitly switched off
+       end if
+
+       call prop_get_integer(md_ptr, 'output', 'MomentumBalance'    , jamombal, success)
+       call prop_get_integer(md_ptr, 'output', 'AvgWaveWriteAll'    , jaavgwriteall, success)
+       if (success .and. jaavgwriteall.eq.0) then    ! else don't bother, everything written anyway
+           call prop_get_integer(md_ptr, 'output', 'AvgWaveWriteH'    , jaavgwriteH    , success)   ! height 
+           call prop_get_integer(md_ptr, 'output', 'AvgWaveWriteE'    , jaavgwriteE    , success)   ! energy
+           call prop_get_integer(md_ptr, 'output', 'AvgWaveWriteR'    , jaavgwriteR    , success)   ! roller
+           call prop_get_integer(md_ptr, 'output', 'AvgWaveWriteD'    , jaavgwriteD    , success)   ! dissipation breaking+roller
+           call prop_get_integer(md_ptr, 'output', 'AvgWaveWriteCel'  , jaavgwriteCel  , success)   ! celerity+group velocity
+           call prop_get_integer(md_ptr, 'output', 'AvgWaveWriteDir'  , jaavgwriteDir  , success)   ! wave direction
+           call prop_get_integer(md_ptr, 'output', 'AvgWaveWriteU'    , jaavgwriteU    , success)   ! velocity + stokes
+           call prop_get_integer(md_ptr, 'output', 'AvgWaveWriteF'    , jaavgwriteF    , success)   ! wave forces
+           call prop_get_integer(md_ptr, 'output', 'AvgWaveWriteUrms' , jaavgwriteUrms , success)   ! orbital velocities
+           call prop_get_integer(md_ptr, 'output', 'AvgWaveWriteS'    , jaavgwriteS    , success)   ! water level
+           call prop_get_integer(md_ptr, 'output', 'AvgWaveWriteSigm' , jaavgwriteSigm , success)   ! frequency
+       end if
 
     end if
 
@@ -2391,7 +2410,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
 
    ! JRE -> aanvullen, kijken wat aangeleverd wordt
     if (writeall .or. jawave > 0) then
-       call prop_set(prop_ptr, 'waves', 'Wavemodelnr',         jawave,         'Wave model nr. (0: none, 1: fetch/depth limited hurdlestive, 2: Young-Verhagen, 3: SWAN, 4: wave group forcing, 5: uniform')
+       call prop_set(prop_ptr, 'waves', 'Wavemodelnr',         jawave,         'Wave model nr. (0: none, 1: fetch/depth limited hurdlestive, 2: Young-Verhagen, 3: SWAN, 5: uniform') 
        call prop_set(prop_ptr, 'waves', 'Wavenikuradse',       wavenikuradse,  'Wave friction Nikuradse ks coefficient (m), used in Krone-Swart')
        ! TODO Check why /30?
        z0wav = wavenikuradse/30d0
@@ -2768,14 +2787,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     call prop_set(prop_ptr, 'output', 'FullGridOutput', jafullgridoutput, 'Full grid output mode (0: compact, 1: full time-varying grid data)')
     call prop_set(prop_ptr, 'output', 'EulerVelocities', jaeulervel, 'Euler velocities output (0: GLM, 1: Euler velocities)')
     call prop_set(prop_ptr, 'output', 'Wrirst_bnd', jarstbnd, 'Write waterlevel, bedlevel and coordinates of boundaries to restart files')
-    if (jawave .eq. 4) then ! only makes sense if xbeach wave driver is enabled
-       call prop_set(prop_ptr, 'output', 'AvgWaveQuantities'     , jaavgwavquant,' ')
-       call prop_set(prop_ptr, 'output', 'AvgWaveQuantitiesFile' , md_avgwavquantfile,' ')
-       ti_wav_array(1) = ti_wav
-       ti_wav_array(2) = ti_wavs
-       ti_wav_array(3) = ti_wave
-       call prop_set(prop_ptr, 'output', 'AvgWaveOutputInterval' , ti_wav_array,' ')
-    end if
+    
 
     if ( get_japart() .or. writeall ) then
 !      particles

@@ -649,6 +649,38 @@ module m_xbeach_avgoutput
    double precision, allocatable      :: sigmwav_mean(:),sigmwav_var(:), sigmwav_min(:), sigmwav_max(:), sigmwav_varcross(:), sigmwav_varsquare(:)
    
    double precision                   :: multcum
+   
+   integer                            :: jaavgwriteall
+   integer                            :: jaavgwriteH    
+   integer                            :: jaavgwriteE    
+   integer                            :: jaavgwriteR    
+   integer                            :: jaavgwriteD    
+   integer                            :: jaavgwriteCel  
+   integer                            :: jaavgwriteDir  
+   integer                            :: jaavgwriteU    
+   integer                            :: jaavgwriteF    
+   integer                            :: jaavgwriteUrms 
+   integer                            :: jaavgwriteS    
+   integer                            :: jaavgwriteSigm 
+   
+   contains
+   
+   subroutine default_xbeach_avgoutput()
+      implicit none
+      jaavgwriteall         = 0
+      jaavgwriteH           = 0
+      jaavgwriteE           = 0
+      jaavgwriteR           = 0
+      jaavgwriteD           = 0
+      jaavgwriteCel         = 0
+      jaavgwriteDir         = 0
+      jaavgwriteU           = 0
+      jaavgwriteF           = 0
+      jaavgwriteUrms        = 0
+      jaavgwriteS           = 0
+      jaavgwriteSigm        = 0
+      
+   end subroutine
 
 end module m_xbeach_avgoutput
 
@@ -4153,9 +4185,12 @@ end subroutine reset_flowgeom
  double precision                  :: ti_his      !< history interval (s)
  double precision                  :: ti_hiss     !< Start of his output period (as assigned in mdu-file) (s)
  double precision                  :: ti_hise     !< End   of his output period (as assigned in mdu-file) (s)
- double precision                  :: ti_wav      !< averaging interval spatial wave quantities (s)    !! JRE
- double precision                  :: ti_wavs     !< averaging interval spatial wave quantities    !! JRE
- double precision                  :: ti_wave     !< averaging interval spatial wave quantities    !! JRE
+ double precision                  :: ti_wav      !< averaging interval spatial wave quantities (s) 
+ double precision                  :: ti_wavs     !< averaging interval spatial wave quantities  
+ double precision                  :: ti_wave     !< averaging interval spatial wave quantities
+ double precision                  :: ti_sed      !< averaging interval sedmor quantities (s) 
+ double precision                  :: ti_seds     !< averaging interval sedmor wave quantities  
+ double precision                  :: ti_sede     !< averaging interval sedmor wave quantities 
  double precision                  :: ti_xls      !< history interval (s) xls
  double precision                  :: ti_rst      !< restart interval (s)
  double precision                  :: ti_rsts     !< Start of restart output period (as assigned in mdu-file) (s)
@@ -4198,6 +4233,7 @@ end subroutine reset_flowgeom
 
  integer                           :: it_map      !< Nr of snapshots presently in map file
  integer                           :: it_wav      !< Nr of snapshots presently in time-avg'd wave output file JRE
+ integer                           :: it_sed      !< Nr of snapshots presently in time-avg'd sedmor output file JRE
  integer                           :: it_map_tec  !< Nr of snapshots presently in map file, Tecplot format
  integer                           :: it_his      !< Nr of snapshots presently in his file
  integer                           :: it_inc      !< Nr of lines     presently in inc file
@@ -4318,6 +4354,7 @@ subroutine reset_flowtimes()
 
     it_map       = 0                 !< Nr of snapshots presently in map file
     it_wav       = 0                 !< Nr of snapshots presently in time-avg'd file JRE
+    it_sed       = 0                 !< Nr of snapshots presently in time-avg'd sed file JRE
     it_map_tec   = 0                 !< Nr of snapshots presently in map file
     it_his       = 0                 !< Nr of snapshots presently in his file
     it_inc       = 0                 !< Nr of lines     presently in inc file
