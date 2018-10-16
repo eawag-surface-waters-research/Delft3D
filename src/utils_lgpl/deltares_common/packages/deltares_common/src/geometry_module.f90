@@ -98,14 +98,14 @@ module geometry_module
    contains
 
    !> projects a point to a polyline and finds the closest link
-   subroutine comp_breach_point(start_location_x, start_location_y, xp, yp, np, xl, yl, Lstart, x_breach, y_breach, jsferic, jasfer3D, dmiss)
+   subroutine comp_breach_point(startLocationX, startLocationY, xp, yp, np, xl, yl, Lstart, x_breach, y_breach, jsferic, jasfer3D, dmiss)
 
    implicit none
 
    !input
    integer, intent(in)                       :: np, jsferic, jasfer3D
    integer, intent(inout)                    :: Lstart
-   double precision, intent(in)              :: start_location_x, start_location_y, dmiss
+   double precision, intent(in)              :: startLocationX, startLocationY, dmiss
    double precision, allocatable, intent(in) :: xp(:), yp(:), xl(:), yl(:)
    double precision, intent(inout)           :: x_breach, y_breach
    
@@ -120,7 +120,7 @@ module geometry_module
    yn = dmiss
    dis = huge(dmiss)
    do k  = 1, np - 1
-      call dlinedis(start_location_x, start_location_y, xp(k), yp(k), xp(k + 1), yp(k + 1), ja, distemp, xntempa, yntempa, jsferic, jasfer3D, dmiss)
+      call dlinedis(startLocationX, startLocationY, xp(k), yp(k), xp(k + 1), yp(k + 1), ja, distemp, xntempa, yntempa, jsferic, jasfer3D, dmiss)
       if (distemp <= dis ) then
          xn  = xntempa
          yn  = yntempa
