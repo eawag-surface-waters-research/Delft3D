@@ -779,8 +779,9 @@ module m_meteo
       type (tEcMask)            :: srcmask
       logical                   :: exist, opened, withCharnock, withStress
       
+      double precision          :: relrow, relcol
       integer                   :: row0, row1, col0, col1, ncols, nrows
-      character(len=128)        :: txt
+      character(len=128)        :: txt1, txt2, txt3
 
 
       ec_addtimespacerelation = .false.
@@ -1403,10 +1404,6 @@ module m_meteo
                sourceItemId_2 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'sea_water_salinity')
                if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId)
                if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_2)
-               
-               call ecConverterGetBbox(ecInstancePtr, SourceItemID, 0, col0, col1, row0, row1, ncols, nrows)
-               write(txt,"('nudge_salinity_temperature: bounding box, col0-col1 X row0-row1 = ', I0, '-', I0, ' X ', I0, '-', I0, ', ncols X nrows = ', I0, ' X ', I0)") col0, col1, row0, row1, ncols, nrows
-               call mess(LEVEL_INFO, trim(txt))
             else
                call mess(LEVEL_FATAL, 'm_meteo::ec_addtimespacerelation: Unsupported filetype for quantity '//trim(target_name)//'.')
                return
@@ -1436,6 +1433,16 @@ module m_meteo
          endif
       end if
       success = ecSetConnectionIndexWeights(ecInstancePtr, connectionId)
+            
+      if ( target_name=='nudge_salinity_temperature' ) then
+         call ecConverterGetBbox(ecInstancePtr, SourceItemID, 0, col0, col1, row0, row1, ncols, nrows)
+         relcol = dble(col1-col0+1)/dble(ncols)
+         relrow = dble(row1-row0+1)/dble(nrows)
+         write(txt1,"('nudge_salinity_temperature: bounding box')")
+         write(txt2,"('col0-col1 X row0-row1 = ', I0, '-', I0, ' X ', I0, '-', I0, ', ncols X nrows = ', I0, ' X ', I0)") col0, col1, row0, row1, ncols, nrows
+         write(txt3,"('relcol X relrow = ', F4.2, ' X ', F4.2, ' = ', F4.2)") relcol, relrow, relcol*relrow
+         call mess(LEVEL_INFO, trim(txt1) // ' ' // trim(txt2) // ', ' // trim(txt3))
+      end if
 
       ec_addtimespacerelation = .true.
       return
