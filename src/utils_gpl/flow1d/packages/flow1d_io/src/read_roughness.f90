@@ -52,23 +52,23 @@ module m_read_roughness
 
 contains
 
-   subroutine roughness_reader(network, md_ptr, mapdir)
+   subroutine roughness_reader(network, roughnessfiles, mapdir, md_ptr)
    
       type(t_network), intent(inout), target :: network
-      character(len=*), intent(in)           :: mapdir
-      type(tree_data), pointer, intent(in)   :: md_ptr
+      character(len=*), intent(in)           :: mapdir, roughnessfiles
+      type(tree_data), pointer, intent(in), optional   :: md_ptr
 
       type(t_RoughnessSet), pointer          :: rgs
       type(t_branchSet), pointer             :: brs
       type(t_spatial_dataSet) , pointer      :: spData
       
+      character(len=1024)                    :: inputfiles
       integer                                :: i
       integer                                :: ifrst
       integer                                :: isemi
       integer                                :: count
       integer                                :: def_type
       logical                                :: success
-      character(len=5000)                    :: filestring
       character(len=charLn)                  :: file
       double precision                       :: default
 
@@ -77,18 +77,21 @@ contains
       logical                                :: file_exist
       integer                                :: istat
       
+      inputfiles = roughnessfiles
       default = 60d0
       def_type = 1
       def_type = 1
-      call prop_get_double(md_ptr, 'GlobalValues', 'roughness', default, success)
-      if (success) then
-         call prop_get_integer(md_ptr, 'GlobalValues', 'roughnessType', def_type, success)
+      if (present(md_ptr)) then
+         call prop_get_double(md_ptr, 'GlobalValues', 'roughness', default, success)
+         if (success) then
+            call prop_get_integer(md_ptr, 'GlobalValues', 'roughnessType', def_type, success)
+         endif
+         if (.not. success) then
+            def_type = R_Chezy
+            default = 45
+         endif
       endif
-      if (.not. success) then
-         def_type = R_Chezy
-         default = 45
-      endif
-
+      
       binfile = 'Roughness.cache'
       inquire(file=binfile, exist=file_exist)
       if (doReadCache .and. file_exist) then
@@ -106,21 +109,14 @@ contains
       brs    => network%brs
       spdata => network%spdata
       
-      call prop_get_string(md_ptr, 'Files', 'roughnessFile', filestring, success)
-      if (.not. success) then
-         return
-      endif
-
-      
-      
       ! initialize hash_search
       ifrst = 1
       isemi = 1
       count = 1
-      do while (len_trim(filestring(ifrst:)) > 0) 
-         isemi = scan(filestring(ifrst:), ';')
+      do while (len_trim(inputfiles(ifrst:)) > 0) 
+         isemi = scan(inputfiles(ifrst:), ';')
          if (isemi ==0) then
-            isemi = len_trim(filestring(ifrst:))+1
+            isemi = len_trim(inputfiles(ifrst:))+1
          endif
          isemi = ifrst+isemi - 1
          ifrst = isemi+1
@@ -156,14 +152,14 @@ contains
       endif
    
       ! now start reading individual files
-      do while (len_trim(filestring) > 0) 
-         isemi = scan(filestring, ';')
+      do while (len_trim(inputfiles) > 0) 
+         isemi = scan(inputfiles, ';')
          if (isemi ==0) then
-            isemi = len_trim(filestring)+1
+            isemi = len_trim(inputfiles)+1
          endif
          
-         file = filestring(1:isemi-1)
-         filestring = filestring(isemi+1:)
+         file = inputfiles(1:isemi-1)
+         inputfiles = inputfiles(isemi+1:)
          file = trim(mapdir)//file
          call remove_leading_spaces(trim(file))
          call read_roughnessfile(rgs, brs, spdata, file, default, def_type)

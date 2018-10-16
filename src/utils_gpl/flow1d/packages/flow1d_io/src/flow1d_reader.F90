@@ -148,6 +148,24 @@ module m_flow1d_reader
       
    end subroutine read_1d_mdu
 
+   subroutine set_filename(md_ptr, head, tag, inputfile, folder)
+      use properties
+      type(tree_data), pointer, intent(in)        :: md_ptr
+      character(len=*), intent(in)                :: head
+      character(len=*), intent(in)                :: tag
+      character(len=*), intent(in)                :: folder
+      character(len=*), intent(inout)             :: inputfile
+      
+      logical :: success
+      
+      if (len_trim(inputfile) > 0) then
+         call prop_get_string(md_ptr, head, tag, inputfile, success)
+         inputfile = trim(folder)//inputfile
+      endif
+
+   end subroutine set_filename
+   
+   
    subroutine read_1d_attributes(filenames, network)
 
       use string_module
@@ -171,7 +189,7 @@ module m_flow1d_reader
       implicit none
       
       ! Variables
-      type(t_filenames), intent(in)   :: filenames
+      type(t_filenames), intent(inout):: filenames
       type(t_network), intent(inout)  :: network
       
       type(tree_data), pointer        :: md_ptr
@@ -198,148 +216,139 @@ module m_flow1d_reader
       ! Convert c string to fortran string and read md1d file into tree
       
       md1d_flow1d_file = filenames%onednetwork
+      call timini()
+      timon = .true.
       
-      call tree_create(trim(md1d_flow1d_file), md_ptr, maxlenpar)
-      call prop_inifile(trim(md1d_flow1d_file), md_ptr, istat)
-      if (istat /= 0) then
-            call setmessage(LEVEL_FATAL, 'Error opening md1d file ' // trim(md1d_flow1d_file))
+      if (len_trim(md1d_flow1d_file) > 0) then
+         call tree_create(trim(md1d_flow1d_file), md_ptr, maxlenpar)
+         call prop_inifile(trim(md1d_flow1d_file), md_ptr, istat)
+         if (istat /= 0) then
+               call setmessage(LEVEL_FATAL, 'Error opening md1d file ' // trim(md1d_flow1d_file))
+         endif
+      
+         success = .true.
+      
+         numstr = 0
+         if (associated(md_ptr%child_nodes)) then
+            numstr = size(md_ptr%child_nodes)
+         end if
+      
+         slash = index(md1d_flow1d_file, '/', back = .true.)
+         backslash = index(md1d_flow1d_file, '\', back = .true.)
+         posslash = max(slash, backslash)
+      
+         if (posslash > 0) then
+            folder = md1d_flow1d_file(1:posslash)
+         else
+            folder = ' '
+ 
+         endif
+         
+         if (len_trim(filenames%roughnessdir) > 0) then
+            filenames%roughnessdir = folder
+         endif
+         call set_filename(md_ptr, 'files', 'roughnessfile' , filenames%roughness,                  folder)
+         call set_filename(md_ptr, 'files', 'crossDefFile'  , filenames%cross_section_definitions,  folder)
+         call set_filename(md_ptr, 'files', 'crossLocFile'  , filenames%cross_section_locations,    folder)
+         call set_filename(md_ptr, 'files', 'structureFile' , filenames%structures,                 folder)
+         call set_filename(md_ptr, 'files', 'retentionFile' , filenames%retentions,                 folder)
+
       endif
       
       call timini()
       timon = .true.
 
       success = .true.
-      
+     
       call timstrt('ReadFiles', timerRead)
 
-      numstr = 0
-      if (associated(md_ptr%child_nodes)) then
-         numstr = size(md_ptr%child_nodes)
-      end if
-      
-      slash = index(md1d_flow1d_file, '/', back = .true.)
-      backslash = index(md1d_flow1d_file, '\', back = .true.)
-      posslash = max(slash, backslash)
-      
-      if (posslash > 0) then
-         folder = md1d_flow1d_file(1:posslash)
-      else
-         folder = ' '
- 
-      endif
-
+      ! Read roughnessFile file
       call timstrt('ReadRoughness', timerReadRoughness)
       call SetMessage(LEVEL_INFO, 'Reading Roughness ...')
 
-      ! Read roughnessFile file
-      call roughness_reader(network, md_ptr, folder)
-      
+      call roughness_reader(network, filenames%roughness, folder)
+     
       call SetMessage(LEVEL_INFO, 'Reading Roughness Done')
       call timstop(timerReadRoughness)
+
+      ! Read cross section definitions
       call timstrt('ReadCsDefs', timerReadCsDefs)
       call SetMessage(LEVEL_INFO, 'Reading Cross Section Definitions ...')
+     
+      call readCrossSectionDefinitions(network, filenames%cross_section_definitions)
       
-      ! Read cross section definition file
-      if (len_trim(filenames%cross_section_definitions) == 0) then
-         inputfile=''
-         call prop_get_string(md_ptr, 'files', 'crossDefFile', inputfile, success)
-         inputfile = trim(folder)//inputfile
-      else
-         inputfile = filenames%cross_section_definitions
-      endif
-      
-      call remove_all_spaces(inputfile)
-      if (success .and. len_trim(inputfile) > 0) then
-         call readCrossSectionDefinitions(network, inputfile)
-      endif
-
       if (network%CSDefinitions%Count < 1) then
-         call SetMessage(LEVEL_FATAL, 'No Any Cross_Section Definition Found')
+         call SetMessage(LEVEL_FATAL, 'No Cross_Section Definitions Found')
       endif
-      
+     
       call SetMessage(LEVEL_INFO, 'Reading Cross Section Definitions Done')
       call timstop(timerReadCsDefs)
+      
+      ! Read cross section locations
       call timstrt('ReadCsLocs', timerReadCsLocs)
       call SetMessage(LEVEL_INFO, 'Reading Cross Section Locations ...')
 
-      ! Read cross section location file
-      inputfile=''
-      call prop_get_string(md_ptr, 'files', 'crossLocFile', inputfile, success)
-      inputfile = trim(folder)//inputfile
-      call remove_all_spaces(inputfile)
-      if (success .and. len_trim(inputfile) > 0) then
-         call readCrossSectionLocationFile(network, inputfile)
-      endif
+      call readCrossSectionLocationFile(network, filenames%cross_section_locations)
+         
+     if (network%crs%Count < 1) then
+        call SetMessage(LEVEL_FATAL, 'No Cross Sections Found')
+     endif
 
-      if (network%crs%Count < 1) then
-         call SetMessage(LEVEL_FATAL, 'No Cross Sections Found')
-      endif
+     call SetMessage(LEVEL_INFO, 'Reading Cross Section Locations Done')
+     call timstop(timerReadCsLocs)
+     
+     
+     ! Read structure file
+     call timstrt('ReadStructures', timerReadStructs)
+     call SetMessage(LEVEL_INFO, 'Reading Structures ...')
 
-      call SetMessage(LEVEL_INFO, 'Reading Cross Section Locations Done')
-      call timstop(timerReadCsLocs)
-      call timstrt('ReadStructures', timerReadStructs)
-      call SetMessage(LEVEL_INFO, 'Reading Structures ...')
+     call readStructures(network, filenames%structures)
 
-      ! Read structure file
-      inputfile=''
-      call prop_get_string(md_ptr, 'files', 'structureFile', inputfile, success)
-      inputfile = trim(folder)//inputfile
-      call remove_all_spaces(inputfile)
-      if (success .and. len_trim(inputfile) > 0) then
-         call readStructures(network, inputfile)
-      endif
+     call SetMessage(LEVEL_INFO, 'Reading Structures Done')
+     call timstop(timerReadStructs)
+     
+     ! Create Storage Mapping to Grid Points
+     if (.not. allocated(network%storS%mapping)) then
+        call create(network%storS, network%nds%count, network%brs%gridpointsCount)
+     endif
 
-      call SetMessage(LEVEL_INFO, 'Reading Structures Done')
-      call timstop(timerReadStructs)
-      
-      ! Create Storage Mapping to Grid Points
-      if (.not. allocated(network%storS%mapping)) then
-         call create(network%storS, network%nds%count, network%brs%gridpointsCount)
-      endif
+     call timstrt('ReadRetentions', timerReadRetentions)
+     call SetMessage(LEVEL_INFO, 'Reading Retentions ...')
 
-      call timstrt('ReadRetentions', timerReadRetentions)
-      call SetMessage(LEVEL_INFO, 'Reading Retentions ...')
+     ! Read Retentions file
+     call readRetentions(network, filenames%retentions)
+      
+     call SetMessage(LEVEL_INFO, 'Reading Retentions Done')
+     call timstop(timerReadRetentions)
 
-      ! Read Retentions file
-      inputfile=''
-      call prop_get_string(md_ptr, 'files', 'retentionFile', inputfile, success)
-      inputfile = trim(folder)//inputfile
-      call remove_all_spaces(inputfile)
-      if (success .and. len_trim(inputfile) > 0) then
-         call readRetentions(network, inputfile)
-      endif
+     call SetMessage(LEVEL_INFO, 'Reading Advanced Parameters ...')
+     call prop_get_double(md_ptr, 'advancedoptions', 'transitionheightsd', summerDikeTransitionHeight, success)
+     if (.not. success) then 
+        call SetMessage(LEVEL_FATAL, 'Error reading Advanced Parameters')
+     endif
+     call SetMessage(LEVEL_INFO, 'Reading Advanced Parameters Done')
       
-      call SetMessage(LEVEL_INFO, 'Reading Retentions Done')
-      call timstop(timerReadRetentions)
+     ! log timings
+     call timstop(timerRead)
+     open(newunit=timerFileUnit, file='read-model-timings.log')
+     call timdump(timerFileUnit)
+     close(timerFileUnit)
+     
+     call tree_destroy(md_ptr)
+     
+     ! Stop in case of errors
+     maxErrorLevel = getMaxErrorLevel()
+     if (maxErrorLevel >= LEVEL_ERROR) then
+        call LogAllParameters()
+        call SetMessage(LEVEL_FATAL, 'Error(s) during reading model data from files')
+     endif
+     
+     call SetMessage(LEVEL_INFO, 'All 1D-Reading Done')
 
-      call SetMessage(LEVEL_INFO, 'Reading Advanced Parameters ...')
-      call prop_get_double(md_ptr, 'advancedoptions', 'transitionheightsd', summerDikeTransitionHeight, success)
-      if (.not. success) then 
-         call SetMessage(LEVEL_FATAL, 'Error reading Advanced Parameters')
-      endif
-      call SetMessage(LEVEL_INFO, 'Reading Advanced Parameters Done')
-      
-      ! log timings
-      call timstop(timerRead)
-      open(newunit=timerFileUnit, file='read-model-timings.log')
-      call timdump(timerFileUnit)
-      close(timerFileUnit)
-      
-      call tree_destroy(md_ptr)
-      
-      ! Stop in case of errors
-      maxErrorLevel = getMaxErrorLevel()
-      if (maxErrorLevel >= LEVEL_ERROR) then
-         call LogAllParameters()
-         call SetMessage(LEVEL_FATAL, 'Error(s) during reading model data from files')
-      endif
-      
-      call SetMessage(LEVEL_INFO, 'All 1D-Reading Done')
+     files_have_been_read = .true.
+     
+     call tree_destroy(md_ptr)
 
-      files_have_been_read = .true.
-      
-      call tree_destroy(md_ptr)
-      
    end subroutine read_1d_attributes
 
    subroutine read_1d_model(md_flow1d_file, md_ptr, network, nc_outputdir)
@@ -381,6 +390,7 @@ module m_flow1d_reader
       double precision                :: default
       
       character(len=Charln)           :: binfile
+      character(len=1024  )           :: filestring
       logical                         :: file_exist
       integer                         :: istat
       integer                         :: ibin
@@ -488,7 +498,13 @@ module m_flow1d_reader
       call SetMessage(LEVEL_INFO, 'Reading Roughness ...')
 
       ! Read roughnessFile file
-      call roughness_reader(network, md_ptr, md_flow1d_file(1:posslash))
+            
+      call prop_get_string(md_ptr, 'Files', 'roughnessFile', filestring, success)
+      if (.not. success) then
+         return
+      endif
+
+      call roughness_reader(network, filestring, md_flow1d_file(1:posslash))
       
       call SetMessage(LEVEL_INFO, 'Reading Roughness Done')
       call timstop(timerReadRoughness)

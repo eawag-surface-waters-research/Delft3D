@@ -92,7 +92,10 @@ module m_GlobalParameters
       character(len=255) :: onednetwork                  = ' ' !< 1d Network definition             (e.g., flow1d.md1d)
       character(len=255) :: cross_section_definitions    = ' ' !< 1d cross section definitions
       character(len=255) :: cross_section_locations      = ' ' !< 1d cross section locations
+      character(len=1024):: roughness                    = ' ' !< 1d roughness files
+      character(len=255) :: roughnessdir                 = ' ' !< location of roughness files
       character(len=255) :: retentions                   = ' ' !< 1d cross section retention manhole definitions
+      character(len=255) :: structures                   = ' ' !< structure file
    end type
 
    
