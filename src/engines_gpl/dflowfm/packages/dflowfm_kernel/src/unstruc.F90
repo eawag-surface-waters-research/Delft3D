@@ -3450,6 +3450,9 @@ end subroutine setdt
              if (squ(k) > eps10) then                   ! outflow only
                 if (hs(k) > epshu .and. vol1(k) > 0.0 .and. squ(k) > 0.0) then
                    dtsc = cflmx*vol1(k)/squ(k)
+                   if (jamapdtcell > 0) then
+                      dtcell(k) = dtsc
+                   endif
                    if (dtsc < dts) then
                       dts = dtsc  ; kkcflmx = k
                    endif
@@ -3470,6 +3473,9 @@ end subroutine setdt
              if (sqwave(k) > eps10) then                   ! outflow only
                 if (hs(k) > epshu) then
                    dtsc = cflmx*vol1(k)/sqwave(k)
+                   if (jamapdtcell > 0) then
+                      dtcell(k) = dtsc
+                   endif
                    if (dtsc < dts) then
                       dts = dtsc  ; kkcflmx = k
                    endif
@@ -3489,6 +3495,9 @@ end subroutine setdt
           if (squ(k) + sqi(k) > eps10) then                   ! outflow+inflow
              if (hs(k) > epshu .and. vol1(k) > 0.0) then
                 dtsc = cflmx*vol1(k)/ (squ(k) + sqi(k))
+                if (jamapdtcell > 0) then
+                   dtcell(k) = dtsc
+                endif
                 if (dtsc < dts) then
                    dts = dtsc  ; kkcflmx = k
                 endif
@@ -3509,6 +3518,9 @@ end subroutine setdt
              do k = kb,kt
                 if (squ2d(k) > eps10) then
                    dtsc = cflmx*vol1(k)/squ2d(k)         ! outflow or outflow+inflow
+                   if (jamapdtcell > 0) then
+                      dtcell(k) = dtsc
+                   endif
                    if (dtsc < dts) then
                        dts = dtsc ; kkcflmx = kk ; kcflmx = k
                    endif
@@ -3535,6 +3547,9 @@ end subroutine setdt
                    if ( squ(k).gt.eps10 .or. sqi(k).gt.eps10 ) then
 !                      dtsc = cflmx*vol1(k)/squ(k)
                       dtsc = cflmx*vol1(k)/max(squ(k),sqi(k))
+                      if (jamapdtcell > 0) then
+                         dtcell(k) = dtsc
+                      endif
                    if ( dtsc.lt.dts ) then
                       dts     = dtsc ; kkcflmx = kk
                    endif
@@ -3560,6 +3575,9 @@ end subroutine setdt
                 if ( sqi(k).gt.eps10 ) then
                    dtsc = cflmx*vol1(k)/sqi(k)
                    dtsc = min(dtsc, dtsc2D)
+                   if (jamapdtcell > 0) then
+                      dtcell(k) = dtsc
+                   endif
                    if ( dtsc.lt.dts ) then
                       dts     = dtsc ; kkcflmx = kk
                    endif
@@ -3598,6 +3616,9 @@ end subroutine setdt
              do k = kb,kt
                 if ( squ(k).gt.eps10 ) then
                    dtsc = cflmx*vol1(k)/ ( squ(k) + sqi(k) )
+                   if (jamapdtcell > 0) then
+                      dtcell(k) = dtsc
+                   endif
                    if ( dtsc.lt.dts ) then
                       dts = dtsc  ; kkcflmx = kk
                    endif
@@ -3618,6 +3639,9 @@ end subroutine setdt
              do k=kb,max(kb, kt-1)
                 if ( squ(k).gt.eps10 ) then
                    dtsc = cflmx*vol1(k)/squ(k)
+                   if (jamapdtcell > 0) then
+                      dtcell(k) = dtsc
+                   endif
                    if ( dtsc.lt.dts ) then
                       dts     = dtsc ; kkcflmx = kk
                    endif
@@ -3643,10 +3667,18 @@ end subroutine setdt
                     !   dt <  vol / dxiAu / N / vicL   ! see Tech Ref.: Limitation of Viscosity Coefficient
                     if ( dxiAu.gt.0d0 .and. vicLu(L).gt.0d0) then
                         if (vol1(k1).gt.0d0) then
-                           dtsvisc = min(dtsvisc,0.2d0*vol1(k1)/dxiAu)
+                           dtsc = 0.2d0*vol1(k1)/dxiAu
+                           dtsvisc = min(dtsvisc,dtsc)
+                           if (jamapdtcell > 0) then
+                              dtcell(k1) = min( dtcell(k1), dtsc )
+                           endif
                         end if     
                         if (vol1(k2).gt.0d0) then
-                           dtsvisc = min(dtsvisc,0.2d0*vol1(k2)/dxiAu)
+                           dtsc = 0.2d0*vol1(k2)/dxiAu
+                           dtsvisc = min(dtsvisc,dtsc)
+                           if (jamapdtcell > 0) then
+                              dtcell(k2) = min( dtcell(k2), dtsc )
+                           endif
                         end if     
                         if ( dtsvisc.lt.dts ) then
                            dts     = dtsvisc ; kkcflmx = k1
@@ -3670,10 +3702,18 @@ end subroutine setdt
                     !   dt <  vol / dxiAu / N / vicL   ! see Tech Ref.: Limitation of Viscosity Coefficient
                     if ( dxiAu.gt.0d0 .and. vicLu(L).gt.0d0) then
                         if (vol1(k1).gt.0d0) then
-                           dtsvisc = min(dtsvisc,0.2d0*vol1(k1)/dxiAu)
+                           dtsc = 0.2d0*vol1(k1)/dxiAu
+                           dtsvisc = min(dtsvisc,dtsc)
+                           if (jamapdtcell > 0) then
+                              dtcell(k1) = min( dtcell(k1), dtsc )
+                           endif
                         end if     
                         if (vol1(k2).gt.0d0) then
-                           dtsvisc = min(dtsvisc,0.2d0*vol1(k2)/dxiAu)
+                           dtsc = 0.2d0*vol1(k2)/dxiAu
+                           dtsvisc = min(dtsvisc,dtsc)
+                           if (jamapdtcell > 0) then
+                              dtcell(k2) = min( dtcell(k2), dtsc )
+                           endif
                         end if                             
                         if ( dtsvisc.lt.dts ) then
                            dts     = dtsvisc ; kkcflmx = k1
@@ -21908,6 +21948,12 @@ end do
  allocate ( volerror(ndkx) , stat = ierr)
  call aerr('volerror(ndkx)', ierr,   ndx)           ; volerror = 0
 
+ if ( allocated(dtcell) ) then
+    deallocate(dtcell)
+ endif
+ allocate( dtcell(ndkx), stat = ierr) 
+ call aerr('dtcell(ndkx)', ierr, ndkx) ; dtcell = 0d0
+ 
  if (kmx > 0 .and. (ja_timestep_auto == 3 .or. ja_timestep_auto == 4) ) then
     if (allocated (squ2D)) deallocate (squ2d)
     allocate ( squ2D(ndkx) , stat=ierr )

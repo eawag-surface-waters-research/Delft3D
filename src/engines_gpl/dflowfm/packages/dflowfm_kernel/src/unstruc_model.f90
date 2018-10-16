@@ -1323,6 +1323,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_internal_tides_dissipation', jamapIntTidesDiss, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_nudging', jamapnudge, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_waves',jamapwav, success)
+    call prop_get_integer(md_ptr, 'output', 'Wrimap_DTcell',jamapdtcell, success)
     call prop_get_integer(md_ptr, 'output', 'Writek_CdWind', jatekcd, success)
     call prop_get_integer(md_ptr, 'output', 'Wrirst_bnd', jarstbnd, success)
     call prop_get_integer(md_ptr, 'output', 'Writepart_domain', japartdomain, success)
@@ -2613,7 +2614,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     if (writeall .or. jahistem /= 1) then
        call prop_set(prop_ptr, 'output', 'Wrihis_temperature', jahistem, 'Write temperature to his file (1: yes, 0: no)' )
     endif
-    if (writeall .or. jahiswav > 0) then
+    if (writeall .or. jahiswav /= 1) then
        call prop_set(prop_ptr, 'output', 'Wrihis_waves', jahiswav, 'Write wave data to his file (1: yes, 0: no)' )
     endif
     if (writeall .or. jahisheatflux /= 1) then
@@ -2631,13 +2632,13 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     if (writeall .or. jahisbedlev == 0) then
        call prop_set(prop_ptr, 'output', 'Wrihis_bedlevel', jahisbedlev, 'Write bed level to his file (1: yes, 0: no)' )
     endif
-    if (writeall .or. jahiswatdep /= 1) then
+    if (writeall .or. jahiswatdep /= 0) then
        call prop_set(prop_ptr, 'output', 'Wrihis_waterdepth', jahiswatdep, 'Write waterd epth to his file (1: yes, 0: no)' )
     endif
     if (writeall .or. jahisvelvec /= 1) then
        call prop_set(prop_ptr, 'output', 'Wrihis_velocity_vector', jahisvelvec, 'Write velocity vectors to his file (1: yes, 0: no)' )
     endif
-    if (writeall .or. jahisww > 0) then
+    if (writeall .or. jahisww /= 0) then
        call prop_set(prop_ptr, 'output', 'Wrihis_upward_velocity_component', jahisww, 'Write upward velocity to his file (1: yes, 0: no)' )
     endif
     if (writeall .or. jahissed /= 1) then
@@ -2670,7 +2671,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     if (writeall .or. jamapucmag /= 1) then
         call prop_set(prop_ptr, 'output', 'Wrimap_velocity_magnitude', jamapucmag, 'Write cell-center velocity vector magnitude to map file (1: yes, 0: no)')
     endif
-    if (writeall .or. jamapucqvec /= 1) then
+    if (writeall .or. jamapucqvec /= 0) then
         call prop_set(prop_ptr, 'output', 'Wrimap_velocity_vectorq', jamapucqvec, 'Write cell-center velocity vectors (discharge-based) to map file (1: yes, 0: no)')
     endif
     if(writeall .or. jamapww1 /= 1) then
@@ -2688,7 +2689,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     if (writeall .or. jamapq1 /= 1) then
         call prop_set(prop_ptr, 'output', 'Wrimap_flow_flux_q1', jamapq1, 'Write flow flux to map file (1: yes, 0: no)')
     endif
-    if (writeall .or. jamapq1main /= 1) then
+    if (writeall .or. jamapq1main /= 0) then
         call prop_set(prop_ptr, 'output', 'Wrimap_flow_flux_q1_main', jamapq1main, 'Write flow flux in main channel to map file (1: yes, 0: no)')
     endif
     if ( jasecflow > 0 .and. (writeall .or. jamapspir /= 1)) then
@@ -2732,6 +2733,10 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     endif
     if (jatem > 1 .and. (writeall .or. jamapheatflux > 0)) then
        call prop_set(prop_ptr, 'output', 'Wrimap_heat_fluxes', jamapheatflux, 'Write heat fluxes to map file (1: yes, 0: no)' )
+    endif
+    
+    if(writeall .or. jamapdtcell /= 0) then
+        call prop_set(prop_ptr, 'output', 'Wrimap_DTcell', jamapdtcell, 'Write time step per cell based on CFL (1: yes, 0: no)')
     endif
 
     if (jatidep > 0 .and. (writeall .or. jamaptidep /= 1)) then

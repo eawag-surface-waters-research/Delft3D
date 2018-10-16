@@ -2803,6 +2803,7 @@ end subroutine default_turbulence
  integer                           :: jamapIntTidesDiss         !< internal tides dissipation to map file, 0: no, 1: yes
  integer                           :: jamapNudge                !< output nudging to map file, 0: no, 1: yes
  integer                           :: jamapwav                  !< output waves to map file, 0: no, 1: yes
+  integer                           :: jamapdtcell              !< output time steps per cell based on CFL
  integer                           :: jatekcd                   !< tek output with wind cd coefficients, 0=no (default), 1=yes
  integer                           :: jafullgridoutput          !< 0:compact, 1:full time-varying grid data
  integer                           :: jaeulervel                !< 0:GLM, 1:Euler velocities
@@ -3146,6 +3147,7 @@ subroutine default_flowparameters()
     jamapIntTidesDiss = 1
     jamapNudge = 1
     jamapwav = 1
+    jamapdtcell = 0
     jatekcd = 1     ! wind cd coeffs on tek
     jarstbnd = 1
     japartdomain = 1
@@ -4167,7 +4169,7 @@ end subroutine reset_flowgeom
  double precision                  :: tim1bnd     !< last time boundary signals were given
  double precision                  :: tim1fld     !< last time field    signals were given
  integer                           :: jatimestepanalysis = 0
-
+ double precision, allocatable     :: dtcell(:)   !< time step per cell based on CFL (s), size:ndkx
 
  !TODO: use in the trachytopes this variable and fully remove reading from rdtrt
  double precision                  :: dt_trach    !< DtTrt Trachytope roughness update time interval (s)

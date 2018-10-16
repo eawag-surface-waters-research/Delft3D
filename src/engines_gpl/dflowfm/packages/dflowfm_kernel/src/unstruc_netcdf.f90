@@ -353,6 +353,7 @@ type t_unc_mapids
    integer :: id_sybwav (4)   = -1
    integer :: id_z0c(4)       = -1
    integer :: id_z0r(4)       = -1
+   integer :: id_dtcell (4)   = -1
    integer :: id_morft     = -1
    integer :: id_morfac    = -1
    !
@@ -3708,6 +3709,11 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
          ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_vol1, nf90_double, UNC_LOC_S, 'vol1',         '',                'volume of water in grid cell', 'm3')
       end if
 
+      ! Calculated time step per cell based on CFL number
+      if(jamapdtcell > 0 ) then
+         ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_dtcell, nf90_double, iLocS, 'dtcell', '', 'Time step per cell based on CFL', 's')
+      endif
+      
       ! Velocities
       need_auxhu = jamapu1 > 0 .or. jamapu0 > 0 .or. jamapq1 > 0 .or. jamapviu > 0 .or. jamapdiu > 0
       if (need_auxhu) then
@@ -4355,6 +4361,9 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
    if (jamapu0 == 1) then
       ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_u0, iLocU, u0, 0d0)
    end if
+   if (jamapdtcell == 1) then
+      ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_dtcell, UNC_LOC_S, dtcell)
+   endif
 
    ! TODO: AvD below: workx/y needs to be reset with miss/0 values before using.
    if (jamapucvec == 1 .or. jamapucmag == 1 .or. jamapucqvec == 1) then
