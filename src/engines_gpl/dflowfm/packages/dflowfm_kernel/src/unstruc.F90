@@ -35665,7 +35665,6 @@ end subroutine make_mirrorcells
  logical :: exist
  integer                       :: numz, numu, numq, numg, numd, numgen, npum, numklep, jaifrcutp
  integer                       :: numnos, numnot, numnon ! < Nr. of unassociated flow links (not opened due to missing z- or u-boundary)
- integer                       :: ipumpsg
 
  double precision, allocatable :: xdum(:), ydum(:), xy2dum(:,:)
  integer, allocatable          :: kdum(:)
@@ -37363,7 +37362,7 @@ if (mext > 0) then
 
  endif
 
- if (npump > 0) then
+ if (jaoldstr > 0 .and. npump > 0) then
     if (allocated (xpump)    ) deallocate( xpump)
     if (allocated (ypump)    ) deallocate( ypump)
     if (allocated (qpump)    ) deallocate( qpump)
@@ -37404,7 +37403,7 @@ if (mext > 0) then
     enddo
 
     ja = 1 ; rewind (mext); kx = 1
-    ipumpsg = 0
+    npumpsg = 0
     do while (ja .eq. 1)                             ! for pumps again postponed read *.ext file
        call readprovider(mext,qid,filename,filetype,method,operand,transformcoef,ja,varname)
        if (ja == 1 .and. ( qid == 'pump1D' .or. qid == 'pump') ) then
