@@ -2009,7 +2009,7 @@ end module m_crspath
  integer         , allocatable           :: activeDambreakLinks(:)           !< activeDambreakLinks, open dambreak links
  integer         , allocatable           :: LStartBreach(:)                  !< the starting link, the closest to the breach point
  integer         , allocatable           :: kdambreak(:,:)                   !< dambreak links index array
- double precision, allocatable, target   :: dambreakHeightsAndWidthsFromTable(:)  !< dambreak widths and heights 
+ double precision, allocatable, target   :: dambreakLevelsAndWidthsFromTable(:)  !< dambreak widths and heights 
  character(len=128), allocatable, target :: dambreak_ids(:)                       !< the dambreak ids
 
  type polygon

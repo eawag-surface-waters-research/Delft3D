@@ -168,7 +168,7 @@ module m_meteo
 
    integer, target :: item_nudge_tem                                         !< 3D temperature for nudging
    integer, target :: item_nudge_sal                                         !< 3D salinity for nudging
-   integer, target :: item_dambreakHeightsAndWidthsFromTable                 !< Dambreak heights and widths
+   integer, target :: item_dambreakLevelsAndWidthsFromTable                  !< Dambreak heights and widths
    !
    integer :: n_qhbnd !< Number of already connected qh-boundaries.
    
@@ -245,7 +245,7 @@ module m_meteo
       item_my                                    = ec_undef_int
       item_dissurf                               = ec_undef_int
       item_diswcap                               = ec_undef_int
-      item_dambreakHeightsAndWidthsFromTable     = ec_undef_int                    
+      item_dambreakLevelsAndWidthsFromTable      = ec_undef_int                    
       !
       n_qhbnd = 0
       !
@@ -503,9 +503,9 @@ module m_meteo
             !dataPtr1      => qpump
          case ('damlevel')
             itemPtr1 => item_damlevel
-         case ('dambreakHeightsAndWidths')      
-            itemPtr1 => item_dambreakHeightsAndWidthsFromTable
-            dataPtr1 => dambreakHeightsAndWidthsFromTable
+         case ('dambreakLevelsAndWidths')      
+            itemPtr1 => item_dambreakLevelsAndWidthsFromTable
+            dataPtr1 => dambreakLevelsAndWidthsFromTable
          case ('lateraldischarge')
             itemPtr1 => item_lateraldischarge 
             !dataPtr1      => zcdam
@@ -991,7 +991,7 @@ module m_meteo
       converterId = ecCreateConverter(ecInstancePtr)
       
       select case(target_name)
-      case ('shiptxy', 'movingstationtxy', 'discharge_salinity_temperature_sorsin', 'pump', 'damlevel', 'gateloweredgelevel', 'generalstructure', 'lateraldischarge','dambreakHeightsAndWidths')
+      case ('shiptxy', 'movingstationtxy', 'discharge_salinity_temperature_sorsin', 'pump', 'damlevel', 'gateloweredgelevel', 'generalstructure', 'lateraldischarge','dambreakLevelsAndWidths')
          ! for the FM 'target' arrays, the index is provided by the caller
          if (.not. present(targetIndex)) then
             message = 'Internal program error: missing targetIndex for quantity '''//trim(target_name)
@@ -1064,7 +1064,7 @@ module m_meteo
             end if
             ! the file reader will have created an item called 'uniform_item'
             sourceItemName = 'uniform_item'
-         case ('pump','generalstructure','damlevel','gateloweredgelevel','lateraldischarge','dambreakHeightsAndWidths')
+         case ('pump','generalstructure','damlevel','gateloweredgelevel','lateraldischarge','dambreakLevelsAndWidths')
             if (checkFileType(ec_filetype, provFile_uniform, target_name)) then
                sourceItemId   = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'uniform_item')
                if (sourceItemId==ec_undef_int) then 

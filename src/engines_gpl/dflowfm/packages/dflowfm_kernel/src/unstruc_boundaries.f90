@@ -2292,9 +2292,9 @@ if (ndambreak > 0) then
    allocate(dambreakAveraging(2,ndambreaksg))
    dambreakAveraging = 0.0d0
    
-   if(allocated(dambreakHeightsAndWidthsFromTable)) deallocate(dambreakHeightsAndWidthsFromTable)
-   allocate(dambreakHeightsAndWidthsFromTable(ndambreaksg*2))
-   dambreakHeightsAndWidthsFromTable = 0.0d0
+   if(allocated(dambreakLevelsAndWidthsFromTable)) deallocate(dambreakLevelsAndWidthsFromTable)
+   allocate(dambreakLevelsAndWidthsFromTable(ndambreaksg*2))
+   dambreakLevelsAndWidthsFromTable = 0.0d0
    
    if(allocated(breachWidthDerivativeDambreak)) deallocate(breachWidthDerivativeDambreak)
    allocate(breachWidthDerivativeDambreak(ndambreaksg))
@@ -2353,13 +2353,13 @@ if (ndambreak > 0) then
          ! set initial phase, width, crest level, coefficents if algorithm is 1
          network%sts%struct(istrtmp)%dambreak%phase  = 0
          network%sts%struct(istrtmp)%dambreak%width  = 0d0
-         network%sts%struct(istrtmp)%dambreak%crl    = network%sts%struct(istrtmp)%dambreak%crestlevelini
+         network%sts%struct(istrtmp)%dambreak%crl    = network%sts%struct(istrtmp)%dambreak%crestLevelIni
          if (network%sts%struct(istrtmp)%dambreak%algorithm == 3) then
             ! Time-interpolated value will be placed in zcgen((n-1)*3+1) when calling ec_gettimespacevalue.
-            qid='dambreakHeightsAndWidths'
-            network%sts%struct(istrtmp)%dambreak%breachwidthandlevel = trim(network%sts%struct(istrtmp)%dambreak%breachwidthandlevel)
-            if (index(trim(network%sts%struct(istrtmp)%dambreak%breachwidthandlevel)//'|','.tim|')>0) then   
-               success  = ec_addtimespacerelation(qid, xdum, ydum, kdum, kx, network%sts%struct(istrtmp)%dambreak%breachwidthandlevel , uniform, spaceandtime, 'O', targetIndex=n) ! Hook up 1 component at a time, even when target element set has kx=3
+            qid='dambreakLevelsAndWidths'
+            network%sts%struct(istrtmp)%dambreak%levelsAndWidths = trim(network%sts%struct(istrtmp)%dambreak%levelsAndWidths)
+            if (index(trim(network%sts%struct(istrtmp)%dambreak%levelsAndWidths)//'|','.tim|')>0) then   
+               success  = ec_addtimespacerelation(qid, xdum, ydum, kdum, kx, network%sts%struct(istrtmp)%dambreak%levelsAndWidths , uniform, spaceandtime, 'O', targetIndex=n) ! Hook up 1 component at a time, even when target element set has kx=3
             else
                success = .false.
             endif            
@@ -2393,8 +2393,8 @@ if (ndambreak > 0) then
       enddo
    
       ! comp_breach_point takes plain arrays to compute the breach point (also used in unstruct_bmi)      
-      call comp_breach_point(network%sts%struct(istrtmp)%dambreak%start_location_x, & 
-                             network%sts%struct(istrtmp)%dambreak%start_location_y, & 
+      call comp_breach_point(network%sts%struct(istrtmp)%dambreak%startLocationX, & 
+                             network%sts%struct(istrtmp)%dambreak%startLocationY, & 
                              dambreakPolygons(indexInStructure)%xp, & 
                              dambreakPolygons(indexInStructure)%yp, & 
                              dambreakPolygons(indexInStructure)%np, & 
