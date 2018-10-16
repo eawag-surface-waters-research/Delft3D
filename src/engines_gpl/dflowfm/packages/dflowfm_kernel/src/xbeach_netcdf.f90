@@ -243,28 +243,28 @@ subroutine unc_write_wav_filepointer_ugrid(wavids, tim)
       tmpstr = 'seconds since '//refdat(1:4)//'-'//refdat(5:6)//'-'//refdat(7:8)//' 00:00:00'
       ierr = unc_def_var_nonspatial(wavids%ncid, wavids%id_time, nf90_double, (/ wavids%id_tsp%id_timedim /), 'time', 'time', '', trim(tmpstr))
       
-      if (jaavgwriteall .or. jaavgwriteH) then
+      if (jaavgwriteall>0 .or. jaavgwriteH>0) then
          ierr = unc_def_var_map(wavids%ncid, wavids%id_tsp, wavids%id_H_mean, nf90_double, UNC_LOC_S, 'H_mean','mean rms wave height', 'mean rms wave height', 'm')
          ierr = unc_def_var_map(wavids%ncid, wavids%id_tsp, wavids%id_H_var, nf90_double, UNC_LOC_S, 'H_var','variance rms wave height', 'variance rms wave height', 'm2')
          ierr = unc_def_var_map(wavids%ncid, wavids%id_tsp, wavids%id_H_max, nf90_double, UNC_LOC_S, 'H_max','max rms wave height', 'max rms wave height', 'm')
          ierr = unc_def_var_map(wavids%ncid, wavids%id_tsp, wavids%id_H_min, nf90_double, UNC_LOC_S, 'H_min','min rms wave height', 'min rms wave height', 'm')
       end if
       
-      if (jaavgwriteall .or. jaavgwriteE) then
+      if (jaavgwriteall>0 .or. jaavgwriteE>0) then
          ierr = unc_def_var_map(wavids%ncid, wavids%id_tsp, wavids%id_E_mean, nf90_double, UNC_LOC_S, 'E_mean','mean wave energy', 'mean wave energy', 'J m-2')
          ierr = unc_def_var_map(wavids%ncid, wavids%id_tsp, wavids%id_E_var, nf90_double, UNC_LOC_S,  'E_var', 'variance wave energy', 'variance wave energy', 'J2 m-4')
          ierr = unc_def_var_map(wavids%ncid, wavids%id_tsp, wavids%id_E_max, nf90_double, UNC_LOC_S,  'E_max', 'max wave energy', 'max wave energy', 'J m-2')
          ierr = unc_def_var_map(wavids%ncid, wavids%id_tsp, wavids%id_E_min, nf90_double, UNC_LOC_S,  'E_min', 'min wave energy', 'min wave energy', 'J m-2')
       end if
       
-      if (jaavgwriteall .or. jaavgwriteR) then
+      if (jaavgwriteall>0 .or. jaavgwriteR>0) then
          ierr = unc_def_var_map(wavids%ncid, wavids%id_tsp, wavids%id_R_mean, nf90_double, UNC_LOC_S, 'R_mean','mean roller energy', 'mean roller energy', 'J m-2')
          ierr = unc_def_var_map(wavids%ncid, wavids%id_tsp, wavids%id_R_var, nf90_double, UNC_LOC_S,  'R_var','variance roller energy', 'variance roller energy', 'J2 m-4')
          ierr = unc_def_var_map(wavids%ncid, wavids%id_tsp, wavids%id_R_max, nf90_double, UNC_LOC_S,  'R_max','max roller energy', 'max roller energy', 'J m-2')
          ierr = unc_def_var_map(wavids%ncid, wavids%id_tsp, wavids%id_R_min, nf90_double, UNC_LOC_S,  'R_min','min roller energy', 'min roller energy', 'J m-2')
       end if
       
-      if (jaavgwriteall .or. jaavgwriteD) then
+      if (jaavgwriteall>0 .or. jaavgwriteD>0) then
          ierr = unc_def_var_map(wavids%ncid, wavids%id_tsp, wavids%id_D_mean, nf90_double, UNC_LOC_S, 'D_mean','mean wave breaking dissipation', 'mean wave breaking dissipation', 'W m-2')
          ierr = unc_def_var_map(wavids%ncid, wavids%id_tsp, wavids%id_D_var, nf90_double, UNC_LOC_S,  'D_var','variance wave breaking dissipation', 'variance wave breaking dissipation', 'W2 m-4')
          ierr = unc_def_var_map(wavids%ncid, wavids%id_tsp, wavids%id_D_max, nf90_double, UNC_LOC_S,  'D_max','max wave breaking dissipation', 'max wave breaking dissipation', 'W m-2')
@@ -276,7 +276,7 @@ subroutine unc_write_wav_filepointer_ugrid(wavids, tim)
          ierr = unc_def_var_map(wavids%ncid, wavids%id_tsp, wavids%id_DR_min, nf90_double, UNC_LOC_S,  'DR_min','min roller breaking dissipation', 'min roller breaking dissipation', 'W m-2')
       end if
       
-      if (jaavgwriteall .or. jaavgwriteCel) then
+      if (jaavgwriteall>0 .or. jaavgwriteCel>0) then
          ierr = unc_def_var_map(wavids%ncid, wavids%id_tsp, wavids%id_cwav_mean, nf90_double, UNC_LOC_S, 'cwav_mean','mean wave celerity', 'mean wave celerity', 'm s-1')
          ierr = unc_def_var_map(wavids%ncid, wavids%id_tsp, wavids%id_cwav_var, nf90_double, UNC_LOC_S,  'cwav_var','variance wave celerity', 'variance wave celerity', 'm2 s-2')
          ierr = unc_def_var_map(wavids%ncid, wavids%id_tsp, wavids%id_cwav_max, nf90_double, UNC_LOC_S,  'cwav_max','max wave celerity', 'max wave celerity', 'm s-1')
@@ -288,14 +288,14 @@ subroutine unc_write_wav_filepointer_ugrid(wavids, tim)
          ierr = unc_def_var_map(wavids%ncid, wavids%id_tsp, wavids%id_cgwav_min, nf90_double, UNC_LOC_S,  'cgwav_min','min wave group celerity', 'min wave group celerity', 'm s-1')
       end if
       
-      if (jaavgwriteall .or. jaavgwriteS) then
+      if (jaavgwriteall>0 .or. jaavgwriteS>0) then
          ierr = unc_def_var_map(wavids%ncid, wavids%id_tsp, wavids%id_s1_mean, nf90_double, UNC_LOC_S, 's1_mean','mean water level', 'mean water level', 'm')
          ierr = unc_def_var_map(wavids%ncid, wavids%id_tsp, wavids%id_s1_var, nf90_double, UNC_LOC_S,  's1_var','variance water level', 'variance water level', 'm2')
          ierr = unc_def_var_map(wavids%ncid, wavids%id_tsp, wavids%id_s1_max, nf90_double, UNC_LOC_S,  's1_max','max water level', 'max water level', 'm')
          ierr = unc_def_var_map(wavids%ncid, wavids%id_tsp, wavids%id_s1_min, nf90_double, UNC_LOC_S,  's1_min','min water level', 'min water level', 'm')   
       endif
       
-      if (jaavgwriteall .or. jaavgwriteU) then
+      if (jaavgwriteall>0 .or. jaavgwriteU>0) then
          ierr = unc_def_var_map(wavids%ncid, wavids%id_tsp, wavids%id_ustx_mean, nf90_double, UNC_LOC_S, 'ustx_mean','mean stokes drift, x-component', 'mean stokes drift, x-component', 'm s-1')
          ierr = unc_def_var_map(wavids%ncid, wavids%id_tsp, wavids%id_ustx_var, nf90_double, UNC_LOC_S,  'ustx_var','variance stokes drift, x-component', 'variance stokes drift, x-component', 'm2 s-2')
          ierr = unc_def_var_map(wavids%ncid, wavids%id_tsp, wavids%id_ustx_max, nf90_double, UNC_LOC_S,  'ustx_max','max stokes drift, x-component', 'max stokes drift, x-component', 'm s-1')
@@ -317,7 +317,7 @@ subroutine unc_write_wav_filepointer_ugrid(wavids, tim)
          ierr = unc_def_var_map(wavids%ncid, wavids%id_tsp, wavids%id_ucy_min, nf90_double, UNC_LOC_S,  'ucy_min','min velocity, y-component', 'min velocity, y-component', 'm s-1')
       endif
       
-      if (jaavgwriteall .or. jaavgwriteF) then
+      if (jaavgwriteall>0 .or. jaavgwriteF>0) then
          ierr = unc_def_var_map(wavids%ncid, wavids%id_tsp, wavids%id_Fx_mean, nf90_double, UNC_LOC_S, 'Fx_mean','mean wave force, x-component', 'mean wave force, x-component', 'N m-2')
          ierr = unc_def_var_map(wavids%ncid, wavids%id_tsp, wavids%id_Fx_var, nf90_double, UNC_LOC_S,  'Fx_var','variance wave force, x-component', 'variance wave force, x-component', 'N2 m-4')
          ierr = unc_def_var_map(wavids%ncid, wavids%id_tsp, wavids%id_Fx_max, nf90_double, UNC_LOC_S,  'Fx_max','max wave force, x-component', 'max wave force, x-component', 'N m-2')
@@ -329,14 +329,14 @@ subroutine unc_write_wav_filepointer_ugrid(wavids, tim)
          ierr = unc_def_var_map(wavids%ncid, wavids%id_tsp, wavids%id_Fx_min, nf90_double, UNC_LOC_S,  'Fy_min','min wave force, y-component', 'min wave force, y-component', 'N m-2')
       endif
       
-      if (jaavgwriteall .or. jaavgwriteUrms) then
+      if (jaavgwriteall>0 .or. jaavgwriteUrms>0) then
          ierr = unc_def_var_map(wavids%ncid, wavids%id_tsp, wavids%id_urms_mean, nf90_double, UNC_LOC_S, 'urms_mean','mean rms orbital velocity', 'mean rms orbital velocity', 'm s-1')
          ierr = unc_def_var_map(wavids%ncid, wavids%id_tsp, wavids%id_urms_var, nf90_double, UNC_LOC_S,  'urms_var','variance rms orbital velocity', 'variance rms orbital velocity', 'm2 s-2')
          ierr = unc_def_var_map(wavids%ncid, wavids%id_tsp, wavids%id_urms_max, nf90_double, UNC_LOC_S,  'urms_max','max rms orbital velocity', 'max rms orbital velocity', 'm s-1')
          ierr = unc_def_var_map(wavids%ncid, wavids%id_tsp, wavids%id_urms_min, nf90_double, UNC_LOC_S,  'urms_min','min rms orbital velocity', 'min rms orbital velocity', 'm s-1')     
       endif
       
-      if (jaavgwriteall .or. jaavgwriteDir) then
+      if (jaavgwriteall>0 .or. jaavgwriteDir>0) then
          ierr = unc_def_var_map(wavids%ncid, wavids%id_tsp, wavids%id_thetamean_mean, nf90_double, UNC_LOC_S, 'thetamean_mean','mean of mean wave angle', 'mean of mean wave angle', 'deg from N')
          ierr = unc_def_var_map(wavids%ncid, wavids%id_tsp, wavids%id_thetamean_var, nf90_double, UNC_LOC_S,  'thetamean_var','variance of mean wave angle', 'variance of mean wave angle', 'deg from N')
          ierr = unc_def_var_map(wavids%ncid, wavids%id_tsp, wavids%id_thetamean_max, nf90_double, UNC_LOC_S,  'thetamean_max','max of mean wave angle', 'max of mean wave angle', 'deg from N')
@@ -350,7 +350,7 @@ subroutine unc_write_wav_filepointer_ugrid(wavids, tim)
    itim                      = wavids%id_tsp%idx_curtime
    ierr                      = nf90_put_var(wavids%ncid, wavids%id_time, tim, (/ itim /))
    
-   if (jaavgwriteall .or. jaavgwriteH) then
+   if (jaavgwriteall>0 .or. jaavgwriteH>0) then
       temp = 0d0
       do k = 1, ndx     ! stack overflow
          temp(k) = sqrt(H_varsquare(k))    
@@ -361,21 +361,21 @@ subroutine unc_write_wav_filepointer_ugrid(wavids, tim)
       ierr = unc_put_var_map(wavids%ncid, wavids%id_tsp, wavids%id_H_min,  UNC_LOC_S, H_min)
    end if
    
-   if (jaavgwriteall .or. jaavgwriteE) then
+   if (jaavgwriteall>0 .or. jaavgwriteE>0) then
       ierr = unc_put_var_map(wavids%ncid, wavids%id_tsp, wavids%id_E_mean, UNC_LOC_S, E_mean)
       ierr = unc_put_var_map(wavids%ncid, wavids%id_tsp, wavids%id_E_var,  UNC_LOC_S, E_var)
       ierr = unc_put_var_map(wavids%ncid, wavids%id_tsp, wavids%id_E_max,  UNC_LOC_S, E_max)
       ierr = unc_put_var_map(wavids%ncid, wavids%id_tsp, wavids%id_E_min,  UNC_LOC_S, E_min)
    end if
    
-   if (jaavgwriteall .or. jaavgwriteR) then
+   if (jaavgwriteall>0 .or. jaavgwriteR>0) then
       ierr = unc_put_var_map(wavids%ncid, wavids%id_tsp, wavids%id_R_mean, UNC_LOC_S, R_mean)
       ierr = unc_put_var_map(wavids%ncid, wavids%id_tsp, wavids%id_R_var,  UNC_LOC_S, R_var)
       ierr = unc_put_var_map(wavids%ncid, wavids%id_tsp, wavids%id_R_max,  UNC_LOC_S, R_max)
       ierr = unc_put_var_map(wavids%ncid, wavids%id_tsp, wavids%id_R_min,  UNC_LOC_S, R_min)
    end if
    
-   if (jaavgwriteall .or. jaavgwriteD) then
+   if (jaavgwriteall>0 .or. jaavgwriteD>0) then
       ierr = unc_put_var_map(wavids%ncid, wavids%id_tsp, wavids%id_D_mean, UNC_LOC_S, D_mean)
       ierr = unc_put_var_map(wavids%ncid, wavids%id_tsp, wavids%id_D_var,  UNC_LOC_S, D_var)
       ierr = unc_put_var_map(wavids%ncid, wavids%id_tsp, wavids%id_D_max,  UNC_LOC_S, D_max)
@@ -387,7 +387,7 @@ subroutine unc_write_wav_filepointer_ugrid(wavids, tim)
       ierr = unc_put_var_map(wavids%ncid, wavids%id_tsp, wavids%id_DR_min,  UNC_LOC_S, DR_min)
    end if
    
-   if (jaavgwriteall .or. jaavgwriteCel) then
+   if (jaavgwriteall>0 .or. jaavgwriteCel>0) then
       ierr = unc_put_var_map(wavids%ncid, wavids%id_tsp, wavids%id_cwav_mean, UNC_LOC_S, cwav_mean)
       ierr = unc_put_var_map(wavids%ncid, wavids%id_tsp, wavids%id_cwav_var,  UNC_LOC_S, cwav_var)
       ierr = unc_put_var_map(wavids%ncid, wavids%id_tsp, wavids%id_cwav_max,  UNC_LOC_S, cwav_max)
@@ -399,14 +399,14 @@ subroutine unc_write_wav_filepointer_ugrid(wavids, tim)
       ierr = unc_put_var_map(wavids%ncid, wavids%id_tsp, wavids%id_cgwav_min,  UNC_LOC_S, cgwav_min)
    end if
    
-   if (jaavgwriteall .or. jaavgwriteS) then
+   if (jaavgwriteall>0 .or. jaavgwriteS>0) then
       ierr = unc_put_var_map(wavids%ncid, wavids%id_tsp, wavids%id_s1_mean, UNC_LOC_S, s1_mean)
       ierr = unc_put_var_map(wavids%ncid, wavids%id_tsp, wavids%id_s1_var,  UNC_LOC_S, s1_var)
       ierr = unc_put_var_map(wavids%ncid, wavids%id_tsp, wavids%id_s1_max,  UNC_LOC_S, s1_max)
       ierr = unc_put_var_map(wavids%ncid, wavids%id_tsp, wavids%id_s1_min,  UNC_LOC_S, s1_min)
    endif
    
-   if (jaavgwriteall .or. jaavgwriteU) then
+   if (jaavgwriteall>0 .or. jaavgwriteU>0) then
       ierr = unc_put_var_map(wavids%ncid, wavids%id_tsp, wavids%id_ustx_mean, UNC_LOC_S, ust_mean)
       ierr = unc_put_var_map(wavids%ncid, wavids%id_tsp, wavids%id_ustx_var,  UNC_LOC_S, ust_var)
       ierr = unc_put_var_map(wavids%ncid, wavids%id_tsp, wavids%id_ustx_max,  UNC_LOC_S, ust_max)
@@ -428,7 +428,7 @@ subroutine unc_write_wav_filepointer_ugrid(wavids, tim)
       ierr = unc_put_var_map(wavids%ncid, wavids%id_tsp, wavids%id_ucy_min,  UNC_LOC_S, v_min)
    endif
    
-   if (jaavgwriteall .or. jaavgwriteF) then
+   if (jaavgwriteall>0 .or. jaavgwriteF>0) then
       ierr = unc_put_var_map(wavids%ncid, wavids%id_tsp, wavids%id_Fx_mean, UNC_LOC_S, Fx_mean)
       ierr = unc_put_var_map(wavids%ncid, wavids%id_tsp, wavids%id_Fx_var,  UNC_LOC_S, Fx_var)
       ierr = unc_put_var_map(wavids%ncid, wavids%id_tsp, wavids%id_Fx_max,  UNC_LOC_S, Fx_max)
@@ -441,7 +441,7 @@ subroutine unc_write_wav_filepointer_ugrid(wavids, tim)
    
    endif
    
-   if (jaavgwriteall .or. jaavgwriteUrms) then
+   if (jaavgwriteall>0 .or. jaavgwriteUrms>0) then
       temp = 0d0
       do k=1, ndx
          temp(k) = sqrt(urms_varsquare(k))
@@ -452,7 +452,7 @@ subroutine unc_write_wav_filepointer_ugrid(wavids, tim)
       ierr = unc_put_var_map(wavids%ncid, wavids%id_tsp, wavids%id_urms_min,  UNC_LOC_S, urms_min)
    endif
    
-   if (jaavgwriteall .or. jaavgwriteDir) then 
+   if (jaavgwriteall>0 .or. jaavgwriteDir>0) then 
       temp = 0d0
       do k = 1, ndx
          temp(k) = 270.d0 - mod(2.d0*pi + atan2(nint(thetamean_mean(k))/1d7, mod(thetamean_mean(k),1.d0)*1d1), 2.d0*pi) / pi * 180d0
@@ -539,28 +539,28 @@ subroutine unc_write_wav_filepointer(imapfile, tim,  jaseparate)
        idims(2) = id_timedim 
        
        ! Flow data on centres
-      if (jaavgwriteall .or. jaavgwriteH) then
+      if (jaavgwriteall>0 .or. jaavgwriteH>0) then
        call definencvar(imapfile,id_H_mean  ,nf90_double,idims,2, 'H_mean'  , 'mean rms wave height', 'm', 'FlowElem_xcc FlowElem_ycc')
        call definencvar(imapfile,id_H_var   ,nf90_double,idims,2, 'H_var'  , 'variance rms wave height', 'm2', 'FlowElem_xcc FlowElem_ycc')
        call definencvar(imapfile,id_H_min   ,nf90_double,idims,2, 'H_min'  , 'min rms wave height', 'm', 'FlowElem_xcc FlowElem_ycc')
        call definencvar(imapfile,id_H_max   ,nf90_double,idims,2, 'H_max'  , 'max rms wave height', 'm', 'FlowElem_xcc FlowElem_ycc')
       end if 
        
-      if (jaavgwriteall .or. jaavgwriteE) then
+      if (jaavgwriteall>0 .or. jaavgwriteE>0) then
        call definencvar(imapfile,id_E_mean  ,nf90_double,idims,2, 'E_mean'  , 'mean bulk wave energy', 'J m-2', 'FlowElem_xcc FlowElem_ycc')
        call definencvar(imapfile,id_E_var   ,nf90_double,idims,2, 'E_var'  , 'variance bulk wave energy', 'J2 m-4', 'FlowElem_xcc FlowElem_ycc')
        call definencvar(imapfile,id_E_min   ,nf90_double,idims,2, 'E_min'  , 'min bulk wave energy', 'J m-2', 'FlowElem_xcc FlowElem_ycc')
        call definencvar(imapfile,id_E_max   ,nf90_double,idims,2, 'E_max'  , 'max bulk wave energy', 'J m-2', 'FlowElem_xcc FlowElem_ycc')
       end if
        
-      if (jaavgwriteall .or. jaavgwriteR) then
+      if (jaavgwriteall>0 .or. jaavgwriteR>0) then
        call definencvar(imapfile,id_R_mean  ,nf90_double,idims,2, 'R_mean'  , 'mean roller energy', 'J m-2', 'FlowElem_xcc FlowElem_ycc')
        call definencvar(imapfile,id_R_var   ,nf90_double,idims,2, 'R_var'  , 'variance roller energy', 'J2 m-4', 'FlowElem_xcc FlowElem_ycc')
        call definencvar(imapfile,id_R_min   ,nf90_double,idims,2, 'R_min'  , 'min roller energy', 'J m-2', 'FlowElem_xcc FlowElem_ycc')
        call definencvar(imapfile,id_R_max   ,nf90_double,idims,2, 'R_max'  , 'max roller energy', 'J m-2', 'FlowElem_xcc FlowElem_ycc')
       end if
               
-      if (jaavgwriteall .or. jaavgwriteD) then
+      if (jaavgwriteall>0 .or. jaavgwriteD>0) then
        call definencvar(imapfile,id_D_mean  ,nf90_double,idims,2, 'D_mean'  , 'mean wave breaking dissipation', 'W m-2', 'FlowElem_xcc FlowElem_ycc')
        call definencvar(imapfile,id_D_var   ,nf90_double,idims,2, 'D_var'  , 'variance wave breaking dissipation', 'W2 m-4', 'FlowElem_xcc FlowElem_ycc')
        call definencvar(imapfile,id_D_min   ,nf90_double,idims,2, 'D_min'  , 'min wave breaking dissipation', 'W m-2', 'FlowElem_xcc FlowElem_ycc')
@@ -572,7 +572,7 @@ subroutine unc_write_wav_filepointer(imapfile, tim,  jaseparate)
        call definencvar(imapfile,id_DR_max   ,nf90_double,idims,2, 'DR_max'  , 'max roller energy dissipation', 'W m-2', 'FlowElem_xcc FlowElem_ycc')
       end if
        
-      if (jaavgwriteall .or. jaavgwriteCel) then
+      if (jaavgwriteall>0 .or. jaavgwriteCel>0) then
        call definencvar(imapfile,id_cwav_mean  ,nf90_double,idims,2, 'cwav_mean'  , 'mean wave phase velocity', 'm s-1', 'FlowElem_xcc FlowElem_ycc')
        call definencvar(imapfile,id_cwav_var   ,nf90_double,idims,2, 'cwav_var'  , 'variance wave phase velocity', 'm2 s-2', 'FlowElem_xcc FlowElem_ycc')
        call definencvar(imapfile,id_cwav_min   ,nf90_double,idims,2, 'cwav_min'  , 'min wave phase velocity', 'm s-1', 'FlowElem_xcc FlowElem_ycc')
@@ -584,28 +584,28 @@ subroutine unc_write_wav_filepointer(imapfile, tim,  jaseparate)
        call definencvar(imapfile,id_cgwav_max   ,nf90_double,idims,2, 'cgwav_max'  , 'max wave group velocity', 'm s-1', 'FlowElem_xcc FlowElem_ycc')
       end if
 
-      if (jaavgwriteall .or. jaavgwriteS) then
+      if (jaavgwriteall>0 .or. jaavgwriteS>0) then
          call definencvar(imapfile,id_s1_mean  ,nf90_double,idims,2, 's1_mean'  , 'mean water level', 'm', 'FlowElem_xcc FlowElem_ycc')
          call definencvar(imapfile,id_s1_var   ,nf90_double,idims,2, 's1_var'  , 'variance water level', 'm2', 'FlowElem_xcc FlowElem_ycc')
          call definencvar(imapfile,id_s1_min   ,nf90_double,idims,2, 's1_min'  , 'min water level', 'm', 'FlowElem_xcc FlowElem_ycc')
          call definencvar(imapfile,id_s1_max   ,nf90_double,idims,2, 's1_max'  , 'max water level', 'm', 'FlowElem_xcc FlowElem_ycc')
       end if
        
-      if (jaavgwriteall .or. jaavgwriteSigm) then
+      if (jaavgwriteall>0 .or. jaavgwriteSigm>0) then
        call definencvar(imapfile,id_sigmwav_mean  ,nf90_double,idims,2, 'sigmwav_mean'  , 'mean of mean frequency', 'rad s-1', 'FlowElem_xcc FlowElem_ycc')
        call definencvar(imapfile,id_sigmwav_var   ,nf90_double,idims,2, 'sigmwav_var'  , 'variance mean frequency', 'rad2 s-2', 'FlowElem_xcc FlowElem_ycc')
        call definencvar(imapfile,id_sigmwav_min   ,nf90_double,idims,2, 'sigmwav_min'  , 'min mean frequency', 'rad s-1', 'FlowElem_xcc FlowElem_ycc')
        call definencvar(imapfile,id_sigmwav_max   ,nf90_double,idims,2, 'sigmwav_max'  , 'max mean frequency', 'rad s-1', 'FlowElem_xcc FlowElem_ycc')
       end if
        
-      if (jaavgwriteall .or. jaavgwriteDir) then
+      if (jaavgwriteall>0 .or. jaavgwriteDir>0) then
          call definencvar(imapfile,id_thetamean_mean  ,nf90_double,idims,2, 'thetamean_mean'  , 'mean of mean wave angle', 'deg from N', 'FlowElem_xcc FlowElem_ycc')
          call definencvar(imapfile,id_thetamean_var   ,nf90_double,idims,2, 'thetamean_var'  , 'variance mean wave angle', 'deg2', 'FlowElem_xcc FlowElem_ycc')
          call definencvar(imapfile,id_thetamean_min   ,nf90_double,idims,2, 'thetamean_min'  , 'min mean wave angle', 'deg', 'FlowElem_xcc FlowElem_ycc')
          call definencvar(imapfile,id_thetamean_max   ,nf90_double,idims,2, 'thetamean_max'  , 'max mean wave angle', 'deg', 'FlowElem_xcc FlowElem_ycc')
       end if
 
-      if (jaavgwriteall .or. jaavgwriteF) then
+      if (jaavgwriteall>0 .or. jaavgwriteF>0) then
          call definencvar(imapfile,id_Fx_mean  ,nf90_double,idims,2, 'fx_mean'  , 'mean of wave force, x-component', 'N m-2', 'FlowElem_xcc FlowElem_ycc')
          call definencvar(imapfile,id_Fx_var   ,nf90_double,idims,2, 'fx_var'  , 'variance wave force, x-component', 'N2 m-4', 'FlowElem_xcc FlowElem_ycc')
          call definencvar(imapfile,id_Fx_min   ,nf90_double,idims,2, 'fx_min'  , 'min wave force, x-component', 'N m-2', 'FlowElem_xcc FlowElem_ycc')
@@ -617,7 +617,7 @@ subroutine unc_write_wav_filepointer(imapfile, tim,  jaseparate)
          call definencvar(imapfile,id_Fy_max   ,nf90_double,idims,2, 'fy_max'  , 'max wave force, y-component', 'N m-2', 'FlowElem_xcc FlowElem_ycc')
       end if
 
-      if (jaavgwriteall .or. jaavgwriteU) then
+      if (jaavgwriteall>0 .or. jaavgwriteU>0) then
          call definencvar(imapfile,id_ustx_mean  ,nf90_double,idims,2, 'ustx_mean'  , 'mean of stokes drift, x-component', 'm s-1', 'FlowElem_xcc FlowElem_ycc')
          call definencvar(imapfile,id_ustx_var   ,nf90_double,idims,2, 'ustx_var'  , 'variance stokes drift, x-component', 'm2 s-2', 'FlowElem_xcc FlowElem_ycc')
          call definencvar(imapfile,id_ustx_min   ,nf90_double,idims,2, 'ustx_min'  , 'min stokes drift, x-component', 'm s-1', 'FlowElem_xcc FlowElem_ycc')
@@ -639,7 +639,7 @@ subroutine unc_write_wav_filepointer(imapfile, tim,  jaseparate)
          call definencvar(imapfile,id_v_max   ,nf90_double,idims,2, 'ucy_max'  , 'max cell centre velocity, y-component', 'm s-1', 'FlowElem_xcc FlowElem_ycc')
       end if
 
-      if (jaavgwriteall .or. jaavgwriteUrms) then
+      if (jaavgwriteall>0 .or. jaavgwriteUrms>0) then
          call definencvar(imapfile,id_urms_mean  ,nf90_double,idims,2, 'urms_mean'  , 'mean of rms orbital velocity', 'm s-1', 'FlowElem_xcc FlowElem_ycc')
          call definencvar(imapfile,id_urms_var   ,nf90_double,idims,2, 'urms_var'  , 'variance rms orbital velocity', 'm2 s-2', 'FlowElem_xcc FlowElem_ycc')
          call definencvar(imapfile,id_urms_min   ,nf90_double,idims,2, 'urms_min'  , 'min rms orbital velocity', 'm s-1', 'FlowElem_xcc FlowElem_ycc')
@@ -669,28 +669,28 @@ subroutine unc_write_wav_filepointer(imapfile, tim,  jaseparate)
        !    
        ! Size of latest timestep
        ! ierr = nf90_inq_varid(imapfile, 'timestep', id_timestep)
-      if (jaavgwriteall .or. jaavgwriteE) then
+      if (jaavgwriteall>0 .or. jaavgwriteE>0) then
        ierr = nf90_inq_varid(imapfile, 'E_mean', id_E_mean)
        ierr = nf90_inq_varid(imapfile, 'E_var', id_E_var)
        ierr = nf90_inq_varid(imapfile, 'E_min', id_E_min)
        ierr = nf90_inq_varid(imapfile, 'E_max', id_E_max)
       end if
 
-      if (jaavgwriteall .or. jaavgwriteH) then
+      if (jaavgwriteall>0 .or. jaavgwriteH>0) then
        ierr = nf90_inq_varid(imapfile, 'H_mean', id_H_mean)
        ierr = nf90_inq_varid(imapfile, 'H_var', id_H_var)
        ierr = nf90_inq_varid(imapfile, 'H_min', id_H_min)
        ierr = nf90_inq_varid(imapfile, 'H_max', id_H_max)
       end if
 
-      if (jaavgwriteall .or. jaavgwriteR) then
+      if (jaavgwriteall>0 .or. jaavgwriteR>0) then
        ierr = nf90_inq_varid(imapfile, 'R_mean', id_R_mean)
        ierr = nf90_inq_varid(imapfile, 'R_var', id_R_var)
        ierr = nf90_inq_varid(imapfile, 'R_min', id_R_min)
        ierr = nf90_inq_varid(imapfile, 'R_max', id_R_max)
       end if
 
-      if (jaavgwriteall .or. jaavgwriteD) then
+      if (jaavgwriteall>0 .or. jaavgwriteD>0) then
        ierr = nf90_inq_varid(imapfile, 'D_mean', id_D_mean)
        ierr = nf90_inq_varid(imapfile, 'D_var', id_D_var)
        ierr = nf90_inq_varid(imapfile, 'D_min', id_D_min)
@@ -702,7 +702,7 @@ subroutine unc_write_wav_filepointer(imapfile, tim,  jaseparate)
        ierr = nf90_inq_varid(imapfile, 'DR_max', id_DR_max)
       end if
 
-      if (jaavgwriteall .or. jaavgwriteF) then
+      if (jaavgwriteall>0 .or. jaavgwriteF>0) then
        ierr = nf90_inq_varid(imapfile, 'Fx_mean', id_Fx_mean)
        ierr = nf90_inq_varid(imapfile, 'Fx_var', id_Fx_var)
        ierr = nf90_inq_varid(imapfile, 'Fx_min', id_Fx_min)
@@ -714,7 +714,7 @@ subroutine unc_write_wav_filepointer(imapfile, tim,  jaseparate)
        ierr = nf90_inq_varid(imapfile, 'Fy_max', id_Fy_max)
       end if
 
-      if (jaavgwriteall .or. jaavgwriteU) then
+      if (jaavgwriteall>0 .or. jaavgwriteU>0) then
          ierr = nf90_inq_varid(imapfile, 'ustx_mean', id_ustx_mean)
          ierr = nf90_inq_varid(imapfile, 'ustx_var', id_ustx_var)
          ierr = nf90_inq_varid(imapfile, 'ustx_min', id_ustx_min)
@@ -736,14 +736,14 @@ subroutine unc_write_wav_filepointer(imapfile, tim,  jaseparate)
          ierr = nf90_inq_varid(imapfile, 'v_max', id_v_max)
       end if
 
-      if (jaavgwriteall .or. jaavgwriteUrms) then
+      if (jaavgwriteall>0 .or. jaavgwriteUrms>0) then
        ierr = nf90_inq_varid(imapfile, 'urms_mean', id_urms_mean)
        ierr = nf90_inq_varid(imapfile, 'urms_var', id_urms_var)
        ierr = nf90_inq_varid(imapfile, 'urms_min', id_urms_min)
        ierr = nf90_inq_varid(imapfile, 'urms_max', id_urms_max)
       end if
 
-      if (jaavgwriteall .or. jaavgwriteCel) then
+      if (jaavgwriteall>0 .or. jaavgwriteCel>0) then
        ierr = nf90_inq_varid(imapfile, 'cwav_mean', id_cwav_mean)
        ierr = nf90_inq_varid(imapfile, 'cwav_var', id_cwav_var)
        ierr = nf90_inq_varid(imapfile, 'cwav_min', id_cwav_min)
@@ -755,21 +755,21 @@ subroutine unc_write_wav_filepointer(imapfile, tim,  jaseparate)
        ierr = nf90_inq_varid(imapfile, 'cgwav_max', id_cgwav_max)
       end if
 
-      if (jaavgwriteall .or. jaavgwriteDir) then
+      if (jaavgwriteall>0 .or. jaavgwriteDir>0) then
        ierr = nf90_inq_varid(imapfile, 'thetamean_mean', id_thetamean_mean)
        ierr = nf90_inq_varid(imapfile, 'thetamean_var', id_thetamean_var)
        ierr = nf90_inq_varid(imapfile, 'thetamean_min', id_thetamean_min)
        ierr = nf90_inq_varid(imapfile, 'thetamean_max', id_thetamean_max)
       end if
 
-      if (jaavgwriteall .or. jaavgwriteSigm) then
+      if (jaavgwriteall>0 .or. jaavgwriteSigm>0) then
        ierr = nf90_inq_varid(imapfile, 'sigmwav_mean', id_sigmwav_mean)
        ierr = nf90_inq_varid(imapfile, 'sigmwav_var', id_sigmwav_var)
        ierr = nf90_inq_varid(imapfile, 'sigmwav_min', id_sigmwav_min)
        ierr = nf90_inq_varid(imapfile, 'sigmwav_max', id_sigmwav_max)
       end if
 
-      if (jaavgwriteall .or. jaavgwriteS) then
+      if (jaavgwriteall>0 .or. jaavgwriteS>0) then
        ierr = nf90_inq_varid(imapfile, 's1_mean', id_s1_mean)
        ierr = nf90_inq_varid(imapfile, 's1_var', id_s1_var)
        ierr = nf90_inq_varid(imapfile, 's1_min', id_s1_min)
@@ -785,14 +785,14 @@ subroutine unc_write_wav_filepointer(imapfile, tim,  jaseparate)
     ierr = nf90_put_var(imapfile, id_time    , tim, (/  itim /))
 
     ! Data on flow nodes
-   if (jaavgwriteall .or. jaavgwriteE) then
+   if (jaavgwriteall>0 .or. jaavgwriteE>0) then
     ierr = nf90_put_var(imapfile, id_E_mean, E_mean(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
     ierr = nf90_put_var(imapfile, id_E_var, E_var(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
     ierr = nf90_put_var(imapfile, id_E_max, E_max(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
     ierr = nf90_put_var(imapfile, id_E_min, E_min(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /))
    end if
 
-   if (jaavgwriteall .or. jaavgwriteH) then
+   if (jaavgwriteall>0 .or. jaavgwriteH>0) then
       temp = 0d0
       do k = 1, ndxi     ! stack overflow
          temp(k) = sqrt(H_varsquare(k))    
@@ -803,14 +803,14 @@ subroutine unc_write_wav_filepointer(imapfile, tim,  jaseparate)
       ierr = nf90_put_var(imapfile, id_H_min, H_min(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /))
    end if
 
-   if (jaavgwriteall .or. jaavgwriteR) then
+   if (jaavgwriteall>0 .or. jaavgwriteR>0) then
     ierr = nf90_put_var(imapfile, id_R_mean, R_mean(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
     ierr = nf90_put_var(imapfile, id_R_var, R_var(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
     ierr = nf90_put_var(imapfile, id_R_max, R_max(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
     ierr = nf90_put_var(imapfile, id_R_min, R_min(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /))
    end if
 
-   if (jaavgwriteall .or. jaavgwriteD) then
+   if (jaavgwriteall>0 .or. jaavgwriteD>0) then
     ierr = nf90_put_var(imapfile, id_D_mean, D_mean(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
     ierr = nf90_put_var(imapfile, id_D_var, D_var(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
     ierr = nf90_put_var(imapfile, id_D_max, D_max(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
@@ -822,7 +822,7 @@ subroutine unc_write_wav_filepointer(imapfile, tim,  jaseparate)
     ierr = nf90_put_var(imapfile, id_DR_min, DR_min(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /))
    end if
 
-   if (jaavgwriteall .or. jaavgwriteCel) then
+   if (jaavgwriteall>0 .or. jaavgwriteCel>0) then
     ierr = nf90_put_var(imapfile, id_cwav_mean, cwav_mean(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
     ierr = nf90_put_var(imapfile, id_cwav_var, cwav_var(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
     ierr = nf90_put_var(imapfile, id_cwav_max, cwav_max(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
@@ -834,7 +834,7 @@ subroutine unc_write_wav_filepointer(imapfile, tim,  jaseparate)
     ierr = nf90_put_var(imapfile, id_cgwav_min, cgwav_min(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /))
    end if
 
-   if (jaavgwriteall .or. jaavgwriteDir) then
+   if (jaavgwriteall>0 .or. jaavgwriteDir>0) then
       temp = 0d0
       do k = 1, ndxi ! stack
          temp(k) = 270.d0 - mod(2.d0*pi + atan2(nint(thetamean_mean(k))/1d7, mod(thetamean_mean(k),1.d0)*1d1), 2.d0*pi) / pi * 180d0
@@ -845,21 +845,21 @@ subroutine unc_write_wav_filepointer(imapfile, tim,  jaseparate)
       ierr = nf90_put_var(imapfile, id_thetamean_min, thetamean_min(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /))
    end if
 
-   if (jaavgwriteall .or. jaavgwriteSigm) then
+   if (jaavgwriteall>0 .or. jaavgwriteSigm>0) then
     ierr = nf90_put_var(imapfile, id_sigmwav_mean, sigmwav_mean(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
     ierr = nf90_put_var(imapfile, id_sigmwav_var, sigmwav_var(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
     ierr = nf90_put_var(imapfile, id_sigmwav_max, sigmwav_max(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
     ierr = nf90_put_var(imapfile, id_sigmwav_min, sigmwav_min(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /))
    end if
  
-   if (jaavgwriteall .or. jaavgwriteS) then
+   if (jaavgwriteall>0 .or. jaavgwriteS>0) then
     ierr = nf90_put_var(imapfile, id_s1_mean, s1_mean(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
     ierr = nf90_put_var(imapfile, id_s1_var, s1_var(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
     ierr = nf90_put_var(imapfile, id_s1_max, s1_max(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
     ierr = nf90_put_var(imapfile, id_s1_min, s1_min(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /))
    end if
 
-   if (jaavgwriteall .or. jaavgwriteF) then
+   if (jaavgwriteall>0 .or. jaavgwriteF>0) then
       ierr = nf90_put_var(imapfile, id_Fx_mean, Fx_mean(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
       ierr = nf90_put_var(imapfile, id_Fx_var, Fx_var(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
       ierr = nf90_put_var(imapfile, id_Fx_max, Fx_max(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
@@ -871,7 +871,7 @@ subroutine unc_write_wav_filepointer(imapfile, tim,  jaseparate)
       ierr = nf90_put_var(imapfile, id_Fy_min, Fy_min(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /))
    end if
       
-   if (jaavgwriteall .or. jaavgwriteU) then
+   if (jaavgwriteall>0 .or. jaavgwriteU>0) then
       ierr = nf90_put_var(imapfile, id_ustx_mean, ust_mean(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
       ierr = nf90_put_var(imapfile, id_ustx_var, ust_var(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
       ierr = nf90_put_var(imapfile, id_ustx_max, ust_max(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
@@ -893,7 +893,7 @@ subroutine unc_write_wav_filepointer(imapfile, tim,  jaseparate)
       ierr = nf90_put_var(imapfile, id_v_min,  v_min(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
    endif
 
-   if (jaavgwriteall .or. jaavgwriteUrms) then      
+   if (jaavgwriteall>0 .or. jaavgwriteUrms>0) then      
       temp = sqrt(urms_varsquare)
       ierr = nf90_put_var(imapfile, id_urms_mean, temp, (/ 1, itim /), (/ ndxi, 1 /))
       ierr = nf90_put_var(imapfile, id_urms_var, urms_var(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /)) 
