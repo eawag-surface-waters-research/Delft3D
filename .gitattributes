@@ -4810,6 +4810,8 @@ src/third_party_open/petsc/include/petscwebclient.h -text
 src/third_party_open/petsc/x64/include/petsc.mod -text
 src/third_party_open/petsc/x64/include/petscao.mod -text
 src/third_party_open/petsc/x64/include/petscaodef.mod -text
+src/third_party_open/petsc/x64/include/petscconf.h -text
+src/third_party_open/petsc/x64/include/petscconfiginfo.h -text
 src/third_party_open/petsc/x64/include/petscdef.mod -text
 src/third_party_open/petsc/x64/include/petscdm.mod -text
 src/third_party_open/petsc/x64/include/petscdmda.mod -text
@@ -4834,7 +4836,6 @@ src/third_party_open/petsc/x64/include/petscisdefdummy.mod -text
 src/third_party_open/petsc/x64/include/petscksp.mod -text
 src/third_party_open/petsc/x64/include/petsckspdef.mod -text
 src/third_party_open/petsc/x64/include/petsckspdefdummy.mod -text
-src/third_party_open/petsc/x64/include/petscmachineinfo.h -text
 src/third_party_open/petsc/x64/include/petscmat.mod -text
 src/third_party_open/petsc/x64/include/petscmatdef.mod -text
 src/third_party_open/petsc/x64/include/petscmatdefdummy.mod -text
