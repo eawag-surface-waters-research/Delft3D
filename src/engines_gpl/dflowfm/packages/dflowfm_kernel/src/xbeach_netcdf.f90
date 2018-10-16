@@ -221,7 +221,7 @@ subroutine unc_write_wav_filepointer_ugrid(wavids, tim)
    
    double precision, allocatable, dimension(:) :: temp
    
-   if (jaavgwriteall .or. jaavgwriteH .or. jaavgwriteUrms) then
+   if (jaavgwriteall>0 .or. jaavgwriteH>0 .or. jaavgwriteUrms>0) then
       allocate(temp(ndx), stat=ierr)
       temp = 0d0
    end if
