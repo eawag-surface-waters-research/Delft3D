@@ -32,7 +32,7 @@
 				<Tool Name="VFPreBuildEventTool" CommandLine="call $(SolutionDir)scripts_lgpl\win32\update_version.cmd src\unstruc_version.F90 $(SolutionDir) $(SolutionDir)engines_gpl\dflowfm\res\version_number.ini --onlyifmissing" Description="Expand unstruc_version.F90.svn and version_number.rc.svn to unstruc_version.F90 and version_number.rc"/>
 				<Tool Name="VFPostBuildEventTool"/></Configuration>
 		<Configuration Name="Release|x64" DeleteExtensionsOnClean="*.obj;*.mod;*.pdb;*.asm;*.map;*.dyn;*.dpi;*.tmp;*.log;*.ilk;*.exe;$(TargetPath)" BuildLogFile="$(IntDir)\$(ProjectName)-BuildLog.htm" ConfigurationType="typeStaticLibrary">
-				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" AdditionalIncludeDirectories="$(SolutionDir)engines_gpl\dflowfm\packages\dflowfm_kernel\include;$(SolutionDir)third_party_open\mpich2\$(PlatformName)\include;$(SolutionDir)\third_party_open\Tecplot\include;$(SolutionDir)\third_party_open\petsc\include;$(SolutionDir)\third_party_open\petsc\$(PlatformName)\include" PreprocessorDefinitions="HAVE_PETSC;WIN32;HAVE_METIS;HAVE_OPENGL;HAVE_MPI=$(HAVE_MPI);HAVE_TECPLOT;HAVE_POLYPACK;HAVE_PROJ;HAVE_SHAPELIB" OpenMP="OpenMPParallelCode" ParallelizerDiagLevel="parallelizerDiagLevel0" VectorizerDiagLevel="vectorizerDiagLevel0" ModulePath="$(INTDIR)/" ObjectFile="$(INTDIR)/" Traceback="true" UseMkl="mklParallel"/>
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" AdditionalIncludeDirectories="$(SolutionDir)engines_gpl\dflowfm\packages\dflowfm_kernel\include;$(SolutionDir)third_party_open\mpich2\$(PlatformName)\include;$(SolutionDir)\third_party_open\Tecplot\include" PreprocessorDefinitions="WIN32;HAVE_METIS;HAVE_OPENGL;HAVE_MPI=$(HAVE_MPI);HAVE_TECPLOT;HAVE_POLYPACK;HAVE_PROJ;HAVE_SHAPELIB" OpenMP="OpenMPParallelCode" ParallelizerDiagLevel="parallelizerDiagLevel0" VectorizerDiagLevel="vectorizerDiagLevel0" ModulePath="$(INTDIR)/" ObjectFile="$(INTDIR)/" Traceback="true" UseMkl="mklParallel"/>
 				<Tool Name="VFLibrarianTool"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
@@ -152,8 +152,8 @@
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
 		<File RelativePath="src\solve_petsc.F90">
 			<FileConfiguration Name="Debug|Win32" ExcludedFromBuild="true"/>
-			<FileConfiguration Name="Release|x64">
-				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Release|x64" ExcludedFromBuild="true">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessNo"/></FileConfiguration>
 			<FileConfiguration Name="Debug|x64" ExcludedFromBuild="true"/>
 			<FileConfiguration Name="Release|Win32" ExcludedFromBuild="true"/></File>
 		<File RelativePath="src\sphcom.f"/>
