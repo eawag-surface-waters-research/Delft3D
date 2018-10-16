@@ -1175,27 +1175,27 @@ module m_readstructures
 
       allocate(dambr)
 
-      call prop_get_double(md_ptr, 'structure', 'start_location_x',  dambr%start_location_x, success)
+      call prop_get_double(md_ptr, 'structure', 'startLocationX',  dambr%startLocationX, success)
       if (.not. success) return
 
-      call prop_get_double(md_ptr, 'structure', 'start_location_y',  dambr%start_location_y, success)
+      call prop_get_double(md_ptr, 'structure', 'startLocationY',  dambr%startLocationY, success)
       if (.not. success) return
 
       call prop_get_integer(md_ptr, 'structure', 'algorithm', dambr%algorithm, success)
       if (.not. success) return
 
-      call prop_get_double(md_ptr, 'structure', 'crestlevelini', dambr%crestlevelini, success)
+      call prop_get_double(md_ptr, 'structure', 'crestLevelIni', dambr%crestLevelIni, success)
       if (.not. success) return
          
       if (dambr%algorithm == 2) then
          
-         call prop_get_double(md_ptr, 'structure', 'breachwidthini', dambr%breachwidthini, success)
+         call prop_get_double(md_ptr, 'structure', 'breachWidthIni', dambr%breachWidthIni, success)
          if (.not. success) return
 
-         call prop_get_double(md_ptr, 'structure', 'crestlevelmin', dambr%crestlevelmin, success)
+         call prop_get_double(md_ptr, 'structure', 'crestLevelMin', dambr%crestLevelMin, success)
          if (.not. success) return
 
-         call prop_get_double(md_ptr, 'structure', 'timetobreachtomaximumdepth', dambr%timetobreachtomaximumdepth, success)
+         call prop_get_double(md_ptr, 'structure', 'timeToBreachToMaximumDepth', dambr%timeToBreachToMaximumDepth, success)
          if (.not. success) return
 
          call prop_get_double(md_ptr, 'structure', 'f1', dambr%f1, success)
@@ -1211,7 +1211,7 @@ module m_readstructures
       
       ! get the name of the tim file 
       if (dambr%algorithm == 3) then
-         call prop_get_string(md_ptr, 'structure', 'breachwidthandlevel', dambr%breachwidthandlevel, success)
+         call prop_get_string(md_ptr, 'structure', 'dambreakLevelsAndWidths', dambr%levelsAndWidths, success)
          if (.not. success) return         
       endif
 

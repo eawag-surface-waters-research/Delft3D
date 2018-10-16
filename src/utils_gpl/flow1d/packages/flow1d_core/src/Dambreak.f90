@@ -38,24 +38,24 @@
    public setCoefficents
 
    type, public :: t_dambreak
-      double precision :: start_location_x
-      double precision :: start_location_y
+      double precision :: startLocationX
+      double precision :: startLocationY
       integer          :: algorithm
-      double precision :: crestlevelini
-      double precision :: breachwidthini
-      double precision :: crestlevelmin
-      double precision :: timetobreachtomaximumdepth
+      double precision :: crestLevelIni
+      double precision :: breachWidthIni
+      double precision :: crestLevelMin
+      double precision :: timeToBreachToMaximumDepth
       double precision :: dischargecoeff
       double precision :: f1
       double precision :: f2
       double precision :: ucrit
       double precision :: t0
       integer          :: hasTable       
-      integer          :: materialtype           = -1
+      integer          :: materialtype           =  1 !for algorithm 1, default matrerial type is clay
       double precision :: endTimeFirstPhase
       double precision :: breachWidthDerivative  = -1.0d0
       double precision :: waterLevelJumpDambreak = -1.0d0	
-      character(Charln) :: breachwidthandlevel = ''
+      character(Charln) :: levelsAndWidths = ''
       
 
       ! State variables, not to be read
@@ -113,9 +113,9 @@
    if(dambreak%algorithm == 1) then     
 
       ! The linear part
-      if (timeFromBreaching < dambreak%timetobreachtomaximumdepth ) then
-         dambreak%crl    = dambreak%crestlevelini - timeFromBreaching / dambreak%timetobreachtomaximumdepth * (dambreak%crestlevelini - dambreak%crestlevelmin)
-         breachWidth     = dambreak%breachwidthini
+      if (timeFromBreaching < dambreak%timeToBreachToMaximumDepth ) then
+         dambreak%crl    = dambreak%crestLevelIni - timeFromBreaching / dambreak%timeToBreachToMaximumDepth * (dambreak%crestLevelIni - dambreak%crestLevelMin)
+         breachWidth     = dambreak%breachWidthIni
       else
       ! The logarithmic part, timeFromBreaching in seconds 
          breachWidth = dambreak%aCoeff * dlog(timeFromBreaching/dambreak%bCoeff)
@@ -132,12 +132,12 @@
 
       if (time1 <= dambreak%endTimeFirstPhase) then
       ! phase 1: lowering
-         dambreak%crl    = dambreak%crestlevelini - timeFromBreaching / dambreak%timetobreachtomaximumdepth * (dambreak%crestlevelini - dambreak%crestlevelmin)
-         dambreak%width  = dambreak%breachwidthini
+         dambreak%crl    = dambreak%crestLevelIni - timeFromBreaching / dambreak%timeToBreachToMaximumDepth * (dambreak%crestLevelIni - dambreak%crestLevelMin)
+         dambreak%width  = dambreak%breachWidthIni
          dambreak%phase  = 1
       else
       ! phase 2: widening
-         dambreak%crl = dambreak%crestlevelmin
+         dambreak%crl = dambreak%crestLevelMin
          smax = max(s1m1, s1m2)
          smin = min(s1m1, s1m2)
          hmx = max(0d0,smax - dambreak%crl)
@@ -193,7 +193,7 @@
          dambreak%maximumAllowedWidth = 200 !meters
       endif
    else if (dambreak%algorithm == 2) then
-         dambreak%endTimeFirstPhase = dambreak%t0 + dambreak%timetobreachtomaximumdepth 
+         dambreak%endTimeFirstPhase = dambreak%t0 + dambreak%timeToBreachToMaximumDepth 
    endif
 
    end subroutine setCoefficents
