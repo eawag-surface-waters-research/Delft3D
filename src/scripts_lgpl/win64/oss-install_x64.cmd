@@ -219,6 +219,7 @@ rem ====================
     call :copyFile "third_party_open\vcredist\x64\Microsoft.VC110.CRT\*.dll"    !dest_share!
     call :copyFile "third_party_open\vcredist\x64\Microsoft.VC120.CRT\*.dll"    !dest_share!
     call :copyFile "third_party_open\vcredist\x64\Microsoft.VC140.CRT\*.dll"    !dest_share!
+    call :copyFile "third_party_open\petsc\x64\lib\*.dll"                       !dest_share!
     call :copyNetcdf                                                            !dest_share!
     echo This directory is automatically created by script https://svn.oss.deltares.nl/repos/delft3d/trunk/src/scripts_lgpl/win64/oss-install_x64.cmd >!dest_share!\readme.txt
     echo This script is executed via a post-build event >>!dest_share!\readme.txt
