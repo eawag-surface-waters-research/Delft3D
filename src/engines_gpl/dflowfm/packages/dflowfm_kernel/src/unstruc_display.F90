@@ -169,7 +169,7 @@ subroutine load_displaysettings(filename)
     use m_wearelt
     use M_isoscaleunit
     use m_transport, only: iconst_cur
-    USE M_FLOW, only: kplot, nplot, kplotfrombedorsurface
+    USE M_FLOW, only: kplot, nplot, kplotfrombedorsurface, kplotordepthaveraged
     use m_observations, only : jafahrenheit
 !   use unstruc_opengl    ! circular dependency
  
@@ -344,6 +344,7 @@ subroutine load_displaysettings(filename)
     call prop_get_integer (dis_ptr, '*', 'NBLUEP ', NBLUEP  , success) 
 
     call prop_get_integer (dis_ptr, '*', 'kplotbedsur', kplotfrombedorsurface, success)
+    call prop_get_integer (dis_ptr, '*', 'kplotordepthaveraged', kplotordepthaveraged, success)
     call prop_get_integer (dis_ptr, '*', 'kplot', kplot, success)
     call prop_get_integer (dis_ptr, '*', 'nplot', nplot, success) 
     
@@ -576,6 +577,7 @@ subroutine save_displaysettings(filename)
     call prop_set(dis_ptr, '*', 'NBLUEP ', NBLUEP   )
 
     call prop_set(dis_ptr, '*', 'kplotbedsur', kplotfrombedorsurface)
+    call prop_set(dis_ptr, '*', 'kplotordepthaveraged', kplotordepthaveraged)
     call prop_set(dis_ptr, '*', 'kplot', kplot)
     call prop_set(dis_ptr, '*', 'nplot', nplot)
     

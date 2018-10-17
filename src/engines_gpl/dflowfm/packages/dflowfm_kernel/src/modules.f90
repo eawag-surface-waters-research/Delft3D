@@ -3265,6 +3265,7 @@ end module m_vegetation
  integer                           :: kplot             !< layer nr to be plotted
  integer                           :: nplot             !< vertical profile to be plotted at node nr
  integer                           :: kplotfrombedorsurface = 1 !< up or down k   
+ integer                           :: kplotordepthaveraged  = 1 !< 1 = kplot, 2 = averaged   
  integer                           :: layertype         !< 1= all sigma, 2 = all z, 3 = left sigma, 4 = left z
  integer                           :: numtopsig = 0     !< number of top layers in sigma
  integer                           :: CSCalculationOption = 2     !< calculation option for total area computation in 1d

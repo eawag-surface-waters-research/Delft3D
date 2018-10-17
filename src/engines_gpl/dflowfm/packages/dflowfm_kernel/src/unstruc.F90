@@ -6779,7 +6779,6 @@ end subroutine update_waqfluxes
  do n   = 1, mxwalls                                        ! wall contribution to scalar linktocenterweights 
     k1  = walls(1,n)
     aa1 = 2d0*walls(17,n)
-    wc(k1) = wc(k1) + aa1
     wcw = 0d0 
     do kk = 1,size(nd(k1)%ln) 
        LL = iabs(nd(k1)%ln(kk))
@@ -6795,6 +6794,7 @@ end subroutine update_waqfluxes
        wcw     = wcw + wwL(kk) 
     enddo   
     if (wcw > 0d0) then 
+       wc(k1) = wc(k1) + aa1
        do kk = 1,size(nd(k1)%ln) 
           LL = iabs(nd(k1)%ln(kk))
           n12 = 1 ; alf = acL(LL) 
@@ -11648,7 +11648,9 @@ end subroutine land_change_callback
 
  k = kk
  if (kmx > 0) then
-     call getktoplot(kk,k)
+    if (kplotordepthaveraged == 1) then 
+       call getktoplot(kk,k)
+    endif 
  endif
 
  znod = dmiss
@@ -19364,7 +19366,7 @@ end subroutine unc_write_shp
 
  do L = 1,lnx
      ! the max func after setting dx1 fraction
-    dxi(L) = 1d0/max(0.1d0,dx(L))                               ! dxi to minimise nr. of divisions
+    dxi(L) = 1d0/dx(L)                               ! dxi to minimise nr. of divisions
     if (wu(L) > 0) then
        wui(L) = 1d0/wu(L)
     else
@@ -26152,7 +26154,32 @@ subroutine transport()                           ! transport for now, advect sal
     enddo
  enddo
 
+ if (kplotordepthaveraged == 2) then 
+    if (jasal > 0) then
+       call getverticallyaveraged(sa1,ndkx)
+    endif   
+ endif   
+
 end subroutine transport
+
+subroutine getverticallyaveraged(sal,mx) 
+use m_flow
+use m_flowgeom
+Implicit none
+double precision :: sal(mx)
+integer          :: n, k, kb, kt, mx 
+
+do n = 1,ndx
+   call getkbotktop(n,kb,kt)
+   sal(n) = 0d0
+   if (vol1(n) > 0) then 
+      do k = kb,kt
+         sal(n) = sal(n) + sal(k)*vol1(k) 
+      enddo   
+      sal(n) = sal(n)/vol1(n) 
+   endif   
+enddo   
+end subroutine getverticallyaveraged
 
 subroutine foresterpoint(temp, vol, a, d, km, kmxx, maxit, ip)
 use m_flow, only  : eps6, eps10
@@ -39149,7 +39176,7 @@ subroutine getymxpar(modind,tauwav, taucur, fw, cdrag, abscos, ypar, ymxpar)
  integer            :: Lb,Lt,kxL,LL
 
  integer            :: L, k, k1, k2
- double precision   :: dzLw, vstress, adv , adv1, tt, ustv, st2, agp
+ double precision   :: dzLw, vstress, adv , adv1, tt, ustv, st2, agp, dzurho
 
  double precision   :: rhof, gdxi, gdxids, bui, du, cu, ac1, ac2, hup, twot = 0.666666666666d0, slopec
 
@@ -39226,13 +39253,30 @@ subroutine getymxpar(modind,tauwav, taucur, fw, cdrag, abscos, ypar, ymxpar)
        c(k  )  = c(k  )  - (vstress - adv) / dzu(k)
 
     else if ( javau == 0 .or. javau >= 6) then  ! 3D checkerboard
-       adv = 0d0; adv1 = 0d0
-
+     
+       if (jarhoxu < 3) then  
        b(k+1)  = b(k+1)  + vstress / dzu(k+1)
        a(k+1)  = a(k+1)  - vstress / dzu(k+1)
 
        b(k  )  = b(k  )  + vstress / dzu(k)
        c(k  )  = c(k  )  - vstress / dzu(k)
+       else if (jarhoxu == 3) then
+          vstress = vstress*( rhou(L)*dzu(k) + rhou(L+1)*dzu(k+1) ) / (2d0*dzLw) 
+          dzurho  = dzu(k+1)*rhou(L+1)
+          b(k+1)  = b(k+1)  + vstress / dzurho
+          a(k+1)  = a(k+1)  - vstress / dzurho
+          
+          dzurho  = dzu(k)*rhou(L)
+          b(k  )  = b(k  )  + vstress / dzurho
+          c(k  )  = c(k  )  - vstress / dzurho
+       else if (jarhoxu >= 4) then
+          
+          b(k+1)  = b(k+1)  + vstress           /   dzu(k+1)
+          a(k+1)  = a(k+1)  - vstress*rhou(L)   / ( dzu(k+1)*rhou(L+1) )
+          
+          b(k  )  = b(k  )  + vstress           /   dzu(k) 
+          c(k  )  = c(k  )  - vstress*rhou(L+1) / ( dzu(k)*rhou(L) ) 
+       endif   
 
     else if( javau == 5 ) then
        if (womegu(k) > 0) then
@@ -39302,7 +39346,7 @@ subroutine getymxpar(modind,tauwav, taucur, fw, cdrag, abscos, ypar, ymxpar)
  endif
  gdxi = agp*dxi(LL)
 
- if (    jarhoxu == 2) then
+ if (    jarhoxu >= 2) then
     gdxi = gdxi*rhomean/rhou(L)
  endif
 
