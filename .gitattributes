@@ -11406,6 +11406,7 @@ src/third_party_open/petsc/petsc-3.10.2/src/vec/vscat/interface/makefile -text
 src/third_party_open/petsc/petsc-3.10.2/src/vec/vscat/interface/vscatfce.c -text
 src/third_party_open/petsc/petsc-3.10.2/src/vec/vscat/interface/vscreate.c -text
 src/third_party_open/petsc/petsc-3.10.2/src/vec/vscat/makefile -text
+src/third_party_open/petsc/petsc.vfproj -text
 src/third_party_open/polypack/Copyright -text
 src/third_party_open/polypack/Makefile.am -text
 src/third_party_open/polypack/README -text
