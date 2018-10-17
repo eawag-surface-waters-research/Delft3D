@@ -158,7 +158,7 @@ module m_flow1d_reader
       
       logical :: success
       
-      if (len_trim(inputfile) > 0) then
+      if (len_trim(inputfile) == 0) then
          call prop_get_string(md_ptr, head, tag, inputfile, success)
          inputfile = trim(folder)//inputfile
       endif
@@ -244,10 +244,10 @@ module m_flow1d_reader
  
          endif
          
-         if (len_trim(filenames%roughnessdir) > 0) then
+         if (len_trim(filenames%roughnessdir) == 0) then
             filenames%roughnessdir = folder
          endif
-         call set_filename(md_ptr, 'files', 'roughnessfile' , filenames%roughness,                  folder)
+         call set_filename(md_ptr, 'files', 'roughnessfile' , filenames%roughness,                  ' ')
          call set_filename(md_ptr, 'files', 'crossDefFile'  , filenames%cross_section_definitions,  folder)
          call set_filename(md_ptr, 'files', 'crossLocFile'  , filenames%cross_section_locations,    folder)
          call set_filename(md_ptr, 'files', 'structureFile' , filenames%structures,                 folder)
