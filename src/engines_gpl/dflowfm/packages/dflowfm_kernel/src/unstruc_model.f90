@@ -394,7 +394,7 @@ subroutine loadModel(filename)
 
        call admin_network(network, iDumk, iDuml)
 
-       if (len_trim(md_1dfiles%onednetwork) > 0) then
+       if (network%L1D > 0) then
          call read_1d_attributes(md_1dfiles, network)
        endif
 
@@ -663,6 +663,10 @@ subroutine readMDUFile(filename, istat)
     call prop_get_string ( md_ptr, 'geometry', 'CrossDefFile',     md_1dfiles%cross_section_definitions, success)
     call prop_get_string ( md_ptr, 'geometry', 'CrossLocFile',     md_1dfiles%cross_section_locations,   success)
     call prop_get_string ( md_ptr, 'geometry', 'NodeFile',         md_1dfiles%retentions,                success)
+    md_1dfiles%roughness    = ' ' 
+    md_1dfiles%roughnessdir = ' ' 
+    md_1dfiles%retentions   = ' ' 
+    md_1dfiles%structures   = ' ' 
     call prop_get_string ( md_ptr, 'geometry', 'NetFile',          md_netfile,      success)
     call prop_get_string ( md_ptr, 'geometry', 'GridEnclosureFile',md_encfile,      success)
     call prop_get_string ( md_ptr, 'geometry', 'BathymetryFile',   md_xybfile,      success)
