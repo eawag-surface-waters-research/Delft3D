@@ -118,6 +118,7 @@ libdflowfm_la_SOURCES+=\
         solve_guus.F90 \
         waves.f90 \
         fm_bedform.f90 \
+		fm_morstatistics.f90 \
         fm_dredge.f90 \
         fm_erosed.f90 \
         fm_thahbc.f90 \

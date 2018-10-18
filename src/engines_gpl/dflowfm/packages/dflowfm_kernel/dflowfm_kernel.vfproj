@@ -67,6 +67,7 @@
 		<File RelativePath="src\fm_bedform.f90"/>
 		<File RelativePath="src\fm_dredge.f90"/>
 		<File RelativePath="src\fm_erosed.f90"/>
+		<File RelativePath="src\fm_morstatistics.f90"/>
 		<File RelativePath="src\fm_thahbc.f90"/>
 		<File RelativePath="src\fourier_analysis.f90"/>
 		<File RelativePath="src\gui.F90">

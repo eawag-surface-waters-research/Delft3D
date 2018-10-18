@@ -477,6 +477,7 @@ src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/filez.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/fm_bedform.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/fm_dredge.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/fm_erosed.f90 -text
+src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/fm_morstatistics.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/fm_thahbc.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/fourier_analysis.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/gui.F90 -text

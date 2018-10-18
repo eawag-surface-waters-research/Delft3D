@@ -166,7 +166,10 @@ function defaultFilename(filecat, timestamp, prefixWithDirectory, allowWildcard)
         suffix     = '_fou.nc'
     case ('avgwavquant')                         !! JRE
         activeFile = md_avgwavquantfile
-        suffix     = '_wav.nc'
+        suffix     = '_wav.nc'    
+    case ('avgsedquant')                         
+        activeFile = md_avgsedquantfile
+        suffix     = '_sed.nc'
     case ('tec')
         activeFile = ''
         suffix     = '.dat'
@@ -301,7 +304,7 @@ function defaultFilename(filecat, timestamp, prefixWithDirectory, allowWildcard)
     
     ! Output files are generally stored in a subfolder, so prefix them here with that.
     select case (trim(filecat))
-    case ('his', 'map', 'clm', 'rstold', 'rst', 'bal', 'histek', 'inc_s1', 'tec', 'map.plt', 'net.plt', 'avgwavquant', 'com')                             !! JRE
+    case ('his', 'map', 'clm', 'rstold', 'rst', 'bal', 'histek', 'inc_s1', 'tec', 'map.plt', 'net.plt', 'avgwavquant', 'com','avgsedquant')                             !! JRE
         if (prefix_dir) then
             defaultFilename = trim(getoutputdir())//trim(defaultFilename)
         end if

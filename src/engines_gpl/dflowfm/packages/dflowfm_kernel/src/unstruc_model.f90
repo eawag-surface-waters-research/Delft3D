@@ -125,6 +125,7 @@ implicit none
     character(len=255) :: md_comfile       = ' ' !< Output com     file for communication (e.g., *_com.nc)
     character(len=255) :: md_timingsfile   = ' ' !< Output timings file (auto-set)
     character(len=255) :: md_avgwavquantfile = ' ' !< Output map file for time-averaged wave output (e.g., *_wav.nc)
+    character(len=255) :: md_avgsedquantfile = ' ' !< Output map file for time-averaged sedmor output (e.g., *_sed.nc)
     character(len=255) :: md_waqfilebase   = ' ' !< File basename for all Delwaq files. (defaults to md_ident)
     character(len=255) :: md_partitionfile = ' ' !< File with domain partitioning polygons (e.g. *_part.pol)
     character(len=255) :: md_outputdir     = ' ' !< Output directory for map-, his-, rst-, dat- and timings-files
@@ -263,6 +264,7 @@ use unstruc_netcdf, only: UNC_CONV_UGRID
     md_comfile = ' '
     md_timingsfile = ' '
     md_avgwavquantfile = ' '
+    md_avgsedquantfile = ' '
     md_waqfilebase   = ' '
     md_partitionfile = ' '
     md_outputdir     = ' '

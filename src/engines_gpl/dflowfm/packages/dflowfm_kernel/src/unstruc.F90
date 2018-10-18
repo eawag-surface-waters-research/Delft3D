@@ -407,7 +407,7 @@ subroutine flow_finalize_usertimestep(iresult)
    
    ! JRE DEBUG: avoid annoying dt_user interference
     call xbeach_write_stats(time1)
-    
+    call sedmor_write_stats(time1)
    iresult = DFM_NOERR
    return ! Return with success
 
@@ -8945,6 +8945,7 @@ subroutine flow_sedmorinit()
     use unstruc_channel_flow
     use m_branch
     use m_oned_functions, only: gridpoint2cross
+    use m_fm_morstatistics
     use MessageHandling
     
     implicit none
@@ -9186,7 +9187,17 @@ subroutine flow_sedmorinit()
     ! Set output interval in case that moroutput%cumavg is set to true
     !
     if (stmpar%morpar%moroutput%cumavg) then
+       success = .true.
+       if (.not. size(stmpar%morpar%moroutput%avgintv,1)==3) success=.false.
        call getOutputTimeArrays(stmpar%morpar%moroutput%avgintv, ti_seds, ti_sed, ti_sede, success)
+       if (ti_sed > (tstop_user-tstart_user)) then
+          ti_sed = tstop_user-tstart_user
+          call mess(LEVEL_WARN, 'unstruc::flow_sedmorinit - The averaging interval for time averaged sedmor output is larger than output duration in the simulation.')
+          write(msgbuf, *)      'Setting ''AverageSedmorOutputInterval'' from *.mor file to tstop-tstart = ', ti_sed, ' s'
+          call warn_flush()
+       endif
+       !
+       call morstats_setflags()
     end if
     return
 end subroutine flow_sedmorinit
