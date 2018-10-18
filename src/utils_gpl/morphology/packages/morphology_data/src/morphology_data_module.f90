@@ -184,8 +184,7 @@ integer,parameter, public  :: MOR_STAT_MIN = 1
 integer,parameter, public  :: MOR_STAT_MAX = 2
 integer,parameter, public  :: MOR_STAT_MEAN= 4
 integer,parameter, public  :: MOR_STAT_STD = 8
-integer,parameter, public  :: MOR_STAT_CUM_X = 16
-integer,parameter, public  :: MOR_STAT_CUM_Y = 32
+integer,parameter, public  :: MOR_STAT_CUM = 16
 !
 ! collection of morphology output options
 !
@@ -200,9 +199,10 @@ type moroutputtype
                                                    "total bedload transport  ",  &
                                                    "total suspended transport"/)
     character(len=30), dimension(4) :: statunt = (/"m  ","m/s","   ","   "/)
-    integer, dimension(5,4)         :: statflg  ! 1 = waterdepth, 2 = velocity, 3 = bedload, 4 = suspload
+    !integer, dimension(5,4)         :: statflg  ! 1 = waterdepth, 2 = velocity, 3 = bedload, 4 = suspload
+    integer, dimension(6,4)         :: statflg  ! 1 = waterdepth, 2 = velocity, 3 = bedload, 4 = suspload
     integer                         :: nstatqnt ! number of quantities for morphology statistics output
-    real(fp), dimension(3)          :: avgintv  ! start, stop and interval for writing statistics (FM only)
+    real(fp), dimension(3)          :: avgintv  ! interval, start, stop for writing statistics (FM only)
     !
     logical :: aks
     logical :: cumavg
@@ -903,7 +903,7 @@ subroutine allocsedtra(sedtra, moroutput, kmax, lsed, lsedtot, nc1, nc2, nu1, nu
     if (istat==0) allocate(sedtra%sytot   (nc1:nc2,lsedtot), STAT = istat)
     if (ioptloc==CODE_DEFAULT) then
        if (istat==0) allocate(sedtra%sscx   (nc1:nc2,lsedtot), STAT = istat)  ! to have ss output in FM in zeta points
-       if (istat==0) allocate(sedtra%sscy   (nc1:nc2,lsedtot), STAT = istat)  ! dimensioned on sedtot on purpose!!
+       if (istat==0) allocate(sedtra%sscy   (nc1:nc2,lsedtot), STAT = istat)  ! dimensioned on sedtot on purpose, see reconstructsedtransports()
     else
        if (istat==0) allocate(sedtra%sscx   (1,1), STAT = istat)           ! not used in structured Delft3D-FLOW
        if (istat==0) allocate(sedtra%sscy   (1,1), STAT = istat)           ! not used in structured Delft3D-FLOW

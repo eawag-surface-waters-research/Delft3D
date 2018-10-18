@@ -179,7 +179,7 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
     integer                                                           :: nxxuser
     integer                                                           :: version
     integer                    , external                             :: newunit
-    integer                    , dimension(5)                         :: stat_flags
+    integer                    , dimension(6)                         :: stat_flags
     integer                    , dimension(:) , allocatable           :: itype
     integer                    , dimension(:) , allocatable           :: ifield
     integer                    , dimension(:) , allocatable           :: lenchr
@@ -744,8 +744,14 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
        call prop_get_logical(mor_ptr, 'Output', 'BedLayerPorosity'            , moroutput%poros)
        !
        call prop_get_logical(mor_ptr, 'Output', 'AverageAtEachOutputTime'     , moroutput%cumavg)
+       call prop_get_doubles(mor_ptr, 'Output', 'AverageSedmorOutputInterval' , moroutput%avgintv, 3)
+       if (moroutput%avgintv(2).lt.0d0) then
+          moroutput%avgintv(2) = 0d0
+          moroutput%avgintv(3) = 0d0
+       end if
        i = 1+lsedtot ! index 1           used internally for weights
-                     ! index 2,lsedtot+1 used for CumNetSedimentationFlux
+                     ! index 2,lsedtot+1 used for CumNetSedimentationFlux per fraction
+                     ! rest follows below
        do iqnt = 1, 4
            string = ' '
            select case (iqnt)
@@ -784,6 +790,11 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
                endif
                i = i+1
                stat_flags(5) = i
+           endif
+           if (index(string,'net') > 0) then
+              stat_flags(1) = stat_flags(1) + MOR_STAT_CUM
+              i = i+1
+              stat_flags(6) = i
            endif
            moroutput%statflg(:,iqnt) = stat_flags
        enddo
