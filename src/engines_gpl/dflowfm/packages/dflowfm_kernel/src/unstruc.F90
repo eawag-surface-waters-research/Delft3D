@@ -647,6 +647,9 @@ end subroutine flow_finalize_single_timestep
  else
     hs = s1 - bl                                     ! total water height
  endif
+ 
+! due to tolerance in poshcheck, hs may be smaller than 0 (but larger than -1e-10) 
+ hs = max(hs,0d0)
 
  call setzminmax()                                   ! our side of preparation for 3D ec module
  call setsigmabnds()                                 ! our side of preparation for 3D ec module
