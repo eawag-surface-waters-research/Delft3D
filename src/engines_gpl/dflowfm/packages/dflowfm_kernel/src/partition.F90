@@ -292,8 +292,7 @@ use m_tpoly
             call find1dcells()
          end if
          
-         call delete_drypoints_from_netgeom(dryptsfile, 0, 0)
-         call delete_drypoints_from_netgeom(gridencfile, 0, -1)
+         call delete_dry_points_and_areas()
       end if
       
 !     determine number of cells
@@ -718,8 +717,7 @@ use m_tpoly
       call findcells(100000)  ! output link permutation array "Lperm" (only used if jacells.eq.1)
       call find1dcells()
    
-      call delete_drypoints_from_netgeom(dryptsfile, 0, 0)
-      call delete_drypoints_from_netgeom(gridencfile, 0, -1)
+      call delete_dry_points_and_areas()
   
       if (numk == 0 .or. numl == 0) then
          write(message,"('While making partition domain #', I0, ': empty domain (', I0, ' net nodes, ', I0, ' net links).')") idmn, numk, numl
@@ -4821,8 +4819,7 @@ end subroutine partition_make_globalnumbers
          call findcells(0)
          call find1Dcells()
          
-         call delete_drypoints_from_netgeom(dryptsfile, 0, 0)
-         call delete_drypoints_from_netgeom(gridencfile, 0, -1)
+         call delete_dry_points_and_areas()
       end if
       
 !     check for 1D cells (not supported)
@@ -5365,7 +5362,7 @@ end subroutine partition_make_globalnumbers
 !     reenable polygons
       NPL = NPL_save
    
-      call delete_drypoints_from_netgeom(dryptsfile, 0, 0)
+      call delete_dry_points_and_areas()
       
       if ( NPL.gt.1 ) then ! use the polygons
          call generate_partitioning_from_pol()

@@ -10508,7 +10508,7 @@ numka:DO K0 = 1,NUMK                 ! ATTRACTION PARAMETERS
    CALL FINDCELLS(0)
    
 !   take dry cells into account (after findcells)
-    call delete_drypoints_from_netgeom(dryptsfile, 0, 0)
+    call delete_dry_points_and_areas()
 
    JAREMOVE = 0
    DO L = 1, NUML                                      ! REMOVE SMALL CIRCUMCENTRE DISTANCES
@@ -28753,7 +28753,7 @@ subroutine refinecellsandfaces2()
    end if
    
 !  take dry cells into account (after findcells)
-   call delete_drypoints_from_netgeom(dryptsfile, 0, 0)
+   call delete_dry_points_and_areas()
 
 !  try to find brother links in the original net
    linkbrother = 0
@@ -28834,7 +28834,7 @@ subroutine refinecellsandfaces2()
       call mess(LEVEL_INFO, 'refinement efficiency factor', real(dble(nump_virtual)/dble(max(nump,1))))
       
 !     take dry cells into account (after findcells)
-      call delete_drypoints_from_netgeom(dryptsfile, 0, 0)
+      call delete_dry_points_and_areas()
            
       if ( jagui.eq.1 ) then
          ja = 1
@@ -28870,7 +28870,7 @@ subroutine refinecellsandfaces2()
       where( kc.eq.-1 ) kc=1
       if ( NPL.gt.0 ) call store_and_set_kc()
       call findcells(1000) !     take dry cells into account (after findcells)
-      call delete_drypoints_from_netgeom(dryptsfile, 0, 0)
+      call delete_dry_points_and_areas()
       if ( NPL.gt.0 ) call restore_kc()
       
 !     remove isolated hanging nodes and update netcell administration (no need for setnodadm)      
@@ -33787,13 +33787,9 @@ subroutine partition_from_commandline(fnam, md_Ndomains, md_jacontiguous, md_icg
    end if
    netstat = NETSTAT_OK
     
-!  set drypointsfile    
-   dryptsfile = md_dryptsfile
+!  delete dry points and dry areas   
+   call delete_dry_points_and_areas()
    
-   call delete_drypoints_from_netgeom(dryptsfile, 0, 0)
-
-   gridencfile = md_encfile
-   call delete_drypoints_from_netgeom(gridencfile, 0, -1)
    if ( nump1d2d.lt.1 ) return
 
    if ( md_Ndomains.gt.0 ) then ! use METIS
@@ -35436,7 +35432,7 @@ subroutine preparecells(md_netfile, jaidomain, jaiglobal_s, ierr)
     end if
    
 !   take dry cells into account (after findcells)
-    call delete_drypoints_from_netgeom(dryptsfile, 0, 0)
+    call delete_dry_points_and_areas()
     
     call makenetnodescoding() ! need it for allocation nb
     
@@ -36036,3 +36032,15 @@ ilp:do isplit=1,MAXSPLIT
     
     return
  end subroutine maketrigrid
+ 
+ 
+ ! Delete dry points from netgeom based on drypoints files and grid enclosure file
+ subroutine delete_dry_points_and_areas()
+   use unstruc_model, only: md_dryptsfile, md_encfile
+   implicit none
+   
+   call delete_drypoints_from_netgeom(md_dryptsfile, 0, 0)
+   call delete_drypoints_from_netgeom(md_encfile, 0, -1)
+   
+   return
+ end subroutine delete_dry_points_and_areas

@@ -18733,8 +18733,7 @@ end subroutine unc_write_shp
  !   enddo
  !   deallocate(fnames)
  !end if
- call delete_drypoints_from_netgeom(md_dryptsfile, 0, 0)
- call delete_drypoints_from_netgeom(md_encfile, 0, -1)
+ call delete_dry_points_and_areas()
  
 ! also disabled isolated cells due to cutcells and store masks
   call cutcell_list(6,'dum',3, 1)

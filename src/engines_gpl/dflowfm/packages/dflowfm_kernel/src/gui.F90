@@ -144,7 +144,7 @@
          call findcells(100)        ! include folded cells
          call find1dcells()
 !         call findcells(0)          ! do not include folded cells
-         call delete_drypoints_from_netgeom(dryptsfile,0,0)
+         call delete_dry_points_and_areas()
          call makenetnodescoding()  ! killcell relies on node codes
       ELSE IF (NWHAT .EQ. 22) THEN
          call interpdivers(2) ! Network zk flow bathy
