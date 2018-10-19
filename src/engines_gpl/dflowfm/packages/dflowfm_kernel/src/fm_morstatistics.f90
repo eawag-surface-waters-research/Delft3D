@@ -20,6 +20,7 @@ module m_fm_morstatistics
       type(t_unc_timespace_id) :: id_tsp
       
       integer                  :: id_time        = -1    
+      integer                  :: id_interval    = -1    
       integer                  :: id_hs_mean(4)  = -1
       integer                  :: id_hs_std(4)   = -1
       integer                  :: id_hs_max(4)   = -1
@@ -208,6 +209,12 @@ module m_fm_morstatistics
       implicit none
       
       integer :: iqnt
+      
+      morstatqnt(:,1) = 0d0
+      
+      if (stmpar%morpar%moroutput%cumavg) then
+         morstatqnt(:,2:stmpar%lsedtot+1) = 0d0
+      endif
       
       do iqnt = 1,4
           select case (iqnt)
@@ -487,7 +494,7 @@ subroutine unc_write_sedstat_filepointer_ugrid(sedids,tim)
    use io_ugrid
    use unstruc_netcdf
    use m_flowgeom
-   use m_flowtimes, only: refdat
+   use m_flowtimes, only: refdat, ti_sed
    use m_sediment, only: stmpar
    use morphology_data_module, only: MOR_STAT_MIN, MOR_STAT_MAX, MOR_STAT_MEAN, MOR_STAT_STD, MOR_STAT_CUM
    
@@ -507,7 +514,7 @@ subroutine unc_write_sedstat_filepointer_ugrid(sedids,tim)
    integer                                      :: dim
    integer, dimension(:), allocatable           :: dimids_
    double precision, dimension(:,:), allocatable:: work
-   double precision, dimension(:),   allocatable:: work2
+   !double precision, dimension(:),   allocatable:: work2
    character(len=10)                            :: transpunit
    character(len=75)                            :: var1, var2
    character(len=150)                           :: descr1, descr2
@@ -543,6 +550,7 @@ subroutine unc_write_sedstat_filepointer_ugrid(sedids,tim)
       call check_error(ierr, 'def time dim')
       tmpstr = 'seconds since '//refdat(1:4)//'-'//refdat(5:6)//'-'//refdat(7:8)//' 00:00:00'
       ierr = unc_def_var_nonspatial(sedids%ncid, sedids%id_time, nf90_double, (/ sedids%id_tsp%id_timedim /), 'time', 'time', '', trim(tmpstr))
+      ierr = unc_def_var_nonspatial(sedids%ncid, sedids%id_interval, nf90_double, (/ sedids%id_tsp%id_timedim /), 'averaging interval', 'averaging interval', '', 's')
    
       ierr = nf90_def_dim(sedids%ncid, 'nSedTot', stmpar%lsedtot, sedids%id_tsp%id_sedtotdim)
       
@@ -696,6 +704,7 @@ subroutine unc_write_sedstat_filepointer_ugrid(sedids,tim)
    sedids%id_tsp%idx_curtime = sedids%id_tsp%idx_curtime+1   
    itim                      = sedids%id_tsp%idx_curtime
    ierr                      = nf90_put_var(sedids%ncid, sedids%id_time, tim, (/ itim /))
+   ierr                      = nf90_put_var(sedids%ncid, sedids%id_interval, morstatqnt(1,1)*ti_sed, (/ itim /))
    !
    if (stmpar%morpar%moroutput%dmsedcum) then
       allocate( work(ndx, stmpar%lsedtot) )
@@ -738,12 +747,12 @@ subroutine unc_write_sedstat_filepointer_ugrid(sedids,tim)
             endif
             !
             if (iand(idx,MOR_STAT_MEAN)>0) then
-               if (allocated(work2)) deallocate(work2)
-               allocate(work2(1:ndx))
-               do k=1,ndx
-                  work2(k)=morstatqnt(k,morstatflg(4,iq))
-               enddo
-               ierr = unc_put_var_map(sedids%ncid, sedids%id_tsp, id_mean_x, UNC_LOC_S, work2)
+               !if (allocated(work2)) deallocate(work2)
+               !allocate(work2(1:ndx))
+               !do k=1,ndx
+               !   work2(k)=morstatqnt(k,morstatflg(4,iq))
+               !enddo
+               ierr = unc_put_var_map(sedids%ncid, sedids%id_tsp, id_mean_x, UNC_LOC_S, morstatqnt(:,morstatflg(4,iq)))
             endif
             !
             if (iand(idx,MOR_STAT_STD)>0) then
