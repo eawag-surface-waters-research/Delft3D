@@ -215,7 +215,6 @@ module network_data
   
 ! for dry/illegal/cutcells (mesh generation related only)
   character(len=255)               :: dryptsfile = ''
-  character(len=255)               :: gridencfile = ''
      
 !  netlink permutation by setnodadm
    integer, dimension(:), allocatable :: Lperm  !< permuation of netlinks by setnodadm, dim(numL)
