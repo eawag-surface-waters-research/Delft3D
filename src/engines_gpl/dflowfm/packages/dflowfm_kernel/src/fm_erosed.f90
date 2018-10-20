@@ -3090,9 +3090,13 @@ end module m_fm_update_crosssections
       enddo
       !
       ! Remember erosion velocity for dilatancy
-      do nm = 1, ndx
-         dzbdt(nm) = blchg(nm)/dtmor
-      enddo
+      if (dtmor>0d0) then
+         do nm = 1, ndx
+            dzbdt(nm) = blchg(nm)/dtmor
+         enddo
+      else
+         dzbdt=0d0   
+      endif
       !
       ! Dredging and Dumping
       !

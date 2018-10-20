@@ -293,11 +293,7 @@ module m_fm_morstatistics
 
 
    subroutine morstats_full(dbodsd, hs_mor, ucxq_mor, ucyq_mor, sbcx, sbcy, sbwx, sbwy, sscx, sscy, sswx, sswy)
-      !use precision, only: fp
-      !use m_fm_erosed, only: cdryb, rhosol, lsedtot, lsed, statqnt
-      !use m_flowgeom, only: ndx
-      !use m_sediment, only: stmpar
-      !use m_flowtimes, only: dts, ti_sed
+      use morphology_data_module, only: MOR_STAT_BODS
       !
       implicit none
       !
@@ -327,18 +323,21 @@ module m_fm_morstatistics
       !
       if (nmorstatqnt == 0) return
       !
-      wght = max(dts/ti_sed,0d0)    ! time weighted, as opposed to original D3D implementation which used accreted volume!!
-      
+      wght = max(dts/ti_sed,0d0)    ! time weighted is default, as opposed to original D3D implementation which used accreted volume
+      !
       do k = 1, ndx
+         if (stmpar%morpar%moroutput%weightflg==MOR_STAT_BODS) then
+            wght = 0d0
+            do ll = 1, stmpar%lsedtot
+               wght = wght + max(0d0,dbodsd(ll,k))
+            enddo
+         endif
          ! 
          morstatqnt(k,1) = morstatqnt(k,1) + wght
          !
          do ll = 1, stmpar%lsedtot
             morstatqnt(k,1+ll) = morstatqnt(k,1+ll) + dbodsd(ll, k)
          enddo
-      enddo
-      
-      do k = 1, ndx
          !
          if (morstatflg(1,1)>0) then
             call local_stats(morstatflg(:,1), k, hs_mor(k), wght)
@@ -494,9 +493,10 @@ subroutine unc_write_sedstat_filepointer_ugrid(sedids,tim)
    use io_ugrid
    use unstruc_netcdf
    use m_flowgeom
+   use m_flowparameters
    use m_flowtimes, only: refdat, ti_sed
    use m_sediment, only: stmpar
-   use morphology_data_module, only: MOR_STAT_MIN, MOR_STAT_MAX, MOR_STAT_MEAN, MOR_STAT_STD, MOR_STAT_CUM
+   use morphology_data_module, only: MOR_STAT_MIN, MOR_STAT_MAX, MOR_STAT_MEAN, MOR_STAT_STD, MOR_STAT_CUM, MOR_STAT_BODS
    
    implicit none
    
@@ -514,7 +514,8 @@ subroutine unc_write_sedstat_filepointer_ugrid(sedids,tim)
    integer                                      :: dim
    integer, dimension(:), allocatable           :: dimids_
    double precision, dimension(:,:), allocatable:: work
-   !double precision, dimension(:),   allocatable:: work2
+   double precision, dimension(:),   allocatable:: work2
+   double precision, dimension(:),   allocatable:: wghtfac
    character(len=10)                            :: transpunit
    character(len=75)                            :: var1, var2
    character(len=150)                           :: descr1, descr2
@@ -735,77 +736,127 @@ subroutine unc_write_sedstat_filepointer_ugrid(sedids,tim)
       end select
       !
       if (stmpar%morpar%moroutput%statflg(1,iq)>0) then
+      
          idx = stmpar%morpar%moroutput%statflg(1,iq)
+      
+         if (iand(idx,MOR_STAT_MEAN)>0 .or. iand(idx,MOR_STAT_STD)>0) then
+            if (allocated(wghtfac)) deallocate(wghtfac, work2)
+            allocate(wghtfac(1:ndx), work2(1:ndx))
+            wghtfac = 1d0; work2 = 0d0
+            if (stmpar%morpar%moroutput%weightflg==MOR_STAT_BODS) then
+               wghtfac = 1d0/max(morstatqnt(:,1),eps10)
+            endif
+         endif
          
          if (dim==1) then
             if (iand(idx,MOR_STAT_MIN)>0) then
+               where (morstatqnt(:,1)<=0.0)
+                  morstatqnt(:,morstatflg(2,iq)) = -999d0
+               endwhere
                ierr = unc_put_var_map(sedids%ncid, sedids%id_tsp, id_min_x, UNC_LOC_S, morstatqnt(:,morstatflg(2,iq)))
             endif
             !
             if (iand(idx,MOR_STAT_MAX)>0) then
+               where (morstatqnt(:,1)<=0.0)
+                  morstatqnt(:,morstatflg(3,iq)) = -999d0
+               endwhere
                ierr = unc_put_var_map(sedids%ncid, sedids%id_tsp, id_max_x, UNC_LOC_S, morstatqnt(:,morstatflg(3,iq)))
             endif
             !
             if (iand(idx,MOR_STAT_MEAN)>0) then
-               !if (allocated(work2)) deallocate(work2)
-               !allocate(work2(1:ndx))
-               !do k=1,ndx
-               !   work2(k)=morstatqnt(k,morstatflg(4,iq))
-               !enddo
-               ierr = unc_put_var_map(sedids%ncid, sedids%id_tsp, id_mean_x, UNC_LOC_S, morstatqnt(:,morstatflg(4,iq)))
+               work2 = morstatqnt(:,morstatflg(4,iq))*wghtfac
+               where (morstatqnt(:,1)<=0.0)
+                  work2 = -999d0
+               endwhere
+               ierr  = unc_put_var_map(sedids%ncid, sedids%id_tsp, id_mean_x, UNC_LOC_S, work2)
             endif
             !
             if (iand(idx,MOR_STAT_STD)>0) then
                j = morstatflg(5,iq)
                do k = 1,ndx
-                  morstatqnt(k, j) = morstatqnt(k, j) - morstatqnt(k, j-1)**2
+                  morstatqnt(k, j) = morstatqnt(k, j)*wghtfac(k) - morstatqnt(k, j-1)**2
                   if (morstatqnt(k, j)>0.0_fp) then  ! safety
                       morstatqnt(k, j)  = sqrt(morstatqnt(k, j))
                   else
                       morstatqnt(k, j)  = 0.0_fp
                   endif                
                enddo
+               
+               where (morstatqnt(:,1)<=0.0)
+                  morstatqnt(:,morstatflg(5,iq)) = -999d0
+               endwhere
+               
                ierr = unc_put_var_map(sedids%ncid, sedids%id_tsp, id_mean_x, UNC_LOC_S, morstatqnt(:,morstatflg(5,iq)))
             endif
          else
             if (iand(idx,MOR_STAT_MIN)>0) then
+               
+               where (morstatqnt(:,1)<=0.0)
+                  morstatqnt(:,morstatflg(2,iq)) = -999d0
+                  morstatqnt(:,morstatflg(3,iq)) = -999d0
+               endwhere
+               
                ierr = unc_put_var_map(sedids%ncid, sedids%id_tsp, id_min_x, UNC_LOC_S, morstatqnt(:,morstatflg(2,iq)))
                ierr = unc_put_var_map(sedids%ncid, sedids%id_tsp, id_min_y, UNC_LOC_S, morstatqnt(:,morstatflg(3,iq)))
             endif
             !
             if (iand(idx,MOR_STAT_MAX)>0) then
+               where (morstatqnt(:,1)<=0.0)
+                  morstatqnt(:,morstatflg(4,iq)) = -999d0
+                  morstatqnt(:,morstatflg(5,iq)) = -999d0
+               endwhere
                ierr = unc_put_var_map(sedids%ncid, sedids%id_tsp, id_max_x, UNC_LOC_S, morstatqnt(:,morstatflg(4,iq)))
                ierr = unc_put_var_map(sedids%ncid, sedids%id_tsp, id_max_y, UNC_LOC_S, morstatqnt(:,morstatflg(5,iq)))
             endif
             !
             if (iand(idx,MOR_STAT_MEAN)>0) then
-               ierr = unc_put_var_map(sedids%ncid, sedids%id_tsp, id_mean_x, UNC_LOC_S, morstatqnt(:,morstatflg(6,iq)))
-               ierr = unc_put_var_map(sedids%ncid, sedids%id_tsp, id_mean_y, UNC_LOC_S, morstatqnt(:,morstatflg(7,iq)))
+               work2 = morstatqnt(:,morstatflg(6,iq))*wghtfac
+               where (morstatqnt(:,1)<=0.0)
+                  work2 = -999d0
+               endwhere
+               ierr = unc_put_var_map(sedids%ncid, sedids%id_tsp, id_mean_x, UNC_LOC_S, work2)
+               work2 = morstatqnt(:,morstatflg(7,iq))*wghtfac
+               where (morstatqnt(:,1)<=0.0)
+                  work2 = -999d0
+               endwhere
+               ierr = unc_put_var_map(sedids%ncid, sedids%id_tsp, id_mean_y, UNC_LOC_S, work2)
             endif
             !
             if (iand(idx,MOR_STAT_STD)>0) then
                do k = 1,ndx
-                  morstatqnt(k, morstatflg(8,iq)) = morstatqnt(k, morstatflg(8,iq)) - morstatqnt(k, morstatflg(6,iq))**2
+                  morstatqnt(k, morstatflg(8,iq)) = morstatqnt(k, morstatflg(8,iq))*wghtfac(k) - morstatqnt(k, morstatflg(6,iq))**2
                   if (morstatqnt(k, morstatflg(8,iq))>0.0_fp) then  ! safety
                       morstatqnt(k, morstatflg(8,iq))  = sqrt(morstatqnt(k, morstatflg(8,iq)))
                   else
                       morstatqnt(k, morstatflg(8,iq))  = 0.0_fp
                   endif                
                enddo
+               where (morstatqnt(:,1)<=0.0)
+                  morstatqnt(:,morstatflg(8,iq)) = -999d0
+               endwhere
                ierr = unc_put_var_map(sedids%ncid, sedids%id_tsp, id_std_x, UNC_LOC_S, morstatqnt(:,morstatflg(8,iq)))
                do k = 1,ndx
-                  morstatqnt(k, morstatflg(9,iq)) = morstatqnt(k, morstatflg(9,iq)) - morstatqnt(k, morstatflg(7,iq))**2
+                  morstatqnt(k, morstatflg(9,iq)) = morstatqnt(k, morstatflg(9,iq))*wghtfac(k) - morstatqnt(k, morstatflg(7,iq))**2
                   if (morstatqnt(k, morstatflg(9,iq))>0.0_fp) then  ! safety
                       morstatqnt(k, morstatflg(9,iq))  = sqrt(morstatqnt(k, morstatflg(9,iq)))
                   else
                       morstatqnt(k, morstatflg(9,iq))  = 0.0_fp
                   endif                
                enddo
+               where (morstatqnt(:,1)<=0.0)
+                  morstatqnt(:,morstatflg(9,iq)) = -999d0
+               endwhere
                ierr = unc_put_var_map(sedids%ncid, sedids%id_tsp, id_std_y, UNC_LOC_S, morstatqnt(:,morstatflg(9,iq)))
             endif
             !
             if (iand(idx,MOR_STAT_CUM)>0 .and. (iq==3 .or. iq==4)) then
+               where (morstatqnt(:,1)<=0.0)
+                  morstatqnt(:,morstatflg(10,iq)) = -999d0
+               endwhere
                ierr = unc_put_var_map(sedids%ncid, sedids%id_tsp, id_net_x, UNC_LOC_S, morstatqnt(:,morstatflg(10,iq)))
+               where (morstatqnt(:,1)<=0.0)
+                  morstatqnt(:,morstatflg(11,iq)) = -999d0
+               endwhere
                ierr = unc_put_var_map(sedids%ncid, sedids%id_tsp, id_net_y, UNC_LOC_S, morstatqnt(:,morstatflg(11,iq)))
             endif
          endif

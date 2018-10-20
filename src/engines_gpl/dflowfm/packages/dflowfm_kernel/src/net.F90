@@ -14497,7 +14497,7 @@ implicit none
             crs(icrs)%sumvalcur(iv) = sumvalcur_tmp(iv,icrs)
             crs(icrs)%sumvalcum(iv) = crs(icrs)%sumvalcum(iv) + sumvalcum_timescale(iv)*timstep*sumvalcur_tmp(iv,icrs)
             if (timtot > 0d0) then
-                crs(icrs)%sumvalavg(iv) = crs(icrs)%sumvalcum(iv)/timtot/sumvalcum_timescale(iv)
+                crs(icrs)%sumvalavg(iv) = crs(icrs)%sumvalcum(iv)/timtot/max(sumvalcum_timescale(iv),1d0)
             else
                 crs(icrs)%sumvalavg(iv) = crs(icrs)%sumvalcur(iv)
             end if
