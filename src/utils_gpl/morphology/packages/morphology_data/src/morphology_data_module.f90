@@ -185,6 +185,9 @@ integer,parameter, public  :: MOR_STAT_MAX = 2
 integer,parameter, public  :: MOR_STAT_MEAN= 4
 integer,parameter, public  :: MOR_STAT_STD = 8
 integer,parameter, public  :: MOR_STAT_CUM = 16
+
+integer,parameter,public   :: MOR_STAT_TIME= 1
+integer,parameter,public   :: MOR_STAT_BODS= 2
 !
 ! collection of morphology output options
 !
@@ -202,6 +205,7 @@ type moroutputtype
     !integer, dimension(5,4)         :: statflg  ! 1 = waterdepth, 2 = velocity, 3 = bedload, 4 = suspload
     integer, dimension(6,4)         :: statflg  ! 1 = waterdepth, 2 = velocity, 3 = bedload, 4 = suspload
     integer                         :: nstatqnt ! number of quantities for morphology statistics output
+    integer                         :: weightflg ! weighting by time or dbodsd
     real(fp), dimension(3)          :: avgintv  ! interval, start, stop for writing statistics (FM only)
     !
     logical :: aks
@@ -1411,6 +1415,8 @@ subroutine nullmorpar(morpar)
     !
     morpar%moroutput%statflg(:,:) = 0
     morpar%moroutput%nstatqnt     = 0
+    morpar%moroutput%weightflg    = 1
+    morpar%moroutput%avgintv      = (/3600d0, 0d0, 0d0/)
     !
     morpar%moroutput%aks         = .false.
     morpar%moroutput%cumavg      = .false.

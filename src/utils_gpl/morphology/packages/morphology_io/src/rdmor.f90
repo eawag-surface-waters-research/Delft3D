@@ -749,6 +749,14 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
           moroutput%avgintv(2) = 0d0
           moroutput%avgintv(3) = 0d0
        end if
+       string = ' '
+       call prop_get_string (mor_ptr, 'Output', 'AverageSedmorWeightFactor'         , string)
+       if (index(string,'time') > 0) then
+          moroutput%weightflg = MOR_STAT_TIME
+       endif
+       if (index(string,'sedimentation') > 0) then
+          moroutput%weightflg = MOR_STAT_BODS
+       endif
        i = 1+lsedtot ! index 1           used internally for weights
                      ! index 2,lsedtot+1 used for CumNetSedimentationFlux per fraction
                      ! rest follows below
