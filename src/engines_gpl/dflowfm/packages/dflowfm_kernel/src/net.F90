@@ -14495,7 +14495,7 @@ implicit none
       do icrs=1,ncrs
          do iv = 1, numvals ! Nu nog "5+ Numconst" standaard grootheden, in buitenlus
             crs(icrs)%sumvalcur(iv) = sumvalcur_tmp(iv,icrs)
-            crs(icrs)%sumvalcum(iv) = crs(icrs)%sumvalcum(iv) + sumvalcum_timescale(iv)*timstep*sumvalcur_tmp(iv,icrs)
+            crs(icrs)%sumvalcum(iv) = crs(icrs)%sumvalcum(iv) + max(sumvalcum_timescale(iv),1d0)*timstep*sumvalcur_tmp(iv,icrs)
             if (timtot > 0d0) then
                 crs(icrs)%sumvalavg(iv) = crs(icrs)%sumvalcum(iv)/timtot/max(sumvalcum_timescale(iv),1d0)
             else
@@ -14505,7 +14505,7 @@ implicit none
       end do
     else
        do icrs=1,ncrs ! Compute time-integrated discharge in current history output interval
-          sumvalcumQ_mpi(icrs) = sumvalcumQ_mpi(icrs) + sumvalcum_timescale(IPNT_Q1C)*timstep*sumvalcur_tmp(IPNT_Q1C,icrs)
+          sumvalcumQ_mpi(icrs) = sumvalcumQ_mpi(icrs) + max(sumvalcum_timescale(IPNT_Q1C),1d0)*timstep*sumvalcur_tmp(IPNT_Q1C,icrs)
        enddo
     endif
     
@@ -14672,10 +14672,10 @@ subroutine updateValuesOnCrossSections_mpi(tim1)
             ! TODO: AvD/JZ: UNST-1281: cumulative Q fort MPI runs is now correct, but:
             ! * jampi==1 code is quite different from jampi==0 for the sumvalcum.
             ! * And: sumvalcum for all other quantities than Q1C are wrong:
-            crs(icrs)%sumvalcum(iv) = crs(icrs)%sumvalcum(iv) + sumvalcum_timescale(iv)*ti_his*sumvalcur_tmp(iv, icrs) 
+            crs(icrs)%sumvalcum(iv) = crs(icrs)%sumvalcum(iv) + max(sumvalcum_timescale(iv),1d0)*ti_his*sumvalcur_tmp(iv, icrs) 
          end if
          if (timtot > 0d0) then
-             crs(icrs)%sumvalavg(iv) = crs(icrs)%sumvalcum(iv)/timtot/sumvalcum_timescale(iv)
+             crs(icrs)%sumvalavg(iv) = crs(icrs)%sumvalcum(iv)/timtot/max(sumvalcum_timescale(iv),1d0)
          else
              crs(icrs)%sumvalavg(iv) = crs(icrs)%sumvalcur(iv)
          endif
