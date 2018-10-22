@@ -64,6 +64,8 @@
 *         =6  : MINABS
 *         =7  : KDTREE (LIKE 1, BUT FAST AVERAGING)
 *
+* RELATIVESEARCHCELLSIZE : For METHOD=6, the relative search cell size for samples inside cell (default: 1.01)
+*
 * PERCENTILEMINMAX : Percentileminmax, average min or max Perc %
 * 
 * OPERAND =O  : Override at all points
