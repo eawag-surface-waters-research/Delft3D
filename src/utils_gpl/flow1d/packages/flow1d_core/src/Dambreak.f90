@@ -51,13 +51,16 @@
       double precision :: ucrit
       double precision :: t0
       integer          :: hasTable       
-      integer          :: materialtype           =  1 !for algorithm 1, default matrerial type is clay
+      integer          :: materialtype                      =  1 !for algorithm 1, default matrerial type is clay
       double precision :: endTimeFirstPhase
-      double precision :: breachWidthDerivative  = -1.0d0
-      double precision :: waterLevelJumpDambreak = -1.0d0	
-      character(Charln) :: levelsAndWidths = ''
+      double precision :: breachWidthDerivative             = -1.0d0
+      double precision :: waterLevelJumpDambreak            = -1.0d0	
+      double precision :: waterLevelUpstreamLocationX       = -999d0 
+      double precision :: waterLevelUpstreamLocationY       = -999d0
+      double precision :: waterLevelDownstreamLocationX     = -999d0	
+      double precision :: waterLevelDownstreamLocationY     = -999d0
+      character(Charln) :: levelsAndWidths                  = ''
       
-
       ! State variables, not to be read
       integer          :: phase
       double precision :: width
