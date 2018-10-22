@@ -4680,7 +4680,7 @@ end subroutine partition_make_globalnumbers
    end subroutine
 
 
-   !> Generic function for weighted average on a quantity defined on cells or links, also applying optional filters
+   !> Generic function for weighted average on a quantities defined on cells or links, also applying optional filters
    !> optional firstFilter is defined on a global weights array [1, ncells/nlinks]
    !> optional secondFilter is defined on a local array [1,size(secondFilter)]
    !> works also across multiple MPI ranks

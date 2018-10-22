@@ -1990,27 +1990,30 @@ end module m_crspath
 
  ! Dambreak 
  !time varying
- double precision, allocatable, target   :: waterLevelsDambreakUpStream(:)   !< the water levels computed each time step upstream
- double precision, allocatable, target   :: waterLevelsDambreakDownStream(:) !< the water levels computed each time step downstream
- double precision, allocatable, target   :: breachDepthDambreak(:)           !< the dambreak breach width (as a level)
- double precision, allocatable, target   :: breachWidthDambreak(:)           !< the dambreak breach width (as a level)
- double precision, allocatable           :: normalVelocityDambreak(:)        !< dambreak normal velocity
- double precision, allocatable           :: dambreakAveraging(:,:)           !< to avoid allocations/deallocations
- double precision, allocatable           :: breachWidthDerivativeDambreak(:) !< breach width derivatives
- double precision, allocatable           :: waterLevelJumpDambreak(:)        !< water level jumps
+ double precision, allocatable, target   :: waterLevelsDambreakUpStream(:)        !< the water levels computed each time step upstream
+ double precision, allocatable, target   :: waterLevelsDambreakDownStream(:)      !< the water levels computed each time step downstream
+ double precision, allocatable, target   :: breachDepthDambreak(:)                !< the dambreak breach width (as a level)
+ double precision, allocatable, target   :: breachWidthDambreak(:)                !< the dambreak breach width (as a level)
+ double precision, allocatable           :: normalVelocityDambreak(:)             !< dambreak normal velocity
+ double precision, allocatable           :: dambreakAveraging(:,:)                !< to avoid allocations/deallocations
+ double precision, allocatable           :: breachWidthDerivativeDambreak(:)      !< breach width derivatives
+ double precision, allocatable           :: waterLevelJumpDambreak(:)             !< water level jumps
  !constant in time
- double precision, allocatable           :: maximumDambreakWidths(:)         !< the total dambreak width (from pli file)
- double precision, allocatable           :: dambreakLinksEffectiveLength(:)  !< dambreak links index array
- integer        , allocatable            :: dambreaks(:)                     !< store the dambreaks indexes among all structures 
- integer                                 :: ndambreak                        !< nr of dambreak links
- integer                                 :: ndambreaksg                      !< nr of dambreak signals 
- integer         , allocatable           :: L1dambreaksg(:)                  !< first dambreak link for each signal
- integer         , allocatable           :: L2dambreaksg(:)                  !< second dambreak link for each signal
- integer         , allocatable           :: activeDambreakLinks(:)           !< activeDambreakLinks, open dambreak links
- integer         , allocatable           :: LStartBreach(:)                  !< the starting link, the closest to the breach point
- integer         , allocatable           :: kdambreak(:,:)                   !< dambreak links index array
- double precision, allocatable, target   :: dambreakLevelsAndWidthsFromTable(:)  !< dambreak widths and heights 
+ double precision, allocatable           :: maximumDambreakWidths(:)              !< the total dambreak width (from pli file)
+ double precision, allocatable           :: dambreakLinksEffectiveLength(:)       !< dambreak links index array
+ integer        , allocatable            :: dambreaks(:)                          !< store the dambreaks indexes among all structures 
+ integer                                 :: ndambreak                             !< nr of dambreak links
+ integer                                 :: ndambreaksg                           !< nr of dambreak signals 
+ integer         , allocatable           :: L1dambreaksg(:)                       !< first dambreak link for each signal
+ integer         , allocatable           :: L2dambreaksg(:)                       !< second dambreak link for each signal
+ integer         , allocatable           :: activeDambreakLinks(:)                !< activeDambreakLinks, open dambreak links
+ integer         , allocatable           :: LStartBreach(:)                       !< the starting link, the closest to the breach point
+ integer         , allocatable           :: kdambreak(:,:)                        !< dambreak links index array
+ double precision, allocatable, target   :: dambreakLevelsAndWidthsFromTable(:)   !< dambreak widths and heights 
  character(len=128), allocatable, target :: dambreak_ids(:)                       !< the dambreak ids
+ integer         , allocatable           :: waterLevelsLocationsDambreakUpStream(:)    !< store cell ids for water level locations upstream
+ integer         , allocatable           :: waterLevelsLocationsDambreakDownStream(:)  !< store cell ids for water level locations downstream
+ 
 
  type polygon
    double precision, dimension(:), allocatable :: xp, yp 

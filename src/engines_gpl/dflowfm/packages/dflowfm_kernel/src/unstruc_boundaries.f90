@@ -1371,6 +1371,7 @@ use m_meteo
 use m_readstructures
 use m_sferic
 use geometry_module
+USE gridoperations, only: incells
  
 implicit none
 character(len=256)            :: plifile
@@ -1397,7 +1398,7 @@ double precision, allocatable :: hulp(:,:) ! hulp
 double precision              :: x_breach, y_breach, distemp
 double precision              :: xc, yc, xn, yn   
 integer                       :: nDambreakCoordinates, k3, k4, kpol, indexInStructure, indexLink, ja, Lstart
-double precision              :: xpola, xpolb, ypola, ypolb
+double precision              :: xla, xlb, yla, ylb
 integer, allocatable          :: lftopol(:)
 double precision, allocatable :: xl(:), yl(:)
 
@@ -2303,6 +2304,18 @@ if (ndambreak > 0) then
    if(allocated(waterLevelJumpDambreak)) deallocate(waterLevelJumpDambreak)
    allocate(waterLevelJumpDambreak(ndambreaksg))
    waterLevelJumpDambreak = 0.0d0
+   
+   if(allocated(waterLevelJumpDambreak)) deallocate(waterLevelJumpDambreak)
+   allocate(waterLevelJumpDambreak(ndambreaksg))
+   waterLevelJumpDambreak = 0.0d0
+   
+   if(allocated(waterLevelsLocationsDambreakUpStream)) deallocate(waterLevelsLocationsDambreakUpStream)
+   allocate(waterLevelsLocationsDambreakUpStream(ndambreaksg))
+   waterLevelsLocationsDambreakUpStream = 0.0d0
+
+   if(allocated(waterLevelsLocationsDambreakDownStream)) deallocate(waterLevelsLocationsDambreakDownStream)
+   allocate(waterLevelsLocationsDambreakDownStream(ndambreaksg))
+   waterLevelsLocationsDambreakDownStream = 0.0d0   
     
    do n = 1, ndambreaksg
       do k = L1dambreaksg(n), L2dambreaksg(n)
@@ -2316,9 +2329,9 @@ if (ndambreak > 0) then
             kbi          = ln(1,Lf)
          endif
          ! kdambreak
-         kdambreak(1,k) = kb
-         kdambreak(2,k) = kbi
-         kdambreak(3,k) = L   
+         kdambreak(1,k)  = kb
+         kdambreak(2,k)  = kbi
+         kdambreak(3,k)  = L   
       end do
    enddo
    
@@ -2364,6 +2377,31 @@ if (ndambreak > 0) then
                success = .false.
             endif            
          endif
+         
+         ! get the cell where the water level upstream is
+         if (network%sts%struct(istrtmp)%dambreak%algorithm == 2) then
+            xla = network%sts%struct(istrtmp)%dambreak%waterLevelUpstreamLocationX
+            yla = network%sts%struct(istrtmp)%dambreak%waterLevelUpstreamLocationY
+            if ((xla.ne.dmiss).and.(yla.ne.dmiss)) then               
+               call incells(xla,yla,k)
+               if (k > 0) then
+                  waterLevelsLocationsDambreakUpStream(n) = k
+               endif
+            endif
+         endif
+         
+         ! get the cell where the water level downstream is
+         if (network%sts%struct(istrtmp)%dambreak%algorithm == 2) then
+            xla = network%sts%struct(istrtmp)%dambreak%waterLevelDownstreamLocationX
+            yla = network%sts%struct(istrtmp)%dambreak%waterLevelDownstreamLocationY
+            if ((xla.ne.dmiss).and.(yla.ne.dmiss)) then               
+               call incells(xla,yla,k)
+               if (k > 0) then
+                  waterLevelsLocationsDambreakDownStream(n) = k
+               endif
+            endif
+         endif
+         
       else
          ! error in reading the structure, nothing can be done
          cycle
@@ -2416,12 +2454,12 @@ if (ndambreak > 0) then
          k3 = lncn(1,Lf)
          k4 = lncn(2,Lf)
          kpol = lftopol(k)
-         xpola = dambreakPolygons(indexInStructure)%xp(kpol)
-         xpolb = dambreakPolygons(indexInStructure)%xp(kpol + 1)
-         ypola = dambreakPolygons(indexInStructure)%yp(kpol)
-         ypolb = dambreakPolygons(indexInStructure)%yp(kpol + 1)
+         xla = dambreakPolygons(indexInStructure)%xp(kpol)
+         xlb = dambreakPolygons(indexInStructure)%xp(kpol + 1)
+         yla = dambreakPolygons(indexInStructure)%yp(kpol)
+         ylb = dambreakPolygons(indexInStructure)%yp(kpol + 1)
          
-         call normalout( xpola, ypola, xpolb, ypolb, xn, yn, jsferic, jasfer3D, dmiss, dxymis)
+         call normalout( xla, yla, xlb, ylb, xn, yn, jsferic, jasfer3D, dmiss, dxymis)
          dambreakLinksEffectiveLength(k) = dbdistance(xk(k3), yk(k3), xk(k4), yk(k4), jsferic, jasfer3D, dmiss)
          dambreakLinksEffectiveLength(k) = dambreakLinksEffectiveLength(k) * abs( xn*csu(Lf) + yn*snu(Lf) )   
          ! Sum the length of the intersected flow links (required to bound maximum breach width)
