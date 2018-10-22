@@ -1416,7 +1416,7 @@ subroutine nullmorpar(morpar)
     morpar%moroutput%statflg(:,:) = 0
     morpar%moroutput%nstatqnt     = 0
     morpar%moroutput%weightflg    = 1
-    morpar%moroutput%avgintv      = (/3600d0, 0d0, 0d0/)
+    morpar%moroutput%avgintv      = 0.0
     !
     morpar%moroutput%aks         = .false.
     morpar%moroutput%cumavg      = .false.

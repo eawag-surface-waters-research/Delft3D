@@ -42,7 +42,7 @@ contains
 subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
                & lsed      ,nmaxus    ,nto       ,lfbedfrm  , &
                & nambnd    ,julday    ,mor_ptr   ,sedpar    ,morpar    , &
-               & fwfac     ,morlyr    ,griddim   )
+               & fwfac     ,morlyr    ,griddim)
 !!--description-----------------------------------------------------------------
 !
 ! Reads attribute file for 3D morphology computation
@@ -185,6 +185,7 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
     integer                    , dimension(:) , allocatable           :: lenchr
     real(fp)                                                          :: rmissval
     real(fp)                                                          :: xxmin
+    real(hp)                   , dimension(3)                         :: tint
     real(fp)                   , dimension(:) , allocatable           :: xxprog
     real(fp)                   , dimension(:) , allocatable           :: rfield
     logical                                                           :: ex       ! Logical flag for file existence
@@ -744,7 +745,13 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
        call prop_get_logical(mor_ptr, 'Output', 'BedLayerPorosity'            , moroutput%poros)
        !
        call prop_get_logical(mor_ptr, 'Output', 'AverageAtEachOutputTime'     , moroutput%cumavg)
-       call prop_get_doubles(mor_ptr, 'Output', 'AverageSedmorOutputInterval' , moroutput%avgintv, 3)
+       tint=0.0
+       call prop_get_doubles(mor_ptr, 'Output', 'AverageSedmorOutputInterval' , tint, 3, ex)
+       if (.not. ex) then
+          errmsg = 'AverageAtEachOutputTime is set to true, but could not read valid AverageSedmorOutputInterval values.'
+          call write_error(errmsg, unit=lundia)
+       endif
+       moroutput%avgintv = real(tint, kind=fp)   ! single precision build fix
        if (moroutput%avgintv(2).lt.0d0) then
           moroutput%avgintv(2) = 0d0
           moroutput%avgintv(3) = 0d0
