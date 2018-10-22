@@ -8991,7 +8991,7 @@ subroutine flow_sedmorinit()
        nambnd(k) = openbndname(k)
     enddo
 
-    call rdstm(stmpar, griddim, md_sedfile, md_morfile, filtrn='', lundia=mdia, lsal=jasal, ltem=jatem, ltur=max(0,iturbulencemodel-1), lsec=jasecflow, lfbedfrm=bfm_included, julrefday=julrefdat, dtunit='Tunit='//md_tunit, nambnd=nambnd, error=error)  !! JRE to check
+    call rdstm(stmpar, griddim, md_sedfile, md_morfile, filtrn='', lundia=mdia, lsal=jasal, ltem=jatem, ltur=max(0,iturbulencemodel-1), lsec=jasecflow, lfbedfrm=bfm_included, julrefday=julrefdat, dtunit='Tunit='//md_tunit, nambnd=nambnd, error=error)
     if (error) then
         call mess(LEVEL_FATAL, 'unstruc::flow_sedmorinit - Error in subroutine rdstm.')
     end if
@@ -34430,7 +34430,7 @@ if (jahisbal > 0) then
          endif
       endif
 
-      if (ti_his == 0) return
+      if (ti_his <= 0) return
       ! in order to compute the cumulative discharge, we have to compute the time step (see update updateValuesOnCrossSections)
       if (timprev == -1d0) then
         timstep  = 0d0

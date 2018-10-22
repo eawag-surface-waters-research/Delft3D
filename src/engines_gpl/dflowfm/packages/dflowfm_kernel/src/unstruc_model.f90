@@ -1250,7 +1250,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_string(md_ptr, 'output', 'HisFile', md_hisfile, success)
     ti_his_array = 0d0
     call prop_get_doubles(md_ptr, 'output', 'HisInterval'   ,  ti_his_array, 3, success)
-    if (ti_his_array(1) .ne. 0d0) ti_his_array(1) = max(ti_his_array(1) , dt_user)
+    if (ti_his_array(1) .gt. 0d0) ti_his_array(1) = max(ti_his_array(1) , dt_user)
     call getOutputTimeArrays(ti_his_array, ti_hiss, ti_his, ti_hise, success)
 
     call prop_get_double(md_ptr, 'output', 'XLSInterval', ti_xls, success)
@@ -1261,7 +1261,7 @@ subroutine readMDUFile(filename, istat)
 
     ti_map_array = 0d0
     call prop_get_doubles(md_ptr, 'output', 'MapInterval'   ,  ti_map_array, 3, success)
-    if (ti_map_array(1) .ne. 0d0) ti_map_array(1) = max(ti_map_array(1) , dt_user)
+    if (ti_map_array(1) .gt. 0d0) ti_map_array(1) = max(ti_map_array(1) , dt_user)
     call getOutputTimeArrays(ti_map_array, ti_maps, ti_map, ti_mape, success)
 
     call prop_get_integer(md_ptr, 'output', 'MapFormat', md_mapformat, success)
@@ -1477,6 +1477,7 @@ subroutine readMDUFile(filename, istat)
     if (jawave .eq. 4) then    ! not for Delta Shell
        call prop_get_integer(md_ptr, 'output', 'AvgWaveQuantities'    , jaavgwavquant)
        call prop_get_string(md_ptr,  'output', 'AvgWaveQuantitiesFile', md_avgwavquantfile, success)
+       ti_wav_array=0d0
        call prop_get_doubles(md_ptr, 'output', 'AvgWaveOutputInterval'   ,  ti_wav_array, 3, success)
        if (ti_wav_array(2).lt.0d0) then
           ti_wav_array(2) = 0d0
@@ -1524,7 +1525,7 @@ subroutine readMDUFile(filename, istat)
     ! Map classes output (formerly: incremental file)
     ti_classmap_array = 0d0
     call prop_get_doubles(md_ptr, 'output', 'ClassMapInterval', ti_classmap_array, 3, success)
-    if (ti_classmap_array(1) /= 0d0) ti_classmap_array(1) = max(ti_classmap_array(1) , dt_user)
+    if (ti_classmap_array(1) .gt. 0d0) ti_classmap_array(1) = max(ti_classmap_array(1) , dt_user)
     call getOutputTimeArrays(ti_classmap_array, ti_classmaps, ti_classmap, ti_classmape, success)
 
     if (ti_classmap > 0d0) then

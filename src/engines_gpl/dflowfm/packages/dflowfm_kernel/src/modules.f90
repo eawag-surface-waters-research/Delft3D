@@ -4303,6 +4303,8 @@ subroutine default_flowtimes()
     ti_maps     = 0d0               !< start interval (s)
     ti_mape     = 0d0               !< end   interval (s)
     ti_his      = 120d0             !< history interval (s)
+    ti_seds     = 0d0
+    ti_sede     = 0d0
     ti_xls      = 0d0               !< history interval (s) xls
     ti_rst      = 24d0*3600d0       !< restart interval (s)
     ti_waq      = 0d0               !< delwaq interval (s) (Default: off)
