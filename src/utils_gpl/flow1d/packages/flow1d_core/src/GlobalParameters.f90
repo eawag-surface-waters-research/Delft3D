@@ -55,7 +55,7 @@ module m_GlobalParameters
    double precision                 :: ThresholdSiphon               = 0.1d0
    double precision                 :: StructureDynamicsFactor       = 1.0d0
    double precision                 :: strucalfa                     = 0.9d0
-   double precision                 :: sl                            = 0.001d0        !< width at top of closed profile (Preisman lock)
+   double precision                 :: sl                            = 0.01d0        !< width at top of closed profile (Preisman lock)
    double precision                 :: pi                            = 3.141592653589793d0
    double precision                 :: ThresholdForPreismannLock     = 0.02d0
    double precision, public         :: dynstructext                  = 1.0d0
