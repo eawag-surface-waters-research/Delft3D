@@ -14711,8 +14711,8 @@ subroutine update_dambreak_breach(startTime, deltaTime)
       normalVelocityDambreak         = 0.0d0
       breachWidthDerivativeDambreak  = 0.0d0
       waterLevelJumpDambreak         = 0.0d0
-	  nAverageUpStream               = 0
-	  nAverageDownStream             = 0
+	   nAverageUpStream               = 0
+	   nAverageDownStream             = 0
    
       !
       ! Upstream water level
@@ -14731,7 +14731,7 @@ subroutine update_dambreak_breach(startTime, deltaTime)
 	  if (nAverageUpStream > 0) then
 	  
  	     ! Compute sumQuantitiesByWeight upstream
-         ierr = getAverageQuantityFromLinks(L1dambreaksg(indAverageUpStream(:)), L2dambreaksg(indAverageUpStream(:)), wu, kdambreak(3,:), s1, kdambreak(1,:), dambreakAveraging, hu, dmiss, activeDambreakLinks, 0)
+         ierr = getAverageQuantityFromLinks(L1dambreaksg(indAverageUpStream(1:nAverageUpStream)), L2dambreaksg(indAverageUpStream(1:nAverageUpStream)), wu, kdambreak(3,:), s1, kdambreak(1,:), dambreakAveraging, hu, dmiss, activeDambreakLinks, 0)
          
 		 if (ierr.ne.0) then 
 		    success=.false.
@@ -14762,7 +14762,7 @@ subroutine update_dambreak_breach(startTime, deltaTime)
 	  if (nAverageDownStream > 0) then
 	  
 	     ! Compute sumQuantitiesByWeight downstream
-         ierr = getAverageQuantityFromLinks(L1dambreaksg(indAverageDownStream(:)), L2dambreaksg(indAverageDownStream(:)), wu, kdambreak(3,:), s1, kdambreak(2,:), dambreakAveraging, hu, dmiss, activeDambreakLinks, 0)
+         ierr = getAverageQuantityFromLinks(L1dambreaksg(indAverageDownStream(1:nAverageDownStream)), L2dambreaksg(indAverageDownStream(1:nAverageDownStream)), wu, kdambreak(3,:), s1, kdambreak(2,:), dambreakAveraging, hu, dmiss, activeDambreakLinks, 0)
 		 
 		 if (ierr.ne.0) then 
 		    success=.false.
