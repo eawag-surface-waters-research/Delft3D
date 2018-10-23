@@ -2011,10 +2011,20 @@ end module m_crspath
  integer         , allocatable           :: kdambreak(:,:)                        !< dambreak links index array
  double precision, allocatable, target   :: dambreakLevelsAndWidthsFromTable(:)   !< dambreak widths and heights 
  character(len=128), allocatable, target :: dambreak_ids(:)                       !< the dambreak ids
- integer         , allocatable           :: waterLevelsLocationsDambreakUpStream(:)    !< store cell ids for water level locations upstream
- integer         , allocatable           :: waterLevelsLocationsDambreakDownStream(:)  !< store cell ids for water level locations downstream
- 
+ ! Upstream water level
+ integer                                 :: nDambreakLocationsUpstream                 !< nr of dambreak signals with locations upstream
+ integer         , allocatable           :: dambreakLocationsUpstreamMapping(:)        !< mapping of dambreak locations upstream 
+ integer         , allocatable           :: dambreakLocationsUpstream(:)               !< store cell ids for water level locations upstream
+ integer                                 :: nDambreakAveragingUpstream                 !< nr of dambreak signals upstream with averaging 
+ integer         , allocatable           :: dambreakAverigingUpstreamMapping(:)        !< mapping of dambreak averaging upstream 
+ ! Downstream water level
+ integer                                 :: nDambreakLocationsDownstream               !< nr of dambreak signals with locations downstream
+ integer         , allocatable           :: dambreakLocationsDownstreamMapping(:)      !< mapping of dambreak locations downstream 
+ integer         , allocatable           :: dambreakLocationsDownstream(:)             !< store cell ids for water level locations downstream
+ integer                                 :: nDambreakAveragingDownstream               !< nr of dambreak signals downstream with averaging
+ integer         , allocatable           :: dambreakAverigingDownstreamMapping(:)      !< mapping of dambreak averaging in the dambreak arrays
 
+ 
  type polygon
    double precision, dimension(:), allocatable :: xp, yp 
    integer :: np

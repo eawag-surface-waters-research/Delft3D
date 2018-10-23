@@ -14704,78 +14704,67 @@ subroutine update_dambreak_breach(startTime, deltaTime)
 
    if (ndambreak > 0) then
       
+....  !
       ! Initialize
+      !
       dambreakAveraging              = 0.0d0
       waterLevelsDambreakUpStream    = 0.0d0
       waterLevelsDambreakDownStream  = 0.0d0
       normalVelocityDambreak         = 0.0d0
       breachWidthDerivativeDambreak  = 0.0d0
       waterLevelJumpDambreak         = 0.0d0
-	   nAverageUpStream               = 0
-	   nAverageDownStream             = 0
    
       !
       ! Upstream water level
-      !	  
-	  do n = 1, ndambreaksg
-	     ! If waterLevelsLocationsDambreakUpStream is not equal to 0, the user has specified a point for the upstream water level 
-		  if (waterLevelsLocationsDambreakUpStream(n).ne.0) then
-	          waterLevelsDambreakUpStream(n) = s1(waterLevelsLocationsDambreakUpStream(n)) 
-	      else
-		      nAverageUpStream = nAverageUpStream + 1
-		      indAverageUpStream(nAverageUpStream) = n
-		  endif
-	  enddo
-		 
-	  !call this code only if something has to be averaged
-	  if (nAverageUpStream > 0) then
-	  
- 	     ! Compute sumQuantitiesByWeight upstream
-         ierr = getAverageQuantityFromLinks(L1dambreaksg(indAverageUpStream(1:nAverageUpStream)), L2dambreaksg(indAverageUpStream(1:nAverageUpStream)), wu, kdambreak(3,:), s1, kdambreak(1,:), dambreakAveraging, hu, dmiss, activeDambreakLinks, 0)
-         
-		 if (ierr.ne.0) then 
-		    success=.false.
-			return
-         endif
-	      
-         do n = 1, nAverageUpStream
-            if (dambreakAveraging(2,n)>0.0d0) then
-               waterLevelsDambreakUpStream(indAverageUpStream(n))  = dambreakAveraging(1,n)/dambreakAveraging(2,n)
-            endif
-         enddo	  
-	  endif
+      !
+      if (nDambreakLocationsUpstream > 0) then
+         waterLevelsDambreakUpStream(dambreakLocationsUpstreamMapping(1:nDambreakLocationsUpstream)) = s1(dambreakLocationsUpstream(1:nDambreakLocationsUpstream))
+      endif
 
-	  !
-      ! Downstream water level
-      !	  
-	  do n = 1, ndambreaksg
-	     ! If waterLevelsLocationsDambreakDownStream is not equal to 0, the user has specified a point for the dowstream water level 
-		  if (waterLevelsLocationsDambreakDownStream(n).ne.0) then
-	          waterLevelsDambreakDownStream(n) = s1(waterLevelsLocationsDambreakDownStream(n)) 
-	      else
-		      nAverageDownStream = nAverageDownStream + 1
-		      indAverageDownStream(nAverageDownStream) = n
-		  endif
-	  enddo
-	  
-	  !call this code only if something has to be averaged downstream
-	  if (nAverageDownStream > 0) then
-	  
-	     ! Compute sumQuantitiesByWeight downstream
-         ierr = getAverageQuantityFromLinks(L1dambreaksg(indAverageDownStream(1:nAverageDownStream)), L2dambreaksg(indAverageDownStream(1:nAverageDownStream)), wu, kdambreak(3,:), s1, kdambreak(2,:), dambreakAveraging, hu, dmiss, activeDambreakLinks, 0)
-		 
-		 if (ierr.ne.0) then 
-		    success=.false.
-			return
+      !call this code only if something has to be averaged
+      if (nDambreakAveragingUpstream > 0) then
+
+         ! Compute sumQuantitiesByWeight upstream
+         ierr = getAverageQuantityFromLinks(L1dambreaksg(dambreakAverigingUpstreamMapping(1:nDambreakAveragingUpstream)), L2dambreaksg(dambreakAverigingUpstreamMapping(1:nDambreakAveragingUpstream)), wu, kdambreak(3,:), s1, kdambreak(1,:), dambreakAveraging, hu, dmiss, activeDambreakLinks, 0)
+
+         if (ierr.ne.0) then
+            success=.false.
+            return
          endif
-		 
-         do n = 1, nAverageDownStream
+
+         do n = 1, nDambreakAveragingUpstream
             if (dambreakAveraging(2,n)>0.0d0) then
-               waterLevelsDambreakDownStream(indAverageDownStream(n))  = dambreakAveraging(1,n)/dambreakAveraging(2,n)
+               waterLevelsDambreakUpStream(dambreakAverigingUpstreamMapping(n))  = dambreakAveraging(1,n)/dambreakAveraging(2,n)
             endif
          enddo
-	  endif
-      
+      endif
+
+      !
+      ! Downstream water level
+      !
+      if (nDambreakLocationsDownstream > 0) then
+         waterLevelsDambreakDownStream(dambreakLocationsDownstreamMapping(1:nDambreakLocationsDownstream)) = s1(dambreakLocationsDownstream(1:nDambreakLocationsDownstream))
+      endif
+
+
+      !call this code only if something has to be averaged downstream
+      if (nDambreakAveragingDownstream > 0) then
+
+         ! Compute sumQuantitiesByWeight downstream
+         ierr = getAverageQuantityFromLinks(L1dambreaksg(dambreakAverigingDownstreamMapping(1:nDambreakAveragingDownstream)), L2dambreaksg(dambreakAverigingDownstreamMapping(1:nDambreakAveragingDownstream)), wu, kdambreak(3,:), s1, kdambreak(2,:), dambreakAveraging, hu, dmiss, activeDambreakLinks, 0)
+
+         if (ierr.ne.0) then
+            success=.false.
+            return
+         endif
+
+         do n = 1, nDambreakAveragingDownstream
+            if (dambreakAveraging(2,n)>0.0d0) then
+               waterLevelsDambreakDownStream(dambreakAverigingDownstreamMapping(n))  = dambreakAveraging(1,n)/dambreakAveraging(2,n)
+            endif
+         enddo
+      endif
+
 	  !
       ! u0 velocity on the flowlinks (averaged by the wetted area). The mask is the water level itself 
       !

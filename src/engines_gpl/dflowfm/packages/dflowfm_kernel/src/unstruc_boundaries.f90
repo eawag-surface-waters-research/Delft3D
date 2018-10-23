@@ -2309,14 +2309,38 @@ if (ndambreak > 0) then
    allocate(waterLevelJumpDambreak(ndambreaksg))
    waterLevelJumpDambreak = 0.0d0
    
-   if(allocated(waterLevelsLocationsDambreakUpStream)) deallocate(waterLevelsLocationsDambreakUpStream)
-   allocate(waterLevelsLocationsDambreakUpStream(ndambreaksg))
-   waterLevelsLocationsDambreakUpStream = 0.0d0
+   ! dambreak upstream
+   if(allocated(dambreakLocationsUpstreamMapping)) deallocate(dambreakLocationsUpstreamMapping)
+   allocate(dambreakLocationsUpstreamMapping(ndambreaksg))
+   dambreakLocationsUpstreamMapping = 0.0d0
+   
+   if(allocated(dambreakLocationsUpstream)) deallocate(dambreakLocationsUpstream)
+   allocate(dambreakLocationsUpstream(ndambreaksg))
+   dambreakLocationsUpstream = 0.0d0
+   
+   if(allocated(dambreakAverigingUpstreamMapping)) deallocate(dambreakAverigingUpstreamMapping)
+   allocate(dambreakAverigingUpstreamMapping(ndambreaksg))
+   dambreakAverigingUpstreamMapping = 0.0d0
+   
+   nDambreakLocationsUpstream = 0
+   nDambreakAveragingUpstream = 0
+   
+   ! dambreak downstream
+   if(allocated(dambreakLocationsDownstreamMapping)) deallocate(dambreakLocationsDownstreamMapping)
+   allocate(dambreakLocationsDownstreamMapping(ndambreaksg))
+   dambreakLocationsDownstreamMapping = 0.0d0
+   
+   if(allocated(dambreakLocationsDownstream)) deallocate(dambreakLocationsDownstream)
+   allocate(dambreakLocationsDownstream(ndambreaksg))
+   dambreakLocationsDownstream = 0.0d0
+   
+   if(allocated(dambreakAverigingDownstreamMapping)) deallocate(dambreakAverigingDownstreamMapping)
+   allocate(dambreakAverigingDownstreamMapping(ndambreaksg))
+   dambreakAverigingDownstreamMapping = 0.0d0  
 
-   if(allocated(waterLevelsLocationsDambreakDownStream)) deallocate(waterLevelsLocationsDambreakDownStream)
-   allocate(waterLevelsLocationsDambreakDownStream(ndambreaksg))
-   waterLevelsLocationsDambreakDownStream = 0.0d0   
-    
+   nDambreakLocationsDownstream = 0
+   nDambreakAveragingDownstream = 0
+
    do n = 1, ndambreaksg
       do k = L1dambreaksg(n), L2dambreaksg(n)
          L               = kedb(k)
@@ -2377,28 +2401,38 @@ if (ndambreak > 0) then
                success = .false.
             endif            
          endif
-         
-         ! get the cell where the water level upstream is
+
+         ! inquire if the water level upstream has to be taken from a location or be a result of averaging
          if (network%sts%struct(istrtmp)%dambreak%algorithm == 2) then
             xla = network%sts%struct(istrtmp)%dambreak%waterLevelUpstreamLocationX
             yla = network%sts%struct(istrtmp)%dambreak%waterLevelUpstreamLocationY
-            if ((xla.ne.dmiss).and.(yla.ne.dmiss)) then               
+            if ((xla.ne.dmiss).and.(yla.ne.dmiss)) then
                call incells(xla,yla,k)
                if (k > 0) then
-                  waterLevelsLocationsDambreakUpStream(n) = k
+                  nDambreakLocationsUpstream = nDambreakLocationsUpstream + 1
+                  dambreakLocationsUpstreamMapping(nDambreakLocationsUpstream) = n
+                  dambreakLocationsUpstream(nDambreakLocationsUpstream) = k
                endif
+            else
+               nDambreakAveragingUpstream = nDambreakAveragingUpstream + 1
+               dambreakAverigingUpstreamMapping(nDambreakAveragingUpstream) = n
             endif
          endif
-         
-         ! get the cell where the water level downstream is
+
+         ! inquire if the water level downstream has to be taken from a location or be a result of averaging
          if (network%sts%struct(istrtmp)%dambreak%algorithm == 2) then
             xla = network%sts%struct(istrtmp)%dambreak%waterLevelDownstreamLocationX
             yla = network%sts%struct(istrtmp)%dambreak%waterLevelDownstreamLocationY
-            if ((xla.ne.dmiss).and.(yla.ne.dmiss)) then               
+            if ((xla.ne.dmiss).and.(yla.ne.dmiss)) then
                call incells(xla,yla,k)
                if (k > 0) then
-                  waterLevelsLocationsDambreakDownStream(n) = k
+                  nDambreakLocationsDownstream = nDambreakLocationsDownstream + 1
+                  dambreakLocationsDownstreamMapping(nDambreakLocationsDownstream) = n
+                  dambreakLocationsDownstream(nDambreakLocationsDownstream) = k
                endif
+            else
+               nDambreakAveragingDownstream = nDambreakAveragingDownstream + 1
+               dambreakAverigingDownstreamMapping(nDambreakAveragingDownstream) = n
             endif
          endif
          
