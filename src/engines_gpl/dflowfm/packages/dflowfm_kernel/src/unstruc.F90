@@ -2470,7 +2470,7 @@ subroutine getseg1D(hpr,wu2,dz,ai,frcn,ifrctyp, wid,ar,conv,perim,jaconv)  ! cop
    !Adjust bobs for dambreak
    do n = 1, ndambreaksg
       istru = dambreaks(n)    
-      if (associated(network%sts%struct(istru)%dambreak)) then         
+      if (istru.ne.0) then         
          ! Update the bottom levels
          call adjust_bobs_on_dambreak_breach(network%sts%struct(istru)%dambreak%width, network%sts%struct(istru)%dambreak%crl,  LStartBreach(n), L1dambreaksg(n), L2dambreaksg(n))
       endif
@@ -14780,7 +14780,7 @@ subroutine update_dambreak_breach(startTime, deltaTime)
       !Compute dambreak widths
       do n = 1, ndambreaksg
          istru = dambreaks(n)    
-         if (associated(network%sts%struct(istru)%dambreak)) then
+         if (istru.ne.0) then
             if(network%sts%struct(istru)%dambreak%algorithm == 1 .or. network%sts%struct(istru)%dambreak%algorithm == 2) then
                ! Compute the breach width
                call prepareComputeDambreak(network%sts%struct(istru)%dambreak, waterLevelsDambreakUpStream(n), waterLevelsDambreakDownStream(n), normalVelocityDambreak(n), startTime, deltaTime, maximumDambreakWidths(n))

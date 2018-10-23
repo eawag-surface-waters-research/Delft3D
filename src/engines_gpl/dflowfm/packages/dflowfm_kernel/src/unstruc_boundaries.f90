@@ -2257,6 +2257,7 @@ if (ndambreak > 0) then
    
    if (allocated(dambreaks)) deallocate(dambreaks)
    allocate(dambreaks(ndambreaksg))
+   dambreaks = 0
    
    if (allocated(LStartBreach)) deallocate(LStartBreach)
    allocate(LStartBreach(ndambreaksg))
@@ -2385,6 +2386,9 @@ if (ndambreak > 0) then
       call readDambreak(network%sts%struct(istrtmp)%dambreak, str_ptr, success)
 
       if (success) then
+         ! new dambreak format
+         write(msgbuf, '(a,a,a)') 'Dambreak ''', trim(strid), ''' set to new format.'
+         call msg_flush()
          ! mapping
          dambreaks(n) = istrtmp
          ! set initial phase, width, crest level, coefficents if algorithm is 1
@@ -2437,7 +2441,9 @@ if (ndambreak > 0) then
          endif
          
       else
-         ! error in reading the structure, nothing can be done
+         ! old dambreak format
+         write(msgbuf, '(a,a,a)') 'Dambreak ''', trim(strid), ''' set to old format.'
+         call msg_flush()
          cycle
       endif
       
