@@ -1207,17 +1207,14 @@ module m_readstructures
          call prop_get_double(md_ptr, 'structure', 'ucrit', dambr%ucrit, success)
          if (.not. success) return
          
+         ! optional extra fields
          call prop_get_double(md_ptr, 'structure', 'waterLevelUpstreamLocationX', dambr%waterLevelUpstreamLocationX, success)
-         if (.not. success) return
          
          call prop_get_double(md_ptr, 'structure', 'waterLevelUpstreamLocationY', dambr%waterLevelUpstreamLocationY, success)
-         if (.not. success) return
 
          call prop_get_double(md_ptr, 'structure', 'waterLevelDownstreamLocationX', dambr%waterLevelDownstreamLocationX, success)
-         if (.not. success) return
          
          call prop_get_double(md_ptr, 'structure', 'waterLevelDownstreamLocationY', dambr%waterLevelDownstreamLocationY, success)
-         if (.not. success) return
          
       endif
       
