@@ -22,6 +22,8 @@ function print_usage_info {
     echo "       print this help message and exit"
     echo "-m, --masterfile <filename>"
     echo "       Delft3D-FLOW configuration filename, default config_d_hydro.xml"
+    echo "-w, --wavefile <wname>"
+    echo "       name of mdw file"
     echo "The following arguments are used when called by submit_dflow2d3d.sh:"
     echo "    --D3D_HOME <path>"
     echo "       path to binaries and scripts"
@@ -44,6 +46,7 @@ D3D_HOME=
 debuglevel=-1
 runscript_extraopts=
 NNODES=1
+wavefile=runwithoutwaveonlinebydefault
 
 
 ulimit -s unlimited
@@ -67,6 +70,10 @@ case $key in
     ;;
     -m|--masterfile)
     configfile="$1"
+    shift
+    ;;
+    -w|--wavefile)
+    wavefile="$1"
     shift
     ;;
     --D3D_HOME)
@@ -153,6 +160,17 @@ if [ $debuglevel -eq 0 ]; then
     echo ========================================================
 fi
 
+
+# Optionally, start D-Waves in the background
+if [ "$wavefile" != "runwithoutwaveonlinebydefault" ]; then
+    if [ ! -f $wavefile ]; then
+        echo "ERROR: Wave input file $wavefile does not exist"
+        print_usage_info
+    fi
+    echo "executing in the background:"
+    echo "$bindir/wave $wavefile 1 &"
+          $bindir/wave $wavefile 1 &
+fi
 
 if [ $NSLOTS -eq 1 ]; then
     echo "executing:"
