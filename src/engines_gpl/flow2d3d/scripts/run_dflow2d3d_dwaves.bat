@@ -88,7 +88,7 @@ goto end
 
 :usage
 echo Usage:
-echo run_dflow2d3d_dwaves.bat [--help] [config_d_hydro.xml] -w <mdw-file>
+echo "run_dflow2d3d_dwaves.bat [--help] [config_d_hydro.xml] -w <mdw-file>"
 echo     --help            : (Optional) show this usage
 echo     config_d_hydro.xml: (Optional) default: config_d_hydro.xml
 echo     -w <mdw-file>     : (Mandatory) Delft3D-WAVE input file
