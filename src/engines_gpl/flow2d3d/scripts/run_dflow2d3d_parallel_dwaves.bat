@@ -92,7 +92,7 @@ goto end
 
 :usage
 echo Usage:
-echo run_dflow2d3d_parallel_dwaves.bat [--help] [n] [config_d_hydro.xml] -w <mdw-file>
+echo "run_dflow2d3d_parallel_dwaves.bat [--help] [n] [config_d_hydro.xml] -w <mdw-file>"
 echo     --help            : (Optional) show this usage
 echo     n                 : (Optional) integer, number of partitions.
 echo                         Default value: %NUMBER_OF_PROCESSORS%
