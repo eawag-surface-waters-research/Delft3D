@@ -2,7 +2,7 @@ include $(top_srcdir)/common.am
 SUBDIRS = \
          waq_utils_c \
          waq_utils_f \
-         waq_data \
+         waq_process \
          waq_io \
          waq_plugin_wasteload \
          waq_kernel \

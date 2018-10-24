@@ -6,4 +6,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-SUBDIRS = waq_data proc_data
+
+SUBDIRS = proc_preprocess \
+          waq_process \
+          bloom

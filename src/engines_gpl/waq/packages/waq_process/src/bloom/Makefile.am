@@ -12,7 +12,7 @@ noinst_LTLIBRARIES = libbloom.la
 #Includes
 FMODULES += \
         -I$(top_builddir)/engines_gpl/waq/include \
-         -I$(top_builddir)/engines_gpl/waq/packages/waq_data/src/proc_data \
+         -I$(top_builddir)/engines_gpl/waq/packages/waq_process/src/waq_process \
          -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src
 
 #-------------------------------------------------------------------------------

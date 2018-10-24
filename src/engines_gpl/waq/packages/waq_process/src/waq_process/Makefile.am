@@ -12,7 +12,6 @@ noinst_LTLIBRARIES = libwaq_process.la
 #Includes
 FMODULES += \
      -I$(top_builddir)/engines_gpl/waq/include \
-     -I$(top_builddir)/engines_gpl/waq/packages/waq_data/src/proc_data \
      -I$(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/mod_timings \
      -I$(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/waq_utils \
      -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src
@@ -20,6 +19,8 @@ FMODULES += \
 #-------------------------------------------------------------------------------
 #Sources
 libwaq_process_la_SOURCES = \
+       data_vtrans.F90 \
+       data_3dl.F90 \
        bottom_set.f \
        get_effi.f \
        adspo4.f \
