@@ -146,6 +146,7 @@ function ncu_copy_chunking_deflate( ncidin, ncidout, varidin, varidout, ndx ) re
    integer, intent(in), optional  :: ndx      !< Number of flow nodes (internal + boundary) for output file
 
    integer                        :: ierr
+   integer, external              :: nf90_inq_var_chunking
 
    character(len=nf90_max_name)   :: name
    integer                        :: storage, ndims, shuffle, deflate, deflate_level
