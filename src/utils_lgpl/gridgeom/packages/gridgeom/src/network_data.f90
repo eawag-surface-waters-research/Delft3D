@@ -189,7 +189,10 @@ module network_data
   integer, parameter               :: I1D2DTP_1TON_LAT = 2              !< 1D2D link generation algorithm for 1-to-n mapping, for lateral ('river') links.
   integer, parameter               :: I1D2DTP_LONG     = -3             !< NOT IMPLEMENTED YET, 1D2D link generation algorithm for 1-to-1 longitudinal links.
   integer                          :: imake1d2dtype                     !< Selects which algorithm to use for 1D2D link generation (in the GUI). One of I1D2DTP_(1TO1|1TON_EMB|1TON_LAT).
-
+  
+  double precision                 :: searchRadius1D2DLateral                 !< Search radius for for lateral ('river') links. When the search radius is equalt to defaultSearchRadius1D2DLateral, the algorithm will calculate an appropriate search radius 
+  double precision, parameter      :: defaultSearchRadius1D2DLateral = 0.0d0  !< The default search radius for for lateral ('river') links.
+ 
   double precision                 :: xkmin, xkmax , ykmin, ykmax
 
 ! 1d NET BRANCHES
@@ -345,6 +348,7 @@ module network_data
    Unidx1D = 100d0                   
    makeorthocenters = 0             
    imake1d2dtype = I1D2DTP_1TO1 ! HK algorithm
+   searchRadius1D2DLateral = defaultSearchRadius1D2DLateral
    xkmin = 0
    xkmax = 0
    ykmin = 0

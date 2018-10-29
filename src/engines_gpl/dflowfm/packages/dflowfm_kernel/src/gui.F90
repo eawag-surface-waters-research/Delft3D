@@ -3145,7 +3145,7 @@
    integer :: iselect, minp
    CHARACTER*128 select(3)
 
-   integer, parameter :: NUMPAR = 20, NUMFLD = 2*NUMPAR
+   integer, parameter :: NUMPAR = 21, NUMFLD = 2*NUMPAR
    INTEGER  IX(NUMFLD),IY(NUMFLD),IS(NUMFLD),IT(NUMFLD)
    CHARACTER WRDKEY*40, OPTION(NUMPAR)*40, HELPM(NUMPAR)*60
    COMMON /HELPNOW/ WRDKEY,NLEVEL
@@ -3182,6 +3182,7 @@
    end if
    IT(19*2) = 4
    OPTION(20)= '1D2D link generation algorithm          ' ; IT(20*2)  = 2
+   OPTION(21)= 'Lateral algorithm search radius         ' ; IT(21*2)  = 6
 
 
 
@@ -3316,6 +3317,7 @@
    CALL IFORMPUTMENU(2*19, select,3,iselect)
 
    CALL IFormputinteger (2*20, imake1d2dtype)
+   call IFormputDouble  (2*21, searchRadius1D2DLateral,'(F7.3)')
 
    ! Display the form with numeric fields left justified and set the initial field to number 2
    CALL IOUTJUSTIFYNUM('L')
@@ -3387,6 +3389,7 @@
            iselect = 1
 
            CALL IFormGetinteger (2*20, imake1d2dtype)
+           call IFormGetDouble  (2*21, searchRadius1D2DLateral)
    
        ENDIF
        CALL IWinClose(1)

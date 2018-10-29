@@ -3492,7 +3492,7 @@
          !a candidate connection already exist
          else if(prevConnectedNetNode.ne.0) then
             prevDistance = dbdistance(xk(prevConnectedNetNode),yk(prevConnectedNetNode),xz(cellId),yz(cellId), jsferic, jasfer3D, dmiss)
-            currDistance = dbdistance(xk(k1),yk(k2),xz(cellId),yz(cellId), jsferic, jasfer3D, dmiss)
+            currDistance = dbdistance(xk(k1),yk(k1),xz(cellId),yz(cellId), jsferic, jasfer3D, dmiss)
             if (currDistance<prevDistance) then
                localCellmask(cellId) = k1
             endif
@@ -3504,8 +3504,8 @@
 
    !make the connections
    do cellId = 1, nump
-      newLinkIndex = -1
-      if (localCellmask(cellId).ne.0) then
+      if (localCellmask(cellId).gt.0) then
+         newLinkIndex = -1
          !check presence of oneDMask
          if (present(oneDMask)) then !again, Fortran does not have logical and two nested if statement are needed
             if(oneDMask(localCellmask(cellId))==1) then

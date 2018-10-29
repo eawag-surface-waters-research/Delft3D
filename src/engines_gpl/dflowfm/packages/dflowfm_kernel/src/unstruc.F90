@@ -41060,11 +41060,12 @@ subroutine setbobsonroofs( )      ! override bobs along pliz's
  end subroutine setbobsonroofs
 
  subroutine make1D2Dconnections()
- use network_data, only: imake1d2dtype, I1D2DTP_1TO1, I1D2DTP_1TON_EMB, I1D2DTP_1TON_LAT
+ use network_data, only: imake1d2dtype, searchRadius1D2DLateral, I1D2DTP_1TO1, I1D2DTP_1TON_EMB, I1D2DTP_1TON_LAT
  use geometry_module
  use gridoperations
  use m_samples
  use m_polygon
+ use m_sferic, only: jsferic, jasfer3D
  integer :: minp, ierr 
  character FILNAM*86 
  minp = 0
@@ -41083,9 +41084,9 @@ subroutine setbobsonroofs( )      ! override bobs along pliz's
     endif  
     call doclose(minp)
  case (I1D2DTP_1TON_EMB)
-    ! TODO: LC: add your new 1d2d call here
+    ierr = ggeo_make1D2Dembeddedlinks(jsferic, jasfer3D) 
  case (I1D2DTP_1TON_LAT)
-    ! TODO: LC: add your new 1d2d call here
+    ierr = ggeo_make1D2DRiverLinks(jsferic, jasfer3D, searchRadius1D2DLateral) 
  case default
     call QNERROR('Invalid 1D2D algorithm selected. Please check your network parameters.', '', '')
  end select
