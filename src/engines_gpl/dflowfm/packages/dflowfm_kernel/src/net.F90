@@ -33827,7 +33827,7 @@ function read_commandline() result(istat)
    use unstruc_api
    use m_makenet
    use m_sferic, only: jsferic, jasfer3D
-   use network_data, only: NUMITCOURANT
+   use network_data, only: dryptsfile, NUMITCOURANT
    use m_flowparameters, only: jalimnor
    implicit none
 
@@ -33978,7 +33978,7 @@ function read_commandline() result(istat)
                else if (trim(Skeys(ikey)) == 'outsidecell') then
                   jaoutsidecell = max(min(ivals(ikey),1),0)
                else if (trim(Skeys(ikey)) == 'drypointsfile') then
-                 md_dryptsfile = trim(svals(ikey))
+                 dryptsfile = trim(svals(ikey))
                else if (trim(Skeys(ikey)) == 'smoothiters') then
                  NUMITCOURANT = ivals(ikey)
                end if
@@ -34946,8 +34946,7 @@ subroutine pol_to_cellmask()
 end subroutine pol_to_cellmask
 
 
-!> read drypoints files and delete dry points from net geometry (netcells)
-!! Grid enclosures are handled via the jinside=-1 option.
+!> read drypoints file and delete dry points from net geometry (netcells)
 subroutine delete_drypoints_from_netgeom(dryptsfilelist, jaconfirm, jinside)
    use unstruc_messages
    use m_sferic, only: jsferic
@@ -34957,9 +34956,9 @@ subroutine delete_drypoints_from_netgeom(dryptsfilelist, jaconfirm, jinside)
    use m_samples
    implicit none
    
-   character(*), intent(inout) :: dryptsfilelist !< List of file names to process for deleting dry parts. (Supported formats: .xyz, .pol)
-   integer, intent(in)         :: jaconfirm      !< Whether (1) or not (0) to interactively prompt for inclusion of each individual file from the list.
-   integer, intent(in)         :: jinside        !< Override the inside check of polygon files. 0: use ZPL polygon (no override), 1: Always delete inside polygon, -1: always delete outside polygon.
+   character(*), intent(inout) :: dryptsfilelist
+   integer, intent(in)         :: jaconfirm
+   integer, intent(in)         :: jinside 
    character(len=128)          :: ext
                                
    character(len=255)          :: dryptsfile

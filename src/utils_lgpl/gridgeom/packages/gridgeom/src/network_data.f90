@@ -212,7 +212,10 @@ module network_data
 
 ! keep circumcenters before orthogonalization in case of quadtree meshes
   integer                          :: keepcircumcenters = 0    !< keep circumcenter (1) or not (0)
-
+  
+! for dry/illegal/cutcells (mesh generation related only)
+  character(len=255)               :: dryptsfile = ''
+     
 !  netlink permutation by setnodadm
    integer, dimension(:), allocatable :: Lperm  !< permuation of netlinks by setnodadm, dim(numL)
 !  netnode permutation by setnodadm

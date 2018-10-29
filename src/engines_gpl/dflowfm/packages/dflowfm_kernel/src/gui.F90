@@ -3174,10 +3174,10 @@
    OPTION(17)= 'snap-to-landbdy tolerance, inner network' ; IT(17*2)  = 6
    OPTION(18)= 'max nr of faces allowed in removesmallfl' ; IT(18*2)  = 2
 !   OPTION(19)= 'dry/illegal/cutcells file (*.pol, *.lst)' ; IT(19*2)  = 4
-   if ( len_trim(md_dryptsfile).eq.0 ) then
+   if ( len_trim(dryptsfile).eq.0 ) then
       OPTION(19) = 'DRY CELL FILE (none)'
    else
-      OPTION(19) = 'DRY CELL FILE (' // trim(md_dryptsfile(1:min(len_trim(md_dryptsfile),25))) // ')'
+      OPTION(19) = 'DRY CELL FILE (' // trim(dryptsfile(1:min(len_trim(dryptsfile),25))) // ')'
    end if
    IT(19*2) = 4
 
@@ -3304,7 +3304,7 @@
    CALL IFormputDouble  (2*17, DCLOSE_whole         ,'(F7.3)')
    CALL IFormputinteger (2*18, maxfaceallow)
    
-   CALL IFORMPUTSTRING  (2*19, md_dryptsfile)
+   CALL IFORMPUTSTRING  (2*19, dryptsfile)
    iselect=1
    select(1) = 'use'
    select(2) = 'new'
@@ -3370,13 +3370,13 @@
            CALL IFormGetDouble  (2*17, DCLOSE_WHOLE)
            CALL IFormGetinteger (2*18, maxfaceallow)
            
-           CALL IFORMGETSTRING(2*19, md_dryptsfile)
+           CALL IFORMGETSTRING(2*19, dryptsfile)
            CALL IFORMGETMENU(2*19, iselect)
            if ( iselect.eq.2 ) then
               minp = 2  ! select file only
-              call filemenu(minp,md_dryptsfile)
+              call filemenu(minp,dryptsfile)
            else if ( iselect.eq.3 ) then
-              md_dryptsfile = ''
+              dryptsfile = ''
            end if
            iselect = 1
    
@@ -9877,6 +9877,7 @@ subroutine change_samples_refine_param(jacancelled)
    use unstruc_display
    use unstruc_version_module, only : unstruc_company, unstruc_program
    use m_samples_refine
+   use network_data, only: dryptsfile
 
    implicit none
    integer, intent(out) :: jacancelled !< Whether or not (1/0) user has pressed 'Esc' in parameter screen.
@@ -10012,6 +10013,7 @@ subroutine change_samples_refine_param(jacancelled)
    CALL IFORMPUTDOUBLE(2*11, hmin,           '(F12.3)')
    CALL IFORMPUTINTEGER(2*12, jadirectional)
    CALL IFORMPUTINTEGER(2*13, jaoutsidecell)
+!   CALL IFORMPUTSTRING(2*15, dryptsfile)
 
    ! Display the form with numeric fields left justified and set the initial field to number 2
    CALL IOUTJUSTIFYNUM('L')

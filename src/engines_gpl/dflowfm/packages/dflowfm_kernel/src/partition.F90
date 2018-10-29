@@ -5339,6 +5339,7 @@ end subroutine partition_make_globalnumbers
       use m_partitioninfo
       use MessageHandling
       use gridoperations
+      use network_data, only: dryptsfile
       
       implicit none
    
