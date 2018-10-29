@@ -984,6 +984,7 @@ namespace gridgeom.Tests
 
         }
 
+		// The network of this test can be seen in packages\test_data\1dnetworkMake1D2DRiverLinksTest.png
         [Test]
         [TestCase("default")]
         [NUnit.Framework.Category("make1D2DRiverLinks")]
