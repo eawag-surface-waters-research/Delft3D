@@ -8435,7 +8435,7 @@ end subroutine checknetwork
       call realloc(pdxL, numnew, keepExisting=.true., fill=0)
       
 !     shift pointers and data
-      iL = idxL(numL+1)-1
+      iL = idxL(numL+1)
       do L=numL,1,-1
          iR = iL-1
          iL = idxL(L)
@@ -36042,6 +36042,7 @@ ilp:do isplit=1,MAXSPLIT
    
    call delete_drypoints_from_netgeom(md_dryptsfile, 0, 0)
    call delete_drypoints_from_netgeom(md_encfile, 0, -1)
+!   call delete_drypoints_from_netgeom(md_cutcelllist, 0, 0)
    
    return
  end subroutine delete_dry_points_and_areas
