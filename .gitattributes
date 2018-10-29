@@ -11867,6 +11867,7 @@ src/tools_gpl/dfmoutput/Makefile.am -text
 src/tools_gpl/dfmoutput/dfmoutput.vfproj -text
 src/tools_gpl/dfmoutput/res/version_number.ini -text
 src/tools_gpl/dfmoutput/src/Makefile.am -text
+src/tools_gpl/dfmoutput/src/dfm_gen_filter.f90 -text
 src/tools_gpl/dfmoutput/src/dfm_merge.F90 -text
 src/tools_gpl/dfmoutput/src/dfm_params.F90 -text
 src/tools_gpl/dfmoutput/src/dfmoutput_main.F90 -text
