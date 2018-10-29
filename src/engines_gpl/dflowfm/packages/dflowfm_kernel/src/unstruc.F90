@@ -41060,6 +41060,7 @@ subroutine setbobsonroofs( )      ! override bobs along pliz's
  end subroutine setbobsonroofs
 
  subroutine make1D2Dconnections()
+ use network_data, only: imake1d2dtype, I1D2DTP_1TO1, I1D2DTP_1TON_EMB, I1D2DTP_1TON_LAT
  use geometry_module
  use gridoperations
  use m_samples
@@ -41068,17 +41069,27 @@ subroutine setbobsonroofs( )      ! override bobs along pliz's
  character FILNAM*86 
  minp = 0
  Filnam = '*.pliz, *.xyz'
- CALL FILEMENU(minp,FILNAM)
- if (minp == -1) then  
-    ierr = make1D2Dinternalnetlinks()
- else if (index(filnam, '.pliz' ) > 0)  then
-    call reapol (minp, 0)
-    call make1D2Droofgutterpipes()
- else if (index(filnam, '.xyz'  ) > 0)  then   
-    call reasam(minp, 0)
-    call make1D2Dstreetinletpipes()
- endif  
- call doclose(minp)
+ select case (imake1d2dtype)
+ case (I1D2DTP_1TO1) ! 0: HK
+    CALL FILEMENU(minp,FILNAM)
+    if (minp == -1) then  
+       ierr = make1D2Dinternalnetlinks()
+    else if (index(filnam, '.pliz' ) > 0)  then
+       call reapol (minp, 0)
+       call make1D2Droofgutterpipes()
+    else if (index(filnam, '.xyz'  ) > 0)  then   
+       call reasam(minp, 0)
+       call make1D2Dstreetinletpipes()
+    endif  
+    call doclose(minp)
+ case (I1D2DTP_1TON_EMB)
+    ! TODO: LC: add your new 1d2d call here
+ case (I1D2DTP_1TON_LAT)
+    ! TODO: LC: add your new 1d2d call here
+ case default
+    call QNERROR('Invalid 1D2D algorithm selected. Please check your network parameters.', '', '')
+ end select
+ 
  end subroutine make1D2Dconnections
    
 subroutine switchiadvnearlink(L)
