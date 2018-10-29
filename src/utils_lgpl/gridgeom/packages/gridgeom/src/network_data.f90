@@ -184,6 +184,12 @@ module network_data
 
   integer                          :: makeorthocenters = 0              !< shift from circumcentre to orthocentre (acts as a maxiter)
 
+  integer, parameter               :: I1D2DTP_1TO1     = 0              !< 1D2D link generation algorithm for 1-to-1 mapping HK algorithm, depending on filetype.
+  integer, parameter               :: I1D2DTP_1TON_EMB = 1              !< 1D2D link generation algorithm for 1-to-1 mapping, for embedded ('rural') links.
+  integer, parameter               :: I1D2DTP_1TON_LAT = 2              !< 1D2D link generation algorithm for 1-to-n mapping, for lateral ('river') links.
+  integer, parameter               :: I1D2DTP_LONG     = -3             !< NOT IMPLEMENTED YET, 1D2D link generation algorithm for 1-to-1 longitudinal links.
+  integer                          :: imake1d2dtype                     !< Selects which algorithm to use for 1D2D link generation (in the GUI). One of I1D2DTP_(1TO1|1TON_EMB|1TON_LAT).
+
   double precision                 :: xkmin, xkmax , ykmin, ykmax
 
 ! 1d NET BRANCHES
@@ -338,6 +344,7 @@ module network_data
    CONNECT1DEND = 200d0              
    Unidx1D = 100d0                   
    makeorthocenters = 0             
+   imake1d2dtype = I1D2DTP_1TO1 ! HK algorithm
    xkmin = 0
    xkmax = 0
    ykmin = 0

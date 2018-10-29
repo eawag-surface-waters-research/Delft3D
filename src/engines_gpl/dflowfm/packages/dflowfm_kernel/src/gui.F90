@@ -3117,7 +3117,7 @@
 
 
    SUBROUTINE changenetworkPARAMETERS()
-   use m_netw
+   use network_data
    use unstruc_display
    use m_ec_triangle
    use m_missing
@@ -3145,7 +3145,7 @@
    integer :: iselect, minp
    CHARACTER*128 select(3)
 
-   integer, parameter :: NUMPAR = 19, NUMFLD = 2*NUMPAR
+   integer, parameter :: NUMPAR = 20, NUMFLD = 2*NUMPAR
    INTEGER  IX(NUMFLD),IY(NUMFLD),IS(NUMFLD),IT(NUMFLD)
    CHARACTER WRDKEY*40, OPTION(NUMPAR)*40, HELPM(NUMPAR)*60
    COMMON /HELPNOW/ WRDKEY,NLEVEL
@@ -3181,6 +3181,7 @@
       OPTION(19) = 'DRY CELL FILE (' // trim(md_dryptsfile(1:min(len_trim(md_dryptsfile),25))) // ')'
    end if
    IT(19*2) = 4
+   OPTION(20)= '1D2D link generation algorithm          ' ; IT(20*2)  = 2
 
 
 
@@ -3227,6 +3228,8 @@
    'max nr of faces allowed in removesmallflowlinks             '
    HELPM (19)= &
    'choose                                                      '
+   WRITE(HELPM (20), '(I0,A,I0,A,I0,A)') &
+   I1D2DTP_1TO1, ': default (1-to-1), ', I1D2DTP_1TON_EMB, ': embedded 1-to-n, ', I1D2DTP_1TON_LAT, ': lateral 1-to-n.'
 
 
    CALL SAVEKEYS()
@@ -3312,6 +3315,8 @@
    select(3) = 'none'
    CALL IFORMPUTMENU(2*19, select,3,iselect)
 
+   CALL IFormputinteger (2*20, imake1d2dtype)
+
    ! Display the form with numeric fields left justified and set the initial field to number 2
    CALL IOUTJUSTIFYNUM('L')
    IFEXIT = 2
@@ -3380,6 +3385,8 @@
               md_dryptsfile = ''
            end if
            iselect = 1
+
+           CALL IFormGetinteger (2*20, imake1d2dtype)
    
        ENDIF
        CALL IWinClose(1)
