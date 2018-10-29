@@ -3297,7 +3297,7 @@
    integer                       :: k, kk, k1, k2, k3, k4, k5, k6, ncellsinSearchRadius, numberCellNetlinks, isCrossing, newPointIndex, newLinkIndex
    integer                       :: l, cellNetLink, cellId, kn3ty, numnetcells
    double precision              :: searchRadiusSquared, ldistance, rdistance, maxdistance, sl, sm, xcr, ycr, crp
-   integer, allocatable          :: localCellmask(:)
+   integer, allocatable          :: localCellmask(:), isInCell(:)
    
    type(kdtree_instance) :: treeinst
 
@@ -3314,13 +3314,13 @@
       return
    endif
 
-   allocate(localCellmask(nump))
+   allocate(localCellmask(nump), isInCell(numk))
    localCellmask = 0
+   isInCell = -1
    do l = 1, numl1d
       k1  = kn(1,l); k2  = kn(2,l); k3 = kn(3,l)
       !get the left 1d mesh point
       call make_queryvector_kdtree(treeinst, xk(k1), yk(k1), jsferic)
-
       !compute the search radius
       ldistance = 0d0
       if (l>=2) then
@@ -3329,6 +3329,15 @@
       endif
       rdistance = dbdistance(xk(k1),yk(k1),xk(k2),yk(k2), jsferic, jasfer3D, dmiss)
       maxdistance = max(ldistance, rdistance)
+      !check if k1 and k2 are in cell
+      if(isInCell(k1).eq.-1) then
+         call incells(xk(k1),yk(k1), cellId)
+         isInCell(k1) = cellId
+      endif
+      if(isInCell(k2).eq.-1) then
+         call incells(xk(k2),yk(k2), cellId)      
+         isInCell(k2) = cellId
+      endif
       !1.1d0: safety
       searchRadiusSquared = 1.1d0*maxdistance**2
       !count number of cells in the search area
@@ -3344,6 +3353,7 @@
       do k = 1, nCellsInSearchRadius
          !check if one of the cell net link crosses the current 1d link
          cellId= treeinst%results(k)%idx
+         if (cellId.le.0) cycle
          !this cell has been already explored or is already connected 
          if (localCellmask(cellId).ne.0) cycle
          !check if the cell is already connected
@@ -3359,8 +3369,8 @@
             if (isCrossing == 1) then
                ldistance = dbdistance(xk(k1), yk(k1), xz(cellId), yz(cellId), jsferic, jasfer3D, dmiss)
                rdistance = dbdistance(xk(k2), yk(k2), xz(cellId), yz(cellId), jsferic, jasfer3D, dmiss)     
-               if (ldistance<=rdistance) then
-                  if (present(oneDMask) .and. size(oneDMask)>0) then !again, Fortran does not have logical and two nested if statement are needed
+               if (ldistance<=rdistance .and. isInCell(k1).ge.1) then
+                  if (present(oneDMask)) then !again, Fortran does not have logical and two nested if statement are needed
                      if(oneDMask(k1)==1) then
                         call setnewpoint(xz(cellId),yz(cellId),zk(cellId), newPointIndex)
                         call connectdbn(newPointIndex, k1, newLinkIndex)
@@ -3369,8 +3379,8 @@
                      call setnewpoint(xz(cellId),yz(cellId),zk(cellId), newPointIndex)
                      call connectdbn(newPointIndex, k1, newLinkIndex)
                   endif
-               else
-                  if (present(oneDMask) .and. size(oneDMask)>0) then !again, Fortran does not have logical and two nested if statement are needed
+               else if (ldistance > rdistance .and. isInCell(k2).ge.1) then
+                  if (present(oneDMask)) then !again, Fortran does not have logical and two nested if statement are needed
                      if(oneDMask(k2)==1) then
                         call setnewpoint(xz(cellId),yz(cellId),zk(cellId), newPointIndex)
                         call connectdbn(newPointIndex, k2, newLinkIndex)
@@ -3385,8 +3395,6 @@
                   !cell is connected, set localCellmask mask and end cycle
                   localCellmask(cellId) = 2
                endif
-            else
-               localCellmask(cellId) = 3
             endif
             !loop over numberCellNetlinks
          enddo
