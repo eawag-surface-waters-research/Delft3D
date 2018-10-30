@@ -47,6 +47,7 @@ use dfmoutput_version_module
 use dfm_params
 use dfm_merge
 use m_alloc
+use precision, only : hp
 use dfm_max25_getdata
 use dfm_gen_filter
 !-----------------------------------------------------------------------------------------------------------------------------------
@@ -62,7 +63,7 @@ character(len=32        )              :: filter_length  !< filter lengths given
 character(len=32        )              :: var_name       !< variable name given for max25
 character(len=MAXNAMELEN)              :: rec
 character(len=12) :: coeff(3)
-real    :: rcoeff(3)
+real(kind=hp)     :: rcoeff(3)
 integer :: ninfiles
 integer :: i, fp
 logical :: exist

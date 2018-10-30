@@ -49,12 +49,11 @@ subroutine gen_filter(filename, filename_out, field_name, intval, coefimpl, coef
    character(len=*) , intent(in) :: filename      !< input filename (NetCDF)
    character(len=*) , intent(in) :: field_name    !< input field name (e.g. 'waterlevel')
    character(len=*) , intent(in) :: filename_out  !< output filename (ascii)
-   real, intent(in) :: coefimpl, coefexpl, intval
+   real(kind=hp), intent(in) :: coefimpl, coefexpl, intval
 
    integer :: ierr, i, nStations, ntimes, iunout
-   real, allocatable :: hisdata(:,:), ySmooth(:), y(:)
+   real(kind=hp), allocatable :: hisdata(:,:), ySmooth(:), y(:)
    character(len=64), allocatable :: stations(:)
-   integer, allocatable :: stats_index(:), list(:)
    logical, parameter :: debug_test = .false.
 
                            ierr = read_meta_data(filename, nStations)
@@ -79,60 +78,57 @@ subroutine gen_filter(filename, filename_out, field_name, intval, coefimpl, coef
       allocate(ySmooth(nTimes))
       do i = 1, nStations
          call fourthOrderMono(hisdata(:,i), intval, coefimpl, coefexpl, ySmooth)
-        !write(iunout,'(f8.3,x,a)') maxval(ySmooth), trim(stations(i))
-        !write(iunout,*) maxval(ySmooth), ' ', trim(stations(i))
-         write(iunout,*) stations(i), maxval(ySmooth)
-         write(*,*) stations(i), maxval(ySmooth)
+         write(iunout,'(f8.3,x,a)') maxval(ySmooth), trim(stations(i))
       enddo
       close(iunout)
    endif
 end subroutine gen_filter
 
 subroutine fourthOrderMono(y, intval, coefimpl, coefexpl, ySmooth)
-   real, intent(in) :: y(:), coefimpl, coefexpl, intval
-   real, intent(out) :: ySmooth(:)
+   real(kind=hp), intent(in) :: y(:), coefimpl, coefexpl, intval
+   real(kind=hp), intent(out) :: ySmooth(:)
 
-   integer :: ndim,i,N,ii,NN
-   real, parameter :: pi = 4.0 * atan(1.0)
-   real :: ToDt, c4expl, c4impl, ca4expl, ca4impl, ddd
-   real, allocatable :: v(:), M(:,:), termN(:), ySmooth2(:)
+   integer :: ndim, i, N, ii, NN
+   real(kind=hp), parameter :: pi = 4.0_hp * atan(1.0_hp)
+   real(kind=hp) :: ToDt, c4expl, c4impl, ca4expl, ca4impl, ddd
+   real(kind=hp), allocatable :: v(:), M(:,:), termN(:), ySmooth2(:)
    integer, allocatable :: indx(:), interval(:)
 
    ndim = size(y)
    allocate(v(ndim), indx(ndim))
    allocate(M(ndim,ndim))
-   M = 0.0
+   M = 0.0_hp
 
    N = nint(1.5 * intval)
-   ToDt=intval/(2.0*pi)
-   ToDt=ToDt*sqrt(sqrt(2.0)-1.0)
+   ToDt=intval/(2.0_hp*pi)
+   ToDt=ToDt*sqrt(sqrt(2.0_hp)-1.0_hp)
 
-   c4expl=2.0*coefexpl
-   c4impl=2.0*(coefimpl-ToDt**2)
+   c4expl=2.0_hp*coefexpl
+   c4impl=2.0_hp*(coefimpl-ToDt**2)
    ca4expl=coefexpl**2
-   ca4impl=coefimpl*(coefimpl - 2.0*ToDt**2)
+   ca4impl=coefimpl*(coefimpl - 2.0_hp*ToDt**2)
 
-   V(1)=1.0-2.0*c4expl+6.0*ca4expl
-   V(2)=c4expl-4.0*ca4expl
+   V(1)=1.0_hp-2.0_hp*c4expl+6.0_hp*ca4expl
+   V(2)=c4expl-4.0_hp*ca4expl
    V(3)=ca4expl
 
    ! symmetry about M41,1 -->M41,0 added to M41,2 and M41,-1 added to M41,3
-   M(1,1) = 1.0-2.0*c4impl + 6.0*(ca4impl+ToDt**4)
-   M(1,2) = 2.0*c4impl -8.0*(ca4impl+ToDt**4)
-   M(1,3) = 2.0*(ca4impl + ToDt**4)
+   M(1,1) = 1.0_hp-2.0_hp*c4impl + 6.0_hp*(ca4impl+ToDt**4)
+   M(1,2) = 2.0_hp*c4impl -8.0_hp*(ca4impl+ToDt**4)
+   M(1,3) = 2.0_hp*(ca4impl + ToDt**4)
 
    ! symmetry about M42,1 -->M42,0 added to M4,2
-   M(2,1) = c4impl-4.0*(ca4impl+ToDt**4)
-   M(2,2) = 1.0-2.0*c4impl+7.0*(ca4impl+ToDt**4)
-   M(2,3) = c4impl-4.0*(ca4impl+ToDt**4)
+   M(2,1) = c4impl-4.0_hp*(ca4impl+ToDt**4)
+   M(2,2) = 1.0_hp-2.0_hp*c4impl+7.0*(ca4impl+ToDt**4)
+   M(2,3) = c4impl-4.0_hp*(ca4impl+ToDt**4)
    M(2,4) = ca4impl + ToDt**4
 
    do i=3, ndim-2
         ! inner discretization with two 2nd-order diffusive fluxes and two 4th order diffusive fluxes
         M(i,i-2)=ca4impl+ToDt**4
-        M(i,i-1)=c4impl-4.0*(ca4impl+ToDt**4)
-        M(i,i)=1.0-2.0*c4impl+6.0*(ca4impl+ToDt**4)
-        M(i,i+1)=c4impl-4*(ca4impl+ToDt**4)
+        M(i,i-1)=c4impl-4.0_hp*(ca4impl+ToDt**4)
+        M(i,i)=1.0_hp-2.0_hp*c4impl+6.0_hp*(ca4impl+ToDt**4)
+        M(i,i+1)=c4impl-4.0_hp*(ca4impl+ToDt**4)
         M(i,i+2)=ca4impl+ToDt**4
    end do
 
@@ -141,13 +137,13 @@ subroutine fourthOrderMono(y, intval, coefimpl, coefexpl, ySmooth)
    ! can still be applied)
    M(ndim-1,ndim-3) = ca4impl+ToDt**4
    M(ndim-1,ndim-2) = c4impl-3.0*(ca4impl+ToDt**4)
-   M(ndim-1,ndim-1) = 1.0-2.0*c4impl+3.0*(ca4impl+ToDt**4)
+   M(ndim-1,ndim-1) = 1.0_hp-2.0_hp*c4impl+3.0*(ca4impl+ToDt**4)
    M(ndim-1,ndim)   = c4impl-(ca4impl+ToDt**4)
 
    ! boundary procedure: apply no 4th order diffusive flux and only one 2nd
    ! order diffusive flux, since both cannot be applied anymore
    M(ndim,ndim-1) = c4impl
-   M(ndim,ndim)   = 1.0-c4impl
+   M(ndim,ndim)   = 1.0_hp-c4impl
 
    call ludcmp(M,ndim,ndim,indx,ddd)
    call lubksb(M,ndim,ndim,indx,V)
@@ -179,9 +175,9 @@ subroutine fourthOrderMono(y, intval, coefimpl, coefexpl, ySmooth)
    do i = 1, ndim
       ii = i-(N-1)
       if (i < N .or. ii > size(interval)) then
-          ySmooth(i) = 0.0;
+          ySmooth(i) = 0.0_hp
       else
-          ySmooth(i) = ySmooth2(ii);
+          ySmooth(i) = ySmooth2(ii)
       end if
    enddo
 
@@ -189,26 +185,26 @@ end subroutine fourthOrderMono
 
 !! from http://www.me.udel.edu/meeg342/LU.f
    subroutine ludcmp(a, n, np, indx, d)
-   integer, intent(in) :: n, np
+   integer, intent(in)  :: n, np
    integer, intent(out) :: indx(n)
-   real, intent(inout) :: a(np, np)
-   real, intent(out) :: d
+   real(kind=hp), intent(inout) :: a(np, np)
+   real(kind=hp), intent(out) :: d
 
-   real, parameter :: Tiny=1.0e-20
-   integer :: i,imax,j,k
-   real :: aamax, dum, sum, vv(np)
+   real(kind=hp), parameter :: Tiny=1.0d-100
+   integer                  :: i, imax, j, k
+   real(kind=hp)            :: aamax, dum, sum, vv(np)
 
-   d=1.0
+   d=1.0_hp
    do i=1,n
-      aamax=0.0
+      aamax=0.0_hp
       do j=1,n
-         if(abs(a(i,j)).gt.aamax) aamax=abs(a(i,j))
+         if(abs(a(i,j)) > aamax) aamax=abs(a(i,j))
       enddo
       if(aamax == 0) then
          write(*,*) 'singular matrix in ludcmp'
          return
       endif
-      vv(i)=1./aamax
+      vv(i)=1.0_hp/aamax
    enddo
 
    do j=1,n
@@ -219,7 +215,7 @@ end subroutine fourthOrderMono
          enddo
          a(i,j)=sum
       enddo
-      aamax=0.0
+      aamax=0.0_hp
       do i=j,n
          sum=a(i,j)
          do k=1,j-1
@@ -242,9 +238,9 @@ end subroutine fourthOrderMono
          vv(imax)=vv(j)
       endif
       indx(j)=imax
-      if(a(j,j) == 0.0) a(j,j)=tiny
+      if(a(j,j) == 0.0_hp) a(j,j)=tiny
       if(j /= n)then
-         dum=1.0/a(j,j)
+         dum=1.0_hp/a(j,j)
          do i=j+1,n
             a(i,j)=a(i,j)*dum
          enddo
@@ -255,11 +251,11 @@ end subroutine fourthOrderMono
 
    subroutine lubksb(a, n, np, indx, b)
    integer, intent(in) :: n, np, indx(n)
-   real, intent(in) :: a(np, np)
-   real, intent(inout) :: b(n)
+   real(kind=hp), intent(in) :: a(np, np)
+   real(kind=hp), intent(inout) :: b(n)
 
    integer :: i, ii, j, ll
-   real :: sum
+   real(kind=hp) :: sum
 
    ii=0
    do i=1,n
@@ -270,7 +266,7 @@ end subroutine fourthOrderMono
          do j=ii,i-1
             sum=sum-a(i,j)*b(j)
          enddo
-      else if(sum /= 0.0)then
+      else if(sum /= 0.0_hp)then
          ii=i
       endif
       b(i)=sum
