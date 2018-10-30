@@ -43,18 +43,19 @@ module dfm_gen_filter
 
    contains
 
-!> main routine to write max25 output to file
-subroutine gen_filter(filename, filename_out, field_name, minmaxlst)
+!> main routine to write maximum values based on a generic filter to file
+subroutine gen_filter(filename, filename_out, field_name, intval, coefimpl, coefexpl)
    implicit none
    character(len=*) , intent(in) :: filename      !< input filename (NetCDF)
    character(len=*) , intent(in) :: field_name    !< input field name (e.g. 'waterlevel')
    character(len=*) , intent(in) :: filename_out  !< output filename (ascii)
-   character(len=*),  intent(in) :: minmaxlst     !< list with filter lengths (e.g. '13,25')
+   real, intent(in) :: coefimpl, coefexpl, intval
 
-   integer :: ierr, i, nStations, ntimes
+   integer :: ierr, i, nStations, ntimes, iunout
    real, allocatable :: hisdata(:,:), ySmooth(:), y(:)
    character(len=64), allocatable :: stations(:)
    integer, allocatable :: stats_index(:), list(:)
+   logical, parameter :: debug_test = .false.
 
                            ierr = read_meta_data(filename, nStations)
    if (ierr == nf90_noerr) ierr = read_station_names(stations, 'station_name')
@@ -62,20 +63,28 @@ subroutine gen_filter(filename, filename_out, field_name, minmaxlst)
    if (ierr == nf90_noerr) ierr = close_nc_his_file()
 
    ! small test
-   ntimes = 20
-   allocate(y(ntimes), ysmooth(ntimes))
-   do i = 1, ntimes
-      y(i) = real(i, hp) + 0.9_hp * sin(3.0_hp * real(i, hp))
-   enddo
-   call fourthOrderMono(y, 4.0, 0.3, 0.3, ySmooth)
-   deallocate(y, ysmooth)
+   if (debug_test) then
+      ntimes = 20
+      allocate(y(ntimes), ysmooth(ntimes))
+      do i = 1, ntimes
+         y(i) = real(i, hp) + 0.9_hp * sin(3.0_hp * real(i, hp))
+      enddo
+      call fourthOrderMono(y, intval, coefimpl, coefexpl, ySmooth)
+      deallocate(y, ysmooth)
+   endif
 
    if (ierr == nf90_noerr) then
+      open (newunit=iunout, file=filename_out)
       ntimes = size(hisdata,1)
       allocate(ySmooth(nTimes))
       do i = 1, nStations
-         call fourthOrderMono(hisdata(:,i), 10.0, 0.3, 0.3, ySmooth)
+         call fourthOrderMono(hisdata(:,i), intval, coefimpl, coefexpl, ySmooth)
+        !write(iunout,'(f8.3,x,a)') maxval(ySmooth), trim(stations(i))
+        !write(iunout,*) maxval(ySmooth), ' ', trim(stations(i))
+         write(iunout,*) stations(i), maxval(ySmooth)
+         write(*,*) stations(i), maxval(ySmooth)
       enddo
+      close(iunout)
    endif
 end subroutine gen_filter
 
