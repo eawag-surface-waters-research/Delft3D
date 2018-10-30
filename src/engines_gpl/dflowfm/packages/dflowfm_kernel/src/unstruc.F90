@@ -30363,11 +30363,13 @@ subroutine setbedlevelfromnetfile()
                cycle
             end if
             
-            do k = 1,ndx
-                if (zs(k) == bl_fillvalue) then 
-                    zs(k) = dmiss
-                endif
-            enddo
+            if (bl_fillvalue .ne. dmiss) then
+               do k = 1,ndx
+                   if (zs(k) == bl_fillvalue) then 
+                       zs(k) = dmiss
+                   endif
+               enddo
+            endif
             
             ! NOTE: associate cell bl's from file with our model's flowgeom cells via nearest neighbour matching.
             NS = nflownode

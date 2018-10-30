@@ -9312,7 +9312,7 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
    integer :: im, nmesh, idim, i, iv, L, numk_last, numl_last
    integer :: ncid, id_netnodez, id_netlinktype
    integer, allocatable :: kn12(:,:), kn3(:) ! Placeholder arrays for the edge_nodes and edge_types
-   double precision :: convversion
+   double precision :: convversion, zk_fillvalue
    type(t_ug_meshgeom) :: meshgeom
    
    logical           :: dflowfm_1d
@@ -9528,8 +9528,16 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
 
       if (ierr == nf90_noerr) then
          ierr = nf90_get_var(ncid, id_netnodez, ZK(numk_last+1:numk_last+meshgeom%numnode))
-         where (ZK(numk_last+1:numk_last+meshgeom%numnode) == NF90_FILL_DOUBLE) ZK(numk_last+1:numk_last+meshgeom%numnode) = dmiss
-         ! call check_error(ierr, 'z values')
+         call check_error(ierr, 'z values')
+         
+         ierr = nf90_get_att(ncid, id_netnodez, '_FillValue', zk_fillvalue)
+         if (ierr == ionc_noerr) then
+            if (zk_fillvalue .ne. dmiss) then
+               where (ZK(numk_last+1:numk_last+meshgeom%numnode) == zk_fillvalue) ZK(numk_last+1:numk_last+meshgeom%numnode) = dmiss
+            endif
+         else
+            ierr = ionc_noerr
+         endif
       else
          ZK(numk_last+1:numk_last+meshgeom%numnode) = dmiss
       end if
@@ -9667,6 +9675,7 @@ subroutine unc_read_net(filename, numk_keep, numl_keep, numk_read, numl_read, ie
                id_crsvar
 
     integer :: ja, L
+    double precision :: zk_fillvalue
 
     call readyy('Reading net data',0d0)
 
@@ -9748,9 +9757,16 @@ subroutine unc_read_net(filename, numk_keep, numl_keep, numk_read, numl_read, ie
     ierr = nf90_inq_varid(inetfile, 'NetNode_z', id_netnodez)
     if (ierr == nf90_noerr) then
         ierr = nf90_get_var(inetfile, id_netnodez,    ZK(numk_keep+1:numk_keep+numk_read))
-        where (ZK(numk_keep+1:numk_keep+numk_read) == NF90_FILL_DOUBLE) ZK(numk_keep+1:numk_keep+numk_read) = dmiss
-
         call check_error(ierr, 'z values')
+        
+        ierr = nf90_get_att(inetfile, id_netnodez, '_FillValue', zk_fillvalue)
+        if (ierr == nf90_noerr) then
+           if (zk_fillvalue .ne. dmiss) then
+              where (ZK(numk_keep+1:numk_keep+numk_read) == zk_fillvalue) ZK(numk_keep+1:numk_keep+numk_read) = dmiss
+           endif
+        else
+           ierr = nf90_noerr
+        endif
     else
         ZK(numk_keep+1:numk_keep+numk_read) = dmiss
     end if
