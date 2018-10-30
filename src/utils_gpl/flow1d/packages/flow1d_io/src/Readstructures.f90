@@ -1172,59 +1172,61 @@ module m_readstructures
       type(t_dambreak), pointer, intent(inout) :: dambr      
       type(tree_data), pointer, intent(in)     :: md_ptr
       logical, intent(inout)                   :: success
+      
+      logical :: localsuccess
 
       allocate(dambr)
 
-      call prop_get_double(md_ptr, 'structure', 'startLocationX',  dambr%startLocationX, success)
+      call prop_get_double(md_ptr, 'Structure', 'StartLocationX',  dambr%startLocationX, success)
       if (.not. success) return
 
-      call prop_get_double(md_ptr, 'structure', 'startLocationY',  dambr%startLocationY, success)
+      call prop_get_double(md_ptr, 'Structure', 'StartLocationY',  dambr%startLocationY, success)
       if (.not. success) return
 
-      call prop_get_integer(md_ptr, 'structure', 'algorithm', dambr%algorithm, success)
+      call prop_get_integer(md_ptr, 'Structure', 'Algorithm', dambr%algorithm, success)
       if (.not. success) return
 
-      call prop_get_double(md_ptr, 'structure', 'crestLevelIni', dambr%crestLevelIni, success)
+      call prop_get_double(md_ptr, 'Structure', 'CrestLevelIni', dambr%crestLevelIni, success)
       if (.not. success) return
          
       if (dambr%algorithm == 2) then
          
-         call prop_get_double(md_ptr, 'structure', 'breachWidthIni', dambr%breachWidthIni, success)
+         call prop_get_double(md_ptr, 'Structure', 'BreachWidthIni', dambr%breachWidthIni, success)
          if (.not. success) return
 
-         call prop_get_double(md_ptr, 'structure', 'crestLevelMin', dambr%crestLevelMin, success)
+         call prop_get_double(md_ptr, 'Structure', 'CrestLevelMin', dambr%crestLevelMin, success)
          if (.not. success) return
 
-         call prop_get_double(md_ptr, 'structure', 'timeToBreachToMaximumDepth', dambr%timeToBreachToMaximumDepth, success)
+         call prop_get_double(md_ptr, 'Structure', 'TimeToBreachToMaximumDepth', dambr%timeToBreachToMaximumDepth, success)
          if (.not. success) return
 
-         call prop_get_double(md_ptr, 'structure', 'f1', dambr%f1, success)
+         call prop_get_double(md_ptr, 'Structure', 'F1', dambr%f1, success)
          if (.not. success) return
 
-         call prop_get_double(md_ptr, 'structure', 'f2', dambr%f2, success)
+         call prop_get_double(md_ptr, 'Structure', 'F2', dambr%f2, success)
          if (.not. success) return
 
-         call prop_get_double(md_ptr, 'structure', 'ucrit', dambr%ucrit, success)
+         call prop_get_double(md_ptr, 'Structure', 'Ucrit', dambr%ucrit, success)
          if (.not. success) return
          
          ! optional extra fields
-         call prop_get_double(md_ptr, 'structure', 'waterLevelUpstreamLocationX', dambr%waterLevelUpstreamLocationX, success)
+         call prop_get_double(md_ptr, 'Structure', 'WaterLevelUpstreamLocationX', dambr%waterLevelUpstreamLocationX, localsuccess)
          
-         call prop_get_double(md_ptr, 'structure', 'waterLevelUpstreamLocationY', dambr%waterLevelUpstreamLocationY, success)
+         call prop_get_double(md_ptr, 'Structure', 'WaterLevelUpstreamLocationY', dambr%waterLevelUpstreamLocationY, localsuccess)
 
-         call prop_get_double(md_ptr, 'structure', 'waterLevelDownstreamLocationX', dambr%waterLevelDownstreamLocationX, success)
+         call prop_get_double(md_ptr, 'Structure', 'WaterLevelDownstreamLocationX', dambr%waterLevelDownstreamLocationX, localsuccess)
          
-         call prop_get_double(md_ptr, 'structure', 'waterLevelDownstreamLocationY', dambr%waterLevelDownstreamLocationY, success)
+         call prop_get_double(md_ptr, 'Structure', 'WaterLevelDownstreamLocationY', dambr%waterLevelDownstreamLocationY, localsuccess)
          
       endif
       
       ! get the name of the tim file 
       if (dambr%algorithm == 3) then
-         call prop_get_string(md_ptr, 'structure', 'dambreakLevelsAndWidths', dambr%levelsAndWidths, success)
+         call prop_get_string(md_ptr, 'Structure', 'DambreakLevelsAndWidths', dambr%levelsAndWidths, success)
          if (.not. success) return         
       endif
 
-      call prop_get_double(md_ptr, 'structure', 't0', dambr%t0, success)
+      call prop_get_double(md_ptr, 'Structure', 'T0', dambr%t0, success)
       if (.not. success) return
       
       call setCoefficents(dambr)
