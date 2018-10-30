@@ -123,13 +123,12 @@ function ncu_inq_var_fill_real8( ncid, varid, no_fill, fill_value) result(ierr)
    real(kind=EightByteReal),  intent(out) :: fill_value  !< This will get the fill value for this variable.
 
    integer :: ierr ! Error status, nf90_noerr = if successful.
-   double precision  :: dmiss    = -999d0
    
    no_fill = 1
 
    ierr = nf90_get_att(ncid, varid, '_FillValue', fill_value)
    if (ierr /= nf90_noerr) then
-      fill_value = dmiss
+      fill_value =  nf90_fill_double
       ierr = nf90_noerr
    end if
 end function ncu_inq_var_fill_real8
