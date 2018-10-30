@@ -59,11 +59,11 @@ type t_ug_meshgeom
    integer            :: start_index     = -1    !< The base index of the arrays
    integer            :: epsg            = -1    !< epsg code that uniquely identifies the coordinate reference system 
 
-   integer, pointer :: edge_nodes(:,:) => null() !< Edge-to-node mapping array.
-   integer, pointer :: face_nodes(:,:) => null() !< Face-to-node mapping array.
-   integer, pointer :: edge_faces(:,:) => null() !< Edge-to-face mapping array (optional, can be null()).
-   integer, pointer :: face_edges(:,:) => null() !< Face-to-edge mapping array (optional, can be null()).
-   integer, pointer :: face_links(:,:) => null() !< Face-to-face mapping array (optional, can be null()).
+   integer, pointer   :: edge_nodes(:,:) => null() !< Edge-to-node mapping array.
+   integer, pointer   :: face_nodes(:,:) => null() !< Face-to-node mapping array.
+   integer, pointer   :: edge_faces(:,:) => null() !< Edge-to-face mapping array (optional, can be null()).
+   integer, pointer   :: face_edges(:,:) => null() !< Face-to-edge mapping array (optional, can be null()).
+   integer, pointer   :: face_links(:,:) => null() !< Face-to-face mapping array (optional, can be null()).
    
    !Network1d variables
    double precision,                  pointer :: nnodex(:) => null()                 !< x-coordinates of the network points.

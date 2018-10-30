@@ -164,6 +164,8 @@ public :: ionc_get_dimid
 
 public :: ionc_get_contact_id_ugrid
 
+public :: ionc_put_meshgeom
+
 private
 
 !
@@ -511,6 +513,32 @@ function ionc_get_topology_dimension(ioncid, meshid, dim) result(ierr)
    return
 
 end function ionc_get_topology_dimension
+
+
+function ionc_put_meshgeom(ioncid, meshgeom, meshid, networkid, meshname, networkName) result(ierr)
+
+   integer,             intent(in   )                       :: ioncid        !< The IONC data set id.
+   type(t_ug_meshgeom), intent(out  )                       :: meshgeom      !< Structure in which all mesh geometry will be stored.
+   integer,             intent(inout)                       :: meshid        !< The mesh id in the specified data set.
+   integer,             intent(inout)                       :: networkid     !< The mesh id in the specified data set.
+   character(len=*)                                         :: meshname
+   character(len=*)                                         :: networkName
+   integer                                                  :: ierr          !< Result status, ionc_noerr if successful.
+
+   !adds a meshids structure
+   ierr = ug_add_mesh(datasets(ioncid)%ncid, datasets(ioncid)%ug_file, meshid)
+   ! set the meshname
+   datasets(ioncid)%ug_file%meshnames(meshid) = meshname
+   ! allocate add a meshids
+   ierr = ug_add_network(datasets(ioncid)%ncid, datasets(ioncid)%ug_file, networkid)
+   ! set the network name
+   datasets(ioncid)%ug_file%networksnames(networkid) = networkName
+  
+   !this call writes mesh and network data contained in meshgeom
+   ierr = ionc_write_mesh_struct(ioncid, datasets(ioncid)%ug_file%meshids(meshid), datasets(ioncid)%ug_file%netids(networkid),  meshgeom)
+
+end function ionc_put_meshgeom 
+
 
 !> Reads the actual mesh geometry and network from the specified mesh in a IONC/UGRID dataset.
 !! Can read separate parts, such as dimension AND/OR all coordinate arrays + connectivity tables AND/OR network geometry

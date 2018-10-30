@@ -1332,4 +1332,34 @@ function ionc_get_meshgeom_dll(ioncid, meshid, networkid, c_meshgeom, start_inde
 end function ionc_get_meshgeom_dll
 
 
+function ionc_put_meshgeom_dll(ioncid, meshid, networkid, c_meshgeom, c_meshgeomdim, c_meshname, c_networkName, start_index) result(ierr) bind(C, name="ionc_put_meshgeom")
+!DEC$ ATTRIBUTES DLLEXPORT :: ionc_put_meshgeom_dll
+   use meshdata
+   integer, intent(in)                         :: ioncid
+   integer, intent (inout)                     :: meshid, networkid
+   type (c_t_ug_meshgeom), intent(in)          :: c_meshgeom
+   type (c_t_ug_meshgeomdim)                   :: c_meshgeomdim
+   character(kind=c_char), intent(in)          :: c_meshname(maxstrlen)
+   character(kind=c_char), intent(in)          :: c_networkName(maxstrlen)
+   integer, intent(in)                         :: start_index
+   integer                                     :: ierr
+   type(t_ug_meshgeom)                         :: meshgeom
+
+   character(len=maxstrlen)                    :: meshname
+   character(len=maxstrlen)                    :: networkName
+
+   ! Store the name
+   meshname = char_array_to_string(c_meshname, strlen(c_meshname))
+   networkName = char_array_to_string(c_networkName, strlen(c_networkName))
+   
+   !initialize meshgeom
+   ierr = t_ug_meshgeom_destructor(meshgeom)
+   !convert c_meshgeom to meshgeom
+   ierr = convert_cptr_to_meshgeom(c_meshgeom, c_meshgeomdim, meshgeom)
+   !set the pointers in c_meshgeom   
+   ierr = ionc_put_meshgeom(ioncid, meshgeom, meshid, networkid,  meshname, networkName)
+   
+end function ionc_put_meshgeom_dll
+
+
 end module io_netcdf_api

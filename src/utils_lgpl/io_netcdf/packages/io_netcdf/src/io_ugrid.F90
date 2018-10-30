@@ -986,9 +986,8 @@ function ug_def_var(ncid, id_var, id_dims, itype, iloctype, mesh_name, var_name,
 
 888 continue
 
-
 end function ug_def_var
-
+    
 
 !> Writes a complete mesh geometry to an open NetCDF data set.
 !! The mesh geometry is the required starting point for all variables/data defined ON that mesh.
