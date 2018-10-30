@@ -75,7 +75,7 @@ module m_oned_functions
       logical stop_warnings
       
       stop_warnings = .false.
-      if (network%brs%Count > 0) then
+      if (network%loaded) then
          ! RGH_TYPE is similar to IFRCUTP, only with different type numbers
          ! Dflow1D also supports water level or discharge dependent roughness parameters (FUN_TYPE )
          rgh_mapping = -1
@@ -143,7 +143,7 @@ module m_oned_functions
       
       default_width = wu1DUNI
       
-      if (network%brs%count > 0) then
+      if (network%loaded) then
          ! nonlinear computation is required for 1d flow
          if (nonlin1D == 0) then
             nonLin1D = 1
@@ -399,7 +399,7 @@ module m_oned_functions
       type(t_nodefraction), pointer          :: pFrac
       type(t_noderelation),pointer           :: pNodRel
 
-      if (network%brs%Count > 0) then
+      if (network%loaded) then
           do iFrac = 1, stmpar%nrd%nFractions
               pFrac => stmpar%nrd%nodefractions(iFrac)
               do iNodeRel = 1, pFrac%nNodeRelations

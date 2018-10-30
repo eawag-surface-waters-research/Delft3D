@@ -380,7 +380,7 @@
       bai_mor(k) = bai(k)
    enddo
 
-   if (network%brs%Count > 0) then
+   if (network%loaded) then
       ! Replace morphologically active 1d widths by main channel width from cross-section.
       ! This could also be chosen as the minimum of the main channel width and the
       ! flow width (this is apparently how it was implemented in Sobek-RE).

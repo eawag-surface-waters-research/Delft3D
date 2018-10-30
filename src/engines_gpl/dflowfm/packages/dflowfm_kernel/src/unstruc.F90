@@ -1060,7 +1060,7 @@ if(q /= 0) then
     if (nums1it > maxNonlinearIterations) then
        write(msgbuf, '(''No convergence in nonlinear solver at time '', g10.5,'' (s)'')') time0
        call fatal_flush()
-    endif
+       endif
 
     !if (nums1it > 10) then
     !   write(tex,*) difmaxlev
@@ -1501,7 +1501,7 @@ if(q /= 0) then
           a1(k1) =   a1(k1) + dx1*wid1
           vol1(k1) = vol1(k1) + dx1*ar1
           ! flow volume
-          if(network%brs%count > 0) then
+          if(network%loaded) then
              call getprof_1D(L, hpr, ar1, wid1, 1, perim)
              vol1_f(k1) = vol1_f(k1) + dx1*ar1
           else
@@ -1518,7 +1518,7 @@ if(q /= 0) then
           a1(k2) =   a1(k2) + dx2*wid2
           vol1(k2) = vol1(k2) + dx2*ar2
           ! flow volume
-          if(network%brs%count > 0) then
+          if(network%loaded) then
              call getprof_1D(L, hpr, ar2, wid2, 1, perim)
              vol1_f(k2) = vol1_f(k2) + dx2*ar2
           else
@@ -1534,7 +1534,7 @@ if(q /= 0) then
           LL = LBND1D(L)
        endif
 
-       if (network%brs%count > 0) then
+       if (network%loaded) then
           hpr = max(0d0,s1m(k1)-bob(1,L))                   ! this statement is called most nr of times through waterlevel iteration
           if (hpr > 0d0) then
              call getprof_1D_min(L, hpr, ar1, wid1)
@@ -2827,6 +2827,7 @@ subroutine getseg1D(hpr,wu2,dz,ai,frcn,ifrctyp, wid,ar,conv,perim,jaconv)  ! cop
        hu(L) = -0.5d0*( bob(1,L) + bob(2,L) )
     enddo
  endif
+ 
  
  if (nbnd1d2d > 0) then       ! 1d2d boundary check for closed boundaries
     call sethu_1d2d()
@@ -19488,7 +19489,7 @@ end subroutine unc_write_shp
  if (isimplefixedweirs == 0) call fixedweirs_on_flowgeom()                        ! Impose fixed weirs paths on all crossed flow links.
  
  jaupdbndbl = 1
- if (network%brs%count > 0 ) then 
+ if (network%loaded ) then 
     jaupdbobbl1d = 1
  else
     jaupdbobbl1d = 0
@@ -39545,7 +39546,7 @@ endif
 
 hpr = hprL
 
-if (abs(kcu(ll))==1 .and. network%brs%count > 0) then !flow1d used only for 1d channels and not for 1d2d roofs and gullies
+if (abs(kcu(ll))==1 .and. network%loaded) then !flow1d used only for 1d channels and not for 1d2d roofs and gullies
    cz = 0d0
    if (japerim == 0) then ! calculate total area and volume
       call getCrossTotalData_on_link(network, LL, hpr, area, width, CSCalculationOption)
@@ -39721,7 +39722,7 @@ if (L > lnxi) then                       ! for 1D boundary links, refer to attac
 endif
 
 
-if (network%brs%count > 0) then
+if (network%loaded) then
    call getCrossTotalData_on_link(network, LL, hpr, area, width, CS_TYPE_MIN)
    return
 endif      
