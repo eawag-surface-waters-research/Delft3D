@@ -2442,8 +2442,8 @@ if (ndambreak > 0) then
          
       else
          ! old dambreak format
-         write(msgbuf, '(a,a,a)') 'Dambreak ''', trim(strid), ''' set to old format.'
-         call msg_flush()
+         write(msgbuf, '(a,a,a)') 'Dambreak ''', trim(strid), ''' could not be read. Perhaps missing fields in structure file?'
+         call err_flush()
          cycle
       endif
       
