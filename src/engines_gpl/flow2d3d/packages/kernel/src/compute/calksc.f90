@@ -331,8 +331,7 @@ subroutine calksc(nmmax     ,itimtt    ,dps       ,s1        ,lsedtot   , &
              if (d50 < dsilt) then
                 rksr0 = 20_fp * dsilt
              endif
-             rksr0    = min(max(d90 , rksr0) , 0.02_fp*depth)
-             rksr0    = rksr0 * par1
+             rksr0    = min(max(d90 , rksr0) , 0.02_fp*depth) * par1
              rksr(nm) = relaxr*rksr(nm) + (1.0_fp-relaxr)*rksr0
              !
              ! Mega-ripples
@@ -385,19 +384,7 @@ subroutine calksc(nmmax     ,itimtt    ,dps       ,s1        ,lsedtot   , &
              else
                 rksd0 = 0.0_fp
              endif
-             !
-             ! In revision 7868, the following code was commented out because it doesn't
-             ! match the paper of Van Rijn(2007). The following code may, however, be needed
-             ! to reproduce some projects, so for the time being we leave it in such that
-             ! it can be reactivated easily when needed.
-             !
-             !if (d50 < dsilt) then
-             !   rksd0 = 0.0_fp
-             !elseif (d50 <= 1.5_fp*dsand) then
-             !   rksd0 = 200.0_fp * (d50 / (1.5_fp * dsand)) * d50
-             !else
-             !   rksd0 = 0.0_fp
-             !endif
+             rksd0 = rksd0*par3
              rksd(nm)  = relaxd*rksd(nm) + (1.0_fp-relaxd)*rksd0
           else
              rksr(nm)  = 0.01_fp
