@@ -3427,10 +3427,10 @@
 
    !locals
    integer                       :: ierr !< Error status, 0 if success, nonzero in case of error.
-   integer                       :: k, kk, k1, k2, k3, ncellsinSearchRadius, numberCellNetlinks, prevConnectedNetNode, newPointIndex
+   integer                       :: k, kk, k1, k2, k3, k4, ncellsinSearchRadius, numberCellNetlinks, prevConnectedNetNode, newPointIndex
    integer                       :: newLinkIndex
    integer                       :: l, cellNetLink, cellId, kn3localType, numnetcells
-   double precision              :: searchRadiusSquared, maxdistance, prevDistance, currDistance
+   double precision              :: searchRadiusSquared, maxdistance, prevDistance, currDistance, ldistance, rdistance
    logical                       :: isBoundaryCell
    type(kdtree_instance)         :: treeinst
    integer, allocatable          :: localCellmask(:)
@@ -3453,14 +3453,29 @@
    do l = 1, numl1d + 1
       !only check the left point
       if( l .eq. numl1d + 1) then
-         k1  = kn(2,l-1)
+         k1  =  kn(2,l-1)
       else
-         k1  = kn(1,l)
+         k1  = kn(1,l) 
       endif
       !get the left 1d mesh point
       call make_queryvector_kdtree(treeinst, xk(k1), yk(k1), jsferic)
       !the search radius
+      if (searchRadius.eq.0.0d0) then
+         ldistance = 0.0d0
+         rdistance = 0.0d0
+         if (l>=2) then
+            k4 = kn(1,l-1) 
+            ldistance = dbdistance(xk(k4),yk(k4),xk(k1),yk(k1), jsferic, jasfer3D, dmiss)
+         endif
+         if (l<numl1d + 1) then
+            k2 = kn(2,l)
+            rdistance = dbdistance(xk(k1),yk(k1),xk(k2),yk(k2), jsferic, jasfer3D, dmiss)
+         endif
+         searchRadiusSquared = max(ldistance, rdistance)
+         searchRadiusSquared = searchRadiusSquared**2
+      else
       searchRadiusSquared = searchRadius**2
+      endif
       !count number of cells in the search area
       nCellsInSearchRadius = kdtree2_r_count(treeinst%tree,treeinst%qv,searchRadiusSquared)
       !no cells found
