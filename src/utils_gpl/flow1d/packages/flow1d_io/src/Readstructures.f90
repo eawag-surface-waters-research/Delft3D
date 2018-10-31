@@ -130,6 +130,10 @@ module m_readstructures
             ! Read Common Structure Data
             
             call prop_get_string(md_ptr%child_nodes(i)%node_ptr, 'structure', 'id', structureId, success)
+            if (.not. success) then
+               cycle
+            endif
+            
             if (success) call prop_get_string(md_ptr%child_nodes(i)%node_ptr, 'structure', 'branchid', branchID, success)
             if (success) call prop_get_double(md_ptr%child_nodes(i)%node_ptr, 'structure', 'chainage', Chainage, success)
             if (success) call prop_get_string(md_ptr%child_nodes(i)%node_ptr, 'structure', 'type', typestr, success)

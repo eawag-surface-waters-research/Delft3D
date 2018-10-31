@@ -160,7 +160,10 @@ contains
          
          file = inputfiles(1:isemi-1)
          inputfiles = inputfiles(isemi+1:)
-         file = trim(mapdir)//file
+         if (len_trim(mapdir) > 0) then
+            file = trim(mapdir)//file
+         endif
+            
          call remove_leading_spaces(trim(file))
          call read_roughnessfile(rgs, brs, spdata, file, default, def_type)
       enddo

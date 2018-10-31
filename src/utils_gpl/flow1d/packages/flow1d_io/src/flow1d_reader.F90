@@ -216,6 +216,7 @@ module m_flow1d_reader
       ! Convert c string to fortran string and read md1d file into tree
       
       md1d_flow1d_file = filenames%onednetwork
+      folder = filenames%roughnessdir
       call timini()
       timon = .true.
       
@@ -244,8 +245,11 @@ module m_flow1d_reader
  
          endif
          
-         if (len_trim(filenames%roughnessdir) == 0) then
+         if (len_trim(filenames%roughness) == 0) then
             filenames%roughnessdir = folder
+         else
+            folder = '  '
+            filenames%roughnessdir = '  '
          endif
          call set_filename(md_ptr, 'files', 'roughnessfile' , filenames%roughness,                  ' ')
          call set_filename(md_ptr, 'files', 'crossDefFile'  , filenames%cross_section_definitions,  folder)
@@ -321,12 +325,18 @@ module m_flow1d_reader
      call SetMessage(LEVEL_INFO, 'Reading Retentions Done')
      call timstop(timerReadRetentions)
 
-     call SetMessage(LEVEL_INFO, 'Reading Advanced Parameters ...')
-     call prop_get_double(md_ptr, 'advancedoptions', 'transitionheightsd', summerDikeTransitionHeight, success)
-     if (.not. success) then 
-        call SetMessage(LEVEL_FATAL, 'Error reading Advanced Parameters')
+     if (len_trim(md1d_flow1d_file) > 0) then
+
+        call SetMessage(LEVEL_INFO, 'Reading Advanced Parameters ...')
+        call prop_get_double(md_ptr, 'advancedoptions', 'transitionheightsd', summerDikeTransitionHeight, success)
+        if (.not. success) then 
+           call SetMessage(LEVEL_FATAL, 'Error reading Advanced Parameters')
+        endif
+        call SetMessage(LEVEL_INFO, 'Reading Advanced Parameters Done')
+     else 
+        summerDikeTransitionHeight = 0.5d0
      endif
-     call SetMessage(LEVEL_INFO, 'Reading Advanced Parameters Done')
+     
       
      ! log timings
      call timstop(timerRead)
