@@ -18,6 +18,8 @@ function print_usage_info {
     echo "Options:"
     echo "-h, --help"
     echo "       print this help message and exit"
+    echo "--dockerparallel"
+    echo "       A parallel run inside docker"
     echo "<filename>"
     echo "       Delft3D-FLOW configuration filename, default config_d_hydro.xml"
     exit 1
@@ -33,6 +35,7 @@ function print_usage_info {
 NPART=0
 configfile=config_d_hydro.xml
 mdwfile=
+dockerprl=0
 D3D_HOME=
 ulimit -s unlimited
 
@@ -54,6 +57,9 @@ case $key in
     -w|--mdwfile)
     mdwfile="$1"
     shift
+    ;;
+    --dockerparallel)
+    dockerprl=1
     ;;
     --D3D_HOME)
     D3D_HOME="$1"
@@ -105,6 +111,7 @@ echo "    mdw-file         : $mdwfile"
 echo "    D3D_HOME         : $D3D_HOME"
 echo "    Working directory: $workdir"
 echo "    nr of parts      : $NPART"
+echo "    Docker parallel  : $dockerprl"
 echo 
 
     #
@@ -117,35 +124,65 @@ libdir=$D3D_HOME/lib
 
 
 export LD_LIBRARY_PATH=$libdir:$LD_LIBRARY_PATH
-export PATH="/opt/mpich2/bin:$bindir:${PATH}"
+export PATH="$bindir:${PATH}"
 export NHOSTS=1
 
+if [ $dockerprl -eq 1 ]; then
+    #
+    # Parallel in Docker
+    # Assumption: 1 node
+    export PATH=/usr/lib64/mpich/bin:$PATH
+    echo "Starting mpd..."
+    mpd &
+    mpdboot -n $NPART --rsh=/usr/bin/rsh
+
+    node_number=$NPART
+    while [ $node_number -ge 1 ]; do
+       node_number=`expr $node_number - 1`
+       ln -s /dev/null log$node_number.irlog
+    done
+
+    echo "executing in the background:"
+    echo "mpirun -np $NPART $bindir/d_hydro $configfile &"
+          mpirun -np $NPART $bindir/d_hydro $configfile &
+
+    echo "executing in the foreground:"
+    echo "$bindir/wave $mdwfile 1"
+          $bindir/wave $mdwfile 1
+else 
+    #
+    # Not in Docker
+    export PATH="/opt/mpich2/bin:${PATH}"
     # Start mpi
-echo " ">$(pwd)/machinefile
-mpd &
-mpdboot -n $NHOSTS
+    echo " ">$(pwd)/machinefile
+    mpd &
+    mpdboot -n $NHOSTS
 
     # link mpich debug rubbish to /dev/null
-node_number=$NPART
-while test $node_number -ge 1
-do
-   node_number=`expr $node_number - 1`
-   ln -s /dev/null log$node_number.irlog
-done
+    node_number=$NPART
+    while test $node_number -ge 1
+    do
+       node_number=`expr $node_number - 1`
+       ln -s /dev/null log$node_number.irlog
+    done
 
     # Run
     echo "executing in the background:"
     echo "mpirun -np $NPART $bindir/d_hydro $configfile &"
     echo 
-mpirun -np $NPART $bindir/d_hydro $configfile &
+    mpirun -np $NPART $bindir/d_hydro $configfile &
 
     echo "executing in the foreground:"
     echo "$bindir/wave $mdwfile 1"
-    echo
-$bindir/wave $mdwfile 1
+          $bindir/wave $mdwfile 1
 
-rm -f log*.irlog
-mpdallexit
+    rm -f log*.irlog
+fi
+
+
+if [[ $dockerprl -eq 1 ]]; then
+    mpdallexit
+fi
 
     # Wait until all child processes are finished
 wait

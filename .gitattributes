@@ -65,6 +65,7 @@ examples/03_flow-wave/r17.mdw -text
 examples/03_flow-wave/run.bat -text
 examples/03_flow-wave/run.sh -text
 examples/03_flow-wave/run_docker.sh -text
+examples/03_flow-wave/run_docker_parallel.sh -text
 examples/03_flow-wave/run_parallel.bat -text
 examples/03_flow-wave/run_parallel.sh -text
 examples/03_flow-wave/sedsand.sed -text
