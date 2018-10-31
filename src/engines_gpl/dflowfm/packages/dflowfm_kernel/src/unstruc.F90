@@ -21526,6 +21526,7 @@ end do
  use m_partitioninfo
  use m_transport, only : NUMCONST
  use m_integralstats
+ use unstruc_channel_flow
 
  implicit none
  integer :: ierr, n, k, mxn, j, kj, kk, LL, L, k1, k2, k3, k4, n1, n2, n3, n4, nL, kb1, kb2, numkmin, numkmax, kbc1, kbc2
@@ -22307,7 +22308,7 @@ endif
  endif
  
  ! TODO alloceer u_to_main alleen bij md1d netwerk 
- if (jamd1dfile > 0 .or. stm_included) then
+ if (network%loaded .or. stm_included) then
     if ( allocated(u_to_umain) ) deallocate(u_to_umain)
     allocate ( u_to_umain   (lnkx) , stat = ierr)
     call aerr('u_to_umain   (lnkx)', ierr , lnkx ) ; u_to_umain    = 1d0
