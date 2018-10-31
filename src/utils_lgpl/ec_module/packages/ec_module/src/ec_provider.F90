@@ -1772,7 +1772,7 @@ module m_ec_provider
             is_qh = (bcBlockPtr%func == BC_FUNC_QHTABLE) ! if a polylinename exist as a label without a number
                                                          ! it might refer to a qh forcing 
             if (.not.is_qh) then
-               call setECMessage("Unnumbered BC-block with label "//trim(plipointlbl)//" found in "//trim(bctfilename)//", so it is a QH boundary condition, but 'function' is not set to QHTable")
+               call setECMessage("Unnumbered BC-block with label "//trim(plipointlbl)//" found in "//trim(bctfilename)//". This is only supported for QH boundary conditions, but 'function' is not set to QHTable. Perhaps a missing point number in block label?")
                return
             else
                n_signals = 1                ! ????? ????  RL: moet n_signals hier niet op 1 gezet worden of iets anders ????
