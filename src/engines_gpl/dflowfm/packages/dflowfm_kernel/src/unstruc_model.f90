@@ -1034,7 +1034,12 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'sediment', 'Seddenscoupling'    ,  jaseddenscoupling)
 
     stm_included = (len_trim(md_sedfile) /= 0 .and. len_trim(md_morfile) /= 0 .and. jased .eq. 4)
-
+    !
+    ! Check needed, otherwise crash in hisfile init
+    if (jased .eq. 4 .and. .not. stm_included) then
+       call mess(LEVEL_ERROR, 'Sedimentmodelnr=4, but no *.sed or no *.mor file specified.')
+    endif
+    
     !if (jased == 4 .and. stm_included .and. ibedlevtyp > 1) then
     !    call mess(LEVEL_WARN, 'BedlevType = 1 should be used in combination with Sedimentmodelnr = 4')
     !endif
