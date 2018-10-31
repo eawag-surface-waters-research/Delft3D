@@ -650,6 +650,9 @@ namespace General.tests
         [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ionc_get_var_chars", CallingConvention = CallingConvention.Cdecl)]
         public static extern int ionc_get_var_chars_dll([In] ref int ioncid, [In] ref int meshid, [MarshalAs(UnmanagedType.LPStr)][In, Out] StringBuilder varname, [In, Out] interop_charinfo[] values, [In] ref int nvalues);
 
+        [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ionc_put_meshgeom", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ionc_put_meshgeom_dll([In] ref int ioncid, [In,Out] ref int meshid, [In, Out] ref int networkid, [In] ref meshgeom meshgeom, [In] ref meshgeomdim meshgeomdim, [In] string c_meshname, [In] string c_networkName, [In] ref int start_index);
+
         #region Implementation of LibWrapper
 
         public bool ionc_adheresto_conventions(ref int ioncid, ref int iconvtype)
@@ -983,6 +986,12 @@ namespace General.tests
         {
             return ionc_get_var_chars_dll(ref ioncid, ref meshid, varname, values, ref nvalues);
         }
-   
+
+        public int ionc_put_meshgeom(ref int ioncid, ref int meshid, ref int networkid, ref meshgeom meshgeom, ref meshgeomdim meshgeomdim, string c_meshname, string c_networkName, ref int start_index)
+        {
+            return ionc_put_meshgeom_dll(ref ioncid, ref  meshid, ref  networkid, ref  meshgeom, ref  meshgeomdim,  c_meshname,  c_networkName, ref  start_index);
+        }
+
+
     }
 }
