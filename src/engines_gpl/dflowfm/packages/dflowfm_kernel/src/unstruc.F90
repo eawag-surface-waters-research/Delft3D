@@ -13182,6 +13182,11 @@ end if
  call klok(cpuiniext(2)) ; cpuiniext(3) = cpuiniext(3) + cpuiniext(2) - cpuiniext(1)  
  if (iresult /= DFM_NOERR) then
     call qnerror('Error occurred while running, please inspect your diagnostic output.',' ', ' ')
+#ifdef HAVE_MPI
+    if (jampi == 1) then
+       call MPI_Abort(DFM_COMM_DFMWORLD, DFM_GENERICERROR, ierr)
+    endif
+#endif
     goto 888
  end if
  call mess(LEVEL_INFO, 'Done initializing external forcings.')
