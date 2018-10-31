@@ -67,7 +67,7 @@ module m_fm_morstatistics
    !  Set up parallel FM administration to ensure backward compatibility of Delft3Dv4
    !
    integer                                         :: nmorstatqnt
-   integer                                         :: morstatflg(11,4)
+   integer                                         :: morstatflg(10,4)
    double precision, dimension(:,:), allocatable   :: morstatqnt
 
    contains
@@ -126,7 +126,8 @@ module m_fm_morstatistics
                 i= i+1
                 morstatflg(6,iqnt)=i
              endif
-         else   ! rest are vectors, two horizontal components
+         else   ! rest are vectors, two horizontal components for mean, min, max
+                ! std = std of magnitude
              if (iand(idx(1),MOR_STAT_MIN)>0) then
                 morstatflg(1,iqnt)=morstatflg(1,iqnt)+MOR_STAT_MIN
                 i = i+2
@@ -156,16 +157,15 @@ module m_fm_morstatistics
                    morstatflg(7,iqnt)=i
                 endif
                 morstatflg(1,iqnt)=morstatflg(1,iqnt)+MOR_STAT_STD
-                i=i+2
-                morstatflg(8,iqnt)=i-1
-                morstatflg(9,iqnt)=i
+                i=i+1                                          ! vector has no meaning in this context, so magnitude
+                morstatflg(8,iqnt)=i
              endif
              !
              if (iand(idx(1),MOR_STAT_CUM)>0) then
                 morstatflg(1,iqnt)=morstatflg(1,iqnt)+MOR_STAT_CUM
                 i= i+2
-                morstatflg(10,iqnt)=i-1
-                morstatflg(11,iqnt)=i
+                morstatflg(9,iqnt)=i-1
+                morstatflg(10,iqnt)=i
              endif
          endif
       end do
@@ -256,11 +256,10 @@ module m_fm_morstatistics
              endif
              if (stmpar%morpar%moroutput%statflg(5,iqnt)>0) then
                  morstatqnt(:,morstatflg(8,iqnt)) = 0d0
-                 morstatqnt(:,morstatflg(9,iqnt)) = 0d0
              endif
              if (stmpar%morpar%moroutput%statflg(6,iqnt)>0) then
+                 morstatqnt(:,morstatflg(9,iqnt)) = 0d0
                  morstatqnt(:,morstatflg(10,iqnt)) = 0d0
-                 morstatqnt(:,morstatflg(11,iqnt)) = 0d0
              endif
           end select
       enddo
@@ -269,9 +268,6 @@ module m_fm_morstatistics
 
    subroutine morstats_simple(dbodsd)
       use precision, only: fp
-      !use m_flowgeom, only: ndx
-      !use m_fm_erosed, only: lsedtot
-      !use m_sediment, only: stmpar
       !
       implicit none
       !
@@ -279,8 +275,6 @@ module m_fm_morstatistics
       !
       integer                                       :: ll
       integer                                       :: k
-      !
-      !! executable statements -------------------------------------------------------
       !
       if (nmorstatqnt > 0) then
          do k = 1, ndx
@@ -344,8 +338,7 @@ module m_fm_morstatistics
          endif
          !
          if (morstatflg(1,2)>0) then
-            call local_stats_vec(morstatflg(:,2), k, ucxq_mor(k), wght, 1)
-            call local_stats_vec(morstatflg(:,2), k, ucyq_mor(k), wght, 2)
+            call local_stats_vec(morstatflg(:,2), k, ucxq_mor(k), ucyq_mor(k), wght)
          endif
          !
          if (morstatflg(1,3)>0) then
@@ -363,8 +356,7 @@ module m_fm_morstatistics
                qu = qu + sbcx(k, ll)/rhol + sbwx(k, ll)/rhol
                qv = qv + sbcy(k, ll)/rhol + sbwy(k, ll)/rhol
             enddo
-            call local_stats_vec(morstatflg(:,3), k, qu, wght, 1)
-            call local_stats_vec(morstatflg(:,3), k, qv, wght, 2)
+            call local_stats_vec(morstatflg(:,3), k, qu, qv, wght)
          endif
          !
          if (morstatflg(1,4)>0) then
@@ -382,15 +374,14 @@ module m_fm_morstatistics
                qu = qu + sscx(k, ll)/rhol + sswx(k, ll)/rhol
                qv = qv + sscy(k, ll)/rhol + sswy(k, ll)/rhol
             enddo
-            call local_stats_vec(morstatflg(:,4), k, qu, wght, 1)
-            call local_stats_vec(morstatflg(:,4), k, qv, wght, 2)
+            call local_stats_vec(morstatflg(:,4), k, qu, qv, wght)
          endif
       enddo
 
    contains
 
       subroutine local_stats(idx, nm, q, wght)
-         integer, dimension(11):: idx
+         integer, dimension(10):: idx
          integer               :: nm
          real(fp)              :: q
          real(fp)              :: wght
@@ -412,37 +403,37 @@ module m_fm_morstatistics
          endif
       end subroutine local_stats
       
-      subroutine local_stats_vec(idx, nm, q, wght, dim)
-         integer, dimension(11):: idx
+      subroutine local_stats_vec(idx, nm, q1, q2, wght)
+         integer, dimension(10):: idx
          integer               :: nm
-         real(fp)              :: q
+         real(fp)              :: q1, q2
          real(fp)              :: wght
-         integer               :: dim
-         
-         integer               :: flg(5)
-         !
-         if (dim==1) then
-            flg = (/2,4,6,8,10/)
-         else
-            flg = (/3,5,7,9,11/)
+         real(fp)              :: presval, newval, minmaxval
+
+         newval     = sqrt(q1**2+q2**2)
+         if (idx(2)>0 .and. wght>0.0_fp) then
+            presval = sqrt(morstatqnt(nm,idx(2))**2+morstatqnt(nm,idx(3))**2)
+            minmaxval = min(presval, newval)
+            morstatqnt(nm,idx(2)) = dcos(minmaxval)
+            morstatqnt(nm,idx(3)) = dsin(minmaxval)
          endif
-         !
-         if (idx(flg(1))>0 .and. wght>0.0_fp) then
-            morstatqnt(nm,idx(flg(1))) = min(morstatqnt(nm,idx(flg(1))),q)
+         if (idx(4)>0 .and. wght>0.0_fp) then
+            presval = sqrt(morstatqnt(nm,idx(4))**2+morstatqnt(nm,idx(5))**2)
+            minmaxval = max(presval, newval)
+            morstatqnt(nm,idx(4)) = dcos(minmaxval)
+            morstatqnt(nm,idx(5)) = dsin(minmaxval)
          endif
-         if (idx(flg(2))>0 .and. wght>0.0_fp) then
-            morstatqnt(nm,idx(flg(2))) = max(morstatqnt(nm,idx(flg(2))),q)
+         if (idx(6)>0) then
+            morstatqnt(nm,idx(6)) = morstatqnt(nm,idx(6)) + wght*q1
+            morstatqnt(nm,idx(7)) = morstatqnt(nm,idx(7)) + wght*q2
          endif
-         if (idx(flg(3))>0) then
-            morstatqnt(nm,idx(flg(3))) = morstatqnt(nm,idx(flg(3))) + wght*q
+         if (idx(8)>0) then
+            morstatqnt(nm,idx(8)) = morstatqnt(nm,idx(8)) + wght*newval**2
          endif
-         if (idx(flg(4))>0) then
-            morstatqnt(nm,idx(flg(4))) = morstatqnt(nm,idx(flg(4))) + wght*q**2
-         endif
-         if (idx(flg(5))>0) then
-            morstatqnt(nm,idx(flg(5))) = morstatqnt(nm,idx(flg(5))) + dts*q
-         endif
-      
+         if (idx(9)>0) then
+            morstatqnt(nm,idx(9))  = morstatqnt(nm,idx(9)) + dts*q1
+            morstatqnt(nm,idx(10)) = morstatqnt(nm,idx(10)) + dts*q2
+         endif      
       end subroutine local_stats_vec      
 
    end subroutine morstats_full
@@ -513,6 +504,7 @@ subroutine unc_write_sedstat_filepointer_ugrid(sedids,tim)
    integer                                      :: idx
    integer                                      :: dim
    integer, dimension(:), allocatable           :: dimids_
+   double precision                             :: meanmag2
    double precision, dimension(:,:), allocatable:: work
    double precision, dimension(:),   allocatable:: work2
    double precision, dimension(:),   allocatable:: wghtfac
@@ -647,19 +639,9 @@ subroutine unc_write_sedstat_filepointer_ugrid(sedids,tim)
             endif
             !
             if (iand(idx,MOR_STAT_STD)>0) then
-               if (iq/=1) then
-                  var1 = 'STD_'//trim(stmpar%morpar%moroutput%statqnt(iq))//'_X'
-                  var2 = 'STD_'//trim(stmpar%morpar%moroutput%statqnt(iq))//'_Y'
-                  descr1 = 'standard deviation '//trim(stmpar%morpar%moroutput%statnam(iq))//', x-component'
-                  descr2 = 'standard deviation '//trim(stmpar%morpar%moroutput%statnam(iq))//', y-component'
-               else
-                  var1 = 'STD_'//trim(stmpar%morpar%moroutput%statqnt(iq))
-                  descr1  = 'standard deviation '//trim(stmpar%morpar%moroutput%statnam(iq))
-               endif
+               var1 = 'STD_'//trim(stmpar%morpar%moroutput%statqnt(iq))
+               descr1  = 'standard deviation of the magnitude of '//trim(stmpar%morpar%moroutput%statnam(iq))
                ierr = unc_def_var_map(sedids%ncid, sedids%id_tsp, id_std_x, nf90_double, UNC_LOC_S, var1,descr1,descr1, stmpar%morpar%moroutput%statunt(iq),dimids=dimids_)
-               if (iq/=1) then
-                  ierr = unc_def_var_map(sedids%ncid, sedids%id_tsp, id_std_y, nf90_double, UNC_LOC_S, var2,descr2,descr2, stmpar%morpar%moroutput%statunt(iq),dimids=dimids_)
-               endif
             endif
             !
             if (iq==3 .or. iq==4) then    ! does not make much sense for waterlevels and velocities
@@ -685,13 +667,13 @@ subroutine unc_write_sedstat_filepointer_ugrid(sedids,tim)
                sedids%id_hs_mean=id_mean_x; sedids%id_hs_std=id_std_x; sedids%id_hs_min = id_min_x; sedids%id_hs_max = id_max_x;
             case (2)
                sedids%id_ucx_mean = id_mean_x; sedids%id_ucx_std=id_std_x; sedids%id_ucx_min=id_min_x; sedids%id_ucx_max=id_max_x;
-               sedids%id_ucy_mean = id_mean_y; sedids%id_ucy_std=id_std_y; sedids%id_ucy_min=id_min_y; sedids%id_ucy_max=id_max_y;
+               sedids%id_ucy_mean = id_mean_y;  sedids%id_ucy_min=id_min_y; sedids%id_ucy_max=id_max_y;
             case (3)
-               sedids%id_sbx_mean = id_mean_x; sedids%id_sbx_std=id_std_x; sedids%id_sbx_min=id_min_x; sedids%id_sbx_max=id_max_x;sedids%id_netsbx=id_net_x
-               sedids%id_sby_mean = id_mean_y; sedids%id_sby_std=id_std_y; sedids%id_sby_min=id_min_y; sedids%id_sby_max=id_max_y;sedids%id_netsby=id_net_y 
+               sedids%id_sbx_mean = id_mean_x; sedids%id_sbx_std=id_std_x; sedids%id_sbx_min=id_min_x; sedids%id_sbx_max=id_max_x;sedids%id_netsbx=id_net_x 
+               sedids%id_sby_mean = id_mean_y; sedids%id_sby_min=id_min_y; sedids%id_sby_max=id_max_y;sedids%id_netsby=id_net_y 
             case (4)                                                                                                                              
                sedids%id_ssx_mean = id_mean_x; sedids%id_ssx_std=id_std_x; sedids%id_ssx_min=id_min_x; sedids%id_ssx_max=id_max_x;sedids%id_netssx=id_net_x 
-               sedids%id_ssy_mean = id_mean_y; sedids%id_ssy_std=id_std_y; sedids%id_ssy_min=id_min_y; sedids%id_ssy_max=id_max_y;sedids%id_netssy=id_net_y 
+               sedids%id_ssy_mean = id_mean_y;  sedids%id_ssy_min=id_min_y; sedids%id_ssy_max=id_max_y;sedids%id_netssy=id_net_y 
          end select
          
       enddo
@@ -725,14 +707,14 @@ subroutine unc_write_sedstat_filepointer_ugrid(sedids,tim)
          case (1)
             id_mean_x = sedids%id_hs_mean; id_std_x = sedids%id_hs_std; id_min_x = sedids%id_hs_min; id_max_x = sedids%id_hs_max; dim=1
          case (2)
-            id_mean_x = sedids%id_ucx_mean; id_std_x = sedids%id_ucx_std; id_min_x = sedids%id_ucx_min; id_max_x = sedids%id_ucx_max; dim=2
-            id_mean_y = sedids%id_ucy_mean; id_std_y = sedids%id_ucy_std; id_min_y = sedids%id_ucy_min; id_max_y = sedids%id_ucy_max;              
+            id_mean_x = sedids%id_ucx_mean; id_std_x = sedids%id_ucx_std; id_min_x = sedids%id_ucx_min; id_max_x = sedids%id_ucx_max; dim=2        
+            id_mean_y = sedids%id_ucy_mean; id_min_y = sedids%id_ucy_min; id_max_y = sedids%id_ucy_max;              
          case (3)
-            id_mean_x = sedids%id_sbx_mean; id_std_x = sedids%id_sbx_std; id_min_x = sedids%id_sbx_min; id_max_x = sedids%id_sbx_max; id_net_x = sedids%id_netsbx; dim=2
-            id_mean_y = sedids%id_sby_mean; id_std_y = sedids%id_sby_std; id_min_y = sedids%id_sby_min; id_max_y = sedids%id_sby_max; id_net_y = sedids%id_netsby              
+            id_mean_x = sedids%id_sbx_mean; id_std_x = sedids%id_sbx_std; id_min_x = sedids%id_sbx_min; id_max_x = sedids%id_sbx_max; id_net_x = sedids%id_netsbx; dim=2       
+            id_mean_y = sedids%id_sby_mean; id_min_y = sedids%id_sby_min; id_max_y = sedids%id_sby_max; id_net_y = sedids%id_netsby              
          case (4)
             id_mean_x = sedids%id_ssx_mean; id_std_x = sedids%id_ssx_std; id_min_x = sedids%id_ssx_min; id_max_x = sedids%id_ssx_max; id_net_x = sedids%id_netssx; dim=2
-            id_mean_y = sedids%id_ssy_mean; id_std_y = sedids%id_ssy_std; id_min_y = sedids%id_ssy_min; id_max_y = sedids%id_ssy_max; id_net_y = sedids%id_netssy
+            id_mean_y = sedids%id_ssy_mean; id_min_y = sedids%id_ssy_min; id_max_y = sedids%id_ssy_max; id_net_y = sedids%id_netssy
       end select
       !
       if (stmpar%morpar%moroutput%statflg(1,iq)>0) then
@@ -824,7 +806,8 @@ subroutine unc_write_sedstat_filepointer_ugrid(sedids,tim)
             !
             if (iand(idx,MOR_STAT_STD)>0) then
                do k = 1,ndx
-                  morstatqnt(k, morstatflg(8,iq)) = morstatqnt(k, morstatflg(8,iq))*wghtfac(k) - morstatqnt(k, morstatflg(6,iq))**2
+                  meanmag2 = (morstatqnt(k, morstatflg(6,iq))**2+morstatqnt(k, morstatflg(7,iq))**2)*wghtfac(k)**2
+                  morstatqnt(k, morstatflg(8,iq)) = morstatqnt(k, morstatflg(8,iq))*wghtfac(k) - meanmag2
                   if (morstatqnt(k, morstatflg(8,iq))>0.0_fp) then  ! safety
                       morstatqnt(k, morstatflg(8,iq))  = sqrt(morstatqnt(k, morstatflg(8,iq)))
                   else
@@ -835,29 +818,17 @@ subroutine unc_write_sedstat_filepointer_ugrid(sedids,tim)
                   morstatqnt(:,morstatflg(8,iq)) = -999d0
                endwhere
                ierr = unc_put_var_map(sedids%ncid, sedids%id_tsp, id_std_x, UNC_LOC_S, morstatqnt(:,morstatflg(8,iq)))
-               do k = 1,ndx
-                  morstatqnt(k, morstatflg(9,iq)) = morstatqnt(k, morstatflg(9,iq))*wghtfac(k) - morstatqnt(k, morstatflg(7,iq))**2
-                  if (morstatqnt(k, morstatflg(9,iq))>0.0_fp) then  ! safety
-                      morstatqnt(k, morstatflg(9,iq))  = sqrt(morstatqnt(k, morstatflg(9,iq)))
-                  else
-                      morstatqnt(k, morstatflg(9,iq))  = 0.0_fp
-                  endif                
-               enddo
-               where (morstatqnt(:,1)<=0.0)
-                  morstatqnt(:,morstatflg(9,iq)) = -999d0
-               endwhere
-               ierr = unc_put_var_map(sedids%ncid, sedids%id_tsp, id_std_y, UNC_LOC_S, morstatqnt(:,morstatflg(9,iq)))
             endif
             !
             if (iand(idx,MOR_STAT_CUM)>0 .and. (iq==3 .or. iq==4)) then
                where (morstatqnt(:,1)<=0.0)
+                  morstatqnt(:,morstatflg(9,iq)) = -999d0
+               endwhere
+               ierr = unc_put_var_map(sedids%ncid, sedids%id_tsp, id_net_x, UNC_LOC_S, morstatqnt(:,morstatflg(9,iq)))
+               where (morstatqnt(:,1)<=0.0)
                   morstatqnt(:,morstatflg(10,iq)) = -999d0
                endwhere
-               ierr = unc_put_var_map(sedids%ncid, sedids%id_tsp, id_net_x, UNC_LOC_S, morstatqnt(:,morstatflg(10,iq)))
-               where (morstatqnt(:,1)<=0.0)
-                  morstatqnt(:,morstatflg(11,iq)) = -999d0
-               endwhere
-               ierr = unc_put_var_map(sedids%ncid, sedids%id_tsp, id_net_y, UNC_LOC_S, morstatqnt(:,morstatflg(11,iq)))
+               ierr = unc_put_var_map(sedids%ncid, sedids%id_tsp, id_net_y, UNC_LOC_S, morstatqnt(:,morstatflg(10,iq)))
             endif
          endif
       endif
