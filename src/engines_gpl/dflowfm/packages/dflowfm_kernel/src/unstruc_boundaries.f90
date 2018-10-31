@@ -1439,6 +1439,18 @@ dambridx = -1
 do i=1,nstr
    str_ptr => strs_ptr%child_nodes(i)%node_ptr
 
+   success = .true.
+   
+   ! check if this structure concerns Flow1D type structure
+   call prop_get_string(str_ptr, '', 'branchid', strtype, success)
+   if (success) then
+      cycle
+   endif
+   call prop_get_string(str_ptr, '', 'filetype', strtype, success)
+   if (success) then
+      cycle
+   endif
+   
    strtype = ' '
    call prop_get_string(str_ptr, '', 'type',         strtype, success)
    if (.not. success .or. len_trim(strtype) == 0) then
