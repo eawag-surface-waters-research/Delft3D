@@ -1771,8 +1771,12 @@ module m_ec_provider
                                     id, bctfilename, quantityname, plipointlbl, fileReaderPtr%tframe%dtnodal, istat)) then
             is_qh = (bcBlockPtr%func == BC_FUNC_QHTABLE) ! if a polylinename exist as a label without a number
                                                          ! it might refer to a qh forcing 
-            ! SHRL: TODO: check of this is always the case
-            n_signals = 1                ! ????? ????  RL: moet n_signals hier niet op 1 gezet worden of iets anders ????
+            if (.not.is_qh) then
+               call setECMessage("Unnumbered BC-block with label "//trim(plipointlbl)//" found in "//trim(bctfilename)//", so it is a QH boundary condition, but 'function' is not set to QHTable")
+               return
+            else
+               n_signals = 1                ! ????? ????  RL: moet n_signals hier niet op 1 gezet worden of iets anders ????
+            endif
          else                            ! .not.is_qh
             n_signals = 0
             do i=1, n_points
