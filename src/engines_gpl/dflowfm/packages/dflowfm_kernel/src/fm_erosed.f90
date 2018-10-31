@@ -666,7 +666,7 @@ end module m_fm_update_crosssections
    use m_missing
    use m_physcoef, only: frcuni, ifrctypuni
    use m_turbulence, only: vicwws, turkinepsws
-   use m_flowparameters, only: jasal, jatem, jawave, epshs, jasecflow
+   use m_flowparameters, only: jasal, jatem, jawave, epshs, jasecflow, eps10
    use m_fm_erosed
    use m_bedform
    use m_xbeach_data
@@ -1029,8 +1029,9 @@ end module m_fm_update_crosssections
    ! closed boundary or dry point.
    !
    do k = 1,ndx                            ! This interpolation is done by considering constant waterdepth per each flow-cell
-      h1 = s1(k) - bl(k)                   ! To ensure to get the same results from interpolation based on constant frcu and ifrcutp in the cell centre
-      z0curk(k) = 0d0                      ! with considering hs
+      h1 = s1(k) - bl(k)                   ! To ensure to get the same results from interpolation based on constant frcu and ifrcutp in the cell centre 
+                                           ! with considering hs
+      z0curk(k) = eps10                    ! safety if nd(k)%lnx==0. Happens sometimes in case of thin dams
       do LL = 1,nd(k)%lnx
          Lf = nd(k)%ln(LL)
          L = abs( Lf )
