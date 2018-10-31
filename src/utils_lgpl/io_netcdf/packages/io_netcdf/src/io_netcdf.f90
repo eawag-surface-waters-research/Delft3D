@@ -518,24 +518,36 @@ end function ionc_get_topology_dimension
 function ionc_put_meshgeom(ioncid, meshgeom, meshid, networkid, meshname, networkName) result(ierr)
 
    integer,             intent(in   )                       :: ioncid        !< The IONC data set id.
-   type(t_ug_meshgeom), intent(out  )                       :: meshgeom      !< Structure in which all mesh geometry will be stored.
+   type(t_ug_meshgeom)                                      :: meshgeom      !< Structure in which all mesh geometry is be stored.
    integer,             intent(inout)                       :: meshid        !< The mesh id in the specified data set.
-   integer,             intent(inout)                       :: networkid     !< The mesh id in the specified data set.
-   character(len=*)                                         :: meshname
-   character(len=*)                                         :: networkName
+   integer,             intent(inout)                       :: networkid     !< The network id in the specified data set.
+   character(len=*)                                         :: meshname      !< The mesh name
+   character(len=*)                                         :: networkName   !< The network name
    integer                                                  :: ierr          !< Result status, ionc_noerr if successful.
-
-   !adds a meshids structure
-   ierr = ug_add_mesh(datasets(ioncid)%ncid, datasets(ioncid)%ug_file, meshid)
-   ! set the meshname
-   datasets(ioncid)%ug_file%meshnames(meshid) = meshname
-   ! allocate add a meshids
-   ierr = ug_add_network(datasets(ioncid)%ncid, datasets(ioncid)%ug_file, networkid)
-   ! set the network name
-   datasets(ioncid)%ug_file%networksnames(networkid) = networkName
-  
+   
+   ! Locals (default values)
+   type(t_ug_mesh)                                          :: meshids 
+   type(t_ug_network)                                       :: networkids
+   
+   if (len_trim(meshname).gt.0) then 
+      !adds a meshids structure
+      ierr = ug_add_mesh(datasets(ioncid)%ncid, datasets(ioncid)%ug_file, meshid)
+      ! set the meshname
+      datasets(ioncid)%ug_file%meshnames(meshid) = meshname
+      meshgeom%meshname = trim(meshname)
+      meshids = datasets(ioncid)%ug_file%meshids(meshid)
+   endif
+   
+   if (len_trim(networkName).gt.0) then 
+      ! allocate add a meshids
+      ierr = ug_add_network(datasets(ioncid)%ncid, datasets(ioncid)%ug_file, networkid)
+      ! set the network name
+      datasets(ioncid)%ug_file%networksnames(networkid) = networkName
+      networkids = datasets(ioncid)%ug_file%netids(networkid)
+   endif
+   
    !this call writes mesh and network data contained in meshgeom
-   ierr = ionc_write_mesh_struct(ioncid, datasets(ioncid)%ug_file%meshids(meshid), datasets(ioncid)%ug_file%netids(networkid),  meshgeom)
+   ierr = ionc_write_mesh_struct(ioncid, meshids, networkids, meshgeom)
 
 end function ionc_put_meshgeom 
 
@@ -1187,11 +1199,11 @@ end function ionc_def_var
 
 !> Writes the complete mesh geometry
 function ionc_write_mesh_struct(ioncid, meshids, networkids, meshgeom) result(ierr)
-   integer,             intent(in)    :: ioncid   !< The IONC data set id.
-   type(t_ug_mesh),     intent(inout) :: meshids  !< Set of NetCDF-ids for all mesh geometry arrays.
+   integer,             intent(in)    :: ioncid      !< The IONC data set id.
+   type(t_ug_mesh),     intent(inout) :: meshids     !< Set of NetCDF-ids for all mesh geometry arrays.
    type(t_ug_network),  intent(inout) :: networkids  !< Set of NetCDF-ids for all mesh geometry arrays.
-   type(t_ug_meshgeom), intent(in)    :: meshgeom !< The complete mesh geometry in a single struct.
-   integer                            :: ierr     !< Result status, ionc_noerr if successful.
+   type(t_ug_meshgeom), intent(in)    :: meshgeom    !< The complete mesh geometry in a single struct.
+   integer                            :: ierr        !< Result status, ionc_noerr if successful.
 
    ierr = ug_write_mesh_struct(datasets(ioncid)%ncid, meshids, networkids, datasets(ioncid)%crs, meshgeom)
 end function ionc_write_mesh_struct

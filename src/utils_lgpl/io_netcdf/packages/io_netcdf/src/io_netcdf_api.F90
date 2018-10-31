@@ -1356,7 +1356,7 @@ function ionc_put_meshgeom_dll(ioncid, meshid, networkid, c_meshgeom, c_meshgeom
    ierr = t_ug_meshgeom_destructor(meshgeom)
    !convert c_meshgeom to meshgeom
    ierr = convert_cptr_to_meshgeom(c_meshgeom, c_meshgeomdim, meshgeom)
-   !set the pointers in c_meshgeom   
+   !write meshgeom 
    ierr = ionc_put_meshgeom(ioncid, meshgeom, meshid, networkid,  meshname, networkName)
    
 end function ionc_put_meshgeom_dll

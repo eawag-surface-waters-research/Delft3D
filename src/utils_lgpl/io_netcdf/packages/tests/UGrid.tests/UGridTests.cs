@@ -2016,7 +2016,7 @@ namespace UGrid.tests
         // Test: get only 1d network using get mesh geom
         [Test]
         [NUnit.Framework.Category("Read1dNetworkUsingGetMeshGeom")]
-        public void Load1dNetworkUsingGetMeshGeom()
+        public void Get1dNetworkUsingGetMeshGeom()
         {
             //1.Open a netcdf file
             string c_path = TestHelper.TestFilesDirectoryPath() + @"\write1dNetwork.nc";
@@ -2080,6 +2080,83 @@ namespace UGrid.tests
             Marshal.Copy(network.ngeopointx, l_ngeopointx, 0, networkdim.ngeometry);
             Marshal.Copy(network.ngeopointy, l_ngeopointy, 0, networkdim.ngeometry);
 
+            //8. Close the file
+            ierr = wrapper.ionc_close(ref ioncid);
+            Assert.That(ierr, Is.EqualTo(0));
+
+        }
+
+        // Test: get only 1d network using get mesh geom
+        [Test]
+        [NUnit.Framework.Category("Read1dNetworkUsingGetMeshGeom")]
+        public void Put2dMeshUsingPutMeshGeom()
+        {
+            //1. Open a netcdf file
+            string c_path = TestHelper.TestFilesDirectoryPath() + @"\Custom_Ugrid.nc";
+            Assert.IsTrue(File.Exists(c_path));
+            int ioncid  = -1; 
+            int mode    =  0; //read mode
+            var wrapper = new IoNetcdfLibWrapper();
+            var ierr = wrapper.ionc_open(c_path, ref mode, ref ioncid, ref iconvtype, ref convversion);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            //2. Get the mesh dimensions in meshdim
+            int existingMeshId = 1;
+            int existingNetworkId = -1;
+            var meshdim = new meshgeomdim();
+            ierr = wrapper.ionc_get_meshgeom_dim(ref ioncid, ref existingMeshId, ref existingNetworkId, ref meshdim);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            //3. Allocate mesh
+            var mesh = new meshgeom();
+            if (meshdim.numnode>0) mesh.nodex = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshdim.numnode);
+            if (meshdim.numnode > 0) mesh.nodey = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshdim.numnode);
+            if (meshdim.numnode > 0) mesh.nodez = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshdim.numnode);
+            if (meshdim.numedge > 0) mesh.edge_nodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshdim.numedge * 2);
+            if (meshdim.numface > 0) mesh.face_nodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshdim.maxnumfacenodes*meshdim.numface);
+            if (meshdim.numedge > 0) mesh.edge_faces = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshdim.numedge * 2);
+            if (meshdim.numface > 0) mesh.face_edges = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshdim.maxnumfacenodes*meshdim.numface);
+            if (meshdim.numface > 0) mesh.face_links = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshdim.maxnumfacenodes*meshdim.numface);
+            if (meshdim.nnodes > 0) mesh.nodex = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshdim.nnodes);
+            if (meshdim.nnodes > 0) mesh.nodey = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshdim.nnodes);
+            if (meshdim.nnodes > 0) mesh.nodez = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshdim.nnodes);
+            if (meshdim.numedge > 0) mesh.edgex = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshdim.numedge);
+            if (meshdim.numedge > 0) mesh.edgey = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshdim.numedge);
+            if (meshdim.numface > 0) mesh.facex = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshdim.numface);
+            if (meshdim.numface > 0) mesh.facey= Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double))  * meshdim.numface);
+
+            //4. Get mesh variables
+            int start_index = 1; //arrays are 1 based
+            bool includeArrays = true;
+            ierr = wrapper.ionc_get_meshgeom(ref ioncid, ref existingMeshId, ref existingNetworkId, ref mesh, ref start_index, ref includeArrays);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            //8. Close the file
+            ierr = wrapper.ionc_close(ref ioncid);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            //4. Create a new netcdf file
+            int targetioncid = -1; //file id  
+            int targetmode = 1; //create in write mode
+            string target_path = TestHelper.TestDirectoryPath() + "/target.nc";
+            TestHelper.DeleteIfExists(target_path);
+            Assert.IsFalse(File.Exists(target_path));
+
+            ierr = wrapper.ionc_create(target_path, ref targetmode, ref targetioncid);
+            Assert.That(ierr, Is.EqualTo(0));
+            Assert.IsTrue(File.Exists(target_path));
+
+            //5. write a 2d mesh using ionc_put_meshgeom
+            string meshname = "my_mesh";
+            string networkname = ""; //empty string if mesh not available
+            int newMeshId    = -1;
+            int newNetworkId = -1;
+            ierr = wrapper.ionc_put_meshgeom(ref targetioncid, ref newMeshId, ref newNetworkId, ref mesh, ref meshdim, meshname, networkname, ref start_index);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            //6. Close the file
+            ierr = wrapper.ionc_close(ref targetioncid);
+            Assert.That(ierr, Is.EqualTo(0));
         }
 
         //open a file test

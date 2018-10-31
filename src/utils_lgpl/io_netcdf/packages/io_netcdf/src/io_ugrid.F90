@@ -1366,7 +1366,6 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    if (ug_checklocation(dataLocs, UG_LOC_EDGE)) then
       ierr = nf90_put_var(ncid, meshids%varids(mid_edgex), xe(1:numEdge))
       ierr = nf90_put_var(ncid, meshids%varids(mid_edgey), ye(1:numEdge))
-
       ! end point coordinates:
       allocate(edgexbnd(2, numEdge), edgeybnd(2, numEdge))
       edgexbnd = dmiss
@@ -2441,16 +2440,29 @@ function ug_get_meshgeom(ncid, meshgeom, start_index, meshids, netid, includeArr
          ! read mesh edge nodes only if numedge is present
          !
          if ( meshgeom%numedge.ne.-1 ) then
-            call reallocP(meshgeom%edge_nodes, (/ 2, meshgeom%numedge /), keepExisting=.false.)
+            call reallocP(meshgeom%edge_nodes, (/ 2, meshgeom%numedge /), keepExisting=.false.)            
             ! Edge nodes
             ierr = ug_get_edge_nodes(ncid, meshids, meshgeom%edge_nodes, meshgeom%start_index)
          endif
+
+
 
          ! Get the node coordinates
          if (meshgeom%dim == 2) then
             ierr = ug_get_node_coordinates(ncid, meshids, meshgeom%nodex, meshgeom%nodey)
             ! TODO: AvD: include zk coordinates
-
+            if (meshgeom%numface .ne.-1 ) then
+               call reallocP(meshgeom%face_nodes, (/ meshgeom%maxnumfacenodes, meshgeom%numface /), keepExisting=.false.)
+               call reallocP(meshgeom%facex, meshgeom%numface, keepExisting=.false.)
+               call reallocP(meshgeom%facey, meshgeom%numface, keepExisting=.false.)
+            
+               ierr = ug_get_face_coordinates(ncid, meshids, meshgeom%facex, meshgeom%facey)
+               ierr = ug_get_face_nodes(ncid, meshids, meshgeom%face_nodes, startIndex = meshgeom%start_index)
+            endif
+            if ( meshgeom%numedge.ne.-1 ) then
+               call reallocP(meshgeom%edge_faces, (/ 2, meshgeom%numedge /), keepExisting=.false.)
+               ierr = ug_get_edge_faces(ncid, meshids, meshgeom%edge_faces, startIndex = meshgeom%start_index)
+            endif
          endif
 
          if (meshgeom%dim == 1) then
