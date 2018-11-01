@@ -227,13 +227,7 @@ namespace ECModuleTests
 
             //You need to know in advance the number of mesh points
             var meshtwod = new meshgeom();
-            meshtwod.nodex = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshtwoddim.numnode);
-            meshtwod.nodey = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshtwoddim.numnode);
-            meshtwod.nodez = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshtwoddim.numnode);
-            meshtwod.facex = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshtwoddim.numface);
-            meshtwod.facey = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshtwoddim.numface);
-            meshtwod.facez = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshtwoddim.numface);
-            meshtwod.edge_nodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshtwoddim.numedge * 2);
+            MeshgeomMemoryManager.allocate(ref meshtwoddim, ref meshtwod);
 
             //var gridGeomWrapper = new GridGeomLibWrapper();
             bool includeArrays = true;
@@ -351,13 +345,7 @@ namespace ECModuleTests
 
             //You need to know in advance the number of mesh points
             var meshtwod = new meshgeom();
-            meshtwod.nodex = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshtwoddim.numnode);
-            meshtwod.nodey = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshtwoddim.numnode);
-            meshtwod.nodez = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshtwoddim.numnode);
-            meshtwod.facex = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshtwoddim.numface);
-            meshtwod.facey = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshtwoddim.numface);
-            meshtwod.facez = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshtwoddim.numface);
-            meshtwod.edge_nodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshtwoddim.numedge * 2);
+            MeshgeomMemoryManager.allocate(ref meshtwoddim, ref meshtwod);
 
             //var gridGeomWrapper = new GridGeomLibWrapper();
             bool includeArrays = true;
@@ -447,13 +435,7 @@ namespace ECModuleTests
 
             //You need to know in advance the number of mesh points
             var meshtwod = new meshgeom();
-            meshtwod.nodex = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double))   * meshtwoddim.numnode);
-            meshtwod.nodey = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double))   * meshtwoddim.numnode);
-            meshtwod.nodez = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double))   * meshtwoddim.numnode);
-            meshtwod.facex = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double))   * meshtwoddim.numface);
-            meshtwod.facey = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double))   * meshtwoddim.numface);
-            meshtwod.facez = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double))   * meshtwoddim.numface);
-            meshtwod.edge_nodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshtwoddim.numedge * 2);
+            MeshgeomMemoryManager.allocate(ref meshtwoddim, ref meshtwod);
 
             //var gridGeomWrapper = new GridGeomLibWrapper();
             bool includeArrays = true;
