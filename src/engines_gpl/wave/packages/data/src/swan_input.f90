@@ -255,6 +255,7 @@ module swan_input
        logical                                 :: flowLinkConnectivity ! false: (default) use netlink connectivity from DFlowFM, true: use flowlink connectivity from DFlowFM
        !
        real                                    :: alpw
+       real                                    :: alfa
        real                                    :: cdd
        real                                    :: cfbr1
        real                                    :: cfbr2
@@ -1721,14 +1722,16 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     sr%percwet = 98.0
     sr%itermx  = 15
     sr%gamma0  = 3.3
+    sr%alfa    = 0.0
     !
-    call prop_get_real   (mdw_ptr, 'Numerics', 'DirSpaceCDD'  , sr%cdd)
-    call prop_get_real   (mdw_ptr, 'Numerics', 'FreqSpaceCSS' , sr%css)
-    call prop_get_real   (mdw_ptr, 'Numerics', 'RChHsTm01'    , sr%drel)
-    call prop_get_real   (mdw_ptr, 'Numerics', 'RChMeanHs'    , sr%dh_abs)
-    call prop_get_real   (mdw_ptr, 'Numerics', 'RChMeanTm01'  , sr%dt_abs)
-    call prop_get_real   (mdw_ptr, 'Numerics', 'PercWet'      , sr%percwet)
-    call prop_get_integer(mdw_ptr, 'Numerics', 'MaxIter'      , sr%itermx)
+    call prop_get_real   (mdw_ptr, 'Numerics', 'DirSpaceCDD'    , sr%cdd)
+    call prop_get_real   (mdw_ptr, 'Numerics', 'FreqSpaceCSS'   , sr%css)
+    call prop_get_real   (mdw_ptr, 'Numerics', 'RChHsTm01'      , sr%drel)
+    call prop_get_real   (mdw_ptr, 'Numerics', 'RChMeanHs'      , sr%dh_abs)
+    call prop_get_real   (mdw_ptr, 'Numerics', 'RChMeanTm01'    , sr%dt_abs)
+    call prop_get_real   (mdw_ptr, 'Numerics', 'PercWet'        , sr%percwet)
+    call prop_get_integer(mdw_ptr, 'Numerics', 'MaxIter'        , sr%itermx)
+    call prop_get_real   (mdw_ptr, 'Numerics', 'AlfaUnderRelax' , sr%alfa)
     !
     ! General output options
     !
@@ -4741,8 +4744,13 @@ subroutine write_swan_inp (wavedata, calccount, &
     line        = ' '
     line(1:10)  = 'NUM ACCUR '
     if ( sr%modsim /= 3 ) then
-        write (line(15:), '(F8.3,1X,F8.3,1X,F8.3,1X,F8.3,1X,I4)') &
-        & sr%drel, sr%dh_abs, sr%dt_abs, sr%percwet, sr%itermx
+        if (sr%alfa > 0.0) then
+            write (line(15:), '(F8.3,1X,F8.3,1X,F8.3,1X,F8.3,1X,A,1X,I4,1X,F8.3)') &
+                 & sr%drel, sr%dh_abs, sr%dt_abs, sr%percwet, 'STAT', sr%itermx, sr%alfa
+        else
+           write (line(15:), '(F8.3,1X,F8.3,1X,F8.3,1X,F8.3,1X,I4)') &
+           & sr%drel, sr%dh_abs, sr%dt_abs, sr%percwet, sr%itermx
+        endif
     else
         write (line(15:), '(F8.3,1X,F8.3,1X,F8.3,1X,F8.3,1X,A,1X,I4)') &
         & sr%drel, sr%dh_abs, sr%dt_abs, sr%percwet, &
