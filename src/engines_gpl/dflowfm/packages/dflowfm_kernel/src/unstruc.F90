@@ -22261,12 +22261,16 @@ endif
 
  ! link related
  if (allocated(cfuhi) ) then
-    deallocate(cfuhi,frcu,ifrcutp,wdsu,u0,u1,q1,qa,v,ucxu,ucyu,hu,huvli,au,viu,vicLu,suu,advi,adve,plotlin,frcu_mor)
+    deallocate(cfuhi,frcu,ifrcutp,wdsu,u0,u1,q1,qa,v,ucxu,ucyu,hu,huvli,au,viu,vicLu,suu,advi,adve,plotlin,frcu_bkp,frcu_mor)
  endif
  allocate ( cfuhi(lnx)   , stat=ierr)            ! hk: hier stond + 1, heb ik weggehaald
  call aerr('cfuhi(lnx)'  , ierr, lnx)   ; cfuhi   = 0
  allocate ( frcu (lnx)   , stat = ierr)
  call aerr('frcu (lnx)'  , ierr,   ndx) ; frcu    = dmiss
+ if (jacali == 1) then
+    allocate ( frcu_bkp (lnx)   , stat = ierr)
+    call aerr('frcu_bkp (lnx)'  , ierr,   ndx) ; frcu_bkp    = dmiss
+ endif
  allocate ( frcu_mor (lnx)   , stat = ierr)
  call aerr('frcu_mor (lnx)'  , ierr,   ndx) ; frcu_mor    = dmiss
  allocate ( ifrcutp(lnx) , stat = ierr)
