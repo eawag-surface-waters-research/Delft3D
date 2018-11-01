@@ -13179,15 +13179,19 @@ end if
  call mess(LEVEL_INFO, 'Start initializing external forcings...')
  call klok(cpuiniext(1))
  iresult = flow_initexternalforcings()               ! this is the general hook-up to wind and boundary conditions
- call klok(cpuiniext(2)) ; cpuiniext(3) = cpuiniext(3) + cpuiniext(2) - cpuiniext(1)  
+ call klok(cpuiniext(2)) ; cpuiniext(3) = cpuiniext(3) + cpuiniext(2) - cpuiniext(1)
+ 
+ ! from hereon, the processes are in sync 
+ if (jampi == 1) then
+    ! globally reduce the error
+    call reduce_error(iresult)
+ end if
  if (iresult /= DFM_NOERR) then
     call qnerror('Error occurred while running, please inspect your diagnostic output.',' ', ' ')
-#ifdef HAVE_MPI
     if (jampi == 1) then
-       call MPI_Abort(DFM_COMM_DFMWORLD, DFM_GENERICERROR, ierr)
-    endif
-#endif
-    goto 888
+        call qnerror('Error occurs on one or more processes.',' ', ' ')
+    end if
+   goto 888
  end if
  call mess(LEVEL_INFO, 'Done initializing external forcings.')
 
