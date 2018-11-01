@@ -2110,22 +2110,21 @@ namespace UGrid.tests
             ierr = wrapper.ionc_get_meshgeom(ref ioncid, ref existingMeshId, ref existingNetworkId, ref mesh, ref start_index, ref includeArrays);
             Assert.That(ierr, Is.EqualTo(0));
 
-            //8. Close the file
+            //5. Close the file
             ierr = wrapper.ionc_close(ref ioncid);
             Assert.That(ierr, Is.EqualTo(0));
 
-            //4. Create a new netcdf file
+            //6. Create a new netcdf file
             int targetioncid = -1; //file id  
             int targetmode = 1; //create in write mode
             string target_path = TestHelper.TestDirectoryPath() + "/target.nc";
             TestHelper.DeleteIfExists(target_path);
             Assert.IsFalse(File.Exists(target_path));
-
             ierr = wrapper.ionc_create(target_path, ref targetmode, ref targetioncid);
             Assert.That(ierr, Is.EqualTo(0));
             Assert.IsTrue(File.Exists(target_path));
 
-            //5. write a 2d mesh using ionc_put_meshgeom
+            //7. write a 2d mesh using ionc_put_meshgeom
             string meshname = "my_mesh";
             string networkname = ""; //empty string if mesh not available
             int newMeshId    = -1;
@@ -2133,7 +2132,7 @@ namespace UGrid.tests
             ierr = wrapper.ionc_put_meshgeom(ref targetioncid, ref newMeshId, ref newNetworkId, ref mesh, ref meshdim, meshname, networkname, ref start_index);
             Assert.That(ierr, Is.EqualTo(0));
 
-            //6. Close the file
+            //8. Close the file
             ierr = wrapper.ionc_close(ref targetioncid);
             Assert.That(ierr, Is.EqualTo(0));
         }
