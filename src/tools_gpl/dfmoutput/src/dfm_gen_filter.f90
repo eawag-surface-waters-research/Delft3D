@@ -39,7 +39,7 @@ module dfm_gen_filter
    use precision
    implicit none
    private
-   public :: gen_filter
+   public :: gen_filter, matlab_test
 
    contains
 
@@ -52,25 +52,13 @@ subroutine gen_filter(filename, filename_out, field_name, intval, coefimpl, coef
    real(kind=hp), intent(in) :: coefimpl, coefexpl, intval
 
    integer :: ierr, i, nStations, ntimes, iunout
-   real(kind=hp), allocatable :: hisdata(:,:), ySmooth(:), y(:)
+   real(kind=hp), allocatable :: hisdata(:,:), ySmooth(:)
    character(len=64), allocatable :: stations(:)
-   logical, parameter :: debug_test = .false.
 
                            ierr = read_meta_data(filename, nStations)
    if (ierr == nf90_noerr) ierr = read_station_names(stations, 'station_name')
    if (ierr == nf90_noerr) ierr = read_data(hisdata, field_name)
    if (ierr == nf90_noerr) ierr = close_nc_his_file()
-
-   ! small test
-   if (debug_test) then
-      ntimes = 20
-      allocate(y(ntimes), ysmooth(ntimes))
-      do i = 1, ntimes
-         y(i) = real(i, hp) + 0.9_hp * sin(3.0_hp * real(i, hp))
-      enddo
-      call fourthOrderMono(y, intval, coefimpl, coefexpl, ySmooth)
-      deallocate(y, ysmooth)
-   endif
 
    if (ierr == nf90_noerr) then
       open (newunit=iunout, file=filename_out)
@@ -84,6 +72,26 @@ subroutine gen_filter(filename, filename_out, field_name, intval, coefimpl, coef
    endif
 end subroutine gen_filter
 
+!> test compare with matlab version
+subroutine matlab_test()
+   integer, parameter :: ntimes = 20
+   real(kind=hp), parameter :: matlab_test_result(ntimes) = [ &
+      0.0_hp, 0.0_hp, 0.0_hp, 0.0_hp, 0.0_hp, 0.0_hp, 0.0_hp, 0.0_hp, &
+      9.018895906639754_hp, 9.980478645717140_hp, 11.019756081887266_hp, 11.980404608621626_hp, &
+      0.0_hp, 0.0_hp, 0.0_hp, 0.0_hp, 0.0_hp, 0.0_hp, 0.0_hp, 0.0_hp ]
+   integer :: i
+   real(kind=hp) :: ySmooth(ntimes), y(ntimes)
+
+   do i = 1, ntimes
+      y(i) = real(i, hp) + 0.9_hp * sin(3.0_hp * real(i, hp))
+   enddo
+   call fourthOrderMono(y, 6.0_hp, 0.3_hp, 0.3_hp, ySmooth)
+   do i = 1, ntimes
+      write(*,'(4(f14.10,x))') y(i), ySmooth(i), matlab_test_result(i), ySmooth(i) - matlab_test_result(i)
+   enddo
+
+end subroutine matlab_test
+
 subroutine fourthOrderMono(y, intval, coefimpl, coefexpl, ySmooth)
    real(kind=hp), intent(in) :: y(:), coefimpl, coefexpl, intval
    real(kind=hp), intent(out) :: ySmooth(:)
@@ -91,15 +99,15 @@ subroutine fourthOrderMono(y, intval, coefimpl, coefexpl, ySmooth)
    integer :: ndim, i, N, ii, NN
    real(kind=hp), parameter :: pi = 4.0_hp * atan(1.0_hp)
    real(kind=hp) :: ToDt, c4expl, c4impl, ca4expl, ca4impl, ddd
-   real(kind=hp), allocatable :: v(:), M(:,:), termN(:), ySmooth2(:)
-   integer, allocatable :: indx(:), interval(:)
+   real(kind=hp), allocatable :: v(:), M(:,:), ySmooth2(:)
+   integer, allocatable :: indx(:)
 
    ndim = size(y)
    allocate(v(ndim), indx(ndim))
    allocate(M(ndim,ndim))
    M = 0.0_hp
 
-   N = nint(1.5 * intval)
+   N = nint(1.5_hp * intval)
    ToDt=intval/(2.0_hp*pi)
    ToDt=ToDt*sqrt(sqrt(2.0_hp)-1.0_hp)
 
@@ -136,8 +144,8 @@ subroutine fourthOrderMono(y, intval, coefimpl, coefexpl, ySmooth)
    ! cannot be applied anymore (the two 2nd order diffusive fluxes that both
    ! can still be applied)
    M(ndim-1,ndim-3) = ca4impl+ToDt**4
-   M(ndim-1,ndim-2) = c4impl-3.0*(ca4impl+ToDt**4)
-   M(ndim-1,ndim-1) = 1.0_hp-2.0_hp*c4impl+3.0*(ca4impl+ToDt**4)
+   M(ndim-1,ndim-2) = c4impl-3.0_hp*(ca4impl+ToDt**4)
+   M(ndim-1,ndim-1) = 1.0_hp-2.0_hp*c4impl+3.0_hp*(ca4impl+ToDt**4)
    M(ndim-1,ndim)   = c4impl-(ca4impl+ToDt**4)
 
    ! boundary procedure: apply no 4th order diffusive flux and only one 2nd
@@ -145,40 +153,31 @@ subroutine fourthOrderMono(y, intval, coefimpl, coefexpl, ySmooth)
    M(ndim,ndim-1) = c4impl
    M(ndim,ndim)   = 1.0_hp-c4impl
 
-   call ludcmp(M,ndim,ndim,indx,ddd)
-   call lubksb(M,ndim,ndim,indx,V)
+   call ludcmp(M, ndim, ndim, indx, ddd)  ! TODO: use a band solver
+   call lubksb(M, ndim, ndim, indx, V)
 
    ! divide weight for central element by 2, to allow double application below
    V(1) = 0.5_hp * V(1)
 
-   ii = 0
    nn = ndim-N+1
-   allocate(interval(nn+1-N))  ! a little bit too big
-   do i = N, nn
-      ii = ii + 1
-      interval(ii) = i
-   enddo
 
-   allocate(termN(nn+1-N), ySmooth2(nn+1-N))
+   allocate(ySmooth2(nn+1-N))
+   ySmooth2 = 0.0_hp
    do i = 0, N-1
       do ii = N, nn
-         termN(ii+1-N) = V(i+1) * (y(interval(ii+1-N)+i) + y(interval(ii+1-N)-i))
+         ySmooth2(ii+1-N) = ySmooth2(ii+1-N) + V(i+1) * (y(ii+i) + y(ii-i))
       enddo
-      if (i == 0) then
-         ySmooth2 = termN
-      else
-         ySmooth2 = ySmooth2 + termN
-      endif
    enddo
 
-   ySmooth = y  ! todo: niet nodig
-   do i = 1, ndim
+   do i = 1, N-1
+      ySmooth(i) = 0.0_hp
+   enddo
+   do i = N, size(ySmooth2) + N - 1
       ii = i-(N-1)
-      if (i < N .or. ii > size(interval)) then
-          ySmooth(i) = 0.0_hp
-      else
-          ySmooth(i) = ySmooth2(ii)
-      end if
+      ySmooth(i) = ySmooth2(ii)
+   enddo
+   do i = size(ySmooth2) + N, ndim
+      ySmooth(i) = 0.0_hp
    enddo
 
 end subroutine fourthOrderMono
@@ -200,7 +199,7 @@ end subroutine fourthOrderMono
       do j=1,n
          if(abs(a(i,j)) > aamax) aamax=abs(a(i,j))
       enddo
-      if(aamax == 0) then
+      if(aamax == 0.0_hp) then
          write(*,*) 'singular matrix in ludcmp'
          return
       endif

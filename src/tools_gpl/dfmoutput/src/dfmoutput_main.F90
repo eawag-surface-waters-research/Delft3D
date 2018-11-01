@@ -76,7 +76,9 @@ logical :: force
 call cli%init(progname    = dfmoutput_basename,                                            &
               version     = dfmoutput_version,                                             &
               description = 'Tool for handling D-Flow FM output files',                    &
-              examples    = ["dfmoutput mapmerge --infile model_0000_map.nc model_0001_map.nc    "])! ,&
+              examples    = ["dfmoutput mapmerge  --infile model_0000_map.nc model_0001_map.nc", &
+                             "dfmoutput max25     --infile hisfile.nc                         ", &
+                             "dfmoutput genfilter --infile hisfile.nc  --intval 6             "])
 !                             "dfmoutput extract --station='stat A' model_his.nc         "])
 
 ! setting Command Line Arguments
