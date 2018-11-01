@@ -58,6 +58,7 @@ module m_GlobalParameters
    double precision                 :: sl                            = 0.01d0        !< width at top of closed profile (Preisman lock)
    double precision                 :: pi                            = 3.141592653589793d0
    double precision                 :: ThresholdForPreismannLock     = 0.02d0
+   double precision                 :: minSectionLength              = 1.0
    double precision, public         :: dynstructext                  = 1.0d0
    double precision, public         :: missingvalue                  =-999.999d0
    double precision, public         :: latitude                      = 52.25

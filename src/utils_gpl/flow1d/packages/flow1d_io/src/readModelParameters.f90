@@ -64,6 +64,12 @@ module m_readModelParameters
       
       call ReadSobekSimIni(sobekSimIniFile)
       
+      ! Retrieve Minimum Distance between Grid Points
+      call prop_get_double(md_ptr, 'NumericalParameters', 'MinimumLength', Value, success)
+      if (success) then
+         minSectionLength = Value
+      endif
+      
       ! Read Interpolation Type for Obsevation Points
       call prop_get_string(md_ptr, 'Observations', 'interpolationType', obsIntPolType, success)
       if (.not. success) then
@@ -71,7 +77,7 @@ module m_readModelParameters
       endif
       
       ! Read Salt Switch
-      call prop_get_integer(md_ptr, 'salinity', 'SaltComputation', iValue, success)
+      call prop_get_integer(md_ptr, 'Salinity', 'SaltComputation', iValue, success)
       if (success .and. (iValue .ne. 0)) then
          transportPars%do_salt = .true.
          transportPars%salt_index = 1
@@ -622,7 +628,7 @@ module m_readModelParameters
       call AddOrReplaceParameter(category, 'MaxTimeStep', '0', .true.)  ! TODO: Default must be corrected when Time Chapter is available
       call AddOrReplaceParameter(category, 'MinimumSurfaceatStreet', '0.1', .true.)
       call AddOrReplaceParameter(category, 'MinimumSurfaceinNode', '0.1', .true.)
-      call AddOrReplaceParameter(category, 'MinumumLength', '1.0', .true.)
+      call AddOrReplaceParameter(category, 'MinimumLength', '1.0', .true.)
       call AddOrReplaceParameter(category, 'RelaxationFactor', '1.0', .true.)
       call AddOrReplaceParameter(category, 'Rho', '1000', .true.)
       call AddOrReplaceParameter(category, 'StructureInertiaDampingFactor', '1.0', .true.)

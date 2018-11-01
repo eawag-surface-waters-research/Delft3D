@@ -47,7 +47,6 @@ module m_branch
    public admin_branch
    public fill_hashtable
 
-   public minSectionLength
    public BR_EMBEDDED, BR_CONNECTED, BR_ISOLATED, BR_BOUNDARY
    
    interface fill_hashtable
@@ -114,7 +113,6 @@ module m_branch
       type(t_hashlist)                                      :: hashlist
    end type t_branchSet
 
-   double precision, parameter    :: minSectionLength = 1.0d0
    integer, parameter    :: BR_BOUNDARY  = -1 
    integer, parameter    :: BR_EMBEDDED  = 0
    integer, parameter    :: BR_ISOLATED  = 1
