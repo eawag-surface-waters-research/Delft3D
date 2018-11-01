@@ -302,10 +302,7 @@ namespace gridgeom.Tests
 
             //You need to know in advance the number of mesh points
             var meshtwod        = new meshgeom();
-            meshtwod.nodex      = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshtwoddim.numnode);
-            meshtwod.nodey      = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshtwoddim.numnode);
-            meshtwod.nodez      = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshtwoddim.numnode);
-            meshtwod.edge_nodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshtwoddim.numedge * 2);
+            MeshgeomMemoryManager.allocate(ref meshtwoddim, ref meshtwod);
 
             //var gridGeomWrapper = new GridGeomLibWrapper();
             bool includeArrays = true;
@@ -349,8 +346,8 @@ namespace gridgeom.Tests
             meshoned.ngeopointx = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshoneddim.ngeometry);
             meshoned.ngeopointy = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshoneddim.ngeometry);
             meshoned.nbranchlengths = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshoneddim.nbranches);
-            meshoned.nedge_nodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshoneddim.nbranches);
-            meshoned.nbranchorder = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshoneddim.nbranches);
+            meshoned.nedge_nodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshoneddim.nbranches);
+            meshoned.nbranchorder = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshoneddim.nbranches);
 
             //need to produce a file with coordinate_space = string variable
             ierr = wrapperNetcdf.ionc_get_meshgeom(ref ioncid, ref meshonedid, ref meshonedid, ref meshoned, ref start_index, ref includeArrays);
@@ -395,30 +392,11 @@ namespace gridgeom.Tests
             ierr = wrapperNetcdf.ionc_close(ref ioncid);
             Assert.That(ierr, Is.EqualTo(0));
 
-            //free arrays
+            //free meshgeom
             //2d
-            Marshal.FreeCoTaskMem(meshtwod.nodex);
-            Marshal.FreeCoTaskMem(meshtwod.nodey);
-            Marshal.FreeCoTaskMem(meshtwod.nodez);
-            Marshal.FreeCoTaskMem(meshtwod.edge_nodes);
-
-             //1d
-                //mesh variables
-            Marshal.FreeCoTaskMem(meshoned.nodex);
-            Marshal.FreeCoTaskMem(meshoned.nodey);
-            Marshal.FreeCoTaskMem(meshoned.nodez);
-            //Marshal.FreeCoTaskMem(meshoned.edge_nodes);
-            //network variables
-            //Marshal.FreeCoTaskMem(meshoned.nnodex);
-            Marshal.FreeCoTaskMem(meshoned.nnodey);
-            Marshal.FreeCoTaskMem(meshoned.branchidx);
-            Marshal.FreeCoTaskMem(meshoned.nbranchgeometrynodes);
-            Marshal.FreeCoTaskMem(meshoned.branchoffsets);
-            Marshal.FreeCoTaskMem(meshoned.ngeopointx);
-            Marshal.FreeCoTaskMem(meshoned.ngeopointy);
-            Marshal.FreeCoTaskMem(meshoned.nbranchlengths);
-            Marshal.FreeCoTaskMem(meshoned.nedge_nodes);
-            Marshal.FreeCoTaskMem(meshoned.nbranchorder);
+            MeshgeomMemoryManager.deallocate(ref meshtwod);
+            //1d
+            MeshgeomMemoryManager.deallocate(ref meshoned);
         }
 
         /// <summary>
@@ -489,10 +467,7 @@ namespace gridgeom.Tests
 
             //4. allocate the arrays in meshgeom for storing the 2d mesh coordinates, edge_nodes
             var meshtwod = new meshgeom();
-            meshtwod.nodex = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * twodnumnode);
-            meshtwod.nodey = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * twodnumnode);
-            meshtwod.nodez = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * twodnumnode);
-            meshtwod.edge_nodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshtwoddim.numedge * 2);
+            MeshgeomMemoryManager.allocate(ref meshtwoddim, ref meshtwod);
 
             //5. get the meshgeom arrays
             bool includeArrays = true;
@@ -580,18 +555,15 @@ namespace gridgeom.Tests
             ierr = wrapperNetcdf.ionc_close(ref ioncid);
             Assert.That(ierr, Is.EqualTo(0));
 
-            //Free 2d arrays
-            Marshal.FreeCoTaskMem(meshtwod.nodex);
-            Marshal.FreeCoTaskMem(meshtwod.nodey);
-            Marshal.FreeCoTaskMem(meshtwod.nodez);
-            Marshal.FreeCoTaskMem(meshtwod.edge_nodes);
+            //Free 2d meshgeom
+            MeshgeomMemoryManager.deallocate(ref meshtwod);
 
-            //Free 1d arrays
+            //Free 1d mesh arrays
             Marshal.FreeCoTaskMem(c_meshXCoords);
             Marshal.FreeCoTaskMem(c_meshYCoords);
             Marshal.FreeCoTaskMem(c_branchids);
 
-            //Free from and to arrays describing the links 
+            //Free 1d mesh links
             Marshal.FreeCoTaskMem(c_arrayfrom);
             Marshal.FreeCoTaskMem(c_arrayto);
         }
@@ -661,10 +633,7 @@ namespace gridgeom.Tests
 
             //4. allocate the arrays in meshgeom for storing the 2d mesh coordinates, edge_nodes
             var meshtwod = new meshgeom();
-            meshtwod.nodex = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * twodnumnode);
-            meshtwod.nodey = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * twodnumnode);
-            meshtwod.nodez = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * twodnumnode);
-            meshtwod.edge_nodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshtwoddim.numedge * 2);
+            MeshgeomMemoryManager.allocate(ref meshtwoddim, ref meshtwod);
 
             //5. get the meshgeom arrays
             bool includeArrays = true;
@@ -736,10 +705,7 @@ namespace gridgeom.Tests
             Assert.That(ierr, Is.EqualTo(0));
 
             //Free 2d arrays
-            Marshal.FreeCoTaskMem(meshtwod.nodex);
-            Marshal.FreeCoTaskMem(meshtwod.nodey);
-            Marshal.FreeCoTaskMem(meshtwod.nodez);
-            Marshal.FreeCoTaskMem(meshtwod.edge_nodes);
+            MeshgeomMemoryManager.deallocate(ref meshtwod);
 
             //Free 1d arrays
             Marshal.FreeCoTaskMem(c_meshXCoords);
@@ -792,10 +758,7 @@ namespace gridgeom.Tests
 
                 //4. allocate meshgeom to pass to find_cells
                 var meshIn = new meshgeom();
-                meshIn.nodex = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshDimIn.numnode);
-                meshIn.nodey = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshDimIn.numnode);
-                meshIn.nodez = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshDimIn.numnode);
-                meshIn.edge_nodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshDimIn.numedge * 2);
+                MeshgeomMemoryManager.allocate(ref meshDimIn, ref meshIn);
 
                 //5. get the meshgeom arrays from file
                 bool includeArrays = true;
@@ -826,11 +789,8 @@ namespace gridgeom.Tests
                 ierr = wrapperGridgeom.ggeo_meshgeom_destructor(ref meshDimOut, ref meshOut);
                 Assert.That(ierr, Is.EqualTo(0));
 
-                //9. deallocate memory allocated by c#
-                Marshal.FreeCoTaskMem(meshIn.nodex);
-                Marshal.FreeCoTaskMem(meshIn.nodey);
-                Marshal.FreeCoTaskMem(meshIn.nodez);
-                Marshal.FreeCoTaskMem(meshIn.edge_nodes);
+            //9. deallocate memory allocated by c#
+                MeshgeomMemoryManager.deallocate(ref meshIn);
             //}, stackSize);
             //th.Start();
             //th.Join();
@@ -874,22 +834,7 @@ namespace gridgeom.Tests
 
             //2c. allocate
             var meshoned = new meshgeom();
-            //mesh variables
-            meshoned.nodex = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshoneddim.numnode);
-            meshoned.nodey = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshoneddim.numnode);
-            meshoned.nodez = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshoneddim.numnode);
-            
-            //network variables
-            meshoned.nnodex = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshoneddim.nnodes);
-            meshoned.nnodey = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshoneddim.nnodes);
-            meshoned.branchidx = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshoneddim.numnode);
-            meshoned.nedge_nodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshoneddim.nnodes * 2);
-            meshoned.nbranchgeometrynodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshoneddim.nbranches);
-            meshoned.branchoffsets = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshoneddim.numnode);
-            meshoned.ngeopointx = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshoneddim.ngeometry);
-            meshoned.ngeopointy = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshoneddim.ngeometry);
-            meshoned.nbranchlengths = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshoneddim.nbranches);
-            meshoned.nbranchorder = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshoneddim.nbranches);
+            MeshgeomMemoryManager.allocate(ref meshoneddim, ref meshoned);
 
             //2d. get 1d meshgeom array 
             ierr = wrapperNetcdf.ionc_get_meshgeom(ref ioncid, ref meshid, ref networkid, ref meshoned, ref start_index, ref includeArrays);
@@ -924,10 +869,7 @@ namespace gridgeom.Tests
 
             //3c. allocate
             var meshtwod = new meshgeom();
-            meshtwod.nodex = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double))   * meshtwoddim.numnode);
-            meshtwod.nodey = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double))   * meshtwoddim.numnode);
-            meshtwod.nodez = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double))   * meshtwoddim.numnode);
-            meshtwod.edge_nodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshtwoddim.numedge * 2);
+            MeshgeomMemoryManager.allocate(ref meshtwoddim, ref meshoned);
 
             //3d. get meshgeom 
             ierr = wrapperNetcdf.ionc_get_meshgeom(ref ioncid, ref meshid, ref networkid, ref meshtwod, ref start_index, ref includeArrays);
@@ -1022,22 +964,7 @@ namespace gridgeom.Tests
 
             //2c. allocate
             var meshoned = new meshgeom();
-            //mesh variables
-            meshoned.nodex = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshoneddim.numnode);
-            meshoned.nodey = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshoneddim.numnode);
-            meshoned.nodez = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshoneddim.numnode);
-
-            //network variables
-            meshoned.nnodex = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshoneddim.nnodes);
-            meshoned.nnodey = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshoneddim.nnodes);
-            meshoned.branchidx = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshoneddim.numnode);
-            meshoned.nedge_nodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshoneddim.nnodes * 2);
-            meshoned.nbranchgeometrynodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshoneddim.nbranches);
-            meshoned.branchoffsets = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshoneddim.numnode);
-            meshoned.ngeopointx = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshoneddim.ngeometry);
-            meshoned.ngeopointy = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshoneddim.ngeometry);
-            meshoned.nbranchlengths = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshoneddim.nbranches);
-            meshoned.nbranchorder = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshoneddim.nbranches);
+            MeshgeomMemoryManager.allocate(ref meshoneddim, ref meshoned);
 
             //2d. get 1d meshgeom array 
             ierr = wrapperNetcdf.ionc_get_meshgeom(ref ioncid, ref meshid, ref networkid, ref meshoned, ref start_index, ref includeArrays);
@@ -1073,10 +1000,7 @@ namespace gridgeom.Tests
 
             //3c. allocate
             var meshtwod = new meshgeom();
-            meshtwod.nodex = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshtwoddim.numnode);
-            meshtwod.nodey = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshtwoddim.numnode);
-            meshtwod.nodez = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshtwoddim.numnode);
-            meshtwod.edge_nodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshtwoddim.numedge * 2);
+            MeshgeomMemoryManager.allocate(ref meshtwoddim, ref meshtwod);
 
             //3d. get meshgeom 
             ierr = wrapperNetcdf.ionc_get_meshgeom(ref ioncid, ref meshid, ref networkid, ref meshtwod, ref start_index, ref includeArrays);
@@ -1115,6 +1039,9 @@ namespace gridgeom.Tests
             //7. deallocate memory of gridgeom
             ierr = wrapperGridgeom.ggeo_deallocate();
             Assert.That(ierr, Is.EqualTo(0));
+
+            MeshgeomMemoryManager.deallocate(ref meshoned);
+            MeshgeomMemoryManager.deallocate(ref meshtwod);
 
         }
 

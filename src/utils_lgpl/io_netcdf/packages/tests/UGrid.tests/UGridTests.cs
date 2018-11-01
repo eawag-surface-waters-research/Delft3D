@@ -2048,14 +2048,7 @@ namespace UGrid.tests
 
             //5. Allocate memory
             var network = new meshgeom();
-            network.nnodex = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * networkdim.nnodes);
-            network.nnodey = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * networkdim.nnodes);
-            network.nedge_nodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * networkdim.nbranches);
-            network.nbranchlengths = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * networkdim.nbranches);
-            network.nbranchgeometrynodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * networkdim.nbranches);
-            network.ngeopointx = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * networkdim.ngeometry);
-            network.ngeopointy = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * networkdim.ngeometry);
-            network.nbranchorder = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * networkdim.nbranches);
+            MeshgeomMemoryManager.allocate(ref networkdim, ref network);
 
             var includeArrays = true;
             int start_index = 1;
@@ -2109,21 +2102,7 @@ namespace UGrid.tests
 
             //3. Allocate mesh
             var mesh = new meshgeom();
-            if (meshdim.numnode>0) mesh.nodex = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshdim.numnode);
-            if (meshdim.numnode > 0) mesh.nodey = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshdim.numnode);
-            if (meshdim.numnode > 0) mesh.nodez = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshdim.numnode);
-            if (meshdim.numedge > 0) mesh.edge_nodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshdim.numedge * 2);
-            if (meshdim.numface > 0) mesh.face_nodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshdim.maxnumfacenodes*meshdim.numface);
-            if (meshdim.numedge > 0) mesh.edge_faces = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshdim.numedge * 2);
-            if (meshdim.numface > 0) mesh.face_edges = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshdim.maxnumfacenodes*meshdim.numface);
-            if (meshdim.numface > 0) mesh.face_links = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshdim.maxnumfacenodes*meshdim.numface);
-            if (meshdim.nnodes > 0) mesh.nodex = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshdim.nnodes);
-            if (meshdim.nnodes > 0) mesh.nodey = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshdim.nnodes);
-            if (meshdim.nnodes > 0) mesh.nodez = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshdim.nnodes);
-            if (meshdim.numedge > 0) mesh.edgex = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshdim.numedge);
-            if (meshdim.numedge > 0) mesh.edgey = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshdim.numedge);
-            if (meshdim.numface > 0) mesh.facex = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshdim.numface);
-            if (meshdim.numface > 0) mesh.facey= Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double))  * meshdim.numface);
+            MeshgeomMemoryManager.allocate(ref meshdim, ref mesh);
 
             //4. Get mesh variables
             int start_index = 1; //arrays are 1 based
