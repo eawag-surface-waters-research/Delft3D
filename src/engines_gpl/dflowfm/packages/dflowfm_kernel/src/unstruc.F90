@@ -19487,7 +19487,7 @@ end subroutine unc_write_shp
  endif
  call cutcell_list(n12,'*.cut',5, 3 ) ! trim(fnam))       ! CUT CELLS, N12 = 5, WU AND BA ADAPTATION
  numlimdt = 0
- deallocate(kfs) ; allocate(kfs(ndx))
+! deallocate(kfs) ; allocate(kfs(ndx)) ! SPvdP: removed, since (1) uninitialized and (2) kfs needed in "setlinktocenterweights" later
 
  call readyy ('geominit',-1d0)
 
