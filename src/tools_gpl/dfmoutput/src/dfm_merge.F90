@@ -1322,7 +1322,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
       if (jamerge_cntv == 0 .and. (var_names(iv) .eq. 'NetLink' .or. var_names(iv) .eq. 'NetElemNode' .or. &
           var_names(iv) .eq. 'NetElemLink' .or. var_names(iv) .eq. 'ElemLink' .or. &
           var_names(iv) .eq. 'mesh2d_edge_nodes' .or. var_names(iv) .eq. 'mesh2d_face_nodes' .or. var_names(iv) .eq. 'mesh2d_edge_faces')) then
-          write (*,'(a)') 'Warning: mapmerge: Skipping merging topology variable: `'//trim(var_names(iv))//'''. '
+          write (*,'(a)') 'Warning: mapmerge: Skipping merging topology variable: `'//trim(var_names(iv))//''', because coordinates of netnodes or netedges can not be read from the file.'
           cycle
       end if
 
