@@ -75,6 +75,7 @@
       integer                               :: i_base_grid  ! index of base grid
       integer                               :: igrid        ! index of input grid
       integer                               :: noseg        ! number of segments
+      integer                               :: noseg_org    ! original number of segments
       integer                               :: i            ! loop counter
       integer                               :: noits        ! number of scale factors / columns sybstances
       integer                               :: noits_loc    ! number of scale factors locations
@@ -140,6 +141,7 @@
 
       i_base_grid = GridPs%base_grid
       noseg = GridPs%Pointers(i_base_grid)%noseg
+      noseg_org = get_original_noseg()
 
 !     initialise a number of variables
 
@@ -512,14 +514,14 @@
 
                ! Check the size of the file (if it is binary, otherwise this is not reliable)
 
-               call check_file_size( ctoken, noits*noseg, mod(data_block%filetype,10), filesize, ierr2 )
+               call check_file_size( ctoken, noits*noseg_org, mod(data_block%filetype,10), filesize, ierr2 )
                if ( ierr2 < 0 ) then
                    ierr2 = 1
                    write( lunut , 2320 ) ctoken
                elseif ( ierr2 > 0 ) then
                    ierr2 = 0        ! It is a warning, proceed at your own peril
                    iwar  = iwar + 1
-                   write( lunut , 2330 ) ctoken, filesize, 4*(1+noits*noseg), noits, noseg
+                   write( lunut , 2330 ) ctoken, filesize, 4*(1+noits*noseg_org), noits, noseg
                    write( lunut , 2340 )
                endif
 
@@ -769,4 +771,11 @@
       endif
 
       end subroutine check_file_size
+
+      ! Function to get around the name clash - information in a COMMON block
+      integer function get_original_noseg()
+          include 'sysn.inc'
+
+          get_original_noseg = noseg
+      end function get_original_noseg
       END

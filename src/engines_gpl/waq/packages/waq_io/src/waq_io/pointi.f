@@ -83,6 +83,7 @@
       integer      ip          ! loop counter pointers
       integer      ierr1       ! local I/O error
       integer      ierr2       ! local error count
+      integer      idummy
       character(len=1) :: cdummy
       integer(4) :: ithndl = 0
       if (timon) call timstrt( "pointi", ithndl )
@@ -106,6 +107,25 @@
          enddo
 
 !        Check that there are no more data in the file
+!        For DELWAQ-G applications, there may already be more data
+!        than the raw 4*noq numbers ...
+
+         if ( noqt > noq ) then
+             ! Any extra exchange pointers already present?
+             read ( lun(44), iostat = ierr1 ) idummy
+             if ( ierr1 == 0 ) then
+                 ! Skip all extra exchange pointers that are expected
+                 read ( lun(44), iostat = ierr1 ) (idummy ,iq = 2,4*(noqt-noq))
+                 if ( ierr1 /= 0 ) then
+                     write( lunut, 2111 )
+                     close ( lun(44) )
+                     ierr2 = 1
+                     goto 100
+                 endif
+             endif
+         endif
+
+!        Any data after the expected exchange pointers indicate a problem
 
          read ( lun(44), iostat = ierr1 ) cdummy
          if ( ierr1 == 0 ) then
@@ -178,5 +198,6 @@
  2100 format (  /,' ERROR: premature end of the file with the exchange pointers',
      &          /,'        number of exchanged read: ', i0 )
  2110 format (  /,' ERROR: more exchanges present in the exchanges file than expected' )
+ 2111 format (  /,' ERROR: too few extra exchanges (DELWAQG) present in the exchanges file' )
 
       end

@@ -382,6 +382,7 @@
          if ( ierr2  .gt. 0 ) goto 100
          noqt = noq  + noq4
          allocate ( ipnt(4,noqt) , stat = ierr2 )
+         ipnt = 0
          if ( ierr2 .ne. 0 ) then
             write ( lunut , 2160 ) ierr2, 4*noqt
             goto 100
