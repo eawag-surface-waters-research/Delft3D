@@ -142,8 +142,8 @@
       INTEGER  :: IPOINT(*)  , INCREM(*), NOSEG , NOFLUX,
      +            IEXPNT(4,*), IKNMRK(*), IKMRK2, IPODIM, NOQ1,NOQ2,NOQ3,NOQ4
 
-      INTEGER  :: NO_POINTER = 348 +21 ! number of input output variables in PMSA array =56+3*ntotnut+7*(nfood-2)+21 output vars
-      INTEGER  :: IP(369)              ! index pointer in PMSA array updated for each segment
+      INTEGER, PARAMETER :: NO_POINTER = 349 +21 ! number of input output variables in PMSA array =56+3*ntotnut+7*(nfood-2)+21 output vars
+      INTEGER            :: IP(NO_POINTER)       ! index pointer in PMSA array updated for each segment
 
       INTEGER  :: I,IFOOD,IFLUX,ISEG,IKMRK1
       INTEGER  :: NFOOD = 40 +2        ! 30 BLOOM algae + 2 DYNAMO algae + 8 dummy food sources + DetCS1 + Detritus = 40+2
@@ -179,7 +179,7 @@
      +             GSI, GSI_upper, GSI_lower, MinSpTemp, DoSpawn,
      +             dSpw, dNSpw, dPSpw, rSpawn, fadult, fjuv,
      +             Pa, Pc, Pr, Pg, Pm, Prj, Pjj, Pja, Pv,
-     +             Vd, Length, Onethird, kappa_G, kT
+     +             Vd, Length, Onethird, kappa_G, kT, minFood
 
       REAL ::      Cin, Cuit, Cbal, Nin, Nuit, Pin, Puit,
      +             Siin, Siuit, Nbal, Pbal, Sibal,
@@ -299,23 +299,24 @@
             Pref(2)     =      PMSA( IP(54))
             FFFood(1)   =      PMSA( IP(55))
             FFFood(2)   =      PMSA( IP(56))
+            MinFood     =      PMSA( IP(57))
 
             DO I=1,NTOTNUT
-               DETRIT(I)   = MAX(0.,PMSA(IP(56 + I              ))  )
-               POM(I)      = MAX(0.,PMSA(IP(56 + I +     NTOTNUT))  )
-               DETS1(I)    = MAX(0.,PMSA(IP(56 + I + 2 * NTOTNUT))  )
+               DETRIT(I)   = MAX(0.,PMSA(IP(57 + I              ))  )
+               POM(I)      = MAX(0.,PMSA(IP(57 + I +     NTOTNUT))  )
+               DETS1(I)    = MAX(0.,PMSA(IP(57 + I + 2 * NTOTNUT))  )
                DETBIO(I)   = MAX(0.,DETRIT(I)*(1.0-GEM) + POM(I)*GEM)
             ENDDO
 
             DO IFOOD=3,NFOOD
-               CFOOD(IFOOD)  = MAX(0.,PMSA( IP(66 +               IFOOD)))
+               CFOOD(IFOOD)  = MAX(0.,PMSA( IP(67 +               IFOOD)))
                CCFOOD(IFOOD) = 1.
-               NCFOOD(IFOOD) =        PMSA( IP(66 +   (NFOOD-2) + IFOOD))
-               PCFOOD(IFOOD) =        PMSA( IP(66 + 2*(NFOOD-2) + IFOOD))
-               SiCFOOD(IFOOD)=        PMSA( IP(66 + 3*(NFOOD-2) + IFOOD))
-               Pref(IFOOD)   =        PMSA( IP(66 + 4*(NFOOD-2) + IFOOD))
-               BenFood(IFOOD)=  NINT (PMSA( IP(66 + 5*(NFOOD-2) + IFOOD)))
-               FFFood(IFOOD) =        PMSA( IP(66 + 6*(NFOOD-2) + IFOOD))
+               NCFOOD(IFOOD) =        PMSA( IP(67 +   (NFOOD-2) + IFOOD))
+               PCFOOD(IFOOD) =        PMSA( IP(67 + 2*(NFOOD-2) + IFOOD))
+               SiCFOOD(IFOOD)=        PMSA( IP(67 + 3*(NFOOD-2) + IFOOD))
+               Pref(IFOOD)   =        PMSA( IP(67 + 4*(NFOOD-2) + IFOOD))
+               BenFood(IFOOD)=  NINT (PMSA( IP(67 + 5*(NFOOD-2) + IFOOD)))
+               FFFood(IFOOD) =        PMSA( IP(67 + 6*(NFOOD-2) + IFOOD))
             ENDDO
 
 ! Add Detbio and DetS1 to the food array's
@@ -437,8 +438,10 @@
                   f_S = 0.
                   f_B = 0.
                else
-                  f_S = (FoodPel / (FoodPel +  Xk_S *(1. + TIM/Yk)))
-                  f_B = (FoodBen / (FoodBen +  Xk_B *(1. + TIM/Yk)))
+                  !f_S = (FoodPel / (FoodPel +  Xk_S *(1. + TIM/Yk)))
+                  !f_B = (FoodBen / (FoodBen +  Xk_B *(1. + TIM/Yk)))
+                  f_S = ((FoodPel-minFood) / ( (FoodPel-minFood) +  Xk_S *(1. + TIM/Yk)))  ! ZZ: Modify half-saturation relationship with a minimum food threshold.
+                  f_B = ((FoodBen-minFood) / ( (FoodBen-minFood) +  Xk_B *(1. + TIM/Yk)))  ! ZZ: Modify half-saturation relationship with a minimum food threshold.
                endif
 ! to avoid negative values or values larger than 1, e.g. due to negative TIM
                f_S=max(f_S,0.)
@@ -470,7 +473,7 @@
                   endif
 
                   dFil(IFOOD) = min(dFil(IFOOD),
-     &                           (CFood(IFOOD)/(DELT*Dens_m2/DEPTH)))                    !to avoid negative food conc
+     &                           ( (CFood(IFOOD)-minFood)/(DELT*Dens_m2/DEPTH)))                    !ZZ: to impose a minimum food conc threshold (mainly a threshold for large time steps).
 
                   dFil(IFOOD) = max(dFil(IFOOD),0.)                                      !to avoid negative food uptake
 
@@ -748,27 +751,27 @@
                   Dens_out = Dens_m2
                ENDIF
 
-               PMSA(IP(349)) = TotBiomass     !gC
-               PMSA(IP(350)) = Biomass        !gC/m2 or gC/m3
-               PMSA(IP(351)) = TotAFDW        !gAFDW
-               PMSA(IP(352)) = AFDW           !gAFDW/m2 or gAFDW/m3
-               PMSA(IP(353)) = TotWW          !gWW
-               PMSA(IP(354)) = WW             !gWW/m2 or gWW/m3
-               PMSA(IP(355)) = WW_ind         !gWW/ind
-               PMSA(IP(356)) = V              !cm3/ind
-               PMSA(IP(357)) = E              !J/ind
-               PMSA(IP(358)) = R              !J/ind
-               PMSA(IP(359)) = Length         !cm/ind
-               PMSA(IP(360)) = GSI            !-
-               PMSA(IP(361)) = E_scaled       !-
-               PMSA(IP(362)) = Harvest        !gC/m2/d
-               PMSA(IP(363)) = Spawn          !gC/m2/d
-               PMSA(IP(364)) = GrossGr        !gC/m2/d
-               PMSA(IP(365)) = NettGr         !gC/m2/d
-               PMSA(IP(366)) = Dens_out       !#/m2
-               PMSA(IP(367)) = Cbal           !gC/m3
-               PMSA(IP(368)) = Nbal           !gN/m3
-               PMSA(IP(369)) = Pbal           !gP/m3
+               PMSA(IP(350)) = TotBiomass     !gC
+               PMSA(IP(351)) = Biomass        !gC/m2 or gC/m3
+               PMSA(IP(352)) = TotAFDW        !gAFDW
+               PMSA(IP(353)) = AFDW           !gAFDW/m2 or gAFDW/m3
+               PMSA(IP(354)) = TotWW          !gWW
+               PMSA(IP(355)) = WW             !gWW/m2 or gWW/m3
+               PMSA(IP(356)) = WW_ind         !gWW/ind
+               PMSA(IP(357)) = V              !cm3/ind
+               PMSA(IP(358)) = E              !J/ind
+               PMSA(IP(359)) = R              !J/ind
+               PMSA(IP(360)) = Length         !cm/ind
+               PMSA(IP(361)) = GSI            !-
+               PMSA(IP(362)) = E_scaled       !-
+               PMSA(IP(363)) = Harvest        !gC/m2/d
+               PMSA(IP(364)) = Spawn          !gC/m2/d
+               PMSA(IP(365)) = GrossGr        !gC/m2/d
+               PMSA(IP(366)) = NettGr         !gC/m2/d
+               PMSA(IP(367)) = Dens_out       !#/m2
+               PMSA(IP(368)) = Cbal           !gC/m3
+               PMSA(IP(369)) = Nbal           !gN/m3
+               PMSA(IP(370)) = Pbal           !gP/m3
 
             ENDIF   ! (Vtot > 0)
          ENDIF      ! (IKMRK1 == 1)

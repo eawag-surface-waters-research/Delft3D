@@ -11298,3 +11298,8 @@ itemid,itemse,itemex,itemde,itemun,itemnm,itemag,itemda,itemwk,itemgr
 "dDecaydTR4","x"," ",   -999.000    ,"(g/m3/d)            ","Decay tracer from source 4                        ","volume    ","volume    "," ","                              "
 "dDecdTR5  ","x"," ",   0.100000E-01,"(1/d)               ","Decay rate tracer5                                ","volume    ","volume    "," ","                              "
 "dDecaydTR5","x"," ",   -999.000    ,"(g/m3/d)            ","Decay tracer from source 5                        ","volume    ","volume    "," ","                              "
+"M_minFood ","x"," ",    0.00000    ,"(gC/m3)             ","Minimum amount of food for DEB Mussel             ","volume    ","volume    "," ","                              "
+"Z_minFood ","x"," ",    0.00000    ,"(gC/m3)             ","Minimum amount of food for DEB Zooplankton        ","volume    ","volume    "," ","                              "
+"G3_minFood","x"," ",    0.00000    ,"(gC/m3)             ","Minimum amount of food for DEB Grazer3            ","volume    ","volume    "," ","                              "
+"G4_minFood","x"," ",    0.00000    ,"(gC/m3)             ","Minimum amount of food for DEB Grazer4            ","volume    ","volume    "," ","                              "
+"G5_minFood","x"," ",    0.00000    ,"(gC/m3)             ","Minimum amount of food for DEB Grazer5            ","volume    ","volume    "," ","                              "

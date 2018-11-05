@@ -12941,298 +12941,299 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "DEBGRZ_M  ","M_PrDetS1 ",  54,"Y","x",1
 "DEBGRZ_M  ","M_FFDet   ",  55,"Y","x",1
 "DEBGRZ_M  ","M_FFDetS1 ",  56,"Y","x",1
-"DEBGRZ_M  ","DetC      ",  57,"Y","x",1
-"DEBGRZ_M  ","DetN      ",  58,"Y","x",1
-"DEBGRZ_M  ","DetP      ",  59,"Y","x",1
-"DEBGRZ_M  ","DetSi     ",  60,"Y","x",1
-"DEBGRZ_M  ","POC1      ",  61,"Y"," ",1
-"DEBGRZ_M  ","PON1      ",  62,"Y"," ",1
-"DEBGRZ_M  ","POP1      ",  63,"Y"," ",1
-"DEBGRZ_M  ","POSi1     ",  64,"Y"," ",1
-"DEBGRZ_M  ","DetCS1    ",  65,"Y","x",1
-"DEBGRZ_M  ","DetNS1    ",  66,"Y","x",1
-"DEBGRZ_M  ","DetPS1    ",  67,"Y","x",1
-"DEBGRZ_M  ","DetSiS1   ",  68,"Y","x",1
-"DEBGRZ_M  ","Green     ",  69,"Y","x",1
-"DEBGRZ_M  ","Diat      ",  70,"Y","x",1
-"DEBGRZ_M  ","BLOOMALG01",  71,"B"," ",1
-"DEBGRZ_M  ","BLOOMALG02",  72,"B"," ",1
-"DEBGRZ_M  ","BLOOMALG03",  73,"B"," ",1
-"DEBGRZ_M  ","BLOOMALG04",  74,"B"," ",1
-"DEBGRZ_M  ","BLOOMALG05",  75,"B"," ",1
-"DEBGRZ_M  ","BLOOMALG06",  76,"B"," ",1
-"DEBGRZ_M  ","BLOOMALG07",  77,"B"," ",1
-"DEBGRZ_M  ","BLOOMALG08",  78,"B"," ",1
-"DEBGRZ_M  ","BLOOMALG09",  79,"B"," ",1
-"DEBGRZ_M  ","BLOOMALG10",  80,"B"," ",1
-"DEBGRZ_M  ","BLOOMALG11",  81,"B"," ",1
-"DEBGRZ_M  ","BLOOMALG12",  82,"B"," ",1
-"DEBGRZ_M  ","BLOOMALG13",  83,"B"," ",1
-"DEBGRZ_M  ","BLOOMALG14",  84,"B"," ",1
-"DEBGRZ_M  ","BLOOMALG15",  85,"B"," ",1
-"DEBGRZ_M  ","BLOOMALG16",  86,"B"," ",1
-"DEBGRZ_M  ","BLOOMALG17",  87,"B"," ",1
-"DEBGRZ_M  ","BLOOMALG18",  88,"B"," ",1
-"DEBGRZ_M  ","BLOOMALG19",  89,"B"," ",1
-"DEBGRZ_M  ","BLOOMALG20",  90,"B"," ",1
-"DEBGRZ_M  ","BLOOMALG21",  91,"B"," ",1
-"DEBGRZ_M  ","BLOOMALG22",  92,"B"," ",1
-"DEBGRZ_M  ","BLOOMALG23",  93,"B"," ",1
-"DEBGRZ_M  ","BLOOMALG24",  94,"B"," ",1
-"DEBGRZ_M  ","BLOOMALG25",  95,"B"," ",1
-"DEBGRZ_M  ","BLOOMALG26",  96,"B"," ",1
-"DEBGRZ_M  ","BLOOMALG27",  97,"B"," ",1
-"DEBGRZ_M  ","BLOOMALG28",  98,"B"," ",1
-"DEBGRZ_M  ","BLOOMALG29",  99,"B"," ",1
-"DEBGRZ_M  ","BLOOMALG30", 100,"B"," ",1
-"DEBGRZ_M  ","F1        ", 101,"Y"," ",1
-"DEBGRZ_M  ","F2        ", 102,"Y"," ",1
-"DEBGRZ_M  ","F3        ", 103,"Y"," ",1
-"DEBGRZ_M  ","F4        ", 104,"Y"," ",1
-"DEBGRZ_M  ","F5        ", 105,"Y"," ",1
-"DEBGRZ_M  ","F6        ", 106,"Y"," ",1
-"DEBGRZ_M  ","F7        ", 107,"Y"," ",1
-"DEBGRZ_M  ","F8        ", 108,"Y"," ",1
-"DEBGRZ_M  ","NCRatGreen", 109,"Y","x",1
-"DEBGRZ_M  ","NCRatDiat ", 110,"Y","x",1
-"DEBGRZ_M  ","NCRAlg01  ", 111,"Y"," ",1
-"DEBGRZ_M  ","NCRAlg02  ", 112,"Y"," ",1
-"DEBGRZ_M  ","NCRAlg03  ", 113,"Y"," ",1
-"DEBGRZ_M  ","NCRAlg04  ", 114,"Y"," ",1
-"DEBGRZ_M  ","NCRAlg05  ", 115,"Y"," ",1
-"DEBGRZ_M  ","NCRAlg06  ", 116,"Y"," ",1
-"DEBGRZ_M  ","NCRAlg07  ", 117,"Y"," ",1
-"DEBGRZ_M  ","NCRAlg08  ", 118,"Y"," ",1
-"DEBGRZ_M  ","NCRAlg09  ", 119,"Y"," ",1
-"DEBGRZ_M  ","NCRAlg10  ", 120,"Y"," ",1
-"DEBGRZ_M  ","NCRAlg11  ", 121,"Y"," ",1
-"DEBGRZ_M  ","NCRAlg12  ", 122,"Y"," ",1
-"DEBGRZ_M  ","NCRAlg13  ", 123,"Y"," ",1
-"DEBGRZ_M  ","NCRAlg14  ", 124,"Y"," ",1
-"DEBGRZ_M  ","NCRAlg15  ", 125,"Y"," ",1
-"DEBGRZ_M  ","NCRAlg16  ", 126,"Y"," ",1
-"DEBGRZ_M  ","NCRAlg17  ", 127,"Y"," ",1
-"DEBGRZ_M  ","NCRAlg18  ", 128,"Y"," ",1
-"DEBGRZ_M  ","NCRAlg19  ", 129,"Y"," ",1
-"DEBGRZ_M  ","NCRAlg20  ", 130,"Y"," ",1
-"DEBGRZ_M  ","NCRAlg21  ", 131,"Y"," ",1
-"DEBGRZ_M  ","NCRAlg22  ", 132,"Y"," ",1
-"DEBGRZ_M  ","NCRAlg23  ", 133,"Y"," ",1
-"DEBGRZ_M  ","NCRAlg24  ", 134,"Y"," ",1
-"DEBGRZ_M  ","NCRAlg25  ", 135,"Y"," ",1
-"DEBGRZ_M  ","NCRAlg26  ", 136,"Y"," ",1
-"DEBGRZ_M  ","NCRAlg27  ", 137,"Y"," ",1
-"DEBGRZ_M  ","NCRAlg28  ", 138,"Y"," ",1
-"DEBGRZ_M  ","NCRAlg29  ", 139,"Y"," ",1
-"DEBGRZ_M  ","NCRAlg30  ", 140,"Y"," ",1
-"DEBGRZ_M  ","NCRatF1   ", 141,"Y"," ",1
-"DEBGRZ_M  ","NCRatF2   ", 142,"Y"," ",1
-"DEBGRZ_M  ","NCRatF3   ", 143,"Y"," ",1
-"DEBGRZ_M  ","NCRatF4   ", 144,"Y"," ",1
-"DEBGRZ_M  ","NCRatF5   ", 145,"Y"," ",1
-"DEBGRZ_M  ","NCRatF6   ", 146,"Y"," ",1
-"DEBGRZ_M  ","NCRatF7   ", 147,"Y"," ",1
-"DEBGRZ_M  ","NCRatF8   ", 148,"Y"," ",1
-"DEBGRZ_M  ","PCRatGreen", 149,"Y","x",1
-"DEBGRZ_M  ","PCRatDiat ", 150,"Y","x",1
-"DEBGRZ_M  ","PCRAlg01  ", 151,"Y"," ",1
-"DEBGRZ_M  ","PCRAlg02  ", 152,"Y"," ",1
-"DEBGRZ_M  ","PCRAlg03  ", 153,"Y"," ",1
-"DEBGRZ_M  ","PCRAlg04  ", 154,"Y"," ",1
-"DEBGRZ_M  ","PCRAlg05  ", 155,"Y"," ",1
-"DEBGRZ_M  ","PCRAlg06  ", 156,"Y"," ",1
-"DEBGRZ_M  ","PCRAlg07  ", 157,"Y"," ",1
-"DEBGRZ_M  ","PCRAlg08  ", 158,"Y"," ",1
-"DEBGRZ_M  ","PCRAlg09  ", 159,"Y"," ",1
-"DEBGRZ_M  ","PCRAlg10  ", 160,"Y"," ",1
-"DEBGRZ_M  ","PCRAlg11  ", 161,"Y"," ",1
-"DEBGRZ_M  ","PCRAlg12  ", 162,"Y"," ",1
-"DEBGRZ_M  ","PCRAlg13  ", 163,"Y"," ",1
-"DEBGRZ_M  ","PCRAlg14  ", 164,"Y"," ",1
-"DEBGRZ_M  ","PCRAlg15  ", 165,"Y"," ",1
-"DEBGRZ_M  ","PCRAlg16  ", 166,"Y"," ",1
-"DEBGRZ_M  ","PCRAlg17  ", 167,"Y"," ",1
-"DEBGRZ_M  ","PCRAlg18  ", 168,"Y"," ",1
-"DEBGRZ_M  ","PCRAlg19  ", 169,"Y"," ",1
-"DEBGRZ_M  ","PCRAlg20  ", 170,"Y"," ",1
-"DEBGRZ_M  ","PCRAlg21  ", 171,"Y"," ",1
-"DEBGRZ_M  ","PCRAlg22  ", 172,"Y"," ",1
-"DEBGRZ_M  ","PCRAlg23  ", 173,"Y"," ",1
-"DEBGRZ_M  ","PCRAlg24  ", 174,"Y"," ",1
-"DEBGRZ_M  ","PCRAlg25  ", 175,"Y"," ",1
-"DEBGRZ_M  ","PCRAlg26  ", 176,"Y"," ",1
-"DEBGRZ_M  ","PCRAlg27  ", 177,"Y"," ",1
-"DEBGRZ_M  ","PCRAlg28  ", 178,"Y"," ",1
-"DEBGRZ_M  ","PCRAlg29  ", 179,"Y"," ",1
-"DEBGRZ_M  ","PCRAlg30  ", 180,"Y"," ",1
-"DEBGRZ_M  ","PCRatF1   ", 181,"Y"," ",1
-"DEBGRZ_M  ","PCRatF2   ", 182,"Y"," ",1
-"DEBGRZ_M  ","PCRatF3   ", 183,"Y"," ",1
-"DEBGRZ_M  ","PCRatF4   ", 184,"Y"," ",1
-"DEBGRZ_M  ","PCRatF5   ", 185,"Y"," ",1
-"DEBGRZ_M  ","PCRatF6   ", 186,"Y"," ",1
-"DEBGRZ_M  ","PCRatF7   ", 187,"Y"," ",1
-"DEBGRZ_M  ","PCRatF8   ", 188,"Y"," ",1
-"DEBGRZ_M  ","SCRatGreen", 189,"Y","x",1
-"DEBGRZ_M  ","SCRatDiat ", 190,"Y","x",1
-"DEBGRZ_M  ","SCRAlg01  ", 191,"Y"," ",1
-"DEBGRZ_M  ","SCRAlg02  ", 192,"Y"," ",1
-"DEBGRZ_M  ","SCRAlg03  ", 193,"Y"," ",1
-"DEBGRZ_M  ","SCRAlg04  ", 194,"Y"," ",1
-"DEBGRZ_M  ","SCRAlg05  ", 195,"Y"," ",1
-"DEBGRZ_M  ","SCRAlg06  ", 196,"Y"," ",1
-"DEBGRZ_M  ","SCRAlg07  ", 197,"Y"," ",1
-"DEBGRZ_M  ","SCRAlg08  ", 198,"Y"," ",1
-"DEBGRZ_M  ","SCRAlg09  ", 199,"Y"," ",1
-"DEBGRZ_M  ","SCRAlg10  ", 200,"Y"," ",1
-"DEBGRZ_M  ","SCRAlg11  ", 201,"Y"," ",1
-"DEBGRZ_M  ","SCRAlg12  ", 202,"Y"," ",1
-"DEBGRZ_M  ","SCRAlg13  ", 203,"Y"," ",1
-"DEBGRZ_M  ","SCRAlg14  ", 204,"Y"," ",1
-"DEBGRZ_M  ","SCRAlg15  ", 205,"Y"," ",1
-"DEBGRZ_M  ","SCRAlg16  ", 206,"Y"," ",1
-"DEBGRZ_M  ","SCRAlg17  ", 207,"Y"," ",1
-"DEBGRZ_M  ","SCRAlg18  ", 208,"Y"," ",1
-"DEBGRZ_M  ","SCRAlg19  ", 209,"Y"," ",1
-"DEBGRZ_M  ","SCRAlg20  ", 210,"Y"," ",1
-"DEBGRZ_M  ","SCRAlg21  ", 211,"Y"," ",1
-"DEBGRZ_M  ","SCRAlg22  ", 212,"Y"," ",1
-"DEBGRZ_M  ","SCRAlg23  ", 213,"Y"," ",1
-"DEBGRZ_M  ","SCRAlg24  ", 214,"Y"," ",1
-"DEBGRZ_M  ","SCRAlg25  ", 215,"Y"," ",1
-"DEBGRZ_M  ","SCRAlg26  ", 216,"Y"," ",1
-"DEBGRZ_M  ","SCRAlg27  ", 217,"Y"," ",1
-"DEBGRZ_M  ","SCRAlg28  ", 218,"Y"," ",1
-"DEBGRZ_M  ","SCRAlg29  ", 219,"Y"," ",1
-"DEBGRZ_M  ","SCRAlg30  ", 220,"Y"," ",1
-"DEBGRZ_M  ","SCRatF1   ", 221,"Y"," ",1
-"DEBGRZ_M  ","SCRatF2   ", 222,"Y"," ",1
-"DEBGRZ_M  ","SCRatF3   ", 223,"Y"," ",1
-"DEBGRZ_M  ","SCRatF4   ", 224,"Y"," ",1
-"DEBGRZ_M  ","SCRatF5   ", 225,"Y"," ",1
-"DEBGRZ_M  ","SCRatF6   ", 226,"Y"," ",1
-"DEBGRZ_M  ","SCRatF7   ", 227,"Y"," ",1
-"DEBGRZ_M  ","SCRatF8   ", 228,"Y"," ",1
-"DEBGRZ_M  ","M_PrGrn   ", 229,"Y","x",1
-"DEBGRZ_M  ","M_PrDiat  ", 230,"Y","x",1
-"DEBGRZ_M  ","M_PrAlg01 ", 231,"Y"," ",1
-"DEBGRZ_M  ","M_PrAlg02 ", 232,"Y"," ",1
-"DEBGRZ_M  ","M_PrAlg03 ", 233,"Y"," ",1
-"DEBGRZ_M  ","M_PrAlg04 ", 234,"Y"," ",1
-"DEBGRZ_M  ","M_PrAlg05 ", 235,"Y"," ",1
-"DEBGRZ_M  ","M_PrAlg06 ", 236,"Y"," ",1
-"DEBGRZ_M  ","M_PrAlg07 ", 237,"Y"," ",1
-"DEBGRZ_M  ","M_PrAlg08 ", 238,"Y"," ",1
-"DEBGRZ_M  ","M_PrAlg09 ", 239,"Y"," ",1
-"DEBGRZ_M  ","M_PrAlg10 ", 240,"Y"," ",1
-"DEBGRZ_M  ","M_PrAlg11 ", 241,"Y"," ",1
-"DEBGRZ_M  ","M_PrAlg12 ", 242,"Y"," ",1
-"DEBGRZ_M  ","M_PrAlg13 ", 243,"Y"," ",1
-"DEBGRZ_M  ","M_PrAlg14 ", 244,"Y"," ",1
-"DEBGRZ_M  ","M_PrAlg15 ", 245,"Y"," ",1
-"DEBGRZ_M  ","M_PrAlg16 ", 246,"Y"," ",1
-"DEBGRZ_M  ","M_PrAlg17 ", 247,"Y"," ",1
-"DEBGRZ_M  ","M_PrAlg18 ", 248,"Y"," ",1
-"DEBGRZ_M  ","M_PrAlg19 ", 249,"Y"," ",1
-"DEBGRZ_M  ","M_PrAlg20 ", 250,"Y"," ",1
-"DEBGRZ_M  ","M_PrAlg21 ", 251,"Y"," ",1
-"DEBGRZ_M  ","M_PrAlg22 ", 252,"Y"," ",1
-"DEBGRZ_M  ","M_PrAlg23 ", 253,"Y"," ",1
-"DEBGRZ_M  ","M_PrAlg24 ", 254,"Y"," ",1
-"DEBGRZ_M  ","M_PrAlg25 ", 255,"Y"," ",1
-"DEBGRZ_M  ","M_PrAlg26 ", 256,"Y"," ",1
-"DEBGRZ_M  ","M_PrAlg27 ", 257,"Y"," ",1
-"DEBGRZ_M  ","M_PrAlg28 ", 258,"Y"," ",1
-"DEBGRZ_M  ","M_PrAlg29 ", 259,"Y"," ",1
-"DEBGRZ_M  ","M_PrAlg30 ", 260,"Y"," ",1
-"DEBGRZ_M  ","M_Pr1     ", 261,"Y"," ",1
-"DEBGRZ_M  ","M_Pr2     ", 262,"Y"," ",1
-"DEBGRZ_M  ","M_Pr3     ", 263,"Y"," ",1
-"DEBGRZ_M  ","M_Pr4     ", 264,"Y"," ",1
-"DEBGRZ_M  ","M_Pr5     ", 265,"Y"," ",1
-"DEBGRZ_M  ","M_Pr6     ", 266,"Y"," ",1
-"DEBGRZ_M  ","M_Pr7     ", 267,"Y"," ",1
-"DEBGRZ_M  ","M_Pr8     ", 268,"Y"," ",1
-"DEBGRZ_M  ","BenGrn    ", 269,"Y","x",1
-"DEBGRZ_M  ","BenDiat   ", 270,"Y","x",1
-"DEBGRZ_M  ","BenAlg01  ", 271,"Y"," ",1
-"DEBGRZ_M  ","BenAlg02  ", 272,"Y"," ",1
-"DEBGRZ_M  ","BenAlg03  ", 273,"Y"," ",1
-"DEBGRZ_M  ","BenAlg04  ", 274,"Y"," ",1
-"DEBGRZ_M  ","BenAlg05  ", 275,"Y"," ",1
-"DEBGRZ_M  ","BenAlg06  ", 276,"Y"," ",1
-"DEBGRZ_M  ","BenAlg07  ", 277,"Y"," ",1
-"DEBGRZ_M  ","BenAlg08  ", 278,"Y"," ",1
-"DEBGRZ_M  ","BenAlg09  ", 279,"Y"," ",1
-"DEBGRZ_M  ","BenAlg10  ", 280,"Y"," ",1
-"DEBGRZ_M  ","BenAlg11  ", 281,"Y"," ",1
-"DEBGRZ_M  ","BenAlg12  ", 282,"Y"," ",1
-"DEBGRZ_M  ","BenAlg13  ", 283,"Y"," ",1
-"DEBGRZ_M  ","BenAlg14  ", 284,"Y"," ",1
-"DEBGRZ_M  ","BenAlg15  ", 285,"Y"," ",1
-"DEBGRZ_M  ","BenAlg16  ", 286,"Y"," ",1
-"DEBGRZ_M  ","BenAlg17  ", 287,"Y"," ",1
-"DEBGRZ_M  ","BenAlg18  ", 288,"Y"," ",1
-"DEBGRZ_M  ","BenAlg19  ", 289,"Y"," ",1
-"DEBGRZ_M  ","BenAlg20  ", 290,"Y"," ",1
-"DEBGRZ_M  ","BenAlg21  ", 291,"Y"," ",1
-"DEBGRZ_M  ","BenAlg22  ", 292,"Y"," ",1
-"DEBGRZ_M  ","BenAlg23  ", 293,"Y"," ",1
-"DEBGRZ_M  ","BenAlg24  ", 294,"Y"," ",1
-"DEBGRZ_M  ","BenAlg25  ", 295,"Y"," ",1
-"DEBGRZ_M  ","BenAlg26  ", 296,"Y"," ",1
-"DEBGRZ_M  ","BenAlg27  ", 297,"Y"," ",1
-"DEBGRZ_M  ","BenAlg28  ", 298,"Y"," ",1
-"DEBGRZ_M  ","BenAlg29  ", 299,"Y"," ",1
-"DEBGRZ_M  ","BenAlg30  ", 300,"Y"," ",1
-"DEBGRZ_M  ","Ben1      ", 301,"Y"," ",1
-"DEBGRZ_M  ","Ben2      ", 302,"Y"," ",1
-"DEBGRZ_M  ","Ben3      ", 303,"Y"," ",1
-"DEBGRZ_M  ","Ben4      ", 304,"Y"," ",1
-"DEBGRZ_M  ","Ben5      ", 305,"Y"," ",1
-"DEBGRZ_M  ","Ben6      ", 306,"Y"," ",1
-"DEBGRZ_M  ","Ben7      ", 307,"Y"," ",1
-"DEBGRZ_M  ","Ben8      ", 308,"Y"," ",1
-"DEBGRZ_M  ","M_FFGrn   ", 309,"Y"," ",1
-"DEBGRZ_M  ","M_FFDiat  ", 310,"Y"," ",1
-"DEBGRZ_M  ","M_ALGFF01 ", 311,"Y"," ",1
-"DEBGRZ_M  ","M_ALGFF02 ", 312,"Y"," ",1
-"DEBGRZ_M  ","M_ALGFF03 ", 313,"Y"," ",1
-"DEBGRZ_M  ","M_ALGFF04 ", 314,"Y"," ",1
-"DEBGRZ_M  ","M_ALGFF05 ", 315,"Y"," ",1
-"DEBGRZ_M  ","M_ALGFF06 ", 316,"Y"," ",1
-"DEBGRZ_M  ","M_ALGFF07 ", 317,"Y"," ",1
-"DEBGRZ_M  ","M_ALGFF08 ", 318,"Y"," ",1
-"DEBGRZ_M  ","M_ALGFF09 ", 319,"Y"," ",1
-"DEBGRZ_M  ","M_ALGFF10 ", 320,"Y"," ",1
-"DEBGRZ_M  ","M_ALGFF11 ", 321,"Y"," ",1
-"DEBGRZ_M  ","M_ALGFF12 ", 322,"Y"," ",1
-"DEBGRZ_M  ","M_ALGFF13 ", 323,"Y"," ",1
-"DEBGRZ_M  ","M_ALGFF14 ", 324,"Y"," ",1
-"DEBGRZ_M  ","M_ALGFF15 ", 325,"Y"," ",1
-"DEBGRZ_M  ","M_ALGFF16 ", 326,"Y"," ",1
-"DEBGRZ_M  ","M_ALGFF17 ", 327,"Y"," ",1
-"DEBGRZ_M  ","M_ALGFF18 ", 328,"Y"," ",1
-"DEBGRZ_M  ","M_ALGFF19 ", 329,"Y"," ",1
-"DEBGRZ_M  ","M_ALGFF20 ", 330,"Y"," ",1
-"DEBGRZ_M  ","M_ALGFF21 ", 331,"Y"," ",1
-"DEBGRZ_M  ","M_ALGFF22 ", 332,"Y"," ",1
-"DEBGRZ_M  ","M_ALGFF23 ", 333,"Y"," ",1
-"DEBGRZ_M  ","M_ALGFF24 ", 334,"Y"," ",1
-"DEBGRZ_M  ","M_ALGFF25 ", 335,"Y"," ",1
-"DEBGRZ_M  ","M_ALGFF26 ", 336,"Y"," ",1
-"DEBGRZ_M  ","M_ALGFF27 ", 337,"Y"," ",1
-"DEBGRZ_M  ","M_ALGFF28 ", 338,"Y"," ",1
-"DEBGRZ_M  ","M_ALGFF29 ", 339,"Y"," ",1
-"DEBGRZ_M  ","M_ALGFF30 ", 340,"Y"," ",1
-"DEBGRZ_M  ","M_FF01    ", 341,"Y"," ",1
-"DEBGRZ_M  ","M_FF02    ", 342,"Y"," ",1
-"DEBGRZ_M  ","M_FF03    ", 343,"Y"," ",1
-"DEBGRZ_M  ","M_FF04    ", 344,"Y"," ",1
-"DEBGRZ_M  ","M_FF05    ", 345,"Y"," ",1
-"DEBGRZ_M  ","M_FF06    ", 346,"Y"," ",1
-"DEBGRZ_M  ","M_FF07    ", 347,"Y"," ",1
-"DEBGRZ_M  ","M_FF08    ", 348,"Y"," ",1
+"DEBGRZ_M  ","M_minFood ",  57,"Y","x",1
+"DEBGRZ_M  ","DetC      ",  58,"Y","x",1
+"DEBGRZ_M  ","DetN      ",  59,"Y","x",1
+"DEBGRZ_M  ","DetP      ",  60,"Y","x",1
+"DEBGRZ_M  ","DetSi     ",  61,"Y","x",1
+"DEBGRZ_M  ","POC1      ",  62,"Y"," ",1
+"DEBGRZ_M  ","PON1      ",  63,"Y"," ",1
+"DEBGRZ_M  ","POP1      ",  64,"Y"," ",1
+"DEBGRZ_M  ","POSi1     ",  65,"Y"," ",1
+"DEBGRZ_M  ","DetCS1    ",  66,"Y","x",1
+"DEBGRZ_M  ","DetNS1    ",  67,"Y","x",1
+"DEBGRZ_M  ","DetPS1    ",  68,"Y","x",1
+"DEBGRZ_M  ","DetSiS1   ",  69,"Y","x",1
+"DEBGRZ_M  ","Green     ",  70,"Y","x",1
+"DEBGRZ_M  ","Diat      ",  71,"Y","x",1
+"DEBGRZ_M  ","BLOOMALG01",  72,"B"," ",1
+"DEBGRZ_M  ","BLOOMALG02",  73,"B"," ",1
+"DEBGRZ_M  ","BLOOMALG03",  74,"B"," ",1
+"DEBGRZ_M  ","BLOOMALG04",  75,"B"," ",1
+"DEBGRZ_M  ","BLOOMALG05",  76,"B"," ",1
+"DEBGRZ_M  ","BLOOMALG06",  77,"B"," ",1
+"DEBGRZ_M  ","BLOOMALG07",  78,"B"," ",1
+"DEBGRZ_M  ","BLOOMALG08",  79,"B"," ",1
+"DEBGRZ_M  ","BLOOMALG09",  80,"B"," ",1
+"DEBGRZ_M  ","BLOOMALG10",  81,"B"," ",1
+"DEBGRZ_M  ","BLOOMALG11",  82,"B"," ",1
+"DEBGRZ_M  ","BLOOMALG12",  83,"B"," ",1
+"DEBGRZ_M  ","BLOOMALG13",  84,"B"," ",1
+"DEBGRZ_M  ","BLOOMALG14",  85,"B"," ",1
+"DEBGRZ_M  ","BLOOMALG15",  86,"B"," ",1
+"DEBGRZ_M  ","BLOOMALG16",  87,"B"," ",1
+"DEBGRZ_M  ","BLOOMALG17",  88,"B"," ",1
+"DEBGRZ_M  ","BLOOMALG18",  89,"B"," ",1
+"DEBGRZ_M  ","BLOOMALG19",  90,"B"," ",1
+"DEBGRZ_M  ","BLOOMALG20",  91,"B"," ",1
+"DEBGRZ_M  ","BLOOMALG21",  92,"B"," ",1
+"DEBGRZ_M  ","BLOOMALG22",  93,"B"," ",1
+"DEBGRZ_M  ","BLOOMALG23",  94,"B"," ",1
+"DEBGRZ_M  ","BLOOMALG24",  95,"B"," ",1
+"DEBGRZ_M  ","BLOOMALG25",  96,"B"," ",1
+"DEBGRZ_M  ","BLOOMALG26",  97,"B"," ",1
+"DEBGRZ_M  ","BLOOMALG27",  98,"B"," ",1
+"DEBGRZ_M  ","BLOOMALG28",  99,"B"," ",1
+"DEBGRZ_M  ","BLOOMALG29", 100,"B"," ",1
+"DEBGRZ_M  ","BLOOMALG30", 101,"B"," ",1
+"DEBGRZ_M  ","F1        ", 102,"Y"," ",1
+"DEBGRZ_M  ","F2        ", 103,"Y"," ",1
+"DEBGRZ_M  ","F3        ", 104,"Y"," ",1
+"DEBGRZ_M  ","F4        ", 105,"Y"," ",1
+"DEBGRZ_M  ","F5        ", 106,"Y"," ",1
+"DEBGRZ_M  ","F6        ", 107,"Y"," ",1
+"DEBGRZ_M  ","F7        ", 108,"Y"," ",1
+"DEBGRZ_M  ","F8        ", 109,"Y"," ",1
+"DEBGRZ_M  ","NCRatGreen", 110,"Y","x",1
+"DEBGRZ_M  ","NCRatDiat ", 111,"Y","x",1
+"DEBGRZ_M  ","NCRAlg01  ", 112,"Y"," ",1
+"DEBGRZ_M  ","NCRAlg02  ", 113,"Y"," ",1
+"DEBGRZ_M  ","NCRAlg03  ", 114,"Y"," ",1
+"DEBGRZ_M  ","NCRAlg04  ", 115,"Y"," ",1
+"DEBGRZ_M  ","NCRAlg05  ", 116,"Y"," ",1
+"DEBGRZ_M  ","NCRAlg06  ", 117,"Y"," ",1
+"DEBGRZ_M  ","NCRAlg07  ", 118,"Y"," ",1
+"DEBGRZ_M  ","NCRAlg08  ", 119,"Y"," ",1
+"DEBGRZ_M  ","NCRAlg09  ", 120,"Y"," ",1
+"DEBGRZ_M  ","NCRAlg10  ", 121,"Y"," ",1
+"DEBGRZ_M  ","NCRAlg11  ", 122,"Y"," ",1
+"DEBGRZ_M  ","NCRAlg12  ", 123,"Y"," ",1
+"DEBGRZ_M  ","NCRAlg13  ", 124,"Y"," ",1
+"DEBGRZ_M  ","NCRAlg14  ", 125,"Y"," ",1
+"DEBGRZ_M  ","NCRAlg15  ", 126,"Y"," ",1
+"DEBGRZ_M  ","NCRAlg16  ", 127,"Y"," ",1
+"DEBGRZ_M  ","NCRAlg17  ", 128,"Y"," ",1
+"DEBGRZ_M  ","NCRAlg18  ", 129,"Y"," ",1
+"DEBGRZ_M  ","NCRAlg19  ", 130,"Y"," ",1
+"DEBGRZ_M  ","NCRAlg20  ", 131,"Y"," ",1
+"DEBGRZ_M  ","NCRAlg21  ", 132,"Y"," ",1
+"DEBGRZ_M  ","NCRAlg22  ", 133,"Y"," ",1
+"DEBGRZ_M  ","NCRAlg23  ", 134,"Y"," ",1
+"DEBGRZ_M  ","NCRAlg24  ", 135,"Y"," ",1
+"DEBGRZ_M  ","NCRAlg25  ", 136,"Y"," ",1
+"DEBGRZ_M  ","NCRAlg26  ", 137,"Y"," ",1
+"DEBGRZ_M  ","NCRAlg27  ", 138,"Y"," ",1
+"DEBGRZ_M  ","NCRAlg28  ", 139,"Y"," ",1
+"DEBGRZ_M  ","NCRAlg29  ", 140,"Y"," ",1
+"DEBGRZ_M  ","NCRAlg30  ", 141,"Y"," ",1
+"DEBGRZ_M  ","NCRatF1   ", 142,"Y"," ",1
+"DEBGRZ_M  ","NCRatF2   ", 143,"Y"," ",1
+"DEBGRZ_M  ","NCRatF3   ", 144,"Y"," ",1
+"DEBGRZ_M  ","NCRatF4   ", 145,"Y"," ",1
+"DEBGRZ_M  ","NCRatF5   ", 146,"Y"," ",1
+"DEBGRZ_M  ","NCRatF6   ", 147,"Y"," ",1
+"DEBGRZ_M  ","NCRatF7   ", 148,"Y"," ",1
+"DEBGRZ_M  ","NCRatF8   ", 149,"Y"," ",1
+"DEBGRZ_M  ","PCRatGreen", 150,"Y","x",1
+"DEBGRZ_M  ","PCRatDiat ", 151,"Y","x",1
+"DEBGRZ_M  ","PCRAlg01  ", 152,"Y"," ",1
+"DEBGRZ_M  ","PCRAlg02  ", 153,"Y"," ",1
+"DEBGRZ_M  ","PCRAlg03  ", 154,"Y"," ",1
+"DEBGRZ_M  ","PCRAlg04  ", 155,"Y"," ",1
+"DEBGRZ_M  ","PCRAlg05  ", 156,"Y"," ",1
+"DEBGRZ_M  ","PCRAlg06  ", 157,"Y"," ",1
+"DEBGRZ_M  ","PCRAlg07  ", 158,"Y"," ",1
+"DEBGRZ_M  ","PCRAlg08  ", 159,"Y"," ",1
+"DEBGRZ_M  ","PCRAlg09  ", 160,"Y"," ",1
+"DEBGRZ_M  ","PCRAlg10  ", 161,"Y"," ",1
+"DEBGRZ_M  ","PCRAlg11  ", 162,"Y"," ",1
+"DEBGRZ_M  ","PCRAlg12  ", 163,"Y"," ",1
+"DEBGRZ_M  ","PCRAlg13  ", 164,"Y"," ",1
+"DEBGRZ_M  ","PCRAlg14  ", 165,"Y"," ",1
+"DEBGRZ_M  ","PCRAlg15  ", 166,"Y"," ",1
+"DEBGRZ_M  ","PCRAlg16  ", 167,"Y"," ",1
+"DEBGRZ_M  ","PCRAlg17  ", 168,"Y"," ",1
+"DEBGRZ_M  ","PCRAlg18  ", 169,"Y"," ",1
+"DEBGRZ_M  ","PCRAlg19  ", 170,"Y"," ",1
+"DEBGRZ_M  ","PCRAlg20  ", 171,"Y"," ",1
+"DEBGRZ_M  ","PCRAlg21  ", 172,"Y"," ",1
+"DEBGRZ_M  ","PCRAlg22  ", 173,"Y"," ",1
+"DEBGRZ_M  ","PCRAlg23  ", 174,"Y"," ",1
+"DEBGRZ_M  ","PCRAlg24  ", 175,"Y"," ",1
+"DEBGRZ_M  ","PCRAlg25  ", 176,"Y"," ",1
+"DEBGRZ_M  ","PCRAlg26  ", 177,"Y"," ",1
+"DEBGRZ_M  ","PCRAlg27  ", 178,"Y"," ",1
+"DEBGRZ_M  ","PCRAlg28  ", 179,"Y"," ",1
+"DEBGRZ_M  ","PCRAlg29  ", 180,"Y"," ",1
+"DEBGRZ_M  ","PCRAlg30  ", 181,"Y"," ",1
+"DEBGRZ_M  ","PCRatF1   ", 182,"Y"," ",1
+"DEBGRZ_M  ","PCRatF2   ", 183,"Y"," ",1
+"DEBGRZ_M  ","PCRatF3   ", 184,"Y"," ",1
+"DEBGRZ_M  ","PCRatF4   ", 185,"Y"," ",1
+"DEBGRZ_M  ","PCRatF5   ", 186,"Y"," ",1
+"DEBGRZ_M  ","PCRatF6   ", 187,"Y"," ",1
+"DEBGRZ_M  ","PCRatF7   ", 188,"Y"," ",1
+"DEBGRZ_M  ","PCRatF8   ", 189,"Y"," ",1
+"DEBGRZ_M  ","SCRatGreen", 190,"Y","x",1
+"DEBGRZ_M  ","SCRatDiat ", 191,"Y","x",1
+"DEBGRZ_M  ","SCRAlg01  ", 192,"Y"," ",1
+"DEBGRZ_M  ","SCRAlg02  ", 193,"Y"," ",1
+"DEBGRZ_M  ","SCRAlg03  ", 194,"Y"," ",1
+"DEBGRZ_M  ","SCRAlg04  ", 195,"Y"," ",1
+"DEBGRZ_M  ","SCRAlg05  ", 196,"Y"," ",1
+"DEBGRZ_M  ","SCRAlg06  ", 197,"Y"," ",1
+"DEBGRZ_M  ","SCRAlg07  ", 198,"Y"," ",1
+"DEBGRZ_M  ","SCRAlg08  ", 199,"Y"," ",1
+"DEBGRZ_M  ","SCRAlg09  ", 200,"Y"," ",1
+"DEBGRZ_M  ","SCRAlg10  ", 201,"Y"," ",1
+"DEBGRZ_M  ","SCRAlg11  ", 202,"Y"," ",1
+"DEBGRZ_M  ","SCRAlg12  ", 203,"Y"," ",1
+"DEBGRZ_M  ","SCRAlg13  ", 204,"Y"," ",1
+"DEBGRZ_M  ","SCRAlg14  ", 205,"Y"," ",1
+"DEBGRZ_M  ","SCRAlg15  ", 206,"Y"," ",1
+"DEBGRZ_M  ","SCRAlg16  ", 207,"Y"," ",1
+"DEBGRZ_M  ","SCRAlg17  ", 208,"Y"," ",1
+"DEBGRZ_M  ","SCRAlg18  ", 209,"Y"," ",1
+"DEBGRZ_M  ","SCRAlg19  ", 210,"Y"," ",1
+"DEBGRZ_M  ","SCRAlg20  ", 211,"Y"," ",1
+"DEBGRZ_M  ","SCRAlg21  ", 212,"Y"," ",1
+"DEBGRZ_M  ","SCRAlg22  ", 213,"Y"," ",1
+"DEBGRZ_M  ","SCRAlg23  ", 214,"Y"," ",1
+"DEBGRZ_M  ","SCRAlg24  ", 215,"Y"," ",1
+"DEBGRZ_M  ","SCRAlg25  ", 216,"Y"," ",1
+"DEBGRZ_M  ","SCRAlg26  ", 217,"Y"," ",1
+"DEBGRZ_M  ","SCRAlg27  ", 218,"Y"," ",1
+"DEBGRZ_M  ","SCRAlg28  ", 219,"Y"," ",1
+"DEBGRZ_M  ","SCRAlg29  ", 220,"Y"," ",1
+"DEBGRZ_M  ","SCRAlg30  ", 221,"Y"," ",1
+"DEBGRZ_M  ","SCRatF1   ", 222,"Y"," ",1
+"DEBGRZ_M  ","SCRatF2   ", 223,"Y"," ",1
+"DEBGRZ_M  ","SCRatF3   ", 224,"Y"," ",1
+"DEBGRZ_M  ","SCRatF4   ", 225,"Y"," ",1
+"DEBGRZ_M  ","SCRatF5   ", 226,"Y"," ",1
+"DEBGRZ_M  ","SCRatF6   ", 227,"Y"," ",1
+"DEBGRZ_M  ","SCRatF7   ", 228,"Y"," ",1
+"DEBGRZ_M  ","SCRatF8   ", 229,"Y"," ",1
+"DEBGRZ_M  ","M_PrGrn   ", 230,"Y","x",1
+"DEBGRZ_M  ","M_PrDiat  ", 231,"Y","x",1
+"DEBGRZ_M  ","M_PrAlg01 ", 232,"Y"," ",1
+"DEBGRZ_M  ","M_PrAlg02 ", 233,"Y"," ",1
+"DEBGRZ_M  ","M_PrAlg03 ", 234,"Y"," ",1
+"DEBGRZ_M  ","M_PrAlg04 ", 235,"Y"," ",1
+"DEBGRZ_M  ","M_PrAlg05 ", 236,"Y"," ",1
+"DEBGRZ_M  ","M_PrAlg06 ", 237,"Y"," ",1
+"DEBGRZ_M  ","M_PrAlg07 ", 238,"Y"," ",1
+"DEBGRZ_M  ","M_PrAlg08 ", 239,"Y"," ",1
+"DEBGRZ_M  ","M_PrAlg09 ", 240,"Y"," ",1
+"DEBGRZ_M  ","M_PrAlg10 ", 241,"Y"," ",1
+"DEBGRZ_M  ","M_PrAlg11 ", 242,"Y"," ",1
+"DEBGRZ_M  ","M_PrAlg12 ", 243,"Y"," ",1
+"DEBGRZ_M  ","M_PrAlg13 ", 244,"Y"," ",1
+"DEBGRZ_M  ","M_PrAlg14 ", 245,"Y"," ",1
+"DEBGRZ_M  ","M_PrAlg15 ", 246,"Y"," ",1
+"DEBGRZ_M  ","M_PrAlg16 ", 247,"Y"," ",1
+"DEBGRZ_M  ","M_PrAlg17 ", 248,"Y"," ",1
+"DEBGRZ_M  ","M_PrAlg18 ", 249,"Y"," ",1
+"DEBGRZ_M  ","M_PrAlg19 ", 250,"Y"," ",1
+"DEBGRZ_M  ","M_PrAlg20 ", 251,"Y"," ",1
+"DEBGRZ_M  ","M_PrAlg21 ", 252,"Y"," ",1
+"DEBGRZ_M  ","M_PrAlg22 ", 253,"Y"," ",1
+"DEBGRZ_M  ","M_PrAlg23 ", 254,"Y"," ",1
+"DEBGRZ_M  ","M_PrAlg24 ", 255,"Y"," ",1
+"DEBGRZ_M  ","M_PrAlg25 ", 256,"Y"," ",1
+"DEBGRZ_M  ","M_PrAlg26 ", 257,"Y"," ",1
+"DEBGRZ_M  ","M_PrAlg27 ", 258,"Y"," ",1
+"DEBGRZ_M  ","M_PrAlg28 ", 259,"Y"," ",1
+"DEBGRZ_M  ","M_PrAlg29 ", 260,"Y"," ",1
+"DEBGRZ_M  ","M_PrAlg30 ", 261,"Y"," ",1
+"DEBGRZ_M  ","M_Pr1     ", 262,"Y"," ",1
+"DEBGRZ_M  ","M_Pr2     ", 263,"Y"," ",1
+"DEBGRZ_M  ","M_Pr3     ", 264,"Y"," ",1
+"DEBGRZ_M  ","M_Pr4     ", 265,"Y"," ",1
+"DEBGRZ_M  ","M_Pr5     ", 266,"Y"," ",1
+"DEBGRZ_M  ","M_Pr6     ", 267,"Y"," ",1
+"DEBGRZ_M  ","M_Pr7     ", 268,"Y"," ",1
+"DEBGRZ_M  ","M_Pr8     ", 269,"Y"," ",1
+"DEBGRZ_M  ","BenGrn    ", 270,"Y","x",1
+"DEBGRZ_M  ","BenDiat   ", 271,"Y","x",1
+"DEBGRZ_M  ","BenAlg01  ", 272,"Y"," ",1
+"DEBGRZ_M  ","BenAlg02  ", 273,"Y"," ",1
+"DEBGRZ_M  ","BenAlg03  ", 274,"Y"," ",1
+"DEBGRZ_M  ","BenAlg04  ", 275,"Y"," ",1
+"DEBGRZ_M  ","BenAlg05  ", 276,"Y"," ",1
+"DEBGRZ_M  ","BenAlg06  ", 277,"Y"," ",1
+"DEBGRZ_M  ","BenAlg07  ", 278,"Y"," ",1
+"DEBGRZ_M  ","BenAlg08  ", 279,"Y"," ",1
+"DEBGRZ_M  ","BenAlg09  ", 280,"Y"," ",1
+"DEBGRZ_M  ","BenAlg10  ", 281,"Y"," ",1
+"DEBGRZ_M  ","BenAlg11  ", 282,"Y"," ",1
+"DEBGRZ_M  ","BenAlg12  ", 283,"Y"," ",1
+"DEBGRZ_M  ","BenAlg13  ", 284,"Y"," ",1
+"DEBGRZ_M  ","BenAlg14  ", 285,"Y"," ",1
+"DEBGRZ_M  ","BenAlg15  ", 286,"Y"," ",1
+"DEBGRZ_M  ","BenAlg16  ", 287,"Y"," ",1
+"DEBGRZ_M  ","BenAlg17  ", 288,"Y"," ",1
+"DEBGRZ_M  ","BenAlg18  ", 289,"Y"," ",1
+"DEBGRZ_M  ","BenAlg19  ", 290,"Y"," ",1
+"DEBGRZ_M  ","BenAlg20  ", 291,"Y"," ",1
+"DEBGRZ_M  ","BenAlg21  ", 292,"Y"," ",1
+"DEBGRZ_M  ","BenAlg22  ", 293,"Y"," ",1
+"DEBGRZ_M  ","BenAlg23  ", 294,"Y"," ",1
+"DEBGRZ_M  ","BenAlg24  ", 295,"Y"," ",1
+"DEBGRZ_M  ","BenAlg25  ", 296,"Y"," ",1
+"DEBGRZ_M  ","BenAlg26  ", 297,"Y"," ",1
+"DEBGRZ_M  ","BenAlg27  ", 298,"Y"," ",1
+"DEBGRZ_M  ","BenAlg28  ", 299,"Y"," ",1
+"DEBGRZ_M  ","BenAlg29  ", 300,"Y"," ",1
+"DEBGRZ_M  ","BenAlg30  ", 301,"Y"," ",1
+"DEBGRZ_M  ","Ben1      ", 302,"Y"," ",1
+"DEBGRZ_M  ","Ben2      ", 303,"Y"," ",1
+"DEBGRZ_M  ","Ben3      ", 304,"Y"," ",1
+"DEBGRZ_M  ","Ben4      ", 305,"Y"," ",1
+"DEBGRZ_M  ","Ben5      ", 306,"Y"," ",1
+"DEBGRZ_M  ","Ben6      ", 307,"Y"," ",1
+"DEBGRZ_M  ","Ben7      ", 308,"Y"," ",1
+"DEBGRZ_M  ","Ben8      ", 309,"Y"," ",1
+"DEBGRZ_M  ","M_FFGrn   ", 310,"Y"," ",1
+"DEBGRZ_M  ","M_FFDiat  ", 311,"Y"," ",1
+"DEBGRZ_M  ","M_ALGFF01 ", 312,"Y"," ",1
+"DEBGRZ_M  ","M_ALGFF02 ", 313,"Y"," ",1
+"DEBGRZ_M  ","M_ALGFF03 ", 314,"Y"," ",1
+"DEBGRZ_M  ","M_ALGFF04 ", 315,"Y"," ",1
+"DEBGRZ_M  ","M_ALGFF05 ", 316,"Y"," ",1
+"DEBGRZ_M  ","M_ALGFF06 ", 317,"Y"," ",1
+"DEBGRZ_M  ","M_ALGFF07 ", 318,"Y"," ",1
+"DEBGRZ_M  ","M_ALGFF08 ", 319,"Y"," ",1
+"DEBGRZ_M  ","M_ALGFF09 ", 320,"Y"," ",1
+"DEBGRZ_M  ","M_ALGFF10 ", 321,"Y"," ",1
+"DEBGRZ_M  ","M_ALGFF11 ", 322,"Y"," ",1
+"DEBGRZ_M  ","M_ALGFF12 ", 323,"Y"," ",1
+"DEBGRZ_M  ","M_ALGFF13 ", 324,"Y"," ",1
+"DEBGRZ_M  ","M_ALGFF14 ", 325,"Y"," ",1
+"DEBGRZ_M  ","M_ALGFF15 ", 326,"Y"," ",1
+"DEBGRZ_M  ","M_ALGFF16 ", 327,"Y"," ",1
+"DEBGRZ_M  ","M_ALGFF17 ", 328,"Y"," ",1
+"DEBGRZ_M  ","M_ALGFF18 ", 329,"Y"," ",1
+"DEBGRZ_M  ","M_ALGFF19 ", 330,"Y"," ",1
+"DEBGRZ_M  ","M_ALGFF20 ", 331,"Y"," ",1
+"DEBGRZ_M  ","M_ALGFF21 ", 332,"Y"," ",1
+"DEBGRZ_M  ","M_ALGFF22 ", 333,"Y"," ",1
+"DEBGRZ_M  ","M_ALGFF23 ", 334,"Y"," ",1
+"DEBGRZ_M  ","M_ALGFF24 ", 335,"Y"," ",1
+"DEBGRZ_M  ","M_ALGFF25 ", 336,"Y"," ",1
+"DEBGRZ_M  ","M_ALGFF26 ", 337,"Y"," ",1
+"DEBGRZ_M  ","M_ALGFF27 ", 338,"Y"," ",1
+"DEBGRZ_M  ","M_ALGFF28 ", 339,"Y"," ",1
+"DEBGRZ_M  ","M_ALGFF29 ", 340,"Y"," ",1
+"DEBGRZ_M  ","M_ALGFF30 ", 341,"Y"," ",1
+"DEBGRZ_M  ","M_FF01    ", 342,"Y"," ",1
+"DEBGRZ_M  ","M_FF02    ", 343,"Y"," ",1
+"DEBGRZ_M  ","M_FF03    ", 344,"Y"," ",1
+"DEBGRZ_M  ","M_FF04    ", 345,"Y"," ",1
+"DEBGRZ_M  ","M_FF05    ", 346,"Y"," ",1
+"DEBGRZ_M  ","M_FF06    ", 347,"Y"," ",1
+"DEBGRZ_M  ","M_FF07    ", 348,"Y"," ",1
+"DEBGRZ_M  ","M_FF08    ", 349,"Y"," ",1
 "DEBGRZ_Z  ","DELT      ",   1,"N","x",1
 "DEBGRZ_Z  ","Volume    ",   2,"N","x",1
 "DEBGRZ_Z  ","Temp      ",   3,"Y","x",1
@@ -13289,298 +13290,299 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "DEBGRZ_Z  ","Z_PrDetS1 ",  54,"Y","x",1
 "DEBGRZ_Z  ","Z_FFDet   ",  55,"Y","x",1
 "DEBGRZ_Z  ","Z_FFDetS1 ",  56,"Y","x",1
-"DEBGRZ_Z  ","DetC      ",  57,"Y","x",1
-"DEBGRZ_Z  ","DetN      ",  58,"Y","x",1
-"DEBGRZ_Z  ","DetP      ",  59,"Y","x",1
-"DEBGRZ_Z  ","DetSi     ",  60,"Y","x",1
-"DEBGRZ_Z  ","POC1      ",  61,"Y"," ",1
-"DEBGRZ_Z  ","PON1      ",  62,"Y"," ",1
-"DEBGRZ_Z  ","POP1      ",  63,"Y"," ",1
-"DEBGRZ_Z  ","Opal      ",  64,"Y"," ",1
-"DEBGRZ_Z  ","DetCS1    ",  65,"Y","x",1
-"DEBGRZ_Z  ","DetNS1    ",  66,"Y","x",1
-"DEBGRZ_Z  ","DetPS1    ",  67,"Y","x",1
-"DEBGRZ_Z  ","DetSiS1   ",  68,"Y","x",1
-"DEBGRZ_Z  ","Green     ",  69,"Y","x",1
-"DEBGRZ_Z  ","Diat      ",  70,"Y","x",1
-"DEBGRZ_Z  ","BLOOMALG01",  71,"B"," ",1
-"DEBGRZ_Z  ","BLOOMALG02",  72,"B"," ",1
-"DEBGRZ_Z  ","BLOOMALG03",  73,"B"," ",1
-"DEBGRZ_Z  ","BLOOMALG04",  74,"B"," ",1
-"DEBGRZ_Z  ","BLOOMALG05",  75,"B"," ",1
-"DEBGRZ_Z  ","BLOOMALG06",  76,"B"," ",1
-"DEBGRZ_Z  ","BLOOMALG07",  77,"B"," ",1
-"DEBGRZ_Z  ","BLOOMALG08",  78,"B"," ",1
-"DEBGRZ_Z  ","BLOOMALG09",  79,"B"," ",1
-"DEBGRZ_Z  ","BLOOMALG10",  80,"B"," ",1
-"DEBGRZ_Z  ","BLOOMALG11",  81,"B"," ",1
-"DEBGRZ_Z  ","BLOOMALG12",  82,"B"," ",1
-"DEBGRZ_Z  ","BLOOMALG13",  83,"B"," ",1
-"DEBGRZ_Z  ","BLOOMALG14",  84,"B"," ",1
-"DEBGRZ_Z  ","BLOOMALG15",  85,"B"," ",1
-"DEBGRZ_Z  ","BLOOMALG16",  86,"B"," ",1
-"DEBGRZ_Z  ","BLOOMALG17",  87,"B"," ",1
-"DEBGRZ_Z  ","BLOOMALG18",  88,"B"," ",1
-"DEBGRZ_Z  ","BLOOMALG19",  89,"B"," ",1
-"DEBGRZ_Z  ","BLOOMALG20",  90,"B"," ",1
-"DEBGRZ_Z  ","BLOOMALG21",  91,"B"," ",1
-"DEBGRZ_Z  ","BLOOMALG22",  92,"B"," ",1
-"DEBGRZ_Z  ","BLOOMALG23",  93,"B"," ",1
-"DEBGRZ_Z  ","BLOOMALG24",  94,"B"," ",1
-"DEBGRZ_Z  ","BLOOMALG25",  95,"B"," ",1
-"DEBGRZ_Z  ","BLOOMALG26",  96,"B"," ",1
-"DEBGRZ_Z  ","BLOOMALG27",  97,"B"," ",1
-"DEBGRZ_Z  ","BLOOMALG28",  98,"B"," ",1
-"DEBGRZ_Z  ","BLOOMALG29",  99,"B"," ",1
-"DEBGRZ_Z  ","BLOOMALG30", 100,"B"," ",1
-"DEBGRZ_Z  ","F1        ", 101,"Y"," ",1
-"DEBGRZ_Z  ","F2        ", 102,"Y"," ",1
-"DEBGRZ_Z  ","F3        ", 103,"Y"," ",1
-"DEBGRZ_Z  ","F4        ", 104,"Y"," ",1
-"DEBGRZ_Z  ","F5        ", 105,"Y"," ",1
-"DEBGRZ_Z  ","F6        ", 106,"Y"," ",1
-"DEBGRZ_Z  ","F7        ", 107,"Y"," ",1
-"DEBGRZ_Z  ","F8        ", 108,"Y"," ",1
-"DEBGRZ_Z  ","NCRatGreen", 109,"Y","x",1
-"DEBGRZ_Z  ","NCRatDiat ", 110,"Y","x",1
-"DEBGRZ_Z  ","NCRAlg01  ", 111,"Y"," ",1
-"DEBGRZ_Z  ","NCRAlg02  ", 112,"Y"," ",1
-"DEBGRZ_Z  ","NCRAlg03  ", 113,"Y"," ",1
-"DEBGRZ_Z  ","NCRAlg04  ", 114,"Y"," ",1
-"DEBGRZ_Z  ","NCRAlg05  ", 115,"Y"," ",1
-"DEBGRZ_Z  ","NCRAlg06  ", 116,"Y"," ",1
-"DEBGRZ_Z  ","NCRAlg07  ", 117,"Y"," ",1
-"DEBGRZ_Z  ","NCRAlg08  ", 118,"Y"," ",1
-"DEBGRZ_Z  ","NCRAlg09  ", 119,"Y"," ",1
-"DEBGRZ_Z  ","NCRAlg10  ", 120,"Y"," ",1
-"DEBGRZ_Z  ","NCRAlg11  ", 121,"Y"," ",1
-"DEBGRZ_Z  ","NCRAlg12  ", 122,"Y"," ",1
-"DEBGRZ_Z  ","NCRAlg13  ", 123,"Y"," ",1
-"DEBGRZ_Z  ","NCRAlg14  ", 124,"Y"," ",1
-"DEBGRZ_Z  ","NCRAlg15  ", 125,"Y"," ",1
-"DEBGRZ_Z  ","NCRAlg16  ", 126,"Y"," ",1
-"DEBGRZ_Z  ","NCRAlg17  ", 127,"Y"," ",1
-"DEBGRZ_Z  ","NCRAlg18  ", 128,"Y"," ",1
-"DEBGRZ_Z  ","NCRAlg19  ", 129,"Y"," ",1
-"DEBGRZ_Z  ","NCRAlg20  ", 130,"Y"," ",1
-"DEBGRZ_Z  ","NCRAlg21  ", 131,"Y"," ",1
-"DEBGRZ_Z  ","NCRAlg22  ", 132,"Y"," ",1
-"DEBGRZ_Z  ","NCRAlg23  ", 133,"Y"," ",1
-"DEBGRZ_Z  ","NCRAlg24  ", 134,"Y"," ",1
-"DEBGRZ_Z  ","NCRAlg25  ", 135,"Y"," ",1
-"DEBGRZ_Z  ","NCRAlg26  ", 136,"Y"," ",1
-"DEBGRZ_Z  ","NCRAlg27  ", 137,"Y"," ",1
-"DEBGRZ_Z  ","NCRAlg28  ", 138,"Y"," ",1
-"DEBGRZ_Z  ","NCRAlg29  ", 139,"Y"," ",1
-"DEBGRZ_Z  ","NCRAlg30  ", 140,"Y"," ",1
-"DEBGRZ_Z  ","NCRatF1   ", 141,"Y"," ",1
-"DEBGRZ_Z  ","NCRatF2   ", 142,"Y"," ",1
-"DEBGRZ_Z  ","NCRatF3   ", 143,"Y"," ",1
-"DEBGRZ_Z  ","NCRatF4   ", 144,"Y"," ",1
-"DEBGRZ_Z  ","NCRatF5   ", 145,"Y"," ",1
-"DEBGRZ_Z  ","NCRatF6   ", 146,"Y"," ",1
-"DEBGRZ_Z  ","NCRatF7   ", 147,"Y"," ",1
-"DEBGRZ_Z  ","NCRatF8   ", 148,"Y"," ",1
-"DEBGRZ_Z  ","PCRatGreen", 149,"Y","x",1
-"DEBGRZ_Z  ","PCRatDiat ", 150,"Y","x",1
-"DEBGRZ_Z  ","PCRAlg01  ", 151,"Y"," ",1
-"DEBGRZ_Z  ","PCRAlg02  ", 152,"Y"," ",1
-"DEBGRZ_Z  ","PCRAlg03  ", 153,"Y"," ",1
-"DEBGRZ_Z  ","PCRAlg04  ", 154,"Y"," ",1
-"DEBGRZ_Z  ","PCRAlg05  ", 155,"Y"," ",1
-"DEBGRZ_Z  ","PCRAlg06  ", 156,"Y"," ",1
-"DEBGRZ_Z  ","PCRAlg07  ", 157,"Y"," ",1
-"DEBGRZ_Z  ","PCRAlg08  ", 158,"Y"," ",1
-"DEBGRZ_Z  ","PCRAlg09  ", 159,"Y"," ",1
-"DEBGRZ_Z  ","PCRAlg10  ", 160,"Y"," ",1
-"DEBGRZ_Z  ","PCRAlg11  ", 161,"Y"," ",1
-"DEBGRZ_Z  ","PCRAlg12  ", 162,"Y"," ",1
-"DEBGRZ_Z  ","PCRAlg13  ", 163,"Y"," ",1
-"DEBGRZ_Z  ","PCRAlg14  ", 164,"Y"," ",1
-"DEBGRZ_Z  ","PCRAlg15  ", 165,"Y"," ",1
-"DEBGRZ_Z  ","PCRAlg16  ", 166,"Y"," ",1
-"DEBGRZ_Z  ","PCRAlg17  ", 167,"Y"," ",1
-"DEBGRZ_Z  ","PCRAlg18  ", 168,"Y"," ",1
-"DEBGRZ_Z  ","PCRAlg19  ", 169,"Y"," ",1
-"DEBGRZ_Z  ","PCRAlg20  ", 170,"Y"," ",1
-"DEBGRZ_Z  ","PCRAlg21  ", 171,"Y"," ",1
-"DEBGRZ_Z  ","PCRAlg22  ", 172,"Y"," ",1
-"DEBGRZ_Z  ","PCRAlg23  ", 173,"Y"," ",1
-"DEBGRZ_Z  ","PCRAlg24  ", 174,"Y"," ",1
-"DEBGRZ_Z  ","PCRAlg25  ", 175,"Y"," ",1
-"DEBGRZ_Z  ","PCRAlg26  ", 176,"Y"," ",1
-"DEBGRZ_Z  ","PCRAlg27  ", 177,"Y"," ",1
-"DEBGRZ_Z  ","PCRAlg28  ", 178,"Y"," ",1
-"DEBGRZ_Z  ","PCRAlg29  ", 179,"Y"," ",1
-"DEBGRZ_Z  ","PCRAlg30  ", 180,"Y"," ",1
-"DEBGRZ_Z  ","PCRatF1   ", 181,"Y"," ",1
-"DEBGRZ_Z  ","PCRatF2   ", 182,"Y"," ",1
-"DEBGRZ_Z  ","PCRatF3   ", 183,"Y"," ",1
-"DEBGRZ_Z  ","PCRatF4   ", 184,"Y"," ",1
-"DEBGRZ_Z  ","PCRatF5   ", 185,"Y"," ",1
-"DEBGRZ_Z  ","PCRatF6   ", 186,"Y"," ",1
-"DEBGRZ_Z  ","PCRatF7   ", 187,"Y"," ",1
-"DEBGRZ_Z  ","PCRatF8   ", 188,"Y"," ",1
-"DEBGRZ_Z  ","SCRatGreen", 189,"Y","x",1
-"DEBGRZ_Z  ","SCRatDiat ", 190,"Y","x",1
-"DEBGRZ_Z  ","SCRAlg01  ", 191,"Y"," ",1
-"DEBGRZ_Z  ","SCRAlg02  ", 192,"Y"," ",1
-"DEBGRZ_Z  ","SCRAlg03  ", 193,"Y"," ",1
-"DEBGRZ_Z  ","SCRAlg04  ", 194,"Y"," ",1
-"DEBGRZ_Z  ","SCRAlg05  ", 195,"Y"," ",1
-"DEBGRZ_Z  ","SCRAlg06  ", 196,"Y"," ",1
-"DEBGRZ_Z  ","SCRAlg07  ", 197,"Y"," ",1
-"DEBGRZ_Z  ","SCRAlg08  ", 198,"Y"," ",1
-"DEBGRZ_Z  ","SCRAlg09  ", 199,"Y"," ",1
-"DEBGRZ_Z  ","SCRAlg10  ", 200,"Y"," ",1
-"DEBGRZ_Z  ","SCRAlg11  ", 201,"Y"," ",1
-"DEBGRZ_Z  ","SCRAlg12  ", 202,"Y"," ",1
-"DEBGRZ_Z  ","SCRAlg13  ", 203,"Y"," ",1
-"DEBGRZ_Z  ","SCRAlg14  ", 204,"Y"," ",1
-"DEBGRZ_Z  ","SCRAlg15  ", 205,"Y"," ",1
-"DEBGRZ_Z  ","SCRAlg16  ", 206,"Y"," ",1
-"DEBGRZ_Z  ","SCRAlg17  ", 207,"Y"," ",1
-"DEBGRZ_Z  ","SCRAlg18  ", 208,"Y"," ",1
-"DEBGRZ_Z  ","SCRAlg19  ", 209,"Y"," ",1
-"DEBGRZ_Z  ","SCRAlg20  ", 210,"Y"," ",1
-"DEBGRZ_Z  ","SCRAlg21  ", 211,"Y"," ",1
-"DEBGRZ_Z  ","SCRAlg22  ", 212,"Y"," ",1
-"DEBGRZ_Z  ","SCRAlg23  ", 213,"Y"," ",1
-"DEBGRZ_Z  ","SCRAlg24  ", 214,"Y"," ",1
-"DEBGRZ_Z  ","SCRAlg25  ", 215,"Y"," ",1
-"DEBGRZ_Z  ","SCRAlg26  ", 216,"Y"," ",1
-"DEBGRZ_Z  ","SCRAlg27  ", 217,"Y"," ",1
-"DEBGRZ_Z  ","SCRAlg28  ", 218,"Y"," ",1
-"DEBGRZ_Z  ","SCRAlg29  ", 219,"Y"," ",1
-"DEBGRZ_Z  ","SCRAlg30  ", 220,"Y"," ",1
-"DEBGRZ_Z  ","SCRatF1   ", 221,"Y"," ",1
-"DEBGRZ_Z  ","SCRatF2   ", 222,"Y"," ",1
-"DEBGRZ_Z  ","SCRatF3   ", 223,"Y"," ",1
-"DEBGRZ_Z  ","SCRatF4   ", 224,"Y"," ",1
-"DEBGRZ_Z  ","SCRatF5   ", 225,"Y"," ",1
-"DEBGRZ_Z  ","SCRatF6   ", 226,"Y"," ",1
-"DEBGRZ_Z  ","SCRatF7   ", 227,"Y"," ",1
-"DEBGRZ_Z  ","SCRatF8   ", 228,"Y"," ",1
-"DEBGRZ_Z  ","Z_PrGrn   ", 229,"Y","x",1
-"DEBGRZ_Z  ","Z_PrDiat  ", 230,"Y","x",1
-"DEBGRZ_Z  ","Z_PrAlg01 ", 231,"Y"," ",1
-"DEBGRZ_Z  ","Z_PrAlg02 ", 232,"Y"," ",1
-"DEBGRZ_Z  ","Z_PrAlg03 ", 233,"Y"," ",1
-"DEBGRZ_Z  ","Z_PrAlg04 ", 234,"Y"," ",1
-"DEBGRZ_Z  ","Z_PrAlg05 ", 235,"Y"," ",1
-"DEBGRZ_Z  ","Z_PrAlg06 ", 236,"Y"," ",1
-"DEBGRZ_Z  ","Z_PrAlg07 ", 237,"Y"," ",1
-"DEBGRZ_Z  ","Z_PrAlg08 ", 238,"Y"," ",1
-"DEBGRZ_Z  ","Z_PrAlg09 ", 239,"Y"," ",1
-"DEBGRZ_Z  ","Z_PrAlg10 ", 240,"Y"," ",1
-"DEBGRZ_Z  ","Z_PrAlg11 ", 241,"Y"," ",1
-"DEBGRZ_Z  ","Z_PrAlg12 ", 242,"Y"," ",1
-"DEBGRZ_Z  ","Z_PrAlg13 ", 243,"Y"," ",1
-"DEBGRZ_Z  ","Z_PrAlg14 ", 244,"Y"," ",1
-"DEBGRZ_Z  ","Z_PrAlg15 ", 245,"Y"," ",1
-"DEBGRZ_Z  ","Z_PrAlg16 ", 246,"Y"," ",1
-"DEBGRZ_Z  ","Z_PrAlg17 ", 247,"Y"," ",1
-"DEBGRZ_Z  ","Z_PrAlg18 ", 248,"Y"," ",1
-"DEBGRZ_Z  ","Z_PrAlg19 ", 249,"Y"," ",1
-"DEBGRZ_Z  ","Z_PrAlg20 ", 250,"Y"," ",1
-"DEBGRZ_Z  ","Z_PrAlg21 ", 251,"Y"," ",1
-"DEBGRZ_Z  ","Z_PrAlg22 ", 252,"Y"," ",1
-"DEBGRZ_Z  ","Z_PrAlg23 ", 253,"Y"," ",1
-"DEBGRZ_Z  ","Z_PrAlg24 ", 254,"Y"," ",1
-"DEBGRZ_Z  ","Z_PrAlg25 ", 255,"Y"," ",1
-"DEBGRZ_Z  ","Z_PrAlg26 ", 256,"Y"," ",1
-"DEBGRZ_Z  ","Z_PrAlg27 ", 257,"Y"," ",1
-"DEBGRZ_Z  ","Z_PrAlg28 ", 258,"Y"," ",1
-"DEBGRZ_Z  ","Z_PrAlg29 ", 259,"Y"," ",1
-"DEBGRZ_Z  ","Z_PrAlg30 ", 260,"Y"," ",1
-"DEBGRZ_Z  ","Z_Pr1     ", 261,"Y"," ",1
-"DEBGRZ_Z  ","Z_Pr2     ", 262,"Y"," ",1
-"DEBGRZ_Z  ","Z_Pr3     ", 263,"Y"," ",1
-"DEBGRZ_Z  ","Z_Pr4     ", 264,"Y"," ",1
-"DEBGRZ_Z  ","Z_Pr5     ", 265,"Y"," ",1
-"DEBGRZ_Z  ","Z_Pr6     ", 266,"Y"," ",1
-"DEBGRZ_Z  ","Z_Pr7     ", 267,"Y"," ",1
-"DEBGRZ_Z  ","Z_Pr8     ", 268,"Y"," ",1
-"DEBGRZ_Z  ","BenGrn    ", 269,"Y","x",1
-"DEBGRZ_Z  ","BenDiat   ", 270,"Y","x",1
-"DEBGRZ_Z  ","BenAlg01  ", 271,"Y"," ",1
-"DEBGRZ_Z  ","BenAlg02  ", 272,"Y"," ",1
-"DEBGRZ_Z  ","BenAlg03  ", 273,"Y"," ",1
-"DEBGRZ_Z  ","BenAlg04  ", 274,"Y"," ",1
-"DEBGRZ_Z  ","BenAlg05  ", 275,"Y"," ",1
-"DEBGRZ_Z  ","BenAlg06  ", 276,"Y"," ",1
-"DEBGRZ_Z  ","BenAlg07  ", 277,"Y"," ",1
-"DEBGRZ_Z  ","BenAlg08  ", 278,"Y"," ",1
-"DEBGRZ_Z  ","BenAlg09  ", 279,"Y"," ",1
-"DEBGRZ_Z  ","BenAlg10  ", 280,"Y"," ",1
-"DEBGRZ_Z  ","BenAlg11  ", 281,"Y"," ",1
-"DEBGRZ_Z  ","BenAlg12  ", 282,"Y"," ",1
-"DEBGRZ_Z  ","BenAlg13  ", 283,"Y"," ",1
-"DEBGRZ_Z  ","BenAlg14  ", 284,"Y"," ",1
-"DEBGRZ_Z  ","BenAlg15  ", 285,"Y"," ",1
-"DEBGRZ_Z  ","BenAlg16  ", 286,"Y"," ",1
-"DEBGRZ_Z  ","BenAlg17  ", 287,"Y"," ",1
-"DEBGRZ_Z  ","BenAlg18  ", 288,"Y"," ",1
-"DEBGRZ_Z  ","BenAlg19  ", 289,"Y"," ",1
-"DEBGRZ_Z  ","BenAlg20  ", 290,"Y"," ",1
-"DEBGRZ_Z  ","BenAlg21  ", 291,"Y"," ",1
-"DEBGRZ_Z  ","BenAlg22  ", 292,"Y"," ",1
-"DEBGRZ_Z  ","BenAlg23  ", 293,"Y"," ",1
-"DEBGRZ_Z  ","BenAlg24  ", 294,"Y"," ",1
-"DEBGRZ_Z  ","BenAlg25  ", 295,"Y"," ",1
-"DEBGRZ_Z  ","BenAlg26  ", 296,"Y"," ",1
-"DEBGRZ_Z  ","BenAlg27  ", 297,"Y"," ",1
-"DEBGRZ_Z  ","BenAlg28  ", 298,"Y"," ",1
-"DEBGRZ_Z  ","BenAlg29  ", 299,"Y"," ",1
-"DEBGRZ_Z  ","BenAlg30  ", 300,"Y"," ",1
-"DEBGRZ_Z  ","Ben1      ", 301,"Y"," ",1
-"DEBGRZ_Z  ","Ben2      ", 302,"Y"," ",1
-"DEBGRZ_Z  ","Ben3      ", 303,"Y"," ",1
-"DEBGRZ_Z  ","Ben4      ", 304,"Y"," ",1
-"DEBGRZ_Z  ","Ben5      ", 305,"Y"," ",1
-"DEBGRZ_Z  ","Ben6      ", 306,"Y"," ",1
-"DEBGRZ_Z  ","Ben7      ", 307,"Y"," ",1
-"DEBGRZ_Z  ","Ben8      ", 308,"Y"," ",1
-"DEBGRZ_Z  ","Z_FFGrn   ", 309,"Y"," ",1
-"DEBGRZ_Z  ","Z_FFDiat  ", 310,"Y"," ",1
-"DEBGRZ_Z  ","Z_ALGFF01 ", 311,"Y"," ",1
-"DEBGRZ_Z  ","Z_ALGFF02 ", 312,"Y"," ",1
-"DEBGRZ_Z  ","Z_ALGFF03 ", 313,"Y"," ",1
-"DEBGRZ_Z  ","Z_ALGFF04 ", 314,"Y"," ",1
-"DEBGRZ_Z  ","Z_ALGFF05 ", 315,"Y"," ",1
-"DEBGRZ_Z  ","Z_ALGFF06 ", 316,"Y"," ",1
-"DEBGRZ_Z  ","Z_ALGFF07 ", 317,"Y"," ",1
-"DEBGRZ_Z  ","Z_ALGFF08 ", 318,"Y"," ",1
-"DEBGRZ_Z  ","Z_ALGFF09 ", 319,"Y"," ",1
-"DEBGRZ_Z  ","Z_ALGFF10 ", 320,"Y"," ",1
-"DEBGRZ_Z  ","Z_ALGFF11 ", 321,"Y"," ",1
-"DEBGRZ_Z  ","Z_ALGFF12 ", 322,"Y"," ",1
-"DEBGRZ_Z  ","Z_ALGFF13 ", 323,"Y"," ",1
-"DEBGRZ_Z  ","Z_ALGFF14 ", 324,"Y"," ",1
-"DEBGRZ_Z  ","Z_ALGFF15 ", 325,"Y"," ",1
-"DEBGRZ_Z  ","Z_ALGFF16 ", 326,"Y"," ",1
-"DEBGRZ_Z  ","Z_ALGFF17 ", 327,"Y"," ",1
-"DEBGRZ_Z  ","Z_ALGFF18 ", 328,"Y"," ",1
-"DEBGRZ_Z  ","Z_ALGFF19 ", 329,"Y"," ",1
-"DEBGRZ_Z  ","Z_ALGFF20 ", 330,"Y"," ",1
-"DEBGRZ_Z  ","Z_ALGFF21 ", 331,"Y"," ",1
-"DEBGRZ_Z  ","Z_ALGFF22 ", 332,"Y"," ",1
-"DEBGRZ_Z  ","Z_ALGFF23 ", 333,"Y"," ",1
-"DEBGRZ_Z  ","Z_ALGFF24 ", 334,"Y"," ",1
-"DEBGRZ_Z  ","Z_ALGFF25 ", 335,"Y"," ",1
-"DEBGRZ_Z  ","Z_ALGFF26 ", 336,"Y"," ",1
-"DEBGRZ_Z  ","Z_ALGFF27 ", 337,"Y"," ",1
-"DEBGRZ_Z  ","Z_ALGFF28 ", 338,"Y"," ",1
-"DEBGRZ_Z  ","Z_ALGFF29 ", 339,"Y"," ",1
-"DEBGRZ_Z  ","Z_ALGFF30 ", 340,"Y"," ",1
-"DEBGRZ_Z  ","Z_FF01    ", 341,"Y"," ",1
-"DEBGRZ_Z  ","Z_FF02    ", 342,"Y"," ",1
-"DEBGRZ_Z  ","Z_FF03    ", 343,"Y"," ",1
-"DEBGRZ_Z  ","Z_FF04    ", 344,"Y"," ",1
-"DEBGRZ_Z  ","Z_FF05    ", 345,"Y"," ",1
-"DEBGRZ_Z  ","Z_FF06    ", 346,"Y"," ",1
-"DEBGRZ_Z  ","Z_FF07    ", 347,"Y"," ",1
-"DEBGRZ_Z  ","Z_FF08    ", 348,"Y"," ",1
+"DEBGRZ_Z  ","Z_minFood ",  57,"Y","x",1
+"DEBGRZ_Z  ","DetC      ",  58,"Y","x",1
+"DEBGRZ_Z  ","DetN      ",  59,"Y","x",1
+"DEBGRZ_Z  ","DetP      ",  60,"Y","x",1
+"DEBGRZ_Z  ","DetSi     ",  61,"Y","x",1
+"DEBGRZ_Z  ","POC1      ",  62,"Y"," ",1
+"DEBGRZ_Z  ","PON1      ",  63,"Y"," ",1
+"DEBGRZ_Z  ","POP1      ",  64,"Y"," ",1
+"DEBGRZ_Z  ","Opal      ",  65,"Y"," ",1
+"DEBGRZ_Z  ","DetCS1    ",  66,"Y","x",1
+"DEBGRZ_Z  ","DetNS1    ",  67,"Y","x",1
+"DEBGRZ_Z  ","DetPS1    ",  68,"Y","x",1
+"DEBGRZ_Z  ","DetSiS1   ",  69,"Y","x",1
+"DEBGRZ_Z  ","Green     ",  70,"Y","x",1
+"DEBGRZ_Z  ","Diat      ",  71,"Y","x",1
+"DEBGRZ_Z  ","BLOOMALG01",  72,"B"," ",1
+"DEBGRZ_Z  ","BLOOMALG02",  73,"B"," ",1
+"DEBGRZ_Z  ","BLOOMALG03",  74,"B"," ",1
+"DEBGRZ_Z  ","BLOOMALG04",  75,"B"," ",1
+"DEBGRZ_Z  ","BLOOMALG05",  76,"B"," ",1
+"DEBGRZ_Z  ","BLOOMALG06",  77,"B"," ",1
+"DEBGRZ_Z  ","BLOOMALG07",  78,"B"," ",1
+"DEBGRZ_Z  ","BLOOMALG08",  79,"B"," ",1
+"DEBGRZ_Z  ","BLOOMALG09",  80,"B"," ",1
+"DEBGRZ_Z  ","BLOOMALG10",  81,"B"," ",1
+"DEBGRZ_Z  ","BLOOMALG11",  82,"B"," ",1
+"DEBGRZ_Z  ","BLOOMALG12",  83,"B"," ",1
+"DEBGRZ_Z  ","BLOOMALG13",  84,"B"," ",1
+"DEBGRZ_Z  ","BLOOMALG14",  85,"B"," ",1
+"DEBGRZ_Z  ","BLOOMALG15",  86,"B"," ",1
+"DEBGRZ_Z  ","BLOOMALG16",  87,"B"," ",1
+"DEBGRZ_Z  ","BLOOMALG17",  88,"B"," ",1
+"DEBGRZ_Z  ","BLOOMALG18",  89,"B"," ",1
+"DEBGRZ_Z  ","BLOOMALG19",  90,"B"," ",1
+"DEBGRZ_Z  ","BLOOMALG20",  91,"B"," ",1
+"DEBGRZ_Z  ","BLOOMALG21",  92,"B"," ",1
+"DEBGRZ_Z  ","BLOOMALG22",  93,"B"," ",1
+"DEBGRZ_Z  ","BLOOMALG23",  94,"B"," ",1
+"DEBGRZ_Z  ","BLOOMALG24",  95,"B"," ",1
+"DEBGRZ_Z  ","BLOOMALG25",  96,"B"," ",1
+"DEBGRZ_Z  ","BLOOMALG26",  97,"B"," ",1
+"DEBGRZ_Z  ","BLOOMALG27",  98,"B"," ",1
+"DEBGRZ_Z  ","BLOOMALG28",  99,"B"," ",1
+"DEBGRZ_Z  ","BLOOMALG29", 100,"B"," ",1
+"DEBGRZ_Z  ","BLOOMALG30", 101,"B"," ",1
+"DEBGRZ_Z  ","F1        ", 102,"Y"," ",1
+"DEBGRZ_Z  ","F2        ", 103,"Y"," ",1
+"DEBGRZ_Z  ","F3        ", 104,"Y"," ",1
+"DEBGRZ_Z  ","F4        ", 105,"Y"," ",1
+"DEBGRZ_Z  ","F5        ", 106,"Y"," ",1
+"DEBGRZ_Z  ","F6        ", 107,"Y"," ",1
+"DEBGRZ_Z  ","F7        ", 108,"Y"," ",1
+"DEBGRZ_Z  ","F8        ", 109,"Y"," ",1
+"DEBGRZ_Z  ","NCRatGreen", 110,"Y","x",1
+"DEBGRZ_Z  ","NCRatDiat ", 111,"Y","x",1
+"DEBGRZ_Z  ","NCRAlg01  ", 112,"Y"," ",1
+"DEBGRZ_Z  ","NCRAlg02  ", 113,"Y"," ",1
+"DEBGRZ_Z  ","NCRAlg03  ", 114,"Y"," ",1
+"DEBGRZ_Z  ","NCRAlg04  ", 115,"Y"," ",1
+"DEBGRZ_Z  ","NCRAlg05  ", 116,"Y"," ",1
+"DEBGRZ_Z  ","NCRAlg06  ", 117,"Y"," ",1
+"DEBGRZ_Z  ","NCRAlg07  ", 118,"Y"," ",1
+"DEBGRZ_Z  ","NCRAlg08  ", 119,"Y"," ",1
+"DEBGRZ_Z  ","NCRAlg09  ", 120,"Y"," ",1
+"DEBGRZ_Z  ","NCRAlg10  ", 121,"Y"," ",1
+"DEBGRZ_Z  ","NCRAlg11  ", 122,"Y"," ",1
+"DEBGRZ_Z  ","NCRAlg12  ", 123,"Y"," ",1
+"DEBGRZ_Z  ","NCRAlg13  ", 124,"Y"," ",1
+"DEBGRZ_Z  ","NCRAlg14  ", 125,"Y"," ",1
+"DEBGRZ_Z  ","NCRAlg15  ", 126,"Y"," ",1
+"DEBGRZ_Z  ","NCRAlg16  ", 127,"Y"," ",1
+"DEBGRZ_Z  ","NCRAlg17  ", 128,"Y"," ",1
+"DEBGRZ_Z  ","NCRAlg18  ", 129,"Y"," ",1
+"DEBGRZ_Z  ","NCRAlg19  ", 130,"Y"," ",1
+"DEBGRZ_Z  ","NCRAlg20  ", 131,"Y"," ",1
+"DEBGRZ_Z  ","NCRAlg21  ", 132,"Y"," ",1
+"DEBGRZ_Z  ","NCRAlg22  ", 133,"Y"," ",1
+"DEBGRZ_Z  ","NCRAlg23  ", 134,"Y"," ",1
+"DEBGRZ_Z  ","NCRAlg24  ", 135,"Y"," ",1
+"DEBGRZ_Z  ","NCRAlg25  ", 136,"Y"," ",1
+"DEBGRZ_Z  ","NCRAlg26  ", 137,"Y"," ",1
+"DEBGRZ_Z  ","NCRAlg27  ", 138,"Y"," ",1
+"DEBGRZ_Z  ","NCRAlg28  ", 139,"Y"," ",1
+"DEBGRZ_Z  ","NCRAlg29  ", 140,"Y"," ",1
+"DEBGRZ_Z  ","NCRAlg30  ", 141,"Y"," ",1
+"DEBGRZ_Z  ","NCRatF1   ", 142,"Y"," ",1
+"DEBGRZ_Z  ","NCRatF2   ", 143,"Y"," ",1
+"DEBGRZ_Z  ","NCRatF3   ", 144,"Y"," ",1
+"DEBGRZ_Z  ","NCRatF4   ", 145,"Y"," ",1
+"DEBGRZ_Z  ","NCRatF5   ", 146,"Y"," ",1
+"DEBGRZ_Z  ","NCRatF6   ", 147,"Y"," ",1
+"DEBGRZ_Z  ","NCRatF7   ", 148,"Y"," ",1
+"DEBGRZ_Z  ","NCRatF8   ", 149,"Y"," ",1
+"DEBGRZ_Z  ","PCRatGreen", 150,"Y","x",1
+"DEBGRZ_Z  ","PCRatDiat ", 151,"Y","x",1
+"DEBGRZ_Z  ","PCRAlg01  ", 152,"Y"," ",1
+"DEBGRZ_Z  ","PCRAlg02  ", 153,"Y"," ",1
+"DEBGRZ_Z  ","PCRAlg03  ", 154,"Y"," ",1
+"DEBGRZ_Z  ","PCRAlg04  ", 155,"Y"," ",1
+"DEBGRZ_Z  ","PCRAlg05  ", 156,"Y"," ",1
+"DEBGRZ_Z  ","PCRAlg06  ", 157,"Y"," ",1
+"DEBGRZ_Z  ","PCRAlg07  ", 158,"Y"," ",1
+"DEBGRZ_Z  ","PCRAlg08  ", 159,"Y"," ",1
+"DEBGRZ_Z  ","PCRAlg09  ", 160,"Y"," ",1
+"DEBGRZ_Z  ","PCRAlg10  ", 161,"Y"," ",1
+"DEBGRZ_Z  ","PCRAlg11  ", 162,"Y"," ",1
+"DEBGRZ_Z  ","PCRAlg12  ", 163,"Y"," ",1
+"DEBGRZ_Z  ","PCRAlg13  ", 164,"Y"," ",1
+"DEBGRZ_Z  ","PCRAlg14  ", 165,"Y"," ",1
+"DEBGRZ_Z  ","PCRAlg15  ", 166,"Y"," ",1
+"DEBGRZ_Z  ","PCRAlg16  ", 167,"Y"," ",1
+"DEBGRZ_Z  ","PCRAlg17  ", 168,"Y"," ",1
+"DEBGRZ_Z  ","PCRAlg18  ", 169,"Y"," ",1
+"DEBGRZ_Z  ","PCRAlg19  ", 170,"Y"," ",1
+"DEBGRZ_Z  ","PCRAlg20  ", 171,"Y"," ",1
+"DEBGRZ_Z  ","PCRAlg21  ", 172,"Y"," ",1
+"DEBGRZ_Z  ","PCRAlg22  ", 173,"Y"," ",1
+"DEBGRZ_Z  ","PCRAlg23  ", 174,"Y"," ",1
+"DEBGRZ_Z  ","PCRAlg24  ", 175,"Y"," ",1
+"DEBGRZ_Z  ","PCRAlg25  ", 176,"Y"," ",1
+"DEBGRZ_Z  ","PCRAlg26  ", 177,"Y"," ",1
+"DEBGRZ_Z  ","PCRAlg27  ", 178,"Y"," ",1
+"DEBGRZ_Z  ","PCRAlg28  ", 179,"Y"," ",1
+"DEBGRZ_Z  ","PCRAlg29  ", 180,"Y"," ",1
+"DEBGRZ_Z  ","PCRAlg30  ", 181,"Y"," ",1
+"DEBGRZ_Z  ","PCRatF1   ", 182,"Y"," ",1
+"DEBGRZ_Z  ","PCRatF2   ", 183,"Y"," ",1
+"DEBGRZ_Z  ","PCRatF3   ", 184,"Y"," ",1
+"DEBGRZ_Z  ","PCRatF4   ", 185,"Y"," ",1
+"DEBGRZ_Z  ","PCRatF5   ", 186,"Y"," ",1
+"DEBGRZ_Z  ","PCRatF6   ", 187,"Y"," ",1
+"DEBGRZ_Z  ","PCRatF7   ", 188,"Y"," ",1
+"DEBGRZ_Z  ","PCRatF8   ", 189,"Y"," ",1
+"DEBGRZ_Z  ","SCRatGreen", 190,"Y","x",1
+"DEBGRZ_Z  ","SCRatDiat ", 191,"Y","x",1
+"DEBGRZ_Z  ","SCRAlg01  ", 192,"Y"," ",1
+"DEBGRZ_Z  ","SCRAlg02  ", 193,"Y"," ",1
+"DEBGRZ_Z  ","SCRAlg03  ", 194,"Y"," ",1
+"DEBGRZ_Z  ","SCRAlg04  ", 195,"Y"," ",1
+"DEBGRZ_Z  ","SCRAlg05  ", 196,"Y"," ",1
+"DEBGRZ_Z  ","SCRAlg06  ", 197,"Y"," ",1
+"DEBGRZ_Z  ","SCRAlg07  ", 198,"Y"," ",1
+"DEBGRZ_Z  ","SCRAlg08  ", 199,"Y"," ",1
+"DEBGRZ_Z  ","SCRAlg09  ", 200,"Y"," ",1
+"DEBGRZ_Z  ","SCRAlg10  ", 201,"Y"," ",1
+"DEBGRZ_Z  ","SCRAlg11  ", 202,"Y"," ",1
+"DEBGRZ_Z  ","SCRAlg12  ", 203,"Y"," ",1
+"DEBGRZ_Z  ","SCRAlg13  ", 204,"Y"," ",1
+"DEBGRZ_Z  ","SCRAlg14  ", 205,"Y"," ",1
+"DEBGRZ_Z  ","SCRAlg15  ", 206,"Y"," ",1
+"DEBGRZ_Z  ","SCRAlg16  ", 207,"Y"," ",1
+"DEBGRZ_Z  ","SCRAlg17  ", 208,"Y"," ",1
+"DEBGRZ_Z  ","SCRAlg18  ", 209,"Y"," ",1
+"DEBGRZ_Z  ","SCRAlg19  ", 210,"Y"," ",1
+"DEBGRZ_Z  ","SCRAlg20  ", 211,"Y"," ",1
+"DEBGRZ_Z  ","SCRAlg21  ", 212,"Y"," ",1
+"DEBGRZ_Z  ","SCRAlg22  ", 213,"Y"," ",1
+"DEBGRZ_Z  ","SCRAlg23  ", 214,"Y"," ",1
+"DEBGRZ_Z  ","SCRAlg24  ", 215,"Y"," ",1
+"DEBGRZ_Z  ","SCRAlg25  ", 216,"Y"," ",1
+"DEBGRZ_Z  ","SCRAlg26  ", 217,"Y"," ",1
+"DEBGRZ_Z  ","SCRAlg27  ", 218,"Y"," ",1
+"DEBGRZ_Z  ","SCRAlg28  ", 219,"Y"," ",1
+"DEBGRZ_Z  ","SCRAlg29  ", 220,"Y"," ",1
+"DEBGRZ_Z  ","SCRAlg30  ", 221,"Y"," ",1
+"DEBGRZ_Z  ","SCRatF1   ", 222,"Y"," ",1
+"DEBGRZ_Z  ","SCRatF2   ", 223,"Y"," ",1
+"DEBGRZ_Z  ","SCRatF3   ", 224,"Y"," ",1
+"DEBGRZ_Z  ","SCRatF4   ", 225,"Y"," ",1
+"DEBGRZ_Z  ","SCRatF5   ", 226,"Y"," ",1
+"DEBGRZ_Z  ","SCRatF6   ", 227,"Y"," ",1
+"DEBGRZ_Z  ","SCRatF7   ", 228,"Y"," ",1
+"DEBGRZ_Z  ","SCRatF8   ", 229,"Y"," ",1
+"DEBGRZ_Z  ","Z_PrGrn   ", 230,"Y","x",1
+"DEBGRZ_Z  ","Z_PrDiat  ", 231,"Y","x",1
+"DEBGRZ_Z  ","Z_PrAlg01 ", 232,"Y"," ",1
+"DEBGRZ_Z  ","Z_PrAlg02 ", 233,"Y"," ",1
+"DEBGRZ_Z  ","Z_PrAlg03 ", 234,"Y"," ",1
+"DEBGRZ_Z  ","Z_PrAlg04 ", 235,"Y"," ",1
+"DEBGRZ_Z  ","Z_PrAlg05 ", 236,"Y"," ",1
+"DEBGRZ_Z  ","Z_PrAlg06 ", 237,"Y"," ",1
+"DEBGRZ_Z  ","Z_PrAlg07 ", 238,"Y"," ",1
+"DEBGRZ_Z  ","Z_PrAlg08 ", 239,"Y"," ",1
+"DEBGRZ_Z  ","Z_PrAlg09 ", 240,"Y"," ",1
+"DEBGRZ_Z  ","Z_PrAlg10 ", 241,"Y"," ",1
+"DEBGRZ_Z  ","Z_PrAlg11 ", 242,"Y"," ",1
+"DEBGRZ_Z  ","Z_PrAlg12 ", 243,"Y"," ",1
+"DEBGRZ_Z  ","Z_PrAlg13 ", 244,"Y"," ",1
+"DEBGRZ_Z  ","Z_PrAlg14 ", 245,"Y"," ",1
+"DEBGRZ_Z  ","Z_PrAlg15 ", 246,"Y"," ",1
+"DEBGRZ_Z  ","Z_PrAlg16 ", 247,"Y"," ",1
+"DEBGRZ_Z  ","Z_PrAlg17 ", 248,"Y"," ",1
+"DEBGRZ_Z  ","Z_PrAlg18 ", 249,"Y"," ",1
+"DEBGRZ_Z  ","Z_PrAlg19 ", 250,"Y"," ",1
+"DEBGRZ_Z  ","Z_PrAlg20 ", 251,"Y"," ",1
+"DEBGRZ_Z  ","Z_PrAlg21 ", 252,"Y"," ",1
+"DEBGRZ_Z  ","Z_PrAlg22 ", 253,"Y"," ",1
+"DEBGRZ_Z  ","Z_PrAlg23 ", 254,"Y"," ",1
+"DEBGRZ_Z  ","Z_PrAlg24 ", 255,"Y"," ",1
+"DEBGRZ_Z  ","Z_PrAlg25 ", 256,"Y"," ",1
+"DEBGRZ_Z  ","Z_PrAlg26 ", 257,"Y"," ",1
+"DEBGRZ_Z  ","Z_PrAlg27 ", 258,"Y"," ",1
+"DEBGRZ_Z  ","Z_PrAlg28 ", 259,"Y"," ",1
+"DEBGRZ_Z  ","Z_PrAlg29 ", 260,"Y"," ",1
+"DEBGRZ_Z  ","Z_PrAlg30 ", 261,"Y"," ",1
+"DEBGRZ_Z  ","Z_Pr1     ", 262,"Y"," ",1
+"DEBGRZ_Z  ","Z_Pr2     ", 263,"Y"," ",1
+"DEBGRZ_Z  ","Z_Pr3     ", 264,"Y"," ",1
+"DEBGRZ_Z  ","Z_Pr4     ", 265,"Y"," ",1
+"DEBGRZ_Z  ","Z_Pr5     ", 266,"Y"," ",1
+"DEBGRZ_Z  ","Z_Pr6     ", 267,"Y"," ",1
+"DEBGRZ_Z  ","Z_Pr7     ", 268,"Y"," ",1
+"DEBGRZ_Z  ","Z_Pr8     ", 269,"Y"," ",1
+"DEBGRZ_Z  ","BenGrn    ", 270,"Y","x",1
+"DEBGRZ_Z  ","BenDiat   ", 271,"Y","x",1
+"DEBGRZ_Z  ","BenAlg01  ", 272,"Y"," ",1
+"DEBGRZ_Z  ","BenAlg02  ", 273,"Y"," ",1
+"DEBGRZ_Z  ","BenAlg03  ", 274,"Y"," ",1
+"DEBGRZ_Z  ","BenAlg04  ", 275,"Y"," ",1
+"DEBGRZ_Z  ","BenAlg05  ", 276,"Y"," ",1
+"DEBGRZ_Z  ","BenAlg06  ", 277,"Y"," ",1
+"DEBGRZ_Z  ","BenAlg07  ", 278,"Y"," ",1
+"DEBGRZ_Z  ","BenAlg08  ", 279,"Y"," ",1
+"DEBGRZ_Z  ","BenAlg09  ", 280,"Y"," ",1
+"DEBGRZ_Z  ","BenAlg10  ", 281,"Y"," ",1
+"DEBGRZ_Z  ","BenAlg11  ", 282,"Y"," ",1
+"DEBGRZ_Z  ","BenAlg12  ", 283,"Y"," ",1
+"DEBGRZ_Z  ","BenAlg13  ", 284,"Y"," ",1
+"DEBGRZ_Z  ","BenAlg14  ", 285,"Y"," ",1
+"DEBGRZ_Z  ","BenAlg15  ", 286,"Y"," ",1
+"DEBGRZ_Z  ","BenAlg16  ", 287,"Y"," ",1
+"DEBGRZ_Z  ","BenAlg17  ", 288,"Y"," ",1
+"DEBGRZ_Z  ","BenAlg18  ", 289,"Y"," ",1
+"DEBGRZ_Z  ","BenAlg19  ", 290,"Y"," ",1
+"DEBGRZ_Z  ","BenAlg20  ", 291,"Y"," ",1
+"DEBGRZ_Z  ","BenAlg21  ", 292,"Y"," ",1
+"DEBGRZ_Z  ","BenAlg22  ", 293,"Y"," ",1
+"DEBGRZ_Z  ","BenAlg23  ", 294,"Y"," ",1
+"DEBGRZ_Z  ","BenAlg24  ", 295,"Y"," ",1
+"DEBGRZ_Z  ","BenAlg25  ", 296,"Y"," ",1
+"DEBGRZ_Z  ","BenAlg26  ", 297,"Y"," ",1
+"DEBGRZ_Z  ","BenAlg27  ", 298,"Y"," ",1
+"DEBGRZ_Z  ","BenAlg28  ", 299,"Y"," ",1
+"DEBGRZ_Z  ","BenAlg29  ", 300,"Y"," ",1
+"DEBGRZ_Z  ","BenAlg30  ", 301,"Y"," ",1
+"DEBGRZ_Z  ","Ben1      ", 302,"Y"," ",1
+"DEBGRZ_Z  ","Ben2      ", 303,"Y"," ",1
+"DEBGRZ_Z  ","Ben3      ", 304,"Y"," ",1
+"DEBGRZ_Z  ","Ben4      ", 305,"Y"," ",1
+"DEBGRZ_Z  ","Ben5      ", 306,"Y"," ",1
+"DEBGRZ_Z  ","Ben6      ", 307,"Y"," ",1
+"DEBGRZ_Z  ","Ben7      ", 308,"Y"," ",1
+"DEBGRZ_Z  ","Ben8      ", 309,"Y"," ",1
+"DEBGRZ_Z  ","Z_FFGrn   ", 310,"Y"," ",1
+"DEBGRZ_Z  ","Z_FFDiat  ", 311,"Y"," ",1
+"DEBGRZ_Z  ","Z_ALGFF01 ", 312,"Y"," ",1
+"DEBGRZ_Z  ","Z_ALGFF02 ", 313,"Y"," ",1
+"DEBGRZ_Z  ","Z_ALGFF03 ", 314,"Y"," ",1
+"DEBGRZ_Z  ","Z_ALGFF04 ", 315,"Y"," ",1
+"DEBGRZ_Z  ","Z_ALGFF05 ", 316,"Y"," ",1
+"DEBGRZ_Z  ","Z_ALGFF06 ", 317,"Y"," ",1
+"DEBGRZ_Z  ","Z_ALGFF07 ", 318,"Y"," ",1
+"DEBGRZ_Z  ","Z_ALGFF08 ", 319,"Y"," ",1
+"DEBGRZ_Z  ","Z_ALGFF09 ", 320,"Y"," ",1
+"DEBGRZ_Z  ","Z_ALGFF10 ", 321,"Y"," ",1
+"DEBGRZ_Z  ","Z_ALGFF11 ", 322,"Y"," ",1
+"DEBGRZ_Z  ","Z_ALGFF12 ", 323,"Y"," ",1
+"DEBGRZ_Z  ","Z_ALGFF13 ", 324,"Y"," ",1
+"DEBGRZ_Z  ","Z_ALGFF14 ", 325,"Y"," ",1
+"DEBGRZ_Z  ","Z_ALGFF15 ", 326,"Y"," ",1
+"DEBGRZ_Z  ","Z_ALGFF16 ", 327,"Y"," ",1
+"DEBGRZ_Z  ","Z_ALGFF17 ", 328,"Y"," ",1
+"DEBGRZ_Z  ","Z_ALGFF18 ", 329,"Y"," ",1
+"DEBGRZ_Z  ","Z_ALGFF19 ", 330,"Y"," ",1
+"DEBGRZ_Z  ","Z_ALGFF20 ", 331,"Y"," ",1
+"DEBGRZ_Z  ","Z_ALGFF21 ", 332,"Y"," ",1
+"DEBGRZ_Z  ","Z_ALGFF22 ", 333,"Y"," ",1
+"DEBGRZ_Z  ","Z_ALGFF23 ", 334,"Y"," ",1
+"DEBGRZ_Z  ","Z_ALGFF24 ", 335,"Y"," ",1
+"DEBGRZ_Z  ","Z_ALGFF25 ", 336,"Y"," ",1
+"DEBGRZ_Z  ","Z_ALGFF26 ", 337,"Y"," ",1
+"DEBGRZ_Z  ","Z_ALGFF27 ", 338,"Y"," ",1
+"DEBGRZ_Z  ","Z_ALGFF28 ", 339,"Y"," ",1
+"DEBGRZ_Z  ","Z_ALGFF29 ", 340,"Y"," ",1
+"DEBGRZ_Z  ","Z_ALGFF30 ", 341,"Y"," ",1
+"DEBGRZ_Z  ","Z_FF01    ", 342,"Y"," ",1
+"DEBGRZ_Z  ","Z_FF02    ", 343,"Y"," ",1
+"DEBGRZ_Z  ","Z_FF03    ", 344,"Y"," ",1
+"DEBGRZ_Z  ","Z_FF04    ", 345,"Y"," ",1
+"DEBGRZ_Z  ","Z_FF05    ", 346,"Y"," ",1
+"DEBGRZ_Z  ","Z_FF06    ", 347,"Y"," ",1
+"DEBGRZ_Z  ","Z_FF07    ", 348,"Y"," ",1
+"DEBGRZ_Z  ","Z_FF08    ", 349,"Y"," ",1
 "DEBGRZ_G3 ","DELT      ",   1,"N","x",1
 "DEBGRZ_G3 ","Volume    ",   2,"N","x",1
 "DEBGRZ_G3 ","Temp      ",   3,"Y","x",1
@@ -13637,298 +13639,299 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "DEBGRZ_G3 ","G3_PrDetS1",  54,"Y","x",1
 "DEBGRZ_G3 ","G3_FFDet  ",  55,"Y","x",1
 "DEBGRZ_G3 ","G3_FFDetS1",  56,"Y","x",1
-"DEBGRZ_G3 ","DetC      ",  57,"Y","x",1
-"DEBGRZ_G3 ","DetN      ",  58,"Y","x",1
-"DEBGRZ_G3 ","DetP      ",  59,"Y","x",1
-"DEBGRZ_G3 ","DetSi     ",  60,"Y","x",1
-"DEBGRZ_G3 ","POC1      ",  61,"Y"," ",1
-"DEBGRZ_G3 ","PON1      ",  62,"Y"," ",1
-"DEBGRZ_G3 ","POP1      ",  63,"Y"," ",1
-"DEBGRZ_G3 ","Opal      ",  64,"Y"," ",1
-"DEBGRZ_G3 ","DetCS1    ",  65,"Y","x",1
-"DEBGRZ_G3 ","DetNS1    ",  66,"Y","x",1
-"DEBGRZ_G3 ","DetPS1    ",  67,"Y","x",1
-"DEBGRZ_G3 ","DetSiS1   ",  68,"Y","x",1
-"DEBGRZ_G3 ","Green     ",  69,"Y","x",1
-"DEBGRZ_G3 ","Diat      ",  70,"Y","x",1
-"DEBGRZ_G3 ","BLOOMALG01",  71,"B"," ",1
-"DEBGRZ_G3 ","BLOOMALG02",  72,"B"," ",1
-"DEBGRZ_G3 ","BLOOMALG03",  73,"B"," ",1
-"DEBGRZ_G3 ","BLOOMALG04",  74,"B"," ",1
-"DEBGRZ_G3 ","BLOOMALG05",  75,"B"," ",1
-"DEBGRZ_G3 ","BLOOMALG06",  76,"B"," ",1
-"DEBGRZ_G3 ","BLOOMALG07",  77,"B"," ",1
-"DEBGRZ_G3 ","BLOOMALG08",  78,"B"," ",1
-"DEBGRZ_G3 ","BLOOMALG09",  79,"B"," ",1
-"DEBGRZ_G3 ","BLOOMALG10",  80,"B"," ",1
-"DEBGRZ_G3 ","BLOOMALG11",  81,"B"," ",1
-"DEBGRZ_G3 ","BLOOMALG12",  82,"B"," ",1
-"DEBGRZ_G3 ","BLOOMALG13",  83,"B"," ",1
-"DEBGRZ_G3 ","BLOOMALG14",  84,"B"," ",1
-"DEBGRZ_G3 ","BLOOMALG15",  85,"B"," ",1
-"DEBGRZ_G3 ","BLOOMALG16",  86,"B"," ",1
-"DEBGRZ_G3 ","BLOOMALG17",  87,"B"," ",1
-"DEBGRZ_G3 ","BLOOMALG18",  88,"B"," ",1
-"DEBGRZ_G3 ","BLOOMALG19",  89,"B"," ",1
-"DEBGRZ_G3 ","BLOOMALG20",  90,"B"," ",1
-"DEBGRZ_G3 ","BLOOMALG21",  91,"B"," ",1
-"DEBGRZ_G3 ","BLOOMALG22",  92,"B"," ",1
-"DEBGRZ_G3 ","BLOOMALG23",  93,"B"," ",1
-"DEBGRZ_G3 ","BLOOMALG24",  94,"B"," ",1
-"DEBGRZ_G3 ","BLOOMALG25",  95,"B"," ",1
-"DEBGRZ_G3 ","BLOOMALG26",  96,"B"," ",1
-"DEBGRZ_G3 ","BLOOMALG27",  97,"B"," ",1
-"DEBGRZ_G3 ","BLOOMALG28",  98,"B"," ",1
-"DEBGRZ_G3 ","BLOOMALG29",  99,"B"," ",1
-"DEBGRZ_G3 ","BLOOMALG30", 100,"B"," ",1
-"DEBGRZ_G3 ","F1        ", 101,"Y"," ",1
-"DEBGRZ_G3 ","F2        ", 102,"Y"," ",1
-"DEBGRZ_G3 ","F3        ", 103,"Y"," ",1
-"DEBGRZ_G3 ","F4        ", 104,"Y"," ",1
-"DEBGRZ_G3 ","F5        ", 105,"Y"," ",1
-"DEBGRZ_G3 ","F6        ", 106,"Y"," ",1
-"DEBGRZ_G3 ","F7        ", 107,"Y"," ",1
-"DEBGRZ_G3 ","F8        ", 108,"Y"," ",1
-"DEBGRZ_G3 ","NCRatGreen", 109,"Y","x",1
-"DEBGRZ_G3 ","NCRatDiat ", 110,"Y","x",1
-"DEBGRZ_G3 ","NCRAlg01  ", 111,"Y"," ",1
-"DEBGRZ_G3 ","NCRAlg02  ", 112,"Y"," ",1
-"DEBGRZ_G3 ","NCRAlg03  ", 113,"Y"," ",1
-"DEBGRZ_G3 ","NCRAlg04  ", 114,"Y"," ",1
-"DEBGRZ_G3 ","NCRAlg05  ", 115,"Y"," ",1
-"DEBGRZ_G3 ","NCRAlg06  ", 116,"Y"," ",1
-"DEBGRZ_G3 ","NCRAlg07  ", 117,"Y"," ",1
-"DEBGRZ_G3 ","NCRAlg08  ", 118,"Y"," ",1
-"DEBGRZ_G3 ","NCRAlg09  ", 119,"Y"," ",1
-"DEBGRZ_G3 ","NCRAlg10  ", 120,"Y"," ",1
-"DEBGRZ_G3 ","NCRAlg11  ", 121,"Y"," ",1
-"DEBGRZ_G3 ","NCRAlg12  ", 122,"Y"," ",1
-"DEBGRZ_G3 ","NCRAlg13  ", 123,"Y"," ",1
-"DEBGRZ_G3 ","NCRAlg14  ", 124,"Y"," ",1
-"DEBGRZ_G3 ","NCRAlg15  ", 125,"Y"," ",1
-"DEBGRZ_G3 ","NCRAlg16  ", 126,"Y"," ",1
-"DEBGRZ_G3 ","NCRAlg17  ", 127,"Y"," ",1
-"DEBGRZ_G3 ","NCRAlg18  ", 128,"Y"," ",1
-"DEBGRZ_G3 ","NCRAlg19  ", 129,"Y"," ",1
-"DEBGRZ_G3 ","NCRAlg20  ", 130,"Y"," ",1
-"DEBGRZ_G3 ","NCRAlg21  ", 131,"Y"," ",1
-"DEBGRZ_G3 ","NCRAlg22  ", 132,"Y"," ",1
-"DEBGRZ_G3 ","NCRAlg23  ", 133,"Y"," ",1
-"DEBGRZ_G3 ","NCRAlg24  ", 134,"Y"," ",1
-"DEBGRZ_G3 ","NCRAlg25  ", 135,"Y"," ",1
-"DEBGRZ_G3 ","NCRAlg26  ", 136,"Y"," ",1
-"DEBGRZ_G3 ","NCRAlg27  ", 137,"Y"," ",1
-"DEBGRZ_G3 ","NCRAlg28  ", 138,"Y"," ",1
-"DEBGRZ_G3 ","NCRAlg29  ", 139,"Y"," ",1
-"DEBGRZ_G3 ","NCRAlg30  ", 140,"Y"," ",1
-"DEBGRZ_G3 ","NCRatF1   ", 141,"Y"," ",1
-"DEBGRZ_G3 ","NCRatF2   ", 142,"Y"," ",1
-"DEBGRZ_G3 ","NCRatF3   ", 143,"Y"," ",1
-"DEBGRZ_G3 ","NCRatF4   ", 144,"Y"," ",1
-"DEBGRZ_G3 ","NCRatF5   ", 145,"Y"," ",1
-"DEBGRZ_G3 ","NCRatF6   ", 146,"Y"," ",1
-"DEBGRZ_G3 ","NCRatF7   ", 147,"Y"," ",1
-"DEBGRZ_G3 ","NCRatF8   ", 148,"Y"," ",1
-"DEBGRZ_G3 ","PCRatGreen", 149,"Y","x",1
-"DEBGRZ_G3 ","PCRatDiat ", 150,"Y","x",1
-"DEBGRZ_G3 ","PCRAlg01  ", 151,"Y"," ",1
-"DEBGRZ_G3 ","PCRAlg02  ", 152,"Y"," ",1
-"DEBGRZ_G3 ","PCRAlg03  ", 153,"Y"," ",1
-"DEBGRZ_G3 ","PCRAlg04  ", 154,"Y"," ",1
-"DEBGRZ_G3 ","PCRAlg05  ", 155,"Y"," ",1
-"DEBGRZ_G3 ","PCRAlg06  ", 156,"Y"," ",1
-"DEBGRZ_G3 ","PCRAlg07  ", 157,"Y"," ",1
-"DEBGRZ_G3 ","PCRAlg08  ", 158,"Y"," ",1
-"DEBGRZ_G3 ","PCRAlg09  ", 159,"Y"," ",1
-"DEBGRZ_G3 ","PCRAlg10  ", 160,"Y"," ",1
-"DEBGRZ_G3 ","PCRAlg11  ", 161,"Y"," ",1
-"DEBGRZ_G3 ","PCRAlg12  ", 162,"Y"," ",1
-"DEBGRZ_G3 ","PCRAlg13  ", 163,"Y"," ",1
-"DEBGRZ_G3 ","PCRAlg14  ", 164,"Y"," ",1
-"DEBGRZ_G3 ","PCRAlg15  ", 165,"Y"," ",1
-"DEBGRZ_G3 ","PCRAlg16  ", 166,"Y"," ",1
-"DEBGRZ_G3 ","PCRAlg17  ", 167,"Y"," ",1
-"DEBGRZ_G3 ","PCRAlg18  ", 168,"Y"," ",1
-"DEBGRZ_G3 ","PCRAlg19  ", 169,"Y"," ",1
-"DEBGRZ_G3 ","PCRAlg20  ", 170,"Y"," ",1
-"DEBGRZ_G3 ","PCRAlg21  ", 171,"Y"," ",1
-"DEBGRZ_G3 ","PCRAlg22  ", 172,"Y"," ",1
-"DEBGRZ_G3 ","PCRAlg23  ", 173,"Y"," ",1
-"DEBGRZ_G3 ","PCRAlg24  ", 174,"Y"," ",1
-"DEBGRZ_G3 ","PCRAlg25  ", 175,"Y"," ",1
-"DEBGRZ_G3 ","PCRAlg26  ", 176,"Y"," ",1
-"DEBGRZ_G3 ","PCRAlg27  ", 177,"Y"," ",1
-"DEBGRZ_G3 ","PCRAlg28  ", 178,"Y"," ",1
-"DEBGRZ_G3 ","PCRAlg29  ", 179,"Y"," ",1
-"DEBGRZ_G3 ","PCRAlg30  ", 180,"Y"," ",1
-"DEBGRZ_G3 ","PCRatF1   ", 181,"Y"," ",1
-"DEBGRZ_G3 ","PCRatF2   ", 182,"Y"," ",1
-"DEBGRZ_G3 ","PCRatF3   ", 183,"Y"," ",1
-"DEBGRZ_G3 ","PCRatF4   ", 184,"Y"," ",1
-"DEBGRZ_G3 ","PCRatF5   ", 185,"Y"," ",1
-"DEBGRZ_G3 ","PCRatF6   ", 186,"Y"," ",1
-"DEBGRZ_G3 ","PCRatF7   ", 187,"Y"," ",1
-"DEBGRZ_G3 ","PCRatF8   ", 188,"Y"," ",1
-"DEBGRZ_G3 ","SCRatGreen", 189,"Y","x",1
-"DEBGRZ_G3 ","SCRatDiat ", 190,"Y","x",1
-"DEBGRZ_G3 ","SCRAlg01  ", 191,"Y"," ",1
-"DEBGRZ_G3 ","SCRAlg02  ", 192,"Y"," ",1
-"DEBGRZ_G3 ","SCRAlg03  ", 193,"Y"," ",1
-"DEBGRZ_G3 ","SCRAlg04  ", 194,"Y"," ",1
-"DEBGRZ_G3 ","SCRAlg05  ", 195,"Y"," ",1
-"DEBGRZ_G3 ","SCRAlg06  ", 196,"Y"," ",1
-"DEBGRZ_G3 ","SCRAlg07  ", 197,"Y"," ",1
-"DEBGRZ_G3 ","SCRAlg08  ", 198,"Y"," ",1
-"DEBGRZ_G3 ","SCRAlg09  ", 199,"Y"," ",1
-"DEBGRZ_G3 ","SCRAlg10  ", 200,"Y"," ",1
-"DEBGRZ_G3 ","SCRAlg11  ", 201,"Y"," ",1
-"DEBGRZ_G3 ","SCRAlg12  ", 202,"Y"," ",1
-"DEBGRZ_G3 ","SCRAlg13  ", 203,"Y"," ",1
-"DEBGRZ_G3 ","SCRAlg14  ", 204,"Y"," ",1
-"DEBGRZ_G3 ","SCRAlg15  ", 205,"Y"," ",1
-"DEBGRZ_G3 ","SCRAlg16  ", 206,"Y"," ",1
-"DEBGRZ_G3 ","SCRAlg17  ", 207,"Y"," ",1
-"DEBGRZ_G3 ","SCRAlg18  ", 208,"Y"," ",1
-"DEBGRZ_G3 ","SCRAlg19  ", 209,"Y"," ",1
-"DEBGRZ_G3 ","SCRAlg20  ", 210,"Y"," ",1
-"DEBGRZ_G3 ","SCRAlg21  ", 211,"Y"," ",1
-"DEBGRZ_G3 ","SCRAlg22  ", 212,"Y"," ",1
-"DEBGRZ_G3 ","SCRAlg23  ", 213,"Y"," ",1
-"DEBGRZ_G3 ","SCRAlg24  ", 214,"Y"," ",1
-"DEBGRZ_G3 ","SCRAlg25  ", 215,"Y"," ",1
-"DEBGRZ_G3 ","SCRAlg26  ", 216,"Y"," ",1
-"DEBGRZ_G3 ","SCRAlg27  ", 217,"Y"," ",1
-"DEBGRZ_G3 ","SCRAlg28  ", 218,"Y"," ",1
-"DEBGRZ_G3 ","SCRAlg29  ", 219,"Y"," ",1
-"DEBGRZ_G3 ","SCRAlg30  ", 220,"Y"," ",1
-"DEBGRZ_G3 ","SCRatF1   ", 221,"Y"," ",1
-"DEBGRZ_G3 ","SCRatF2   ", 222,"Y"," ",1
-"DEBGRZ_G3 ","SCRatF3   ", 223,"Y"," ",1
-"DEBGRZ_G3 ","SCRatF4   ", 224,"Y"," ",1
-"DEBGRZ_G3 ","SCRatF5   ", 225,"Y"," ",1
-"DEBGRZ_G3 ","SCRatF6   ", 226,"Y"," ",1
-"DEBGRZ_G3 ","SCRatF7   ", 227,"Y"," ",1
-"DEBGRZ_G3 ","SCRatF8   ", 228,"Y"," ",1
-"DEBGRZ_G3 ","G3_PrGrn  ", 229,"Y","x",1
-"DEBGRZ_G3 ","G3_PrDiat ", 230,"Y","x",1
-"DEBGRZ_G3 ","G3_PrAlg01", 231,"Y"," ",1
-"DEBGRZ_G3 ","G3_PrAlg02", 232,"Y"," ",1
-"DEBGRZ_G3 ","G3_PrAlg03", 233,"Y"," ",1
-"DEBGRZ_G3 ","G3_PrAlg04", 234,"Y"," ",1
-"DEBGRZ_G3 ","G3_PrAlg05", 235,"Y"," ",1
-"DEBGRZ_G3 ","G3_PrAlg06", 236,"Y"," ",1
-"DEBGRZ_G3 ","G3_PrAlg07", 237,"Y"," ",1
-"DEBGRZ_G3 ","G3_PrAlg08", 238,"Y"," ",1
-"DEBGRZ_G3 ","G3_PrAlg09", 239,"Y"," ",1
-"DEBGRZ_G3 ","G3_PrAlg10", 240,"Y"," ",1
-"DEBGRZ_G3 ","G3_PrAlg11", 241,"Y"," ",1
-"DEBGRZ_G3 ","G3_PrAlg12", 242,"Y"," ",1
-"DEBGRZ_G3 ","G3_PrAlg13", 243,"Y"," ",1
-"DEBGRZ_G3 ","G3_PrAlg14", 244,"Y"," ",1
-"DEBGRZ_G3 ","G3_PrAlg15", 245,"Y"," ",1
-"DEBGRZ_G3 ","G3_PrAlg16", 246,"Y"," ",1
-"DEBGRZ_G3 ","G3_PrAlg17", 247,"Y"," ",1
-"DEBGRZ_G3 ","G3_PrAlg18", 248,"Y"," ",1
-"DEBGRZ_G3 ","G3_PrAlg19", 249,"Y"," ",1
-"DEBGRZ_G3 ","G3_PrAlg20", 250,"Y"," ",1
-"DEBGRZ_G3 ","G3_PrAlg21", 251,"Y"," ",1
-"DEBGRZ_G3 ","G3_PrAlg22", 252,"Y"," ",1
-"DEBGRZ_G3 ","G3_PrAlg23", 253,"Y"," ",1
-"DEBGRZ_G3 ","G3_PrAlg24", 254,"Y"," ",1
-"DEBGRZ_G3 ","G3_PrAlg25", 255,"Y"," ",1
-"DEBGRZ_G3 ","G3_PrAlg26", 256,"Y"," ",1
-"DEBGRZ_G3 ","G3_PrAlg27", 257,"Y"," ",1
-"DEBGRZ_G3 ","G3_PrAlg28", 258,"Y"," ",1
-"DEBGRZ_G3 ","G3_PrAlg29", 259,"Y"," ",1
-"DEBGRZ_G3 ","G3_PrAlg30", 260,"Y"," ",1
-"DEBGRZ_G3 ","G3_Pr1    ", 261,"Y"," ",1
-"DEBGRZ_G3 ","G3_Pr2    ", 262,"Y"," ",1
-"DEBGRZ_G3 ","G3_Pr3    ", 263,"Y"," ",1
-"DEBGRZ_G3 ","G3_Pr4    ", 264,"Y"," ",1
-"DEBGRZ_G3 ","G3_Pr5    ", 265,"Y"," ",1
-"DEBGRZ_G3 ","G3_Pr6    ", 266,"Y"," ",1
-"DEBGRZ_G3 ","G3_Pr7    ", 267,"Y"," ",1
-"DEBGRZ_G3 ","G3_Pr8    ", 268,"Y"," ",1
-"DEBGRZ_G3 ","BenGrn    ", 269,"Y","x",1
-"DEBGRZ_G3 ","BenDiat   ", 270,"Y","x",1
-"DEBGRZ_G3 ","BenAlg01  ", 271,"Y"," ",1
-"DEBGRZ_G3 ","BenAlg02  ", 272,"Y"," ",1
-"DEBGRZ_G3 ","BenAlg03  ", 273,"Y"," ",1
-"DEBGRZ_G3 ","BenAlg04  ", 274,"Y"," ",1
-"DEBGRZ_G3 ","BenAlg05  ", 275,"Y"," ",1
-"DEBGRZ_G3 ","BenAlg06  ", 276,"Y"," ",1
-"DEBGRZ_G3 ","BenAlg07  ", 277,"Y"," ",1
-"DEBGRZ_G3 ","BenAlg08  ", 278,"Y"," ",1
-"DEBGRZ_G3 ","BenAlg09  ", 279,"Y"," ",1
-"DEBGRZ_G3 ","BenAlg10  ", 280,"Y"," ",1
-"DEBGRZ_G3 ","BenAlg11  ", 281,"Y"," ",1
-"DEBGRZ_G3 ","BenAlg12  ", 282,"Y"," ",1
-"DEBGRZ_G3 ","BenAlg13  ", 283,"Y"," ",1
-"DEBGRZ_G3 ","BenAlg14  ", 284,"Y"," ",1
-"DEBGRZ_G3 ","BenAlg15  ", 285,"Y"," ",1
-"DEBGRZ_G3 ","BenAlg16  ", 286,"Y"," ",1
-"DEBGRZ_G3 ","BenAlg17  ", 287,"Y"," ",1
-"DEBGRZ_G3 ","BenAlg18  ", 288,"Y"," ",1
-"DEBGRZ_G3 ","BenAlg19  ", 289,"Y"," ",1
-"DEBGRZ_G3 ","BenAlg20  ", 290,"Y"," ",1
-"DEBGRZ_G3 ","BenAlg21  ", 291,"Y"," ",1
-"DEBGRZ_G3 ","BenAlg22  ", 292,"Y"," ",1
-"DEBGRZ_G3 ","BenAlg23  ", 293,"Y"," ",1
-"DEBGRZ_G3 ","BenAlg24  ", 294,"Y"," ",1
-"DEBGRZ_G3 ","BenAlg25  ", 295,"Y"," ",1
-"DEBGRZ_G3 ","BenAlg26  ", 296,"Y"," ",1
-"DEBGRZ_G3 ","BenAlg27  ", 297,"Y"," ",1
-"DEBGRZ_G3 ","BenAlg28  ", 298,"Y"," ",1
-"DEBGRZ_G3 ","BenAlg29  ", 299,"Y"," ",1
-"DEBGRZ_G3 ","BenAlg30  ", 300,"Y"," ",1
-"DEBGRZ_G3 ","Ben1      ", 301,"Y"," ",1
-"DEBGRZ_G3 ","Ben2      ", 302,"Y"," ",1
-"DEBGRZ_G3 ","Ben3      ", 303,"Y"," ",1
-"DEBGRZ_G3 ","Ben4      ", 304,"Y"," ",1
-"DEBGRZ_G3 ","Ben5      ", 305,"Y"," ",1
-"DEBGRZ_G3 ","Ben6      ", 306,"Y"," ",1
-"DEBGRZ_G3 ","Ben7      ", 307,"Y"," ",1
-"DEBGRZ_G3 ","Ben8      ", 308,"Y"," ",1
-"DEBGRZ_G3 ","G3_FFGrn  ", 309,"Y"," ",1
-"DEBGRZ_G3 ","G3_FFDiat ", 310,"Y"," ",1
-"DEBGRZ_G3 ","G3_ALGFF01", 311,"Y"," ",1
-"DEBGRZ_G3 ","G3_ALGFF02", 312,"Y"," ",1
-"DEBGRZ_G3 ","G3_ALGFF03", 313,"Y"," ",1
-"DEBGRZ_G3 ","G3_ALGFF04", 314,"Y"," ",1
-"DEBGRZ_G3 ","G3_ALGFF05", 315,"Y"," ",1
-"DEBGRZ_G3 ","G3_ALGFF06", 316,"Y"," ",1
-"DEBGRZ_G3 ","G3_ALGFF07", 317,"Y"," ",1
-"DEBGRZ_G3 ","G3_ALGFF08", 318,"Y"," ",1
-"DEBGRZ_G3 ","G3_ALGFF09", 319,"Y"," ",1
-"DEBGRZ_G3 ","G3_ALGFF10", 320,"Y"," ",1
-"DEBGRZ_G3 ","G3_ALGFF11", 321,"Y"," ",1
-"DEBGRZ_G3 ","G3_ALGFF12", 322,"Y"," ",1
-"DEBGRZ_G3 ","G3_ALGFF13", 323,"Y"," ",1
-"DEBGRZ_G3 ","G3_ALGFF14", 324,"Y"," ",1
-"DEBGRZ_G3 ","G3_ALGFF15", 325,"Y"," ",1
-"DEBGRZ_G3 ","G3_ALGFF16", 326,"Y"," ",1
-"DEBGRZ_G3 ","G3_ALGFF17", 327,"Y"," ",1
-"DEBGRZ_G3 ","G3_ALGFF18", 328,"Y"," ",1
-"DEBGRZ_G3 ","G3_ALGFF19", 329,"Y"," ",1
-"DEBGRZ_G3 ","G3_ALGFF20", 330,"Y"," ",1
-"DEBGRZ_G3 ","G3_ALGFF21", 331,"Y"," ",1
-"DEBGRZ_G3 ","G3_ALGFF22", 332,"Y"," ",1
-"DEBGRZ_G3 ","G3_ALGFF23", 333,"Y"," ",1
-"DEBGRZ_G3 ","G3_ALGFF24", 334,"Y"," ",1
-"DEBGRZ_G3 ","G3_ALGFF25", 335,"Y"," ",1
-"DEBGRZ_G3 ","G3_ALGFF26", 336,"Y"," ",1
-"DEBGRZ_G3 ","G3_ALGFF27", 337,"Y"," ",1
-"DEBGRZ_G3 ","G3_ALGFF28", 338,"Y"," ",1
-"DEBGRZ_G3 ","G3_ALGFF29", 339,"Y"," ",1
-"DEBGRZ_G3 ","G3_ALGFF30", 340,"Y"," ",1
-"DEBGRZ_G3 ","G3_FF01   ", 341,"Y"," ",1
-"DEBGRZ_G3 ","G3_FF02   ", 342,"Y"," ",1
-"DEBGRZ_G3 ","G3_FF03   ", 343,"Y"," ",1
-"DEBGRZ_G3 ","G3_FF04   ", 344,"Y"," ",1
-"DEBGRZ_G3 ","G3_FF05   ", 345,"Y"," ",1
-"DEBGRZ_G3 ","G3_FF06   ", 346,"Y"," ",1
-"DEBGRZ_G3 ","G3_FF07   ", 347,"Y"," ",1
-"DEBGRZ_G3 ","G3_FF08   ", 348,"Y"," ",1
+"DEBGRZ_G3 ","G3_minFood",  57,"Y","x",1
+"DEBGRZ_G3 ","DetC      ",  58,"Y","x",1
+"DEBGRZ_G3 ","DetN      ",  59,"Y","x",1
+"DEBGRZ_G3 ","DetP      ",  60,"Y","x",1
+"DEBGRZ_G3 ","DetSi     ",  61,"Y","x",1
+"DEBGRZ_G3 ","POC1      ",  62,"Y"," ",1
+"DEBGRZ_G3 ","PON1      ",  63,"Y"," ",1
+"DEBGRZ_G3 ","POP1      ",  64,"Y"," ",1
+"DEBGRZ_G3 ","Opal      ",  65,"Y"," ",1
+"DEBGRZ_G3 ","DetCS1    ",  66,"Y","x",1
+"DEBGRZ_G3 ","DetNS1    ",  67,"Y","x",1
+"DEBGRZ_G3 ","DetPS1    ",  68,"Y","x",1
+"DEBGRZ_G3 ","DetSiS1   ",  69,"Y","x",1
+"DEBGRZ_G3 ","Green     ",  70,"Y","x",1
+"DEBGRZ_G3 ","Diat      ",  71,"Y","x",1
+"DEBGRZ_G3 ","BLOOMALG01",  72,"B"," ",1
+"DEBGRZ_G3 ","BLOOMALG02",  73,"B"," ",1
+"DEBGRZ_G3 ","BLOOMALG03",  74,"B"," ",1
+"DEBGRZ_G3 ","BLOOMALG04",  75,"B"," ",1
+"DEBGRZ_G3 ","BLOOMALG05",  76,"B"," ",1
+"DEBGRZ_G3 ","BLOOMALG06",  77,"B"," ",1
+"DEBGRZ_G3 ","BLOOMALG07",  78,"B"," ",1
+"DEBGRZ_G3 ","BLOOMALG08",  79,"B"," ",1
+"DEBGRZ_G3 ","BLOOMALG09",  80,"B"," ",1
+"DEBGRZ_G3 ","BLOOMALG10",  81,"B"," ",1
+"DEBGRZ_G3 ","BLOOMALG11",  82,"B"," ",1
+"DEBGRZ_G3 ","BLOOMALG12",  83,"B"," ",1
+"DEBGRZ_G3 ","BLOOMALG13",  84,"B"," ",1
+"DEBGRZ_G3 ","BLOOMALG14",  85,"B"," ",1
+"DEBGRZ_G3 ","BLOOMALG15",  86,"B"," ",1
+"DEBGRZ_G3 ","BLOOMALG16",  87,"B"," ",1
+"DEBGRZ_G3 ","BLOOMALG17",  88,"B"," ",1
+"DEBGRZ_G3 ","BLOOMALG18",  89,"B"," ",1
+"DEBGRZ_G3 ","BLOOMALG19",  90,"B"," ",1
+"DEBGRZ_G3 ","BLOOMALG20",  91,"B"," ",1
+"DEBGRZ_G3 ","BLOOMALG21",  92,"B"," ",1
+"DEBGRZ_G3 ","BLOOMALG22",  93,"B"," ",1
+"DEBGRZ_G3 ","BLOOMALG23",  94,"B"," ",1
+"DEBGRZ_G3 ","BLOOMALG24",  95,"B"," ",1
+"DEBGRZ_G3 ","BLOOMALG25",  96,"B"," ",1
+"DEBGRZ_G3 ","BLOOMALG26",  97,"B"," ",1
+"DEBGRZ_G3 ","BLOOMALG27",  98,"B"," ",1
+"DEBGRZ_G3 ","BLOOMALG28",  99,"B"," ",1
+"DEBGRZ_G3 ","BLOOMALG29", 100,"B"," ",1
+"DEBGRZ_G3 ","BLOOMALG30", 101,"B"," ",1
+"DEBGRZ_G3 ","F1        ", 102,"Y"," ",1
+"DEBGRZ_G3 ","F2        ", 103,"Y"," ",1
+"DEBGRZ_G3 ","F3        ", 104,"Y"," ",1
+"DEBGRZ_G3 ","F4        ", 105,"Y"," ",1
+"DEBGRZ_G3 ","F5        ", 106,"Y"," ",1
+"DEBGRZ_G3 ","F6        ", 107,"Y"," ",1
+"DEBGRZ_G3 ","F7        ", 108,"Y"," ",1
+"DEBGRZ_G3 ","F8        ", 109,"Y"," ",1
+"DEBGRZ_G3 ","NCRatGreen", 110,"Y","x",1
+"DEBGRZ_G3 ","NCRatDiat ", 111,"Y","x",1
+"DEBGRZ_G3 ","NCRAlg01  ", 112,"Y"," ",1
+"DEBGRZ_G3 ","NCRAlg02  ", 113,"Y"," ",1
+"DEBGRZ_G3 ","NCRAlg03  ", 114,"Y"," ",1
+"DEBGRZ_G3 ","NCRAlg04  ", 115,"Y"," ",1
+"DEBGRZ_G3 ","NCRAlg05  ", 116,"Y"," ",1
+"DEBGRZ_G3 ","NCRAlg06  ", 117,"Y"," ",1
+"DEBGRZ_G3 ","NCRAlg07  ", 118,"Y"," ",1
+"DEBGRZ_G3 ","NCRAlg08  ", 119,"Y"," ",1
+"DEBGRZ_G3 ","NCRAlg09  ", 120,"Y"," ",1
+"DEBGRZ_G3 ","NCRAlg10  ", 121,"Y"," ",1
+"DEBGRZ_G3 ","NCRAlg11  ", 122,"Y"," ",1
+"DEBGRZ_G3 ","NCRAlg12  ", 123,"Y"," ",1
+"DEBGRZ_G3 ","NCRAlg13  ", 124,"Y"," ",1
+"DEBGRZ_G3 ","NCRAlg14  ", 125,"Y"," ",1
+"DEBGRZ_G3 ","NCRAlg15  ", 126,"Y"," ",1
+"DEBGRZ_G3 ","NCRAlg16  ", 127,"Y"," ",1
+"DEBGRZ_G3 ","NCRAlg17  ", 128,"Y"," ",1
+"DEBGRZ_G3 ","NCRAlg18  ", 129,"Y"," ",1
+"DEBGRZ_G3 ","NCRAlg19  ", 130,"Y"," ",1
+"DEBGRZ_G3 ","NCRAlg20  ", 131,"Y"," ",1
+"DEBGRZ_G3 ","NCRAlg21  ", 132,"Y"," ",1
+"DEBGRZ_G3 ","NCRAlg22  ", 133,"Y"," ",1
+"DEBGRZ_G3 ","NCRAlg23  ", 134,"Y"," ",1
+"DEBGRZ_G3 ","NCRAlg24  ", 135,"Y"," ",1
+"DEBGRZ_G3 ","NCRAlg25  ", 136,"Y"," ",1
+"DEBGRZ_G3 ","NCRAlg26  ", 137,"Y"," ",1
+"DEBGRZ_G3 ","NCRAlg27  ", 138,"Y"," ",1
+"DEBGRZ_G3 ","NCRAlg28  ", 139,"Y"," ",1
+"DEBGRZ_G3 ","NCRAlg29  ", 140,"Y"," ",1
+"DEBGRZ_G3 ","NCRAlg30  ", 141,"Y"," ",1
+"DEBGRZ_G3 ","NCRatF1   ", 142,"Y"," ",1
+"DEBGRZ_G3 ","NCRatF2   ", 143,"Y"," ",1
+"DEBGRZ_G3 ","NCRatF3   ", 144,"Y"," ",1
+"DEBGRZ_G3 ","NCRatF4   ", 145,"Y"," ",1
+"DEBGRZ_G3 ","NCRatF5   ", 146,"Y"," ",1
+"DEBGRZ_G3 ","NCRatF6   ", 147,"Y"," ",1
+"DEBGRZ_G3 ","NCRatF7   ", 148,"Y"," ",1
+"DEBGRZ_G3 ","NCRatF8   ", 149,"Y"," ",1
+"DEBGRZ_G3 ","PCRatGreen", 150,"Y","x",1
+"DEBGRZ_G3 ","PCRatDiat ", 151,"Y","x",1
+"DEBGRZ_G3 ","PCRAlg01  ", 152,"Y"," ",1
+"DEBGRZ_G3 ","PCRAlg02  ", 153,"Y"," ",1
+"DEBGRZ_G3 ","PCRAlg03  ", 154,"Y"," ",1
+"DEBGRZ_G3 ","PCRAlg04  ", 155,"Y"," ",1
+"DEBGRZ_G3 ","PCRAlg05  ", 156,"Y"," ",1
+"DEBGRZ_G3 ","PCRAlg06  ", 157,"Y"," ",1
+"DEBGRZ_G3 ","PCRAlg07  ", 158,"Y"," ",1
+"DEBGRZ_G3 ","PCRAlg08  ", 159,"Y"," ",1
+"DEBGRZ_G3 ","PCRAlg09  ", 160,"Y"," ",1
+"DEBGRZ_G3 ","PCRAlg10  ", 161,"Y"," ",1
+"DEBGRZ_G3 ","PCRAlg11  ", 162,"Y"," ",1
+"DEBGRZ_G3 ","PCRAlg12  ", 163,"Y"," ",1
+"DEBGRZ_G3 ","PCRAlg13  ", 164,"Y"," ",1
+"DEBGRZ_G3 ","PCRAlg14  ", 165,"Y"," ",1
+"DEBGRZ_G3 ","PCRAlg15  ", 166,"Y"," ",1
+"DEBGRZ_G3 ","PCRAlg16  ", 167,"Y"," ",1
+"DEBGRZ_G3 ","PCRAlg17  ", 168,"Y"," ",1
+"DEBGRZ_G3 ","PCRAlg18  ", 169,"Y"," ",1
+"DEBGRZ_G3 ","PCRAlg19  ", 170,"Y"," ",1
+"DEBGRZ_G3 ","PCRAlg20  ", 171,"Y"," ",1
+"DEBGRZ_G3 ","PCRAlg21  ", 172,"Y"," ",1
+"DEBGRZ_G3 ","PCRAlg22  ", 173,"Y"," ",1
+"DEBGRZ_G3 ","PCRAlg23  ", 174,"Y"," ",1
+"DEBGRZ_G3 ","PCRAlg24  ", 175,"Y"," ",1
+"DEBGRZ_G3 ","PCRAlg25  ", 176,"Y"," ",1
+"DEBGRZ_G3 ","PCRAlg26  ", 177,"Y"," ",1
+"DEBGRZ_G3 ","PCRAlg27  ", 178,"Y"," ",1
+"DEBGRZ_G3 ","PCRAlg28  ", 179,"Y"," ",1
+"DEBGRZ_G3 ","PCRAlg29  ", 180,"Y"," ",1
+"DEBGRZ_G3 ","PCRAlg30  ", 181,"Y"," ",1
+"DEBGRZ_G3 ","PCRatF1   ", 182,"Y"," ",1
+"DEBGRZ_G3 ","PCRatF2   ", 183,"Y"," ",1
+"DEBGRZ_G3 ","PCRatF3   ", 184,"Y"," ",1
+"DEBGRZ_G3 ","PCRatF4   ", 185,"Y"," ",1
+"DEBGRZ_G3 ","PCRatF5   ", 186,"Y"," ",1
+"DEBGRZ_G3 ","PCRatF6   ", 187,"Y"," ",1
+"DEBGRZ_G3 ","PCRatF7   ", 188,"Y"," ",1
+"DEBGRZ_G3 ","PCRatF8   ", 189,"Y"," ",1
+"DEBGRZ_G3 ","SCRatGreen", 190,"Y","x",1
+"DEBGRZ_G3 ","SCRatDiat ", 191,"Y","x",1
+"DEBGRZ_G3 ","SCRAlg01  ", 192,"Y"," ",1
+"DEBGRZ_G3 ","SCRAlg02  ", 193,"Y"," ",1
+"DEBGRZ_G3 ","SCRAlg03  ", 194,"Y"," ",1
+"DEBGRZ_G3 ","SCRAlg04  ", 195,"Y"," ",1
+"DEBGRZ_G3 ","SCRAlg05  ", 196,"Y"," ",1
+"DEBGRZ_G3 ","SCRAlg06  ", 197,"Y"," ",1
+"DEBGRZ_G3 ","SCRAlg07  ", 198,"Y"," ",1
+"DEBGRZ_G3 ","SCRAlg08  ", 199,"Y"," ",1
+"DEBGRZ_G3 ","SCRAlg09  ", 200,"Y"," ",1
+"DEBGRZ_G3 ","SCRAlg10  ", 201,"Y"," ",1
+"DEBGRZ_G3 ","SCRAlg11  ", 202,"Y"," ",1
+"DEBGRZ_G3 ","SCRAlg12  ", 203,"Y"," ",1
+"DEBGRZ_G3 ","SCRAlg13  ", 204,"Y"," ",1
+"DEBGRZ_G3 ","SCRAlg14  ", 205,"Y"," ",1
+"DEBGRZ_G3 ","SCRAlg15  ", 206,"Y"," ",1
+"DEBGRZ_G3 ","SCRAlg16  ", 207,"Y"," ",1
+"DEBGRZ_G3 ","SCRAlg17  ", 208,"Y"," ",1
+"DEBGRZ_G3 ","SCRAlg18  ", 209,"Y"," ",1
+"DEBGRZ_G3 ","SCRAlg19  ", 210,"Y"," ",1
+"DEBGRZ_G3 ","SCRAlg20  ", 211,"Y"," ",1
+"DEBGRZ_G3 ","SCRAlg21  ", 212,"Y"," ",1
+"DEBGRZ_G3 ","SCRAlg22  ", 213,"Y"," ",1
+"DEBGRZ_G3 ","SCRAlg23  ", 214,"Y"," ",1
+"DEBGRZ_G3 ","SCRAlg24  ", 215,"Y"," ",1
+"DEBGRZ_G3 ","SCRAlg25  ", 216,"Y"," ",1
+"DEBGRZ_G3 ","SCRAlg26  ", 217,"Y"," ",1
+"DEBGRZ_G3 ","SCRAlg27  ", 218,"Y"," ",1
+"DEBGRZ_G3 ","SCRAlg28  ", 219,"Y"," ",1
+"DEBGRZ_G3 ","SCRAlg29  ", 220,"Y"," ",1
+"DEBGRZ_G3 ","SCRAlg30  ", 221,"Y"," ",1
+"DEBGRZ_G3 ","SCRatF1   ", 222,"Y"," ",1
+"DEBGRZ_G3 ","SCRatF2   ", 223,"Y"," ",1
+"DEBGRZ_G3 ","SCRatF3   ", 224,"Y"," ",1
+"DEBGRZ_G3 ","SCRatF4   ", 225,"Y"," ",1
+"DEBGRZ_G3 ","SCRatF5   ", 226,"Y"," ",1
+"DEBGRZ_G3 ","SCRatF6   ", 227,"Y"," ",1
+"DEBGRZ_G3 ","SCRatF7   ", 228,"Y"," ",1
+"DEBGRZ_G3 ","SCRatF8   ", 229,"Y"," ",1
+"DEBGRZ_G3 ","G3_PrGrn  ", 230,"Y","x",1
+"DEBGRZ_G3 ","G3_PrDiat ", 231,"Y","x",1
+"DEBGRZ_G3 ","G3_PrAlg01", 232,"Y"," ",1
+"DEBGRZ_G3 ","G3_PrAlg02", 233,"Y"," ",1
+"DEBGRZ_G3 ","G3_PrAlg03", 234,"Y"," ",1
+"DEBGRZ_G3 ","G3_PrAlg04", 235,"Y"," ",1
+"DEBGRZ_G3 ","G3_PrAlg05", 236,"Y"," ",1
+"DEBGRZ_G3 ","G3_PrAlg06", 237,"Y"," ",1
+"DEBGRZ_G3 ","G3_PrAlg07", 238,"Y"," ",1
+"DEBGRZ_G3 ","G3_PrAlg08", 239,"Y"," ",1
+"DEBGRZ_G3 ","G3_PrAlg09", 240,"Y"," ",1
+"DEBGRZ_G3 ","G3_PrAlg10", 241,"Y"," ",1
+"DEBGRZ_G3 ","G3_PrAlg11", 242,"Y"," ",1
+"DEBGRZ_G3 ","G3_PrAlg12", 243,"Y"," ",1
+"DEBGRZ_G3 ","G3_PrAlg13", 244,"Y"," ",1
+"DEBGRZ_G3 ","G3_PrAlg14", 245,"Y"," ",1
+"DEBGRZ_G3 ","G3_PrAlg15", 246,"Y"," ",1
+"DEBGRZ_G3 ","G3_PrAlg16", 247,"Y"," ",1
+"DEBGRZ_G3 ","G3_PrAlg17", 248,"Y"," ",1
+"DEBGRZ_G3 ","G3_PrAlg18", 249,"Y"," ",1
+"DEBGRZ_G3 ","G3_PrAlg19", 250,"Y"," ",1
+"DEBGRZ_G3 ","G3_PrAlg20", 251,"Y"," ",1
+"DEBGRZ_G3 ","G3_PrAlg21", 252,"Y"," ",1
+"DEBGRZ_G3 ","G3_PrAlg22", 253,"Y"," ",1
+"DEBGRZ_G3 ","G3_PrAlg23", 254,"Y"," ",1
+"DEBGRZ_G3 ","G3_PrAlg24", 255,"Y"," ",1
+"DEBGRZ_G3 ","G3_PrAlg25", 256,"Y"," ",1
+"DEBGRZ_G3 ","G3_PrAlg26", 257,"Y"," ",1
+"DEBGRZ_G3 ","G3_PrAlg27", 258,"Y"," ",1
+"DEBGRZ_G3 ","G3_PrAlg28", 259,"Y"," ",1
+"DEBGRZ_G3 ","G3_PrAlg29", 260,"Y"," ",1
+"DEBGRZ_G3 ","G3_PrAlg30", 261,"Y"," ",1
+"DEBGRZ_G3 ","G3_Pr1    ", 262,"Y"," ",1
+"DEBGRZ_G3 ","G3_Pr2    ", 263,"Y"," ",1
+"DEBGRZ_G3 ","G3_Pr3    ", 264,"Y"," ",1
+"DEBGRZ_G3 ","G3_Pr4    ", 265,"Y"," ",1
+"DEBGRZ_G3 ","G3_Pr5    ", 266,"Y"," ",1
+"DEBGRZ_G3 ","G3_Pr6    ", 267,"Y"," ",1
+"DEBGRZ_G3 ","G3_Pr7    ", 268,"Y"," ",1
+"DEBGRZ_G3 ","G3_Pr8    ", 269,"Y"," ",1
+"DEBGRZ_G3 ","BenGrn    ", 270,"Y","x",1
+"DEBGRZ_G3 ","BenDiat   ", 271,"Y","x",1
+"DEBGRZ_G3 ","BenAlg01  ", 272,"Y"," ",1
+"DEBGRZ_G3 ","BenAlg02  ", 273,"Y"," ",1
+"DEBGRZ_G3 ","BenAlg03  ", 274,"Y"," ",1
+"DEBGRZ_G3 ","BenAlg04  ", 275,"Y"," ",1
+"DEBGRZ_G3 ","BenAlg05  ", 276,"Y"," ",1
+"DEBGRZ_G3 ","BenAlg06  ", 277,"Y"," ",1
+"DEBGRZ_G3 ","BenAlg07  ", 278,"Y"," ",1
+"DEBGRZ_G3 ","BenAlg08  ", 279,"Y"," ",1
+"DEBGRZ_G3 ","BenAlg09  ", 280,"Y"," ",1
+"DEBGRZ_G3 ","BenAlg10  ", 281,"Y"," ",1
+"DEBGRZ_G3 ","BenAlg11  ", 282,"Y"," ",1
+"DEBGRZ_G3 ","BenAlg12  ", 283,"Y"," ",1
+"DEBGRZ_G3 ","BenAlg13  ", 284,"Y"," ",1
+"DEBGRZ_G3 ","BenAlg14  ", 285,"Y"," ",1
+"DEBGRZ_G3 ","BenAlg15  ", 286,"Y"," ",1
+"DEBGRZ_G3 ","BenAlg16  ", 287,"Y"," ",1
+"DEBGRZ_G3 ","BenAlg17  ", 288,"Y"," ",1
+"DEBGRZ_G3 ","BenAlg18  ", 289,"Y"," ",1
+"DEBGRZ_G3 ","BenAlg19  ", 290,"Y"," ",1
+"DEBGRZ_G3 ","BenAlg20  ", 291,"Y"," ",1
+"DEBGRZ_G3 ","BenAlg21  ", 292,"Y"," ",1
+"DEBGRZ_G3 ","BenAlg22  ", 293,"Y"," ",1
+"DEBGRZ_G3 ","BenAlg23  ", 294,"Y"," ",1
+"DEBGRZ_G3 ","BenAlg24  ", 295,"Y"," ",1
+"DEBGRZ_G3 ","BenAlg25  ", 296,"Y"," ",1
+"DEBGRZ_G3 ","BenAlg26  ", 297,"Y"," ",1
+"DEBGRZ_G3 ","BenAlg27  ", 298,"Y"," ",1
+"DEBGRZ_G3 ","BenAlg28  ", 299,"Y"," ",1
+"DEBGRZ_G3 ","BenAlg29  ", 300,"Y"," ",1
+"DEBGRZ_G3 ","BenAlg30  ", 301,"Y"," ",1
+"DEBGRZ_G3 ","Ben1      ", 302,"Y"," ",1
+"DEBGRZ_G3 ","Ben2      ", 303,"Y"," ",1
+"DEBGRZ_G3 ","Ben3      ", 304,"Y"," ",1
+"DEBGRZ_G3 ","Ben4      ", 305,"Y"," ",1
+"DEBGRZ_G3 ","Ben5      ", 306,"Y"," ",1
+"DEBGRZ_G3 ","Ben6      ", 307,"Y"," ",1
+"DEBGRZ_G3 ","Ben7      ", 308,"Y"," ",1
+"DEBGRZ_G3 ","Ben8      ", 309,"Y"," ",1
+"DEBGRZ_G3 ","G3_FFGrn  ", 310,"Y"," ",1
+"DEBGRZ_G3 ","G3_FFDiat ", 311,"Y"," ",1
+"DEBGRZ_G3 ","G3_ALGFF01", 312,"Y"," ",1
+"DEBGRZ_G3 ","G3_ALGFF02", 313,"Y"," ",1
+"DEBGRZ_G3 ","G3_ALGFF03", 314,"Y"," ",1
+"DEBGRZ_G3 ","G3_ALGFF04", 315,"Y"," ",1
+"DEBGRZ_G3 ","G3_ALGFF05", 316,"Y"," ",1
+"DEBGRZ_G3 ","G3_ALGFF06", 317,"Y"," ",1
+"DEBGRZ_G3 ","G3_ALGFF07", 318,"Y"," ",1
+"DEBGRZ_G3 ","G3_ALGFF08", 319,"Y"," ",1
+"DEBGRZ_G3 ","G3_ALGFF09", 320,"Y"," ",1
+"DEBGRZ_G3 ","G3_ALGFF10", 321,"Y"," ",1
+"DEBGRZ_G3 ","G3_ALGFF11", 322,"Y"," ",1
+"DEBGRZ_G3 ","G3_ALGFF12", 323,"Y"," ",1
+"DEBGRZ_G3 ","G3_ALGFF13", 324,"Y"," ",1
+"DEBGRZ_G3 ","G3_ALGFF14", 325,"Y"," ",1
+"DEBGRZ_G3 ","G3_ALGFF15", 326,"Y"," ",1
+"DEBGRZ_G3 ","G3_ALGFF16", 327,"Y"," ",1
+"DEBGRZ_G3 ","G3_ALGFF17", 328,"Y"," ",1
+"DEBGRZ_G3 ","G3_ALGFF18", 329,"Y"," ",1
+"DEBGRZ_G3 ","G3_ALGFF19", 330,"Y"," ",1
+"DEBGRZ_G3 ","G3_ALGFF20", 331,"Y"," ",1
+"DEBGRZ_G3 ","G3_ALGFF21", 332,"Y"," ",1
+"DEBGRZ_G3 ","G3_ALGFF22", 333,"Y"," ",1
+"DEBGRZ_G3 ","G3_ALGFF23", 334,"Y"," ",1
+"DEBGRZ_G3 ","G3_ALGFF24", 335,"Y"," ",1
+"DEBGRZ_G3 ","G3_ALGFF25", 336,"Y"," ",1
+"DEBGRZ_G3 ","G3_ALGFF26", 337,"Y"," ",1
+"DEBGRZ_G3 ","G3_ALGFF27", 338,"Y"," ",1
+"DEBGRZ_G3 ","G3_ALGFF28", 339,"Y"," ",1
+"DEBGRZ_G3 ","G3_ALGFF29", 340,"Y"," ",1
+"DEBGRZ_G3 ","G3_ALGFF30", 341,"Y"," ",1
+"DEBGRZ_G3 ","G3_FF01   ", 342,"Y"," ",1
+"DEBGRZ_G3 ","G3_FF02   ", 343,"Y"," ",1
+"DEBGRZ_G3 ","G3_FF03   ", 344,"Y"," ",1
+"DEBGRZ_G3 ","G3_FF04   ", 345,"Y"," ",1
+"DEBGRZ_G3 ","G3_FF05   ", 346,"Y"," ",1
+"DEBGRZ_G3 ","G3_FF06   ", 347,"Y"," ",1
+"DEBGRZ_G3 ","G3_FF07   ", 348,"Y"," ",1
+"DEBGRZ_G3 ","G3_FF08   ", 349,"Y"," ",1
 "DEBGRZ_G4 ","DELT      ",   1,"N","x",1
 "DEBGRZ_G4 ","Volume    ",   2,"N","x",1
 "DEBGRZ_G4 ","Temp      ",   3,"Y","x",1
@@ -13985,298 +13988,299 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "DEBGRZ_G4 ","G4_PrDetS1",  54,"Y","x",1
 "DEBGRZ_G4 ","G4_FFDet  ",  55,"Y","x",1
 "DEBGRZ_G4 ","G4_FFDetS1",  56,"Y","x",1
-"DEBGRZ_G4 ","DetC      ",  57,"Y","x",1
-"DEBGRZ_G4 ","DetN      ",  58,"Y","x",1
-"DEBGRZ_G4 ","DetP      ",  59,"Y","x",1
-"DEBGRZ_G4 ","DetSi     ",  60,"Y","x",1
-"DEBGRZ_G4 ","POC1      ",  61,"Y"," ",1
-"DEBGRZ_G4 ","PON1      ",  62,"Y"," ",1
-"DEBGRZ_G4 ","POP1      ",  63,"Y"," ",1
-"DEBGRZ_G4 ","Opal      ",  64,"Y"," ",1
-"DEBGRZ_G4 ","DetCS1    ",  65,"Y","x",1
-"DEBGRZ_G4 ","DetNS1    ",  66,"Y","x",1
-"DEBGRZ_G4 ","DetPS1    ",  67,"Y","x",1
-"DEBGRZ_G4 ","DetSiS1   ",  68,"Y","x",1
-"DEBGRZ_G4 ","Green     ",  69,"Y","x",1
-"DEBGRZ_G4 ","Diat      ",  70,"Y","x",1
-"DEBGRZ_G4 ","BLOOMALG01",  71,"B"," ",1
-"DEBGRZ_G4 ","BLOOMALG02",  72,"B"," ",1
-"DEBGRZ_G4 ","BLOOMALG03",  73,"B"," ",1
-"DEBGRZ_G4 ","BLOOMALG04",  74,"B"," ",1
-"DEBGRZ_G4 ","BLOOMALG05",  75,"B"," ",1
-"DEBGRZ_G4 ","BLOOMALG06",  76,"B"," ",1
-"DEBGRZ_G4 ","BLOOMALG07",  77,"B"," ",1
-"DEBGRZ_G4 ","BLOOMALG08",  78,"B"," ",1
-"DEBGRZ_G4 ","BLOOMALG09",  79,"B"," ",1
-"DEBGRZ_G4 ","BLOOMALG10",  80,"B"," ",1
-"DEBGRZ_G4 ","BLOOMALG11",  81,"B"," ",1
-"DEBGRZ_G4 ","BLOOMALG12",  82,"B"," ",1
-"DEBGRZ_G4 ","BLOOMALG13",  83,"B"," ",1
-"DEBGRZ_G4 ","BLOOMALG14",  84,"B"," ",1
-"DEBGRZ_G4 ","BLOOMALG15",  85,"B"," ",1
-"DEBGRZ_G4 ","BLOOMALG16",  86,"B"," ",1
-"DEBGRZ_G4 ","BLOOMALG17",  87,"B"," ",1
-"DEBGRZ_G4 ","BLOOMALG18",  88,"B"," ",1
-"DEBGRZ_G4 ","BLOOMALG19",  89,"B"," ",1
-"DEBGRZ_G4 ","BLOOMALG20",  90,"B"," ",1
-"DEBGRZ_G4 ","BLOOMALG21",  91,"B"," ",1
-"DEBGRZ_G4 ","BLOOMALG22",  92,"B"," ",1
-"DEBGRZ_G4 ","BLOOMALG23",  93,"B"," ",1
-"DEBGRZ_G4 ","BLOOMALG24",  94,"B"," ",1
-"DEBGRZ_G4 ","BLOOMALG25",  95,"B"," ",1
-"DEBGRZ_G4 ","BLOOMALG26",  96,"B"," ",1
-"DEBGRZ_G4 ","BLOOMALG27",  97,"B"," ",1
-"DEBGRZ_G4 ","BLOOMALG28",  98,"B"," ",1
-"DEBGRZ_G4 ","BLOOMALG29",  99,"B"," ",1
-"DEBGRZ_G4 ","BLOOMALG30", 100,"B"," ",1
-"DEBGRZ_G4 ","F1        ", 101,"Y"," ",1
-"DEBGRZ_G4 ","F2        ", 102,"Y"," ",1
-"DEBGRZ_G4 ","F3        ", 103,"Y"," ",1
-"DEBGRZ_G4 ","F4        ", 104,"Y"," ",1
-"DEBGRZ_G4 ","F5        ", 105,"Y"," ",1
-"DEBGRZ_G4 ","F6        ", 106,"Y"," ",1
-"DEBGRZ_G4 ","F7        ", 107,"Y"," ",1
-"DEBGRZ_G4 ","F8        ", 108,"Y"," ",1
-"DEBGRZ_G4 ","NCRatGreen", 109,"Y","x",1
-"DEBGRZ_G4 ","NCRatDiat ", 110,"Y","x",1
-"DEBGRZ_G4 ","NCRAlg01  ", 111,"Y"," ",1
-"DEBGRZ_G4 ","NCRAlg02  ", 112,"Y"," ",1
-"DEBGRZ_G4 ","NCRAlg03  ", 113,"Y"," ",1
-"DEBGRZ_G4 ","NCRAlg04  ", 114,"Y"," ",1
-"DEBGRZ_G4 ","NCRAlg05  ", 115,"Y"," ",1
-"DEBGRZ_G4 ","NCRAlg06  ", 116,"Y"," ",1
-"DEBGRZ_G4 ","NCRAlg07  ", 117,"Y"," ",1
-"DEBGRZ_G4 ","NCRAlg08  ", 118,"Y"," ",1
-"DEBGRZ_G4 ","NCRAlg09  ", 119,"Y"," ",1
-"DEBGRZ_G4 ","NCRAlg10  ", 120,"Y"," ",1
-"DEBGRZ_G4 ","NCRAlg11  ", 121,"Y"," ",1
-"DEBGRZ_G4 ","NCRAlg12  ", 122,"Y"," ",1
-"DEBGRZ_G4 ","NCRAlg13  ", 123,"Y"," ",1
-"DEBGRZ_G4 ","NCRAlg14  ", 124,"Y"," ",1
-"DEBGRZ_G4 ","NCRAlg15  ", 125,"Y"," ",1
-"DEBGRZ_G4 ","NCRAlg16  ", 126,"Y"," ",1
-"DEBGRZ_G4 ","NCRAlg17  ", 127,"Y"," ",1
-"DEBGRZ_G4 ","NCRAlg18  ", 128,"Y"," ",1
-"DEBGRZ_G4 ","NCRAlg19  ", 129,"Y"," ",1
-"DEBGRZ_G4 ","NCRAlg20  ", 130,"Y"," ",1
-"DEBGRZ_G4 ","NCRAlg21  ", 131,"Y"," ",1
-"DEBGRZ_G4 ","NCRAlg22  ", 132,"Y"," ",1
-"DEBGRZ_G4 ","NCRAlg23  ", 133,"Y"," ",1
-"DEBGRZ_G4 ","NCRAlg24  ", 134,"Y"," ",1
-"DEBGRZ_G4 ","NCRAlg25  ", 135,"Y"," ",1
-"DEBGRZ_G4 ","NCRAlg26  ", 136,"Y"," ",1
-"DEBGRZ_G4 ","NCRAlg27  ", 137,"Y"," ",1
-"DEBGRZ_G4 ","NCRAlg28  ", 138,"Y"," ",1
-"DEBGRZ_G4 ","NCRAlg29  ", 139,"Y"," ",1
-"DEBGRZ_G4 ","NCRAlg30  ", 140,"Y"," ",1
-"DEBGRZ_G4 ","NCRatF1   ", 141,"Y"," ",1
-"DEBGRZ_G4 ","NCRatF2   ", 142,"Y"," ",1
-"DEBGRZ_G4 ","NCRatF3   ", 143,"Y"," ",1
-"DEBGRZ_G4 ","NCRatF4   ", 144,"Y"," ",1
-"DEBGRZ_G4 ","NCRatF5   ", 145,"Y"," ",1
-"DEBGRZ_G4 ","NCRatF6   ", 146,"Y"," ",1
-"DEBGRZ_G4 ","NCRatF7   ", 147,"Y"," ",1
-"DEBGRZ_G4 ","NCRatF8   ", 148,"Y"," ",1
-"DEBGRZ_G4 ","PCRatGreen", 149,"Y","x",1
-"DEBGRZ_G4 ","PCRatDiat ", 150,"Y","x",1
-"DEBGRZ_G4 ","PCRAlg01  ", 151,"Y"," ",1
-"DEBGRZ_G4 ","PCRAlg02  ", 152,"Y"," ",1
-"DEBGRZ_G4 ","PCRAlg03  ", 153,"Y"," ",1
-"DEBGRZ_G4 ","PCRAlg04  ", 154,"Y"," ",1
-"DEBGRZ_G4 ","PCRAlg05  ", 155,"Y"," ",1
-"DEBGRZ_G4 ","PCRAlg06  ", 156,"Y"," ",1
-"DEBGRZ_G4 ","PCRAlg07  ", 157,"Y"," ",1
-"DEBGRZ_G4 ","PCRAlg08  ", 158,"Y"," ",1
-"DEBGRZ_G4 ","PCRAlg09  ", 159,"Y"," ",1
-"DEBGRZ_G4 ","PCRAlg10  ", 160,"Y"," ",1
-"DEBGRZ_G4 ","PCRAlg11  ", 161,"Y"," ",1
-"DEBGRZ_G4 ","PCRAlg12  ", 162,"Y"," ",1
-"DEBGRZ_G4 ","PCRAlg13  ", 163,"Y"," ",1
-"DEBGRZ_G4 ","PCRAlg14  ", 164,"Y"," ",1
-"DEBGRZ_G4 ","PCRAlg15  ", 165,"Y"," ",1
-"DEBGRZ_G4 ","PCRAlg16  ", 166,"Y"," ",1
-"DEBGRZ_G4 ","PCRAlg17  ", 167,"Y"," ",1
-"DEBGRZ_G4 ","PCRAlg18  ", 168,"Y"," ",1
-"DEBGRZ_G4 ","PCRAlg19  ", 169,"Y"," ",1
-"DEBGRZ_G4 ","PCRAlg20  ", 170,"Y"," ",1
-"DEBGRZ_G4 ","PCRAlg21  ", 171,"Y"," ",1
-"DEBGRZ_G4 ","PCRAlg22  ", 172,"Y"," ",1
-"DEBGRZ_G4 ","PCRAlg23  ", 173,"Y"," ",1
-"DEBGRZ_G4 ","PCRAlg24  ", 174,"Y"," ",1
-"DEBGRZ_G4 ","PCRAlg25  ", 175,"Y"," ",1
-"DEBGRZ_G4 ","PCRAlg26  ", 176,"Y"," ",1
-"DEBGRZ_G4 ","PCRAlg27  ", 177,"Y"," ",1
-"DEBGRZ_G4 ","PCRAlg28  ", 178,"Y"," ",1
-"DEBGRZ_G4 ","PCRAlg29  ", 179,"Y"," ",1
-"DEBGRZ_G4 ","PCRAlg30  ", 180,"Y"," ",1
-"DEBGRZ_G4 ","PCRatF1   ", 181,"Y"," ",1
-"DEBGRZ_G4 ","PCRatF2   ", 182,"Y"," ",1
-"DEBGRZ_G4 ","PCRatF3   ", 183,"Y"," ",1
-"DEBGRZ_G4 ","PCRatF4   ", 184,"Y"," ",1
-"DEBGRZ_G4 ","PCRatF5   ", 185,"Y"," ",1
-"DEBGRZ_G4 ","PCRatF6   ", 186,"Y"," ",1
-"DEBGRZ_G4 ","PCRatF7   ", 187,"Y"," ",1
-"DEBGRZ_G4 ","PCRatF8   ", 188,"Y"," ",1
-"DEBGRZ_G4 ","SCRatGreen", 189,"Y","x",1
-"DEBGRZ_G4 ","SCRatDiat ", 190,"Y","x",1
-"DEBGRZ_G4 ","SCRAlg01  ", 191,"Y"," ",1
-"DEBGRZ_G4 ","SCRAlg02  ", 192,"Y"," ",1
-"DEBGRZ_G4 ","SCRAlg03  ", 193,"Y"," ",1
-"DEBGRZ_G4 ","SCRAlg04  ", 194,"Y"," ",1
-"DEBGRZ_G4 ","SCRAlg05  ", 195,"Y"," ",1
-"DEBGRZ_G4 ","SCRAlg06  ", 196,"Y"," ",1
-"DEBGRZ_G4 ","SCRAlg07  ", 197,"Y"," ",1
-"DEBGRZ_G4 ","SCRAlg08  ", 198,"Y"," ",1
-"DEBGRZ_G4 ","SCRAlg09  ", 199,"Y"," ",1
-"DEBGRZ_G4 ","SCRAlg10  ", 200,"Y"," ",1
-"DEBGRZ_G4 ","SCRAlg11  ", 201,"Y"," ",1
-"DEBGRZ_G4 ","SCRAlg12  ", 202,"Y"," ",1
-"DEBGRZ_G4 ","SCRAlg13  ", 203,"Y"," ",1
-"DEBGRZ_G4 ","SCRAlg14  ", 204,"Y"," ",1
-"DEBGRZ_G4 ","SCRAlg15  ", 205,"Y"," ",1
-"DEBGRZ_G4 ","SCRAlg16  ", 206,"Y"," ",1
-"DEBGRZ_G4 ","SCRAlg17  ", 207,"Y"," ",1
-"DEBGRZ_G4 ","SCRAlg18  ", 208,"Y"," ",1
-"DEBGRZ_G4 ","SCRAlg19  ", 209,"Y"," ",1
-"DEBGRZ_G4 ","SCRAlg20  ", 210,"Y"," ",1
-"DEBGRZ_G4 ","SCRAlg21  ", 211,"Y"," ",1
-"DEBGRZ_G4 ","SCRAlg22  ", 212,"Y"," ",1
-"DEBGRZ_G4 ","SCRAlg23  ", 213,"Y"," ",1
-"DEBGRZ_G4 ","SCRAlg24  ", 214,"Y"," ",1
-"DEBGRZ_G4 ","SCRAlg25  ", 215,"Y"," ",1
-"DEBGRZ_G4 ","SCRAlg26  ", 216,"Y"," ",1
-"DEBGRZ_G4 ","SCRAlg27  ", 217,"Y"," ",1
-"DEBGRZ_G4 ","SCRAlg28  ", 218,"Y"," ",1
-"DEBGRZ_G4 ","SCRAlg29  ", 219,"Y"," ",1
-"DEBGRZ_G4 ","SCRAlg30  ", 220,"Y"," ",1
-"DEBGRZ_G4 ","SCRatF1   ", 221,"Y"," ",1
-"DEBGRZ_G4 ","SCRatF2   ", 222,"Y"," ",1
-"DEBGRZ_G4 ","SCRatF3   ", 223,"Y"," ",1
-"DEBGRZ_G4 ","SCRatF4   ", 224,"Y"," ",1
-"DEBGRZ_G4 ","SCRatF5   ", 225,"Y"," ",1
-"DEBGRZ_G4 ","SCRatF6   ", 226,"Y"," ",1
-"DEBGRZ_G4 ","SCRatF7   ", 227,"Y"," ",1
-"DEBGRZ_G4 ","SCRatF8   ", 228,"Y"," ",1
-"DEBGRZ_G4 ","G4_PrGrn  ", 229,"Y","x",1
-"DEBGRZ_G4 ","G4_PrDiat ", 230,"Y","x",1
-"DEBGRZ_G4 ","G4_PrAlg01", 231,"Y"," ",1
-"DEBGRZ_G4 ","G4_PrAlg02", 232,"Y"," ",1
-"DEBGRZ_G4 ","G4_PrAlg03", 233,"Y"," ",1
-"DEBGRZ_G4 ","G4_PrAlg04", 234,"Y"," ",1
-"DEBGRZ_G4 ","G4_PrAlg05", 235,"Y"," ",1
-"DEBGRZ_G4 ","G4_PrAlg06", 236,"Y"," ",1
-"DEBGRZ_G4 ","G4_PrAlg07", 237,"Y"," ",1
-"DEBGRZ_G4 ","G4_PrAlg08", 238,"Y"," ",1
-"DEBGRZ_G4 ","G4_PrAlg09", 239,"Y"," ",1
-"DEBGRZ_G4 ","G4_PrAlg10", 240,"Y"," ",1
-"DEBGRZ_G4 ","G4_PrAlg11", 241,"Y"," ",1
-"DEBGRZ_G4 ","G4_PrAlg12", 242,"Y"," ",1
-"DEBGRZ_G4 ","G4_PrAlg13", 243,"Y"," ",1
-"DEBGRZ_G4 ","G4_PrAlg14", 244,"Y"," ",1
-"DEBGRZ_G4 ","G4_PrAlg15", 245,"Y"," ",1
-"DEBGRZ_G4 ","G4_PrAlg16", 246,"Y"," ",1
-"DEBGRZ_G4 ","G4_PrAlg17", 247,"Y"," ",1
-"DEBGRZ_G4 ","G4_PrAlg18", 248,"Y"," ",1
-"DEBGRZ_G4 ","G4_PrAlg19", 249,"Y"," ",1
-"DEBGRZ_G4 ","G4_PrAlg20", 250,"Y"," ",1
-"DEBGRZ_G4 ","G4_PrAlg21", 251,"Y"," ",1
-"DEBGRZ_G4 ","G4_PrAlg22", 252,"Y"," ",1
-"DEBGRZ_G4 ","G4_PrAlg23", 253,"Y"," ",1
-"DEBGRZ_G4 ","G4_PrAlg24", 254,"Y"," ",1
-"DEBGRZ_G4 ","G4_PrAlg25", 255,"Y"," ",1
-"DEBGRZ_G4 ","G4_PrAlg26", 256,"Y"," ",1
-"DEBGRZ_G4 ","G4_PrAlg27", 257,"Y"," ",1
-"DEBGRZ_G4 ","G4_PrAlg28", 258,"Y"," ",1
-"DEBGRZ_G4 ","G4_PrAlg29", 259,"Y"," ",1
-"DEBGRZ_G4 ","G4_PrAlg30", 260,"Y"," ",1
-"DEBGRZ_G4 ","G4_Pr1    ", 261,"Y"," ",1
-"DEBGRZ_G4 ","G4_Pr2    ", 262,"Y"," ",1
-"DEBGRZ_G4 ","G4_Pr3    ", 263,"Y"," ",1
-"DEBGRZ_G4 ","G4_Pr4    ", 264,"Y"," ",1
-"DEBGRZ_G4 ","G4_Pr5    ", 265,"Y"," ",1
-"DEBGRZ_G4 ","G4_Pr6    ", 266,"Y"," ",1
-"DEBGRZ_G4 ","G4_Pr7    ", 267,"Y"," ",1
-"DEBGRZ_G4 ","G4_Pr8    ", 268,"Y"," ",1
-"DEBGRZ_G4 ","BenGrn    ", 269,"Y","x",1
-"DEBGRZ_G4 ","BenDiat   ", 270,"Y","x",1
-"DEBGRZ_G4 ","BenAlg01  ", 271,"Y"," ",1
-"DEBGRZ_G4 ","BenAlg02  ", 272,"Y"," ",1
-"DEBGRZ_G4 ","BenAlg03  ", 273,"Y"," ",1
-"DEBGRZ_G4 ","BenAlg04  ", 274,"Y"," ",1
-"DEBGRZ_G4 ","BenAlg05  ", 275,"Y"," ",1
-"DEBGRZ_G4 ","BenAlg06  ", 276,"Y"," ",1
-"DEBGRZ_G4 ","BenAlg07  ", 277,"Y"," ",1
-"DEBGRZ_G4 ","BenAlg08  ", 278,"Y"," ",1
-"DEBGRZ_G4 ","BenAlg09  ", 279,"Y"," ",1
-"DEBGRZ_G4 ","BenAlg10  ", 280,"Y"," ",1
-"DEBGRZ_G4 ","BenAlg11  ", 281,"Y"," ",1
-"DEBGRZ_G4 ","BenAlg12  ", 282,"Y"," ",1
-"DEBGRZ_G4 ","BenAlg13  ", 283,"Y"," ",1
-"DEBGRZ_G4 ","BenAlg14  ", 284,"Y"," ",1
-"DEBGRZ_G4 ","BenAlg15  ", 285,"Y"," ",1
-"DEBGRZ_G4 ","BenAlg16  ", 286,"Y"," ",1
-"DEBGRZ_G4 ","BenAlg17  ", 287,"Y"," ",1
-"DEBGRZ_G4 ","BenAlg18  ", 288,"Y"," ",1
-"DEBGRZ_G4 ","BenAlg19  ", 289,"Y"," ",1
-"DEBGRZ_G4 ","BenAlg20  ", 290,"Y"," ",1
-"DEBGRZ_G4 ","BenAlg21  ", 291,"Y"," ",1
-"DEBGRZ_G4 ","BenAlg22  ", 292,"Y"," ",1
-"DEBGRZ_G4 ","BenAlg23  ", 293,"Y"," ",1
-"DEBGRZ_G4 ","BenAlg24  ", 294,"Y"," ",1
-"DEBGRZ_G4 ","BenAlg25  ", 295,"Y"," ",1
-"DEBGRZ_G4 ","BenAlg26  ", 296,"Y"," ",1
-"DEBGRZ_G4 ","BenAlg27  ", 297,"Y"," ",1
-"DEBGRZ_G4 ","BenAlg28  ", 298,"Y"," ",1
-"DEBGRZ_G4 ","BenAlg29  ", 299,"Y"," ",1
-"DEBGRZ_G4 ","BenAlg30  ", 300,"Y"," ",1
-"DEBGRZ_G4 ","Ben1      ", 301,"Y"," ",1
-"DEBGRZ_G4 ","Ben2      ", 302,"Y"," ",1
-"DEBGRZ_G4 ","Ben3      ", 303,"Y"," ",1
-"DEBGRZ_G4 ","Ben4      ", 304,"Y"," ",1
-"DEBGRZ_G4 ","Ben5      ", 305,"Y"," ",1
-"DEBGRZ_G4 ","Ben6      ", 306,"Y"," ",1
-"DEBGRZ_G4 ","Ben7      ", 307,"Y"," ",1
-"DEBGRZ_G4 ","Ben8      ", 308,"Y"," ",1
-"DEBGRZ_G4 ","G4_FFGrn  ", 309,"Y"," ",1
-"DEBGRZ_G4 ","G4_FFDiat ", 310,"Y"," ",1
-"DEBGRZ_G4 ","G4_ALGFF01", 311,"Y"," ",1
-"DEBGRZ_G4 ","G4_ALGFF02", 312,"Y"," ",1
-"DEBGRZ_G4 ","G4_ALGFF03", 313,"Y"," ",1
-"DEBGRZ_G4 ","G4_ALGFF04", 314,"Y"," ",1
-"DEBGRZ_G4 ","G4_ALGFF05", 315,"Y"," ",1
-"DEBGRZ_G4 ","G4_ALGFF06", 316,"Y"," ",1
-"DEBGRZ_G4 ","G4_ALGFF07", 317,"Y"," ",1
-"DEBGRZ_G4 ","G4_ALGFF08", 318,"Y"," ",1
-"DEBGRZ_G4 ","G4_ALGFF09", 319,"Y"," ",1
-"DEBGRZ_G4 ","G4_ALGFF10", 320,"Y"," ",1
-"DEBGRZ_G4 ","G4_ALGFF11", 321,"Y"," ",1
-"DEBGRZ_G4 ","G4_ALGFF12", 322,"Y"," ",1
-"DEBGRZ_G4 ","G4_ALGFF13", 323,"Y"," ",1
-"DEBGRZ_G4 ","G4_ALGFF14", 324,"Y"," ",1
-"DEBGRZ_G4 ","G4_ALGFF15", 325,"Y"," ",1
-"DEBGRZ_G4 ","G4_ALGFF16", 326,"Y"," ",1
-"DEBGRZ_G4 ","G4_ALGFF17", 327,"Y"," ",1
-"DEBGRZ_G4 ","G4_ALGFF18", 328,"Y"," ",1
-"DEBGRZ_G4 ","G4_ALGFF19", 329,"Y"," ",1
-"DEBGRZ_G4 ","G4_ALGFF20", 330,"Y"," ",1
-"DEBGRZ_G4 ","G4_ALGFF21", 331,"Y"," ",1
-"DEBGRZ_G4 ","G4_ALGFF22", 332,"Y"," ",1
-"DEBGRZ_G4 ","G4_ALGFF23", 333,"Y"," ",1
-"DEBGRZ_G4 ","G4_ALGFF24", 334,"Y"," ",1
-"DEBGRZ_G4 ","G4_ALGFF25", 335,"Y"," ",1
-"DEBGRZ_G4 ","G4_ALGFF26", 336,"Y"," ",1
-"DEBGRZ_G4 ","G4_ALGFF27", 337,"Y"," ",1
-"DEBGRZ_G4 ","G4_ALGFF28", 338,"Y"," ",1
-"DEBGRZ_G4 ","G4_ALGFF29", 339,"Y"," ",1
-"DEBGRZ_G4 ","G4_ALGFF30", 340,"Y"," ",1
-"DEBGRZ_G4 ","G4_FF01   ", 341,"Y"," ",1
-"DEBGRZ_G4 ","G4_FF02   ", 342,"Y"," ",1
-"DEBGRZ_G4 ","G4_FF03   ", 343,"Y"," ",1
-"DEBGRZ_G4 ","G4_FF04   ", 344,"Y"," ",1
-"DEBGRZ_G4 ","G4_FF05   ", 345,"Y"," ",1
-"DEBGRZ_G4 ","G4_FF06   ", 346,"Y"," ",1
-"DEBGRZ_G4 ","G4_FF07   ", 347,"Y"," ",1
-"DEBGRZ_G4 ","G4_FF08   ", 348,"Y"," ",1
+"DEBGRZ_G4 ","G4_minFood",  57,"Y","x",1
+"DEBGRZ_G4 ","DetC      ",  58,"Y","x",1
+"DEBGRZ_G4 ","DetN      ",  59,"Y","x",1
+"DEBGRZ_G4 ","DetP      ",  60,"Y","x",1
+"DEBGRZ_G4 ","DetSi     ",  61,"Y","x",1
+"DEBGRZ_G4 ","POC1      ",  62,"Y"," ",1
+"DEBGRZ_G4 ","PON1      ",  63,"Y"," ",1
+"DEBGRZ_G4 ","POP1      ",  64,"Y"," ",1
+"DEBGRZ_G4 ","Opal      ",  65,"Y"," ",1
+"DEBGRZ_G4 ","DetCS1    ",  66,"Y","x",1
+"DEBGRZ_G4 ","DetNS1    ",  67,"Y","x",1
+"DEBGRZ_G4 ","DetPS1    ",  68,"Y","x",1
+"DEBGRZ_G4 ","DetSiS1   ",  69,"Y","x",1
+"DEBGRZ_G4 ","Green     ",  70,"Y","x",1
+"DEBGRZ_G4 ","Diat      ",  71,"Y","x",1
+"DEBGRZ_G4 ","BLOOMALG01",  72,"B"," ",1
+"DEBGRZ_G4 ","BLOOMALG02",  73,"B"," ",1
+"DEBGRZ_G4 ","BLOOMALG03",  74,"B"," ",1
+"DEBGRZ_G4 ","BLOOMALG04",  75,"B"," ",1
+"DEBGRZ_G4 ","BLOOMALG05",  76,"B"," ",1
+"DEBGRZ_G4 ","BLOOMALG06",  77,"B"," ",1
+"DEBGRZ_G4 ","BLOOMALG07",  78,"B"," ",1
+"DEBGRZ_G4 ","BLOOMALG08",  79,"B"," ",1
+"DEBGRZ_G4 ","BLOOMALG09",  80,"B"," ",1
+"DEBGRZ_G4 ","BLOOMALG10",  81,"B"," ",1
+"DEBGRZ_G4 ","BLOOMALG11",  82,"B"," ",1
+"DEBGRZ_G4 ","BLOOMALG12",  83,"B"," ",1
+"DEBGRZ_G4 ","BLOOMALG13",  84,"B"," ",1
+"DEBGRZ_G4 ","BLOOMALG14",  85,"B"," ",1
+"DEBGRZ_G4 ","BLOOMALG15",  86,"B"," ",1
+"DEBGRZ_G4 ","BLOOMALG16",  87,"B"," ",1
+"DEBGRZ_G4 ","BLOOMALG17",  88,"B"," ",1
+"DEBGRZ_G4 ","BLOOMALG18",  89,"B"," ",1
+"DEBGRZ_G4 ","BLOOMALG19",  90,"B"," ",1
+"DEBGRZ_G4 ","BLOOMALG20",  91,"B"," ",1
+"DEBGRZ_G4 ","BLOOMALG21",  92,"B"," ",1
+"DEBGRZ_G4 ","BLOOMALG22",  93,"B"," ",1
+"DEBGRZ_G4 ","BLOOMALG23",  94,"B"," ",1
+"DEBGRZ_G4 ","BLOOMALG24",  95,"B"," ",1
+"DEBGRZ_G4 ","BLOOMALG25",  96,"B"," ",1
+"DEBGRZ_G4 ","BLOOMALG26",  97,"B"," ",1
+"DEBGRZ_G4 ","BLOOMALG27",  98,"B"," ",1
+"DEBGRZ_G4 ","BLOOMALG28",  99,"B"," ",1
+"DEBGRZ_G4 ","BLOOMALG29", 100,"B"," ",1
+"DEBGRZ_G4 ","BLOOMALG30", 101,"B"," ",1
+"DEBGRZ_G4 ","F1        ", 102,"Y"," ",1
+"DEBGRZ_G4 ","F2        ", 103,"Y"," ",1
+"DEBGRZ_G4 ","F3        ", 104,"Y"," ",1
+"DEBGRZ_G4 ","F4        ", 105,"Y"," ",1
+"DEBGRZ_G4 ","F5        ", 106,"Y"," ",1
+"DEBGRZ_G4 ","F6        ", 107,"Y"," ",1
+"DEBGRZ_G4 ","F7        ", 108,"Y"," ",1
+"DEBGRZ_G4 ","F8        ", 109,"Y"," ",1
+"DEBGRZ_G4 ","NCRatGreen", 110,"Y","x",1
+"DEBGRZ_G4 ","NCRatDiat ", 111,"Y","x",1
+"DEBGRZ_G4 ","NCRAlg01  ", 112,"Y"," ",1
+"DEBGRZ_G4 ","NCRAlg02  ", 113,"Y"," ",1
+"DEBGRZ_G4 ","NCRAlg03  ", 114,"Y"," ",1
+"DEBGRZ_G4 ","NCRAlg04  ", 115,"Y"," ",1
+"DEBGRZ_G4 ","NCRAlg05  ", 116,"Y"," ",1
+"DEBGRZ_G4 ","NCRAlg06  ", 117,"Y"," ",1
+"DEBGRZ_G4 ","NCRAlg07  ", 118,"Y"," ",1
+"DEBGRZ_G4 ","NCRAlg08  ", 119,"Y"," ",1
+"DEBGRZ_G4 ","NCRAlg09  ", 120,"Y"," ",1
+"DEBGRZ_G4 ","NCRAlg10  ", 121,"Y"," ",1
+"DEBGRZ_G4 ","NCRAlg11  ", 122,"Y"," ",1
+"DEBGRZ_G4 ","NCRAlg12  ", 123,"Y"," ",1
+"DEBGRZ_G4 ","NCRAlg13  ", 124,"Y"," ",1
+"DEBGRZ_G4 ","NCRAlg14  ", 125,"Y"," ",1
+"DEBGRZ_G4 ","NCRAlg15  ", 126,"Y"," ",1
+"DEBGRZ_G4 ","NCRAlg16  ", 127,"Y"," ",1
+"DEBGRZ_G4 ","NCRAlg17  ", 128,"Y"," ",1
+"DEBGRZ_G4 ","NCRAlg18  ", 129,"Y"," ",1
+"DEBGRZ_G4 ","NCRAlg19  ", 130,"Y"," ",1
+"DEBGRZ_G4 ","NCRAlg20  ", 131,"Y"," ",1
+"DEBGRZ_G4 ","NCRAlg21  ", 132,"Y"," ",1
+"DEBGRZ_G4 ","NCRAlg22  ", 133,"Y"," ",1
+"DEBGRZ_G4 ","NCRAlg23  ", 134,"Y"," ",1
+"DEBGRZ_G4 ","NCRAlg24  ", 135,"Y"," ",1
+"DEBGRZ_G4 ","NCRAlg25  ", 136,"Y"," ",1
+"DEBGRZ_G4 ","NCRAlg26  ", 137,"Y"," ",1
+"DEBGRZ_G4 ","NCRAlg27  ", 138,"Y"," ",1
+"DEBGRZ_G4 ","NCRAlg28  ", 139,"Y"," ",1
+"DEBGRZ_G4 ","NCRAlg29  ", 140,"Y"," ",1
+"DEBGRZ_G4 ","NCRAlg30  ", 141,"Y"," ",1
+"DEBGRZ_G4 ","NCRatF1   ", 142,"Y"," ",1
+"DEBGRZ_G4 ","NCRatF2   ", 143,"Y"," ",1
+"DEBGRZ_G4 ","NCRatF3   ", 144,"Y"," ",1
+"DEBGRZ_G4 ","NCRatF4   ", 145,"Y"," ",1
+"DEBGRZ_G4 ","NCRatF5   ", 146,"Y"," ",1
+"DEBGRZ_G4 ","NCRatF6   ", 147,"Y"," ",1
+"DEBGRZ_G4 ","NCRatF7   ", 148,"Y"," ",1
+"DEBGRZ_G4 ","NCRatF8   ", 149,"Y"," ",1
+"DEBGRZ_G4 ","PCRatGreen", 150,"Y","x",1
+"DEBGRZ_G4 ","PCRatDiat ", 151,"Y","x",1
+"DEBGRZ_G4 ","PCRAlg01  ", 152,"Y"," ",1
+"DEBGRZ_G4 ","PCRAlg02  ", 153,"Y"," ",1
+"DEBGRZ_G4 ","PCRAlg03  ", 154,"Y"," ",1
+"DEBGRZ_G4 ","PCRAlg04  ", 155,"Y"," ",1
+"DEBGRZ_G4 ","PCRAlg05  ", 156,"Y"," ",1
+"DEBGRZ_G4 ","PCRAlg06  ", 157,"Y"," ",1
+"DEBGRZ_G4 ","PCRAlg07  ", 158,"Y"," ",1
+"DEBGRZ_G4 ","PCRAlg08  ", 159,"Y"," ",1
+"DEBGRZ_G4 ","PCRAlg09  ", 160,"Y"," ",1
+"DEBGRZ_G4 ","PCRAlg10  ", 161,"Y"," ",1
+"DEBGRZ_G4 ","PCRAlg11  ", 162,"Y"," ",1
+"DEBGRZ_G4 ","PCRAlg12  ", 163,"Y"," ",1
+"DEBGRZ_G4 ","PCRAlg13  ", 164,"Y"," ",1
+"DEBGRZ_G4 ","PCRAlg14  ", 165,"Y"," ",1
+"DEBGRZ_G4 ","PCRAlg15  ", 166,"Y"," ",1
+"DEBGRZ_G4 ","PCRAlg16  ", 167,"Y"," ",1
+"DEBGRZ_G4 ","PCRAlg17  ", 168,"Y"," ",1
+"DEBGRZ_G4 ","PCRAlg18  ", 169,"Y"," ",1
+"DEBGRZ_G4 ","PCRAlg19  ", 170,"Y"," ",1
+"DEBGRZ_G4 ","PCRAlg20  ", 171,"Y"," ",1
+"DEBGRZ_G4 ","PCRAlg21  ", 172,"Y"," ",1
+"DEBGRZ_G4 ","PCRAlg22  ", 173,"Y"," ",1
+"DEBGRZ_G4 ","PCRAlg23  ", 174,"Y"," ",1
+"DEBGRZ_G4 ","PCRAlg24  ", 175,"Y"," ",1
+"DEBGRZ_G4 ","PCRAlg25  ", 176,"Y"," ",1
+"DEBGRZ_G4 ","PCRAlg26  ", 177,"Y"," ",1
+"DEBGRZ_G4 ","PCRAlg27  ", 178,"Y"," ",1
+"DEBGRZ_G4 ","PCRAlg28  ", 179,"Y"," ",1
+"DEBGRZ_G4 ","PCRAlg29  ", 180,"Y"," ",1
+"DEBGRZ_G4 ","PCRAlg30  ", 181,"Y"," ",1
+"DEBGRZ_G4 ","PCRatF1   ", 182,"Y"," ",1
+"DEBGRZ_G4 ","PCRatF2   ", 183,"Y"," ",1
+"DEBGRZ_G4 ","PCRatF3   ", 184,"Y"," ",1
+"DEBGRZ_G4 ","PCRatF4   ", 185,"Y"," ",1
+"DEBGRZ_G4 ","PCRatF5   ", 186,"Y"," ",1
+"DEBGRZ_G4 ","PCRatF6   ", 187,"Y"," ",1
+"DEBGRZ_G4 ","PCRatF7   ", 188,"Y"," ",1
+"DEBGRZ_G4 ","PCRatF8   ", 189,"Y"," ",1
+"DEBGRZ_G4 ","SCRatGreen", 190,"Y","x",1
+"DEBGRZ_G4 ","SCRatDiat ", 191,"Y","x",1
+"DEBGRZ_G4 ","SCRAlg01  ", 192,"Y"," ",1
+"DEBGRZ_G4 ","SCRAlg02  ", 193,"Y"," ",1
+"DEBGRZ_G4 ","SCRAlg03  ", 194,"Y"," ",1
+"DEBGRZ_G4 ","SCRAlg04  ", 195,"Y"," ",1
+"DEBGRZ_G4 ","SCRAlg05  ", 196,"Y"," ",1
+"DEBGRZ_G4 ","SCRAlg06  ", 197,"Y"," ",1
+"DEBGRZ_G4 ","SCRAlg07  ", 198,"Y"," ",1
+"DEBGRZ_G4 ","SCRAlg08  ", 199,"Y"," ",1
+"DEBGRZ_G4 ","SCRAlg09  ", 200,"Y"," ",1
+"DEBGRZ_G4 ","SCRAlg10  ", 201,"Y"," ",1
+"DEBGRZ_G4 ","SCRAlg11  ", 202,"Y"," ",1
+"DEBGRZ_G4 ","SCRAlg12  ", 203,"Y"," ",1
+"DEBGRZ_G4 ","SCRAlg13  ", 204,"Y"," ",1
+"DEBGRZ_G4 ","SCRAlg14  ", 205,"Y"," ",1
+"DEBGRZ_G4 ","SCRAlg15  ", 206,"Y"," ",1
+"DEBGRZ_G4 ","SCRAlg16  ", 207,"Y"," ",1
+"DEBGRZ_G4 ","SCRAlg17  ", 208,"Y"," ",1
+"DEBGRZ_G4 ","SCRAlg18  ", 209,"Y"," ",1
+"DEBGRZ_G4 ","SCRAlg19  ", 210,"Y"," ",1
+"DEBGRZ_G4 ","SCRAlg20  ", 211,"Y"," ",1
+"DEBGRZ_G4 ","SCRAlg21  ", 212,"Y"," ",1
+"DEBGRZ_G4 ","SCRAlg22  ", 213,"Y"," ",1
+"DEBGRZ_G4 ","SCRAlg23  ", 214,"Y"," ",1
+"DEBGRZ_G4 ","SCRAlg24  ", 215,"Y"," ",1
+"DEBGRZ_G4 ","SCRAlg25  ", 216,"Y"," ",1
+"DEBGRZ_G4 ","SCRAlg26  ", 217,"Y"," ",1
+"DEBGRZ_G4 ","SCRAlg27  ", 218,"Y"," ",1
+"DEBGRZ_G4 ","SCRAlg28  ", 219,"Y"," ",1
+"DEBGRZ_G4 ","SCRAlg29  ", 220,"Y"," ",1
+"DEBGRZ_G4 ","SCRAlg30  ", 221,"Y"," ",1
+"DEBGRZ_G4 ","SCRatF1   ", 222,"Y"," ",1
+"DEBGRZ_G4 ","SCRatF2   ", 223,"Y"," ",1
+"DEBGRZ_G4 ","SCRatF3   ", 224,"Y"," ",1
+"DEBGRZ_G4 ","SCRatF4   ", 225,"Y"," ",1
+"DEBGRZ_G4 ","SCRatF5   ", 226,"Y"," ",1
+"DEBGRZ_G4 ","SCRatF6   ", 227,"Y"," ",1
+"DEBGRZ_G4 ","SCRatF7   ", 228,"Y"," ",1
+"DEBGRZ_G4 ","SCRatF8   ", 229,"Y"," ",1
+"DEBGRZ_G4 ","G4_PrGrn  ", 230,"Y","x",1
+"DEBGRZ_G4 ","G4_PrDiat ", 231,"Y","x",1
+"DEBGRZ_G4 ","G4_PrAlg01", 232,"Y"," ",1
+"DEBGRZ_G4 ","G4_PrAlg02", 233,"Y"," ",1
+"DEBGRZ_G4 ","G4_PrAlg03", 234,"Y"," ",1
+"DEBGRZ_G4 ","G4_PrAlg04", 235,"Y"," ",1
+"DEBGRZ_G4 ","G4_PrAlg05", 236,"Y"," ",1
+"DEBGRZ_G4 ","G4_PrAlg06", 237,"Y"," ",1
+"DEBGRZ_G4 ","G4_PrAlg07", 238,"Y"," ",1
+"DEBGRZ_G4 ","G4_PrAlg08", 239,"Y"," ",1
+"DEBGRZ_G4 ","G4_PrAlg09", 240,"Y"," ",1
+"DEBGRZ_G4 ","G4_PrAlg10", 241,"Y"," ",1
+"DEBGRZ_G4 ","G4_PrAlg11", 242,"Y"," ",1
+"DEBGRZ_G4 ","G4_PrAlg12", 243,"Y"," ",1
+"DEBGRZ_G4 ","G4_PrAlg13", 244,"Y"," ",1
+"DEBGRZ_G4 ","G4_PrAlg14", 245,"Y"," ",1
+"DEBGRZ_G4 ","G4_PrAlg15", 246,"Y"," ",1
+"DEBGRZ_G4 ","G4_PrAlg16", 247,"Y"," ",1
+"DEBGRZ_G4 ","G4_PrAlg17", 248,"Y"," ",1
+"DEBGRZ_G4 ","G4_PrAlg18", 249,"Y"," ",1
+"DEBGRZ_G4 ","G4_PrAlg19", 250,"Y"," ",1
+"DEBGRZ_G4 ","G4_PrAlg20", 251,"Y"," ",1
+"DEBGRZ_G4 ","G4_PrAlg21", 252,"Y"," ",1
+"DEBGRZ_G4 ","G4_PrAlg22", 253,"Y"," ",1
+"DEBGRZ_G4 ","G4_PrAlg23", 254,"Y"," ",1
+"DEBGRZ_G4 ","G4_PrAlg24", 255,"Y"," ",1
+"DEBGRZ_G4 ","G4_PrAlg25", 256,"Y"," ",1
+"DEBGRZ_G4 ","G4_PrAlg26", 257,"Y"," ",1
+"DEBGRZ_G4 ","G4_PrAlg27", 258,"Y"," ",1
+"DEBGRZ_G4 ","G4_PrAlg28", 259,"Y"," ",1
+"DEBGRZ_G4 ","G4_PrAlg29", 260,"Y"," ",1
+"DEBGRZ_G4 ","G4_PrAlg30", 261,"Y"," ",1
+"DEBGRZ_G4 ","G4_Pr1    ", 262,"Y"," ",1
+"DEBGRZ_G4 ","G4_Pr2    ", 263,"Y"," ",1
+"DEBGRZ_G4 ","G4_Pr3    ", 264,"Y"," ",1
+"DEBGRZ_G4 ","G4_Pr4    ", 265,"Y"," ",1
+"DEBGRZ_G4 ","G4_Pr5    ", 266,"Y"," ",1
+"DEBGRZ_G4 ","G4_Pr6    ", 267,"Y"," ",1
+"DEBGRZ_G4 ","G4_Pr7    ", 268,"Y"," ",1
+"DEBGRZ_G4 ","G4_Pr8    ", 269,"Y"," ",1
+"DEBGRZ_G4 ","BenGrn    ", 270,"Y","x",1
+"DEBGRZ_G4 ","BenDiat   ", 271,"Y","x",1
+"DEBGRZ_G4 ","BenAlg01  ", 272,"Y"," ",1
+"DEBGRZ_G4 ","BenAlg02  ", 273,"Y"," ",1
+"DEBGRZ_G4 ","BenAlg03  ", 274,"Y"," ",1
+"DEBGRZ_G4 ","BenAlg04  ", 275,"Y"," ",1
+"DEBGRZ_G4 ","BenAlg05  ", 276,"Y"," ",1
+"DEBGRZ_G4 ","BenAlg06  ", 277,"Y"," ",1
+"DEBGRZ_G4 ","BenAlg07  ", 278,"Y"," ",1
+"DEBGRZ_G4 ","BenAlg08  ", 279,"Y"," ",1
+"DEBGRZ_G4 ","BenAlg09  ", 280,"Y"," ",1
+"DEBGRZ_G4 ","BenAlg10  ", 281,"Y"," ",1
+"DEBGRZ_G4 ","BenAlg11  ", 282,"Y"," ",1
+"DEBGRZ_G4 ","BenAlg12  ", 283,"Y"," ",1
+"DEBGRZ_G4 ","BenAlg13  ", 284,"Y"," ",1
+"DEBGRZ_G4 ","BenAlg14  ", 285,"Y"," ",1
+"DEBGRZ_G4 ","BenAlg15  ", 286,"Y"," ",1
+"DEBGRZ_G4 ","BenAlg16  ", 287,"Y"," ",1
+"DEBGRZ_G4 ","BenAlg17  ", 288,"Y"," ",1
+"DEBGRZ_G4 ","BenAlg18  ", 289,"Y"," ",1
+"DEBGRZ_G4 ","BenAlg19  ", 290,"Y"," ",1
+"DEBGRZ_G4 ","BenAlg20  ", 291,"Y"," ",1
+"DEBGRZ_G4 ","BenAlg21  ", 292,"Y"," ",1
+"DEBGRZ_G4 ","BenAlg22  ", 293,"Y"," ",1
+"DEBGRZ_G4 ","BenAlg23  ", 294,"Y"," ",1
+"DEBGRZ_G4 ","BenAlg24  ", 295,"Y"," ",1
+"DEBGRZ_G4 ","BenAlg25  ", 296,"Y"," ",1
+"DEBGRZ_G4 ","BenAlg26  ", 297,"Y"," ",1
+"DEBGRZ_G4 ","BenAlg27  ", 298,"Y"," ",1
+"DEBGRZ_G4 ","BenAlg28  ", 299,"Y"," ",1
+"DEBGRZ_G4 ","BenAlg29  ", 300,"Y"," ",1
+"DEBGRZ_G4 ","BenAlg30  ", 301,"Y"," ",1
+"DEBGRZ_G4 ","Ben1      ", 302,"Y"," ",1
+"DEBGRZ_G4 ","Ben2      ", 303,"Y"," ",1
+"DEBGRZ_G4 ","Ben3      ", 304,"Y"," ",1
+"DEBGRZ_G4 ","Ben4      ", 305,"Y"," ",1
+"DEBGRZ_G4 ","Ben5      ", 306,"Y"," ",1
+"DEBGRZ_G4 ","Ben6      ", 307,"Y"," ",1
+"DEBGRZ_G4 ","Ben7      ", 308,"Y"," ",1
+"DEBGRZ_G4 ","Ben8      ", 309,"Y"," ",1
+"DEBGRZ_G4 ","G4_FFGrn  ", 310,"Y"," ",1
+"DEBGRZ_G4 ","G4_FFDiat ", 311,"Y"," ",1
+"DEBGRZ_G4 ","G4_ALGFF01", 312,"Y"," ",1
+"DEBGRZ_G4 ","G4_ALGFF02", 313,"Y"," ",1
+"DEBGRZ_G4 ","G4_ALGFF03", 314,"Y"," ",1
+"DEBGRZ_G4 ","G4_ALGFF04", 315,"Y"," ",1
+"DEBGRZ_G4 ","G4_ALGFF05", 316,"Y"," ",1
+"DEBGRZ_G4 ","G4_ALGFF06", 317,"Y"," ",1
+"DEBGRZ_G4 ","G4_ALGFF07", 318,"Y"," ",1
+"DEBGRZ_G4 ","G4_ALGFF08", 319,"Y"," ",1
+"DEBGRZ_G4 ","G4_ALGFF09", 320,"Y"," ",1
+"DEBGRZ_G4 ","G4_ALGFF10", 321,"Y"," ",1
+"DEBGRZ_G4 ","G4_ALGFF11", 322,"Y"," ",1
+"DEBGRZ_G4 ","G4_ALGFF12", 323,"Y"," ",1
+"DEBGRZ_G4 ","G4_ALGFF13", 324,"Y"," ",1
+"DEBGRZ_G4 ","G4_ALGFF14", 325,"Y"," ",1
+"DEBGRZ_G4 ","G4_ALGFF15", 326,"Y"," ",1
+"DEBGRZ_G4 ","G4_ALGFF16", 327,"Y"," ",1
+"DEBGRZ_G4 ","G4_ALGFF17", 328,"Y"," ",1
+"DEBGRZ_G4 ","G4_ALGFF18", 329,"Y"," ",1
+"DEBGRZ_G4 ","G4_ALGFF19", 330,"Y"," ",1
+"DEBGRZ_G4 ","G4_ALGFF20", 331,"Y"," ",1
+"DEBGRZ_G4 ","G4_ALGFF21", 332,"Y"," ",1
+"DEBGRZ_G4 ","G4_ALGFF22", 333,"Y"," ",1
+"DEBGRZ_G4 ","G4_ALGFF23", 334,"Y"," ",1
+"DEBGRZ_G4 ","G4_ALGFF24", 335,"Y"," ",1
+"DEBGRZ_G4 ","G4_ALGFF25", 336,"Y"," ",1
+"DEBGRZ_G4 ","G4_ALGFF26", 337,"Y"," ",1
+"DEBGRZ_G4 ","G4_ALGFF27", 338,"Y"," ",1
+"DEBGRZ_G4 ","G4_ALGFF28", 339,"Y"," ",1
+"DEBGRZ_G4 ","G4_ALGFF29", 340,"Y"," ",1
+"DEBGRZ_G4 ","G4_ALGFF30", 341,"Y"," ",1
+"DEBGRZ_G4 ","G4_FF01   ", 342,"Y"," ",1
+"DEBGRZ_G4 ","G4_FF02   ", 343,"Y"," ",1
+"DEBGRZ_G4 ","G4_FF03   ", 344,"Y"," ",1
+"DEBGRZ_G4 ","G4_FF04   ", 345,"Y"," ",1
+"DEBGRZ_G4 ","G4_FF05   ", 346,"Y"," ",1
+"DEBGRZ_G4 ","G4_FF06   ", 347,"Y"," ",1
+"DEBGRZ_G4 ","G4_FF07   ", 348,"Y"," ",1
+"DEBGRZ_G4 ","G4_FF08   ", 349,"Y"," ",1
 "DEBGRZ_G5 ","DELT      ",   1,"N","x",1
 "DEBGRZ_G5 ","Volume    ",   2,"N","x",1
 "DEBGRZ_G5 ","Temp      ",   3,"Y","x",1
@@ -14333,298 +14337,299 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "DEBGRZ_G5 ","G5_PrDetS1",  54,"Y","x",1
 "DEBGRZ_G5 ","G5_FFDet  ",  55,"Y","x",1
 "DEBGRZ_G5 ","G5_FFDetS1",  56,"Y","x",1
-"DEBGRZ_G5 ","DetC      ",  57,"Y","x",1
-"DEBGRZ_G5 ","DetN      ",  58,"Y","x",1
-"DEBGRZ_G5 ","DetP      ",  59,"Y","x",1
-"DEBGRZ_G5 ","DetSi     ",  60,"Y","x",1
-"DEBGRZ_G5 ","POC1      ",  61,"Y"," ",1
-"DEBGRZ_G5 ","PON1      ",  62,"Y"," ",1
-"DEBGRZ_G5 ","POP1      ",  63,"Y"," ",1
-"DEBGRZ_G5 ","Opal      ",  64,"Y"," ",1
-"DEBGRZ_G5 ","DetCS1    ",  65,"Y","x",1
-"DEBGRZ_G5 ","DetNS1    ",  66,"Y","x",1
-"DEBGRZ_G5 ","DetPS1    ",  67,"Y","x",1
-"DEBGRZ_G5 ","DetSiS1   ",  68,"Y","x",1
-"DEBGRZ_G5 ","Green     ",  69,"Y","x",1
-"DEBGRZ_G5 ","Diat      ",  70,"Y","x",1
-"DEBGRZ_G5 ","BLOOMALG01",  71,"B"," ",1
-"DEBGRZ_G5 ","BLOOMALG02",  72,"B"," ",1
-"DEBGRZ_G5 ","BLOOMALG03",  73,"B"," ",1
-"DEBGRZ_G5 ","BLOOMALG04",  74,"B"," ",1
-"DEBGRZ_G5 ","BLOOMALG05",  75,"B"," ",1
-"DEBGRZ_G5 ","BLOOMALG06",  76,"B"," ",1
-"DEBGRZ_G5 ","BLOOMALG07",  77,"B"," ",1
-"DEBGRZ_G5 ","BLOOMALG08",  78,"B"," ",1
-"DEBGRZ_G5 ","BLOOMALG09",  79,"B"," ",1
-"DEBGRZ_G5 ","BLOOMALG10",  80,"B"," ",1
-"DEBGRZ_G5 ","BLOOMALG11",  81,"B"," ",1
-"DEBGRZ_G5 ","BLOOMALG12",  82,"B"," ",1
-"DEBGRZ_G5 ","BLOOMALG13",  83,"B"," ",1
-"DEBGRZ_G5 ","BLOOMALG14",  84,"B"," ",1
-"DEBGRZ_G5 ","BLOOMALG15",  85,"B"," ",1
-"DEBGRZ_G5 ","BLOOMALG16",  86,"B"," ",1
-"DEBGRZ_G5 ","BLOOMALG17",  87,"B"," ",1
-"DEBGRZ_G5 ","BLOOMALG18",  88,"B"," ",1
-"DEBGRZ_G5 ","BLOOMALG19",  89,"B"," ",1
-"DEBGRZ_G5 ","BLOOMALG20",  90,"B"," ",1
-"DEBGRZ_G5 ","BLOOMALG21",  91,"B"," ",1
-"DEBGRZ_G5 ","BLOOMALG22",  92,"B"," ",1
-"DEBGRZ_G5 ","BLOOMALG23",  93,"B"," ",1
-"DEBGRZ_G5 ","BLOOMALG24",  94,"B"," ",1
-"DEBGRZ_G5 ","BLOOMALG25",  95,"B"," ",1
-"DEBGRZ_G5 ","BLOOMALG26",  96,"B"," ",1
-"DEBGRZ_G5 ","BLOOMALG27",  97,"B"," ",1
-"DEBGRZ_G5 ","BLOOMALG28",  98,"B"," ",1
-"DEBGRZ_G5 ","BLOOMALG29",  99,"B"," ",1
-"DEBGRZ_G5 ","BLOOMALG30", 100,"B"," ",1
-"DEBGRZ_G5 ","F1        ", 101,"Y"," ",1
-"DEBGRZ_G5 ","F2        ", 102,"Y"," ",1
-"DEBGRZ_G5 ","F3        ", 103,"Y"," ",1
-"DEBGRZ_G5 ","F4        ", 104,"Y"," ",1
-"DEBGRZ_G5 ","F5        ", 105,"Y"," ",1
-"DEBGRZ_G5 ","F6        ", 106,"Y"," ",1
-"DEBGRZ_G5 ","F7        ", 107,"Y"," ",1
-"DEBGRZ_G5 ","F8        ", 108,"Y"," ",1
-"DEBGRZ_G5 ","NCRatGreen", 109,"Y","x",1
-"DEBGRZ_G5 ","NCRatDiat ", 110,"Y","x",1
-"DEBGRZ_G5 ","NCRAlg01  ", 111,"Y"," ",1
-"DEBGRZ_G5 ","NCRAlg02  ", 112,"Y"," ",1
-"DEBGRZ_G5 ","NCRAlg03  ", 113,"Y"," ",1
-"DEBGRZ_G5 ","NCRAlg04  ", 114,"Y"," ",1
-"DEBGRZ_G5 ","NCRAlg05  ", 115,"Y"," ",1
-"DEBGRZ_G5 ","NCRAlg06  ", 116,"Y"," ",1
-"DEBGRZ_G5 ","NCRAlg07  ", 117,"Y"," ",1
-"DEBGRZ_G5 ","NCRAlg08  ", 118,"Y"," ",1
-"DEBGRZ_G5 ","NCRAlg09  ", 119,"Y"," ",1
-"DEBGRZ_G5 ","NCRAlg10  ", 120,"Y"," ",1
-"DEBGRZ_G5 ","NCRAlg11  ", 121,"Y"," ",1
-"DEBGRZ_G5 ","NCRAlg12  ", 122,"Y"," ",1
-"DEBGRZ_G5 ","NCRAlg13  ", 123,"Y"," ",1
-"DEBGRZ_G5 ","NCRAlg14  ", 124,"Y"," ",1
-"DEBGRZ_G5 ","NCRAlg15  ", 125,"Y"," ",1
-"DEBGRZ_G5 ","NCRAlg16  ", 126,"Y"," ",1
-"DEBGRZ_G5 ","NCRAlg17  ", 127,"Y"," ",1
-"DEBGRZ_G5 ","NCRAlg18  ", 128,"Y"," ",1
-"DEBGRZ_G5 ","NCRAlg19  ", 129,"Y"," ",1
-"DEBGRZ_G5 ","NCRAlg20  ", 130,"Y"," ",1
-"DEBGRZ_G5 ","NCRAlg21  ", 131,"Y"," ",1
-"DEBGRZ_G5 ","NCRAlg22  ", 132,"Y"," ",1
-"DEBGRZ_G5 ","NCRAlg23  ", 133,"Y"," ",1
-"DEBGRZ_G5 ","NCRAlg24  ", 134,"Y"," ",1
-"DEBGRZ_G5 ","NCRAlg25  ", 135,"Y"," ",1
-"DEBGRZ_G5 ","NCRAlg26  ", 136,"Y"," ",1
-"DEBGRZ_G5 ","NCRAlg27  ", 137,"Y"," ",1
-"DEBGRZ_G5 ","NCRAlg28  ", 138,"Y"," ",1
-"DEBGRZ_G5 ","NCRAlg29  ", 139,"Y"," ",1
-"DEBGRZ_G5 ","NCRAlg30  ", 140,"Y"," ",1
-"DEBGRZ_G5 ","NCRatF1   ", 141,"Y"," ",1
-"DEBGRZ_G5 ","NCRatF2   ", 142,"Y"," ",1
-"DEBGRZ_G5 ","NCRatF3   ", 143,"Y"," ",1
-"DEBGRZ_G5 ","NCRatF4   ", 144,"Y"," ",1
-"DEBGRZ_G5 ","NCRatF5   ", 145,"Y"," ",1
-"DEBGRZ_G5 ","NCRatF6   ", 146,"Y"," ",1
-"DEBGRZ_G5 ","NCRatF7   ", 147,"Y"," ",1
-"DEBGRZ_G5 ","NCRatF8   ", 148,"Y"," ",1
-"DEBGRZ_G5 ","PCRatGreen", 149,"Y","x",1
-"DEBGRZ_G5 ","PCRatDiat ", 150,"Y","x",1
-"DEBGRZ_G5 ","PCRAlg01  ", 151,"Y"," ",1
-"DEBGRZ_G5 ","PCRAlg02  ", 152,"Y"," ",1
-"DEBGRZ_G5 ","PCRAlg03  ", 153,"Y"," ",1
-"DEBGRZ_G5 ","PCRAlg04  ", 154,"Y"," ",1
-"DEBGRZ_G5 ","PCRAlg05  ", 155,"Y"," ",1
-"DEBGRZ_G5 ","PCRAlg06  ", 156,"Y"," ",1
-"DEBGRZ_G5 ","PCRAlg07  ", 157,"Y"," ",1
-"DEBGRZ_G5 ","PCRAlg08  ", 158,"Y"," ",1
-"DEBGRZ_G5 ","PCRAlg09  ", 159,"Y"," ",1
-"DEBGRZ_G5 ","PCRAlg10  ", 160,"Y"," ",1
-"DEBGRZ_G5 ","PCRAlg11  ", 161,"Y"," ",1
-"DEBGRZ_G5 ","PCRAlg12  ", 162,"Y"," ",1
-"DEBGRZ_G5 ","PCRAlg13  ", 163,"Y"," ",1
-"DEBGRZ_G5 ","PCRAlg14  ", 164,"Y"," ",1
-"DEBGRZ_G5 ","PCRAlg15  ", 165,"Y"," ",1
-"DEBGRZ_G5 ","PCRAlg16  ", 166,"Y"," ",1
-"DEBGRZ_G5 ","PCRAlg17  ", 167,"Y"," ",1
-"DEBGRZ_G5 ","PCRAlg18  ", 168,"Y"," ",1
-"DEBGRZ_G5 ","PCRAlg19  ", 169,"Y"," ",1
-"DEBGRZ_G5 ","PCRAlg20  ", 170,"Y"," ",1
-"DEBGRZ_G5 ","PCRAlg21  ", 171,"Y"," ",1
-"DEBGRZ_G5 ","PCRAlg22  ", 172,"Y"," ",1
-"DEBGRZ_G5 ","PCRAlg23  ", 173,"Y"," ",1
-"DEBGRZ_G5 ","PCRAlg24  ", 174,"Y"," ",1
-"DEBGRZ_G5 ","PCRAlg25  ", 175,"Y"," ",1
-"DEBGRZ_G5 ","PCRAlg26  ", 176,"Y"," ",1
-"DEBGRZ_G5 ","PCRAlg27  ", 177,"Y"," ",1
-"DEBGRZ_G5 ","PCRAlg28  ", 178,"Y"," ",1
-"DEBGRZ_G5 ","PCRAlg29  ", 179,"Y"," ",1
-"DEBGRZ_G5 ","PCRAlg30  ", 180,"Y"," ",1
-"DEBGRZ_G5 ","PCRatF1   ", 181,"Y"," ",1
-"DEBGRZ_G5 ","PCRatF2   ", 182,"Y"," ",1
-"DEBGRZ_G5 ","PCRatF3   ", 183,"Y"," ",1
-"DEBGRZ_G5 ","PCRatF4   ", 184,"Y"," ",1
-"DEBGRZ_G5 ","PCRatF5   ", 185,"Y"," ",1
-"DEBGRZ_G5 ","PCRatF6   ", 186,"Y"," ",1
-"DEBGRZ_G5 ","PCRatF7   ", 187,"Y"," ",1
-"DEBGRZ_G5 ","PCRatF8   ", 188,"Y"," ",1
-"DEBGRZ_G5 ","SCRatGreen", 189,"Y","x",1
-"DEBGRZ_G5 ","SCRatDiat ", 190,"Y","x",1
-"DEBGRZ_G5 ","SCRAlg01  ", 191,"Y"," ",1
-"DEBGRZ_G5 ","SCRAlg02  ", 192,"Y"," ",1
-"DEBGRZ_G5 ","SCRAlg03  ", 193,"Y"," ",1
-"DEBGRZ_G5 ","SCRAlg04  ", 194,"Y"," ",1
-"DEBGRZ_G5 ","SCRAlg05  ", 195,"Y"," ",1
-"DEBGRZ_G5 ","SCRAlg06  ", 196,"Y"," ",1
-"DEBGRZ_G5 ","SCRAlg07  ", 197,"Y"," ",1
-"DEBGRZ_G5 ","SCRAlg08  ", 198,"Y"," ",1
-"DEBGRZ_G5 ","SCRAlg09  ", 199,"Y"," ",1
-"DEBGRZ_G5 ","SCRAlg10  ", 200,"Y"," ",1
-"DEBGRZ_G5 ","SCRAlg11  ", 201,"Y"," ",1
-"DEBGRZ_G5 ","SCRAlg12  ", 202,"Y"," ",1
-"DEBGRZ_G5 ","SCRAlg13  ", 203,"Y"," ",1
-"DEBGRZ_G5 ","SCRAlg14  ", 204,"Y"," ",1
-"DEBGRZ_G5 ","SCRAlg15  ", 205,"Y"," ",1
-"DEBGRZ_G5 ","SCRAlg16  ", 206,"Y"," ",1
-"DEBGRZ_G5 ","SCRAlg17  ", 207,"Y"," ",1
-"DEBGRZ_G5 ","SCRAlg18  ", 208,"Y"," ",1
-"DEBGRZ_G5 ","SCRAlg19  ", 209,"Y"," ",1
-"DEBGRZ_G5 ","SCRAlg20  ", 210,"Y"," ",1
-"DEBGRZ_G5 ","SCRAlg21  ", 211,"Y"," ",1
-"DEBGRZ_G5 ","SCRAlg22  ", 212,"Y"," ",1
-"DEBGRZ_G5 ","SCRAlg23  ", 213,"Y"," ",1
-"DEBGRZ_G5 ","SCRAlg24  ", 214,"Y"," ",1
-"DEBGRZ_G5 ","SCRAlg25  ", 215,"Y"," ",1
-"DEBGRZ_G5 ","SCRAlg26  ", 216,"Y"," ",1
-"DEBGRZ_G5 ","SCRAlg27  ", 217,"Y"," ",1
-"DEBGRZ_G5 ","SCRAlg28  ", 218,"Y"," ",1
-"DEBGRZ_G5 ","SCRAlg29  ", 219,"Y"," ",1
-"DEBGRZ_G5 ","SCRAlg30  ", 220,"Y"," ",1
-"DEBGRZ_G5 ","SCRatF1   ", 221,"Y"," ",1
-"DEBGRZ_G5 ","SCRatF2   ", 222,"Y"," ",1
-"DEBGRZ_G5 ","SCRatF3   ", 223,"Y"," ",1
-"DEBGRZ_G5 ","SCRatF4   ", 224,"Y"," ",1
-"DEBGRZ_G5 ","SCRatF5   ", 225,"Y"," ",1
-"DEBGRZ_G5 ","SCRatF6   ", 226,"Y"," ",1
-"DEBGRZ_G5 ","SCRatF7   ", 227,"Y"," ",1
-"DEBGRZ_G5 ","SCRatF8   ", 228,"Y"," ",1
-"DEBGRZ_G5 ","G5_PrGrn  ", 229,"Y","x",1
-"DEBGRZ_G5 ","G5_PrDiat ", 230,"Y","x",1
-"DEBGRZ_G5 ","G5_PrAlg01", 231,"Y"," ",1
-"DEBGRZ_G5 ","G5_PrAlg02", 232,"Y"," ",1
-"DEBGRZ_G5 ","G5_PrAlg03", 233,"Y"," ",1
-"DEBGRZ_G5 ","G5_PrAlg04", 234,"Y"," ",1
-"DEBGRZ_G5 ","G5_PrAlg05", 235,"Y"," ",1
-"DEBGRZ_G5 ","G5_PrAlg06", 236,"Y"," ",1
-"DEBGRZ_G5 ","G5_PrAlg07", 237,"Y"," ",1
-"DEBGRZ_G5 ","G5_PrAlg08", 238,"Y"," ",1
-"DEBGRZ_G5 ","G5_PrAlg09", 239,"Y"," ",1
-"DEBGRZ_G5 ","G5_PrAlg10", 240,"Y"," ",1
-"DEBGRZ_G5 ","G5_PrAlg11", 241,"Y"," ",1
-"DEBGRZ_G5 ","G5_PrAlg12", 242,"Y"," ",1
-"DEBGRZ_G5 ","G5_PrAlg13", 243,"Y"," ",1
-"DEBGRZ_G5 ","G5_PrAlg14", 244,"Y"," ",1
-"DEBGRZ_G5 ","G5_PrAlg15", 245,"Y"," ",1
-"DEBGRZ_G5 ","G5_PrAlg16", 246,"Y"," ",1
-"DEBGRZ_G5 ","G5_PrAlg17", 247,"Y"," ",1
-"DEBGRZ_G5 ","G5_PrAlg18", 248,"Y"," ",1
-"DEBGRZ_G5 ","G5_PrAlg19", 249,"Y"," ",1
-"DEBGRZ_G5 ","G5_PrAlg20", 250,"Y"," ",1
-"DEBGRZ_G5 ","G5_PrAlg21", 251,"Y"," ",1
-"DEBGRZ_G5 ","G5_PrAlg22", 252,"Y"," ",1
-"DEBGRZ_G5 ","G5_PrAlg23", 253,"Y"," ",1
-"DEBGRZ_G5 ","G5_PrAlg24", 254,"Y"," ",1
-"DEBGRZ_G5 ","G5_PrAlg25", 255,"Y"," ",1
-"DEBGRZ_G5 ","G5_PrAlg26", 256,"Y"," ",1
-"DEBGRZ_G5 ","G5_PrAlg27", 257,"Y"," ",1
-"DEBGRZ_G5 ","G5_PrAlg28", 258,"Y"," ",1
-"DEBGRZ_G5 ","G5_PrAlg29", 259,"Y"," ",1
-"DEBGRZ_G5 ","G5_PrAlg30", 260,"Y"," ",1
-"DEBGRZ_G5 ","G5_Pr1    ", 261,"Y"," ",1
-"DEBGRZ_G5 ","G5_Pr2    ", 262,"Y"," ",1
-"DEBGRZ_G5 ","G5_Pr3    ", 263,"Y"," ",1
-"DEBGRZ_G5 ","G5_Pr4    ", 264,"Y"," ",1
-"DEBGRZ_G5 ","G5_Pr5    ", 265,"Y"," ",1
-"DEBGRZ_G5 ","G5_Pr6    ", 266,"Y"," ",1
-"DEBGRZ_G5 ","G5_Pr7    ", 267,"Y"," ",1
-"DEBGRZ_G5 ","G5_Pr8    ", 268,"Y"," ",1
-"DEBGRZ_G5 ","BenGrn    ", 269,"Y","x",1
-"DEBGRZ_G5 ","BenDiat   ", 270,"Y","x",1
-"DEBGRZ_G5 ","BenAlg01  ", 271,"Y"," ",1
-"DEBGRZ_G5 ","BenAlg02  ", 272,"Y"," ",1
-"DEBGRZ_G5 ","BenAlg03  ", 273,"Y"," ",1
-"DEBGRZ_G5 ","BenAlg04  ", 274,"Y"," ",1
-"DEBGRZ_G5 ","BenAlg05  ", 275,"Y"," ",1
-"DEBGRZ_G5 ","BenAlg06  ", 276,"Y"," ",1
-"DEBGRZ_G5 ","BenAlg07  ", 277,"Y"," ",1
-"DEBGRZ_G5 ","BenAlg08  ", 278,"Y"," ",1
-"DEBGRZ_G5 ","BenAlg09  ", 279,"Y"," ",1
-"DEBGRZ_G5 ","BenAlg10  ", 280,"Y"," ",1
-"DEBGRZ_G5 ","BenAlg11  ", 281,"Y"," ",1
-"DEBGRZ_G5 ","BenAlg12  ", 282,"Y"," ",1
-"DEBGRZ_G5 ","BenAlg13  ", 283,"Y"," ",1
-"DEBGRZ_G5 ","BenAlg14  ", 284,"Y"," ",1
-"DEBGRZ_G5 ","BenAlg15  ", 285,"Y"," ",1
-"DEBGRZ_G5 ","BenAlg16  ", 286,"Y"," ",1
-"DEBGRZ_G5 ","BenAlg17  ", 287,"Y"," ",1
-"DEBGRZ_G5 ","BenAlg18  ", 288,"Y"," ",1
-"DEBGRZ_G5 ","BenAlg19  ", 289,"Y"," ",1
-"DEBGRZ_G5 ","BenAlg20  ", 290,"Y"," ",1
-"DEBGRZ_G5 ","BenAlg21  ", 291,"Y"," ",1
-"DEBGRZ_G5 ","BenAlg22  ", 292,"Y"," ",1
-"DEBGRZ_G5 ","BenAlg23  ", 293,"Y"," ",1
-"DEBGRZ_G5 ","BenAlg24  ", 294,"Y"," ",1
-"DEBGRZ_G5 ","BenAlg25  ", 295,"Y"," ",1
-"DEBGRZ_G5 ","BenAlg26  ", 296,"Y"," ",1
-"DEBGRZ_G5 ","BenAlg27  ", 297,"Y"," ",1
-"DEBGRZ_G5 ","BenAlg28  ", 298,"Y"," ",1
-"DEBGRZ_G5 ","BenAlg29  ", 299,"Y"," ",1
-"DEBGRZ_G5 ","BenAlg30  ", 300,"Y"," ",1
-"DEBGRZ_G5 ","Ben1      ", 301,"Y"," ",1
-"DEBGRZ_G5 ","Ben2      ", 302,"Y"," ",1
-"DEBGRZ_G5 ","Ben3      ", 303,"Y"," ",1
-"DEBGRZ_G5 ","Ben4      ", 304,"Y"," ",1
-"DEBGRZ_G5 ","Ben5      ", 305,"Y"," ",1
-"DEBGRZ_G5 ","Ben6      ", 306,"Y"," ",1
-"DEBGRZ_G5 ","Ben7      ", 307,"Y"," ",1
-"DEBGRZ_G5 ","Ben8      ", 308,"Y"," ",1
-"DEBGRZ_G5 ","G5_FFGrn  ", 309,"Y"," ",1
-"DEBGRZ_G5 ","G5_FFDiat ", 310,"Y"," ",1
-"DEBGRZ_G5 ","G5_ALGFF01", 311,"Y"," ",1
-"DEBGRZ_G5 ","G5_ALGFF02", 312,"Y"," ",1
-"DEBGRZ_G5 ","G5_ALGFF03", 313,"Y"," ",1
-"DEBGRZ_G5 ","G5_ALGFF04", 314,"Y"," ",1
-"DEBGRZ_G5 ","G5_ALGFF05", 315,"Y"," ",1
-"DEBGRZ_G5 ","G5_ALGFF06", 316,"Y"," ",1
-"DEBGRZ_G5 ","G5_ALGFF07", 317,"Y"," ",1
-"DEBGRZ_G5 ","G5_ALGFF08", 318,"Y"," ",1
-"DEBGRZ_G5 ","G5_ALGFF09", 319,"Y"," ",1
-"DEBGRZ_G5 ","G5_ALGFF10", 320,"Y"," ",1
-"DEBGRZ_G5 ","G5_ALGFF11", 321,"Y"," ",1
-"DEBGRZ_G5 ","G5_ALGFF12", 322,"Y"," ",1
-"DEBGRZ_G5 ","G5_ALGFF13", 323,"Y"," ",1
-"DEBGRZ_G5 ","G5_ALGFF14", 324,"Y"," ",1
-"DEBGRZ_G5 ","G5_ALGFF15", 325,"Y"," ",1
-"DEBGRZ_G5 ","G5_ALGFF16", 326,"Y"," ",1
-"DEBGRZ_G5 ","G5_ALGFF17", 327,"Y"," ",1
-"DEBGRZ_G5 ","G5_ALGFF18", 328,"Y"," ",1
-"DEBGRZ_G5 ","G5_ALGFF19", 329,"Y"," ",1
-"DEBGRZ_G5 ","G5_ALGFF20", 330,"Y"," ",1
-"DEBGRZ_G5 ","G5_ALGFF21", 331,"Y"," ",1
-"DEBGRZ_G5 ","G5_ALGFF22", 332,"Y"," ",1
-"DEBGRZ_G5 ","G5_ALGFF23", 333,"Y"," ",1
-"DEBGRZ_G5 ","G5_ALGFF24", 334,"Y"," ",1
-"DEBGRZ_G5 ","G5_ALGFF25", 335,"Y"," ",1
-"DEBGRZ_G5 ","G5_ALGFF26", 336,"Y"," ",1
-"DEBGRZ_G5 ","G5_ALGFF27", 337,"Y"," ",1
-"DEBGRZ_G5 ","G5_ALGFF28", 338,"Y"," ",1
-"DEBGRZ_G5 ","G5_ALGFF29", 339,"Y"," ",1
-"DEBGRZ_G5 ","G5_ALGFF30", 340,"Y"," ",1
-"DEBGRZ_G5 ","G5_FF01   ", 341,"Y"," ",1
-"DEBGRZ_G5 ","G5_FF02   ", 342,"Y"," ",1
-"DEBGRZ_G5 ","G5_FF03   ", 343,"Y"," ",1
-"DEBGRZ_G5 ","G5_FF04   ", 344,"Y"," ",1
-"DEBGRZ_G5 ","G5_FF05   ", 345,"Y"," ",1
-"DEBGRZ_G5 ","G5_FF06   ", 346,"Y"," ",1
-"DEBGRZ_G5 ","G5_FF07   ", 347,"Y"," ",1
-"DEBGRZ_G5 ","G5_FF08   ", 348,"Y"," ",1
+"DEBGRZ_G5 ","G5_minFood",  57,"Y","x",1
+"DEBGRZ_G5 ","DetC      ",  58,"Y","x",1
+"DEBGRZ_G5 ","DetN      ",  59,"Y","x",1
+"DEBGRZ_G5 ","DetP      ",  60,"Y","x",1
+"DEBGRZ_G5 ","DetSi     ",  61,"Y","x",1
+"DEBGRZ_G5 ","POC1      ",  62,"Y"," ",1
+"DEBGRZ_G5 ","PON1      ",  63,"Y"," ",1
+"DEBGRZ_G5 ","POP1      ",  64,"Y"," ",1
+"DEBGRZ_G5 ","Opal      ",  65,"Y"," ",1
+"DEBGRZ_G5 ","DetCS1    ",  66,"Y","x",1
+"DEBGRZ_G5 ","DetNS1    ",  67,"Y","x",1
+"DEBGRZ_G5 ","DetPS1    ",  68,"Y","x",1
+"DEBGRZ_G5 ","DetSiS1   ",  69,"Y","x",1
+"DEBGRZ_G5 ","Green     ",  70,"Y","x",1
+"DEBGRZ_G5 ","Diat      ",  71,"Y","x",1
+"DEBGRZ_G5 ","BLOOMALG01",  72,"B"," ",1
+"DEBGRZ_G5 ","BLOOMALG02",  73,"B"," ",1
+"DEBGRZ_G5 ","BLOOMALG03",  74,"B"," ",1
+"DEBGRZ_G5 ","BLOOMALG04",  75,"B"," ",1
+"DEBGRZ_G5 ","BLOOMALG05",  76,"B"," ",1
+"DEBGRZ_G5 ","BLOOMALG06",  77,"B"," ",1
+"DEBGRZ_G5 ","BLOOMALG07",  78,"B"," ",1
+"DEBGRZ_G5 ","BLOOMALG08",  79,"B"," ",1
+"DEBGRZ_G5 ","BLOOMALG09",  80,"B"," ",1
+"DEBGRZ_G5 ","BLOOMALG10",  81,"B"," ",1
+"DEBGRZ_G5 ","BLOOMALG11",  82,"B"," ",1
+"DEBGRZ_G5 ","BLOOMALG12",  83,"B"," ",1
+"DEBGRZ_G5 ","BLOOMALG13",  84,"B"," ",1
+"DEBGRZ_G5 ","BLOOMALG14",  85,"B"," ",1
+"DEBGRZ_G5 ","BLOOMALG15",  86,"B"," ",1
+"DEBGRZ_G5 ","BLOOMALG16",  87,"B"," ",1
+"DEBGRZ_G5 ","BLOOMALG17",  88,"B"," ",1
+"DEBGRZ_G5 ","BLOOMALG18",  89,"B"," ",1
+"DEBGRZ_G5 ","BLOOMALG19",  90,"B"," ",1
+"DEBGRZ_G5 ","BLOOMALG20",  91,"B"," ",1
+"DEBGRZ_G5 ","BLOOMALG21",  92,"B"," ",1
+"DEBGRZ_G5 ","BLOOMALG22",  93,"B"," ",1
+"DEBGRZ_G5 ","BLOOMALG23",  94,"B"," ",1
+"DEBGRZ_G5 ","BLOOMALG24",  95,"B"," ",1
+"DEBGRZ_G5 ","BLOOMALG25",  96,"B"," ",1
+"DEBGRZ_G5 ","BLOOMALG26",  97,"B"," ",1
+"DEBGRZ_G5 ","BLOOMALG27",  98,"B"," ",1
+"DEBGRZ_G5 ","BLOOMALG28",  99,"B"," ",1
+"DEBGRZ_G5 ","BLOOMALG29", 100,"B"," ",1
+"DEBGRZ_G5 ","BLOOMALG30", 101,"B"," ",1
+"DEBGRZ_G5 ","F1        ", 102,"Y"," ",1
+"DEBGRZ_G5 ","F2        ", 103,"Y"," ",1
+"DEBGRZ_G5 ","F3        ", 104,"Y"," ",1
+"DEBGRZ_G5 ","F4        ", 105,"Y"," ",1
+"DEBGRZ_G5 ","F5        ", 106,"Y"," ",1
+"DEBGRZ_G5 ","F6        ", 107,"Y"," ",1
+"DEBGRZ_G5 ","F7        ", 108,"Y"," ",1
+"DEBGRZ_G5 ","F8        ", 109,"Y"," ",1
+"DEBGRZ_G5 ","NCRatGreen", 110,"Y","x",1
+"DEBGRZ_G5 ","NCRatDiat ", 111,"Y","x",1
+"DEBGRZ_G5 ","NCRAlg01  ", 112,"Y"," ",1
+"DEBGRZ_G5 ","NCRAlg02  ", 113,"Y"," ",1
+"DEBGRZ_G5 ","NCRAlg03  ", 114,"Y"," ",1
+"DEBGRZ_G5 ","NCRAlg04  ", 115,"Y"," ",1
+"DEBGRZ_G5 ","NCRAlg05  ", 116,"Y"," ",1
+"DEBGRZ_G5 ","NCRAlg06  ", 117,"Y"," ",1
+"DEBGRZ_G5 ","NCRAlg07  ", 118,"Y"," ",1
+"DEBGRZ_G5 ","NCRAlg08  ", 119,"Y"," ",1
+"DEBGRZ_G5 ","NCRAlg09  ", 120,"Y"," ",1
+"DEBGRZ_G5 ","NCRAlg10  ", 121,"Y"," ",1
+"DEBGRZ_G5 ","NCRAlg11  ", 122,"Y"," ",1
+"DEBGRZ_G5 ","NCRAlg12  ", 123,"Y"," ",1
+"DEBGRZ_G5 ","NCRAlg13  ", 124,"Y"," ",1
+"DEBGRZ_G5 ","NCRAlg14  ", 125,"Y"," ",1
+"DEBGRZ_G5 ","NCRAlg15  ", 126,"Y"," ",1
+"DEBGRZ_G5 ","NCRAlg16  ", 127,"Y"," ",1
+"DEBGRZ_G5 ","NCRAlg17  ", 128,"Y"," ",1
+"DEBGRZ_G5 ","NCRAlg18  ", 129,"Y"," ",1
+"DEBGRZ_G5 ","NCRAlg19  ", 130,"Y"," ",1
+"DEBGRZ_G5 ","NCRAlg20  ", 131,"Y"," ",1
+"DEBGRZ_G5 ","NCRAlg21  ", 132,"Y"," ",1
+"DEBGRZ_G5 ","NCRAlg22  ", 133,"Y"," ",1
+"DEBGRZ_G5 ","NCRAlg23  ", 134,"Y"," ",1
+"DEBGRZ_G5 ","NCRAlg24  ", 135,"Y"," ",1
+"DEBGRZ_G5 ","NCRAlg25  ", 136,"Y"," ",1
+"DEBGRZ_G5 ","NCRAlg26  ", 137,"Y"," ",1
+"DEBGRZ_G5 ","NCRAlg27  ", 138,"Y"," ",1
+"DEBGRZ_G5 ","NCRAlg28  ", 139,"Y"," ",1
+"DEBGRZ_G5 ","NCRAlg29  ", 140,"Y"," ",1
+"DEBGRZ_G5 ","NCRAlg30  ", 141,"Y"," ",1
+"DEBGRZ_G5 ","NCRatF1   ", 142,"Y"," ",1
+"DEBGRZ_G5 ","NCRatF2   ", 143,"Y"," ",1
+"DEBGRZ_G5 ","NCRatF3   ", 144,"Y"," ",1
+"DEBGRZ_G5 ","NCRatF4   ", 145,"Y"," ",1
+"DEBGRZ_G5 ","NCRatF5   ", 146,"Y"," ",1
+"DEBGRZ_G5 ","NCRatF6   ", 147,"Y"," ",1
+"DEBGRZ_G5 ","NCRatF7   ", 148,"Y"," ",1
+"DEBGRZ_G5 ","NCRatF8   ", 149,"Y"," ",1
+"DEBGRZ_G5 ","PCRatGreen", 150,"Y","x",1
+"DEBGRZ_G5 ","PCRatDiat ", 151,"Y","x",1
+"DEBGRZ_G5 ","PCRAlg01  ", 152,"Y"," ",1
+"DEBGRZ_G5 ","PCRAlg02  ", 153,"Y"," ",1
+"DEBGRZ_G5 ","PCRAlg03  ", 154,"Y"," ",1
+"DEBGRZ_G5 ","PCRAlg04  ", 155,"Y"," ",1
+"DEBGRZ_G5 ","PCRAlg05  ", 156,"Y"," ",1
+"DEBGRZ_G5 ","PCRAlg06  ", 157,"Y"," ",1
+"DEBGRZ_G5 ","PCRAlg07  ", 158,"Y"," ",1
+"DEBGRZ_G5 ","PCRAlg08  ", 159,"Y"," ",1
+"DEBGRZ_G5 ","PCRAlg09  ", 160,"Y"," ",1
+"DEBGRZ_G5 ","PCRAlg10  ", 161,"Y"," ",1
+"DEBGRZ_G5 ","PCRAlg11  ", 162,"Y"," ",1
+"DEBGRZ_G5 ","PCRAlg12  ", 163,"Y"," ",1
+"DEBGRZ_G5 ","PCRAlg13  ", 164,"Y"," ",1
+"DEBGRZ_G5 ","PCRAlg14  ", 165,"Y"," ",1
+"DEBGRZ_G5 ","PCRAlg15  ", 166,"Y"," ",1
+"DEBGRZ_G5 ","PCRAlg16  ", 167,"Y"," ",1
+"DEBGRZ_G5 ","PCRAlg17  ", 168,"Y"," ",1
+"DEBGRZ_G5 ","PCRAlg18  ", 169,"Y"," ",1
+"DEBGRZ_G5 ","PCRAlg19  ", 170,"Y"," ",1
+"DEBGRZ_G5 ","PCRAlg20  ", 171,"Y"," ",1
+"DEBGRZ_G5 ","PCRAlg21  ", 172,"Y"," ",1
+"DEBGRZ_G5 ","PCRAlg22  ", 173,"Y"," ",1
+"DEBGRZ_G5 ","PCRAlg23  ", 174,"Y"," ",1
+"DEBGRZ_G5 ","PCRAlg24  ", 175,"Y"," ",1
+"DEBGRZ_G5 ","PCRAlg25  ", 176,"Y"," ",1
+"DEBGRZ_G5 ","PCRAlg26  ", 177,"Y"," ",1
+"DEBGRZ_G5 ","PCRAlg27  ", 178,"Y"," ",1
+"DEBGRZ_G5 ","PCRAlg28  ", 179,"Y"," ",1
+"DEBGRZ_G5 ","PCRAlg29  ", 180,"Y"," ",1
+"DEBGRZ_G5 ","PCRAlg30  ", 181,"Y"," ",1
+"DEBGRZ_G5 ","PCRatF1   ", 182,"Y"," ",1
+"DEBGRZ_G5 ","PCRatF2   ", 183,"Y"," ",1
+"DEBGRZ_G5 ","PCRatF3   ", 184,"Y"," ",1
+"DEBGRZ_G5 ","PCRatF4   ", 185,"Y"," ",1
+"DEBGRZ_G5 ","PCRatF5   ", 186,"Y"," ",1
+"DEBGRZ_G5 ","PCRatF6   ", 187,"Y"," ",1
+"DEBGRZ_G5 ","PCRatF7   ", 188,"Y"," ",1
+"DEBGRZ_G5 ","PCRatF8   ", 189,"Y"," ",1
+"DEBGRZ_G5 ","SCRatGreen", 190,"Y","x",1
+"DEBGRZ_G5 ","SCRatDiat ", 191,"Y","x",1
+"DEBGRZ_G5 ","SCRAlg01  ", 192,"Y"," ",1
+"DEBGRZ_G5 ","SCRAlg02  ", 193,"Y"," ",1
+"DEBGRZ_G5 ","SCRAlg03  ", 194,"Y"," ",1
+"DEBGRZ_G5 ","SCRAlg04  ", 195,"Y"," ",1
+"DEBGRZ_G5 ","SCRAlg05  ", 196,"Y"," ",1
+"DEBGRZ_G5 ","SCRAlg06  ", 197,"Y"," ",1
+"DEBGRZ_G5 ","SCRAlg07  ", 198,"Y"," ",1
+"DEBGRZ_G5 ","SCRAlg08  ", 199,"Y"," ",1
+"DEBGRZ_G5 ","SCRAlg09  ", 200,"Y"," ",1
+"DEBGRZ_G5 ","SCRAlg10  ", 201,"Y"," ",1
+"DEBGRZ_G5 ","SCRAlg11  ", 202,"Y"," ",1
+"DEBGRZ_G5 ","SCRAlg12  ", 203,"Y"," ",1
+"DEBGRZ_G5 ","SCRAlg13  ", 204,"Y"," ",1
+"DEBGRZ_G5 ","SCRAlg14  ", 205,"Y"," ",1
+"DEBGRZ_G5 ","SCRAlg15  ", 206,"Y"," ",1
+"DEBGRZ_G5 ","SCRAlg16  ", 207,"Y"," ",1
+"DEBGRZ_G5 ","SCRAlg17  ", 208,"Y"," ",1
+"DEBGRZ_G5 ","SCRAlg18  ", 209,"Y"," ",1
+"DEBGRZ_G5 ","SCRAlg19  ", 210,"Y"," ",1
+"DEBGRZ_G5 ","SCRAlg20  ", 211,"Y"," ",1
+"DEBGRZ_G5 ","SCRAlg21  ", 212,"Y"," ",1
+"DEBGRZ_G5 ","SCRAlg22  ", 213,"Y"," ",1
+"DEBGRZ_G5 ","SCRAlg23  ", 214,"Y"," ",1
+"DEBGRZ_G5 ","SCRAlg24  ", 215,"Y"," ",1
+"DEBGRZ_G5 ","SCRAlg25  ", 216,"Y"," ",1
+"DEBGRZ_G5 ","SCRAlg26  ", 217,"Y"," ",1
+"DEBGRZ_G5 ","SCRAlg27  ", 218,"Y"," ",1
+"DEBGRZ_G5 ","SCRAlg28  ", 219,"Y"," ",1
+"DEBGRZ_G5 ","SCRAlg29  ", 220,"Y"," ",1
+"DEBGRZ_G5 ","SCRAlg30  ", 221,"Y"," ",1
+"DEBGRZ_G5 ","SCRatF1   ", 222,"Y"," ",1
+"DEBGRZ_G5 ","SCRatF2   ", 223,"Y"," ",1
+"DEBGRZ_G5 ","SCRatF3   ", 224,"Y"," ",1
+"DEBGRZ_G5 ","SCRatF4   ", 225,"Y"," ",1
+"DEBGRZ_G5 ","SCRatF5   ", 226,"Y"," ",1
+"DEBGRZ_G5 ","SCRatF6   ", 227,"Y"," ",1
+"DEBGRZ_G5 ","SCRatF7   ", 228,"Y"," ",1
+"DEBGRZ_G5 ","SCRatF8   ", 229,"Y"," ",1
+"DEBGRZ_G5 ","G5_PrGrn  ", 230,"Y","x",1
+"DEBGRZ_G5 ","G5_PrDiat ", 231,"Y","x",1
+"DEBGRZ_G5 ","G5_PrAlg01", 232,"Y"," ",1
+"DEBGRZ_G5 ","G5_PrAlg02", 233,"Y"," ",1
+"DEBGRZ_G5 ","G5_PrAlg03", 234,"Y"," ",1
+"DEBGRZ_G5 ","G5_PrAlg04", 235,"Y"," ",1
+"DEBGRZ_G5 ","G5_PrAlg05", 236,"Y"," ",1
+"DEBGRZ_G5 ","G5_PrAlg06", 237,"Y"," ",1
+"DEBGRZ_G5 ","G5_PrAlg07", 238,"Y"," ",1
+"DEBGRZ_G5 ","G5_PrAlg08", 239,"Y"," ",1
+"DEBGRZ_G5 ","G5_PrAlg09", 240,"Y"," ",1
+"DEBGRZ_G5 ","G5_PrAlg10", 241,"Y"," ",1
+"DEBGRZ_G5 ","G5_PrAlg11", 242,"Y"," ",1
+"DEBGRZ_G5 ","G5_PrAlg12", 243,"Y"," ",1
+"DEBGRZ_G5 ","G5_PrAlg13", 244,"Y"," ",1
+"DEBGRZ_G5 ","G5_PrAlg14", 245,"Y"," ",1
+"DEBGRZ_G5 ","G5_PrAlg15", 246,"Y"," ",1
+"DEBGRZ_G5 ","G5_PrAlg16", 247,"Y"," ",1
+"DEBGRZ_G5 ","G5_PrAlg17", 248,"Y"," ",1
+"DEBGRZ_G5 ","G5_PrAlg18", 249,"Y"," ",1
+"DEBGRZ_G5 ","G5_PrAlg19", 250,"Y"," ",1
+"DEBGRZ_G5 ","G5_PrAlg20", 251,"Y"," ",1
+"DEBGRZ_G5 ","G5_PrAlg21", 252,"Y"," ",1
+"DEBGRZ_G5 ","G5_PrAlg22", 253,"Y"," ",1
+"DEBGRZ_G5 ","G5_PrAlg23", 254,"Y"," ",1
+"DEBGRZ_G5 ","G5_PrAlg24", 255,"Y"," ",1
+"DEBGRZ_G5 ","G5_PrAlg25", 256,"Y"," ",1
+"DEBGRZ_G5 ","G5_PrAlg26", 257,"Y"," ",1
+"DEBGRZ_G5 ","G5_PrAlg27", 258,"Y"," ",1
+"DEBGRZ_G5 ","G5_PrAlg28", 259,"Y"," ",1
+"DEBGRZ_G5 ","G5_PrAlg29", 260,"Y"," ",1
+"DEBGRZ_G5 ","G5_PrAlg30", 261,"Y"," ",1
+"DEBGRZ_G5 ","G5_Pr1    ", 262,"Y"," ",1
+"DEBGRZ_G5 ","G5_Pr2    ", 263,"Y"," ",1
+"DEBGRZ_G5 ","G5_Pr3    ", 264,"Y"," ",1
+"DEBGRZ_G5 ","G5_Pr4    ", 265,"Y"," ",1
+"DEBGRZ_G5 ","G5_Pr5    ", 266,"Y"," ",1
+"DEBGRZ_G5 ","G5_Pr6    ", 267,"Y"," ",1
+"DEBGRZ_G5 ","G5_Pr7    ", 268,"Y"," ",1
+"DEBGRZ_G5 ","G5_Pr8    ", 269,"Y"," ",1
+"DEBGRZ_G5 ","BenGrn    ", 270,"Y","x",1
+"DEBGRZ_G5 ","BenDiat   ", 271,"Y","x",1
+"DEBGRZ_G5 ","BenAlg01  ", 272,"Y"," ",1
+"DEBGRZ_G5 ","BenAlg02  ", 273,"Y"," ",1
+"DEBGRZ_G5 ","BenAlg03  ", 274,"Y"," ",1
+"DEBGRZ_G5 ","BenAlg04  ", 275,"Y"," ",1
+"DEBGRZ_G5 ","BenAlg05  ", 276,"Y"," ",1
+"DEBGRZ_G5 ","BenAlg06  ", 277,"Y"," ",1
+"DEBGRZ_G5 ","BenAlg07  ", 278,"Y"," ",1
+"DEBGRZ_G5 ","BenAlg08  ", 279,"Y"," ",1
+"DEBGRZ_G5 ","BenAlg09  ", 280,"Y"," ",1
+"DEBGRZ_G5 ","BenAlg10  ", 281,"Y"," ",1
+"DEBGRZ_G5 ","BenAlg11  ", 282,"Y"," ",1
+"DEBGRZ_G5 ","BenAlg12  ", 283,"Y"," ",1
+"DEBGRZ_G5 ","BenAlg13  ", 284,"Y"," ",1
+"DEBGRZ_G5 ","BenAlg14  ", 285,"Y"," ",1
+"DEBGRZ_G5 ","BenAlg15  ", 286,"Y"," ",1
+"DEBGRZ_G5 ","BenAlg16  ", 287,"Y"," ",1
+"DEBGRZ_G5 ","BenAlg17  ", 288,"Y"," ",1
+"DEBGRZ_G5 ","BenAlg18  ", 289,"Y"," ",1
+"DEBGRZ_G5 ","BenAlg19  ", 290,"Y"," ",1
+"DEBGRZ_G5 ","BenAlg20  ", 291,"Y"," ",1
+"DEBGRZ_G5 ","BenAlg21  ", 292,"Y"," ",1
+"DEBGRZ_G5 ","BenAlg22  ", 293,"Y"," ",1
+"DEBGRZ_G5 ","BenAlg23  ", 294,"Y"," ",1
+"DEBGRZ_G5 ","BenAlg24  ", 295,"Y"," ",1
+"DEBGRZ_G5 ","BenAlg25  ", 296,"Y"," ",1
+"DEBGRZ_G5 ","BenAlg26  ", 297,"Y"," ",1
+"DEBGRZ_G5 ","BenAlg27  ", 298,"Y"," ",1
+"DEBGRZ_G5 ","BenAlg28  ", 299,"Y"," ",1
+"DEBGRZ_G5 ","BenAlg29  ", 300,"Y"," ",1
+"DEBGRZ_G5 ","BenAlg30  ", 301,"Y"," ",1
+"DEBGRZ_G5 ","Ben1      ", 302,"Y"," ",1
+"DEBGRZ_G5 ","Ben2      ", 303,"Y"," ",1
+"DEBGRZ_G5 ","Ben3      ", 304,"Y"," ",1
+"DEBGRZ_G5 ","Ben4      ", 305,"Y"," ",1
+"DEBGRZ_G5 ","Ben5      ", 306,"Y"," ",1
+"DEBGRZ_G5 ","Ben6      ", 307,"Y"," ",1
+"DEBGRZ_G5 ","Ben7      ", 308,"Y"," ",1
+"DEBGRZ_G5 ","Ben8      ", 309,"Y"," ",1
+"DEBGRZ_G5 ","G5_FFGrn  ", 310,"Y"," ",1
+"DEBGRZ_G5 ","G5_FFDiat ", 311,"Y"," ",1
+"DEBGRZ_G5 ","G5_ALGFF01", 312,"Y"," ",1
+"DEBGRZ_G5 ","G5_ALGFF02", 313,"Y"," ",1
+"DEBGRZ_G5 ","G5_ALGFF03", 314,"Y"," ",1
+"DEBGRZ_G5 ","G5_ALGFF04", 315,"Y"," ",1
+"DEBGRZ_G5 ","G5_ALGFF05", 316,"Y"," ",1
+"DEBGRZ_G5 ","G5_ALGFF06", 317,"Y"," ",1
+"DEBGRZ_G5 ","G5_ALGFF07", 318,"Y"," ",1
+"DEBGRZ_G5 ","G5_ALGFF08", 319,"Y"," ",1
+"DEBGRZ_G5 ","G5_ALGFF09", 320,"Y"," ",1
+"DEBGRZ_G5 ","G5_ALGFF10", 321,"Y"," ",1
+"DEBGRZ_G5 ","G5_ALGFF11", 322,"Y"," ",1
+"DEBGRZ_G5 ","G5_ALGFF12", 323,"Y"," ",1
+"DEBGRZ_G5 ","G5_ALGFF13", 324,"Y"," ",1
+"DEBGRZ_G5 ","G5_ALGFF14", 325,"Y"," ",1
+"DEBGRZ_G5 ","G5_ALGFF15", 326,"Y"," ",1
+"DEBGRZ_G5 ","G5_ALGFF16", 327,"Y"," ",1
+"DEBGRZ_G5 ","G5_ALGFF17", 328,"Y"," ",1
+"DEBGRZ_G5 ","G5_ALGFF18", 329,"Y"," ",1
+"DEBGRZ_G5 ","G5_ALGFF19", 330,"Y"," ",1
+"DEBGRZ_G5 ","G5_ALGFF20", 331,"Y"," ",1
+"DEBGRZ_G5 ","G5_ALGFF21", 332,"Y"," ",1
+"DEBGRZ_G5 ","G5_ALGFF22", 333,"Y"," ",1
+"DEBGRZ_G5 ","G5_ALGFF23", 334,"Y"," ",1
+"DEBGRZ_G5 ","G5_ALGFF24", 335,"Y"," ",1
+"DEBGRZ_G5 ","G5_ALGFF25", 336,"Y"," ",1
+"DEBGRZ_G5 ","G5_ALGFF26", 337,"Y"," ",1
+"DEBGRZ_G5 ","G5_ALGFF27", 338,"Y"," ",1
+"DEBGRZ_G5 ","G5_ALGFF28", 339,"Y"," ",1
+"DEBGRZ_G5 ","G5_ALGFF29", 340,"Y"," ",1
+"DEBGRZ_G5 ","G5_ALGFF30", 341,"Y"," ",1
+"DEBGRZ_G5 ","G5_FF01   ", 342,"Y"," ",1
+"DEBGRZ_G5 ","G5_FF02   ", 343,"Y"," ",1
+"DEBGRZ_G5 ","G5_FF03   ", 344,"Y"," ",1
+"DEBGRZ_G5 ","G5_FF04   ", 345,"Y"," ",1
+"DEBGRZ_G5 ","G5_FF05   ", 346,"Y"," ",1
+"DEBGRZ_G5 ","G5_FF06   ", 347,"Y"," ",1
+"DEBGRZ_G5 ","G5_FF07   ", 348,"Y"," ",1
+"DEBGRZ_G5 ","G5_FF08   ", 349,"Y"," ",1
 "Dredge    ","max_basin ",   1,"Y"," ",1
 "Dredge    ","basin_no  ",   2,"Y","x",1
 "Dredge    ","no_basin  ",   3,"O","x",1
