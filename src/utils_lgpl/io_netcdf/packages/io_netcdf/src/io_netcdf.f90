@@ -165,6 +165,7 @@ public :: ionc_get_dimid
 public :: ionc_get_contact_id_ugrid
 
 public :: ionc_put_meshgeom
+public :: ionc_get_contact_topo_count
 
 private
 
@@ -1913,5 +1914,16 @@ function ionc_get_network_id_from_mesh_id_ugrid(ioncid, meshid, networkid) resul
    ierr = ug_get_network_id_from_mesh_id(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), datasets(ioncid)%ug_file, networkid)
 
 end function ionc_get_network_id_from_mesh_id_ugrid
+
+!> Gets the number of contats from a data set.
+function ionc_get_contact_topo_count(ioncid, ncontacts) result(ierr)
+   integer,             intent(in)    :: ioncid  !< The IONC data set id.
+   integer,             intent(  out) :: ncontacts !< Number of meshes.
+   integer                            :: ierr    !< Result status, ionc_noerr if successful.
+
+   ! TODO: AvD: some error handling if ioncid is wrong
+   ierr = ug_get_contact_topo_count(datasets(ioncid)%ncid, ncontacts)
+
+end function ionc_get_contact_topo_count
 
 end module io_netcdf
