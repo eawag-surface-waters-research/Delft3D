@@ -966,7 +966,6 @@ subroutine allocsedtra(sedtra, moroutput, kmax, lsed, lsedtot, nc1, nc2, nu1, nu
     sedtra%vvv      = 0.0_fp
     sedtra%umod     = 0.0_fp
     sedtra%zumod    = 0.0_fp
-    sedtra%ust2     = 0.0_fp
     !
     sedtra%aks      = 0.0_fp
     sedtra%rca      = 0.0_fp
