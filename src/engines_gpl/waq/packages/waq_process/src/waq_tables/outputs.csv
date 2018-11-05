@@ -3852,6 +3852,7 @@ outppr,outpit,outpnm,outpdo,outpsx
 "DEBGRZ_M  ","M_Cbal    ",  19,"x",1
 "DEBGRZ_M  ","M_Nbal    ",  20,"x",1
 "DEBGRZ_M  ","M_Pbal    ",  21,"x",1
+"DEBGRZ_M  ","M_DoSpawn ",  22,"x",1
 "DEBGRZ_Z  ","Z_TotBiom ",   1,"x",1
 "DEBGRZ_Z  ","Z_Bio     ",   2,"x",1
 "DEBGRZ_Z  ","Z_TotAFDW ",   3,"x",1
@@ -3873,6 +3874,7 @@ outppr,outpit,outpnm,outpdo,outpsx
 "DEBGRZ_Z  ","Z_Cbal    ",  19,"x",1
 "DEBGRZ_Z  ","Z_Nbal    ",  20,"x",1
 "DEBGRZ_Z  ","Z_Pbal    ",  21,"x",1
+"DEBGRZ_Z  ","Z_DoSpawn ",  22,"x",1
 "DEBGRZ_G3 ","G3_TotBiom",   1,"x",1
 "DEBGRZ_G3 ","G3_Biomass",   2,"x",1
 "DEBGRZ_G3 ","G3_TotAFDW",   3,"x",1
@@ -3894,6 +3896,7 @@ outppr,outpit,outpnm,outpdo,outpsx
 "DEBGRZ_G3 ","G3_Cbal   ",  19,"x",1
 "DEBGRZ_G3 ","G3_Nbal   ",  20,"x",1
 "DEBGRZ_G3 ","G3_Pbal   ",  21,"x",1
+"DEBGRZ_G3 ","G3_DoSpawn",  22,"x",1
 "DEBGRZ_G4 ","G4_TotBiom",   1,"x",1
 "DEBGRZ_G4 ","G4_Biomass",   2,"x",1
 "DEBGRZ_G4 ","G4_TotAFDW",   3,"x",1
@@ -3915,6 +3918,7 @@ outppr,outpit,outpnm,outpdo,outpsx
 "DEBGRZ_G4 ","G4_Cbal   ",  19,"x",1
 "DEBGRZ_G4 ","G4_Nbal   ",  20,"x",1
 "DEBGRZ_G4 ","G4_Pbal   ",  21,"x",1
+"DEBGRZ_G4 ","G4_DoSpawn",  22,"x",1
 "DEBGRZ_G5 ","G5_TotBiom",   1,"x",1
 "DEBGRZ_G5 ","G5_Biomass",   2,"x",1
 "DEBGRZ_G5 ","G5_TotAFDW",   3,"x",1
@@ -3936,5 +3940,6 @@ outppr,outpit,outpnm,outpdo,outpsx
 "DEBGRZ_G5 ","G5_Cbal   ",  19,"x",1
 "DEBGRZ_G5 ","G5_Nbal   ",  20,"x",1
 "DEBGRZ_G5 ","G5_Pbal   ",  21,"x",1
+"DEBGRZ_G5 ","G5_DoSpawn",  22,"x",1
 "IM_Floceq ","SPMratioem",   1,"x",1
 "AttribOut ","Attribute ",   1,"x",1

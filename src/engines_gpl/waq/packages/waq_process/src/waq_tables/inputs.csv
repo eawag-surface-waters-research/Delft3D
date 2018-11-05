@@ -12918,7 +12918,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "DEBGRZ_M  ","M_Tl      ",  31,"Y","x",1
 "DEBGRZ_M  ","M_GSIupr  ",  32,"Y","x",1
 "DEBGRZ_M  ","M_GSIlwr  ",  33,"Y","x",1
-"DEBGRZ_M  ","M_DoSpawn ",  34,"Y","x",1
+"DEBGRZ_M  ","M_DoSpawn ",  34,"N","x",1
 "DEBGRZ_M  ","M_rSpawn  ",  35,"Y","x",1
 "DEBGRZ_M  ","M_MinSTmp ",  36,"Y","x",1
 "DEBGRZ_M  ","M_Xk      ",  37,"Y","x",1
@@ -13266,7 +13266,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "DEBGRZ_Z  ","Z_Tl      ",  31,"Y","x",1
 "DEBGRZ_Z  ","Z_GSIupr  ",  32,"Y","x",1
 "DEBGRZ_Z  ","Z_GSIlwr  ",  33,"Y","x",1
-"DEBGRZ_Z  ","Z_DoSpawn ",  34,"Y","x",1
+"DEBGRZ_Z  ","Z_DoSpawn ",  34,"N","x",1
 "DEBGRZ_Z  ","Z_rSpawn  ",  35,"Y","x",1
 "DEBGRZ_Z  ","Z_MinSTmp ",  36,"Y","x",1
 "DEBGRZ_Z  ","Z_Xk      ",  37,"Y","x",1
@@ -13614,7 +13614,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "DEBGRZ_G3 ","G3_Tl     ",  31,"Y","x",1
 "DEBGRZ_G3 ","G3_GSIupr ",  32,"Y","x",1
 "DEBGRZ_G3 ","G3_GSIlwr ",  33,"Y","x",1
-"DEBGRZ_G3 ","G3_DoSpawn",  34,"Y","x",1
+"DEBGRZ_G3 ","G3_DoSpawn",  34,"N","x",1
 "DEBGRZ_G3 ","G3_rSpawn ",  35,"Y","x",1
 "DEBGRZ_G3 ","G3_MinSTmp",  36,"Y","x",1
 "DEBGRZ_G3 ","G3_Xk     ",  37,"Y","x",1
@@ -13962,7 +13962,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "DEBGRZ_G4 ","G4_Tl     ",  31,"Y","x",1
 "DEBGRZ_G4 ","G4_GSIupr ",  32,"Y","x",1
 "DEBGRZ_G4 ","G4_GSIlwr ",  33,"Y","x",1
-"DEBGRZ_G4 ","G4_DoSpawn",  34,"Y","x",1
+"DEBGRZ_G4 ","G4_DoSpawn",  34,"N","x",1
 "DEBGRZ_G4 ","G4_rSpawn ",  35,"Y","x",1
 "DEBGRZ_G4 ","G4_MinSTmp",  36,"Y","x",1
 "DEBGRZ_G4 ","G4_Xk     ",  37,"Y","x",1
@@ -14310,7 +14310,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "DEBGRZ_G5 ","G5_Tl     ",  31,"Y","x",1
 "DEBGRZ_G5 ","G5_GSIupr ",  32,"Y","x",1
 "DEBGRZ_G5 ","G5_GSIlwr ",  33,"Y","x",1
-"DEBGRZ_G5 ","G5_DoSpawn",  34,"Y","x",1
+"DEBGRZ_G5 ","G5_DoSpawn",  34,"N","x",1
 "DEBGRZ_G5 ","G5_rSpawn ",  35,"Y","x",1
 "DEBGRZ_G5 ","G5_MinSTmp",  36,"Y","x",1
 "DEBGRZ_G5 ","G5_Xk     ",  37,"Y","x",1
