@@ -9340,6 +9340,7 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
    numl_last = numl_keep
    includeArrays = .true.
    networkIndex = 0
+   koffset1dmesh = 0
 
    ierr = ionc_open(filename, NF90_NOWRITE, ioncid, iconvtype, convversion)
    if (ierr /= ionc_noerr .or. iconvtype /= IONC_CONV_UGRID .or. convversion < 1.0) then ! NOTE: no check on conventions version number (yet?)
@@ -9595,7 +9596,7 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
    !------------------------------------------------------------!
    ! 1d2d contacts
    !------------------------------------------------------------!
-   ierr = ug_get_contact_topo_count(ncid, ncontactmeshes)
+   ierr = ionc_get_contact_topo_count(ioncid, ncontactmeshes)
    if (ierr /= ionc_noerr) then
       call mess(LEVEL_WARN,  'ug_get_contact_topo_count: No mesh contacts found in UGRID net file '''//trim(filename)//'''.')
       goto 999
