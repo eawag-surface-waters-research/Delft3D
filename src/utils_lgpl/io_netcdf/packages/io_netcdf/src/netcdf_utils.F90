@@ -35,6 +35,7 @@ implicit none
 
 private
 
+public :: ncu_format_to_cmode
 public :: ncu_inq_var_fill, ncu_copy_atts, ncu_copy_chunking_deflate
 
 ! Copied from official NetCDF: typeSizes.f90
@@ -52,8 +53,30 @@ interface ncu_inq_var_fill
    module procedure ncu_inq_var_fill_real8
 end interface ncu_inq_var_fill
 
-contains
+   contains
 
+
+!> Returns the NetCDF creation mode flag value, given the colloquial
+!! format number (3 or 4).
+!! Use this returned value as cmode argument to nf90_create calls.
+!!
+!! NOTE: the input number is *not* equivalent with the library's
+!! NF90_FORMAT_* constants!
+pure function ncu_format_to_cmode(iformatnumber) result(cmode)
+   integer, intent(in) :: iformatnumber !< The NetCDF format version (3 or 4, colloquially speaking)
+   integer             :: cmode         !< Return value (for example NF90_CLASSIC_MODEL or NF90_NETCDF4), ready for use in nf90_create calls.
+
+   select case(iformatnumber)
+   case(3)
+      cmode = NF90_CLASSIC_MODEL
+   case(4)
+      cmode = NF90_NETCDF4
+   case default
+      cmode = NF90_CLOBBER ! 0: use library default
+   end select
+end function ncu_format_to_cmode
+
+      
 !> Copy all attributes from a variable or dataset into another variable/dataset.
 !! Returns:
 !     nf90_noerr if all okay, otherwise an error code
