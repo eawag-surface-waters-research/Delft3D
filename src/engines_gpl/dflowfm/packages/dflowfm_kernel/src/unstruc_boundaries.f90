@@ -1444,7 +1444,13 @@ do i=1,nstr
    ! check if this structure concerns Flow1D type structure
    call prop_get_string(str_ptr, '', 'branchid', strtype, success)
    if (success) then
-      cycle
+      success = .true.
+      call prop_get_string(str_ptr, '', 'type', strtype, success)
+      
+      if (trim(strtype) /= 'pump') then
+         cycle
+      endif
+      
    endif
    call prop_get_string(str_ptr, '', 'filetype', strtype, success)
    if (success) then

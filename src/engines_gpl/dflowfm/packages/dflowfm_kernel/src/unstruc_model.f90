@@ -213,9 +213,12 @@ contains
 subroutine resetModel()
 use m_trachy, only: trtdef_ptr
 use unstruc_netcdf, only: UNC_CONV_UGRID
+use unstruc_channel_flow
 
     call tree_destroy(md_ptr)
     nullify(trtdef_ptr) ! trtdef_ptr was only pointing to subtree of md_ptr, so is now a dangling pointer: model's responsibility to nullify it here.
+        
+    network%loaded = .false.
 
     md_ident   = ' '
     md_mdu = ' ' ! TODO: AvD: I believe the (newer) md_mdu may be an unnecessary duplicate of md_ident_sequential
