@@ -251,12 +251,13 @@ module m_flow1d_reader
             folder = '  '
             filenames%roughnessdir = '  '
          endif
-         call set_filename(md_ptr, 'files', 'roughnessfile' , filenames%roughness,                  ' ')
-         call set_filename(md_ptr, 'files', 'crossDefFile'  , filenames%cross_section_definitions,  folder)
-         call set_filename(md_ptr, 'files', 'crossLocFile'  , filenames%cross_section_locations,    folder)
-         call set_filename(md_ptr, 'files', 'structureFile' , filenames%structures,                 folder)
-         call set_filename(md_ptr, 'files', 'retentionFile' , filenames%retentions,                 folder)
-
+         if (len_trim(filenames%onednetwork) > 0) then
+            call set_filename(md_ptr, 'files', 'roughnessfile' , filenames%roughness,                  ' ')
+            call set_filename(md_ptr, 'files', 'crossDefFile'  , filenames%cross_section_definitions,  folder)
+            call set_filename(md_ptr, 'files', 'crossLocFile'  , filenames%cross_section_locations,    folder)
+            call set_filename(md_ptr, 'files', 'structureFile' , filenames%structures,                 folder)
+            call set_filename(md_ptr, 'files', 'retentionFile' , filenames%retentions,                 folder)
+         endif
       endif
       
       call timini()
