@@ -845,7 +845,7 @@ type(t_unc_timespace_id),         intent(in)  :: id_tsp        !< Map file and o
 integer,                    intent(in)  :: id_var(:)     !< Ids of variable to write values into, one for each submesh (1d/2d/3d if applicable)
 integer,                    intent(in)  :: iloc          !< Stagger location for this variable (one of UNC_LOC_S, UNC_LOC_U, UNC_LOC_W).
 real(kind=4), dimension(:), intent(in)  :: reals
-double precision, optional          :: default_value
+double precision, optional              :: default_value
 
    double precision, dimension(:), allocatable   :: values
 
@@ -3126,7 +3126,7 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
        !   ierr = nf90_put_var(irstfile, id_unorm, u1(Lb:Lt),  start=(/ 1, LL, itim /), count=(/ Lt-Lb+1, 1, 1 /))
        !   ierr = nf90_put_var(irstfile, id_u0   , u0(Lb:Lt),  start=(/ 1, LL, itim /), count=(/ Lt-Lb+1, 1, 1 /))
        !   ierr = nf90_put_var(irstfile, id_q1   , q1(Lb:Lt),  start=(/ 1, LL, itim /), count=(/ Lt-Lb+1, 1, 1 /))
-       !end do       
+       !end do
 
        work1 = dmiss
        do kk=1,ndxi
@@ -4829,8 +4829,8 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
          toutputx(:,l) = sedtra%sscx(:,sedtot2sedsus(l))/rhol
          toutputy(:,l) = sedtra%sscy(:,sedtot2sedsus(l))/rhol
       end do
-      ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_sswx   , UNC_LOC_S, toutputx)
-      ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_sswy   , UNC_LOC_S, toutputy)
+      ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_sscx   , UNC_LOC_S, toutputx)
+      ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_sscy   , UNC_LOC_S, toutputy)
    endif
 
    
@@ -4907,8 +4907,8 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
          toutputx(:,l) = sedtra%sscx(:,sedtot2sedsus(l))/rhol
          toutputy(:,l) = sedtra%sscy(:,sedtot2sedsus(l))/rhol
       end do
-      ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_sswx_reconstructed   , UNC_LOC_S, toutputx)
-      ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_sswy_reconstructed   , UNC_LOC_S, toutputy)
+      ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_sscx_reconstructed   , UNC_LOC_S, toutputx)
+      ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_sscy_reconstructed   , UNC_LOC_S, toutputy)
    endif
    !
    call realloc(toutputx, (/ndxi, stmpar%lsedtot /), keepExisting=.false., fill = -999d0)
