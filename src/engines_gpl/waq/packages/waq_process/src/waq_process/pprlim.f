@@ -82,11 +82,11 @@
       real(4) NO3         ! I  Nitrate (NO3)                                      (gN/m3)
       real(4) PO4         ! I  Ortho-Phosphate (PO4)                              (gP/m3)
       real(4) Si          ! I  dissolved Silica (Si)                              (gSi/m3)
-      real(4) fcPPGreeN   ! O  numerical maximum flux Greens                      (gC/m3/d)
+      real(4) fcPPGreen   ! O  numerical maximum flux Greens                      (gC/m3/d)
       real(4) fcPPDiat    ! O  numerical maximum flux Diatoms                     (gC/m3/d)
-      real(4) dcPPGreeN   ! F  correction flux Greens growth                      (gC/m3/d)
+      real(4) dcPPGreen   ! F  correction flux Greens growth                      (gC/m3/d)
       real(4) dcPPDiat    ! F  correction flux Diatoms growth                     (gC/m3/d)
-      integer IdcPPGreeN  !    Pointer to the correction flux Greens growth
+      integer IdcPPGreen  !    Pointer to the correction flux Greens growth
       integer IdcPPDiat   !    Pointer to the correction flux Diatoms growth
       real(4) ConmxN      !    Total available nitrogen, minimally 0.0            (gN/m3)
       real(4) ConmxP      !    Total available phosphorus, minimally 0.0          (gP/m3)
@@ -100,7 +100,7 @@
       real(4) G_fact      !    available / demand N & P                           (-)
 
       ipnt        = ipoint
-      IdcPPGreeN  = 1
+      IdcPPGreen  = 1
       IdcPPDiat   = 2
 
       do 9000 iseg = 1 , noseg
@@ -162,16 +162,16 @@
 
 !     CORRECTION ON Nett primary production 1 and 2
 
-            dcPPGreeN = fcPPGreeN - fPPGreen
+            dcPPGreen = fcPPGreen - fPPGreen
             dcPPDiat  = fcPPDiat  - fPPDiat
-            fl  ( IdcPPGreeN  ) = dcPPGreeN
+            fl  ( IdcPPGreen  ) = dcPPGreen
             fl  ( IdcPPDiat   ) = dcPPDiat
-            pmsa( ipnt( 13)   ) = fcPPGreeN
+            pmsa( ipnt( 13)   ) = fcPPGreen
             pmsa( ipnt( 14)   ) = fcPPDiat
 
          endif
 
-         IdcPPGreeN  = IdcPPGreeN  + noflux
+         IdcPPGreen  = IdcPPGreen  + noflux
          IdcPPDiat   = IdcPPDiat   + noflux
          ipnt        = ipnt        + increm
 
