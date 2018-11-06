@@ -246,6 +246,9 @@
       INTEGER, ALLOCATABLE, SAVE ::  MNCWQID1(:,:), MNCWQID2(:,:)
       LOGICAL       FIRST  /.TRUE./
 
+      integer, parameter :: dp = kind(1.0d0)
+      real(dp)           :: damass2(notot,5)
+
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwqo2", ithandl )
 
@@ -266,6 +269,8 @@
 !     Fill mass in AMASS2 array by summing AMASS over all segments
 !
       IF ( IMFLAG ) THEN
+         damass2 = amass2
+
          call collect_data(mypart, amass , notot,'noseg',1,ierr)
          call combine_1d_rdata(amass2, notot*5, CP_SUM, ierr)
          IAFLAG = 1
@@ -273,10 +278,12 @@
             DO 20 I2 = 1,NOTOT
                AMASS2(I2,1) = 0.0
                DO 10 I1 = 1,NOSEG
-                  AMASS2(I2,1) = AMASS2(I2,1) + AMASS(I2,I1)
+                  dAMASS2(I2,1) = dAMASS2(I2,1) + AMASS(I2,I1)
    10          CONTINUE
    20       CONTINUE
          endif
+
+         amass2 = damass2
       ENDIF
 !
 !     Fill mass in ASMASS array using DMPQ and DMPS
