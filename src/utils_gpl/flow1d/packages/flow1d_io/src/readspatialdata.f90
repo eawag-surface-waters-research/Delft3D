@@ -74,6 +74,7 @@ contains
       character(len=idlen)                      :: branchid
       double precision, allocatable             :: levels(:,:)
       double precision, allocatable             :: rough(:)
+      logical                                   :: branch_error = .false.
 
       type(t_ptable), dimension(:), allocatable :: tbls
    
@@ -139,6 +140,8 @@ contains
                if (ibr < 1 .or. ibr > brs%count) then
                   msgbuf = 'Incorrect branchId found in file: '//trim(inputfile)//' branchid = '// trim(branchid)
                   call err_flush()
+                  branch_error = .true.
+                  cycle
                endif
                numLevels(ibr) = numLevs
                call prop_get_doubles(md_ptr%child_nodes(i)%node_ptr, '', 'levels', levels(1:numLevs,ibr), numLevs, success)
@@ -163,6 +166,12 @@ contains
             endif
             call prop_get_string(md_ptr%child_nodes(i)%node_ptr, '', 'branchid', branchid, success)
             ibr = hashsearch(brs%hashlist, branchid)
+            if (ibr < 1 .or. ibr > brs%count) then
+               msgbuf = 'Incorrect branchId found in file: '//trim(inputfile)//' branchid = '// trim(branchid)
+               call err_flush()
+               branch_error = .true.
+               cycle
+            endif
             pspData%brIndex(ind) = ibr
             if (success) call prop_get_double(md_ptr%child_nodes(i)%node_ptr, '', 'value', pspData%valuesOnLocation(ind), success)
             if (.not.success) then
@@ -187,6 +196,10 @@ contains
    
       pspData%numValues = max(0, count)
    
+      if (branch_error) then
+         call SetMessage(LEVEL_FATAL, 'Branch Error(s) found during reading Spatial Data.')
+      endif
+      
       call ValuesToGridPoints(spData%quant(isp), brs, tbls, interpolateOverBranches)
       
       select case (itype)

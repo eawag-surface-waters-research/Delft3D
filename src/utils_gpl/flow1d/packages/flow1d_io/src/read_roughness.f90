@@ -282,8 +282,9 @@ contains
          call prop_get_integer(tree_ptr%child_nodes(i)%node_ptr, '', 'roughnessType',itype,success)
          call prop_get_string(tree_ptr%child_nodes(i)%node_ptr, '', 'branchId',branchid, success)
          ibr = hashsearch(brs%hashlist, branchid)
-         if (ibr <= 0 .or. ibr >brs%count) then
+         if (ibr <= 0 .or. ibr > brs%count) then
             call setmessage(LEVEL_ERROR, 'Unknown branchid found ('//trim(branchid)//') in file: '//inputfile)
+            cycle
          endif
       
          rgh_type(ibr) = itype
