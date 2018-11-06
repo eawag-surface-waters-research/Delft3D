@@ -204,6 +204,8 @@ implicit none
 
     integer                                   :: md_mapformat !< map file output format (one of IFORMAT_*)
     integer                                   :: md_unc_conv  !< Unstructured NetCDF conventions (either UNC_CONV_CFOLD or UNC_CONV_UGRID)
+
+    integer                                   :: md_ncformat  !< NetCDF format (3: classic, 4: NetCDF4+HDF5)
 contains
 
 
@@ -284,6 +286,8 @@ use unstruc_channel_flow
 
     md_mapformat    = IFORMAT_UGRID   !< map file output format (one of IFORMAT_*)
     md_unc_conv     = UNC_CONV_UGRID  ! TODO: AvD: does this double now with IFORMAT_UGRID?
+
+    md_ncformat     = 3               !< NetCDF format (3: classic, 4: NetCDF4+HDF5)
 
     md_jaAutoStart     = MD_NOAUTOSTART !< Autostart simulation after loading or not.
 
@@ -580,7 +584,7 @@ subroutine readMDUFile(filename, istat)
     use string_module
     use m_heatfluxes
     use m_xbeach_avgoutput
-    use unstruc_netcdf, only: UNC_CONV_CFOLD, UNC_CONV_UGRID
+    use unstruc_netcdf, only: UNC_CONV_CFOLD, UNC_CONV_UGRID, unc_set_ncformat
     use unstruc_version_module
     use dfm_error
     use MessageHandling
@@ -1281,6 +1285,9 @@ subroutine readMDUFile(filename, istat)
 
        ! md_unc_conv = UNC_CONV_UGRID ! TODO: AvD: TEMP for testing. REMOVE!
     end if
+
+    call prop_get_integer(md_ptr, 'output', 'NcFormat', md_ncformat, success)
+    call unc_set_ncformat(md_ncformat)
 
     call prop_get_integer(md_ptr, 'output', 'Wrihis_balance', jahisbal, success)
     call prop_get_integer(md_ptr, 'output', 'Wrihis_sourcesink', jahissourcesink, success)
@@ -2594,6 +2601,8 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        write(helptxt, "(A, ', ', I0, ': ', A)") trim(helptxt), i, trim(SFORMATNAMES(i))
     end do
     call prop_set(prop_ptr, 'output', 'MapFormat', md_mapformat, trim(helptxt))
+
+    call prop_set(prop_ptr, 'output', 'NcFormat',  md_ncformat, 'Format for all NetCDF output files (3: classic, 4: NetCDF4+HDF5)')
 
     if (writeall .or. jahisbal /= 1) then
        call prop_set(prop_ptr, 'output', 'Wrihis_balance', jahisbal, 'Write mass balance totals to his file (1: yes, 0: no)' )

@@ -73,6 +73,9 @@ private :: nerr_, err_firsttime_, err_firstline_, &
 integer, parameter :: UNC_CONV_CFOLD = 1 !< Old CF-only conventions.
 integer, parameter :: UNC_CONV_UGRID = 2 !< New CF+UGRID conventions.
 
+integer            :: unc_cmode      = 0 !< Default NetCDF creation mode flag value, used in nf90_create calls (e.g., NF90_NETCDF4).
+
+
 ! The following location codes generalize for 1D/2D/3D models. See function unc_def_var_map for the details.
 integer, parameter :: UNC_LOC_CN  = 1  !< Data location: corner point.
 integer, parameter :: UNC_LOC_S   = 2  !< Data location: pressure point.
@@ -389,8 +392,26 @@ use unstruc_version_module
    ug_meta_fm%references  = trim(unstruc_company_url)
    ug_meta_fm%version     = trim(unstruc_version)
    ug_meta_fm%modelname   = ''
+   
+   unc_cmode              = NF90_CLOBBER ! Default: 0, use NetCDF library default.
 
 end subroutine init_unstruc_netcdf
+
+!> Sets the default NetCDF cmode flag values for all D-Flow FM's created files.
+!! Recommended use via calling unc_set_ncformat.
+subroutine unc_set_cmode(cmode)
+   integer, intent(in) :: cmode !< NetCDF creation mode flags value, intended for use in nf90_create calls.
+   unc_cmode = cmode
+end subroutine unc_set_cmode
+
+
+!> Sets the default NetCDF format for all D-Flow FM's created files (NetCDF 3 or 4).
+subroutine unc_set_ncformat(iformatnumber)
+   use netcdf_utils, only: ncu_format_to_cmode
+   integer, intent(in) :: iformatnumber !< The NetCDF format version (3 or 4, colloquially speaking)
+
+   call unc_set_cmode(ncu_format_to_cmode(iformatnumber))
+end subroutine unc_set_ncformat
 
 
 !> Defines a NetCDF variable that has no spatial dimension, also setting the most used attributes.
@@ -1840,7 +1861,7 @@ function unc_create(filename, cmode, ncid)
     integer,          intent(out) :: ncid
     integer                       :: unc_create
 
-    unc_create = nf90_create(filename, cmode, ncid)
+    unc_create = nf90_create(filename, or(cmode, unc_cmode), ncid)
     if (unc_create == nf90_noerr) then
         nopen_files_ = nopen_files_ + 1
         open_files_(nopen_files_)    = filename

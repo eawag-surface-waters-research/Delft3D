@@ -8629,6 +8629,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  end if
 
  call init_unstruc_netcdf()
+ call unc_set_ncformat(md_ncformat)
 
  call resetflow()
 

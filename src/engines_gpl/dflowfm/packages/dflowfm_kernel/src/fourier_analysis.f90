@@ -1632,7 +1632,7 @@ end subroutine setfouunit
            !write(filename,'(2a)') trim(filename), '.nc'
            !!
            !ierror = nf90_create(filename, NF90_WRITE, idfile)
-           ierr = nf90_create(trim(trifil), NF90_WRITE, fileids%ncid)
+           ierr = unc_create(trim(trifil), 0, fileids%ncid)
            FouMessage = ''
            if (ierr/=0) FouMessage = nf90_strerror(ierr)
            !  DEFINITIONS 
