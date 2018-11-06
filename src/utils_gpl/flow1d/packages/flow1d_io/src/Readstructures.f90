@@ -131,14 +131,23 @@ module m_readstructures
             
             call prop_get_string(md_ptr%child_nodes(i)%node_ptr, 'structure', 'id', structureId, success)
             if (.not. success) then
+               write (msgbuf, '(a,i0,a)') 'Error Reading Structure #', i, ' from '''//trim(structureFile)//''', Id is missing.'
+               call err_flush()
                cycle
             endif
             
             if (success) call prop_get_string(md_ptr%child_nodes(i)%node_ptr, 'structure', 'branchid', branchID, success)
             if (success) call prop_get_double(md_ptr%child_nodes(i)%node_ptr, 'structure', 'chainage', Chainage, success)
+
+            if (.not. success) then
+               cycle
+            endif
+
             if (success) call prop_get_string(md_ptr%child_nodes(i)%node_ptr, 'structure', 'type', typestr, success)
             if (.not. success) then
-               call SetMessage(LEVEL_FATAL, 'Error Reading Common Structure Data')
+               write (msgbuf, '(a,i0,a)') 'Error Reading Structure '''//trim(structureId)//''' from '''//trim(structureFile)//''', Type is missing.'
+               call err_flush()
+               cycle
             endif
       
             call prop_get_integer(md_ptr%child_nodes(i)%node_ptr, 'structure', 'compound', iCompound, success)
