@@ -1083,6 +1083,13 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    logical :: add_face_edge_connectivity !< Specifies whether face_edge_connectivity should be added.
    logical :: add_face_face_connectivity !< Specifies whether face_face_connectivity should be added.
    logical :: add_layers                 !< Specifies whether layer and interface vertical dimensions should be added.
+   integer :: offset
+   
+   
+   offset = 0
+   if (start_index.ne.-1 .and. start_index == 0) then
+      offset = 1
+   endif
 
    ierr = UG_SOMEERR
    wasInDefine = 0
@@ -1371,8 +1378,8 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
       edgexbnd = dmiss
       edgeybnd = dmiss
       do n=1,numEdge
-         edgexbnd(1:2, n) = xn(edge_nodes(1:2, n))
-         edgeybnd(1:2, n) = yn(edge_nodes(1:2, n))
+         edgexbnd(1:2, n) = xn(edge_nodes(1:2, n)+offset)
+         edgeybnd(1:2, n) = yn(edge_nodes(1:2, n)+offset)
       end do
       ierr = nf90_put_var(ncid, meshids%varids(mid_edgexbnd), edgexbnd)
       ierr = nf90_put_var(ncid, meshids%varids(mid_edgeybnd), edgeybnd)
@@ -1393,8 +1400,8 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
          edgelonbnd = dmiss
          edgelatbnd = dmiss
          do n=1,numEdge
-            edgelonbnd(1:2, n) = lonn(edge_nodes(1:2, n))
-            edgelatbnd(1:2, n) = latn(edge_nodes(1:2, n))
+            edgelonbnd(1:2, n) = lonn(edge_nodes(1:2, n)+offset)
+            edgelatbnd(1:2, n) = latn(edge_nodes(1:2, n)+offset)
          end do
          ierr = nf90_put_var(ncid, meshids%varids(mid_edgelonbnd), edgelonbnd)
          ierr = nf90_put_var(ncid, meshids%varids(mid_edgelatbnd), edgelatbnd)
@@ -1425,15 +1432,15 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
       allocate(facexbnd(maxnv, numFace), faceybnd(maxnv, numFace))
       facexbnd = dmiss
       faceybnd = dmiss
-
+      
       do n=1,numFace
          do k=1,maxnv
             if (face_nodes(k, n) == imiss) then
                exit ! This face has less corners than maxnv, we're done for this one.
             end if
 
-            facexbnd(k, n) = xn(face_nodes(k, n))
-            faceybnd(k, n) = yn(face_nodes(k, n))
+            facexbnd(k, n) = xn(face_nodes(k, n) + offset)
+            faceybnd(k, n) = yn(face_nodes(k, n) + offset)
          end do
       end do
       ierr = nf90_put_var(ncid, meshids%varids(mid_facexbnd), facexbnd)
@@ -1453,8 +1460,8 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
                   exit ! This face has less corners than maxnv, we're done for this one.
                end if
 
-               facelonbnd(k, n) = lonn(face_nodes(k, n))
-               facelatbnd(k, n) = latn(face_nodes(k, n))
+               facelonbnd(k, n) = lonn(face_nodes(k, n) + offset)
+               facelatbnd(k, n) = latn(face_nodes(k, n) + offset)
             end do
          end do
          ierr = nf90_put_var(ncid, meshids%varids(mid_facelonbnd), facelonbnd)
