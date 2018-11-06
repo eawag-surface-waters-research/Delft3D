@@ -165,6 +165,7 @@
 !
       use timers
       use m_couplib
+      use precision
       use output
 !
       INTEGER       NOTOT , NOSEG , NOPA  , NOSFUN, ITIME ,
@@ -246,8 +247,7 @@
       INTEGER, ALLOCATABLE, SAVE ::  MNCWQID1(:,:), MNCWQID2(:,:)
       LOGICAL       FIRST  /.TRUE./
 
-      integer, parameter :: dp = kind(1.0d0)
-      real(dp)           :: damass2(notot,5)
+      real(hp)           :: damass2(notot,5)
 
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwqo2", ithandl )
