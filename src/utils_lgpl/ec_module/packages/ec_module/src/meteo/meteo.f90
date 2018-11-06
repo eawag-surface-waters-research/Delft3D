@@ -199,7 +199,8 @@ function addmeteoitem(runid, inputfile, gridsferic, mmax, nmax) result(success)
     !
     ! Open meteofile
     !
-    success = openexistingfile_meteo(minp, inputfile)
+    meteoitem%filetype = 0
+    success = openexistingfile_meteo(minp, inputfile, meteoitem%filetype)
     if (.not. success) return
     !
     meteoitem%filename = inputfile

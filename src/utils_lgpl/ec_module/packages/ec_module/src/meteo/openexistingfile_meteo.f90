@@ -1,4 +1,4 @@
-function openexistingfile_meteo(minp, filename) result(success)
+function openexistingfile_meteo(minp, filename, meteotype) result(success)
 !----- LGPL --------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2018.                                
@@ -38,6 +38,7 @@ function openexistingfile_meteo(minp, filename) result(success)
 ! Global variables
 !
     integer         :: minp
+    integer         :: meteotype
     logical         :: success
     character(*)    :: filename
 !
@@ -49,13 +50,13 @@ function openexistingfile_meteo(minp, filename) result(success)
 !! executable statements -------------------------------------------------------
 !
     if (len_trim(filename) == 0) then
-       meteomessage = 'While opening file: name is empty'
+       write (meteomessage, '(a,i0)') 'While opening meteo file: name is empty, for meteotype = ', meteotype
        success = .false.
        return
     endif
     inquire (file = trim(filename), exist = success)
     if (.not. success) then
-       write(meteomessage,'(3a)') 'File ',trim(filename),' does not exist'
+       write(meteomessage,'(3a)') 'Meteo file ',trim(filename),' does not exist'
        success = .false.
        return
     endif
