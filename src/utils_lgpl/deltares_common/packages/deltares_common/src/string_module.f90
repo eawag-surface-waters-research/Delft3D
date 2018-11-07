@@ -44,6 +44,7 @@ module string_module
    !
    public :: string_module_info
    public :: str_token
+   public :: str_tolower
    public :: str_lower
    public :: str_upper
    public :: strcmpi
@@ -189,6 +190,17 @@ module string_module
           end if
       end subroutine str_token
 
+
+      !> Return copy of input string with all uppercase characters changed
+      !! into lowercase.
+      !! This is the function version of subroutine str_lower()
+      function str_tolower(string) result(stringout)
+          character(len=*), intent(in) :: string !< String to be converted.
+          character(len=len(string))   :: stringout
+          
+          stringout = string
+          call str_lower(stringout)
+      end function str_tolower
 
 
       ! ------------------------------------------------------------------------------
