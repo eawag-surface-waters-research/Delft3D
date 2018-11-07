@@ -154,15 +154,19 @@ module m_oned_functions
          nonlin = max(nonlin, nonlin1D)
       endif
       
-      call set_linknumbers_in_branches()
-      call set_retention_grid_numbers()
-      call set_structure_grid_numbers()
+      if (.not. network%initialized) then
+         call set_linknumbers_in_branches()
+         call set_retention_grid_numbers()
+         call set_structure_grid_numbers()
       
-      if (jased > 0 .and. stm_included) then
-         ! 
-         call set_cross_sections_to_gridpoints()
+         if (jased > 0 .and. stm_included) then
+            ! 
+            call set_cross_sections_to_gridpoints()
+         endif
+         call set_structure_indices()
+         
+         network%initialized = .true.         
       endif
-      call set_structure_indices()
       
    end subroutine set_1d_indices_in_network
 

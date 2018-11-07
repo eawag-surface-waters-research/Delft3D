@@ -22265,9 +22265,29 @@ endif
  call aerr   ('z0urou(lnx)', ierr, lnx)
 
  ! link related
- if (allocated(cfuhi) ) then
-    deallocate(cfuhi,frcu,ifrcutp,wdsu,u0,u1,q1,qa,v,ucxu,ucyu,hu,huvli,au,viu,vicLu,suu,advi,adve,plotlin,frcu_bkp,frcu_mor)
- endif
+ if (allocated(cfuhi))    deallocate(cfuhi)
+ if (allocated(frcu))     deallocate(frcu)
+ if (allocated(ifrcutp))  deallocate(ifrcutp)
+ if (allocated(wdsu))     deallocate(wdsu)
+ if (allocated(u0))       deallocate(u0)
+ if (allocated(u1))       deallocate(u1)
+ if (allocated(q1))       deallocate(q1)
+ if (allocated(qa))       deallocate(qa)
+ if (allocated(v))        deallocate(v)
+ if (allocated(ucxu))     deallocate(ucxu)
+ if (allocated(ucyu))     deallocate(ucyu)
+ if (allocated(hu))       deallocate(hu)
+ if (allocated(huvli))    deallocate(huvli)
+ if (allocated(au))       deallocate(au)
+ if (allocated(viu))      deallocate(viu)
+ if (allocated(vicLu))    deallocate(vicLu)
+ if (allocated(suu))      deallocate(suu)
+ if (allocated(advi))     deallocate(advi)
+ if (allocated(adve))     deallocate(adve)
+ if (allocated(plotlin))  deallocate(plotlin)
+ if (allocated(frcu_bkp)) deallocate(frcu_bkp)
+ if (allocated(frcu_mor)) deallocate(frcu_mor) 
+
  allocate ( cfuhi(lnx)   , stat=ierr)            ! hk: hier stond + 1, heb ik weggehaald
  call aerr('cfuhi(lnx)'  , ierr, lnx)   ; cfuhi   = 0
  allocate ( frcu (lnx)   , stat = ierr)
