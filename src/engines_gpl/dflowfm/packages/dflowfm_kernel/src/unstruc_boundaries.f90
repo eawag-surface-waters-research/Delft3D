@@ -866,8 +866,14 @@ logical function initboundaryblocksforcings(filename)
  use tree_structures
  use messageHandling
  use m_flowexternalforcings
- use timespace_data, only: weightfactors, poly_tim, getmeteoerror
- !use m_meteo, only: bndname_to_fm
+ use m_flowgeom
+ use timespace_data, only: weightfactors, poly_tim, uniform, spaceandtime, getmeteoerror
+ use m_wind ! for laterals
+ use m_alloc
+ use m_meteo, only: ec_addtimespacerelation
+ use timespace
+ use string_module, only: str_tolower
+
 
  implicit none
 
@@ -891,6 +897,22 @@ logical function initboundaryblocksforcings(filename)
  character(len=1)             :: oper                !
  character (len=300)          :: rec
 
+ character(len=ini_value_len) :: locid
+ character(len=ini_value_len) :: itemtype
+ character(len=256)           :: fnam
+ double precision             :: tmpval
+ integer                      :: iostat, ierr
+ integer                      :: ilattype
+ integer                      :: k, n
+ 
+ double precision, allocatable :: xdum(:), ydum(:)!, xy2dum(:,:)
+ integer, allocatable          :: kdum(:)
+
+ if (allocated(xdum  )) deallocate(xdum, ydum, kdum) !, xy2dum)
+ allocate ( xdum(1), ydum(1), kdum(1)) !, xy2dum(2,1) , stat=ierr)
+ !call aerr('xdum(1), ydum(1), kdum(1), xy2dum     ', ierr, 3)
+ xdum = 1d0 ; ydum = 1d0; kdum = 1!; xy2dum = 0d0
+
  initboundaryblocksforcings = .true.
 
  call tree_create(trim(filename), bnd_ptr)
@@ -906,7 +928,8 @@ logical function initboundaryblocksforcings(filename)
 
     node_ptr => bnd_ptr%child_nodes(i)%node_ptr
     groupname = tree_get_name(node_ptr)
-    if (trim(groupname) == 'boundary') then
+    select case (str_tolower(trim(groupname)))
+    case ('boundary')
 
        ! First check for required input:
        call prop_get_string(node_ptr, '', 'quantity', quantity, retVal)
@@ -982,19 +1005,229 @@ logical function initboundaryblocksforcings(filename)
           endif
           call mess(LEVEL_WARN, 'initboundaryblockforcings: Error while initializing quantity '''//trim(quantity)//'''. Check preceding log lines for details.')
        end if
-    else       ! Unrecognized item in a ext block
+    case ('lateral')
+       ! [lateral]
+       ! Id = ...
+       locid = ' '
+       call prop_get(node_ptr, '', 'Id', locid, success)
+       if (.not. success .or. len_trim(locid) == 0) then
+          write(msgbuf, '(a,i0,a)') 'Required field ''Id'' missing in lateral (block #', i, ').'
+          call warn_flush()
+          cycle
+       end if
+ 
+       ! [lateral]
+       ! Type = 1d | 2d | 1d2d
+       itemtype = ' '
+       call prop_get(node_ptr, '', 'Type',         itemtype, success)
+       ! Type = optional for lateral
+       select case (str_tolower(trim(itemtype)))
+       case ('1d')
+          ilattype = ILATTP_1D
+       case ('2d')
+          ilattype = ILATTP_2D
+       case ('1d2d')
+          ilattype = ILATTP_ALL
+       case default
+          ilattype = ILATTP_ALL
+       end select
+
+       ! [lateral]
+       ! LocationFile = test.pol
+       locationfile = ' '
+       call prop_get(node_ptr, '', 'LocationFile', locationfile, success)
+       if (.not. success .or. len_trim(locationfile) == 0) then
+          write(msgbuf, '(a,a,a)') 'Required field ''LocationFile'' missing in lateral ''', trim(locid), '''.'
+          call warn_flush()
+          cycle
+       end if
+       
+       ! TODO: AvD: support NodeIds instead of LocationFile
+
+       call ini_alloc_laterals()
+
+       call prepare_lateral_mask(kclat, ilattype)
+
+       numlatsg = numlatsg + 1
+       call selectelset_internal_nodes( locationfile, 10, xz, yz, kclat, ndxi, numlatsg, nnLat) ! find nodes in polygon  
+
+       call realloc(qplat, numlatsg, keepExisting = .true.)
+
+       ! [lateral]
+       ! Flow = 1.23 | test.tim | REALTIME
+       kx = 1
+       rec = ' '
+       call prop_get(node_ptr, '', 'Flow', rec, success)
+       if (.not. success .or. len_trim(rec) == 0) then
+          write(msgbuf, '(a,a,a)') 'Required field ''Flow'' missing in lateral ''', trim(locid), '''.'
+          call warn_flush()
+          cycle
+       end if
+
+       qid = 'lateraldischarge'
+       success = adduniformtimerelation_objects(qid, '', 'lateral', locid, 'flow', trim(rec), numlatsg, kx, qplat)
+
+       if (success) then
+          jaqin = 1
+       end if
+
+    case default       ! Unrecognized item in a ext block
        ! initboundaryblocksforcings remains unchanged: Not an error (support commented/disabled blocks in ext file)
        write(msgbuf, '(5a)') 'Unrecognized block in file ''', trim(filename), ''': [', trim(groupname), ']. Ignoring this block.'
        call warn_flush()
-    endif
+    end select
  end do
 
+ if (numlatsg > 0) then
+    if (allocated (balat) ) deallocate(balat)
+    allocate ( balat(numlatsg)  , stat=ierr    )
+    call aerr('balat(numlatsg)' , ierr, numlatsg ); balat = 0d0
+    do k = 1,ndx
+       n = nnlat(k)
+       if (n > 0) then 
+          balat(n) = balat(n) + ba(k)
+       endif   
+    enddo   
+    deallocate(kclat) 
+ end if
+ 
  call tree_destroy(bnd_ptr)
  if (allocated(thrtt)) then 
     call init_threttimes()
  endif
  
 end function initboundaryblocksforcings
+
+
+!> Initializes memory for laterals on flow nodes.
+subroutine ini_alloc_laterals()
+   use m_wind
+   use m_flowgeom, only: ndx
+   use m_alloc
+   integer :: ierr
+
+   if (.not. allocated(QQlat) ) then                      ! just once
+      allocate ( QQLat(ndx) , stat=ierr) ; QQLat = 0d0
+      call aerr('QQLAT(ndx)', ierr, ndx)
+      allocate ( nnLat(ndx) , stat=ierr) ; nnLat = 0  
+      call aerr('nnLat(ndx)', ierr, ndx)
+   endif
+   if (.not. allocated(kcLat) ) then 
+      allocate ( kcLat(ndx) , stat=ierr)                  ! only if needed  
+      call aerr('kcLat(ndx)', ierr, ndx)
+   endif
+end subroutine ini_alloc_laterals
+
+
+!> Prepare the 'kclat' mask array for a specific type of lateral.
+subroutine prepare_lateral_mask(kclat, ilattype)
+   use m_flowgeom
+   use m_wind
+   implicit none
+   
+   integer         , intent(inout) :: kclat(:) !< (ndx) The mask array that is to be filled.
+   integer         , intent(in)    :: ilattype !< Type of the new lateral (one of ILATTP_1D|2D|1D2D)
+   
+   integer                         :: L, k1, k2
+
+   kclat = 0
+   select case (ilattype)
+   case (ILATTP_1D)       ! in everything 1D
+      do L = 1,lnx1D
+         !if (abs(prof1D(3,L)) .ne. 1 .and. prof1D(3,L) > 0 ) then ! no pipes pos or neg, others only if pos
+            k1 = ln(1,L) ; kclat(k1) = 1
+            k2 = ln(2,L) ; kclat(k2) = 1
+         !endif   
+      enddo   
+   case (ILATTP_2D)       ! in everything 2D
+      do L = lnx1D+1,lnxi
+         k1 = ln(1,L) ; kclat(k1) = 1
+         k2 = ln(2,L) ; kclat(k2) = 1
+      enddo   
+   case (ILATTP_ALL)      ! both to everything 2D, and 1D, except to 1D pipes
+      do L = 1,lnx1D
+         if (abs(prof1D(3,L)) .ne. 1 .and. prof1D(3,L) > 0 ) then ! no pipes pos or neg, others only if pos
+            k1 = ln(1,L) ; kclat(k1) = 1
+            k2 = ln(2,L) ; kclat(k2) = 1
+         endif   
+      enddo   
+      do L = lnx1D+1,lnxi
+         k1 = ln(1,L) ; kclat(k1) = 1
+         k2 = ln(2,L) ; kclat(k2) = 1
+      enddo   
+   end select
+end subroutine prepare_lateral_mask
+
+
+!> Calls the ec_addtimespacerelation with all proper dflowfm-specific
+!! target arrays and element set masks for object parameters with
+!! spatially uniform time series.
+!! Also handles inside one function the old-style *.ext quantities and
+!! the new style *.ext and structures.ini quantities.
+function adduniformtimerelation_objects(qid, locationfile, objtype, objid, paramname, paramvalue, targetindex, vectormax, targetarray) result(success)
+   !use m_flowexternalforcings, no1=>qid, no2=>filetype, no3=>operand, no4 => success
+   use m_meteo, no5=>qid, no6=>filetype, no7=>operand, no8 => success
+   use string_module, only: strcmpi
+   use timespace_parameters, only: uniform, spaceandtime
+   use unstruc_messages
+   
+   implicit none
+
+   character(len=*), intent(inout) :: qid            !< Identifier of current quantity (i.e., 'waterlevelbnd')
+   character(len=*), intent(in)    :: locationfile   !< Name of location file (*.pli/*.pol) for current quantity (leave empty when valuestring contains value or filename).
+   character(len=*), intent(in)    :: objtype        !< Type name of the object for which this relation is set (e.g., 'lateral', for prettyprinting only).
+   character(len=*), intent(in)    :: objid          !< Id of the object for which this relation is set (for prettyprinting only).
+   character(len=*), intent(in)    :: paramname      !< Name of the parameter that is set in this relation (e.g., 'flow', for prettyprinting only).
+   character(len=*), intent(in)    :: paramvalue     !< String containing the parameter value (either a scalar double, or 'REALTIME', or a filename)
+   integer,          intent(in)    :: targetindex    !< Target index in target value array (typically, the current count of this object type, e.g. numlatsg).
+   integer,          intent(in)    :: vectormax      !< The number of values per object ('kx'), typically 1.
+   double precision, intent(inout) :: targetarray(:) !< The target array in which the value(s) will be stored. Either now with scalar, or later via ec_gettimespacevalue() calls.
+   logical                         :: success        !< Return value. Whether relation was added successfully.
+
+   character(len=256) :: valuestring, fnam
+   double precision   :: valuedble
+   double precision   :: xdum(1), ydum(1)
+   integer            :: kdum(1)
+   integer            :: ierr, L
+
+
+   success = .true.   ! initialization
+   xdum = 1d0 ; ydum = 1d0; kdum = 1
+
+   if (len_trim(paramvalue) > 0) then
+      valuestring = paramvalue
+   else if (len_trim(locationfile) > 0) then
+      ! Old-style *.ext:
+      ! Prepare time series relation, if the .pli file has an associated .tim file.
+      L = index(locationfile,'.', back=.true.) - 1
+      valuestring = locationfile(1:L)//'_0001.tim'
+   else 
+      ! TODO: AvD: error msg?
+      success = .false.
+   end if
+
+   ! Now check the valuestring for either scalar/REALTIME/.tim filename
+   read(valuestring, *, iostat = ierr) valuedble
+   if (ierr /= 0) then ! No number, so check for timeseries filename
+      if (strcmpi(trim(valuestring), 'REALTIME')) then
+         success = .true.
+         ! targetarray(targetindex) should be filled via DLL's API
+         write(msgbuf, '(a,a,a,a,a)') 'Control for ', trim(objtype), '''' // trim(objid) // ''', ', paramname, ' set to REALTIME.'
+         call dbg_flush()
+      else
+         fnam = trim(valuestring)
+         ! Time-interpolated value will be placed in target array (e.g., qplat(n)) when calling ec_gettimespacevalue.
+         if (index(trim(fnam)//'|','.tim|')>0) then 
+            ! uniform=single time series vectormax = 1
+            success  = ec_addtimespacerelation(qid, xdum, ydum, kdum, vectormax, fnam, filetype=uniform, method=spaceandtime, operand='O', targetIndex=targetindex)
+         endif 
+         ! TODO: AvD: support .bc
+      end if
+   else
+      targetarray(targetindex) = valuedble ! Constant value for always, set it now already.
+   end if
+end function adduniformtimerelation_objects
+
 
 subroutine register_quantity_pli_combination(quantity, locationfile)
    use m_alloc

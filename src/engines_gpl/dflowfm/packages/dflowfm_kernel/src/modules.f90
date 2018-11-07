@@ -1082,6 +1082,10 @@ double precision, allocatable, target :: evap(:)     !< [m/s] evaporation at xz,
 !!
 !! Laterals
 !!
+integer, parameter :: ILATTP_ALL = 0 !< Type code for laterals that apply to both 2D and 1D nodes.
+integer, parameter :: ILATTP_1D  = 1 !< Type code for laterals that only apply to 1D nodes.
+integer, parameter :: ILATTP_2D  = 2 !< Type code for laterals that only apply to 2D nodes.
+
 integer                      , target :: numlatsg    !< [-] nr of lateral discharge providers  {"rank": 0}
 double precision, allocatable, target :: qplat(:)    !< [m3/s] Lateral discharge of provider {"location": "face", "shape": ["numlatsg"]}
 double precision, allocatable, target :: qqlat(:)    !< [m3/s] Lateral discharge at xz,yz {"location": "face", "shape": ["ndx"]}

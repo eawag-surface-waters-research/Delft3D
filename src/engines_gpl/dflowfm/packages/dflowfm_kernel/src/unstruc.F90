@@ -35850,7 +35850,7 @@ end subroutine make_mirrorcells
  double precision,  external   :: ran0
 
  integer                       :: L1, L2
-
+ integer                       :: ilattype
  iresult = DFM_NOERR
 
  success = .true.    ! default if no valid providers are present in *.ext file (m_flowexternalforcings::success)
@@ -37084,43 +37084,21 @@ if (mext > 0) then
 
         else if (qid(1:16) == 'lateraldischarge' ) then
 
-           if (.not. allocated(QQlat) ) then                      ! just once
-              allocate ( QQLat(ndx) , stat=ierr) ; QQLat = 0d0
-              call aerr('QQLAT(ndx)', ierr, ndx)
-              allocate ( nnLat(ndx) , stat=ierr) ; nnLat = 0  
-              call aerr('nnLat(ndx)', ierr, ndx)
-           endif
-           if (.not. allocated(kcLat) ) then 
-              allocate ( kcLat(ndx) , stat=ierr)                  ! only if needed  
-              call aerr('kcLat(ndx)', ierr, ndx)
-           endif
-              
-           kclat = 0
-           if (qid == 'lateraldischarge1d') then ! in everything 1D
-              do L = 1,lnx1D
-                 !if (abs(prof1D(3,L)) .ne. 1 .and. prof1D(3,L) > 0 ) then ! no pipes pos or neg, others only if pos
-                    k1 = ln(1,L) ; kclat(k1) = 1
-                    k2 = ln(2,L) ; kclat(k2) = 1
-                 !endif   
-              enddo   
-           else if (qid == 'lateraldischarge2d') then ! in everything 2D
-              do L = lnx1D+1,lnxi
-                 k1 = ln(1,L) ; kclat(k1) = 1
-                 k2 = ln(2,L) ; kclat(k2) = 1
-              enddo   
-           else if (qid == 'lateraldischarge') then ! both to eveything 2D, and 1D, except to 1D pipes
-              do L = 1,lnx1D
-                 if (abs(prof1D(3,L)) .ne. 1 .and. prof1D(3,L) > 0 ) then ! no pipes pos or neg, others only if pos
-                    k1 = ln(1,L) ; kclat(k1) = 1
-                    k2 = ln(2,L) ; kclat(k2) = 1
-                 endif   
-              enddo   
-              do L = lnx1D+1,lnxi
-                 k1 = ln(1,L) ; kclat(k1) = 1
-                 k2 = ln(2,L) ; kclat(k2) = 1
-              enddo   
-           endif   
-           
+           call ini_alloc_laterals()
+
+           select case (trim(qid(17:)))
+           case ('1d')
+              ilattype = ILATTP_1D
+           case ('2d')
+              ilattype = ILATTP_2D
+           case ('1d2d')
+              ilattype = ILATTP_ALL
+           case default
+              ilattype = ILATTP_ALL
+           end select
+
+           call prepare_lateral_mask(kclat, ilattype)
+
            numlatsg = numlatsg + 1
            call selectelset_internal_nodes( filename, filetype, xz, yz, kclat, ndxi, numlatsg, nnLat) ! find nodes in polygon  
                      
@@ -37391,25 +37369,6 @@ if (mext > 0) then
  endif
  
  if (numlatsg > 0) then ! Allow laterals from old ext, even when new structures file is present.
-    ja = 1 ; rewind (mext); kx = 1 ; numlatsg = 0   
-    do while (ja .eq. 1)                             ! for cdams again postponed read *.ext file
-       call readprovider(mext,qid,filename,filetype,method,operand,transformcoef,ja,varname)
-       if (ja == 1 .and. qid(1:16) == 'lateraldischarge') then
-          numlatsg = numlatsg + 1
-          ! Check outside EC whether associated .tim file exists. should this check be inside addtimeetc  
-          L = index(filename,'.', back=.true.) - 1
-          filename0 = filename(1:L)//'_0001.tim'
-          inquire (file = trim(filename0), exist = exist)
-          if (exist) then
-             filetype0 = uniform            ! uniform=single time series vectormax = 1
-             success  = ec_addtimespacerelation(qid(1:16), xdum, ydum, kdum, kx, filename0, filetype0, method=spaceandtime, operand='O', targetIndex=numlatsg)
-          else
-             write (msgbuf, '(a,a,a)') 'No .tim-series file found for quantity lateraldischarge and file ''', trim(filename), '''. Keeping zero discharge (closed).'
-             call warn_flush()
-             success = .true.
-          end if
-       endif
-    enddo
     if (allocated (balat) ) deallocate(balat,qplat)
     allocate ( balat(numlatsg)  , stat=ierr    )
     call aerr('balat(numlatsg)' , ierr, numlatsg ); balat = 0d0
@@ -37421,6 +37380,30 @@ if (mext > 0) then
           balat(n) = balat(n) + ba(k)
        endif   
     enddo   
+
+    ja = 1 ; rewind (mext); kx = 1 ; numlatsg = 0   
+
+    do while (ja .eq. 1)                             ! for cdams again postponed read *.ext file
+       call readprovider(mext,qid,filename,filetype,method,operand,transformcoef,ja,varname)
+       if (ja == 1 .and. qid(1:16) == 'lateraldischarge') then
+          numlatsg = numlatsg + 1
+          L = index(filename,'.', back=.true.) - 1
+          success = adduniformtimerelation_objects(qid(1:16), filename, 'lateral', filename(1:L), 'flow', '', numlatsg, kx, qplat)
+          
+          !! Check outside EC whether associated .tim file exists. should this check be inside addtimeetc  
+          !L = index(filename,'.', back=.true.) - 1
+          !filename0 = filename(1:L)//'_0001.tim'
+          !inquire (file = trim(filename0), exist = exist)
+          !if (exist) then
+          !   filetype0 = uniform            ! uniform=single time series vectormax = 1
+          !   success  = ec_addtimespacerelation(qid(1:16), xdum, ydum, kdum, kx, filename0, filetype0, method=spaceandtime, operand='O', targetIndex=numlatsg)
+          !else
+          !   write (msgbuf, '(a,a,a)') 'No .tim-series file found for quantity lateraldischarge and file ''', trim(filename), '''. Keeping zero discharge (closed).'
+          !   call warn_flush()
+          !   success = .true.
+          !end if
+       endif
+    enddo
     deallocate(kclat) 
  endif
 
