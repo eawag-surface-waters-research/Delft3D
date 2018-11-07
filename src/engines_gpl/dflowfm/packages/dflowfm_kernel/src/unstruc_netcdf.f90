@@ -9345,7 +9345,7 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
    integer :: nstru
    
    ! 1d2d links
-   integer                                   :: ncontacts, ncontactmeshes, koffset1dmesh
+   integer                                   :: ncontacts, ncontactmeshes, koffset1dmesh, totalKsoFar
    integer                                   :: begin_face, end_face 
    integer, allocatable                      :: mesh1indexes(:),mesh2indexes(:), contacttype(:)
    character(len=40), allocatable            :: contactsids(:)
@@ -9378,34 +9378,39 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
       if (network%loaded) then
          call admin_network(network, numk, numl)  
 	     
-         ! TODO: Start temporary fix, to be removed when 1d ugrid file is correct (at this point 
-         !       branches are not connected
-         numk = 0
-         numl = 0
+         !! TODO: Start temporary fix, to be removed when 1d ugrid file is correct (at this point 
+         !!       branches are not connected
+         numk = 1
          do inod = 1, network%nds%Count
             pnod => network%nds%node(inod)
-            numk = numk+1
             pnod%gridNumber = numk
             xk(numk) = pnod%x
             yk(numk) = pnod%y
             zk(numk) = dmiss
+            if (inod <= network%brs%Count) then
+               numk = numk - 1 + network%brs%branch(inod)%gridPointsCount
+            endif
          enddo
-       
+         
+         numl = 0
+         totalKsoFar = 0
          do ibr = 1, network%brs%Count
             pbr => network%brs%branch(ibr)
-          
             ! first step add coordinates and bed levels to nodes
             ngrd = pbr%gridPointsCount
             pbr%grd(1) = pbr%FromNode%gridNumber
             do k = 2, ngrd-1
-               numk = numk+1
+               ! i do not want to renumber the nodes, because otherwise link info gets screwed
+               numk = k + totalKsoFar
                pbr%grd(k) = numk
                xk(numk) = pbr%Xs(k)
                yk(numk) = pbr%Ys(k)
                zk(numk) = dmiss
             enddo
             pbr%grd(ngrd) = pbr%toNode%gridNumber
-          
+            numk = ngrd + totalKsoFar
+            totalKsoFar = totalKsoFar + ngrd
+
             ! second step create links
             do k = 1, ngrd-1
                numl = numl+1
@@ -9418,13 +9423,13 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
             pbr%grd_buf = pbr%grd
           
          enddo
-
+         
          network%numk = numk
          network%numl = numl
-
+         
          numk_keep = numk
          numl_keep = numl
-      
+         
          numk_last = numk
          numl_last = numl
          ! End temporary fix
@@ -9635,10 +9640,10 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
       ierr = ionc_get_mesh_contact_ugrid(ioncid, im, mesh1indexes, mesh2indexes, contactsids, contactslongnames, contacttype, 1 )
       call increasenetw(numk_last + ncontacts, numl_last + ncontacts)      
       do l = 1, ncontacts
-         XK(numk_last+l) = xface(mesh1indexes(L))
-         YK(numk_last+l) = yface(mesh1indexes(L))
-         kn(1,numl_last+l) = numk_last+l
-         kn(2,numl_last+l) = koffset1dmesh + mesh2indexes(L) 
+         XK(numk_last+l) = xface(mesh2indexes(L))
+         YK(numk_last+l) = yface(mesh2indexes(L))
+         kn(1,numl_last+l) = mesh1indexes(L)
+         kn(2,numl_last+l) = numk_last+l
          kn(3,numl_last+l) = 3 !2d1d links
       enddo
       ! Set the ZK to dmiss 
