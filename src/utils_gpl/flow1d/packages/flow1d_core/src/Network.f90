@@ -107,7 +107,8 @@ module m_network
       type(t_spatial_dataSet)                   :: spData
       type(t_boundarySet)                       :: boundaries
       type(t_transportSet)                      :: trans
-      logical                                   :: loaded = .false.
+      logical                                   :: loaded      = .false.
+      logical                                   :: initialized = .false.
    end type
    
 contains
