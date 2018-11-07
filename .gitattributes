@@ -347,6 +347,7 @@ examples/12_dflowfm/test_data/e02_f14_c040_westerscheldt/doc/figures/gekras.png 
 examples/12_dflowfm/test_data/e02_f14_c040_westerscheldt/obslocations_obs.xyn -text
 examples/12_dflowfm/test_data/e02_f14_c040_westerscheldt/run.bat -text
 examples/12_dflowfm/test_data/e02_f14_c040_westerscheldt/run.sh -text
+examples/12_dflowfm/test_data/e02_f14_c040_westerscheldt/run_docker.sh -text
 examples/12_dflowfm/test_data/e02_f14_c040_westerscheldt/westerscheldt.ext -text
 examples/12_dflowfm/test_data/e02_f14_c040_westerscheldt/westerscheldt.mdu -text
 examples/12_dflowfm/test_data/e02_f14_c040_westerscheldt/westerscheldt_0000.mdu -text
