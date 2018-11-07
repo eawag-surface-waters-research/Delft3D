@@ -673,7 +673,6 @@ src/engines_gpl/dimr/scripts/generic/lnx64/dimr_config_example.xml -text
 src/engines_gpl/dimr/scripts/generic/lnx64/libtool -text
 src/engines_gpl/dimr/scripts/generic/lnx64/libtool_install.sh -text
 src/engines_gpl/dimr/scripts/generic/lnx64/run_dimr.sh -text
-src/engines_gpl/dimr/scripts/generic/lnx64/run_dimr_docker_parallel.sh -text
 src/engines_gpl/dimr/scripts/generic/lnx64/submit_dimr.sh -text
 src/engines_gpl/dimr/scripts/generic/win32/dimr_config_example.xml -text
 src/engines_gpl/dimr/scripts/generic/win32/run_dimr.bat -text
