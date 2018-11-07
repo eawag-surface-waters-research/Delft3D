@@ -11,6 +11,7 @@ dist_bin_SCRIPTS = \
 	libtool \
 	libtool_install.sh \
 	run_dimr.sh \
+	run_dimr_docker_parallel.sh \
 	submit_dimr.sh
 
 dist_pkgdata_DATA = \
