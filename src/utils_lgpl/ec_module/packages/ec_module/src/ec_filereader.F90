@@ -356,7 +356,7 @@ module m_ec_filereader
                case ('rainfall','precipitation')
                   success = ecNetcdfReadNextBlock(fileReaderPtr, fileReaderPtr%items(1)%ptr, 0)
                   success = ecNetcdfReadNextBlock(fileReaderPtr, fileReaderPtr%items(1)%ptr, 1)
-               case ('hrms', 'tp', 'tps', 'rtp', 'dir', 'fx', 'fy', 'wsbu', 'wsbv', 'mx', 'my', 'dissurf','diswcap')
+               case ('hrms', 'tp', 'tps', 'rtp', 'dir', 'fx', 'fy', 'wsbu', 'wsbv', 'mx', 'my', 'dissurf','diswcap','ubot')
                   t0t1 = -1
                   do i=1, fileReaderPtr%nItems
                      success = ecNetcdfReadBlock(fileReaderPtr, fileReaderPtr%items(i)%ptr, t0t1, fileReaderPtr%items(i)%ptr%elementSetPtr%nCoordinates)                  
