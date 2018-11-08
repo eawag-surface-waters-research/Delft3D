@@ -136,9 +136,9 @@
          integer :: ierr
 
          maxpolcur = size(xpl)
-         !IF (N < maxpolcur ) THEN
-         !   RETURN
-         !ENDIF
+         IF (N < maxpolcur ) THEN
+            RETURN
+         ENDIF
          MAXPOL = MAX(100000,INT(5d0*N))
 
          jakeep = jaKeepExisting==1
