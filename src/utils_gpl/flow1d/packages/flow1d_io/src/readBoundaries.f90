@@ -136,7 +136,7 @@ module m_readBoundaries
                      call setMessage(LEVEL_FATAL, 'Error Reading Boundary: On node '//trim(nds%node(nodeIdx)%id) //' more than one boundary condition is defined.')
 
                   elseif (boundaryType == 2 .and. nds%node(nodeIdx)%nodetype /= nt_EndNode) then
-                     call setMessage(LEVEL_FATAL, 'Error Reading Boundary: Discharhe Boundary Node '//trim(nds%node(nodeIdx)%id) //' is not an end node.')
+                     call setMessage(LEVEL_FATAL, 'Error Reading Boundary: Discharge Boundary Node '//trim(nds%node(nodeIdx)%id) //' is not an end node.')
                      return
                   endif
                endif
@@ -179,7 +179,14 @@ module m_readBoundaries
          
                ! Get Thatcher-Harleman Return Time
                call prop_get_double(md_ptr%child_nodes(i)%node_ptr, 'boundary', 'thatcher-harlemancoeff', returnTime, success)
-               if (.not. success) returnTime = 0.0d0
+               if (success) then 
+                  if (returnTime < 0.0d0) then
+                     call setMessage(LEVEL_ERROR, 'Negative Thatcher-Harleman Coefficient at Boundary Node '//trim(nds%node(nodeIdx)%id))
+                     returnTime = 0.0d0
+                  endif
+               else
+                  returnTime = 0.0d0
+               endif
                
                boundaries%tp(ityp)%bd(boundaries%tp(ityp)%Count)%nodeID        = nodeID
                boundaries%tp(ityp)%bd(boundaries%tp(ityp)%Count)%node          = nodeIdx
