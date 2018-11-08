@@ -14463,6 +14463,9 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
          if (allocated (dwcap) ) then
             success = success .and. ecGetValues(ecInstancePtr, item_diswcap, tim)
          endif
+         if (allocated (uorbwav) ) then
+            success = success .and. ecGetValues(ecInstancePtr, item_ubot, tim)
+         endif         
       endif
       if (.not. success) then
          !
@@ -16387,12 +16390,12 @@ subroutine unc_write_his(tim)            ! wrihis
             if( jased == 4 .and. stmpar%lsedtot > 0 ) then
                ierr = nf90_def_var(ihisfile, 'cross_section_bedload_sediment_transport', nf90_double, (/ id_crsdim, id_timedim /), id_sedbtrans)
                ierr = nf90_put_att(ihisfile, id_sedbtrans, 'long_name', 'cumulative bed load sediment transport')
-               ierr = nf90_put_att(ihisfile, id_sedbtrans, 'units', 'kg s-1')
+               ierr = nf90_put_att(ihisfile, id_sedbtrans, 'units', 'kg')
                ierr = nf90_put_att(ihisfile, id_sedbtrans, 'coordinates', 'cross_section_name')
                if( stmpar%lsedsus > 0 ) then
                   ierr = nf90_def_var(ihisfile, 'cross_section_suspended_sediment_transport', nf90_double, (/ id_crsdim, id_timedim /), id_sedstrans)
                   ierr = nf90_put_att(ihisfile, id_sedstrans, 'long_name', 'cumulative suspended load sediment transport')
-                  ierr = nf90_put_att(ihisfile, id_sedstrans, 'units', 'kg s-1')
+                  ierr = nf90_put_att(ihisfile, id_sedstrans, 'units', 'kg')
                   ierr = nf90_put_att(ihisfile, id_sedstrans, 'coordinates', 'cross_section_name')
                endif
                

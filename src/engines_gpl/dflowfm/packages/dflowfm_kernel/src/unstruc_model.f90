@@ -1136,7 +1136,8 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'waves', 'uorbfac'        , jauorb)    ! 0=delft3d4, sqrt(pi)/2 included in uorb calculation; >0: FM, factor not included; default: 0
     call prop_get_integer(md_ptr, 'waves', 'jahissigwav'       , jahissigwav)  ! 1: sign wave height on his output; 0: hrms wave height on his output. Default=1
     call prop_get_integer(md_ptr, 'waves', 'jamapsigwav'       , jamapsigwav)  ! 1: sign wave height on map output; 0: hrms wave height on map output. Default=0 (legacy)
-
+    call prop_get_integer(md_ptr, 'waves', 'jauorbfromswan'       , jauorbfromswan)  ! 1: sign wave height on map output; 0: hrms wave height on map output. Default=0 (legacy)
+        
     call prop_get_integer(md_ptr, 'grw'  , 'groundwater'        , jagrw)
 
     call prop_get_integer(md_ptr, 'grw'  , 'Infiltrationmodel'  , Infiltrationmodel) ; if (Infiltrationmodel == 1 .or. infiltrationmodel == 3) jagrw = 1

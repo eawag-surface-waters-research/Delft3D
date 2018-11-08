@@ -1574,6 +1574,13 @@ function flow_initwaveforcings_runtime() result(retval)              ! This is t
  endif
  success = ec_addtimespacerelation(qid_l, xz(1:ndx), yz(1:ndx), kcw, kx, md_wavefile, filetype_l, method_l, operand_l, quiet=.true.)
  !
+ qid_l = 'ubot'
+ if (.not. allocated(hwav) ) then
+    allocate ( uorbwav(ndx), stat=ierr) ; uorbwav = 0.0
+    call aerr('uorbwav(ndx)', ierr, ndx)
+ endif
+ success = ec_addtimespacerelation(qid_l, xz(1:ndx), yz(1:ndx), kcw, kx, md_wavefile, filetype_l, method_l, operand_l, quiet=.true.)
+ !
  retval = success
 
 888 continue

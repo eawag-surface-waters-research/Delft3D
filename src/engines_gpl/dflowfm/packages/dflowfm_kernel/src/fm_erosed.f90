@@ -679,7 +679,7 @@ end module m_fm_update_crosssections
    !
    real(fp)                                       :: eps = 1.0e-6_fp
    logical                                        :: scour = .false.
-   logical                                        :: ubot_from_com = .true. !! promoted approach, so only option in FM
+   logical                                        :: ubot_from_com != .true. !! promoted approach, so only option in FM
    logical                                        :: flmd2l = .false.
    logical                                        :: wave
 
@@ -832,7 +832,7 @@ end module m_fm_update_crosssections
    !
    error = .false.
    if (.not.stm_included) return
-
+   ubot_from_com = jauorbfromswan>0
    !
    ! Allocate memory
    allocate(dzdx(1:ndx), dzdy(1:ndx), stat=istat)
@@ -867,7 +867,10 @@ end module m_fm_update_crosssections
    ! Back up velocities before contributions ua, stokes drift
    !
    u1ori = u1; u0ori = u0; vori = v
+   !
+   ! Reset some arrays before next iteration
    spirintnm = 0.0_fp
+   ust2 = 0.0_fp
    !
    ! Use Eulerian velocities if jatranspvel > 0
    !
@@ -3405,7 +3408,6 @@ end module m_fm_update_crosssections
    !
    !    Function: Reduces sourse and sink terms to avoid large
    !              bed level changes
-   !    TO DO: apply fixfac when morlayers work
    !
    !!--declarations----------------------------------------------------------------
    use precision

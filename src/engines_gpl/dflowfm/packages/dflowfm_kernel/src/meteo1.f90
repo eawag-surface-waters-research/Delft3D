@@ -165,6 +165,7 @@ module m_meteo
    integer, target :: item_my                                                !< Unique Item id of the ext-file's 'item_my' quantity
    integer, target :: item_dissurf                                           !< Unique Item id of the ext-file's 'item_dissurf' quantity
    integer, target :: item_diswcap                                           !< Unique Item id of the ext-file's 'item_diswcap' quantity
+   integer, target :: item_ubot                                              !< Unique Item id of the ext-file's 'item_ubot' quantity
 
    integer, target :: item_nudge_tem                                         !< 3D temperature for nudging
    integer, target :: item_nudge_sal                                         !< 3D salinity for nudging
@@ -245,6 +246,7 @@ module m_meteo
       item_my                                    = ec_undef_int
       item_dissurf                               = ec_undef_int
       item_diswcap                               = ec_undef_int
+      item_ubot                                  = ec_undef_int
       item_dambreakLevelsAndWidthsFromTable      = ec_undef_int                    
       !
       n_qhbnd = 0
@@ -588,6 +590,9 @@ module m_meteo
          case ('diswcap')
             itemPtr1 => item_diswcap
             dataPtr1 => dwcap
+         case ('ubot')
+            itemPtr1 => item_ubot
+            dataPtr1 => uorbwav            
          case ('tracerbnd')
             ! get tracer (boundary) number
             itrac = findname(numtracers, trnames, trname)
@@ -712,7 +717,7 @@ module m_meteo
    !> Replacement function for FM's meteo1 'addtimespacerelation' function.
    logical function ec_addtimespacerelation(name, x, y, mask, vectormax, filename, filetype, method, operand, &
                                             xyen, z, pzmin, pzmax, pkbot, pktop, targetIndex, forcingfile, srcmaskfile, dtnodal, quiet, varname, maxSearchRadius)
-      use m_ec_module, only: ecFindFileReader ! TODO: Refactor this private data access (UNST-703).
+      use m_ec_module , only: ecFindFileReader ! TODO: Refactor this private data access (UNST-703).
       use m_ec_filereader_read, only: ecParseARCinfoMask
       use m_flow, only: kmx, kbot, ktop
       use m_sferic, only: jsferic
@@ -1125,7 +1130,7 @@ module m_meteo
                call mess(LEVEL_FATAL, 'm_meteo::ec_addtimespacerelation: Unsupported filetype for quantity rainfall_rate.')
                return
             end if
-         case ('hrms', 'tp', 'tps', 'rtp', 'dir', 'fx', 'fy', 'wsbu', 'wsbv', 'mx', 'my', 'dissurf','diswcap')
+         case ('hrms', 'tp', 'tps', 'rtp', 'dir', 'fx', 'fy', 'wsbu', 'wsbv', 'mx', 'my', 'dissurf','diswcap','ubot')
             ! the name of the source item created by the file reader will be the same as the ext.force. quant name
             sourceItemName = target_name
          case ('airpressure', 'atmosphericpressure')

@@ -599,8 +599,6 @@
    double precision           :: uorb1, k0, k0h, phigrid, phiwave, phi
    integer                    :: k, k1, k2, n, L, mout
    integer                    :: jatauw = 1
-   integer                    :: wlenwav_from_SWAN = 0
-   integer                    :: uorbwav_from_SWAN = 0
    double precision           :: hk, sh2hk,hksh2,rn,asg,ew,sxx,syy,dtau,shs, h2k, cc, cg, omeg, hminlwi
    double precision           :: dsk2, rk, astar, fw, hss, per, astarc, tauwav, taucur, tauwci, cdrag, z0, uorbu, tpu
    double precision           :: cz, frcn, uuu, vvv, umod, umodsq, cvalue, costu, sintu, abscos, uorbhs, waveps, u2dh
@@ -622,43 +620,6 @@
    double precision, dimension(8, 4)          :: nn         ! Coefficient n(i) in expression for parameter n
    double precision, dimension(8, 4)          :: pp         ! Coefficient p(i) in expression for parameter p
    double precision, dimension(8, 4)          :: qq         ! Coefficient q(i) in expression for parameter q
-
-   !!! ! data statemens
-   !!!!
-   !!!    data bb/      0.29,  0.65,  0.27,  0.73,  0.22,  0.32,  0.47, -0.06, &
-   !!!                  0.55,  0.29,  0.51,  0.40,  0.73,  0.55,  0.29,  0.26, &
-   !!!                 -0.10, -0.30, -0.10, -0.23, -0.05,  0.00, -0.09,  0.08, &
-   !!!                 -0.14, -0.21, -0.24, -0.24, -0.35,  0.00, -0.12, -0.03/
-   !!!    !
-   !!!    data pp/     -0.77, -0.60, -0.75, -0.68, -0.86, -0.63, -0.70, -1.00, &
-   !!!                  0.10,  0.10,  0.13,  0.13,  0.26,  0.05,  0.13,  0.31, &
-   !!!                  0.27,  0.27,  0.12,  0.24,  0.34,  0.00,  0.28,  0.25, &
-   !!!                  0.14, -0.06,  0.02, -0.07, -0.07,  0.00, -0.04, -0.26/
-   !!!    !
-   !!!    data qq/      0.91,  1.19,  0.89,  1.04, -0.89,  1.14,  1.65,  0.38, &
-   !!!                  0.25, -0.68,  0.40, -0.56,  2.33,  0.18, -1.19,  1.19, &
-   !!!                  0.50,  0.22,  0.50,  0.34,  2.60,  0.00, -0.42,  0.25, &
-   !!!                  0.45, -0.21, -0.28, -0.27, -2.50,  0.00,  0.49, -0.66/
-   !!!    !
-   !!!    data coeffj/  3.00,  0.50,  2.70,  0.50,  2.70,  3.00,  0.60,  1.50/
-   !!!    !
-   !!!    !-----for tau_max
-   !!!    data aa/     -0.06, -0.01, -0.07,  0.11,  0.05,  0.00, -0.01, -0.45, &
-   !!!                  1.70,  1.84,  1.87,  1.95,  1.62,  2.00,  1.58,  2.24, &
-   !!!                 -0.29, -0.58, -0.34, -0.49, -0.38,  0.00, -0.52,  0.16, &
-   !!!                  0.29, -0.22, -0.12, -0.28,  0.25,  0.00,  0.09, -0.09/
-   !!!    !
-   !!!    data mm/      0.67,  0.63,  0.72,  0.65,  1.05,  0.00,  0.65,  0.71, &
-   !!!                 -0.29, -0.09, -0.33, -0.22, -0.75,  0.50, -0.17,  0.27, &
-   !!!                  0.09,  0.23,  0.08,  0.15, -0.08,  0.00,  0.18, -0.15, &
-   !!!                  0.42, -0.02,  0.34,  0.06,  0.59,  0.00,  0.05,  0.03/
-   !!!    !
-   !!!    data nn/      0.75,  0.82,  0.78,  0.71,  0.66,  0.00,  0.47,  1.19, &
-   !!!                 -0.27, -0.30, -0.23, -0.19, -0.25,  0.50, -0.03, -0.66, &
-   !!!                  0.11,  0.19,  0.12,  0.17,  0.19,  0.00,  0.59, -0.13, &
-   !!!                 -0.02, -0.21, -0.12, -0.15, -0.03,  0.00, -0.50,  0.12/
-   !!!    !
-   !!!    data coeffi/  0.80,  0.67,  0.82,  0.67,  0.82,  1.00,  0.64,  0.77/
 
    waveps = 1d-8
    alfaw  = 20d0
@@ -735,37 +696,6 @@
             !
             call getymxpar(modind,tauwav, taucur, fw, cdrag, abscos, yparL, ymxpar)
             ypar(L) = yparL
-            !!!if (tauwav<1.0E-8) then
-            !!!    xpar    = 1.0d0                               ! X-parameter in D3D-FLOW manual 9.7.5
-            !!!    ypar(L) = 1.0d0                               ! Y-parameter in D3D-FLOW manual 9.7.5
-            !!!    ymxpar  = 1.0d0                               ! Z-parameter in D3D-FLOW manual 9.7.5
-            !!!else
-            !!!    xpar = taucur/(taucur + tauwav)
-            !!!    if (xpar<1.0d-8 .or. modind==9) then
-            !!!        ypar(L)= 0.0d0
-            !!!        ymxpar = 1.0d0
-            !!!    else
-            !!!        lfc    = log10(fw/cdrag)
-            !!!        !
-            !!!        cj     = abscos**coeffj(modind)
-            !!!        coeffb = (bb(modind, 1) + bb(modind, 2)*cj)                     &
-            !!!               & + (bb(modind, 3) + bb(modind, 4)*cj)*lfc
-            !!!        coeffp = (pp(modind, 1) + pp(modind, 2)*cj)                     &
-            !!!               & + (pp(modind, 3) + pp(modind, 4)*cj)*lfc
-            !!!        coeffq = (qq(modind, 1) + qq(modind, 2)*cj)                     &
-            !!!               & + (qq(modind, 3) + qq(modind, 4)*cj)*lfc
-            !!!        ypar(L)= xpar*(1.0d0 + coeffb*(xpar**coeffp)*((1.0d0 - xpar)**coeffq))
-            !!!        !
-            !!!        ci     = abscos**coeffi(modind)
-            !!!        coeffa = (aa(modind, 1) + aa(modind, 2)*ci)                     &
-            !!!               & + (aa(modind, 3) + aa(modind, 4)*ci)*lfc
-            !!!        coeffm = (mm(modind, 1) + mm(modind, 2)*ci)                     &
-            !!!               & + (mm(modind, 3) + mm(modind, 4)*ci)*lfc
-            !!!        coeffn = (nn(modind, 1) + nn(modind, 2)*ci)                     &
-            !!!               & + (nn(modind, 3) + nn(modind, 4)*ci)*lfc
-            !!!        ymxpar = 1.0d0 + coeffa*(xpar**coeffm)*((1.0d0 - xpar)**coeffn)
-            !!!    endif
-            !!!endif
             !
             ! bottom friction for combined waves and current
             !
@@ -867,7 +797,7 @@
    end subroutine tauwave
 
    subroutine wave_uorbrlabda()
-   use m_waves, only: uorb, wlenwav, uorbwav, twav, hwav, gammax, rlabda, jauorb
+   use m_waves, only: uorb, wlenwav, uorbwav, twav, hwav, gammax, rlabda, jauorb, jauorbfromswan
    use m_flow, only: hs
    use m_flowgeom, only: ndx
    use m_physcoef, only: ag
@@ -903,20 +833,19 @@
          rlabda(k) = 2.0*pi/rk
       endif
       if (rk*hss<80d0) then            ! if not very deep water
-         if (uorbwav_from_SWAN.eq.1) then
+         if (jauorbfromswan.eq.1) then
             Uorb(k)    = uorbwav(k)
          else
             Uorb(k)      = 0.5d0*hwav(k)*omeg/sinh(rk*hss)
             !Uorb(k)    = uorb1*sqrt(pi)/2d0                            ! See note Dano on orbital velocities in D3D, SWAN and XBeach
+            if (jauorb==0) then       ! old d3d convention
+               uorb(k) = uorb(k)*sqrt(pi)/2d0    ! only on hrms derived value, not on SWAN read uorb
+            end if
          endif
       else
          Uorb(k) = 0d0
       endif
    enddo
-
-   if (jauorb==0) then       ! old d3d convention
-      uorb = uorb*sqrt(pi)/2d0
-   end if
 
    end subroutine wave_uorbrlabda
 

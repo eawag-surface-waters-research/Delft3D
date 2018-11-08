@@ -4230,7 +4230,7 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
          if (jamapsigwav==0) then
             ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_hwav        , nf90_double, UNC_LOC_S, 'hwav'         , 'sea_surface_wave_rms_height'          , 'RMS wave height'          , 'm'    ) ! not CF
          else
-            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_hwav        , nf90_double, UNC_LOC_S, 'hwav'         , 'sea_surface_wave_significant_wave_height'          , 'hsig wave height'          , 'm'    )
+            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_hwav        , nf90_double, UNC_LOC_S, 'hwav'         , 'sea_surface_wave_significant_wave_height'          , 'Significant wave height'          , 'm'    )
          endif
          ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_uorb     , nf90_double, UNC_LOC_S, 'uorb'            , 'sea_surface_wave_orbital_velocity'    , 'Wave orbital velocity'    , 'm s-1') ! not CF
          ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_ustokes      , nf90_double, UNC_LOC_S, 'ust_cc'     , 'sea_surface_x_stokes_drift'        , 'Stokes drift, x-component'   , 'm s-1') ! not CF
