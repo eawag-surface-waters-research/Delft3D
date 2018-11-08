@@ -1123,6 +1123,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     use read_grids
     use time_module
     use string_module
+    use netcdf_utils, only: ncu_format_to_cmode
     implicit none
     !
     type(swan)                  :: sr
@@ -1750,6 +1751,7 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     sr%swflux              = .true.
     sr%swmapwritenetcdf    = .true.
     sr%netcdf_sp           = .false.
+    par                    = 0
     !
     ! Standard output options
     !
@@ -1770,6 +1772,8 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     call prop_get_logical(mdw_ptr, 'Output', 'AppendCOM'       , sr%append_com)
     call prop_get_logical(mdw_ptr, 'Output', 'MapWriteNetCDF'  , sr%swmapwritenetcdf)
     call prop_get_logical(mdw_ptr, 'Output', 'NetCDFSinglePrecision'  , sr%netcdf_sp)
+    call prop_get_integer(mdw_ptr, 'Output', 'ncFormat'  , par)
+    call set_ncmode(wavedata%output, ncu_format_to_cmode(par))
     !
     ! Check that the comfile is not a map file (not allowed. Was allowed in preliminary versions)
     !

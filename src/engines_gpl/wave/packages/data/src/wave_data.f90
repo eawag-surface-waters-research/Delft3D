@@ -71,6 +71,7 @@ end type wave_time_type
 type wave_output_type
    integer  :: count           ! [-]        Counts the number of generated output fields on the wavm file
    integer  :: comcount        ! [-]        Counts the number of generated output fields on the NetCDF-com file
+   integer  :: ncmode          ! [3 or 4]   NetCDF creation mode: NetCDF3 (NF90_CLASSIC_MODEL) or NetCDF4 (NF90_NETCDF4)
    real     :: nexttim         ! [sec]      Next time to write to wavm-file
    real     :: timseckeephot   ! [sec]      seconds since ref date on which time the hotfile should not be deleted
    logical  :: write_wavm      ! [y/n]      True when writing to wavm file
@@ -95,6 +96,7 @@ contains
 !
 !===============================================================================
 subroutine initialize_wavedata(wavedata)
+   use netcdf_utils, only: ncu_format_to_cmode
    type(wave_data_type) :: wavedata
    character(30)        :: txthlp
 
@@ -109,6 +111,7 @@ subroutine initialize_wavedata(wavedata)
    wavedata%time%timmin            =  0.0
    wavedata%output%count           =  0
    wavedata%output%comcount        =  0
+   wavedata%output%ncmode          =  ncu_format_to_cmode(0)
    wavedata%output%nexttim         =  0.0
    wavedata%output%timseckeephot   =  0.0
    wavedata%output%write_wavm      =  .false.
@@ -247,7 +250,15 @@ subroutine setwrite_wavm(waveoutput, write_in)
 
    waveoutput%write_wavm = write_in
 end subroutine setwrite_wavm
+!
+!
+!===============================================================================
+subroutine set_ncmode(waveoutput, ncmode_in)
+   integer, intent(in) :: ncmode_in
+   type(wave_output_type) :: waveoutput
 
+   waveoutput%ncmode = ncmode_in
+end subroutine set_ncmode
 
 
 end module wave_data

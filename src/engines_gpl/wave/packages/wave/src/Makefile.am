@@ -22,6 +22,7 @@ FMODULES += \
 	-I$(top_builddir)/engines_gpl/wave/packages/manager/src \
 	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src \
 	-I$(top_builddir)/utils_lgpl/ec_module/packages/ec_module/src/meteo \
+	-I$(top_builddir)/utils_lgpl/io_netcdf/packages/io_netcdf/src \
 	-I$(top_builddir)/utils_lgpl/delftio/packages/delftio/src/delftio_sync
 
 AM_CPPFLAGS = \
@@ -47,6 +48,7 @@ $(top_builddir)/engines_gpl/wave/packages/data/src/libdata.la \
 $(top_builddir)/utils_lgpl/delftio/packages/delftio/src/delftio_sync/libDelftIO.la \
 $(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm/src/fsm/libESMFSM.la \
 $(top_builddir)/utils_lgpl/ec_module/packages/ec_module/src/libECModule.la \
+$(top_builddir)/utils_lgpl/io_netcdf/packages/io_netcdf/src/libIONetcdf.la \
 $(top_builddir)/utils_lgpl/nefis/packages/nefis/src/libNefis.la \
 $(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/libDeltaresCommon.la \
 $(top_builddir)/utils_lgpl/kdtree_wrapper/packages/kdtree_wrapper/src/libkdtreewrapper.la \

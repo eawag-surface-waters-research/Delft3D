@@ -281,7 +281,7 @@ subroutine write_wave_his_netcdf (sg, sof, n_swan_grids, i_swan, wavedata)
        !
        ! create file
        !
-       ierror = nf90_create(filename, 0, idfile); call nc_check_err(ierror, "creating file", filename)
+       ierror = nf90_create(filename, wavedata%output%ncmode, idfile); call nc_check_err(ierror, "creating file", filename)
        !
        ! global attributes
        !
