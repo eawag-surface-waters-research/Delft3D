@@ -1038,7 +1038,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                            ifacec = face_g2c(ifaceglob) ! and this is now from the OTHER domain.
                            ! in which domain (iii) does iface belong
                            do iii = 1, nfiles
-                               if (ifacec>=sum(nump(1:iii-1)) .and. ifacec <= sum(nump(1:iii))) then
+                               if (ifacec > sum(nump(1:iii-1)) .and. ifacec <= sum(nump(1:iii))) then
                                    ifacefile = iii
                                    exit
                                end if
