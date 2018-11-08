@@ -6403,22 +6403,23 @@ subroutine generatePartitionMDUFile(filename, filename_new)
       end if
 
       string_c = string(1:n)
-      k1 = index(string_c, 'NetFile')
-      k2 = index(string_c, 'Icgsolver')
+      call str_lower(string_c)
+      k1 = index(string_c, 'netfile')
+      k2 = index(string_c, 'icgsolver')
       if (len_trim(md_restartfile) > 0) then
-         k3 = index(string_c, 'RestartFile')
+         k3 = index(string_c, 'restartfile')
       endif
       if (len_trim(md_mapfile) > 0) then
-         k4 = index(string_c, 'MapFile')
+         k4 = index(string_c, 'mapfile')
       endif
       if (md_genpolygon .eq. 1) then
-         k5 = index(string_c, 'PartitionFile')
+         k5 = index(string_c, 'partitionfile')
       endif
       if (len_trim(md_flowgeomfile) > 0) then
-         k6 = index(string_c, 'FlowGeomFile')
+         k6 = index(string_c, 'flowgeomfile')
       endif
       if (len_trim(md_classmap_file) > 0) then
-         k7 = index(string_c, 'ClassMapFile')
+         k7 = index(string_c, 'classmapfile')
       endif
 
       if(k1==0 .and. k2==0 .and. k3==0 .and. k4==0 .and. k5==0 .and. k6==0 .and. k7==0) then ! Copy the whole row
