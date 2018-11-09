@@ -342,6 +342,7 @@ class Dimr {
         dimr_components      componentsList; // Array of all components
         dimr_couplers        couplersList;   // Array of all couplers
         bool                 use_mpi;        // Whether MPI-mode is active for this run.
+        int                  nc_mode;        // [3 or 4]   NetCDF creation mode: NetCDF3 (NF90_CLASSIC_MODEL) or NetCDF4 (NF90_NETCDF4)
         int                  my_rank;        // Rank# of current process
         int                  numranks;       // Total nr of MPI processes for dimr main.
         Level                logLevel;
@@ -358,24 +359,24 @@ class Dimr {
         double         transferValue;
 
         // Additional destructor routine
-        void           deleteControlBlock(dimr_control_block);
+        void           deleteControlBlock (dimr_control_block);
 
         // Additional run routines
-        void           runStartBlock    (dimr_control_block *, double, int);
-        void           runParallelUpdate(dimr_control_block *, double);
+        void           runStartBlock      (dimr_control_block *, double, int);
+        void           runParallelUpdate  (dimr_control_block *, double);
 
 
-        void           scanControl      (XmlTree *, dimr_control_block *);
+        void           scanControl        (XmlTree *, dimr_control_block *);
+        void           scanGlobalSettings (XmlTree *);
+        void           scanUnits          (XmlTree *);
+        void           scanComponent      (XmlTree *, dimr_component *);
+        void           scanCoupler        (XmlTree *, dimr_coupler *);
 
-        void           scanUnits        (XmlTree *);
-        void           scanComponent    (XmlTree *, dimr_component *);
-        void           scanCoupler      (XmlTree *, dimr_coupler *);
+        dimr_component * getComponent     (const char *);
 
-        dimr_component * getComponent   (const char *);
+        dimr_coupler *   getCoupler       (const char *);
 
-        dimr_coupler *   getCoupler     (const char *);
-
-        void           char_to_ints     (char *, int **, int *);
+        void           char_to_ints       (char *, int **, int *);
 
         map<string, int> ncfiles;
 

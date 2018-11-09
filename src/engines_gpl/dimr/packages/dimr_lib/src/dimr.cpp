@@ -932,7 +932,7 @@ void Dimr::runParallelInit (dimr_control_block * cb) {
                         // write NetCDF file
 
                         int ncid = -1;
-                        if (nc_create(fileName.c_str(), NC_CLOBBER, &ncid))
+                        if (nc_create(fileName.c_str(), nc_mode, &ncid))
                             throw Exception(true, Exception::ERR_OS, "Could not create NetCDF file at location \"%s\".", fileName.c_str());
                         ncfiles[fileName] = ncid;
 
@@ -1535,13 +1535,40 @@ void Dimr::scanConfigFile (void) {
     control->numSubBlocks = 0;
     control->subBlocks    = NULL;
     control->masterSubBlockId = -1;
-    // First scan the config file for all components and couplers (= units)
+    // First scan the global settings
+    scanGlobalSettings(rootXml);
+    // Then scan the config file for all components and couplers (= units)
     scanUnits(rootXml);
     // Then scan the control part
     // References are added to the list of components/couplers
     scanControl(controlXml, control);
 }
 
+
+
+//------------------------------------------------------------------------------
+void Dimr::scanGlobalSettings(XmlTree * rootXml) {
+    // Init
+    nc_mode = 0;
+    // Scan
+    XmlTree * globalSettings = rootXml->Lookup ("global_settings");
+    if (globalSettings == NULL)
+        return;
+    XmlTree * loggerNcFormat = globalSettings->Lookup ("logger_ncFormat");
+    if (loggerNcFormat != NULL) {
+        int intRead = sscanf(loggerNcFormat->charData, "%d", &(nc_mode));
+        if (intRead != 1)
+            throw Exception (true, Exception::ERR_INVALID_INPUT, "logger_ncFormat must contain the value 3 or 4");
+        if (nc_mode == 3) {
+            nc_mode = NC_CLASSIC_MODEL;
+        } else if (nc_mode == 4) {
+            nc_mode = NC_NETCDF4;
+        } else {
+            nc_mode = NC_CLOBBER;
+        }
+
+    }
+}
 
 
 //------------------------------------------------------------------------------
