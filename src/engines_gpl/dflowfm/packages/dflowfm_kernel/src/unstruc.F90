@@ -15659,17 +15659,17 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
       end if
    endif
 
-#ifdef HAVE_SHAPELIB
    !! Write shape files at the initialization
    if (abs(tim - tstart_user ) < 1d-10) then
+#ifdef HAVE_SHAPELIB
       call unc_write_shp()
-   endif
-#else    
-    if (jashp_crs > 0 .or. jashp_obs > 0 .or. jashp_weir > 0 .or. jashp_thd > 0 .or. jashp_gate > 0 &
+#else
+      if (jashp_crs > 0 .or. jashp_obs > 0 .or. jashp_weir > 0 .or. jashp_thd > 0 .or. jashp_gate > 0 &
        .or. jashp_emb > 0 .or. jashp_fxw > 0 .or. jashp_src > 0) then
-       call mess(LEVEL_WARN, 'Shapefile export is not supported yet on the current platform.')
-    end if  
+      call mess(LEVEL_WARN, 'Shapefile export is not supported yet on the current platform.')
+      end if
 #endif
+   endif
    
    if ( (jatimer.eq.1) .and. (ti_timings.gt.0) ) then
       if ( tim.ge.time_timings ) then
