@@ -4930,6 +4930,16 @@ end subroutine partition_make_globalnumbers
       return 
    end subroutine reduce_error 
    
+!> Abort all processes
+   subroutine abort_all()
+      use dfm_error, only: DFM_GENERICERROR
+      implicit none
+      integer :: ierr
+#ifdef HAVE_MPI      
+      call MPI_Abort(DFM_COMM_DFMWORLD, DFM_GENERICERROR, ierr)
+#endif
+      return
+   end subroutine abort_all
    end module m_partitioninfo
    
    

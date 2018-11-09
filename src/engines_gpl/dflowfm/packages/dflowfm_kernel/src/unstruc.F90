@@ -625,6 +625,7 @@ end subroutine flow_finalize_single_timestep
  use m_xbeach_data, only: swave, Lwave, uin, vin, cgwav
  use dfm_error
  use MessageHandling
+ use m_partitioninfo
  implicit none
 
  integer          :: jazws0
@@ -664,6 +665,12 @@ end subroutine flow_finalize_single_timestep
 
  if (iresult /= DFM_NOERR) then
     write (msgbuf,*) ' Error found in EC-module ' ; call err_flush()
+    if (jampi == 1) then
+       write(msgbuf,*) 'Error occurs on one or more processes when setting external forcings on boundaries at time=', tim1bnd;
+       call err_flush()
+       ! Terminate all MPI processes
+       call abort_all()
+    endif         
     goto 888
  end if
 
@@ -13190,7 +13197,7 @@ end if
  if (iresult /= DFM_NOERR) then
     call qnerror('Error occurred while running, please inspect your diagnostic output.',' ', ' ')
     if (jampi == 1) then
-        call qnerror('Error occurs on one or more processes.',' ', ' ')
+        call qnerror('Error occurs on one or more processes when initializing external forcings.',' ', ' ')
     end if
    goto 888
  end if
@@ -13376,7 +13383,14 @@ end if
  call setzminmax()                                 ! our side of preparation for 3D ec module
  call setsigmabnds()
  call flow_setexternalforcingsonboundaries(tstart_user, iresult)         ! set bnd   oriented external forcings
+ if (jampi == 1) then
+    ! globally reduce the error
+    call reduce_error(iresult)
+ end if
  if (iresult /= DFM_NOERR) then
+    if (jampi == 1) then
+        call qnerror('Error occurs on one or more processes when setting external forcings on boundaries.',' ', ' ')
+    end if
     goto 888
  end if
  tim1bnd = tstart_user
