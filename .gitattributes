@@ -4812,8 +4812,6 @@ src/third_party_open/petsc/petsc-3.10.2/include/petscwebclient.h -text
 src/third_party_open/petsc/petsc-3.10.2/lib/x64/Release/libpetsc.dll -text
 src/third_party_open/petsc/petsc-3.10.2/lib/x64/Release/libpetsc.exp -text
 src/third_party_open/petsc/petsc-3.10.2/lib/x64/Release/libpetsc.lib -text
-src/third_party_open/petsc/petsc-3.10.2/lib/x64/Release/mkl_core.dll -text
-src/third_party_open/petsc/petsc-3.10.2/lib/x64/Release/mkl_intel_thread.dll -text
 src/third_party_open/petsc/petsc-3.10.2/src/benchmarks/Index.c -text
 src/third_party_open/petsc/petsc-3.10.2/src/benchmarks/MPI_Wtime.c -text
 src/third_party_open/petsc/petsc-3.10.2/src/benchmarks/PLogEvent.c -text
