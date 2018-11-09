@@ -126,6 +126,6 @@ subroutine cp_file(filnm1    ,filnm2    ,filtype      ,nuerr         )
     !
     ! close both files
     !
-    close (lunf1)
-    close (lunf2)
+    close (lunf1, iostat = iocond)
+    close (lunf2, iostat = iocond)
 end subroutine cp_file
