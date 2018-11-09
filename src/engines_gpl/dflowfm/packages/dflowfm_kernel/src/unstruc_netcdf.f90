@@ -9400,7 +9400,7 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
             ngrd = pbr%gridPointsCount
             pbr%grd(1) = pbr%FromNode%gridNumber
             do k = 2, ngrd-1
-               ! i do not want to renumber the nodes, because otherwise link info gets screwed
+               ! i do not want to renumber the nodes, otherwise link info gets screwed
                numk = k + totalKsoFar
                pbr%grd(k) = numk
                xk(numk) = pbr%Xs(k)
@@ -9475,11 +9475,11 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
       ierr = ionc_get_meshgeom(ioncid, im, networkIndex, meshgeom)
       
       if (meshgeom%dim == 1) then
-         cycle
-         !Save meshgeom for later writing of the 1d network
+         !Save meshgeom for later writing of the 1d network names
          ierr = ionc_get_meshgeom(ioncid, im, networkIndex, meshgeom, start_index, includeArrays, nbranchids, nbranchlongnames, nnodeids, nnodelongnames, & 
                                   nodeids, nodelongnames, network1dname, mesh1dname) 
          meshgeom1d = meshgeom 
+         cycle
       elseif (meshgeom%dim == 2) then
          !Else 2d/3d mesh
          ierr = ionc_get_meshgeom(ioncid, im, networkIndex, meshgeom, start_index, includeArrays) 
