@@ -30,7 +30,7 @@
 !! @author arjen.markus@deltares.nl
 !! @author adri.mourits@deltares.nl
 !! @author stef.hummel@deltares.nl
-!! @author edwin.bos@deltares.nl
+!! @author edwin.spee@deltares.nl
 module m_ec_message
    use precision
    
@@ -44,10 +44,17 @@ module m_ec_message
     public :: getECMessage
     public :: getECMsgLenTrim
     public :: dumpECMessageStack
-   
+
    integer,                 parameter :: maxMessageLen = 1000
-   character(maxMessageLen)           :: ECMessage     = ' '
-   
+
+    type TEcMessage
+      character(len=:), allocatable :: message
+      integer                       :: message_type
+    end type TEcMessage
+
+    type(TEcMessage), pointer :: EcMessages(:) => null()
+    integer                   :: EcMsgActualSize = 0
+
    interface setECMessage
       module procedure setECMessage_char
       module procedure setECMessage_int
@@ -59,48 +66,78 @@ module m_ec_message
       
       !> 
       subroutine clearECMessage()
-         ECMessage = ''
+         EcMsgActualSize = 0
       end subroutine clearECMessage
-            
+
+      subroutine IncEcMessages()
+         integer :: cursize, newsize, i
+         type(TEcMessage), pointer :: newStack(:)
+
+         if (.not. associated(EcMessages)) then
+            allocate(EcMessages(10))
+         else
+            cursize = size(EcMessages)
+            newsize = EcMsgActualSize + 1
+
+            if (newsize > cursize) then
+               allocate(newStack(10+cursize))
+               do i = 1, EcMsgActualSize
+                  newStack(i) = EcMessages(i)
+               enddo
+               deallocate(EcMessages)
+               EcMessages => newStack
+            endif
+         endif
+      end subroutine IncEcMessages
+
       subroutine setECMessage_char(string, suffix)
          character(len=*), intent(in)           :: string
          character(len=*), intent(in), optional :: suffix
          !
+         call IncEcMessages()
+
+         EcMsgActualSize = EcMsgActualSize + 1
+
          if (present(suffix)) then
-!           ECMessage = trim(string) // ' ' // suffix
-            ECMessage = "|"//trim(string)//" "// suffix //"| "// trim(ECMessage)
+            ECMessages(EcMsgActualSize)%message = trim(string)  // " " // suffix
          else
-!           ECMessage = string
-            ECMessage = "|"//trim(string) //"| "// trim(ECMessage)
+            ECMessages(EcMsgActualSize)%message = trim(string)
          endif
+         ECMessages(EcMsgActualSize)%message_type = -1
       end subroutine setECMessage_char
-      
+
       ! =======================================================================
-      
+
       !> 
       subroutine setECMessage_int(string, val)
          character(len=*), intent(in) :: string
          integer,          intent(in) :: val
          !
-         integer :: nlen, nrem
-         
-         nlen = len_trim(string)
-         nrem = min(len_trim(ECMessage), maxMessageLen - nlen-1-1-2-10)
-         ! NOTE: AvD: all this string trimming here can cause enormous delays
-         ! When calling setECMessage every timestep for some diagnostics, total running time
-         ! for FM testmodel e02_f01_c010 went from 53s to 66s!
-         ! TODO: introduce a proper message stack, not string concatenation based.
-         write(ECMessage, '(a,a,i0,a)') "|"//trim(string), ' ', val,"| "//ECMessage(1:nrem)
+         character(len=8) :: cvalue
+
+         call IncEcMessages()
+
+         EcMsgActualSize = EcMsgActualSize + 1
+
+         write(cvalue, '(i8)') val
+         cvalue = adjustl(cvalue)
+
+         ECMessages(EcMsgActualSize)%message = trim(string) // ' ' // trim(cvalue)
+         ECMessages(EcMsgActualSize)%message_type = -1
       end subroutine setECMessage_int
 
       ! =======================================================================
 
       !> 
       function getECMessage() result(retval)
-         character(len=len(ECMessage)) :: retval
+         character(len=maxMessageLen) :: retval
+         integer :: i
          !
-         retval    = trim(ECMessage)
-         ECMessage = ' '
+         retval    = ' '
+         do i = 1, EcMsgActualSize
+            retval = retval // '|' // trim(EcMessages(i)%message)
+         enddo
+         EcMsgActualSize = 0
       end function getECMessage
 
       ! =======================================================================
@@ -114,33 +151,25 @@ module m_ec_message
          character(len=*), intent(in)    :: msg 
          end subroutine
       end interface
-      character(len=maxMessageLen) :: retval, message 
-      integer                      :: i, i0
-      character(len=maxMessageLen) :: messages(15)
-      message = getECMessage()
-      messages = ''
-      i0=1
+      character(len=maxMessageLen) :: retval
+      integer                      :: i
 
       call messenger (msglevel,"...")! separator 
-      do i=1,len_trim(message)
-         if (message(i:i)=='|') then
-            if (len_trim(message(i0:i-1))>0) then
-               call messenger (msglevel,message(i0:i-1))
-            endif
-            i0=i+1
-         endif
+      do i=1, EcMsgActualSize
+         call messenger (msglevel,EcMessages(i)%message)
       enddo
-      if (len_trim(message(i0:i-1))>0) then
-         call messenger (msglevel,message(i0:i-1))
-      endif
       retval = 'Fatal EC-error !!'           ! TODO: make this a meaningful return string 
       end function dumpECMessageStack
-      
 
       !> 
       function getECMsgLenTrim () result(ECMsgLenTrim)
          integer :: ECMsgLenTrim
+
+         integer :: i
          !
-         ECMsgLenTrim = len_trim(ECMessage)
+         ECMsgLenTrim = 0
+         do i = 1, EcMsgActualSize
+            ECMsgLenTrim = ECMsgLenTrim + len(ECMessages(i)%message)
+         enddo
       end function getECMsgLenTrim
 end module m_ec_message
