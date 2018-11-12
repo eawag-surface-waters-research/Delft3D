@@ -51,6 +51,8 @@
    real(fp), dimension(:)               , pointer :: ucxq_mor
    real(fp), dimension(:)               , pointer :: ucyq_mor
    real(fp), dimension(:)               , pointer :: hs_mor
+   
+   real(fp), dimension(:,:)             , pointer :: q_zeta
 
    !     stmpar
    integer,                               pointer :: lsed
@@ -439,7 +441,7 @@ end module m_fm_update_crosssections
 
    subroutine inipointers_erosed()
    use m_fm_erosed
-   use m_flowgeom, only: ndx
+   use m_flowgeom, only: ndx, lnx
    implicit none
    integer :: ierr
 
@@ -620,6 +622,9 @@ end module m_fm_update_crosssections
 
    allocate(ucxq_mor(1:ndx), ucyq_mor(1:ndx), hs_mor(1:ndx), stat=ierr)
    ucxq_mor = 0d0; ucyq_mor = 0d0; hs_mor = 0d0
+   allocate(q_zeta(2,lnx), stat=ierr)
+   q_zeta = 0d0
+   
    end subroutine inipointers_erosed
 
 
@@ -887,6 +892,8 @@ end module m_fm_update_crosssections
    !   Calculate cell centre velocities ucxq, ucyq
    call setucxucyucxuucyu()
    call setucxqucyq()
+   !
+   call junctionadv()
    !
    ! Replace ucx, ucxq, ucyq, ucyq by incoming values at node
    do inod = 1, network%nds%Count
@@ -4390,4 +4397,38 @@ end module m_fm_update_crosssections
 
    end subroutine setucxqucyq
      
-   
+  ! =================================================================================================
+  ! =================================================================================================
+  subroutine junctionadv()
+    use m_flowgeom , only: lnx1d, ln, nd
+    use m_flow     , only: q1
+    use m_fm_erosed, only: q_zeta
+    implicit none
+    integer          :: i, L, Li, Lf, La, k
+    double precision :: s_l, s_m
+    
+    q_zeta = 0d0
+    
+    do L = 1,lnx1d                                       ! loop over flow links
+      !if (kfu(m)==1) then                                      !.and. kcu(m)==1
+      do i = 1,2
+        k = ln(i,L) 
+        do Li = 1,nd(k)%lnx                              ! loop over all flow links for each zeta point
+          Lf = nd(k)%ln(Li)
+          La = iabs(Lf)
+          if (La /= L) then                               ! if (m1 /= current flow link)
+            s_l = sign(1d0,Lf+0d0)
+            q_zeta(i,L) = q_zeta(i,L) + q1(La) * s_l
+          else
+            s_m = sign(1d0,Lf+0d0)
+          endif
+        enddo                                              
+        if (nd(k)%lnx == 1) then                           ! if boundary or end node
+          q_zeta(i,L)  = q1(L)
+        else
+          q_zeta(i,L) = ( - s_m * q_zeta(i,L) + ( nd(k)%lnx - 1 ) * q1(L) ) / nd(k)%lnx
+        endif
+      enddo      
+    enddo
+    
+  end subroutine junctionadv
