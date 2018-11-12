@@ -15183,6 +15183,7 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
 
    ! Error handling:
 888 continue
+   msgbuf = dumpECMessageStack(LEVEL_WARN, callback_msg)
    iresult = DFM_EXTFORCERROR
    write(msgbuf,'(a,f13.3)')  'Error while updating boundary forcing at time=', tim
    call mess(LEVEL_WARN, trim(msgbuf))
