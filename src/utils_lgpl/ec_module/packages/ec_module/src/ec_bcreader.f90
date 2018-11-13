@@ -16,6 +16,7 @@ module m_ec_bcreader
   public   ::  ecBCBlockCreate
   public   ::  ecBCBlockFree
   public   ::  ecBCBlockFree1dArray
+  public   ::  jablock
   public   ::  jakeyvalue
   public   ::  jakeyvaluelist
   public   ::  processhdr
@@ -28,7 +29,7 @@ contains
   ! =======================================================================
 
   !> Initialize BC instance
-  function ecBCInit (instancePtr, fname, quantityName, plilabel, bc, iostat) result (success)
+  function ecBCInit (instancePtr, fname, quantityName, plilabel, bc, iostat, funtype) result (success)
     use m_ec_netcdf_timeseries
     implicit none
     !   Open a .bc file with external forcings
@@ -42,6 +43,7 @@ contains
     character(len=*),              intent(in)      :: plilabel
     type (tEcBCBlock),             intent(inout)   :: bc
     integer, optional,             intent(out)     :: iostat
+    character(len=*), optional,    intent(in)      :: funtype
 
     success = .false.
     bc%qname = quantityName
@@ -57,14 +59,13 @@ contains
        if (.not.ecSupportOpenExistingFileGnu(bc%fhandle, bc%fname)) then
           return
        end if
-       if (scanbc_ascii(bc, bc%fhandle, iostat)) then          ! parsing the open bc-file
-          allocate(bc%columns(bc%numcols))
-       else
+       if (.not.ecBCFilescan(bc, bc%fhandle, iostat, funtype=funtype)) then     ! parsing the open bc-file
           call mf_close(bc%fhandle)
           return                                               ! quantityName-plilabel combination not found
+       else
+          allocate(bc%columns(bc%numcols))
        endif
     case (BC_FTYPE_NETCDF)
-       ! in combination with netcdf
        if (.not.ecNetCDFscan(bc%ncptr, quantityName, plilabel, bc%ncvarndx, bc%nclocndx, bc%dimvector)) then
           return                                               ! quantityName-plilabel combination not found
        endif
@@ -92,102 +93,99 @@ contains
   ! =======================================================================
 
   !> Find quantity-pli point combination, preparing a BC-block using an ASCII-file as input
-  function scanbc_ascii(bc, fhandle, iostat) result (success)
+  function ecBCFilescan(bc, fhandle, iostat, funtype) result (success)
     implicit none
-    logical                                 :: success
-    type (tEcBCBlock),      intent(inout)   :: bc
-    integer (kind=8),       intent(in)      :: fhandle
-    integer,                intent(out)     :: iostat
+    logical                                   :: success
+    type (tEcBCBlock),          intent(inout) :: bc
+    integer (kind=8),           intent(in)    :: fhandle
+    integer,                    intent(out)   :: iostat
+    character(len=*), optional, intent(in)    :: funtype
 
     character*(1000)              ::  rec
     integer                       ::  reclen
-    integer                       ::  commentpos
     character(len=:), allocatable ::  keyvaluestr ! all key-value pairs in one header; allocated on assign
     integer                       ::  posfs
     integer                       ::  nfld
     integer                       ::  nq
-    logical                       ::  jablock, jaheader
-    integer                       ::  lineno
+    logical                       ::  jaheader, jafound
+    integer(kind=8)               ::  currentpos    
+
     integer (kind=8)              ::  savepos
+    type(tEcBlockList), pointer   ::  blocklistPtr
+    type(tEcBCFile), pointer      ::  bcFilePtr
 
     success = .false.
     iostat = EC_UNKNOWN_ERROR
-    lineno = 0
     savepos = 0
 
-    do
-       if (mf_eof(fhandle)) then
-          iostat = EC_EOF
-          return
-       endif
-       call mf_read(fhandle,rec,savepos)
-       lineno = lineno + 1
-       if (index('!#%*',rec(1:1))>0) cycle                     ! deal with various begin-of-line delimiters
-       reclen = len_trim(rec)                                  ! deal with various comment delimiters
-       commentpos = index(rec(1:reclen),'//')
-       if (commentpos>0) reclen = min(reclen,commentpos-1)
-       commentpos = index(rec(1:reclen),' %')
-       if (commentpos>0) reclen = min(reclen,commentpos-1)
-       commentpos = index(rec(1:reclen),' #')
-       if (commentpos>0) reclen = min(reclen,commentpos-1)
-       commentpos = index(rec(1:reclen),' *')
-       if (commentpos>0) reclen = min(reclen,commentpos-1)
-       commentpos = index(rec(1:reclen),' !')
-       if (commentpos>0) reclen = min(reclen,commentpos-1)
+    ! TODO: Check if we have a matching postion in the adminstration,
+    ! If so:
+    !    create a new filehandler
+    !    set the metadata correctly by process-header 
+    ! If not:
+    !    find the last read position for this file, that is: the last recorded start position of  a data-block
+    !    start searching from there 
+    
+    bcFilePtr => bc%bcptr
+    blocklistPtr => bcFilePtr%blocklist
+    jafound = .false.
+    jaheader = .false.
+    currentpos = bcFilePtr%last_position
+    do while (associated(blocklistPtr))
+       if (jablock(blocklistPtr%keyvaluestr,bc%bcname,bc%qname,funtype=funtype)) then
+          jafound = .true.
+          currentpos = blocklistPtr%position
+          exit
+       endif 
+       blocklistPtr => blocklistPtr%next 
+    enddo
+    
+    call mf_backspace(fhandle, currentpos)
+    if (.not.jafound) then
+       do
+          if (mf_eof(fhandle)) then                               ! forward to last position we searched in this file
+             iostat = EC_EOF
+             return
+          endif
+          call mf_read(fhandle,rec,savepos)
+          if (index('!#%*',rec(1:1))>0) cycle
+          reclen = len_trim(rec)
 
-       if (len_trim(rec(1:reclen))>0) then                     ! skip empty lines
-          if (index(rec,'[forcing]')>0) then                   ! new boundary chapter
-             jaheader = .true.                                 ! switching to header mode
-             keyvaluestr = ''
-             jablock=.false.
-             nfld = 0                                          ! count the number of fields in this header block
-             nq = 0                                            ! count the (maximum) number of quantities in this block
-          else
-             if (jaheader) then
-                posfs = index(rec(1:reclen),'=')               ! key value pair ?
-                if (posfs>0) then
-                   call replace_char(rec,9,32)                 ! replace tabs by spaces, header key-value pairs only
-                   nfld = nfld + 1                             ! count the number of lines in the header file
-                   ! Create a lengthy string of ',key,value,key,value.....'
-                   call str_upper(rec(1:posfs-1))              ! all keywords uppercase , not case sensitive
-                   if (index(rec(1:posfs-1),'QUANTITY')>0) then
-                      nq = nq + 1
-                   endif
-
-                   !                  keyvaluestr = trim(keyvaluestr)//(trim(adjustl(rec(1:posfs-1))))//',' &
-                   !                                                 //(trim(adjustl(rec(posfs+1:reclen))))//','
-                   keyvaluestr = trim(keyvaluestr)//''''// (trim(adjustl(rec(1:posfs-1))))//''',''' //(trim(adjustl(rec(posfs+1:reclen))))//''','
-                else                                                    ! switch to datamode
-                   call str_upper(keyvaluestr,len(trim(keyvaluestr)))   ! case insensitive format
-                   if (jakeyvalue(keyvaluestr,'NAME',trim(bc%bcname))) then
-                      if (jakeyvalue(keyvaluestr,'FUNCTION','ASTRONOMIC').or.jakeyvalue(keyvaluestr,'FUNCTION','ASTRONOMIC-CORRECTION')) then
-                         ! Check for harmonic or astronomic components
-                         jablock = .true.
-                         jablock = jablock .and. jakeyvalue(keyvaluestr,'QUANTITY','ASTRONOMIC COMPONENT')
-                         jablock = jablock .and. jakeyvalue(keyvaluestr,'QUANTITY',trim(bc%qname)//' '//'AMPLITUDE')
-                         jablock = jablock .and. jakeyvalue(keyvaluestr,'QUANTITY',trim(bc%qname)//' '//'PHASE')
-                      elseif (jakeyvalue(keyvaluestr,'FUNCTION','HARMONIC').or.jakeyvalue(keyvaluestr,'FUNCTION','HARMONIC-CORRECTION')) then
-                         ! Check for harmonic or harmonic components
-                         jablock = .true.
-                         jablock = jablock .and. jakeyvalue(keyvaluestr,'QUANTITY','HARMONIC COMPONENT')
-                         jablock = jablock .and. jakeyvalue(keyvaluestr,'QUANTITY',trim(bc%qname)//' '//'AMPLITUDE')
-                         jablock = jablock .and. jakeyvalue(keyvaluestr,'QUANTITY',trim(bc%qname)//' '//'PHASE')
-                      elseif (jakeyvalue(keyvaluestr,'FUNCTION','QHTABLE')) then
-                         ! Check for qh
-                         jablock = .true.
-                         jablock = jablock .and. jakeyvalue(keyvaluestr,'QUANTITY',trim(bc%qname)//' '//'WATERLEVEL')
-                         jablock = jablock .and. jakeyvalue(keyvaluestr,'QUANTITY',trim(bc%qname)//' '//'DISCHARGE')
-                      elseif (jakeyvalue(keyvaluestr,'FUNCTION','T3D')) then
-                         ! Check for timeseries on sigma- or z-levels
-                         jablock = jakeyvalue(keyvaluestr,'QUANTITY',bc%qname) .or. jakeyvaluelist(keyvaluestr,'VECTOR',bc%qname)
-                      elseif (jakeyvalue(keyvaluestr,'FUNCTION','TIMESERIES')) then
-                         ! Check for timeseries
-                         jablock = jakeyvalue(keyvaluestr,'QUANTITY',bc%qname) .or. jakeyvaluelist(keyvaluestr,'VECTOR',bc%qname)
+          if (len_trim(rec(1:reclen))>0) then                     ! skip empty lines
+             if (index(rec,'[forcing]')>0) then                   ! new boundary chapter
+                jaheader = .true.                                 ! switching to header mode
+                keyvaluestr = ''
+                nfld = 0                                          ! count the number of fields in this header block
+                nq = 0                                            ! count the (maximum) number of quantities in this block
+             else
+                if (jaheader) then
+                   posfs = index(rec(1:reclen),'=')               ! key value pair ?
+                   if (posfs>0) then
+                      call replace_char(rec,9,32)                 ! replace tabs by spaces, header key-value pairs only
+                      nfld = nfld + 1                             ! count the number of lines in the header file
+                      ! TODO: Replace this key-value string by a linked list-base class for key-value dictionaries
+                      call str_upper(rec(1:posfs-1))              ! all keywords uppercase , not case sensitive
+                      if (index(rec(1:posfs-1),'QUANTITY')>0) then
+                         nq = nq + 1
                       endif
-                      if (jablock) then                                        ! block confirmed
+                      keyvaluestr = trim(keyvaluestr)//''''// (trim(adjustl(rec(1:posfs-1))))//''',''' //(trim(adjustl(rec(posfs+1:reclen))))//''','
+                   else                                                    ! switch to datamode
+                      ! TODO: Store the location information somewhere to be able to return to it later 
+                      call str_upper(keyvaluestr,len(trim(keyvaluestr)))   ! case insensitive format
+   
+                      allocate(blocklistPtr)                                   ! Add information for this block to the administration
+                      blocklistPtr%position = savepos
+                      blocklistPtr%keyvaluestr = keyvaluestr
+                      blocklistPtr%next => bcFilePtr%blocklist
+                      blocklistPtr%nfld = nfld
+                      blocklistPtr%nq = nq
+                      bcFilePtr%blocklist => blocklistPtr
+                      bcFilePtr%last_position = savepos
+   
+                      if (jablock(keyvaluestr,bc%bcname,bc%qname,funtype=funtype)) then
                          if (.not.processhdr(bc,nfld,nq,keyvaluestr)) return   ! dumb translation of bc-object metadata
                          if (.not.checkhdr(bc)) return                         ! check on the contents of the bc-object
-                         call mf_backspace(fhandle, savepos)      ! Rewind the first line with data
+                         call mf_backspace(fhandle, savepos)                   ! Rewind the first line with data
                          success = .true.
                          iostat = EC_NOERR
                          return
@@ -195,17 +193,19 @@ contains
                          ! location was found, but not all required meta data was present
                          iostat = EC_METADATA_INVALID
                       endif                                    ! Right quantity
-                   else
-                      ! location was found, but data was missing/invalid
-                      iostat = EC_DATA_NOTFOUND
-                   endif                                       ! Right label
-                   jaheader = .false.                          ! No, we are NOT reading a header
-                endif                                          ! switch to datamode
-             endif          ! in header mode (data lines are ignored)
-          endif             ! not a new '[forcing]' item
-       endif                ! non-empty string
-    enddo                   ! read/scan loop
-  end function scanbc_ascii
+                      jaheader = .false.                       ! No, we are NOT reading a header
+                   endif                                       ! switch to datamode
+                endif          ! in header mode (data lines are ignored)
+             endif             ! not a new '[forcing]' item
+          endif                ! non-empty string
+       enddo                   ! read/scan loop
+    else
+       if (.not.processhdr(bc,blocklistPtr%nfld,blocklistPtr%nq,blocklistPtr%keyvaluestr)) return
+       if (.not.checkhdr(bc)) return
+       success = .true.
+       iostat = EC_NOERR
+    endif                      ! need to search or already in 'database'
+  end function ecBCFilescan
 
   function jakeyvaluelist(keyvaluestr,key,value) result (jafound)
     implicit none
@@ -225,6 +225,47 @@ contains
 !   jafound = (index(keyvaluestr,','''//trim(key)//''','''//trim(value)//''',')>0)            ! like 'keyword1','value1','keyword',.....
     jafound = (index(keyvaluestr,''''//trim(key)//''','''//trim(value)//'''')>0)            ! like 'keyword1','value1','keyword',.....
   end function jakeyvalue
+
+  function jablock(keyvaluestr,bcname,qname,funtype) result (jafound)
+    logical                                 :: jafound
+    character(len=*), intent(in)            :: keyvaluestr
+    character(len=*), intent(in)            :: bcname
+    character(len=*), intent(in)            :: qname
+    character(len=*), intent(in), optional  :: funtype
+    jafound = .false.
+    if (present(funtype)) then
+       if (.not.jakeyvalue(keyvaluestr,'FUNCTION',trim(funtype))) then
+          return
+       endif
+    endif
+    if (jakeyvalue(keyvaluestr,'NAME',trim(bcname))) then
+       if (jakeyvalue(keyvaluestr,'FUNCTION','ASTRONOMIC').or.jakeyvalue(keyvaluestr,'FUNCTION','ASTRONOMIC-CORRECTION')) then
+          if (jakeyvalue(keyvaluestr,'QUANTITY',trim(qname)//' '//'AMPLITUDE')) then
+             if (jakeyvalue(keyvaluestr,'QUANTITY',trim(qname)//' '//'PHASE')) then
+                jafound = .true.
+             endif
+          endif
+       elseif (jakeyvalue(keyvaluestr,'FUNCTION','HARMONIC').or.jakeyvalue(keyvaluestr,'FUNCTION','HARMONIC-CORRECTION')) then
+          if (jakeyvalue(keyvaluestr,'QUANTITY',trim(qname)//' '//'AMPLITUDE')) then
+             if (jakeyvalue(keyvaluestr,'QUANTITY',trim(qname)//' '//'PHASE')) then
+                jafound = .true.
+             endif
+          endif
+       elseif (jakeyvalue(keyvaluestr,'FUNCTION','QHTABLE')) then
+          if (jakeyvalue(keyvaluestr,'QUANTITY',trim(qname)//' '//'WATERLEVEL')) then
+             if (jakeyvalue(keyvaluestr,'QUANTITY',trim(qname)//' '//'DISCHARGE')) then
+                jafound = .true.
+             endif
+          endif
+       else
+          if (jakeyvalue(keyvaluestr,'QUANTITY',qname)) then
+             jafound = .true.
+          elseif (jakeyvaluelist(keyvaluestr,'VECTOR',qname)) then
+             jafound = .true.
+          endif
+       endif
+    endif
+  end function jablock
 
   !> Given a character string of key-value pairs gathered from a header block,
   !> extract all relevant fields (and find the block of requested quantity)
@@ -250,7 +291,7 @@ contains
     character(len=maxNameLen)        ::     vectorquantities(MAXDIM)
     character(len=maxNameLen)        ::     vectordefinition, vectorstr
 
-    success = .False.
+    success = .false.
     if (allocated(hdrkeys)) then
        deallocate(hdrkeys)
     endif
@@ -463,7 +504,7 @@ contains
     deallocate(hdrvals)
     deallocate(iv,il)
 
-    success = .True.
+    success = .true.
     if (bc%vptyp == BC_VPTYP_PERCBED) then
        success = checkAndFixLayers(bc%vp, bc%quantity%name)
     endif
@@ -494,7 +535,7 @@ contains
      else if (minvp < 0.0d0 .or. maxvp > 100.0d0) then
         ! negative or even in percentages too high
         call printErrMessageLayers()
-        success = .False.
+        success = .false.
      else
         ! in range 0.0 - 100.0. probably percentages. extra check, increasing numbers?
         do k = 2, kmax
@@ -538,7 +579,7 @@ contains
     logical                                     ::      success
     type (tEcBCBlock),         intent(inout)    ::      bc
     !
-    success = .False.
+    success = .false.
     ! If function is tseries (not intended for the 3rd dimension, but numlay>1, indicating a specification of
     ! vertical position, assume that the function label is a mistake and change it into T3D
     if (bc%numlay>1 .and. bc%func==BC_FUNC_TSERIES) then
@@ -553,7 +594,7 @@ contains
        end if
     endif
 
-    success = .True.
+    success = .true.
   end function checkhdr
 
   !> Read the next record from a *.bc file.
@@ -797,10 +838,10 @@ contains
     !
     integer   :: i
 
-    success = .False.
+    success = .false.
 
     !----------------------------------------
-    success = .True.        ! RL666 : This destructor needs fixing asap, disabled for now, crashes
+    success = .true.        ! RL666 : This destructor needs fixing asap, disabled for now, crashes
     return
     !----------------------------------------
     if (associated(bcblock%ncptr)) then
@@ -828,7 +869,7 @@ contains
        endif
     enddo
 
-    success = .True.
+    success = .true.
   end function ecBCBlockFree
 
    !> Frees a 1D array of tEcFieldPtrs, after which the fieldPtr is deallocated.
@@ -870,7 +911,7 @@ end function ecBCBlockFree1dArray
     implicit none
     logical                            :: success    !< function status
     type(tEcBCQuantity), intent(inout) :: bcquantity !< intent(inout)
-    success = .False.
+    success = .false.
     if (allocated(bcquantity%jacolumn)) then
        deallocate(bcquantity%jacolumn)
     endif
@@ -886,7 +927,7 @@ end function ecBCBlockFree1dArray
     if (allocated(bcquantity%astro_phase)) then
        deallocate(bcquantity%astro_phase)
     endif
-    success = .True.
+    success = .true.
   end function ecBCQuantityFree
 
 

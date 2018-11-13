@@ -142,7 +142,7 @@ module m_ec_netcdf_timeseries
     ncptr%nVars = nVars
     allocate (ncptr%dimlen(nDims))
 
-    ncptr%ncname =  ncname 
+    ncptr%ncfilename =  ncname 
     iostat = 0                                                                              ! not yet used, placeholder 
     do iDims = 1, nDims
        ierr = nf90_inquire_dimension(ncptr%ncid, iDims, name, ncptr%dimlen(iDims))
@@ -296,7 +296,7 @@ module m_ec_netcdf_timeseries
     if (ivar <= ncptr%nVars) then
        q_id = ivar
     else
-       call setECMessage("Quantity '"//trim(quantity)//"' not found in file '"//trim(ncptr%ncname)//"'.")
+       call setECMessage("Quantity '"//trim(quantity)//"' not found in file '"//trim(ncptr%ncfilename)//"'.")
        q_id = -1 
     endif 
     do itim=1,ncptr%nTims

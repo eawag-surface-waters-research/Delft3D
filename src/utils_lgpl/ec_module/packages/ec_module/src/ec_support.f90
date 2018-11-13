@@ -60,6 +60,7 @@ module m_ec_support
    public :: ecSupportFindBCBlock
    public :: ecSupportFindNetCDF
    public :: ecSupportFindNetCDFByFilename
+   public :: ecSupportFindBCFileByFilename
    public :: ecSupportNetcdfCheckError
    public :: ecSupportNCFindCFCoordinates
    public :: ecSupportTimestringToUnitAndRefdate
@@ -363,10 +364,11 @@ module m_ec_support
       
       ! =======================================================================
       !> Retrieve the pointer to a NetCDF object by filename 
-      function ecSupportFindNetCDFByFilename(instancePtr, ncname) result(netCDFPtr)
+      function ecSupportFindNetCDFByFilename(instancePtr, ncfilename) result(netCDFPtr)
          type(tEcNetCDF), pointer            :: netCDFPtr   !< Quantity corresponding to quantityId
          type(tEcInstance), pointer          :: instancePtr !< intent(in)
-         character(len=*),  intent(in)       :: ncname      !< netCDF filename 
+         character(len=*),  intent(in)       :: ncfilename  !< netCDF filename 
+         integer                             :: netCDFId
          !
          integer :: i !< loop counter
          !
@@ -374,13 +376,32 @@ module m_ec_support
          !
          if (associated(instancePtr)) then
             do i=1, instancePtr%nNetCDFs
-               if (instancePtr%ecNetCDFsPtr(i)%ptr%ncname == ncname) then
+               if (instancePtr%ecNetCDFsPtr(i)%ptr%ncfilename == ncfilename) then
                   netCDFPtr => instancePtr%ecNetCDFsPtr(i)%ptr
                end if
             end do
          end if
       end function ecSupportFindNetCDFByFilename
 
+      ! =======================================================================
+      !> Retrieve the pointer to a BC-File object by filename 
+      function ecSupportFindBCFileByFilename(instancePtr, bcfilename) result(BCFilePtr)
+         type(tEcBCFile), pointer            :: BCFilePtr   !< Quantity corresponding to quantityId
+         type(tEcInstance), pointer          :: instancePtr !< intent(in)
+         character(len=*),  intent(in)       :: bcfilename  !< BC filename 
+         !
+         integer :: i !< loop counter
+         !
+         BCFilePtr => null()
+         !
+         if (associated(instancePtr)) then
+            do i=1, instancePtr%nBCFiles
+               if (instancePtr%ecBCFilesPtr(i)%ptr%bcfilename == bcfilename) then
+                  BCFilePtr => instancePtr%ecBCFilesPtr(i)%ptr
+               end if
+            end do
+         end if
+      end function ecSupportFindBCFileByFilename
       ! =======================================================================
       
       !> Retrieve the pointer to the ElementSet with id == elementSetId.
@@ -744,7 +765,7 @@ end subroutine ecInstanceListSourceItems
 
       ! =======================================================================
 
-      !> Retrieve the pointer to the BCBlock with id == bcBlockId.
+      !> Retrieve the pointer to the NetCDF instance with id == netCDFId.
       function ecSupportFindNetCDF(instancePtr, netCDFId) result(netCDFPtr)
          type(tEcNetCDF), pointer                :: netCDFPtr     !< NetCDF instance for the given Id
          type(tEcInstance), pointer              :: instancePtr   !< intent(in)

@@ -61,6 +61,8 @@ module m_ec_typedefs
       integer                                         :: nItems                      !< Number of tEcItemPtrs <= size(ecItemsPtr)
       type(tEcQuantityPtr),     dimension(:), pointer :: ecQuantitiesPtr   => null()
       integer                                         :: nQuantities                 !< Number of tEcQuantityPtrs <= size(ecQuantitiesPtr)
+      type(tEcBCFilePtr),       dimension(:), pointer :: ecBCFilesPtr      => null()
+      integer                                         :: nBCFiles                    !< Number of tEcBCFilePtrs <= size(ecBCFilesPtr)
       integer                                         :: idCounter                   !< helper variable for assigning unique ids to the Instance's stored objects
       integer                                         :: coordsystem = -1            !< Coordinate system of 
    end type tEcInstance
@@ -115,6 +117,7 @@ module m_ec_typedefs
         type (tEcBCQuantity), pointer              ::  quantity => null()  !< Quantity object 
         type (tEcBCQuantity), allocatable          ::  quantities(:)       !< Array of quantity objects for each quantity with the same name  
         type (tEcNetCDF), pointer                  ::  ncptr => null()     !< pointer to a NetCDF instance, responsible for a connected NetCDF file 
+        type (tEcBCFile), pointer                  ::  bcptr => null()     !< pointer to a BCFile instance, responsible for a connected BC file 
         integer                                    ::  ncvarndx = -1       !< varid in the associated netcdf for the requested quantity 
         integer                                    ::  nclocndx = -1       !< index in the timeseries_id dimension for the requested location 
         integer                                    ::  nctimndx =  1       !< record number to be read 
@@ -134,11 +137,34 @@ module m_ec_typedefs
    end type tEcBCBlockPtr
 
    !===========================================================================
+   
+   ! temporary dictionary type
+   type tEcBlocklist
+      character(len=:), allocatable :: keyvaluestr
+      integer                       :: position
+      integer                       :: nfld
+      integer                       :: nq
+      type (tEcBlocklist), pointer  :: next
+!     TODO: add some methods 
+   end type tEcBlocklist
+      
+   type :: tEcBCFile
+      integer                       :: id                                !< unique NCBlock number, set by ecInstanceCreateNCBlock
+      character(len=:), allocatable :: bcfilename
+      type (tEcBlocklist), pointer  :: blocklist => null()
+      integer                       :: last_position = 0                      
+   end type tEcBCFile
+
+   type tEcBCFilePtr
+      type(tEcBCFile), pointer      :: ptr => null()
+   end type tEcBCFilePtr
+
+   !===========================================================================
 
    type :: tEcNetCDF
         integer                                      ::  id              !< unique NCBlock number, set by ecInstanceCreateNCBlock
         integer                                      ::  ncid            !< unique NetCDF ncid 
-        character(len=maxFileNameLen)                ::  ncname          !< netCDF filename
+        character(len=maxFileNameLen)                ::  ncfilename      !< netCDF filename
         integer, allocatable, dimension(:)           ::  dimlen          !< lengths of dimensions 
         character(len=maxFileNameLen), allocatable, dimension(:)  ::  standard_names   !< list of standard names
         character(len=maxFileNameLen), allocatable, dimension(:)  ::  long_names       !< list of long names

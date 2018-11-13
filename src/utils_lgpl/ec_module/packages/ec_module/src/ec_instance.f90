@@ -128,6 +128,12 @@ module m_ec_instance
                   call setECMessage("ERROR: ec_instance::ecInstanceCreate: Unable to allocate memory for ecNetCDFsPtr array.")
                   success = .false.
                end if
+               ptr%nBCFiles = 0
+               allocate(ptr%ecBCFilesPtr(10), STAT = istat)
+               if (istat /= 0) then
+                  call setECMessage("ERROR: ec_instance::ecInstanceCreate: Unable to allocate memory for ecBCFilesPtr array.")
+                  success = .false.
+               end if
                ptr%nBCBlocks = 0
                allocate(ptr%ecItemsPtr(10), STAT = istat)
                if (istat /= 0) then
@@ -438,7 +444,7 @@ module m_ec_instance
                   return
                end if
             end if
-            ! register the BCBlock
+            ! register the new instance
             instancePtr%nNetCDFs = instancePtr%nNetCDFs + 1
             instancePtr%ecNetCDFsPtr(instancePtr%nNetCDFs)%ptr => netCDFPtr
             instancePtr%idCounter = instancePtr%idCounter + 1
@@ -447,7 +453,6 @@ module m_ec_instance
       end function ecInstanceCreateNetCDF
 
       ! =======================================================================
-      
       !> 
       subroutine ecInstanceListSourceItems(instancePtr,dev)
          implicit none

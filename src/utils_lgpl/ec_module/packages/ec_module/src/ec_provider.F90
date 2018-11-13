@@ -56,18 +56,12 @@ module m_ec_provider
    
    private
    
-   public :: ecSetFileReaderProperties
    public :: ecProviderInitializeFileReader
    public :: ecProviderCreateUniformItems
    public :: ecProviderCreateQhtableItems
    public :: ecProviderCreateTimeInterpolatedItem
    public :: ecProviderInitializeTimeFrame
    public :: items_from_bc_quantities
-
-   
-   interface ecSetFileReaderProperties                ! Kan weg
-      module procedure ecProviderInitializeFileReader
-   end interface ecSetFileReaderProperties
 
    public :: ecAtLeastOnePointIsCorrection            ! TODO: Refactor this shortcut (UNST-180).
    logical :: ecAtLeastOnePointIsCorrection = .false. ! TODO: Refactor this shortcut (UNST-180).
@@ -78,7 +72,8 @@ module m_ec_provider
       
       !> Initialize a new BCBlock item, which in turn constructs and initializes a filereader 
 
-      function ecProviderInitializeBCBlock(instancePtr, bcBlockId, k_refdat, k_tzone, k_tsunit, fileReaderId, fileName, quantityName, plilabel, dtnodal, istat) result(success)
+      function ecProviderInitializeBCBlock(instancePtr, bcBlockId, k_refdat, k_tzone, k_tsunit, fileReaderId, fileName, quantityName, &
+                                           plilabel, istat, dtnodal, funtype) result(success)
       use m_ec_filereader_read
       use m_ec_netcdf_timeseries
          logical                             :: success      !< function status
@@ -93,6 +88,7 @@ module m_ec_provider
          character(*),           intent(in)  :: plilabel     !< identify a (set of) pli-points
          real(hp), optional,     intent(in)  :: dtnodal      !< Nodal factors in astronomical bc update interval
          integer,                intent(out) :: istat        !< Detailed result status. \see{m_ec_parameters}.
+         character(len=*), optional, intent(in) :: funtype
 
          type(tEcBCBlock),    pointer :: bcBlockPtr     !< BCBlock corresponding to bcBlockId
          type(tEcFileReader), pointer :: fileReaderPtr  !< FileReader associated with the BC instance 
@@ -107,8 +103,16 @@ module m_ec_provider
          if (.not.associated(bcBlockPtr)) return
              
          if (index(trim(fileName)//'|','.bc')>0) then                               ! ASCII: bc-format  : detection is extension-based
+!           bcFilePtr => ecSupportFindBCFileByFilename(instancePtr, fileName)       ! was this BC-file already opened?
+            bcBlockPtr%bcptr => ecSupportFindBCFileByFilename(instancePtr, fileName)! was this BC-file already opened?
+            if (.not.associated(bcBlockPtr%bcptr)) then                                    ! if not, create anew
+               instancePtr%nBCFiles = instancePtr%nBCFiles + 1
+               allocate (bcBlockPtr%bcptr)
+               bcBlockPtr%bcptr%bcfilename = fileName
+               instancePtr%ecBCFilesPtr(instancePtr%nBCFiles)%Ptr => bcBlockPtr%bcptr
+            endif
             bcBlockPtr%ftype=BC_FTYPE_ASCII
-         else if (index(trim(fileName)//'|','.nc')>0) then                               ! NETCDF: nc-format 
+         else if (index(trim(fileName)//'|','.nc')>0) then                          ! NETCDF: nc-format 
             !if (index(plilabel,'_')<=0) then 
             !   return                                                              ! If this was not pli-label  bla_0001 then its is a qhbnd
             !endif                                                                  ! not supported in combination with netcdf-files 
@@ -116,12 +120,14 @@ module m_ec_provider
                                                                                     ! but no alternative for it as we speak 
             bcBlockPtr%ncptr => ecSupportFindNetCDFByFilename(instancePtr, fileName)! is there a netCDF instance with this file ?
             if (.not.associated(bcBlockPtr%ncptr)) then                             ! if not ...
-                netCDFId = ecInstanceCreateNetCDF(instancePtr)                      !   ... create a new instance 
-                bcBlockPtr%ncptr => ecSupportFindNetCDF(instancePtr,netCDFId)
-                if (.not.ecNetCDFInit(fileName, bcBlockPtr%ncptr, iostat)) then     ! initialise 
-                   return                                                           ! optionally add a message to the EC-error stack 
-                endif 
+               netCDFId = ecInstanceCreateNetCDF(instancePtr)
+               bcBlockPtr%ncptr => ecSupportFindNetCDF(instancePtr,netCDFId)
+               if (.not.ecNetCDFInit(fileName, bcBlockPtr%ncptr, iostat)) then
+                  bcBlockPtr%ncptr => null()
+                  return
+               endif 
             endif
+            
             bcBlockPtr%ftype=BC_FTYPE_NETCDF
             bcBlockPtr%vptyp=bcBlockPtr%ncptr%vptyp
             if (allocated(bcBlockPtr%ncptr%vp)) then
@@ -133,7 +139,7 @@ module m_ec_provider
            return
          endif 
          
-         if (.not.ecBCInit (instancePtr, filename, quantityName, plilabel, bcBlockPtr, iostat)) return
+         if (.not.ecBCInit (instancePtr, filename, quantityName, plilabel, bcBlockPtr, iostat, funtype=funtype)) return
 
          ! Every BC block (instance) needs an associated filereader referring to it  
          fileReaderId = ecInstanceCreateFileReader(instancePtr)    
@@ -1232,7 +1238,7 @@ module m_ec_provider
             if ( index(rec,'sigma') /= 0  ) then
                vptyp = BC_VPTYP_PERCBED
             else if ( index(rec,'z') /= 0 ) then
-               vptyp = BC_VPTYP_ZBED             ! rl666, or should this be BC_VPTYP_ZDATUM
+               vptyp = BC_VPTYP_ZBED  
             else
                call setECMessage("Invalid LAYER_TYPE specified in header.")
                return
@@ -1768,16 +1774,9 @@ module m_ec_provider
          write(plipointlbl,'(a)') trim(polyline_name)   
          call str_upper(quantityname)
          if (ecProviderInitializeBCBlock(InstancePtr, bcBlockId, k_yyyymmdd, fileReaderPtr%tframe%k_timezone, fileReaderPtr%tframe%k_timestep_unit,   &
-                                    id, bctfilename, quantityname, plipointlbl, fileReaderPtr%tframe%dtnodal, istat)) then
-            is_qh = (bcBlockPtr%func == BC_FUNC_QHTABLE) ! if a polylinename exist as a label without a number
-                                                         ! it might refer to a qh forcing 
-            if (.not.is_qh) then
-               call setECMessage("Unnumbered BC-block with label "//trim(plipointlbl)//" found in "//trim(bctfilename)//". This is only supported for QH boundary conditions, but 'function' is not set to QHTable. Perhaps a missing point number in block label?")
-               return
-            else
-               n_signals = 1                ! ????? ????  RL: moet n_signals hier niet op 1 gezet worden of iets anders ????
-            endif
-         else                            ! .not.is_qh
+                                    id, bctfilename, quantityname, plipointlbl, istat, dtnodal=fileReaderPtr%tframe%dtnodal, funtype = 'QHTABLE')) then
+            n_signals = 1
+         else
             n_signals = 0
             do i=1, n_points
                is_tim = .false.
@@ -1798,7 +1797,7 @@ module m_ec_provider
                endif
                
                if (.not. ecProviderInitializeBCBlock(InstancePtr, bcBlockId, k_yyyymmdd, fileReaderPtr%tframe%k_timezone, fileReaderPtr%tframe%k_timestep_unit,   &
-                                     id, bctfilename, quantityname, plipointlbl, fileReaderPtr%tframe%dtnodal, istat)) then
+                                     id, bctfilename, quantityname, plipointlbl, istat, dtnodal=fileReaderPtr%tframe%dtnodal)) then
                   !call setECMessage("WARNING: ec_provider::ecProviderPolyTimItems: Error initializing EC Block.")
                   mask(i) = 0
                   mask(i) = 0
@@ -2630,7 +2629,7 @@ module m_ec_provider
             ! =========================================
             elementSetId = ecInstanceCreateElementSet(instancePtr)
             if (grid_type == ec_undef_int) then
-               dummy = ecElementSetSetNumberOfCoordinates(instancePtr, elementSetId, 0)          ! RL666: waar slaat DIT op ??
+               dummy = ecElementSetSetNumberOfCoordinates(instancePtr, elementSetId, 0)
             else
                if (allocated(fgd_data)) deallocate(fgd_data)
                if (allocated(sgd_data)) deallocate(sgd_data)
