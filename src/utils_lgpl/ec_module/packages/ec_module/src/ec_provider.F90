@@ -56,12 +56,18 @@ module m_ec_provider
    
    private
    
+   public :: ecSetFileReaderProperties
    public :: ecProviderInitializeFileReader
    public :: ecProviderCreateUniformItems
    public :: ecProviderCreateQhtableItems
    public :: ecProviderCreateTimeInterpolatedItem
    public :: ecProviderInitializeTimeFrame
    public :: items_from_bc_quantities
+
+
+   interface ecSetFileReaderProperties
+      module procedure ecProviderInitializeFileReader
+   end interface ecSetFileReaderProperties
 
    public :: ecAtLeastOnePointIsCorrection            ! TODO: Refactor this shortcut (UNST-180).
    logical :: ecAtLeastOnePointIsCorrection = .false. ! TODO: Refactor this shortcut (UNST-180).
