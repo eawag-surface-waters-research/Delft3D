@@ -1442,21 +1442,15 @@ end module unstruc_boundaries
 
 function flow_initwaveforcings_runtime() result(retval)              ! This is the general hook-up to wave conditions
 
- !use m_flowexternalforcings
  use m_flowparameters
  use m_flowtimes                                     ! Two stages: 1 = collect elsets for which data is provided
  use m_flowgeom                                      !             2 = add relations between elsets and their providers
- !use m_netw
  use unstruc_model
  use unstruc_messages
  use unstruc_files
  use timespace
  use m_missing
  use m_waves
- !use m_ship
- !use m_flow, only : teta, frcu, frculin, jafrculin, viusp, javiusp, vicouv,    &
- !                   ifrcutp, frcuni, ifrctypuni, s1, sa1, satop, kmx
- !use m_observations
  use m_alloc
  use m_meteo
 
@@ -1467,14 +1461,14 @@ function flow_initwaveforcings_runtime() result(retval)              ! This is t
  integer               :: ierr
  integer               :: filetype_l
  integer               :: method_l
- character(1)          :: operand_l
- character(256)        :: qid_l
+ character(len=1)      :: operand_l
+ character(len=256)    :: qid_l
 
  if (extfor_wave_initialized) then
     retval = .true.
     return
  end if
-    
+
 
  filetype_l = 14  ! netcdf
  method_l   = 7   ! only time interpolation, extrapolation allowed (online WAVE)
@@ -1483,8 +1477,9 @@ function flow_initwaveforcings_runtime() result(retval)              ! This is t
  !
  qid_l = 'hrms'
  if (.not. allocated(hwav) ) then
-    allocate ( hwav(ndx), stat=ierr) ; hwav = 0.0
+    allocate ( hwav(ndx), stat=ierr)
     call aerr('hwav(ndx)', ierr, ndx)
+    hwav = 0.0
  endif
  success = ec_addtimespacerelation(qid_l, xz(1:ndx), yz(1:ndx), kcw, kx, md_wavefile, filetype_l, method_l, operand_l, quiet=.true.)
  if (.not.success) then
@@ -1506,78 +1501,89 @@ function flow_initwaveforcings_runtime() result(retval)              ! This is t
     qid_l = 'tp'
  endif
  if (.not. allocated(twav) ) then
-    allocate ( twav(ndx), stat=ierr) ; twav = 0.0
+    allocate ( twav(ndx), stat=ierr)
     call aerr('twav(ndx)', ierr, ndx)
+    twav = 0.0
  endif
  success = ec_addtimespacerelation(qid_l, xz(1:ndx), yz(1:ndx), kcw, kx, md_wavefile, filetype_l, method_l, operand_l, quiet=.true.)
  !
  qid_l = 'dir'
  if (.not. allocated(phiwav) ) then
-    allocate ( phiwav(ndx), stat=ierr) ; phiwav = 0.0
+    allocate ( phiwav(ndx), stat=ierr)
     call aerr('phiwav(ndx)', ierr, ndx)
+    phiwav = 0.0
  endif
  success = ec_addtimespacerelation(qid_l, xz(1:ndx), yz(1:ndx), kcw, kx, md_wavefile, filetype_l, method_l, operand_l, quiet=.true.)
  !
  qid_l = 'dissurf'
  if (.not. allocated(dsurf) ) then
-    allocate ( dsurf(ndx), stat=ierr) ; dsurf = 0.0
+    allocate ( dsurf(ndx), stat=ierr)
     call aerr('dsurf(ndx)', ierr, ndx)
+    dsurf = 0.0
  endif
  success = ec_addtimespacerelation(qid_l, xz(1:ndx), yz(1:ndx), kcw, kx, md_wavefile, filetype_l, method_l, operand_l, quiet=.true.)
  !
  qid_l = 'diswcap'
  if (.not. allocated(dwcap) ) then
-    allocate ( dwcap(ndx), stat=ierr) ; dwcap = 0.0
+    allocate ( dwcap(ndx), stat=ierr)
     call aerr('dwcap(ndx)', ierr, ndx)
+    dwcap = 0.0
  endif
  success = ec_addtimespacerelation(qid_l, xz(1:ndx), yz(1:ndx), kcw, kx, md_wavefile, filetype_l, method_l, operand_l, quiet=.true.)
  !
  qid_l = 'fx'
  if (.not. allocated(sxwav) ) then
-    allocate ( sxwav(ndx), stat=ierr) ; sxwav = 0.0
+    allocate ( sxwav(ndx), stat=ierr)
     call aerr('sxwav(ndx)', ierr, ndx)
+    sxwav = 0.0
  endif
  success = ec_addtimespacerelation(qid_l, xz(1:ndx), yz(1:ndx), kcw, kx, md_wavefile, filetype_l, method_l, operand_l, quiet=.true.)
  !
  qid_l = 'fy'
  if (.not. allocated(sywav) ) then
-    allocate ( sywav(ndx), stat=ierr) ; sywav = 0.0
+    allocate ( sywav(ndx), stat=ierr)
     call aerr('sywav(ndx)', ierr, ndx)
+    sywav = 0.0
  endif
  success = ec_addtimespacerelation(qid_l, xz(1:ndx), yz(1:ndx), kcw, kx, md_wavefile, filetype_l, method_l, operand_l, quiet=.true.)
  !
  qid_l = 'wsbu'
  if (.not. allocated(sbxwav) ) then
-    allocate ( sbxwav(ndx), stat=ierr) ; sbxwav = 0.0
+    allocate ( sbxwav(ndx), stat=ierr)
     call aerr('sbxwav(ndx)', ierr, ndx)
+    sbxwav = 0.0
  endif
  success = ec_addtimespacerelation(qid_l, xz(1:ndx), yz(1:ndx), kcw, kx, md_wavefile, filetype_l, method_l, operand_l, quiet=.true.)
  !
  qid_l = 'wsbv'
  if (.not. allocated(sbywav) ) then
-    allocate ( sbywav(ndx), stat=ierr) ; sbywav = 0.0
+    allocate ( sbywav(ndx), stat=ierr)
     call aerr('sbywav(ndx)', ierr, ndx)
+    sbywav = 0.0
  endif
  success = ec_addtimespacerelation(qid_l, xz(1:ndx), yz(1:ndx), kcw, kx, md_wavefile, filetype_l, method_l, operand_l, quiet=.true.)
  !
  qid_l = 'mx'
  if (.not. allocated(mxwav) ) then
-    allocate ( mxwav(ndx), stat=ierr) ; mxwav = 0.0
+    allocate ( mxwav(ndx), stat=ierr)
     call aerr('mxwav(ndx)', ierr, ndx)
+    mxwav = 0.0
  endif
  success = ec_addtimespacerelation(qid_l, xz(1:ndx), yz(1:ndx), kcw, kx, md_wavefile, filetype_l, method_l, operand_l, quiet=.true.)
  !
  qid_l = 'my'
  if (.not. allocated(mywav) ) then
-    allocate ( mywav(ndx), stat=ierr) ; mywav = 0.0
+    allocate ( mywav(ndx), stat=ierr)
     call aerr('mywav(ndx)', ierr, ndx)
+    mywav = 0.0
  endif
  success = ec_addtimespacerelation(qid_l, xz(1:ndx), yz(1:ndx), kcw, kx, md_wavefile, filetype_l, method_l, operand_l, quiet=.true.)
  !
  qid_l = 'ubot'
- if (.not. allocated(hwav) ) then
-    allocate ( uorbwav(ndx), stat=ierr) ; uorbwav = 0.0
+ if (.not. allocated(uorbwav) ) then
+    allocate ( uorbwav(ndx), stat=ierr)
     call aerr('uorbwav(ndx)', ierr, ndx)
+    uorbwav = 0.0
  endif
  success = ec_addtimespacerelation(qid_l, xz(1:ndx), yz(1:ndx), kcw, kx, md_wavefile, filetype_l, method_l, operand_l, quiet=.true.)
  !
