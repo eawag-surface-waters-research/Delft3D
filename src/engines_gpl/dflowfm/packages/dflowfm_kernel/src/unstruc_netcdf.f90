@@ -12039,7 +12039,7 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
 
    !define 1d2dcontacts only after mesh2d is completly defined  
    if (n1d2dcontacts.gt.0) then
-      ierr = ug_def_mesh_contact(ncid, id_tsp%meshcontacts, 'contact', n1d2dcontacts, id_tsp%meshids2d, id_tsp%meshids1d, UG_LOC_NODE, UG_LOC_FACE)
+      ierr = ug_def_mesh_contact(ncid, id_tsp%meshcontacts, 'contact', n1d2dcontacts, id_tsp%meshids2d, id_tsp%meshids1d, UG_LOC_NODE, UG_LOC_FACE, start_index)
    endif
 
    ! Define domain numbers when it is a parallel run
