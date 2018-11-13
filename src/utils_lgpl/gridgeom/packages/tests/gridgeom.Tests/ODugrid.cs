@@ -951,8 +951,14 @@ namespace gridgeom.Tests
 
             //5. make the links
             int c_npl = 0;
-            int c_nOneDMask = 0;
-            IntPtr c_oneDmask = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * 0);
+            int c_nOneDMask = meshoneddim.numnode;
+            IntPtr c_oneDmask = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshoneddim.numnode);
+            int[] oneDmask = new int[meshoneddim.numnode];
+            for (int i=0;i< meshoneddim.numnode; i++)
+            {
+                oneDmask[i] = 1;
+            }
+            Marshal.Copy(oneDmask, 0, c_oneDmask, meshoneddim.numnode);
             ierr = wrapperGridgeom.ggeo_make1D2DEmbeddedLinks(ref c_nOneDMask, ref c_oneDmask);
             Assert.That(ierr, Is.EqualTo(0));
 
@@ -971,14 +977,14 @@ namespace gridgeom.Tests
             int[] rc_arrayto = new int[n1d2dlinks];
             Marshal.Copy(c_arrayfrom, rc_arrayfrom, 0, n1d2dlinks);
             Marshal.Copy(c_arrayto, rc_arrayto, 0, n1d2dlinks);
-            var arrayfrom = new int[] { 12, 23, 34, 45, 56, 67, 78, 100};
-            var arrayto   = new int[] { 2,   2,  3,  3,  4,  4,  5,   6};
-            //for (int i = 0; i < n1d2dlinks; i++)
-            //{
-            //    Assert.That(rc_arrayfrom[i], Is.EqualTo(arrayfrom[i]));
-            //    Assert.That(rc_arrayto[i], Is.EqualTo(arrayto[i]));
-            //}
-            //7. deallocate memory of gridgeom
+            var arrayfrom = new int[] { 1, 11, 12, 22, 23, 33, 34, 44, 45, 55, 56, 66, 67, 77, 78, 79, 89 };
+            var arrayto   = new int[] { 1,  2,  2,  2,  2,  3,  3,  3,  3,  3,  4,  4,  4,  4,  5,  5 , 5 };
+            for (int i = 0; i < n1d2dlinks; i++)
+            {
+                Assert.That(rc_arrayfrom[i], Is.EqualTo(arrayfrom[i]));
+                Assert.That(rc_arrayto[i], Is.EqualTo(arrayto[i]));
+            }
+           // 7.deallocate memory of gridgeom
             ierr = wrapperGridgeom.ggeo_deallocate();
             Assert.That(ierr, Is.EqualTo(0));
 
