@@ -1916,7 +1916,7 @@ module m_ec_converter
                            end if
                         end do
                         connection%targetItemsPtr(1)%ptr%targetFieldPtr%arr1dPtr(i) = connection%sourceItemsPtr(3)%ptr%sourceT0FieldPtr%arr1dPtr(start_j-1) * magic_array(i) &
-                                                                                                                         + connection%sourceItemsPtr(4)%ptr%sourceT0FieldPtr%arr1dPtr(start_j-1)! slope(start_j-1)* magic_array(i) + crossing(start_j-1)
+                                                                                    + connection%sourceItemsPtr(4)%ptr%sourceT0FieldPtr%arr1dPtr(start_j-1)
                      end do
                   case default
                      call setECMessage("ERROR: ec_converter::ecConverterQhtable: Unsupported operand type requested.")

@@ -94,7 +94,8 @@ module m_ec_provider
          character(*),           intent(in)  :: plilabel     !< identify a (set of) pli-points
          real(hp), optional,     intent(in)  :: dtnodal      !< Nodal factors in astronomical bc update interval
          integer,                intent(out) :: istat        !< Detailed result status. \see{m_ec_parameters}.
-         character(len=*), optional, intent(in) :: funtype
+         character(len=*), optional, intent(in) :: funtype   !< Function type requested to match; the value for the keyword 'FUNCTION' in the bc-headers
+                                                             !< passing funtype narrows down the search for blocks to blocks with the requested function
 
          type(tEcBCBlock),    pointer :: bcBlockPtr     !< BCBlock corresponding to bcBlockId
          type(tEcFileReader), pointer :: fileReaderPtr  !< FileReader associated with the BC instance 
@@ -108,7 +109,7 @@ module m_ec_provider
          bcBlockPtr => ecSupportFindBCBlock(instancePtr, bcBlockId)
          if (.not.associated(bcBlockPtr)) return
              
-         if (index(trim(fileName)//'|','.bc')>0) then                               ! ASCII: bc-format  : detection is extension-based
+         if (index(trim(fileName)//'|','.bc|')>0) then                               ! ASCII: bc-format  : detection is extension-based
 !           bcFilePtr => ecSupportFindBCFileByFilename(instancePtr, fileName)       ! was this BC-file already opened?
             bcBlockPtr%bcptr => ecSupportFindBCFileByFilename(instancePtr, fileName)! was this BC-file already opened?
             if (.not.associated(bcBlockPtr%bcptr)) then                                    ! if not, create anew
@@ -118,7 +119,7 @@ module m_ec_provider
                instancePtr%ecBCFilesPtr(instancePtr%nBCFiles)%Ptr => bcBlockPtr%bcptr
             endif
             bcBlockPtr%ftype=BC_FTYPE_ASCII
-         else if (index(trim(fileName)//'|','.nc')>0) then                          ! NETCDF: nc-format 
+         else if (index(trim(fileName)//'|','.nc|')>0) then                          ! NETCDF: nc-format 
             !if (index(plilabel,'_')<=0) then 
             !   return                                                              ! If this was not pli-label  bla_0001 then its is a qhbnd
             !endif                                                                  ! not supported in combination with netcdf-files 
@@ -162,7 +163,6 @@ module m_ec_provider
             if (.not. ecProviderInitializeTimeFrame(fileReaderPtr, k_refdat, k_tzone, k_tsunit)) return
          end if
 
-         success = .false.
          select case(fileReaderPtr%bc%func)
             case (BC_FUNC_TSERIES)
                success = ecProviderCreateUniformItems(instancePtr, fileReaderPtr)
@@ -177,11 +177,6 @@ module m_ec_provider
             case default
                call setECMessage("ERROR: unknown function type.")             ! RL666 Todo: expand info on which file this is ...
          end select
-         if (.not.success) then
-            return
-         else 
-            success = .True. 
-         endif 
       end function ecProviderInitializeBCBlock
       ! =======================================================================
       
@@ -1782,6 +1777,7 @@ module m_ec_provider
          if (ecProviderInitializeBCBlock(InstancePtr, bcBlockId, k_yyyymmdd, fileReaderPtr%tframe%k_timezone, fileReaderPtr%tframe%k_timestep_unit,   &
                                     id, bctfilename, quantityname, plipointlbl, istat, dtnodal=fileReaderPtr%tframe%dtnodal, funtype = 'QHTABLE')) then
             n_signals = 1
+            is_qh = .True.
          else
             n_signals = 0
             do i=1, n_points

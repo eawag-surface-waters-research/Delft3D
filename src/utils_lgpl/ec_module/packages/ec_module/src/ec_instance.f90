@@ -536,7 +536,7 @@ module m_ec_instance
                write(line,'(a,i5.5,a,i1,a)') 'Element Set ', targetItemPtr%elementSetPtr%id
                call messenger(lvl, line)
                if (targetItemPtr%nConnections==0) then
-                  write(line,'(a)') '   TARGET ITEM HAS NO CONNECTIONS !!!'
+                  write(line,'(a,i5.5,a)') '   TARGET ITEM ',targetItemPtr%id,' HAS NO CONNECTIONS !!!'
                   call messenger(lvl, line)
                end if
                do ic=1, targetItemPtr%nConnections

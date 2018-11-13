@@ -109,61 +109,25 @@ module m_ec_bccollect
                 endif 
              else                                                    ! switch to datamode 
                 call str_upper(keyvaluestr,len(trim(keyvaluestr)))   ! case insensitive format 
-                if (jakeyvalue(keyvaluestr,'NAME',trim(location))) then  
-                   if (jakeyvalue(keyvaluestr,'FUNCTION','ASTRONOMIC').or.jakeyvalue(keyvaluestr,'FUNCTION','ASTROCOR')) then 
-                      ! Check for harmonic or astronomic components
-                      jablock = .true.
-                      jablock = jablock .and. jakeyvalue(keyvaluestr,'QUANTITY','ASTRONOMIC COMPONENT') 
-                      jablock = jablock .and. jakeyvalue(keyvaluestr,'QUANTITY',trim(quantity)//' '//'AMPLITUDE')
-                      jablock = jablock .and. jakeyvalue(keyvaluestr,'QUANTITY',trim(quantity)//' '//'PHASE')
-                   elseif (jakeyvalue(keyvaluestr,'FUNCTION','HARMONIC').or.jakeyvalue(keyvaluestr,'FUNCTION','HARMCOR')) then 
-                      ! Check for harmonic or harmonic components
-                      jablock = .true.
-                      jablock = jablock .and. jakeyvalue(keyvaluestr,'QUANTITY','HARMONIC COMPONENT')
-                      jablock = jablock .and. jakeyvalue(keyvaluestr,'QUANTITY',trim(quantity)//' '//'AMPLITUDE')
-                      jablock = jablock .and. jakeyvalue(keyvaluestr,'QUANTITY',trim(quantity)//' '//'PHASE')
-                   elseif (jakeyvalue(keyvaluestr,'FUNCTION','QH')) then  
-                      ! Check for qh
-                      jablock = .true.
-                      jablock = jablock .and. ( jakeyvalue(keyvaluestr,'QUANTITY',trim(quantity)//' '//'WATERLEVEL') .or. &
-                                                jakeyvalue(keyvaluestr,'QUANTITY',trim(quantity)//' '//'WATER_LEVEL'))
-                      jablock = jablock .and. ( jakeyvalue(keyvaluestr,'QUANTITY',trim(quantity)//' '//'DISCHARGE') .or. &
-                                                jakeyvalue(keyvaluestr,'QUANTITY',trim(quantity)//' '//'WATER_DISCHARGE'))
-                   elseif (jakeyvalue(keyvaluestr,'FUNCTION','T3D')) then  
-                      ! Check for timeseries on sigma- or z-levels 
-                      jablock = jakeyvalue(keyvaluestr,'QUANTITY',quantity)
-                   elseif (jakeyvalue(keyvaluestr,'FUNCTION','TIMESERIES')) then  
-                      ! Check for timeseries
-                      jablock = jakeyvalue(keyvaluestr,'QUANTITY',quantity)
-                   endif 
-                   if (jablock) then                           ! block confirmed, Create a filereader and initialize a bc-Block 
-                      bcBlockId = ecInstanceCreateBCBlock(InstancePtr)
-                      bcBlockPtr=>ecSupportFindBCBlock(instancePtr, bcBlockId)
-                      fileReaderId = ecInstanceCreateFileReader(InstancePtr)
-                      fileReaderPtr = ecSupportFindFileReader(instancePtr, fileReaderID)
-                      fileReaderPtr%bc => bcBlockPtr
-                      if (.not.processhdr_all_quantities(bcBlockPtr,nfld,nq,keyvaluestr)) return   ! dumb translation of bc-object metadata  
-                      if (.not.checkhdr(bcBlockPtr)) return                                        ! check on the contents of the bc-object 
-                      bcBlockPtr%fname = fname 
-                      if (ecSupportOpenExistingFileGnu(bcBlockPtr%fhandle, fname)) then
-                         call mf_backspace(bcBlockPtr%fhandle, savepos)           ! set newly opened file to the appropriate position 
-                         count = count + 1 
-                         iostat = EC_NOERR
-                      else 
-                         call mf_close(bcBlockPtr%fhandle)
-                         iostat = EC_DATA_NOTFOUND
-                      end if
+                if (matchblock(keyvaluestr,location,quantity)) then
+                   bcBlockId = ecInstanceCreateBCBlock(InstancePtr)
+                   bcBlockPtr=>ecSupportFindBCBlock(instancePtr, bcBlockId)
+                   fileReaderId = ecInstanceCreateFileReader(InstancePtr)
+                   fileReaderPtr = ecSupportFindFileReader(instancePtr, fileReaderID)
+                   fileReaderPtr%bc => bcBlockPtr
+                   if (.not.processhdr_all_quantities(bcBlockPtr,nfld,nq,keyvaluestr)) return   ! dumb translation of bc-object metadata  
+                   if (.not.checkhdr(bcBlockPtr)) return                                        ! check on the contents of the bc-object 
+                   bcBlockPtr%fname = fname 
+                   if (ecSupportOpenExistingFileGnu(bcBlockPtr%fhandle, fname)) then
+                      call mf_backspace(bcBlockPtr%fhandle, savepos)           ! set newly opened file to the appropriate position 
+                      count = count + 1 
+                      iostat = EC_NOERR
                    else 
-                      ! location was found, but not all required meta data was present
-                      iostat = EC_METADATA_INVALID
-                   endif                                    ! Right quantity
-                else
-                   ! location was found, but data was missing/invalid
-                   iostat = EC_DATA_NOTFOUND
+                      call mf_close(bcBlockPtr%fhandle)
+                      iostat = EC_DATA_NOTFOUND
+                   end if
                 endif                                       ! Right label
                 jaheader = .false.                          ! No, we are NOT reading a header 
-                if (jablock) then                           ! Yes, we are in the bc-block of interest
-                endif                                       ! found matching block 
              endif          ! in header mode (data lines are ignored) 
           endif             ! not a new '[forcing]' item  
        endif                ! non-empty string 

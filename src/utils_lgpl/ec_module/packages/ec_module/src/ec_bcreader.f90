@@ -16,9 +16,9 @@ module m_ec_bcreader
   public   ::  ecBCBlockCreate
   public   ::  ecBCBlockFree
   public   ::  ecBCBlockFree1dArray
-  public   ::  jablock
-  public   ::  jakeyvalue
-  public   ::  jakeyvaluelist
+  public   ::  matchblock
+  public   ::  matchkeyvalue
+  public   ::  matchkeyvaluelist
   public   ::  processhdr
   public   ::  checkhdr
   public   ::  sortndx
@@ -132,7 +132,7 @@ contains
     jaheader = .false.
     currentpos = bcFilePtr%last_position
     do while (associated(blocklistPtr))
-       if (jablock(blocklistPtr%keyvaluestr,bc%bcname,bc%qname,funtype=funtype)) then
+       if (matchblock(blocklistPtr%keyvaluestr,bc%bcname,bc%qname,funtype=funtype)) then
           jafound = .true.
           currentpos = blocklistPtr%position
           exit
@@ -182,7 +182,7 @@ contains
                       bcFilePtr%blocklist => blocklistPtr
                       bcFilePtr%last_position = savepos
    
-                      if (jablock(keyvaluestr,bc%bcname,bc%qname,funtype=funtype)) then
+                      if (matchblock(keyvaluestr,bc%bcname,bc%qname,funtype=funtype)) then
                          if (.not.processhdr(bc,nfld,nq,keyvaluestr)) return   ! dumb translation of bc-object metadata
                          if (.not.checkhdr(bc)) return                         ! check on the contents of the bc-object
                          call mf_backspace(fhandle, savepos)                   ! Rewind the first line with data
@@ -207,16 +207,16 @@ contains
     endif                      ! need to search or already in 'database'
   end function ecBCFilescan
 
-  function jakeyvaluelist(keyvaluestr,key,value) result (jafound)
+  function matchkeyvaluelist(keyvaluestr,key,value) result (jafound)
     implicit none
     logical                          :: jafound
     character(len=*),    intent(in)  :: keyvaluestr
     character(len=*),    intent(in)  :: key
     character(len=*),    intent(in)  :: value
     jafound = (index(keyvaluestr,','''//trim(key)//''','''//trim(value)//':')>0)            ! like 'keyword1','value1 : one,two,three','keyword',..... etc
-  end function jakeyvaluelist
+  end function matchkeyvaluelist
 
-  function jakeyvalue(keyvaluestr,key,value) result (jafound)
+  function matchkeyvalue(keyvaluestr,key,value) result (jafound)
     implicit none
     logical                          :: jafound
     character(len=*),    intent(in)  :: keyvaluestr
@@ -224,9 +224,9 @@ contains
     character(len=*),    intent(in)  :: value
 !   jafound = (index(keyvaluestr,','''//trim(key)//''','''//trim(value)//''',')>0)            ! like 'keyword1','value1','keyword',.....
     jafound = (index(keyvaluestr,''''//trim(key)//''','''//trim(value)//'''')>0)            ! like 'keyword1','value1','keyword',.....
-  end function jakeyvalue
+  end function matchkeyvalue
 
-  function jablock(keyvaluestr,bcname,qname,funtype) result (jafound)
+  function matchblock(keyvaluestr,bcname,qname,funtype) result (jafound)
     logical                                 :: jafound
     character(len=*), intent(in)            :: keyvaluestr
     character(len=*), intent(in)            :: bcname
@@ -234,38 +234,38 @@ contains
     character(len=*), intent(in), optional  :: funtype
     jafound = .false.
     if (present(funtype)) then
-       if (.not.jakeyvalue(keyvaluestr,'FUNCTION',trim(funtype))) then
+       if (.not.matchkeyvalue(keyvaluestr,'FUNCTION',trim(funtype))) then
           return
        endif
     endif
-    if (jakeyvalue(keyvaluestr,'NAME',trim(bcname))) then
-       if (jakeyvalue(keyvaluestr,'FUNCTION','ASTRONOMIC').or.jakeyvalue(keyvaluestr,'FUNCTION','ASTRONOMIC-CORRECTION')) then
-          if (jakeyvalue(keyvaluestr,'QUANTITY',trim(qname)//' '//'AMPLITUDE')) then
-             if (jakeyvalue(keyvaluestr,'QUANTITY',trim(qname)//' '//'PHASE')) then
+    if (matchkeyvalue(keyvaluestr,'NAME',trim(bcname))) then
+       if (matchkeyvalue(keyvaluestr,'FUNCTION','ASTRONOMIC').or.matchkeyvalue(keyvaluestr,'FUNCTION','ASTRONOMIC-CORRECTION')) then
+          if (matchkeyvalue(keyvaluestr,'QUANTITY',trim(qname)//' '//'AMPLITUDE')) then
+             if (matchkeyvalue(keyvaluestr,'QUANTITY',trim(qname)//' '//'PHASE')) then
                 jafound = .true.
              endif
           endif
-       elseif (jakeyvalue(keyvaluestr,'FUNCTION','HARMONIC').or.jakeyvalue(keyvaluestr,'FUNCTION','HARMONIC-CORRECTION')) then
-          if (jakeyvalue(keyvaluestr,'QUANTITY',trim(qname)//' '//'AMPLITUDE')) then
-             if (jakeyvalue(keyvaluestr,'QUANTITY',trim(qname)//' '//'PHASE')) then
+       elseif (matchkeyvalue(keyvaluestr,'FUNCTION','HARMONIC').or.matchkeyvalue(keyvaluestr,'FUNCTION','HARMONIC-CORRECTION')) then
+          if (matchkeyvalue(keyvaluestr,'QUANTITY',trim(qname)//' '//'AMPLITUDE')) then
+             if (matchkeyvalue(keyvaluestr,'QUANTITY',trim(qname)//' '//'PHASE')) then
                 jafound = .true.
              endif
           endif
-       elseif (jakeyvalue(keyvaluestr,'FUNCTION','QHTABLE')) then
-          if (jakeyvalue(keyvaluestr,'QUANTITY',trim(qname)//' '//'WATERLEVEL')) then
-             if (jakeyvalue(keyvaluestr,'QUANTITY',trim(qname)//' '//'DISCHARGE')) then
+       elseif (matchkeyvalue(keyvaluestr,'FUNCTION','QHTABLE')) then
+          if (matchkeyvalue(keyvaluestr,'QUANTITY',trim(qname)//' '//'WATERLEVEL')) then
+             if (matchkeyvalue(keyvaluestr,'QUANTITY',trim(qname)//' '//'DISCHARGE')) then
                 jafound = .true.
              endif
           endif
        else
-          if (jakeyvalue(keyvaluestr,'QUANTITY',qname)) then
+          if (matchkeyvalue(keyvaluestr,'QUANTITY',qname)) then
              jafound = .true.
-          elseif (jakeyvaluelist(keyvaluestr,'VECTOR',qname)) then
+          elseif (matchkeyvalue(keyvaluestr,'VECTOR',qname)) then
              jafound = .true.
           endif
        endif
     endif
-  end function jablock
+  end function matchblock
 
   !> Given a character string of key-value pairs gathered from a header block,
   !> extract all relevant fields (and find the block of requested quantity)
