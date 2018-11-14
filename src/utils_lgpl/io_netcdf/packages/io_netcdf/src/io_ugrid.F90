@@ -3616,7 +3616,7 @@ function ug_def_mesh_ids(ncid, meshids, meshname, locationType) result(ierr)
 end function ug_def_mesh_ids
 
 ! Creates a mesh_topology_contact variable for storing contacts between meshes.
-function ug_def_mesh_contact(ncid, contactids, linkmeshname, ncontacts, meshidfrom, meshidto, locationType1Id, locationType2Id) result(ierr)
+function ug_def_mesh_contact(ncid, contactids, linkmeshname, ncontacts, meshidfrom, meshidto, locationType1Id, locationType2Id, start_index) result(ierr)
 
    integer, intent(in)                   :: ncid, locationType1Id, locationType2Id, ncontacts
    type(t_ug_mesh), intent(in)           :: meshidfrom, meshidto
@@ -3624,7 +3624,8 @@ function ug_def_mesh_contact(ncid, contactids, linkmeshname, ncontacts, meshidfr
    character(len=len_trim(linkmeshname)) :: prefix
    type(t_ug_contacts), intent(inout)    :: contactids
    character(len=nf90_max_name)          :: locationType1, locationType2, mesh1, mesh2     
-   integer                               :: ierr, wasInDefine 
+   integer                               :: ierr, wasInDefine
+   integer, optional                     :: start_index
 
    ierr = UG_SOMEERR
    wasInDefine = 0
@@ -3671,6 +3672,9 @@ function ug_def_mesh_contact(ncid, contactids, linkmeshname, ncontacts, meshidfr
    ierr = nf90_put_att(ncid, contactids%varids(cid_contacttopo), 'contact_type'         , prefix//'_contact_type') 
    ierr = nf90_put_att(ncid, contactids%varids(cid_contacttopo), 'contact_ids'         , prefix//'_ids')
    ierr = nf90_put_att(ncid, contactids%varids(cid_contacttopo), 'contact_long_names'  , prefix//'_long_names') 
+   if (present(start_index)) then
+      if (start_index.ne.0) ierr = nf90_put_att(ncid, contactids%varids(cid_contacttopo), 'start_index'  , start_index) 
+   endif
    
    !define the variable and attributes contacts id
    ierr = nf90_def_var(ncid, prefix//'_ids', nf90_char, (/ contactids%dimids(cdim_idstring), contactids%dimids(cdim_ncontacts) /) , contactids%varids(cid_contactids))
