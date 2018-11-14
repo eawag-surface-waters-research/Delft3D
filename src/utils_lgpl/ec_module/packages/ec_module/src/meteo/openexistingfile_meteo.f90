@@ -38,7 +38,7 @@ function openexistingfile_meteo(minp, filename, meteotype) result(success)
 ! Global variables
 !
     integer         :: minp
-    integer         :: meteotype
+    integer,optional:: meteotype
     logical         :: success
     character(*)    :: filename
 !
@@ -50,7 +50,11 @@ function openexistingfile_meteo(minp, filename, meteotype) result(success)
 !! executable statements -------------------------------------------------------
 !
     if (len_trim(filename) == 0) then
-       write (meteomessage, '(a,i0)') 'While opening meteo file: name is empty, for meteotype = ', meteotype
+       if (present(meteotype)) then
+          write (meteomessage, '(a,i0)') 'While opening meteo file: name is empty, for meteotype = ', meteotype
+       else
+          write (meteomessage, '(a)') 'While opening meteo file: name is empty'
+       endif
        success = .false.
        return
     endif
