@@ -691,9 +691,7 @@ subroutine readMDUFile(filename, istat)
        call prop_get_string ( md_ptr, 'geometry', 'ThindykeFile',     md_fixedweirfile, success)
     end if
     call prop_get_string ( md_ptr, 'geometry', 'PillarFile',       md_pillarfile,   success)
-    if ( len_trim(md_pillarfile) > 0 ) then
-       japillar = 1
-    endif
+
     if( len_trim(md_1dfiles%onednetwork) > 0 ) then
        jamd1dfile = 1
     endif
@@ -861,6 +859,11 @@ subroutine readMDUFile(filename, istat)
     !end if
 !    call prop_get_integer(md_ptr, 'numerics', 'numoverlap'      , numoverlap, success)
 
+    call prop_get_integer(md_ptr, 'numerics', 'PillarScheme'  , japillar, success)
+    if ( len_trim(md_pillarfile) == 0 ) then
+       japillar = 0
+    endif
+        
     call prop_get_double( md_ptr, 'numerics', 'FixedWeirContraction' , Fixedweircontraction, success)
     if (.not. success) then ! Backwards compatibility: read old Thindykecontraction keyword.
        call prop_get_double( md_ptr, 'numerics', 'Thindykecontraction' , Fixedweircontraction)
@@ -2087,6 +2090,9 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        call prop_set(prop_ptr, 'numerics', 'Fixedweirtopwidth' , fixedweirtopwidth,        'Uniform width of the groyne part of fixed weirs')
        call prop_set(prop_ptr, 'numerics', 'Fixedweirtopfrictcoef' , fixedweirtopfrictcoef,'Uniform friction coefficient of the groyne part of fixed weirs')
        call prop_set(prop_ptr, 'numerics', 'Fixedweirtalud' , fixedweirtalud,              'Uniform talud slope of fixed weirs')
+    endif
+    if (writeall .or. japillar /= 1) then
+       call prop_set(prop_ptr, 'numerics', 'PillarScheme', japillar, 'Pillar scheme (0: none, 1: Located on the cell centred, 2: vegetation type method, 3: Defined on the cell faces')
     endif
     if (writeall .or. (izbndpos > 0)) then
        call prop_set(prop_ptr, 'numerics', 'Izbndpos',  Izbndpos,   'Position of z boundary (0: D3Dflow, 1: on net boundary, 2: on specified polyline)')
