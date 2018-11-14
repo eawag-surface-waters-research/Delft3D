@@ -285,7 +285,7 @@ rem ====================
         rem is needed for dimr nuget package? please check 
         call :copyFile "third_party_open\petsc\petsc-3.10.2\lib\x64\Release\libpetsc.dll"  !dest_share!
     )
-    mkl_redist_dir
+
     if !mkl_redist_dir!=="" (
         rem mkl_redist_dir not set
     ) else (
