@@ -4,6 +4,7 @@ import glob
 import sys
 import shutil
 import subprocess
+import re
 if sys.version_info<(3,0,0):
    # To avoid problems with encoding:
    # - Use codecs.open instead of open (Python 2.x only)
@@ -133,6 +134,50 @@ redistdir["fortran1932"] = "$(IFORT_COMPILER19)redist\\ia32\\compiler\\&quot"
 redistdir["c1932"] = "$(IFORT_COMPILER19)redist\\ia32\\compiler\\"
 redistdir["fortran1964"] = "$(IFORT_COMPILER19)redist\\intel64\\compiler\\&quot"
 redistdir["c1964"] = "$(IFORT_COMPILER19)redist\\intel64\\compiler\\"
+
+
+# redistdir specifies the directory containing the ifort redistributable dlls
+# The string to be added can be set depending on:
+# - fortran/c project file to place it in
+# - ifort version
+# - 32/64 bit settings
+mkldir = {}
+mkldir["fortran1132"] = "$(IFORT_COMPILER11)redist\\ia32\\mkl\\&quot"
+mkldir["c1132"] = "$(IFORT_COMPILER11)redist\\ia32\\mkl\\"
+mkldir["fortran1164"] = "$(IFORT_COMPILER11)redist\\intel64\\mkl\\&quot"
+mkldir["c1164"] = "$(IFORT_COMPILER11)redist\\intel64\\mkl\\"
+mkldir["fortran1232"] = "$(IFORT_COMPILER12)redist\\ia32\\mkl\\&quot"
+mkldir["c1232"] = "$(IFORT_COMPILER12)redist\\ia32\\mkl\\"
+mkldir["fortran1264"] = "$(IFORT_COMPILER12)redist\\intel64\\mkl\\&quot"
+mkldir["c1264"] = "$(IFORT_COMPILER12)redist\\intel64\\mkl\\"
+mkldir["fortran1332"] = "$(IFORT_COMPILER13)redist\\ia32\\mkl\\&quot"
+mkldir["c1332"] = "$(IFORT_COMPILER13)redist\\ia32\\mkl\\"
+mkldir["fortran1364"] = "$(IFORT_COMPILER13)redist\\intel64\\mkl\\&quot"
+mkldir["c1364"] = "$(IFORT_COMPILER13)redist\\intel64\\mkl\\"
+mkldir["fortran1432"] = "$(IFORT_COMPILER14)redist\\ia32\\mkl\\&quot"
+mkldir["c1432"] = "$(IFORT_COMPILER14)redist\\ia32\\mkl\\"
+mkldir["fortran1464"] = "$(IFORT_COMPILER14)redist\\intel64\\mkl\\&quot"
+mkldir["c1464"] = "$(IFORT_COMPILER14)redist\\intel64\\mkl\\"
+mkldir["fortran1532"] = "$(IFORT_COMPILER15)redist\\ia32\\mkl\\&quot"
+mkldir["c1532"] = "$(IFORT_COMPILER15)redist\\ia32\\mkl\\"
+mkldir["fortran1564"] = "$(IFORT_COMPILER15)redist\\intel64\\mkl\\&quot"
+mkldir["c1564"] = "$(IFORT_COMPILER15)redist\\intel64\\mkl\\"
+mkldir["fortran1632"] = "$(IFORT_COMPILER16)redist\\ia32\\mkl\\&quot"
+mkldir["c1632"] = "$(IFORT_COMPILER16)redist\\ia32\\mkl\\"
+mkldir["fortran1664"] = "$(IFORT_COMPILER16)redist\\intel64\\mkl\\&quot"
+mkldir["c1664"] = "$(IFORT_COMPILER16)redist\\intel64\\mkl\\"
+mkldir["fortran1732"] = "$(IFORT_COMPILER17)redist\\ia32\\mkl\\&quot"
+mkldir["c1732"] = "$(IFORT_COMPILER17)redist\\ia32\\mkl\\"
+mkldir["fortran1764"] = "$(IFORT_COMPILER17)redist\\intel64\\mkl\\&quot"
+mkldir["c1764"] = "$(IFORT_COMPILER17)redist\\intel64\\mkl\\"
+mkldir["fortran1832"] = "$(IFORT_COMPILER18)redist\\ia32\\mkl\\&quot"
+mkldir["c1832"] = "$(IFORT_COMPILER18)redist\\ia32\\mkl\\"
+mkldir["fortran1864"] = "$(IFORT_COMPILER18)redist\\intel64\\mkl\\&quot"
+mkldir["c1864"] = "$(IFORT_COMPILER18)redist\\intel64\\mkl\\"
+mkldir["fortran1932"] = "$(IFORT_COMPILER19)redist\\ia32\\mkl\\&quot"
+mkldir["c1932"] = "$(IFORT_COMPILER19)redist\\ia32\\mkl\\"
+mkldir["fortran1964"] = "$(IFORT_COMPILER19)redist\\intel64\\mkl\\&quot"
+mkldir["c1964"] = "$(IFORT_COMPILER19)redist\\intel64\\mkl\\"
 
 #
 #
@@ -394,17 +439,17 @@ def process_project_file(pfile):
                     if ptype == "c":
                         split_char = '"'
                     parts = line.split(split_char)
-                    added = False
                     i = 0
                     for part in parts:
-                        if part.find("$(IFORT_COMPILER") != -1:
-                            if not added:
-                                key = ptype + str(ifort) + str(configuration)
+                        res = [s.start() for s in re.finditer("IFORT_COMPILER", part)]
+                        for it in enumerate(res):
+                            key = ptype + str(ifort) + str(configuration)
+                            if it == 0:
                                 parts[i] = redistdir[key]
-                                added = True
                                 i += 1
-                            # else:
-                            # remove this part
+                            if it == 1:
+                                parts[i] = mkldir[key]
+                                i += 1
                         else:
                             parts[i] = part
                             i += 1
