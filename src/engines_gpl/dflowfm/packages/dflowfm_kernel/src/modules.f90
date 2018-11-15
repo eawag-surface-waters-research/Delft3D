@@ -2915,7 +2915,7 @@ subroutine default_flowparameters()
 
     jasecflow = 0     ! include secondary flow (0=no, 1=yes)
 
-    japillar  = 1     ! include pillar (0=no, 1=inside cell, 2=vegetation method, 3=on cell face)
+    japillar  = 0     ! include pillar (0=no, 1=yes)
 
     jaequili  = 0     ! equilibrium secondary flow (0=no, 1=yes)
 
