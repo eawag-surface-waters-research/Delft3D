@@ -247,7 +247,7 @@ module m_oned_functions
       do i = 1, storageCount
          pstor => network%storS%stor(i)
          if (pstor%branch_index <= 0) then
-            pstor%gridPoint = network%nds%node(pstor%node_index)%gridNumber
+            pstor%gridPoint = network%nds%node(iabs(pstor%node_index))%gridNumber
          else
             pbr => network%brs%branch(pstor%branch_index)
             pstor%gridPoint = pbr%grd(pstor%local_grid_index)
