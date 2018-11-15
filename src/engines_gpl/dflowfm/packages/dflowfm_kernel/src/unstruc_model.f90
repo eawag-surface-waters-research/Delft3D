@@ -843,7 +843,8 @@ subroutine readMDUFile(filename, istat)
 
     call prop_get_integer(md_ptr, 'numerics', 'Horadvtypzlayer' , jahazlayer)
     call prop_get_integer(md_ptr, 'numerics', 'Zlayercenterbedvel', jaZlayercenterbedvel)
-
+    call prop_get_integer(md_ptr, 'numerics', 'Zerozbndinflowadvection', jaZerozbndinflowadvection)
+    
     call prop_get_integer(md_ptr, 'numerics', 'Zlayeratubybob' , jaZlayeratubybob)
 
     call prop_get_integer(md_ptr, 'numerics', 'Jarhoxu' , Jarhoxu)
@@ -1029,7 +1030,14 @@ subroutine readMDUFile(filename, istat)
     call prop_get_double (md_ptr, 'veg'    , 'Rhoveg'         , Rhoveg)
     call prop_get_double (md_ptr, 'veg'    , 'Stemheightstd'  , Stemheightstd)
     call prop_get_double (md_ptr, 'veg'    , 'Densvegminbap'  , Densvegminbap)
-
+    
+    call prop_get_double (md_ptr, 'veg'    , 'Expchistem'     , expchistem)
+    call prop_get_double (md_ptr, 'veg'    , 'Expchileaf'     , expchileaf)
+    call prop_get_double (md_ptr, 'veg'    , 'Uchistem'       , uchistem)
+    call prop_get_double (md_ptr, 'veg'    , 'Uchileaf'       , uchileaf)
+    call prop_get_double (md_ptr, 'veg'    , 'Arealeaf'       , arealeaf)
+    call prop_get_double (md_ptr, 'veg'    , 'Cdleaf'         , Cdleaf)
+    
     call prop_get_integer(md_ptr, 'sediment', 'Sedimentmodelnr'    ,  jased) ! 1 = krone, 2 = svr, 3 engelund, 4=D3D
     call prop_get_string (md_ptr, 'sediment', 'SedFile',              md_sedfile,    success)
     call prop_get_string (md_ptr, 'sediment', 'MorFile',              md_morfile,    success)
@@ -2065,10 +2073,12 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     if (writeall .or. (jahazlayer .ne. 0 .and. layertype .ne. 1)) then
       call prop_set(prop_ptr, 'numerics', 'Horadvtypzlayer', Jahazlayer, 'Horizontal advection treatment of z-layers (1: default, 2: sigma-like)')
     endif
+    if (jaZerozbndinflowadvection == 1) then
+       call prop_set(prop_ptr, 'numerics', 'Zerozbndinflowadvection', jaZerozbndinflowadvection, 'On waterlevel boundaries set incoming advection velocity to zero on inflow (0=no, 1=yes)')
+    endif
     if (jaZlayercenterbedvel == 1) then
        call prop_set(prop_ptr, 'numerics', 'Zlayercenterbedvel', JaZlayercenterbedvel, 'reconstruction of center velocity at half closed bedcells (0=no, 1: copy bed link velocities)')
     endif
-
     if (writeall .or. jaZlayeratubybob .ne. 0 .and. layertype .ne. 1) then
       call prop_set(prop_ptr, 'numerics', 'Zlayeratubybob', JaZlayeratubybob, 'Lowest connected cells governed by bob instead of by bL L/R' )
     endif
@@ -2390,8 +2400,16 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        if (kmx == 0) then
           call prop_set(prop_ptr, 'veg', 'Densvegminbap'  , Densvegminbap, 'Minimum vegetation density in Baptist formula  (1/m2)' )
        endif
+       if (expchistem < 0) then 
+          call prop_set (prop_ptr, 'veg'    , 'Expchistem'     , expchistem , '( )' )
+          call prop_set (prop_ptr, 'veg'    , 'Expchileaf'     , expchileaf , '( )' )
+          call prop_set (prop_ptr, 'veg'    , 'Uchistem'       , uchistem   , '(m/s)' )
+          call prop_set (prop_ptr, 'veg'    , 'Uchileaf'       , uchileaf   , '(m/s)' )
+          call prop_set (prop_ptr, 'veg'    , 'Arealeaf'       , arealeaf   , '(m2)   (per m2 bed surface) ')
+          call prop_set (prop_ptr, 'veg'    , 'Cdleaf'         , Cdleaf     , '( )' )  
+       endif   
     endif
-
+    
     call prop_set(prop_ptr,    'wind', 'ICdtyp',               ICdtyp,   'Wind drag coefficient type (1=Const; 2=Smith&Banke (2 pts); 3=S&B (3 pts); 4=Charnock 1955, 5=Hwang 2005, 6=Wuest 2005, 7=Hersbach 2010 (2 pts)' )
     if (ICdtyp == 1 .or. ICdtyp == 4) then
        call prop_set(prop_ptr, 'wind', 'Cdbreakpoints',        Cdb(1:1), 'Wind drag coefficient break points')

@@ -2417,7 +2417,7 @@
       OPTION(18)= 'Squ sum of q out of cell          (m3/s)'
       OPTION(19)= 'Sqi sum of q in to  cell          (m3/s)'
       OPTION(20)= 'Sqi-squ                           (m3/s)'
-      OPTION(21)= 'QW vertical interface flux        (m3/s)'
+      OPTION(21)= 'QW vertical interface velocity    (m /s)'
       OPTION(22)= 'Equilibrium Transport conc.      (kg/m3)'
       OPTION(23)= 'Qin                               (m3/s)'
       OPTION(24)= 'Erodable Lay. Thickn.                (m)'
@@ -18189,7 +18189,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
    implicit none
 
    integer :: numpar, numfld, numparactual, numfldactual
-   PARAMETER  (NUMPAR = 11, NUMFLD = 2*NUMPAR)
+   PARAMETER  (NUMPAR = 17, NUMFLD = 2*NUMPAR)
    INTEGER  IX(NUMFLD),IY(NUMFLD),IS(NUMFLD),IT(NUMFLD), L
    CHARACTER WRDKEY*40, OPTION(NUMPAR)*40, HELPM(NUMPAR)*60
    integer :: nlevel
@@ -18213,7 +18213,12 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
    OPTION( 9) = 'hh1DUNI7                         (m)   ' ; it(2* 9) = 6
    OPTION(10) = 'Uniformtyp1D7                    (m)   ' ; it(2*10) = 2
    OPTION(11) = 'japiaczek33                      ( )   ' ; it(2*11) = 2
-
+   OPTION(12) = 'Expchistem                       ( )   ' ; it(2*12) = 6
+   OPTION(13) = 'Uchistem                         ( )   ' ; it(2*13) = 6
+   OPTION(14) = 'Expchileaf                       ( )   ' ; it(2*14) = 6
+   OPTION(15) = 'Uchileaf                         ( )   ' ; it(2*15) = 6
+   OPTION(16) = 'Cdleaf                           ( )   ' ; it(2*16) = 6
+   OPTION(17) = 'Arealeaf                         ( )   ' ; it(2*17) = 6
    
 !   123456789012345678901234567890123456789012345678901234567890
 !            1         2         3         4         5         6
@@ -18229,8 +18234,13 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
    HELPM ( 9) = 'Uniform height of 1D2D connection type 7 roofgutterpipes( ) '
    HELPM (10) = 'Uniform proftyp kn3=7,  1=circle, 2=rect A/P, 3=rect K  ( ) '
    HELPM (11) = '0=no, 1 = yes                                           ( ) '
-
-   
+   HELPM (12) = '                                                        ( ) '
+   HELPM (13) = '                                                        ( ) '
+   HELPM (14) = '                                                        ( ) '
+   HELPM (15) = '                                                        ( ) '
+   HELPM (16) = '                                                        ( ) '
+   HELPM (17) = '                                                        ( ) '
+      
    CALL SAVEKEYS()
    NUMPARACTUAL = NUMPAR
    NUMFLDACTUAL = 2*NUMPARACTUAL
@@ -18311,8 +18321,13 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
    CALL IFORMputdouble  (2* 9 , hh1DUNI7, '(F7.3)' )       
    CALL IFORMputinteger (2*10 , iproftypuni7)       
    CALL IFORMputinteger (2*11 , japiaczek33 )       
+   CALL IFORMputdouble  (2*12 , Expchistem, '(F7.3)' )    
+   CALL IFORMputdouble  (2*13 , Uchistem,   '(F7.3)' ) 
+   CALL IFORMputdouble  (2*14 , Expchileaf, '(F7.3)' )  
+   CALL IFORMputdouble  (2*15 , Uchileaf,   '(F7.3)' )  
+   CALL IFORMputdouble  (2*16 , Cdleaf,     '(F7.3)' ) 
+   CALL IFORMputdouble  (2*17 , Arealeaf,   '(F7.3)' ) 
 
-   
    !  Display the form with numeric fields left justified
    !  and set the initial field to number 2
    CALL IOUTJUSTIFYNUM('L')
@@ -18360,7 +18375,13 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
           CALL IFORMgetdouble  (2* 8 , wu1DUNI7 )       
           CALL IFORMgetdouble  (2* 9 , hh1DUNI7 ) 
           CALL IFORMgetinteger (2*10 , iproftypuni7)        
-          CALL IFORMgetinteger (2*11 , japiaczek33 )       
+          CALL IFORMgetinteger (2*11 , japiaczek33 )    
+          CALL IFORMgetdouble  (2*12 , Expchistem )    
+          CALL IFORMgetdouble  (2*13 , Uchistem   )
+          CALL IFORMgetdouble  (2*14 , Expchileaf )  
+          CALL IFORMgetdouble  (2*15 , Uchileaf   ) 
+          CALL IFORMgetdouble  (2*16 , Cdleaf     ) 
+          CALL IFORMgetdouble  (2*17 , Arealeaf   ) 
           do L = 1,Lnx1D
              if (prof1D(1,L) > 0) then  ! only direct profiles
                 if (kcu(L) == 1 ) then 

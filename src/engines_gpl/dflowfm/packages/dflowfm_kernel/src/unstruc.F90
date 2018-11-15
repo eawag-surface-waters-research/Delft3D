@@ -754,7 +754,7 @@ end subroutine flow_finalize_single_timestep
  use m_flowgeom
  implicit none
  integer          :: L, k1, k2
- double precision :: ap, Cz, Czb, Czr, rnL, diaL, stemhL, gamhg
+ double precision :: ap, Cz, Czb, Czr, rnL, diaL, stemhL, gamhg,Cda, areastem, umag,fac, facL, Cdaleaf
 
  do L = 1,lnx
     k1  = ln(1,L) ; k2 = ln(2,L)
@@ -775,7 +775,33 @@ end subroutine flow_finalize_single_timestep
               stemhL = max( stemheight(k1), stemheight(k2) )
            endif
            stemhL   = min(stemhL,hu(L))
-           gamhg    = 0.5d0*Cdveg*rnL*diaL*stemhL/ag           ! gamma*h/g
+           areastem = diaL*stemhL
+           Cda      = Cdveg*areastem
+           if (uchistem > 0d0 .and. expchistem < 0d0) then 
+              umag  = sqrt( u1(L)**2 + v(L)**2 )
+              if (umag > 0d0) then 
+                 fac   = (umag/uchistem)**expchistem
+              else
+                 fac   = 1d0 
+              endif   
+              Cda   = Cda*fac
+              !if ( leafarea(k1) > 0 .and. leafarea(k2) > 0) then 
+              !   arealeaf = 0.5d0*( leafarea(k1) + leafarea(k2) )
+              !else
+              !   arealeaf = max( leafarea(k1), leafarea(k2) )
+              !endif
+              if (uchileaf > 0d0 .and. expchileaf < 0d0) then 
+                 if (umag > 0d0) then 
+                    facL  = (umag/uchileaf)**expchileaf
+                 else
+                    facL = 1d0
+                 endif   
+                 Cdaleaf  = Cdleaf*arealeaf*facL 
+                 Cda   = Cda + Cdaleaf
+              endif   
+           endif   
+           
+           gamhg    = 0.5d0*Cda*rnL/ag           ! gamma*h/g
            ap       = gamhg + 1d0/(Czb*Czb)
            ! ap     = gamhg + (1d0/Czb*Czb)                    ! old=wrong
            Czr      = sqrt(1d0 / ap)
@@ -6258,6 +6284,20 @@ if (ihorvic > 0 .or. NDRAW(29) == 37) then
     endif
  enddo
 
+ if (jaZerozbndinflowadvection == 1) then 
+    do n  = 1, nbndz                                     ! on waterlevel boundaries put inflow advection velocity to 0
+       kb = kbndz(1,n)
+       LL = kbndz(3,n)
+       call getLbotLtop(LL,Lb,Lt)
+       do L  = Lb, Lt
+          k1 = ln(1,L) 
+          if (u1(L) > 0) then 
+             ucx(k1) = 0d0 ; ucy(k1) = 0d0
+          endif   
+       enddo 
+    enddo
+ endif   
+       
  do n  = 1,nbndu                                      ! velocity boundaries
     kb = kbndu(1,n)
     k2 = kbndu(2,n)
@@ -11735,7 +11775,7 @@ end subroutine land_change_callback
  else if (nodval == 20) then
     znod = sqi(k) - squ(k)
  else if (nodval == 21) then
-    znod = qw(k)
+    znod = qw(k)/a1(kk)
  else if (nodval == 22) then
     if (jased>0) then
        call getequilibriumtransportrates(kk, seq, wse, mxgr, hsk)
@@ -12181,7 +12221,6 @@ else if (nodval == 27) then
            zlin = max( stemheight(k1), stemheight(k2) )
         endif
     endif
-    zlin = cfuhi(LL)
  else if ( linval == 25) then
     zlin = wx(LL)
  else if ( linval == 26) then
@@ -12624,7 +12663,7 @@ end if
                 sa1(kk) = 1d0
              endif
           else
-             if (xz(k) < 0.5d0*(xzmin+xzmax) .and. (kk-kb+1) <= locsaltlev * kmx ) then
+             if (xz(k) > 0.5d0*(xzmin+xzmax) .and. (kk-kb+1) <= locsaltlev * kmx ) then
                 sa1(kk) = locsaltmax
                 if (jatem > 0) then
                    tem1(kk) = 5d0
@@ -12634,7 +12673,7 @@ end if
                 sa1(kk) = locsaltmin
                 if (jatem > 0) then
                    tem1(kk) = 10d0
-             endif
+                endif
           endif
           endif
           sa1(k)  = sa1(k) + vol1(kk)*sa1(kk)
@@ -21429,8 +21468,8 @@ end do
  end if
 
  CALL DLINEDIS(Xz(n),Yz(n),X3,Y3,X4,Y4,JA,DIS,Xd,Yd, jsferic, jasfer3D, dmiss)  ! dis is half cell size in boundary normal dir
- !if (jadismxbnd == 1) dis = max(dis,0.5d0*sqrt(ba(n)))
- dis = max(dis,0.5d0*sqrt(ba(n)))
+ if (jadismxbnd == 1) dis = max(dis,0.5d0*sqrt(ba(n)))
+ !dis = max(dis,0.5d0*sqrt(ba(n)))
 
 ! (rx,ry) outward normal in reference frame of half(x3,y3,x4,y4)
  call normaloutchk(x3, y3, x4, y4, xzw(n), yzw(n), rx, ry, ja, jsferic, jasfer3D, dmiss, dxymis)
@@ -22311,11 +22350,11 @@ endif
  allocate ( frcu (lnx)   , stat = ierr)
  call aerr('frcu (lnx)'  , ierr,   ndx) ; frcu    = dmiss
  if (jacali == 1) then
-    allocate ( frcu_bkp (lnx)   , stat = ierr)
-    call aerr('frcu_bkp (lnx)'  , ierr,   ndx) ; frcu_bkp    = dmiss
+     allocate ( frcu_bkp (lnx)   , stat = ierr)
+     call aerr('frcu_bkp (lnx)'  , ierr,   ndx) ; frcu_bkp    = dmiss
+     allocate ( frcu_mor (lnx)   , stat = ierr)
+     call aerr('frcu_mor (lnx)'  , ierr,   ndx) ; frcu_mor    = dmiss
  endif
- allocate ( frcu_mor (lnx)   , stat = ierr)
- call aerr('frcu_mor (lnx)'  , ierr,   ndx) ; frcu_mor    = dmiss
  allocate ( ifrcutp(lnx) , stat = ierr)
  call aerr('ifrcutp(lnx)', ierr,   ndx) ; ifrcutp = abs(ifrctypuni)
  allocate ( wdsu  (lnx)  , stat=ierr  )
