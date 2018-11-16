@@ -873,6 +873,7 @@ subroutine readMDUFile(filename, istat)
 
     call prop_get_integer(md_ptr, 'numerics', 'Izbndpos'          , Izbndpos)
     call prop_get_double (md_ptr, 'numerics', 'Tlfsmo'            , Tlfsmo)
+    call prop_get_integer(md_ptr, 'numerics', 'Keepstbndonoutflow', keepstbndonoutflow )
     call prop_get_double (md_ptr, 'numerics', 'Tspinupturblogprof', Tspinupturblogprof )
     call prop_get_integer(md_ptr, 'numerics', 'Logprofatubndin'   , jaLogprofatubndin  )
     call prop_get_integer(md_ptr, 'numerics', 'Logprofkepsbndin'  , jaLogprofkepsbndin )
@@ -2093,6 +2094,10 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     endif
 
     call prop_set(prop_ptr, 'numerics', 'Tlfsmo'            , Tlfsmo,             'Fourier smoothing time (s) on water level boundaries')
+    if (keepstbndonoutflow == 1) then 
+       call prop_set(prop_ptr, 'numerics', 'Keepstbndonoutflow', keepstbndonoutflow, 'Keep sal and tem signals on bnd also at outflow, 1=yes, 0=no=default=copy inside value on outflow')
+    endif    
+    
     if (Tspinupturblogprof > 0d0) then
        call prop_set(prop_ptr, 'numerics', 'Tspinupturblogprof', Tspinupturblogprof, 'During Tspinup force log profiles to avoid almost zero vertical eddy viscosity')
     endif

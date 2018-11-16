@@ -4283,6 +4283,7 @@ end subroutine reset_flowgeom
 
  double precision                  :: tlfsmo = 0d0  !< fourier bnd smoothing times
  double precision                  :: alfsmo = 1d0  !< fourier bnd smoothing weight factor
+ integer                           :: keepstbndonoutflow = 0 !< keep them on outflow = 1
 
  double precision                  :: Tspinupturblogprof = 0d0 !< From Tstart to Tstart+Tspinupturblogprof, Turbulent profiles based on log profiles
                                                               !< 0d0 = No

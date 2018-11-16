@@ -24994,7 +24994,7 @@ subroutine transport()                           ! transport for now, advect sal
        kb = 0
        do L  = Lb,Lt
           kb = ln(1,L) ; ki = ln(2,L)
-          if (q1(L) >= 0) then
+          if (q1(L) >= 0 .or. keepstbndonoutflow == 1) then
               kk      = kmxd*(k-1)+L-Lb+1
               sa1(kb) = zbnds(kk)                 ! inflow
               salmax  = max( salmax, sa1(kb) )
@@ -25036,7 +25036,7 @@ subroutine transport()                           ! transport for now, advect sal
        kb = 0
        do L  = Lb,Lt
           kb = ln(1,L) ; ki = ln(2,L)
-          if (q1(L) >= 0) then
+          if (q1(L) >= 0  .or. keepstbndonoutflow == 1) then
               kk        = kmxd*(k-1)+L-Lb+1
               constituents(itemp, kb)  = zbndTM(kk)                  ! inflow
 
