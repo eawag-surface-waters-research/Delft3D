@@ -237,7 +237,7 @@ subroutine findexternalboundarypoints()             ! find external boundary poi
        write(msgbuf, '(a)') 'Boundaries in BOTH external forcing and bound.ext.force file is not allowed'
        call msg_flush()
        call qnerror( 'Boundaries in two files: ', trim(md_extfile_new), ' and ' // trim(md_extfile) )
-        ja_ext_force = 0
+       ja_ext_force = 0
     endif
 
     if (ja_ext_force == 1) then
@@ -1411,10 +1411,9 @@ subroutine init_threttimes()
     
        n = nbndtr(itrac)
     
-       allocate (bndtr(itrac)%tht(n), bndtr(itrac)%thz(n*kmxd), stat=ierr)
+       allocate(bndtr(itrac)%tht(n), bndtr(itrac)%thz(n*kmxd), stat=ierr)
        call aerr('bndtr(itrac)%tht(n), bndtr(itrac)%thz(n*kmxd)', ierr, n*(kmxd+1))
 
-       bndtr(itrac)%thz = dmiss 
        do i = 1,n
          bndtr(itrac)%tht(i) = threttim(iconst,bndtr(itrac)%k(5,i))
        enddo

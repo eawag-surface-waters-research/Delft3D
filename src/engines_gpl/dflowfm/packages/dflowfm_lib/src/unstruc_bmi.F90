@@ -236,7 +236,7 @@ end subroutine get_attribute
 
     !PETSC must be called AFTER reading the mdu file, so the icgsolver option is known to startpetsc 
 #ifdef HAVE_PETSC
-   !call startpetsc()
+   call startpetsc()
 #endif
 
     c_iresult = flowinit()

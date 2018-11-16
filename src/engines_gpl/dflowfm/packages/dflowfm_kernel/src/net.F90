@@ -7357,18 +7357,10 @@ end subroutine checknetwork
     
     call readyy('Renumber flow nodes', 1d0 )
 
-    deallocate(adj_row)
-    deallocate(adj)
-    deallocate(perm)
-    deallocate(perm_inv) 
-    deallocate(perm_lnk) 
-    deallocate(perm_inv_lnk)
-    deallocate(i1) 
-    deallocate(xz1) 
-    deallocate(yz1) 
-    deallocate(tface1)
-    deallocate(adj_tmp)
-    deallocate(adj_tmp2)
+    deallocate(adj_row, adj, &
+               perm, perm_inv, perm_lnk, perm_inv_lnk, &
+               i1, xz1, yz1, tface1)
+    deallocate(adj_tmp,adj_tmp2)
 
     call readyy('Renumber flow nodes', -1d0 )
  

@@ -107,10 +107,6 @@ subroutine thconst(iconst, nbnd, zbnd, kbnd, tht, thz)
    double precision                 :: thfactor, rettim, q
    integer                          :: i, j, l, lf, m, n, lb, lt, ki 
    
-   if (nbnd == 0) then 
-      return
-   endif 
-      
    thfactor = 1.0
    
    if(thz(1) == DMISS) then
