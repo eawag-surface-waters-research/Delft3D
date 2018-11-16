@@ -21,8 +21,8 @@ rem
 rem Example calls:
 rem > install.cmd <dest directory>                # Install entire solution
 rem > install.cmd dflowfm <dest directory>        # Install only project dflowfm (and its dependencies)
-rem > install.cmd dflowfm <dest directory> "C:\Program Files (x86)\IntelSWTools\compilers_and_libraries\windows\redist\ia32\compiler"      																				  # Install only project dflowfm (and its dependencies)
-rem > install.cmd dflowfm <dest directory> "C:\Program Files (x86)\IntelSWTools\compilers_and_libraries\windows\redist\ia32\mkl"  "C:\Program Files (x86)\IntelSWTools\compilers_and_libraries\windows\redist\ia32\mkl"   # Install only project dflowfm (and its dependencies including mkl required dlls)
+rem > install.cmd dflowfm <dest directory> "C:\Program Files (x86)\IntelSWTools\compilers_and_libraries\windows\redist\ia32\compiler\"      																				  # Install only project dflowfm (and its dependencies)
+rem > install.cmd dflowfm <dest directory> "C:\Program Files (x86)\IntelSWTools\compilers_and_libraries\windows\redist\ia32\compiler\"  "C:\Program Files (x86)\IntelSWTools\compilers_and_libraries\windows\redist\ia32\mkl\"   # Install only project dflowfm (and its dependencies including mkl required dlls)
 rem                                                                                                                          including compiler specific dll's
 
 rem 0. defaults:
@@ -289,11 +289,11 @@ rem ====================
     if !mkl_redist_dir!=="" (
         rem mkl_redist_dir not set
     ) else (
-        set localstring="!mkl_redist_dir!\mkl_core.dll"
+        set localstring="!mkl_redist_dir!mkl_core.dll"
         call :copyFile !!localstring! !dest_bin!
         rem is needed for dimr nuget package? please check 
         call :copyFile !!localstring! !dest_share!
-        set localstring="!mkl_redist_dir!\mkl_intel_thread.dll"
+        set localstring="!mkl_redist_dir!mkl_intel_thread.dll"
         call :copyFile !!localstring! !dest_bin!
         rem is needed for dimr nuget package?  please check 
         call :copyFile !!localstring! !dest_share!
