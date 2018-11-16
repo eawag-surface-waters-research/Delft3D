@@ -4,7 +4,7 @@ import glob
 import sys
 import shutil
 import subprocess
-import re
+
 if sys.version_info<(3,0,0):
    # To avoid problems with encoding:
    # - Use codecs.open instead of open (Python 2.x only)
@@ -440,16 +440,25 @@ def process_project_file(pfile):
                         split_char = '"'
                     parts = line.split(split_char)
                     i = 0
+                    lastFound = -1
+                    it = 0
                     for part in parts:
-                        res = [s.start() for s in re.finditer("IFORT_COMPILER", part)]
-                        for it in enumerate(res):
-                            key = ptype + str(ifort) + str(configuration)
-                            if it == 0:
-                                parts[i] = redistdir[key]
-                                i += 1
-                            if it == 1:
-                                parts[i] = mkldir[key]
-                                i += 1
+                        lastFound = part.find("$(IFORT_COMPILER", lastFound + 1)
+                        if(lastFound!= -1):
+                            tempStr=""
+                            while (lastFound!=-1):
+                                key = ptype + str(ifort) + str(configuration)
+                                if it == 0:
+                                    tempStr += redistdir[key]
+                                    lastFound = part.find("$(IFORT_COMPILER", lastFound + 1)
+                                elif it == 1:
+                                    tempStr += mkldir[key]
+                                    lastFound = part.find("$(IFORT_COMPILER", lastFound + 1)
+                                elif it>1:
+                                    break
+                                it += 1
+                            parts[i] = tempStr
+                            i += 1
                         else:
                             parts[i] = part
                             i += 1
