@@ -3319,6 +3319,8 @@
    isInCell = -1
    do l = 1, numl1d
       k1  = kn(1,l); k2  = kn(2,l); k3 = kn(3,l)
+      ! if the link is not 1d do not consider
+      if (k3.ne.1) cycle
       !get the left 1d mesh point
       call make_queryvector_kdtree(treeinst, xk(k1), yk(k1), jsferic)
       !compute the search radius
@@ -3453,9 +3455,17 @@
       !only check the left point
       if( l .eq. numl1d + 1) then
          k1  =  kn(2,l-1)
+         k3 = kn(3,l-1)
       else
          k1  = kn(1,l) 
+         k3 = kn(3,l)
       endif
+      ! if the link is not 1d cycle
+      if (k3.ne.1) cycle
+      ! only 1d points outside 2d mesh should be considered 
+      cellId = -1zz
+      call incells(xk(k1),yk(k1), cellId)
+      if (cellId.ne.0) cycle
       !get the left 1d mesh point
       call make_queryvector_kdtree(treeinst, xk(k1), yk(k1), jsferic)
       !the search radius
