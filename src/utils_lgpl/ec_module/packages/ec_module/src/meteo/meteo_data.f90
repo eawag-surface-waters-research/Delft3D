@@ -449,7 +449,6 @@ function meteoallocateitemgrid(runid, meteoitem, m, n, gridfilnam, flowmmax, flo
    character(10)         :: dum
    logical               :: sferic
    logical               :: kw_found
-   logical, external     :: openexistingfile_meteo
    real(fp)              :: xymiss
    type(tmeteo), pointer :: meteo
    !
@@ -611,8 +610,6 @@ function addnewsubdomainmeteopointer(subdomname, subdommeteo) result(success)
     success = .true.
 end function addnewsubdomainmeteopointer
 
-
-
 subroutine getmeteopointer(subdomname, meteopointer)
    implicit none
    type(tmeteo), pointer               :: meteopointer
@@ -671,6 +668,54 @@ subroutine meteoblockint()
    implicit none
    meteoint = .false.
 end subroutine meteoblockint
+
+function openexistingfile_meteo(minp, filename, meteotype) result(success)
+
+implicit none
+!
+! Global variables
+!
+    integer         :: minp
+    integer,optional:: meteotype
+    logical         :: success
+    character(*)    :: filename
+!
+! Local variables
+!
+    integer :: i
+    logical :: unitused
+!
+!! executable statements -------------------------------------------------------
+!
+    if (len_trim(filename) == 0) then
+       if (present(meteotype)) then
+          write (meteomessage, '(a,i0)') 'While opening meteo file: name is empty, for meteotype = ', meteotype
+       else
+          write (meteomessage, '(a)') 'While opening meteo file: name is empty'
+       endif
+       success = .false.
+       return
+    endif
+    inquire (file = trim(filename), exist = success)
+    if (.not. success) then
+       write(meteomessage,'(3a)') 'Meteo file ',trim(filename),' does not exist'
+       success = .false.
+       return
+    endif
+    do i = 32, 200
+       inquire (unit = i, opened = unitused) 
+       if (.not. unitused) exit
+    enddo
+    if (unitused) then
+       meteomessage = 'No free unit number available for opening file'
+       success = .false.
+       return
+    endif
+    minp = i
+    open (minp, file = trim(filename), action = 'READ')
+    success = .true.
+    
+end function openexistingfile_meteo
 
 
 end module meteo_data

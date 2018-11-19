@@ -13686,7 +13686,6 @@ src/utils_lgpl/ec_module/packages/ec_module/src/meteo/meteo.f90 -text
 src/utils_lgpl/ec_module/packages/ec_module/src/meteo/meteo_data.f90 -text
 src/utils_lgpl/ec_module/packages/ec_module/src/meteo/meteo_read.f90 -text
 src/utils_lgpl/ec_module/packages/ec_module/src/meteo/numbersonline_m.f90 -text
-src/utils_lgpl/ec_module/packages/ec_module/src/meteo/openexistingfile_meteo.f90 -text
 src/utils_lgpl/ec_module/packages/ec_module/src/meteo/readmeteoheader.f90 -text
 src/utils_lgpl/ec_module/packages/ec_module/src/transform_shiftedpole.f90 -text
 src/utils_lgpl/ec_module/packages/nuget/ecmodule.nuspec -text
