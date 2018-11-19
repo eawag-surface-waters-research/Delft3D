@@ -3463,7 +3463,7 @@
       ! if the link is not 1d cycle
       if (k3.ne.1) cycle
       ! only 1d points outside 2d mesh should be considered 
-      cellId = -1zz
+      cellId = -1
       call incells(xk(k1),yk(k1), cellId)
       if (cellId.ne.0) cycle
       !get the left 1d mesh point
