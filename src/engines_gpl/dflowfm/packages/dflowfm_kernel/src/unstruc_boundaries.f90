@@ -1052,7 +1052,8 @@ logical function initboundaryblocksforcings(filename)
        call selectelset_internal_nodes( locationfile, 10, xz, yz, kclat, ndxi, numlatsg, nnLat) ! find nodes in polygon  
 
        call realloc(qplat, numlatsg, keepExisting = .true.)
-
+       call realloc(lat_ids, numlatsg, keepExisting = .true.)
+     
        ! [lateral]
        ! Flow = 1.23 | test.tim | REALTIME
        kx = 1
@@ -1069,6 +1070,7 @@ logical function initboundaryblocksforcings(filename)
 
        if (success) then
           jaqin = 1
+          lat_ids(numlatsg) = locid
        end if
 
     case default       ! Unrecognized item in a ext block
@@ -2867,6 +2869,27 @@ subroutine getStructureIndex(strtypename, strname, index)
 
 end subroutine getStructureIndex
 
+!> returns the index of a named lateral in the global array from this module
+subroutine getLateralIndex(idlat, index)
+   use m_wind
+   
+   implicit none
+   character(len=*), intent(in)  :: idlat !< id of the lateral
+   integer,          intent(out) :: index !< its position in the global array
+   integer                       :: i
+   
+   index = 0
+   
+   i = -1
+   do i = 1, numlatsg
+      if (trim(lat_ids(i)) == trim(idlat)) then
+         index = i
+         exit
+      end if 
+   end do    
+      
+end subroutine getLateralIndex
+ 
 !> Reads a key=value entry from a property block and tries to interpret the value.
 !! The (single!) property block should come from an already-parsed .ini file.
 !! The string value is always returned, if found, and an attempt is also made to

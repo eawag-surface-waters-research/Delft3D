@@ -806,7 +806,7 @@ end function dfm_finalize_computational_timestep
         rank = 2
     case("flowelemnode", "flowelemnbs", "flowelemlns", "flowelemcontour_x", "flowelemcontour_y")
         rank = 2
-    case("pumps", "weirs", "gates", "sourcesinks", "observations", "crosssections") ! Compound vars: shape = [numobj, numfields_per_obj]
+    case("pumps", "weirs", "gates", "sourcesinks", "observations", "crosssections", "laterals") ! Compound vars: shape = [numobj, numfields_per_obj]
         rank = 2
     end select
 
@@ -833,7 +833,8 @@ end function dfm_finalize_computational_timestep
     use network_data
     use m_observations, only: numobs, nummovobs, MAXNUMVALOBS2D, MAXNUMVALOBS3D, MAXNUMVALOBS3Dw
     use m_monitoring_crosssections, only: ncrs, maxnval
-
+    use m_wind
+	
     character(kind=c_char), intent(in) :: c_var_name(*)
     integer(c_int), intent(inout) :: shape(MAXDIMS)
 
@@ -886,6 +887,9 @@ end function dfm_finalize_computational_timestep
         shape(1) = ncrs
         shape(2) = maxnval
         return
+	case("laterals")
+		shape(1) = numlatsg
+		shape(2) = 1
     end select
 
     include "bmi_get_var_shape.inc"
@@ -1102,7 +1106,7 @@ subroutine get_var(c_var_name, x) bind(C, name="get_var")
   call str_token(tmp_var_name, varset_name, DELIMS='/')
   ! Check for valid group/set name (e.g. 'observations')
   select case(varset_name)
-  case ("pumps", "weirs", "gates", "generalstructures", "sourcesinks", "observations", "crosssections")
+  case ("pumps", "weirs", "gates", "generalstructures", "sourcesinks", "observations", "crosssections", "laterals")
      ! A valid group name, now parse the location id first...
      call str_token(tmp_var_name, item_name, DELIMS='/')
      if (len_trim(item_name) > 0) then
@@ -1447,7 +1451,8 @@ subroutine get_compound_field(c_var_name, c_item_name, c_field_name, x) bind(C, 
   use m_monitoring_crosssections
   use m_strucs
   use m_structures, only: valdambreak
-
+  use m_wind
+  
   character(kind=c_char), intent(in) :: c_var_name(*)   !< Name of the set variable, e.g., 'pumps'
   character(kind=c_char), intent(in) :: c_item_name(*)  !< Name of a single item's index/location, e.g., 'Pump01'
   character(kind=c_char), intent(in) :: c_field_name(*) !< Name of the field to get, e.g., 'capacity'
@@ -1638,7 +1643,18 @@ subroutine get_compound_field(c_var_name, c_item_name, c_field_name, x) bind(C, 
         ! TODO: AvD: error to warn for unimplemented feature?
         return
      end select
-
+  ! LATERAL DISCHARGES
+  case("laterals")   
+     call getLateralIndex(item_name, item_index)
+     if (item_index == 0) then
+        return
+     end if
+ 
+     select case(field_name)
+        case("water_discharge")
+           x = c_loc(qplat(item_index))
+           return
+     end select
   end select ! var_name
 
   ! check automatically generated interface
@@ -1660,6 +1676,7 @@ subroutine set_compound_field(c_var_name, c_item_name, c_field_name, xptr) bind(
   use iso_c_utils
   use unstruc_messages
   use m_strucs
+  use m_wind
 
   character(kind=c_char), intent(in) :: c_var_name(*)   !< Name of the set variable, e.g., 'pumps'
   character(kind=c_char), intent(in) :: c_item_name(*)  !< Name of a single item's index/location, e.g., 'Pump01'
@@ -1793,7 +1810,20 @@ subroutine set_compound_field(c_var_name, c_item_name, c_field_name, xptr) bind(
          qstss((item_index-1)*3+3) = x_0d_double_ptr
          return
      end select
-
+	 
+  ! LATERAL DISCHARGES
+  case("laterals")
+     call getStructureIndex('laterals', item_name, item_index)
+     if (item_index == 0) then
+         return
+     endif
+     select case(field_name)
+     case("water_discharge")
+         call c_f_pointer(xptr, x_0d_double_ptr)
+         qplat(item_index) = x_0d_double_ptr
+        return
+     end select
+	 
      ! NOTE: observations and crosssections are read-only!
   end select
 end subroutine set_compound_field

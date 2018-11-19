@@ -32681,6 +32681,12 @@ end subroutine setbobs_fixedweirs
                    continue ! WIP carniato: pumps should not be in network data structure, furu computation is in npumpsg loop, and not here.
                 case (ST_DAMBREAK)
                    continue
+                case (ST_CULVERT)
+                   ! TODO: implement this?!
+                   continue
+                case (ST_BRIDGE)
+                   ! TODO: implement this?!
+                continue
                 case default
                    write(msgbuf,'(''Unsupported structure type'', i5)') network%sts%struct(istru)%ST_TYPE
                    call err_flush()
@@ -37385,8 +37391,12 @@ if (mext > 0) then
     enddo
 
  endif
- 
+  
  if (numlatsg > 0) then ! Allow laterals from old ext, even when new structures file is present.
+    if (allocated(lat_ids)) deallocate(lat_ids)
+    allocate ( lat_ids(numlatsg), stat=ierr    )
+    call aerr('lat_ids(numlatsg)' , ierr, numlatsg ); lat_ids = ''
+    
     if (allocated (balat) ) deallocate(balat,qplat)
     allocate ( balat(numlatsg)  , stat=ierr    )
     call aerr('balat(numlatsg)' , ierr, numlatsg ); balat = 0d0
@@ -37404,9 +37414,14 @@ if (mext > 0) then
     do while (ja .eq. 1)                             ! for cdams again postponed read *.ext file
        call readprovider(mext,qid,filename,filetype,method,operand,transformcoef,ja,varname)
        if (ja == 1 .and. qid(1:16) == 'lateraldischarge') then
-          numlatsg = numlatsg + 1
-          L = index(filename,'.', back=.true.) - 1
+          numlatsg = numlatsg + 1                             
+          
           success = adduniformtimerelation_objects(qid(1:16), filename, 'lateral', filename(1:L), 'flow', '', numlatsg, kx, qplat)
+          if (success) then
+             ! assign id derived from pol file         
+             L = index(filename,'.', back=.true.) - 1
+             lat_ids(numlatsg) = filename(1:L)   
+          endif
           
           !! Check outside EC whether associated .tim file exists. should this check be inside addtimeetc  
           !L = index(filename,'.', back=.true.) - 1

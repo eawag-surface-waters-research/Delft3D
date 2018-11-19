@@ -1091,6 +1091,7 @@ integer                      , target :: numlatsg    !< [-] nr of lateral discha
 double precision, allocatable, target :: qplat(:)    !< [m3/s] Lateral discharge of provider {"location": "face", "shape": ["numlatsg"]}
 double precision, allocatable, target :: qqlat(:)    !< [m3/s] Lateral discharge at xz,yz {"location": "face", "shape": ["ndx"]}
 double precision, allocatable, target :: balat(:)    !< [m2] total area of all cells in provider numlatsg  {"location": "face", "shape": ["numlatsg"]}
+character(len=128), allocatable       :: lat_ids(:)  !< id of laterals, size: numlatsg
 
 !! Lateral lookup table: nnlat(n1) == ilat
 integer,          allocatable, target :: nnlat(:)    !< [-] for each cell pointer to qplat/balat {"location": "face", "shape": ["ndx"]}
