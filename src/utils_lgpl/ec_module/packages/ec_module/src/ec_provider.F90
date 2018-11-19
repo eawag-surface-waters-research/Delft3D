@@ -307,7 +307,7 @@ module m_ec_provider
                            "rainfall_rate",                                               &
                            "airpressure_windx_windy", "airpressure_windx_windy_charnock", &
                            "airpressure_stressx_stressy",                                 &
-                           "windxy","windx","windy",                                      &
+                           "windxy", "stressxy", "windx", "windy",                        &
                            "nudge_salinity_temperature",                                  &
                            "airpressure","atmosphericpressure",                           &
                            "humidity_airtemperature_cloudiness",                          &
@@ -2430,6 +2430,11 @@ module m_ec_provider
             ncstdnames(1) = 'eastward_wind'
             ncvarnames(2) = 'v10'                            ! 10 meter eastward wind
             ncstdnames(2) = 'northward_wind'
+         case ('stressxy')
+            ncvarnames(1) = 'tauu'                           ! eastward wind stress
+            ncstdnames(1) = 'surface_downward_eastward_stress'
+            ncvarnames(2) = 'tauv'                           ! northward wind stress
+            ncstdnames(2) = 'surface_downward_northward_stress'
          case ('airpressure','atmosphericpressure') 
             ncvarnames(1) = 'msl'                            ! mean sea-level pressure
             ncstdnames(1) = 'air_pressure'

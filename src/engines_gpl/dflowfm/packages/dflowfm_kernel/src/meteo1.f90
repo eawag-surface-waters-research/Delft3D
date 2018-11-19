@@ -437,7 +437,7 @@ module m_meteo
          case ('windy')
             itemPtr1 => item_windy
             dataPtr1 => wy
-         case ('windxy')
+         case ('windxy', 'stressxy')
             itemPtr1 => item_windxy_x
             dataPtr1 => wx
             itemPtr2 => item_windxy_y
@@ -1012,17 +1012,17 @@ module m_meteo
          ! Each qhbnd polytim file replaces exactly one element in the target data array.
          ! Converter will put qh value in target_array(n_qhbnd)
          if (success) success = ecSetConverterElement(ecInstancePtr, converterId, n_qhbnd)
-      case ('windx', 'windy', 'windxy', 'airpressure', 'atmosphericpressure', 'airpressure_windx_windy', &
+      case ('windx', 'windy', 'windxy', 'stressxy', 'airpressure', 'atmosphericpressure', 'airpressure_windx_windy', &
             'airpressure_windx_windy_charnock', 'airpressure_stressx_stressy')
          if (present(srcmaskfile)) then 
             if (ec_filetype == provFile_arcinfo .or. ec_filetype == provFile_curvi) then
                if (.not.ecParseARCinfoMask(srcmaskfile, srcmask, fileReaderPtr)) then
-                  write (msgbuf, '(a,a,a,a,a)') 'Error while reading mask file ''', trim(srcmaskfile),'''.'
+                  write (msgbuf, '(3a)') 'Error while reading mask file ''', trim(srcmaskfile),'''.'
                   call err_flush()
                   return
                endif 
                if (.not.initializeConverter(ecInstancePtr, converterId, ec_convtype, ec_operand, ec_method, srcmask=srcmask)) then 
-                  write (msgbuf, '(a,a,a,a,a)') 'Error while setting mask to converter (file=''', trim(srcmaskfile), ''', associated with meteo file ''', trim(filename), '''.'
+                  write (msgbuf, '(5a)') 'Error while setting mask to converter (file=''', trim(srcmaskfile), ''', associated with meteo file ''', trim(filename), '''.'
                   call err_flush()
                   return
                end if 
@@ -1177,6 +1177,23 @@ module m_meteo
                call mess(LEVEL_FATAL, 'm_meteo::ec_addtimespacerelation: Unsupported filetype for quantity windy.')
                return
             end if
+         case ('stressxy')
+            if (ec_filetype == provFile_netcdf) then
+               sourceItemId   = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'surface_downward_eastward_stress')
+               sourceItemId_2 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'surface_downward_northward_stress')
+               if (sourceItemId == ec_undef_int .or. sourceItemId_2 == ec_undef_int) then
+                  goto 1234
+               end if
+            else
+               call mess(LEVEL_FATAL, 'm_meteo::ec_addtimespacerelation: stressxy only implemented for NetCDF.')
+               return
+            end if
+            success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId)
+            if (success) success = ecAddConnectionSourceItem(ecInstancePtr, connectionId, sourceItemId_2)
+            if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_windxy_x)
+            if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_windxy_y)
+            if (success) success = ecAddItemConnection(ecInstancePtr, item_windxy_x, connectionId)
+            if (success) success = ecAddItemConnection(ecInstancePtr, item_windxy_y, connectionId)
          case ('windxy')
             ! special case: m:n converter, (for now) handle here in case switch
             if (ec_filetype == provFile_unimagdir) then
@@ -1194,12 +1211,14 @@ module m_meteo
             else if (ec_filetype == provFile_netcdf) then
                sourceItemId   = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'eastward_wind')
                sourceItemId_2 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'northward_wind')
+               success = (sourceItemId /= ec_undef_int .and. sourceItemId_2 /= ec_undef_int)
                if (.not. success) then
                   goto 1234
                end if
             else if (ec_filetype == provFile_spiderweb) then
                sourceItemId   = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'windspeed')
                sourceItemId_2 = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'winddirection')
+               success = (sourceItemId /= ec_undef_int .and. sourceItemId_2 /= ec_undef_int)
                if (.not. success) then
                   goto 1234
                end if

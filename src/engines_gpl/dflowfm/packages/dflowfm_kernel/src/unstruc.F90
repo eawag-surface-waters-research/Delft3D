@@ -36950,12 +36950,21 @@ if (mext > 0) then
             endif
             jagrainlayerthicknessspecified = 1
 
-        else if (qid == 'windx' .or. qid == 'windy' .or. qid == 'windxy') then
+        else if (qid == 'windx' .or. qid == 'windy' .or. qid == 'windxy' .or. qid == 'stressxy') then
+
+           jawindstressgiven = merge(1, 0, qid == 'stressxy')
+           success = (.not. (jawindstressgiven == 1 .and. kmx > 0))
+           if (.not. success) then
+              msgbuf = "Quantity 'stressxy' not implemented for 3D (yet)"
+              call err_flush()
+           endif
 
            if (.not. allocated(wx) ) then
-              if ( allocated (kcw) ) deallocate(kcw) ; allocate( kcw(lnx) )
-              allocate ( wx(lnx), wy(lnx), stat=ierr) ; wx = 0 ; wy = 0 ; kcw = 1
-              call aerr('wx(lnx), wy(lnx)', ierr, 3*lnx)
+              call realloc(kcw, lnx, stat=ierr, keepExisting=.false.)
+              call aerr('kcw(lnx)', ierr, lnx)
+              allocate ( wx(lnx), wy(lnx), stat=ierr)
+              call aerr('wx(lnx), wy(lnx)', ierr, 2*lnx)
+              wx = 0.0_hp ; wy = 0.0_hp ; kcw = 1
            endif
 
            if (len_trim(sourcemask)>0)  then
