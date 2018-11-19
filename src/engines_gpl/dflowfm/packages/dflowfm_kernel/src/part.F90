@@ -250,7 +250,8 @@ subroutine update_particles_in_cells(numremaining, ierror)
 !        END DEBUG
          
 !        check inside or outside triangle 
-         if ( dis.lt.-DTOLd .and. rL.ge.0d0 .and. rL.le.1d0 .and. .not.isboundary ) then
+!         if ( dis.lt.-DTOLd .and. rL.ge.0d0 .and. rL.le.1d0 .and. .not.isboundary ) then
+         if ( dis.lt.-DTOLd .and. .not.isboundary ) then
 !           outside triangle
             tex = 0d0
             Lexit = L
@@ -277,9 +278,9 @@ subroutine update_particles_in_cells(numremaining, ierror)
          
             if ( un.gt.max(DTOLun_rel*d,DTOLun) ) then   ! normal velocity does not change sign: sufficient to look at u0.n
    !           compute exit time for this edge: ln(1+ d/un alpha) / alpha
-               dvar = alpha(k)*d/un
+               dvar = alpha(k)*dis/un
                if ( dvar.gt.-1d0) then
-                  t = d/un
+                  t = dis/un
                   if ( abs(dvar).ge.DTOL ) then
                      t = t * log(1d0+dvar)/dvar
                   end if
@@ -288,7 +289,9 @@ subroutine update_particles_in_cells(numremaining, ierror)
                end if  
             
    !           update exit time/edge (flowlink)      
-               if ( t.le.tex .and. t.ge.0d0 ) then
+!               if ( t.le.tex .and. t.ge.0d0 ) then
+               if ( t.le.tex ) then
+
                   tex = t
                   Lexit = L
                end if
