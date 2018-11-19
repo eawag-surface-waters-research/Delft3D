@@ -449,6 +449,7 @@ end function unc_def_var_nonspatial
 !! Produces a UGRID-compliant map file.
 !! Typical call: unc_def_var(mapids, mapids%id_s1(:), nf90_double, UNC_LOC_S, 's1', 'sea_surface_height', 'water level', 'm')
 function unc_def_var_map(ncid,id_tsp, id_var, itype, iloc, var_name, standard_name, long_name, unit, is_timedep, dimids) result(ierr)
+use m_save_ugrid_state
 use m_flowgeom
 use network_data, only: numk, numl, numl1d
 use dfm_error
@@ -481,6 +482,27 @@ integer :: idx_fastdim    !< Will point to the first used position in idims (i.e
 integer :: is_timedep_
 integer :: is_layerdep_
 integer :: ndims, i
+character(len=255) :: localMesh1dName, localMesh2dName, localContactName
+
+   if(len(trim(mesh1dname)) > 0) then
+      localMesh1dName  = mesh1dname
+   else
+      localMesh1dName = 'mesh1d'
+   endif
+
+   if(len(trim(mesh2dname)) > 0) then
+      localMesh2dName = mesh2dname
+   else
+      localMesh2dName = 'mesh2d'      
+   endif   
+   
+   if(len(trim(contactName)) > 0) then
+      localContactName = contactName
+   else
+      localContactName = 'contacts'      
+   endif
+
+   
 
    ierr = DFM_NOERR
 
@@ -570,7 +592,7 @@ integer :: ndims, i
          cell_method = 'point'
          idims(idx_spacedim) = id_tsp%meshids2d%dimids(mdim_node)
          ierr = ug_def_var(ncid, id_var(2), idims(idx_fastdim:maxrank), itype, UG_LOC_NODE, &
-                           'mesh2d', var_name, standard_name, long_name, unit, cell_method, crs, ifill=-999, dfill=dmiss)
+                           trim(localMesh2dName), var_name, standard_name, long_name, unit, cell_method, crs, ifill=-999, dfill=dmiss)
       end if
 
    case(UNC_LOC_S) ! Pressure point location
@@ -579,13 +601,13 @@ integer :: ndims, i
       if (ndx1d > 0) then
          idims(idx_spacedim) = id_tsp%meshids1d%dimids(mdim_node)
          ierr = ug_def_var(ncid, id_var(1), idims(idx_fastdim:maxrank), itype, UG_LOC_NODE, &
-                           'mesh1d', var_name, standard_name, long_name, unit, cell_method, crs, ifill=-999, dfill=dmiss)
+                           trim(localMesh1dName), var_name, standard_name, long_name, unit, cell_method, crs, ifill=-999, dfill=dmiss)
       end if
       ! Internal 2d flownodes. Horizontal position: faces in 2d mesh.
       if (ndx2d > 0) then
          idims(idx_spacedim) = id_tsp%meshids2d%dimids(mdim_face)
          ierr = ug_def_var(ncid, id_var(2), idims(idx_fastdim:maxrank), itype, UG_LOC_FACE, &
-                           'mesh2d', var_name, standard_name, long_name, unit, cell_method, crs, ifill=-999, dfill=dmiss)
+                           trim(localMesh2dName), var_name, standard_name, long_name, unit, cell_method, crs, ifill=-999, dfill=dmiss)
       end if
 
    case(UNC_LOC_U, UNC_LOC_L) ! Horizontal velocity point location, or horizontal net link. Note: defvar for netlinks and flowlinks is the same, putvar not.
@@ -595,13 +617,13 @@ integer :: ndims, i
          if(size(id_tsp%edgetoln,1).gt.0) then
             idims(idx_spacedim) = id_tsp%meshids1d%dimids(mdim_edge)
             ierr = ug_def_var(ncid, id_var(1), idims(idx_fastdim:maxrank), itype, UG_LOC_EDGE, &
-                              'mesh1d', var_name, standard_name, long_name, unit, cell_method, crs, ifill=-999, dfill=dmiss)
+                              trim(localMesh1dName), var_name, standard_name, long_name, unit, cell_method, crs, ifill=-999, dfill=dmiss)
          end if
          !1d2d contacts
          if(size(id_tsp%contactstoln,1).gt.0) then  
             idims(idx_spacedim) = id_tsp%meshcontacts%dimids(cdim_ncontacts)
             ierr = ug_def_var(ncid, id_var(4), idims(idx_fastdim:maxrank), itype, UG_LOC_CONTACT, &
-                              'contact', var_name, standard_name, long_name, unit, ' ', crs, ifill=-999, dfill=dmiss)
+                              trim(contactname), var_name, standard_name, long_name, unit, ' ', crs, ifill=-999, dfill=dmiss)
          endif
       end if
       numl2d = numl - numl1d
@@ -609,7 +631,7 @@ integer :: ndims, i
       if (numl2d > 0) then
          idims(idx_spacedim) = id_tsp%meshids2d%dimids(mdim_edge)
          ierr = ug_def_var(ncid, id_var(2), idims(idx_fastdim:maxrank), itype, UG_LOC_EDGE, &
-                           'mesh2d', var_name, standard_name, long_name, unit, cell_method, crs, ifill=-999, dfill=dmiss)
+                           trim(localMesh2dName), var_name, standard_name, long_name, unit, cell_method, crs, ifill=-999, dfill=dmiss)
       end if
 
    case(UNC_LOC_S3D) ! Pressure point location in all layers.
@@ -619,14 +641,14 @@ integer :: ndims, i
          idims(idx_spacedim) = id_tsp%meshids1d%dimids(mdim_node)
          idims(idx_layerdim) = id_tsp%meshids1d%dimids(mdim_layer)
          ierr = ug_def_var(ncid, id_var(1), idims(idx_fastdim:maxrank), itype, UG_LOC_NODE, &
-                           'mesh1d', var_name, standard_name, long_name, unit, cell_method, crs, ifill=-999, dfill=dmiss)
+                           trim(localMesh1dName), var_name, standard_name, long_name, unit, cell_method, crs, ifill=-999, dfill=dmiss)
       end if
       ! Internal 3d flownodes. Horizontal position: faces in 2d mesh. Vertical position: layer centers.
       if (ndx2d > 0) then
          idims(idx_spacedim) = id_tsp%meshids2d%dimids(mdim_face)
          idims(idx_layerdim) = id_tsp%meshids2d%dimids(mdim_layer)
          ierr = ug_def_var(ncid, id_var(2), idims(idx_fastdim:maxrank), itype, UG_LOC_FACE, &
-                           'mesh2d', var_name, standard_name, long_name, unit, cell_method, crs, ifill=-999, dfill=dmiss)
+                           trim(localMesh2dName), var_name, standard_name, long_name, unit, cell_method, crs, ifill=-999, dfill=dmiss)
       end if
 
    case(UNC_LOC_U3D) ! Horizontal velocity point location in all layers.
@@ -635,7 +657,7 @@ integer :: ndims, i
          idims(idx_spacedim) = id_tsp%meshids1d%dimids(mdim_edge)
          idims(idx_layerdim) = id_tsp%meshids1d%dimids(mdim_layer)
          ierr = ug_def_var(ncid, id_var(1), idims(idx_fastdim:maxrank), itype, UG_LOC_EDGE, &
-                           'mesh1d', var_name, standard_name, long_name, unit, cell_method, crs, ifill=-999, dfill=dmiss)
+                           trim(localMesh1dName), var_name, standard_name, long_name, unit, cell_method, crs, ifill=-999, dfill=dmiss)
       end if
       numl2d = numl - numl1d
       ! Internal 3d horizontal flowlinks. Horizontal position: edges in 2d mesh. Vertical position: layer centers.
@@ -643,7 +665,7 @@ integer :: ndims, i
          idims(idx_spacedim) = id_tsp%meshids2d%dimids(mdim_edge)
          idims(idx_layerdim) = id_tsp%meshids2d%dimids(mdim_layer)
          ierr = ug_def_var(ncid, id_var(2), idims(idx_fastdim:maxrank), itype, UG_LOC_EDGE, &
-                           'mesh2d', var_name, standard_name, long_name, unit, cell_method, crs, ifill=-999, dfill=dmiss)
+                           trim(localMesh2dName), var_name, standard_name, long_name, unit, cell_method, crs, ifill=-999, dfill=dmiss)
       end if
 
    case(UNC_LOC_W) ! Vertical velocity point location on all layer interfaces.
@@ -653,14 +675,14 @@ integer :: ndims, i
          idims(idx_spacedim) = id_tsp%meshids1d%dimids(mdim_node)
          idims(idx_layerdim) = id_tsp%meshids1d%dimids(mdim_interface)
          ierr = ug_def_var(ncid, id_var(1), idims(idx_fastdim:maxrank), itype, UG_LOC_NODE, &
-                           'mesh1d', var_name, standard_name, long_name, unit, cell_method, crs, ifill=-999, dfill=dmiss)
+                           trim(localMesh1dName), var_name, standard_name, long_name, unit, cell_method, crs, ifill=-999, dfill=dmiss)
       end if
       ! Internal 3d vertical flowlinks. Horizontal position: faces in 2d mesh. Vertical position: layer interfaces.
       if (ndx2d > 0) then ! If there are 2d flownodes and layers, then there are 3d vertical flowlinks.
          idims(idx_spacedim) = id_tsp%meshids2d%dimids(mdim_face)
          idims(idx_layerdim) = id_tsp%meshids2d%dimids(mdim_interface)
          ierr = ug_def_var(ncid, id_var(2), idims(idx_fastdim:maxrank), itype, UG_LOC_FACE, &
-                           'mesh2d', var_name, standard_name, long_name, unit, cell_method, crs, ifill=-999, dfill=dmiss)
+                           trim(localMesh2dName), var_name, standard_name, long_name, unit, cell_method, crs, ifill=-999, dfill=dmiss)
       end if
 
    case(UNC_LOC_WU) ! Vertical viscosity point location on all layer interfaces.
@@ -669,7 +691,7 @@ integer :: ndims, i
          idims(idx_spacedim) = id_tsp%meshids1d%dimids(mdim_edge)
          idims(idx_layerdim) = id_tsp%meshids1d%dimids(mdim_interface)
          ierr = ug_def_var(ncid, id_var(1), idims(idx_fastdim:maxrank), itype, UG_LOC_EDGE, &
-                           'mesh1d', var_name, standard_name, long_name, unit, cell_method, crs, ifill=-999, dfill=dmiss)
+                           trim(localMesh1dName), var_name, standard_name, long_name, unit, cell_method, crs, ifill=-999, dfill=dmiss)
       end if
       numl2d = numl - numl1d
       ! Internal 3d vertical viscosity points. Horizontal position: edges in 2d mesh. Vertical position: layer interfaces.
@@ -677,7 +699,7 @@ integer :: ndims, i
          idims(idx_spacedim) = id_tsp%meshids2d%dimids(mdim_edge)
          idims(idx_layerdim) = id_tsp%meshids2d%dimids(mdim_interface)
          ierr = ug_def_var(ncid, id_var(2), idims(idx_fastdim:maxrank), itype, UG_LOC_EDGE, &
-                           'mesh2d', var_name, standard_name, long_name, unit, cell_method, crs, ifill=-999, dfill=dmiss)
+                           trim(localMesh2dName), var_name, standard_name, long_name, unit, cell_method, crs, ifill=-999, dfill=dmiss)
       end if
 
    case default
@@ -9483,6 +9505,7 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
       elseif (meshgeom%dim == 2) then
          !Else 2d/3d mesh
          ierr = ionc_get_meshgeom(ioncid, im, networkIndex, meshgeom, start_index, includeArrays) 
+         mesh2dname = meshgeom%meshname
          !Variable to store the coordinates of face centres
          allocate(xface(meshgeom%numface))
          allocate(yface(meshgeom%numface))
@@ -9638,6 +9661,8 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
       allocate(contacttype(ncontacts))
     
       ierr = ionc_get_mesh_contact_ugrid(ioncid, im, mesh1indexes, mesh2indexes, contactsids, contactslongnames, contacttype, 1 )
+      ierr = ionc_get_contact_name(ioncid, im, contactname)
+      
       call increasenetw(numk_last + ncontacts, numl_last + ncontacts)      
       do l = 1, ncontacts
          XK(numk_last+l) = xface(mesh2indexes(L))
@@ -11722,7 +11747,7 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
    use m_flow, only: kmx, mxlaydefs, laymx
    use m_alloc
    use dfm_error
-   use m_save_ugrid_state
+   use m_save_ugrid_state !stores the contactname and other saved ugrid names
    use m_CrossSections 
    use unstruc_channel_flow, only: network
    use m_flowparameters, only: jamd1dfile
@@ -12039,7 +12064,7 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
 
    !define 1d2dcontacts only after mesh2d is completly defined  
    if (n1d2dcontacts.gt.0) then
-      ierr = ug_def_mesh_contact(ncid, id_tsp%meshcontacts, 'contact', n1d2dcontacts, id_tsp%meshids2d, id_tsp%meshids1d, UG_LOC_NODE, UG_LOC_FACE, start_index)
+      ierr = ug_def_mesh_contact(ncid, id_tsp%meshcontacts, trim(contactname), n1d2dcontacts, id_tsp%meshids2d, id_tsp%meshids1d, UG_LOC_NODE, UG_LOC_FACE, start_index)
    endif
 
    ! Define domain numbers when it is a parallel run

@@ -5543,6 +5543,6 @@ end module m_partparallel
    type(t_ug_meshgeom)                                :: meshgeom1d
    character(len=ug_idsLen),allocatable               :: nbranchids(:), nnodeids(:), nodeids(:)
    character(len=ug_idsLongNamesLen), allocatable     :: nbranchlongnames(:), nnodelongnames(:), nodelongnames(:)
-   character(len=255)                                 :: network1dname, mesh1dname !MAXSTRLEN = 255
+   character(len=255)                                 :: network1dname, mesh2dname, mesh1dname, contactname !MAXSTRLEN = 255
     
    end module m_save_ugrid_state
