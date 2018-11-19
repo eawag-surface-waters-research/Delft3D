@@ -131,6 +131,7 @@ public :: ionc_def_mesh_contact_ugrid
 public :: ionc_get_contacts_count_ugrid
 public :: ionc_put_mesh_contact_ugrid
 public :: ionc_get_mesh_contact_ugrid
+public :: ionc_get_contact_name
 !clone functions
 public :: ionc_clone_mesh_definition_ugrid
 public :: ionc_clone_mesh_data_ugrid
@@ -157,13 +158,9 @@ public :: ionc_get_network_id_from_mesh_id_ugrid
 public :: ionc_def_mesh_ids_ugrid
 public :: ionc_put_var_chars
 public :: ionc_get_var_chars
-
 public :: ionc_getfullversionstring_io_netcdf
-
 public :: ionc_get_dimid
-
 public :: ionc_get_contact_id_ugrid
-
 public :: ionc_put_meshgeom
 public :: ionc_get_contact_topo_count
 
@@ -1925,5 +1922,15 @@ function ionc_get_contact_topo_count(ioncid, ncontacts) result(ierr)
    ierr = ug_get_contact_topo_count(datasets(ioncid)%ncid, ncontacts)
 
 end function ionc_get_contact_topo_count
+
+!> Gets the name of the contact topology variable in an open dataset.
+function ionc_get_contact_name(ioncid, contactid, contactname) result(ierr)
+   integer,             intent(in)    :: ioncid      !< The IONC data set id.
+   integer,             intent(in)    :: contactid   !< The contact id in the specified data set.
+   character(len=*),    intent(  out) :: contactname !< The name of the mesh topology variable.
+   integer                            :: ierr        !< Result status, ionc_noerr if successful.
+
+   ierr = ug_get_contact_name(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%contactids(contactid), contactname)
+end function ionc_get_contact_name
 
 end module io_netcdf

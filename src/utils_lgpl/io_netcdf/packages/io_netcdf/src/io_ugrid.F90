@@ -4714,4 +4714,20 @@ function ug_get_network_id_from_mesh_id(ncid, meshids, ug_file, networkid) resul
    
 end function ug_get_network_id_from_mesh_id
 
+!> Gets the name of the contact topology variable in an open dataset.
+function ug_get_contact_name(ncid, contactids, meshContactName) result(ierr)
+   integer,              intent(in)    :: ncid            !< NetCDF dataset id, should be already open.
+   type(t_ug_contacts),  intent(in)    :: contactids      !< Set of NetCDF-ids for all contact ids.
+   character(len=*),     intent(  out) :: meshContactName !< The name of the mesh topology variable.
+   integer                             :: ierr            !< Result status, ug_noerr if successful.
+   
+   meshContactName = ''
+   ierr = nf90_inquire_variable(ncid, contactids%varids(cid_contacttopo), name=meshContactName)
+   if (ierr /= nf90_noerr) then
+      write (ug_messagestr, '(a,i0)') 'ug_get_mesh_name: could not find meshContactName for topology var id ', contactids%varids(cid_contacttopo)
+      ierr = UG_INVALID_MESHNAME
+      Call SetMessage(Level_Fatal, ug_messagestr)
+   end if
+end function ug_get_contact_name
+
 end module io_ugrid
