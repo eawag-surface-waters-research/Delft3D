@@ -449,7 +449,7 @@ end function unc_def_var_nonspatial
 !! Produces a UGRID-compliant map file.
 !! Typical call: unc_def_var(mapids, mapids%id_s1(:), nf90_double, UNC_LOC_S, 's1', 'sea_surface_height', 'water level', 'm')
 function unc_def_var_map(ncid,id_tsp, id_var, itype, iloc, var_name, standard_name, long_name, unit, is_timedep, dimids) result(ierr)
-use m_save_ugrid_state
+use m_save_ugrid_state, only: network1dname, mesh2dname, mesh1dname, contactname 
 use m_flowgeom
 use network_data, only: numk, numl, numl1d
 use dfm_error
@@ -484,19 +484,19 @@ integer :: is_layerdep_
 integer :: ndims, i
 character(len=255) :: localMesh1dName, localMesh2dName, localContactName
 
-   if(len(trim(mesh1dname)) > 0) then
-      localMesh1dName  = mesh1dname
-   else
+   if (mesh1dname(1:1).ne.' ') then 
+      localMesh1dName = mesh1dname
+   else 
       localMesh1dName = 'mesh1d'
    endif
 
-   if(len(trim(mesh2dname)) > 0) then
+   if (mesh2dname(1:1).ne.' ') then
       localMesh2dName = mesh2dname
    else
       localMesh2dName = 'mesh2d'      
    endif   
    
-   if(len(trim(contactName)) > 0) then
+   if (contactName(1:1).ne.' ') then
       localContactName = contactName
    else
       localContactName = 'contacts'      
@@ -623,7 +623,7 @@ character(len=255) :: localMesh1dName, localMesh2dName, localContactName
          if(size(id_tsp%contactstoln,1).gt.0) then  
             idims(idx_spacedim) = id_tsp%meshcontacts%dimids(cdim_ncontacts)
             ierr = ug_def_var(ncid, id_var(4), idims(idx_fastdim:maxrank), itype, UG_LOC_CONTACT, &
-                              trim(contactname), var_name, standard_name, long_name, unit, ' ', crs, ifill=-999, dfill=dmiss)
+                              trim(localContactname), var_name, standard_name, long_name, unit, ' ', crs, ifill=-999, dfill=dmiss)
          endif
       end if
       numl2d = numl - numl1d
@@ -9501,6 +9501,7 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
          ierr = ionc_get_meshgeom(ioncid, im, networkIndex, meshgeom, start_index, includeArrays, nbranchids, nbranchlongnames, nnodeids, nnodelongnames, & 
                                   nodeids, nodelongnames, network1dname, mesh1dname) 
          meshgeom1d = meshgeom 
+         mesh1dname = meshgeom1d%meshname
          cycle
       elseif (meshgeom%dim == 2) then
          !Else 2d/3d mesh
