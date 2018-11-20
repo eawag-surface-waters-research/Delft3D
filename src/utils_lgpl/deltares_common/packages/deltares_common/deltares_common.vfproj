@@ -103,6 +103,7 @@
 		<File RelativePath="src\small.f90"/>
 		<File RelativePath=".\src\sorting_algorithms.f90"/>
 		<File RelativePath=".\src\string_module.f90"/>
+		<File RelativePath=".\src\dictionary_class.f90"/>
 		<File RelativePath="src\stringsequal.f90"/>
 		<File RelativePath=".\src\system_utils.F90">
 			<FileConfiguration Name="Debug|Win32">
