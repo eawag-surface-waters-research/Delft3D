@@ -565,7 +565,7 @@ end subroutine read_land_boundary_netcdf
       else if (nkol .ge. 9) then 
          jaKol45 = 2
       end if
-      CALL INCREASEPOL(NPL + NROW + 1, 1) ! previous pols (if any) + 1 dmiss + new polyline
+      CALL INCREASEPOL(int(1.2*(NPL + NROW + 1)), 1) ! previous pols (if any) + 1 dmiss + new polyline
 
    11 ipli = ipli + 1         ! Start reading a new polyline
      

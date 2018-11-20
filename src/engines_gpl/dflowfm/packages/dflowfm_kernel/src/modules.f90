@@ -2723,7 +2723,9 @@ end subroutine default_turbulence
 
  integer                           :: jaZlayeratubybob=0  !< 0 = BL left/right based, 1: Linkbob based
 
- integer                           :: jaZlayercenterbedvel=1
+ integer                           :: jaZlayercenterbedvel=1 !< In z-layer model copy lowest u-velocity to lower cell centres 
+ 
+ integer                           :: jaZerozbndinflowadvection=0 !< set zero advection velocity on inflow at z boundaries 0=no, 1=yes
  
  integer                           :: jabaroctimeint    !< time integration baroclini pressure, 1 = Euler, abs() = 2; rho at n+1/2, 3: AdamsB
 
@@ -3088,6 +3090,7 @@ subroutine default_flowparameters()
     javased    = 6       !< vert. adv. suspended sediment concentrations : 0=No, 1=UpwexpL, 2=Centralexpl, 3=UpwimpL, 4=CentraLimpL, 5=switched to 3 for neg stratif., 6=higher-order upwind/explicit
     jahazlayer = 0       !<
     JaZlayercenterbedvel = 1
+    JaZerozbndinflowadvection = 0
 
     jabaroctimeint = -3  !< time integration baroclini pressure, 1 = explicit, abs() = 2; adams bashford , 3 = ab3, 5 = adv rho
     jabarocterm = 2      ! revised baroc term
@@ -3252,7 +3255,14 @@ module m_vegetation
  double precision                  :: growthunidicouv         ! uniform values in veg growth model diffusion coef
  double precision                  :: growthunidiam           ! uniform values in veg growth model diam
  double precision                  :: growthuniheight         ! uniform values in veg growth model height
-
+ 
+ double precision                  :: expchistem = 0d0
+ double precision                  :: uchistem   = 0d0 
+ double precision                  :: expchileaf = 0d0 
+ double precision                  :: uchileaf   = 0d0
+ double precision                  :: arealeaf   = 0d0
+ double precision                  :: Cdleaf     = 1d0
+ 
 end module m_vegetation
 
  module m_flow   ! flow arrays-999
