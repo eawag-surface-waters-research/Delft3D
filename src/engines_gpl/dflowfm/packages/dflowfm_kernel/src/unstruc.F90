@@ -25827,7 +25827,6 @@ subroutine transport()                           ! transport for now, advect sal
                  if (jasal > 0) then
                     b(n+1) = b(n+1) + ( dif  + adv *tetav) / vol1(k+1)
                     a(n+1) = a(n+1) - ( dif  + adv1*tetav) / vol1(k+1)
-
                     b(n  ) = b(n  ) + ( dif  + adv1*tetav) / vol1(k  )
                     c(n  ) = c(n  ) - ( dif  + adv *tetav) / vol1(k  )
                  endif
@@ -26284,10 +26283,10 @@ subroutine transport()                           ! transport for now, advect sal
     do L = Lb, Lt
        if (q1(L) < 0) then
           kb = ln(1,L) ; ki = ln(2,L)
-          if (jasal > 0) then
+          if (jasal > 0 .and. keepstbndonoutflow == 0) then
               sa1(kb)  = sa1(ki)
           endif
-          if (jatem > 0) then
+          if (jatem > 0  .and. keepstbndonoutflow == 0) then
               constituents(itemp, kb) = constituents(itemp,ki)
           endif
           if (jased > 0) then
