@@ -397,6 +397,7 @@ module m_flow1d_reader
       integer                         :: isp
       integer                         :: maxErrorLevel
       logical                         :: success
+      logical                         :: extra_output
       logical                         :: UseInitialWaterDepth
       double precision                :: default
       
@@ -550,7 +551,12 @@ module m_flow1d_reader
       if (network%crs%Count < 1) then
          call SetMessage(LEVEL_FATAL, 'Not Any Cross Section Found')
       endif
-
+      
+      call prop_get_logical(md_ptr, 'SimulationOptions', 'OutputYZConveyanceTables', extra_output, success)
+      if (success .and. extra_output) then
+         call write_crosssection_data(network%crs, network%brs)
+      endif
+      
       call SetMessage(LEVEL_INFO, 'Reading Cross Section Locations Done')
       call timstop(timerReadCsLocs)
       call timstrt('ReadStructures', timerReadStructs)

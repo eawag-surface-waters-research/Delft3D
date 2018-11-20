@@ -40,6 +40,7 @@ public generateConvtab
 public regulatehlv
 public realloc
 public dealloc
+public write_conv_tab
 
  integer, parameter                             :: ncx = 144
  integer, parameter, public                             :: CS_VERT_SEGM = 1
@@ -1149,6 +1150,38 @@ double precision :: dh                         ! depth dif
    a  = 0.5d0*( h1 + h2 )*w
    p  = dsqrt ( w*w  + dh*dh )
 end subroutine compwap
+
+subroutine write_conv_tab(convtab)
+   use messagehandling
+   
+   type(t_crsu), intent(in)      :: convtab
+   
+   integer :: nlevels
+   integer :: i
+   
+   write(msgbuf, '(''Number of levels in Conveyance table = '', i5)') convtab%nru
+   call msg_flush()
+   
+   write(msgbuf,'(''Extrapolation factor a (positive direction)'', g14.6)') convtab%a_pos_extr
+   call msg_flush()
+   write(msgbuf,'(''Extrapolation factor a (negative direction)'', g14.6)') convtab%a_neg_extr
+   call msg_flush()
+   write(msgbuf,'(''Extrapolation factor b (positive direction)'', g14.6)') convtab%b_pos_extr
+   call msg_flush()
+   write(msgbuf,'(''Extrapolation factor b (negative direction)'', g14.6)') convtab%b_neg_extr
+   call msg_flush()
+   write(msgbuf,'(11a17)') 'Water_depth', 'Total_width', 'Flow_width', 'Total_Area', 'Flow_Area', 'Conv_pos_dir', &
+               'Conv_neg_dir', 'Perimeter'
+   call msg_flush()
+
+   nlevels = convtab%nru
+   do i = 1, nlevels
+      write(msgbuf, '(11g17.6)') convtab%hu (i) , convtab%wt(i,1), convtab%wf (i), convtab%at(i,1), convtab%af (i), &
+                                 convtab%co1(i), convtab%co2(i), convtab%pf (i)
+      call msg_flush()
+   enddo 
+   
+end subroutine write_conv_tab
 
 end module M_newcross           ! new type conveyance table crossections
 

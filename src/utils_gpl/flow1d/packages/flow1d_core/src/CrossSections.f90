@@ -62,6 +62,7 @@ module m_CrossSections
    public setGroundLayerData
    public SetParsCross
    public useBranchOrders
+   public write_crosssection_data
    
    interface fill_hashtable
       module procedure fill_hashtable_csdef
@@ -3415,6 +3416,60 @@ subroutine createTablesForTabulatedProfile(crossDef)
 
    enddo
    
-end subroutine createTablesForTabulatedProfile
+   end subroutine createTablesForTabulatedProfile
 
+   subroutine write_crosssection_data(crs, brs)
+      use M_newcross
+   
+      type(t_CrossSectionSet), intent(in)    :: crs
+      type(t_branchSet), intent(in)          :: brs
+      
+      integer                       :: icross
+      integer                       :: n
+      integer                       :: count
+      type(t_CrossSection), pointer :: cross
+      character(len=20)             :: cstype
+      
+      count = crs%count
+      do icross = 1, count
+         cross => crs%cross(icross)
+         msgbuf = '  '
+         call msg_flush()      
+         write(msgbuf, '(137a1)') ('=', n=1,137)
+         call msg_flush()
+
+         msgbuf = 'Id                   = '// trim(cross%csid)
+         call msg_flush()
+         select case(cross%crossType)
+         case(CS_TABULATED) 
+            cstype = 'tabulated'
+         case(CS_CIRCLE   ) 
+            cstype = 'circle'
+         case(CS_EGG      )
+            cstype = 'egg'
+         case(CS_YZ_PROF  ) 
+            cstype = 'yz'
+         case default
+            cstype = '***UNKNOWN***'
+         end select
+         msgbuf = 'Type                 = '// trim(cstype)
+         call msg_flush()
+         msgbuf = 'Branch id            = '// trim(brs%branch(cross%branchid)%id)
+         call msg_flush()
+         write(msgbuf, '(''Chainage             = '', f14.2)') cross%location
+         call msg_flush()
+         write(msgbuf, '(''Bed level            = '', f14.2)') cross%bedlevel
+         call msg_flush()
+         
+         if (cross%crossType == CS_YZ_PROF) then
+            call write_conv_tab(cross%convTab)
+         endif
+         
+      enddo
+          msgbuf = '  '
+         call msg_flush()
+         call msg_flush()
+ 
+   
+   end subroutine write_crosssection_data
 end module m_CrossSections

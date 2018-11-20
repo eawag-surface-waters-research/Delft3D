@@ -62,7 +62,7 @@ module m_readCrossSections
    contains
     
    subroutine readCrossSectionLocationFile(network, CrossSectionfile)
-
+      use m_CrossSections
       type(t_network), intent(inout) :: network
       character(len=*), intent(in)   :: CrossSectionFile
 
@@ -521,7 +521,7 @@ module m_readCrossSections
       enddo
 
       !call dumpCrossDefs(network%CSDefinitions, 'dumpCrossDefFileRead')
-      
+
       call tree_destroy(md_ptr)
       call fill_hashtable(network%CSDefinitions)
       
