@@ -676,7 +676,7 @@ implicit none
 ! Global variables
 !
     integer         :: minp
-    integer,optional:: meteotype
+    integer         :: meteotype
     logical         :: success
     character(*)    :: filename
 !
@@ -688,11 +688,7 @@ implicit none
 !! executable statements -------------------------------------------------------
 !
     if (len_trim(filename) == 0) then
-       if (present(meteotype)) then
-          write (meteomessage, '(a,i0)') 'While opening meteo file: name is empty, for meteotype = ', meteotype
-       else
-          write (meteomessage, '(a)') 'While opening meteo file: name is empty'
-       endif
+       write (meteomessage, '(a,i0)') 'While opening meteo file: name is empty, for meteotype = ', meteotype
        success = .false.
        return
     endif
