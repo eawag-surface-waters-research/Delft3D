@@ -260,7 +260,7 @@ contains
        else
           if (matchkeyvalue(keyvaluestr,'QUANTITY',qname)) then
              jafound = .true.
-          elseif (matchkeyvalue(keyvaluestr,'VECTOR',qname)) then
+          elseif (matchkeyvaluelist(keyvaluestr,'VECTOR',qname)) then
              jafound = .true.
           endif
        endif
