@@ -3415,6 +3415,7 @@ end module m_vegetation
  double precision, allocatable, target :: ucyq  (:)   !< cell center velocity, q based  global y-dir (m/s)
  double precision, allocatable         :: uqcx  (:)   !< cell center incoming momentum, global x-dir (m4/s2), only for iadvec = 1
  double precision, allocatable         :: uqcy  (:)   !< cell center incoming momentum, global y-dir (m4/s2), only for iadvec = 1
+ double precision, allocatable         :: ucmag (:)   !< [m/s] cell center velocity magnitude {"location": "face", "shape": ["ndkx"]}
  double precision, allocatable         :: cfli  (:)   !< sum of incoming courants (    ) = sum( Dt*Qj/Vi)
  double precision, allocatable         :: dvxc  (:)   !< cell center stress term, global x-dir (m3/s2)
  double precision, allocatable         :: dvyc  (:)   !< cell center stress term, global y-dir (m3/s2)

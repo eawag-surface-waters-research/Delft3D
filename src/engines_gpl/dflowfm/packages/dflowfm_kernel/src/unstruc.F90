@@ -6679,6 +6679,33 @@ subroutine setucxucyeuler()
  endif
 end subroutine setucxucyeuler
 
+!> Updates the velocity magnitude in cell centers, typically used for output only.
+!! Stored in m_flow::ucmag(:)
+subroutine setucmag()
+use m_flowgeom
+use m_flow
+
+implicit none
+
+integer          :: kk,k,kb,kt
+
+!call realloc(ucmag, ndkx, keepExisting = .false.)
+! NOTE: workx/y contain the velocity vectors, possibly corrected into Eulerian velocities (see setucxucyeuler).
+if ( kmx.gt.0 ) then
+   do kk=1,ndx
+      call getkbotktop(kk,kb,kt)
+      do k = kb,kt
+         ucmag(k) = sqrt(workx(k)**2 + worky(k)**2) ! TODO: this does not include vertical/w-component now.
+      end do
+   end do
+else
+   do kk = 1,ndx
+         ucmag(kk) = sqrt(workx(kk)**2 + worky(kk)**2)
+   enddo     
+end if
+
+end subroutine setucmag
+
 !> Update the cumulative waq fluxes for the just set timestep.
 !!
 !! Should be called at the end of each computational timestep.
@@ -22055,6 +22082,9 @@ end do
  call aerr('uqcx(ndkx) , uqcy(ndkx)', ierr, 2*ndkx) ; uqcx = 0 ; uqcy = 0
  allocate ( ucxq(ndkx) , ucyq(ndkx) , stat = ierr)
  call aerr('ucxq(ndkx) , ucyq(ndkx)', ierr, 2*ndkx) ; ucxq = 0 ; ucyq = 0
+ if (jamapucmag == 1) then
+    call realloc(ucmag, ndkx, keepExisting=.false.)
+ end if
  allocate ( qin (ndkx) , vih (ndkx) , stat = ierr)
  call aerr('qin (ndkx) , vih (ndkx)', ierr, 2*ndkx) ; qin  = 0 ; vih  = 0
  allocate ( dvxc(ndkx) , dvyc(ndkx) , stat = ierr)

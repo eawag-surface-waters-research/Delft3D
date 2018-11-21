@@ -992,7 +992,7 @@ subroutine get_var(c_var_name, x) bind(C, name="get_var")
   ! can be computed outside.
   ! You can generate extra variables here.
   select case(var_name)
-  case("uabs")
+  case("uabs") ! TODO: AvD: UNST-2165, consider replacing by ucmag
      if (.not.allocated(uabs))  allocate(uabs(size(ucx)))
 
      do i=1, size(ucx)

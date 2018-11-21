@@ -4438,20 +4438,8 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
       end if
 
       if (jamapucmag == 1) then
-         call realloc(work1d, ndkx, keepExisting = .false.)
-         if ( kmx.gt.0 ) then
-            do kk=1,ndx
-               call getkbotktop(kk,kb,kt)
-               do k = kb,kt
-                  work1d(k) = sqrt(workx(k)**2 + worky(k)**2) ! TODO: this does not include vertical/w-component now.
-               end do
-            end do
-         else
-            do kk = 1,ndx
-                work1d(kk) = sqrt(workx(kk)**2 + worky(kk)**2)
-            enddo     
-         end if
-         ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_ucmag, iLocS, work1d)
+         call setucmag()
+         ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_ucmag, iLocS, ucmag)
       end if
 
       if (kmx > 0) then
