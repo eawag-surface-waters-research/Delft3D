@@ -5546,7 +5546,7 @@ end module m_partparallel
    
    
    ! Save data for later writing of 1d Ugrid 
-   module m_save_ugrid_state
+module m_save_ugrid_state
    
    use meshdata
    
@@ -5555,4 +5555,22 @@ end module m_partparallel
    character(len=ug_idsLongNamesLen), allocatable     :: nbranchlongnames(:), nnodelongnames(:), nodelongnames(:)
    character(len=255)                                 :: network1dname, mesh2dname, mesh1dname, contactname !MAXSTRLEN = 255
     
-   end module m_save_ugrid_state
+!> Sets ALL (scalar) variables in this module to their default values.
+!! For a reinit prior to flow computation, only call reset_waves() instead.
+contains
+   subroutine default_save_ugrid_state()
+      implicit none
+      call reset_save_ugrid_state()
+      network1dname = ''   
+      mesh1dname = ''   
+      mesh2dname = ''   
+      contactname = ''   
+   end subroutine default_save_ugrid_state
+   
+   !> Resets only waves variables intended for a restart of flow simulation.
+   !! Upon loading of new model/MDU, call default_waves() instead.
+   subroutine reset_save_ugrid_state()
+      implicit none
+   end subroutine reset_save_ugrid_state
+   
+end module m_save_ugrid_state

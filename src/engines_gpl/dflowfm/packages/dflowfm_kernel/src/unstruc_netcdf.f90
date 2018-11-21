@@ -484,19 +484,19 @@ integer :: is_layerdep_
 integer :: ndims, i
 character(len=255) :: localMesh1dName, localMesh2dName, localContactName
 
-   if (mesh1dname(1:1).ne.' ') then 
+   if (len_trim(mesh1dname)>0) then 
       localMesh1dName = mesh1dname
    else 
       localMesh1dName = 'mesh1d'
    endif
 
-   if (mesh2dname(1:1).ne.' ') then
+   if (len_trim(mesh2dname)>0) then
       localMesh2dName = mesh2dname
    else
       localMesh2dName = 'mesh2d'      
    endif   
    
-   if (contactName(1:1).ne.' ') then
+   if (len_trim(contactName)>0) then
       localContactName = contactName
    else
       localContactName = 'contacts'      

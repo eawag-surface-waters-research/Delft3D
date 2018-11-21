@@ -10381,6 +10381,7 @@ end subroutine cosphiunetcheck
  use unstruc_channel_flow
  use m_sobekdfm
  use m_waves, only: default_waves
+ use m_save_ugrid_state
  use  m_xbeach_avgoutput, only: default_xbeach_avgoutput
  use m_ship
  implicit none
@@ -10431,6 +10432,8 @@ end subroutine cosphiunetcheck
     
     call default_xbeach_avgoutput()
 
+    call default_save_ugrid_state()
+    
     !Reset samples:
     ns = 0
 
