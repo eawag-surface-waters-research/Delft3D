@@ -2031,9 +2031,9 @@ do ng=1,ncgensg ! Loop over general structures
       endif
    enddo
    
-   if ( L2cgensg(ng) == L1cgensg(ng) ) then 
-      generalstruc(ng)%widthcenteronlink(L0) = min( wu(Lf), zcgen((ng-1)*3+3) ) 
-   endif
+   !if ( L2cgensg(ng) == L1cgensg(ng) ) then 
+   !   generalstruc(ng)%widthcenteronlink(L0) = min( wu(Lf), zcgen((ng-1)*3+3) ) 
+   !endif
    
 end do ! 1,ngensg
 
