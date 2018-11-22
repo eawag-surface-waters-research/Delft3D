@@ -109,7 +109,7 @@ DllProcedureAddress GetDllProcedure(
 #if defined(WIN32)
 	procedure = GetProcAddress(sharedDLL->dllHandle, fun_name);
 #elif defined(HAVE_CONFIG_H)
-	proc = (DllProcedureAddress)dlsym(sharedDLL->dllHandle, fun_name);
+	procedure = (DllProcedureAddress)dlsym(sharedDLL->dllHandle, fun_name);
 #endif
 	return procedure;
 }
