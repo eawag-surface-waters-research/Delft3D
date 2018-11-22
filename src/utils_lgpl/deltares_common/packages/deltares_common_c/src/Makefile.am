@@ -19,7 +19,6 @@ AM_CPPFLAGS = -I$(top_srcdir)/utils_lgpl/deltares_common/packages/deltares_commo
 #-------------------------------------------------------------------------------
 #Sources
 libDeltaresCommonC_la_SOURCES = \
-     bmi_shared_lib_fortran_api.c \
 	 cpuinfo.cpp \
 	 cutil.c \
 	 getopt.cpp \
