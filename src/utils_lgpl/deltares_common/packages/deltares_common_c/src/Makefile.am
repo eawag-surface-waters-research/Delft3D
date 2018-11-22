@@ -28,7 +28,8 @@ libDeltaresCommonC_la_SOURCES = \
 	 sems.cpp \
 	 stream.cpp \
 	 throwexception.cpp \
-	 shared_library_fortran_api.c
+	 shared_library_fortran_api.c \
+	 bmi_shared_lib_fortran_api.c
 
 #-------------------------------------------------------------------------------
 #Libraries
