@@ -4438,6 +4438,7 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
       end if
 
       if (jamapucmag == 1) then
+         call realloc(work1d, ndkx, keepExisting = .false.)
          call setucmag()
          ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_ucmag, iLocS, ucmag)
       end if
