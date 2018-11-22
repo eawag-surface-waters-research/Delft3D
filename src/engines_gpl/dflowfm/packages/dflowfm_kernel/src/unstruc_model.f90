@@ -142,7 +142,7 @@ implicit none
     character(len=255) :: md_trtdfile     = ' ' !< File containing trachytopes definitions
     character(len=255) :: md_trtlfile     = ' ' !< File containing distribution of trachytope definitions
     integer            :: md_mxrtrach     = 8   !< Maximum recursion level for combined trachytope definitions 
-    double precision   :: md_clltrach     = 1d0 !< Overall calibration factor for roughness from trachytopes (see also [calibration] block)
+    character(len=255) :: md_trtcllfile   = ' ' !< Overall calibration factor file for roughness from trachytopes (see also [calibration] block)
     double precision   :: md_mnhtrach     = 0.1d0 !< Minimum water depth for roughness computations  
     integer            :: md_mthtrach     = 1   !< Area averaging method, 1: Nikuradse k based, 2: Chezy C based (parallel and serial)
     
@@ -1253,7 +1253,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_double(md_ptr, 'trachytopes', 'DtTrt', dt_trach, success)
     if (.not. success) dt_trach = dt_user
     call prop_get_integer(md_ptr, 'trachytopes', 'TrtMxR', md_mxrtrach, success)
-    call prop_get_double(md_ptr, 'trachytopes', 'TrtCll' , md_clltrach, success)
+    call prop_get_string(md_ptr, 'trachytopes', 'TrtCll' , md_trtcllfile, success)
     call prop_get_double(md_ptr, 'trachytopes', 'TrtMnH', md_mnhtrach, success)
     call prop_get_integer(md_ptr, 'trachytopes', 'TrtMth', md_mthtrach, success)
     
@@ -2547,7 +2547,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
         call prop_set(prop_ptr, 'trachytopes', 'TrtL'            , trim(md_trtlfile) , 'File (*.arl) including distribution of trachytope definitions')
         call prop_set(prop_ptr, 'trachytopes', 'DtTrt'           , dt_trach               , 'Trachytope roughness update time interval (s)')
         call prop_set(prop_ptr, 'trachytopes', 'TrtMxR'          , md_mxrtrach          , 'Maximum recursion level for combined trachytope definitions')
-        call prop_set(prop_ptr, 'trachytopes', 'TrtCll'          , md_clltrach          , 'Overall calibration factor for roughness from trachytopes (see also [calibration] block)')
+        call prop_set(prop_ptr, 'trachytopes', 'TrtCll'          , trim(md_trtcllfile)  , 'Calibration factor file for roughness from trachytopes (see also [calibration] block)')
         call prop_set(prop_ptr, 'trachytopes', 'TrtMnH'          , md_mnhtrach          , 'Minimum water depth for roughness computations')
         call prop_set(prop_ptr, 'trachytopes', 'TrtMth'          , md_mthtrach          , 'Area averaging method, (1=Nikuradse k based, 2=Chezy C based (parallel and serial))')
     end if
