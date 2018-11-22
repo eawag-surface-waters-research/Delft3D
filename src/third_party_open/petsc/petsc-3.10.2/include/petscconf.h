@@ -339,10 +339,7 @@
 #endif
 
 #ifndef PETSC_HAVE_FORTRAN_TYPE_STAR
-// Intel Fortran only supports assumed types after Intel 15.0
-#if !defined(__INTEL_COMPILER) || __INTEL_COMPILER>=1500
 #define PETSC_HAVE_FORTRAN_TYPE_STAR 1
-#endif
 #endif
 
 #ifndef PETSC_CXX_RESTRICT
