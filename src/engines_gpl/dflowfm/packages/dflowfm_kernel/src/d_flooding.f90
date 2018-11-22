@@ -171,8 +171,8 @@ end subroutine reset_sobekdfm
    subroutine dealloc_1d2d()
 ! todo: avd: one already deallocated...      
       deallocate ( xbnd1d2d, ybnd1d2d, xy2bnd1d2d, zbnd1d2d1, zbnd1d2d0, kbnd1d2d, &
-         zcrest1d2d, b1ds, b1dq, d1d, CFL, qzeta_1d2d, qlat_1d2d, width_1d, qtotal_1d2d, &
-         FlowCond, sb_1d2d, edgenumbers1d2d)
+         b1ds, b1dq, d1d, CFL, qzeta_1d2d, qlat_1d2d, width_1d, qtotal_1d2d, b_i,  &
+         FlowCond, sb_1d2d, edgenumbers1d2d, b_2dv, b_2di, d_2dv, s0_2d, s1_2d, s0_1d)
 
    end subroutine dealloc_1d2d
 
