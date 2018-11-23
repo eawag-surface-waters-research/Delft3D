@@ -810,7 +810,7 @@ subroutine readMDUFile(filename, istat)
     endif
     call prop_get_double ( md_ptr, 'geometry', 'Bamin'   ,  Bamin )
     call prop_get_double ( md_ptr, 'geometry', 'OpenBoundaryTolerance',  rrtol)
-
+    call prop_get_integer( md_ptr, 'geometry', 'AllowBndAtBifurcation',  jaAllowBndAtBifurcation)
     call prop_get_integer( md_ptr, 'geometry', 'RenumberFlowNodes',  jarenumber) ! hidden option for testing renumbering
 
 ! Numerics
@@ -1996,6 +1996,9 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     endif
     if (writeall .or. (rrtol .ne. 3d0)) then !
        call prop_set(prop_ptr, 'geometry', 'OpenBoundaryTolerance',  rrtol, 'Search tolerance factor between boundary polyline and grid cells, in cell size units')
+    endif
+    if (writeall .or.  jaAllowBndAtBifurcation > 0) then
+       call prop_set(prop_ptr, 'geometry', 'AllowBndAtBifurcation',  jaAllowBndAtBifurcation, 'Allow 1d boundary node when connecting branch leads to bifurcation (1: yes, 0: no)')
     endif
     if (writeall) then !
        call prop_set (prop_ptr, 'geometry', 'RenumberFlowNodes',  jarenumber, 'Renumber the flow nodes (1: yes, 0: no)') ! hidden option for testing renumbering

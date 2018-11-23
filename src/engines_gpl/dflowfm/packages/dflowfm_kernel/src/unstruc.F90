@@ -32537,26 +32537,30 @@ end subroutine setbobs_fixedweirs
  use m_waves, only: ypar, cfwavhi, hminlw, cfhi_vanrijn
  use m_sediment
  use unstruc_channel_flow
+ use m_cross_helper
  use m_structure
  use m_general_structure
  use m_weir
  use m_orifice
  use m_sferic
+ use m_culvert
 
  implicit none
 
  integer          :: L, Lf, n, k1, k2, kb, LL, k, itu1, Lb, Lt, itpbn, ns, nstrucsg
  integer          :: kfu, istru
  integer          :: state
+ integer          :: mdown 
+ 
  double precision :: bui, cu, du, du0, gdxi, ds, riep, as, gdxids
  double precision :: slopec, hup, u1L, v2, frL, u1L0, rhof, zbndun, zbndu0n, bdmwrp, bdmwrs
  double precision :: qk0, qk1, dzb, hdzb, z00  !
- double precision :: as1, as2, qtotal, s_on_crest, width, st2
+ double precision :: as1, as2, qtotal, s_on_crest, width, st2, cmustr, wetdown, dpt
  double precision :: twot = 2d0/3d0, hb, h23, ustbLL, agp, vLL
  double precision :: hminlwi,fsqrtt
  logical          :: firstiter, jarea
  type(t_structure), pointer :: pstru
-
+ 
  integer          :: np, L1     ! pumpstuff
  double precision :: ap, qp, vp ! pumpstuff
 
@@ -32753,8 +32757,18 @@ end subroutine setbobs_fixedweirs
                 case (ST_DAMBREAK)
                    continue
                 case (ST_CULVERT)
-                   ! TODO: implement this?!
-                   continue
+                   if (s1(k1) > s1(k2)) then
+                      mdown = k2
+                   else
+                      mdown = k1
+                   endif
+                   dpt = s1(mdown) - bl(mdown)
+
+                   call getCrossFlowData_on_link(network, L, dpt, flowArea=wetdown)
+
+                   wetdown = max(wetdown, 0.0001d0)
+                   call computeculvert(pstru%culvert, fu(L), ru(L), au(L), width, kfu, cmustr, s1(k1), s1(k2), &
+                       q1(L), q1(L), u1(L), u0(L), dx(L), dts, bob(1,L), bob(2,L), wetdown, network%sts%struct(istru)%state, .true.)
                 case (ST_BRIDGE)
                    ! TODO: implement this?!
                 continue
@@ -35485,6 +35499,8 @@ subroutine make_mirrorcells(Nx, xe, ye, xyen, kce, ke, ierror)
 
    integer,                           intent(out)   :: ierror   !< error (1) or not (0)
 
+   logical, external                                :: is_1d_boundary_candidate
+   
    double precision, dimension(4)                   :: xx, yy  ! (half) mirror cell contour
 
    double precision                                 :: xci, yci, xcb, ycb, xce2, yce2
@@ -35513,14 +35529,14 @@ subroutine make_mirrorcells(Nx, xe, ye, xyen, kce, ke, ierror)
          ke(L)     = ind
       else if (kn(3,L) == 1 .or. kn(3,L) == 6) then                      ! 1D links
          k1 = k3 ; k2 = k4
-         if      (nmk(k1) == 1 .and. nmk(k2) == 2 .and. lne(1,L) < 0 ) then
+         if (is_1d_boundary_candidate(L,1)) then
             xe(L)     = xk(k1)
             ye(L)     = yk(k1)
             xyen(1,L) = 2d0*xk(k1) - xk(k2)
             xyen(2,L) = 2d0*yk(k1) - yk(k2)
             kce(L)    = 1
             ke(L)     = -lne(1,L)
-         else if (nmk(k2) == 1 .and. nmk(k1) == 2 .and. lne(2,L) < 0 ) then
+         else if (is_1d_boundary_candidate(L,2)) then
             xe(L)     = xk(k2)
             ye(L)     = yk(k2)
             xyen(1,L) = 2d0*xk(k2) - xk(k1)
@@ -35607,6 +35623,8 @@ end subroutine make_mirrorcells
 
  implicit none
 
+ logical, external                                :: is_1d_boundary_candidate
+ 
  integer :: i, k, k1, k2, L, Lf, lb, nn, ierr, ja, k3, k4, id, istart, num1d2d, kL, kR, mpliz
 
  double precision :: x0,y0,x1,y1,x2,y2,xn,yn, dis, wL, wR
@@ -35673,7 +35691,7 @@ end subroutine make_mirrorcells
         kcu(Lf) = -2
         kcs(k1) = -2
     else                                               ! in 1D mirror point
-        if      (nmk(k3) == 1 .and. nmk(k4) == 2 .and. lne(1,L) < 0 ) then
+         if (is_1d_boundary_candidate(L,1)) then
             if (izbndpos == 0) then                    ! as in D3DFLOW
 !               xz(k1)  = 2d0*xk(k3) - xk(k4)
 !               yz(k1)  = 2d0*yk(k3) - yk(k4)
@@ -35690,7 +35708,7 @@ end subroutine make_mirrorcells
             kcs(k1)  = -1
             nd(k1)%x = xz(k1) ; nd(k1)%y = yz(k1)  ! todo, naar allocateandset1D nodestuff
             xzw(k1) = xz(k1); yzw(k1) = yz(k1)
-        else if (nmk(k4) == 1 .and. nmk(k3) == 2 .and. lne(2,L) < 0 ) then
+         else if (is_1d_boundary_candidate(L,2)) then
             if (izbndpos == 0) then                    ! as in D3DFLOW
 !               xz(k1) = 2d0*xk(k4) - xk(k3)
 !               yz(k1) = 2d0*yk(k4) - yk(k3)
@@ -35751,7 +35769,7 @@ end subroutine make_mirrorcells
         kcu(Lf) = -2
         kcs(k1) = -2
     else                      ! in 1D mirror point
-        if      (nmk(k3) == 1 .and. nmk(k4) == 2 .and. lne(1,L) < 0 ) then
+         if (is_1d_boundary_candidate(L,1)) then
 !            xz(k1)  = 2d0*xk(k3) - xk(k4)
 !            yz(k1)  = 2d0*yk(k3) - yk(k4)
             call a1x1a2x2(xk(k3), yk(k3), xk(k4), yk(k4), 2d0, -1d0, xz(k1), yz(k1))
@@ -35760,7 +35778,7 @@ end subroutine make_mirrorcells
             kcs(k1) = -1
             nd(k1)%x = xz(k1) ; nd(k1)%y = yz(k1)  ! todo: JN: naar allocateandset1D nodestuff
             xzw(k1) = xz(k1); yzw(k1) = yz(k1)
-        else if (nmk(k4) == 1 .and. nmk(k3) == 2 .and. lne(2,L) < 0 ) then
+         else if (is_1d_boundary_candidate(L,2)) then
 !            xz(k1)  = 2d0*xk(k4) - xk(k3)
 !            yz(k1)  = 2d0*yk(k4) - yk(k3)
             call a1x1a2x2(xk(k3), yk(k3), xk(k4), yk(k4), -1d0, 2.0d0, xz(k1), yz(k1))
@@ -35868,9 +35886,31 @@ end subroutine make_mirrorcells
     call restorepol()
     if (allocated(kdum)) deallocate(kdum)
  end if ! nbnd1d2d > 0
- end subroutine addexternalboundarypoints
+    end subroutine addexternalboundarypoints
 
+!< Returns true when a 1d node can be used as a boundary. By default
+!< the connecting edge should not lead to a bifurcation, unless
+!< the flag jaAllowBndAtBifurcation is true
+pure logical function is_1d_boundary_candidate(L,i)
+    use network_data
+    use m_flowgeom
+    
+    implicit none
+    
+    integer, intent(in)     :: L    !<  net link to check for boundary candidate 
+    integer, intent(in)     :: i    !<  node to check, equals 1 or 2
 
+    logical                 :: isEndNode
+    
+    is_1d_boundary_candidate = nmk(kn(i,L)) == 1 .and. nmk(kn(3-i,L)) == 2 .and. lne(i,L) < 0
+    if (jaAllowBndAtBifurcation == 1) then
+        is_1d_boundary_candidate = nmk(kn(i,L)) == 1 .and. nmk(kn(3-i,L)) >= 2 .and. lne(i,L) < 0
+    endif
+    
+    return
+end function is_1d_boundary_candidate
+
+    
  !> Initializes boundaries and meteo for the current model.
  !! @return Integer result status (0 if successful)
  integer function flow_initexternalforcings() result(iresult)              ! This is the general hook-up to wind and boundary conditions

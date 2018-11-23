@@ -4091,7 +4091,7 @@ double precision, allocatable      :: thindam(:,:)
  double precision, allocatable     :: xyen(:,:)        !< temp boundary opposite point (end of EdgeNormal) (replaces ebtol tolerance)
  integer                           :: jarenumber       !< renumberFlowNodes
  integer                           :: jaFlowNetChanged !< To enforce various net(link)-related init routines after renumbering
-
+ integer                           :: jaAllowBndAtBifurcation !< allow 1d boundary at endnode when connecting branch leads to bifurcation
 
 ! JRE Stuff related to setting up wave directional grid
  integer                                     :: ntheta          !< Number of wave direction bins
@@ -4132,7 +4132,8 @@ subroutine default_flowgeom()
     
     ! useful parameters :
     rrtol      = 3d0 ! relative cellsize factor in search tolerance ()
-
+    jaAllowBndAtBifurcation = 0
+    
     jarenumber = 1
     ! Remaining of variables is handled in reset_flowgeom()
     call reset_flowgeom()

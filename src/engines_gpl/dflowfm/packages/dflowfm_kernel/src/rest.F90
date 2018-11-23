@@ -5157,7 +5157,7 @@ end subroutine timdat
               
            endif 
            if ( in.eq.1 ) then
-              if ( inod(isam).ne.0 ) then            ! should not happen, but it can
+              if ( inod(isam).ne.0 ) then            ! should not happen, but it can: for example in case of overlapping 1D branches
                  write(mesg, "('find_flowcells_kdtree: sample/point ', I0, ' in cells ', I0, ' and ', I0)") isam, inod(isam), k
                  call mess(LEVEL_INFO, mesg  )
 !                goto 1234
