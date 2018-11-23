@@ -51,7 +51,7 @@ set rtcdefaultdir=%D3D_HOME%\%ARCH%\rtc\default
     rem Start FLOW
 set PATH=%dflow2d3ddir%;%sharedir%
 echo executing in separate window: "%dflow2d3ddir%\d_hydro.exe" %argfile%
-              start "Delft3D-FLOW" "%sharedir%\mpiexec.exe" -n 4 -localonly "%dflow2d3ddir%\d_hydro.exe" %argfile%
+              start "Delft3D-FLOW" "%dflow2d3ddir%\d_hydro.exe" %argfile%
 
 
 
