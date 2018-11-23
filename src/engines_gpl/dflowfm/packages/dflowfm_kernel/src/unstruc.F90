@@ -21497,15 +21497,15 @@ end do
      x4 = x4 + nint( (xz(n)-x4)/360d0 ) * 360d0
  end if
 
- CALL DLINEDIS(Xz(n),Yz(n),X3,Y3,X4,Y4,JA,DIS,Xd,Yd, jsferic, jasfer3D, dmiss)  ! dis is half cell size in boundary normal dir
+ CALL DLINEDIS(Xzw(n),Yzw(n),X3,Y3,X4,Y4,JA,DIS,Xd,Yd, jsferic, jasfer3D, dmiss)  ! dis is half cell size in boundary normal dir
  if (jadismxbnd == 1) dis = max(dis,0.5d0*sqrt(ba(n)))
  ! dis = max(dis,0.5d0*sqrt(ba(n)))
 
 ! (rx,ry) outward normal in reference frame of half(x3,y3,x4,y4)
  call normaloutchk(x3, y3, x4, y4, xzw(n), yzw(n), rx, ry, ja, jsferic, jasfer3D, dmiss, dxymis)
 
- xci  = xz(n)
- yci  = yz(n)
+ xci  = xzw(n)
+ yci  = yzw(n)
 
  if ( jsferic.eq.1 .and. jasfer3D.eq.1 ) then
     CALL DLINEDIS(Xci,Yci,X3,Y3,X4,Y4,JA,DIS2,Xd,Yd, jsferic, jasfer3D, dmiss)  ! dis is half cell size in boundary normal dir
