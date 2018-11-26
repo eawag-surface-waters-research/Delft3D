@@ -11435,21 +11435,21 @@ subroutine unc_read_map(filename, tim, ierr)
    ! Check if the orientation of each flowlink in the current model is the same with the link in the rst file
    ! If not, reverse the velocity that is read from rst file
    ! Check only when parallel restart with different partitions. ToDo: check for all the restart scenarios
-   if (jamergedmap_same == 0 .and. jampi == 1 ) then
-      ! Read link/interface between two flow elements (flow link) from the merged file
-      allocate(ln_read(2,lnx_own))
-      allocate(itmp2D(2,lnx_merge))
-      ierr = nf90_inq_varid(imapfile, 'FlowLink', id_flowlink)
-      ierr = nf90_get_var(imapfile, id_flowlink, itmp2D)
-      do L = 1, lnx_own
-         LL = ilink_merge(L)
-         ln_read(:,L) = itmp2D(:,LL)
-      end do
-      call check_error(ierr, 'FlowLink')
-      
-      ! check orientation
-      call check_flowlink_orientation(lnx_own, ln_read, ilink_own, lnx_merge, ndxi_merge, ndxi, inode_owninv, inode_merge2own)
-   end if
+   !if (jamergedmap_same == 0 .and. jampi == 1 ) then
+   !   ! Read link/interface between two flow elements (flow link) from the merged file
+   !   allocate(ln_read(2,lnx_own))
+   !   allocate(itmp2D(2,lnx_merge))
+   !   ierr = nf90_inq_varid(imapfile, 'FlowLink', id_flowlink)
+   !   ierr = nf90_get_var(imapfile, id_flowlink, itmp2D)
+   !   do L = 1, lnx_own
+   !      LL = ilink_merge(L)
+   !      ln_read(:,L) = itmp2D(:,LL)
+   !   end do
+   !   call check_error(ierr, 'FlowLink')
+   !   
+   !   ! check orientation
+   !   call check_flowlink_orientation(lnx_own, ln_read, ilink_own, lnx_merge, ndxi_merge, ndxi, inode_owninv, inode_merge2own)
+   !end if
    
    !-- Synchronisation to other domains, only for merged-map input
    if (jampi == 1 .and. jamergedmap == 1) then
