@@ -1042,15 +1042,15 @@ end subroutine setfouunit
             nmaxus = ndx
        case('ws')
             nmaxus = lnx
-       case('u1')
+       case('u1', 'v1')
             nmaxus = lnkx
-       case('ux','uy','uc')
-            nmaxus = ndkx
-       case('uxa','uya')
-            nmaxus = ndx
        case('qxk')
             nmaxus = lnx
        case('taubpu')
+            nmaxus = lnx
+       case('ux','uy','uc')
+            nmaxus = ndkx
+       case('uxa','uya')
             nmaxus = ndx
        case('r1')
             nmaxus = ndkx
@@ -2147,21 +2147,21 @@ end subroutine setfouunit
        !
        namfun = founam(ifou)
        select case (founam(ifou))
-       case('s1','uc')
+       case('s1')
             nmaxus = ndx
        case('ws')
             nmaxus = lnx
        case('u1','v1')
-            nmaxus = ndkx
+            nmaxus = lnkx
        case('qxk')
             nmaxus = lnx
        case('taubpu')
             nmaxus = lnx
-       case('r1')
+       case('ux','uy','uc')
             nmaxus = ndkx
        case('uxa','uya')
             nmaxus = ndx
-       case('ux','uy')
+       case('r1')
             nmaxus = ndkx
        end select
 
