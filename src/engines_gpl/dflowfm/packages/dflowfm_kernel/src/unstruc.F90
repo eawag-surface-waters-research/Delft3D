@@ -291,7 +291,7 @@ subroutine flow_finalize_usertimestep(iresult)
 
    integer, intent(out) :: iresult !< Error status, DFM_NOERR==0 if successful.
    double precision, pointer, dimension(:,:) :: s1_ptr, ws_ptr, ucx_ptr,  ucy_ptr,  taus_ptr,bl_ptr, u1_ptr
-   double precision, pointer, dimension(:,:) :: xs_ptr, ys_ptr, ucxa_ptr, ucya_ptr, xu_ptr, yu_ptr
+   double precision, pointer, dimension(:,:) :: xs_ptr, ys_ptr, ucxa_ptr, ucya_ptr, ucmag_ptr, xu_ptr, yu_ptr
    integer, pointer, dimension(:,:) :: kfs_ptr,kfst0_ptr
    double precision, pointer, dimension(:,:,:) :: const_ptr
    character(len=255) :: filename_fou_out
@@ -341,6 +341,7 @@ subroutine flow_finalize_usertimestep(iresult)
       ucy_ptr(1:ndkx,1:1) => ucy
       ucxa_ptr(1:ndx,1:1) => ucxq
       ucya_ptr(1:ndx,1:1) => ucyq
+      ucmag_ptr(1:ndx,1:1) => ucmag
       const_ptr(1:NUMCONST,1:ndkx,1:1) => constituents
       taus_ptr(1:ndxi,1:1) => taus
       bl_ptr(1:ndx,1:1) => bl
@@ -352,7 +353,10 @@ subroutine flow_finalize_usertimestep(iresult)
 !        wmag = wx*wx + wy*wy
          wmag = sqrt(wx*wx + wy*wy)
       endif
-      call postpr_fourier(s1_ptr,u1_ptr,ws_ptr,ucx_ptr,ucy_ptr,ucxa_ptr,ucya_ptr,const_ptr,taus_ptr,kfs_ptr,kfst0_ptr,bl_ptr,                       &
+      if (gdfourier%ibluc>0) then
+         call setucmag()
+      endif  
+      call postpr_fourier(s1_ptr,u1_ptr,ws_ptr,ucx_ptr,ucy_ptr,ucxa_ptr,ucya_ptr,ucmag_ptr,const_ptr,taus_ptr,kfs_ptr,kfst0_ptr,bl_ptr,                       &
         &                   nint(time0/dt_user),  &
         &                   trim(getoutputdir())//trim(filename_fou_out),dt_user,filename_fou_out,const_names,   &
         &                   refdat,0.5d0*dt_user,     &
@@ -8939,6 +8943,15 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
 
  jaFlowNetChanged = 0
 
+
+ ! Initialise Fourier Analysis
+ if (len_trim(md_foufile)>0) then
+    kfst0 = kfs                                      ! Preserve the wet/dry-state on zero time
+    call flow_fourierinit()
+ endif
+
+ 
+ 
  call mess(LEVEL_INFO, '** Model initialization was successful **')
  call mess(LEVEL_INFO, '* Active Model definition:')! Print model settings in diagnostics file.
  call writeMDUFilepointer(mdia, .true., istat)
@@ -8953,11 +8966,6 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
     end if
  end if
 
- ! Initialise Fourier Analysis
- if (len_trim(md_foufile)>0) then
-    kfst0 = kfs                                      ! Preserve the wet/dry-state on zero time
-    call flow_fourierinit()
- endif
 
 
 
@@ -13909,6 +13917,8 @@ do ifou = 1,nofou                         ! scan for windspeed in the list of fo
       exit
    endif
 enddo
+
+call count_fourier_variables
 
 ! TODO: do some stuff with the file contents
 end subroutine flow_fourierinit
@@ -22082,7 +22092,7 @@ end do
  call aerr('uqcx(ndkx) , uqcy(ndkx)', ierr, 2*ndkx) ; uqcx = 0 ; uqcy = 0
  allocate ( ucxq(ndkx) , ucyq(ndkx) , stat = ierr)
  call aerr('ucxq(ndkx) , ucyq(ndkx)', ierr, 2*ndkx) ; ucxq = 0 ; ucyq = 0
- if (jamapucmag == 1) then
+ if (jamapucmag == 1 .or. len_trim(md_foufile)>0) then                  
     call realloc(ucmag, ndkx, keepExisting=.false.)
  end if
  allocate ( qin (ndkx) , vih (ndkx) , stat = ierr)

@@ -56,6 +56,7 @@ module m_fourier_analysis
     !
     integer :: fouwrt       ! Time to write fourier file (TEKAL/map-NetCDF)
     integer :: nofouvar = 0 ! Number of parameters to write to NetCDF file
+    integer :: ibluc
     integer :: ibluv
     integer :: ibluva
     integer :: iblqf
@@ -118,6 +119,7 @@ module m_fourier_analysis
 
     public fouini
     public alloc_fourier_analysis_arrays
+    public count_fourier_variables
     public reafou
     public postpr_fourier
     public fouana
@@ -126,8 +128,57 @@ module m_fourier_analysis
     public gdfourier_ptr
     public nofou
     public ag_fouana
- contains
+    contains
 
+
+    subroutine count_fourier_variables
+       implicit none
+       integer :: ifou, ivar
+       ifou  = 1
+       gdfourier%iblwl = 0
+       gdfourier%iblws = 0
+       gdfourier%ibleh = 0
+       gdfourier%iblcn = 0
+       gdfourier%ibluv = 0
+       gdfourier%ibluva= 0
+       gdfourier%ibluc = 0
+       gdfourier%iblqf = 0
+       gdfourier%iblbs = 0
+       gdfourier%iblep = 0
+       do ivar=1, gdfourier%nofouvar
+          !
+          select case (gdfourier%founam(ivar)(:2))
+          case ('s1')
+             if (gdfourier%fouelp(ifou)=='e') then
+                gdfourier%ibleh = gdfourier%ibleh + 1
+             else
+                gdfourier%iblwl = gdfourier%iblwl + 1
+             endif
+          case ('ws')
+             gdfourier%iblws = gdfourier%iblws + 1
+          case ('ux')
+             gdfourier%ibluv = gdfourier%ibluv + 1
+          case ('uy')
+             gdfourier%ibluv = gdfourier%ibluv + 1
+          case ('uxa')
+             gdfourier%ibluva = gdfourier%ibluva + 1
+          case ('uya')
+             gdfourier%ibluva = gdfourier%ibluva + 1
+          case ('uc')
+             gdfourier%ibluc = gdfourier%ibluc + 1
+          case ('r1')
+             gdfourier%iblcn = gdfourier%iblcn + 1
+          case ('u1')
+             gdfourier%ibluv = gdfourier%ibluv + 1
+          case ('qx')
+             gdfourier%iblqf = gdfourier%iblqf + 1
+          case ('ta')
+             gdfourier%iblbs = gdfourier%iblbs + 1
+          end select
+       enddo
+    end subroutine count_fourier_variables
+    
+    
     subroutine default_fouana()
     implicit none 
       ! some default setting 
@@ -431,6 +482,10 @@ module m_fourier_analysis
           foutyp(ifou+1)     = 'v'
           fouref(ifou,1)   = fouid
           fouref(ifou+1,1)   = fouid
+       elseif (founam(ifou)=='uc') then                     ! absolute wind-speed 
+          founam(ifou)   = 'uc              '
+          foutyp(ifou)   = 's'
+          fouref(ifou,1) = fouid
        elseif (founam(ifou)=='qf') then                     ! interpolated cell-centre velocities (vector)
           founam(ifou)     = 'qxk             '             ! ucx 
           foutyp(ifou)     = 's'
@@ -602,6 +657,7 @@ module m_fourier_analysis
             founam(ifou)(1:3)/='tau' .and. &
             founam(ifou)(1:3)/='uxa' .and. &
             founam(ifou)(1:3)/='uya' .and. &
+            founam(ifou)(1:3)/='uc'  .and. &
             founam(ifou)(1:2)/='ws') then
           fmt = '(i    )'
           nopos = len_trim(columns(7))
@@ -883,7 +939,7 @@ subroutine setfouunit(founam, lsal, ltem, fconno, fouvarunit)
        fouvarunit = 'm'
     case ('ws')
        fouvarunit = 'm/s'
-    case ('u1', 'v1', 'ux', 'uy')
+    case ('u1', 'v1', 'ux', 'uy','uc')
        fouvarunit = 'm/s'
     case ('ta')
        fouvarunit = 'N m-2'
@@ -988,7 +1044,7 @@ end subroutine setfouunit
             nmaxus = lnx
        case('u1')
             nmaxus = lnkx
-       case('ux','uy')
+       case('ux','uy','uc')
             nmaxus = ndkx
        case('uxa','uya')
             nmaxus = ndx
@@ -1269,6 +1325,16 @@ end subroutine setfouunit
              nofouvar = nofouvar + 2
           endif
        !
+       ! requested fourier analysis cell centred velocity magnitude   ucmag
+       !
+       elseif (columns(1)(1:2)=='uc') then
+          nofou = nofou + 1
+          if (index(record,'max')>0 .or. index(record,'min')>0 .or. index(record,'avg')>0) then
+             nofouvar = nofouvar + 1
+          else
+             nofouvar = nofouvar + 2
+          endif
+       !
        ! requested fourier analysis salinity
        !
        elseif (columns(1)(1:2)=='cs') then
@@ -1309,9 +1375,9 @@ end subroutine setfouunit
    end subroutine fouini
 
 
-    subroutine postpr_fourier(s1,u1,ws,ucx,ucy,ucxa,ucya,constituents,taus,kfs,kfst0,dps,nst , &
+    subroutine postpr_fourier(s1,u1,ws,ucx,ucy,ucxa,ucya,ucmag,constituents,taus,kfs,kfst0,dps,nst , &
                    & trifil   ,dtsec     ,versio    ,namcon     , &
-                   & refdat   ,hdt       ,tzone     ,gdfourier  ,gddimens  ,umean    ,vmean)
+                   & refdat   ,hdt       ,tzone     ,gdfourier  ,gddimens)
     use m_d3ddimens
     implicit none
        type(gd_fourier) , pointer :: gdfourier           !< Fourier Analysis structure 
@@ -1323,6 +1389,7 @@ end subroutine setfouunit
        double precision , intent(in), pointer :: ucy(:,:)            !< cell-centre velocity y-direction 
        double precision , intent(in), pointer :: ucxa(:,:)           !< cell-centre velocity x-direction, vertical avg  
        double precision , intent(in), pointer :: ucya(:,:)           !< cell-centre velocity y-direction, vertical avg 
+       double precision , intent(in), pointer :: ucmag(:,:)          !< cell-centre velocity y-direction, vertical avg 
 
        !double precision , intent(in), pointer :: xs(:,:)             !< s-point x-coordinate 
        !double precision , intent(in), pointer :: ys(:,:)             !< s-point y-coordinate 
@@ -1334,12 +1401,10 @@ end subroutine setfouunit
        !double precision , intent(in) :: xu(:)             !< u-point x-coordinate 
        !double precision , intent(in) :: yu(:)             !< u-point y-coordinate 
 
-       real(fp)          , intent(in)  :: dtsec   !<  Integration time step [in seconds]
-       real(fp)          , intent(in)  :: hdt     !< Half Integration time step [seconds] => gdp%gdnumeco%hdt         
-       real(fp)          , intent(in)  :: tzone   !< Local (FLOW) time - GMT (in hours)  => gdp%gdexttim%tzone
-       double precision , intent(in), pointer, optional :: umean(:,:)          !< depth-average cell-centre velocity x-direction 
-       double precision , intent(in), pointer, optional :: vmean(:,:)          !< depth-average cell-centre velocity y-direction 
-       double precision , intent(in) :: dps(:,:)            !< depth (inverted bottomlevel)
+       real(fp)          , intent(in) :: dtsec   !<  Integration time step [in seconds]
+       real(fp)          , intent(in) :: hdt     !< Half Integration time step [seconds] => gdp%gdnumeco%hdt         
+       real(fp)          , intent(in) :: tzone   !< Local (FLOW) time - GMT (in hours)  => gdp%gdexttim%tzone
+       double precision  , intent(in) :: dps(:,:)            !< depth (inverted bottomlevel)
        integer           , intent(in) :: kfs(:,:)            !< if cell is wet: 1, otherwise: 0 
        integer           , intent(in) :: kfst0(:,:)          !< if cell is wet at t=0: 1, otherwise: 0 
        integer           , intent(in) :: nst                 !< timestep number 
@@ -1357,7 +1422,7 @@ end subroutine setfouunit
     integer          , dimension(:)      , pointer :: fconno
     integer          , dimension(:)      , pointer :: flayno
     integer          , dimension(:)      , pointer :: fnumcy
-    integer                               , pointer :: fouwrt
+    integer                              , pointer :: fouwrt
     integer          , dimension(:)      , pointer :: ftmsto
     integer          , dimension(:)      , pointer :: ftmstr
     integer(pntrsize), dimension(:)      , pointer :: ifoupt
@@ -1441,6 +1506,8 @@ end subroutine setfouunit
                 fieldptr1 => ucxa
              case ('uya')
                 fieldptr1 => ucya
+             case ('uc')                        ! ucmag, velocity magnitude
+                fieldptr1 => ucmag 
              case ('r1')
                 fieldptr1 => constituents(fconno(ifou),:,:)
              case ('taubpu')
@@ -1448,13 +1515,8 @@ end subroutine setfouunit
              case default 
                 continue         ! Unknown FourierVariable exception 
              end select 
-             if (present(umean) .and. present(vmean)) then 
-                call fouana(ifou    ,kfs    ,kfst0     ,nst       ,fieldptr1 , &         ! future use of analysis with depth average cell-centre velocities
-                       & dps     ,gdfourier  ,gddimens  ,umean  ,vmean)
-             else 
-                call fouana(ifou    ,kfs    ,kfst0     ,nst       ,fieldptr1 , &
+             call fouana(ifou    ,kfs    ,kfst0     ,nst       ,fieldptr1 , &
                        & dps     ,gdfourier  ,gddimens)
-             endif 
              ifou = ifou + 1
           else 
              !
@@ -1526,6 +1588,7 @@ end subroutine setfouunit
         integer                        , pointer :: iblcn
         integer                        , pointer :: ibluv
         integer                        , pointer :: ibluva
+        integer                        , pointer :: ibluc
         integer                        , pointer :: iblqf
         integer                        , pointer :: iblbs
         integer                        , pointer :: iblep
@@ -1608,6 +1671,7 @@ end subroutine setfouunit
         iblcn         => gdfourier%iblcn
         ibluv         => gdfourier%ibluv
         ibluva        => gdfourier%ibluva
+        ibluc         => gdfourier%ibluc
         iblqf         => gdfourier%iblqf
         iblbs         => gdfourier%iblbs
         iblep         => gdfourier%iblep
@@ -1650,6 +1714,7 @@ end subroutine setfouunit
            iblcn = 0
            ibluv = 0
            ibluva= 0
+           ibluc = 0
            iblqf = 0
            iblbs = 0
            iblep = 0
@@ -1689,28 +1754,35 @@ end subroutine setfouunit
                  ibluv = ibluv + 1
                  blnm = 'UX??'
                  write (blnm(3:4), '(i2.2)') ibluv
-                 namfun = 'X-component of cell-centre velocity'
+                 namfun = 'U-component of cell-centre velocity'
               endif
               if (founam(ifou)(:2)=='uy') then
                  unc_loc = UNC_LOC_S
                  ibluv = ibluv + 1
                  blnm = 'UY??'
                  write (blnm(3:4), '(i2.2)') ibluv
-                 namfun = 'Y-component of cell-centre velocity'
+                 namfun = 'V-component of cell-centre velocity'
               endif
               if (founam(ifou)(:3)=='uxa') then
                  unc_loc = UNC_LOC_S
                  ibluva = ibluva + 1
                  blnm = 'UX??'
                  write (blnm(3:4), '(i2.2)') ibluva
-                 namfun = 'horizontal velocity, vertical average'
+                 namfun = 'U-component velocity, column average'
               endif
               if (founam(ifou)(:3)=='uya') then
                  unc_loc = UNC_LOC_S
                  ibluva = ibluva + 1
                  blnm = 'UY??'
                  write (blnm(3:4), '(i2.2)') ibluva
-                 namfun = 'vertical velocity, vertical average'
+                 namfun = 'V-component velocity, column average'
+              endif
+              if (founam(ifou)(:2)=='uc') then
+                 unc_loc = UNC_LOC_S
+                 ibluc = ibluc + 1
+                 blnm = 'UC??'
+                 write (blnm(3:4), '(i2.2)') ibluc
+                 namfun = 'velocity magnitude'
               endif
               if (founam(ifou)(:2)=='r1') then
                  unc_loc = UNC_LOC_S
@@ -1754,7 +1826,7 @@ end subroutine setfouunit
               
               ierr = unc_add_gridmapping_att(fileids%ncid, idvar(:,ivar), jsferic)
               select case (founam(ifou))
-              case('s1','r1','u1','ux','uy','uxa','uya')
+              case('s1','r1','u1','ux','uy','uxa','uya','uc')
                  ierr = unc_put_att(fileids%ncid, idvar(:,ivar),  'coordinates'  , 'FlowElem_xcc FlowElem_ycc')
               case('qxk','taubpu','ws')
                  ierr = unc_put_att(fileids%ncid, idvar(:,ivar),  'coordinates'  , 'FlowLink_xu FlowLink_yu')
@@ -1772,6 +1844,7 @@ end subroutine setfouunit
            iblcn = 0
            ibluv = 0
            ibluva= 0
+           ibluc = 0
            iblqf = 0
            iblbs = 0
            iblep = 0
@@ -1790,7 +1863,7 @@ end subroutine setfouunit
               if (ifou > nofou) exit
               !
               select case (trim(founam(ifou)))
-              case ('s1','ux','uy','uxa','uya','r1')
+              case ('s1','ux','uy','uxa','uya','uc','r1')
                  unc_loc = UNC_LOC_S
               case ('u1','ws','qx','ta')
                  unc_loc = UNC_LOC_U
@@ -1961,6 +2034,7 @@ end subroutine setfouunit
        integer                              , pointer :: iblwl
        integer                              , pointer :: iblws
        integer                              , pointer :: ibluv
+       integer                              , pointer :: ibluc
        integer                              , pointer :: ibluva
        integer                              , pointer :: ibleh
        integer                              , pointer :: iblcn
@@ -2026,6 +2100,7 @@ end subroutine setfouunit
        iblws         => gdfourier%iblws
        ibluv         => gdfourier%ibluv
        ibluva        => gdfourier%ibluva
+       ibluc         => gdfourier%ibluc
        ibleh         => gdfourier%ibleh
        iblcn         => gdfourier%iblcn
        ftmsto        => gdfourier%ftmsto
@@ -2072,7 +2147,7 @@ end subroutine setfouunit
        !
        namfun = founam(ifou)
        select case (founam(ifou))
-       case('s1')
+       case('s1','uc')
             nmaxus = ndx
        case('ws')
             nmaxus = lnx
@@ -2136,6 +2211,12 @@ end subroutine setfouunit
              blnm = 'UY??'
              namfun = 'vertical velocity'
           endif
+       endif
+       if (founam(ifou)(:2)=='uc') then
+          ibluc = ibluc + 1
+          blnm = 'UC??'
+          write (blnm(3:4), '(i2.2)') ibluc
+          namfun = 'velocity magnitude'
        endif
 
        !
