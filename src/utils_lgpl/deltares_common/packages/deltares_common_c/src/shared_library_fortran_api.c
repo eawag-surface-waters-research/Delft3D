@@ -29,6 +29,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 
 #include "so_fortran_api.h"
 
@@ -95,7 +96,7 @@ char * strFcpy(char * str_1, int len)
 
 void RemoveTrailingBlanks_dll(char * String)
 {
-  int i;
+  size_t i;
   i = strlen(String)-1;
   while ( String[i] == ' '  ||
           String[i] == '\n' ||
@@ -110,9 +111,9 @@ void RemoveTrailingBlanks_dll(char * String)
  * ============================================================================
  */
 #if defined(WIN32) || defined (HAVE_CONFIG_H)
-long STDCALL OPEN_SHARED_LIBRARY(long * sharedDLLHandle, char * library, long length_lib)
+long STDCALL OPEN_SHARED_LIBRARY(int64_t * sharedDLLHandle, char * library, long length_lib)
 #elif defined (salford32)
-extern "C" OPEN_SHARED_LIBRARY(long * sharedDLLHandle, char * library, long length_lib)
+extern "C" OPEN_SHARED_LIBRARY(int64_t * sharedDLLHandle, char * library, long length_lib)
 #endif
 {
     long error = 1;
@@ -135,7 +136,7 @@ extern "C" OPEN_SHARED_LIBRARY(long * sharedDLLHandle, char * library, long leng
     if (tmpSharedDLL->dllHandle != NULL)
     {
         error = 0;
-        *sharedDLLHandle = (long) tmpSharedDLL;
+        *sharedDLLHandle = (int64_t) tmpSharedDLL;
     }
 
     free(lib_name); lib_name = NULL;

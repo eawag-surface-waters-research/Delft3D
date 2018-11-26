@@ -29,6 +29,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 
 #include "so_fortran_api.h"
 
@@ -100,7 +101,7 @@ typedef struct {
 
 
 DllProcedureAddress GetDllProcedure(
-	long * sharedDLLHandle,
+	int64_t * sharedDLLHandle,
 	char * fun_name)
 {
 	SharedDLL * sharedDLL = (SharedDLL *)(*sharedDLLHandle);
@@ -114,7 +115,7 @@ DllProcedureAddress GetDllProcedure(
 	return procedure;
 }
 
-double DllGetBmiTime(long * sharedDLLHandle, char * function_name)
+double DllGetBmiTime(int64_t * sharedDLLHandle, char * function_name)
 {
 	typedef void * (STDCALL * MyProc)(double *);
 	MyProc proc = (MyProc)GetDllProcedure(sharedDLLHandle, function_name);
@@ -128,7 +129,7 @@ double DllGetBmiTime(long * sharedDLLHandle, char * function_name)
 	return time;
 }
 
-long STDCALL BMI_INITIALIZE(long * sharedDLLHandle,
+long STDCALL BMI_INITIALIZE(int64_t * sharedDLLHandle,
 	char   * config_file,
 	int      config_file_len)
 {
@@ -151,31 +152,31 @@ long STDCALL BMI_INITIALIZE(long * sharedDLLHandle,
 	return error;
 }
 
-void STDCALL BMI_GET_START_TIME(long * sharedDLLHandle,
+void STDCALL BMI_GET_START_TIME(int64_t * sharedDLLHandle,
 	double * start_time)
 {
 	*start_time = DllGetBmiTime(sharedDLLHandle, "get_start_time");
 }
 
-void STDCALL BMI_GET_END_TIME(long * sharedDLLHandle,
+void STDCALL BMI_GET_END_TIME(int64_t * sharedDLLHandle,
 	double * end_time)
 {
 	*end_time = DllGetBmiTime(sharedDLLHandle, "get_end_time");
 }
 
-void STDCALL BMI_GET_CURRENT_TIME(long * sharedDLLHandle,
+void STDCALL BMI_GET_CURRENT_TIME(int64_t * sharedDLLHandle,
 	double * current_time)
 {
 	*current_time = DllGetBmiTime(sharedDLLHandle, "get_current_time");
 }
 
-void STDCALL BMI_GET_TIME_STEP(long * sharedDLLHandle,
+void STDCALL BMI_GET_TIME_STEP(int64_t * sharedDLLHandle,
 	double * time_step)
 {
 	*time_step = DllGetBmiTime(sharedDLLHandle, "get_time_step");
 }
 
-void STDCALL BMI_GET_VAR(long * sharedDLLHandle,
+void STDCALL BMI_GET_VAR(int64_t * sharedDLLHandle,
    char   * var_name,
    double * values,
    int    * num_values,
@@ -201,7 +202,7 @@ void STDCALL BMI_GET_VAR(long * sharedDLLHandle,
    free(c_var_name); c_var_name = NULL;
 }
 
-void STDCALL BMI_GET_VAR_SHAPE(long * sharedDLLHandle,
+void STDCALL BMI_GET_VAR_SHAPE(int64_t * sharedDLLHandle,
    char   * var_name,
    int    * values,
    int      var_name_len)
@@ -224,7 +225,7 @@ void STDCALL BMI_GET_VAR_SHAPE(long * sharedDLLHandle,
 }
 
 
-void STDCALL BMI_SET_VAR(long * sharedDLLHandle,
+void STDCALL BMI_SET_VAR(int64_t * sharedDLLHandle,
 	char   * var_name,
 	double * values,
 	int    * num_values,
@@ -244,7 +245,7 @@ void STDCALL BMI_SET_VAR(long * sharedDLLHandle,
 	free(c_var_name); c_var_name = NULL;
 }
 
-long STDCALL BMI_UPDATE(long * sharedDLLHandle,
+long STDCALL BMI_UPDATE(int64_t * sharedDLLHandle,
 	double * dt)
 {
 	typedef void * (STDCALL * MyProc)(double);
@@ -258,7 +259,7 @@ long STDCALL BMI_UPDATE(long * sharedDLLHandle,
 	return -1;
 }
 
-long STDCALL BMI_FINALIZE(long * sharedDLLHandle)
+long STDCALL BMI_FINALIZE(int64_t * sharedDLLHandle)
 {
 	typedef void * (STDCALL * MyProc)();
 	MyProc proc = (MyProc)GetDllProcedure(sharedDLLHandle, "finalize");
