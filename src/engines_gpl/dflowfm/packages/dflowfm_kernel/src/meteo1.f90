@@ -7232,7 +7232,10 @@ contains
    !
    ! ==========================================================================
    !> 
-   subroutine selectelset_internal_links( filename, filetype, xz, yz, ln, lnx, keg, numg, xps, yps, nps, lftopol) ! find links cut by polyline filetype 9  
+   subroutine selectelset_internal_links( filename, filetype, xz, yz, ln, lnx, keg, numg, xps, yps, nps, lftopol, sortLinks) ! find links cut by polyline filetype 9  
+     
+     use sorting_algorithms, only: sort
+     
      implicit none
      
      !inputs
@@ -7250,11 +7253,13 @@ contains
      double precision, allocatable, optional, dimension(:), intent(inout) :: xps(:), yps(:) 
      integer, optional, intent(inout) :: nps
      integer, optional, dimension(:), intent(inout) :: lftopol
+     integer, optional, intent(in) :: sortLinks
                                              
      !locals 
      integer :: minp, L, k1, k2, ja, np
-     double precision :: xa, ya, xb, yb,xm, ym, CRPM 
-     double precision, allocatable, dimension(:) :: xp, yp
+     double precision :: xa, ya, xb, yb,xm, ym, CRPM, dist 
+     double precision, allocatable, dimension(:) :: xp, yp, distsStartPoly, sortedDistsStartPoly
+     integer, allocatable, dimension(:):: sortedIndexses, tempLinkArray !< the sorted indexses
 
      
      numg = 0 
@@ -7266,12 +7271,16 @@ contains
         call oldfil(minp, filename)
         call read1polylin(minp,xp,yp,np)
         
+        if (present(sortLinks)) then
+           allocate(distsStartPoly(lnx))
+        endif
+        
         do L  = 1,lnx
            k1 = ln(1,L) ; k2 = ln(2,L) 
            xa = xz(k1)  ; ya = yz(k1)
            xb = xz(k2)  ; yb = yz(k2)
            
-           call CROSSPOLY(xa,ya,xb,yb,xp,yp,np,XM,YM,CRPM,JA,isec)
+           call crosspoly(xa,ya,xb,yb,xp,yp,np,XM,YM,CRPM,JA,isec,dist)
     
            if (ja == 1) then   
               numg = numg + 1
@@ -7281,6 +7290,9 @@ contains
               else 
                  keg(numg) =  L
               end if
+              if (present(sortLinks)) then
+                 distsStartPoly(numg) = dist
+              endif
            end if
         enddo
 
@@ -7295,7 +7307,21 @@ contains
         endif
         deallocate(xp,yp)
 
-     end if
+        !if required, sort the links by distance in the polyline
+        if (present(sortLinks)) then
+            if (sortLinks==1) then
+               allocate(sortedDistsStartPoly(numg))
+               allocate(sortedIndexses(numg))
+               allocate(tempLinkArray(numg))
+     
+               call sort(numg,distsStartPoly(1:numg),sortedDistsStartPoly,sortedIndexses)
+               tempLinkArray = keg(sortedIndexses(1:numg))
+               keg(1:numg) = tempLinkArray
+            endif
+        endif
+        
+     endif
+          
    end subroutine selectelset_internal_links
    
    subroutine selectelset_internal_nodes( filename, filetype, xz, yz, kc, nx, numprov, kp) ! find nodes contained inside polygon filetype 10

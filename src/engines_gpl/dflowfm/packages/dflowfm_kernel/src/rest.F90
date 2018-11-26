@@ -5513,7 +5513,7 @@ implicit none
      integer,          dimension(:),   allocatable              :: idx
 
      double precision                                           :: wL, wR
-     double precision                                           :: xm, ym, crpm
+     double precision                                           :: xm, ym, crpm, distanceStartPolygon
 
      double precision, dimension(4)                             :: xx, yy
      double precision                                           :: xzz, yzz, xci, yci, xce2, yce2
@@ -5666,7 +5666,7 @@ implicit none
            do i=1,num
               m = ki(i)
    !          find polyline section (again)
-              call CROSSPOLY(xe(m),ye(m),xyen(1,m),xyen(2,m),XPL,YPL,NPL,xm,ym,crpm,ja,isec)
+              call CROSSPOLY(xe(m),ye(m),xyen(1,m),xyen(2,m),XPL,YPL,NPL,xm,ym,crpm,ja,isec,distanceStartPolygon)
            
    !          remember which polyline segment points to this link
               if ( isec.gt.0 ) then
