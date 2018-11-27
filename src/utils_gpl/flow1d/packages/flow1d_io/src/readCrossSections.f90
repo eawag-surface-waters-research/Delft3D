@@ -118,14 +118,14 @@ module m_readCrossSections
          
          call prop_get_string(md_ptr%child_nodes(i)%node_ptr, '', 'id', pCrs%csid, success)
          if (.not. success) then
-            call SetMessage(LEVEL_ERROR, 'Incorrect CrossSection input for CrossSection on branch '//trim(branchid)// &
+            call SetMessage(LEVEL_ERROR, 'Incorrect CrossSection input for Cross-Section on branch '//trim(branchid)// &
                'no ID was given')
             cycle
          endif
 
          call prop_get_string(md_ptr%child_nodes(i)%node_ptr, '', 'branchid', branchid, success)
          if (.not. success) then
-            call SetMessage(LEVEL_ERROR, 'Incorrect CrossSection input for CrossSection on branch '//trim(branchid)// &
+            call SetMessage(LEVEL_ERROR, 'Incorrect Cross-Section input for Cross-Section on branch '//trim(branchid)// &
                'no BranchID was given')
             cycle
          endif
@@ -134,14 +134,14 @@ module m_readCrossSections
          pCrs%branchid = indx
          call prop_get_double(md_ptr%child_nodes(i)%node_ptr, '', 'chainage', pCrs%location, success)
          if (.not. success) then
-            call SetMessage(LEVEL_ERROR, 'Incorrect CrossSection input for CrossSection on branch '//trim(branchid)// &
+            call SetMessage(LEVEL_ERROR, 'Incorrect Cross-Section input for Cross-Section on branch '//trim(branchid)// &
                'no chainage was given')
             cycle
          endif
          call prop_get_string(md_ptr%child_nodes(i)%node_ptr, '', 'definition', defid, success)
          iref = hashsearch(network%CSDefinitions%hashlist, defid)
          if (iref < 1) then
-            call SetMessage(LEVEL_ERROR, 'Incorrect CrossSection input for CrossSection on branch '//trim(branchid)// &
+            call SetMessage(LEVEL_ERROR, 'Incorrect Cross-Section input for Cross-Section on branch '//trim(branchid)// &
                   'no definition is given')
             cycle
          endif
@@ -333,7 +333,7 @@ module m_readCrossSections
          call prop_get_string(md_ptr%child_nodes(i)%node_ptr, '', 'id', id, success)
          if (success) call prop_get_string(md_ptr%child_nodes(i)%node_ptr, '', 'type', typestr, success)
          if (.not. success) then
-            call SetMessage(LEVEL_ERROR, 'Incorrect CrossSection input for CrossSection with type '//trim(typestr)//' and id: '//trim(id))
+            call SetMessage(LEVEL_ERROR, 'Incorrect Cross-Section input for Cross-Section Definition with type '//trim(typestr)//' and id: '//trim(id))
             cycle
          endif
          crossType = getCrosstype(typestr)
@@ -360,7 +360,7 @@ module m_readCrossSections
                level(numlevels) = 0.0d0
                call prop_get_doubles(md_ptr%child_nodes(i)%node_ptr, '', 'width', width, numlevels, success)
                if (.not. success) then
-                   call SetMessage(LEVEL_ERROR, 'Incorrect CrossSection input for CrossSection with type '//trim(typestr)//' and id: '//trim(id))
+                   call SetMessage(LEVEL_ERROR, 'Incorrect Cross-Section input for Cross-Section Definition with type '//trim(typestr)//' and id: '//trim(id))
                endif
                
                call prop_get_logical(md_ptr%child_nodes(i)%node_ptr, '', 'closed', closed, success)
@@ -369,7 +369,7 @@ module m_readCrossSections
                if (closed) then
                   call prop_get_double(md_ptr%child_nodes(i)%node_ptr, '', 'height', height, success)
                   if (.not. success) then
-                     call SetMessage(LEVEL_ERROR, 'HEIGHT is obligatory for closed rectangular cross sections. Refer to cross section with id '//trim(id))
+                     call SetMessage(LEVEL_ERROR, 'HEIGHT is obligatory for closed rectangular cross sections. Refer to cross-section definition with id '//trim(id))
                      cycle
                   endif
                   numlevels = numlevels + 1
@@ -409,7 +409,7 @@ module m_readCrossSections
                if (success) call prop_get_double(md_ptr%child_nodes(i)%node_ptr, '', 'maximumFlowWidth', maximumFlowWidth, success)
                if (success) call prop_get_double(md_ptr%child_nodes(i)%node_ptr, '', 'slope', slope, success)
                if (.not. success) then
-                   call SetMessage(LEVEL_ERROR, 'Incorrect CrossSection input for CrossSection with type '//trim(typestr)//' and id: '//trim(id))
+                   call SetMessage(LEVEL_ERROR, 'Incorrect Cross-Section input for Cross-Section Definition with type '//trim(typestr)//' and id: '//trim(id))
                endif
                
                numlevels = 2
@@ -460,7 +460,7 @@ module m_readCrossSections
                   ! use analytical description of circle and egg profile
                   call prop_get_double(md_ptr%child_nodes(i)%node_ptr, '', 'diameter', diameter, success)
                   if (.not. success) then
-                     call SetMessage(LEVEL_ERROR, 'DIAMETER not found for CrossSection with type '//trim(typestr)//' and id: '//trim(id))
+                     call SetMessage(LEVEL_ERROR, 'DIAMETER not found for Cross-Section Definition with type '//trim(typestr)//' and id: '//trim(id))
                   endif
 
                   pCs%frictionSectionsCount = 1
@@ -489,7 +489,7 @@ module m_readCrossSections
                success = readYZCS(pCS, md_ptr%child_nodes(i)%node_ptr) 
                
             case default
-               call SetMessage(LEVEL_ERROR, 'Incorrect CrossSection type for CrossSection with given type '//trim(typestr)//' and id: '//trim(id))
+               call SetMessage(LEVEL_ERROR, 'Incorrect Cross-Section type for Cross-Section Definition with given type '//trim(typestr)//' and id: '//trim(id))
                success = .false.
                
             end select
@@ -563,7 +563,7 @@ module m_readCrossSections
       call prop_get_double(node_ptr, '', 'height', pCS%height(2), success)
       if (success) call prop_get_double(node_ptr, '', 'width', pCS%flowWidth(1), success)
       if (.not. success) then
-            call SetMessage(LEVEL_ERROR, 'Incorrect CrossSection input for CrossSection id: '//trim(pCS%id)//'. Invalid levels/widths.')
+            call SetMessage(LEVEL_ERROR, 'Incorrect Cross-Section input for Cross-Section Definition id: '//trim(pCS%id)//'. Invalid levels/widths.')
             return
       endif
       pCS%flowWidth(2) = pCS%flowWidth(1)
@@ -616,7 +616,7 @@ module m_readCrossSections
       readTabulatedCS= .false.
       call prop_get_integer(node_ptr, '', 'numLevels', numlevels, success)
       if (numlevels == 0) then
-            call SetMessage(LEVEL_ERROR, 'Incorrect CrossSection input for CrossSection with id: '//trim(pCS%id)//'. NumLevels should be > 0.')
+            call SetMessage(LEVEL_ERROR, 'Incorrect Cross-Section input for Cross-Section Definition with id: '//trim(pCS%id)//'. NumLevels should be > 0.')
             return
       end if
 
@@ -634,7 +634,7 @@ module m_readCrossSections
          call prop_get_doubles(node_ptr, '', 'flowWidths', width, numlevels, success)
       endif
       if (.not. success) then
-            call SetMessage(LEVEL_ERROR, 'Incorrect CrossSection input for CrossSection id: '//trim(pCS%id)//'. Invalid levels/widths.')
+            call SetMessage(LEVEL_ERROR, 'Incorrect Cross-Section input for Cross-Section Definition id: '//trim(pCS%id)//'. Invalid levels/widths.')
             return
       endif
       call prop_get_double(node_ptr, '', 'totalWidths', totalWidth(1), success)
@@ -688,9 +688,9 @@ module m_readCrossSections
 
          ! Check and Make Consistent if Needed
          if ((Main + FP1 + FP2) < (maxFlowWidth) - 0.001d0) then
-             call SetMessage(LEVEL_ERROR, 'Sum of all Sections less than Flow Width for CrossSection Definition ID: '//trim(pCS%id))
+             call SetMessage(LEVEL_ERROR, 'Sum of all Sections less than Flow Width for Cross-Section Definition ID: '//trim(pCS%id))
          elseif (FP1 <= 0.0d0 .and. FP2 > 0) then
-             call SetMessage(LEVEL_ERROR, 'Floodplain2 only allowed when Floodplain1 exists for CrossSection Definition ID: '//trim(pCS%id))
+             call SetMessage(LEVEL_ERROR, 'Floodplain2 only allowed when Floodplain1 exists for Cross-Section Definition ID: '//trim(pCS%id))
          else
          
             ! Compensate for rounf off if needed
@@ -814,6 +814,10 @@ module m_readCrossSections
       integer :: frictionCount
       logical :: success
       double precision, allocatable, dimension(:) :: positions
+
+      integer          :: i
+      double precision :: locShift
+
       
       readYZCS = .false.
       call prop_get_integer(node_ptr, '', 'yzCount', numlevels, success)
@@ -823,7 +827,7 @@ module m_readCrossSections
       
       if (success) call prop_get_integer(node_ptr, '', 'sectionCount', frictionCount, success)
       if (.not. success .or. numLevels <= 0 .or. frictionCount <= 0) then
-            call SetMessage(LEVEL_ERROR, 'Error while reading number of levels/sections for YZ-CrossSection ID: '//trim(pCS%id))
+            call SetMessage(LEVEL_ERROR, 'Error while reading number of levels/sections for YZ-Cross-Section Definition ID: '//trim(pCS%id))
             return
       endif
       
@@ -843,22 +847,43 @@ module m_readCrossSections
       call prop_get_doubles(node_ptr, '', 'yValues', pCS%y, numlevels, success)
       if (success) call prop_get_doubles(node_ptr, '', 'zValues', pCS%z, numlevels, success)
       if (.not. success) then
-          call SetMessage(LEVEL_ERROR, 'Error while reading number of yz-levels for YZ-CrossSection ID: '//trim(pCS%id))
+          call SetMessage(LEVEL_ERROR, 'Error while reading number of yz-levels for YZ-Cross-Section Definition ID: '//trim(pCS%id))
       endif
       
       pCS%storLevels = 0
       
       call prop_get_strings(node_ptr, '', 'roughnessNames', frictionCount, pCS%frictionSectionID, success)
       if (.not. success) then
-          call SetMessage(LEVEL_ERROR, 'Error while reading section IDs for YZ-CrossSection ID: '//trim(pCS%id))
+          call SetMessage(LEVEL_ERROR, 'Error while reading section IDs for YZ-Cross-Section Definition ID: '//trim(pCS%id))
       endif
       
       call prop_get_doubles(node_ptr, '', 'roughnessPositions', positions, frictionCount+1, success)
-      if (.not.success .and. frictionCount==1) then
+      
+      if (success) then
+         
+         ! Check Consistency of Rougness Positions
+         if (positions(1) .ne. pCS%y(1) .or. positions(frictionCount + 1) .ne. pCS%y(numLevels)) then
+            
+            if (positions(1) == 0.0d0  .and. positions(frictionCount+1) == (pCS%y(numLevels) - pCS%y(1))) then
+               ! Probably lined out wrong because of import from SOBEK2
+               locShift = positions(frictionCount + 1) - pCS%y(numLevels)
+               do i = 1, frictionCount + 1
+                  positions(i) = positions(i) - locShift
+               enddo
+               call SetMessage(LEVEL_WARN, 'Rougness sections corrected for YZ-Cross-Section Definition ID: '//trim(pCS%id))
+            else
+               call SetMessage(LEVEL_ERROR, 'Section data not consistent for YZ-Cross-Section Definition ID: '//trim(pCS%id))
+            endif
+         
+         endif
+         
+      elseif (.not.success .and. frictionCount==1) then
          positions(1) = pCS%y(1)
          positions(2) = pCS%y(numLevels)
          success = .true.
       endif
+      
+      
       pCS%frictionSectionFrom = positions(1:frictionCount)
       pCS%frictionSectionTo = positions(2:frictionCount+1)
          
@@ -1452,7 +1477,7 @@ module m_readCrossSections
       integer                        :: iStatus
       
       if (crs%frictionSectionsCount <= 0) then
-         call SetMessage(LEVEL_ERROR, 'No Friction Section Data for CrossSection ID: '//trim(crs%csid))
+         call SetMessage(LEVEL_ERROR, 'No Friction Section Data for Cross-Section ID: '//trim(crs%csid))
          return
       endif
            
@@ -1460,7 +1485,7 @@ module m_readCrossSections
            
          iRough = hashsearch(network%rgs%hashlist, crs%frictionSectionID(i))
          if (iRough <= 0) then
-            call SetMessage(LEVEL_ERROR, 'No Data found for Section '//trim(crs%frictionSectionID(i))//' of CrossSection ID: '//trim(crs%csid))
+            call SetMessage(LEVEL_ERROR, 'No Data found for Section '//trim(crs%frictionSectionID(i))//' of Cross-Section ID: '//trim(crs%csid))
             cycle
          endif
          
@@ -1480,7 +1505,7 @@ module m_readCrossSections
          endif
          
          if (pRgs%spd_pos_idx <= 0 .and. pRgs%spd_neg_idx <= 0) then
-            call SetMessage(LEVEL_ERROR, 'No Spatial Data specified for Section '//trim(crs%frictionSectionID(i))//' of CrossSection ID: '//trim(crs%csid))
+            call SetMessage(LEVEL_ERROR, 'No Spatial Data specified for Section '//trim(crs%frictionSectionID(i))//' of Cross-Section ID: '//trim(crs%csid))
             cycle
          endif
          
