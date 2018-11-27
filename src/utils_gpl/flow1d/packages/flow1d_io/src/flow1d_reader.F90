@@ -193,7 +193,6 @@ module m_flow1d_reader
       type(t_network), intent(inout)  :: network
       
       type(tree_data), pointer        :: md_ptr
-      character(len=charln)           :: inputfile
       character(len=charln)           :: folder
       integer                         :: numstr
       integer                         :: backslash
