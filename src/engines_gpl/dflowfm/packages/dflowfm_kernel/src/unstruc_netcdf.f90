@@ -4410,27 +4410,7 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
 
    ! TODO: AvD below: workx/y needs to be reset with miss/0 values before using.
    if (jamapucvec == 1 .or. jamapucmag == 1 .or. jamapucqvec == 1) then
-      !
-      ! Copy ucx/ucy to workx/worky
-      ! They will optionally be transformed into Eulerian velocities
-      if (kmx > 0) then
-         do kk = 1,ndx
-             call getkbotktop(kk,kb,kt)
-             do k = kb,kt
-                 workx(k) = ucx(k)
-                 worky(k) = ucy(k) 
-             enddo
-         enddo
-      else
-         do kk = 1,ndx
-             workx(kk) = ucx(kk)
-             worky(kk) = ucy(kk)
-         enddo        
-      endif
-      
-      if (jaeulervel==1 .and. jawave>0) then
-         call setucxucyeuler() ! TODO: JR: this does not work/is not relevant yet for 3D ucx velocities.
-      endif
+      call getucxucyeulmag(ndkx, workx, worky, ucmag, jaeulervel, jamapucmag)
 
       if (jamapucvec == 1) then
          ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_ucx, iLocS, workx)     ! JRE langrangian or eulerian, see write_map_filepointer
@@ -4438,7 +4418,6 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
       end if
 
       if (jamapucmag == 1) then
-         call setucmag()
          ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_ucmag, iLocS, ucmag)
       end if
 
@@ -5408,6 +5387,7 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
     double precision, dimension(:), allocatable :: windx, windy, windang
     double precision, dimension(:), allocatable :: numlimdtdbl ! TODO: WO/AvD: remove this once integer version of unc_def_map_var is available
     double precision :: vicc, dicc, dens
+    integer :: jaeulerloc
     
     double precision   :: rhol
     character(16)      :: dxname
@@ -6929,30 +6909,18 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
     ! Time
     ierr = nf90_put_var(imapfile, id_time    (iid), tim, (/ itim /))
     ierr = nf90_put_var(imapfile, id_timestep(iid), dts, (/ itim /))
+
     !
-    ! Copy ucx/ucy to workx/worky
-    ! They will optionally be transformed into Eulerian velocities
-    if (kmx > 0) then
-       do kk = 1,ndx
-           call getkbotktop(kk,kb,kt)
-           do k = kb,kt
-               workx(k) = ucx(k)
-               worky(k) = ucy(k) 
-           enddo
-       enddo
-    else
-       do kk = 1,ndx
-           workx(kk) = ucx(kk)
-           worky(kk) = ucy(kk)
-       enddo        
-    endif
-    !
-    ! Transform workx/worky into Eulerian velocities,
+    ! Transform uxy/ucy into Eulerian velocities,
     ! only when the user asks for it and only if we are not writing to com-file
     !
+    jaeulerloc = 0
     if (jaeulervel==1 .and. jaseparate_/=2 .and. jawave.gt.0) then
-       call setucxucyeuler()
+       jaeulerloc = 1
     endif
+
+    call getucxucyeulmag(ndkx, workx, worky, ucmag, jaeulerloc, 0)
+
     !
     !  Hack to pass time varying bottom levels to SWAN
     !

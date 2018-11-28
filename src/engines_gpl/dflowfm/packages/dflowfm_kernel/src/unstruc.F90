@@ -354,7 +354,7 @@ subroutine flow_finalize_usertimestep(iresult)
          wmag = sqrt(wx*wx + wy*wy)
       endif
       if (gdfourier%ibluc>0) then
-         call setucmag()
+         call getucxucyeulmag(ndkx, workx, worky, ucmag, jaeulervel, 1)
       endif  
       call postpr_fourier(s1_ptr,u1_ptr,ws_ptr,ucx_ptr,ucy_ptr,ucxa_ptr,ucya_ptr,ucmag_ptr,const_ptr,taus_ptr,kfs_ptr,kfst0_ptr,bl_ptr,                       &
         &                   nint(time0/dt_user),  &
@@ -6655,61 +6655,109 @@ if (ihorvic > 0 .or. NDRAW(29) == 37) then
 
 end subroutine setucxucyucxuucyu
 
-subroutine setucxucyeuler()
- use m_flowgeom
- use m_flow
- use m_waves, only: ustokes            ! available for all wave models
 
- implicit none
+!> Computes/gets cell centered horizontal x/y velocities, either Eulerian or Lagrangian, and when requested also magnitude.
+!! Centralized routine for multiple uses in output files.
+subroutine getucxucyeulmag(N, ucxeulg, ucyeulg, ucmago, jaeulervel, jaucmag)
+   use m_flowgeom
+   use m_flow, only: ndkx, ucx, ucy
+   use m_flowparameters, only: jawave
+   use m_waves, only: ustokes            ! available for all wave models
 
- integer          :: i, Lb, Lt, L, LL, k, k1, k2
- double precision :: u1l, wcxu, wcyu, ueul
+   implicit none
 
- if (jawave > 0) then
-    workx(1:ndkx) = ucx(1:ndkx) ; worky(1:ndkx) = ucy(1:ndkx)
-    do LL = 1,lnx
-       Lb = Lbot(LL) ; Lt = Lb - 1 + kmxL(LL)
-       do L = Lb, Lt
-          if (ustokes(L) .ne. 0d0) then                    ! link flows
-             k1 = ln(1,L)
-             k2 = ln(2,L)
-             workx(k1) = workx(k1) - wcx1(LL)*ustokes(L)
-             worky(k1) = worky(k1) - wcy1(LL)*ustokes(L)
-             workx(k2) = workx(k2) - wcx2(LL)*ustokes(L)
-             worky(k2) = worky(k2) - wcy2(LL)*ustokes(L)
-          endif
-       enddo
-    enddo
- endif
-end subroutine setucxucyeuler
+   integer,          intent(in   ) :: N          !< Length of cell arrays (probably ndkx)
+   double precision, intent(  out) :: ucxeulg(N) !< Target array in which to store x-velocities.
+   double precision, intent(  out) :: ucyeulg(N) !< Target array in which to store y-velocities.
+   double precision, intent(  out) :: ucmago(N)  !< Target array in which to store velocity magnitudes. May be undefined when jaucmag==0.
+   integer,          intent(in   ) :: jaeulervel !< Whether or not (1/0) to compute Eulerian velocities (i.e., substract Stokes drift)
+   integer,          intent(in   ) :: jaucmag    !< Whether or not (1/0) to compute velocity magnitudes.
 
-!> Updates the velocity magnitude in cell centers, typically used for output only.
-!! Stored in m_flow::ucmag(:)
-subroutine setucmag()
-use m_flowgeom
-use m_flow
+   ! Copy ucx/ucy to ucxeulg/ucyeulg
+   ! They will optionally be transformed into Eulerian velocities
+   ucxeulg(1:ndkx) = ucx(1:ndkx) ; ucyeulg(1:ndkx) = ucy(1:ndkx)
 
-implicit none
+   ! Transform uxy/ucy into Eulerian velocities
+   if (jaeulervel==1 .and. jawave>0) then
+      call getucxucyeuler(N, ucxeulg, ucyeulg)
+   endif
 
-integer          :: kk,k,kb,kt
+   ! Compute magnitude for vel.vectors (either Lagr. or Eul.)
+   if (jaucmag == 1) then
+      call getucmag(N, ucxeulg, ucyeulg, ucmago)
+   end if
 
-!call realloc(ucmag, ndkx, keepExisting = .false.)
-! NOTE: workx/y contain the velocity vectors, possibly corrected into Eulerian velocities (see setucxucyeuler).
-if ( kmx.gt.0 ) then
-   do kk=1,ndx
-      call getkbotktop(kk,kb,kt)
-      do k = kb,kt
-         ucmag(k) = sqrt(workx(k)**2 + worky(k)**2) ! TODO: this does not include vertical/w-component now.
+end subroutine getucxucyeulmag
+
+   
+!> Computes the Eulerian horizontal velocities.
+!! In absence of waves, these are equal to the Lagrangian ucx/ucy.
+!! The Stokes drift on links is averaged to cell centers using the Perot weights.
+subroutine getucxucyeuler(N, ucxeu, ucyeu)
+   use m_flowgeom
+   use m_flow
+   use m_waves, only: ustokes            ! available for all wave models
+
+   implicit none
+
+   integer,          intent(in   ) :: N        !< Length of cell arrays (probably ndkx)
+   double precision, intent(  out) :: ucxeu(N) !< Target array in which to store Eulerian x-velocities
+   double precision, intent(  out) :: ucyeu(N) !< Target array in which to store Eulerian y-velocities
+
+   integer          :: i, Lb, Lt, L, LL, k, k1, k2
+   double precision :: u1l, wcxu, wcyu, ueul
+
+   ucxeu(1:ndkx) = ucx(1:ndkx) ; ucyeu(1:ndkx) = ucy(1:ndkx)
+   if (jawave > 0) then
+      do LL = 1,lnx
+         Lb = Lbot(LL) ; Lt = Lb - 1 + kmxL(LL)
+         do L = Lb, Lt
+            if (ustokes(L) .ne. 0d0) then                    ! link flows
+               k1 = ln(1,L)
+               k2 = ln(2,L)
+               ucxeu(k1) = ucxeu(k1) - wcx1(LL)*ustokes(L)
+               ucyeu(k1) = ucyeu(k1) - wcy1(LL)*ustokes(L)
+               ucxeu(k2) = ucxeu(k2) - wcx2(LL)*ustokes(L)
+               ucyeu(k2) = ucyeu(k2) - wcy2(LL)*ustokes(L)
+            endif
+         enddo
+      enddo
+   endif
+end subroutine getucxucyeuler
+
+   
+!> Computes the velocity magnitude in cell centers, typically used for output only.
+!! All arrays via input arguments, not via use m_flow.
+subroutine getucmag(N, ucxi, ucyi, ucmago)
+   use m_flowgeom, only: ndx
+   use m_flow, only: kmx
+
+   implicit none
+   integer,          intent(in   ) :: N         !< Length of cell arrays (probably ndkx)
+   double precision, intent(in   ) :: ucxi(N)   !< Input array containing cell centered x-velocities.
+   double precision, intent(in   ) :: ucyi(N)   !< Input array containing cell centered y-velocities.
+   double precision, intent(  out) :: ucmago(N) !< Output array containing cell centered velocity magnitudes.
+
+   integer          :: kk,k,kb,kt
+
+   !call realloc(ucmag, ndkx, keepExisting = .false.)
+   ! NOTE: workx/y contain the velocity vectors, possibly corrected into Eulerian velocities (see getucxucyeuler).
+   if ( kmx.gt.0 ) then
+      do kk=1,ndx
+         call getkbotktop(kk,kb,kt)
+         do k = kb,kt
+            ucmago(k) = sqrt(ucxi(k)**2 + ucyi(k)**2) ! TODO: this does not include vertical/w-component now.
+         end do
       end do
-   end do
-else
-   do kk = 1,ndx
-         ucmag(kk) = sqrt(workx(kk)**2 + worky(kk)**2)
-   enddo     
-end if
+   else
+      do kk = 1,ndx
+            ucmago(kk) = sqrt(ucxi(kk)**2 + ucyi(kk)**2)
+      enddo     
+   end if
 
-end subroutine setucmag
+end subroutine getucmag
 
+   
 !> Update the cumulative waq fluxes for the just set timestep.
 !!
 !! Should be called at the end of each computational timestep.
@@ -17579,7 +17627,7 @@ subroutine fill_valobs()
 
    kmx_const = kmx
    if (jaeulervel==1 .and. jawave > 0) then
-      call setucxucyeuler()
+      call getucxucyeuler(ndkx, workx, worky)
    endif
    
    if (jawave>0) then
