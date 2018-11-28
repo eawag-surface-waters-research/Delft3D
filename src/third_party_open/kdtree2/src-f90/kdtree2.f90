@@ -856,7 +856,9 @@ contains
             sizeToSort = u - l + 1
             allocate(toSort(sizeToSort))
             
-            toSort = tp%the_data(c,tp%ind(l:u))
+            do i = l, u
+                toSort(i-l+1) = tp%the_data(c,tp%ind(i))
+            end do
             call heapsort(toSort, tp%ind(l:u), sizeToSort)
             
             m = l + (u - l) / 2 
