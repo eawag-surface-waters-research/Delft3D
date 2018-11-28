@@ -24,6 +24,8 @@ function print_usage_info {
     echo "       Delft3D-FLOW configuration filename, default config_d_hydro.xml"
     echo "-w, --wavefile <wname>"
     echo "       name of mdw file"
+    echo "--rtc"
+    echo "       Online with RTC. Not possible with parallel Delft3D-FLOW."
     echo "The following arguments are used when called by submit_dflow2d3d.sh:"
     echo "    --D3D_HOME <path>"
     echo "       path to binaries and scripts"
@@ -47,6 +49,7 @@ debuglevel=-1
 runscript_extraopts=
 NNODES=1
 wavefile=runwithoutwaveonlinebydefault
+withrtc=0
 
 
 ulimit -s unlimited
@@ -70,6 +73,10 @@ case $key in
     ;;
     -m|--masterfile)
     configfile="$1"
+    shift
+    ;;
+    --rtc)
+    withrtc=1
     shift
     ;;
     -w|--wavefile)
@@ -121,12 +128,23 @@ if [ ! -d $D3D_HOME ]; then
     echo "ERROR: directory $D3D_HOME does not exist"
     print_usage_info
 fi
+if [[ $withrtc -ne 0 && $NSLOTS -ne 1 ]] ; then
+    echo "ERROR: Combination of RTC online and Delft3D-FLOW in parallel is not implemented yet"
+    print_usage_info
+fi
+
 export D3D_HOME
  
 echo "    Configfile           : $configfile"
 echo "    D3D_HOME             : $D3D_HOME"
 echo "    Working directory    : $workdir"
 echo "    Number of partitions : $NSLOTS"
+if [ "$wavefile" != "runwithoutwaveonlinebydefault" ]; then
+    echo "    Wave file            : $wavefile"
+fi
+if [ $withrtc -ne 0 ] ; then
+    echo "    Online with RTC      : YES"
+fi
 echo 
 
     #
@@ -135,6 +153,7 @@ echo
 
 bindir=$D3D_HOME/bin
 libdir=$D3D_HOME/lib
+sharedir=$D3D_HOME/share
 
     #
     # No adaptions needed below
@@ -160,64 +179,94 @@ if [ $debuglevel -eq 0 ]; then
     echo ========================================================
 fi
 
-
-# Optionally, start D-Waves in the background
-if [ "$wavefile" != "runwithoutwaveonlinebydefault" ]; then
-    if [ ! -f $wavefile ]; then
-        echo "ERROR: Wave input file $wavefile does not exist"
-        print_usage_info
-    fi
-    echo "executing in the background:"
-    echo "$bindir/wave $wavefile 1 &"
-          $bindir/wave $wavefile 1 &
-fi
-
-if [ $NSLOTS -eq 1 ]; then
+if [ $withrtc -ne 0 ] ; then
+    #
+    #
+    # Separate block when running with RTC online
+    #
+    # Shared memory allocation
+    export DIO_SHM_ESM=`$bindir/esm_create`
+    # Start Delft3D-FLOW in the background
     echo "executing:"
-    echo "$bindir/d_hydro $configfile"
-          $bindir/d_hydro $configfile
+    echo "$bindir/d_hydro $configfile &"
+          $bindir/d_hydro $configfile &
+
+    # Be sure Delft3D-FLOW is started before RTC is started
+    sleep 5
+    # echo press enter to continue
+    # read dummy
+
+    # Start RTC
+    $bindir/rtc $sharedir/rtc/RTC.FNM $sharedir/rtc/RTC.RTN
+
+    # Remove allocated shared memory
+    $bindir/esm_delete $DIO_SHM_ESM 
+
+
+
 else
     #
-    # Create machinefile using $PE_HOSTFILE
-    if [ $NNODES -eq 1 ]; then
-        echo " ">$(pwd)/machinefile
-    else
-        if [ -n $corespernode ]; then
-            if [ -e $(pwd)/machinefile ]; then
-                rm -f machinefile
-            fi
-            for (( i = 1 ; i <= $corespernode; i++ )); do
-                awk '{print $1":"1}' $PE_HOSTFILE >> $(pwd)/machinefile
-            done
-        else
-           awk '{print $1":"2}' $PE_HOSTFILE > $(pwd)/machinefile
+    #
+    # Without RTC online
+    #
+    # Optionally, start D-Waves in the background
+    if [ "$wavefile" != "runwithoutwaveonlinebydefault" ]; then
+        if [ ! -f $wavefile ]; then
+            echo "ERROR: Wave input file $wavefile does not exist"
+            print_usage_info
         fi
+        echo "executing in the background:"
+        echo "$bindir/wave $wavefile 1 &"
+              $bindir/wave $wavefile 1 &
     fi
-    echo Contents of machinefile:
-    cat $(pwd)/machinefile
-    echo ----------------------------------------------------------------------
+    
+    if [ $NSLOTS -eq 1 ]; then
+        echo "executing:"
+        echo "$bindir/d_hydro $configfile"
+              $bindir/d_hydro $configfile
+    else
+        #
+        # Create machinefile using $PE_HOSTFILE
+        if [ $NNODES -eq 1 ]; then
+            echo " ">$(pwd)/machinefile
+        else
+            if [ -n $corespernode ]; then
+                if [ -e $(pwd)/machinefile ]; then
+                    rm -f machinefile
+                fi
+                for (( i = 1 ; i <= $corespernode; i++ )); do
+                    awk '{print $1":"1}' $PE_HOSTFILE >> $(pwd)/machinefile
+                done
+            else
+               awk '{print $1":"2}' $PE_HOSTFILE > $(pwd)/machinefile
+            fi
+        fi
+        echo Contents of machinefile:
+        cat $(pwd)/machinefile
+        echo ----------------------------------------------------------------------
+
+        if [ $NNODES -ne 1 ]; then
+            echo "Starting mpd..."
+            mpd &
+            mpdboot -n $NSLOTS
+        fi
+
+        node_number=$NSLOTS
+        while [ $node_number -ge 1 ]; do
+           node_number=`expr $node_number - 1`
+           ln -s /dev/null log$node_number.irlog
+        done
+
+        echo "/opt/mpich2/1.4.1_intel14.0.3/bin/mpiexec -np $NSLOTS $bindir/d_hydro $configfile"
+              /opt/mpich2/1.4.1_intel14.0.3/bin/mpiexec -np $NSLOTS $bindir/d_hydro $configfile
+
+
+        rm -f log*.irlog
+    fi
 
     if [ $NNODES -ne 1 ]; then
-        echo "Starting mpd..."
-        mpd &
-        mpdboot -n $NSLOTS
+        mpdallexit
     fi
-
-    node_number=$NSLOTS
-    while [ $node_number -ge 1 ]; do
-       node_number=`expr $node_number - 1`
-       ln -s /dev/null log$node_number.irlog
-    done
-
-    echo "/opt/mpich2/1.4.1_intel14.0.3/bin/mpiexec -np $NSLOTS $bindir/d_hydro $configfile"
-          /opt/mpich2/1.4.1_intel14.0.3/bin/mpiexec -np $NSLOTS $bindir/d_hydro $configfile
-
-
-    rm -f log*.irlog
-fi
-
-if [ $NNODES -ne 1 ]; then
-    mpdallexit
 fi
 
 
