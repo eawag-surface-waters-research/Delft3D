@@ -9656,11 +9656,11 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
       
       call increasenetw(numk_last + ncontacts, numl_last + ncontacts)      
       do l = 1, ncontacts
-         XK(numk_last+l) = xface(mesh2indexes(L))
-         YK(numk_last+l) = yface(mesh2indexes(L))
-         kn(1,numl_last+l) = mesh1indexes(L)
+         XK(numk_last+l) = xface(mesh2indexes(l))
+         YK(numk_last+l) = yface(mesh2indexes(l))
+         kn(1,numl_last+l) = mesh1indexes(l)
          kn(2,numl_last+l) = numk_last+l
-         kn(3,numl_last+l) = 3 !2d1d links
+         kn(3,numl_last+l) = contacttype(l)
       enddo
       ! Set the ZK to dmiss 
       ZK(numk_last+1:numk_last+ncontacts) = dmiss
@@ -11850,7 +11850,7 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
       do L=1,lnx1d
          if (kcu(L) == 1) then
             n1dedges = n1dedges + 1
-         else if (kcu(L) == 3 .or. kcu(L) == 4) then  
+         else if (kcu(L) == 3 .or. kcu(L) == 4 .or. kcu(L) == 5 .or. kcu(L) == 7) then  ! 1d2d, lateralLinks, streetinlet, roofgutterpipe
             n1d2dcontacts = n1d2dcontacts + 1
          else
             continue
@@ -11874,7 +11874,7 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
             edge_nodes(1:2,n1dedges) = ln(1:2,L) - ndx2d !only 1d edge nodes
             !mappings
             id_tsp%edgetoln(n1dedges) = L
-         else if (kcu(L) == 3 .or. kcu(L) == 4) then 
+         else if (kcu(L) == 3 .or. kcu(L) == 4 .or. kcu(L) == 5 .or. kcu(L) == 7) then  ! 1d2d, lateralLinks, streetinlet, roofgutterpipe
             ! 1D2D link, find the 2D flow node and store its cell center as '1D' node coordinates
             n1d2dcontacts = n1d2dcontacts + 1
             id_tsp%contactstoln(n1d2dcontacts) = L
