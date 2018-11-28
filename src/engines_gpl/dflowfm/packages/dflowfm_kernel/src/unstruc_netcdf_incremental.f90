@@ -32,8 +32,8 @@
 module unstruc_netcdf_map_class
 use precision, only : hp
 use precision_basics, only : comparereal
-use m_flow, only : s1, hs
-use m_flowtimes, only : map_classes_s1, map_classes_hs, ti_classmape, ti_classmaps, ti_classmap, refdat
+use m_flow, only : s1, hs, ucmag, workx, worky, ndkx
+use m_flowtimes, only : map_classes_s1, map_classes_hs, map_classes_ucmag, ti_classmape, ti_classmaps, ti_classmap, refdat
 use m_flowgeom, only : ndx, ndxi
 use m_cell_geometry, only : ndx2d
 use unstruc_model, only : md_classmap_file
@@ -43,7 +43,7 @@ use unstruc_netcdf, only : check_error, t_unc_mapids, unc_create, ug_meta_fm, un
 use io_ugrid, only : ug_addglobalatts
 use netcdf
 use MessageHandling, only : mess, LEVEL_ERROR, LEVEL_INFO, LEVEL_FATAL
-use m_flowparameters, only : eps10
+use m_flowparameters, only : eps10, jaeulervel
 
 implicit none
 
@@ -64,8 +64,8 @@ integer, parameter :: mapclass_chunksize_ndx    = 2000
 integer, parameter :: mapclass_chunksize_time   =  100
 
 integer :: id_nodeId = -1
-integer :: id_jumps_s1, id_jumps_hs
-integer :: id_class_dim_s1, id_class_dim_hs
+integer :: id_jumps_s1, id_jumps_hs, id_jumps_ucmag
+integer :: id_class_dim_s1, id_class_dim_hs, id_class_dim_ucmag
 integer :: time_index = 0
 
 integer,          parameter :: open_mode = NF90_HDF5
@@ -75,8 +75,9 @@ integer                     :: maxTimes, chunkSizeTime
 
 integer(kind=int8), pointer, save :: previous_s1(:) => null()
 integer(kind=int8), pointer, save :: previous_hs(:) => null()
-integer(kind=int8), pointer :: current_s1(:), current_hs(:)
-integer(kind=int8), allocatable :: buffer_s1(:,:), buffer_hs(:,:)
+integer(kind=int8), pointer, save :: previous_ucmag(:) => null()
+integer(kind=int8), pointer :: current_s1(:), current_hs(:), current_ucmag(:)
+integer(kind=int8), allocatable :: buffer_s1(:,:), buffer_hs(:,:), buffer_ucmag(:,:)
 
    contains
 
@@ -88,7 +89,7 @@ integer(kind=int8), allocatable :: buffer_s1(:,:), buffer_hs(:,:)
 
    integer :: ierr, ndim
    integer, parameter :: jabndnd_ = 0 !< Whether to include boundary nodes (1) or not (0). Default: no.
-   integer :: id_class_s1, id_class_hs, tl, var_ids(4)
+   integer :: id_class_s1, id_class_hs, id_class_ucmag, tl, var_ids(4)
    character(len=:), allocatable :: errmsg, tmpstr
    logical :: isLast, need_flush
 
@@ -120,6 +121,9 @@ integer(kind=int8), allocatable :: buffer_s1(:,:), buffer_hs(:,:)
       if (size(map_classes_hs) > 0 .and. ierr == nf90_noerr) then
          ierr = nf90_def_dim(incids%ncid, 'class_hs', size(map_classes_hs), id_class_dim_hs)
       endif
+      if (size(map_classes_ucmag) > 0 .and. ierr == nf90_noerr) then
+         ierr = nf90_def_dim(incids%ncid, 'class_ucmag', size(map_classes_ucmag), id_class_dim_ucmag)
+      endif
       call check_error(ierr, 'definition phase dimensions of classes')
 
       ! define variables:
@@ -134,6 +138,9 @@ integer(kind=int8), allocatable :: buffer_s1(:,:), buffer_hs(:,:)
       endif
       if (size(map_classes_hs) > 0 .and. ierr == nf90_noerr) then
          ierr = def_var_classmap_ugrid('hs', incids%ncid, id_class_hs, id_jumps_hs, incids)
+      endif
+      if (size(map_classes_ucmag) > 0 .and. ierr == nf90_noerr) then
+         ierr = def_var_classmap_ugrid('ucmag', incids%ncid, id_class_ucmag, id_jumps_ucmag, incids)
       endif
       if (ierr == nf90_noerr) ierr = nf90_enddef(incids%ncid)
       call check_error(ierr, 'definition phase variables of classes')
@@ -150,6 +157,11 @@ integer(kind=int8), allocatable :: buffer_s1(:,:), buffer_hs(:,:)
       allocate(current_hs(ndx))
       call put_in_classes(map_classes_hs, hs, current_hs)
    endif
+   if (size(map_classes_ucmag) > 0) then
+      allocate(current_ucmag(ndx))
+      call getucxucyeulmag(ndkx, workx, worky, ucmag, jaeulervel, 1)
+      call put_in_classes(map_classes_ucmag, ucmag, current_ucmag)
+   endif
 
    if (ndim == 0) then
       if (mapclass_time_buffer_size > 1) then
@@ -160,6 +172,10 @@ integer(kind=int8), allocatable :: buffer_s1(:,:), buffer_hs(:,:)
          if (size(map_classes_hs) > 0) then
             if (allocated(buffer_hs)) deallocate(buffer_hs)
             allocate(buffer_hs(ndx, mapclass_time_buffer_size))
+         endif
+         if (size(map_classes_ucmag) > 0) then
+            if (allocated(buffer_ucmag)) deallocate(buffer_ucmag)
+            allocate(buffer_ucmag(ndx, mapclass_time_buffer_size))
          endif
       endif
 
@@ -173,12 +189,20 @@ integer(kind=int8), allocatable :: buffer_s1(:,:), buffer_hs(:,:)
          if (ierr == nf90_noerr) ierr = write_initial_classes(incids, current_hs, buffer_hs, 'hs', id_jumps_hs)
          previous_hs => current_hs
       endif
+      if (size(map_classes_ucmag) > 0) then
+         if (ierr == nf90_noerr) ierr = nf90_put_var(incids%ncid, id_class_ucmag, map_classes_ucmag)
+         if (ierr == nf90_noerr) ierr = write_initial_classes(incids, current_ucmag, buffer_ucmag, 'ucmag', id_jumps_ucmag)
+         previous_ucmag => current_ucmag
+      endif
    else
       if (size(map_classes_s1) > 0) then
          if (ierr == nf90_noerr) ierr = write_changed_classes_update_previous(incids, previous_s1, current_s1, buffer_s1, 's1', id_jumps_s1)
       endif
       if (size(map_classes_hs) > 0) then
          if (ierr == nf90_noerr) ierr = write_changed_classes_update_previous(incids, previous_hs, current_hs, buffer_hs, 'hs', id_jumps_hs)
+      endif
+      if (size(map_classes_ucmag) > 0) then
+         if (ierr == nf90_noerr) ierr = write_changed_classes_update_previous(incids, previous_ucmag, current_ucmag, buffer_ucmag, 'ucmag', id_jumps_ucmag)
       endif
    endif
    if (ierr == nf90_noerr) ierr = nf90_put_var(incids%ncid, incids%id_time, tim, start=[time_index])
@@ -199,6 +223,10 @@ integer(kind=int8), allocatable :: buffer_s1(:,:), buffer_hs(:,:)
             var_ids = get_varids('hs', incids)
             ierr = unc_put_var_map_byte_timebuffer(incids%ncid, incids%id_tsp, var_ids, UNC_LOC_S, buffer_hs, 1, tl)
          endif
+         if (size(map_classes_ucmag) > 0 .and. ierr == nf90_noerr) then
+            var_ids = get_varids('ucmag', incids)
+            ierr = unc_put_var_map_byte_timebuffer(incids%ncid, incids%id_tsp, var_ids, UNC_LOC_S, buffer_ucmag, 1, tl)
+         endif
          need_flush = .true.
       endif
    else
@@ -209,8 +237,10 @@ integer(kind=int8), allocatable :: buffer_s1(:,:), buffer_hs(:,:)
       if (ierr == nf90_noerr) ierr = nf90_close(incids%ncid)
       if (associated(previous_s1)) deallocate(previous_s1)
       if (associated(previous_hs)) deallocate(previous_hs)
+      if (associated(previous_ucmag)) deallocate(previous_ucmag)
       if (allocated(buffer_s1)) deallocate(buffer_s1)
       if (allocated(buffer_hs)) deallocate(buffer_hs)
+      if (allocated(buffer_ucmag)) deallocate(buffer_ucmag)
    else
       if (ierr == nf90_noerr .and. need_flush) then
          ierr = nf90_sync(incids%ncid)  ! flush output to file
@@ -246,6 +276,11 @@ function def_var_classmap_ugrid(name, ncid, var_id_class_bnds, var_id_jumps, inc
       id_class = id_class_dim_hs
       ids = incids%id_hs
       map_classes => map_classes_hs
+   else if (name == 'ucmag') then
+      ierr = unc_def_var_map(incids%ncid, incids%id_tsp, incids%id_ucmag, nf90_byte, UNC_LOC_S, 'ucmag', 'sea_water_speed', 'Flow element center velocity magnitude', 'm s-1')
+      id_class = id_class_dim_ucmag
+      ids = incids%id_ucmag
+      map_classes => map_classes_ucmag
    else
       call mess(LEVEL_FATAL, 'programming error in def_var_incremental_ugrid')
    endif
@@ -435,6 +470,8 @@ function get_varids(name, incids) result(var_ids)
       var_ids = incids%id_s1
    else if (name == 'hs') then
       var_ids = incids%id_hs
+   else if (name == 'ucmag') then
+      var_ids = incids%id_ucmag
    else
       call mess(LEVEL_FATAL, 'programming error in get_varids')
    endif

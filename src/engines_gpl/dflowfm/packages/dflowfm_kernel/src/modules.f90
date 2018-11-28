@@ -4236,6 +4236,7 @@ end subroutine reset_flowgeom
  double precision                  :: ti_classmape       !< End   of class map output period (as assigned in mdu-file) (s)
  double precision, allocatable, target :: map_classes_s1(:)  !< classes for water level
  double precision, allocatable, target :: map_classes_hs(:)  !< classes for water depth
+ double precision, allocatable, target :: map_classes_ucmag(:)  !< classes for water depth
  double precision                  :: ti_stat     !< Interval between simulation statistics output (s).
  double precision                  :: ti_timings  !< (parallel) timings output interval
  double precision                  :: ti_split    !< Time interval for time splitting: time after which new his/map file will be created (e.g. montly), see also the unit below.

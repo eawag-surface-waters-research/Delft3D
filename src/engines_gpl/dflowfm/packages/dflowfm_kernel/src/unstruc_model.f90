@@ -1558,8 +1558,10 @@ subroutine readMDUFile(filename, istat)
        call readClasses('WaterlevelClasses', map_classes_s1)
        call readClasses('WaterdepthClasses', map_classes_hs)
 
-       if (size(map_classes_s1) == 0 .and. size(map_classes_hs) == 0) then
-          call mess(LEVEL_ERROR, 'ClassMapInterval given, but no WaterlevelClasses nor WaterdepthClasses defined.')
+       call readClasses('VelocityMagnitudeClasses', map_classes_ucmag)
+
+       if (size(map_classes_s1) == 0 .and. size(map_classes_hs) == 0 .and. size(map_classes_ucmag) == 0) then
+          call mess(LEVEL_ERROR, 'ClassMapInterval given, but none of WaterlevelClasses, WaterdepthClasses, VelocityMagnitudeClasses is defined.')
        endif
 
     endif
@@ -2607,6 +2609,11 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        call prop_set(prop_ptr, 'output', 'WaterDepthClasses', map_classes_hs, 'Class map''s list of class values for water depths')
     else if (writeall) then
        call prop_set(prop_ptr, 'output', 'WaterDepthClasses', '', 'Class map''s list of class values for water depths')
+    end if
+    if (allocated(map_classes_ucmag)) then
+       call prop_set(prop_ptr, 'output', 'VelocityMagnitudeClasses', map_classes_ucmag, 'Class map''s list of class values for velocity magnitudes')
+    else if (writeall) then
+       call prop_set(prop_ptr, 'output', 'VelocityMagnitudeClasses', '', 'Class map''s list of class values for velocity magnitudes')
     end if
 
     call prop_set(prop_ptr, 'output', 'StatsInterval', ti_stat,        'Screen step output interval in seconds simulation time, if negative in seconds wall clock time')
