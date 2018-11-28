@@ -203,6 +203,7 @@ implicit none
                                                                     'NetCDF-UGRID' ]
 
     integer                                   :: md_mapformat !< map file output format (one of IFORMAT_*)
+    integer                                   :: md_fou_step  !< determines if fourier analysis is updated at the end of the user time step or comp. time step
     integer                                   :: md_unc_conv  !< Unstructured NetCDF conventions (either UNC_CONV_CFOLD or UNC_CONV_UGRID)
 
     integer                                   :: md_ncformat  !< NetCDF format (3: classic, 4: NetCDF4+HDF5)
@@ -288,6 +289,8 @@ use unstruc_channel_flow
     md_unc_conv     = UNC_CONV_UGRID  ! TODO: AvD: does this double now with IFORMAT_UGRID?
 
     md_ncformat     = 3               !< NetCDF format (3: classic, 4: NetCDF4+HDF5)
+
+    md_fou_step     = 0               !< default: fourier analysis is updated on a user-timestep basis 
 
     md_jaAutoStart     = MD_NOAUTOSTART !< Autostart simulation after loading or not.
 
@@ -1286,6 +1289,7 @@ subroutine readMDUFile(filename, istat)
     call getOutputTimeArrays(ti_map_array, ti_maps, ti_map, ti_mape, success)
 
     call prop_get_integer(md_ptr, 'output', 'MapFormat', md_mapformat, success)
+    call prop_get_integer(md_ptr, 'output', 'FouUpdateStep', md_fou_step, success)
     if (md_mapformat == IFORMAT_UGRID) then
        md_unc_conv = UNC_CONV_UGRID
     else

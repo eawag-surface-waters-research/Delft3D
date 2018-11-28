@@ -108,7 +108,7 @@ module m_fourier_analysis
     type(gd_fourier), pointer :: gdfourier_ptr => null()
     integer,        parameter :: maxMessageLen = 1000
     character(maxMessageLen)  :: FouMessage     = ' '
-
+    character(len=:), allocatable   :: FouOutputFile
 
     private
 
@@ -128,6 +128,7 @@ module m_fourier_analysis
     public gdfourier_ptr
     public nofou
     public ag_fouana
+    public FouOutputFile
     contains
 
 
@@ -218,7 +219,7 @@ module m_fourier_analysis
        istat = 0
        !
        ! Arrays for Fourier analysis (fourier.igs)
-       !
+       !,
        if (istat == 0) allocate (gdfourier%fconno  (1:nofou), STAT = istat)
        if (istat == 0) allocate (gdfourier%flayno  (1:nofou), STAT = istat)
        if (istat == 0) allocate (gdfourier%fnumcy  (1:nofou), STAT = istat)
@@ -958,7 +959,7 @@ end subroutine setfouunit
                    
 
    subroutine fouana( ifou      ,kfs       ,kfst0     ,nst      , rarray    , &
-                   &   dps       ,gdfourier ,gddimens  ,umean, vmean)
+                   &   bl       ,gdfourier ,gddimens  ,umean, vmean)
    !-------------------------------------------------------------------------------
    !  $Id$
    !  $HeadURL$
@@ -1005,7 +1006,7 @@ end subroutine setfouunit
        real(fp)  , dimension(gddimens%nlb:gddimens%nub, gddimens%mlb:gddimens%mub)        , intent(in)  :: rarray !  Array for fourier analysis
        real(fp)  , dimension(gddimens%nlb:gddimens%nub, gddimens%mlb:gddimens%mub)        , intent(in), optional  :: umean  !  Description and declaration in esm_alloc_real.f90
        real(fp)  , dimension(gddimens%nlb:gddimens%nub, gddimens%mlb:gddimens%mub)        , intent(in), optional  :: vmean  !  Description and declaration in esm_alloc_real.f90
-       real(prec), dimension(gddimens%nlb:gddimens%nub, gddimens%mlb:gddimens%mub)        , intent(in)  :: dps
+       real(prec), dimension(gddimens%nlb:gddimens%nub, gddimens%mlb:gddimens%mub)        , intent(in)  :: bl
    !
    ! Local variables
    !
@@ -1072,7 +1073,7 @@ end subroutine setfouunit
                             ! only for wet points
                             !
                             fousma(n,m,ifou) = max(fousma(n,m,ifou), rarray(n,m))
-                            fousmb(n,m,ifou) = max(fousmb(n,m,ifou), rarray(n,m) + real(dps(n,m),fp))
+                            fousmb(n,m,ifou) = max(fousmb(n,m,ifou), rarray(n,m) - real(bl(n,m),fp))               ! NOTE: bl is a HEIGHT (as bl in fm) and NOT a DEPTH (delft3d)
                          endif
                       enddo
                    enddo
@@ -1085,7 +1086,7 @@ end subroutine setfouunit
                             ! only for wet points, only for initially dry points
                             !
                             fousma(n,m,ifou) = max(fousma(n,m,ifou), rarray(n,m))
-                            fousmb(n,m,ifou) = max(fousmb(n,m,ifou), rarray(n,m) + real(dps(n,m),fp))
+                            fousmb(n,m,ifou) = max(fousmb(n,m,ifou), rarray(n,m) - real(bl(n,m),fp))
                          endif
                       enddo
                    enddo
@@ -1208,6 +1209,7 @@ end subroutine setfouunit
        logical                         :: success  !!  Flag=True if no error is encountered
        real(fp), intent(in), optional  :: ag       !!  override gravitational constant 
        character(len=*), intent(in)    :: time_unit_user, time_unit_kernel
+
 
    !
    ! Local variables
@@ -1357,7 +1359,7 @@ end subroutine setfouunit
        else
           !
           ! requested fourier analysis undefined
-          !
+          !r
           write(msgbuf,'(a)') 'Fourier analysis: variable keyword '''//trim(columns(1))//''' not recognized, ignored' 
           call msg_flush()
           continue
@@ -1375,50 +1377,29 @@ end subroutine setfouunit
    end subroutine fouini
 
 
-    subroutine postpr_fourier(s1,u1,ws,ucx,ucy,ucxa,ucya,ucmag,constituents,taus,kfs,kfst0,dps,nst , &
-                   & trifil   ,dtsec     ,versio    ,namcon     , &
-                   & refdat   ,hdt       ,tzone     ,gdfourier  ,gddimens)
+    subroutine postpr_fourier(nst, trifil, dtsec, versio, refdat, hdt, tzone, gdfourier)
     use m_d3ddimens
+    use m_transport
+    use m_flowgeom
+    use m_wind
+    use m_flow
     implicit none
-       type(gd_fourier) , pointer :: gdfourier           !< Fourier Analysis structure 
-       type(gd_dimens)  , pointer :: gddimens            !< Model geometry/grid structure 
-       double precision , intent(in), pointer :: s1(:,:)             !< waterlevel
-       double precision , intent(in), pointer :: u1(:,:)             !< face-normal velocity
-       double precision , intent(in), pointer :: ws(:,:)             !< windspeed
-       double precision , intent(in), pointer :: ucx(:,:)            !< cell-centre velocity x-direction  
-       double precision , intent(in), pointer :: ucy(:,:)            !< cell-centre velocity y-direction 
-       double precision , intent(in), pointer :: ucxa(:,:)           !< cell-centre velocity x-direction, vertical avg  
-       double precision , intent(in), pointer :: ucya(:,:)           !< cell-centre velocity y-direction, vertical avg 
-       double precision , intent(in), pointer :: ucmag(:,:)          !< cell-centre velocity y-direction, vertical avg 
-
-       !double precision , intent(in), pointer :: xs(:,:)             !< s-point x-coordinate 
-       !double precision , intent(in), pointer :: ys(:,:)             !< s-point y-coordinate 
-       !double precision , intent(in), pointer :: xu(:,:)             !< u-point x-coordinate 
-       !double precision , intent(in), pointer :: yu(:,:)             !< u-point y-coordinate 
-
-       !double precision , intent(in) :: xs(:)             !< s-point x-coordinate 
-       !double precision , intent(in) :: ys(:)             !< s-point y-coordinate 
-       !double precision , intent(in) :: xu(:)             !< u-point x-coordinate 
-       !double precision , intent(in) :: yu(:)             !< u-point y-coordinate 
+       type(gd_fourier)  , pointer    :: gdfourier           !< Fourier Analysis structure 
 
        real(fp)          , intent(in) :: dtsec   !<  Integration time step [in seconds]
        real(fp)          , intent(in) :: hdt     !< Half Integration time step [seconds] => gdp%gdnumeco%hdt         
        real(fp)          , intent(in) :: tzone   !< Local (FLOW) time - GMT (in hours)  => gdp%gdexttim%tzone
-       double precision  , intent(in) :: dps(:,:)            !< depth (inverted bottomlevel)
-       integer           , intent(in) :: kfs(:,:)            !< if cell is wet: 1, otherwise: 0 
-       integer           , intent(in) :: kfst0(:,:)          !< if cell is wet at t=0: 1, otherwise: 0 
-       integer           , intent(in) :: nst                 !< timestep number 
+       integer           , intent(in) :: nst                !< timestep number 
        character(len=*)  , intent(in) :: trifil             !< output filename 
        character(len=*)  , intent(in) :: versio             !  Version nr. of the current package
+       character(len=*), intent(in)   :: refdat 
 
-       double precision , intent(in), pointer    :: constituents(:,:,:)  !< array of constituents, also containing sal and tmp 
-       character(len=*) , intent(in), dimension(:)  :: namcon               !< constituent names 
-       double precision , intent(in), pointer    :: taus(:,:)            !< bedfriction velocity  (?)
-       character(len=*), intent(in)              :: refdat 
+    ! NOTE: In DELFT3D depth is used, but bl is passed (positive bottomlevel). Defined direction is different  
+       
     !
     ! Perform analysis and write to Fourier file
     !
-    integer    ::    ifou 
+    integer                                        :: ifou 
     integer          , dimension(:)      , pointer :: fconno
     integer          , dimension(:)      , pointer :: flayno
     integer          , dimension(:)      , pointer :: fnumcy
@@ -1445,7 +1426,11 @@ end subroutine setfouunit
     integer                              , pointer :: mub
     integer                              , pointer :: nmaxus
     integer                              , pointer :: kmax
-    double precision, pointer :: fieldptr1(:,:), fieldptr2(:,:)
+    type (gd_dimens)                      , pointer :: gddimensPtr
+
+    double precision, pointer        :: fieldptr1(:,:)
+    double precision, pointer        :: bl_ptr(:,:)
+    integer         , pointer        :: kfs_ptr(:,:), kfst0_ptr(:,:)
 
     integer    :: itdate   !<  Reference time in yyyymmdd as an integer 
     
@@ -1470,14 +1455,23 @@ end subroutine setfouunit
     founam              => gdfourier%founam
     foutyp              => gdfourier%foutyp
     
-    nmax                => gddimens%nmax
-    mmax                => gddimens%mmax
-    nlb                 => gddimens%nlb
-    nub                 => gddimens%nub
-    mlb                 => gddimens%mlb
-    mub                 => gddimens%mub
-    nmaxus              => gddimens%nmaxus
-    kmax                => gddimens%kmax
+    gddimensPtr         => gddimens
+    nmax                => gddimensPtr%nmax
+    mmax                => gddimensPtr%mmax
+    nlb                 => gddimensPtr%nlb
+    nub                 => gddimensPtr%nub
+    mlb                 => gddimensPtr%mlb
+    mub                 => gddimensPtr%mub
+    nmaxus              => gddimensPtr%nmaxus
+    kmax                => gddimensPtr%kmax
+    
+    bl_ptr(1:gddimens%ndx,1:1) => bl
+    kfs_ptr(1:gddimens%ndx,1:1) => kfs
+    kfst0_ptr(1:gddimens%ndx,1:1) => kfst0
+
+    if (allocated(wmag) .and. allocated(wx) .and. allocated(wy)) then
+       wmag = sqrt(wx*wx + wy*wy)
+    endif
     
     if (nofou > 0) then
        ifou = 1
@@ -1495,28 +1489,27 @@ end subroutine setfouunit
              !
              select case (founam(ifou))
              case ('s1')                        ! waterlevels 
-                fieldptr1 => s1
+                fieldptr1(1:gddimens%ndx,1:1) => s1
              case ('ws')                        ! absolute wind magnitude
-                fieldptr1 => ws 
+                fieldptr1(1:gddimens%ndx,1:1) => wmag
              case ('ux')
-                fieldptr1 => ucx 
+                fieldptr1(1:gddimens%ndkx,1:1) => ucx
              case ('uy')
-                fieldptr1 => ucy 
+                fieldptr1(1:gddimens%ndkx,1:1) => ucy
              case ('uxa')
-                fieldptr1 => ucxa
+                fieldptr1(1:gddimens%ndx,1:1) => ucxq
              case ('uya')
-                fieldptr1 => ucya
+                fieldptr1(1:gddimens%ndx,1:1) => ucyq
              case ('uc')                        ! ucmag, velocity magnitude
-                fieldptr1 => ucmag 
+                fieldptr1(1:gddimens%ndx,1:1) => ucmag
              case ('r1')
-                fieldptr1 => constituents(fconno(ifou),:,:)
+                fieldptr1(1:gddimens%ndx,1:1) => constituents(fconno(ifou),:)
              case ('taubpu')
-                fieldptr1 => taus
+                fieldptr1(1:gddimens%ndx,1:1) => taus
              case default 
                 continue         ! Unknown FourierVariable exception 
              end select 
-             call fouana(ifou    ,kfs    ,kfst0     ,nst       ,fieldptr1 , &
-                       & dps     ,gdfourier  ,gddimens)
+             call fouana(ifou ,kfs_ptr ,kfst0_ptr ,nst ,fieldptr1 ,bl_ptr ,gdfourier ,gddimensPtr)
              ifou = ifou + 1
           else 
              !
@@ -1529,8 +1522,8 @@ end subroutine setfouunit
        ! only once when all fourier periods are complete
        !
        if (nst==fouwrt) then                                        
-          call wrfou(trifil    ,dtsec     ,versio    ,namcon    , &
-                   & itdate    ,hdt       ,tzone     ,gdfourier ,gddimens)
+!         call wrfou(trifil ,dtsec ,versio ,const_names ,itdate ,hdt ,tzone ,gdfourier ,gddimens)
+          call wrfou(trifil ,dtsec ,versio ,const_names ,itdate ,hdt ,tzone ,gdfourier ,gddimensPtr)
        endif
     endif   
     end subroutine postpr_fourier
@@ -1608,7 +1601,7 @@ end subroutine setfouunit
     !
         integer                                                            , intent(in)  :: itdate  !< Reference time in yyyymmdd as an integer
         real(fp)                                                           , intent(in)  :: dtsec   !< Integration time step [in seconds]
-        character(20) , dimension(:)                                       , intent(in)  :: namcon  !< Description and declaration in esm_alloc_char.f90
+        character(len=*) , dimension(:)                                    , intent(in)  :: namcon  !< Description and declaration in esm_alloc_char.f90
         character(5)                                                       , intent(in)  :: versio  !< Version nr. of the current package
         character(*)                                                       , intent(in)  :: trifil  !< File name for FLOW NEFIS output files (tri"h/m"-"casl""labl".dat/def)
         real(fp)                                                           , intent(in)  :: tzone   !< Local (FLOW) time - GMT (in hours)  => gdp%gdexttim%tzone

@@ -283,6 +283,7 @@ subroutine flow_finalize_usertimestep(iresult)
    use m_flowgeom
    use m_transport, only: constituents, NUMCONST, const_names
    use m_fourier_analysis
+   use unstruc_model
    use dfm_error
    use precision_basics
    use unstruc_files, only: defaultFilename, getoutputdir
@@ -292,7 +293,7 @@ subroutine flow_finalize_usertimestep(iresult)
    integer, intent(out) :: iresult !< Error status, DFM_NOERR==0 if successful.
    double precision, pointer, dimension(:,:) :: s1_ptr, ws_ptr, ucx_ptr,  ucy_ptr,  taus_ptr,bl_ptr, u1_ptr
    double precision, pointer, dimension(:,:) :: xs_ptr, ys_ptr, ucxa_ptr, ucya_ptr, ucmag_ptr, xu_ptr, yu_ptr
-   integer, pointer, dimension(:,:) :: kfs_ptr,kfst0_ptr
+   integer, pointer, dimension(:,:)          :: kfs_ptr,kfst0_ptr
    double precision, pointer, dimension(:,:,:) :: const_ptr
    character(len=255) :: filename_fou_out
 
@@ -328,39 +329,12 @@ subroutine flow_finalize_usertimestep(iresult)
    endif
 
    if (associated(gdfourier_ptr)) then
-      filename_fou_out = defaultFilename('fou')
-      if (jampi>0) then
-         filename_fou_out = filename_fou_out(1:index(filename_fou_out,'_',back=.true.)) //   &
-                                     sdmn //   &
-                            filename_fou_out(index(filename_fou_out,'_',back=.true.):len_trim(filename_fou_out))
-      end if
-      s1_ptr(1:ndx,1:1) => s1
-      ws_ptr(1:ndx,1:1) => wmag
-      u1_ptr(1:lnkx,1:1) => u1
-      ucx_ptr(1:ndkx,1:1) => ucx
-      ucy_ptr(1:ndkx,1:1) => ucy
-      ucxa_ptr(1:ndx,1:1) => ucxq
-      ucya_ptr(1:ndx,1:1) => ucyq
-      ucmag_ptr(1:ndx,1:1) => ucmag
-      const_ptr(1:NUMCONST,1:ndkx,1:1) => constituents
-      taus_ptr(1:ndxi,1:1) => taus
-      bl_ptr(1:ndx,1:1) => bl
-      kfs_ptr(1:ndx,1:1) => kfs
-      kfst0_ptr(1:ndx,1:1) => kfst0
-      gdfourier_ptr => gdfourier
-      gddimens_ptr => gddimens
-      if (allocated(wmag) .and. allocated(wx) .and. allocated(wy)) then
-!        wmag = wx*wx + wy*wy
-         wmag = sqrt(wx*wx + wy*wy)
+      if (md_fou_step == 0) then
+         if (gdfourier%ibluc>0) then
+            call getucxucyeulmag(ndkx, workx, worky, ucmag, jaeulervel, 1)
+         endif  
+         call postpr_fourier(nint(time0/dt_user), FouOutputFile, dt_user, filename_fou_out, refdat, 0.5d0*dt_user, Tzone, gdfourier_ptr)
       endif
-      if (gdfourier%ibluc>0) then
-         call getucxucyeulmag(ndkx, workx, worky, ucmag, jaeulervel, 1)
-      endif  
-      call postpr_fourier(s1_ptr,u1_ptr,ws_ptr,ucx_ptr,ucy_ptr,ucxa_ptr,ucya_ptr,ucmag_ptr,const_ptr,taus_ptr,kfs_ptr,kfst0_ptr,bl_ptr,                       &
-        &                   nint(time0/dt_user),  &
-        &                   trim(getoutputdir())//trim(filename_fou_out),dt_user,filename_fou_out,const_names,   &
-        &                   refdat,0.5d0*dt_user,     &
-        &                   Tzone, gdfourier_ptr, gddimens_ptr)
    endif
 
  iresult = DFM_NOERR
@@ -515,15 +489,19 @@ use m_flow
 use m_flowgeom
 use m_flowtimes
 use unstruc_model, only : jawritebalancefile
+use unstruc_model, only : md_fou_step
 use unstruc_netcdf
 use m_timer
 use unstruc_display, only : jaGUI
 use dfm_error
 use dfm_signals
-use m_partitioninfo, only: jampi, my_rank
+use m_partitioninfo, only: jampi, sdmn, my_rank
 use m_integralstats
+use m_fourier_analysis
 implicit none
 integer, intent(out) :: iresult
+character(len=255)   :: filename_fou_out
+
    ! Timestep has been performed, now finalize it.
 
  call flow_f0isf1()                                  ! mass balance and vol0 = vol1
@@ -573,6 +551,14 @@ integer, intent(out) :: iresult
 
 888 continue
 
+   if (associated(gdfourier_ptr)) then
+      if (md_fou_step == 1) then
+         if (gdfourier%ibluc>0) then
+            call getucxucyeulmag(ndkx, workx, worky, ucmag, jaeulervel, 1)
+         endif  
+         call postpr_fourier(nint(time0/dt_user), FouOutputFile, dt_user, filename_fou_out, refdat, 0.5d0*dt_user, Tzone, gdfourier_ptr)
+      endif
+   endif
 end subroutine flow_finalize_single_timestep
 
  subroutine velocities_explicit()
@@ -13940,17 +13926,25 @@ subroutine flow_fourierinit()
 use m_fourier_analysis
 use m_transport, only: NUMCONST, ISALT, ITEMP
 use unstruc_model, only: md_foufile, md_tunit
+use unstruc_files
 use m_flow, only: kmxd
 use m_wind, only: wmag, jawind
 use m_physcoef, only: ag
 use m_flowgeom, only: gddimens, lnx
 use m_flowtimes, only: tstart_user, tstop_user, dt_user
+use m_partitioninfo
 
 implicit none
 integer  :: minp, ifou
 logical  :: success
 call oldfil(minp, md_foufile)
 call fouini(minp, success, ag, md_tunit,'S')
+FouOutputFile = trim(getoutputdir())//defaultFilename('fou')
+if (jampi>0) then
+   FouOutputFile = FouOutputFile(1:index(FouOutputFile,'_',back=.true.))//sdmn   &
+                 //FouOutputFile(index(FouOutputFile,'_',back=.true.):len_trim(FouOutputFile))
+end if
+
 call alloc_fourier_analysis_arrays(gdfourier,gddimens,nofou)
 call reafou(minp   ,md_foufile    ,kmxd      ,&
                    & NUMCONST     ,ISALT    ,ITEMP    ,&
