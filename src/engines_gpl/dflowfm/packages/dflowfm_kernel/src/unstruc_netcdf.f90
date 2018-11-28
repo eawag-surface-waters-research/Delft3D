@@ -4438,7 +4438,6 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
       end if
 
       if (jamapucmag == 1) then
-         call realloc(work1d, ndkx, keepExisting = .false.)
          call setucmag()
          ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_ucmag, iLocS, ucmag)
       end if
@@ -4452,6 +4451,7 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
          end if
 
          if (jamapucmag == 1) then
+            call realloc(work1d, ndkx, keepExisting = .false.)
             do k=1,size(ucxq)
                work1d(k) = sqrt(ucxq(k)**2 + ucyq(k)**2) ! TODO: this does not include vertical/w-component now.
             end do
@@ -4460,6 +4460,7 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
       end if
 
       if (jamapucqvec == 1) then
+         ! TODO: AvD/MN: consider removing entire loop and simply unc_put_var_map( ..., ucqx,..)
          if (kmx > 0) then
             do kk = 1,ndx
                 call getkbotktop(kk,kb,kt)
