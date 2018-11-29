@@ -56,8 +56,8 @@ module m_hash_list
       allocate(hash_list%id_list(hash_list%id_count))
       read(ibin) (hash_list%id_list(i), i = 1, hash_list%id_count)
       
-      allocate(hash_list%hashfirst(0:hashcon-1))
-      read(ibin) (hash_list%hashfirst(i), i = 0, hash_list%hashcon-1)
+      allocate(hash_list%hashfirst(0:hashcon))
+      read(ibin) (hash_list%hashfirst(i), i = 0, hash_list%hashcon)
 
       allocate(hash_list%hashnext(hash_list%id_count))
       read(ibin) (hash_list%hashnext(i), i = 1, hash_list%id_count)
@@ -78,7 +78,7 @@ module m_hash_list
       write(ibin) hash_list%hashcon
       
       write(ibin) (hash_list%id_list(i), i = 1, hash_list%id_count)
-      write(ibin) (hash_list%hashfirst(i), i = 0, hash_list%hashcon-1)
+      write(ibin) (hash_list%hashfirst(i), i = 0, hash_list%hashcon)
       write(ibin) (hash_list%hashnext(i), i = 1, hash_list%id_count)
  
    end subroutine write_hash_list_cache 

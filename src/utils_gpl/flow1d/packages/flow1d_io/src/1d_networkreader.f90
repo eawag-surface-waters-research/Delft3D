@@ -930,7 +930,8 @@ module m_1d_networkreader
          
          read(ibin) pbrn%brType
          read(ibin) pbrn%iTrench
-
+         read(ibin) pbrn%flapGate
+         
          read(ibin) (pbrn%nextBranch(j), j = 1, 2)
          
          read(ibin) (pbrn%nodeIndex(j), j = 1, 2)
@@ -995,6 +996,7 @@ module m_1d_networkreader
          
          write(ibin) pbrn%brType
          write(ibin) pbrn%iTrench
+         write(ibin) pbrn%flapGate
 
          write(ibin) (pbrn%nextBranch(j), j = 1, 2)
          write(ibin) (pbrn%nodeIndex(j), j = 1, 2)
