@@ -65,7 +65,10 @@ module m_hash_search
       ires = iabs(ires)
       ires = mod (ires, hashcon)
       
-      if (ires == 0) ires = hashcon
+      if (ires == 0) then
+         ires = hashcon
+      endif
+         
       
       hashfun = ires
 
@@ -91,7 +94,7 @@ module m_hash_search
       hashlist%hashcon   = 1009
       
       call realloc(hashlist%hashfirst, hashlist%hashcon, lindex = 0, stat = ierr)
-      call aerr('hashfirst(0:hashcon - 1)', ierr, hashlist%hashcon)
+      call aerr('hashfirst(0:hashcon)', ierr, hashlist%hashcon)
     
       call realloc(hashlist%hashnext, hashlist%id_count, stat = ierr)
       call aerr('hashnext(id_count)', ierr, hashlist%id_count)
@@ -144,7 +147,7 @@ module m_hash_search
       
       hashlist%hashcon = hashcon
       call realloc(hashlist%hashfirst, hashlist%hashcon, lindex = 0, stat = ierr)
-      call aerr('hashfirst(0:hashcon - 1)', ierr, hashlist%hashcon)
+      call aerr('hashfirst(0:hashcon)', ierr, hashlist%hashcon)
     
       call realloc(hashlist%hashnext, count, stat = ierr)
       call realloc(hashlist%id_list, count, stat = ierr)
