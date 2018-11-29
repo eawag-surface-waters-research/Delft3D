@@ -1512,6 +1512,14 @@ subroutine fill_constituents(jas) ! if jas == 1 do sources
    
 !  sources
    do kk=1,Ndx
+   
+!     nudging
+      Trefi = 0d0
+      if ( janudge.eq.1 .and. jas.eq.1 ) then
+!        get reference time
+         Trefi = nudge_rate(kk)
+      end if
+            
       call getkbotktop(kk,kb,kt)
       do k=kb,kt
          dvoli = 1d0/max(vol1(k),dtol)
@@ -1526,16 +1534,13 @@ subroutine fill_constituents(jas) ! if jas == 1 do sources
          endif
          
 !        nudging
-         if ( janudge.eq.1 .and. jas.eq.1 ) then
-!           get reference time
-            Trefi = 1d0/nudge_time(kk)
-            
+         if ( Trefi.gt.0d0 ) then
             if ( ITEMP.gt.0 .and. nudge_tem(k).ne.DMISS ) then
                const_sour(ITEMP,k) = const_sour(ITEMP,k) + nudge_tem(k) * Trefi
                const_sink(ITEMP,k) = const_sink(ITEMP,k) + Trefi
             end if
                  
-            if ( ISALT.gt.0 .and. nudge_tem(k).ne.DMISS ) then
+            if ( ISALT.gt.0 .and. nudge_sal(k).ne.DMISS ) then
                const_sour(ISALT,k) = const_sour(ISALT,k) + nudge_sal(k) * Trefi
                const_sink(ISALT,k) = const_sink(ISALT,k) + Trefi
             end if

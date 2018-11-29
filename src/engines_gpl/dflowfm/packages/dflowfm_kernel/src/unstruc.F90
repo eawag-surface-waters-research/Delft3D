@@ -11955,7 +11955,10 @@ else if (nodval == 27) then
     endif
  else if (nodval == 50) then
     if (janudge > 0) then
-       znod = nudge_time(kk)
+       znod = 0d0
+       if ( nudge_rate(kk).gt.0d0 ) then
+         znod = 1d0/nudge_rate(kk)
+       endif
     else if (nshiptxy > 0) then 
        znod = v1ship(kk) 
     endif 
@@ -13873,11 +13876,7 @@ endif
  end if
 
  if ( janudge.eq.1 ) then
-    do k=1,Ndx
-       if ( nudge_time(k).eq.DMISS ) then
-          nudge_time(k) = Tnudgeuni
-       end if
-    end do
+    call set_nudgerate()
  end if
 
 ! BEGIN DEBUG
@@ -22777,6 +22776,7 @@ endif
     call realloc(nudge_sal, Ndkx, fill=DMISS)
     call realloc(zcs, Ndkx)
     call realloc(nudge_time, Ndx, fill=DMISS)
+    call realloc(nudge_rate, Ndx, fill=DMISS)
  end if
 
  end subroutine flow_allocflow
@@ -37001,6 +37001,10 @@ if (mext > 0) then
 
             success = timespaceinitialfield(xz, yz, nudge_time, ndx, filename, filetype, method, operand, transformcoef, 2) ! zie meteo module
 
+        else if (janudge > 0 .and. qid == 'nudgerate' ) then
+
+            success = timespaceinitialfield(xz, yz, nudge_rate, ndx, filename, filetype, method, operand, transformcoef, 2) ! zie meteo module
+
         else if (stm_included .and. qid(1:14) == 'initialsedfrac') then
            call get_sedfracname(qid, sfnam, qidnam)
            iconst = 0
@@ -43411,3 +43415,38 @@ end subroutine alloc_jacobi
       enddo
        
    end subroutine get_netlinks_of_dryarea
+   
+   
+!>  set nudge rates [1/s] from input in following order of preference:
+!>     1. nudge time [s]
+!>     2. nudge rate [NUDGE_RATE_UNIT_TO_SECI]
+!>     3. uniform nudge time [s]
+!>
+!>  caution: will overwrite nudge_rate in 1/s
+   subroutine set_nudgerate()
+      use m_flowgeom, only: Ndx
+      use m_flowparameters, only: Tnudgeuni
+      use m_nudge
+      use m_missing
+      implicit none
+      
+      integer :: k
+      
+      do k=1,Ndx
+         if ( nudge_time(k).eq.DMISS ) then
+            if ( nudge_rate(k).ne.DMISS ) then
+               nudge_rate(k) = NUDGE_RATE_UNIT_TO_SECI * nudge_rate(k)
+            else if ( Tnudgeuni.gt.0d0 ) then
+               nudge_rate(k) = 1d0 / Tnudgeuni
+            else
+               nudge_rate(k) = 0d0
+            end if
+         else if ( nudge_time(k).gt.0d0 ) then
+            nudge_rate(k) = 1d0 / nudge_time(k)
+         else
+            nudge_rate(k) = 0d0
+         end if
+      end do
+      
+      return
+   end subroutine set_nudgerate

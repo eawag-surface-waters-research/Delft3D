@@ -4356,7 +4356,13 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
       
       if ( janudge.gt.0 .and. jamapnudge.gt.0 ) then
 !        output static nudging time
-         ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_nudge_time, UNC_LOC_S, nudge_time)
+         workx = 0d0
+         do k=1,Ndx
+            if ( nudge_rate(k).gt.0d0 ) then
+               workx(k) = 1d0/nudge_rate(k)
+            end if
+         end do
+         ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_nudge_time, UNC_LOC_S, workx)
       end if
 
    endif

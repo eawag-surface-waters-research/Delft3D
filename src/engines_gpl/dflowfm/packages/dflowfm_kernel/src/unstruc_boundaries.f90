@@ -689,7 +689,7 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
 
      nshiptxy = nshiptxy + 1
      
-  else if (qidfm == 'nudgetime' .or. qidfm == 'nudge_salinity_temperature' ) then
+  else if (qidfm == 'nudgetime' .or. qidfm == 'nudgerate' .or. qidfm == 'nudge_salinity_temperature' ) then
   
      janudge = 1
      
