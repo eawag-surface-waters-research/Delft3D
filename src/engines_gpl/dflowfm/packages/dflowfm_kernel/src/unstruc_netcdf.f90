@@ -4432,6 +4432,7 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
          if (jamapucmag == 1) then
             call realloc(work1d, ndkx, keepExisting = .false.)
             do k=1,size(ucxq)
+               if (.not. allocated(work1D)) allocate(work1D(size(ucxq)))
                work1d(k) = sqrt(ucxq(k)**2 + ucyq(k)**2) ! TODO: this does not include vertical/w-component now.
             end do
             ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_ucmaga, UNC_LOC_S, work1d)

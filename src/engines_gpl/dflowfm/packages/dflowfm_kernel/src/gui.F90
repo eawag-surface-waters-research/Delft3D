@@ -3474,7 +3474,7 @@
    HELPM (7) = &
    'Balance between smoothing and cell-area homogenization      '
    HELPM (8) = &
-   '0:no, 1:to orig. netbdy, 2:netbound to landbound 3:''2''+inner net to landbound 4:whole net'
+   '0:no, 1:to org netb, 2:netb to Ldb, 3:''2''+inner net to Ldb, 4:whole net, 5:ok'
    HELPM (9) = &
    'corner if cosine of boundary edge angle < -threshold        '
    HELPM (10)= &

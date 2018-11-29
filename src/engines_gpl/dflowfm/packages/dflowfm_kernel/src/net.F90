@@ -16240,7 +16240,7 @@ SUBROUTINE ORTHOGONALISENET(jarerun)
          call qnerror('net-to-land administration out of date: falling back to ''netbound to orig. netbound''', ' ', ' ')
          JAPROJECT = 1
       else
-         call snap_to_landboundary()
+         !if (japroject <= 4) call snap_to_landboundary()
       end if
    end if
 

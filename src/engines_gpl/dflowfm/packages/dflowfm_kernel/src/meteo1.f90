@@ -7392,7 +7392,7 @@ contains
    !
    ! ==========================================================================
    !> 
-   function timespaceinitialfield(xu, yu, zu, nx, filename, filetype, method, operand, transformcoef, iprimpos) result(success)  ! 
+   function timespaceinitialfield(xu, yu, zu, nx, filename, filetype, method, operand, transformcoef, iprimpos, kcc) result(success)  ! 
       
    use kdtree2Factory
    use m_samples
@@ -7418,6 +7418,8 @@ contains
    double precision, intent(in)    :: xu(nx)
    double precision, intent(in)    :: yu(nx)
    double precision, intent(out)   :: zu(nx)
+   integer         , intent(in), optional    :: kcc(nx)
+
    character(*),     intent(in)    :: filename   ! file name for meteo data file
    integer     ,     intent(in)    :: filetype   ! spw, arcinfo, uniuvp etc
    integer     ,     intent(in)    :: method     ! time/space interpolation method
@@ -7477,6 +7479,7 @@ contains
              
       inside = -1
       do k=1,nx
+         if (kc(k) == 0) cycle
          call dbpinpol(xu(k), yu(k), inside, &
                        dmiss, JINS, NPL, xpl, ypl, zpl)  
          if (inside == 1) then
@@ -7504,7 +7507,7 @@ contains
       if (method == 5) then
           jdla = 1 
           call triinterp2(xu,yu,zh,nx,jdla, &
-                          XS, YS, ZS, NS, dmiss, jsferic, jins, jasfer3D, NPL, MXSAM, MYSAM, XPL, YPL, ZPL, transformcoef)
+                          XS, YS, ZS, NS, dmiss, jsferic, jins, jasfer3D, NPL, MXSAM, MYSAM, XPL, YPL, ZPL, transformcoef,kcc)
       
       else if (method == 6) then                ! and this only applies to flow-link data
       
