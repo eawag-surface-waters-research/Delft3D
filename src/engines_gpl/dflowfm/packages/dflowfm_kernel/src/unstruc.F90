@@ -2855,10 +2855,6 @@ subroutine getseg1D(hpr,wu2,dz,ai,frcn,ifrctyp, wid,ar,conv,perim,jaconv)  ! cop
  if (nbnd1d2d > 0) then       ! 1d2d boundary check for closed boundaries
     call sethu_1d2d()
  endif
- 
- if (japillar > 0) then
-    call setpillars()
- endif
 
  if (javeg > 0) then 
     call setveg()
@@ -13908,6 +13904,10 @@ endif
  
  if (jabarrieradvection == 3) then
     call setstruclink()
+ endif
+ 
+ if (japillar > 0) then
+    call setpillars()
  endif
 
  iresult = DFM_NOERR
