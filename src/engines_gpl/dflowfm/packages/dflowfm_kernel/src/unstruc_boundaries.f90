@@ -1818,7 +1818,7 @@ do i=1,nstr
 
    case ('dambreak')
 
-      call selectelset_internal_links( plifile, POLY_TIM, xz, yz, ln, lnx, kedb(ndambreak+1:numl), ndambr, dambreakPolygons(i)%xp, dambreakPolygons(i)%yp, dambreakPolygons(i)%np, lftopol(ndambreak+1:numl))
+      call selectelset_internal_links( plifile, POLY_TIM, xz, yz, ln, lnx, kedb(ndambreak+1:numl), ndambr, dambreakPolygons(i)%xp, dambreakPolygons(i)%yp, dambreakPolygons(i)%np, lftopol(ndambreak+1:numl), sortLinks = 1)
       success = .true.
       WRITE(msgbuf,'(2a,i8,a)') trim(qid), trim(plifile) , ndambr, ' nr of dambreak links' ; call msg_flush()
 
