@@ -3,7 +3,7 @@
    !NTRANSFORMCOEF is substituted by 25 (hardcoded)
    
    !Global modules
-   module m_ec_triangle           ! original name : m_triangle 
+   module m_ec_triangle
    implicit none
    double precision, ALLOCATABLE :: XCENT(:), YCENT(:)
    INTEGER, ALLOCATABLE          :: INDX(:,:)
@@ -104,7 +104,7 @@
    !---------------------------------------------------------------------------!
 
    subroutine triinterp2_dbldbl(XZ, YZ, BL, NDX, JDLA,&
-                        XS, YS, ZS, NS, dmiss, jsferic, jins, jasfer3D, NPL, MXSAM, MYSAM, XPL, YPL, ZPL, transformcoef, kcc)
+                        XS, YS, ZS, NS, dmiss, jsferic, jins, jasfer3D, NPL, MXSAM, MYSAM, XPL, YPL, ZPL, transformcoef)
    implicit none
    !
    ! Parameters
@@ -130,9 +130,6 @@
    real(hp), intent(in)            :: YPL(:)
    real(hp), intent(in)            :: ZPL(:)
    real(hp), intent(in)            :: transformcoef(:)
-   
-   integer , intent(in), optional  :: kcc(:) 
-   
    !
    ! Locals
    integer :: i
@@ -152,7 +149,7 @@
    if ( MXSAM.gt.0 .and. MYSAM.gt. 0 ) then  ! bi-linear interpolation
       call bilin_interp(NDX, XZ, YZ, BL, dmiss, XS, YS, ZS, MXSAM, MYSAM, XPL, YPL, ZPL, NPL, jsferic)
    else  ! Delauny
-      call TRIINTfast(XS,YS,ZS,NS,1,XZ,YZ,BL,Ndx,JDLA, jakdtree, jsferic, Npl, jins, dmiss, jasfer3D, XPL, YPL, ZPL, transformcoef,kcc)
+      call TRIINTfast(XS,YS,ZS,NS,1,XZ,YZ,BL,Ndx,JDLA, jakdtree, jsferic, Npl, jins, dmiss, jasfer3D, XPL, YPL, ZPL, transformcoef)
    end if
 
    !   in_unit = 10 
@@ -272,7 +269,7 @@
 
 
    SUBROUTINE TRIINTfast(XS, YS, ZS, NS,NDIM,X,Y,Z,NXY,JDLA,jakdtree, jsferic, NH, jins, dmiss, jasfer3D, &
-                         XH, YH, ZH, transformcoef,kc)
+                         XH, YH, ZH, transformcoef)
    use m_ec_triangle
    use m_ec_interpolationsettings
    use geometry_module, only: dbpinpol
@@ -306,14 +303,13 @@
    double precision :: ymaxs
    double precision :: ymins
    double precision :: XS(ns), YS(ns), ZS(NDIM,ns), X(nxy), Y(nxy), Z(NDIM,nxy)
-   integer, optional:: kc(nxy) 
    double precision :: XL(3),YL(3)
    double precision, allocatable :: xx(:), yy(:) , zz(:,:)
    integer         , allocatable :: ind(:)
 
    double precision, dimension(:),   allocatable :: xs1, ys1      ! for store/restore of xs, ys
    double precision, dimension(:,:), allocatable :: zs1           ! for store/restore of zs
-   
+
    double precision                              :: xsmin, ysmin, xsmax, ysmax  ! bounding box corner coordinates
 
    integer                                       :: indf(3)
@@ -329,7 +325,7 @@
    double precision, intent(in)                  :: dmiss    
    integer,          intent(in)                  :: jasfer3D
    double precision                              :: XH(nh), YH(nh), ZH(nh), transformcoef(:)
-   integer                                       :: KMOD, jakc
+   integer                                       :: KMOD
 
    type(kdtree_instance) :: sampletree
 
@@ -339,11 +335,7 @@
    double precision                             :: R2Search, dist2, cof1, cof2
 
    jakdtree2 = jakdtree
-   
-   jakc = 0
-   if (present(kc)) jakc = 1
-   
-   
+
    if ( jakdtree.eq.1 ) then
       !       enforce generation of kdtree
       treeglob%itreestat = ITREE_EMPTY
@@ -410,11 +402,6 @@
 
          nxx  = 0 ; in = -1  ! net/grid size reduction
          DO K = 1,Nxy
-            if ( jakc == 1 ) then 
-               if (kc(k) == 0) then
-                  cycle
-               endif   
-            endif            
             call dbpinpol(x(k), y(k), in, dmiss, JINS, nh, XH, YH, ZH)
             if (in == 1) then
                nxx = nxx + 1
@@ -497,12 +484,6 @@
          YP = yy(N)
          RD = zz(idim,N)
       else
-         if ( jakc == 1 ) then 
-            if (kc(n) == 0) then
-               cycle
-            endif   
-         endif            
-
          XP = x(N)
          YP = y(N)
          RD = z(idim,N)
@@ -524,8 +505,8 @@
                !if ( N.eq.7797 ) jadum = 1
                !if ( N.eq.341 ) jadum =
                !if ( N.eq.9 ) jadum = 1
-               call findtri_kdtree(XP,YP,ZP,XS,YS,ZS,N2,NDIM,NRFIND,INTRI,JSLO,SLO, & 
-                                   Jtekinterpolationprocess,jadum,ierror,indf,wf, dmiss, jsferic, jins, jasfer3D)
+               call findtri_kdtree(XP,YP,ZP,XS,YS,ZS,N2,NDIM, &
+                  NRFIND,INTRI,JSLO,SLO,Jtekinterpolationprocess,jadum,ierror,indf,wf, dmiss, jsferic, jins, jasfer3D)
                if ( ierror.ne.0 ) then
                   !                    deallocate
                   if ( treeglob%itreestat.ne.ITREE_EMPTY ) call delete_kdtree2(treeglob)
@@ -537,15 +518,15 @@
             end if
 
             if ( jakdtree.ne.1 ) then              
-               CALL FINDTRI(XP,YP,ZP,XS,YS,ZS,N2,NDIM,NRFIND,INTRI,JSLO,SLO, & 
-                            Jtekinterpolationprocess,indf,wf, dmiss, jsferic, jins)
+               CALL FINDTRI(XP,YP,ZP,XS,YS,ZS,N2,NDIM,     &
+                             NRFIND,INTRI,JSLO,SLO,Jtekinterpolationprocess,indf,wf, dmiss, jsferic, jins)
             end if
 
             IF (INTRI .EQ. 1) THEN
                if (nh > 2) then
                   Zz(:,N) = ZP
                else
-                  z(:,n)  = zp
+                  z(:,n) = zp
                endif
 
                if (jagetwf == 1) then
@@ -623,11 +604,6 @@
 
    if (nh > 2) then
       do k = 1,nxx
-         if ( jakc == 1 ) then 
-            if (kc(k) == 0) then
-               cycle
-            endif   
-         endif            
          do idim=1,NDIM
             z(idim,ind(k)) = zz(idim,k)
          end do

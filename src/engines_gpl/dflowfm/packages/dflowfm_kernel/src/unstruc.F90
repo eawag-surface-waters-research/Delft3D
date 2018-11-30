@@ -2549,8 +2549,6 @@ subroutine getseg1D(hpr,wu2,dz,ai,frcn,ifrctyp, wid,ar,conv,perim,jaconv)  ! cop
     ! if(jazws0==1 .and. len_trim(md_restartfile)>0) then s0 and s1 are read from restart file, in this case, no need to call the following subroutine
     call sets01zbnd(0)                               ! set s0 on z-boundaries
  endif
- 
- !call sets01zbnd(0) 
 
  if (uniformhu > 0d0) then
     hu = uniformhu ; return
@@ -6436,13 +6434,13 @@ if (ihorvic > 0 .or. NDRAW(29) == 37) then
        uucx = uu*cs - vv*sn                   !
        uucy = uu*sn + vv*cs
        if (jasfer3D == 1) then
-          ucx(kbk)  = lin2nodx(LL,1,uucx,uucy)
-          ucy(kbk)  = lin2nody(LL,1,uucx,uucy)
+          ucx(kbk) = lin2nodx(LL,1,uucx,uucy)
+          ucy(kbk) = lin2nody(LL,1,uucx,uucy)
           ucxq(kbk) = ucx(kbk)
           ucyq(kbk) = ucy(kbk)
        else
-          ucx(kbk)  = uucx
-          ucy(kbk)  = uucy
+          ucx(kbk) = uucx
+          ucy(kbk) = uucy
           ucxq(kbk) = ucx(kbk)
           ucyq(kbk) = ucy(kbk)
        end if
@@ -11905,7 +11903,7 @@ else if (nodval == 27) then
 
  else if (nodval == 37) then
 
-    if (Soiltempthick > 0 .and. jatem > 0) then
+    if (Soiltempthick > 0) then
        znod = tbed(kk)
     else
        znod = same(k)
@@ -13513,17 +13511,20 @@ end if
 !    k2 = kbndz(2,n)
 !    zbndz0(n) = s1(k2)
 ! end do
- if (.not. jawelrestart) then ! If one restarts a simulation, then s0 and s1 are read from the restart file (new version), no need to set them.
-    call sets01zbnd(1)
- else if (jaoldrstfile==1) then ! If the restart file is of old version (which does not have waterlevel etc info on boundaries), then need to set.
-    call sets01zbnd(0)
-    call sets01zbnd(1)
+if (.not. jawelrestart) then ! If one restarts a simulation, then s0 and s1 are read from the restart file (new version), no need to set them.
+   call sets01zbnd(1)
+else if (jaoldrstfile==1) then ! If the restart file is of old version (which does not have waterlevel etc info on boundaries), then need to set.
+   call sets01zbnd(0)
+   call sets01zbnd(1)
 endif
 
- do n  = 1, nbndn                                  ! for normal velocity boundaries, also initialise velocity on link
+
+ do n  = 1, nbndn                                   ! for normal velocity boundaries, also initialise velocity on link
+    kb = kbndn(1,n)
+    k2 = kbndn(2,n)
     LL = kbndn(3,n)
-    call getLbotLtop(LL,Lb,Lt)
-    do L = Lb, Lt
+    do k = 1,kmxd
+       L     = (LL-1)*kmxd + k
        u1(L) = zbndn(n)
     enddo
  enddo
@@ -26053,6 +26054,7 @@ subroutine transport()                           ! transport for now, advect sal
                     endif
                  endif
 
+
               enddo
 
 
@@ -26124,7 +26126,7 @@ subroutine transport()                           ! transport for now, advect sal
     end if
 ! end DEBUG
 
-  if ( jasal.gt.0 ) then    !  compute salt error
+   if ( jasal.gt.0 ) then    !  compute salt error
 
       if (jatransportmodule == 0) sam0 = sam1
       sam0tot = sam1tot
@@ -26142,7 +26144,7 @@ subroutine transport()                           ! transport for now, advect sal
         do k = kb,kt
             sam1tot = sam1tot + sa1(k)*vol1(k)
             if (jatransportmodule == 0) then
-               sam1(k) =        sa1(k)*vol1(k)                              ! mass balance
+               sam1(k) =        sa1(k)*vol1(k)            ! mass balance
                same(k) = sam1(k) - sam0(k) - dts*( supq(k) + salsrc(k) )    ! mass balance
             endif
         enddo
@@ -30574,9 +30576,8 @@ end subroutine setbedlevelfromnetfile
 
  logical :: jawel
  logical :: bl_set_from_zkuni = .false.
- integer              :: mxyb, ja, method, iprimpos
- integer              :: k, L, k1, k2, mx
- integer, allocatable :: kcc(:), kc1D(:), kc2D(:)
+ integer            :: mxyb, ja, method, iprimpos
+ integer            :: k, L, k1, k2
 
  character(len=256) :: filename
  character(len=64)  :: varname
@@ -30600,58 +30601,31 @@ end subroutine setbedlevelfromnetfile
  ! These types need to be mapped to one of three possible primitive locations (center/edge/corner).
  select case (ibedlevtyp)
  case (1)       ! primitime position = waterlevelpoint, cell centre
-    iprimpos = 2 ; mx = ndx
+    iprimpos = 2
  case (2)       ! primitime position = velocitypoint, cellfacemid
-    iprimpos = 1 ; mx = lnx 
+    iprimpos = 1
  case (3,4,5,6) ! primitime position = netnode, cell corner
-    iprimpos = 3 ; mx = numk
+    iprimpos = 3
  end select
 
  if (mext > 0) then
     rewind(mext)
     ja = 1
-    allocate(kcc(mx),kc1d(mx),kc2d(mx)) ; kcc = 1; kc1D = 0 ; kc2D = 0 
-
-    do L = 1, numL
-       if (kn(3,L) .ne. 2 .and. kn(3,L) .ne. 0) then 
-           k1 = kn(1,L) ; k2 = kn(2,L)
-           if (.not. ( nmk(k1) == 1 .and. (kn(3,L) == 5 .or. kn(3,L) == 7)  )  ) kc1D(k1) = 1
-           if (.not. ( nmk(k2) == 1 .and. (kn(3,L) == 5 .or. kn(3,L) == 7)  )  ) kc1D(k2) = 1 
-       endif   
-    enddo   
-    do L = 1, numL
-       if (kn(3,L) == 2) then 
-           k1 = kn(1,L) ; k2 = kn(2,L)
-           kc2D(k1) = 1
-           kc2D(k2) = 1
-       endif   
-    enddo   
 
     do while (ja .eq. 1)                                ! read *.ext file
        call delpol()                                    ! ook jammer dan
        call readprovider(mext,qid,filename,filetype,method,operand,transformcoef,ja,varname)
-       if (ja == 1) then 
-          if (qid == 'bedlevel1D') then
-             call mess(LEVEL_INFO, 'setbedlevelfromextfile: Setting bedlevel1D from file '''//trim(filename)//'''.')
-             kc(1:mx) = kc1D
-             success = timespaceinitialfield_mpi(xk, yk, zk, numk, filename, filetype, method, operand, transformcoef, iprimpos, kc) ! zie meteo module
-          else  
-             if (qid == 'bedlevel')  then
-                call mess(LEVEL_INFO, 'setbedlevelfromextfile: Setting bedlevelboth1D2D from file '''//trim(filename)//'''.')
-                kc(1:mx) = kcc
-             else if (qid == 'bedlevel2D') then
-                call mess(LEVEL_INFO, 'setbedlevelfromextfile: Setting bedlevel2D from file '''//trim(filename)//'''.')
-                kc(1:mx) = kc2D
-             endif   
-             
-             if (ibedlevtyp == 3) then
-                success = timespaceinitialfield_mpi(xk, yk, zk, numk, filename, filetype, method, operand, transformcoef, iprimpos, kc) ! zie meteo module
-             else if (ibedlevtyp == 2) then
-                success = timespaceinitialfield_mpi(xu, yu, blu, lnx, filename, filetype, method, operand, transformcoef, iprimpos, kc) ! zie meteo module
-             else if (ibedlevtyp == 1) then
-                success = timespaceinitialfield_mpi(xz, yz, bl, ndx, filename, filetype, method, operand, transformcoef, iprimpos, kc) ! zie meteo module
-             endif
-          endif   
+       if (ja == 1 .and. qid == 'bedlevel') then
+          call mess(LEVEL_INFO, 'setbedlevelfromextfile: Setting bedlevel from file '''//trim(filename)//'''.')
+
+          if (ibedlevtyp == 3) then
+             success = timespaceinitialfield_mpi(xk, yk, zk, numk, filename, filetype, method, operand, transformcoef, iprimpos) ! zie meteo module
+          else if (ibedlevtyp == 2) then
+             success = timespaceinitialfield_mpi(xu, yu, blu, lnx, filename, filetype, method, operand, transformcoef, iprimpos) ! zie meteo module
+          else if (ibedlevtyp == 1) then
+             success = timespaceinitialfield_mpi(xz, yz, bl, ndx, filename, filetype, method, operand, transformcoef, iprimpos) ! zie meteo module
+          endif
+
        endif
 
     enddo
@@ -30666,11 +30640,7 @@ end subroutine setbedlevelfromnetfile
        end select
     end if
 
-    deallocate(kcc,kc1d,kc2d) 
-    
  endif
- 
- 
  
  if (ibedlevtyp == 1) then 
     do k = 1, ndxi
@@ -30700,7 +30670,7 @@ end subroutine setbedlevelfromnetfile
 
    !> perform interpolation on rank 0 only (and save some memory with multiple ranks on one node)
    !>   note: only methods "4" (in polygon) and "5" (trangulation) supported, averaging (method "6") not supported
-   function timespaceinitialfield_mpi(x, y, z, N, filename, filetype, method, operand, transformcoef, iprimpos, kc) result(success)
+   function timespaceinitialfield_mpi(x, y, z, N, filename, filetype, method, operand, transformcoef, iprimpos) result(success)
       use m_partitioninfo
       use timespace, only : timespaceinitialfield
       use m_flowexternalforcings, only: NTRANSFORMCOEF
@@ -30715,8 +30685,7 @@ end subroutine setbedlevelfromnetfile
       double precision, dimension(N),              intent(in)    :: x(N)   !< x-coordinates
       double precision, dimension(N),              intent(in)    :: y(N)   !< y-coordinates
       double precision, dimension(N),              intent(out)   :: z(N)   !< interpolated values
-      integer         , dimension(N),              intent(in)    :: kc(N)  !< 0=no, 1 = yes 
-      
+
       character(*),                                intent(in)    :: filename        !< name of data file
       integer,                                     intent(in)    :: filetype        !< file type
       integer,                                     intent(in)    :: method          !< interpolation method, only "4" and "5" supported
@@ -30726,7 +30695,7 @@ end subroutine setbedlevelfromnetfile
 
       double precision, dimension(:),              allocatable   :: xall, yall, zall
 
-      integer,          dimension(:),              allocatable   :: nums, offset,kcall
+      integer,          dimension(:),              allocatable   :: nums, offset
 
       integer                                                    :: numtot
       integer                                                    :: i, ierror
@@ -30751,7 +30720,6 @@ end subroutine setbedlevelfromnetfile
          allocate(xall(numtot))
          allocate(yall(numtot))
          allocate(zall(numtot))
-         allocate(kcall(numtot))
          allocate(offset(0:ndomains-1))
 
          offset(0) = 0
@@ -30763,11 +30731,10 @@ end subroutine setbedlevelfromnetfile
          call mpi_gatherv(x,N,MPI_DOUBLE_PRECISION,xall,nums,offset,MPI_DOUBLE_PRECISION,0,DFM_COMM_DFMWORLD,ierror)
          call mpi_gatherv(y,N,MPI_DOUBLE_PRECISION,yall,nums,offset,MPI_DOUBLE_PRECISION,0,DFM_COMM_DFMWORLD,ierror)
          call mpi_gatherv(z,N,MPI_DOUBLE_PRECISION,zall,nums,offset,MPI_DOUBLE_PRECISION,0,DFM_COMM_DFMWORLD,ierror)
-         call mpi_gatherv(kc,N,MPI_INTEGER       ,kcall,nums,offset,MPI_DOUBLE_PRECISION,0,DFM_COMM_DFMWORLD,ierror)
-         
+
          if ( my_rank.eq.0 ) then
 !           perform interpolation on rank 0
-            success = timespaceinitialfield(xall, yall, zall, numtot, filename, filetype, method, operand, transformcoef, iprimpos, kcall)
+            success = timespaceinitialfield(xall, yall, zall, numtot, filename, filetype, method, operand, transformcoef, iprimpos)
          else
             success = .true.
          end if
@@ -30780,14 +30747,13 @@ end subroutine setbedlevelfromnetfile
          deallocate(xall)
          deallocate(yall)
          deallocate(zall)
-         deallocate(kcall)
          deallocate(offset)
       else
-         success = timespaceinitialfield(x, y, z, N, filename, filetype, method, operand, transformcoef, iprimpos, kc)
-      endif
+         success = timespaceinitialfield(x, y, z, N, filename, filetype, method, operand, transformcoef, iprimpos)
+      end if
 
 #else
-      success = timespaceinitialfield(x, y, z, N, filename, filetype, method, operand, transformcoef, iprimpos, kc)
+      success = timespaceinitialfield(x, y, z, N, filename, filetype, method, operand, transformcoef, iprimpos)
 #endif
 
       return
@@ -36907,7 +36873,7 @@ if (mext > 0) then
 
             success = timespaceinitialfield(xk, yk, zk, numk, filename, filetype, method, operand, transformcoef, 3) ! zie meteo module
 
-        else if (index(qid,'bedlevel') > 0) then  ! to suppress error message while actually doing this in geominit
+        else if (qid == 'bedlevel') then  ! to suppress error message while actually doing this in geominit
 
             success = .true.
 
