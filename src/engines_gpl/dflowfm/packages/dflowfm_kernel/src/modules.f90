@@ -4643,7 +4643,7 @@ implicit none
 integer          :: ITATP = 25  !< Nr. of outer    iterations in grid/net orthogonalisation.
 integer          :: ITBND = 1   !< Nr. of boundary iterations in grid/net orthogonalisation. (within ITATP)
 integer          :: ITIN  = 25  !< Nr. of inner    iterations in grid/net orthogonalisation. (within ITBND)
-                      !! Also used within transfinite regular grid generation.
+                                !! Also used within structured grid orthogonalisation.
 integer          :: JAPROJECT = 1 !< Project nodes back to boundary (2: yes, all, 1:yes, net bounds only, 0:no)
 double precision :: ATPF = 0.95d0  !< Factor (0.<=ATPF<=1.) between grid smoothing and grid ortho resp.
 double precision :: ATPF_B = 1d0 !< minimum ATPF on the boundary
