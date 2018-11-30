@@ -767,6 +767,7 @@ module m_meteo
       !
       character(len=maxnamelen)       :: sourceItemName           !< name of source item (as created by provider)
       character(len=maxnamelen)       :: target_name              !< Unstruc target name derived from user-specified name 
+      character(len=maxnamelen)       :: location                 !< location (name) as specified in the LOCATION field of the new EXT-file
       integer,                pointer :: targetItemPtr1 => null() !< pointer to the target item id
       integer,                pointer :: targetItemPtr2 => null() !< pointer to optional second target item id (e.g. in case of windxy)
       integer,                pointer :: targetItemPtr3 => null() !< pointer to optional third target item id (e.g. in case of spiderweb)
@@ -833,56 +834,66 @@ module m_meteo
       call clearECMessage()
       
       ! ============================================================
-      ! Construct the FileReader, which constructs the source Items.
+      ! If BC-Type file, create filereader and source items here
       ! ============================================================
-
-      ! first see if the file has already been opened
-      inquire(file=trim(fileName), exist = exist, opened = opened)
-      if (opened .and. ec_fileType==provFile_spiderweb) then                    ! double file access not allowed when using the Gnu compiler 
-         fileReaderPtr => ecFindFileReader(ecInstancePtr, fileName)
-         if (.not.associated(fileReaderPtr)) then
-            continue
+      location = filename
+      if (ec_filetype == provFile_bc) then
+         if (.not.ecCreateInitializeBCFileReader(ecInstancePtr, forcingfile, location, qidname, &
+                                                 itdate, tzone, ec_second, fileReaderId)) then
+            return                           
          end if
-         fileReaderId = fileReaderPtr%id 
       else
-         fileReaderId = ecCreateFileReader(ecInstancePtr)
-         
-         fileReaderPtr => ecFindFileReader(ecInstancePtr, fileReaderId) ! TODO: Refactor this private data access (UNST-703).
-   
-         fileReaderPtr%vectormax = vectormax
-   
-         if (present(forcingfile)) then
-            if (present(dtnodal)) then
-               success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, itdate, tzone, ec_second, name, forcingfile=forcingfile, dtnodal=dtnodal)
-            else
-               success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, itdate, tzone, ec_second, name, forcingfile=forcingfile)
+      ! ============================================================
+      ! For the remaining types, construct the fileReader and source Items here.
+      ! ============================================================
+         ! first see if the file has already been opened
+         inquire(file=trim(fileName), exist = exist, opened = opened)
+         if (opened .and. ec_fileType==provFile_spiderweb) then                    ! double file access not allowed when using the Gnu compiler 
+            fileReaderPtr => ecFindFileReader(ecInstancePtr, fileName)
+            if (.not.associated(fileReaderPtr)) then
+               continue
             end if
-            !message = dumpECMessageStack(LEVEL_WARN,callback_msg)
-            if (.not. success) then
-               goto 1234
-            end if
-            if (ecAtLeastOnePointIsCorrection) then       ! TODO: Refactor this shortcut (UNST-180).
-                  ecAtLeastOnePointIsCorrection = .false. ! TODO: Refactor this shortcut (UNST-180).
-                  ec_addtimespacerelation = .true.
-                  return
-            end if
+            fileReaderId = fileReaderPtr%id 
          else
-            if (present(dtnodal)) then
-               success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, itdate, tzone, ec_second, name, dtnodal=dtnodal, varname=varname)
+            fileReaderId = ecCreateFileReader(ecInstancePtr)
+            
+            fileReaderPtr => ecFindFileReader(ecInstancePtr, fileReaderId) ! TODO: Refactor this private data access (UNST-703).
+      
+            fileReaderPtr%vectormax = vectormax
+      
+            if (present(forcingfile)) then
+               if (present(dtnodal)) then
+                  success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, itdate, tzone, ec_second, name, forcingfile=forcingfile, dtnodal=dtnodal)
+               else
+                  success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, itdate, tzone, ec_second, name, forcingfile=forcingfile)
+               end if
+               !message = dumpECMessageStack(LEVEL_WARN,callback_msg)
+               if (.not. success) then
+                  goto 1234
+               end if
+               if (ecAtLeastOnePointIsCorrection) then       ! TODO: Refactor this shortcut (UNST-180).
+                     ecAtLeastOnePointIsCorrection = .false. ! TODO: Refactor this shortcut (UNST-180).
+                     ec_addtimespacerelation = .true.
+                     return
+               end if
             else
-               success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, itdate, tzone, ec_second, name, varname=varname)
-            end if
-            if (.not. success) then
-               ! message = ecGetMessage()
-               ! message = dumpECMessageStack(LEVEL_WARN,callback_msg)
-               ! NOTE: do all error dumping (if any) at the end of this routine at label 1234
-   
-               ! NOTE: in relation to WAVE: all calling WAVE-related routines now pass quiet=.true. to this addtimespace routine.
-               ! When running online with WAVE and the first WAVE calculation is after the first DFlowFM calculation,
-               ! this message will be generated. This must be a warning: notify the user that DFlowFM is going to do
-               ! a calculation with zero wave values. This message should be written every time step, until proper
-               ! wave data is available. The user has to check whether this behaviour is as expected.
-               goto 1234
+               if (present(dtnodal)) then
+                  success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, itdate, tzone, ec_second, name, dtnodal=dtnodal, varname=varname)
+               else
+                  success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, itdate, tzone, ec_second, name, varname=varname)
+               end if
+               if (.not. success) then
+                  ! message = ecGetMessage()
+                  ! message = dumpECMessageStack(LEVEL_WARN,callback_msg)
+                  ! NOTE: do all error dumping (if any) at the end of this routine at label 1234
+      
+                  ! NOTE: in relation to WAVE: all calling WAVE-related routines now pass quiet=.true. to this addtimespace routine.
+                  ! When running online with WAVE and the first WAVE calculation is after the first DFlowFM calculation,
+                  ! this message will be generated. This must be a warning: notify the user that DFlowFM is going to do
+                  ! a calculation with zero wave values. This message should be written every time step, until proper
+                  ! wave data is available. The user has to check whether this behaviour is as expected.
+                  goto 1234
+               end if
             end if
          end if
       end if
@@ -1109,6 +1120,8 @@ module m_meteo
          case ('rainfall')
             ! the name of the source item depends on the file reader
             if (ec_filetype == provFile_uniform) then
+               sourceItemName = 'uniform_item'
+            else if (ec_filetype == provFile_bc) then
                sourceItemName = 'uniform_item'
             else if (ec_filetype == provFile_netcdf) then
                sourceItemName = 'precipitation_amount'
