@@ -30619,14 +30619,20 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
            if (.not. ( nmk(k2) == 1 .and. (kn(3,L) == 5 .or. kn(3,L) == 7)  )  ) kc1D(k2) = 1 
        endif   
     enddo   
-    do L = 1, numL
-       if (kn(3,L) == 2) then 
-           k1 = kn(1,L) ; k2 = kn(2,L)
-           kc2D(k1) = 1
-           kc2D(k2) = 1
-       endif   
-    enddo   
-
+    if (iprimpos == 3) then 
+       do L = 1, numL
+          if (kn(3,L) == 2) then 
+              k1 = kn(1,L) ; k2 = kn(2,L)
+              kc2D(k1) = 1
+              kc2D(k2) = 1
+          endif   
+       enddo   
+    else if (iprimpos == 1) then 
+       kc2D(lnx1d+1:lnxi) = 1  
+    else if (iprimpos == 2) then 
+       kc2D(1:ndx2D) = 1  
+    endif    
+ 
     do while (ja .eq. 1)                                ! read *.ext file
        call delpol()                                    ! ook jammer dan
        call readprovider(mext,qid,filename,filetype,method,operand,transformcoef,ja,varname)
