@@ -349,6 +349,10 @@ module m_ec_module
       module procedure ecProviderCreateTimeInterpolatedItem
    end interface ecCreateTimeInterpolatedItem
 
+   interface ecCreateInitializeBCFileReader
+      module procedure ecProviderCreateInitializeBCFileReader
+   end interface ecCreateInitializeBCFileReader
+
    ! Support
    interface ecFindItemByQuantityLocation
       module procedure ecSupportFindItemByQuantityLocation

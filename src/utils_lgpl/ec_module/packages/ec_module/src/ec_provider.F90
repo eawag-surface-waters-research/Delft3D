@@ -58,6 +58,7 @@ module m_ec_provider
    
    public :: ecSetFileReaderProperties
    public :: ecProviderInitializeFileReader
+   public :: ecProviderCreateInitializeBCFileReader
    public :: ecProviderCreateUniformItems
    public :: ecProviderCreateQhtableItems
    public :: ecProviderCreateTimeInterpolatedItem
@@ -74,6 +75,40 @@ module m_ec_provider
 
    contains
       
+
+  
+      ! =======================================================================
+   
+      !> Create and Initialize BC instance, yielding a file reader with items, returning the fileReaderID
+      function ecProviderCreateInitializeBCFileReader(instancePtr, forcingfile, location, quantity, k_refdat, k_tzone, k_tsunit, fileReaderId, funtype) result (success)
+      use m_ec_support
+      implicit none
+         logical                             :: success
+         type(tEcInstance),      pointer     :: instancePtr  !< intent(in)
+         character(len=*),       intent(in)  :: forcingfile
+         character(len=*),       intent(in)  :: location
+         character(len=*),       intent(in)  :: quantity
+         integer,                intent(in)  :: k_refdat     !< kernel ref date 
+         real(hp),               intent(in)  :: k_tzone      !< kernel time zone 
+         integer,                intent(in)  :: k_tsunit     !< kernel timestep unit (1=sec, 2=min, 3=hour)
+         integer,                intent(out) :: fileReaderId !< unique fileReader id
+         character(len=*), optional, intent(in) :: funtype   !< matching function in the BC-block header
+         !
+         integer                    :: istat
+         integer                    :: bcBlockId
+         type (tEcBCBlock), pointer :: bcBlockPtr
+         success = .False.
+         bcBlockId = ecInstanceCreateBCBlock(instancePtr)
+         bcBlockPtr=>ecSupportFindBCBlock(instancePtr, bcBlockId)
+         if (.not. ecProviderInitializeBCBlock(instancePtr, bcBlockId,  &
+                         k_refdat, k_tzone, k_tsunit, fileReaderId, forcingfile, quantity, location, istat, funtype=funtype)) then
+               ! TODO: handle exception 
+               return
+            continue
+         end if
+         success = .False.
+      end function ecProviderCreateInitializeBCFileReader
+       
       ! =======================================================================
       
       !> Initialize a new BCBlock item, which in turn constructs and initializes a filereader 
@@ -82,6 +117,7 @@ module m_ec_provider
                                            plilabel, istat, dtnodal, funtype) result(success)
       use m_ec_filereader_read
       use m_ec_netcdf_timeseries
+      implicit none
          logical                             :: success      !< function status
          type(tEcInstance),      pointer     :: instancePtr  !< intent(in)
          integer,                intent(in)  :: bcBlockId    !< unique bcBlock id
@@ -766,7 +802,6 @@ module m_ec_provider
          integer                :: field1Id     !< helper variable 
          integer                :: itemId       !< helper variable 
          type(tEcItem), pointer :: item         !< Item containing all components
-         character(len=16)      :: cnum1, cnum2 !< helper variable to convert an int to a string
          character(len=:), allocatable :: elementSetName
          !
          success = .false.
