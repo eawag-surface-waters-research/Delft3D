@@ -13519,12 +13519,10 @@ else if (jaoldrstfile==1) then ! If the restart file is of old version (which do
 endif
 
 
- do n  = 1, nbndn                                   ! for normal velocity boundaries, also initialise velocity on link
-    kb = kbndn(1,n)
-    k2 = kbndn(2,n)
+ do n  = 1, nbndn                                  ! for normal velocity boundaries, also initialise velocity on link
     LL = kbndn(3,n)
-    do k = 1,kmxd
-       L     = (LL-1)*kmxd + k
+    call getLbotLtop(LL,Lb,Lt)
+    do L = Lb, Lt
        u1(L) = zbndn(n)
     enddo
  enddo
