@@ -659,7 +659,7 @@ module m_ec_module
       integer, intent(out) :: convtype
       !
       select case (filetype)
-      case (provFile_uniform)
+      case (provFile_uniform, provFile_bc)
          convtype = convType_uniform
       case (provFile_fourier)
          convtype = convType_fourier

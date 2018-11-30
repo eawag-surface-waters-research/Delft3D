@@ -106,7 +106,7 @@ module m_ec_provider
                return
             continue
          end if
-         success = .False.
+         success = .True.
       end function ecProviderCreateInitializeBCFileReader
        
       ! =======================================================================
