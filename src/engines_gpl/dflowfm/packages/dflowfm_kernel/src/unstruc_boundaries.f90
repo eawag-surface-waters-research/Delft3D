@@ -890,6 +890,7 @@ logical function initboundaryblocksforcings(filename)
  character(len=ini_value_len) :: quantity
  character(len=ini_value_len) :: locationfile        !
  character(len=ini_value_len) :: forcingfile         !
+ character(len=ini_value_len) :: locationtype        !
  integer                      :: i,j                 !
  integer                      :: num_items_in_file   !
  integer                      :: num_items_in_block
@@ -1072,7 +1073,47 @@ logical function initboundaryblocksforcings(filename)
           jaqin = 1
           lat_ids(numlatsg) = locid
        end if
+       
+    case ('meteo')
 
+       ! First check for required input:
+       call prop_get_string(node_ptr, '', 'quantity', quantity, retVal)
+       if (.not. retVal) then
+          write(msgbuf, '(5a)') 'Incomplete block in file ''', trim(filename), ''': [', trim(groupname), ']. Field ''quantity'' is missing.'
+          call warn_flush()
+          cycle
+       end if
+
+       call prop_get_string(node_ptr, '', 'locationtype', locationtype, retVal)
+       if (.not. retVal) then
+          write(msgbuf, '(5a)') 'Incomplete block in file ''', trim(filename), ''': [', trim(groupname), ']. Field ''locationtype'' is missing.'
+          call warn_flush()
+          cycle
+       end if
+
+       call prop_get_string(node_ptr, '', 'locationfile', locationfile, retVal)
+       if (.not. retVal) then
+          write(msgbuf, '(5a)') 'Incomplete block in file ''', trim(filename), ''': [', trim(groupname), ']. Field ''locationfile'' is missing.'
+          call warn_flush()
+          cycle
+       end if
+
+       call prop_get_string(node_ptr, '', 'forcingfile ', forcingfile , retVal)
+       if (.not. retVal) then
+          write(msgbuf, '(5a)') 'Incomplete block in file ''', trim(filename), ''': [', trim(groupname), ']. Field ''forcingfile'' is missing.'
+          call warn_flush()
+          cycle
+       end if
+       
+       kx = 1
+       success = ec_addtimespacerelation(quantity, xz(1:ndx), yz(1:ndx), kcs, kx, locationtype, filetype=bcascii, method=weightfactors, operand='O', forcingfile=forcingfile)
+
+       
+       if (success) then
+          jarain = 1
+          jaqin = 1
+       endif
+       
     case default       ! Unrecognized item in a ext block
        ! initboundaryblocksforcings remains unchanged: Not an error (support commented/disabled blocks in ext file)
        write(msgbuf, '(5a)') 'Unrecognized block in file ''', trim(filename), ''': [', trim(groupname), ']. Ignoring this block.'

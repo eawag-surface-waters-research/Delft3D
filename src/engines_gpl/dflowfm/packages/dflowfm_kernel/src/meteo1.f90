@@ -1122,7 +1122,7 @@ module m_meteo
             if (ec_filetype == provFile_uniform) then
                sourceItemName = 'uniform_item'
             else if (ec_filetype == provFile_bc) then
-               sourceItemName = 'uniform_item'
+               sourceItemName = 'rainfall'
             else if (ec_filetype == provFile_netcdf) then
                sourceItemName = 'precipitation_amount'
             else if (ec_filetype == provFile_curvi) then
