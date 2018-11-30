@@ -840,7 +840,7 @@ module m_meteo
       if (ec_filetype == provFile_bc) then
          if (.not.ecCreateInitializeBCFileReader(ecInstancePtr, forcingfile, location, qidname, &
                                                  itdate, tzone, ec_second, fileReaderId)) then
-            return                           
+            goto 1234
          end if
       else
       ! ============================================================
@@ -1122,7 +1122,7 @@ module m_meteo
             if (ec_filetype == provFile_uniform) then
                sourceItemName = 'uniform_item'
             else if (ec_filetype == provFile_bc) then
-               sourceItemName = 'rainfall'
+               sourceItemName = 'RAINFALL'
             else if (ec_filetype == provFile_netcdf) then
                sourceItemName = 'precipitation_amount'
             else if (ec_filetype == provFile_curvi) then

@@ -57,6 +57,7 @@ contains
     select case (bc%ftype)
     case (BC_FTYPE_ASCII)
        if (.not.ecSupportOpenExistingFileGnu(bc%fhandle, bc%fname)) then
+          call setECMessage("Unable to open "//trim(bc%fname))
           return
        end if
        if (.not.ecBCFilescan(bc, bc%fhandle, iostat, funtype=funtype)) then     ! parsing the open bc-file
