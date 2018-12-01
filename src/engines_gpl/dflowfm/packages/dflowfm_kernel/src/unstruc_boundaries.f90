@@ -1105,13 +1105,22 @@ logical function initboundaryblocksforcings(filename)
           cycle
        end if
        
-       kx = 1
-       success = ec_addtimespacerelation(quantity, xz(1:ndx), yz(1:ndx), kcs, kx, locationtype, filetype=bcascii, method=weightfactors, operand='O', forcingfile=forcingfile)
-
-       
+       select case (quantity)
+          case ('rainfall')
+             if (.not. allocated(rain) ) then
+                allocate ( rain(ndx) , stat=ierr) 
+                rain = 0d0
+                call aerr('rain(ndx)', ierr, ndx)
+             endif
+            kx = 1
+       end select
+       success = ec_addtimespacerelation(quantity, xz(1:ndx), yz(1:ndx), kcs, kx, locationtype, filetype=bcascii, method=spaceandtime, operand='O', forcingfile=forcingfile)
        if (success) then
-          jarain = 1
-          jaqin = 1
+          select case (quantity)
+             case ('rainfall')
+                jarain = 1
+                jaqin = 1
+          end select
        endif
        
     case default       ! Unrecognized item in a ext block
