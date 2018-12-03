@@ -2098,7 +2098,6 @@ end subroutine setfouunit
        character(20)             :: namfun       ! Local name for fourier function 
        character(4)              :: blnm
 
-   real(sp), dimension(:,:),     allocatable, save :: glbarr2              ! global arrays in dffunctionals.f90, used in d3d, local here !! 
    real(sp), dimension(:,:,:),   allocatable, save :: glbarr3
    !
    !! executable statements -------------------------------------------------------
@@ -2233,10 +2232,11 @@ end subroutine setfouunit
        ! Write data for user defined dimensions, hence NMAXUS and MMAX
        ! First for Maximum or Minimum
        !
+       if (allocated(glbarr3)) deallocate(glbarr3, stat = ierror)
+       allocate(glbarr3(nmaxgl,mmaxgl,2), stat = ierror)
+       glbarr3 = defaul
+
        if (fouelp(ifou)=='x' .or. fouelp(ifou)=='i' .or. fouelp(ifou)=='a' .or. fouelp(ifou)=='e') then
-          if (allocated(glbarr2)) deallocate(glbarr2, stat = ierror)
-          allocate(glbarr2(nmaxgl,mmaxgl), stat = ierror)
-          glbarr2 = defaul
           do n = 1, nmaxus
              do m = 1, mmax
                 !
@@ -2245,35 +2245,32 @@ end subroutine setfouunit
                 if (comparereal(abs(fousma(n,m,ifou)),1.0e29_fp)==-1) then
                    select case (fouelp(ifou))
                    case ('x','i','e')
-                      glbarr2(n,m) = real(fousma(n,m,ifou),sp)
+                       glbarr3(n,m,1) = real(fousma(n,m,ifou),sp)
                    case ('a')
                       if( fousmb(n,m,ifou) > 0d0 ) then
-                         glbarr2(n,m) = real(fousma(n,m,ifou),sp)/ fousmb(n,m,ifou) !(real(ftmsto(ifou) - ftmstr(ifou),fp))
+                         glbarr3(n,m,1) = real(fousma(n,m,ifou),sp)/ fousmb(n,m,ifou)
                       endif
                    end select
                 endif
              enddo
           enddo
           fouvar = fouref(ifou,2)
-          ierror = unc_put_var_map(fileids%ncid,fileids%id_tsp, idvar(:,fouvar), iloc, glbarr2(1:nmaxus,1))
+          ierror = unc_put_var_map(fileids%ncid,fileids%id_tsp, idvar(:,fouvar),   iloc, glbarr3(1:nmaxus,1,1))          ! write amplitudes
           if (fouelp(ifou)=='x' .and. founam(ifou)=='s1') then
              !
              ! Write max waterdepth too
              !
-             glbarr2 = defaul
              do n = 1, nmaxus
                 do m = 1, mmax
                    !
                    ! Only write values unequal to initial min/max values (-/+1.0e+30)
                    !
                    if (comparereal(abs(fousmb(n,m,ifou)),1.0e29_fp)==-1) then
-                      glbarr2(n,m) = real(fousmb(n,m,ifou),sp)
+                      glbarr3(n,m,2) = real(fousmb(n,m,ifou),sp)
                    endif
                 enddo
              enddo
-             fouvar = fouvar + 1
-             !ierror = nf90_put_var(idfile, idvar(fouvar),glbarr2(1:nmaxus,1),start=(/ 1/), count = (/nmaxus/))           ! RL: split in flowlink and flownode quantities 
-             ierror = unc_put_var_map(fileids%ncid,fileids%id_tsp, idvar(:,fouvar), iloc, glbarr2(1:nmaxus,1))
+             ierror = unc_put_var_map(fileids%ncid,fileids%id_tsp, idvar(:,fouvar+1), iloc, glbarr3(1:nmaxus,1,2))          ! write phase
           endif
        else
           if (allocated(glbarr3)) deallocate(glbarr3, stat = ierror)
