@@ -803,6 +803,7 @@ module m_ec_provider
          integer                :: itemId       !< helper variable 
          type(tEcItem), pointer :: item         !< Item containing all components
          character(len=:), allocatable :: elementSetName
+         character(len=:), allocatable :: quantityName
          !
          success = .false.
          item => null()
@@ -826,10 +827,14 @@ module m_ec_provider
                   elementSetName = elementSetName(1:index(elementSetName,'.'))
                end if 
             case (provFile_bc)
-               if (.not. ecQuantitySet(instancePtr, quantityId, name=fileReaderPtr%bc%quantity%name)) then ! trim(fileReaderPtr%bc%qname))) then
+               quantityName=fileReaderPtr%bc%quantity%name
+               if (.not. ecQuantitySet(instancePtr, quantityId, name=quantityName)) then
                   return
                end if
                elementSetName = fileReaderPtr%bc%bcname
+               if (quantityName == 'rainfall') then
+                  if (.not.(ecQuantitySet(instancePtr, quantityId, timeint=timeint_rainfall))) return
+               end if
          end select 
 
          ! N_quantities number of scalar quantities.

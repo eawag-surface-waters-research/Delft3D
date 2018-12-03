@@ -1106,7 +1106,7 @@ logical function initboundaryblocksforcings(filename)
        end if
        
        select case (quantity)
-          case ('rainfall')
+          case ('rainfall','rainfall_rate')
              if (.not. allocated(rain) ) then
                 allocate ( rain(ndx) , stat=ierr) 
                 rain = 0d0
@@ -1117,7 +1117,7 @@ logical function initboundaryblocksforcings(filename)
        success = ec_addtimespacerelation(quantity, xz(1:ndx), yz(1:ndx), kcs, kx, locationtype, filetype=bcascii, method=spaceandtime, operand='O', forcingfile=forcingfile)
        if (success) then
           select case (quantity)
-             case ('rainfall')
+             case ('rainfall','rainfall_rate')
                 jarain = 1
                 jaqin = 1
           end select

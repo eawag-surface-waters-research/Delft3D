@@ -1135,6 +1135,8 @@ module m_meteo
             ! the name of the source item depends on the file reader
             if (ec_filetype == provFile_uniform) then
                sourceItemName = 'uniform_item'
+            else if (ec_filetype == provFile_bc) then
+               sourceItemName = 'RAINFALL_RATE'
             else if (ec_filetype == provFile_netcdf) then
                sourceItemName = 'rainfall_rate'
             else if (ec_filetype == provFile_curvi) then
