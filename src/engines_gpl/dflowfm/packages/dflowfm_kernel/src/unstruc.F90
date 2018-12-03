@@ -30769,7 +30769,7 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
          call mpi_gatherv(x,N,MPI_DOUBLE_PRECISION,xall,nums,offset,MPI_DOUBLE_PRECISION,0,DFM_COMM_DFMWORLD,ierror)
          call mpi_gatherv(y,N,MPI_DOUBLE_PRECISION,yall,nums,offset,MPI_DOUBLE_PRECISION,0,DFM_COMM_DFMWORLD,ierror)
          call mpi_gatherv(z,N,MPI_DOUBLE_PRECISION,zall,nums,offset,MPI_DOUBLE_PRECISION,0,DFM_COMM_DFMWORLD,ierror)
-         call mpi_gatherv(kc,N,MPI_INTEGER       ,kcall,nums,offset,MPI_DOUBLE_PRECISION,0,DFM_COMM_DFMWORLD,ierror)
+         call mpi_gatherv(kc,N,MPI_INTEGER       ,kcall,nums,offset,MPI_INTEGER,         0,DFM_COMM_DFMWORLD,ierror)
          
          if ( my_rank.eq.0 ) then
 !           perform interpolation on rank 0
