@@ -335,6 +335,7 @@ subroutine make_grid_map(i1, i2, g1, g2, gm, external_mapper)
    real(kind=hp)   , dimension(:)  , allocatable   :: ys
    real            , dimension(:,:), allocatable   :: testfield
    character(1024)                                 :: command
+   character(1024)                                 :: tmpstr
    character(50)                                   :: searchstring
    character(NF90_MAX_NAME)                        :: string
    !
@@ -356,7 +357,8 @@ subroutine make_grid_map(i1, i2, g1, g2, gm, external_mapper)
       write(searchstring,'(a,i4.4,a)') "destination_", i2, ".nc"
       ind = index(gm%w_tmp_filename, trim(searchstring), back = .true.)
       if (ind > 0) then
-         write(gm%w_tmp_filename,'(2a,i4.4,a,i4.4,a)') gm%w_tmp_filename(:ind-1), 'weights_', i1, 'to', i2, '.nc'
+         tmpstr = gm%w_tmp_filename(1:ind-1) ! Cannot write and read from w_tmp_filename at the same time.
+         write(gm%w_tmp_filename,'(2a,i4.4,a,i4.4,a)') tmpstr(1:ind-1), 'weights_', i1, 'to', i2, '.nc'
       else
          write(*,'(4a)') '*** ERROR: unable to locate "',trim(searchstring), '" in "', trim(gm%w_tmp_filename), '"'
          call wavestop(1, 'unable to locate "'//trim(searchstring)//'" in "'//trim(gm%w_tmp_filename)// '"')
