@@ -15622,7 +15622,7 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
  use m_timer
  use m_reduce,        only : nocgiter
  use m_partitioninfo, only : ndomains, jampi, my_rank
- use unstruc_files,   only : getoutputdir, defaultfilename
+ use unstruc_files,   only : getoutputdir
  use m_flowparameters, only: jashp_crs, jashp_obs, jashp_weir, jashp_thd, jashp_gate, jashp_emb, jashp_fxw, jashp_src
  
 #ifdef _OPENMP
@@ -15727,8 +15727,7 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
    ! FM does not know whether the com-file for this time step will be used
    ! To be safe: always write the com-file at each user_timestep
    if (jawave==3 .and. (tim==tstart_user .or. tim>=time_user)) then
-!      call wricom(tim)
-      md_wavefile = defaultFilename('com')
+      call wricom(tim)
    endif
 
    if (ti_xls > 0) then
@@ -21549,7 +21548,6 @@ end do
 
  CALL DLINEDIS(Xzw(n),Yzw(n),X3,Y3,X4,Y4,JA,DIS,Xd,Yd, jsferic, jasfer3D, dmiss)  ! dis is half cell size in boundary normal dir
  if (jadismxbnd == 1) dis = max(dis,0.5d0*sqrt(ba(n)))
- 
  ! dis = max(dis,0.5d0*sqrt(ba(n)))
 
 ! (rx,ry) outward normal in reference frame of half(x3,y3,x4,y4)
@@ -30771,7 +30769,7 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
          call mpi_gatherv(x,N,MPI_DOUBLE_PRECISION,xall,nums,offset,MPI_DOUBLE_PRECISION,0,DFM_COMM_DFMWORLD,ierror)
          call mpi_gatherv(y,N,MPI_DOUBLE_PRECISION,yall,nums,offset,MPI_DOUBLE_PRECISION,0,DFM_COMM_DFMWORLD,ierror)
          call mpi_gatherv(z,N,MPI_DOUBLE_PRECISION,zall,nums,offset,MPI_DOUBLE_PRECISION,0,DFM_COMM_DFMWORLD,ierror)
-         call mpi_gatherv(kc,N,MPI_INTEGER       ,kcall,nums,offset,MPI_INTEGER,         0,DFM_COMM_DFMWORLD,ierror)
+         call mpi_gatherv(kc,N,MPI_INTEGER       ,kcall,nums,offset,MPI_DOUBLE_PRECISION,0,DFM_COMM_DFMWORLD,ierror)
          
          if ( my_rank.eq.0 ) then
 !           perform interpolation on rank 0
