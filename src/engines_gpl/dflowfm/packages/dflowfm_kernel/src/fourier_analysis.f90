@@ -146,7 +146,7 @@ module m_fourier_analysis
        gdfourier%iblqf = 0
        gdfourier%iblbs = 0
        gdfourier%iblep = 0
-       do ivar=1, gdfourier%nofouvar
+       do ivar=1, nofou
           !
           select case (gdfourier%founam(ivar)(:2))
           case ('s1')
@@ -781,12 +781,12 @@ module m_fourier_analysis
                  write(fouvarnam(ivar),'(a,i3.3,a)') "fourier", fouref(ifou,1), "_max"
                  fouvarnamlong(ivar) = "maximum value"
                  call setfouunit(founam(ifou), lsal, ltem, fconno(ifou), fouvarunit(ivar))
-                 !if (founam(ifou) == 's1') then
-                 !   ivar = ivar + 1
-                 !   write(fouvarnam(ivar),'(a,i3.3,a)') "fourier", fouref(ifou,1), "_max_depth"
-                 !   fouvarnamlong(ivar) = "maximum depth value"
-                 !   call setfouunit(founam(ifou), lsal, ltem, fconno(ifou), fouvarunit(ivar))
-                 !endif
+                 if (founam(ifou) == 's1') then
+                    ivar = ivar + 1
+                    write(fouvarnam(ivar),'(a,i3.3,a)') "fourier", fouref(ifou,1), "_max_depth"
+                    fouvarnamlong(ivar) = "maximum depth value"
+                    call setfouunit(founam(ifou), lsal, ltem, fconno(ifou), fouvarunit(ivar))
+                 endif
                  if (foumask(ifou) == 1) then
                     write(fouvarnam    (ivar  ),'(2a)') trim(fouvarnam    (ivar  )), "_inidryonly"
                     write(fouvarnamlong(ivar  ),'(2a)') trim(fouvarnamlong(ivar  )), ", initially dry points only"
@@ -809,6 +809,12 @@ module m_fourier_analysis
                  write(fouvarnam(ivar),'(a,i3.3,a)') "fourier", fouref(ifou,1), "_min"
                  fouvarnamlong(ivar) = "minimum value"
                  call setfouunit(founam(ifou), lsal, ltem, fconno(ifou), fouvarunit(ivar))
+                 if (founam(ifou) == 's1') then
+                    ivar = ivar + 1
+                    write(fouvarnam(ivar),'(a,i3.3,a)') "fourier", fouref(ifou,1), "_min_depth"
+                    fouvarnamlong(ivar) = "minimum depth value"
+                    call setfouunit(founam(ifou), lsal, ltem, fconno(ifou), fouvarunit(ivar))
+                 endif
               elseif (fouelp(ifou)=='a') then
                  ivar = ivar + 1
                  write(fouvarnam(ivar),'(a,i3.3,a)') "fourier", fouref(ifou,1), "_avg"
@@ -907,8 +913,10 @@ module m_fourier_analysis
              fousmb(:, :, ifou) = -1.0e+30_fp
           elseif (fouelp(ifou)=='x') then
              fousma(:, :, ifou) = -1.0e+30_fp
+             fousmb(:, :, ifou) = -1.0e+30_fp
           elseif (fouelp(ifou)=='i') then
              fousma(:, :, ifou) =  1.0e+30_fp
+             fousmb(:, :, ifou) =  1.0e+30_fp
           else
              fousma(:, :, ifou) =  0.0_fp
              fousmb(:, :, ifou) =  0.0_fp
@@ -1146,6 +1154,15 @@ end subroutine setfouunit
                    endif
                 enddo
              enddo
+             if (founam(ifou) == 's1') then
+                do n = 1, nmaxus
+                   do m = 1, mmax
+                      if (kfs(n,m) == 1) then
+                         fousmb(n,m,ifou) = min(fousmb(n,m,ifou), rarray(n,m) - real(bl(n,m),fp))
+                      endif
+                   enddo
+                enddo
+             endif
           elseif (fouelp(ifou) == 'a') then
              !
              ! Calculate AVG value
@@ -1278,11 +1295,11 @@ end subroutine setfouunit
        !
        if (columns(1)(1:2)=='wl') then
           nofou = nofou + 1
-          if (index(record,'max')>0 .or. index(record,'min')>0 .or. index(record,'avg')>0) then
+          if (index(record,'avg')>0) then
              nofouvar = nofouvar + 1
-          else
+          else 
              !
-             ! max: also write max depth
+             ! max and min: also write max depth
              !
              nofouvar = nofouvar + 2
           endif
