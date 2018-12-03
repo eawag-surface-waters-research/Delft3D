@@ -747,7 +747,7 @@ end subroutine waq_write_waqgeom_ugrid
 subroutine waq_write_waqgeom_filepointer_ugrid(igeomfile)
     use io_ugrid
     use m_flowgeom, only: ndxi
-    use unstruc_netcdf, only: check_error, ug_meta_fm
+    use unstruc_netcdf, only: crs, check_error, ug_meta_fm
     use m_partitioninfo, only: jampi, idomain, iglobal_s
     use m_alloc
 
@@ -759,7 +759,6 @@ subroutine waq_write_waqgeom_filepointer_ugrid(igeomfile)
     type(t_ug_meshgeom)                :: meshgeom, aggregated_meshgeom !< Mesh geometry to be written to the NetCDF file.
     type(t_ug_mesh)                    :: meshids  !< Set of NetCDF-ids for all mesh geometry variables.
     type(t_ug_network)                 :: networkids !< Set of NetCDF-ids for all network variables
-    type(t_crs)                        :: crs
     integer, dimension(:), allocatable :: edge_type, aggregated_edge_type !< Edge type array to be written to the NetCDF file.
     integer                            :: ierr     !< Result status (UG_NOERR==NF90_NOERR if successful).
     logical                            :: success  !< Helper variable.
