@@ -2336,8 +2336,6 @@ subroutine waq_wri_vol(itim, filenamevol, lunvol)
 !    
 !! executable statements -------------------------------------------------------
 !
-    ! waqpar%vol = 0d0
-
     if (waqpar%aggre == 0 .and. waqpar%kmxnxa == 1) then
         do i = 1, ndxi
             waqpar%vol(i) = vol1(i)
@@ -2357,7 +2355,6 @@ subroutine waq_wri_vol(itim, filenamevol, lunvol)
                    dv(kk) = vol1(kk) - waqpar%vol(waqpar%isaggr(kk)) 
                 end do
              enddo
-             waqpar%vol = 0d0
           
              dv1 = 0d0
              do L = 1, lnx
@@ -2392,6 +2389,7 @@ subroutine waq_wri_vol(itim, filenamevol, lunvol)
           num = 1
         endif 
         
+        waqpar%vol = 0d0
         do k = 1, ndxi
             call getkbotktopmax(k,kb,ktx)
             do kk = kb, ktx
@@ -2400,7 +2398,7 @@ subroutine waq_wri_vol(itim, filenamevol, lunvol)
         end do
    
     else
-           
+        waqpar%vol = 0d0
         do k = 1, ndxi
             call getkbotktopmax(k,kb,ktx)
             do kk = kb, ktx
@@ -2411,8 +2409,6 @@ subroutine waq_wri_vol(itim, filenamevol, lunvol)
 
     ! Call the waq-vol file writer
      call wrwaqbin(itim, waqpar%vol, waqpar%noseg, filenamevol, waq_format_ascii, lunvol)   
-
-     
 end subroutine waq_wri_vol
 !
 !------------------------------------------------------------------------------
@@ -2949,7 +2945,7 @@ double precision, intent(out) :: czc     !< Chezy at flow node (taucurrent)
 !           Local variables
 !
 integer :: LL, nn                            !< Local link counters
-double precision ::  cf, cfn, cz, frcn, ar,  wa, ust, ust2, ustw2, fw    !< Local intermediate variables
+double precision ::  cf, cfn, cz, frcn, ar,  wa, ust, ust2, fw    !< Local intermediate variables
 
 taucurc = 0d0
 czc = 0d0
