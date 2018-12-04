@@ -9337,6 +9337,7 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
    integer, allocatable                      :: mesh1indexes(:),mesh2indexes(:), contacttype(:)
    character(len=40), allocatable            :: contactsids(:)
    character(len=80), allocatable            :: contactslongnames(:)
+   character(len=40)                         :: currentNodeId
    logical                                   :: includeArrays
    double precision, allocatable             :: xface(:), yface(:)
    integer, allocatable                      :: branchStartNode(:), branchEndNode(:)
@@ -9444,6 +9445,10 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
          network%numl = 0
       endif
    endif
+   
+   ! re-allocate mesh1dNodeIds and mesh1dNodeIndexes
+   call realloc(mesh1dNodeIds, numMesh1dBeforeMerging, keepExisting=.true.)
+   call realloc(mesh1dNodeIndexes, numMesh1dBeforeMerging, keepExisting=.true.)
       
    ierr = ionc_get_coordinate_reference_system(ioncid, crs)
    ! ierr = ionc_get_crs(ioncid, crs) ! TODO: make this API routine.
@@ -9649,7 +9654,14 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
       do l = 1, ncontacts
          XK(numk_last+l) = xface(mesh2indexes(l))
          YK(numk_last+l) = yface(mesh2indexes(l))
-         kn(1,numl_last+l) = mesh1indexes(l)
+         currentNodeId   = nodeids(mesh1indexes(l))
+         ! For 1d use mapping 
+         do i = 1, numMesh1dBeforeMerging
+            if (mesh1dNodeIds(i) == currentNodeId) then
+               kn(1,numl_last+l) = mesh1dNodeIndexes(i)
+               exit
+            endif
+         enddo         
          kn(2,numl_last+l) = numk_last+l
          kn(3,numl_last+l) = contacttype(l)
       enddo
@@ -11892,7 +11904,7 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
       !define 1dmesh      
       if (n1dedges.gt.0) then
          if (associated(meshgeom1d%ngeopointx)) then    
-         ierr = ug_write_mesh_arrays(ncid, id_tsp%meshids1d, 'mesh1d', 1, UG_LOC_NODE + UG_LOC_EDGE, ndx1d+n1d2dcontacts, n1dedges, 0, 0, &
+         ierr = ug_write_mesh_arrays(ncid, id_tsp%meshids1d, 'mesh1d', 1, UG_LOC_NODE + UG_LOC_EDGE, ndx1d, n1dedges, 0, 0, &
                                        edge_nodes, face_nodes, null(), null(), null(), x1dn, y1dn, xu(id_tsp%edgetoln(:)), yu(id_tsp%edgetoln(:)), xz(1:1), yz(1:1), &
                                        crs, -999, dmiss, start_index, layer_count, layer_type, layer_zs, interface_zs, &
                                        id_tsp%network1d, network1dname, meshgeom1d%nnodex, meshgeom1d%nnodey, nnodeids, nnodelongnames, &
@@ -11902,7 +11914,7 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
                                        nodeids, nodelongnames, meshgeom1d%branchidx, meshgeom1d%branchoffsets,&
                                        numMesh1dBeforeMerging, mesh1dNodeIds, mesh1dNodeIndexes)
          else
-         ierr = ug_write_mesh_arrays(ncid, id_tsp%meshids1d, 'mesh1d', 1, UG_LOC_NODE + UG_LOC_EDGE, ndx1d+n1d2dcontacts, n1dedges, 0, 0, &
+         ierr = ug_write_mesh_arrays(ncid, id_tsp%meshids1d, 'mesh1d', 1, UG_LOC_NODE + UG_LOC_EDGE, ndx1d, n1dedges, 0, 0, &
                                        edge_nodes, face_nodes, null(), null(), null(), x1dn, y1dn, xu(id_tsp%edgetoln(:)), yu(id_tsp%edgetoln(:)), xz(1:1), yz(1:1), &
                                        crs, -999, dmiss, start_index, layer_count, layer_type, layer_zs, interface_zs)
          endif         
