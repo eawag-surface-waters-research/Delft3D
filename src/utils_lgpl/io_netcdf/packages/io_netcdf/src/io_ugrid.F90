@@ -4865,7 +4865,7 @@ function ug_get_node_original_count(meshids, node_original_count) result(ierr)
 end function ug_get_node_original_count
 
 !> get meshNodeIds and meshNodeIndexes
-function ug_get_mesh_original_ids_and_mapping(ncid, meshids, node_ids_original, node_mapping_original, startIndex) result(ierr)
+function ug_get_mesh_original_ids_and_mapping(ncid, meshids, node_ids_original, node_mapping_original) result(ierr)
 
    integer                          :: ncid
    type(t_ug_mesh), intent(in)      :: meshids
