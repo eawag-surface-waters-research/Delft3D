@@ -5559,6 +5559,9 @@ module m_save_ugrid_state
    character(len=ug_idsLen),allocatable               :: nbranchids(:), nnodeids(:), nodeids(:)
    character(len=ug_idsLongNamesLen), allocatable     :: nbranchlongnames(:), nnodelongnames(:), nodelongnames(:)
    character(len=255)                                 :: network1dname, mesh2dname, mesh1dname, contactname !MAXSTRLEN = 255
+   character(len=ug_idsLen), allocatable              :: mesh1dNodeIds(:) 
+   integer, allocatable, dimension(:)                 :: mesh1dNodeIndexes(:) 
+   integer                                            :: numMesh1dBeforeMerging
     
 !> Sets ALL (scalar) variables in this module to their default values.
 !! For a reinit prior to flow computation, only call reset_waves() instead.
@@ -5570,6 +5573,7 @@ contains
       mesh1dname = ''   
       mesh2dname = ''   
       contactname = ''   
+      numMesh1dBeforeMerging = 0
    end subroutine default_save_ugrid_state
    
    !> Resets only waves variables intended for a restart of flow simulation.

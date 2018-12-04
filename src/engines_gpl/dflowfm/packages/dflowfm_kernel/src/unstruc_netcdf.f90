@@ -8461,7 +8461,8 @@ subroutine unc_write_net_ugrid2(ncid,id_tsp, janetcell)
                                     meshgeom1d%nedge_nodes(1,:), meshgeom1d%nedge_nodes(2,:), nbranchids, nbranchlongnames, meshgeom1d%nbranchlengths, meshgeom1d%nbranchgeometrynodes, meshgeom1d%nbranches, & 
                                     meshgeom1d%ngeopointx, meshgeom1d%ngeopointy, meshgeom1d%ngeometry, &
                                     meshgeom1d%nbranchorder, &
-                                    nodeids, nodelongnames, meshgeom1d%branchidx, meshgeom1d%branchoffsets)
+                                    nodeids, nodelongnames, meshgeom1d%branchidx, meshgeom1d%branchoffsets,&
+                                    numMesh1dBeforeMerging, mesh1dNodeIds, mesh1dNodeIndexes)
          else
                call mess(LEVEL_ERROR, 'Could not put header in net geometry file.')
                return
@@ -9357,15 +9358,16 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
       goto 999
    end if
    
+   
+   allocate(mesh1dNodeIndexes(size(xk)))
+   allocate(mesh1dNodeIds(size(xk)))
    !! Read 1D from file
    if (.not. network%loaded) then
       dflowfm_1d = .true.
       call read_1d_ugrid(network, ioncid, dflowfm_1d)
       if (network%loaded) then
          call admin_network(network, numk, numl)  
-	     
-         !! TODO: Start temporary fix, to be removed when 1d ugrid file is correct (at this point 
-         !!       branches are not connected
+         !! TODO: Start temporary fix, to be removed when 1d ugrid file is correct (at this point branches are not connected)
          numk = 1
          do inod = 1, network%nds%Count
             pnod => network%nds%node(inod)
@@ -9380,20 +9382,35 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
          
          numl = 0
          totalKsoFar = 0
+         numMesh1dBeforeMerging = 0
          do ibr = 1, network%brs%Count
             pbr => network%brs%branch(ibr)
             ! first step add coordinates and bed levels to nodes
             ngrd = pbr%gridPointsCount
             pbr%grd(1) = pbr%FromNode%gridNumber
+            ! id-mesh node mapping
+               numMesh1dBeforeMerging = numMesh1dBeforeMerging + 1
+               mesh1dNodeIds(numMesh1dBeforeMerging) = pbr%gridPointIDs(1)
+               mesh1dNodeIndexes(numMesh1dBeforeMerging) = pbr%grd(1)
             do k = 2, ngrd-1
-               ! i do not want to renumber the nodes, otherwise link info gets screwed
+               ! i do not want to renumber the nodes, otherwise link info gets invalidated
                numk = k + totalKsoFar
                pbr%grd(k) = numk
                xk(numk) = pbr%Xs(k)
                yk(numk) = pbr%Ys(k)
                zk(numk) = dmiss
+                  ! id-mesh node mapping  
+                  numMesh1dBeforeMerging = numMesh1dBeforeMerging + 1
+                  mesh1dNodeIds(numMesh1dBeforeMerging) = pbr%gridpointids(k)
+                  mesh1dNodeIndexes(numMesh1dBeforeMerging) = pbr%grd(k)
             enddo
             pbr%grd(ngrd) = pbr%toNode%gridNumber
+            ! id-mesh node mapping   
+               numMesh1dBeforeMerging = numMesh1dBeforeMerging + 1
+               mesh1dNodeIds(numMesh1dBeforeMerging) = pbr%gridPointIDs(ngrd)
+               mesh1dNodeIndexes(numMesh1dBeforeMerging) = pbr%grd(ngrd)
+
+            ! update merged indexes
             numk = ngrd + totalKsoFar
             totalKsoFar = totalKsoFar + ngrd
 
@@ -11882,7 +11899,8 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
                                        meshgeom1d%nedge_nodes(1,:), meshgeom1d%nedge_nodes(2,:), nbranchids, nbranchlongnames, meshgeom1d%nbranchlengths, meshgeom1d%nbranchgeometrynodes, meshgeom1d%nbranches, & 
                                        meshgeom1d%ngeopointx, meshgeom1d%ngeopointy, meshgeom1d%ngeometry, &
                                        meshgeom1d%nbranchorder, &
-                                       nodeids, nodelongnames, meshgeom1d%branchidx, meshgeom1d%branchoffsets)
+                                       nodeids, nodelongnames, meshgeom1d%branchidx, meshgeom1d%branchoffsets,&
+                                       numMesh1dBeforeMerging, mesh1dNodeIds, mesh1dNodeIndexes)
          else
          ierr = ug_write_mesh_arrays(ncid, id_tsp%meshids1d, 'mesh1d', 1, UG_LOC_NODE + UG_LOC_EDGE, ndx1d+n1d2dcontacts, n1dedges, 0, 0, &
                                        edge_nodes, face_nodes, null(), null(), null(), x1dn, y1dn, xu(id_tsp%edgetoln(:)), yu(id_tsp%edgetoln(:)), xz(1:1), yz(1:1), &
