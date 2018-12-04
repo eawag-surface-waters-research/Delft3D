@@ -809,11 +809,11 @@ subroutine ConveyanceTables(href, grndlyr, typ, yin, z, nbo, branchid, bedFricti
    double precision           :: frictionValueNeg(:)
 
    integer nc, ind, typ
-   integer jf(*), icrds
+   integer jf(:), icrds
    integer j, jgetlevels, n12
-   double precision              :: vf(*)
+   double precision              :: vf(:)
    double precision              :: cg(2)
-   double precision              :: hlv(*), d(*), y(:), zminpr
+   double precision              :: hlv(:), d(:), y(:), zminpr
    logical                       :: prtout
    character*10                  :: id
    
@@ -825,7 +825,7 @@ subroutine ConveyanceTables(href, grndlyr, typ, yin, z, nbo, branchid, bedFricti
       d(j) = z(j) + href       ! nc = actueel aantal punten, wordt aangepast
       if (j>1) then
          if (d(j) == d(j-1)) then
-            d(j) = d(j) + 0.0011
+            d(j) = d(j) + 0.0011    ! Prevent horizontal to prevent devision by zero
          endif
       endif
       y(j) = yin(j)
