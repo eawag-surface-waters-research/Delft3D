@@ -1656,36 +1656,36 @@ function ionc_def_mesh_ids_ugrid(ioncid, meshid, locationType) result(ierr)
 
 end function ionc_def_mesh_ids_ugrid
 
-function ionc_put_1d_mesh_discretisation_points_ugrid(ioncid, networkid, branchidx, offset, startIndex) result(ierr) 
+function ionc_put_1d_mesh_discretisation_points_ugrid(ioncid, meshid, branchidx, offset, startIndex) result(ierr) 
 
-  integer, intent(in)         :: ioncid, networkid, startIndex  
+  integer, intent(in)         :: ioncid, meshid, startIndex  
   integer, intent(in)         :: branchidx(:)
   double precision,intent(in) :: offset(:)
   integer                     :: ierr
   
-  ierr=ug_put_1d_mesh_discretisation_points(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(networkid), branchidx, offset, startIndex)  
+  ierr=ug_put_1d_mesh_discretisation_points(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), branchidx, offset, startIndex)  
   
 end function ionc_put_1d_mesh_discretisation_points_ugrid
 
-function ionc_get_1d_mesh_discretisation_points_count_ugrid(ioncid, networkid, nmeshpoints) result(ierr) 
+function ionc_get_1d_mesh_discretisation_points_count_ugrid(ioncid, meshid, nmeshpoints) result(ierr) 
 
-   integer, intent(in)    :: ioncid, networkid 
+   integer, intent(in)    :: ioncid, meshid 
    integer, intent(out)   :: nmeshpoints
    integer                :: ierr
    
-   ierr = ug_get_1d_mesh_discretisation_points_count(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(networkid), nmeshpoints)
+   ierr = ug_get_1d_mesh_discretisation_points_count(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), nmeshpoints)
    
 end function ionc_get_1d_mesh_discretisation_points_count_ugrid
 
 
-function ionc_get_1d_mesh_discretisation_points_ugrid(ioncid, networkid, branchidx, offset, startIndex) result(ierr) 
+function ionc_get_1d_mesh_discretisation_points_ugrid(ioncid, meshid, branchidx, offset, startIndex) result(ierr) 
 
-  integer, intent(in)         :: ioncid, networkid, startIndex 
+  integer, intent(in)         :: ioncid, meshid, startIndex 
   integer, intent(out)        :: branchidx(:)
   double precision,intent(out):: offset(:)
   integer                     :: ierr
   
-  ierr = ug_get_1d_mesh_discretisation_points(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(networkid), branchidx, offset, startIndex)
+  ierr = ug_get_1d_mesh_discretisation_points(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), branchidx, offset, startIndex)
    
 end function ionc_get_1d_mesh_discretisation_points_ugrid
 
