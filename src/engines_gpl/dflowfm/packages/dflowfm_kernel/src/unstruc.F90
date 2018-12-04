@@ -30610,15 +30610,17 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
  if (mext > 0) then
     rewind(mext)
     ja = 1
-    allocate(kcc(mx),kc1d(mx),kc2d(mx)) ; kcc = 1; kc1D = 0 ; kc2D = 0 
+    
+    allocate(kcc(mx),kc1d(numk),kc2d(mx)) ; kcc = 1; kc1D = 0 ; kc2D = 0 
 
-    do L = 1, numL
-       if (kn(3,L) .ne. 2 .and. kn(3,L) .ne. 0) then 
+    do L = 1, numL1D
+       if (kn(3,L) == 1 .or. kn(3,L) == 6) then 
            k1 = kn(1,L) ; k2 = kn(2,L)
-           if (.not. ( nmk(k1) == 1 .and. (kn(3,L) == 5 .or. kn(3,L) == 7)  )  ) kc1D(k1) = 1
-           if (.not. ( nmk(k2) == 1 .and. (kn(3,L) == 5 .or. kn(3,L) == 7)  )  ) kc1D(k2) = 1 
+           if (nmk(k1) > 1) kc1D(k1) = 1
+           if (nmk(k2) > 1) kc1D(k2) = 1 
        endif   
     enddo   
+    
     if (iprimpos == 3) then 
        do L = 1, numL
           if (kn(3,L) == 2) then 
@@ -30958,9 +30960,19 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
     do L = 1,lnx1D                                       ! 1D
        n1  = ln(1,L)   ; n2 = ln(2,L)                    ! flow ref
        k1  = lncn(1,L) ; k2 = lncn(2,L)                  ! net  ref
-       zn1 = zk(k1)    ; if (zn1 == dmiss) zn1 = zkuni 
-       zn2 = zk(k2)    ; if (zn2 == dmiss) zn2 = zkuni
-   
+       if (ibedlevtyp == 3) then 
+          zn1 = zk(k1)     
+          zn2 = zk(k2)    
+       else if(ibedlevtyp == 1 .or. ibedlevtyp == 6) then 
+          zn1 = bl(n1)     
+          zn2 = bl(n2)    
+       else
+          zn1 = blu(L)
+          zn2 = blu(L)
+       endif   
+       if (zn1 == dmiss) zn1 = zkuni
+       if (zn2 == dmiss) zn2 = zkuni
+ 
     if (kcu(L) == 3) then                             ! 1D2D internal link, bobs at minimum
        if (kcs(n1) == 21) then
           blv   = bl(n1)
