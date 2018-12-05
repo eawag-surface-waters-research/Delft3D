@@ -460,18 +460,19 @@
    RETURN
    END SUBROUTINE SETNEWPOINT
 
-   SUBROUTINE CROSSED2d_BNDCELL(NML, XP1, YP1, XP2, YP2 , NC1)
+   SUBROUTINE CROSSED2d_BNDCELL(NML, XP1, YP1, XP2, YP2 , NC1, Lfound)
    !use m_netw
    use network_data
+   use m_cell_geometry, only: xz, yz
    use m_missing, only : dmiss
-   use geometry_module, only : crossinbox
+   use geometry_module, only : crossinbox, cross
    use m_sferic, only: jsferic, jasfer3D
 
    implicit none
-   INTEGER          :: NML, NC1
+   INTEGER          :: NC1, NML
    DOUBLE PRECISION :: XP1, YP1, XP2, YP2
 
-   INTEGER          :: L, JACROS, K1, K2
+   INTEGER          :: L, JACROS, K1, K2, LL, Lfound
    DOUBLE PRECISION :: SL, SM, XCR, YCR, CRP, slm
 
    NC1 = 0
@@ -479,21 +480,59 @@
    DO L  = 1,NML
       K1 = KN(1,L) ; K2 = KN(2,L)
       if ( k1.lt.1 .or. k2.lt.1 ) cycle   ! SPvdP: safety
-      IF (LNN(L) == 1) THEN       ! LINK MET 1 BUURCEL
+
+       IF (LNN(L) == 1) THEN       ! LINK MET 1 BUURCEL
          IF (KN(3,L) == 2) THEN
             CALL CROSSinbox (XP1, YP1, XP2, YP2, XK(K1), YK(K1), XK(K2), YK(K2), jacros, SL, SM, XCR, YCR, CRP, jsferic, dmiss)
             if (jacros == 1) then
                if (sl < slm) then
                   NC1 = LNE(1,L)
                   slm = sl
+                  Lfound = L
                endif
             end if
          ENDIF
       ENDIF
    ENDDO
-
+ 
    END SUBROUTINE CROSSED2d_BNDCELL
 
+   SUBROUTINE CROSSEDanother1Dlink(NML, XP1, YP1, NC1, Lfound)
+   !use m_netw
+   use network_data
+   use m_cell_geometry, only: xz, yz
+   use m_missing, only : dmiss
+   use geometry_module, only : crossinbox, cross
+   use m_sferic, only: jsferic, jasfer3D
+
+   implicit none
+   INTEGER          :: NC1, NML
+   DOUBLE PRECISION :: XP1, YP1, XP2, YP2
+
+   INTEGER          :: L, JACROS, K1, K2, LL, Lfound
+   DOUBLE PRECISION :: SL, SM, XCR, YCR, CRP, slm
+  
+   if (nc1 > 0) then 
+      xp2 = xz(nc1) ; yp2 = yz(nc1)
+
+      do LL = 1,nml
+         if ( LL == Lfound) cycle
+         IF ( kn(3,LL) == 1 .or. kn(3,LL) == 3 .or. kn(3,LL) == 6 ) THEN   ! crossing any another 1D type 
+             K1 = KN(1,LL) ; K2 = KN(2,LL)
+             if ( k1.lt.1 .or. k2.lt.1 ) cycle   ! SPvdP: safety
+             CALL CROSS(XP1, YP1, XP2, YP2, XK(K1), YK(K1), XK(K2), YK(K2), jacros, SL, SM, XCR, YCR, CRP, jsferic, dmiss)
+             if (jacros == 1) then
+                 if (sl > 0d0 .and. sl < 1d0 .and. sm > 0d0 .and. sm < 1d0) then
+                    nc1 = 0
+                    return
+                 endif   
+             endif   
+         endif   
+      enddo
+   endif 
+   END SUBROUTINE CROSSEDanother1Dlink
+
+   
    SUBROUTINE OTHERNODE(K1,L1,K2)
 
    use network_data
@@ -2524,7 +2563,7 @@
    integer                                :: K1, K2, K3, L, NC1, NC2, JA, KK2(2), KK, NML, LL
    integer                                :: i, ierr, k, kcell
    double precision                       :: XN, YN, XK2, YK2, WWU
-   integer                                :: insidePolygons
+   integer                                :: insidePolygons, Lfound
    
    ierr = 0
    call savenet()
@@ -2570,14 +2609,16 @@
    NML  = NUML
    DO K = 1,NUMK
 
-      IF (NMK(K) > 0) THEN ! == 2 .or. ) THEN ! Do not connect the extreme vertices of the 1d mesh
+      IF (NMK(K) == 2 .and. kc(k) == 1) THEN ! Do not connect the extreme vertices of the 1d mesh
 
-         IF (allocated(KC) .and. KC(K) == 1) THEN
-            if ( present(xplLinks) .and. present(yplLinks) .and. present(zplLinks)) then
-                insidePolygons = - 1 
-                call dbpinpol(XK(K), YK(K), insidePolygons, dmiss, jins, size(xplLinks), xplLinks, yplLinks, zplLinks) 
-                if (insidePolygons .ne. 1) cycle
-            endif
+         IF (allocated(KC) ) then 
+            if ( KC(K) == 1) THEN
+               if ( present(xplLinks) .and. present(yplLinks) .and. present(zplLinks)) then
+                   insidePolygons = - 1 
+                   call dbpinpol(XK(K), YK(K), insidePolygons, dmiss, jins, size(xplLinks), xplLinks, yplLinks, zplLinks) 
+                   if (insidePolygons .ne. 1) cycle
+               endif
+            endif   
             NC1 = 0
             CALL INCELLS(XK(K), YK(K), NC1)
             IF (NC1 > 1) THEN
@@ -2589,7 +2630,7 @@
                   L  = NOD(K)%LIN(KK)
                   KK2(KK) = KN(1,L) + KN(2,L) - K
                ENDDO
-               K1 = KK2(1) ;
+               K1 = KK2(1) 
                IF(NMK(K) == 1) THEN
                   K2 = K
                ELSE
@@ -2602,22 +2643,28 @@
 
                XK2 = XK(K) + XN*WWU
                YK2 = YK(K) + YN*WWU
-               CALL CROSSED2d_BNDCELL(NML, XK(K), YK(K), XK2, YK2, NC1)
+               CALL CROSSED2d_BNDCELL(NML, XK(K), YK(K), XK2, YK2, NC1, Lfound)
 
-               IF (NC1 > 1) THEN
-                  CALL SETNEWPOINT(XZ(NC1),YZ(NC1),ZK(K) ,NC2)
-                  call connectdbn(NC2, K, L)
-                  KN(3,L) = kn3typ
+               IF (NC1 > 0) THEN
+                  call CROSSEDanother1Dlink(NuML, Xk(k), Yk(k), NC1, Lfound)
+                  if (nc1 > 0) then 
+                     CALL SETNEWPOINT(XZ(NC1),YZ(NC1),ZK(K) ,NC2)
+                     call connectdbn(NC2, K, L)
+                     KN(3,L) = kn3typ
+                  endif   
                ENDIF
 
                XK2 = XK(K) - XN*WWU
                YK2 = YK(K) - YN*WWU
-               CALL CROSSED2d_BNDCELL(NML, XK(K), YK(K), XK2, YK2, NC1)
+               CALL CROSSED2d_BNDCELL(NML, XK(K), YK(K), XK2, YK2, NC1,Lfound)
 
-               IF (NC1 > 1) THEN
-                  CALL SETNEWPOINT(XZ(NC1),YZ(NC1),ZK(K) ,NC2)
-                  call connectdbn(NC2, K, L)
-                  KN(3,L) = 3
+               IF (NC1 > 0) THEN
+                  call CROSSEDanother1Dlink(NuML, Xk(k), Yk(k), NC1, Lfound)
+                  if (nc1 > 0) then 
+                     CALL SETNEWPOINT(XZ(NC1),YZ(NC1),ZK(K) ,NC2)
+                     call connectdbn(NC2, K, L)
+                     KN(3,L) = 3
+                  endif   
                ENDIF
 
             ENDIF
