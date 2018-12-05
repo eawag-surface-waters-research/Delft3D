@@ -565,6 +565,7 @@ subroutine readMDUFile(filename, istat)
                !                         Tsigma, jarhoxu,                                                      &
                !                         iStrchType, STRCH_UNIFORM, STRCH_USER, STRCH_EXPONENT, STRCH_FIXLEVEL, laycof
 
+    use m_globalparameters, only : sl
     use m_flowgeom !,              only : wu1Duni, bamin, rrtol, jarenumber, VillemonteCD1, VillemonteCD2
     use m_flowtimes
     use m_flowparameters
@@ -759,6 +760,8 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer( md_ptr, 'geometry', 'Nonlin1D'    , Nonlin1D)
     call prop_get_double ( md_ptr, 'geometry', 'Slotw2D'     , slotw2D)
     call prop_get_double ( md_ptr, 'geometry', 'Slotw1D'     , slotw1D)
+    ! use slotw1d also in getcspars routines
+    sl = slotw1D
 
     call prop_get_double ( md_ptr, 'geometry', 'Sillheightmin', sillheightmin)
 
