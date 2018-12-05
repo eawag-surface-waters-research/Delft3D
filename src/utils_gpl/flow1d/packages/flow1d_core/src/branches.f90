@@ -46,6 +46,7 @@ module m_branch
    public get2CalcPoints
    public admin_branch
    public fill_hashtable
+   public getLinkIndex
 
    public BR_EMBEDDED, BR_CONNECTED, BR_ISOLATED, BR_BOUNDARY
    
@@ -190,8 +191,29 @@ module m_branch
       endif
       brs%Size = brs%Size+brs%growsBy
    end subroutine
+   
+   !> this function returns the link index based on (branch/chainage), to be used in FM, where subarray
+   !! LIN is filled correctly
+   integer function getLinkIndex(branch, chainage) 
 
-   !> Get calculation points just before and after structure location on a branch
+       type(t_branch)                  :: branch
+       double precision, intent(in)    :: chainage  !< Chainage
+
+       integer                         :: i
+       
+       do i = 2, branch%gridPointsCount
+           if (branch%gridPointsOffsets(i) >= chainage) then !found
+              getLinkIndex = branch%lin(i-1)
+              exit
+           endif
+       enddo
+       if (branch%gridPointsOffsets(branch%gridPointsCount) < chainage) then
+          getLinkIndex = branch%lin(branch%gridPointsCount-1)
+       endif
+       
+   end function getLinkIndex
+
+   !> Get calculation points just before and after structure location on a branch (used in SOBEK)
    subroutine getCalcPoints(brs, ibranch, dist, leftcalc, rightcalc, ilink, distcalc) 
 
        type(t_branchSet)               :: brs       !< Current branche set

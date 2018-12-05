@@ -1653,6 +1653,7 @@ end function flow_initwaveforcings_runtime
 !! Currently only time series files, in the future also realtime control (RTC).
 subroutine flow_init_structurecontrol()
 use m_flowexternalforcings
+use m_hash_search
 use m_alloc
 use m_flowgeom
 use m_netw
@@ -1674,7 +1675,7 @@ USE gridoperations, only: incells
  
 implicit none
 character(len=256)            :: plifile
-integer                       :: i, L, Lf, kb, LL, ierr, k, kbi, n, ifld
+integer                       :: i, L, Lf, kb, LL, ierr, k, kbi, n, ifld, k1, k2
 integer                       :: nstr
 character (len=256)           :: fnam, rec
 integer, allocatable          :: pumpidx(:), gateidx(:), cdamidx(:), cgenidx(:), dambridx(:) ! temp
@@ -1690,6 +1691,8 @@ integer, allocatable          :: kdum(:)
 character(len=IdLen)          :: strid ! TODO: where to put IdLen (now in MessageHandling)
 character(len=IdLen)          :: strtype ! TODO: where to put IdLen (now in MessageHandling)
                                     ! TODO: in readstruc* change incoming ids to len=*
+character(len=idLen)          :: branchid
+
 integer :: istrtmp
 double precision, allocatable :: hulp(:,:) ! hulp 
 
@@ -1700,7 +1703,8 @@ integer                       :: nDambreakCoordinates, k3, k4, kpol, indexInStru
 double precision              :: xla, xlb, yla, ylb
 integer, allocatable          :: lftopol(:)
 double precision, allocatable :: xl(:), yl(:)
-
+integer                       :: branchIndex   
+double precision              :: chainage
 !! if (jatimespace == 0) goto 888                      ! Just cleanup and close ext file.
 
 ngs = 0 ! Local counter for all crossed flow liks by *all* general structures.
@@ -1772,14 +1776,30 @@ do i=1,nstr
       cycle
    end if
 
-   plifile = ' '
-   call prop_get_string(str_ptr, '', 'polylinefile', plifile, success)
-   if (.not. success .or. len_trim(plifile) == 0) then
-      write(msgbuf, '(a,a,a)') 'Required field ''polylinefile'' missing in '//trim(strtype)//' ''', trim(strid), '''.'
-      call warn_flush()
-      cycle
-   end if
-
+   branchIndex = -1
+   call prop_get_string(str_ptr, '', 'branchid', branchid, success)
+   if (success .and. strtype == 'pump') then
+      branchIndex = hashsearch(network%brs%hashlist, branchid)
+      if (branchIndex <= 0) then
+         msgbuf ='Branch ' // trim(branchid) // ' in structure ' // trim(strid)//' does not exist.'
+         call warn_flush()
+         cycle
+      endif
+      call prop_get_double(str_ptr, '', 'chainage', chainage, success)
+      if (.not. success) then
+         write(msgbuf, '(a,a,a)') 'Required field ''chainage'' is missing in '//trim(strtype)//' ''', trim(strid), '''.'
+         call warn_flush()
+         cycle
+      endif
+   else
+      plifile = ' '
+      call prop_get_string(str_ptr, '', 'polylinefile', plifile, success)
+      if (.not. success .or. len_trim(plifile) == 0) then
+         write(msgbuf, '(a,a,a)') 'Required field ''polylinefile'' missing in '//trim(strtype)//' ''', trim(strid), '''.'
+         call warn_flush()
+         cycle
+      end if
+   endif
    select case (strtype)
    case ('gateloweredgelevel')  ! Old-style controllable gateloweredgelevel
         !else if (qid == 'gateloweredgelevel' ) then
@@ -1812,11 +1832,17 @@ do i=1,nstr
       ncdam   = ncdam   + numd
 
    case ('pump')
-      call selectelset_internal_links( plifile, POLY_TIM, xz, yz, ln, lnx, kep(npump+1:numl), npum )
+      if (branchIndex > 0) then
+         !use branchId, chainage
+         npum = 1
+         kep(npump+1) = getLinkIndex(network%brs%branch(branchIndex), chainage)
+      else
+         call selectelset_internal_links( plifile, POLY_TIM, xz, yz, ln, lnx, kep(npump+1:numl), npum )
+      endif
+      
       !endif
       success = .true.
       WRITE(msgbuf,'(2a,i8,a)') trim(qid), trim(plifile) , npum, ' nr of pump links' ; call msg_flush()
-
 
       npumpsg = npumpsg + 1
       pumpidx(npumpsg) = i
