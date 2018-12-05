@@ -11357,19 +11357,19 @@ numka:DO K0 = 1,NUMK                 ! ATTRACTION PARAMETERS
    END SUBROUTINE ALLIN
 
    SUBROUTINE Triangulatesamplestonetwork(JADOORLADEN)
-   use m_netw
+   use m_netw, only : numk, numl, kn, xk, yk, zk, nb, LMAX, KMAX 
    USE M_SAMPLES
    use m_ec_triangle
-   USE M_POLYGON
    USE M_ALLOC
    use m_missing, only: dmiss, JINS
    use m_ec_basic_interpolation, only: dlaun
    use geometry_module, only: pinpok, dbpinpol, get_startend
    use gridoperations
-
+   use m_polygon ! , only: savepol, restorepol
+   
    implicit none
-   integer :: jadoorladen
-
+   integer :: jadoorladen ! ,npl
+   !double precision :: xpl(npl),ypl(npl)
    double precision :: af
    integer :: in
    integer :: ja
@@ -11414,7 +11414,7 @@ numka:DO K0 = 1,NUMK                 ! ATTRACTION PARAMETERS
       L0 = NUML
    ENDIF
 
-   CALL SAVEPOL()
+   ! CALL SAVEPOL()
    CALL SAVESAM()
 
    N = 0
@@ -11473,11 +11473,11 @@ numka:DO K0 = 1,NUMK                 ! ATTRACTION PARAMETERS
          N = N+1
          XS(N) = XPL(K)
          YS(N) = YPL(K)
-         ZS(N) = ZPL(K)
+         ! ZS(N) = ZPL(K)
 
          XK(K) = XS(N)
          YK(K) = YS(N)
-         ZK(K) = ZS(N)
+         ! ZK(K) = ZS(N)
          KS(N) = K
       end do
 
@@ -11511,7 +11511,7 @@ numka:DO K0 = 1,NUMK                 ! ATTRACTION PARAMETERS
       K1 = KS (K1)   ; K2 = KS (K2)   ; K3 = KS (K3)
       XP = THIRD*( XK(K1) + XK(K2) + XK(K3) )
       YP = THIRD*( YK(K1) + YK(K2) + YK(K3) )
-      CALL DBPINPOL(XP, YP, IN, dmiss, JINS, NPL, xpl, ypl, zpl)
+      CALL DBPINPOL(XP, YP, IN, dmiss, JINS, NPL, xpl, ypl, ypl)
       IF (IN == 0) THEN
          CYCLE
       ELSE
@@ -11558,20 +11558,20 @@ numka:DO K0 = 1,NUMK                 ! ATTRACTION PARAMETERS
    NUMK = K0 + NSIN
    NUML = L
 
-!  merge nodes in polygon
-   call mergenodesinpolygon()
+   ! merge nodes in polygon
+   !call mergenodesinpolygon()
 
-   call delsam(1)
-   call delpol()
+   ns  = 0 ! call delsam(1)
+   npl = 0 ! call delpol()
    CALL SETNODADM(0) ! No cross checks for now.
 
    DEALLOCATE (KS,NB)
    IF (ALLOCATED(TRIEDGE) ) THEN
        DEALLOCATE(TRIEDGE, EDGEINDX)
    ENDIF
+   
    RETURN
    END SUBROUTINE Triangulatesamplestonetwork
-
 
 
    SUBROUTINE externaltrianglestoouterquads()
@@ -11957,18 +11957,64 @@ numka:DO K0 = 1,NUMK                 ! ATTRACTION PARAMETERS
 
    RETURN
    END SUBROUTINE CLOSEIN
-
+   
    SUBROUTINE CREATESAMPLESINPOLYGON()
+   use m_polygon
+   use m_missing
+   use m_samples
+   use geometry_module, only: get_startend   ! zijn er nog meer startends zodat dit afgeschermd moet worden?
+   
+   integer :: jpoint, jstart,jend,jadoall, nplsav 
+   double precision, allocatable :: xplsav(:), yplsav(:)
+   
+   allocate(xplsav(npl) , yplsav(npl)) ; xplsav = xpl(1:npl) ; yplsav = ypl(1:npl) ; nplsav = npl
+   
+   jpoint = 1; jadoall = 0
+   do while ( jpoint.lt.NPLsav )
+   
+      !get subpolyline 
+      call get_startend(NPLsav-jpoint+1,xplsav(jpoint:NPLsav),yplsav(jpoint:NPLsav),jstart,jend, dmiss)
+      xpl(1:jend-jstart+1) = xplsav(jstart+jpoint-1:jend+jpoint-1)
+      ypl(1:jend-jstart+1) = yplsav(jstart+jpoint-1:jend+jpoint-1)
+      npl = jend-jstart+1
+      
+      if (nplsav > jend) then 
+         jadoall = 1 
+      endif   
+      
+      jstart = jstart+jpoint-1
+      jend   = jend+jpoint-1
+      jpoint = jend+2
+
+      call CREATESAMPLESINPOLYGON2()
+      
+      if (jadoall == 1) then 
+         call Triangulatesamplestonetwork(1)
+      endif 
+         
+   enddo
+   
+   deallocate (xplsav, yplsav)
+
+   END SUBROUTINE CREATESAMPLESINPOLYGON
+
+   
+   SUBROUTINE CREATESAMPLESINPOLYGON2()
    use m_ec_triangle
-   USE M_POLYGON
-   use m_netw
+   !use m_netw
    USE M_SAMPLES
    use M_MISSING
    use m_sferic
    use m_alloc
    use geometry_module, only: dbpinpol, get_startend
+   use m_polygon
    
    implicit none
+   
+   !integer          :: NPL
+   !double precision :: XPL(NPL), YPL(NPL) 
+
+   
    integer :: ierr
    integer :: in
    integer :: n
@@ -12027,11 +12073,9 @@ numka:DO K0 = 1,NUMK                 ! ATTRACTION PARAMETERS
       call realloc(EDGEINDX, (/ 2,Ntx /), keepExisting=.false., fill=0, stat=ierr)
       call realloc(TRIEDGE , (/ 3,Ntx /), keepExisting=.false., fill=0, stat=ierr)
 
-
-
       NN = NTX
       CALL increasesam(NS1 + NN)
-      zs(ns1:ubound(zs,1)) = zkuni ! SPvdP: used to be DMISS, but then the samples are not plotted
+      zs(ns1:ubound(zs,1)) = 0d0 ! zkuni ! SPvdP: used to be DMISS, but then the samples are not plotted
 
       TRIAREA = TRIANGLESIZEFAC*TRIANGLESIZEFAC*TRIAREA
       NPL1 = NPL
@@ -12041,7 +12085,6 @@ numka:DO K0 = 1,NUMK                 ! ATTRACTION PARAMETERS
             exit
          end if
       end do
-
 
       numtri = ntx ! Input value should specify max nr of triangles in indx.
       NN = ntx ! used to check array size of xs, ys in tricall
@@ -12053,19 +12096,15 @@ numka:DO K0 = 1,NUMK                 ! ATTRACTION PARAMETERS
    IN = -1  ! EN BIJPLUGGEN
    DO N = NS1, NS1 + NN
       XP = XS(N) ; YP = YS(N)
-      CALL DBPINPOL( XP, YP, IN, dmiss, JINS, NPL, xpl, ypl, zpl)
+      CALL DBPINPOL( XP, YP, IN, dmiss, JINS, NPL, xpl, ypl, ypl)
       IF (IN == 1) THEN
          NS = NS + 1
          XS(NS) = XP ; YS(NS) = YP
       ENDIF
    ENDDO
 
-   ! CALL REMOVESAMPLESONTOPOFNETPOINTS(XS(NS1), YS(NS1), NN )
-
-   ! CALL DELPOL()
-
    RETURN
-   END SUBROUTINE CREATESAMPLESINPOLYGON
+   END SUBROUTINE CREATESAMPLESINPOLYGON2
 
    SUBROUTINE REMOVESAMPLESONTOPOFNETPOINTS(XS, YS, NS)
    use m_netw
