@@ -79,7 +79,7 @@ module bmi
   integer, external :: findname
 
 
-  integer(c_int), parameter :: var_count_compound = 6 ! pumps, gates, weirs, sourcesinks, observations, crosssections ! TODO: AvD: temp, as long as this is not templated
+  integer(c_int), parameter :: var_count_compound = 7 ! pumps, gates, weirs, sourcesinks, observations, crosssections, laterals ! TODO: AvD: temp, as long as this is not templated
 contains
 
   subroutine main() bind(C, name="main")
@@ -647,6 +647,8 @@ end function dfm_finalize_computational_timestep
        var_name = "observations"
     case(var_count + 5)
        var_name = "crosssections"
+    case(var_count + 6)
+       var_name = "laterals"
     end select
 
     if (var_index >= var_count + var_count_compound .and. var_index < var_count + var_count_compound + numconst) then
@@ -1932,6 +1934,13 @@ subroutine get_compound_field_name(c_var_name, c_field_index, c_field_name) bind
          field_name = "water_depth"
      case default
         ! TODO: AvD: error to warn for unimplemented feature?
+        return
+     end select
+  case("laterals")
+     select case(field_index)
+     case(1)
+         field_name = "water_discharge"
+     case default
         return
      end select
   end select ! var_name
