@@ -1109,8 +1109,8 @@ logical function initboundaryblocksforcings(filename)
           case ('rainfall','rainfall_rate')
              if (.not. allocated(rain) ) then
                 allocate ( rain(ndx) , stat=ierr) 
-                rain = 0d0
                 call aerr('rain(ndx)', ierr, ndx)
+                rain = 0d0
              endif
             kx = 1
        end select
