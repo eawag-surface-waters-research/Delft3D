@@ -156,7 +156,11 @@
    jakdtree = 1
 
    if ( MXSAM.gt.0 .and. MYSAM.gt. 0 ) then  ! bi-linear interpolation
-      call bilin_interp(NDX, XZ, YZ, BL, dmiss, XS, YS, ZS, MXSAM, MYSAM, XPL, YPL, ZPL, NPL, jsferic)
+      if (jakc == 0) then 
+         call bilin_interp(NDX, XZ, YZ, BL, dmiss, XS, YS, ZS, MXSAM, MYSAM, XPL, YPL, ZPL, NPL, jsferic)
+      else   
+         call bilin_interp(NDX, XZ, YZ, BL, dmiss, XS, YS, ZS, MXSAM, MYSAM, XPL, YPL, ZPL, NPL, jsferic, kcc)
+      endif    
    else  ! Delauny
       if (jakc == 0) then  
          call TRIINTfast(XS,YS,ZS,NS,1,XZ,YZ,BL,Ndx,JDLA, jakdtree, jsferic, Npl, jins, dmiss, jasfer3D, XPL, YPL, ZPL, transformcoef)
@@ -1337,7 +1341,7 @@
    !---------------------------------------------------------------------------!
 
    !> bilinear interpolation of structed sample data at points
-   subroutine bilin_interp(Nc, xc, yc, zc, dmiss, XS, YS, ZS, MXSAM, MYSAM, XPL, YPL, ZPL, NPL, jsferic)
+   subroutine bilin_interp(Nc, xc, yc, zc, dmiss, XS, YS, ZS, MXSAM, MYSAM, XPL, YPL, ZPL, NPL, jsferic, kc)
 
    implicit none
 
@@ -1350,10 +1354,14 @@
    double precision, intent(in)                 ::  XS(:), YS(:), ZS(:)
    double precision, intent(in)                 ::  XPL(:),YPL(:), ZPL(:)
    integer, intent(in)                          ::  MXSAM, MYSAM, NPL, jsferic
+   integer, intent(in), optional                ::  kc(nc) 
    
    integer               :: ierror
-   integer               :: k
+   integer               :: k, jakc
 
+   jakc = 0
+   if (present(kc)) jakc = 1
+   
    ierror = 1
 
    if ( MXSAM.eq.0 .or. MYSAM.eq.0 ) then
@@ -1367,7 +1375,11 @@
 
    do k=1,Nc
       if ( zc(k).eq.DMISS ) then
-         call bilin_interp_loc(MXSAM, MYSAM, MXSAM, MYSAM, 1, XS, YS, ZS, xc(k), yc(k), xi, eta, zc(k), ierror, dmiss, jsferic)
+         if (jakc == 0) then 
+            call bilin_interp_loc(MXSAM, MYSAM, MXSAM, MYSAM, 1, XS, YS, ZS, xc(k), yc(k), xi, eta, zc(k), ierror, dmiss, jsferic)
+         else if (kc(k) == 1) then
+            call bilin_interp_loc(MXSAM, MYSAM, MXSAM, MYSAM, 1, XS, YS, ZS, xc(k), yc(k), xi, eta, zc(k), ierror, dmiss, jsferic)
+         endif   
       end if
    end do
 
