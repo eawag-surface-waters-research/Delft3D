@@ -5288,13 +5288,13 @@ end subroutine partition_make_globalnumbers
          end if
       end do
       
-!     make CSR arrays zero-based
-      iadj = iadj-1
-      jadj = jadj-1
-      
 !     edge weights
       allocate(adjw(iadj(nump1d2d+1)-1))
       adjw = 1
+      
+!     make CSR arrays zero-based
+      iadj = iadj-1
+      jadj = jadj-1
       
       netstat = NETSTAT_CELLS_DIRTY
 !      
