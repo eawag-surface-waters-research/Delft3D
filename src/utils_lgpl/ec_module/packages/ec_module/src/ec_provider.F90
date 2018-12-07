@@ -2349,10 +2349,9 @@ module m_ec_provider
          logical                                :: success        !< function status
          type(tEcInstance),     pointer         :: instancePtr    !< intent(in)
          type(tEcFileReader),   pointer         :: fileReaderPtr  !< intent(inout)
-         character(len=maxNameLen),  intent(in) :: quantityName   !< name of quantity to read
+         character(len=*),           intent(in) :: quantityName   !< name of quantity to read
          character(len=*), optional, intent(in) :: varname        !< name of variabele (ignored if = ' ')
 
-         !character(len=maxMessageLen)                            :: message
          integer                                                 :: ierror                !< return value of NetCDF function calls
          integer                                                 :: idvar
          integer                                                 :: ndims                 !< number of dimensions within NetCDF or for the current variable

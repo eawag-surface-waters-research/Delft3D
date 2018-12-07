@@ -780,6 +780,7 @@ module string_module
             exit      ! Some sort of error.
         endif
         if (isFirstBuffer) then
+            size = max(1, size)
             line = buffer(:size)
             isFirstBuffer = .false.
         else
