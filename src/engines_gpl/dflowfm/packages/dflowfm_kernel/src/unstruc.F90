@@ -30986,7 +30986,7 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
        endif
        skewn     = abs(xn*xt + yn*yt)
        bob(1,L)  = blv
-       bob(2,L)  = blv + wu(L)*skewn ! TODO: HK: why wu here? Why not dx(L) or something similar?
+       bob(2,L)  = blv    ! revisit later+ wu(L)*skewn ! TODO: HK: why wu here? Why not dx(L) or something similar?
        bl(n1)    = min(bl(n1) , blv)
        bl(n2)    = min(bl(n2) , blv)
     else if (kcu(L) == 4) then                           ! left right
