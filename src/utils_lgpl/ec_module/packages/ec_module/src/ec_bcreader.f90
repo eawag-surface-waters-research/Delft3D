@@ -613,7 +613,7 @@ contains
     type(tEcFileReader),    pointer                         :: fileReaderPtr
     real(hp), optional,                       intent(inout) :: time_steps    !< number of time steps of duration: seconds
     real(hp), dimension(:), optional,         intent(inout) :: values        !< vector of values for a BC_FUNC_TSERIES
-    character(len=*), optional,               intent(out)   :: recout        !< line prepared from input for caller
+    character(len=:), optional, allocatable,  intent(out)   :: recout        !< line prepared from input for caller
     logical, optional,                        intent(out)   :: eof           !< reading failed, but only because eof
 
     !

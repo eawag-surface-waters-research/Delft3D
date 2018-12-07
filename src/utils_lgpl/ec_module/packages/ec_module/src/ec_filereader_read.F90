@@ -1020,7 +1020,7 @@ module m_ec_filereader_read
                endif 
             endif 
             if (fileReaderPtr%ofType == provFile_qhtable) then 
-               read (fileReaderPtr%fileHandle,'(a)', IOSTAT = istat) rec
+               call GetLine(fileReaderPtr%fileHandle, rec, istat)
             endif 
             if (istat == 0) then
                if (.not. (rec(1:1) == '*' .or. len_trim(rec) == 0)) then
@@ -1112,7 +1112,7 @@ module m_ec_filereader_read
                endif 
             endif 
             if (fileReaderPtr%ofType == provFile_fourier) then 
-               read (fileReaderPtr%fileHandle,'(a)', IOSTAT = istat) rec
+               call GetLine(fileReaderPtr%fileHandle, rec, istat)
             endif 
             if (istat == 0) then
                if (.not. (rec(1:1) == '*' .or. len_trim(rec) == 0)) then
@@ -1388,6 +1388,7 @@ module m_ec_filereader_read
          double precision :: xymis_dflt = -999d0   !
          character(len=:), allocatable :: rec
          character(len=maxMessageLen) :: tex
+         integer                      :: istat
 
 
          success = .true.
@@ -1408,7 +1409,8 @@ module m_ec_filereader_read
 ! TODO: this reader does not yet have all functionality that reasam() in dflowfm kernel has (comments *, PHAROS filetype, ...)
          nSamples = 0
 10       continue
-         read (msam,'(a)',end = 30) rec
+         call GetLine(msam, rec, istat)
+         if (istat /= 0) goto 30
          read (rec,*,end = 40, err = 40) xx,yy,zz
 
          if (  xx .ne. xymis_dflt .and. yy .ne. xymis_dflt .and. &
