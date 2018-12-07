@@ -48,7 +48,7 @@ function readmeteoheader(minp, meteoitem) result(success)
     integer        :: ierr           ! Error indicator used for reading
     integer        :: il             ! Position on the read line behind the =
     integer        :: ir             ! Position on the read line before the # (comments)
-    character(132) :: rec
+    character(:), allocatable :: rec
     character(10)  :: newest_version ! newest version of format of meteo input files
 !
 !! executable statements -------------------------------------------------------

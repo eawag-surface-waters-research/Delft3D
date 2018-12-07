@@ -87,7 +87,7 @@ module m_ec_filereader_read
       
       !> Read the first line from a uni* file.
       function ecUniReadFirstLine(fileReaderPtr) result(rec)
-         character(len=maxRecordLen)  :: rec           !< content of a line
+         character(len=:), allocatable  :: rec           !< content of a line
          type(tEcFileReader), pointer :: fileReaderPtr !< intent(in)
          !
          integer :: istat !< status of read operation
@@ -99,7 +99,7 @@ module m_ec_filereader_read
          endif
          ! continue reading lines untill a data line is encountered
          do
-            read(fileReaderPtr%fileHandle, '(a)', IOSTAT = istat) rec
+            call GetLine(fileReaderPtr%fileHandle, rec, istat)
             if (istat == 0) then
                call strip_comment(rec)
                if (len_trim(rec)>0) then 
@@ -121,13 +121,13 @@ module m_ec_filereader_read
          type(tEcFileReader), pointer             :: fileReaderPtr !< intent(in)
          real(hp),                    intent(out) :: time_steps    !< number of time steps of length tEcTimeFrame%time_unit
          !
-         character(132) :: rec   !< content of a line
+         character(:), allocatable :: rec   !< content of a line
          integer        :: istat !< status of read operation
          !
          success = .false.
          ! continue reading lines untill a data line is encountered
          do
-            read(fileReaderPtr%fileHandle, '(a)', IOSTAT = istat) rec
+            call GetLine(fileReaderPtr%fileHandle, rec, istat)
             if (istat == 0) then
                if (.not. (rec(1:1) == '*' .or. rec(1:1) == '#' .or. len_trim(rec) == 0)) then
                   read(rec, *, IOSTAT = istat) time_steps
@@ -158,7 +158,7 @@ module m_ec_filereader_read
          real(hp), dimension(:), intent(inout) :: values        !< read values
          !
          integer        :: n_values !< number of quantities in the file
-         character(132) :: rec, rec0!< content of a line
+         character(len=:), allocatable :: rec, rec0!< content of a line
          integer        :: istat    !< status of read operation
          integer        :: i        !< loop counter
 
@@ -167,7 +167,7 @@ module m_ec_filereader_read
          n_values = size(values)
          ! continue reading lines untill a data line is encountered
          do
-            read(fileReaderPtr%fileHandle, '(a)', IOSTAT = istat) rec
+            call GetLine(fileReaderPtr%fileHandle, rec, istat)
             rec0 = rec                                         ! preserve originally read line for error reporting
             if (istat == 0) then
                call strip_comment(rec)
@@ -990,7 +990,7 @@ module m_ec_filereader_read
          integer,                                        intent(out) :: nr_rows       !< 
          !
          integer        :: istat !< status of operation
-         character(132) :: rec   !< content of a line
+         character(:), allocatable :: rec   !< content of a line
          logical        :: eof   !< end-of_file mark 
          !
          success = .true.
@@ -1067,7 +1067,7 @@ module m_ec_filereader_read
          
          !
          integer                   :: istat     !< status of allocation operation
-         character(132)            :: rec       !< content of a line
+         character(:), allocatable :: rec       !< content of a line
          integer                   :: i1        !< start index of first word
          integer                   :: i2        !< stop index of first word
          character(len=maxNameLen) :: component !< helper variable, when converting from component to period
@@ -1386,7 +1386,7 @@ module m_ec_filereader_read
          double precision :: xx, yy, zz
          double precision :: dmiss_dflt = -999d0   ! Use default missing value for this 'old' sample file type
          double precision :: xymis_dflt = -999d0   !
-         character(len=132) :: rec
+         character(len=:), allocatable :: rec
          character(len=maxMessageLen) :: tex
 
 

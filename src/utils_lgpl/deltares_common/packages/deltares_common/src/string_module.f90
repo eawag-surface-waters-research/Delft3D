@@ -60,6 +60,7 @@ module string_module
    public :: strsplit
    public :: strip_quotes
    public :: real2string, real2stringLeft
+   public :: GetLine
 
    interface strip_quotes
       module procedure strip_quotes1
@@ -739,5 +740,56 @@ module string_module
          cnumber = adjustl(cnumber)
 
       end subroutine real2stringLeft
+
+      subroutine GetLine(unit, line, stat, iomsg)
+      !!
+      !> Reads a complete line (end-of-record terminated) from a file.
+      !!
+      !! @param[in]     unit              Logical unit connected for formatted input to the file.
+      !!
+      !! @param[out]    line              The line read.
+      !!
+      !! @param[out]    stat              Error code, positive on error, IOSTAT_END (which is negative) on end of file.
+      !!
+      !! @param[out]    iomsg             Error message - only defined if iostat is non-zero.
+      !!
+      !! found in: https://software.intel.com/en-us/forums/intel-visual-fortran-compiler-for-windows/topic/385790
+      !!
+      use, intrinsic :: iso_fortran_env, only: iostat_eor
+      !---------------------------------------------------------------------------
+      ! arguments
+      integer,      intent(in)               :: unit
+      character(:), intent(out), allocatable :: line
+      integer,      intent(out)              :: stat
+      character(*), intent(out), optional    :: iomsg
+      !---------------------------------------------------------------------------
+      ! Local variables
+      character(len=256) :: buffer         ! Buffer to read the line (or partial line).
+      integer            :: size           ! Number of characters read from the file.
+      logical            :: isFirstBuffer  ! flag to handle first read different from others
+      !***************************************************************************
+      isFirstBuffer = .true.
+      do
+        if (present(iomsg)) then
+            read (unit, "(A)", ADVANCE='NO', IOSTAT=stat, IOMSG=iomsg, SIZE=size)  buffer
+        else
+            read (unit, "(A)", ADVANCE='NO', IOSTAT=stat, SIZE=size)  buffer
+        endif
+        if (stat > 0) then
+            line = ''
+            exit      ! Some sort of error.
+        endif
+        if (isFirstBuffer) then
+            line = buffer(:size)
+            isFirstBuffer = .false.
+        else
+            line = line // buffer(:size)
+        endif
+        if (stat < 0) then
+            if (stat == IOSTAT_EOR) stat = 0
+            exit
+        end if
+      end do
+      end subroutine GetLine
 
 end module string_module

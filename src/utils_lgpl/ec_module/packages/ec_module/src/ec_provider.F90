@@ -232,12 +232,11 @@ module m_ec_provider
          real(kind=hp),    optional, intent(in) :: dtnodal      !< Nodal factors update interval
          character(len=*), optional, intent(in) :: varname      !< variable name within filename
          !
-         type(tEcFileReader), pointer :: fileReaderPtr  !< FileReader corresponding to fileReaderId
-         character(maxNameLen)        :: l_quantityName !< explicit length version of quantityName
+         type(tEcFileReader), pointer  :: fileReaderPtr  !< FileReader corresponding to fileReaderId
+         character(len=:), allocatable :: l_quantityName !< explicit length version of quantityName
          !
          success = .false.
          fileReaderPtr => null()
-         l_quantityName = ''
          !
          if (len_trim(fileName) > maxFileNameLen) then
             call setECMessage("ERROR: ec_provider::ecProviderInitializeFileReader: The filename string is too long.")
@@ -269,10 +268,10 @@ module m_ec_provider
 
             ! Create source Items and their contained types, based on file type and file header.
             if (present(quantityName) .and. present(varname)) then
-               l_quantityName = quantityName
+               l_quantityName = trim(quantityName)
                if (.not. ecProviderCreateItems(instancePtr, fileReaderPtr, forcingFile, l_quantityName, varname)) return
             else if (present(quantityName)) then
-               l_quantityName = quantityName
+               l_quantityName = trim(quantityName)
                if (.not. ecProviderCreateItems(instancePtr, fileReaderPtr, forcingFile, l_quantityName)) return
             else if (present(varname)) then
                if (.not. ecProviderCreateItems(instancePtr, fileReaderPtr, varname=varname)) return
@@ -291,9 +290,9 @@ module m_ec_provider
          logical                         :: success          !< function status
          type(tEcInstance),     pointer  :: instancePtr      !< intent(in)
          type(tEcFileReader),   pointer  :: fileReaderPtr    !< intent(inout)
-         character(maxNameLen), optional :: quantityname     !< Names of the quantities read from file, needed for structured files (NetCDF),
+         character(len=*),      optional :: quantityname     !< Names of the quantities read from file, needed for structured files (NetCDF),
                                                              !< but also for bct-file 
-         character(maxNameLen), optional :: bctfilename      !< file name of bct-file with data
+         character(len=*),      optional :: bctfilename      !< file name of bct-file with data
          character(len=*),      optional :: varname          !< variable name within filename
          !
          success = .false.
@@ -794,7 +793,7 @@ module m_ec_provider
          type(tEcInstance),   pointer :: instancePtr   !< intent(in)
          type(tEcFileReader), pointer :: fileReaderPtr !< intent(inout)
          !
-         character(len=132)     :: rec          !< first data line in file
+         character(len=:), allocatable  :: rec          !< first data line in file
          integer                :: n_quantities !< number of quantities in the file
          integer                :: quantityId   !< helper variable 
          integer                :: elementSetId !< helper variable 
@@ -1016,7 +1015,7 @@ module m_ec_provider
          integer,                     intent(out) :: elementSetId  !< if of new ElementSet
          integer,                     intent(out) :: n_cols, n_rows
          !
-         character(len=132)                  :: rec       !< a read line
+         character(len=:), allocatable       :: rec       !< a read line
          character(len=maxFileNameLen)       :: grid_file !< file name of curvilinear grid
          integer                             :: minp      !< IO unit number
          integer                             :: mx, nx    !< n_clos, n_rows
@@ -1033,7 +1032,7 @@ module m_ec_provider
          if (.not. success) return
          ! Read the file header.
          elmSetType = elmSetType_Cartesian
-20       read(minp,'(a)') rec
+20       call GetLine(minp, rec, istat)
          if (index (rec,'=') == 0) then
          
             ! Backwards compatible: first line could contain spherical keyword         
@@ -1092,7 +1091,7 @@ module m_ec_provider
          integer                   :: field0Id        !< id of new Field
          integer                   :: field1Id        !< id of new Field
          integer                   :: itemId          !< id of new Item
-         character(len=132)        :: rec             !< a read line
+         character(len=:), allocatable :: rec             !< a read line
          real(hp)                  :: missingValue    !< helper variable
          integer                   :: n_cols, n_rows
          integer                   :: n_quantity
@@ -1248,7 +1247,7 @@ module m_ec_provider
          integer                             :: zInterpolationType    !< vertical interpolation type
          type(tEcItem), pointer              :: valueptr      !< Item containing z/sigma-dependent values
          type(tEcBCBlock), pointer           :: bcptr
-         character(len=132)                  :: rec           !< a read line
+         character(len=:), allocatable       :: rec           !< a read line
          integer, parameter                  :: MAXSTRLEN=128 !<
          integer, parameter                  :: MAXLAY=256    !<
          integer                             :: numlay, i     !<
@@ -1419,7 +1418,7 @@ module m_ec_provider
          integer,  dimension(:), allocatable :: mask  !< support point mask array (for polytime ElementSet)
          integer                             :: n_points !< number of support points
          integer                             :: n_signals !< Number of forcing signals created (at most n_signals==n_points, but warn if n_signals==0)
-         character(len=132)                  :: rec      !< a read line
+         character(len=:), allocatable       :: rec      !< a read line
          integer                             :: i        !< loop counters
          integer                             :: istat    !< status of read operation
          integer                             :: L        !< helper index
@@ -1455,7 +1454,7 @@ module m_ec_provider
          !
          ! Skip the lead comment lines plus one additional line.
          do
-            read(fileReaderPtr%fileHandle, '(a)', iostat = istat) rec
+            call GetLine(fileReaderPtr%fileHandle, rec, istat)
             if (istat /= 0) then
                call setECMessage("ERROR: ec_provider::ecProviderCreatePolyTimItems: Unexpected end of file.")
                return
@@ -1487,7 +1486,7 @@ module m_ec_provider
 
 
          do i=1, n_points
-            read(fileReaderPtr%fileHandle,'(a132)', iostat = istat) rec
+            call GetLine(fileReaderPtr%fileHandle, rec, istat)
             if (index(rec,'!')>0) rec = rec(1:index(rec,'!')-1)          ! trim commented  (!)
             if (index(rec,'#')>0) rec = rec(1:index(rec,'#')-1)          ! trim commented  (#)
             if (len(trim(rec)) == 0) cycle                               ! skip empty lines     (or commented-out coordinate pairs) 
@@ -1692,13 +1691,13 @@ module m_ec_provider
          integer,  dimension(:), allocatable :: mask  !< support point mask array (for polytime ElementSet)
          integer                             :: n_points !< number of support points
          integer                             :: n_signals !< Number of forcing signals created (at most n_signals==n_points, but warn if n_signals==0)
-         character(len=132)                  :: rec      !< a read line
+         character(len=:), allocatable       :: rec      !< a read line
          integer                             :: i        !< loop counters
          integer                             :: istat    !< status of read operation
-         character(len=maxFileNameLen)       :: plipointlbl   !< temporary name of current pli-point in bct context 
-         character(len=maxFileNameLen), &
-         &   dimension(:), allocatable       :: plipointlbls  !< user-specified name for all pli-point in bct context 
-         character(len=maxFileNameLen)       :: polyline_name !< polyline name read from pli-file 
+         character(len=:), allocatable       :: plipointlbl   !< temporary name of current pli-point in bct context 
+         type(VLSType), dimension(:), allocatable :: plipointlbls  !< user-specified name for all pli-point in bct context 
+         character(len=:), allocatable       :: polyline_name !< polyline name read from pli-file
+         character(len=4)                    :: cnum     !< temp integer converted to a string
          integer                             :: id       !< dummy, catches ids which are not used
          integer                             :: k_yyyymmdd !< calculated Gregorian calender date, serving as reference date
          integer                             :: quantityId, elementSetId, fieldId, itemId, subconverterId, connectionId, BCBlockID
@@ -1725,7 +1724,7 @@ module m_ec_provider
          !
          ! Skip the lead comment lines plus one additional line.
          do
-            read(fileReaderPtr%fileHandle, '(a)', iostat = istat) rec
+            call GetLine(fileReaderPtr%fileHandle, rec, istat)
             if (istat /= 0) then
                call setECMessage("ERROR: ec_provider::ecProviderCreatePolyTimItems: Unexpected end of file.")
                return
@@ -1754,9 +1753,8 @@ module m_ec_provider
          allocate(itemIDList(n_points))
          itemIDList = ec_undef_int
          allocate(plipointlbls(n_points))
-         plipointlbls = ''
          do i=1, n_points
-            read(fileReaderPtr%fileHandle,'(a132)', iostat = istat) rec
+            call GetLine(fileReaderPtr%fileHandle, rec, istat)
             if (index(rec,'!')>0) rec = rec(1:index(rec,'!')-1)          ! trim commented  (!)
             if (index(rec,'#')>0) rec = rec(1:index(rec,'#')-1)          ! trim commented  (#)
             if (len(trim(rec)) == 0) cycle                               ! skip empty lines     (or commented-out coordinate pairs) 
@@ -1767,16 +1765,10 @@ module m_ec_provider
                call setECMessage("Unable to read a coordinate pair from file "//trim(fileReaderPtr%fileName))
                return
             end if
-            !lblstart = index(rec,'{')
-            !lblend = index(rec,'}')
-            !plipointlbls(i) = ''
-            !if (lblstart>0 .and. lblend>lblstart) then
-            !   plipointlbls  = rec(lblstart+1:lblend-1)
-            !endif
             lblstart = index(rec,'label=')
-            plipointlbls(i) = ''
+            
             if (lblstart>0) then
-               read(rec(lblstart+6:len_trim(rec)),*,iostat=istat)  plipointlbls(i)
+               plipointlbls(i)%s = rec(lblstart+6:)
             endif
          enddo
 
@@ -1812,7 +1804,7 @@ module m_ec_provider
          n_signals = 0                                   ! Record whether at least one child provider is created for this polytim.
          bcBlockId = ecInstanceCreateBCBlock(InstancePtr)
          bcBlockPtr=>ecSupportFindBCBlock(instancePtr, bcBlockId)
-         write(plipointlbl,'(a)') trim(polyline_name)   
+         plipointlbl = polyline_name
          call str_upper(quantityname)
          if (ecProviderInitializeBCBlock(InstancePtr, bcBlockId, k_yyyymmdd, fileReaderPtr%tframe%k_timezone, fileReaderPtr%tframe%k_timestep_unit,   &
                                     id, bctfilename, quantityname, plipointlbl, istat, dtnodal=fileReaderPtr%tframe%dtnodal, funtype = 'QHTABLE')) then
@@ -1830,12 +1822,13 @@ module m_ec_provider
                ! id van de filereader
 
                ! plipoint labels read from the third column in the pli-file. Currently this goes wrong if in the test third-column labels are not unique 
-               if (len_trim(plipointlbls(i))==0) then 
-                  write(plipointlbl,'(a,i4.4)') trim(polyline_name)//'_', i     ! using polyline_name from tekal-block 
-                  has_label = .False. 
+               if ( .not. allocated(plipointlbls(i)%s)) then
+                  write(cnum,'(i4.4)') i
+                  plipointlbl =  polyline_name // '_' // cnum     ! using polyline_name from tekal-block
+                  has_label = .False.
                else
-                  plipointlbl = trim(plipointlbls(i))
-                  has_label = .True. 
+                  plipointlbl = trim(plipointlbls(i)%s)
+                  has_label = .True.
                endif
                
                if (.not. ecProviderInitializeBCBlock(InstancePtr, bcBlockId, k_yyyymmdd, fileReaderPtr%tframe%k_timezone, fileReaderPtr%tframe%k_timestep_unit,   &

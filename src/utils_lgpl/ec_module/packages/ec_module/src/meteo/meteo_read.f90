@@ -410,8 +410,8 @@ function readseries(minp,d,kx,tread) result(success)
    real(fp)                      :: tread
    logical                       :: success
    !
-   integer                :: k
-   character(132)         :: rec
+   integer                   :: k
+   character(:), allocatable :: rec
    !
    if ( size(d,1) .lt. kx ) then
       meteomessage = 'READSERIES: wrong sizes'
@@ -516,7 +516,7 @@ function read_spiderweb_block(minp, d, mx, nx, meteoitem, x_spw_eye, y_spw_eye, 
    integer                    :: iread
    integer                    :: j
    real(fp)                   :: p_drop_spw_eye
-   character(132)             :: rec
+   character(:), allocatable  :: rec
    !
    if ( size(d,1) .ne. mx .or. size(d,2) .ne. nx ) then
       meteomessage = 'READ_SPIDERWEB_BLOCK: wrong sizes'

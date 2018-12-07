@@ -28,7 +28,6 @@
 
 !> This module contains all the user defined datatypes.
 !! @author edwin.spee@deltares.nl
-!! @author edwin.bos@deltares.nl
 module m_ec_typedefs
    use precision
    use m_ec_parameters
@@ -408,4 +407,10 @@ module m_ec_typedefs
       real(hp), dimension(:), allocatable :: times            !< The timesteps [ec_timestep_unit] at which data is available.
       real(hp)                            :: dtnodal          !< Nodal factors update interval
    end type tEcTimeFrame
+
+   !> needed to make an array of allocatable strings
+   type VLSType
+      character (len=:), allocatable :: s
+   end type VLSType
+
 end module m_ec_typedefs

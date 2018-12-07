@@ -30,14 +30,13 @@
 !! @author arjen.markus@deltares.nl
 !! @author adri.mourits@deltares.nl
 !! @author stef.hummel@deltares.nl
-!! @author edwin.bos@deltares.nl
+!! @author edwin.spee@deltares.nl
 module m_ec_parameters
    use precision
 
    implicit none
 
    integer,  parameter :: maxNameLen           = 256
-   integer,  parameter :: maxRecordLen         = 132
    integer,  parameter :: maxFileNameLen       = 256
    integer,  parameter :: maxFileReaderFiles   = 3
    integer             :: maxFileUnits         = 2000   !< may be lowered if too high for current OS

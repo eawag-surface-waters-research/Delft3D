@@ -282,11 +282,11 @@ contains
     integer                          ::     ifld
     integer                          ::     i, jv
     integer                          ::     iostat
-    character(len=maxNameLen),  allocatable   ::     hdrkeys(:)     !< All keys from header
-    character(len=10*maxRecordLen),  allocatable ::     hdrvals(:)     !< All values from header
+    type(VLSType), allocatable       ::     hdrkeys(:)     !< All keys from header
+    type(VLSType), allocatable       ::     hdrvals(:)     !< All values from header
     integer, allocatable             ::     iv(:), il(:), perm_vpos(:)
 
-    integer                          ::     ipos, npos, posfs
+    integer                          ::     ipos, npos, posfs, ipos1, ipos2
     integer                          ::     iq, iq_sel, idim
     integer, parameter               ::     MAXDIM = 10    !< max number of vector quantities in one vector
     character(len=maxNameLen)        ::     vectorquantities(MAXDIM)
@@ -317,29 +317,36 @@ contains
     iv = -1
     il = -1
     bc%quantity%col2elm = -1
-    hdrvals=''
-    hdrkeys=''
     vectordefinition = ''
 
-    read(keyvaluestr,*,iostat=iostat) (hdrkeys(ifld),hdrvals(ifld),ifld=1,nfld)
+    ipos1=1
+    do ifld = 1, nfld
+       ipos2 = index(keyvaluestr(ipos1:), ',')
+       hdrkeys(ifld)%s = keyvaluestr(ipos1+1:ipos1+ipos2-3)
+       ipos1 = ipos1+ipos2
+       ipos2 = index(keyvaluestr(ipos1:), ',')
+       hdrvals(ifld)%s = keyvaluestr(ipos1+1:ipos1+ipos2-3)
+       ipos1 = ipos1+ipos2
+    end do
+
     iq = 0
     iq_sel = 0
     do ifld=1,nfld
-       call replace_char(hdrkeys(ifld),ichar('-'),ichar(' '))
-       call replace_char(hdrkeys(ifld),ichar('_'),ichar(' '))
-       call replace_char(hdrkeys(ifld),ichar('.'),ichar(' '))
-       select case (trim(adjustl(hdrkeys(ifld))))
+       call replace_char(hdrkeys(ifld)%s,ichar('-'),ichar(' '))
+       call replace_char(hdrkeys(ifld)%s,ichar('_'),ichar(' '))
+       call replace_char(hdrkeys(ifld)%s,ichar('.'),ichar(' '))
+       select case (adjustl(hdrkeys(ifld)%s))
        case ('QUANTITY')
           iq = iq + 1                                     ! count quantities, corresponds with column numbers [iq]
-          if (trim(hdrvals(ifld))==bc%qname) then         ! detected quantity of interest
+          if (hdrvals(ifld)%s==bc%qname) then         ! detected quantity of interest
              bc%quantity%name=bc%qname
              bc%quantity%jacolumn(iq)=.true.
              iq_sel = iq_sel + 1
              il(iq) = 1                                  ! layer this column belongs to, default 1
              iv(iq) = 1                                  ! iv is the number of the element in the vector
              bc%quantity%col2elm(iq_sel) = iq
-          else if (index(vectordefinition,'|'//trim(hdrvals(ifld))//'|')>0) then         ! quantity is part of requested vector
-             posfs = index(vectordefinition,'|'//trim(hdrvals(ifld))//'|')
+          else if (index(vectordefinition,'|'//trim(hdrvals(ifld)%s)//'|')>0) then         ! quantity is part of requested vector
+             posfs = index(vectordefinition,'|'//trim(hdrvals(ifld)%s)//'|')
              bc%quantity%jacolumn(iq)=.true.
              iq_sel = iq_sel + 1
              il(iq) = 1                                  ! layer this column belongs to, default 1
@@ -351,33 +358,33 @@ contains
              bc%quantity%jacolumn(iq)=.false.
              select case (bc%func)
              case (BC_FUNC_TSERIES, BC_FUNC_TIM3D)
-                if (trim(hdrvals(ifld))=='TIME') then    ! special check on the time field
+                if (hdrvals(ifld)%s=='TIME') then    ! special check on the time field
                    bc%timecolumn = iq
                 endif
                 case (BC_FUNC_HARMONIC, BC_FUNC_ASTRO, BC_FUNC_HARMOCORR, BC_FUNC_ASTROCORR, BC_FUNC_CMP3D)
-                   if (trim(hdrvals(ifld))=='HARMONIC COMPONENT') then          ! harmonic component
+                   if (hdrvals(ifld)%s=='HARMONIC COMPONENT') then          ! harmonic component
                       bc%astro_component_column = iq
                    endif
-                   if (trim(hdrvals(ifld))=='ASTRONOMIC COMPONENT') then        ! astronomic component label
+                   if (hdrvals(ifld)%s=='ASTRONOMIC COMPONENT') then        ! astronomic component label
                       bc%astro_component_column = iq
                    endif
-                   if (trim(hdrvals(ifld))==trim(bc%qname)//' AMPLITUDE') then  ! amplitude field for astronomic/harmonic components
+                   if (hdrvals(ifld)%s==trim(bc%qname)//' AMPLITUDE') then  ! amplitude field for astronomic/harmonic components
                       bc%astro_amplitude_column = iq
                    endif
-                   if (trim(hdrvals(ifld))==trim(bc%qname)//' PHASE') then      ! phase field for astronomic/harmonic components
+                   if (hdrvals(ifld)%s==trim(bc%qname)//' PHASE') then      ! phase field for astronomic/harmonic components
                       bc%astro_phase_column = iq
                    endif
              case (BC_FUNC_QHTABLE)
-                if (trim(hdrvals(ifld))==trim(bc%qname)//' WATERLEVEL') then ! waterlevel field for qh-boundary
+                if (hdrvals(ifld)%s==trim(bc%qname)//' WATERLEVEL') then ! waterlevel field for qh-boundary
                    bc%qh_waterlevel_column = iq
                 endif
-                if (trim(hdrvals(ifld))==trim(bc%qname)//' DISCHARGE') then  ! discharge field for qh-boundary
+                if (hdrvals(ifld)%s==trim(bc%qname)//' DISCHARGE') then  ! discharge field for qh-boundary
                    bc%qh_discharge_column = iq
                 endif
              end select
           endif
        case ('VECTOR')
-          vectorstr = trim(hdrvals(ifld))
+          vectorstr = trim(hdrvals(ifld)%s)
           posfs = index(vectorstr,':')
           if (posfs>0) then
              if (trim(vectorstr(1:posfs-1))==trim(bc%qname)) then           ! this vector defines the requested 'quantity'
@@ -394,17 +401,17 @@ contains
           endif
        case ('UNIT')
           if (bc%quantity%jacolumn(iq)) then
-             bc%quantity%unit = trim(hdrvals(ifld))
+             bc%quantity%unit = trim(hdrvals(ifld)%s)
           endif
           if (iq==bc%timecolumn) then                     ! Is this the unit of time ?
-             bc%timeunit = trim(hdrvals(ifld))            ! store timeunit string in this bc instance
+             bc%timeunit = trim(hdrvals(ifld)%s)            ! store timeunit string in this bc instance
           endif
           if (iq == bc%astro_component_column) then
-             bc%timeunit = trim(hdrvals(ifld))            ! store period/feq unit in time unit
+             bc%timeunit = trim(hdrvals(ifld)%s)            ! store period/feq unit in time unit
           endif
        case ('FUNCTION')
           if (iq>0) cycle
-          select case (trim(adjustl(hdrvals(ifld))))
+          select case (adjustl(hdrvals(ifld)%s))
           case ('TIMESERIES')
              bc%func = BC_FUNC_TSERIES
           case ('HARMONIC')
@@ -424,28 +431,28 @@ contains
           end select
        case ('OFFSET')
           if (iq>0) cycle
-          read(hdrvals(ifld),*) bc%quantity%offset
+          read(hdrvals(ifld)%s,*) bc%quantity%offset
        case ('FACTOR')
           if (iq>0) cycle
-          read(hdrvals(ifld),*) bc%quantity%factor
+          read(hdrvals(ifld)%s,*) bc%quantity%factor
        case ('VERTICAL POSITION')
-          read(hdrvals(ifld),*) il(iq)
+          read(hdrvals(ifld)%s,*) il(iq)
           bc%quantity%vertndx = il(iq)                          ! layer this column belongs to, default 1
        case ('VERTICAL POSITION SPECIFICATION')
           npos=0
-          if (len_trim(hdrvals(ifld))>0) then
-             npos = count([(verify(hdrvals(ifld)(i:i),', ')>0   &
-                  .and.verify(hdrvals(ifld)(i-1:i-1),', ')==0, i=2,len_trim(hdrvals(ifld)))]) + 1
+          if (len_trim(hdrvals(ifld)%s)>0) then
+             npos = count([(verify(hdrvals(ifld)%s(i:i),', ')>0   &
+                  .and.verify(hdrvals(ifld)%s(i-1:i-1),', ')==0, i=2,len_trim(hdrvals(ifld)%s))]) + 1
           endif
           allocate(bc%vp(npos))
           bc%numlay = npos
-          read(hdrvals(ifld),*) (bc%vp(ipos),ipos=1,npos)       ! globally store ALL vertical positions
+          read(hdrvals(ifld)%s,*) (bc%vp(ipos),ipos=1,npos)       ! globally store ALL vertical positions
           allocate(perm_vpos(npos))
           call sortndx(bc%vp,perm_vpos,npos)                    ! produce the permutation that sorts the vertical positions perm_vpos
        case ('MISSING VALUE DEFINITION')
-          read(hdrvals(ifld),*) bc%missing
+          read(hdrvals(ifld)%s,*) bc%missing
        case ('TIME INTERPOLATION')
-          select case (trim(adjustl(hdrvals(ifld))))
+          select case (adjustl(hdrvals(ifld)%s))
           case ('LINEAR')
              bc%timeint = BC_TIMEINT_LIN
           case ('BLOCK-TO')
@@ -454,7 +461,7 @@ contains
              bc%timeint = BC_TIMEINT_BFROM
           end select
        case ('VERTICAL INTERPOLATION')
-          select case (trim(adjustl(hdrvals(ifld))))
+          select case (adjustl(hdrvals(ifld)%s))
           case ('LINEAR')
              bc%zInterpolationType = zinterpolate_linear
           case ('LOG')
@@ -465,10 +472,10 @@ contains
              bc%zInterpolationType = zinterpolate_unknown
           end select
        case ('VERTICAL POSITION TYPE')
-          IF (index(hdrvals(ifld),'PERCEN')+index(hdrvals(ifld),'BED')>0) then
-             hdrvals(ifld)='PERCBED'
+          IF (index(hdrvals(ifld)%s,'PERCEN')+index(hdrvals(ifld)%s,'BED')>0) then
+             hdrvals(ifld)%s = 'PERCBED'
           endif
-          select case (trim(adjustl(hdrvals(ifld))))
+          select case (adjustl(hdrvals(ifld)%s))
           case ('PERCBED')
              bc%vptyp = BC_VPTYP_PERCBED
           case ('ZDATUM')
