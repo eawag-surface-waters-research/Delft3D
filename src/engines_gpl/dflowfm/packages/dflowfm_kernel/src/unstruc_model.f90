@@ -502,6 +502,7 @@ subroutine loadModel(filename)
     if (len_trim(md_pillarfile) > 0) then
         call strsplit(md_pillarfile,1,fnames,1)
         i = size(fnames)
+        if (allocated(pillar)) deallocate(pillar)
         allocate( pillar(i) )
         do ifil=1,size(fnames)
            call oldfil(minp, fnames(ifil))
