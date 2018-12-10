@@ -909,6 +909,7 @@ use m_flow, only: kmx
 use dfm_error
 use m_alloc
 use m_missing
+use m_save_ugrid_state
 implicit none
 
 integer, intent(in)                     :: ncid
@@ -924,6 +925,8 @@ integer :: ndx1d, lnx2d, lnx2db, numl2d, Lf, L, i, n, k, kb, kt, nlayb, nrlay, L
 !TODO remove save and deallocate?
 double precision, allocatable, save :: workL(:)
 double precision, allocatable, save :: workS3D(:,:), workU3D(:,:), workW(:,:), workWU(:,:)
+! temporary UGRID fix
+double precision, allocatable :: mappedValues(:)
 
    ierr = DFM_NOERR
 
@@ -944,7 +947,17 @@ double precision, allocatable, save :: workS3D(:,:), workU3D(:,:), workW(:,:), w
       ndx1d = ndxi - ndx2d
       ! Internal 1d flownodes. Horizontal position: nodes in 1d mesh.
       if (ndx1d > 0) then
-         ierr = nf90_put_var(ncid, id_var(1), values(ndx2d+1:ndxi), start = (/ 1, id_tsp%idx_curtime /))
+         ! temporary UGRID fix
+         if(numMesh1dBeforeMerging>0) then
+            if(allocated(mappedValues)) deallocate(mappedValues)
+            allocate(mappedValues(numMesh1dBeforeMerging))
+            do i =1, numMesh1dBeforeMerging
+               mappedValues(i)=values(ndx2d+mesh1dNodeIndexes(i))
+            enddo  
+            ierr = nf90_put_var(ncid, id_var(1), mappedValues, start = (/ 1, id_tsp%idx_curtime /))
+         else
+            ierr = nf90_put_var(ncid, id_var(1), values(ndx2d+1:ndxi), start = (/ 1, id_tsp%idx_curtime /))
+         end if
       end if
       ! Internal 2d flownodes. Horizontal position: faces in 2d mesh.
       if (ndx2d > 0) then
@@ -11834,18 +11847,32 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
       end if
    end if
 
-   ! 1D flow grid geometry + 1D2D connections
-   ndx1d = ndxi - ndx2d
+   ! Temporary UGRID fix
+   if(numMesh1dBeforeMerging>0) then
+      ndx1d=numMesh1dBeforeMerging
+   else
+      ! 1D flow grid geometry + 1D2D connections
+      ndx1d = ndxi - ndx2d
+   endif
+   
    n1d2dcontacts = 0
    if (ndx1d > 0) then
       
       ! First store pure 1D nodes (in flow node order), start counting at 1.call realloc(x1dn, ndx1d)
       call realloc(x1dn, ndx1d)
       call realloc(y1dn, ndx1d)
-      do n=1,ndx1d
-         x1dn(n) = xz(ndx2d+n)
-         y1dn(n) = yz(ndx2d+n)
-      end do
+      ! Temporary UGRID fix
+      if(numMesh1dBeforeMerging>0) then
+         do n =1,ndx1d
+            x1dn(n)=xz(ndx2d+mesh1dNodeIndexes(n))
+            y1dn(n)=xz(ndx2d+mesh1dNodeIndexes(n))
+         enddo  
+      else
+         do n=1,ndx1d
+            x1dn(n) = xz(ndx2d+n)
+            y1dn(n) = yz(ndx2d+n)
+         enddo
+      endif
       
       !count 1d mesh edges and 1d2d contacts 
       n1dedges = 0 
@@ -11870,7 +11897,6 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
       !assign values to mesh edges 1d2d contacts 
       n1dedges = 0 
       n1d2dcontacts = 0
-      ndx1d = ndxi - ndx2d
       do L=1,lnx1d
          if (kcu(L) == 1) then
             n1dedges = n1dedges + 1
@@ -11882,20 +11908,13 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
             n1d2dcontacts = n1d2dcontacts + 1
             id_tsp%contactstoln(n1d2dcontacts) = L
             contacttype(n1d2dcontacts) = kcu(L) !contact type can be 3 or 4
-            call realloc(x1dn, ndx1d+n1d2dcontacts) ! TODO: AvD: introduce realloc growby
-            call realloc(y1dn, ndx1d+n1d2dcontacts)
             if (ln(1,L) > ndx2d) then ! First point of 1D link is 1D cell
                contacts(1,n1d2dcontacts) = ln(1,L) - ndx2d
                contacts(2,n1d2dcontacts) = ln(2,L)   ! In m_flowgeom: 1D nodenr = ndx2d+n, in UGRID 1D flowgeom: local 1D nodenr = n.
-               x1dn(n1d2dcontacts)       = xz(ln(2,L))
-               y1dn(n1d2dcontacts)       = yz(ln(2,L))
             else                       ! Second point of 1D link is 1D cell
                contacts(1,n1d2dcontacts) = ln(2,L) - ndx2d !1d
                contacts(2,n1d2dcontacts) = ln(1,L)         !2d
-               x1dn(n1d2dcontacts)       = xz(ln(1,L))
-               y1dn(n1d2dcontacts)       = yz(ln(1,L))
             end if
-
          else
             continue
          endif
@@ -11915,8 +11934,8 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
                                        numMesh1dBeforeMerging, mesh1dNodeIds, mesh1dNodeIndexes)
          else
          ierr = ug_write_mesh_arrays(ncid, id_tsp%meshids1d, 'mesh1d', 1, UG_LOC_NODE + UG_LOC_EDGE, ndx1d, n1dedges, 0, 0, &
-                                       edge_nodes, face_nodes, null(), null(), null(), x1dn, y1dn, xu(id_tsp%edgetoln(:)), yu(id_tsp%edgetoln(:)), xz(1:1), yz(1:1), &
-                                       crs, -999, dmiss, start_index, layer_count, layer_type, layer_zs, interface_zs)
+                                     edge_nodes, face_nodes, null(), null(), null(), x1dn, y1dn, xu(id_tsp%edgetoln(:)), yu(id_tsp%edgetoln(:)), xz(1:1), yz(1:1), &
+                                     crs, -999, dmiss, start_index, layer_count, layer_type, layer_zs, interface_zs)
          endif         
       endif
 
