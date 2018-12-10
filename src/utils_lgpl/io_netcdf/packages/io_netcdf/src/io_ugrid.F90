@@ -1158,7 +1158,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
       end if
 #endif
 
-      ierr = ug_def_var(ncid, meshids%varids(mid_nodez), (/ meshids%dimids(mdim_node) /), nf90_double, UG_LOC_NODE, &
+      ierr = ug_def_var(ncid, meshids%varids(mid_nodez), (/meshids%dimids(mdim_node) /), nf90_double, UG_LOC_NODE, &
          meshName, 'node_z', 'altitude', 'z-coordinate of mesh nodes', 'm', '', crs, dfill=dmiss)
 
 
@@ -1166,9 +1166,8 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
       !some results might still be saved at the edges, also for 1d 
       ierr = nf90_def_dim(ncid, 'n'//prefix//'_edge',        numEdge,   meshids%dimids(mdim_edge))   
       ierr = ug_create_1d_network(ncid, networkids, network1dname, size(nnodex), nbranches, ngeometry)
-      ierr = ug_create_1d_mesh(ncid, network1dname, meshids, meshname, numNode, numMesh1dBeforeMerging)
-      ierr = ug_def_mesh_ids(ncid, meshids, meshname, UG_LOC_NODE, numMesh1dBeforeMerging)
-      ierr = ug_def_mesh_original_ids_and_mapping(ncid, meshids, meshname, numMesh1dBeforeMerging)
+      ierr = ug_create_1d_mesh(ncid, network1dname, meshids, meshname, numNode)
+      ierr = ug_def_mesh_ids(ncid, meshids, meshname, UG_LOC_NODE)
    endif
    
    if (ierr /= UG_NOERR) then
@@ -1372,9 +1371,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
          ierr = ug_put_1d_network_branchorder(ncid, networkids, nbranchorder)
          ierr = ug_write_1d_network_branches_geometry(ncid, networkids, ngeopointx, ngeopointy)
          ! write mesh1d
-         ierr = ug_put_1d_mesh_discretisation_points(ncid, meshids, branchidx, branchoffsets, start_index)
-         ! write mesh1d mapping
-         ierr = ug_put_mesh_original_ids_and_mapping(ncid, meshids, mesh1dNodeIds, mesh1dNodeIndexes, start_index)         
+         ierr = ug_put_1d_mesh_discretisation_points(ncid, meshids, branchidx, branchoffsets, start_index)   
       endif
         ! always write edge nodes
         ierr = nf90_put_var(ncid, meshids%varids(mid_edgenodes), edge_nodes, count=(/ 2, numEdge /))
@@ -3504,12 +3501,11 @@ function ug_create_1d_network(ncid, netids, networkName, nNodes, nBranches,nGeom
 end function ug_create_1d_network
 
 !> This function creates a 1d mesh accordingly to the new 1d format. 
-function ug_create_1d_mesh(ncid, networkname, meshids, meshname, nmeshpoints, nmeshpointsOriginal) result(ierr)
+function ug_create_1d_mesh(ncid, networkname, meshids, meshname, nmeshpoints) result(ierr)
    
    integer, intent(in)                  :: ncid, nmeshpoints
    type(t_ug_mesh), intent(inout)       :: meshids   
    character(len=*),intent(in)          :: meshname, networkname
-   integer, optional                    :: nmeshpointsOriginal
    !locals
    integer                              :: ierr, wasInDefine
 
@@ -3537,14 +3533,6 @@ function ug_create_1d_mesh(ncid, networkname, meshids, meshname, nmeshpoints, nm
    endif
    ierr = nf90_inq_dimid(ncid, 'n'//prefix//'_edge', meshids%dimids(mdim_edge))  
    
-   ! Put an additional dimension for original mesh points
-   if (present(nmeshpointsOriginal)) then
-      ierr = nf90_inq_dimid(ncid, 'n'//prefix//'_node_original', meshids%dimids(mdim_node_original))
-	  if ( ierr /= UG_NOERR) then 
-	     ierr  = nf90_def_dim(ncid, 'n'//prefix//'_node_original', nmeshpointsOriginal, meshids%dimids(mdim_node_original))
-	   endif
-   endif
-
    !define mesh1d accordingly to the UGRID format
    ierr = nf90_def_var(ncid, prefix, nf90_int, meshids%varids(mid_meshtopo))
    ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'cf_role','mesh_topology')
@@ -3554,21 +3542,12 @@ function ug_create_1d_mesh(ncid, networkname, meshids, meshname, nmeshpoints, nm
    ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'node_dimension','n'//prefix//'_node')
    ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'node_coordinates', prefix//'_nodes_branch_id '//prefix//'_nodes_branch_offset')
    
-   if (present(nmeshpointsOriginal)) then
-      ! 1. mesh1D :assign the branch number to each node
-      ierr = nf90_def_var(ncid, prefix//'_nodes_branch_id', nf90_int, (/ meshids%dimids(mdim_node_original) /) , meshids%varids(mid_1dmeshtobranch))
-      ierr = nf90_put_att(ncid, meshids%varids(mid_1dmeshtobranch), 'long_name', 'Number of the branch on which the node is located')
-      ! 2. mesh1D :assign the the offset from the starting node
-      ierr = nf90_def_var(ncid, prefix//'_nodes_branch_offset', nf90_double, (/ meshids%dimids(mdim_node_original) /) , meshids%varids(mid_1doffset))
-      ierr = nf90_put_att(ncid, meshids%varids(mid_1doffset), 'long_name', 'Offset along the branch at which the node is located')
-   else
-      ! 1. mesh1D :assign the branch number to each node
-      ierr = nf90_def_var(ncid, prefix//'_nodes_branch_id', nf90_int, (/ meshids%dimids(mdim_node) /) , meshids%varids(mid_1dmeshtobranch))
-      ierr = nf90_put_att(ncid, meshids%varids(mid_1dmeshtobranch), 'long_name', 'Number of the branch on which the node is located')
-      ! 2. mesh1D :assign the the offset from the starting node
-      ierr = nf90_def_var(ncid, prefix//'_nodes_branch_offset', nf90_double, (/ meshids%dimids(mdim_node) /) , meshids%varids(mid_1doffset))
-      ierr = nf90_put_att(ncid, meshids%varids(mid_1doffset), 'long_name', 'Offset along the branch at which the node is located')   
-   endif
+   ! 1. mesh1D :assign the branch number to each node
+   ierr = nf90_def_var(ncid, prefix//'_nodes_branch_id', nf90_int, (/ meshids%dimids(mdim_node) /) , meshids%varids(mid_1dmeshtobranch))
+   ierr = nf90_put_att(ncid, meshids%varids(mid_1dmeshtobranch), 'long_name', 'Number of the branch on which the node is located')
+   ! 2. mesh1D :assign the the offset from the starting node
+   ierr = nf90_def_var(ncid, prefix//'_nodes_branch_offset', nf90_double, (/ meshids%dimids(mdim_node) /) , meshids%varids(mid_1doffset))
+   ierr = nf90_put_att(ncid, meshids%varids(mid_1doffset), 'long_name', 'Offset along the branch at which the node is located')   
    
    if (wasInDefine==0) then
       ierr = nf90_enddef(ncid)
@@ -3577,14 +3556,13 @@ function ug_create_1d_mesh(ncid, networkname, meshids, meshname, nmeshpoints, nm
 end function ug_create_1d_mesh
 
 !> This function defines the ids of a specific entity (node/edge/face) on the current mesh and creates the variable to store the ids
-function ug_def_mesh_ids(ncid, meshids, meshname, locationType, nmeshpointsOriginal) result(ierr)
+function ug_def_mesh_ids(ncid, meshids, meshname, locationType) result(ierr)
 
    integer, intent(in)                  :: ncid, locationType
    type(t_ug_mesh), intent(inout)       :: meshids
    character(len=*),intent(in)          :: meshname
    character(len=len_trim(meshname))    :: prefix
    integer                              :: ierr, wasInDefine
-   integer, optional                    :: nmeshpointsOriginal
 
    prefix=trim(meshname)
 
@@ -3606,29 +3584,16 @@ function ug_def_mesh_ids(ncid, meshids, meshname, locationType, nmeshpointsOrigi
    endif
 
    if(locationType == UG_LOC_NODE ) then
-      if (present(nmeshpointsOriginal)) then
-         !ids
-         ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'node_ids',prefix//'_node_ids')
-         ierr = nf90_def_var(ncid, prefix//'_node_ids', nf90_char, (/ meshids%dimids(mdim_idstring), meshids%dimids(mdim_node_original) /) , meshids%varids(mid_node_ids))
-         ierr = nf90_put_att(ncid, meshids%varids(mid_node_ids), 'long_name', 'the node ids')
-         ierr = nf90_put_att(ncid, meshids%varids(mid_node_ids), 'mesh', prefix)
-         !long_names
-         ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'node_long_names',prefix//'_node_long_names')
-         ierr = nf90_def_var(ncid, prefix//'_node_long_names', nf90_char, (/ meshids%dimids(mdim_longnamestring), meshids%dimids(mdim_node_original) /) , meshids%varids(mid_node_longnames))
-         ierr = nf90_put_att(ncid, meshids%varids(mid_node_longnames), 'long_name', 'the node long names')
-         ierr = nf90_put_att(ncid, meshids%varids(mid_node_longnames), 'mesh', prefix)
-      else
-	     !ids
-         ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'node_ids',prefix//'_node_ids')
-         ierr = nf90_def_var(ncid, prefix//'_node_ids', nf90_char, (/ meshids%dimids(mdim_idstring), meshids%dimids(mdim_node) /) , meshids%varids(mid_node_ids))
-         ierr = nf90_put_att(ncid, meshids%varids(mid_node_ids), 'long_name', 'the node ids')
-         ierr = nf90_put_att(ncid, meshids%varids(mid_node_ids), 'mesh', prefix)
-         !long_names
-         ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'node_long_names',prefix//'_node_long_names')
-         ierr = nf90_def_var(ncid, prefix//'_node_long_names', nf90_char, (/ meshids%dimids(mdim_longnamestring), meshids%dimids(mdim_node) /) , meshids%varids(mid_node_longnames))
-         ierr = nf90_put_att(ncid, meshids%varids(mid_node_longnames), 'long_name', 'the node long names')
-         ierr = nf90_put_att(ncid, meshids%varids(mid_node_longnames), 'mesh', prefix)
-	  endif      
+      !ids
+      ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'node_ids',prefix//'_node_ids')
+      ierr = nf90_def_var(ncid, prefix//'_node_ids', nf90_char, (/ meshids%dimids(mdim_idstring), meshids%dimids(mdim_node) /) , meshids%varids(mid_node_ids))
+      ierr = nf90_put_att(ncid, meshids%varids(mid_node_ids), 'long_name', 'the node ids')
+      ierr = nf90_put_att(ncid, meshids%varids(mid_node_ids), 'mesh', prefix)
+      !long_names
+      ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'node_long_names',prefix//'_node_long_names')
+      ierr = nf90_def_var(ncid, prefix//'_node_long_names', nf90_char, (/ meshids%dimids(mdim_longnamestring), meshids%dimids(mdim_node) /) , meshids%varids(mid_node_longnames))
+      ierr = nf90_put_att(ncid, meshids%varids(mid_node_longnames), 'long_name', 'the node long names')
+      ierr = nf90_put_att(ncid, meshids%varids(mid_node_longnames), 'mesh', prefix)     
    else if (locationType == UG_LOC_EDGE ) then
       !ids
       ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'edge_ids',prefix//'_edge_ids')
@@ -4773,123 +4738,5 @@ function ug_get_contact_name(ncid, contactids, meshContactName) result(ierr)
       Call SetMessage(Level_Fatal, ug_messagestr)
    end if
 end function ug_get_contact_name
-
-!-------------------------------------------------------------------------------------------------------------------! 
-!-------------------------------------------------------------------------------------------------------------------!
-
-!> This function defines two arrays: the mesh ids as originally read in the input net file and the ids-mesh node mapping (required if an engine re-maps the mesh nodes)
-function ug_def_mesh_original_ids_and_mapping(ncid, meshids, meshname, nmeshpointsOriginal) result(ierr)
-
-   integer, intent(in)                  :: ncid
-   type(t_ug_mesh), intent(inout)       :: meshids
-   character(len=*),intent(in)          :: meshname
-   character(len=len_trim(meshname))    :: prefix
-   integer                              :: ierr, wasInDefine
-   integer                              :: nmeshpointsOriginal
-
-   prefix=trim(meshname)
-
-   ierr = UG_SOMEERR
-   
-   wasInDefine = 0
-   ierr = nf90_redef(ncid) 
-   if (ierr == nf90_eindefine) then
-      wasInDefine = 1 ! Was still in define mode.
-   endif  
-
-   ierr = nf90_inq_dimid(ncid, 'idstrlength', meshids%dimids(mdim_idstring))
-   if ( ierr /= UG_NOERR) then 
-   ierr = nf90_def_dim(ncid, 'idstrlength', ug_idsLen, meshids%dimids(mdim_idstring))   
-   endif
-   ierr = nf90_inq_dimid(ncid, 'n'//prefix//'_node_original', meshids%dimids(mdim_node_original))
-   if ( ierr /= UG_NOERR) then 
-         ierr  = nf90_def_dim(ncid, 'n'//prefix//'_node_original', nmeshpointsOriginal, meshids%dimids(mdim_node_original))
-   endif
-   
-   ! original ids
-   ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'node_ids_original',prefix//'_node_ids_original')
-   ierr = nf90_def_var(ncid, prefix//'_node_ids_original', nf90_char, (/ meshids%dimids(mdim_idstring), meshids%dimids(mdim_node_original) /) , meshids%varids(mid_node_ids_original))
-   ierr = nf90_put_att(ncid, meshids%varids(mid_node_ids_original), 'long_name', 'the original node ids')
-   ierr = nf90_put_att(ncid, meshids%varids(mid_node_ids_original), 'mesh', prefix)
-   ! mapping of current indexes to ids
-   ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'node_mapping_original',prefix//'_node_mapping_original')
-   ierr = nf90_def_var(ncid, prefix//'_node_mapping_original', nf90_int, meshids%dimids(mdim_node_original), meshids%varids(mid_node_mapping_original))
-   ierr = nf90_put_att(ncid, meshids%varids(mid_node_mapping_original), 'long_name', 'the mapping of the original ids to current node indexes')
-   ierr = nf90_put_att(ncid, meshids%varids(mid_node_mapping_original), 'mesh', prefix)
-
-   if (wasInDefine==0) then
-      ierr = nf90_enddef(ncid)
-   endif
-
-end function ug_def_mesh_original_ids_and_mapping
-
-!> This function puts the original mesh ids and ids-mesh node mapping
-function ug_put_mesh_original_ids_and_mapping(ncid, meshids, meshNodeIds, meshNodeIndexes, startIndex) result(ierr)
-
-   integer                              :: ncid
-   type(t_ug_mesh), intent(in)          :: meshids
-   character(len=ug_idsLen), intent(in) :: meshNodeIds(:)  
-   integer, intent(in)                  :: meshNodeIndexes(:)  
-   integer                              :: startIndex
-   integer                              :: ierr
-   
-   ! Locals
-   integer, allocatable                 :: localMeshNodeIndexes(:)
-
-   ierr = UG_SOMEERR
-   ierr = nf90_enddef(ncid) !Put the NetCDF in write mode
-   
-   ! We always put the variable 0 based
-   if (startIndex.ne.-1) then
-      allocate(localMeshNodeIndexes(size(meshNodeIndexes)))      
-      localMeshNodeIndexes = meshNodeIndexes
-      ierr = ug_convert_start_index(localMeshNodeIndexes, startIndex, 0)
-   endif
-   
-   ierr = nf90_put_var(ncid, meshids%varids(mid_node_ids_original), meshNodeIds) 
-   ierr = nf90_put_var(ncid, meshids%varids(mid_node_mapping_original), localMeshNodeIndexes) 
-
-end function ug_put_mesh_original_ids_and_mapping
-
-!> get original dimension of the mesh nodes
-function ug_get_node_original_count(meshids, node_original_count) result(ierr)
-
-   integer                          :: ncid   
-   type(t_ug_mesh), intent(in)      :: meshids
-   integer, intent(inout)           :: node_original_count
-   integer                          :: ierr
-   
-   ierr = UG_SOMEERR   
-   ierr = nf90_get_var(ncid, meshids%dimids(mdim_node_original), node_original_count) 
-
-end function ug_get_node_original_count
-
-!> get meshNodeIds and meshNodeIndexes
-function ug_get_mesh_original_ids_and_mapping(ncid, meshids, node_ids_original, node_mapping_original) result(ierr)
-
-   integer                          :: ncid
-   type(t_ug_mesh), intent(in)      :: meshids
-   character(len=*), intent(inout)  :: node_ids_original(:)  
-   integer, intent(inout)           :: node_mapping_original(:)
-   integer                          :: ierr
-   
-   !if (present(startIndex)) then
-   !   !we check for the start_index, we do not know if the variable was written as 0 based
-   !   ierr = nf90_get_att(ncid, meshids%varids(mid_edgefaces),'start_index', varStartIndex)  
-   !   if (ierr .eq. UG_NOERR) then
-   !      ierr = ug_convert_start_index(edge_faces(1,:), varStartIndex, startIndex)
-   !      ierr = ug_convert_start_index(edge_faces(2,:), varStartIndex, startIndex)
-   !   else
-   !      ierr = ug_convert_start_index(edge_faces(1,:), 0, startIndex)
-   !      ierr = ug_convert_start_index(edge_faces(2,:), 0, startIndex)
-   !   endif
-   !endif
-   
-   
-   ierr = UG_SOMEERR   
-   ierr = nf90_get_var(ncid, meshids%varids(mid_node_ids_original), node_ids_original) 
-   ierr = nf90_get_var(ncid, meshids%varids(mid_node_mapping_original), node_mapping_original) 
-
-end function ug_get_mesh_original_ids_and_mapping
 
 end module io_ugrid
