@@ -483,7 +483,7 @@ module m_fourier_analysis
           foutyp(ifou+1)     = 'v'
           fouref(ifou,1)   = fouid
           fouref(ifou+1,1)   = fouid
-       elseif (founam(ifou)=='uc') then                     ! absolute wind-speed 
+       elseif (founam(ifou)=='uc') then                     ! absolute cell-centre velocity magnitude
           founam(ifou)   = 'uc              '
           foutyp(ifou)   = 's'
           fouref(ifou,1) = fouid
@@ -658,7 +658,6 @@ module m_fourier_analysis
             founam(ifou)(1:3)/='tau' .and. &
             founam(ifou)(1:3)/='uxa' .and. &
             founam(ifou)(1:3)/='uya' .and. &
-            founam(ifou)(1:3)/='uc'  .and. &
             founam(ifou)(1:2)/='ws') then
           fmt = '(i    )'
           nopos = len_trim(columns(7))
@@ -2256,9 +2255,9 @@ end subroutine setfouunit
           enddo
           fouvar = fouref(ifou,2)
           ierror = unc_put_var_map(fileids%ncid,fileids%id_tsp, idvar(:,fouvar),   iloc, glbarr3(1:nmaxus,1,1))          ! write amplitudes
-          if (fouelp(ifou)=='x' .and. founam(ifou)=='s1') then
+          if ((fouelp(ifou)=='i' .or. fouelp(ifou)=='x') .and. founam(ifou)=='s1') then
              !
-             ! Write max waterdepth too
+             ! Write min or max waterdepth too
              !
              do n = 1, nmaxus
                 do m = 1, mmax
