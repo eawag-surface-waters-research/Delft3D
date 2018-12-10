@@ -26,6 +26,7 @@ program test_deltares_common
     use test_sorting_algorithms
     use test_combinepaths
     use test_precision_basics
+    use test_hash_search
 
     implicit none
 
@@ -38,6 +39,7 @@ program test_deltares_common
     call tests_sorting
     call tests_combinepaths
     call tests_precision_basics
+    call tests_hash_search
 
     !
     ! Done - properly finalize
