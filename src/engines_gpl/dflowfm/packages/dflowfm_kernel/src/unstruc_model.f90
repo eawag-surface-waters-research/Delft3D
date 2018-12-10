@@ -203,10 +203,11 @@ implicit none
                                                                     'NetCDF-UGRID' ]
 
     integer                                   :: md_mapformat !< map file output format (one of IFORMAT_*)
-    integer                                   :: md_fou_step  !< determines if fourier analysis is updated at the end of the user time step or comp. time step
     integer                                   :: md_unc_conv  !< Unstructured NetCDF conventions (either UNC_CONV_CFOLD or UNC_CONV_UGRID)
 
     integer                                   :: md_ncformat  !< NetCDF format (3: classic, 4: NetCDF4+HDF5)
+
+    integer                                   :: md_fou_step  !< determines if fourier analysis is updated at the end of the user time step or comp. time step
 contains
 
 
@@ -1273,6 +1274,8 @@ subroutine readMDUFile(filename, istat)
     call prop_get_string(md_ptr, 'output', 'ObsFile', md_obsfile, success)
     call prop_get_string(md_ptr, 'output', 'CrsFile', md_crsfile, success)
     call prop_get_string(md_ptr, 'output', 'FouFile', md_foufile, success)
+    call prop_get_integer(md_ptr, 'output', 'FouUpdateStep', md_fou_step, success)
+
 
     call prop_get_string(md_ptr, 'output', 'HisFile', md_hisfile, success)
     ti_his_array = 0d0
@@ -1292,7 +1295,6 @@ subroutine readMDUFile(filename, istat)
     call getOutputTimeArrays(ti_map_array, ti_maps, ti_map, ti_mape, success)
 
     call prop_get_integer(md_ptr, 'output', 'MapFormat', md_mapformat, success)
-    call prop_get_integer(md_ptr, 'output', 'FouUpdateStep', md_fou_step, success)
     if (md_mapformat == IFORMAT_UGRID) then
        md_unc_conv = UNC_CONV_UGRID
     else
@@ -2578,6 +2580,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     call prop_set(prop_ptr, 'output', 'ObsFile',     trim(md_obsfile), 'Points file *.xyn with observation stations with rows x, y, station name')
     call prop_set(prop_ptr, 'output', 'CrsFile',     trim(md_crsfile), 'Polyline file *_crs.pli defining observation cross sections')
     call prop_set(prop_ptr, 'output', 'FouFile',     trim(md_foufile), 'Fourier analysis input file *.fou')
+    call prop_set(prop_ptr, 'output', 'FouUpdateStep', md_fou_step,    'Fourier update step type: 0=every user time step, 1=every computational timestep.')
 
     call prop_set(prop_ptr, 'output', 'HisFile',     trim(md_hisfile), 'HisFile name *_his.nc')
     call prop_set(prop_ptr, 'output', 'MapFile',     trim(md_mapfile), 'MapFile name *_map.nc')

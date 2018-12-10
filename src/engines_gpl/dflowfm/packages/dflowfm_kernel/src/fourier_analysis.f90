@@ -219,7 +219,7 @@ module m_fourier_analysis
        istat = 0
        !
        ! Arrays for Fourier analysis (fourier.igs)
-       !,
+       !
        if (istat == 0) allocate (gdfourier%fconno  (1:nofou), STAT = istat)
        if (istat == 0) allocate (gdfourier%flayno  (1:nofou), STAT = istat)
        if (istat == 0) allocate (gdfourier%fnumcy  (1:nofou), STAT = istat)
@@ -1375,7 +1375,7 @@ end subroutine setfouunit
        else
           !
           ! requested fourier analysis undefined
-          !r
+          !
           write(msgbuf,'(a)') 'Fourier analysis: variable keyword '''//trim(columns(1))//''' not recognized, ignored' 
           call msg_flush()
           continue
@@ -1442,7 +1442,6 @@ end subroutine setfouunit
     integer                              , pointer :: mub
     integer                              , pointer :: nmaxus
     integer                              , pointer :: kmax
-    type (gd_dimens)                      , pointer :: gddimensPtr
 
     double precision, pointer        :: fieldptr1(:,:)
     double precision, pointer        :: bl_ptr(:,:)
@@ -1471,15 +1470,14 @@ end subroutine setfouunit
     founam              => gdfourier%founam
     foutyp              => gdfourier%foutyp
     
-    gddimensPtr         => gddimens
-    nmax                => gddimensPtr%nmax
-    mmax                => gddimensPtr%mmax
-    nlb                 => gddimensPtr%nlb
-    nub                 => gddimensPtr%nub
-    mlb                 => gddimensPtr%mlb
-    mub                 => gddimensPtr%mub
-    nmaxus              => gddimensPtr%nmaxus
-    kmax                => gddimensPtr%kmax
+    nmax                => gddimens%nmax
+    mmax                => gddimens%mmax
+    nlb                 => gddimens%nlb
+    nub                 => gddimens%nub
+    mlb                 => gddimens%mlb
+    mub                 => gddimens%mub
+    nmaxus              => gddimens%nmaxus
+    kmax                => gddimens%kmax
     
     bl_ptr(1:gddimens%ndx,1:1) => bl
     kfs_ptr(1:gddimens%ndx,1:1) => kfs
@@ -1524,8 +1522,8 @@ end subroutine setfouunit
                 fieldptr1(1:gddimens%ndx,1:1) => taus
              case default 
                 continue         ! Unknown FourierVariable exception 
-             end select 
-             call fouana(ifou ,kfs_ptr ,kfst0_ptr ,nst ,fieldptr1 ,bl_ptr ,gdfourier ,gddimensPtr)
+             end select
+             call fouana(ifou ,kfs_ptr ,kfst0_ptr ,nst ,fieldptr1 ,bl_ptr ,gdfourier ,gddimens_ptr)
              ifou = ifou + 1
           else 
              !
@@ -1537,9 +1535,8 @@ end subroutine setfouunit
        ! Write results of fourier analysis to data file
        ! only once when all fourier periods are complete
        !
-       if (nst==fouwrt) then                                        
-!         call wrfou(trifil ,dtsec ,versio ,const_names ,itdate ,hdt ,tzone ,gdfourier ,gddimens)
-          call wrfou(trifil ,dtsec ,versio ,const_names ,itdate ,hdt ,tzone ,gdfourier ,gddimensPtr)
+       if (nst==fouwrt) then
+          call wrfou(trifil ,dtsec ,versio ,const_names ,itdate ,hdt ,tzone ,gdfourier ,gddimens_ptr)
        endif
     endif   
     end subroutine postpr_fourier
