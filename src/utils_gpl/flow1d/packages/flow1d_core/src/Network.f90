@@ -503,12 +503,19 @@ contains
                   if (ibran == network%crs%cross(crossOrder(icrs2))%branchid) then
                      
                      if (.not. interpolDone) then
-                        adm%line2cross(ilnk)%c1 = crossOrder(icrs1)
-                        adm%line2cross(ilnk)%c2 = crossOrder(icrs2)
-                        f  = (offsetu - offset1) / (offset2 - offset1)
-                        f = max(f, 0.0d0) 
-                        f = min(f, 1.0d0) 
-                        adm%line2cross(ilnk)%f = f
+                        if (icrs1 == icrs2) then 
+                            adm%line2cross(ilnk)%c1 = crossOrder(icrs1)
+                            adm%line2cross(ilnk)%c2 = crossOrder(icrs2)
+                            f = 1.0d0
+                            adm%line2cross(ilnk)%f = f
+                        else    
+                            adm%line2cross(ilnk)%c1 = crossOrder(icrs1)
+                            adm%line2cross(ilnk)%c2 = crossOrder(icrs2)
+                            f  = (offsetu - offset1) / (offset2 - offset1)
+                            f = max(f, 0.0d0) 
+                            f = min(f, 1.0d0) 
+                            adm%line2cross(ilnk)%f = f
+                        endif 
                      endif
                      
                   else

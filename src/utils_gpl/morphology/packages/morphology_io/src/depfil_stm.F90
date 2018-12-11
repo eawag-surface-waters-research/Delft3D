@@ -127,7 +127,7 @@ subroutine depfil_stm(lundia    ,error     ,fildep    ,fmttmp    , &
       allocate (array1d(ngrid), stat=ierror)
       array1d = dmiss
 
-      CALL triinterp2(dims%xz, dims%yz, array1d, dims%nmmax, jdla, & 
+      CALL triinterp2(dims%xz, dims%yz, array1d, ngrid, jdla, & 
                       XS, YS, ZS(1,:), NS, dmiss, jsferic, jins, jasfer3D, NPL, 0, 0, XPL, YPL, ZPL, transformcoef)
       array(ifld,:,1) = array1d
       deallocate(array1d, stat=ierror)
@@ -250,7 +250,7 @@ subroutine depfil_stm_double(lundia    ,error     ,fildep    ,fmttmp    , &
       allocate (array1d(ngrid), stat=ierror)
       array1d = dmiss
 
-      CALL triinterp2(dims%xz, dims%yz, array1d, dims%nmmax, jdla, & 
+      CALL triinterp2(dims%xz, dims%yz, array1d, ngrid, jdla, & 
                       XS, YS, ZS(1,:), NS, dmiss, jsferic, jins, jasfer3D, NPL, 0, 0, XPL, YPL, ZPL, transformcoef)
       array(ifld,:,1) = array1d
       deallocate(array1d, stat=ierror)
