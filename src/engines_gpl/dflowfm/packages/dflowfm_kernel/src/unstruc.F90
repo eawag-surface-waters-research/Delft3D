@@ -41508,7 +41508,7 @@ double precision :: prair=0.7d0, pr2=.49d0, xnuair=16d-6, cfree=0.14d0
 
 double precision :: rdry=287.05d-2 , rvap=461.495d-2 , evafac = 1d0
 
-double precision :: hlc, arn, wxL, wyL, uL, vL, uxL, uyL, bak2
+double precision :: hlc, arn, wxL, wyL, uL, vL, uxL, uyL, bak2, twatb
 
 double precision :: qsunsoil, qwatsoil, watsoiltransfer, rdtsdz, soiltemprev, pvtamxB, pvtwmxB
 
@@ -41623,10 +41623,11 @@ else if (jatem == 5) then
           qsunsoil = 0d0
        endif
        watsoiltransfer = 1d0/(0.5d0*Soiltempthick)           ! thermalcond sand = 0.15 -> 4 for dry -> saturated, [W/mK]
-       qwatsoil        = watsoiltransfer*( twatn - tbed(n) )
+       twatb           = constituents(itemp, kb)
+       qwatsoil        = watsoiltransfer*( twatb - tbed(n) )
        heatsrc0(kb)    = heatsrc0(kb) - rcpiba*qwatsoil
        rdtsdz          = rcpi*dts/Soiltempthick
-       tbed(n)         = ( tbed(n) + rdtsdz*( qsunsoil + watsoiltransfer* twatn )  ) / ( 1d0 + watsoiltransfer*rdtsdz )
+       tbed(n)         = ( tbed(n) + rdtsdz*( qsunsoil + watsoiltransfer* twatb )  ) / ( 1d0 + watsoiltransfer*rdtsdz )
    endif
 
 
