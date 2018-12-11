@@ -153,7 +153,7 @@ subroutine step_to_screen()
     !      & 'user time steps left  ', nst2go
     !!
     !0    .    1    .    2    .    3    .    4    .    5    .    6    .    7
-    write(msgbuf, '(4(1x,a16),i11,f8.1,a1,f12.5)') &
+    write(msgbuf, '(4(1x,a20),i11,f8.1,a1,f12.5)') &
         seconds_to_dhms(nint(time_user-tstart_user, long)), &
         seconds_to_dhms(nint(tstop_user-time_user, long)), &
         seconds_to_dhms(nint(cpusteps(3), long)), &
@@ -170,7 +170,7 @@ function seconds_to_dhms(secs_long) result(timestr)
     use precision
     implicit none
     integer(long), intent(in) :: secs_long  !< total in seconds
-    character(len=16)         :: timestr
+    character(len=20)         :: timestr
 
     integer(long) :: secs_l    !!  Copy of total seconds for computations
     integer       :: secs      !!  seconds remaining (normal integer)
@@ -201,7 +201,7 @@ function seconds_to_dhms(secs_long) result(timestr)
         secs = int(secs_l)
     endif
     if (secs >= 0) then
-        write(timestr, '(i6,a,i2,a,i2.2,a,i2.2)') days,'d ', hours, ':', mins, ':', secs
+        write(timestr, '(i10,a,i2,a,i2.2,a,i2.2)') days,'d ', hours, ':', mins, ':', secs
     else
         write(timestr, '(a6,a,a2,a,a2,a,a2)') '    ??','d ', '??', ':', '??', ':', '??'
     end if

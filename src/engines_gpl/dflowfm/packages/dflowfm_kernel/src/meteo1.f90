@@ -153,6 +153,11 @@ module m_meteo
    integer, target :: item_hac_airtemperature                                !< Unique Item id of the ext-file's 'airtemperature' quantity
    integer, target :: item_hac_cloudiness                                    !< Unique Item id of the ext-file's 'cloudiness' quantity
 
+   integer, target :: item_humidity                                          !< 'humidity' quantity
+   integer, target :: item_airtemperature                                    !< 'airtemperature' quantity
+   integer, target :: item_cloudiness                                        !< 'cloudiness' quantity
+   integer, target :: item_solarradiation                                    !< 'solarradiation' quantity
+   
    integer, target :: item_discharge_salinity_temperature_sorsin             !< Unique Item id of the ext-file's 'discharge_salinity_temperature_sorsin' quantity
    integer, target :: item_hrms                                              !< Unique Item id of the ext-file's 'item_hrms' quantity
    integer, target :: item_tp                                                !< Unique Item id of the ext-file's 'item_tp' quantity
@@ -229,6 +234,10 @@ module m_meteo
       item_hacs_airtemperature                   = ec_undef_int
       item_hacs_cloudiness                       = ec_undef_int
       item_hacs_solarradiation                   = ec_undef_int
+      item_humidity                              = ec_undef_int
+      item_airtemperature                        = ec_undef_int
+      item_cloudiness                            = ec_undef_int
+      item_solarradiation                        = ec_undef_int
       item_hac_humidity                          = ec_undef_int
       item_hac_airtemperature                    = ec_undef_int
       item_hac_cloudiness                        = ec_undef_int
@@ -549,6 +558,18 @@ module m_meteo
             dataPtr3 => clou
             itemPtr4 => item_dacs_solarradiation 
             dataPtr4 => qrad
+         case ('humidity')
+            itemPtr1 => item_humidity
+            dataPtr1 => rhum                 ! Relative humidity 
+         case ('airtemperature')
+            itemPtr1 => item_airtemperature
+            dataPtr1 => tair                
+         case ('cloudiness')
+            itemPtr1 => item_cloudiness
+            dataPtr1 => clou                 
+         case ('solarradiation')
+            itemPtr1 => item_solarradiation
+            dataPtr1 => qrad                
          case ('nudge_salinity_temperature')
             itemPtr2 => item_nudge_sal
             dataPtr2 => nudge_sal 
@@ -1024,7 +1045,7 @@ module m_meteo
          ! Converter will put qh value in target_array(n_qhbnd)
          if (success) success = ecSetConverterElement(ecInstancePtr, converterId, n_qhbnd)
       case ('windx', 'windy', 'windxy', 'stressxy', 'airpressure', 'atmosphericpressure', 'airpressure_windx_windy', &
-            'airpressure_windx_windy_charnock', 'airpressure_stressx_stressy')
+            'airpressure_windx_windy_charnock', 'airpressure_stressx_stressy','humidity','airtemperature','cloudiness','solarradiation' )
          if (present(srcmaskfile)) then 
             if (ec_filetype == provFile_arcinfo .or. ec_filetype == provFile_curvi) then
                if (.not.ecParseARCinfoMask(srcmaskfile, srcmask, fileReaderPtr)) then
@@ -1437,6 +1458,14 @@ module m_meteo
             if (success) success = ecAddItemConnection(ecInstancePtr, item_dacs_airtemperature, connectionId)
             if (success) success = ecAddItemConnection(ecInstancePtr, item_dacs_cloudiness, connectionId)
             if (success) success = ecAddItemConnection(ecInstancePtr, item_dacs_solarradiation, connectionId)
+         case ('humidity')
+            sourceItemName = 'relative_humidity'
+         case ('airtemperature')
+            sourceItemName = 'air_temperature'
+         case ('cloudiness')
+            sourceItemName = 'cloudfraction'
+         case ('solarradiation')
+            sourceItemName = 'sw_radiation_flux'
          case ('nudge_salinity_temperature')
             if (ec_filetype == provFile_netcdf) then
                sourceItemId   = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'sea_water_potential_temperature')
@@ -7637,7 +7666,7 @@ contains
       end if    
              
       do k=1,nx
-         if ( zh(k).ne.dmiss_default ) then
+         if ( zh(k) .ne. dmiss_default) then
              call operate(zu(k), zh(k), operand)
              zh(k) = zu(k)
          end if

@@ -791,7 +791,7 @@ end subroutine flow_finalize_single_timestep
               endif   
            endif   
            
-           gamhg    = 0.5d0*Cda*rnL/ag           ! gamma*h/g
+           gamhg    = 0.5d0*Cda*rnL/ag                         ! gamma*h/g
            ap       = gamhg + 1d0/(Czb*Czb)
            ! ap     = gamhg + (1d0/Czb*Czb)                    ! old=wrong
            Czr      = sqrt(1d0 / ap)
@@ -14527,6 +14527,12 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
 
            success = success .or. ec_gettimespacevalue(ecInstancePtr, 'dewpoint_airtemperature_cloudiness_solarradiation', tim)
 
+       else if (itempforcingtyp == 5) then    
+
+           success = success .or. ec_gettimespacevalue(ecInstancePtr, item_humidity, tim) ! hk: En bedankt voor de rename he lekker dan
+           success = success .or. ec_gettimespacevalue(ecInstancePtr, item_airtemperature, tim)
+           success = success .or. ec_gettimespacevalue(ecInstancePtr, item_solarradiation, tim)
+          
        else
             call mess(LEVEL_WARN,'No humidity, airtemperature and  cloudiness forcing found, setting temperature model [physics:Temperature] = 1 (Only transport)')
             jatem = 1
@@ -37313,12 +37319,55 @@ if (mext > 0) then
               allocate ( patm(ndx) , stat=ierr)  ; patm = 0d0
               call aerr('patm(ndx)', ierr, ndx)
            endif
-
            success = ec_addtimespacerelation(qid, xz, yz, kcs, kx, filename, filetype, method, operand, varname=varname)
-
            if (success) then
               japatm = 1
            endif
+           
+        else if (qid == 'airtemperature') then
+
+           if (.not. allocated(tair) ) then
+              allocate ( tair(ndx) , stat=ierr)  ; tair = 0d0 
+              call aerr('tair(ndx)', ierr, ndx)
+           endif
+           success = ec_addtimespacerelation(qid, xz, yz, kcs, kx, filename, filetype, method, operand, varname=varname)
+           if (success) then
+              jatair = 1 ; itempforcingtyp = 5
+           endif
+           
+        else if (qid == 'humidity') then
+
+           if (.not. allocated(rhum) ) then
+              allocate ( rhum(ndx) , stat=ierr)  ; rhum = 0d0
+              call aerr('rhum(ndx)', ierr, ndx)
+           endif
+           success = ec_addtimespacerelation(qid, xz, yz, kcs, kx, filename, filetype, method, operand, varname=varname)
+           if (success) then
+              jarhum = 1  ; itempforcingtyp = 5
+           endif
+
+        else if (qid == 'cloudiness') then
+
+           if (.not. allocated(clou) ) then
+              allocate ( clou(ndx) , stat=ierr)  ; clou = 0d0
+              call aerr('clou(ndx)', ierr, ndx)
+           endif
+           success = ec_addtimespacerelation(qid, xz, yz, kcs, kx, filename, filetype, method, operand, varname=varname)
+           if (success) then
+              jaclou = 1 ; itempforcingtyp = 5
+           endif
+     
+         else if (qid == 'solarradiation') then
+
+           if (.not. allocated(qrad) ) then
+              allocate ( qrad(ndx) , stat=ierr)  ; qrad = 0d0
+              call aerr('qrad(ndx)', ierr, ndx)
+           endif
+           success = ec_addtimespacerelation(qid, xz, yz, kcs, kx, filename, filetype, method, operand, varname=varname)
+           if (success) then
+              jasol = 1 ;  itempforcingtyp = 5
+           endif
+           
         else if (qid(1:8) == 'rainfall' ) then
 
            if (.not. allocated(rain) ) then
@@ -41571,7 +41620,6 @@ else if (jatem == 5) then
    if (japatm > 0) then
        presn = 1d-2*patm(n)
    endif
-
                              ! Solar radiation restricted by presence of clouds and reflection of water surface (albedo)
    if (jasol == 1) then      ! Measured solar radiation qradin specified in .tem file
       qsu = qrad(n) * (1d0-albedo)

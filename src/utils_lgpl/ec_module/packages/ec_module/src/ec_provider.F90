@@ -954,6 +954,36 @@ module m_ec_provider
                                                                 units=trim(ecSpiderwebAndCurviFindInFile(fileReaderPtr%fileHandle, 'unit1'))))) then
                   success = .false.
                end if
+            else if (index(lc_filename, '.amh') /= 0) then
+               ! ===== quantity: rhum
+               quantityId = ecInstanceCreateQuantity(instancePtr)
+               if (.not. (ecQuantitySet(instancePtr, quantityId, name='relative_humidity', &
+                                                                units=trim(ecSpiderwebAndCurviFindInFile(fileReaderPtr%fileHandle, 'unit1'))))) then
+                  success = .false.
+               end if
+            else if (index(lc_filename, '.amt') /= 0) then
+               ! ===== quantity: tair
+               quantityId = ecInstanceCreateQuantity(instancePtr)
+               if (.not. (ecQuantitySet(instancePtr, quantityId, name='air_temperature', &
+                                                                units=trim(ecSpiderwebAndCurviFindInFile(fileReaderPtr%fileHandle, 'unit1'))))) then
+                  success = .false.
+               end if
+            else if (index(lc_filename, '.amc') /= 0) then
+               ! ===== quantity: clou
+               quantityId = ecInstanceCreateQuantity(instancePtr)
+               if (.not. (ecQuantitySet(instancePtr, quantityId, name='cloudiness', &
+                                                                units=trim(ecSpiderwebAndCurviFindInFile(fileReaderPtr%fileHandle, 'unit1'))))) then
+                  success = .false.
+               end if
+
+            else if (index(lc_filename, '.ams') /= 0) then
+               ! ===== quantity: solrad
+               quantityId = ecInstanceCreateQuantity(instancePtr)
+               if (.not. (ecQuantitySet(instancePtr, quantityId, name='sw_radiation_flux', &
+                                                                units=trim(ecSpiderwebAndCurviFindInFile(fileReaderPtr%fileHandle, 'unit1'))))) then
+                  success = .false.
+               end if
+
             else if (index(lc_filename, '.amr') /= 0) then
                ! ===== quantity: rainfall =====
                quantityId = ecInstanceCreateQuantity(instancePtr)
