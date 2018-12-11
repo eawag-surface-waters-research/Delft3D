@@ -13743,7 +13743,7 @@ endif
        else if (inisal2D == 3) then          ! uniform below is specified    
           do k = kb, kt
              zz = 0.5d0*( zws(k) + zws(k-1) )   
-             if (zz < uniformsalinitybelowz) then
+             if (zz < uniformsalinitybelowz .and. sabot(kk) .ne. dmiss) then
                 sa1(k) = sabot(kk)  
              else
                 sa1(k) = sa1(kk)
