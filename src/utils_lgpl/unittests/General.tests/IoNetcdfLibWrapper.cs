@@ -254,6 +254,12 @@ namespace General.tests
         [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ionc_inq_varids", CallingConvention = CallingConvention.Cdecl)]
         private static extern int ionc_inq_varids_dll(ref int ioncid, ref int meshId, ref int location, ref IntPtr ptr, ref int nVar);
 
+        [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ionc_def_var", CallingConvention = CallingConvention.Cdecl)]
+        private static extern int ionc_def_var_dll(ref int ioncid, ref int meshId, ref int varId, ref int type, ref int locType, string varName, string standardName, string longName, string unit, ref double fillValue);
+
+        [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ionc_inq_varid", CallingConvention = CallingConvention.Cdecl)]
+        private static extern int ionc_inq_varid_dll(ref int ioncid, ref int meshId, string varName, ref int varId);
+
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate void IO_NetCDF_Message_Callback(int level, [MarshalAs(UnmanagedType.LPStr)]string message);
 
@@ -271,6 +277,11 @@ namespace General.tests
 
         [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ionc_put_node_coordinates", CallingConvention = CallingConvention.Cdecl)]
         private static extern int ionc_put_node_coordinates_dll(ref int ioncid, ref int meshid, ref IntPtr c_xvalues_ptr, ref IntPtr c_yvalues_ptr, ref int nNode);
+
+        [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ionc_inq_varid_by_standard_name",
+            CallingConvention = CallingConvention.Cdecl)]
+        private static extern int ionc_inq_varid_by_standard_name_dll(ref int ioncid, ref int meshId, ref int location,
+            string standardName, ref int varId);
 
         #endregion
         #region UGRID 1D Specifics
@@ -992,6 +1003,22 @@ namespace General.tests
             return ionc_put_meshgeom_dll(ref ioncid, ref  meshid, ref  networkid, ref  meshgeom, ref  meshgeomdim,  c_meshname,  c_networkName, ref  start_index);
         }
 
-
+        public int ionc_inq_varid_by_standard_name(ref int ioncid, ref int meshId, ref int location, string standardName, ref int varId)
+        {
+            return ionc_inq_varid_by_standard_name_dll(ref ioncid, ref meshId, ref location, standardName, ref varId);
+        }
+        public virtual int InqueryVariableId(int ioncId, int meshId, string varName, ref int varId)
+        {
+            return ionc_inq_varid_dll(ref ioncId, ref meshId, varName, ref varId);
+        }
+        public virtual int DefineVariable(int ioncId, int meshId, int varId, int type, int locationType, string varName, string standardName, string longName, string unit, double fillValue)
+        {
+            return ionc_def_var_dll(ref ioncId, ref meshId, ref varId, ref type, ref locationType, varName, standardName,
+             longName, unit, ref fillValue);
+        }
+        public virtual int PutVariable(int ioncId, int meshId, int locationType, string varname, IntPtr valuesPtr, int numberOfValues)
+        {
+            return ionc_put_var_dll(ref ioncId, ref meshId, ref locationType, varname, ref valuesPtr, ref numberOfValues);
+        }
     }
 }

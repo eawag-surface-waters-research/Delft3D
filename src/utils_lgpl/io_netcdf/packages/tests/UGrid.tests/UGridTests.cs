@@ -2131,11 +2131,145 @@ namespace UGrid.tests
             int newNetworkId = -1;
             ierr = wrapper.ionc_put_meshgeom(ref targetioncid, ref newMeshId, ref newNetworkId, ref mesh, ref meshdim, meshname, networkname, ref start_index);
             Assert.That(ierr, Is.EqualTo(0));
-
             //8. Close the file
             ierr = wrapper.ionc_close(ref targetioncid);
             Assert.That(ierr, Is.EqualTo(0));
         }
+
+        // Test: get only 1d network using get mesh geom
+        [Test]
+        [NUnit.Framework.Category("Read1dNetworkUsingGetMeshGeom")]
+        public void Put2dMeshUsingPutMeshGeomPutNodeZ()
+        {
+            //1. Open a netcdf file
+            string c_path = TestHelper.TestFilesDirectoryPath() + @"\Custom_Ugrid.nc";
+            Assert.IsTrue(File.Exists(c_path));
+            int ioncid  = -1; 
+            int mode    =  0; //read mode
+            var wrapper = new IoNetcdfLibWrapper();
+            var ierr = wrapper.ionc_open(c_path, ref mode, ref ioncid, ref iconvtype, ref convversion);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            //2. Get the mesh dimensions in meshdim
+            int existingMeshId = 1;
+            int existingNetworkId = -1;
+            var meshdim = new meshgeomdim();
+            ierr = wrapper.ionc_get_meshgeom_dim(ref ioncid, ref existingMeshId, ref existingNetworkId, ref meshdim);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            //3. Allocate mesh
+            var mesh = new meshgeom();
+            MeshgeomMemoryManager.allocate(ref meshdim, ref mesh);
+
+            //4. Get mesh variables
+            int start_index = 1; //arrays are 1 based
+            bool includeArrays = true;
+            ierr = wrapper.ionc_get_meshgeom(ref ioncid, ref existingMeshId, ref existingNetworkId, ref mesh, ref start_index, ref includeArrays);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            //5. Close the file
+            ierr = wrapper.ionc_close(ref ioncid);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            //6. Create a new netcdf file
+            int targetioncid = -1; //file id  
+            int targetmode = 1; //create in write mode
+            string target_path = TestHelper.TestDirectoryPath() + "/target.nc";
+            TestHelper.DeleteIfExists(target_path);
+            Assert.IsFalse(File.Exists(target_path));
+            ierr = wrapper.ionc_create(target_path, ref targetmode, ref targetioncid);
+            Assert.That(ierr, Is.EqualTo(0));
+            Assert.IsTrue(File.Exists(target_path));
+
+            //7. write a 2d mesh using ionc_put_meshgeom
+            string meshname = "my_mesh";
+            string networkname = ""; //empty string if mesh not available
+            int newMeshId    = -1;
+            int newNetworkId = -1;
+            ierr = wrapper.ionc_put_meshgeom(ref targetioncid, ref newMeshId, ref newNetworkId, ref mesh, ref meshdim, meshname, networkname, ref start_index);
+            Assert.That(ierr, Is.EqualTo(0));
+            addglobalattributes(targetioncid, ref wrapper);
+            //8. Close the file
+            ierr = wrapper.ionc_close(ref targetioncid);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            int myioncid = -1;
+            ierr = wrapper.ionc_open(target_path, ref targetmode, ref myioncid, ref iconvtype, ref convversion);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            int mymesh2dId = 0;
+            ierr = wrapper.ionc_get_2d_mesh_id(ref myioncid, ref mymesh2dId);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            ierr = WriteZCoordinateValues(wrapper, myioncid, mymesh2dId, 1, "node_z", "nodeess", new double[1] { 80.1 });
+            Assert.That(ierr, Is.EqualTo(0));
+
+            ierr = wrapper.ionc_close(ref myioncid);
+            Assert.That(ierr, Is.EqualTo(0));
+
+
+        }
+
+
+        public int WriteZCoordinateValues(IoNetcdfLibWrapper wrapper, int ioncId, int meshId, int locationType, string varName, string longName, double[] zValues)
+        {
+        
+            var nVal = zValues.Length;
+            var nCalVal = 0;
+            int ierr;
+            ierr = wrapper.ionc_get_node_count(ref ioncId, ref meshId, ref nCalVal);
+            
+            IntPtr zPtr = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * nCalVal);
+
+            try
+            {
+                int varId = 0;
+                wrapper.ionc_inq_varid_by_standard_name(ref ioncId, ref meshId,ref locationType, "altitude", ref varId);
+
+                // Testing...
+                wrapper.InqueryVariableId(ioncId, meshId, varName, ref varId);
+
+                if (varId == -1) // does not exist
+                {
+                    wrapper.DefineVariable(ioncId, meshId, varId, (int)NetcdfDataType.nf90_double, locationType, varName,
+                    "altitude", longName, "m", -999.0);
+                }
+                if (nVal == nCalVal)
+                {
+                    Marshal.Copy(zValues, 0, zPtr, nVal);
+
+                    // Eventually the idea is to change PutVariable to use varId rather than varName
+                    ierr = wrapper.PutVariable(ioncId, meshId, locationType, varName, zPtr, nVal);
+                    return ierr;
+                }
+                var zCalValues = new double[nCalVal];
+                for (int i = 0; i < nVal; i++)
+                {
+                    zCalValues[i] = zValues[i];
+                }
+                for (int i = nVal; i < nCalVal; i++)
+                {
+                    zCalValues[i] = -999.0;
+                }
+                Marshal.Copy(zCalValues, 0, zPtr, nCalVal);
+
+                // Eventually the idea is to change PutVariable to use varId rather than varName
+                ierr = wrapper.PutVariable(ioncId, meshId, locationType, varName, zPtr, nCalVal);
+                return ierr;
+            }
+            catch
+            {
+                return 0;
+            }
+
+            finally
+            {
+                if (zPtr != IntPtr.Zero)
+                    Marshal.FreeCoTaskMem(zPtr);
+                zPtr = IntPtr.Zero;
+            }
+        }
+
 
         //open a file test
         [Test]
