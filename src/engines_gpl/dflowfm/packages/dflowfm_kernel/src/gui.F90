@@ -1089,12 +1089,13 @@
          if (filnam(i-6:i) == '_rst.nc' .or. filnam(i-6:i) == '_RST.NC') then
             call doclose(mlan) ! TODO: change... [AvD] 
             call read_restart_from_map(FILNAM, ierr)
-            call setucxucyucxuucyu() ! reconstruct cell center velocities
             if (ierr /= DFM_NOERR) then
+               call qnerror('Error occurs when reading the restart file.',' ', ' ')
                JA = 0
             else
                JA = 1
-            end if
+            end if 
+            call setucxucyucxuucyu() ! reconstruct cell center velocities
          else 
             call rearst(MLAN,JA)
          endif   

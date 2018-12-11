@@ -10647,6 +10647,7 @@ subroutine unc_read_map(filename, tim, ierr)
          write (msgbuf, '(a,i0,a,i0,a)') trim(tmpstr)//'#links in file: ', lnx_read, ', #links in model: ', lnx_own, '.'
          call warn_flush()
          call qnerror('Number of nodes/links read unequal to nodes/links in model',' ',' ')
+         ierr = DFM_GENERICERROR
          call readyy('Reading map data',-1d0)
          goto 999
       end if
@@ -10657,6 +10658,7 @@ subroutine unc_read_map(filename, tim, ierr)
                    ndx-ndxi, '.'
             call warn_flush()
             call qnerror('Number of boundary points unequal to those in model',' ',' ')
+            ierr = DFM_GENERICERROR
             call readyy('Reading map data',-1d0)
             goto 999
             endif

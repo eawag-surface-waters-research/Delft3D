@@ -13444,7 +13444,17 @@ end if
          endif
      else ! Restart from *_yyyymmdd_hhmmss_rst.nc or from *_map.nc
        call read_restart_from_map(md_restartfile, iresult) !TODO:JZ modify the name of this subroutine, since it also restarts from rst files.
+       if (jampi == 1) then
+          ! globally reduce the error
+          call reduce_error(iresult)
+       end if
        if (iresult /= DFM_NOERR) then
+          if (jampi == 1) then
+              call qnerror('Error occurs on one or more processes when reading the restart file.',' ', ' ')
+          else
+              call qnerror('Error occurs when reading the restart file.',' ', ' ')
+          end if
+
           goto 888
        else
           JAWEL = .true.
