@@ -718,7 +718,7 @@ module m_readModelParameters
       call AddOrReplaceParameter(category, 'StantonNumber', '0.0013', .true.)
 
       category = 'Observations'
-      call AddOrReplaceParameter(category, 'interpolationType', 'nearest', .true.)
+      call AddOrReplaceParameter(category, 'interpolationType', 'OBS_NEAREST', .true.)
    
    end subroutine setModelParameterDefaults
 
