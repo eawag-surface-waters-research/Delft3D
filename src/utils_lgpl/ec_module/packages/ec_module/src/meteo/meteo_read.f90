@@ -41,6 +41,7 @@ module meteo_read
    use precision
    use meteo_data
    use time_module
+   use string_module
 
    implicit none
 
@@ -60,30 +61,30 @@ function readtime(minp, meteoitem, flow_itdate, flow_tzone, tread) result(succes
    logical                               :: success
    type(tmeteoitem)                      :: meteoitem
    !
-   integer                  :: ierr
-   integer                  :: il
-   integer                  :: ir
-   integer                  :: i_since
-   integer                  :: i_unit
-   integer                  :: flow_julday
-   integer                  :: meteo_julday
-   integer                  :: day
-   integer                  :: hrs
-   integer                  :: meteo_itdate
-   integer                  :: min
-   integer                  :: month
-   integer                  :: sec
-   integer                  :: time_zone_hrs
-   integer                  :: time_zone_min
-   integer                  :: year
-   real(fp)                 :: day_diff
-   real(fp)                 :: min_diff
-   real(fp)                 :: meteo_tzone
-   real(fp)                 :: time_conv
-   real(fp)                 :: tzone_diff
-   character(1)             :: sign_time_zone
-   character(600)           :: rec
-   character(300)           :: time_definition
+   integer                       :: ierr
+   integer                       :: il
+   integer                       :: ir
+   integer                       :: i_since
+   integer                       :: i_unit
+   integer                       :: flow_julday
+   integer                       :: meteo_julday
+   integer                       :: day
+   integer                       :: hrs
+   integer                       :: meteo_itdate
+   integer                       :: min
+   integer                       :: month
+   integer                       :: sec
+   integer                       :: time_zone_hrs
+   integer                       :: time_zone_min
+   integer                       :: year
+   real(fp)                      :: day_diff
+   real(fp)                      :: min_diff
+   real(fp)                      :: meteo_tzone
+   real(fp)                      :: time_conv
+   real(fp)                      :: tzone_diff
+   character(len=1)              :: sign_time_zone
+   character(len=:), allocatable :: rec
+   character(len=:), allocatable :: time_definition
    !
    if (meteoitem%filetype == uniuvp) then
       success = .true.
@@ -93,7 +94,7 @@ function readtime(minp, meteoitem, flow_itdate, flow_tzone, tread) result(succes
    rec             = ' '
    time_definition = ' '
    do
-      read (minp,'(a)', iostat=ierr) rec
+      call GetLine(minp, rec, ierr)
       if (ierr /= 0) then
          meteomessage = 'Meteo input: Premature end of file; expecting data at additional time'
          success = .false.
@@ -129,8 +130,7 @@ function readtime(minp, meteoitem, flow_itdate, flow_tzone, tread) result(succes
       call small(rec,il)
       !
       if ( index(rec(1:il-2), 'time') /= 0 )  then
-         read( rec(il:ir), '(a)', iostat=ierr )    time_definition
-         time_definition = adjustl(time_definition)
+         time_definition = adjustl(rec(il:ir))
          exit
       else
          cycle
@@ -411,6 +411,7 @@ function readseries(minp,d,kx,tread) result(success)
    logical                       :: success
    !
    integer                   :: k
+   integer                   :: istat
    character(:), allocatable :: rec
    !
    if ( size(d,1) .lt. kx ) then
@@ -419,7 +420,8 @@ function readseries(minp,d,kx,tread) result(success)
       return
    endif
 10  continue
-   read (minp,'(a)',end = 100) rec
+   call GetLine(minp, rec, istat)
+   if (istat /= 0) goto 100
    if (rec(1:1) .eq. '*') goto 10
    read(rec,*,err = 101) tread, ( d(k), k = 1, kx )
    do k = 1, kx
@@ -515,6 +517,7 @@ function read_spiderweb_block(minp, d, mx, nx, meteoitem, x_spw_eye, y_spw_eye, 
    integer                    :: ir
    integer                    :: iread
    integer                    :: j
+   integer                    :: istat
    real(fp)                   :: p_drop_spw_eye
    character(:), allocatable  :: rec
    !
@@ -527,7 +530,8 @@ function read_spiderweb_block(minp, d, mx, nx, meteoitem, x_spw_eye, y_spw_eye, 
    p_drop_spw_eye = 0.0_fp
    !
    do iread = 1,3
-      read (minp,'(a)',end=100) rec
+      call GetLine(minp, rec, istat)
+      if (istat /= 0) goto 100
       il = index(rec, '=') + 1
       ir = index(rec, '#') - 1
       if (ir == -1) then

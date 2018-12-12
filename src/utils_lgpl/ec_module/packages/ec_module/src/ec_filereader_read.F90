@@ -2690,11 +2690,11 @@ module m_ec_filereader_read
          type(tEcMask),      intent(out) :: mask
          type(tEcFileReader),pointer     :: fileReaderPtr
    
-         integer             :: fmask
-         integer             :: iostat 
-         character(len=999)  :: rec 
-         logical             :: jamaskinit
-         integer             :: i
+         integer                        :: fmask
+         integer                        :: iostat 
+         character(len=:), allocatable  :: rec
+         logical                        :: jamaskinit
+         integer                        :: i
 
          success = .false.
 
@@ -2712,7 +2712,7 @@ module m_ec_filereader_read
          iostat = 0
          i = 0 
          do while(iostat==0) 
-            read(fmask,'(a256)',iostat=iostat) rec 
+            call GetLine(fmask, rec, iostat)
             if (len_trim(rec)==0) cycle
             if (iostat/=0) cycle
             rec = adjustl(rec)
@@ -2720,7 +2720,7 @@ module m_ec_filereader_read
             if (index('%*!#',rec(1:1))+index('//',rec(1:2)) > 0 ) cycle
             if (index(rec,'=')>0) then 
                if (index(rec,'N_COLS')>0) then 
-                   read(rec(index(rec,'=')+1:len_trim(rec)),*,iostat=iostat) mask%mrange   
+                   read(rec(index(rec,'=')+1:len_trim(rec)),*,iostat=iostat) mask%mrange
                elseif (index(rec,'N_ROWS')>0) then 
                    read(rec(index(rec,'=')+1:len_trim(rec)),*,iostat=iostat) mask%nrange
                elseif (index(rec,'XLL')>0) then 
@@ -2737,8 +2737,8 @@ module m_ec_filereader_read
                    else 
                       call setECMessage('At least one of the mask dimensions in '//trim(maskfilname)//' is smaller than 1.')
                       return
-                   endif 
-                endif  
+                   endif
+                endif
                 i = i + 1 
                 ! NB. Mask is stored in a 1D-array (n_rows*n_cols) row-by-row from the last row to the first,
                 !     identically to the curvi and arcinfo data, so that data 1d-array matches the mask array elementwise
