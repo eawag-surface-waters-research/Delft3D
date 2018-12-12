@@ -185,7 +185,7 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
     integer                    , dimension(:) , allocatable           :: lenchr
     real(fp)                                                          :: rmissval
     real(fp)                                                          :: xxmin
-    real(hp)                   , dimension(3)                         :: tint
+    real(fp)                   , dimension(3)                         :: tint
     real(fp)                   , dimension(:) , allocatable           :: xxprog
     real(fp)                   , dimension(:) , allocatable           :: rfield
     logical                                                           :: ex       ! Logical flag for file existence
@@ -745,16 +745,15 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
        call prop_get_logical(mor_ptr, 'Output', 'BedLayerPorosity'            , moroutput%poros)
        !
        call prop_get_logical(mor_ptr, 'Output', 'AverageAtEachOutputTime'     , moroutput%cumavg)
-       tint=0.0
-       call prop_get_doubles(mor_ptr, 'Output', 'AverageSedmorOutputInterval' , tint, 3, ex)
-       if (.not. ex) then
+       call prop_get(mor_ptr, 'Output', 'AverageSedmorOutputInterval' , moroutput%avgintv, 3, ex)
+       if (.false.) then
+          ! currently this error is disabled. The error and check were not correct.
           errmsg = 'AverageAtEachOutputTime is set to true, but could not read valid AverageSedmorOutputInterval values.'
           call write_error(errmsg, unit=lundia)
        endif
-       moroutput%avgintv = real(tint, kind=fp)   ! single precision build fix
-       if (moroutput%avgintv(2).lt.0d0) then
-          moroutput%avgintv(2) = 0d0
-          moroutput%avgintv(3) = 0d0
+       if (moroutput%avgintv(2) < 0.0_fp) then
+          moroutput%avgintv(2) = 0.0_fp
+          moroutput%avgintv(3) = 0.0_fp
        end if
        string = ' '
        call prop_get_string (mor_ptr, 'Output', 'AverageSedmorWeightFactor'         , string)
