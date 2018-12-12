@@ -435,7 +435,7 @@ module m_readModelParameters
 
          read (startTime, '(I4,1X,I2,1X,I2,1X,I2,1X,I2,1X,I2)') iYear, iMonth, iDay, iHour, iMinute, iSecond
          julDate = julian(iYear, iMonth, iDay, iHour, iMinute, iSecond)
-         RestartTime = nint(max((juldate - modelTimeStepData%julianStart)*86400,0d0))
+         RestartTime = nint((juldate - modelTimeStepData%julianStart)*86400)
          modelTimeStepData%nextRestarttimestep =restartTime/modelTimeStepData%timeStep
          
          read (stopTime, '(I4,1X,I2,1X,I2,1X,I2,1X,I2,1X,I2)') iYear, iMonth, iDay, iHour, iMinute, iSecond
@@ -447,6 +447,15 @@ module m_readModelParameters
             call SetMessage(LEVEL_FATAL, 'Error Reading Date Time Data: Output Time Step must be multiple of Time Step')
          endif
          modelTimeStepData%restartInterval = nint(timeStep/modelTimeStepData%timeStep)
+         
+         if (modelTimeStepData%nextRestarttimestep < 0) then
+            modelTimeStepData%nextRestarttimestep = modelTimeStepData%nextRestarttimestep - &
+                                   (modelTimeStepData%nextRestarttimestep/modelTimeStepData%restartInterval)*modelTimeStepData%restartInterval
+            if (modelTimeStepData%nextRestarttimestep < 0) then
+               modelTimeStepData%nextRestarttimestep = modelTimeStepData%nextRestarttimestep + modelTimeStepData%restartInterval
+            endif
+         endif
+         
       elseif (.not. success) then
          
          ! TODO remove this part in due time, for now it stays compatibility reasons:
