@@ -34,9 +34,17 @@
    !!--pseudo code and references--------------------------------------------------
    ! NONE
    !!--declarations----------------------------------------------------------------
-   
-   contains 
-   
+
+   !> \page deltares_common
+   !! \section sorting Sorting algorithms
+   !! The module \em sorting_algorithms provides several basic routines for sorting
+   !! arrays, both integer and real (double precision).
+   !!
+   !! The relevant routine is:
+   !! \ref sort
+   !!
+   contains
+
    SUBROUTINE INDEXXI(N,ARRIN,INDX)
    implicit none
    integer :: i
@@ -87,7 +95,7 @@
      INDX(I)=INDXT
    GO TO 10
    END SUBROUTINE INDEXXi
-   
+
    SUBROUTINE INDEXX(N,ARRIN,INDX)
    implicit none
    integer :: i
@@ -140,8 +148,10 @@
    END SUBROUTINE INDEXX
 
 
+   !> \anchor sort
+   !! Sort a real (double precision) array in ascending order
+   !!
    subroutine sort(n,ra,wksp,iwksp)
-   !!--description-----------------------------------------------------------------
    ! Sorts an array, routine from Numerical Recipes
    !!--pseudo code and references--------------------------------------------------
    ! NONE
@@ -151,10 +161,10 @@
    !
    ! Global variables
    !
-   integer                              :: n
-   integer, dimension(n)                :: iwksp
-   real*8   , dimension(n)              :: ra
-   real*8   , dimension(n), intent(out) :: wksp
+   integer                              :: n          !< Number of elements in the array
+   integer, dimension(n)                :: iwksp      !< Integer workspace array
+   real*8   , dimension(n)              :: ra         !< Array to be sorted
+   real*8   , dimension(n), intent(out) :: wksp       !< Real workspace array
    !
    ! Local variables
    !
@@ -167,5 +177,5 @@
       wksp(j) = ra(iwksp(j))
    enddo
    end subroutine sort
-   
+
    end module sorting_algorithms
