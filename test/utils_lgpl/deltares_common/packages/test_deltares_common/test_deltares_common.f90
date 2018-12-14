@@ -27,6 +27,7 @@ program test_deltares_common
     use test_combinepaths
     use test_precision_basics
     use test_hash_search
+    use test_bilin5
 
     implicit none
 
@@ -34,12 +35,13 @@ program test_deltares_common
     call runtests_init
 
     !
-    ! Tests for ZOEK.F
+    ! Tests for the various modules and standalone routines
     !
     call tests_sorting
     call tests_combinepaths
     call tests_precision_basics
     call tests_hash_search
+    call tests_bilin5
 
     !
     ! Done - properly finalize
