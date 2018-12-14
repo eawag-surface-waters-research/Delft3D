@@ -98,6 +98,8 @@ module ftnunit
 
     implicit none
 
+    integer, private, parameter :: dp = kind(1.0d0)
+
     integer, private, save :: last_test           ! Last test that was started
     integer, private, save :: testno              ! Current test number
     integer, private, save :: nofails             ! Number of assertions that failed
@@ -120,6 +122,9 @@ module ftnunit
         module procedure assert_comparable_real
         module procedure assert_comparable_real1d
         module procedure assert_comparable_real2d
+        module procedure assert_comparable_double
+        module procedure assert_comparable_double1d
+        module procedure assert_comparable_double2d
     end interface
 
 contains
@@ -592,6 +597,139 @@ subroutine assert_comparable_real2d( array1, array2, margin, text )
         endif
     endif
 end subroutine assert_comparable_real2d
+
+! assert_comparable_double --
+!     Subroutine to check if two reals are approximately equal
+! Arguments:
+!     value1        First value
+!     value2        Second value
+!     margin        Allowed margin (relative)
+!     text          Text describing the assertion
+! Side effects:
+!     If the assertion fails, this is reported to standard
+!     output. Also, nofails is increased by one.
+!
+subroutine assert_comparable_double( value1, value2, margin, text )
+    real(kind=dp), intent(in)    :: value1
+    real(kind=dp), intent(in)    :: value2
+    real(kind=dp), intent(in)    :: margin
+    character(len=*), intent(in) :: text
+
+    if ( abs(value1-value2) > 0.5_dp * margin * (abs(value1)+abs(value2)) ) then
+        nofails = nofails + 1
+        write(*,*) '    Values not comparable: "',trim(text), '" - assertion failed'
+        write(*,*) '    Values: ', value1, ' and ', value2
+        call ftnunit_hook_test_assertion_failed( testname, text, "One or more values differ more than the margin" )
+        call ftnunit_write_html_failed_double( text, value1, value2 )
+    endif
+end subroutine assert_comparable_double
+
+! assert_comparable_double1d --
+!     Subroutine to check if two real arrays are comparable
+! Arguments:
+!     array1        First array
+!     array2        Second array
+!     text          Text describing the assertion
+! Side effects:
+!     If the assertion fails, this is reported to standard
+!     output. Also, nofails is increased by one.
+!
+subroutine assert_comparable_double1d( array1, array2, margin, text )
+    real(kind=dp), dimension(:), intent(in) :: array1
+    real(kind=dp), dimension(:), intent(in) :: array2
+    real(kind=dp), intent(in)               :: margin
+    character(len=*), intent(in)            :: text
+
+    integer                                 :: i
+    integer                                 :: count
+    logical                                 :: addtext
+
+    addtext = .false.
+
+    if ( size(array1) /= size(array2) ) then
+        nofails = nofails + 1
+        write(*,*) '    Arrays have different sizes: "',trim(text), '" - assertion failed'
+        call ftnunit_hook_test_assertion_failed( testname, text, "Arrays have different sizes" )
+    else
+        if ( any( abs(array1-array2) > 0.5_dp * margin * (abs(array1)+abs(array2)) ) ) then
+            nofails = nofails + 1
+            write(*,*) '    One or more values different: "',trim(text), '" - assertion failed'
+            call ftnunit_hook_test_assertion_failed( testname, text, "One or more values differ more than the margin" )
+            count = 0
+            do i = 1,size(array1)
+                if ( abs(array1(i)-array2(i)) > &
+                         0.5_dp * margin * (abs(array1(i))+abs(array2(i))) ) then
+                    count = count + 1
+                    write(*,'(a10,2a15)')    '    Index', '          First', '         Second'
+                    if ( count < 50 ) then
+                        write(*,'(i10,2e15.5)')    i, array1(i), array2(i)
+                        call ftnunit_write_html_failed_double1d( &
+                            text, i, array1(i), array2(i), addtext )
+                        addtext = .false.
+                    endif
+                endif
+            enddo
+            if ( count > 0 ) then
+                write(*,*) 'Number of differences: ', count
+            endif
+        endif
+    endif
+end subroutine assert_comparable_double1d
+
+! assert_comparable_double2d --
+!     Subroutine to check if two two-dimensional real arrays are comparable
+! Arguments:
+!     array1        First array
+!     array2        Second array
+!     text          Text describing the assertion
+! Side effects:
+!     If the assertion fails, this is reported to standard
+!     output. Also, nofails is increased by one.
+!
+subroutine assert_comparable_double2d( array1, array2, margin, text )
+    real(kind=dp), dimension(:,:), intent(in) :: array1
+    real(kind=dp), dimension(:,:), intent(in) :: array2
+    real(kind=dp), intent(in)                 :: margin
+    character(len=*), intent(in)              :: text
+
+    integer                                   :: i
+    integer                                   :: j
+    integer                                   :: count
+    logical                                   :: addtext
+
+    addtext = .false.
+
+    if ( any( shape(array1) /= shape(array2) ) ) then
+        nofails = nofails + 1
+        write(*,*) '    Arrays have different shapes: "',trim(text), '" - assertion failed'
+        call ftnunit_hook_test_assertion_failed( testname, text, "Arrays have different shapes" )
+    else
+        if ( any( abs(array1-array2) > 0.5_dp * margin * (abs(array1)+abs(array2)) ) ) then
+            nofails = nofails + 1
+            write(*,*) '    One or more values different: "',trim(text), '" - assertion failed'
+            call ftnunit_hook_test_assertion_failed( testname, text, "One or more values differ more than the margin" )
+            count = 0
+            do j = 1,size(array1,2)
+                do i = 1,size(array1,1)
+                    if ( abs(array1(i,j)-array2(i,j)) > &
+                             0.5_dp * margin * (abs(array1(i,j))+abs(array2(i,j))) ) then
+                        count = count + 1
+                        write(*,'(a10,2a15)')    '    Index', '          First', '         Second'
+                        if ( count < 50 ) then
+                            write(*,'(2i5,2e15.5)')    i, j, array1(i,j), array2(i,j)
+                            call ftnunit_write_html_failed_double2d( &
+                                text, i, j, array1(i,j), array2(i,j), addtext )
+                            addtext = .false.
+                        endif
+                    endif
+                enddo
+            enddo
+            if ( count > 0 ) then
+                write(*,*) 'Number of differences: ', count
+            endif
+        endif
+    endif
+end subroutine assert_comparable_double2d
 
 ! assert_files_comparable --
 !     Compare two files and establish whether they are equal or not
@@ -1281,6 +1419,120 @@ subroutine ftnunit_write_html_failed_real2d( text, idx1, idx2, value1, value2, a
         value1, ' -- ', value2, '</td>'
     close( lun )
 end subroutine ftnunit_write_html_failed_real2d
+
+! ftnunit_write_html_failed_double --
+!     Auxiliary subroutine to write a failed real assertion to the HTML file
+! Arguments:
+!     text         Description of the test
+!     value1       First value
+!     value2       Second value
+!
+subroutine ftnunit_write_html_failed_double( text, value1, value2 )
+    character(len=*)  :: text
+    real(kind=dp)     :: value1
+    real(kind=dp)     :: value2
+
+    integer           :: lun
+
+    call ftnunit_get_lun( lun )
+    open( lun, file = html_file, position = 'append' )
+
+    failed_asserts = failed_asserts + 1
+
+    call ftnunit_write_html_close_row( lun )
+
+    write( lun, '(a)' ) &
+        '<td><span class="indent">', trim(text), '</span></td>', &
+        '<td>Values: '
+    write( lun, '(e15.7,a,e15.7,a)' ) &
+        value1, ' -- ', value2, '</td>'
+    close( lun )
+
+end subroutine ftnunit_write_html_failed_double
+
+! ftnunit_write_html_failed_double1d --
+!     Auxiliary subroutine to write a failed real assertion to the HTML file
+! Arguments:
+!     text         Description of the test
+!     idx          Index
+!     value1       First value
+!     value2       Second value
+!     addtext      Add the text or not
+!
+subroutine ftnunit_write_html_failed_double1d( text, idx, value1, value2, addtext )
+    character(len=*)  :: text
+    integer           :: idx
+    real(kind=dp)     :: value1
+    real(kind=dp)     :: value2
+    logical           :: addtext
+
+    integer           :: lun
+
+    call ftnunit_get_lun( lun )
+    open( lun, file = html_file, position = 'append' )
+
+    failed_asserts = failed_asserts + 1
+
+    call ftnunit_write_html_close_row( lun )
+
+    if ( addtext ) then
+        write( lun, '(a)' ) &
+            '<td><span class="indent">', trim(text), '</span></td>'
+    else
+        write( lun, '(a)' ) &
+            '<td></td>'
+    endif
+
+    write( lun, '(a)' ) &
+        '<td>Values at index: '
+    write( lun, '(i0,a,g15.5,a,g15.5,a)' ) &
+        idx, ':', &
+        value1, ' -- ', value2, '</td>'
+    close( lun )
+end subroutine ftnunit_write_html_failed_double1d
+
+! ftnunit_write_html_failed_double2d --
+!     Auxiliary subroutine to write a failed real assertion to the HTML file
+! Arguments:
+!     text         Description of the test
+!     idx1         Index 1
+!     idx2         Index 2
+!     value1       First value
+!     value2       Second value
+!     addtext      Add the text or not
+!
+subroutine ftnunit_write_html_failed_double2d( text, idx1, idx2, value1, value2, addtext )
+    character(len=*)  :: text
+    integer           :: idx1
+    integer           :: idx2
+    real(kind=dp)     :: value1
+    real(kind=dp)     :: value2
+    logical           :: addtext
+
+    integer           :: lun
+
+    call ftnunit_get_lun( lun )
+    open( lun, file = html_file, position = 'append' )
+
+    failed_asserts = failed_asserts + 1
+
+    call ftnunit_write_html_close_row( lun )
+
+    if ( addtext ) then
+        write( lun, '(a)' ) &
+            '<td><span class="indent">', trim(text), '</span></td>'
+    else
+        write( lun, '(a)' ) &
+            '<td></td>'
+    endif
+
+    write( lun, '(a)' ) &
+        '<td>Values at index: '
+    write( lun, '(i0,a,i0,a,g15.5,a,g15.5,a)' ) &
+        idx1, ',', idx2, ':', &
+        value1, ' -- ', value2, '</td>'
+    close( lun )
+end subroutine ftnunit_write_html_failed_double2d
 
 
 subroutine ftnunit_write_html_failed_files( text, string1, string2, string3 )
