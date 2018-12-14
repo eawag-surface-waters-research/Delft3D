@@ -233,7 +233,7 @@ module m_ec_provider
          character(len=*), optional, intent(in) :: varname      !< variable name within filename
          !
          type(tEcFileReader), pointer  :: fileReaderPtr  !< FileReader corresponding to fileReaderId
-         character(len=:), allocatable :: l_quantityName !< explicit length version of quantityName
+         character(maxNameLen)         :: l_quantityName !< explicit length version of quantityName
          !
          success = .false.
          fileReaderPtr => null()
