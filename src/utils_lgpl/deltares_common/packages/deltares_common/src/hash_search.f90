@@ -1,3 +1,20 @@
+!> \page deltares_common
+!! \section m_hash_search Searching for string using a hash function
+!! The module \em m_hash_search helps storing and retrieving strings by means of
+!! a hash function. The table is automaticaly expanded if it becomes full.
+!!
+!! The relevant routines are:
+!!
+!! \ref hashfill_init - initialise a hash list
+!!
+!! \ref hashfill - ??
+!!
+!! \ref dealloc - clean up the memory occupied by the hash list
+!!
+!! \ref hashsearch - look up a string
+!!
+!! \ref hashsearch_or_add - look up a string and if it does not exist yet, add it
+!!
 module m_hash_search
 
    use m_alloc
@@ -15,7 +32,7 @@ module m_hash_search
       module procedure deallochashtable
    end interface
 
-   type, public :: t_hashlist
+   type, public :: t_hashlist  !< Definition of the hash list
       integer :: hashcon
       integer :: id_count = 0
       integer :: growsby = 200
@@ -28,8 +45,9 @@ module m_hash_search
    integer, parameter :: hashcon = 1009
    contains
 
+   !> \anchor dealloc Free the memory associated with the hash list
    subroutine deallochashtable(hashlist)
-      type(t_hashlist) :: hashlist
+      type(t_hashlist) :: hashlist                   !< Hash list to be cleaned up
 
       if (allocated(hashlist%hashfirst)) then
          deallocate(hashlist%hashfirst)
@@ -74,13 +92,14 @@ module m_hash_search
 
    end function hashfun
 
+   !> \anchor hashfill Fill the hash list (?)
    subroutine hashfill(hashlist)
 
       ! Module description: Fill hashing arrays
       use string_module
 
       ! Global Variables
-      type(t_hashlist), intent(inout) :: hashlist
+      type(t_hashlist), intent(inout) :: hashlist     !< Hash list to be treated
 
       ! Local Variables
       integer                                  :: icount
@@ -138,10 +157,11 @@ module m_hash_search
 
    end subroutine hashfill
 
+   !> \anchor hashfill_init Initialise a hash list
    subroutine hashfill_init(hashlist, count)
 
-      type(t_hashlist), intent(inout) :: hashlist
-      integer, intent(in) :: count
+      type(t_hashlist), intent(inout) :: hashlist   !< Hash list to be initialised
+      integer, intent(in) :: count                  !< Initial size of the hash list
 
       integer                                  :: ierr
 
@@ -208,13 +228,16 @@ module m_hash_search
 
  !  inode = hashsearch(node_local_id, nodefirst, nodenext, node_id)
 
+   !> \anchor hashsearch Look up a string in the hash list. If it does not
+   !! exist, return the value -1 instead of the index belonging to the
+   !! string.
    integer function hashsearch(hashlist, id)
 
       ! Module description: Search in hashing arrays
       use string_module
       ! Global Variables
-      character(len=*), intent(in)           :: id
-      type(t_hashlist), intent(in)           :: hashlist
+      character(len=*), intent(in)           :: id           !< String to be searched
+      type(t_hashlist), intent(in)           :: hashlist     !< Hash list possibly containing the string
 
       ! Local Variables
       character(len=idLen)                             :: locid
@@ -264,13 +287,16 @@ module m_hash_search
 
    end function hashsearch
 
+   !> \anchor hashsearch Look up a string in the hash list. If it does not
+   !! exist, store it. In all cases, return the index belonging to the
+   !! string.
    integer function hashsearch_or_add(hashlist, id)
 
       ! Module description: Search in hashing arrays
       use string_module
       ! Global Variables
-      character(len=*), intent(in)           :: id
-      type(t_hashlist), intent(inout)        :: hashlist
+      character(len=*), intent(in)           :: id                !< String to be searched
+      type(t_hashlist), intent(inout)        :: hashlist          !< Hash list possibly containing the string
 
       ! Local Variables
       character(len=idLen)                             :: locid
