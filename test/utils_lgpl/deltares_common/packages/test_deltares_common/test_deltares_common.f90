@@ -28,6 +28,7 @@ program test_deltares_common
     use test_precision_basics
     use test_hash_search
     use test_bilin5
+    use test_distance
 
     implicit none
 
@@ -42,6 +43,7 @@ program test_deltares_common
     call tests_precision_basics
     call tests_hash_search
     call tests_bilin5
+    call tests_distance
 
     !
     ! Done - properly finalize
