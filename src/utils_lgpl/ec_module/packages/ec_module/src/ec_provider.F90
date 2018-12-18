@@ -233,7 +233,7 @@ module m_ec_provider
          character(len=*), optional, intent(in) :: varname      !< variable name within filename
          !
          type(tEcFileReader), pointer  :: fileReaderPtr  !< FileReader corresponding to fileReaderId
-         character(maxNameLen)         :: l_quantityName !< explicit length version of quantityName
+         character(len=:), allocatable :: l_quantityName !< local string with quantityName
          !
          success = .false.
          fileReaderPtr => null()
@@ -243,7 +243,7 @@ module m_ec_provider
             return
          end if
          !
-         fileReaderPtr => ecSupportFindFileReader(instancePtr, fileReaderId)         
+         fileReaderPtr => ecSupportFindFileReader(instancePtr, fileReaderId)
          if (associated(fileReaderPtr)) then
             fileReaderPtr%ofType = fileType
             fileReaderPtr%fileName = fileName
@@ -2970,7 +2970,7 @@ module m_ec_provider
          logical                      :: success       !< function status
          type(tEcInstance),   pointer :: instancePtr   !< intent(in)
          type(tEcFileReader), pointer :: fileReaderPtr !< intent(inout)
-         character(maxNameLen), intent(in) :: quantityName  !< name of quantity to read
+         character(len=*), intent(in) :: quantityName  !< name of quantity to read
          !
          integer                   :: ierror         !< return value of function calls
          integer                   :: iddim_netelem  !< id as obtained from NetCDF
