@@ -17758,7 +17758,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
    HELPM ( 2) = '0123                                                        '
    HELPM ( 3) = '1 = expl, -2; abashford, -3 = ab3, -5 = adv rho             '
    HELPM ( 4) = '0 = NO, 3 = VERT IMPL, HOR EXPL                             '
-   HELPM ( 5) = '0 = no, 1 = eckardt                                         '
+   HELPM ( 5) = '0 = no, 1 = eckart                                          '
    HELPM ( 6) = '0 = no, 1 = YES                                             '
    HELPM ( 7) = '0=No, 1=Upwe, 2=Cente, 3=Upwi, 4=Centi, 5=4,3, 6=MCexpl     ' 
    HELPM ( 8) = '0=No, 6=subgrid, 7=rajaratnam, 8=Tabelb, 9=Willemontenotyet ' 

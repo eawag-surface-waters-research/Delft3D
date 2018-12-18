@@ -112,11 +112,11 @@
  double precision                  :: backgroundhumidity         !< (%) relative humidity for non-specified points
  double precision                  :: secchidepth                !< (m) secchidepth
 
- double precision                  :: cp0                        !< eckardt density parameters
- double precision                  :: clam                       !< eckardt density parameters
- double precision                  :: clam0                      !< eckardt density parameters
- double precision                  :: alph0                      !< eckardt density parameters
- integer                           :: idensform                  !< 0 = no, 1 = eckardt
+ double precision                  :: cp0                        !< eckart density parameters
+ double precision                  :: clam                       !< eckart density parameters
+ double precision                  :: clam0                      !< eckart density parameters
+ double precision                  :: alph0                      !< eckart density parameters
+ integer                           :: idensform                  !< 0 = no, 1 = eckart
  integer                           :: limiterhordif              !< 0=No, 1=Horizontal gradient densitylimiter, 2=Finite volume
 
  double precision                  :: Stanton                    !< coeff for convective  heat flux, if negative , take wind Cd
@@ -190,7 +190,7 @@ xlozmidov                   = 0d0           ! Ozmidov length scale
 
 alph0                       = 0.698d0       ! =Eckart density parameters
 
-idensform                   = 1             !< 0 = no, 1 = eckardt
+idensform                   = 1             !< 0 = no, 1 = eckart
 limiterhordif               = 2             !< 0=No, 1=Horizontal gradient densitylimiter, 2=Finite volume
 
 Stanton                     = -1            !< coeff for convective  heat flux, if negative , take wind Cd
