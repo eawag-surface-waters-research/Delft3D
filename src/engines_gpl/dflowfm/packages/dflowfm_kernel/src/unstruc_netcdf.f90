@@ -11784,7 +11784,6 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
 
    double precision :: xx, yy
    double precision, dimension(:), allocatable :: zz
-   double precision, allocatable :: x1dn(:), y1dn(:), xue(:), yue(:)
    double precision, allocatable :: work2(:,:)
 
    integer                       :: n1dedges, n1d2dcontacts, numk2d, start_index
@@ -11794,6 +11793,12 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
    type(t_CSType), pointer, dimension(:)         :: pCSs
    integer                                       :: j, jmax
    double precision, dimension(:,:), allocatable :: work1d_z, work1d_n
+
+   ! re-mapping of 1d mesh coordinates for UGrid
+   double precision, allocatable                 :: x1dn(:), y1dn(:), xue(:), yue(:)
+   ! re-mapping of 2d mesh coordinates for UGrid
+   double precision, allocatable                 :: x2dn(:), y2dn(:), z2dn(:)
+   integer                                       :: netNodeReMappedIndex, nnSize
 
    jaInDefine    = 0
    n1d2dcontacts = 0
@@ -12030,6 +12035,9 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
       call realloc(edge_type, numl2d, fill = -999, keepExisting = .false.)
       call realloc(xue, numl2d, fill = dmiss, keepExisting = .false.)
       call realloc(yue, numl2d, fill = dmiss, keepExisting = .false.)
+      call realloc(x2dn,numk2d, fill = dmiss, keepExisting = .false.)
+      call realloc(y2dn,numk2d, fill = dmiss, keepExisting = .false.)
+      call realloc(z2dn,numk2d, fill = dmiss, keepExisting = .false.)
       call get_2d_edge_data(edge_nodes, edge_faces, edge_type, xue, yue)
 
       ! Determine max nr of vertices and contour points
@@ -12043,16 +12051,54 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
       ! Note: AvD: for cell corners, we write *all* net nodes (numk). This may also be '1D' nodes, but that is not problematic: they will simply not be referenced in face_nodes/edge_nodes.
       ! Note: AvD: numk may be larger than nr of cell corners. Will cause problems when writing output data on corners (mismatch in dimensions), not crucial now.
       call realloc(face_nodes, (/ numNodes, ndx2d /), fill = -999)
+      
+      ! re-mapping by edge nodes is needed, use kc as table
+      kc = 0
+      netNodeReMappedIndex = 0
+      do l=1,numl2d
+         nn = edge_nodes(1,l)
+         if (nn > 0) then
+            if ( kc(nn)==0 ) then
+               netNodeReMappedIndex = netNodeReMappedIndex + 1
+               x2dn(netNodeReMappedIndex) = xk(nn)
+               y2dn(netNodeReMappedIndex) = yk(nn)
+               z2dn(netNodeReMappedIndex) = zk(nn)
+               kc(nn)=netNodeReMappedIndex
+            endif
+         endif
+         nn = edge_nodes(2,l)
+         if (nn > 0) then
+            if ( kc(nn)==0 ) then
+               netNodeReMappedIndex = netNodeReMappedIndex + 1
+               x2dn(netNodeReMappedIndex) = xk(nn)
+               y2dn(netNodeReMappedIndex) = yk(nn)
+               z2dn(netNodeReMappedIndex) = zk(nn)
+               kc(nn)=netNodeReMappedIndex
+            endif
+         endif
+      enddo
+
+      !remapped edge_nodes
+      do l=1,numl2d
+         edge_nodes(1,l) = kc(edge_nodes(1,l))
+         edge_nodes(2,l) = kc(edge_nodes(2,l))
+      enddo
+
+      !remapped face_nodes
       do n=1,ndx2d
-         nn  = size(nd(n)%nod)
-         face_nodes(1:nn,n) = nd(n)%nod
-      end do
+         nnSize  = size(nd(n)%nod)
+         do i=1,nnSize
+            nn = nd(n)%nod(i)
+            if(nn>0) then
+               face_nodes(i,n) = kc(nn)
+            endif
+         enddo
+      enddo
+      ! face_nodes does not need to be re-mapped: 2d cells come first
       ! TODO: AvD: lnx1d+1:lnx includes open bnd links, which may *also* be 1D boundaries (don't want that in mesh2d)
-      edge_nodes = edge_nodes - ndx1d ! indexing relative to mesh2d net nodes
-      face_nodes = face_nodes - ndx1d ! indexing relative to mesh2d net nodes  
       ! note edge_faces does not need re-indexing, cell number are flow variables and 2d comes first
       ierr = ug_write_mesh_arrays(ncid, id_tsp%meshids2d, 'mesh2d', 2, UG_LOC_EDGE + UG_LOC_FACE, numk2d, numl2d, ndx2d, numNodes, &
-                                    edge_nodes, face_nodes, edge_faces, null(), null(), xk(ndx1d + 1 : ndx1d + 1 + numk2d), yk(ndx1d + 1 : ndx1d + 1 + numk2d), xue, yue, xz(1:ndx2d), yz(1:ndx2d), &
+                                    edge_nodes, face_nodes, edge_faces, null(), null(),x2dn, y2dn, xue, yue, xz(1:ndx2d), yz(1:ndx2d), &
                                     crs, -999, dmiss, start_index, layer_count, layer_type, layer_zs, interface_zs)
 
       ! Add edge type variable (edge-flowlink relation)
@@ -12061,6 +12107,8 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
       deallocate(edge_nodes)
       deallocate(face_nodes)
       deallocate(edge_faces)
+      deallocate(x2dn)
+      deallocate(y2dn)
    end if
 
    ! NOTE: UNST-1318: backwards compatibility: we write zk values in flowgeom/map file since DELFT3DFM still needs it.
@@ -12100,8 +12148,9 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
    if (ndx2d > 0) then
       ierr = nf90_put_var(ncid, id_tsp%id_flowelemba(2), ba(1:ndx2d)) ! TODO: AvD: handle 1D/2D boundaries
       ierr = nf90_put_var(ncid, id_tsp%id_flowelembl(2), bl(1:ndx2d)) ! TODO: AvD: handle 1D/2D boundaries
-      ierr = nf90_put_var(ncid, id_tsp%id_netnodez(2),   zk(1:numk))  ! NOTE: UNST-1318: backwards compatibility
-   end if
+      ierr = nf90_put_var(ncid, id_tsp%id_netnodez(2),   z2dn)        ! NOTE: UNST-1318: backwards compatibility, UNST-2207: remapped depth array must be used
+      deallocate(z2dn)
+   endif
    !
    if (jamd1dfile > 0 .and. stm_included) then
       if (stmpar%morpar%bedupd) then
