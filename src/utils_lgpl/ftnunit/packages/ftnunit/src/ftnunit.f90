@@ -1228,7 +1228,7 @@ subroutine ftnunit_write_html_failed_string( text, value1, value2 )
         '<td><span class="indent">', trim(text), '</span></td>', &
         '<td>Strings should have been equal:<br>', &
         'String 1: ', value1, '<br>', &
-        'String 2: ', value1, '</td>'
+        'String 2: ', value2, '</td>'
     close( lun )
 
 end subroutine ftnunit_write_html_failed_string
