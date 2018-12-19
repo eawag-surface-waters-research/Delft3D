@@ -1584,7 +1584,7 @@
     !>         ZSS contains a NDIM-dimensional vector for each of the NS samples, dim(NDIM,NS)
     
     SUBROUTINE AVERAGING2(NDIM,NS,XS,YS,ZSS,IPSAM,XC,YC,ZC,NX,XX,YY,N6,NNN,jakdtree_, &
-                          dmiss, jsferic, jasfer3D, JINS, NPL, xpl, ypl, zpl) ! WERKT ALLEEN VOOR CELL REGIONS, DIE ZITTEN IN XX EN YY
+                          dmiss, jsferic, jasfer3D, JINS, NPL, xpl, ypl, zpl, kcc) ! WERKT ALLEEN VOOR CELL REGIONS, DIE ZITTEN IN XX EN YY
 
     use m_ec_interpolationsettings
     use kdtree2Factory
@@ -1603,6 +1603,7 @@
     DOUBLE PRECISION,                     INTENT(IN)    :: XX(N6,NX), YY(N6,NX) ! polygon coordinates
     INTEGER,                              INTENT(IN)    :: NNN(NX)              ! polygon sizes
     integer,                              intent(in)    :: jakdtree_            ! use kdtree (1) or not (0)
+    integer ,                             intent(in), optional  :: kcc(:) !< Masking array for each of the target points.
 
     DOUBLE PRECISION, ALLOCATABLE     :: XH(:), YH(:)
     DOUBLE PRECISION, DIMENSION(NDIM) :: HP, RHP
@@ -1632,7 +1633,8 @@
     integer, intent(in)                     :: jsferic, jasfer3D, NPL, JINS
     double precision, intent(in)            :: XPL(:), YPL(:), ZPL(:)
     integer                                 :: i, in_unit, out_unit 
-    
+    integer               :: jakc
+
     INTEGER :: NCOLNOW
     
     !COMMON /COLNOW/ NCOLNOW
@@ -1640,6 +1642,9 @@
     ! default/no samples in cell
     ! ZC = DMISS
     ! hk : do not switch off please
+
+    jakc = 0
+    if (present(kcc)) jakc = 1
 
     jakdtree = jakdtree_
 
@@ -1667,6 +1672,12 @@
     MODIN = MAX(1.0,REAL(NX)/100.0)
     in = -1
     DO N = 1,NX
+
+       if (jakc == 1) then
+          if (kcc(N) /= 1) then
+             cycle
+          end if
+       end if
 
        JADOEN = 0
        do ivar=1,NDIM

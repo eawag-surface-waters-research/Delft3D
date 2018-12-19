@@ -15743,7 +15743,7 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
    ! FM does not know whether the com-file for this time step will be used
    ! To be safe: always write the com-file at each user_timestep
    if (jawave==3 .and. (tim==tstart_user .or. tim>=time_user)) then
-      call wricom(tim)
+      call wricom(tim) ! TODO: AvD: disable during FM-MOR-WAVE-par testing
    endif
 
    if (ti_xls > 0) then
@@ -30625,9 +30625,9 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
  ! These types need to be mapped to one of three possible primitive locations (center/edge/corner).
  select case (ibedlevtyp)
  case (1)       ! position = waterlevelpoint, cell centre
-    iprimpos = 2 ; mx = ndx
+    iprimpos = 2 ; mx = max(numk, ndx)
  case (2)       ! position = velocitypoint, cellfacemid
-    iprimpos = 1 ; mx = lnx 
+    iprimpos = 1 ; mx = max(numk, lnx) 
  case (3,4,5,6) ! position = netnode, cell corner
     iprimpos = 3 ; mx = numk
  end select
@@ -30639,7 +30639,7 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
     allocate(kcc(mx),kc1d(numk),kc2d(mx)) ; kcc = 1; kc1D = 0 ; kc2D = 0 
 
     do L = 1, numL1D
-       if (kn(3,L) == 1 .or. kn(3,L) == 6) then 
+       if (kn(3,L) == 1 .or. kn(3,L) == 6) then ! TODO: AvD: why not also type 3/4/5/7?
            k1 = kn(1,L) ; k2 = kn(2,L)
            if (nmk(k1) > 1) kc1D(k1) = 1
            if (nmk(k2) > 1) kc1D(k2) = 1 
@@ -30667,7 +30667,7 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
           if (qid == 'bedlevel1D') then
              call mess(LEVEL_INFO, 'setbedlevelfromextfile: Setting bedlevel1D from file '''//trim(filename)//'''.')
              kc(1:mx) = kc1D
-             success = timespaceinitialfield_mpi(xk, yk, zk, numk, filename, filetype, method, operand, transformcoef, iprimpos, kc) ! zie meteo module
+             success = timespaceinitialfield_mpi(xk, yk, zk, numk, filename, filetype, method, operand, transformcoef, 3, kc) ! zie meteo module
           else if (index(qid,'bedlevel') > 0) then  
              if (qid == 'bedlevel')  then
                 call mess(LEVEL_INFO, 'setbedlevelfromextfile: Setting bedlevelboth1D2D from file '''//trim(filename)//'''.')
@@ -30968,10 +30968,17 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
        if ( kcu(L) == 1) then                            ! 1D link
 
           if (ibedlevtyp == 1 .or. ibedlevtyp == 6) then     ! tegeldieptes celcentra ! TODO: [TRUNKMERGE] WO/BJ: do we need stm_included in this if (consistent?)
-             bl1      = bl(n1)
-             bl2      = bl(n2)
-             bob(1,L) = max( bl1, bl2 )
-             bob(2,L) = bob(1,L)
+             if (stm_included) then
+                bl1      = bl(n1)
+                bl2      = bl(n2)
+                bob(1,L) = max( bl1, bl2 )
+                bob(2,L) = bob(1,L)
+             else ! Old non-MOR code for 1D in models with tiledepths
+                bob(1,L)  = zn1
+                bob(2,L)  = zn2                             
+                bl(n1)    = zn1
+                bl(n2)    = zn2
+             end if
           else
              blv = 0.5d0*( zn1 + zn2 )                      ! same as 2D, based on network, but now in flow link dir. In 2D this is net link dir
              bob(1,L)  = blv

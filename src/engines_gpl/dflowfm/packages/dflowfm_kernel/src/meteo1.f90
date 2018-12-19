@@ -7624,6 +7624,12 @@ contains
                n6 = 3*maxval(nmk)   ! 2: safe upper bound , 3 : even safer!
                allocate( xx(n6,numk), yy(n6,numk), nnn(numk), xxx(n6), yyy(n6) )
                do k = 1,numk
+                  if (jakc == 0) then
+                     if (kcc(k) /= 1) then
+                        cycle
+                     end if
+                  end if
+
 !              get the celllist
                   call make_dual_cell(k, n6, rcel, xxx, yyy, nnn(k), Wu1Duni)
                   do i=1,nnn(k)
@@ -7645,8 +7651,13 @@ contains
                end if
           end if
                    
-          call averaging2(1,ns,xs,ys,zs,ipsam,xu,yu,zh,nx,xx,yy,n6,nnn,jakdtree,&
-                          dmiss, jsferic, jasfer3D, JINS, NPL, xpl, ypl, zpl)
+          if (jakc == 0) then  
+             call averaging2(1,ns,xs,ys,zs,ipsam,xu,yu,zh,nx,xx,yy,n6,nnn,jakdtree,&
+                             dmiss, jsferic, jasfer3D, JINS, NPL, xpl, ypl, zpl)
+          else
+             call averaging2(1,ns,xs,ys,zs,ipsam,xu,yu,zh,nx,xx,yy,n6,nnn,jakdtree,&
+                             dmiss, jsferic, jasfer3D, JINS, NPL, xpl, ypl, zpl, kcc)
+          end if
           deallocate(xx,yy,nnn)
           if ( iprimpos.eq.2 ) then
              if ( allocated(LnnL) ) deallocate(LnnL)
