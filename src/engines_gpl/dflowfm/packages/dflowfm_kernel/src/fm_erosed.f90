@@ -1152,7 +1152,8 @@ end module m_fm_update_crosssections
                ! If user-specified THRESH is <= 0.0, the erosion flux is effectively not limited by FIXFAC since ffthresh is 1e-10
                ! but by the amount of sediment that is available
                !
-               srcmax(nm, l) = bodsed(l, nm)*cdryb(l)/dtmor
+               !srcmax(nm, l) = bodsed(l, nm)*cdryb(l)/dtmor
+               srcmax(nm, l) = bodsed(l, nm)/dtmor
             enddo
          endif
          !
