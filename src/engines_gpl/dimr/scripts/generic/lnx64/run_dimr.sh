@@ -24,6 +24,8 @@ function print_usage_info {
     echo "       print this help message and exit"
     echo "-m, --masterfile <filename>"
     echo "       dimr configuration filename, default dimr_config.xml"
+    echo "--dockerparallel"
+    echo "       A parallel run inside docker"
     echo "The following arguments are used when called by submit_dimr.sh:"
     echo "    --D3D_HOME <path>"
     echo "       path to binaries and scripts"
@@ -43,6 +45,7 @@ corespernodedefault=1
 corespernode=$corespernodedefault
 debuglevel=-1
 configfile=dimr_config.xml
+dockerprl=0
 D3D_HOME=
 runscript_extraopts=
 NNODES=1
@@ -72,6 +75,9 @@ case $key in
     -m|--masterfile)
     configfile="$1"
     shift
+    ;;
+    --dockerparallel)
+    dockerprl=1
     ;;
     --D3D_HOME)
     D3D_HOME="$1"
@@ -142,6 +148,7 @@ echo "    Configfile       : $configfile"
 echo "    D3D_HOME         : $D3D_HOME"
 echo "    Working directory: $workdir"
 echo "    Number of slots  : $NSLOTS"
+echo "    Docker parallel  : $dockerprl"
 echo 
 
     #
@@ -189,46 +196,68 @@ if [ $NSLOTS -eq 1 ]; then
     echo "$bindir/dimr $configfile $debugarg"
           $bindir/dimr $configfile $debugarg
 else
-    #
-    # Create machinefile using $PE_HOSTFILE
-    if [ $NNODES -eq 1 ]; then
-        echo " ">$(pwd)/machinefile
-    else
-        if [ -n $corespernode ]; then
-            if [ -e $(pwd)/machinefile ]; then
-                rm -f machinefile
-            fi
-            for (( i = 1 ; i <= $corespernode; i++ )); do
-                awk '{print $1":"1}' $PE_HOSTFILE >> $(pwd)/machinefile
-            done
-        else
-           awk '{print $1":"2}' $PE_HOSTFILE > $(pwd)/machinefile
-        fi
-    fi
-    echo Contents of machinefile:
-    cat $(pwd)/machinefile
-    echo ----------------------------------------------------------------------
-
-    if [ $NNODES -ne 1 ]; then
+    if [ $dockerprl -eq 1 ]; then
+        #
+        # Parallel in Docker
+        # Assumption: 1 node
+        export PATH=/usr/lib64/mpich/bin:$PATH
         echo "Starting mpd..."
         mpd &
-        mpdboot -n $NSLOTS
+        mpdboot -n $NSLOTS --rsh=/usr/bin/rsh
+
+        node_number=$NSLOTS
+        while [ $node_number -ge 1 ]; do
+           node_number=`expr $node_number - 1`
+           ln -s /dev/null log$node_number.irlog
+        done
+
+        echo "executing:"
+        echo "mpirun -np $NSLOTS $bindir/dimr $configfile $debugarg"
+              mpirun -np $NSLOTS $bindir/dimr $configfile $debugarg
+    else
+        #
+        # Parallel on Deltares cluster
+        export PATH=/opt/mpich2/1.4.1_intel14.0.3/bin:$PATH
+        #
+        # Create machinefile using $PE_HOSTFILE
+        if [ $NNODES -eq 1 ]; then
+            echo " ">$(pwd)/machinefile
+        else
+            if [ -n $corespernode ]; then
+                if [ -e $(pwd)/machinefile ]; then
+                    rm -f machinefile
+                fi
+                for (( i = 1 ; i <= $corespernode; i++ )); do
+                    awk '{print $1":"1}' $PE_HOSTFILE >> $(pwd)/machinefile
+                done
+            else
+               awk '{print $1":"2}' $PE_HOSTFILE > $(pwd)/machinefile
+            fi
+        fi
+        echo Contents of machinefile:
+        cat $(pwd)/machinefile
+        echo ----------------------------------------------------------------------
+
+        if [ $NNODES -ne 1 ]; then
+            echo "Starting mpd..."
+            mpd &
+            mpdboot -n $NSLOTS
+        fi
+
+        node_number=$NSLOTS
+        while [ $node_number -ge 1 ]; do
+           node_number=`expr $node_number - 1`
+           ln -s /dev/null log$node_number.irlog
+        done
+
+        echo "executing:"
+        echo "mpiexec -np $NSLOTS $bindir/dimr $configfile $debugarg"
+              mpiexec -np $NSLOTS $bindir/dimr $configfile $debugarg
     fi
-
-    node_number=$NSLOTS
-    while [ $node_number -ge 1 ]; do
-       node_number=`expr $node_number - 1`
-       ln -s /dev/null log$node_number.irlog
-    done
-
-    echo "/opt/mpich2/1.4.1_intel14.0.3/bin/mpiexec -np $NSLOTS $bindir/dimr $configfile $debugarg"
-          /opt/mpich2/1.4.1_intel14.0.3/bin/mpiexec -np $NSLOTS $bindir/dimr $configfile $debugarg
-
-
     rm -f log*.irlog
 fi
 
-if [ $NNODES -ne 1 ]; then
+if [[ $NNODES -ne 1 ]] || [[ $NSLOTS -ne 1 && $dockerprl -eq 1 ]]; then
     mpdallexit
 fi
 
