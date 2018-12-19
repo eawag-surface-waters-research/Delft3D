@@ -29,6 +29,7 @@ program test_deltares_common
     use test_hash_search
     use test_bilin5
     use test_distance
+    use test_string_module
 
     implicit none
 
@@ -44,6 +45,7 @@ program test_deltares_common
     call tests_hash_search
     call tests_bilin5
     call tests_distance
+    call tests_string_module
 
     !
     ! Done - properly finalize
