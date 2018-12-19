@@ -14627,7 +14627,7 @@ subroutine sumvalueOnCrossSections(resu, numvals)
            if( jased == 4 .and. stmpar%lsedtot > 0 ) then ! todo, loop korter tot lsedsus.
               IP = IPNT_HUA + NUMCONST_MDU + 1 ! TODO: mourits/dam_ar: check whether all uses of NUMCONST versus NUMCONST_MDU are now correct.
               do lsed = 1,stmpar%lsedtot
-                 resu(IP,icrs) = resu(IP,icrs) + sedtra%e_sbn(L,lsed) * wu(L) * dble(sign(1, Lf))
+                 resu(IP,icrs) = resu(IP,icrs) + sedtra%e_sbn(L,lsed) * wu_mor(L) * dble(sign(1, Lf))
               enddo
               if( stmpar%lsedsus > 0 ) then
                  IP = IP + 1
