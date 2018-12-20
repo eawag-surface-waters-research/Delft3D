@@ -12148,8 +12148,8 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
    if (ndx2d > 0) then
       ierr = nf90_put_var(ncid, id_tsp%id_flowelemba(2), ba(1:ndx2d)) ! TODO: AvD: handle 1D/2D boundaries
       ierr = nf90_put_var(ncid, id_tsp%id_flowelembl(2), bl(1:ndx2d)) ! TODO: AvD: handle 1D/2D boundaries
-      ierr = nf90_put_var(ncid, id_tsp%id_netnodez(2),   z2dn)        ! NOTE: UNST-1318: backwards compatibility, UNST-2207: remapped depth array must be used
-      deallocate(z2dn)
+      ierr = nf90_put_var(ncid, id_tsp%id_netnodez(2),   zk(1:numk))  ! NOTE: UNST-1318: backwards compatibility, UNST-2207: remapped depth array must be used (ierr = nf90_put_var(ncid, id_tsp%id_netnodez(2), z2dn(1:numk))), 
+                                                                      ! but is not part of ugrid coverage
    endif
    !
    if (jamd1dfile > 0 .and. stm_included) then
