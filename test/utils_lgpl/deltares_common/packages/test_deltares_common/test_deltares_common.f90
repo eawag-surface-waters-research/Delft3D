@@ -30,6 +30,7 @@ program test_deltares_common
     use test_bilin5
     use test_distance
     use test_string_module
+    use test_properties
 
     implicit none
 
@@ -46,6 +47,7 @@ program test_deltares_common
     call tests_bilin5
     call tests_distance
     call tests_string_module
+    call tests_properties
 
     !
     ! Done - properly finalize

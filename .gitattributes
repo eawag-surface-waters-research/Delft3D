@@ -14304,6 +14304,7 @@ test/utils_lgpl/deltares_common/packages/test_deltares_common/src/test_distance.
 test/utils_lgpl/deltares_common/packages/test_deltares_common/src/test_hash_search.f90 -text
 test/utils_lgpl/deltares_common/packages/test_deltares_common/src/test_precision_basics.f90 -text
 test/utils_lgpl/deltares_common/packages/test_deltares_common/src/test_precision_body.f90 -text
+test/utils_lgpl/deltares_common/packages/test_deltares_common/src/test_properties.f90 -text
 test/utils_lgpl/deltares_common/packages/test_deltares_common/src/test_sorting_algorithms.f90 -text
 test/utils_lgpl/deltares_common/packages/test_deltares_common/src/test_string_module.f90 -text
 test/utils_lgpl/deltares_common/packages/test_deltares_common/test_deltares_common.f90 -text
