@@ -7820,6 +7820,7 @@ subroutine unc_write_net_filepointer(inetfile, janetcell, janetbnd, jaidomain, j
     use m_partitioninfo
     use geometry_module, only: get_startend, normaloutchk
     use gridoperations
+    use m_flowparameters, only: jawave
     
     integer, intent(in) :: inetfile
 
@@ -7907,7 +7908,7 @@ subroutine unc_write_net_filepointer(inetfile, janetcell, janetbnd, jaidomain, j
 
        ! Start detecting grid enclosure
        call savepol()
-       if (jampi>0) then
+       if (jampi>0 .and. jawave == 3) then
           call generate_partition_pol_from_idomain(ierr, myrank=my_rank)    ! UNST-1937: strictly domain, no ghostcells
        else
           call copynetboundstopol(0, 0, 1, 0)
