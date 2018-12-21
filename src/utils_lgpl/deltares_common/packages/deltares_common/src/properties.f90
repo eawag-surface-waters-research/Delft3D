@@ -1,29 +1,29 @@
 module properties
 !----- LGPL --------------------------------------------------------------------
-!                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2018.                                
-!                                                                               
-!  This library is free software; you can redistribute it and/or                
-!  modify it under the terms of the GNU Lesser General Public                   
-!  License as published by the Free Software Foundation version 2.1.                 
-!                                                                               
-!  This library is distributed in the hope that it will be useful,              
-!  but WITHOUT ANY WARRANTY; without even the implied warranty of               
-!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU            
-!  Lesser General Public License for more details.                              
-!                                                                               
-!  You should have received a copy of the GNU Lesser General Public             
-!  License along with this library; if not, see <http://www.gnu.org/licenses/>. 
-!                                                                               
-!  contact: delft3d.support@deltares.nl                                         
-!  Stichting Deltares                                                           
-!  P.O. Box 177                                                                 
-!  2600 MH Delft, The Netherlands                                               
-!                                                                               
-!  All indications and logos of, and references to, "Delft3D" and "Deltares"    
-!  are registered trademarks of Stichting Deltares, and remain the property of  
-!  Stichting Deltares. All rights reserved.                                     
-!                                                                               
+!
+!  Copyright (C)  Stichting Deltares, 2011-2018.
+!
+!  This library is free software; you can redistribute it and/or
+!  modify it under the terms of the GNU Lesser General Public
+!  License as published by the Free Software Foundation version 2.1.
+!
+!  This library is distributed in the hope that it will be useful,
+!  but WITHOUT ANY WARRANTY; without even the implied warranty of
+!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+!  Lesser General Public License for more details.
+!
+!  You should have received a copy of the GNU Lesser General Public
+!  License along with this library; if not, see <http://www.gnu.org/licenses/>.
+!
+!  contact: delft3d.support@deltares.nl
+!  Stichting Deltares
+!  P.O. Box 177
+!  2600 MH Delft, The Netherlands
+!
+!  All indications and logos of, and references to, "Delft3D" and "Deltares"
+!  are registered trademarks of Stichting Deltares, and remain the property of
+!  Stichting Deltares. All rights reserved.
+!
 !-------------------------------------------------------------------------------
 !  $Id$
 !  $HeadURL$
@@ -139,10 +139,10 @@ subroutine prop_inifile(filename , tree, error, japreproc)
     !
     ! Parameters
     !
-    character(*),               intent(in)                    :: filename     !< File name 
-    type(tree_data),    pointer,intent(inout)                 :: tree         !< Tree object generated 
-    integer,                    intent(out)                   :: error        !< Placeholder for file errors 
-    logical,                    intent(in),     optional      :: japreproc    !< Run the file through a preprocessor 
+    character(*),               intent(in)                    :: filename     !< File name
+    type(tree_data),    pointer,intent(inout)                 :: tree         !< Tree object generated
+    integer,                    intent(out)                   :: error        !< Placeholder for file errors
+    logical,                    intent(in),     optional      :: japreproc    !< Run the file through a preprocessor
     !
     ! Local variables
     !
@@ -150,17 +150,17 @@ subroutine prop_inifile(filename , tree, error, japreproc)
 
     lu = 0
     if (present(japreproc)) then            ! If preprocessor was requested
-       if (japreproc) then 
-          lu = preprocINI(filename, error)  ! do preprocessing 
-       endif 
-    endif 
-    if (lu == 0) then                          ! if lu has not been assigned a valid unit number 
-!      open existing file only       
+       if (japreproc) then
+          lu = preprocINI(filename, error)  ! do preprocessing
+       endif
+    endif
+    if (lu == 0) then                          ! if lu has not been assigned a valid unit number
+!      open existing file only
        open(newunit=lu,file=filename,iostat=error,status='old')
        if (error/=0) then
           return
        endif
-    endif 
+    endif
 
     call prop_inifile_pointer(lu, tree)
     close (lu)
@@ -175,8 +175,8 @@ subroutine prop_inifile_pointer(lu, tree)
     !
     ! Parameters
     !
-    integer,                    intent(in)      :: lu           !< File unit 
-    type(tree_data),    pointer,intent(inout)   :: tree         !< Tree object generated 
+    integer,                    intent(in)      :: lu           !< File unit
+    type(tree_data),    pointer,intent(inout)   :: tree         !< Tree object generated
     !
     ! Local variables
     !
@@ -186,20 +186,27 @@ subroutine prop_inifile_pointer(lu, tree)
     integer               :: lend, lcend, num_bs
     logical               :: multiple_lines
     character(max_length) :: key
-    
+
     character(len=:),    allocatable :: line
     character(len=:),    allocatable :: linecont !< Placeholder for continued line
     character(len=:),    allocatable :: lineconttemp
     character(len=:),    allocatable :: value
-    
+
     type(tree_data), pointer          :: achapter
-    type(tree_data), pointer          :: anode  
+    type(tree_data), pointer          :: anode
     integer                           :: num_hash
 
     allocate(character(maxlen)::line)
     allocate(character(maxlen)::linecont)
     allocate(character(maxlen)::value)
     allocate(character(maxlen)::lineconttemp)
+
+    if ( .not. associated(tree) ) then
+        allocate( tree )
+    endif
+    if ( .not. associated(tree%node_name) ) then
+        allocate( tree%node_name(0) )
+    endif
 
     !
     !! executable statements -------------------------------------------------------
@@ -228,22 +235,22 @@ subroutine prop_inifile_pointer(lu, tree)
             ! There could be a comment (started by #) after line continuation backslash
             num_hash = 0
             do i=1,lcend                                          ! count number of #
-               if (linecont(i:i)=='#') num_hash = num_hash + 1 
-            enddo 
+               if (linecont(i:i)=='#') num_hash = num_hash + 1
+            enddo
             if (num_hash==0) then                                 ! if none, it is easy
                lcend = len_trim(linecont)
-            else 
+            else
                if (num_hash==1) then                              ! if only one, then this is THE comment mark
                   lcend = index(linecont(1:lcend),'#') - 1
                else                                               ! if more than one
                                                                   !    if nothing between '=' and the first '#', cut after second '#'
-                  if (len_trim(linecont(index(linecont(1:lcend),'=')+1:index(linecont(1:lcend),'#')-1))==0) then 
+                  if (len_trim(linecont(index(linecont(1:lcend),'=')+1:index(linecont(1:lcend),'#')-1))==0) then
                      lcend=index(linecont(index(linecont(1:lcend),'#')+1:lcend),'#')+index(linecont(1:lcend),'#')
-                  else 
+                  else
                      lcend = index(linecont(1:lcend),'#') - 1     !    else cut before the first
-                  endif 
-               endif 
-            endif 
+                  endif
+               endif
+            endif
             lcend=len_trim(linecont(1:lcend))                     ! finally, remove trailing blanks
             linecont=linecont(1:lcend)                            ! and actually remove the end of the string
             if (lcend > 0) then
@@ -262,7 +269,7 @@ subroutine prop_inifile_pointer(lu, tree)
             else
                 ! Empty line, leave continuation loop
                 exit
-            end if                
+            end if
 
         700 line = line(1:lend)//' '//linecont(1:lcend)
             lend = lend + lcend + 1
@@ -318,7 +325,7 @@ subroutine prop_inifile_pointer(lu, tree)
           endif
           key = adjustl(line(1:eqpos-1))
           call lowercase(key,999)
-          
+
           ! Strip off comments that start with #
           ! To allow lines like: FileName = somefile.ext # Comment text
           ! and prevent that comment text also ends up in file name.
@@ -337,7 +344,7 @@ subroutine prop_inifile_pointer(lu, tree)
           value = adjustl(line(eqpos+1:valend))
           call tree_create_node( achapter, trim(key), anode)
           call tree_put_data( anode, transfer(trim(value),node_value), "STRING")
-      
+
        endif
        !
        ! Get the next line
@@ -381,9 +388,9 @@ subroutine prop_tekalfile(filename , tree, error)
     !
     ! Parameters
     !
-    character(*),               intent(in)      :: filename     !< File name 
-    type(tree_data),    pointer,intent(inout)   :: tree         !< Tree object generated 
-    integer,                    intent(out)     :: error        !< Placeholder for file errors 
+    character(*),               intent(in)      :: filename     !< File name
+    type(tree_data),    pointer,intent(inout)   :: tree         !< Tree object generated
+    integer,                    intent(out)     :: error        !< Placeholder for file errors
     !
     ! Local variables
     !
@@ -406,8 +413,8 @@ subroutine prop_tekalfile_pointer(lu, tree)
     !
     ! Parameters
     !
-    integer,                    intent(in)      :: lu           !< File unit 
-    type(tree_data),    pointer,intent(inout)   :: tree         !< Tree object generated 
+    integer,                    intent(in)      :: lu           !< File unit
+    type(tree_data),    pointer,intent(inout)   :: tree         !< Tree object generated
     !
     ! Local variables
     !
@@ -422,6 +429,14 @@ subroutine prop_tekalfile_pointer(lu, tree)
 
     allocate(character(maxlen)::line)
     allocate(character(maxlen)::linetemp)
+
+    if ( .not. associated(tree) ) then
+        allocate( tree )
+    endif
+    if ( .not. associated(tree%node_name) ) then
+        allocate( tree%node_name(0) )
+    endif
+
     !
     !! executable statements -------------------------------------------------------
     !
@@ -478,23 +493,23 @@ end subroutine prop_tekalfile_pointer
 
 ! --------------------------------------------------------------------
 !   Subroutine: expand
-!   Purpose:    Expand keys ${key} in subject, given a set of key-value pairs 
+!   Purpose:    Expand keys ${key} in subject, given a set of key-value pairs
 !   Context:    Called by parse_directives
 !   Summary:
 !               Non-recursive (first level) expansion
 !               Defnames and defstrings form a list of ndef (key,value)-pairs
 !               used in the substitution upon encountering $key or ${key} in the string
-!               keys starting with an underscore refer to environment variables 
-!               e.g. ${_PATH} or $_PATH refers to the path variable 
+!               keys starting with an underscore refer to environment variables
+!               e.g. ${_PATH} or $_PATH refers to the path variable
 !   Arguments:
-!   subject     Character string subjected to replacements 
-!   defnames    keys 
-!   defstrings  replacement strings 
-!   ndef        number of keys = number of replacement strings 
+!   subject     Character string subjected to replacements
+!   defnames    keys
+!   defstrings  replacement strings
+!   ndef        number of keys = number of replacement strings
 !
 !   Restrictions:
 !               - Single pass, replacement strings are not subject to expansion themselves (i.e. no recursion)
-!               - keys and replacement strings can at max hold 50 characters 
+!               - keys and replacement strings can at max hold 50 characters
 ! --------------------------------------------------------------------
 !
 subroutine expand(subject,defnames,defstrings,ndef)
@@ -510,12 +525,12 @@ subroutine expand(subject,defnames,defstrings,ndef)
     !
     ! Local variables
     !
-    character*(300)     ::  envstring       ! environment strings can be lengthy sometimes  ... 
+    character*(300)     ::  envstring       ! environment strings can be lengthy sometimes  ...
     character*(600)     ::  outstring       ! so the output must support that. Adapt if still insufficient.
     character*(50)      ::  defstring
     integer             ::  s1
-    integer             ::  s2 
-    integer             ::  l1 
+    integer             ::  s2
+    integer             ::  l1
     integer             ::  idef
 
     !
@@ -527,19 +542,19 @@ subroutine expand(subject,defnames,defstrings,ndef)
     outstring=''
     do while(s1<=l1)
        if (subject(s1:s1)=='$') then
-           if(subject(s1+1:s1+1)=='{') then 
+           if(subject(s1+1:s1+1)=='{') then
               read(subject(s1+2:index(subject(s1+1:l1),'}')+s1-1),*) defstring
               s1 = s1 + len(trim(defstring)) + 2 + 1
-           else 
+           else
               read(subject(s1+1:l1),*) defstring
               s1 = s1 + len(trim(defstring)) + 1
-           endif 
+           endif
            if (defstring(1:1)=='_') then                                    ! environment variable
               defstring=defstring(2:len(trim(defstring)))
               call getenv(trim(defstring),envstring)                         ! is left empty if not existent
               outstring=outstring(1:s2-1)//trim(envstring)
               s2 = s2 + len(trim(envstring))
-           else 
+           else
               do idef=1,ndef
                   if (trim(defstring)==trim(defnames(idef))) then
                       outstring=outstring(1:s2-1)//trim(defstrings(idef))
@@ -547,7 +562,7 @@ subroutine expand(subject,defnames,defstrings,ndef)
                       exit
                   endif
               enddo
-          endif 
+          endif
        else
            outstring(s2:s2)=subject(s1:s1)
            s2 = s2 + 1
@@ -560,45 +575,45 @@ end subroutine expand
 
 ! --------------------------------------------------------------------
 !   Subroutine: preprocINI
-!   Purpose:    INI-file preprocessor, cpp-style 
-!   Context:    preceeds processing an ini-files into a tree  
+!   Purpose:    INI-file preprocessor, cpp-style
+!   Context:    preceeds processing an ini-files into a tree
 !   Summary:
-!            * (nested) file inclusion through include-directive       
+!            * (nested) file inclusion through include-directive
 !                  #include filename
 !                  #include <filename>
-!            * aliases, defined 
+!            * aliases, defined
 !                  #define aliasname content
 !              and invoked by placing $aliasname or ${aliasname} in the text
-!            * $_aliasname and ${_aliasname} refer to environment variables 
-!            * conditionals #ifdef, #ifndef #endif 
+!            * $_aliasname and ${_aliasname} refer to environment variables
+!            * conditionals #ifdef, #ifndef #endif
 !            * #include and #define work recursive, but preprocessing is 'single-pass' (begin to end of files)
 !            Resulting file (expanded) is written to filename_out
-!            Return error code: -5 -> file not found  
-!                               -6 -> trying to open an already opened file 
+!            Return error code: -5 -> file not found
+!                               -6 -> trying to open an already opened file
 !                               positive error codes refer to iostats
 !            filename_out is optional. If provided, the file is created (or overwritten if existing),
-!                otherwise a scratchfile is used, which is automatically unlinked upon closure  
+!                otherwise a scratchfile is used, which is automatically unlinked upon closure
 !            Non-recursive (first level) expansion
 !            Defnames and defstrings form a list of ndef (key,value)-pairs
 !            used in the substitution upon encountering $key or ${key} in the string
-!            keys starting with an underscore refer to environment variables 
-!            e.g. ${_PATH} or $_PATH refers to the path variable 
+!            keys starting with an underscore refer to environment variables
+!            e.g. ${_PATH} or $_PATH refers to the path variable
 !   Arguments:
-!   infilename      Original file subjected to preprocessing  
-!   error           Reports final status: 
+!   infilename      Original file subjected to preprocessing
+!   error           Reports final status:
 !                           0  : no error
 !                         -55  : file not found (passed from parse_directives)
-!                         -66  : tryng to open a file that has already been opened (passed from parse_directives) 
-!                         -33  : available unit numbers ran out 
-!                   otherwise  : iostat from the last failed file operation 
-!   filename_out    Resulting file, optional (if not given, a scratch file is used) 
+!                         -66  : tryng to open a file that has already been opened (passed from parse_directives)
+!                         -33  : available unit numbers ran out
+!                   otherwise  : iostat from the last failed file operation
+!   filename_out    Resulting file, optional (if not given, a scratch file is used)
 !
 !   Result:
 !   outfilenumber   Handle to a file open for reading, containing the preprocessors result
 !   Restrictions:
-!               - the maximum file unit number to be returned is 500 
+!               - the maximum file unit number to be returned is 500
 !               - keys and replacement strings can at hold up to 50 characters only
-!               - no more than 100 replacements can be defined 
+!               - no more than 100 replacements can be defined
 ! --------------------------------------------------------------------
 !
 integer function preprocINI(infilename, error, outfilename) result (outfilenumber)
@@ -608,14 +623,14 @@ integer function preprocINI(infilename, error, outfilename) result (outfilenumbe
     !
     ! Parameters
     !
-    character(*),     intent(in)                :: infilename           !< basic config file 
-    integer,          intent(out)               :: error                !< error code 
-    character(*),     intent(in), optional      :: outfilename          !< resulting input to build tree 
+    character(*),     intent(in)                :: infilename           !< basic config file
+    integer,          intent(out)               :: error                !< error code
+    character(*),     intent(in), optional      :: outfilename          !< resulting input to build tree
     !
     ! Local variables
     !
-    character(50)     :: defnames(100)         ! definition database 
-    character(50)     :: defstrings(100)       
+    character(50)     :: defnames(100)         ! definition database
+    character(50)     :: defstrings(100)
     integer           :: ndef
     integer           :: iostat
 
@@ -625,53 +640,53 @@ integer function preprocINI(infilename, error, outfilename) result (outfilenumbe
     error = 0
     ndef = 0
 
-    if (present(outfilename)) then 
+    if (present(outfilename)) then
        open(newunit=outfilenumber,file=trim(outfilename),iostat=iostat)
        if (iostat/=0) then
           outfilenumber = 0
           error = iostat                          !       ERROR : Intermediate ini-file could not be written.
           return
        endif
-    else 
+    else
        open (newunit=outfilenumber, status='SCRATCH', IOSTAT=iostat)
-       if (iostat/=0) then 
+       if (iostat/=0) then
           outfilenumber = 0
           error = iostat
           return
-       endif 
-    endif 
+       endif
+    endif
 
     error = parse_directives(trim(infilename), outfilenumber, defnames, defstrings, ndef, 1)
     if (error/=0) then                ! either something went wrong ...
-       close(outfilenumber)           ! close the file 
-       outfilenumber = 0              ! return 0 as a filenumber 
+       close(outfilenumber)           ! close the file
+       outfilenumber = 0              ! return 0 as a filenumber
     else                              ! ... or we're all clear  ....
-       rewind(outfilenumber)          ! rewind the file just written and return the number to caller 
-    endif 
-end function preprocINI 
+       rewind(outfilenumber)          ! rewind the file just written and return the number to caller
+    endif
+end function preprocINI
 
 ! --------------------------------------------------------------------
-!   Subroutine: parse_directives 
-!   Purpose:    part of the INI-file preprocessor, handles preprocessor directives 
-!   Context:    called by preprocINI 
+!   Subroutine: parse_directives
+!   Purpose:    part of the INI-file preprocessor, handles preprocessor directives
+!   Context:    called by preprocINI
 !   Summary:    see preprocINI
 
 !   Arguments:
-!   filename_in     Character string subjected to replacements 
-!   infilename      Original file subjected to preprocessing (can also be an included file at deeper level)  
+!   filename_in     Character string subjected to replacements
+!   infilename      Original file subjected to preprocessing (can also be an included file at deeper level)
 !   outfilenumber   Handle to a file open for reading, containing the preprocessors result
-!   defnames        keys 
-!   defstrings      replacement strings 
-!   ndef            number of keys = number of replacement strings 
+!   defnames        keys
+!   defstrings      replacement strings
+!   ndef            number of keys = number of replacement strings
 !   level           keeps track of the recursive depth (we could enforce a max on this depth if desired)
 !
 !   Result:
-!   error           Reports final status: 
+!   error           Reports final status:
 !                           0  : no error
-!                         -55  : file not found 
-!                         -66  : tryng to open a file that has already been opened 
-!                         -33  : ran out of available unit numbers 
-!                   otherwise  : iostat from the last failed file operation 
+!                         -55  : file not found
+!                         -66  : tryng to open a file that has already been opened
+!                         -33  : ran out of available unit numbers
+!                   otherwise  : iostat from the last failed file operation
 !   Restrictions:   see preprocINI
 ! --------------------------------------------------------------------
 !
@@ -687,7 +702,7 @@ recursive integer function parse_directives (infilename, outfilenumber, defnames
     character(len=50),    intent(inout) :: defnames(:)     !< defined constants: names
     character(len=50),    intent(inout) :: defstrings(:)   !< defined constants: content
     integer,              intent(inout) :: ndef            !< keeps track of the number of definitions
-    integer,              intent(in)    :: level           !< nesting level 
+    integer,              intent(in)    :: level           !< nesting level
     !
     ! Local variables
     !
@@ -695,12 +710,12 @@ recursive integer function parse_directives (infilename, outfilenumber, defnames
     character(len=50)  :: includefile
     character(len=50)  :: dumstr
     character(len=50)  :: defname
-    character(len=50)  :: defstring 
-    integer            :: writing 
-    integer            :: idef 
-    integer            :: infilenumber 
+    character(len=50)  :: defstring
+    integer            :: writing
+    integer            :: idef
+    integer            :: infilenumber
     integer            :: iostat
-    logical            :: opened 
+    logical            :: opened
     logical            :: exist
 
     !
@@ -708,18 +723,18 @@ recursive integer function parse_directives (infilename, outfilenumber, defnames
     !
     error = 0
     inquire(file=trim(infilename), opened=opened, exist=exist)
-    if (opened) then 
-       error = -66                 ! ERROR : included file is already open (circular dependency), ignore file  
+    if (opened) then
+       error = -66                 ! ERROR : included file is already open (circular dependency), ignore file
        return
-    endif  
-    if (.not.exist) then 
-       error = -55                 ! ERROR : included file not found 
+    endif
+    if (.not.exist) then
+       error = -55                 ! ERROR : included file not found
        return
-    endif  
+    endif
 
     open(newunit=infilenumber,file=trim(infilename),iostat=iostat)
     if (iostat/=0) then
-       error = iostat              ! ERROR : file was encountered, but for some reason cannot be opened .... 
+       error = iostat              ! ERROR : file was encountered, but for some reason cannot be opened ....
        return
     endif
 
@@ -728,13 +743,13 @@ recursive integer function parse_directives (infilename, outfilenumber, defnames
        read(infilenumber,'(a200)',end=666) s
        if (index(s,'#include')==1) then
           read(s,*) dumstr, includefile
-          if (includefile(1:1)=='<') then 
+          if (includefile(1:1)=='<') then
              includefile=includefile(2:index(includefile,'>')-1)
-          endif 
+          endif
           if (writing>0) then
              error = parse_directives(includefile, outfilenumber, defnames, defstrings, ndef, level+1)
-             if (error/=0) return                                   ! first error stops the process 
-          endif                                                     ! is returned to higher levels 
+             if (error/=0) return                                   ! first error stops the process
+          endif                                                     ! is returned to higher levels
        elseif (index(s,'#define')==1) then
           read(s,*) dumstr, defname, defstring
           call expand(defstring,defnames,defstrings,ndef)           ! first expand names
@@ -787,7 +802,7 @@ subroutine prop_write_inifile(mout, tree, error)
 
     ! Determine maximum key stringlength (used for prettyprinting/alignment in print_initree)
     call tree_fold(tree, max_keylength, leaf_keylength, lenmaxdata, dummylog)
-    
+
     ! Print the tree by traversing it depth-first, pass mout and lenmax by transfer into data variable.
     call tree_traverse(tree, print_initree, transfer((/ mout, transfer(lenmaxdata, 123) /), node_value), dummylog)
 
@@ -844,7 +859,7 @@ subroutine print_initree( tree, data, stop )
 
     integer, dimension(2)                  :: inputdata
     integer                                :: mout
-    integer                                :: maxkeylength 
+    integer                                :: maxkeylength
     character(len=1), dimension(:),pointer :: data_ptr
     character(len=max_length)              :: string
     character(len=40)                      :: type_string
@@ -888,17 +903,17 @@ end subroutine print_initree
 
 
 ! subroutine prop_get_keyvalue(tree, chapterin ,keyin     ,value, success)
-!     implicit none 
-!     interface 
+!     implicit none
+!     interface
 !        subroutine tree_all_children( tree, keys, values, numkeys )
 !           type(TREE_DATA), pointer, intent(in) :: tree
 !           character(len=*), intent(out)        :: keys(:)
 !           character(len=*), intent(out)        :: values(:)
 !           integer, intent(out)                 :: numkeys
 !        end subroutine tree_all_children
-!     end interface 
+!     end interface
 !        call tree_all_children( tree, keys, values, numkeys )
-! end subroutine 
+! end subroutine
 
 !
 !
@@ -1048,9 +1063,9 @@ subroutine prop_get_string(tree, chapterin ,keyin     ,value, success)
                exit
             endif
          enddo
-         if (size(anode%node_data)>0) then          
+         if (size(anode%node_data)>0) then
             anode%node_visit = anode%node_visit + 1  ! Count visits (request of the value)
-         endif 
+         endif
      else
          ! Key not found
      endif
@@ -1064,13 +1079,13 @@ subroutine visit_tree(tree,direction)
    implicit none
    type(TREE_DATA), pointer                    :: tree
    character(len=1), dimension(0)              :: data
-   logical                                     :: stop 
-   integer, intent(in)                         :: direction       
+   logical                                     :: stop
+   integer, intent(in)                         :: direction
    if (direction>0) then
       call tree_traverse( tree, node_visit, data, stop )
    else
       call tree_traverse( tree, node_unvisit, data, stop )
-   endif 
+   endif
 end subroutine visit_tree
 
 subroutine node_visit( node, data, stop )
@@ -1078,9 +1093,9 @@ subroutine node_visit( node, data, stop )
    type(TREE_DATA), pointer                    :: node
    character(len=1), dimension(:), intent(in)  :: data
    logical, intent(inout)                      :: stop
-   if (size(node%node_data)>0) then          
-      node%node_visit = node%node_visit + 1  ! Update visit count 
-   endif 
+   if (size(node%node_data)>0) then
+      node%node_visit = node%node_visit + 1  ! Update visit count
+   endif
 end subroutine node_visit
 
 subroutine node_unvisit( node, data, stop )
@@ -1088,9 +1103,9 @@ subroutine node_unvisit( node, data, stop )
    type(TREE_DATA), pointer                    :: node
    character(len=1), dimension(:), intent(in)  :: data
    logical, intent(inout)                      :: stop
-   if (size(node%node_data)>0) then          
-      node%node_visit = max(0,node%node_visit - 1)  ! Update visit count 
-   endif 
+   if (size(node%node_data)>0) then
+      node%node_visit = max(0,node%node_visit - 1)  ! Update visit count
+   endif
 end subroutine node_unvisit
 !
 !
@@ -1637,7 +1652,7 @@ subroutine prop_set_data(tree, chapter, key, value, type_string, anno, success)
     character(len=1),         intent (in)  :: value(:)    !< Value of the property
     character(*),             intent (in)  :: type_string !< Data type of the property
     character(len=*), optional, intent (in) :: anno       !< Optional annotation/comment
-    logical, optional,        intent (out) :: success     !< Returns whether the operation was successful  
+    logical, optional,        intent (out) :: success     !< Returns whether the operation was successful
 
     character(len=1), allocatable :: valueline(:)
     logical :: ignore
@@ -1712,7 +1727,7 @@ subroutine prop_set_string(tree, chapter, key, value, anno, success)
     character(len=*),  intent (in)  :: value   !< Value of the property
     character(len=*), optional, intent (in) :: anno       !< Optional annotation/comment
     logical, optional, intent (out) :: success !< Returns whether the operation was successful
-    logical :: success_                         
+    logical :: success_
 
     if (present(anno)) then
         call prop_set_data(tree, chapter, key, transfer(value, node_value), 'STRING', anno = anno, success = success_)
@@ -1735,7 +1750,7 @@ subroutine prop_set_doubles(tree, chapter, key, value, anno, success)
     real(kind=dp),     intent (in)  :: value(:)  !< Value of the property
     character(len=*), optional, intent (in) :: anno       !< Optional annotation/comment
     logical, optional, intent (out) :: success   !< Returns whether the operation was successful
-                                                  
+
     logical :: success_
     character(len=max_length) :: strvalue
     character(len=24)         :: strscalar
@@ -1754,7 +1769,7 @@ subroutine prop_set_doubles(tree, chapter, key, value, anno, success)
         strvalue(iv+2:iv+is+1) = strscalar(1:is)
         iv  = iv+is+1
     end do
-    
+
 
  10 continue ! Put the string representation into the tree
     if (present(anno)) then
@@ -1766,7 +1781,7 @@ subroutine prop_set_doubles(tree, chapter, key, value, anno, success)
     if (present(success)) then
         success = success_
     end if
- 
+
 end subroutine prop_set_doubles
 
 
@@ -1779,7 +1794,7 @@ subroutine prop_set_double(tree, chapter, key, value, anno, success)
     double precision,  intent (in)  :: value    !< Value of the property
     character(len=*), optional, intent (in) :: anno       !< Optional annotation/comment
     logical, optional, intent (out) :: success  !< Returns whether the operation was successful
- 
+
     logical :: success_
     real(kind=dp) :: valuearray(1)
 
@@ -1807,7 +1822,7 @@ subroutine prop_set_integers(tree, chapter, key, value, anno, success)
     integer,           intent (in)  :: value(:)  !< Value of the property
     character(len=*), optional, intent (in) :: anno       !< Optional annotation/comment
     logical, optional, intent (out) :: success   !< Returns whether the operation was successful
-                                                  
+
     logical :: success_
     character(len=max_length) :: strvalue
     character(len=24)         :: strscalar
@@ -1839,7 +1854,7 @@ subroutine prop_set_integers(tree, chapter, key, value, anno, success)
     if (present(success)) then
         success = success_
     end if
- 
+
 end subroutine prop_set_integers
 
 
@@ -1852,7 +1867,7 @@ subroutine prop_set_integer(tree, chapter, key, value, anno, success)
     integer,           intent (in)  :: value    !< Value of the property
     character(len=*), optional, intent (in) :: anno       !< Optional annotation/comment
     logical, optional, intent (out) :: success  !< Returns whether the operation was successful
- 
+
     logical :: success_
     integer :: valuearray(1)
 
@@ -1862,7 +1877,7 @@ subroutine prop_set_integer(tree, chapter, key, value, anno, success)
         call prop_set_integers(tree, chapter, key, valuearray, anno = anno, success = success_)
     else
         call prop_set_integers(tree, chapter, key, valuearray, success = success_)
-    end if    
+    end if
 
     if (present(success)) then
         success = success_
@@ -2057,7 +2072,7 @@ end subroutine count_occurrences
     call lowercase(chapter,999)
     call lowercase(key,999)
     localvalue(1:maxlen) = ' '
-    
+
     ! Determine separation character
     if (present(spChar)) then
        sepChar = spChar
@@ -2093,29 +2108,29 @@ end subroutine count_occurrences
        call tree_get_data_string( anode, localvalue, success)
        if (.not. success) return
        localvalue = trim(localvalue)
-       
+
        ipos   = scan(localvalue, sepChar)
        icount = 0
-       
+
        do while (ipos > 0 .and. icount < valuelength)
-           
+
           icount = icount + 1
 
           value(icount) = trim(localvalue(1:ipos - 1))
-           
+
           localvalue = localvalue(ipos+1:)
-           
+
           ipos = scan(localvalue, sepChar)
-         
+
           ! Pickup the last one
-           
+
        enddo
-      
+
        if (ipos == 0 .and. icount < valuelength) then
           icount = icount + 1
           value(icount) = trim(localvalue)
        endif
-      
+
     else
        success = .false.
     endif
