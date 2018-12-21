@@ -68,7 +68,7 @@ end subroutine test_properties_load
 
 subroutine test_properties_check
     character(len=20)        :: filename
-    type(tree_data), pointer :: tree
+    type(tree_data), pointer :: tree1, tree2, tree
     integer                  :: error
     logical                  :: preprocess
 
@@ -92,29 +92,44 @@ subroutine test_properties_check
     !
     allocate( tree )
 
-    call prop_inifile( 'simple-file.ini', tree, error )
+    !
+    ! Note: A chapter "*" is considered to indicate a keyword outside a (named) chapter
+    ! So use two different ini files
+    !
+    call prop_inifile( 'simple-file.ini', tree1, error )
+    call prop_inifile( 'no-chapters.ini', tree2, error )
     call assert_equal( error, 0, "There should have been no error" )
 
     !
     ! Get numerical values from any chapter
     !
     do i = 1,2
-        call prop_get( tree, chapter(i), 'íntegerValue', integerValue, success )
+        tree => tree1
+        if ( i == 2 ) then
+            tree => tree2
+        endif
+
+        integerValue = -999
+        call prop_get( tree, chapter(i), 'integerValue', integerValue, success )
         call assert_true( success, "Retrieving the integer value should succeed (chapter: " // trim(chapter(i)) // ")" )
         call assert_equal( integerValue, 1, "The integer value should be 1 (chapter: " // trim(chapter(i)) // ")"  )
 
+        realValue = -999.0
         call prop_get( tree, chapter(i), 'realValue', realValue, success )
         call assert_true( success, "Retrieving the real value should succeed (chapter: " // trim(chapter(i)) // ")"   )
         call assert_comparable( realValue, 2.2, 1.0e-6, "The real value should be 2.2 (chapter: " // trim(chapter(i)) // ")"   )
 
+        realValue = -999.0
         call prop_get( tree, chapter(i), 'integerValue', realValue, success )
         call assert_true( success, "Retrieving the real value (from 'integerValue') should succeed (chapter: " // trim(chapter(i)) // ")"   )
         call assert_comparable( realValue, 1.0, 1.0e-6, "The real value (from 'integerValue') should be 1 (chapter: " // trim(chapter(i)) // ")"   )
 
+        doubleValue = -999.0_dp
         call prop_get( tree, chapter(i), 'doubleValue', doubleValue, success )
         call assert_true( success, "Retrieving the double value should succeed (chapter: " // trim(chapter(i)) // ")"   )
-        call assert_comparable( doubleValue, 2.3_dp, 1.0_dp, "The double value should be 2.3 (chapter: " // trim(chapter(i)) // ")"   )
+        call assert_comparable( doubleValue, 2.3e2_dp, 1.0_dp, "The double value should be 230.0 (chapter: " // trim(chapter(i)) // ")"   )
 
+        doubleValue = -999.0_dp
         call prop_get( tree, chapter(i), 'realValue', doubleValue, success )
         call assert_true( success, "Retrieving the double value (from 'realValue') should succeed (chapter: " // trim(chapter(i)) // ")"   )
         call assert_comparable( doubleValue, 2.2_dp, 1.0_dp, "The double value (from 'realValue') should be 2.2 (chapter: " // trim(chapter(i)) // ")"   )
@@ -124,18 +139,27 @@ subroutine test_properties_check
     ! Get the string values from any chapter
     !
     do i = 2,3
+        tree => tree1
+        if ( i == 2 ) then
+            tree => tree2
+        endif
+
+        stringValue = '?'
         call prop_get( tree, chapter(i), 'plainString', stringValue, success )
         call assert_true( success, "Retrieving the string value should succeed (chapter: " // trim(chapter(i)) // ")" )
         call assert_equal( stringValue, "plain", "Single words should be treated correctly (chapter: " // trim(chapter(i)) // ")"  )
 
+        stringValue = '?'
         call prop_get( tree, chapter(i), 'stringValue1', stringValue, success )
         call assert_true( success, "Retrieving the string value should succeed (chapter: " // trim(chapter(i)) // ")" )
         call assert_equal( stringValue,expectedString, "Strings in double quotes should be treated correctly (chapter: " // trim(chapter(i)) // ")"  )
 
+        stringValue = '?'
         call prop_get( tree, chapter(i), 'stringValue2', stringValue, success )
         call assert_true( success, "Retrieving the string value should succeed (chapter: " // trim(chapter(i)) // ")" )
         call assert_equal( stringValue, expectedString, "Strings in single quotes should be treated correctly (chapter: " // trim(chapter(i)) // ")"  )
 
+        stringValue = '?'
         call prop_get( tree, chapter(i), 'stringValue3', stringValue, success )
         call assert_true( success, "Retrieving the string value should succeed (chapter: " // trim(chapter(i)) // ")" )
         call assert_equal( stringValue, expectedString, "Strings enclosed in hashes should be treated correctly (chapter: " // trim(chapter(i)) // ")"  )
