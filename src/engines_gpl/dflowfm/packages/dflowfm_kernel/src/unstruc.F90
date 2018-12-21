@@ -3449,6 +3449,7 @@ end subroutine setdt
  COMMON /DRAWTHIS/ ndraw(50)
 
  jareduced = 0
+ if (jamapdtcell > 0) dtcell = 0d0
 
  if (ja_timestep_auto >= 1) then
 
