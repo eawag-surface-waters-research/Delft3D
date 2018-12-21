@@ -1330,7 +1330,7 @@ subroutine ftnunit_write_html_failed_real( text, value1, value2 )
     write( lun, '(a)' ) &
         '<td><span class="indent">', trim(text), '</span></td>', &
         '<td>Values: '
-    write( lun, '(a,e15.7,a,e15.7,a)' ) &
+    write( lun, '(e15.7,a,e15.7,a)' ) &
         value1, ' -- ', value2, '</td>'
     close( lun )
 
