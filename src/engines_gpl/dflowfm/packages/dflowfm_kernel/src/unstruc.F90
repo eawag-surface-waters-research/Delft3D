@@ -43358,7 +43358,7 @@ end subroutine alloc_jacobi
     allocate(idum(1))
     idum = 0
     
-    pi = 4d0 * atan( 1d0 )
+    pi = 4.0d0 * atan( 1d0 )
 
     if( japillar == 2 ) then
       if( allocated( cdeq ) ) deallocate( cdeq, npil )
