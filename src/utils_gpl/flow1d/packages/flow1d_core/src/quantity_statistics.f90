@@ -77,14 +77,6 @@ end module QSCallBack
     !! - maximum
     !! indices of some importantant quantities are stored so that the memory can be efficiently addressed.
     !!
-    type, public :: t_quantityStatisticsSet
-        integer                                            :: size             = 0   !< current length of array quantities
-        integer                                            :: count            = 0   !< number of defined and initialized quantities
-        integer                                            :: growsBy          = 20  !< used increment for extending array quantities
-        type(t_quantityStatistics), pointer, dimension(:) :: quantities => null()   !< the actual quantities
-        !
-        ! indexes of several quantities in the quantities array
-    end type
     !
     !> type t_quantityStatistics contains statistics associated with the grid points of which the indexes are stored in array domain_sites,
     !! defining the domain of quantity.
@@ -105,6 +97,15 @@ end module QSCallBack
         double precision               :: timeForOutput = 0d0                       !< next time instance to request output
         procedure(QS_callbackiface), pointer, nopass  :: QS_GetValue => null()      !< function pointer for retrieving results from the model engine
         double precision, pointer, dimension(:)       :: inputValues => null()      !< Pointer to array in model engine, that contains the results
+    end type
+	 
+    type, public :: t_quantityStatisticsSet
+        integer                                            :: size             = 0   !< current length of array quantities
+        integer                                            :: count            = 0   !< number of defined and initialized quantities
+        integer                                            :: growsBy          = 20  !< used increment for extending array quantities
+        type(t_quantityStatistics), pointer, dimension(:) :: quantities => null()   !< the actual quantities
+        !
+        ! indexes of several quantities in the quantities array
     end type
 
     double precision, parameter              :: maxValue =  1d20           !< Large value for computing minimum values
