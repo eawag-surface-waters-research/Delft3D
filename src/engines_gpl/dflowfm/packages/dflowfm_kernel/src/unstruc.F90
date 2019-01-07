@@ -30976,7 +30976,7 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
                 bob(2,L) = bob(1,L)
              else ! Old non-MOR code for 1D in models with tiledepths
                 bob(1,L)  = zn1
-                bob(2,L)  = zn2                             
+                bob(2,L)  = zn2
                 bl(n1)    = zn1
                 bl(n2)    = zn2
              end if
