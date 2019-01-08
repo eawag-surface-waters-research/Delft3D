@@ -1320,8 +1320,20 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'output', 'Wrihis_wind', jahiswind, success)
     call prop_get_integer(md_ptr, 'output', 'Wrihis_rain', jahisrain, success)
     call prop_get_integer(md_ptr, 'output', 'Wrihis_temperature', jahistem, success)
+    if (success .and. jahistem == 1 .and. jatem < 1) then
+      write (msgbuf, '(a)') 'MDU setting "Wrihis_temperature = 1" asks to write temperature to the output his file, ' &
+         //'but no temperature is involved due to MDU setting "Temperature = 0". So we set "Wrihis_temperature = 0" '&
+         //' and do not write temperature to his file.'
+      call warn_flush()
+    end if
     call prop_get_integer(md_ptr, 'output', 'Wrihis_heat_fluxes', jahisheatflux, success)
     call prop_get_integer(md_ptr, 'output', 'Wrihis_salinity', jahissal, success)
+    if (success .and. jahissal == 1 .and. jasal < 1) then
+      write (msgbuf, '(a)') 'MDU setting "Wrihis_salinity = 1" asks to write salinity to the output his file, ' &
+         //'but no salinity is involved due to MDU setting "Salinity = 0". So we set "Wrihis_salinity = 0" '&
+         //'and do not write salinity to his file.'
+      call warn_flush()
+    end if
     call prop_get_integer(md_ptr, 'output', 'Wrihis_density', jahisrho, success)
     call prop_get_integer(md_ptr, 'output', 'Wrihis_waterlevel_s1', jahiswatlev, success)
     call prop_get_integer(md_ptr, 'output', 'Wrihis_bedlevel', jahisbedlev, success)
@@ -1350,8 +1362,21 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_numlimdt', jamapnumlimdt, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_taucurrent', jamaptaucurrent, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_salinity', jamapsal, success)
+    if (success .and. jamapsal == 1 .and. jasal < 1) then
+      write (msgbuf, '(a)') 'MDU setting "Wrimap_salinity = 1" asks to write salinity to the output map file, ' &
+         //'but no salinity is involved due to MDU setting "Salinity = 0". So we set "Wrimap_salinity = 0" '&
+         //'and do not write salinity to map file.'
+      call warn_flush()
+    end if
     call prop_get_integer(md_ptr, 'output', 'Wrimap_chezy', jamapchezy, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_temperature', jamaptem, success)
+    if (success .and. jamaptem == 1 .and. jatem < 1) then
+      write (msgbuf, '(a)') 'MDU setting "Wrimap_temperature = 1" asks to write temperature to the output map file, ' &
+         //'but no temperature is involved due to MDU setting "Temperature = 0". So we set "Wrimap_temperature = 0"'&
+         //'and do not write temperature to map file.'
+      call warn_flush()
+    end if
+
     call prop_get_integer(md_ptr, 'output', 'Wrimap_constituents', jamapconst, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_sediment', jamapsed, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_turbulence', jamaptur, success)
@@ -1371,6 +1396,14 @@ subroutine readMDUFile(filename, istat)
       jamapheatflux = 0
       jahisheatflux = 0
     endif
+    if (jatem < 1) then ! If no temperature is involved, then do not write temperature to output map/his files.
+      jamaptem = 0
+      jahistem = 0
+    end if
+    if (jasal < 1) then ! If no salinity is involved, then do not write salinity to output map/his files.
+      jamapsal = 0
+      jahissal = 0
+    end if
 
     call prop_get_integer(md_ptr, 'output', 'Richardsononoutput', jaRichardsononoutput, success)
 
