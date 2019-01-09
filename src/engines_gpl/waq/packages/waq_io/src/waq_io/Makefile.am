@@ -41,7 +41,6 @@ libwaq_io_la_SOURCES = bound.f \
        dlwq09.f \
        dlwq0f.f \
        dlwq0i.f \
-       dlwq0t.f \
        dlwq5a.f \
        dlwq5b.f \
        dlwq5c.f \
@@ -62,7 +61,6 @@ libwaq_io_la_SOURCES = bound.f \
        opt1.f \
        opt2.f \
        opt3.f \
-       outbo2.f \
        outboo.f \
        pointb.f \
        pointi.f \

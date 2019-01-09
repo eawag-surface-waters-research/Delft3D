@@ -203,6 +203,7 @@ type t_unc_mapids
    integer :: id_sa1(4)    = -1 !< Variable ID for 
    integer :: id_tem1(4)   = -1 !< Variable ID for 
    integer, dimension(:,:), allocatable :: id_const !< Variable ID for (3, NUM_CONST) constituents (on 1D, 2D, 3D grid parts resp.)
+   integer, dimension(:,:), allocatable :: id_waq !< Variable ID for (3, noout) waq output (on 1D, 2D, 3D grid parts resp.)
    integer, dimension(:,:), allocatable :: id_sed !< Variable ID for 
    integer, dimension(:,:), allocatable :: id_ero !< Variable ID for 
    integer :: id_cfcl(4)   = -1 !< Variable ID for netlink data of calibration factor for friction 
@@ -2357,7 +2358,7 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
     use m_sferic
     use network_data
     use m_sediment
-    use m_transport, only: NUMCONST, ISALT, ITEMP, ISED1, ISEDN, ITRA1, ITRAN, ITRAN0, constituents, itrac2const, const_names
+    use m_transport, only: NUMCONST, ISALT, ITEMP, ISED1, ISEDN, ITRA1, ITRAN, ITRAN0, constituents, itrac2const, const_names, const_units
     use m_xbeach_data, only: E, thetamean, sigmwav
     use m_flowexternalforcings, only: numtracers  !, trbndnames
     use m_partitioninfo
@@ -2784,7 +2785,12 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
           ierr = nf90_put_att(irstfile, id_tr1(j),  'coordinates'  , 'FlowElem_xcc FlowElem_ycc')
           ierr = nf90_put_att(irstfile, id_tr1(j),  'standard_name', trim(tmpstr))
           ierr = nf90_put_att(irstfile, id_tr1(j),  'long_name'    , trim(tmpstr))
-          ierr = nf90_put_att(irstfile, id_tr1(j),  'units'        , '1e-3')
+          if (const_units(j).ne.' ') then
+             tmpstr = const_units(j)
+          else
+             tmpstr = '1e-3'
+          endif
+          ierr = nf90_put_att(irstfile, id_tr1(j),  'units'        , tmpstr)
        enddo
        ITRAN0 = ITRAN
     endif
@@ -3633,8 +3639,9 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
    use m_bedform
    use m_wind
    use m_flowparameters, only: jatrt, jamd1dfile
+   use m_fm_wq_processes
    use m_xbeach_data
-   use m_transport, only: NUMCONST, itemp, ITRA1, ITRAN, ISED1, ISEDN, constituents, const_names, id_const, u1sed, q1sed, ucxsed, ucysed, qcxsed, qcysed, xsedflux, ysedflux
+   use m_transport, only: NUMCONST, itemp, ITRA1, ITRAN, ISED1, ISEDN, constituents, const_names, const_units, id_const, u1sed, q1sed, ucxsed, ucysed, qcxsed, qcysed, xsedflux, ysedflux
    use m_particles, only: japart, jatracer, part_iconst
    use m_alloc
    use m_waves
@@ -3642,6 +3649,7 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
    use m_CrossSections 
    use unstruc_channel_flow, only: network
    use m_oned_functions, only: gridpoint2cross
+   use string_module, only: replace_multiple_spaces_by_single_spaces
 
    implicit none
 
@@ -3656,7 +3664,7 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
    integer, save                 :: ierr, ndim
 
    double precision, allocatable                       :: ust_x(:), ust_y(:), wavout(:), wavout2(:)
-   character(len=255) :: tmpstr
+   character(len=255)                                  :: tmpstr
    integer                                             :: nm
    character(16)                                       :: dxname
    character(64)                                       :: dxdescr
@@ -3896,13 +3904,30 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
             ! Forbidden chars in NetCDF names: space, /, and more.
             call replace_char(tmpstr,32,95) 
             call replace_char(tmpstr,47,95) 
-            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_const(:,j), nf90_double, iLocS, trim(tmpstr), '', trim(const_names(j)) // ' in flow element', '')
+            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_const(:,j), nf90_double, iLocS, trim(tmpstr), &
+                                   '', trim(const_names(j)) // ' in flow element', const_units(j))
          end do
       endif
       ! Discharges
       ! TODO: AVD...
       ! TIDAL TURBINES: Insert equivalent of addturbine_cnst and addturbine_time here
       
+      ! WAQ extra outputs
+      if (jawaqproc>0) then
+         if (noout_map > 0) then
+            call realloc(mapids%id_waq, (/ 3, noout_map /), keepExisting=.false., fill = 0)
+            do j=1,noout_map
+               tmpstr = ' '
+               write (tmpstr, "('water_quality_output_',I0)") j
+               ierr = unc_def_var_map(mapids%ncid,  mapids%id_tsp, mapids%id_waq(:,j), nf90_double, iLocS, tmpstr, &
+                                      '', outputs%names(j), outputs%units(j))
+               tmpstr = trim(outputs%names(j))//' - '//trim(outputs%descrs(j))//' in flow element'
+               call replace_multiple_spaces_by_single_spaces(tmpstr)
+               ierr = nf90_put_att(mapids%ncid, mapids%id_waq(2,j),  'description'  , tmpstr)
+            end do
+         endif
+      endif
+
       ! Meteo forcings
       if (jamapwind > 0 .and. japatm /= 0) then
          ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_patm,  nf90_double, UNC_LOC_S, 'Patm',  'surface_air_pressure', 'Atmospheric pressure near surface', 'N m-2')
@@ -4637,6 +4662,30 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
        end do
     end if
 
+    ! WAQ output
+    if (jawaqproc > 0) then
+       do j=1,noout_map
+          if (outvar(j)>0)then
+             workx = DMISS ! For proper fill values in z-model runs.
+             if ( kmx>0 ) then
+!               3D
+                do kk=1,ndxndxi
+                   call getkbotktop(kk,kb,kt)
+                   do k = kb,kt
+                      workx(k) = waqoutputs(j,k-kbx+1)
+                   enddo
+                end do
+                ierr = unc_put_var_map(mapids%ncid,  mapids%id_tsp, mapids%id_waq(:,j), UNC_LOC_S3D, workx)
+             else
+!                do kk=1,NdxNdxi
+!                   workx(kk) = waqoutputs(j,kk)
+!                end do
+!                ierr = unc_put_var_map(mapids%ncid, mapids%id_waq(:,j), UNC_LOC_S, workx)
+             end if
+          end if
+       end do
+    end if
+
    ! Turbulence.
    if (jamaptur > 0 .and. kmx > 0) then
       if (iturbulencemodel >= 3) then
@@ -5340,12 +5389,14 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
     use m_bedform
     use m_wind
     use m_flowparameters, only: jatrt, jacali
+    use m_fm_wq_processes, only: jawaqproc, outputs, id_waq, waqoutputs, kbx, outvar, noout_map
     use m_xbeach_data
-    use m_transport, only: NUMCONST, itemp, ITRA1, ITRAN, ISED1, ISEDN, constituents, const_names, id_const
+    use m_transport, only: NUMCONST, itemp, ITRA1, ITRAN, ISED1, ISEDN, constituents, const_names, const_units, id_const
     use bedcomposition_module, only: bedcomp_getpointer_integer
     use m_alloc
     use m_missing
     use m_partitioninfo, only: jampi
+    use string_module, only: replace_multiple_spaces_by_single_spaces
   
     implicit none
 
@@ -5794,10 +5845,38 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
                  ierr = nf90_put_att(imapfile, id_const(iid,j),  'coordinates'  , 'FlowElem_xcc FlowElem_ycc')
                  ierr = nf90_put_att(imapfile, id_const(iid,j),  'standard_name', trim(tmpstr))
                  ierr = nf90_put_att(imapfile, id_const(iid,j),  'long_name'    , trim(tmpstr))
-                 ierr = nf90_put_att(imapfile, id_const(iid,j),  'units'        , '1e-3')
+                 if (const_units(j).ne.' ') then
+                    tmpstr = const_units(j)
+                 else
+                    tmpstr = '1e-3'
+                 endif
+                 ierr = nf90_put_att(imapfile, id_const(iid,j),  'units'        , tmpstr)
                  ierr = nf90_put_att(imapfile, id_const(iid,j),  '_FillValue'   , dmiss)
               end do
            endif
+
+!          waq output
+           if(jawaqproc .eq. 1) then
+              if (noout_map > 0) then
+                 call realloc(id_waq, (/ 3, noout_map /), keepExisting=.false., fill = 0)
+                 do j=1,noout_map
+                    if ( kmx > 0 ) then  !        3D
+                       tmpstr = ' '
+                       write (tmpstr, "('water_quality_output_',I0)") j
+                       ierr = nf90_def_var(imapfile, tmpstr, nf90_double, (/ id_laydim(iid), id_flowelemdim (iid), id_timedim (iid)/) , id_waq(iid,j))
+                    else
+                       exit ! ierr = nf90_def_var(imapfile, trim('WQ_'//outputs%names(j)), nf90_double, (/ id_flowelemdim (iid), id_timedim (iid)/) , id_waq(iid,j))
+                    end if
+                    tmpstr = trim(outputs%names(j))//' - '//trim(outputs%descrs(j))//' in flow element'
+                    call replace_multiple_spaces_by_single_spaces(tmpstr)
+                    ierr = nf90_put_att(imapfile, id_waq(iid,j),  'coordinates'  , 'FlowElem_xcc FlowElem_ycc')
+                    ierr = nf90_put_att(imapfile, id_waq(iid,j),  'long_name'    , trim(outputs%names(j)))
+                    ierr = nf90_put_att(imapfile, id_waq(iid,j),  'units'        , trim(outputs%units(j)))
+                    ierr = nf90_put_att(imapfile, id_waq(iid,j),  'description'  , tmpstr)
+                    ierr = nf90_put_att(imapfile, id_waq(iid,j),  '_FillValue'   , dmiss)
+                 end do
+              endif
+           endif 
 
            if ( jasecflow > 0 .and. jamapspir > 0) then
               if (kmx < 2) then
@@ -7240,6 +7319,32 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
           if ( allocated(dum) ) deallocate(dum)
        end if
     
+       ! WAQ extra outputs
+       if (jawaqproc > 0) then
+          do j=1,noout_map
+             if (outvar(j)>0)then
+                work1 = DMISS ! For proper fill values in z-model runs.
+                if ( kmx>0 ) then
+!                  3D
+                   do kk=1,ndxndxi
+                      work1(:, kk) = dmiss ! For proper fill values in z-model runs.
+                      call getkbotktop(kk,kb,kt)
+                      call getlayerindices(kk, nlayb, nrlay)  
+                      do k = kb,kt
+                         work1(k-kb+nlayb, kk) = waqoutputs(j,k-kbx+1)
+                      enddo
+                   end do
+                   ierr = nf90_put_var(imapfile, id_waq(iid,j), work1(1:kmx,1:ndxndxi), (/ 1, 1, itim /), (/ kmx, ndxndxi, 1 /))
+                else
+!                   do kk=1,NdxNdxi
+!                      workx(kk) = waqoutputs(j,kk)
+!                   end do
+!                   ierr = unc_put_var_map(mapids, mapids%id_waq(:,j), UNC_LOC_S, workx)
+                end if
+             end if
+          end do
+       end if
+
        if (jased>0 .and. stm_included) then
           if (stmpar%lsedsus > 0) then
              if (kmx > 0) then

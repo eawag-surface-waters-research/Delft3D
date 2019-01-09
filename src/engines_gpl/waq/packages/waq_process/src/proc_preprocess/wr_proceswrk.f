@@ -31,7 +31,7 @@
      +                         ivpnw , dsto     , vsto  , locnam, nopred,
      +                         nocons, nopa     , nofun , nosfun, notot ,
      +                         noloc , nodisp   , novelo, ndspx , nvelx ,
-     +                         nlocx , nosys    , nogrid, coname, paname,
+     +                         nlocx , nosys    , nogrid, dename, coname, paname,
      +                         funame, sfname   , syname, intopt, lun   ,
      +                         lchar , noutp    , ioutps, outputs,ndmpar,
      +                         nbufmx, versio   , ndspn , nveln , nrref ,
@@ -74,6 +74,7 @@
       integer             , intent(in   ) :: nlocx                  !< number of local values on exchanges
       integer             , intent(in   ) :: nosys                  !< number of active substances
       integer             , intent(in   ) :: nogrid                 !< number of grids
+      character(len=20)   , intent(in   ) :: dename(*)              !< default names
       character(len=20)   , intent(in   ) :: coname(*)              !< constant names
       character(len=20)   , intent(in   ) :: paname(*)              !< parameter names
       character(len=20)   , intent(in   ) :: funame(*)              !< function names
@@ -186,7 +187,7 @@
      +              noloc , ndspx , nvelx , nlocx , nflux ,
      +              nopred, novar , vararr, varidx, vartda,
      +              vardag, vartag, varagg, nogrid,
-     +              coname, paname, funame, sfname, syname,
+     +              coname, paname, funame, sfname, dename, syname,
      +              locnam, varnam)
       deallocate(varnam)
 

@@ -21,13 +21,15 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-      BLOCK DATA
-      IMPLICIT INTEGER (A-Z)
-      COMMON /ZDLMTZ/DLM(256), IGN(256), IDLM, IIGN, PUSH(256), PTR
-      DATA PTR/0/, IDLM, IIGN/2, 2/
-!     DATA DLM/64*0, 1, 42*0, 1, 148*0/
-!     DATA IGN/64*0, 1, 42*0, 1, 148*0/
-! *** Replaced previous two line by following two lines on ASCI computers
-      DATA DLM/32*0, 1, 11*0, 1, 211*0/
-      DATA IGN/32*0, 1, 11*0, 1, 211*0/
-      END
+      subroutine getidentification(idstr)
+         !
+         ! Get the ident-string and version number for DELWAQ2
+         !
+         use wq_processes_version_module
+         implicit none
+         
+         character(len=*) :: idstr
+
+         call getfullversionstring_wq_processes(idstr)
+
+      end subroutine

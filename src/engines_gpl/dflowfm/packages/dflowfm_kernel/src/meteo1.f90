@@ -93,6 +93,7 @@ module m_meteo
    use m_waves
    use m_ship
    use m_flowexternalforcings
+   use processes_input, only: nofun, funame, funinp
    use unstruc_messages
    use time_module
    use m_observations
@@ -106,6 +107,7 @@ module m_meteo
    !
    integer, dimension(:), allocatable, target :: item_tracerbnd              !< dim(numtracers)
    integer, dimension(:), allocatable, target :: item_sedfracbnd             !< dim(numfracs)   ! JRE DEBUG sedfrac
+   integer, dimension(:), allocatable, target :: item_waqfun                 !< dim(nofun)  
 
    integer, target :: item_windx                                             !< Unique Item id of the ext-file's 'windx' quantity's x-component.
    integer, target :: item_windy                                             !< Unique Item id of the ext-file's 'windy' quantity's y-component.
@@ -271,6 +273,10 @@ module m_meteo
       item_sedfracbnd = ec_undef_int
       ! TO ADD: initial concentration field?
       
+      if ( allocated(item_waqfun) ) deallocate(item_waqfun)
+      allocate(item_waqfun(nofun))
+      item_waqfun = ec_undef_int
+      
       !\ DEBUG sedfrac
    end subroutine init_variables
 
@@ -415,18 +421,19 @@ module m_meteo
    
    !> Translate EC's ext.force-file's item name to the integer EC item handle and to
    !> the data pointer(s), i.e. the array that will contain the values of the target item
-   function fm_ext_force_name_to_ec_item(trname, sfname, qidname,                        &
+   function fm_ext_force_name_to_ec_item(trname, sfname, waqinput, qidname,                        &
                                          itemPtr1, itemPtr2, itemPtr3, itemPtr4, &
                                          dataPtr1, dataPtr2, dataPtr3, dataPtr4  ) result(success)
       logical                               :: success
       character(len=NAMTRACLEN), intent(in) :: trname, sfname
+      character(len=20)                     :: waqinput
 
       character(len=NAMTRACLEN), intent(in) :: qidname
       integer,                   pointer    :: itemPtr1, itemPtr2, itemPtr3, itemPtr4
       real(hp), dimension(:),    pointer    :: dataPtr1, dataPtr2, dataPtr3, dataPtr4
       
       ! for tracers:      
-      integer           :: itrac, isf
+      integer           :: itrac, isf, ifun
       integer, external :: findname
       
       success = .true.
@@ -624,6 +631,11 @@ module m_meteo
             isf = findname(numfracs, sfnames, sfname)
             itemPtr1 => item_sedfracbnd(isf)
             dataPtr1 => bndsf(isf)%z
+         case ('waqfunction') 
+            ! get sediment fraction (boundary) number
+            ifun = findname(nofun, funame, waqinput)
+            itemPtr1 => item_waqfun(ifun)
+            dataPtr1 => funinp(ifun,:)
             
          case default
             call mess(LEVEL_FATAL, 'm_meteo::fm_ext_force_name_to_ec_item: Unsupported quantity specified in ext-file (construct target field): '//qidname)
@@ -802,6 +814,7 @@ module m_meteo
       logical                   :: success
       logical                   :: quiet_
       character(len=NAMTRACLEN) :: trname, sfname, qidname
+      character (len=20)        :: waqinput
       integer, external         :: findname
       type (tEcMask)            :: srcmask
       logical                   :: exist, opened, withCharnock, withStress
@@ -850,6 +863,7 @@ module m_meteo
       qidname = name
       call get_tracername(name, trname, qidname)
       call get_sedfracname(name, sfname, qidname)
+      call get_waqinputname(qid, waqinput, qidname)
       target_name = qidname
 
       call clearECMessage()
@@ -978,7 +992,7 @@ module m_meteo
       ! ==============================================
       ! determine which target item (id) will be created, and which FM data array has to be used
       ! JRE DEBUG sedfrac
-      if (.not. fm_ext_force_name_to_ec_item(trname, sfname, qidname,                                                &
+      if (.not. fm_ext_force_name_to_ec_item(trname, sfname, waqinput, qidname,                                                &
                                              targetItemPtr1, targetItemPtr2, targetItemPtr3, targetItemPtr4, &
                                              dataPtr1      , dataPtr2      , dataPtr3      , dataPtr4        )) then
          return
@@ -1480,6 +1494,12 @@ module m_meteo
             if (success) success = ecAddConnectionTargetItem(ecInstancePtr, connectionId, item_nudge_sal)
             if (success) success = ecAddItemConnection(ecInstancePtr, item_nudge_tem, connectionId)
             if (success) success = ecAddItemConnection(ecInstancePtr, item_nudge_sal, connectionId)
+         case ('waqfunction') 
+            if (.not. checkFileType(ec_filetype, provFile_uniform, target_name)) then
+               return
+            end if
+            ! the file reader will have created an item called 'polytim_item'
+            sourceItemName = 'uniform_item'
          case default
             call mess(LEVEL_FATAL, 'm_meteo::ec_addtimespacerelation: Unsupported quantity specified in ext-file (connect source and target): '//trim(target_name)//'.')
             return
@@ -1554,6 +1574,8 @@ module m_meteo
       vectorMaxTgt = itemPtrTgt%quantityPtr%vectorMax
       if (vectorMaxSrc /= vectorMaxTgt) then
          success = .false.
+         call mess(LEVEL_WARN, "There was a problem with a source of type " // trim(itemPtrSrc%quantityPtr%name) &
+                    // " with source file '" // trim(itemPtrSrc%elementsetPtr%name) // "'")
          call mess(LEVEL_ERROR, "Vector max differs for " // trim(itemPtrTgt%quantityPtr%name) &
                     // " values (resp. source, target): ", vectorMaxSrc, vectorMaxTgt)
       endif

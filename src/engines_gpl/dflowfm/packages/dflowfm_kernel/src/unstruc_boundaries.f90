@@ -441,11 +441,12 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
  
  character(len=256)                    :: qidfm                               !
  integer                               :: itpbn
- character (len=NAMTRACLEN)            :: tracnam, sfnam, qidnam
+ character (len=NAMTRACLEN)            :: tracnam, sfnam, qidnam 
+ character(len=20)                     :: tracunit
  integer                               :: itrac, isf
  integer, external                     :: findname
  
- integer                               :: iconst
+ integer                               :: janew
 
 !  call bndname_to_fm(qid,qidfm)
   qidfm = qid
@@ -576,22 +577,12 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
      
      kce   = abs(kce) ! switch kce back on, but only for all net boundaries (some of which may have been set to -1 by a flow boundary)
      call get_tracername(qidfm, tracnam, qidnam)
-     itrac = findname(numtracers, trnames, tracnam)
+     tracunit = " "
+     call add_bndtracer(tracnam, tracunit, itrac, janew)
      
-!    add tracer name  if it does not already exist
-     if ( itrac.eq.0 ) then
-     
-        numtracers = numtracers+1    
-!       realloc
+     if ( janew.eq.1 ) then
+!       realloc ketr
         call realloc(ketr, (/ Nx, numtracers /), keepExisting=.true., fill=0 )
-        call realloc(nbndtr, numtracers, keepExisting=.true., fill=0 )
-        call realloc(trnames, numtracers, keepExisting=.true., fill='')
-        call realloc(wstracers, numtracers, keepExisting=.true., fill=0d0)
-        wstracers(numtracers) = transformcoef(4)
-                
-        trnames(numtracers) = trim(tracnam)
-        itrac = numtracers
-        
      end if
      
      ! kce   = 1 ! switch kce back on as points to be potentially flagged
@@ -605,20 +596,12 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
      
   else if (qid(1:13) == 'initialtracer' ) then
      call get_tracername(qid, tracnam, qidnam)
-     itrac = findname(numtracers, trnames, tracnam)
+     tracunit = " "
+     call add_bndtracer(tracnam, tracunit, itrac, janew)
      
-!    add tracer name  if it does not already exist
-     if ( itrac.eq.0 ) then
-        
-        numtracers = numtracers+1    
-!       realloc
+     if ( janew.eq.1 ) then
+!       realloc ketr
         call realloc(ketr, (/ Nx, numtracers /), keepExisting=.true., fill=0 )
-        call realloc(nbndtr, numtracers, keepExisting=.true., fill=0 )
-        call realloc(trnames, numtracers, keepExisting=.true., fill='')
-        call realloc(wstracers, numtracers, keepExisting=.true., fill=0d0)
-        wstracers(numtracers) = transformcoef(4)
-  
-        trnames(numtracers) = trim(tracnam)
      end if
      
   ! DEBUG JRE sedfrac
@@ -3046,3 +3029,35 @@ subroutine flow_init_discharge()
 
 
 end subroutine flow_init_discharge
+
+!> add tracer boundary
+subroutine add_bndtracer(tracnam, tracunit, itrac, janew)
+   use m_flowexternalforcings
+   use m_alloc
+   implicit none
+   
+   character(len=*), intent(in)  :: tracnam
+   character(len=20), intent(in)  :: tracunit
+   integer,          intent(out) :: itrac
+   integer,          intent(out) :: janew
+   
+   integer,          external    :: findname
+   
+   itrac = findname(numtracers, trnames, tracnam)
+   
+   janew = 0
+   if ( itrac.eq.0 ) then
+      janew = 1
+!     add tracer
+   
+      numtracers = numtracers+1    
+!     realloc
+      call realloc(nbndtr, numtracers, keepExisting=.true., fill=0 )
+      call realloc(trnames, numtracers, keepExisting=.true., fill='')
+      call realloc(trunits, numtracers, keepExisting=.true., fill='')
+
+      trnames(numtracers) = trim(tracnam)
+      itrac = numtracers
+   end if
+   trunits(itrac) = tracunit
+end subroutine add_bndtracer

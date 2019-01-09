@@ -26,7 +26,7 @@
      +                    NOLOC , NDSPX , NVELX , NLOCX , NFLUX ,
      +                    NOPRED, NOVAR , VARARR, VARIDX, VARTDA,
      +                    VARDAG, VARTAG, VARAGG, NOGRID,
-     +                    CONAME, PANAME, FUNAME, SFNAME, SYNAME,
+     +                    CONAME, PANAME, FUNAME, SFNAME, SYNAME, DENAME,
      +                    LOCNAM, VARNAM)
 !
 !     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
@@ -65,8 +65,9 @@
      +             VATNDA(MAXLOC)
       CHARACTER*20 CONAME(*)     , PANAME(*)     ,
      +             FUNAME(*)     , SFNAME(*)     ,
-     +             SYNAME(*)     , LOCNAM(*)
-      CHARACTER*79 LINE
+     +             SYNAME(*)     , LOCNAM(*)     ,
+     +             DENAME(*) 
+      CHARACTER*79 LINE, NAME
       LOGICAL      LEXI
       integer(4) :: ithndl = 0
       if (timon) call timstrt( "setvat", ithndl )
@@ -309,6 +310,7 @@
 !
       DO ISYS = 1 , NOTOT
          IVAR = IVAR + 1
+         VARNAM(IVAR) = 'MASS_'//SYNAME(ISYS)
          VARARR(IVAR) = IIMASS
          VARIDX(IVAR) = ISYS
          VARTDA(IVAR) = 0
@@ -321,6 +323,7 @@
 !
       DO ISYS = 1 , NOTOT
          IVAR = IVAR + 1
+         VARNAM(IVAR) = 'DERIV_'//SYNAME(ISYS)
          VARARR(IVAR) = IIDERV
          VARIDX(IVAR) = ISYS
          VARTDA(IVAR) = 2
@@ -333,6 +336,9 @@
 !
       DO IDSP = 1 , NODISP
          IVAR = IVAR + 1
+         NAME = ' '
+         WRITE (NAME, '("DISP_ARRAY_",I0)') IDSP
+         VARNAM(IVAR) = NAME
          VARARR(IVAR) = IIDISP
          VARIDX(IVAR) = IDSP
          VARTDA(IVAR) = 0
@@ -345,6 +351,9 @@
 !
       DO IVEL = 1 , NOVELO
          IVAR = IVAR + 1
+         NAME = ' '
+         WRITE (NAME, '("VELO_ARRAY_",I0)') IVEL
+         VARNAM(IVAR) = NAME
          VARARR(IVAR) = IIVELO
          VARIDX(IVAR) = IVEL
          VARTDA(IVAR) = 0
@@ -357,6 +366,7 @@
 !
       DO IDEF = 1 , NODEF
          IVAR = IVAR + 1
+         VARNAM(IVAR) = DENAME(IDEF)
          VARARR(IVAR) = IIDEFA
          VARIDX(IVAR) = IDEF
          VARTDA(IVAR) = 0
@@ -394,6 +404,9 @@
 !
       DO IVLX = 1 , NVELX
          IVAR = IVAR + 1
+         NAME = ' '
+         WRITE (NAME, '("VELX_ARRAY_",I0)') IVLX
+         VARNAM(IVAR) = NAME
          VARARR(IVAR) = IIVELX
          VARIDX(IVAR) = IVLX
          VARTDA(IVAR) = 0
@@ -406,6 +419,9 @@
 !
       DO ILCX = 1 , NLOCX
          IVAR = IVAR + 1
+         NAME = ' '
+         WRITE (NAME, '("VLOCX_",I0)') ILCX
+         VARNAM(IVAR) = NAME
          VARARR(IVAR) = IILOCX
          VARIDX(IVAR) = ILCX
          VARTDA(IVAR) = 0

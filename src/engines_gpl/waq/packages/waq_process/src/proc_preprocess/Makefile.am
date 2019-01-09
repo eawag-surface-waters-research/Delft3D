@@ -17,7 +17,8 @@ FMODULES += \
 
 #-------------------------------------------------------------------------------
 #Sources
-libproc_preprocess_la_SOURCES = partab.f90 \
+libproc_preprocess_la_SOURCES = \
+       partab.f90 \
        actrep.f \
        add_atrfrc.f \
        add_dspfrc.f \
@@ -41,6 +42,7 @@ libproc_preprocess_la_SOURCES = partab.f90 \
        getinv.f \
        intoou.f \
        makbar.f \
+       outbo2.f \
        primpro.f \
        proc_totals.f \
        prprop.f \

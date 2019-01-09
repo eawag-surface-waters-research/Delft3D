@@ -1852,6 +1852,7 @@ end module m_crspath
  integer                           :: numtracers        !< number of tracers with boundary conditions
  integer,          parameter       :: NAMTRACLEN = 128
  character(len=NAMTRACLEN), allocatable :: trnames(:)   !< tracer names (boundary conditions only, used for look-up)
+ character(len=NAMTRACLEN), allocatable :: trunits(:)   !< tracer units
  type(bndtype),    allocatable, target  :: bndtr(:)
  double precision, allocatable          :: wstracers(:) !< tracer fall velocity pos is downward (m/s)  
  
@@ -3021,7 +3022,7 @@ subroutine default_flowparameters()
                         ! (set teta=1.0)      (set teta=0.51->0.99)   (set teta<0)
 
     jaLogprofatubndin  = 1 
-    jaLogprofkepsbndin = 0      
+    jaLogprofkepsbndin = 1      
 
     limtypsa   = 4      ! 0=no, 1=minmod, 2=vanleer, 3=koren 4=MC voor scalar tr-ansport SALINITY
     limtypTM   = 4      ! 0=no, 1=minmod, 2=vanleer, 3=koren 4=MC voor scalar transport TEMPERATURE
@@ -4233,6 +4234,9 @@ end subroutine reset_flowgeom
  double precision                  :: ti_waq      !< Interval between output in delwaq files (s).
  double precision                  :: ti_waqs     !< Start of WAQ output period
  double precision                  :: ti_waqe     !< End   of WAQ output period
+ double precision                  :: ti_waqproc  !< Time step for water quality processes
+ double precision                  :: ti_waqbal   !< Time step for water quality mass balance output
+
  double precision                  :: ti_classmap        !< class map interval (s)
  double precision                  :: ti_classmaps       !< Start of class map output period (as assigned in mdu-file) (s)
  double precision                  :: ti_classmape       !< End   of class map output period (as assigned in mdu-file) (s)
@@ -4260,6 +4264,8 @@ end subroutine reset_flowgeom
  double precision                  :: time_classmap !< Next time for class map output
  double precision                  :: time_waq      !< Next time for delwaq output
  double precision                  :: time_waqset   !< Next time to reset the quantitis for waq
+ double precision                  :: time_waqproc  !< Next time to calcualate waq processes
+ double precision                  :: time_mba      !< Next time to process mass balances
  double precision                  :: time_stat     !< Next time for simulation statistics output
  double precision                  :: time_timings  !< Next time for timings output
  double precision                  :: time_split    !< Next time for a new time-split output file.
@@ -4376,6 +4382,8 @@ subroutine reset_flowtimes()
 
     time_waq     = ti_waqs           !< next time for waq output, starting at the output start time
     time_waqset  = tstart_user       !< next time for reset the quantities for waq output
+    time_waqproc = tstart_user       !< next time for wq processes
+    time_mba     = ti_waqbal         !< next time for balance update
     if ( ti_stat.gt.0d0 ) then
        time_stat    = tstart_user    !< next model time for simulation statistics output
     else
@@ -4842,7 +4850,7 @@ end module m_kml_parameters
 module m_timer
 implicit none
    integer, parameter                      :: jatimer = 1  !< time parallel solver (1) or not (0)
-   integer, parameter                      :: NUMT=21      !< number of timings
+   integer, parameter                      :: NUMT=22      !< number of timings
    double precision,  dimension(3,NUMT)    :: t            !< wall-clock timings, (1,:): start, (2,:): end, (3,:): sum
    double precision,  dimension(3,NUMT)    :: tcpu         !< CPU        timings, (1,:): start, (2,:): end, (3,:): sum
    integer,           dimension(NUMT)      :: itstat       !< timer status, 0: not timing (stopped), 1: timing (started)
@@ -4871,6 +4879,7 @@ implicit none
    integer, parameter                      :: IXBEACH    = 19
    integer, parameter                      :: IAXPY      = 20
    integer, parameter                      :: IDEBUG     = 21
+   integer, parameter                      :: IFMWAQ     = 22
 
    character(len=10), dimension(numt), parameter :: tnams= [character(len=10) :: &
                                                                'reduce',      &
@@ -4893,7 +4902,8 @@ implicit none
                                                                'transport',   &
                                                                'XBeach',      &
                                                                'Axpy',        &
-                                                               'debug']
+                                                               'debug',       &
+                                                               'fmwaq']
    contains
 
 !> initialize timers
@@ -5107,6 +5117,7 @@ module m_transport
    double precision, dimension(:,:), allocatable, target :: constituents    ! constituents, dim(NUMCONST,Ndkx)
 
    character(len=NAMLEN), dimension(:), allocatable :: const_names    ! constituent names
+   character(len=NAMLEN), dimension(:), allocatable :: const_units    ! constituent names
    character(len=NAMLEN), parameter              :: DEFTRACER = 'default_tracer'
 
    integer,          dimension(:,:), allocatable :: id_const   ! consituent id's in map-file
@@ -5150,6 +5161,9 @@ module m_transport
    integer,          dimension(:),   allocatable :: jaupdateconst !< update constituent (1) or not (0)
    integer,          dimension(:),   allocatable :: noupdateconst !< do not update constituent (1) or do (0)
    
+!  for waq static systems: only sources
+   integer,          dimension(:),   allocatable :: jasourceonly !< sources only (1) or not (0), dim(NCONST)
+   
    ! DEBUG
    double precision, dimension(:),   allocatable :: u1sed
    double precision, dimension(:),   allocatable :: q1sed
@@ -5162,7 +5176,118 @@ module m_transport
    !\ DEBUG
 end module m_transport
 
+module m_fm_wq_processes
+   use precision
+   use processes_input
+   use processes_pointers
+   use dlwq_data
+   use processet
+   use output
+   
+   integer                                   :: jawaqproc                   !< switch for water quality processes
+   real(hp)                                  :: waq_vol_dry_thr = 1d-16     !< minimum volume for processes to be active
+   integer                                   :: flux_int                    !< flux integration by WAQ (1) or by FM (2, not implemented)
+   integer                                   :: kbx                         !< pointer of first segment to D-Flow FM 3D administration
+   integer                                   :: ktx                         !< pointer of last  segment to D-Flow FM 3D administration
 
+   integer                                   :: noseg                       !< Nr. of computational volumes
+   integer                                   :: noq1                        !< Number of exchanges first direction
+   integer                                   :: noq2                        !< Number of exchanges second direction
+   integer                                   :: noq3                        !< Number of exchanges vertical
+   integer                                   :: noq4                        !< Number of exchanges in the bed
+   integer,  allocatable, dimension(:,:)     :: iexpnt                      !< Exchange pointer
+   integer,  allocatable, dimension(:)       :: iex2k                       !< exchange to interface
+      
+   real(hp), allocatable, dimension(:,:)     :: amass                       !< mass array to be updated
+   integer , allocatable, dimension(:)       :: iknmrk                      !< Integration suboptions
+
+   integer                                   :: sizepmsa                    !< size of (pms)a-array
+   real(sp), allocatable, dimension(:)       :: pmsa                        !< the actual data array
+      
+   real(sp), allocatable, dimension(:,:)     :: deriv                       !< Model derivatives (= stochi(notot ,noflux) * flux(noflux, noseg))
+   real(sp), allocatable, dimension(:,:)     :: flux                        !< Proces fluxes
+      
+   integer,  allocatable, dimension(:)       :: isys2const                  !< WAQ substance to D-Flow FM constituents
+   integer,  allocatable, dimension(:)       :: iconst2sys                  !< WAQ substance to D-Flow FM constituents
+   integer,  allocatable, dimension(:)       :: isys2trac                   !< WAQ active system to D-FlowFM tracer
+   integer,  allocatable, dimension(:)       :: ifall2vpnw                  !< substance-with-fall-velocity to WAQ numbering in fall-velocity array
+
+   type(outputcoll)                          :: outputs                     !< output structure
+   integer,  allocatable, dimension(:,:)     :: id_waq                      !< waq output id's in map-file
+   real(hp), allocatable, dimension(:,:)     :: waqoutputs                  !< waq outputs, dim(noout,Ndkx)
+
+   integer                                   :: isfsal                      !< pointer to Salinity        segment function
+   integer                                   :: isftem                      !< pointer to Temperature     segment function
+   integer                                   :: isfvwind                    !< pointer to wind vel. magn. segment function
+   integer                                   :: isffetch                    !< pointer to fetch length    segment function
+   integer                                   :: isfradsurf                  !< pointer to solar radiation segment function
+   integer                                   :: isfrain                     !< pointer to rain            segment function
+!
+!     Balance output
+!
+   integer                                   :: ibflag                      !< if 1 then mass balance output
+   real(hp), allocatable, dimension(:,:,:)   :: flxdmp                      !< Fluxes at dump segments
+   real(hp), allocatable, dimension(:,:,:)   :: flxdmpreduce                !< Fluxes at dump segments
+   real(hp), allocatable, dimension(:,:,:)   :: flxdmptot                   !< Total fluxes at dump segments
+   
+!   double precision           :: dum
+      
+   integer, parameter                        :: nammbamonlen = 128
+   integer                                   :: nomba                       !< number of mass balance areas
+   integer                                   :: nombabnd                    !< number of mass balance areas and boundaries
+   character(len=nammbamonlen),allocatable   :: mbaname(:)                  !< parameter names
+   integer, allocatable                      :: mbadef(:)                   !< mass balance area (mba) definition
+   integer, allocatable                      :: mbadefdomain(:)             !< mass balance area (mba) definition without ghost cells
+   integer, allocatable                      :: mbalnfromto(:,:)            !< from mba (1:lnxi) or bnd (lnxi+1:lnx) to mba for each link (2D)
+   integer, allocatable                      :: mbalnused(:,:)              !< number of links between mda and mbabnd that are actually active
+   integer, allocatable                      :: mbasorsin(:,:)              !< mba for each side of a source sink
+   integer, allocatable                      :: mbasorsinout(:,:)           !< (reduced) mba for each side of a source sink for output
+   integer                                   :: nombaln                     !< number of links needed for mass balance (2D)
+   integer, allocatable                      :: mbalnlist(:)                !< list of links needed for the mass balance (2D)
+   logical                                   :: mbaremaining                !< mass balance area for ramaining cells added?
+   integer                                   :: nomon                       !< number of mass balance areas
+   character(len=nammbamonlen),allocatable   :: monname(:)                  !< parameter names
+   integer, allocatable                      :: mondef(:,:)                 !< monitoring area definition
+   integer                                   :: lunmbahis                   !< logical unit of mba his-file
+   integer                                   :: lunmbatothis                !< logical unit of mba total his-file
+   integer                                   :: lunmbabal                   !< logical unit of mba bal-file
+   integer                                   :: lunmbatotbal                !< logical unit of mba total bal-file
+   integer                                   :: itimembastart               !< start time of balance period
+   integer                                   :: itimembastarttot            !< start time of balance period
+   integer                                   :: itimembaend                 !< end time of balance period
+   double precision                          :: timembastart                !< start time of balance period
+   double precision                          :: timembastarttot             !< start time of balance period
+   double precision                          :: timembaend                  !< end time of balance period
+   
+   real(hp), allocatable, dimension(:)       :: mbaarea                     !< surface area of mass balance area
+
+   real(hp), allocatable, dimension(:)       :: mbavolumebegin              !< begin volume in mass balance area
+   real(hp), allocatable, dimension(:)       :: mbavolumebegintot           !< total begin volume in mass balance area
+   real(hp), allocatable, dimension(:)       :: mbavolumeend                !< end volume in mass balance area
+
+   real(hp), allocatable, dimension(:,:,:)   :: mbaflowhor                  !< periodical flow between balance areas and between boundaries and balance areas
+   real(hp), allocatable, dimension(:,:,:)   :: mbaflowhortot               !< total flow between balance areas and between boundaries and balance areas
+   real(hp), allocatable, dimension(:,:)     :: mbaflowsorsin               !< periodical flow from source sinks
+   real(hp), allocatable, dimension(:,:)     :: mbaflowsorsintot            !< total flow from source sinks
+
+   real(hp), allocatable, dimension(:,:)     :: mbamassbegin                !< begin volume in mass balance area
+   real(hp), allocatable, dimension(:,:)     :: mbamassbegintot             !< total begin volume in mass balance area
+   real(hp), allocatable, dimension(:,:)     :: mbamassend                  !< end volume in mass balance area
+
+   real(hp), allocatable, dimension(:,:,:,:) :: mbafluxhor                  !< periodical fluxes between balance areas and between boundaries and balance areas
+   real(hp), allocatable, dimension(:,:,:,:) :: mbafluxhortot               !< total fluxes between balance areas and between boundaries and balance areas
+   real(hp), allocatable, dimension(:,:,:,:) :: mbafluxsorsin               !< periodical fluxes from source sinks
+   real(hp), allocatable, dimension(:,:,:,:) :: mbafluxsorsintot            !< total fluxes from source sinks
+   
+   real(hp), allocatable, dimension(:)       :: mbavolumereduce             !< begin volume in mass balance area
+   real(hp), allocatable, dimension(:,:,:)   :: mbaflowhorreduce            !< periodical flow between balance areas and between boundaries and balance areas
+   real(hp), allocatable, dimension(:,:)     :: mbaflowsorsinreduce         !< periodical flow from sources sinks
+   real(hp), allocatable, dimension(:,:)     :: mbamassreduce               !< begin volume in mass balance area
+   real(hp), allocatable, dimension(:,:,:,:) :: mbafluxhorreduce            !< periodical fluxes between balance areas and between boundaries and balance areas
+   real(hp), allocatable, dimension(:,:,:,:) :: mbafluxsorsinreduce         !< periodical fluxes from source sinks
+
+end module
+   
 module dfm_error
 implicit none
 

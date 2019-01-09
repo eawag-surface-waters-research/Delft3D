@@ -51,7 +51,6 @@
 		<File RelativePath="..\..\version\version_number.rc"/>
 		<File RelativePath="..\..\version\waq_icon.rc"/></Filter>
 		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
-		<File RelativePath=".\src\block.f"/>
 		<File RelativePath=".\src\delwaq1.f"/>
 		<File RelativePath=".\src\delwaq2.f"/>
 		<File RelativePath=".\src\delwaq2_global_data.f90"/>

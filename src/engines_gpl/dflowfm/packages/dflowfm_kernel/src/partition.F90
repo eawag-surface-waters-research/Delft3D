@@ -3501,7 +3501,28 @@ end subroutine partition_make_globalnumbers
 
       return
    end subroutine reduce_intN_sum
-   
+
+   !> for an array over integers, take global sum over all subdomains (not over the array itself)
+   subroutine reduce_int_array_sum(N, var)
+#ifdef HAVE_MPI
+      use mpi
+#endif
+
+      implicit none
+      
+      integer,                        intent(in)    :: N  !< array size
+      integer, dimension(N),          intent(inout) :: var !< array with values to be summed over the subdomains (not an array summation)
+      
+      integer, dimension(N)                         :: dum
+      
+      integer :: ierror
+      
+#ifdef HAVE_MPI
+      call MPI_allreduce(var,dum,N,mpi_integer,mpi_sum,DFM_COMM_DFMWORLD,ierror)
+#endif
+      var = dum
+      return
+   end subroutine reduce_int_array_sum
     
 !> reduce key (also used for nonlin in setprofs1D)
 !>   take maximum
@@ -3862,9 +3883,7 @@ end subroutine partition_make_globalnumbers
       do iobs=1,numobs
          do ival=1,numvals
             if ( valobs(ival,iobs).eq.DMISS ) then
-                valobs(1:numvals,iobs) = dsmall
-!               write(6,"(I4, ':', I4)") my_rank, iobs
-               exit
+                valobs(ival,iobs) = dsmall
             end if
          end do
       end do
@@ -3876,8 +3895,7 @@ end subroutine partition_make_globalnumbers
       do iobs=1,numobs
          do ival=1,numvals
             if ( valobs(ival,iobs).eq.dsmall ) then   ! safety, check all vals until not found (not necessary)
-               valobs(1:numvals,iobs) = DMISS
-               exit
+               valobs(ival,iobs) = DMISS
             end if
          end do
       end do

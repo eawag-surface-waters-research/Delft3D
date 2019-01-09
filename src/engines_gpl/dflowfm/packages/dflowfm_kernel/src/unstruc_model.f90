@@ -137,6 +137,16 @@ implicit none
     double precision   :: md_parttimestep      = 0d0
     integer            :: md_part3Dtype        = 0 !< 0: depth averaged, 1: free surface
 
+!   processes (WAQ)
+    character(len=255) :: md_subfile = ' '      !< substance file
+    character(len=255) :: md_ehofile = ' '      !< extra history output file
+    character(len=255) :: md_pdffile = ' '      !< process library file
+    character(len=255) :: md_blmfile = ' '      !< BLOOM aglae species definition file
+    double precision   :: md_thetav_waq = 0d0   !< thetav for waq
+    double precision   :: md_dt_waqproc = 0d0   !< processes time step
+    double precision   :: md_dt_waqbal = 0d0    !< mass balance output time step
+    integer            :: md_flux_int = 1       !< process fluxes integration option (1: WAQ, 2: D-Flow FM)
+
     ! TODO: reading for trachytopes is still within rdtrt, below was added for partitioning (when no initialization)
     character(len=4)   :: md_trtrfile     = ' ' !< Variable that stores information if trachytopes are used ('Y') or not ('N')
     character(len=255) :: md_trtdfile     = ' ' !< File containing trachytopes definitions
@@ -1658,6 +1668,40 @@ subroutine readMDUFile(filename, istat)
    call prop_get_double (md_ptr, 'particles', 'TimeStep', md_parttimestep, success)
    call prop_get_integer(md_ptr, 'particles', '3Dtype', md_part3Dtype, success)
 
+!  processes (WAQ)   
+   call prop_get_string (md_ptr, 'processes', 'SubstanceFile', md_subfile, success)
+   call prop_get_string (md_ptr, 'processes', 'AdditionalHistoryOutputFile', md_ehofile, success)
+   call prop_get_double (md_ptr, 'processes', 'ThetaVertical', md_thetav_waq, success)
+   call prop_get_integer(md_ptr, 'processes', 'ProcessFluxIntegration', md_flux_int, success)
+
+   call prop_get_double (md_ptr, 'processes', 'DtProcesses', md_dt_waqproc, success)
+    if (md_dt_waqproc <= 0d0) then
+        ti_waqproc = dt_user
+    else
+        if(dt_user > 0d0 .and. md_dt_waqproc > 0d0) then
+           if(md_dt_waqproc < dt_user .or. modulo(md_dt_waqproc, dt_user) /= 0d0) then
+             ti_waqproc = max(1,floor(md_dt_waqproc/dt_user))*dt_user
+             ! Processes timestep can only a multiple of dtuser...
+             write(msgbuf, '(a,f9.3,a,f9.3,a)') 'DtProcesses should be a multiple of DtUser. It has been reset to: ', ti_waqproc, '(was: ',md_dt_waqproc,')'
+             call msg_flush()
+           else
+             ti_waqproc = md_dt_waqproc
+           end if
+        end if
+    end if
+
+    call prop_get_double (md_ptr, 'processes', 'DtMassBalance', md_dt_waqbal, success)
+    if(md_dt_waqbal > 0d0 .and. md_dt_waqproc > 0d0) then
+       if(md_dt_waqbal < md_dt_waqproc .or. modulo(md_dt_waqbal, md_dt_waqproc) /= 0d0) then
+         ti_waqbal = max(1,floor(md_dt_waqbal/md_dt_waqproc))*dt_user
+         ! Processes timestep can only a multiple of dtprocesses...
+         write(msgbuf, '(a,f9.3,a,f9.3,a)') 'DtMassBalance should be a multiple of DtProcesses. It has been reset to: ', ti_waqbal, '(was: ',md_dt_waqbal,')'
+         call msg_flush()
+       else
+         ti_waqbal = md_dt_waqbal
+       end if
+    end if
+
    ! Some combined validation checks of model settings:
    if (len_trim(md_restartfile)>0 .and. Tspinupturblogprof>0d0) then
       call mess(LEVEL_ERROR, 'Not allowed to use a RestartFile with a non-zero spin up time: ' &
@@ -2901,6 +2945,15 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        call prop_set_double (prop_ptr, 'particles', 'TimeStep', md_parttimestep, 'time step (>0) or every computational time step')
        call prop_set_integer(prop_ptr, 'particles', '3Dtype', md_part3Dtype, '3D type: depth averaged (0) or free surface (1)')
     end if
+
+    
+!  processes (WAQ)   
+   call prop_set_string (prop_ptr, 'processes', 'SubstanceFile', md_subfile, 'substance file')
+   call prop_set_string (prop_ptr, 'processes', 'AdditionalHistoryOutputFile', md_ehofile, 'extra history output file')
+   call prop_set_double (md_ptr, 'processes', 'ThetaVertical', md_thetav_waq, 'theta vertical for waq')
+   call prop_set_double (prop_ptr, 'processes', 'DtProcesses', md_dt_waqproc, 'waq processes time step')
+   call prop_set_double (prop_ptr, 'processes', 'DtMassBalance', md_dt_waqbal, 'waq mass balance output time step')
+   call prop_set_integer(prop_ptr, 'processes', 'ProcessFluxIntegration', md_flux_int, 'Process fluxes integration option (1: WAQ, 2: D-Flow FM)')
 
 !   Secondary Flow
     !call prop_set(prop_ptr, 'output', 'SecFlowTesting', jasftesting, '0:none, 1: exact ucx,ucy point vel, 2: exact staggered vels.')

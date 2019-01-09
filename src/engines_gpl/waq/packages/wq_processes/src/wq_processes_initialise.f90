@@ -20,13 +20,11 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
-
-      subroutine dlwqp1 ( lun          , lchar        ,
-     +                    statprocesdef, allitems     ,
-     +                    ioutps       , outputs      ,
-     +                    nomult       , imultp       ,
-     +                    constants    , noinfo       ,
-     +                    nowarn       , ierr         )
+      
+      subroutine wq_processes_initialise ( lunlsp       , pdffil       , blmfil    , &
+                                           statprocesdef,                outputs   , &
+                                           nomult       , imultp       , constants , &
+                                           noinfo       , nowarn       , ierr)
 
 !       Deltares Software Centre
 
@@ -40,25 +38,25 @@
 !>                             .
 !>                          to a consistent set of sequential processes for the simulation part
 
-      use timers       !   performance timers
+      use processes_input
+      use processes_pointers
+      
       use dlwq_data
       use processet
       use output
-      use partable
       use string_module
+      use m_alloc
 
       implicit none
 
-      include 'sysn.inc'                           ! COMMON  /  SYSN   /   System characteristics
-      include 'sysi.inc'                           ! COMMON  /  SYSI  /    Timer characteristics
 
       ! declaration of arguments
 
-      integer             , intent(in   ) :: lun(*)          !< unit numbers
-      character(len=*)    , intent(inout) :: lchar(*)        !< filenames
+      integer             , intent(in   ) :: lunlsp          !< unit number spe
+      character(len=*)    , intent(inout) :: pdffil          !< filename proc_def
+      character(len=*)    , intent(inout) :: blmfil          !< filename spe
+
       type(procespropcoll), intent(in   ) :: statprocesdef   !< the statistical proces definition
-      type(itempropcoll)  , intent(in   ) :: allitems        !< all items of the proces system
-      integer             , intent(inout) :: ioutps(7,*)     !< (old) output structure
       type(outputcoll)    , intent(inout) :: outputs         !< output structure
       integer  ( 4)       , intent(in   ) :: nomult          !< number of multiple substances
       integer  ( 4)       , intent(in   ) :: imultp(2,nomult)!< multiple substance administration
@@ -68,80 +66,56 @@
       integer             , intent(inout) :: ierr            !< error count
 
       ! local declarations
+      type(itempropcoll)        :: allitems        !< all items of the proces system
 
-      real, parameter           :: versip = 5.07   ! version process system
+      real, parameter           :: versip = 5.06   ! version process system
       real                      :: verspe = 1.0    ! version bloom.spe file
       integer, parameter        :: novarm = 15000  ! max number of variables overall
       integer, parameter        :: nbprm  = 1750   ! max number of processes
       integer, parameter        :: nopred = 6      ! number of pre-defined variables
 
       integer                   :: noqtt           ! total number of exhanges
-      integer                   :: nosss           ! total number of segments
-      integer                   :: no_in           ! number of input items
-      integer                   :: no_out          ! number of output items
       integer                   :: no_ins          ! number of output items
       integer                   :: no_ine          ! number of output items
       integer                   :: no_ous          ! number of output items
       integer                   :: no_oue          ! number of output items
-      integer                   :: no_flu          ! number of output items
       integer                   :: no_sto          ! number of output items
       integer                   :: no_dis          ! number of output items
       integer                   :: no_vel          ! number of output items
-      integer                   :: noconm          ! number of constants plus some extra max
       integer                   :: nocon2          ! number of constants plus some extra
       integer                   :: nmis            ! number of missing items
       integer                   :: maxdef          ! length defaul array
 
-      integer                   :: lurep           ! unit number report file
       integer                   :: lunblm          ! unit number bloom file
       integer                   :: lunfrm          ! unit number bloom frm file
       integer                   :: lund09          ! unit number bloom d09 file
-      integer                   :: mlevel          ! monitoring level
 
       integer                   :: isys            ! index variable
       integer                   :: igrp            ! index variable
       integer                   :: iatyp           ! index variable
       integer                   :: ialg            ! index variable
       integer                   :: icof            ! index variable
-      integer                   :: ico             ! index variable
-      integer                   :: iconf           ! index variable
       integer                   :: istat           ! index variable
-      integer                   :: iioitem         ! index variable
       integer                   :: ioutp           ! index variable
-      integer                   :: i               ! index variable
       integer                   :: iitem           ! index variable
+      integer                   :: iproc           ! index variable
       integer                   :: iindx           ! index variable
       integer                   :: ix_act          ! index variable
-      integer                   :: ix_dbl          ! index variable
       integer                   :: ioff            ! offset for index item
       integer                   :: ioffx           ! offset for index item on exchange
       integer                   :: idef            ! offset to defualt items
       integer                   :: iflx            ! offset to flux items
+      integer                   :: nflx            ! offset to flux items
+      integer                   :: ifluxsys        ! index of flux items
+      integer                   :: istochi         ! offset to stochi
+      integer                   :: mxpmsa          ! maximum size of ipmsa (=max nr of input variables)
       integer                   :: iret            ! return value
       integer                   :: ierr2           ! error count
-      integer                   :: ierr_alloc      ! error
-      integer                   :: ierr_dalloc     ! error
 
       integer                   :: idummy          ! dummy variable
       real                      :: rdummy          ! dummy variable
       character                 :: cdummy          ! dummy variable
 
-      integer     ,allocatable  :: idpnt(:)        ! dispersion pointers
-      integer     ,allocatable  :: ivpnt(:)        ! velocity pointers
-      integer     ,allocatable  :: grdref(:)       ! reference grid
-      integer     ,allocatable  :: sysgrd(:)       ! substance grid
-      integer     ,allocatable  :: sysndt(:)       ! substance timestep multiplier
-
-      character*40              :: modid (4)       ! model id
-      character*20,allocatable  :: syname(:)       ! substance names
-      character*20,allocatable  :: coname(:)       ! constant names
-      character*20,allocatable  :: paname(:)       ! parameter names
-      character*20,allocatable  :: funame(:)       ! function names
-      character*20,allocatable  :: sfname(:)       ! segm.func. names
-      character*20,allocatable  :: diname(:)       ! dispersion names
-      character*20,allocatable  :: vename(:)       ! velocity names
-      character*20,allocatable  :: dename(:)       ! default array names
-      character*20,allocatable  :: locnam(:)       ! loacal array names
       character*20 ,allocatable :: ainame(:)       ! all item names names in the proc_def
       character*20              :: subname         ! substance name
       character*100,allocatable :: substdname(:)   ! substance standard name
@@ -152,6 +126,9 @@
       ! proces definition structure
 
       type(procespropcoll)      :: procesdef       ! the complete process definition
+      type(procesprop), pointer :: proc            ! process description
+      real                      :: scale           ! stochi factor
+      character(len=20)         :: flxnam          ! output buffer
       integer                   :: nbpr            ! number of processes
       integer                   :: no_act          ! number of activated processes
       integer                   :: serial          ! serial number process definition
@@ -159,38 +136,23 @@
       real                      :: versio          ! version process defintion
       character*20 , allocatable :: actlst(:)
 
-      ! proces "output" structure
-
-      integer      , pointer :: idpnw(:)
-      integer      , pointer :: ivpnw(:)
-      real         , pointer :: defaul(:)
-      real         , pointer :: dsto(:)
-      real         , pointer :: vsto(:)
-
       ! settings
 
       character*80   swinam
       character*80   blmnam
       character*80   line
-      character*256  pdffil
+      character*80   idstr
+      character*20   rundat
       character*10   config
       logical        lfound, laswi , swi_nopro, l3dmod, nolic
       integer        blm_act                       ! index of ACTIVE_BLOOM_P
 
-      ! charon coupling
-
-      type(procesprop)      :: procha              ! charon (extra) process definition
-      character*256  chemid
-      logical        l_chem
-
       ! information
 
-      character*20   rundat
       logical        ex
 
       ! bloom-species database
 
-      character*256 blmfil
       logical        l_eco
       integer       maxtyp, maxcof
       parameter   ( maxtyp = 500 , maxcof = 50 )
@@ -204,8 +166,7 @@
       integer       noutgrp, nouttyp
       character*10  outgrp(maxtyp), outtyp(maxtyp)
       integer       noprot , nopralg
-      character*10  namprot(maxtyp), nampact(maxtyp),
-     +              nampralg(maxtyp)
+      character*10  namprot(maxtyp), nampact(maxtyp), nampralg(maxtyp)
 
       ! actual algae
 
@@ -220,28 +181,27 @@
 
       character(len=20)     :: parnam                    ! output parameter name
       integer               :: parindx                   ! index in output parameter name array
-      integer  ,pointer     :: proref(:,:)
-      integer               :: nothread                  ! nr of threads
 
       ! old_items and replacent things
 
       type(old_item_coll)                :: old_items        ! the old_items table
 
-      ! performance timer
+      ! Dummy file structure (temp?)
+      integer               :: lun(50)                 !< unit numbers
+      character(len=255)    :: lchar(50)               !< filenames
 
-      integer(4)                :: ithndl = 0
-      if (timon) call timstrt( "dlwqp1", ithndl )
-
-      ! how many threads ?
-      nothread = nothrd
-
+      ierr2 = 0
+      lun =  0
+      lchar = ' '
+      lun(24) = 1972
+      lchar(24) = 'test-proces.wrk'
+      
       ! allocate
 
-      allocate(actlst(nbprm))
+      call realloc(actlst, nbprm, keepExisting=.false.,Fill=' ')
 
       ! start
 
-      lchar(34) = 'proc_def'
       noloc  = 0
       nodef  = 0
       ndspx  = 0
@@ -249,132 +209,85 @@
       nlocx  = 0
       ndspn  = 0
       nveln  = 0
-      noqtt  = noq   + noq4
-      nosss  = noseg + nseg2
+      noqtt  = 1
+!      nosss  = noseg + nseg2
+      allitems%cursize = 0
+      allitems%maxsize = 0
       procesdef%cursize=0
       procesdef%maxsize=0
       old_items%cursize = 0
       old_items%maxsize = 0
-      if ( noq3 .gt. 0 ) then
+
+      ! when we assume one column per call, is it really needed?
+!      if ( noseg .gt. 1 ) then
          l3dmod = .true.
-      else
-         l3dmod = .false.
-      endif
+!      else
+!         l3dmod = .false.
+!      endif
 
       ! open report file
 
-      call dhopnf ( lun(35) , lchar(35), 35    , 1     , ierr2 )
-      lurep = lun(35)
-      call setmlu ( lurep )
-      call unlock ( lurep ,l3dmod ,nolic)
-      if (nolic .and. noseg>150) then
-         ! error and stop
-      endif
-      call monsys(line,11)
-      line = ' '
-      call monsys(line,1)
-
+      ! Header for lsp
+      call getidentification(idstr)
+      write( lunlsp, '(XA/)') idstr
+      call dattim(rundat)
+      write (lunlsp,'(A,A/)') ' Execution start: ',rundat
+      
+      ! Active/inactive substance list
+      write ( lunlsp , 2080 ) nosys , notot-nosys , notot
+      write ( lunlsp , 2100 )
+      do isys = 1,nosys
+          write(lunlsp , '(I7,A,A)' ) isys, '  active      ', syname(isys)
+      end do
+      do isys = nosys+1,notot
+          write(lunlsp , '(I7,A,A)' ) isys, '  inactive    ', syname(isys)
+      end do
+      write( lunlsp, '(/)')
       ! command line settingen , commands
 
       ! case sensitivity
-
-      call getcom ( '-cs' , 0    , lfound, idummy, rdummy,
-     +              cdummy, ierr2)
-      if ( lfound ) then
-         call setzmo ( 1 )
-      endif
+      call setzmo ( 0 )
+      ! call setzmo ( 1 )
 
       ! monitoring level
-
-      call getcom ( '-m'  , 1    , lfound, mlevel, rdummy,
-     +              cdummy, ierr2)
-      if ( lfound ) then
-         if ( ierr2.eq. 0 ) then
-            call setmmo ( mlevel )
-         else
-            call setmmo ( 10     )
-         endif
-      endif
+      !call setmmo ( mlevel )
+      call setmmo ( 10     )
 
       ! active processes only switch
+      ! only activated processes are switched on
+      laswi = .true.
+      ! laswi = .false.
 
-      call getcom ( '-a'  , 1    , lfound, idummy, rdummy,
-     +              cdummy, ierr2)
-      if ( lfound ) then
-         write(line,'(a)' ) ' found -a command line switch'
-         call monsys(line,1)
-         write(line,'(a)' ) ' only activated processes are switched on'
-         call monsys(line,1)
-         laswi = .true.
+      ! read process definition file
+
+      call rd_tabs( pdffil, lunlsp , versio, serial, noinfo, nowarn, ierr )
+      if (ierr.gt.ierr2) then
+         write(lunlsp,*) ' '
+         write(lunlsp,*) ' ERROR: Could not read the process definition file.'
+         write(lunlsp,*) '        Check if the filename after -p is correct, and exists.'
+         write(lunlsp,*) '        Use -np if you want to run without processes.'
+         write(lunlsp,*) ' '
+         write(*,*) ' error opening nefis file(s):', trim(pdffil)
+         write(*,*) ' '
+         write(*,*) ' ERROR: Could not read the process definition file.'
+         write(*,*) '        Check if the filename after -p is correct, and exists.'
+         write(*,*) '        Use -np if you want to run without processes.'
+         write(*,*) ' '
+         call srstop(1)
       else
-         laswi = .false.
-      endif
+         write (lunlsp, *  )
+         write (lunlsp,2001) trim(pdffil)
+         write (lunlsp,2002) versio
+         write (lunlsp,2003) serial
+         write (lunlsp, *  )
 
-      ! no processes
+         ! fill the old_items conversion table
 
-      call getcom ( '-np' , 0    , lfound, idummy, rdummy,
-     +              cdummy, ierr2)
-      if ( lfound ) then
-         swi_nopro = .true.
-         write(line,'(a)' ) ' found -np command line switch'
-         call monsys(line,1)
-         write(line,'(a)' ) ' no processes from the process definition file are switched on'
-         call monsys(line,1)
-         versio = versip
-      else
-         swi_nopro = .false.
-      endif
-
-      ! process definition file
-
-      if ( .not. swi_nopro ) then
-         call getcom ( '-p'  , 3    , lfound, idummy, rdummy,
-     +                 pdffil, ierr2)
-         if ( lfound ) then
-            if ( ierr2.ne. 0 ) then
-               pdffil = ' '
-            endif
-         else
-            pdffil = ' '
-         endif
-         if ( pdffil .ne. ' ' ) then
-            lchar(34) = pdffil
-            write(line,'(a)' ) ' found -p command line switch'
-            call monsys(line,1)
-         else
-            pdffil = lchar(34)
-         endif
-         ierr2 = ierr
-         call rd_tabs( pdffil, lurep , versio, serial, noinfo,
-     +                 nowarn, ierr )
-         if (ierr.gt.ierr2) then
-            write(lurep,*) ' '
-            write(lurep,*) ' ERROR: Could not read the process definition file.'
-            write(lurep,*) '        Check if the filename after -p is correct, and exists.'
-            write(lurep,*) '        Use -np if you want to run without processes.'
-            write(lurep,*) ' '
-            write(*,*) ' error opening nefis file(s):', trim(pdffil)
-            write(*,*) ' '
-            write(*,*) ' ERROR: Could not read the process definition file.'
-            write(*,*) '        Check if the filename after -p is correct, and exists.'
-            write(*,*) '        Use -np if you want to run without processes.'
-            write(*,*) ' '
-            call srstop(1)
-         else
-            write (lurep, *  )
-            write (lurep,2001) trim(lchar(34))
-            write (lurep,2002) versio
-            write (lurep,2003) serial
-            write (lurep, *  )
-
-            ! fill the old_items conversion table
-
-            call fill_old_items(old_items)
-         endif
+         call fill_old_items(old_items)
       endif
 
       ! old serial definitions
-
+      swi_nopro = .false.
       if ( .not. swi_nopro ) then
          call getcom ( '-target_serial'  , 1    , lfound, target_serial, rdummy, cdummy, ierr2)
          if ( lfound ) then
@@ -397,8 +310,7 @@
 
       ! configuration
 
-      call getcom ( '-conf'  , 3    , lfound, idummy, rdummy,
-     +              config, ierr2)
+      call getcom ( '-conf'  , 3    , lfound, idummy, rdummy, config, ierr2)
       if ( lfound ) then
          write(line,'(a)' ) ' found -conf command line switch'
          call monsys(line,1)
@@ -416,34 +328,26 @@
 
       ! eco coupling
 
-      call getcom ( '-eco'  , 3    , lfound, idummy, rdummy,
-     +              blmfil, ierr2)
-      if ( lfound ) then
-         l_eco = .true.
-         line = ' '
-         call monsys(line,1)
-         write(line,'(a)' ) ' found -eco command line switch'
-         call monsys(line,1)
-         if ( ierr2.ne. 0 ) then
-            blmfil = 'bloom.spe'
-            write(line,'(a30,a50)') ' using default eco input file:', blmfil
-            call monsys(line,1)
-         else
-            write(line,'(a22,a58)') ' using eco input file:', blmfil
-            call monsys(line,1)
-         endif
-      else
+      l_eco = blmfil .ne. ' '
+
+      if (.not.l_eco) then
          blmnam = 'ACTIVE_BLOOM_P'
          blm_act = dlwq_find(constants,blmnam)
          if ( blm_act .gt. 0 .and. .not.swi_nopro) then
-            l_eco = .true.
-            line = ' '
-            call monsys(line,1)
-            write(line,'(a)' ) ' found constant ACTIVE_BLOOM_P without -eco command line switch'
-            call monsys(line,1)
             blmfil = 'bloom.spe'
-            write(line,'(a39,a41)') ' will try using default eco input file:', blmfil
-            call monsys(line,1)
+            inquire(file=blmfil,exist=l_eco)
+            if (l_eco) then
+               line = ' '
+               call monsys(line,1)
+               write(line,'(a)' ) ' found constant ACTIVE_BLOOM_P without -eco command line switch'
+               call monsys(line,1)
+               write(line,'(a)') ' and found default file bloom.spe. Will using default BLOOM file.'
+               call monsys(line,1)
+            else
+               l_eco = .false.
+               noprot  = 0
+               nopralg = 0
+            endif
          else
             l_eco = .false.
             noprot  = 0
@@ -453,8 +357,8 @@
          ! read the bloom-species database.
 
       if ( l_eco ) then
-         lunblm = 88
-         open ( lunblm    , file=blmfil )
+         write (lunlsp,2004) trim(blmfil)
+         open ( newunit = lunblm    , file=blmfil )
          read ( lunblm    , '(a)' ) line
          verspe = 1.0
          ioff =  index(line, 'BLOOMSPE_VERSION_')
@@ -465,72 +369,24 @@
 100         continue
          endif
 
-         call reaalg ( lurep  , lunblm , verspe , maxtyp , maxcof , 
-     +                 notyp  , nocof  , noutgrp, nouttyp, alggrp ,
-     +                 abrgrp , algtyp , abrtyp , algdsc , cofnam ,
-     +                 algcof , outgrp , outtyp , noprot , namprot,
-     +                 nampact, nopralg, nampralg)
-      endif
-
-      ! chem coupling
-
-      call getcom ( '-chem'  , 3    , lfound, idummy, rdummy,
-     +              chemid, ierr2)
-      if ( lfound ) then
-         l_chem = .true.
-         write(line,'(a)' ) ' found -chem command line switch'
-         call monsys(line,1)
-         write(line,'(a)' ) ' chem coupling activated'
-         call monsys(line,1)
-         if ( ierr2.ne. 0 ) then
-            chemid = 'charon'
-            write(line,'(a30,a50)') ' using default chem input id: ', chemid
-            call monsys(line,1)
-         else
-            write(line,'(a22,a58)') ' using chem input id: ', chemid
-            call monsys(line,1)
-         endif
-      else
-         l_chem = .false.
+         call reaalg ( lunlsp  , lunblm , verspe , maxtyp , maxcof , &
+                       notyp   , nocof  , noutgrp, nouttyp, alggrp , &
+                       abrgrp  , algtyp , abrtyp , algdsc , cofnam , &
+                       algcof  , outgrp , outtyp , noprot , namprot, &
+                       nampact , nopralg, nampralg)
       endif
 
       ! check local dimensions
 
-      allocate(idpnt(notot))
-      allocate(ivpnt(notot))
-      allocate(grdref(nogrid))
-      allocate(sysgrd(notot))
-      allocate(sysndt(notot))
-      allocate(syname(notot))
-      noconm = nocons + 1000
-      allocate(coname(noconm))
-      allocate(paname(nopa))
-      allocate(funame(nofun))
-      allocate(sfname(nosfun))
-      allocate(diname(nodisp))
-      allocate(vename(novelo))
-
-      ! read ( rest ) of relevant delwaq files
-
-      call dhopnf ( lun(2) , lchar(2), 2     , 2     , ierr2 )
-      call rdwrk4 ( lun(2) , lurep  , modid  , syname , notot  ,
-     +              nodump , nosys  , nobnd  , nowst  , nocons ,
-     +              nopa   , noseg  , nseg2  , coname , paname ,
-     +              funame , nofun  , sfname , nosfun , nodisp ,
-     +              novelo , diname , vename , idpnt  , ivpnt  ,
-     +              ndmpar , ntdmpq , ntdmps , noqtt  , noraai ,
-     +              ntraaq , nobtyp , nowtyp , nogrid , grdref ,
-     +              sysgrd , sysndt , notot  )
-      write ( lurep   , 2020 ) (modid(i),i=1,2)
-      write ( lurep   , 2030 ) (modid(i),i=3,4)
-      close ( lun(2) )
+      call realloc(idpnt, notot, keepExisting=.false.,Fill=0)
+      call realloc(ivpnt, notot, keepExisting=.false.,Fill=0)
 
       ! change names according to old_items table
 
       nocon2 = nocons
-      call set_old_items( lurep , old_items, notot , nopa  , nofun    ,
-     +                    nosfun, nodisp   , novelo, syname, paname   ,
-     +                    funame, sfname   , diname, vename, constants)
+      call set_old_items( lunlsp , old_items, notot , nopa  , nofun    , &
+                          nosfun , nodisp   , novelo, syname, paname   , &
+                          funame , sfname   , diname, vename, constants)
 
       ! replace proto with actual processes
 
@@ -541,7 +397,7 @@
          noalg = 0
          do ialg = 1 , notyp
             name10 = algtyp(ialg)
-            call zoek( name10, notot, syname, 10 , isys )
+            call zoekns( name10, notot, syname, 10 , isys )
             if ( isys .gt. 0 ) then
                noalg        = noalg + 1
                algact(ialg) = 1
@@ -557,7 +413,7 @@
          nogrp = 0
          do iatyp = 1 , notyp
             if ( algact(iatyp) .eq. 1 ) then
-               call zoek( alggrp(iatyp), nogrp , grpnam, 10 , igrp )
+               call zoekns( alggrp(iatyp), nogrp , grpnam, 10 , igrp )
                if ( igrp .le. 0 ) then
                   nogrp = nogrp + 1
                   grpnam(nogrp)= alggrp(iatyp)
@@ -568,8 +424,7 @@
 
          ! replace proto with actual processes in constant list
 
-         call actrep( noalg   , noprot   , namprot, nampact, nopralg,
-     +                nampralg, constants)
+         call actrep( noalg   , noprot   , namprot, nampact, nopralg, nampralg, constants)
 
       endif
 
@@ -596,15 +451,12 @@
 
       if ( .not. laswi ) then
          if ( config .eq. ' ' ) then
-            if ( l_chem ) then
-               config = 'chem'
-            elseif ( l_eco ) then
+            if ( l_eco ) then
                config = 'eco'
             else
                config = 'waq'
             endif
-            write(line,'(a,a10)') ' using default configuration: ',
-     +                            config
+            write(line,'(a,a10)') ' using default configuration: ', config
             call monsys(line,1)
          endif
       endif
@@ -616,31 +468,19 @@
          ! copy the configuration info for the eco proto processes to the actual processes
 
          if ( l_eco ) then
-            call cnfrep( noalg   , noprot, namprot, nampact, nopralg,
-     +                   nampralg)
+            call cnfrep( noalg   , noprot, namprot, nampact, nopralg, nampralg)
          endif
 
          ! add the processes in the strucure
 
-         call prprop ( lurep    , laswi   , l3dmod   , config, no_act,
-     +                 actlst   , allitems, procesdef, noinfo, nowarn,
-     +                 old_items, ierr2 )
+         call prprop ( lunlsp    , laswi   , l3dmod   , config, no_act, &
+                       actlst    , allitems, procesdef, noinfo, nowarn, &
+                       old_items , ierr2 )
          if ( ierr2 .ne. 0 ) ierr = ierr + 1
          nbpr   = procesdef%cursize
 
       else
          nbpr   = 0
-      endif
-
-      ! charon coupling
-
-      if ( l_chem ) then
-!         call pdfch1 ( lurep   , chemid, nosys , syname, procha,
-!     +                 allitems)
-
-         ! fill in the names of the charon coupling, manipulate stochiometric terms for
-
-!         call pdfch2 ( lurep , procesdef, procha)
       endif
 
       ! add the statistical processes in the structure
@@ -657,24 +497,23 @@
 
       ! set processes and fluxes for the substance fractions, this adds and alters processes in procesdef!
 
-      call set_fraction( lurep    , notot   , syname, nomult, imultp,
-     +                   procesdef, allitems, no_act, actlst, nbpr  )
+      call set_fraction( lunlsp    , notot   , syname, nomult, imultp, procesdef, allitems, no_act, actlst, nbpr  )
 
       ! sort processes according to input - output relation
 
-      call prsort ( lurep , procesdef, notot , nopa     , nosfun,
-     +              syname, nocons   , nofun , constants, paname,
-     +              funame, sfname   , nowarn)
+      call prsort ( lunlsp , procesdef, notot , nopa     , nosfun, &
+                    syname, nocons   , nofun , constants, paname,  &
+                    funame, sfname   , nowarn)
 
       ! handle output from statistical processes
 
-      call set_stat_output( statprocesdef, noutp, ioutps, nrvart, outputs)
+!      call set_stat_output( statprocesdef, noutp, ioutps, nrvart, outputs)
 
       ! set output boot dimensions, attention !!!!! is new ncbufm written to work file?
 
-       call outbo2 ( noutp , ioutps, nosss , nodump, nx    ,
-     +               ny    , nrvart, nbufmx, ndmpar, notot ,
-     +               ncbufm, noraai)
+!       call outbo2 ( noutp , ioutps, nosss , nodump, nx    ,
+!     +               ny    , nrvart, nbufmx, ndmpar, notot ,
+!     +               ncbufm, noraai)
 
 
       ! replace names of bloom algea with actual names
@@ -683,16 +522,16 @@
 
          ! now replace process parameters
 
-         call algrep ( procesdef, notyp , nocof , algtyp , algact,
-     +                 abrtyp   , cofnam, algcof, maxcof , alggrp,
-     +                 nogrp    , grpnam, grpabr, nouttyp, outtyp,
-     +                 noutgrp  , outgrp)
+         call algrep ( procesdef, notyp , nocof , algtyp , algact, &
+                       abrtyp   , cofnam, algcof, maxcof , alggrp, &
+                       nogrp    , grpnam, grpabr, nouttyp, outtyp, &
+                       noutgrp  , outgrp)
 
          ! write the bloom efficiency file
 
          lunfrm = 89
          open ( lunfrm    , file='bloominp.frm' )
-         call blmeff (lurep , lunblm, verspe, lunfrm, grpnam, nogrp , typnam, noalg)
+         call blmeff (lunlsp , lunblm, verspe, lunfrm, grpnam, nogrp , typnam, noalg)
          close(lunblm)
          close(lunfrm)
 
@@ -700,15 +539,15 @@
          if(.not.ex) then
             lund09 = 89
             open ( lund09    , file='bloominp.d09' )
-            call blmd09 (lurep , lund09)
+            call blmd09 (lunlsp , lund09)
             close(lund09)
          endif
       endif
 
       ! calculate new totals
 
-      call proc_totals( lurep , procesdef, no_ins  , no_ine, no_ous,
-     +                  no_oue, no_flu   , no_sto  , no_dis, no_vel)
+      call proc_totals( lunlsp , procesdef, no_ins  , no_ine, no_ous, &
+                        no_oue, no_flu   , no_sto  , no_dis, no_vel)
 
       ! set offset local array
 
@@ -716,28 +555,28 @@
 
       ! check which processes can be turned on
 
-      call makbar ( procesdef, notot , syname, nocons, constants,
-     +              nopa     , paname, nofun , funame, nosfun,
-     +              sfname   , nodisp, diname, novelo, vename,
-     +              noqtt    , laswi , no_act, actlst, noinfo,
-     +              nowarn   , ierr  )
-      deallocate(       actlst,stat=ierr_dalloc)
+      call makbar ( procesdef, notot , syname, nocons, constants, &
+                    nopa     , paname, nofun , funame, nosfun,    &
+                    sfname   , nodisp, diname, novelo, vename,    &
+                    noqtt    , laswi , no_act, actlst, noinfo,    &
+                    nowarn   , ierr  )
+      deallocate(actlst)
 
       ! determine wich primary processes must be turned on
 
       ioffx = 4+nodisp+novelo+nofun+nocons
-      allocate(idpnw(notot))
-      allocate(ivpnw(notot))
-      allocate(dsto(nosys*no_dis))
-      allocate(vsto(nosys*no_vel))
+      call realloc(idpnw, notot, keepExisting=.false.,Fill=0)
+      call realloc(ivpnw, notot, keepExisting=.false.,Fill=0)
+      call realloc(dsto , nosys*no_dis, keepExisting=.false.,Fill=0.0e0)
+      call realloc(vsto , nosys*no_vel, keepExisting=.false.,Fill=0.0e0)
       idpnw  = 0
       ivpnw  = 0
       dsto   = 0.0
       vsto   = 0.0
-      call primpro ( procesdef, notot , syname, ndspx , nvelx ,
-     &               ioffx    , nosys , dsto  , vsto  , ndspn ,
-     &               idpnw    , nveln , ivpnw , noqtt , noinfo,
-     &               nowarn   , ierr  )
+      call primpro ( procesdef, notot , syname, ndspx , nvelx , &
+                     ioffx    , nosys , dsto  , vsto  , ndspn , &
+                     idpnw    , nveln , ivpnw , noqtt , noinfo, &
+                     nowarn   , ierr  )
 
       ! determine wich processes must be turned on for output purposes
 
@@ -750,18 +589,19 @@
       nlocx = 0
       nodef = nopred
       maxdef = nodef + no_ins + no_ine
-      allocate(defaul(maxdef))
-      allocate(dename(maxdef))
+      call realloc(defaul, maxdef, keepExisting=.false.,Fill=0.0e0)
+      call realloc(dename, maxdef, keepExisting=.false.,Fill=' ')
+
       defaul    = 0.0
       defaul(5) = float(itstrt)
       defaul(6) = float(itstop)
-      allocate(locnam(novarm))
+      call realloc(locnam, novarm, keepExisting=.false.,Fill=' ')
 
       ! put theta in local array if wanted for output, the value will be filled by the integration routine
       ! noloc is already 1?, use this space!
 
       parnam = 'theta'
-      call zoek(parnam,outputs%cursize,outputs%names,20,parindx)
+      call zoekns(parnam,outputs%cursize,outputs%names,20,parindx)
       if ( parindx .gt. 0 .and. (intsrt .eq. 21 .or. intsrt .eq. 22) ) then
          locnam(1) = parnam
          outputs%pointers(parindx) = nopred + nocons + nopa + nofun + nosfun + notot + 1
@@ -769,70 +609,143 @@
          call monsys( line , 4 )
       endif
 
-      call getinv ( procesdef, notot , syname, nocons, constants,
-     +              nopa     , paname, nofun , funame, nosfun,
-     +              sfname   , nodisp, diname, novelo, vename,
-     +              nmis     , defaul, noloc , nodef , dename, outputs,
-     +              ndspx    , nvelx , nlocx , locnam   )
+      call getinv ( procesdef, notot , syname, nocons, constants, &
+                    nopa     , paname, nofun , funame, nosfun,    &
+                    sfname   , nodisp, diname, novelo, vename,    &
+                    nmis     , defaul, noloc , nodef , dename, outputs,   &
+                    ndspx    , nvelx , nlocx , locnam   )
 
       ! report on the use of the delwaq input
 
-      call repuse ( procesdef, nocons, coname, nopa  , paname,
-     +              nofun    , funame, nosfun, sfname, noinfo)
-
-      ! a table will be made on selected processes
-      ! to ensure resolved inputs with parallel processing
-
-      call partab ( procesdef, notot , syname, nocons, constants,
-     &              nopa     , paname, nofun , funame, nosfun   ,
-     &              sfname   , proref, nrref , nowarn, nothread ,
-     &              nopred   , noloc , nodef )
+      call repuse ( procesdef, nocons, coname, nopa  , paname, nofun    , funame, nosfun, sfname, noinfo)
 
       ! set output pointers to process arrays parloc and defaul
 
       idef = ioff + noloc
       iflx = idef + nodef
-      call setopo ( procesdef, outputs, ioff  , idef  , iflx  ,
-     +              nowarn   )
+      call setopo ( procesdef, outputs, ioff  , idef  , iflx  , nowarn   )
 
       ! if not all input present , stop with exit code
 
       if ( nmis .gt. 0 ) then
-         call dhopnf ( lun(24) , lchar(24), 24    , 1     , ierr2 )
-         close ( lun(24) )
-         write(lurep,*) ' not all input available.'
-         write(lurep,*) ' number off missing variables :',nmis
-         write(lurep,*) ' simulation impossible.'
+!         call dhopnf ( lun(24) , lchar(24), 24    , 1     , ierr2 )   why?
+!         close ( lun(24) )                                            why?
+         write(lunlsp,*) ' not all input available.'
+         write(lunlsp,*) ' number off missing variables :',nmis
+         write(lunlsp,*) ' simulation impossible.'
          call srstop(1)
       endif
 
       ! set new pointer for dispersion and velocity
 
-      call setdvp ( nodisp, idpnt , ndspn , idpnw , nosys ,
-     +              ndspx , dsto  )
-      call setdvp ( novelo, ivpnt , nveln , ivpnw , nosys ,
-     +              nvelx , vsto  )
+      call setdvp ( nodisp, idpnt , ndspn , idpnw , nosys , ndspx , dsto  )
+      call setdvp ( novelo, ivpnt , nveln , ivpnw , nosys , nvelx , vsto  )
 
       ! set grid for processes
-
-      call setprg ( procesdef, nogrid, notot, grdref, sysgrd,
-     +              sysndt   )
-      deallocate(grdref,sysgrd,sysndt)
+      procesdef%procesprops%grid = 1
 
       ! write proces work file
+      nproc = 0
+      nflux = 0
 
-      call wr_proceswrk( lurep , procesdef, nodef , defaul, idpnw ,
-     +                   ivpnw , dsto     , vsto  , locnam, nopred,
-     +                   nocons, nopa     , nofun , nosfun, notot ,
-     +                   noloc , nodisp   , novelo, ndspx , nvelx ,
-     +                   nlocx , nosys    , nogrid, dename, coname, paname,
-     +                   funame, sfname   , syname, intopt, lun   ,
-     +                   lchar , noutp    , ioutps, outputs,ndmpar,
-     +                   nbufmx, versio   , ndspn , nveln , nrref ,
-     +                   proref, nproc    , nflux , novar , nipmsa)
-      deallocate(defaul,dsto,vsto)
-      deallocate(idpnw,ivpnw)
-      deallocate(locnam)
+      nbpr  = 0
+      do iproc = 1, procesdef%cursize
+         if ( procesdef%procesprops(iproc)%active ) then
+            nbpr = nbpr + 1
+         endif
+      enddo
+
+      ! calculate new totals
+
+      call proc_totals( lunlsp , procesdef, no_ins  , no_ine, no_ous, &
+                        no_oue, no_flu   , no_sto  , no_dis, no_vel)
+
+      ! calculate and fill output structure
+
+      nipmsa = 0
+      ioffx = nopred+nocons+nopa+nofun+nosfun+notot+noloc+nodef
+      mxpmsa = no_ine+no_ins+no_ous+no_oue+no_flu
+      call realloc(prvnio, nbpr  , keepExisting=.false.,Fill=0)
+      call realloc(iflux , nbpr  , keepExisting=.false.,Fill=0)
+      call realloc(ipmsa , mxpmsa, keepExisting=.false.,Fill=0)
+      call realloc(ipssa , mxpmsa, keepExisting=.false.,Fill=0)
+      call realloc(prvvar, mxpmsa, keepExisting=.false.,Fill=0)
+      call realloc(prvtyp, mxpmsa, keepExisting=.false.,Fill=0)
+      call realloc(progrd, nbpr  , keepExisting=.false.,Fill=0)
+      call realloc(prondt, nbpr  , keepExisting=.false.,Fill=0)
+      call realloc(pronam, nbpr  , keepExisting=.false.,Fill=' ')
+      call intoou ( procesdef, nproc , nflux , prvnio, pronam, &
+                    iflux    , ipmsa , ipssa , nipmsa, ioffx , &
+                    nocons   , nopa  , nofun , nosfun, notot , &
+                    nodisp   , novelo, nodef , noloc , ndspx , &
+                    nvelx    , nlocx , nopred, prvvar, prvtyp, &
+                    novar    , progrd, prondt)
+
+      deallocate(ipmsa,ipssa)
+
+      ! set variables attribute's for aggregation dis-aggregation
+
+      call realloc(varnam, novar, keepExisting=.false.,Fill=' ')
+      varnam = ' '
+      call realloc(vararr, novar, keepExisting=.false.,Fill=0)
+      call realloc(varidx, novar, keepExisting=.false.,Fill=0)
+      call realloc(vartda, novar, keepExisting=.false.,Fill=0)
+      call realloc(vardag, novar, keepExisting=.false.,Fill=0)
+      call realloc(vartag, novar, keepExisting=.false.,Fill=0)
+      call realloc(varagg, novar, keepExisting=.false.,Fill=0)
+      call setvat ( lunlsp , nocons, nopa  , nofun , nosfun, &
+                    nosys , notot , nodisp, novelo, nodef ,  &
+                    noloc , ndspx , nvelx , nlocx , nflux ,  &
+                    nopred, novar , vararr, varidx, vartda,  &
+                    vardag, vartag, varagg, nogrid,          &
+                    coname, paname, funame, sfname, syname, dename, &
+                    locnam, varnam)
+
+      ! determine stochi
+
+      call realloc(stochi,(/notot,nflux/), keepExisting=.false.,Fill=0.0e0)
+      call realloc(fluxname, nflux, keepExisting=.false.,Fill=' ')
+      call realloc(fluxprocname, nflux, keepExisting=.false.,Fill=' ')
+      do iflx = 1 , nflux
+         do isys = 1 , notot
+            stochi(isys,iflx) = 0.0
+         enddo
+      enddo
+
+      nflx = 0
+      totfluxsys = 0
+      do iproc = 1 , nproc
+         proc => procesdef%procesprops(iproc)
+         if ( proc%active ) then
+            do istochi = 1, proc%no_fluxstochi
+               flxnam = proc%fluxstochi(istochi)%ioitem
+               isys   = proc%fluxstochi(istochi)%subindx
+               scale  = proc%fluxstochi(istochi)%scale
+               if ( isys.gt.0 .and. abs(scale).gt.1e-10) then
+                  call zoekio ( flxnam, proc%no_fluxoutput, proc%fluxoutput, 20, iflx)
+                  stochi(isys,nflx + iflx) = scale
+                  fluxname(nflx + iflx) = flxnam(1:10)
+                  fluxprocname(nflx + iflx) = proc%name(1:10)
+                  totfluxsys = totfluxsys + 1
+               endif
+            enddo
+            nflx = nflx + proc%no_fluxoutput
+         endif
+      enddo
+
+      call realloc(nfluxsys, notot, keepExisting=.false.,Fill=0)
+      call realloc(fluxsys, totfluxsys, keepExisting=.false.,Fill=0)
+      
+      ifluxsys = 0
+      do isys = 1 , notot
+         do iflx = 1 , nflux
+            if(stochi(isys,iflx).ne.0.0) then
+               ifluxsys = ifluxsys + 1
+               nfluxsys(isys) = nfluxsys(isys) + 1
+               fluxsys(ifluxsys) = iflx
+            endif
+         enddo
+      enddo
 
       ! nrvart is in the boot sysn common
 
@@ -841,31 +754,31 @@
       ! Prepare descrtion and unit information for output from the proces library to be written in the NetCDF-file
 
       ! Extract names list from allitems
-      allocate(ainame(allitems%cursize))
+      call realloc(ainame, allitems%cursize, keepExisting=.false.,Fill=' ')
       do iitem = 1, allitems%cursize
          ainame(iitem) = allitems%itemproppnts(iitem)%pnt%name
       enddo
 
       ! Get location of FixAlg in algcof
       name10 = 'FixAlg'
-      call zoek( name10, maxcof, cofnam, 10 , icof )
+      call zoekns( name10, maxcof, cofnam, 10 , icof )
 
       ! Get information about the substances
-      allocate (substdname(notot))
-      allocate (subunit(notot))
-      allocate (subdescr(notot))
+      call realloc (substdname, notot, keepExisting=.false.,Fill=' ')
+      call realloc (subunit   , notot, keepExisting=.false.,Fill=' ')
+      call realloc (subdescr  , notot, keepExisting=.false.,Fill=' ')
       do isys = 1, notot
          subname = syname(isys)
          call str_lower(subname)
-         call zoek(subname,allitems%cursize,ainame,20,iindx)
+         call zoekns(subname,allitems%cursize,ainame,20,iindx)
          if ( iindx .gt. 0) then
             substdname(isys) = allitems%itemproppnts(iindx)%pnt%stdn
             subunit(isys) = allitems%itemproppnts(iindx)%pnt%stdu
-            subdescr(isys) = trim(allitems%itemproppnts(iindx)%pnt%text)//' '//
-     &                            allitems%itemproppnts(iindx)%pnt%unit
+            subdescr(isys) = trim(allitems%itemproppnts(iindx)%pnt%text)//' '// &
+                                  allitems%itemproppnts(iindx)%pnt%unit
          else
             ! Is it an algae?
-            call zoek( subname(1:10), maxtyp, algtyp, 10 , ialg )
+            call zoekns( subname(1:10), maxtyp, algtyp, 10 , ialg )
             if ( ialg .gt. 0) then
                if (algcof(icof, ialg) .ge. 0) then
                   substdname(isys) = ' '
@@ -888,10 +801,10 @@
       do ioutp = 1, outputs%cursize
          outname = outputs%names(ioutp)
          call str_lower(outname)
-         call zoek(outname,allitems%cursize,ainame,20,iindx)
+         call zoekns(outname,allitems%cursize,ainame,20,iindx)
          if ( iindx .gt. 0) then
             outputs%stdnames(ioutp) = allitems%itemproppnts(iindx)%pnt%stdn
-            outputs%units(ioutp) = allitems%itemproppnts(iindx)%pnt%stdu
+            outputs%units(ioutp) = allitems%itemproppnts(iindx)%pnt%unit
             outputs%descrs(ioutp) = allitems%itemproppnts(iindx)%pnt%text//' '//allitems%itemproppnts(iindx)%pnt%unit
          else if (outname.eq.'theta') then
             outputs%stdnames(ioutp) = ' '
@@ -899,7 +812,7 @@
             outputs%descrs(ioutp) = 'Local-theta, generated by numerical scheme (-)'
          else
             ! Is it an algae?
-            call zoek( outname(1:10), maxtyp, algtyp, 10 , ialg )
+            call zoekns( outname(1:10), maxtyp, algtyp, 10 , ialg )
             if ( ialg .gt. 0) then
                if (algcof(icof, ialg) .ge. 0) then
                   outputs%stdnames(ioutp) = ' '
@@ -917,26 +830,28 @@
             endif
          endif
       enddo
-      ! write updated output work file ( output.wrk )
 
-      call dhopnf ( lun(25), lchar(25), 25    , 1     , ierr2 )
-      call wrwrko ( lun(25), noutp , nbufmx , ioutps, outputs,
-     &              notot,  substdname, subunit, subdescr )
-      close ( lun(25) )
+      ! Determine pointer from prvnio, and promnr from pronam
+      call realloc(prvpnt, nproc, keepExisting=.false.,Fill=0)
+      call realloc(promnr, nproc, keepExisting=.false.,Fill=0)
+      prvpnt(1) = 1
+      do iproc = 2,nproc
+          prvpnt(iproc) = prvpnt(iproc-1)+prvnio(iproc-1)
+      end do
+      do iproc = 1,nproc
+          call pronrs(pronam(iproc),promnr(iproc))
+      end do
 
-      ! write altoys input files, only for old balnce file
-      ! ( altoys.inp batoys.inp altoys.ini altoys.fil)
-
-      if ( btest(intopt,3) .and. .not. btest(intopt,4) ) then
-         call wrtoys ( lchar  , lun   , notot , syname, noutp ,
-     +                 ioutps , outputs)
-      endif
-
-      if (timon) call timstop( ithndl )
       return
  2001 format( ' Using process definition file : ',a    )
  2002 format( ' Version number                : ',f10.2)
  2003 format( ' Serial                        : ',i10  )
+ 2004 format( ' Using BLOOM definition file   : ',a    /)
  2020 format (//' Model :            ',a40,/20x,a40 )
  2030 format (//' Run   :            ',a40,/20x,a40//)
+ 2080 format ( /' Number of active (transported) constituents       :',I3,/ &
+                ' Number of inactive (not transported) constituents :',I3,/ &
+                ' Total number of constituents                      :',I3  )
+ 2100 format ( /' Number  (in)active  name')
+ 2090 format ( 'I4,8X,A,4X,A' )
       end

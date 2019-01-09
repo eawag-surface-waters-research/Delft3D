@@ -47,6 +47,8 @@
       use timers         ! performance timers
       implicit none
 
+      include 'omp_lib.h'
+
 !     declaration of arguments
 
       integer               , intent(in)    :: lun(*)       !< unit numbers used
@@ -213,6 +215,8 @@
             nothrd = nint(dlwqdata%values(inothr,1,1))
             write(lunut,2310)
             write(lunut,2320) nothrd
+            if ( nothrd .gt. 0 ) call omp_set_num_threads( nothrd )
+            nothrd = omp_get_max_threads()
          else
             nothrd = 1
          endif

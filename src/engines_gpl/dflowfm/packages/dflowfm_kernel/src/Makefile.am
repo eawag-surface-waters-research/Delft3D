@@ -121,6 +121,8 @@ libdflowfm_la_SOURCES+=\
 		fm_morstatistics.f90 \
         fm_dredge.f90 \
         fm_erosed.f90 \
+        fm_wq_processes.f90 \
+        fm_wq_processes_mba.f90 \
         fm_thahbc.f90 \
         tecplot.F90 \
         transport.f90 \
@@ -178,7 +180,19 @@ FMODULES += \
     -I$(top_builddir)/utils_gpl/flow1d/packages/flow1d_io/src \
     -I$(top_builddir)/third_party_open/kdtree2/src-f90 \
     -I$(top_builddir)/third_party_open/libsigwatch \
-    -I$(top_builddir)/utils_lgpl/kdtree_wrapper/packages/kdtree_wrapper/src
+    -I$(top_builddir)/utils_lgpl/kdtree_wrapper/packages/kdtree_wrapper/src \
+    -I$(top_builddir)/engines_gpl/waq/include \
+    -I$(top_builddir)/engines_gpl/waq/packages/wq_processes/src \
+    -I$(top_builddir)/engines_gpl/waq/packages/waq_process/src \
+    -I$(top_builddir)/engines_gpl/waq/packages/waq_process/src/bloom \
+    -I$(top_builddir)/engines_gpl/waq/packages/waq_process/src/charon \
+    -I$(top_builddir)/engines_gpl/waq/packages/waq_process/src/proc_preprocess \
+    -I$(top_builddir)/engines_gpl/waq/packages/waq_process/src/waq_process \
+    -I$(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/mod_timings \
+    -I$(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/mod_couplib \
+    -I$(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/waq_utils \
+    -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/rd_token \
+    -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src
 
 # NOTE:
 # includes, modules, optimization and openmp are all added to AM_FCFLAGS by common.am
@@ -246,6 +260,15 @@ EXTRALIBS=\
         $(top_builddir)/utils_gpl/morphology/packages/morphology_data/src/libMorphologyData.la \
         $(top_builddir)/utils_gpl/trachytopes/packages/trachytopes_kernel/src/libTrachytopesKernel.la \
         $(top_builddir)/utils_gpl/trachytopes/packages/trachytopes_io/src/libTrachytopesIO.la \
+        $(top_builddir)/engines_gpl/waq/packages/waq_process/src/proc_preprocess/libproc_preprocess.la \
+        $(top_builddir)/engines_gpl/waq/packages/waq_process/src/bloom/libbloom.la \
+        $(top_builddir)/engines_gpl/waq/packages/waq_process/src/waq_process/libwaq_process.la \
+        $(top_builddir)/engines_gpl/waq/packages/waq_plugin_wasteload/src/libwaq_plugin_wasteload.la \
+        $(top_builddir)/engines_gpl/waq/packages/waq_utils_c/src/libwaq_utils_c.la \
+        $(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/interact/libinteract.la \
+        $(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/libwaq_utils.la \
+        $(top_builddir)/engines_gpl/waq/packages/wq_processes/src/libwqprocesses.la \
+        $(top_builddir)/utils_lgpl/nefis/packages/nefis/src/libNefis.la \
         $(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/libDeltaresCommon.la \
         $(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common_mpi/src/libDeltaresCommonMpi.la \
         $(top_builddir)/utils_lgpl/kdtree_wrapper/packages/kdtree_wrapper/src/libkdtreewrapper.la \
@@ -258,7 +281,7 @@ EXTRALIBS=\
         $(top_builddir)/third_party_open/kdtree2/src-f90/libkdtree2f.la \
         $(top_builddir)/third_party_open/polypack/src/libpolypack.la \
         $(top_builddir)/third_party_open/libsigwatch/libsigwatch.la \
-        $(CCLIBS)
+        $(CCLIBS) -luuid
 
 # dflowfm_LDADD = \
 #         libdflowfm.la		#

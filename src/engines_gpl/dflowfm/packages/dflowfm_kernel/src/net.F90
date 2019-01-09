@@ -352,8 +352,9 @@
    
    subroutine maketekaltimes()
    use m_flowtimes
+   implicit none
    logical          :: jawel
-   integer          :: minp, mout
+   integer          :: minp, mout, i, k
    double precision :: tim, a(30)
    
    character*20 dateandtime
@@ -34179,6 +34180,19 @@ function read_commandline() result(istat)
          case ('cutcells')
             md_cutcells = 1
 
+         case ('processlibrary')
+!           read next argument as well for the filename:
+            k = k+1
+            call get_command_argument(k, inarg)
+            md_pdffile = inarg
+            call mess(LEVEL_INFO, 'Using process library file: '//trim(md_pdffile))
+
+         case ('bloomspecies')
+            k = k+1
+            call get_command_argument(k, inarg)
+            md_blmfile = inarg
+            call mess(LEVEL_INFO, 'Using bloom species definition file: '//trim(md_blmfile))
+
          case default
             INQUIRE(FILE = trim(inarg),EXIST = JAWEL)
             if (JAWEL) then
@@ -34266,6 +34280,11 @@ end if
    write (*,*) '  -t N, --threads N'
    write (*,*) '      Set maximum number of OpenMP threads. N must be a positive integer.'
    write (*,*) ' '
+   write (*,*) '  --processlibrary PROCESSLIBRARYFILE'
+   write (*,*) '      Specify the process library file to be used for water quality processes.'
+   write (*,*) ' '
+   write (*,*) '  --bloomspecies BLOOMSPECIESFILE'
+   write (*,*) '      Specify the BLOOM species definition file to be used for water quality processes.'
    write (*,*) ' '
 #ifdef HAVE_OPENGL
 if (jaGUI == 1) then ! Cheap trick at runtime instead of compiletime with HAVE_DISPLAY.

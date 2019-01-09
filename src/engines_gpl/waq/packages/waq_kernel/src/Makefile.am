@@ -38,6 +38,11 @@ libWaqKernel_la_SOURCES = \
        dlwq_mt3d.f90 \
        dlwq2_hydro_set.F \
        delwaq2_data.f \
+       dhmmar.f \
+       dhmmca.f \
+       dhmmja.f \
+       dhmmra.f \
+       space.f \
        delwaq_in_openda.f90 \
        oil2waq.f \
        wqparcom.F90 \
@@ -199,6 +204,7 @@ libWaqKernel_la_SOURCES = \
        fiosub.f \
        fioutv.f \
        flxbal.f \
+       getper.f \
        hsurf.f \
        ixsets.f \
        lsame.f \
@@ -224,6 +230,7 @@ libWaqKernel_la_SOURCES = \
        propoi.f \
        provel.f \
        psolve.f \
+       putper.f \
        raatra.f \
        saxpy.f \
        scopy.f \

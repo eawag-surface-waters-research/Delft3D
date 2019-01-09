@@ -50,6 +50,7 @@ module string_module
    public :: strcmpi
    public :: remove_leading_spaces
    public :: remove_all_spaces
+   public :: replace_multiple_spaces_by_single_spaces
    public :: find_first_word
    public :: find_first_letter
    public :: find_first_char
@@ -328,6 +329,62 @@ module string_module
       end subroutine remove_all_spaces
 
 
+
+      ! ------------------------------------------------------------------------------
+      !   Subroutine: replace_multiple_spaces_by_single_spaces
+      !   Purpose:    Replace multiple spaces in a string, and replace them with
+      !               a single space instead
+      !   Summary:    Scan string for multiple space characters and if they exists, 
+      !               replace them with a single space.
+      !   Arguments:
+      !   string      String to be converted
+      ! ------------------------------------------------------------------------------
+      subroutine replace_multiple_spaces_by_single_spaces(string)
+          !
+          ! Call variables
+          !
+          character(*)                       :: string
+          !
+          ! Local variables
+          !
+          integer          :: lenstr
+          integer          :: lenstrnew
+          integer          :: iold
+          integer          :: inew
+          !
+          !! executable statements ---------------------------------------------------
+          !
+          lenstr = len(string)
+          !
+          ! loop over all characters in string minus last
+          !    if it is a double space character, skip copying
+          !    single spaces are copied
+          !
+          inew = 0
+          do iold = 1, lenstr - 1
+              if(string(iold:iold + 1) /= '  ') then
+                  inew = inew + 1
+                  string(inew:inew) = string(iold:iold)
+              endif
+          enddo
+          !
+          ! last character might be defined, so copy that one
+          !
+          if(string(lenstr:lenstr) /= ' ') then
+              inew = inew + 1
+              string(inew:inew) = string(lenstr:lenstr)
+          endif
+          !
+          ! fill up the remainder of the string with spaces
+          !
+          if (inew < lenstr) then
+              lenstrnew = inew
+              do inew = lenstrnew + 1, lenstr
+                  string(inew:inew) = ' '
+              enddo
+          endif
+          return
+      end subroutine replace_multiple_spaces_by_single_spaces
 
       ! ------------------------------------------------------------------------------
       !   Subroutine: remove_leading_spaces

@@ -635,6 +635,8 @@ engines_gpl/waq/packages/waq_utils_f/src/Makefile
 engines_gpl/waq/packages/waq_utils_f/src/mod_couplib/Makefile
 engines_gpl/waq/packages/waq_utils_f/src/mod_timings/Makefile
 engines_gpl/waq/packages/waq_utils_f/src/waq_utils/Makefile
+engines_gpl/waq/packages/wq_processes/Makefile
+engines_gpl/waq/packages/wq_processes/src/Makefile
 engines_gpl/waq/scripts/Makefile
 engines_gpl/wave/Makefile
 engines_gpl/wave/packages/data/Makefile

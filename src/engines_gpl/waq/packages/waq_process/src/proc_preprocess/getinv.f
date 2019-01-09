@@ -24,7 +24,7 @@
       subroutine getinv ( procesdef, notot , syname, nocons, constants,
      +                    nopa     , paname, nofun , funame, nosfun,
      +                    sfname   , nodisp, diname, novelo, vename,
-     +                    nmis     , defaul, noloc , nodef , outputs,
+     +                    nmis     , defaul, noloc , nodef , dename, outputs,
      +                    ndspx    , nvelx , nlocx , locnam)
 
       ! sets the i/o pointers for every proces
@@ -58,6 +58,7 @@
       real                      :: defaul(*)       ! default values array
       integer                   :: noloc           ! number of local values
       integer                   :: nodef           ! number of default
+      character(len=*)          :: dename(*)       ! default names
       type(outputcoll)          :: outputs         ! output structure
       integer                   :: ndspx           ! number of dispersions
       integer                   :: nvelx           ! number of velocities
@@ -237,6 +238,7 @@
                         write ( line1, '(a)' )  'error: not in input'
                      else
                         nodef   = nodef + 1
+                        dename(nodef) = valnam
                         ivalip = -3
                         if ( abs(proc1%input_item(i_input)%actdef-rmis0) .lt. 1.e-20 )then
                            line = ' '
@@ -336,6 +338,7 @@
                         write ( line1, '(a)' )  'error: not in input'
                      else
                         nodef   = nodef + 1
+                        dename(nodef) = valnam
                         ivalip = -3
                         if ( abs(proc1%input_item(i_input)%actdef-rmis0) .lt. 1.e-20 )then
                            line = ' '

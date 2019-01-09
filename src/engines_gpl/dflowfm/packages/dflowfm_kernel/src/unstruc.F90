@@ -6789,14 +6789,14 @@ if (numsrc > 0) then ! waq
             k2  = max(ksrc(5,isrc) - ksrc(6,isrc) + 1 , 1)
             kmxnxa2 = waqpar%kmxnxa
             if (kk1 > 0) then
-                call getkbotktopmax(kk1,kb1,ktx1)
+                call getkbotktopmax(kk1,kb1,kt,ktx1)
                 kmax1 = ktx1 - kb1 + 1
             else
                 kmax1 = 1
                 kmxnxa2 = 1
             endif
             if (kk2 > 0) then
-                call getkbotktopmax(kk2,kb2,ktx2)
+                call getkbotktopmax(kk2,kb2,kt,ktx2)
                 kmax2 = ktx2 - kb2 + 1
             else
                 kmax2 = 1
@@ -8914,6 +8914,11 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
     call save_1d_nrd_vars_in_stm()
  end if
 
+! initialize waq and add to tracer administration
+ if ( len_trim(md_subfile) > 0 ) then
+    call fm_wq_processes_ini()
+ end if
+ 
  if ( jatransportmodule.eq.1 ) then
     call ini_transport()
  end if
@@ -8928,6 +8933,10 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
     goto 1234
  end if
  
+ if (ti_waqbal > 0) then
+    call mba_init()
+ endif
+
  if (stm_included) then 
      updateTabulatedProfiles = .true.
      call fm_update_mor_width_area()
@@ -10249,6 +10258,10 @@ end subroutine cosphiunetcheck
  if ( jatimer.eq.1 ) then
     write(msgbuf,'(a,F25.10)') 'time transport [s]         :' , gettimer(1,ITRANSPORT)
     call msg_flush()
+    if (ti_waqproc > 0) then
+       write(msgbuf,'(a,F25.10)') 'time processes [s]         :' , gettimer(1,IFMWAQ)
+       call msg_flush()
+    endif
     write(msgbuf,'(a,F25.10)') 'time debug     [s]         :' , gettimer(1,IDEBUG)
     call msg_flush()
  end if
@@ -10292,6 +10305,11 @@ end subroutine cosphiunetcheck
  ! endif
  ! call unc_write_his(time1)                         ! schrijf aan het einde ook een .his-file weg
  ! call wrimap(time1)                                ! schrijf aan het einde ook een .map-file weg
+
+!   call mba_final(time_user)
+   if (ti_waqbal > 0) then
+      call mba_final(time_user)
+   endif
 
  msgbuf = ' ' ; call msg_flush()
 
@@ -10477,6 +10495,8 @@ end subroutine cosphiunetcheck
     call default_sediment()  ! stm_included not defined yet
 
     call default_trachy()
+
+    call default_fm_wq_processes()
 
     call default_turbulence()
 
@@ -14391,6 +14411,7 @@ end subroutine flow_initfloodfill
 
 !> set field oriented boundary conditions
 subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
+   use m_timer
    use m_flowtimes
    use m_flowgeom
    use m_flow
@@ -14418,6 +14439,7 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
 
    double precision :: timmin
    double precision :: ntrtsteps            !< variable to determine if trachytopes should be updated
+   double precision :: tem_dif
    integer          :: k, L, i, k1, k2
    logical          :: l_set_frcu_mor = .false.
 
@@ -14770,6 +14792,26 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
    ! Update nudging temperature (and salinity)
    if (item_nudge_tem /= ec_undef_int ) then ! .and. .not.l_initphase) then
       success = success .and. ec_gettimespacevalue(ecInstancePtr, item_nudge_tem, tim)
+   endif
+
+!   call fm_wq_processes_step(dt_user,time_user)
+   if (ti_waqproc > 0) then
+     if (comparereal(tim, time_waqproc, eps10) == 0) then
+         if ( jatimer.eq.1 ) call starttimer(IFMWAQ)
+         call fm_wq_processes_step(ti_waqproc,time_user)
+         if ( jatimer.eq.1 ) call stoptimer (IFMWAQ)
+         tem_dif = tim/ti_waqproc
+         time_waqproc = (floor(tem_dif + 0.001d0)+1)*ti_waqproc
+     endif
+   endif
+
+!   call mba_update(time_user)
+   if (ti_waqbal > 0) then
+     if (comparereal(tim, time_mba, eps10) == 0) then
+         call mba_update(time_user)
+         tem_dif = tim/ti_waqbal
+         time_mba = min((floor(tem_dif + 0.001d0)+1)*ti_waqbal, floor(tstop_user/ti_waqproc + 0.001d0)*ti_waqproc)
+     endif
    endif
 
    iresult = DFM_NOERR
@@ -15961,11 +16003,12 @@ subroutine unc_write_his(tim)            ! wrihis
     use unstruc_model, only: md_ident
     use m_sediment
     use m_flowexternalforcings, only: numtracers, trnames
-    use m_transport, only: NUMCONST_MDU, ITRA1, ITRAN, ISED1, ISEDN, const_names, NUMCONST, itemp, isalt
+    use m_transport, only: NUMCONST_MDU, ITRA1, ITRAN, ISED1, ISEDN, const_names, const_units, NUMCONST, itemp, isalt
     use m_structures, only: valcgen, valgenstru, valpump, valgate, valcdam, valgategen, valweirgen, &
                             jahiscgen, jahispump, jahisgate, jahiscdam, jahisweir, jaoldstr, jahisdambreak, &
                             valdambreak
     use m_particles, only: japart
+    use m_fm_wq_processes
     use string_module
     use m_dad
 
@@ -16003,6 +16046,7 @@ subroutine unc_write_his(tim)            ! wrihis
                      id_dambreak_breach_width_derivative, id_dambreak_water_level_jump, id_dambreak_normal_velocity  
                   
     integer, allocatable, save :: id_tra(:)
+    integer, allocatable, save :: id_hwq(:)
     integer, allocatable, save :: id_sf(:), id_ws(:), id_seddif(:)            ! sediment fractions 
     integer, allocatable, save :: id_const(:), id_voltot(:)
     double precision, allocatable, save :: valobsT(:,:)
@@ -16364,10 +16408,38 @@ subroutine unc_write_his(tim)            ! wrihis
                      ierr = nf90_def_var(ihisfile, trim(tmpstr), nf90_double, (/ id_statdim, id_timedim /), id_tra(i))
                      ierr = nf90_put_att(ihisfile, id_tra(i), 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
                   end if
-                  ierr = nf90_put_att(ihisfile, id_tra(i), 'units', '1e-3')
+                  if (const_units(j).ne.' ') then
+                     tmpstr = const_units(j)
+                  else
+                     tmpstr = '1e-3'
+                  endif
+                  ierr = nf90_put_att(ihisfile, id_tra(i), 'units', tmpstr)
                   ierr = nf90_put_att(ihisfile, id_tra(i), '_FillValue', dmiss)
                   ierr = nf90_put_att(ihisfile, id_tra(i), 'long_name', const_names(j))
                enddo
+            endif
+
+!          waq output
+             if(jawaqproc .eq. 1) then
+               if (noout > 0) then
+                  call realloc(id_hwq, noout, keepExisting = .false.)
+                  do j=1,noout
+                     if ( kmx > 0 ) then  !        3D
+                        tmpstr = ' '
+                        write (tmpstr, "('water_quality_output_',I0)") j
+                        ierr = nf90_def_var(ihisfile, trim(tmpstr), nf90_double, (/ id_laydim, id_statdim, id_timedim /), id_hwq(j))
+                        ierr = nf90_put_att(ihisfile, id_hwq(j), 'coordinates', 'station_x_coordinate station_y_coordinate station_name zcoordinate_c')
+                     else
+                        exit ! ierr = nf90_def_var(imapfile, trim('WQ_'//outputs%names(j)), nf90_double, (/ id_flowelemdim (iid), id_timedim (iid)/) , id_waq(iid,j))
+                     end if
+                     tmpstr = trim(outputs%names(j))//' - '//trim(outputs%descrs(j))//' in flow element'
+                     call replace_multiple_spaces_by_single_spaces(tmpstr)
+                     ierr = nf90_put_att(ihisfile, id_hwq(j), '_FillValue', dmiss)
+                     ierr = nf90_put_att(ihisfile, id_hwq(j), 'long_name', trim(outputs%names(j)))
+                     ierr = nf90_put_att(ihisfile, id_hwq(j), 'units', trim(outputs%units(j)))
+                     ierr = nf90_put_att(ihisfile, id_hwq(j), 'description', tmpstr)
+                  enddo
+               endif
             endif
 
             if (stm_included .and. ISED1 > 0 .and. jahissed > 0) then
@@ -16532,7 +16604,12 @@ subroutine unc_write_his(tim)            ! wrihis
                   call replace_char(tmpstr,47,95) 
                   ierr = nf90_def_var(ihisfile, 'cross_section_'//trim(tmpstr), nf90_double, (/ id_crsdim, id_timedim /), id_const(num))
                   ierr = nf90_put_att(ihisfile, id_const(num), 'long_name', 'cumulative flux (based on upwind flow element) for '//trim(tmpstr)//'.')
-                  ierr = nf90_put_att(ihisfile, id_const(num), 'units', '-')
+                  if (const_units(num).ne.' ') then
+                     tmpstr = const_units(num)
+                  else
+                     tmpstr = '-'
+                  endif
+                  ierr = nf90_put_att(ihisfile, id_const(num), 'units', tmpstr)
                   ierr = nf90_put_att(ihisfile, id_const(num), 'coordinates', 'cross_section_name')
                enddo
             endif
@@ -17128,6 +17205,12 @@ subroutine unc_write_his(tim)            ! wrihis
                ierr = nf90_put_var(ihisfile, id_tra(i), valobsT(:,IPNT_TRA1 + (i-1)*kmx+kk-1), start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1/))
              enddo
           end if
+          if (IVAL_HWQ1 > 0) then
+             do j = IVAL_HWQ1,IVAL_HWQN   ! enumerators of tracers in valobs array (not the pointer)
+               i = j - IVAL_HWQ1 + 1
+               ierr = nf90_put_var(ihisfile, id_hwq(i), valobsT(:,IPNT_HWQ1 + (i-1)*kmx+kk-1), start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1/))
+             enddo
+          end if
           if (IVAL_SF1 > 0) then
              do j = IVAL_SF1,IVAL_SFN
                i = j - IVAL_SF1 + 1
@@ -17153,6 +17236,12 @@ subroutine unc_write_his(tim)            ! wrihis
           do j = IVAL_TRA1,IVAL_TRAN   ! enumerators of tracers in valobs array (not the pointer)
             i = j - IVAL_TRA1 + 1
             ierr = nf90_put_var(ihisfile, id_tra(i), valobsT(:,IPNT_TRA1 + i-1), start = (/ 1, it_his /), count = (/ ntot, 1/))
+          end do
+       end if
+       if (IVAL_HWQ1 > 0) then
+          do j = IVAL_HWQ1,IVAL_HWQN   ! enumerators of tracers in valobs array (not the pointer)
+            i = j - IVAL_HWQ1 + 1
+            ierr = nf90_put_var(ihisfile, id_hwq(i), valobsT(:,IPNT_HWQ1 + i-1), start = (/ 1, it_his /), count = (/ ntot, 1/))
           end do
        end if
        if (IVAL_SF1 > 0) then
@@ -17625,6 +17714,7 @@ end subroutine unc_write_part
 subroutine fill_valobs()
    use m_flow
    use m_transport
+   use m_fm_wq_processes, only: kbx, waqoutputs
    use m_flowgeom
    use m_observations
    use m_sediment
@@ -17751,6 +17841,12 @@ subroutine fill_valobs()
                end do
             end if
             
+            if ( IVAL_HWQ1.gt.0 ) then
+               do j=IVAL_HWQ1,IVAL_HWQN
+                  ii = j-IVAL_HWQ1+1
+                  valobs(IPNT_HWQ1+(ii-1)*kmx_const+klay-1,i) = waqoutputs(ii,kk-kbx+1)
+               end do
+            end if
             
             if ( IVAL_SF1.gt.0 ) then
                do j=IVAL_SF1,IVAL_SFN
@@ -18788,6 +18884,7 @@ end subroutine unc_write_shp
  use m_flowexternalforcings
  use m_physcoef
  use m_flowparameters
+ use m_flowtimes, only : ti_waq
  use m_sferic
  use m_missing
  use m_alloc
@@ -23634,16 +23731,16 @@ endif
  endif
  end subroutine getkbotktop
 
- subroutine getkbotktopmax(n,kb,ktx)
+ subroutine getkbotktopmax(n,kb,kt,ktx)
 ! Variation on getkbotktop. Always returns the maximum possible layer range instead of the actual range.
  use m_flow
  use m_flowgeom
  implicit none
- integer :: n,kb,ktx
+ integer :: n,kb,kt,ktx
  if (kmx == 0) then
-    kb = n       ; ktx = n
+    kb = n       ; kt = n       ; ktx = n
  else
-    kb = kbot(n) ; ktx = kb +  kmxn(n) - 1
+    kb = kbot(n) ; kt = ktop(n) ; ktx = kb +  kmxn(n) - 1
  endif
  end subroutine getkbotktopmax
 
@@ -33927,7 +34024,7 @@ end function ispumpon
              do L = 1,numconst
                 srsn(1+L,n) = srsn(1+L,n) + constituents(L,k)*vol1(k)  
              enddo   
-             ksrc(3,n) = max(k, ksrc(3,n) )
+             ksrc(3,n) = k
              if ( frac*srsn(1,n) / dts > abs(qsrc(n)) ) then
                   exit
              endif
@@ -33941,7 +34038,7 @@ end function ispumpon
               if (jasal > 0) sa1(k)  = srsn(1+isalt,n)
               if (jatem > 0) constituents(itemp,k) = srsn(1+itemp,n)
               do L = 1,numconst
-                 constituents(L,n) = srsn(L+1,n)   
+                 constituents(L,k) = srsn(L+1,n)   
               enddo   
           enddo
 
@@ -33981,7 +34078,7 @@ end function ispumpon
              do L = 1,numconst
                 srsn(1+numconst+1+L,n) = srsn(1+numconst+1+L,n) + constituents(L,k)*vol1(k)
              enddo   
-             ksrc(6,n) = max(k, ksrc(6,n) )
+             ksrc(6,n) = k
              if ( frac*srsn(1+numconst+1,n) / dts > abs(qsrc(n)) ) then
                   exit
              endif
@@ -36133,6 +36230,9 @@ end function is_1d_boundary_candidate
 
  integer                       :: L1, L2
  integer                       :: ilattype
+ integer                       :: ifun
+ character (len=20)            :: waqinput
+
  iresult = DFM_NOERR
 
  success = .true.    ! default if no valid providers are present in *.ext file (m_flowexternalforcings::success)
@@ -37534,6 +37634,13 @@ if (mext > 0) then
 
            ! Converter will put 'x' in array(2*nummovobs-1) and 'y' in array(2*nummovobs).
            success  = ec_addtimespacerelation(qid, xdum, ydum, kdum, kx, filename, filetype, method, operand, targetIndex=nummovobs)
+
+        else if (qid(1:12) == 'waqparameter' .or. qid(1:18) == 'waqmassbalancearea' .or. qid(1:17) == 'waqmonitoringarea') then
+           ! Already taken care of in m_fm_wq_processes
+           success  =  .true.
+
+        else if (qid(1:11) == 'waqfunction') then
+           success = ec_addtimespacerelation(qid, xdum, ydum, kdum, kx, filename, filetype, method, operand)
 
         else if (trim(qid) == "spiderweb") then
            call qnerror(' ', 'Quantity SPIDERWEB must be renamed to airpressure_windx_windy in the ext-file.', ' ')

@@ -1723,7 +1723,7 @@ subroutine waq_prepare_aggr()
     use m_alloc
     implicit none
     
-    integer :: i, kb, ktx, vaglay
+    integer :: i, kb, kt, ktx, vaglay
     integer :: lunvag, istat, ierr
     logical :: test_aggr, test_layeraggr
 
@@ -1841,7 +1841,7 @@ subroutine waq_prepare_aggr()
     call realloc(waqpar%kmk1, waqpar%noseg, keepExisting=.false., fill=0)
     call realloc(waqpar%kmk2, waqpar%noseg, keepExisting=.false., fill=0)
         
-    call getkbotktopmax(ndxi,kb,ktx)
+    call getkbotktopmax(ndxi,kb,kt,ktx)
     waqpar%ndkxi = ktx ! Maximum internal 3D node
 
     call waq_make_aggr_seg()
@@ -1881,7 +1881,7 @@ subroutine waq_make_aggr_seg()
     integer, parameter   :: kmkmiddle = 2  !< Segment is an intermediate layer at this node
     integer, parameter   :: kmkbot = 3     !< Segment is at the highest layer at this node
     
-    integer :: k, kk, kb, ktx, iseg
+    integer :: k, kk, kb, kt, ktx, iseg
 
 !   clear segment aggregation pointer
     waqpar%isaggr = 0
@@ -1900,7 +1900,7 @@ subroutine waq_make_aggr_seg()
 !   3D    
     if (waqpar%kmxnxa > 1) then
         do k = 1, ndxi
-            call getkbotktopmax(k,kb,ktx)
+            call getkbotktopmax(k,kb,kt,ktx)
             do kk = ktx, kb, -1
                 iseg = waqpar%iapnt(k) + (waqpar%ilaggr(ktx - kk + 1) - 1) * waqpar%nosegl
                 waqpar%isaggr(kk) = iseg
@@ -1919,7 +1919,7 @@ subroutine waq_make_aggr_seg()
 
 !       also aggregate boundary nodes in 3D!
         do k = ndxi + 1, ndx
-            call getkbotktopmax(k,kb,ktx)
+            call getkbotktopmax(k,kb,kt,ktx)
             do kk = ktx, kb, -1
                 waqpar%isaggr(kk) = -((k - ndxi) + (waqpar%ilaggr(ktx - kk + 1) - 1) * (ndx - ndxi))
             enddo
@@ -1940,7 +1940,7 @@ subroutine waq_make_aggr_lnk()
     
     integer :: dseg, dbnd, isrc
     integer :: L, LL, Lb, Ltx, ip, ip1, ip2, ip3, ip4, iq
-    integer :: k, kk, kb, ktx
+    integer :: k, kk, kb, kt, ktx
     
 ! first 2D
     waqpar%noq12  = 0
@@ -2048,7 +2048,7 @@ subroutine waq_make_aggr_lnk()
         end do
         waqpar%noq = waqpar%noq + waqpar%nosegl * (waqpar%kmxnxa - 1)
         do k = 1, ndxi
-            call getkbotktopmax(k,kb,ktx)
+            call getkbotktopmax(k,kb,kt,ktx)
             do kk = ktx - 1, kb, -1
                 if(waqpar%ilaggr(ktx - kk + 1) /= waqpar%ilaggr(ktx - kk)) then
                     waqpar%iqwaggr(kk) = waqpar%noq12s + waqpar%iapnt(k) + (waqpar%ilaggr(ktx - kk) - 1) * waqpar%nosegl
@@ -2328,7 +2328,7 @@ subroutine waq_wri_vol(itim, filenamevol, lunvol)
 !
 !           Local variables
 !
-    integer :: i, k, kb, ktx, kk, k1, k2, LL, L, lb, ltx, Lt, num = 0, jacheck = 0
+    integer :: i, k, kb, kt, ktx, kk, k1, k2, LL, L, lb, ltx, Lt, num = 0, jacheck = 0
     
     double precision, save, allocatable :: dv(:), dv1(:)
     double precision                    :: errvol, qwq
@@ -2349,7 +2349,7 @@ subroutine waq_wri_vol(itim, filenamevol, lunvol)
           if (num > 0) then 
              dv = 0d0
              do k = 1, ndxi
-                call getkbotktopmax(k,kb,ktx)
+                call getkbotktopmax(k,kb,kt,ktx)
                 do kk = kb, ktx
                    dv(kk) = vol1(kk) - waqpar%vol(waqpar%isaggr(kk)) 
                 end do
@@ -2366,7 +2366,7 @@ subroutine waq_wri_vol(itim, filenamevol, lunvol)
              end do
           
              do k = 1, ndxi
-                call getkbotktopmax(k,kb,ktx)
+                call getkbotktopmax(k,kb,kt,ktx)
                 do kk = kb, ktx - 1
                 !if (waqpar%iqwaggr(kk)>0) then
                    dv1(kk+1) = dv1(kk+1) + qwwaq(kk) 
@@ -2376,7 +2376,7 @@ subroutine waq_wri_vol(itim, filenamevol, lunvol)
              end do
           
              do k = 1, ndxi
-                call getkbotktopmax(k,kb,ktx)
+                call getkbotktopmax(k,kb,kt,ktx)
                 do kk = kb, ktx
                    errvol = dv(kk) - dv1(kk)  
                    if (errvol > 1d-6) then
@@ -2390,7 +2390,7 @@ subroutine waq_wri_vol(itim, filenamevol, lunvol)
         
         waqpar%vol = 0d0
         do k = 1, ndxi
-            call getkbotktopmax(k,kb,ktx)
+            call getkbotktopmax(k,kb,kt,ktx)
             do kk = kb, ktx
                 waqpar%vol(waqpar%isaggr(kk)) = vol1(kk)
             end do
@@ -2399,7 +2399,7 @@ subroutine waq_wri_vol(itim, filenamevol, lunvol)
     else
         waqpar%vol = 0d0
         do k = 1, ndxi
-            call getkbotktopmax(k,kb,ktx)
+            call getkbotktopmax(k,kb,kt,ktx)
             do kk = kb, ktx
                 waqpar%vol(waqpar%isaggr(kk)) = waqpar%vol(waqpar%isaggr(kk)) + vol1(kk)
             end do
@@ -2431,7 +2431,7 @@ subroutine waq_wri_sal(itim, filenamesal, lunsal)
 !
 !           Local variables
 !
-    integer :: i, k, kb, ktx, kk
+    integer :: i, k, kb, kt, ktx, kk
 !
 !! executable statements -------------------------------------------------------
 !
@@ -2444,7 +2444,7 @@ subroutine waq_wri_sal(itim, filenamesal, lunsal)
         end do
     else if (waqpar%aggre == 0 .and. waqpar%aggrel == 0) then
         do k = 1, ndxi
-            call getkbotktopmax(k,kb,ktx)
+            call getkbotktopmax(k,kb,kt,ktx)
             do kk = kb, ktx
                 if ( vol1(kk) > 1d-25 ) then
                     waqpar%sal(waqpar%isaggr(kk)) = sa1(kk)
@@ -2454,7 +2454,7 @@ subroutine waq_wri_sal(itim, filenamesal, lunsal)
     else
         ! Salinity is aggregated volume weighted
         do k = 1, ndxi
-            call getkbotktopmax(k,kb,ktx)
+            call getkbotktopmax(k,kb,kt,ktx)
             do kk = kb, ktx
                 if ( vol1(kk) > 1d-25 ) then
                     waqpar%sal(waqpar%isaggr(kk)) = waqpar%sal(waqpar%isaggr(kk)) + sa1(kk) * vol1(kk)
@@ -2494,7 +2494,7 @@ subroutine waq_wri_tem(itim, filenametem, luntem)
 !
 !           Local variables
 !
-    integer :: i, k, kb, ktx, kk
+    integer :: i, k, kb, kt, ktx, kk
 !
 !! executable statements -------------------------------------------------------
 !
@@ -2507,7 +2507,7 @@ subroutine waq_wri_tem(itim, filenametem, luntem)
         end do
     else if (waqpar%aggre == 0 .and. waqpar%aggrel == 0) then
         do k = 1, ndxi
-            call getkbotktopmax(k,kb,ktx)
+            call getkbotktopmax(k,kb,kt,ktx)
             do kk = kb, ktx
                 if ( vol1(kk) > 1d-25 ) then
                     waqpar%tem(waqpar%isaggr(kk)) = constituents(itemp,kk)
@@ -2517,7 +2517,7 @@ subroutine waq_wri_tem(itim, filenametem, luntem)
     else
         ! Temperature is aggregated volume weighted
         do k = 1, ndxi
-            call getkbotktopmax(k,kb,ktx)
+            call getkbotktopmax(k,kb,kt,ktx)
             do kk = kb, ktx
                 if ( vol1(kk) > 1d-25 ) then
                     waqpar%tem(waqpar%isaggr(kk)) = waqpar%tem(waqpar%isaggr(kk)) + constituents(itemp,kk) * vol1(kk)
@@ -2556,7 +2556,7 @@ subroutine waq_wri_tau(itim, filenametau, luntau)
 !
 !           Local variables
 !
-    integer :: i, k, kb, ktx, kk
+    integer :: i, k, kb, kt, ktx, kk
 !
 !! executable statements -------------------------------------------------------
 !
@@ -2568,7 +2568,7 @@ subroutine waq_wri_tau(itim, filenametau, luntau)
         end do
     else if (waqpar%aggre == 0 .and. waqpar%aggrel == 0) then
         do k = 1, ndxi
-            call getkbotktopmax(k,kb,ktx)
+            call getkbotktopmax(k,kb,kt,ktx)
             do kk = kb, ktx
                 waqpar%tau(waqpar%isaggr(kk)) = taus(k)
             end do
@@ -2613,7 +2613,7 @@ subroutine waq_wri_vdf(itim, filenamevdf, lunvdf)
     integer,          intent(inout) :: lunvdf   !< File pointer for output tau-file (opened upon first call).
 !           Local variables
 !
-    integer :: i, k, kb, ktx, kk
+    integer :: i, k, kb, kt, ktx, kk
     double precision                :: vdfmin   ! help variable for WAQ minimum vertical diffusion for aggregated layers in this column
     double precision                :: volsum   ! help variable for WAQ summed volume for aggregated layers in this column
 !
@@ -2622,7 +2622,7 @@ subroutine waq_wri_vdf(itim, filenamevdf, lunvdf)
     waqpar%vdf = 0d0
     if (waqpar%aggre == 0 .and. waqpar%aggrel == 0) then
         do k = 1, ndxi
-            call getkbotktopmax(k,kb,ktx)
+            call getkbotktopmax(k,kb,kt,ktx)
             do kk = kb+1, ktx
                 if ( vol1(kk) > 1d-25 ) then
                     waqpar%vdf(waqpar%isaggr(kk)) = vicwws(kk-1)
@@ -2631,7 +2631,7 @@ subroutine waq_wri_vdf(itim, filenamevdf, lunvdf)
         end do
     else
         do k = 1, ndxi
-            call getkbotktopmax(k,kb,ktx)
+            call getkbotktopmax(k,kb,kt,ktx)
             vdfmin = 0.0
             volsum = vol1(kb)
             do kk = kb+1, ktx
@@ -2750,7 +2750,7 @@ subroutine waq_wri_flo(itim, ti_waq, filename, lun)
 !
     integer :: isrc
     integer :: i, L, LL, Lb, Ltx, ip
-    integer :: k, kk, kb, ktx
+    integer :: k, kk, kb, kt, ktx
 !
 !! executable statements -------------------------------------------------------
 !
@@ -2797,7 +2797,7 @@ subroutine waq_wri_flo(itim, ti_waq, filename, lun)
     if (waqpar%kmxnxa > 1) then
         if (waqpar%aggre == 0 .and. waqpar%aggrel == 0) then
             do k = 1, ndxi
-                call getkbotktopmax(k,kb,ktx)
+                call getkbotktopmax(k,kb,kt,ktx)
                 do kk = kb, ktx - 1
                     if (waqpar%iqwaggr(kk)>0) then
                         waqpar%qag(waqpar%iqwaggr(kk)) = - qwwaq(kk) / dble(ti_waq)
@@ -2806,7 +2806,7 @@ subroutine waq_wri_flo(itim, ti_waq, filename, lun)
             end do
         else
             do k = 1, ndxi
-                call getkbotktopmax(k,kb,ktx)
+                call getkbotktopmax(k,kb,kt,ktx)
                 do kk = kb, ktx
                     if (waqpar%iqwaggr(kk)>0) then
                         waqpar%qag(waqpar%iqwaggr(kk)) = waqpar%qag(waqpar%iqwaggr(kk)) - qwwaq(kk) / dble(ti_waq)

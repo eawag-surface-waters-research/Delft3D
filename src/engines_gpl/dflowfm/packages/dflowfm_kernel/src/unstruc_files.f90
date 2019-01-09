@@ -278,6 +278,12 @@ function defaultFilename(filecat, timestamp, prefixWithDirectory, allowWildcard)
         end if
         basename = trim(basename)//trim(md_waqfilebase)
         suffix   = '.'//trim(filecat)
+    case ('lsp')
+        activeFile = ''
+        suffix = '.lsp'
+    case ('mon')
+        activeFile = ''
+        suffix = '.mon'
     end select
 
     if (present(timestamp)) then

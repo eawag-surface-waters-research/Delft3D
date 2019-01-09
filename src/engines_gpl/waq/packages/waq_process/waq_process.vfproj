@@ -180,6 +180,7 @@
 		<File RelativePath=".\src\proc_preprocess\getinv.f"/>
 		<File RelativePath=".\src\proc_preprocess\intoou.f"/>
 		<File RelativePath=".\src\proc_preprocess\makbar.f"/>
+		<File RelativePath=".\src\proc_preprocess\outbo2.f"/>
 		<File RelativePath=".\src\proc_preprocess\partab.f90"/>
 		<File RelativePath=".\src\proc_preprocess\primpro.f"/>
 		<File RelativePath=".\src\proc_preprocess\proc_totals.f"/>

@@ -63,6 +63,10 @@
 		<File RelativePath=".\src\delwaq2.f"/>
 		<File RelativePath=".\src\delwaq2_data.f"/>
 		<File RelativePath=".\src\delwaq_in_openda.f90"/>
+		<File RelativePath=".\src\dhmmar.f"/>
+		<File RelativePath=".\src\dhmmca.f"/>
+		<File RelativePath=".\src\dhmmja.f"/>
+		<File RelativePath=".\src\dhmmra.f"/>
 		<File RelativePath=".\src\difacr.f"/>
 		<File RelativePath=".\src\difhor.f"/>
 		<File RelativePath=".\src\dlback.f">
@@ -390,6 +394,7 @@
 		<File RelativePath=".\src\fiosub.f"/>
 		<File RelativePath=".\src\fioutv.f"/>
 		<File RelativePath=".\src\flxbal.f"/>
+		<File RelativePath=".\src\getper.f"/>
 		<File RelativePath=".\src\hsurf.f"/>
 		<File RelativePath=".\src\ixsets.f"/>
 		<File RelativePath=".\src\lsame.f">
@@ -470,6 +475,7 @@
 				<Tool Name="VFFortranCompilerTool" ReentrantCode="reentrancyThreaded" LocalVariableStorage="localStorageAutomatic"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" ReentrantCode="reentrancyThreaded" LocalVariableStorage="localStorageAutomatic"/></FileConfiguration></File>
+		<File RelativePath=".\src\putper.f"/>
 		<File RelativePath=".\src\raatra.f"/>
 		<File RelativePath=".\src\saxpy.f"/>
 		<File RelativePath=".\src\scopy.f"/>
@@ -496,6 +502,7 @@
 				<Tool Name="VFFortranCompilerTool" ReentrantCode="reentrancyThreaded" LocalVariableStorage="localStorageAutomatic"/></FileConfiguration></File>
 		<File RelativePath=".\src\snrm2.f"/>
 		<File RelativePath=".\src\sobbal.f"/>
+		<File RelativePath=".\src\space.f"/>
 		<File RelativePath=".\src\srot.f">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" ReentrantCode="reentrancyThreaded" LocalVariableStorage="localStorageAutomatic"/></FileConfiguration>

@@ -336,12 +336,18 @@
             IF ( NOQ3 .GT. 0 ) THEN
                CALL DHNOSEG(NOSEGW)
                CALL DHNOLAY(NOLAY)
+               NOLAY = MAX (1, NOLAY)
+               NOSEGW = MAX (1, NOSEGW)
                NOSEGL = NOSEGW/NOLAY
-               IF ( NOSEGL*NOLAY .NE. NOSEGW ) THEN
+               IF ( NOSEGL*NOLAY .NE. NOSEG ) THEN
                   CALL GETMLU(LUNREP)
                   WRITE(LUNREP,*) ' WARNING unstructured 3D application'
                   WRITE(LUNREP,*) ' BLOOM 3D light approach not possible'
                   ACTIVE_3DL = .FALSE.
+                  NOSEG_3DL  = NOSEG            ! number of segments, copy of NOSEG
+                  NOSEGL_3DL = 1000000000       ! number of segments per layer
+                  NOLAY_3DL  = 1                ! number of layers
+                  NGRO_3DL   = NGRO_A           ! number of BLOOM algae groups, copy of NGRO_A
                   NOLAY = 1
                ELSE
                   ACTIVE_3DL = .TRUE.

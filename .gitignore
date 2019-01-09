@@ -40,6 +40,16 @@ src/engines_gpl/waq/packages/delwaq2_openda_lib/[Dd]ebug
 src/engines_gpl/waq/packages/delwaq2_openda_lib/[Rr]elease
 src/engines_gpl/waq/packages/delwaq2_openda_lib/_Pvt_Extensions
 src/engines_gpl/waq/packages/delwaq2_openda_lib/obj
+src/engines_gpl/waq/packages/wq_processes/*.aps
+src/engines_gpl/waq/packages/wq_processes/*.eto
+src/engines_gpl/waq/packages/wq_processes/*.user
+src/engines_gpl/waq/packages/wq_processes/ClientBin
+src/engines_gpl/waq/packages/wq_processes/GeneratedArtifacts
+src/engines_gpl/waq/packages/wq_processes/[Bb]in
+src/engines_gpl/waq/packages/wq_processes/[Dd]ebug
+src/engines_gpl/waq/packages/wq_processes/[Rr]elease
+src/engines_gpl/waq/packages/wq_processes/_Pvt_Extensions
+src/engines_gpl/waq/packages/wq_processes/obj
 src/third_party_open/openda/tests/bin
 src/third_party_open/openda/tests/test_dll_noise/Release
 src/tools_lgpl/matlab/quickplot/progsrc/tekal_map.m

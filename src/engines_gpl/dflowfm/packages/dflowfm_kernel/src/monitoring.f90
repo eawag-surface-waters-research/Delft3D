@@ -95,6 +95,8 @@ implicit none
     integer                           :: IVAL_TEM1
     integer                           :: IVAL_TRA1
     integer                           :: IVAL_TRAN
+    integer                           :: IVAL_HWQ1
+    integer                           :: IVAL_HWQN
     integer                           :: IVAL_SED ! HK code
     integer                           :: IVAL_SF1 ! stm code
     integer                           :: IVAL_SFN
@@ -144,6 +146,8 @@ implicit none
     integer                           :: IPNT_TEM1
     integer                           :: IPNT_TRA1
     integer                           :: IPNT_TRAN
+    integer                           :: IPNT_HWQ1
+    integer                           :: IPNT_HWQN
 !    integer                           :: IPNT_SPIR1
     integer                           :: IPNT_SF1
     integer                           :: IPNT_SFN
@@ -218,6 +222,7 @@ subroutine init_valobs_pointers()
    use m_flowparameters
    use m_flow, only: iturbulencemodel, idensform, kmx
    use m_transport, only: ITRA1, ITRAN, ISED1, ISEDN
+   use m_fm_wq_processes, only: noout
    use m_sediment, only: stm_included
    implicit none
    
@@ -250,6 +255,8 @@ subroutine init_valobs_pointers()
    IVAL_TEM1       = 0
    IVAL_TRA1       = 0
    IVAL_TRAN       = 0
+   IVAL_HWQ1       = 0
+   IVAL_HWQN       = 0
    IVAL_SF1        = 0
    IVAL_SFN        = 0
    IVAL_SED        = 0
@@ -342,6 +349,10 @@ subroutine init_valobs_pointers()
       i=i+1;            IVAL_TRA1       = i
       i=i+ITRAN-ITRA1;  IVAL_TRAN       = i  !< All tracers (NOT only the ones with bnd)
    end if
+   if ( noout.gt.0 ) then
+      i=i+1;            IVAL_HWQ1       = i
+      i=i+noout-1;      IVAL_HWQN       = i  !< All waq history outputs
+   end if
    if ( stm_included .and. ISED1.gt.0 ) then
       i=i+1;              IVAL_SF1       = i
       i=i+ISEDN-ISED1;    IVAL_SFN       = i 
@@ -391,6 +402,8 @@ subroutine init_valobs_pointers()
    IPNT_TEM1  = ivalpoint(IVAL_TEM1,  kmx)
    IPNT_TRA1  = ivalpoint(IVAL_TRA1,  kmx)
    IPNT_TRAN  = ivalpoint(IVAL_TRAN,  kmx)
+   IPNT_HWQ1  = ivalpoint(IVAL_HWQ1,  kmx)
+   IPNT_HWQN  = ivalpoint(IVAL_HWQN,  kmx)
    IPNT_SF1   = ivalpoint(IVAL_SF1,   kmx)
    IPNT_SFN   = ivalpoint(IVAL_SFN,   kmx)
 !   IPNT_SPIR1 = ivalpoint(IVAL_SPIR1, kmx)

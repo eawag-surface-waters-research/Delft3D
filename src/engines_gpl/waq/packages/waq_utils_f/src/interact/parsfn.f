@@ -32,7 +32,7 @@
       CHARACTER*1 DELIM1
       CHARACTER*1 CLAST  , dot
       INTEGER GETS,SETDLM,STOS,POSIT,WIPE,LPOS(2),LPATH,LNAM,LEXT
-      INTEGER LOCATE
+      INTEGER ILOCATE
       DATA DELIM /' \\'/
       DATA DELIM1/'\\'/
 !
@@ -96,7 +96,7 @@
 ! Get name and extension, if there is one. Get the lengths.
 !
       dot = '.'
-      LOC = LOCATE (TOKEN,dot,LNAM,1)
+      LOC = ILOCATE (TOKEN,dot,LNAM,1)
       IF (LOC .EQ. 0) THEN
          LEXT = 0
          IPOS = 1

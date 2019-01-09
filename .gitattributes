@@ -482,6 +482,8 @@ src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/fm_dredge.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/fm_erosed.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/fm_morstatistics.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/fm_thahbc.f90 -text
+src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/fm_wq_processes.f90 -text
+src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/fm_wq_processes_mba.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/fourier_analysis.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/gui.F90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/hrfft.f -text
@@ -580,6 +582,7 @@ src/engines_gpl/dflowfm/res/version_number.ini -text
 src/engines_gpl/dflowfm/res/version_number.rc.svn -text
 src/engines_gpl/dflowfm/res/version_number_dll.rc.svn -text
 src/engines_gpl/dflowfm/scripts/MSDOS/dflowfm.bat -text
+src/engines_gpl/dflowfm/scripts/MSDOS/run_dflowfm_processes.bat -text
 src/engines_gpl/dflowfm/scripts/QA/build-QA.cmd -text
 src/engines_gpl/dflowfm/scripts/QA/build-test-cover.cmd -text
 src/engines_gpl/dflowfm/scripts/QA/runtests.cmd -text
@@ -1844,7 +1847,6 @@ src/engines_gpl/waq/packages/Makefile.am -text
 src/engines_gpl/waq/packages/delwaq/Makefile.am -text
 src/engines_gpl/waq/packages/delwaq/delwaq_dll.vfproj -text
 src/engines_gpl/waq/packages/delwaq/src/Makefile.am -text
-src/engines_gpl/waq/packages/delwaq/src/block.f -text
 src/engines_gpl/waq/packages/delwaq/src/delwaq1.f -text
 src/engines_gpl/waq/packages/delwaq/src/delwaq2.f -text
 src/engines_gpl/waq/packages/delwaq/src/delwaq2_global_data.f90 -text
@@ -1925,7 +1927,6 @@ src/engines_gpl/waq/packages/waq_io/src/waq_io/dlwq08.f -text
 src/engines_gpl/waq/packages/waq_io/src/waq_io/dlwq09.f -text
 src/engines_gpl/waq/packages/waq_io/src/waq_io/dlwq0f.f -text
 src/engines_gpl/waq/packages/waq_io/src/waq_io/dlwq0i.f -text
-src/engines_gpl/waq/packages/waq_io/src/waq_io/dlwq0t.f -text
 src/engines_gpl/waq/packages/waq_io/src/waq_io/dlwq5a.f -text
 src/engines_gpl/waq/packages/waq_io/src/waq_io/dlwq5b.f -text
 src/engines_gpl/waq/packages/waq_io/src/waq_io/dlwq5c.f -text
@@ -1946,7 +1947,6 @@ src/engines_gpl/waq/packages/waq_io/src/waq_io/opt0.f -text
 src/engines_gpl/waq/packages/waq_io/src/waq_io/opt1.f -text
 src/engines_gpl/waq/packages/waq_io/src/waq_io/opt2.f -text
 src/engines_gpl/waq/packages/waq_io/src/waq_io/opt3.f -text
-src/engines_gpl/waq/packages/waq_io/src/waq_io/outbo2.f -text
 src/engines_gpl/waq/packages/waq_io/src/waq_io/outboo.f -text
 src/engines_gpl/waq/packages/waq_io/src/waq_io/pointb.f -text
 src/engines_gpl/waq/packages/waq_io/src/waq_io/pointi.f -text
@@ -1988,6 +1988,10 @@ src/engines_gpl/waq/packages/waq_kernel/src/delpar01.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/delwaq2.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/delwaq2_data.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/delwaq_in_openda.f90 -text
+src/engines_gpl/waq/packages/waq_kernel/src/dhmmar.f -text
+src/engines_gpl/waq/packages/waq_kernel/src/dhmmca.f -text
+src/engines_gpl/waq/packages/waq_kernel/src/dhmmja.f -text
+src/engines_gpl/waq/packages/waq_kernel/src/dhmmra.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/difacr.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/difhor.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/dlback.f -text
@@ -2140,6 +2144,7 @@ src/engines_gpl/waq/packages/waq_kernel/src/fioraa.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/fiosub.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/fioutv.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/flxbal.f -text
+src/engines_gpl/waq/packages/waq_kernel/src/getper.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/hsurf.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/ixsets.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/lsame.f -text
@@ -2168,6 +2173,7 @@ src/engines_gpl/waq/packages/waq_kernel/src/proint.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/propoi.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/provel.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/psolve.f -text
+src/engines_gpl/waq/packages/waq_kernel/src/putper.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/raatra.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/saxpy.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/scopy.f -text
@@ -2178,6 +2184,7 @@ src/engines_gpl/waq/packages/waq_kernel/src/sgemv.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/sgmres.f90 -text
 src/engines_gpl/waq/packages/waq_kernel/src/snrm2.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/sobbal.f -text
+src/engines_gpl/waq/packages/waq_kernel/src/space.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/srot.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/srotg.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/sscal.f -text
@@ -2339,6 +2346,7 @@ src/engines_gpl/waq/packages/waq_process/src/proc_preprocess/get_sfrac.f -text
 src/engines_gpl/waq/packages/waq_process/src/proc_preprocess/getinv.f -text
 src/engines_gpl/waq/packages/waq_process/src/proc_preprocess/intoou.f -text
 src/engines_gpl/waq/packages/waq_process/src/proc_preprocess/makbar.f -text
+src/engines_gpl/waq/packages/waq_process/src/proc_preprocess/outbo2.f -text
 src/engines_gpl/waq/packages/waq_process/src/proc_preprocess/partab.f90 -text
 src/engines_gpl/waq/packages/waq_process/src/proc_preprocess/primpro.f -text
 src/engines_gpl/waq/packages/waq_process/src/proc_preprocess/proc_totals.f -text
@@ -2691,10 +2699,6 @@ src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/dhisys.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/dhkmrk.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/dhkmst.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/dhltim.f -text
-src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/dhmmar.f -text
-src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/dhmmca.f -text
-src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/dhmmja.f -text
-src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/dhmmra.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/dhnlun.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/dhnolay.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/dhnoseg.f -text
@@ -2709,6 +2713,7 @@ src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/dhswtr.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/dhucas.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/dhzerc.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/dhzeri.f -text
+src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/dlwq0t.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/dlwq1_grid_mod.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/dlwq_data.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/dwq_proces_set.f -text
@@ -2717,7 +2722,6 @@ src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/fffind.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/fileutils.f90 -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/filldm.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/getcom.f -text
-src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/getper.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/gkwini.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/gregor.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/julian.f -text
@@ -2732,14 +2736,13 @@ src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/partition_arrays.f90 -tex
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/progress.f90 -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/putget.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/putgtc.f -text
-src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/putper.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/rapdef.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/rbpdef.f -text
+src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/rd_sub.f90 -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/rdvers.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/rdwrk3.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/rdwrk4.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/reptim.f -text
-src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/space.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/stasub.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/strip.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/unlock.f90 -text
@@ -2751,6 +2754,19 @@ src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/wrwrk3.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/zero.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/zoek.f -text
 src/engines_gpl/waq/packages/waq_utils_f/waq_utils_f.vfproj -text
+src/engines_gpl/waq/packages/wq_processes/Makefile.am -text
+src/engines_gpl/waq/packages/wq_processes/src/Makefile.am -text
+src/engines_gpl/waq/packages/wq_processes/src/getidentification.f -text
+src/engines_gpl/waq/packages/wq_processes/src/wq_processes_data.f90 -text
+src/engines_gpl/waq/packages/wq_processes/src/wq_processes_derivatives.f90 -text
+src/engines_gpl/waq/packages/wq_processes/src/wq_processes_initialise.f90 -text
+src/engines_gpl/waq/packages/wq_processes/src/wq_processes_integrate_fluxes.f90 -text
+src/engines_gpl/waq/packages/wq_processes/src/wq_processes_integrate_velocities.f90 -text
+src/engines_gpl/waq/packages/wq_processes/src/wq_processes_pmsa_size.f90 -text
+src/engines_gpl/waq/packages/wq_processes/src/wq_processes_proces.f90 -text
+src/engines_gpl/waq/packages/wq_processes/src/wq_processes_velocities.f90 -text
+src/engines_gpl/waq/packages/wq_processes/src/wq_processes_version.F90.svn -text
+src/engines_gpl/waq/packages/wq_processes/wq_processes.vfproj -text
 src/engines_gpl/waq/scripts/Makefile.am -text
 src/engines_gpl/waq/scripts/run_delwaq.bat -text
 src/engines_gpl/waq/scripts/run_delwaq.sh -text

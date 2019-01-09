@@ -74,7 +74,6 @@
 		<File RelativePath=".\src\waq_io\dlwq09.f"/>
 		<File RelativePath=".\src\waq_io\dlwq0f.f"/>
 		<File RelativePath=".\src\waq_io\dlwq0i.f"/>
-		<File RelativePath=".\src\waq_io\dlwq0t.f"/>
 		<File RelativePath=".\src\waq_io\dlwq5a.f"/>
 		<File RelativePath=".\src\waq_io\dlwq5b.f"/>
 		<File RelativePath=".\src\waq_io\dlwq5c.f"/>
@@ -95,7 +94,6 @@
 		<File RelativePath=".\src\waq_io\opt1.f"/>
 		<File RelativePath=".\src\waq_io\opt2.f"/>
 		<File RelativePath=".\src\waq_io\opt3.f"/>
-		<File RelativePath=".\src\waq_io\outbo2.f"/>
 		<File RelativePath=".\src\waq_io\outboo.f"/>
 		<File RelativePath=".\src\waq_io\pointb.f"/>
 		<File RelativePath=".\src\waq_io\pointi.f"/>

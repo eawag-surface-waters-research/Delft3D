@@ -69,6 +69,8 @@
 		<File RelativePath="src\fm_erosed.f90"/>
 		<File RelativePath="src\fm_morstatistics.f90"/>
 		<File RelativePath="src\fm_thahbc.f90"/>
+		<File RelativePath="src\fm_wq_processes.f90"/>
+		<File RelativePath=".\src\fm_wq_processes_mba.f90"/>
 		<File RelativePath="src\fourier_analysis.f90"/>
 		<File RelativePath="src\gui.F90">
 			<FileConfiguration Name="Debug|Win32">

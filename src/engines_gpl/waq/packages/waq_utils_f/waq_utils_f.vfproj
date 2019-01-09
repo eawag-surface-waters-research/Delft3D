@@ -241,10 +241,6 @@
 				<Tool Name="VFFortranCompilerTool" ReentrantCode="reentrancyThreaded" LocalVariableStorage="localStorageAutomatic"/></FileConfiguration></File>
 		<File RelativePath=".\src\waq_utils\dhkmst.f"/>
 		<File RelativePath=".\src\waq_utils\dhltim.f"/>
-		<File RelativePath=".\src\waq_utils\dhmmar.f"/>
-		<File RelativePath=".\src\waq_utils\dhmmca.f"/>
-		<File RelativePath=".\src\waq_utils\dhmmja.f"/>
-		<File RelativePath=".\src\waq_utils\dhmmra.f"/>
 		<File RelativePath=".\src\waq_utils\dhnlun.f"/>
 		<File RelativePath=".\src\waq_utils\dhnolay.f"/>
 		<File RelativePath=".\src\waq_utils\dhnoseg.f"/>
@@ -261,6 +257,7 @@
 		<File RelativePath=".\src\waq_utils\dhucas.f"/>
 		<File RelativePath=".\src\waq_utils\dhzerc.f"/>
 		<File RelativePath=".\src\waq_utils\dhzeri.f"/>
+		<File RelativePath=".\src\waq_utils\dlwq0t.f"/>
 		<File RelativePath=".\src\waq_utils\dlwq1_grid_mod.f"/>
 		<File RelativePath=".\src\waq_utils\dlwq_data.f"/>
 		<File RelativePath=".\src\waq_utils\dwq_proces_set.f"/>
@@ -269,7 +266,6 @@
 		<File RelativePath=".\src\waq_utils\fileutils.f90"/>
 		<File RelativePath=".\src\waq_utils\filldm.f"/>
 		<File RelativePath=".\src\waq_utils\getcom.f"/>
-		<File RelativePath=".\src\waq_utils\getper.f"/>
 		<File RelativePath=".\src\waq_utils\gkwini.f"/>
 		<File RelativePath=".\src\waq_utils\julian.f"/>
 		<File RelativePath=".\src\waq_utils\makpnt.f"/>
@@ -283,14 +279,13 @@
 		<File RelativePath=".\src\waq_utils\progress.f90"/>
 		<File RelativePath=".\src\waq_utils\putget.f"/>
 		<File RelativePath=".\src\waq_utils\putgtc.f"/>
-		<File RelativePath=".\src\waq_utils\putper.f"/>
 		<File RelativePath=".\src\waq_utils\rapdef.f"/>
 		<File RelativePath=".\src\waq_utils\rbpdef.f"/>
+		<File RelativePath=".\src\waq_utils\rd_sub.f90"/>
 		<File RelativePath=".\src\waq_utils\rdvers.f"/>
 		<File RelativePath=".\src\waq_utils\rdwrk3.f"/>
 		<File RelativePath=".\src\waq_utils\rdwrk4.f"/>
 		<File RelativePath=".\src\waq_utils\reptim.f"/>
-		<File RelativePath=".\src\waq_utils\space.f"/>
 		<File RelativePath=".\src\waq_utils\SRSTOP.F"/>
 		<File RelativePath=".\src\waq_utils\stasub.f"/>
 		<File RelativePath=".\src\waq_utils\strip.f"/>
