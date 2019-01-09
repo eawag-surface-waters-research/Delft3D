@@ -30835,6 +30835,7 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
  use m_flowtimes
  use m_sediment
  use m_oned_functions
+ use unstruc_channel_flow
  !\ DEBUG
  use m_missing
 
@@ -31083,7 +31084,7 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
            bl(n1)   = bl1
            bob(1,L) = max(bl(n1), bl(n2))
            bob(2,L) = bob(1,L)
-        else
+        elseif (bl(n1) == 1d30 .or. bl(n2) == 30) then
 !          SPvdP: previous expression is problematic when zk(k2) and/or zk(k3) have missing values
            zn2 = zk(k2)    ; if (zn2 == dmiss) zn2 = zkuni
            zn3 = zk(k3)    ; if (zn3 == dmiss) zn3 = zkuni
