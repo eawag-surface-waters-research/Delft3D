@@ -1561,7 +1561,7 @@ subroutine fill_constituents(jas) ! if jas == 1 do sources
          difsedu(i)   =          difmoltr
          if (dicoww .ge. 0d0) difsedw(i,:) = dicoww + difmoltr 
          sigdifi(i)   = 1d0
-         wsf(i)       = 0d0 ! wstracers(i - itra1 + 1)
+         wsf(i)       = wstracers(i - itra1 + 1)
       end do
    end if
    
