@@ -3132,7 +3132,7 @@
    ierr = m_dimens_destructor()
    ierr = m_polygon_destructor()
 
-   end function
+   end function ggeo_deallocate
 
    !< get the number of created links
    function ggeo_get_links_count(nlinks, linkType) result(ierr)

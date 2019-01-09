@@ -815,6 +815,8 @@ namespace gridgeom.Tests
                 //6. call find cells  
                 int startIndex = 1; // provide 1 based (read from netcdf), return 1 based
                 var wrapperGridgeom = new GridGeomLibWrapper();
+                //ierr = wrapperGridgeom.ggeo_deallocate();
+                //Assert.That(ierr, Is.EqualTo(0));
                 ierr = wrapperGridgeom.ggeo_find_cells(ref meshDimIn, ref meshIn, ref meshDimOut, ref meshOut, ref startIndex);
                 Assert.That(ierr, Is.EqualTo(0));
 
@@ -823,8 +825,8 @@ namespace gridgeom.Tests
                 Marshal.Copy(meshOut.face_nodes, face_nodes, 0, meshDimOut.maxnumfacenodes * meshDimOut.numface);
 
                 //8. deallocate memory allocated by fortran
-                ierr = wrapperGridgeom.ggeo_meshgeom_destructor(ref meshDimOut, ref meshOut);
-                Assert.That(ierr, Is.EqualTo(0));
+                //ierr = wrapperGridgeom.ggeo_meshgeom_destructor(ref meshDimOut, ref meshOut);
+                //Assert.That(ierr, Is.EqualTo(0));
 
                 //9. deallocate memory allocated by c#
                 Marshal.FreeCoTaskMem(meshIn.nodex);
@@ -850,9 +852,11 @@ namespace gridgeom.Tests
             int mode = 0;   //create in read mode
             var wrapperNetcdf = new IoNetcdfLibWrapper();
             var wrapperGridgeom = new GridGeomLibWrapper();
+            var ierr = wrapperGridgeom.ggeo_deallocate();
+            Assert.That(ierr, Is.EqualTo(0));
             int iconvtype = 2;
             double convversion = 0.0;
-            var ierr = wrapperNetcdf.ionc_open(c_path, ref mode, ref ioncid, ref iconvtype, ref convversion);
+            ierr = wrapperNetcdf.ionc_open(c_path, ref mode, ref ioncid, ref iconvtype, ref convversion);
             Assert.That(ierr, Is.EqualTo(0));
 
             int meshid = -1;
@@ -977,8 +981,83 @@ namespace gridgeom.Tests
             int[] rc_arrayto = new int[n1d2dlinks];
             Marshal.Copy(c_arrayfrom, rc_arrayfrom, 0, n1d2dlinks);
             Marshal.Copy(c_arrayto, rc_arrayto, 0, n1d2dlinks);
-            var arrayfrom = new int[] { 1, 11, 12, 22, 23, 33, 34, 44, 45, 55, 56, 66, 67, 77, 78, 79, 89 };
-            var arrayto   = new int[] { 1,  2,  2,  2,  2,  3,  3,  3,  3,  3,  4,  4,  4,  4,  5,  5 , 5 };
+            var arrayfrom = new int[]
+            { 1,   
+              11,  
+              12,  
+              22,  
+              23,  
+              33,  
+              34,  
+              44,  
+              44,  
+              44,  
+              44,  
+              43,  
+              44,  
+              45, 
+              45,  
+              45,  
+              53,  
+              35,  
+              55,  
+              53,  
+              36,  
+              53,  
+              56,  
+              66,  
+              67,  
+              77,  
+              45,  
+              45,  
+              46,  
+              78,  
+              46,  
+              44,  
+              54,  
+              54,  
+              54,  
+              79,  
+              89};
+
+            var arrayto   = new int[]
+            { 1,
+              2,
+              2,
+              2,
+              2,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              4,
+              4,
+              4,
+              4,
+              4,
+              4,
+              4,
+              5,
+              4,
+              4,
+              4,
+              4,
+              4,
+              5,
+              5 };
             for (int i = 0; i < n1d2dlinks; i++)
             {
                 Assert.That(rc_arrayfrom[i], Is.EqualTo(arrayfrom[i]));
@@ -1004,9 +1083,11 @@ namespace gridgeom.Tests
             int mode = 0;   //create in read mode
             var wrapperNetcdf = new IoNetcdfLibWrapper();
             var wrapperGridgeom = new GridGeomLibWrapper();
+            var ierr = wrapperGridgeom.ggeo_deallocate();
+            Assert.That(ierr, Is.EqualTo(0));
             int iconvtype = 2;
             double convversion = 0.0;
-            var ierr = wrapperNetcdf.ionc_open(c_path, ref mode, ref ioncid, ref iconvtype, ref convversion);
+            ierr = wrapperNetcdf.ionc_open(c_path, ref mode, ref ioncid, ref iconvtype, ref convversion);
             Assert.That(ierr, Is.EqualTo(0));
 
             int meshid         = -1;
