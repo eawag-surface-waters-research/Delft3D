@@ -2282,7 +2282,6 @@ subroutine fm_dredge(error)
     tmor                => stmpar%morpar%tmor
     morft               => stmpar%morpar%morft
     cmpupd              => stmpar%morpar%cmpupd
-    tmor                => stmpar%morpar%tmor
     !
     morhr = real(morft*24.0_hp,fp)
     if (firstdredge) then
