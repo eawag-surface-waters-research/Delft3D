@@ -33250,15 +33250,25 @@ end function ispumpon
     do k = 1,ndxi
        if (qin(k) > 0d0) then
           hsk = s0(k) - bl(k)
-          if (kfs(k) == 0) then                              ! niet in matrix => expliciet vullen
+          if (kfs(k) == 0) then                  
+             ! niet in matrix => expliciet vullen
+             if (a1(k) > 0.0) then
+                s1(k)  = s0(k) + dts*qin(k)/a1(k)  
+             else
+                !
               s1(k)  = s0(k) + dts*qin(k)/ba(k)              !
+             endif
           else
               dd(k)  = qin(k)
           endif
        else if (qin(k) < 0d0) then
 
           hsk = s0(k) - bl(k)
+          if (a1(k) > 0.0) then
+             ds  = -dts*qin(k)/a1(k)                            ! altijd minder dan daling bij niet-lin volumes
+          else
           ds  = -dts*qin(k)/ba(k)                            ! altijd minder dan daling bij niet-lin volumes
+          endif
           if (kfs(k) == 0) then                              ! niet in matrix
              if (ds  < hsk) then                             ! er is genoeg
                 s1(k) = s0(k) - ds
@@ -37720,10 +37730,11 @@ if (mext > 0) then
        if (ja == 1 .and. qid(1:16) == 'lateraldischarge') then
           numlatsg = numlatsg + 1                             
           
+          L = index(filename,'.', back=.true.) - 1
+          
           success = adduniformtimerelation_objects(qid(1:16), filename, 'lateral', filename(1:L), 'flow', '', numlatsg, kx, qplat)
           if (success) then
              ! assign id derived from pol file         
-             L = index(filename,'.', back=.true.) - 1
              lat_ids(numlatsg) = filename(1:L)   
           endif
           
