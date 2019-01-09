@@ -2656,7 +2656,7 @@ subroutine EggProfile(dpt, diameter, area, width, perimeter)
             & *dsqrt(r*r - ((dpt - 2*r)**2))
       area = 3.02333378394124*r*r + e + sl*dpt
 
-   else if (dpt>=3*r) then
+   else 
       perimeter = 7.92989452435109*r
       width = sl
       area = 4.59413011073614*r*r + sl*dpt
