@@ -367,15 +367,15 @@ function ggeo_find_cells_dll(c_meshDimIn, c_meshIn, c_meshDimOut, c_meshOut, sta
    use m_missing
    use m_alloc
 
-   type(c_t_ug_meshgeomdim), intent(in)       :: c_meshDimIn     !< input mesh dimensions, externally allocated
-   type(c_t_ug_meshgeom), intent(in)          :: c_meshIn        !< input mesh, externally allocated 
-   type(c_t_ug_meshgeomdim), intent(inout)    :: c_meshDimOut    !< input mesh dimensions, intenally allocated
-   type(c_t_ug_meshgeom), intent(inout)       :: c_meshOut       !< input mesh, intenally allocated 
-   integer(c_int), intent(in)                 :: startIndex      !< the start_index index of the arrays
+   type(c_t_ug_meshgeomdim), intent(in)       :: c_meshDimIn       !< input mesh dimensions, externally allocated
+   type(c_t_ug_meshgeom), intent(in)          :: c_meshIn          !< input mesh, externally allocated 
+   type(c_t_ug_meshgeomdim), intent(inout)    :: c_meshDimOut      !< input mesh dimensions, intenally allocated
+   type(c_t_ug_meshgeom), intent(inout)       :: c_meshOut         !< input mesh, intenally allocated 
+   integer(c_int), intent(in)                 :: startIndex        !< the start_index index of the arrays
    !locals
-   type(t_ug_meshgeom)                        :: meshgeomIn       !< fortran meshgeom
+   type(t_ug_meshgeom)                        :: meshgeomIn        !< fortran meshgeom
    type(t_ug_meshgeom)                        :: meshgeomOut       !< fortran meshgeom
-   integer, pointer                           :: face_nodes(:,:)  !< Face-to-node mapping array.
+   integer, pointer                           :: face_nodes(:,:)   !< Face-to-node mapping array.
    double precision, pointer                  :: facex(:)
    double precision, pointer                  :: facey(:)
    integer                                    :: ierr, n, nn, maxNumNodes
@@ -390,22 +390,26 @@ function ggeo_find_cells_dll(c_meshDimIn, c_meshIn, c_meshDimOut, c_meshOut, sta
    !convert c to fortran pointers
    ierr = convert_cptr_to_meshgeom(c_meshIn, c_meshDimIn, meshgeomIn)
    !set library state
+   ierr = ggeo_deallocate()
    ierr = ggeo_initialize() 
    ierr = ggeo_convert(meshgeomIn, startIndex)
    
    !find net cells
    call findcells(0)   
-
-   call reallocP(meshgeomOut%facex, nump, keepExisting = .false., fill = -999d0)
-   call reallocP(meshgeomOut%facey, nump, keepExisting = .false., fill = -999d0)
    
-   if (meshgeomIn%dim.eq.2) then
-      !get the max number of nodes for each face
+   !inquire dimension for outside allocation
+   ierr = convert_cptr_to_meshgeom(c_meshOut, c_meshDimOut, meshgeomOut)
+   if (c_meshDimOut%numface <=0 .or. c_meshDimOut%maxnumfacenodes <=0) then
       maxNumNodes = 0
       do n = 1, nump
          maxNumNodes = max(maxNumNodes, size(netcell(n)%nod))
       enddo
-      allocate(meshgeomOut%face_nodes(maxNumNodes, nump))
+      c_meshDimOut%numface         = nump
+      c_meshDimOut%maxnumfacenodes = maxNumNodes
+      return
+   endif
+ 
+   if (meshgeomIn%dim.eq.2) then
       do n = 1, nump
          !fill face nodes
          meshgeomOut%face_nodes(:,n) = imiss;
@@ -421,13 +425,7 @@ function ggeo_find_cells_dll(c_meshDimIn, c_meshIn, c_meshDimOut, c_meshOut, sta
    if (startIndex == 0) then
       where(meshgeomOut%face_nodes.ne.imiss) meshgeomOut%face_nodes = meshgeomOut%face_nodes - 1;
    endif
-   
-   !assign c pointers to fortran pointers (memory will be deleted later)
-   c_meshOut%face_nodes         = c_loc(meshgeomOut%face_nodes(1,1));
-   c_meshOut%facex              = c_loc(meshgeomOut%facex(1));
-   c_meshOut%facey              = c_loc(meshgeomOut%facey(1));
-   c_meshDimOut%numface         = nump          
-   c_meshDimOut%maxnumfacenodes = maxNumNodes    
+ 
    
 end function ggeo_find_cells_dll
 

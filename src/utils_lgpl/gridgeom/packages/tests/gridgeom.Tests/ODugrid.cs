@@ -808,15 +808,17 @@ namespace gridgeom.Tests
                 //5. declare but do not allocate meshgeom. it will be allocated by gridgeom (fortran)
                 var meshOut = new meshgeom();
                 var meshDimOut = new meshgeomdim();
-                meshOut.face_nodes = IntPtr.Zero;
-                meshOut.facex = IntPtr.Zero;
-                meshOut.facey = IntPtr.Zero;
 
                 //6. call find cells  
                 int startIndex = 1; // provide 1 based (read from netcdf), return 1 based
                 var wrapperGridgeom = new GridGeomLibWrapper();
-                //ierr = wrapperGridgeom.ggeo_deallocate();
-                //Assert.That(ierr, Is.EqualTo(0));
+                ierr = wrapperGridgeom.ggeo_find_cells(ref meshDimIn, ref meshIn, ref meshDimOut, ref meshOut, ref startIndex);
+
+                meshOut.face_nodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshDimOut.numface* meshDimOut.maxnumfacenodes);
+                meshOut.facex = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshDimOut.numface);
+                meshOut.facey = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshDimOut.numface);
+
+                Assert.That(ierr, Is.EqualTo(0));
                 ierr = wrapperGridgeom.ggeo_find_cells(ref meshDimIn, ref meshIn, ref meshDimOut, ref meshOut, ref startIndex);
                 Assert.That(ierr, Is.EqualTo(0));
 
@@ -824,15 +826,15 @@ namespace gridgeom.Tests
                 int[] face_nodes = new int[meshDimOut.maxnumfacenodes * meshDimOut.numface];
                 Marshal.Copy(meshOut.face_nodes, face_nodes, 0, meshDimOut.maxnumfacenodes * meshDimOut.numface);
 
-                //8. deallocate memory allocated by fortran
-                //ierr = wrapperGridgeom.ggeo_meshgeom_destructor(ref meshDimOut, ref meshOut);
-                //Assert.That(ierr, Is.EqualTo(0));
-
-                //9. deallocate memory allocated by c#
+                //8. deallocate memory allocated by c#
                 Marshal.FreeCoTaskMem(meshIn.nodex);
                 Marshal.FreeCoTaskMem(meshIn.nodey);
                 Marshal.FreeCoTaskMem(meshIn.nodez);
                 Marshal.FreeCoTaskMem(meshIn.edge_nodes);
+
+                Marshal.FreeCoTaskMem(meshOut.face_nodes);
+                Marshal.FreeCoTaskMem(meshOut.facex);
+                Marshal.FreeCoTaskMem(meshOut.facey);
             //}, stackSize);
             //th.Start();
             //th.Join();
@@ -1066,7 +1068,6 @@ namespace gridgeom.Tests
            // 7.deallocate memory of gridgeom
             ierr = wrapperGridgeom.ggeo_deallocate();
             Assert.That(ierr, Is.EqualTo(0));
-
         }
 
 		// The network of this test can be seen in packages\test_data\1dnetworkMake1D2DRiverLinksTest.png
