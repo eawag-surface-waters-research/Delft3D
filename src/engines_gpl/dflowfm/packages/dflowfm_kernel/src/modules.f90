@@ -3022,7 +3022,7 @@ subroutine default_flowparameters()
                         ! (set teta=1.0)      (set teta=0.51->0.99)   (set teta<0)
 
     jaLogprofatubndin  = 1 
-    jaLogprofkepsbndin = 1      
+    jaLogprofkepsbndin = 0      
 
     limtypsa   = 4      ! 0=no, 1=minmod, 2=vanleer, 3=koren 4=MC voor scalar tr-ansport SALINITY
     limtypTM   = 4      ! 0=no, 1=minmod, 2=vanleer, 3=koren 4=MC voor scalar transport TEMPERATURE
