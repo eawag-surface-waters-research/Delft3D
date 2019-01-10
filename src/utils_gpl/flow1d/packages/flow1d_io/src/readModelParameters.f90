@@ -461,19 +461,25 @@ module m_readModelParameters
          ! TODO remove this part in due time, for now it stays compatibility reasons:
          modelTimeStepData%nextRestarttimestep = nint((modelTimeStepData%julianEnd - modelTimeStepData%julianStart) * 86400)
 
-         call prop_get_logical(md_ptr, 'SimulationOptions', 'WriteRestart', modelTimeStepData%writeRestart, success) 
+         call prop_get_logical(md_ptr, 'SimulationOptions', 'WriteRestart', modelTimeStepData%writeRestart, success)
+         
+         if (success) then
+            call SetMessage(LEVEL_WARN, 'Keyword WriteRestart under SimulationOptions has been depreciated, better use WriteRestart under Restart')
+         endif
 
       endif
       
-      success = .true.
       modelTimeStepData%restartFile =  '  '
       modelTimeStepData%useRestart = .false.
-      call prop_get_logical(md_ptr, 'restart', 'UseRestart',   modelTimeStepData%useRestart,   success) 
-      if (success) call prop_get_string (md_ptr, 'restart', 'restartfile', modelTimeStepData%restartFile, success)   
-      
-      if (.not. success) then
+      call prop_get_logical(md_ptr, 'Restart', 'UseRestart',   modelTimeStepData%useRestart,   success) 
+      if (success) then 
+         call prop_get_string (md_ptr, 'Restart', 'restartfile', modelTimeStepData%restartFile, success)   
+      else
          ! TODO remove this part in due time, for now it stays compatibility reasons:
-         call prop_get_logical(md_ptr, 'SimulationOptions', 'UseRestart',   modelTimeStepData%useRestart,   success) 
+         call prop_get_logical(md_ptr, 'SimulationOptions', 'UseRestart',   modelTimeStepData%useRestart, success) 
+         if (success) then
+            call SetMessage(LEVEL_WARN, 'Keyword UseRestart under SimulationOptions has been depreciated, better use UseRestart under Restart')
+         endif
       endif
       
       
