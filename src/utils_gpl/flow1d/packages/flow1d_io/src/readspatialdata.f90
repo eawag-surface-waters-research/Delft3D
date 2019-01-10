@@ -273,6 +273,8 @@ contains
       
          pQuant => network%spdata%quant(i)
 
+         read(ibin) pQuant%default
+         
          read(ibin) pQuant%quantity
          
          read(ibin) nValues
@@ -348,6 +350,8 @@ contains
       do i = 1, spData%Count
       
          pQuant => spdata%quant(i)
+         
+         write(ibin) pQuant%default
 
          write(ibin) pQuant%quantity
          

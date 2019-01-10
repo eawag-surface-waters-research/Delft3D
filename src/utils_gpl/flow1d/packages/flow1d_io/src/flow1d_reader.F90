@@ -758,15 +758,6 @@ module m_flow1d_reader
          endif
 
          inputfile=''
-         transportpars%USE_F4_DISPERSION = .false.
-         call prop_get_string(md_ptr, 'files', 'salinityParametersFile', inputfile, success)
-         if (success .and. len_trim(inputfile) > 0) then
-            inputfile = md_flow1d_file(1:posslash)//inputfile
-            call readSalinityParameters(network, inputfile)
-            call SetMessage(LEVEL_INFO, 'Salinity Parameters Loaded')
-         endif
-      
-         inputfile=''
          call prop_get_string(md_ptr, 'files', 'windShieldingFile', inputfile, success)    
          if (success .and. len_trim(inputfile) > 0) then
             inputfile = md_flow1d_file(1:posslash)//inputfile
@@ -777,6 +768,15 @@ module m_flow1d_reader
          
       endif
 
+      inputfile=''
+      transportpars%USE_F4_DISPERSION = .false.
+      call prop_get_string(md_ptr, 'files', 'salinityParametersFile', inputfile, success)
+      if (success .and. len_trim(inputfile) > 0) then
+         inputfile = md_flow1d_file(1:posslash)//inputfile
+         call readSalinityParameters(network, inputfile)
+         call SetMessage(LEVEL_INFO, 'Salinity Parameters Loaded')
+      endif
+      
       call SetMessage(LEVEL_INFO, 'Reading Initial Data Done')
       call timstop(timerReadInitial)
       call timstrt('ReadBoundData', timerReadBoundData)

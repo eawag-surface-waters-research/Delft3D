@@ -61,7 +61,6 @@ module m_spatial_data
    type, public:: t_spatial_data
       integer                         :: numValues
       logical                         :: interpolate
-      double precision                :: default
       integer                         :: def_type
       
       integer, allocatable            :: brIndex(:)
@@ -69,6 +68,7 @@ module m_spatial_data
       double precision, allocatable   :: valuesOnLocation(:)
       
       ! Only data below into Cache
+      double precision                :: default
       integer                         :: quantity    !< Name of the quantity
       integer, allocatable            :: tblIndex(:)
       double precision, allocatable   :: values(:)   !< Values of the quantity
