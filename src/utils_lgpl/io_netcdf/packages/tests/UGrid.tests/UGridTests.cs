@@ -2319,6 +2319,9 @@ namespace UGrid.tests
             int[] rc_face_nodes = new int[nface * maxfacenodes];
             Marshal.Copy(c_face_nodes, rc_face_nodes, 0, nface * maxfacenodes);
         }
+
+        // testing writing of coordinates for 1d ugrid mesh
+        // int ierr = wrapper.ionc_create_1d_mesh_v2(ref ioncid, l_networkName.ToString(), ref meshid, l_meshname.ToString(), ref l_nmeshpoints, TRUE);
     }
 }
 

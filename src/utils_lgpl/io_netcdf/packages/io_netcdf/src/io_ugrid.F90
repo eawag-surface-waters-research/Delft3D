@@ -3500,12 +3500,25 @@ function ug_create_1d_network(ncid, netids, networkName, nNodes, nBranches,nGeom
    
 end function ug_create_1d_network
 
-!> This function creates a 1d mesh accordingly to the new 1d format. 
+!> This function is included for backward compatibility
 function ug_create_1d_mesh(ncid, networkname, meshids, meshname, nmeshpoints) result(ierr)
    
    integer, intent(in)                  :: ncid, nmeshpoints
    type(t_ug_mesh), intent(inout)       :: meshids   
    character(len=*),intent(in)          :: meshname, networkname
+   integer                              :: ierr
+
+   ierr = -1
+   ierr = ug_create_1d_mesh_v1(ncid, networkname, meshids, meshname, nmeshpoints, .FALSE.)
+end function ug_create_1d_mesh
+
+!> This function creates a 1d mesh accordingly to the new 1d format. 
+function ug_create_1d_mesh_v1(ncid, networkname, meshids, meshname, nmeshpoints, writexy) result(ierr)
+   
+   integer, intent(in)                  :: ncid, nmeshpoints
+   type(t_ug_mesh), intent(inout)       :: meshids   
+   character(len=*),intent(in)          :: meshname, networkname
+   logical, intent(in)                  :: writexy
    !locals
    integer                              :: ierr, wasInDefine
 
@@ -3540,7 +3553,11 @@ function ug_create_1d_mesh(ncid, networkname, meshids, meshname, nmeshpoints) re
    ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'coordinate_space',  trim(networkname))
    ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'edge_node_connectivity', prefix//'_edge_nodes')
    ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'node_dimension','n'//prefix//'_node')
-   ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'node_coordinates', prefix//'_nodes_branch_id '//prefix//'_nodes_branch_offset')
+   if (writexy) then
+       ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'node_coordinates', prefix//'_nodes_branch_id '//prefix//'_nodes_branch_offset '//prefix//'_nodes_x '//prefix//'_nodes_y')
+   else
+       ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'node_coordinates', prefix//'_nodes_branch_id '//prefix//'_nodes_branch_offset')
+   endif
    
    ! 1. mesh1D :assign the branch number to each node
    ierr = nf90_def_var(ncid, prefix//'_nodes_branch_id', nf90_int, (/ meshids%dimids(mdim_node) /) , meshids%varids(mid_1dmeshtobranch))
@@ -3553,7 +3570,7 @@ function ug_create_1d_mesh(ncid, networkname, meshids, meshname, nmeshpoints) re
       ierr = nf90_enddef(ncid)
    endif
 
-end function ug_create_1d_mesh
+end function ug_create_1d_mesh_v1
 
 !> This function defines the ids of a specific entity (node/edge/face) on the current mesh and creates the variable to store the ids
 function ug_def_mesh_ids(ncid, meshids, meshname, locationType) result(ierr)
