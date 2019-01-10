@@ -446,12 +446,15 @@ namespace ECModuleTests
             //5. declare but do not allocate meshgeom. it will be allocated by gridgeom (fortran)
             var meshTwoOut        = new meshgeom();
             var meshTwoDimOut     = new meshgeomdim();
-            meshTwoOut.face_nodes = IntPtr.Zero;
-            meshTwoOut.facex      = IntPtr.Zero;
-            meshTwoOut.facey      = IntPtr.Zero;
-
             //6. call find cells
             var wrapperGridgeom = new GridGeomLibWrapper();
+            ierr = wrapperGridgeom.ggeo_find_cells(ref meshtwoddim, ref meshtwod, ref meshTwoDimOut, ref meshTwoOut, ref startIndex);
+            Assert.That(ierr, Is.EqualTo(0));
+
+            meshTwoOut.face_nodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshTwoDimOut.numface * meshTwoDimOut.maxnumfacenodes);
+            meshTwoOut.facex = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshTwoDimOut.numface);
+            meshTwoOut.facey = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshTwoDimOut.numface);
+
             ierr = wrapperGridgeom.ggeo_find_cells(ref meshtwoddim, ref meshtwod, ref meshTwoDimOut, ref meshTwoOut, ref startIndex);
             Assert.That(ierr, Is.EqualTo(0));
             meshtwod.facex = meshTwoOut.facex;
