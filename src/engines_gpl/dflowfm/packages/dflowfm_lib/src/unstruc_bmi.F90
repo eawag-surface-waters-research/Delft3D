@@ -2666,6 +2666,7 @@ subroutine get_snapped_feature(c_feature_type, c_Nin, cptr_xin, cptr_yin, c_Nout
    integer                                                        :: startIndex, i, noutSnapped, lstart, oldSize
    double precision, dimension(:), target, allocatable            :: xSnapped, ySnapped 
    double precision                                               :: start_location_x, start_location_y, x_breach, y_breach  
+   integer                                                        :: feautureIncrement
    
    c_ierror = 1
 
@@ -2734,16 +2735,17 @@ subroutine get_snapped_feature(c_feature_type, c_Nin, cptr_xin, cptr_yin, c_Nout
    endif
    ! re-map feature_ids array
    i = 1
-   ntemp   = 1
-   do while (i <= size(xout))
-      feature_ids(i) = ntemp
+   ntemp   = 0
+   feautureIncrement = 1
+   do i = 1, size(xout)
       if(xout(i) == dmiss) then
          feature_ids(i) = 0
-         ntemp = ntemp + 1
+         feautureIncrement = 1
       else
+         ntemp = ntemp + feautureIncrement
+         feautureIncrement = 0
          feature_ids(i) = ntemp
       endif
-      i = i + 1
    enddo
    case("dambreak")
       ! Extract polygon and the breach point coordinates
