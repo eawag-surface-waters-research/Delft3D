@@ -106,7 +106,7 @@ module geometry_module
    integer, intent(in)                       :: np, jsferic, jasfer3D
    integer, intent(inout)                    :: Lstart
    double precision, intent(in)              :: startLocationX, startLocationY, dmiss
-   double precision, allocatable, intent(in) :: xp(:), yp(:), xl(:), yl(:)
+   double precision, allocatable, intent(in) :: xp(:), yp(:), xl(:,:), yl(:,:)
    double precision, intent(inout)           :: x_breach, y_breach
    
    !locals
@@ -130,9 +130,9 @@ module geometry_module
 
    ! Assign the flow links and the starting link of the breach
    dis = huge(dmiss)      
-   do k = 1, size(xl) - 1
+   do k = 1, size(xl, 1)
       ! compute the mid point of the segment
-      call half(xl(k), yl(k), xl(k+1), yl(k+1), xc, yc, jsferic, jasfer3D)
+      call half(xl(k,1), yl(k,1), xl(k,2), yl(k,2), xc, yc, jsferic, jasfer3D)
       ! calculate the distance with projected start of the breach
       distemp = dbdistance(xn, yn, xc, yc, jsferic, jasfer3D, dmiss)
       ! identify the closest link to the projected point
