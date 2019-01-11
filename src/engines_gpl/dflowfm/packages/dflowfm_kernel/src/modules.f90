@@ -5675,7 +5675,7 @@ module m_partparallel
 end module m_partparallel
    
    
-   ! Save data for later writing of 1d Ugrid 
+!> Save data for later writing of Ugrid 
 module m_save_ugrid_state
    
    use meshdata
@@ -5689,15 +5689,15 @@ module m_save_ugrid_state
    integer                                            :: numMesh1dBeforeMerging
     
 !> Sets ALL (scalar) variables in this module to their default values.
-!! For a reinit prior to flow computation, only call reset_waves() instead.
+!! For a reinit prior to flow computation, only call reset_save_ugrid_state() instead.
 contains
    subroutine default_save_ugrid_state()
       implicit none
       call reset_save_ugrid_state()
-      network1dname = ''   
-      mesh1dname = ''   
-      mesh2dname = ''   
-      contactname = ''   
+      network1dname = 'network1d'
+      mesh1dname    = 'mesh1d'
+      mesh2dname    = 'mesh2d'
+      contactname   = 'contacts'
       numMesh1dBeforeMerging = 0
    end subroutine default_save_ugrid_state
    
