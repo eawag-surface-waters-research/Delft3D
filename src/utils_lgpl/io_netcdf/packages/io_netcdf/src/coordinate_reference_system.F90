@@ -160,7 +160,8 @@ end function is_grid_mapping
 !> Detects and initializes the PROJ-string in a given coordinate reference system.
 !! Stored in the crs%proj_string attribute, for repeated use later.
 function detect_proj_string(crs) result(ierr)
-   use string_module
+   use iso_c_utils, only: char_array_to_string
+   use string_module, only: strcmpi
    implicit none
 
    type(t_crs),         intent(inout) :: crs         !< The coordinate reference system container.
