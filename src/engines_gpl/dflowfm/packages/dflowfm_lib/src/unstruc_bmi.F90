@@ -2665,6 +2665,7 @@ subroutine get_snapped_feature(c_feature_type, c_Nin, cptr_xin, cptr_yin, c_Nout
    ! Dambreak
    integer                                                        :: startIndex, i, noutSnapped, lstart, oldSize
    double precision, dimension(:), target, allocatable            :: xSnapped, ySnapped 
+   double precision, allocatable, dimension(:,:)                  :: xSnappedLinks, ySnappedLinks 
    double precision                                               :: start_location_x, start_location_y, x_breach, y_breach  
    integer                                                        :: feautureIncrement
    
@@ -2765,6 +2766,8 @@ subroutine get_snapped_feature(c_feature_type, c_Nin, cptr_xin, cptr_yin, c_Nout
             if(allocated(yintemp))  deallocate(yintemp)
             if(allocated(xSnapped)) deallocate(xSnapped)
             if(allocated(ySnapped)) deallocate(ySnapped)
+            if(allocated(xSnappedLinks)) deallocate(xSnappedLinks)
+            if(allocated(ySnappedLinks)) deallocate(ySnappedLinks)
             ! Allocation and assignment: polyline, dimiss, breach point 
             allocate(xintemp(ntemp))
             allocate(yintemp(ntemp))
@@ -2776,7 +2779,13 @@ subroutine get_snapped_feature(c_feature_type, c_Nin, cptr_xin, cptr_yin, c_Nout
             call snappol(ntemp, xintemp, yintemp, dmiss, 2, noutSnapped, xSnapped, ySnapped, feature_ids, c_ierror)
             ! Project the breach point into the input polygon, determines the flow link where the breach is starting and gives back the coordinates of the middle point (x_breach, y_breach)
             ! note: default values for jsferic, jasfer3D and dmiss
-            call comp_breach_point(start_location_x, start_location_y, xintemp, yintemp, ntemp, xSnapped, ySnapped, lstart, x_breach, y_breach, jsferic, jasfer3D, dmiss)
+            allocate(xSnappedLinks(size(xSnapped)-1,2))
+            allocate(ySnappedLinks(size(ySnapped)-1,2))
+            xSnappedLinks(:,1)=xSnapped(1:size(xSnapped)-1)
+            ySnappedLinks(:,1)=ySnapped(1:size(ySnapped)-1)
+            xSnappedLinks(:,2)=xSnapped(2:size(xSnapped))
+            ySnappedLinks(:,2)=ySnapped(2:size(ySnapped))
+            call comp_breach_point(start_location_x, start_location_y, xintemp, yintemp, ntemp, xSnappedLinks, ySnappedLinks, lstart, x_breach, y_breach, jsferic, jasfer3D, dmiss)
             ! Save the results (snapped line, dmiss, snapped point, dmiss)
             if(allocated(xout)) oldSize = size(xout)
             c_Nout = c_Nout + noutSnapped  + 2
