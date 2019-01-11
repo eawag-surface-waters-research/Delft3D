@@ -1676,9 +1676,9 @@ double precision, allocatable :: hulp(:,:) ! hulp
 double precision              :: x_breach, y_breach, distemp
 double precision              :: xc, yc, xn, yn   
 integer                       :: nDambreakCoordinates, k3, k4, kpol, indexInStructure, indexLink, ja, Lstart
-double precision              :: xla, xlb, yla, ylb
+double precision              :: xla, xlb, yla, ylb, rn, rt
 integer, allocatable          :: lftopol(:)
-double precision, allocatable :: xl(:), yl(:)
+double precision, allocatable :: xl(:,:), yl(:,:)
 integer                       :: branchIndex   
 double precision              :: chainage
 !! if (jatimespace == 0) goto 888                      ! Just cleanup and close ext file.
@@ -2774,8 +2774,8 @@ if (ndambreak > 0) then
       if(allocated(xl)) deallocate(xl)
       if(allocated(yl)) deallocate(yl)
       nDambreakCoordinates = L2dambreaksg(n) - L1dambreaksg(n)  + 2
-      allocate(xl(nDambreakCoordinates))
-      allocate(yl(nDambreakCoordinates))
+      allocate(xl(nDambreakCoordinates,2))
+      allocate(yl(nDambreakCoordinates,2))
       indexLink = 0
       do k = L1dambreaksg(n), L2dambreaksg(n)
          indexLink = indexLink + 1
@@ -2783,10 +2783,10 @@ if (ndambreak > 0) then
          Lf = iabs(kdambreak(3,k))
          k3 = lncn(1,Lf) 
          k4 = lncn(2,Lf)
-         xl(indexLink)     = xk(k3)
-         xl(indexLink + 1) = xk(k4)
-         yl(indexLink)     = yk(k3)
-         yl(indexLink + 1) = yk(k4)
+         xl(indexLink, 1) = xk(k3)
+         xl(indexLink, 2) = xk(k4)
+         yl(indexLink, 1) = yk(k3)
+         yl(indexLink, 2) = yk(k4)
       enddo
    
       ! comp_breach_point takes plain arrays to compute the breach point (also used in unstruct_bmi)      
