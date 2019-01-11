@@ -101,8 +101,7 @@ do nm = 1, nmmax
       zkbot(k) = 0.0
       dzk(k)   = 0.0
       porosu(nm, k) = 1.0
-      kspu  (nm, k) = 0
-      ubrlsu(nm, k) = 0.0 
+      if (abs(kspu(nm,0))==10) kspu  (nm, k) = 0    !! only for CDW (to avoid overwiting of 3D gates)
    enddo
    kfrst = 1
    klast = kmax
