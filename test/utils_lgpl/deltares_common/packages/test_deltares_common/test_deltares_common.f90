@@ -31,6 +31,7 @@ program test_deltares_common
     use test_distance
     use test_string_module
     use test_properties
+    use test_geometry_module
 
     implicit none
 
@@ -48,6 +49,7 @@ program test_deltares_common
     call tests_distance
     call tests_string_module
     call tests_properties
+    call tests_geometry_module
 
     !
     ! Done - properly finalize
