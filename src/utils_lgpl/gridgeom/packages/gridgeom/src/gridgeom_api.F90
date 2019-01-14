@@ -255,11 +255,12 @@ function ggeo_get_links_count_dll(nlinks, linkType) result(ierr) bind(C, name="g
 end function ggeo_get_links_count_dll
 
 
-function ggeo_get_links_dll(c_arrayfrom, c_arrayto, nlinks, linkType) result(ierr) bind(C, name="ggeo_get_links")
+function ggeo_get_links_dll(c_arrayfrom, c_arrayto, nlinks, linkType, startIndex) result(ierr) bind(C, name="ggeo_get_links")
 !DEC$ ATTRIBUTES DLLEXPORT :: ggeo_get_links_dll
    use gridoperations
    
    type(c_ptr), intent(in)                  :: c_arrayfrom, c_arrayto
+   integer(kind=c_int), intent(in)          :: startIndex
    integer(kind=c_int), intent(in)          :: nlinks, linkType
    integer, pointer                         :: arrayfrom(:), arrayto(:)
    integer                                  :: ierr
@@ -267,7 +268,7 @@ function ggeo_get_links_dll(c_arrayfrom, c_arrayto, nlinks, linkType) result(ier
    call c_f_pointer(c_arrayfrom, arrayfrom, (/ nlinks /))
    call c_f_pointer(c_arrayto, arrayto, (/ nlinks /))
    
-   ierr = ggeo_get_links(arrayfrom, arrayto, linkType)
+   ierr = ggeo_get_links(arrayfrom, arrayto, linkType, startIndex)
    
 end function ggeo_get_links_dll
 

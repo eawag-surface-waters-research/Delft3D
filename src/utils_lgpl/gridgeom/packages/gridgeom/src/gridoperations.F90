@@ -3154,11 +3154,12 @@
    end function ggeo_get_links_count
 
    !< get the links
-   function ggeo_get_links(arrayfrom, arrayto, linkType)  result(ierr)
-
+   function ggeo_get_links(arrayfrom, arrayto, linkType, start_index)  result(ierr)
+   use array_module
    use network_data
 
    integer, intent(inout)  :: arrayfrom(:), arrayto(:)
+   integer, intent(in)     :: start_index
    integer                 :: ierr, nlinks, l, nc
    integer                 :: linkType
 
@@ -3178,6 +3179,11 @@
          arrayto(nlinks)   = kn(2,l)  !1dlink
       end if
    end do
+   
+   !convert to required start index, 1 based is assumed
+   ierr = convert_start_index(arrayfrom, -999, 1, start_index) 
+   ierr = convert_start_index(arrayto, -999, 1, start_index) 
+   
 
    end function ggeo_get_links
 

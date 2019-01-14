@@ -272,6 +272,8 @@ type t_ug_file
    character(len=256), allocatable  :: contactsnames(:)   !< The variable names for all contacts.
 end type t_ug_file
 
+integer:: imiss = -999
+
    contains
 
 !> Returns the latest message string from this module.
@@ -2640,6 +2642,7 @@ end function ug_put_node_coordinates
 !> Gets the edge-face connectivity table for all edges in the specified mesh.
 !! The output edge_faces array is supposed to be of exact correct size already.
 function ug_get_edge_faces(ncid, meshids, edge_faces, ifill, startIndex) result(ierr)
+   use array_module
    integer,           intent(in)  :: ncid              !< NetCDF dataset id, should be already open.
    type(t_ug_mesh),   intent(in)  :: meshids           !< Set of NetCDF-ids for all mesh geometry arrays.
    integer,           intent(out) :: edge_faces(:,:)   !< Array to the edge-node connectivity table.
@@ -2657,11 +2660,11 @@ function ug_get_edge_faces(ncid, meshids, edge_faces, ifill, startIndex) result(
       !we check for the start_index, we do not know if the variable was written as 0 based
       ierr = nf90_get_att(ncid, meshids%varids(mid_edgefaces),'start_index', varStartIndex)  
       if (ierr .eq. UG_NOERR) then
-         ierr = ug_convert_start_index(edge_faces(1,:), varStartIndex, startIndex)
-         ierr = ug_convert_start_index(edge_faces(2,:), varStartIndex, startIndex)
+         ierr = convert_start_index(edge_faces(1,:), imiss, varStartIndex, startIndex)
+         ierr = convert_start_index(edge_faces(2,:), imiss, varStartIndex, startIndex)
       else
-         ierr = ug_convert_start_index(edge_faces(1,:), 0, startIndex)
-         ierr = ug_convert_start_index(edge_faces(2,:), 0, startIndex)
+         ierr = convert_start_index(edge_faces(1,:), imiss, 0, startIndex)
+         ierr = convert_start_index(edge_faces(2,:), imiss, 0, startIndex)
       endif
    endif
 
@@ -2671,6 +2674,7 @@ end function ug_get_edge_faces
 !> Gets the edge-node connectivity table for all edges in the specified mesh.
 !! The output edge_nodes array is supposed to be of exact correct size already.
 function ug_get_edge_nodes(ncid, meshids, edge_nodes, startIndex) result(ierr)
+   use array_module
    integer,           intent(in)  :: ncid             !< NetCDF dataset id, should be already open.
    type(t_ug_mesh),   intent(in)  :: meshids          !< Set of NetCDF-ids for all mesh geometry arrays.
    integer,           intent(out) :: edge_nodes(:,:)  !< Array to the edge-node connectivity table.
@@ -2684,11 +2688,11 @@ function ug_get_edge_nodes(ncid, meshids, edge_nodes, startIndex) result(ierr)
       !we check for the start_index, we do not know if the variable was written as 0 based
       ierr = nf90_get_att(ncid, meshids%varids(mid_edgenodes),'start_index', varStartIndex)  
       if (ierr .eq. UG_NOERR) then
-         ierr = ug_convert_start_index(edge_nodes(1,:), varStartIndex, startIndex)
-         ierr = ug_convert_start_index(edge_nodes(2,:), varStartIndex, startIndex)
+         ierr = convert_start_index(edge_nodes(1,:), imiss, varStartIndex, startIndex)
+         ierr = convert_start_index(edge_nodes(2,:), imiss, varStartIndex, startIndex)
       else
-        ierr = ug_convert_start_index(edge_nodes(1,:), 0, startIndex)
-        ierr = ug_convert_start_index(edge_nodes(2,:), 0, startIndex)
+        ierr = convert_start_index(edge_nodes(1,:), imiss, 0, startIndex)
+        ierr = convert_start_index(edge_nodes(2,:), imiss, 0, startIndex)
       endif
    endif
    
@@ -2735,6 +2739,7 @@ end function ug_put_face_coordinates
 !> Gets the face-edge connectivity table for all faces in the specified mesh.
 !! The output face_edges array is supposed to be of exact correct size already.
 function ug_get_face_edges(ncid, meshids, face_edges, ifill, startIndex) result(ierr)
+   use array_module
    integer,           intent(in)  :: ncid            !< NetCDF dataset id, should be already open.
    type(t_ug_mesh),   intent(in)  :: meshids         !< Set of NetCDF-ids for all mesh geometry arrays.
    integer,           intent(out) :: face_edges(:,:) !< Array to the face-node connectivity table.
@@ -2753,11 +2758,11 @@ function ug_get_face_edges(ncid, meshids, face_edges, ifill, startIndex) result(
       ierr = nf90_get_att(ncid, meshids%varids(mid_faceedges),'start_index', varStartIndex)  
       if (ierr .eq. UG_NOERR) then
          do k = 1, size(face_edges,1)
-            ierr = ug_convert_start_index(face_edges(k,:), varStartIndex, startIndex)
+            ierr = convert_start_index(face_edges(k,:), imiss, varStartIndex, startIndex)
          enddo
       else
          do k = 1, size(face_edges,1)
-         ierr = ug_convert_start_index(face_edges(k,:), 0, startIndex)
+         ierr = convert_start_index(face_edges(k,:), imiss, 0, startIndex)
          enddo
       endif
    endif
@@ -2768,6 +2773,7 @@ end function ug_get_face_edges
 !> Gets the face-node connectivity table for all faces in the specified mesh.
 !! The output face_nodes array is supposed to be of exact correct size already.
 function ug_get_face_nodes(ncid, meshids, face_nodes, ifill, startIndex) result(ierr)
+   use array_module 
    integer,           intent(in)  :: ncid            !< NetCDF dataset id, should be already open.
    type(t_ug_mesh),   intent(in)  :: meshids         !< Set of NetCDF-ids for all mesh geometry arrays.
    integer,           intent(out) :: face_nodes(:,:) !< Array to the face-node connectivity table.
@@ -2786,11 +2792,11 @@ function ug_get_face_nodes(ncid, meshids, face_nodes, ifill, startIndex) result(
       ierr = nf90_get_att(ncid, meshids%varids(mid_facenodes),'start_index', varStartIndex)  
       if (ierr .eq. UG_NOERR) then
          do k = 1, size(face_nodes,1)
-         ierr = ug_convert_start_index(face_nodes(k,:), varStartIndex, startIndex)
+         ierr = convert_start_index(face_nodes(k,:), imiss, varStartIndex, startIndex)
          enddo
       else
          do k = 1, size(face_nodes,1)
-         ierr = ug_convert_start_index(face_nodes(k,:), 0, startIndex)
+         ierr = convert_start_index(face_nodes(k,:), imiss, 0, startIndex)
          enddo
       endif
    endif
@@ -3862,7 +3868,7 @@ end function ug_get_contacts_count
 
 ! Writes the mesh_topology_contact mesh.
 function ug_put_mesh_contact(ncid, contactids, mesh1indexes, mesh2indexes, contacttype, contactsids, contactslongnames, startIndex) result(ierr)
-
+   use array_module
    integer, intent(in)                        :: ncid 
    type(t_ug_contacts), intent(in)            :: contactids
    integer, intent(in)                        :: mesh1indexes(:),mesh2indexes(:),contacttype(:) 
@@ -3881,8 +3887,8 @@ function ug_put_mesh_contact(ncid, contactids, mesh1indexes, mesh2indexes, conta
 
    !we have not defined the start_index, so when we put the variable it must be zero based   
    if (present(startIndex) .and. startIndex.ne.-1) then
-       ierr = ug_convert_start_index(contacts(1,:), startIndex, 0)
-       ierr = ug_convert_start_index(contacts(2,:), startIndex, 0)
+       ierr = convert_start_index(contacts(1,:), imiss, startIndex, 0)
+       ierr = convert_start_index(contacts(2,:), imiss, startIndex, 0)
    endif
 
    ierr = nf90_put_var(ncid, contactids%varids(cid_contacttopo), contacts)
@@ -3900,7 +3906,7 @@ end function ug_put_mesh_contact
 
 ! Gets the indexses of the contacts and the ids and the descriptions of each link
 function ug_get_mesh_contact(ncid, contactids, mesh1indexes, mesh2indexes, contactsids, contactslongnames, contacttype, startIndex) result(ierr)
-
+   use array_module
    integer, intent(in)               :: ncid, startIndex 
    type(t_ug_contacts), intent(in)   :: contactids
    integer, intent(out)              :: mesh1indexes(:),mesh2indexes(:),contacttype(:)
@@ -3918,11 +3924,11 @@ function ug_get_mesh_contact(ncid, contactids, mesh1indexes, mesh2indexes, conta
    !we check for the start_index, we do not know if the variable was written as 0 based
    ierr = nf90_get_att(ncid, contactids%varids(cid_contacttopo),'start_index', varStartIndex)  
    if (ierr .eq. UG_NOERR) then
-        ierr = ug_convert_start_index(contacts(1,:), varStartIndex, startIndex)
-        ierr = ug_convert_start_index(contacts(2,:), varStartIndex, startIndex)
+        ierr = convert_start_index(contacts(1,:), imiss, varStartIndex, startIndex)
+        ierr = convert_start_index(contacts(2,:), imiss, varStartIndex, startIndex)
    else
-        ierr = ug_convert_start_index(contacts(1,:), 0, startIndex)
-        ierr = ug_convert_start_index(contacts(2,:), 0, startIndex)
+        ierr = convert_start_index(contacts(1,:), imiss, 0, startIndex)
+        ierr = convert_start_index(contacts(2,:), imiss, 0, startIndex)
    endif
    
    do i = 1, size(mesh1indexes)
@@ -3959,7 +3965,7 @@ end function ug_write_1d_network_nodes
 !> This function writes the branches information
 !> This function writes the branches information
 function ug_put_1d_network_branches(ncid,netids, sourceNodeId, targetNodeId, branchids, branchlengths, branchlongnames, nbranchgeometrynodes,nBranches, startIndex) result(ierr)
-
+   use array_module
    integer, intent(in)               ::ncid, nBranches, startIndex
    type(t_ug_network), intent(in)    :: netids !< Set of NetCDF-ids for all mesh geometry arrays
    integer,           intent(in)     ::sourceNodeId(:),targetNodeId(:)
@@ -3982,8 +3988,8 @@ function ug_put_1d_network_branches(ncid,netids, sourceNodeId, targetNodeId, bra
    
    !we have not defined the start_index, so when we put the variable it must be zero based
    if (startIndex.ne.-1) then
-        ierr = ug_convert_start_index(sourcestargets(1,:), startIndex, 0)
-        ierr = ug_convert_start_index(sourcestargets(2,:), startIndex, 0)
+        ierr = convert_start_index(sourcestargets(1,:), imiss, startIndex, 0)
+        ierr = convert_start_index(sourcestargets(2,:), imiss, startIndex, 0)
    endif
    
    ierr = nf90_put_var(ncid, netids%varids(ntid_1dedgenodes), sourcestargets)
@@ -3993,22 +3999,6 @@ function ug_put_1d_network_branches(ncid,netids, sourceNodeId, targetNodeId, bra
    ierr = nf90_put_var(ncid, netids%varids(ntid_1dgeopointsperbranch), nbranchgeometrynodes) 
   
 end function ug_put_1d_network_branches
-
-function ug_convert_start_index(sourcestargets, providedIndex, requestedIndex) result(ierr)
-    
-    integer, intent(inout) ::sourcestargets(:)
-    integer, intent(in)    ::providedIndex, requestedIndex
-    integer                ::shift, ierr
-    
-    shift = requestedIndex - providedIndex
-    
-    ! do not apply shift is values are undefined. Note undefined values dmiss should be specified in deltares common
-    where(sourcestargets .ne. -999.0d0) 
-      sourcestargets= sourcestargets + shift   
-    end where
-    ierr = 0
-    
-end function 
    
 !> This function writes the branch order array
    function ug_put_1d_network_branchorder(ncid, netids, branchorder) result(ierr)
@@ -4057,7 +4047,7 @@ end function ug_put_1d_mesh_discretisation_points
 
 !> This function writes the mesh points
 function ug_put_1d_mesh_discretisation_points_v1(ncid, meshids, branchidx, offset, startIndex, coordx, coordy) result(ierr)
-
+   use array_module
    integer, intent(in)                                  :: ncid, branchidx(:), startIndex
    double precision, intent(in)                         :: offset(:)
    type(t_ug_mesh), intent(in)                          :: meshids 
@@ -4077,7 +4067,7 @@ function ug_put_1d_mesh_discretisation_points_v1(ncid, meshids, branchidx, offse
    allocate(shiftedBranchidx(size(branchidx)))
    shiftedBranchidx = branchidx
    if (startIndex.ne.-1) then
-       ierr = ug_convert_start_index(shiftedBranchidx, startIndex, 0)
+       ierr = convert_start_index(shiftedBranchidx, imiss, startIndex, 0)
    endif
 
    ierr = nf90_put_var(ncid, meshids%varids(mid_1dmeshtobranch), shiftedBranchidx)
@@ -4168,7 +4158,7 @@ end function ug_read_1d_network_nodes
 
 !> This function reads the network branches
 function ug_get_1d_network_branches(ncid, netids, sourcenodeid, targetnodeid, branchlengths, nbranchgeometrypoints, startIndex, nbranchid, nbranchlongnames) result(ierr)
-
+   use array_module
    integer, intent(in)                        :: ncid, startIndex
    type(t_ug_network), intent(in)             :: netids 
    integer,intent(out)                        :: sourcenodeid(:), targetnodeid(:),nbranchgeometrypoints(:) 
@@ -4188,11 +4178,11 @@ function ug_get_1d_network_branches(ncid, netids, sourcenodeid, targetnodeid, br
    !we check for the start_index, we do not know if the variable was written as 0 based
    ierr = nf90_get_att(ncid, netids%varids(ntid_1dedgenodes),'start_index', varStartIndex)
    if (ierr .eq. UG_NOERR) then
-       ierr = ug_convert_start_index(sourcestargets(1,:), varStartIndex, startIndex)
-       ierr = ug_convert_start_index(sourcestargets(2,:), varStartIndex, startIndex)
+       ierr = convert_start_index(sourcestargets(1,:), imiss, varStartIndex, startIndex)
+       ierr = convert_start_index(sourcestargets(2,:), imiss, varStartIndex, startIndex)
    else
-       ierr = ug_convert_start_index(sourcestargets(1,:), 0, startIndex)
-       ierr = ug_convert_start_index(sourcestargets(2,:), 0, startIndex)
+       ierr = convert_start_index(sourcestargets(1,:), imiss, 0, startIndex)
+       ierr = convert_start_index(sourcestargets(2,:), imiss, 0, startIndex)
    endif
    
    k = 0
@@ -4279,7 +4269,7 @@ end function ug_get_1d_mesh_discretisation_points_count
 
 !> This function reads the geometry information for the mesh points
 function ug_get_1d_mesh_discretisation_points(ncid, meshids, branchidx, offsets, startIndex) result(ierr)
-
+   use array_module
    integer, intent(in)                      :: ncid, startIndex
    type(t_ug_mesh), intent(in)              :: meshids 
    real(kind=dp),   intent(out)             :: offsets(:)
@@ -4291,9 +4281,9 @@ function ug_get_1d_mesh_discretisation_points(ncid, meshids, branchidx, offsets,
    !we check for the start_index, we do not know if the variable was written as 0 based
    ierr = nf90_get_att(ncid, meshids%varids(mid_1dmeshtobranch),'start_index', varStartIndex)
    if (ierr .eq. UG_NOERR) then
-        ierr = ug_convert_start_index(branchidx, varStartIndex, startIndex)
+        ierr = convert_start_index(branchidx, imiss, varStartIndex, startIndex)
    else
-        ierr = ug_convert_start_index(branchidx, 0, startIndex)
+        ierr = convert_start_index(branchidx, imiss, 0, startIndex)
    endif
    
    !define dim

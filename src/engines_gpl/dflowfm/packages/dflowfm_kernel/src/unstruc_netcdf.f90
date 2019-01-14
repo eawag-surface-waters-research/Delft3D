@@ -932,7 +932,7 @@ double precision, allocatable :: mappedValues(:)
             if(allocated(mappedValues)) deallocate(mappedValues)
             allocate(mappedValues(numMesh1dBeforeMerging))
             do i =1, numMesh1dBeforeMerging
-               mappedValues(i)=values(ndx2d+mesh1dNodeIndexes(i))
+               mappedValues(i)=values(ndx2d+mesh1dUnmergedToMerged(i))
             enddo  
             ierr = nf90_put_var(ncid, id_var(1), mappedValues, start = (/ 1, id_tsp%idx_curtime /))
          else
@@ -8562,7 +8562,7 @@ subroutine unc_write_net_ugrid2(ncid,id_tsp, janetcell)
                                     meshgeom1d%ngeopointx, meshgeom1d%ngeopointy, meshgeom1d%ngeometry, &
                                     meshgeom1d%nbranchorder, &
                                     nodeids, nodelongnames, meshgeom1d%branchidx, meshgeom1d%branchoffsets,&
-                                    numMesh1dBeforeMerging, mesh1dNodeIds, mesh1dNodeIndexes)
+                                    numMesh1dBeforeMerging, mesh1dNodeIds, mesh1dUnmergedToMerged)
          else
                call mess(LEVEL_ERROR, 'Could not put header in net geometry file.')
                return
@@ -9460,7 +9460,8 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
    end if
    
    
-   allocate(mesh1dNodeIndexes(size(xk)))
+   allocate(mesh1dUnmergedToMerged(size(xk)))
+   allocate(mesh1dMergedToUnMerged(size(xk)))
    allocate(mesh1dNodeIds(size(xk)))
    !! Read 1D from file
    if (.not. network%loaded) then
@@ -9492,7 +9493,8 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
             ! id-mesh node mapping
                numMesh1dBeforeMerging = numMesh1dBeforeMerging + 1
                mesh1dNodeIds(numMesh1dBeforeMerging) = pbr%gridPointIDs(1)
-               mesh1dNodeIndexes(numMesh1dBeforeMerging) = pbr%grd(1)
+               mesh1dUnmergedToMerged(numMesh1dBeforeMerging) = pbr%grd(1)
+               mesh1dMergedToUnMerged(pbr%grd(1)) = numMesh1dBeforeMerging
             do k = 2, ngrd-1
                ! i do not want to renumber the nodes, otherwise link info gets invalidated
                numk = k + totalKsoFar
@@ -9500,16 +9502,18 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
                xk(numk) = pbr%Xs(k)
                yk(numk) = pbr%Ys(k)
                zk(numk) = dmiss
-                  ! id-mesh node mapping  
-                  numMesh1dBeforeMerging = numMesh1dBeforeMerging + 1
-                  mesh1dNodeIds(numMesh1dBeforeMerging) = pbr%gridpointids(k)
-                  mesh1dNodeIndexes(numMesh1dBeforeMerging) = pbr%grd(k)
+               ! id-mesh node mapping  
+               numMesh1dBeforeMerging = numMesh1dBeforeMerging + 1
+               mesh1dNodeIds(numMesh1dBeforeMerging) = pbr%gridpointids(k)
+               mesh1dUnmergedToMerged(numMesh1dBeforeMerging) = pbr%grd(k)
+               mesh1dMergedToUnMerged(pbr%grd(k)) = numMesh1dBeforeMerging
             enddo
             pbr%grd(ngrd) = pbr%toNode%gridNumber
             ! id-mesh node mapping   
                numMesh1dBeforeMerging = numMesh1dBeforeMerging + 1
                mesh1dNodeIds(numMesh1dBeforeMerging) = pbr%gridPointIDs(ngrd)
-               mesh1dNodeIndexes(numMesh1dBeforeMerging) = pbr%grd(ngrd)
+               mesh1dUnmergedToMerged(numMesh1dBeforeMerging) = pbr%grd(ngrd)
+               mesh1dMergedToUnMerged(pbr%grd(ngrd)) = numMesh1dBeforeMerging
 
             ! update merged indexes
             numk = ngrd + totalKsoFar
@@ -9546,9 +9550,9 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
       endif
    endif
    
-   ! re-allocate mesh1dNodeIds and mesh1dNodeIndexes
+   ! re-allocate mesh1dNodeIds and mesh1dUnmergedToMerged
    call realloc(mesh1dNodeIds, numMesh1dBeforeMerging, keepExisting=.true.)
-   call realloc(mesh1dNodeIndexes, numMesh1dBeforeMerging, keepExisting=.true.)
+   call realloc(mesh1dUnmergedToMerged, numMesh1dBeforeMerging, keepExisting=.true.)
       
    ierr = ionc_get_coordinate_reference_system(ioncid, crs)
    ! ierr = ionc_get_crs(ioncid, crs) ! TODO: make this API routine.
@@ -9758,7 +9762,7 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
          ! For 1d use mapping 
          do i = 1, numMesh1dBeforeMerging
             if (mesh1dNodeIds(i) == currentNodeId) then
-               kn(1,numl_last+l) = mesh1dNodeIndexes(i)
+               kn(1,numl_last+l) = mesh1dUnmergedToMerged(i)
                exit
             endif
          enddo         
@@ -11958,8 +11962,8 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
       ! Temporary UGRID fix
       if(numMesh1dBeforeMerging>0) then
          do n =1,ndx1d
-            x1dn(n)=xz(ndx2d+mesh1dNodeIndexes(n))
-            y1dn(n)=xz(ndx2d+mesh1dNodeIndexes(n))
+            x1dn(n)=xz(ndx2d+mesh1dUnmergedToMerged(n))
+            y1dn(n)=xz(ndx2d+mesh1dUnmergedToMerged(n))
          enddo  
       else
          do n=1,ndx1d
@@ -12003,10 +12007,10 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
             id_tsp%contactstoln(n1d2dcontacts) = L
             contacttype(n1d2dcontacts) = kcu(L) !contact type can be 3 or 4
             if (ln(1,L) > ndx2d) then ! First point of 1D link is 1D cell
-               contacts(1,n1d2dcontacts) = ln(1,L) - ndx2d
+               contacts(1,n1d2dcontacts) = mesh1dMergedToUnMerged(ln(1,L) - ndx2d)
                contacts(2,n1d2dcontacts) = ln(2,L)   ! In m_flowgeom: 1D nodenr = ndx2d+n, in UGRID 1D flowgeom: local 1D nodenr = n.
             else                       ! Second point of 1D link is 1D cell
-               contacts(1,n1d2dcontacts) = ln(2,L) - ndx2d !1d
+               contacts(1,n1d2dcontacts) = mesh1dMergedToUnMerged(ln(2,L) - ndx2d) !1d
                contacts(2,n1d2dcontacts) = ln(1,L)         !2d
             end if
          else
@@ -12025,7 +12029,7 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
                                        meshgeom1d%ngeopointx, meshgeom1d%ngeopointy, meshgeom1d%ngeometry, &
                                        meshgeom1d%nbranchorder, &
                                        nodeids, nodelongnames, meshgeom1d%branchidx, meshgeom1d%branchoffsets,&
-                                       numMesh1dBeforeMerging, mesh1dNodeIds, mesh1dNodeIndexes)
+                                       numMesh1dBeforeMerging, mesh1dNodeIds, mesh1dUnmergedToMerged)
          else
          ierr = ug_write_mesh_arrays(ncid, id_tsp%meshids1d, mesh1dname, 1, UG_LOC_NODE + UG_LOC_EDGE, ndx1d, n1dedges, 0, 0, &
                                      edge_nodes, face_nodes, null(), null(), null(), x1dn, y1dn, xu(id_tsp%edgetoln(:)), yu(id_tsp%edgetoln(:)), xz(1:1), yz(1:1), &

@@ -40818,6 +40818,10 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
     SL = dsl(iL) 
     n1 = ln(1,L) ; n2 = ln(2,L)
 
+    if (kcu(L) .eq. 1) then 
+       cycle ! UNST-2226: test code for forbidding fixed weirs on 1D 
+    end if
+
     zc = sl*zpL(k+1) + (1d0-sl)*zpL(k)
     
     if (abs(kcu(L)) == 2) then 
