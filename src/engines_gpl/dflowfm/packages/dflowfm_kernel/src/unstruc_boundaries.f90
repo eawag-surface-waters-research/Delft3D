@@ -3034,6 +3034,7 @@ end subroutine flow_init_discharge
 subroutine add_bndtracer(tracnam, tracunit, itrac, janew)
    use m_flowexternalforcings
    use m_alloc
+   use m_missing
    implicit none
    
    character(len=*), intent(in)  :: tracnam
@@ -3056,8 +3057,11 @@ subroutine add_bndtracer(tracnam, tracunit, itrac, janew)
       call realloc(trnames, numtracers, keepExisting=.true., fill='')
       call realloc(trunits, numtracers, keepExisting=.true., fill='')
       call realloc(wstracers, numtracers, keepExisting=.true., fill=0d0)
-      wstracers(numtracers) = transformcoef(4)
-
+      if ( transformcoef(4).ne.DMISS ) then
+         wstracers(numtracers) = transformcoef(4)
+      else
+         wstracers(numtracers) = 0.0d0
+      endif
       trnames(numtracers) = trim(tracnam)
       itrac = numtracers
    end if
