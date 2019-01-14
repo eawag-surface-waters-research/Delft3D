@@ -51,6 +51,7 @@
    logical :: writebalance
    character(len=64)  :: ident !< Identifier of the model, used as suggested basename for some files. (runid)
 
+   jamba = 1
    timembastart = tstart_user ! when DFM doesn't start at t=0.0??
    timembastarttot = timembastart
    itimembastart = nint(tstart_user)

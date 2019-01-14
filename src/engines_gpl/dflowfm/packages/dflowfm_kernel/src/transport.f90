@@ -169,7 +169,7 @@ subroutine update_constituents(jarhoonly)
          call comp_horfluxtot()
       endif
 
-      if (jawaqproc > 0) then  ! at moment, this function is only required by waq processes
+      if (jamba > 0) then  ! at moment, this function is only required by waq processes
          call comp_horfluxwaq()
       endif
 
@@ -1670,10 +1670,12 @@ subroutine fill_constituents(jas) ! if jas == 1 do sources
       qsrckk = qsrc(n) 
       qsrck  = qsrckk  
       
-      if (qsrck > 0) then
-         mbaflowsorsin(2,n) = mbaflowsorsin(2,n) + qsrck*dts
-      else if (qsrck < 0) then
-         mbaflowsorsin(1,n) = mbaflowsorsin(1,n) - qsrck*dts
+      if (jamba > 0) then
+         if (qsrck > 0) then
+            mbaflowsorsin(2,n) = mbaflowsorsin(2,n) + qsrck*dts
+         else if (qsrck < 0) then
+            mbaflowsorsin(1,n) = mbaflowsorsin(1,n) - qsrck*dts
+         endif
       endif
          
       if (kk > 0) then                     ! FROM Point
@@ -1690,17 +1692,21 @@ subroutine fill_constituents(jas) ! if jas == 1 do sources
             if (qsrck > 0) then              ! FROM k to k2
                do L = 1,numconst
                   const_sour(L,k) = const_sour(L,k) - qsrck*constituents(L,k)*dvoli
-                  s = iconst2sys(L)
-                  if (s > 0 .and. s <= nosys) then
-                    mbafluxsorsin(2,1,s,n) = mbafluxsorsin(2,1,s,n) + qsrck*constituents(L,k)*dts
+                  if (jamba > 0) then
+                     s = iconst2sys(L)
+                     if (s > 0 .and. s <= nosys) then
+                       mbafluxsorsin(2,1,s,n) = mbafluxsorsin(2,1,s,n) + qsrck*constituents(L,k)*dts
+                     endif
                   endif
                enddo   
             else if  (qsrck  < 0) then       ! FROM k2 to k
                do L = 1,numconst
                   const_sour(L,k) = const_sour(L,k) - qsrck*ccsrc(L,n)*dvoli
-                  s = iconst2sys(L)
-                  if (s > 0 .and. s <= nosys) then
-                     mbafluxsorsin(1,1,s,n) = mbafluxsorsin(1,1,s,n) - qsrck*ccsrc(L,n)*dts
+                  if (jamba > 0) then
+                     s = iconst2sys(L)
+                     if (s > 0 .and. s <= nosys) then
+                        mbafluxsorsin(1,1,s,n) = mbafluxsorsin(1,1,s,n) - qsrck*ccsrc(L,n)*dts
+                     endif
                   endif
                enddo   
             endif
@@ -1721,17 +1727,21 @@ subroutine fill_constituents(jas) ! if jas == 1 do sources
             if (qsrck > 0) then
                do L = 1,numconst
                   const_sour(L,k) = const_sour(L,k) + qsrck*ccsrc(L,n)*dvoli
-                  s = iconst2sys(L)
-                  if (s > 0 .and. s <= nosys) then
-                     mbafluxsorsin(2,2,s,n) = mbafluxsorsin(2,2,s,n) + qsrck*ccsrc(L,n)*dts
+                  if (jamba > 0) then
+                     s = iconst2sys(L)
+                     if (s > 0 .and. s <= nosys) then
+                        mbafluxsorsin(2,2,s,n) = mbafluxsorsin(2,2,s,n) + qsrck*ccsrc(L,n)*dts
+                     endif
                   endif
                enddo   
             else if  (qsrck  < 0) then  
                do L = 1,numconst
                   const_sour(L,k) = const_sour(L,k) + qsrck*constituents(L,k)*dvoli
-                  s = iconst2sys(L)
-                  if (s > 0 .and. s <= nosys) then
-                     mbafluxsorsin(1,2,s,n) = mbafluxsorsin(1,2,s,n) -  qsrck*constituents(L,k)*dts
+                  if (jamba > 0) then
+                     s = iconst2sys(L)
+                     if (s > 0 .and. s <= nosys) then
+                        mbafluxsorsin(1,2,s,n) = mbafluxsorsin(1,2,s,n) -  qsrck*constituents(L,k)*dts
+                     endif
                   endif
                enddo   
             endif

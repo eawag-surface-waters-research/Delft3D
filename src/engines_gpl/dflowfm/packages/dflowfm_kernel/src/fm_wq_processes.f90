@@ -1115,7 +1115,7 @@
       implicit none
       
       jawaqproc = 0
-      
+      jamba = 0      
       md_subfile = ''
       md_ehofile = ''
       md_thetav_waq = 0d0

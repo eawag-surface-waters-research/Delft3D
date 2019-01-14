@@ -5233,6 +5233,7 @@ module m_fm_wq_processes
 !   double precision           :: dum
       
    integer, parameter                        :: nammbamonlen = 128
+   integer                                   :: jamba                       !< switch for mass balance areas being active
    integer                                   :: nomba                       !< number of mass balance areas
    integer                                   :: nombabnd                    !< number of mass balance areas and boundaries
    character(len=nammbamonlen),allocatable   :: mbaname(:)                  !< parameter names
