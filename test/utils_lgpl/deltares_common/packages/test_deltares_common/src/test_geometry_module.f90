@@ -32,8 +32,8 @@ module test_geometry_module
     private
     public:: tests_geometry_module
 
-    real(fp), parameter :: eps   = 1.0e-6_fp
-    real(fp), parameter :: dmiss = -999.0_fp
+    real(hp), parameter :: eps   = 1.0e-6_hp
+    real(hp), parameter :: dmiss = -999.0_hp
 
 contains
 subroutine tests_geometry_module
@@ -44,25 +44,25 @@ subroutine tests_geometry_module
 end subroutine tests_geometry_module
 
 subroutine test_inproduct
-    real(fp) :: x1, y1, x2, y2
-    real(fp), dimension(3) :: a, b
-    real(fp) :: inproduct, expected
+    real(hp) :: x1, y1, x2, y2
+    real(hp), dimension(3) :: a, b
+    real(hp) :: inproduct, expected
 
     integer  :: i
-    real(fp), dimension(5,4) :: vector_inproduct = reshape( &
-        [ 100.0_fp,    0.0_fp, 100.0_fp,   0.0_fp,  1.0e4_fp, &  ! Parallel vectors
-          100.0_fp,  100.0_fp, 100.0_fp, 100.0_fp,  2.0e4_fp, &  ! Parallel vectors
-          100.0_fp,    0.0_fp,   0.0_fp, 100.0_fp,  0.0e0_fp, &  ! Perpendicular vectors
-          100.0_fp,  100.0_fp, 100.0_fp,-100.0_fp,  0.0e0_fp] &  ! Perpendicular vectors
+    real(hp), dimension(5,4) :: vector_inproduct = reshape( &
+        [ 100.0_hp,    0.0_hp, 100.0_hp,   0.0_hp,  1.0e4_hp, &  ! Parallel vectors
+          100.0_hp,  100.0_hp, 100.0_hp, 100.0_hp,  2.0e4_hp, &  ! Parallel vectors
+          100.0_hp,    0.0_hp,   0.0_hp, 100.0_hp,  0.0e0_hp, &  ! Perpendicular vectors
+          100.0_hp,  100.0_hp, 100.0_hp,-100.0_hp,  0.0e0_hp] &  ! Perpendicular vectors
         , [5,4] )
-    real(fp), dimension(7,6) :: vector_inproduct_3d = reshape( &
-        [ 100.0_fp,    0.0_fp,   0.0_fp, 100.0_fp,   0.0_fp,   0.0_fp,  1.0e4_fp, &  ! Parallel vectors
-          100.0_fp,  100.0_fp,   0.0_fp, 100.0_fp, 100.0_fp,   0.0_fp,  2.0e4_fp, &  ! Parallel vectors
-          100.0_fp,  100.0_fp, 100.0_fp, 100.0_fp, 100.0_fp, 100.0_fp,  3.0e4_fp, &  ! Parallel vectors
-          100.0_fp,    0.0_fp,   0.0_fp,   0.0_fp, 100.0_fp,   0.0_fp,  0.0e0_fp, &  ! Perpendicular vectors
-          100.0_fp,  100.0_fp,   0.0_fp, 100.0_fp,-100.0_fp,   0.0_fp,  0.0e0_fp, &  ! Perpendicular vectors
-            0.0_fp,  100.0_fp, 100.0_fp,   0.0_fp,-100.0_fp, 100.0_fp,  0.0e0_fp, &  ! Perpendicular vectors
-          100.0_fp,    0.0_fp, 100.0_fp,-100.0_fp,   0.0_fp, 100.0_fp,  0.0e0_fp] &  ! Perpendicular vectors
+    real(hp), dimension(7,6) :: vector_inproduct_3d = reshape( &
+        [ 100.0_hp,    0.0_hp,   0.0_hp, 100.0_hp,   0.0_hp,   0.0_hp,  1.0e4_hp, &  ! Parallel vectors
+          100.0_hp,  100.0_hp,   0.0_hp, 100.0_hp, 100.0_hp,   0.0_hp,  2.0e4_hp, &  ! Parallel vectors
+          100.0_hp,  100.0_hp, 100.0_hp, 100.0_hp, 100.0_hp, 100.0_hp,  3.0e4_hp, &  ! Parallel vectors
+          100.0_hp,    0.0_hp,   0.0_hp,   0.0_hp, 100.0_hp,   0.0_hp,  0.0e0_hp, &  ! Perpendicular vectors
+          100.0_hp,  100.0_hp,   0.0_hp, 100.0_hp,-100.0_hp,   0.0_hp,  0.0e0_hp, &  ! Perpendicular vectors
+            0.0_hp,  100.0_hp, 100.0_hp,   0.0_hp,-100.0_hp, 100.0_hp,  0.0e0_hp, &  ! Perpendicular vectors
+          100.0_hp,    0.0_hp, 100.0_hp,-100.0_hp,   0.0_hp, 100.0_hp,  0.0e0_hp] &  ! Perpendicular vectors
         , [7,6] )
 
     !
@@ -92,27 +92,27 @@ subroutine test_inproduct
 end subroutine test_inproduct
 
 subroutine test_clockwise
-    real(fp), dimension(4) :: x, y
+    real(hp), dimension(4) :: x, y
     logical                :: isclockwise
 
     !
     ! Clockwise polygon
     !
-    x = [0.0_fp, 0.0_fp, 1.0_fp, 1.0_fp]; y = [0.0_fp, 1.0_fp, 1.0_fp, 0.0_fp]
+    x = [0.0_hp, 0.0_hp, 1.0_hp, 1.0_hp]; y = [0.0_hp, 1.0_hp, 1.0_hp, 0.0_hp]
     isclockwise = clockwise( x, y )
     call assert_true( isclockwise, "The polygon should be identified as clockwise" )
 
     !
     ! Anti-clockwise polygon
     !
-    x = [0.0_fp, 1.0_fp, 1.0_fp, 0.0_fp]; y = [0.0_fp, 0.0_fp, 1.0_fp, 1.0_fp]
+    x = [0.0_hp, 1.0_hp, 1.0_hp, 0.0_hp]; y = [0.0_hp, 0.0_hp, 1.0_hp, 1.0_hp]
     isclockwise = clockwise( x, y )
     call assert_false( isclockwise, "The polygon should be identified as anti-clockwise" )
 end subroutine test_clockwise
 
 subroutine test_pinpok
-    real(fp), dimension(6) :: x, y
-    real(fp)               :: xl, yl
+    real(hp), dimension(6) :: x, y
+    real(hp)               :: xl, yl
     logical                :: isclockwise
     integer                :: jins
     integer                :: inside
@@ -120,9 +120,9 @@ subroutine test_pinpok
     !
     ! Basic version: no missing points
     !
-    x    = [0.0_fp, 0.0_fp, 1.0_fp, 1.0_fp, 0.0_fp, 0.0_fp]; y = [0.0_fp, 1.0_fp, 1.0_fp, 0.0_fp, 0.0_fp, 0.0_fp]
+    x    = [0.0_hp, 0.0_hp, 1.0_hp, 1.0_hp, 0.0_hp, 0.0_hp]; y = [0.0_hp, 1.0_hp, 1.0_hp, 0.0_hp, 0.0_hp, 0.0_hp]
 
-    xl   = -1.0_fp; yl = -1.0_fp ! Clearly outside
+    xl   = -1.0_hp; yl = -1.0_hp ! Clearly outside
     jins = 1
     call pinpok( xl, yl, 4, x, y, inside, jins, dmiss )
     call assert_equal( inside, 0, "The point should be detected as outside the polygon (0)" )
@@ -131,7 +131,7 @@ subroutine test_pinpok
     call pinpok( xl, yl, 4, x, y, inside, jins, dmiss )
     call assert_equal( inside, 1, "The point should be detected as outside the polygon (1)" )
 
-    xl   =  0.5_fp; yl =  0.5_fp ! Clearly inside
+    xl   =  0.5_hp; yl =  0.5_hp ! Clearly inside
     jins = 1
     call pinpok( xl, yl, 4, x, y, inside, jins, dmiss )
     call assert_equal( inside, 1, "The point should be detected as inside the polygon (1)" )
@@ -140,7 +140,7 @@ subroutine test_pinpok
     call pinpok( xl, yl, 4, x, y, inside, jins, dmiss )
     call assert_equal( inside, 0, "The point should be detected as inside the polygon (0)" )
 
-    xl   =  1.0_fp; yl =  0.5_fp ! On the border
+    xl   =  1.0_hp; yl =  0.5_hp ! On the border
     jins = 1
     call pinpok( xl, yl, 4, x, y, inside, jins, dmiss )
     call assert_equal( inside, 1, "A point on the border should be detected as inside the polygon (1)" )
@@ -152,9 +152,9 @@ subroutine test_pinpok
     !
     ! Extended version: missing points in between
     !
-    x    = [0.0_fp, 0.0_fp, dmiss, 1.0_fp, dmiss, 1.0_fp]; y = [0.0_fp, 1.0_fp, dmiss, 1.0_fp, dmiss, 0.0_fp]
+    x    = [0.0_hp, 0.0_hp, dmiss, 1.0_hp, dmiss, 1.0_hp]; y = [0.0_hp, 1.0_hp, dmiss, 1.0_hp, dmiss, 0.0_hp]
 
-    xl   = -1.0_fp; yl = -1.0_fp ! Clearly outside
+    xl   = -1.0_hp; yl = -1.0_hp ! Clearly outside
     jins = 1
     call pinpok( xl, yl, 6, x, y, inside, jins, dmiss )
     call assert_equal( inside, 0, "The point should be detected as outside the polygon (0; extended)" )
@@ -163,7 +163,7 @@ subroutine test_pinpok
     call pinpok( xl, yl, 6, x, y, inside, jins, dmiss )
     call assert_equal( inside, 1, "The point should be detected as outside the polygon (1; extended)" )
 
-    xl   =  0.5_fp; yl =  0.5_fp ! Clearly inside
+    xl   =  0.5_hp; yl =  0.5_hp ! Clearly inside
     jins = 1
     call pinpok( xl, yl, 6, x, y, inside, jins, dmiss )
     call assert_equal( inside, 0, "The point should be detected as inside the polygon (1; extended)" )
@@ -172,7 +172,7 @@ subroutine test_pinpok
     call pinpok( xl, yl, 6, x, y, inside, jins, dmiss )
     call assert_equal( inside, 1, "The point should be detected as inside the polygon (0; extended)" )
 
-    xl   =  1.0_fp; yl =  0.5_fp ! On the border
+    xl   =  1.0_hp; yl =  0.5_hp ! On the border
     jins = 1
     call pinpok( xl, yl, 6, x, y, inside, jins, dmiss )
     call assert_equal( inside, 0, "A point on the border should be detected as inside the polygon (1)" )
@@ -183,25 +183,25 @@ subroutine test_pinpok
 end subroutine test_pinpok
 
 subroutine test_dbdistance
-    real(fp) :: x1, y1, x2, y2, distance
+    real(hp) :: x1, y1, x2, y2, distance
     integer  :: i, jsferic, jasfer3d
 
-    real(fp), dimension(5,9) :: coords
-    real(fp), parameter      :: twopi = 2.0_fp * acos(-1.0_fp)
+    real(hp), dimension(5,9) :: coords
+    real(hp), parameter      :: twopi = 2.0_hp * acos(-1.0_hp)
 
     !
     ! Note: this cannot be an initialisation expression, because earth_radius is
     !       not defined as a parameter!
     coords = reshape( &
-       [  0.0_fp, 0.0_fp , 1.0_fp,  0.0_fp, 1.0_fp,               & ! Plane
-          0.0_fp, 0.0_fp,  0.0_fp,  1.0_fp, 1.0_fp,               &
-         30.0_fp, 0.0_fp,  0.0_fp, 40.0_fp,50.0_fp,               &
-          0.0_fp, 0.0_fp, 90.0_fp,  0.0_fp,0.25_fp*twopi*earth_radius,  & ! Spherical
-        -90.0_fp, 0.0_fp, 90.0_fp,  0.0_fp,0.50_fp*twopi*earth_radius,  &
-          0.0_fp, 0.0_fp,  0.0_fp, 90.0_fp,0.25_fp*twopi*earth_radius,  &
-          0.0_fp,90.0_fp,  0.0_fp,-90.0_fp,0.50_fp*twopi*earth_radius,  &
-        -90.0_fp,45.0_fp, 90.0_fp,-45.0_fp,0.50_fp*twopi*earth_radius,  &
-          0.0_fp, 0.0_fp,360.0_fp,  0.0_fp,0.00_fp*twopi*earth_radius], [5,9] ) ! The points coindice on the sphere
+       [  0.0_hp, 0.0_hp , 1.0_hp,  0.0_hp, 1.0_hp,               & ! Plane
+          0.0_hp, 0.0_hp,  0.0_hp,  1.0_hp, 1.0_hp,               &
+         30.0_hp, 0.0_hp,  0.0_hp, 40.0_hp,50.0_hp,               &
+          0.0_hp, 0.0_hp, 90.0_hp,  0.0_hp,0.25_hp*twopi*earth_radius,  & ! Spherical
+        -90.0_hp, 0.0_hp, 90.0_hp,  0.0_hp,0.50_hp*twopi*earth_radius,  &
+          0.0_hp, 0.0_hp,  0.0_hp, 90.0_hp,0.25_hp*twopi*earth_radius,  &
+          0.0_hp,90.0_hp,  0.0_hp,-90.0_hp,0.50_hp*twopi*earth_radius,  &
+        -90.0_hp,45.0_hp, 90.0_hp,-45.0_hp,0.50_hp*twopi*earth_radius,  &
+          0.0_hp, 0.0_hp,360.0_hp,  0.0_hp,0.00_hp*twopi*earth_radius], [5,9] ) ! The points coindice on the sphere
 
     !
     ! Distance between points in the plane
