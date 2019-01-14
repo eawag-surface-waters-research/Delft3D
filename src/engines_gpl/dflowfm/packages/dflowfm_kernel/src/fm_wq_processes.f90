@@ -469,6 +469,7 @@
       endif
 
 !     add corresponding tracers, if not already defined by initial and/or boundary conditions
+      transformcoef = 0.0_hp
       call realloc(isys2trac,notot,keepExisting=.false.,fill=0)
       do i=1,notot
          call add_bndtracer(trim(syname(i)), syunit(i), isys2trac(i), janew)
