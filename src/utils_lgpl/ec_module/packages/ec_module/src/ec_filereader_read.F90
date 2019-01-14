@@ -58,6 +58,7 @@ module m_ec_filereader_read
    public :: ecSpiderwebReadBlock
    public :: ecArcinfoAndT3dReadBlock
    public :: ecCurviReadBlock
+   public :: ecNetcdfGetTimeIndexByTime
    public :: ecNetcdfReadBlock
    public :: ecQhtableReadAll
    public :: ect3DFindInFile
@@ -664,9 +665,18 @@ module m_ec_filereader_read
       end function ecSpiderwebReadBlock
       
       ! =======================================================================
+      !> Given the time, find the index of the time dimension in a netCDF filereader
       
+      function ecNetcdfGetTimeIndexByTime(fileReaderPtr, timesteps) result(ndx)
+         integer                      :: ndx           !< read into Field T0 or T1 (0,1).
+         type(tEcFileReader), pointer :: fileReaderPtr !< intent(in)
+         real(hp), intent(in)         :: timesteps
+         ndx = ecSupportTimestepsToTime(fileReaderPtr%tframe, timesteps)
+      end function ecNetcdfGetTimeIndexByTime
+      
+      ! =======================================================================
       !> Read the next record from a NetCDF file.
-      function ecNetcdfReadNextBlock(fileReaderPtr, item, t0t1) result(success)
+      function ecNetcdfReadNextBlock(fileReaderPtr, item, t0t1, timesndx) result(success)
          use netcdf
          use m_ec_field, only:ecFieldCreate1DArray, ecFieldSetMissingValue
          !
@@ -674,6 +684,7 @@ module m_ec_filereader_read
          type(tEcFileReader), pointer :: fileReaderPtr !< intent(in)
          type(tEcItem)                :: item          !< Item containing quantity1, intent(inout)
          integer                      :: t0t1          !< read into Field T0 or T1 (0,1).
+         integer, optional            :: timesndx      !< explicit index of the time dimension to jump to in the netCDF file
          !
          type(tEcField), pointer                 :: fieldPtr         !< Field to update
          integer                                 :: ierror           !< return status of NetCDF method call
@@ -699,18 +710,20 @@ module m_ec_filereader_read
 
          dmiss_nc = item%quantityPtr%fillvalue
          varid = item%quantityPtr%ncid
-         times_index = ec_undef_int
 
-         if (t0t1 < 0) then
-            if (comparereal(item%sourceT0FieldPtr%timesteps,0.0_hp) == -1) then
-               t0t1 = 0
-            elseif (comparereal(item%sourceT1FieldPtr%timesteps,0.0_hp) == -1) then
-               t0t1 = 1
-            elseif (comparereal(item%sourceT0FieldPtr%timesteps,item%sourceT1FieldPtr%timesteps) /= 1) then
-               t0t1 = 0
-            else
-               t0t1 = 1
-            endif
+             !
+         if (item%sourceT0FieldPtr%timesndx < 0) then
+            t0t1 = 0 
+            times_index = timesndx
+         elseif (item%sourceT1FieldPtr%timesndx < 0) then
+            t0t1 = 1 
+            times_index = timesndx
+         elseif (item%sourceT0FieldPtr%timesndx > item%sourceT1FieldPtr%timesndx) then
+            t0t1 = 1
+            times_index = item%sourceT0FieldPtr%timesndx + 1
+         else
+            t0t1 = 0 
+            times_index = item%sourceT1FieldPtr%timesndx + 1
          endif
          !
          !
@@ -737,7 +750,6 @@ module m_ec_filereader_read
          ! ===================
          ! update source Field
          ! ===================
-         !"Data block requested outside valid time window in "//trim(fileReaderPtr%filename)//".")
          ! - 0 - Determine if the timesteps of the field to be updated are still below the last time in the file 
          mintime = ecSupportTimeToTimesteps(fileReaderPtr%tframe, 1)
          maxtime = ecSupportTimeToTimesteps(fileReaderPtr%tframe, int(fileReaderPtr%tframe%nr_timesteps))
@@ -753,23 +765,8 @@ module m_ec_filereader_read
                 return
             endif
          else
-            ! - 1 - Determine the relevant time entry from the times array and its index (irrespective of the data recorded at this timelevel)
-            if (fieldPtr%timesteps == ec_undef_hp) then
-               times_index = 1
-            else
-               do i=1, int(fileReaderPtr%tframe%nr_timesteps)
-                  ! Convert times(i) * ec_timestep_unit since ec_refdate to seconds since k_refdate.
-                  netcdf_timesteps = ecSupportTimeToTimesteps(fileReaderPtr%tframe, i)
-                  ! field timesteps < NetCDf timesteps => read this block
-                  if (comparereal(fieldPtr%timesteps, netcdf_timesteps) == -1) then
-                     times_index = i
-                     exit
-                  end if
-               end do
-            end if
-            if (times_index == ec_undef_int) then
-               call setECMessage("Data block requested outside valid time window in "//trim(fileReaderPtr%filename)//".")
-               return
+            if (present(timesndx)) then                  ! if index into netcdf time dimension specified
+               times_index = timesndx                    ! Override the default timesndx (progressing) by an explicitly specified timesndx
             end if
             !
             col0 = fieldPtr%bbox(1)
@@ -819,7 +816,6 @@ module m_ec_filereader_read
 
                if (item%elementSetPtr%nCoordinates > 0) then
                   if (item%elementSetPtr%n_layers == 0) then                  ! 2D elementset
-!                    ierror = nf90_get_var(fileReaderPtr%fileHandle, varid, data_block, start=(/1, 1, times_index/), count=(/item%elementSetPtr%n_cols, item%elementSetPtr%n_rows, 1/))
                      ierror = nf90_get_var(fileReaderPtr%fileHandle, varid, data_block, start=(/col0, row0, times_index/), count=(/ncol, nrow, 1/))
                      ! copy data to source Field's 1D array, store (X1Y1, X1Y2, ..., X1Yn_rows, X2Y1, XYy2, ..., Xn_colsY1, ...)
                      do i=1, nrow
@@ -831,7 +827,6 @@ module m_ec_filereader_read
                   else
                      ! copy data to source Field's 1D array, store (X1Y1, X1Y2, ..., X1Yn_rows, X2Y1, XYy2, ..., Xn_colsY1, ...)
                      do k=1, item%elementSetPtr%n_layers
-!                       ierror = nf90_get_var(fileReaderPtr%fileHandle, varid, data_block, start=(/1, 1, k, times_index/), count=(/item%elementSetPtr%n_cols, item%elementSetPtr%n_rows, 1, 1/))
                         ierror = nf90_get_var(fileReaderPtr%fileHandle, varid, data_block, start=(/col0, row0, k, times_index/), count=(/ncol, nrow, 1, 1/))
                         do i=1, nrow
                            do j=1, ncol

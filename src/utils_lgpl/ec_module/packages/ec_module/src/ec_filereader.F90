@@ -197,9 +197,11 @@ module m_ec_filereader
          character(len=255)      :: qname 
          integer                 :: nv, nl, iitem
          integer                 :: from, thru
+         integer                 :: time_ndx
          real(hp), dimension(:), allocatable    :: values
          type(tEcItem), pointer  :: itemPtr
          integer                 :: n_invalid_components
+         integer                 :: timesndx, timesndx0, timesndx1
          
          ! body
          success = .false.
@@ -369,8 +371,15 @@ module m_ec_filereader
                   end do
                case default
                   t0t1 = -1
+                  timesndx  = ecNetcdfGetTimeIndexByTime(fileReaderPtr, timesteps)   ! where we are going
+                  timesndx0 = fileReaderPtr%items(1)%ptr%sourceT0FieldPtr%timesndx   ! what we have
+                  timesndx1 = fileReaderPtr%items(1)%ptr%sourceT1FieldPtr%timesndx
                   do i=1, fileReaderPtr%nItems
-                     success = ecNetcdfReadNextBlock(fileReaderPtr, fileReaderPtr%items(i)%ptr, t0t1)
+                     if ((timesndx0==-1) .and. (timesndx1==-1)) then
+                        success = ecNetcdfReadNextBlock(fileReaderPtr, fileReaderPtr%items(i)%ptr, t0t1, timesndx=timesndx)
+                     else
+                        success = ecNetcdfReadNextBlock(fileReaderPtr, fileReaderPtr%items(i)%ptr, t0t1)
+                     endif
                      if (t0t1 == 0) then
                         ! flip t0 and t1
                         fieldPtrA => fileReaderPtr%items(i)%ptr%sourceT1FieldPtr
@@ -380,9 +389,8 @@ module m_ec_filereader
                      ! Initially, both T0 and T1 refer to ec_undef_hp < 0
                      ! At this point, after swapping, T0-field is still uninitialized
                      ! In the next lines, 
-                     if (fileReaderPtr%items(i)%ptr%sourceT0FieldPtr%timesteps<0.0_hp) then
-                        fileReaderPtr%items(i)%ptr%sourceT0FieldPtr%timesteps = fileReaderPtr%items(i)%ptr%sourceT1FieldPtr%timesteps
-                        success = ecNetcdfReadNextBlock(fileReaderPtr, fileReaderPtr%items(i)%ptr, t0t1)
+                     if ((timesndx0==-1) .and. (timesndx1==-1)) then
+                        success = ecNetcdfReadNextBlock(fileReaderPtr, fileReaderPtr%items(i)%ptr, t0t1, timesndx=timesndx+1)
                         if (t0t1 == 0) then
                            ! flip t0 and t1
                            fieldPtrA => fileReaderPtr%items(i)%ptr%sourceT1FieldPtr

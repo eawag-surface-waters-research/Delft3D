@@ -65,6 +65,7 @@ module m_ec_support
    public :: ecSupportNCFindCFCoordinates
    public :: ecSupportTimestringToUnitAndRefdate
    public :: ecSupportTimeUnitConversionFactor
+   public :: ecSupportTimestepsToTime
    public :: ecSupportTimeToTimesteps
    public :: ecSupportThisTimeToTimesteps
    public :: ecSupportFindRelatedBCBlock
@@ -1075,6 +1076,30 @@ end subroutine ecInstanceListSourceItems
 
       ! =======================================================================
       
+      !> Convert seconds since k_refdate to times(i) * ec_timestep_unit since ec_refdate to seconds since k_refdate.
+      function ecSupportTimestepsToTime(tframe, timesteps) result(index)
+         integer                        :: index     !< function result, largest index with a time less than timesteps
+         type(tEcTimeFrame), intent(in) :: tframe    !< TimeFrame containing input data for conversion
+         real(hp)          , intent(in) :: timesteps !< seconds since k_refdate representing time to be found
+         !
+         real(hp):: srctime 
+         integer :: factor !< conversion factor from ec_timestep_unit to seconds
+         !
+         factor = ecSupportTimeUnitConversionFactor(tframe%ec_timestep_unit)
+         !
+         srctime = (timesteps - (tframe%k_timezone-tframe%ec_timezone) * 60.0_hp*60.0_hp                      & 
+                              - (tframe%ec_refdate - tframe%k_refdate) * 60.0_hp*60.0_hp*24.0_hp)/factor
+         do index=1,tframe%nr_timesteps
+            if (srctime<=tframe%times(index)) exit
+         enddo
+         if (index>tframe%nr_timesteps) then
+            index = -1
+         else
+            index = max(index - 1,1)
+         endif
+      end function ecSupportTimestepsToTime
+
+      ! =======================================================================
       !> Convert times(i) * ec_timestep_unit since ec_refdate to seconds since k_refdate.
       function ecSupportTimeToTimesteps(tframe, index) result(timesteps)
          real(hp)                       :: timesteps !< function result, seconds since k_refdate
@@ -1085,10 +1110,8 @@ end subroutine ecInstanceListSourceItems
          !
          factor = ecSupportTimeUnitConversionFactor(tframe%ec_timestep_unit)
          !
-         timesteps = tframe%times(index) * factor + (tframe%ec_refdate - tframe%k_refdate) * 60.0_hp*60.0_hp*24.0_hp
-         !
-         ! Correct for Kernel's timzone in seconds
-         timesteps = timesteps + (tframe%k_timezone-tframe%ec_timezone) * 60.0_hp*60.0_hp
+         timesteps = tframe%times(index) * factor + (tframe%ec_refdate - tframe%k_refdate) * 60.0_hp*60.0_hp*24.0_hp   &
+                   + (tframe%k_timezone-tframe%ec_timezone) * 60.0_hp*60.0_hp
       end function ecSupportTimeToTimesteps
 
       ! =======================================================================
