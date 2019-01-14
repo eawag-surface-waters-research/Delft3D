@@ -164,6 +164,8 @@ public :: ionc_get_dimid
 public :: ionc_get_contact_id_ugrid
 public :: ionc_put_meshgeom
 public :: ionc_get_contact_topo_count
+public :: ionc_create_1d_mesh_ugrid_v1
+public :: ug_put_1d_mesh_discretisation_points_v1
 
 private
 
@@ -1642,6 +1644,24 @@ function ionc_create_1d_mesh_ugrid(ioncid, networkname, meshid, meshname, nmeshp
 end function ionc_create_1d_mesh_ugrid
 
 
+function ionc_create_1d_mesh_ugrid_v1(ioncid, networkname, meshid, meshname, nmeshpoints, writexy) result(ierr)
+
+   integer, intent(in)         :: ioncid, nmeshpoints
+   integer, intent (inout)     :: meshid
+   integer, intent(in)         :: writexy
+   character(len=*),intent(in) :: meshname, networkname 
+   integer                     :: ierr
+   
+   !adds a meshids structure
+   ierr = ug_add_mesh(datasets(ioncid)%ncid, datasets(ioncid)%ug_file, meshid)
+   ! set the meshname
+   datasets(ioncid)%ug_file%meshnames(meshid) = meshname
+   ! create mesh
+   ierr = ug_create_1d_mesh_v1(datasets(ioncid)%ncid, networkname, datasets(ioncid)%ug_file%meshids(meshid), meshname, nmeshpoints, writexy)
+  
+end function ionc_create_1d_mesh_ugrid_v1
+
+
 function ionc_def_mesh_ids_ugrid(ioncid, meshid, locationType) result(ierr)
 
    integer, intent(in)         :: ioncid, meshid, locationType
@@ -1661,6 +1681,18 @@ function ionc_put_1d_mesh_discretisation_points_ugrid(ioncid, meshid, branchidx,
   ierr=ug_put_1d_mesh_discretisation_points(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), branchidx, offset, startIndex)  
   
 end function ionc_put_1d_mesh_discretisation_points_ugrid
+
+function ionc_put_1d_mesh_discretisation_points_ugrid_v1(ioncid, meshid, branchidx, offset, startIndex, coordx, coordy) result(ierr) 
+
+  integer, intent(in)         :: ioncid, meshid, startIndex  
+  integer, intent(in)         :: branchidx(:)
+  double precision,intent(in) :: offset(:)
+  double precision,intent(in) :: coordx(:), coordy(:) 
+  integer                     :: ierr
+  
+  ierr=ug_put_1d_mesh_discretisation_points_v1(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), branchidx, offset, startIndex, coordx, coordy)  
+  
+end function ionc_put_1d_mesh_discretisation_points_ugrid_v1
 
 function ionc_get_1d_mesh_discretisation_points_count_ugrid(ioncid, meshid, nmeshpoints) result(ierr) 
 
