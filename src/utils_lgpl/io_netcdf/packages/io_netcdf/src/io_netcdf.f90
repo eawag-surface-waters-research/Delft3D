@@ -127,6 +127,8 @@ public :: ionc_create_1d_mesh_ugrid
 public :: ionc_put_1d_mesh_discretisation_points_ugrid
 public :: ionc_get_1d_mesh_discretisation_points_count_ugrid
 public :: ionc_get_1d_mesh_discretisation_points_ugrid
+public :: ionc_create_1d_mesh_ugrid_v1
+public :: ionc_put_1d_mesh_discretisation_points_ugrid_v1
 !links functions
 public :: ionc_def_mesh_contact_ugrid
 public :: ionc_get_contacts_count_ugrid
@@ -164,8 +166,6 @@ public :: ionc_get_dimid
 public :: ionc_get_contact_id_ugrid
 public :: ionc_put_meshgeom
 public :: ionc_get_contact_topo_count
-public :: ionc_create_1d_mesh_ugrid_v1
-public :: ug_put_1d_mesh_discretisation_points_v1
 
 private
 
@@ -1686,8 +1686,7 @@ function ionc_put_1d_mesh_discretisation_points_ugrid_v1(ioncid, meshid, branchi
 
   integer, intent(in)         :: ioncid, meshid, startIndex  
   integer, intent(in)         :: branchidx(:)
-  double precision,intent(in) :: offset(:)
-  double precision,intent(in) :: coordx(:), coordy(:) 
+  double precision,intent(in) :: offset(:), coordx(:), coordy(:) 
   integer                     :: ierr
   
   ierr=ug_put_1d_mesh_discretisation_points_v1(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), branchidx, offset, startIndex, coordx, coordy)  

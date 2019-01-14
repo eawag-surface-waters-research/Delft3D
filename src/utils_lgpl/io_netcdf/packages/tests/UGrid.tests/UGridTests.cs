@@ -69,6 +69,8 @@ namespace UGrid.tests
         private int nmesh1dPoints = 8;
         private int[] branchidx = { 1, 1, 1, 1, 2, 2, 3, 3 };
         private double[] offset = { 0.0, 2.0, 3.0, 4.0, 1.5, 3.0, 1.5, 3.0 };
+        private double[] mesh1dCoordX = { 1, 1, 1, 1, 2, 2, 3, 3 };
+        private double[] mesh1dCoordY = { 1, 1, 1, 1, 2, 2, 3, 3 };
 
         private string[] meshnodeids = { "node1_branch1", "node2_branch1", "node3_branch1", "node4_branch1", "node1_branch2",
                                          "node2_branch2", "node3_branch2", "node1_branch3", "node2_branch3", "node3_branch3" };
@@ -378,7 +380,9 @@ namespace UGrid.tests
             ref int[] l_branchidx, 
             ref int[] l_sourcenodeid, 
             ref int[] l_targetnodeid, 
-            int l_startIndex 
+            int l_startIndex,
+            ref double[] l_mesh1dCoordX,
+            ref double[] l_mesh1dCoordY
             )
         {
             // Mesh variables
@@ -387,6 +391,8 @@ namespace UGrid.tests
             IntPtr c_targetnodeid = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int))    * l_nBranches);
             IntPtr c_branchoffset = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * l_nmeshpoints);
             IntPtr c_branchlength = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * l_nBranches);
+            IntPtr c_mesh1dCoordX = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * l_nmeshpoints);
+            IntPtr c_mesh1dCoordY = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * l_nmeshpoints);
             // Links variables
             IntPtr c_mesh1indexes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * l_nlinks);
             IntPtr c_mesh2indexes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * l_nlinks);
@@ -395,9 +401,10 @@ namespace UGrid.tests
             {
                 string tmpstring;
                 int meshid = -1;
+                int writexy = 1;
 
                 //1. Create: the assumption here is that l_nedgenodes is known (we could move this calculation inside ionc_create_1d_mesh)
-                int ierr = wrapper.ionc_create_1d_mesh(ref ioncid, l_networkName.ToString(), ref meshid, l_meshname.ToString(), ref l_nmeshpoints);
+                int ierr = wrapper.ionc_create_1d_mesh_v1(ref ioncid, l_networkName.ToString(), ref meshid, l_meshname.ToString(), ref l_nmeshpoints, ref writexy);
                 Assert.That(ierr, Is.EqualTo(0));
 
                 //2. Create the edge nodes (the algorithm is in gridgeom.dll, not in ionetcdf.dll)
@@ -406,9 +413,11 @@ namespace UGrid.tests
                 Marshal.Copy(l_targetnodeid, 0, c_targetnodeid, l_nBranches);
                 Marshal.Copy(l_branchoffset, 0, c_branchoffset, l_nmeshpoints);
                 Marshal.Copy(l_branchlength, 0, c_branchlength, l_nBranches);
-                
+                Marshal.Copy(l_mesh1dCoordX, 0, c_mesh1dCoordX, l_nmeshpoints);
+                Marshal.Copy(l_mesh1dCoordY, 0, c_mesh1dCoordY, l_nmeshpoints);
+
                 //3. Write the discretization points
-                ierr = wrapper.ionc_put_1d_mesh_discretisation_points(ref ioncid, ref meshid, ref c_branchidx, ref c_branchoffset, meshnodeidsinfo, ref l_nmeshpoints, ref l_startIndex);
+                ierr = wrapper.ionc_put_1d_mesh_discretisation_points_v1(ref ioncid, ref meshid, ref c_branchidx, ref c_branchoffset, meshnodeidsinfo, ref l_nmeshpoints, ref l_startIndex, ref c_mesh1dCoordX, ref c_mesh1dCoordY);
                 Assert.That(ierr, Is.EqualTo(0));
             }
             finally
@@ -684,6 +693,8 @@ namespace UGrid.tests
             double[] l_branchlength = branchlengths;
             int[] l_branchidx = branchidx;
             int l_startIndex = startIndex;
+            double[] l_mesh1dCoordX = mesh1dCoordX;
+            double[] l_mesh1dCoordY = mesh1dCoordY;
 
             //3. Create the node branchidx, offsets, meshnodeidsinfo
             IoNetcdfLibWrapper.interop_charinfo[] meshnodeidsinfo = new IoNetcdfLibWrapper.interop_charinfo[l_nmeshpoints];
@@ -732,7 +743,9 @@ namespace UGrid.tests
                 ref l_branchidx,
                 ref l_sourcenodeid,
                 ref l_targetnodeid,
-                l_startIndex);
+                l_startIndex,
+                ref l_mesh1dCoordX,
+                ref l_mesh1dCoordY);
 
             //8. Close the file
             ierr = wrapper.ionc_close(ref ioncid);
@@ -972,6 +985,8 @@ namespace UGrid.tests
             double[] l_branchlength = branchlengths;
             int[] l_branchidx = branchidx;
             int l_startIndex = startIndex;
+            double[] l_mesh1dCoordX = mesh1dCoordX;
+            double[] l_mesh1dCoordY = mesh1dCoordY;
 
             //3. Create the node branchidx, offsets, meshnodeidsinfo
             IoNetcdfLibWrapper.interop_charinfo[] meshnodeidsinfo = new IoNetcdfLibWrapper.interop_charinfo[l_nmeshpoints];
@@ -1021,7 +1036,9 @@ namespace UGrid.tests
                 ref l_branchidx,
                 ref l_sourcenodeid,
                 ref l_targetnodeid,
-                l_startIndex);
+                l_startIndex,
+                ref l_mesh1dCoordX,
+                ref l_mesh1dCoordY);
 
             //7. Clone the 2d mesh definitions in the new file
             int target2dmesh = -1;
@@ -1802,6 +1819,8 @@ namespace UGrid.tests
                 1,
                 1
             };
+            double[] l_mesh1dCoordX = l_branchoffset;
+            double[] l_mesh1dCoordY = l_branchoffset;
 
             IoNetcdfLibWrapper.interop_charinfo[] meshnodeidsinfo = new IoNetcdfLibWrapper.interop_charinfo[l_nmeshpoints];
             for (int i = 0; i < l_nmeshpoints; i++)
@@ -1850,7 +1869,9 @@ namespace UGrid.tests
                 ref l_branchidx, 
                 ref l_sourcenodeid,
                 ref l_targetnodeid,
-                l_startIndex);
+                l_startIndex,
+                ref l_mesh1dCoordX,
+                ref l_mesh1dCoordY);
 
             //8. Clone the 2d mesh definitions in the new file
             int target2dmesh = -1;
