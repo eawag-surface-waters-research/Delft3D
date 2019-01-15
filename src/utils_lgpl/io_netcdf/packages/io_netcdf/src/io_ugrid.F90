@@ -1168,7 +1168,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
       !some results might still be saved at the edges, also for 1d 
       ierr = nf90_def_dim(ncid, 'n'//prefix//'_edge',        numEdge,   meshids%dimids(mdim_edge))   
       ierr = ug_create_1d_network(ncid, networkids, network1dname, size(nnodex), nbranches, ngeometry)
-      ierr = ug_create_1d_mesh(ncid, network1dname, meshids, meshname, numNode)
+      ierr = ug_create_1d_mesh_v1(ncid, network1dname, meshids, meshname, numNode, 1)
       ierr = ug_def_mesh_ids(ncid, meshids, meshname, UG_LOC_NODE)
    endif
    
@@ -1373,7 +1373,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
          ierr = ug_put_1d_network_branchorder(ncid, networkids, nbranchorder)
          ierr = ug_write_1d_network_branches_geometry(ncid, networkids, ngeopointx, ngeopointy)
          ! write mesh1d
-         ierr = ug_put_1d_mesh_discretisation_points(ncid, meshids, branchidx, branchoffsets, start_index)   
+         ierr = ug_put_1d_mesh_discretisation_points_v1(ncid, meshids, branchidx, branchoffsets, start_index, xn, yn)   
       endif
         ! always write edge nodes
         ierr = nf90_put_var(ncid, meshids%varids(mid_edgenodes), edge_nodes, count=(/ 2, numEdge /))
