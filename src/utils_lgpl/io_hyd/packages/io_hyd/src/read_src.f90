@@ -200,6 +200,7 @@
 
       wasteload_data%subject         = SUBJECT_WASTE
       wasteload_data%functype        = FUNCTYPE_BLOCK
+      wasteload_data%igrid          =  1
       wasteload_data%extern          = .FALSE.
       wasteload_data%iorder          = ORDER_PARAM_LOC
       wasteload_data%param_pointered = .FALSE.

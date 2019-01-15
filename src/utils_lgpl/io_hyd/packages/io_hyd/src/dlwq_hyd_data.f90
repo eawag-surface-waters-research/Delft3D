@@ -540,7 +540,7 @@
             enddo
 
          else
-            if ( dlwqdata%igrid .ne. 1 ) then
+            if ( dlwqdata%igrid .gt. 1 ) then
                allocate(tmp_conc(dlwqdata%no_param,dlwqdata%no_loc),iseg_set(dlwqdata%no_loc))
                iseg_set = .false.
             endif
@@ -605,7 +605,7 @@
                   aa = ( it2c*aa + it1c*ab ) / idtc
                   aa = aa*param_factor*loc_factor
 
-                  if ( dlwqdata%igrid .eq. 1 ) then
+                  if ( dlwqdata%igrid .le. 1 ) then
                      if ( dlwqdata%subject .eq. SUBJECT_SEGFUNC ) then
                         conc(iseg,isys) = aa
                      else
@@ -618,7 +618,7 @@
 
                enddo
             enddo
-            if ( dlwqdata%igrid .ne. 1 ) then
+            if ( dlwqdata%igrid .gt. 1 ) then
                do iseg2 = 1 , noseg
                   iseg = GridPs%Pointers(dlwqdata%igrid)%finalpointer(iseg2)
                   if ( iseg .gt. 0 ) then
