@@ -2348,7 +2348,6 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
     use unstruc_channel_flow, only: network
     use m_flowparameters, only: jamd1dfile
     use m_oned_functions, only: gridpoint2cross
-    use m_save_ugrid_state, only: mesh1dname
    
     integer,           intent(in) :: irstfile
     real(kind=hp),     intent(in) :: tim
@@ -3630,7 +3629,6 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
    use unstruc_channel_flow, only: network
    use m_oned_functions, only: gridpoint2cross
    use string_module, only: replace_multiple_spaces_by_single_spaces
-   use m_save_ugrid_state, only: mesh1dname
 
    implicit none
 

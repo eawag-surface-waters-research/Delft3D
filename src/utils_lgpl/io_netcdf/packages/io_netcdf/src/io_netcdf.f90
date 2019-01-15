@@ -34,7 +34,6 @@
 module io_netcdf
 use netcdf
 use io_ugrid
-use coordinate_reference_system
 implicit none
 
 !
@@ -1295,8 +1294,15 @@ function detect_coordinate_system(ioncid) result(ierr)
       ierr = IONC_EBADID
       goto 999
    end if
-
-   ierr = find_grid_mapping_var(datasets(ioncid)%ncid, id_crs)
+   
+   ierr = nf90_inq_varid(datasets(ioncid)%ncid, 'wgs84', id_crs)
+   if (ierr /= nf90_noerr) then
+       ierr = nf90_inq_varid(datasets(ioncid)%ncid, 'WGS84', id_crs)  ! needed for DIMR sets 2.0.6, 2.0.7 and 2.0.8
+   end if
+    
+   if (ierr /= nf90_noerr) then
+      ierr = nf90_inq_varid(datasets(ioncid)%ncid, 'projected_coordinate_system', id_crs)
+   end if
    if (ierr /= nf90_noerr) then
       goto 999
    end if
@@ -1328,7 +1334,6 @@ function detect_coordinate_system(ioncid) result(ierr)
       !end if
       !!datasets(ioncid)%epsg = epsg_code
       ierr = ug_get_var_attset(datasets(ioncid)%ncid, id_crs, datasets(ioncid)%crs%attset)
-      ierr = detect_proj_string(datasets(ioncid)%crs)
    else 
       goto 999
    end if
