@@ -1068,6 +1068,40 @@ function ionc_get_1d_mesh_discretisation_points_dll(ioncid, meshid, c_branchidx,
   
 end function ionc_get_1d_mesh_discretisation_points_dll
 
+function ionc_get_1d_mesh_discretisation_points_v1_dll(ioncid, meshid, c_branchidx, c_offset, nodesinfo, nmeshpoints, startIndex, c_coordx, c_coordy) result(ierr) bind(C, name="ionc_get_1d_mesh_discretisation_points_v1")
+!DEC$ ATTRIBUTES DLLEXPORT :: ionc_get_1d_mesh_discretisation_points_v1_dll
+  integer(kind=c_int), intent(in)   :: ioncid, meshid, nmeshpoints,startIndex
+  type(c_ptr), intent(inout)        :: c_branchidx, c_offset, c_coordx, c_coordy
+  type(t_ug_charinfo),  intent(inout)  :: nodesinfo(nmeshpoints)
+  character(len=ug_idsLen)          :: nodeids(nmeshpoints)
+  character(len=ug_idsLongNamesLen) :: nodelongnames(nmeshpoints)
+  double precision,pointer          :: offset(:)
+  integer,pointer                   :: branchidx(:)
+  double precision,pointer          :: coordx(:), coordy(:)
+  character(len=8)                  :: varnameids
+  character(len=15)                 :: varnamelongnames
+  integer                           :: ierr,i
+  
+  call c_f_pointer(c_branchidx, branchidx, (/ nmeshpoints /))
+  call c_f_pointer(c_offset, offset, (/ nmeshpoints /))
+  call c_f_pointer(c_coordx, coordx, (/ nmeshpoints /))
+  call c_f_pointer(c_coordy, coordy, (/ nmeshpoints /))
+  
+  ierr = ionc_get_1d_mesh_discretisation_points_ugrid_v1(ioncid, meshid, branchidx, offset, startIndex, coordx, coordy )
+  
+  !The names of the variables are hard-coded
+  varnameids        = 'node_ids'
+  ierr              = ionc_get_var_chars(ioncid, meshid, varnameids, nodeids)
+  varnamelongnames  = 'node_long_names'
+  ierr              = ionc_get_var_chars(ioncid, meshid, varnamelongnames, nodelongnames)
+  
+  do i=1,nmeshpoints
+     nodesinfo(i)%ids       = nodeids(i) 
+     nodesinfo(i)%longnames = nodelongnames(i) 
+  end do
+  
+end function ionc_get_1d_mesh_discretisation_points_v1_dll
+
 !
 ! mesh links
 !

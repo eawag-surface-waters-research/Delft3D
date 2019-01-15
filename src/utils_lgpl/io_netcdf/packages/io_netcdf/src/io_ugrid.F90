@@ -4198,6 +4198,52 @@ function ug_get_1d_mesh_discretisation_points(ncid, meshids, branchidx, offsets,
     
 end function  ug_get_1d_mesh_discretisation_points
 
+!> This function reads the geometry information for the mesh points
+function ug_get_1d_mesh_discretisation_points_v1(ncid, meshids, branchidx, offsets, startIndex, coordx, coordy) result(ierr)
+   use array_module
+   integer, intent(in)                      :: ncid, startIndex
+   type(t_ug_mesh), intent(in)              :: meshids 
+   real(kind=dp),   intent(out)             :: offsets(:)
+   integer,intent(out)                      :: branchidx(:)
+   
+   real(kind=dp),   intent(out), optional   :: coordx(:), coordy(:) 
+   integer                                  :: ierr,varStartIndex
+         
+   ierr = nf90_get_var(ncid, meshids%varids(mid_1dmeshtobranch), branchidx)
+
+   !we check for the start_index, we do not know if the variable was written as 0 based
+   ierr = nf90_get_att(ncid, meshids%varids(mid_1dmeshtobranch),'start_index', varStartIndex)
+   if (ierr .eq. UG_NOERR) then
+        ierr = convert_start_index(branchidx, imiss, varStartIndex, startIndex)
+   else
+        ierr = convert_start_index(branchidx, imiss, 0, startIndex)
+   endif
+   
+   !define dim
+   if(ierr /= UG_NOERR) then 
+       Call SetMessage(Level_Fatal, 'could not read the branch ids')
+   end if 
+   ierr = nf90_get_var(ncid, meshids%varids(mid_1doffset), offsets)
+   if(ierr /= UG_NOERR) then 
+       Call SetMessage(Level_Fatal, 'could not read the branch offsets')
+   end if 
+   
+   if(present(coordx)) then
+      ierr = nf90_get_var(ncid, meshids%varids(mid_nodex), coordx)
+      if(ierr /= UG_NOERR) then 
+         Call SetMessage(Level_Fatal, 'could not read the branch mesh x coords')
+      end if 
+   endif
+   
+   if(present(coordy)) then
+      ierr = nf90_get_var(ncid, meshids%varids(mid_nodey), coordy)
+      if(ierr /= UG_NOERR) then 
+         Call SetMessage(Level_Fatal, 'could not read the branch mesh y coords')
+      end if
+   endif
+    
+end function  ug_get_1d_mesh_discretisation_points_v1
+
 !
 ! Cloning functions
 !

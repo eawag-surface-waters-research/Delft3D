@@ -124,10 +124,11 @@ public :: ionc_get_1d_network_branches_ugrid
 public :: ionc_read_1d_network_branches_geometry_ugrid
 public :: ionc_create_1d_mesh_ugrid
 public :: ionc_put_1d_mesh_discretisation_points_ugrid
+public :: ionc_put_1d_mesh_discretisation_points_ugrid_v1
 public :: ionc_get_1d_mesh_discretisation_points_count_ugrid
 public :: ionc_get_1d_mesh_discretisation_points_ugrid
+public :: ionc_get_1d_mesh_discretisation_points_ugrid_v1
 public :: ionc_create_1d_mesh_ugrid_v1
-public :: ionc_put_1d_mesh_discretisation_points_ugrid_v1
 !links functions
 public :: ionc_def_mesh_contact_ugrid
 public :: ionc_get_contacts_count_ugrid
@@ -1719,6 +1720,17 @@ function ionc_get_1d_mesh_discretisation_points_ugrid(ioncid, meshid, branchidx,
   ierr = ug_get_1d_mesh_discretisation_points(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), branchidx, offset, startIndex)
    
 end function ionc_get_1d_mesh_discretisation_points_ugrid
+
+function ionc_get_1d_mesh_discretisation_points_ugrid_v1(ioncid, meshid, branchidx, offset, startIndex, coordx, coordy) result(ierr) 
+
+  integer, intent(in)         :: ioncid, meshid, startIndex 
+  integer, intent(out)        :: branchidx(:)
+  double precision,intent(out):: offset(:), coordx(:), coordy(:)
+  integer                     :: ierr
+  
+  ierr = ug_get_1d_mesh_discretisation_points_v1(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%meshids(meshid), branchidx, offset, startIndex, coordx, coordy)
+   
+end function ionc_get_1d_mesh_discretisation_points_ugrid_v1
 
 !
 ! create mesh links
