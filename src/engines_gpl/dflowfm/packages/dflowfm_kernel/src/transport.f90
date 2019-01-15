@@ -1658,10 +1658,10 @@ subroutine fill_constituents(jas) ! if jas == 1 do sources
       end if
    end do
    
-   !       apply_sediment_bc must still be done here, since above the boundary
+   ! NOTE: apply_tracer_bc has been moved earlier to transport() routine,
+   !       but apply_sediment_bc must still be done here, since above the boundary
    !       nodes's constituents(kb,:) = sed(kb,:) has reset it to 0.
    if ( stm_included ) call apply_sediment_bc()
-   
    if (jas == 0) return                    ! no sources from initialise
    
    do n  = 1,numsrc
