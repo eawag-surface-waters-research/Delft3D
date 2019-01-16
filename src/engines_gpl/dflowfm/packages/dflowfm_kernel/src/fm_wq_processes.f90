@@ -398,8 +398,8 @@
 
 !     Finally, evaluate the processes using the proces library
 !     --------------------------------------------------------
-      call wq_processes_initialise ( proc_log_file   , proc_def_file, bloom_file, statprocesdef, outputs , &
-                                     nomult , imultp, constants, noinfo, nowarn, ierr)
+      call wq_processes_initialise ( lunlsp, proc_def_file, bloom_file, statprocesdef, outputs, &
+                                     nomult, imultp, constants, noinfo, nowarn, ierr)
 
 !     proces fractional step multiplier is 1 for all
       prondt = 1
@@ -654,6 +654,9 @@
                   end do
                endif
                deallocate(viuh)
+            else
+!              just accept any other keyword as success, they are evaluated again in unstruc.F90
+               success = .true.
             endif
       
         endif
