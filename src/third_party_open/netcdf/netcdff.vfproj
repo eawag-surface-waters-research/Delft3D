@@ -51,7 +51,9 @@
 		<File RelativePath=".\netcdf-fortran-4.4.4\fortran\module_netcdf_nc_interfaces.f90"/>
 		<File RelativePath=".\netcdf-fortran-4.4.4\fortran\module_netcdf_nf_data.F90"/>
 		<File RelativePath=".\netcdf-fortran-4.4.4\fortran\netcdf4.f90"/>
-		<File RelativePath=".\netcdf-fortran-4.4.4\fortran\netcdf4_func.f90"/>
+		<File RelativePath=".\netcdf-fortran-4.4.4\fortran\netcdf4_func.f90">
+			<FileConfiguration Name="Debug|x64">
+				<Tool Name="VFFortranCompilerTool" WarnInterfaces="false"/></FileConfiguration></File>
 		<File RelativePath=".\netcdf-fortran-4.4.4\fortran\netcdf4_visibility.f90"/>
 		<File RelativePath=".\netcdf-fortran-4.4.4\fortran\nf_attio.F90"/>
 		<File RelativePath=".\netcdf-fortran-4.4.4\fortran\nf_control.F90"/>
