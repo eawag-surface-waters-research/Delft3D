@@ -17,7 +17,7 @@
 #   adri.mourits@deltares.nl
 #   04 Feb 2015
 #
-#   Copyright (C)  Stichting Deltares, 2011-2013.
+#   Copyright (C)  Stichting Deltares, 2011-2019.
 #-------------------------------------------------------------------------------
 #
 #   WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING

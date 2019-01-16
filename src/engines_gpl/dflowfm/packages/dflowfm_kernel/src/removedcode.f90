@@ -1,6 +1,6 @@
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2017-2019.                                
 !                                                                               
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).               
 !                                                                               
@@ -158,23 +158,6 @@
 !
 !function readarcinfoheader(minp      ,mmax      ,nmax      ,x0        ,y0        , &
 !                         & dxa       ,dya       ,dmiss      ) result(success)
-!!!--copyright-------------------------------------------------------------------
-!! Copyright (c) 2006, WL | Delft Hydraulics. All rights reserved.
-!!!--disclaimer------------------------------------------------------------------
-!! This code is part of the Delft3D software system. WL|Delft Hydraulics has
-!! developed c.q. manufactured this code to its best ability and according to the
-!! state of the art. Nevertheless, there is no express or implied warranty as to
-!! this software whether tangible or intangible. In particular, there is no
-!! express or implied warranty as to the fitness for a particular purpose of this
-!! software, whether tangible or intangible. The intellectual property rights
-!! related to this software code remain with WL|Delft Hydraulics at all times.
-!! For details on the licensing agreement, we refer to the Delft3D software
-!! license and any modifications to this license, if applicable. These documents
-!! are available upon request.
-!!!--version information---------------------------------------------------------
-!! $Author$
-!! $Date$
-!! $Revision$
 !!!--description-----------------------------------------------------------------
 !! NONE
 !!!--pseudo code and references--------------------------------------------------
@@ -356,23 +339,6 @@
 ! 
 !function reaspwheader(minp      ,mx        ,nx        ,dxa        ,dya        , &
 !                      & mncoor, dmisval    ) result(success)
-!!!--copyright-------------------------------------------------------------------
-!! Copyright (c) 2003, WL | Delft Hydraulics. All rights reserved.
-!!!--disclaimer------------------------------------------------------------------
-!! This code is part of the Delft3D software system. WL|Delft Hydraulics has
-!! developed c.q. manufactured this code to its best ability and according to the
-!! state of the art. Nevertheless, there is no express or implied warranty as to
-!! this software whether tangible or intangible. In particular, there is no
-!! express or implied warranty as to the fitness for a particular purpose of this
-!! software, whether tangible or intangible. The intellectual property rights
-!! related to this software code remain with WL|Delft Hydraulics at all times.
-!! For details on the licensing agreement, we refer to the Delft3D software
-!! license and any modifications to this license, if applicable. These documents
-!! are available upon request.
-!!!--version information---------------------------------------------------------
-!! $Author$
-!! $Date$
-!! $Revision$
 !!!--description-----------------------------------------------------------------
 !! NONE
 !!!--pseudo code and references--------------------------------------------------
@@ -2309,23 +2275,6 @@
 !
 !subroutine distance2(sferic    ,x1        ,y1        ,x2        ,y2        , &
 !                   & d12       )
-!!!--copyright-------------------------------------------------------------------
-!! Copyright (c) 2003, WL | Delft Hydraulics. All rights reserved.
-!!!--disclaimer------------------------------------------------------------------
-!! This code is part of the Delft3D software system. WL|Delft Hydraulics has
-!! developed c.q. manufactured this code to its best ability and according to the
-!! state of the art. Nevertheless, there is no express or implied warranty as to
-!! this software whether tangible or intangible. In particular, there is no
-!! express or implied warranty as to the fitness for a particular purpose of this
-!! software, whether tangible or intangible. The intellectual property rights
-!! related to this software code remain with WL|Delft Hydraulics at all times.
-!! For details on the licensing agreement, we refer to the Delft3D software
-!! license and any modifications to this license, if applicable. These documents
-!! are available upon request.
-!!!--version information---------------------------------------------------------
-!! $Author$
-!! $Date$
-!! $Revision$
 !!!--description-----------------------------------------------------------------
 !!
 !!    Function: Calculates distance between two points on earth
@@ -2597,23 +2546,6 @@
 !
 !
 !subroutine asc(omeg, ampl, phas, inaam, itdate, ierrs)
-!!!--copyright-------------------------------------------------------------------
-!! Copyright (c) 2003, WL | Delft Hydraulics. All rights reserved.
-!!!--disclaimer------------------------------------------------------------------
-!! This code is part of the Delft3D software system. WL|Delft Hydraulics has
-!! developed c.q. manufactured this code to its best ability and according to the
-!! state of the art. Nevertheless, there is no express or implied warranty as to
-!! this software whether tangible or intangible. In particular, there is no
-!! express or implied warranty as to the fitness for a particular purpose of this
-!! software, whether tangible or intangible. The intellectual property rights
-!! related to this software code remain with WL|Delft Hydraulics at all times.
-!! For details on the licensing agreement, we refer to the Delft3D software
-!! license and any modifications to this license, if applicable. These documents
-!! are available upon request.
-!!!--version information---------------------------------------------------------
-!! $Author$
-!! $Date$
-!! $Revision$
 !!!--description-----------------------------------------------------------------
 !!
 !!    Function: Determination of FR and V0+U
@@ -2707,23 +2639,6 @@
 !end subroutine asc
 !
 !subroutine datumi(jaar      ,jdatum    ,t         )
-!!!--copyright-------------------------------------------------------------------
-!! Copyright (c) 2003, WL | Delft Hydraulics. All rights reserved.
-!!!--disclaimer------------------------------------------------------------------
-!! This code is part of the Delft3D software system. WL|Delft Hydraulics has
-!! developed c.q. manufactured this code to its best ability and according to the
-!! state of the art. Nevertheless, there is no express or implied warranty as to
-!! this software whether tangible or intangible. In particular, there is no
-!! express or implied warranty as to the fitness for a particular purpose of this
-!! software, whether tangible or intangible. The intellectual property rights
-!! related to this software code remain with WL|Delft Hydraulics at all times.
-!! For details on the licensing agreement, we refer to the Delft3D software
-!! license and any modifications to this license, if applicable. These documents
-!! are available upon request.
-!!!--version information---------------------------------------------------------
-!! $Author$
-!! $Date$
-!! $Revision$
 !!!--description-----------------------------------------------------------------
 !!
 !!    Function: Calculates the number of hours referred to
@@ -2800,23 +2715,6 @@
 !end subroutine datumi
 !
 !subroutine hulpgr(jaar      ,tm1       ,v         ,f         )
-!!!--copyright-------------------------------------------------------------------
-!! Copyright (c) 2003, WL | Delft Hydraulics. All rights reserved.
-!!!--disclaimer------------------------------------------------------------------
-!! This code is part of the Delft3D software system. WL|Delft Hydraulics has
-!! developed c.q. manufactured this code to its best ability and according to the
-!! state of the art. Nevertheless, there is no express or implied warranty as to
-!! this software whether tangible or intangible. In particular, there is no
-!! express or implied warranty as to the fitness for a particular purpose of this
-!! software, whether tangible or intangible. The intellectual property rights
-!! related to this software code remain with WL|Delft Hydraulics at all times.
-!! For details on the licensing agreement, we refer to the Delft3D software
-!! license and any modifications to this license, if applicable. These documents
-!! are available upon request.
-!!!--version information---------------------------------------------------------
-!! $Author$
-!! $Date$
-!! $Revision$
 !!!--description-----------------------------------------------------------------
 !!
 !!    Function: Calulates help var. V and F
@@ -2952,23 +2850,6 @@
 !end subroutine hulpgr
 !
 !function cmpnum(num       )
-!!!--copyright-------------------------------------------------------------------
-!! Copyright (c) 2003, WL | Delft Hydraulics. All rights reserved.
-!!!--disclaimer------------------------------------------------------------------
-!! This code is part of the Delft3D software system. WL|Delft Hydraulics has
-!! developed c.q. manufactured this code to its best ability and according to the
-!! state of the art. Nevertheless, there is no express or implied warranty as to
-!! this software whether tangible or intangible. In particular, there is no
-!! express or implied warranty as to the fitness for a particular purpose of this
-!! software, whether tangible or intangible. The intellectual property rights
-!! related to this software code remain with WL|Delft Hydraulics at all times.
-!! For details on the licensing agreement, we refer to the Delft3D software
-!! license and any modifications to this license, if applicable. These documents
-!! are available upon request.
-!!!--version information---------------------------------------------------------
-!! $Author$
-!! $Date$
-!! $Revision$
 !!!--description-----------------------------------------------------------------
 !!
 !!    Function: Finds the name of the tidal component
@@ -3245,23 +3126,6 @@
 !    endif
 !end function cmpnum
 !subroutine kompbs(l         )
-!!!--copyright-------------------------------------------------------------------
-!! Copyright (c) 2003, WL | Delft Hydraulics. All rights reserved.
-!!!--disclaimer------------------------------------------------------------------
-!! This code is part of the Delft3D software system. WL|Delft Hydraulics has
-!! developed c.q. manufactured this code to its best ability and according to the
-!! state of the art. Nevertheless, there is no express or implied warranty as to
-!! this software whether tangible or intangible. In particular, there is no
-!! express or implied warranty as to the fitness for a particular purpose of this
-!! software, whether tangible or intangible. The intellectual property rights
-!! related to this software code remain with WL|Delft Hydraulics at all times.
-!! For details on the licensing agreement, we refer to the Delft3D software
-!! license and any modifications to this license, if applicable. These documents
-!! are available upon request.
-!!!--version information---------------------------------------------------------
-!! $Author$
-!! $Date$
-!! $Revision$
 !!!--description-----------------------------------------------------------------
 !!
 !!    Function: SIMULATION OF EXTERNAL KOMPBES-FILE
@@ -3523,23 +3387,6 @@
 !subroutine bewvuf(ierrs     ,kcmp      ,mxkc      ,inaam     ,knaam     , &
 !                & jnaam     ,w         ,v0u       ,fr        ,v         , &
 !                & f         )
-!!!--copyright-------------------------------------------------------------------
-!! Copyright (c) 2003, WL | Delft Hydraulics. All rights reserved.
-!!!--disclaimer------------------------------------------------------------------
-!! This code is part of the Delft3D software system. WL|Delft Hydraulics has
-!! developed c.q. manufactured this code to its best ability and according to the
-!! state of the art. Nevertheless, there is no express or implied warranty as to
-!! this software whether tangible or intangible. In particular, there is no
-!! express or implied warranty as to the fitness for a particular purpose of this
-!! software, whether tangible or intangible. The intellectual property rights
-!! related to this software code remain with WL|Delft Hydraulics at all times.
-!! For details on the licensing agreement, we refer to the Delft3D software
-!! license and any modifications to this license, if applicable. These documents
-!! are available upon request.
-!!!--version information---------------------------------------------------------
-!! $Author$
-!! $Date$
-!! $Revision$
 !!!--description-----------------------------------------------------------------
 !!
 !!    Function: calculates V0U() and FR()
@@ -5113,23 +4960,6 @@
 ! END subroutine LINEDISq
 ! 
 ! function numbersonline(rec)
-!!!--copyright-------------------------------------------------------------------
-!! Copyright (c) 2003, WL | Delft Hydraulics. All rights reserved.
-!!!--disclaimer------------------------------------------------------------------
-!! This code is part of the Delft3D software system. WL|Delft Hydraulics has
-!! developed c.q. manufactured this code to its best ability and according to the
-!! state of the art. Nevertheless, there is no express or implied warranty as to
-!! this software whether tangible or intangible. In particular, there is no
-!! express or implied warranty as to the fitness for a particular purpose of this
-!! software, whether tangible or intangible. The intellectual property rights
-!! related to this software code remain with WL|Delft Hydraulics at all times.
-!! For details on the licensing agreement, we refer to the Delft3D software
-!! license and any modifications to this license, if applicable. These documents
-!! are available upon request.
-!!!--version information---------------------------------------------------------
-!! $Author$
-!! $Date$
-!! $Revision$
 !!!--description-----------------------------------------------------------------
 !! NONE
 !!!--pseudo code and references--------------------------------------------------

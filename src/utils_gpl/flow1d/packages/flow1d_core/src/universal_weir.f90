@@ -1,7 +1,7 @@
 module m_Universal_Weir
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2017-2018.                                
+!  Copyright (C)  Stichting Deltares, 2017-2019.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify              
 !  it under the terms of the GNU Affero General Public License as               
@@ -81,23 +81,6 @@ module m_Universal_Weir
    
    subroutine ComputeUniversalWeir(uniweir, fum, rum, aum, dadsm, kfum, s1m1, s1m2, &
                                    qm, q0m, u1m, u0m, dxm, dt, infuru)
-      !!--copyright-------------------------------------------------------------------
-      ! Copyright (c) 2003, Deltares. All rights reserved.
-      !!--disclaimer------------------------------------------------------------------
-      ! This code is part of the Delft3D software system. Deltares has
-      ! developed c.q. manufactured this code to its best ability and according to the
-      ! state of the art. Nevertheless, there is no express or implied warranty as to
-      ! this software whether tangible or intangible. In particular, there is no
-      ! express or implied warranty as to the fitness for a particular purpose of this
-      ! software, whether tangible or intangible. The intellectual property rights
-      ! related to this software code remain with Deltares at all times.
-      ! For details on the licensing agreement, we refer to the Delft3D software
-      ! license and any modifications to this license, if applicable. These documents
-      ! are available upon request.
-      !!--version information---------------------------------------------------------
-      ! $Author$
-      ! $Date$
-      ! $Revision$
       !!--description-----------------------------------------------------------------
       ! NONE
       !!--pseudo code and references--------------------------------------------------
