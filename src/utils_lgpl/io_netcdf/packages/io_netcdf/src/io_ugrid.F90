@@ -4562,9 +4562,11 @@ function ug_ionc_get_number_of_networks(ug_file, nnumNetworks) result(ierr)
    
    ierr = UG_NOERR
    nnumNetworks = 0
-   if(size(ug_file%netids)>0) then
-      nnumNetworks = size(ug_file%netids)
-   end if
+   if (allocated(ug_file%netids)) then
+      if(size(ug_file%netids)>0) then
+         nnumNetworks = size(ug_file%netids)
+      end if
+   endif
    
 end function ug_ionc_get_number_of_networks
 
