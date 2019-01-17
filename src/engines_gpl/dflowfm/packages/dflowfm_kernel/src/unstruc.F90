@@ -1081,8 +1081,24 @@ if(q /= 0) then
     nums1it   = nums1it + 1
     
     if (nums1it > maxNonlinearIterations) then
-       write(msgbuf, '(''No convergence in nonlinear solver at time '', g10.5,'' (s)'')') time0
-       call fatal_flush()
+       write(msgbuf, '(''No convergence in nonlinear solver at time '', g10.5,'' (s), time step is reduced from '', f8.4, '' (s) into '', f8.4, '' (s)'')') time0, dts, 0.5d0*dts
+       if (nonlin1D == 2) then
+          ! Nested Newtotn
+          call err_flush()
+       else
+          call warn_flush()
+          dts = 0.5d0*dts
+          dsetb  = dsetb + 1                               ! total nr of setbacks
+          s1     = s0
+          if (dts .lt. dtmin) then
+              s1 = max(s1,bl)                              ! above bottom
+              call okay(0)
+              key = 1                                      ! for easier mouse interrupt
+              return
+          endif
+          call setkfs()
+          goto 111                                      ! redo with timestep reduction => 111 furu
+       endif
     endif
 
     !if (nums1it > 10) then
