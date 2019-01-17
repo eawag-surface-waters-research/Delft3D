@@ -7946,6 +7946,7 @@ subroutine unc_write_net_filepointer(inetfile, janetcell, janetbnd, jaidomain, j
     integer, dimension(:), allocatable :: kn1write
     integer, dimension(:), allocatable :: kn2write
     integer :: istart, iend, ipoint, ipoly, numpoints, iorient, iinterior
+    integer :: netstat_store
     
     call readyy('Writing net data',0d0)
 
@@ -7994,8 +7995,11 @@ subroutine unc_write_net_filepointer(inetfile, janetcell, janetbnd, jaidomain, j
 
        ! Start detecting grid enclosure
        call savepol()
-       if (jampi>0 .and. jawave == 3) then
+       if (jampi>0) then ! .and. jawave == 3) then
+          netstat_store = netstat
+          netstat = NETSTAT_OK
           call generate_partition_pol_from_idomain(ierr, myrank=my_rank)    ! UNST-1937: strictly domain, no ghostcells
+          netstat = netstat_store
        else
           call copynetboundstopol(0, 0, 1, 0)
        endif
