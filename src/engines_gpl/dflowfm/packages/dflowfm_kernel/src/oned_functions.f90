@@ -333,6 +333,7 @@ module m_oned_functions
             if (allocated(gridpoint2cross(k1)%cross)) deallocate(gridpoint2cross(k1)%cross)
             allocate(gridpoint2cross(k1)%cross(linkcount))
             gridpoint2cross(k1)%num_cross_sections = linkcount
+            gridpoint2cross(k1)%cross = -999
          enddo
          
          igrid = 0
@@ -379,7 +380,7 @@ module m_oned_functions
                elseif (d2 < dh) then
                   gridpoint2cross(k1)%cross(jpos) = c2
                else
-                  gridpoint2cross(k1)%cross(jpos) = 0
+                  gridpoint2cross(k1)%cross(jpos) = -999
                endif
             enddo
          enddo
@@ -418,23 +419,23 @@ module m_oned_functions
                       endif
                       if (pNodRel%BranchIn == pbr%id) then
                           if (pNodRel%node == pbr%fromNode%id) then
-                              pNodRel%BranchInLn = pbr%lin(pbr%upoints(1))    ! (negative = at start of branch)
+                              pNodRel%BranchInLn = pbr%lin(1)                    ! (negative = at start of branch)
                           elseif (pNodRel%node == pbr%toNode%id) then
-                              pNodRel%BranchInLn = pbr%lin(pbr%upoints(2))     ! (positive = at end of branch)
+                              pNodRel%BranchInLn = pbr%lin(pbr%uPointsCount)     ! (positive = at end of branch)
                           endif
                       endif
                       if (pNodRel%BranchOut1 == pbr%id) then
                           if (pNodRel%node == pbr%fromNode%id) then
-                              pNodRel%BranchOut1Ln = pbr%lin(pbr%upoints(1))  ! (negative = at start of branch)
+                              pNodRel%BranchOut1Ln = pbr%lin(1)                  ! (negative = at start of branch)
                           elseif (pNodRel%node == pbr%toNode%id) then
-                              pNodRel%BranchOut1Ln = pbr%lin(pbr%upoints(2))   ! (positive = at end of branch)
+                              pNodRel%BranchOut1Ln = pbr%lin(pbr%uPointsCount)   ! (positive = at end of branch)
                           endif
                       endif
                       if (pNodRel%BranchOut2 == pbr%id) then
                           if (pNodRel%node == pbr%fromNode%id) then
-                              pNodRel%BranchOut2Ln = pbr%lin(pbr%upoints(1))  ! (negative = at start of branch)
+                              pNodRel%BranchOut2Ln = pbr%lin(1)                  ! (negative = at start of branch)
                           elseif (pNodRel%node == pbr%toNode%id) then
-                              pNodRel%BranchOut2Ln = pbr%lin(pbr%upoints(2))   ! (positive = at end of branch)
+                              pNodRel%BranchOut2Ln = pbr%lin(pbr%uPointsCount)   ! (positive = at end of branch)
                           endif
                       endif
                   enddo

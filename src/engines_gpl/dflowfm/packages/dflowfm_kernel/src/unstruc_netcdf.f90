@@ -2852,7 +2852,7 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
          do i = 1,ndx1d
             if (gridpoint2cross(i)%num_cross_sections==1) then
                n = gridpoint2cross(i)%cross(1)
-               if (n==0) cycle
+               if (n==-999) cycle
                pCS => network%crs%cross(n)%tabdef
                if (pCS%crosstype == CS_TABULATED) then
                   do j = 1,pCS%levelscount
@@ -5088,7 +5088,7 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
             k = ndx2d + i
             if (gridpoint2cross(k)%num_cross_sections==1) then
                n = gridpoint2cross(k)%cross(1)
-               if (n==0) cycle
+               if (n==-999) cycle
                pCS => network%crs%cross(n)%tabdef
                if (pCS%crosstype == CS_TABULATED) then
                   do j = 1,pCS%levelscount
@@ -12252,7 +12252,7 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
          do i = 1,ndx1d
             if (gridpoint2cross(i)%num_cross_sections==1) then
                n = gridpoint2cross(i)%cross(1)
-               if (n==0) cycle
+               if (n==-999) cycle
                pCS => network%crs%cross(n)%tabdef
                if (pCS%crosstype == CS_TABULATED) then
                   do j = 1,pCS%levelscount

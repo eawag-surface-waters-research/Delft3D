@@ -226,9 +226,9 @@
 
    subroutine fm_update_crosssections(blchg)
    use precision
-   use m_flowgeom, only: ndxi, kcs, dx, wu, nd, wu_mor, ba_mor
+   use m_flowgeom, only: ndxi, kcs, dx, wu, nd, wu_mor, ba_mor, bai_mor, bl, ndx, acl
    use m_oned_functions, only:gridpoint2cross
-   use unstruc_channel_flow, only: network
+   use unstruc_channel_flow, only: network, t_node, nt_LinkNode
    use m_CrossSections, only: t_CSType, CS_TABULATED
    use m_flow, only: s1
    use MessageHandling
@@ -236,12 +236,18 @@
    real(fp), dimension(:), intent(inout) :: blchg         !< Bed level change (> 0 = sedimentation, < 0 = erosion)
 
    integer :: i
+   integer :: inod
    integer :: iref
+   integer :: j
    integer :: l
    integer :: nm
+   integer :: nm2
+   integer :: nmm 
    integer :: c
    integer :: ctype
+   integer :: LL 
    double precision :: aref
+   double precision :: blmin
    double precision :: da
    double precision :: ds
    double precision :: dvol
@@ -249,16 +255,42 @@
    double precision :: href
    double precision :: w_active
    type(t_CSType), pointer :: cdef
+   type(t_node), pointer :: pnod
    !
    ! upon entry blchg contains the bed level change averaged over the total cell area
    !
    do nm = 1, ndxi
       if (kcs(nm)==1) then ! only for 1D nodes
-         if (gridpoint2cross(nm)%num_cross_sections==1) then
-            c = gridpoint2cross(nm)%cross(1)
+         do j = 1, gridpoint2cross(nm)%num_cross_sections
+            c = gridpoint2cross(nm)%cross(j)
+            if (c == -999) cycle
             cdef => network%crs%cross(c)%tabdef
             ctype = cdef%crosstype
-            if (ctype== CS_TABULATED) then
+            if (gridpoint2cross(nm)%num_cross_sections == 1) then 
+               nmm = nm
+               !
+               ! compute the total cell length
+               !
+               ds = 0d0
+               do i = 1,nd(nm)%lnx
+                  LL = nd(nm)%ln(i)
+                  L = iabs(LL)
+                  if (LL < 0) then 
+                     ds = ds+dx(L)*acl(L)
+                  else
+                     ds = ds+dx(L)*(1d0 - acl(L))
+                  endif
+               enddo
+            else    
+               LL = nd(nm)%ln(j)
+               L = iabs(LL)
+               if (LL < 0) then 
+                  ds = dx(L)*acl(L)
+               else
+                  ds = dx(L)*(1d0 - acl(L))
+               endif
+            endif
+            if (ctype == CS_TABULATED) then
                !
                ! determine the reference height href and the cross sectional area  below that level
                !
@@ -279,16 +311,7 @@
                ! use blchg as bed level change over the total cell area (can be partly dry)
                ! to compute the total volume deposited inside the cell
                !
-               dvol = blchg(nm)*ba_mor(nm)
-               !
-               ! compute the total cell length
-               !
-               ds   = 0
-               do i = 1,nd(nm)%lnx
-                  L = iabs(nd(nm)%ln(i))
-                  ds = ds+dx(L)
-               enddo
-               ds = ds/dble(nd(nm)%lnx)
+               dvol = blchg(nm)*ds*cdef%plains(1) ! relative volume (at links)
                !
                ! compute the deposited area per unit length, i.e. the area by which the cross section should be adjusted
                !
@@ -342,17 +365,43 @@
                !
                ! set blchg to bed level change for deepest point
                !
-               blchg(nm) = cdef%height(1) - network%crs%cross(c)%bedLevel
-               !
                network%crs%cross(c)%surfaceLevel = cdef%height(cdef%levelscount)
+               if (gridpoint2cross(nm)%num_cross_sections == 1) then 
+                  blchg(nm) = cdef%height(1) - network%crs%cross(c)%bedLevel
+               endif
                network%crs%cross(c)%bedLevel     = cdef%height(1) !TODO: check if we need to include network%crs%cross(c)%shift
                network%crs%cross(c)%charheight   = network%crs%cross(c)%surfaceLevel - network%crs%cross(c)%bedLevel
             else
                write(msgbuf,'(a,i5)') 'Bed level updating has not yet implemented for cross section type ',ctype
                call err_flush()
             endif
-         endif
+         enddo
       endif
+   enddo
+   !
+   ! set blchg to bed level change for deepest point of incoming branches
+   !
+   ! loop over connection nodes 
+   do inod = 1, network%nds%Count
+      pnod => network%nds%node(inod)
+      if (pnod%nodeType == nt_LinkNode) then  ! connection node
+         nm = pnod%gridnumber
+         blmin = 999999d0   
+         do j = 1, gridpoint2cross(nm)%num_cross_sections
+            c = gridpoint2cross(nm)%cross(j)
+            cdef => network%crs%cross(c)%tabdef
+            if (c == -999) cycle
+            !LL = nd(nm)%ln(j)
+            !L = iabs(LL)
+            !if (LL < 0) then 
+            !   ds = dx(L)*acl(L)
+            !else
+            !   ds = dx(L)*(1d0 - acl(L))
+            !endif            
+            blmin = min(blmin, network%crs%cross(c)%bedLevel)
+         enddo
+         blchg(nm) = blmin - bl(nm)
+      endif   
    enddo
    !
    ! upon exit blchg contains the bed level change for deepest point
@@ -431,7 +480,6 @@
    endif
 
    end subroutine fm_update_mor_width_area
-
 
 end module m_fm_update_crosssections
 !
@@ -662,7 +710,7 @@ end module m_fm_update_crosssections
       iturbulencemodel, z0urou, frcu, ifrcutp, hu, spirint, spiratx, spiraty, u_to_umain, q1, frcu_mor
    use m_flowtimes, only: julrefdat, dts, time1
    use unstruc_files, only: mdia
-   use unstruc_channel_flow, only: network, t_branch, t_node
+   use unstruc_channel_flow, only: network, t_branch, t_node, nt_LinkNode
    use message_module, only: write_error
    use MessageHandling, only: LEVEL_INFO, LEVEL_FATAL, mess, setmessage
    use m_transport, only: ised1, numconst, constituents
@@ -826,7 +874,6 @@ end module m_fm_update_crosssections
    !
    real(fp), dimension(:), allocatable :: qb_out          !< sum of outgoing discharge at 1d node
    real(fp), dimension(:), allocatable :: width_out       !< sum of outgoing main channel widths
-   real(fp), dimension(:), allocatable :: width_in        !< sum of incoming main channel widths
    real(fp), dimension(:,:), allocatable :: sb_in         !< sum of incoming sediment transport at 1d node
    integer, dimension(:,:,:), allocatable :: sb_dir       !< direction of transport at node (nnod, lsedtot, nbr) (-1 = incoming or no transport, +1 = outgoing)
    integer, dimension(:), allocatable :: branInIDLn       !< ID of Incoming Branch (If there is only one) (nnod)
@@ -846,13 +893,12 @@ end module m_fm_update_crosssections
    if (istat == 0) allocate(z0rouk(1:ndx), z0curk(1:ndx), taub(1:ndx), deltas(1:ndx), stat=istat)
    if (istat == 0) allocate(qb_out(network%nds%Count), stat = istat)
    if (istat == 0) allocate(width_out(network%nds%Count), stat = istat)
-   if (istat == 0) allocate(width_in(network%nds%Count), stat = istat)
    if (istat == 0) allocate(sb_in(network%nds%Count, lsedtot), stat = istat)
    if (istat == 0) allocate(sb_dir(network%nds%Count, lsedtot, network%nds%maxnumberofconnections), stat = istat)
    if (istat == 0) allocate(branInIDLn(network%nds%Count), stat = istat)
 
    localpar = 0d0; ua = 0d0; va = 0d0; z0rouk = 0d0; z0curk=0d0
-   qb_out = 0d0; width_out = 0d0; width_in = 0d0; sb_in = 0d0; sb_dir = -1
+   qb_out = 0d0; width_out = 0d0; sb_in = 0d0; sb_dir = -1
    BranInIDLn = 0
 
    if ((istat == 0) .and. (.not. allocated(u1ori))) allocate(u1ori(1:lnx), u0ori(1:lnx), vori(1:lnx), stat=ierr)
@@ -892,61 +938,6 @@ end module m_fm_update_crosssections
    !   Calculate cell centre velocities ucxq, ucyq
    call setucxucyucxuucyu()
    call setucxqucyq()
-   !
-   call junctionadv()
-   !
-   ! Replace ucx, ucxq, ucyq, ucyq by incoming values at node
-   do inod = 1, network%nds%Count
-      pnod => network%nds%node(inod)
-      if (pnod%numberofconnections > 1) then
-         k3 = pnod%gridnumber
-         do j=1,nd(k3)%lnx
-            L = iabs(nd(k3)%ln(j))
-            Ldir = -sign(1,nd(k3)%ln(j))
-            !
-            wb1d = wu_mor(L)
-            !
-            if (u1(L)*Ldir > 0d0) then
-               ! Outgoing discharge
-               qb1d = q1(L)*Ldir
-               width_out(inod) = width_out(inod) + wb1d
-               qb_out(inod)    = qb_out(inod) + qb1d
-               do ised = 1, lsedtot
-                  sb_dir(inod, ised, j) = 1           ! set direction to outgoing
-               enddo
-            else
-               ! Incoming discharge
-               width_in(inod) = width_in(inod) + wb1d
-               if (branInIDLn(inod) == 0) then
-                  branInIDLn(inod) = L
-                  ucxq(k3) = u1(L)*hu(L)*csu(L)*wb1d    ! should be cross-section area at node  q1(L)/wu(k3) ?
-                  ucyq(k3) = u1(L)*hu(L)*snu(L)*wb1d
-               else
-                  branInIDLn(inod) = -444               ! multiple incoming branches
-                  ucxq(k3) = ucxq(k3) + u1(L)*hu(L)*csu(L)*wb1d    ! should be cross-section area at node  q1(L)/wu(k3) ?
-                  ucyq(k3) = ucyq(k3) + u1(L)*hu(L)*snu(L)*wb1d
-               endif
-            endif
-         enddo
-      endif
-   enddo
-   !
-   do inod = 1, network%nds%Count
-      pnod => network%nds%node(inod)
-      if (pnod%numberofconnections == 1) cycle
-      k3 = pnod%gridnumber
-      if ((hs(k3) > 0.d0) .and. (width_in(inod) > 0.d0)) then
-         ucxq(k3) = ucxq(k3)/width_in(inod)/hs(k3)
-         ucyq(k3) = ucyq(k3)/width_in(inod)/hs(k3)
-      else
-         ucxq(k3) = 0.d0
-         ucyq(k3) = 0.d0
-      endif
-      ucx(k3) = ucxq(k3)
-      ucy(k3) = ucyq(k3)
-      ucxq_mor(k3) = ucxq(k3)
-      ucyq_mor(k3) = ucyq(k3)
-   enddo
    !
    if (.not. (jawave==4 .or. jawave==3)) then
       ktb=0d0     ! no roller turbulence
@@ -1918,23 +1909,60 @@ end module m_fm_update_crosssections
       call fm_adjust_bedload(e_sbcn, e_sbct)
    endif
    !
+   ! Determine incoming discharge and transport at nodes 
+   !
+   qb_out = 0d0; width_out = 0d0; sb_in = 0d0; sb_dir = 1
+   BranInIDLn = 0
+   do inod = 1, network%nds%Count
+      pnod => network%nds%node(inod)
+      if (pnod%numberofconnections > 1) then
+         k3 = pnod%gridnumber
+         do j=1,nd(k3)%lnx
+            L = iabs(nd(k3)%ln(j))
+            Ldir = sign(1,nd(k3)%ln(j))
+            !
+            wb1d = wu_mor(L)
+            !
+            if (u1(L)*Ldir < 0d0) then
+               ! Outgoing discharge
+               qb1d = -q1(L)*Ldir  ! replace with junction advection: to do WO
+               width_out(inod) = width_out(inod) + wb1d
+               qb_out(inod)    = qb_out(inod) + qb1d
+               do ised = 1, lsedtot
+                  sb_dir(inod, ised, j) = -1           ! set direction to outgoing
+               enddo
+            else
+               ! Incoming discharge
+               if (branInIDLn(inod) == 0) then
+                  branInIDLn(inod) = L
+               else
+                  branInIDLn(inod) = -444               ! multiple incoming branches
+               endif
+            endif
+         enddo
+      endif
+   enddo
+   !
+   ! Apply nodal relations to transport 
+   !
    do inod = 1, network%nds%Count
       pnod => network%nds%node(inod)
       if (pnod%numberofconnections == 1) cycle
-      k3 = pnod%gridnumber
-      do j=1,nd(k3)%lnx
-         L = iabs(nd(k3)%ln(j))
-         Ldir = -sign(1,nd(k3)%ln(j))
-         !
-         wb1d = wu_mor(L)
-         do ised = 1, lsedtot
-            sb1d = (csu(L)*sbcx(k3,ised) + snu(L)*sbcy(k3,ised)) * Ldir  ! requires updating of velocity in node prior to sediment transport computation
-            ! this works for one incoming branch TO DO: WO
-            if (sb_dir(inod, ised, j) == -1) then
-               sb_in(inod, ised) = sb_in(inod, ised) + max(wb1d*sb1d, 0.0_fp)
-            endif
-         enddo
-      enddo
+      if (pnod%nodeType == nt_LinkNode) then  ! connection node
+          k1 = pnod%gridnumber
+          do j=1,nd(k1)%lnx
+             L = iabs(nd(k1)%ln(j))
+             !
+             wb1d = wu_mor(L)
+             do ised = 1, lsedtot
+                sb1d = e_sbcn(L, ised) * Ldir  ! first compute all outgoing sed. transport.
+                ! this works for one incoming branch TO DO: WO
+                if (sb_dir(inod, ised, j) == -1) then
+                   sb_in(inod, ised) = sb_in(inod, ised) + max(-wb1d*sb1d, 0.0_fp)  ! outgoing transport is negative
+                endif
+             enddo
+          enddo
+      endif
    enddo
    !
    ! Determining sediment redistribution
@@ -1949,95 +1977,96 @@ end module m_fm_update_crosssections
 
       do inod = 1, network%nds%Count
          pnod => network%nds%node(inod)
+         if (pnod%nodeType == nt_LinkNode) then  ! connection node
 
-         facCheck = 0.d0
+             facCheck = 0.d0
 
-         if (pnod%numberofconnections == 1) cycle
+             if (pnod%numberofconnections == 1) cycle
 
-         if (width_in(inod) > 0.d0) then
-            sb_in(inod, ised) = sb_in(inod, ised)/width_in(inod)
-         endif
+             if (width_out(inod) > 0.d0) then
+                sb_in(inod, ised) = sb_in(inod, ised)/width_out(inod)
+             endif
 
-         ! loop over branches and determine redistribution of incoming sediment
-         k3 = pnod%gridnumber
-         do j=1,nd(k3)%lnx
-            L = iabs(nd(k3)%ln(j))
-            Ldir = -sign(1,nd(k3)%ln(j))
-            !
-            qb1d = q1(L)
-            wb1d = wu_mor(L)                 ! here and elsewhere: should be w main TO DO WO?
+             ! loop over branches and determine redistribution of incoming sediment
+             k3 = pnod%gridnumber
+             do j=1,nd(k3)%lnx
+                L = iabs(nd(k3)%ln(j))
+                Ldir = sign(1,nd(k3)%ln(j))
+                qb1d = -Ldir*q1(L)  
+                wb1d = wu_mor(L)    
 
-            ! Get Nodal Point Relation Data
-            nrd_idx = get_noderel_idx(inod, pFrac, pnod%gridnumber, branInIDLn(inod), pnod%numberofconnections)
+                ! Get Nodal Point Relation Data
+                nrd_idx = get_noderel_idx(inod, pFrac, pnod%gridnumber, branInIDLn(inod), pnod%numberofconnections)
 
-            pNodRel => pFrac%noderelations(nrd_idx)
+                pNodRel => pFrac%noderelations(nrd_idx)
 
-            if (sb_dir(inod, ised, j) == 1) then
+                if (sb_dir(inod, ised, j) == -1) then ! is outgoing 
 
-               if (qb_out(inod) > 0.0_fp) then
+                   if (qb_out(inod) > 0.0_fp) then
 
-                  if (pNodRel%Method == 'function') then
+                      if (pNodRel%Method == 'function') then
 
-                     expQ = pNodRel%expQ
-                     expW = pNodRel%expW
+                         expQ = pNodRel%expQ
+                         expW = pNodRel%expW
 
-                     facQ = (qb1d / qb_out(inod))**expQ
-                     facW = (wb1d / width_out(inod))**expW
+                         facQ = (qb1d / qb_out(inod))**expQ
+                         facW = (wb1d / width_out(inod))**expW
 
-                     facCheck = facCheck + facQ * facW
+                         facCheck = facCheck + facQ * facW  
 
-                     e_sbcn(L,ised) = Ldir * facQ * facW * sb_in(inod, ised)
+                         e_sbcn(L,ised) = -Ldir * facQ * facW * sb_in(inod, ised)
 
-                  elseif (pNodRel%Method == 'table') then
+                      elseif (pNodRel%Method == 'table') then
 
-                     facCheck = 1.0d0
+                         facCheck = 1.0d0
 
-                     if (pbr%id == pNodRel%BranchOut1) then
-                        Qbr1 = qb1d
-                        Qbr2 = qb_out(inod) - qb1d
-                     elseif (pbr%id == pNodRel%BranchOut2) then
-                        Qbr1 = qb_out(inod) - qb1d
-                        Qbr2 = qb1d
-                     else
-                        call SetMessage(LEVEL_FATAL, 'Unknown Branch Out (This should never happen!)')
-                     endif
+                         if (L == pNodRel%BranchOut1Ln) then
+                            Qbr1 = qb1d
+                            Qbr2 = qb_out(inod) - qb1d
+                         elseif (L == pNodRel%BranchOut2Ln) then
+                            Qbr1 = qb_out(inod) - qb1d
+                            Qbr2 = qb1d
+                         else
+                            call SetMessage(LEVEL_FATAL, 'Unknown Branch Out (This should never happen!)')
+                         endif
 
-                     QbrRatio = Qbr1 / Qbr2
+                         QbrRatio = Qbr1 / Qbr2
 
-                     SbrRatio = interpolate(pNodRel%Table, QbrRatio)
+                         SbrRatio = interpolate(pNodRel%Table, QbrRatio)
 
-                     if (pbr%id == pNodRel%BranchOut1) then
-                        e_sbcn(L,ised) = Ldir * SbrRatio * sb_in(inod, ised) / (1 + SbrRatio)
-                        e_sbct(L,ised) = 0.0
-                     elseif (pbr%id == pNodRel%BranchOut2) then
-                        e_sbcn(L,ised) = Ldir * sb_in(inod, ised) / (1 + SbrRatio)
-                        e_sbct(L,ised) = 0.0
-                     endif
+                         if (L == pNodRel%BranchOut1Ln) then
+                            e_sbcn(L,ised) = -Ldir * SbrRatio * sb_in(inod, ised) / (1 + SbrRatio)
+                            e_sbct(L,ised) = 0.0
+                         elseif (L == pNodRel%BranchOut2Ln) then
+                            e_sbcn(L,ised) = -Ldir * sb_in(inod, ised) / (1 + SbrRatio)
+                            e_sbct(L,ised) = 0.0
+                         endif
 
 
-                  else
-                     call SetMessage(LEVEL_FATAL, 'Unknown Nodal Point Relation Method Specified')
-                  endif
+                      else
+                         call SetMessage(LEVEL_FATAL, 'Unknown Nodal Point Relation Method Specified')
+                      endif
 
-               else
-                  e_sbcn(L,ised) = 0.0_fp
-                  e_sbct(L,ised) = 0.0
-               endif
+                   else
+                      e_sbcn(L,ised) = 0.0_fp
+                      e_sbct(L,ised) = 0.0
+                   endif
 
-            endif
+                endif
 
-         enddo    ! Branches
+             enddo    ! Branches
 
-         ! Correct Total Outflow
-         if ((facCheck /= 1.0_fp) .and. (facCheck > 0.0_fp)) then
-            ! loop over branches and correct redistribution of incoming sediment
-            do j=1,nd(k3)%lnx
-               L = iabs(nd(k3)%ln(j))
-               if (sb_dir(inod, ised, j) == 1) then
-                  e_sbcn(L,ised) = e_sbcn(L,ised)/facCheck
-               endif
-            enddo    ! Branches
-         endif
+             ! Correct Total Outflow
+             if ((facCheck /= 1.0_fp) .and. (facCheck > 0.0_fp)) then
+                ! loop over branches and correct redistribution of incoming sediment
+                do j=1,nd(k3)%lnx
+                   L = iabs(nd(k3)%ln(j))
+                   if (sb_dir(inod, ised, j) == -1) then
+                      e_sbcn(L,ised) = e_sbcn(L,ised)/facCheck
+                   endif
+                enddo    ! Branches
+             endif
+          endif
       enddo      ! Nodes
 
    enddo    ! Fractions
@@ -2129,7 +2158,6 @@ end module m_fm_update_crosssections
    deallocate(dzdx, dzdy, u1ori, u0ori, vori, stat = istat)
    if (istat == 0) deallocate(qb_out, stat = istat)
    if (istat == 0) deallocate(width_out, stat = istat)
-   if (istat == 0) deallocate(width_in, stat = istat)
    if (istat == 0) deallocate(sb_in, stat = istat)
    if (istat == 0) deallocate(sb_dir, stat = istat)
    if (istat == 0) deallocate(BranInIDLn, stat = istat)
