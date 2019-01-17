@@ -1983,9 +1983,6 @@ end module m_fm_update_crosssections
 
              if (pnod%numberofconnections == 1) cycle
 
-             if (width_out(inod) > 0.d0) then
-                sb_in(inod, ised) = sb_in(inod, ised)/width_out(inod)
-             endif
 
              ! loop over branches and determine redistribution of incoming sediment
              k3 = pnod%gridnumber
@@ -2062,7 +2059,7 @@ end module m_fm_update_crosssections
                 do j=1,nd(k3)%lnx
                    L = iabs(nd(k3)%ln(j))
                    if (sb_dir(inod, ised, j) == -1) then
-                      e_sbcn(L,ised) = e_sbcn(L,ised)/facCheck
+                      e_sbcn(L,ised) = e_sbcn(L,ised)/facCheck/wu_mor(L)
                    endif
                 enddo    ! Branches
              endif
