@@ -863,7 +863,7 @@ module m_meteo
       qidname = name
       call get_tracername(name, trname, qidname)
       call get_sedfracname(name, sfname, qidname)
-      call get_waqinputname(qid, waqinput, qidname)
+      call get_waqinputname(name, waqinput, qidname)
       target_name = qidname
 
       call clearECMessage()

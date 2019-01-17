@@ -728,10 +728,9 @@
       implicit none
       
       character(len=*), intent(in)  :: qid       !< Original quantityid, e.g., 'waqfunctionradsurf'.
-      character(len=*), intent(out) :: inputname !< The trimmed waq input name, e.g., 'fluor'.
-      character(len=*), intent(out) :: qidname   !< The base input name for further use in external file analisys, e.g., 'tracerbnd'.
+      character(len=*), intent(inout) :: inputname !< The trimmed waq input name, e.g., 'fluor'.
+      character(len=*), intent(inout) :: qidname   !< The base input name for further use in external file analisys, e.g., 'tracerbnd'.
       
-      inputname = ''
       if ( qid(1:11).eq.'waqfunction' ) then
          qidname = qid(1:11)
          if ( len_trim(qid).gt.11 ) then
