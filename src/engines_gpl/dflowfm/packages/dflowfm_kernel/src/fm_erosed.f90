@@ -2558,7 +2558,7 @@ end module m_fm_update_crosssections
    !
    ! if morphological computations have started
    !
-   if (time1 > tstart_user + tmor * tfac) then   ! tmor in minutes since start of computations, time1 in seconds since reference date
+   if (time1 >= tstart_user + tmor * tfac) then   ! tmor in tunit since start of computations, time1 in seconds since reference date
       !
       ! Increment morphological time
       ! Note: dtmor in seconds, morft in days!
