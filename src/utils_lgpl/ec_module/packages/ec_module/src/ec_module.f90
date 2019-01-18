@@ -438,7 +438,6 @@ module m_ec_module
             if (present(forcingfile)) then
                if (present(dtnodal)) then
                   res = ecProviderInitializeFileReader(instancePtr, fileReaderId, filetype, filename, tgt_refdate, tgt_tzone, tgt_tunit, name, forcingfile=forcingfile, dtnodal=dtnodal)
-                  res = ecProviderInitializeFileReader(instancePtr, fileReaderId, filetype, filename, tgt_refdate, tgt_tzone, tgt_tunit, name, forcingfile=forcingfile, dtnodal=dtnodal)
                else
                   res = ecProviderInitializeFileReader(instancePtr, fileReaderId, filetype, filename, tgt_refdate, tgt_tzone, tgt_tunit, name, forcingfile=forcingfile)
                end if
