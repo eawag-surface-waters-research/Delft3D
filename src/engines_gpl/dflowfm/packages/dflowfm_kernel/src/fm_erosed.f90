@@ -2836,7 +2836,7 @@ end module m_fm_update_crosssections
             totdbodsd = totdbodsd + dbodsd(l, nm)
          enddo
          !
-         ! If this is a cell in erosion is occuring (accretion is not
+         ! If this is a cell where erosion is occuring (accretion is not
          ! distributed to dry points) then...
          !
          if (totdbodsd < 0.0_fp) then
@@ -2901,6 +2901,7 @@ end module m_fm_update_crosssections
                   !
                   do L=1,nd(nm)%lnx
                      k1 = ln(1,iabs(nd(nm)%ln(L))); k2 = ln(2,iabs(nd(nm)%ln(L)))
+                     Lf = iabs(nd(nm)%ln(L))
                      if (k2 == nm) then
                         knb = k1
                      else
@@ -2910,7 +2911,7 @@ end module m_fm_update_crosssections
                         dv              = thet * fixfac(knb, ll)*frac(knb, ll)
                         dbodsd(ll, knb) = dbodsd(ll, knb) - dv*bai_mor(knb)
                         dbodsd(ll, nm)  = dbodsd(ll, nm)  + dv*bai_mor(nm)
-                        e_sbn(L,ll)     = e_sbn(L,ll)     + dv/(dtmor*wu_mor(L))
+                        e_sbn(Lf,ll)     = e_sbn(Lf,ll)     + dv/(dtmor*wu_mor(Lf))
                      end if
                   end do ! L
                enddo ! ll
