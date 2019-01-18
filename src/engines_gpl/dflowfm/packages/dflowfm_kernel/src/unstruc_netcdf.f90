@@ -12006,16 +12006,23 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
             !mappings
             id_tsp%edgetoln(n1dedges) = L
          else if (kcu(L) == 3 .or. kcu(L) == 4 .or. kcu(L) == 5 .or. kcu(L) == 7) then  ! 1d2d, lateralLinks, streetinlet, roofgutterpipe
-            cycle ! TODO: LC: this is temporary to avoid a bug below for 1D2D models without network/branches (then mesh1dMergedToUnMerged is not even available)
             ! 1D2D link, find the 2D flow node and store its cell center as '1D' node coordinates
             n1d2dcontacts = n1d2dcontacts + 1
             id_tsp%contactstoln(n1d2dcontacts) = L
-            contacttype(n1d2dcontacts) = kcu(L) !contact type can be 3 or 4
-            if (ln(1,L) > ndx2d) then ! First point of 1D link is 1D cell
-               contacts(1,n1d2dcontacts) = mesh1dMergedToUnMerged(ln(1,L) - ndx2d)
-               contacts(2,n1d2dcontacts) = ln(2,L)   ! In m_flowgeom: 1D nodenr = ndx2d+n, in UGRID 1D flowgeom: local 1D nodenr = n.
+            contacttype(n1d2dcontacts) = kcu(L)
+            if (ln(1,L) > ndx2d) then  ! First point of 1D link is 1D cell
+               if (allocated(mesh1dMergedToUnMerged)) then ! mesh1dMergedToUnMerged is allocated only for UGrid file format (where merging might be necessary)
+                  contacts(1,n1d2dcontacts) = mesh1dMergedToUnMerged(ln(1,L) - ndx2d)
+               else
+                  contacts(1,n1d2dcontacts) = ln(1,L) - ndx2d
+               endif
+               contacts(2,n1d2dcontacts) = ln(2,L)   ! In m_flowgeom: 1D nodenr = ndx2d+n, in UGrid 1D flowgeom: local 1D nodenr = n.
             else                       ! Second point of 1D link is 1D cell
-               contacts(1,n1d2dcontacts) = mesh1dMergedToUnMerged(ln(2,L) - ndx2d) !1d
+               if (allocated(mesh1dMergedToUnMerged)) then 
+                  contacts(1,n1d2dcontacts) = mesh1dMergedToUnMerged(ln(2,L) - ndx2d)
+               else
+                  contacts(1,n1d2dcontacts) = ln(2,L) - ndx2d
+               endif
                contacts(2,n1d2dcontacts) = ln(1,L)         !2d
             end if
          else
