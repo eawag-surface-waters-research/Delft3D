@@ -30753,7 +30753,7 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
     rewind(mext)
     ja = 1
     
-    allocate(kcc(mx),kc1d(numk),kc2d(mx)) ; kcc = 1; kc1D = 0 ; kc2D = 0 
+    allocate(kcc(mx),kc1d(mx),kc2d(mx)) ; kcc = 1; kc1D = 0 ; kc2D = 0 
 
     do L = 1, numL1D
        if (kn(3,L) == 1 .or. kn(3,L) == 6) then ! TODO: AvD: why not also type 3/4/5/7?
