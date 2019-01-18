@@ -38,7 +38,7 @@ use m_flowgeom, only : ndx, ndxi
 use m_cell_geometry, only : ndx2d
 use unstruc_model, only : md_classmap_file
 use unstruc_files
-use unstruc_netcdf, only : check_error, t_unc_mapids, unc_create, ug_meta_fm, unc_def_var_nonspatial, &
+use unstruc_netcdf, only : check_error, t_unc_mapids, unc_close, unc_create, ug_meta_fm, unc_def_var_nonspatial, &
        UNC_LOC_S, unc_def_var_map, unc_write_flowgeom_filepointer_ugrid, unc_put_var_map_byte, unc_put_var_map_byte_timebuffer
 use io_ugrid, only : ug_addglobalatts
 use netcdf
@@ -50,6 +50,8 @@ implicit none
 private
 
 public :: write_map_classes_ugrid
+public :: reset_unstruc_netcdf_map_class
+
 type(t_unc_mapids), public :: m_incids
 
 integer, parameter :: int8 = 1     ! also local storage compact in 1 byte
@@ -66,7 +68,7 @@ integer, parameter :: mapclass_chunksize_time   =  100
 integer :: id_nodeId = -1
 integer :: id_jumps_s1, id_jumps_hs, id_jumps_ucmag
 integer :: id_class_dim_s1, id_class_dim_hs, id_class_dim_ucmag
-integer :: time_index = 0
+integer :: time_index
 
 integer,          parameter :: open_mode = NF90_HDF5
 character(len=*), parameter :: nc_file_type = 'NetCDF-4'
@@ -81,6 +83,12 @@ integer(kind=int8), allocatable :: buffer_s1(:,:), buffer_hs(:,:), buffer_ucmag(
 
    contains
 
+!> Resets only unstruc_netcdf_map_class variables intended for a restart of flow simulation.
+subroutine reset_unstruc_netcdf_map_class()
+   time_index = 0
+end subroutine reset_unstruc_netcdf_map_class
+
+
 !> write map class data in ugrid format to an NetCDF file
 !! the first time this module is initialized
    subroutine write_map_classes_ugrid(incids, tim)
@@ -94,6 +102,12 @@ integer(kind=int8), allocatable :: buffer_s1(:,:), buffer_hs(:,:), buffer_ucmag(
    logical :: isLast, need_flush
 
    ierr = nf90_noerr
+
+    ! Close/reset any previous clm file.
+    if (incids%ncid > 0 .and. time_index == 0) then
+        ierr = unc_close(incids%ncid)
+        incids%ncid = 0
+    end if
 
    if (incids%ncid == 0) then
       ! opening NetCDF file:

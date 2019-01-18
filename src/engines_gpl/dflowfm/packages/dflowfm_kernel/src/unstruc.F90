@@ -8711,6 +8711,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  use m_bedform 
  use m_fm_update_crosssections, only: fm_update_mor_width_area
  use m_globalparameters, only: updateTabulatedProfiles
+ use unstruc_netcdf_map_class
  ! 
  ! To raise floating-point invalid, divide-by-zero, and overflow exceptions:
  ! Activate the following line (See also statements below)
@@ -8755,6 +8756,8 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
 
  call init_unstruc_netcdf()
  call unc_set_ncformat(md_ncformat)
+ 
+ call reset_unstruc_netcdf_map_class()
 
  call resetflow()
 
