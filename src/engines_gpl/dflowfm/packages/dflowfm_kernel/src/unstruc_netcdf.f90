@@ -12006,6 +12006,7 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
             !mappings
             id_tsp%edgetoln(n1dedges) = L
          else if (kcu(L) == 3 .or. kcu(L) == 4 .or. kcu(L) == 5 .or. kcu(L) == 7) then  ! 1d2d, lateralLinks, streetinlet, roofgutterpipe
+            cycle ! TODO: LC: this is temporary to avoid a bug below for 1D2D models without network/branches (then mesh1dMergedToUnMerged is not even available)
             ! 1D2D link, find the 2D flow node and store its cell center as '1D' node coordinates
             n1d2dcontacts = n1d2dcontacts + 1
             id_tsp%contactstoln(n1d2dcontacts) = L
