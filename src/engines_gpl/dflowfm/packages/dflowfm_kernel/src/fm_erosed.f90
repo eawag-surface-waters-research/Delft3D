@@ -2011,7 +2011,7 @@ end module m_fm_update_crosssections
 
                          facCheck = facCheck + facQ * facW  
 
-                         e_sbcn(L,ised) = -Ldir * facQ * facW * sb_in(inod, ised)
+                         e_sbcn(L,ised) = -Ldir * facQ * facW * sb_in(inod, ised) / wu_mor(L)
 
                       elseif (pNodRel%Method == 'table') then
 
@@ -2032,10 +2032,10 @@ end module m_fm_update_crosssections
                          SbrRatio = interpolate(pNodRel%Table, QbrRatio)
 
                          if (L == pNodRel%BranchOut1Ln) then
-                            e_sbcn(L,ised) = -Ldir * SbrRatio * sb_in(inod, ised) / (1 + SbrRatio)
+                            e_sbcn(L,ised) = -Ldir * SbrRatio * sb_in(inod, ised) / (1 + SbrRatio) / wu_mor(L)
                             e_sbct(L,ised) = 0.0
                          elseif (L == pNodRel%BranchOut2Ln) then
-                            e_sbcn(L,ised) = -Ldir * sb_in(inod, ised) / (1 + SbrRatio)
+                            e_sbcn(L,ised) = -Ldir * sb_in(inod, ised) / (1 + SbrRatio) / wu_mor(L)
                             e_sbct(L,ised) = 0.0
                          endif
 
@@ -2059,7 +2059,7 @@ end module m_fm_update_crosssections
                 do j=1,nd(k3)%lnx
                    L = iabs(nd(k3)%ln(j))
                    if (sb_dir(inod, ised, j) == -1) then
-                      e_sbcn(L,ised) = e_sbcn(L,ised)/facCheck/wu_mor(L)
+                      e_sbcn(L,ised) = e_sbcn(L,ised)/facCheck
                    endif
                 enddo    ! Branches
              endif
