@@ -31156,6 +31156,10 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
     else 
        bob(2,L) = zn2 
     endif
+    if (setHorizontalBobsFor1d2d) then
+       bob(:,L) = max(bob(1,L), bob(2,L))
+    endif
+    
  endif 
     
  enddo

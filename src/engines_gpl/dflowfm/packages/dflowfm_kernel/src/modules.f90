@@ -2480,7 +2480,7 @@ end subroutine default_turbulence
                                                         !< 11=Perot in uit, 12=Perot in, piaczek fully implicit, gate + factor
                                                         !< 20=Energy conserving compact, piaczek fully implicit, weir
  integer                           :: maxNonlinearIterations!< maximal iterations in non linear iteration loop before a time step reduction is applied
-
+ logical                           :: setHorizontalBobsFor1d2d !< bobs are set to 2d bedlevel, to prevent incorrect storage in sewer system.
  integer                           :: iadvec1D          !< same, now for 1D links
 
  integer                           :: lincontin         !< 0 = no, 1 = yes linear continuity
