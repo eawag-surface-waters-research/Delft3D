@@ -210,6 +210,7 @@ type moroutputtype
     !
     logical :: aks
     logical :: cumavg
+    logical :: morstats
     logical :: dg
     logical :: dgsd
     logical :: dm
@@ -244,6 +245,7 @@ type moroutputtype
     logical :: uuuvvv
     logical :: ws
     logical :: zumod
+    logical :: rawtransports    ! output flag for transports before upwinding/bed slope effects
 end type moroutputtype
 
 !
@@ -360,7 +362,7 @@ type morpar_type
     real(fp):: pangle     !  phase lead angle acc. to Nielsen (1992) for TR2004 expression
     real(fp):: fpco       !  coefficient for phase llag effects
     real(fp):: factcr     !  calibration factor on Shields' critical shear stress   
-    real(fp):: tmor       !  time where calculation for morphological changes start (minutes relative to ITDATE,00:00:00)
+    real(fp):: tmor       !  time where calculation for morphological changes start (tunit relative to ITDATE,00:00:00)
     real(fp):: thetsd     !  global dry bank erosion factor
     real(fp):: susw       !  factor for adjusting wave-related suspended sand transport (included in bed-load)
     real(fp):: sedthr     !  minimum depth for sediment calculations
@@ -688,6 +690,10 @@ type sedtra_type
     real(fp)         , dimension(:,:)    , pointer :: sytot    !(nc1:nc2,lsedtot) svtot in structured Delft3D-FLOW
     real(fp)         , dimension(:,:)    , pointer :: sscx     !(nc1:nc2,lsedtot) svtot in structured Delft3D-FLOW
     real(fp)         , dimension(:,:)    , pointer :: sscy     !(nc1:nc2,lsedtot) svtot in structured Delft3D-FLOW
+    real(fp)         , dimension(:,:)    , pointer :: sbxcum   !(nc1:nc2,lsedtot) Cumulative transports in FM in zeta
+    real(fp)         , dimension(:,:)    , pointer :: sbycum   !(nc1:nc2,lsedtot) Cumulative transports in FM in zeta
+    real(fp)         , dimension(:,:)    , pointer :: ssxcum   !(nc1:nc2,lsedtot) Cumulative transports in FM in zeta
+    real(fp)         , dimension(:,:)    , pointer :: ssycum   !(nc1:nc2,lsedtot) Cumulative transports in FM in zeta    
     !
     real(fp)         , dimension(:,:)    , pointer :: srcmax   !(nc1:nc2,lsedtot)
     real(fp)         , dimension(:,:)    , pointer :: fixfac   !(nc1:nc2,lsedtot)
@@ -788,6 +794,10 @@ subroutine nullsedtra(sedtra)
     nullify(sedtra%sytot)
     nullify(sedtra%sscx)
     nullify(sedtra%sscy)
+    nullify(sedtra%sbxcum)
+    nullify(sedtra%sbycum)
+    nullify(sedtra%ssxcum)
+    nullify(sedtra%ssycum)    
     !
     nullify(sedtra%srcmax)
     nullify(sedtra%fixfac)
@@ -908,9 +918,17 @@ subroutine allocsedtra(sedtra, moroutput, kmax, lsed, lsedtot, nc1, nc2, nu1, nu
     if (ioptloc==CODE_DEFAULT) then
        if (istat==0) allocate(sedtra%sscx   (nc1:nc2,lsedtot), STAT = istat)  ! to have ss output in FM in zeta points
        if (istat==0) allocate(sedtra%sscy   (nc1:nc2,lsedtot), STAT = istat)  ! dimensioned on sedtot on purpose, see reconstructsedtransports()
+       if (istat==0) allocate(sedtra%sbxcum (nc1:nc2,lsedtot), STAT = istat)  ! Cumulative transports in FM in zeta points
+       if (istat==0) allocate(sedtra%sbycum (nc1:nc2,lsedtot), STAT = istat)  
+       if (istat==0) allocate(sedtra%ssxcum (nc1:nc2,lsedtot), STAT = istat)  
+       if (istat==0) allocate(sedtra%ssycum (nc1:nc2,lsedtot), STAT = istat)         
     else
        if (istat==0) allocate(sedtra%sscx   (1,1), STAT = istat)           ! not used in structured Delft3D-FLOW
        if (istat==0) allocate(sedtra%sscy   (1,1), STAT = istat)           ! not used in structured Delft3D-FLOW
+       if (istat==0) allocate(sedtra%sbxcum (1,1), STAT = istat)  ! Cumulative transports in FM, compare to e_sstc
+       if (istat==0) allocate(sedtra%sbycum (1,1), STAT = istat)  
+       if (istat==0) allocate(sedtra%ssxcum (1,1), STAT = istat)  
+       if (istat==0) allocate(sedtra%ssycum (1,1), STAT = istat)       
     endif
     !
     if (istat==0) allocate(sedtra%srcmax  (nc1:nc2,lsedtot), STAT = istat)
@@ -986,6 +1004,10 @@ subroutine allocsedtra(sedtra, moroutput, kmax, lsed, lsedtot, nc1, nc2, nu1, nu
     sedtra%sytot    = 0.0_fp
     sedtra%sscx     = 0.0_fp
     sedtra%sscy     = 0.0_fp
+    sedtra%sbxcum   = 0.0_fp
+    sedtra%sbycum   = 0.0_fp
+    sedtra%ssxcum   = 0.0_fp
+    sedtra%ssycum   = 0.0_fp    
     !
     sedtra%srcmax   = 0.0_fp
     sedtra%fixfac   = 1.0_fp
@@ -1093,8 +1115,12 @@ subroutine clrsedtra(istat, sedtra)
     if (associated(sedtra%sswy    ))   deallocate(sedtra%sswy    , STAT = istat)
     if (associated(sedtra%sxtot   ))   deallocate(sedtra%sxtot   , STAT = istat)
     if (associated(sedtra%sytot   ))   deallocate(sedtra%sytot   , STAT = istat)
-    if (associated(sedtra%sscx   ))   deallocate(sedtra%sscx    , STAT = istat)
-    if (associated(sedtra%sscy   ))   deallocate(sedtra%sscy    , STAT = istat)
+    if (associated(sedtra%sscx    ))   deallocate(sedtra%sscx    , STAT = istat)
+    if (associated(sedtra%sscy    ))   deallocate(sedtra%sscy    , STAT = istat)
+    if (associated(sedtra%sbxcum  ))   deallocate(sedtra%sbxcum  , STAT = istat)
+    if (associated(sedtra%sbycum  ))   deallocate(sedtra%sbycum  , STAT = istat)
+    if (associated(sedtra%ssxcum  ))   deallocate(sedtra%ssxcum  , STAT = istat)
+    if (associated(sedtra%ssycum  ))   deallocate(sedtra%ssycum  , STAT = istat)    
     !
     if (associated(sedtra%srcmax  ))   deallocate(sedtra%srcmax  , STAT = istat)
     if (associated(sedtra%fixfac  ))   deallocate(sedtra%fixfac  , STAT = istat)
@@ -1415,7 +1441,8 @@ subroutine nullmorpar(morpar)
     morpar%moroutput%statflg(:,:) = 0
     morpar%moroutput%nstatqnt     = 0
     morpar%moroutput%weightflg    = 1
-    morpar%moroutput%avgintv      = 0.0
+    morpar%moroutput%avgintv      = -999d0
+    morpar%moroutput%morstats     = .false.
     !
     morpar%moroutput%aks         = .false.
     morpar%moroutput%cumavg      = .false.
@@ -1452,7 +1479,8 @@ subroutine nullmorpar(morpar)
     morpar%moroutput%ustar       = .false.
     morpar%moroutput%uuuvvv      = .false.
     morpar%moroutput%ws           = .true.
-    morpar%moroutput%zumod       = .false.
+    morpar%moroutput%zumod        = .false.
+    morpar%moroutput%rawtransports= .false.
     !
     morpar%mornum%upwindbedload            = .true.
     morpar%mornum%laterallyaveragedbedload = .false.

@@ -725,6 +725,7 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
        call prop_get_logical(mor_ptr, 'Output', 'SourceSinkTerms'             , moroutput%sourcesink)
        call prop_get_logical(mor_ptr, 'Output', 'ReferenceHeight'             , moroutput%aks)
        call prop_get_logical(mor_ptr, 'Output', 'SettlingVelocity'            , moroutput%ws)
+       call prop_get_logical(mor_ptr, 'Output', 'RawTransportsAtZeta'         , moroutput%rawtransports)
        !
        call prop_get_logical(mor_ptr, 'Output', 'Bedslope'                    , moroutput%dzduuvv)
        call prop_get_logical(mor_ptr, 'Output', 'Taurat'                      , moroutput%taurat)
@@ -745,23 +746,23 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
        call prop_get_logical(mor_ptr, 'Output', 'BedLayerPorosity'            , moroutput%poros)
        !
        call prop_get_logical(mor_ptr, 'Output', 'AverageAtEachOutputTime'     , moroutput%cumavg)
-       call prop_get(mor_ptr, 'Output', 'AverageSedmorOutputInterval' , moroutput%avgintv, 3, ex)
-       if (.false.) then
-          ! currently this error is disabled. The error and check were not correct.
-          errmsg = 'AverageAtEachOutputTime is set to true, but could not read valid AverageSedmorOutputInterval values.'
-          call write_error(errmsg, unit=lundia)
+       !
+       call prop_get(mor_ptr,         'Output', 'MorStatsOutputInterval'      , moroutput%avgintv, 3, ex)
+       if (ex) then
+          moroutput%morstats = .true.    ! only used in FM, separate _sed.nc file
        endif
        if (moroutput%avgintv(2) < 0.0_fp) then
           moroutput%avgintv(2) = 0.0_fp
           moroutput%avgintv(3) = 0.0_fp
        end if
        string = ' '
-       call prop_get_string (mor_ptr, 'Output', 'AverageSedmorWeightFactor'         , string)
+       call prop_get_string (mor_ptr, 'Output', 'MorstatsWeightFactor'         , string)
+       call str_lower(string)
        if (index(string,'time') > 0) then
           moroutput%weightflg = MOR_STAT_TIME
        endif
        if (index(string,'sedimentation') > 0) then
-          moroutput%weightflg = MOR_STAT_BODS
+          moroutput%weightflg = MOR_STAT_BODS            ! Delft3D behaviour
        endif
        i = 1+lsedtot ! index 1           used internally for weights
                      ! index 2,lsedtot+1 used for CumNetSedimentationFlux per fraction
@@ -1502,6 +1503,7 @@ subroutine echomor(lundia    ,error     ,lsec      ,lsedtot   ,nto       , &
     else
        txtput2 = '                  NO'
     endif
+    write (lundia, '(3a)') txtput3(1:82), ':', txtput2
     txtput3 = 'GLM velocities i.s.o Eulerian velocities for' //       &
              & ' bed load transport and reference concentrations'
     if (glmisoeuler) then
