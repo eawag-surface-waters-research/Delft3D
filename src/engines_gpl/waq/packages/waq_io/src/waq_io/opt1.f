@@ -284,7 +284,8 @@
 
          case ( -2 )
             write ( lunut , 2060 ) cdummy
-            ierr = 1
+            iwar = iwar + 1
+            ierr = 0
 
          case ( -1 )
             write ( lunut , 2100 ) cdummy
@@ -311,7 +312,7 @@
  2040 format (/' Information from unformatted intermediate file.' ,
      &        /' Filename is: ',A )
  2050 format ( ' Information from the standard input file.' )
- 2060 format ( ' ERROR: File does not exist.'/' Filename: ',A )
+ 2060 format ( ' WARNING file does not exist.'/' Filename: ',A )
  2070 format ( ' ERROR reading input!' )
  2080 format (/' Nr: Interpolation        From                  ',
      &         ' To                  Start with      Hydro-dynamic',
