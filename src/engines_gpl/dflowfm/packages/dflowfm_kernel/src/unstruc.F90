@@ -9195,7 +9195,6 @@ subroutine flow_sedmorinit()
            return
         else
            call mess(LEVEL_WARN , 'unstruc::flow_sedmorinit - BedlevType should equal 1 in combination with SedimentModelNr 4 ')
-           return
         endif    
     end if
 
@@ -9215,7 +9214,8 @@ subroutine flow_sedmorinit()
        write(errstr,'(I0)') npnterror
        if (stmpar%morpar%bedupd) then
           if( npnterror > 0 ) then
-             call mess(LEVEL_FATAL, 'A cross section is needed at every grid point for morphological updating. '//trim(errstr)//' grid points detected without cross section. Please adjust the input.')   
+             call mess(LEVEL_FATAL, 'A cross section is needed at every grid point for morphological updating. '//trim(errstr)//' grid points detected without cross section. Please adjust the input.') 
+             return  
           endif    
        endif
     endif
@@ -9271,6 +9271,7 @@ subroutine flow_sedmorinit()
                    & .false., .false.)
     if (error) then 
         call mess(LEVEL_FATAL, 'unstruc::flow_sedmorinit - Error in subroutine rdinimorlyr.')
+        return
     end if 
     !    set pointers
     call inipointers_erosed()
