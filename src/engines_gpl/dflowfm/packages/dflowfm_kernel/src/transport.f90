@@ -64,17 +64,17 @@ subroutine update_constituents(jarhoonly)
    double precision                                      :: dvoli
    double precision                                      :: dt, dts_store
 
-   integer                                               :: k, LL, L, j, numconst_store
+   integer                                               :: k, LL, L, j, numconst_store,kk,lll
    integer                                               :: istep
    integer                                               :: numstepssync
    
    
    if ( NUMCONST.eq.0 ) return  ! nothing to do
-
+   
    ierror = 1
   
    limtyp = max(limtypsa, limtyptm, limtypsed)
-
+   
    if (jarhoonly == 1) then 
       call fill_rho() ; numconst_store = numconst 
    else if (jarhoonly == 2) then 
@@ -210,7 +210,7 @@ subroutine update_constituents(jarhoonly)
          fluxhortot(j,:) = fluxhortot(j,:) / dts_store
       enddo
    endif
-
+   
 !!  communicate
 !   if ( jampi.gt.0 ) then
 !      if ( jatimer.eq.1 ) call starttimer(IUPDSALL)
@@ -2239,6 +2239,7 @@ subroutine get_dtmax()
    use m_timer
    use m_transport
    use m_partitioninfo
+
    implicit none
    
    integer                                       :: kk, k, kb, kt

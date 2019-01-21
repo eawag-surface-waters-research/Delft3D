@@ -569,6 +569,7 @@ module m_xbeach_data
    integer                 :: maxiter                    = -123    !  [-] (advanced) Maximum number of iterations in wave stationary
    integer                 :: tsmult                     = -123    !  [-] multiplier, maximizes implicit timestep based on CFL based timestep for implicit solver
    double precision        :: waveps                     = -123    !  [-] eps for wave related quantities, for comparison with XBeach
+   double precision        :: d_relaxfac                 = -123    !  [-] Relaxation factor for wave dissipation in stationary solver
    !
    ! [Section] Roller and wave turbulence parameters
    double precision        :: BRfac                      = -123    !  [-] (advanced) Calibration factor surface slope
@@ -798,6 +799,13 @@ module m_sediment
  !$BMIEXPORT double precision      :: sswy(:,:)     !< [kg s-1 m-1] suspended load transport due to waves, y-component.    {"location": "face", "shape": ["ndx","stmpar%lsedsus"], "internal": "sedtra%sswy"}
 
  type(mortmpdummy), target         :: mtd           !< Dummy quantities not yet available in D-Flow FM
+ 
+ double precision, allocatable     :: sbcx_raw(:,:) !< Arrays for raw transport outputs WO
+ double precision, allocatable     :: sbcy_raw(:,:)
+ double precision, allocatable     :: sswx_raw(:,:)
+ double precision, allocatable     :: sswy_raw(:,:)
+ double precision, allocatable     :: sbwx_raw(:,:)
+ double precision, allocatable     :: sbwy_raw(:,:)
 
  !-------------------------------------------------- old sediment transport and morphology
  integer                           :: jased         !< Include sediment, 1=Krone, 2=Soulsby van Rijn 2007, 3=Bert's morphology module
@@ -808,8 +816,9 @@ module m_sediment
  integer, allocatable              :: sedtot2sedsus(:) !< mapping of suspended fractions to total fraction index; name is somewhat misleading, but hey, who said this stuff should make sense..
  integer                           :: sedparopt     !< for interactor plotting
  integer                           :: numoptsed
- integer                           :: jaBndTreatment=0
- integer                           :: jasedtranspveldebug=0
+ integer                           :: jaBndTreatment
+ integer                           :: jasedtranspveldebug
+ integer                           :: jaupdates1
  ! 
  !-------------------------------------------------- old sediment transport and morphology
  integer                           :: mxgrKrone     !< mx grainsize index nr that followsKrone. Rest follows v.Rijn
@@ -877,6 +886,9 @@ module m_sediment
  alfabed       = 1d0
  alfasus       = 1d0
  jamorf        = 0
+ jaBndTreatment=0
+ jasedtranspveldebug=0
+ jaupdates1=0
  end subroutine default_sediment
 
  subroutine allocgrains() ! for all fractions:
@@ -2775,7 +2787,9 @@ end subroutine default_turbulence
  integer                           :: jaupwindsrc               !< 1st-order upwind advection (1) or higher-order (0)
  
  integer                           :: jajre                     !< 0: default, 1: sb
-
+ 
+ integer                           :: jasourcesink              !< 1: source+sink 2:source 3:sink for sediment
+ 
  ! written to his file yes or no
  integer                           :: jahisbal                  !< Write mass balance/volume totals to his file, 0: no, 1: yes
  integer                           :: jahissourcesink           !< Write discharge/volume at sources/sinks, 0: no, 1: yest
@@ -3014,6 +3028,7 @@ subroutine default_flowparameters()
     drop3D      = 1d0    ! Apply droplosses in 3D yes or no 1 or 0
     jacstbnd    = 0
     jajre       = 0
+    jasourcesink= 1
 
     cflmx    = 0.7d0    ! max Courant nr ()
     cflw     = 0.1d0    ! wave velocity fraction, total courant vel = u + cflw*wavevelocity
@@ -4366,14 +4381,15 @@ end subroutine default_flowtimes
 subroutine reset_flowtimes()
     dtprev       = dt_init           !< previous computational timestep (s)  (1s is a bit like sobek)
     dts          = dt_init           !< internal computational timestep (s)
-    tfac         = 1d0               !< Time unit in seconds
+    !tfac         = 1d0               !< Time unit in seconds JRE: disabled, and handled in readMDU
     time0        = 0d0               !< current   julian (s) of s0
     time1        = 0d0               !< current   julian (s) of s1  ! and of course, time1 = time0 + dt
     tim1bnd      = -9d9              !< last time bnd signals were given
     tim1fld      = -9d9              !< last time bnd signals were given
 
     time_map     = tstart_user       !< next time for map output
-    time_wav     = tstart_user       !< same, xb JRE
+    time_wav     = tstart_user       !< same, wav
+    time_sed     = tstart_user       !< same, morstats 
     time_his     = tstart_user       !< next time for his output
     time_xls     = tstart_user       !< next time for his output
     time_rst     = tstart_user       !< next time for restart output

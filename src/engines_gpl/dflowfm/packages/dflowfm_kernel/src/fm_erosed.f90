@@ -106,6 +106,7 @@
    real(fp)                             , pointer :: morfac
    logical                              , pointer :: varyingmorfac
    real(hp)                             , pointer :: morft
+   real(hp)                             , pointer :: hydrt
    real(fp)                             , pointer :: espir
    logical                              , pointer :: epspar
    real(fp)                             , pointer :: camax
@@ -189,6 +190,10 @@
    real(fp)         , dimension(:,:)    , pointer :: e_sswt
    real(fp)         , dimension(:,:)    , pointer :: sxtot
    real(fp)         , dimension(:,:)    , pointer :: sytot
+   real(fp)         , dimension(:,:)    , pointer :: sbxcum   
+   real(fp)         , dimension(:,:)    , pointer :: sbycum   
+   real(fp)         , dimension(:,:)    , pointer :: ssxcum   
+   real(fp)         , dimension(:,:)    , pointer :: ssycum   
    real(fp)         , dimension(:,:)    , pointer :: sinkse
    real(fp)         , dimension(:,:)    , pointer :: sourse
    real(fp)         , dimension(:,:)    , pointer :: sour_im
@@ -218,6 +223,7 @@
    logical                              , pointer :: neglectentrainment
    real(fp)          , dimension(:,:)   , pointer :: rca
    real(fp)          , dimension(:,:)   , pointer :: statqnt
+   
    end module m_fm_erosed
 
    module m_fm_update_crosssections
@@ -486,7 +492,6 @@ end module m_fm_update_crosssections
 ! ========================================================================================
 !
 
-
    subroutine inipointers_erosed()
    use m_fm_erosed
    use m_flowgeom, only: ndx, lnx
@@ -557,6 +562,7 @@ end module m_fm_update_crosssections
    morfac              => stmpar%morpar%morfac
    varyingmorfac       => stmpar%morpar%varyingmorfac
    morft               => stmpar%morpar%morft
+   hydrt               => stmpar%morpar%hydrt
    espir               => stmpar%morpar%espir
    epspar              => stmpar%morpar%epspar
    camax               => stmpar%morpar%camax
@@ -654,6 +660,10 @@ end module m_fm_update_crosssections
    e_sswt              => sedtra%e_sswt
    sxtot               => sedtra%sxtot
    sytot               => sedtra%sytot
+   sbxcum              => sedtra%sbxcum
+   sbycum              => sedtra%sbycum
+   ssxcum              => sedtra%ssxcum
+   ssycum              => sedtra%ssycum
    sinkse              => sedtra%sinkse
    sourse              => sedtra%sourse
    sour_im             => sedtra%sour_im
@@ -704,7 +714,7 @@ end module m_fm_update_crosssections
    use morphology_data_module
    use sediment_basics_module
    use m_physcoef, only: ag, vonkar, sag, ee, backgroundsalinity, backgroundwatertemperature,dicoww, rhomean
-   use m_sediment, only: stmpar, sedtra, stm_included, mtd, vismol, jatranspvel
+   use m_sediment, only: stmpar, sedtra, stm_included, mtd, vismol, jatranspvel, sbcx_raw,sbcy_raw,sswx_raw,sswy_raw,sbwx_raw,sbwy_raw
    use m_flowgeom, only: ndxi, bl, kfs, lnxi, lnx, ln, dxi, ndx, csu, snu, wcx1, wcx2, wcy1, wcy2, acl, nd, csu, snu, wcl, xz, yz, xu, yu, wu, wu_mor
    use m_flow, only: s0, s1, u1, u0, v, ucx, ucy, kbot, ktop, kmx, kmxn, plotlin, sa1, tem1, zws, hs, ucxq, ucyq, layertype, &
       iturbulencemodel, z0urou, frcu, ifrcutp, hu, spirint, spiratx, spiraty, u_to_umain, q1, frcu_mor
@@ -719,7 +729,7 @@ end module m_fm_update_crosssections
    use m_missing
    use m_physcoef, only: frcuni, ifrctypuni
    use m_turbulence, only: vicwws, turkinepsws
-   use m_flowparameters, only: jasal, jatem, jawave, epshs, jasecflow, eps10
+   use m_flowparameters, only: jasal, jatem, jawave, epshs, jasecflow, eps10, jasourcesink
    use m_fm_erosed
    use m_bedform
    use m_xbeach_data
@@ -1428,7 +1438,7 @@ end module m_fm_update_crosssections
       ! Input parameters are passed via dll_reals/integers/strings-arrays
       !
       if (max_reals < MAX_RP) then
-         write(errmsg,'(a)') 'Insufficient space to pass real values to transport routine.'
+         write(errmsg,'(a)') 'fm_erosed::Insufficient space to pass real values to transport routine.'
          call write_error(errmsg, unit=mdia)
          error = .true.
          return
@@ -1491,7 +1501,7 @@ end module m_fm_update_crosssections
       !
 
       if (max_integers < MAX_IP) then
-         write(errmsg,'(a)') 'Insufficient space to pass integer values to transport routine.'
+         write(errmsg,'(a)') 'fm_erosed::Insufficient space to pass integer values to transport routine.'
          call write_error(errmsg, unit=mdia)
          error = .true.
          return
@@ -1499,7 +1509,7 @@ end module m_fm_update_crosssections
       dll_integers(IP_NM   ) = nm
       !
       if (max_strings < MAX_SP) then
-         write(errmsg,'(a)') 'Insufficient space to pass strings to transport routine.'
+         write(errmsg,'(a)') 'fm_erosed::Insufficient space to pass strings to transport routine.'
          call write_error(errmsg, unit=mdia)
          error = .true.
          return
@@ -1770,7 +1780,7 @@ end module m_fm_update_crosssections
                call soursin_3d  (h1                ,thick0         ,thick1             , &
                   &  siglc(kmaxsd)     ,thicklc(kmaxsd),constituents(ll, kmxsed(nm,l))    , &
                   &  vismol            ,tsigmol        ,seddif(l, kmxsed(nm,l)), &                 ! to check: tsigmol
-               &  rhosol(l)         ,caks_ss3d      ,ws(kmxsed(nm,l),l)      , &
+                  &  rhosol(l)         ,caks_ss3d      ,ws(kmxsed(nm,l),l)      , &
                   &  aks_ss3d          ,sourse(nm,l)   ,sour_im(nm,l)      , &
                   &  sinkse(nm,l) )
                !
@@ -1856,7 +1866,7 @@ end module m_fm_update_crosssections
    !
    do L = 1, lnxi
       k1 = ln(1,L); k2=ln(2,L)
-      mtd%uau(L) = (acL(L)*ua(k1) + (1d0-acL(L))*ua(k2)) * csu(L) +   &
+      uau(L) = (acL(L)*ua(k1) + (1d0-acL(L))*ua(k2)) * csu(L) +   &
          (acL(L)*va(k1) + (1d0-acL(L))*va(k2)) * snu(L)
    end do
    !
@@ -1877,6 +1887,12 @@ end module m_fm_update_crosssections
          enddo
       endif
    enddo
+   !
+   if (stmpar%morpar%moroutput%rawtransports) then
+      sbcx_raw = sbcx; sbcy_raw = sbcy;    ! save transports before upwinding and bed slope effects
+      sbwx_raw = sbwx; sbwy_raw = sbwy;    ! to compare with analytical solutions
+      sswx_raw = sswx; sswy_raw = sswy;
+   endif
    !
    ! Upwind scheme for bed load and wave driven transport
    ! Convert sand bed load transport to velocity points using upwind scheme
@@ -2104,36 +2120,36 @@ end module m_fm_update_crosssections
    !
    ! Update sourse fluxes due to sand-mud interaction
    !
-   allocate(Evel(lsedtot), STAT=istat)
+   allocate(evel(lsedtot), stat=istat)
    do nm = 1, ndx
       if (pmcrit(nm)<0.0_fp) cycle
       if (mudfrac(nm)<=0.0_fp .or. mudfrac(nm)>=1.0_fp) cycle
       !
-      ! Compute erosion velocities
+      ! compute erosion velocities
       !
-      Evel = 0.0_fp
+      evel = 0.0_fp
       !call getkbotktop(nm, kb, kt)
       do l = 1, lsed
          ll = lstart + l
          kmaxsd = kmxsed(nm,l)              ! meaning of kmaxsd changes here!
-         if (frac(nm,l)>0.0_fp)  Evel(l) = (sourse(nm,l) - sour_im(nm,l)*constituents(ll,kmaxsd))/(cdryb(l)*frac(nm,l))
+         if (frac(nm,l)>0.0_fp)  evel(l) = (sourse(nm,l) - sour_im(nm,l)*constituents(ll,kmaxsd))/(cdryb(l)*frac(nm,l))
       enddo
       !
-      ! Recompute erosion velocities
+      ! recompute erosion velocities
       !
-      call sand_mud(lsed, Evel, frac(nm,:), mudfrac(nm), sedtyp, pmcrit(nm))
+      call sand_mud(lsed, evel, frac(nm,:), mudfrac(nm), sedtyp, pmcrit(nm))
       !
-      ! Recompute erosion fluxes
+      ! recompute erosion fluxes
       ! only explicit part of erosion flux is changed
       ! (is effectively the same as changing the equilibrium concentration)
       !
       do l = 1, lsed
          ll = ised1 - 1 + l
          kmaxsd = kmxsed(nm,l)
-         sourse(nm,l) = frac(nm,l)*cdryb(l)*Evel(l) + sour_im(nm,l)*constituents(ll,kmaxsd)
+         sourse(nm,l) = frac(nm,l)*cdryb(l)*evel(l) + sour_im(nm,l)*constituents(ll,kmaxsd)
       enddo
    enddo
-   deallocate(Evel, STAT=istat)
+   deallocate(evel, stat=istat)
    !
    ! Add implicit part of source term to sinkse
    !
@@ -2143,9 +2159,16 @@ end module m_fm_update_crosssections
       enddo
    enddo
    !
-   ! Finally fill sour and sink arrays for both sand and silt
-   ! note that sourse/sinkse and sourf/sinkf arrays are required for BOTT3D
-   ! Happens in transport, subroutine fill_constituents()
+   if (jasourcesink==0) then
+      sourse=0d0
+      sinkse=0d0
+   elseif (jasourcesink==1) then
+      !  
+   elseif (jasourcesink==2) then
+      sinkse=0d0
+   elseif (jasourcesink==3) then
+      sourse=0d0
+   endif
    !
    if (jatranspvel > 0 .or. jawave>0) then
       u1 = u1ori; u0 = u0ori; v=vori
@@ -2173,7 +2196,8 @@ end module m_fm_update_crosssections
    use m_flowgeom
    use m_flow
    use unstruc_messages
-   use m_sediment, only: jabndtreatment  ! debug
+   use m_sediment, only: stmpar, jabndtreatment  ! debug
+   use sediment_basics_module
    implicit none
 
    integer,                                  intent(in)  :: lsedtot        !< number of sediment fractions
@@ -2204,6 +2228,8 @@ end module m_fm_update_crosssections
          k2 = ln(2,Lf)
 
          do l=1,lsedtot
+            if (stmpar%sedpar%sedtyp(l) == SEDTYP_COHESIVE) cycle   ! conform with d3d
+            !
             !           project the fluxes in flowlink direction
             sutot1 =  csu(Lf)*sxtot(k1,l) + snu(Lf)*sytot(k1,l)
             sutot2 =  csu(Lf)*sxtot(k2,l) + snu(Lf)*sytot(k2,l)
@@ -2269,9 +2295,9 @@ end module m_fm_update_crosssections
    use m_flow     , only: vol0, vol1, s0, s1, hs, u1, kmx, hu, au
    use m_flowgeom , only: bai, ndxi, nd, wu, bl, ba, ln, dx, ndx, lnx, lnxi, acl, wcx1, wcy1, wcx2, wcy2, xz, yz, wu_mor, ba_mor, bai_mor
    use m_flowexternalforcings, only: nbndz, nbndu, nopenbndsect
-   use m_flowparameters, only: epshs, epshu, jawave
-   use m_sediment,  only: stmpar, sedtra, mtd, sedtot2sedsus
-   use m_flowtimes, only: dts, tstart_user, time1, dnt, julrefdat, tfac
+   use m_flowparameters, only: epshs, epshu, jawave, eps10
+   use m_sediment,  only: stmpar, sedtra, mtd, sedtot2sedsus, jaupdates1
+   use m_flowtimes, only: dts, tstart_user, time1, dnt, julrefdat, tfac, ti_sed, ti_seds
    use m_transport, only: fluxhortot, ised1, isedn, constituents
    use unstruc_files, only: mdia, close_all_files
    use m_fm_erosed
@@ -2283,7 +2309,7 @@ end module m_fm_update_crosssections
    use table_handles , only:handletype, gettabledata
    use m_partitioninfo
    use m_fm_update_crosssections
-   use m_fm_morstatistics, only: morstats
+   use m_fm_morstatistics, only: morstats, morstatt0
    use precision_basics
    !
    implicit none
@@ -2305,8 +2331,8 @@ end module m_fm_update_crosssections
    integer                     :: ierror
    integer                     :: l, nm, ii, ll, Lx, LLL, Lf, lstart, j, bedchangemesscount, k, k1, k2, knb, nb, kb, ki, mout
    integer                     :: Lb, Lt, ka, kf1, kf2, kt, nto, n1, n2
-   real(fp)                    :: dsdnm, eroflx, sedflx, thick0, thick1, trndiv, flux, sumflux, dtmor
-   real(fp)                    :: dhmax, h1, totdbodsd, totfixfrac, bamin, thet, dv, zktop, cflux
+   double precision            :: dsdnm, eroflx, sedflx, thick0, thick1, trndiv, flux, sumflux, dtmor
+   double precision            :: dhmax, h1, totdbodsd, totfixfrac, bamin, thet, dv, zktop, cflux
 
    integer,          parameter :: bedchangemessmax = 50
    double precision, parameter :: dtol = 1d-8
@@ -2314,7 +2340,7 @@ end module m_fm_update_crosssections
    double precision            :: tausum2(1)
    double precision            :: sbsum, taucurc, czc
    double precision, dimension(lsedtot) :: bc_sed_distribution
-
+   
    integer  :: icond
    integer  :: jb
    integer  :: ib
@@ -2341,6 +2367,7 @@ end module m_fm_update_crosssections
    real(fp) :: z
    real(fp) :: timhr
    real(fp) :: dhh
+   
    !!
    !!! executable statements -------------------------------------------------------
    !!
@@ -2560,7 +2587,12 @@ end module m_fm_update_crosssections
       ! Increment morphological time
       ! Note: dtmor in seconds, morft in days!
       !
+      
       morft = morft + dtmor/86400.0_fp
+      if (morfac>0d0) hydrt  = hydrt + dts/86400d0 
+      if (stmpar%morpar%moroutput%morstats) then
+         if (comparereal(time1,ti_seds,eps10)>=0) morstatt0 = morft   
+      endif
       !
       ! Bed boundary conditions: transport condition
       !
@@ -2829,7 +2861,7 @@ end module m_fm_update_crosssections
          ! If this is a cell in which sediment processes are active then ...
          !
          !if (kcs(nm)*kfs(nm)*kfsed(nm) /= 1) cycle
-         if (kfsed(nm) /= 1) cycle                    ! check whether sufficient as condition
+         if (kfsed(nm) /= 1 .or. hs(nm)<epshs) cycle                    ! check whether sufficient as condition
          !
          totdbodsd = 0.0_fp
          do l = 1, lsedtot
@@ -2838,7 +2870,7 @@ end module m_fm_update_crosssections
          !
          ! If this is a cell where erosion is occuring (accretion is not
          ! distributed to dry points) then...
-         !
+         !     
          if (totdbodsd < 0.0_fp) then
             !
             ! Note: contrary to the previous implementation, this new
@@ -2852,8 +2884,7 @@ end module m_fm_update_crosssections
             ! individual fractions.
             !
             bamin      = ba(nm)
-            totfixfrac = 0.0_fp
-
+            totfixfrac = 0.0_hp
             !
             do L=1,nd(nm)%lnx
                k1 = ln(1,iabs(nd(nm)%ln(L))); k2 = ln(2,iabs(nd(nm)%ln(L)))
@@ -2866,7 +2897,7 @@ end module m_fm_update_crosssections
                ! evaluate whether dry cell, and calculate totfixfac value for cell
                !
                if (kfsed(knb)==0 .and. bl(knb)>bl(nm)) then
-                  bamin = min(bamin, real(ba(knb),fp))
+                  bamin = min(bamin, ba(knb))
                   do ll = 1, lsedtot
                      totfixfrac = totfixfrac + fixfac(knb, ll)*frac(knb, ll)
                   end do
@@ -2923,6 +2954,13 @@ end module m_fm_update_crosssections
          call update_ghosts(ITYPE_Sall, lsedtot, Ndx, dbodsd, ierror)
       end if
       !
+      call reconstructsedtransports()   ! reconstruct cell centre transports for morstats and cumulative st output
+      call collectcumultransports()     ! Always needed, written on last timestep of simulation
+      !
+      if (stmpar%morpar%moroutput%morstats .and. ti_sed>0d0) then
+         call morstats(dbodsd, hs_mor, ucxq_mor, ucyq_mor, sbcx, sbcy, sbwx, sbwy, sscx, sscy, sswx, sswy)
+      endif
+      !
       ! Apply erosion and sedimentation to bookkeeping system
       !
       if (cmpupd) then
@@ -2933,10 +2971,6 @@ end module m_fm_update_crosssections
          !
          ! Update layers and obtain the depth change
          !
-         if (stmpar%morpar%moroutput%cumavg) then
-            call reconstructsedtransports()   ! reconstruct cell centre transports for morstats
-            call morstats(dbodsd, hs_mor, ucxq_mor, ucyq_mor, sbcx, sbcy, sbwx, sbwy, sscx, sscy, sswx, sswy)
-         end if
          if (updmorlyr(stmpar%morlyr, dbodsd, blchg, mtd%messages) /= 0) then
             call writemessages(mtd%messages, mdia)
             !            to replace by "nice" exit
@@ -3112,7 +3146,6 @@ end module m_fm_update_crosssections
          ! should change to following test because blchg may be small
          ! due to truncation errors
          !
-         if (abs(blchg(nm)) >= 0.d0) then
             s1(nm) = max(s1(nm), bl(nm))
             s0(nm) = max(s0(nm), bl(nm))
             !
@@ -3120,11 +3153,10 @@ end module m_fm_update_crosssections
             ! bed or maximum water level in surrounding wet cells
             ! (whichever is higher)
             !
-            if (hs(nm) < epshs) then
-               s1(nm) = s1(nm) + blchg(nm)
+            if (hs(nm) < epshs .or. jaupdates1==1) then
+               s1(nm) = s1(nm) + blchg(nm)         
                s0(nm) = s0(nm) + blchg(nm)
             endif
-         endif
       enddo
       !
       ! Remember erosion velocity for dilatancy
@@ -4243,17 +4275,17 @@ end module m_fm_update_crosssections
    ierr = 0
 1234 continue
    end subroutine duneaval
-
+   
    subroutine reconstructsedtransports()
    ! Reconstructs cell centre transports from link based values for output purposes
    use m_fm_erosed
    use m_flowgeom
    use m_sediment
-
+   
    implicit none
 
    integer               :: l, ll, k1, k2, k
-
+  
    ! init
    sbcx = 0.0_fp
    sbcy = 0.0_fp
@@ -4306,6 +4338,31 @@ end module m_fm_update_crosssections
    end do
 
    end subroutine reconstructsedtransports
+   
+   subroutine collectcumultransports()
+   use m_flowtimes, only:dts
+   use m_flowgeom
+   use m_fm_erosed
+   
+   implicit none
+  
+   integer            :: k, l
+   double precision   :: dtmor_
+   
+   ! cumulative transports
+   dtmor_ = dts*morfac
+   do l = 1, lsedtot
+      do k = 1,ndx
+         sbxcum(k,l) = sbxcum(k,l) + (sbcx(k,l) + sbwx(k,l)) * dtmor_
+         sbycum(k,l) = sbycum(k,l) + (sbcy(k,l) + sbwy(k,l)) * dtmor_
+         ssxcum(k,l) = ssxcum(k,l) + (sscx(k,l) + sswx(k,l)) * dtmor_
+         ssycum(k,l) = ssycum(k,l) + (sscy(k,l) + sswy(k,l)) * dtmor_
+      enddo
+   enddo
+   
+   end subroutine
+
+   
 
    subroutine reconstructsedadvvel()
    use m_flowgeom

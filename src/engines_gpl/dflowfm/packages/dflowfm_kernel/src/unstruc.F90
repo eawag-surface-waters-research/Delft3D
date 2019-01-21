@@ -1,6 +1,7 @@
 !----- AGPL --------------------------------------------------------------------
 !
-!  Copyright (C)  Stichting Deltares, 2017-2019.!
+!  Copyright (C)  Stichting Deltares, 2017-2019.
+!
 !  This file is part of Delft3D (D-Flow Flexible Mesh component).
 !
 !  Delft3D is free software: you can redistribute it and/or modify
@@ -1212,7 +1213,7 @@ if(q /= 0) then
  if (jased > 0 .and. stm_included) then     
     call fm_bott3d() ! bottom update
     call setbobs()   ! adjust administration - This option only works for ibedlevtyp = 1, otherwise original bed level [bl] is overwritten to original value
-!    call volsur() !< -- causes testbench cases in f22 to fail, since commit #9193, TODO: JRE.
+    !call volsur() !< -- causes testbench cases in f22 to fail, since commit #9193, TODO: JRE.
  end if
  
  ! Moved to flow_finalize_single_timestep: call flow_f0isf1()                                  ! mass balance and vol0 = vol1
@@ -8871,10 +8872,6 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
     call flow_bedforminit(2)        ! bedforms  stage 2: parameter read and process
  endif
 
- !if ( len_trim(md_dredgefile) > 0 .and. stm_included) then 
- !   call flow_dredgeinit()          ! dredging and dumping
- !endif
-
  !! Initialise Fourier Analysis
  !if (len_trim(md_foufile)>0) then
  !   call flow_fourierinit()
@@ -9102,7 +9099,7 @@ subroutine flow_sedmorinit()
     character(40)                             :: errstr
    !type(griddimtype) :: griddim
     type (bedbndtype)     , dimension(:) , pointer :: morbnd
-    integer           :: kk, k, kbot, ktop, i, j, isus, ifrac, isusmud, isussand, isf, ised, Lf, npnt, j0
+    integer           :: kk, k, kbot, ktop, i, j, isus, ifrac, isusmud, isussand, isf, ised, Lf, npnt, j0, ierr
     integer           :: ibr, nbr, pointscount, k1
     integer           :: npnterror=0   !< number of grid points without cross-section definition
     type(t_branch), pointer                 :: pbr
@@ -9116,16 +9113,19 @@ subroutine flow_sedmorinit()
 
     if ( stm_included .and. jased.ne.0 .and. jatransportmodule.eq.0 ) then
        call mess(LEVEL_FATAL, 'unstruc::flow_sedmorinit - Please use transport module when Sedimentmodelnr == 4, by setting TransportMethod = 1 under [numerics].')
+       return
     end if
     !
     inquire (file = trim(md_sedfile), exist = ex)
     if (.not. ex) then
        call mess(LEVEL_FATAL, 'unstruc::flow_sedmorinit - *.sed file in mdu file does not exist.')
+       return
     end if
 
     inquire (file = trim(md_morfile), exist = ex)
     if (.not. ex) then
        call mess(LEVEL_FATAL, 'unstruc::flow_sedmorinit - *.mor file in mdu file does not exist.')
+       return
     end if
 
     if( allocated( nambnd) ) deallocate( nambnd )
@@ -9137,12 +9137,14 @@ subroutine flow_sedmorinit()
     call rdstm(stmpar, griddim, md_sedfile, md_morfile, filtrn='', lundia=mdia, lsal=jasal, ltem=jatem, ltur=max(0,iturbulencemodel-1), lsec=jasecflow, lfbedfrm=bfm_included, julrefday=julrefdat, dtunit='Tunit='//md_tunit, nambnd=nambnd, error=error)
     if (error) then
         call mess(LEVEL_FATAL, 'unstruc::flow_sedmorinit - Error in subroutine rdstm.')
+        return
     end if
     
     do i = 1, stmpar%lsedtot
        if (stmpar%trapar%iform(i) == 19 .or. stmpar%trapar%iform(i) == 20) then
           if (jawave .ne. 4) then
              call mess(LEVEL_FATAL, 'unstruc::flow_sedmorinit - Sediment transport formula '//trim(stmpar%trapar%name(i))//' is not supported without the surfbeat model.')
+             return
           end if
        end if
     end do
@@ -9157,7 +9159,7 @@ subroutine flow_sedmorinit()
     if (stmpar%morpar%glmisoeuler) then
         jatranspvel = 0                          ! everything lagrangian
     end if
-
+    !    
     call nullsedtra(sedtra)
     call allocsedtra(sedtra, stmpar%morpar%moroutput, kmx+1, stmpar%lsedsus, stmpar%lsedtot, 1, ndx, 1, lnx, stmpar%morpar%nxx, stmpar%morpar%moroutput%nstatqnt)
     
@@ -9190,8 +9192,10 @@ subroutine flow_sedmorinit()
     if ( jased.eq.4 .and. ibedlevtyp .ne. 1 ) then
         if (stmpar%morpar%bedupd) then 
            call mess(LEVEL_FATAL, 'unstruc::flow_sedmorinit - BedlevType should equal 1 in combination with SedimentModelNr 4 ')   ! setbobs call after fm_erosed resets the bed level for ibedlevtyp > 1, resulting in no bed level change
+           return
         else
            call mess(LEVEL_WARN , 'unstruc::flow_sedmorinit - BedlevType should equal 1 in combination with SedimentModelNr 4 ')
+           return
         endif    
     end if
 
@@ -9330,21 +9334,46 @@ subroutine flow_sedmorinit()
        endif
     enddo
     !
-    ! Set output interval in case that moroutput%cumavg is set to true
+    ! Set output interval in case that moroutput%avgintv(1)>0d0 
     !
-    if (stmpar%morpar%moroutput%cumavg) then
+    if (stmpar%morpar%moroutput%morstats .and. (.not. stmpar%morpar%moroutput%dmsedcum) .and. (stmpar%morpar%moroutput%nstatqnt==1+stmpar%lsedtot)) then
+       stmpar%morpar%moroutput%morstats = .false.
+       call mess(LEVEL_WARN, 'unstruc::flow_sedmorinit - Time vector for morstats specified in mor-file, but no quantities. Skipping morstats output.')   
+    endif
+    !
+    if (stmpar%morpar%moroutput%morstats) then
+       ! Check wether anything is asked in mor file
        success = .true.
-       if (.not. size(stmpar%morpar%moroutput%avgintv,1)==3) success=.false.
+       if (.not. size(stmpar%morpar%moroutput%avgintv,1)==3) then
+          success = .false.
+       end if   
        call getOutputTimeArrays(stmpar%morpar%moroutput%avgintv, ti_seds, ti_sed, ti_sede, success)
        if (ti_sed > (tstop_user-tstart_user)) then
           ti_sed = tstop_user-tstart_user
           call mess(LEVEL_WARN, 'unstruc::flow_sedmorinit - The averaging interval for time averaged sedmor output is larger than output duration in the simulation.')
-          write(msgbuf, *)      'Setting ''AverageSedmorOutputInterval'' from *.mor file to tstop-tstart = ', ti_sed, ' s'
+          write(msgbuf, *)      '                           Setting ''AverageSedmorOutputInterval'' from *.mor file to tstop-tstart = ', ti_sed, ' s.'
           call warn_flush()
        endif
+       time_sed = tstart_user + stmpar%morpar%tmor*tfac    ! model time
+       ti_seds  = max(ti_seds,time_sed)
+       time_sed = ti_seds
        !
        call morstats_setflags()
     end if
+    !
+    ! Arrays for transports before upwinding and bed slope effects
+    if (stmpar%morpar%moroutput%rawtransports) then
+       if (allocated(sbcx_raw)) then
+          deallocate(sbcx_raw, sbcy_raw,sswx_raw,sswy_raw,sbwx_raw,sbwy_raw)   
+       endif
+       call realloc(sbcx_raw,(/ndx, stmpar%lsedtot/),stat=ierr,fill=0d0, keepExisting=.false.)
+       call realloc(sbcy_raw,(/ndx, stmpar%lsedtot/),stat=ierr,fill=0d0, keepExisting=.false.)
+       call realloc(sbwx_raw,(/ndx, stmpar%lsedtot/),stat=ierr,fill=0d0, keepExisting=.false.)
+       call realloc(sbwy_raw,(/ndx, stmpar%lsedtot/),stat=ierr,fill=0d0, keepExisting=.false.)
+       call realloc(sswx_raw,(/ndx, stmpar%lsedtot/),stat=ierr,fill=0d0, keepExisting=.false.)
+       call realloc(sswy_raw,(/ndx, stmpar%lsedtot/),stat=ierr,fill=0d0, keepExisting=.false.)
+    endif
+        
     return
 end subroutine flow_sedmorinit
 
@@ -15783,25 +15812,6 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
        endif
     endif
 
-   !! JRE time-averaged output ! TODO: [TRUNKMERGE] JR: this was commented in sedmor. Remove it? Or reinstate it?
-   !if ((jawave.eq.4) .and. (ti_wav > 0) .and. (jaavgwavquant .eq. 1)) then
-   !   if (comparereal(tim, time_wav, eps10) == 0) then
-   !      call unc_write_wav(tim)
-   !      call xbeach_clearaverages()
-   !      if (comparereal(time_wav, ti_wave, eps10) == 0) then
-   !         time_wav = tstop_user + 1
-   !      else
-   !         tem_dif = (tim - ti_wavs)/ti_wav
-   !         time_wav = max(ti_wavs + (floor(tem_dif + 0.001d0)+1)*ti_wav,ti_wavs)
-   !         if (comparereal(time_wav, ti_wave, eps10) == 1) then
-   !            ! next time_wav would be beyond end of wave-window, write one last wave output exactly at that end.
-   !            time_wav = ti_wave
-   !         endif
-   !      endif   
-   !   endif
-   !endif
-
-
    ! FM does not know whether the com-file for this time step will be used
    ! To be safe: always write the com-file at each user_timestep
    if (jawave==3 .and. (tim==tstart_user .or. tim>=time_user)) then
@@ -16270,12 +16280,14 @@ subroutine unc_write_his(tim)            ! wrihis
             if (jaeulervel==0) then
                ierr = nf90_put_att(ihisfile, id_varucx, 'long_name', 'flow element center velocity vector, x-component') ! sorry for inland water people
                ierr = nf90_put_att(ihisfile, id_varucy, 'long_name', 'flow element center velocity vector, y-component') ! sorry for inland water people  !Vertical == onhandige woordkeuze als 3d wordt gerekend
+
             else
                ierr = nf90_put_att(ihisfile, id_varucx, 'long_name', 'flow element center Eulerian velocity vector, x-component') ! sorry for inland water people
                ierr = nf90_put_att(ihisfile, id_varucy, 'long_name', 'flow element center Eulerian velocity vector, y-component') ! sorry for inland water people  !Vertical == onhandige woordkeuze als 3d wordt gerekend
             endif
             ierr = nf90_put_att(ihisfile, id_varucx, 'units', 'm s-1')
             ierr = nf90_put_att(ihisfile, id_varucy, 'units', 'm s-1')
+            
             if (kmx > 0) then
                ierr = nf90_put_att(ihisfile, id_varucx, 'coordinates', 'station_x_coordinate station_y_coordinate station_name zcoordinate_c')
                ierr = nf90_put_att(ihisfile, id_varucy, 'coordinates', 'station_x_coordinate station_y_coordinate station_name zcoordinate_c')
@@ -34689,7 +34701,7 @@ end function ispumpon
 
  implicit none
 
- integer :: ierror, k,kk,kb,kt, Lf, i, k1, k2
+ integer :: ierror, k,kk,kb,kt, Lf, i, k1, k2,ll
  integer :: ndraw
  COMMON /DRAWTHIS/ ndraw(50)
 
@@ -34713,17 +34725,27 @@ end function ispumpon
  voutbnd     = qoutbnd *dts
  vincel      = qincel  *dts  ! do *dts here to avoid inconsistencies
  voutcel     = qoutcel *dts
- volerr      = vol1tot - vol0tot - vinbnd + voutbnd - vincel + voutcel
+ !volerr      = vol1tot - vol0tot - vinbnd + voutbnd - vincel + voutcel
 
  vinbndcum   = vinbndcum    + vinbnd
  voutbndcum  = voutbndcum   + voutbnd
  vincelcum   = vincelcum    + vincel
  voutcelcum  = voutcelcum   + voutcel
- volerrcum   = volerrcum    + volerr
+ 
 
- if (jamorf == 1) then
-    volerrcum = volerrcum + dvolbot
+ if (jamorf == 1 .and. .not. stm_included) then
+    !volerrcum = volerrcum + dvolbot
  endif
+ 
+ !if (stm_included) then
+ !   dvolbot = 0d0
+ !   do ll=1,stmpar%lsedtot
+ !      dvolbot = dvolbot + sum(sedtra%dbodsd(ll,:)/stmpar%sedpar%cdryb(ll)*ba)
+ !   enddo
+ !   !volerrcum = volerrcum + dvolbot
+ !end if
+ volerr      = vol1tot - vol0tot - vinbnd + voutbnd - vincel + voutcel !+ dvolbot
+ volerrcum   = volerrcum    + volerr
 
 if (jahisbal > 0) then
     ! extra

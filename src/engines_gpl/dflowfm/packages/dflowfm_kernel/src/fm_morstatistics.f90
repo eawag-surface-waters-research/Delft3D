@@ -21,6 +21,7 @@ module m_fm_morstatistics
       
       integer                  :: id_time        = -1    
       integer                  :: id_interval    = -1    
+      integer                  :: id_morfac      = -1    
       integer                  :: id_hs_mean(4)  = -1
       integer                  :: id_hs_std(4)   = -1
       integer                  :: id_hs_max(4)   = -1
@@ -68,16 +69,15 @@ module m_fm_morstatistics
    !
    integer                                         :: nmorstatqnt
    integer                                         :: morstatflg(10,4)
+   double precision                                :: morstatt0
    double precision, dimension(:,:), allocatable   :: morstatqnt
 
    contains
    
    subroutine morstats_setflags()   
-   ! needed because FM approach differs from Delft3Dv4, and we need backward compatibility
-   ! so we cannot affect rdmor
-      !use m_sediment, only: stmpar 
+      ! needed because FM approach differs from Delft3Dv4, and we need backward compatibility
+      ! so we cannot affect rdmor
       use morphology_data_module, only: MOR_STAT_MIN,MOR_STAT_MAX,MOR_STAT_MEAN,MOR_STAT_STD,MOR_STAT_CUM
-      !use m_flowgeom, only: ndx
    
       implicit none
       
@@ -211,21 +211,18 @@ module m_fm_morstatistics
       integer :: iqnt
       
       morstatqnt(:,1) = 0d0
-      
-      if (stmpar%morpar%moroutput%cumavg) then
-         morstatqnt(:,2:stmpar%lsedtot+1) = 0d0
-      endif
+      morstatqnt(:,2:stmpar%lsedtot+1) = 0d0
       
       do iqnt = 1,4
           select case (iqnt)
           case (1)  ! waterdepth
              ! min
              if (stmpar%morpar%moroutput%statflg(2,iqnt)>0) then
-                 morstatqnt(:,morstatflg(2,iqnt)) = 1e10
+                 morstatqnt(:,morstatflg(2,iqnt)) = 1d10
              endif
              ! max
              if (stmpar%morpar%moroutput%statflg(3,iqnt)>0) then
-                 morstatqnt(:,morstatflg(3,iqnt)) = -1e10
+                 morstatqnt(:,morstatflg(3,iqnt)) = -1d10
              endif
              !
              if (stmpar%morpar%moroutput%statflg(4,iqnt)>0) then
@@ -242,13 +239,13 @@ module m_fm_morstatistics
           case default  ! vectors
              ! min
              if (stmpar%morpar%moroutput%statflg(2,iqnt)>0) then
-                 morstatqnt(:,morstatflg(2,iqnt)) = 1e10
-                 morstatqnt(:,morstatflg(3,iqnt)) = 1e10
+                 morstatqnt(:,morstatflg(2,iqnt)) = 1d10
+                 morstatqnt(:,morstatflg(3,iqnt)) = 1d10
              endif
              ! max
              if (stmpar%morpar%moroutput%statflg(3,iqnt)>0) then
-                 morstatqnt(:,morstatflg(4,iqnt)) = -1e10
-                 morstatqnt(:,morstatflg(5,iqnt)) = -1e10
+                 morstatqnt(:,morstatflg(4,iqnt)) = 0d0           ! comparison on magnitude
+                 morstatqnt(:,morstatflg(5,iqnt)) = 0d0
              endif
              if (stmpar%morpar%moroutput%statflg(4,iqnt)>0) then
                  morstatqnt(:,morstatflg(6,iqnt)) = 0d0
@@ -291,12 +288,12 @@ module m_fm_morstatistics
       !
       implicit none
       !
-      real(fp), dimension(stmpar%lsedtot, ndx), intent(in)  :: dbodsd !  change in sediment composition, units : kg/m2
-      real(fp), dimension(ndx)         ,        intent(in)  :: hs_mor        
-      real(fp), dimension(ndx)         ,        intent(in)  :: ucxq_mor  
-      real(fp), dimension(ndx)         ,        intent(in)  :: ucyq_mor  
-      real(fp), dimension(ndx, stmpar%lsedtot), intent(in)  :: sbcx   
-      real(fp), dimension(ndx, stmpar%lsedtot), intent(in)  :: sbcy   
+      real(fp), dimension(stmpar%lsedtot, ndx),    intent(in)  :: dbodsd !  change in sediment composition, units : kg/m2
+      real(fp), dimension(ndx)         ,           intent(in)  :: hs_mor        
+      real(fp), dimension(ndx)         ,           intent(in)  :: ucxq_mor  
+      real(fp), dimension(ndx)         ,           intent(in)  :: ucyq_mor  
+      real(fp), dimension(ndx, stmpar%lsedtot),    intent(in)  :: sbcx   
+      real(fp), dimension(ndx, stmpar%lsedtot),    intent(in)  :: sbcy   
       real(fp), dimension(ndx, stmpar%lsedsus),    intent(in)  :: sbwx
       real(fp), dimension(ndx, stmpar%lsedsus),    intent(in)  :: sbwy
       real(fp), dimension(ndx, stmpar%lsedsus),    intent(in)  :: sscx
@@ -317,7 +314,7 @@ module m_fm_morstatistics
       !
       if (nmorstatqnt == 0) return
       !
-      wght = max(dts/ti_sed,0d0)    ! time weighted is default, as opposed to original D3D implementation which used accreted volume
+      wght = max(dts/ti_sed,0d0)                     ! time weighted is default, as opposed to original D3D implementation which used accreted volume
       !
       do k = 1, ndx
          if (stmpar%morpar%moroutput%weightflg==MOR_STAT_BODS) then
@@ -408,20 +405,22 @@ module m_fm_morstatistics
          integer               :: nm
          real(fp)              :: q1, q2
          real(fp)              :: wght
-         real(fp)              :: presval, newval, minmaxval
+         real(fp)              :: presval, newval
 
          newval     = sqrt(q1**2+q2**2)
          if (idx(2)>0 .and. wght>0.0_fp) then
             presval = sqrt(morstatqnt(nm,idx(2))**2+morstatqnt(nm,idx(3))**2)
-            minmaxval = min(presval, newval)
-            morstatqnt(nm,idx(2)) = dcos(minmaxval)
-            morstatqnt(nm,idx(3)) = dsin(minmaxval)
+            if (presval>newval) then
+               morstatqnt(nm,idx(2)) = q1
+               morstatqnt(nm,idx(3)) = q2
+            endif
          endif
          if (idx(4)>0 .and. wght>0.0_fp) then
             presval = sqrt(morstatqnt(nm,idx(4))**2+morstatqnt(nm,idx(5))**2)
-            minmaxval = max(presval, newval)
-            morstatqnt(nm,idx(4)) = dcos(minmaxval)
-            morstatqnt(nm,idx(5)) = dsin(minmaxval)
+            if (presval<newval) then
+               morstatqnt(nm,idx(4)) = q1
+               morstatqnt(nm,idx(5)) = q2
+            endif
          endif
          if (idx(6)>0) then
             morstatqnt(nm,idx(6)) = morstatqnt(nm,idx(6)) + wght*q1
@@ -505,6 +504,8 @@ subroutine unc_write_sedstat_filepointer_ugrid(sedids,tim)
    integer                                      :: dim
    integer, dimension(:), allocatable           :: dimids_
    double precision                             :: meanmag2
+   double precision                             :: morfc
+   double precision, save                       :: morft0, hydrt0
    double precision, dimension(:,:), allocatable:: work
    double precision, dimension(:),   allocatable:: work2
    double precision, dimension(:),   allocatable:: wghtfac
@@ -513,7 +514,7 @@ subroutine unc_write_sedstat_filepointer_ugrid(sedids,tim)
    character(len=150)                           :: descr1, descr2
    character(len=125)                           :: tmpstr
    
-   if (jased==0 .or. .not.stm_included .or. stmpar%lsedtot==0) then
+   if (jased==0 .or. (.not. stm_included) .or. stmpar%lsedtot==0) then
       return
    endif
    !                                              
@@ -544,6 +545,7 @@ subroutine unc_write_sedstat_filepointer_ugrid(sedids,tim)
       tmpstr = 'seconds since '//refdat(1:4)//'-'//refdat(5:6)//'-'//refdat(7:8)//' 00:00:00'
       ierr = unc_def_var_nonspatial(sedids%ncid, sedids%id_time, nf90_double, (/ sedids%id_tsp%id_timedim /), 'time', 'time', '', trim(tmpstr))
       ierr = unc_def_var_nonspatial(sedids%ncid, sedids%id_interval, nf90_double, (/ sedids%id_tsp%id_timedim /), 'averaging interval', 'averaging interval', '', 's')
+      ierr = unc_def_var_nonspatial(sedids%ncid, sedids%id_morfac, nf90_double, (/ sedids%id_tsp%id_timedim /), 'morfac', 'morphological accelaration factor', '', '-')
    
       ierr = nf90_def_dim(sedids%ncid, 'nSedTot', stmpar%lsedtot, sedids%id_tsp%id_sedtotdim)
       
@@ -680,20 +682,29 @@ subroutine unc_write_sedstat_filepointer_ugrid(sedids,tim)
       
       ierr = nf90_enddef(sedids%ncid)
       
+      morft0 = morstatt0
+      hydrt0 = time1
    endif
    !
    ! write data to netcdf file
    !
    sedids%id_tsp%idx_curtime = sedids%id_tsp%idx_curtime+1   
    itim                      = sedids%id_tsp%idx_curtime
-   ierr                      = nf90_put_var(sedids%ncid, sedids%id_time, tim, (/ itim /))
-   ierr                      = nf90_put_var(sedids%ncid, sedids%id_interval, morstatqnt(1,1)*ti_sed, (/ itim /))
+   if (itim==1) return
+   !
+   morfc  = (stmpar%morpar%morft - morft0)/(time1 - hydrt0)*86400d0
+   morft0 = stmpar%morpar%morft
+   hydrt0 = time1
+   !
+   ierr = nf90_put_var(sedids%ncid, sedids%id_time, tim, (/ itim /))
+   ierr = nf90_put_var(sedids%ncid, sedids%id_interval, morstatqnt(1,1)*ti_sed, (/ itim /))
+   ierr = nf90_put_var(sedids%ncid, sedids%id_morfac, morfc, (/ itim /))
    !
    if (stmpar%morpar%moroutput%dmsedcum) then
       allocate( work(ndx, stmpar%lsedtot) )
       do ll = 1, stmpar%lsedtot
           do k = 1, ndx           
-              work(k, ll) = morstatqnt(k, 1+ll)
+              work(k, ll) = morstatqnt(k, 1+ll)                ! has morfac incorporated
           enddo
       enddo
       ierr = unc_put_var_map(sedids%ncid, sedids%id_tsp, sedids%id_dmsedcum, UNC_LOC_S, work)
@@ -730,7 +741,7 @@ subroutine unc_write_sedstat_filepointer_ugrid(sedids,tim)
             endif
          endif
          
-         if (dim==1) then
+         if (dim==1) then                                    ! just waterlevel
             if (iand(idx,MOR_STAT_MIN)>0) then
                where (morstatqnt(:,1)<=0.0)
                   morstatqnt(:,morstatflg(2,iq)) = -999d0
@@ -771,6 +782,12 @@ subroutine unc_write_sedstat_filepointer_ugrid(sedids,tim)
                ierr = unc_put_var_map(sedids%ncid, sedids%id_tsp, id_mean_x, UNC_LOC_S, morstatqnt(:,morstatflg(5,iq)))
             endif
          else
+            if (iq==2) then
+               morfc = 1d0
+            else
+               morfc = max(morfc,1d0)   
+            endif
+            
             if (iand(idx,MOR_STAT_MIN)>0) then
                
                where (morstatqnt(:,1)<=0.0)
@@ -792,12 +809,12 @@ subroutine unc_write_sedstat_filepointer_ugrid(sedids,tim)
             endif
             !
             if (iand(idx,MOR_STAT_MEAN)>0) then
-               work2 = morstatqnt(:,morstatflg(6,iq))*wghtfac
+               work2 = morstatqnt(:,morstatflg(6,iq))*wghtfac*morfc
                where (morstatqnt(:,1)<=0.0)
                   work2 = -999d0
                endwhere
                ierr = unc_put_var_map(sedids%ncid, sedids%id_tsp, id_mean_x, UNC_LOC_S, work2)
-               work2 = morstatqnt(:,morstatflg(7,iq))*wghtfac
+               work2 = morstatqnt(:,morstatflg(7,iq))*wghtfac*morfc
                where (morstatqnt(:,1)<=0.0)
                   work2 = -999d0
                endwhere
@@ -809,7 +826,7 @@ subroutine unc_write_sedstat_filepointer_ugrid(sedids,tim)
                   meanmag2 = (morstatqnt(k, morstatflg(6,iq))**2+morstatqnt(k, morstatflg(7,iq))**2)*wghtfac(k)**2
                   morstatqnt(k, morstatflg(8,iq)) = morstatqnt(k, morstatflg(8,iq))*wghtfac(k) - meanmag2
                   if (morstatqnt(k, morstatflg(8,iq))>0.0_fp) then  ! safety
-                      morstatqnt(k, morstatflg(8,iq))  = sqrt(morstatqnt(k, morstatflg(8,iq)))
+                      morstatqnt(k, morstatflg(8,iq))  = sqrt(morstatqnt(k, morstatflg(8,iq)))*morfc
                   else
                       morstatqnt(k, morstatflg(8,iq))  = 0.0_fp
                   endif                
@@ -824,16 +841,19 @@ subroutine unc_write_sedstat_filepointer_ugrid(sedids,tim)
                where (morstatqnt(:,1)<=0.0)
                   morstatqnt(:,morstatflg(9,iq)) = -999d0
                endwhere
-               ierr = unc_put_var_map(sedids%ncid, sedids%id_tsp, id_net_x, UNC_LOC_S, morstatqnt(:,morstatflg(9,iq)))
+               ierr = unc_put_var_map(sedids%ncid, sedids%id_tsp, id_net_x, UNC_LOC_S, morstatqnt(:,morstatflg(9,iq))*morfc)
                where (morstatqnt(:,1)<=0.0)
                   morstatqnt(:,morstatflg(10,iq)) = -999d0
                endwhere
-               ierr = unc_put_var_map(sedids%ncid, sedids%id_tsp, id_net_y, UNC_LOC_S, morstatqnt(:,morstatflg(10,iq)))
+               ierr = unc_put_var_map(sedids%ncid, sedids%id_tsp, id_net_y, UNC_LOC_S, morstatqnt(:,morstatflg(10,iq))*morfc)
             endif
          endif
       endif
       ierr = nf90_sync(sedids%ncid)
-   end do   
+   end do
+   if (ierr/=0) then
+       call mess(LEVEL_FATAL, 'fm_morstatistics::unc_write_sedstat_filepointer_ugrid - Error in subroutine unc_put_var_map (morstatqnt).')
+   end if
 end subroutine unc_write_sedstat_filepointer_ugrid
    
    end module m_fm_morstatistics
@@ -849,25 +869,30 @@ end subroutine unc_write_sedstat_filepointer_ugrid
    
    double precision, intent(in)      :: tim
    integer                           :: ierr
+   double precision                  :: tem_dif
    
    if (.not.stm_included) return
+   if (.not. stmpar%morpar%moroutput%morstats) return
    
-   ierr = 1
-   if (stmpar%morpar%moroutput%cumavg .and. (ti_sed > 0)) then
-      if (comparereal(tim, time_sed, eps10) >= 0) then
-         call unc_write_sed(tim)
-         call morstats_clearstats()
-         if (ti_sed > 0) then
-             time_sed = max(ti_seds + (floor((tim-ti_seds)/ti_sed)+1)*ti_sed,ti_seds)
+   ierr = 1   
+   if (stmpar%morpar%moroutput%morstats .and. ti_sed > 0) then
+     if (comparereal(tim, time_sed, eps10) >= 0) then
+          call unc_write_sed(tim)
+          call morstats_clearstats()
+         if (comparereal(time_sed, ti_sede, eps10) == 0) then
+            time_sed = tstop_user + 1
          else
-             time_sed = tstop_user
+            tem_dif = (tim - ti_seds)/ti_sed
+            time_sed = max(ti_seds + (floor(tem_dif + 0.001d0) +1)*ti_sed,ti_seds)
+
+            if (comparereal(time_sed, ti_sede, eps10) == 1) then
+            ! next time_map would be beyond end of map-window, write one last map exactly at that end.
+                time_sed = ti_sede
+            endif
          endif
-         if (comparereal(time_sed, ti_sede, eps10) == 1) then
-             time_sed = tstop_user
-         endif
-      endif
-   end if
-   
+     endif
+   endif
+      
    ierr = 0
    
 1234 continue

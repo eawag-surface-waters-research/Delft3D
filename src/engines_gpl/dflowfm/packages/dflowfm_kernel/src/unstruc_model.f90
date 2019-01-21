@@ -1063,8 +1063,11 @@ subroutine readMDUFile(filename, istat)
     call prop_get_string (md_ptr, 'sediment', 'SedFile',              md_sedfile,    success)
     call prop_get_string (md_ptr, 'sediment', 'MorFile',              md_morfile,    success)
     call prop_get_string (md_ptr, 'sediment', 'DredgeFile',           md_dredgefile, success)
-    call prop_get_integer(md_ptr, 'sediment', 'jaBndTreatment',       jabndtreatment, success)           ! separate treatment boundary links in upwinding transports
-    call prop_get_integer(md_ptr, 'sediment', 'jaTransVelOutput',     jasedtranspveldebug, success)      ! write sed adv velocities to output ugrid file
+    call prop_get_integer(md_ptr, 'sediment', 'BndTreatment',         jabndtreatment, success)           ! separate treatment boundary links in upwinding transports
+    call prop_get_integer(md_ptr, 'sediment', 'TransVelOutput',       jasedtranspveldebug, success)      ! write sed adv velocities to output ugrid file
+    call prop_get_integer(md_ptr, 'sediment', 'SourSink',             jasourcesink, success)             ! switch off source or sink terms for sed advection
+    call prop_get_integer(md_ptr, 'sediment', 'UpdateS1',             jaupdates1, success )              ! update s1 when updating bottom (1) or not (0, default) 
+        
     call prop_get_integer(md_ptr, 'sediment', 'Nr_of_sedfractions' ,  Mxgr)
     call prop_get_integer(md_ptr, 'sediment', 'MxgrKrone'          ,  MxgrKrone)
     call prop_get_integer(md_ptr, 'sediment', 'Seddenscoupling'    ,  jaseddenscoupling)
@@ -1187,16 +1190,21 @@ subroutine readMDUFile(filename, istat)
     call prop_get_double(md_ptr, 'time', 'TStart', tstart_user)
     tstart_user = max(tstart_user, 0d0)
     call prop_get_double (md_ptr, 'time', 'TStop', tstop_user)
-    select case (md_tunit)
+    select case (md_tunit)                                            ! tfac added here for use in sedmorinit
     case('D')
         tstart_user = tstart_user*3600*24
         tstop_user  = tstop_user*3600*24
+        tfac = 3600d0*24d0
     case('H')
         tstart_user = tstart_user*3600
         tstop_user  = tstop_user*3600
+        tfac = 3600d0
     case('M')
         tstart_user = tstart_user*60
         tstop_user  = tstop_user*60
+        tfac = 60d0
+    case default
+        tfac = 1d0
     end select
 
     call prop_get_double  (md_ptr, 'time', 'DtUser', dt_user)
@@ -1400,7 +1408,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_internal_tides_dissipation', jamapIntTidesDiss, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_nudging', jamapnudge, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_waves',jamapwav, success)
-    call prop_get_integer(md_ptr, 'output', 'Wrimap_DTcell',jamapdtcell, success)
+    call prop_get_integer(md_ptr, 'output', 'Wrimap_DTcell',jamapdtcell, success) 
     call prop_get_integer(md_ptr, 'output', 'Writek_CdWind', jatekcd, success)
     call prop_get_integer(md_ptr, 'output', 'Wrirst_bnd', jarstbnd, success)
     call prop_get_integer(md_ptr, 'output', 'Writepart_domain', japartdomain, success)
@@ -2593,6 +2601,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     endif
 
     call prop_set(prop_ptr, 'time', 'Tunit',                   md_tunit,        'Time unit for start/stop times (D, H, M or S)')
+    ! Also in readMDU, but Interacter may have changed md_tunit
     select case (md_tunit)
     case('D')
         tfac = 3600d0*24d0
