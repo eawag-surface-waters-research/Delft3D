@@ -3197,31 +3197,37 @@
    double precision, intent(in)         :: nodex(:), nodey(:), branchoffset(:), branchlength(:)
    integer, intent(in)                  :: branchidx(:), sourcenodeid(:), targetnodeid(:), startindex
    type(t_ug_meshgeom), intent(inout)   :: meshgeom
-   integer                              :: ierr, nbranches, branch, numkUnMerged, numk, numl, st, en, stn, enn, stnumk, ennumk, k, numNetworkNodes
-   integer, allocatable                 :: networkNodesUnmerged(:), meshnodemapping(:,:), xk(:), yk(:), edge_nodes(:,:)
+   integer                              :: ierr, nbranches, branch, numkUnMerged, numk, numl, st, en, stn, enn, stnumk, ennumk, k, numNetworkNodes, firstvalidarraypos
+   integer, allocatable                 :: networkNodesUnmerged(:), meshnodemapping(:,:), xk(:), yk(:), edge_nodes(:,:), correctedBranchidx(:)
 
    !initial size
    ierr         = 0
+   firstvalidarraypos = 0
+   if (startindex.eq.0) then
+      firstvalidarraypos = 1
+   endif
    nbranches    = size(sourcenodeid)
    numkUnMerged = size(branchidx,1)
-   numNetworkNodes = max(maxval(sourcenodeid), maxval(targetnodeid)) 
-
+   numNetworkNodes = max(maxval(sourcenodeid) + firstvalidarraypos, maxval(targetnodeid) + firstvalidarraypos) 
    ! allocate enough space for temp arrays
    allocate(xk(numkUnMerged))
    allocate(yk(numkUnMerged))
    allocate(networkNodesUnmerged(numNetworkNodes)); networkNodesUnmerged = 0
    allocate(edge_nodes(2,numkUnMerged))
-
+   allocate(correctedBranchidx(numkUnMerged))
    allocate(meshnodemapping(2,nbranches)); meshnodemapping = -1
-   ierr = odu_get_start_end_nodes_of_branches(branchidx, meshnodemapping(1,:), meshnodemapping(2,:))
+   
+   !map the mesh nodes   
+   correctedBranchidx = branchidx + firstvalidarraypos
+   ierr = odu_get_start_end_nodes_of_branches(correctedBranchidx, meshnodemapping(1,:), meshnodemapping(2,:))
 
    numk = 0
    numl = 0
    do branch = 1, nbranches
-      st  = meshnodemapping(1,branch)
+      st  = meshnodemapping(1,branch) 
       en  = meshnodemapping(2,branch)
-      stn = sourcenodeid(branch)
-      enn = targetnodeid(branch)
+      stn = sourcenodeid(branch) + firstvalidarraypos
+      enn = targetnodeid(branch) + firstvalidarraypos
 	   stnumk = 0
 	   ennumk = 0
       !start
