@@ -3243,18 +3243,7 @@ module m_ec_provider
          fileReaderPtr%tframe%ec_refdate = fileReaderPtr%tframe%k_refdate
          ! Obtain the total number of timesteps in this file.
          rewind(unit=fileReaderPtr%fileHandle)
-
-         !!! This read action is too slow on multi-gigabyte files. Commented for now.
-         !!!time_steps = 0.0_hp
-         !!!do
-         !!!   prev_time_steps = time_steps
-         !!!   if (.not. ecUniReadTimeSteps(fileReaderPtr, time_steps)) exit ! TODO: EB: do we really need to count all time steps beforehand?
-         !!!end do
-         !!!! Convert timesteps from minutes to seconds.
-         !!!fileReaderPtr%tframe%nr_timesteps = prev_time_steps * 60.0_hp
          success = .true.
-
-! ecSupportTimestringToUnitAndRefdate(units, fileReaderPtr%tframe%ec_timestep_unit, fileReaderPtr%tframe%ec_refdate)         
       end function ecUniInitializeTimeFrame
       
       ! =======================================================================
@@ -3310,7 +3299,7 @@ module m_ec_provider
          ! Determine the total number of timesteps.
          if (.not. ecSupportNetcdfCheckError(nf90_inquire_variable(fileReaderPtr%fileHandle, time_id, dimids=dimid), "obtain time dimension ids", fileReaderPtr%fileName)) return
          if (.not. ecSupportNetcdfCheckError(nf90_inquire_dimension(fileReaderPtr%fileHandle, dimid(1), len=length), "obtain time dimension length", fileReaderPtr%fileName)) return
-         fileReaderPtr%tframe%nr_timesteps = 0.0_hp + length
+         fileReaderPtr%tframe%nr_timesteps = length
          allocate(fileReaderPtr%tframe%times(length), stat = istat)
          ! Store the times at which data is available.
          if (.not. ecSupportNetcdfCheckError(nf90_get_var(fileReaderPtr%fileHandle, time_id, fileReaderPtr%tframe%times, start=(/1/), count=(/length/)), "obtain time data", fileReaderPtr%fileName)) return
@@ -3595,6 +3584,7 @@ module m_ec_provider
          if (ndim==1) then                     ! Is this variable a coordinate variable
              ierror = nf90_inquire_variable(fileReaderPtr%fileHandle, ivar, dimids=dimid)
              ierror = nf90_inquire_dimension(fileReaderPtr%fileHandle,dimid(1),name=dim_name,len=dim_size)
+             call str_lower(dim_name)
              if (trim(dim_name)==trim(fileReaderPtr%variable_names(ivar))) then
                 fileReaderPtr%dim_varids(dimid(1)) = ivar      ! connects a varid to a dimid 
              end if

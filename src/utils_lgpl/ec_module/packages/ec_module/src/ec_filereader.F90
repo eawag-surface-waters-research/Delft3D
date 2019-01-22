@@ -89,7 +89,7 @@ module m_ec_filereader
          fileReaderPtr%tframe%k_timestep_unit = ec_undef_int
          fileReaderPtr%tframe%ec_refdate = ec_undef_hp
          fileReaderPtr%tframe%ec_timestep_unit = ec_undef_int
-         fileReaderPtr%tframe%nr_timesteps = ec_undef_hp
+         fileReaderPtr%tframe%nr_timesteps = ec_undef_int
          fileReaderPtr%lastReadTime = ec_undef_hp
          fileReaderPtr%end_of_data = .false.
       end function ecFileReaderCreate
@@ -201,7 +201,7 @@ module m_ec_filereader
          real(hp), dimension(:), allocatable    :: values
          type(tEcItem), pointer  :: itemPtr
          integer                 :: n_invalid_components
-         integer                 :: timesndx, timesndx0, timesndx1
+         integer                 :: timesndx
          
          ! body
          success = .false.
@@ -354,11 +354,20 @@ module m_ec_filereader
             case (provFile_netcdf)
                qname = fileReaderPtr%items(1)%ptr%quantityPtr%name
                call str_lower(qname)
+               itemPtr => fileReaderPtr%items(1)%ptr
+               if (itemPtr%sourceT0FieldPtr%timesndx < 0) then
+                  t0t1 = 0 
+                  timesndx  = ecNetcdfGetTimeIndexByTime(fileReaderPtr, timesteps)
+               elseif (itemPtr%sourceT0FieldPtr%timesndx > itemPtr%sourceT1FieldPtr%timesndx) then
+                  t0t1 = 1
+                  timesndx = itemPtr%sourceT0FieldPtr%timesndx + 1
+               else
+                  t0t1 = 0 
+                  timesndx = itemPtr%sourceT1FieldPtr%timesndx + 1
+               endif
                select case (qname)
-               case ('rainfall','precipitation')
-                  success = ecNetcdfReadNextBlock(fileReaderPtr, fileReaderPtr%items(1)%ptr, 0)
-                  success = ecNetcdfReadNextBlock(fileReaderPtr, fileReaderPtr%items(1)%ptr, 1)
                case ('hrms', 'tp', 'tps', 'rtp', 'dir', 'fx', 'fy', 'wsbu', 'wsbv', 'mx', 'my', 'dissurf','diswcap','ubot')
+                  ! TODO: see if we really need this case or that it can pass as the default case
                   t0t1 = -1
                   do i=1, fileReaderPtr%nItems
                      success = ecNetcdfReadBlock(fileReaderPtr, fileReaderPtr%items(i)%ptr, t0t1, fileReaderPtr%items(i)%ptr%elementSetPtr%nCoordinates)                  
@@ -370,35 +379,25 @@ module m_ec_filereader
                      endif
                   end do
                case default
-                  t0t1 = -1
-                  timesndx  = ecNetcdfGetTimeIndexByTime(fileReaderPtr, timesteps)   ! where we are going
-                  timesndx0 = fileReaderPtr%items(1)%ptr%sourceT0FieldPtr%timesndx   ! what we have
-                  timesndx1 = fileReaderPtr%items(1)%ptr%sourceT1FieldPtr%timesndx
                   do i=1, fileReaderPtr%nItems
-                     if ((timesndx0==-1) .and. (timesndx1==-1)) then
-                        success = ecNetcdfReadNextBlock(fileReaderPtr, fileReaderPtr%items(i)%ptr, t0t1, timesndx=timesndx)
-                     else
-                        success = ecNetcdfReadNextBlock(fileReaderPtr, fileReaderPtr%items(i)%ptr, t0t1)
-                     endif
-                     if (t0t1 == 0) then
-                        ! flip t0 and t1
+                     success = ecNetcdfReadNextBlock(fileReaderPtr, fileReaderPtr%items(i)%ptr, t0t1, timesndx)
+                  end do
+                  if (itemPtr%sourceT1FieldPtr%timesndx < 0) then
+                     t0t1 = 1
+                     timesndx = timesndx + 1
+                     do i=1, fileReaderPtr%nItems
+                        success = ecNetcdfReadNextBlock(fileReaderPtr, fileReaderPtr%items(i)%ptr, t0t1, timesndx)
+                     end do      
+                  endif
+!                 if (itemPtr%sourceT1FieldPtr%timesndx < itemPtr%sourceT0FieldPtr%timesndx) then   ! RL: These checks should be equivalent, but the lower one is used for other types 
+                  if (t0t1 == 0) then
+                     ! flip t0 and t1
+                     do i=1, fileReaderPtr%nItems
                         fieldPtrA => fileReaderPtr%items(i)%ptr%sourceT1FieldPtr
                         fileReaderPtr%items(i)%ptr%sourceT1FieldPtr => fileReaderPtr%items(i)%ptr%sourceT0FieldPtr
                         fileReaderPtr%items(i)%ptr%sourceT0FieldPtr => fieldPtrA
-                     endif
-                     ! Initially, both T0 and T1 refer to ec_undef_hp < 0
-                     ! At this point, after swapping, T0-field is still uninitialized
-                     ! In the next lines, 
-                     if ((timesndx0==-1) .and. (timesndx1==-1)) then
-                        success = ecNetcdfReadNextBlock(fileReaderPtr, fileReaderPtr%items(i)%ptr, t0t1, timesndx=timesndx+1)
-                        if (t0t1 == 0) then
-                           ! flip t0 and t1
-                           fieldPtrA => fileReaderPtr%items(i)%ptr%sourceT1FieldPtr
-                           fileReaderPtr%items(i)%ptr%sourceT1FieldPtr => fileReaderPtr%items(i)%ptr%sourceT0FieldPtr
-                           fileReaderPtr%items(i)%ptr%sourceT0FieldPtr => fieldPtrA
-                        endif
-                     end if
-                  end do
+                     end do      
+                  endif
                end select
             case (provFile_svwp, provFile_svwp_weight, provFile_curvi_weight, provFile_samples, &
                   provFile_triangulationmagdir, provFile_poly_tim, provFile_grib)

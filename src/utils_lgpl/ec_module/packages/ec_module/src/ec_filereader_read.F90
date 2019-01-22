@@ -682,17 +682,15 @@ module m_ec_filereader_read
          !
          logical                      :: success       !< function status
          type(tEcFileReader), pointer :: fileReaderPtr !< intent(in)
-         type(tEcItem)                :: item          !< Item containing quantity1, intent(inout)
-         integer                      :: t0t1          !< read into Field T0 or T1 (0,1).
-         integer, optional            :: timesndx      !< explicit index of the time dimension to jump to in the netCDF file
+         type(tEcItem),    intent(in) :: item          !< Item containing quantity1, intent(inout)
+         integer,          intent(in) :: t0t1          !< read into Field T0 or T1 (0,1).
+         integer,       intent(inout) :: timesndx      !< index of the time dimension to jump to in the netCDF file
          !
          type(tEcField), pointer                 :: fieldPtr         !< Field to update
          integer                                 :: ierror           !< return status of NetCDF method call
          integer                                 :: varid            !< NetCDF id of NetCDF variable
-         integer                                 :: times_index      !< Index in tEcTimeFrame's times array
-         real(hp)                                :: netcdf_timesteps !< seconds since k_refdate
          integer                                 :: i, j, k          !< loop counters
-         real(hp), dimension(:,:), allocatable :: data_block         !< 2D slice of NetCDF variable's data
+         real(hp), dimension(:,:), allocatable   :: data_block         !< 2D slice of NetCDF variable's data
          integer                                 :: istat            !< allocation status
          real(hp)                                :: dmiss_nc         !< local netcdf missing
 
@@ -711,21 +709,6 @@ module m_ec_filereader_read
          dmiss_nc = item%quantityPtr%fillvalue
          varid = item%quantityPtr%ncid
 
-             !
-         if (item%sourceT0FieldPtr%timesndx < 0) then
-            t0t1 = 0 
-            times_index = timesndx
-         elseif (item%sourceT1FieldPtr%timesndx < 0) then
-            t0t1 = 1 
-            times_index = timesndx
-         elseif (item%sourceT0FieldPtr%timesndx > item%sourceT1FieldPtr%timesndx) then
-            t0t1 = 1
-            times_index = item%sourceT0FieldPtr%timesndx + 1
-         else
-            t0t1 = 0 
-            times_index = item%sourceT1FieldPtr%timesndx + 1
-         endif
-         !
          !
          ! =============
          ! sanity checks
@@ -742,7 +725,7 @@ module m_ec_filereader_read
          end if
          !
          ! - 3 - Check for the presence of times, indicating the presence of further data blocks.
-         if (fileReaderPtr%tframe%nr_timesteps == ec_undef_int .or. fileReaderPtr%tframe%nr_timesteps <= 0.0_hp) then
+         if (fileReaderPtr%tframe%nr_timesteps <= 0) then
             call setECMessage("Empty NetCDF time dimension in "//trim(fileReaderPtr%filename)//".")
             return
          end if
@@ -751,24 +734,21 @@ module m_ec_filereader_read
          ! update source Field
          ! ===================
          ! - 0 - Determine if the timesteps of the field to be updated are still below the last time in the file 
-         mintime = ecSupportTimeToTimesteps(fileReaderPtr%tframe, 1)
-         maxtime = ecSupportTimeToTimesteps(fileReaderPtr%tframe, int(fileReaderPtr%tframe%nr_timesteps))
 
-         if (comparereal(fieldPtr%timesteps, maxtime) /= -1) then
+         if (timesndx>fileReaderPtr%tframe%nr_timesteps) then
+            mintime = ecSupportTimeToTimesteps(fileReaderPtr%tframe, 1)
+            maxtime = ecSupportTimeToTimesteps(fileReaderPtr%tframe, fileReaderPtr%tframe%nr_timesteps)
             call real2string(cnumber1, '(f12.2)', mintime)
             call real2string(cnumber2, '(f12.2)', maxtime)
             call setECMessage('   Valid range: ' // trim(cnumber1) // ' to ' // trim(cnumber2))
             call setECMessage("Data block requested outside valid time window in "//trim(fileReaderPtr%filename)//".")
             if (.True.) then                                       ! TODO : pass if extrapolation (constant value) is allowed here, now always allowed
                 fieldPtr%timesteps = huge(fieldPtr%timesteps)      ! set time to infinity
+                fieldPtr%timesndx = timesndx
             else
                 return
             endif
          else
-            if (present(timesndx)) then                  ! if index into netcdf time dimension specified
-               times_index = timesndx                    ! Override the default timesndx (progressing) by an explicitly specified timesndx
-            end if
-            !
             col0 = fieldPtr%bbox(1)
             row0 = fieldPtr%bbox(2)
             col1 = fieldPtr%bbox(3)
@@ -795,7 +775,7 @@ module m_ec_filereader_read
             do while (.not.valid_field)
                ! - 3 - Read a scalar data block.
                if (item%elementSetPtr%nCoordinates == 0) then
-                  ierror = nf90_get_var(fileReaderPtr%fileHandle, varid, fieldPtr%arr1dPtr, start=(/times_index/), count=(/1/))
+                  ierror = nf90_get_var(fileReaderPtr%fileHandle, varid, fieldPtr%arr1dPtr, start=(/timesndx/), count=(/1/))
                   if (ierror.ne.NF90_NOERR) then         ! handle exception
                      call setECMessage("NetCDF:'"//trim(nf90_strerror(ierror))//"' in "//trim(fileReaderPtr%filename)//".")
                      return
@@ -816,7 +796,7 @@ module m_ec_filereader_read
 
                if (item%elementSetPtr%nCoordinates > 0) then
                   if (item%elementSetPtr%n_layers == 0) then                  ! 2D elementset
-                     ierror = nf90_get_var(fileReaderPtr%fileHandle, varid, data_block, start=(/col0, row0, times_index/), count=(/ncol, nrow, 1/))
+                     ierror = nf90_get_var(fileReaderPtr%fileHandle, varid, data_block, start=(/col0, row0, timesndx/), count=(/ncol, nrow, 1/))
                      ! copy data to source Field's 1D array, store (X1Y1, X1Y2, ..., X1Yn_rows, X2Y1, XYy2, ..., Xn_colsY1, ...)
                      do i=1, nrow
                         do j=1, ncol
@@ -827,7 +807,7 @@ module m_ec_filereader_read
                   else
                      ! copy data to source Field's 1D array, store (X1Y1, X1Y2, ..., X1Yn_rows, X2Y1, XYy2, ..., Xn_colsY1, ...)
                      do k=1, item%elementSetPtr%n_layers
-                        ierror = nf90_get_var(fileReaderPtr%fileHandle, varid, data_block, start=(/col0, row0, k, times_index/), count=(/ncol, nrow, 1, 1/))
+                        ierror = nf90_get_var(fileReaderPtr%fileHandle, varid, data_block, start=(/col0, row0, k, timesndx/), count=(/ncol, nrow, 1, 1/))
                         do i=1, nrow
                            do j=1, ncol
                               fieldPtr%arr1dPtr( (k-1)*ncol*nrow + (i-1)*ncol +  j ) = data_block(j,i)
@@ -838,13 +818,13 @@ module m_ec_filereader_read
                   end if
                end if
                if (.not.valid_field) then
-                  times_index = times_index+1
+                  timesndx = timesndx+1
                end if
             end do         ! loop while fields invalid            
    
             ! - 2 - Update the source Field's timesteps variable.
-            fieldPtr%timesteps = ecSupportTimeToTimesteps(fileReaderPtr%tframe, times_index)
-            fieldPtr%timesndx = times_index
+            fieldPtr%timesteps = ecSupportTimeToTimesteps(fileReaderPtr%tframe, timesndx)
+            fieldPtr%timesndx = timesndx
          endif
 
          ! - 3 - Apply the scale factor and offset
