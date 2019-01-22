@@ -3208,7 +3208,7 @@
    endif
    nbranches    = size(sourcenodeid)
    numkUnMerged = size(branchidx,1)
-   numNetworkNodes = max(maxval(sourcenodeid) + firstvalidarraypos, maxval(targetnodeid) + firstvalidarraypos) 
+   numNetworkNodes = max(maxval(sourcenodeid) + firstvalidarraypos, maxval(targetnodeid) + firstvalidarraypos)
    ! allocate enough space for temp arrays
    allocate(xk(numkUnMerged))
    allocate(yk(numkUnMerged))
@@ -3216,20 +3216,20 @@
    allocate(edge_nodes(2,numkUnMerged))
    allocate(correctedBranchidx(numkUnMerged))
    allocate(meshnodemapping(2,nbranches)); meshnodemapping = -1
-   
-   !map the mesh nodes   
+
+   !map the mesh nodes
    correctedBranchidx = branchidx + firstvalidarraypos
    ierr = odu_get_start_end_nodes_of_branches(correctedBranchidx, meshnodemapping(1,:), meshnodemapping(2,:))
 
    numk = 0
    numl = 0
    do branch = 1, nbranches
-      st  = meshnodemapping(1,branch) 
+      st  = meshnodemapping(1,branch)
       en  = meshnodemapping(2,branch)
       stn = sourcenodeid(branch) + firstvalidarraypos
       enn = targetnodeid(branch) + firstvalidarraypos
-	   stnumk = 0
-	   ennumk = 0
+      stnumk = 0
+      ennumk = 0
       !start
       if (stn > 0) then
          if(networkNodesUnmerged(stn)==0) then
@@ -3261,11 +3261,20 @@
          endif
       endif
       !create edge node table
-      do k = stnumk, ennumk-1
-         numl = numl +1
-         edge_nodes(1,numl) = k
-         edge_nodes(2,numl) = k+1
-      enddo
+      if (ennumk>stnumk) then
+         do k = stnumk, ennumk-1
+            numl = numl +1
+            edge_nodes(1,numl) = k
+            edge_nodes(2,numl) = k+1
+         enddo
+      endif
+      if (ennumk<stnumk) then
+         do k = ennumk, stnumk-1
+            numl = numl +1
+            edge_nodes(1,numl) = k
+            edge_nodes(2,numl) = k+1
+         enddo
+      endif
    enddo
 
    ! assigned merged nodes
