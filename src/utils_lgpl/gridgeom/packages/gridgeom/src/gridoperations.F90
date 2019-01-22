@@ -3197,27 +3197,85 @@
    double precision, intent(in)         :: nodex(:), nodey(:), branchoffset(:), branchlength(:)
    integer, intent(in)                  :: branchidx(:), sourcenodeid(:), targetnodeid(:), startindex
    type(t_ug_meshgeom), intent(inout)   :: meshgeom
-   integer                              :: ierr, numedge, nbranches
+   integer                              :: ierr, nbranches, branch, numkUnMerged, numk, numl, st, en, stn, enn, stnumk, ennumk, k, numNetworkNodes
+   integer, allocatable                 :: networkNodesUnmerged(:), meshnodemapping(:,:), xk(:), yk(:), edge_nodes(:,:)
 
-   ierr = 0
-   nbranches = size(sourcenodeid)
-   meshgeom%dim = 1
-   meshgeom%numnode =  size(nodex,1)
-   allocate(meshgeom%nodex(meshgeom%numnode))
-   allocate(meshgeom%nodey(meshgeom%numnode))
-   allocate(meshgeom%branchidx(size(branchidx,1)))
-   
-   !Assign the node coordinates
+   !initial size
+   ierr         = 0
+   nbranches    = size(sourcenodeid)
+   numkUnMerged = size(branchidx,1)
+   numNetworkNodes = max(maxval(sourcenodeid), maxval(targetnodeid)) 
+
+   ! allocate enough space for temp arrays
+   allocate(xk(numkUnMerged))
+   allocate(yk(numkUnMerged))
+   allocate(networkNodesUnmerged(numNetworkNodes)); networkNodesUnmerged = 0
+   allocate(edge_nodes(2,numkUnMerged))
+
+   allocate(meshnodemapping(2,nbranches)); meshnodemapping = -1
+   ierr = odu_get_start_end_nodes_of_branches(branchidx, meshnodemapping(1,:), meshnodemapping(2,:))
+
+   numk = 0
+   numl = 0
+   do branch = 1, nbranches
+      st  = meshnodemapping(1,branch)
+      en  = meshnodemapping(2,branch)
+      stn = sourcenodeid(branch)
+      enn = targetnodeid(branch)
+	   stnumk = 0
+	   ennumk = 0
+      !start
+      if (stn > 0) then
+         if(networkNodesUnmerged(stn)==0) then
+            numk = numk + 1
+            stnumk = numk
+            xk(numk) = nodex(st)
+            yk(numk) = nodey(st)
+            networkNodesUnmerged(stn) = numk
+         else
+            stnumk = networkNodesUnmerged(stn)
+         endif
+      endif
+      !internals
+      do k = st + 1, en - 1
+         numk = numk + 1
+         xk(numk) = nodex(k)
+         yk(numk) = nodey(k)
+      enddo
+      !end
+      if (enn > 0) then
+         if(networkNodesUnmerged(enn)==0) then
+            numk = numk + 1
+            ennumk = numk
+            xk(numk) = nodex(en)
+            yk(numk) = nodey(en)
+            networkNodesUnmerged(enn) = numk
+         else
+            ennumk = networkNodesUnmerged(enn)
+         endif
+      endif
+      !create edge node table
+      do k = stnumk, ennumk-1
+         numl = numl +1
+         edge_nodes(1,numl) = k
+         edge_nodes(2,numl) = k+1
+      enddo
+   enddo
+
+   ! assigned merged nodes
+   meshgeom%dim     = 1
+   meshgeom%numnode = numk
+   meshgeom%numedge = numl
+
+   allocate(meshgeom%nodex(numk))
+   allocate(meshgeom%nodey(numk))
+   allocate(meshgeom%branchidx(numkUnMerged))
+   allocate(meshgeom%edge_nodes(2, numl))
+
    meshgeom%branchidx  = branchidx
-   meshgeom%nodex      =  nodex
-   meshgeom%nodey      =  nodey
-   
-   ierr = ggeo_count_or_create_edge_nodes(meshgeom%branchidx, branchoffset, sourcenodeid, targetnodeid, branchlength, startindex, meshgeom%numedge) 
-   
-   allocate(meshgeom%edge_nodes(2, meshgeom%numedge))
-
-   !Calculate the edge_nodes
-   ierr = ggeo_count_or_create_edge_nodes(meshgeom%branchidx, branchoffset, sourcenodeid, targetnodeid, branchlength, startindex, meshgeom%numedge, meshgeom%edge_nodes)
+   meshgeom%nodex      = xk(1:numk)
+   meshgeom%nodey      = yk(1:numk)
+   meshgeom%edge_nodes = edge_nodes(:,1:numl)
 
    end function ggeo_convert_1d_arrays
    
