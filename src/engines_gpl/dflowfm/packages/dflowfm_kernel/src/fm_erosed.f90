@@ -3127,6 +3127,7 @@ end module m_fm_update_crosssections
          bl(nm) = bl(nm) + blchg(nm)
          !
       enddo
+         ! AvD: Sander suggestie: call update_geom(2)
       !
       ! Free morpho boundaries get Neumann update
       !
