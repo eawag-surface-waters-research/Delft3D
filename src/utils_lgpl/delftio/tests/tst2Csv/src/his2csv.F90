@@ -70,7 +70,7 @@ program his2csv
     retval = 0
 
     ! check / read arguments
-    numArgs = nargs()
+    numArgs = COMMAND_ARGUMENT_COUNT()
     args(:) = ''
     if (numArgs >= 1) call GetArg(1, args(1))
     if ( numArgs == 1 .or. &

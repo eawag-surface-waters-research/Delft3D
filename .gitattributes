@@ -13163,10 +13163,10 @@ src/utils_lgpl/delftio/packages/his2csv/testdata/run_test.bat -text
 src/utils_lgpl/delftio/scripts/conv2ux -text
 src/utils_lgpl/delftio/scripts/diorun -text
 src/utils_lgpl/delftio/scripts/setup -text
+src/utils_lgpl/delftio/tests/tst2Csv/runtest/runTst.bat -text
+src/utils_lgpl/delftio/tests/tst2Csv/runtest/tstHis2Csv.his -text
 src/utils_lgpl/delftio/tests/tst2Csv/src/his2csv.F90 -text
 src/utils_lgpl/delftio/tests/tst2Csv/tstHis2csv.vfproj -text
-src/utils_lgpl/delftio/tests/tst2Csv/w32/runTst.bat -text
-src/utils_lgpl/delftio/tests/tst2Csv/w32/tstHis2Csv.his -text
 src/utils_lgpl/delftio/tests/tstAll2D/resultsapproved/intel/TEST2DFAutoFiles-res.txt -text
 src/utils_lgpl/delftio/tests/tstAll2D/resultsapproved/intel/TEST2DFAutoShm-res.txt -text
 src/utils_lgpl/delftio/tests/tstAll2D/resultsapproved/intel/TEST2DFSerial-res.txt -text
@@ -13175,6 +13175,9 @@ src/utils_lgpl/delftio/tests/tstAll2D/resultsapproved/w32/TEST2DFAutoFiles-res.t
 src/utils_lgpl/delftio/tests/tstAll2D/resultsapproved/w32/TEST2DFAutoShm-res.txt -text
 src/utils_lgpl/delftio/tests/tstAll2D/resultsapproved/w32/TEST2DFSerial-res.txt -text
 src/utils_lgpl/delftio/tests/tstAll2D/resultsapproved/w32/TEST2DFSynch-res.txt -text
+src/utils_lgpl/delftio/tests/tstAll2D/runtest/dioconfigFiles.ini -text
+src/utils_lgpl/delftio/tests/tstAll2D/runtest/dioconfigShm.ini -text
+src/utils_lgpl/delftio/tests/tstAll2D/runtest/runTst.bat -text
 src/utils_lgpl/delftio/tests/tstAll2D/src/Makefile -text
 src/utils_lgpl/delftio/tests/tstAll2D/src/dio-2d-tst.F90 -text
 src/utils_lgpl/delftio/tests/tstAll2D/src/tst-2d-get.F90 -text
@@ -13186,9 +13189,6 @@ src/utils_lgpl/delftio/tests/tstAll2D/unix/dioconfig.ini -text
 src/utils_lgpl/delftio/tests/tstAll2D/unix/dioconfigFiles.ini -text
 src/utils_lgpl/delftio/tests/tstAll2D/unix/dioconfigShm.ini -text
 src/utils_lgpl/delftio/tests/tstAll2D/unix/diorun -text
-src/utils_lgpl/delftio/tests/tstAll2D/w32/dioconfigFiles.ini -text
-src/utils_lgpl/delftio/tests/tstAll2D/w32/dioconfigShm.ini -text
-src/utils_lgpl/delftio/tests/tstAll2D/w32/runTst.bat -text
 src/utils_lgpl/delftio/tests/tstAllF77/include/dio-f77-tst.inc -text
 src/utils_lgpl/delftio/tests/tstAllF77/resultsapproved/intel/TESTF77Serial-res.txt -text
 src/utils_lgpl/delftio/tests/tstAllF77/resultsapproved/intel/TESTF77Synch-res.txt -text
@@ -13438,6 +13438,7 @@ src/utils_lgpl/delftio/tests/tstShmDataBlocksF77/src/tst-shmDatablock-put.F -tex
 src/utils_lgpl/delftio/tests/tstShmDataBlocksF77/tstShmDatablock-get.vfproj -text
 src/utils_lgpl/delftio/tests/tstShmDataBlocksF77/tstShmDatablock-put.vfproj -text
 src/utils_lgpl/delftio/tests/tstShmDataBlocksF77/unix/Makefile -text
+src/utils_lgpl/delftio/tests/tstShmDataBlocksF90/runtest/runTst.bat -text
 src/utils_lgpl/delftio/tests/tstShmDataBlocksF90/src/Makefile -text
 src/utils_lgpl/delftio/tests/tstShmDataBlocksF90/src/tst-shmDatablock-get.F90 -text
 src/utils_lgpl/delftio/tests/tstShmDataBlocksF90/src/tst-shmDatablock-put.F90 -text
