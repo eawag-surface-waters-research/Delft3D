@@ -38,6 +38,7 @@
 
 module dio_shm
 
+use precision
 !!
 !! Enumeration for Memory Type (must be equal to enum in dio_shm.h)
 !!
@@ -57,7 +58,7 @@ integer, parameter :: DioShmDataPart   = 1
 !! F90 handle to c++-pointer
 !!
 type DsShmHandle
-    integer :: cppPntr
+    integer(pntrsize) :: cppPntr
 end type DsShmHandle
 
 
