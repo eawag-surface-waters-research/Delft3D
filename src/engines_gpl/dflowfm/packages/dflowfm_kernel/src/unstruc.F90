@@ -10595,6 +10595,7 @@ end subroutine cosphiunetcheck
  use waq
  use m_waves
  use m_sobekdfm
+ use m_save_ugrid_state, only: reset_save_ugrid_state
  implicit none
 
     ! Only reset counters and other scalars, allocatables should be
