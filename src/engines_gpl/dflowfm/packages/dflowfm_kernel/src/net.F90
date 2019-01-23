@@ -34110,9 +34110,9 @@ function read_commandline() result(istat)
             write (*,'(a)') 'METIS : no'
 #endif
 #ifdef HAVE_PROJ
-            write (*,'(a)') 'PROJ : yes'
+            write (*,'(a)') 'PROJ  : yes'
 #else
-            write (*,'(a)') 'PROJ : no'
+            write (*,'(a)') 'PROJ  : no'
 #endif
 
             istat = DFM_EXIT ! Exit without any error.
