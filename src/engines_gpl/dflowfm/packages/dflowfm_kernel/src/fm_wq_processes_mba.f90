@@ -243,14 +243,14 @@
            form='unformatted', access='stream', status='replace')
       call mba_write_his_header(lunmbahis)
       open(newunit=lunmbabal,file=trim(getoutputdir())//trim(ident)//'_bal.txt')
-      call mba_write_bal_header(lunmbabal, nosys, notot, nomba, mbaname, syname, nflux, &
+      call mba_write_bal_header(lunmbabal, nosys, notot, nomba, mbaname, syname_sub, nflux, &
                                 totfluxsys, stochi, fluxname, fluxprocname, nfluxsys, fluxsys)
 
       open(newunit=lunmbatothis,file=trim(getoutputdir())//trim(ident)//'_mbatot.his', &
            form='unformatted', access='stream', status='replace')
       call mba_write_his_header(lunmbatothis)
       open(newunit=lunmbatotbal,file=trim(getoutputdir())//trim(ident)//'_baltot.txt')
-      call mba_write_bal_header(lunmbatotbal, nosys, notot, nomba, mbaname, syname, nflux, &
+      call mba_write_bal_header(lunmbatotbal, nosys, notot, nomba, mbaname, syname_sub, nflux, &
                                 totfluxsys, stochi, fluxname, fluxprocname, nfluxsys, fluxsys)
    endif
    
@@ -333,7 +333,7 @@
                                    flxdmp, stochi, nfluxsys, fluxsys)
 
       call mba_write_bal_time_step(lunmbabal, timembastart, timembaend, nosys, notot, nomba, nombabnd, nflux, totfluxsys, &
-                                   mbaname, syname, mbalnused, numsrc, srcname, mbasorsinout, &
+                                   mbaname, syname_sub, mbalnused, numsrc, srcname, mbasorsinout, &
                                    mbaarea, mbavolumebegin, mbavolumeend, mbaflowhor, mbaflowsorsin, &
                                    mbamassbegin, mbamassend, mbafluxhor, mbafluxsorsin, &
                                    flxdmp, stochi, fluxname, nfluxsys, fluxsys)
@@ -423,7 +423,7 @@
                                    flxdmptot, stochi, nfluxsys, fluxsys)
       
       call mba_write_bal_time_step(lunmbatotbal, timembastarttot, timembaend, nosys, notot, nomba, nombabnd, nflux, totfluxsys, &
-                                   mbaname, syname, mbalnused, numsrc, srcname, mbasorsinout, &
+                                   mbaname, syname_sub, mbalnused, numsrc, srcname, mbasorsinout, &
                                    mbaarea, mbavolumebegintot, mbavolumeend, mbaflowhortot,mbaflowsorsintot,  &
                                    mbamassbegintot, mbamassend, mbafluxhortot, mbafluxsorsintot, &
                                    flxdmptot, stochi, fluxname, nfluxsys, fluxsys)
@@ -533,28 +533,28 @@
    ifluxsys = 0
    do isys = 1, notot
       j = j + 1
-      balterms(j) = trim(syname(isys))//' begin mass'
+      balterms(j) = trim(syname_sub(isys))//' begin mass'
       j = j + 1
-      balterms(j) = trim(syname(isys))//' end   mass'
+      balterms(j) = trim(syname_sub(isys))//' end   mass'
       j = j + 1
-      balterms(j) = trim(syname(isys))//' in  storage'
+      balterms(j) = trim(syname_sub(isys))//' in  storage'
       j = j + 1
-      balterms(j) = trim(syname(isys))//' out storage'
+      balterms(j) = trim(syname_sub(isys))//' out storage'
       if (isys.le.nosys) then
          do i = 1, nombabnd
             j = j + 1
-            balterms(j) = trim(syname(isys))//' in  '//trim(mbaname(i))
+            balterms(j) = trim(syname_sub(isys))//' in  '//trim(mbaname(i))
             j = j + 1
-            balterms(j) = trim(syname(isys))//' out '//trim(mbaname(i))
+            balterms(j) = trim(syname_sub(isys))//' out '//trim(mbaname(i))
          enddo
       endif
       if (nfluxsys(isys).gt.0) then
          do i = ifluxsys + 1, ifluxsys + nfluxsys(isys)
             jflux = fluxsys(i)
             j = j + 1
-            balterms(j) = trim(syname(isys))//' in  '//fluxname(jflux)
+            balterms(j) = trim(syname_sub(isys))//' in  '//fluxname(jflux)
             j = j + 1
-            balterms(j) = trim(syname(isys))//' out '//fluxname(jflux)
+            balterms(j) = trim(syname_sub(isys))//' out '//fluxname(jflux)
          enddo
          ifluxsys = ifluxsys + nfluxsys(isys)
       endif

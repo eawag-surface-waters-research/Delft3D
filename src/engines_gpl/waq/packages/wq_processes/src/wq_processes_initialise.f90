@@ -237,10 +237,10 @@
       write ( lunlsp , 2080 ) nosys , notot-nosys , notot
       write ( lunlsp , 2100 )
       do isys = 1,nosys
-          write(lunlsp , '(I7,A,A)' ) isys, '  active      ', syname(isys)
+          write(lunlsp , '(I7,A,A)' ) isys, '  active      ', syname_sub(isys)
       end do
       do isys = nosys+1,notot
-          write(lunlsp , '(I7,A,A)' ) isys, '  inactive    ', syname(isys)
+          write(lunlsp , '(I7,A,A)' ) isys, '  inactive    ', syname_sub(isys)
       end do
       write( lunlsp, '(/)')
       ! command line settingen , commands

@@ -33,6 +33,7 @@
       integer  ( 4)              :: novelo          !< Number of velocity arrays
       integer  ( 4)              :: noout_map       !< Number of map outputs
       integer  ( 4)              :: noout           !< Number of his outputs
+      character(20),allocatable  :: syname_sub(:)   !< substance names from sub-file (before old items replacement)
       character(20),allocatable  :: syname(:)       !< substance names
       character(20),allocatable  :: syunit(:)       !< substance names
       character(20),allocatable  :: coname(:)       !< constant names

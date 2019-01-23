@@ -44,7 +44,6 @@
       
       implicit none
       
-      character(20), allocatable :: syname_sub(:)       !< substance names from sub-file
       character(20), allocatable :: syunit_sub(:)       !< substance unit from sub-file
       character(20), allocatable :: coname_sub(:)       !< constant names from sub-file
       real         , allocatable :: covalue_sub(:)      !< values for contants from sub-file
@@ -382,7 +381,6 @@
           outputs%pointers(i) = -1
       enddo
 
-      deallocate (syname_sub)
       deallocate (coname_sub)
       deallocate (covalue_sub)
       deallocate (ouname_sub)
@@ -471,7 +469,7 @@
       transformcoef = 0.0_hp
       call realloc(isys2trac,notot,keepExisting=.false.,fill=0)
       do i=1,notot
-         call add_bndtracer(trim(syname(i)), syunit(i), isys2trac(i), janew)
+         call add_bndtracer(trim(syname_sub(i)), syunit(i), isys2trac(i), janew)
       end do
 !      write(lunrep,'(/a)') '  var number var name               var array   var index'
 !      write(lunrep,'(i,x,a20,2i)') ((i,varnam(i),vararr(i),varidx(i)),i=1,novar)
