@@ -1865,29 +1865,13 @@ function ug_init_mesh_topology(ncid, varid, meshids) result(ierr)
    ierr = att_to_dimid(ncid,'edge_dimension', meshids%dimids(mdim_edge), varid)
    ierr = att_to_dimid(ncid,'face_dimension', meshids%dimids(mdim_face), varid)
    ierr = att_to_dimid(ncid,'max_face_nodes_dimension', meshids%dimids(mdim_maxfacenodes), varid)   
-   if (ierr /= nf90_noerr) then
-      ! The non-UGRID max_face_nodes_dimension was not found. Detect it ourselves.
-      varname = ''
-      ierr = nf90_get_att(ncid, meshids%varids(mid_meshtopo), 'face_node_connectivity', varname)
-      id = 0
-      ierr = nf90_inq_varid(ncid, trim(varname), id)
-      ! Get the dimension ids from the face-nodes variable, and select the correct one from that.
-      ierr = nf90_inquire_variable(ncid, id, dimids=dimids)
-      if (ierr == nf90_noerr) then
-         if (dimids(1) == meshids%dimids(mdim_face)) then
-            meshids%dimids(mdim_maxfacenodes) = dimids(2) ! the other
-         else
-            meshids%dimids(mdim_maxfacenodes) = dimids(1)
-         end if
-      end if
-   end if
    ! Dimension 2 might already be present
    ierr = nf90_inq_dimid(ncid, 'Two', meshids%dimids(mdim_two))
    ! Otherwise check another possible definitions
    if ( ierr /= UG_NOERR) then 
-   ierr = nf90_inquire_variable( ncid, varid, name = varname)
-   varname = 'n'//trim(varname)//'_Two'
-   ierr = nf90_inq_dimid(ncid, trim(varname), meshids%dimids(mdim_two))   
+      ierr = nf90_inquire_variable( ncid, varid, name = varname)
+      varname = 'n'//trim(varname)//'_Two'
+      ierr = nf90_inq_dimid(ncid, trim(varname), meshids%dimids(mdim_two))   
    endif
    
    !check here if this is a mapped mesh
@@ -1904,6 +1888,10 @@ function ug_init_mesh_topology(ncid, varid, meshids) result(ierr)
    !
    if (isMappedMesh /= nf90_noerr) then
       ierr = att_to_coordvarids(ncid,'node_coordinates', meshids%varids(mid_nodex), meshids%varids(mid_nodey),varin = varid)
+      ! The optional node_dimension attribute was not found, so auto-detect it from a node coordinates variable.
+      if (ierr == nf90_noerr .and. meshids%dimids(mdim_node) == -1) then
+         ierr = varid_to_dimid(ncid, meshids%varids(mid_nodex), meshids%dimids(mdim_node))
+      end if
    endif
    ierr = att_to_coordvarids(ncid,'edge_coordinates', meshids%varids(mid_edgex), meshids%varids(mid_edgey),varin = varid)
    ierr = att_to_coordvarids(ncid,'face_coordinates', meshids%varids(mid_facex), meshids%varids(mid_facey),varin = varid)
@@ -1913,7 +1901,34 @@ function ug_init_mesh_topology(ncid, varid, meshids) result(ierr)
    !
    
    ierr = att_to_varid(ncid,'edge_node_connectivity', meshids%varids(mid_edgenodes),varid) !< Variable ID for edge-to-node mapping table.
+   if (ierr == nf90_noerr) then
+      ! The optional edge_dimension attribute was not found, so auto-detect it from the edge_node topology.
+      if (meshids%dimids(mdim_edge) == -1) then
+         ierr = varid_to_dimid(ncid, meshids%varids(mid_edgenodes), meshids%dimids(mdim_edge), dimidx=2)
+      end if
+   end if
+
    ierr = att_to_varid(ncid,'face_node_connectivity', meshids%varids(mid_facenodes),varid) !< Variable ID for face-to-node mapping table.
+   if (ierr == nf90_noerr) then
+      ! The optional face_dimension attribute was not found, so auto-detect it from the face_node topology.
+      if (meshids%dimids(mdim_face) == -1) then
+         ierr = varid_to_dimid(ncid, meshids%varids(mid_facenodes), meshids%dimids(mdim_face), dimidx=2)
+      end if
+
+      ! The non-UGRID max_face_nodes_dimension was not found. Detect it ourselves.
+      if (meshids%dimids(mdim_maxfacenodes) == -1) then
+         ! Get the dimension ids from the face_nodes variable, and select the correct one from that.
+         ierr = nf90_inquire_variable(ncid, meshids%varids(mid_facenodes), dimids=dimids)
+         if (ierr == nf90_noerr) then
+            if (dimids(1) == meshids%dimids(mdim_face)) then
+               meshids%dimids(mdim_maxfacenodes) = dimids(2) ! the other
+            else
+               meshids%dimids(mdim_maxfacenodes) = dimids(1)
+            end if
+         end if
+      end if
+   end if
+
    ierr = att_to_varid(ncid,'edge_face_connectivity', meshids%varids(mid_edgefaces),varid) !< Variable ID for edge-to-face mapping table (optional, can be -1).   
    ierr = att_to_varid(ncid,'face_edge_connectivity', meshids%varids(mid_faceedges),varid) !< Variable ID for face-to-edge mapping table (optional, can be -1).
    ierr = att_to_varid(ncid,'face_face_connectivity', meshids%varids(mid_facelinks),varid) !< Variable ID for face-to-face mapping table (optional, can be -1).
@@ -2049,6 +2064,42 @@ function att_to_dimid(ncid, name, id, varin) result(ierr)
     ! here we should return an error is the variable is undefined, following up actions are taken in ug_init_mesh_topology
     id = -1           ! undefined id 
 end function att_to_dimid
+
+
+!> Gets a single dimension ID for a given variable ID.
+!! Used for example to determine node dimension id from a node coordinate variable.
+function varid_to_dimid(ncid, varin, dimid, dimidx) result(ierr)
+   
+   integer         , intent(in)  :: ncid
+   integer         , intent(in)  :: varin
+   integer         , intent(out) :: dimid
+   integer,optional, intent(in)  :: dimidx !< Optional index of the desired dimension, in case of a multidimensional variable. Default: 1.
+   integer                       :: ierr
+
+   integer, dimension(nf90_max_dims) :: dimids
+   integer :: dimidx_, ndims
+
+   ierr = UG_NOERR
+   
+   if (present(dimidx)) then
+      dimidx_ = dimidx
+   else
+      dimidx_ = 1
+   end if
+
+   ierr = nf90_inquire_variable(ncid, varin, ndims=ndims, dimids=dimids)
+   if (ierr /= nf90_noerr .or. dimidx_ > ndims) then
+      goto 999
+   end if
+
+   dimid = dimids(dimidx_)
+
+   return 
+    
+999 continue 
+    ! here we should return an error is the variable is undefined, following up actions are taken in ug_init_mesh_topology
+    dimid = -1           ! undefined id 
+end function varid_to_dimid
 
 !> Returns whether a given variable is a mesh topology variable.
 function ug_is_mesh_topology(ncid, varid) result(is_mesh_topo)
