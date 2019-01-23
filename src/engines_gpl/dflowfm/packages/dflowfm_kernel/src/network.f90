@@ -98,7 +98,7 @@ subroutine loadNetwork(filename, istat, jadoorladen)
         endif
         if (istat == 0) then
             ! Autosave NetCDF form of the network just read.
-            L = index(filename, '.')
+            L = index(filename, '.', back=.true.)
             call unc_write_net(filename(1:L-1)//'_net.nc')
             call mess(LEVEL_INFO, 'Autosaved NetCDF form of net to ', filename(1:L-1)//'_net.nc')
         endif
