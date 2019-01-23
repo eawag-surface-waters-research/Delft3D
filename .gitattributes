@@ -2960,6 +2960,7 @@ src/scripts_lgpl/win64/list_all_what_strings.py -text
 src/scripts_lgpl/win64/nefis_template.sln -text
 src/scripts_lgpl/win64/oss-install_debug_x64.cmd -text
 src/scripts_lgpl/win64/oss-install_x64.cmd -text
+src/scripts_lgpl/win64/tests_template.sln -text
 src/scripts_lgpl/win64/utils_lgpl_template.sln -text
 src/third_party/Makefile.am -text
 src/third_party/interacter_stub/Makefile.am -text
