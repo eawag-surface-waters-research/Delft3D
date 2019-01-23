@@ -10627,6 +10627,8 @@ end subroutine cosphiunetcheck
        call xbeach_reset()
     end if
     
+    call reset_save_ugrid_state()
+
     call reset_sedtra()
 
  end subroutine resetFlow
