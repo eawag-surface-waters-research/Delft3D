@@ -9557,7 +9557,7 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
    integer :: im, nmesh, idim, i, iv, L, numk_last, numl_last
    integer :: ncid, id_netnodez, id_netlinktype
    integer, allocatable :: kn12(:,:), kn3(:) ! Placeholder arrays for the edge_nodes and edge_types
-   double precision :: convversion, zk_fillvalue
+   double precision :: convversion, zk_fillvalue, altsign
    type(t_ug_meshgeom) :: meshgeom
    
    logical           :: dflowfm_1d
@@ -9735,7 +9735,7 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
          ierr = ionc_get_meshgeom(ioncid, im, networkIndex, meshgeom, start_index, includeArrays) 
          mesh2dname = meshgeom%meshname
          !Variable to store the coordinates of face centres
-         allocate(xface(meshgeom%numface))
+         allocate(xface(meshgeom%numface)) ! TODO: LC: this is only used when there are mesh contacts. Also: have these not already been read into meshgeom%facex/y?
          allocate(yface(meshgeom%numface))
          ierr = ionc_get_face_coordinates(ioncid, nmesh, xface, yface)
       else
@@ -9798,20 +9798,36 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
       end if
 
       ! zk values on nodes
-      ! NOTE: AvD: As long as there's no proper standard_name, try some possible variable names for reading in net node z values:
-      ierr = ionc_inq_varid(ioncid, im, 'NetNode_z', id_netnodez)
-      if (ierr /= ionc_noerr) then
-         ierr = ionc_inq_varid(ioncid, im, 'node_z', id_netnodez)
+      ierr = ionc_inq_varid_by_standard_name(ioncid, im, UG_LOC_NODE, 'sea_floor_depth_below_geoid', id_netnodez)
+      if (ierr == ionc_noerr) then
+         altsign = -1d0 ! altitude as depths
+      else
+         ierr = ionc_inq_varid_by_standard_name(ioncid, im, UG_LOC_NODE, 'altitude', id_netnodez)
+         if (ierr == ionc_noerr) then
+            altsign = 1d0 ! altitude as altitudes
+         else
+            ! NOTE: AvD: As long as there's no proper standard_name, try some possible variable names for reading in net node z values:
+            altsign = 1d0 ! altitude as altitudes
+            ierr = ionc_inq_varid(ioncid, im, 'NetNode_z', id_netnodez)
+            if (ierr /= ionc_noerr) then
+               ierr = ionc_inq_varid(ioncid, im, 'node_z', id_netnodez)
+            end if
+         end if
       end if
 
       if (ierr == nf90_noerr) then
          ierr = nf90_get_var(ncid, id_netnodez, ZK(numk_last+1:numk_last+meshgeom%numnode))
          call check_error(ierr, 'z values')
-         
+         if (ierr == nf90_noerr) then
+            ZK(numk_last+1:numk_last+meshgeom%numnode) = altsign*ZK(numk_last+1:numk_last+meshgeom%numnode)
+         end if
+
+         ! Replace the missing/fill values read from file by the kernel's dmiss missing value.
          ierr = nf90_get_att(ncid, id_netnodez, '_FillValue', zk_fillvalue)
-         if (ierr == ionc_noerr) then
+         ! TODO: LC: should we not check for nf90 constant default double-fill-value here as a fallback?
+         if (ierr == nf90_noerr) then
             if (zk_fillvalue .ne. dmiss) then
-               where (ZK(numk_last+1:numk_last+meshgeom%numnode) == zk_fillvalue) ZK(numk_last+1:numk_last+meshgeom%numnode) = dmiss
+               where (ZK(numk_last+1:numk_last+meshgeom%numnode) == altsign*zk_fillvalue) ZK(numk_last+1:numk_last+meshgeom%numnode) = dmiss
             endif
          else
             ierr = ionc_noerr
@@ -9830,6 +9846,7 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
       allocate(kn3(meshgeom%numedge))
 
       if (meshgeom%dim.ne.1) then 
+         ! TODO: LC: these have already been read into meshgeom%edge_nodes, so maybe just copy it here?
          ierr = ionc_get_edge_nodes(ioncid, im, kn12, 1) !unstruct requires 1 based indexes
       else
          kn12 = meshgeom%edge_nodes
