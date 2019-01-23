@@ -4684,12 +4684,13 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
                       workx(k) = waqoutputs(j,k-kbx+1)
                    enddo
                 end do
-                ierr = unc_put_var_map(mapids%ncid,  mapids%id_tsp, mapids%id_waq(:,j), UNC_LOC_S3D, workx)
+                ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_waq(:,j), UNC_LOC_S3D, workx)
              else
-!                do kk=1,NdxNdxi
-!                   workx(kk) = waqoutputs(j,kk)
-!                end do
-!                ierr = unc_put_var_map(mapids%ncid, mapids%id_waq(:,j), UNC_LOC_S, workx)
+!               2D                
+                do kk=1,NdxNdxi
+                   workx(kk) = waqoutputs(j,kk)
+                end do
+                ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_waq(:,j), UNC_LOC_S, workx)
              end if
           end if
        end do
@@ -5974,12 +5975,12 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
               if (noout_map > 0) then
                  call realloc(id_waq, (/ 3, noout_map /), keepExisting=.false., fill = 0)
                  do j=1,noout_map
+                    tmpstr = ' '
+                    write (tmpstr, "('water_quality_output_',I0)") j
                     if ( kmx > 0 ) then  !        3D
-                       tmpstr = ' '
-                       write (tmpstr, "('water_quality_output_',I0)") j
                        ierr = nf90_def_var(imapfile, tmpstr, nf90_double, (/ id_laydim(iid), id_flowelemdim (iid), id_timedim (iid)/) , id_waq(iid,j))
                     else
-                       exit ! ierr = nf90_def_var(imapfile, trim('WQ_'//outputs%names(j)), nf90_double, (/ id_flowelemdim (iid), id_timedim (iid)/) , id_waq(iid,j))
+                       ierr = nf90_def_var(imapfile, tmpstr, nf90_double, (/ id_flowelemdim (iid), id_timedim (iid)/) , id_waq(iid,j))
                     end if
                     tmpstr = trim(outputs%names(j))//' - '//trim(outputs%descrs(j))//' in flow element'
                     call replace_multiple_spaces_by_single_spaces(tmpstr)

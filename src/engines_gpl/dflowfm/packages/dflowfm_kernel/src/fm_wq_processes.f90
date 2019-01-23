@@ -193,7 +193,25 @@
             end if
          end do
       else
-         call mess(LEVEL_ERROR, 'WAQ: 2D not supported, set kmx=1')
+         kbx = 1
+         ktx = Ndxi
+         noseg = Ndxi 
+         noq1 = 0
+         noq2 = 0
+         noq3 = 0
+         noq4 = 0
+         
+!        allocate vertical exchanges array
+         call realloc(iexpnt, [4, noq3], keepExisting=.false., fill=0)
+      
+!        allocate array that indicates active cells (segments)
+         call realloc(iknmrk, noseg, keepExisting=.false., fill=0)
+         
+!        allocate exchange to interface array
+         call realloc(iex2k, noq3, keepExisting=.false., fill=0)
+         
+!        set array that indicates active cells (segments)
+         iknmrk = 1101
       end if
    
 ! ======================
@@ -993,35 +1011,44 @@
       end if
 
 !     set dry/wet indicator
-      do kk=1,Ndxi
-         call getkbotktopmax(kk,kb,kt,ktmax)
-         do k=kb,kt
-            kwaq = k-kbx+1
+      if(kmx.gt.0) then
+         do kk=1,Ndxi
+            call getkbotktopmax(kk,kb,kt,ktmax)
+            do k=kb,kt
+               kwaq = k-kbx+1
+               
+               iknmrk_dry = int(iknmrk(kwaq)/10) * 10
+               iknmrk_wet = iknmrk_dry + 1
+               
+               if ( vol1(k).gt.waq_vol_dry_thr ) then
+                  iknmrk(kwaq) = iknmrk_wet
+               else
+                  iknmrk(kwaq) = iknmrk_dry
+               end if
+            end do
             
-            iknmrk_dry = int(iknmrk(kwaq)/10) * 10
-            iknmrk_wet = iknmrk_dry + 1
-            
+            do k=kt+1,ktmax
+               kwaq = k-kbx+1
+               
+               iknmrk_dry = int(iknmrk(kwaq)/10) * 10
+               iknmrk_wet = iknmrk_dry + 1
+               
+               if ( vol1(k).gt.waq_vol_dry_thr ) then
+                  iknmrk(kwaq) = iknmrk_wet
+               else
+                  iknmrk(kwaq) = iknmrk_dry
+               end if
+            end do
+         end do
+      else
+         do k=1,Ndxi
             if ( vol1(k).gt.waq_vol_dry_thr ) then
-               iknmrk(kwaq) = iknmrk_wet
+               iknmrk(k) = 1101
             else
-               iknmrk(kwaq) = iknmrk_dry
+               iknmrk(k) = 1100
             end if
          end do
-         
-         do k=kt+1,ktmax
-            kwaq = k-kbx+1
-            
-            iknmrk_dry = int(iknmrk(kwaq)/10) * 10
-            iknmrk_wet = iknmrk_dry + 1
-            
-            if ( vol1(k).gt.waq_vol_dry_thr ) then
-               iknmrk(kwaq) = iknmrk_wet
-            else
-               iknmrk(kwaq) = iknmrk_dry
-            end if
-         end do
-      end do
-      
+      end if      
       return
    end subroutine copy_data_from_fm_to_wq_processes
 

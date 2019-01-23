@@ -16459,14 +16459,14 @@ subroutine unc_write_his(tim)            ! wrihis
                if (noout > 0) then
                   call realloc(id_hwq, noout, keepExisting = .false.)
                   do j=1,noout
+                     tmpstr = ' '
+                     write (tmpstr, "('water_quality_output_',I0)") j
                      if ( kmx > 0 ) then  !        3D
-                        tmpstr = ' '
-                        write (tmpstr, "('water_quality_output_',I0)") j
                         ierr = nf90_def_var(ihisfile, trim(tmpstr), nf90_double, (/ id_laydim, id_statdim, id_timedim /), id_hwq(j))
-                        ierr = nf90_put_att(ihisfile, id_hwq(j), 'coordinates', 'station_x_coordinate station_y_coordinate station_name zcoordinate_c')
                      else
-                        exit ! ierr = nf90_def_var(imapfile, trim('WQ_'//outputs%names(j)), nf90_double, (/ id_flowelemdim (iid), id_timedim (iid)/) , id_waq(iid,j))
+                        ierr = nf90_def_var(ihisfile, trim(tmpstr), nf90_double, (/ id_statdim, id_timedim /), id_hwq(j))
                      end if
+                     ierr = nf90_put_att(ihisfile, id_hwq(j), 'coordinates', 'station_x_coordinate station_y_coordinate station_name zcoordinate_c')
                      tmpstr = trim(outputs%names(j))//' - '//trim(outputs%descrs(j))//' in flow element'
                      call replace_multiple_spaces_by_single_spaces(tmpstr)
                      ierr = nf90_put_att(ihisfile, id_hwq(j), '_FillValue', dmiss)
