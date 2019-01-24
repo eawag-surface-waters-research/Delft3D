@@ -2829,14 +2829,14 @@
 
    ierr = 0
    if (allocated(mesh1dUnMergedToMerged)) then
-   numUnMergedNodes = size(mesh1dUnMergedToMerged)
-   allocate(merged(numUnMergedNodes))
-   do i  = 1,numUnMergedNodes
-      k = mesh1dUnMergedToMerged(i)
-      if(k>0) then
-         merged(k) = unMergedOneDmask(i)
-      endif
-   enddo
+      numUnMergedNodes = size(mesh1dUnMergedToMerged)
+      allocate(merged(numUnMergedNodes))
+      do i  = 1,numUnMergedNodes
+         k = mesh1dUnMergedToMerged(i)
+         if(k>0) then
+            merged(k) = unMergedOneDmask(i)
+         endif
+      enddo
    else
       ierr = -1
    endif
