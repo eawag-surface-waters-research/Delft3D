@@ -747,7 +747,7 @@
       character(len=*), intent(inout) :: inputname !< The trimmed waq input name, e.g., 'fluor'.
       character(len=*), intent(inout) :: qidname   !< The base input name for further use in external file analisys, e.g., 'tracerbnd'.
       
-      character(len=132)              :: qidloc    !< Original quantityid, e.g., 'waqfunctionradsurf'.
+      character(len=256)              :: qidloc    !< Original quantityid, e.g., 'waqfunctionradsurf'.
 
       qidloc = qid
       if ( qidloc(1:11).eq.'waqfunction' ) then
