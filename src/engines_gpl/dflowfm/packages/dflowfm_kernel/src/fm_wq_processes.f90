@@ -743,29 +743,32 @@
    subroutine get_waqinputname(qid, inputname, qidname)
       implicit none
       
-      character(len=*), intent(in)  :: qid       !< Original quantityid, e.g., 'waqfunctionradsurf'.
+      character(len=*), intent(in)    :: qid       !< Original quantityid, e.g., 'waqfunctionradsurf'.
       character(len=*), intent(inout) :: inputname !< The trimmed waq input name, e.g., 'fluor'.
       character(len=*), intent(inout) :: qidname   !< The base input name for further use in external file analisys, e.g., 'tracerbnd'.
       
-      if ( qid(1:11).eq.'waqfunction' ) then
-         qidname = qid(1:11)
-         if ( len_trim(qid).gt.11 ) then
-            inputname = trim(qid(12:))
+      character(len=132)              :: qidloc    !< Original quantityid, e.g., 'waqfunctionradsurf'.
+
+      qidloc = qid
+      if ( qidloc(1:11).eq.'waqfunction' ) then
+         qidname = qidloc(1:11)
+         if ( len_trim(qidloc).gt.11 ) then
+            inputname = trim(qidloc(12:))
          end if
-      else if (qid(1:12).eq.'waqparameter' ) then
-         qidname = qid(1:12)
-         if ( len_trim(qid).gt.12 ) then
-            inputname = trim(qid(13:))
+      else if (qidloc(1:12).eq.'waqparameter' ) then
+         qidname = qidloc(1:12)
+         if ( len_trim(qidloc).gt.12 ) then
+            inputname = trim(qidloc(13:))
          end if
-      else if (qid(1:18).eq.'waqmassbalancearea' ) then
-         qidname = qid(1:18)
-         if ( len_trim(qid).gt.18 ) then
-            inputname = trim(qid(19:))
+      else if (qidloc(1:18).eq.'waqmassbalancearea' ) then
+         qidname = qidloc(1:18)
+         if ( len_trim(qidloc).gt.18 ) then
+            inputname = trim(qidloc(19:))
          end if
-      else if (qid(1:17).eq.'waqmonitoringarea' ) then
-         qidname = qid(1:17)
-         if ( len_trim(qid).gt.17 ) then
-            inputname = trim(qid(18:))
+      else if (qidloc(1:17).eq.'waqmonitoringarea' ) then
+         qidname = qidloc(1:17)
+         if ( len_trim(qidloc).gt.17 ) then
+            inputname = trim(qidloc(18:))
          end if
       end if
       
