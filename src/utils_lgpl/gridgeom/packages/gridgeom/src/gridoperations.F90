@@ -2733,24 +2733,17 @@
       zpl(iiend(i)) = zpl(iistart(i))
    enddo
 
-   !map 1d mask from unmerged to merged
-   if (allocated(mesh1dUnMergedToMerged).and.present(unMergedOneDmask)) then
-      numUnMergedNodes = size(unMergedOneDmask)
-      allocate(mergedOneDmask(numUnMergedNodes)); mergedOneDmask = 0
-      do n  = 1,numUnMergedNodes
-         k = mesh1dUnMergedToMerged(n)
-         if(k>0) then
-            mergedOneDmask(k) = unMergedOneDmask(n)
-         endif
-      enddo
+   !map unMergedOneDmask to merged
+   if (present(unMergedOneDmask)) then
+      ierr = ggeo_unMergedArrayToMergedArray(unMergedOneDmask, mergedOneDmask)
    endif
-
+   
    allocate( dismin(npoly), nodroof(npoly), nod1D(npoly) )
    dismin = 9d9 ; nodroof = 0 ; nod1D = 0
    do n  = 1,nump
       if (kc(n) > 0) then
          ip = kc(n)
-         if(present(unMergedOneDmask)) then
+         if ( present(unMergedOneDmask).and. ierr==0 ) then
             call CLOSETO1Dnetnode(xzw(n), yzw(n), N1, DIST, mergedOneDmask)
          else
             call CLOSETO1Dnetnode(xzw(n), yzw(n), N1, DIST)
@@ -2791,7 +2784,7 @@
    !when called from DFM xs, ys are already allocated in m_samples
    double precision, optional, intent(in)  :: xsStreetInletPipes(:), ysStreetInletPipes(:)
    integer, optional, intent(in)           :: unMergedOneDmask(:)           !< Masking array for 1d mesh points, unmerged nodes
-   integer                                 :: n,k,n1,k1,l, numUnMergedNodes
+   integer                                 :: n,k,n1,k1,l, ierr
    double precision                        :: dist
    integer, allocatable                    :: mergedOneDmask(:)                   !< Masking array for 1d mesh points, merged nodes
 
@@ -2804,21 +2797,14 @@
    endif
 
    !map unMergedOneDmask to merged
-   if (allocated(mesh1dUnMergedToMerged).and.present(unMergedOneDmask)) then
-      numUnMergedNodes = size(unMergedOneDmask)
-      allocate(mergedOneDmask(numUnMergedNodes)); mergedOneDmask = 0
-      do n  = 1,numUnMergedNodes
-         k = mesh1dUnMergedToMerged(n)
-         if(k>0) then
-            mergedOneDmask(k) = unMergedOneDmask(n)
-         endif
-      enddo
+   if (present(unMergedOneDmask)) then
+      ierr = ggeo_unMergedArrayToMergedArray(unMergedOneDmask, mergedOneDmask)
    endif
 
    do n  = 1,ns
       call incells(Xs(n),Ys(n),K)
       if (k > 0) then
-         if(present(unMergedOneDmask)) then
+         if(present(unMergedOneDmask).and.ierr == 0) then
             call CLOSETO1Dnetnode(xzw(k), yzw(k), n1, dist, mergedOneDmask)
          else
             call CLOSETO1Dnetnode(xzw(k), yzw(k), n1, dist)
@@ -2832,6 +2818,30 @@
    enddo
 
    end subroutine make1D2Dstreetinletpipes
+
+   function ggeo_unMergedArrayToMergedArray(unMergedOneDmask, merged) result(ierr)
+
+   !inputs
+   integer, intent(in)               :: unMergedOneDmask(:)
+   integer, allocatable, intent(out) :: merged(:)
+   !locals
+   integer                           :: numUnMergedNodes, i, k, ierr
+
+   ierr = 0
+   if (allocated(mesh1dUnMergedToMerged)) then
+   numUnMergedNodes = size(mesh1dUnMergedToMerged)
+   allocate(merged(numUnMergedNodes))
+   do i  = 1,numUnMergedNodes
+      k = mesh1dUnMergedToMerged(i)
+      if(k>0) then
+         merged(k) = unMergedOneDmask(i)
+      endif
+   enddo
+   else
+      ierr = -1
+   endif
+
+   end function ggeo_unMergedArrayToMergedArray
 
    !> make dual cell polygon around netnode k
    subroutine make_dual_cell(k, N, rcel, xx, yy, num, Wu1Duni)
