@@ -37051,9 +37051,25 @@ if (mext > 0) then
 
             success = timespaceinitialfield_int(xu, yu, ibot, lnx, filename, filetype, method, operand, transformcoef) ! zie meteo module
 
-        else if (qid == 'initialwaterlevel') then
+        else if (qid(1:17) == 'initialwaterlevel') then
 
-            success = timespaceinitialfield(xz, yz, s1, ndx, filename, filetype, method, operand, transformcoef, 2) ! zie meteo module
+           call realloc(kcsini, ndx, keepExisting=.false.)
+
+           ! NOTE: we intentionally re-use the lateral coding here for selection of 1D and/or 2D flow nodes
+           select case (trim(qid(18:)))
+           case ('1d')
+              ilattype = ILATTP_1D
+           case ('2d')
+              ilattype = ILATTP_2D
+           case ('1d2d')
+              ilattype = ILATTP_ALL
+           case default
+              ilattype = ILATTP_ALL
+           end select
+
+           call prepare_lateral_mask(kcsini, ilattype)
+
+           success = timespaceinitialfield(xz, yz, s1, ndx, filename, filetype, method, operand, transformcoef, 2, kcsini) ! zie meteo module
 
         else if (qid == 'initialvelocity') then ! both ucx and ucy component from map file in one QUANTITY
 
@@ -38370,7 +38386,11 @@ end if
     enddo   
     a1ini = sum(bare(1:ndxi)) 
  endif  
-    
+
+ if (allocated(kcsini)) then
+    deallocate(kcsini)
+ end if
+
  ! Copy NUMCONST to NUMCONST_MDU, before the user (optionally) adds tracers interactively
  NUMCONST_MDU = NUMCONST
  
