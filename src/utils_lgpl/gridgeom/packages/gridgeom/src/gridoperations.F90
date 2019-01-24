@@ -3,6 +3,9 @@
 
    use MessageHandling, only: msgbox, mess, LEVEL_ERROR
    implicit none
+   
+   !unfortunatly we do not have much other options if we do not want to modify api calls 
+   integer, allocatable, dimension(:) :: mesh1dMergedToUnMerged(:) 
 
    !new functions
    public :: make1D2Dinternalnetlinks
@@ -3175,11 +3178,15 @@
             ierr = -1
             return
          endif
-         arrayfrom(nlinks) = nc       !2d cell
-         arrayto(nlinks)   = kn(2,l)  !1dlink
+         arrayfrom(nlinks) = nc          !2d cell
+         if(allocated(mesh1dMergedToUnMerged)) then
+            arrayto(nlinks)   = mesh1dMergedToUnMerged(kn(2,l))  !1dlink
+         else
+            arrayto(nlinks)   = kn(2,l)  !1dlink
+         endif
       end if
    end do
-   
+
    !convert to required start index, 1 based is assumed
    ierr = convert_start_index(arrayfrom, -999, 1, start_index) 
    ierr = convert_start_index(arrayto, -999, 1, start_index) 
@@ -3197,8 +3204,9 @@
    double precision, intent(in)         :: nodex(:), nodey(:), branchoffset(:), branchlength(:)
    integer, intent(in)                  :: branchidx(:), sourcenodeid(:), targetnodeid(:), startindex
    type(t_ug_meshgeom), intent(inout)   :: meshgeom
-   integer                              :: ierr, nbranches, branch, numkUnMerged, numk, numl, st, en, stn, enn, stnumk, ennumk, k, numNetworkNodes, firstvalidarraypos
-   integer, allocatable                 :: networkNodesUnmerged(:), meshnodemapping(:,:), xk(:), yk(:), edge_nodes(:,:), correctedBranchidx(:)
+   integer                              :: ierr, nbranches, branch, numkUnMerged, numk, numl, st, en, stn, enn, stnumk, ennumk, k, numNetworkNodes, firstvalidarraypos, numINodes
+   integer, allocatable                 :: networkNodesUnmerged(:), meshnodemapping(:,:), edge_nodes(:,:), correctedBranchidx(:), nodeids(:)
+   double precision, allocatable        :: xk(:), yk(:)
 
    !initial size
    ierr         = 0
@@ -3206,40 +3214,51 @@
    if (startindex.eq.0) then
       firstvalidarraypos = 1
    endif
-   nbranches    = size(sourcenodeid)
-   numkUnMerged = size(branchidx,1)
+   nbranches       = size(sourcenodeid)
+   numkUnMerged    = size(branchidx,1)
    numNetworkNodes = max(maxval(sourcenodeid) + firstvalidarraypos, maxval(targetnodeid) + firstvalidarraypos)
+   
    ! allocate enough space for temp arrays
    allocate(xk(numkUnMerged))
    allocate(yk(numkUnMerged))
+   allocate(nodeids(numkUnMerged))
    allocate(networkNodesUnmerged(numNetworkNodes)); networkNodesUnmerged = 0
-   allocate(edge_nodes(2,numkUnMerged))
+   allocate(edge_nodes(2,numkUnMerged*3)) !rough estimate of the maximum number of edges given a certain amount of nodes
    allocate(correctedBranchidx(numkUnMerged))
    allocate(meshnodemapping(2,nbranches)); meshnodemapping = -1
+
+   !check if mesh1dMergedToUnMerged is already allocated
+   if(allocated(mesh1dMergedToUnMerged)) then
+      deallocate(mesh1dMergedToUnMerged)
+   endif
+   allocate(mesh1dMergedToUnMerged(numkUnMerged))
 
    !map the mesh nodes
    correctedBranchidx = branchidx + firstvalidarraypos
    ierr = odu_get_start_end_nodes_of_branches(correctedBranchidx, meshnodemapping(1,:), meshnodemapping(2,:))
 
+   !do the merging
    numk = 0
    numl = 0
    do branch = 1, nbranches
-      st  = meshnodemapping(1,branch)
-      en  = meshnodemapping(2,branch)
-      stn = sourcenodeid(branch) + firstvalidarraypos
-      enn = targetnodeid(branch) + firstvalidarraypos
-      stnumk = 0
-      ennumk = 0
+      st        = meshnodemapping(1,branch)
+      en        = meshnodemapping(2,branch)
+      stn       = sourcenodeid(branch) + firstvalidarraypos
+      enn       = targetnodeid(branch) + firstvalidarraypos
+      numINodes = 0
       !start
       if (stn > 0) then
          if(networkNodesUnmerged(stn)==0) then
-            numk = numk + 1
-            stnumk = numk
-            xk(numk) = nodex(st)
-            yk(numk) = nodey(st)
-            networkNodesUnmerged(stn) = numk
+            numk                         = numk + 1
+            xk(numk)                     = nodex(st)
+            yk(numk)                     = nodey(st)
+            networkNodesUnmerged(stn)    = numk
+            numINodes                    = numINodes + 1
+            nodeids(numINodes)           = numk
+            mesh1dMergedToUnMerged(numk) = st
          else
-            stnumk = networkNodesUnmerged(stn)
+            numINodes                    = numINodes + 1
+            nodeids(numINodes)           = networkNodesUnmerged(stn)
          endif
       endif
       !internals
@@ -3247,34 +3266,31 @@
          numk = numk + 1
          xk(numk) = nodex(k)
          yk(numk) = nodey(k)
+         numINodes = numINodes + 1
+         nodeids(numINodes) = numk
+         mesh1dMergedToUnMerged(numk) = k
       enddo
       !end
       if (enn > 0) then
          if(networkNodesUnmerged(enn)==0) then
-            numk = numk + 1
-            ennumk = numk
-            xk(numk) = nodex(en)
-            yk(numk) = nodey(en)
-            networkNodesUnmerged(enn) = numk
+            numk                         = numk + 1
+            xk(numk)                     = nodex(en)
+            yk(numk)                     = nodey(en)
+            networkNodesUnmerged(enn)    = numk
+            numINodes                    = numINodes + 1
+            nodeids(numINodes)           = numk
+            mesh1dMergedToUnMerged(numk) = en
          else
-            ennumk = networkNodesUnmerged(enn)
+            numINodes = numINodes + 1
+            nodeids(numINodes) = networkNodesUnmerged(enn)
          endif
       endif
       !create edge node table
-      if (ennumk>stnumk) then
-         do k = stnumk, ennumk-1
-            numl = numl +1
-            edge_nodes(1,numl) = k
-            edge_nodes(2,numl) = k+1
-         enddo
-      endif
-      if (ennumk<stnumk) then
-         do k = ennumk, stnumk-1
-            numl = numl +1
-            edge_nodes(1,numl) = k
-            edge_nodes(2,numl) = k+1
-         enddo
-      endif
+      do k = 1, numINodes - 1
+         numl = numl + 1
+         edge_nodes(1,numl) = nodeids(k)
+         edge_nodes(2,numl) = nodeids(k+1)
+      enddo
    enddo
 
    ! assigned merged nodes
