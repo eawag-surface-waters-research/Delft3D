@@ -14029,10 +14029,7 @@ call alloc_fourier_analysis_arrays(gdfourier,gddimens,nofou)
 call reafou(minp   ,md_foufile    ,kmxd      ,&
                    & NUMCONST     ,ISALT    ,ITEMP    ,&
                    & tstart_user   ,tstop_user   ,dt_user     ,success)
-if (minp/=0) then
-   close(minp)
-   minp=0
-end if
+call doclose(minp)
 
 if (.not.success) then
 ! TODO: deal with failed attempts to connect a fou-file
