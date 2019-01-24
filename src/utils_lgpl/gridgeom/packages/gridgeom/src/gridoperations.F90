@@ -6,6 +6,7 @@
    
    !unfortunatly we do not have much other options if we do not want to modify api calls 
    integer, allocatable, dimension(:) :: mesh1dMergedToUnMerged(:) 
+   integer, allocatable, dimension(:) :: mesh1dUnMergedToMerged(:) 
 
    !new functions
    public :: make1D2Dinternalnetlinks
@@ -2680,119 +2681,155 @@
 
    end function make1D2Dinternalnetlinks
    
-   subroutine make1D2Droofgutterpipes(xplRoofs, yplRoofs, zplRoofs, oneDmask)      !
-      
-      use m_missing
-      use m_polygon
-      use geometry_module
-      use m_alloc
-      use network_data
-      use m_cell_geometry
-      
-      implicit none
-   
-      !dfm might have already allocated xpl, ypl, zpl
-      double precision, optional, intent(in)  :: xplRoofs(:), yplRoofs(:), zplRoofs(:)
-      integer, optional, intent(in)           :: oneDmask(:)
-      
-      integer                                 :: inp, n, n1, ip, i, k1, k2, L
-      double precision                        :: XN1, YN1, DIST
-      integer,          allocatable           :: nodroof(:), nod1D(:)
-      double precision, allocatable           :: dismin(:)
-      character(len=5)                        :: sd
-      character(len=1), external              :: get_dirsep
-      integer                                 :: ierr
-      integer                                 :: nInputPolygon
-   
-      call findcells(0)
-      
-      !allocate and assign polygon if input arrays are present
-      !when called from DFM xpl, ypl, and zpl arrays are already allocated in m_polygon
-      if (present(xplRoofs)) then
-         npl = size(xplRoofs)
-         call increasepol(size(xplRoofs), 0)
-         xpl(1:npl) = xplRoofs
-         ypl(1:npl) = yplRoofs
-         zpl(1:npl) = zplRoofs
-         inp = -1
-      endif 
-      
-      kc   = 0
-      do n = 1,nump
-         call inwhichpolygon(xzw(n), yzw(n), inp)
-         if (inp > 0) then
-            kc(n) = inp
+   subroutine make1D2Droofgutterpipes(xplRoofs, yplRoofs, zplRoofs, unMergedOneDmask)      !
+
+   use m_missing
+   use m_polygon
+   use geometry_module
+   use m_alloc
+   use network_data
+   use m_cell_geometry
+
+   implicit none
+
+   !dfm might have already allocated xpl, ypl, zpl
+   double precision, optional, intent(in)  :: xplRoofs(:), yplRoofs(:), zplRoofs(:)
+   integer, optional, intent(in)           :: unMergedOneDmask(:)            !< Masking array for 1d mesh points, unmerged nodes
+
+   integer                                 :: inp, n, n1, ip, i, k1, k2, L, k, numUnMergedNodes
+   double precision                        :: XN1, YN1, DIST
+   integer,          allocatable           :: nodroof(:), nod1D(:)
+   double precision, allocatable           :: dismin(:)
+   character(len=5)                        :: sd
+   character(len=1), external              :: get_dirsep
+   integer                                 :: ierr
+   integer                                 :: nInputPolygon
+   integer, allocatable                    :: mergedOneDmask(:)                   !< Masking array for 1d mesh points, merged nodes
+
+   call findcells(0)
+
+   !allocate and assign polygon if input arrays are present
+   !when called from DFM xpl, ypl, and zpl arrays are already allocated in m_polygon
+   if (present(xplRoofs)) then
+      npl = size(xplRoofs)
+      call increasepol(size(xplRoofs), 0)
+      xpl(1:npl) = xplRoofs
+      ypl(1:npl) = yplRoofs
+      zpl(1:npl) = zplRoofs
+      inp = -1
+   endif
+
+   kc   = 0
+   do n = 1,nump
+      call inwhichpolygon(xzw(n), yzw(n), inp)
+      if (inp > 0) then
+         kc(n) = inp
+      endif
+   enddo
+
+   do i = 1,npoly
+      xpl(iiend(i)) = xpl(iistart(i))
+      ypl(iiend(i)) = ypl(iistart(i))
+      zpl(iiend(i)) = zpl(iistart(i))
+   enddo
+
+   !map 1d mask from unmerged to merged
+   if (allocated(mesh1dUnMergedToMerged).and.present(unMergedOneDmask)) then
+      numUnMergedNodes = size(unMergedOneDmask)
+      allocate(mergedOneDmask(numUnMergedNodes)); mergedOneDmask = 0
+      do n  = 1,numUnMergedNodes
+         k = mesh1dUnMergedToMerged(n)
+         if(k>0) then
+            mergedOneDmask(k) = unMergedOneDmask(n)
          endif
       enddo
-      
-      do i = 1,npoly
-         xpl(iiend(i)) = xpl(iistart(i))
-         ypl(iiend(i)) = ypl(iistart(i))
-         zpl(iiend(i)) = zpl(iistart(i))
-      enddo
-      
-      allocate( dismin(npoly), nodroof(npoly), nod1D(npoly) )
-      dismin = 9d9 ; nodroof = 0 ; nod1D = 0
-      do n  = 1,nump
-         if (kc(n) > 0) then
-            ip = kc(n)
-            call CLOSETO1Dnetnode(xzw(n), yzw(n), N1, DIST, oneDmask)
-            if (dist < dismin(ip)) then
-               dismin(ip) = dist ; nodroof(ip) = n; nod1D(ip) = n1
-            endif
+   endif
+
+   allocate( dismin(npoly), nodroof(npoly), nod1D(npoly) )
+   dismin = 9d9 ; nodroof = 0 ; nod1D = 0
+   do n  = 1,nump
+      if (kc(n) > 0) then
+         ip = kc(n)
+         if(present(unMergedOneDmask)) then
+            call CLOSETO1Dnetnode(xzw(n), yzw(n), N1, DIST, mergedOneDmask)
+         else
+            call CLOSETO1Dnetnode(xzw(n), yzw(n), N1, DIST)
          endif
-      enddo
-      
-      do ip = 1,npoly
-         n1 = nodroof(ip)
-         if (n1 > 0) then
-            call setnewpoint(xz(n1),yz(n1),dmiss,k1)
-            k2 = nod1D(ip) 
-            call connectdbn(k1,k2,l)
-            kn(3,l) = 7
+         if (dist < dismin(ip)) then
+            dismin(ip) = dist ; nodroof(ip) = n; nod1D(ip) = n1
          endif
-      enddo
-      
-      deallocate( dismin, nodroof, nod1D )
-   
+      endif
+   enddo
+
+   do ip = 1,npoly
+      n1 = nodroof(ip)
+      if (n1 > 0) then
+         call setnewpoint(xz(n1),yz(n1),dmiss,k1)
+         k2 = nod1D(ip)
+         call connectdbn(k1,k2,l)
+         kn(3,l) = 7
+      endif
+   enddo
+
+   deallocate( dismin, nodroof, nod1D )
+
    end subroutine make1D2Droofgutterpipes
 
-   subroutine make1D2Dstreetinletpipes(xsStreetInletPipes, ysStreetInletPipes, oneDmask)
-   
-       use m_missing
-       use m_polygon
-       use geometry_module
-       use m_alloc
-       use network_data
-       use m_cell_geometry
-       use m_samples
+   subroutine make1D2Dstreetinletpipes(xsStreetInletPipes, ysStreetInletPipes, unMergedOneDmask)
 
-       implicit none
-       
-      !allocate and assign samples if input arrays are present
-      !when called from DFM xs, ys are already allocated in m_samples
-      double precision, optional, intent(in)  :: xsStreetInletPipes(:), ysStreetInletPipes(:)
-      integer, optional, intent(in)           :: oneDmask(:) !< Masking array for 1d mesh points (1 connect, 0 do not connect)
-      integer                                 :: n,k,n1,k1,L
-      double precision                        :: DIST
+   use m_missing
+   use m_polygon
+   use geometry_module
+   use m_alloc
+   use network_data
+   use m_cell_geometry
+   use m_samples
 
-       call findcells(0)
-       if (present(xsStreetInletPipes)) then
-         ns = size(xsStreetInletPipes)
-         call INCREASESAM(ns)
-         Xs(1:ns) = xsStreetInletPipes
-         Ys(1:ns) = ysStreetInletPipes
+   implicit none
+
+   !allocate and assign samples if input arrays are present
+   !when called from DFM xs, ys are already allocated in m_samples
+   double precision, optional, intent(in)  :: xsStreetInletPipes(:), ysStreetInletPipes(:)
+   integer, optional, intent(in)           :: unMergedOneDmask(:)           !< Masking array for 1d mesh points, unmerged nodes
+   integer                                 :: n,k,n1,k1,l, numUnMergedNodes
+   double precision                        :: dist
+   integer, allocatable                    :: mergedOneDmask(:)                   !< Masking array for 1d mesh points, merged nodes
+
+   call findcells(0)
+   if (present(xsStreetInletPipes)) then
+      ns = size(xsStreetInletPipes)
+      call INCREASESAM(ns)
+      Xs(1:ns) = xsStreetInletPipes
+      Ys(1:ns) = ysStreetInletPipes
+   endif
+
+   !map unMergedOneDmask to merged
+   if (allocated(mesh1dUnMergedToMerged).and.present(unMergedOneDmask)) then
+      numUnMergedNodes = size(unMergedOneDmask)
+      allocate(mergedOneDmask(numUnMergedNodes)); mergedOneDmask = 0
+      do n  = 1,numUnMergedNodes
+         k = mesh1dUnMergedToMerged(n)
+         if(k>0) then
+            mergedOneDmask(k) = unMergedOneDmask(n)
+         endif
+      enddo
+   endif
+
+   do n  = 1,ns
+      call incells(Xs(n),Ys(n),K)
+      if (k > 0) then
+         if(present(unMergedOneDmask)) then
+            call CLOSETO1Dnetnode(xzw(k), yzw(k), n1, dist, mergedOneDmask)
+         else
+            call CLOSETO1Dnetnode(xzw(k), yzw(k), n1, dist)
+         endif
+         if (n1.ne.0) then
+            call setnewpoint(xzw(k),yzw(k),dmiss,k1)
+            call connectdbn(k1,n1,l)
+            kn(3,L) = 5
+         endif
       endif
-
-       do n  = 1,ns
-          call INCELLS(Xs(n),Ys(n),K)
-          if (k > 0) then
-             call CLOSETO1Dnetnode(xzw(k), yzw(k), N1, DIST, oneDmask)
-             CALL SETNEWPOINT(xzw(k),yzw(k),dmiss,k1)
-             call CONNECTDBN(K1,N1,L)
-             kn(3,L) = 5
-          endif
-       enddo
+   enddo
 
    end subroutine make1D2Dstreetinletpipes
 
@@ -3233,6 +3270,12 @@
    endif
    allocate(mesh1dMergedToUnMerged(numkUnMerged))
 
+   !check if mesh1dUnMergedToMerged is already allocated
+   if(allocated(mesh1dUnMergedToMerged)) then
+      deallocate(mesh1dUnMergedToMerged)
+   endif
+   allocate(mesh1dUnMergedToMerged(numkUnMerged))
+   
    !map the mesh nodes
    correctedBranchidx = branchidx + firstvalidarraypos
    ierr = odu_get_start_end_nodes_of_branches(correctedBranchidx, meshnodemapping(1,:), meshnodemapping(2,:))
@@ -3256,19 +3299,22 @@
             numINodes                    = numINodes + 1
             nodeids(numINodes)           = numk
             mesh1dMergedToUnMerged(numk) = st
+            mesh1dUnMergedToMerged(st)   = numk
          else
             numINodes                    = numINodes + 1
             nodeids(numINodes)           = networkNodesUnmerged(stn)
+            mesh1dUnMergedToMerged(st)   = networkNodesUnmerged(stn)
          endif
       endif
       !internals
       do k = st + 1, en - 1
-         numk = numk + 1
-         xk(numk) = nodex(k)
-         yk(numk) = nodey(k)
-         numINodes = numINodes + 1
-         nodeids(numINodes) = numk
-         mesh1dMergedToUnMerged(numk) = k
+         numk                            = numk + 1
+         xk(numk)                        = nodex(k)
+         yk(numk)                        = nodey(k)
+         numINodes                       = numINodes + 1
+         nodeids(numINodes)              = numk
+         mesh1dMergedToUnMerged(numk)    = k
+         mesh1dUnMergedToMerged(k)       = numk
       enddo
       !end
       if (enn > 0) then
@@ -3280,9 +3326,11 @@
             numINodes                    = numINodes + 1
             nodeids(numINodes)           = numk
             mesh1dMergedToUnMerged(numk) = en
+            mesh1dUnMergedToMerged(en)   = numk
          else
             numINodes = numINodes + 1
-            nodeids(numINodes) = networkNodesUnmerged(enn)
+            nodeids(numINodes)           = networkNodesUnmerged(enn)
+            mesh1dUnMergedToMerged(en)   = networkNodesUnmerged(enn)
          endif
       endif
       !create edge node table
@@ -3307,6 +3355,15 @@
    meshgeom%nodex      = xk(1:numk)
    meshgeom%nodey      = yk(1:numk)
    meshgeom%edge_nodes = edge_nodes(:,1:numl)
+   
+   !deallocate
+   deallocate(xk)
+   deallocate(yk)
+   deallocate(nodeids)
+   deallocate(networkNodesUnmerged)
+   deallocate(edge_nodes) !rough estimate of the maximum number of edges given a certain amount of nodes
+   deallocate(correctedBranchidx)
+   deallocate(meshnodemapping)
 
    end function ggeo_convert_1d_arrays
    
