@@ -93,7 +93,8 @@ subroutine cdwkad(nmmax     ,kmax      ,zmodel    ,kspu      ,kfsmax    , &
     dzmin => gdp%gdzmodel%dzmin
     zbot  => gdp%gdzmodel%zbot
 !
-! if KSPU/KSPV (NM,0) /= 10 then POROSU(NM,K)=1.0 and UBRLSU(NM,K)=0.0
+! POROSU(NM,K) is initialized to 1.0 for whole model domain 
+! in case of a CDW (KSPU/KSPV (NM,0) = 10) UBRLSU(NM,K) is initialized to 0.0
 ! 
 do nm = 1, nmmax
    do k = 1,kmax
@@ -101,7 +102,9 @@ do nm = 1, nmmax
       zkbot(k) = 0.0
       dzk(k)   = 0.0
       porosu(nm, k) = 1.0
-      if (abs(kspu(nm,0))==10) kspu  (nm, k) = 0    !! only for CDW (to avoid overwiting of 3D gates)
+      if (abs(kspu(nm,0))==10) then
+         kspu  (nm, k) = 0 
+      endif    
    enddo
    kfrst = 1
    klast = kmax
