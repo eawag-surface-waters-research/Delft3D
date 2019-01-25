@@ -1452,8 +1452,10 @@ subroutine get_compound_field(c_var_name, c_item_name, c_field_name, x) bind(C, 
   use m_observations
   use m_monitoring_crosssections
   use m_strucs
-  use m_structures, only: valdambreak
+  use m_structures , only: valdambreak
+  use m_structure , only: get_crest_level_c_loc
   use m_wind
+  use unstruc_channel_flow, only: network
   
   character(kind=c_char), intent(in) :: c_var_name(*)   !< Name of the set variable, e.g., 'pumps'
   character(kind=c_char), intent(in) :: c_item_name(*)  !< Name of a single item's index/location, e.g., 'Pump01'
@@ -1461,7 +1463,6 @@ subroutine get_compound_field(c_var_name, c_item_name, c_field_name, x) bind(C, 
   type(c_ptr),            intent(inout) :: x            !< Pointer (by reference) to requested value data, NULL if not available.
 
   integer :: item_index
-
 
   ! The fortran name of the attribute name
   character(len=MAXSTRLEN) :: var_name
@@ -1492,15 +1493,28 @@ subroutine get_compound_field(c_var_name, c_item_name, c_field_name, x) bind(C, 
      if (item_index == 0) then
          return
      endif
-     select case(field_name)
-     case("crest_level")
-         x = c_loc(zcgen((item_index-1)*3+1))
-         return
-     case("lat_contr_coeff")
-         ! TODO: RTC: AvD: get this from weir params
-         return
-     end select
-
+     if (item_index <= ncgensg) then 
+         ! DFlowFM type structures
+         select case(field_name)
+         case("crest_level")
+             x = c_loc(zcgen((item_index-1)*3+1))
+             return
+         case("lat_contr_coeff")
+             ! TODO: RTC: AvD: get this from weir params
+             return
+         end select
+     else
+         ! DFlowFM1D type structures
+         item_index = item_index - ncgensg
+         select case(field_name)
+         case("crest_level")
+             x = get_crest_level_c_loc(network%sts%struct(item_index))  
+             return
+         case("lat_contr_coeff")
+             ! TODO: RTC: AvD: get this from weir params (also for 1d?) 
+             return
+         end select
+     endif 
   ! GATES
   case("gates")
      call getStructureIndex('gates', item_name, item_index)

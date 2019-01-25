@@ -2857,6 +2857,9 @@ subroutine getStructureIndex(strtypename, strname, index)
 ! NOTE: this will only return the GUI-used structures (i.e., the new gates and weirs via general structure, not the old ext-based damlevel and gateloweredgelevel).
 ! TODO: longer-term all structure sets run via channel_flow and t_structureset, cleanup this function then.
    use m_flowexternalforcings
+   use m_hash_search, only: hashsearch
+   use unstruc_channel_flow, only: network
+   
    implicit none
    character(len=*), intent(in)  :: strtypename !< the type of the structure: 'pumps', 'weirs', 'gates', ...
    character(len=*), intent(in)  :: strname     !< Id/name of the requested structure, e.g. 'Pump01'
@@ -2918,6 +2921,17 @@ subroutine getStructureIndex(strtypename, strname, index)
             end if
          end if
       end do
+      
+      if (nstr == 0) then 
+          ! 'No DFlowFM structures found, looking for DFlowFM-1D structures ...'
+          select case(strtypename)
+          case('weirs')
+             index = ncgensg + hashsearch(network%sts%hashlist_weir, strname)  ! add shift of ncgensg for all weirs defined in FM
+          case default
+             index = 0
+      end select          
+          
+      endif 
    end if
 
 end subroutine getStructureIndex
