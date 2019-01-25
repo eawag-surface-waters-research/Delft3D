@@ -2613,7 +2613,8 @@
    NML  = NUML
    DO K = 1,NUMK
 
-      IF (NMK(K) == 2 .and. kc(k) == 1) THEN ! Do not connect the extreme vertices of the 1d mesh
+      IF ((NMK(K) == 2 .and. kc(k) == 1) .or. (kc(k) == 1 .and. present(oneDmask))) THEN ! Do not connect the extreme vertices of the 1d mesh. 
+                                                                                         ! TODO: If oneDmask, calls comes from Delta Shell, remove when this information can be retrived from an extra argument  
 
          IF (allocated(KC) ) then 
             if ( KC(K) == 1) THEN
@@ -3210,12 +3211,16 @@
 
    integer, intent(inout)  :: arrayfrom(:), arrayto(:)
    integer, intent(in)     :: start_index
-   integer                 :: ierr, nlinks, l, nc
+   integer                 :: ierr, nlinks, l, nc, n1dmergedNodes
    integer                 :: linkType
 
    ierr     = 0
    nlinks   = 0
-
+   n1dmergedNodes = 0
+   if(allocated(mesh1dMergedToUnMerged)) then
+      n1dmergedNodes = size(mesh1dMergedToUnMerged)
+   endif
+   
    do l=1,numl1d + numl
       if(kn(3,l).eq.linkType) then
          nlinks = nlinks + 1
@@ -3225,11 +3230,13 @@
             ierr = -1
             return
          endif
-         arrayfrom(nlinks) = nc          !2d cell
-         if(allocated(mesh1dMergedToUnMerged)) then
-            arrayto(nlinks)   = mesh1dMergedToUnMerged(kn(2,l))  !1dlink
+         !2d cell
+         arrayfrom(nlinks) = nc          
+         !1dpoint
+         if(n1dmergedNodes>0) then
+            if(kn(2,l)<=n1dmergedNodes) arrayto(nlinks)   = mesh1dMergedToUnMerged(kn(2,l))  
          else
-            arrayto(nlinks)   = kn(2,l)  !1dlink
+            arrayto(nlinks)   = kn(2,l)  !1dpoint
          endif
       end if
    end do
