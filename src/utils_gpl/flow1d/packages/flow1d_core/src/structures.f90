@@ -47,7 +47,7 @@ module m_structure
    use m_ExtraResistance
    use m_hash_search
    use m_Dambreak
-
+   use iso_c_utils
 
    implicit none
 
@@ -68,6 +68,7 @@ module m_structure
    public getCrossSection
    public getStructureById
    public get_crest_level
+   public get_crest_level_c_loc
    public get_width
    public get_watershed_threshold
    public get_gle
@@ -937,6 +938,28 @@ end subroutine
 
    end function get_crest_level
 
+   type(c_ptr) function get_crest_level_c_loc(struc)
+      type(t_structure), intent(in) :: struc
+      
+       select case (struc%st_type)
+          case (ST_WEIR)
+             get_crest_level_c_loc = c_loc(struc%weir%crestlevel)
+          case (ST_UNI_WEIR)
+             get_crest_level_c_loc = c_loc(struc%uniweir%crestlevel)
+          case (ST_ORIFICE)
+             get_crest_level_c_loc = c_loc(struc%orifice%crestlevel)
+          case (ST_RIVER_WEIR)
+             get_crest_level_c_loc = c_loc(struc%riverweir%crestlevel)
+          case (ST_ADV_WEIR)
+             get_crest_level_c_loc = c_loc(struc%advweir%crestlevel)
+          case (ST_GENERAL_ST)
+             get_crest_level_c_loc = c_loc(struc%generalst%levelcenter)
+          case default
+             get_crest_level_c_loc = C_NULL_PTR
+       end select
+
+   end function get_crest_level_c_loc   
+   
    double precision function get_width(struc)
       type(t_structure), intent(in) :: struc
       
