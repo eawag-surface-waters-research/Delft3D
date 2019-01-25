@@ -1024,7 +1024,7 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     call updmassbal(1         ,r(qxk)    ,r(qyk)    ,i(kcs)    ,r(r1)     , &
                   & r(volum0) ,r(volum1) ,r(sbuu)   ,r(sbvv)   ,r(disch)  , &
                   & i(mnksrc) ,r(sink)   ,r(sour)   ,r(gsqs)   ,r(guu)    , &
-                  & r(gvv)    ,d(dps)    ,r(rintsm) ,gdp       )
+                  & r(gvv)    ,d(dps)    ,r(rintsm) ,0.0_fp    ,gdp       )
     !
     ! F0ISF1: copy old (1) in new arrays (0)
     ! N.B.:

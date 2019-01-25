@@ -1,4 +1,4 @@
-subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
+subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   ,ithisc    , &
                          & timnow    ,nst       ,itiwec    ,trasol    ,forfuv    , &
                          & forfww    ,nfltyp    , &
                          & saleqs    ,temeqs    , &
@@ -476,6 +476,7 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
 !
 ! Global variables
 !
+    integer             :: ithisc      !! History file output time step
     integer             :: icreep      !  Description and declaration in tricom.igs
     integer             :: itiwec      !!  Current time counter for the calibration of internal wave energy
     integer, intent(in) :: keva        !  Description and declaration in tricom.igs
@@ -506,6 +507,7 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
 !
     integer      :: icx
     integer      :: icy
+    integer      :: imode
     integer      :: itemp
     integer      :: itype
     integer      :: n
@@ -2037,6 +2039,16 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
                     &  r(thick)  ,gdp       )
        endif
        call timer_stop(timer_3dmor, gdp)
+       !
+       if (nst+1 == ithisc) then
+          imode = 3 ! output needed, so update fluxes and volumes
+       else
+          imode = 2 ! no output needed, so just update fluxes
+       endif
+       call updmassbal(imode    ,r(qxk)    ,r(qyk)    ,i(kcs)    ,r(r1)     , &
+                    & r(volum0) ,r(volum1) ,r(sbuu)   ,r(sbvv)   ,r(disch)  , &
+                    & i(mnksrc) ,r(sink)   ,r(sour)   ,r(gsqs)   ,r(guu)    , &
+                    & r(gvv)    ,d(dps)    ,r(rintsm) ,dtsec     ,gdp       )
        !
        ! Check Courant numbers for U and V velocities in U-points
        ! Check is based on the old geometry (corresponding to S0)

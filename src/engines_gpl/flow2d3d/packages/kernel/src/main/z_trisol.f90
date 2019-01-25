@@ -1,4 +1,4 @@
-subroutine z_trisol(dischy    ,solver    ,icreep    , &
+subroutine z_trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                   & timnow    ,nst       ,itiwec    ,trasol    ,forfuv    , &
                   & forfww    ,nfltyp    , &
                   & saleqs    ,temeqs    , &
@@ -493,6 +493,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
 !
 ! Global variables
 !
+    integer             :: ithisc      !! History file output time step
     integer             :: icreep      !  Description and declaration in tricom.igs
     integer             :: itiwec      !!  Current time counter for the cali-
                                        !!  bration of internal wave energy
@@ -530,6 +531,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
 !
     integer      :: icx
     integer      :: icy
+    integer      :: imode
     integer      :: itemp
     integer      :: itype
     integer      :: n
@@ -1833,6 +1835,10 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
        call updwaqflx(nst       ,zmodel    ,nmmax     ,kmax      ,i(kcs)    , &
                     & i(kcu)    ,i(kcv)    ,r(qxk)    ,r(qyk)    ,r(qzk)    , &
                     & nsrc      ,r(disch)  ,gdp       )
+       call updmassbal(2        ,r(qxk)    ,r(qyk)    ,i(kcs)    ,r(r1)     , &
+                    & r(volum0) ,r(volum1) ,r(sbuu)   ,r(sbvv)   ,r(disch)  , &
+                    & i(mnksrc) ,r(sink)   ,r(sour)   ,r(gsqs)   ,r(guu)    , &
+                    & r(gvv)    ,d(dps)    ,r(rintsm) ,hdt       ,gdp       )
        call updcomflx(nst       ,zmodel    ,nmmax     ,kmax      ,i(kcs)    , &
                     & i(kcu)    ,i(kcv)    ,r(qxk)    ,r(qyk)    ,r(qzk)    , &
                     & nsrc      ,r(disch)  ,i(kfumin) ,i(kfvmin) ,r(qu)     , &
@@ -2786,6 +2792,15 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
        call updwaqflx(nst       ,zmodel    ,nmmax     ,kmax      ,i(kcs)    , &
                     & i(kcu)    ,i(kcv)    ,r(qxk)    ,r(qyk)    ,r(qzk)    , &
                     & nsrc      ,r(disch)  ,gdp       )
+       if (nst+1 == ithisc) then
+          imode = 3 ! output needed, so update fluxes and volumes
+       else
+          imode = 2 ! no output needed, so just update fluxes
+       endif
+       call updmassbal(imode    ,r(qxk)    ,r(qyk)    ,i(kcs)    ,r(r1)     , &
+                    & r(volum0) ,r(volum1) ,r(sbuu)   ,r(sbvv)   ,r(disch)  , &
+                    & i(mnksrc) ,r(sink)   ,r(sour)   ,r(gsqs)   ,r(guu)    , &
+                    & r(gvv)    ,d(dps)    ,r(rintsm) ,hdt       ,gdp       )
        call updcomflx(nst       ,zmodel    ,nmmax     ,kmax      ,i(kcs)    , &
                     & i(kcu)    ,i(kcv)    ,r(qxk)    ,r(qyk)    ,r(qzk)    , &
                     & nsrc      ,r(disch)  ,i(kfumin) ,i(kfvmin) ,r(qu)     , &

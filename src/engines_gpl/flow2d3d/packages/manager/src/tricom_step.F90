@@ -885,7 +885,7 @@ subroutine tricom_step(olv_handle, gdp)
                     & error     ,gdp       )
        else
           if (nh_level == nh_full) then
-             call z_trisol_nhfull(dischy    ,solver    ,icreep    , &
+             call z_trisol_nhfull(dischy    ,solver    ,icreep    ,ithisc    , &
                                 & timnow    ,nst       ,itiwec    ,trasol    ,forfuv    , &
                                 & forfww    ,nfltyp    , &
                                 & saleqs    ,temeqs    , &
@@ -893,7 +893,7 @@ subroutine tricom_step(olv_handle, gdp)
                                 & evaint    ,anglat    ,anglon    ,rouflo    ,rouwav    , &
                                 & betac     ,tkemod    ,gdp       )
           else
-             call z_trisol(dischy    ,solver    ,icreep    , &
+             call z_trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                          & timnow    ,nst       ,itiwec    ,trasol    ,forfuv    , &
                          & forfww    ,nfltyp    , &
                          & saleqs    ,temeqs    , &

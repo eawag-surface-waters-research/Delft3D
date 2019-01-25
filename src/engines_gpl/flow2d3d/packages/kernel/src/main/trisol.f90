@@ -2194,7 +2194,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
        call updmassbal(2        ,r(qxk)    ,r(qyk)    ,i(kcs)    ,r(r1)     , &
                     & r(volum0) ,r(volum1) ,r(sbuu)   ,r(sbvv)   ,r(disch)  , &
                     & i(mnksrc) ,r(sink)   ,r(sour)   ,r(gsqs)   ,r(guu)    , &
-                    & r(gvv)    ,d(dps)    ,r(rintsm) ,gdp       )
+                    & r(gvv)    ,d(dps)    ,r(rintsm) ,hdt       ,gdp       )
        call updcomflx(nst       ,zmodel    ,nmmax     ,kmax      ,i(kcs)    , &
                     & i(kcu)    ,i(kcv)    ,r(qxk)    ,r(qyk)    ,r(qzk)    , &
                     & nsrc      ,r(disch)  ,i(kfumin) ,i(kfvmin) ,r(qu)     , &
@@ -3274,7 +3274,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
        call updmassbal(imode    ,r(qxk)    ,r(qyk)    ,i(kcs)    ,r(r1)     , &
                     & r(volum0) ,r(volum1) ,r(sbuu)   ,r(sbvv)   ,r(disch)  , &
                     & i(mnksrc) ,r(sink)   ,r(sour)   ,r(gsqs)   ,r(guu)    , &
-                    & r(gvv)    ,d(dps)    ,r(rintsm) ,gdp       )
+                    & r(gvv)    ,d(dps)    ,r(rintsm) ,hdt       ,gdp       )
        call updcomflx(nst       ,zmodel    ,nmmax     ,kmax      ,i(kcs)    , &
                     & i(kcu)    ,i(kcv)    ,r(qxk)    ,r(qyk)    ,r(qzk)    , &
                     & nsrc      ,r(disch)  ,i(kfumin) ,i(kfvmin) ,r(qu)     , &

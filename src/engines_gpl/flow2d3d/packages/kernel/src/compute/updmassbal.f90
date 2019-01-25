@@ -1,7 +1,7 @@
 subroutine updmassbal(imode     ,qxk       ,qyk       ,kcs       ,r1        , &
                     & volum0    ,volum1    ,sbuu      ,sbvv      ,disch     , &
                     & mnksrc    ,sink      ,sour      ,gsqs      ,guu       , &
-                    & gvv       ,dps       ,rintsm    ,gdp       )
+                    & gvv       ,dps       ,rintsm    ,dt        ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2019.                                
@@ -54,7 +54,6 @@ subroutine updmassbal(imode     ,qxk       ,qyk       ,kcs       ,r1        , &
     integer                        , pointer :: lsedtot
     integer                        , pointer :: lstsc
     integer                        , pointer :: lstsci
-    real(fp)                       , pointer :: hdt
     logical                        , pointer :: massbal
     integer                        , pointer :: nbalpol
     integer                        , pointer :: nneighb
@@ -94,6 +93,7 @@ subroutine updmassbal(imode     ,qxk       ,qyk       ,kcs       ,r1        , &
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                            , intent(in) :: gvv
     real(fp)  , dimension(gdp%d%lstsc,gdp%d%nsrc)                           , intent(in) :: rintsm
     real(fp)  , dimension(gdp%d%nsrc)                                       , intent(in) :: disch
+    real(fp)                                                                             :: dt
     real(prec), dimension(gdp%d%nmlb:gdp%d%nmub)                            , intent(in) :: dps
 !
 ! Local variables
@@ -111,7 +111,7 @@ subroutine updmassbal(imode     ,qxk       ,qyk       ,kcs       ,r1        , &
     integer                                 :: nm1
     integer                                 :: nm2
     integer                                 :: nmaxddb
-    real(fp)                                :: hdtmor
+    real(fp)                                :: dtmor
     real(fp)                                :: q
     real(fp)                                :: vol
 !
@@ -126,7 +126,6 @@ subroutine updmassbal(imode     ,qxk       ,qyk       ,kcs       ,r1        , &
     lsedtot        => gdp%d%lsedtot
     lstsc          => gdp%d%lstsc
     lstsci         => gdp%d%lstsci
-    hdt            => gdp%gdnumeco%hdt
     !
     nbalpol        => gdp%gdmassbal%nbalpol
     nneighb        => gdp%gdmassbal%nneighb
@@ -171,10 +170,10 @@ subroutine updmassbal(imode     ,qxk       ,qyk       ,kcs       ,r1        , &
              do j=1,2
                 if (j==1) then
                    nm2 = nm+nmaxddb
-                   q = qxk(nm,k)*hdt
+                   q = qxk(nm,k)*dt
                 else
                    nm2 = nm+1
-                   q = qyk(nm,k)*hdt
+                   q = qyk(nm,k)*dt
                 endif
                 !
                 jvol = volnr(nm2)
@@ -213,40 +212,40 @@ subroutine updmassbal(imode     ,qxk       ,qyk       ,kcs       ,r1        , &
           !
           if (disch(isrc)>0.0_fp) then
               ! outflow at outfall or single point discharge
-              fluxes(1,ex) = fluxes(1,ex) + disch(isrc)*hdt
+              fluxes(1,ex) = fluxes(1,ex) + disch(isrc)*dt
               do l = 1,lstsc
-                  fluxes_r1(1,ex,l) = fluxes_r1(1,ex,l) + disch(isrc)*rintsm(l,isrc)*hdt
+                  fluxes_r1(1,ex,l) = fluxes_r1(1,ex,l) + disch(isrc)*rintsm(l,isrc)*dt
               enddo
               !
               if (ex1>0) then
                  ! equivalent inflow at intake
-                 fluxes(2,ex1) = fluxes(2,ex1) + disch(isrc)*hdt
+                 fluxes(2,ex1) = fluxes(2,ex1) + disch(isrc)*dt
                  do l = 1,lstsc
                     if (k==0) then
                        ! determine "depth averaged concentration" r1avg
-                       ! fluxes_r1(2,ex1,l) = fluxes_r1(2,ex1,l) + disch(isrc)*r1avg*hdt
+                       ! fluxes_r1(2,ex1,l) = fluxes_r1(2,ex1,l) + disch(isrc)*r1avg*dt
                     else
-                       fluxes_r1(2,ex1,l) = fluxes_r1(2,ex1,l) + disch(isrc)*r1(nm1,k,l)*hdt
+                       fluxes_r1(2,ex1,l) = fluxes_r1(2,ex1,l) + disch(isrc)*r1(nm1,k,l)*dt
                     endif
                  enddo
               endif
           else
               ! inflow at outfall or single point discharge
-              fluxes(2,ex) = fluxes(2,ex) - disch(isrc)*hdt
+              fluxes(2,ex) = fluxes(2,ex) - disch(isrc)*dt
               do l = 1,lstsc
                   if (k==0) then
                      ! determine "depth averaged concentration" r1avg
-                     ! fluxes_r1(2,ex,l) = fluxes_r1(2,ex,l) - disch(isrc)*r1avg*hdt
+                     ! fluxes_r1(2,ex,l) = fluxes_r1(2,ex,l) - disch(isrc)*r1avg*dt
                   else
-                     fluxes_r1(2,ex,l) = fluxes_r1(2,ex,l) - disch(isrc)*r1(nm,k,l)*hdt
+                     fluxes_r1(2,ex,l) = fluxes_r1(2,ex,l) - disch(isrc)*r1(nm,k,l)*dt
                   endif
               enddo
               !
               if (ex1>0) then
                  ! equivalent outflow at intake
-                 fluxes(2,ex1) = fluxes(2,ex1) - disch(isrc)*hdt
+                 fluxes(2,ex1) = fluxes(2,ex1) - disch(isrc)*dt
                  do l = 1,lstsc
-                    fluxes_r1(2,ex1,l) = fluxes_r1(2,ex1,l) - disch(isrc)*rintsm(l,isrc)*hdt
+                    fluxes_r1(2,ex1,l) = fluxes_r1(2,ex1,l) - disch(isrc)*rintsm(l,isrc)*dt
                  enddo
               endif
           endif
@@ -266,10 +265,10 @@ subroutine updmassbal(imode     ,qxk       ,qyk       ,kcs       ,r1        , &
                    do j = 1,2
                       if (j==1) then
                          nm2 = nm+nmaxddb
-                         q = fluxu(nm,k,l)*hdt
+                         q = fluxu(nm,k,l)*dt
                       else
                          nm2 = nm+1
-                         q = fluxv(nm,k,l)*hdt
+                         q = fluxv(nm,k,l)*dt
                       endif
                       !
                       jvol = volnr(nm2)
@@ -300,7 +299,7 @@ subroutine updmassbal(imode     ,qxk       ,qyk       ,kcs       ,r1        , &
        ! but in SSUU on the map-file.
        !
        if (lsedtot>0) then
-          hdtmor  = hdt*morfac
+          dtmor  = dt*morfac
           !
           do l = 1,lsedtot
              do nm = 1, nmmax
@@ -312,12 +311,12 @@ subroutine updmassbal(imode     ,qxk       ,qyk       ,kcs       ,r1        , &
                       nm2 = nm+nmaxddb
                       q = sbuu(nm,l)
                       if (l<=lsed) q = q+ssuu(nm,l)
-                      q = q*guu(nm)*hdtmor
+                      q = q*guu(nm)*dtmor
                    else
                       nm2 = nm+1
                       q = sbvv(nm,l)
                       if (l<=lsed) q = q+ssvv(nm,l)
-                      q = q*gvv(nm)*hdtmor
+                      q = q*gvv(nm)*dtmor
                    endif
                    !
                    jvol = volnr(nm2)
