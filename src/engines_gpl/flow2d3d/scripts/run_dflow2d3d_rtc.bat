@@ -69,8 +69,8 @@ title RTC simulation
 pause
 
 set PATH=%rtcexedir%;%sharedir%
-echo executing: "%rtcexedir%\rtc.exe" "%rtcdefaultdir%\RTC.FNM" "%rtcdefaultdir%\RTC.RTN"
-                "%rtcexedir%\rtc.exe" "%rtcdefaultdir%\RTC.FNM" "%rtcdefaultdir%\RTC.RTN"
+echo executing: "%rtcexedir%\rtc.exe" "%rtcdefaultdir%\RTC.FNM" "RTC.RTN"
+                "%rtcexedir%\rtc.exe" "%rtcdefaultdir%\RTC.FNM" "RTC.RTN"
 
 
 
