@@ -5725,7 +5725,7 @@ contains
    subroutine reset_save_ugrid_state()
       implicit none
       if (allocated(mesh1dNodeIds)) deallocate(mesh1dNodeIds)
-      if (allocated(mesh1dUnmergedToMerged)) deallocate(mesh1dUnmergedToMerged)
+      !if (allocated(mesh1dUnmergedToMerged)) deallocate(mesh1dUnmergedToMerged)
       if (allocated(mesh1dMergedToUnMerged)) deallocate(mesh1dMergedToUnMerged)
    end subroutine reset_save_ugrid_state
    
