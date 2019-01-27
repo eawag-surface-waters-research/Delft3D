@@ -506,8 +506,8 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
         call realloc(huqbnd,L2qbnd(nqbnd)); huqbnd(L1qbnd(nqbnd):L2qbnd(nqbnd)) = 0d0
      else if ( qidfm == 'absgenbnd') then
         if (.not. (jawave.eq.4)) then                 ! Safety to avoid allocation errors later on
-           call qnerror( 'Absorbing-generating boundary defined without activating XBeach wave driver. Please set Wavemodelnr=4, or change the boundary condition type.', '  ', ' ')
-           write(msgbuf, '(a)') 'Absorbing-generating boundary defined without activating XBeach wave driver. Please set Wavemodelnr=4, or change the boundary condition type.'
+           call qnerror( 'Absorbing-generating boundary defined without activating surfbeat model. Please use appropriate wave model, or change the boundary condition type.', '  ', ' ')
+           write(msgbuf, '(a)') 'Absorbing-generating boundary defined without activating surfbeat model. Please use appropriate wave model, or change the boundary condition type.'
            call err_flush()
         end if
         itpbn = 5
@@ -1505,10 +1505,10 @@ function flow_initwaveforcings_runtime() result(retval)              ! This is t
  kx = 1           ! default vectormax = 1
  !
  qid_l = 'hrms'
- if (.not. allocated(hwav) ) then
-    allocate ( hwav(ndx), stat=ierr)
-    call aerr('hwav(ndx)', ierr, ndx)
-    hwav = 0.0
+ if (.not. allocated(hwavcom) ) then
+    allocate ( hwavcom(ndx), stat=ierr)
+    call aerr('hwavcom(ndx)', ierr, ndx)
+    hwavcom = hwavuni
  endif
  success = ec_addtimespacerelation(qid_l, xz(1:ndx), yz(1:ndx), kcw, kx, md_wavefile, filetype_l, method_l, operand_l, quiet=.true.)
  if (.not.success) then

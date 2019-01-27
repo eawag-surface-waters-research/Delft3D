@@ -8831,25 +8831,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
 
  ! 3D: flow_allocflow will set kmxn, kmxL and kmxc arrays
  call flow_allocflow()                               ! allocate   flow arrays
- 
- ! JRE This double realloc is unnecessary, done in in flow_waveinit
- !if  (jawave > 0) then     
- !     call realloc( rlabda,  ndx,   stat=ierr, keepExisting = .false., fill = 0d0)
- !     call aerr   ('rlabda  (ndx)', ierr, ndx)
- !     call realloc( hwav,    ndx,   stat=ierr, keepExisting = .false., fill = hwavuni)
- !     call aerr   ('hwav    (ndx)', ierr, ndx)
- !     call realloc( twav,    ndx,   stat=ierr, keepExisting = .false., fill = twavuni)
- !     call aerr   ('twav    (ndx)', ierr, ndx)
- !     call realloc( phiwav,  ndx,   stat=ierr, keepExisting = .false., fill = phiwavuni)
- !     call aerr   ('phiwav  (ndx)', ierr, ndx)
- !     call realloc( uorb,    ndx,   stat=ierr, keepExisting = .false., fill = 0d0)
- !     call aerr   ('uorb    (ndx)', ierr, ndx)
- !     call realloc( ustokes, lnkx,  stat=ierr, keepExisting = .false., fill = 0d0)
- !     call aerr   ('ustokes (lnkx)', ierr, lnkx)
- !     call realloc( vstokes, lnkx,  stat=ierr, keepExisting = .false., fill = 0d0)
- !     call aerr   ('vstokes (lnkx)', ierr, lnkx)
- ! endif
- !if (jawave >= 3 .or. (jased > 0 .and. stm_included)) call flow_waveinit()
+ !
  if (jawave > 0 .or. (jased > 0 .and. stm_included)) call flow_waveinit()
  ! Construct a default griddim struct for D3D subroutines, i.e. fourier, sedmor or trachytopen
  if ( len_trim(md_foufile) > 0 .or. len_trim(md_sedfile) > 0 .or. jatrt == 1) then
@@ -14637,7 +14619,7 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
       if (.not.l_initPhase) then
          ! Finally the delayed external forcings can be initialized
          success = flow_initwaveforcings_runtime()
-         if (allocated (hwav) ) then
+         if (allocated (hwavcom) ) then
             ! Don't make them zero: ecGetValues might do nothing
             !hwav = 0.0
             success = success .and. ecGetValues(ecInstancePtr, item_hrms, tim)

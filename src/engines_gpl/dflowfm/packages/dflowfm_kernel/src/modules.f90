@@ -249,6 +249,7 @@ module m_waves
  double precision, allocatable              :: fett(:,:)            !< reduce array, (2,ndx)
  
  double precision, allocatable, target      :: hwav(:)              !< [m] root mean square wave height (m) from external source, {"location": "face", "shape": ["ndx"]}
+ double precision, allocatable, target      :: hwavcom(:)           !< [m] root mean square wave height (m) from external source
  double precision, allocatable, target      :: twav(:)              !< [s] wave period {"location": "face", "shape": ["ndx"]}   
  double precision, allocatable, target      :: phiwav(:)            !< [degree] mean wave direction (degrees) from external source
  double precision, allocatable, target      :: Uorb(:)              !< [m/s] orbital velocity {"location": "face", "shape": ["ndx"]}

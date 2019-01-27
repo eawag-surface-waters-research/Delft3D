@@ -587,7 +587,7 @@ module m_meteo
             dataPtr1 => qstss
          case ('hrms')
             itemPtr1 => item_hrms
-            dataPtr1 => hwav
+            dataPtr1 => hwavcom
          case ('tp', 'tps', 'rtp')
             itemPtr1 => item_tp
             dataPtr1 => twav

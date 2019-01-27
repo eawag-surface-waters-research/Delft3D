@@ -128,6 +128,8 @@
       call aerr('rlabda(ndx)', ierr, ndx)
       call realloc( hwav,   ndx, stat=ierr, keepExisting = .false., fill = hwavuni)
       call aerr   ('hwav   (ndx)', ierr, ndx)
+      call realloc( hwavcom,   ndx, stat=ierr, keepExisting = .false., fill = hwavuni)
+      call aerr   ('hwavcom   (ndx)', ierr, ndx)
       call realloc( twav,   ndx, stat=ierr, keepExisting = .false., fill = twavuni)
       call aerr   ('twav   (ndx)', ierr, ndx)
       call realloc( phiwav, ndx, stat=ierr, keepExisting = .false., fill = phiwavuni)
@@ -797,7 +799,7 @@
    end subroutine tauwave
 
    subroutine wave_uorbrlabda()
-   use m_waves, only: uorb, wlenwav, uorbwav, twav, hwav, gammax, rlabda, jauorb, jauorbfromswan
+   use m_waves, only: uorb, wlenwav, uorbwav, twav, hwav, hwavcom, gammax, rlabda, jauorb, jauorbfromswan
    use m_flow, only: hs
    use m_flowgeom, only: ndx
    use m_physcoef, only: ag
@@ -816,7 +818,7 @@
       hss  = max(0.01, hs(k))
       per = max(0.01, twav(k))                   ! wave period
 
-      hwav(k) = min(hwav(k), gammax*hs(k))       ! Prevent unrealistic Hrms in shallow water
+      hwav(k) = min(hwavcom(k), gammax*hs(k))       ! Prevent unrealistic Hrms in shallow water. Use original comfile value again every time, as hs changes per dts
       omeg       = 2.0*pi/per
       k0         = omeg*omeg/ag
       k0h        = k0*hss
