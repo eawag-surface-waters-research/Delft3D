@@ -14884,7 +14884,7 @@ subroutine update_pumps_with_levels()
    
       ! Compute sumQuantitiesByWeight and sumWeights for the suction side
       !LC: TODO, do the average only over open links
-      ierr = getAverageQuantityFromLinks(L1pumpsg, L2pumpsg, wu, kpump(3,:), s1, kpump(1,:), pumpAveraging)
+      ierr = getAverageQuantityFromLinks(L1pumpsg, L2pumpsg, wu, kpump(3,:), s1, kpump(1,:), pumpAveraging, 0)
       if (ierr.ne.0) success=.false.
       
       do n = 1, npumpsg
@@ -14894,7 +14894,7 @@ subroutine update_pumps_with_levels()
       enddo
    
       ! Compute sumQuantitiesByWeight and sumWeights for the delivery side
-      ierr = getAverageQuantityFromLinks(L1pumpsg, L2pumpsg, wu, kpump(3,:), s1, kpump(2,:), pumpAveraging)
+      ierr = getAverageQuantityFromLinks(L1pumpsg, L2pumpsg, wu, kpump(3,:), s1, kpump(2,:), pumpAveraging, 0)
       if (ierr.ne.0) success=.false.
       
       do n = 1, npumpsg
@@ -14966,7 +14966,8 @@ subroutine update_dambreak_breach(startTime, deltaTime)
       if (nDambreakAveragingUpstream > 0) then
 
          ! Compute sumQuantitiesByWeight upstream
-         ierr = getAverageQuantityFromLinks(L1dambreaksg(dambreakAverigingUpstreamMapping(1:nDambreakAveragingUpstream)), L2dambreaksg(dambreakAverigingUpstreamMapping(1:nDambreakAveragingUpstream)), wu, kdambreak(3,:), s1, kdambreak(1,:), dambreakAveraging, hu, dmiss, activeDambreakLinks, 0)
+         ierr = getAverageQuantityFromLinks(L1dambreaksg(dambreakAverigingUpstreamMapping(1:nDambreakAveragingUpstream)), L2dambreaksg(dambreakAverigingUpstreamMapping(1:nDambreakAveragingUpstream)), wu, kdambreak(3,:), s1, kdambreak(1,:), dambreakAveraging, 0, &
+		                                    hu, dmiss, activeDambreakLinks, 0)
 
          if (ierr.ne.0) then
             success=.false.
@@ -14992,7 +14993,8 @@ subroutine update_dambreak_breach(startTime, deltaTime)
       if (nDambreakAveragingDownstream > 0) then
 
          ! Compute sumQuantitiesByWeight downstream
-         ierr = getAverageQuantityFromLinks(L1dambreaksg(dambreakAverigingDownstreamMapping(1:nDambreakAveragingDownstream)), L2dambreaksg(dambreakAverigingDownstreamMapping(1:nDambreakAveragingDownstream)), wu, kdambreak(3,:), s1, kdambreak(2,:), dambreakAveraging, hu, dmiss, activeDambreakLinks, 0)
+         ierr = getAverageQuantityFromLinks(L1dambreaksg(dambreakAverigingDownstreamMapping(1:nDambreakAveragingDownstream)), L2dambreaksg(dambreakAverigingDownstreamMapping(1:nDambreakAveragingDownstream)), wu, kdambreak(3,:), s1, kdambreak(2,:), dambreakAveraging, 0, & 
+		                                    hu, dmiss, activeDambreakLinks, 0)
 
          if (ierr.ne.0) then
             success=.false.
@@ -15009,7 +15011,8 @@ subroutine update_dambreak_breach(startTime, deltaTime)
 	  !
       ! u0 velocity on the flowlinks (averaged by the wetted area). The mask is the water level itself 
       !
-	  ierr = getAverageQuantityFromLinks(L1dambreaksg, L2dambreaksg, au, kdambreak(3,:), u1, kdambreak(3,:), dambreakAveraging, hu, dmiss, activeDambreakLinks, 0)
+	  ierr = getAverageQuantityFromLinks(L1dambreaksg, L2dambreaksg, au, kdambreak(3,:), u1, kdambreak(3,:), dambreakAveraging, 1, &
+                                        hu, dmiss, activeDambreakLinks, 0)
       if (ierr.ne.0) success=.false.
       
       do n = 1, ndambreaksg

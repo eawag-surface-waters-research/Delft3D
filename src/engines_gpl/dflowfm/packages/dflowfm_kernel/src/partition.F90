@@ -4702,8 +4702,8 @@ end subroutine partition_make_globalnumbers
    !> optional firstFilter is defined on a global weights array [1, ncells/nlinks]
    !> optional secondFilter is defined on a local array [1,size(secondFilter)]
    !> works also across multiple MPI ranks
-   function getAverageQuantityFromLinks(startLinks, endLinks, weights, indsWeight, quantity, indsQuantity, results, &
-      firstFilter, firstFilterValue, secondFilter, secondFilterValue) result(ierr)
+   function getAverageQuantityFromLinks(startLinks, endLinks, weights, indsWeight, quantity, indsQuantity, results, quantityType, &
+      firstFilter, firstFilterValue, secondFilter, secondFilterValue ) result(ierr)
 
    use mpi
    use m_flowexternalforcings
@@ -4716,7 +4716,8 @@ end subroutine partition_make_globalnumbers
    integer,intent(in),dimension(:)               :: indsWeight             !< local indexes on global weights array
    double precision,intent(in),dimension(:)      :: quantity               !< global quantity array
    integer,intent(in),dimension(:)               :: indsQuantity           !< local indexes on global quantity array
-
+   integer,intent(in)                            :: quantityType           !< The type of quantity: 0 scalar, 1 array (edge orientation matters)
+   
    double precision,intent(in),dimension(:), optional :: firstFilter       !< filter to apply on the global weights array
    double precision,intent(in), optional              :: firstFilterValue  !< value to activate the first filter (activated if larger than filter value)
 
@@ -4756,14 +4757,18 @@ end subroutine partition_make_globalnumbers
             end if
          end if
 
-         ! this function calculates an average on absolute values (sign matters for velocities defined on oriented edges)
-         if (indsQuantity(nl) < 0) then
-            quantitiesByWeight =  -quantity(indQuantity)*weights(indWeight)
-         else
-            quantitiesByWeight =  quantity(indQuantity)*weights(indWeight)
-         endif
-         ! weights are always positive 
+
+         ! weights are always positive
          weight = weights(indWeight)
+         if(quantityType == 1) then
+            if (indsQuantity(nl)< 0) then
+               quantitiesByWeight =   - quantity(indQuantity)*weight
+            else
+               quantitiesByWeight =   quantity(indQuantity)*weight
+            endif
+         else
+            quantitiesByWeight =  quantity(indQuantity)*weight
+         endif
 
          if ( present(firstFilter).and.present(firstFilterValue)) then
             if ( firstFilter(indWeight) <= firstFilterValue ) then
