@@ -4756,7 +4756,13 @@ end subroutine partition_make_globalnumbers
             end if
          end if
 
-         quantitiesByWeight =  quantity(indQuantity)*weights(indWeight)
+         ! this function calculates an average on absolute values (sign matters for velocities defined on oriented edges)
+         if (quantity(indQuantity)< 0) then
+            quantitiesByWeight =  -quantity(indQuantity)*weights(indWeight)
+         else
+            quantitiesByWeight =  quantity(indQuantity)*weights(indWeight)
+         endif
+         ! weights are always positive 
          weight = weights(indWeight)
 
          if ( present(firstFilter).and.present(firstFilterValue)) then
