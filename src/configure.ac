@@ -462,6 +462,25 @@ AS_IF([test "x$with_proj" != "xno"],
 	])
 AM_CONDITIONAL([USEPROJ], test "x$with_proj" != "xno")
 
+dnl Check for SHAPELIB
+AC_MSG_CHECKING([if Shapelib is wanted])
+AC_ARG_WITH(shapelib,[AS_HELP_STRING([--with-shapelib[=DIR]],[Build with shapelib support  @<:@default=no@:>@])],[],[with_shapelib=no])
+
+SHAPELIB_DIR=""
+AS_IF([test "x$with_shapelib" != "xno"],
+	[
+		AC_DEFINE([HAVE_SHAPELIB],1,[Defined if you have Shapelib library.])
+		AS_IF([test "x$with_shapelib" != "xyes"],
+		[
+		  SHAPELIB_DIR=$with_shapelib
+		])
+		AC_MSG_RESULT([yes])
+	],
+	[
+		AC_MSG_RESULT([no])
+	])
+AM_CONDITIONAL([USESHAPELIB], test "x$with_shapelib" != "xno")
+
 AC_LANG_PUSH([C])
 AC_CHECK_LIB([dl], [dlclose],, [AC_MSG_ERROR([Compiler can not find libdl])])
 

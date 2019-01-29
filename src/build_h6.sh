@@ -440,6 +440,20 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+#---------------------
+# shapelib
+shapelibModule=""
+if [ "$compiler" = 'intel16' ]; then
+    # icc c++11 features are only available if gcc is in the path. This is required by shapelib
+    shapelibModule="gcc/4.9.2 shapelib/1.4.1_intel16.0.3" 
+fi
+shapelib="module load $shapelibModule"
+eval $shapelib
+if [ $? -ne 0 ]; then
+    echo 'ERROR: shapelib initialization fails!'
+    cd $orgdir
+    exit 1
+fi
 
 #===============================================================================
 echo
@@ -456,6 +470,7 @@ echo "module load $petscModule"
 echo "module load $metisModule"
 echo "module load $netcdfModule"
 echo "module load $projModule"
+echo "module load $shapelibModule"
 echo
 echo "Module display of loaded modules:"
 module display $fortranModule
@@ -467,6 +482,7 @@ module display $petscModule
 module display $metisModule
 module display $netcdfModule
 module display $projModule
+module display $shapelibModule
 # echo "export ACLOCAL=\"$ACLOCAL\""
 # echo "export AUTOMAKE=\"$AUTOMAKE\""
 # echo "export AUTOHEADER=\"$AUTOHEADER\""
@@ -546,7 +562,7 @@ command=" \
     AM_FCFLAGS='$LDFLAGSMT_ADDITIONAL $AM_FCFLAGS' \
     FCFLAGS='$flags $fflags $FCFLAGS' \
     AM_LDFLAGS='$LDFLAGSMT_ADDITIONAL $AM_LDFLAGS' \
-        ./configure --prefix=`pwd` --with-proj=$PROJ_DIR --with-mpi --with-petsc --with-metis=$METIS_DIR $configureArgs &> $log \
+        ./configure --prefix=`pwd` --with-proj=$PROJ_DIR --with-shapelib=$SHAPELIB_DIR --with-mpi --with-petsc --with-metis=$METIS_DIR $configureArgs &> $log \
     "
 
 log "Running `echo $command | sed 's/ +/ /g'`"
