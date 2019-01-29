@@ -148,9 +148,9 @@ extern "C" OPEN_SHARED_LIBRARY(int64_t * sharedDLLHandle, char * library, long l
  */
 
 #if defined (WIN32) || defined (HAVE_CONFIG_H)
-long STDCALL CLOSE_SHARED_LIBRARY(long * sharedDLLHandle)
+long STDCALL CLOSE_SHARED_LIBRARY(int64_t * sharedDLLHandle)
 #elif defined (salford32)
-extern "C" CLOSE_SHARED_LIBRARY(long * sharedDLLHandle)
+extern "C" CLOSE_SHARED_LIBRARY(int64_t * sharedDLLHandle)
 #endif
 {
     SharedDLL * sharedDLL = (SharedDLL *) (*sharedDLLHandle);
