@@ -28877,7 +28877,7 @@ end SUBROUTINE getwavenrqn
  else if (limtyp .eq. 4) then                        ! monotonized central no division
     dslim = dcentral(d1,d2)
  else if (limtyp .eq. 5) then                        ! monotonized central Sander with division
-    dslim = dlimiter(d1,d2,limtyp)
+    dslim = dlimiter(d1,d2,limtyp) * d2
  else if (limtyp .eq. 6) then                        ! monotonized central Sander with division, upwind slope ds1 at central cel
     dslim = dlimitercentral(d1,d2,limtyp)
   else if (limtyp .eq. 11) then                      ! standaard codering

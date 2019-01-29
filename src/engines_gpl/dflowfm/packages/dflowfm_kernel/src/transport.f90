@@ -293,6 +293,7 @@ subroutine comp_fluxhor3D(NUMCONST, limtyp, Ndkx, Lnkx, u1, q1, au, sqi, vol1, k
    integer                                                   :: kk1L, kk2L, kk1R, kk2R, k1L, k2L, k1R, k2R, is, ku
                                                              
    double precision, external                                :: dlimiter, dlimitercentral
+   double precision, external                                :: dlimiter_nonequi
 
    continue
    
@@ -447,25 +448,41 @@ subroutine comp_fluxhor3D(NUMCONST, limtyp, Ndkx, Lnkx, u1, q1, au, sqi, vol1, k
                   ds1 = is*(dsedx(j,ku)*csu(LL) + dsedy(j,ku)*snu(LL)) * Dx(LL)
                   flux(j,L) = q1(L)* ( sed(j,ku) + half*max(0d0,1d0-cf)*dlimitercentral(ds1, ds2, limtyp) )    
                 end if
+            else if ( limtyp == 9 ) then  ! MC on non-equidistant mesh
+               if ( kk1L.ne.0 .and. q1(L).gt.0d0 .and. jaL.gt.0 ) then
+                   sedkuL = sed(j,k1L)*sl1L + sed(j,k2L)*sl2L
+                   ds2L =  sed(j,k2) - sed(j,k1)
+                   ds1L = (sed(j,k1) - sedkuL)*sl3L
+                   sedL = sedL +      acl(LL) *max(0d0,1d0-cf) * dlimiter_nonequi(ds1L,ds2L,acl(LL),sl3L) * ds2L
+               end if
+               
+                if ( kk1R.ne.0 .and. q1(L).lt.0d0 .and. jaR > 0) then
+                   sedkuR = sed(j,k1R)*sl1R + sed(j,k2R)*sl2R
+                   ds2R =  sed(j,k1) - sed(j,k2)
+                   ds1R = (sed(j,k2) - sedkuR)*sl3R
+                   sedR = sedR + (1d0-acl(LL))*max(0d0,1d0-cf) * dlimiter_nonequi(ds1R,ds2R,1d0-acl(LL),sl3R) * ds2R
+                end if
+               
+                flux(j,L) = QL*sedL + QR*sedR
             else  
                 
                 if ( kk1L.ne.0 .and. q1(L).gt.0d0 .and. jaL > 0) then
                    sedkuL = sed(j,k1L)*sl1L + sed(j,k2L)*sl2L
                    ds2L =  sed(j,k2) - sed(j,k1)
                    ds1L = (sed(j,k1) - sedkuL)*sl3L
-                   sedL = sedL +      acl(LL) *max(0d0,1d0-cf) * dlimiter(ds1L,ds2L,limtyp)
+                   sedL = sedL +      acl(LL) *max(0d0,1d0-cf) * dlimiter(ds1L,ds2L,limtyp) * ds2L
                 end if
                
                 if ( kk1R.ne.0 .and. q1(L).lt.0d0 .and. jaR > 0) then
                    sedkuR = sed(j,k1R)*sl1R + sed(j,k2R)*sl2R
                    ds2R =  sed(j,k1) - sed(j,k2)
                    ds1R = (sed(j,k2) - sedkuR)*sl3R
-                   sedR = sedR + (1d0-acl(LL))*max(0d0,1d0-cf) * dlimiter(ds1R,ds2R,limtyp)
+                   sedR = sedR + (1d0-acl(LL))*max(0d0,1d0-cf) * dlimiter(ds1R,ds2R,limtyp) * ds2R
                 end if
                
                 flux(j,L) = QL*sedL + QR*sedR
                
-            endif   
+            endif
 
             
          end do
@@ -680,7 +697,7 @@ subroutine comp_fluxver(NUMCONST, limtyp, thetavert, Ndkx, kmx, zws, qw, kbot, k
                    
                      ds2L =  sedR-sedL
                      ds1L = (sedL-sed(j,kLL))*sl3L
-                     sedL = sedL + 0.5d0 * cf * dlimiter(ds1L,ds2L,limtyp)
+                     sedL = sedL + 0.5d0 * cf * dlimiter(ds1L,ds2L,limtyp) * ds2L
                   end if
                   
                   if ( k.lt.kt .and. qw_loc.lt.0d0 .and. s1(kk)-zws(kb-1) > epshsdif ) then
@@ -692,7 +709,7 @@ subroutine comp_fluxver(NUMCONST, limtyp, thetavert, Ndkx, kmx, zws, qw, kbot, k
                   
                      ds2R =  sedL-sedR
                      ds1R = (sedR-sed(j,kRR))*sl3R
-                     sedR = sedR + 0.5d0 * cf * dlimiter(ds1R,ds2R,limtyp)
+                     sedR = sedR + 0.5d0 * cf * dlimiter(ds1R,ds2R,limtyp) * ds2R
                   end if
               !  end if
                
@@ -1126,13 +1143,39 @@ double precision function dlimiter(d1,d2,limtyp)
       
 !   if ( limtyp.eq.1 ) then
 !!     Van Leer
-!      dlimiter = dble(min(limtyp,1)) * (r + abs(r) ) / (1 + abs(r) ) * d2
+!      dlimiter = dble(min(limtyp,1)) * (r + abs(r) ) / (1 + abs(r) )
 !   else
 !!     Monotinized Central
-      dlimiter = dble(min(limtyp,1)) * max(0d0, min(TWO*r,TWO,0.5d0*(1d0+r)) ) * d2
+      dlimiter = dble(min(limtyp,1)) * max(0d0, min(TWO*r,TWO,0.5d0*(1d0+r)) ) 
 !   end if
    
 end function dlimiter
+
+!> MC limiter function for non-equidistant grid
+double precision function dlimiter_nonequi(d1,d2,alpha,s)
+   implicit none
+   
+   double precision, intent(in) :: d1, d2   !< left and right slopes
+   double precision, intent(in) :: alpha    !< interface distance
+   double precision, intent(in) :: s        !< mesh width ratio DX2/DX1
+   
+   double precision             :: r
+   double precision, parameter  :: dtol=1d-16
+   
+   double precision             :: TWO1, TWO2
+   
+   dlimiter_nonequi = 0d0
+   if ( d1*d2.lt.dtol ) return
+
+   r = d1/d2    ! d1/d2
+   
+   TWO2 = 1d0/max(alpha,dtol)
+   TWO1 = TWO2/max(s,dtol)
+      
+!  Monotinized Central
+   dlimiter_nonequi = max(0d0, min(TWO1*r,TWO2,0.5d0*(1d0+r)) )
+   
+end function dlimiter_nonequi
 
    
    double precision function dlimitercentral(dc,d2,limtyp)  ! as dlimiter, now for central gradient instead of slope
