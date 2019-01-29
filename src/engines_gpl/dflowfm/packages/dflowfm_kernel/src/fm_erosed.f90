@@ -2942,7 +2942,7 @@ end module m_fm_update_crosssections
                         dv              = thet * fixfac(knb, ll)*frac(knb, ll)
                         dbodsd(ll, knb) = dbodsd(ll, knb) - dv*bai_mor(knb)
                         dbodsd(ll, nm)  = dbodsd(ll, nm)  + dv*bai_mor(nm)
-                        e_sbn(Lf,ll)     = e_sbn(Lf,ll)     + dv/(dtmor*wu_mor(Lf))
+                        e_sbn(Lf,ll)     = e_sbn(Lf,ll)     + dv/(dtmor*wu_mor(Lf)) * sign(1d0,nd(nm)%ln(L)+0d0)
                      end if
                   end do ! L
                enddo ! ll
