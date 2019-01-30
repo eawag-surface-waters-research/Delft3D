@@ -9597,10 +9597,15 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
       goto 999
    end if
    
-   
+   !reduce the scope, do deallocation here
+   if (allocated(mesh1dNodeIds)) deallocate(mesh1dNodeIds)
+   if (allocated(mesh1dUnmergedToMerged)) deallocate(mesh1dUnmergedToMerged)
+   if (allocated(mesh1dMergedToUnMerged)) deallocate(mesh1dMergedToUnMerged)
+      
+   allocate(mesh1dNodeIds(size(xk)))
    allocate(mesh1dUnmergedToMerged(size(xk)))
    allocate(mesh1dMergedToUnMerged(size(xk)))
-   allocate(mesh1dNodeIds(size(xk)))
+   
    !! Read 1D from file
    if (.not. network%loaded) then
       dflowfm_1d = .true.

@@ -5725,9 +5725,9 @@ contains
    !! Upon loading of new model/MDU, call default_save_ugrid_state() instead.
    subroutine reset_save_ugrid_state()
       implicit none
-      if (allocated(mesh1dNodeIds)) deallocate(mesh1dNodeIds)
+      !if (allocated(mesh1dNodeIds)) deallocate(mesh1dNodeIds)
       !if (allocated(mesh1dUnmergedToMerged)) deallocate(mesh1dUnmergedToMerged)
-      if (allocated(mesh1dMergedToUnMerged)) deallocate(mesh1dMergedToUnMerged)
+      !if (allocated(mesh1dMergedToUnMerged)) deallocate(mesh1dMergedToUnMerged)
    end subroutine reset_save_ugrid_state
    
 end module m_save_ugrid_state
