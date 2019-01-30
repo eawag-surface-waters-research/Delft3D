@@ -5,8 +5,8 @@
    implicit none
    
    !unfortunatly we do not have much other options if we do not want to modify api calls 
-   integer, allocatable, dimension(:) :: mesh1dMergedToUnMerged(:) 
-   integer, allocatable, dimension(:) :: mesh1dUnMergedToMerged(:) 
+   integer, allocatable, dimension(:) :: mesh1dMergedToUnMergedGridGeom(:) 
+   integer, allocatable, dimension(:) :: mesh1dUnMergedToMergedGridGeom(:) 
 
    !new functions
    public :: make1D2Dinternalnetlinks
@@ -2829,11 +2829,11 @@
    integer                           :: numUnMergedNodes, i, k, ierr
 
    ierr = 0
-   if (allocated(mesh1dUnMergedToMerged)) then
-      numUnMergedNodes = size(mesh1dUnMergedToMerged)
+   if (allocated(mesh1dUnMergedToMergedGridGeom)) then
+      numUnMergedNodes = size(mesh1dUnMergedToMergedGridGeom)
       allocate(merged(numUnMergedNodes))
       do i  = 1,numUnMergedNodes
-         k = mesh1dUnMergedToMerged(i)
+         k = mesh1dUnMergedToMergedGridGeom(i)
          if(k>0) then
             merged(k) = unMergedOneDmask(i)
          endif
@@ -3217,8 +3217,8 @@
    ierr     = 0
    nlinks   = 0
    n1dmergedNodes = 0
-   if(allocated(mesh1dMergedToUnMerged)) then
-      n1dmergedNodes = size(mesh1dMergedToUnMerged)
+   if(allocated(mesh1dMergedToUnMergedGridGeom)) then
+      n1dmergedNodes = size(mesh1dMergedToUnMergedGridGeom)
    endif
    
    do l=1,numl1d + numl
@@ -3234,7 +3234,7 @@
          arrayfrom(nlinks) = nc          
          !1dpoint
          if(n1dmergedNodes>0) then
-            if(kn(2,l)<=n1dmergedNodes) arrayto(nlinks)   = mesh1dMergedToUnMerged(kn(2,l))  
+            if(kn(2,l)<=n1dmergedNodes) arrayto(nlinks)   = mesh1dMergedToUnMergedGridGeom(kn(2,l))  
          else
             arrayto(nlinks)   = kn(2,l)  !1dpoint
          endif
@@ -3281,17 +3281,17 @@
    allocate(correctedBranchidx(numkUnMerged))
    allocate(meshnodemapping(2,nbranches)); meshnodemapping = -1
 
-   !check if mesh1dMergedToUnMerged is already allocated
-   if(allocated(mesh1dMergedToUnMerged)) then
-      deallocate(mesh1dMergedToUnMerged)
+   !check if mesh1dMergedToUnMergedGridGeom is already allocated
+   if(allocated(mesh1dMergedToUnMergedGridGeom)) then
+      deallocate(mesh1dMergedToUnMergedGridGeom)
    endif
-   allocate(mesh1dMergedToUnMerged(numkUnMerged))
+   allocate(mesh1dMergedToUnMergedGridGeom(numkUnMerged))
 
-   !check if mesh1dUnMergedToMerged is already allocated
-   if(allocated(mesh1dUnMergedToMerged)) then
-      deallocate(mesh1dUnMergedToMerged)
+   !check if mesh1dUnMergedToMergedGridGeom is already allocated
+   if(allocated(mesh1dUnMergedToMergedGridGeom)) then
+      deallocate(mesh1dUnMergedToMergedGridGeom)
    endif
-   allocate(mesh1dUnMergedToMerged(numkUnMerged))
+   allocate(mesh1dUnMergedToMergedGridGeom(numkUnMerged))
    
    !map the mesh nodes
    correctedBranchidx = branchidx + firstvalidarraypos
@@ -3315,12 +3315,12 @@
             networkNodesUnmerged(stn)    = numk
             numINodes                    = numINodes + 1
             nodeids(numINodes)           = numk
-            mesh1dMergedToUnMerged(numk) = st
-            mesh1dUnMergedToMerged(st)   = numk
+            mesh1dMergedToUnMergedGridGeom(numk) = st
+            mesh1dUnMergedToMergedGridGeom(st)   = numk
          else
             numINodes                    = numINodes + 1
             nodeids(numINodes)           = networkNodesUnmerged(stn)
-            mesh1dUnMergedToMerged(st)   = networkNodesUnmerged(stn)
+            mesh1dUnMergedToMergedGridGeom(st)   = networkNodesUnmerged(stn)
          endif
       endif
       !internals
@@ -3330,8 +3330,8 @@
          yk(numk)                        = nodey(k)
          numINodes                       = numINodes + 1
          nodeids(numINodes)              = numk
-         mesh1dMergedToUnMerged(numk)    = k
-         mesh1dUnMergedToMerged(k)       = numk
+         mesh1dMergedToUnMergedGridGeom(numk)    = k
+         mesh1dUnMergedToMergedGridGeom(k)       = numk
       enddo
       !end
       if (enn > 0) then
@@ -3342,12 +3342,12 @@
             networkNodesUnmerged(enn)    = numk
             numINodes                    = numINodes + 1
             nodeids(numINodes)           = numk
-            mesh1dMergedToUnMerged(numk) = en
-            mesh1dUnMergedToMerged(en)   = numk
+            mesh1dMergedToUnMergedGridGeom(numk) = en
+            mesh1dUnMergedToMergedGridGeom(en)   = numk
          else
             numINodes = numINodes + 1
             nodeids(numINodes)           = networkNodesUnmerged(enn)
-            mesh1dUnMergedToMerged(en)   = networkNodesUnmerged(enn)
+            mesh1dUnMergedToMergedGridGeom(en)   = networkNodesUnmerged(enn)
          endif
       endif
       !create edge node table
