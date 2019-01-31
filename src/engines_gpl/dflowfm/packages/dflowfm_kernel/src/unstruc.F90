@@ -40105,6 +40105,7 @@ if (abs(kcu(ll))==1 .and. network%loaded) then !flow1d used only for 1d channels
             cfuhi(L) = 0d0
          endif
       endif
+      wu(L) = max(0.01d0,area/hpr)
    endif
    ! finished for 1d network from flow1d
    return
