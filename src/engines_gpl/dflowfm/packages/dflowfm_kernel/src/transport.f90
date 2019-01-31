@@ -453,14 +453,16 @@ subroutine comp_fluxhor3D(NUMCONST, limtyp, Ndkx, Lnkx, u1, q1, au, sqi, vol1, k
                    sedkuL = sed(j,k1L)*sl1L + sed(j,k2L)*sl2L
                    ds2L =  sed(j,k2) - sed(j,k1)
                    ds1L = (sed(j,k1) - sedkuL)*sl3L
-                   sedL = sedL +      acl(LL) *max(0d0,1d0-cf) * dlimiter_nonequi(ds1L,ds2L,acl(LL),sl3L) * ds2L
+!                   sedL = sedL +      acl(LL) *max(0d0,1d0-cf) * dlimiter_nonequi(ds1L,ds2L,acl(LL),sl3L) * ds2L
+                   sedL = sedL +      acl(LL) *max(0d0,1d0-cf) * dlimiter_nonequi(ds1L,ds2L,acl(LL),1d0) * ds2L
                end if
                
                 if ( kk1R.ne.0 .and. q1(L).lt.0d0 .and. jaR > 0) then
                    sedkuR = sed(j,k1R)*sl1R + sed(j,k2R)*sl2R
                    ds2R =  sed(j,k1) - sed(j,k2)
                    ds1R = (sed(j,k2) - sedkuR)*sl3R
-                   sedR = sedR + (1d0-acl(LL))*max(0d0,1d0-cf) * dlimiter_nonequi(ds1R,ds2R,1d0-acl(LL),sl3R) * ds2R
+!                   sedR = sedR + (1d0-acl(LL))*max(0d0,1d0-cf) * dlimiter_nonequi(ds1R,ds2R,1d0-acl(LL),sl3R) * ds2R
+                   sedR = sedR + (1d0-acl(LL))*max(0d0,1d0-cf) * dlimiter_nonequi(ds1R,ds2R,1d0-acl(LL),1d0) * ds2R
                 end if
                
                 flux(j,L) = QL*sedL + QR*sedR
