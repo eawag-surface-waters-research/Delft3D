@@ -40090,8 +40090,10 @@ if (abs(kcu(ll))==1 .and. network%loaded) then !flow1d used only for 1d channels
       dpt = hu(LL)
    
       if (japerim ==1) then
-         call getconveyance(network, dpt, u1L, q1L, s1L, LL, perim_sub, af_sub, conv, cz_sub, cz, area, perim)
-      
+         if (af_sub(2)>0) then
+            call getconveyance(network, dpt, u1L, q1L, s1L, LL, perim_sub, af_sub, conv, cz_sub, cz, area, perim)
+         endif
+         
          ! Qmain/ QT = Kmain/KT -> u_main = Kmain/KT * (AT/Amain)
          if (conv > 0d0) then
             u_to_umain(L) = area*cz_sub(1) * sqrt(af_sub(1)/perim_sub(1)) /  conv
