@@ -142,7 +142,7 @@ subroutine depfil_stm(lundia    ,error     ,fildep    ,fmttmp    , &
       enddo   
       
       ! if sample still equal to dmiss (values are not defined on flow nodes) - throw error
-      do nm = 1, size(array,1)  ! loop over flow nodes
+      do nm = 1, size(array,2)  ! loop over flow nodes
          if (array(ifld, nm, 1) == dmiss) then
              error = .true.
              write(xlocstring, '(F10.3)') dims%xz(nm)
