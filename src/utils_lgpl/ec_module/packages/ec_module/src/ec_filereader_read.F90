@@ -1128,7 +1128,7 @@ module m_ec_filereader_read
                            select case (fileReaderPtr%bc%timeunit)
                               case ('SECOND')
                                  periods(nPeriods) = 2.0_hp * pi_hp / (periods(nPeriods)/60.0)
-                              case ('MINUTTE')
+                              case ('MINUTE')
                                  periods(nPeriods) = 2.0_hp * pi_hp / (periods(nPeriods))
                               case ('HOUR')
                                  periods(nPeriods) = 2.0_hp * pi_hp / (periods(nPeriods)*60.0)
