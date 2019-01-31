@@ -206,7 +206,15 @@
       real*8  effi
       integer numgr, i
       real*8  interpol
+      logical, save :: first = .true.
 
+      if (first) then
+         if (power(npoint).eq.0.0) then
+            write(*,*) 'ERROR: the highest power in the light curve is 0.0. Check if your bloom.spe file contains light curves!'
+            call srstop(1)
+         endif
+         first=.false.
+      endif
 !
 !  lookup efficency in light curve
 !
