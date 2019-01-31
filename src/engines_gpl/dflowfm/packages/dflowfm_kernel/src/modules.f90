@@ -815,7 +815,7 @@ module m_sediment
  integer                           :: mxgr          !< nr of grainsizes
  integer                           :: jatranspvel   !< transport velocities: 0=all lagr, 1=eul bed+lagr sus, 2=all eul; default=1
  integer, allocatable              :: sedtot2sedsus(:) !< mapping of suspended fractions to total fraction index; name is somewhat misleading, but hey, who said this stuff should make sense..
- integer                           :: sedparopt     !< for interactor plotting
+ integer                           :: sedparopt=1   !< for interactor plotting
  integer                           :: numoptsed
  integer                           :: jaBndTreatment
  integer                           :: jasedtranspveldebug
