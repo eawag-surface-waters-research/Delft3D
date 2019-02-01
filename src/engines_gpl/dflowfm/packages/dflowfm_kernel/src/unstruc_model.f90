@@ -1032,6 +1032,7 @@ subroutine readMDUFile(filename, istat)
     endif
 
     call prop_get_double(md_ptr, 'physics', 'Nudgetimeuni', Tnudgeuni)
+    call prop_get_integer(md_ptr, 'physics', 'IniWithNudge', jainiwithnudge)
 
     call prop_get_integer(md_ptr, 'physics', 'Jadelvappos'       , Jadelvappos)
 
@@ -2446,6 +2447,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
 
        if ( janudge > 0 ) then
           call prop_set_double(prop_ptr, 'physics', 'Nudgetimeuni', Tnudgeuni, 'Uniform nudge relaxation time')
+          call prop_set_integer(prop_ptr, 'physics', 'IniWithNudge', jainiwithnudge, 'Initialize salinity and temperature with nudge variables')
        end if
 
     endif

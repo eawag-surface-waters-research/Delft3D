@@ -2533,6 +2533,7 @@ end subroutine default_turbulence
  integer                           :: jatem             !< Temperature model (0=no, 5=heatfluxmodel)
  
  integer                           :: janudge           !< temperature and salinity nudging
+ integer                           :: jainiwithnudge   !< initialize salinity and temperature with nudge variables
 
  integer                           :: itempforcingtyp   !< Forcing parameter types 1,2 humidity, 3,4 dewpoint see code
  
@@ -2949,6 +2950,7 @@ subroutine default_flowparameters()
     jatem    = 0      ! Temperature model
     
     janudge  = 0      ! temperature and salinity nudging
+    jainiwithnudge = 0   !< initialize salinity and temperature with nudge variables
 
     jarhoxu  = 0      ! rho effects in momentum, 0=no, 1=in horizontal adv, 2=+ in vertical adv, 3 = + in pressure term
 

@@ -13941,6 +13941,9 @@ endif
 
  if ( janudge.eq.1 ) then
     call set_nudgerate()
+    if ( jainiwithnudge.eq.1 ) then
+      call set_saltem_nudge()
+    end if
  end if
 
 ! BEGIN DEBUG
@@ -43724,3 +43727,31 @@ end subroutine alloc_jacobi
       
       return
    end subroutine set_nudgerate
+   
+   
+   !> fill initial salinity and temperature with nudge variables
+   subroutine set_saltem_nudge()
+      use m_flowgeom
+      use m_flow, only: sa1
+      use m_transport
+      use m_nudge
+      use m_missing
+      implicit none
+      
+      integer :: k, kk, KB, KT
+      
+      do kk=1,Ndx
+         call getkbotktop(kk,kb,kt)
+         do k=kb,kt
+            if ( ITEMP.gt.0 .and. nudge_tem(k).ne.DMISS ) then
+               constituents(ITEMP,k) = nudge_tem(k)
+            end if
+              
+            if ( ISALT.gt.0 .and. nudge_sal(k).ne.DMISS ) then
+               constituents(ISALT,k) = nudge_sal(k)
+               sa1(k) = constituents(ISALT,k)
+            end if
+         end do
+      end do
+      
+   end subroutine set_saltem_nudge
