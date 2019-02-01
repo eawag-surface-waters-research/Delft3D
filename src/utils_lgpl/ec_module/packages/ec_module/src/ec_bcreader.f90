@@ -103,7 +103,6 @@ contains
     character(len=*), optional, intent(in)    :: funtype
 
     character*(1000)              ::  rec
-    integer                       ::  reclen
     character(len=:), allocatable ::  keyvaluestr ! all key-value pairs in one header; allocated on assign
     integer                       ::  posfs
     integer                       ::  nfld
@@ -150,9 +149,8 @@ contains
           endif
           call mf_read(fhandle,rec,savepos)
           if (index('!#%*',rec(1:1))>0) cycle
-          reclen = len_trim(rec)
-
-          if (len_trim(rec(1:reclen))>0) then                     ! skip empty lines
+ 
+          if (len_trim(rec)>0) then                     ! skip empty lines
              if (index(rec,'[forcing]')>0) then                   ! new boundary chapter
                 jaheader = .true.                                 ! switching to header mode
                 keyvaluestr = ''
@@ -160,7 +158,7 @@ contains
                 nq = 0                                            ! count the (maximum) number of quantities in this block
              else
                 if (jaheader) then
-                   posfs = index(rec(1:reclen),'=')               ! key value pair ?
+                   posfs = index(rec,'=')               ! key value pair ?
                    if (posfs>0) then
                       call replace_char(rec,9,32)                 ! replace tabs by spaces, header key-value pairs only
                       nfld = nfld + 1                             ! count the number of lines in the header file
@@ -169,7 +167,7 @@ contains
                       if (index(rec(1:posfs-1),'QUANTITY')>0) then
                          nq = nq + 1
                       endif
-                      keyvaluestr = trim(keyvaluestr)//''''// (trim(adjustl(rec(1:posfs-1))))//''',''' //(trim(adjustl(rec(posfs+1:reclen))))//''','
+                      keyvaluestr = trim(keyvaluestr)//''''// (trim(adjustl(rec(1:posfs-1))))//''',''' //(trim(adjustl(rec(posfs+1:))))//''','
                    else                                                    ! switch to datamode
                       ! TODO: Store the location information somewhere to be able to return to it later 
                       call str_upper(keyvaluestr,len(trim(keyvaluestr)))   ! case insensitive format
@@ -624,8 +622,6 @@ contains
     character(30)  :: ncolstr
     integer        :: istat      !< status of read operation
     integer        :: i, j       !< loop counters
-    integer        :: reclen
-    integer        :: commentpos
     integer(kind=8):: savepos    !< saved position in file, for mf_read to enabled rewinding
     real(kind=hp), dimension(1:1)  :: ec_timesteps ! to read in source time from file block
     real(kind=hp)  :: amplitude
@@ -643,11 +639,10 @@ contains
           recout = ''                       ! initialize return string to empty
        endif
        rec = ''
-       reclen = len_trim(rec)
        if (present(eof)) then
           eof = .false.
        endif
-       do while(reclen==0)
+       do while(len_trim(rec)==0)
           if (mf_eof(bcPtr%fhandle)) then
              select case (BCPtr%func)
              case (BC_FUNC_TSERIES, BC_FUNC_TIM3D, BC_FUNC_CONSTANT)
@@ -661,20 +656,7 @@ contains
           endif
 
           call mf_read(bcPtr%fhandle,rec,savepos)
-          reclen = len_trim(rec)
-
-          ! deal with various comment delimiters, RL: skip it if performance is affected !
-          commentpos = index(rec,'//')                                      ! Scan for various types of comments
-          if (commentpos>0) reclen = min(reclen,commentpos-1)
-          commentpos = index(rec,'%')
-          if (commentpos>0) reclen = min(reclen,commentpos-1)
-          commentpos = index(rec,'#')
-          if (commentpos>0) reclen = min(reclen,commentpos-1)
-          commentpos = index(rec,'*')
-          if (commentpos>0) reclen = min(reclen,commentpos-1)
-          commentpos = index(rec,'!')
-          if (commentpos>0) reclen = min(reclen,commentpos-1)
-          reclen = len_trim(rec(1:reclen))                                 ! Finally remove trailing spaces
+          if (rec(1:1)=='#') cycle
           if (index(rec,'[forcing]'         )>0 .or. &
               index(rec,'[Boundary]'        )>0 .or. &
               index(rec,'[LateralDischarge]')>0) then ! new boundary chapter
@@ -690,16 +672,15 @@ contains
           endif
        enddo
 
-       !     read(rec(1:reclen), *, IOSTAT = istat) (values(i), i=1,n_col_time-1), time_steps, (values(i), i=n_col_time, n_col-1)
        BCPtr%columns(1:n_col)=''
-       read(rec(1:reclen), *, IOSTAT = istat) BCPtr%columns(1:n_col)
+       read(rec, *, IOSTAT = istat) BCPtr%columns(1:n_col)
        if (istat /= 0) then
           ! error handling, report column number i, field content columns(i) and record rec  ....
           ! TODO: hookup MessageHandlign and print rec and column stats here directly
           call setECMessage("   File: "//trim(bcPtr%fname)//", Location: "//trim(bcPtr%fname)//", Quantity: "//trim(bcPtr%qname))
           call setECMessage("ec_bcreader::ecBCReadBlock: Read failure.")
           write (ncolstr,'(a,i0,a,i0,a)') '(expecting ',n_col,' columns)'
-          call setECMessage("   ''"//rec(1:reclen)//"'' "//trim(ncolstr))
+          call setECMessage("   ''"//trim(rec)//"'' "//trim(ncolstr))
           success = .false.
           return
        endif
