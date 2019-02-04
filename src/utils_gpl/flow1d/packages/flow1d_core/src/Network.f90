@@ -354,6 +354,7 @@ contains
       integer                            :: nstru
       logical                            :: structure_found 
       logical                            :: interpolDone
+      logical                            :: initError = .false.
 
       character(20)                      :: offsetString
       
@@ -639,6 +640,7 @@ contains
                            if (offset1 == offset2) then 
                                write(offsetString, '(F10.3)') offset1 
                                call setmessage(LEVEL_ERROR, 'Mulitple cross sections defined at same chainage ('// trim(offsetString) //') on branch '//trim(pbran%id))
+                               initError = .true.
                            endif
                            f = (offsetg - offset1) / (offset2 - offset1)
                         endif    
@@ -664,6 +666,10 @@ contains
       endif
       
       network%adm = adm
+      
+      if (initError) then 
+          call setmessage(LEVEL_FATAL, 'Error initialising network')
+      endif 
       
    end subroutine initialize_1dadmin
 
