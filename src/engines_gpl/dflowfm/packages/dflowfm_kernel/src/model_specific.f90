@@ -432,6 +432,7 @@ use unstruc_colors
 use m_observations
 use m_monitoring_crosssections
 use m_flowtimes
+use unstruc_model, only: getoutputdir
 implicit none
 integer, intent(in) :: j12
 integer             :: k, L, LL, num  , kk, k1, k2
@@ -447,9 +448,9 @@ integer, save       :: mout = 0, nt = 0, minp = 0, mou2 = 0
 
 if (mout == 0) then 
    if (ifixedweirscheme == 6) then 
-       call newfil(mout, 'qweirs6.out')
+       call newfil(mout, trim(getoutputdir())//'qweirs6.out')
    else if (ifixedweirscheme == 8) then 
-       call newfil(mout, 'qweirs8.out')
+       call newfil(mout, trim(getoutputdir())//'qweirs8.out')
    else 
    endif   
    write(mout,'(A)') ' submergence  analytic  subgrid'   

@@ -36,7 +36,7 @@
    use m_partitioninfo
    use m_flowtimes, only: tstart_user
    use m_flowgeom, only: Ndxi, Lnxi, ln, lne2ln
-   use unstruc_model, only: md_ident, md_ident_sequential
+   use unstruc_model, only: md_ident, md_ident_sequential, getoutputdir
    use m_flowexternalforcings
    use unstruc_files
 

@@ -556,7 +556,6 @@
    USE M_FLOW
    USE M_FLOWGEOM
    use unstruc_model
-   use unstruc_files, only: getoutputdir
    use m_sediment, only: jaceneqtr
    use unstruc_netcdf, only: unc_write_net
    implicit none

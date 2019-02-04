@@ -7407,6 +7407,7 @@ contains
    use m_ec_basic_interpolation, only: triinterp2, averaging2
    use geometry_module, only: dbpinpol
    use gridoperations
+   use unstruc_model, only: getoutputdir
    
    implicit none
    
@@ -7665,7 +7666,7 @@ contains
    end if
       
    if (jawriteDFMinterpretedvalues > 0) then 
-      call newfil(mout, 'DFM_interpreted_values_'//trim(filename(n1+1:n2))//trim(sd)//'.xyz')
+      call newfil(mout, trim(getoutputdir())//'DFM_interpreted_values_'//trim(filename(n1+1:n2))//trim(sd)//'.xyz')
           
       do k = 1,nx
          if (zh(k) .ne. dmiss_default) then 

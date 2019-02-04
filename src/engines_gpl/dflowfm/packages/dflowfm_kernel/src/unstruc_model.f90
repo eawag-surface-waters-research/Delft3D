@@ -646,6 +646,11 @@ subroutine readMDUFile(filename, istat)
        call tree_traverse(md_ptr, print_tree, dummychar, dummylog)
     end if
 
+! Early read of OutputDir, such that the .dia fle can be stored there.
+    call prop_get_string(md_ptr, 'output', 'OutputDir', md_outputdir, success)
+    call switch_dia_file()
+    
+
 ! Correct program ?
     call prop_get_string(md_ptr, 'model', 'Program', program, success)
     if (.not. success .or. (program /= 'Unstruc' .and. program /= 'UNSTRUC' .and. program /= 'D-Flow FM' .and. program /= 'D-Flow Flexible Mesh')) then
@@ -1292,7 +1297,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_string(md_ptr, 'calibration', 'AreaFile'  , md_cllfile,  success)
 
 ! Output
-    call prop_get_string(md_ptr, 'output', 'OutputDir', md_outputdir, success)
+    ! [output] OutputDir was read earlier already.
     call prop_get_string(md_ptr, 'output', 'ObsFile', md_obsfile, success)
     call prop_get_string(md_ptr, 'output', 'CrsFile', md_crsfile, success)
     call prop_get_string(md_ptr, 'output', 'FouFile', md_foufile, success)
@@ -2990,10 +2995,8 @@ USE MessageHandling
 
 character(*),     intent(in) :: filename !< Name of file to be read (in current directory or with full path).
 
-integer                      :: L1, L2, mdia2, mdia, ierr
-character(len=256)           :: rec
+integer                      :: L1, L2
 
-integer,          external   :: numuni
 character(len=1), external   :: get_DIRSEP
 
 
@@ -3013,7 +3016,22 @@ else
         md_ident = trim(md_ident) // '_' // sdmn          ! add rank number to ident
     end if
 
-!    inquire(file = trim(md_ident)//'.dia', exist = jawel)  ! SPvdP: allow overwrite of dia-file, check on status instead
+   !  NOTE: The switch_dia_file() call is now in loadModel().
+end if
+
+end subroutine setmd_ident
+
+
+!> Switched to the model-specific .dia file.
+!! An .mdu must have been loaded, such that the possible model-configured
+!! OutputDir has been read already.
+subroutine switch_dia_file()
+implicit none
+integer                      :: L1, L2, mdia2, mdia, ierr
+character(len=256)           :: rec
+
+external :: getmdia, setmdia
+integer,          external   :: numuni
 
     call getmdia(mdia)
 
@@ -3021,7 +3039,7 @@ else
 
 !      SPvdP : check status of file, mostly copied from inidia
        mdia2 = numuni()
-       open (MDIA2, FILE = trim(md_ident)//'.dia', action='readwrite', IOSTAT=IERR)
+       open (MDIA2, FILE = trim(getoutputdir())//trim(md_ident)//'.dia', action='readwrite', IOSTAT=IERR)
 
        if ( ierr.eq.0 ) then
           rewind(mdia)
@@ -3040,13 +3058,34 @@ else
 
           WRITE(MDIA,*) 'Until here copy of previous diagnostic file'
        end if
+    end if
 
-    endif
+end subroutine switch_dia_file
 
-end if
-
-end subroutine setmd_ident
-
+!> get output directory
+function getoutputdir()
+   use m_flowtimes
+   implicit none
+   
+   character(len=255)         :: getoutputdir
+   
+   character(len=1), external :: get_dirsep
+   
+   call datum2(rundat2)
+   
+   if ( len_trim(md_outputdir)==0 ) then
+!     default
+      if ( len_trim(md_ident_sequential) > 0 ) then
+         getoutputdir = 'DFM_OUTPUT_'//trim(md_ident_sequential)//trim(rundat2)
+      else
+         getoutputdir = 'DFM_OUTPUT_'//trim(rundat2)
+      end if
+   else
+      getoutputdir = trim(md_outputdir)//get_dirsep()
+   end if
+   
+   return
+end function getoutputdir
 
 subroutine getOutputTimeArrays(ti_output, ti_outs, ti_out, ti_oute, success)
 
@@ -3083,98 +3122,3 @@ end subroutine getOutputTimeArrays
    end module unstruc_model
 
 
-   subroutine convert_externalforcings_file(extfileold)
-use properties
-use unstruc_messages
-use unstruc_version_module
-use m_flowexternalforcings, only: qid, filetype, operand, transformcoef
-use timespace
-implicit none
-
-   character(len=*), intent(in) :: extfileold
-   type(tree_data), pointer :: ext_ptr, q_ptr
-   character(len=256)       :: filename
-   character(len=20)        :: rundat
-   integer                  :: L1, L2, istat, method, mextold, mextnew, ja
-   character(len=64)        :: qtype, varname
-   logical                        :: jawel
-
-   inquire (file = trim(extfileold), exist = jawel)
-   if (jawel) then
-      call oldfil(mextold, extfileold)
-   else
-      return
-   end if
-
-   call mess(LEVEL_INFO, 'Attempting to convert '''//trim(extfileold)//''' to new format...')
-
-   qtype = ' '
-   ja = 1
-   call tree_create(trim(extfileold), ext_ptr)
-   do while (ja .eq. 1)                                ! read *.ext file
-
-      call readprovider(mextold,qid,filename,filetype,method,operand,transformcoef,ja, varname)
-
-      if (ja /= 1) then
-         call mess(LEVEL_WARN, 'Failed to read provider.')
-         cycle
-      end if
-
-      ! value, factor, ifrctyp
-      L2 = len_trim(qid)
-      L1 = max(1,L2-2)
-      if (qid(L1:L2) == 'bnd') then
-         qtype = 'boundary'
-      else
-         select case (qid)
-         case ('lowergatelevel', 'damlevel', 'pump')
-            qtype = 'structure'
-
-         case ('frictioncoefficient', 'frictiontrtfactor', 'horizontaleddyviscositycoefficient', 'horizontaleddydiffusivitycoefficient', 'advectiontype', &
-               'bedlevel', 'ibedlevtype', 'initialwaterlevel', 'initialsalinity', 'initialsalinitytop', 'initialsalinitybot', 'initialsediment', &
-               'initialverticaltemperatureprofile', 'initialverticalsalinityprofile', 'windstresscoefficient', &
-               'stemdiameter', 'stemdensity', 'stemheight' , 'interceptionlayerthickness','groundlayerthickness')
-            qtype = 'initial'
-
-         case ('windx', 'windy', 'windxy', 'rainfall', 'airpressure', 'atmosphericpressure')
-            qtype = 'meteo'
-
-         case ('shiptxy', 'movingstationtxy')
-            qtype = 'misc'
-         end select
-      end if
-
-      call tree_create_node(ext_ptr, trim(qtype), q_ptr)
-      call prop_set(q_ptr, '', 'quantity', trim(qid))
-      call prop_set(q_ptr, '', 'filename', trim(filename))
-      call prop_set(q_ptr, '', 'filetype', filetype)
-      call prop_set(q_ptr, '', 'method', method)
-      call prop_set(q_ptr, '', 'operand', operand)
-
-      if (transformcoef(1) /= -999d0) then
-         call prop_set(q_ptr, '', 'value',   transformcoef(1))
-      end if
-      if (transformcoef(2) /= -999d0) then
-         call prop_set(q_ptr, '', 'factor',   transformcoef(2))
-      end if
-      if (transformcoef(3) /= -999d0) then
-         call prop_set(q_ptr, '', 'ifrctyp',   int(transformcoef(3)))
-      end if
-   end do
-   call doclose(mextold)
-
-   L2 = len_trim(extfileold)
-   L1 = max(1, L2-3)
-
-   call newfil(mextnew, extfileold(1:L1-1)//'.converted.ext')
-
-   call datum(rundat)
-   write(mextnew, '(a,a)') '# Converted from old format ext-file: ', trim(extfileold)
-   write(mextnew, '(a,a)') '# Generated on ', trim(rundat)
-   write(mextnew, '(a,a)') '# ', trim(unstruc_version_full)
-
-   call prop_write_inifile(mextnew, ext_ptr, istat)
-
-   call doclose(mextnew)
-
-end subroutine convert_externalforcings_file

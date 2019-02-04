@@ -287,7 +287,8 @@ subroutine flow_finalize_usertimestep(iresult)
    use unstruc_model
    use dfm_error
    use precision_basics
-   use unstruc_files, only: defaultFilename, getoutputdir
+   use unstruc_files, only: defaultFilename
+   use unstruc_model, only: getoutputdir
    use m_partitioninfo, only: jampi, sdmn
    implicit none
 
@@ -8698,7 +8699,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  use m_timer
  use m_flowtimes
  use unstruc_model ! , only: md_ident, md_restartfile,  writeMDUFilepointer, md_foufile, md_flowgeomfile, md_snapshotdir, md_numthreads
- use unstruc_files, only: mdia, getoutputdir
+ use unstruc_files, only: mdia
  use unstruc_netcdf
  use MessageHandling
  use m_flowparameters, only: jawave, jatrt, jacali, jacreep, jatransportmodule, jamd1dfile
@@ -10362,8 +10363,7 @@ end subroutine cosphiunetcheck
  use m_flowgeom
  use m_flow
  use m_partitioninfo
- use unstruc_files, only : getoutputdir
- use unstruc_model, only : md_ident
+ use unstruc_model, only : md_ident, getoutputdir
  implicit none
  integer :: mlim, k
 
@@ -13990,7 +13990,7 @@ endif
 subroutine flow_fourierinit()
 use m_fourier_analysis
 use m_transport, only: NUMCONST, ISALT, ITEMP
-use unstruc_model, only: md_foufile, md_tunit
+use unstruc_model, only: md_foufile, md_tunit, getoutputdir
 use unstruc_files
 use m_flow, only: kmxd
 use m_wind, only: wmag, jawind
@@ -15577,7 +15577,6 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
 
  subroutine writeCdcoeffs()
  use unstruc_model
- use unstruc_files, only: getoutputdir
  use m_wind
  use m_waves
  use m_flow,     only : jawave
@@ -15723,7 +15722,6 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
  use m_timer
  use m_reduce,        only : nocgiter
  use m_partitioninfo, only : ndomains, jampi, my_rank
- use unstruc_files,   only : getoutputdir
  use m_flowparameters, only: jashp_crs, jashp_obs, jashp_weir, jashp_thd, jashp_gate, jashp_emb, jashp_fxw, jashp_src
  
 #ifdef _OPENMP
@@ -16017,13 +16015,13 @@ subroutine unc_write_his(tim)            ! wrihis
     use m_monitoring_crosssections
     use m_missing
     use netcdf
-    use unstruc_files, only: defaultFilename, getoutputdir
+    use unstruc_files, only: defaultFilename
     use unstruc_netcdf, only: unc_create, unc_close, unc_addcoordatts, unc_def_var_nonspatial
     use unstruc_messages
     use m_sferic, only: jsferic
     use m_partitioninfo
     use m_timer
-    use unstruc_model, only: md_ident
+    use unstruc_model, only: md_ident, getoutputdir
     use m_sediment
     use m_flowexternalforcings, only: numtracers, trnames
     use m_transport, only: NUMCONST_MDU, ITRA1, ITRAN, ISED1, ISEDN, const_names, const_units, NUMCONST, itemp, isalt

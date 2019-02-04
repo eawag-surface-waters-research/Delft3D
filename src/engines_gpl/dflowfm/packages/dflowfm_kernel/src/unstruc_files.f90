@@ -450,32 +450,6 @@ subroutine basename(filename, filebase, filecat)
 end subroutine basename
 
 
-!> get output directory
-function getoutputdir()
-   use m_flowtimes
-   use unstruc_model
-   implicit none
-   
-   character(len=255)         :: getoutputdir
-   
-   character(len=1), external :: get_dirsep
-   
-   call datum2(rundat2)
-   
-   if ( len_trim(md_outputdir)==0 ) then
-!     default
-      if ( len_trim(md_ident_sequential) > 0 ) then
-         getoutputdir = 'DFM_OUTPUT_'//trim(md_ident_sequential)//trim(rundat2)
-      else
-         getoutputdir = 'DFM_OUTPUT_'//trim(rundat2)
-      end if
-   else
-      getoutputdir = trim(md_outputdir)//get_dirsep()
-   end if
-   
-   return
-end function getoutputdir
-
 end module unstruc_files
 
 !>
