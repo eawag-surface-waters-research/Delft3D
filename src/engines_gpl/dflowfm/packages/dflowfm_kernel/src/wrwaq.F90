@@ -676,8 +676,7 @@ end subroutine waq_wri_hyd
 subroutine waq_wri_geom()
     use unstruc_netcdf
     use unstruc_files
-    use unstruc_model, only: md_ident, md_unc_conv
-    use m_flowtimes, only: rundat2
+    use unstruc_model, only: md_unc_conv
     implicit none
 !
 !           Local variables
@@ -686,14 +685,14 @@ subroutine waq_wri_geom()
 !
 !! executable statements -------------------------------------------------------
 !
-    filename = trim('DFM_DELWAQ_'//trim(md_ident)//trim(rundat2)//defaultFilename('waqgeom', prefixWithDirectory=.false.))
+    filename = defaultFilename('waqgeom')
 
     if (md_unc_conv == UNC_CONV_UGRID) then
         ! Write UGRID format file (this supports aggregation of mesh geometry).
         call waq_write_waqgeom_ugrid(filename)
     else
         ! Write old CF format file (this does not support aggregation of mesh geometry).
-        call unc_write_net_flowgeom(filename) ! TODO: AvD: this overall mixing up of DFM_DELWAQ_ and rundat2 is a mess, centralize this!
+        call unc_write_net_flowgeom(filename)
     end if
 
     ! add segment aggregation table to this file! label with delwaq_role = "segment_aggregation_table" and a "segdim"

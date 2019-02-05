@@ -127,6 +127,7 @@ implicit none
     character(len=255) :: md_avgwavquantfile = ' ' !< Output map file for time-averaged wave output (e.g., *_wav.nc)
     character(len=255) :: md_avgsedquantfile = ' ' !< Output map file for time-averaged sedmor output (e.g., *_sed.nc)
     character(len=255) :: md_waqfilebase   = ' ' !< File basename for all Delwaq files. (defaults to md_ident)
+    character(len=255) :: md_waqoutputdir  = ' ' !< Output directory for all WAQ communication files (waqgeom, vol, flo, etc.)
     character(len=255) :: md_partitionfile = ' ' !< File with domain partitioning polygons (e.g. *_part.pol)
     character(len=255) :: md_outputdir     = ' ' !< Output directory for map-, his-, rst-, dat- and timings-files
 
@@ -283,6 +284,7 @@ use unstruc_channel_flow
     md_avgwavquantfile = ' '
     md_avgsedquantfile = ' '
     md_waqfilebase   = ' '
+    md_waqoutputdir  = ' '
     md_partitionfile = ' '
     md_outputdir     = ' '
     md_partfile      = ' '
@@ -1454,6 +1456,9 @@ subroutine readMDUFile(filename, istat)
     if (len_trim(md_waqfilebase) == 0) then
       md_waqfilebase = md_ident
     end if
+
+    call prop_get_string(md_ptr, 'output', 'WaqOutputDir', md_waqoutputdir, success)
+
     ti_waq_array = 0d0
     call prop_get_doubles(md_ptr, 'output', 'WaqInterval'   ,  ti_waq_array, 3, success)
     call getOutputTimeArrays(ti_waq_array, ti_waqs, ti_waq, ti_waqe, success)
@@ -1890,6 +1895,8 @@ subroutine writeMDUFile(filename, istat)
     call writeMDUFilepointer(mout, .false., istat)
     call doclose(mout)
     call setmd_ident(filename)
+    call switch_dia_file() ! Used to be in setmd_ident, now separate.
+
 end subroutine writeMDUFile
 
 
@@ -2696,6 +2703,8 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     call prop_set(prop_ptr, 'output', 'RstInterval', ti_rst_array, 'Restart file output times, given as "interval" "start period" "end period" (s)' )
 
 !    call prop_set(prop_ptr, 'output', 'WaqFileBase', trim(md_waqfilebase), 'Basename (without extension) for all Delwaq files to be written.')
+    call prop_set(prop_ptr, 'output', 'WaqOutputDir',   trim(md_waqoutputdir),    'Output directory of WAQ communication files (flowgeom, vol, flo, etc.), default: DFM_DELWAQ_<modelname>. Set to . for current dir.')
+
     ti_waq_array(1) = ti_waq
     ti_waq_array(2) = ti_waqs
     ti_waq_array(3) = ti_waqe
@@ -3061,26 +3070,44 @@ integer,          external   :: numuni
 end subroutine switch_dia_file
 
 !> get output directory
-function getoutputdir()
+function getoutputdir(dircat)
    use m_flowtimes
    implicit none
    
+   character(len=*), optional, intent(in) :: dircat !< (optional) The type of the directory: currently supported only 'waq'.
    character(len=255)         :: getoutputdir
    
    character(len=1), external :: get_dirsep
-   
-   call datum2(rundat2)
-   
-   if ( len_trim(md_outputdir)==0 ) then
-!     default
-      if ( len_trim(md_ident_sequential) > 0 ) then
-         getoutputdir = 'DFM_OUTPUT_'//trim(md_ident_sequential)//trim(rundat2)
-      else
-         getoutputdir = 'DFM_OUTPUT_'//trim(rundat2)
-      end if
+
+   character(len=16) :: dircat_
+
+   if (present(dircat)) then
+      dircat_ = dircat
    else
-      getoutputdir = trim(md_outputdir)//get_dirsep()
+      dircat_ = ''
    end if
+
+   select case(trim(dircat_))
+   case ('waq')
+      if (len_trim(md_waqoutputdir) == 0) then
+         call datum2(rundat2)
+         getoutputdir = 'DFM_DELWAQ_'//trim(md_ident)//trim(rundat2)
+      else
+         getoutputdir = trim(md_waqoutputdir)//get_dirsep()
+      end if
+
+   case default
+      if ( len_trim(md_outputdir)==0 ) then
+   !     default
+         if ( len_trim(md_ident_sequential) > 0 ) then
+            getoutputdir = 'DFM_OUTPUT_'//trim(md_ident_sequential)//trim(rundat2)
+         else
+            getoutputdir = 'DFM_OUTPUT_'//trim(rundat2)
+         end if
+      else
+         getoutputdir = trim(md_outputdir)//get_dirsep()
+      end if
+   end select
    
    return
 end function getoutputdir

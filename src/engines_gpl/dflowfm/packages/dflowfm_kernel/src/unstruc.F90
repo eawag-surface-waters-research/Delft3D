@@ -8742,7 +8742,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  call klok(cpuall(1))
 
  IF (ti_waq > 0d0) then
-    call makedir( 'DFM_DELWAQ_'//trim(md_ident)//rundat2(1:L) )  ! No problem if it exists already.
+    call makedir(getoutputdir('waq'))  ! No problem if it exists already.
  end if
 
 

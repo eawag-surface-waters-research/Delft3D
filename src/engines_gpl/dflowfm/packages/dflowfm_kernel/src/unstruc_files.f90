@@ -182,9 +182,6 @@ function defaultFilename(filecat, timestamp, prefixWithDirectory, allowWildcard)
     case ('net')
         activeFile = md_netfile
         suffix     = '_net.nc'
-    case ('waqgeom')
-        activeFile = ''
-        suffix     = '_waqgeom.nc'
     case ('ldb')
         activeFile = md_ldbfile
         suffix     = '.ldb'
@@ -271,13 +268,19 @@ function defaultFilename(filecat, timestamp, prefixWithDirectory, allowWildcard)
     !---------------------------------------------------------!
 
     ! Delwaq files: filecat is identical to file extension
-    case ('hyd','vol','are','flo','poi','len','srf','tau','vdf','tem','sal','atr','bnd')
+    case ('hyd','vol','are','flo','poi','len','srf','tau','vdf','tem','sal','atr','bnd','waqgeom')
         if (prefix_dir) then
-            call datum2(rundat2)
-            basename =  'DFM_DELWAQ_'//trim(md_ident)//trim(rundat2)
+           basename = getoutputdir('waq')
         end if
         basename = trim(basename)//trim(md_waqfilebase)
-        suffix   = '.'//trim(filecat)
+        if (trim(filecat) == 'waqgeom') then
+           suffix = '_waqgeom.nc'
+        else
+           suffix = '.'//trim(filecat)
+        end if
+
+        activeFile = ''
+
     case ('lsp')
         activeFile = ''
         suffix = '.lsp'
