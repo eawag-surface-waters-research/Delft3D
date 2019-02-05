@@ -2386,8 +2386,8 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
     integer, allocatable, save :: id_tr1(:), id_bndtradim(:), id_ttrabnd(:), id_ztrabnd(:)
     integer, allocatable, save :: id_sf1(:), id_bndsedfracdim(:), id_tsedfracbnd(:), id_zsedfracbnd(:)
 
-    integer :: i, numContPts, numNodes, itim, k, kb, kt, kk, LL, Lb, Lt, iconst, L, j, nv, nv1, nm, ndxbnd, nlayb, nrlay
-    double precision              :: dens
+    integer :: i, numContPts, numNodes, itim, k, kb, kt, kk, LL, Lb, Lt, iconst, L, j, nv, nv1, nm, ndxbnd, nlayb, nrlay, LTX, nlaybL, nrlaylx
+    double precision              :: vicc, dicc, dens
     double precision, allocatable :: max_threttim(:)
     double precision, dimension(:), allocatable       :: dum
     double precision, dimension(:,:,:), allocatable   :: frac
@@ -3176,8 +3176,9 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
        work1 = dmiss
        do kk=1,ndxi
           call getkbotktop(kk,kb,kt)
+          call getlayerindices(kk, nlayb, nrlay)
           do k = kb,kt
-             work1(k-kb+1,kk) = ucx(k)
+             work1(k-kb+nlayb,kk) = ucx(k)
           enddo
        enddo
        ierr = nf90_put_var(irstfile, id_ucx, work1(1:kmx,1:ndxi), start=(/ 1, 1, itim /), count=(/ kmx, ndxi, 1 /))
@@ -3185,8 +3186,9 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
        work1 = dmiss
        do kk=1,ndxi
           call getkbotktop(kk,kb,kt)
+          call getlayerindices(kk, nlayb, nrlay)
           do k = kb,kt
-             work1(k-kb+1,kk) = ucy(k)
+             work1(k-kb+nlayb,kk) = ucy(k)
           enddo
        enddo
        ierr = nf90_put_var(irstfile, id_ucy, work1(1:kmx,1:ndxi), start=(/ 1, 1, itim /), count=(/ kmx, ndxi, 1 /))
@@ -3194,8 +3196,9 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
        work1 = dmiss
        do kk=1,ndxi
           call getkbotktop(kk,kb,kt)
+          call getlayerindices(kk, nlayb, nrlay)
           do k = kb,kt
-             work1(k-kb+1,kk) = ucz(k)
+             work1(k-kb+nlayb,kk) = ucz(k)
           enddo
        enddo
        ierr = nf90_put_var(irstfile, id_ucz, work1(1:kmx,1:ndxi), start=(/ 1, 1, itim /), count=(/ kmx, ndxi, 1 /))
@@ -3203,35 +3206,39 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
        work0 = dmiss
        do kk=1,ndxi
          call getkbotktop(kk,kb,kt)
+         call getlayerindices(kk, nlayb, nrlay)
          do k = kb-1,kt
-             work0(k-kb+1,kk) = ww1(k)
+             work0(k-kb+nlayb,kk) = ww1(k)
          enddo
        enddo
        ierr = nf90_put_var(irstfile, id_ww1, work0(0:kmx,1:ndxi), start=(/ 1, 1, itim /), count=(/ kmx+1, ndxi, 1 /))
             
        work1 = dmiss
        do LL=1,lnx
-          call getLbotLtopmax(LL,Lb,Lt)
-          do L = Lb,Lt
-             work1(L-Lb+1,LL) = u1(L)
+          call getLbotLtopmax(LL,Lb,Ltx)
+          call getlayerindicesLmax(LL, nlaybL, nrlayLx)
+          do L = Lb,Ltx
+             work1(L-Lb+nlaybL,LL) = u1(L)
           enddo
        enddo
        ierr = nf90_put_var(irstfile, id_unorm, work1(1:kmx,1:lnx), start=(/ 1, 1, itim /), count=(/ kmx, lnx, 1 /))
        
        work1 = dmiss
        do LL=1,lnx
-          call getLbotLtopmax(LL,Lb,Lt)
-          do L = Lb,Lt
-             work1(L-Lb+1,LL) = u0(L)
+          call getLbotLtopmax(LL,Lb,Ltx)
+          call getlayerindicesLmax(LL, nlaybL, nrlayLx)
+          do L = Lb,Ltx
+             work1(L-Lb+nlaybL,LL) = u0(L)
           enddo
        enddo
        ierr = nf90_put_var(irstfile, id_u0   , work1(1:kmx,1:lnx), start=(/ 1, 1, itim /), count=(/ kmx, lnx, 1 /))
        
        work1 = dmiss
        do LL=1,lnx
-          call getLbotLtopmax(LL,Lb,Lt)
-          do L = Lb,Lt
-             work1(L-Lb+1,LL) = q1(L)
+          call getLbotLtopmax(LL,Lb,Ltx)
+          call getlayerindicesLmax(LL, nlaybL, nrlayLx)
+          do L = Lb,Ltx
+             work1(L-Lb+nlaybL,LL) = q1(L)
           enddo
        enddo
        ierr = nf90_put_var(irstfile, id_q1   , work1(1:kmx,1:lnx), start=(/ 1, 1, itim /), count=(/ kmx, lnx, 1 /))
@@ -3239,75 +3246,85 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
        ! write averaged u1
        ierr = nf90_put_var(irstfile, id_unorma, u1(1:lnx), start=(/ 1, itim /), count=(/ lnx, 1 /))
        
-       ! write vertical eddy viscosity vicwwu
-       work0 = dmiss
-       do LL=1,lnx
-          call getLbotLtopmax(LL,Lb,Lt)
-          do L = Lb-1,Lt
-             work0(L-Lb+1,LL) = vicwwu(L)
-          enddo
-       enddo
-       ierr = nf90_put_var(irstfile, id_vicwwu, work0(0:kmx,1:lnx), start=(/ 1, 1, itim /), count=(/ kmx+1, lnx, 1 /))
-       
-       ! write tureps1
-       work0 = dmiss
-       do LL=1,lnx
-          call getLbotLtopmax(LL,Lb,Lt)
-          do L = Lb-1,Lt
-             work0(L-Lb+1,LL) = tureps1(L)
-          enddo
-       enddo
-       ierr = nf90_put_var(irstfile, id_tureps1, work0(0:kmx,1:lnx), start=(/ 1, 1, itim /), count=(/ kmx+1, lnx, 1 /))
-   
-       ! write turkin1
-       work0 = dmiss
-       do LL=1,lnx
-          call getLbotLtopmax(LL,Lb,Lt)
-          do L = Lb-1,Lt
-             work0(L-Lb+1,LL) = turkin1(L)
-          enddo
-       enddo
-       ierr = nf90_put_var(irstfile, id_turkin1, work0(0:kmx,1:lnx), start=(/ 1, 1, itim /), count=(/ kmx+1, lnx, 1 /))
-       
-       ! qw
-       work0 = dmiss
-       do kk=1,ndxi
-          call getkbotktop(kk,kb,kt)
-          do k = kb-1,kt
-             work0(k-kb+1,kk) = qw(k)
-          enddo
-       enddo
-       ierr = nf90_put_var(irstfile, id_qw, work0(0:kmx,1:ndxi), start=(/ 1, 1, itim /), count=(/ kmx+1, ndxi, 1 /))
-       
-       ! qa
-       work1 = dmiss
-       do LL=1,lnx
-          call getLbotLtopmax(LL,Lb,Lt)
-          do L = Lb,Lt
-             work1(L-Lb+1,LL) = qa(L)
-          enddo
-       enddo
-       ierr = nf90_put_var(irstfile, id_qa, work1(1:kmx,1:lnx), start=(/ 1, 1, itim /), count=(/ kmx, lnx, 1 /))
-       
-       ! sqi
-       work0 = dmiss
-       do kk=1,ndxi
-          call getkbotktop(kk,kb,kt)
-          do k = kb-1,kt
-             work0(k-kb+1,kk) = sqi(k)
-          enddo
-       enddo
-       ierr = nf90_put_var(irstfile, id_sqi, work0(0:kmx,1:ndxi), start=(/ 1, 1, itim /), count=(/ kmx+1, ndxi, 1 /))
-       
-       ! squ
-       work0 = dmiss
-       do kk=1,ndxi
-          call getkbotktop(kk,kb,kt)
-          do k = kb-1,kt
-             work0(k-kb+1,kk) = squ(k)
-          enddo
-       enddo
-       ierr = nf90_put_var(irstfile, id_squ, work0(0:kmx,1:ndxi), start=(/ 1, 1, itim /), count=(/ kmx+1, ndxi, 1 /))
+       if (iturbulencemodel >= 3) then
+         ! write vertical eddy viscosity vicwwu
+          work0 = dmiss
+          do LL=1,lnx    
+             call getLbotLtopmax(LL,Lb,Ltx)
+             call getlayerindicesLmax(LL, nlaybL, nrlayLx)
+             do L = Lb-1,Ltx
+                work0(L-Lb+nlaybL,LL) = vicwwu(L)
+             enddo
+             enddo
+          ierr = nf90_put_var(irstfile, id_vicwwu, work0(0:kmx,1:lnx), start=(/ 1, 1, itim /), count=(/ kmx+1, lnx, 1 /))
+
+      
+           ! write tureps1
+           work0 = dmiss
+           do LL=1,lnx
+              call getLbotLtopmax(LL,Lb,Ltx)
+              call getlayerindicesLmax(LL, nlaybL, nrlayLx)
+              do L = Lb-1,Ltx
+                 work0(L-Lb+nlaybL,LL) = tureps1(L)
+              enddo
+           enddo
+           ierr = nf90_put_var(irstfile, id_tureps1, work0(0:kmx,1:lnx), start=(/ 1, 1, itim /), count=(/ kmx+1, lnx, 1 /))
+           
+           ! write turkin1
+           work0 = dmiss
+           do LL=1,lnx
+              call getLbotLtopmax(LL,Lb,Ltx)
+              call getlayerindicesLmax(LL, nlaybL, nrlayLx)
+              do L = Lb-1,Ltx
+                 work0(L-Lb+nlaybL,LL) = turkin1(L)
+              enddo
+           enddo
+           ierr = nf90_put_var(irstfile, id_turkin1, work0(0:kmx,1:lnx), start=(/ 1, 1, itim /), count=(/ kmx+1, lnx, 1 /))
+        end if
+    
+        ! qw
+        work0 = dmiss
+        do kk=1,ndxi
+           call getkbotktop(kk,kb,kt)
+           call getlayerindices(kk, nlayb, nrlay)
+           do k = kb-1,kt
+              work0(k-kb+nlayb,kk) = qw(k)
+           enddo
+        enddo
+        ierr = nf90_put_var(irstfile, id_qw, work0(0:kmx,1:ndxi), start=(/ 1, 1, itim /), count=(/ kmx+1, ndxi, 1 /))
+        
+        ! qa
+        work1 = dmiss
+        do LL=1,lnx
+           call getLbotLtopmax(LL,Lb,Ltx)
+           call getlayerindicesLmax(LL, nlaybL, nrlayLx)
+           do L = Lb,Ltx
+              work1(L-Lb+nlaybL,LL) = qa(L)
+           enddo
+        enddo
+        ierr = nf90_put_var(irstfile, id_qa, work1(1:kmx,1:lnx), start=(/ 1, 1, itim /), count=(/ kmx, lnx, 1 /))
+        
+        ! sqi
+        work0 = dmiss
+        do kk=1,ndxi
+           call getkbotktop(kk,kb,kt)
+           call getlayerindices(kk, nlayb, nrlay)
+           do k = kb-1,kt
+              work0(k-kb+nlayb,kk) = sqi(k)
+           enddo
+        enddo
+        ierr = nf90_put_var(irstfile, id_sqi, work0(0:kmx,1:ndxi), start=(/ 1, 1, itim /), count=(/ kmx+1, ndxi, 1 /))
+        
+        ! squ
+        work0 = dmiss
+        do kk=1,ndxi
+           call getkbotktop(kk,kb,kt)
+           call getlayerindices(kk, nlayb, nrlay)
+           do k = kb-1,kt
+              work0(k-kb+nlayb,kk) = squ(k)
+           enddo
+        enddo
+        ierr = nf90_put_var(irstfile, id_squ, work0(0:kmx,1:ndxi), start=(/ 1, 1, itim /), count=(/ kmx+1, ndxi, 1 /))
        
     else
        ierr = nf90_put_var(irstfile, id_ucx  , ucx,  (/ 1, itim /), (/ ndxi, 1 /))
@@ -3328,8 +3345,9 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
           work1 = dmiss
           do kk = 1,ndxi
              call getkbotktop(kk,kb,kt)
+             call getlayerindices(kk, nlayb, nrlay)  
              do k = kb,kt
-                work1(k-kb+1,kk) = sa1(k)
+                work1(k-kb+nlayb,kk) = sa1(k)
              enddo
           end do
           ierr = nf90_put_var(irstfile, id_sa1, work1(1:kmx,1:ndxi), (/ 1, 1, itim /), (/ kmx, ndxi, 1 /))
@@ -3347,8 +3365,9 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
           work1 = dmiss
           do kk = 1,ndxi
              call getkbotktop(kk,kb,kt)
+             call getlayerindices(kk, nlayb, nrlay)  
              do k = kb,kt
-                work1(k-kb+1,kk) = constituents(itemp, k)
+                work1(k-kb+nlayb,kk) = constituents(itemp, k)
              enddo
           end do
           ierr = nf90_put_var(irstfile, id_tem1, work1(1:kmx,1:ndxi), (/ 1, 1, itim /), (/ kmx, ndxi, 1 /))
@@ -3368,8 +3387,9 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
             work1 = dmiss
             do kk=1,ndxi
                call getkbotktop(kk,kb,kt)
+               call getlayerindices(kk, nlayb, nrlay) 
                do k = kb,kt
-                  work1(k-kb+1,kk) = constituents(j,k)
+                  work1(k-kb+nlayb,kk) = constituents(j,k)
                enddo
             enddo
             ierr = nf90_put_var(irstfile, id_tr1(j-ITRA1+1), work1(1:kmx,1:ndxi), (/ 1, 1, itim /), (/ kmx, ndxi, 1 /))
@@ -3399,8 +3419,9 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
              if (kmx > 0) then
                 do kk=1,ndxi
                    call getkbotktop(kk,kb,kt)
+                   call getlayerindices(kk, nlayb, nrlay)
                    do k = kb,kt
-                      work1(k-kb+1,kk) = constituents(j,k)
+                      work1(k-kb+nlayb,kk) = constituents(j,k)
                    enddo
                 enddo
                 ierr = nf90_put_var(irstfile, id_sf1(j-ISED1+1), work1(1:kmx,1:ndxi), (/ 1, 1, itim /), (/ kmx, ndxi, 1 /))
