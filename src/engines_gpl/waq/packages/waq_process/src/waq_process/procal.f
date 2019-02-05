@@ -528,9 +528,6 @@
 
 !     assumed from dll
 
-            write(*,*) 'Handle: ', dll_opb
-            write(*,*) 'Module: ', pronam
-
             ierror = perf_function(dll_opb, pronam,                                          ! &
      &                             pmsa   , flux   , ipoint , increm , noseg  ,                   ! &
      &                             noflux , iexpnt , iknmrk , noq1   , noq2   ,                   ! &
