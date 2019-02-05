@@ -68,9 +68,9 @@ libdflowfm_la_SOURCES=\
         shaec.f \
         shsec.f \
         sphcom.f \
+        unstruc_model.f90 \
         meteo1.f90 \
         fourier_analysis.f90 \
-        unstruc_model.f90 \
         unstruc_files.f90 \
         unstruc_netcdf_incremental.f90 \
         dredgepolygon.f90 \

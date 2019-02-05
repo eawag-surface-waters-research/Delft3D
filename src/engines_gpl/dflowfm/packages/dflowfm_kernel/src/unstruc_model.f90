@@ -352,7 +352,6 @@ subroutine loadModel(filename)
     use m_fixedweirs
     use m_partitioninfo
     use string_module
-    use m_fourier_analysis
     use m_transport, only: NUMCONST, ISALT, ITEMP
     use m_flowtimes, only: tstart_user, tstop_user, dt_max
     use m_flowparameters , only: jatransportmodule
@@ -1915,7 +1914,6 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     use m_reduce,                only : maxdge
     use m_grw
     use m_missing
-    use m_meteo
     use m_heatfluxes
     use m_trachy
     use m_transport, only: ITRA1
