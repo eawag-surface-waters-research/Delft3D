@@ -3040,6 +3040,8 @@ character(len=256)           :: rec
 external :: getmdia, setmdia
 integer,          external   :: numuni
 
+    call makedir(getoutputdir()) ! No problem if it exists already.
+
     call getmdia(mdia)
 
     if ( mdia >0 ) then ! rename diagnostic file to md_ident.dia
@@ -3087,10 +3089,10 @@ function getoutputdir(dircat)
       dircat_ = ''
    end if
 
+   call datum2(rundat2)
    select case(trim(dircat_))
    case ('waq')
       if (len_trim(md_waqoutputdir) == 0) then
-         call datum2(rundat2)
          getoutputdir = 'DFM_DELWAQ_'//trim(md_ident)//trim(rundat2)
       else
          getoutputdir = trim(md_waqoutputdir)//get_dirsep()
