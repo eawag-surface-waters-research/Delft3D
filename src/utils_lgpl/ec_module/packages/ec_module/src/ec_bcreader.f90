@@ -319,10 +319,10 @@ contains
 
     ipos1=1
     do ifld = 1, nfld
-       ipos2 = index(keyvaluestr(ipos1:), ',')
+       ipos2 = index(keyvaluestr(ipos1:), "',")+1
        hdrkeys(ifld)%s = keyvaluestr(ipos1+1:ipos1+ipos2-3)
        ipos1 = ipos1+ipos2
-       ipos2 = index(keyvaluestr(ipos1:), ',')
+       ipos2 = index(keyvaluestr(ipos1:), "',")+1
        hdrvals(ifld)%s = keyvaluestr(ipos1+1:ipos1+ipos2-3)
        ipos1 = ipos1+ipos2
     end do
