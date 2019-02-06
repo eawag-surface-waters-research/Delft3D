@@ -16148,8 +16148,8 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_def_dim(ihisfile, 'stations', numobs+nummovobs, id_statdim)
 
             if (kmx > 0) then
-            ierr = nf90_def_dim(ihisfile, 'laydim', kmx, id_laydim)
-            ierr = nf90_def_dim(ihisfile, 'laydimw', kmx+1, id_laydimw)
+               ierr = nf90_def_dim(ihisfile, 'laydim', kmx, id_laydim)
+               ierr = nf90_def_dim(ihisfile, 'laydimw', kmx+1, id_laydimw)
             end if
 
             if (nummovobs > 0) then
@@ -16505,8 +16505,8 @@ subroutine unc_write_his(tim)            ! wrihis
                    
                    if ( kmx > 0 ) then
                       ierr = nf90_put_att(ihisfile, id_sf(i), 'coordinates', 'station_x_coordinate station_y_coordinate station_name zcoordinate_c')
-                      ierr = nf90_put_att(ihisfile, id_ws(i), 'coordinates', 'station_x_coordinate station_y_coordinate station_name zcoordinate_c')
-                      ierr = nf90_put_att(ihisfile, id_seddif(i), 'coordinates', 'station_x_coordinate station_y_coordinate station_name zcoordinate_c')
+                      ierr = nf90_put_att(ihisfile, id_ws(i), 'coordinates', 'station_x_coordinate station_y_coordinate station_name zcoordinate_w')
+                      ierr = nf90_put_att(ihisfile, id_seddif(i), 'coordinates', 'station_x_coordinate station_y_coordinate station_name zcoordinate_w')
                    else
                       ierr = nf90_put_att(ihisfile, id_sf(i), 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
                       ierr = nf90_put_att(ihisfile, id_ws(i), 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
@@ -17326,7 +17326,13 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_var(ihisfile, id_sf(i), valobsT(:,IPNT_SF1 + i-1), start = (/ 1, it_his /), count = (/ ntot, 1/))
           end do
        end if
-       if (jased > 0) then
+       if (IVAL_WS1 > 0) then
+          do j = IVAL_WS1,IVAL_WSN
+            i = j - IVAL_WS1 + 1
+            ierr = nf90_put_var(ihisfile, id_ws(i), valobsT(:,IPNT_WS1 + i-1), start = (/ 1, it_his /), count = (/ ntot, 1/))
+          enddo
+       end if
+       if (jased > 0 .and. .not. stm_included) then
           ierr = nf90_put_var(ihisfile, id_varsed, valobsT(:,IPNT_SED),  start = (/ 1, it_his /), count = (/ ntot, 1 /))
        end if
      endif
@@ -17929,6 +17935,13 @@ subroutine fill_valobs()
                   ii = j-IVAL_SF1+1
                   valobs(IPNT_SF1+(ii-1)*kmx_const+klay-1,i) = constituents(ISED1+j-IVAL_SF1, kk)
                end do
+            end if
+            
+            if (kmx==0 .and. IVAL_WS1 .gt. 0) then
+               do j=IVAL_WS1,IVAL_WSN
+                  ii = j-IVAL_WS1+1
+                  valobs(IPNT_WS1+(ii-1)*kmx_const+klay-1,i) = mtd%ws(kk, ISED1+j-IVAL_WS1)
+               end do               
             end if
             
             if ( jased.gt.0 .and. .not. stm_included) then
@@ -36984,9 +36997,9 @@ if (mext > 0) then
 
         qidnam = qid
         call get_tracername(qid, tracnam, qidnam)
-        ! DEBUG JRE
+        
         call get_sedfracname(qid, sfnam, qidnam)
-        !\ DEBUG JRE
+
         lenqidnam = len_trim(qidnam)
         if (filetype == 7 .and. method == 4) then
            method = 5                                   ! upward compatible fix
@@ -42645,12 +42658,12 @@ subroutine anticreep( L )
 !  update geometry data that may have been incorrectly computed in the ghost area
    subroutine update_geom(iphase)
       use m_partitioninfo
-use m_flowgeom
-use unstruc_channel_flow
-use m_crosssections
-use m_cross_helper
-
-implicit none
+      use m_flowgeom
+      use unstruc_channel_flow
+      use m_crosssections
+      use m_cross_helper
+      
+      implicit none
 
       integer, intent(in) :: iphase ! phase, 0 (all), 1 (first) or 2 (second)
       integer :: ierror
