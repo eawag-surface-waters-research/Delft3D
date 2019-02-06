@@ -1032,8 +1032,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
                               sourceNodeId, targetNodeId, nbranchids, nbranchlongnames, nbranchlengths, nbranchgeometrynodes, nbranches, &
                               ngeopointx, ngeopointy, ngeometry, &
                               nbranchorder, &
-                              nodeids, nodelongnames, branchidx, branchoffsets, &
-                              numMesh1dBeforeMerging, mesh1dNodeIds, mesh1dNodeIndexes) result(ierr)
+                              nodeids, nodelongnames, branchidx, branchoffsets) result(ierr)
    use m_alloc
 
    implicit none
@@ -1074,9 +1073,6 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    ! Optional mesh1d variables for 1d UGrid
    integer, optional, pointer,intent(in)                     :: branchidx(:)
    double precision, optional, pointer,intent(in)            :: branchoffsets(:)
-   integer, optional, intent(in)                             :: numMesh1dBeforeMerging
-   character(len=ug_idsLen), optional, allocatable           :: mesh1dNodeIds(:) 
-   integer, optional, allocatable                            :: mesh1dNodeIndexes(:) 
    
    integer                                               :: ierr !< Result status (UG_NOERR==NF90_NOERR) if successful.
       
