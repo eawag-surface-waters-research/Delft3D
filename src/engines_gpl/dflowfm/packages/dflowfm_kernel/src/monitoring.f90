@@ -380,12 +380,12 @@ subroutine init_valobs_pointers()
       if ( idensform.gt.0 ) then
          i=i+1;         IVAL_RICH       = i
       end if
-      if (jased>0 .and. stm_included) then
+      if (jased>0 .and. stm_included .and. ISED1.gt.0) then
          i=i+1;              IVAL_SEDDIF1   = i
          i=i+ISEDN-ISED1;    IVAL_SEDDIFN   = i
       endif
    end if
-   if (jased>0 .and. stm_included) then     ! also 2d
+   if (jased>0 .and. stm_included .and. ISED1.gt.0) then     ! also 2d
       i=i+1;              IVAL_WS1       = i
       i=i+ISEDN-ISED1;    IVAL_WSN       = i
    endif
