@@ -8720,8 +8720,7 @@ subroutine unc_write_net_ugrid2(ncid,id_tsp, janetcell)
                                     meshgeom1d%nedge_nodes(1,:), meshgeom1d%nedge_nodes(2,:), nbranchids, nbranchlongnames, meshgeom1d%nbranchlengths, meshgeom1d%nbranchgeometrynodes, meshgeom1d%nbranches, & 
                                     meshgeom1d%ngeopointx, meshgeom1d%ngeopointy, meshgeom1d%ngeometry, &
                                     meshgeom1d%nbranchorder, &
-                                    nodeids, nodelongnames, meshgeom1d%branchidx, meshgeom1d%branchoffsets,&
-                                    numMesh1dBeforeMerging, mesh1dNodeIds, mesh1dUnmergedToMerged)
+                                    nodeids, nodelongnames, meshgeom1d%branchidx, meshgeom1d%branchoffsets)
          else
                call mess(LEVEL_ERROR, 'Could not put header in net geometry file.')
                return
@@ -12179,7 +12178,11 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
       do L=1,lnx1d
          if (kcu(L) == 1) then
             n1dedges = n1dedges + 1
-            edge_nodes(1:2,n1dedges) = ln(1:2,L) - ndx2d !only 1d edge nodes
+            if (allocated(mesh1dMergedToUnMerged)) then 
+                edge_nodes(1:2,n1dedges) = mesh1dMergedToUnMerged(ln(1:2,L) - ndx2d) !only 1d edge nodes
+            else
+                edge_nodes(1:2,n1dedges) = ln(1:2,L) - ndx2d !only 1d edge nodes
+            endif
             !mappings
             id_tsp%edgetoln(n1dedges) = L
          else if (kcu(L) == 3 .or. kcu(L) == 4 .or. kcu(L) == 5 .or. kcu(L) == 7) then  ! 1d2d, lateralLinks, streetinlet, roofgutterpipe
@@ -12217,8 +12220,7 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
                                        meshgeom1d%nedge_nodes(1,:), meshgeom1d%nedge_nodes(2,:), nbranchids, nbranchlongnames, meshgeom1d%nbranchlengths, meshgeom1d%nbranchgeometrynodes, meshgeom1d%nbranches, & 
                                        meshgeom1d%ngeopointx, meshgeom1d%ngeopointy, meshgeom1d%ngeometry, &
                                        meshgeom1d%nbranchorder, &
-                                       nodeids, nodelongnames, meshgeom1d%branchidx, meshgeom1d%branchoffsets,&
-                                       numMesh1dBeforeMerging, mesh1dNodeIds, mesh1dUnmergedToMerged)
+                                       nodeids, nodelongnames, meshgeom1d%branchidx, meshgeom1d%branchoffsets)
          else
          ierr = ug_write_mesh_arrays(ncid, id_tsp%meshids1d, mesh1dname, 1, UG_LOC_NODE + UG_LOC_EDGE, ndx1d, n1dedges, 0, 0, &
                                      edge_nodes, face_nodes, null(), null(), null(), x1dn, y1dn, xu(id_tsp%edgetoln(:)), yu(id_tsp%edgetoln(:)), xz(1:1), yz(1:1), &
