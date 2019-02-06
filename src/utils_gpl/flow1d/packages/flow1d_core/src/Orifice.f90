@@ -160,22 +160,21 @@ subroutine ComputeOrifice(orifice, fum, rum, aum, dadsm, kfum, s1m1, s1m2, qm, q
     ! ARS 7367, 7966 wrong value of dynstruc set here
     !     dynstruc=1.0  dynstruc is set by ini-file
 
-    rhsc = 0.0
+    rhsc = 0.0d0
 
     !     made similar condition as in wtcrsu
-    if (2./3.*(smax - scr)<sop - scr) then
+    if (2.0d0/3.0d0*(smax - scr)<sop - scr) then
        !        weir flow; 2/3 ( h_1 - z_s) < d_g = s_op - z_s
-       if (smax - scr<=1.5*(smin - scr)) then
+       if ((smax - scr) <= 1.5d0 * (smin - scr)) then
           !          submerged weir flow;  h_1 - z_s <= 3/2 (h_2 - z_s)
           state = 2
-          cu = cmu**2*2.0d0*gravity/(StructureDynamicsFactor*dxm)
+          cu = cmu**2 * 2.0d0 * gravity/(StructureDynamicsFactor * dxm)
           !          ARS 4681 improved wetted area computation
           !          ARS 3479 wetted area orifice limited to opening
-          aum = min(max(smax - u0m**2/(2.0d0*gravity) - scr, 2.0d0/3.0d0*(smax - scr))*swi,   &
-              & scf*(sop - scr)*swi)
-          uweir = cmu*dsqrt(gravity*2.0d0*(smax - smin))
-          fr = dabs(uweir)/(StructureDynamicsFactor*dxm)
-          rhsc = 0.0
+          aum = max(smax - u0m * u0m / (2.0d0*gravity) - scr, 2.0d0/3.0d0*(smax - scr)) * swi
+          uweir = cmu*dsqrt(gravity * 2.0d0 * (smax - smin))
+          fr = dabs(uweir) / (StructureDynamicsFactor * dxm)
+          rhsc = 0.0d0
           dadsm = swi
        else
           !          free weir flow;  h_1 - z_s > 3/2 (h_2 - z_s)
