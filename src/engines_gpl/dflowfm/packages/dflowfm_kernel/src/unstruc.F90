@@ -16011,6 +16011,7 @@ subroutine unc_write_his(tim)            ! wrihis
     use m_flowtimes
     use m_flow
     use m_flowgeom
+    use network_data, only: xk, yk
     use m_observations
     use m_monitoring_crosssections
     use m_missing
@@ -16052,6 +16053,7 @@ subroutine unc_write_his(tim)            ! wrihis
                      id_wind, id_patm, id_tair, id_rhum, id_clou, &
                      id_R, id_WH, id_WD, id_WL, id_WT, id_WU, id_WTAU, id_hs, &
                      id_pumpdim,    id_pumpname,    id_pump_dis,    id_pump_cap,       id_pump_s1up,      id_pump_s1dn,    &                              ! id_pump_head,
+                     id_pump_xmid,  id_pump_ymid, &
                      id_gatedim,    id_gatename,    id_gate_dis,    id_gate_edgel,     id_gate_s1up,      id_gate_s1dn,    &                              ! id_gate_head,
                      id_cdamdim,    id_cdamname,    id_cdam_dis,    id_cdam_cresth,    id_cdam_s1up,      id_cdam_s1dn,    &                              ! id_cdam_head,
                      id_weirgendim, id_weirgenname, id_weirgen_dis, id_weirgen_cresth, id_weirgen_crestw, id_weirgen_s1up,  id_weirgen_s1dn,  &        ! id_weirgen_head,
@@ -16065,7 +16067,7 @@ subroutine unc_write_his(tim)            ! wrihis
                      id_dredlinkdim, id_dreddim, id_dumpdim, id_dredlink_dis, id_dred_dis, id_dump_dis, id_dred_tfrac, id_plough_tfrac, id_lsedtot, id_dred_name, id_dump_name, id_frac_name, & !id_dump_dis_frac, id_dred_dis_frac, &
                      id_dambreakdim, id_dambreakname, id_dambreak_s1up, id_dambreak_s1dn, id_dambreak_breach_depth,id_dambreak_breach_width, id_dambreak_discharge, id_dambreak_cumulative_discharge, &
                      id_dambreak_breach_width_derivative, id_dambreak_water_level_jump, id_dambreak_normal_velocity  
-                  
+                     
     integer, allocatable, save :: id_tra(:)
     integer, allocatable, save :: id_hwq(:)
     integer, allocatable, save :: id_sf(:), id_ws(:), id_seddif(:)            ! sediment fractions 
@@ -16076,7 +16078,7 @@ subroutine unc_write_his(tim)            ! wrihis
 
 
     double precision, save       :: curtime_split = 0d0 ! Current time-partition that the file writer has open.
-    integer                      :: ntot, mobs, k, i, j, i1, ierr, mnp, kk, kb, kt, klay, idims(3), LL,Lb,Lt,L
+    integer                      :: ntot, mobs, k, i, j, i1, ierr, mnp, kk, kb, kt, klay, idims(3), LL,Lb,Lt,L, Lf, k3, k4
     logical                      :: jawel
     double precision             :: xp, yp, qsum, vals, valx, valy, valwx, valwy, valpatm, wind, cof0
 
@@ -16086,6 +16088,7 @@ subroutine unc_write_his(tim)            ! wrihis
     character(len=255) :: tmpstr, tmpstr2, tmpstr3, unit1, unit2, unit3
     integer                      :: jawrizc = 0
     integer                      :: jawrizw = 0
+    double precision             :: w1, pumplensum, pumplenmid, pumpxmid, pumpymid
 
     if (jahiszcor > 0) then
        jawrizc = 1
@@ -16777,6 +16780,13 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_att(ihisfile, id_pumpname,  'cf_role',   'timeseries_id')
             ierr = nf90_put_att(ihisfile, id_pumpname,  'long_name', 'pump name'    )
 
+            ierr = nf90_def_var(ihisfile, 'pump_xmid', nf90_double, (/ id_pumpdim /), id_pump_xmid)
+            ierr = nf90_def_var(ihisfile, 'pump_ymid', nf90_double, (/ id_pumpdim /), id_pump_ymid)
+            ierr = unc_addcoordatts(ihisfile, id_pump_xmid, id_pump_ymid, jsferic)
+            ierr = nf90_put_att(ihisfile, id_pump_xmid, 'long_name', 'x-coordinate of representative mid point of pump location (snapped polyline)')
+            ierr = nf90_put_att(ihisfile, id_pump_ymid, 'long_name', 'y-coordinate of representative mid point of pump location (snapped polyline)')
+
+
             ierr = nf90_def_var(ihisfile, 'pump_discharge', nf90_double, (/ id_pumpdim, id_timedim /), id_pump_dis)
             !ierr = nf90_put_att(ihisfile, id_pump_dis, 'standard_name', 'pump_discharge')
             ierr = nf90_put_att(ihisfile, id_pump_dis, 'long_name', 'pump discharge')
@@ -17097,6 +17107,49 @@ subroutine unc_write_his(tim)            ! wrihis
         if (jahispump > 0 .and. npumpsg > 0) then
             do i=1,npumpsg
                ierr = nf90_put_var(ihisfile, id_pumpname,  trim(pump_ids(i)),      (/ 1, i /))
+
+               ! NOTE: the code below is now only active for pumps (DELFT3D-36341). Should be
+               ! generalized for all structure locations that are polyline based.
+               !
+               ! Store one single representative x/y point for each pump in the time series file,
+               ! because CF conventions require that for variables on discrete geometries.
+               ! Computed at half the total length of the snapped flow links
+               ! (so, it lies on an edge, not per se on the input pump pli)).
+               pumplensum = 0d0
+               do k = L1pumpsg(i), L2pumpsg(i)
+                  Lf = abs(kpump(3,k))
+                  pumplensum = pumplensum + wu(Lf)
+               end do
+               pumplenmid = pumplensum / 2
+
+               ! Find the mid point on the snapped flow link path
+               pumplensum = 0d0
+               do k = L1pumpsg(i), L2pumpsg(i)
+                  Lf = abs(kpump(3,k))
+                  if (pumplensum + wu(Lf) >= pumplenmid) then
+                     if (kcu(Lf) == 2) then ! 2D
+                        if (kpump(3,k) > 0) then
+                           k3 = lncn(1,Lf)
+                           k4 = lncn(2,Lf)
+                        else
+                           k3 = lncn(2,Lf)
+                           k4 = lncn(1,Lf)
+                        end if
+                        w1 = (pumplenmid-pumplensum)/wu(Lf)
+                        pumpxmid = w1*xk(k3) + (1d0-w1)*xk(k4)
+                        pumpymid = w1*yk(k3) + (1d0-w1)*yk(k4)
+                     else                   ! 1D
+                        pumpxmid = xu(Lf)
+                        pumpymid = yu(Lf)
+                     end if
+                     exit ! mid point was found
+                  else
+                     pumplensum = pumplensum + wu(Lf)
+                  end if
+               end do
+
+               ierr = nf90_put_var(ihisfile, id_pump_xmid,  pumpxmid,      (/ i /))
+               ierr = nf90_put_var(ihisfile, id_pump_ymid,  pumpymid,      (/ i /))
             end do
         end if
         if (jahisgate > 0 .and. ngatesg > 0) then
