@@ -2918,7 +2918,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "PPrLim    ","NO3       ",  10,"N","x",1
 "PPrLim    ","PO4       ",  11,"N","x",1
 "PPrLim    ","Si        ",  12,"Y","x",1
-"NutUpt_Alg","fcPPGreeN ",   1,"N","x",1
+"NutUpt_Alg","fcPPGreen ",   1,"N","x",1
 "NutUpt_Alg","NCRatGreen",   2,"Y","x",1
 "NutUpt_Alg","PCRatGreen",   3,"Y","x",1
 "NutUpt_Alg","fcPPDiat  ",   4,"N","x",1

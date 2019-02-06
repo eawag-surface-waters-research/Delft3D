@@ -795,7 +795,7 @@ outppr,outpit,outpnm,outpdo,outpsx
 "GroMrt_DS1","fMrtDiatS1",   4,"x",1
 "GroMrt_DS1","EffNutDiS1",   5,"x",1
 "GroMrt_DS1","EffLigDiS1",   6,"x",1
-"PPrLim    ","fcPPGreeN ",   1,"x",1
+"PPrLim    ","fcPPGreen ",   1,"x",1
 "PPrLim    ","fcPPDiat  ",   2,"x",1
 "NutUpt_Alg","FracUptNH4",   1,"x",1
 "NutUpt_Alg","ReqDin    ",   2,"x",1
