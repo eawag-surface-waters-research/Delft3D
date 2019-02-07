@@ -6289,19 +6289,25 @@ if (ihorvic > 0 .or. NDRAW(29) == 37) then
     endif
  enddo
 
- if (jaZerozbndinflowadvection == 1) then 
-    do n  = 1, nbndz                                     ! on waterlevel boundaries put inflow advection velocity to 0
-       kb = kbndz(1,n)
+ if (jaZerozbndinflowadvection == 1) then
+    do n  = 1, nbndz                                      ! on waterlevel boundaries put inflow advection velocity to 0
        LL = kbndz(3,n)
-       call getLbotLtop(LL,Lb,Lt)
-       do L  = Lb, Lt
-          k1 = ln(1,L) 
-          if (u1(L) > 0) then 
+       do L  = Lbot(LL), Ltop(LL)
+          k1 = ln(1,L)
+          if (u1(LL) > 0) then
              ucx(k1) = 0d0 ; ucy(k1) = 0d0
-          endif   
-       enddo 
+          endif
+       enddo
     enddo
- endif   
+ else if (jaZerozbndinflowadvection == 2) then
+    do n  = 1, nbndz                                      ! on waterlevel boundaries put all advection velocity to 0
+       LL = kbndz(3,n)
+       do L  = Lbot(LL), Ltop(LL)
+          k1 = ln(1,L)
+          ucx(k1) = 0d0 ; ucy(k1) = 0d0
+       enddo
+    enddo
+ endif
        
  do n  = 1,nbndu                                      ! velocity boundaries
     kb = kbndu(1,n)
