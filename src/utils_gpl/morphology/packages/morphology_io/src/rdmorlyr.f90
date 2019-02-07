@@ -1207,9 +1207,9 @@ subroutine rdinimorlyr(lsedtot   ,lsed      ,lundia    ,error     , &
                 !
                 do ised = 1, lsedtot
                    if (bodsed(ised, nm) < 0.0) then
-                      write (message,'(a,i2,a,f15.2,a,a,a,i0)')  &
+                      write (message,'(a,i2,a,f15.2,a,a,a,i0,a,f15.2,f15.2,a)')  &
                           & 'Negative sediment thickness for fraction ',ised, ': ',bodsed(ised, nm),' in file ', &
-                          & trim(flsdbd(ised)),' at nm=',nm
+                          & trim(flsdbd(ised)),' at nm=',nm, ' (x, y = ', dims%xz(nm), dims%yz(nm), ')'
                       call write_error(trim(message), unit=lundia)
                       error = .true.
                       return
