@@ -2108,14 +2108,17 @@ subroutine GetTabulatedSizes(dpt, crossDef, doFlow, area, width, perimeter, af_s
    else
       widths => crossDef%TotalWidth
       widthplains(1) = 0d0
-      widthplains(2:4) = crossDef%TotalWidth(levelsCount)
+      widthplains(2:4) = 0.5d0*huge(1d0)
    endif
 
-   area = 0.0D0
-   d2 = 0.0D0
-   e2 = widths(1)
+   area      = 0.0D0
+   d2        = 0.0D0
+   e2        = widths(1)
+   wl        = 0d0
    area_min  = 0d0
    width_min = 0d0
+   perimeter = 0d0
+   width     = 0d0
    !
    istart = 1
    do isec = 1, 3
@@ -2135,8 +2138,8 @@ subroutine GetTabulatedSizes(dpt, crossDef, doFlow, area, width, perimeter, af_s
       do ilev = istart, levelsCount-1
          d1 = heights(ilev) - heights(1)
          d2 = heights(ilev + 1) - heights(1)
-         e1 = min(max(0d0, widths(ilev)-widthplains(isec)), widthplains(isec+1)-widthplains(isec))
-         e2 = min(max(0d0, widths(ilev + 1)-widthplains(isec)), widthplains(isec+1)-widthplains(isec))
+         e1 = min(max(sl, widths(ilev)-widthplains(isec)), widthplains(isec+1)-widthplains(isec))
+         e2 = min(max(sl, widths(ilev + 1)-widthplains(isec)), widthplains(isec+1)-widthplains(isec))
          if (dpt > d2) then
             af_sub(isec)    = af_sub(isec) + 0.5d0 * (d2 - d1) * (e1 + e2)
             perim_sub(isec) = perim_sub(isec) + 2.0d0 * dsqrt(0.25d0 * (e2 - e1)**2 + (d2 - d1)**2)
@@ -2164,88 +2167,17 @@ subroutine GetTabulatedSizes(dpt, crossDef, doFlow, area, width, perimeter, af_s
       dTop = heights(levelsCount) - heights(1)
       if (dpt > dTop) then
       
-         eTop = min(max(0d0, widths(levelsCount)-widthplains(isec)), widthplains(isec+1)-widthplains(isec))
-
+         eTop = min(max(sl, widths(levelsCount)-widthplains(isec)), widthplains(isec+1)-widthplains(isec))
+   
          af_sub(isec) = af_sub(isec) + (dpt - dTop) * eTop
-
+         area_min = area_min + (dpt - dTop) * width_min
          w_section(isec) = eTop
-
-      endif
-   enddo
    
-   levelsCount = crossDef%levelsCount
-   dTop = heights(levelsCount) - heights(1)
-   if (dpt > dTop) then
-      eTop = widths(levelsCount)
-      if ((eTop > ThresholdForPreismannLock)) then
-         if (af_sub(3) > 0d0) then
-            isec = 3
-         elseif (af_sub(2) > 0d0) then
-            isec = 2
-         else 
-            isec = 1
-         endif
-         perim_sub(isec) = perim_sub(isec) + 2.0d0 * (dpt - dTop)  !hk: add only when this part is meant to carry water
       endif
-   endif
-
-   area2      = 0d0
-   width2     = 0d0   
-   perimeter2 = 0d0
-   do isec = 1, 3
-      area2      = area2      + af_sub(isec)
-      width2     = width2     + w_section(isec)
-      perimeter2 = perimeter2 + perim_sub(isec)
+      area = area + af_sub(isec)
+      width = width + w_section(isec)
+      perimeter = perimeter + perim_sub(isec)
    enddo
-   !!!!!!!!
-   levelsCount = crossDef%levelsCount
-   heights => crossDef%height
-   if (doFlow) then
-      widths => crossDef%flowwidth
-   else
-      widths => crossDef%TotalWidth
-   endif
-
-   area = 0.0D0
-   wl = widths(1)
-   d2 = 0.0D0
-   e2 = widths(1)
-   !
-   do ilev = 1, levelsCount - 1
-      d1 = heights(ilev) - heights(1)
-      d2 = heights(ilev + 1) - heights(1)
-      e1 = widths(ilev)
-      e2 = widths(ilev + 1)
-      if (dpt > d2) then
-         area = area + 0.5d0 * (d2 - d1) * (e1 + e2)
-         wl = wl + 2.0d0 * dsqrt(0.25d0 * (e2 - e1)**2 + (d2 - d1)**2)
-      else
-         call trapez(dpt, d1, d2, e1, e2, areal, width, wll)
-         area = area + areal
-         wl = wl + wll
-         perimeter = wl
-         exit
-      endif
-   enddo
-   
-   ! Extend above table if necessary
-   dTop = heights(levelsCount) - heights(1)
-   if (dpt > dTop) then
-      
-      eTop = widths(levelsCount)
-
-      area = area + (dpt - dTop) * eTop
-
-      if (eTop > ThresholdForPreismannLock) then
-         wl = wl + 2.0d0 * (dpt - dTop)  !hk: add only when this part is meant to carry water
-      endif
-
-      width = eTop
-
-   endif
-   
-   perimeter = wl
-      
    select case (calculationOption)
    case(CS_TYPE_PLUS)
       area  = area  + area_min
@@ -2591,8 +2523,8 @@ subroutine CircleProfile(dpt, diameter, area, width, perimeter, calculationOptio
    endif
    select case(calculationOption)
    case(CS_TYPE_NORMAL)
-      area = areacircle
-      width = widthcircle
+      area = areacircle   + sl*dpt
+      width = widthcircle + sl
    case(CS_TYPE_PREISMAN)
       area = areacircle    + sl*dpt
       width = widthcircle  + sl
@@ -2600,18 +2532,18 @@ subroutine CircleProfile(dpt, diameter, area, width, perimeter, calculationOptio
       if (dpt<ra) then
          ! half circle profile
          area      = dabs(fi*ra*ra - sq*(ra-dpt)) + sl*dpt
-         perimeter = 2d0*fi*ra
+         perimeter = 2d0*fi*ra 
          width     = 2d0*sq + sl
       else
-         area      = 0.5d0* pi*ra*ra + diameter*(dpt-ra)
+         area      = 0.5d0* pi*ra*ra + diameter*(dpt-ra) + sl*dpt
          perimeter = 2d0*pi*ra
-         width     = diameter
+         width     = diameter + sl
       endif   
    end select
 
    if (calculationOption == CS_TYPE_MIN) then
-      area  = area  - areacircle
-      width = width - widthcircle
+      area  = area  - areacircle- sl*dpt
+      width = width - widthcircle - sl
    endif
    
 end subroutine CircleProfile
