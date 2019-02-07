@@ -39310,9 +39310,11 @@ subroutine update_verticalprofiles()
     endif  ! end test
 
     ! If it is a restart simulation, spin up function is not allowed
-    if (jarestart == 0) then
-     if (  ( Tspinupturblogprof > 0d0 .and. Time1 < Tstart_user + Tspinupturblogprof )   .or. &
-          ( jaLogprofkepsbndin >= 1   .and. LL    > lnxi .and. u1(LL) >= 0d0         )        ) then
+    !if (jarestart == 0) then
+     if (  ( Tspinupturblogprof > 0d0 .and. Time1 < Tstart_user + Tspinupturblogprof )  .or.  &
+          ( jaLogprofkepsbndin == 1   .and. LL    > lnxi .and. u1(LL) >= 0d0         )  .or.  &
+          ( jaLogprofkepsbndin == 2   .and. LL    > lnxi                             )        ) then
+
        alfaT = dmiss
        if (Tspinupturblogprof > 0d0) then
           alfaT = (Time1-Tstart_user) / Tspinupturblogprof
@@ -39351,8 +39353,7 @@ subroutine update_verticalprofiles()
           endif
        endif
      endif
-    endif
-
+    !endif
     vicwmax = 0.1d0*hu(LL)                                    ! 0.009UH, Elder, uavmax=
     if (iturbulencemodel == 3) then                           ! k-eps
        vicwwu (Lb0:Lt) = min(vicwmax, cmukep*turkin1(Lb0:Lt)*turkin1(Lb0:Lt) / tureps1(Lb0:Lt) )
