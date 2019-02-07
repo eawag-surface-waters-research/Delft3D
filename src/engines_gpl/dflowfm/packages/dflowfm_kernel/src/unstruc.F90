@@ -26384,7 +26384,7 @@ subroutine transport()                           ! transport for now, advect sal
 
   !$OMP PARALLEL DO             &
   !$OMP PRIVATE(kk,kb,kt,k)
-   do kk = 1,ndxi
+   do kk = 1,ndx ! i
       call getkbotktop(kk,kb,kt)
       if ( kt < kb ) cycle
       do k = kb,kt
