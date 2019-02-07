@@ -425,35 +425,41 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# #---------------------
-# # proj
-# projModule=""
-# if [ "$compiler" = 'intel16' ]; then
-    # # icc c++11 features are only available if gcc is in the path. This is required by proj
-    # projModule="intel/16.0.3 gcc/4.9.2 proj/5.2.0_intel16.0.3" 
-# fi
-# initProj="module load $projModule"
-# eval $initProj
-# if [ $? -ne 0 ]; then
-    # echo 'ERROR: Proj initialization fails!'
-    # cd $orgdir
-    # exit 1
-# fi
+#---------------------
+# proj
+projModule=""
+if [ "$compiler" = 'intel16' ]; then
+    # icc c++11 features are only available if gcc is in the path. This is required by proj
+    projModule="intel/16.0.3 gcc/4.9.2 proj/5.2.0_intel16.0.3" 
+    PROJ_CPPFLAGS=-I$PROJ_DIR/include
+    PROJ_LDFLAGS=-L$PROJ_DIR/lib
+    PROJ_CONFARGS=--with-proj=$PROJ_DIR
+fi
+initProj="module load $projModule"
+eval $initProj
+if [ $? -ne 0 ]; then
+    echo 'ERROR: Proj initialization fails!'
+    cd $orgdir
+    exit 1
+fi
 
-# #---------------------
-# # shapelib
-# shapelibModule=""
-# if [ "$compiler" = 'intel16' ]; then
-    # # icc c++11 features are only available if gcc is in the path. This is required by shapelib
-    # shapelibModule="intel/16.0.3 gcc/4.9.2 shapelib/1.4.1_intel16.0.3" 
-# fi
-# shapelib="module load $shapelibModule"
-# eval $shapelib
-# if [ $? -ne 0 ]; then
-    # echo 'ERROR: shapelib initialization fails!'
-    # cd $orgdir
-    # exit 1
-# fi
+#---------------------
+# shapelib
+shapelibModule=""
+if [ "$compiler" = 'intel16' ]; then
+    # icc c++11 features are only available if gcc is in the path. This is required by shapelib
+    shapelibModule="intel/16.0.3 gcc/4.9.2 shapelib/1.4.1_intel16.0.3" 
+    SHAPELIB_CPPFLAGS=-I$SHAPELIB_DIR/include
+    SHAPELIB_LDFLAGS=-I$SHAPELIB_DIR/lib
+    SHAPELIB_CONFARGS=--with-shapelib=$SHAPELIB_DIR
+fi
+shapelib="module load $shapelibModule"
+eval $shapelib
+if [ $? -ne 0 ]; then
+    echo 'ERROR: shapelib initialization fails!'
+    cd $orgdir
+    exit 1
+fi
 
 #===============================================================================
 echo
@@ -481,8 +487,12 @@ module display $mpichModule
 module display $petscModule
 module display $metisModule
 module display $netcdfModule
-# module display $projModule
-# module display $shapelibModule
+if [ ! -z "$projModule" ]; then
+module display $projModule
+fi
+if [ ! -z "$shapelibModule" ]; then
+module display $shapelibModule
+fi
 # echo "export ACLOCAL=\"$ACLOCAL\""
 # echo "export AUTOMAKE=\"$AUTOMAKE\""
 # echo "export AUTOHEADER=\"$AUTOHEADER\""
@@ -531,6 +541,14 @@ log "Running $command in `pwd`"
 eval $command
 cd ../..
 
+if [ ! -z "$shapelibModule" -o ! -z "$projModule" ]; then
+cd third_party_open/fortrangis
+cp -f ../../autogen.sh . # temp fix
+log "Running $command in `pwd`"
+eval $command
+cd ../..
+fi
+
 if [ $? -ne 0 ]; then
     log "ERROR: Autogen fails!"
     cd $orgdir
@@ -555,6 +573,8 @@ fi
 # http://www.gentoo.org/proj/en/base/amd64/howtos/index.xml?full=1#book_part1_chap3
 
 command=" \
+    CPPFLAGS='$PROJ_CPPFLAGS $SHAPELIB_CPPFLAGS' \
+    LDFLAGS='$PROJ_LDFLAGS $SHAPELIB_LDFLAGS' \
     CFLAGS='$flags $CFLAGS' \
     CXXFLAGS='$flags $CXXFLAGS' \
     AM_FFLAGS='$LDFLAGSMT_ADDITIONAL $AM_FFLAGS' \
@@ -562,7 +582,7 @@ command=" \
     AM_FCFLAGS='$LDFLAGSMT_ADDITIONAL $AM_FCFLAGS' \
     FCFLAGS='$flags $fflags $FCFLAGS' \
     AM_LDFLAGS='$LDFLAGSMT_ADDITIONAL $AM_LDFLAGS' \
-        ./configure --prefix=`pwd` --with-mpi --with-petsc --with-metis=$METIS_DIR $configureArgs &> $log \
+        ./configure --prefix=`pwd` --with-mpi --with-petsc --with-metis=$METIS_DIR $PROJ_CONFARGS $SHAPELIB_CONFARGS $configureArgs &> $log \
     "
 
 log "Running `echo $command | sed 's/ +/ /g'`"

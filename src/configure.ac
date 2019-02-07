@@ -444,13 +444,17 @@ AC_SUBST(blasdir)
 AM_CONDITIONAL([USEPARMS], test "x$withblas" != "xno" -a -d "${blasdir}")
 
 dnl Check for PROJ
-AC_MSG_CHECKING([if Proj4 is wanted])
-AC_ARG_WITH(proj,[AS_HELP_STRING([--with-proj[=DIR]],[Build with proj4 support  @<:@default=no@:>@])],[],[with_proj=no])
+dnl Note that the option below is a --with-PKG=dir option,
+dnl whereas the third_party_open/fortrangis/ uses a --enable-PKG option.
+dnl As a result the include/lib paths are not automatically correct,
+dnl so we set them below in the central CPPFLAGS and LDFLAGS.
+AC_MSG_CHECKING([if PROJ is wanted])
+AC_ARG_WITH(proj,[AS_HELP_STRING([--with-proj[=DIR]],[Build with PROJ support  @<:@default=no@:>@])],[],[with_proj=no])
 
 PROJ_DIR=""
 AS_IF([test "x$with_proj" != "xno"],
 	[
-		AC_DEFINE([HAVE_PROJ],1,[Defined if you have Proj4 library.])
+		AC_DEFINE([HAVE_PROJ],1,[Defined if you have PROJ library.])
 		AS_IF([test "x$with_proj" != "xyes"],
 		[
 		  PROJ_DIR=$with_proj
@@ -463,6 +467,10 @@ AS_IF([test "x$with_proj" != "xno"],
 AM_CONDITIONAL([USEPROJ], test "x$with_proj" != "xno")
 
 dnl Check for SHAPELIB
+dnl Note that the option below is a --with-PKG=dir option,
+dnl whereas the third_party_open/fortrangis/ uses a --enable-PKG option.
+dnl As a result the include/lib paths are not automatically correct,
+dnl so we set them below in the central CPPFLAGS and LDFLAGS.
 AC_MSG_CHECKING([if Shapelib is wanted])
 AC_ARG_WITH(shapelib,[AS_HELP_STRING([--with-shapelib[=DIR]],[Build with shapelib support  @<:@default=no@:>@])],[],[with_shapelib=no])
 
@@ -477,9 +485,17 @@ AS_IF([test "x$with_shapelib" != "xno"],
 		AC_MSG_RESULT([yes])
 	],
 	[
-		AC_MSG_RESULT([no])
+			AC_MSG_RESULT([no])
 	])
 AM_CONDITIONAL([USESHAPELIB], test "x$with_shapelib" != "xno")
+if test "x" != "x$SHAPELIB_DIR"; then
+    if test -d "${SHAPELIB_DIR}"; then
+        AX_APPEND_FLAG("-I${SHAPELIB_DIR}/include", CPPFLAGS)
+        AX_APPEND_FLAG("-L${SHAPELIB_DIR}/lib", LDFLAGS)
+    fi
+fi
+
+AM_CONDITIONAL([USEFORTRANGIS], test "x$with_shapelib" != "xno" -o "x$with_proj" != "xno")
 
 AC_LANG_PUSH([C])
 AC_CHECK_LIB([dl], [dlclose],, [AC_MSG_ERROR([Compiler can not find libdl])])
@@ -494,23 +510,23 @@ AS_IF([test "x$with_metis" != "xno"], [
 
 	# Check for Metis headers
   	AS_IF([test "x$METIS_CFLAGS" != "x"], [
-  		CPPFLAGS=$METIS_CFLAGS ],
+  		AX_APPEND_FLAG($METIS_CFLAGS, CPPFLAGS) ],
   	[
   		AS_IF([test "x$METIS_DIR" != "x"], 
   		[
       	dnl # Look for METIS on the user specified inky install path
       		METIS_CFLAGS="-I$METIS_DIR/include";
-      		CPPFLAGS=$METIS_CFLAGS
+      		AX_APPEND_FLAG($METIS_CFLAGS, CPPFLAGS)
   		])
     ])
   	AS_IF([test "x$METIS_LIBS" != "x"], [
-  		LDFLAGS=$METIS_LIBS ],
+  		AX_APPEND_FLAG($METIS_LIBS, LDFLAGS) ],
   	[
   		AS_IF([test "x$METIS_DIR" != "x"], 
   		[
       	dnl # Look for METIS on the user specified inky install path
       		METIS_LIBS="-L$METIS_DIR/lib";
-      		LDFLAGS=$METIS_LIBS
+      		AX_APPEND_FLAG($METIS_LIBS, LDFLAGS)
   		])
     	METIS_LIBS="$METIS_LIBS -lmetis"
     ])
@@ -919,5 +935,11 @@ AC_CONFIG_SUBDIRS([
     third_party_open/kdtree2
     third_party_open/libsigwatch
 ])
+
+if test "x$with_shapelib" != "xno" -o "x$with_proj" != "xno"; then
+AC_CONFIG_SUBDIRS([
+    third_party_open/fortrangis
+])
+fi
 
 AC_OUTPUT

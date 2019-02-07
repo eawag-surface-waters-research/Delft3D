@@ -29,6 +29,9 @@
 
 ! $Id$
 ! $HeadURL$
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 !> Write shape files 
 module unstruc_shapefile

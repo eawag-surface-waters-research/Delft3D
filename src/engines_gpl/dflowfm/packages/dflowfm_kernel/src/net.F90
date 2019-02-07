@@ -34071,47 +34071,52 @@ function read_commandline() result(istat)
             write (*,'(a)') 'Source: '//trim(msgbuf)
             write (*,'(a)') 'Compiled with support for:'
             if (jaGUI == 1) then
-               write (*,'(a)') 'IntGUI: yes'
+               write (*,'(a)') 'IntGUI   : yes'
             else
                ! Cheap trick for fast compilation of dflowfm-cli executable: it never included linking of Interacter, nor OpenGL,
                ! but since we don't want to completely recompile the kernel with HAVE_DISPLAY=0, we simply detect it at runtime with jaGUI==0.
-               write (*,'(a)') 'IntGUI: no'
+               write (*,'(a)') 'IntGUI   : no'
             end if
 #ifdef HAVE_OPENGL
             if (jaGUI == 1) then
-               write (*,'(a)') 'OpenGL: yes'
+               write (*,'(a)') 'OpenGL   : yes'
             else
                ! Cheap trick for fast compilation of dflowfm-cli executable: it never included linking of Interacter, nor OpenGL,
                ! but since we don't want to completely recompile the kernel with HAVE_DISPLAY=0, we simply detect it at runtime with jaGUI==0.
-               write (*,'(a)') 'OpenGL: no'
+               write (*,'(a)') 'OpenGL   : no'
             end if
 #else
-            write (*,'(a)') 'OpenGL: no'
+            write (*,'(a)') 'OpenGL   : no'
 #endif
 #ifdef _OPENMP
-            write (*,'(a)') 'OpenMP: yes'
+            write (*,'(a)') 'OpenMP   : yes'
 #else
-            write (*,'(a)') 'OpenMP: no'
+            write (*,'(a)') 'OpenMP   : no'
 #endif
 #ifdef HAVE_MPI
-            write (*,'(a)') 'MPI   : yes'
+            write (*,'(a)') 'MPI      : yes'
 #else
-            write (*,'(a)') 'MPI   : no'
+            write (*,'(a)') 'MPI      : no'
 #endif
 #ifdef HAVE_PETSC
-            write (*,'(a)') 'PETSc : yes'
+            write (*,'(a)') 'PETSc    : yes'
 #else
-            write (*,'(a)') 'PETSc : no'
+            write (*,'(a)') 'PETSc    : no'
 #endif
 #ifdef HAVE_METIS
-            write (*,'(a)') 'METIS : yes'
+            write (*,'(a)') 'METIS    : yes'
 #else
-            write (*,'(a)') 'METIS : no'
+            write (*,'(a)') 'METIS    : no'
 #endif
 #ifdef HAVE_PROJ
-            write (*,'(a)') 'PROJ  : yes'
+            write (*,'(a)') 'PROJ     : yes'
 #else
-            write (*,'(a)') 'PROJ  : no'
+            write (*,'(a)') 'PROJ     : no'
+#endif
+#ifdef HAVE_SHAPELIB
+            write (*,'(a)') 'Shapelib : yes'
+#else
+            write (*,'(a)') 'Shapelib : no'
 #endif
 
             istat = DFM_EXIT ! Exit without any error.

@@ -30,6 +30,8 @@ EXTRA_DIST += $(builddir)/../../dflowfm_lib/templates
 # default to empty so we can conditionally expand it
 include_HEADERS=
 
+EXTRALIBS=
+
 # For source distributions: the tar.gz will contain the correct version numbers in the generated *version.F90
 # So, just before packaging the .tar.gz dist, disable version number REgeneration parts of this Makefile.am.
 dist-hook:
@@ -56,7 +58,6 @@ libdflowfm_la_SOURCES=\
         d_flooding.f90 \
         partition.F90 \
         unstruc_netcdf.f90 \
-        unstruc_shapefile.F90 \
         network.f90 \
         monitoring.f90 \
         manholes.f90 \
@@ -73,6 +74,7 @@ libdflowfm_la_SOURCES=\
         fourier_analysis.f90 \
         unstruc_files.f90 \
         unstruc_netcdf_incremental.f90 \
+        unstruc_shapefile.F90 \
         dredgepolygon.f90 \
         bedform_io.f90 \
         unstruc_startup.f90 \
@@ -222,6 +224,26 @@ AM_FCFLAGS+=${PETSc_CFLAGS}
 LIBS+=${PETSc_LIBS}
 endif
 
+if USEPROJ
+AM_FCFLAGS+=${PROJ_CFLAGS}
+LIBS+=${PROJ_LIBS}
+USEFORTRANGIS=TRUE
+endif
+
+if USESHAPELIB
+AM_FCFLAGS+=${SHAPELIB_CFLAGS}
+LIBS+=${SHAPELIB_LIBS}
+USEFORTRANGIS=TRUE
+endif
+
+if USEFORTRANGIS
+FMODULES += \
+    -I$(top_builddir)/third_party_open/fortrangis/libfortrangis
+EXTRALIBS += \
+    $(top_builddir)/third_party_open/fortrangis/libfortranc/libfortranc.la \
+    $(top_builddir)/third_party_open/fortrangis/libfortrangis/libfortrangis.la
+endif
+
 if USEMETIS
 AM_FCFLAGS+=${METIS_CFLAGS}
 LIBS+=${METIS_LIBS}
@@ -250,7 +272,7 @@ endif
 
 
 
-EXTRALIBS=\
+EXTRALIBS+=\
         $(top_builddir)/utils_gpl/flow1d/packages/flow1d/src/libflow1d.la \
         $(top_builddir)/utils_gpl/flow1d/packages/flow1d_core/src/libflow1d_core.la \
         $(top_builddir)/utils_gpl/flow1d/packages/flow1d_io/src/libflow1d_io.la \

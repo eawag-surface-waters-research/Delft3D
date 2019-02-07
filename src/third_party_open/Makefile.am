@@ -11,6 +11,13 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
+
+# Descending into FortranGIS is optional, since its prerequisites
+# --with-shapelib and --with-proj are optional.
+if USEFORTRANGIS
+  MAYBE_FORTRANGIS = fortrangis
+endif
+
 SUBDIRS = \
     esmf \
     triangle \
@@ -19,4 +26,5 @@ SUBDIRS = \
     FLAP \
     polypack \
     kdtree2 \
-    swan
+    swan \
+    $(MAYBE_FORTRANGIS)
