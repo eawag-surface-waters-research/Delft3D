@@ -14544,7 +14544,7 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
             goto 888
          end if
          ! FM performs an additional spatial interpolation:
-         do L  = 1,lnxi
+         do L  = 1,lnx ! i
             k1 = ln(1,L) ; k2 = ln(2,L)
             wx(L) = 0.5d0*( ec_pwxwy_x(k1) + ec_pwxwy_x(k2) )
             wy(L) = 0.5d0*( ec_pwxwy_y(k1) + ec_pwxwy_y(k2) )
