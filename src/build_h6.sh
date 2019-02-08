@@ -431,9 +431,6 @@ projModule=""
 if [ "$compiler" = 'intel16' ]; then
     # icc c++11 features are only available if gcc is in the path. This is required by proj
     projModule="intel/16.0.3 gcc/4.9.2 proj/5.2.0_intel16.0.3" 
-    PROJ_CPPFLAGS=-I$PROJ_DIR/include
-    PROJ_LDFLAGS=-L$PROJ_DIR/lib
-    PROJ_CONFARGS="--with-proj=$PROJ_DIR --disable-gdal"
 fi
 initProj="module load $projModule"
 eval $initProj
@@ -441,6 +438,10 @@ if [ $? -ne 0 ]; then
     echo 'ERROR: Proj initialization fails!'
     cd $orgdir
     exit 1
+else
+    PROJ_CPPFLAGS=-I$PROJ_DIR/include
+    PROJ_LDFLAGS=-L$PROJ_DIR/lib
+    PROJ_CONFARGS="--with-proj=$PROJ_DIR --disable-gdal"
 fi
 
 #---------------------
@@ -449,9 +450,6 @@ shapelibModule=""
 if [ "$compiler" = 'intel16' ]; then
     # icc c++11 features are only available if gcc is in the path. This is required by shapelib
     shapelibModule="intel/16.0.3 gcc/4.9.2 shapelib/1.4.1_intel16.0.3" 
-    SHAPELIB_CPPFLAGS=-I$SHAPELIB_DIR/include
-    SHAPELIB_LDFLAGS=-I$SHAPELIB_DIR/lib
-    SHAPELIB_CONFARGS="--with-shapelib=$SHAPELIB_DIR --disable-gdal"
 fi
 shapelib="module load $shapelibModule"
 eval $shapelib
@@ -459,6 +457,10 @@ if [ $? -ne 0 ]; then
     echo 'ERROR: shapelib initialization fails!'
     cd $orgdir
     exit 1
+else
+    SHAPELIB_CPPFLAGS=-I$SHAPELIB_DIR/include
+    SHAPELIB_LDFLAGS=-L$SHAPELIB_DIR/lib
+    SHAPELIB_CONFARGS="--with-shapelib=$SHAPELIB_DIR --disable-gdal"
 fi
 
 #===============================================================================
