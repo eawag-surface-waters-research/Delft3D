@@ -623,6 +623,14 @@ fi
 
 # Build D-Flow FM, only when not in singlePrecision mode
 if [ $useSp -eq 0 ]; then
+    # build fix: clean and rebuild with FC=ifort, because fortrangis
+    # does not currently accept mpif90, and therefore falls back to gfortran.
+    log='logs/make_fortrangis.log'
+    command="FC=ifort make clean install -C third_party_open/fortrangis &> $log"
+
+    log "Running $command"
+    eval $command
+
     log='logs/make_dflowfm.log'
     command="FC=mpif90 make ds-install -C engines_gpl/dflowfm &> $log"
 
