@@ -879,7 +879,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
 
       ! Identify the node domain based on the already processed net cells
       do ip=1,nump(ii)
-         do ik=1,netfacemaxnodesg
+         do ik=1,netfacemaxnodes(ii)
             k1 = netfacenodes(ik, nfacecount+ip)
             if (k1 == -1 .or. k1 == ifill_value) then
                exit
@@ -940,7 +940,11 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
       if (jaugrid==0) then
          ierr = nf90_inq_varid(ncids(ii), 'NetElemLink', id_netfaceedges)
          if (ierr == nf90_noerr) then
-            ierr = nf90_get_var(ncids(ii), id_netfaceedges, netfaceedges(:,nfacecount+1:nfacecount+nump(ii)), count=(/ netfacemaxnodesg, nump(ii) /))
+            ierr = nf90_get_var(ncids(ii), id_netfaceedges, netfaceedges(1:netfacemaxnodes(ii),nfacecount+1:nfacecount+nump(ii)), count=(/ netfacemaxnodes(ii), nump(ii) /))
+            if (ierr /= nf90_noerr) then
+               jamerge_cntv = 0
+               write (*,'(a)') 'Warning: mapmerge: could not retrieve NetElemLink from `'//trim(infiles(ii))//'''. '
+            end if
          else
             write (*,'(a)') 'Warning: mapmerge: could not retrieve NetElemLink from `'//trim(infiles(ii))//'''. '
             if (.not. verbose_mode) goto 888
@@ -1044,7 +1048,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                                end if
                            end do
                            ! Loop on all the nodes of face ifacec, to find the node which has the same coordinates with node ik from file ii
-                           do im=1,netfacemaxnodesg
+                           do im=1,netfacemaxnodes(ifacefile)
                                k1 = netfacenodes(im, ifacec)
                                if (k1 .ne. -1 .and. k1 .ne. ifill_value) then
                                    k1c = k1 + sum(numk(1:ifacefile-1)) ! concatinated index of nodes
@@ -1099,16 +1103,18 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                         end if
                     end do
                     ! Loop on all netedges of face ifacec
-                    do im = 1, netfacemaxnodesg
+                    do im = 1, netfacemaxnodes(ifacefile)
                         k1 = netfaceedges(im, ifacec)
-                        if (k1 .ne. -1) then
-                            k1c= k1 + sum(numl(1:ifacefile-1))! concatinated index of the edge
-                            xx = edge_x(k1c)
-                            yy = edge_y(k1c)
-                            if (abs(edge_x(ip+netedgecount)-xx)<1d-10 .and. abs(edge_y(ip+netedgecount)-yy)<1d-10) then
-                                netedge_c2g(ip+netedgecount) = netedge_c2g(k1c)
-                                exit
-                            end if
+                        if (k1 .ne. -1 .and. k1 .ne. ifill_value) then
+                           if (k1 .ne. -1) then
+                               k1c= k1 + sum(numl(1:ifacefile-1))! concatinated index of the edge
+                               xx = edge_x(k1c)
+                               yy = edge_y(k1c)
+                               if (abs(edge_x(ip+netedgecount)-xx)<1d-10 .and. abs(edge_y(ip+netedgecount)-yy)<1d-10) then
+                                   netedge_c2g(ip+netedgecount) = netedge_c2g(k1c)
+                                   exit
+                               end if
+                           end if
                         end if
                     end do
                 end if
