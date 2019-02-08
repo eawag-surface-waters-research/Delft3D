@@ -1842,7 +1842,7 @@ do i=1,nstr
 
 
    case ('gate', 'weir', 'generalstructure') !< The various generalstructure-based structures
-      call selectelset_internal_links( plifile, POLY_TIM, xz, yz, ln, lnx, kegen(ncgen+1:numl), numgen )
+      call selectelset_internal_links( plifile, POLY_TIM, xz, yz, ln, lnx, kegen(ncgen+1:numl), numgen, sortLinks = 1 )
       success = .true.
       WRITE(msgbuf,'(a,1x,a,i8,a)') trim(qid), trim(plifile) , numgen, ' nr of '//trim(strtype)//' cells' ; call msg_flush()
 
@@ -1924,7 +1924,7 @@ end do
    if (allocated(fusav)) deallocate(fusav)
    if (allocated(rusav)) deallocate(rusav)
    if (allocated(ausav)) deallocate(ausav)
-   allocate( Fusav(2,ncgen), Rusav(2,ncgen), Ausav(2,ncgen) , stat = ierr ) ; Fusav = 0d0 ; Rusav = 0d0 ; ausav = 0d0
+   allocate( Fusav(3,ncgen), Rusav(3,ncgen), Ausav(3,ncgen) , stat = ierr ) ; Fusav = 0d0 ; Rusav = 0d0 ; ausav = 0d0
 
    do n = 1, ncgensg
 

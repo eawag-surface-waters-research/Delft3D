@@ -5453,6 +5453,7 @@ type tgeneralstruc
    double precision                      :: stabilitycounter
    double precision, allocatable         :: widthcenteronlink(:) !< For each crossed flow link the the center width portion of this genstr. (sum(widthcenteronlink(1:numlink)) should equal widthcenter)
    double precision, allocatable         :: gateheightonlink(:)  !< For each crossed flow link the the gate height portion of this genstr. (will be set to dummy high value in open part of sideways closing gates.)
+   double precision, allocatable         :: gateclosedfractiononlink(:) !< part of the link width that is closed by the gate
    integer                               :: numlinks !< Nr of flow links that cross this generalstructure.
 
 end type tgeneralstruc

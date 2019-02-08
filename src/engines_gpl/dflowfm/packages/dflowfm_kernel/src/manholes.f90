@@ -508,6 +508,7 @@ use m_flowgeom
     double precision               :: zb2
     double precision               :: zs, gateloweredgelevel, gatedoorheight
     double precision               :: DsL 
+    double precision               :: gatefraction, g1, fu_sav, ru_sav, au_sav
     
 !
 !! executable statements -------------------------------------------------------
@@ -574,6 +575,7 @@ use m_flowgeom
 
     zs                 = min  ( bob(1,Lf), bob(2,Lf) )         ! == zcgen(3*ng - 2) crest/silllevel
     gateloweredgelevel = generalstruc(ng)%gateheightonlink(L0) ! == zcgen(3*ng - 1) under gate door and infinity in open part.
+    gatefraction = generalstruc(ng)%gateclosedfractiononlink(L0)
 
     ! TODO: RTC: AvD/Herman: hier ook wu'tjes en zb1-tjes etc gaan zetten, voordat we de flupd/flgtar-subroutines gaan callen?
     ! Velheight is always true for river structures
@@ -625,6 +627,27 @@ use m_flowgeom
           fusav(2,n) = 0d0 ; rusav(2,n) = 0d0 ; ausav(2,n) = 0d0   
        endif 
     endif
+    
+    if ( gatefraction.lt.1d0 .and. gatefraction.gt.0d0 ) then
+       fu_sav = fu(Lf)
+       ru_sav = ru(Lf)
+       au_sav = au(Lf)
+       
+       zs =  min  ( bob(1,Lf), bob(2,Lf) ) 
+       dg = huge(1d0)
+       u1(Lf) = rusav(3,n) - Fusav(3,n)*dsL ; u0(Lf) = u1(Lf) ; q1(Lf) = Ausav(3,n)*u1(Lf) 
+       call flgtarfm(ng, L0, wu(Lf), bl(kL), bl(kR), tekenstr, zs, wstr, w2, wsd, zb2, dg, ds1, ds2, cgf, cgd,   &
+                     cwf, cwd, mugf, lambda, strdamf, gatedoorheight)
+       call flqhgsfm(Lf, teken, husb, hdsb, uu, zs, wstr, w2, wsd, zb2, ds1, ds2, dg,  &
+                     cgf, cgd, cwf, cwd, mugf, lambda, strdamf, jarea, ds)
+       fusav(3,n) = fu(Lf) ; rusav(3,n) = ru(Lf) ; ausav(3,n) = au(Lf) 
+       
+       g1 = 1d0-gatefraction
+       
+       fu(Lf) = gatefraction * fu_sav + g1 * fu(Lf)
+       ru(Lf) = gatefraction * ru_sav + g1 * ru(Lf)
+       au(Lf) = gatefraction * au_sav + g1 * au(Lf)
+    end if
 
     if (au(Lf) == 0d0) then 
         hu(Lf) =  0d0 
@@ -1224,6 +1247,8 @@ generalstruc(ng)%widthcenteronlink(1:ngen) = widths(1:ngen)
 call realloc(generalstruc(ng)%gateheightonlink, ngen)
 generalstruc(ng)%gateheightonlink(1:ngen) = generalstruc(ng)%gateheight
 generalstruc(ng)%numlinks                = ngen
+
+call realloc(generalstruc(ng)%gateclosedfractiononlink, ngen, fill=0d0)
 end subroutine togeneral
 
 
@@ -1851,7 +1876,9 @@ do ng=1,ncgensg ! Loop over general structures
    !       NOT because of gate door closing: that is handled by closedGateWidthL/R and may still
    !       have flow underneath doors if they are up high enough.
    closedWidth = max(0d0, totalWidth - crestwidth)/2d0 ! Intentionally symmetric: if crest/sill_width < totalwidth. Only gate door motion may have a direction, was already handled above.
-    
+   
+   generalstruc(ng)%gateclosedfractiononlink = 0d0
+   
    do L=L1cgensg(ng),L2cgensg(ng)
       L0 = L-L1cgensg(ng)+1
       Lf = kcgen(3,L)
@@ -1870,6 +1897,10 @@ do ng=1,ncgensg ! Loop over general structures
          help = min (wu(Lf), closedGateWidthL)
          closedGateWidthL = closedGateWidthL - help
          !end if
+         
+         if ( wu(Lf).gt.0d0 ) then
+            generalstruc(ng)%gateclosedfractiononlink(L0) = generalstruc(ng)%gateclosedfractiononlink(L0) + help/wu(Lf)
+         end if
       else    
          
       end if
@@ -1904,6 +1935,10 @@ do ng=1,ncgensg ! Loop over general structures
          help = min (wu(Lf), closedGateWidthR)
          closedGateWidthR = closedGateWidthR - help
          !end if
+         
+         if ( wu(Lf).gt.0d0 ) then
+            generalstruc(ng)%gateclosedfractiononlink(L0) = generalstruc(ng)%gateclosedfractiononlink(L0) + help/wu(Lf)
+         end if
       end if
 
        if (closedWidth <= 0d0 .and. closedGateWidthR <= 0d0) then

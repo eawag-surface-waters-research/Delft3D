@@ -7306,7 +7306,7 @@ contains
         deallocate(xp,yp)
 
         !if required, sort the links by distance in the polyline
-        if (present(sortLinks)) then
+        if (present(sortLinks) .and. numg.gt.0) then
             if (sortLinks==1) then
                allocate(sortedDistsStartPoly(numg))
                allocate(sortedIndexses(numg))

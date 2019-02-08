@@ -37695,7 +37695,7 @@ if (mext > 0) then
 
         else if (jaoldstr > 0 .and. qid == 'generalstructure' ) then
 
-           call selectelset_internal_links( filename, filetype, xz, yz, ln, lnx, kegen(ncgen+1:numl), numgen )
+           call selectelset_internal_links( filename, filetype, xz, yz, ln, lnx, kegen(ncgen+1:numl), numgen, sortLinks = 1)
            success = .true.
            WRITE(msgbuf,'(a,1x,a,i8,a)') trim(qid), trim(filename) , numgen, ' nr of general structure cells' ; call msg_flush()
 
@@ -37998,7 +37998,7 @@ if (mext > 0) then
     if (allocated(fusav)) deallocate(fusav)
     if (allocated(rusav)) deallocate(rusav)
     if (allocated(ausav)) deallocate(ausav)
-    allocate( Fusav(2,ncgen), Rusav(2,ncgen), Ausav(2,ncgen) , stat = ierr ) ; Fusav = 0d0 ; Rusav = 0d0 ; ausav = 0d0
+    allocate( Fusav(3,ncgen), Rusav(3,ncgen), Ausav(3,ncgen) , stat = ierr ) ; Fusav = 0d0 ; Rusav = 0d0 ; ausav = 0d0
 
     if ( allocated(cgen_ids) ) deallocate( cgen_ids )
     allocate( cgen_ids(ncgensg) )
