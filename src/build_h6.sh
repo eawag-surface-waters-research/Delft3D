@@ -433,7 +433,7 @@ if [ "$compiler" = 'intel16' ]; then
     projModule="intel/16.0.3 gcc/4.9.2 proj/5.2.0_intel16.0.3" 
     PROJ_CPPFLAGS=-I$PROJ_DIR/include
     PROJ_LDFLAGS=-L$PROJ_DIR/lib
-    PROJ_CONFARGS=--with-proj=$PROJ_DIR
+    PROJ_CONFARGS="--with-proj=$PROJ_DIR --disable-gdal"
 fi
 initProj="module load $projModule"
 eval $initProj
@@ -451,7 +451,7 @@ if [ "$compiler" = 'intel16' ]; then
     shapelibModule="intel/16.0.3 gcc/4.9.2 shapelib/1.4.1_intel16.0.3" 
     SHAPELIB_CPPFLAGS=-I$SHAPELIB_DIR/include
     SHAPELIB_LDFLAGS=-I$SHAPELIB_DIR/lib
-    SHAPELIB_CONFARGS=--with-shapelib=$SHAPELIB_DIR
+    SHAPELIB_CONFARGS="--with-shapelib=$SHAPELIB_DIR --disable-gdal"
 fi
 shapelib="module load $shapelibModule"
 eval $shapelib
