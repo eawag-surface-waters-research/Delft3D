@@ -548,6 +548,8 @@ cd third_party_open/fortrangis
 cp -f ../../autogen.sh . # temp fix
 log "Running $command in `pwd`"
 eval $command
+# needed a second time as workaroung for 'missing ltmain.sh'error
+eval $command
 cd ../..
 fi
 
