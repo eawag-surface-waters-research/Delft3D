@@ -2117,8 +2117,6 @@ subroutine GetTabulatedSizes(dpt, crossDef, doFlow, area, width, perimeter, af_s
    wl        = 0d0
    area_min  = 0d0
    width_min = 0d0
-   perimeter = 0d0
-   width     = 0d0
    !
    istart = 1
    do isec = 1, 3
@@ -2172,12 +2170,36 @@ subroutine GetTabulatedSizes(dpt, crossDef, doFlow, area, width, perimeter, af_s
          af_sub(isec) = af_sub(isec) + (dpt - dTop) * eTop
          area_min = area_min + (dpt - dTop) * width_min
          w_section(isec) = eTop
-   
       endif
-      area = area + af_sub(isec)
-      width = width + w_section(isec)
+   enddo
+
+   
+   levelsCount = crossDef%levelsCount
+   dTop = heights(levelsCount) - heights(1)
+   if (dpt > dTop) then
+      eTop = widths(levelsCount)
+      if ((eTop > ThresholdForPreismannLock)) then
+         if (af_sub(3) > 0d0) then
+            isec = 3
+         elseif (af_sub(2) > 0d0) then
+            isec = 2
+         else 
+            isec = 1
+         endif
+         perim_sub(isec) = perim_sub(isec) + 2.0d0 * (dpt - dTop)  !hk: add only when this part is meant to carry water
+      endif
+   endif
+
+   area      = 0d0
+   width     = 0d0   
+   perimeter = 0d0
+   do isec = 1, 3
+      area      = area      + af_sub(isec)
+      width     = width     + w_section(isec)
       perimeter = perimeter + perim_sub(isec)
    enddo
+   
+
    select case (calculationOption)
    case(CS_TYPE_PLUS)
       area  = area  + area_min
@@ -2523,8 +2545,8 @@ subroutine CircleProfile(dpt, diameter, area, width, perimeter, calculationOptio
    endif
    select case(calculationOption)
    case(CS_TYPE_NORMAL)
-      area = areacircle   + sl*dpt
-      width = widthcircle + sl
+      area = areacircle
+      width = widthcircle
    case(CS_TYPE_PREISMAN)
       area = areacircle    + sl*dpt
       width = widthcircle  + sl
@@ -2532,18 +2554,18 @@ subroutine CircleProfile(dpt, diameter, area, width, perimeter, calculationOptio
       if (dpt<ra) then
          ! half circle profile
          area      = dabs(fi*ra*ra - sq*(ra-dpt)) + sl*dpt
-         perimeter = 2d0*fi*ra 
+         perimeter = 2d0*fi*ra
          width     = 2d0*sq + sl
       else
-         area      = 0.5d0* pi*ra*ra + diameter*(dpt-ra) + sl*dpt
+         area      = 0.5d0* pi*ra*ra + diameter*(dpt-ra)
          perimeter = 2d0*pi*ra
-         width     = diameter + sl
+         width     = diameter
       endif   
    end select
 
    if (calculationOption == CS_TYPE_MIN) then
-      area  = area  - areacircle- sl*dpt
-      width = width - widthcircle - sl
+      area  = area  - areacircle
+      width = width - widthcircle
    endif
    
 end subroutine CircleProfile
