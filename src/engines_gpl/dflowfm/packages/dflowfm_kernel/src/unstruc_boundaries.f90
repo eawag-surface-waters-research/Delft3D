@@ -1716,6 +1716,8 @@ allocate(dambreakPolygons(nstr))
 !initialize the index
 dambridx = -1
 do i=1,nstr
+   plifile = ''
+   qid = ''
    str_ptr => strs_ptr%child_nodes(i)%node_ptr
 
    success = .true.
