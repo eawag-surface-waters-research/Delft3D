@@ -196,8 +196,10 @@ module m_structure
       integer gridpoint2
       integer istru               !< help variable to remove compounds with one structure
       logical cleared             ! To Check if compound is still cleared
-      double precision discharge
-      double precision velocity
+      double precision totalDischarge
+      double precision elementDischarge      !< contains the discharge of the first element of the compound structure (which is located on the branch link of the network)
+      double precision totalVelocity
+      double precision elementVelocity       !< contains the velocity of the first element of the compound structure (which is located on the branch link of the network)
       double precision water_level_up
       double precision water_level_down
       double precision head
