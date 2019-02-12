@@ -1,6 +1,7 @@
       subroutine ESPACE     ( pmsa   , fl     , ipoint , increm, noseg , &
                               noflux , iexpnt , iknmrk , noq1  , noq2  , &
                               noq3   , noq4   )
+!!!!!!!DEC$ ATTRIBUTES DLLEXPORT, ALIAS: 'ESPACE' :: ESPACE
 !
 !*******************************************************************************
 !
@@ -39,25 +40,26 @@
 !     Type    Name         I/O Description                                        Unit
 !
 !     support variables
-      integer,parameter  :: npmsamax = 200
-      integer            :: ipnt(npmsamax)    !    Local work array for the pointering
+!!    integer,parameter  :: npmsamax = 200
+      integer, allocatable, save :: ipnt(:)    !    Local work array for the pointering
       integer            :: iseg, isegl, iflux, ip, isrc, irec, isubs, ioq, iatt1, npmsa, ipmsa, isc
       real               :: emisvar, emisfac, sumlocator, drydep, rainconc, flux, ro_mmperday, ra_mmperday, roun_mmperday,&
-                            in_mmperday, fwashoff, ferosion, froun, finf, fdisp
-      real               :: fluxloss, conc, fluxbound, fluxunbound, fluxinf, fluxroun, fluxero, fluxwash, fluxleak, fluxstp,&
-                            kpaved, kunpaved, kdunpaved, fluxexp
+                            in_mmperday, fwashoff, ferosion, froun, finf, fdisp, fdeepinf, fgwbflow
+      real               :: fluxloss, conc, fluxbound, fluxunbound, fluxinf, fluxroun, fluxero, fluxwash, fluxgwf, fluxdeepinf,&
+                            fluxleak, fluxstp, kpaved, kunpaved, ksoil, kdunpaved, fluxexp
       character*20       :: itemname
       character*12       :: ddhhmmss1
 
       ! fixed quantities
       integer,parameter   :: scu = 1
-      integer,parameter   :: nrec = 5
+      integer,parameter   :: nrec = 6
       integer,parameter   :: nsubs = 5
       integer,parameter   :: rec_sew = 1
       integer,parameter   :: rec_pav = 2
       integer,parameter   :: rec_unp = 3
-      integer,parameter   :: rec_stw = 4
-      integer,parameter   :: rec_sfw = 5
+      integer,parameter   :: rec_soi = 4
+      integer,parameter   :: rec_stw = 5
+      integer,parameter   :: rec_sfw = 6
       integer,parameter   :: nopar_srca = 2
       integer,parameter   :: nopar_srcb = 1
       integer,parameter   :: lu_loc = 1961
@@ -75,6 +77,7 @@
       integer             :: offset_rf_srcb
       integer             :: offset_decp
       integer             :: offset_decup
+      integer             :: offset_decso
       integer             :: offset_kdup
       integer             :: offset_conc
       integer             :: lins
@@ -95,9 +98,11 @@
       integer,parameter   :: sew2stp = 2
       integer,parameter   :: pav2stw = 3
       integer,parameter   :: unp2stw = 4
-      integer,parameter   :: stw2exp = 5
-      integer,parameter   :: sfw2exp = 6
-      integer,parameter   :: unp2inf = 7
+      integer,parameter   :: unp2soi = 5
+      integer,parameter   :: soi2stw = 6
+      integer,parameter   :: stw2exp = 7
+      integer,parameter   :: sfw2exp = 8
+      integer,parameter   :: soi2inf = 9
 
 
       ! pointers to concrete items
@@ -115,10 +120,12 @@
       integer,parameter   :: ip_leakage = 12
       integer,parameter   :: ip_ropaved = 13
       integer,parameter   :: ip_rounpaved = 14
-      integer,parameter   :: ip_infilt = 15
-      integer,parameter   :: ip_totflow = 16
-      integer,parameter   :: ip_itime = 17
-      integer,parameter   :: lastsingle = 17
+      integer,parameter   :: ip_percola = 15
+      integer,parameter   :: ip_gwbflow = 16
+      integer,parameter   :: ip_deepinf = 17
+      integer,parameter   :: ip_totflow = 18
+      integer,parameter   :: ip_itime = 19
+      integer,parameter   :: lastsingle = 19
 
       ! input items
       integer             :: nsrca     ! # of sources type A
@@ -136,6 +143,8 @@
       real                :: ropaved    ! runoff from paved areas
       real                :: rounpaved  ! unpaved
       real                :: infilt     ! infiltration
+      real                :: gwbaseflow ! groundwater flow
+      real                :: deepinfilt ! deep infiltration
       integer             :: itime      ! actual time
       real                :: totalflow  ! actual flow
 
@@ -165,11 +174,9 @@
       logical first
       data first /.true./
 
-      integer :: ierr
-
       save sc_losses, losses, frac2rec, totflxin, boun
       save first, npmsa, nsrca, nsrcb, nosegl, delt, &
-            offset_srca, offset_srcb, offset_decp, offset_decup, offset_kdup, &
+            offset_srca, offset_srcb, offset_decp, offset_decup, offset_decso, offset_kdup, &
             offset_ef, offset_ef_srca, offset_ef_srcb, offset_rf_srca, offset_rf_srcb, &
             offset_conc, lins, louts, offset_vel, fl0_atm, fl0_srca, fl0_srcb, fl0_dec
 
@@ -195,7 +202,8 @@
             offset_srcb = offset_srca + nsrca*nopar_srca  ! EV and locator sources type A
             offset_decp = offset_srcb + nsrcb*nopar_srcb  ! decay rate paved
             offset_decup = offset_decp + nsubs            ! decay rate unpaved
-            offset_kdup = offset_decup + nsubs            ! Kd rate unpaved
+            offset_decso = offset_decup + nsubs           ! decay rate soil
+            offset_kdup = offset_decso + nsubs            ! Kd rate unpaved
             offset_ef = offset_kdup + nsubs               ! emission factors
             offset_ef_srca = offset_ef + 2*nsubs          ! EF Type A
             offset_ef_srcb = offset_ef_srca + nsrca*nsubs ! Type B
@@ -206,16 +214,19 @@
             louts = nsubs
             loute = nsubs
             npmsa = lins+line+louts+loute
-            if (npmsa.gt.npmsamax) then
-                write (*,*) 'lins = ',lins
-                write (*,*) 'line = ',line
-                write (*,*) 'louts = ',louts
-                write (*,*) 'loute = ',loute
-                write (*,*) 'npmsa = ',npmsa
-                write (*,*) 'npmsamax = ',npmsamax
+
+            allocate( ipnt(npmsa) )
+!!            write (*,*) 'NPMSA = ', npmsa
+!!            if (npmsa.gt.npmsamax) then
+!!                write (*,*) 'lins = ',lins
+!!                write (*,*) 'line = ',line
+!!                write (*,*) 'louts = ',louts
+!!                write (*,*) 'loute = ',loute
+!!                write (*,*) 'npmsa = ',npmsa
+!!                write (*,*) 'npmsamax = ',npmsamax
 !           if (npmsa.gt.npmsamax) then
-                call errsys ('PMSA admin array too small',1)
-            endif
+!!               call errsys ('PMSA admin array too small',1)
+!!            endif
             offset_vel = lins+line+louts
 
             ! Fluxes Admin
@@ -274,50 +285,30 @@
             enddo
 
             ! pick up elements from STU file
-            open (lu_ini,file='espace.ini', iostat = ierr, status = 'old')
-            if ( ierr == 0 ) then
-                call gkwini(lu_ini,'Espace','file_in_names',file_in_names)
-                call gkwini(lu_ini,'Espace','file_out_nodes',file_out_nodes)
-                call gkwini(lu_ini,'Espace','file_usefor',file_usefor)
-                call gkwini(lu_ini,'Espace','file_subs',file_subs)
-            else
-                write(*,*) 'Note: ini-file "espace.ini" not found - using defaults'
-                file_in_names = ' '
-                file_out_nodes = 'espace.out'
-                file_usefor    = 'espace.use'
-                file_subs      = 'espace.sub'
-            endif
+            open (lu_ini,file='espace.ini')
+            call gkwini(lu_ini,'Espace','file_in_names',file_in_names)
+            call gkwini(lu_ini,'Espace','file_out_nodes',file_out_nodes)
+            call gkwini(lu_ini,'Espace','file_usefor',file_usefor)
+            call gkwini(lu_ini,'Espace','file_subs',file_subs)
 
             ! Headers of output files
+            open (lu_loc,file=file_in_names)
+            read (lu_loc,*) nsc
+
+            ! one file for all boundaries
             open (lu_nod,file=file_out_nodes)
-
-            if ( ierr == 0 ) then
-                open (lu_loc,file=file_in_names)
-                read (lu_loc,*) nsc
-                write (lu_nod,'(''ITEM ;    '',2i10)') nsc,nsubs
-
-                ! one file for all boundaries
-                do isc = 1,nsc
-                    read (lu_loc,*) itemname
-                    write (lu_nod,1001) trim(itemname)
-                enddo
-                read (lu_loc,*) nswb
-            else
-                ! one file for all boundaries
-                nsc  = nosegl
-                nswb = 0
-                write (lu_nod,'(''ITEM ;    '',2i10)') nsc,nsubs
-                do isc = 1,nsc
-                    write(itemname, '(a,i0)') 'Boundary-', isc
-                    write (lu_nod,1001) trim(itemname)
-                enddo
-            endif
+            write (lu_nod,'(''ITEM ;    '',2i10)') nsc,nsubs
+            do isc = 1,nsc
+                read (lu_loc,*) itemname
+                write (lu_nod,1001) trim(itemname)
+            enddo
             write (lu_nod,'(''CONCENTRATIONS'')')
             write (lu_nod,1002) trim(file_usefor)
             write (lu_nod,'(''TIME BLOCK'')')
             write (lu_nod,'(''DATA'')')
             write (lu_nod,1002) trim(file_subs)
 
+            read (lu_loc,*) nswb
             if (nsc+nswb.ne.nosegl) call errsys('NSC+NSWB=/NOSEGL',1)
             if (nswb.gt.0) call errsys('NSWB>0 not implemented',1)
 
@@ -406,6 +397,7 @@
           frac2rec(rec_sew) = 0.0
           frac2rec(rec_pav) = fpaved
           frac2rec(rec_unp) = funpaved
+          frac2rec(rec_soi) = 0.0
           frac2rec(rec_stw) = 0.0
           frac2rec(rec_sfw) = fwater
 
@@ -487,7 +479,7 @@
 
           rounpaved = pmsa(ipnt(ip_rounpaved))
           roun_mmperday = rounpaved / (totsurf*funpaved) * 1000. * 86400.
-          infilt = pmsa(ipnt(ip_infilt))
+          infilt = pmsa(ipnt(ip_percola))
           in_mmperday = infilt / totsurf * 1000. * 86400.
           ra_mmperday = rainfall / totsurf * 1000.           ! already in m3/d
           ferosion = (ra_mmperday-ra_lothr)/(ra_hithr-ra_lothr)
@@ -516,12 +508,46 @@
               fluxroun = fluxunbound * fdisp * froun
               ioq = (unp2stw-1)*nosegl + isegl
               pmsa(ipoint(offset_vel+isubs)+increm(offset_vel+isubs)*(ioq-1)) = fluxero + fluxroun
-              ioq = (unp2inf-1)*nosegl + isegl
+              ioq = (unp2soi-1)*nosegl + isegl
               pmsa(ipoint(offset_vel+isubs)+increm(offset_vel+isubs)*(ioq-1)) = fluxinf
               iflux = fl0_dec + isubs + (iseg-1)*noflux
               fl(iflux) = fluxloss
               ! to downstream
+              totflxin(isubs,rec_soi) = totflxin(isubs,rec_soi) + fluxinf
               totflxin(isubs,rec_stw) = totflxin(isubs,rec_stw) + fluxero + fluxroun
+          enddo
+
+          endif
+
+          ! SOIL SYSTEM ------------------------------------------------------------------------------------
+
+          iseg = isegl + (rec_soi-1)*nosegl
+          call dhkmrk(1,iknmrk(iseg),iatt1) ! pick up first attribute
+          if (iatt1.gt.0) then
+
+          gwbaseflow = pmsa(ipnt(ip_gwbflow))
+          deepinfilt = pmsa(ipnt(ip_deepinf))
+          fgwbflow = max(min(gwbaseflow,1.0),0.0)
+          fdeepinf = max(min(deepinfilt,1.0),0.0)
+
+          do isubs = 1,nsubs
+              ! input
+              ip = offset_decso + isubs
+              ksoil = pmsa(ipoint(ip))
+              ip = offset_conc + isubs
+              conc = pmsa(ipoint(ip)+(iseg-1)*increm(ip))
+              ! fluxes
+              fluxloss = ksoil * conc / 86400.
+              fluxgwf = (conc / delt + totflxin(isubs,rec_soi) - fluxloss) * fgwbflow
+              fluxdeepinf = (conc / delt + totflxin(isubs,rec_soi) - fluxloss) * fdeepinf
+              ioq = (soi2stw-1)*nosegl + isegl
+              pmsa(ipoint(offset_vel+isubs)+increm(offset_vel+isubs)*(ioq-1)) = fluxgwf
+              ioq = (soi2inf-1)*nosegl + isegl
+              pmsa(ipoint(offset_vel+isubs)+increm(offset_vel+isubs)*(ioq-1)) = fluxdeepinf
+              iflux = fl0_dec + isubs + (iseg-1)*noflux
+              fl(iflux) = fluxloss
+              ! to downstream
+              totflxin(isubs,rec_stw) = totflxin(isubs,rec_stw) + fluxgwf
           enddo
 
           endif
