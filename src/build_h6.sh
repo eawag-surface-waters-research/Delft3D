@@ -430,7 +430,9 @@ fi
 projModule=""
 if [ "$compiler" = 'intel16' ]; then
     # icc c++11 features are only available if gcc is in the path. This is required by proj
-    projModule="intel/16.0.3 gcc/4.9.2 proj/5.2.0_intel16.0.3" 
+    projModule="intel/16.0.3 gcc/4.9.2 proj/5.2.0_intel16.0.3"
+elif [ "$compiler" = 'intel18' ]; then
+    projModule="intel/18.0.3 gcc/4.9.2 proj/5.2.0_intel18.0.3"
 fi
 initProj="module load $projModule"
 eval $initProj
@@ -450,6 +452,8 @@ shapelibModule=""
 if [ "$compiler" = 'intel16' ]; then
     # icc c++11 features are only available if gcc is in the path. This is required by shapelib
     shapelibModule="intel/16.0.3 gcc/4.9.2 shapelib/1.4.1_intel16.0.3" 
+elif [ "$compiler" = 'intel18' ]; then
+    shapelibModule="intel/18.0.3 gcc/4.9.2 shapelib/1.4.1_intel18.0.3"
 fi
 shapelib="module load $shapelibModule"
 eval $shapelib
