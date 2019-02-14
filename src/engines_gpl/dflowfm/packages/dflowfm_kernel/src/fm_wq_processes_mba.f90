@@ -898,19 +898,30 @@
          totals = zero
          write (lunbal, 1010) seconds_to_dhms(nint(timestart, long)), seconds_to_dhms(nint(timeend, long)), mbaname(imba), syname(isys)
          write (lunbal, 2000) mbamassbegin(isys, imba), mbamassend(isys, imba)
-         write (lunbal, 1011)
-         if (mbavolumebegin(imba).gt.0.0) then
-            concbegin = mbamassbegin(isys, imba) / mbavolumebegin(imba)
+         if (isys.le.nosys) then
+            write (lunbal, 1011)
+            if (mbavolumebegin(imba).gt.0.0) then
+               concbegin = mbamassbegin(isys, imba) / mbavolumebegin(imba)
+            else
+               concbegin = 0.0
+            endif
+            if (mbavolumeend(imba).gt.0.0) then
+               concend = mbamassend(isys, imba) / mbavolumeend(imba)
+            else
+               concend = 0.0
+            endif
          else
-            concbegin = 0.0
-         endif
-         if (mbavolumeend(imba).gt.0.0) then
-            concend = mbamassend(isys, imba) / mbavolumeend(imba)
-         else
-            concend = 0.0
+            write (lunbal, 1012)
+            if (mbaarea(imba).gt.0.0) then
+               concbegin = mbamassbegin(isys, imba) / mbaarea(imba)
+               concend = mbamassend(isys, imba) / mbaarea(imba)
+            else
+               concbegin = 0.0
+               concend = 0.0
+            endif
          endif
          write (lunbal, 2000) concbegin, concend
-         write (lunbal, 1012) syname(isys)
+         write (lunbal, 1013) syname(isys)
          if (mbamassbegin(isys, imba).gt.mbamassend(isys, imba)) then
             totals(1) = mbamassbegin(isys, imba) - mbamassend(isys, imba)
          else
@@ -1014,19 +1025,30 @@
       summbamassbegin = sum(mbamassbegin(isys, :))
       summbamassend = sum(mbamassend(isys, :))
       write (lunbal, 2000) summbamassbegin, summbamassend
-      write (lunbal, 1011)
-      if (summbavolumebegin.gt.0.0) then
-         concbegin = summbamassbegin / summbavolumebegin
+      if(isys.le.nosys) then
+         write (lunbal, 1011)
+         if (summbavolumebegin.gt.0.0) then
+            concbegin = summbamassbegin / summbavolumebegin
+         else
+            concbegin = 0.0
+         endif
+         if (summbavolumeend.gt.0.0) then
+            concend = summbamassend / summbavolumeend
+         else
+            concend = 0.0
+         endif
       else
-         concbegin = 0.0
-      endif
-      if (summbavolumeend.gt.0.0) then
-         concend = summbamassend / summbavolumeend
-      else
-         concend = 0.0
+         write (lunbal, 1012)
+         if (summbaarea.gt.0.0) then
+            concbegin = summbamassbegin / summbaarea
+            concend = summbamassend / summbaarea
+         else
+            concbegin = 0.0
+            concend = 0.0
+         endif
       endif
       write (lunbal, 2000) concbegin, concend
-      write (lunbal, 1012) syname(isys)
+      write (lunbal, 1013) syname(isys)
       if (summbamassbegin.gt.summbamassend) then
          totals(1) = summbamassbegin - summbamassend
       else
@@ -1100,9 +1122,11 @@
                  //'Mass balance area             : ',a                           &
                  //'Mass substance ',A20,'     Begin            End '             &
                   /'-------------------------------------------------------------')
-   1011 format (  /'Average concentration                   Begin            End '&
+   1011 format (  /'Average concentration (mass/m3)         Begin            End '&
                   /'-------------------------------------------------------------')
-   1012 format (  /'Substance ',A20,'Sources/Inflows Sinks/Outflows '             &
+   1012 format (  /'Average concentration (mass/m2)         Begin            End '&
+                  /'-------------------------------------------------------------')
+   1013 format (  /'Substance ',A20,'Sources/Inflows Sinks/Outflows '             &
                   /'-------------------------------------------------------------')
 
    2000 format (30X,2ES15.7)
