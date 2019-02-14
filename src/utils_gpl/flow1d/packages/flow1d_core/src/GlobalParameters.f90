@@ -46,7 +46,7 @@ module m_GlobalParameters
    logical                          :: fillCulvertsWithGL            = .false.
    logical                          :: doReadCache                   = .false.
    logical                          :: doWriteCache                  = .false.
-   logical                          :: updateTabulatedProfiles       = .true.
+   logical                          :: updateTabulatedProfiles       = .false.
    double precision                 :: thresholdDry                  = 0.001d0
    double precision                 :: thresholdFlood                = 0.01d0
    double precision                 :: factorFloodingDividedByDrying = 10.0d0
