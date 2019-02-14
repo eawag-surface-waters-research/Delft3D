@@ -68,7 +68,8 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    integer, parameter :: mapclass_time_buffer_size =   1
 
    integer, dimension(nfiles+1) :: ncids, id_timedim, id_facedim, id_edgedim, id_laydim, id_wdim, id_nodedim, &
-                                   id_netedgedim, id_netfacedim, id_netfacemaxnodesdim, id_time, id_timestep, id_bnddim !< dim and var ids, maintained for all input files + 1 output file.
+                                   id_netedgedim, id_netfacedim, id_netfacemaxnodesdim, id_time, id_timestep, id_bnddim, &
+                                   id_laycoordcc, id_laycoordw !< dim and var ids, maintained for all input files + 1 output file.
    double precision :: convversion
    integer :: jaugrid, iconvtype, formatCode, new_ndx
    integer, dimension(nfiles) :: jaugridi, ioncids
@@ -109,7 +110,8 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
 !   integer :: nnetfaceglob, nnetfaceglob0, nnetfacecount, numpg
    integer :: nnetedgeglob, nnetedgeglob0, nnetedgecount
    integer :: nitemglob, nitemglob0, nitemcount, maxitems
-   integer :: nkmxglob
+   integer :: nkmxglob, ifilekmxglob
+   integer :: jasigma = 1
 
    integer :: idom, n1, n2, n3, k1, k2
    integer :: tmpdimids(NF90_MAX_VAR_DIMS)
@@ -167,6 +169,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    integer,                      allocatable :: itimsel(:)
    double precision,             allocatable :: times(:)
    double precision,             allocatable :: timestep(:)
+   double precision,             allocatable :: laycoordcc(:), laycoordw(:) ! vertical coordinates
    logical :: isfound, needshift, exist
    integer :: size_btmp
    character(len=1) :: answer
@@ -197,6 +200,8 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    id_laydim  = -1
    id_wdim    = -1
    id_bnddim  = -1
+   id_laycoordcc = -1
+   id_laycoordw  = -1
    ndx        =  0
    lnx        =  0
    kmx        =  0
@@ -383,6 +388,12 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                   ! No special dimension, so probably just some vectormax-type dimension that
                   ! we may need later for some variables, so store it.
                   dimids(id, ii) = id ! Only stored to filter on non-missing values in def_dim loop later
+                  if (trim(dimname) == 'nmesh2d_layer') then
+                     id_laydim(ii) = id
+                     kmx(ii)       = nlen
+                  else if (trim(dimname) == 'nmesh2d_interface') then
+                     id_wdim(ii) = id
+                  end if
                endif
             endif
          enddo
@@ -569,8 +580,12 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
       ! *or* if it is a special time-related variable. All others impossible to merge.
       if (var_spacedimpos(ivarcandidate) <= 0 .and. var_timdimpos(ivarcandidate) <= 0 .and. nvardims .ne. 0) then
          if (verbose_mode) then
-            write (*,'(a)')           'Error: mapmerge: detected that variable `'//trim(varname)//''': is not defined on space' &
+            if ((trim(varname) == 'LayCoord_cc' .or. trim(varname) == 'LayCoord_w' .or. trim(varname) == 'mesh2d_layer_sigma' .or. trim(varname) == 'mesh2d_layer_z' .or. trim(varname) == 'mesh2d_interface_sigma' .or. trim(varname) == 'mesh2d_interface_z')) then
+               write (*,'(a)')'Info: mapmerge: Variable `'//trim(varname)//''' will be copied from one of the input files to the merged file.'  
+            else
+               write (*,'(a)') 'Error: mapmerge: detected that variable `'//trim(varname)//''': is not defined on space' &
                //'locations, and is not a special time-related variable. Skipping this variable.'
+            end if
          end if
          ! Make decrement -1 to all dimensions of the skipped variable, i.e. they are used one time less
          ! dimids_uses(id_infile) needs to be decremented -1 here for the kx dim
@@ -1123,12 +1138,14 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
     end do
    end if
    nkmxglob = kmx(1)
+   ifilekmxglob = 1
    do ii = 2,nfiles
       if (kmx(ii) .ne. nkmxglob) then
          write(*, '(a)') 'Error: Different layers are found in subdomains.'
          if (.not. verbose_mode) goto 888
          if (kmx(ii) > nkmxglob) then
             nkmxglob = kmx(ii)
+            ifilekmxglob = ii
          endif
       endif
    enddo
@@ -1167,6 +1184,10 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
       ierr = nf90_def_dim(ncids(noutfile), 'nmesh2d_face', ndx(noutfile),  id_facedim(noutfile))
       ierr = nf90_def_dim(ncids(noutfile), 'nmesh2d_edge', numl(noutfile), id_netedgedim(noutfile))
       ierr = nf90_def_dim(ncids(noutfile), 'nmesh2d_node', numk(noutfile), id_nodedim(noutfile))
+      if (kmx(noutfile) > 0) then
+         ierr = nf90_def_dim(ncids(noutfile), 'nmesh2d_layer', kmx(noutfile), id_laydim(noutfile))
+         ierr = nf90_def_dim(ncids(noutfile), 'nmesh2d_interface', kmx(noutfile)+1, id_wdim(noutfile))
+      end if
    endif
 
    !! 4. Define all variables (grid + data), including any remaining dimensions
@@ -1175,7 +1196,9 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
       if (dimids(id,ifile) > 0) then ! For now, just copy the vectormax dimids (if any) from file #1 to output file. Assume same length in all files.
          ierr = nf90_inquire_dimension(ncids(ifile), dimids(id,ifile), name = dimname, len = nlen)
          if (dimids_uses(id) <= 0) then
-            write (*,'(a)') 'Info: mapmerge: Dimension `'//trim(dimname)//''' is not merged because no merged variable uses it. '
+            if (trim(dimname) .ne. 'nmesh2d_layer' .and. trim(dimname) .ne. 'nmesh2d_interface' .and. trim(dimname) .ne. 'laydim' .and. trim(dimname) .ne. 'wdim') then
+               write (*,'(a)') 'Info: mapmerge: Dimension `'//trim(dimname)//''' is not merged because no merged variable uses it. '
+            end if
             cycle
          endif
          ! When one file has only triangular mesh and one file has only rectangular mesh, then a variable, e.g. 'NetElemNode'
@@ -1288,6 +1311,60 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    ! 4. Write new flow geom to output file
    ! 5. Write all timedep fields from all files into output file
 
+   ! define variables of vertical coordinates for 3D model files
+   if (kmx(noutfile) > 0) then
+      if (jaugrid == 0) then ! old format
+         ierr = nf90_inq_varid(ncids(ifilekmxglob), 'LayCoord_cc', id_laycoordcc(ifilekmxglob))
+         if (ierr /= nf90_noerr) then
+            write (*,'(a)') 'Warning: mapmerge: could not find variable LayCoord_cc in file `'//trim(infiles(ifilekmxglob))//''', so do not write this variable to the output file. '
+         else
+            ierr = nf90_def_var(ncids(noutfile), 'LayCoord_cc', nf90_double, id_laydim(noutfile), id_laycoordcc(noutfile))
+            ierr = ncu_copy_atts(ncids(ifilekmxglob), ncids(noutfile), id_laycoordcc(ifilekmxglob), id_laycoordcc(noutfile))
+         end if
+
+         ierr = nf90_inq_varid(ncids(ifilekmxglob), 'LayCoord_w', id_laycoordw(ifilekmxglob))
+         if (ierr /= nf90_noerr) then
+            write (*,'(a)') 'Warning: mapmerge: could not find variable LayCoord_w in file `'//trim(infiles(ifilekmxglob))//''', so do not write this variable to the output file. '
+         else
+            ierr = nf90_def_var(ncids(noutfile), 'LayCoord_w', nf90_double, id_wdim(noutfile), id_laycoordw(noutfile))
+            ierr = ncu_copy_atts(ncids(ifilekmxglob), ncids(noutfile), id_laycoordw(ifilekmxglob), id_laycoordw(noutfile))
+         end if
+      else ! UGRID format, need to distinguish between sigma-layer and z-layer
+         ierr = nf90_inq_varid(ncids(ifilekmxglob), 'mesh2d_layer_sigma', id_laycoordcc(ifilekmxglob))
+         if (ierr == nf90_noerr) then
+            jasigma = 1
+            ierr = nf90_def_var(ncids(noutfile), 'mesh2d_layer_sigma', nf90_double, id_laydim(noutfile), id_laycoordcc(noutfile))
+            ierr = ncu_copy_atts(ncids(ifilekmxglob), ncids(noutfile), id_laycoordcc(ifilekmxglob), id_laycoordcc(noutfile))          
+         else
+            ierr = nf90_inq_varid(ncids(ifilekmxglob), 'mesh2d_layer_z', id_laycoordcc(ifilekmxglob))
+            if (ierr == nf90_noerr) then
+               jasigma = 0
+               ierr = nf90_def_var(ncids(noutfile), 'mesh2d_layer_z', nf90_double, id_laydim(noutfile), id_laycoordcc(noutfile))
+               ierr = ncu_copy_atts(ncids(ifilekmxglob), ncids(noutfile), id_laycoordcc(ifilekmxglob), id_laycoordcc(noutfile))
+            else
+               write (*,'(a)') 'Warning: mapmerge: could not find variable mesh2d_layer_sigma/mesh2d_layer_z in file `'//trim(infiles(ifilekmxglob))//''', so do not write this variable to the output file. '
+            end if
+         end if
+
+         if (jasigma == 1) then
+            ierr = nf90_inq_varid(ncids(ifilekmxglob), 'mesh2d_interface_sigma', id_laycoordw(ifilekmxglob))
+         else
+            ierr = nf90_inq_varid(ncids(ifilekmxglob), 'mesh2d_interface_z', id_laycoordw(ifilekmxglob))
+         end if
+
+         if (ierr /= nf90_noerr) then
+            write (*,'(a)') 'Warning: mapmerge: could not find variable mesh2d_interface_sigma/mesh2d_interface_z in file `'//trim(infiles(ifilekmxglob))//''', so do not write this variable to the output file. '
+         else
+            if (jasigma == 1) then
+               ierr = nf90_def_var(ncids(noutfile), 'mesh2d_interface_sigma', nf90_double, id_wdim(noutfile), id_laycoordw(noutfile))
+            else
+               ierr = nf90_def_var(ncids(noutfile), 'mesh2d_interface_z', nf90_double, id_wdim(noutfile), id_laycoordw(noutfile))
+            end if
+            ierr = ncu_copy_atts(ncids(ifilekmxglob), ncids(noutfile), id_laycoordw(ifilekmxglob), id_laycoordw(noutfile))
+         end if
+      end if
+   end if
+
    ierr = nf90_enddef(ncids(noutfile))
 
    ! For now: do all times.
@@ -1303,6 +1380,55 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
 
    ierr = nf90_put_var(ncids(noutfile), id_time(noutfile), times, count = (/ ntsel /))
    ierr = nf90_put_var(ncids(noutfile), id_timestep(noutfile), timestep, count = (/ ntsel /))
+
+   ! Write vertical coordinate for 3D model map/rst files: copy values from file ifilekmxglob
+   if (kmx(noutfile) > 0) then
+      allocate(laycoordcc(kmx(noutfile)))
+      allocate(laycoordw(kmx(noutfile)+1))
+      laycoordcc = dmiss
+      laycoordw  = dmiss
+      if (jaugrid == 0) then
+         ierr = nf90_inq_varid(ncids(ifilekmxglob), 'LayCoord_cc', id_laycoordcc(ifilekmxglob))
+         ierr = nf90_get_var(ncids(ifilekmxglob), id_laycoordcc(ifilekmxglob), laycoordcc, count = (/ kmx(ifilekmxglob)  /), start = (/ 1 /))
+         if (ierr /= nf90_noerr) then
+            write (*,'(a)') 'Warning: mapmerge: could not read variable LayCoord_cc in file `'//trim(infiles(ifilekmxglob))//''', so do not copy this variable to the output file. '
+         else
+            ierr = nf90_put_var(ncids(noutfile), id_laycoordcc(noutfile), laycoordcc, count = (/kmx(noutfile)/))
+         end if
+
+         ierr = nf90_inq_varid(ncids(ifilekmxglob), 'LayCoord_w', id_laycoordw(ifilekmxglob))
+         ierr = nf90_get_var(ncids(ifilekmxglob), id_laycoordw(ifilekmxglob), laycoordw, count = (/ kmx(ifilekmxglob)+1  /), start = (/ 1 /))
+         if (ierr /= nf90_noerr) then
+            write (*,'(a)') 'Warning: mapmerge: could not read variable LayCoord_w in file `'//trim(infiles(ifilekmxglob))//''', so do not copy this variable to the output file. '
+         else
+            ierr = nf90_put_var(ncids(noutfile), id_laycoordw(noutfile), laycoordw, count = (/kmx(noutfile)+1/))
+         end if
+      else
+         if (jasigma == 1) then
+            ierr = nf90_inq_varid(ncids(ifilekmxglob), 'mesh2d_layer_sigma', id_laycoordcc(ifilekmxglob))
+         else
+            ierr = nf90_inq_varid(ncids(ifilekmxglob), 'mesh2d_layer_z', id_laycoordcc(ifilekmxglob))
+         end if
+         ierr = nf90_get_var(ncids(ifilekmxglob), id_laycoordcc(ifilekmxglob), laycoordcc, count = (/ kmx(ifilekmxglob)  /), start = (/ 1 /))
+         if (ierr /= nf90_noerr) then
+            write (*,'(a)') 'Warning: mapmerge: could not read variable mesh2d_layer_sigma/mesh2d_layer_z in file `'//trim(infiles(ifilekmxglob))//''', so do not copy this variable to the output file. '
+         else
+            ierr = nf90_put_var(ncids(noutfile), id_laycoordcc(noutfile), laycoordcc, count = (/kmx(noutfile)/))
+         end if
+
+         if (jasigma == 1) then
+            ierr = nf90_inq_varid(ncids(ifilekmxglob), 'mesh2d_interface_sigma', id_laycoordw(ifilekmxglob))
+         else
+            ierr = nf90_inq_varid(ncids(ifilekmxglob), 'mesh2d_interface_z', id_laycoordw(ifilekmxglob))
+         end if
+         ierr = nf90_get_var(ncids(ifilekmxglob), id_laycoordw(ifilekmxglob), laycoordw, count = (/ kmx(ifilekmxglob)+1  /), start = (/ 1 /))
+         if (ierr /= nf90_noerr) then
+            write (*,'(a)') 'Warning: mapmerge: could not read variable mesh2d_interface_sigma/mesh2d_interface_z in file `'//trim(infiles(ifilekmxglob))//''', so do not copy this variable to the output file. '
+         else
+            ierr = nf90_put_var(ncids(noutfile), id_laycoordw(noutfile), laycoordw, count = (/kmx(noutfile)+1/))
+         end if
+      end if
+   end if
 
    if (verbose_mode) then
       write (*,'(a)') '## Writing merged variables to output file...'
