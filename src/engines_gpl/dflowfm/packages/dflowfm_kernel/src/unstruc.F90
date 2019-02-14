@@ -1084,10 +1084,10 @@ if(q /= 0) then
     
     if (nums1it > maxNonlinearIterations) then
        write(msgbuf, '(''No convergence in nonlinear solver at time '', g10.5,'' (s), time step is reduced from '', f8.4, '' (s) into '', f8.4, '' (s)'')') time0, dts, 0.5d0*dts
-       if (nonlin1D == 2) then
-          ! Nested Newtotn
-          call err_flush()
-       else
+       !if (nonlin1D == 2) then
+       !   ! Nested Newton
+       !   !call err_flush()
+       !else
           call warn_flush()
           dts = 0.5d0*dts
           dsetb  = dsetb + 1                               ! total nr of setbacks
@@ -1100,7 +1100,7 @@ if(q /= 0) then
           endif
           call setkfs()
           goto 111                                      ! redo with timestep reduction => 111 furu
-       endif
+       !endif
     endif
 
     !if (nums1it > 10) then
@@ -8942,8 +8942,8 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
     call mba_init()
  endif
 
+ updateTabulatedProfiles = .true.
  if (stm_included) then 
-     updateTabulatedProfiles = .true.
      call fm_update_mor_width_area()
  endif 
  
