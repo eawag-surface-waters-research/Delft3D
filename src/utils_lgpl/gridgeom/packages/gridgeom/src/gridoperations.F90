@@ -689,11 +689,6 @@
             JA = 0
          ELSE IF (XK(K1) == XK(K2) .AND. YK(K1) == YK(K2) ) THEN !            : OR BOTH EQUAL
             JA = 0
-            if (k3==1) then
-               write(msgbuf,'(''coordinates of the netnodes of netlink '', i6, ''are identical'')') L
-               call err_flush()
-            endif
-            
          ENDIF
          IF (JA == 1) THEN
             IF (K3 == 0 .or. K3 == 2) THEN
