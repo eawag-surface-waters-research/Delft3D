@@ -5097,7 +5097,8 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
       ierr = nf90_put_var(mapids%ncid, mapids%id_ssycum(2), toutputy(1:ndxi,:), start = (/ 1, 1, itim /), count = (/ ndxi, stmpar%lsedtot, 1 /))       
    else
       if (time_map == ti_mape) then   ! to check, last timestep?
-         ierr = nf90_put_var(mapids%ncid, mapids%id_sedavgtim    , mortime, (/ 1 /))  
+         ! The following line is incorrect and commented out: it writes a variable into a dimension. As result the first entry of the edge_node table is corrupted and the geometry is unreadble by quickplot.
+         ! ierr = nf90_put_var(mapids%ncid, mapids%id_sedavgtim    , mortime, (/ 1 /))  
          ! Bedload components
          call realloc(toutputx, (/ndx, stmpar%lsedtot /), keepExisting=.false., fill = -999d0)
          call realloc(toutputy, (/ndx, stmpar%lsedtot /), keepExisting=.false., fill = -999d0)
