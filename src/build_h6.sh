@@ -119,7 +119,7 @@ while [ $# -gt 0 ]; do
         -intel16|-intel16.0.3)
             compiler='intel16'
             ;;
-	-intel18|-intel18.0.3)
+        -intel18|-intel18.0.3)
             compiler='intel18'
             ;;
         -m|-make)
@@ -187,11 +187,11 @@ case $compiler in
         ;;
     
     intel18)
-	fortranModule="intel/18.0.3"
-	ifortInit="module load $fortranModule"
+    fortranModule="intel/18.0.3"
+    ifortInit="module load $fortranModule"
         iccInit=""
         echo "Using Intel 18.0.3 Fortran ($platform) compiler"
-	;;
+        ;;
 
     intel16)
         fortranModule="intel/16.0.3"
@@ -320,7 +320,7 @@ else
         mpichModule="mpich2/3.1.4_intel_16.0.3"
 
     elif [ "$compiler" = 'intel18' ]; then
-	mpichModule="mpich2/3.3_intel_18.0.3" 
+    mpichModule="mpich2/3.3_intel_18.0.3" 
     fi
 fi
 initMpich2="module load $mpichModule"
@@ -343,9 +343,9 @@ else
     if [ "$compiler" = 'intel14' ]; then
         petscModule="petsc/3.4.0_intel14.0.3_mpich_3.1.4"
     elif [ "$compiler" = 'intel16' ]; then
-	petscModule="petsc/3.4.0_intel16.0.3_mpich_3.1.4"
+    petscModule="petsc/3.4.0_intel16.0.3_mpich_3.1.4"
     elif [ "$compiler" = 'intel18' ]; then
-	petscModule="petsc/3.9.3_intel18.0.3_mpich_3.3"
+    petscModule="petsc/3.9.3_intel18.0.3_mpich_3.3"
     fi
 fi
 initPetsc="module load $petscModule"
@@ -412,9 +412,9 @@ else
     if [ "$compiler" = 'intel14' ]; then
         netcdfModule="netcdf/v4.3.2_v4.4.0_intel_14.0.3"
     elif [ "$compiler" = 'intel16' ]; then
-	netcdfModule="netcdf/v4.6.1_v4.4.0_intel_16.0.3"
+    netcdfModule="netcdf/v4.6.1_v4.4.0_intel_16.0.3"
     elif [ "$compiler" = 'intel18' ]; then
-	netcdfModule="netcdf/v4.6.2_v4.4.4_intel_18.0.3"
+    netcdfModule="netcdf/v4.6.2_v4.4.4_intel_18.0.3"
     fi
 fi
 initNetcdf="module load $netcdfModule"
