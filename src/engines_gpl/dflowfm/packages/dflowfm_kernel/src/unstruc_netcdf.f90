@@ -9590,7 +9590,7 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
    integer :: nstru
    
    ! 1d2d links
-   integer                                   :: ncontacts, ncontactmeshes, koffset1dmesh, totalKsoFar
+   integer                                   :: ncontacts, ncontactmeshes, koffset1dmesh
    integer                                   :: begin_face, end_face 
    integer, allocatable                      :: mesh1indexes(:),mesh2indexes(:), contacttype(:)
    character(len=40), allocatable            :: contactsids(:)
@@ -9632,35 +9632,35 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
       call read_1d_ugrid(network, ioncid, dflowfm_1d)
       if (network%loaded) then
          call admin_network(network, numk, numl)  
-         !! TODO: Start temporary fix, to be removed when 1d ugrid file is correct (at this point branches are not connected)
-         numk = 1
+         !! TODO: Start temporary fix, to be removed when 1d ugrid file is correct (at this point branches are not connected)       
          do inod = 1, network%nds%Count
             pnod => network%nds%node(inod)
-            pnod%gridNumber = numk
-            xk(numk) = pnod%x
-            yk(numk) = pnod%y
-            zk(numk) = dmiss
-            if (inod <= network%brs%Count) then
-               numk = numk - 1 + network%brs%branch(inod)%gridPointsCount
-            endif
+            pnod%gridNumber = 0
          enddo
          
+         numk = 0
          numl = 0
-         totalKsoFar = 0
          numMesh1dBeforeMerging = 0
          do ibr = 1, network%brs%Count
             pbr => network%brs%branch(ibr)
             ! first step add coordinates and bed levels to nodes
-            ngrd = pbr%gridPointsCount
-            pbr%grd(1) = pbr%FromNode%gridNumber
+            if ( pbr%FromNode%gridNumber == 0 ) then
+               numk = numk + 1
+               pbr%FromNode%gridNumber = numk
+               xk(numk) = pbr%Xs(1)
+               yk(numk) = pbr%Ys(1)
+               zk(numk) = dmiss
+            endif
+            pbr%grd(1) = pbr%FromNode%gridNumber            
             ! id-mesh node mapping
-               numMesh1dBeforeMerging = numMesh1dBeforeMerging + 1
-               mesh1dNodeIds(numMesh1dBeforeMerging) = pbr%gridPointIDs(1)
-               mesh1dUnmergedToMerged(numMesh1dBeforeMerging) = pbr%grd(1)
-               mesh1dMergedToUnMerged(pbr%grd(1)) = numMesh1dBeforeMerging
+            numMesh1dBeforeMerging = numMesh1dBeforeMerging + 1
+            mesh1dNodeIds(numMesh1dBeforeMerging) = pbr%gridPointIDs(1)
+            mesh1dUnmergedToMerged(numMesh1dBeforeMerging) = pbr%grd(1)
+            mesh1dMergedToUnMerged(pbr%grd(1)) = numMesh1dBeforeMerging
+            ngrd = pbr%gridPointsCount  
             do k = 2, ngrd-1
                ! i do not want to renumber the nodes, otherwise link info gets invalidated
-               numk = k + totalKsoFar
+               numk = numk + 1
                pbr%grd(k) = numk
                xk(numk) = pbr%Xs(k)
                yk(numk) = pbr%Ys(k)
@@ -9671,16 +9671,19 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
                mesh1dUnmergedToMerged(numMesh1dBeforeMerging) = pbr%grd(k)
                mesh1dMergedToUnMerged(pbr%grd(k)) = numMesh1dBeforeMerging
             enddo
+            if ( pbr%toNode%gridNumber == 0 ) then
+               numk = numk + 1
+               pbr%toNode%gridNumber = numk
+               xk(numk) = pbr%Xs(ngrd)
+               yk(numk) = pbr%Ys(ngrd)
+               zk(numk) = dmiss
+            endif
             pbr%grd(ngrd) = pbr%toNode%gridNumber
             ! id-mesh node mapping   
-               numMesh1dBeforeMerging = numMesh1dBeforeMerging + 1
-               mesh1dNodeIds(numMesh1dBeforeMerging) = pbr%gridPointIDs(ngrd)
-               mesh1dUnmergedToMerged(numMesh1dBeforeMerging) = pbr%grd(ngrd)
-               mesh1dMergedToUnMerged(pbr%grd(ngrd)) = numMesh1dBeforeMerging
-
-            ! update merged indexes
-            numk = ngrd + totalKsoFar
-            totalKsoFar = totalKsoFar + ngrd
+            numMesh1dBeforeMerging = numMesh1dBeforeMerging + 1
+            mesh1dNodeIds(numMesh1dBeforeMerging) = pbr%gridPointIDs(ngrd)
+            mesh1dUnmergedToMerged(numMesh1dBeforeMerging) = pbr%grd(ngrd)
+            mesh1dMergedToUnMerged(pbr%grd(ngrd)) = numMesh1dBeforeMerging
 
             ! second step create links
             do k = 1, ngrd-1
