@@ -6255,7 +6255,6 @@
      SUBROUTINE delgrd(KEY,JASAVE,jadelpol)
 !    delete grid
      use m_grid
-     use m_polygon
      use m_missing
      use m_polygon, only: NPL, xpl, ypl, zpl
      use geometry_module, only: dbpinpol

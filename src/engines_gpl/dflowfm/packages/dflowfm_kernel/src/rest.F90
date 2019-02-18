@@ -4188,7 +4188,6 @@ end subroutine read_samples_from_arcinfo
       end function nod2wally
    
       SUBROUTINE dLINEDIS3(X3,Y3,X1,Y1,X2,Y2,JA,DIS,XN,YN, RLOUT)  ! 3: SORRY
-      use m_sferic
       use geometry_module, only: getdx, getdy, dbdistance, sphertocart3D, Cart3Dtospher
       use m_missing, only: dmiss
       use m_sferic, only: jsferic, jasfer3D
