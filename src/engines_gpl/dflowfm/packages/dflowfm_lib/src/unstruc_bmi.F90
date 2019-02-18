@@ -195,14 +195,6 @@ end subroutine get_attribute
     if ( numranks.le.1 ) then
         jampi = 0
     end if
-
-!   make domain number string as soon as possible
-    write(sdmn, '(I4.4)') my_rank
-
-    open (unit = 2, file = "mpi_"//sdmn//".out")
-    write(2, *) 'my_rank =', my_rank
-    close(2)
-
 #else
     numranks=1
 #endif
@@ -229,7 +221,7 @@ end subroutine get_attribute
     !call start()
     !call resetFullFlowModel()
     !call loadmodel(config_file)
-    call inidia(config_file(1:(len_trim(config_file)-len_trim('.mdu'))))
+    ! TODO: should we not call init_core() here?
 
     CALL INIDAT()
     call api_loadmodel(config_file)
