@@ -2959,4 +2959,57 @@ subroutine write_partition_pol(c_netfile_in, c_netfile_out, c_polfile) bind(C, n
 
 end subroutine write_partition_pol
 
+!> Get the flow links indexes crossed by a polyline
+!!
+!! numberOfInputVertices        :: size of input vertices
+!! c_xVerticesCoordinates       :: pointer to x array of coordinates
+!! c_yVerticesCoordinates       :: pointer to y array of coordinates
+!! numberOfOutputIndexes        :: number of intersected flow links
+!! c_indexes                    :: flow links indexes
+function get_snapped_flow_links_indexes( numberOfInputVertices, c_xVerticesCoordinates, c_yVerticesCoordinates, numberOfOutputIndexes, c_indexes ) result(ierr) bind(C, name="get_snapped_flow_links_indexes")
+!DEC$ ATTRIBUTES DLLEXPORT :: get_snapped_flow_links_indexes
+
+use m_flowgeom
+use gridoperations
+
+implicit none 
+integer(c_int), intent(in)         :: numberOfInputVertices
+type(c_ptr), intent(in)            :: c_xVerticesCoordinates, c_yVerticesCoordinates
+integer(c_int), intent(out)        :: numberOfOutputIndexes
+type(c_ptr), intent(inout)         :: c_indexes
+!return error code
+integer                            :: ierr
+!locals
+double precision                   :: xa, ya, xb, yb, xm, ym, crpm, distanceStartPolygon
+double precision, pointer          :: xVerticesCoordinates(:), yVerticesCoordinates(:)
+integer                            :: l, k1, k2, np, crossed, isec
+integer, allocatable, target, save :: indexes(:) !as commented above, this is a memory leak of lnx integers
+
+ierr= 0
+
+call c_f_pointer(c_xVerticesCoordinates, xVerticesCoordinates, (/ numberOfInputVertices /))
+call c_f_pointer(c_yVerticesCoordinates, yVerticesCoordinates, (/ numberOfInputVertices /))
+
+if (allocated(indexes)) then
+   deallocate(indexes)
+endif
+
+allocate(indexes(lnx))
+
+numberOfOutputIndexes = 0
+do l  = 1,lnx
+   k1 = ln(1,l) ; k2 = ln(2,l)
+   xa = xz(k1)  ; ya = yz(k1)
+   xb = xz(k2)  ; yb = yz(k2)
+   call crosspoly(xa,ya,xb,yb,xVerticesCoordinates,yVerticesCoordinates,numberOfInputVertices,xm,ym,crpm,crossed,isec,distanceStartPolygon)
+   if (crossed == 1) then
+      numberOfOutputIndexes = numberOfOutputIndexes + 1
+      indexes(numberOfOutputIndexes) = l
+   end if
+enddo
+
+c_indexes = c_loc(indexes)
+
+end function get_snapped_flow_links_indexes
+
 end module bmi
