@@ -7472,10 +7472,12 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
                    end do
                    ierr = nf90_put_var(imapfile, id_waq(iid,j), work1(1:kmx,1:ndxndxi), (/ 1, 1, itim /), (/ kmx, ndxndxi, 1 /))
                 else
-!                   do kk=1,NdxNdxi
-!                      workx(kk) = waqoutputs(j,kk)
-!                   end do
-!                   ierr = unc_put_var_map(mapids, mapids%id_waq(:,j), UNC_LOC_S, workx)
+                   call realloc(dum,NdxNdxi, keepExisting=.false.)
+                   do kk=1,NdxNdxi
+                      dum(kk) = waqoutputs(j,kk)
+                   end do
+                   ierr = nf90_put_var(imapfile, id_waq(iid,j), dum, (/ 1, itim /), (/ NdxNdxi, 1 /) )
+                   if (allocated(dum)) deallocate(dum)
                 end if
              end if
           end do
