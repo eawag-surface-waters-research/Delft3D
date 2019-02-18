@@ -21301,7 +21301,7 @@ subroutine readprofilesdef(ja)    ! in afwachting van een module die profieldefi
              y02 = yy(n2) - yy(n0)
              y01 = yy(n2) - yy(n1)
              a   = y01/y02 ; b = 1d0 - a
-             zn1 = b*zz(n0) + a*zz(n2)
+             zn1 = a*zz(n0) + b*zz(n2)   ! fix for e02_f04_c104
              dif = abs(zz(n1) - zn1)
              if (dif > tolzprof) then
                 ikp(n1) = 1
