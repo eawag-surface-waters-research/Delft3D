@@ -441,6 +441,7 @@ if [ $? -ne 0 ]; then
     cd $orgdir
     exit 1
 else
+    # NOTE: PROJ currently ONLY available on H6 for Intel, disable for GNU compiler.
     PROJ_CPPFLAGS=""
     PROJ_LDFLAGS=""
     PROJ_CONFARGS=""
@@ -467,6 +468,7 @@ if [ $? -ne 0 ]; then
     cd $orgdir
     exit 1
 else
+    # NOTE: Shapelib currently ONLY available on H6 for Intel, disable for GNU compiler.
     SHAPELIB_CPPFLAGS=""
     SHAPELIB_LDFLAGS=""
     SHAPELIB_CONFARGS=""
