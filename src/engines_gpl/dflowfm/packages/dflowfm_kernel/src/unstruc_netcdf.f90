@@ -13121,6 +13121,7 @@ subroutine readcells(filename, ierr, jaidomain, jaiglobal_s, jareinitialize)
     integer                       :: ja_oldformatread, L, nv, k, s, jaidomain_, jaiglobal_s_, fillvalue, jareinitialize_
     integer                       :: nerr_store
     integer, allocatable          :: netcellnod(:,:), netcelllin(:,:), kn_tmp(:,:), ltype_tmp(:)
+    integer                       :: numl_read
     ierr = DFM_NOERR
     
     if ( len_trim(filename)<1 ) then
@@ -13158,6 +13159,15 @@ subroutine readcells(filename, ierr, jaidomain, jaiglobal_s, jareinitialize)
     ierr = nf90_inquire_dimension(inetfile, id_netelemdim, len=nump1d2d)
     call check_error(ierr, 'Elem count')
     if (nerr_ > 0) goto 888
+
+    ! check number of netlinks in the network file
+    ierr = nf90_inq_dimid(inetfile, 'nNetLink', id_netlinkdim)
+    call check_error(ierr, 'nNetLink')
+    ierr = nf90_inquire_dimension(inetfile, id_netlinkdim, len=numl_read)
+    call check_error(ierr, 'link count')
+    if (numl_read .ne. numl) then
+       goto 888
+    end if
 
     call readyy('Reading net data',.1d0)
 
@@ -13215,8 +13225,8 @@ subroutine readcells(filename, ierr, jaidomain, jaiglobal_s, jareinitialize)
           enddo
           call realloc(netcell(L)%nod, s, keepExisting=.false.)
           call realloc(netcell(L)%lin, s, keepExisting=.false.)
-          netcell(L)%nod = netcellnod(:, L)
-          netcell(L)%lin = netcelllin(:, L)
+          netcell(L)%nod = netcellnod(1:s, L)
+          netcell(L)%lin = netcelllin(1:s, L)
           netcell(L)%n   = s
        endif
     enddo
