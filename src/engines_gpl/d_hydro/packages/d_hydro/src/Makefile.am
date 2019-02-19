@@ -25,7 +25,7 @@ AM_CPPFLAGS = \
 
 d_hydro_LDADD = \
     $(top_builddir)/utils_lgpl/d_hydro_lib/packages/d_hydro_lib/src/libDHydroLib.la \
-    -ldl
+    -ldl -lpthread
 
 d_hydro_LDFLAGS = -export-dynamic
 

@@ -100,6 +100,7 @@ endif
 
 EXTRALIBS=\
         $(top_builddir)/utils_lgpl/kdtree_wrapper/packages/kdtree_wrapper/src/libkdtreewrapper.la \
+        $(top_builddir)/utils_lgpl/gridgeom/packages/gridgeom/src/libgridgeom.la \
         $(CCLIBS)
 
 #dflowfm_LDFLAGS=-static
