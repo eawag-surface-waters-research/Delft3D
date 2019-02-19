@@ -50,5 +50,5 @@
 		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
 		<Filter Name="waq_utils">
 		<File RelativePath=".\src\waq_utils\basic_tests.f90"/></Filter>
-		<File RelativePath=".\src\test_waq_utils_f.f90"/></Filter></Files>
+		<File RelativePath=".\src\waq_utils\test_waq_utils_f.f90"/></Filter></Files>
 	<Globals/></VisualStudioProject>

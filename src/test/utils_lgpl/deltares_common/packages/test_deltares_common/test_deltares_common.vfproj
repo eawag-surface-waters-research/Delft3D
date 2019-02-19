@@ -50,7 +50,7 @@
 		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
 		<File RelativePath=".\src\test_bilin5.f90"/>
 		<File RelativePath=".\src\test_combinepaths.f90"/>
-		<File RelativePath=".\test_deltares_common.f90"/>
+		<File RelativePath=".\src\test_deltares_common.f90"/>
 		<File RelativePath=".\src\test_distance.f90"/>
 		<File RelativePath=".\src\test_geometry_module.f90"/>
 		<File RelativePath=".\src\test_hash_search.f90"/>
