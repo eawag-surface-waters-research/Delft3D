@@ -186,8 +186,8 @@
      +              nosys , notot , nodisp, novelo, nodef ,
      +              noloc , ndspx , nvelx , nlocx , nflux ,
      +              nopred, novar , vararr, varidx, vartda,
-     +              vardag, vartag, varagg, nogrid,
-     +              coname, paname, funame, sfname, dename, syname,
+     +              vardag, vartag, varagg, nogrid, coname,
+     +              paname, funame, sfname, dename, syname,
      +              locnam, varnam)
       deallocate(varnam)
 

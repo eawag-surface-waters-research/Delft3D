@@ -25,8 +25,8 @@
      +                    NOSYS , NOTOT , NODISP, NOVELO, NODEF ,
      +                    NOLOC , NDSPX , NVELX , NLOCX , NFLUX ,
      +                    NOPRED, NOVAR , VARARR, VARIDX, VARTDA,
-     +                    VARDAG, VARTAG, VARAGG, NOGRID,
-     +                    CONAME, PANAME, FUNAME, SFNAME, SYNAME, DENAME,
+     +                    VARDAG, VARTAG, VARAGG, NOGRID, CONAME, 
+     +                    PANAME, FUNAME, SFNAME, DENAME, SYNAME, 
      +                    LOCNAM, VARNAM)
 !
 !     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
