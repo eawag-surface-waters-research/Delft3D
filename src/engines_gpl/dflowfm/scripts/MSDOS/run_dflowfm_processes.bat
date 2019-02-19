@@ -10,8 +10,9 @@ title %cd%
     rem
 set scriptdir=%~dp0
 set dflowfmexedir=%scriptdir%\..\bin
+set libdir=%scriptdir%\..\..\share\bin
 set procdefbloomspedir=%scriptdir%\..\default
-set path=%dflowfmexedir%;%path%
+set path=%dflowfmexedir%;%libdir%;%path%
 
     rem
     rem Run
