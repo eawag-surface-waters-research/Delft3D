@@ -1,4 +1,4 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.168
@@ -76,7 +76,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "delftio", "delftio", "{BB3D
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "delftio", "delftio", "{2D39A792-638D-4187-B7CC-AC60D48745A5}"
 EndProject
-Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "test_deltares_common", "..\test\utils_lgpl\deltares_common\packages\test_deltares_common\test_deltares_common.vfproj", "{AD0BB199-2F93-45C9-8D51-A500BDE0C6B5}"
+Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "test_deltares_common", "test\utils_lgpl\deltares_common\packages\test_deltares_common\test_deltares_common.vfproj", "{AD0BB199-2F93-45C9-8D51-A500BDE0C6B5}"
 	ProjectSection(ProjectDependencies) = postProject
 		{10382558-3C7B-4BED-BEE8-C89EDCAE740B} = {10382558-3C7B-4BED-BEE8-C89EDCAE740B}
 		{2D6BCBCA-CC6C-49FE-A6AA-61AF62529118} = {2D6BCBCA-CC6C-49FE-A6AA-61AF62529118}
@@ -103,7 +103,7 @@ Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "waq_utils_f", "engines_gpl\
 		{2D6BCBCA-CC6C-49FE-A6AA-61AF62529118} = {2D6BCBCA-CC6C-49FE-A6AA-61AF62529118}
 	EndProjectSection
 EndProject
-Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "waq_utils_f_test", "..\test\engines_gpl\waq\packages\waq_utils_f\waq_utils_f_test.vfproj", "{F5BCA10C-7CBA-4136-A94C-784EC9F09657}"
+Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "waq_utils_f_test", "test\engines_gpl\waq\packages\waq_utils_f\waq_utils_f_test.vfproj", "{F5BCA10C-7CBA-4136-A94C-784EC9F09657}"
 	ProjectSection(ProjectDependencies) = postProject
 		{51065F4C-23D3-4C5F-AF5B-E70776409D7B} = {51065F4C-23D3-4C5F-AF5B-E70776409D7B}
 		{10382558-3C7B-4BED-BEE8-C89EDCAE740B} = {10382558-3C7B-4BED-BEE8-C89EDCAE740B}
