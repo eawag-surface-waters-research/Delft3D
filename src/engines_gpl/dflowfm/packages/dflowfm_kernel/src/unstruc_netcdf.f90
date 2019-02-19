@@ -13121,7 +13121,7 @@ subroutine readcells(filename, ierr, jaidomain, jaiglobal_s, jareinitialize)
     integer                       :: ja_oldformatread, L, nv, k, s, jaidomain_, jaiglobal_s_, fillvalue, jareinitialize_
     integer                       :: nerr_store
     integer, allocatable          :: netcellnod(:,:), netcelllin(:,:), kn_tmp(:,:), ltype_tmp(:)
-    integer                       :: numl_read
+    integer                       :: numl_read, numk_read
     ierr = DFM_NOERR
     
     if ( len_trim(filename)<1 ) then
@@ -13166,6 +13166,15 @@ subroutine readcells(filename, ierr, jaidomain, jaiglobal_s, jareinitialize)
     ierr = nf90_inquire_dimension(inetfile, id_netlinkdim, len=numl_read)
     call check_error(ierr, 'link count')
     if (numl_read .ne. numl) then
+       goto 888
+    end if
+
+    ! check number of netnodes in the network file
+    ierr = nf90_inq_dimid(inetfile, 'nNetNode', id_netnodedim)
+    call check_error(ierr, 'nNetNode')
+    ierr = nf90_inquire_dimension(inetfile, id_netnodedim, len=numk_read)
+    call check_error(ierr, 'Node count')
+    if (numk_read .ne. numk) then
        goto 888
     end if
 
