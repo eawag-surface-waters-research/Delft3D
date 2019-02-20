@@ -625,6 +625,8 @@ def do_work():
         slnName = os.path.basename(templateSolutionPath).replace("_template","")
         process_solution_file(slnName, templateSolutionPath)
 
+    process_solution_file("ec_module.sln",    os.path.join("scripts_lgpl", "win64", "ec_module_template.sln"))
+
     # Force reading GUI parameters next run
     vs = -999
     ifort = -999
