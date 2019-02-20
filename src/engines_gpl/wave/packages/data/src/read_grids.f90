@@ -572,7 +572,9 @@ end subroutine read_grd
 !
 !
 !==============================================================================
-subroutine read_netcdf_grd(i_grid, filename, xcc, ycc, codb, covered, mmax, nmax, kmax, sferic, xymiss, bndx, bndy, numenclpts, numenclparts,numenclptsppart,filename_tmp, flowLinkConnectivity)
+subroutine read_netcdf_grd(i_grid, filename, xcc, ycc, codb, covered, mmax, nmax, kmax, &
+                         & sferic, xymiss, bndx, bndy, numenclpts, numenclparts, numenclptsppart, &
+                         & filename_tmp, flowLinkConnectivity)
     use netcdf
     implicit none
 !
@@ -810,11 +812,6 @@ subroutine read_netcdf_grd(i_grid, filename, xcc, ycc, codb, covered, mmax, nmax
        ierror = nf90_get_var(idfile, idvar_flowlink, flowlink  , start=(/ 1, 1 /), count=(/ 2, nflowlink /)); call nc_check_err(ierror, "get_var flowlink", filename)
     endif
     ierror = nf90_close(idfile); call nc_check_err(ierror, "closing file", filename)
-    !
-!call replacecoordinates("zxzyd3d.txt", mmax, nmax, xcc, ycc)
-!do i=1,mmax
-!    write(66,*) xcc(i,1),ycc(i,1)
-!enddo
     !
     if (.not. sferic) then
        ! Is this a regular grid?

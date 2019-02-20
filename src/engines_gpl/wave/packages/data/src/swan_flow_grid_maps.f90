@@ -467,10 +467,16 @@ subroutine make_grid_map(i1, i2, g1, g2, gm, external_mapper)
       endif 
       !
       ! Make polygon administration of domain enclosure
-      call savepol() ! safety
-      call makedomainbndpol(g1%bndx, g1%bndy, g1%numenclpts, g1%numenclparts, g1%numenclptsppart)    ! saved in m_polygon::xpl, ypl, zpl
+      !
+      ! safety
+      call savepol()
+      !
+      ! saved in m_polygon::xpl, ypl, zpl
+      call makedomainbndpol(g1%bndx, g1%bndy, g1%numenclpts, g1%numenclparts, g1%numenclptsppart)
       keepExisting = .false.
-      call pol_to_tpoly(numpli, pli_loc, keepExisting)    ! poly with bounding box
+      !
+      ! poly with bounding box
+      call pol_to_tpoly(numpli, pli_loc, keepExisting)
       !
       do i=1, g2%mmax
          do j=1, g2%nmax
@@ -504,7 +510,9 @@ subroutine make_grid_map(i1, i2, g1, g2, gm, external_mapper)
       !     
       deallocate(testfield, stat=ierror)
       deallocate(ncontrib, stat=ierror)
-      deallocate(pli_loc, stat=ierror)    ! gets allocated in pol_to_tpoly
+      !
+      ! gets allocated in pol_to_tpoly
+      deallocate(pli_loc, stat=ierror)
    else
       ! No external mapper
       !
@@ -815,43 +823,52 @@ subroutine alloc_output_fields (g,outfld)
       outfld%add_out_names   = ' '
    endif
 end subroutine alloc_output_fields
-
-subroutine makedomainbndpol(bndx, bndy, numenclpts, numenclparts, numenclptsppart)   ! write netboundary data to polygons
+!
+!
+!==============================================================================
+! write netboundary data to polygons
+subroutine makedomainbndpol(bndx, bndy, numenclpts, numenclparts, numenclptsppart)
    use geometry_module
    use m_polygon
    use m_missing
    !
    implicit none
    !
-   integer, intent(in)                     :: numenclpts
-   integer, intent(in)                     :: numenclparts
-   integer         , dimension(:), pointer :: numenclptsppart
-   double precision, dimension(:), pointer :: bndx
-   double precision, dimension(:), pointer :: bndy
+   ! Parameters
    !
-   integer                                 :: ipt
-   integer                                 :: pcount
-   double precision, allocatable           :: temp(:)
+   integer, intent(in)                         :: numenclpts
+   integer, intent(in)                         :: numenclparts
+   integer         , dimension(:), pointer     :: numenclptsppart
+   double precision, dimension(:), pointer     :: bndx
+   double precision, dimension(:), pointer     :: bndy
    !
-   if (allocated(xpl)) deallocate(xpl, ypl, zpl)
-   allocate(XPL(1), YPL(1), ZPL(1))
-   XPL = XYMIS
-   YPL = XYMIS
-   ZPL = XYMIS
-   NPL = 0
+   ! Locals
+   !
+   integer                                     :: ipt
+   integer                                     :: localErr
+   integer                                     :: pcount
+   !
+   ! Body
+   !
+   ! Defined in module geometry_module: xpl, ypl, zpl, npl, xymis
+   if (allocated(xpl)) deallocate(xpl, ypl, zpl, stat = localErr)
+   allocate(xpl(1), ypl(1), zpl(1), stat = localErr)
+   xpl = XYMIS
+   ypl = XYMIS
+   zpl = XYMIS
+   npl = 0
    !
    pcount = 1
    do ipt = 1, numenclparts
-      call increasepol(NPL + numenclptsppart(ipt) + 1, 1)   ! assert size: previous pols (if any) + 1 dmiss + new polyline
-      XPL(NPL+1:NPL+numenclptsppart(ipt)) = bndx(pcount:pcount+numenclptsppart(ipt)-1)
-      YPL(NPL+1:NPL+numenclptsppart(ipt)) = bndy(pcount:pcount+numenclptsppart(ipt)-1)
-      NPL      = NPL + numenclptsppart(ipt) + 1
+      ! assert size: previous pols (if any) + 1 dmiss + new polyline
+      call increasepol(npl + numenclptsppart(ipt) + 1, 1)
+      xpl(npl+1:npl+numenclptsppart(ipt)) = bndx(pcount:pcount+numenclptsppart(ipt)-1)
+      ypl(npl+1:npl+numenclptsppart(ipt)) = bndy(pcount:pcount+numenclptsppart(ipt)-1)
+      npl      = npl    + numenclptsppart(ipt) + 1
       pcount   = pcount + numenclptsppart(ipt) 
-      XPL(NPL) = dmiss
-      YPL(NPL) = dmiss
-      temp = xymis
+      xpl(npl) = dmiss
+      ypl(npl) = dmiss
    enddo
-   return
 end subroutine makedomainbndpol 
 
 end module swan_flow_grid_maps
