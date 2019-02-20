@@ -497,14 +497,6 @@ subroutine make_grid_map(i1, i2, g1, g2, gm, external_mapper)
             endif
          enddo
       enddo
-      !!
-      !OPEN(UNIT=1234, FILE="covered.txt", ACTION="write", STATUS="replace")
-      !do i=1, g2%mmax
-      !   do j=1, g2%nmax
-      !      write(1234,"(2F15.5 I)") g2%x(i,j), g2%y(i,j), g2%covered(i,j)
-      !   enddo
-      !enddo
-      !close(1234)
       !
       call restorepol()
       !     
@@ -862,10 +854,13 @@ subroutine makedomainbndpol(bndx, bndy, numenclpts, numenclparts, numenclptsppar
    do ipt = 1, numenclparts
       ! assert size: previous pols (if any) + 1 dmiss + new polyline
       call increasepol(npl + numenclptsppart(ipt) + 1, 1)
-      xpl(npl+1:npl+numenclptsppart(ipt)) = bndx(pcount:pcount+numenclptsppart(ipt)-1)
-      ypl(npl+1:npl+numenclptsppart(ipt)) = bndy(pcount:pcount+numenclptsppart(ipt)-1)
-      npl      = npl    + numenclptsppart(ipt) + 1
-      pcount   = pcount + numenclptsppart(ipt) 
+      ! safety on indexing
+      if (numenclptsppart(ipt)>0) then
+         xpl(npl+1:npl+numenclptsppart(ipt)) = bndx(pcount:pcount+numenclptsppart(ipt)-1)
+         ypl(npl+1:npl+numenclptsppart(ipt)) = bndy(pcount:pcount+numenclptsppart(ipt)-1)
+         npl      = npl    + numenclptsppart(ipt) + 1
+         pcount   = pcount + numenclptsppart(ipt) 
+      endif
       xpl(npl) = dmiss
       ypl(npl) = dmiss
    enddo
