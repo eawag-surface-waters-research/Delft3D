@@ -135,7 +135,7 @@ subroutine update_constituents(jarhoonly)
       
 !     compute horizontal fluxes, explicit part
       if (.not. stm_included) then     ! just do the normal stuff
-         call comp_fluxhor3D(NUMCONST, limtyp, Ndkx, Lnkx, u1, q1, au, sqi, vol1, kbot, Lbot, Ltop,  kmxn, kmxL, constituents, difsedu, sigdifi, viu, vicouv, nsubsteps, jaupdate, jaupdatehorflux, ndeltasteps, jaupdateconst,jasourceonly,fluxhor, dsedx, dsedy)   
+         call comp_fluxhor3D(NUMCONST, limtyp, Ndkx, Lnkx, u1, q1, au, sqi, vol1, kbot, Lbot, Ltop,  kmxn, kmxL, constituents, difsedu, sigdifi, viu, vicouv, nsubsteps, jaupdate, jaupdatehorflux, ndeltasteps, jaupdateconst,fluxhor, dsedx, dsedy)   
       else
          if ( jatranspvel.eq.0 .or. jatranspvel.eq.1 ) then       ! Lagrangian approach
             ! only add velocity asymmetry
@@ -156,9 +156,9 @@ subroutine update_constituents(jarhoonly)
                q1sed(Lbot(LL)) = q1sed(Lbot(LL))+mtd%uau(LL)*Au(Lbot(LL))  ! VR2004 already has this effect
             end do
          end if
-         call comp_fluxhor3D(NUMCONST, limtyp, Ndkx, Lnkx, u1sed, q1sed, au, sqi, vol1, kbot, Lbot, Ltop,  kmxn, kmxL, constituents, difsedu, sigdifi, viu, vicouv, nsubsteps, jaupdate, jaupdatehorflux, ndeltasteps, noupdateconst, jasourceonly, fluxhor, dsedx, dsedy)         
+         call comp_fluxhor3D(NUMCONST, limtyp, Ndkx, Lnkx, u1sed, q1sed, au, sqi, vol1, kbot, Lbot, Ltop,  kmxn, kmxL, constituents, difsedu, sigdifi, viu, vicouv, nsubsteps, jaupdate, jaupdatehorflux, ndeltasteps, noupdateconst, fluxhor, dsedx, dsedy)         
 !        water advection velocity
-         call comp_fluxhor3D(NUMCONST, limtyp, Ndkx, Lnkx, u1,    q1,    au, sqi, vol1, kbot, Lbot, Ltop,  kmxn, kmxL, constituents, difsedu, sigdifi, viu, vicouv, nsubsteps, jaupdate, jaupdatehorflux, ndeltasteps, jaupdateconst, jasourceonly, fluxhor, dsedx, dsedy)
+         call comp_fluxhor3D(NUMCONST, limtyp, Ndkx, Lnkx, u1,    q1,    au, sqi, vol1, kbot, Lbot, Ltop,  kmxn, kmxL, constituents, difsedu, sigdifi, viu, vicouv, nsubsteps, jaupdate, jaupdatehorflux, ndeltasteps, jaupdateconst, fluxhor, dsedx, dsedy)
       end if   
       
       call starttimer(IDEBUG)
@@ -181,12 +181,12 @@ subroutine update_constituents(jarhoonly)
       if ( kmx.lt.1 ) then   ! 2D, call to 3D as well for now
          call solve_2D(NUMCONST, Ndkx, Lnkx, vol1, kbot, ktop, Lbot, Ltop, sumhorflux, fluxver, const_sour, const_sink, nsubsteps, jaupdate, ndeltasteps, constituents, rhs)
       else
-         call comp_fluxver( NUMCONST, limtyp, thetavert, Ndkx, kmx, zws, qw, kbot, ktop, constituents, nsubsteps, jaupdate, ndeltasteps, jasourceonly, fluxver, wsf)
+         call comp_fluxver( NUMCONST, limtyp, thetavert, Ndkx, kmx, zws, qw, kbot, ktop, constituents, nsubsteps, jaupdate, ndeltasteps, fluxver, wsf)
 
          call solve_vertical(NUMCONST, ISED1, ISEDN, limtyp, thetavert, Ndkx, Lnkx, kmx,    &
                              zws, qw, vol1, kbot, ktop, Lbot, Ltop,                     &
                              sumhorflux, fluxver, const_sour, const_sink,                   &
-                             difsedw, sigdifi, vicwws, nsubsteps, jaupdate, ndeltasteps, jasourceonly, constituents, &
+                             difsedw, sigdifi, vicwws, nsubsteps, jaupdate, ndeltasteps, constituents, &
                              a, b, c, d, e, sol, rhs)
       end if
 
@@ -238,7 +238,7 @@ subroutine update_constituents(jarhoonly)
 end subroutine update_constituents
 
 !> compute horizontal transport fluxes at flowlink
-subroutine comp_fluxhor3D(NUMCONST, limtyp, Ndkx, Lnkx, u1, q1, au, sqi, vol1, kbot, Lbot, Ltop, kmxn, kmxL, sed, difsed, sigdifi, viu, vicouv, nsubsteps, jaupdate, jaupdatehorflux, ndeltasteps, jaupdateconst, jasourceonly, flux, dsedx, dsedy)
+subroutine comp_fluxhor3D(NUMCONST, limtyp, Ndkx, Lnkx, u1, q1, au, sqi, vol1, kbot, Lbot, Ltop, kmxn, kmxL, sed, difsed, sigdifi, viu, vicouv, nsubsteps, jaupdate, jaupdatehorflux, ndeltasteps, jaupdateconst, flux, dsedx, dsedy)
    use m_flowgeom,  only: Ndx, Lnx, Lnxi, ln, nd, klnup, slnup, dxi, acl, csu, snu, wcx1, wcx2, wcy1, wcy2, Dx  ! static mesh information
    use m_flowtimes, only: dts, dnt
    use m_flowparameters, only: cflmx
@@ -272,7 +272,6 @@ subroutine comp_fluxhor3D(NUMCONST, limtyp, Ndkx, Lnkx, u1, q1, au, sqi, vol1, k
    integer,          dimension(Lnx),           intent(in)    :: jaupdatehorflux  !< update horizontal flux (1) or not (0)
    integer,          dimension(Ndx),           intent(in)    :: ndeltasteps !< number of substeps between updates
    integer,          dimension(NUMCONST),      intent(in)    :: jaupdateconst   !< update constituent (1) or not (0)
-   integer,          dimension(NUMCONST),      intent(in)    :: jasourceonly    !< sources only (1) or not (0)
    double precision, dimension(NUMCONST,Lnkx), intent(inout) :: flux     !< adds horizontal advection and diffusion fluxes
    double precision, dimension(NUMCONST,ndkx), intent(inout) :: dsedx    !< grrx 
    double precision, dimension(NUMCONST,ndkx), intent(inout) :: dsedy    !< grry 
@@ -435,8 +434,6 @@ subroutine comp_fluxhor3D(NUMCONST, limtyp, Ndkx, Lnkx, u1, q1, au, sqi, vol1, k
          do j=1,NUMCONST
             if ( jaupdateconst(j).ne.1 ) cycle
             
-            if ( jasourceonly(j).eq.1 ) cycle
-            
             sedL   = sed(j,k1)
             sedR   = sed(j,k2)
  
@@ -538,8 +535,6 @@ subroutine comp_fluxhor3D(NUMCONST, limtyp, Ndkx, Lnkx, u1, q1, au, sqi, vol1, k
             do j=1,NUMCONST
                if ( jaupdateconst(j).ne.1 ) cycle
                
-               if ( jasourceonly(j).eq.1 ) cycle
-               
                difcoeff  = sigdifi(j)*viu(L) + difsed(j) + diuspL  ! without smagorinsky, viu is 0 , 
                                                                    ! difsed only contains molecular value, 
                                                                    ! so then you only get user specified value  
@@ -577,7 +572,7 @@ end subroutine comp_fluxhor3D
 
 
 !> compute vertical fluxes
-subroutine comp_fluxver(NUMCONST, limtyp, thetavert, Ndkx, kmx, zws, qw, kbot, ktop, sed, nsubsteps, jaupdate, ndeltasteps, jasourceonly, flux, wsf)
+subroutine comp_fluxver(NUMCONST, limtyp, thetavert, Ndkx, kmx, zws, qw, kbot, ktop, sed, nsubsteps, jaupdate, ndeltasteps, flux, wsf)
    use m_flowgeom, only: Ndx, ba, kfs  ! static mesh information
    use m_flowtimes, only: dts
    use m_flowparameters, only: cflmx
@@ -602,7 +597,6 @@ subroutine comp_fluxver(NUMCONST, limtyp, thetavert, Ndkx, kmx, zws, qw, kbot, k
    integer,                                    intent(in)    :: nsubsteps    !< number of substeps
    integer,          dimension(Ndx),           intent(in)    :: jaupdate     !< update cell (1) or not (0)
    integer,          dimension(Ndx),           intent(in)    :: ndeltasteps  !< number of substeps between updates
-   integer,          dimension(NUMCONST),      intent(in)    :: jasourceonly !< sourcesonly (1) or not (0)
    double precision, dimension(NUMCONST,Ndkx), intent(inout) :: flux         !< adds vertical advection fluxes
    double precision, dimension(NUMCONST),      intent(in   ) :: wsf          !< vertical fall velocities 
 
@@ -661,7 +655,6 @@ subroutine comp_fluxver(NUMCONST, limtyp, thetavert, Ndkx, kmx, zws, qw, kbot, k
          kR = k+1 ! min(k+1,kt)
          
          do j=1,NUMCONST
-            if ( jasourceonly(j).eq.1 ) cycle
             qw_loc = qw(k)
             if (jased < 4) then
                qw_loc = qw(k) - wsf(j)*ba(kk)
@@ -926,7 +919,7 @@ subroutine solve_vertical(NUMCONST, ISED1, ISEDN, limtyp, thetavert, Ndkx, Lnkx,
                           zws, qw, vol1, kbot, ktop, Lbot, Ltop,    &
                           sumhorflux, fluxver, source, sink,   &
                           difsed, sigdifi, vicwws, &
-                          nsubsteps, jaupdate, ndeltasteps, jasourceonly, sed,  &
+                          nsubsteps, jaupdate, ndeltasteps, sed,  &
                           a, b, c, d, e, sol, rhs)
    use m_flowgeom,  only: Ndxi, Ndx, Lnx, Ln, ba, kfs, bl  ! static mesh information
    use m_flowtimes, only: dts
@@ -961,7 +954,6 @@ subroutine solve_vertical(NUMCONST, ISED1, ISEDN, limtyp, thetavert, Ndkx, Lnkx,
    integer,                                    intent(in)    :: nsubsteps   !< number of substeps
    integer,          dimension(Ndx),           intent(in)    :: jaupdate    !< update cell (1) or not (0)
    integer,          dimension(Ndx),           intent(in)    :: ndeltasteps !< number of substeps
-   integer,          dimension(NUMCONST),      intent(in)    :: jasourceonly !< only sources for quantity (1) or not (0)
    double precision, dimension(NUMCONST,Ndkx), intent(inout) :: sed         !< transported quantities
    double precision, dimension(kmx,NUMCONST)                 :: a,b,c,d     ! work array: aj(i,j)*sed(j,k-1) + bj(i,j)*sed(j,k) + c(i,j)*sed(j,k+1) = d(i), i=k-kb+1
    double precision, dimension(kmx)                          :: sol, e      ! work array: solution and dummy array in tridag, respectively
@@ -1045,7 +1037,6 @@ subroutine solve_vertical(NUMCONST, ISED1, ISEDN, limtyp, thetavert, Ndkx, Lnkx,
          endif     
          
          do j=1,NUMCONST
-            if ( jasourceonly(j).eq.1 ) cycle
 !           ! diffusion  
             if (jased > 3 .and. j >= ISED1 .and. j <= ISEDN) then  ! sediment d3d
                fluxfac = (mtd%seddif(j-ISED1+1,k))*dtbazi
@@ -1359,23 +1350,23 @@ subroutine ini_transport()
       enddo
    endif
 
-   jasourceonly=0
-   
+   if ( numwqbots.gt.0 ) then
+      call mess(LEVEL_INFO, 'List of water quality bottom variables defined in the model')
+      do i = 1, numwqbots
+         write(msg, '(I8,X,A)') i, wqbotnames(i)
+         call mess(LEVEL_INFO, msg)
+      enddo
+   endif
+
    if ( jawaqproc.eq.1 ) then
 !     fill administration for WAQ substances with fall velocities, and thetavert
-      do isys=1,Notot
+      do isys=1,nosys
          i = itrac2const(isys2trac(isys))
          isys2const(isys) = i
          iconst2sys(i) = isys
          
          thetavert(i) = md_thetav_waq
       end do  
-      
-!     set passive systems      
-      do isys=nosys+1,notot
-         iconst = isys2const(isys)
-         jasourceonly(iconst) = 1
-      end do    
    end if
    
 !   iconst_cur = min(NUMCONST,ITRA1)
@@ -1454,7 +1445,6 @@ subroutine alloc_transport(Keepexisting)
    call realloc(dtmax,       Ndx, keepExisting=.false., fill=0d0)
    
    call realloc(jaupdateconst, NUMCONST, keepExisting=.false., fill=1)
-   call realloc(jasourceonly, NUMCONST, keepExisting=.false., fill=0)
    if ( stm_included ) then
       call realloc(noupdateconst, NUMCONST, keepExisting=.false., fill=0)
       

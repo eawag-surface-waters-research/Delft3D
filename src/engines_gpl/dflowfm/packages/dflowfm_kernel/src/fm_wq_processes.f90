@@ -483,15 +483,17 @@
           ioffbl = 0
       endif
 
-!     add corresponding tracers, if not already defined by initial and/or boundary conditions
+!     add corresponding tracers and bottom substances, if not already defined by initial and/or boundary conditions
       transformcoef = 0.0_hp
       call realloc(isys2trac,notot,keepExisting=.false.,fill=0)
-      do i=1,notot
+      do i=1,nosys
          call add_bndtracer(trim(syname_sub(i)), syunit(i), isys2trac(i), janew)
       end do
-!      write(lunrep,'(/a)') '  var number var name               var array   var index'
-!      write(lunrep,'(i,x,a20,2i)') ((i,varnam(i),vararr(i),varidx(i)),i=1,novar)
-!     lookup output variables in the variables list (output%pointers is to complex)
+      call realloc(isys2wqbot,notot,keepExisting=.false.,fill=0)
+      do i=nosys+1,notot
+         call add_wqbot(trim(syname_sub(i)), syunit(i), isys2wqbot(i), janew)
+      end do
+      
       noout = outputs%cursize   
       call realloc(outvar,noout,keepExisting=.false.,fill=0)
       do j=1,noout
@@ -750,7 +752,12 @@
       character(len=256)              :: qidloc    !< Original quantityid, e.g., 'waqfunctionradsurf'.
 
       qidloc = qid
-      if ( qidloc(1:11).eq.'waqfunction' ) then
+      if ( qidloc(1:13).eq.'initialwaqbot' ) then
+         qidname = qidloc(1:13)
+         if ( len_trim(qidloc).gt.13 ) then
+            inputname = trim(qidloc(14:))
+         end if
+      else if ( qidloc(1:11).eq.'waqfunction' ) then
          qidname = qidloc(1:11)
          if ( len_trim(qidloc).gt.11 ) then
             inputname = trim(qidloc(12:))
@@ -774,6 +781,50 @@
       
       return
    end subroutine get_waqinputname
+
+!> add waq bottom substance
+   subroutine add_wqbot(wqbotnam, wqbotunit, iwqbot, janew)
+      use m_flowgeom
+      use m_flowexternalforcings, only: numtracers, trnames
+      use m_fm_wq_processes
+      use m_alloc
+      use m_missing
+      use unstruc_messages
+      implicit none
+      
+      character(len=*), intent(in)  :: wqbotnam
+      character(len=20), intent(in) :: wqbotunit
+      integer,          intent(out) :: iwqbot
+      integer,          intent(out) :: janew
+      
+      integer,          external    :: findname
+      
+      integer                       :: itrac
+      
+      iwqbot = findname(numwqbots, wqbotnames, wqbotnam)
+      itrac = findname(numtracers, trnames, wqbotnam)
+   
+      if ( itrac.ne.0 ) then
+         call mess(LEVEL_ERROR, 'add_wqbot: water quality bottom variable named '''//trim(wqbotnam)//''' already exists as a tracer.')
+      endif
+      
+      janew = 0
+      if ( iwqbot.eq.0 ) then
+         janew = 1
+   !     add bottom substance
+      
+         numwqbots = numwqbots+1    
+   !     realloc
+         call realloc(wqbot, [numwqbots,Ndxi], keepExisting=.true., fill=0.0d0)
+         call realloc(wqbotnames, numwqbots, keepExisting=.true., fill='')
+         call realloc(wqbotunits, numwqbots, keepExisting=.true., fill='')
+         iwqbot = numwqbots
+         wqbotnames(iwqbot) = trim(wqbotnam)
+      end if
+      if (wqbotunit.ne.' ') then
+         wqbotunits(iwqbot) = wqbotunit
+      endif
+   end subroutine add_wqbot
 
    subroutine fm_wq_processes_step(dt,time)
       use m_fm_wq_processes
@@ -854,7 +905,7 @@
       double precision :: alfa1, alfa2
       double precision :: qsu
       
-      integer          :: isys, iconst
+      integer          :: isys, iconst, iwqbot
       integer          :: ipoisurf, ipoitau, ipoivel
       integer          :: ipoivol, ipoiconc, ipoisal, ipoitem
       integer          :: ipoivwind, ipoifetch, ipoiradsurf, ipoirain
@@ -980,7 +1031,7 @@
       
 !     fill concentrations   
       do k=kbx,ktx
-         do isys=1,notot
+         do isys=1,nosys !notot
             iconst = isys2const(isys)
             pmsa(ipoiconc+(k-kbx)*(notot)+isys-1) = constituents(iconst,k)
          end do
@@ -1007,8 +1058,8 @@
          do kk=1,Ndxi
             call getkbotktopmax(kk,kb,kt,ktmax)
             do isys=nosys+1,notot
-               iconst = isys2const(isys)
-               amass(isys,kb-kbx+1) = constituents(iconst,kb)*ba(kk)
+               iwqbot = isys2wqbot(isys)
+               amass(isys,kb-kbx+1) = wqbot(iwqbot,kk)*ba(kk)
             end do
          end do
       end if
@@ -1075,7 +1126,7 @@
       double precision :: alfa1, alfa2
       double precision :: qsu
       
-      integer          :: isys, iconst
+      integer          :: isys, iconst, iwqbot
       integer          :: ipoiconc
       integer          :: ivar, iarr, iv_idx
       integer          :: iarknd, ip_arr, idim1, idim2
@@ -1101,8 +1152,8 @@
          do kk=1,Ndxi
             call getkbotktopmax(kk,kb,kt,ktmax)
             do isys=nosys+1,notot
-               iconst = isys2const(isys)
-               constituents(iconst,kb) = amass(isys,kb-kbx+1) / ba(kk)
+               iwqbot = isys2wqbot(isys)
+               wqbot(iwqbot,kk) = amass(isys,kb-kbx+1) / ba(kk)
             end do
          end do
       end if

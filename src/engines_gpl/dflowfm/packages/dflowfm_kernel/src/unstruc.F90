@@ -16076,6 +16076,7 @@ subroutine unc_write_his(tim)            ! wrihis
                      
     integer, allocatable, save :: id_tra(:)
     integer, allocatable, save :: id_hwq(:)
+    integer, allocatable, save :: id_hwqb(:)
     integer, allocatable, save :: id_sf(:), id_ws(:), id_seddif(:)            ! sediment fractions 
     integer, allocatable, save :: id_const(:), id_voltot(:)
     double precision, allocatable, save :: valobsT(:,:)
@@ -16448,6 +16449,23 @@ subroutine unc_write_his(tim)            ! wrihis
                   ierr = nf90_put_att(ihisfile, id_tra(i), 'units', tmpstr)
                   ierr = nf90_put_att(ihisfile, id_tra(i), '_FillValue', dmiss)
                   ierr = nf90_put_att(ihisfile, id_tra(i), 'long_name', const_names(j))
+               enddo
+            endif
+
+            if (numwqbots > 0) then
+               call realloc(id_hwqb, numwqbots, keepExisting = .false.)
+               do i=1,numwqbots
+                  tmpstr = wqbotnames(i)
+                  ! Forbidden chars in NetCDF names: space, /, and more.
+                  call replace_char(tmpstr,32,95) 
+
+                  ierr = nf90_def_var(ihisfile, trim(tmpstr), nf90_double, (/ id_statdim, id_timedim /), id_hwqb(i))
+                  ierr = nf90_put_att(ihisfile, id_hwqb(i), 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+
+                  tmpstr = wqbotunits(i)
+                  ierr = nf90_put_att(ihisfile, id_hwqb(i), 'units', tmpstr)
+                  ierr = nf90_put_att(ihisfile, id_hwqb(i), '_FillValue', dmiss)
+                  ierr = nf90_put_att(ihisfile, id_hwqb(i), 'long_name', wqbotnames(i))
                enddo
             endif
 
@@ -17261,6 +17279,13 @@ subroutine unc_write_his(tim)            ! wrihis
     if ((jarain > 0) .and. (jahisrain > 0)) then
        ierr = nf90_put_var(ihisfile, id_varrain,  valobsT(:,IPNT_rain),    start = (/ 1, it_his /), count = (/ ntot, 1 /))
     endif
+    
+    if (IVAL_WQB1 > 0) then
+       do j = IVAL_WQB1,IVAL_WQBN   ! enumerators of tracers in valobs array (not the pointer)
+         i = j - IVAL_WQB1 + 1
+         ierr = nf90_put_var(ihisfile, id_hwqb(i), valobsT(:,IPNT_WQB1 + i-1), start = (/ 1, it_his /), count = (/ ntot, 1/))
+       end do
+    endif
 
     if (numobs+nummovobs > 0) then
       if ( kmx>0 ) then
@@ -17802,7 +17827,7 @@ end subroutine unc_write_part
 subroutine fill_valobs()
    use m_flow
    use m_transport
-   use m_fm_wq_processes, only: kbx, waqoutputs
+   use m_fm_wq_processes, only: kbx, wqbot, waqoutputs
    use m_flowgeom
    use m_observations
    use m_sediment
@@ -17887,6 +17912,13 @@ subroutine fill_valobs()
             valobs(IPNT_WAVEU,i) = uorb(k)   
             valobs(IPNT_WAVETAU,i) = taus(k)   
          endif
+
+         if ( IVAL_WQB1.gt.0 ) then
+            do j=IVAL_WQB1,IVAL_WQBN
+               ii = j-IVAL_WQB1+1
+               valobs(IPNT_WQB1+ii-1,i) = wqbot(ii,k)
+            end do
+         end if
 
          do kk=kb,kt
             klay = kk-kb+1
@@ -36292,6 +36324,7 @@ end function is_1d_boundary_candidate
  use m_alloc
  use m_sediment
  use m_transport
+ use m_fm_wq_processes
  use m_strucs
  use dfm_error
  use m_sobekdfm
@@ -36306,6 +36339,7 @@ end function is_1d_boundary_candidate
  character (len=256)           :: fnam, rec, filename0
  character (len=64)            :: varname
  character (len=NAMTRACLEN)    :: tracnam, qidnam
+ character (len=NAMWAQLEN)     :: wqbotnam
  ! JRE DEBUG
  character (len=NAMSFLEN)      :: sfnam, qidsfnam
  ! \DEBUG
@@ -36331,7 +36365,7 @@ end function is_1d_boundary_candidate
  integer                       :: inivelx, inively !< set to 1 when initial velocity x or y component is available in *.ext file
  double precision, allocatable :: uxini(:), uyini(:) !< optional initial velocity fields on u points in x/y dir.
 
- integer                       :: iconst, itrac, idum, isf, isednum, itp
+ integer                       :: iconst, itrac, iwqbot, janew, idum, isf, isednum, itp
  real(kind=hp)                 :: maxSearchRadius
 
  integer, external             :: findname
@@ -36340,7 +36374,8 @@ end function is_1d_boundary_candidate
  integer                       :: L1, L2
  integer                       :: ilattype
  integer                       :: ifun
- character (len=20)            :: waqinput
+ character(len=20)             :: wqinput
+ character(len=20)             :: wqbotunit
 
  iresult = DFM_NOERR
 
@@ -37003,8 +37038,8 @@ if (mext > 0) then
 
         qidnam = qid
         call get_tracername(qid, tracnam, qidnam)
-        
         call get_sedfracname(qid, sfnam, qidnam)
+        call get_waqinputname(qid, wqinput, qidnam)
 
         lenqidnam = len_trim(qidnam)
         if (filetype == 7 .and. method == 4) then
@@ -37366,6 +37401,33 @@ if (mext > 0) then
 !                       constituents(iconst,k) = fff
                        constituents(iconst,k) = constituents(iconst,kk)
                     end do
+                 endif
+              enddo
+           endif
+           deallocate(viuh)
+
+        else if (qid(1:13) == 'initialwaqbot') then
+           iwqbot = findname(numwqbots, wqbotnames, wqinput)
+           
+           if ( iwqbot.eq.0 ) then
+              call mess(LEVEL_ERROR, 'flow_initexternalforcings: water quality bottom variable ' // trim(wqinput) // ' not found')
+           end if
+
+           if ( allocated(viuh) ) deallocate(viuh)
+           allocate(viuh(Ndxi))
+
+!          copy existing tracer values (if they existed) in temp array
+           do kk=1,Ndxi
+              viuh(kk) = wqbot(iwqbot,kk)
+           end do
+
+!          will only fill 2D part of viuh          
+           success = timespaceinitialfield(xz, yz, viuh, Ndxi, filename, filetype, method, operand, transformcoef, 2)
+
+           if (success) then
+              do kk = 1,Ndxi
+                 if (viuh(kk) .ne. dmiss) then
+                    wqbot(iwqbot,kk) = viuh(kk)
                  endif
               enddo
            endif

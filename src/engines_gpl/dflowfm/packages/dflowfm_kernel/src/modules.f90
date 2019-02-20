@@ -5181,9 +5181,6 @@ module m_transport
    integer,          dimension(:),   allocatable :: jaupdateconst !< update constituent (1) or not (0)
    integer,          dimension(:),   allocatable :: noupdateconst !< do not update constituent (1) or do (0)
    
-!  for waq static systems: only sources
-   integer,          dimension(:),   allocatable :: jasourceonly !< sources only (1) or not (0), dim(NCONST)
-   
    ! DEBUG
    double precision, dimension(:),   allocatable :: u1sed
    double precision, dimension(:),   allocatable :: q1sed
@@ -5204,6 +5201,7 @@ module m_fm_wq_processes
    use processet
    use output
    
+   integer, parameter                        :: NAMWAQLEN = 128
    integer                                   :: jawaqproc                   !< switch for water quality processes
    real(hp)                                  :: waq_vol_dry_thr = 1d-16     !< minimum volume for processes to be active
    integer                                   :: flux_int                    !< flux integration by WAQ (1) or by FM (2, not implemented)
@@ -5230,7 +5228,14 @@ module m_fm_wq_processes
    integer,  allocatable, dimension(:)       :: isys2const                  !< WAQ substance to D-Flow FM constituents
    integer,  allocatable, dimension(:)       :: iconst2sys                  !< WAQ substance to D-Flow FM constituents
    integer,  allocatable, dimension(:)       :: isys2trac                   !< WAQ active system to D-FlowFM tracer
+   integer,  allocatable, dimension(:)       :: isys2wqbot                  !< WAQ inactive system to D-FlowFM water quality bottom variable
    integer,  allocatable, dimension(:)       :: ifall2vpnw                  !< substance-with-fall-velocity to WAQ numbering in fall-velocity array
+
+   integer                                   :: numwqbots                   !< number of water quality bottom variables
+   character(len=NAMWAQLEN), dimension(:), allocatable :: wqbotnames        !< water quality bottom variable names
+   character(len=NAMWAQLEN), dimension(:), allocatable :: wqbotunits        !< water quality bottom variable units
+   integer,  allocatable, dimension(:,:)     :: id_wqb                      !< wqbot id's in map-file
+   real(hp), allocatable, dimension(:,:)     :: wqbot                       !< water quality bottom variable values in double precission
 
    type(outputcoll)                          :: outputs                     !< output structure
    integer,  allocatable, dimension(:,:)     :: id_waq                      !< waq output id's in map-file
@@ -5252,11 +5257,10 @@ module m_fm_wq_processes
    
 !   double precision           :: dum
       
-   integer, parameter                        :: nammbamonlen = 128
    integer                                   :: jamba                       !< switch for mass balance areas being active
    integer                                   :: nomba                       !< number of mass balance areas
    integer                                   :: nombabnd                    !< number of mass balance areas and boundaries
-   character(len=nammbamonlen),allocatable   :: mbaname(:)                  !< parameter names
+   character(len=NAMWAQLEN),allocatable      :: mbaname(:)                  !< parameter names
    integer, allocatable                      :: mbadef(:)                   !< mass balance area (mba) definition
    integer, allocatable                      :: mbadefdomain(:)             !< mass balance area (mba) definition without ghost cells
    integer, allocatable                      :: mbalnfromto(:,:)            !< from mba (1:lnxi) or bnd (lnxi+1:lnx) to mba for each link (2D)
@@ -5267,7 +5271,7 @@ module m_fm_wq_processes
    integer, allocatable                      :: mbalnlist(:)                !< list of links needed for the mass balance (2D)
    logical                                   :: mbaremaining                !< mass balance area for ramaining cells added?
    integer                                   :: nomon                       !< number of mass balance areas
-   character(len=nammbamonlen),allocatable   :: monname(:)                  !< parameter names
+   character(len=NAMWAQLEN),allocatable      :: monname(:)                  !< parameter names
    integer, allocatable                      :: mondef(:,:)                 !< monitoring area definition
    integer                                   :: lunmbahis                   !< logical unit of mba his-file
    integer                                   :: lunmbatothis                !< logical unit of mba total his-file

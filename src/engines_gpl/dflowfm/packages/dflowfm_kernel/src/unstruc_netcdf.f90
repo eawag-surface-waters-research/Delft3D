@@ -203,6 +203,7 @@ type t_unc_mapids
    integer :: id_sa1(4)    = -1 !< Variable ID for 
    integer :: id_tem1(4)   = -1 !< Variable ID for 
    integer, dimension(:,:), allocatable :: id_const !< Variable ID for (3, NUM_CONST) constituents (on 1D, 2D, 3D grid parts resp.)
+   integer, dimension(:,:), allocatable :: id_wqb !< Variable ID for (3, numwqbots) water quality bottom variables output (on 2D grid only)
    integer, dimension(:,:), allocatable :: id_waq !< Variable ID for (3, noout) waq output (on 1D, 2D, 3D grid parts resp.)
    integer, dimension(:,:), allocatable :: id_sed !< Variable ID for 
    integer, dimension(:,:), allocatable :: id_ero !< Variable ID for 
@@ -2341,6 +2342,7 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
     use network_data
     use m_sediment
     use m_transport, only: NUMCONST, ISALT, ITEMP, ISED1, ISEDN, ITRA1, ITRAN, ITRAN0, constituents, itrac2const, const_names, const_units
+    use m_fm_wq_processes, only: numwqbots, wqbotnames, wqbotunits, wqbot
     use m_xbeach_data, only: E, thetamean, sigmwav
     use m_flowexternalforcings, only: numtracers  !, trbndnames
     use m_partitioninfo
@@ -2383,7 +2385,7 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
         id_unorma, id_vicwwu, id_tureps1, id_turkin1, id_qw, id_qa, id_hu, id_squ, id_sqi, &
         id_jmax, id_flowelemcrsz, id_flowelemcrsn, id_ndx1d
     
-    integer, allocatable, save :: id_tr1(:), id_bndtradim(:), id_ttrabnd(:), id_ztrabnd(:)
+    integer, allocatable, save :: id_tr1(:), id_rwqb(:), id_bndtradim(:), id_ttrabnd(:), id_ztrabnd(:)
     integer, allocatable, save :: id_sf1(:), id_bndsedfracdim(:), id_tsedfracbnd(:), id_zsedfracbnd(:)
 
     integer :: i, numContPts, numNodes, itim, k, kb, kt, kk, LL, Lb, Lt, iconst, L, j, nv, nv1, nm, ndxbnd, nlayb, nrlay, LTX, nlaybL, nrlaylx
@@ -2778,6 +2780,24 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
        ITRAN0 = ITRAN
     endif
     
+    ! water quality bottom variables
+    if(numwqbots > 0) then
+       call realloc(id_rwqb, numwqbots, keepExisting = .false., fill = 0)
+       do j=1,numwqbots
+          tmpstr = wqbotnames(j)
+          ! Forbidden chars in NetCDF names: space, /, and more.
+          call replace_char(tmpstr,32,95) 
+          call replace_char(tmpstr,47,95) 
+          ierr = nf90_def_var(irstfile, trim(tmpstr), nf90_double, (/ id_flowelemdim , id_timedim /), id_rwqb(j))
+          ierr = nf90_put_att(irstfile, id_rwqb(j),  'coordinates'  , 'FlowElem_xcc FlowElem_ycc')
+          ierr = nf90_put_att(irstfile, id_rwqb(j),  'standard_name', trim(tmpstr))
+          ierr = nf90_put_att(irstfile, id_rwqb(j),  'long_name'    , trim(tmpstr))
+          tmpstr = wqbotunits(j)
+          ierr = nf90_put_att(irstfile, id_rwqb(j),  'units'        , trim(tmpstr))
+       enddo
+       ITRAN0 = ITRAN
+    endif
+
     if (jawave .eq. 4) then
       ierr = nf90_def_var(irstfile, 'E',  nf90_double, (/ id_flowelemdim, id_timedim /) , id_E)
       ierr = nf90_put_att(irstfile, id_E,   'coordinates'  , 'FlowElem_xcc FlowElem_ycc')
@@ -3403,6 +3423,18 @@ subroutine unc_write_rst_filepointer(irstfile, tim)
        enddo
        if (allocated(dum)) deallocate(dum)
     end if
+    
+    ! water quality bottom variables
+    if (numwqbots > 0) then
+       allocate(dum(ndxi))
+       do j=1,numwqbots
+          do kk=1,ndxi
+             dum(kk) = wqbot(j,kk)
+          enddo
+          ierr = nf90_put_var(irstfile, id_rwqb(j), dum(1:ndxi), (/ 1, itim /), (/ ndxi, 1 /) )
+       enddo
+       if (allocated(dum)) deallocate(dum)
+    end if
 
     ! JRE: review what is really necessary
     if (jawave .eq. 4) then
@@ -3918,6 +3950,19 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
       ! TODO: AVD...
       ! TIDAL TURBINES: Insert equivalent of addturbine_cnst and addturbine_time here
       
+    ! water quality bottom variables
+      if (numwqbots > 0) then
+         call realloc(mapids%id_wqb, (/ 3, numwqbots /), keepExisting=.false., fill = 0)
+         do j=1,numwqbots
+            tmpstr = wqbotnames(j)
+            ! Forbidden chars in NetCDF names: space, /, and more.
+            call replace_char(tmpstr,32,95) 
+            call replace_char(tmpstr,47,95) 
+            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_wqb(:,j), nf90_double, UNC_LOC_S, trim(tmpstr), &
+                                   '', trim(wqbotnames(j)) // ' in flow element', wqbotunits(j))
+         end do
+      endif
+
       ! WAQ extra outputs
       if (jawaqproc>0) then
          if (noout_map > 0) then
@@ -4689,6 +4734,16 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
 !             ierr = nf90_put_var(imapfile, id_const(iid,j), dum, (/ 1, itim /), (/ NdxNdxi, 1 /) )
              ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_const(:,j), UNC_LOC_S, workx)
           end if
+       end do
+    end if
+
+    ! water quality bottom variables
+    if (numwqbots > 0) then
+       do j=1,numwqbots
+          do k=1,Ndxi
+             workx(k) = wqbot(j,k)
+          end do
+          ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_wqb(:,j), UNC_LOC_S, workx(1:ndxi))
        end do
     end if
 
@@ -5525,7 +5580,7 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
     use m_bedform
     use m_wind
     use m_flowparameters, only: jatrt, jacali
-    use m_fm_wq_processes, only: jawaqproc, outputs, id_waq, waqoutputs, kbx, outvar, noout_map
+    use m_fm_wq_processes, only: jawaqproc, outputs, id_wqb, numwqbots, wqbotnames, wqbotunits, wqbot, id_waq, waqoutputs, kbx, outvar, noout_map
     use m_xbeach_data
     use m_transport, only: NUMCONST, itemp, ITRA1, ITRAN, ISED1, ISEDN, constituents, const_names, const_units, id_const
     use bedcomposition_module, only: bedcomp_getpointer_integer
@@ -5988,6 +6043,24 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
                  endif
                  ierr = nf90_put_att(imapfile, id_const(iid,j),  'units'        , tmpstr)
                  ierr = nf90_put_att(imapfile, id_const(iid,j),  '_FillValue'   , dmiss)
+              end do
+           endif
+
+!          water quality bottom variables
+           if (numwqbots > 0) then
+              call realloc(id_wqb, (/ 3, numwqbots /), keepExisting=.false., fill = 0)
+              do j=1,numwqbots
+                 tmpstr = wqbotnames(j)
+                 ! Forbidden chars in NetCDF names: space, /, and more.
+                 call replace_char(tmpstr,32,95) 
+                 call replace_char(tmpstr,47,95) 
+                 ierr = nf90_def_var(imapfile, trim(tmpstr), nf90_double, (/ id_flowelemdim (iid), id_timedim (iid)/) , id_wqb(iid,j))
+                 ierr = nf90_put_att(imapfile, id_wqb(iid,j),  'coordinates'  , 'FlowElem_xcc FlowElem_ycc')
+                 ierr = nf90_put_att(imapfile, id_wqb(iid,j),  'standard_name', trim(tmpstr))
+                 ierr = nf90_put_att(imapfile, id_wqb(iid,j),  'long_name'    , trim(tmpstr))
+                 tmpstr = wqbotunits(j)
+                 ierr = nf90_put_att(imapfile, id_wqb(iid,j),  'units'        , tmpstr)
+                 ierr = nf90_put_att(imapfile, id_wqb(iid,j),  '_FillValue'   , dmiss)
               end do
            endif
 
@@ -7455,6 +7528,18 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
           if ( allocated(dum) ) deallocate(dum)
        end if
     
+       ! water quality bottom variables outputs
+       if (numwqbots > 0) then
+          allocate(dum(NdxNdxi))
+          do j=1,numwqbots
+             do kk=1,NdxNdxi
+                dum(kk) = wqbot(j,kk)
+             end do
+             ierr = nf90_put_var(imapfile, id_wqb(iid,j), dum, (/ 1, itim /), (/ NdxNdxi, 1 /) )
+          end do
+          if ( allocated(dum) ) deallocate(dum)
+       end if
+
        ! WAQ extra outputs
        if (jawaqproc > 0) then
           do j=1,noout_map
@@ -10314,6 +10399,7 @@ subroutine unc_read_map(filename, tim, ierr)
     use m_flow
     use m_flowtimes
     use m_transport, only: NUMCONST, ISALT, ITEMP, ISED1, ISEDN, ITRA1, ITRAN, constituents, itrac2const, const_names
+    use m_fm_wq_processes
     use m_flowexternalforcings, only: numtracers, trnames, kbndz
     use m_sediment
     use bedcomposition_module
@@ -10381,10 +10467,11 @@ subroutine unc_read_map(filename, tim, ierr)
     integer :: layerfrac
     integer, allocatable :: id_tr1(:), id_bndtradim(:), id_ttrabnd(:), id_ztrabnd(:)
     integer, allocatable :: id_sf1(:), id_bndsedfracdim(:), id_tsedfracbnd(:), id_zsedfracbnd(:)
-       
+    integer, allocatable :: id_rwqb(:)
+
     integer :: it_read, nt_read, ndxi_read, lnx_read, mapref, L, tok1, tok2, tok3, nbnd_read
     integer :: sedtot_read, sedsus_read, nlyr_read
-    integer :: kloc,kk, kb, kt, LL, Lb, Lt, laydim, wdim, itmp, i, iconst, nm, Lf, j, k, nlayb, nrlay
+    integer :: kloc,kk, kb, kt, LL, Lb, Lt, laydim, wdim, itmp, i, iconst, iwqbot, nm, Lf, j, k, nlayb, nrlay
     integer :: iostat
     logical :: fname_has_date, mdu_has_date
     integer :: titleLength, strlen
@@ -11364,7 +11451,33 @@ subroutine unc_read_map(filename, tim, ierr)
           call check_error(ierr, const_names(iconst))
        enddo
     endif
-    
+
+!   Read the water quality bottom variables
+    if(numwqbots > 0) then
+       call realloc(id_rwqb, numwqbots, keepExisting = .false., fill = 0)
+       call realloc(tmpvar, [1, ndxi], keepExisting = .false., fill = 0.0d0)
+       do iwqbot = 1, numwqbots
+          tmpstr = wqbotnames(iwqbot)
+          ! Forbidden chars in NetCDF names: space, /, and more.
+          call replace_char(tmpstr,32,95) 
+          call replace_char(tmpstr,47,95) 
+          ierr = nf90_inq_varid(imapfile, trim(tmpstr), id_rwqb(i))
+          if ( ierr.eq.NF90_NOERR ) then
+!            water quality bottom variable exists in restart file
+             ierr = nf90_get_var(imapfile, id_rwqb(i), tmpvar(1,1:ndxi_own), start = (/ kstart, it_read/), count = (/ndxi,1/))
+             do kk = 1, ndxi
+                if (jamergedmap == 1) then
+                   kloc = inode_own(kk)
+                else
+                   kloc = kk
+                end if
+                wqbot(iwqbot, kloc) = tmpvar(1,kk)
+             end do
+          endif
+          call check_error(ierr, wqbotnames(iwqbot))
+       enddo
+    endif
+
     ! JRE to do
     if (jased > 0 .and. stm_included) then
        if (jamergedmap == 1) then

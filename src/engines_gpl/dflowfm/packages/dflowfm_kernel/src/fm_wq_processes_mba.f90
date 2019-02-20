@@ -445,7 +445,7 @@
    double precision :: mbavolume(nmba)      ! volumes
    double precision :: mbamass(ntot, nmba)  ! masses
 
-   integer :: k, kk, kb, kt, isys, iconst, imba
+   integer :: k, kk, kb, kt, isys, iconst, iwqbot, imba
 
    mbavolume = 0.0d0
    mbamass = 0.0d0
@@ -465,8 +465,8 @@
          end do
       end do
       do isys=nosys+1,notot
-         iconst = isys2const(isys)
-         mbamass(isys,imba) = mbamass(isys,imba) + constituents(iconst,kb)*ba(kk)
+         iwqbot = isys2wqbot(isys)
+         mbamass(isys,imba) = mbamass(isys,imba) + wqbot(iwqbot,kk)*ba(kk)
       end do
    end do 
    end subroutine mba_sum

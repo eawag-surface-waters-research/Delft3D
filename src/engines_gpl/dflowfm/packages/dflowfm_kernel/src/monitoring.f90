@@ -97,6 +97,8 @@ implicit none
     integer                           :: IVAL_TRAN
     integer                           :: IVAL_HWQ1
     integer                           :: IVAL_HWQN
+    integer                           :: IVAL_WQB1
+    integer                           :: IVAL_WQBN
     integer                           :: IVAL_SED ! HK code
     integer                           :: IVAL_SF1 ! stm code
     integer                           :: IVAL_SFN
@@ -146,6 +148,8 @@ implicit none
     integer                           :: IPNT_TEM1
     integer                           :: IPNT_TRA1
     integer                           :: IPNT_TRAN
+    integer                           :: IPNT_WQB1
+    integer                           :: IPNT_WQBN
     integer                           :: IPNT_HWQ1
     integer                           :: IPNT_HWQN
 !    integer                           :: IPNT_SPIR1
@@ -222,7 +226,7 @@ subroutine init_valobs_pointers()
    use m_flowparameters
    use m_flow, only: iturbulencemodel, idensform, kmx
    use m_transport, only: ITRA1, ITRAN, ISED1, ISEDN
-   use m_fm_wq_processes, only: noout
+   use m_fm_wq_processes, only: noout, numwqbots
    use m_sediment, only: stm_included
    implicit none
    
@@ -257,6 +261,8 @@ subroutine init_valobs_pointers()
    IVAL_TRAN       = 0
    IVAL_HWQ1       = 0
    IVAL_HWQN       = 0
+   IVAL_WQB1       = 0
+   IVAL_WQBN       = 0
    IVAL_SF1        = 0
    IVAL_SFN        = 0
    IVAL_SED        = 0
@@ -329,6 +335,10 @@ subroutine init_valobs_pointers()
    end if
    if ( jahisrain.gt.0 ) then
       i=i+1;            IVAL_RAIN       = i
+   end if
+   if ( numwqbots.gt.0 ) then
+      i=i+1;            IVAL_WQB1       = i
+      i=i+numwqbots-1; IVAL_WQBN       = i
    end if
    MAXNUMVALOBS2D                       = i-i0
    
@@ -444,6 +454,8 @@ subroutine init_valobs_pointers()
    IPNT_QFRC  = ivalpoint(IVAL_QFRC,  kmx)
    IPNT_QTOT  = ivalpoint(IVAL_QTOT,  kmx)
    IPNT_RAIN  = ivalpoint(IVAL_RAIN,  kmx)
+   IPNT_WQB1  = ivalpoint(IVAL_WQB1,  kmx)
+   IPNT_WQBN  = ivalpoint(IVAL_WQBN,  kmx)
    
    IPNT_NUM   = ivalpoint(0,          kmx)-1
    
