@@ -8275,6 +8275,7 @@ end subroutine checknetwork
         integer                                     :: numcrossedlinks
         integer                                     :: i, j, L, num
         integer                                     :: ierror
+        double precision                            :: t0, t1
         
 !       count total number of polygon nodes, including missing and closures
         num = numpols-1 ! missing values as seperators
@@ -8291,6 +8292,7 @@ end subroutine checknetwork
         allocate(polynum(num))
         allocate(polysec(num))
         
+        call klok(t0)
         num = 0
         do i=1,numpols
 !          copy i-the tpoly-type polygon        
@@ -8355,7 +8357,10 @@ end subroutine checknetwork
         end do
      
   1234  continue
-     
+
+        call klok(t1)
+        write(mesg,"('cutcell with kdtree2, elapsed time: ', G15.5, 's.')") t1-t0
+        call mess(LEVEL_INFO, trim(mesg))
 !       deallocate
         if ( allocated(iLink) ) deallocate(iLink)
         if ( allocated(iPol) )  deallocate(iPol)
@@ -14030,6 +14035,7 @@ subroutine crosssections_on_flowgeom()
     use m_flowgeom, only: Lnx
     use m_missing
     use kdtree2Factory
+    use unstruc_messages
     implicit none
 
     integer                                       :: ic, icmod
@@ -14044,6 +14050,8 @@ subroutine crosssections_on_flowgeom()
     integer                                       :: istart, iend
 
     integer                                       :: jakdtree=1
+    double precision                              :: t0, t1
+    character(len=128)                            :: mesg
 
     if ( ncrs.lt.1 ) return
 
@@ -14055,6 +14063,7 @@ subroutine crosssections_on_flowgeom()
     idum = 0
     
     if ( jakdtree.eq.1 ) then
+      call klok(t0)
         num = 0
 !       determine polyline size
         do ic=1,ncrs
@@ -14123,6 +14132,9 @@ subroutine crosssections_on_flowgeom()
 !       deallocate
         if ( allocated(istartcrs) ) deallocate(istartcrs)
         if ( allocated(xx)        ) deallocate(xx,yy)
+      call klok(t1)
+      write(mesg,"('cross sections with kdtree2, elapsed time: ', G15.5, 's.')") t1-t0
+      call mess(LEVEL_INFO, trim(mesg))
     end if
 
     icMOD = MAX(1,ncrs/100)

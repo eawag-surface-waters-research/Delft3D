@@ -40813,6 +40813,8 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
  character(len=1), external                  :: get_dirsep
  character(len=200), dimension(:), allocatable       :: fnames
  integer                                     :: jadoorladen, ifil
+ double precision                            :: t0, t1
+ character(len=128)                          :: mesg
 
 
  if ( len_trim(md_fixedweirfile) == 0 ) then
@@ -40845,6 +40847,8 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
  allocate (vegetat(lnx))  ; vegetat = 0d0
  allocate (iweirtyp(lnx)) ; iweirtyp = 0 
  allocate (ifirstweir(lnx)) ; ifirstweir = 1                       ! added to check whether fixed weir data is set for the first time at a net link (1=true, 0=false)
+ 
+ call klok(t0)
  
  ! Load fixed weirs polygons from file. 
  ! --------------------------------------------------------------------
@@ -40941,6 +40945,10 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
     enddo 
     numcrossedlinks = n 
  endif    
+ 
+ call klok(t1)
+ write(mesg,"('fixed weirs with kdtree2, elapsed time: ', G15.5, 's.')") t1-t0
+ call mess(LEVEL_INFO, trim(mesg))
  
  nh = 0
  do iL = 1,numcrossedlinks
@@ -41266,6 +41274,8 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
  integer,          allocatable :: iLink(:), iLcr(:), iPol(:)
  character(len=5)              :: sd
  character(len=1), external    :: get_dirsep
+ double precision              :: t0, t1
+ character(len=128)            :: mesg
 
  if ( len_trim(md_gulliesfile) == 0 ) then
     return
@@ -41277,6 +41287,7 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
  call reapol (minp, 0)
 
  if ( jakdtree.eq.1 ) then
+    call klok(t0)
     allocate(iLink(Lnx),ipol(Lnx),dSL(Lnx))
     call find_crossed_links_kdtree2(treeglob,NPL,XPL,YPL,2,numL,0,numcrossedLinks, iLink, iPol, dSL, ierror)
     numLL = numcrossedLinks
@@ -41284,6 +41295,9 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
        deallocate(iLink,ipoL,dSL)
        jakdtree = 0
     end if
+    call klok(t1)
+    write(mesg,"('set bobs (on gullies) with kdtree2, elapsed time: ', G15.5, 's.')") t1-t0
+    call mess(LEVEL_INFO, trim(mesg))
  else
     numLL = Lnxi
  end if
@@ -41405,6 +41419,8 @@ subroutine setbobsonroofs( )      ! override bobs along pliz's
  double precision              :: SL, SM, XCR, YCR, CRP, Xa, Ya, Xb, Yb, zc, af, roofgutterheight = 0.1d0
  double precision, allocatable :: dSL(:),   blav(:)
  integer,          allocatable :: iLink(:), iLcr(:), iPol(:), nblav(:)
+ double precision              :: t0, t1
+ character(len=128)            :: mesg
  
  character(len=5)              :: sd
  character(len=1), external    :: get_dirsep
@@ -41440,6 +41456,7 @@ subroutine setbobsonroofs( )      ! override bobs along pliz's
  enddo   
 
  if ( jakdtree.eq.1 ) then
+    call klok(t0)
     allocate(iLink(Lnx),ipol(Lnx),dSL(Lnx))
     call find_crossed_links_kdtree2(treeglob,NPL,XPL,YPL,2,Lnxi,0,numcrossedLinks, iLink, iPol, dSL, ierror)
     numLL = numcrossedLinks
@@ -41447,6 +41464,9 @@ subroutine setbobsonroofs( )      ! override bobs along pliz's
        deallocate(iLink,ipoL,dSL)
        jakdtree = 0
     end if
+    call klok(t1)
+    write(mesg,"('set bobs (on roofs) with kdtree2, elapsed time: ', G15.5, 's.')") t1-t0
+    call mess(LEVEL_INFO, trim(mesg))
  else
     numLL = Lnxi
  end if
