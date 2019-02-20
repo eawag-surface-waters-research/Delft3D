@@ -4,7 +4,7 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "deltares_common", "utils_lgpl\deltares_common\packages\deltares_common\deltares_common.vfproj", "{2D6BCBCA-CC6C-49FE-A6AA-61AF62529118}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "triangle_c_2012", "third_party_open\triangle\triangle_c_2012.vcxproj", "{A5638E14-9D2D-49ED-ACA3-A73833756311}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "triangle_c", "third_party_open\triangle\triangle_c.vcxproj", "{A5638E14-9D2D-49ED-ACA3-A73833756311}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "unstruc_dll_csharp", "csharp\unstruc_dll_csharp\unstruc_dll_csharp.csproj", "{8161EAC2-AD3A-403E-9709-965AFC85B159}"
 	ProjectSection(ProjectDependencies) = postProject

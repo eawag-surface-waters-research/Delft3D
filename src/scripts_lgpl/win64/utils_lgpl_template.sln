@@ -4,7 +4,7 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "deltares_common", "utils_lgpl\deltares_common\packages\deltares_common\deltares_common.vfproj", "{2D6BCBCA-CC6C-49FE-A6AA-61AF62529118}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "triangle_c_2012", "third_party_open\triangle\triangle_c_2012.vcxproj", "{A5638E14-9D2D-49ED-ACA3-A73833756311}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "triangle_c", "third_party_open\triangle\triangle_c.vcxproj", "{A5638E14-9D2D-49ED-ACA3-A73833756311}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "utils_lgpl", "utils_lgpl", "{E86AA903-25B1-475E-8E53-E4E3F9CEB5FF}"
 EndProject
