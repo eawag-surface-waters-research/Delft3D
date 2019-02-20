@@ -445,7 +445,7 @@ else
     PROJ_CPPFLAGS=""
     PROJ_LDFLAGS=""
     PROJ_CONFARGS=""
-    if [[ "$compiler" = 'intel16' || "$compiler" = 'intel18']]; then
+    if [[ "$compiler" = 'intel16' || "$compiler" = 'intel18' ]]; then
        PROJ_CPPFLAGS=-I$PROJ_DIR/include
        PROJ_LDFLAGS=-L$PROJ_DIR/lib
        PROJ_CONFARGS="--with-proj=$PROJ_DIR --disable-gdal"
