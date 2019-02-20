@@ -63,33 +63,6 @@ subroutine grmap_esmf(i1, f1, n1, f2, mmax, nmax, f2s, f2g, adaptCovered)
 !
     if (.not.f2s%grids_linked) return
     n2 = mmax * nmax
-    !if (present(adaptCovered)) then
-    !    adaptCovered_ = adaptCovered
-    !else
-    !    adaptCovered_ = .false.
-    !endif
-    !!
-    !if (adaptCovered_) then
-    !   if (f2s%sferic) then
-    !      do n=1, f2s%n_s
-    !         i       = floor(real(f2s%row(n)-1)/real(nmax)) + 1
-    !         j       = f2s%row(n) - nmax*(i-1)
-    !         if (      comparereal(abs(f1(f2s%col(n))),999.1) == -1 &
-    !           & .and. comparereal(abs(f1(f2s%col(n))),998.9) ==  1) then
-    !            f2g%covered(i,j) = 0
-    !         endif
-    !      enddo
-    !   else
-    !      do n=1, f2s%n_s
-    !         j       = floor(real(f2s%row(n)-1)/real(mmax)) + 1
-    !         i       = f2s%row(n) - mmax*(j-1)
-    !         if (      comparereal(abs(f1(f2s%col(n))),999.1) == -1 &
-    !           & .and. comparereal(abs(f1(f2s%col(n))),998.9) ==  1) then
-    !            f2g%covered(i,j) = 0
-    !         endif
-    !      enddo
-    !   endif
-    !endif
     !
     ! f2 already contains valid data
     ! Only replace f2 values when covered by f1
@@ -125,32 +98,5 @@ subroutine grmap_esmf(i1, f1, n1, f2, mmax, nmax, f2s, f2g, adaptCovered)
              f2(i,j) = f2(i,j) + f2s%s(n)*f1(f2s%col(n))    ! generate_partioning_pol_from_idomain
           endif
        enddo
-       
-       
-       
-       !! Only works with structured grids:
-       !do n3d=1, f2s%n_s/4
-       !   n = n3d + floor(real(n3d-1)/4.0)*4
-       !   ! n3d = 5,6,7,8,13,14,15,16,21,22,23,24: contribution of points at z=1 so skip
-       !   ! => use n instead of n3d
-       !   ! n > n_s/2: This point is at z=1 (instead of z=0) so skip
-       !   ! => stop when n > n_s/2 (n3d>n_s/4)
-       !   j       = floor(real(f2s%row(n)-1)/real(mmax)) + 1
-       !   i       = f2s%row(n) - mmax*(j-1)
-       !   !if (f2g%covered(i,j) == 1) then
-       !      f2(i,j) = f2(i,j) + f2s%s(n)*f1(f2s%col(n))
-       !   !endif
-       !enddo
-
-       ! Not needed when using bilinear interpolation:
-       !do n=1, f2s%n_b
-       !   if (f2s%frac_b(n) /= 0.0_hp) then
-       !      j       = floor(real(n-1)/real(mmax)) + 1
-       !      i       = n - mmax*(j-1)
-       !      !if (f2g%covered(i,j) == 1) then
-       !         f2(i,j) = f2(i,j)/f2s%frac_b(n)
-       !      !endif
-       !   endif
-       !enddo
     endif
 end subroutine grmap_esmf

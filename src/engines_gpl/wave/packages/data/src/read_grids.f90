@@ -572,7 +572,7 @@ end subroutine read_grd
 !
 !
 !==============================================================================
-subroutine read_netcdf_grd(i_grid, filename, xcc, ycc, codb, covered, mmax, nmax, kmax, sferic, xymiss, bndx, bndy, numenclpts, filename_tmp, flowLinkConnectivity)
+subroutine read_netcdf_grd(i_grid, filename, xcc, ycc, codb, covered, mmax, nmax, kmax, sferic, xymiss, bndx, bndy, numenclpts, numenclparts,numenclptsppart,filename_tmp, flowLinkConnectivity)
     use netcdf
     implicit none
 !
@@ -588,13 +588,15 @@ subroutine read_netcdf_grd(i_grid, filename, xcc, ycc, codb, covered, mmax, nmax
     integer                          , intent(out) :: nmax
     integer                          , intent(out) :: kmax
     integer                          , intent(out) :: numenclpts
+    integer                          , intent(out) :: numenclparts
     real                             , intent(out) :: xymiss
     integer , dimension(:,:), pointer              :: codb
     integer , dimension(:,:), pointer              :: covered
+    integer , dimension(:),   pointer              :: numenclptsppart
     real(hp), dimension(:,:), pointer              :: xcc
     real(hp), dimension(:,:), pointer              :: ycc
-    real(hp), dimension(:,:), pointer              :: bndx
-    real(hp), dimension(:,:), pointer              :: bndy    
+    real(hp), dimension(:),   pointer              :: bndx
+    real(hp), dimension(:),   pointer              :: bndy    
     logical                                        :: sferic
     character(*)                                   :: filename_tmp
     logical                          , intent(in)  :: flowLinkConnectivity
@@ -609,6 +611,7 @@ subroutine read_netcdf_grd(i_grid, filename, xcc, ycc, codb, covered, mmax, nmax
     integer                                :: iddim_e
     integer                                :: iddim_enclsp
     integer                                :: iddim_numencpts
+    integer                                :: iddim_numencparts
     integer                                :: iddim_laydim
     integer                                :: iddim_n
     integer                                :: iddim_mmax
@@ -631,6 +634,7 @@ subroutine read_netcdf_grd(i_grid, filename, xcc, ycc, codb, covered, mmax, nmax
     integer                                :: idvar_y
     integer                                :: idvar_encx
     integer                                :: idvar_ency
+    integer                                :: idvar_encptsppt
     integer                                :: ierror
     integer                                :: ik
     integer                                :: irgf
@@ -739,33 +743,31 @@ subroutine read_netcdf_grd(i_grid, filename, xcc, ycc, codb, covered, mmax, nmax
           ierror = nf90_inq_varid(idfile, 'FlowLink'   , idvar_flowlink); call nc_check_err(ierror, "inq_varid FlowLink", filename)
     endif
     !
-    ! For the enclosure
-    !
-    !ierror = nf90_inq_dimid(idfile, 'nmesh2d_EnclosureParts', iddim_enclsp        ); call nc_check_err(ierror, "inq_dimid nmesh2d_EnclosureParts", filename)
-    !ierror = nf90_inquire_dimension(idfile, iddim_enclsp, string, numencl)         ; call nc_check_err(ierror, "inq_dim enclsp", filename)
-    !if (numencl/=1) then
-    !   write(*,'(a,i0,a)') "ERROR nmesh2d_EnclosureParts = ", numencl, ". Expecting 1. Please make sure your (partition) domain has a single contiguous grid."
-    !   call wavestop(1, 'nmesh2d_EnclosureParts should be 1')
-    !endif
     ierror = nf90_inq_dimid(idfile, 'nmesh2d_EnclosurePoints', iddim_numencpts       ); call nc_check_err(ierror, "inq_dimid nmesh2d_EnclosurePoints", filename)
     ierror = nf90_inquire_dimension(idfile, iddim_numencpts, string, numenclpts)      ; call nc_check_err(ierror, "inq_dim numencpts", filename)
+    !
+    ierror = nf90_inq_dimid(idfile, 'nmesh2d_EnclosureParts', iddim_numencparts       ); call nc_check_err(ierror, "inq_dimid nmesh2d_EnclosureParts", filename)
+    ierror = nf90_inquire_dimension(idfile, iddim_numencparts, string, numenclparts)   ; call nc_check_err(ierror, "inq_dim numencparts", filename)
     !
     ierror = nf90_inq_varid(idfile, 'mesh2d_enc_x', idvar_encx       ); call nc_check_err(ierror, "inq_varid encx", filename)
     ierror = nf90_inq_varid(idfile, 'mesh2d_enc_y', idvar_ency       ); call nc_check_err(ierror, "inq_varid ency", filename)
     !
+    ierror = nf90_inq_varid(idfile, 'mesh2d_enc_part_node_count', idvar_encptsppt  ); call nc_check_err(ierror, "inq_varid encptsppt", filename)
+    !
     ! Allocate arrays
     ! xcc,ycc: +4 needed by subroutine tricall
     !
-    allocate (xcc        (mmax+4,nmax)     , STAT=ierror)
-    allocate (ycc        (mmax+4,nmax)     , STAT=ierror)
-    allocate (bndx       (numenclpts,nmax) , STAT=ierror)
-    allocate (bndy       (numenclpts,nmax) , STAT=ierror)
-    allocate (codb       (mmax,nmax)       , STAT=ierror)
-    allocate (covered    (mmax,nmax)       , STAT=ierror)
-    allocate (xnode      (nnodes)          , STAT=ierror)
-    allocate (ynode      (nnodes)          , STAT=ierror)
-    allocate (elemtonode (nemax,nelm)      , STAT=ierror)
-    allocate (nelmslice  (nelm)            , STAT=ierror)
+    allocate (xcc            (mmax+4,nmax)     , STAT=ierror)
+    allocate (ycc            (mmax+4,nmax)     , STAT=ierror)
+    allocate (bndx           (numenclpts)      , STAT=ierror)
+    allocate (bndy           (numenclpts)      , STAT=ierror)
+    allocate (numenclptsppart(numenclparts)    , STAT=ierror)
+    allocate (codb           (mmax,nmax)       , STAT=ierror)
+    allocate (covered        (mmax,nmax)       , STAT=ierror)
+    allocate (xnode          (nnodes)          , STAT=ierror)
+    allocate (ynode          (nnodes)          , STAT=ierror)
+    allocate (elemtonode     (nemax,nelm)      , STAT=ierror)
+    allocate (nelmslice      (nelm)            , STAT=ierror)
     if (sferic) then
        allocate (grid_corner(nemax,nelm), STAT=ierror)
        allocate (mask_area  (nelm)      , STAT=ierror)
@@ -796,13 +798,14 @@ subroutine read_netcdf_grd(i_grid, filename, xcc, ycc, codb, covered, mmax, nmax
     endif
     codb    = 1
     covered = 0
-    ierror = nf90_get_var(idfile, idvar_x       , xcc       , start=(/ 1 /)   , count=(/ mmax /)            ); call nc_check_err(ierror, "get_var x", filename)
-    ierror = nf90_get_var(idfile, idvar_y       , ycc       , start=(/ 1 /)   , count=(/ mmax /)            ); call nc_check_err(ierror, "get_var y", filename)
-    ierror = nf90_get_var(idfile, idvar_nx      , xnode     , start=(/ 1 /)   , count=(/ nnodes /)          ); call nc_check_err(ierror, "get_var xnode", filename)
-    ierror = nf90_get_var(idfile, idvar_ny      , ynode     , start=(/ 1 /)   , count=(/ nnodes /)          ); call nc_check_err(ierror, "get_var ynode", filename)
-    ierror = nf90_get_var(idfile, idvar_encx    , bndx      , start=(/ 1 /)   , count=(/ numenclpts /)      ); call nc_check_err(ierror, "get_var bndx", filename)
-    ierror = nf90_get_var(idfile, idvar_ency    , bndy      , start=(/ 1 /)   , count=(/ numenclpts /)      ); call nc_check_err(ierror, "get_var bndy", filename)
-    ierror = nf90_get_var(idfile, idvar_en      , elemtonode, start=(/ 1, 1 /), count=(/ nemax, nelm /)     ); call nc_check_err(ierror, "get_var netelemnode", filename)
+    ierror = nf90_get_var(idfile, idvar_x        , xcc            , start=(/ 1 /)   , count=(/ mmax /)            ); call nc_check_err(ierror, "get_var x", filename)
+    ierror = nf90_get_var(idfile, idvar_y        , ycc            , start=(/ 1 /)   , count=(/ mmax /)            ); call nc_check_err(ierror, "get_var y", filename)
+    ierror = nf90_get_var(idfile, idvar_nx       , xnode          , start=(/ 1 /)   , count=(/ nnodes /)          ); call nc_check_err(ierror, "get_var xnode", filename)
+    ierror = nf90_get_var(idfile, idvar_ny       , ynode          , start=(/ 1 /)   , count=(/ nnodes /)          ); call nc_check_err(ierror, "get_var ynode", filename)
+    ierror = nf90_get_var(idfile, idvar_encx     , bndx           , start=(/ 1 /)   , count=(/ numenclpts /)      ); call nc_check_err(ierror, "get_var bndx", filename)
+    ierror = nf90_get_var(idfile, idvar_ency     , bndy           , start=(/ 1 /)   , count=(/ numenclpts /)      ); call nc_check_err(ierror, "get_var bndy", filename)
+    ierror = nf90_get_var(idfile, idvar_encptsppt, numenclptsppart, start=(/ 1 /)   , count=(/ numenclparts /)    ); call nc_check_err(ierror, "get_var encptsppt", filename)
+    ierror = nf90_get_var(idfile, idvar_en       , elemtonode     , start=(/ 1, 1 /), count=(/ nemax, nelm /)     ); call nc_check_err(ierror, "get_var netelemnode", filename)
     if (.not.sferic .and. flowLinkConnectivity) then
        ierror = nf90_get_var(idfile, idvar_flowlink, flowlink  , start=(/ 1, 1 /), count=(/ 2, nflowlink /)); call nc_check_err(ierror, "get_var flowlink", filename)
     endif
@@ -1002,104 +1005,6 @@ subroutine read_netcdf_grd(i_grid, filename, xcc, ycc, codb, covered, mmax, nmax
              !
              ! element neighneigh does not need to be updated
           enddo
-          !! voor f34:
-          !maxelem=200
-          !elt=20
-          !lc=27
-          !hc=40
-          !do i=1,15
-          !   do j=1,12
-          !      elt=elt+1
-          !      lc=lc+1
-          !      hc=hc+1
-          !      elemconn(1,elt) = lc
-          !      elemconn(2,elt) = lc+1
-          !      elemconn(3,elt) = hc+1
-          !      elemconn(4,elt) = hc
-          !   enddo
-          !   lc=lc+1
-          !   hc=hc+1
-          !enddo
-          !elemconn(1,1) = 1
-          !elemconn(2,1) = 2
-          !elemconn(3,1) = 8
-          !elemconn(4,1) = 7
-          !elemconn(1,2) = 2
-          !elemconn(2,2) = 3
-          !elemconn(3,2) = 9
-          !elemconn(4,2) = 8
-          !elemconn(1,3) = 4
-          !elemconn(2,3) = 5
-          !elemconn(3,3) = 11
-          !elemconn(4,3) = 10
-          !elemconn(1,4) = 5
-          !elemconn(2,4) = 6
-          !elemconn(3,4) = 12
-          !elemconn(4,4) = 11
-          !elemconn(1,5) = 7
-          !elemconn(2,5) = 8
-          !elemconn(3,5) = 16
-          !elemconn(4,5) = 15
-          !elemconn(1,6) = 8
-          !elemconn(2,6) = 9
-          !elemconn(3,6) = 17
-          !elemconn(4,6) = 16
-          !elemconn(1,7) = 10
-          !elemconn(2,7) = 11
-          !elemconn(3,7) = 19
-          !elemconn(4,7) = 18
-          !elemconn(1,8) = 11
-          !elemconn(2,8) = 12
-          !elemconn(3,8) = 20
-          !elemconn(4,8) = 19
-          !elemconn(1,9) = 12
-          !elemconn(2,9) = 13
-          !elemconn(3,9) = 21
-          !elemconn(4,9) = 20
-          !elemconn(1,10) = 14
-          !elemconn(2,10) = 15
-          !elemconn(3,10) = 25
-          !elemconn(4,10) = 24
-          !elemconn(1,11) = 15
-          !elemconn(2,11) = 16
-          !elemconn(3,11) = 26
-          !elemconn(4,11) = 25
-          !elemconn(1,12) = 16
-          !elemconn(2,12) = 17
-          !elemconn(3,12) = 27
-          !elemconn(4,12) = 26
-          !elemconn(1,13) = 18
-          !elemconn(2,13) = 19
-          !elemconn(3,13) = 29
-          !elemconn(4,13) = 28
-          !elemconn(1,14) = 19
-          !elemconn(2,14) = 20
-          !elemconn(3,14) = 30
-          !elemconn(4,14) = 29
-          !elemconn(1,15) = 20
-          !elemconn(2,15) = 21
-          !elemconn(3,15) = 31
-          !elemconn(4,15) = 30
-          !elemconn(1,16) = 21
-          !elemconn(2,16) = 22
-          !elemconn(3,16) = 32
-          !elemconn(4,16) = 31
-          !elemconn(1,17) = 23
-          !elemconn(2,17) = 24
-          !elemconn(3,17) = 37
-          !elemconn(4,17) = 36
-          !elemconn(1,18) = 24
-          !elemconn(2,18) = 25
-          !elemconn(3,18) = 38
-          !elemconn(4,18) = 37
-          !elemconn(1,19) = 25
-          !elemconn(2,19) = 26
-          !elemconn(3,19) = 39
-          !elemconn(4,19) = 38
-          !elemconn(1,20) = 26
-          !elemconn(2,20) = 27
-          !elemconn(3,20) = 40
-          !elemconn(4,20) = 39
           deallocate(linkadmin, STAT=ierror)
        else
           ! Not a regular grid (containing at least 1 triangle)
@@ -1264,106 +1169,7 @@ subroutine read_netcdf_grd(i_grid, filename, xcc, ycc, codb, covered, mmax, nmax
           grid_corner(2,i     ) = ycc(i,1)
        enddo
        ierror = nf90_put_var(idfile, idvar_coords, grid_corner, start=(/1,1/), count=(/2,mmax/));   call nc_check_err(ierror, "put_var nodeCoords", filename_tmp)
-       !
-       !do i=1, nelm
-       !   necurnodes = 0
-       !   do j=1, nemaxout/2
-       !      if (j > nemax) then
-       !         ! Triangle instead of quadrangle
-       !         ! Reuse the last node (resulting in a prism instead of hexahedron)
-       !         !
-       !         elemconn(j           ,i) =          elemtonode(necurnodes,i)
-       !         elemconn(j+nemaxout/2,i) = nnodes + elemtonode(necurnodes,i)
-       !      elseif (elemtonode(j,i) == -1) then
-       !         ! Triangle instead of quadrangle
-       !         ! Reuse the last node (resulting in a prism instead of hexahedron)
-       !         !
-       !         elemconn(j           ,i) =          elemtonode(necurnodes,i)
-       !         elemconn(j+nemaxout/2,i) = nnodes + elemtonode(necurnodes,i)
-       !      else
-       !         necurnodes = j
-       !         elemconn(j           ,i) =          elemtonode(j,i)
-       !         elemconn(j+nemaxout/2,i) = nnodes + elemtonode(j,i)
-       !      endif
-       !   enddo
-       !enddo
-
-       !! Just some triangles using all grid points
-       !elemconn(1,1) = 1
-       !elemconn(2,1) = 2
-       !elemconn(3,1) = 5
-       !elemconn(4,1) = 5
-       !elemconn(5,1) = 1+mmax
-       !elemconn(6,1) = 2+mmax
-       !elemconn(7,1) = 5+mmax
-       !elemconn(8,1) = 5+mmax
-       !
-       !elemconn(1,2) = 2
-       !elemconn(2,2) = 3
-       !elemconn(3,2) = 5
-       !elemconn(4,2) = 5
-       !elemconn(5,2) = 2+mmax
-       !elemconn(6,2) = 3+mmax
-       !elemconn(7,2) = 5+mmax
-       !elemconn(8,2) = 5+mmax
-       !
-       !elemconn(1,3) = 4
-       !elemconn(2,3) = 8
-       !elemconn(3,3) = 7
-       !elemconn(4,3) = 7
-       !elemconn(5,3) = 4+mmax
-       !elemconn(6,3) = 8+mmax
-       !elemconn(7,3) = 7+mmax
-       !elemconn(8,3) = 7+mmax
-       !
-       !elemconn(1,4) = 5
-       !elemconn(2,4) = 6
-       !elemconn(3,4) = 9
-       !elemconn(4,4) = 9
-       !elemconn(5,4) = 5+mmax
-       !elemconn(6,4) = 6+mmax
-       !elemconn(7,4) = 9+mmax
-       !elemconn(8,4) = 9+mmax
-
-       
-       !       ! Structured grid based on the cc points
-       !elemconn(1,1) = 1
-       !elemconn(2,1) = 2
-       !elemconn(3,1) = 5
-       !elemconn(4,1) = 4
-       !elemconn(5,1) = 1+mmax
-       !elemconn(6,1) = 2+mmax
-       !elemconn(7,1) = 5+mmax
-       !elemconn(8,1) = 4+mmax
-       !
-       !elemconn(1,2) = 2
-       !elemconn(2,2) = 3
-       !elemconn(3,2) = 6
-       !elemconn(4,2) = 5
-       !elemconn(5,2) = 2+mmax
-       !elemconn(6,2) = 3+mmax
-       !elemconn(7,2) = 6+mmax
-       !elemconn(8,2) = 5+mmax
-       !
-       !elemconn(1,3) = 4
-       !elemconn(2,3) = 5
-       !elemconn(3,3) = 8
-       !elemconn(4,3) = 7
-       !elemconn(5,3) = 4+mmax
-       !elemconn(6,3) = 5+mmax
-       !elemconn(7,3) = 8+mmax
-       !elemconn(8,3) = 7+mmax
-       !
-       !elemconn(1,4) = 5
-       !elemconn(2,4) = 6
-       !elemconn(3,4) = 9
-       !elemconn(4,4) = 8
-       !elemconn(5,4) = 5+mmax
-       !elemconn(6,4) = 6+mmax
-       !elemconn(7,4) = 9+mmax
-       !elemconn(8,4) = 8+mmax
-       !
-       
+       !       
        ierror = nf90_put_var(idfile, idvar_eConn , elemconn , start=(/1,1/), count=(/nemaxout,maxelem/)); call nc_check_err(ierror, "put_var elementConn", filename_tmp)
        !
        do i=1, maxelem
