@@ -90,7 +90,7 @@ module m_df1d_transport
       
       integer :: i
       
-      if (trans%mouthSize > 0) then
+      if (associated(trans%mp)) then
          deallocate(trans%mp)
          trans%mp => null()
          trans%mouthSize  = 0
@@ -106,7 +106,7 @@ module m_df1d_transport
          if (allocated(trans%co(i)%sbdscr)) deallocate(trans%co(i)%sbdscr)
       enddo
       
-      if (trans%constSize > 0) deallocate(trans%co)
+      if (associated(trans%co)) deallocate(trans%co)
       trans%co => null()
       
       trans%constSize = 0

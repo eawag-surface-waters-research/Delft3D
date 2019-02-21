@@ -140,7 +140,6 @@ module m_readSalinityParameters
          mp%tp = transportPars%tidal_period
          
          nbr = network%brs%count
-         allocate(network%trans%mp(2,nbr))
          pmp => network%trans%mp
          do i = 1, 2
             do ibr = 1, nbr
