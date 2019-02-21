@@ -10360,14 +10360,15 @@ use m_flow, only: layertype
             call getlayerindices(is, nlayb, nrlay)
          else if (loctype == UNC_LOC_U3D .or. loctype == UNC_LOC_WU) then
             call getLbotLtopmax(is, ib, it)
+            call getlayerindicesLmax(is, nlayb, nrlay)
             !call getlayerindices(is, nlayb, nrlay)
             ! UNST-976: TODO: does NOT work for links yet. We need some setlbotltop call up in read_map, similar to sethu behavior.
-            if (layertype .ne. 1 .and. jawarn < 100)  then
-                call mess(LEVEL_WARN, 'get_var_and_shift: reading 3D flow link data from '''//trim(varname)//''' is badly supported for z-layer models.')
-                jawarn = jawarn + 1 
-            endif
-            nlayb = 1
-            nrlay = it-ib+1 ! For now, sigma defaults
+            !if (layertype .ne. 1 .and. jawarn < 100)  then
+            !    call mess(LEVEL_WARN, 'get_var_and_shift: reading 3D flow link data from '''//trim(varname)//''' is badly supported for z-layer models.')
+            !    jawarn = jawarn + 1 
+            !endif
+            !nlayb = 1
+            !nrlay = it-ib+1 ! For now, sigma defaults
             !goto 999
          end if
 !         call getLbotLtopmax(LL,Lb,Lt)
