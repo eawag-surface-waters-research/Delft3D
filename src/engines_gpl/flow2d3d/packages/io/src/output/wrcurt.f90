@@ -2,8 +2,7 @@ subroutine wrcurt(comfil    ,lundia    ,error     ,itcur     ,ntcur     , &
                 & itimc     ,mmax      ,nmax      ,kmax      ,nmaxus    , &
                 & lstsci    ,lsecfl    ,s1        ,u1        ,v1        , &
                 & r1        ,qu        ,qv        ,dzu1      ,dzv1      , &
-                & rbuff     ,kmaxz     ,hu        ,hv        ,thick     , &
-                & gdp       )
+                & kmaxz     ,hu        ,hv        ,thick     ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2019.                                
@@ -82,7 +81,6 @@ subroutine wrcurt(comfil    ,lundia    ,error     ,itcur     ,ntcur     , &
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)        , intent(in)  :: u1     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)        , intent(in)  :: v1     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax, lstsci), intent(in)  :: r1     !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(nmaxus, mmax, kmax)                                                  :: rbuff  !  Description and declaration in r-i-ch.igs
     real(fp), dimension(kmax)                                                                :: thick  !  Description and declaration in esm_alloc_real.f90
     logical                                                                    , intent(out) :: error  !!  Flag=TRUE if an error is encountered
     character(*)                                                                             :: comfil !!  Name for communication file
@@ -306,7 +304,7 @@ subroutine wrcurt(comfil    ,lundia    ,error     ,itcur     ,ntcur     , &
        ! element 'DZV1'
        !
        i = 0
-       rbuff = 0.0_fp
+       sbuff = 0.0_fp
        if (zmodel) then
           do k = 1, kmax
              do m = 1, mmax

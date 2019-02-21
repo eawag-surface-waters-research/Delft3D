@@ -1,8 +1,7 @@
 subroutine wrdwqt(comfil    ,lundia    ,error     ,itcur     ,itimc     , &
                 & nsrc      ,mnksrc    ,mmax      ,nmax      ,kmax      , &
                 & nmaxus    ,lstsci    ,lsal      ,ltem      ,r1        , &
-                & dicuv     ,dicww     ,discum    ,taubmx    ,rbuff     , &
-                & gdp       )
+                & dicuv     ,dicww     ,discum    ,taubmx    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2019.                                
@@ -77,7 +76,6 @@ subroutine wrdwqt(comfil    ,lundia    ,error     ,itcur     ,itimc     , &
     real(fp)    , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax)      , intent(in)  :: dicww  !  Description and declaration in esm_alloc_real.f90
     real(fp)    , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax + 2)    , intent(in)  :: dicuv  !  Description and declaration in esm_alloc_real.f90
     real(fp)    , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax, lstsci), intent(in)  :: r1     !  Description and declaration in esm_alloc_real.f90
-    real(fp)    , dimension(nmaxus, mmax, kmax)                                                  :: rbuff  !  Description and declaration in r-i-ch.igs
     real(fp)    , dimension(nsrc)                                                                :: discum !  Description and declaration in esm_alloc_real.f90
     character(*)                                                                                 :: comfil !!  Name for communication file
                                                                                                            !!  com-<case><label>
