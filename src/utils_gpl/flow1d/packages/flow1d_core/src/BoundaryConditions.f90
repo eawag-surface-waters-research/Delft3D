@@ -40,7 +40,7 @@ module m_boundaryConditions
    integer, parameter, public       :: H_BOUN  = 1             !< Parameter for boundary condition of type water level boundary
    integer, parameter, public       :: Q_BOUN  = 2             !< Parameter for boundary condition of type discharge boundary
    integer, parameter, public       :: S_BOUN  = 3             !< Parameter for boundary condition of type salt boundary
-   integer, parameter, public       :: T_BOUN  = 6             !< Parameter for boundary condition of type salt boundary
+   integer, parameter, public       :: T_BOUN  = 6             !< Parameter for boundary condition of type temperature boundary
    integer, parameter, public       :: B_WINDVEL = 4           !< Parameter for wind velocity
    integer, parameter, public       :: B_WINDDIR = 5           !< Parameter for wind direction
    integer, parameter, public       :: NUM_BOUN_TYPE = 6       !< Number of possible boundary types
