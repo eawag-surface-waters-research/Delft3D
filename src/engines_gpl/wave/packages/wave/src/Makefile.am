@@ -45,6 +45,7 @@ $(top_builddir)/engines_gpl/wave/packages/manager/src/libmanager.la \
 $(top_builddir)/engines_gpl/wave/packages/kernel/src/libkernel.la \
 $(top_builddir)/engines_gpl/wave/packages/io/src/libio.la \
 $(top_builddir)/engines_gpl/wave/packages/data/src/libdata.la \
+$(top_builddir)/utils_lgpl/gridgeom/packages/gridgeom/src/libgridgeom.la \
 $(top_builddir)/utils_lgpl/delftio/packages/delftio/src/delftio_sync/libDelftIO.la \
 $(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm/src/fsm/libESMFSM.la \
 $(top_builddir)/utils_lgpl/ec_module/packages/ec_module/src/libECModule.la \
