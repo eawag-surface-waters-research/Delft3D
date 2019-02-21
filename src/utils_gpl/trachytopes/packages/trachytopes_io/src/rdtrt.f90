@@ -60,7 +60,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
     use grid_dimens_module, only: griddimtype
     use dfparall
     use system_utils, only: exifil
-    use message_module, only: write_error, write_warning, FILE_NOT_FOUND, FILE_READ_ERROR, PREMATURE_EOF
+    use MessageHandling
     !
     implicit none
     !
@@ -191,7 +191,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
     character(132)                   :: rec132
     character(20)                    :: chulp
     character(256)                   :: filtmp
-    character(300)                   :: errmsg
+    character(256)                   :: msgtmp
     character(6)                     :: keyw
     character(20)                    :: txtput1
 !
@@ -258,8 +258,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
           if (istat==0) allocate(gdtrachy%dir(jdir)%rttfu(nmlb:nmub,kmax), stat = istat)
           ! 
           if (istat/=0) then
-             errmsg = 'RDTRT: memory alloc error'
-             call write_error(errmsg, unit=lundia)
+             call SetMessage(LEVEL_ERROR, 'RDTRT: memory alloc error')
              error = .true.
              return        
           endif
@@ -330,8 +329,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
        if (istat==0) allocate(gdtrachy%gen%ittdef_q(n_q)                                  , stat = istat)
        !
        if (istat/=0) then
-          errmsg = 'RDTRT: memory alloc error'
-          call write_error(errmsg, unit=lundia)
+          call SetMessage(LEVEL_ERROR, 'RDTRT: memory alloc error')
           error = .true.
           return        
        endif
@@ -364,7 +362,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
        enddo
     endif
     !
-    write (lundia, '(a)') '*** Start  of trachytopes input'
+    call SetMessage(LEVEL_INFO, 'Start  of trachytopes input')
     !
     ! locate 'DtTrt' record for update time step
     !
@@ -375,21 +373,21 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
     ! Check on multiple
     itimtt = nint(rtimtt/dt)
     if (abs(real(itimtt,fp)*dt-rtimtt) > (0.1_fp*dt)) then       ! previously : if (dtn(itimtt, rtimtt, dt)) which is approximate - updates are preformed within 0.1 of dtmax, cf. Delft3D, WO) 
-       errmsg = 'RDTRT: Trachytope update time is/are not multiple of the user time step'
-       call write_error(errmsg, unit=lundia)
+       call SetMessage(LEVEL_ERROR, 'RDTRT: Trachytope update time is not a multiple of the user time step' )
        error = .true.
        goto 9999
     endif
     if (abs(real(itimtt,fp)*dt) < (0.1_fp*dt)) then
-       errmsg = 'RDTRT: Trachytope update time is smaller than the user time step'
-       call write_error(errmsg, unit=lundia)
+       call SetMessage(LEVEL_ERROR, 'RDTRT: Trachytope update time is smaller than the user time step' )
        error = .true.
        goto 9999
     endif
     !
     txtput1 = 'DtTrt'
-    write (lundia, '(a,a,f7.3,a)') txtput1,': ',rtimtt*d3d_tunit,' seconds'
-    write (lundia, '(a,a,i5,a)') txtput1,': every ',itimtt,' timesteps'
+    write (msgtmp, '(a,a,f7.3,a)') txtput1,': ',rtimtt*d3d_tunit,' seconds'
+    call SetMessage(LEVEL_INFO, msgtmp)
+    write (msgtmp, '(a,a,i5,a)') txtput1,': every ',itimtt,' timesteps'
+    call SetMessage(LEVEL_INFO, msgtmp)
     !
     ! Trtdef: trachytope definition file (must exist, no default)
     !
@@ -399,13 +397,13 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
     md_ttdfile = filtmp
     !
     txtput1 = keyw
-    write (lundia, '(a,a,a)') txtput1,': ',trim(filtmp)
+    write (msgtmp, '(a,a,a)') txtput1,': ',trim(filtmp)
+    call SetMessage(LEVEL_INFO, msgtmp)
     !
     ! keyword not found ?
     !
     if (filtmp == ' ') then
-       errmsg = 'Missing value (or the keyword): '// keyw //' in file'
-       call write_error(errmsg, unit=lundia)
+       call SetMessage(LEVEL_ERROR, 'Missing value (or the keyword): '// keyw //' in file')
        error = .true.
        goto 9999
     endif
@@ -419,8 +417,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
        !
        ! file does not exist !!
        !
-       errmsg = 'The specified file '// trim(filtmp) //' does not exist'
-       call write_error(errmsg, unit=lundia)
+       call SetMessage(LEVEL_ERROR, 'The specified file '// trim(filtmp) //' does not exist')
        error = .true.
        goto 9999
     endif
@@ -430,8 +427,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
     open (newunit=luntmp, file = trim(filtmp), form = 'formatted', iostat = iocond,  &
         & status = 'old')
     if (iocond/=0) then
-       errmsg = 'Error while opening file '// trim(filtmp)
-       call write_error(errmsg, unit=lundia)
+       call SetMessage(LEVEL_ERROR, 'Error while opening file '// trim(filtmp))
        error = .true.
        goto 9999
     endif
@@ -548,8 +544,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
        !
        ! Reading error
        !
-       errmsg = 'Read error from file: '// trim(filtmp)
-       call write_error(errmsg, unit=lundia)
+       call SetMessage(LEVEL_ERROR, 'Read error from file: '// trim(filtmp))
        error = .true.
        goto 199
     else
@@ -595,8 +590,8 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
        !
        rec132 = ' '
        write (rec132, '(i12)') mcurec
-       errmsg = 'Read error from file: '// trim(filtmp) // ', Record: ' // trim(rec132)
-       call write_error(errmsg, unit=lundia)
+       call SetMessage(LEVEL_ERROR, 'Read error from file: '// & 
+           & trim(filtmp) // ', Record: ' // trim(rec132))
        error = .true.
        goto 199
     endif
@@ -621,8 +616,8 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
           if (nrflds/=nropar(i) + 2) then
              rec132 = ' '
              write (rec132, '(i12)') mcurec
-             errmsg = 'Trachytopes: Wrong number of parameters defined, File: ' // trim(filtmp) // ', Record: ' // trim(rec132)
-             call write_error(errmsg, unit=lundia)
+             call SetMessage(LEVEL_ERROR, 'Trachytopes: Wrong number of parameters defined, File: ' & 
+                 & // trim(filtmp) // ', Record: ' // trim(rec132))
              error  = .true.
              goto 199
           endif
@@ -641,8 +636,8 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
           if (.not.lokay) then
              rec132 = ' '
              write (rec132, '(i12)') mcurec
-             errmsg = 'Read error from file: '// trim(filtmp) // ', Record: ' // trim(rec132)
-             call write_error(errmsg, unit=lundia)
+             call SetMessage(LEVEL_FATAL, 'Read error from file: '// & 
+                 & trim(filtmp) // ', Record: ' // trim(rec132))
              error = .true.
              goto 199
           endif
@@ -657,16 +652,12 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
           prev_trt_type = TRACHY_UNDEFINED
           !
           if (mtrt>ntrt) then
-             errmsg = 'Trachytopes: Number of trachytope ' //                  &
-           & 'definitions in file > array size.'
-             call write_error(errmsg, unit=lundia)
+             call SetMessage(LEVEL_ERROR, 'Trachytopes: Number of trachytope definitions in file > array size.')
              error = .true.             
              goto 199
           endif
           if (mtrtnrm>ntrtnrm) then
-             errmsg = 'Trachytopes: Number of standard trachytope ' //                  &
-           & 'definitions in file > array size.'
-             call write_error(errmsg, unit=lundia)
+             call SetMessage(LEVEL_ERROR, 'Trachytopes: Number of standard trachytope definitions in file > array size.')
              error = .true.             
              goto 199
           endif
@@ -691,8 +682,8 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
           !
           rec132 = ' '
           write (rec132, '(i12)') mcurec
-          errmsg = 'Trachytopes: Unknown roughness code in  file ' // trim(filtmp) // ', Record: ' // trim(rec132)
-          call write_error(errmsg, unit=lundia)
+          call SetMessage(LEVEL_ERROR, 'Trachytopes: Unknown roughness code in  file ' & 
+              & // trim(filtmp) // ', Record: ' // trim(rec132))
           error  = .true.
           goto 199
        endif
@@ -715,16 +706,14 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
             gdtrachy%gen%crs(mtrtcrs)%idx_end   = m_q         ! gets updated when first dependent row is read 
             !
             if (mtrtcrs>ntrtcrs) then
-                errmsg = 'Trachytopes: Number of discharge-dependent trachytope ' //                  &
-                & 'definitions in file > array size.'
-                call write_error(errmsg, unit=lundia)
+                call SetMessage(LEVEL_ERROR, & 
+                    & 'Trachytopes: Number of discharge-dependent trachytope definitions in file > array size.')
                 error = .true.             
                 goto 199
             endif
             if (mtrt>ntrt) then
-                errmsg = 'Trachytopes: Number of trachytope ' //                  &
-                & 'definitions in file > array size (check in discharge).'
-                call write_error(errmsg, unit=lundia)
+                call SetMessage(LEVEL_ERROR, & 
+                    & 'Trachytopes: Number of trachytope definitions in file > array size (check in discharge).')
                 error = .true.             
                 goto 199
             endif
@@ -745,22 +734,19 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
             gdtrachy%gen%obs(mtrtobs)%idx_end   = m_zs       ! gets updated when first dependent row is read 
             !
             if (mtrtobs>ntrtobs) then
-                errmsg = 'Trachytopes: Number of waterlevel-dependent trachytope definitions in file > array size.'
-                call write_error(errmsg, unit=lundia)
+                call SetMessage(LEVEL_ERROR, 'Trachytopes: Number of waterlevel-dependent trachytope definitions in file > array size.')
                 error = .true.             
                 goto 199
             endif
             if (mtrt>ntrt) then
-                errmsg = 'Trachytopes: Number of trachytope definitions in file > array size (check in waterlevel).'
-                call write_error(errmsg, unit=lundia)
+                call SetMessage(LEVEL_ERROR, 'Trachytopes: Number of trachytope definitions in file > array size (check in waterlevel).')
                 error = .true.             
                 goto 199
             endif
             !
             goto 110
         else 
-            errmsg = 'Trachytopes: Unknown roughness code in  file ' // trim(filtmp) // ', Record: ' // trim(rec132)
-            call write_error(errmsg, unit=lundia)
+            call SetMessage(LEVEL_ERROR, 'Trachytopes: Unknown roughness code in  file ' // trim(filtmp) // ', Record: ' // trim(rec132))
             error  = .true.
             goto 199
         end if 
@@ -792,8 +778,8 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
                         gdtrachy%gen%rttdef_zs(m_zs, j)          = rfield(j + 3)
                     end do 
                 else
-                    errmsg = 'Trachytopes: Unknown roughness code for waterlevel dependence in file ' // trim(filtmp) // ', Record: ' // trim(rec132)
-                    call write_error(errmsg, unit=lundia)
+                    call SetMessage(LEVEL_ERROR, 'Trachytopes: Unknown roughness code for waterlevel dependence in file ' &
+                        & // trim(filtmp) // ', Record: ' // trim(rec132))
                     error  = .true.
                     goto 199
                 end if     
@@ -823,19 +809,17 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
                         gdtrachy%gen%rttdef_q(m_q, j)   = rfield(j + 3)
                     end do 
                 else
-                    errmsg = 'Trachytopes: Unknown roughness code for discharge dependence in file ' // trim(filtmp) // ', Record: ' // trim(rec132)
-                    call write_error(errmsg, unit=lundia)
+                    call SetMessage(LEVEL_ERROR, 'Trachytopes: Unknown roughness code for discharge dependence in file ' & 
+                        & // trim(filtmp) // ', Record: ' // trim(rec132))
                     error  = .true.
                     goto 199
                 end if                
             else 
-                errmsg = 'Unknown read error #3 in rdtrt.f90'
-                call write_error(errmsg, unit=lundia)
+                call SetMessage(LEVEL_ERROR, 'Unknown read error #3 in rdtrt.f90')
                 error = .true.
             end if
         else
-            errmsg = 'Unknown read error #4 in rdtrt.f90'
-            call write_error(errmsg, unit=lundia)
+            call SetMessage(LEVEL_ERROR, 'Unknown read error #4 in rdtrt.f90')
             error = .true.                
         end if                
     else
@@ -844,8 +828,8 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
        !
        rec132 = ' '
        write (rec132, '(i12)') mcurec
-       errmsg = 'Read error from file: '// trim(filtmp) // ', Record: ' // trim(rec132)
-       call write_error(errmsg, unit=lundia)
+       call SetMessage(LEVEL_ERROR, 'Read error from file: '// trim(filtmp) // & 
+           & ', Record: ' // trim(rec132))
        error = .true.
        goto 199
     endif
@@ -864,15 +848,17 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
     !
     do itrtcrs = 1, ntrtcrs
         if (gdtrachy%gen%crs(itrtcrs)%idx_start + 1 > gdtrachy%gen%crs(itrtcrs)%idx_end) then
-            errmsg = 'Error reading trachytopes: Expected 2 or more TRTDEF DISCHARGE TRT_EQ PARAMS after ->  "'//trim(gdtrachy%gen%md_ttdfile)//'": '//trim(gdtrachy%gen%crs(itrtcrs)%rec132)
-            call write_error(errmsg, unit=lundia)
+            call SetMessage(LEVEL_ERROR, 'Error reading trachytopes: Expected 2 '// & 
+                & 'or more TRTDEF DISCHARGE TRT_EQ PARAMS after ->  "'//trim(gdtrachy%gen%md_ttdfile)// & 
+                & '": '//trim(gdtrachy%gen%crs(itrtcrs)%rec132))
             error = .true.
         end if 
         itttmp = gdtrachy%gen%ittdef_q(gdtrachy%gen%crs(itrtcrs)%idx_start)
         do m_q = gdtrachy%gen%crs(itrtcrs)%idx_start, gdtrachy%gen%crs(itrtcrs)%idx_end
             if (gdtrachy%gen%ittdef_q(m_q) /= itttmp) then 
-               errmsg = 'Error reading trachytopes: Trt function type should be the same for all discharges in  "'//trim(gdtrachy%gen%md_ttdfile)//'": '//trim(gdtrachy%gen%crs(itrtcrs)%rec132)
-               call write_error(errmsg, unit=lundia)
+               call SetMessage(LEVEL_ERROR, 'Error reading trachytopes: Trt function '//&
+                   & 'type should be the same for all discharges in  "'//&
+                   & trim(gdtrachy%gen%md_ttdfile)//'": '//trim(gdtrachy%gen%crs(itrtcrs)%rec132))
                error = .true.
             end if 
         end do 
@@ -881,13 +867,16 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
             if (gdtrachy%gen%table_q(m_q)>gdtrachy%gen%table_q(m_q-1)) then
                 do j = 1,gdtrachy%gen%crs(itrtcrs)%nropars
                     ! compute slope
-                    gdtrachy%gen%rttdef_q_slope(m_q-1,j) = (gdtrachy%gen%rttdef_q(m_q, j)-gdtrachy%gen%rttdef_q(m_q-1, j))/(gdtrachy%gen%table_q(m_q)-gdtrachy%gen%table_q(m_q-1))
+                    gdtrachy%gen%rttdef_q_slope(m_q-1,j) = (gdtrachy%gen%rttdef_q(m_q, j) - &
+                        & gdtrachy%gen%rttdef_q(m_q-1, j))/(gdtrachy%gen%table_q(m_q)-gdtrachy%gen%table_q(m_q-1))
                     ! compute crossing 
-                    gdtrachy%gen%rttdef_q_cross(m_q-1,j) = gdtrachy%gen%rttdef_q(m_q-1, j) - gdtrachy%gen%rttdef_q_slope(m_q-1,j) * gdtrachy%gen%table_q(m_q-1)
+                    gdtrachy%gen%rttdef_q_cross(m_q-1,j) = gdtrachy%gen%rttdef_q(m_q-1, j) - & 
+                        & gdtrachy%gen%rttdef_q_slope(m_q-1,j) * gdtrachy%gen%table_q(m_q-1)
                 end do    
             else                                 
-                errmsg = 'Trachytopes: Discharges should be monotonically increasing for discharge dependence in file ' // trim(gdtrachy%gen%md_ttdfile) // ', Record: ' // trim(gdtrachy%gen%crs(itrtcrs)%rec132)
-                call write_error(errmsg, unit=lundia)
+                call SetMessage(LEVEL_ERROR, 'Trachytopes: Discharges should be monotonically' & 
+                    & //'increasing for discharge dependence in file ' // trim(gdtrachy%gen%md_ttdfile) &
+                    & // ', Record: ' // trim(gdtrachy%gen%crs(itrtcrs)%rec132))
                 error  = .true.
             end if    
         end do    
@@ -895,15 +884,17 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
     !
     do itrtobs = 1, ntrtobs
         if (gdtrachy%gen%obs(itrtobs)%idx_start + 1 > gdtrachy%gen%obs(itrtobs)%idx_end) then
-            errmsg = 'Error reading trachytopes: Expected 2 or more TRTDEF WATERLEVEL TRT_EQ PARAMS after -> "'//trim(gdtrachy%gen%md_ttdfile)//'": '//trim(gdtrachy%gen%obs(itrtobs)%rec132)
-            call write_error(errmsg, unit=lundia)
+            call SetMessage(LEVEL_ERROR, 'Error reading trachytopes: Expected 2 '&
+                & //'or more TRTDEF WATERLEVEL TRT_EQ PARAMS after -> "'//trim(gdtrachy%gen%md_ttdfile) & 
+                & //'": '//trim(gdtrachy%gen%obs(itrtobs)%rec132))
             error = .true.
         end if 
         itttmp = gdtrachy%gen%ittdef_zs(gdtrachy%gen%obs(itrtobs)%idx_start)
         do m_zs = gdtrachy%gen%obs(itrtobs)%idx_start, gdtrachy%gen%obs(itrtobs)%idx_end
             if (gdtrachy%gen%ittdef_zs(m_zs) /= itttmp) then 
-               errmsg = 'Error reading trachytopes: Trt function type should be the same for all waterlevels in  "'//trim(gdtrachy%gen%md_ttdfile)//'": '//trim(gdtrachy%gen%obs(itrtobs)%rec132)
-               call write_error(errmsg, unit=lundia)
+               call SetMessage(LEVEL_ERROR, 'Error reading trachytopes: Trt '&
+                   &//'function type should be the same for all waterlevels in  "'&
+                   &//trim(gdtrachy%gen%md_ttdfile)//'": '//trim(gdtrachy%gen%obs(itrtobs)%rec132))
                error = .true.
             end if 
         end do   
@@ -917,8 +908,9 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
                      gdtrachy%gen%rttdef_zs_cross(m_zs-1,j) = gdtrachy%gen%rttdef_zs(m_zs-1, j) - gdtrachy%gen%rttdef_zs_slope(m_zs-1,j) * gdtrachy%gen%table_zs(m_zs-1)
                 end do     
             else
-                errmsg = 'Trachytopes: Water levels should be monotonically increasing for waterlevel dependence in file ' // trim(gdtrachy%gen%md_ttdfile) // ', Record: ' // trim(gdtrachy%gen%obs(itrtobs)%rec132)
-                call write_error(errmsg, unit=lundia)
+                call SetMessage(LEVEL_ERROR, 'Trachytopes: Water levels should '&
+                    &//'be monotonically increasing for waterlevel dependence in file '&
+                    &// trim(gdtrachy%gen%md_ttdfile) // ', Record: ' // trim(gdtrachy%gen%obs(itrtobs)%rec132))
                 error  = .true.
             end if
         end do
@@ -945,14 +937,15 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
         call prop_get_string(mdfile_ptr, '*',keyw,filtmp)
         !
         txtput1 = keyw
-        write (lundia, '(a,a,a)') txtput1,': ',trim(filtmp)
+        write (msgtmp, '(a,a,a)') txtput1,': ',trim(filtmp)
+        call SetMessage(LEVEL_INFO, msgtmp)
+        
         md_arlfile = trim(filtmp)
         !
         ! keyword not found ?
         !
         if (filtmp == ' ' .and. ntrt /= 1) then
-           errmsg = 'Missing value (or the keyword): '// keyw // ' in file'
-           call write_error(errmsg, unit=lundia)
+           call SetMessage(LEVEL_ERROR, 'Missing value (or the keyword): '// keyw // ' in file')
            error = .true.
            goto 9999
         endif
@@ -994,7 +987,8 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
         call prop_get_string(mdfile_ptr, '*',keyw,filtmp)
         !
         txtput1 = keyw
-        write (lundia, '(a,a,a)') txtput1,': ',trim(filtmp)
+        write (msgtmp, '(a,a,a)') txtput1,': ',trim(filtmp)
+        call SetMessage(LEVEL_INFO, msgtmp)
         !
         ! keyword not found ?
         !
@@ -1009,8 +1003,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
               !
               ! file does not exist !!
               !
-              errmsg = 'The specified file ' // trim(filtmp) // ' does not exist '
-              call write_error(errmsg, unit=lundia)
+              call SetMessage(LEVEL_ERROR, 'The specified file ' // trim(filtmp) // ' does not exist ')
               error = .true.
               goto 9999
            endif
@@ -1039,7 +1032,8 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
     call prop_get(mdfile_ptr, '*', keyw, trtminh)
     !
     txtput1 = keyw
-    write (lundia, '(a,a,f7.3,a)') txtput1,': ',trtminh,' m'
+    write (msgtmp, '(a,a,f7.3,a)') txtput1,': ',trtminh,' m'
+    call SetMessage(LEVEL_INFO, msgtmp)
     !
     !  Area averaging method:
     !  1: Nikuradse k based
@@ -1050,12 +1044,11 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
     !
     txtput1 = keyw
     if (iarea_avg<1 .or. iarea_avg>2) then
-       errmsg = 'Trachytopes: ' // 'TrtMth should be 1 or 2'
-       call write_error(errmsg, unit=lundia)
+       call SetMessage(LEVEL_ERROR, 'Trachytopes: ' // 'TrtMth should be 1 or 2')
        error = .true.
        goto 9999
     endif
-    write (lundia, '(a,a,i3)') txtput1,': ',iarea_avg
+    write (msgtmp, '(a,a,i3)') txtput1,': ',iarea_avg
     !
     if (iarea_avg == 2) then
        !
@@ -1065,7 +1058,8 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
        call prop_get(mdfile_ptr, '*', keyw, alf_area_ser)
        !
        txtput1 = keyw
-       write (lundia, '(a,a,f7.3)') txtput1,': ',alf_area_ser
+       write (msgtmp, '(a,a,f7.3)') txtput1,': ',alf_area_ser
+       call SetMessage(LEVEL_INFO, msgtmp)
        !
     endif
     !
@@ -1079,16 +1073,14 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
        fraccu_list     => gdtrachy%gen%fraccu_list
        !
        if (istat/=0) then
-          errmsg = 'Trachytopes: ' // 'RDTRT: memory alloc error (step 2)'
-          call write_error(errmsg, unit=lundia)
+          call SetMessage(LEVEL_ERROR, 'Trachytopes: ' // 'RDTRT: memory alloc error (step 2)')
           error = .true.
           goto 9999
        endif
     endif    
     
     !
-    write (lundia, '(a)') '*** End    of trachytopes input'
-    write (lundia, *)
+    call SetMessage(LEVEL_INFO, 'End    of trachytopes input')
     !
     ! transfer to local subdomain
     !
@@ -1140,7 +1132,7 @@ subroutine rdttar(filnam    ,lundia    ,error     ,nttaru    ,ittaru    , &
     use precision
     use trachytopes_data_module
     use system_utils, only: exifil
-    use message_module, only: write_error, write_warning, FILE_NOT_FOUND, FILE_READ_ERROR, PREMATURE_EOF
+    use MessageHandling
     !
     implicit none
     !
@@ -1159,7 +1151,6 @@ subroutine rdttar(filnam    ,lundia    ,error     ,nttaru    ,ittaru    , &
     real(fp)      , dimension(nttaru)    :: rttaru
     real(fp)      , dimension(nttaru, 3) :: rttxyz
     character(256)                       :: filnam
-    character(300)                       :: errmsg
     
 !
 ! Local variables
@@ -1211,8 +1202,7 @@ subroutine rdttar(filnam    ,lundia    ,error     ,nttaru    ,ittaru    , &
        !
        ! file does not exist !!
        !
-       errmsg = 'The specified file ' // trim(filnam) // ' does not exist '
-       call write_error(errmsg, unit=lundia)
+       call SetMessage(LEVEL_ERROR, 'The specified file ' // trim(filnam) // ' does not exist ')
        error = .true.
        goto 9999
     endif
@@ -1222,8 +1212,7 @@ subroutine rdttar(filnam    ,lundia    ,error     ,nttaru    ,ittaru    , &
     open (newunit=luntmp2, file = trim(filnam), form = 'formatted', iostat = iocond,  &
         & status = 'old')
     if (iocond/=0) then
-       errmsg = 'Error while opening file ' // trim(filnam) 
-       call write_error(errmsg, unit=lundia)
+       call SetMessage(LEVEL_ERROR, 'Error while opening file ' // trim(filnam))
        error = .true.
        goto 9999
     endif
@@ -1272,8 +1261,7 @@ subroutine rdttar(filnam    ,lundia    ,error     ,nttaru    ,ittaru    , &
        !
        rec132 = ' '
        write (rec132, '(i12)') mcurec + 1
-       errmsg = 'Read error from file: ' // trim(filnam) // ', Record: ' // trim(rec132)
-       call write_error(errmsg, unit=lundia)
+       call SetMessage(LEVEL_ERROR, 'Read error from file: ' // trim(filnam) // ', Record: ' // trim(rec132))
        error = .true.
        close (luntmp2)
        goto 9999
@@ -1344,8 +1332,7 @@ subroutine rdttar(filnam    ,lundia    ,error     ,nttaru    ,ittaru    , &
        !
        rec132 = ' '
        write (rec132, '(i12)') mcurec
-       errmsg = 'Read error from file: ' // trim(filnam) // ', Record: ' // trim(rec132)
-       call write_error(errmsg, unit=lundia)
+       call SetMessage(LEVEL_ERROR, 'Read error from file: ' // trim(filnam) // ', Record: ' // trim(rec132))
        error = .true.
        close (luntmp2)
        goto 9999
@@ -1378,9 +1365,8 @@ subroutine rdttar(filnam    ,lundia    ,error     ,nttaru    ,ittaru    , &
           !
           mttaru = mttaru + 1
           if (mttaru>nttaru) then
-             errmsg = 'Trachytopes: Number of area entries ' //                &
-               & ' in file ' // trim(filnam) // ' > array size.'
-             call write_error(errmsg, unit=lundia)
+             call SetMessage(LEVEL_ERROR, 'Trachytopes: Number of area entries ' //                &
+                  & ' in file ' // trim(filnam) // ' > array size.')
              error = .true.
              close (luntmp2)
              goto 9999
@@ -1401,9 +1387,8 @@ subroutine rdttar(filnam    ,lundia    ,error     ,nttaru    ,ittaru    , &
        !
        mttaru = mttaru + 1
        if (mttaru>nttaru) then
-          errmsg = 'Trachytopes: Number of area entries ' //                &
-           & ' in file ' // trim(filnam) // ' > array size.'
-          call write_error(errmsg, unit=lundia)
+          call SetMessage(LEVEL_ERROR, 'Trachytopes: Number of area entries ' //                &
+           & ' in file ' // trim(filnam) // ' > array size.')
           error = .true.
           close (luntmp2)
           goto 9999
@@ -1451,9 +1436,8 @@ subroutine rdttar(filnam    ,lundia    ,error     ,nttaru    ,ittaru    , &
           !
           mttaru = mttaru + 1
           if (mttaru>nttaru) then
-             errmsg = 'Trachytopes: Number of area entries ' //                &
-             & ' in file ' // trim(filnam) // ' > array size.'
-             call write_error(errmsg, unit=lundia)
+             call SetMessage(LEVEL_ERROR, 'Trachytopes: Number of area entries ' //                &
+             & ' in file ' // trim(filnam) // ' > array size.')
              error = .true.
              close (luntmp2)
              goto 9999
@@ -1474,9 +1458,8 @@ subroutine rdttar(filnam    ,lundia    ,error     ,nttaru    ,ittaru    , &
        !
        mttaru = mttaru + 1
        if (mttaru>nttaru) then
-          errmsg = 'Trachytopes: Number of area entries ' //                &
-           & ' in file ' // trim(filnam) // ' > array size.'
-          call write_error(errmsg, unit=lundia)
+          call SetMessage(LEVEL_ERROR, 'Trachytopes: Number of area entries ' //                &
+           & ' in file ' // trim(filnam) // ' > array size.')
           error = .true.
           close (luntmp2)
           goto 9999
@@ -1518,9 +1501,8 @@ subroutine rdttar(filnam    ,lundia    ,error     ,nttaru    ,ittaru    , &
           !
           mttaru = mttaru + 1
           if (mttaru>nttaru) then
-             errmsg = 'Trachytopes: Number of area entries ' //                &
-               & ' in file ' // trim(filnam) // ' > array size.'
-             call write_error(errmsg, unit=lundia)
+             call SetMessage(LEVEL_ERROR, 'Trachytopes: Number of area entries ' //                &
+               & ' in file ' // trim(filnam) // ' > array size.')
              error = .true.
              close (luntmp2)
              goto 9999
@@ -1541,9 +1523,8 @@ subroutine rdttar(filnam    ,lundia    ,error     ,nttaru    ,ittaru    , &
        !
        mttaru = mttaru + 1
        if (mttaru>nttaru) then
-          errmsg = 'Trachytopes: Number of area entries ' //                &
-           & ' in file ' // trim(filnam) // ' > array size.'
-          call write_error(errmsg, unit=lundia)
+          call SetMessage(LEVEL_ERROR, 'Trachytopes: Number of area entries ' //                &
+              & ' in file ' // trim(filnam) // ' > array size.')
           error = .true.
           close (luntmp2)
           goto 9999
@@ -1605,9 +1586,8 @@ subroutine rdttar(filnam    ,lundia    ,error     ,nttaru    ,ittaru    , &
                 !
                 mttaru = mttaru + 1
                 if (mttaru>nttaru) then
-                   errmsg = 'Trachytopes: Number of area entries ' //                &
-                    & ' in file ' // trim(filnam) // ' > array size.'
-                   call write_error(errmsg, unit=lundia)
+                   call SetMessage(LEVEL_ERROR, 'Trachytopes: Number of area entries ' //                &
+                    & ' in file ' // trim(filnam) // ' > array size.')
                    error = .true.
                    close (luntmp2)
                    goto 9999
@@ -1627,9 +1607,8 @@ subroutine rdttar(filnam    ,lundia    ,error     ,nttaru    ,ittaru    , &
              !
              mttaru = mttaru + 1
              if (mttaru>nttaru) then
-                errmsg = 'Trachytopes: Number of area entries ' //                &
-                & ' in file ' // trim(filnam) // ' > array size.'
-                call write_error(errmsg, unit=lundia)
+                call SetMessage(LEVEL_ERROR, 'Trachytopes: Number of area entries ' //                &
+                     & ' in file ' // trim(filnam) // ' > array size.')
                 error = .true.
                 close (luntmp2)
                 goto 9999
@@ -1657,9 +1636,8 @@ subroutine rdttar(filnam    ,lundia    ,error     ,nttaru    ,ittaru    , &
        mttaru = mttaru + (abs(ifield(1) - ifield(3)) + 1)                       &
               & *(abs(ifield(2) - ifield(4)) + 1)
        if (mttaru>nttaru) then
-          errmsg = 'Trachytopes: Number of area entries ' //                &
-          & ' in file ' // trim(filnam) // ' > array size.'
-          call write_error(errmsg, unit=lundia)
+          call SetMessage(LEVEL_ERROR, 'rachytopes: Number of area entries ' //                &
+               & ' in file ' // trim(filnam) // ' > array size.') 
           error = .true.
           close (luntmp2)
           goto 9999
@@ -1707,7 +1685,7 @@ subroutine expblk(lundia    ,ittaru    ,rttaru    ,nttaru    ,iblbeg    , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
-    use message_module, only: write_error, write_warning, FILE_NOT_FOUND, FILE_READ_ERROR, PREMATURE_EOF
+    use MessageHandling
     !use globaldata
     !
     implicit none
@@ -1729,7 +1707,6 @@ subroutine expblk(lundia    ,ittaru    ,rttaru    ,nttaru    ,iblbeg    , &
     integer , dimension(nttaru, 4)              :: ittaru
     logical                       , intent(out) :: error
     real(fp), dimension(nttaru)                 :: rttaru
-    character(300)                              :: errmsg
     
 !
 ! Local variables
@@ -1772,9 +1749,8 @@ subroutine expblk(lundia    ,ittaru    ,rttaru    ,nttaru    ,iblbeg    , &
           !
           icur = icur + 1
           if (icur>nttaru) then
-             errmsg = 'Trachytopes: Out of array size while ' //               &
-           & 'expanding trachytope data'
-             call write_error(errmsg, unit=lundia)
+             call SetMessage(LEVEL_ERROR, 'Trachytopes: Out of array size while ' //               &
+                & 'expanding trachytope data')
              error = .true.
              goto 9999
           endif
@@ -1799,9 +1775,8 @@ subroutine expblk(lundia    ,ittaru    ,rttaru    ,nttaru    ,iblbeg    , &
              !
              icur = icur + 1
              if (icur>nttaru) then
-                errmsg = 'Trachytopes: Out of array size while ' //               &
-                & 'expanding trachytope data'
-                call write_error(errmsg, unit=lundia)
+                call SetMessage(LEVEL_ERROR, 'Trachytopes: Out of array size while ' //               &
+                   & 'expanding trachytope data')
                 error = .true.
                 goto 9999
              endif
@@ -1837,7 +1812,7 @@ subroutine dimtrt(lundia    ,error     ,gdtrachy   ,mdfile_ptr , &
     use system_utils, only: exifil
     use properties   ! includes tree_structures
     use tree_structures
-    use message_module, only: write_error, write_warning, FILE_NOT_FOUND, FILE_READ_ERROR, PREMATURE_EOF
+    use MessageHandling
 
     implicit none
     !
@@ -1897,7 +1872,6 @@ subroutine dimtrt(lundia    ,error     ,gdtrachy   ,mdfile_ptr , &
     character(20)                                 :: chulp
     character(256)                                :: filtmp
     character(6)                                  :: keyw
-    character(300)                                :: errmsg
 
 !
 !! executable statements -------------------------------------------------------
@@ -1952,8 +1926,7 @@ subroutine dimtrt(lundia    ,error     ,gdtrachy   ,mdfile_ptr , &
     ! keyword not found ?
     !
     if (filtmp == ' ') then
-       errmsg = 'Missing value (or the keyword): '// keyw //' in file'
-       call write_error(errmsg, unit=lundia)
+       call SetMessage(LEVEL_ERROR, 'Missing value (or the keyword): '// keyw //' in file')
        error = .true.
        goto 9999
     endif
@@ -1964,8 +1937,7 @@ subroutine dimtrt(lundia    ,error     ,gdtrachy   ,mdfile_ptr , &
        !
        ! file does not exist !!
        !
-       errmsg = 'The specified file ' // trim(filtmp) // ' does not exist '
-       call write_error(errmsg, unit=lundia)
+       call SetMessage(LEVEL_ERROR, 'The specified file ' // trim(filtmp) // ' does not exist ')
        error = .true.
        goto 9999
     endif
@@ -1975,8 +1947,7 @@ subroutine dimtrt(lundia    ,error     ,gdtrachy   ,mdfile_ptr , &
     open (newunit=luntmp, file = trim(filtmp), form = 'formatted', iostat = iocond,  &
         & status = 'old')
     if (iocond/=0) then
-       errmsg = 'Error while opening file '// trim(filtmp)
-       call write_error(errmsg, unit=lundia)
+       call SetMessage(LEVEL_ERROR, 'Error while opening file '// trim(filtmp))
        error = .true.
        goto 9999
     endif
@@ -1999,8 +1970,7 @@ subroutine dimtrt(lundia    ,error     ,gdtrachy   ,mdfile_ptr , &
        !
        ! Reading error
        !
-       errmsg = 'Read error from file: '// trim(filtmp)
-       call write_error(errmsg, unit=lundia)
+       call SetMessage(LEVEL_ERROR, 'Read error from file: '// trim(filtmp))
        error = .true.
        ! <--
        !
@@ -2027,8 +1997,7 @@ subroutine dimtrt(lundia    ,error     ,gdtrachy   ,mdfile_ptr , &
            ! keyword not found ?
            !
            if (filtmp == ' ' .and. ntrt /= 1) then
-              errmsg = 'Missing value (or the keyword): '// keyw //' in file'
-              call write_error(errmsg, unit=lundia)
+              call SetMessage(LEVEL_ERROR, 'Missing value (or the keyword): '// keyw //' in file')
               error = .true.
               goto 9999
            endif
@@ -2102,13 +2071,11 @@ subroutine dimtrt(lundia    ,error     ,gdtrachy   ,mdfile_ptr , &
                     ! count values to table for discharge dependent trachytopes
                     n_q = n_q + 1
                 else 
-                   errmsg = 'Unknown read error #1 in rdtrt.f90'
-                   call write_error(errmsg, unit=lundia)
+                   call SetMessage(LEVEL_ERROR, 'Unknown read error #1 in rdtrt.f90')
                    error = .true.
                 end if
             else
-                errmsg = 'Unknown read error #2 in rdtrt.f90'
-                call write_error(errmsg, unit=lundia)
+                call SetMessage(LEVEL_ERROR, 'Unknown read error #2 in rdtrt.f90')
                 error = .true.                
             end if                
         endif
@@ -2131,7 +2098,7 @@ subroutine dittar(filnam    ,lundia    ,error     ,nttaru    )
     use precision
 !    use globaldata
     use system_utils, only: exifil
-    use message_module, only: write_error, write_warning, FILE_NOT_FOUND, FILE_READ_ERROR, PREMATURE_EOF
+    use MessageHandling
     !
     implicit none
     !
@@ -2169,7 +2136,6 @@ subroutine dittar(filnam    ,lundia    ,error     ,nttaru    )
     real(fp), dimension(MAXFLD)      :: rfield
     character(30), dimension(MAXFLD) :: cfield
     character(132)                   :: rec132
-    character(300)                   :: errmsg
 !
 !! executable statements -------------------------------------------------------
 !
@@ -2187,8 +2153,7 @@ subroutine dittar(filnam    ,lundia    ,error     ,nttaru    )
        !
        ! file does not exist !!
        !
-       errmsg = 'The specified file ' // trim(filnam) // ' does not exist '
-       call write_error(errmsg, unit=lundia)
+       call SetMessage(LEVEL_ERROR, 'The specified file ' // trim(filnam) // ' does not exist ')
        error = .true.
        goto 9999
     endif
@@ -2198,8 +2163,7 @@ subroutine dittar(filnam    ,lundia    ,error     ,nttaru    )
     open (newunit=luntmp, file = trim(filnam), form = 'formatted', iostat = iocond,  &
         & status = 'old')
     if (iocond/=0) then
-       errmsg = 'Error while opening file '// trim(filnam)
-       call write_error(errmsg, unit=lundia)
+       call SetMessage(LEVEL_ERROR, 'Error while opening file '// trim(filnam))
        error = .true.
        goto 9999
     endif
@@ -2237,8 +2201,7 @@ subroutine dittar(filnam    ,lundia    ,error     ,nttaru    )
        error = .true.
        rec132 = ' '
        write (rec132, '(i12)') mcurec + 1
-       errmsg = 'Read error from file: '// trim(filnam) // ', Record: ' // trim(rec132)
-       call write_error(errmsg, unit=lundia)
+       call SetMessage(LEVEL_ERROR, 'Read error from file: '// trim(filnam) // ', Record: ' // trim(rec132))
        close (luntmp)
        goto 9999
     endif
@@ -2304,8 +2267,7 @@ subroutine dittar(filnam    ,lundia    ,error     ,nttaru    )
        error = .true.
        rec132 = ' '
        write (rec132, '(i12)') mcurec
-       errmsg = 'Read error from file: '// trim(filnam) // ', Record: ' // trim(rec132)
-       call write_error(errmsg, unit=lundia)
+       call SetMessage(LEVEL_ERROR, 'Read error from file: '// trim(filnam) // ', Record: ' // trim(rec132))
        close (luntmp)
        goto 9999
     endif

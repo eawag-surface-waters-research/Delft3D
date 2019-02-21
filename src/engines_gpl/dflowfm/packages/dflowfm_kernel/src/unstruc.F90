@@ -9534,6 +9534,7 @@ subroutine flow_trachyinit()
     integer :: L
     integer :: LF
     integer :: ddbval   = 0
+    integer :: threshold_abort_current
 
     double precision :: dummy_tunit = 1d0
     double precision :: cz_dum, hh
@@ -9570,6 +9571,10 @@ subroutine flow_trachyinit()
     allocate(kcu_trt(numl)) ! TODO: alle deallocs oplossen, zodra FM ook een flow_finalize heeft.
     allocate(dx_trt(numl))
     !
+    !
+    ! Temporariliy set threshold for abort to LEVEL_FATAL 
+    threshold_abort_current = threshold_abort
+    threshold_abort = LEVEL_FATAL
     !
     if (jawave==0) then
        do k = 1, ndx
@@ -9610,7 +9615,7 @@ subroutine flow_trachyinit()
     call dimtrt(mdia    ,error     ,trachy_fl,   trtdef_ptr , &
               & griddim )
     if (error) then
-        call mess(LEVEL_ERROR, 'flow_trachyinit:: Error reading trachytope dimensions (dimtrt)', mdia)
+        call SetMessage(LEVEL_FATAL, 'flow_trachyinit:: Error reading trachytope dimensions (dimtrt)')
     end if
 
     call rdtrt(mdia      ,error     ,lftrto    , dt_user   , &                !lftrto = jatrt (read twice, in unstruc_model and rdtrt), so always true after rdtrt
@@ -9618,7 +9623,7 @@ subroutine flow_trachyinit()
              & griddim   ,0.1_fp    ,trtdef_ptr    ,.false.   , &
              & ddbval    ,dummy_tunit)
     if (error) then
-        call mess(LEVEL_ERROR, 'flow_trachyinit:: Error reading trachytopes (rdtrt)', mdia)
+        call SetMessage(LEVEL_FATAL, 'flow_trachyinit:: Error reading trachytopes (rdtrt)')
     end if
 
     ! Initialise kcu_trt
@@ -9631,7 +9636,7 @@ subroutine flow_trachyinit()
     call chktrt(mdia     , error  , griddim, &
               & trachy_fl, flnmD50, flnmD50, lfbedfrmrou, stm_included, ddbval)    
     if (error) then
-        call mess(LEVEL_ERROR, 'unstruc::flow_trachyinit - Error reading trachytope definitions')
+        call SetMessage(LEVEL_FATAL, 'unstruc::flow_trachyinit - Error reading trachytope definitions')
     end if
 
     allocate(xuL(numL), yuL(numL))   ! can we refer to tree instead ? 
@@ -9691,7 +9696,7 @@ subroutine flow_trachyinit()
     elseif (ifrctypuni==3) then
        rouflo = 'WHIT'
     else
-       call mess(LEVEL_ERROR, 'Unsupported friction type specified in combination with trachytopes', mdia)
+       call SetMessage(LEVEL_FATAL, 'Unsupported friction type specified in combination with trachytopes')
     endif
 
     do L = 1, numl
@@ -9762,7 +9767,7 @@ subroutine flow_trachyinit()
         enddo
 
         if ((trachy_fl%gen%crs(itrtcrs)%id == TRACHY_UNDEFINED) .and. trt_in_arl) then
-            call mess(LEVEL_ERROR, 'Error reading trachytopes: Cross-section does not exist in "'//trim(trachy_fl%gen%md_ttdfile)//'": '//trim(trachy_fl%gen%crs(itrtcrs)%rec132), mdia)
+            call SetMessage(LEVEL_FATAL, 'Error reading trachytopes: Cross-section does not exist in "'//trim(trachy_fl%gen%md_ttdfile)//'": '//trim(trachy_fl%gen%crs(itrtcrs)%rec132))
         end if
     end do
 
@@ -9787,13 +9792,14 @@ subroutine flow_trachyinit()
         enddo
 
         if ((trachy_fl%gen%obs(itrtobs)%id == TRACHY_UNDEFINED) .and. trt_in_arl) then
-            call mess(LEVEL_ERROR, 'Error reading trachytopes: Observation station does not exist in "'//trim(trachy_fl%gen%md_ttdfile)//'": '//trim(trachy_fl%gen%obs(itrtobs)%rec132), mdia)
+            call SetMessage(LEVEL_FATAL, 'Error reading trachytopes: Observation station does not exist in "'//trim(trachy_fl%gen%md_ttdfile)//'": '//trim(trachy_fl%gen%obs(itrtobs)%rec132))
         end if
     end do
 
     
     if ( allocated(xuL) ) deallocate(xuL)
     if ( allocated(yuL) ) deallocate(yuL)
+    threshold_abort = threshold_abort_current
 
 end subroutine flow_trachyinit
 
