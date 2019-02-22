@@ -693,6 +693,7 @@ plugins_lgpl/plugin_delftflow_traform/Makefile
 plugins_lgpl/plugin_delftflow_traform/src/Makefile
 scripts_lgpl/linux/Makefile
 scripts_lgpl/Makefile
+test/Makefile
 test/engines_gpl/Makefile
 test/engines_gpl/waq/Makefile
 test/engines_gpl/waq/packages/Makefile
@@ -776,14 +777,6 @@ tools_gpl/waq_run_processes/packages/waq_run_processes/Makefile
 tools_gpl/waq_run_processes/packages/waq_run_processes/src/Makefile
 tools_gpl/waq_run_processes/packages/waq_run_processes_version_number/Makefile
 tools_gpl/waq_run_processes/packages/waq_run_processes_version_number/src/Makefile
-utils_gpl/dhydrology/Makefile
-utils_gpl/dhydrology/packages/dhydrology_io/Makefile
-utils_gpl/dhydrology/packages/dhydrology_io/src/Makefile
-utils_gpl/dhydrology/packages/dhydrology_kernel/Makefile
-utils_gpl/dhydrology/packages/dhydrology_kernel/src/Makefile
-utils_gpl/dhydrology/packages/Makefile
-utils_gpl/dhydrology/tests/Makefile
-utils_gpl/dhydrology/tests/src/Makefile
 utils_gpl/flow1d/include/Makefile
 utils_gpl/flow1d/Makefile
 utils_gpl/flow1d/packages/flow1d_core/Makefile
