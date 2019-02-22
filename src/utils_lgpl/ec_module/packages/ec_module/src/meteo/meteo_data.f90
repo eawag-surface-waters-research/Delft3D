@@ -682,8 +682,7 @@ implicit none
 !
 ! Local variables
 !
-    integer :: i
-    logical :: unitused
+    integer :: ierr
 !
 !! executable statements -------------------------------------------------------
 !
@@ -698,19 +697,8 @@ implicit none
        success = .false.
        return
     endif
-    do i = 32, 200
-       inquire (unit = i, opened = unitused) 
-       if (.not. unitused) exit
-    enddo
-    if (unitused) then
-       meteomessage = 'No free unit number available for opening file'
-       success = .false.
-       return
-    endif
-    minp = i
-    open (minp, file = trim(filename), action = 'READ')
-    success = .true.
-    
+    open (newunit=minp, file = trim(filename), action = 'READ', iostat=ierr)
+    if (ierr == 0) success = .true.
 end function openexistingfile_meteo
 
 
