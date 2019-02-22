@@ -897,7 +897,7 @@ end function ug_write_meshtopology
 !> Defines a new variable in an existing dataset.
 !! Does not write the actual data yet.
 function ug_def_var(ncid, id_var, id_dims, itype, iloctype, mesh_name, var_name, standard_name, long_name, &
-                    unit, cell_method, crs, ifill, dfill) result(ierr)
+                    unit, cell_method, cell_measures, crs, ifill, dfill) result(ierr)
    integer,                 intent(in)    :: ncid          !< NetCDF dataset id
    integer,                 intent(out)   :: id_var        !< Created NetCDF variable id.
    integer, dimension(:),   intent(in)    :: id_dims       !< NetCDF dimension ids for this variable. Example: (/ id_edgedim /) for scalar data on edges, or (/ id_twodim, id_facedim /) for vector data on faces.
@@ -909,6 +909,7 @@ function ug_def_var(ncid, id_var, id_dims, itype, iloctype, mesh_name, var_name,
    character(len=*),        intent(in)    :: long_name     !< Long name for 'long_name' attribute in this variable (use empty string if not wanted).
    character(len=*),        intent(in)    :: unit          !< Unit of this variable (CF-compliant) (use empty string for dimensionless quantities).
    character(len=*),        intent(in)    :: cell_method   !< Cell method for the spatial dimension (i.e., for edge/face/volume), value should be one of 'point', 'mean', etc. (See CF) (empty string if not relevant).
+   character(len=*),        intent(in)    :: cell_measures !< Cell measures attribute, for example: 'area: mesh2d_cellarea', etc. (See CF) (empty string if not relevant).
    type(t_crs), optional,   intent(in)       :: crs        !< (Optional) Add grid_mapping attribute based on this coordinate reference system for independent coordinates
    integer,          optional, intent(in)    :: ifill         !< (Optional) Integer fill value.
    double precision, optional, intent(in)    :: dfill         !< (Optional) Double precision fill value.
@@ -945,15 +946,22 @@ function ug_def_var(ncid, id_var, id_dims, itype, iloctype, mesh_name, var_name,
       if (len_trim(cell_method) > 0) then
          ierr = nf90_put_att(ncid, id_var, 'cell_methods', 'n'//prefix//'_edge: '//trim(cell_method))
       end if
+      if (len_trim(cell_measures) > 0) then
+         ierr = nf90_put_att(ncid, id_var, 'cell_measures', trim(cell_measures))
+      end if
    case (UG_LOC_FACE)
       ierr = nf90_put_att(ncid, id_var, 'location',    'face')
       ierr = nf90_put_att(ncid, id_var, 'coordinates', prefix//'_face_x '//prefix//'_face_y')
       if (len_trim(cell_method) > 0) then
          ierr = nf90_put_att(ncid, id_var, 'cell_methods', 'n'//prefix//'_face: '//trim(cell_method))
       end if
+      if (len_trim(cell_measures) > 0) then
+         ierr = nf90_put_att(ncid, id_var, 'cell_measures', trim(cell_measures))
+      end if
    case (UG_LOC_CONTACT)
       ierr = nf90_put_att(ncid, id_var, 'location',    'contact')
       ierr = nf90_put_att(ncid, id_var, 'coordinates', prefix)
+      ! TODO: AvD: UNST-1100: cell_measures for contacts not yet supported/well defined...
    case (UG_LOC_VOL)
       ierr = UG_NOTIMPLEMENTED
       goto 888
@@ -1157,7 +1165,7 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
 #endif
 
       ierr = ug_def_var(ncid, meshids%varids(mid_nodez), (/meshids%dimids(mdim_node) /), nf90_double, UG_LOC_NODE, &
-         meshName, 'node_z', 'altitude', 'z-coordinate of mesh nodes', 'm', '', crs, dfill=dmiss)
+         meshName, 'node_z', 'altitude', 'z-coordinate of mesh nodes', 'm', '', '', crs, dfill=dmiss)
 
 
    else if (dim == 1 .and. present(ngeopointx) .and. associated(ngeopointx)) then !1d UGRID 1.6
@@ -3039,7 +3047,7 @@ subroutine write_edge_type_variable(igeomfile, meshids, meshName, edge_type)
 
     ! Define edge type variable.
     ierr = ug_def_var(igeomfile, id_edgetype, (/ meshids%dimids(mdim_edge) /), nf90_int, UG_LOC_EDGE, &
-                      meshName, 'edge_type', '', 'edge type (relation between edge and flow geometry)', '', 'mean', ifill=-999)
+                      meshName, 'edge_type', '', 'edge type (relation between edge and flow geometry)', '', '', '', ifill=-999)
     ierr = nf90_put_att(igeomfile, id_edgetype, 'flag_values',   (/ UG_EDGETYPE_INTERNAL_CLOSED, UG_EDGETYPE_INTERNAL, UG_EDGETYPE_BND, UG_EDGETYPE_BND_CLOSED /))
     ierr = nf90_put_att(igeomfile, id_edgetype, 'flag_meanings', 'internal_closed internal boundary boundary_closed')
 
@@ -3081,7 +3089,7 @@ subroutine write_face_domain_number_variable(igeomfile, meshids, meshName, idoma
 
     ! Define face domain number variable.
     ierr = ug_def_var(igeomfile, id_facedomainnumber, (/ meshids%dimids(mdim_face) /), nf90_int, UG_LOC_FACE, &
-                      meshName, 'face_domain_number', '', 'Face partition domain number', '', '', ifill=-999)
+                      meshName, 'face_domain_number', '', 'Face partition domain number', '', '', '', ifill=-999)
 
     ! Put netcdf file in write mode.
     ierr = nf90_enddef(igeomfile)
@@ -3121,7 +3129,7 @@ subroutine write_face_global_number_variable(igeomfile, meshids, meshName, iglob
 
     ! Define global face number variable.
     ierr = ug_def_var(igeomfile, id_faceglobalnumber, (/ meshids%dimids(mdim_face) /), nf90_int, UG_LOC_FACE, &
-                      meshName, 'face_global_number', '', 'Global face number (as it was in the full grid, before partitioning)', '', '', ifill=-999)
+                      meshName, 'face_global_number', '', 'Global face number (as it was in the full grid, before partitioning)', '', '', '', ifill=-999)
 
     ! Put netcdf file in write mode.
     ierr = nf90_enddef(igeomfile)
@@ -3388,16 +3396,16 @@ function ug_write_map_ugrid(filename) result(ierr)
     ierr = nf90_put_att(ncid, id_time, 'units'        , 'seconds since 2008-01-09 00:00:00')
 
     ierr = ug_def_var(ncid, id_s1, (/ meshids%dimids(mdim_face), id_timedim /), nf90_double, UG_LOC_FACE, meshgeom%meshname, "s1", "sea_surface_level_above_geoid", "Water level on cell centres", &
-                    "m", "average", crs, -1, -999d0)
+                    "m", "average", '', crs, -1, -999d0)
     
     ierr = ug_def_var(ncid, id_s2, (/ meshids%dimids(mdim_face), id_timedim /), nf90_double, UG_LOC_FACE, meshgeom%meshname, "s2", "sea_floor_depth_below_geoid", "Water depth on cell centres", &
-                    "m", "average", crs, -1, -999d0)
+                    "m", "average", '', crs, -1, -999d0)
     
     ierr = ug_def_var(ncid, id_u1, (/ meshids%dimids(mdim_edge), id_timedim /), nf90_double, UG_LOC_EDGE, meshgeom%meshname, "u1", "", "Normal velocity on cell edges", &
-                    "m s-1", "average", crs, -1, -999d0)
+                    "m s-1", "average", '', crs, -1, -999d0)
     
     ierr = ug_def_var(ncid, id_zk, (/ meshids%dimids(mdim_node), id_timedim /), nf90_double, UG_LOC_NODE, meshgeom%meshname, "zk", "", "Bed level on cell corners", &
-                    "m", "point", crs, -1, -999d0)
+                    "m", "point", '', crs, -1, -999d0)
     ! NOTE: zk is rarely time-dependent, but just as an example
 
     ierr = nf90_enddef(ncid)

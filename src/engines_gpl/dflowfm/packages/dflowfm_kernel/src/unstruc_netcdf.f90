@@ -456,6 +456,7 @@ end function unc_def_var_nonspatial
 function unc_def_var_map(ncid,id_tsp, id_var, itype, iloc, var_name, standard_name, long_name, unit, is_timedep, dimids) result(ierr)
 use m_save_ugrid_state, only: network1dname, mesh2dname, mesh1dname, contactname 
 use m_flowgeom
+use m_flowparameters, only: jamapvol1
 use network_data, only: numk, numl, numl1d
 use dfm_error
 use m_missing
@@ -475,7 +476,8 @@ integer, optional,  intent(in)  :: dimids(:)     !< (Optional) Array with dimens
 
 integer                         :: ierr          !< Result status, DFM_NOERR if successful.
 ! TODO: AvD: inject vectormax dim here AND timedim!!
-character(len=10) :: cell_method   !< Cell_method for this variable (one of 'mean', 'point', see CF for details).
+character(len=10) :: cell_method   !< cell_method for this variable (one of 'mean', 'point', see CF for details).
+character(len=50) :: cell_measures !< cell_measures for this variable (e.g. 'area: mesh2d_ba', see CF for details).
 integer :: ndx1d, numl2d
 
 integer, parameter :: maxrank = 5
@@ -562,6 +564,7 @@ integer :: ndims, i
 
 
    cell_method = 'mean' !< Default cell average for now. ! TODO:  AvD: change this, and refer to proper ba variable.
+   cell_measures = ''
 
    select case (iloc)
    case(UNC_LOC_CN) ! Corner point location
@@ -576,22 +579,24 @@ integer :: ndims, i
          cell_method = 'point'
          idims(idx_spacedim) = id_tsp%meshids2d%dimids(mdim_node)
          ierr = ug_def_var(ncid, id_var(2), idims(idx_fastdim:maxrank), itype, UG_LOC_NODE, &
-                           trim(mesh2dname), var_name, standard_name, long_name, unit, cell_method, crs, ifill=-999, dfill=dmiss)
+                           trim(mesh2dname), var_name, standard_name, long_name, unit, cell_method, cell_measures, crs, ifill=-999, dfill=dmiss)
       end if
 
    case(UNC_LOC_S) ! Pressure point location
       ndx1d = ndxi - ndx2d
       ! Internal 1d flownodes. Horizontal position: nodes in 1d mesh.
       if (ndx1d > 0) then
+         cell_measures = 'area: '//trim(mesh1dname)//'_flowelem_ba' ! relies on unc_write_flowgeom_ugrid_filepointer
          idims(idx_spacedim) = id_tsp%meshids1d%dimids(mdim_node)
          ierr = ug_def_var(ncid, id_var(1), idims(idx_fastdim:maxrank), itype, UG_LOC_NODE, &
-                           trim(mesh1dname), var_name, standard_name, long_name, unit, cell_method, crs, ifill=-999, dfill=dmiss)
+                           trim(mesh1dname), var_name, standard_name, long_name, unit, cell_method, cell_measures, crs, ifill=-999, dfill=dmiss)
       end if
       ! Internal 2d flownodes. Horizontal position: faces in 2d mesh.
       if (ndx2d > 0) then
+         cell_measures = 'area: '//trim(mesh2dname)//'_flowelem_ba' ! relies on unc_write_flowgeom_ugrid_filepointer
          idims(idx_spacedim) = id_tsp%meshids2d%dimids(mdim_face)
          ierr = ug_def_var(ncid, id_var(2), idims(idx_fastdim:maxrank), itype, UG_LOC_FACE, &
-                           trim(mesh2dname), var_name, standard_name, long_name, unit, cell_method, crs, ifill=-999, dfill=dmiss)
+                           trim(mesh2dname), var_name, standard_name, long_name, unit, cell_method, cell_measures, crs, ifill=-999, dfill=dmiss)
       end if
 
    case(UNC_LOC_U, UNC_LOC_L) ! Horizontal velocity point location, or horizontal net link. Note: defvar for netlinks and flowlinks is the same, putvar not.
@@ -599,74 +604,88 @@ integer :: ndims, i
       if (numl1d > 0) then
          !1d mesh
          if(size(id_tsp%edgetoln,1).gt.0) then
+            !cell_measures = 'area: '//trim(mesh1dname)//'_au' ! TODO: AvD: UNST-1100: au is not yet in map file at all.
             idims(idx_spacedim) = id_tsp%meshids1d%dimids(mdim_edge)
             ierr = ug_def_var(ncid, id_var(1), idims(idx_fastdim:maxrank), itype, UG_LOC_EDGE, &
-                              trim(mesh1dname), var_name, standard_name, long_name, unit, cell_method, crs, ifill=-999, dfill=dmiss)
+                              trim(mesh1dname), var_name, standard_name, long_name, unit, cell_method, cell_measures, crs, ifill=-999, dfill=dmiss)
          end if
          !1d2d contacts
          if(size(id_tsp%contactstoln,1).gt.0) then  
             idims(idx_spacedim) = id_tsp%meshcontacts%dimids(cdim_ncontacts)
             ierr = ug_def_var(ncid, id_var(4), idims(idx_fastdim:maxrank), itype, UG_LOC_CONTACT, &
-                              trim(contactname), var_name, standard_name, long_name, unit, ' ', crs, ifill=-999, dfill=dmiss)
+                              trim(contactname), var_name, standard_name, long_name, unit, ' ', cell_measures, crs, ifill=-999, dfill=dmiss)
          endif
       end if
       numl2d = numl - numl1d
       ! Internal 2d flowlinks. Horizontal position: edges in 2d mesh.
       if (numl2d > 0) then
+         !cell_measures = 'area: '//trim(mesh2dname)//'_au' ! TODO: AvD: UNST-1100: au is not yet in map file at all.
          idims(idx_spacedim) = id_tsp%meshids2d%dimids(mdim_edge)
          ierr = ug_def_var(ncid, id_var(2), idims(idx_fastdim:maxrank), itype, UG_LOC_EDGE, &
-                           trim(mesh2dname), var_name, standard_name, long_name, unit, cell_method, crs, ifill=-999, dfill=dmiss)
+                           trim(mesh2dname), var_name, standard_name, long_name, unit, cell_method, cell_measures, crs, ifill=-999, dfill=dmiss)
       end if
 
    case(UNC_LOC_S3D) ! Pressure point location in all layers.
       ndx1d = ndxi - ndx2d
       ! Internal 2dv flownodes. Horizontal position: nodes in 1d mesh. Vertical position: layer centers.
       if (ndx1d > 0) then
+         if (jamapvol1 > 0) then
+            cell_measures = 'volume: '//trim(mesh1dname)//'_vol1'
+         end if
+
          idims(idx_spacedim) = id_tsp%meshids1d%dimids(mdim_node)
          idims(idx_layerdim) = id_tsp%meshids1d%dimids(mdim_layer)
          ierr = ug_def_var(ncid, id_var(1), idims(idx_fastdim:maxrank), itype, UG_LOC_NODE, &
-                           trim(mesh1dname), var_name, standard_name, long_name, unit, cell_method, crs, ifill=-999, dfill=dmiss)
+                           trim(mesh1dname), var_name, standard_name, long_name, unit, cell_method, cell_measures, crs, ifill=-999, dfill=dmiss)
       end if
       ! Internal 3d flownodes. Horizontal position: faces in 2d mesh. Vertical position: layer centers.
       if (ndx2d > 0) then
+         if (jamapvol1 > 0) then
+            cell_measures = 'volume: '//trim(mesh2dname)//'_vol1'
+         end if
+
          idims(idx_spacedim) = id_tsp%meshids2d%dimids(mdim_face)
          idims(idx_layerdim) = id_tsp%meshids2d%dimids(mdim_layer)
          ierr = ug_def_var(ncid, id_var(2), idims(idx_fastdim:maxrank), itype, UG_LOC_FACE, &
-                           trim(mesh2dname), var_name, standard_name, long_name, unit, cell_method, crs, ifill=-999, dfill=dmiss)
+                           trim(mesh2dname), var_name, standard_name, long_name, unit, cell_method, cell_measures, crs, ifill=-999, dfill=dmiss)
       end if
 
    case(UNC_LOC_U3D) ! Horizontal velocity point location in all layers.
       ! Internal 2dv horizontal flowlinks. Horizontal position: edges in 1d mesh. Vertical position: layer centers.
       if (numl1d > 0) then
+         !cell_measures = 'area: '//trim(mesh1dname)//'_au' ! TODO: AvD: UNST-1100: au is not yet in map file at all.
          idims(idx_spacedim) = id_tsp%meshids1d%dimids(mdim_edge)
          idims(idx_layerdim) = id_tsp%meshids1d%dimids(mdim_layer)
          ierr = ug_def_var(ncid, id_var(1), idims(idx_fastdim:maxrank), itype, UG_LOC_EDGE, &
-                           trim(mesh1dname), var_name, standard_name, long_name, unit, cell_method, crs, ifill=-999, dfill=dmiss)
+                           trim(mesh1dname), var_name, standard_name, long_name, unit, cell_method, cell_measures, crs, ifill=-999, dfill=dmiss)
       end if
       numl2d = numl - numl1d
       ! Internal 3d horizontal flowlinks. Horizontal position: edges in 2d mesh. Vertical position: layer centers.
       if (numl2d > 0) then
+         !cell_measures = 'area: '//trim(mesh2dname)//'_au' ! TODO: AvD: UNST-1100: au is not yet in map file at all.
          idims(idx_spacedim) = id_tsp%meshids2d%dimids(mdim_edge)
          idims(idx_layerdim) = id_tsp%meshids2d%dimids(mdim_layer)
          ierr = ug_def_var(ncid, id_var(2), idims(idx_fastdim:maxrank), itype, UG_LOC_EDGE, &
-                           trim(mesh2dname), var_name, standard_name, long_name, unit, cell_method, crs, ifill=-999, dfill=dmiss)
+                           trim(mesh2dname), var_name, standard_name, long_name, unit, cell_method, cell_measures, crs, ifill=-999, dfill=dmiss)
       end if
 
    case(UNC_LOC_W) ! Vertical velocity point location on all layer interfaces.
       ndx1d = ndxi - ndx2d
       ! Internal 2dv vertical flowlinks. Horizontal position: nodes in 1d mesh. Vertical position: layer interfaces.
       if (ndx1d > 0) then ! If there are 1d flownodes and layers, then there are 2dv vertical flowlinks.
+         cell_measures = 'area: '//trim(mesh1dname)//'_flowelem_ba' ! relies on unc_write_flowgeom_ugrid_filepointer ! TODO: AvD: UNST-1100: or do we need to use a1 here??
          idims(idx_spacedim) = id_tsp%meshids1d%dimids(mdim_node)
          idims(idx_layerdim) = id_tsp%meshids1d%dimids(mdim_interface)
          ierr = ug_def_var(ncid, id_var(1), idims(idx_fastdim:maxrank), itype, UG_LOC_NODE, &
-                           trim(mesh1dname), var_name, standard_name, long_name, unit, cell_method, crs, ifill=-999, dfill=dmiss)
+                           trim(mesh1dname), var_name, standard_name, long_name, unit, cell_method, cell_measures, crs, ifill=-999, dfill=dmiss)
       end if
       ! Internal 3d vertical flowlinks. Horizontal position: faces in 2d mesh. Vertical position: layer interfaces.
       if (ndx2d > 0) then ! If there are 2d flownodes and layers, then there are 3d vertical flowlinks.
+         cell_measures = 'area: '//trim(mesh2dname)//'_flowelem_ba' ! relies on unc_write_flowgeom_ugrid_filepointer ! TODO: AvD: UNST-1100: or do we need to use a1 here??
          idims(idx_spacedim) = id_tsp%meshids2d%dimids(mdim_face)
          idims(idx_layerdim) = id_tsp%meshids2d%dimids(mdim_interface)
          ierr = ug_def_var(ncid, id_var(2), idims(idx_fastdim:maxrank), itype, UG_LOC_FACE, &
-                           trim(mesh2dname), var_name, standard_name, long_name, unit, cell_method, crs, ifill=-999, dfill=dmiss)
+                           trim(mesh2dname), var_name, standard_name, long_name, unit, cell_method, cell_measures, crs, ifill=-999, dfill=dmiss)
       end if
 
    case(UNC_LOC_WU) ! Vertical viscosity point location on all layer interfaces.
@@ -675,7 +694,7 @@ integer :: ndims, i
          idims(idx_spacedim) = id_tsp%meshids1d%dimids(mdim_edge)
          idims(idx_layerdim) = id_tsp%meshids1d%dimids(mdim_interface)
          ierr = ug_def_var(ncid, id_var(1), idims(idx_fastdim:maxrank), itype, UG_LOC_EDGE, &
-                           trim(mesh1dname), var_name, standard_name, long_name, unit, cell_method, crs, ifill=-999, dfill=dmiss)
+                           trim(mesh1dname), var_name, standard_name, long_name, unit, cell_method, cell_measures, crs, ifill=-999, dfill=dmiss)
       end if
       numl2d = numl - numl1d
       ! Internal 3d vertical viscosity points. Horizontal position: edges in 2d mesh. Vertical position: layer interfaces.
@@ -683,7 +702,7 @@ integer :: ndims, i
          idims(idx_spacedim) = id_tsp%meshids2d%dimids(mdim_edge)
          idims(idx_layerdim) = id_tsp%meshids2d%dimids(mdim_interface)
          ierr = ug_def_var(ncid, id_var(2), idims(idx_fastdim:maxrank), itype, UG_LOC_EDGE, &
-                           trim(mesh2dname), var_name, standard_name, long_name, unit, cell_method, crs, ifill=-999, dfill=dmiss)
+                           trim(mesh2dname), var_name, standard_name, long_name, unit, cell_method, cell_measures, crs, ifill=-999, dfill=dmiss)
       end if
 
    case default

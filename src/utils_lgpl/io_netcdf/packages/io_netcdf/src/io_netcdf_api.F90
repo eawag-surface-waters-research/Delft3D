@@ -492,7 +492,7 @@ end function ionc_inq_varid_by_standard_name_dll
 !! NOTE: File should still be in define mode.
 !! Does not write the actual data yet.
 function ionc_def_var_dll(ioncid, meshid, id_var, itype, iloctype, c_var_name, c_standard_name, c_long_name, & ! id_dims, 
-                    c_unit, dfill) result(ierr) bind(C, name="ionc_def_var")  ! , cell_method, crs, ifill
+                    c_unit, dfill) result(ierr) bind(C, name="ionc_def_var")  ! , cell_method, cell_measures, crs, ifill
 !DEC$ ATTRIBUTES DLLEXPORT :: ionc_def_var_dll
    integer(kind=c_int),              intent(in)    :: ioncid    !< The IONC data set id.
    integer(kind=c_int),              intent(in)    :: meshid    !< The mesh id in the specified data set.
@@ -505,6 +505,7 @@ function ionc_def_var_dll(ioncid, meshid, id_var, itype, iloctype, c_var_name, c
    character(kind=c_char),           intent(in)    :: c_long_name(MAXSTRLEN)     !< Long name for 'long_name' attribute in this variable (use empty string if not wanted).
    character(kind=c_char),           intent(in)    :: c_unit(MAXSTRLEN)          !< Unit of this variable (CF-compliant) (use empty string for dimensionless quantities).
 !   character(len=*),           intent(in)    :: cell_method   !< Cell method for the spatial dimension (i.e., for edge/face/volume), value should be one of 'point', 'mean', etc. (See CF) (empty string if not relevant).
+!   character(len=*),           intent(in)    :: cell_measures !< Cell measures attribute, for example: 'area: mesh2d_cellarea', etc. (See CF) (empty string if not relevant).
 !   type(t_crs),      optional, intent(in)    :: crs           !< (Optional) Add grid_mapping attribute based on this coordinate reference system for independent coordinates
 !   integer,          optional, intent(in)    :: ifill         !< (Optional) Integer fill value.
    real(c_double),                   intent(in)    :: dfill         !< (Optional) Double precision fill value.
@@ -519,7 +520,7 @@ function ionc_def_var_dll(ioncid, meshid, id_var, itype, iloctype, c_var_name, c
    unit          = char_array_to_string(c_unit,          strlen(c_unit))
 
    ierr = ionc_def_var(ioncid, meshid, id_var, itype, iloctype, var_name, standard_name, long_name, &
-                    unit, "", dfill = dfill)
+                    unit, "", "", dfill = dfill)
 end function ionc_def_var_dll
 
 
