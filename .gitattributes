@@ -431,6 +431,7 @@ src/build32vs15.cmd -text
 src/build_gnu.sh -text
 src/build_h5.sh -text
 src/build_h6.sh -text
+src/build_test.sh -text
 src/build_ubuntu.16.04LT.readme -text
 src/build_ubuntu1604.sh -text
 src/buildvs15.cmd -text
@@ -2964,11 +2965,13 @@ src/scripts_lgpl/win64/oss-install_debug_x64.cmd -text
 src/scripts_lgpl/win64/oss-install_x64.cmd -text
 src/scripts_lgpl/win64/tests_template.sln -text
 src/scripts_lgpl/win64/utils_lgpl_template.sln -text
+src/test/Makefile.am -text
 src/test/engines_gpl/Makefile.am -text
 src/test/engines_gpl/waq/Makefile.am -text
 src/test/engines_gpl/waq/packages/Makefile.am -text
 src/test/engines_gpl/waq/packages/waq_utils_f/Makefile.am -text
 src/test/engines_gpl/waq/packages/waq_utils_f/src/Makefile.am -text
+src/test/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/Makefile.am -text
 src/test/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/basic_tests.f90 -text
 src/test/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/test_waq_utils_f.f90 -text
 src/test/engines_gpl/waq/packages/waq_utils_f/waq_utils_f_test.vfproj -text
@@ -2976,6 +2979,7 @@ src/test/utils_lgpl/Makefile.am -text
 src/test/utils_lgpl/deltares_common/Makefile.am -text
 src/test/utils_lgpl/deltares_common/packages/Makefile.am -text
 src/test/utils_lgpl/deltares_common/packages/test_deltares_common/Makefile.am -text
+src/test/utils_lgpl/deltares_common/packages/test_deltares_common/src/Makefile.am -text
 src/test/utils_lgpl/deltares_common/packages/test_deltares_common/src/test_bilin5.f90 -text
 src/test/utils_lgpl/deltares_common/packages/test_deltares_common/src/test_combinepaths.f90 -text
 src/test/utils_lgpl/deltares_common/packages/test_deltares_common/src/test_deltares_common.f90 -text
