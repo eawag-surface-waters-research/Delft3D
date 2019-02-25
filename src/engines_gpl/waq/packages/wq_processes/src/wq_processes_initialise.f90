@@ -693,12 +693,12 @@
       call realloc(vardag, novar, keepExisting=.false.,Fill=0)
       call realloc(vartag, novar, keepExisting=.false.,Fill=0)
       call realloc(varagg, novar, keepExisting=.false.,Fill=0)
-      call setvat ( lunlsp , nocons, nopa  , nofun , nosfun, &
-                    nosys , notot , nodisp, novelo, nodef ,  &
-                    noloc , ndspx , nvelx , nlocx , nflux ,  &
-                    nopred, novar , vararr, varidx, vartda,  &
-                    vardag, vartag, varagg, nogrid,          &
-                    coname, paname, funame, sfname, syname, dename, &
+      call setvat ( lunlsp, nocons, nopa  , nofun , nosfun, &
+                    nosys , notot , nodisp, novelo, nodef , &
+                    noloc , ndspx , nvelx , nlocx , nflux , &
+                    nopred, novar , vararr, varidx, vartda, &
+                    vardag, vartag, varagg, nogrid, coname, &
+                    paname, funame, sfname, dename, syname, &
                     locnam, varnam)
 
       ! determine stochi
