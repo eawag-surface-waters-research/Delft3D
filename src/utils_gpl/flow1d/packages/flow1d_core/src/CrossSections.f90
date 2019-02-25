@@ -2557,15 +2557,15 @@ subroutine CircleProfile(dpt, diameter, area, width, perimeter, calculationOptio
          perimeter = 2d0*fi*ra
          width     = 2d0*sq + sl
       else
-         area      = 0.5d0* pi*ra*ra + diameter*(dpt-ra)
+         area      = 0.5d0* pi*ra*ra + (diameter)*(dpt-ra) + sl * dpt
          perimeter = 2d0*pi*ra
-         width     = diameter
+         width     = diameter+sl
       endif   
    end select
 
    if (calculationOption == CS_TYPE_MIN) then
-      area  = area  - areacircle
-      width = width - widthcircle
+      area  = area  - areacircle - sl*dpt
+      width = width - widthcircle - sl
    endif
    
 end subroutine CircleProfile
