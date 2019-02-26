@@ -17977,14 +17977,14 @@ subroutine fill_valobs()
             if ( IVAL_SF1.gt.0 ) then
                do j=IVAL_SF1,IVAL_SFN
                   ii = j-IVAL_SF1+1
-                  valobs(IPNT_SF1+(ii-1)*kmx_const+klay-1,i) = constituents(ISED1+j-IVAL_SF1, kk)
+                  valobs(IPNT_SF1+(ii-1)*kmx_const+klay-1,i) = constituents(ISED1+ii-1, kk)
                end do
             end if
             
             if (kmx==0 .and. IVAL_WS1 .gt. 0) then
                do j=IVAL_WS1,IVAL_WSN
                   ii = j-IVAL_WS1+1
-                  valobs(IPNT_WS1+(ii-1)*kmx_const+klay-1,i) = mtd%ws(kk, ISED1+j-IVAL_WS1)
+                  valobs(IPNT_WS1+(ii-1)*kmx_const+klay-1,i) = mtd%ws(kk, ii)   ! 1:lsedsus
                end do               
             end if
             
@@ -18027,14 +18027,14 @@ subroutine fill_valobs()
                if ( IVAL_WS1.gt.0 ) then
                   do j=IVAL_WS1,IVAL_WSN
                      ii = j-IVAL_WS1+1
-                     valobs(IPNT_WS1+(ii-1)*(kmx+1)+klay-1,i) =mtd%ws(kb+klay-1, ISED1+j-IVAL_WS1)
+                     valobs(IPNT_WS1+(ii-1)*(kmx+1)+klay-1,i) =mtd%ws(kb+klay-1, ii)
                   end do
                end if
             
                if ( IVAL_SEDDIF1.gt.0 ) then
                   do j=IVAL_SEDDIF1,IVAL_SEDDIFN
                      ii = j-IVAL_SEDDIF1+1
-                     valobs(IPNT_SEDDIF1+(ii-1)*(kmx+1)+klay-1,i) =mtd%seddif(ISED1+j-IVAL_SEDDIF1, kb+klay-1)
+                     valobs(IPNT_SEDDIF1+(ii-1)*(kmx+1)+klay-1,i) =mtd%seddif(ii, kb+klay-1)
                   end do
                end if
             enddo
