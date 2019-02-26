@@ -110,9 +110,11 @@ subroutine update_constituents(jarhoonly)
    
    jaupdate = 1
    
-   fluxhor = 0d0  ! not necessary
+   fluxhor    = 0d0  ! not necessary
    sumhorflux = 0d0
    fluxhortot = 0d0
+   sinksetot  = 0d0
+   sinkftot   = 0d0
    
    do istep=0,nsubsteps-1
       if ( kmx.gt.0 ) then
@@ -184,7 +186,7 @@ subroutine update_constituents(jarhoonly)
          call comp_fluxver( NUMCONST, limtyp, thetavert, Ndkx, kmx, zws, qw, kbot, ktop, constituents, nsubsteps, jaupdate, ndeltasteps, fluxver, wsf)
 
          call solve_vertical(NUMCONST, ISED1, ISEDN, limtyp, thetavert, Ndkx, Lnkx, kmx,    &
-                             zws, qw, vol1, kbot, ktop, Lbot, Ltop,                     &
+                             zws, qw, vol1, kbot, ktop, Lbot, Ltop,                         &
                              sumhorflux, fluxver, const_sour, const_sink,                   &
                              difsedw, sigdifi, vicwws, nsubsteps, jaupdate, ndeltasteps, constituents, &
                              a, b, c, d, e, sol, rhs)
@@ -202,12 +204,16 @@ subroutine update_constituents(jarhoonly)
             if ( jatimer.eq.1 ) call stoptimer(IUPDSALL)
          end if
       end if
-   
+      
+      call comp_sinktot()      
+        
    end do
    
    if( jased == 4 .and. stmpar%lsedsus > 0 ) then
       do j = ISED1,ISEDN
          fluxhortot(j,:) = fluxhortot(j,:) / dts_store
+         sinksetot(j,:)  = sinksetot(j,:)  / dts_store
+         sinkftot(j,:)   = sinkftot(j,:)   / dts_store
       enddo
    endif
    
@@ -1417,6 +1423,8 @@ subroutine alloc_transport(Keepexisting)
    call realloc(fluxver, (/ NUMCONST, Ndkx /), keepExisting=KeepExisting, fill=0d0)
    
    call realloc(fluxhortot, (/ NUMCONST, Lnkx /), keepExisting=KeepExisting, fill=0d0)
+   call realloc(sinksetot,    (/ NUMCONST, Ndx /), keepExisting=KeepExisting, fill=0d0)
+   call realloc(sinkftot,    (/ NUMCONST, Ndx /), keepExisting=KeepExisting, fill=0d0)
    
    call realloc(difsedu, NUMCONST, keepExisting=KeepExisting, fill=0d0)
    call realloc(difsedw, (/ NUMCONST, ndkx /), keepExisting=KeepExisting, fill=0d0)
@@ -1671,9 +1679,6 @@ subroutine fill_constituents(jas) ! if jas == 1 do sources
                kkk = sedtra%kmxsed(kk,i)
                if ( kkk.gt.0 ) then
                   iconst = i+ISED1-1
-                  if (const_sour(iconst,kkk).lt.0d0 .or. const_sink(iconst,kkk).lt.0d0) then
-                      continue
-                  end if
                   const_sour(iconst,kkk) = const_sour(iconst,kkk)+sedtra%sourse(kk,i)
                   const_sink(iconst,kkk) = const_sink(iconst,kkk)+sedtra%sinkse(kk,i)
                   if (stmpar%morpar%flufflyr%iflufflyr .gt. 0) then
@@ -1681,12 +1686,12 @@ subroutine fill_constituents(jas) ! if jas == 1 do sources
                      const_sink(iconst,kkk) = const_sink(iconst,kkk) + stmpar%morpar%flufflyr%sinkf(i,kk)
                   end if
                   
-!                 BEGIN DEBUG
-                  !if ( constituents(iconst,kb)+dts*const_sour(iconst,kb).lt.0d0 ) then
-                  !   write(message, "('const. source < -const/dt, iconst=', I0, ', kk=', I0)") iconst, kk
-                  !   call mess(LEVEL_WARN, trim(message))
-                  !end if
-!                 END DEBUG
+                 ! BEGIN DEBUG
+                  if ( constituents(iconst,kb)+dts*const_sour(iconst,kb).lt.0d0 ) then
+                     write(message, "('const. source < -const/dt, iconst=', I0, ', kk=', I0)") iconst, kk
+                     call mess(LEVEL_WARN, trim(message))
+                  end if
+                 ! END DEBUG
                end if
             end do
          end if
@@ -1833,14 +1838,14 @@ subroutine extract_constituents()
    integer :: i, iconst, k, kk, limmin, limmax
    
    double precision :: dmin
-   
+     
    do k=1,Ndkx
       if ( ISALT.ne.0 ) then
          sa1(k) = constituents(ISALT,k)
       end if
    
       !if ( ITEMP.ne.0 ) then
-         ! t em1(k) = constituents(ITEMP,k)
+         ! tem1(k) = constituents(ITEMP,k)
       !end if
    
       if( jasecflow > 0 .and. jaequili == 0 .and. kmx == 0 ) then
@@ -2598,7 +2603,7 @@ end subroutine doforester
 subroutine comp_horfluxtot()
    use m_flowgeom, only: Lnx
    use m_flow, only: Lbot, Ltop, kmx, Lnkx 
-   use m_transport, only: ISED1, ISEDN, fluxhor, fluxhortot
+   use m_transport, only: ISED1, ISEDN, fluxhor, fluxhortot, sinksetot, sinkftot
    use m_flowtimes, only: dts
    implicit none
    
@@ -2810,3 +2815,43 @@ end subroutine comp_horfluxwaq
 !
 !   return
 !end subroutine update_constituents_RK3
+
+subroutine comp_sinktot()
+   use m_transport
+   use m_flow, only: vol1, kmx, ndkx
+   use m_flowgeom, only: ndx
+   use m_flowtimes, only: dts
+   use m_sediment
+   
+   implicit none
+ 
+   integer   :: k, j, kb, kt, ll
+   !
+      
+   if (.not. stm_included) return
+   
+   
+   if (kmx<1) then    ! 2D
+      do k=1,ndx
+         do j=ISED1,ISEDN
+            ll = j-ISED1+1
+            sinksetot(j,k) = sinksetot(j,k) + vol1(k)*sedtra%sinkse(k,ll)*constituents(j,k)*dts
+            if (stmpar%morpar%flufflyr%iflufflyr .gt. 0) then
+               sinkftot(j,k)  = sinkftot(j,k) + vol1(k)*stmpar%morpar%flufflyr%sinkf(ll,k)*constituents(j,k)*dts
+            endif
+         enddo
+      enddo
+   else               ! 3D
+      do k=1,ndkx
+         call getkbotktop(k,kb,kt)
+         do j=ISED1,ISEDN
+            ll = j-ISED1+1
+            sinksetot(j,k) = sinksetot(j,k) + vol1(k)*sedtra%sinkse(k,ll)               *constituents(j,kb)*dts
+            if (stmpar%morpar%flufflyr%iflufflyr .gt. 0) then
+               sinkftot(j,k)  = sinkftot(j,k) +  vol1(k)*stmpar%morpar%flufflyr%sinkf(ll,k)*constituents(j,kb)*dts
+            endif
+         enddo
+      enddo
+   endif
+
+end subroutine comp_sinktot

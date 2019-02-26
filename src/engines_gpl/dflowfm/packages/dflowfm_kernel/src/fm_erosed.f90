@@ -921,6 +921,9 @@ end module m_fm_update_crosssections
    !
    wave = jawave>0
    !
+   ! Mass conservation; s1 is updated before entering fm_erosed
+   hs = s1 - bl
+   !
    if (varyingmorfac) then
       call updmorfac(stmpar%morpar, time1/3600.0_fp, julrefdat)
    endif
@@ -1010,7 +1013,7 @@ end module m_fm_update_crosssections
    sswx   = 0.0_fp
    sswy   = 0.0_fp
    e_sswn = 0.0_fp
-   e_sswt = 0.0_fp        ! suspended load due to currents in source sinks
+   e_sswt = 0.0_fp        
    sxtot  = 0.0_fp
    sytot  = 0.0_fp
    rsedeq = 0.0_fp
@@ -2296,13 +2299,13 @@ end module m_fm_update_crosssections
    use m_flowgeom , only: bai, ndxi, nd, wu, bl, ba, ln, dx, ndx, lnx, lnxi, acl, wcx1, wcy1, wcx2, wcy2, xz, yz, wu_mor, ba_mor, bai_mor
    use m_flowexternalforcings, only: nbndz, nbndu, nopenbndsect
    use m_flowparameters, only: epshs, epshu, jawave, eps10
-   use m_sediment,  only: stmpar, sedtra, mtd, sedtot2sedsus, jaupdates1
+   use m_sediment,  only: stmpar, sedtra, mtd, sedtot2sedsus, jaupdates1, m_sediment_sed=>sed
    use m_flowtimes, only: dts, tstart_user, time1, dnt, julrefdat, tfac, ti_sed, ti_seds
-   use m_transport, only: fluxhortot, ised1, isedn, constituents
+   use m_transport, only: fluxhortot, ised1, isedn, constituents, sinksetot, sinkftot
    use unstruc_files, only: mdia, close_all_files
    use m_fm_erosed
    use Messagehandling
-   use message_module, only: writemessages
+   use message_module, only: writemessages, write_error
    use unstruc_netcdf, only: unc_closeall
    use m_dredge
    use m_dad   , only: dad_included
@@ -2329,13 +2332,13 @@ end module m_fm_update_crosssections
    !!
    logical                     :: bedload, error
    integer                     :: ierror
-   integer                     :: l, nm, ii, ll, Lx, LLL, Lf, lstart, j, bedchangemesscount, k, k1, k2, knb, nb, kb, ki, mout
+   integer                     :: l, nm, ii, ll, Lx, LLL, Lf, lstart, j, bedchangemesscount, k, k1, k2, knb, nb, kb, ki, mout, kk, ised
    integer                     :: Lb, Lt, ka, kf1, kf2, kt, nto, n1, n2
    double precision            :: dsdnm, eroflx, sedflx, thick0, thick1, trndiv, flux, sumflux, dtmor
-   double precision            :: dhmax, h1, totdbodsd, totfixfrac, bamin, thet, dv, zktop, cflux
+   double precision            :: dhmax, h1, totdbodsd, totfixfrac, bamin, thet, dv, zktop, cflux, bedflxtot
 
    integer,          parameter :: bedchangemessmax = 50
-   double precision, parameter :: dtol = 1d-8
+   double precision, parameter :: dtol = 1d-16
 
    double precision            :: tausum2(1)
    double precision            :: sbsum, taucurc, czc
@@ -2350,24 +2353,22 @@ end module m_fm_update_crosssections
    integer  :: nxmx
    integer  :: nmk
    integer  :: lm
-   real(fp) :: aksu
-   real(fp) :: apower
-   real(fp) :: cavg
-   real(fp) :: cavg1
-   real(fp) :: cavg2
-   real(fp) :: ceavg
-   real(fp) :: cumflux
-   real(fp) :: alfa_dist
-   real(fp) :: alfa_mag
-   real(fp) :: dz
-   real(fp) :: dzup
-   real(fp) :: htdif
-   real(fp) :: rate
-   real(fp) :: r1avg
-   real(fp) :: z
-   real(fp) :: timhr
-   real(fp) :: dhh
-   
+   double precision :: aksu
+   double precision :: apower
+   double precision :: cavg
+   double precision :: cavg1
+   double precision :: cavg2
+   double precision :: ceavg
+   double precision :: cumflux
+   double precision :: alfa_dist
+   double precision :: alfa_mag
+   double precision :: dz
+   double precision :: dzup
+   double precision :: htdif
+   double precision :: rate
+   double precision :: r1avg
+   double precision :: z
+   double precision :: timhr     
    !!
    !!! executable statements -------------------------------------------------------
    !!
@@ -2394,13 +2395,13 @@ end module m_fm_update_crosssections
    !   vector arrays are blank
    !
    !
-   e_scrn = 0.0_fp
-   e_scrt = 0.0_fp
-   e_ssn  = 0.0_fp
+   e_scrn = 0d0
+   e_scrt = 0d0
+   e_ssn  = 0d0
    !
    ! calculate corrections
    !
-   if (sus /= 0.0_fp) then
+   if (sus /= 0d0) then
       !
       ! suspension transport correction vector only for 3D
       !
@@ -2442,7 +2443,7 @@ end module m_fm_update_crosssections
                      ! work up through layers integrating transport
                      ! below aksu, according to Bert's new implementation
                      !
-                     zktop = 0.0_fp
+                     zktop = 0d0
                      ka = 0
                      do Lf = Lb, Lt
                         zktop = hu(Lf)
@@ -2493,7 +2494,7 @@ end module m_fm_update_crosssections
                         ! If there is a significant concentration gradient, and significant
                         ! reference concentration
                         !
-                        if (ceavg>r1avg*1.1_fp .and. ceavg>0.05_fp) then
+                        if (ceavg>r1avg*1.1d0 .and. ceavg>0.05d0) then
                            !
                            ! Compute Rouse number based on reference concentration and
                            ! concentration of the layer above it. Make sure that Rouse number
@@ -2511,14 +2512,14 @@ end module m_fm_update_crosssections
                            ! c(z) = c_a*(a/z)^R = c_a*(z/a)^-R
                            !
                            z = zktop + dzup/2.0_fp
-                           apower = log(max(r1avg/ceavg,1.0e-5_fp)) / log(z/aksu)
-                           if (apower>-1.05_fp .and. apower<=-1.0_fp) then
-                              apower = -1.05_fp
-                           elseif (apower>=-1.0_fp .and. apower<-0.95_fp) then
-                              apower = -0.95_fp
+                           apower = log(max(r1avg/ceavg,1d-5)) / log(z/aksu)
+                           if (apower>-1.05d0 .and. apower<=-1.0d0) then
+                              apower = -1.05d0
+                           elseif (apower>=-1.0d0 .and. apower<-0.95d0) then
+                              apower = -0.95d0
                            else
                            endif
-                           apower  = min(max(-10.0_fp , apower), 10.0_fp)
+                           apower  = min(max(-10.0d0 , apower), 10.0d0)
                            !
                            ! Compute the average concentration cavg between the reference
                            ! height a and the top of the current layer (bottom of layer above) z.
@@ -2527,8 +2528,8 @@ end module m_fm_update_crosssections
                            !       /a                                     a                           a
                            !
                            dz     = zktop - aksu
-                           cavg1   = (ceavg/(apower+1.0_fp)) * aksu**(-apower)
-                           cavg2   = zktop**(apower+1.0_fp) - aksu**(apower+1.0_fp)
+                           cavg1   = (ceavg/(apower+1.0d0)) * aksu**(-apower)
+                           cavg2   = zktop**(apower+1.0d0) - aksu**(apower+1.0d0)
                            cavg    = cavg1 * cavg2 / dz
                            !
                            ! The corresponding effective suspended load flux is
@@ -2538,10 +2539,10 @@ end module m_fm_update_crosssections
                            ! Increment the correction by the part of the suspended load flux
                            ! that is in excess of the flux computed above, but never opposite.
                            !
-                           if (fluxhortot(ll, k)>0.0_fp .and. cflux>0.0_fp) then
-                              cumflux = cumflux + max(0.0_fp, fluxhortot(ll, k)-cflux)
-                           elseif (fluxhortot(ll, k)<0.0_fp .and. cflux<0.0_fp) then
-                              cumflux = cumflux + min(fluxhortot(ll, k)-cflux, 0.0_fp)
+                           if (fluxhortot(ll, k)>0.0d0 .and. cflux>0.0d0) then
+                              cumflux = cumflux + max(0.0d0, fluxhortot(ll, k)-cflux)
+                           elseif (fluxhortot(ll, k)<0.0d0 .and. cflux<0.0_fp) then
+                              cumflux = cumflux + min(fluxhortot(ll, k)-cflux, 0.0d0)
                            else
                               cumflux = cumflux + fluxhortot(ll,k)
                            endif
@@ -2554,13 +2555,13 @@ end module m_fm_update_crosssections
                      ! a case, the suspended sediment transport vector must
                      ! also be reduced.
                      !
-                     if (e_scrn(Lx,l) > 0.0_fp .and. Lx<lnxi) then
+                     if (e_scrn(Lx,l) > 0.0d0 .and. Lx<lnxi) then
                         e_scrn(Lx,l) = e_scrn(Lx,l)*fixfac(k1, l)      ! to check
                      else
                         e_scrn(Lx,l) = e_scrn(Lx,l)*fixfac(k2, l)      ! binnenpunt
                      endif
                   else
-                     e_scrn(Lx,l) = 0.0_fp
+                     e_scrn(Lx,l) = 0.0d0
                   endif
                enddo ! nm
             endif    ! sedtyp = SEDTYP_NONCOHESIVE_SUSPENDED
@@ -2588,7 +2589,7 @@ end module m_fm_update_crosssections
       ! Note: dtmor in seconds, morft in days!
       !
       
-      morft = morft + dtmor/86400.0_fp
+      morft = morft + dtmor/86400.0d0
       if (morfac>0d0) hydrt  = hydrt + dts/86400d0 
       if (stmpar%morpar%moroutput%morstats) then
          if (comparereal(time1,ti_seds,eps10)>=0) morstatt0 = morft   
@@ -2618,7 +2619,7 @@ end module m_fm_update_crosssections
                if (jampi == 1) then
                   if (.not. (idomain(k2) == my_rank)) cycle    ! internal cells at boundary are in the same domain as the link
                endif
-               if( u1(lm) < 0.0_fp ) cycle                     ! to do: 3d
+               if( u1(lm) < 0.0d0 ) cycle                     ! to do: 3d
                call gettau(k2,taucurc,czc)
                tausum2(1) = tausum2(1) + taucurc**2            ! sum of the shear stress squared
             enddo                                         ! the distribution of bedload is scaled with square stress
@@ -2665,7 +2666,7 @@ end module m_fm_update_crosssections
                !
                ! Detect the case based on the value of nxmx.
                !
-               if( u1(lm) < 0.0_fp ) cycle              ! to do: 3d
+               if( u1(lm) < 0.0d0 ) cycle              ! to do: 3d
                !
                ! The velocity/transport points to the left and top are part
                ! of this cell. nxmx contains by default the index of the
@@ -2722,7 +2723,7 @@ end module m_fm_update_crosssections
       !
       ! Update quantity of bottom sediment
       !
-      dbodsd = 0.0_fp
+      dbodsd = 0d0
       !
       ! compute change in bodsed (dbodsd)
       !
@@ -2734,10 +2735,10 @@ end module m_fm_update_crosssections
          ! loop over internal (ndxi) nodes - don't update the boundary nodes
          !
          do nm=1,Ndxi
-            trndiv  = 0.0_fp
-            sedflx  = 0.0_fp
-            eroflx  = 0.0_fp
-            if (sus/=0.0_fp .and. .not. bedload) then
+            trndiv  = 0d0
+            sedflx  = 0d0
+            eroflx  = 0d0
+            if (sus/=0d0 .and. .not. bedload) then
                if (neglectentrainment) then
                   !
                   ! mass balance based on transport fluxes only: entrainment and deposition
@@ -2755,8 +2756,7 @@ end module m_fm_update_crosssections
                         sumflux = sumflux - flux
                      end if
                   end do
-                  !trndiv = trndiv + sumflux / max(vol1(nm),dtol)
-                  trndiv = trndiv + sumflux * bai_mor(nm) ! MvO & DR + dimensiecheck levert op * bai ipv /vol1 verandering gemaakt rond release 35807
+                  trndiv = trndiv + sumflux * bai_mor(nm)
                else
                   !
                   ! mass balance includes entrainment and deposition
@@ -2772,17 +2772,18 @@ end module m_fm_update_crosssections
                      call getkbotktop(nm, kb, kt)
                      k = kb
                   endif
-                  thick0 = vol0(k) * bai_mor(nm)
+                  !thick0 = vol0(k) * bai_mor(nm)
                   thick1 = vol1(k) * bai_mor(nm)
-                  sedflx = sinkse(nm,l) * constituents(j,k) * thick1
-                  eroflx = sourse(nm,l)                     * thick0
+                  !sedflx = sinkse(nm,l) * m_sediment_sed(l,k) * thick1
+                  sedflx = sinksetot(j,nm)*bai_mor(nm)                           
+                  eroflx = sourse(nm,l)                       * thick1         ! mass conservation, different from D3D
                   !
                   ! Update fluff layer
                   !
                   if (iflufflyr>0) then
                      mfluff(l, nm) = mfluff(l, nm) + &
-                        & dts*(  sinkf(l, nm)*constituents(j,k)*thick1   &
-                        &      - sourf(l, nm)                  *thick0  )
+                        & dts*(  sinkftot(j,nm)*bai_mor(nm)   &
+                        &      - sourf(l, nm)                  *thick1  )
                   endif
                   !
                   ! add suspended transport correction vector
@@ -2802,7 +2803,7 @@ end module m_fm_update_crosssections
                   trndiv = trndiv + sumflux * bai_mor(nm)
                endif
             endif
-            if (bed /= 0.0_fp) then
+            if (bed /= 0.0d0) then
                sumflux = 0d0
                do ii=1,nd(nm)%lnx
                   LL = nd(nm)%ln(ii)
@@ -2823,8 +2824,8 @@ end module m_fm_update_crosssections
             ! Warn if bottom changes are very large,
             ! depth change NOT LIMITED
             !
-            dhmax = 0.05_fp
-            h1 = max(0.01_fp, s1(nm) - bl(nm))
+            dhmax = 0.05d0
+            h1 = max(0.01d0, s1(nm) - bl(nm))
             if (abs(dsdnm) > dhmax*h1*cdryb(1) .and. bedupd) then
                !
                ! Only write bed change warning when bed updating is true
@@ -2835,7 +2836,7 @@ end module m_fm_update_crosssections
                bedchangemesscount = bedchangemesscount + 1
                if (bedchangemesscount <= bedchangemessmax) then
                   write (mdia, '(a,f5.1,a,i0,a,i0,a)') &
-                     & '*** WARNING Bed change exceeds ' , dhmax*100.0_fp, ' % of waterdepth after ', int(dnt),  &
+                     & '*** WARNING Bed change exceeds ' , dhmax*100.0d0, ' % of waterdepth after ', int(dnt),  &
                      & ' timesteps, flow node = (', nm,')'
                endif
             endif
@@ -2845,7 +2846,7 @@ end module m_fm_update_crosssections
             dbodsd(l, nm) = dbodsd(l, nm) + dsdnm
          enddo    ! nm
       enddo       ! l
-
+      !
       if (bedchangemesscount > bedchangemessmax) then
          write (mdia,'(12x,a,i0,a)') 'Bed change messages skipped (more than ',bedchangemessmax,')'
          write (mdia,'(12x,2(a,i0))') 'Total number of Bed change messages for timestep ', int(dnt), ' : ',bedchangemesscount
@@ -2863,15 +2864,15 @@ end module m_fm_update_crosssections
          !if (kcs(nm)*kfs(nm)*kfsed(nm) /= 1) cycle
          if (kfsed(nm) /= 1 .or. hs(nm)<epshs) cycle                    ! check whether sufficient as condition
          !
-         totdbodsd = 0.0_fp
+         totdbodsd = 0d0
          do l = 1, lsedtot
-            totdbodsd = totdbodsd + dbodsd(l, nm)
+            totdbodsd = totdbodsd + real(dbodsd(l, nm), hp)
          enddo
          !
          ! If this is a cell where erosion is occuring (accretion is not
          ! distributed to dry points) then...
          !     
-         if (totdbodsd < 0.0_fp) then
+         if (totdbodsd < 0d0) then
             !
             ! Note: contrary to the previous implementation, this new
             ! implementation erodes the sediment from nm and
@@ -2884,7 +2885,7 @@ end module m_fm_update_crosssections
             ! individual fractions.
             !
             bamin      = ba(nm)
-            totfixfrac = 0.0_hp
+            totfixfrac = 0d0
             !
             do L=1,nd(nm)%lnx
                k1 = ln(1,iabs(nd(nm)%ln(L))); k2 = ln(2,iabs(nd(nm)%ln(L)))
@@ -2908,7 +2909,7 @@ end module m_fm_update_crosssections
             ! Re-distribute THET % of erosion in nm to surrounding cells
             ! THETSD is a user-specified maximum value, range 0-1
             !
-            if (totfixfrac > 1.0e-7_fp) then
+            if (totfixfrac > 1d-7) then
                !
                ! Compute local re-distribution factor THET
                !
@@ -2942,7 +2943,7 @@ end module m_fm_update_crosssections
                         dv              = thet * fixfac(knb, ll)*frac(knb, ll)
                         dbodsd(ll, knb) = dbodsd(ll, knb) - dv*bai_mor(knb)
                         dbodsd(ll, nm)  = dbodsd(ll, nm)  + dv*bai_mor(nm)
-                        e_sbn(Lf,ll)     = e_sbn(Lf,ll)     + dv/(dtmor*wu_mor(Lf)) * sign(1d0,nd(nm)%ln(L)+0d0)
+                        e_sbn(Lf,ll)    = e_sbn(Lf,ll)    + dv/(dtmor*wu_mor(Lf)) * sign(1d0,nd(nm)%ln(L)+0d0)
                      end if
                   end do ! L
                enddo ! ll
@@ -2974,10 +2975,10 @@ end module m_fm_update_crosssections
          if (updmorlyr(stmpar%morlyr, dbodsd, blchg, mtd%messages) /= 0) then
             call writemessages(mtd%messages, mdia)
             !            to replace by "nice" exit
-            call unc_closeall()
-            call close_all_files
-            close(mdia)
-            stop
+            write(errmsg,'(a,a,a)') 'fm_bott3d :: updmorlyr returned an error.'
+            call write_error(errmsg, unit=mdia)
+            error = .true.
+            return
          else
             call writemessages(mtd%messages, mdia)
          endif
@@ -2990,7 +2991,7 @@ end module m_fm_update_crosssections
          !
          ! Compute bed level changes without actually updating the bed composition
          !
-         blchg = 0.0_fp
+         blchg = 0d0
          do ll = 1, lsedtot
             do nm = 1, ndx
                blchg(nm) = blchg(nm) + dbodsd(ll, nm)/cdryb(ll)
@@ -3038,7 +3039,7 @@ end module m_fm_update_crosssections
             ! entries in the morbnd structure. The sum of alfa_mag(ib)**2
             ! will be equal to 1.
             !
-            if (u1(lm)<0.0) icond = 0
+            if (u1(lm)<0d0) icond = 0
             !
             select case(icond)
             case (0,4,5)
@@ -3111,12 +3112,11 @@ end module m_fm_update_crosssections
       ! if morphological computations haven't started yet
       !
       do nm = 1, ndx
-         blchg(nm) = 0.0_fp
+         blchg(nm) = 0d0
       enddo
    endif ! nst >= itmor
    !
    ! Update bottom elevations
-   !
    !
    if (bedupd) then
       !
@@ -3127,7 +3127,7 @@ end module m_fm_update_crosssections
          bl(nm) = bl(nm) + blchg(nm)
          !
       enddo
-         ! AvD: Sander suggestie: call update_geom(2)
+      ! AvD: Sander suggestie: call update_geom(2)
       !
       ! Free morpho boundaries get Neumann update
       !
@@ -3135,29 +3135,50 @@ end module m_fm_update_crosssections
          icond = morbnd(jb)%icond
          if (icond .eq. 0) then
             do ib = 1, morbnd(jb)%npnt
-               bl(morbnd(jb)%nm(ib)) = bl(morbnd(jb)%nxmx(ib))
+               bl(morbnd(jb)%nm(ib))    = bl(morbnd(jb)%nxmx(ib))
+               blchg(morbnd(jb)%nm(ib)) = blchg(morbnd(jb)%nxmx(ib))  ! needed below
             end do
          end if
       end do
       !
+      ! JRE+BJ: Update concentrations in water column to conserve mass because of bottom update
+      ! This needs to happen in work array sed, not constituents, because of copying back and forth later on
+      ! To do: 3D
+      do ll = 1, stmpar%lsedsus
+         m_sediment_sed(ll,:) = m_sediment_sed(ll,:) * hs / max(hs - blchg, 1d-10)
+      enddo
       !
+      ! Placeholders, question is whether we need this here: 
+      !if (jasal>0) then
+      !   ! to do
+      !endif
+      !!
+      !if (jatem>0) then
+      !   ! to do
+      !end if
+      !!
+      !if (TRA1>0) then
+      !   ! you guessed it...
+      !endif
+      
+      !     
       do nm = 1, ndx
          !
          ! note: if kcs(nm)=0 then blchg(nm)=0.0
          ! should change to following test because blchg may be small
          ! due to truncation errors
          !
-            s1(nm) = max(s1(nm), bl(nm))
-            s0(nm) = max(s0(nm), bl(nm))
-            !
-            ! if dry cells are eroded then bring water level down to
-            ! bed or maximum water level in surrounding wet cells
-            ! (whichever is higher)
-            !
-            if (hs(nm) < epshs .or. jaupdates1==1) then
-               s1(nm) = s1(nm) + blchg(nm)         
-               s0(nm) = s0(nm) + blchg(nm)
-            endif
+         s1(nm) = max(s1(nm), bl(nm))
+         s0(nm) = max(s0(nm), bl(nm))
+         !
+         ! if dry cells are eroded then bring water level down to
+         ! bed or maximum water level in surrounding wet cells
+         ! (whichever is higher)
+         !
+         if (hs(nm) < epshs .or. jaupdates1==1) then
+            s1(nm) = s1(nm) + blchg(nm)         
+            s0(nm) = s0(nm) + blchg(nm)
+         endif
       enddo
       !
       ! Remember erosion velocity for dilatancy
@@ -3179,6 +3200,7 @@ end module m_fm_update_crosssections
          end if
       endif
    endif
+
    end subroutine fm_bott3d
 
    subroutine fm_fallve()
@@ -3193,8 +3215,8 @@ end module m_fm_update_crosssections
    use m_physcoef, only: ee, ag, sag, vonkar, frcuni, backgroundsalinity, backgroundwatertemperature, rhomean
    use m_sediment, only: stmpar, sedtra, stm_included, mtd, vismol
    use m_flowtimes, only: time1
-   use m_flowgeom, only: ndx, ln, kfs
-   use m_flow    , only: ifrctypuni, z0, hs, iturbulencemodel,kbot,ktop,kmx,zws,ucxq,ucyq,sa1,tem1,ucx,ucy,ucz,ndkx !kmx, layertype, kbot, ktop, ndkx, hu, zws, hs, ucxq, ucyq
+   use m_flowgeom, only: ndx, ln, kfs,bl
+   use m_flow    , only: ifrctypuni, z0, hs, iturbulencemodel,kbot,ktop,kmx,zws,ucxq,ucyq,sa1,tem1,ucx,ucy,ucz,ndkx,s1 !kmx, layertype, kbot, ktop, ndkx, hu, zws, hs, ucxq, ucyq
    use m_flowparameters, only: jasal, jatem, jawave, epshs
    use m_transport, only: constituents, ised1
    use m_turbulence, only:turkinepsws, rho
@@ -3236,25 +3258,25 @@ end module m_fm_update_crosssections
    integer                     :: k, kk, k1, k2, L, ll, nm, i, istat, kb, kt
    logical                     :: error
 
-   real(fp)                    :: chezy
-   real(fp)                    :: cz
-   real(fp)                    :: h0
-   real(fp)                    :: rhoint
-   real(fp)                    :: salint
-   real(fp)                    :: temint
-   real(fp)                    :: tka
-   real(fp)                    :: tkb
-   real(fp)                    :: tkt
-   real(fp)                    :: tur_eps
-   real(fp)                    :: tur_k
-   real(fp)                    :: u
-   real(fp), allocatable, dimension(:)   :: um
-   real(fp)                    :: v
-   real(fp), allocatable, dimension(:)   :: vm
-   real(fp)                    :: w
-   real(fp)                    :: wsloc
-   real(fp)                    :: z0rou
-   real(hp)                    :: thick
+   double precision                    :: chezy
+   double precision                    :: cz
+   double precision                    :: h0
+   double precision                    :: rhoint
+   double precision                    :: salint
+   double precision                    :: temint
+   double precision                    :: tka
+   double precision                    :: tkb
+   double precision                    :: tkt
+   double precision                    :: tur_eps
+   double precision                    :: tur_k
+   double precision                    :: u
+   double precision, allocatable, dimension(:)   :: um
+   double precision                    :: v
+   double precision, allocatable, dimension(:)   :: vm
+   double precision                    :: w
+   double precision                    :: wsloc
+   double precision                    :: z0rou
+   double precision                    :: thick
 
    character(256)              :: errmsg
    !!
@@ -3288,7 +3310,7 @@ end module m_fm_update_crosssections
    !    !
    allocate (localpar (stmpar%trapar%npar), stat = istat)
    !    !
-   ctot = 0.0_fp
+   ctot = 0d0
    um = 0d0
    vm = 0d0
    !
@@ -3312,11 +3334,12 @@ end module m_fm_update_crosssections
    if (kmx>0) then                       ! 3D
       um = 0d0; vm = 0d0
       do k = 1, ndx
+         h0 = max(s1(k)-bl(k), epshs)
          call getkbotktop(k, kb, kt)
          do kk = kb, kt
             thick = zws(kk) - zws(kk-1)
-            um(k) = um(k) + thick/hs(k)*ucxq(kk)
-            vm(k) = vm(k) + thick/hs(k)*ucyq(kk)
+            um(k) = um(k) + thick/h0*ucxq(kk)     
+            vm(k) = vm(k) + thick/h0*ucyq(kk)
          end do
       end do
    else
@@ -3337,13 +3360,13 @@ end module m_fm_update_crosssections
          !
          call getkbotktop(k, kb, kt)
          !
-         h0 = max(hs(k), epshs)
+         h0 = max(s1(k)-bl(k), epshs)
          !
          ! Calculate total (possibly wave enhanced) roughness
          !
          call getczz0(h0, frcuni, ifrctypuni, cz, z0) ! sets z0 (just currents for now) and chezy
          z0rou = z0                                   ! TO DO: wave related roughness
-         chezy = sag * log( 1.0_fp + h0/max(1.0e-8_fp,ee*z0rou) ) / vonkar
+         chezy = sag * log( 1.0d0 + h0/max(1d-8,ee*z0rou) ) / vonkar
          !
          ! loop over the interfaces in the vertical
          !
@@ -3376,17 +3399,17 @@ end module m_fm_update_crosssections
                if (iturbulencemodel == 3) then     ! k-eps
                   tur_k = turkinepsws(1,kk)
                else
-                  tur_k = -999.0_fp
+                  tur_k = -999.0d0
                endif
                if (iturbulencemodel == 3) then
                   tur_eps = turkinepsws(2,kk)
                else
-                  tur_eps = -999.0_fp
+                  tur_eps = -999.0d0
                endif
             end do
          else                           ! 2D
             if (jasal > 0) then
-               salint = max(0.0_fp, sa1(k))
+               salint = max(0d0, sa1(k))
             else
                salint = backgroundsalinity
             endif
@@ -3401,9 +3424,9 @@ end module m_fm_update_crosssections
             !
             u       = ucx(k)   ! x component
             v       = ucy(k)   ! y component
-            w       = -999.0_fp   ! z component
-            tur_k   = -999.0_fp
-            tur_eps = -999.0_fp
+            w       = -999d0   ! z component
+            tur_k   = -999d0
+            tur_eps = -999d0
          end if
 
          do kk = kb, kt
@@ -3459,7 +3482,12 @@ end module m_fm_update_crosssections
             call eqsettle(dll_function(ll), dll_handle(ll), max_integers, max_reals, max_strings, &
                & dll_integers, dll_reals, dll_strings, mdia, iform_settle(ll),  &
                & localpar, stmpar%trapar%npar, wsloc, error)
-            if (error) return
+            if (error) then
+               write(errmsg,'(a,a,a)') 'fm_fallve:: Error from eqsettle.'
+               call write_error(errmsg, unit=mdia)
+               error = .true.
+               return
+            endif
             !
             ws(kk, ll) = wsloc
          end do    ! kk
@@ -3728,23 +3756,10 @@ end module m_fm_update_crosssections
    !!
    !! Global variables
    !!
-   !    integer                                               , intent(in)  :: kmax    !  Number of layers
-   !integer                                               , intent(in)  :: kbed    !  Index of near bed layer
-   !    logical                                               , intent(in)  :: avalan
-   !logical                                               , intent(in)  :: slopecor
-   !    real(fp)  , dimension(1:ndxi               )          , intent(in)  :: dm
-   !real(fp)  , dimension(1:lnx                )          , intent(in)  :: dzduu   ! e_dzdn
-   !real(fp)  , dimension(1:lnx                )          , intent(in)  :: dzdvv   ! e_dzdt
-   !    real(fp)  , dimension(1:ndxi               , lsedtot) , intent(in)  :: fixfac
-   !    real(fp)  , dimension(1:ndxi               , lsedtot) , intent(in)  :: frac
-   !    real(fp)  , dimension(1:ndxi               , lsedtot) , intent(in)  :: hidexp
-   !    real(fp)  , dimension(1:ndxi               , kmax)    , intent(in)  :: rhowat  ! to check what was used in fm_erosed: rhou
    real(fp)  , dimension(1:lnx,1:lsedtot),          intent(inout)        :: sbn     !  sbcuu, sbwuu, or sswuu
    real(fp)  , dimension(1:lnx,1:lsedtot),          intent(inout)        :: sbt     !  sbcvv, sbwvv, or sswvv
    real(fp)  , dimension(:)  ,          allocatable                      :: sbncor    ! corrected values
    real(fp)  , dimension(:)  ,          allocatable                      :: sbtcor
-   !real(fp)  , dimension(1:ndx                , lsedtot) , intent(in)  :: taurat
-   !    real(fp)  , dimension(1:ndxi               )          , intent(in)  :: ust2     ! ustar**2, possibly corrected for spiral flow
    !!
    !! Local variables
    !!
@@ -4517,3 +4532,4 @@ end module m_fm_update_crosssections
     enddo
     
   end subroutine junctionadv
+  

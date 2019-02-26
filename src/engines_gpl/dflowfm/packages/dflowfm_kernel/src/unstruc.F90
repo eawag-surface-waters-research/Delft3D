@@ -284,11 +284,10 @@ subroutine flow_finalize_usertimestep(iresult)
    use m_flowgeom
    use m_transport, only: constituents, NUMCONST, const_names
    use m_fourier_analysis
-   use unstruc_model
    use dfm_error
    use precision_basics
    use unstruc_files, only: defaultFilename
-   use unstruc_model, only: getoutputdir
+   use unstruc_model, only: getoutputdir, md_fou_step
    use m_partitioninfo, only: jampi, sdmn
    implicit none
 
@@ -1159,6 +1158,8 @@ if(q /= 0) then
  ! JRE: moved update of SWAN derived quantities here
  if (jawave==3) then
     if( kmx == 0 ) then
+       hs = s1-bl
+       hs = max(hs,0d0)  
        call wave_comp_stokes_velocities()
        call wave_uorbrlabda()                       ! hwav gets depth-limited here
        call tauwave()
@@ -1174,7 +1175,9 @@ if(q /= 0) then
        call setwavmubnd()
     end if
  end if
- if (jawave.eq.4 .and. jajre.eq.1) then  
+ if (jawave.eq.4 .and. jajre.eq.1) then
+    hs = s1-bl
+    hs = max(hs,0d0)
     if (swave.eq.1 ) then
        call xbeach_waves()
     endif
@@ -1211,10 +1214,12 @@ if(q /= 0) then
  !update particles
  call update_part()
 
- if (jased > 0 .and. stm_included) then     
+ if (jased > 0 .and. stm_included) then  
     call fm_bott3d() ! bottom update
     call setbobs()   ! adjust administration - This option only works for ibedlevtyp = 1, otherwise original bed level [bl] is overwritten to original value
-    !call volsur() !< -- causes testbench cases in f22 to fail, since commit #9193, TODO: JRE.
+    vol1 = (s1-bl)*ba ! for mass conservation, assumes tiles. a1 does not change
+                      ! Could be potentially a volsur call. Has same effect with tiles.
+                      ! To check Jan Noort: is this okay for 1D as well
  end if
  
  ! Moved to flow_finalize_single_timestep: call flow_f0isf1()                                  ! mass balance and vol0 = vol1

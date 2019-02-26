@@ -5145,6 +5145,8 @@ module m_transport
    double precision, dimension(:,:), allocatable :: fluxhor  ! horizontal fluxes
    double precision, dimension(:,:), allocatable :: fluxver  ! vertical   fluxes
    double precision, dimension(:,:), allocatable :: fluxhortot ! sum of horizontal fluxes (fluxhor) at local time stepping
+   double precision, dimension(:,:), allocatable :: sinksetot    ! sum of sed sinks at local time stepping
+   double precision, dimension(:,:), allocatable :: sinkftot    ! sum of  fluff sinks at local time stepping
 
    double precision, dimension(:),   allocatable :: thetavert  ! vertical advection fluxes explicit (0) or implicit (1)
 
