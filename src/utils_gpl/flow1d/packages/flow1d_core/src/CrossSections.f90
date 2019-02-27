@@ -63,6 +63,8 @@ module m_CrossSections
    public SetParsCross
    public useBranchOrders
    public write_crosssection_data
+   public EggProfile
+   public CircleProfile
    
    interface fill_hashtable
       module procedure fill_hashtable_csdef
@@ -861,7 +863,7 @@ subroutine setGroundLayerData(crossDef, thickness)
       case (CS_CIRCLE)
          call CircleProfile(thickness, crossDef%diameter, area, width, perimeter, CS_TYPE_NORMAL)
       case (CS_EGG)
-         call EggProfile(thickness, crossDef%diameter, area, width, perimeter)
+         call EggProfile(thickness, crossDef%diameter, area, width, perimeter, CS_TYPE_NORMAL)
       case default
          call SetMessage(LEVEL_ERROR, 'INTERNAL ERROR: Unknown type of cross section')
    end select
@@ -1522,7 +1524,7 @@ subroutine GetCSParsFlowCross(cross, dpt, u1, cz, flowArea, wetPerimeter, flowWi
    case (CS_CIRCLE)
       call CircleProfile(dpt, crossDef%diameter, flowArea, flowWidth, wetPerimeter, CS_TYPE_NORMAL)
    case (CS_EGG)
-      call EggProfile(dpt, crossDef%diameter, flowArea, flowWidth, wetPerimeter)
+      call EggProfile(dpt, crossDef%diameter, flowArea, flowWidth, wetPerimeter, CS_TYPE_NORMAL)
    case (CS_YZ_PROF)
       call YZProfile(dpt, u1, cz, cross%convtab, 0, flowArea, flowWidth, wetPerimeter, conv)
    case default
@@ -1723,7 +1725,7 @@ subroutine GetCSParsTotalCross(cross, dpt, totalArea, totalWidth, calculationOpt
          call CircleProfile(dpt, crossDef%diameter, totalArea, totalWidth, wetPerimeter, calculationOption)
       case (CS_EGG)
          !TODO:
-         call EggProfile(dpt, crossDef%diameter, totalArea, totalWidth, wetPerimeter)
+         call EggProfile(dpt, crossDef%diameter, totalArea, totalWidth, wetPerimeter, calculationOption)
       case (CS_YZ_PROF)
          call YZProfile(dpt, u1, cz, cross%convtab, 1, totalArea, totalWidth, wetPerimeter, conv)
       case default
@@ -2520,8 +2522,10 @@ subroutine CircleProfile(dpt, diameter, area, width, perimeter, calculationOptio
    double precision               :: fi
    double precision               :: ra
    double precision               :: sq
-   double precision               :: areacircle
-   double precision               :: widthcircle
+   double precision               :: area_plus
+   double precision               :: width_plus
+   double precision               :: dpt2
+   integer :: i
    
 !
 !! executable statements -------------------------------------------------------
@@ -2530,47 +2534,53 @@ subroutine CircleProfile(dpt, diameter, area, width, perimeter, calculationOptio
    !
    !
    ra = 0.5*diameter
-   fi = dacos(max((ra-dpt)/ra, -1d0))
-   sq = dsqrt(max(dpt*(diameter - dpt),0d0))
 
    ! normal circle profile
-   if (dpt<diameter) then
-      areacircle      = dabs(fi*ra*ra - sq*(ra-dpt))
-      perimeter       = dabs(2d0*fi*ra)
-      widthcircle     = 2d0*sq
-   else
-      areacircle      = pi*ra*ra
-      perimeter       = 2d0*pi*ra
-      widthcircle     = 0d0
-   endif
+   do i = 1, 2
+      if (i==1) then
+         dpt2 = min(dpt, ra)  ! first step only increasing part.
+      else
+         dpt2 = dpt              ! second step full egg profile up to water depth
+      endif
+      fi = dacos(max((ra-dpt2)/ra, -1d0))
+      sq = dsqrt(max(dpt2*(diameter - dpt2),0d0))
+      
+      if (dpt2<diameter) then
+         area      = dabs(fi*ra*ra - sq*(ra-dpt2))
+         perimeter       = dabs(2d0*fi*ra)
+         width     = 2d0*sq
+      else
+         area      = pi*ra*ra
+         perimeter       = 2d0*pi*ra
+         width     = 0d0
+      endif
+      
+      if (i==1) then
+         area_plus = area + width*(dpt-dpt2)
+         width_plus = width
+      endif
+      
+   enddo
+   
    select case(calculationOption)
    case(CS_TYPE_NORMAL)
-      area = areacircle
-      width = widthcircle
+      area = area 
+      width = width 
    case(CS_TYPE_PREISMAN)
-      area = areacircle    + sl*dpt
-      width = widthcircle  + sl
-   case(CS_TYPE_PLUS, CS_TYPE_MIN)
-      if (dpt<ra) then
-         ! half circle profile
-         area      = dabs(fi*ra*ra - sq*(ra-dpt)) + sl*dpt
-         perimeter = 2d0*fi*ra
-         width     = 2d0*sq + sl
-      else
-         area      = 0.5d0* pi*ra*ra + (diameter)*(dpt-ra) + sl * dpt
-         perimeter = 2d0*pi*ra
-         width     = diameter+sl
-      endif   
+      area = area    + sl*dpt
+      width = width  + sl
+   case(CS_TYPE_PLUS)
+      area      = area_plus + dpt*sl
+      width     = width_plus + sl
+   case(CS_TYPE_MIN)
+      area      = area_plus - area
+      width     = width_plus - width
    end select
-
-   if (calculationOption == CS_TYPE_MIN) then
-      area  = area  - areacircle - sl*dpt
-      width = width - widthcircle - sl
-   endif
+   
    
 end subroutine CircleProfile
 
-subroutine EggProfile(dpt, diameter, area, width, perimeter)
+subroutine EggProfile(dpt, diameter, area, width, perimeter, calculationOption)
    use m_GlobalParameters
    use precision_basics
 
@@ -2581,40 +2591,75 @@ subroutine EggProfile(dpt, diameter, area, width, perimeter)
    double precision, intent(out)       :: width
    double precision, intent(out)       :: area
    double precision, intent(out)       :: perimeter
+   integer, intent(in)                 :: calculationOption
 
    double precision                    :: r
+   double precision                    :: dpt2
    double precision                    :: e
+   double precision                    :: area_plus
+   double precision                    :: width_plus
+   integer :: i
 
    r = 0.5*diameter
-   if ((dpt>0) .and. (dpt<=.2*r)) then
-      perimeter = 2*r*(.5*atan((dsqrt(r*dpt - dpt*dpt)/(.5*r - dpt))))
-      width = r*sin(atan(dsqrt(dpt*r - dpt*dpt)/(.5*r - dpt))) + sl
-      e = .25*r*r*atan((dpt - .5*r)/(dsqrt(dpt*r - dpt*dpt))) + .392699082*r*r +       &
-         & (dpt - .5*r)*dsqrt(dpt*r - dpt*dpt)
-      area = e + sl*dpt
+   do i = 1, 2
+      if (i==1) then
+         dpt2 = min(dpt, 2d0*r)  ! first step only increasing part.
+      else
+         dpt2 = dpt              ! second step full egg profile up to water depth
+      endif
+      
+      if ((dpt2>0) .and. (dpt2<=.2*r)) then
+         perimeter = 2*r*(.5*atan((dsqrt(r*dpt2 - dpt2*dpt2)/(.5*r - dpt2))))
+         width = r*sin(atan(dsqrt(dpt2*r - dpt2*dpt2)/(.5*r - dpt2)))
+         e = .25*r*r*atan((dpt2 - .5*r)/(dsqrt(dpt2*r - dpt2*dpt2))) + .392699082*r*r +       &
+            & (dpt2 - .5*r)*dsqrt(dpt2*r - dpt2*dpt2)
+         area = e
 
-   elseif ((dpt>.2*r) .and. (dpt<=2.*r)) then
-      perimeter = 2*r*(2.39415093538065 -                                          &
-            & 3.*atan((2*r - dpt)/(dsqrt(5.*r*r + 4*r*dpt - dpt*dpt))))
-      width = 2.*((dsqrt(5.*r*r + 4.*r*dpt - dpt*dpt)) - 2.*r) + sl
-      e = 9.*r*r*atan((dpt - 2*r)/(dsqrt(9.*r*r - ((dpt - 2*r)**2)))) + (dpt - 2*r)&
-         & *dsqrt(9*r*r - ((dpt - 2*r)**2)) - 4.*r*(dpt - .2*r)                   &
-         & + 10.11150997913956*r*r
-      area = .11182380480168*r*r + e + sl*dpt
+      elseif ((dpt2>.2*r) .and. (dpt2<=2.*r)) then
+         perimeter = 2*r*(2.39415093538065 -                                          &
+               & 3.*atan((2*r - dpt2)/(dsqrt(5.*r*r + 4*r*dpt2 - dpt2*dpt2))))
+         width = 2.*((dsqrt(5.*r*r + 4.*r*dpt2 - dpt2*dpt2)) - 2.*r)
+         e = 9.*r*r*atan((dpt2 - 2*r)/(dsqrt(9.*r*r - ((dpt2 - 2*r)**2)))) + (dpt2 - 2*r)&
+            & *dsqrt(9*r*r - ((dpt2 - 2*r)**2)) - 4.*r*(dpt2 - .2*r)                   &
+            & + 10.11150997913956*r*r
+         area = .11182380480168*r*r + e
 
-   elseif ((dpt>2*r) .and. (comparereal(dpt,3*r, 1d-6) < 0)) then
-      perimeter = 2.*r*(2.39415093538065 +                                         &
-            & atan((dpt - 2*r)/(dsqrt( - 3.*r*r + 4*r*dpt - dpt*dpt))))
-      width = 2*r*cos(atan((dpt - 2*r)/(dsqrt( - 3.*r*r + 4*dpt*r - dpt*dpt)))) + sl
-      e = r*r*(atan((dpt - 2*r)/(dsqrt(r*r - ((dpt - 2*r)**2))))) + (dpt - 2*r)   &
-            & *dsqrt(r*r - ((dpt - 2*r)**2))
-      area = 3.02333378394124*r*r + e + sl*dpt
+      elseif ((dpt2>2*r) .and. (comparereal(dpt2,3*r, 1d-6) < 0)) then
+         perimeter = 2.*r*(2.39415093538065 +                                         &
+               & atan((dpt2 - 2*r)/(dsqrt( - 3.*r*r + 4*r*dpt2 - dpt2*dpt2))))
+         width = 2*r*cos(atan((dpt2 - 2*r)/(dsqrt( - 3.*r*r + 4*dpt2*r - dpt2*dpt2))))
+         e = r*r*(atan((dpt2 - 2*r)/(dsqrt(r*r - ((dpt2 - 2*r)**2))))) + (dpt2 - 2*r)   &
+               & *dsqrt(r*r - ((dpt2 - 2*r)**2))
+         area = 3.02333378394124*r*r + e
 
-   else 
-      perimeter = 7.92989452435109*r
-      width = sl
-      area = 4.59413011073614*r*r + sl*dpt
-   endif
+      else 
+         perimeter = 7.92989452435109*r
+         width = 0d0
+         area = 4.59413011073614*r*r 
+      endif
+      
+      if (i==1) then
+         area_plus = area + width*max(0d0, dpt - 2d0*r)
+         width_plus = width
+      endif
+      
+   enddo
+   
+   select case(calculationOption)
+   case(CS_TYPE_NORMAL)
+      area = area 
+      width = width 
+   case(CS_TYPE_PREISMAN)
+      area = area    + sl*dpt
+      width = width  + sl
+   case(CS_TYPE_PLUS)
+      area      = area_plus + dpt*sl
+      width     = width_plus + sl
+   case(CS_TYPE_MIN)
+      area      = area_plus - area
+      width     = width_plus - width
+   end select
+   
 end subroutine EggProfile
 
 subroutine YZProfile(dpt, u1, cz, convtab, i012, area, width, perimeter, conv)
