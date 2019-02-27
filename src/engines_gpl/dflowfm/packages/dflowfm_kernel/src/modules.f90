@@ -2816,6 +2816,7 @@ end subroutine default_turbulence
  integer                           :: jamaps0                   !< previous step water levels to map file, 0: no, 1: yes
  integer                           :: jamaps1                   !< water levels to map file, 0: no, 1: yes
  integer                           :: jamapvol1                 !< Volumes to map file, 0: no, 1: yes
+ integer                           :: jamapau                   !< Normal flow areas au to map file, 0: no, 1: yes
  integer                           :: jamapu1                   !< velocities to map file, 0: no, 1: yes
  integer                           :: jamapu0                   !< previous step velocities to map file, 0: no, 1: yes
  integer                           :: jamapucvec                !< velocity vectors to map file, 0: no, 1: yes
@@ -3163,6 +3164,7 @@ subroutine default_flowparameters()
     jamaps0 = 1
     jamaps1 = 1
     jamapvol1 = 0
+    jamapau = 0
     jamapu0 = 1
     jamapu1 = 1
     jamapucvec = 1

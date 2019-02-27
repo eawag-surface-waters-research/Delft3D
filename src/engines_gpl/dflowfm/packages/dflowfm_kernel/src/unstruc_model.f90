@@ -1374,6 +1374,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_waterlevel_s0', jamaps0, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_waterlevel_s1', jamaps1, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_volume1', jamapvol1, success)
+    call prop_get_integer(md_ptr, 'output', 'Wrimap_flowarea_au', jamapau, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_velocity_component_u1', jamapu1, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_velocity_component_u0', jamapu0, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_velocity_vector', jamapucvec, success)
@@ -2828,6 +2829,9 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     endif
     if (writeall .or. jamapvol1 > 0) then
         call prop_set(prop_ptr, 'output', 'Wrimap_volume1', jamapvol1, 'Write volumes to map file (1: yes, 0: no)')
+    endif
+    if (writeall .or. jamapau > 0) then
+        call prop_set(prop_ptr, 'output', 'Wrimap_flowarea_au', jamapau, 'Write flow areas au to map file (1: yes, 0: no)')
     endif
     if (writeall .or. jamapu0 /= 1) then
         call prop_set(prop_ptr, 'output', 'Wrimap_velocity_component_u0', jamapu0, 'Write velocity component for previous time step to map file (1: yes, 0: no)')

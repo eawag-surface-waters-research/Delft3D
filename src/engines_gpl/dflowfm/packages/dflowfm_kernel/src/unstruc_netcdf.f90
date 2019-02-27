@@ -181,6 +181,7 @@ type t_unc_mapids
    integer :: id_s0(4)     = -1 !< Variable ID for 
    integer :: id_hs(4)     = -1 !< Variable ID for 
    integer :: id_vol1(4)   = -1 !< Variable ID for volume
+   integer :: id_au(4)     = -1 !< Variable ID for flow area
    integer :: id_taus(4)   = -1 !< Variable ID for 
    integer :: id_ucx(4)    = -1 !< Variable ID for 
    integer :: id_ucy(4)    = -1 !< Variable ID for 
@@ -456,7 +457,7 @@ end function unc_def_var_nonspatial
 function unc_def_var_map(ncid,id_tsp, id_var, itype, iloc, var_name, standard_name, long_name, unit, is_timedep, dimids) result(ierr)
 use m_save_ugrid_state, only: network1dname, mesh2dname, mesh1dname, contactname 
 use m_flowgeom
-use m_flowparameters, only: jamapvol1
+use m_flowparameters, only: jamapvol1, jamapau
 use network_data, only: numk, numl, numl1d
 use dfm_error
 use m_missing
@@ -653,7 +654,9 @@ integer :: ndims, i
    case(UNC_LOC_U3D) ! Horizontal velocity point location in all layers.
       ! Internal 2dv horizontal flowlinks. Horizontal position: edges in 1d mesh. Vertical position: layer centers.
       if (numl1d > 0) then
-         !cell_measures = 'area: '//trim(mesh1dname)//'_au' ! TODO: AvD: UNST-1100: au is not yet in map file at all.
+         if (jamapau > 0) then
+            cell_measures = 'area: '//trim(mesh1dname)//'_au'
+         end if
          idims(idx_spacedim) = id_tsp%meshids1d%dimids(mdim_edge)
          idims(idx_layerdim) = id_tsp%meshids1d%dimids(mdim_layer)
          ierr = ug_def_var(ncid, id_var(1), idims(idx_fastdim:maxrank), itype, UG_LOC_EDGE, &
@@ -662,7 +665,9 @@ integer :: ndims, i
       numl2d = numl - numl1d
       ! Internal 3d horizontal flowlinks. Horizontal position: edges in 2d mesh. Vertical position: layer centers.
       if (numl2d > 0) then
-         !cell_measures = 'area: '//trim(mesh2dname)//'_au' ! TODO: AvD: UNST-1100: au is not yet in map file at all.
+         if (jamapau > 0) then
+            cell_measures = 'area: '//trim(mesh2dname)//'_au'
+         end if
          idims(idx_spacedim) = id_tsp%meshids2d%dimids(mdim_edge)
          idims(idx_layerdim) = id_tsp%meshids2d%dimids(mdim_layer)
          ierr = ug_def_var(ncid, id_var(2), idims(idx_fastdim:maxrank), itype, UG_LOC_EDGE, &
@@ -3830,6 +3835,10 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
          ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_vol1, nf90_double, iLocS, 'vol1',         '',                'volume of water in grid cell', 'm3')
       end if
 
+      if (jamapau > 0) then
+         ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_au, nf90_double, iLocU, 'au',         '',                'normal flow area between two neighbouring grid cells', 'm2')
+      end if
+
       ! Calculated time step per cell based on CFL number
       if(jamapdtcell > 0 ) then
          ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_dtcell, nf90_double, iLocS, 'dtcell', '', 'Time step per cell based on CFL', 's')
@@ -4532,6 +4541,11 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
    ! Volumes
    if (jamapvol1 == 1) then
       ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_vol1, UNC_LOC_S, vol1) 
+   end if
+
+   ! Flow areas
+   if (jamapau == 1) then
+      ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_au, iLocU, au) 
    end if
 
    ! Velocities
