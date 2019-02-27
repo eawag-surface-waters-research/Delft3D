@@ -2816,6 +2816,8 @@ end subroutine default_turbulence
  integer                           :: jamaps0                   !< previous step water levels to map file, 0: no, 1: yes
  integer                           :: jamaps1                   !< water levels to map file, 0: no, 1: yes
  integer                           :: jamapvol1                 !< Volumes to map file, 0: no, 1: yes
+ integer                           :: jamaphu                   !< Water depths on u point to map file, 0: no, 1: yes
+ integer                           :: jamapanc                  !< Ancillary variables attribute added to map file, 0: no, 1: yes (http://cfconventions.org/cf-conventions/v1.6.0/cf-conventions.html#ancillary-data)
  integer                           :: jamapau                   !< Normal flow areas au to map file, 0: no, 1: yes
  integer                           :: jamapu1                   !< velocities to map file, 0: no, 1: yes
  integer                           :: jamapu0                   !< previous step velocities to map file, 0: no, 1: yes
@@ -3164,6 +3166,8 @@ subroutine default_flowparameters()
     jamaps0 = 1
     jamaps1 = 1
     jamapvol1 = 0
+    jamaphu = 0
+    jamapanc = 0
     jamapau = 0
     jamapu0 = 1
     jamapu1 = 1

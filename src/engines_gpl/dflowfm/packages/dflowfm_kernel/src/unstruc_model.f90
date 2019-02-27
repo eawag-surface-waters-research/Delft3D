@@ -1374,6 +1374,22 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_waterlevel_s0', jamaps0, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_waterlevel_s1', jamaps1, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_volume1', jamapvol1, success)
+    call prop_get_integer(md_ptr, 'output', 'Wrimap_waterdepth_hu', jamaphu, success)
+    call prop_get_integer(md_ptr, 'output', 'Wrimap_ancillary_variables', jamapanc, success)
+    if (jamapanc > 0) then
+       if (jamaps1 <= 0) then
+          jamaps1 = 1
+          write (msgbuf, '(a, i0, a)') 'MDU setting "Wrimap_ancillary_variables = ', jamapanc, '" requires ' &
+             //'"Wrimap_waterlevel_s1 = 1". Has been enabled now.'
+          call warn_flush()
+       end if
+       if (jamaphu <= 0) then
+          jamaphu = 1
+          write (msgbuf, '(a, i0, a)') 'MDU setting "Wrimap_ancillary_variables = ', jamapanc, '" requires ' &
+             //'"Wrimap_waterdepth_hu = 1". Has been enabled now.'
+          call warn_flush()
+       end if
+    end if
     call prop_get_integer(md_ptr, 'output', 'Wrimap_flowarea_au', jamapau, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_velocity_component_u1', jamapu1, success)
     call prop_get_integer(md_ptr, 'output', 'Wrimap_velocity_component_u0', jamapu0, success)
@@ -2829,6 +2845,12 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     endif
     if (writeall .or. jamapvol1 > 0) then
         call prop_set(prop_ptr, 'output', 'Wrimap_volume1', jamapvol1, 'Write volumes to map file (1: yes, 0: no)')
+    endif
+    if (writeall .or. jamaphu > 0) then
+        call prop_set(prop_ptr, 'output', 'Wrimap_waterdepth_hu', jamaphu, 'Write water depths on u-points to map file (1: yes, 0: no)')
+    endif
+    if (writeall .or. jamapanc > 0) then
+        call prop_set(prop_ptr, 'output', 'Wrimap_ancillary_variables', jamapanc, 'Write ancillary_variables attributes to map file (1: yes, 0: no)')
     endif
     if (writeall .or. jamapau > 0) then
         call prop_set(prop_ptr, 'output', 'Wrimap_flowarea_au', jamapau, 'Write flow areas au to map file (1: yes, 0: no)')

@@ -457,10 +457,11 @@ end function unc_def_var_nonspatial
 function unc_def_var_map(ncid,id_tsp, id_var, itype, iloc, var_name, standard_name, long_name, unit, is_timedep, dimids) result(ierr)
 use m_save_ugrid_state, only: network1dname, mesh2dname, mesh1dname, contactname 
 use m_flowgeom
-use m_flowparameters, only: jamapvol1, jamapau
+use m_flowparameters, only: jamapvol1, jamapau, jamaps1, jamaphu, jamapanc
 use network_data, only: numk, numl, numl1d
 use dfm_error
 use m_missing
+use string_module, only: strcmpi
 implicit none
 integer,            intent(in)  :: ncid
 type(t_unc_timespace_id), intent(in)  :: id_tsp        !< Map file and other NetCDF ids.
@@ -599,6 +600,9 @@ integer :: ndims, i
          ierr = ug_def_var(ncid, id_var(2), idims(idx_fastdim:maxrank), itype, UG_LOC_FACE, &
                            trim(mesh2dname), var_name, standard_name, long_name, unit, cell_method, cell_measures, crs, ifill=-999, dfill=dmiss)
       end if
+      if (jamapanc > 0 .and. jamaps1 > 0 .and. .not. strcmpi(var_name, 'waterdepth')) then
+         ierr = unc_put_att_map_char(ncid, id_tsp, id_var, 'ancillary_variables', 'waterdepth')
+      end if
 
    case(UNC_LOC_U, UNC_LOC_L) ! Horizontal velocity point location, or horizontal net link. Note: defvar for netlinks and flowlinks is the same, putvar not.
       ! Internal 1d flowlinks. Horizontal position: edges in 1d mesh.
@@ -626,6 +630,10 @@ integer :: ndims, i
                            trim(mesh2dname), var_name, standard_name, long_name, unit, cell_method, cell_measures, crs, ifill=-999, dfill=dmiss)
       end if
 
+      if (jamapanc > 0 .and. jamaphu > 0 .and. .not. strcmpi(var_name, 'hu')) then
+         ierr = unc_put_att_map_char(ncid, id_tsp, id_var, 'ancillary_variables', 'hu')
+      end if
+
    case(UNC_LOC_S3D) ! Pressure point location in all layers.
       ndx1d = ndxi - ndx2d
       ! Internal 2dv flownodes. Horizontal position: nodes in 1d mesh. Vertical position: layer centers.
@@ -651,6 +659,10 @@ integer :: ndims, i
                            trim(mesh2dname), var_name, standard_name, long_name, unit, cell_method, cell_measures, crs, ifill=-999, dfill=dmiss)
       end if
 
+      if (jamapanc > 0 .and. jamaps1 > 0 .and. .not. strcmpi(var_name, 'waterdepth')) then
+         ierr = unc_put_att_map_char(ncid, id_tsp, id_var, 'ancillary_variables', 'waterdepth')
+      end if
+
    case(UNC_LOC_U3D) ! Horizontal velocity point location in all layers.
       ! Internal 2dv horizontal flowlinks. Horizontal position: edges in 1d mesh. Vertical position: layer centers.
       if (numl1d > 0) then
@@ -672,6 +684,10 @@ integer :: ndims, i
          idims(idx_layerdim) = id_tsp%meshids2d%dimids(mdim_layer)
          ierr = ug_def_var(ncid, id_var(2), idims(idx_fastdim:maxrank), itype, UG_LOC_EDGE, &
                            trim(mesh2dname), var_name, standard_name, long_name, unit, cell_method, cell_measures, crs, ifill=-999, dfill=dmiss)
+      end if
+
+      if (jamapanc > 0 .and. jamaphu > 0 .and. .not. strcmpi(var_name, 'hu')) then
+         ierr = unc_put_att_map_char(ncid, id_tsp, id_var, 'ancillary_variables', 'hu')
       end if
 
    case(UNC_LOC_W) ! Vertical velocity point location on all layer interfaces.
@@ -3739,7 +3755,6 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
    integer, dimension(:),   allocatable        :: idum
    double precision, dimension(:), allocatable :: work1d
    double precision :: vicc, dicc
-   logical :: need_auxhu
 
 !    Secondary Flow 
 !        id_rsi, id_rsiexact, id_dudx, id_dudy, id_dvdx, id_dvdy, id_dsdx, id_dsdy
@@ -3823,8 +3838,8 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
 
       ! Water levels
       if (jamaps1 > 0) then
-         ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_s1, nf90_double, UNC_LOC_S, 's1',         'sea_surface_height',                'Water level', 'm')
          ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_hs, nf90_double, UNC_LOC_S, 'waterdepth', 'sea_floor_depth_below_sea_surface', 'Water depth at pressure points', 'm')
+         ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_s1, nf90_double, UNC_LOC_S, 's1',         'sea_surface_height',                'Water level', 'm')
       end if
       if (jamaps0 > 0) then
          ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_s0, nf90_double, UNC_LOC_S, 's0', 'sea_surface_height', 'Water level on previous timestep', 'm')
@@ -3835,30 +3850,27 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
          ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_vol1, nf90_double, iLocS, 'vol1',         '',                'volume of water in grid cell', 'm3')
       end if
 
-      if (jamapau > 0) then
-         ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_au, nf90_double, iLocU, 'au',         '',                'normal flow area between two neighbouring grid cells', 'm2')
-      end if
-
       ! Calculated time step per cell based on CFL number
       if(jamapdtcell > 0 ) then
          ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_dtcell, nf90_double, iLocS, 'dtcell', '', 'Time step per cell based on CFL', 's')
       endif
       
       ! Velocities
-      need_auxhu = jamapu1 > 0 .or. jamapu0 > 0 .or. jamapq1 > 0 .or. jamapviu > 0 .or. jamapdiu > 0
-      if (need_auxhu) then
+      if (jamaphu > 0) then
          ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_hu, nf90_double, UNC_LOC_U, 'hu', 'sea_floor_depth_below_sea_surface', 'water depth at velocity points', 'm')
+      end if
+
+      if (jamapau > 0) then
+         ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_au, nf90_double, iLocU, 'au',         '',                'normal flow area between two neighbouring grid cells', 'm2')
       end if
 
       if(jamapu1 > 0) then
          ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_u1, nf90_double, iLocU, 'u1', '', 'Velocity at velocity point, n-component', 'm s-1')
          ierr = unc_put_att(mapids%ncid, mapids%id_u1, 'comment', 'Positive direction is from first to second neighbouring face (flow element).')
-         ierr = unc_put_att_map_char(mapids%ncid, mapids%id_tsp, mapids%id_u1, 'ancillary_variables', 'hu')
       end if
       if(jamapu0 > 0) then
          ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_u0, nf90_double, iLocU, 'u0', '', 'Velocity at velocity point at previous time step, n-component', 'm s-1')
          ierr = unc_put_att(mapids%ncid, mapids%id_u0, 'comment', 'Positive direction is from first to second neighbouring face (flow element).')
-         ierr = unc_put_att_map_char(mapids%ncid, mapids%id_tsp, mapids%id_u0, 'ancillary_variables', 'hu')
       end if
       if(jamapucvec > 0) then
          if (jaeulervel==1 .and. jawave>0) then ! TODO: AvD:refactor such that yes<->no Eulerian velocities are in parameters below:
@@ -3916,22 +3928,18 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
       if(jamapq1 > 0) then
          ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_q1, nf90_double, iLocU, 'q1', 'discharge', 'Discharge through flow link at current time', 'm3 s-1')
          ierr = unc_put_att(mapids%ncid, mapids%id_q1, 'comment', 'Positive direction is from first to second neighbouring face (flow element).')
-         ierr = unc_put_att_map_char(mapids%ncid, mapids%id_tsp, mapids%id_q1, 'ancillary_variables', 'hu')
       end if
 
       if(jamapq1main > 0) then
          ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_q1main, nf90_double, iLocU, 'q1_main', '', 'Main channel discharge through flow link at current time', 'm3 s-1')
          ierr = unc_put_att(mapids%ncid, mapids%id_q1main, 'comment', 'Positive direction is from first to second neighbouring face (flow element).')
-         ierr = unc_put_att_map_char(mapids%ncid, mapids%id_tsp, mapids%id_q1main, 'ancillary_variables', 'hu')
       end if
 
       if (jamapviu > 0) then
          ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_viu, nf90_double, iLocU, 'viu', '', 'Horizontal eddy viscosity', 'm2 s-1')
-         ierr = unc_put_att_map_char(mapids%ncid, mapids%id_tsp, mapids%id_viu, 'ancillary_variables', 'hu')
       end if
       if (jamapdiu > 0) then
          ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_diu, nf90_double, iLocU, 'diu', '', 'Horizontal eddy diffusivity', 'm2 s-1')
-         ierr = unc_put_att_map_char(mapids%ncid, mapids%id_tsp, mapids%id_diu, 'ancillary_variables', 'hu')
       end if
 
       ! Bed shear stress
