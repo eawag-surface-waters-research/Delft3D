@@ -3827,7 +3827,7 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
 
       ! Volumes
       if (jamapvol1 > 0) then
-         ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_vol1, nf90_double, UNC_LOC_S, 'vol1',         '',                'volume of water in grid cell', 'm3')
+         ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_vol1, nf90_double, iLocS, 'vol1',         '',                'volume of water in grid cell', 'm3')
       end if
 
       ! Calculated time step per cell based on CFL number
