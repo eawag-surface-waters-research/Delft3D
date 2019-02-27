@@ -195,6 +195,10 @@ end subroutine get_attribute
     if ( numranks.le.1 ) then
         jampi = 0
     end if
+
+!   make domain number string as soon as possible
+    write(sdmn, '(I4.4)') my_rank
+
 #else
     numranks=1
 #endif
