@@ -309,7 +309,8 @@ module m_ec_converter
          real(hp)                             ::  cx, cy, r2
          integer                              ::  nresult, iresult, idx, jsferic
          integer                              ::  iimin, iimax, jjmin, jjmax
-         type(kdtree_instance)                :: treeinst
+         type(kdtree_instance)                ::  treeinst
+         real(hp)                             ::  x0, x1, y0, y1, rd
          
          real(hp), dimension(4) :: xfindpoly, yfindpoly
          integer                :: imin, jmin, iii, jjj
@@ -428,35 +429,43 @@ module m_ec_converter
                         n_rows = sourceElementSet%n_rows
                         sy_2D(1:n_cols,1:n_rows) => sourceElementSet%y
                         sx_2D(1:n_cols,1:n_rows) => sourceElementSet%x
+                        
+                        x0 = minval(targetElementSet%x)     ! improvised bounding box (does not work with targets around the 0-meridian)
+                        x1 = maxval(targetElementSet%x)
+                        y0 = minval(targetElementSet%y)
+                        y1 = maxval(targetElementSet%y)
                         do jj=1,n_cols-1
                            do ii=1,n_rows-1
-                               cx = (sx_2D(jj,ii)+sx_2D(jj+1,ii)+sx_2D(jj,ii+1)+sx_2D(jj+1,ii+1))/4.0
-                               cy = (sy_2D(jj,ii)+sy_2D(jj+1,ii)+sy_2D(jj,ii+1)+sy_2D(jj+1,ii+1))/4.0
-                               r2 = (max ( &
+                              cx = (sx_2D(jj,ii)+sx_2D(jj+1,ii)+sx_2D(jj,ii+1)+sx_2D(jj+1,ii+1))/4.0
+                              cy = (sy_2D(jj,ii)+sy_2D(jj+1,ii)+sy_2D(jj,ii+1)+sy_2D(jj+1,ii+1))/4.0
+                              r2 = (max ( &
                                    dbdistance(sx_2D(jj,ii),sy_2D(jj,ii),sx_2D(jj+1,ii+1),sy_2D(jj+1,ii+1)),          &
                                    dbdistance(sx_2D(jj+1,ii),sy_2D(jj+1,ii),sx_2D(jj,ii+1),sy_2D(jj,ii+1))) / 2.)**2     ! longest diagonal divided by 2 (jasfer3D on if jsferic)
-                               call make_queryvector_kdtree(treeinst, cx, cy, jsferic)
-                               nresult = kdtree2_r_count(treeinst%tree, treeinst%qv, r2)
-                               call realloc_results_kdtree(treeinst, nresult)
-                               call kdtree2_n_nearest(treeinst%tree, treeinst%qv, nresult, treeinst%results)
-                               ! loop over find results with pinpok
-                               do iresult = 1, nresult
-                                  idx = treeinst%results(iresult)%idx 
-                                  call pinpok(targetElementSet%x(idx), targetElementSet%y(idx), 5,                       &
-                                     (/sx_2D(jj,ii), sx_2D(jj,ii+1), sx_2D(jj+1,ii+1), sx_2D(jj+1,ii),  sx_2D(jj,ii)/),  &
-                                     (/sy_2D(jj,ii), sy_2D(jj,ii+1), sy_2D(jj+1,ii+1), sy_2D(jj+1,ii),  sy_2D(jj,ii)/),  &
-                                      inside)                        
-                                  if (inside == 1) then
-                                      ! [jj,ii] and [jj+1,ii] and [jj,ii+1] and [jj+1,ii+1] are used
-                                      ! Do stuff for a target point in a source cell     
-                                      weight%indices(1,idx) = ii 
-                                      weight%indices(2,idx) = jj 
-                                      iimin=min(ii,iimin)
-                                      jjmin=min(jj,jjmin)
-                                      iimax=max(ii+1,iimax)
-                                      jjmax=max(jj+1,jjmax)
-                                  end if
-                              end do
+                              rd = sqrt(r2)
+                              if (cx+rd>=x0 .and. cx-rd<=x1 .and. cy+rd>=y0 .and. cy-rd<=y1) then                       ! check if source point within the rectangle of interest
+                                 call make_queryvector_kdtree(treeinst, cx, cy, jsferic)
+                                 nresult = kdtree2_r_count(treeinst%tree, treeinst%qv, r2)
+                                 call realloc_results_kdtree(treeinst, nresult)
+                                 call kdtree2_n_nearest(treeinst%tree, treeinst%qv, nresult, treeinst%results)
+                                 ! loop over find results with pinpok
+                                 do iresult = 1, nresult
+                                    idx = treeinst%results(iresult)%idx 
+                                    call pinpok(targetElementSet%x(idx), targetElementSet%y(idx), 5,                       &
+                                       (/sx_2D(jj,ii), sx_2D(jj,ii+1), sx_2D(jj+1,ii+1), sx_2D(jj+1,ii),  sx_2D(jj,ii)/),  &
+                                       (/sy_2D(jj,ii), sy_2D(jj,ii+1), sy_2D(jj+1,ii+1), sy_2D(jj+1,ii),  sy_2D(jj,ii)/),  &
+                                        inside)                        
+                                    if (inside == 1) then
+                                        ! [jj,ii] and [jj+1,ii] and [jj,ii+1] and [jj+1,ii+1] are used
+                                        ! Do stuff for a target point in a source cell     
+                                        weight%indices(1,idx) = ii 
+                                        weight%indices(2,idx) = jj 
+                                        iimin=min(ii,iimin)
+                                        jjmin=min(jj,jjmin)
+                                        iimax=max(ii+1,iimax)
+                                        jjmax=max(jj+1,jjmax)
+                                    end if
+                                 end do
+                              end if
                            end do
                         end do
                         call delete_kdtree2(treeinst)
