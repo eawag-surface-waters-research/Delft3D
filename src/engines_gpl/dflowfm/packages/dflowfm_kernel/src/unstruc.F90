@@ -13983,6 +13983,9 @@ endif
     call inisolver_advec(ierror)
  end if
  
+ if ( jafilter.eq.1 ) then
+!    call ini_filter(ierror)
+ end if
  
  if (jabarrieradvection == 3) then
     call setstruclink()
@@ -40117,6 +40120,10 @@ subroutine getymxpar(modind,tauwav, taucur, fw, cdrag, abscos, ypar, ymxpar)
  else
     call tridag(a,b,c,d,e,Fu(Lb:),kxL)
  endif
+ 
+! if ( jafilter.eq.1 ) then
+!   call filter_furu()
+! end if
 
  end subroutine vertical_profile_u0
 

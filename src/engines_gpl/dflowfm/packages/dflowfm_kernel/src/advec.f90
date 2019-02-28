@@ -269,11 +269,11 @@
       if ( ierror.ne.0 ) goto 1234
       
       if ( jaoutput.eq.1 ) then
-         call writematrix('Imat.m', Lnx,   iI, jI, aI, 'I')
-         call writematrix('Rmat.m', 2*Ndx, iR, jR, aR, 'R')
-         call writematrix('Cmat.m', 2*Ndx, iC, jC, aC, 'C')
+         call writematrix('Imat.m', Lnx,   iI, jI, aI, 'I', 0)
+         call writematrix('Rmat.m', 2*Ndx, iR, jR, aR, 'R', 0)
+         call writematrix('Cmat.m', 2*Ndx, iC, jC, aC, 'C', 0)
          solver_advec%a = 1d0
-         call writematrix('Amat.m', Lnx, solver_advec%ia, solver_advec%ja, solver_advec%a, 'A')
+         call writematrix('Amat.m', Lnx, solver_advec%ia, solver_advec%ja, solver_advec%a, 'A', 0)
       end if
       
       ierror = 0
@@ -437,7 +437,7 @@
       end do
       
       if ( jaoutput.eq.1 ) then
-         call writematrix('C.m', 2*Ndx, iC, jC, aC, 'A_C')
+         call writematrix('C.m', 2*Ndx, iC, jC, aC, 'A_C', 0)
       end if
       
       ierror = 0
@@ -450,7 +450,7 @@
    
    
    !> output matrix in CRS format to file
-   subroutine writeMatrix(FNAM, N, ia, ja, a, VARNAM)
+   subroutine writeMatrix(FNAM, N, ia, ja, a, VARNAM, jaappend)
       implicit none
       
       character(len=*),                       intent(in) :: FNAM         !< filename
@@ -462,10 +462,21 @@
       double precision, dimension(ia(N+1)-1), intent(in) :: a            !< matrix in CRS format
 
       character(len=*),                       intent(in) :: VARNAM       !< variable name
+      
+      integer,                                intent(in) :: jaappend     !< append (1), or not (0)
+      
+      logical                                            :: Lexist
                                               
       integer                                            :: irow, icol, j
       
-      open(1234,file=trim(FNAM))
+      inquire(file=trim(FNAM), exist=Lexist)
+      if ( jaappend.eq.0 .or. .not.Lexist ) then
+         open(1234,file=trim(FNAM))
+      else
+         open(1234,file=trim(FNAM), access="append")
+      end if
+      
+      
       write(1234,"('dum = [')")
       do irow=1,N
          do j=ia(irow),ia(irow+1)-1

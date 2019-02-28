@@ -2632,6 +2632,7 @@ end subroutine default_turbulence
 
  integer                           :: iNormalMethod     !< 0: take normal in direction of flowlinks "1-2", 1: take normal perpendicular to netlinks "3-4"
  integer                           :: jaimplicit        !< implicit momentum eqn. (1) or not (0)
+ integer                           :: jafilter          !< apply horizontal filter (1) or not (0)
 
 !    Secondary Flow
 ! integer                           :: jasftesting       !< (secondary flow testing: 0: no just compute fm velocitie, 1: prescribe exact ucx,ucy point values 2: prescribe exact edge velocities (FM reconstructs ucx,ucy) 3: prescribe exact ucx,ucy cell-averaged values
@@ -3063,6 +3064,7 @@ subroutine default_flowparameters()
 
     iNormalMethod         = 0
     jaimplicit            = 0
+    jafilter              = 1
 
     sini       = 0d0     ! uniform initial waterlevel (m),   (uniform bottom level = zkuni)
     uini       = 0       ! uniform initial velocity   (m/s)
@@ -5746,3 +5748,11 @@ contains
    end subroutine reset_save_ugrid_state
    
 end module m_save_ugrid_state
+
+
+module m_filter
+   use m_solver
+   integer,          dimension(:), allocatable :: iLvec2  !< vector Laplacian in CRS format, startpointers
+   integer,          dimension(:), allocatable :: jLvec2  !< vector Laplacian in CRS format, row numbers
+   double precision, dimension(:), allocatable :: ALvec2  !< vector Laplacian in CRS format, matrix entries
+end module m_filter

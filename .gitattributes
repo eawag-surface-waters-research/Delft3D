@@ -479,6 +479,7 @@ src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dfm_signals.F90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dredge_data.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dredgepolygon.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/filez.f90 -text
+src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/filter.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/fm_bedform.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/fm_dredge.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/fm_erosed.f90 -text
