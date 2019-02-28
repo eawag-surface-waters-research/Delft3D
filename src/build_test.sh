@@ -619,6 +619,19 @@ fi
 # make: Build and install everything
 
 #
+# Third_party_open
+log='logs/make_third_party_open.log'
+command="FC=mpif90 make ds-install -C third_party_open &> $log"
+log "Running $command"
+eval $command
+if [ $? -ne 0 ]; then
+    log "ERROR: Make third_party_open fails!"
+    cd $orgdir
+    exit 1
+fi
+
+
+#
 # Utils
 log='logs/make_utils_lgpl.log'
 command="FC=mpif90 make ds-install -C utils_lgpl &> $log"
