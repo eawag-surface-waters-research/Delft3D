@@ -88,7 +88,7 @@ module m_ec_provider
          character(len=*),       intent(in)  :: forcingfile
          character(len=*),       intent(in)  :: location
          character(len=*),       intent(in)  :: quantity
-         integer,                intent(in)  :: k_refdat     !< kernel ref date 
+         real(hp),               intent(in)  :: k_refdat     !< kernel ref date 
          real(hp),               intent(in)  :: k_tzone      !< kernel time zone 
          integer,                intent(in)  :: k_tsunit     !< kernel timestep unit (1=sec, 2=min, 3=hour)
          integer,                intent(out) :: fileReaderId !< unique fileReader id
@@ -121,7 +121,7 @@ module m_ec_provider
          logical                             :: success      !< function status
          type(tEcInstance),      pointer     :: instancePtr  !< intent(in)
          integer,                intent(in)  :: bcBlockId    !< unique bcBlock id
-         integer,                intent(in)  :: k_refdat     !< kernel ref date 
+         real(hp),               intent(in)  :: k_refdat     !< kernel ref date 
          real(hp),               intent(in)  :: k_tzone      !< kernel time zone 
          integer,                intent(in)  :: k_tsunit     !< kernel timestep unit (1=sec, 2=min, 3=hour)
          integer,                intent(out) :: fileReaderId !< unique fileReader id
@@ -224,7 +224,7 @@ module m_ec_provider
          integer,                    intent(in) :: fileReaderId !< unique FileReader id
          integer,                    intent(in) :: fileType     !< type of data file, see provFile enumeration
          character(len=*),           intent(in) :: fileName     !< relative path of data file
-         integer,                    intent(in) :: refdat       !< Kernel's reference date, format: Gregorian yyyymmdd
+         real(kind=hp),              intent(in) :: refdat       !< Kernel's reference date, format: Gregorian yyyymmdd
          real(kind=hp),              intent(in) :: tzone        !< Kernel's timezone.
          integer,                    intent(in) :: tsunit       !< Kernel's timestep unit (1=sec 2=min 3=sec).
          character(len=*), optional, intent(in) :: quantityName !< name of quantity, needed for structured input files (NetCDF and BC)
@@ -290,10 +290,10 @@ module m_ec_provider
          logical                         :: success          !< function status
          type(tEcInstance),     pointer  :: instancePtr      !< intent(in)
          type(tEcFileReader),   pointer  :: fileReaderPtr    !< intent(inout)
-         character(len=*),      optional :: quantityname     !< Names of the quantities read from file, needed for structured files (NetCDF),
+         character(len=*), intent(in), optional :: quantityname     !< Names of the quantities read from file, needed for structured files (NetCDF),
                                                              !< but also for bct-file 
-         character(len=*),      optional :: bctfilename      !< file name of bct-file with data
-         character(len=*),      optional :: varname          !< variable name within filename
+         character(len=*), intent(in), optional :: bctfilename      !< file name of bct-file with data
+         character(len=*), intent(in), optional :: varname          !< variable name within filename
          !
          success = .false.
          select case(fileReaderPtr%ofType)
@@ -828,6 +828,9 @@ module m_ec_provider
             case (provFile_bc)
                quantityName=fileReaderPtr%bc%quantity%name
                if (.not. ecQuantitySet(instancePtr, quantityId, name=quantityName)) then
+                  return
+               end if
+               if (.not. ecQuantitySetTimeint(instancePtr, quantityId, fileReaderPtr%bc%timeint, fileReaderPtr%bc%periodic)) then ! trim(fileReaderPtr%bc%qname))) then
                   return
                end if
                elementSetName = fileReaderPtr%bc%bcname
@@ -1459,7 +1462,6 @@ module m_ec_provider
          character(len=maxFileNameLen)       :: polyline_name !< polyline name read from pli-file 
          logical                             :: exists   !< helper boolian, indicating file existence
          integer                             :: id       !< dummy, catches ids which are not used
-         integer                             :: k_yyyymmdd !< calculated Gregorian calender date, serving as reference date
          integer                             :: quantityId, elementSetId, fieldId, itemId, subconverterId, connectionId
          integer                             :: discharge, waterlevel, slope, crossing, maxLay
          type(tEcItem), pointer              :: itemPT
@@ -1560,12 +1562,6 @@ module m_ec_provider
 
          itemPT => ecSupportFindItem(instancePtr, itemId)
 
-         istat = mjd2date(fileReaderPtr%tframe%k_refdate, k_yyyymmdd)
-         if (istat == 0) then
-             call setECMessage('Error with refdate in ' // fileReaderPtr%filename)
-             return
-         endif
-
          ! Init BCBlock for (global) qh-bound 
          is_qh = .false. 
          ! Determine the end of the base of the fileName.
@@ -1583,7 +1579,7 @@ module m_ec_provider
             end if
 
             ! Initialize the new FileReader.
-            if (.not. ecProviderInitializeFileReader(instancePtr, id, provFile_qhtable, filename, k_yyyymmdd, &
+            if (.not. ecProviderInitializeFileReader(instancePtr, id, provFile_qhtable, filename, fileReaderPtr%tframe%k_refdate, &
                            fileReaderPtr%tframe%k_timezone, fileReaderPtr%tframe%k_timestep_unit)) return 
             ! All fine:
             is_qh = .true.
@@ -1641,8 +1637,8 @@ module m_ec_provider
                   id = ecInstanceCreateFileReader(instancePtr)
                   if (id == ec_undef_int) return
                   fileReaderPtr2=>ecSupportFindFileReader(instancePtr, id)
-                  fileReaderPtr2%vectormax = fileReaderPtr%vectormax
-                  if (.not. (ecProviderInitializeFileReader(instancePtr, id, provFile_uniform, filename, k_yyyymmdd,       &
+                  fileReaderPtr2%vectormax = fileReaderPtr%vectormax ! TODO copy timeframe
+                  if (.not. (ecProviderInitializeFileReader(instancePtr, id, provFile_uniform, filename, fileReaderPtr%tframe%k_refdate,       &
                                         fileReaderPtr%tframe%k_timezone, fileReaderPtr%tframe%k_timestep_unit))) return
                   is_tim = .true.
                else 
@@ -1653,7 +1649,7 @@ module m_ec_provider
                      if (id == ec_undef_int) return
                      fileReaderPtr2=>ecSupportFindFileReader(instancePtr, id)
                      fileReaderPtr2%vectormax = fileReaderPtr%vectormax
-                     if (.not. (ecProviderInitializeFileReader(instancePtr, id, provFile_fourier, filename, k_yyyymmdd,       &
+                     if (.not. (ecProviderInitializeFileReader(instancePtr, id, provFile_fourier, filename, fileReaderPtr%tframe%k_refdate,       &
                                         fileReaderPtr%tframe%k_timezone, fileReaderPtr%tframe%k_timestep_unit, dtnodal=fileReaderPtr%tframe%dtnodal))) return
 
                      is_cmp = .true.
@@ -1665,7 +1661,7 @@ module m_ec_provider
                         if (id == ec_undef_int) return
                         fileReaderPtr2=>ecSupportFindFileReader(instancePtr, id)
                         fileReaderPtr2%vectormax = fileReaderPtr%vectormax
-                        if (.not. (ecProviderInitializeFileReader(instancePtr, id, provFile_t3D, filename, k_yyyymmdd,       &
+                        if (.not. (ecProviderInitializeFileReader(instancePtr, id, provFile_t3D, filename, fileReaderPtr%tframe%k_refdate,       &
                                         fileReaderPtr%tframe%k_timezone, fileReaderPtr%tframe%k_timestep_unit))) return
 
                         is_tim3d = .true.
@@ -1729,7 +1725,6 @@ module m_ec_provider
          character(len=:), allocatable       :: polyline_name !< polyline name read from pli-file
          character(len=4)                    :: cnum     !< temp integer converted to a string
          integer                             :: id       !< dummy, catches ids which are not used
-         integer                             :: k_yyyymmdd !< calculated Gregorian calender date, serving as reference date
          integer                             :: quantityId, elementSetId, fieldId, itemId, subconverterId, connectionId, BCBlockID
          integer                             :: discharge, waterlevel, slope, crossing, maxLay
          type(tEcItem), pointer              :: itemPT
@@ -1802,12 +1797,6 @@ module m_ec_provider
             endif
          enddo
 
-         istat = mjd2date(fileReaderPtr%tframe%k_refdate, k_yyyymmdd)
-         if (istat == 0) then
-             call setECMessage('Error with refdate in ' // fileReaderPtr%filename)
-             return
-         endif
-
          ! Construct the poly_tim Item
          quantityId = ecInstanceCreateQuantity(instancePtr)
          if (.not. (ecQuantitySet(instancePtr, quantityId, name='polytim_item'))) return
@@ -1836,7 +1825,7 @@ module m_ec_provider
          bcBlockPtr=>ecSupportFindBCBlock(instancePtr, bcBlockId)
          plipointlbl = polyline_name
          call str_upper(quantityname)
-         if (ecProviderInitializeBCBlock(InstancePtr, bcBlockId, k_yyyymmdd, fileReaderPtr%tframe%k_timezone, fileReaderPtr%tframe%k_timestep_unit,   &
+         if (ecProviderInitializeBCBlock(InstancePtr, bcBlockId, fileReaderPtr%tframe%k_refdate, fileReaderPtr%tframe%k_timezone, fileReaderPtr%tframe%k_timestep_unit,   &
                                     id, bctfilename, quantityname, plipointlbl, istat, dtnodal=fileReaderPtr%tframe%dtnodal, funtype = 'QHTABLE')) then
             n_signals = 1
             is_qh = .True.
@@ -1861,7 +1850,7 @@ module m_ec_provider
                   has_label = .True.
                endif
                
-               if (.not. ecProviderInitializeBCBlock(InstancePtr, bcBlockId, k_yyyymmdd, fileReaderPtr%tframe%k_timezone, fileReaderPtr%tframe%k_timestep_unit,   &
+               if (.not. ecProviderInitializeBCBlock(InstancePtr, bcBlockId, fileReaderPtr%tframe%k_refdate, fileReaderPtr%tframe%k_timezone, fileReaderPtr%tframe%k_timestep_unit,   &
                                      id, bctfilename, quantityname, plipointlbl, istat, dtnodal=fileReaderPtr%tframe%dtnodal)) then
                   !call setECMessage("WARNING: ec_provider::ecProviderPolyTimItems: Error initializing EC Block.")
                   mask(i) = 0
@@ -3090,7 +3079,7 @@ module m_ec_provider
       function ecProviderInitializeTimeFrame(fileReaderPtr, k_refdate, k_timezone, k_timestep_unit, dtnodal) result(success)
          logical                         :: success          !< function status
          type(tEcFileReader), pointer    :: fileReaderPtr    !< intent(inout)
-         integer,             intent(in) :: k_refdate        !< Kernel's reference date, format: Gregorian yyyymmdd
+         real(hp),            intent(in) :: k_refdate        !< Kernel's reference date as MJD
          real(hp),            intent(in) :: k_timezone       !< Kernel's timezone.
          integer,             intent(in) :: k_timestep_unit  !< Kernel's time step unit (1=seconds, 2=minutes, 3=hours)
          real(hp), optional,  intent(in) :: dtnodal          !< Nodal factors update interval
@@ -3101,11 +3090,7 @@ module m_ec_provider
          !
          if (k_refdate > -1) then
 
-            if ( .not. ymd2reduced_jul(k_refdate, fileReaderPtr%tframe%k_refdate)) then
-               write(date,'(i0)') k_refdate
-               call setECMessage("WARNING: error converting date " // trim(date) // " into reduced Julian date")
-               fileReaderPtr%tframe%k_refdate = -1
-            endif
+            fileReaderPtr%tframe%k_refdate = k_refdate
             fileReaderPtr%tframe%k_timezone = k_timezone
             fileReaderPtr%tframe%k_timestep_unit = k_timestep_unit
 

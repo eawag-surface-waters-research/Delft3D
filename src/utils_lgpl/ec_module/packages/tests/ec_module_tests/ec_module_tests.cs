@@ -15,6 +15,7 @@ namespace ECModuleTests
        //The Constructor loads the library
         static ECModuleTests()
         {
+            TestHelper.SetSharedPath(Ec_ModuleLibWrapper.LibDetails.NETCDF_DEP);
             string filename = TestHelper.GetLibraryPath(Ec_ModuleLibWrapper.LibDetails.LIB_NAME);
             __libecmodule = TestHelper.LoadLibrary(filename);
             Assert.That(__libecmodule, Is.Not.Null);
@@ -77,6 +78,7 @@ namespace ECModuleTests
 
 
         // Create the netcdf files
+        //TODO: add in/out txt
         [Test]
         [NUnit.Framework.Category("TestTriangleInterpolation")]
         public void TestTriangleInterpolation()
@@ -511,6 +513,71 @@ namespace ECModuleTests
 
     }
 
+        [Test]
+        [NUnit.Framework.Category("TestECModule2D")]
+        public void TestECModule2D()
+        {
+            var wrapper = new Ec_ModuleLibWrapper();
+            int ntargets = 1;
+
+            // 1. ecModuleAddTimeSpaceRelation
+            string c_name = "waterlevelbnd";
+            var x = new [] { 0.75, 0.75, 0.75 };
+            var y = new [] { 0.66, 1.00, 1.33 };
+            int ncoordinatesSize = x.Length;
+            int jsferic = 0;
+            int vectormax = 1;
+            string c_filename = TestHelper.TestFilesDirectoryPath() + @"\tfl_01.pli";
+            int filetype = 11;
+            int method = 3;
+            int operand = 2;
+            int src_refdate = 20180320;
+            int dummInt = 0;
+            double src_tzone = -999.0; //to be defined
+            double missing_value = -999.0;
+            var  targetItemArray = new int[ntargets];
 
 
+            IntPtr c_x = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * ncoordinatesSize);
+            IntPtr c_y = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * ncoordinatesSize);
+            IntPtr c_targetItemArray = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * ntargets);
+            Marshal.Copy(x, 0, c_x, ncoordinatesSize);
+            Marshal.Copy(y, 0, c_y, ncoordinatesSize);
+            
+            bool success = wrapper.ecModuleAddTimeSpaceRelation(
+                c_name,
+                ref c_x,
+                ref c_y,
+                ref ncoordinatesSize,
+                ref jsferic,
+                ref vectormax,
+                c_filename,
+                ref filetype,
+                ref method,
+                ref operand,
+                ref src_refdate,
+                ref src_tzone,
+                ref missing_value,
+                ref c_targetItemArray,
+                ref dummInt);
+            Assert.That(success, Is.EqualTo(true));
+           // Marshal.Copy(targetItemArray, 0, c_targetItemArray, ntargets);
+            Marshal.Copy(c_targetItemArray, targetItemArray, 0, 1);
+
+            // 2. ecGettimespacevalueByItemID
+            double timesteps = 99.9;
+            IntPtr c_target_array = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * ntargets);
+            success = wrapper.ecGettimespacevalueByItemID(ref targetItemArray[0], ref timesteps, ref c_target_array, ref ntargets);
+            // LC here it breaks, success is false
+            Assert.That(success, Is.EqualTo(true));
+
+            var target_array = new double[ntargets];
+            Marshal.Copy(target_array, 0, c_target_array, ntargets);
+
+            success = wrapper.ecInstancePrintStateToFile();
+            Assert.That(success, Is.EqualTo(true));
+
+            //Add clean ec module instance
+        }
+    }
 }

@@ -65,14 +65,19 @@ module m_ec_support
    public :: ecSupportNCFindCFCoordinates
    public :: ecSupportTimestringToUnitAndRefdate
    public :: ecSupportTimeUnitConversionFactor
-   public :: ecSupportTimestepsToTime
-   public :: ecSupportTimeToTimesteps
-   public :: ecSupportThisTimeToTimesteps
+   public :: ecSupportThisTimeToMJD
+   public :: ecSupportMJDToThisTime
+   public :: ecSupportMJDToTimeIndex
+   public :: ecSupportTimeIndexToMJD
    public :: ecSupportFindRelatedBCBlock
    
    interface ecTimeFrameRealHpTimestepsToModifiedJulianDate
       module procedure ecTimeFrameRealHpTimestepsToModifiedJulianDate
    end interface ecTimeFrameRealHpTimestepsToModifiedJulianDate
+
+   interface ecNFC
+      module procedure ecSupportNetcdfCheckError
+   end interface ecNFC
    
    contains
       
@@ -94,75 +99,90 @@ module m_ec_support
       ! =======================================================================
 
       !> Calculate a Gregorian date and hour-minutes-seconds integer since reference date
-      function ecTimeFrameRealHpTimestepsToDateTime(timeFramePtr, steps, yyyymmdd, hhmmss) result(success)
+      function ecTimeFrameRealHpTimestepsToDateTime(timestamp_mjd, yyyymmdd, hhmmss) result(success)
       use mathconsts, only : daysec_hp
-         logical                                 :: success      !< function status
-         type(tEcTimeFrame),         intent(in)  :: timeFramePtr !< time frame pointer
-         real(hp),                   intent(in)  :: steps        !< number of time steps
-         integer,                    intent(out) :: yyyymmdd     !< calculated Gregorian date
-         integer,                    intent(out) :: hhmmss       !< time of the day
-         real(hp)                                :: ssm          !< seconds since midnight helper variable
-         integer                                 :: hh, mm, ss   !< hours, minutes, seconds helper variables
-         integer                                 :: ierr         !< return code mjd2date
-         !
-         ierr = mjd2date(timeFramePtr%k_refdate  + (steps / daysec_hp), yyyymmdd)
-         success = (ierr == 1)
+         logical                                 :: success             !< function status
+         real(hp),                   intent(in)  :: timestamp_mjd       !< number of time steps
+         integer,                    intent(out) :: yyyymmdd            !< calculated Gregorian date
+         integer,                    intent(out) :: hhmmss              !< time of the day
+         real(hp)                                :: dsec                !< fraction of seconds
+         integer                                 :: hh, mm, ss          !< hours, minutes, seconds helper variables
+         integer                                 :: iyear, imonth, iday !< year, month and day
 
-         if (success) then
-            ssm = mod(steps, daysec_hp)
-            hh = int(ssm) / 3600
-            mm = int(ssm) / 60 - hh * 60
-            ss = int(ssm) - hh * 3600 - mm * 60
-            hhmmss = hh*10000 + mm*100 + ss
-         else
-            hhmmss = 0
-         endif
+         !! TODO very ugly to add offset_reduced_jd here
+         call gregor(timestamp_mjd + offset_reduced_jd, iyear, imonth, iday, hh, mm, ss, dsec)
+
+         yyyymmdd = 10000 * iyear + 100 * imonth + iday
+         hhmmss = 10000 * hh + 100 * mm + ss
+
+         success = .true.
 
       end function ecTimeFrameRealHpTimestepsToDateTime
-      
+
       ! =======================================================================
       
       !> Read and convert the timesteps to seconds.
       !! Takes a string of format: TIME = 0 hours since 2006-01-01 00:00:00 +00:00
       !! or ... TIME (HRS)      6.0 20000101 6
       function ecGetTimesteps(rec, time_steps, convert) result(success)
-         logical                                :: success    !< function status
-         character(len=maxNameLen), intent(in)  :: rec        !< time information string
-         real(hp),                  intent(out) :: time_steps !< timesteps in seconds
-         logical, optional,         intent(in)  :: convert    !< convert to seconds or leave unconverted
+         logical                           :: success    !< function status
+         character(len=*),   intent(in)    :: rec        !< time information string
+         real(kind=hp),      intent(out)   :: time_steps !< timesteps in seconds
+         logical, optional,  intent(in)    :: convert    !< convert to mjd or leave unconverted
 
-         integer :: posSince !< position in string of 'since'
+         integer                       :: unit
+         real(kind=hp)                 :: ref_date, tzone, time_in
+         integer                       :: i, posTimeUnit !< position in string of 'since'
+         character(len=:), allocatable :: time_string
+         character(len=*), parameter   :: time_units(4) = ['seconds', 'minutes', 'hours  ', 'days   ']
          !
          success = .false.
          !
-         if (len(trim(rec)) == 0) then
-            call setECMessage("ec_provider::ecGetTimesteps: Input string is empty.")
+         if (len_trim(rec) == 0) then
+            call setECMessage("ec_support::ecGetTimesteps: Input string is empty.")
             return
          end if
-         posSince = index(rec, 'since')
-         if (posSince > 0) then
-            read(rec(index(rec, '=')+1 : posSince-1), *) time_steps
-         else if ( .not. ecSupportTimestringArcInfo(rec, time_steps=time_steps)) then
-            call setECMessage("ec_provider::ecGetTimesteps: can not find time step in: " // trim(rec) // ".")
+
+         time_string = trim(rec)
+         call str_lower(time_string)
+
+         do i = 1, size(time_units)
+            posTimeUnit = index(time_string, trim(time_units(i)))
+            if (posTimeUnit > 0) exit
+         end do
+
+         if (posTimeUnit > 0) then
+            if (.not.ecSupportTimestringToUnitAndRefdate(time_string(posTimeUnit:), unit, ref_date, tzone, 0.0_hp))     &
+               call setECMessage("ec_support::ecGetTimesteps: can not convert time unit string: " // time_string // ".")
+         endif
+
+         if (posTimeUnit > 0) then
+            read(time_string(index(time_string, '=')+1 : posTimeUnit-1), *) time_in
+         else if ( .not. ecSupportTimestringArcInfo(time_string, time_steps=time_in)) then
+            call setECMessage("ec_support::ecGetTimesteps: can not find time step in: " // time_string // ".")
             return
          endif
-         call str_lower(rec)
+
          if (present(convert)) then
             if (.not. convert) then
+                time_steps = time_in
                 success = .true.
                 return
             end if
          end if
-         if (index(rec, 'seconds') /= 0) then
-            continue
-         else if (index(rec, 'minutes') /= 0) then
-            time_steps = time_steps * 60.0_hp
-         else if (index(rec, 'hours') /= 0 .or. index( rec, 'hrs') /= 0) then
-            time_steps = time_steps * 60.0_hp * 60.0_hp
-         else
-            call setECMessage("ec_provider::ecGetTimesteps: Unable to identify the time unit.")
-            return
-         end if
+         select case (unit)
+             case (ec_second)
+                time_steps = ref_date + time_in / 86400.0_hp
+             case (ec_minute)
+                time_steps = ref_date + time_in / 1440.0_hp
+             case (ec_hour)
+                time_steps = ref_date + time_in / 24.0_hp
+             case (ec_day)
+                time_steps = ref_date + time_in
+             case default
+                call setECMessage("ec_support::ecGetTimesteps: Unable to identify the time unit.")
+                return
+         end select
          success = .true.
       end function ecGetTimesteps
       
@@ -819,15 +839,19 @@ end subroutine ecInstanceListSourceItems
       function ecSupportNetcdfCheckError(ierror, description, filename) result(success)
          use netcdf
          !
-         logical                                   :: success     !< 
-         integer,                       intent(in) :: ierror      !< 
-         character(len=*),              intent(in) :: description !< 
-         character(len=maxFileNameLen), intent(in) :: filename    !< 
+         logical                                             :: success     !< 
+         integer,                       intent(in)           :: ierror      !< 
+         character(len=*),              intent(in), optional :: description !< 
+         character(len=maxFileNameLen), intent(in), optional :: filename    !< 
          !
          character(3000) :: message
          !
          if (ierror /= nf90_noerr) then
-            write (message,'(6a)') 'ERROR ', trim(description), '. NetCDF file : "', trim(filename), '". Error message:', nf90_strerror(ierror)
+            if (present(description) .and. present(filename)) then
+               write (message,'(6a)') trim(description), '. NetCDF file : "', trim(filename), '". Error message:', nf90_strerror(ierror)
+            else
+               write (message,'(2a)') 'NetCDF error : ', nf90_strerror(ierror)
+            endif
             call setECMessage(message)
             success = .false.
          else
@@ -981,7 +1005,8 @@ end subroutine ecInstanceListSourceItems
             endif
 
             if (ierr == 0) then
-               success = ymd2reduced_jul(yyyymmdd, ref_date)
+               success = .true.
+               ref_date = JULIAN(yyyymmdd, 0)
                ref_date = ref_date + real(hh, hp) / 24.0_hp
             endif
          endif
@@ -1058,91 +1083,88 @@ end subroutine ecInstanceListSourceItems
 
       !> Calculate conversion factor from ec_timestep_unit to seconds
       function ecSupportTimeUnitConversionFactor(unit) result(factor)
-         integer             :: factor
+         real(kind=hp)       :: factor
          integer, intent(in) :: unit !< time unit enum
          !
-         factor = 1 ! default return value
+         factor = 1.0_hp ! default return value
          !
          if (unit == ec_second) then
-            factor = 1
+            factor = 1.0_hp
          else if (unit == ec_minute) then
-            factor = 60
+            factor = 60.0_hp
          else if (unit == ec_hour) then
-            factor = 3600
+            factor = 3600.0_hp
          else if (unit == ec_day) then
-            factor = 3600*24
+            factor = 3600.0_hp * 24.0_hp
          end if
       end function ecSupportTimeUnitConversionFactor
 
       ! =======================================================================
-      
       !> Convert seconds since k_refdate to times(i) * ec_timestep_unit since ec_refdate to seconds since k_refdate.
-      function ecSupportTimestepsToTime(tframe, timesteps) result(index)
-         integer                        :: index     !< function result, largest index with a time less than timesteps
+      function ecSupportMJDToTimeIndex(tframe, time_mjd) result(ndx)
+         integer                        :: ndx       !< function result, largest index with a time less than timesteps
          type(tEcTimeFrame), intent(in) :: tframe    !< TimeFrame containing input data for conversion
-         real(hp)          , intent(in) :: timesteps !< seconds since k_refdate representing time to be found
+         real(hp)          , intent(in) :: time_mjd  !< seconds since k_refdate representing time to be found
          !
          real(hp):: srctime 
-         integer :: factor !< conversion factor from ec_timestep_unit to seconds
+         integer :: i
          !
-         factor = ecSupportTimeUnitConversionFactor(tframe%ec_timestep_unit)
-         !
-         srctime = (timesteps - (tframe%k_timezone-tframe%ec_timezone) * 60.0_hp*60.0_hp                      & 
-                              - (tframe%ec_refdate - tframe%k_refdate) * 60.0_hp*60.0_hp*24.0_hp)/factor
-         do index=1,tframe%nr_timesteps
-            if (srctime<=tframe%times(index)) exit
+         srctime = ecSupportMJDToThisTime(tframe, time_mjd)
+         do i=1,tframe%nr_timesteps
+            if (srctime<=tframe%times(i)) exit
          enddo
-         if (index>tframe%nr_timesteps) then
-            index = -1
+         if (i>tframe%nr_timesteps) then
+            i = -1
          else
-            index = max(index - 1,1)
+            i = max(i - 1,1)
          endif
-      end function ecSupportTimestepsToTime
+         ndx = i
+      end function ecSupportMJDToTimeIndex
+
 
       ! =======================================================================
-      !> Convert times(i) * ec_timestep_unit since ec_refdate to seconds since k_refdate.
-      function ecSupportTimeToTimesteps(tframe, index) result(timesteps)
-         real(hp)                       :: timesteps !< function result, seconds since k_refdate
+      !> Convert seconds since k_refdate to times(i) * ec_timestep_unit since ec_refdate to seconds since k_refdate.
+      function ecSupportTimeIndexToMJD(tframe, ndx) result(time_mjd)
+         real(hp)                       :: time_mjd  !< seconds since k_refdate representing time to be found
          type(tEcTimeFrame), intent(in) :: tframe    !< TimeFrame containing input data for conversion
-         integer,            intent(in) :: index     !< index in times array, indicating which time needs to be converted
+         integer                        :: ndx       !< function result, largest index with a time less than timesteps
          !
-         integer :: factor !< conversion factor from ec_timestep_unit to seconds
+         real(hp):: srctime 
+         integer :: i
          !
-         factor = ecSupportTimeUnitConversionFactor(tframe%ec_timestep_unit)
-         !
-         timesteps = tframe%times(index) * factor + (tframe%ec_refdate - tframe%k_refdate) * 60.0_hp*60.0_hp*24.0_hp   &
-                   + (tframe%k_timezone-tframe%ec_timezone) * 60.0_hp*60.0_hp
-      end function ecSupportTimeToTimesteps
+         time_mjd = ecSupportThisTimeToMJD(tframe, tframe%times(ndx))
+      end function ecSupportTimeIndexToMJD
 
-      ! =======================================================================
-      
+
+      !> Convert from MJD to timefrane
       !> Convert thistime * ec_timestep_unit since ec_refdate to seconds since k_refdate.
-      function ecSupportThisTimeToTimesteps(tframe, thistime) result(timesteps)
-         real(hp)                       :: timesteps !< function result, seconds since k_refdate
+      function ecSupportMJDToThisTime(tframe, time_mjd) result(thistime)
+         real(hp)                       :: thistime  !< function result, time wrt timeframe
          type(tEcTimeFrame), intent(in) :: tframe    !< TimeFrame containing input data for conversion
-         real(hp),           intent(in) :: thistime  !< this time needs to be converted
+         real(hp),           intent(in) :: time_mjd  !< this time in mjd needs to be converted
          !
-         integer :: factor_in    !< conversion factor from ec_timestep_unit to seconds    (EC-module)
-         integer :: factor_out   !< conversion factor from k_timestep_unit to seconds     (Kernel)
-         integer :: factor       !< resulting conversion factor
+         real(hp)                       :: factor       !< resulting conversion factor
          !
-         if (tframe%k_refdate > (-1.0d+0 + 1.0d-10)) then
-            ! convert time stamp in file (*.tmp) to kernel time stamp
-            factor_in = ecSupportTimeUnitConversionFactor(tframe%ec_timestep_unit)
-            factor_out = ecSupportTimeUnitConversionFactor(tframe%k_timestep_unit)
-            factor = real(factor_in)/real(factor_out)
-            !
-            timesteps = thistime * factor + (tframe%ec_refdate - tframe%k_refdate) * 60.0_hp*60.0_hp*24.0_hp
-            !
-            ! Correct for difference in Kernel's timezone and EC's timezone.
-            timesteps = timesteps + (tframe%k_timezone - tframe%ec_timezone)*3600.0_hp
-         else
-            ! no kernel ref date defined, convert to modified julian day
-            factor_in = ecSupportTimeUnitConversionFactor(tframe%ec_timestep_unit)
-            timesteps = tframe%ec_refdate + factor_in * thistime / 86400.0_hp
-         endif
-      end function ecSupportThisTimeToTimesteps
+         factor = ecSupportTimeUnitConversionFactor(tframe%ec_timestep_unit) / 86400.0_hp    ! Converts to DAYS
+         thistime = (time_mjd + tframe%ec_timezone/24.0_hp - tframe%ec_refdate)/factor
+      end function ecSupportMJDToThisTime
+
+
+      ! =======================================================================
+
+      !> Convert from timeframe to MJD
+      function ecSupportThisTimeToMJD(tframe, thistime) result(time_mjd)
+         real(hp)                       :: time_mjd  !< function result, modified julian days
+         type(tEcTimeFrame), intent(in) :: tframe    !< TimeFrame containing input data for conversion
+         real(hp),           intent(in) :: thistime  !< time defined wrt timeframe to be converted
+         !
+         real(hp)                       :: factor       !< resulting conversion factor
+         !
+         factor = ecSupportTimeUnitConversionFactor(tframe%ec_timestep_unit) / 86400.0_hp    ! Converts to DAYS
+         time_mjd = tframe%ec_refdate + thistime * factor - tframe%ec_timezone/24.0_hp
+      end function ecSupportThisTimeToMJD
       
+      ! =======================================================================
 
       !> Find the CF-compliant longitude and latitude dimensions and associated variables
       function ecSupportNCFindCFCoordinates(ncid, lon_varid, lon_dimid, lat_varid, lat_dimid,      &

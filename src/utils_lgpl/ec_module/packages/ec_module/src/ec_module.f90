@@ -43,6 +43,7 @@ module m_ec_module
    use m_ec_item
    use m_ec_quantity
    use m_ec_filereader
+   use m_ec_filereader_read
    use m_ec_bcreader
    use m_ec_bccollect
    use m_ec_instance
@@ -123,6 +124,7 @@ module m_ec_module
    
    !> 
    interface ecGetValues
+      module procedure ecItemGetValuesMJD
       module procedure ecItemGetValues
    end interface ecGetValues
 
@@ -242,9 +244,9 @@ module m_ec_module
       module procedure ecElementSetSetXyen
    end interface ecSetElementSetXyen
 
-   interface ecSetElementSetKbotKtop      
+   interface ecSetElementSetKbotKtop
       module procedure ecElementSetSetKbotKtop
-   end interface ecSetElementSetKbotKtop      
+   end interface ecSetElementSetKbotKtop
 
    ! Field
    
@@ -294,7 +296,7 @@ module m_ec_module
    interface ecAddItemConnection
       module procedure ecItemAddConnection
    end interface ecAddItemConnection
-   
+
    interface ecEstimateItemresultSize
       module procedure ecItemEstimateResultSize
    end interface ecEstimateItemresultSize
@@ -361,7 +363,7 @@ module m_ec_module
       module procedure ecSupportFindFileReader
       module procedure ecSupportFindFileReaderByFileName
    end interface ecFindFileReader
-   
+
    
    contains  
    
@@ -371,15 +373,16 @@ module m_ec_module
                                             method, operand, tgt_refdate, tgt_tzone, tgt_tunit, &
                                             jsferic, missing_value, itemIDs, &
                                             mask, xyen, z, pzmin, pzmax, pkbot, pktop, &
-                                            targetIndex, forcingfile, srcmaskfile, dtnodal, varname) &
+                                            targetIndex, forcingfile, srcmaskfile, dtnodal) &
                                             result (success)
    !     use m_ec_module, only: ecFindFileReader ! TODO: Refactor this private data access (UNST-703).
          use m_ec_filereader_read, only: ecParseARCinfoMask
          use m_ec_support
-   
+         use time_module, only: JULIAN, date2mjd
+ 
          type(tEcInstance), pointer :: instancePtr !< intent(in)
          character(len=*),                         intent(inout) :: name         !< Name for the target Quantity, possibly compounded with a tracer name.
-         real(hp), dimension(:),                   intent(in)    :: x            !< Array of x-coordinates for the target ElementSet.
+         real(hp), dimension(:),                   intent(in)    :: x            !< Array of x-coordinates for the .
          real(hp), dimension(:),                   intent(in)    :: y            !< Array of y-coordinates for the target ElementSet.
          logical,                                  intent(in)    :: jsferic      !< Sferic coordinates
          integer,                                  intent(in)    :: vectormax    !< Vector max (length of data values at each element location).
@@ -404,7 +407,6 @@ module m_ec_module
          character(len=*),       optional,         intent(in)    :: forcingfile  !< file containing the forcing data for pli-file 'filename'
          character(len=*),       optional,         intent(in)    :: srcmaskfile  !< file containing mask applicable to the arcinfo source data 
          real(hp),               optional,         intent(in)    :: dtnodal      !< update interval for nodal factors
-         character(len=*),       optional,         intent(in)    :: varname      !< the variable name in the file
          !
          integer :: convtype !< EC-module's convType_ enumeration.
          !
@@ -422,6 +424,7 @@ module m_ec_module
          logical                   :: res
          integer                   :: i, itgt
          integer                   :: fieldId
+         real(hp)                  :: tgt_mjd
    
          success = .False.
    
@@ -434,12 +437,14 @@ module m_ec_module
             fileReaderId = ecInstanceCreateFileReader(instancePtr)
             fileReaderPtr => ecSupportFindFileReader(instancePtr, fileReaderId)
             fileReaderPtr%vectormax = vectormax
-      
+            
+            tgt_mjd = JULIAN(tgt_refdate, 0) ! TODO: handle time zone (and time?)
+
             if (present(forcingfile)) then
                if (present(dtnodal)) then
-                  res = ecProviderInitializeFileReader(instancePtr, fileReaderId, filetype, filename, tgt_refdate, tgt_tzone, tgt_tunit, name, forcingfile=forcingfile, dtnodal=dtnodal)
+                  res = ecProviderInitializeFileReader(instancePtr, fileReaderId, filetype, filename, tgt_mjd, tgt_tzone, tgt_tunit, name, forcingfile=forcingfile, dtnodal=dtnodal)
                else
-                  res = ecProviderInitializeFileReader(instancePtr, fileReaderId, filetype, filename, tgt_refdate, tgt_tzone, tgt_tunit, name, forcingfile=forcingfile)
+                  res = ecProviderInitializeFileReader(instancePtr, fileReaderId, filetype, filename, tgt_mjd, tgt_tzone, tgt_tunit, name, forcingfile=forcingfile)
                end if
                if (.not. res) return
                if (ecAtLeastOnePointIsCorrection) then       ! TODO: Refactor this shortcut (UNST-180).
@@ -449,9 +454,9 @@ module m_ec_module
                end if
             else
                if (present(dtnodal)) then
-                  res = ecProviderInitializeFileReader(instancePtr, fileReaderId, filetype, filename, tgt_refdate, tgt_tzone, tgt_tunit, name, dtnodal=dtnodal, varname= varname)
+                  res = ecProviderInitializeFileReader(instancePtr, fileReaderId, filetype, filename, tgt_mjd, tgt_tzone, tgt_tunit, name, dtnodal=dtnodal)
                else
-                  res = ecProviderInitializeFileReader(instancePtr, fileReaderId, filetype, filename, tgt_refdate, tgt_tzone, tgt_tunit, name)
+                  res = ecProviderInitializeFileReader(instancePtr, fileReaderId, filetype, filename, tgt_mjd, tgt_tzone, tgt_tunit, name)
                end if
                if (.not. res) return
             end if
@@ -467,7 +472,7 @@ module m_ec_module
          if (filetype == provFile_poly_tim) then
                res = ecElementSetSetType(instancePtr, elementSetId, elmSetType_polytim)
          else
-            if (.not.jsferic) then
+            if (jsferic) then
                res = ecElementSetSetType(instancePtr, elementSetId, elmSetType_cartesian)
             else
                res = ecElementSetSetType(instancePtr, elementSetId, elmSetType_spheric)
@@ -541,7 +546,7 @@ module m_ec_module
          if (filetype == provFile_poly_tim) then
             if (.not.ecSetElementSetType(instancePtr, elementSetId, elmSetType_polytim)) return
          else
-            if (.not.jsferic) then
+            if (jsferic) then
                if (.not.ecSetElementSetType(instancePtr, elementSetId, elmSetType_cartesian)) return
             else
                if (.not.ecSetElementSetType(instancePtr, elementSetId, elmSetType_spheric)) return
@@ -612,24 +617,38 @@ module m_ec_module
             if (.not.ecAddConnectionTargetItem(instancePtr, connectionId, itemIDs(i))) return
             if (.not.ecAddItemConnection(instancePtr, itemIDs(i), connectionId)) return
          enddo
+
+         if (.not. ecSetConnectionIndexWeights(InstancePtr, connectionId)) return
+
          success = .True.
-                                            end function ecModuleAddTimeSpaceRelation
-                                            
-                                                                                           
+      end function ecModuleAddTimeSpaceRelation
+                                               
+                                               
    !> Replacement function for FM's meteo1 'gettimespacevalue' function.
-   function ec_gettimespacevalue_by_itemID(instancePtr, itemId, timesteps, target_array) result(success)
+   function ec_gettimespacevalue_by_itemID(instancePtr, itemId, tgt_refdate, tgt_tzone, tgt_tunit, timesteps, target_array) result(success)
+      use time_module
+      use time_class
       logical                                                 :: success      !< function status
       type(tEcInstance),                        pointer       :: instancePtr  !< intent(in)
       integer,                                  intent(in)    :: itemID       !< unique Item id
+      integer,                                  intent(in)    :: tgt_refdate
+      real(kind=hp),                            intent(in)    :: tgt_tzone
+      integer,                                  intent(in)    :: tgt_tunit
       real(hp),                                 intent(in)    :: timesteps    !< time
       real(hp), dimension(:), target, optional, intent(inout) :: target_array !< kernel's data array for the requested values
+
+      type(c_time)                                            :: ecReqTime    !< time stamp for request to EC
+      real(hp)                                                :: tUnitFactor  !< factor for time step unit
+
       if (itemId == ec_undef_int) then       ! We isolate the case that itemId was uninitialized,
          success = .true.                    ! in which case we simply ignore the Get-request
          return
       else
          success = .false.
          call clearECMessage()
-         if (.not. ecGetValues(instancePtr, itemId, timesteps, target_array)) then
+         tUnitFactor = ecSupportTimeUnitConversionFactor(tgt_tunit)
+         call ecReqTime%set2(JULIAN(tgt_refdate, 0), timesteps * tUnitFactor / 86400.0_hp - tgt_tzone / 24.0_hp)
+         if (.not. ecGetValues(instancePtr, itemId, ecReqTime, target_array)) then
             return
          end if
          success = .true.
@@ -684,6 +703,7 @@ module m_ec_module
          convtype = convType_undefined
       end select
       end subroutine ec_filetype_to_conv_type
-   
-   
+
+      ! ==========================================================================
+
 end module m_ec_module

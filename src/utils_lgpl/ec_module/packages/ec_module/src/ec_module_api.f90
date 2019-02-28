@@ -1,8 +1,21 @@
 module ec_module_api
 
    use iso_c_binding
+   use iso_c_utils
+   use m_ec_module
+   use m_ec_parameters
    
 implicit none
+
+   type(tEcInstance), pointer  :: instancePtr
+
+   public :: averaging
+   public :: ecModuleAddTimeSpaceRelation_dll
+!   public :: ecGettimespacevalueByItemID_dll
+   public :: ecInstancePrintStateToFile_dll
+   
+   private
+   
    contains
    
 function triangulation(meshtwoddim, meshtwod, startIndex, c_sampleX, c_sampleY, c_sampleValues, numSamples, c_targetValues, locType, jsferic, jasfer3D) result(ierr) bind(C, name="triangulation")
@@ -352,5 +365,113 @@ function averaging(meshtwoddim, meshtwod, startIndex, c_sampleX, c_sampleY, c_sa
     if (allocated(yyy)) deallocate(yyy) 
 
 end function averaging
-      
+
+! ecModuleAddTimeSpaceRelation
+function ecModuleAddTimeSpaceRelation_dll(c_name,& 
+   c_x,& 
+   c_y,& 
+   ncoordinatesSize,&
+   jsferic,& 
+   vectormax,& 
+   c_filename,&
+   filetype,&
+   method,&
+   operand,&
+   src_refdate,&
+   src_tzone,&
+   missing_value, &
+   c_targetItemArray, &
+   dummInt) result(success) bind(C, name="ecModuleAddTimeSpaceRelation")
+   !DEC$ ATTRIBUTES DLLEXPORT :: ecModuleAddTimeSpaceRelation_dll
+   
+   implicit none
+             
+   character(kind=c_char),   intent(in)    :: c_name(MAXSTRINGLEN)     !< Name for the target Quantity, possibly compounded with a tracer name.
+   type(c_ptr),              intent(in)    :: c_x                    !< Array of x-coordinates for the target ElementSet.
+   type(c_ptr),              intent(in)    :: c_y                    !< Array of y-coordinates for the target ElementSet.
+   integer(kind=c_int),      intent(in)    :: ncoordinatesSize       !< Number of coordinates 
+   logical,                  intent(in)    :: jsferic                !< Sferic coordinates
+   integer,                  intent(in)    :: vectormax              !< Vector max (length of data values at each element location).
+   character(kind=c_char),   intent(in)    :: c_filename(MAXSTRINGLEN) !< File name of meteo data file.
+   integer,                  intent(in)    :: filetype               !< filetype enumeration.
+   integer,                  intent(in)    :: method                 !< method enumeration.
+   integer,                  intent(in)    :: operand                !< operand enumeration.
+   integer,                  intent(in)    :: src_refdate
+   real(kind=hp),            intent(in)    :: src_tzone
+   real(kind=hp),            intent(in)    :: missing_value
+   type(c_ptr),              intent(inout) :: c_targetItemArray
+   integer,  intent(inout)    :: dummInt
+   
+   !the locals
+   double precision, dimension(:), pointer   :: x, y
+   integer, dimension(:), pointer   :: targetItemArray
+   character(len=MAXSTRINGLEN) :: name, filename
+   integer :: tgt_tunit = ec_second
+   
+   !the return value
+   logical :: success
+   
+   name = char_array_to_string(c_name)
+   filename = char_array_to_string(c_filename)
+   
+   call c_f_pointer(c_x, x, (/ ncoordinatesSize /))
+   call c_f_pointer(c_y, y, (/ ncoordinatesSize /))
+   call c_f_pointer(c_targetItemArray, targetItemArray,  (/ 1 /))
+   !create an istance of ecModule
+   success = ecCreateInstance(instancePtr)
+   
+   !call ecModuleAddTimeSpaceRelation for 2d
+   success = ecModuleAddTimeSpaceRelation(instancePtr, name, x, y, vectormax, filename, filetype, &
+                                          method, operand, src_refdate, src_tzone, tgt_tunit, &
+                                          jsferic, missing_value, targetItemArray)
+   
+   dummInt = targetItemArray(1)
+   
+
+   end function ecModuleAddTimeSpaceRelation_dll
+   
+!   function ecGettimespacevalueByItemID_dll(itemId, timesteps, c_target_array, ntargets) result(success) bind(C, name="ecGettimespacevalueByItemID")
+!   !DEC$ ATTRIBUTES DLLEXPORT :: ecGettimespacevalueByItemID_dll
+!      
+!      implicit none
+!   
+!      logical                                         :: success        !< function status
+!      integer,                          intent(in)    :: itemID         !< unique Item id
+!      integer,                          intent(in)    :: ntargets       !< number of ntargets
+!      double precision,                 intent(in)    :: timesteps      !< TODO: add comment
+!      type(c_ptr),                      intent(in)    :: c_target_array !< TODO: add comment
+!   
+!      double precision, dimension(:), pointer         :: target_array 
+!      
+!      call c_f_pointer(c_target_array, target_array, (/  ntargets /))
+!      
+!      success = ec_gettimespacevalue_by_itemID(instancePtr, itemId, timesteps, target_array)
+!      
+!   end function ecGettimespacevalueByItemID_dll
+
+   
+   function ecInstancePrintStateToFile_dll() result(success) bind(C, name="ecInstancePrintStateToFile")
+   !DEC$ ATTRIBUTES DLLEXPORT :: ecInstancePrintStateToFile_dll
+   
+   logical               :: success
+   integer               :: lvl
+   
+   !the verbosity level is hard coded here
+   lvl = 1
+   
+   call ecInstancePrintState(instancePtr,messenger, lvl)
+   
+   success = .true.
+   
+   end function ecInstancePrintStateToFile_dll
+   
+   !private functions
+   subroutine messenger(lvl,msg)
+     implicit none
+     integer, intent(in)             :: lvl
+     character(len=*), intent(in)    :: msg
+     write(666,*) trim(msg)         
+   end subroutine messenger
+
+   
 end module ec_module_api

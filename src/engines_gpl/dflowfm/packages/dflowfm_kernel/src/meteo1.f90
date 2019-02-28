@@ -390,7 +390,6 @@ module m_meteo
       end select
    end subroutine operand_fm_to_ec
    
-   ! ==========================================================================
    
    
    !> Convert quantity names as given in user input (ext file)
@@ -750,11 +749,12 @@ module m_meteo
    !> Replacement function for FM's meteo1 'addtimespacerelation' function.
    logical function ec_addtimespacerelation(name, x, y, mask, vectormax, filename, filetype, method, operand, &
                                             xyen, z, pzmin, pzmax, pkbot, pktop, targetIndex, forcingfile, srcmaskfile, dtnodal, quiet, varname, maxSearchRadius)
-      use m_ec_module , only: ecFindFileReader ! TODO: Refactor this private data access (UNST-703).
+      use m_ec_module, only: ecFindFileReader, ec_filetype_to_conv_type ! TODO: Refactor this private data access (UNST-703).
       use m_ec_filereader_read, only: ecParseARCinfoMask
       use m_flow, only: kmx, kbot, ktop
       use m_sferic, only: jsferic
       use m_missing, only: dmiss
+      use m_flowtimes, only: refdate_mjd
 
       character(len=*),                         intent(inout) :: name         !< Name for the target Quantity, possibly compounded with a tracer name.
       real(hp), dimension(:),                   intent(in)    :: x            !< Array of x-coordinates for the target ElementSet.
@@ -823,7 +823,6 @@ module m_meteo
       integer                   :: row0, row1, col0, col1, ncols, nrows
       character(len=128)        :: txt1, txt2, txt3
 
-
       ec_addtimespacerelation = .false.
       if (present(quiet)) then
          quiet_ = quiet
@@ -874,10 +873,12 @@ module m_meteo
       location = filename
       if (ec_filetype == provFile_bc) then
          if (.not.ecCreateInitializeBCFileReader(ecInstancePtr, forcingfile, location, qidname, &
-                                                 itdate, tzone, ec_second, fileReaderId)) then
+                                                 refdate_mjd, tzone, ec_second, fileReaderId)) then
             goto 1234
          end if
       else
+               success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, refdate_mjd, tzone, ec_second, name, forcingfile=forcingfile, dtnodal=dtnodal)
+               success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, refdate_mjd, tzone, ec_second, name, forcingfile=forcingfile)
       ! ============================================================
       ! For the remaining types, construct the fileReader and source Items here.
       ! ============================================================
@@ -890,6 +891,7 @@ module m_meteo
             end if
             fileReaderId = fileReaderPtr%id 
          else
+               success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, refdate_mjd, tzone, ec_second, name, dtnodal=dtnodal, varname=varname)
             fileReaderId = ecCreateFileReader(ecInstancePtr)
             
             fileReaderPtr => ecFindFileReader(ecInstancePtr, fileReaderId) ! TODO: Refactor this private data access (UNST-703).
@@ -898,9 +900,9 @@ module m_meteo
       
             if (present(forcingfile)) then
                if (present(dtnodal)) then
-                  success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, itdate, tzone, ec_second, name, forcingfile=forcingfile, dtnodal=dtnodal)
+                  success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, refdate_mjd, tzone, ec_second, name, forcingfile=forcingfile, dtnodal=dtnodal)
                else
-                  success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, itdate, tzone, ec_second, name, forcingfile=forcingfile)
+                  success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, refdate_mjd, tzone, ec_second, name, forcingfile=forcingfile)
                end if
                !message = dumpECMessageStack(LEVEL_WARN,callback_msg)
                if (.not. success) then
@@ -912,10 +914,11 @@ module m_meteo
                      return
                end if
             else
+               success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, refdate_mjd, tzone, ec_second, name, varname=varname)
                if (present(dtnodal)) then
-                  success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, itdate, tzone, ec_second, name, dtnodal=dtnodal, varname=varname)
+                  success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, refdate_mjd, tzone, ec_second, name, dtnodal=dtnodal, varname=varname)
                else
-                  success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, itdate, tzone, ec_second, name, varname=varname)
+                  success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, refdate_mjd, tzone, ec_second, name, varname=varname)
                end if
                if (.not. success) then
                   ! message = ecGetMessage()
@@ -1583,6 +1586,7 @@ module m_meteo
    
    ! ==========================================================================
    function ec_gettimeseries_by_itemID(instancePtr, itemId, t0, t1, dt, target_array) result(success)
+      use m_flowtimes
       logical                                                 :: success      !< function status
       type(tEcInstance),                        pointer       :: instancePtr  !< intent(in)
       integer,                                  intent(in)    :: itemID       !< unique Item id
@@ -1604,7 +1608,7 @@ module m_meteo
 
       call clearECMessage()
       do while (t0+it*dt<t1)
-         if (.not.ec_gettimespacevalue_by_itemID(instancePtr, itemId, t0+it*dt,  &
+         if (.not.ec_gettimespacevalue_by_itemID(instancePtr, itemId, irefdate, tzone, tunit, t0+it*dt,  &
                                      target_array(it*blksize+1:(it+1)*blksize))) then
             return         ! Message stack was already dumped by gettimespacevalue
          end if
@@ -1617,6 +1621,7 @@ module m_meteo
    
    !> Convenience wrapper around ec_gettimespacevalue_by_itemID.
    function ec_gettimespacevalue_by_name(instancePtr, group_name, timesteps) result(success)
+      use m_flowtimes
       logical                       :: success     !< function status
       type(tEcInstance), pointer    :: instancePtr !< intent(in)
       character(len=*),  intent(in) :: group_name  !< unique group name
@@ -1626,7 +1631,7 @@ module m_meteo
       success = .false.
       !
       if (trim(group_name) == 'rainfall') then
-         if (.not.ec_gettimespacevalue_by_itemID(instancePtr, item_rainfall  , timesteps)) return
+         if (.not.ec_gettimespacevalue_by_itemID(instancePtr, item_rainfall, irefdate, tzone, tunit, timesteps)) return
          ! rain = rain * 86400.0                  ! EC delivers rainfall intensity in mm/s, convert to mm/day
          ! Hi Robert, if you change some input definition in 2017, than please repair code from 2009 till now
          ! foreseeing problems like this, I first called this quantity rainfall_mmperday.
@@ -1635,19 +1640,19 @@ module m_meteo
          ! I give a course this Thursday, please no surprises 
          end if
       if (trim(group_name) == 'rainfall_rate') then
-         if (.not.ec_gettimespacevalue_by_itemID(instancePtr, item_rainfall_rate  , timesteps)) return
+         if (.not.ec_gettimespacevalue_by_itemID(instancePtr, item_rainfall_rate, irefdate, tzone, tunit, timesteps)) return
       end if
       if (trim(group_name) == 'humidity_airtemperature_cloudiness') then
-         if (.not.ec_gettimespacevalue_by_itemID(instancePtr, item_hac_humidity  , timesteps)) return
+         if (.not.ec_gettimespacevalue_by_itemID(instancePtr, item_hac_humidity, irefdate, tzone, tunit, timesteps)) return
       end if
       if (trim(group_name) == 'humidity_airtemperature_cloudiness_solarradiation') then
-         if (.not.ec_gettimespacevalue_by_itemID(instancePtr, item_hacs_humidity , timesteps)) return
+         if (.not.ec_gettimespacevalue_by_itemID(instancePtr, item_hacs_humidity, irefdate, tzone, tunit, timesteps)) return
       end if
       if (trim(group_name) == 'dewpoint_airtemperature_cloudiness') then
-         if (.not.ec_gettimespacevalue_by_itemID(instancePtr, item_dac_dewpoint  , timesteps)) return
+         if (.not.ec_gettimespacevalue_by_itemID(instancePtr, item_dac_dewpoint, irefdate, tzone, tunit, timesteps)) return
       end if
       if (trim(group_name) == 'dewpoint_airtemperature_cloudiness_solarradiation') then
-         if (.not.ec_gettimespacevalue_by_itemID(instancePtr, item_dacs_dewpoint , timesteps)) return
+         if (.not.ec_gettimespacevalue_by_itemID(instancePtr, item_dacs_dewpoint, irefdate, tzone, tunit, timesteps)) return
       end if
       
       if ((trim(group_name) == 'dewpoint_airtemperature_cloudiness' .and. item_dac_dewpoint/=ec_undef_int)    &
@@ -1660,7 +1665,7 @@ module m_meteo
           call dewpt2rhum(ptd,ptm,prh)        ! convert dewpoint temperatures to relative humidity (percentage)
       end if
       if (index(group_name, 'airpressure_windx_windy') == 1) then
-         if (.not.ec_gettimespacevalue_by_itemID(instancePtr, item_apwxwy_p, timesteps)) return
+         if (.not.ec_gettimespacevalue_by_itemID(instancePtr, item_apwxwy_p, irefdate, tzone, tunit, timesteps)) return
       end if
       success = .true.
    end function ec_gettimespacevalue_by_name

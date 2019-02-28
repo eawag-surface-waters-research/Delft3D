@@ -41,13 +41,17 @@ module m_ec_item
    use m_ec_alloc
    use m_ec_converter
    use m_ec_filereader
-   
+   use m_alloc
+   use time_class
+
    implicit none
    
    private
    
    public :: ecItemCreate
+   public :: ecItemInitialize
    public :: ecItemFree1dArray
+   public :: ecItemGetValuesMJD
    public :: ecItemGetValues
    public :: ecItemSetRole
    public :: ecItemSetType
@@ -62,6 +66,9 @@ module m_ec_item
    public :: ecItemGetArr1dPtr
    public :: ecItemGetQHtable
    public :: ecItemEstimateResultSize
+   public :: ecItemToTimeseries
+   public :: ecItemFinalizeTimeseries
+   public :: ecItemFromTimeseries
    
    contains
       
@@ -120,6 +127,20 @@ module m_ec_item
          do i=1, item%nConnections
             item%connectionsPtr(i)%ptr => null()
          end do
+
+         if (allocated(item%timeseries)) then
+            if (allocated(item%timeseries%times)) then
+                deallocate(item%timeseries%times, stat = istat)
+                if (istat /= 0) success = .false.
+            end if
+            if (allocated(item%timeseries%values)) then
+                deallocate(item%timeseries%values, stat = istat)
+                if (istat /= 0) success = .false.
+            end if
+            deallocate(item%timeseries, stat = istat)
+            if (istat /= 0) success = .false.
+         end if
+
          ! Finally deallocate the array of tEcConnection pointers.
          deallocate(item%connectionsPtr, STAT = istat)
          if (istat /= 0) success = .false.
@@ -161,6 +182,22 @@ module m_ec_item
       
       ! =======================================================================
       
+      !> Retrieve the data of an Item for timestep specified as MJD
+      function ecItemGetValuesMJD(instancePtr, itemId, timeAsMJD, target_array) result(success)
+         logical                                                 :: success      !< function status
+         type(tEcInstance),      pointer                         :: instancePtr  !< intent(in)
+         integer,                                  intent(in)    :: itemID       !< unique Item id
+         double precision,                         intent(in)    :: timeAsMJD    !< time stamp as Modified Julian Day
+         real(hp), dimension(:), target, optional, intent(inout) :: target_array !< kernel's data array for the requested values
+         ! 
+         type(c_time)  :: ecTime
+         call ecTime%set(timeAsMJD)
+         success = ecItemGetValues(instancePtr, itemId, ecTime, target_array)
+         !
+      end function ecItemGetValuesMJD
+      
+      ! =======================================================================
+      
       !> Retrieve the data of an Item for a specific number of timesteps since kernel's reference date and put it in the target Item's Field.
       recursive function ecItemGetValues(instancePtr, itemId, timesteps, target_array) result(success)
          use m_ec_message
@@ -168,7 +205,7 @@ module m_ec_item
          logical                                                 :: success      !< function status
          type(tEcInstance),      pointer                         :: instancePtr  !< intent(in)
          integer,                                  intent(in)    :: itemID       !< unique Item id
-         real(hp),                                 intent(in)    :: timesteps    !< get data corresponding to this number of timesteps since k_refdate
+         type(c_time),                             intent(in)    :: timesteps    !< get data corresponding to this number of timesteps since k_refdate
          real(hp), dimension(:), target, optional, intent(inout) :: target_array !< kernel's data array for the requested values
          !
          integer                :: i       !< loop counter
@@ -199,9 +236,8 @@ module m_ec_item
             end if
          end do
       end function ecItemGetValues
-      
-      
-      ! =======================================================================
+
+! =======================================================================
       !> Retrieve the id of the provider (filereader) that supplies this item
       function ecItemEstimateResultSize(instancePtr, itemId) result(ressize)
          implicit none
@@ -322,15 +358,20 @@ module m_ec_item
          logical                          :: success     !< function status
          type(tEcInstance), pointer       :: instancePtr !< intent(inout)
          type(tEcItem),     intent(inout) :: item        !< the target item
-         real(hp),          intent(in)    :: timesteps   !< get data corresponding to this number of timesteps since k_refdate
+         type(c_time),      intent(in)    :: timesteps   !< get data corresponding to this number of timesteps since k_refdate
          !
          integer                            :: istat        !< return value of stat
          integer                            :: i            !< loop variable
          integer                            :: j            !< loop variable
          character(len=1000)                :: message
          logical, dimension(:), allocatable :: skipWeights  !< Flags for each connection if weight computation can be skipped
+         integer                            :: ntimes
+         logical                            :: first_item_is_periodic
+         type(tEcItem), pointer             :: source_item  !< the source item
          !
          success = .true.
+         first_item_is_periodic = .false.
+
          allocate(skipWeights(item%nConnections), stat = istat)
          if (istat /= 0) then
             call setECMessage("ERROR: ec_item::ecItemUpdateTargetItem: Unable to allocate additional memory")
@@ -347,10 +388,21 @@ module m_ec_item
             ! update the source Items
             UpdateSrc: do i=1, item%nConnections
                do j=1, item%connectionsPtr(i)%ptr%nSourceItems
+                  source_item => item%connectionsPtr(i)%ptr%sourceItemsPtr(j)%ptr
+                  if (first_item_is_periodic .and. j > 1) then
+                     write(message,'(A)') 'Multiple periodic source items not yet supported'
+                     success = .false.
+                     return
+                  endif
                   if (.not. (ecItemUpdateSourceItem(instancePtr, item%connectionsPtr(i)%ptr%sourceItemsPtr(j)%ptr, timesteps, &
                              item%connectionsPtr(i)%ptr%converterPtr%interpolationType))) then
-                     !
+                     ! If updating source item failed .....
                      ! No interpolation in time possible. => skipWeights(i) is allowed to stay true
+                     if(source_item%quantityPtr%timeint == timeint_bfrom) then
+                        ! We came beyond the last line in a non-periodic block function
+                        ! Adjust the value in T0 field (the converter will only use the T0-field)s
+                        source_item%sourceT0FieldPtr%arr1d = source_item%sourceT1FieldPtr%arr1d
+                     endif
                      ! Check whether extrapolation is allowed
                      if (item%connectionsPtr(i)%ptr%converterPtr%interpolationType /= interpolate_time_extrapolation_ok) then
                         write(message,'(a,i5.5)') "Updating source failed, quantity='" &
@@ -408,7 +460,7 @@ module m_ec_item
          logical                                  :: success       !< function status
          type(tEcInstance), pointer               :: instancePtr   !< intent(inout)
          type(tEcItem),             intent(inout) :: item          !< the source item
-         real(hp),                  intent(in)    :: timesteps     !< objective: t0<=timesteps<=t1
+         type(c_time),              intent(in)    :: timesteps     !< objective: t0<=timesteps<=t1
          integer ,                  intent(in)    :: interpol_type !< interpolation
          !
          integer                                  :: i                     !< loop counter
@@ -445,7 +497,14 @@ module m_ec_item
          !
 
          ! timesteps < t0 : not supported
-         if (comparereal(timesteps, item%sourceT0FieldPtr%timesteps) == -1) then
+         if (comparereal(item%sourceT1FieldPtr%timesteps, timesteps%mjd(), 1.0D-10) == 0) then
+            ! requested time equals to T1.
+            ! no read action needed, UNLESS 'block-from'
+            if (item%quantityPtr%timeint /= timeint_bfrom) then
+               success = .true.
+               return
+            endif
+         else if (comparereal(timesteps%mjd(), item%sourceT0FieldPtr%timesteps) == -1) then
             if (interpol_type /= interpolate_time_extrapolation_ok) then
                if (associated (fileReaderPtr)) then
                   if (associated (fileReaderPtr%bc)) then
@@ -455,40 +514,81 @@ module m_ec_item
                   endif
                   call setECMessage("       in file: '"//trim(filename)//"'.")
                endif
-               call real2stringLeft(strnum1, '(f22.3)', timesteps)
+               call real2stringLeft(strnum1, '(f22.3)', timesteps%mjd())
                call setECMessage("             Requested: t= " // trim(strnum1) // ' seconds')
                call real2stringLeft(strnum1, '(f22.3)', item%sourceT0FieldPtr%timesteps)
                call setECMessage("       Current EC-time: t= " // trim(strnum1) // ' seconds')
-               call real2stringLeft(strnum1, '(f22.3)', item%sourceT0FieldPtr%timesteps-timesteps)
-               call real2stringLeft(strnum2, '(f22.3)', (item%sourceT0FieldPtr%timesteps-timesteps)/86400)
+               call real2stringLeft(strnum1, '(f22.3)', item%sourceT0FieldPtr%timesteps-timesteps%mjd())
+               call real2stringLeft(strnum2, '(f22.3)', (item%sourceT0FieldPtr%timesteps-timesteps%mjd())/86400)
                call setECMessage("Requested time preceeds current forcing EC-timelevel by " // trim(strnum1) // " seconds = " // trim(strnum2) // " days.")
             else
                success = .true.
             endif
-         ! t0<=timesteps<=t1 : no update required
-         else if (comparereal(item%sourceT1FieldPtr%timesteps, timesteps) /= -1) then
+            return
+         else if (comparereal(timesteps%mjd(), item%sourceT1FieldPtr%timesteps) == -1) then
+            ! requested time is before T1
             success = .true.
+            return
+         endif
+
          ! timesteps > t1: update untill t0<=timesteps<=t1
-         else
-            ! Update all source Items which belong to the found FileReader, if associated .
-            if (associated(fileReaderPtr)) then
-               if (.not. fileReaderPtr%end_of_data) then
-                  do ! read next record untill t0<=timesteps<=t1
-                     if (ecFileReaderReadNextRecord(fileReaderPtr, timesteps)) then
-                        if (comparereal(item%sourceT1FieldPtr%timesteps, timesteps) /= -1) then
-                           success = .true.
-                           exit
-                        end if
-                     else
-                        if (interpol_type == interpolate_time_extrapolation_ok) then
-                           exit
-                        else
-                           return         ! failed to update item AND no extrapolation allowed !!
+
+         ! Store the zeroth value into the timeseries
+         if (item%quantityPtr%periodic) then
+            if (.not.allocated(item%timeseries)) then       ! This must be the first time we are getting here, store value
+               if (.not.ecItemToTimeseries(item,item%sourceT0FieldPtr%timesteps,item%sourceT0FieldPtr%arr1dptr)) then
+                  ! TODO: handle exception, report error 
+                  success = .false.
+                  return
+               end if
+               if (.not.ecItemToTimeseries(item,item%sourceT1FieldPtr%timesteps,item%sourceT1FieldPtr%arr1dptr)) then
+                  ! TODO: handle exception, report error 
+                  success = .false.
+                  return
+               end if
+            end if
+         endif
+
+
+         ! Update all source Items which belong to the found FileReader, if associated .
+         if (associated(fileReaderPtr)) then
+            if (.not. fileReaderPtr%end_of_data) then
+               do ! read next record untill t0<=timesteps<=t1
+                  if (ecFileReaderReadNextRecord(fileReaderPtr, timesteps%mjd())) then
+                     if (item%quantityPtr%periodic) then                      ! Store saved to item's timeseries
+                        if (.not.ecItemToTimeseries(item,item%sourceT1FieldPtr%timesteps,item%sourceT1FieldPtr%arr1dptr)) then
+                           success = .false.
+                           return
                         end if
                      end if
-                  end do
+                     if (comparereal(item%sourceT1FieldPtr%timesteps, timesteps%mjd()) /= -1) then
+                        if(item%quantityPtr%timeint == timeint_bfrom) then
+                           if (comparereal(item%sourceT1FieldPtr%timesteps, timesteps%mjd(), 1.0D-7) == 0) then
+                              ! Adjust the value in T0 field (the converter will only use the T0-field)s
+                              item%sourceT0FieldPtr%arr1d = item%sourceT1FieldPtr%arr1d
+                           endif
+                        endif
+                        success = .true.
+                        exit
+                     end if
+                  else
+                     if (item%quantityPtr%periodic) then
+                        success = ecItemFinalizeTimeseries(item)
+                        success = ecItemFromTimeseries(item, timesteps%mjd())
+                        return
+                     end if
+                     if (interpol_type == interpolate_time_extrapolation_ok) then
+                        exit
+                     else
+                        return         ! failed to update item AND no extrapolation allowed !!
+                     end if
+                  end if
+               end do
+            else
+               if (item%quantityPtr%periodic) then
+                  success = ecItemFromTimeseries(item, timesteps%mjd())
                endif
-            end if
+            endif
          end if
       end function ecItemUpdateSourceItem
       
@@ -742,4 +842,132 @@ module m_ec_item
             call setECMessage("ERROR: ec_item::ecItemAddConnection: Cannot find an Item or Connection with the supplied id.")
          end if
       end function ecItemAddConnection
+      
+      ! =======================================================================
+      !> Append the field1%timesteps and field1%arr1d value(s) of the FIRST item of the connection to an array of stored values within the converter.
+      !> This serves future reuse of these values.
+      function ecItemToTimeseries(item,timestep,values) result (success)
+         implicit none
+         logical                            :: success    !< function status
+         real(hp)                           :: timestep   !< source item t0 and t1
+         real(hp), dimension(:), pointer    :: values     !< values at time t0
+         type(tEcItem)                      :: item
+
+         type(tEcConverter), pointer        :: cnvrt => null()
+         integer, parameter                 :: array_increment = 100
+         integer                            :: vectormax, newsize
+         logical                            :: do_add
+
+         success = .false.
+         vectormax = size(values)
+         if (.not.allocated(item%timeseries))  then
+            allocate(item%timeseries)
+         end if
+         
+         do_add = .false.
+         if (item%timeseries%ntimes == 0) then         
+            allocate (item%timeseries%times(array_increment))
+            allocate (item%timeseries%values(vectormax,array_increment))
+            do_add = .true.
+         else
+            do_add = timestep > item%timeseries%times(item%timeseries%ntimes)
+         end if
+
+         if (do_add) then
+            item%timeseries%ntimes = item%timeseries%ntimes + 1 
+            if (size(item%timeseries%times) < item%timeseries%ntimes) then
+               newsize = size(item%timeseries%times) + array_increment
+               call realloc(item%timeseries%times,newsize)
+               call realloc(item%timeseries%values,vectormax,newsize) 
+            end if
+            item%timeseries%times(item%timeseries%ntimes) = timestep
+            item%timeseries%values(1:vectormax,item%timeseries%ntimes) = values(1:vectormax) 
+         endif
+         success = .true.
+      end function ecItemToTimeseries
+      
+      ! =======================================================================
+      !> Stop recording an items timeseries
+      function ecItemFinalizeTimeseries(item) result (success)
+         implicit none
+         logical                             :: success    !< function status
+         real(hp)                            :: t0, t1     !< source item t0 and t1
+         type(tEcItem), intent(inout)        :: item
+         integer, parameter                  :: array_increment = 100
+         integer                             :: vectormax, ntimes
+
+         success = .false.
+         if (.not.item%timeseries%finalized) then
+            ntimes = item%timeseries%ntimes
+            item%timeseries%tmin = item%timeseries%times(1)
+            item%timeseries%tmax = item%timeseries%times(ntimes)
+            vectormax = size(item%timeseries%values,dim=1)
+            call realloc(item%timeseries%times,ntimes)
+            call realloc(item%timeseries%values,vectormax,ntimes) 
+            item%timeseries%finalized = .true.
+         end if
+         success = .true.
+      end function ecItemFinalizeTimeseries
+
+      ! =======================================================================
+      !> Update the first source item in a periodical sence with values from a stored timeseries
+      function ecItemFromTimeseries(item,timesteps) result (success)
+         implicit none
+         logical                            :: success    !< function status
+         real(hp), intent(in)               :: timesteps  !< convert to this number of timesteps past the kernel's reference date
+         real(hp)                           :: tmin, tmax        !< source item t0 and t1
+         real(hp), dimension(:), pointer    :: valuesT0      !< values at time t0
+         real(hp), dimension(:), pointer    :: valuesT1      !< values at time t1
+         type(tEcItem), intent(inout)       :: item
+         integer, parameter                 :: array_increment = 100
+         integer                            :: vectormax, newsize
+         real(hp)                           :: tmod
+         integer                            :: it
+         real(hp)                           :: periodic_shift
+
+         success = .false.
+
+         tmin = item%timeseries%tmin
+         tmax = item%timeseries%tmax
+         tmod = mod(mod(timesteps-tmin,tmax-tmin)+(tmax-tmin),tmax-tmin)    ! time between (t0-t1) and (t1-t0)
+         if (tmod<0.d0) then 
+            tmod = mod(tmod+(tmax-tmin),tmax-tmin)                          ! time between 0 and t1-t0
+         end if
+         do it = 1,item%timeseries%ntimes - 1
+            if (item%timeseries%times(it)-tmin>tmod) exit
+         end do                                                             ! index of the first time in the series exceeding requested time 
+
+         periodic_shift = (tmax - tmin) * floor((timesteps - tmin) / (tmax - tmin)) 
+
+         ! Restore times and values in the T0 and T1 fields of the first item
+         item%sourceT0FieldPtr%timesteps = item%timeseries%times(it-1) + periodic_shift
+         item%sourceT1FieldPtr%timesteps = item%timeseries%times(it) + periodic_shift
+         valuesT0 => item%sourceT0FieldPtr%arr1dPtr
+         valuesT1 => item%sourceT1FieldPtr%arr1dPtr
+         vectormax = size(item%timeseries%values,dim=1)
+         valuesT0(1:vectormax) = item%timeseries%values(1:vectormax,it-1)
+         valuesT1(1:vectormax) = item%timeseries%values(1:vectormax,it)
+         success = .true.
+      end function ecItemFromTimeseries
+
+      ! =======================================================================
+      !> Update the first source item in a periodical sence with values from a stored timeseries
+      function ecItemInitialize(instancePtr, itemId, itemRole, quantityId, elementSetId, fieldId) result(success)
+         logical                          :: success      !< function status
+         type(tEcInstance), pointer       :: instancePtr  !< 
+         integer,           intent(in)    :: itemId       !< Unique Item id.
+         integer,           intent(in)    :: itemRole     !< Item role.
+         integer,           intent(in)    :: quantityId   !< Unique Quantity id.
+         integer,           intent(in)    :: elementSetId !< Unique ElementSet id.
+         integer,           intent(in)    :: fieldId      !< Unique Field id.
+         !
+         success = .true.
+         if (itemId /= ec_undef_int) then                ! if Target Item already exists, do NOT create a new one ... 
+            success              = ecItemSetRole(instancePtr, itemId, itemType_target)
+            if (success) success = ecItemSetQuantity(instancePtr, itemId, quantityId)
+            if (success) success = ecItemSetElementSet(instancePtr, itemId, elementSetId)
+            if (success) success = ecItemSetTargetField(instancePtr, itemId, fieldId)    
+        endif
+     end function ecItemInitialize
+      
 end module m_ec_item

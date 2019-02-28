@@ -74,7 +74,7 @@ module m_ec_typedefs
         integer                 ::  qtype       !< Type number    
         logical, allocatable    ::  jacolumn(:) !< If(jacolumn(i) then i-th column contains the requested quantity (possibly more than one column)
         integer, allocatable    ::  col2elm(:)  !< Map column to vector element number to column in a t3D-block
-        character(len=25)       ::  name        !< User-specified name 
+        character(len=25)       ::  name = ''   !< User-specified name 
         integer                 ::  column      !< Unique column number in the data for this quantity 
         character(len=25)       ::  unit        !< unit specification 
         real(hp)                ::  offset = 0.d0  !< to be added to all data for this quantity
@@ -101,6 +101,7 @@ module m_ec_typedefs
         integer                                    ::  func                
         integer                                    ::  timecolumn          !< Number of the column holding the time strings, compul
         character(len=50)                          ::  timeunit            !< netcdf-convention time unit definition 
+        logical                                    ::  periodic = .False.  !< should a timeseries be rewinded beyond the last entry ? 
         integer                                    ::  timeint             !< Type of time interpolation 
         integer                                    ::  vptyp               !< Type of specification of vertical position
         real(hp), pointer                          ::  vp(:) => null()     !< vertical positions  
@@ -219,6 +220,20 @@ module m_ec_typedefs
       integer, allocatable          :: msk(:)                !< Array of mask values (TODO: should this be 2d?) 
    end type tEcMask
    
+   !===========================================================================
+   
+   !> Datatype containing a timeseries obtained from a uniform item and stored in here, supporting 'rewinding' of the timeries
+   type tEcTimeseries
+      integer                                 :: id
+      integer                                 :: ntimes = 0
+      logical                                 :: finalized = .False.!< no further updates for this timeseries; start from beginning
+      real(hp)                                :: tmin, tmax         !< time span of this series  
+      real(hp), dimension(:),     allocatable :: times              !< 1-dim times array 
+      real(hp), dimension(:,:),   allocatable :: values             !< 1-dim values array 
+   end type tEcTimeseries
+
+   !===========================================================================
+
    !> 
    type tEcConverter
       integer                       :: id                    !< unique Converter number, set by ecInstanceCreateConverter
@@ -343,7 +358,9 @@ module m_ec_typedefs
       type(tEcField),                       pointer :: sourceT0FieldPtr   => null() !< Field containing source data of second to last read data block.
       type(tEcField),                       pointer :: sourceT1FieldPtr   => null() !< Field containing source data of last read data block.
       type(tEcField),                       pointer :: targetFieldPtr     => null() !< Field containing target data at current time.
+      type(tEcTimeseries),      allocatable :: timeseries                   !< Information supporting rewinding of a read timeseries 
       type(tEcConnectionPtr), dimension(:), pointer :: connectionsPtr     => null() !< Connections in which this Item is a target Item
+      type(tEcTimeFrame),                   pointer :: tframe => null()             !< TimeFrame at which data is available
       integer                                       :: nConnections                 !< Number of Connections <= size(connectionsPtr)
    end type tEcItem
    

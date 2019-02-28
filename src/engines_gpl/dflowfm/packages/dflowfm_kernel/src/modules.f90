@@ -4201,7 +4201,10 @@ end subroutine reset_flowgeom
 
  character (len=8)                 :: refdat      !< Reference date (e.g., '20090101'). All times (tstart_user, tend_user, etc.) are w.r.t. to this date.
  integer                           :: julrefdat   !< will be set by calling settimespacerefdat
+ double precision                  :: refdate_mjd !< Reference date as modified Julian date
+ integer                           :: irefdate    !< Reference date (e.g., 20090101)
  double precision                  :: Tzone       !< Data Sources in GMT are interrogated with time in minutes since refdat-Tzone*60
+ integer, parameter                :: tunit = 1   !< Times to EC-module are in seconds
  double precision                  :: Timjan      !< time in hours of refdat relative to Januari 1 of the same year
  double precision                  :: dt_user     !< User specified time step (s) for external forcing update.
  double precision                  :: dt_nodal    !< User specified time step (s) for nodal factors update.

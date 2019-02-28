@@ -50,6 +50,8 @@ module time_module
    public :: datetime_to_string
    public :: parse_ud_timeunit
    public :: split_date_time
+   public :: CalendarYearMonthDayToJulianDateNumber
+   public :: julian, gregor, offset_reduced_jd
 
    interface ymd2jul
       ! obsolete, use ymd2reduced_jul
@@ -83,6 +85,8 @@ module time_module
 
    real(kind=hp), parameter :: offset_reduced_jd   = 2400000.5_hp
    integer      , parameter :: firstGregorianDayNr = 2299161
+   integer      , parameter :: justBeforeFirstGregorian(3) = [1582, 10, 14]
+   integer      , parameter :: justAfterLastJulian(3)      = [1582, 10,  5]
 
    contains
 
@@ -217,10 +221,9 @@ module time_module
 
          read(date, fmt, iostat=ierr) year, month, day
 
-         if (ierr == 0) then
-            success = ymd2reduced_jul_int3(year, month, day, reduced_jul_date)
-         else
-            success  = .false.
+         success = (ierr == 0)
+         if (success) then
+            reduced_jul_date = julian(year*10000 + month * 100 + day, 0)
          endif
 
       end function ymd2reduced_jul_string
@@ -248,10 +251,6 @@ module time_module
          logical                    :: success           !< function result
 
          integer :: jdn
-
-         if (.false.) then
-            call testConversion()
-         endif
 
          jdn = CalendarYearMonthDayToJulianDateNumber(year, month, day)
 
@@ -301,9 +300,6 @@ module time_module
          integer, intent(in) :: year  !< year
          integer, intent(in) :: month !< month
          integer, intent(in) :: day   !< day
-
-         integer, parameter :: justBeforeFirstGregorian(3) = [1582, 10, 14]
-         integer, parameter :: justAfterLastJulian(3)      = [1582, 10,  5]
 
          if (compareDates([year, month, day], justBeforeFirstGregorian) == 1) then
             jdn = GregorianYearMonthDayToJulianDateNumber(year, month, day)
@@ -744,11 +740,10 @@ module time_module
          implicit none
          integer, intent(in)       :: ymd
          real(kind=hp)             :: days
-         integer       :: year, month, day, hour, minute
-         real(kind=hp) :: second
-         year   = int(ymd/10000)
-         month  = int(mod(ymd,10000)/100)
-         day    = mod(ymd,100)
+
+         integer       :: year, month, day
+
+         call splitDate(ymd, year, month, day)
          days = datetime2mjd(year,month,day,0,0,0.d0)
       end function ymd2mjd
 
@@ -877,51 +872,205 @@ module time_module
          endif
       end subroutine split_date_time
 
-      ! todo: move to unit test environment
-      subroutine testConversion
-         integer :: jdn1, jdn2, jdn3, jdn4, yyyymmdd, yyyymmdd2, istat
-         real(kind=hp) :: mjd, mjd2
+      DOUBLE PRECISION FUNCTION JULIAN ( IDATE , ITIME )
+!***********************************************************************
+!
+!     Description of module :
+!
+!        This functions returns the so called Julian day of a date, or
+!        the value -1.0 if an error occurred.
+!
+!        The Julian day of a date is the number of days that has passed
+!        since January 1, 4712 BC at 12h00 ( Gregorian). It is usefull
+!        to compute differences between dates. ( See SUBROUTINE GREGOR
+!        for the reverse proces ).
+!
+!         If idate is before 15821005 Julian calendar is assumed,
+!         otherwise Gregorian.
+!
+!***********************************************************************
+!
+!     Arguments :
+!
+!     Name   Type     In/Out Size            Description
+!     ------ -----    ------ -------         ---------------------------
+!     IDATE  integer  in     -               Date as YYYYMMDD
+!     ITIME  integer  in     -               Time as HHMMSS
+!
+!     Local variables :
+!
+!     Name   Type     Size   Description
+!     ------ -----    ------ ------------------------
+!     TEMP1  real*8   -      Temporary variable
+!     TEMP2  real*8   -      Temporary variable
+!     IYEAR  integer  -      Year   ( -4713-.. )
+!     IMONTH integer  -      Month  ( 1-12 )
+!     IDAY   integer  -      Day    ( 1-28,29,30 or 31 )
+!     IHOUR  integer  -      Hour   ( 0-23 )
+!     IMIN   integer  -      Minute ( 0-59 )
+!     ISEC   integer  -      Second ( 0-59 )
+!     MONLEN integer  12     Length of month in days
+!
+!     Calls to : none
+!
+!***********************************************************************
+!
+!     Variables :
+!
+      IMPLICIT NONE !!!
 
-         jdn1 = CalendarYearMonthDayToJulianDateNumber(1, 1, 1)
-         jdn2 = CalendarYearMonthDayToJulianDateNumber(1582, 10, 4)
-         jdn3 = CalendarYearMonthDayToJulianDateNumber(1582, 10, 15)
-         jdn4 = CalendarYearMonthDayToJulianDateNumber(2001, 1, 1)
+      INTEGER          IYEAR, IMONTH, IDAY, IHOUR, IMIN, ISEC, IDATE, ITIME, MONLEN(12)
+      DOUBLE PRECISION TEMP1, TEMP2
+!
+!***********************************************************************
+!
+!     Initialize lenghts of months :
+!
+      DATA MONLEN / 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 /
+!
+!***********************************************************************
+!
+!
+!
+      IYEAR  = IDATE/10000
+      IMONTH = IDATE/100 - IYEAR*100
+      IDAY   = IDATE - IYEAR*10000 - IMONTH*100
+      IHOUR  = ITIME/10000
+      IMIN   = ITIME/100 - IHOUR*100
+      ISEC   = ITIME - IHOUR*10000 - IMIN*100
+      
+      IF (( IYEAR  .LT. -4713 ) .OR. ( IMONTH .LT.  1 ) .OR. &
+          ( IMONTH .GT.    12 ) .OR. ( IDAY   .LT.  1 ) .OR. &
+          ( IDAY   .GT. MONLEN(IMONTH) ) .OR. &
+          ( IHOUR  .LT.     0 ) .OR. ( IHOUR  .GT. 23 ) .OR. &
+          ( IMIN   .LT.     0 ) .OR. ( IMIN   .GT. 59 ) .OR. &
+          ( ISEC   .LT.     0 ) .OR. ( ISEC   .GT. 60 )) THEN
+!!!GP original check was op 59 seconden, gaf afrondingsproblemen; daarom nu op 60 gezet
+!!!  5    ( ISEC   .LT.     0 ) .OR. ( ISEC   .GT. 59 )) THEN
+         JULIAN = -1.0
+         GOTO 999
+      ELSE if (compareDates([iyear, imonth, iday], justAfterLastJulian) == -1) then
+         TEMP2 = JulianYearMonthDayToJulianDateNumber(iyear, imonth, iday)
+         TEMP1  = FLOAT ( IHOUR ) * 3600.0 + &
+                  FLOAT ( IMIN  ) *   60.0 + &
+                  FLOAT ( ISEC  ) - 43200.0
+         JULIAN = TEMP2 + ( TEMP1 / 86400.0 ) - offset_reduced_jd
+      ELSE
+         TEMP1  = INT (( IMONTH-14.0) / 12.0 )
+         TEMP2  = IDAY - 32075.0 + &
+                INT ( 1461.0 * ( IYEAR + 4800.0 + TEMP1 ) / 4.0 ) + &
+                INT ( 367.0 * ( IMONTH - 2.0 - TEMP1 * 12.0 ) / 12.0 ) - &
+                INT ( 3.0 * INT ( ( IYEAR + 4900.0 + TEMP1 ) / 100.0 ) / &
+                4.0 )
+         TEMP1  = FLOAT ( IHOUR ) * 3600.0 + &
+                  FLOAT ( IMIN  ) *   60.0 + &
+                  FLOAT ( ISEC  ) - 43200.0
+         JULIAN = TEMP2 + ( TEMP1 / 86400.0 ) - offset_reduced_jd
+      ENDIF
+  999 RETURN
+      END FUNCTION JULIAN
 
-         if (jdn1 /= 1721424) write(*,*) 'error for 1-1-1'
-         if (jdn2 /= 2299160) write(*,*) 'error for 4-10-1582'
-         if (jdn3 /= 2299161) write(*,*) 'error for 15-10-1582'
-         if (jdn4 /= 2451911) write(*,*) 'error for 1-1-2001'
+      SUBROUTINE GREGOR ( JULIAN, IYEAR , IMONTH, IDAY  , IHOUR , IMIN  , ISEC  , DSEC)
+!***********************************************************************
+!
+!     Description of module :
+!
+!        This functions returns the Gregorian date and the time of a so
+!        called Julian day, or iyear -9999 if an error occurred.
+!
+!        The Julian day of a date is the number of days that has passed
+!        since January 1, 4712 BC at 12h00 ( Gregorian). It is usefull
+!        to compute differces between dates. ( See DOUBLE PRECISION
+!        FUNCTION JULIAN for the reverse proces ).
+!
+!***********************************************************************
+!
+!     Arguments :
+!
+!     Name   Type     In/Out Size            Description
+!     ------ -----    ------ -------         ---------------------------
+!     JULIAN real*8   in     -               Julian day
+!     IYEAR  integer  out    -               Year   ( -4713-.. )
+!     IMONTH integer  out    -               Month  ( 1-12 )
+!     IDAY   integer  out    -               Day    ( 1-28,29,30 or 31 )
+!     IHOUR  integer  out    -               Hour   ( 0-23 )
+!     IMIN   integer  out    -               Minute ( 0-59 )
+!     ISEC   integer  out    -               Second ( 0-59 )
+!     DSEC   real*8   out    -               Second as double
+!
+!     Local variables :
+!
+!     Name   Type     Size   Description
+!     ------ -----    ------ ------------------------
+!     TEMP1  real*8   -      Temporary variable
+!     TEMP2  real*8   -      Temporary variable
+!     TEMP3  real*8   -      Temporary variable
+!     TEMP4  real*8   -      Temporary variable, JULIAN
+!     TEMP5  real*8   -      Temporary variable, fractional part JULIAN
+!
+!     Calls to : none
+!
+!***********************************************************************
+!
+!     Variables :
+!
+      INTEGER           :: IYEAR , IMONTH, IDAY  , IHOUR , IMIN  , ISEC
+      DOUBLE PRECISION  :: JULIAN, TEMP1 , TEMP2 , TEMP3 , TEMP4 , TEMP5
+      DOUBLE PRECISION  :: DSEC
+      DOUBLE PRECISION  :: myJULIAN, delta
+      integer           :: nTry
+!
+!***********************************************************************
+!
+      delta = 0.0D+00
+ 
+      IF ( JULIAN .LT. 0.0 ) THEN
+         IYEAR = -9999
+      ELSE IF ( JULIAN < real(firstGregorianDayNr, hp)) then
+         IYEAR = -9999 ! not yet implemented
+      ELSE
+         nTry = 1
+         DO WHILE ( nTry <= 2 )
+             myJULIAN= JULIAN + delta
+             TEMP4 = myJULIAN
+             TEMP5 = DMOD ( myJULIAN, 1.0D0 )
+             IF ( TEMP5 .LT. 0.5 ) THEN
+                TEMP3  = 0.5 + TEMP5
+                TEMP4  = DINT ( TEMP4 )
+             ELSE
+                TEMP3  = TEMP5 - 0.5
+                TEMP4  = DINT ( TEMP4 ) + 1.0
+             ENDIF
+             TEMP1  = TEMP4 + 68569.0
+             TEMP2  = DINT  ( 4.0 * TEMP1 / 146097.0 )
+             TEMP1  = TEMP1 - DINT ( ( 146097.0 * TEMP2 + 3.0 ) / 4.0 )
+             IYEAR  = INT   ( 4000.0 * ( TEMP1 + 1.0 ) / 1461001.0 )
+             TEMP1  = TEMP1 - DINT ( (1461.0D0 * IYEAR) / 4.0 ) + 31.0
+             IMONTH = INT   ( 80.0 * TEMP1 / 2447.0 )
+             IDAY   = INT   ( TEMP1 - AINT ( 2447.0 * IMONTH / 80.0 ) )
+             TEMP1  = DINT  ( dble(IMONTH / 11.0D0) )
+             IMONTH = INT   ( IMONTH + 2.0 - 12.0 * TEMP1 )
+             IYEAR  = INT   ( 100.0 * ( TEMP2 - 49.0 ) + IYEAR + TEMP1 )
+             IHOUR  = INT   ( TEMP3 * 24.0 )
+             IMIN   = INT   ( TEMP3 * 1440.0 - 60.0 * IHOUR )
+             DSEC   =         TEMP3 * 86400.0 - 3600.0 * IHOUR - 60.0*IMIN
+             ISEC   = NINT  ( DSEC )
 
-         mjd = 55833.5
-         istat = mjd2date(mjd, yyyymmdd)
-         mjd2 = ymd2mjd(yyyymmdd)
-         if (mjd /= mjd2) write(*,*) 'error for mjd=55833.5'
+             if ( isec >= 60 ) then
+                 if ( nTry < 2 ) then
+                     delta = 0.49999D+00 / 86400.0D+00
+                     nTry = nTry + 1
+                 else
+                     IYEAR = -9999
+                     exit
+                 endif
+             else
+                 exit
+             endif
+         ENDDO
 
-         yyyymmdd = 15821015
-         mjd = ymd2mjd(yyyymmdd)
-         istat = mjd2date(mjd, yyyymmdd2)
-         if (yyyymmdd /= yyyymmdd2) write(*,*) 'error for yyyymmdd = 15821015'
+      ENDIF
 
-         yyyymmdd = 15821004
-         mjd2 = ymd2mjd(yyyymmdd)
-         istat = mjd2date(mjd, yyyymmdd2)
-         if (yyyymmdd /= yyyymmdd2) write(*,*) 'error for yyyymmdd = 15821004'
-         if (abs(mjd - mjd2 - 1d0) > 1d-4) write(*,*) 'error for jump 15821004 -> 15821015'
-
-      contains
-      function ymd2mjd(ymd) result(days)
-         implicit none
-         integer, intent(in)       :: ymd
-         real(kind=hp)             :: days
-         integer       :: year, month, day, hour, minute
-         real(kind=hp) :: second
-         !year   = int(ymd/10000)
-         !month  = int(mod(ymd,10000)/100)
-         !day    = mod(ymd,100)
-         call splitDate(ymd, year, month, day)
-         days = date2mjd(year,month,day,0,0,0.d0)
-      end function
-
-      end subroutine testConversion
+      END SUBROUTINE GREGOR
 
 end module time_module

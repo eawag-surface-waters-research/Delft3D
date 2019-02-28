@@ -38,7 +38,6 @@ if (executable == ""):
     sys.exit()
 
 abs_exec = os.path.abspath(executable)
-print (abs_exec)
 args = ["-v", "-c"] 
 
 for root, dirs, files in os.walk("."):

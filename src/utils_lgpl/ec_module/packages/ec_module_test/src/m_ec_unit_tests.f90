@@ -25,18 +25,14 @@ module m_ec_unit_tests
    contains
 
    subroutine TestEcGetTimesteps(success, errMessage)
-      use m_ec_parameters
       logical,          intent(out) :: success     !< all tests are successful or not
       character(len=*), intent(out) :: errMessage  !< error message in case an error failed
 
-      character(len=MaxNameLen) :: rec1
-      character(len=MaxNameLen) :: rec2
+      character(len=*), parameter :: rec1 = 'TIME = 0 hours since 2006-01-01 00:00:00 +00:00'
+      character(len=*), parameter :: rec2 = 'TIME = 0 hour since 2006-01-01 00:00:00 +00:00'
       real(kind=hp) :: time_steps
       real(kind=hp), parameter :: time_step_expected1 = 53736.0_hp
       real(kind=hp), parameter :: time_step_expected2 = 0.0_hp
-
-      rec1 = 'TIME = 0 hours since 2006-01-01 00:00:00 +00:00'
-      rec2 = 'TIME = 0 hour since 2006-01-01 00:00:00 +00:00'
 
       errMessage = ' '
       call clearECMessage()
@@ -80,8 +76,7 @@ module m_ec_unit_tests
       !
       ! test 4: error handling
       !
-      rec1 = ' '
-      success = .not. ecGetTimesteps(rec1, time_steps)
+      success = .not. ecGetTimesteps(' ', time_steps)
       if (success) then
          success = (getEcMessage() == '|ec_support::ecGetTimesteps: Input string is empty.|')
       endif

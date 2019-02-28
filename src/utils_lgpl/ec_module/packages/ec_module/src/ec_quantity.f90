@@ -45,6 +45,8 @@ module m_ec_quantity
    public :: ecQuantityFree1dArray
    public :: ecQuantitySet
    public :: ecQuantitySetUnitsFillScaleOffsetFromNcidVarid
+   public :: ecQuantitySetName
+   public :: ecQuantitySetTimeint
    
    contains
       
@@ -218,4 +220,62 @@ module m_ec_quantity
          
       end function ecQuantitySetUnitsFillScaleOffsetFromNcidVarid
      
+      ! =======================================================================
+      
+      !> Change the name of the Quantity corresponding to quantityId.
+      function ecQuantitySetName(instancePtr, quantityId, newName) result(success)
+         logical                               :: success     !< function status
+         type(tEcInstance), pointer            :: instancePtr !< intent(in)
+         integer,                   intent(in) :: quantityId  !< unique Quantity id
+         character(*),              intent(in) :: newName     !< new name of the Quantity
+         !
+         type(tEcQuantity), pointer :: quantityPtr !< Quantity corresponding to quantityId
+         character(len=maxNameLen)  :: name        !< new name of the Quantity, converted to the correct length
+         !
+         success = .false.
+         quantityPtr => null()
+         !
+         if (len_trim(newName) > maxNameLen) then
+            call setECMessage("ERROR: ec_quantity::ecQuantitySetName: The new name string is too long, unable to change name.")
+         else
+            name = newName
+         end if
+         quantityPtr => ecSupportFindQuantity(instancePtr, quantityId)
+         if (associated(quantityPtr)) then
+            quantityPtr%name = name
+            success = .true.
+         else
+            call setECMessage("ERROR: ec_quantity::ecQuantitySetName: Cannot find a Quantity with the supplied id.")
+         end if
+      end function ecQuantitySetName
+
+      ! =======================================================================
+      
+      !> Change the timeinterpolation type of the Quantity corresponding to quantityId.
+      function ecQuantitySetTimeint(instancePtr, quantityId, timeint, periodic) result(success)
+         logical                               :: success     !< function status
+         type(tEcInstance), pointer            :: instancePtr !< intent(in)
+         integer,                   intent(in) :: quantityId  !< unique Quantity id
+         integer,                   intent(in) :: timeint     !< new vectormax of the Quantity
+         logical, optional,         intent(in) :: periodic    !< periodic time function?
+         !
+         type(tEcQuantity), pointer :: quantityPtr !< Quantity corresponding to quantityId
+         !
+         success = .false.
+         quantityPtr => null()
+         !
+         quantityPtr => ecSupportFindQuantity(instancePtr, quantityId)
+         if (associated(quantityPtr)) then
+            quantityPtr%timeint = timeint
+            if (present(periodic)) then
+               if (periodic) then
+                   quantityPtr%periodic = periodic
+               endif
+            endif
+            success = .true.
+         else
+            call setECMessage("ERROR: ec_quantity::ecQuantitySetTimeint: Cannot find a Quantity with the supplied id.")
+         end if
+      end function ecQuantitySetTimeint
+      
 end module m_ec_quantity

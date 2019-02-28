@@ -40,6 +40,7 @@ module m_ec_parameters
    integer,  parameter :: maxFileNameLen       = 256
    integer,  parameter :: maxFileReaderFiles   = 3
    integer             :: maxFileUnits         = 2000   !< may be lowered if too high for current OS
+   integer,  parameter :: numberOfTargetItems  = 4
 
    integer,  parameter :: EC_MISSING_VALUE = -999
    integer,  parameter :: ec_undef_int = -987
@@ -196,6 +197,7 @@ module m_ec_parameters
     integer, parameter :: BC_TIMEINT_LIN_EXTRAPOL  = 4   !< linear
 
     ! Vertical position type
+    integer, parameter :: BC_VPTYP_SINGLE      = 0   !< depth averaged
     integer, parameter :: BC_VPTYP_PERCBED     = 1   !< precentage from bed
     integer, parameter :: BC_VPTYP_ZDATUM      = 2   !< z above datum
     integer, parameter :: BC_VPTYP_ZDATUM_DOWN = 3   !< z below datum

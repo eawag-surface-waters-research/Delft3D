@@ -38,6 +38,7 @@ use tree_data_types
 use tree_structures
 use unstruc_messages
 use m_globalparameters, only : t_filenames
+use time_module, only : JULIAN
 
 implicit none
 
@@ -1192,6 +1193,8 @@ subroutine readMDUFile(filename, istat)
 
 ! Time
     call prop_get_string(md_ptr, 'time', 'RefDate', refdat)
+    read(refdat,*) irefdate
+    refdate_mjd = JULIAN(irefdate, 0)
     call prop_get_double(md_ptr, 'time', 'Tzone', Tzone)
     call prop_get_string(md_ptr, 'time', 'Tunit', md_tunit)
     call prop_get_double(md_ptr, 'time', 'TStart', tstart_user)

@@ -22,6 +22,8 @@
     use m_ec_provider
     use properties
     use string_module
+    use time_module_tests
+    use time_class
     use m_ec_unit_tests
     use tree_data_types
     use tree_structures
@@ -72,6 +74,7 @@
 private
 
    public :: do_test
+   public :: do_test_internal
    public :: TIME_FMT
    public :: DATA_FMT
    public :: time_format
@@ -125,6 +128,7 @@ contains
        logical                             :: has_forcingfile
        logical                             :: results_differ
        character(len=50)                   :: timestr
+       type(c_time)                        :: ec_time
 
       character(len=300):: quantityname, inFilename, inFiletype, method, operand, forcingfile
       integer           :: infiletype_nr, method_nr, operand_nr
@@ -336,8 +340,7 @@ contains
           endif
           write(*,*) 'Writing new reference file '//trim(treeRefFile)
        else
-          ftree=666
-          open(newunit=ftree,file=trim(treeTstFile),iostat=iostat)
+           open(newunit=ftree,file=trim(treeTstFile),iostat=iostat)
           if (iostat/=0) then
              call TCMessage(testname,'Cannot write EC-module tree!','testFailed')
              call ec_test_exception
@@ -423,7 +426,12 @@ contains
 
        comparison_failed = .false.
        do it = 1, tst%ntimes
-          success = ec_gettimespacevalue_by_itemID(ecInstancePtr, itemIDs(1), tst%t(it), targetArray)
+          if (tst%useBcBlockApproach) then
+             call ec_time%set(tst%t(it))
+             success = ecItemGetValues(ecInstancePtr, itemIDs(1), ec_time, targetArray)
+          else
+             success = ec_gettimespacevalue_by_itemID(ecInstancePtr, itemIDs(1), tst%tgt_refdate, tst%tgt_tzone, tst%tgt_tunit, tst%t(it), targetArray)
+          endif
           if (.not.success) then
              call TCMessage(testname,'Error getting value for target item','testFailed',details=dumpECMessageStack(0,ec_test_callback_msg))
              call ec_test_exception
@@ -872,6 +880,39 @@ contains
           call tEcTestDef_destroy(tst)
        end subroutine ec_test_exception
     end subroutine do_test
+
+    subroutine do_test_internal
+       character(len=100) :: testname
+       character(len=300) :: errMessage
+       logical            :: success
+
+       testname = 'time_module_unittests_1'
+       call TCMessage(testname,'','testStarted')
+       call testConversion1(success, errMessage)
+       if (success) then
+         call TCMessage(testname,'Comparison passed','testFinished')
+       else
+         call TCMessage(testname, errMessage, 'testFinished')
+       endif
+
+       testname = 'time_module_unittests_2'
+       call TCMessage(testname,'','testStarted')
+       call testConversion2(success, errMessage)
+       if (success) then
+         call TCMessage(testname,'Comparison passed','testFinished')
+       else
+         call TCMessage(testname, errMessage, 'testFinished')
+       endif
+
+       testname = 'ec_support_unittests'
+       call TCMessage(testname,'','testStarted')
+       call TestEcGetTimesteps(success, errMessage)
+       if (success) then
+         call TCMessage(testname,'Comparison passed','testFinished')
+       else
+         call TCMessage(testname, errMessage, 'testFinished')
+       endif
+    end subroutine do_test_internal
 
     subroutine tEcTestDef_destroy(tst)
       implicit none

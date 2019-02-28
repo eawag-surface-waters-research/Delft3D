@@ -29,14 +29,14 @@
 !> This module contains all the methods for the datatype tEcFileReader.
 !! @author adri.mourits@deltares.nl
 !! @author stef.hummel@deltares.nl
-!! @author edwin.bos@deltares.nl
+!! @author edwin.spee@deltares.nl
 module m_ec_filereader
    use m_ec_typedefs
    use m_ec_message
    use m_ec_parameters
    use m_ec_alloc
    use m_ec_support
-   use m_ec_filereader_read
+   use m_ec_astro
    
    implicit none
    
@@ -96,6 +96,7 @@ module m_ec_filereader
       
       ! =======================================================================
       
+
       !> Free a tEcFileReader, after which it can be deallocated.
       function ecFileReaderFree(fileReader) result(success)
       use m_ec_bcreader, only : ecBCBlockFree
@@ -259,7 +260,7 @@ module m_ec_filereader
                   end do
                   success = .true.
                case (BC_FUNC_ASTRO)
-                  success = ecTimeFrameRealHpTimestepsToDateTime(fileReaderPtr%tframe, timesteps, yyyymmdd, hhmmss)
+                  success = ecTimeFrameRealHpTimestepsToDateTime(timesteps, yyyymmdd, hhmmss)
                   n_invalid_components = (ecFileReaderLookupAstroComponents(fileReaderPtr)) 
                   do i = 1, size(fileReaderPtr%items(1)%ptr%sourceT1FieldPtr%arr1d)
                      fileReaderPtr%items(1)%ptr%sourceT0FieldPtr%arr1d(i) = fileReaderPtr%items(1)%ptr%sourceT1FieldPtr%arr1d(i)
@@ -327,7 +328,7 @@ module m_ec_filereader
             case (provFile_fourier)
                success = .true.
                if(allocated(fileReaderPtr%items(1)%ptr%sourceT0FieldPtr%astro_components)) then ! Astronomical case
-                  success = ecTimeFrameRealHpTimestepsToDateTime(fileReaderPtr%tframe, timesteps, yyyymmdd, hhmmss)
+                  success = ecTimeFrameRealHpTimestepsToDateTime(timesteps, yyyymmdd, hhmmss)
                   n_invalid_components = (ecFileReaderLookupAstroComponents(fileReaderPtr)) 
                   do i = 1, size(fileReaderPtr%items(1)%ptr%sourceT1FieldPtr%arr1d)
                      fileReaderPtr%items(1)%ptr%sourceT0FieldPtr%arr1d(i) = fileReaderPtr%items(1)%ptr%sourceT1FieldPtr%arr1d(i)
@@ -357,7 +358,7 @@ module m_ec_filereader
                itemPtr => fileReaderPtr%items(1)%ptr
                if (itemPtr%sourceT0FieldPtr%timesndx < 0) then
                   t0t1 = 0 
-                  timesndx  = ecNetcdfGetTimeIndexByTime(fileReaderPtr, timesteps)
+                  timesndx  = ecNetcdfGetTimeIndexByTime(fileReaderPtr, timesteps)           ! timesteps is MJD in the new EC-module ? CHECK!
                elseif (itemPtr%sourceT0FieldPtr%timesndx > itemPtr%sourceT1FieldPtr%timesndx) then
                   t0t1 = 1
                   timesndx = itemPtr%sourceT0FieldPtr%timesndx + 1
@@ -366,8 +367,7 @@ module m_ec_filereader
                   timesndx = itemPtr%sourceT1FieldPtr%timesndx + 1
                endif
                select case (qname)
-               case ('hrms', 'tp', 'tps', 'rtp', 'dir', 'fx', 'fy', 'wsbu', 'wsbv', 'mx', 'my', 'dissurf','diswcap','ubot')
-                  ! TODO: see if we really need this case or that it can pass as the default case
+               case ('hrms', 'tp', 'tps', 'rtp', 'dir', 'fx', 'fy', 'wsbu', 'wsbv', 'mx', 'my', 'dissurf','diswcap','ubot')   ! TODO RL: kijken of dit eruit kan 
                   t0t1 = -1
                   do i=1, fileReaderPtr%nItems
                      success = ecNetcdfReadBlock(fileReaderPtr, fileReaderPtr%items(i)%ptr, t0t1, fileReaderPtr%items(i)%ptr%elementSetPtr%nCoordinates)                  
@@ -389,15 +389,15 @@ module m_ec_filereader
                         success = ecNetcdfReadNextBlock(fileReaderPtr, fileReaderPtr%items(i)%ptr, t0t1, timesndx)
                      end do      
                   endif
-!                 if (itemPtr%sourceT1FieldPtr%timesndx < itemPtr%sourceT0FieldPtr%timesndx) then   ! RL: These checks should be equivalent, but the lower one is used for other types 
                   if (t0t1 == 0) then
                      ! flip t0 and t1
                      do i=1, fileReaderPtr%nItems
+                        ! flip t0 and t1
                         fieldPtrA => fileReaderPtr%items(i)%ptr%sourceT1FieldPtr
                         fileReaderPtr%items(i)%ptr%sourceT1FieldPtr => fileReaderPtr%items(i)%ptr%sourceT0FieldPtr
                         fileReaderPtr%items(i)%ptr%sourceT0FieldPtr => fieldPtrA
-                     end do      
-                  endif
+                     end do
+                  end if
                end select
             case (provFile_svwp, provFile_svwp_weight, provFile_curvi_weight, provFile_samples, &
                   provFile_triangulationmagdir, provFile_poly_tim, provFile_grib)
@@ -552,6 +552,7 @@ module m_ec_filereader
                   itemPtr%quantityPtr%vectormax = fileReaderPtr%bc%quantity%vectormax
                end select
             endif 
+            itemPtr%tframe => fileReaderPtr%tframe
             success = .true.
          end if
       end function ecFileReaderAddItem

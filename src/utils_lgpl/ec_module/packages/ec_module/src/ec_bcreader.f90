@@ -285,10 +285,11 @@ contains
     integer, allocatable             ::     iv(:), il(:), perm_vpos(:)
 
     integer                          ::     ipos, npos, posfs, ipos1, ipos2
-    integer                          ::     iq, iq_sel, idim
+    integer                          ::     iq, iq_sel, idim, kmax
     integer, parameter               ::     MAXDIM = 10    !< max number of vector quantities in one vector
     character(len=maxNameLen)        ::     vectorquantities(MAXDIM)
     character(len=maxNameLen)        ::     vectordefinition, vectorstr
+    real(kind=hp), pointer           ::     vp_new(:)
 
     success = .false.
     if (allocated(hdrkeys)) then
@@ -317,6 +318,9 @@ contains
     bc%quantity%col2elm = -1
     vectordefinition = ''
 
+
+! HIER GAAT IETS FOUT, KIJK IN DE OORSPRONKELIJKE CODE:
+    
     ipos1=1
     do ifld = 1, nfld
        ipos2 = index(keyvaluestr(ipos1:), "',")+1
@@ -457,6 +461,17 @@ contains
              bc%timeint = BC_TIMEINT_BTO
           case ('BLOCK-FROM')
              bc%timeint = BC_TIMEINT_BFROM
+          case default
+             call setECMessage("Unknown time interpolation '"//trim(adjustl(hdrvals(ifld)%s))//           &
+                                "' in file "//trim(bc%fname)//", block "//trim(bc%bcname)//".") 
+             return
+          end select
+       case ('PERIODIC')
+          select case (trim(adjustl(hdrvals(ifld)%s)))
+          case ('TRUE','T','.T.','1','JA','YES')
+             bc%periodic = .True.
+          case default
+             bc%periodic = .False.
           end select
        case ('VERTICAL INTERPOLATION')
           select case (adjustl(hdrvals(ifld)%s))
@@ -468,12 +483,17 @@ contains
              bc%zInterpolationType = zinterpolate_block
           case default
              bc%zInterpolationType = zinterpolate_unknown
+             call setECMessage("Unknown vertical interpolation '"//trim(adjustl(hdrvals(ifld)%s))//           &
+                                "' in file "//trim(bc%fname)//", block "//trim(bc%bcname)//".") 
+             return
           end select
        case ('VERTICAL POSITION TYPE')
           IF (index(hdrvals(ifld)%s,'PERCEN')+index(hdrvals(ifld)%s,'BED')>0) then
              hdrvals(ifld)%s = 'PERCBED'
           endif
           select case (adjustl(hdrvals(ifld)%s))
+          case ('SINGLE')
+             bc%vptyp = BC_VPTYP_SINGLE
           case ('PERCBED')
              bc%vptyp = BC_VPTYP_PERCBED
           case ('ZDATUM')
@@ -486,6 +506,10 @@ contains
              bc%vptyp = BC_VPTYP_ZBED
           case ('ZSURF')
              bc%vptyp = BC_VPTYP_ZSURF
+          case default
+             call setECMessage("Unknown vertical position type '"//trim(adjustl(hdrvals(ifld)%s))//           &
+                                "' in file "//trim(bc%fname)//", block "//trim(bc%bcname)//".") 
+             return
           end select
        end select
     enddo
@@ -505,6 +529,18 @@ contains
           bc%quantity%col2elm(iq) = -1
        endif
     enddo
+
+    if (associated(bc%vp)) then
+       kmax = size(bc%vp)
+       if (perm_vpos(1) /= 1) then
+         allocate(vp_new(kmax))
+         do iq = 1, kmax
+            vp_new(iq) = bc%vp(perm_vpos(iq))
+         enddo
+         deallocate(bc%vp)
+         bc%vp => vp_new
+       endif
+    endif
 
     deallocate(hdrkeys)
     deallocate(hdrvals)
@@ -662,7 +698,7 @@ contains
               index(rec,'[LateralDischarge]')>0) then ! new boundary chapter
              select case (BCPtr%func)
              case (BC_FUNC_TSERIES, BC_FUNC_TIM3D)
-                call setECMessage("   File: "//trim(bcPtr%fname)//", Location: "//trim(bcPtr%fname)//", Quantity: "//trim(bcPtr%qname))
+                call setECMessage("   File: "//trim(bcPtr%fname)//", Location: "//trim(bcPtr%bcname)//", Quantity: "//trim(bcPtr%qname))
                 call setECMessage("Datablock end (new [forcing] block) has been prematurely reached.")
              end select
              if (present(eof)) then
@@ -690,7 +726,7 @@ contains
           if (n_col_time>0) then
              read (BCPtr%columns(n_col_time), *) ec_timesteps(1)
              ! Convert source time to kernel time:
-             time_steps = ecSupportThisTimeToTimesteps(fileReaderPtr%tframe, ec_timesteps(1))
+             time_steps = ecSupportThisTimeToMJD(fileReaderPtr%tframe, ec_timesteps(1))
           endif
           j=0
           if (count(BCPtr%quantity%col2elm>0)==0) then                ! col2elm is not used to map the read colums, added to the vector in reading order
@@ -750,7 +786,7 @@ contains
           return
        else
           BCPtr%nctimndx = BCPtr%nctimndx + 1
-          time_steps = ecSupportThisTimeToTimesteps(fileReaderPtr%tframe, ec_timesteps(1))
+          time_steps = ecSupportThisTimeToMJD(fileReaderPtr%tframe, ec_timesteps(1))
        endif
     case default
        call setECMessage("Invalid filetype set for file: "//trim(bcPtr%fname)//' (internal EC-error)')

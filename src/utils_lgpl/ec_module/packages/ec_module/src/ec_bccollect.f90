@@ -165,6 +165,7 @@ module m_ec_bccollect
     integer             :: bcBlockId, fileReaderId
     integer             :: ifr 
     logical             :: success, isLateral
+    real(hp)            :: k_mjd                                          ! kernel reference date as Modified Julian date
 
     iostat = EC_UNKNOWN_ERROR
     lineno = 0 
@@ -172,12 +173,12 @@ module m_ec_bccollect
     jaheader = .false.
     isLateral = .false.
 
+    count = 0
     if (.not.ecSupportOpenExistingFileGnu(fhandle, fname)) then
        iostat = EC_DATA_NOTFOUND
        return
     end if
 
-    count = 0
     do while (.not.mf_eof(fhandle))
        call mf_read(fhandle,rec,savepos)
        iostatloc = 0 ! mf_read always ok?
@@ -251,13 +252,14 @@ module m_ec_bccollect
                    !endif              ! Timeseries function 
 
                    if (present(k_refdate) .and. present(k_timezone) .and. present(k_timestep_unit)) then 
+                      k_mjd = date2mjd(k_refdate)
                       if (present(dtnodal)) then
-                         if (.not.ecProviderInitializeTimeFrame(fileReaderPtr, k_refdate, k_timezone, k_timestep_unit, dtnodal)) return
+                         if (.not.ecProviderInitializeTimeFrame(fileReaderPtr, k_mjd, k_timezone, k_timestep_unit, dtnodal)) return
                       else
-                         if (.not.ecProviderInitializeTimeFrame(fileReaderPtr, k_refdate, k_timezone, k_timestep_unit)) return
+                         if (.not.ecProviderInitializeTimeFrame(fileReaderPtr, k_mjd, k_timezone, k_timestep_unit)) return
                       endif
                    else
-                      if (.not.ecProviderInitializeTimeFrame(fileReaderPtr, -1, 0.d0, ec_second)) return
+                      if (.not.ecProviderInitializeTimeFrame(fileReaderPtr, -1.d0, 0.d0, ec_second)) return
                    endif
 
                    if (ecSupportOpenExistingFileGnu(bcBlockPtr%fhandle, fname)) then
@@ -388,6 +390,7 @@ module m_ec_bccollect
                      bc%func = BC_FUNC_TSERIES
                   case ('CONSTANT')                        ! Constant is a special version of time-series (Sobek3)
                      bc%func = BC_FUNC_CONSTANT
+                     bc%timeint = timeint_bfrom            ! Time interpolation keyword is likely absent, default to a0=1 and a1=0
                   case ('T3D')
                      bc%func = BC_FUNC_TIM3D
                      allocate(bc%quantities(1))                     ! joint quantity objects
@@ -421,7 +424,14 @@ module m_ec_bccollect
                   case ('BLOCK-TO')
                      bc%timeint = BC_TIMEINT_BTO
                   case ('BLOCK-FROM')
-                     bc%timeint = BC_TIMEINT_BFROM
+                     bc%timeint = timeint_bfrom
+               end select  
+          case ('PERIODIC')
+               select case (trim(adjustl(hdrvals(ifld))))
+               case ('TRUE','T','.T.','1','JA','YES')
+                  bc%periodic = .True.
+               case default
+                  bc%periodic = .False.
                end select  
        end select 
     enddo 

@@ -40,6 +40,7 @@ module m_ec_converter
    use m_ec_magic_number
    use m_ec_parameters
    use m_ec_spatial_extrapolation
+   use time_class
 
    implicit none
    
@@ -146,7 +147,7 @@ module m_ec_converter
       ! =======================================================================
       ! Set methods
       ! =======================================================================
-      
+
       !> Helper function for initializing a Converter.
       function ecConverterInitialize(instancePtr, converterId, convtype, operand, method, srcmask) result(success)
          logical                    :: success      !< function status
@@ -164,7 +165,7 @@ module m_ec_converter
             if (success) success = ecConverterSetMask(instancePtr, converterId, srcmask)
          end if
       end function ecConverterInitialize
-            
+
       !> Attach a mask instance to the converter masking source points (used in case of arcinfo data)
       function ecConverterSetMask(instancePtr, converterId, srcmask) result(success)
          logical                               :: success     !< function status
@@ -902,33 +903,33 @@ module m_ec_converter
       function ecConverterPerformConversions(connection, timesteps) result (success)
          logical                            :: success    !< function status
          type(tEcConnection), intent(inout) :: connection !< access to Converter and Items
-         real(hp),            intent(in)    :: timesteps  !< convert to this number of timesteps since the kernel's reference date
+         type(c_time),        intent(in)    :: timesteps  !< convert to this number of timesteps since the kernel's reference date
          !
          success = .false.
          !
          select case(connection%converterPtr%ofType)
             case (convType_uniform)
-               success = ecConverterUniform(connection, timesteps)
+               success = ecConverterUniform(connection, timesteps%mjd())
             case (convType_uniform_to_magnitude)
-               success = ecConverterUniformToMagnitude(connection, timesteps)
+               success = ecConverterUniformToMagnitude(connection, timesteps%mjd())
             case (convType_unimagdir)
-               success = ecConverterUnimagdir(connection, timesteps)
+               success = ecConverterUnimagdir(connection, timesteps%mjd())
             case(convType_spiderweb)
-               success = ecConverterSpiderweb(connection, timesteps)
+               success = ecConverterSpiderweb(connection, timesteps%mjd())
             case(convType_fourier)
                success = ecConverterFourier(connection, timesteps)
             case(convType_arcinfo)
-               success = ecConverterArcinfo(connection, timesteps)
+               success = ecConverterArcinfo(connection, timesteps%mjd())
             case(convType_curvi)
-               success = ecConverterCurvi(connection, timesteps)
+               success = ecConverterCurvi(connection, timesteps%mjd())
             case(convType_polytim)
-               success = ecConverterPolytim(connection, timesteps)
+               success = ecConverterPolytim(connection, timesteps%mjd())
             case(convType_netcdf)
-               success = ecConverterNetcdf(connection, timesteps)
+               success = ecConverterNetcdf(connection, timesteps%mjd())
             case(convType_qhtable)
-               success = ecConverterQhtable(connection, timesteps)
+               success = ecConverterQhtable(connection, timesteps%mjd())
             case(convType_samples)
-               success = ecConverterSamples(connection, timesteps)
+               success = ecConverterSamples(connection, timesteps%mjd())
             case default
                call setECMessage("ERROR: ec_converter::ecConverterPerformConversions: Unknown Converter type requested.")
          end select
@@ -1022,10 +1023,20 @@ module m_ec_converter
          targetField => null()
          !
          ! ===== interpolation =====
-         ! linear interpolation in time
-         t0 = connection%sourceItemsPtr(1)%ptr%sourceT0FieldPtr%timesteps
-         t1 = connection%sourceItemsPtr(1)%ptr%sourceT1FieldPtr%timesteps
-         call time_weight_factors(a0, a1, timesteps, t0, t1)
+         ! linear interpolation in time, or block(to:from)
+         select case(connection%sourceItemsPtr(1)%ptr%quantityptr%timeint)
+         case (timeint_lin, timeint_lin_extrapol)   
+            ! linear interpolation in time
+            t0 = connection%sourceItemsPtr(1)%ptr%sourceT0FieldPtr%timesteps
+            t1 = connection%sourceItemsPtr(1)%ptr%sourceT1FieldPtr%timesteps
+            call time_weight_factors(a0, a1, timesteps, t0, t1)
+         case (timeint_bto)   
+            a0 = 0.0d0
+            a1 = 1.0d0
+         case (timeint_bfrom)   
+            a0 = 1.0d0
+            a1 = 0.0d0
+         end select
          !
          valuesT0 => connection%sourceItemsPtr(1)%ptr%sourceT0FieldPtr%arr1dPtr
          valuesT1 => connection%sourceItemsPtr(1)%ptr%sourceT1FieldPtr%arr1dPtr
@@ -1329,7 +1340,7 @@ module m_ec_converter
          !
          integer  :: i, k             !< loop counters
          real(hp) :: wL, wR           !< left and right weights
-         integer  :: kL, kR, kkL, kkR !< 
+         integer  :: kL, kR           !< 
          integer  :: maxlay_tgt       !< size of ElementSet of the TARGET in third dimension (if relevant), a.k.a kmx 
          integer  :: maxlay_src       !< size of ElementSet of the SOURCE in third dimension (if relevant)
          integer  :: maxlay_srcL      !< number of layers at the LEFT interpolation support point
@@ -1488,39 +1499,11 @@ module m_ec_converter
                                  do k=kbegin,kend
                                     ! RL: BUG!!! z(k) not initialised if the model is not 3D !!! TO BE FIXED !!!!!!!!!!!!!!
                                     if ( sigma(k) < 0.5*ec_undef_hp ) cycle
-                                    do kkL=0, maxlay_srcL-1                       ! find vertical indices and weights for the LEFT point
-                                       if (sigma(k)<=sigmaL(kkL+1)) exit 
-                                    enddo
-                                    if (kkL==0) then                              ! only use upper of idxL1 and idxL2
-                                       wwL = 0.5d0
-                                       idxL2 = maxlay_src*(kL-1) + kkL + 1
-                                       idxL1 = idxL2
-                                    elseif (kkL==maxlay_srcL) then                ! only use lower of idxL1 and idxL2
-                                       wwL = 0.5d0
-                                       idxL1 = maxlay_src*(kL-1) + kkL 
-                                       idxL2 = idxL1
-                                    else                                          ! save to use both idxL1 AND idxL2
-                                       wwL = (sigmaL(kkL+1)-sigma(k)) / (sigmaL(kkL+1)-sigmaL(kkL))
-                                       idxL1 = maxlay_src*(kL-1) + kkL
-                                       idxL2 = maxlay_src*(kL-1) + kkL + 1
-                                    endif 
 
-                                    do kkR=0, maxlay_srcR-1                       ! find vertical indices and weights for the RIGHT point
-                                       if (sigma(k)<=sigmaR(kkR+1)) exit 
-                                    enddo
-                                    if (kkR==0) then
-                                       wwR = 0.5d0
-                                       idxR2 = maxlay_src*(kR-1) + kkR + 1
-                                       idxR1 = idxR2
-                                    elseif (kkR==maxlay_srcR) then 
-                                       wwR = 0.5d0
-                                       idxR1 = maxlay_src*(kR-1) + kkR
-                                       idxR2 = idxR1
-                                    else 
-                                       wwR = (sigmaR(kkR+1)-sigma(k)) / (sigmaR(kkR+1)-sigmaR(kkR))
-                                       idxR1 = maxlay_src*(kR-1) + kkR
-                                       idxR2 = maxlay_src*(kR-1) + kkR + 1
-                                    endif 
+                                    ! find vertical indices and weights for the LEFT point
+                                    call findVerticalIndexWeight(sigma(k), sigmaL, maxlay_src, maxlay_srcL, kL, wwL, idxL1, idxL2)
+                                    ! find vertical indices and weights for the RIGHT point
+                                    call findVerticalIndexWeight(sigma(k), sigmaR, maxlay_src, maxlay_srcR, kR, wwR, idxR1, idxR2)
 
                                     ! idx are in terms of vector for a specific pli-point and layer 
                                     valL1(1:vectormax) = connection%sourceItemsPtr(1)%ptr%targetFieldPtr%arr1Dptr((idxL1-1)*vectormax+1:(idxL1)*vectormax)
@@ -1602,6 +1585,32 @@ module m_ec_converter
       end function ecConverterPolytim
 !     maxlaysource 
 
+      subroutine findVerticalIndexWeight(sigmak, sigma, maxdimlay_src, maxlay_src, kLR, ww, idx1, idx2)
+         real(kind=hp), intent(in) :: sigmak, sigma(:)
+         integer, intent(in) :: maxdimlay_src, maxlay_src, kLR
+         real(kind=hp), intent(out) :: ww
+         integer, intent(out) :: idx1, idx2
+
+         integer :: kkl
+
+         do kkL = 0, maxlay_src-1                      ! find vertical indices
+            if (sigmak <= sigma(kkL+1)) exit
+         enddo
+
+         if (kkL==0) then                              ! only use upper of idxL1 and idxL2
+            ww = 0.5d0
+            idx2 = maxdimlay_src*(kLR-1) + kkL + 1
+            idx1 = idx2
+         elseif (kkL==maxlay_src) then                 ! only use lower of idxL1 and idxL2
+            ww = 0.5d0
+            idx1 = maxdimlay_src*(kLR-1) + kkL
+            idx2 = idx1
+         else                                          ! save to use both idxL1 AND idxL2
+            ww = (sigma(kkL+1)-sigmak) / (sigma(kkL+1)-sigma(kkL))
+            idx1 = maxdimlay_src*(kLR-1) + kkL
+            idx2 = maxlay_src*(kLR-1) + kkL + 1
+         endif
+      end subroutine findVerticalIndexWeight
       ! =======================================================================
 
       !> Perform the configured conversion, if supported, for a curvi FileReader.
@@ -1948,11 +1957,12 @@ module m_ec_converter
       function ecConverterFourier(connection, timesteps) result (success)
          logical                            :: success    !< function status
          type(tEcConnection), intent(inout) :: connection !< access to Converter and Items
-         real(hp),            intent(in)    :: timesteps  !< convert to this number of timesteps past the kernel's reference date
+         type(c_time),        intent(in)    :: timesteps  !< time in mjd
          !
          integer                                          :: i, j      !< loop counters
          character(len=maxNameLen)                        :: str       !< helper variable
          logical                                          :: is_astro  !< flag for astronomical signal
+         real(hp)                                         :: refdate   !< reference date for this source in mjd
          real(hp)                                         :: tseconds  !< time in seconds
          real(hp)                                         :: tnodal    !< start time (seconds after reftime)
          real(hp)                                         :: omega     !< angular velocity [rad/minute]
@@ -1969,13 +1979,14 @@ module m_ec_converter
             ! Source data at timesteps t is generated from the seed data in sourceT0Field.
             ! === FileReader contains periods. ===
             is_astro = .false.
+            refdate = connection%sourceItemsPtr(1)%ptr%tframe%ec_refdate
             do j=1, connection%sourceItemsPtr(1)%ptr%elementSetPtr%nCoordinates
                do i=1, connection%nSourceItems
                   str = connection%sourceItemsPtr(i)%ptr%quantityPtr%name
                   if (trim(str) == 'period') then
                      omega = connection%sourceItemsPtr(i)%ptr%sourceT0FieldPtr%arr1dPtr(j)
                      is_astro = allocated(connection%sourceItemsPtr(i)%ptr%sourceT0FieldPtr%astro_components)
-                     tnodal = connection%sourceItemsPtr(i)%ptr%sourceT0FieldPtr%timesteps
+                     tnodal = (connection%sourceItemsPtr(i)%ptr%sourceT0FieldPtr%timesteps - refdate)
                   else if (trim(str) == 'phase') then
                      phase0 = connection%sourceItemsPtr(i)%ptr%sourceT0FieldPtr%arr1dPtr(j)
                   else if (trim(str) == 'magnitude') then
@@ -1983,11 +1994,11 @@ module m_ec_converter
                   end if
                end do
                if(is_astro) then
-                  tseconds = timesteps - tnodal
+                  tseconds = timesteps%seconds() - tnodal * 86400.0_hp
                else
-                  tseconds = timesteps
+                  tseconds = timesteps%seconds()
                endif
-               phase = omega * (tseconds/60) - phase0                         ! omega, angle velocity [rad/minute]
+               phase = omega * (tseconds/60.0_hp) - phase0                      ! omega, angle velocity [rad/minute]
                deflection = deflection + magnitude * cos(phase)
             end do
             select case(connection%converterPtr%operandType)

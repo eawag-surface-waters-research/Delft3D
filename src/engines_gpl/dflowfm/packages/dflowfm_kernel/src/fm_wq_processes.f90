@@ -888,6 +888,7 @@
    subroutine copy_data_from_fm_to_wq_processes(time) 
       use m_flowgeom,       only: Ndxi, ba
       use m_flow,           only: vol1, sa1, tem1, ucx, ucy
+      use m_flowtimes,      only: irefdate, tunit
       use m_fm_wq_processes           
       use m_transport,      only: itrac2const, constituents
       use m_sferic,         only: twopi
@@ -918,7 +919,7 @@
       
       if (nofun>0) then
          do ifun=1,nofun
-            success = ec_gettimespacevalue(ecInstancePtr, item_waqfun(ifun), time)
+            success = ec_gettimespacevalue(ecInstancePtr, item_waqfun(ifun), irefdate, tzone, tunit, time)
          end do
          ip = arrpoi(iifunc)
          do ifun=1,nofun

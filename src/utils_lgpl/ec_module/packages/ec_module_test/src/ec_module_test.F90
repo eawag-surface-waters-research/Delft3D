@@ -88,28 +88,32 @@
     is_internal = (configfilename == 'internal')
 
     ! Open configuration file
-    call tree_create(trim(configfilename), config_ptr)
-    call prop_inifile(trim(configfilename), config_ptr, readerr)                       ! without preprocessing the mdu-file
-    if ( readerr /= 0 ) then
-       call TCMessage(testname,'Cannot open file '//trim(configfilename),'testFailed')
-       stop ''
-    endif
+    if (is_internal) then
+       call do_test_internal
+    else
+       call tree_create(trim(configfilename), config_ptr)
+       call prop_inifile(trim(configfilename), config_ptr, readerr)                       ! without preprocessing the mdu-file
+       if ( readerr /= 0 ) then
+          call TCMessage(testname,'Cannot open file '//trim(configfilename),'testFailed')
+          stop ''
+       endif
 
-    if (multitest) then
-       open (newunit=lun, file=testlistname, status='OLD', iostat=iostat)
-       if (iostat==0) then
-          iostat = 0
-          do while(.True.)
-             read(lun,'(a)',iostat=iostat) regel
-             if (is_iostat_end(iostat)) exit
-             if (len_trim(regel)>0 .and. regel(1:1)/='#') then
-                read(regel,*) configfilepath, configfilename, testname
-                call chdir(trim(configfilepath))
-                call do_test(verbose, jacompare, janewref, config_ptr, testname, stop_on_differ)   ! Loop over tests
-                call chdir(trim(startupDir))
-             endif
-          enddo
-          close(lun)
+       if (multitest) then
+          open (newunit=lun, file=testlistname, status='OLD', iostat=iostat)
+          if (iostat==0) then
+             iostat = 0
+             do while(.True.)
+                read(lun,'(a)',iostat=iostat) regel
+                if (is_iostat_end(iostat)) exit
+                if (len_trim(regel)>0 .and. regel(1:1)/='#') then
+                   read(regel,*) configfilepath, configfilename, testname
+                   call chdir(trim(configfilepath))
+                   call do_test(verbose, jacompare, janewref, config_ptr, testname, stop_on_differ)   ! Loop over tests
+                   call chdir(trim(startupDir))
+                endif
+             enddo
+             close(lun)
+          endif
        endif
 
        if (singletest) then

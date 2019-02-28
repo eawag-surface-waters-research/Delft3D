@@ -1,27 +1,27 @@
 !----- LGPL --------------------------------------------------------------------
-!                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2019.                                
-!                                                                               
-!  This library is free software; you can redistribute it and/or                
-!  modify it under the terms of the GNU Lesser General Public                   
-!  License as published by the Free Software Foundation version 2.1.            
-!                                                                               
-!  This library is distributed in the hope that it will be useful,              
-!  but WITHOUT ANY WARRANTY; without even the implied warranty of               
-!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU            
-!  Lesser General Public License for more details.                              
-!                                                                               
-!  You should have received a copy of the GNU Lesser General Public             
-!  License along with this library; if not, see <http://www.gnu.org/licenses/>. 
-!                                                                               
-!  contact: delft3d.support@deltares.nl                                         
-!  Stichting Deltares                                                           
-!  P.O. Box 177                                                                 
-!  2600 MH Delft, The Netherlands                                               
-!                                                                               
-!  All indications and logos of, and references to, "Delft3D" and "Deltares"    
-!  are registered trademarks of Stichting Deltares, and remain the property of  
-!  Stichting Deltares. All rights reserved.                                     
+!
+!  Copyright (C)  Stichting Deltares, 2011-2019.
+!
+!  This library is free software; you can redistribute it and/or
+!  modify it under the terms of the GNU Lesser General Public
+!  License as published by the Free Software Foundation version 2.1.
+!
+!  This library is distributed in the hope that it will be useful,
+!  but WITHOUT ANY WARRANTY; without even the implied warranty of
+!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+!  Lesser General Public License for more details.
+!
+!  You should have received a copy of the GNU Lesser General Public
+!  License along with this library; if not, see <http://www.gnu.org/licenses/>.
+!
+!  contact: delft3d.support@deltares.nl
+!  Stichting Deltares
+!  P.O. Box 177
+!  2600 MH Delft, The Netherlands
+!
+!  All indications and logos of, and references to, "Delft3D" and "Deltares"
+!  are registered trademarks of Stichting Deltares, and remain the property of
+!  Stichting Deltares. All rights reserved.
 
 !  $Id$
 !  $HeadURL$
@@ -33,143 +33,145 @@
 !! @author edwin.spee@deltares.nl
 module m_ec_message
    use precision
-   
+
    implicit none
-   
+
    private
-   
-    public :: maxMessageLen
-    public :: clearECMessage
-    public :: setECMessage
-    public :: getECMessage
-    public :: getECMsgLenTrim
-    public :: dumpECMessageStack
 
-   integer,                 parameter :: maxMessageLen = 1000
+   public :: clearECMessage
+   public :: setECMessage
+   public :: getECMessage
+   public :: dumpECMessageStack
 
-    type TEcMessage
-      character(len=:), allocatable :: message
-      integer                       :: message_type
-    end type TEcMessage
+   integer, parameter, public :: maxMessageLen = 1000
 
-    type(TEcMessage), pointer :: EcMessages(:) => null()
-    integer                   :: EcMsgActualSize = 0
+   integer, parameter, public :: MSG_TYPE_ALL   = 0
+   integer, parameter, public :: MSG_TYPE_DEBUG = 1
+   integer, parameter, public :: MSG_TYPE_INFO  = 2
+   integer, parameter, public :: MSG_TYPE_WARN  = 3
+   integer, parameter, public :: MSG_TYPE_ERROR = 4
+   integer, parameter, public :: MSG_TYPE_FATAL = 5
+   integer, parameter, public :: MSG_TYPE_NONE  = 6
+
+   !> type holding one message
+   type TEcMessage
+      character(len=:), allocatable :: message                !< The actual message
+      integer                       :: message_type           !< one of MSG_TYPE_ALL ... MSG_TYPE_NONE; but not yet used
+      type (TEcMessage), pointer    :: next_message => null() !< pointer to next message in the list of messages
+   end type TEcMessage
+
+   !> list of messages
+   type(TEcMessage), pointer :: EcMessages => null()
 
    interface setECMessage
       module procedure setECMessage_char
       module procedure setECMessage_int
    end interface
-   
+
    contains
-      
+
       ! =======================================================================
-      
-      !> 
+
+      !> clear the message stack
       subroutine clearECMessage()
-         EcMsgActualSize = 0
+         type (TEcMessage), pointer :: cur_msg  !< local pointer to a message on the message stack
+         type (TEcMessage), pointer :: next_msg !< idem
+
+         cur_msg => EcMessages
+         do while (associated(cur_msg))
+            next_msg => cur_msg%next_message
+            deallocate(cur_msg)
+            cur_msg => next_msg
+         enddo
+         EcMessages => null()
       end subroutine clearECMessage
 
-      subroutine IncEcMessages()
-         integer :: cursize, newsize, i
-         type(TEcMessage), pointer :: newStack(:)
-
-         if (.not. associated(EcMessages)) then
-            allocate(EcMessages(10))
-         else
-            cursize = size(EcMessages)
-            newsize = EcMsgActualSize + 1
-
-            if (newsize > cursize) then
-               allocate(newStack(10+cursize))
-               do i = 1, EcMsgActualSize
-                  newStack(i) = EcMessages(i)
-               enddo
-               deallocate(EcMessages)
-               EcMessages => newStack
-            endif
-         endif
-      end subroutine IncEcMessages
-
+      !> add message to message stack
       subroutine setECMessage_char(string, suffix)
-         character(len=*), intent(in)           :: string
-         character(len=*), intent(in), optional :: suffix
+         character(len=*), intent(in)           :: string  !< message to be added to message stack
+         character(len=*), intent(in), optional :: suffix  !< suffix of message
          !
-         call IncEcMessages()
+         type (TEcMessage), pointer :: NewMessage
+         integer                    :: ierr
 
-         EcMsgActualSize = EcMsgActualSize + 1
-
-         if (present(suffix)) then
-            ECMessages(EcMsgActualSize)%message = trim(string)  // " " // suffix
+         allocate (NewMessage, stat=ierr)
+         if (ierr /= 0) then
+            write(*,*) 'Internal error in message stack.'
+            write(*,*) 'message: ', string
          else
-            ECMessages(EcMsgActualSize)%message = trim(string)
+            NewMessage%next_message => EcMessages
+            EcMessages => NewMessage
+
+            if (present(suffix)) then
+               NewMessage%message = trim(string)  // " " // suffix
+            else
+               NewMessage%message = trim(string)
+            endif
+            NewMessage%message_type = -1
          endif
-         ECMessages(EcMsgActualSize)%message_type = -1
       end subroutine setECMessage_char
 
       ! =======================================================================
 
-      !> 
+      !> add message to message stack
       subroutine setECMessage_int(string, val)
-         character(len=*), intent(in) :: string
-         integer,          intent(in) :: val
+         character(len=*), intent(in) :: string !< message to be added to message stack
+         integer,          intent(in) :: val    !< number to be added to message
          !
          character(len=8) :: cvalue
 
-         call IncEcMessages()
-
-         EcMsgActualSize = EcMsgActualSize + 1
-
          write(cvalue, '(i8)') val
-         cvalue = adjustl(cvalue)
 
-         ECMessages(EcMsgActualSize)%message = trim(string) // ' ' // trim(cvalue)
-         ECMessages(EcMsgActualSize)%message_type = -1
+         call setEcMessage(trim(adjustl(string)) // ' ' // trim(cvalue))
+
       end subroutine setECMessage_int
 
       ! =======================================================================
 
-      !> 
+      !> get all messages of the messagestack in a long string
       function getECMessage() result(retval)
          character(len=maxMessageLen) :: retval
-         integer :: i
+
+         type (TEcMessage), pointer    :: my_msg
          !
          retval    = ' '
-         do i = 1, EcMsgActualSize
-            retval = retval // '|' // trim(EcMessages(i)%message)
+         my_msg => EcMessages
+         do while (associated(my_msg))
+            retval = retval // my_msg%message
+            my_msg => my_msg%next_message
          enddo
-         EcMsgActualSize = 0
+         call clearECMessage()
       end function getECMessage
 
       ! =======================================================================
 
-      function dumpECMessageStack(msglevel,messenger) result(retval)
-      implicit none 
-      integer, intent(in)           :: msglevel
-      interface 
-         subroutine messenger(lvl,msg)
+      !> dump all messages of the stack using a user supplied messenger function
+      function dumpECMessageStack(msglevel, messenger) result(retval)
+      implicit none
+      integer, intent(in)                 :: msglevel  !< message level; not used yet
+      interface
+         subroutine messenger(lvl, msg)
          integer, intent(in)              :: lvl
-         character(len=*), intent(in)    :: msg 
+         character(len=*), intent(in)     :: msg
          end subroutine
       end interface
-      character(len=maxMessageLen) :: retval
-      integer                      :: i
+      character(len=32)                   :: retval    !< function result
 
-      call messenger (msglevel,"...")! separator 
-      do i=1, EcMsgActualSize
-         call messenger (msglevel,EcMessages(i)%message)
+      type (TEcMessage), pointer    :: my_msg !< local pointer to one of the messages in the stack
+
+      call messenger (msglevel, "...")! separator
+
+      !> loop over all messages in the stack
+      my_msg => EcMessages
+      do while (associated(my_msg))
+         call messenger (msglevel, my_msg%message)
+         my_msg => my_msg%next_message
       enddo
-      retval = 'Fatal EC-error !!'           ! TODO: make this a meaningful return string 
+
+      call clearECMessage()
+
+      retval = 'Fatal EC-error !!'           ! TODO: make this a meaningful return string
+
       end function dumpECMessageStack
 
-      !> 
-      function getECMsgLenTrim () result(ECMsgLenTrim)
-         integer :: ECMsgLenTrim
-
-         integer :: i
-         !
-         ECMsgLenTrim = 0
-         do i = 1, EcMsgActualSize
-            ECMsgLenTrim = ECMsgLenTrim + len(ECMessages(i)%message)
-         enddo
-      end function getECMsgLenTrim
 end module m_ec_message

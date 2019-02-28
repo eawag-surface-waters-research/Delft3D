@@ -14489,10 +14489,12 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
    use m_Dambreak
    use m_flowexternalforcings
    use m_partitioninfo
+   use time_class
 
    implicit none
 
    double precision, intent(in)    :: tim !< Time in seconds
+   type(c_time)                    :: ecTime !< Time in EC-module
    logical                         :: l_initPhase
    integer,          intent(out)   :: iresult !< Integer error status: DFM_NOERR==0 if succesful.
 
@@ -14540,7 +14542,7 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
 
       ! Retrieve wind's x- and y-component for ext-file quantity 'windxy'.
       if (item_windxy_x /= ec_undef_int .and. item_windxy_y /= ec_undef_int) then
-         success = ec_gettimespacevalue(ecInstancePtr, item_windxy_x, tim)
+         success = ec_gettimespacevalue(ecInstancePtr, item_windxy_x, irefdate, tzone, tunit, tim)
          !success = ec_gettimespacevalue(ecInstancePtr, item_windxy_y, tim) ! Due to removal of up-to-date check in ec_item.f90::ecItemGetValues.
          if (.not. success) then
             goto 888
@@ -14570,7 +14572,7 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
 
       ! Retrieve wind's x-component for ext-file quantity 'windx'.
       if (item_windx /= ec_undef_int) then
-         success = ec_gettimespacevalue(ecInstancePtr, item_windx, tim)
+         success = ec_gettimespacevalue(ecInstancePtr, item_windx, irefdate, tzone, tunit, tim)
          if (.not. success) then
             goto 888
          endif
@@ -14578,7 +14580,7 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
 
       ! Retrieve wind's y-component for ext-file quantity 'windy'.
       if (item_windy /= ec_undef_int) then
-         success = ec_gettimespacevalue(ecInstancePtr, item_windy, tim)
+         success = ec_gettimespacevalue(ecInstancePtr, item_windy, irefdate, tzone, tunit, tim)
          if (.not. success) then
             goto 888
          endif
@@ -14621,9 +14623,9 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
 
        else if (itempforcingtyp == 5) then    
 
-           success = success .or. ec_gettimespacevalue(ecInstancePtr, item_humidity, tim) ! hk: En bedankt voor de rename he lekker dan
-           success = success .or. ec_gettimespacevalue(ecInstancePtr, item_airtemperature, tim)
-           success = success .or. ec_gettimespacevalue(ecInstancePtr, item_solarradiation, tim)
+           success = success .or. ec_gettimespacevalue(ecInstancePtr, item_humidity, irefdate, tzone, tunit, tim) ! hk: En bedankt voor de rename he lekker dan
+           success = success .or. ec_gettimespacevalue(ecInstancePtr, item_airtemperature, irefdate, tzone, tunit, tim)
+           success = success .or. ec_gettimespacevalue(ecInstancePtr, item_solarradiation, irefdate, tzone, tunit, tim)
           
        else
             call mess(LEVEL_WARN,'No humidity, airtemperature and  cloudiness forcing found, setting temperature model [physics:Temperature] = 1 (Only transport)')
@@ -14636,6 +14638,7 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
 !   !$OMP SECTION
 
    ! Get wave parameters within this parallel section:
+   call ecTime%set(tim)
    if (jawave == 3) then
       !
       ! This part must be skipped during initialization
@@ -14645,57 +14648,57 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
          if (allocated (hwavcom) ) then
             ! Don't make them zero: ecGetValues might do nothing
             !hwav = 0.0
-            success = success .and. ecGetValues(ecInstancePtr, item_hrms, tim)
+            success = success .and. ecGetValues(ecInstancePtr, item_hrms, ecTime)
          endif
          if (allocated (twav) ) then
             ! Don't make them zero: ecGetValues might do nothing
             !twav = 0.0
-            success = success .and. ecGetValues(ecInstancePtr, item_tp, tim)
+            success = success .and. ecGetValues(ecInstancePtr, item_tp, ecTime)
          endif
          if (allocated (phiwav) ) then
             ! Don't make them zero: ecGetValues might do nothing
             !phiwav = 0.0
-            success = success .and. ecGetValues(ecInstancePtr, item_dir, tim)
+            success = success .and. ecGetValues(ecInstancePtr, item_dir, ecTime)
          endif
          if (allocated (sxwav) ) then
             ! Don't make them zero: ecGetValues might do nothing
             !sxwav = 0.0
-            success = success .and. ecGetValues(ecInstancePtr, item_fx, tim)
+            success = success .and. ecGetValues(ecInstancePtr, item_fx, ecTime)
          endif
          if (allocated (sywav) ) then
             ! Don't make them zero: ecGetValues might do nothing
             !sywav = 0.0
-            success = success .and. ecGetValues(ecInstancePtr, item_fy, tim)
+            success = success .and. ecGetValues(ecInstancePtr, item_fy, ecTime)
          endif
          if (allocated (sbxwav) ) then
             ! Don't make them zero: ecGetValues might do nothing
             !sxwav = 0.0
-            success = success .and. ecGetValues(ecInstancePtr, item_wsbu, tim)
+            success = success .and. ecGetValues(ecInstancePtr, item_wsbu, ecTime)
          endif
          if (allocated (sbywav) ) then
             ! Don't make them zero: ecGetValues might do nothing
             !sywav = 0.0
-            success = success .and. ecGetValues(ecInstancePtr, item_wsbv, tim)
+            success = success .and. ecGetValues(ecInstancePtr, item_wsbv, ecTime)
          endif
          if (allocated (mxwav) ) then
             ! Don't make them zero: ecGetValues might do nothing
             !mxwav = 0.0
-            success = success .and. ecGetValues(ecInstancePtr, item_mx, tim)
+            success = success .and. ecGetValues(ecInstancePtr, item_mx, ecTime)
          endif
          if (allocated (mywav) ) then
             ! Don't make them zero: ecGetValues might do nothing
             !mywav = 0.0
-            success = success .and. ecGetValues(ecInstancePtr, item_my, tim)
+            success = success .and. ecGetValues(ecInstancePtr, item_my, ecTime)
          endif
          if (allocated (dsurf) ) then
-            success = success .and. ecGetValues(ecInstancePtr, item_dissurf, tim)
+            success = success .and. ecGetValues(ecInstancePtr, item_dissurf, ecTime)
          endif
          if (allocated (dwcap) ) then
-            success = success .and. ecGetValues(ecInstancePtr, item_diswcap, tim)
+            success = success .and. ecGetValues(ecInstancePtr, item_diswcap, ecTime)
          endif
          if (allocated (uorbwav) ) then
-            success = success .and. ecGetValues(ecInstancePtr, item_ubot, tim)
-         endif         
+            success = success .and. ecGetValues(ecInstancePtr, item_ubot, ecTime)
+         endif
       endif
       if (.not. success) then
          !
@@ -14740,7 +14743,7 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
 
    ! Retrieve wind's p-component for ext-file quantity 'atmosphericpressure'.
    if (japatm > 0  .and. item_atmosphericpressure /= ec_undef_int) then
-      success = success .and. ec_gettimespacevalue(ecInstancePtr, item_atmosphericpressure, tim)
+      success = success .and. ec_gettimespacevalue(ecInstancePtr, item_atmosphericpressure, irefdate, tzone, tunit, tim)
       do k = 1,ndx
          if (patm(k) == dmiss) patm(k) = 101325d0
       enddo
@@ -14761,20 +14764,20 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
 !   !$OMP SECTION
 
    if (ncdamsg > 0) then
-      success = success .and. ec_gettimespacevalue(ecInstancePtr, item_damlevel, tim, zcdam)
+      success = success .and. ec_gettimespacevalue(ecInstancePtr, item_damlevel, irefdate, tzone, tunit, tim, zcdam)
    endif
 
 !   !$OMP SECTION
 
    if (ncgensg > 0) then
-      success = success .and. ec_gettimespacevalue(ecInstancePtr, item_generalstructure, tim, zcgen)
+      success = success .and. ec_gettimespacevalue(ecInstancePtr, item_generalstructure, irefdate, tzone, tunit, tim, zcgen)
       call update_zcgen_widths_and_heights() ! TODO: replace by Jan's LineStructure from channel_flow
    endif
 
 !   !$OMP SECTION
 
    if (npumpsg > 0) then
-      success = success .and. ec_gettimespacevalue(ecInstancePtr, item_pump, tim, qpump)
+      success = success .and. ec_gettimespacevalue(ecInstancePtr, item_pump, irefdate, tzone, tunit, tim, qpump)
    endif
  
 !   !$OMP SECTION
@@ -14786,7 +14789,7 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
 !   !$OMP SECTION
       
    if (numlatsg > 0) then
-      success = success .and. ec_gettimespacevalue(ecInstancePtr, item_lateraldischarge, tim, qplat) ! 'lateraldischarge'
+      success = success .and. ec_gettimespacevalue(ecInstancePtr, item_lateraldischarge, irefdate, tzone, tunit, tim, qplat) ! 'lateraldischarge'
    endif
    
 !   !$OMP END PARALLEL SECTIONS
@@ -14797,7 +14800,7 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
    endif
 
    if (numsrc > 0) then
-      success = success .and. ec_gettimespacevalue(ecInstancePtr, item_discharge_salinity_temperature_sorsin, tim)
+      success = success .and. ec_gettimespacevalue(ecInstancePtr, item_discharge_salinity_temperature_sorsin, irefdate, tzone, tunit, tim)
    endif
 
    call klok(cpuext(2)) ; cpuext(3) = cpuext(3) + cpuext(2) - cpuext(1)
@@ -14850,7 +14853,7 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
    
    ! Update nudging temperature (and salinity)
    if (item_nudge_tem /= ec_undef_int ) then ! .and. .not.l_initphase) then
-      success = success .and. ec_gettimespacevalue(ecInstancePtr, item_nudge_tem, tim)
+      success = success .and. ec_gettimespacevalue(ecInstancePtr, item_nudge_tem, irefdate, tzone, tunit, tim)
    endif
 
 !   call fm_wq_processes_step(dt_user,time_user)
@@ -14952,6 +14955,7 @@ subroutine update_dambreak_breach(startTime, deltaTime)
    use m_partitioninfo 
    use m_meteo
    use m_flowexternalforcings
+   use m_flowtimes
    
    implicit none
 
@@ -15054,7 +15058,7 @@ subroutine update_dambreak_breach(startTime, deltaTime)
             endif
             if(network%sts%struct(istru)%dambreak%algorithm == 3 .and. startTime > network%sts%struct(istru)%dambreak%t0) then
                !Time in the tim file is relative to the start time
-               success = ec_gettimespacevalue_by_itemID(ecInstancePtr, item_dambreakLevelsAndWidthsFromTable, startTime-network%sts%struct(istru)%dambreak%t0)
+               success = ec_gettimespacevalue_by_itemID(ecInstancePtr, item_dambreakLevelsAndWidthsFromTable, irefdate, tzone, tunit, startTime-network%sts%struct(istru)%dambreak%t0)
                ! NOTE: AvD: the code above works correctly, but is dangerous:
                ! the addtimespace for dambreak has added each dambreak separately with a targetoffset.
                ! The gettimespace above, however, gets the values for *all* dambreaks, but with the relative time
@@ -15260,7 +15264,7 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
 !   end if
 
    if (nzbnd > nqhbnd) then
-      success = ec_gettimespacevalue(ecInstancePtr, item_waterlevelbnd, tim)
+      success = ec_gettimespacevalue(ecInstancePtr, item_waterlevelbnd, irefdate, tzone, tunit, tim)
       if (.not. success) then
          goto 888
       end if
@@ -15294,7 +15298,7 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
       end if
 
       magic_array = atqh_all ! TODO: Eliminate the need for this magic array.
-      success = ec_gettimespacevalue(ecInstancePtr, item_qhbnd, tim)
+      success = ec_gettimespacevalue(ecInstancePtr, item_qhbnd, irefdate, tzone, tunit, tim)
       if (.not. success) then
          goto 888
       end if
@@ -15308,7 +15312,7 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
    endif
 
    if (nbndu > 0 ) then
-       success = ec_gettimespacevalue(ecInstancePtr, item_velocitybnd, tim)
+       success = ec_gettimespacevalue(ecInstancePtr, item_velocitybnd, irefdate, tzone, tunit, tim)
        if (.not. success) then
           goto 888
        end if
@@ -15317,21 +15321,21 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
    ! TODO: [TRUNKMERGE] JR: waveenergybnd was already partially missing in sedmor branch. Remove all, or reinstate?
 
    if (nbnds > 0) then
-      success = ec_gettimespacevalue(ecInstancePtr, item_salinitybnd, tim)
+      success = ec_gettimespacevalue(ecInstancePtr, item_salinitybnd, irefdate, tzone, tunit, tim)
       if (.not. success) then
          goto 888
       endif
    endif
 
    if (nbndTM > 0) then
-      success = ec_gettimespacevalue(ecInstancePtr, item_temperaturebnd, tim)
+      success = ec_gettimespacevalue(ecInstancePtr, item_temperaturebnd, irefdate, tzone, tunit, tim)
       if (.not. success) then
          goto 888
       endif
    endif
 
    if (nbndsd > 0) then
-       success = ec_gettimespacevalue(ecInstancePtr, item_sedimentbnd, tim)
+       success = ec_gettimespacevalue(ecInstancePtr, item_sedimentbnd, irefdate, tzone, tunit, tim)
       if (.not. success) then
          goto 888
       end if
@@ -15339,7 +15343,7 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
 
    do itrac=1,numtracers
       if (nbndtr(itrac) > 0) then
-         success = ec_gettimespacevalue(ecInstancePtr, item_tracerbnd(itrac), tim)
+         success = ec_gettimespacevalue(ecInstancePtr, item_tracerbnd(itrac), irefdate, tzone, tunit, tim)
          if (.not. success) then
             goto 888
          end if
@@ -15349,7 +15353,7 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
    if (stm_included) then
       do isf=1,numfracs          ! numfracs okay, is number of fractions with bc
          if (nbndsf(isf) > 0) then
-            success = ec_gettimespacevalue(ecInstancePtr, item_sedfracbnd(isf), tim)
+            success = ec_gettimespacevalue(ecInstancePtr, item_sedfracbnd(isf), irefdate, tzone, tunit, tim)
             if (.not. success) then
                goto 888
             end if
@@ -15358,21 +15362,21 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
    end if
 
    if (nbndt > 0) then
-      success = ec_gettimespacevalue(ecInstancePtr, item_tangentialvelocitybnd, tim)
+      success = ec_gettimespacevalue(ecInstancePtr, item_tangentialvelocitybnd, irefdate, tzone, tunit, tim)
       if (.not. success) then
          goto 888
       end if
    end if
 
    if (nbnduxy > 0) then
-      success = ec_gettimespacevalue(ecInstancePtr, item_uxuyadvectionvelocitybnd, tim)
+      success = ec_gettimespacevalue(ecInstancePtr, item_uxuyadvectionvelocitybnd, irefdate, tzone, tunit, tim)
       if (.not. success) then
          goto 888
       end if
    end if
 
    if (nbndn > 0) then
-      success = ec_gettimespacevalue(ecInstancePtr, item_normalvelocitybnd, tim)
+      success = ec_gettimespacevalue(ecInstancePtr, item_normalvelocitybnd, irefdate, tzone, tunit, tim)
       if (.not. success) then
          goto 888
       end if
@@ -15383,14 +15387,14 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
    end if
 
    if (nshiptxy > 0) then
-      success = ec_gettimespacevalue(ecInstancePtr, item_shiptxy, tim)
+      success = ec_gettimespacevalue(ecInstancePtr, item_shiptxy, irefdate, tzone, tunit, tim)
       if (.not. success) then
          goto 888
       endif
    endif
 
    if (nummovobs > 0) then
-      success = ec_gettimespacevalue(ecInstancePtr, item_movingstationtxy, tim)
+      success = ec_gettimespacevalue(ecInstancePtr, item_movingstationtxy, irefdate, tzone, tunit, tim)
       if (success) then
           do i=1,nummovobs
               call updateObservationXY(numobs+i, xyobs(2*(i-1)+1), xyobs(2*(i-1)+2))
@@ -15406,7 +15410,7 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
    endif
 
    if (ngatesg > 0) then
-      success = success .and. ec_gettimespacevalue(ecInstancePtr, item_gateloweredgelevel, tim, zgate)
+      success = success .and. ec_gettimespacevalue(ecInstancePtr, item_gateloweredgelevel, irefdate, tzone, tunit, tim, zgate)
    endif
    
    !dambreak 
