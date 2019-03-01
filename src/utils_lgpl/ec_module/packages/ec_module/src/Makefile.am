@@ -95,8 +95,5 @@ ec_module_version.F90:
 #Libraries
 
 libECModule_la_LIBADD=\
-    $(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/libDeltaresCommon.la \
-    $(top_builddir)/utils_lgpl/kdtree_wrapper/packages/kdtree_wrapper/src/libkdtreewrapper.la \
-    $(top_builddir)/third_party_open/kdtree2/src-f90/libkdtree2f.la \
     $(top_builddir)/utils_lgpl/ec_module/packages/ec_module/src/meteo/libMeteo.la
 
