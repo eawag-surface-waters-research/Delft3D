@@ -19308,10 +19308,10 @@ end subroutine unc_write_shp
            call dumpnetlink('flownode 2 not found for netlink = ', L)
        end if
 
-       k1 = netcell(n1)%nod(1) 
-       k2 = netcell(n2)%nod(1)
        
        if (nc1 < 0 ) then
+          k1 = netcell(n1)%nod(1)
+         ! TODO: duplicated codes: xz, yz, xzw, yzw are already computed in subroutine find1Dcells.
           xz(N1) = xk(k1) ; yz(N1) = yk(k1); BL(N1) = ZK(K1); xzw(n1) = xz(n1) ; yzw(n1) = yz(n1)
           if ( .not.allocated(nd(n1)%nod) ) then
              allocate ( nd(n1)%nod(1), stat=ierr )      ! Store original net node with this flow node
@@ -19325,6 +19325,7 @@ end subroutine unc_write_shp
        endif
 
        if (nc2 <0 ) then
+          k2 = netcell(n2)%nod(1)
           xz(n2) = xk(k2) ; yz(n2) = yk(k2); BL(N2) = ZK(K2) ; xzw(n2) = xz(n2) ; yzw(n2) = yz(n2)
           if ( .not.allocated(nd(n2)%nod) ) then
              allocate ( nd(n2)%nod(1), stat=ierr )
@@ -35919,8 +35920,9 @@ subroutine make_mirrorcells(Nx, xe, ye, xyen, kce, ke, ierror)
 !         continue
 !      end if
 
-      if (lne(1,L) == 0 .and. lne(2,L) /= 0 .or. &     ! 2D links
-         lne(1,L) /= 0 .and. lne(2,L) == 0 ) then
+      if (kn(3,L) == 2 .and. &     ! 2D links
+          (lne(1,L) == 0 .and. lne(2,L) /= 0 .or. &     ! boundary links
+           lne(1,L) /= 0 .and. lne(2,L) == 0)) then
          ind = lne(1,L)+lne(2,L)                      ! i.e., the nonzero cell nr.
 
          call mirrorcell( ind, xk(k3), yk(k3), xk(k4), yk(k4), xci, yci, xcb, ycb, xce2, yce2, xx, yy)  ! voetje uitsteken tussen xz intern (xci) en xz rand (xcb)
