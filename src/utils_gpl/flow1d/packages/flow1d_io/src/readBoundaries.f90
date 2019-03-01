@@ -40,6 +40,7 @@ module m_readBoundaries
    use string_module
 
    use m_ec_module
+   use time_class
 
    implicit none
 
@@ -456,8 +457,11 @@ function getBoundaryValue(ec_target_item, timeAsMJD) result(value_from_ec)
    double precision, intent(in)   :: timeAsMJD
    double precision, dimension(1) :: array_values_from_ec
    
+   type(c_time) :: ecTime
+
    value_from_ec = 0.0
-   if (.not. ecItemGetValues(ec, ec_target_item, timeAsMJD, array_values_from_ec) ) then
+   call ecTime%set(timeAsMJD)
+   if (.not. ecItemGetValues(ec, ec_target_item, ecTime, array_values_from_ec) ) then
       ! call SetMessage(LEVEL_FATAL, 'Error ec_target_item value from EC file')
    else
       value_from_ec = array_values_from_ec(1)
