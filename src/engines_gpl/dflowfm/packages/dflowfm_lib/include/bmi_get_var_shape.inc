@@ -110,6 +110,10 @@
        shape(1) = ndkx
     case("vincum")
        shape(1) = ndkx
+    case("zbndz")
+       shape(1) = nbndz
+    case("zbndu")
+       shape(1) = nbndu
     case("rnveg")
        shape(1) = ndkx
     case("diaveg")
@@ -146,6 +150,8 @@
        shape(1) = ndx
     case("vol1")
        shape(1) = ndx
+    case("vol1_f")
+       shape(1) = ndx
     case("hs")
        shape(1) = ndx
     case("ucx")
@@ -153,6 +159,8 @@
     case("ucy")
        shape(1) = ndkx
     case("ucz")
+       shape(1) = ndkx
+    case("ucmag")
        shape(1) = ndkx
     case("sa0")
        shape(1) = ndkx
@@ -171,6 +179,8 @@
     case("u_to_umain")
        shape(1) = lnkx
     case("q1")
+       shape(1) = lnkx
+    case("q1_main")
        shape(1) = lnkx
     case("au")
        shape(1) = lnkx
@@ -191,6 +201,8 @@
     case("kfst0")
        shape(1) = ndx
     case("bare")
+       shape(1) = ndx
+    case("ba_mor")
        shape(1) = ndx
     case("bl")
        shape(1) = ndx
@@ -213,6 +225,8 @@
     case("dx")
        shape(1) = lnx
     case("wu")
+       shape(1) = lnx
+    case("wu_mor")
        shape(1) = lnx
     case("bob")
        shape(2) = 2

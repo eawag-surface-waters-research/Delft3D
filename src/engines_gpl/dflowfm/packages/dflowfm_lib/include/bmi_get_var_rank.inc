@@ -108,6 +108,10 @@
      rank = 1
   case("vincum")
      rank = 1
+  case("zbndz")
+     rank = 1
+  case("zbndu")
+     rank = 1
   case("rnveg")
      rank = 1
   case("diaveg")
@@ -144,6 +148,8 @@
      rank = 1
   case("vol1")
      rank = 1
+  case("vol1_f")
+     rank = 1
   case("hs")
      rank = 1
   case("ucx")
@@ -151,6 +157,8 @@
   case("ucy")
      rank = 1
   case("ucz")
+     rank = 1
+  case("ucmag")
      rank = 1
   case("sa0")
      rank = 1
@@ -169,6 +177,8 @@
   case("u_to_umain")
      rank = 1
   case("q1")
+     rank = 1
+  case("q1_main")
      rank = 1
   case("au")
      rank = 1
@@ -190,6 +200,8 @@
      rank = 1
   case("bare")
      rank = 1
+  case("ba_mor")
+     rank = 1
   case("bl")
      rank = 1
   case("lnx1D")
@@ -209,6 +221,8 @@
   case("dx")
      rank = 1
   case("wu")
+     rank = 1
+  case("wu_mor")
      rank = 1
   case("bob")
      rank = 2

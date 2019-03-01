@@ -108,6 +108,10 @@ select case(var_name)
     type_name = "double"
   case("vincum")
     type_name = "double"
+  case("zbndz")
+    type_name = "double"
+  case("zbndu")
+    type_name = "double"
   case("rnveg")
     type_name = "double"
   case("diaveg")
@@ -144,6 +148,8 @@ select case(var_name)
     type_name = "double"
   case("vol1")
     type_name = "double"
+  case("vol1_f")
+    type_name = "double"
   case("hs")
     type_name = "double"
   case("ucx")
@@ -151,6 +157,8 @@ select case(var_name)
   case("ucy")
     type_name = "double"
   case("ucz")
+    type_name = "double"
+  case("ucmag")
     type_name = "double"
   case("sa0")
     type_name = "double"
@@ -169,6 +177,8 @@ select case(var_name)
   case("u_to_umain")
     type_name = "double"
   case("q1")
+    type_name = "double"
+  case("q1_main")
     type_name = "double"
   case("au")
     type_name = "double"
@@ -190,6 +200,8 @@ select case(var_name)
     type_name = "int"
   case("bare")
     type_name = "double"
+  case("ba_mor")
+    type_name = "double"
   case("bl")
     type_name = "double"
   case("lnx1D")
@@ -209,6 +221,8 @@ select case(var_name)
   case("dx")
     type_name = "double"
   case("wu")
+    type_name = "double"
+  case("wu_mor")
     type_name = "double"
   case("bob")
     type_name = "double"

@@ -102,12 +102,16 @@
      x = c_loc(balat)
   case("nnlat") !<  [-] for each cell pointer to qplat/balat {"location": "face", "shape": ["ndx"]}
      x = c_loc(nnlat)
-  case("qinext") !<  [m3/s] Lateral discharge per cell {"location": "face", "shape": ["ndkx"]}
+  case("qinext") !<  [m3/s] External discharge per cell {"location": "face", "shape": ["ndkx"]}
      x = c_loc(qinext)
-  case("qinextreal") !<  [m3/s] Realized lateral discharge per cell {"location": "face", "shape": ["ndkx"]}
+  case("qinextreal") !<  [m3/s] Realized external discharge per cell {"location": "face", "shape": ["ndkx"]}
      x = c_loc(qinextreal)
   case("vincum") !<  [m3] Cumulative realized volume through qinext {"location": "face", "shape": ["ndkx"]}
      x = c_loc(vincum)
+  case("zbndz") !<  [m] waterlevel boundary points function {"location": "edge", "shape": ["nbndz"]}
+     x = c_loc(zbndz)
+  case("zbndu") !<  [m/s] velocity   boundary points function {"location": "edge", "shape": ["nbndu"]}
+     x = c_loc(zbndu)
   case("rnveg") !<  [1/m2] 3D plant density , 2D part is basis input (1/m2) {"location": "face", "shape": ["ndkx"]}
      x = c_loc(rnveg)
   case("diaveg") !<  [m] 3D plant diameter, 2D part is basis input (m) {"location": "face", "shape": ["ndkx"]}
@@ -140,10 +144,12 @@
      x = c_loc(a0)
   case("a1") !<  [m2] storage area at end of timestep {"location": "face", "shape": ["ndx"]}
      x = c_loc(a1)
-  case("vol0") !<  [m3] volume at start of timestep {"location": "face", "shape": ["ndx"]}
+  case("vol0") !<  [m3] total volume at start of timestep {"location": "face", "shape": ["ndx"]}
      x = c_loc(vol0)
-  case("vol1") !<  [m3] volume at end of timestep {"location": "face", "shape": ["ndx"]}
+  case("vol1") !<  [m3] total volume at end of timestep {"location": "face", "shape": ["ndx"]}
      x = c_loc(vol1)
+  case("vol1_f") !<  [m3] flow volume volume at end of timestep {"location": "face", "shape": ["ndx"]}
+     x = c_loc(vol1_f)
   case("hs") !<  [m] waterdepth at cell centre = s1 - bl  (m) {"location": "face", "shape": ["ndx"]}
      x = c_loc(hs)
   case("ucx") !<  [m/s] cell center velocity, global x-dir (m/s) {"location": "face", "shape": ["ndkx"]}
@@ -152,6 +158,8 @@
      x = c_loc(ucy)
   case("ucz") !<  [m/s] cell center velocity, global z-dir (m/s) {"location": "face", "shape": ["ndkx"]}
      x = c_loc(ucz)
+  case("ucmag") !<  [m/s] cell center velocity magnitude {"location": "face", "shape": ["ndkx"]}
+     x = c_loc(ucmag)
   case("sa0") !<  [1e-3] salinity (ppt) at start of timestep {"location": "face", "shape": ["ndkx"]}
      x = c_loc(sa0)
   case("sa1") !<  [1e-3] salinity (ppt) at end   of timestep {"location": "face", "shape": ["ndkx"]}
@@ -170,6 +178,8 @@
      x = c_loc(u_to_umain)
   case("q1") !<  [m3/s] discharge     (m3/s) at   end of timestep n, used as q0 in timestep n+1, statement q0 = q1 is out of code, saves 1 array {"location": "edge", "shape": ["lnkx"]}
      x = c_loc(q1)
+  case("q1_main") !<  [m3/s] discharge     (m3/s) in main channel at {"location": "edge", "shape": ["lnkx"]}
+     x = c_loc(q1_main)
   case("au") !<  [m2] flow area     (m2)   at u point {"location": "edge", "shape": ["lnkx"]}
      x = c_loc(au)
   case("hu") !<  [m] upwind waterheight at u-point (m) {"location": "edge", "shape": ["lnx"]}
@@ -190,6 +200,8 @@
      x = c_loc(kfst0)
   case("bare") !<  [m2] bottom area, for rain and evaporaton {"location": "face", "shape": ["ndx"]}
      x = c_loc(bare)
+  case("ba_mor") !<  [m2] morphologically active bottom area, if < 0 use table in node type {"location": "face", "shape": ["ndx"]}
+     x = c_loc(ba_mor)
   case("bl") !<  [m] bottom level (m) (positive upward) {"location": "face", "shape": ["ndx"]}
      x = c_loc(bl)
   case("lnx1D") !<  [-] nr of 1D flow links (so first 1D, next 2D, next boundaries). {"rank": 0}
@@ -210,6 +222,8 @@
      x = c_loc(dx)
   case("wu") !<  [m] link initial width (m), if < 0 pointer to convtab {"location": "edge", "shape": ["lnx"]}
      x = c_loc(wu)
+  case("wu_mor") !<  [m] morphologically active width (m), if < 0 pointer to convtab {"location": "edge", "shape": ["lnx"]}
+     x = c_loc(wu_mor)
   case("bob") !<  [m] left and right inside lowerside tube (binnenkant onderkant buis) HEIGHT values (m) (positive upward) {"location": "edge", "shape": [2, "lnx"]}
      x = c_loc(bob)
   case("vort") !<  [s-1] vorticity at netnodes {"shape": ["ndx"], "comment": "Currently not available, is nowhere allocated nor filled."}

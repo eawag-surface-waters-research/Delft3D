@@ -186,6 +186,14 @@
 
      call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
      vincum(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
+  case("zbndz")
+
+     call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
+     zbndz(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
+  case("zbndu")
+
+     call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
+     zbndu(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
   case("rnveg")
 
      call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
@@ -258,6 +266,10 @@
 
      call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
      vol1(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
+  case("vol1_f")
+
+     call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
+     vol1_f(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
   case("hs")
 
      call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
@@ -274,6 +286,10 @@
 
      call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
      ucz(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
+  case("ucmag")
+
+     call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
+     ucmag(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
   case("sa0")
 
      call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
@@ -310,6 +326,10 @@
 
      call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
      q1(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
+  case("q1_main")
+
+     call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
+     q1_main(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
   case("au")
 
      call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
@@ -348,6 +368,10 @@
 
      call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
      bare(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
+  case("ba_mor")
+
+     call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
+     ba_mor(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
   case("bl")
 
      call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
@@ -384,6 +408,10 @@
 
      call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
      wu(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
+  case("wu_mor")
+
+     call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
+     wu_mor(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
   case("bob")
 
      call c_f_pointer(xptr, x_2d_double_ptr, (/c_count(1), c_count(2)/))

@@ -108,6 +108,10 @@ select case(var_name)
     location_name = "face"
   case("vincum")
     location_name = "face"
+  case("zbndz")
+    location_name = "edge"
+  case("zbndu")
+    location_name = "edge"
   case("rnveg")
     location_name = "face"
   case("diaveg")
@@ -144,6 +148,8 @@ select case(var_name)
     location_name = "face"
   case("vol1")
     location_name = "face"
+  case("vol1_f")
+    location_name = "face"
   case("hs")
     location_name = "face"
   case("ucx")
@@ -151,6 +157,8 @@ select case(var_name)
   case("ucy")
     location_name = "face"
   case("ucz")
+    location_name = "face"
+  case("ucmag")
     location_name = "face"
   case("sa0")
     location_name = "face"
@@ -169,6 +177,8 @@ select case(var_name)
   case("u_to_umain")
     location_name = "edge"
   case("q1")
+    location_name = "edge"
+  case("q1_main")
     location_name = "edge"
   case("au")
     location_name = "edge"
@@ -190,6 +200,8 @@ select case(var_name)
     location_name = ""
   case("bare")
     location_name = "face"
+  case("ba_mor")
+    location_name = "face"
   case("bl")
     location_name = "face"
   case("lnx1D")
@@ -209,6 +221,8 @@ select case(var_name)
   case("dx")
     location_name = "edge"
   case("wu")
+    location_name = "edge"
+  case("wu_mor")
     location_name = "edge"
   case("bob")
     location_name = "edge"

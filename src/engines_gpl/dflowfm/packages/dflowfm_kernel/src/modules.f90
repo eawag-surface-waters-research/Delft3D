@@ -580,7 +580,7 @@ module m_xbeach_data
    !
    ! [Section] Hydrodynamics for FI (frequency integrated) approach as opposed to FF (fixed frequency)
    integer                 :: windmodel                  = -123    !   [-] Turns on (1) or off (0) the frequency integrated 2-equation approach
-   integer                 :: advecmod                   = -123    !   [-] advect moments m^E_{-1} an m^E_{0} (1) or moments m^E_{0} and m^E_{1}
+   integer                 :: advecmod                   = -123    !   [-] advect moments m^E_-1 an m^E_0 (1) or moments m^E_0 and m^E_1
    double precision        :: Trepini                    = -123    !   [s] Initial fill value for Trep in entire domain
    double precision        :: Eini                       = -123    !   [J/rad/m2] Initial fill value for ee1 in entire domain
    !arrays                                                                 
@@ -1771,7 +1771,7 @@ end module m_crspath
  integer                           :: nbndz             !< waterlevel boundary points dimension
  double precision, allocatable     :: xbndz(:)          !< waterlevel boundary points xcor
  double precision, allocatable     :: ybndz(:)          !< waterlevel boundary points ycor
- double precision, allocatable, target :: zbndz(:)      !< waterlevel boundary points function
+ double precision, allocatable, target :: zbndz(:)      !< [m] waterlevel boundary points function  {"location": "edge", "shape": ["nbndz"]}
  double precision, allocatable     :: zbndz0(:)         !< waterlevel boundary points function
  double precision, allocatable     :: xy2bndz(:,:)      !< waterlevel boundary 'external tolerance point'
  integer         , allocatable     :: kdz  (:)          !< waterlevel boundary points temp array
@@ -1796,7 +1796,7 @@ end module m_crspath
  integer                           :: nbndu             !< velocity   boundary points dimension
  double precision, allocatable     :: xbndu(:)          !< velocity   boundary points xcor
  double precision, allocatable     :: ybndu(:)          !< velocity   boundary points ycor
- double precision, allocatable, target :: zbndu(:)      !< velocity   boundary points function
+ double precision, allocatable, target :: zbndu(:)      !< [m/s] velocity   boundary points function   {"location": "edge", "shape": ["nbndu"]}
  double precision, allocatable     :: zbndu0(:)         !< velocity   boundary points function in start time
  double precision, allocatable     :: xy2bndu(:,:)      !< velocity   boundary 'external tolerance point'
  integer         , allocatable     :: kdu  (:)          !< velocity   boundary points temp array
@@ -3529,7 +3529,7 @@ end module m_vegetation
 ! link related, dim = lnkx
  double precision, allocatable     :: u0    (:)   !< flow velocity (m/s)  at start of timestep
  double precision, allocatable, target     :: u1(:)   !< [m/s]  flow velocity (m/s)  at   end of timestep {"location": "edge", "shape": ["lnkx"]}
- double precision, allocatable, target     :: u_to_umain(:)   !< [-]  Factor for translating general velocity to the flow velocity in the main channel at end of timestep (1d) {"location": "edge", "shape": ["lnkx"]}
+ double precision, allocatable     :: u_to_umain(:)   !< [-]  Factor for translating general velocity to the flow velocity in the main channel at end of timestep (1d) {"location": "edge", "shape": ["lnkx"]}
  double precision, allocatable, target     :: q1(:)   !< [m3/s] discharge     (m3/s) at   end of timestep n, used as q0 in timestep n+1, statement q0 = q1 is out of code, saves 1 array {"location": "edge", "shape": ["lnkx"]}
  double precision, allocatable     :: q1_main(:)   !< [m3/s] discharge     (m3/s) in main channel at {"location": "edge", "shape": ["lnkx"]}
  double precision, allocatable     :: qa    (:)   !< discharge (m3/s) used in advection, qa=au(n)*u1(n+1) instead of
@@ -3547,8 +3547,8 @@ end module m_vegetation
  double precision, allocatable     :: suu   (:)   !< stress u dir (m/s2)
  double precision, allocatable     :: cfuhi (:)   !< g/(hCC) u point (1/m)
  double precision, allocatable, target :: frcu(:) !< [TODO] friction coefficient set by initial fields {"location": "edge", "shape": ["lnx"]}
- double precision, allocatable, target :: frcu_mor(:) !< friction coefficient in morphologically active region set by initial fields {"location": "edge", "shape": ["lnx"]}
- double precision, allocatable, target :: frcu_bkp(:) !< Backup of friction coefficient set by initial fields {"location": "edge", "shape": ["lnx"]}
+ double precision, allocatable     :: frcu_mor(:) !< friction coefficient in morphologically active region set by initial fields {"location": "edge", "shape": ["lnx"]}
+ double precision, allocatable     :: frcu_bkp(:) !< Backup of friction coefficient set by initial fields {"location": "edge", "shape": ["lnx"]}
  double precision, allocatable     :: cfclval(:)  !< array for calibration factor for friction coefficients
  double precision, allocatable     :: cftrt(:,:)  !< array for friction coefficients due to trachytopes
  double precision, allocatable     :: cftrtfac(:) !< array for optional multiplication factor for trachytopes's returned roughness values
@@ -4002,7 +4002,7 @@ end module m_profiles
  double precision, allocatable, target :: dx    (:)      !< [m] link length (m) {"location": "edge", "shape": ["lnx"]}
  double precision, allocatable     :: dxi   (:)      !< inverse dx
  double precision, allocatable, target :: wu(:)      !< [m] link initial width (m), if < 0 pointer to convtab {"location": "edge", "shape": ["lnx"]}
- double precision, allocatable, target :: wu_mor(:)  !< [m] morphologically active width (m), if < 0 pointer to convtab {"location": "edge", "shape": ["lnx"]}
+ double precision, allocatable     :: wu_mor(:)      !< [m] morphologically active width (m), if < 0 pointer to convtab {"location": "edge", "shape": ["lnx"]}
  double precision, allocatable     :: wui   (:)      !< inverse link initial width (m), if < 0 pointer to convtab
  double precision, allocatable     :: prof1D (:,:)   !< dim = (3,lnx1D) 1= 1D prof width, 2=1D profile height, 3=proftyp, or: if 1,2< 0, pointers to prof 1,2, then 3=alfa1
  integer,          allocatable     :: jaduiktmp(:)  !< temparr

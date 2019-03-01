@@ -148,6 +148,12 @@
   case("vincum")
      call c_f_pointer(xptr, x_1d_double_ptr, shape(vincum))
      vincum(:) = x_1d_double_ptr
+  case("zbndz")
+     call c_f_pointer(xptr, x_1d_double_ptr, shape(zbndz))
+     zbndz(:) = x_1d_double_ptr
+  case("zbndu")
+     call c_f_pointer(xptr, x_1d_double_ptr, shape(zbndu))
+     zbndu(:) = x_1d_double_ptr
   case("rnveg")
      call c_f_pointer(xptr, x_1d_double_ptr, shape(rnveg))
      rnveg(:) = x_1d_double_ptr
@@ -202,6 +208,9 @@
   case("vol1")
      call c_f_pointer(xptr, x_1d_double_ptr, shape(vol1))
      vol1(:) = x_1d_double_ptr
+  case("vol1_f")
+     call c_f_pointer(xptr, x_1d_double_ptr, shape(vol1_f))
+     vol1_f(:) = x_1d_double_ptr
   case("hs")
      call c_f_pointer(xptr, x_1d_double_ptr, shape(hs))
      hs(:) = x_1d_double_ptr
@@ -214,6 +223,9 @@
   case("ucz")
      call c_f_pointer(xptr, x_1d_double_ptr, shape(ucz))
      ucz(:) = x_1d_double_ptr
+  case("ucmag")
+     call c_f_pointer(xptr, x_1d_double_ptr, shape(ucmag))
+     ucmag(:) = x_1d_double_ptr
   case("sa0")
      call c_f_pointer(xptr, x_1d_double_ptr, shape(sa0))
      sa0(:) = x_1d_double_ptr
@@ -241,6 +253,9 @@
   case("q1")
      call c_f_pointer(xptr, x_1d_double_ptr, shape(q1))
      q1(:) = x_1d_double_ptr
+  case("q1_main")
+     call c_f_pointer(xptr, x_1d_double_ptr, shape(q1_main))
+     q1_main(:) = x_1d_double_ptr
   case("au")
      call c_f_pointer(xptr, x_1d_double_ptr, shape(au))
      au(:) = x_1d_double_ptr
@@ -271,6 +286,9 @@
   case("bare")
      call c_f_pointer(xptr, x_1d_double_ptr, shape(bare))
      bare(:) = x_1d_double_ptr
+  case("ba_mor")
+     call c_f_pointer(xptr, x_1d_double_ptr, shape(ba_mor))
+     ba_mor(:) = x_1d_double_ptr
   case("bl")
      call c_f_pointer(xptr, x_1d_double_ptr, shape(bl))
      bl(:) = x_1d_double_ptr
@@ -301,6 +319,9 @@
   case("wu")
      call c_f_pointer(xptr, x_1d_double_ptr, shape(wu))
      wu(:) = x_1d_double_ptr
+  case("wu_mor")
+     call c_f_pointer(xptr, x_1d_double_ptr, shape(wu_mor))
+     wu_mor(:) = x_1d_double_ptr
   case("bob")
      call c_f_pointer(xptr, x_2d_double_ptr, shape(bob))
      bob(:,:) = x_2d_double_ptr
