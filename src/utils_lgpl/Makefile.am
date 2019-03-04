@@ -3,7 +3,6 @@ SUBDIRS = \
          deltares_common \
          delftonline \
          delftio \
-         ec_module \
          esmfsm \
          ftnunit \
          io_netcdf \
