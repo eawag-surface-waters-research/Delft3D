@@ -1685,12 +1685,12 @@ subroutine fill_constituents(jas) ! if jas == 1 do sources
                      const_sour(iconst,kkk) = const_sour(iconst,kkk) + stmpar%morpar%flufflyr%sourf(i,kk)
                      const_sink(iconst,kkk) = const_sink(iconst,kkk) + stmpar%morpar%flufflyr%sinkf(i,kk)
                   end if
-                  
+
                  ! BEGIN DEBUG
-                  if ( constituents(iconst,kb)+dts*const_sour(iconst,kb).lt.0d0 ) then
-                     write(message, "('const. source < -const/dt, iconst=', I0, ', kk=', I0)") iconst, kk
-                     call mess(LEVEL_WARN, trim(message))
-                  end if
+                 ! if ( constituents(iconst,kb)+dts*const_sour(iconst,kb).lt.0d0 ) then
+                 !    write(message, "('const. source < -const/dt, iconst=', I0, ', kk=', I0)") iconst, kk
+                 !    call mess(LEVEL_WARN, trim(message))
+                 ! end if
                  ! END DEBUG
                end if
             end do
@@ -2822,21 +2822,22 @@ subroutine comp_sinktot()
    use m_flowgeom, only: ndx
    use m_flowtimes, only: dts
    use m_sediment
-   
+
    implicit none
- 
+
    integer   :: k, j, kb, kt, ll
    !
-      
+
    if (.not. stm_included) return
-   
-   
+   if (mxgr == 0) return
+
+
    if (kmx<1) then    ! 2D
       do k=1,ndx
          do j=ISED1,ISEDN
             ll = j-ISED1+1
             sinksetot(j,k) = sinksetot(j,k) + vol1(k)*sedtra%sinkse(k,ll)*constituents(j,k)*dts
-            if (stmpar%morpar%flufflyr%iflufflyr .gt. 0) then
+            if (stmpar%morpar%flufflyr%iflufflyr > 0) then
                sinkftot(j,k)  = sinkftot(j,k) + vol1(k)*stmpar%morpar%flufflyr%sinkf(ll,k)*constituents(j,k)*dts
             endif
          enddo
@@ -2847,7 +2848,7 @@ subroutine comp_sinktot()
          do j=ISED1,ISEDN
             ll = j-ISED1+1
             sinksetot(j,k) = sinksetot(j,k) + vol1(k)*sedtra%sinkse(k,ll)               *constituents(j,kb)*dts
-            if (stmpar%morpar%flufflyr%iflufflyr .gt. 0) then
+            if (stmpar%morpar%flufflyr%iflufflyr > 0) then
                sinkftot(j,k)  = sinkftot(j,k) +  vol1(k)*stmpar%morpar%flufflyr%sinkf(ll,k)*constituents(j,kb)*dts
             endif
          enddo
