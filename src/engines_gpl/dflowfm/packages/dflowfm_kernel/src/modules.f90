@@ -3529,9 +3529,9 @@ end module m_vegetation
 ! link related, dim = lnkx
  double precision, allocatable     :: u0    (:)   !< flow velocity (m/s)  at start of timestep
  double precision, allocatable, target     :: u1(:)   !< [m/s]  flow velocity (m/s)  at   end of timestep {"location": "edge", "shape": ["lnkx"]}
- double precision, allocatable     :: u_to_umain(:)   !< [-]  Factor for translating general velocity to the flow velocity in the main channel at end of timestep (1d) {"location": "edge", "shape": ["lnkx"]}
+ double precision, allocatable, target     :: u_to_umain(:)   !< [-]  Factor for translating general velocity to the flow velocity in the main channel at end of timestep (1d) {"location": "edge", "shape": ["lnkx"]}
  double precision, allocatable, target     :: q1(:)   !< [m3/s] discharge     (m3/s) at   end of timestep n, used as q0 in timestep n+1, statement q0 = q1 is out of code, saves 1 array {"location": "edge", "shape": ["lnkx"]}
- double precision, allocatable     :: q1_main(:)   !< [m3/s] discharge     (m3/s) in main channel at {"location": "edge", "shape": ["lnkx"]}
+ double precision, allocatable, target     :: q1_main(:)   !< [m3/s] discharge     (m3/s) in main channel at {"location": "edge", "shape": ["lnkx"]}
  double precision, allocatable     :: qa    (:)   !< discharge (m3/s) used in advection, qa=au(n)*u1(n+1) instead of
  double precision, allocatable     :: cflj  (:)   !< courant nr link j to downwind volume i (    ) = Dt*Qj/Vi
  double precision, allocatable     :: tetaj (:)   !< 1-1/sum(upwind incoming courants)      (    )
@@ -4002,7 +4002,7 @@ end module m_profiles
  double precision, allocatable, target :: dx    (:)      !< [m] link length (m) {"location": "edge", "shape": ["lnx"]}
  double precision, allocatable     :: dxi   (:)      !< inverse dx
  double precision, allocatable, target :: wu(:)      !< [m] link initial width (m), if < 0 pointer to convtab {"location": "edge", "shape": ["lnx"]}
- double precision, allocatable     :: wu_mor(:)      !< [m] morphologically active width (m), if < 0 pointer to convtab {"location": "edge", "shape": ["lnx"]}
+ double precision, allocatable, target :: wu_mor(:)      !< [m] morphologically active width (m), if < 0 pointer to convtab {"location": "edge", "shape": ["lnx"]}
  double precision, allocatable     :: wui   (:)      !< inverse link initial width (m), if < 0 pointer to convtab
  double precision, allocatable     :: prof1D (:,:)   !< dim = (3,lnx1D) 1= 1D prof width, 2=1D profile height, 3=proftyp, or: if 1,2< 0, pointers to prof 1,2, then 3=alfa1
  integer,          allocatable     :: jaduiktmp(:)  !< temparr
