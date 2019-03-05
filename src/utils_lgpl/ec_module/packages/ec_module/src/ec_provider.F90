@@ -1541,6 +1541,8 @@ module m_ec_provider
                read(rec(lblstart+6:len_trim(rec)),*,iostat=istat)  plipointlbls(i)
             endif
          enddo
+         ! close pli file
+         close(fileReaderPtr%fileHandle, iostat = istat)
          
          ! Construct the poly_tim Item.
          quantityId = ecInstanceCreateQuantity(instancePtr)
@@ -1695,8 +1697,6 @@ module m_ec_provider
          ! Add successfully created source Item to the main FileReader
          if (.not. ecFileReaderAddItem(instancePtr, fileReaderPtr%id, itemPT%id)) return 
          !
-         ! close pli file
-         close(fileReaderPtr%fileHandle, iostat = istat)
          success = .true. 
       end function ecProviderCreatePolyTimItems
       

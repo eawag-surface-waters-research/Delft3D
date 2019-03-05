@@ -214,7 +214,7 @@ module m_ec_support
          use netcdf
          !
          logical                         :: success  !< function status
-         integer,          intent(inout) :: minp     !< IO unit number
+         integer,          intent(out)   :: minp     !< IO unit number
          character(len=*), intent(in)    :: filename !< relative path
          !
          integer :: ierror         !< netcdf helper variable
@@ -243,18 +243,7 @@ module m_ec_support
             return
          endif
          ! Locate an unused file unit.
-         do i = 10, maxFileUnits
-            inquire (unit = i, opened = unitused) 
-            if (.not. unitused) exit
-         enddo
-         if (unitused) then
-            call setECMessage("ec_support::ecSupportOpenExistingFile: No free unit number available")
-            success = .false.
-            return
-         endif
-         minp = i
-         ! Open the data file.
-         open(minp, file = trim(filename), action = 'READ', iostat = istat)
+         open(newunit=minp,file=trim(filename),iostat=istat)
          if (istat == 0) then
             success = .true.
          else
