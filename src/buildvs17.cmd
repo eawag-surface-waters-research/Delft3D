@@ -49,7 +49,7 @@ call "%VS2017INSTALLDIR%\VC\Auxiliary\Build\vcvarsall.bat" amd64
 
 rem ===========================================================================
 rem delft3d_open.sln
-devenv.exe delft3d_open.sln /Build "Release|x64" /Out build_delft3d_open.log
+"%VS2017INSTALLDIR%\Common7\IDE\devenv.exe" delft3d_open.sln /Build "Release|x64" /Out build_delft3d_open.log
 if NOT %ErrorLevel% EQU 0 (
     echo "Error in compiling delft3d_open.sln: %ErrorLevel%"
     set globalErrorLevel=%ErrorLevel%
@@ -61,7 +61,7 @@ if %d3d_open_only% EQU 1 (
 
 rem ===========================================================================
 rem dflowfm_open.sln
-devenv.exe dflowfm_open.sln /Build "Release|x64" /Out build_dflowfm_open.log
+"%VS2017INSTALLDIR%\Common7\IDE\devenv.exe" dflowfm_open.sln /Build "Release|x64" /Out build_dflowfm_open.log
 if NOT %ErrorLevel% EQU 0 (
     echo "Error in compiling dflowfm_open.sln: %ErrorLevel%"
     set globalErrorLevel=%ErrorLevel%
@@ -70,7 +70,7 @@ if NOT %ErrorLevel% EQU 0 (
 
 rem ===========================================================================
 rem io_netcdf.sln
-devenv.exe io_netcdf.sln /Build "Release|x64" /Out build_io_netcdf.log
+"%VS2017INSTALLDIR%\Common7\IDE\devenv.exe" io_netcdf.sln /Build "Release|x64" /Out build_io_netcdf.log
 if NOT %ErrorLevel% EQU 0 (
     echo "Error in compiling delft3d_open.sln: %ErrorLevel%"
     set globalErrorLevel=%ErrorLevel%
@@ -79,7 +79,7 @@ if NOT %ErrorLevel% EQU 0 (
 
 rem ===========================================================================
 rem nefis.sln
-devenv.exe nefis.sln /Build "Release|x64" /Out build_nefis.log
+"%VS2017INSTALLDIR%\Common7\IDE\devenv.exe" nefis.sln /Build "Release|x64" /Out build_nefis.log
 if NOT %ErrorLevel% EQU 0 (
     echo "Error in compiling delft3d_open.sln: %ErrorLevel%"
     set globalErrorLevel=%ErrorLevel%
