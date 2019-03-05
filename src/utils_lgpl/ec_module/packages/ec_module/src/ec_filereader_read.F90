@@ -86,22 +86,26 @@ module m_ec_filereader_read
          type(tEcFileReader), pointer :: fileReaderPtr !< intent(in)
          !
          integer :: istat !< status of read operation
+         character(len=maxNameLen)      :: iomsg         !< io-message
          !
-         rewind(unit=fileReaderPtr%fileHandle, IOMSG = message, IOSTAT = istat)
+         iomsg = ""
+         rewind(unit=fileReaderPtr%fileHandle, IOMSG = iomsg, IOSTAT = istat)
          if (istat /= 0) then
-            call setECMessage("ERROR: ec_filereader_read::ecUniReadFirstLine: rewind failed on " // trim(fileReaderPtr%fileName) // ". Error: " // trim(message))
+            call setECMessage("Rewind failed on " // trim(fileReaderPtr%fileName) // ". Error: " // trim(iomsg))
             return
          endif
          ! continue reading lines untill a data line is encountered
          do
-            call GetLine(fileReaderPtr%fileHandle, rec, istat)
+            iomsg = ""
+            call GetLine(fileReaderPtr%fileHandle, rec, istat, iomsg=iomsg)
             if (istat == 0) then
                call strip_comment(rec)
                if (len_trim(rec)>0) then
                   exit
                end if
             else
-               call setECMessage("INFO: ec_filereader_read::ecUniReadFirstLine: File end has been reached of: "//trim(fileReaderPtr%fileName))
+               call setECMessage("  IOMessage: "//trim(iomsg))
+               call setECMessage("File error in "//trim(fileReaderPtr%fileName))
                exit
             end if
          end do
