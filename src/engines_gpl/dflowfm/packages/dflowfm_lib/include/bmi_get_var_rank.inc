@@ -112,6 +112,8 @@
      rank = 1
   case("zbndu")
      rank = 1
+  case("zbndq")
+     rank = 1
   case("rnveg")
      rank = 1
   case("diaveg")

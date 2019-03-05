@@ -194,6 +194,10 @@
 
      call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
      zbndu(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
+  case("zbndq")
+
+     call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
+     zbndq(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
   case("rnveg")
 
      call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))

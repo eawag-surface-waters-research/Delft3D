@@ -1797,6 +1797,7 @@ end module m_crspath
  double precision, allocatable     :: xbndu(:)          !< velocity   boundary points xcor
  double precision, allocatable     :: ybndu(:)          !< velocity   boundary points ycor
  double precision, allocatable, target :: zbndu(:)      !< [m/s] velocity   boundary points function   {"location": "edge", "shape": ["nbndu"]}
+ double precision, allocatable, target :: zbndq(:)      !< [m3/s] discharge  boundary points function   {"location": "edge", "shape": ["nbndu"]}
  double precision, allocatable     :: zbndu0(:)         !< velocity   boundary points function in start time
  double precision, allocatable     :: xy2bndu(:,:)      !< velocity   boundary 'external tolerance point'
  integer         , allocatable     :: kdu  (:)          !< velocity   boundary points temp array

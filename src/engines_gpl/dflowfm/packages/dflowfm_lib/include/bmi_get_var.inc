@@ -112,6 +112,8 @@
      x = c_loc(zbndz)
   case("zbndu") !<  [m/s] velocity   boundary points function {"location": "edge", "shape": ["nbndu"]}
      x = c_loc(zbndu)
+  case("zbndq") !<  [m3/s] discharge  boundary points function {"location": "edge", "shape": ["nbndu"]}
+     x = c_loc(zbndq)
   case("rnveg") !<  [1/m2] 3D plant density , 2D part is basis input (1/m2) {"location": "face", "shape": ["ndkx"]}
      x = c_loc(rnveg)
   case("diaveg") !<  [m] 3D plant diameter, 2D part is basis input (m) {"location": "face", "shape": ["ndkx"]}

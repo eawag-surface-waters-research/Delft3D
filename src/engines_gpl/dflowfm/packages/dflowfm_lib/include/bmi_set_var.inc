@@ -154,6 +154,9 @@
   case("zbndu")
      call c_f_pointer(xptr, x_1d_double_ptr, shape(zbndu))
      zbndu(:) = x_1d_double_ptr
+  case("zbndq")
+     call c_f_pointer(xptr, x_1d_double_ptr, shape(zbndq))
+     zbndq(:) = x_1d_double_ptr
   case("rnveg")
      call c_f_pointer(xptr, x_1d_double_ptr, shape(rnveg))
      rnveg(:) = x_1d_double_ptr

@@ -3215,7 +3215,7 @@ end subroutine sethu
           huqbnd(n) = hu(L)
        endif
 
-       if (zbndu(n) < 0d0 .and. hu(L) < qbndhutrs) then
+       if (zbndq(n) < 0d0 .and. hu(L) < qbndhutrs) then
           hu(L) = 0d0 ; au(L) = 0d0
        else
           if ( jampi.eq.0 ) then
@@ -3245,7 +3245,7 @@ end subroutine sethu
        do n  = L1qbnd(nq), L2qbnd(nq)
           L  = kbndu(3,n)
 !          zbndu(n) = (zbndu(n)*hu(L)**FAC23)/at
-           zbndu(n) = (zbndu(n)*huqbnd(n)**FAC23)/at
+           zbndu(n) = (zbndq(n)*huqbnd(n)**FAC23)/at
        enddo
     endif
  enddo
@@ -15317,7 +15317,7 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
           goto 888
        end if
    end if
-
+   
    ! TODO: [TRUNKMERGE] JR: waveenergybnd was already partially missing in sedmor branch. Remove all, or reinstate?
 
    if (nbnds > 0) then
@@ -36537,11 +36537,15 @@ end function is_1d_boundary_candidate
        call aerr('zbndu(nbndu*kmxd)', ierr, nbndu*kmxd )
        allocate(zbndu0(nbndu*kmxd), stat=ierr) ! TODO: Spee/Reyns: the zbndu array was made 3D by Spee, but Reyns's zbndu0 changes have not been updated for this yet.
        call aerr('zbndu0(nbndu*kmxd)', ierr, nbndu*kmxd )
+       allocate(zbndq(nbndu*kmxd), stat=ierr)
+       call aerr('zbndq(nbndu*kmxd)', ierr, nbndu*kmxd )
     else
        allocate(zbndu(nbndu), stat=ierr)
        call aerr('zbndu(nbndu)', ierr, nbndu )
        allocate(zbndu0(nbndu), stat=ierr)
        call aerr('zbndu0(nbndu)', ierr, nbndu )
+       allocate(zbndq(nbndu), stat=ierr)
+       call aerr('zbndq(nbndu)', ierr, nbndu )
     endif
 
     !allocate ( zbndu_store(nbndu) , stat=ierr   )

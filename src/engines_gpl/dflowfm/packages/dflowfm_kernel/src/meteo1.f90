@@ -476,9 +476,12 @@ module m_meteo
          case ('waterlevelbnd', 'neumannbnd', 'riemannbnd', 'outflowbnd')
             itemPtr1 => item_waterlevelbnd
             dataPtr1 => zbndz
-         case ('velocitybnd', 'dischargebnd', 'criticaloutflowbnd','weiroutflowbnd', 'absgenbnd')
+         case ('velocitybnd', 'criticaloutflowbnd','weiroutflowbnd', 'absgenbnd')
             itemPtr1 => item_velocitybnd
             dataPtr1 => zbndu
+         case ('dischargebnd')
+            itemPtr1 => item_velocitybnd
+            dataPtr1 => zbndq
          case ('salinitybnd')
             itemPtr1 => item_salinitybnd
             dataPtr1 => zbnds

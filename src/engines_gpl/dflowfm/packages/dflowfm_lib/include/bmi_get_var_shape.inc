@@ -114,6 +114,8 @@
        shape(1) = nbndz
     case("zbndu")
        shape(1) = nbndu
+    case("zbndq")
+       shape(1) = nbndu
     case("rnveg")
        shape(1) = ndkx
     case("diaveg")
