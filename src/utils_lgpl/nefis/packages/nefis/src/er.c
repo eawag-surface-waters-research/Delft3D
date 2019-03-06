@@ -55,10 +55,10 @@
 #include "btps.h"
 #include "nefis.h" /* needed for definition of LENGTH_ERROR_MESSAGE */
 #include "nef-def.h"
+#include "er.h"
 
 BInt4 nefis_errno;
 BInt4 nefis_errcnt;
-BChar error_text[LENGTH_ERROR_MESSAGE+1];
 
 /*
  *----------------------------------------------------------------------
