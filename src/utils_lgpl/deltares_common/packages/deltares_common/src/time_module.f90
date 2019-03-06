@@ -75,6 +75,7 @@ module time_module
    interface mjd2date
       module procedure mjd2datetime
       module procedure mjd2ymd
+      module procedure mjd2ymdhms
    end interface mjd2date
 
    interface datetime_to_string
