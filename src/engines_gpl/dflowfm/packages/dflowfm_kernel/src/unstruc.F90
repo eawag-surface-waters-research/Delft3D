@@ -1014,8 +1014,8 @@ if(q /= 0) then
        difmaxlevm = 0d0 ;  noddifmaxlevm = 0
     endif
 
-333 call pack_matrix()
-    call s1ini()
+333 call s1ini()
+    call pack_matrix()
 
  !-----------------------------------------------------------------------------------------------
 
@@ -33496,18 +33496,7 @@ end function ispumpon
 
     do k = 1,ndxi
        if (qin(k) > 0d0) then
-          hsk = s0(k) - bl(k)
-          if (kfs(k) == 0) then                  
-             ! niet in matrix => expliciet vullen
-             if (a1(k) > 0.0) then
-                s1(k)  = s0(k) + dts*qin(k)/a1(k)  
-             else
-                !
-              s1(k)  = s0(k) + dts*qin(k)/ba(k)              !
-             endif
-          else
               dd(k)  = qin(k)
-          endif
        else if (qin(k) < 0d0) then
 
           hsk = s0(k) - bl(k)
@@ -40417,7 +40406,7 @@ if (L > lnxi) then                       ! for 1D boundary links, refer to attac
 endif
 
 
-if (network%loaded) then
+if (abs(kcu(ll))==1 .and. network%loaded) then !flow1d used only for 1d channels and not for 1d2d roofs and gullies
    call getCrossTotalData_on_link(network, LL, hpr, area, width, CS_TYPE_MIN)
    return
 endif      
