@@ -43,7 +43,8 @@ del /F/Q del.log
 
   rem Set environment parameters for VisualStudio
 call "%VS2017INSTALLDIR%\VC\Auxiliary\Build\vcvarsall.bat" amd64
-
+rem Execution of vcvarsall results in a jump to the C-drive. Jump back to the script directory
+cd /D %~dp0
   rem The path to devenv.exe is now added to PATH: no full path specificitation needed on next line.
 
 
