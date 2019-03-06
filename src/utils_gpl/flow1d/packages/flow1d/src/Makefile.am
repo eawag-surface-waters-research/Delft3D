@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libflow1d.la
+noinst_LTLIBRARIES = libflow1d.la
 
 #-------------------------------------------------------------------------------
 #Includes
