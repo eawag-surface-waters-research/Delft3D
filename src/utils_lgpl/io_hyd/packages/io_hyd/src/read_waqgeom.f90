@@ -40,7 +40,7 @@ module m_read_waqgeom
     
     !> Reads an unstructured waqgeom grid from UGRID file format.
     !! Reads netnode coordinates, edges (netlinks), net boundary and elements (netelems).
-    function read_waqgeom_file(filename, meta, crs, waqgeom, edge_type, conv_type, conv_version) result (success)
+    function read_waqgeom_file(filename, meta, crs, waqgeom, edge_type, idomain, iglobal, conv_type, conv_version) result (success)
         use netcdf
         use io_netcdf
         use io_ugrid
@@ -52,6 +52,8 @@ module m_read_waqgeom
         type(t_crs), intent(out)               :: crs
         type(t_ug_meshgeom), intent(out)       :: waqgeom
         integer, pointer, intent(out)          :: edge_type(:)
+        integer, pointer, intent(out)          :: idomain(:)
+        integer, pointer, intent(out)          :: iglobal(:)
         integer                                :: conv_type 
         real(8)                                :: conv_version
 
@@ -67,6 +69,8 @@ module m_read_waqgeom
         integer :: ncid 
         integer :: nmesh 
         integer :: id_edgetypes
+        integer :: id_idomain
+        integer :: id_iglobal
         integer :: file_size
         character(len=260) :: var_name
 
@@ -123,8 +127,19 @@ module m_read_waqgeom
 
         call reallocP(edge_type, waqgeom%numedge, keepExisting = .false.)
         ierr = ionc_get_ncid(ioncid, ncid)
-        ierr = nf90_inq_varid(ncid, "mesh2d_edge_type", id_edgetypes)
+        ierr = nf90_inq_varid(ncid, "mesh2d_edge_type", id_edgetypes)  ! instead of variable name, we should look at the mesh attributes (but these are not set yet)
         ierr = nf90_get_var(ncid, id_edgetypes, edge_type, count=(/ waqgeom%numedge /))
+
+        ierr = nf90_inq_varid(ncid, "mesh2d_face_domain_number", id_idomain)  ! instead of variable name, we should look at the mesh attributes (but these are not set yet)
+        if (ierr .eq. 0) then
+           call reallocP(idomain, waqgeom%numface, keepExisting = .false.)
+           ierr = nf90_get_var(ncid, id_idomain, idomain, count=(/ waqgeom%numface /))
+        endif 
+        ierr = nf90_inq_varid(ncid, "mesh2d_face_global_number", id_iglobal)  ! instead of variable name, we should look at the mesh attributes (but these are not set yet)
+        if (ierr .eq. 0) then
+           call reallocP(iglobal, waqgeom%numface, keepExisting = .false.)
+           ierr = nf90_get_var(ncid, id_iglobal, iglobal, count=(/ waqgeom%numface /))
+        endif 
 
         call add_facexy_waqgeom(waqgeom)
         call add_edgexy_waqgeom(waqgeom)

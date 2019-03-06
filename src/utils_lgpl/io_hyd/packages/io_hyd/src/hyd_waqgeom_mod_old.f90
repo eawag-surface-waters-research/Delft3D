@@ -237,48 +237,7 @@ real            , allocatable     :: sncnw (:)      !< closed wall alignment sin
  double precision                            :: theta0          !< mean theta-grid direction
  double precision, allocatable               :: thetabin(:)           !< bin-means of theta-grid
 
-contains
-!> Sets ALL (scalar) variables in this module to their default values.
-!! For a reinit prior to flow computation, call reset_waqgeom() instead.
-subroutine default_waqgeom()
-    bamin   = 1d-6   ! 1d0    ! minimum 2D cell area
-    bamin1D = 0d-2   ! minimum cell area 1d nodes
-    dxmin   = 1D-3   ! minimum link length (m)
-
-    wu1DUNI =  2d0   ! Uniform 1D profile width
-    hh1DUNI =  3d0   ! Uniform 1D profile height
-
-    ! useful parameters :
-    rrtol      = 5d0 ! relative cellsize factor in search tolerance ()
-    jasnelucxy = 3   ! method for cell center velocities
-                     ! 1 = slow node oriented, 2 = link csu etc, 3= fast linkweight
-
-    ! Remaining of variables is handled in reset_waqgeom()
-    call reset_waqgeom()
-end subroutine default_waqgeom
-
-
-!> Resets only waq geometry variables intended for a restart of flow simulation.
-!! Upon loading of new model/MDU, use default_waqgeom() instead.
-subroutine reset_waqgeom()
-! node (s) related : dim=ndx
-    ndx2D   = 0      ! nr of 2d FLOW CELLS = NUMP
-    ndxi    = 0      ! max nr of internal flowcells  (internal = 2D + 1D )
-    ndx     = 0      ! nr of flow nodes (internal + boundary)
-
-! link (u) related : dim = lnx
-    lnx1D   = 0      ! nr of 1D flow links
-    lnxi    = 0      ! nr of flow links (internal           )
-    lnx     = 0      ! nr of flow links (internal + boundary)
-
-! useful parameters :
-    jaFlowNetChanged = 1 ! To enforce various net(link)-related init routines after renumbering
-
-!    if (jawave .eq. 4) then  ! reinitialize wave directional grid
-!      ntheta = 0
-!    end if
-end subroutine reset_waqgeom
-end module wqm_waqgeom
+ end module wqm_waqgeom
 
     
 
@@ -1197,30 +1156,6 @@ type t_ug_meshids
    integer :: id_facenodes       = -1 !< Variable ID for face-to-node mapping table.
 
 end type t_ug_meshids
-!> Structure for storing an entire mesh geometry (topology and coordinates and more).
-type t_ug_meshgeom
-! TODO: AvD: extend this to 3D (volumes)
-   character(len=256) :: meshName           !< Name of this mesh ! TODO: AvD: should this be in this data type?
-   integer            :: dim                !< Dimensionality of the mesh (1/2/3)
-   integer            :: numNode            !< Number of mesh nodes.
-   integer            :: numEdge            !< Number of mesh edges.
-   integer            :: numFace            !< Number of mesh faces.
-
-   integer,      pointer :: edge_nodes(:,:) !< Edge-to-node mapping array.
-   integer,      pointer :: face_nodes(:,:) !< Face-to-node mapping array.
-
-   real(kind=dp), pointer :: nodex(:)       !< x-coordinates of the mesh nodes.
-   real(kind=dp), pointer :: nodey(:)       !< y-coordinates of the mesh nodes.
-   real(kind=dp), pointer :: nodez(:)       !< z-coordinates of the mesh nodes.
-   real(kind=dp), pointer :: edgex(:)       !< x-coordinates of the mesh edges.
-   real(kind=dp), pointer :: edgey(:)       !< y-coordinates of the mesh edges.
-   real(kind=dp), pointer :: edgez(:)       !< z-coordinates of the mesh edges.
-   real(kind=dp), pointer :: facex(:)       !< x-coordinates of the mesh faces.
-   real(kind=dp), pointer :: facey(:)       !< y-coordinates of the mesh faces.
-   real(kind=dp), pointer :: facez(:)       !< z-coordinates of the mesh faces.
-
-   type(t_crs),  pointer :: crs           !< Map projection/coordinate transformation used for the coordinates of this mesh.
-end type t_ug_meshgeom
 
    contains
 
@@ -1390,43 +1325,6 @@ function ug_put_var_attset(ncid, varid, attset) result(ierr)
    end do
 
 end function ug_put_var_attset
-
-
-!> Creates/initializes an empty mesh geometry.
-!!
-!! NOTE: do not pass already filled mesh geometries to this function,
-!! since array pointers will become disassociated, possibly causing
-!! memory leaks.
-function ug_new_meshgeom(meshgeom) result(ierr)
-   type(t_ug_meshgeom), intent(out) :: meshgeom !< The mesh geometry that is to be created.
-   integer                          :: ierr     !< Result status (UG_NOERR==NF90_NOERR) if successful.
-
-   ierr = UG_NOERR
-
-   meshgeom%dim    = 0 
-   meshgeom%numNode = 0 
-   meshgeom%numEdge = 0 
-   meshgeom%numFace = 0 
-
-   meshgeom%edge_nodes => null()
-   meshgeom%face_nodes => null()
-
-   meshgeom%nodex => null()
-   meshgeom%nodey => null()
-   meshgeom%nodez => null()
-
-   meshgeom%edgex => null()
-   meshgeom%edgey => null()
-   meshgeom%edgez => null()
-
-   meshgeom%facex => null()
-   meshgeom%facey => null()
-   meshgeom%facez => null()
-
-   meshgeom%crs   => null()
-
-end function ug_new_meshgeom
-
 
 
 ! -- COORDINATES ------------
@@ -1769,22 +1667,6 @@ function ug_def_var(ncid, meshids, id_var, id_dims, itype, iloc, mesh_name, var_
 
 
 end function ug_def_var
-
-
-!> Writes a complete mesh geometry to an open NetCDF data set.
-!! The mesh geometry is the required starting point for all variables/data defined ON that mesh.
-!! This function accepts the mesh geometry derived type as input, for the arrays-based function, see ug_write_mesh_arrays
-function ug_write_mesh_struct(ncid, meshids, meshgeom) result(ierr)
-   integer,             intent(in) :: ncid     !< NetCDF dataset id, should be already open and ready for writing.
-   type(t_ug_meshids),  intent(inout) :: meshids !< Set of NetCDF-ids for all mesh geometry arrays.
-   type(t_ug_meshgeom), intent(in) :: meshgeom !< The complete mesh geometry in a single struct.
-   integer                         :: ierr     !< Result status (UG_NOERR==NF90_NOERR) if successful.
-
-   ierr = ug_write_mesh_arrays(ncid, meshids, meshgeom%meshName, meshgeom%dim, UG_LOC_ALL2D, meshgeom%numNode, meshgeom%numEdge, meshgeom%numFace, &
-                           meshgeom%edge_nodes, meshgeom%face_nodes, meshgeom%nodex, meshgeom%nodey, & ! meshgeom%nodez, &
-                           meshgeom%edgex, meshgeom%edgey, meshgeom%facex, meshgeom%facey, meshgeom%crs, -999, -999d0)
-end function ug_write_mesh_struct
-
 
 !> Writes a complete mesh geometry to an open NetCDF data set based on separate arrays with all mesh data..
 !! The mesh geometry is the required starting point for all variables/data defined ON that mesh.

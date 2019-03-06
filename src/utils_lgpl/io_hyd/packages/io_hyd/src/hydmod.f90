@@ -218,6 +218,8 @@
          integer                                :: conv_type              !< netcdf convention type
          real(8)                                :: conv_version           !< netcdf convension version
          integer, pointer                       :: edge_type(:)           !< edge type
+         integer, pointer                       :: global_edge(:)         !< global edge number
+         integer, pointer                       :: global_node(:)         !< global node number
          
       end type t_hyd
 
