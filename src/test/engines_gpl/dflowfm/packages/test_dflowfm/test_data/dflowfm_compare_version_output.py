@@ -17,7 +17,7 @@ parser.add_argument("--new",
                     dest="newfile")
 args = parser.parse_args()
 
-with open(args.__dict__["newfile"], "r", errors='ignore') as filinhandle:
+with open(args.__dict__["newfile"], "r") as filinhandle:
     newFileContents = filinhandle.readlines()
 filinhandle.closed
 
