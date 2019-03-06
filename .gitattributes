@@ -2969,7 +2969,7 @@ src/scripts_lgpl/win64/tests_template.sln -text
 src/scripts_lgpl/win64/utils_lgpl_template.sln -text
 src/test/Makefile.am -text
 src/test/engines_gpl/Makefile.am -text
-src/test/engines_gpl/dflowfm/packages/tet_dflowfm/test_data/dflowfm_version.log -text
+src/test/engines_gpl/dflowfm/packages/test_dflowfm/test_data/dflowfm_version.log -text
 src/test/engines_gpl/waq/Makefile.am -text
 src/test/engines_gpl/waq/packages/Makefile.am -text
 src/test/engines_gpl/waq/packages/waq_utils_f/Makefile.am -text
