@@ -880,8 +880,8 @@ module m_meteo
             goto 1234
          end if
       else
-               success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, refdate_mjd, tzone, ec_second, name, forcingfile=forcingfile, dtnodal=dtnodal)
-               success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, refdate_mjd, tzone, ec_second, name, forcingfile=forcingfile)
+               !success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, refdate_mjd, tzone, ec_second, name, forcingfile=forcingfile, dtnodal=dtnodal)
+              ! success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, refdate_mjd, tzone, ec_second, name, forcingfile=forcingfile)
       ! ============================================================
       ! For the remaining types, construct the fileReader and source Items here.
       ! ============================================================
@@ -894,7 +894,7 @@ module m_meteo
             end if
             fileReaderId = fileReaderPtr%id 
          else
-               success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, refdate_mjd, tzone, ec_second, name, dtnodal=dtnodal, varname=varname)
+               !success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, refdate_mjd, tzone, ec_second, name, dtnodal=dtnodal, varname=varname)
             fileReaderId = ecCreateFileReader(ecInstancePtr)
             
             fileReaderPtr => ecFindFileReader(ecInstancePtr, fileReaderId) ! TODO: Refactor this private data access (UNST-703).
@@ -917,7 +917,7 @@ module m_meteo
                      return
                end if
             else
-               success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, refdate_mjd, tzone, ec_second, name, varname=varname)
+               !success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, refdate_mjd, tzone, ec_second, name, varname=varname)
                if (present(dtnodal)) then
                   success = ecSetFileReaderProperties(ecInstancePtr, fileReaderId, ec_filetype, filename, refdate_mjd, tzone, ec_second, name, dtnodal=dtnodal, varname=varname)
                else
