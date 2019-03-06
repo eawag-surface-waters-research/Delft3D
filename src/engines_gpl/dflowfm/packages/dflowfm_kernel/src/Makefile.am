@@ -274,8 +274,6 @@ endif
 
 EXTRALIBS+=\
         $(top_builddir)/utils_gpl/flow1d/packages/flow1d/src/libflow1d.la \
-        $(top_builddir)/utils_gpl/flow1d/packages/flow1d_core/src/libflow1d_core.la \
-        $(top_builddir)/utils_gpl/flow1d/packages/flow1d_io/src/libflow1d_io.la \
         $(top_builddir)/utils_gpl/morphology/packages/morphology_plugins_c/src/libMorphologyPluginsC.la \
         $(top_builddir)/utils_gpl/morphology/packages/morphology_kernel/src/libMorphologyKernel.la \
         $(top_builddir)/utils_gpl/morphology/packages/morphology_io/src/libMorphologyIO.la \
