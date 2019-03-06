@@ -247,7 +247,7 @@ module m_ec_provider
          if (associated(fileReaderPtr)) then
             fileReaderPtr%ofType = fileType
             fileReaderPtr%fileName = fileName
-            fileReaderPtr%fileHandle = -1                      ! The filereader itself has now an invalid filehandle 
+            fileReaderPtr%fileHandle = ec_undef_int                      ! The filereader itself has now an invalid filehandle 
 
             if (.not. ecSupportOpenExistingFile(fileReaderPtr%fileHandle, fileReaderPtr%fileName)) return
             select case (fileReaderPtr%ofType)                 ! Inventory of the opened netcdf-file
@@ -1699,7 +1699,7 @@ module m_ec_provider
          !
          success = .true. 
       end function ecProviderCreatePolyTimItems
-      
+    
       
 !==============================================================================================================
 

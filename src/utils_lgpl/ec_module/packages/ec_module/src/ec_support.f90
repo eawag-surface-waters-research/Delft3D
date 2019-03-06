@@ -247,6 +247,7 @@ module m_ec_support
          if (istat == 0) then
             success = .true.
          else
+            minp = ec_undef_int
             call setECMessage("ec_support::ecSupportOpenExistingFile: opening file " // trim(filename) // " failed")
          endif
       end function ecSupportOpenExistingFile
@@ -255,7 +256,7 @@ module m_ec_support
    
       !> Add an integer to a set of integers.
       function ecSupportAddUniqueInt(intArr, anInt) result(success)
-         logical                        :: success !< function status
+         logical                        :: success!< function status
          integer, dimension(:), pointer :: intArr !< array containing unique integers (a set)
          integer, intent(in)            :: anInt  !< integer to be added to the set of integers
    
