@@ -882,9 +882,11 @@ subroutine wrwaqgeom (filename, version_full, sferic, epsg, nr_nodes, xk, yk, zk
       deallocate( xcrd, ycrd )
       !
  9999 continue
-      ierr = nf90_sync(igeomfile); call check_error( ierr, "sync file " // trim(filename) )
-      ierr = nf90_close(igeomfile); call check_error( ierr, "closing file" // trim(filename) )
-      !
+      ierr = nf90_sync(igeomfile)
+      call check_error( ierr, "sync file " // trim(filename) )
+      ierr = nf90_close(igeomfile)
+      call check_error( ierr, "closing file" // trim(filename) )
+      
 end subroutine wrwaqgeom
 
 end module hyd_waqgeom_old
