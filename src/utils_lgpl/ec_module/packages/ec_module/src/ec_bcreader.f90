@@ -416,6 +416,9 @@ contains
           select case (adjustl(hdrvals(ifld)%s))
           case ('TIMESERIES')
              bc%func = BC_FUNC_TSERIES
+          case ('CONSTANT')                        ! Constant is a special version of time-series (Sobek3)
+             bc%func = BC_FUNC_CONSTANT
+             bc%timeint = timeint_bfrom            ! Time interpolation keyword is likely absent, default to a0=1 and a1=0
           case ('HARMONIC')
              bc%func = BC_FUNC_HARMONIC
           case ('ASTRONOMIC')
@@ -457,6 +460,8 @@ contains
           select case (adjustl(hdrvals(ifld)%s))
           case ('LINEAR')
              bc%timeint = BC_TIMEINT_LIN
+          case ('LINEAR-EXTRAPOLATE')
+             bc%timeint = BC_TIMEINT_LIN_EXTRAPOL
           case ('BLOCK-TO')
              bc%timeint = BC_TIMEINT_BTO
           case ('BLOCK-FROM')
