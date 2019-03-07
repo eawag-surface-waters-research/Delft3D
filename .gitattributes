@@ -2207,7 +2207,6 @@ src/engines_gpl/waq/packages/waq_kernel/waq_kernel.vfproj -text
 src/engines_gpl/waq/packages/waq_plugin_wasteload/Makefile.am -text
 src/engines_gpl/waq/packages/waq_plugin_wasteload/src/Makefile.am -text
 src/engines_gpl/waq/packages/waq_plugin_wasteload/src/delwaq_user_wasteloads.f -text
-src/engines_gpl/waq/packages/waq_plugin_wasteload/src/srstop.f -text
 src/engines_gpl/waq/packages/waq_plugin_wasteload/src/waq_plugin_wasteload_version.F90.svn -text
 src/engines_gpl/waq/packages/waq_plugin_wasteload/src/zoekns.f -text
 src/engines_gpl/waq/packages/waq_plugin_wasteload/waq_plugin_wasteload.vfproj -text
