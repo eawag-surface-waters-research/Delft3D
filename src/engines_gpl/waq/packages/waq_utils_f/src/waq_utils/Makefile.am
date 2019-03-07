@@ -106,3 +106,5 @@ libwaq_utils_la_SOURCES =  \
 
 #-------------------------------------------------------------------------------
 # Libraries
+libwaq_utils_la_LIBADD=\
+	$(top_builddir)/utils_lgpl/nefis/packages/nefis/src/libNefis.la
