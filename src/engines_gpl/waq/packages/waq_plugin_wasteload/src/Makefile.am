@@ -18,11 +18,13 @@ FMODULES += \
 libwaq_plugin_wasteload_la_SOURCES = \
        waq_plugin_wasteload_version.F90 \
        delwaq_user_wasteloads.f \
-       srstop.f \
        zoekns.f
 
 #-------------------------------------------------------------------------------
 # Libraries
+libwaq_plugin_wasteload_la_LIBADD = \
+	$(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/libwaq_utils.la
+
 
 BUILT_SOURCES = ./always \
 	./waq_plugin_wasteload_version.F90
