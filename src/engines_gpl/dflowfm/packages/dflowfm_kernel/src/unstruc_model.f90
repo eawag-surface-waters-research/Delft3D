@@ -2248,7 +2248,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        call prop_set(prop_ptr, 'numerics', 'Logprofatubndin', jaLogprofatubndin, 'ubnds inflow: 0=uniform U1, 1 = log U1, 2 = user3D')
     endif
     if ( writeall .or. jaLogprofkepsbndin .ne. 1) then
-       call prop_set(prop_ptr, 'numerics', 'Logprofkepsbndin', jaLogprofkepsbndin, 'inflow: 0=0 keps, 1 = log keps, 2 = user3D')
+       call prop_set(prop_ptr, 'numerics', 'Logprofkepsbndin', jaLogprofkepsbndin, 'inflow: 0=0 keps, 1 = log keps inflow, 2 = log keps in and outflow')
     endif
 
     call prop_set(prop_ptr, 'numerics', 'Slopedrop2D', Slopedrop2D, 'Apply drop losses only if local bed slope > Slopedrop2D, (<=0: no drop losses)')
@@ -2544,7 +2544,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
           call prop_set (prop_ptr, 'veg'    , 'Expchileaf'     , expchileaf , '( )' )
           call prop_set (prop_ptr, 'veg'    , 'Uchistem'       , uchistem   , '(m/s)' )
           call prop_set (prop_ptr, 'veg'    , 'Uchileaf'       , uchileaf   , '(m/s)' )
-          call prop_set (prop_ptr, 'veg'    , 'Arealeaf'       , arealeaf   , '(m2)   (per m2 bed surface) ')
+          call prop_set (prop_ptr, 'veg'    , 'Arealeaf'       , arealeaf   , '(m2)   (per plant) ')
           call prop_set (prop_ptr, 'veg'    , 'Cdleaf'         , Cdleaf     , '( )' )  
        endif   
     endif
