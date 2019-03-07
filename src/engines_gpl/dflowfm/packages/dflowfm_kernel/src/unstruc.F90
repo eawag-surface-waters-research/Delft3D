@@ -12499,6 +12499,7 @@ else if (nodval == 27) then
  use m_ship
  use geometry_module ! , only: dbdistance, normalout, half 
  use m_physcoef, only: backgroundwatertemperature
+ use m_alloc
  implicit none
 
  ! locals
@@ -13762,22 +13763,23 @@ endif
     
  endif
 
- if (infiltrationmodel == 2 .or. infiltrationmodel == 3) then  ! set infiltcap=0 for closed links only 
-    kc = 0
+ if (infiltrationmodel == 2 .or. infiltrationmodel == 3) then  ! set infiltcap=0 for closed links only
+    call realloc(kcsini, ndx, keepExisting=.false., fill = 0)
     do L = 1,lnx  ! only one connected open profile will open surface runoff
        n1 = ln(1,L) ; n2 = ln(2,L) 
        if (L <= lnx1D) then 
           if (prof1D(3,L) < 0) then ! closed profile
           else    
-              kc(n1) = 1 ; kc(n2) = 1 
+              kcsini(n1) = 1 ; kcsini(n2) = 1 
           endif
        else
-          kc(n1) = 1 ; kc(n2) = 1 
+          kcsini(n1) = 1 ; kcsini(n2) = 1 
        endif
     enddo
     do n = 1,ndx
-       infiltcap(n) = infiltcap(n)*kc(n)  ! 0 for all links closed  
+       infiltcap(n) = infiltcap(n)*kcsini(n)  ! 0 for all links closed  
     enddo   
+    if (allocated(kcsini)) deallocate(kcsini)
  endif
  
  call sethu(1)
@@ -30881,6 +30883,7 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
     ja = 1
     
     allocate(kcc(mx),kc1d(mx),kc2d(mx)) ; kcc = 1; kc1D = 0 ; kc2D = 0 
+    call realloc(kc, mx, keepExisting = .false., fill = 0)
 
     do L = 1, numL1D
        if (kn(3,L) == 1 .or. kn(3,L) == 6) then ! TODO: AvD: why not also type 3/4/5/7?
@@ -30967,6 +30970,8 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
         bl(k1) = bl(k2) 
     enddo
     call mess(LEVEL_INFO, 'setbedlevelfromextfile: Mirroring input bedlevels at open boundaries.')
+
+    call realloc(kc, numk, keepExisting = .false., fill = 0)
      
  endif
  
