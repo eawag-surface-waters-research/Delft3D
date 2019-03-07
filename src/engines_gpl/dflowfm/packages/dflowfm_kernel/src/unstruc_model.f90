@@ -1744,8 +1744,8 @@ subroutine readMDUFile(filename, istat)
 
    ! Some combined validation checks of model settings:
    if (len_trim(md_restartfile)>0 .and. Tspinupturblogprof>0d0) then
-      call mess(LEVEL_ERROR, 'Not allowed to use a RestartFile with a non-zero spin up time: ' &
-                //'Tspinupturblogprof =', Tspinupturblogprof)
+      write (msgbuf, '(a,f9.3,a)') 'You start from a restartfile and also have a non-zero Tspinupturblogprof'
+      call warn_flush()
    endif
 
    if (len_trim(md_restartfile)>0 .and. Tlfsmo>0d0) then
