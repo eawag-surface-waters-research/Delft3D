@@ -439,30 +439,26 @@ function put_flag_attributes(ncid, varid, class_bnds) result (ierr)
    integer                      :: ierr          !< function result; 0=OK
 
    integer :: i, max_user_classes
-   character(len=:), allocatable :: values, meanings, meaning
-   character(len=3) :: value
+   character(len=:), allocatable :: meanings, meaning
+   integer,          allocatable :: values(:)
    character(len=12) :: meaning_p, meaning_c
 
    ierr = nf90_noerr
    max_user_classes = size(class_bnds)
-
+   allocate(values(max_user_classes + 1))
    ! construct the attributes flag_values and flag_meanings
    do i = 1, max_user_classes + 1
-      write(value,'(i3)') i
-
+      values(i) = i
       if (i <= max_user_classes) then
          write(meaning_c, '(f12.3)') class_bnds(i)
       endif
 
       if (i == 1) then
-         values = trim(adjustl(value))
          meanings = 'below_' // trim(adjustl(meaning_c)) // 'm'
       else if (i <= max_user_classes) then
-         values = values // ' ' // trim(adjustl(value))
          meaning = trim(adjustl(meaning_p)) // 'm_to_' // trim(adjustl(meaning_c)) // 'm'
          meanings = meanings // ' ' // meaning
       else
-         values = values // ' ' // trim(adjustl(value))
          meanings = meanings // ' ' // 'above_' // trim(adjustl(meaning_p)) // 'm'
       endif
 
@@ -470,8 +466,14 @@ function put_flag_attributes(ncid, varid, class_bnds) result (ierr)
    enddo
 
    ! write the attributes flag_values and flag_meanings
-   if (ierr == nf90_noerr) ierr = nf90_put_att(ncid, varid, 'flag_values', values)
-   if (ierr == nf90_noerr) ierr = nf90_put_att(ncid, varid, 'flag_meanings', meanings)
+   if (ierr == nf90_noerr) then
+      ierr = nf90_put_att(ncid, varid, 'flag_values', values)
+   end if
+   if (ierr == nf90_noerr) then
+      ierr = nf90_put_att(ncid, varid, 'flag_meanings', meanings)
+   end if
+
+   deallocate(values)
 end function put_flag_attributes
 
 !> helper function to get the variable ids based on its name
