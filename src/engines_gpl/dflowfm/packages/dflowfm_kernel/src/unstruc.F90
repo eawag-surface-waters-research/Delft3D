@@ -11384,7 +11384,7 @@ end subroutine copynetlinkstosam
  else
 
     do n = ndxi,1,-1
-       nn = size( nd(n)%x )
+       nn = size( nd(n)%x ) ; if (nn == 0) cycle
        call PINPOK(Xp, Yp, Nn, nd(n)%x, nd(n)%y, IN, jins, dmiss)
        if (in == 1) then
           s10 = s1(n)
@@ -12405,7 +12405,9 @@ else if (nodval == 27) then
  else if ( linval == 44) then
     zlin = ustb(LL)
  else if ( linval == 45) then
-    if (L < ltop(LL) ) then
+    if (jawind > 0 .and. kmx > 0 ) then 
+       zlin = ustw(L)
+    else if (L < ltop(LL) ) then
        k1 = ln(1,L)    ; k2  = ln(2,L)
        n1 = ln(1,LL)   ; zb1 = zws(kbot(n1)-1)
        n2 = ln(2,LL)   ; zb2 = zws(kbot(n2)-1)
@@ -31336,7 +31338,8 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
            bl(n1)   = bl1
            bob(1,L) = max(bl(n1), bl(n2))
            bob(2,L) = bob(1,L)
-        elseif (bl(n1) == 1d30 .or. bl(n2) == 30) then
+        !elseif (bl(n1) == 1d30 .or. bl(n2) == 30) then
+        else if (.not. network%loaded) then
 !          SPvdP: previous expression is problematic when zk(k2) and/or zk(k3) have missing values
            zn2 = zk(k2)    ; if (zn2 == dmiss) zn2 = zkuni
            zn3 = zk(k3)    ; if (zn3 == dmiss) zn3 = zkuni
