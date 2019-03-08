@@ -1604,12 +1604,12 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                            inetedgeglob = netedge_c2g(nnetedgecount+ip)
                            if (inetedgeglob > 0) then
                                nitemglob = nitemglob + 1               ! for later checking nitemglob
-                               itmpvar2D(:,inetedgeglob) = itmpvar2D(:,nitemglob0+ip)
+                               itmpvar2D(:,nitemglob) = itmpvar2D(:,nitemglob0+ip)
                                do ikk=1,2
-                                   g1 = itmpvar2D(ikk, inetedgeglob)
+                                   g1 = itmpvar2D(ikk, nitemglob)
                                    if (g1 > 0) then
                                        g1 = g1 +nnodecount
-                                       itmpvar2D(ikk,inetedgeglob) = node_c2g(g1) ! mapping the nodes to global nodes
+                                       itmpvar2D(ikk,nitemglob) = node_c2g(g1) ! mapping the nodes to global nodes
                                    end if
                                end do
                            end if
@@ -1623,12 +1623,12 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                            ifaceglob = face_c2g(nfacecount+ip)
                            if (ifaceglob > 0) then
                                nitemglob = nitemglob + 1
-                               itmpvar2D_tmp(:,ifaceglob) = itmpvar2D(:,nitemglob0+ip)
+                               itmpvar2D_tmp(:,nitemglob) = itmpvar2D(:,nitemglob0+ip)
                                do ikk = 1, netfacemaxnodes(ii)
-                                   g1 = itmpvar2D_tmp(ikk,ifaceglob)
+                                   g1 = itmpvar2D_tmp(ikk,nitemglob)
                                    if (g1 > 0) then
                                        g1 = g1 + nnodecount
-                                       itmpvar2D_tmp(ikk,ifaceglob) = node_c2g(g1)
+                                       itmpvar2D_tmp(ikk,nitemglob) = node_c2g(g1)
                                    end if
                                end do
                            end if
@@ -1645,12 +1645,12 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                            ifaceglob = face_c2g(nfacecount+ip)
                            if (ifaceglob > 0) then
                                nitemglob = nitemglob + 1
-                               itmpvar2D_tmp(:,ifaceglob) = itmpvar2D(:,nitemglob0+ip)
+                               itmpvar2D_tmp(:,nitemglob) = itmpvar2D(:,nitemglob0+ip)
                                do ikk = 1, netfacemaxnodes(ii)
-                                   g1 = itmpvar2D_tmp(ikk,ifaceglob)
+                                   g1 = itmpvar2D_tmp(ikk,nitemglob)
                                    if (g1 > 0) then
                                        g1 = g1 + nnetedgecount
-                                       itmpvar2D_tmp(ikk,ifaceglob) = netedge_c2g(g1)
+                                       itmpvar2D_tmp(ikk,nitemglob) = netedge_c2g(g1)
                                    end if
                                end do
                            end if
@@ -1667,14 +1667,14 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                            inetedgeglob = netedge_c2g(nnetedgecount+ip)
                            if (inetedgeglob > 0) then
                                nitemglob = nitemglob + 1
-                               itmpvar2D(:,inetedgeglob) = itmpvar2D(:,nitemglob0+ip)
+                               itmpvar2D(:,nitemglob) = itmpvar2D(:,nitemglob0+ip)
                                do ikk=1,2
-                                   g1 = itmpvar2D(ikk, inetedgeglob)
+                                   g1 = itmpvar2D(ikk, nitemglob)
                                    if (g1 > 0) then
                                        g1 = g1 +nfacecount
-                                       itmpvar2D(ikk,inetedgeglob) = face_c2g(g1)
+                                       itmpvar2D(ikk,nitemglob) = face_c2g(g1)
                                    else if (g1 == 0) then
-                                       itmpvar2D(ikk,inetedgeglob) = 0
+                                       itmpvar2D(ikk,nitemglob) = 0
                                    end if
                                end do
                            end if
@@ -1688,14 +1688,14 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
                            iedgeglob = edge_c2g(nedgecount+ip)
                            if (iedgeglob > 0) then
                                nitemglob = nitemglob + 1
-                               itmpvar2D_tmp(:,iedgeglob) = itmpvar2D(:,nitemglob0+ip)
+                               itmpvar2D_tmp(:,nitemglob) = itmpvar2D(:,nitemglob0+ip)
                                do ikk=1,2
-                                   g1 = itmpvar2D_tmp(ikk, iedgeglob)
+                                   g1 = itmpvar2D_tmp(ikk, nitemglob)
                                    if (g1 > 0 .and. g1 <= nump(ii)) then
                                        g1 = g1 +nfacecount
-                                       itmpvar2D_tmp(ikk,iedgeglob) = face_c2g(g1)
+                                       itmpvar2D_tmp(ikk,nitemglob) = face_c2g(g1)
                                    else if (g1 > nump(ii)) then
-                                       itmpvar2D_tmp(ikk,iedgeglob) = intmiss
+                                       itmpvar2D_tmp(ikk,nitemglob) = intmiss
                                    end if
                                end do
                            end if
