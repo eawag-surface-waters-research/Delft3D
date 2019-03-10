@@ -25,7 +25,7 @@ libwaq_plugin_wasteload_la_SOURCES = \
 libwaq_plugin_wasteload_la_LIBADD = \
 	$(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/libwaq_utils.la \
 	$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/libDeltaresCommon.la \
-	$(top_builddir)/engines_gpl/waq/packages/waq_process/src/libwaq_process.la \
+	$(top_builddir)/engines_gpl/waq/packages/waq_process/src/waq_process/libwaq_process.la \
 	$(top_builddir)/engines_gpl/waq/packages/wq_processes/src/libwqprocesses.la
 
 
