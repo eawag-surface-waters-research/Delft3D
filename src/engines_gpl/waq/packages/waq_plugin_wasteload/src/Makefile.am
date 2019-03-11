@@ -6,7 +6,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-noinst_LTLIBRARIES = libwaq_plugin_wasteload.la
+lib_LTLIBRARIES = libwaq_plugin_wasteload.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -18,19 +18,11 @@ FMODULES += \
 libwaq_plugin_wasteload_la_SOURCES = \
        waq_plugin_wasteload_version.F90 \
        delwaq_user_wasteloads.f \
+       srstop.f \
        zoekns.f
 
 #-------------------------------------------------------------------------------
-# Libraries, needed if build as shared library (lib instead of noinst)
-# libwaq_plugin_wasteload_la_LIBADD = \
-# 	$(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/libwaq_utils.la \
-# 	$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/libDeltaresCommon.la \
-# 	$(top_builddir)/engines_gpl/waq/packages/waq_process/src/proc_preprocess/libproc_preprocess.la \
-# 	$(top_builddir)/engines_gpl/waq/packages/waq_process/src/bloom/libbloom.la \
-# 	$(top_builddir)/engines_gpl/waq/packages/waq_process/src/waq_process/libwaq_process.la \
-# 	$(top_builddir)/engines_gpl/waq/packages/wq_processes/src/libwqprocesses.la
-
-
+# Libraries
 
 BUILT_SOURCES = ./always \
 	./waq_plugin_wasteload_version.F90
