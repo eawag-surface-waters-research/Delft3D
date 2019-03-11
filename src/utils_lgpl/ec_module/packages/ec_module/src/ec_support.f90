@@ -1327,6 +1327,7 @@ module m_ec_alloc
       module procedure ecNetCDFPtrArrayIncrease
       module procedure ecItemPtrArrayIncrease
       module procedure ecQuantityPtrArrayIncrease
+      module procedure ecBCFilePtrArrayIncrease
    end interface ecArrayIncrease
    
    contains
@@ -1625,5 +1626,36 @@ module m_ec_alloc
             end if
          end if
       end function ecQuantityPtrArrayIncrease
+
+      !> Increases the size of an array of tEcBCFilePtr instances by 10.
+      function ecBCFilePtrArrayIncrease(ptr, nBCFiles) result(success)
+         logical                                      :: success      !< function status
+         type(tEcBCFilePtr), dimension(:), pointer   :: ptr          !< intent(inout)
+         integer                                      :: nBCFiles     !< Number of tEcBCFilePtrs =< size(ptr)
+         !
+         integer                                      :: istat   !< allocate() status
+         type(tEcBCFilePtr), dimension(:), pointer   :: new_ptr !< new array
+         integer                                      :: i       !< loop counter
+         !
+         success = .false.
+         istat = 1
+         !
+         if (.not. associated(ptr)) then
+            call setECMessage("ec_alloc::ecBCFilePtrArrayIncrease: Dummy argument ptr is not associated.")
+         else
+            allocate(new_ptr(size(ptr)+10), STAT = istat)
+            if (istat == 0) then
+               do i=1, nBCFiles
+                  new_ptr(i)%ptr => ptr(i)%ptr
+                  ptr(i)%ptr => null()
+               end do
+               ptr => new_ptr
+               new_ptr => null()
+               success = .true.
+            else
+               call setECMessage("ec_alloc::ecBCFilePtrArrayIncrease: Unable to allocate additional memory.")
+            end if
+         end if
+      end function ecBCFilePtrArrayIncrease
       
 end module m_ec_alloc

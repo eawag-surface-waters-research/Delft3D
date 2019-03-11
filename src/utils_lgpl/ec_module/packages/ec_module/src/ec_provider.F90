@@ -115,8 +115,8 @@ module m_ec_provider
 
       function ecProviderInitializeBCBlock(instancePtr, bcBlockId, k_refdat, k_tzone, k_tsunit, fileReaderId, fileName, quantityName, &
                                            plilabel, istat, dtnodal, funtype) result(success)
-      use m_ec_filereader_read
       use m_ec_netcdf_timeseries
+      use m_ec_alloc
       implicit none
          logical                             :: success      !< function status
          type(tEcInstance),      pointer     :: instancePtr  !< intent(in)
@@ -149,7 +149,14 @@ module m_ec_provider
 !           bcFilePtr => ecSupportFindBCFileByFilename(instancePtr, fileName)       ! was this BC-file already opened?
             bcBlockPtr%bcptr => ecSupportFindBCFileByFilename(instancePtr, fileName)! was this BC-file already opened?
             if (.not.associated(bcBlockPtr%bcptr)) then                                    ! if not, create anew
+            ! ensure capacity
+               if (instancePtr%nBCFiles == size(instancePtr%ecBCFilesPtr)) then
+                  if (.not. ecArrayIncrease(instancePtr%ecBCFilesPtr, instancePtr%nBCFiles)) then
+                     return
+                  end if
+               end if
                instancePtr%nBCFiles = instancePtr%nBCFiles + 1
+
                allocate (bcBlockPtr%bcptr)
                bcBlockPtr%bcptr%bcfilename = fileName
                instancePtr%ecBCFilesPtr(instancePtr%nBCFiles)%Ptr => bcBlockPtr%bcptr
