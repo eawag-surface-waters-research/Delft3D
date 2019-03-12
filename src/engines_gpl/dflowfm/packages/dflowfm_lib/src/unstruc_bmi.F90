@@ -225,7 +225,7 @@ end subroutine get_attribute
     !call start()
     !call resetFullFlowModel()
     !call loadmodel(config_file)
-    ! TODO: should we not call init_core() here?
+    call init_core()
 
     CALL INIDAT()
     call api_loadmodel(config_file)
