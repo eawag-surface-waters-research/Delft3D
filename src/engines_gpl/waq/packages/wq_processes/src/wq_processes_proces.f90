@@ -42,6 +42,8 @@
 !>
 !>         Control routine of PROCES system. Process sub-system of DELWAQ waterquality modelling system.
 
+      use timers
+
       implicit none
 
 
@@ -143,6 +145,9 @@
       
       save    istep
       data    istep  / 0 /
+
+      integer(4) ithndl /0/
+      if ( timon ) call timstrt ( "wq_processes_proces", ithndl )
       
       IFRACS = 1
       
@@ -344,6 +349,7 @@
       endif
 
  9999 continue
+      if (timon) call timstop( ithndl )
       return
  2000 format ( ' ERROR: undefined kind of array in PROCES :', i8 )
       end
@@ -489,5 +495,6 @@
          endif
 
       enddo
+
       return
       end

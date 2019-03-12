@@ -29,6 +29,8 @@
 !>\File
 !>           Sets an explicit time step from DERIV.
 
+      use timers
+
       implicit none
 
 !     Parameters          :
@@ -52,6 +54,9 @@
       real                         :: s1                      !  segment surface
       real(8)                      :: a                       !  segment mass
       real(8)                      :: ndt                     !  time step (real)
+
+      integer(4), save :: ithndl = 0
+      if (timon) call timstrt( "wq_processes_integrate_fluxes", ithndl )
 
       ! loop accross the number of computational elements
 
@@ -78,5 +83,6 @@
             enddo
          endif
       enddo
+      if (timon) call timstop( ithndl )
       return
       end

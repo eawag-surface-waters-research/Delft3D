@@ -40,6 +40,7 @@
       use unstruc_model
       use unstruc_files
       use m_flowtimes
+      use timers
       use m_wind, only: jawind, jarain
       
       implicit none
@@ -95,6 +96,16 @@
       integer :: ierror
       
       logical :: Lsub, Lpdf, Lblm, Leho, opened, Lallocated, writebalance
+
+      integer(4), save         :: ithndl = 0
+
+      call mess(LEVEL_INFO, 'Initialising water quality processes')
+
+      call timini ( )
+      timon = .true.
+      call mess(LEVEL_INFO, 'Water quality timers switched on')
+      if (timon) call timstrt( "fm_wq_processes", ithndlwq )
+      if (timon) call timstrt( "fm_wq_processes_ini", ithndl )
       
       ierror = 1
       
@@ -502,10 +513,7 @@
       enddo  
 
       ierror = 0
-   
-!     error handling   
- 1234 continue
-
+      if ( timon ) call timstop ( ithndl )
       return
    end subroutine fm_wq_processes_ini
 
@@ -830,6 +838,8 @@
       use m_fm_wq_processes
       use m_missing, only: dmiss
       use unstruc_model, only: md_flux_int
+      use timers
+
       implicit none
       
       double precision, intent(in) :: dt   !< timestep for waq in seconds
@@ -852,12 +862,19 @@
       double precision             :: dti
       
       integer                      :: ipvol, isys, k
+
+      integer(4), save :: ithand0 = 0
+      integer(4), save :: ithand1 = 0
+      integer(4), save :: ithand2 = 0
+      if ( timon ) call timstrt ( "fm_wq_processes_step", ithand0 )
       
       if ( jawaqproc.ne.1 ) return
       flux_int = md_flux_int
       
 !     copy data from D-FlowFM to WAQ 
+      if ( timon ) call timstrt ( "copy_data_from_fm_to_wq_processes", ithand1 )
       call copy_data_from_fm_to_wq_processes(time)
+      if ( timon ) call timstop ( ithand1 )
       
       ipoiconc = arrpoi(iiconc)
       ipoivol  = arrpoi(iivol)
@@ -878,7 +895,11 @@
                                 arrdm2, novar , pmsa  , nomba , pronam, prvpnt, nodef , pmsa(ipoisurf), flux_int )
 
 !     copy data from WAQ to D-FlowFM
+      if ( timon ) call timstrt ( "copy_data_from_wq_processes_to_fm", ithand2 )
       call copy_data_from_wq_processes_to_fm()
+      if ( timon ) call timstop ( ithand2 )
+
+      if ( timon ) call timstop ( ithand0 )
       return
    end subroutine fm_wq_processes_step
   
@@ -1205,3 +1226,20 @@
       
       return
    end subroutine default_fm_wq_processes
+
+   subroutine fm_wq_processes_finalise()
+      use unstruc_messages
+      use unstruc_files, only: defaultFilename
+      use m_fm_wq_processes, only: ithndlwq
+      use timers
+	  
+      character(len=255) :: filename
+
+      if ( timon ) then
+         filename = defaultfilename('wq_timers')
+         call mess(LEVEL_INFO, 'finalising water quality timers and writing output to: ', filename)
+         if ( timon ) call timstop ( ithndlwq  )
+         call timdump(filename)
+         call timfinalize()
+      endif
+   end subroutine fm_wq_processes_finalise

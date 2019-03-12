@@ -25,6 +25,9 @@
 !
 !     function            : makes velonw array from velo and velx array
 !
+
+      use timers
+
       implicit none
 
       ! declaration of arguments
@@ -50,6 +53,9 @@
       logical                   :: lfirst                          ! first velocity in combination of velocities
       logical                   :: update                          ! update of the combined velocity needed
       real                      :: factor                          ! factor for susbtance velocity combination
+
+      integer(4), save :: ithndl = 0
+      if (timon) call timstrt( "wq_processes_velocities", ithndl )
 
       ! local copy of ivpnew
 
@@ -100,5 +106,6 @@
             endif
          enddo
       enddo
+      if (timon) call timstop( ithndl )
       return
       end

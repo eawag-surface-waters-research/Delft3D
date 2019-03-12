@@ -5216,6 +5216,7 @@ module m_fm_wq_processes
    use output
    
    integer, parameter                        :: NAMWAQLEN = 128
+   integer                                   :: ithndlwq = 0                !< overall timer for water quality processes
    integer                                   :: jawaqproc                   !< switch for water quality processes
    real(hp)                                  :: waq_vol_dry_thr = 1d-16     !< minimum volume for processes to be active
    integer                                   :: flux_int                    !< flux integration by WAQ (1) or by FM (2, not implemented)

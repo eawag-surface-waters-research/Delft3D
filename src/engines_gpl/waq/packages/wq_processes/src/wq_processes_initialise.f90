@@ -46,6 +46,7 @@
       use output
       use string_module
       use m_alloc
+      use timers
 
       implicit none
 
@@ -189,6 +190,9 @@
       ! Dummy file structure (temp?)
       integer               :: lun(50)                 !< unit numbers
       character(len=255)    :: lchar(50)               !< filenames
+
+      integer(4), save :: ithndl = 0
+      if (timon) call timstrt( "wq_processes_initialise", ithndl )
 
       ierr2 = 0
       lun =  0
@@ -841,6 +845,8 @@
       do iproc = 1,nproc
           call pronrs(pronam(iproc),promnr(iproc))
       end do
+
+      if (timon) call timstop( ithndl )
 
       return
  2001 format( ' Using process definition file : ',a    )

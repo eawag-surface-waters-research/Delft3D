@@ -10223,6 +10223,7 @@ end subroutine cosphiunetcheck
  use m_partitioninfo
  use m_monitoring_crosssections
  use m_observations, only : mxls
+ use unstruc_model, only : md_subfile
 #ifdef _OPENMP
  use omp_lib
 #endif
@@ -10356,9 +10357,13 @@ end subroutine cosphiunetcheck
  ! call wrimap(time1)                                ! schrijf aan het einde ook een .map-file weg
 
 !   call mba_final(time_user)
-   if (ti_waqbal > 0) then
-      call mba_final(time_user)
-   endif
+ if (ti_waqbal > 0) then
+    call mba_final(time_user)
+ endif
+ 
+ if ( len_trim(md_subfile) > 0 ) then
+    call fm_wq_processes_finalise()
+ endif
 
  msgbuf = ' ' ; call msg_flush()
 

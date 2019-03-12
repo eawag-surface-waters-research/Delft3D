@@ -24,12 +24,17 @@
       subroutine wq_processes_derivatives (deriv , notot , noflux, stochi, nflux1, &
                                            nfluxp, flux  , noseg , volume, ndt)
 !
+      use timers
+
       implicit none
 
       integer notot, noflux, nflux1, nfluxp, noseg
       integer isys, iflux, iseg, ndt
       real    deriv(notot,noseg) , stochi(notot,noflux) , flux(noflux,noseg) , volume(noseg)
       real    st, fact
+
+      integer(4), save :: ithndl = 0
+      if (timon) call timstrt( "wq_processes_derivatives", ithndl )
 !
 !     Construct the DERIV's
 !
@@ -50,6 +55,8 @@
             endif
          enddo
       enddo
+!
+      if (timon) call timstop( ithndl )
 !
       return
 !

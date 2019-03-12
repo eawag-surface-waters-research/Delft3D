@@ -38,6 +38,8 @@
 
 !     Routines            : none
 
+      use timers
+
       implicit none
 
 !     Parameters          :
@@ -67,7 +69,10 @@
       real     ( 4) q           ! flow for this exchange
       real     ( 4) dq          ! total flux from and to
 
-!     loop accross the number of exchanges
+      integer(4), save :: ithndl = 0
+      if (timon) call timstrt( "wq_processes_integrate_velocities", ithndl )
+
+      !     loop accross the number of exchanges
 
       do iq = 1 , noq
           ifrom = ipoint(1,iq)
@@ -91,6 +96,6 @@
               endif
           enddo
       enddo
-
+      if (timon) call timstop( ithndl )
       return
       end
