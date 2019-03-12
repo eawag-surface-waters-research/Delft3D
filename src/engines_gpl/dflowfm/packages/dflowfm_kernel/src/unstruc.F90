@@ -1217,9 +1217,10 @@ if(q /= 0) then
  if (jased > 0 .and. stm_included) then
     call fm_bott3d() ! bottom update
     call setbobs()   ! adjust administration - This option only works for ibedlevtyp = 1, otherwise original bed level [bl] is overwritten to original value
-    vol1 = (s1-bl)*ba ! for mass conservation, assumes tiles. a1 does not change
+    !vol1 = (s1-bl)*ba ! for mass conservation, assumes tiles. a1 does not change
                       ! Could be potentially a volsur call. Has same effect with tiles.
                       ! To check Jan Noort: is this okay for 1D as well
+    call volsur()
  end if
 
  ! Moved to flow_finalize_single_timestep: call flow_f0isf1()                                  ! mass balance and vol0 = vol1
