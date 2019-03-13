@@ -986,7 +986,7 @@ module m_ec_converter
             a1 = 0.0d0
          case (timeint_rainfall)  ! constant rainfall intensity from time-integrated amount
             a0 = 0.0d0
-            a1 = 1.d0/(t1-t0)*3600.*24
+            a1 = 1.d0/(t1-t0)
          case default
             ! invalid interpolation method  
             return
@@ -1025,11 +1025,12 @@ module m_ec_converter
          ! ===== interpolation =====
          ! linear interpolation in time, or block(to:from)
          select case(connection%sourceItemsPtr(1)%ptr%quantityptr%timeint)
-         case (timeint_lin, timeint_lin_extrapol)   
+         case (timeint_lin, timeint_lin_extrapol, timeint_rainfall)   
             ! linear interpolation in time
             t0 = connection%sourceItemsPtr(1)%ptr%sourceT0FieldPtr%timesteps
             t1 = connection%sourceItemsPtr(1)%ptr%sourceT1FieldPtr%timesteps
-            call time_weight_factors(a0, a1, timesteps, t0, t1)
+            call time_weight_factors(a0, a1, timesteps, t0, t1,  &
+                                     timeint = connection%sourceItemsPtr(1)%ptr%quantityptr%timeint)
          case (timeint_bto)   
             a0 = 0.0d0
             a1 = 1.0d0
@@ -1051,7 +1052,7 @@ module m_ec_converter
          do i=1, size(valuesT0,dim=1)
             ! "val0+(val1-val0)*a1" is more precise than "val0*a0+val1*a1" when val0 and val1 are huge
             !
-            valuesT(i) = valuesT0(i)  + ( valuesT1(i)-valuesT0(i) )*a1
+            valuesT(i) = valuesT0(i) * (a1+a0)  + (valuesT1(i)-valuesT0(i)) * a1
          end do
          !
 
