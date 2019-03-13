@@ -202,6 +202,7 @@ function dfm_merge_mapfiles(infiles, nfiles, outfile, force) result(ierr)
    kmx        =  0
    nt         =  0
    ndxbnd     =  0
+   netfacemaxnodes = 0
 
    !! 0a. Open input files
    call dfm_order_by_partition(infiles, nfiles)
