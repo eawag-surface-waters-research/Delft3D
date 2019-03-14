@@ -608,6 +608,8 @@
    integer :: jacrosscheck ! remove 2D crossing netlinks (1) or not (0)
    integer :: japermout    ! output permutation array (1) or not (0)
    integer :: janodperm    ! output node permutation array (1) or not (0)
+   
+   logical :: need_to_allocate_kc
 
    jacrosscheck = jacrosscheck_
    japermout = 0
@@ -663,8 +665,17 @@
 
 100 continue
 
+   need_to_allocate_kc = .true.
+   if ( allocated(kc) ) then
+     if ( size(kc).ge.numk ) then
+        need_to_allocate_kc = .false.
+     else
+        deallocate(kc)
+     end if
+   end if
+
    ALLOCATE(KCK(NUMK) )
-   if ( .not.allocated(kc) ) then
+   if ( need_to_allocate_kc ) then
       allocate(kc(numk))
       kc  = 0
       kck = 0
