@@ -36518,6 +36518,7 @@ end function is_1d_boundary_candidate
 
  if (allocated(kbndu)) deallocate(  xbndu,ybndu,xy2bndu,zbndu,kbndu,zbndu0)
  if (allocated(zkbndu)) deallocate( zkbndu)
+ if (allocated(zbndq)) deallocate(  zbndq)
  !if (allocated(zbndu_store)) deallocate(zbndu_store)
  if (allocated(sigmabndu)) deallocate(sigmabndu)
  if (allocated(zminmaxu)) deallocate(zminmaxu)
