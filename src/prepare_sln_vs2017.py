@@ -537,18 +537,17 @@ def getUCRTVersionNumber():
         # if so, get the value behind the '='-sign
         sys.stdout.write("Trying to execute: " + getucrtdir[str(vs)] + " ...\n")
         try:
-            cmd = '"' + getucrtdir[str(vs)] + '"'
+            cmd = '\"' + getucrtdir[str(vs)] + '\"'
             subprocess.call(cmd, shell=True)
             ucrtdir = os.environ['UniversalCRTSdkDir']
         except:
             sys.stdout.write("Execution of vsvarall.bat failed; is VisualStudio " + str(vs) + " installed?\n")
-            exit()
             
         if not os.path.isdir(ucrtdir):
-            sys.stdout.write("Could not find UniversalCRTSdkDir, exiting...")
-            exit()
-           
-        sys.stdout.write("ucrtdir found:" + ucrtdir + "\n")
+            sys.stdout.write("Could not find UniversalCRTSdkDir, using default...")
+            ucrtdir = "c:\\Program Files (x86)\\Windows Kits\\10\\Lib\\"
+        else:  
+            sys.stdout.write("ucrtdir found:" + ucrtdir + "\n")
         
         # Search in subdir Lib for directories starting with a digit and containing at least one "."
         searchstring = os.path.join(ucrtdir, "Lib", "[0-9]*.*")
