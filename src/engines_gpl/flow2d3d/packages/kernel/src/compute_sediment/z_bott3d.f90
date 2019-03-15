@@ -841,7 +841,9 @@ subroutine z_bott3d(nmmax     ,kmax      ,lsed      ,lsedtot   , &
              !
              dbodsd(l, nm) = dbodsd(l, nm) + dsdnm
              !
-             call updwaqflxsed(nst, nm, l, trndiv, sedflx, eroflx, gdp)
+             if (.not. bedload) then
+                call updwaqflxsed(nst, nm, l, trndiv, sedflx, eroflx, gdp)
+             endif
           enddo    ! nm
        enddo       ! l
        if (bedchangemesscount > bedchangemessmax) then
