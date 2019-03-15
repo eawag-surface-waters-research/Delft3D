@@ -537,7 +537,8 @@ def getUCRTVersionNumber():
         # if so, get the value behind the '='-sign
         sys.stdout.write("Trying to execute: " + getucrtdir[str(vs)] + " ...\n")
         try:
-            subprocess.call("getucrtdir[str(vs)]", shell=True)
+            cmd = '"' + getucrtdir[str(vs)] + '"'
+            subprocess.call(cmd, shell=True)
             ucrtdir = os.environ['UniversalCRTSdkDir']
         except:
             sys.stdout.write("Execution of vsvarall.bat failed; is VisualStudio " + str(vs) + " installed?\n")
