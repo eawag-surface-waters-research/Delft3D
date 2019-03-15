@@ -197,7 +197,7 @@ if [ $withrtc -ne 0 ] ; then
     # read dummy
 
     # Start RTC
-    $bindir/rtc $sharedir/rtc/RTC.FNM $sharedir/rtc/RTC.RTN
+    $bindir/rtc $sharedir/rtc/RTC.FNM $workdir/RTC.RTN
 
     # Remove allocated shared memory
     $bindir/esm_delete $DIO_SHM_ESM 
