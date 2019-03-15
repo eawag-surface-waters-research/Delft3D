@@ -81,6 +81,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DFlowFMLibWrapper.cs" />
     <Compile Include="Ec_ModuleLibWrapper.cs" />
     <Compile Include="GridGeomLibWrapper.cs" />
     <Compile Include="IoNetcdfLibWrapper.cs" />
