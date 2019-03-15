@@ -237,7 +237,7 @@ ucrtlibdir["201764"] = "$(UniversalCRTSdkDir)Lib\\UCRTLIBDIRVERSIONNUMBER\\ucrt\
 # This is combined in the folowing string:
 getucrtdir = {}
 getucrtdir["2015"] = '"' + str(os.environ.get("VS140COMNTOOLS")) + "..\\..\\VC\\vcvarsall.bat" + '" amd64&&set UniversalCRTSdkDir'
-getucrtdir["2017"] = '"' + str(os.environ.get("VS2017INSTALLDIR")) + "\\VC\\Auxiliary\\Build\\vcvarsall.bat" + '" amd64'
+getucrtdir["2017"] = '"' + str(os.environ.get("VS2017INSTALLDIR")) + "\\VC\\Auxiliary\\Build\\vcvarsall.bat" + '" amd64&&set UniversalCRTSdkDir'
 
 #
 #
@@ -537,21 +537,24 @@ def getUCRTVersionNumber():
         # if so, get the value behind the '='-sign
         sys.stdout.write("Trying to execute: " + getucrtdir[str(vs)] + " ...\n")
         try:
-            subprocess.call(getucrtdir[str(vs)], shell=True)
-            ucrtdir = os.environ['UniversalCRTSdkDir']
+            result = subprocess.check_output(getucrtdir[str(vs)], shell=True)
         except:
-            sys.stdout.write("Execution of vsvarall.bat failed; is VisualStudio " + str(vs) + " installed?\n")
-            exit()
-            
-        if not os.path.isdir(ucrtdir):
-            sys.stdout.write("Could not find UniversalCRTSdkDir, exiting...")
-            exit()
-           
-        sys.stdout.write("ucrtdir found:" + ucrtdir + "\n")
-        
+            result = ""
+            sys.stdout.write("Execution failed; is VisualStudio " + str(vs) + " installed?\n")
+        result = result.decode('utf-8')
+        if result.find("UniversalCRTSdkDir") == -1:
+            # Fallback: it should be this:
+            sys.stdout.write("ucrtdir not found; set to default value\n")
+            ucrtdir = "c:\\Program Files (x86)\\Windows Kits\\10\\Lib\\"
+        else:
+            ucrtdir = result[19:]
+            # Remove the trailing slash and the newline-character behind it
+            lastslash = ucrtdir.rfind("\\")
+            if lastslash != -1:
+                ucrtdir = ucrtdir[:lastslash]
+            sys.stdout.write("ucrtdir found:" + ucrtdir + "\n")
         # Search in subdir Lib for directories starting with a digit and containing at least one "."
         searchstring = os.path.join(ucrtdir, "Lib", "[0-9]*.*")
-        sys.stdout.write("searching in " + searchstring + "\n")
         versions = glob.glob(searchstring)
         if len(versions) <= 0:
             # Fallback: it should be this:
