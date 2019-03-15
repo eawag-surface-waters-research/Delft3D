@@ -2970,17 +2970,20 @@ end subroutine write_partition_pol
 !! c_yVerticesCoordinates       :: pointer to y array of coordinates
 !! numberOfOutputIndexes        :: number of intersected flow links
 !! c_indexes                    :: flow links indexes
-function get_snapped_flow_links_indexes( numberOfInputVertices, c_xVerticesCoordinates, c_yVerticesCoordinates, numberOfOutputIndexes, c_indexes ) result(ierr) bind(C, name="get_snapped_flow_links_indexes")
+function get_snapped_flow_links_indexes( numberOfInputVertices, c_xVerticesCoordinates, c_yVerticesCoordinates, startIndex, numberOfOutputIndexes, c_indexes) result(ierr) bind(C, name="get_snapped_flow_links_indexes")
 !DEC$ ATTRIBUTES DLLEXPORT :: get_snapped_flow_links_indexes
 
 use m_flowgeom
 use gridoperations
+use array_module
+use m_missing
 
 implicit none 
 integer(c_int), intent(in)         :: numberOfInputVertices
 type(c_ptr), intent(in)            :: c_xVerticesCoordinates, c_yVerticesCoordinates
 integer(c_int), intent(out)        :: numberOfOutputIndexes
 type(c_ptr), intent(inout)         :: c_indexes
+integer, intent(in)                :: startIndex 
 !return error code
 integer                            :: ierr
 !locals
@@ -3012,6 +3015,8 @@ do l  = 1,lnx
    end if
 enddo
 
+
+ierr = convert_start_index(indexes, imiss, 1, startIndex)
 c_indexes = c_loc(indexes)
 
 end function get_snapped_flow_links_indexes

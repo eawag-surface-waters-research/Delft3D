@@ -615,6 +615,11 @@ src/engines_gpl/dflowfm/scripts/team-city/run_dflowfm_parallel.bat -text
 src/engines_gpl/dflowfm/scripts/template/dflowfm_open_template.sln -text
 src/engines_gpl/dflowfm/scripts/template/dflowfm_unit_tests_template.sln -text
 src/engines_gpl/dflowfm/scripts/template/generate.py -text
+src/engines_gpl/dflowfm/tests/DFlowFMTests/DFlowFmTests.cs -text
+src/engines_gpl/dflowfm/tests/DFlowFMTests/DflowFmTests.csproj -text
+src/engines_gpl/dflowfm/tests/test_data/2d_ugrid_net.nc -text
+src/engines_gpl/dflowfm/tests/test_data/rectangular_mesh.mdu -text
+src/engines_gpl/dflowfm/tests/test_data/testPolygon.pol -text
 src/engines_gpl/dimr/Makefile.am -text
 src/engines_gpl/dimr/doc/use_dimr_dll_example.c -text
 src/engines_gpl/dimr/packages/DimrTesting/DimrDllNative.cs -text
