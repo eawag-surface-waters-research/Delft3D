@@ -837,7 +837,9 @@ module m_ec_provider
                if (.not. ecQuantitySet(instancePtr, quantityId, name=quantityName)) then
                   return
                end if
-               if (.not. ecQuantitySetTimeint(instancePtr, quantityId, fileReaderPtr%bc%timeint, fileReaderPtr%bc%periodic)) then ! trim(fileReaderPtr%bc%qname))) then
+               if (.not. ecQuantitySetTimeint(instancePtr, quantityId, fileReaderPtr%bc%timeint, & 
+                                              periodic = fileReaderPtr%bc%periodic,              &
+                                              constant = (fileReaderPtr%bc%func == BC_FUNC_CONSTANT))) then
                   return
                end if
                elementSetName = fileReaderPtr%bc%bcname
@@ -2309,6 +2311,7 @@ module m_ec_provider
           integer                       :: itemId         !< returned  target item ID, if successful, otherwise -1 
           type(tECItem), pointer        :: sourceItemPtr => null() 
           character(len=:), allocatable :: quantityName
+          logical                       :: quantityPeriodic, quantityConstant
           integer                       :: arraySize
 
           integer :: targetIndex 
@@ -2339,8 +2342,11 @@ module m_ec_provider
           if (.not. ecItemSetType(instancePtr, targetItemId, accessType_evaluate)) return 
           quantityId = ecInstanceCreateQuantity(instancePtr)
           quantityName = trim(sourceItemPtr%quantityPtr%name)
+          quantityPeriodic = sourceItemPtr%quantityPtr%periodic
+          quantityConstant = sourceItemPtr%quantityPtr%constant
           if (.not. ecItemSetQuantity(instancePtr, targetItemId, quantityId)) return
           if (.not. (ecQuantitySet(instancePtr, quantityId, name=quantityName//'_interpolated'))) return
+          if (.not. (ecQuantitySet(instancePtr, quantityId, periodic=quantityPeriodic, constant=quantityConstant))) return
           elementSetId = sourceItemPtr%elementSetPtr%id
           if (.not. ecItemSetElementSet(instancePtr, targetItemId, elementSetId)) return
 

@@ -108,6 +108,7 @@ module m_ec_quantity
        function ecQuantitySet(instancePtr, quantityId, name,                     &
                                                        units,                    &
                                                        vectormax,                &
+                                                       periodic, constant,       &
                                                        factor,                   &
                                                        offset,                   &
                                                        fillvalue,                &
@@ -122,6 +123,7 @@ module m_ec_quantity
          character(len=*),optional :: name
          character(len=*),optional :: units
          integer         ,optional :: vectormax
+         logical         ,optional :: periodic, constant
          real(hp)        ,optional :: factor
          real(hp)        ,optional :: offset
          real(hp)        ,optional :: fillvalue
@@ -147,6 +149,8 @@ module m_ec_quantity
 
          if (present(units)) quantityPtr%units = units  
          if (present(vectormax)) quantityPtr%vectormax = vectormax  
+         if (present(periodic)) quantityPtr%periodic = periodic  
+         if (present(constant)) quantityPtr%constant = constant  
          if (present(factor)) quantityPtr%factor = factor  
          if (present(offset)) quantityPtr%offset = offset  
          if (present(fillvalue)) quantityPtr%fillvalue = fillvalue  
@@ -252,12 +256,13 @@ module m_ec_quantity
       ! =======================================================================
       
       !> Change the timeinterpolation type of the Quantity corresponding to quantityId.
-      function ecQuantitySetTimeint(instancePtr, quantityId, timeint, periodic) result(success)
+      function ecQuantitySetTimeint(instancePtr, quantityId, timeint, periodic, constant) result(success)
          logical                               :: success     !< function status
          type(tEcInstance), pointer            :: instancePtr !< intent(in)
          integer,                   intent(in) :: quantityId  !< unique Quantity id
          integer,                   intent(in) :: timeint     !< new vectormax of the Quantity
          logical, optional,         intent(in) :: periodic    !< periodic time function?
+         logical, optional,         intent(in) :: constant    !< constant value?
          !
          type(tEcQuantity), pointer :: quantityPtr !< Quantity corresponding to quantityId
          !
@@ -268,11 +273,12 @@ module m_ec_quantity
          if (associated(quantityPtr)) then
             quantityPtr%timeint = timeint
             if (present(periodic)) then
-               if (periodic) then
                    quantityPtr%periodic = periodic
-               endif
             endif
-            success = .true.
+            if (present(constant)) then
+                   quantityPtr%constant = constant
+            endif
+            success = .True.
          else
             call setECMessage("ERROR: ec_quantity::ecQuantitySetTimeint: Cannot find a Quantity with the supplied id.")
          end if

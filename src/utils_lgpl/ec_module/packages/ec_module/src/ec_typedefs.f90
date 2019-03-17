@@ -378,7 +378,8 @@ module m_ec_typedefs
       integer                   :: vectorMax = 1            !< number of dimensions (vector data) or 1 in case of scalar
       integer                   :: zInterpolationType       !< Vertical interpolation type ! TODO: Add initialization in the constructor. (4748)
       integer                   :: timeint = timeint_lin    !< Temporal interpolation type, default is linear
-      logical                   :: periodic = .false.       !< Use timeseries periodically
+      logical                   :: periodic = .false.       !< Use timeseries periodically if True
+      logical                   :: constant = .false.       !< Provide constant value if True
                                                             !< Intended for quantities from NetCDF:
       real(hp)                  :: fillvalue = 0.d0         !<    default if NaN, missing value
       real(hp)                  :: factor = 1.d0            !<    multiplication (scale) factor

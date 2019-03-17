@@ -148,13 +148,8 @@ module m_ec_parameters
    !
    ! enumeration for tEcConverter types
    integer, parameter :: convType_undefined = 0
-   !integer, parameter :: convType_default   = 1
-   integer, parameter :: convType_unimagdir = 2 !< first time, then space
+   integer, parameter :: convType_unimagdir = 2
    integer, parameter :: convType_uniform = 3 !< only time
-   !integer, parameter :: convType_svwp      = 4
-   !integer, parameter :: convType_svwp_cpu  = 5
-   !integer, parameter :: convType_grib      = 6
-   !integer, parameter :: convType_ById      = 7
    integer, parameter :: convType_fourier = 8
    integer, parameter :: convType_arcinfo = 9
    integer, parameter :: convType_curvi = 10
