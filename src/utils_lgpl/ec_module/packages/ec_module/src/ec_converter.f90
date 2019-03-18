@@ -956,7 +956,7 @@ module m_ec_converter
             l_timeint = timeint
          endif
          select case (l_timeint)
-         case (timeint_lin)
+         case (timeint_lin, timeint_lin_extrapol)
             l_extrapolated = .false.
             if (comparereal(timesteps,t0) == -1) then
                l_extrapolated = .true.
