@@ -18497,11 +18497,11 @@ end subroutine wribal
  !> Writes shapefiles, these shapefiles can be visulaized in geographic information system (GIS) software
 #ifdef HAVE_SHAPELIB
 subroutine unc_write_shp()
-    use m_flowparameters, only: jashp_crs, jashp_obs, jashp_weir, jashp_thd, jashp_gate, jashp_emb, jashp_fxw, jashp_src, jashp_pump, jashp_dry
+    use m_flowparameters, only: jashp_crs, jashp_obs, jashp_weir, jashp_thd, jashp_gate, jashp_emb, jashp_fxw, jashp_src, jashp_pump, jashp_dry, jashp_genstruc
     use unstruc_shapefile
     use m_monitoring_crosssections, only: ncrs, crs
     use m_observations, only: numobs, kobs
-    use m_flowexternalforcings, only: nweirgen, ngategen, numsrc, ksrc, gate2cgen, L1cgensg, L2cgensg, npumpsg, L1pumpsg, L2pumpsg
+    use m_flowexternalforcings, only: nweirgen, ngategen, numsrc, ksrc, gate2cgen, L1cgensg, L2cgensg, npumpsg, L1pumpsg, L2pumpsg, ngenstru
     use m_thindams
     use m_sobekdfm, only: nbnd1d2d
     use m_fixedweirs, only: nfxw
@@ -18733,6 +18733,36 @@ subroutine unc_write_shp()
           endif
        endif
     endif
+    
+    ! general structures
+    if (jashp_genstruc > 0) then
+       if (jampi .eq. 0) then
+          if (ngenstru > 0) then
+             call unc_write_shp_genstruc()
+          else
+             call mess(LEVEL_WARN, 'SHAPEFILE: No shape file for general structures is written because no gate is found.')
+          endif
+       else
+          if (ngenstru > 0) then
+             jawrite = ngenstru
+             do n = 1, ngenstru
+                igen = gate2cgen(n)
+                if (L1cgensg(igen) > L2cgensg(igen)) then
+                   jawrite = jawrite - 1
+                endif
+             enddo
+             if (jawrite > 0) then
+                call unc_write_shp_genstruc()
+             else
+                call mess(LEVEL_WARN, 'SHAPEFILE: No shape file for general structures is written because no general structure is found on subdomain:', my_rank)
+             endif
+          else
+             call mess(LEVEL_WARN, 'SHAPEFILE: No shape file for general structures is written because no general structure is found on subdomain:', my_rank)
+          endif
+       endif
+    endif
+    
+    
 
 end subroutine unc_write_shp
 #endif

@@ -2869,6 +2869,7 @@ end subroutine default_turbulence
  integer                           :: jashp_src                 !< Write a shape file for source-sinks
  integer                           :: jashp_pump                !< Write a shape file for pumps
  integer                           :: jashp_dry                 !< Write a shape file for dry areas
+ integer                           :: jashp_genstruc            !< Write a shape file for general structures
  
  integer                           :: jawriteDFMinterpretedvalues = 0 !< Write interpretedvalues 
  
@@ -3213,6 +3214,7 @@ subroutine default_flowparameters()
     jashp_src = 0
     jashp_pump= 0
     jashp_dry = 0
+    jashp_genstruc = 0
     
     ispirparopt = 1
 

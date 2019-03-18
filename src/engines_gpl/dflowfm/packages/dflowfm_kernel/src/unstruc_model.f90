@@ -1464,6 +1464,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'output', 'Wrishp_src', jashp_src, success)
     call prop_get_integer(md_ptr, 'output', 'Wrishp_pump', jashp_pump, success)
     call prop_get_integer(md_ptr, 'output', 'Wrishp_dryarea', jashp_dry, success)
+    call prop_get_integer(md_ptr, 'output', 'wrishp_genstruc', jashp_genstruc, success)
 
     call prop_get_integer(md_ptr, 'output', 'WriteDFMinterpretedvalues', jawriteDFMinterpretedvalues, success)
 
@@ -1767,9 +1768,9 @@ subroutine readMDUFile(filename, istat)
       jashp_obs = 0
    endif
 
-   if (len_trim(md_structurefile) == 0 .and. (jashp_weir > 0 .or. jashp_gate > 0 )) then
+   if (len_trim(md_structurefile) == 0 .and. (jashp_weir > 0 .or. jashp_gate > 0 .or. jashp_genstruc > 0 )) then
       write (msgbuf, '(a)') 'MDU settings does not specify any structur: StructureFile =  , but sets to write a ' &
-         //'shape file for structure (Wrishp_weir/Wrishp_gate = 1). In this situation, no such shape file is written.'
+         //'shape file for structure (Wrishp_weir/Wrishp_gate/Wrishp_genstruc = 1). In this situation, no such shape file is written.'
       call warn_flush()
       jashp_weir = 0
       jashp_gate = 0
@@ -2981,6 +2982,9 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     end if
     if( writeall .or. jashp_dry > 0 ) then
        call prop_set(prop_ptr, 'output', 'Wrishp_dryarea', jashp_dry, 'Write a shape file for dry areas')
+    end if
+    if( writeall .or. jashp_genstruc > 0 ) then
+       call prop_set(prop_ptr, 'output', 'wrishp_genstruc', jashp_genstruc, 'Write a shape file for general structures')
     end if
     
     call prop_set(prop_ptr, 'output', 'WriteDFMinterpretedvalues', jaWriteDFMinterpretedvalues, 'Write DFMinterpretedvalues (1: yes, 0: no)' )
