@@ -13707,6 +13707,7 @@ src/utils_lgpl/ec_module/packages/ec_module/ec_module.vfproj -text
 src/utils_lgpl/ec_module/packages/ec_module/ec_module_dll.vfproj -text
 src/utils_lgpl/ec_module/packages/ec_module/include/version_number.ini -text
 src/utils_lgpl/ec_module/packages/ec_module/src/Makefile.am -text
+src/utils_lgpl/ec_module/packages/ec_module/src/ec_alloc.f90 -text
 src/utils_lgpl/ec_module/packages/ec_module/src/ec_astro.f90 -text
 src/utils_lgpl/ec_module/packages/ec_module/src/ec_basic_interpolation.f90 -text
 src/utils_lgpl/ec_module/packages/ec_module/src/ec_bccollect.f90 -text

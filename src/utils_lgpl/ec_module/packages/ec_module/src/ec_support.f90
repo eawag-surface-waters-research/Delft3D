@@ -1,34 +1,35 @@
 !----- LGPL --------------------------------------------------------------------
-!                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2019.                                
-!                                                                               
-!  This library is free software; you can redistribute it and/or                
-!  modify it under the terms of the GNU Lesser General Public                   
-!  License as published by the Free Software Foundation version 2.1.            
-!                                                                               
-!  This library is distributed in the hope that it will be useful,              
-!  but WITHOUT ANY WARRANTY; without even the implied warranty of               
-!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU            
-!  Lesser General Public License for more details.                              
-!                                                                               
-!  You should have received a copy of the GNU Lesser General Public             
-!  License along with this library; if not, see <http://www.gnu.org/licenses/>. 
-!                                                                               
-!  contact: delft3d.support@deltares.nl                                         
-!  Stichting Deltares                                                           
-!  P.O. Box 177                                                                 
-!  2600 MH Delft, The Netherlands                                               
-!                                                                               
-!  All indications and logos of, and references to, "Delft3D" and "Deltares"    
-!  are registered trademarks of Stichting Deltares, and remain the property of  
-!  Stichting Deltares. All rights reserved.                                     
+!
+!  Copyright (C)  Stichting Deltares, 2011-2019.
+!
+!  This library is free software; you can redistribute it and/or
+!  modify it under the terms of the GNU Lesser General Public
+!  License as published by the Free Software Foundation version 2.1.
+!
+!  This library is distributed in the hope that it will be useful,
+!  but WITHOUT ANY WARRANTY; without even the implied warranty of
+!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+!  Lesser General Public License for more details.
+!
+!  You should have received a copy of the GNU Lesser General Public
+!  License along with this library; if not, see <http://www.gnu.org/licenses/>.
+!
+!  contact: delft3d.support@deltares.nl
+!  Stichting Deltares
+!  P.O. Box 177
+!  2600 MH Delft, The Netherlands
+!
+!  All indications and logos of, and references to, "Delft3D" and "Deltares"
+!  are registered trademarks of Stichting Deltares, and remain the property of
+!  Stichting Deltares. All rights reserved.
 
 !  $Id$
 !  $HeadURL$
 
 !> This module contains support methods for the EC-module.
 !! @author adri.mourits@deltares.nl
-!! @author edwin.bos@deltares.nl
+!! @author robert.leander@deltares.nl
+!! @author edwin.spee@deltares.nl
 module m_ec_support
    use m_ec_message
    use m_ec_typedefs
@@ -38,9 +39,9 @@ module m_ec_support
    use time_module
 
    implicit none
-   
+
    private
-   
+
    public :: ecTimeFrameRealHpTimestepsToModifiedJulianDate
    public :: ecTimeFrameRealHpTimestepsToDateTime
    public :: ecGetTimesteps
@@ -70,7 +71,7 @@ module m_ec_support
    public :: ecSupportMJDToTimeIndex
    public :: ecSupportTimeIndexToMJD
    public :: ecSupportFindRelatedBCBlock
-   
+
    interface ecTimeFrameRealHpTimestepsToModifiedJulianDate
       module procedure ecTimeFrameRealHpTimestepsToModifiedJulianDate
    end interface ecTimeFrameRealHpTimestepsToModifiedJulianDate
@@ -78,11 +79,11 @@ module m_ec_support
    interface ecNFC
       module procedure ecSupportNetcdfCheckError
    end interface ecNFC
-   
+
    contains
-      
+
       ! ==========================================================================
-      
+
       !> Calculate a Julian Date from the number of timesteps in seconds since reference_date.
       function ecTimeFrameRealHpTimestepsToModifiedJulianDate(timeFramePtr, steps, mjd) result(success)
          logical                                 :: success      !< function status
@@ -93,9 +94,9 @@ module m_ec_support
          success = .true.
          !
          mjd = timeFramePtr%k_refdate + (steps / 60.0_hp / 60.0_hp / 24.0_hp)
-         
+
       end function ecTimeFrameRealHpTimestepsToModifiedJulianDate
-      
+
       ! =======================================================================
 
       !> Calculate a Gregorian date and hour-minutes-seconds integer since reference date
@@ -120,7 +121,7 @@ module m_ec_support
       end function ecTimeFrameRealHpTimestepsToDateTime
 
       ! =======================================================================
-      
+
       !> Read and convert the timesteps to seconds.
       !! Takes a string of format: TIME = 0 hours since 2006-01-01 00:00:00 +00:00
       !! or ... TIME (HRS)      6.0 20000101 6
@@ -185,9 +186,9 @@ module m_ec_support
          end select
          success = .true.
       end function ecGetTimesteps
-      
+
       ! ==========================================================================
-      
+
       !> Attempt to open an file for reading that might already have been opened under another handle.
       !> Workaround for GNU Fortran (which normally does not support multiple file openings of the same file)
       function ecSupportOpenExistingFileGnu(minp, filename) result(success)
@@ -200,15 +201,15 @@ module m_ec_support
          success = .false.
 
          minp = mf_open(filename)
-         if (minp<=0) then 
+         if (minp<=0) then
             call setECMessage("ec_support::ecSupportOpenExistingFileGnu: Opening "//trim(filename)//" failed.")
             return
-         endif 
+         endif
          success = .true.
       end function ecSupportOpenExistingFileGnu
 
       ! ==========================================================================
-      
+
       !> Attempt to open an existing file.
       function ecSupportOpenExistingFile(minp, filename) result(success)
          use netcdf
@@ -251,26 +252,26 @@ module m_ec_support
             call setECMessage("ec_support::ecSupportOpenExistingFile: opening file " // trim(filename) // " failed")
          endif
       end function ecSupportOpenExistingFile
-   
+
       ! ==========================================================================
-   
+
       !> Add an integer to a set of integers.
       function ecSupportAddUniqueInt(intArr, anInt) result(success)
          logical                        :: success!< function status
          integer, dimension(:), pointer :: intArr !< array containing unique integers (a set)
          integer, intent(in)            :: anInt  !< integer to be added to the set of integers
-   
+
          integer                        :: i         !< loop counter
          integer                        :: istat     !< deallocate() status
          integer                        :: lenArr    !< lenght of intArr
          integer, dimension(:), pointer :: newIntArr !< larger version of intArr
-      
+
          success = .false.
          newIntArr => null()
          i = 0
          istat = 1
          lenArr = 0
-      
+
          if (.not. associated(intArr)) then
             call setECMessage("ec_support::ecSupportAddUniqueInt: Dummy argument pointer intArr is not associated.")
          else
@@ -300,9 +301,9 @@ module m_ec_support
             end if
          endif
       end function ecSupportAddUniqueInt
-   
+
       ! ==========================================================================
-   
+
       !> Add a char to a set of chars.
       function ecSupportAddUniqueChar(charArr, aChar) result(success)
          logical                                             :: success !< function status
@@ -329,7 +330,7 @@ module m_ec_support
          !   end if
          !   return
          !end if
-         !! 
+         !!
          !lenArr = size(charArr)
          !do i=1, lenArr
          !   if (charArr(i) == aChar) then
@@ -347,11 +348,11 @@ module m_ec_support
          !   call setECMessage("ec_support::ecSupportAddUniqueChar: Unable to allocate additional memory.")
          !end if
       end function ecSupportAddUniqueChar
-      
+
       ! =======================================================================
       ! Find methods
       ! =======================================================================
-      
+
       !> Retrieve the pointer to the Quantity with id == quantityId.
       function ecSupportFindQuantity(instancePtr, quantityId) result(quantityPtr)
          type(tEcQuantity), pointer            :: quantityPtr !< Quantity corresponding to quantityId
@@ -372,13 +373,13 @@ module m_ec_support
             call setECMessage("ec_support::ecSupportFindQuantity: Dummy argument instancePtr is not associated.")
          end if
       end function ecSupportFindQuantity
-      
+
       ! =======================================================================
-      !> Retrieve the pointer to a NetCDF object by filename 
+      !> Retrieve the pointer to a NetCDF object by filename
       function ecSupportFindNetCDFByFilename(instancePtr, ncfilename) result(netCDFPtr)
          type(tEcNetCDF), pointer            :: netCDFPtr   !< Quantity corresponding to quantityId
          type(tEcInstance), pointer          :: instancePtr !< intent(in)
-         character(len=*),  intent(in)       :: ncfilename  !< netCDF filename 
+         character(len=*),  intent(in)       :: ncfilename  !< netCDF filename
          integer                             :: netCDFId
          !
          integer :: i !< loop counter
@@ -395,11 +396,11 @@ module m_ec_support
       end function ecSupportFindNetCDFByFilename
 
       ! =======================================================================
-      !> Retrieve the pointer to a BC-File object by filename 
+      !> Retrieve the pointer to a BC-File object by filename
       function ecSupportFindBCFileByFilename(instancePtr, bcfilename) result(BCFilePtr)
          type(tEcBCFile), pointer            :: BCFilePtr   !< Quantity corresponding to quantityId
          type(tEcInstance), pointer          :: instancePtr !< intent(in)
-         character(len=*),  intent(in)       :: bcfilename  !< BC filename 
+         character(len=*),  intent(in)       :: bcfilename  !< BC filename
          !
          integer :: i !< loop counter
          !
@@ -414,7 +415,7 @@ module m_ec_support
          end if
       end function ecSupportFindBCFileByFilename
       ! =======================================================================
-      
+
       !> Retrieve the pointer to the ElementSet with id == elementSetId.
       function ecSupportFindElementSet(instancePtr, elementSetId) result(elementSetPtr)
          type(tEcElementSet), pointer            :: elementSetPtr !< ElementSet corresponding to elementSetId
@@ -435,9 +436,9 @@ module m_ec_support
             call setECMessage("ec_support::ecSupportFindElementSet: Dummy argument instancePtr is not associated.")
          end if
       end function ecSupportFindElementSet
-      
+
       ! =======================================================================
-      
+
       !> Retrieve the pointer to the Field with id == fieldId.
       function ecSupportFindField(instancePtr, fieldId) result(fieldPtr)
          type(tEcField),    pointer            :: fieldPtr    !< Field corresponding to fieldId
@@ -462,33 +463,33 @@ module m_ec_support
 subroutine ecInstanceListSourceItems(instancePtr,dev)
          implicit none
          ! List source items by quantity and location
-         type(tEcInstance), pointer :: instancePtr           !< EC instance 
-         integer, intent(in)        :: dev 
+         type(tEcInstance), pointer :: instancePtr           !< EC instance
+         integer, intent(in)        :: dev
          type(tEcItem), pointer     :: sourceItemPtr
-         integer  :: ii 
-         do ii=1, instancePtr%nItems 
+         integer  :: ii
+         do ii=1, instancePtr%nItems
             sourceItemPtr => instancePtr%ecItemsPtr(ii)%ptr
             if (sourceItemPtr%role == itemType_source) then
                      write(dev,'(a,i5.5)') 'Source Item ',sourceItemPtr%id
                      write(dev,'(a)')      '  Quantity = '//trim(sourceItemPtr%quantityPtr%name)
                      write(dev,'(a)')      '  Location = '//trim(sourceItemPtr%elementsetPtr%name)
                      write(dev,*) ''
-            endif 
+            endif
          enddo
 end subroutine ecInstanceListSourceItems
-      
+
       !! =======================================================================
       !!> Retrieve the item ID given a quantitystring and locationstring
-      !!> Loop over all items in the EC instance qualified as 'source' 
+      !!> Loop over all items in the EC instance qualified as 'source'
       !function ecSupportFindItemByQuantityLocation(instancePtr, quantityname, locationname ) result(itemID)
       !   type(tEcInstance), pointer            :: instancePtr    !< EC-instance
-      !   character(len=*), intent(in)         :: quantityname   !< Desired quantity  
-      !   character(len=*), intent(in)         :: locationname   !< Desired location 
+      !   character(len=*), intent(in)         :: quantityname   !< Desired quantity
+      !   character(len=*), intent(in)         :: locationname   !< Desired location
       !   integer                               :: itemID         !< returned item ID
-      !   integer :: i                                            !< loop counter over items 
+      !   integer :: i                                            !< loop counter over items
       !   type (tEcItem), pointer               :: itemPtr
-      !   
-      !   itemID = -1 
+      !
+      !   itemID = -1
       !   if (associated(instancePtr)) then
       !      do i=1, instancePtr%nItems
       !         itemPtr => instancePtr%ecItemsPtr(i)%ptr
@@ -499,39 +500,39 @@ end subroutine ecInstanceListSourceItems
       !            end if
       !         end if
       !      end do
-      !   end if 
+      !   end if
       !end function ecSupportFindItemByQuantityLocation
 
       ! =======================================================================
       !> Retrieve the item ID given a quantitystring and locationstring
       !> Use the fact that each filereader is associated with ONE location, but possibly MULTIPLE quantities
-      !> i.e., select filereader first and check its items. 
+      !> i.e., select filereader first and check its items.
       function ecSupportFindItemByQuantityLocation(instancePtr, locationname, quantityname, isLateral) result(itemID)
          type(tEcInstance), pointer             :: instancePtr    !< EC-instance
-         character(len=*), intent(in)           :: quantityname   !< Desired quantity  
-         character(len=*), intent(in)           :: locationname   !< Desired location 
+         character(len=*), intent(in)           :: quantityname   !< Desired quantity
+         character(len=*), intent(in)           :: locationname   !< Desired location
          logical         , intent(in), optional :: isLateral      !< searching for lateral discharge?
          integer                                :: itemID         !< returned item ID
-         integer                                :: i, j           !< loop counter over filereader, items 
+         integer                                :: i, j           !< loop counter over filereader, items
          logical                                :: found          !< item found?
          type (tEcItem), pointer                :: itemPtr
          type (tEcFileReader), pointer          :: fileReaderPtr
          character(len=:), allocatable          :: quantity_requested, location_requested
          character(len=:), allocatable          :: quantity_supplied, location_supplied
 !        character(len=maxNameLen)         :: quantityname_upper, locationname_upper
-         
+
 
          quantity_requested = trim(quantityname)
          call str_upper(quantity_requested)
          location_requested = trim(locationname)
          call str_upper(location_requested)
-         itemID = -1 
+         itemID = -1
          if (associated(instancePtr)) then
            frs:do i=1, instancePtr%nFileReaders
                fileReaderPtr => instancePtr%ecFileReadersPtr(i)%ptr
-               if (fileReaderPtr%nItems<=0) cycle                                               ! No items to check 
+               if (fileReaderPtr%nItems<=0) cycle                                               ! No items to check
                location_supplied = fileReaderPtr%items(1)%ptr%elementSetPtr%name
-               if (location_supplied/=location_requested) cycle     ! Items have the wrong location 
+               if (location_supplied/=location_requested) cycle     ! Items have the wrong location
                do j=1, fileReaderPtr%nItems
                   itemPtr => fileReaderPtr%items(j)%ptr
                   quantity_supplied = itemPtr%quantityPtr%name
@@ -551,9 +552,9 @@ end subroutine ecInstanceListSourceItems
                         exit frs
                      endif
                   end if
-               end do 
+               end do
             end do frs
-         end if 
+         end if
       end function ecSupportFindItemByQuantityLocation
       ! =======================================================================
 
@@ -561,7 +562,7 @@ end subroutine ecInstanceListSourceItems
       !    use m_ec_item
       !    use m_ec_converter,  only: ecConverterSetType, ecConverterSetInterpolation, ecConverterSetOperand, ecConverterSetElement
       !    use m_ec_instance,   only: ecInstanceCreateConverter, ecInstanceCreateConnection, ecInstanceCreateItem, ecInstanceCreateField, ecInstanceCreateQuantity
-      !    use m_ec_connection, only: ecConnectionAddTargetItem, ecConnectionAddSourceItem, ecConnectionSetConverter 
+      !    use m_ec_connection, only: ecConnectionAddTargetItem, ecConnectionAddSourceItem, ecConnectionSetConverter
       !    use m_ec_quantity,   only: ecQuantitySetName
       !    use m_ec_field,      only: ecFieldCreate1dArray
       !    use m_ec_item
@@ -571,30 +572,30 @@ end subroutine ecInstanceListSourceItems
       !    integer, intent(in)           :: sourceItemId   !< Source item id, before temporal interpolation
       !    integer, intent(in), optional :: tgtNdx         !< Optional target index, 1 is assumed as default
       !    integer                       :: targetItemId   !< Target item id, after temporal interpolation
-      !    integer                       :: itemId         !< returned  target item ID, if successful, otherwise -1 
-      !    integer                       :: convertId 
-      !    type(tECItem), pointer        :: sourceItemPtr => null() 
+      !    integer                       :: itemId         !< returned  target item ID, if successful, otherwise -1
+      !    integer                       :: convertId
+      !    type(tECItem), pointer        :: sourceItemPtr => null()
       !    type(tECItem), pointer        :: targetItemPtr => null()
       !    character(len=:), allocatable :: quantityName
       !    integer                       :: arraySize
       !
-      !    integer :: targetIndex 
+      !    integer :: targetIndex
       !    integer :: converterId, connectionId, quantityId, elementSetId, fieldId
-      !    
-      !    if (present(tgtNdx)) then 
+      !
+      !    if (present(tgtNdx)) then
       !       targetIndex = tgtNdx
       !    else
       !       targetIndex = 1
-      !    end if 
+      !    end if
       !
       !    sourceItemPtr => ecSupportFindItem(instancePtr, sourceItemId)
       !
       !    ! TODO: create target item:
       !    !       . elementset-name = source_item's elementset-name
       !    !       . quantity-name = source_item's quantity-name + '-interpolated'
-      !    itemId = -1 
+      !    itemId = -1
       !
-      !    ! Set up the target item 
+      !    ! Set up the target item
       !    targetItemId = ecInstanceCreateItem(instancePtr)
       !    fieldId = ecInstanceCreateField(instancePtr)
       !
@@ -603,7 +604,7 @@ end subroutine ecInstanceListSourceItems
       !
       !    if (.not. ecItemSetRole(instancePtr, targetItemId, itemType_target)) return
       !    if (.not. ecItemSetTargetField(instancePtr, targetItemId, fieldId)) return
-      !    if (.not. ecItemSetType(instancePtr, targetItemId, accessType_evaluate)) return 
+      !    if (.not. ecItemSetType(instancePtr, targetItemId, accessType_evaluate)) return
       !    quantityId = ecInstanceCreateQuantity(instancePtr)
       !    quantityName = trim(sourceItemPtr%quantityPtr%name)
       !    if (.not. ecItemSetQuantity(instancePtr, targetItemId, quantityId)) return
@@ -632,7 +633,7 @@ end subroutine ecInstanceListSourceItems
       !end function ecSupportCreateTimeInterpolatedItem
       ! =======================================================================
 
-      
+
       !> Retrieve the pointer to the Item with id == itemId.
       function ecSupportFindItem(instancePtr, itemId) result(itemPtr)
          type(tEcItem),     pointer            :: itemPtr     !< Item corresponding to itemId
@@ -653,9 +654,9 @@ end subroutine ecInstanceListSourceItems
             call setECMessage("ec_support::ecSupportFindItem: Dummy argument instancePtr is not associated.")
          end if
       end function ecSupportFindItem
-      
+
       ! =======================================================================
-      
+
       !> Retrieve the pointer to the Connection with id == connectionId.
       function ecSupportFindConnection(instancePtr, connectionId) result(connectionPtr)
          type(tEcConnection),     pointer            :: connectionPtr !< Item corresponding to connectionId
@@ -676,9 +677,9 @@ end subroutine ecInstanceListSourceItems
             call setECMessage("ec_support::ecSupportFindConnection: Dummy argument instancePtr is not associated.")
          end if
       end function ecSupportFindConnection
-      
+
       ! =======================================================================
-      
+
       !> Retrieve the pointer to the Converter with id == converterId.
       function ecSupportFindConverter(instancePtr, converterId) result(converterPtr)
          type(tEcConverter), pointer            :: converterPtr !< Item corresponding to converterId
@@ -699,9 +700,9 @@ end subroutine ecInstanceListSourceItems
             call setECMessage("ec_support::ecSupportFindConverter: Dummy argument instancePtr is not associated.")
          end if
       end function ecSupportFindConverter
-      
+
       ! =======================================================================
-      
+
       !> Retrieve the pointer to the FileReader with id == converterId.
       function ecSupportFindFileReader(instancePtr, fileReaderId) result(fileReaderPtr)
          type(tEcFileReader), pointer            :: fileReaderPtr !< FileReader corresponding to fileReaderId
@@ -722,7 +723,7 @@ end subroutine ecInstanceListSourceItems
             call setECMessage("ec_support::ecSupportFindFileReader: Dummy argument instancePtr is not associated.")
          end if
       end function ecSupportFindFileReader
-      
+
       ! =======================================================================
       !> Retrieve the pointer to the FileReader with id == converterId.
       function ecSupportFindFileReaderByFilename(instancePtr, filename) result(fileReaderPtr)
@@ -808,31 +809,31 @@ end subroutine ecInstanceListSourceItems
          integer, intent(in)          :: func              !< function type
 
          integer                      :: iFileReader
-         type (tEcBCBlock), pointer   :: BCBlockptr 
+         type (tEcBCBlock), pointer   :: BCBlockptr
          !
          cmpFileReaderPtr => null()
          do iFileReader = 1, instancePtr%nFileReaders
             BCBlockptr => instancePtr%EcFileReadersPtr(iFileReader)%ptr%bc
-            if (associated(BCBlockptr)) then 
+            if (associated(BCBlockptr)) then
                if (trim(BCBlockptr%bcname)==trim(bcname) .and. (trim(BCBlockptr%qname)==trim(qname))  &
-                                                         .and. BCBlockptr%func == func) then 
-                  cmpFileReaderPtr => instancePtr%EcFileReadersPtr(iFileReader)%ptr 
-                  exit 
-               endif 
-            else 
-            endif 
-         enddo 
+                                                         .and. BCBlockptr%func == func) then
+                  cmpFileReaderPtr => instancePtr%EcFileReadersPtr(iFileReader)%ptr
+                  exit
+               endif
+            else
+            endif
+         enddo
       end function ecSupportFindRelatedBCBlock
 
-      
+
       !> Translate NetCDF error code into a NetCDF error message.
       function ecSupportNetcdfCheckError(ierror, description, filename) result(success)
          use netcdf
          !
-         logical                                             :: success     !< 
-         integer,                       intent(in)           :: ierror      !< 
-         character(len=*),              intent(in), optional :: description !< 
-         character(len=maxFileNameLen), intent(in), optional :: filename    !< 
+         logical                                             :: success     !<
+         integer,                       intent(in)           :: ierror      !<
+         character(len=*),              intent(in), optional :: description !<
+         character(len=maxFileNameLen), intent(in), optional :: filename    !<
          !
          character(3000) :: message
          !
@@ -1096,7 +1097,7 @@ end subroutine ecInstanceListSourceItems
          type(tEcTimeFrame), intent(in) :: tframe    !< TimeFrame containing input data for conversion
          real(hp)          , intent(in) :: time_mjd  !< seconds since k_refdate representing time to be found
          !
-         real(hp):: srctime 
+         real(hp):: srctime
          integer :: i
          !
          srctime = ecSupportMJDToThisTime(tframe, time_mjd)
@@ -1119,7 +1120,7 @@ end subroutine ecInstanceListSourceItems
          type(tEcTimeFrame), intent(in) :: tframe    !< TimeFrame containing input data for conversion
          integer                        :: ndx       !< function result, largest index with a time less than timesteps
          !
-         real(hp):: srctime 
+         real(hp):: srctime
          integer :: i
          !
          time_mjd = ecSupportThisTimeToMJD(tframe, tframe%times(ndx))
@@ -1153,7 +1154,7 @@ end subroutine ecInstanceListSourceItems
          factor = ecSupportTimeUnitConversionFactor(tframe%ec_timestep_unit) / 86400.0_hp    ! Converts to DAYS
          time_mjd = tframe%ec_refdate + thistime * factor - tframe%ec_timezone/24.0_hp
       end function ecSupportThisTimeToMJD
-      
+
       ! =======================================================================
 
       !> Find the CF-compliant longitude and latitude dimensions and associated variables
@@ -1214,7 +1215,7 @@ end subroutine ecInstanceListSourceItems
                    stdname = ''
                    ierr = nf90_get_att(ncid, ivar, 'standard_name', stdname)
                    if (ierr == 0) then
-                      select case (stdname) 
+                      select case (stdname)
                          case ('grid_longitude')
                             grid_lon_varid = ivar
                             lon_dimid = dimids(1)
@@ -1266,7 +1267,7 @@ end subroutine ecInstanceListSourceItems
                    stdname = ''
                    ierr = nf90_get_att(ncid, ivar, 'standard_name', stdname)
                    if (ierr == 0) then
-                      select case (stdname) 
+                      select case (stdname)
                          case ('grid_latitude')
                             grid_lat_varid = ivar
                          case ('grid_longitude')
@@ -1278,7 +1279,7 @@ end subroutine ecInstanceListSourceItems
                case ('m','meters','km','kilometers')
                    stdname = ''
                    ierr = nf90_get_att(ncid, ivar, 'standard_name', stdname)
-                   select case (stdname) 
+                   select case (stdname)
                       case ('projection_x_coordinate')
                          x_varid = ivar
                       case ('projection_y_coordinate')
@@ -1287,7 +1288,7 @@ end subroutine ecInstanceListSourceItems
                end select
          end if
       end do   !ivar
-      
+
       success = .True.
       end function ecSupportNCFindCFCoordinates
 
@@ -1298,364 +1299,11 @@ end subroutine ecInstanceListSourceItems
       !integer, intent(in)  :: ncid                      !< NetCDF file ID
       !integer, intent(in)  :: varid                     !< Variable file ID
       !
-      !integer, dimension(:), allocatable :: intent(out) !< array of dimension ID's for this variable 
-      !integer, dimension(:), allocatable :: intent(out) !< array of dimension s for this variable 
+      !integer, dimension(:), allocatable :: intent(out) !< array of dimension ID's for this variable
+      !integer, dimension(:), allocatable :: intent(out) !< array of dimension s for this variable
       !end function ecSupportNCGetVarDim
 
 end module m_ec_support
 
 ! =============================================================================
 
-!> This module contains the allocation methods for the EC-module's pointer arrays.
-module m_ec_alloc
-   use m_ec_typedefs
-   use m_ec_message
-   
-   implicit none
-   
-   private
-   
-   public :: ecArrayIncrease
-   
-   interface ecArrayIncrease
-      module procedure ecConnectionPtrArrayIncrease
-      module procedure ecConverterPtrArrayIncrease
-      module procedure ecElementSetPtrArrayIncrease
-      module procedure ecFieldPtrArrayIncrease
-      module procedure ecFileReaderPtrArrayIncrease
-      module procedure ecBCBlockPtrArrayIncrease
-      module procedure ecNetCDFPtrArrayIncrease
-      module procedure ecItemPtrArrayIncrease
-      module procedure ecQuantityPtrArrayIncrease
-      module procedure ecBCFilePtrArrayIncrease
-   end interface ecArrayIncrease
-   
-   contains
-      
-      !> Increases the size of an array of tEcConnectionPtr instances by 10.
-      function ecConnectionPtrArrayIncrease(ptr, nConnections) result(success)
-         logical                                       :: success      !< function status
-         type(tEcConnectionPtr), dimension(:), pointer :: ptr          !< intent(inout)
-         integer                                       :: nConnections !< Number of tEcConnectionPtrs =< size(ptr)
-         !
-         integer                                       :: istat   !< allocate() status
-         type(tEcConnectionPtr), dimension(:), pointer :: new_ptr !< new array
-         integer                                       :: i       !< loop counter
-         !
-         success = .false.
-         istat = 1
-         !
-         if (.not. associated(ptr)) then
-            call setECMessage("ec_alloc::ecConnectionPtrArrayIncrease: Dummy argument ptr is not associated.")
-         else
-            allocate(new_ptr(size(ptr)+10), STAT = istat)
-            if (istat == 0) then
-               do i=1, nConnections
-                  new_ptr(i)%ptr => ptr(i)%ptr
-                  ptr(i)%ptr => null()
-               end do
-               ptr => new_ptr
-               new_ptr => null()
-               success = .true.
-            else
-               call setECMessage("ec_alloc::ecConnectionPtrArrayIncrease: Unable to allocate additional memory.")
-            end if
-         end if
-      end function ecConnectionPtrArrayIncrease
-      
-      ! =======================================================================
-      
-      !> Increases the size of an array of tEcConverterPtr instances by 10.
-      function ecConverterPtrArrayIncrease(ptr, nConverters) result(success)
-         logical                                      :: success      !< function status
-         type(tEcConverterPtr), dimension(:), pointer :: ptr          !< intent(inout)
-         integer                                      :: nConverters  !< Number of tEcConverterPtrs =< size(ptr)
-         !
-         integer                                      :: istat   !< allocate() status
-         type(tEcConverterPtr), dimension(:), pointer :: new_ptr !< new array
-         integer                                      :: i       !< loop counter
-         !
-         success = .false.
-         istat = 1
-         !
-         if (.not. associated(ptr)) then
-            call setECMessage("ec_alloc::ecConverterPtrArrayIncrease: Dummy argument ptr is not associated.")
-         else
-            allocate(new_ptr(size(ptr)+10), STAT = istat)
-            if (istat == 0) then
-               do i=1, nConverters
-                  new_ptr(i)%ptr => ptr(i)%ptr
-                  ptr(i)%ptr => null()
-               end do
-               ptr => new_ptr
-               new_ptr => null()
-               success = .true.
-            else
-               call setECMessage("ec_alloc::ecConverterPtrArrayIncrease: Unable to allocate additional memory.")
-            end if
-         end if
-      end function ecConverterPtrArrayIncrease
-      
-      ! =======================================================================
-      
-      !> Increases the size of an array of tEcElementSetPtr instances by 10.
-      function ecElementSetPtrArrayIncrease(ptr, nElementSets) result(success)
-         logical                                       :: success      !< function status
-         type(tEcElementSetPtr), dimension(:), pointer :: ptr          !< intent(inout)
-         integer                                       :: nElementSets !< Number of tEcElementSetPtrs =< size(ptr)
-         !
-         integer                                       :: istat   !< allocate() status
-         type(tEcElementSetPtr), dimension(:), pointer :: new_ptr !< new array
-         integer                                       :: i       !< loop counter
-         !
-         success = .false.
-         istat = 1
-         !
-         if (.not. associated(ptr)) then
-            call setECMessage("ec_alloc::ecElementSetPtrArrayIncrease: Dummy argument ptr is not associated.")
-         else
-            allocate(new_ptr(size(ptr)+10), STAT = istat)
-            if (istat == 0) then
-               do i=1, nElementSets
-                  new_ptr(i)%ptr => ptr(i)%ptr
-                  ptr(i)%ptr => null()
-               end do
-               ptr => new_ptr
-               new_ptr => null()
-               success = .true.
-            else
-               call setECMessage("ec_alloc::ecElementSetPtrArrayIncrease: Unable to allocate additional memory.")
-            end if
-         end if
-      end function ecElementSetPtrArrayIncrease
-      
-      ! =======================================================================
-      
-      !> Increases the size of an array of tEcFieldPtr instances by 10.
-      function ecFieldPtrArrayIncrease(ptr, nFields) result(success)
-         logical                                  :: success !< function status
-         type(tEcFieldPtr), dimension(:), pointer :: ptr     !< intent(inout)
-         integer                                  :: nFields !< Number of tEcFieldPtrs =< size(ptr)
-         !
-         integer                                  :: istat   !< allocate() status
-         type(tEcFieldPtr), dimension(:), pointer :: new_ptr !< new array
-         integer                                  :: i       !< loop counter
-         !
-         success = .false.
-         istat = 1
-         !
-         if (.not. associated(ptr)) then
-            call setECMessage("ec_alloc::ecFieldPtrArrayIncrease: Dummy argument ptr is not associated.")
-         else
-            allocate(new_ptr(size(ptr)+10), STAT = istat)
-            if (istat == 0) then
-               do i=1, nFields
-                  new_ptr(i)%ptr => ptr(i)%ptr
-                  ptr(i)%ptr => null()
-               end do
-               ptr => new_ptr
-               new_ptr => null()
-               success = .true.
-            else
-               call setECMessage("ec_alloc::ecFieldPtrArrayIncrease: Unable to allocate additional memory.")
-            end if
-         end if
-      end function ecFieldPtrArrayIncrease
-      
-      ! =======================================================================
-      
-      !> Increases the size of an array of tEcFileReaderPtr instances by 10.
-      function ecFileReaderPtrArrayIncrease(ptr, nFileReaders) result(success)
-         logical                                       :: success      !< function status
-         type(tEcFileReaderPtr), dimension(:), pointer :: ptr          !< intent(inout)
-         integer                                       :: nFileReaders !< Number of tEcFileReaderPtrs =< size(ptr)
-         !
-         integer                                       :: istat   !< allocate() status
-         type(tEcFileReaderPtr), dimension(:), pointer :: new_ptr !< new array
-         integer                                       :: i       !< loop counter
-         !
-         success = .false.
-         istat = 1
-         !
-         if (.not. associated(ptr)) then
-            call setECMessage("ec_alloc::ecFileReaderPtrArrayIncrease: Dummy argument ptr is not associated.")
-         else
-            allocate(new_ptr(size(ptr)+10), STAT = istat)
-            if (istat == 0) then
-               do i=1, nFileReaders
-                  new_ptr(i)%ptr => ptr(i)%ptr
-                  ptr(i)%ptr => null()
-               end do
-               ptr => new_ptr
-               new_ptr => null()
-               success = .true.
-            else
-               call setECMessage("ec_alloc::ecFileReaderPtrArrayIncrease: Unable to allocate additional memory.")
-            end if
-         end if
-      end function ecFileReaderPtrArrayIncrease
-
-      ! =======================================================================
-      
-      !> Increases the size of an array of tEcBCBlockPtr instances by 10.
-      function ecBCBlockPtrArrayIncrease(ptr, nBCBlocks) result(success)
-         logical                                       :: success      !< function status
-         type(tEcBCBlockPtr), dimension(:), pointer    :: ptr          !< intent(inout)
-         integer                                       :: nBCBlocks    !< Number of tEcBCBlockPtrs =< size(ptr)
-         !
-         integer                                       :: istat   !< allocate() status
-         type(tEcBCBlockPtr), dimension(:), pointer    :: new_ptr !< new array
-         integer                                       :: i       !< loop counter
-         !
-         success = .false.
-         istat = 1
-         !
-         if (.not. associated(ptr)) then
-            call setECMessage("ec_alloc::ecBCBlockPtrArrayIncrease: Dummy argument ptr is not associated.")
-         else
-            allocate(new_ptr(size(ptr)+10), STAT = istat)
-            if (istat == 0) then
-               do i=1, nBCBlocks
-                  new_ptr(i)%ptr => ptr(i)%ptr
-                  ptr(i)%ptr => null()
-               end do
-               ptr => new_ptr
-               new_ptr => null()
-               success = .true.
-            else
-               call setECMessage("ec_alloc::ecBCBlockPtrArrayIncrease: Unable to allocate additional memory.")
-            end if
-         end if
-      end function ecBCBlockPtrArrayIncrease
-      
-      ! =======================================================================
-      
-      !> Increases the size of an array of tEcNetCDFPtr instances by 10.
-      function ecNetCDFPtrArrayIncrease(ptr, nNetCDFs) result(success)
-         logical                                       :: success      !< function status
-         type(tEcNetCDFPtr), dimension(:), pointer     :: ptr          !< intent(inout)
-         integer                                       :: nNetCDFs     !< Number of tEcBCBlockPtrs =< size(ptr)
-         !
-         integer                                       :: istat   !< allocate() status
-         type(tEcNetCDFPtr), dimension(:), pointer     :: new_ptr !< new array
-         integer                                       :: i       !< loop counter
-         !
-         success = .false.
-         istat = 1
-         !
-         if (.not. associated(ptr)) then
-            call setECMessage("ec_alloc::ecNetCDFPtrArrayIncrease: Dummy argument ptr is not associated.")
-         else
-            allocate(new_ptr(size(ptr)+10), STAT = istat)
-            if (istat == 0) then
-               do i=1, nNetCDFs
-                  new_ptr(i)%ptr => ptr(i)%ptr
-                  ptr(i)%ptr => null()
-               end do
-               ptr => new_ptr
-               new_ptr => null()
-               success = .true.
-            else
-               call setECMessage("ec_alloc::ecNetCDFPtrArrayIncrease: Unable to allocate additional memory.")
-            end if
-         end if
-      end function ecNetCDFPtrArrayIncrease
-      
-      ! =======================================================================
-
-      !> Increases the size of an array of tEcItemPtr instances by 10.
-      function ecItemPtrArrayIncrease(ptr, nItems) result(success)
-         logical                                 :: success !< function status
-         type(tEcItemPtr), dimension(:), pointer :: ptr     !< intent(inout)
-         integer                                 :: nItems  !< Number of tEcItemPtrs =< size(ptr)
-         !
-         integer                                 :: istat   !< allocate() status
-         type(tEcItemPtr), dimension(:), pointer :: new_ptr !< new array
-         integer                                 :: i       !< loop counter
-         !
-         success = .false.
-         istat = 1
-         !
-         if (.not. associated(ptr)) then
-            call setECMessage("ec_alloc::ecItemPtrArrayIncrease: Dummy argument ptr is not associated.")
-         else
-            allocate(new_ptr(size(ptr)+10), STAT = istat)
-            if (istat == 0) then
-               do i=1, nItems
-                  new_ptr(i)%ptr => ptr(i)%ptr
-                  ptr(i)%ptr => null()
-               end do
-               ptr => new_ptr
-               new_ptr => null()
-               success = .true.
-            else
-               call setECMessage("ec_alloc::ecItemPtrArrayIncrease: Unable to allocate additional memory.")
-            end if
-         end if
-      end function ecItemPtrArrayIncrease
-      
-      ! =======================================================================
-      
-      !> Increases the size of an array of tEcQuantityPtr instances by 10.
-      function ecQuantityPtrArrayIncrease(ptr, nQuantitys) result(success)
-         logical                                     :: success    !< function status
-         type(tEcQuantityPtr), dimension(:), pointer :: ptr        !< intent(inout)
-         integer                                     :: nQuantitys !< Number of tEcQuantityPtrs =< size(ptr)
-         !
-         integer                                     :: istat   !< allocate() status
-         type(tEcQuantityPtr), dimension(:), pointer :: new_ptr !< new array
-         integer                                     :: i       !< loop counter
-         !
-         success = .false.
-         istat = 1
-         !
-         if (.not. associated(ptr)) then
-            call setECMessage("ec_alloc::ecQuantityPtrArrayIncrease: Dummy argument ptr is not associated.")
-         else
-            allocate(new_ptr(size(ptr)+10), STAT = istat)
-            if (istat == 0) then
-               do i=1, nQuantitys
-                  new_ptr(i)%ptr => ptr(i)%ptr
-                  ptr(i)%ptr => null()
-               end do
-               ptr => new_ptr
-               new_ptr => null()
-               success = .true.
-            else
-               call setECMessage("ec_alloc::ecQuantityPtrArrayIncrease: Unable to allocate additional memory.")
-            end if
-         end if
-      end function ecQuantityPtrArrayIncrease
-
-      !> Increases the size of an array of tEcBCFilePtr instances by 10.
-      function ecBCFilePtrArrayIncrease(ptr, nBCFiles) result(success)
-         logical                                      :: success      !< function status
-         type(tEcBCFilePtr), dimension(:), pointer   :: ptr          !< intent(inout)
-         integer                                      :: nBCFiles     !< Number of tEcBCFilePtrs =< size(ptr)
-         !
-         integer                                      :: istat   !< allocate() status
-         type(tEcBCFilePtr), dimension(:), pointer   :: new_ptr !< new array
-         integer                                      :: i       !< loop counter
-         !
-         success = .false.
-         istat = 1
-         !
-         if (.not. associated(ptr)) then
-            call setECMessage("ec_alloc::ecBCFilePtrArrayIncrease: Dummy argument ptr is not associated.")
-         else
-            allocate(new_ptr(size(ptr)+10), STAT = istat)
-            if (istat == 0) then
-               do i=1, nBCFiles
-                  new_ptr(i)%ptr => ptr(i)%ptr
-                  ptr(i)%ptr => null()
-               end do
-               ptr => new_ptr
-               new_ptr => null()
-               success = .true.
-            else
-               call setECMessage("ec_alloc::ecBCFilePtrArrayIncrease: Unable to allocate additional memory.")
-            end if
-         end if
-      end function ecBCFilePtrArrayIncrease
-      
-end module m_ec_alloc
