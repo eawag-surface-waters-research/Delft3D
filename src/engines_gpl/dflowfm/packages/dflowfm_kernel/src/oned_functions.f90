@@ -488,8 +488,7 @@ module m_oned_functions
       
    do L = 1, lnx1D
       if (kcu(L) ==1) then
-         bob(:,L)  = getbobs(network, L)
-         bob0(:,L) = bob(:,L)
+         bob(:,L) = getbobs(network, L)
          n1  = ln(1,L)
          n2 = ln(2,L)                    ! flow ref
          bl(n1) = min(bl(n1), bob(1,L))
@@ -501,30 +500,20 @@ module m_oned_functions
    do i = 1, nstruc
       pstruc => network%sts%struct(i)
       crest_level = get_crest_level(pstruc)
-      if (crest_level < 0.5*huge(1d0)) then
+      if (crest_level < 0.5*huge(1d0) ) then
          L = pstruc%link_number
          bob(1,L) = crest_level
-         if (bob0(1,L) > 0.5*huge(1d0)) then
-            ! in case no cross section is available for this link also set BOB0 to crest level
-            bob0(1,L) = bob(1,L)
-         endif
          bob(2,L) = crest_level
-         if (bob0(2,L) > 0.5*huge(1d0)) then
-            ! in case no cross section is available for this link also set BOB0 to crest level
-            bob0(2,L) = bob(2,L)
-         endif
       endif
    enddo
    
    ! look for missing bobs
    do L = 1, lnx1d
       if (bob(1,L) > 0.5d0*huge(1d0)) then
-         bob(1,L)  = bl(ln(1,L))
-         bob0(1,L) = bob(1,L)
+         bob(1,L) = bl(ln(1,L))
       endif
       if (bob(2,L) > 0.5d0*huge(1d0)) then
-         bob(2,L)  = bl(ln(2,L))
-         bob0(2,L) = bob(2,L)
+         bob(2,L) = bl(ln(2,L))
       endif
    enddo
    
@@ -570,10 +559,8 @@ module m_oned_functions
        n1 = ln(1,L)
        n2 = ln(2,L)
        bl(n1) = bl(n2)
-       bob(1,L)  = bl(n1)
-       bob(2,L)  = bl(n2)       
-       bob0(1,L) = bl(n1)
-       bob0(2,L) = bl(n2)       
+       bob(1,L) = bl(n1)
+       bob(2,L) = bl(n2)       
    enddo    
    
    end subroutine setbobs_1d

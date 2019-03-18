@@ -1009,7 +1009,7 @@ if(q /= 0) then
  if ( itstep.ne.4 ) then                                ! implicit time-step
 
  222 if (nonlin == 2) then                               ! only for pressurised
-       s1m = bl !  s1mini
+       !s1m = bl !  s1mini
        call volsur()
        difmaxlevm = 0d0 ;  noddifmaxlevm = 0
     endif
@@ -1542,7 +1542,7 @@ if(q /= 0) then
 
        !TODO discuss with Herman: Checking wether a node is a 1d node seems superfluous
     if (kcs(k1) == 1) then
-       hpr = max(0d0,s1(k1)-bob0(1,L))                ! this statement is called most nr of times through waterlevel iteration
+       hpr = max(0d0,s1(k1)-bob(1,L))                ! this statement is called most nr of times through waterlevel iteration
        if (hpr > 0) then                             !
           call getprof_1D(L, hpr, ar1, wid1, japerim, perim)
           a1(k1) =   a1(k1) + dx1*wid1
@@ -1559,7 +1559,7 @@ if(q /= 0) then
 
     !TODO discuss with Herman: Checking wether a node is a 1d node seems superfluous
     if (kcs(k2) == 1) then
-       hpr = max(0d0,s1(k2)-bob0(2,L))
+       hpr = max(0d0,s1(k2)-bob(2,L))
        if (hpr > 0) then                             !
           call getprof_1D(L, hpr, ar2, wid2, japerim, perim)
           a1(k2) =   a1(k2) + dx2*wid2
@@ -1582,14 +1582,14 @@ if(q /= 0) then
        endif
 
        if (network%loaded) then
-          hpr = max(0d0,s1m(k1)-bob0(1,L))                   ! this statement is called most nr of times through waterlevel iteration
+          hpr = max(0d0,s1m(k1)-bob(1,L))                   ! this statement is called most nr of times through waterlevel iteration
           if (hpr > 0d0) then
              call getprof_1D_min(L, hpr, ar1, wid1)
              a1m(k1)  = a1m(k1)  + dx1*wid1
              vol1(k1) = vol1(k1) - dx1*ar1
           endif
 
-          hpr = max(0d0,s1m(k2)-bob0(2,L))                   ! this statement is called most nr of times through waterlevel iteration
+          hpr = max(0d0,s1m(k2)-bob(2,L))                   ! this statement is called most nr of times through waterlevel iteration
           if (hpr > 0d0) then
              call getprof_1D_min(L, hpr, ar2, wid2)
              a1m(k2)  = a1m(k2)  + dx2*wid2
@@ -1598,7 +1598,7 @@ if(q /= 0) then
 
        elseif (prof1D(3,LL) < 0 ) then                          ! closed
           if (kcs(k1) == 1) then
-             hpr = max(0d0,s1m(k1)-bob0(1,L))                   ! this statement is called most nr of times through waterlevel iteration
+             hpr = max(0d0,s1m(k1)-bob(1,L))                   ! this statement is called most nr of times through waterlevel iteration
              if (hpr > 0.5d0*prof1D(2,LL) ) then
                 call getprof_1D_min(L, hpr, ar1, wid1)
                 a1m(k1)  = a1m(k1)  + dx1*wid1
@@ -1606,7 +1606,7 @@ if(q /= 0) then
              endif
           endif
           if (kcs(k2) == 1) then
-             hpr = max(0d0,s1m(k2)-bob0(2,L))                   ! this statement is called most nr of times through waterlevel iteration
+             hpr = max(0d0,s1m(k2)-bob(2,L))                   ! this statement is called most nr of times through waterlevel iteration
              if (hpr > 0.5d0*prof1D(2,LL) ) then
                 call getprof_1D_min(L, hpr, ar2, wid2)
                 a1m(k2)  = a1m(k2)  + dx2*wid2
@@ -1685,10 +1685,10 @@ if(q /= 0) then
 
 
  k1  = ln(1,L) ; k2 = ln(2,L)
-  if (bob0(1,L) < bob0(2,L)) then
-    BL1 = bob0(1,L); BL2 = bob0(2,L)
+  if (bob(1,L) < bob(2,L)) then
+    BL1 = bob(1,L); BL2 = bob(2,L)
  else
-    BL1 = bob0(2,L); BL2 = bob0(1,L)
+    BL1 = bob(2,L); BL2 = bob(1,L)
  endif
  wu2 = wu(L)
  b21 = BL2 - BL1
@@ -1754,10 +1754,10 @@ if(q /= 0) then
  double precision  :: beta, bt2, deltaa,hyr, uucn, ucna
 
  k1  = ln(1,L) ; k2 = ln(2,L)
-  if (bob0(1,L) < bob0(2,L)) then
-    BL1 = bob0(1,L); BL2 = bob0(2,L)
+  if (bob(1,L) < bob(2,L)) then
+    BL1 = bob(1,L); BL2 = bob(2,L)
  else
-    BL1 = bob0(2,L); BL2 = bob0(1,L)
+    BL1 = bob(2,L); BL2 = bob(1,L)
  endif
  wu2 = wu(L)
 
@@ -2932,8 +2932,8 @@ end subroutine sethu
     bl   = bl + blinc
 
     do L = lnx1D+1, lnx
-       bob(1,L)  = max( bl(ln(1,L)), bl(ln(2,L)) )
-       bob(2,L)  = bob(1,L)
+       bob(1,L) = max( bl(ln(1,L)), bl(ln(2,L)) )
+       bob(2,L) = bob(1,L)
     enddo
 
  else                     ! netnode types
@@ -2989,9 +2989,6 @@ end subroutine sethu
         s1(k) = bl(k) + 1d-9
     endif
  enddo
- 
- bob0(:, lnx1D+1:lnxi) = bob(:, lnx1D+1:lnxi)
- 
  end subroutine bathyupdate
 
  subroutine writesluices()
@@ -13665,6 +13662,7 @@ endif
     teta(lnxi+1:lnx) = 1d0
  endif
 
+ !TODO discuss with Herman. What is happeining here?
  if (nonlin1d == 2 .or. nonlin2D == 2) then
     if (allocated(s1mini) ) deallocate(s1mini)
     allocate  ( s1mini(ndx) , stat= ierr)
@@ -14013,6 +14011,10 @@ endif
 888 continue  ! Some error occurred, prevent further flow
  ndx = 0
 
+ if (nonlin==2) then
+    s1m = bl
+ endif
+    
  end function flow_flowinit
 
 
@@ -19444,7 +19446,7 @@ end subroutine unc_write_shp
 
  call readyy ('geominit-NODELINKS         ',0.5d0)
 
- if (allocated (ln) ) deallocate(ln,lncn,bob,bob0, dx,dxi,wu,wui,kcu,csu,snu,acl,iadv,teta,wu_mor)
+ if (allocated (ln) ) deallocate(ln,lncn,bob,dx,dxi,wu,wui,kcu,csu,snu,acl,iadv,teta,wu_mor)
  if (allocated(ibot)) deallocate(ibot)
  allocate (  ln   (2,lnx) , stat=ierr  )
  call aerr( 'ln   (2,lnx)', ierr, 2*lnx)
@@ -19452,8 +19454,6 @@ end subroutine unc_write_shp
  call aerr( 'lncn (2,lnx)', ierr, 2*lnx)
  allocate (  bob  (2,lnx) , stat=ierr  )
  call aerr( 'bob  (2,lnx)', ierr, 2*lnx)
- allocate (  bob0  (2,lnx) , stat=ierr  )
- call aerr( 'bob0  (2,lnx)', ierr, 2*lnx)
  allocate (  dx   (  lnx) , stat=ierr )
  call aerr( 'dx   (  lnx)', ierr, lnx )
  allocate (  dxi  (  lnx) , stat=ierr )
@@ -31242,8 +31242,7 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
     blu(L) = min(bob(1,L), bob(2,L) )
 
  enddo
- bob0(:,lnx1d+1:lnxi) = bob(:,lnx1d+1:lnxi)
- 
+
  if (jaupdbobbl1d > 0) then
     call setbobs_1d()
     jaupdbobbl1d = 0 ! update bobs and bl only at initialization. After initialisation bobs should only follow from bl, in particular for morphological updating. When considering nodal relations, some special treatment may be required
@@ -31280,8 +31279,7 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
              bl(n2)    = min(bl(n2) , blv)
           endif
        endif
-    enddo 
-    bob0(:, 1:lnx1d) =bob(:, 1:lnx1d) 
+    enddo
  endif
  do L = 1,lnx1D                                       ! 1D
     n1  = ln(1,L)   ; n2 = ln(2,L)                    ! flow ref
@@ -31313,43 +31311,27 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
     skewn     = abs(xn*xt + yn*yt)
     bob(1,L)  = blv
     bob(2,L)  = blv    ! revisit later+ wu(L)*skewn ! TODO: HK: why wu here? Why not dx(L) or something similar?
-    bob0(1,L)  = blv
-    bob0(2,L)  = blv    ! revisit later+ wu(L)*skewn ! TODO: HK: why wu here? Why not dx(L) or something similar?
     bl(n1)    = min(bl(n1) , blv)
     bl(n2)    = min(bl(n2) , blv)
  else if (kcu(L) == 4) then                           ! left right
     blv       = min(zn1,zn2)
     bob(1,L)  = zn1
     bob(2,L)  = zn2
-    bob0(1,L)  = zn1
-    bob0(2,L)  = zn2
     bl(n1)    = min(bl(n1) , blv)
     bl(n2)    = min(bl(n2) , blv)
  else if (kcu(L) == 5 .or. kcu(L) == 7) then         ! keep 1D and 2D levels
     if (bl(n1) .ne. 1d30 ) then
        bob(1,L) = bl(n1)
-       bob0(1,L) = bl(n1)
-    else    
+    else
        bob(1,L) = zn1
-       bob0(1,L) = zn1
-    endif   
-    if (bl(n1) .ne. 1d30 ) then 
-       bob(2,L) = bl(n2) 
-       bob0(2,L) = bl(n2) 
-    else 
-       bob(2,L) = zn2 
-       bob0(2,L) = zn2 
-    endif   
-    if (bl(n1) .ne. 1d30 ) then 
-       bob(2,L) = bl(n2) 
-       bob0(2,L) = bl(n2) 
-    else 
-       bob(2,L) = zn2 
-       bob0(2,L) = zn2 
+    endif
+    if (bl(n1) .ne. 1d30 ) then
+       bob(2,L) = bl(n2)
+    else
+       bob(2,L) = zn2
     endif
     if (setHorizontalBobsFor1d2d) then
        bob(:,L) = max(bob(1,L), bob(2,L))
-       bob0(:,L) = max(bob(1,L), bob(2,L))
     endif
 
  endif
@@ -31403,9 +31385,8 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
            zn3 = zk(k3)    ; if (zn3 == dmiss) zn3 = zkuni
            zn1 = 1.5d0*zn2 - 0.5d0*zn3 ! note: actual locations of cells centers not taken into account
 
-           bob(1,L)  = zn1
-           bob(2,L)  = zn1
-           bob0(:,L) = zn1
+           bob(1,L) = zn1
+           bob(2,L) = zn1
            bl(n1)   = min(bl(n1) , zn1)
            bl(n2)   = min(bl(n2) , zn1)
         endif
@@ -31417,9 +31398,9 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
            if (stm_included) then
               bob(1,L) = max( bl(n1), bl(n2) )
               bob(2,L) = bob(1,L)
-              bob0(:,L) = bob(1,L)
            endif
         endif
+
      endif
  enddo
 
@@ -33049,7 +33030,7 @@ end subroutine setbobs_fixedweirs
                    endif
                 endif
              endif
-          else !if (iadv(L) == 8) then            ! 1D2D droplosses, coding to avoid evaluating array iadv as long as possible
+          else if (iadv(L) == 8) then            ! 1D2D droplosses, coding to avoid evaluating array iadv as long as possible
              hup = s0(k2) - ( min(bob(1,L), bob(2,L) ) + twot*hu(L) )
              if (hup < 0) then
                 slopec = hup
@@ -41507,8 +41488,6 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
      if (jacros == 1) then                                 !        dig the gullies
          zc       = sl*zpL(k+1) + (1d0-sl)*zpL(k)
          bob(1,L) = min(zc, bob(1,L), bob(2,L) ) ; bob(2,L) = bob(1,L)
-         bob0(:,L) = bob(:,L)
-         
          bl(n1)   = min(bl(n1),zc)
          bl(n2)   = min(bl(n2),zc)
          nt       = nt + 1
@@ -41710,7 +41689,6 @@ subroutine setbobsonroofs( )      ! override bobs along pliz's
           if (ip1 > 0 .and. ip2 == ip1) then     ! both in same poly
              zc       = blav(ip1) + roofheightuni
              bob(1,L) = zc ; bob(2,L) = bob(1,L)
-             bob0(:,L) = bob(:,L)
              bl(n1)   = zc
              bl(n2)   = zc
              frcuroofs(L)       = frcuniroof
@@ -41791,9 +41769,8 @@ subroutine setbobsonroofs( )      ! override bobs along pliz's
             zc = sl*zpL(k+1) + (1d0-sl)*zpL(k)
          endif
          bob(1,L) = zc ; bob(2,L) = bob(1,L)
-         bob0(:,L) = bob(:,L)
-         bl(n1)   = min(bl(n1),zc)  
-         bl(n2)   = min(bl(n2),zc)  
+         bl(n1)   = min(bl(n1),zc)
+         bl(n2)   = min(bl(n2),zc)
          iadv(L)  = 8
          nt2 = nt2 + 1
      endif
@@ -41811,9 +41788,8 @@ subroutine setbobsonroofs( )      ! override bobs along pliz's
        endif
        if (ip2 > 0) then
           bob(2,L) = bl(n2) ; ! zk(k2) = bl(n2)
-       endif  
-       bob0(:,L) = bob(:,L)
-       if (ip1 > 0 .or. ip2 > 0) then 
+       endif
+       if (ip1 > 0 .or. ip2 > 0) then
           dx(L)        = max(dx(L), dxminroofgutterpipe)
           frcuroofs(L) = frcuniroofgutterpipe
        endif
