@@ -3385,10 +3385,17 @@ SUBROUTINE ISflowlink(XP, YP, LL) ! IS THIS A flow NODE OR A flow LINK ?
   call setnodadm(0)
   KC = 0
   in = -1
-  DO K = 1,NUMK
+  node:DO K = 1,NUMK
+     DO kk=1,nmk(K)
+        LL = abs(nod(k)%lin(kk))
+        if (kn(3,LL) /= 1 .and. kn(3,LL) /= 2) then
+           ! Don't merge net nodes that are part of special 1D2D connections.
+           cycle node
+        end if
+     end do
      CALL DBPINPOL( XK(K), YK(K), in, dmiss, JINS, NPL, xpl, ypl, zpl)
      if ( in.gt.0 ) kc(k) = 1
-  ENDDO
+  ENDDO node
 
   if ( jsferic.eq.1 ) then
      call get_meshbounds(xboundmin, xboundmax)
