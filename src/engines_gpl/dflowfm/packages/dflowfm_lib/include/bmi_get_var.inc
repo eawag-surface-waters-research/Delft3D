@@ -114,6 +114,8 @@
      x = c_loc(zbndu)
   case("zbndq") !<  [m3/s] discharge  boundary points function {"location": "edge", "shape": ["nbndu"]}
      x = c_loc(zbndq)
+  case("turkin1") !<  [m2/s2] turbulent kinectic energy at layer interface u {"location": "edge", "shape": ["lnkx"]}
+     x = c_loc(turkin1)
   case("rnveg") !<  [1/m2] 3D plant density , 2D part is basis input (1/m2) {"location": "face", "shape": ["ndkx"]}
      x = c_loc(rnveg)
   case("diaveg") !<  [m] 3D plant diameter, 2D part is basis input (m) {"location": "face", "shape": ["ndkx"]}
@@ -226,8 +228,14 @@
      x = c_loc(wu)
   case("wu_mor") !<  [m] morphologically active width (m), if < 0 pointer to convtab {"location": "edge", "shape": ["lnx"]}
      x = c_loc(wu_mor)
-  case("bob") !<  [m] left and right inside lowerside tube (binnenkant onderkant buis) HEIGHT values (m) (positive upward) {"location": "edge", "shape": [2, "lnx"]}
+  case("bob") !<  [m] left and right inside lowerside tube (binnenkant onderkant buis) HEIGHT values (m) (positive upward), adjusted for structures {"location": "edge", "shape": [2, "lnx"]}
      x = c_loc(bob)
+  case("bob0") !<  [m] left and right inside lowerside tube (binnenkant onderkant buis) HEIGHT values (m) (positive upward), NOT adjusted for structures {"location": "edge", "shape": [2, "lnx"]}
+     x = c_loc(bob0)
+  case("xu") !<  [m] velocity point x {"location": "edge", "shape": ["lnx"]}
+     x = c_loc(xu)
+  case("yu") !<  [m] velocity point y {"location": "edge", "shape": ["lnx"]}
+     x = c_loc(yu)
   case("vort") !<  [s-1] vorticity at netnodes {"shape": ["ndx"], "comment": "Currently not available, is nowhere allocated nor filled."}
      x = c_loc(vort)
   case("xzw") !<  [m] centre of gravity {"shape": ["nump"]}

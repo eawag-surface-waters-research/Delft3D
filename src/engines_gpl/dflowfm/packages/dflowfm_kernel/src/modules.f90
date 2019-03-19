@@ -2400,7 +2400,7 @@ end module m_structures
  double precision                  :: epsd = 1d-32      ! D3D: - 7, dpm: -32
 
  double precision, allocatable     :: turkin0  (:)      ! k old (m2/s2)  , at layer interface at u     these will become global, rename to : turkinwu0
- double precision, allocatable     :: turkin1  (:)      ! k new          , at layer interface at u
+ double precision, allocatable, target :: turkin1(:)    !< [m2/s2] turbulent kinectic energy at layer interface u {"location": "edge", "shape": ["lnkx"]}
 
  double precision, allocatable     :: tureps0  (:)      ! eps old (1/s)  , at layer interface at u
  double precision, allocatable     :: tureps1  (:)      ! eps new        , at layer interface at u
@@ -4015,8 +4015,8 @@ end module m_profiles
 
  double precision, allocatable     :: acl   (  :)    !< left dx fraction, alfacl
  double precision, allocatable     :: acn   (:,:)    !< 2,L left and right wu fraction
- double precision, allocatable     :: xu    (:)      !< velocity point x (m)
- double precision, allocatable     :: yu    (:)      !< velocity point y (m)
+ double precision, allocatable, target   :: xu    (:)      !< [m] velocity point x {"location": "edge", "shape": ["lnx"]}
+ double precision, allocatable, target   :: yu    (:)      !< [m] velocity point y {"location": "edge", "shape": ["lnx"]}
  double precision, allocatable     :: blu   (:)      !< velocity point bottom level positive up (m)
  double precision, allocatable     :: csu   (:)      !< cosine comp of u0, u1
  double precision, allocatable     :: snu   (:)      !< sine   comp of u0, u1

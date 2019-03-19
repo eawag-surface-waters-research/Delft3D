@@ -116,6 +116,8 @@
        shape(1) = nbndu
     case("zbndq")
        shape(1) = nbndu
+    case("turkin1")
+       shape(1) = lnkx
     case("rnveg")
        shape(1) = ndkx
     case("diaveg")
@@ -232,6 +234,13 @@
        shape(1) = lnx
     case("bob")
        shape(2) = 2
+       shape(1) = lnx
+    case("bob0")
+       shape(2) = 2
+       shape(1) = lnx
+    case("xu")
+       shape(1) = lnx
+    case("yu")
        shape(1) = lnx
     case("vort")
        shape(1) = ndx

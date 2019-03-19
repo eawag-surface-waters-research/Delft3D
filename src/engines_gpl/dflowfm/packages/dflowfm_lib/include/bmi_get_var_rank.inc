@@ -114,6 +114,8 @@
      rank = 1
   case("zbndq")
      rank = 1
+  case("turkin1")
+     rank = 1
   case("rnveg")
      rank = 1
   case("diaveg")
@@ -228,6 +230,12 @@
      rank = 1
   case("bob")
      rank = 2
+  case("bob0")
+     rank = 2
+  case("xu")
+     rank = 1
+  case("yu")
+     rank = 1
   case("vort")
      rank = 1
   case("xzw")

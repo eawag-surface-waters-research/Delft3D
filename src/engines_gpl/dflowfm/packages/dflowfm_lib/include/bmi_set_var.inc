@@ -157,6 +157,9 @@
   case("zbndq")
      call c_f_pointer(xptr, x_1d_double_ptr, shape(zbndq))
      zbndq(:) = x_1d_double_ptr
+  case("turkin1")
+     call c_f_pointer(xptr, x_1d_double_ptr, shape(turkin1))
+     turkin1(:) = x_1d_double_ptr
   case("rnveg")
      call c_f_pointer(xptr, x_1d_double_ptr, shape(rnveg))
      rnveg(:) = x_1d_double_ptr
@@ -328,6 +331,15 @@
   case("bob")
      call c_f_pointer(xptr, x_2d_double_ptr, shape(bob))
      bob(:,:) = x_2d_double_ptr
+  case("bob0")
+     call c_f_pointer(xptr, x_2d_double_ptr, shape(bob0))
+     bob0(:,:) = x_2d_double_ptr
+  case("xu")
+     call c_f_pointer(xptr, x_1d_double_ptr, shape(xu))
+     xu(:) = x_1d_double_ptr
+  case("yu")
+     call c_f_pointer(xptr, x_1d_double_ptr, shape(yu))
+     yu(:) = x_1d_double_ptr
   case("vort")
      call c_f_pointer(xptr, x_1d_double_ptr, shape(vort))
      vort(:) = x_1d_double_ptr

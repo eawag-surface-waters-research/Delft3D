@@ -114,6 +114,8 @@ select case(var_name)
     location_name = "edge"
   case("zbndq")
     location_name = "edge"
+  case("turkin1")
+    location_name = "edge"
   case("rnveg")
     location_name = "face"
   case("diaveg")
@@ -227,6 +229,12 @@ select case(var_name)
   case("wu_mor")
     location_name = "edge"
   case("bob")
+    location_name = "edge"
+  case("bob0")
+    location_name = "edge"
+  case("xu")
+    location_name = "edge"
+  case("yu")
     location_name = "edge"
   case("vort")
     location_name = ""

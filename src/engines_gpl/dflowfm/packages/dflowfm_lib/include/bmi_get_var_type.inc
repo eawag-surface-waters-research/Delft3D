@@ -114,6 +114,8 @@ select case(var_name)
     type_name = "double"
   case("zbndq")
     type_name = "double"
+  case("turkin1")
+    type_name = "double"
   case("rnveg")
     type_name = "double"
   case("diaveg")
@@ -227,6 +229,12 @@ select case(var_name)
   case("wu_mor")
     type_name = "double"
   case("bob")
+    type_name = "double"
+  case("bob0")
+    type_name = "double"
+  case("xu")
+    type_name = "double"
+  case("yu")
     type_name = "double"
   case("vort")
     type_name = "double"

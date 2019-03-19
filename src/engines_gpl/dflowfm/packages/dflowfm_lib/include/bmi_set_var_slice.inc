@@ -198,6 +198,10 @@
 
      call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
      zbndq(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
+  case("turkin1")
+
+     call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
+     turkin1(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
   case("rnveg")
 
      call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
@@ -420,6 +424,18 @@
 
      call c_f_pointer(xptr, x_2d_double_ptr, (/c_count(1), c_count(2)/))
      bob(c_start(1)+1:(c_start(1)+c_count(1)),c_start(2)+1:(c_start(2)+c_count(2))) = x_2d_double_ptr
+  case("bob0")
+
+     call c_f_pointer(xptr, x_2d_double_ptr, (/c_count(1), c_count(2)/))
+     bob0(c_start(1)+1:(c_start(1)+c_count(1)),c_start(2)+1:(c_start(2)+c_count(2))) = x_2d_double_ptr
+  case("xu")
+
+     call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
+     xu(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
+  case("yu")
+
+     call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
+     yu(c_start(1)+1:(c_start(1)+c_count(1))) = x_1d_double_ptr
   case("vort")
 
      call c_f_pointer(xptr, x_1d_double_ptr, (/c_count(1)/))
