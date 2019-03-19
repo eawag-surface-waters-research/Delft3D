@@ -22,8 +22,8 @@
 !!  rights reserved.
 
       subroutine wq_processes_integrate_velocities ( nosys  , notot  , noseg  , noq    , novelo , &
-                                                     velo   , area   , ipoint , iknmrk , ivpnt  , &
-                                                     conc   , idt    , deriv  )
+                                                     velo   , area   , volume , ipoint , iknmrk , &
+                                                     ivpnt  , conc   , idt    , deriv  )
 
 !     Deltares Software Centre
 
@@ -53,12 +53,13 @@
       integer  ( 4), intent(in   ) :: novelo               !< number additional velocities
       real     ( 4), intent(in   ) :: velo  (novelo,noq)   !< array with additional velocities
       real     ( 4), intent(in   ) :: area  (noq)          !< exchange areas in m2
+      real     ( 4), intent(in   ) :: volume(noseg)        !< volumes in m3
       integer  ( 4), intent(in   ) :: ipoint(  4   ,noq)   !< from, to, from-1, to+1 volume numbers
       integer  ( 4), intent(in   ) :: iknmrk(noseg)        !< feature array
       integer  ( 4), intent(in   ) :: ivpnt (nosys)        !< additional velocity number per substance
       real     ( 4), intent(in   ) :: conc  (notot,noseg)  !< concentrations at previous time level
       integer  ( 4), intent(in   ) :: idt                  !< time step in seconds
-      real     ( 4), intent(inout) :: deriv (notot,noseg)  !< explicit derivative in mass/s
+      real     ( 4), intent(inout) :: deriv (noseg,notot)  !< explicit derivative in mass/m3/s
 
 !     Local variables     :
 
@@ -66,6 +67,8 @@
       integer  ( 4) isys        ! loop counter substance
       integer  ( 4) ifrom, ito  ! from and to volume numbers
       real     ( 4) a           ! this area
+      real     ( 4) vfrom       ! from volume
+      real     ( 4) vto         ! to volume
       real     ( 4) q           ! flow for this exchange
       real     ( 4) dq          ! total flux from and to
 
@@ -79,6 +82,12 @@
           ito   = ipoint(2,iq)
           if ( ifrom .le. 0 .or. ito .le. 0 ) cycle
           a = area(iq)
+          if(ifrom.gt.0) then
+              vfrom = volume(ifrom)
+          endif
+          if(ito.gt.0) then
+              vto = volume(ito)
+          endif
           do isys = 1, nosys
               if ( ivpnt(isys) .gt. 0 ) then
                   q = velo  ( ivpnt(isys), iq ) * a
@@ -87,11 +96,11 @@
                   else
                       dq = q*conc(isys,ito  )
                   endif
-                  if(ifrom.gt.0) then
-                      deriv(isys,ifrom) = deriv(isys,ifrom) - dq
+                  if(ifrom.gt.0.and.vfrom.gt.0.0) then
+                      deriv(ifrom,isys) = deriv(ifrom,isys) - dq/vfrom
                   endif
-                  if(ito.gt.0) then
-                      deriv(isys,ito  ) = deriv(isys,ito  ) + dq
+                  if(ito.gt.0.and.vto.gt.0.0) then
+                      deriv(ito,isys) = deriv(ito,isys) + dq/vto
                   endif
               endif
           enddo

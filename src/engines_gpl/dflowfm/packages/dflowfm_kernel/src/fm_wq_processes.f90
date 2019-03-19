@@ -436,7 +436,7 @@
       
 !     allocate flux and deriv arrays
       call realloc(flux, [nflux, noseg], keepExisting=.false., fill=0.0 )       !< Proces fluxes
-      call realloc(deriv, [notot, noseg], keepExisting=.false., fill=0.0 )      !< Model derivatives (= stochi(notot ,noflux) * flux(noflux, noseg))
+      call realloc(deriv, [noseg, notot], keepExisting=.false., fill=0.0 )      !< Model derivatives (= stochi(notot ,noflux) * flux(noflux, noseg))
       call realloc(velonw, [nveln, noq3], keepExisting=.false., fill=0.0 )      !< New velocity array   
 
 !     Determine size of a array from process system and noseg/noq3, and allocate it

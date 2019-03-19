@@ -41,7 +41,7 @@
       integer   (4), intent(in   ) :: noseg                   !< number of computational volumes
       real      (4), intent(inout) :: conc  (notot ,noseg)    !< concentrations per substance per volume
       real      (8), intent(inout) :: amass (notot ,noseg)    !< masses per substance per volume
-      real      (4), intent(inout) :: deriv (notot ,noseg)    !< derivatives per substance per volume
+      real      (4), intent(inout) :: deriv (noseg, notot)    !< derivatives per substance per volume
       real      (4), intent(inout) :: volume(noseg )          !< volumes of the segments
       integer   (4), intent(in   ) :: idt                     !< integration time step size
       real      (4), intent(in   ) :: surfac(noseg)           !< horizontal surface
@@ -66,7 +66,7 @@
          v1 = volume(iseg)
          if ( v1.gt.1.0e-25 ) then
             do i=1,nosys
-               a           = amass(i,iseg) + ndt*deriv(i,iseg)
+               a           = amass(i,iseg) + ndt*deriv(iseg,i)*v1
                amass(i,iseg) = a
                conc (i,iseg) = a / v1
                deriv(i,iseg) = 0.0
@@ -76,7 +76,7 @@
          s1 = surfac(iseg)
          if(s1.gt.0.0) then
             do i=nosys+1,notot
-               a             = amass(i,iseg) + ndt*deriv(i,iseg)
+               a             = amass(i,iseg) + ndt*deriv(iseg,i)*v1
                amass(i,iseg) = a
                conc (i,iseg) = a / s1
                deriv(i,iseg) = 0.0

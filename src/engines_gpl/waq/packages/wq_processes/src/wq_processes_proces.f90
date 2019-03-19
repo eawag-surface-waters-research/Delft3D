@@ -59,7 +59,7 @@
       real   ( 4), intent(in   ) :: volume(      noseg)         !< Segment volumes
       integer( 4), intent(in   ) :: itime                       !< Time in system clock units
       integer( 4), intent(in   ) :: idt                         !< Time step system clock units
-      real   ( 4), intent(inout) :: deriv (notot,noseg)         !< Model derivatives
+      real   ( 4), intent(inout) :: deriv (noseg,notot)         !< Model derivatives
       integer( 4), intent(in   ) :: ndmpar                      !< Number of dump areas
       integer( 4), intent(in   ) :: nproc                       !< Number of processes
       integer( 4), intent(in   ) :: noflux                      !< Number of fluxes
@@ -262,7 +262,7 @@
 !              Scale fluxes and update "processes" accumulation arrays
                atfac = 1.0/real(itfact)
                do iseg = 1 , noseg
-                  deriv (:,iseg) = deriv(:,iseg) * atfac
+                  deriv (iseg,:) = deriv(iseg,:) * atfac
                enddo
 
                if (flux_int == 1) then
@@ -329,7 +329,7 @@
 !           Scale fluxes and update "processes" accumulation arrays
             atfac = 1.0/real(itfact)
             do iseg = 1 , noseg
-               deriv (:,iseg) = deriv(:,iseg) * atfac
+               deriv (iseg,:) = deriv(iseg,:) * atfac
             enddo
 
             if (flux_int == 1) then
@@ -337,8 +337,8 @@
                if ( nveln  .gt. 0 ) then
 !                 Add effect of additional flow velocities
                   call wq_processes_integrate_velocities ( nosys    , notot    , noseg    , noq      , nveln    , &
-                                velx     , area     , iexpnt   , iknmrk   , ivpnew   , &
-                                conc     , idt      , deriv  )
+                                                           velx     , area     , volume   , iexpnt   , iknmrk   , &
+                                                           ivpnew   , conc     , idt      , deriv  )
                end if
 
 !              Integration (derivs are zeroed)
@@ -359,6 +359,8 @@
                               a     , ipmsa , increm, noflux, iflux , promnr, &
                               flux  , iexpnt, iknmrk, noq1  , noq2  , noq3  , &
                               noq4  , pronam, dll_opb)
+
+      use timers
 
       integer             iproc , k, noseg , noflux, noq1  , noq2  , noq3  , noq4
       integer             prvnio(*)      , prvtyp(*)      , &
@@ -385,6 +387,9 @@
       integer :: idim1 
       integer :: idim2 
       integer :: ipflux
+
+      integer(4) ithndl /0/
+      if ( timon ) call timstrt ( "onepro_wqp", ithndl )
 
 !     Set the variables
       do ivario = 1 , prvnio(iproc)
@@ -417,6 +422,8 @@
                    noseg    , noflux       , iexpnt      , iknmrk(1)     , noq1         , &
                    noq2     , noq3         , noq4        , pronam(iproc) , prvnio(iproc), &
                    prvtyp(k), iproc        , dll_opb     )
+
+      if (timon) call timstop( ithndl )
       return
       end
 
@@ -424,6 +431,8 @@
                              notot  , ndmps  , idt    , iflux  , &
                              volume , deriv  , stochi , flux   , &
                              prondt , ibflag , isdmp  , flxdmp , ipbloo , istep  )
+
+      use timers
 
       implicit none
 
@@ -438,7 +447,7 @@
       integer(4), intent(in   ) :: idt
       integer(4), intent(in   ) :: iflux (nproc )                  ! Offset in the flux array per process
       real   (4), intent(in   ) :: volume(noseg )                  ! Computational volumes
-      real   (4), intent(inout) :: deriv (notot , noseg )          ! Array with derivatives
+      real   (4), intent(inout) :: deriv (noseg , notot )          ! Array with derivatives
       real   (4), intent(in   ) :: stochi(notot , noflux )         ! Stoichiometric factors per flux
       real   (4), intent(in   ) :: flux  (noflux, noseg )          ! Process fluxes
       integer(4), intent(in   ) :: prondt(nproc )                  ! Time step size of the process
@@ -457,6 +466,9 @@
       integer(4)                :: nfluxp                          ! Number of fluxes in this process
       real                      :: vol                             ! Help variable volume
       real                      :: ndt                             ! Help variable time step multiplier
+
+      integer(4) ithndl /0/
+      if ( timon ) call timstrt ( "twopro_wqm", ithndl )
 
       do iproc = 1, nproc
          if ( iproc .eq. ipbloo ) cycle
@@ -496,5 +508,6 @@
 
       enddo
 
+      if (timon) call timstop( ithndl )
       return
       end

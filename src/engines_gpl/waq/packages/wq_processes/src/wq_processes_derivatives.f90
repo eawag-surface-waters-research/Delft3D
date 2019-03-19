@@ -30,7 +30,7 @@
 
       integer notot, noflux, nflux1, nfluxp, noseg
       integer isys, iflux, iseg, ndt
-      real    deriv(notot,noseg) , stochi(notot,noflux) , flux(noflux,noseg) , volume(noseg)
+      real    deriv(noseg,notot) , stochi(notot,noflux) , flux(noflux,noseg) , volume(noseg)
       real    st, fact
 
       integer(4), save :: ithndl = 0
@@ -45,11 +45,11 @@
                fact = real(ndt)*st
                if ( abs(fact-1.0) .lt. 1.e-10 ) then
                   do iseg = 1 , noseg
-                     deriv(isys,iseg) = deriv(isys,iseg) + flux(iflux,iseg)*volume(iseg)
+                     deriv(iseg,isys) = deriv(iseg,isys) + flux(iflux,iseg)
                   enddo
                else
                   do iseg = 1 , noseg
-                     deriv(isys,iseg) = deriv(isys,iseg) + flux(iflux,iseg)*volume(iseg)*fact
+                     deriv(iseg,isys) = deriv(iseg,isys) + flux(iflux,iseg)*fact
                   enddo
                endif
             endif
