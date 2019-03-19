@@ -6859,10 +6859,11 @@ end subroutine update_waqfluxes
  implicit none
 
  double precision       :: wud, wuL1, wuL2, wuk, cs, sn
- integer                :: k, L, ierr, n, kk, n12
+ integer                :: k, L, ierr, n, kk, n12, lnxmax
  integer                :: k1, k2, k3, k4, nn, LL, jaclosedcorner
 
- double precision       :: xloc, yloc, beta, aa1, wwl(6), wcw, alf
+ double precision       :: xloc, yloc, beta, aa1, wcw, alf
+ double precision, allocatable       :: wwL(:)
 
  double precision, allocatable       :: wcxy (:,:)   ! center weight factors (2,ndx) , only for normalising
  double precision, allocatable       :: wc   (:)     ! center weight factors (ndx)   , only for normalising
@@ -6922,10 +6923,13 @@ end subroutine update_waqfluxes
     wcxy (2,k2) = wcxy (2,k2) + abs(wcy2(L))
  enddo
 
+ lnxmax = 0
  do n   = 1, mxwalls                                        ! wall contribution to scalar linktocenterweights
     k1  = walls(1,n)
     aa1 = 2d0*walls(17,n)
     wcw = 0d0
+    lnxmax = max(lnxmax,  nd(k1)%lnx)
+    call realloc(wwL, lnxmax, keepExisting = .false.)
     do kk = 1,size(nd(k1)%ln)
        LL = iabs(nd(k1)%ln(kk))
        n12 = 1 ; alf = acL(LL)
@@ -6981,7 +6985,7 @@ end subroutine update_waqfluxes
 
  enddo
 
- deallocate (wcxy, wc)
+ deallocate (wcxy, wc, wwL)
 
  kfs = 0
 
