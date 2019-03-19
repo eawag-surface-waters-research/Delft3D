@@ -18503,7 +18503,7 @@ subroutine unc_write_shp()
     use unstruc_shapefile
     use m_monitoring_crosssections, only: ncrs, crs
     use m_observations, only: numobs, kobs
-    use m_flowexternalforcings, only: nweirgen, ngategen, numsrc, ksrc, gate2cgen, L1cgensg, L2cgensg, npumpsg, L1pumpsg, L2pumpsg, ngenstru
+    use m_flowexternalforcings, only: nweirgen, ngategen, numsrc, ksrc, gate2cgen, L1cgensg, L2cgensg, npumpsg, L1pumpsg, L2pumpsg, ngenstru, genstru2cgen
     use m_thindams
     use m_sobekdfm, only: nbnd1d2d
     use m_fixedweirs, only: nfxw
@@ -18748,7 +18748,7 @@ subroutine unc_write_shp()
           if (ngenstru > 0) then
              jawrite = ngenstru
              do n = 1, ngenstru
-                igen = gate2cgen(n)
+                igen = genstru2cgen(n)
                 if (L1cgensg(igen) > L2cgensg(igen)) then
                    jawrite = jawrite - 1
                 endif

@@ -1569,7 +1569,7 @@ double precision            :: tmp_x(2), tmp_y(2)
              j = dbfwriteattribute(shphandle, ishape, id_effwu, wu(La))
          end if
          if (j /= 1) then
-           call mess(LEVEL_ERROR, 'SHAPEFILE: Could not write attribute "OPENWIDTH" to shape'''//trim(objectid)//'''.')
+           call mess(LEVEL_ERROR, 'SHAPEFILE: Could not write attribute "EFF_WU" to shape'''//trim(objectid)//'''.')
            return
          endif
          
