@@ -116,7 +116,7 @@
       his_output_file = md_ehofile
       proc_def_file = md_pdffile
       bloom_file = md_blmfile
-      proc_log_file = defaultfilename('lsp')
+      proc_log_file = defaultfilename('wq_lsp')
       
       open (newunit=lunlsp , file=proc_log_file, status='unknown', iostat=ierr)
       if (ierr.ne.0) then

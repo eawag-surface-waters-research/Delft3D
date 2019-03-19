@@ -281,9 +281,12 @@ function defaultFilename(filecat, timestamp, prefixWithDirectory, allowWildcard)
 
         activeFile = ''
 
-    case ('lsp')
+    case ('wq_lsp')
         activeFile = ''
-        suffix = '.lsp'
+        suffix = '_wq_proc.lsp'
+    case ('wq_bal')
+        activeFile = ''
+        suffix = '_wq_proc_bal.txt'
     case ('wq_timers')
         activeFile = ''
         suffix = '_wq_proc_timers.txt'
@@ -313,7 +316,7 @@ function defaultFilename(filecat, timestamp, prefixWithDirectory, allowWildcard)
     
     ! Output files are generally stored in a subfolder, so prefix them here with that.
     select case (trim(filecat))
-    case ('his', 'map', 'clm', 'rstold', 'rst', 'bal', 'histek', 'inc_s1', 'tec', 'map.plt', 'net.plt', 'avgwavquant', 'com','avgsedquant', 'lsp', 'wq_timers') !! JRE
+    case ('his', 'map', 'clm', 'rstold', 'rst', 'bal', 'histek', 'inc_s1', 'tec', 'map.plt', 'net.plt', 'avgwavquant', 'com','avgsedquant', 'wq_lsp', 'wq_bal', 'wq_timers') !! JRE
         if (prefix_dir) then
             defaultFilename = trim(getoutputdir())//trim(defaultFilename)
         end if

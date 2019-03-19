@@ -239,19 +239,16 @@
    endif
 
    if (writebalance) then
-      open(newunit=lunmbahis,file=trim(getoutputdir())//trim(ident)//'_mba.his', &
-           form='unformatted', access='stream', status='replace')
-      call mba_write_his_header(lunmbahis)
-      open(newunit=lunmbabal,file=trim(getoutputdir())//trim(ident)//'_bal.txt')
+!      open(newunit=lunmbahis,file=trim(getoutputdir())//trim(ident)//'_mba.his', &
+!           form='unformatted', access='stream', status='replace')
+!      call mba_write_his_header(lunmbahis)
+      open(newunit=lunmbabal,file=defaultfilename('wq_bal'))
       call mba_write_bal_header(lunmbabal, nosys, notot, nomba, mbaname, syname_sub, nflux, &
                                 totfluxsys, stochi, fluxname, fluxprocname, nfluxsys, fluxsys)
 
-      open(newunit=lunmbatothis,file=trim(getoutputdir())//trim(ident)//'_mbatot.his', &
-           form='unformatted', access='stream', status='replace')
-      call mba_write_his_header(lunmbatothis)
-      open(newunit=lunmbatotbal,file=trim(getoutputdir())//trim(ident)//'_baltot.txt')
-      call mba_write_bal_header(lunmbatotbal, nosys, notot, nomba, mbaname, syname_sub, nflux, &
-                                totfluxsys, stochi, fluxname, fluxprocname, nfluxsys, fluxsys)
+!      open(newunit=lunmbatothis,file=trim(getoutputdir())//trim(ident)//'_mbatot.his', &
+!           form='unformatted', access='stream', status='replace')
+!      call mba_write_his_header(lunmbatothis)
    endif
    
    end subroutine mba_init
@@ -327,10 +324,10 @@
    endif
 
    if (writebalance) then
-      call mba_write_his_time_step(lunmbahis, itimembastart, nosys, notot, nomba, nombabnd, nflux, totfluxsys, &
-                                   mbavolumebegin, mbavolumeend, mbaflowhor, &
-                                   mbamassbegin, mbamassend, mbafluxhor, &
-                                   flxdmp, stochi, nfluxsys, fluxsys)
+!      call mba_write_his_time_step(lunmbahis, itimembastart, nosys, notot, nomba, nombabnd, nflux, totfluxsys, &
+!                                   mbavolumebegin, mbavolumeend, mbaflowhor, &
+!                                   mbamassbegin, mbamassend, mbafluxhor, &
+!                                   flxdmp, stochi, nfluxsys, fluxsys)
 
       call mba_write_bal_time_step(lunmbabal, timembastart, timembaend, nosys, notot, nomba, nombabnd, nflux, totfluxsys, &
                                    mbaname, syname_sub, mbalnused, numsrc, srcname, mbasorsinout, &
@@ -417,17 +414,22 @@
    endif
 
    if (writebalance) then
-      call mba_write_his_time_step(lunmbatothis, itimembastarttot, nosys, notot, nomba, nombabnd, nflux, totfluxsys, &
-                                   mbavolumebegintot, mbavolumeend, mbaflowhortot, &
-                                   mbamassbegintot, mbamassend, mbafluxhortot, &
-                                   flxdmptot, stochi, nfluxsys, fluxsys)
+!      call mba_write_his_time_step(lunmbatothis, itimembastarttot, nosys, notot, nomba, nombabnd, nflux, totfluxsys, &
+!                                   mbavolumebegintot, mbavolumeend, mbaflowhortot, &
+!                                   mbamassbegintot, mbamassend, mbafluxhortot, &
+!                                   flxdmptot, stochi, nfluxsys, fluxsys)
       
-      call mba_write_bal_time_step(lunmbatotbal, timembastarttot, timembaend, nosys, notot, nomba, nombabnd, nflux, totfluxsys, &
+      write(lunmbabal,1000)
+      call mba_write_bal_time_step(lunmbabal, timembastarttot, timembaend, nosys, notot, nomba, nombabnd, nflux, totfluxsys, &
                                    mbaname, syname_sub, mbalnused, numsrc, srcname, mbasorsinout, &
                                    mbaarea, mbavolumebegintot, mbavolumeend, mbaflowhortot,mbaflowsorsintot,  &
                                    mbamassbegintot, mbamassend, mbafluxhortot, mbafluxsorsintot, &
                                    flxdmptot, stochi, fluxname, nfluxsys, fluxsys)
    endif
+
+   1000 format (///'============================================================='&
+                  /'Mass balances for whole calculation period'                   &
+                  /'=============================================================')
 
    end subroutine mba_final
 
