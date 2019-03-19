@@ -69,7 +69,7 @@
                a           = amass(i,iseg) + ndt*deriv(iseg,i)*v1
                amass(i,iseg) = a
                conc (i,iseg) = a / v1
-               deriv(i,iseg) = 0.0
+               deriv(iseg,i) = 0.0
             enddo
          endif
          ! then the inactive substances
@@ -79,7 +79,7 @@
                a             = amass(i,iseg) + ndt*deriv(iseg,i)*v1
                amass(i,iseg) = a
                conc (i,iseg) = a / s1
-               deriv(i,iseg) = 0.0
+               deriv(iseg,i) = 0.0
             enddo
          endif
       enddo
