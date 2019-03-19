@@ -1189,12 +1189,13 @@ use m_physcoef, only : rhomean
     windxav = 0d0
     windyav = 0d0
 
-    ! Rain+qin not reset every re-init, only upon new MDU load, because rain can be
+    ! Rain+qin+wind not reset every re-init, only upon new MDU load, because rain can be
     ! enabled by user in MDU (for BMI use, even without rain in external forcings file)
     jarain  = 0         !< use rain yes or no
     jaevap  = 0         !< use evap yes or no
     jaqin   = 0         !< use qin , sum of all in fluxes
     jaQinext= 0         !< use Qin externally provided yes or no
+    jawind  = 0         !< use wind yes or no
 
     ! Remaining of variables is handled in reset_wind()
     call reset_wind()
@@ -1203,7 +1204,6 @@ use m_physcoef, only : rhomean
    !> Resets only wind variables intended for a restart of flow simulation.
    !! Upon loading of new model/MDU, call default_wind() instead.
    subroutine reset_wind()
-   jawind   = 0           !< use wind yes or no
    japatm   = 0           !< use patm yes or no
    numlatsg = 0           !< [] nr of lateral discharge providers
    jaspacevarcharn = 0   !< use space varying Charnock coefficients

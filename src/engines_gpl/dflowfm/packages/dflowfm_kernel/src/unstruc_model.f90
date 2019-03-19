@@ -1271,6 +1271,7 @@ subroutine readMDUFile(filename, istat)
     if (jaevap > 0) then
        jaqin = 1
     end if
+    call prop_get_integer(md_ptr, 'external forcing', 'WindExt', jawind, success)
 
 ! Trachytopes
     ! Further reading is done in m_rdtrt, by passing just the [trachytopes] chapter as a separate trtdef_ptr to rdtrt.
@@ -2664,6 +2665,9 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     end if
     if (writeall .or. jaevap > 0) then
        call prop_set(prop_ptr, 'external forcing', 'Evaporation', jaevap, 'Include evaporation in water balance, (0=no, 1=yes)')
+    end if
+    if (writeall .or. jawind > 0) then
+       call prop_set(prop_ptr, 'external forcing', 'WindExt', jawind, 'Include wind, externally provided, (0=no, 1=reserved for EC, 2=yes)')
     end if
 
     if (nmode .ne. 0) then

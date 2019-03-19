@@ -14609,9 +14609,10 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
       if (jawave == 1 .or. jawave == 2) then
          call tauwavefetch(tim)
       endif
-
+   endif
+   
+   if (jawind > 0) then 
       call setwindstress()
-
    endif
 
 !   !$OMP  PARALLEL SECTIONS   &
@@ -23041,6 +23042,11 @@ endif
     call realloc(evap, ndx, keepExisting = .false., fill = 0d0, stat = ierr)
  end if
 
+ if (jawind > 0) then
+    call realloc(wx, lnx, keepExisting = .false., fill = 0d0, stat = ierr)
+    call realloc(wy, lnx, keepExisting = .false., fill = 0d0, stat = ierr)
+ end if 
+ 
  if (jaQinext > 0) then
     call realloc(qinext, ndkx, keepExisting = .false., fill = 0d0, stat = ierr)
     call aerr('qinext(ndkx)', ierr, ndkx)
@@ -36482,7 +36488,7 @@ end function is_1d_boundary_candidate
 
  if (jatimespace == 0) goto 888                      ! Just cleanup and close ext file.
 
- if (allocated(wx))           deallocate(wx,wy)              ! wind arrays
+ !if (allocated(wx))           deallocate(wx,wy)              ! wind arrays
  if (allocated(wmag))         deallocate(wmag)
  if (allocated(ec_pwxwy_x))   deallocate(ec_pwxwy_x)
  if (allocated(ec_pwxwy_y))   deallocate(ec_pwxwy_y)
