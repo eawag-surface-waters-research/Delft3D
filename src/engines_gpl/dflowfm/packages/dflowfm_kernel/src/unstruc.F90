@@ -6985,7 +6985,8 @@ end subroutine update_waqfluxes
 
  enddo
 
- deallocate (wcxy, wc, wwL)
+ deallocate (wcxy, wc)
+ if (allocated(wwL)) deallocate(wwL)
 
  kfs = 0
 
