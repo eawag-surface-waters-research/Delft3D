@@ -160,6 +160,9 @@
   case("turkin1")
      call c_f_pointer(xptr, x_1d_double_ptr, shape(turkin1))
      turkin1(:) = x_1d_double_ptr
+  case("vicwws")
+     call c_f_pointer(xptr, x_1d_double_ptr, shape(vicwws))
+     vicwws(:) = x_1d_double_ptr
   case("rnveg")
      call c_f_pointer(xptr, x_1d_double_ptr, shape(rnveg))
      rnveg(:) = x_1d_double_ptr

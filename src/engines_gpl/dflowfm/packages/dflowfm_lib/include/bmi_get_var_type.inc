@@ -116,6 +116,8 @@ select case(var_name)
     type_name = "double"
   case("turkin1")
     type_name = "double"
+  case("vicwws")
+    type_name = "double"
   case("rnveg")
     type_name = "double"
   case("diaveg")

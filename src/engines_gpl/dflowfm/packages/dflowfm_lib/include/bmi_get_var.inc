@@ -116,6 +116,8 @@
      x = c_loc(zbndq)
   case("turkin1") !<  [m2/s2] turbulent kinectic energy at layer interface u {"location": "edge", "shape": ["lnkx"]}
      x = c_loc(turkin1)
+  case("vicwws") !<  [m2/s] vertical eddy viscosity at layer interface at s point u {"location": "face", "shape": ["ndkx"]}
+     x = c_loc(vicwws)
   case("rnveg") !<  [1/m2] 3D plant density , 2D part is basis input (1/m2) {"location": "face", "shape": ["ndkx"]}
      x = c_loc(rnveg)
   case("diaveg") !<  [m] 3D plant diameter, 2D part is basis input (m) {"location": "face", "shape": ["ndkx"]}

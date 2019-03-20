@@ -2406,7 +2406,7 @@ end module m_structures
  double precision, allocatable     :: tureps1  (:)      ! eps new        , at layer interface at u
 
  double precision, allocatable     :: vicwwu   (:)      ! vertical eddy viscosity (m2/s) at layer interface at u point
- double precision, allocatable     :: vicwws   (:)      ! vertical eddy viscosity (m2/s) at layer interface at s point
+ double precision, allocatable, target :: vicwws   (:)  !< [m2/s] vertical eddy viscosity at layer interface at s point u {"location": "face", "shape": ["ndkx"]}
 
  !real            , allocatable     :: tkepro   (:)      ! vertical production t
  !real            , allocatable     :: tkedis   (:)      ! vertical dissipation

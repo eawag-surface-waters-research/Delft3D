@@ -118,6 +118,8 @@
        shape(1) = nbndu
     case("turkin1")
        shape(1) = lnkx
+    case("vicwws")
+       shape(1) = ndkx
     case("rnveg")
        shape(1) = ndkx
     case("diaveg")

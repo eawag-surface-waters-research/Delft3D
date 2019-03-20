@@ -116,6 +116,8 @@
      rank = 1
   case("turkin1")
      rank = 1
+  case("vicwws")
+     rank = 1
   case("rnveg")
      rank = 1
   case("diaveg")

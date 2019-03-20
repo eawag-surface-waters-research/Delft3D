@@ -116,6 +116,8 @@ select case(var_name)
     location_name = "edge"
   case("turkin1")
     location_name = "edge"
+  case("vicwws")
+    location_name = "face"
   case("rnveg")
     location_name = "face"
   case("diaveg")
