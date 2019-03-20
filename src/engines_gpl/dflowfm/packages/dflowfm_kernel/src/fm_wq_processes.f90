@@ -706,9 +706,9 @@
    endif
    
    if(needextramba.ne.0) then
-!     add the extra mass balance area, and assing the undefined cells to this area.
+!     add the extra 'Unnamed' mass balance area, and assing the unassigned cells to this area.
       nomba = nomba + 1
-      call realloc(mbaname,nomba,keepExisting=.true.,fill="Remaining cells")
+      call realloc(mbaname,nomba,keepExisting=.true.,fill="Unnamed")
       imba = nomba
       do kk=1,Ndxi
          if (mbadef(kk).eq.-999) then

@@ -42,10 +42,6 @@
 
    implicit none
    
-   character(40)              :: moname(4)
-   character(20), allocatable :: balmonname(:)
-   integer                    :: lunmbadef
-
    integer :: isys, imba, i, j, istart, ibnd, isrc, L, LL, Lf, kk1, kk2, ba1, ba2, to, from
    logical :: writebalance
    character(len=64)  :: ident !< Identifier of the model, used as suggested basename for some files. (runid)
@@ -58,23 +54,6 @@
    
    flxdmp = 0.0
    flxdmptot = 0.0
-
-!  write mbadef to a map file
-   moname=' '
-   moname(1)='mass balance and monitoring areas'
-   moname(2)=trim(md_ident(1:40))
-   call realloc(balmonname, 1+nomon, keepexisting=.false., fill='monitoring area')
-   balmonname(1) = ' mass balance areas'
-   do j = 1, nomon
-       balmonname(1+j) = monname(j)(1:20)
-   enddo
-   open(newunit=lunmbadef,file=trim(getoutputdir())//trim(md_ident)//'_mbadef.map', &
-        form='unformatted', access='stream', status='replace')
-   write(lunmbadef) moname
-   write(lunmbadef) 1+nomon,Ndxi
-   write(lunmbadef) balmonname
-   write(lunmbadef) 0,(real(mbadef(i)),(real(mondef(j,i)),j=1,nomon),i=1,Ndxi)
-   close(lunmbadef)
 
 !  Allocate the massbalance, flux and derivative arrays
    nombabnd = nomba + nopenbndsect

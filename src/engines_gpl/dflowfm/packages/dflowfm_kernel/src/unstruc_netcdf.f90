@@ -206,6 +206,7 @@ type t_unc_mapids
    integer, dimension(:,:), allocatable :: id_const !< Variable ID for (3, NUM_CONST) constituents (on 1D, 2D, 3D grid parts resp.)
    integer, dimension(:,:), allocatable :: id_wqb !< Variable ID for (3, numwqbots) water quality bottom variables output (on 2D grid only)
    integer, dimension(:,:), allocatable :: id_waq !< Variable ID for (3, noout) waq output (on 1D, 2D, 3D grid parts resp.)
+   integer :: id_mba(4)    = -1 !< Variable ID for mass balance areas 
    integer, dimension(:,:), allocatable :: id_sed !< Variable ID for 
    integer, dimension(:,:), allocatable :: id_ero !< Variable ID for 
    integer :: id_cfcl(4)   = -1 !< Variable ID for netlink data of calibration factor for friction 
@@ -3754,6 +3755,8 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
    double precision                                    :: moravg, morstarthyd, dmorft, dmorfs, rhodt
    double precision, dimension(:,:), allocatable       :: poros, toutputx, toutputy
    double precision, dimension(:,:,:), allocatable     :: frac
+   integer, dimension(:), allocatable                  :: flag_val
+   character(len=10000)                                :: flag_mean
    
    double precision, dimension(:), allocatable :: numlimdtdbl
    integer, dimension(:),   allocatable        :: idum
@@ -4019,6 +4022,19 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
          endif
       endif
 
+      ! water quality mass balance areas
+      if (nomba > 0) then
+         ierr = unc_def_var_map(mapids%ncid,  mapids%id_tsp, mapids%id_mba(:), nf90_int, UNC_LOC_S, 'water_quality_mba', '', 'Water quality mass balance areas', '', is_timedep=0)
+         call realloc(flag_val, nomba, keepExisting = .false., fill = 0)
+         flag_mean = ' '
+         do j=nomba,1,-1
+            flag_val(j) = j
+            flag_mean = trim(mbaname(j))//' '//flag_mean
+         enddo
+         ierr = nf90_put_att(mapids%ncid, mapids%id_mba(2), 'flag_values', flag_val)
+         ierr = nf90_put_att(mapids%ncid, mapids%id_mba(2), 'flag_meanings', flag_mean)
+      endif
+      
       ! Meteo forcings
       if (jamapwind > 0 .and. japatm /= 0) then
          ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp, mapids%id_patm,  nf90_double, UNC_LOC_S, 'Patm',  'surface_air_pressure', 'Atmospheric pressure near surface', 'N m-2')
@@ -4516,6 +4532,10 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
             end if
          end do
          ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_nudge_time, UNC_LOC_S, workx)
+      end if
+
+      if (nomba > 0) then
+         ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_mba(:), UNC_LOC_S, mbadef)
       end if
 
    endif
@@ -5625,7 +5645,7 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
     use m_bedform
     use m_wind
     use m_flowparameters, only: jatrt, jacali
-    use m_fm_wq_processes, only: jawaqproc, outputs, id_wqb, numwqbots, wqbotnames, wqbotunits, wqbot, id_waq, waqoutputs, kbx, outvar, noout_map
+    use m_fm_wq_processes, only: jawaqproc, outputs, id_wqb, numwqbots, wqbotnames, wqbotunits, wqbot, id_waq, waqoutputs, kbx, outvar, noout_map, nomba, mbaname, mbadef, id_mba
     use m_xbeach_data
     use m_transport, only: NUMCONST, itemp, ITRA1, ITRAN, ISED1, ISEDN, constituents, const_names, const_units, id_const
     use bedcomposition_module, only: bedcomp_getpointer_integer
@@ -5700,6 +5720,9 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
     character(64)      :: dxdescr
     character(10)      :: transpunit
     character(len=255) :: tmpstr
+
+    integer, dimension(:), allocatable :: flag_val
+    character(len=10000)               :: flag_mean
     
     if (.not. allocated(id_dxx) .and. stm_included) allocate(id_dxx(1:stmpar%morpar%nxx,1:2))
     
@@ -6131,6 +6154,22 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
                  end do
               endif
            endif 
+
+           ! water quality mass balance areas
+           if (nomba > 0) then
+              ierr = nf90_def_var(imapfile,  'water_quality_mba', nf90_int, (/ id_flowelemdim (iid) /) , id_mba(iid))
+              ierr = nf90_put_att(imapfile, id_mba(iid),  'coordinates'  , 'FlowElem_xcc FlowElem_ycc')
+              ierr = nf90_put_att(imapfile, id_mba(iid),  'long_name'    , 'Water quality mass balance areas')
+              ierr = unc_add_gridmapping_att(imapfile, (/ id_mba(iid) /), jsferic)
+              call realloc(flag_val, nomba, keepExisting = .false., fill = 0)
+              flag_mean = ' '
+              do j=nomba,1,-1
+                 flag_val(j) = j
+                 flag_mean = trim(mbaname(j))//' '//flag_mean
+              enddo
+              ierr = nf90_put_att(imapfile, id_mba(iid), 'flag_values', flag_val)
+              ierr = nf90_put_att(imapfile, id_mba(iid), 'flag_meanings', flag_mean)
+           endif
 
            if ( jasecflow > 0 .and. jamapspir > 0) then
               if (kmx < 2) then
@@ -6914,6 +6953,10 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
            end do
            ierr = nf90_put_var(imapfile, id_1d2d_edges(iid), idum)
            deallocate(idum)
+        end if
+
+        if (nomba > 0) then
+           ierr = nf90_put_var(imapfile, id_mba(iid), mbadef(1:NdxNdxi))
         end if
 
         firststep(iid) = .false.

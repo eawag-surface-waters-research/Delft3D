@@ -5276,11 +5276,12 @@ module m_fm_wq_processes
 !   double precision           :: dum
       
    integer                                   :: jamba                       !< switch for mass balance areas being active
-   integer                                   :: nomba                       !< number of mass balance areas
+   integer                                   :: nomba = 0                   !< number of mass balance areas
    integer                                   :: nombabnd                    !< number of mass balance areas and boundaries
    character(len=NAMWAQLEN),allocatable      :: mbaname(:)                  !< parameter names
    integer, allocatable                      :: mbadef(:)                   !< mass balance area (mba) definition
    integer, allocatable                      :: mbadefdomain(:)             !< mass balance area (mba) definition without ghost cells
+   integer                                   :: id_mba(3)                   !< mbd id's in map-file
    integer, allocatable                      :: mbalnfromto(:,:)            !< from mba (1:lnxi) or bnd (lnxi+1:lnx) to mba for each link (2D)
    integer, allocatable                      :: mbalnused(:,:)              !< number of links between mda and mbabnd that are actually active
    integer, allocatable                      :: mbasorsin(:,:)              !< mba for each side of a source sink
