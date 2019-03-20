@@ -405,6 +405,13 @@ module m_ec_filereader
                call setECMessage("ERROR: ec_filereader::ecFileReaderReadNextRecord: Unsupported file type.")
             case default
                call setECMessage("ERROR: ec_filereader::ecFileReaderReadNextRecord: Unknown file type.")
+            do i=1, fileReaderPtr%nItems
+               if (fileReaderPtr%items(i)%ptr%sourceT1FieldPtr%timesteps<fileReaderPtr%items(i)%ptr%sourceT0FieldPtr%timesteps) then
+                  call setECMessage('Non-progressive time variable detected in file: '//trim(fileReaderPtr%fileName))
+                  success = .False.
+                  return
+               end if
+            end do
          end select
       end function ecFileReaderReadNextRecord
       
