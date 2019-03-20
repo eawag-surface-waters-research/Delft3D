@@ -552,25 +552,29 @@
             endif
          enddo
 
+         ! when no algae were found, turn of eco mode
+         if (noalg == 0) then
+            write(line,'(a)') ' no BLOOM algae were found, switching of eco mode.'
+            call monsys(line,1)
+            l_eco = .false.
+         else
          ! set algal group list
-
-         nogrp = 0
-         do iatyp = 1 , notyp
-            if ( algact(iatyp) .eq. 1 ) then
-               call zoek( alggrp(iatyp), nogrp , grpnam, 10 , igrp )
-               if ( igrp .le. 0 ) then
-                  nogrp = nogrp + 1
-                  grpnam(nogrp)= alggrp(iatyp)
-                  grpabr(nogrp)= abrgrp(iatyp)
+            nogrp = 0
+            do iatyp = 1 , notyp
+               if ( algact(iatyp) .eq. 1 ) then
+                  call zoek( alggrp(iatyp), nogrp , grpnam, 10 , igrp )
+                  if ( igrp .le. 0 ) then
+                     nogrp = nogrp + 1
+                     grpnam(nogrp)= alggrp(iatyp)
+                     grpabr(nogrp)= abrgrp(iatyp)
+                  endif
                endif
-            endif
-         enddo
-
-         ! replace proto with actual processes in constant list
-
-         call actrep( noalg   , noprot   , namprot, nampact, nopralg,
-     +                nampralg, constants)
-
+            enddo
+         
+            ! replace proto with actual processes in constant list
+            call actrep( noalg   , noprot   , namprot, nampact, nopralg,
+     +                   nampralg, constants)
+         endif
       endif
 
       ! active only switch set trough a constant
