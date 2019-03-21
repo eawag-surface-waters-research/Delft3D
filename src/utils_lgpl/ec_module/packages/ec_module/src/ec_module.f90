@@ -365,10 +365,15 @@ module m_ec_module
    end interface ecFindFileReader
 
    
-   contains  
+    contains  
    
       ! ==========================================================================
       !> Replacement function for FM's meteo1 'addtimespacerelation' function.
+      !> Calls to this routine should be embedded as follows:
+      !> * Ensure that target items are created or re-used,
+      !> * Call this routine which includes 
+      !>      the array of TARGET ITEM ID's prepared on the caller site
+      !>      the array of SOURCE QUANTITY NAMES to be sought in the FileReader
       function ecModuleAddTimeSpaceRelation(instancePtr, name, x, y, vectormax, filename, filetype, &
                                             method, operand, tgt_refdate, tgt_tzone, tgt_tunit, &
                                             jsferic, missing_value, qnames, itemIDs, &
@@ -475,6 +480,8 @@ module m_ec_module
                res = ecElementSetSetType(instancePtr, elementSetId, elmSetType_polytim)
          else
             if (jsferic) then
+               res = ecElementSetSetType(instancePtr, elementSetId, elmSetType_spheric)
+            else
                res = ecElementSetSetType(instancePtr, elementSetId, elmSetType_cartesian)
             end if
          end if
