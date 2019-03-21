@@ -1787,10 +1787,10 @@ function ug_init_link_topology(ncid, varid, contactids) result(ierr)
    ierr = UG_NOERR
    
    contactids%varids(cid_contacttopo) = varid  
-   ierr = att_to_dimid(ncid,'link_dimension'  , contactids%dimids(cdim_ncontacts)      ,varid)
-   ierr = att_to_varid(ncid,'contact_ids'       , contactids%varids(cid_contactids)      ,varid)
-   ierr = att_to_varid(ncid,'contact_long_names', contactids%varids(cid_contactlongnames),varid)
-   ierr = att_to_varid(ncid,'contact_type', contactids%varids(cid_contacttype),varid)
+   ierr = att_to_dimid(ncid, varid, 'link_dimension'  , contactids%dimids(cdim_ncontacts))
+   ierr = att_to_varid(ncid, varid, 'contact_ids'       , contactids%varids(cid_contactids))
+   ierr = att_to_varid(ncid, varid, 'contact_long_names', contactids%varids(cid_contactlongnames))
+   ierr = att_to_varid(ncid, varid, 'contact_type', contactids%varids(cid_contacttype))
    
    ierr = UG_NOERR
 
@@ -1808,27 +1808,27 @@ function ug_init_network_topology(ncid, varid, netids) result(ierr)
    ierr = UG_NOERR
    
    netids%varids(ntid_1dtopo) = varid
-   ierr = att_to_dimid(ncid, 'edge_dimension',  netids%dimids(ntdim_1dbranches),varid)
-   ierr = att_to_dimid(ncid, 'node_dimension',  netids%dimids(ntdim_1dnodes),varid)
+   ierr = att_to_dimid(ncid, varid, 'edge_dimension',  netids%dimids(ntdim_1dbranches))
+   ierr = att_to_dimid(ncid, varid, 'node_dimension',  netids%dimids(ntdim_1dnodes))
    !edge_geometry container
-   ierr = att_to_varid(ncid,'edge_geometry'  ,  netids%varids(ntid_1dgeometry),varid)
+   ierr = att_to_varid(ncid, varid, 'edge_geometry'  ,  netids%varids(ntid_1dgeometry))
    !geometry x and  y
-   ierr = att_to_coordvarids(ncid,'node_coordinates', netids%varids(ntid_1dgeox), netids%varids(ntid_1dgeoy), varin = netids%varids(ntid_1dgeometry))
+   ierr = att_to_coordvarids(ncid, netids%varids(ntid_1dgeometry), 'node_coordinates', netids%varids(ntid_1dgeox), netids%varids(ntid_1dgeoy))
    !ndim_1dgeopoints
    ierr = nf90_inquire_variable(ncid, netids%varids(ntid_1dgeox), dimids = netids%dimids(ntdim_1dgeopoints:ntdim_1dgeopoints))
 
    !node variables ids
-   ierr = att_to_coordvarids(ncid,'node_coordinates', netids%varids(ntid_1dnodex), netids%varids(ntid_1dnodey), varin = varid)
-   ierr = att_to_varid(ncid,'node_ids'       , netids%varids(ntid_1dnodids), varid)
-   ierr = att_to_varid(ncid,'node_long_names', netids%varids(ntid_1dnodlongnames), varid)
+   ierr = att_to_coordvarids(ncid, varid, 'node_coordinates', netids%varids(ntid_1dnodex), netids%varids(ntid_1dnodey))
+   ierr = att_to_varid(ncid, varid, 'node_ids'       , netids%varids(ntid_1dnodids))
+   ierr = att_to_varid(ncid, varid, 'node_long_names', netids%varids(ntid_1dnodlongnames))
    !branch variables ids
-   ierr = att_to_varid(ncid,'edge_node_connectivity', netids%varids(ntid_1dedgenodes),varid)
-   ierr = att_to_varid(ncid,'branch_ids'            , netids%varids(ntid_1dbranchids),varid)
-   ierr = att_to_varid(ncid,'branch_long_names'     , netids%varids(ntid_1dbranchlongnames),varid) ! TODO: LC: error when not found
-   ierr = att_to_varid(ncid,'branch_lengths'        , netids%varids(ntid_1dbranchlengths),varid)
+   ierr = att_to_varid(ncid, varid, 'edge_node_connectivity', netids%varids(ntid_1dedgenodes))
+   ierr = att_to_varid(ncid, varid, 'branch_ids'            , netids%varids(ntid_1dbranchids))
+   ierr = att_to_varid(ncid, varid, 'branch_long_names'     , netids%varids(ntid_1dbranchlongnames)) ! TODO: LC: error when not found
+   ierr = att_to_varid(ncid, varid, 'branch_lengths'        , netids%varids(ntid_1dbranchlengths))
    !get the number of geometric points for each branch
    ! TODO: UNST-2391
-   ierr = att_to_varid(ncid,'part_node_count', netids%varids(ntid_1dgeopointsperbranch), netids%varids(ntid_1dgeometry))
+   ierr = att_to_varid(ncid, netids%varids(ntid_1dgeometry), 'part_node_count', netids%varids(ntid_1dgeopointsperbranch))
 
    !dim variables
    ierr = nf90_inquire_variable( ncid, netids%varids(ntid_1dbranchids),dimids = dimids)
@@ -1867,10 +1867,10 @@ function ug_init_mesh_topology(ncid, varid, meshids) result(ierr)
    !
    ! Dimensions:
    !
-   ierr = att_to_dimid(ncid,'node_dimension', meshids%dimids(mdim_node), varid)
-   ierr = att_to_dimid(ncid,'edge_dimension', meshids%dimids(mdim_edge), varid)
-   ierr = att_to_dimid(ncid,'face_dimension', meshids%dimids(mdim_face), varid)
-   ierr = att_to_dimid(ncid,'max_face_nodes_dimension', meshids%dimids(mdim_maxfacenodes), varid)   
+   ierr = att_to_dimid(ncid, varid, 'node_dimension', meshids%dimids(mdim_node))
+   ierr = att_to_dimid(ncid, varid, 'edge_dimension', meshids%dimids(mdim_edge))
+   ierr = att_to_dimid(ncid, varid, 'face_dimension', meshids%dimids(mdim_face))
+   ierr = att_to_dimid(ncid, varid, 'max_face_nodes_dimension', meshids%dimids(mdim_maxfacenodes))
    ! Dimension 2 might already be present
    ierr = nf90_inq_dimid(ncid, 'Two', meshids%dimids(mdim_two))
    ! Otherwise check another possible definitions
@@ -1884,29 +1884,29 @@ function ug_init_mesh_topology(ncid, varid, meshids) result(ierr)
    isMappedMesh = nf90_get_att(ncid, meshids%varids(mid_meshtopo), 'coordinate_space', coordspaceind)
    if (isMappedMesh == nf90_noerr) then
       !inquire the variable with that name 
-      ierr = att_to_varid(ncid,'coordinate_space', meshids%varids(mid_1dtopo),varid)
+      ierr = att_to_varid(ncid, varid, 'coordinate_space', meshids%varids(mid_1dtopo))
       !read branch id and offsets
-      ierr = att_to_coordvarids(ncid,'node_coordinates', meshids%varids(mid_1dmeshtobranch), meshids%varids(mid_1doffset), varin = meshids%varids(mid_meshtopo))
+      ierr = att_to_coordvarids(ncid, meshids%varids(mid_meshtopo), 'node_coordinates', meshids%varids(mid_1dmeshtobranch), meshids%varids(mid_1doffset))
    end if
 
    !
    ! Coordinate variables
    !
    if (isMappedMesh /= nf90_noerr) then
-      ierr = att_to_coordvarids(ncid,'node_coordinates', meshids%varids(mid_nodex), meshids%varids(mid_nodey),varin = varid)
+      ierr = att_to_coordvarids(ncid, varid, 'node_coordinates', meshids%varids(mid_nodex), meshids%varids(mid_nodey))
       ! The optional node_dimension attribute was not found, so auto-detect it from a node coordinates variable.
       if (ierr == nf90_noerr .and. meshids%dimids(mdim_node) == -1) then
          ierr = varid_to_dimid(ncid, meshids%varids(mid_nodex), meshids%dimids(mdim_node))
       end if
    endif
-   ierr = att_to_coordvarids(ncid,'edge_coordinates', meshids%varids(mid_edgex), meshids%varids(mid_edgey),varin = varid)
-   ierr = att_to_coordvarids(ncid,'face_coordinates', meshids%varids(mid_facex), meshids%varids(mid_facey),varin = varid)
+   ierr = att_to_coordvarids(ncid, varid, 'edge_coordinates', meshids%varids(mid_edgex), meshids%varids(mid_edgey))
+   ierr = att_to_coordvarids(ncid, varid, 'face_coordinates', meshids%varids(mid_facex), meshids%varids(mid_facey))
 
    !
    ! Topology variables
    !
    
-   ierr = att_to_varid(ncid,'edge_node_connectivity', meshids%varids(mid_edgenodes),varid) !< Variable ID for edge-to-node mapping table.
+   ierr = att_to_varid(ncid, varid, 'edge_node_connectivity', meshids%varids(mid_edgenodes)) !< Variable ID for edge-to-node mapping table.
    if (ierr == nf90_noerr) then
       ! The optional edge_dimension attribute was not found, so auto-detect it from the edge_node topology.
       if (meshids%dimids(mdim_edge) == -1) then
@@ -1914,7 +1914,7 @@ function ug_init_mesh_topology(ncid, varid, meshids) result(ierr)
       end if
    end if
 
-   ierr = att_to_varid(ncid,'face_node_connectivity', meshids%varids(mid_facenodes),varid) !< Variable ID for face-to-node mapping table.
+   ierr = att_to_varid(ncid, varid, 'face_node_connectivity', meshids%varids(mid_facenodes)) !< Variable ID for face-to-node mapping table.
    if (ierr == nf90_noerr) then
       ! The optional face_dimension attribute was not found, so auto-detect it from the face_node topology.
       if (meshids%dimids(mdim_face) == -1) then
@@ -1935,43 +1935,45 @@ function ug_init_mesh_topology(ncid, varid, meshids) result(ierr)
       end if
    end if
 
-   ierr = att_to_varid(ncid,'edge_face_connectivity', meshids%varids(mid_edgefaces),varid) !< Variable ID for edge-to-face mapping table (optional, can be -1).   
-   ierr = att_to_varid(ncid,'face_edge_connectivity', meshids%varids(mid_faceedges),varid) !< Variable ID for face-to-edge mapping table (optional, can be -1).
-   ierr = att_to_varid(ncid,'face_face_connectivity', meshids%varids(mid_facelinks),varid) !< Variable ID for face-to-face mapping table (optional, can be -1).
+   ierr = att_to_varid(ncid, varid, 'edge_face_connectivity', meshids%varids(mid_edgefaces)) !< Variable ID for edge-to-face mapping table (optional, can be -1).   
+   ierr = att_to_varid(ncid, varid, 'face_edge_connectivity', meshids%varids(mid_faceedges)) !< Variable ID for face-to-edge mapping table (optional, can be -1).
+   ierr = att_to_varid(ncid, varid, 'face_face_connectivity', meshids%varids(mid_facelinks)) !< Variable ID for face-to-face mapping table (optional, can be -1).
    
    ! 
    ! Get the ids defined in nodes/edges/faces
    !
-   ierr = att_to_varid(ncid,'node_ids', meshids%varids(mid_node_ids),varid) !< Variable ID for node ids
-   ierr = att_to_varid(ncid,'edge_ids', meshids%varids(mid_edge_ids),varid) !< Variable ID for edge ids
-   ierr = att_to_varid(ncid,'face_ids', meshids%varids(mid_face_ids),varid) !< Variable ID for face ids
+   ierr = att_to_varid(ncid, varid, 'node_ids', meshids%varids(mid_node_ids)) !< Variable ID for node ids
+   ierr = att_to_varid(ncid, varid, 'edge_ids', meshids%varids(mid_edge_ids)) !< Variable ID for edge ids
+   ierr = att_to_varid(ncid, varid, 'face_ids', meshids%varids(mid_face_ids)) !< Variable ID for face ids
    
    ! 
    ! Get the longnames defined in nodes/edges/faces
    !
-   ierr = att_to_varid(ncid,'node_long_names', meshids%varids(mid_node_longnames),varid) !< Variable ID for node ids
-   ierr = att_to_varid(ncid,'edge_long_names', meshids%varids(mid_edge_longnames),varid) !< Variable ID for edge ids
-   ierr = att_to_varid(ncid,'face_long_names', meshids%varids(mid_face_longnames),varid) !< Variable ID for face ids
+   ierr = att_to_varid(ncid, varid, 'node_long_names', meshids%varids(mid_node_longnames)) !< Variable ID for node ids
+   ierr = att_to_varid(ncid, varid, 'edge_long_names', meshids%varids(mid_edge_longnames)) !< Variable ID for edge ids
+   ierr = att_to_varid(ncid, varid, 'face_long_names', meshids%varids(mid_face_longnames)) !< Variable ID for face ids
    
    ierr = UG_NOERR
 
 end function ug_init_mesh_topology
 
 
-function att_to_coordvarids(ncid, name, idx, idy, idz, varin) result(ierr)
-
-   character(len=*),  intent(in   ) :: name
-   integer         ,  intent(in)    :: ncid
-   integer         ,  intent(  out) :: idx, idy
-   integer, optional, intent(  out) :: idz
-   integer, intent(in)              :: varin
-   integer                          :: ierr
+!> Inquire for NetCDF variable IDs based on some
+!! coordinates attribute in a container variable.
+!! For example: mesh1d:node_coordinates
+function att_to_coordvarids(ncid, varin, attname, idx, idy, idz) result(ierr)
+   integer         ,  intent(in   ) :: ncid     !< NetCDF dataset ID
+   integer         ,  intent(in   ) :: varin    !< NetCDF variable ID from which the coordinate attribute will be gotten.
+   character(len=*),  intent(in   ) :: attname  !< Name of attribute in varin that contains the coordinate variable names.
+   integer         ,  intent(  out) :: idx, idy !< NetCDF variable ID for x,y coordinates.
+   integer, optional, intent(  out) :: idz      !< NetCDF variable ID for z coordinates.
+   integer                          :: ierr     !< Result status. NF90_NOERR if successful.
    character(len=nf90_max_name)     :: varname
 
    integer :: i1, i2, n
    varname = ''
 
-   ierr = nf90_get_att(ncid, varin, name, varname)
+   ierr = nf90_get_att(ncid, varin, attname, varname)
    if (ierr /= nf90_noerr) then
       goto 999
    end if
@@ -1980,6 +1982,7 @@ function att_to_coordvarids(ncid, name, idx, idy, idz, varin) result(ierr)
    n = len_trim(varname)   
    
    ! TODO: AvD: I'd rather use a string tokenizer here.
+   ! TODO: UNST-2408, support multiple sets of coordinates.
    i2 = index(varname(i1:n), ' ')
    if (i2 == 0) then
       i2 = n
@@ -2015,19 +2018,22 @@ function att_to_coordvarids(ncid, name, idx, idy, idz, varin) result(ierr)
     ! Some error  
 end function att_to_coordvarids
 
-function att_to_varid(ncid, name, id, varin) result(ierr)
+!> Inquire for a NetCDF variable ID based on an attribute in another variable.
+!! For example: mesh2d:face_node_connectivity
+function att_to_varid(ncid, varin, attname, id) result(ierr)
    
-   integer         , intent(in)  :: ncid
-   character(len=*), intent(in)  :: name
-   integer         , intent(out) :: id
-   integer         , intent(in)  :: varin
-   integer                       :: ierr
+   integer         , intent(in   ) :: ncid    !< NetCDF dataset ID
+   integer         , intent(in   ) :: varin   !< NetCDF variable ID from which the attribute will be gotten.
+   character(len=*), intent(in   ) :: attname !< Name of attribute in varin that contains the variable name.
+   integer         , intent(  out) :: id      !< NetCDF variable ID that was found.
+   integer                         :: ierr    !< Result status. UG_NOERR if successful.
+
    character(len=nf90_max_name)  :: varname
    
    ierr = UG_NOERR
    
    varname = ''
-   ierr = nf90_get_att(ncid, varin, name, varname)
+   ierr = nf90_get_att(ncid, varin, attname, varname)
    if (ierr /= nf90_noerr) then
       goto 999
    end if
@@ -2044,19 +2050,22 @@ function att_to_varid(ncid, name, id, varin) result(ierr)
    id = -1         ! undefined id
 end function att_to_varid
 
-function att_to_dimid(ncid, name, id, varin) result(ierr)
-   
-   integer         , intent(in)  :: ncid
-   character(len=*), intent(in)  :: name
-   integer         , intent(out) :: id
-   integer         , intent(in)  :: varin
-   integer                       :: ierr
-   character(len=nf90_max_name)  :: varname
+
+!> Inquire for a NetCDF dimension ID based on an attribute in another variable.
+!! For example: mesh2d:edge_dimension
+function att_to_dimid(ncid, varin, attname, id) result(ierr)
+   integer         , intent(in   ) :: ncid    !< NetCDF dataset ID
+   integer         , intent(in   ) :: varin   !< NetCDF variable ID from which the attribute will be gotten.
+   character(len=*), intent(in   ) :: attname !< Name of attribute in varin that contains the dimension name.
+   integer         , intent(  out) :: id      !< NetCDF dimension ID that was found.
+   integer                         :: ierr    !< Result status. UG_NOERR if successful.
+
+   character(len=nf90_max_name)    :: varname
    
    ierr = UG_NOERR
    
    varname = ''
-   ierr = nf90_get_att(ncid, varin, name, varname)
+   ierr = nf90_get_att(ncid, varin, attname, varname)
    if (ierr /= nf90_noerr) then
       goto 999
    end if
@@ -2069,7 +2078,7 @@ function att_to_dimid(ncid, name, id, varin) result(ierr)
 999 continue 
     ! here we should return an error is the variable is undefined, following up actions are taken in ug_init_mesh_topology
     id = -1           ! undefined id 
-end function att_to_dimid
+end function att_to_dimid 
 
 
 !> Gets a single dimension ID for a given variable ID.
