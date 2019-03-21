@@ -10,9 +10,6 @@ implicit none
    type(tEcInstance), pointer  :: instancePtr
 
    public :: averaging
-   public :: ecModuleAddTimeSpaceRelation_dll
-!   public :: ecGettimespacevalueByItemID_dll
-   public :: ecInstancePrintStateToFile_dll
    
    private
    
