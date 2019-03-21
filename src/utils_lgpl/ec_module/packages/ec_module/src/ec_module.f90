@@ -371,7 +371,7 @@ module m_ec_module
       !> Replacement function for FM's meteo1 'addtimespacerelation' function.
       function ecModuleAddTimeSpaceRelation(instancePtr, name, x, y, vectormax, filename, filetype, &
                                             method, operand, tgt_refdate, tgt_tzone, tgt_tunit, &
-                                            jsferic, missing_value, itemIDs, &
+                                            jsferic, missing_value, qnames, itemIDs, &
                                             mask, xyen, z, pzmin, pzmax, pkbot, pktop, &
                                             targetIndex, forcingfile, srcmaskfile, dtnodal) &
                                             result (success)
@@ -394,6 +394,7 @@ module m_ec_module
          real(kind=hp),                            intent(in)    :: tgt_tzone
          integer,                                  intent(in)    :: tgt_tunit
          real(kind=hp),                            intent(in)    :: missing_value
+         character(len=*), dimension(:),           intent(in)    :: qnames       !< list of quantity names 
          integer, dimension(:),                    intent(inout) :: itemIDs      !<  Connection available outside to which one can connect target items
    
          integer,  dimension(:), optional,         intent(in)    :: mask         !< Array of masking values for the target ElementSet.
@@ -411,6 +412,7 @@ module m_ec_module
          integer :: convtype !< EC-module's convType_ enumeration.
          !
          integer :: fileReaderId   !< Unique FileReader id.
+         integer :: sourceItemId   !< Unique SourceItem id.
          integer :: quantityId     !< Unique Quantity id.
          integer :: elementSetId   !< Unique ElementSet id.
          integer :: converterId    !< Unique Converter id.
@@ -422,7 +424,7 @@ module m_ec_module
          integer, external         :: findname
          type (tEcMask)            :: srcmask
          logical                   :: res
-         integer                   :: i, itgt
+         integer                   :: i, isrc, itgt
          integer                   :: fieldId
          real(hp)                  :: tgt_mjd
    
@@ -474,8 +476,6 @@ module m_ec_module
          else
             if (jsferic) then
                res = ecElementSetSetType(instancePtr, elementSetId, elmSetType_cartesian)
-            else
-               res = ecElementSetSetType(instancePtr, elementSetId, elmSetType_spheric)
             end if
          end if
          if (.not. res) return
@@ -530,12 +530,6 @@ module m_ec_module
             if (.not.ecConverterInitialize(instancePtr, converterId, convtype, operand, method)) return
          end if
          
-         !! Construct a new Connection, and connect source Items to the connection. The connection is returned.
-         !call realloc(itemIDs,fileReaderPtr%nItems)
-         !do i = 1, fileReaderPtr%nItems
-         !   itemIDs(i) = fileReaderPtr%items(i)%ptr%id  ! THIS IS WRONG
-         !enddo   
-         
  ! ============================== Setting up the TARGET side of the connection ===================================
          
          quantityId = ecCreateQuantity(instancePtr)
@@ -587,14 +581,9 @@ module m_ec_module
             if (.not.ecSetFieldMissingValue(instancePtr, fieldId, ec_undef_hp)) return
 
             if (itemIDs(itgt) == ec_undef_int) then                ! if Target Item already exists, do NOT create a new one ... 
-               itemIDs(itgt) = ecCreateItem(instancePtr)
                if (.not.ecSetItemRole(instancePtr, itemIDs(itgt), itemType_target)) return
                if (.not.ecSetItemQuantity(instancePtr, itemIDs(itgt), quantityId)) return
             end if
-            ! ... but we would like to use the newest targetFIELD for this item, since old targetFIELDs can refer to the 
-            ! wrong data location (Arr1DPtr). This happens in the case that the demand-side arrays are reallocated while 
-            ! building the targets! Same is done for the elementset, so we are sure to always connect the latest 
-            ! elementset to this target.
             if (.not.ecSetItemElementSet(instancePtr, itemIDs(itgt), elementSetId)) return
             if (.not.ecSetItemTargetField(instancePtr, itemIDs(itgt), fieldId)) return    
          enddo
@@ -608,14 +597,20 @@ module m_ec_module
          if (.not. ecSetConnectionConverter(instancePtr, connectionId, converterId)) return
 
          ! Connect the source items to the connector
-         do i=1,fileReaderPtr%nItems
-            if (.not.ecAddConnectionSourceItem(instancePtr, connectionId, fileReaderPtr%items(i)%ptr%id)) return
+         ! Loop over the given quantity names for the SOURCE side 
+         do isrc = 1, size(qnames)
+            sourceItemId = ecFindItemInFileReader(instancePtr, fileReaderId, trim(qnames(isrc)))
+            if (sourceItemId==ec_undef_int) then
+               return
+            endif
+            if (.not.ecAddConnectionSourceItem(instancePtr, connectionId, sourceItemId)) return
          enddo
 
          ! Connect the target items to the connector
+         ! Loop over the given item id list for the TARGET side 
          do i=1,size(itemIDs)
             if (.not.ecAddConnectionTargetItem(instancePtr, connectionId, itemIDs(i))) return
-            if (.not.ecAddItemConnection(instancePtr, itemIDs(i), connectionId)) return
+            if (.not.ecAddItemConnection(instancePtr, itemIDs(i), connectionId)) return 
          enddo
 
          if (.not. ecSetConnectionIndexWeights(InstancePtr, connectionId)) return
@@ -669,6 +664,28 @@ module m_ec_module
          if (success) success = ecItemAddConnection(instancePtr, targetItemId, connectionId)
       end function ecModuleConnectItem
 
+      ! ==========================================================================
+      
+      !> Given the quantity names and the filereader ID, search for source items provided by the filereader with these quantity names and associate them with the connection.
+      function ecModuleConnectSrc(instancePtr, fileReaderId, connectionId, qnames) result (success)
+         implicit none
+         logical                                     :: success      !< function status
+         type(tEcInstance),               pointer    :: instancePtr  !< instance of the EC module
+         integer,                         intent(in) :: fileReaderId !< identifier of the filereader
+         integer,                         intent(in) :: connectionId !< identifier of the connection
+         character(len=*), dimension(:),  intent(in) :: qnames       !< list of quantity names 
+         integer :: sourceItemId
+         integer :: n, i, isrc
+         !
+         do isrc = 1, size(qnames)
+            sourceItemId = ecFindItemInFileReader(instancePtr, fileReaderId, trim(qnames(i)))
+            if (sourceItemId==ec_undef_int) then
+               return
+            endif
+            if (.not.ecAddConnectionSourceItem(instancePtr, connectionId, sourceItemId)) return
+         enddo
+      end function ecModuleConnectSrc      
+      
       ! ==========================================================================
 
       !> Translate EC's 'filetype' to EC's 'convType' enum.
