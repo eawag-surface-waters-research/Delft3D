@@ -1810,9 +1810,12 @@ function ug_init_network_topology(ncid, varid, netids) result(ierr)
    netids%varids(ntid_1dtopo) = varid
    ierr = att_to_dimid(ncid, 'edge_dimension',  netids%dimids(ntdim_1dbranches),varid)
    ierr = att_to_dimid(ncid, 'node_dimension',  netids%dimids(ntdim_1dnodes),varid)
-   !ndim_1dgeopoints
+   !edge_geometry container
    ierr = att_to_varid(ncid,'edge_geometry'  ,  netids%varids(ntid_1dgeometry),varid)
-   ierr = att_to_dimid(ncid,'node_count'     ,  netids%dimids(ntdim_1dgeopoints), netids%varids(ntid_1dgeometry))
+   !geometry x and  y
+   ierr = att_to_coordvarids(ncid,'node_coordinates', netids%varids(ntid_1dgeox), netids%varids(ntid_1dgeoy), varin = netids%varids(ntid_1dgeometry))
+   !ndim_1dgeopoints
+   ierr = nf90_inquire_variable(ncid, netids%varids(ntid_1dgeox), dimids = netids%dimids(ntdim_1dgeopoints:ntdim_1dgeopoints))
 
    !node variables ids
    ierr = att_to_coordvarids(ncid,'node_coordinates', netids%varids(ntid_1dnodex), netids%varids(ntid_1dnodey), varin = varid)
@@ -1824,9 +1827,8 @@ function ug_init_network_topology(ncid, varid, netids) result(ierr)
    ierr = att_to_varid(ncid,'branch_long_names'     , netids%varids(ntid_1dbranchlongnames),varid) ! TODO: LC: error when not found
    ierr = att_to_varid(ncid,'branch_lengths'        , netids%varids(ntid_1dbranchlengths),varid)
    !get the number of geometric points for each branch
+   ! TODO: UNST-2391
    ierr = att_to_varid(ncid,'part_node_count', netids%varids(ntid_1dgeopointsperbranch), netids%varids(ntid_1dgeometry))
-   !geometry x and  y
-   ierr = att_to_coordvarids(ncid,'node_coordinates', netids%varids(ntid_1dgeox), netids%varids(ntid_1dgeoy), varin = netids%varids(ntid_1dgeometry))
 
    !dim variables
    ierr = nf90_inquire_variable( ncid, netids%varids(ntid_1dbranchids),dimids = dimids)
