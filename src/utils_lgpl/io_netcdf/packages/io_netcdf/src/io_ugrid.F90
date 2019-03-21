@@ -2076,11 +2076,11 @@ end function att_to_dimid
 !! Used for example to determine node dimension id from a node coordinate variable.
 function varid_to_dimid(ncid, varin, dimid, dimidx) result(ierr)
    
-   integer         , intent(in)  :: ncid
-   integer         , intent(in)  :: varin
-   integer         , intent(out) :: dimid
-   integer,optional, intent(in)  :: dimidx !< Optional index of the desired dimension, in case of a multidimensional variable. Default: 1.
-   integer                       :: ierr
+   integer         , intent(in   ) :: ncid   !< NetCDF dataset ID
+   integer         , intent(in   ) :: varin  !< NetCDF variable ID from which the dimension ID will be gotten.
+   integer         , intent(  out) :: dimid  !< NetCDF dimension ID that was found.
+   integer,optional, intent(in   ) :: dimidx !< Optional index of the desired dimension, in case of a multidimensional variable. Default: 1.
+   integer                         :: ierr   !< Result status. UG_NOERR if successful.
 
    integer, dimension(nf90_max_dims) :: dimids
    integer :: dimidx_, ndims
