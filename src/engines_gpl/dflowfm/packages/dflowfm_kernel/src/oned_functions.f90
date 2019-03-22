@@ -516,18 +516,6 @@ module m_oned_functions
       endif
    enddo
    
-   ! look for missing bobs
-   do L = 1, lnx1d
-      if (bob(1,L) > 0.5d0*huge(1d0)) then
-         bob(1,L)  = bl(ln(1,L))
-         bob0(1,L) = bob(1,L)
-      endif
-      if (bob(2,L) > 0.5d0*huge(1d0)) then
-         bob(2,L)  = bl(ln(2,L))
-         bob0(2,L) = bob(2,L)
-      endif
-   enddo
-   
    if (time_user<= tstart_user) then
       ! check if all manholes are lower than or equal to the invert level of all incoming pipes
       nstor = network%storS%count
@@ -546,25 +534,26 @@ module m_oned_functions
    endif
    
 
-   ! check for missing storage on nodes
-   nnode = networK%nds%count
-   do i = 1, nnode
-      n1 = network%nds%node(i)%gridNumber
-      if (bl(n1) > 0.5d0*huge(1d0)) then
-         call setmessage(LEVEL_ERROR, 'Storage is missing on node '//trim(network%nds%node(i)%id))
-      endif
-   enddo
-      
-   if (getMaxErrorLevel() > LEVEL_ERROR) then
-      call setmessage(LEVEL_FATAL, 'Error(s) occurred in initialisation.')
-   endif
-         
    do i = ndx2D+1, ndxi
       if (bl(i) > 0.5d0*huge(1d0)) then
+         write(msgbuf, '(a,i0,a)') 'Bedlevel is missing on calculation flow node ', i, '. No nearby cross sections nor storage nodes.'
+         call warn_flush()
          bl(i) = zkuni
-      endif
+      end if
    enddo
 
+   ! look for missing bobs
+   do L = 1, lnx1d
+      if (bob(1,L) > 0.5d0*huge(1d0)) then
+         bob(1,L)  = bl(ln(1,L))
+         bob0(1,L) = bob(1,L)
+      endif
+      if (bob(2,L) > 0.5d0*huge(1d0)) then
+         bob(2,L)  = bl(ln(2,L))
+         bob0(2,L) = bob(2,L)
+      endif
+   enddo
+   
    do L = lnxi+1, lnx1Db
        ! mirror 1d bed level points at boundary 
        n1 = ln(1,L)
