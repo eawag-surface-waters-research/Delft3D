@@ -21163,7 +21163,7 @@ subroutine readprofilesdef(ja)    ! in afwachting van een module die profieldefi
 
      profiles1D(1:mxprof)%ityp   = 0
      profiles1D(1:mxprof)%width  = 0
-     profiles1D(1:mxprof)%height = 0
+     profiles1D(1:mxprof)%height = 3d3
      profiles1D(1:mxprof)%zmin   = -999
 
 
