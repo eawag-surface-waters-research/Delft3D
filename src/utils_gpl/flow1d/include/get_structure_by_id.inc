@@ -31,7 +31,7 @@
     c_weir%x = structure%x
     c_weir%y = structure%y
     c_weir%branchid = structure%ibran
-    c_weir%chainage = structure%distance
+    c_weir%chainage = structure%chainage
     c_weir%left_calc_point = structure%left_calc_point
     c_weir%right_calc_point = structure%right_calc_point
     c_weir%link_number = structure%link_number
@@ -73,7 +73,7 @@
     c_orifice%x = structure%x
     c_orifice%y = structure%y
     c_orifice%branchid = structure%ibran
-    c_orifice%chainage = structure%distance
+    c_orifice%chainage = structure%chainage
     c_orifice%left_calc_point = structure%left_calc_point
     c_orifice%right_calc_point = structure%right_calc_point
     c_orifice%link_number = structure%link_number
@@ -118,7 +118,7 @@
     c_pump%x = structure%x
     c_pump%y = structure%y
     c_pump%branchid = structure%ibran
-    c_pump%chainage = structure%distance
+    c_pump%chainage = structure%chainage
     c_pump%left_calc_point = structure%left_calc_point
     c_pump%right_calc_point = structure%right_calc_point
     c_pump%link_number = structure%link_number
@@ -162,7 +162,7 @@
     c_culvert%x = structure%x
     c_culvert%y = structure%y
     c_culvert%branchid = structure%ibran
-    c_culvert%chainage = structure%distance
+    c_culvert%chainage = structure%chainage
     c_culvert%left_calc_point = structure%left_calc_point
     c_culvert%right_calc_point = structure%right_calc_point
     c_culvert%link_number = structure%link_number

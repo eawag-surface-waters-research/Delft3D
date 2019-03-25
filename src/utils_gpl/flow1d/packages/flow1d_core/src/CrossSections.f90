@@ -238,7 +238,7 @@ module m_CrossSections
        integer                      :: crossType        !< Type of cross section
 
        integer                      :: branchid = -1    !< integer branch id
-       double precision             :: location         !< offset in meters along reach
+       double precision             :: chainage         !< offset in meters along reach
        double precision             :: bedLevel
        double precision             :: shift
        double precision             :: surfaceLevel
@@ -728,13 +728,13 @@ subroutine reallocCrossSections(crs)
 end subroutine
 
 !> Add a cross-section on an reach
-integer function  AddCrossSectionByVariables(crs, CSDef, branchid, location, iref, bedLevel, bedFrictionType, &
+integer function  AddCrossSectionByVariables(crs, CSDef, branchid, chainage, iref, bedLevel, bedFrictionType, &
                   bedFriction, groundFrictionType, groundFriction)
 
    type(t_CrossSectionSet)          :: crs       !< Cross-section set
    type(t_CSDefinitionSet)          :: CSDef     !< Cross-section definition set
    integer, intent(in)              :: branchid  !< Reach id (integer)
-   double precision, intent(in)     :: location  !< Location on the reach
+   double precision, intent(in)     :: chainage  !< chainage on the reach
    integer, intent(in)              :: iref      !< Current cross-section
    double precision, intent(in)     :: bedLevel
    integer, intent(in)              :: bedFrictionType !< bed friction type
@@ -759,7 +759,7 @@ integer function  AddCrossSectionByVariables(crs, CSDef, branchid, location, ire
       crs%cross(i)%branchid = branchid
    endif
 
-   crs%cross(i)%location            = location
+   crs%cross(i)%chainage            = chainage
    crs%cross(i)%bedLevel            = bedLevel
    crs%cross(i)%shift               = bedlevel
    
@@ -878,12 +878,12 @@ end subroutine setGroundLayerData
    
 
 !> Add a cross-section on a reach, using a cross section defined on another reach
-integer function AddCrossSectionByCross(crs, cross, branchid, location)
+integer function AddCrossSectionByCross(crs, cross, branchid, chainage)
 
    type(t_CrossSectionSet)          :: crs       !< Cross-section set
    type(t_CrossSection), intent(in) :: cross     !< Cross-section
    integer, intent(in)              :: branchid  !< Reach id
-   double precision, intent(in)     :: location  !< Location on the reach
+   double precision, intent(in)     :: chainage  !< chainage on the reach
    integer                          :: i
 
    crs%count = crs%count+1
@@ -896,7 +896,7 @@ integer function AddCrossSectionByCross(crs, cross, branchid, location)
 
    crs%cross(i) = cross
    crs%cross(i)%branchid = branchid
-   crs%cross(i)%location = location
+   crs%cross(i)%chainage = chainage
 
    AddCrossSectionByCross = i
 
@@ -1093,7 +1093,7 @@ subroutine useBranchOrdersCrs(crs, brs)
          ibr = crs%cross(ics)%branchid
          minordernumber = getOrderNumber(brs, ibr)
          minBranchindex = ibr
-         minoffset = crs%cross(ics)%location
+         minoffset = crs%cross(ics)%chainage
          do i = ics, crsCount
             if (crs%cross(i)%branchid <= 0) then
                minindex = i
@@ -1105,16 +1105,16 @@ subroutine useBranchOrdersCrs(crs, brs)
                if (minOrderNumber > getOrdernumber(brs, ibr)) then
                   minOrderNumber =  getOrdernumber(brs, ibr)
                   minBranchindex = ibr
-                  minOffset = crs%cross(i)%location
+                  minOffset = crs%cross(i)%chainage
                   minIndex = i
                elseif (minOrderNumber == getOrdernumber(brs, ibr))then
                   if (minBranchIndex > ibr) then
                      minBranchindex = ibr
-                     minOffset = crs%cross(i)%location
+                     minOffset = crs%cross(i)%chainage
                      minIndex = i
                   elseif (minBranchIndex == ibr) then
-                     if (minoffset > crs%cross(i)%location) then
-                        minOffset = crs%cross(i)%location
+                     if (minoffset > crs%cross(i)%chainage) then
+                        minOffset = crs%cross(i)%chainage
                         minIndex = i
                      endif
                   endif
@@ -1143,7 +1143,7 @@ subroutine useBranchOrdersCrs(crs, brs)
          ! because crs%cross can be reallocated a copy of the cross section has to be made
          cross = crs%cross(ics)
          cross%IsCopy = .true.
-         call findNeighbourAndAddCrossSection(brs, crs, ibr, cross, cross%location, .true., orderNumber, orderNumberCount)
+         call findNeighbourAndAddCrossSection(brs, crs, ibr, cross, cross%chainage, .true., orderNumber, orderNumberCount)
          ! find last cross section on branch
          do while (ics < crs%count .and. crs%cross(ics+1)%branchid == ibr)
             ics = ics+1
@@ -1158,7 +1158,7 @@ subroutine useBranchOrdersCrs(crs, brs)
          ! because crs%cross can be reallocated a copy of the cross section has to be made
          cross = crs%cross(ics)
          cross%IsCopy = .true.
-         call findNeighbourAndAddCrossSection(brs, crs, ibr, cross, cross%location, .false., orderNumber, orderNumberCount)
+         call findNeighbourAndAddCrossSection(brs, crs, ibr, cross, cross%chainage, .false., orderNumber, orderNumberCount)
          ics = ics +1
       enddo
    enddo
@@ -1193,7 +1193,7 @@ recursive subroutine findNeighbourAndAddCrossSection(brs, crs, branchid, cross, 
    type(t_branchSet)                :: brs       !< Set of reaches
    integer                          :: branchid    !< branch for which a neighbour is requested
    type(t_CrossSection)             :: cross     !< cross section
-   double precision                 :: offset    !< location of cross section on branch
+   double precision                 :: offset    !< chainage of cross section on branch
    logical                          :: beginNode !< indicates whether the begin or end node is to be used of the branch
    integer, dimension(:,:)          :: orderNumber       !< first index contains orderNumber, second contains start position for this ordernumber
 
@@ -1207,7 +1207,7 @@ recursive subroutine findNeighbourAndAddCrossSection(brs, crs, branchid, cross, 
    logical                          :: found
    logical                          :: nextBeginNode
    double precision                 :: distanceFromNode
-   double precision                 :: location
+   double precision                 :: chainage
    type(t_branch), pointer          :: branch
 
    !program code
@@ -1231,13 +1231,13 @@ recursive subroutine findNeighbourAndAddCrossSection(brs, crs, branchid, cross, 
          if (brs%branch(i)%ToNode%index == nodeIndex) then
             found = .true.
             ! interpolation is required over begin node of reach i
-            location = brs%branch(i)%length + distanceFromNode
+            chainage = brs%branch(i)%length + distanceFromNode
             nextBeginNode = .true.              ! NOTE: since the end node of the reach is connected to a node of the first reach, now check the begin node
             exit
          elseif (brs%branch(i)%FromNode%index == nodeIndex) then
             ! interpolation is required over end node of reach i
             found = .true.
-            location = - distanceFromNode
+            chainage = - distanceFromNode
             nextBeginNode = .false.             ! NOTE: since the begin node of the reach is connected to a node of the first reach, now check the end node
             exit
          endif
@@ -1245,7 +1245,7 @@ recursive subroutine findNeighbourAndAddCrossSection(brs, crs, branchid, cross, 
    enddo
 
    if (found) then
-      idum = AddCrossSection(crs, cross, i, location)
+      idum = AddCrossSection(crs, cross, i, chainage)
       ! look in crs if a cross section is placed on brs%branch(i)
       found = .false.
       do iorder = 1, orderNumberCount
@@ -1262,7 +1262,7 @@ recursive subroutine findNeighbourAndAddCrossSection(brs, crs, branchid, cross, 
       enddo
       if (.not. found) then
          ! Now check for another neighbouring branch
-         call findNeighbourAndAddCrossSection(brs, crs, i, cross, location, nextBeginNode, orderNumber, orderNumberCount)
+         call findNeighbourAndAddCrossSection(brs, crs, i, cross, chainage, nextBeginNode, orderNumber, orderNumberCount)
       endif
    endif
 
@@ -2923,7 +2923,7 @@ type(t_CrossSection) function CopyCross(CrossFrom)
 
    CopyCross%crossType          = CrossFrom%crossType
    CopyCross%branchid           = CrossFrom%branchid
-   CopyCross%location           = CrossFrom%location
+   CopyCross%chainage           = CrossFrom%chainage
    CopyCross%bedLevel           = CrossFrom%bedLevel
    CopyCross%shift              = CrossFrom%shift
    CopyCross%surfaceLevel       = CrossFrom%surfaceLevel
@@ -3455,7 +3455,7 @@ subroutine createTablesForTabulatedProfile(crossDef)
          call msg_flush()
          msgbuf = 'Branch id            = '// trim(brs%branch(cross%branchid)%id)
          call msg_flush()
-         write(msgbuf, '(''Chainage             = '', f14.2)') cross%location
+         write(msgbuf, '(''Chainage             = '', f14.2)') cross%chainage
          call msg_flush()
          write(msgbuf, '(''Bed level            = '', f14.2)') cross%bedlevel
          call msg_flush()

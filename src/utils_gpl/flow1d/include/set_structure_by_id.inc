@@ -38,9 +38,9 @@
     write(msgbuf,*) 'setting structure%ibran to', c_weir%branchid
     call mess(LEVEL_DEBUG, msgbuf)
     structure%ibran = c_weir%branchid
-    write(msgbuf,*) 'setting structure%distance to', c_weir%chainage
+    write(msgbuf,*) 'setting structure%chainage to', c_weir%chainage
     call mess(LEVEL_DEBUG, msgbuf)
-    structure%distance = c_weir%chainage
+    structure%chainage = c_weir%chainage
     write(msgbuf,*) 'setting structure%left_calc_point to', c_weir%left_calc_point
     call mess(LEVEL_DEBUG, msgbuf)
     structure%left_calc_point = c_weir%left_calc_point
@@ -104,9 +104,9 @@
     write(msgbuf,*) 'setting structure%ibran to', c_orifice%branchid
     call mess(LEVEL_DEBUG, msgbuf)
     structure%ibran = c_orifice%branchid
-    write(msgbuf,*) 'setting structure%distance to', c_orifice%chainage
+    write(msgbuf,*) 'setting structure%chainage to', c_orifice%chainage
     call mess(LEVEL_DEBUG, msgbuf)
-    structure%distance = c_orifice%chainage
+    structure%chainage = c_orifice%chainage
     write(msgbuf,*) 'setting structure%left_calc_point to', c_orifice%left_calc_point
     call mess(LEVEL_DEBUG, msgbuf)
     structure%left_calc_point = c_orifice%left_calc_point
@@ -179,9 +179,9 @@
     write(msgbuf,*) 'setting structure%ibran to', c_pump%branchid
     call mess(LEVEL_DEBUG, msgbuf)
     structure%ibran = c_pump%branchid
-    write(msgbuf,*) 'setting structure%distance to', c_pump%chainage
+    write(msgbuf,*) 'setting structure%chainage to', c_pump%chainage
     call mess(LEVEL_DEBUG, msgbuf)
-    structure%distance = c_pump%chainage
+    structure%chainage = c_pump%chainage
     write(msgbuf,*) 'setting structure%left_calc_point to', c_pump%left_calc_point
     call mess(LEVEL_DEBUG, msgbuf)
     structure%left_calc_point = c_pump%left_calc_point
@@ -251,9 +251,9 @@
     write(msgbuf,*) 'setting structure%ibran to', c_culvert%branchid
     call mess(LEVEL_DEBUG, msgbuf)
     structure%ibran = c_culvert%branchid
-    write(msgbuf,*) 'setting structure%distance to', c_culvert%chainage
+    write(msgbuf,*) 'setting structure%chainage to', c_culvert%chainage
     call mess(LEVEL_DEBUG, msgbuf)
-    structure%distance = c_culvert%chainage
+    structure%chainage = c_culvert%chainage
     write(msgbuf,*) 'setting structure%left_calc_point to', c_culvert%left_calc_point
     call mess(LEVEL_DEBUG, msgbuf)
     structure%left_calc_point = c_culvert%left_calc_point

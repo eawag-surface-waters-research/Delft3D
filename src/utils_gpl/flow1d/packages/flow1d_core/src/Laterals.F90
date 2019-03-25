@@ -77,8 +77,8 @@ module m_Laterals
    type, public :: t_lateral
       character(IdLen)                             :: id           !< Identification of the lateral discharge
       integer, allocatable, dimension(:)           :: branch       !< array of reaches
-      double precision, allocatable, dimension(:)  :: beginOffset  !< begin locatie of lateral discharge along reach 
-      double precision, allocatable, dimension(:)  :: endOffset    !< End location of lateral discharge along reach
+      double precision, allocatable, dimension(:)  :: beginChainage  !< begin locatie of lateral discharge along reach 
+      double precision, allocatable, dimension(:)  :: endChainage    !< End location of lateral discharge along reach
       
       double precision                             :: discharge    !< Discharge value
       double precision, dimension(2)               :: concentration !< Concentration value
@@ -196,20 +196,20 @@ contains
       call setTable(pLat%qh, 0, levels, discharge, length)
    end subroutine setQlatQh
    
-   !> Look for the gridpoints before and after the lateral discharge location and give the offset for both on the reach
-   subroutine lookupGridPoint(brs, offsetLateral, branch, goforward, ipoint1, ipoint2, offset1, offset2)
+   !> Look for the gridpoints before and after the lateral discharge location and give the Chainage for both on the reach
+   subroutine lookupGridPoint(brs, ChainageLateral, branch, goforward, ipoint1, ipoint2, Chainage1, Chainage2)
       ! Modules
       
       implicit none
       ! Input/output parameters
       type(t_branchSet)                   :: brs
-      double precision, intent(in)        :: offsetLateral
+      double precision, intent(in)        :: ChainageLateral
       integer, intent(in)                 :: branch
       logical, intent(in)                 :: goforward
       integer, intent(out)                :: ipoint1
       integer, intent(out)                :: ipoint2
-      double precision, intent(out)       :: offset1
-      double precision, intent(out)       :: offset2
+      double precision, intent(out)       :: Chainage1
+      double precision, intent(out)       :: Chainage2
       
       ! Local variables
       type(t_branch)                      :: pBran
@@ -222,10 +222,10 @@ contains
          
          ipoint2 = 1
          do while ( (ipoint2 < pBran%gridPointsCount) .and.             &
-                    (offsetLateral > pBran%gridPointsOffsets(ipoint2)) )
+                    (chainageLateral > pBran%gridPointschainages(ipoint2)) )
             ipoint2 = ipoint2 + 1
          enddo
-         if (offsetlateral >= pBran%gridPointsOffsets(ipoint2) ) then
+         if (chainagelateral >= pBran%gridPointschainages(ipoint2) ) then
             ipoint1 = max(1, ipoint2)
          else
             ipoint1 = max(1, ipoint2 - 1)
@@ -235,10 +235,10 @@ contains
          
          ipoint2 = pBran%gridPointsCount
          do while ( (ipoint2 > 1) .and.             &
-                    (offsetLateral < pBran%gridPointsOffsets(ipoint2)) )
+                    (chainageLateral < pBran%gridPointschainages(ipoint2)) )
             ipoint2 = ipoint2 - 1
          enddo
-         if (offsetlateral <= pBran%gridPointsOffsets(ipoint2) ) then
+         if (chainagelateral <= pBran%gridPointschainages(ipoint2) ) then
             ipoint1 = min(pBran%gridPointsCount, ipoint2)
          else
             ipoint1 = min(pBran%gridPointsCount, ipoint2 + 1)
@@ -261,8 +261,8 @@ contains
          endif
       endif
    
-      offset1 = pBran%gridPointsOffsets(ipoint1)
-      offset2 = pBran%gridPointsOffsets(ipoint2)
+      chainage1 = pBran%gridPointschainages(ipoint1)
+      chainage2 = pBran%gridPointschainages(ipoint2)
       
       ! change sequence number into SOBEK gridpoint number
       ipoint1 = pBran%Points(1) + ipoint1 - 1
@@ -286,8 +286,8 @@ contains
          
          do i = 1, lts%count
             if (allocated(lts%lat(i)%branch))                deallocate(lts%lat(i)%branch)
-            if (allocated(lts%lat(i)%beginOffset))           deallocate(lts%lat(i)%beginOffset)
-            if (allocated(lts%lat(i)%endOffset))             deallocate(lts%lat(i)%endOffset)
+            if (allocated(lts%lat(i)%beginChainage))           deallocate(lts%lat(i)%beginChainage)
+            if (allocated(lts%lat(i)%endChainage))             deallocate(lts%lat(i)%endChainage)
             if (allocated(lts%lat(i)%distributedDischarge))  deallocate(lts%lat(i)%distributedDischarge)
             if (allocated(lts%lat(i)%brnum))                 deallocate(lts%lat(i)%brnum)
             if (allocated(lts%lat(i)%gridPoints))            deallocate(lts%lat(i)%gridPoints)

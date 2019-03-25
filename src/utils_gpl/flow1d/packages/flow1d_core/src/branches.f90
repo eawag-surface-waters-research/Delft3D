@@ -84,13 +84,13 @@ module m_branch
 
 
       integer                        :: gridPointsCount         !< number of grid points on branch
-      double precision, allocatable  :: gridPointsOffsets(:)    !< offset of grid points on branch
+      double precision, allocatable  :: gridPointsChainages(:)  !< chainage of grid points on branch
       character(IdLen), allocatable  :: gridPointIDs(:)         !< ID's of grid points on branch
       double precision, allocatable  :: Xs(:)                   !< X-coordinates of grid points
       double precision, allocatable  :: Ys(:)                   !< Y-coordinates of grid points
 
       integer                        :: uPointsCount            !< number of u points on branch (gridpointsCount -1)
-      double precision, allocatable  :: uPointsOffsets(:)       !< offset of velocity points on branch (each upoint 
+      double precision, allocatable  :: uPointsChainages(:)     !< chainage of velocity points on branch (each upoint 
       double precision, allocatable  :: Xu(:)                   !< X-coordinates of u points
       double precision, allocatable  :: Yu(:)                   !< Y-coordinates of u points
       double precision, allocatable  :: dx(:)                   !< distance between two gridpoints  
@@ -139,9 +139,9 @@ module m_branch
       if (associated(brs%branch)) then
          length = size(brs%branch)
          do i = 1, length
-            if (allocated(brs%branch(i)%gridPointsOffsets)) deallocate(brs%branch(i)%gridPointsOffsets)
+            if (allocated(brs%branch(i)%gridPointschainages)) deallocate(brs%branch(i)%gridPointschainages)
             if (allocated(brs%branch(i)%gridPointIDs))      deallocate(brs%branch(i)%gridPointIDs)
-            if (allocated(brs%branch(i)%uPointsOffsets))    deallocate(brs%branch(i)%uPointsOffsets)
+            if (allocated(brs%branch(i)%uPointschainages))    deallocate(brs%branch(i)%uPointschainages)
             if (allocated(brs%branch(i)%dx))                deallocate(brs%branch(i)%dx)
             if (allocated(brs%branch(i)%xs))                deallocate(brs%branch(i)%xs)
             if (allocated(brs%branch(i)%ys))                deallocate(brs%branch(i)%ys)
@@ -203,12 +203,12 @@ module m_branch
        integer                         :: i
        
        do i = 2, branch%gridPointsCount
-           if (branch%gridPointsOffsets(i) >= chainage) then !found
+           if (branch%gridPointschainages(i) >= chainage) then !found
               getLinkIndex = branch%lin(i-1)
               exit
            endif
        enddo
-       if (branch%gridPointsOffsets(branch%gridPointsCount) < chainage) then
+       if (branch%gridPointschainages(branch%gridPointsCount) < chainage) then
           getLinkIndex = branch%lin(branch%gridPointsCount-1)
        endif
        
@@ -237,7 +237,7 @@ module m_branch
        rightcalc= 0
        dist = max(0.2, min(dist, pbran%length-0.2)) !< JanM: Waarom is de afstand afgeknot en bestaat er een minSectionLength
        do i = 1, pbran%gridPointsCount
-           if (pbran%gridPointsOffsets(i) > dist) then !found
+           if (pbran%gridPointschainages(i) > dist) then !found
                leftcalc  = pbran%Points(1) - 1 + i - 1
                rightcalc = pbran%Points(1) - 1 + i
                ilink     = pbran%uPoints(1) - 1 + i - 1
@@ -275,7 +275,7 @@ module m_branch
        dist_in_b= 0.0
        dist = max(0.2, min(dist, pbran%length-0.2)) !< JanM: Waarom is de afstand afgeknot en bestaat er een minSectionLength
        do i = 2, pbran%gridPointsCount
-           if (pbran%gridPointsOffsets(i) > dist) then !found
+           if (pbran%gridPointschainages(i) > dist) then !found
               getLinkNumber = pbran%lin(i-1)
               return
            endif
@@ -293,7 +293,7 @@ module m_branch
       integer              :: p1, p2
       double precision     :: weight
       
-      call Get2Points(brs%branch(ibranch)%gridPointsOffsets, &
+      call Get2Points(brs%branch(ibranch)%gridPointschainages, &
                  brs%branch(ibranch)%gridpointsCount, dist, p1, p2, Weight)
       p1 = brs%branch(ibranch)%Points(1) -1 + p1
       p2 = brs%branch(ibranch)%Points(1) -1 + p2
@@ -315,12 +315,12 @@ module m_branch
       integer, intent(out), optional :: l2            !< second u-point index
       double precision, intent(out)  :: linkWeight    !< weight for determining function value depending on function value in l1 and l2
 
-      call Get2Points(brs%branch(ibranch)%gridPointsOffsets, &
+      call Get2Points(brs%branch(ibranch)%gridPointschainages, &
                  brs%branch(ibranch)%gridpointsCount, dist, p1, p2, pointWeight)
       p1 = brs%branch(ibranch)%Points(1) -1 + p1
       p2 = brs%branch(ibranch)%Points(1) -1 + p2
       
-      call Get2Points(brs%branch(ibranch)%uPointsOffsets, &
+      call Get2Points(brs%branch(ibranch)%uPointschainages, &
                  brs%branch(ibranch)%upointsCount, dist, l1, l2, linkWeight)
       l1 = brs%branch(ibranch)%uPoints(1) -1 + l1
       l2 = brs%branch(ibranch)%uPoints(1) -1 + l2
@@ -334,7 +334,7 @@ module m_branch
       integer :: i
       
       do i = 1, branch%uPointsCount
-          if (branch%uPointsOffsets(i) > chainage) then !found
+          if (branch%uPointschainages(i) > chainage) then !found
               getGridPointNumber     = branch%grd(i)
               exit
           endif
@@ -345,23 +345,23 @@ module m_branch
    end function getGridPointNumber
 
 
-   subroutine Get2Points(offsets, offsetCount, offset, p1, p2, weight)
+   subroutine Get2Points(chainages, chainageCount, chainage, p1, p2, weight)
    
-      integer                       :: offsetCount          !< 
-      double precision              :: offset
-      double precision, dimension(offsetCount) :: offsets
+      integer                       :: chainageCount          !< 
+      double precision              :: chainage
+      double precision, dimension(chainageCount) :: chainages
       integer :: p1
       integer :: p2
       double precision :: weight
       
       integer        :: i
 
-      do i=2, offsetCount ! only internal points of the branch
+      do i=2, chainageCount ! only internal points of the branch
          ! look up calculation point and/or segment in which the grid point lies
-         if (Offsets(i) > offset) then !found
+         if (chainages(i) > chainage) then !found
             p1 = i-1
             p2 = i
-            weight = (offsets(i)-offset)/(offsets(i)-offsets(i-1))
+            weight = (chainages(i)-chainage)/(chainages(i)-chainages(i-1))
             if (weight < 0.0) then
                weight = 0.0
             elseif (weight > 1.0) then
@@ -372,8 +372,8 @@ module m_branch
          endif
       enddo
       
-      p1 = offsetCount
-      p2 = offsetCount
+      p1 = chainageCount
+      p2 = chainageCount
       weight = 0d0
    end subroutine get2Points
 

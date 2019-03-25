@@ -480,7 +480,7 @@ module m_1d_networkreader
       
       double precision, allocatable, dimension(:)     :: gpX
       double precision, allocatable, dimension(:)     :: gpY
-      double precision, allocatable, dimension(:)     :: gpOffsets
+      double precision, allocatable, dimension(:)     :: gpchainages
       character(len=IdLen), allocatable, dimension(:) :: gpID
       
       brs%Count = brs%Count + 1
@@ -536,24 +536,24 @@ module m_1d_networkreader
       ! The Gridpoints
       call realloc(gpX, gridPointsCount, stat=istat)
       if (istat == 0) call realloc(gpY, gridPointsCount, stat=istat)
-      if (istat == 0) call realloc(gpOffsets, gridPointsCount, stat=istat)
+      if (istat == 0) call realloc(gpchainages, gridPointsCount, stat=istat)
       if (istat .ne. 0) then
          call SetMessage(LEVEL_FATAL, 'Reading Branch: Error allocating Gridpoint Arrays')
       endif
       
       call prop_get_doubles(md_ptr, 'branch', 'gridPointX', gpX, gridPointsCount, success)
       if (success) call prop_get_doubles(md_ptr, 'branch', 'gridPointY', gpY, gridPointsCount, success)
-      if (success) call prop_get_doubles(md_ptr, 'branch', 'gridPointOffsets', gpOffsets, gridPointsCount, success)
+      if (success) call prop_get_doubles(md_ptr, 'branch', 'gridPointOffsets', gpchainages, gridPointsCount, success)
       if (.not. success) then
          call SetMessage(LEVEL_FATAL, 'Error Reading Grid Data from Branch '''//trim(branchId)//'''')
       endif
       
-      ! Check offsets of Grid Points
+      ! Check chainages of Grid Points
       do igr = 1, gridPointsCount - 1
-         if (gpOffsets(igr) + minSectionLength > gpOffsets(igr + 1)) then
+         if (gpchainages(igr) + minSectionLength > gpchainages(igr + 1)) then
             ! Two adjacent gridpoints too close
-            write (msgbuf, '(a, a, a, g11.4, a, g11.4)' ) 'Two grid points on branch ''', trim(branchid), ''' are too close at offset ',               &
-                                    gpOffsets(igr), ' and ', gpOffsets(igr + 1)
+            write (msgbuf, '(a, a, a, g11.4, a, g11.4)' ) 'Two grid points on branch ''', trim(branchid), ''' are too close at chainage ',               &
+                                    gpchainages(igr), ' and ', gpchainages(igr + 1)
             call SetMessage(LEVEL_WARN, msgbuf)
          endif 
       enddo
@@ -562,8 +562,8 @@ module m_1d_networkreader
       uPointsCount        = pbr%gridPointsCount - 1
       pbr%uPointsCount    = uPointsCount
       
-      call realloc(pbr%gridPointsOffsets, pbr%gridPointsCount)
-      call realloc(pbr%uPointsOffsets, pbr%uPointsCount)
+      call realloc(pbr%gridPointschainages, pbr%gridPointsCount)
+      call realloc(pbr%uPointschainages, pbr%uPointsCount)
       call realloc(pbr%dx, pbr%uPointsCount)
       call realloc(pbr%Xs, pbr%gridPointsCount)
       call realloc(pbr%Ys, pbr%gridPointsCount)
@@ -577,10 +577,10 @@ module m_1d_networkreader
       pbr%Points(2)         = ip2
       pbr%upoints(1)        = ip1
       pbr%upoints(2)        = ip2 - 1
-      pbr%gridPointsOffsets = gpOffsets
-      pbr%uPointsOffsets    = (pbr%gridPointsOffsets(1:uPointsCount) + pbr%gridPointsOffsets(2:uPointsCount+1) ) / 2.0d0
-      pbr%dx                = pbr%gridPointsOffsets(2:uPointsCount+1) - pbr%gridPointsOffsets(1:uPointsCount)
-      pbr%length            = gpOffsets(gridPointsCount)
+      pbr%gridPointschainages = gpchainages
+      pbr%uPointschainages    = (pbr%gridPointschainages(1:uPointsCount) + pbr%gridPointschainages(2:uPointsCount+1) ) / 2.0d0
+      pbr%dx                = pbr%gridPointschainages(2:uPointsCount+1) - pbr%gridPointschainages(1:uPointsCount)
+      pbr%length            = gpchainages(gridPointsCount)
       pbr%Xs                = gpX
       pbr%Ys                = gpY
       pbr%fromNode%x        = gpX(1)
@@ -633,7 +633,7 @@ module m_1d_networkreader
          ! Create grid point IDs
          pbr%gridPointIDs = ' '
          do igr = 1, gridPointsCount
-            write(Chainage, '(F35.3)') pbr%gridPointsOffsets(igr)
+            write(Chainage, '(F35.3)') pbr%gridPointschainages(igr)
             pbr%gridPointIDs(igr) = trim(pbr%id)//'_'//trim(adjustl(Chainage))
          enddo
          
@@ -642,7 +642,7 @@ module m_1d_networkreader
       ! Clear Grid Point Arrays
       if (allocated(gpX)) deallocate(gpX, stat=istat)
       if (istat == 0 .and. allocated(gpY)) deallocate(gpY, stat=istat)
-      if (istat == 0 .and. allocated(gpOffsets)) deallocate(gpOffsets, stat=istat)
+      if (istat == 0 .and. allocated(gpchainages)) deallocate(gpchainages, stat=istat)
       if (istat == 0 .and. allocated(gpID)) deallocate(gpID, stat=istat)
       if (istat .ne. 0) then
          call SetMessage(LEVEL_FATAL, 'Reading Branch: Error Deallocating Gridpoint Arrays')
@@ -650,7 +650,7 @@ module m_1d_networkreader
       
    end subroutine readBranch
 
-   subroutine storeBranch(brs, nds, branchId, begNodeId, endNodeId, ordernumber, gridPointsCount, gpX, gpY, gpOffsets, gpID)
+   subroutine storeBranch(brs, nds, branchId, begNodeId, endNodeId, ordernumber, gridPointsCount, gpX, gpY, gpchainages, gpID)
    
       use m_branch
       
@@ -666,7 +666,7 @@ module m_1d_networkreader
       integer, intent(in)                                          :: gridPointsCount
       double precision, dimension(gridPointsCount), intent(in)     :: gpX
       double precision, dimension(gridPointsCount), intent(in)     :: gpY
-      double precision, dimension(gridPointsCount), intent(in)     :: gpOffsets
+      double precision, dimension(gridPointsCount), intent(in)     :: gpchainages
       character(len=IdLen), dimension(gridPointsCount), intent(in) :: gpID
       
       ! Local Variables
@@ -722,12 +722,12 @@ module m_1d_networkreader
 
       ! The Gridpoints
 
-      ! Check offsets of Grid Points
+      ! Check chainages of Grid Points
       do igr = 1, gridPointsCount - 1
-         if (gpOffsets(igr) + minSectionLength > gpOffsets(igr + 1)) then
+         if (gpchainages(igr) + minSectionLength > gpchainages(igr + 1)) then
             ! Two adjacent gridpoints too close
-            write (msgbuf, '(a, a, a, g11.4, a, g11.4)' ) 'Two grid points on branch ''', trim(branchid), ''' are too close at offset ',               &
-                                    gpOffsets(igr), ' and ', gpOffsets(igr + 1)
+            write (msgbuf, '(a, a, a, g11.4, a, g11.4)' ) 'Two grid points on branch ''', trim(branchid), ''' are too close at chainage ',               &
+                                    gpchainages(igr), ' and ', gpchainages(igr + 1)
             call SetMessage(LEVEL_WARN, msgbuf)
          endif 
       enddo
@@ -736,8 +736,8 @@ module m_1d_networkreader
       uPointsCount        = pbr%gridPointsCount - 1
       pbr%uPointsCount    = uPointsCount
       
-      call realloc(pbr%gridPointsOffsets, pbr%gridPointsCount)
-      call realloc(pbr%uPointsOffsets, pbr%uPointsCount)
+      call realloc(pbr%gridPointschainages, pbr%gridPointsCount)
+      call realloc(pbr%uPointschainages, pbr%uPointsCount)
       call realloc(pbr%dx, pbr%uPointsCount)
       call realloc(pbr%Xs, pbr%gridPointsCount)
       call realloc(pbr%Ys, pbr%gridPointsCount)
@@ -751,10 +751,10 @@ module m_1d_networkreader
       pbr%Points(2)         = ip2
       pbr%upoints(1)        = ip1
       pbr%upoints(2)        = ip2 - 1
-      pbr%gridPointsOffsets = gpOffsets
-      pbr%uPointsOffsets    = (pbr%gridPointsOffsets(1:uPointsCount) + pbr%gridPointsOffsets(2:uPointsCount+1) ) / 2.0d0
-      pbr%dx                = pbr%gridPointsOffsets(2:uPointsCount+1) - pbr%gridPointsOffsets(1:uPointsCount)
-      pbr%length            = gpOffsets(gridPointsCount)
+      pbr%gridPointschainages = gpchainages
+      pbr%uPointschainages    = (pbr%gridPointschainages(1:uPointsCount) + pbr%gridPointschainages(2:uPointsCount+1) ) / 2.0d0
+      pbr%dx                = pbr%gridPointschainages(2:uPointsCount+1) - pbr%gridPointschainages(1:uPointsCount)
+      pbr%length            = gpchainages(gridPointsCount)
       pbr%Xs                = gpX
       pbr%Ys                = gpY
       pbr%fromNode%x        = gpX(1)
@@ -797,7 +797,7 @@ module m_1d_networkreader
       do igr = 1, gridPointsCount
       
          if (gpID(igr) .eq. ' ') then
-            write(Chainage, '(F35.3)') pbr%gridPointsOffsets(igr)
+            write(Chainage, '(F35.3)') pbr%gridPointschainages(igr)
             pbr%gridPointIDs(igr) = trim(pbr%id)//'_'//trim(adjustl(Chainage))
          else
             pbr%gridPointIDs(igr) = gpID(igr)
@@ -940,24 +940,24 @@ module m_1d_networkreader
 
          read(ibin) pbrn%gridPointsCount
          
-         allocate(pbrn%gridPointsOffsets(pbrn%gridPointsCount))
+         allocate(pbrn%gridPointschainages(pbrn%gridPointsCount))
          allocate(pbrn%gridPointIDs(pbrn%gridPointsCount))
          allocate(pbrn%Xs(pbrn%gridPointsCount))
          allocate(pbrn%Ys(pbrn%gridPointsCount))
          
-         read(ibin) (pbrn%gridPointsOffsets(j), j = 1, pbrn%gridPointsCount)   
+         read(ibin) (pbrn%gridPointschainages(j), j = 1, pbrn%gridPointsCount)   
          read(ibin) (pbrn%gridPointIDs(j), j = 1, pbrn%gridPointsCount)   
          read(ibin) (pbrn%Xs(j), j = 1, pbrn%gridPointsCount)   
          read(ibin) (pbrn%Ys(j), j = 1, pbrn%gridPointsCount)   
       
          read(ibin) pbrn%uPointsCount
          
-         allocate(pbrn%uPointsOffsets(pbrn%uPointsCount))
+         allocate(pbrn%uPointschainages(pbrn%uPointsCount))
          allocate(pbrn%Xu(pbrn%uPointsCount))
          allocate(pbrn%Yu(pbrn%uPointsCount))
          allocate(pbrn%dx(pbrn%uPointsCount))
          
-         read(ibin) (pbrn%uPointsOffsets(j), j = 1, pbrn%uPointsCount)   
+         read(ibin) (pbrn%uPointschainages(j), j = 1, pbrn%uPointsCount)   
          read(ibin) (pbrn%Xu(j), j = 1, pbrn%uPointsCount)   
          read(ibin) (pbrn%Yu(j), j = 1, pbrn%uPointsCount)   
          read(ibin) (pbrn%dx(j), j = 1, pbrn%uPointsCount)   
@@ -1002,13 +1002,13 @@ module m_1d_networkreader
          write(ibin) (pbrn%nodeIndex(j), j = 1, 2)
 
          write(ibin) pbrn%gridPointsCount
-         write(ibin) (pbrn%gridPointsOffsets(j), j = 1, pbrn%gridPointsCount)   
+         write(ibin) (pbrn%gridPointschainages(j), j = 1, pbrn%gridPointsCount)   
          write(ibin) (pbrn%gridPointIDs(j), j = 1, pbrn%gridPointsCount)   
          write(ibin) (pbrn%Xs(j), j = 1, pbrn%gridPointsCount)   
          write(ibin) (pbrn%Ys(j), j = 1, pbrn%gridPointsCount)   
       
          write(ibin) pbrn%uPointsCount
-         write(ibin) (pbrn%uPointsOffsets(j), j = 1, pbrn%uPointsCount)   
+         write(ibin) (pbrn%uPointschainages(j), j = 1, pbrn%uPointsCount)   
          write(ibin) (pbrn%Xu(j), j = 1, pbrn%uPointsCount)   
          write(ibin) (pbrn%Yu(j), j = 1, pbrn%uPointsCount)   
          write(ibin) (pbrn%dx(j), j = 1, pbrn%uPointsCount)   

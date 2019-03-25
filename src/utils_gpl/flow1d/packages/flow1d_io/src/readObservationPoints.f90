@@ -145,7 +145,7 @@ module m_readObservationPoints
             pOPnt%name      = obsPointName
             pOPnt%branch    => network%brs%branch(branchIdx)
             pOPnt%branchIdx = branchIdx
-            pOPnt%offset    = Chainage
+            pOPnt%chainage    = Chainage
             pbr             => network%brs%branch(branchIdx)
       
             call get2CalcPoints(network%brs, branchIdx, Chainage, pOPnt%p1, pOPnt%p2, &
@@ -171,14 +171,14 @@ module m_readObservationPoints
             if (thresholdLvl_file == LEVEL_DEBUG) then
             write(val1, '(f10.0)') Chainage
             call remove_all_spaces(val1)
-            line = 'Observation point '//trim(obsPointID)//' added on branch '//trim(pbr%id)//' at offset '//val1
+            line = 'Observation point '//trim(obsPointID)//' added on branch '//trim(pbr%id)//' at chainage '//val1
                call setMessage(LEVEL_DEBUG, line)
             p1 = pOPnt%p1 - pbr%Points(1) + 1
             p2 = pOPnt%p2 - pbr%Points(1) + 1
             
-            write(pnt1, '(f10.0)') pbr%gridPointsOffsets(p1)
+            write(pnt1, '(f10.0)') pbr%gridPointschainages(p1)
             call remove_all_spaces(pnt1)
-            write(pnt2, '(f10.0)') pbr%gridPointsOffsets(p2)
+            write(pnt2, '(f10.0)') pbr%gridPointschainages(p2)
             call remove_all_spaces(pnt2)
             write(val1,'(f6.3)') pOPnt%pointWeight
             write(val2,'(f6.3)') 1.0-pOPnt%pointWeight
@@ -187,9 +187,9 @@ module m_readObservationPoints
             p1 = pOPnt%l1 - pbr%uPoints(1) + 1
             p2 = pOPnt%l2 - pbr%uPoints(1) + 1
             
-            write(pnt1, '(f10.0)') pbr%uPointsOffsets(p1)
+            write(pnt1, '(f10.0)') pbr%uPointschainages(p1)
             call remove_all_spaces(pnt1)
-            write(pnt2, '(f10.0)') pbr%uPointsOffsets(p2)
+            write(pnt2, '(f10.0)') pbr%uPointschainages(p2)
             call remove_all_spaces(pnt2)
             write(val1,'(f6.3)') pOPnt%linkWeight
             write(val2,'(f6.3)') 1.0-pOPnt%linkWeight
@@ -233,7 +233,7 @@ module m_readObservationPoints
          read(ibin) pobs%linkWeight
          read(ibin) pobs%branchIdx
          pobs%branch => network%brs%branch(pobs%branchIdx)
-         read(ibin) pobs%offset
+         read(ibin) pobs%chainage
 
       enddo
       
@@ -264,7 +264,7 @@ module m_readObservationPoints
          write(ibin) pobs%l2
          write(ibin) pobs%linkWeight
          write(ibin) pobs%branchIdx
-         write(ibin) pobs%offset
+         write(ibin) pobs%chainage
         
       enddo
       

@@ -119,8 +119,8 @@ module m_readLaterals
             pLat%id = lateralID
             pLat%pointsCount = 1
             allocate(pLat%branch(1))
-            allocate(pLat%beginOffset(1))
-            allocate(pLat%endOffset(1))
+            allocate(pLat%beginchainage(1))
+            allocate(pLat%endchainage(1))
             
             if (length > 0.0d0)  then
                pLat%pointLateral = .false.
@@ -129,8 +129,8 @@ module m_readLaterals
             endif
       
             pLat%branch(1)       = branchIdx
-            pLat%beginOffset(1)  = Chainage
-            pLat%endOffset(1)    = Chainage + length
+            pLat%beginchainage(1)  = Chainage
+            pLat%endchainage(1)    = Chainage + length
             pLat%concentration   = 0.0d0;          
             pLat%freshWater      = .true.
       

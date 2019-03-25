@@ -55,7 +55,7 @@ module m_network
    end interface dealloc
    
 
-   type, public :: t_offset2cross
+   type, public :: t_chainage2cross
       integer :: c1 = -1           !< cross section index 1
       integer :: c2 = -1           !< cross section index 2
       double precision :: f        !< fraction: c_loc = f * c1 + (1-f)*c2
@@ -74,8 +74,8 @@ module m_network
                                                                            !! link l is found by adm%au_1d(adm%lin2local(l))  
       integer, allocatable          :: lin2local(:)
       integer, allocatable          :: lin2grid(:)
-      type(t_offset2cross), pointer :: line2cross(:) => null()             !< list containing cross section indices per u-location
-      type(t_offset2cross), pointer :: gpnt2cross(:) => null()             !< list containing cross section indices per gridpoint-location
+      type(t_chainage2cross), pointer :: line2cross(:) => null()             !< list containing cross section indices per u-chainage
+      type(t_chainage2cross), pointer :: gpnt2cross(:) => null()             !< list containing cross section indices per gridpoint-chainage
       logical, allocatable          :: hysteresis_for_summerdike(:,:)      !< array indicating for hysteresis in summerdikes
 
       double precision, allocatable :: au_1d(:)
@@ -333,10 +333,10 @@ contains
       double precision                   :: f
       double precision                   :: dpu1
       double precision                   :: dpu2
-      double precision                   :: offset1
-      double precision                   :: offset2
-      double precision                   :: offsetu
-      double precision                   :: offsetg
+      double precision                   :: chainage1
+      double precision                   :: chainage2
+      double precision                   :: chainageu
+      double precision                   :: chainageg
       double precision                   :: chezy
       double precision                   :: vel 
       double precision                   :: as
@@ -356,7 +356,7 @@ contains
       logical                            :: interpolDone
       logical                            :: initError = .false.
 
-      character(20)                      :: offsetString
+      character(20)                      :: chainageString
       
       call realloc(network%adm, linall, network%gridpointsCount)
       
@@ -434,12 +434,12 @@ contains
             icrs1 = icrsBeg
             icrs2 = icrsBeg
 
-            xBeg = network%crs%cross(crossOrder(icrsBeg))%location
-            xEnd = network%crs%cross(crossOrder(icrsEnd))%location
+            xBeg = network%crs%cross(crossOrder(icrsBeg))%chainage
+            xEnd = network%crs%cross(crossOrder(icrsEnd))%chainage
 
             do m = 1, pbran%uPointsCount
 
-               offsetu = pbran%uPointsOffsets(m)
+               chainageu = pbran%uPointschainages(m)
                ilnk = pbran%lin(m)
                
                if (icrsBeg == icrsEnd) then
@@ -451,7 +451,7 @@ contains
                   adm%line2cross(ilnk)%distance  = 0d0
                   interpolDone            = .true.
                   
-               elseif (offsetu <= xBeg) then
+               elseif (chainageu <= xBeg) then
                   
                   ! Before First Cross-Section
                   adm%line2cross(ilnk)%c1 = crossOrder(icrsBeg)
@@ -460,7 +460,7 @@ contains
                   adm%line2cross(ilnk)%distance  = 0d0
                   interpolDone            = .true.
                   
-               elseif (offsetu >= xEnd) then
+               elseif (chainageu >= xEnd) then
                   
                   ! After Last Cross-Section
                   adm%line2cross(ilnk)%c1 = crossOrder(icrsEnd)
@@ -471,23 +471,23 @@ contains
                   
                else
                   
-                  offset1 = network%crs%cross(crossOrder(icrs1))%location
-                  offset2 = network%crs%cross(crossOrder(icrs2))%location
-                  adm%line2cross(ilnk)%distance  = offset2 - offset1
+                  chainage1 = network%crs%cross(crossOrder(icrs1))%chainage
+                  chainage2 = network%crs%cross(crossOrder(icrs2))%chainage
+                  adm%line2cross(ilnk)%distance  = chainage2 - chainage1
                   
-                  if (.not. ((offset1 <= offsetu) .and. (offset2 >= offsetu))) then
+                  if (.not. ((chainage1 <= chainageu) .and. (chainage2 >= chainageu))) then
                      
                      do i = icrs1, icrsEnd
-                        if (network%crs%cross(crossOrder(i))%location >= offsetu) then
-                           offset2 = network%crs%cross(crossOrder(i))%location
+                        if (network%crs%cross(crossOrder(i))%chainage >= chainageu) then
+                           chainage2 = network%crs%cross(crossOrder(i))%chainage
                            icrs2 = i
                            exit
                         endif
                      enddo
                      
                      do i = icrsEnd, icrsBeg, -1
-                        if (network%crs%cross(crossOrder(i))%location <= offsetu) then
-                           offset1 = network%crs%cross(crossOrder(i))%location
+                        if (network%crs%cross(crossOrder(i))%chainage <= chainageu) then
+                           chainage1 = network%crs%cross(crossOrder(i))%chainage
                            icrs1 = i
                            exit
                         endif
@@ -512,7 +512,7 @@ contains
                         else    
                             adm%line2cross(ilnk)%c1 = crossOrder(icrs1)
                             adm%line2cross(ilnk)%c2 = crossOrder(icrs2)
-                            f  = (offsetu - offset1) / (offset2 - offset1)
+                            f  = (chainageu - chainage1) / (chainage2 - chainage1)
                             f = max(f, 0.0d0) 
                             f = min(f, 1.0d0) 
                             adm%line2cross(ilnk)%f = f
@@ -566,12 +566,12 @@ contains
             icrs1 = icrsBeg
             icrs2 = icrsBeg
 
-            xBeg = network%crs%cross(crossOrder(icrsBeg))%location
-            xEnd = network%crs%cross(crossOrder(icrsEnd))%location
+            xBeg = network%crs%cross(crossOrder(icrsBeg))%chainage
+            xEnd = network%crs%cross(crossOrder(icrsEnd))%chainage
             
             do m = 1, pbran%gridPointsCount
 
-               offsetg = pbran%gridPointsOffsets(m)
+               chainageg = pbran%gridPointschainages(m)
                igpt = pbran%grd(m)
                
                if (icrsBeg == icrsEnd) then
@@ -582,7 +582,7 @@ contains
                   adm%gpnt2cross(igpt)%f  = 1.0d0
                   interpolDone            = .true.   
                   
-               elseif (offsetg <= xBeg) then
+               elseif (chainageg <= xBeg) then
                   
                   ! Before First Cross-Section
                   adm%gpnt2cross(igpt)%c1 = crossOrder(icrsBeg)
@@ -590,7 +590,7 @@ contains
                   adm%gpnt2cross(igpt)%f  = 1.0d0
                   interpolDone            = .true.   
                   
-               elseif (offsetg >= xEnd) then
+               elseif (chainageg >= xEnd) then
                   
                   ! After Last Cross-Section
                   adm%gpnt2cross(igpt)%c1 = crossOrder(icrsEnd)
@@ -600,22 +600,22 @@ contains
                   
                else
                   
-                  offset1 = network%crs%cross(crossOrder(icrs1))%location
-                  offset2 = network%crs%cross(crossOrder(icrs2))%location
+                  chainage1 = network%crs%cross(crossOrder(icrs1))%chainage
+                  chainage2 = network%crs%cross(crossOrder(icrs2))%chainage
                   
-                  if (.not. ((offset1 <= offsetg) .and. (offset2 >= offsetg))) then
+                  if (.not. ((chainage1 <= chainageg) .and. (chainage2 >= chainageg))) then
                      
                      do i = icrs1, icrsEnd
-                        if (network%crs%cross(crossOrder(i))%location >= offsetg) then
-                           offset2 = network%crs%cross(crossOrder(i))%location
+                        if (network%crs%cross(crossOrder(i))%chainage >= chainageg) then
+                           chainage2 = network%crs%cross(crossOrder(i))%chainage
                            icrs2 = i
                            exit
                         endif
                      enddo
                      
                      do i = icrsEnd, icrsBeg, -1
-                        if (network%crs%cross(crossOrder(i))%location <= offsetg) then
-                           offset1 = network%crs%cross(crossOrder(i))%location
+                        if (network%crs%cross(crossOrder(i))%chainage <= chainageg) then
+                           chainage1 = network%crs%cross(crossOrder(i))%chainage
                            icrs1 = i
                            exit
                         endif
@@ -637,12 +637,12 @@ contains
                         if (icrs1 == icrs2) then 
                            f = 1.0d0
                         else    
-                           if (offset1 == offset2) then 
-                               write(offsetString, '(F10.3)') offset1 
-                               call setmessage(LEVEL_ERROR, 'Mulitple cross sections defined at same chainage ('// trim(offsetString) //') on branch '//trim(pbran%id))
+                           if (chainage1 == chainage2) then 
+                               write(chainageString, '(F10.3)') chainage1 
+                               call setmessage(LEVEL_ERROR, 'Mulitple cross sections defined at same chainage ('// trim(chainageString) //') on branch '//trim(pbran%id))
                                initError = .true.
                            endif
-                           f = (offsetg - offset1) / (offset2 - offset1)
+                           f = (chainageg - chainage1) / (chainage2 - chainage1)
                         endif    
                         f = max(f, 0.0d0) 
                         f = min(f, 1.0d0) 
@@ -731,10 +731,10 @@ contains
 
    !> In this subroutine arrays crossorder and lastAtBran are filled \n
    !! crossorder contains the cross section indices, where the cross sections are ordered 
-   !! in ascending branchid and subsequently in offset.\n
+   !! in ascending branchid and subsequently in chainage.\n
    !! crossorder(lastAtBran(ibr-1)+1) .. crossorder(lastAtBran(ibr)) contain the cross
-   !! sections on branch ibr, in ascending branch offset.
-   !! sections on branch ibr, in ascending branch offset.
+   !! sections on branch ibr, in ascending branch chainage.
+   !! sections on branch ibr, in ascending branch chainage.
    subroutine crossSectionsSort(crs, brs, crossOrder, lastAtBran)
 
       ! Ordering crs's on branches and x on branches
@@ -847,8 +847,8 @@ contains
               
             do icrsn = ifirst, ilast - 1
                  
-               if (crs%cross(crossOrder(icrsn))%location .gt.  &
-                   crs%cross(crossOrder(icrsn + 1))%location) then
+               if (crs%cross(crossOrder(icrsn))%chainage .gt.  &
+                   crs%cross(crossOrder(icrsn + 1))%chainage) then
                   
                   ihulp               = crossOrder(icrsn)
                   crossOrder(icrsn)   = crossOrder(icrsn+1)

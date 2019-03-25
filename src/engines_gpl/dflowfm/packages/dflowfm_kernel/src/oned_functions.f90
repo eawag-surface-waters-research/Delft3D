@@ -192,8 +192,8 @@ module m_oned_functions
       type(t_storage), pointer                :: pstor
       integer, dimension(:), pointer          :: lin
       integer, dimension(:), pointer          :: grd
-      double precision, dimension(:), pointer :: offset
-      type(t_offset2cross), pointer           :: gpnt2cross(:)                   !< list containing cross section indices per u-location
+      double precision, dimension(:), pointer :: chainage
+      type(t_chainage2cross), pointer           :: gpnt2cross(:)                   !< list containing cross section indices per u-location
       type (t_CrossSection), pointer          :: cross1, cross2
 
       nbr = network%brs%count
@@ -238,8 +238,8 @@ module m_oned_functions
       type(t_storage), pointer                :: pstor
       integer, dimension(:), pointer          :: lin
       integer, dimension(:), pointer          :: grd
-      double precision, dimension(:), pointer :: offset
-      type(t_offset2cross), pointer           :: gpnt2cross(:)                   !< list containing cross section indices per u-location
+      double precision, dimension(:), pointer :: chainage
+      type(t_chainage2cross), pointer           :: gpnt2cross(:)                   !< list containing cross section indices per u-location
       type (t_CrossSection), pointer          :: cross1, cross2
 
 
@@ -258,6 +258,7 @@ module m_oned_functions
    subroutine set_structure_grid_numbers()
       use unstruc_channel_flow
       use m_flowexternalforcings
+      use m_inquire_flowgeom
 
       implicit none
     
@@ -274,8 +275,8 @@ module m_oned_functions
       do istru = 1, nstru
          pstru   => network%sts%struct(istru)
          pbranch => network%brs%branch(pstru%ibran)
+         call findlink(pstru%ibran, pstru%chainage, pstru%link_number)
          local_index = pstru%left_calc_point - pbranch%Points(1)+1
-         pstru%link_number      = pbranch%lin(local_index)
          pstru%left_calc_point  = pbranch%grd(local_index)
          pstru%right_calc_point = pbranch%grd(local_index+1)
          L1strucsg(istru) = istru
@@ -311,8 +312,8 @@ module m_oned_functions
       type(t_storage), pointer                :: pstor
       integer, dimension(:), pointer          :: lin
       integer, dimension(:), pointer          :: grd
-      double precision, dimension(:), pointer :: offset
-      type(t_offset2cross), pointer           :: gpnt2cross(:)                   !< list containing cross section indices per u-location
+      double precision, dimension(:), pointer :: chainage
+      type(t_chainage2cross), pointer           :: gpnt2cross(:)                   !< list containing cross section indices per u-location
       type (t_CrossSection), pointer          :: cross1, cross2
 
 
@@ -342,7 +343,7 @@ module m_oned_functions
             pbr => network%brs%branch(ibr)
             lin => pbr%lin
             grd => pbr%grd
-            offset => pbr%gridPointsOffsets
+            chainage => pbr%gridPointschainages
             pointscount = pbr%gridPointsCount
             do i = 1, pointscount
                igrid = igrid+1
@@ -352,10 +353,10 @@ module m_oned_functions
                   ! this entry (gridpoint2cross(k1)) is already allocated
                   if (i==1) then 
                      L = lin(1)
-                     dh = (offset(i+1)-offset(i))/2d0
+                     dh = (chainage(i+1)-chainage(i))/2d0
                   else
                      L = lin(pointscount-1)
-                     dh = (offset(i)-offset(i-1))/2d0
+                     dh = (chainage(i)-chainage(i-1))/2d0
                   endif
                   do j = 1,nd(k1)%lnx
                      if (L == iabs(nd(k1)%ln(j))) then
@@ -368,12 +369,12 @@ module m_oned_functions
                   allocate(gridpoint2cross(k1)%cross(1))
                   gridpoint2cross(k1)%num_cross_sections = 1
                   jpos = 1
-                  dh = min(offset(i)-offset(i-1),offset(i+1)-offset(i))/2d0
+                  dh = min(chainage(i)-chainage(i-1),chainage(i+1)-chainage(i))/2d0
                endif
                c1 = gpnt2cross(igrid)%c1
                c2 = gpnt2cross(igrid)%c2
-               d1 = abs(network%crs%cross(c1)%location - offset(i))
-               d2 = abs(network%crs%cross(c2)%location - offset(i))
+               d1 = abs(network%crs%cross(c1)%chainage - chainage(i))
+               d2 = abs(network%crs%cross(c2)%chainage - chainage(i))
                ! cross1%branchid and cross2%branchid should correspond to ibr
                if (d1 < dh) then
                   gridpoint2cross(k1)%cross(jpos) = c1

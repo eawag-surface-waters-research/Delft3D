@@ -540,7 +540,7 @@ contains
           res(2) = res(1)
       else
           dxlocal = 0.5d0*getdeltax(network, ilink) 
-          distancelocal = cross2%location - cross1%location
+          distancelocal = cross2%chainage - cross1%chainage
           dx = dxlocal/distancelocal
           linkpos = network%adm%line2cross(ilink)%f
           factor = linkpos - dx

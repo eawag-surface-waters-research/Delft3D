@@ -145,7 +145,7 @@ module m_structure
       integer                          :: right_calc_point
       integer                          :: link_number
       double precision                 :: x, y
-      double precision                 :: distance
+      double precision                 :: chainage
       double precision                 :: charHeight
       double precision                 :: charWidth
       integer                          :: state = -1     !< State of the Structure for General Structure, Weir, Orifice and Culvert/Siphon
@@ -237,18 +237,18 @@ module m_structure
       integer :: ibranch
       double precision :: x
       double precision :: y
-      double precision :: distcalc
+      double precision :: chainage
       
    
       ! Program code
-      distcalc = 0d0
+      chainage = 0d0
       x = 0d0
       y = 0d0
       ibranch = 0
-      AddStructure_short = AddStructureByCalcPoints(sts, leftcalc, rightcalc, linknumber, distcalc, icompound, compoundName, id, structureType, x, y, ibranch)
+      AddStructure_short = AddStructureByCalcPoints(sts, leftcalc, rightcalc, linknumber, chainage, icompound, compoundName, id, structureType, x, y, ibranch)
    end function AddStructure_short
 
-   integer function AddStructureByCalcPoints(sts, leftcalc, rightcalc, linknumber, distcalc, icompound, compoundName, id, structureType, x, y, ibranch)
+   integer function AddStructureByCalcPoints(sts, leftcalc, rightcalc, linknumber, chainage, icompound, compoundName, id, structureType, x, y, ibranch)
       ! Modules
 
       implicit none
@@ -258,7 +258,7 @@ module m_structure
       integer              :: leftcalc
       integer              :: rightcalc
       integer              :: linknumber
-      double precision     :: distcalc
+      double precision     :: chainage
       integer              :: icompound
       character(*)         :: compoundName
       character(*)         :: id
@@ -286,7 +286,7 @@ module m_structure
       sts%struct(i)%left_calc_point    = leftcalc
       sts%struct(i)%right_calc_point   = rightcalc
       sts%struct(i)%link_number        = linknumber
-      sts%struct(i)%distance           = distcalc
+      sts%struct(i)%chainage           = chainage
       sts%struct(i)%compound           = icompound
       sts%struct(i)%compoundName       = compoundName
       sts%struct(i)%st_type            = structureType
@@ -321,14 +321,14 @@ module m_structure
       AddStructureByCalcPoints = sts%count
    end function AddStructureByCalcPoints
 
-   integer function AddStructureByBranchLocation(sts, brs, ibranch, dist, icompound, compoundName, id, structureType)
+   integer function AddStructureByBranchLocation(sts, brs, ibranch, chainage, icompound, compoundName, id, structureType)
       ! Modules
 
       implicit none
 
       ! Input/output parameters
       integer              :: ibranch
-      double precision                 :: dist
+      double precision                 :: chainage
       character(*)         :: id
 
       integer              :: icompound
@@ -342,13 +342,27 @@ module m_structure
       integer              :: rightcalc
       integer              :: ilink
 
-      double precision                 :: distcalc
+      ! Local variables
+      integer              :: i, j
+
+      type(t_structure), pointer       :: pstru
 
       ! Program code
-      call getCalcPoints(brs, ibranch, dist, leftcalc, rightcalc, ilink, distcalc)
+      sts%Count = sts%Count+1
+      i = sts%Count
+      if (sts%Count > sts%Size) then
+         call realloc(sts)
+      endif
+      call incStructureCount(sts, structureType)
 
-      AddStructureByBranchLocation = AddStructureByCalcPoints(sts, leftcalc, rightcalc, ilink, distcalc, &
-                                                              icompound, compoundName, id, structureType, ibranch = ibranch)
+      sts%struct(i)%id                 = id
+      sts%struct(i)%chainage           = chainage
+      sts%struct(i)%compound           = icompound
+      sts%struct(i)%compoundName       = compoundName
+      sts%struct(i)%st_type            = structureType
+      sts%struct(i)%ibran = ibranch
+
+      AddStructureByBranchLocation = sts%count
       
    end function AddStructureByBranchLocation
 
@@ -769,7 +783,7 @@ end subroutine
       write(unit, '(a, i5)') 'id = '//trim(struc%id)
       write(unit, '(''branch = '' , i7, '' left calc point = '', i7, ''right calc point = '', i7)')  &
                   struc%ibran, struc%left_calc_point, struc%right_calc_point
-      write(unit, '(''distance = '', f10.3)') struc%distance
+      write(unit, '(''chainage = '', f10.3)') struc%chainage
    end subroutine printStructure
 
    subroutine reIndexCrossSections(sts, crs)

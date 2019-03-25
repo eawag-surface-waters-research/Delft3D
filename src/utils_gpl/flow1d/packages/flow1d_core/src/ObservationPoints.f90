@@ -73,7 +73,7 @@ module m_ObservationPoints
         double precision            :: linkWeight
         integer                     :: branchIdx            !< index of branch on which the observation point is located
         type(t_branch), pointer     :: branch               !< pointer to branch on which the observation point is located
-        double precision            :: offset               !< offset of observation point on branch
+        double precision            :: chainage             !< chainage of observation point on branch
    end type
    
    type, public :: t_ObservationPointSet

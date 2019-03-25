@@ -54,7 +54,7 @@ module m_readCrossSections
    type, public  :: t_Crosslist
          integer              :: n
          integer, allocatable              :: crossnr(:)
-         double precision, allocatable     :: location(:)
+         double precision, allocatable     :: chainage(:)
    end type
    
    type(t_Crosslist), allocatable, public :: crs_by_brs(:)                ! keeping crosssections by branch ordered by chainage
@@ -132,7 +132,7 @@ module m_readCrossSections
          
          indx = hashsearch(network%brs%hashlist, branchid)
          pCrs%branchid = indx
-         call prop_get_double(md_ptr%child_nodes(i)%node_ptr, '', 'chainage', pCrs%location, success)
+         call prop_get_double(md_ptr%child_nodes(i)%node_ptr, '', 'chainage', pCrs%chainage, success)
          if (.not. success) then
             call SetMessage(LEVEL_ERROR, 'Incorrect Cross-Section input for Cross-Section on branch '//trim(branchid)// &
                'no chainage was given')
@@ -1080,7 +1080,7 @@ module m_readCrossSections
          write(ibin) pcross%closed
          
          write(ibin) pcross%branchid
-         write(ibin) pcross%location
+         write(ibin) pcross%chainage
          
          write(ibin) pcross%surfaceLevel
          write(ibin) pcross%bedLevel
@@ -1146,7 +1146,7 @@ module m_readCrossSections
          read(ibin) pcross%closed
          
          read(ibin) pcross%branchid
-         read(ibin) pcross%location
+         read(ibin) pcross%chainage
          
          read(ibin) pcross%surfaceLevel
          read(ibin) pcross%bedLevel
@@ -1384,9 +1384,9 @@ module m_readCrossSections
          write(dmpUnit, *) pcross%IsCopy
          write(dmpUnit, *) pcross%closed
          
-         write(dmpUnit, *) '############### LOCATION ####################'
+         write(dmpUnit, *) '############### chainage ####################'
          write(dmpUnit, *) pcross%branchid
-         write(dmpUnit, *) pcross%location
+         write(dmpUnit, *) pcross%chainage
                  
          write(dmpUnit, *) '############### LEVELS AND SIZES ####################'
          write(dmpUnit, *) pcross%surfaceLevel
@@ -1514,7 +1514,7 @@ module m_readCrossSections
          
             pSpData => network%spData%quant(pRgs%spd_pos_idx)
             
-            iStatus = getValueAtLocation(pSpData, crs%branchid, crs%location, frictionValue, frictionType)
+            iStatus = getValueAtLocation(pSpData, crs%branchid, crs%chainage, frictionValue, frictionType)
             
             if (istatus >= 0) crs%frictionValuePos(i) = frictionValue
             if (istatus > 0)  crs%frictionTypePos(i)  = frictionType
@@ -1526,7 +1526,7 @@ module m_readCrossSections
          
             pSpData => network%spData%quant(pRgs%spd_neg_idx)
             
-            iStatus = getValueAtLocation(pSpData, crs%branchid, crs%location, frictionValue, frictionType)
+            iStatus = getValueAtLocation(pSpData, crs%branchid, crs%chainage, frictionValue, frictionType)
             
             if (istatus >= 0) crs%frictionValueNeg(i) = frictionValue
             if (istatus > 0)  crs%frictionTypeNeg(i)  = frictionType

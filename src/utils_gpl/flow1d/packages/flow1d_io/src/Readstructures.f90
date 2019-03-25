@@ -341,7 +341,7 @@ module m_readstructures
          read(ibin) pstr%link_number
          read(ibin) pstr%x
          read(ibin) pstr%y
-         read(ibin) pstr%distance
+         read(ibin) pstr%chainage
          read(ibin) pstr%compound
          read(ibin) pstr%compoundName
          
@@ -570,7 +570,7 @@ module m_readstructures
          write(ibin) pstr%link_number
          write(ibin) pstr%x
          write(ibin) pstr%y
-         write(ibin) pstr%distance
+         write(ibin) pstr%chainage
          write(ibin) pstr%compound
          write(ibin) pstr%compoundName
          
