@@ -55,6 +55,7 @@ libdflowfm_la_SOURCES=\
         modules.f90 \
         dfm_signals.F90 \
         oned_functions.f90 \
+        inquire_flowgeom.f90 \
         d_flooding.f90 \
         partition.F90 \
         unstruc_netcdf.f90 \

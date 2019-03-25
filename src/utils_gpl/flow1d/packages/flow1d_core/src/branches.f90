@@ -47,6 +47,7 @@ module m_branch
    public admin_branch
    public fill_hashtable
    public getLinkIndex
+   public getGridPointNumber
 
    public BR_EMBEDDED, BR_CONNECTED, BR_ISOLATED, BR_BOUNDARY
    
@@ -326,7 +327,24 @@ module m_branch
   
    end subroutine
    
-   
+   integer function getGridPointNumber(branch, chainage)
+      type (t_branch)   , intent(in   ) :: branch              !< branch object
+      double precision  , intent(in   ) :: chainage            !< chainage of object on branch
+      
+      integer :: i
+      
+      do i = 1, branch%uPointsCount
+          if (branch%uPointsOffsets(i) > chainage) then !found
+              getGridPointNumber     = branch%grd(i)
+              exit
+          endif
+      enddo
+      ! return end point of branch
+      getGridPointNumber = branch%grd(branch%gridpointscount)
+      
+   end function getGridPointNumber
+
+
    subroutine Get2Points(offsets, offsetCount, offset, p1, p2, weight)
    
       integer                       :: offsetCount          !< 
