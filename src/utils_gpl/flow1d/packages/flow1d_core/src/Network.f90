@@ -394,6 +394,7 @@ contains
          allocate(crossOrder(network%crs%Count))
          allocate(lastAtBran(network%brs%Count))
          
+         call useBranchOrders(network%crs, network%brs)
          call crossSectionsSort(network%crs, network%brs, crossOrder, lastAtBran)
          
          ! Fill in the Index for checking later
