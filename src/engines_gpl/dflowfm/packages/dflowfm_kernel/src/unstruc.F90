@@ -1527,8 +1527,6 @@ if(q /= 0) then
 
     k1  = ln(1,L) ; k2 = ln(2,L)
 
-       !TODO discuss with Herman: use of ACL is skipped here, but is still used in ADVEC
-
     dx1 = 0.5d0*dx(L) ; dx2 = dx1
     if (kcu(L) == 1) then
        if ( nd(k1)%lnx == 1 ) then
@@ -1540,7 +1538,6 @@ if(q /= 0) then
     endif
 
 
-       !TODO discuss with Herman: Checking wether a node is a 1d node seems superfluous
     if (kcs(k1) == 1) then
        hpr = max(0d0,s1(k1)-bob0(1,L))                ! this statement is called most nr of times through waterlevel iteration
        if (hpr > 0) then                             !
@@ -1557,7 +1554,6 @@ if(q /= 0) then
        endif
     endif
 
-    !TODO discuss with Herman: Checking wether a node is a 1d node seems superfluous
     if (kcs(k2) == 1) then
        hpr = max(0d0,s1(k2)-bob0(2,L))
        if (hpr > 0) then                             !
