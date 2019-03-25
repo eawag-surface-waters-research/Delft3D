@@ -1009,7 +1009,7 @@ if(q /= 0) then
  if ( itstep.ne.4 ) then                                ! implicit time-step
 
  222 if (nonlin == 2) then                               ! only for pressurised
-       !s1m = bl !  s1mini
+       s1m = bl !  s1mini
        call volsur()
        difmaxlevm = 0d0 ;  noddifmaxlevm = 0
     endif
