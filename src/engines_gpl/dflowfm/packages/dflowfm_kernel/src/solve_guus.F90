@@ -1628,8 +1628,7 @@ subroutine gauss_eliminationjipjan
 
  do nn=1,nogauss0
    ndn=noel0(nn)
-   if (kfs(ndn)==1 .or.abs(qin(ndn))>1d-12) then
-     kfs(ndn) = 1 
+   if (kfs(ndn)==1) then
      nowet=nowet+1
      noel(nowet)=ndn
      nogauss=nogauss+1
@@ -1638,8 +1637,7 @@ subroutine gauss_eliminationjipjan
 
  do nn=nogauss0+1,nogauss0+nocg0
    ndn=noel0(nn)
-   if (kfs(ndn)==1.or.abs(qin(ndn))>1d-12) then
-     kfs(ndn) = 1 
+   if (kfs(ndn)==1) then
      nowet=nowet+1
      noel(nowet)=ndn
      nocg=nocg+1

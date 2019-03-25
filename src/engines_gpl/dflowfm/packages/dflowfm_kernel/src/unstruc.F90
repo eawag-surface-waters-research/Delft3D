@@ -31653,9 +31653,16 @@ end subroutine setbobs_fixedweirs
  implicit none
 
  integer :: i, L, LL
- integer :: n, kb, ki
+ integer :: n, kb, ki, ndn
 
  kfs = 0
+ 
+ ! open all grid points with positive lateral inflow
+ do ndn = 1, ndx
+   if (qin(ndn)>1d-12) then
+     kfs(ndn) = 1 
+   endif
+ enddo
 
  if (ivariableteta<=1) then                          ! fully implicit and teta=constant
 
