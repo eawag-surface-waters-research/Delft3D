@@ -82,6 +82,7 @@
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
 		<File RelativePath="src\hrfft.f"/>
+		<File RelativePath=".\src\inquire_flowgeom.f90"/>
 		<File RelativePath="src\manholes.f90"/>
 		<File RelativePath="src\meteo1.f90"/>
 		<File RelativePath="src\model_specific.f90"/>
