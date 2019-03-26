@@ -22218,31 +22218,198 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
  SUBROUTINE DISLN(LL)   ! print link values
  use m_flowgeom
  use m_devices
+ use network_data
+ use m_flow
  implicit none
 
  integer :: LL
+ integer :: linec ! line counter
+ integer :: colc  ! column counter
+ integer :: texc  ! tex counter
+ integer :: k1, k2! node number
 
- CHARACTER TEX*23
+ CHARACTER TEX*60
  DOUBLE PRECISION :: ZLIN
 
  IF (LL .LE. 0) THEN
     TEX = 'NO FLOW LINK FOUND    '
     CALL KTEXT(TEX,IWS-22,4,15)
  ELSE
-    TEX = 'FLOW LINK NR:         '
-    WRITE(TEX (14:),'(I10)') LL
-    CALL KTEXT(TEX,IWS-22,4,15)
-    TEX = 'VAL=                  '
-    WRITE(TEX(6:), '(E18.11)') ZLIN(LL)
-    CALL KTEXT(TEX,IWS-22,5,15)
-    TEX = 'Nd1:         '
-    WRITE(TEX (6:),'(I10)') LN(1,LL)
-    CALL KTEXT(TEX,IWS-22,6,15)
-    call gtext(tex, xz(ln(1,LL)), yz(ln(1,LL)), 221)
-    TEX = 'Nd2:         '
-    WRITE(TEX (6:),'(I10)') LN(2,LL)
-    CALL KTEXT(TEX,IWS-22,7,15)
-    call gtext(tex, xz(ln(2,LL)), yz(ln(2,LL)), 221)
+    if (kn(3,LL)==2) then
+       TEX = 'FLOW LINK NR:         '
+       WRITE(TEX (14:),'(I10)') LL
+       CALL KTEXT(TEX,IWS-22,4,15)
+       TEX = 'VAL=                  '
+       WRITE(TEX(6:), '(E18.11)') ZLIN(LL)
+       CALL KTEXT(TEX,IWS-22,5,15)
+       TEX = 'Nd1:         '
+       WRITE(TEX (6:),'(I10)') LN(1,LL)
+       CALL KTEXT(TEX,IWS-22,6,15)
+       call gtext(tex, xz(ln(1,LL)), yz(ln(1,LL)), 221)
+       TEX = 'Nd2:         '
+       WRITE(TEX (6:),'(I10)') LN(2,LL)
+       CALL KTEXT(TEX,IWS-22,7,15)
+       call gtext(tex, xz(ln(2,LL)), yz(ln(2,LL)), 221)
+    else ! for a 1d or 1d2d link: kn(3,LL)=1,3,4,5,6,7
+       linec = 6
+       tex = 'Info. of the link and nodes, press q to exit'
+       texc = len(trim(tex))
+       colc = 1
+       call ktext(tex, colc, linec, 15)
+       
+       ! block for flow link
+       linec = linec + 1
+       tex = ''
+       call ktext(tex, colc, linec, 15)
+
+       linec = linec + 1
+       tex = 'Flow link number ='
+       texc = len(trim(tex)) + 1
+       write(tex(texc:), '(I18, A8)') LL, ' (-)'
+       call ktext(tex, colc, linec, 15)
+       
+       linec = linec + 1      
+       tex = 'Flow link type   ='
+       write(tex(texc:), '(I18, A8)') kn(3,LL), ' (-)'
+       call ktext(tex, colc, linec, 15)
+       
+       linec = linec + 1
+       tex = 'Branch id        ='
+       write(tex(texc:), '(I18, A8)') -999, ' (-)'
+       call ktext(tex, colc, linec, 15)
+       
+       linec = linec + 1
+       tex = 'Chainage         ='
+       write(tex(texc:), '(E18.4, A8)') -999.00, ' (m)'
+       call ktext(tex, colc, linec, 15)
+       
+       linec = linec + 1
+       tex = 'Bob(1,L)         =' 
+       write(tex(texc:), '(E18.4, A8)') bob(1,LL), ' (m)'
+       call ktext(tex, colc, linec, 15)
+       
+       linec = linec + 1
+       tex = 'Bob(2,L)         =' 
+       write(tex(texc:), '(E18.4, A8)') bob(2,LL), ' (m)'
+       call ktext(tex, colc, linec, 15)
+       
+       linec = linec + 1
+       tex = 'Bob0(1,L)         =' 
+       write(tex(texc:), '(E18.4, A8)') bob0(1,LL), ' (m)'
+       call ktext(tex, colc, linec, 15)
+       
+       linec = linec + 1
+       tex = 'Bob0(2,L)         =' 
+       write(tex(texc:), '(E18.4, A8)') bob0(2,LL), ' (m)'
+       call ktext(tex, colc, linec, 15)
+       
+       linec = linec + 1
+       tex = 'Flow area        ='
+       write(tex(texc:), '(E18.4, A8)') au(LL), ' (m2)'
+       call ktext(tex, colc, linec, 15)
+       
+       linec = linec + 1
+       tex = 'Flow width       ='
+       write(tex(texc:), '(E18.4, A8)') wu(LL), ' (m)'
+       call ktext(tex, colc, linec, 15)
+      
+       linec = linec + 1
+       tex = 'Water depth      =   '
+       write(tex(texc:), '(E18.4, A8)') hu(LL), ' (m)'
+       call ktext(tex, colc, linec, 15)
+       linec = linec + 1
+       tex = 'Velocity         ='
+       write(tex(texc:), '(E18.4, A8)') u1(LL), ' (m/s)'
+       call ktext(tex, colc, linec, 15)
+       
+       linec = linec + 1
+       tex = 'Discharge        ='
+       write(tex(texc:), '(E18.4, A8)') q1(LL), ' (m3/s)'
+       call ktext(tex, colc, linec, 15)
+       
+       linec = linec + 1
+       tex = 'Conveyance       ='
+       write(tex(texc:), '(E18.4, A8)') cfuhi(LL), ' (m3/s)'
+       call ktext(tex, colc, linec, 15)       
+       
+       ! block for node 1
+       k1 = ln(1,LL)
+       if (k1 > 0) then
+       
+         linec = linec + 1
+         tex = ''
+         call ktext(tex, colc, linec, 15)
+         
+         linec = linec + 1
+         tex = 'Node1 number     = '
+         write(tex(texc:),'(I18, A8)') k1, ' (-)'
+         call ktext(tex, colc, linec,15)
+         
+         linec = linec + 1
+         tex = 'Kfs              = '
+         write(tex(texc:),'(I18, A8)') kfs(k1), ' (-)'
+         call ktext(tex, colc, linec,15)
+         
+         linec = linec + 1
+         tex = 'Water level      ='
+         write(tex(texc:),'(E18.4, A8)') s1(k1), ' (m)'
+         call ktext(tex, colc, linec,15)
+         
+         linec = linec + 1
+         tex = 'Water depth      ='
+         write(tex(texc:),'(E18.4, A8)') hs(k1), ' (m)'
+         call ktext(tex, colc, linec,15)
+         
+         linec = linec + 1
+         tex = 'Bottem level     ='
+         write(tex(texc:),'(E18.4, A8)') bl(k1), ' (m)'
+         call ktext(tex, colc, linec,15)
+         
+         linec = linec + 1
+         tex = 'Volume           ='
+         write(tex(texc:),'(E18.4, A8)') vol1(k1), ' (m3)'
+         call ktext(tex, colc, linec,15) 
+       end if
+       
+       ! block for node 2
+       k2 = ln(2,LL)
+       if (k2 > 0) then
+       
+         linec = linec + 1
+         tex = ''
+         call ktext(tex, colc, linec, 15)
+         
+         linec = linec + 1
+         tex = 'Node2 number     = '
+         write(tex(texc:),'(I18, A8)') k2, ' (-)'
+         call ktext(tex, colc, linec,15)
+         
+         linec = linec + 1
+         tex = 'Kfs              = '
+         write(tex(texc:),'(I18, A8)') kfs(k2), ' (-)'
+         call ktext(tex, colc, linec,15)
+         
+         linec = linec + 1
+         tex = 'Water level      ='
+         write(tex(texc:),'(E18.4, A8)') s1(k2), ' (m)'
+         call ktext(tex, colc, linec,15)
+         
+         linec = linec + 1
+         tex = 'Water depth      ='
+         write(tex(texc:),'(E18.4, A8)') hs(k2), ' (m)'
+         call ktext(tex, colc, linec,15)
+         
+         linec = linec + 1
+         tex = 'Bottem level     ='
+         write(tex(texc:),'(E18.4, A8)') bl(k2), ' (m)'
+         call ktext(tex, colc, linec,15)
+         
+         linec = linec + 1
+         tex = 'Volume           ='
+         write(tex(texc:),'(E18.4, A8)') vol1(k2), ' (m3)'
+         call ktext(tex, colc, linec,15) 
+       end if
+    end if
  ENDIF
 
  RETURN
