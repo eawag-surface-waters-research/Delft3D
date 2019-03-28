@@ -113,26 +113,26 @@ module m_network
    
 contains
 
-   subroutine realloc_1dadmin(adm, all_links_count, oned_links_count)
+   subroutine realloc_1dadmin(adm, links_count, gridpoints_count)
 
       type(t_administration_1d)  :: adm
-      integer, intent(in)        :: all_links_count
-      integer, intent(in)        :: oned_links_count
+      integer, intent(in)        :: links_count
+      integer, intent(in)        :: gridpoints_count
       
-      if (.not. allocated(adm%lin2str)) allocate(adm%lin2str(all_links_count))  
-      if (.not. allocated(adm%lin2ibr)) allocate(adm%lin2ibr(all_links_count))   
-      if (.not. allocated(adm%lin2point)) allocate(adm%lin2point(all_links_count)) 
-      if (.not. allocated(adm%lin2local)) allocate(adm%lin2local(all_links_count)) 
-      if (.not. allocated(adm%lin2grid)) allocate(adm%lin2grid(all_links_count)) 
-      if (.not. associated(adm%line2cross)) allocate(adm%line2cross(all_links_count))
-      if (.not. associated(adm%gpnt2cross)) allocate(adm%gpnt2cross(all_links_count))
-      if (.not. allocated(adm%hysteresis_for_summerdike)) allocate(adm%hysteresis_for_summerdike(2,all_links_count))
+      if (.not. allocated(adm%lin2str)) allocate(adm%lin2str(links_count))  
+      if (.not. allocated(adm%lin2ibr)) allocate(adm%lin2ibr(links_count))   
+      if (.not. allocated(adm%lin2point)) allocate(adm%lin2point(links_count)) 
+      if (.not. allocated(adm%lin2local)) allocate(adm%lin2local(links_count)) 
+      if (.not. allocated(adm%lin2grid)) allocate(adm%lin2grid(links_count)) 
+      if (.not. associated(adm%line2cross)) allocate(adm%line2cross(links_count))
+      if (.not. associated(adm%gpnt2cross)) allocate(adm%gpnt2cross(gridpoints_count))
+      if (.not. allocated(adm%hysteresis_for_summerdike)) allocate(adm%hysteresis_for_summerdike(2,links_count))
       adm%hysteresis_for_summerdike = .true.
-      if (.not. allocated(adm%au_1d)) allocate(adm%au_1d(oned_links_count))
-      if (.not. allocated(adm%conv_1d)) allocate(adm%conv_1d(oned_links_count))
-      if (.not. allocated(adm%dpu_1d)) allocate(adm%dpu_1d(oned_links_count))
-      if (.not. allocated(adm%minwidth1d)) allocate(adm%minwidth1d(oned_links_count))
-      if (.not. allocated(adm%minconv)) allocate(adm%minconv(oned_links_count))   
+      if (.not. allocated(adm%au_1d)) allocate(adm%au_1d(links_count))
+      if (.not. allocated(adm%conv_1d)) allocate(adm%conv_1d(links_count))
+      if (.not. allocated(adm%dpu_1d)) allocate(adm%dpu_1d(links_count))
+      if (.not. allocated(adm%minwidth1d)) allocate(adm%minwidth1d(links_count))
+      if (.not. allocated(adm%minconv)) allocate(adm%minconv(links_count))   
       
    end subroutine realloc_1dadmin
 
@@ -313,14 +313,13 @@ contains
    end subroutine admin_network
 
 
-   subroutine initialize_1dadmin(network, linall)
+   subroutine initialize_1dadmin(network, lnx1d, lnx, ngrid)
    
       use m_CrossSections
       use m_GlobalParameters
       
-      type(t_network), intent(inout) :: network
-      integer, intent(in)            :: linall
-      
+      type(t_network), intent(inout), target :: network
+      integer, intent(in)            :: lnx1d, lnx, ngrid     
       integer :: ilnk
       integer :: igpt
       integer :: ll
@@ -341,7 +340,7 @@ contains
       double precision                   :: vel 
       double precision                   :: as
       double precision                   :: wetperimeter
-      type(t_administration_1d)          :: adm
+      type(t_administration_1d), pointer :: adm
       type(t_branch), pointer            :: pbran
 
       integer, allocatable, dimension(:) :: crossOrder
@@ -358,9 +357,9 @@ contains
 
       character(20)                      :: chainageString
       
-      call realloc(network%adm, linall, network%gridpointsCount)
+      call realloc(network%adm, lnx1d, ngrid)
       
-      adm = network%adm
+      adm => network%adm
       
       adm%lin2str = -huge(1)
       if (network%sts%Count > 0) then
@@ -368,6 +367,7 @@ contains
       else
          adm%hasStructures = .false.
       endif
+      adm%lin2str = -1
       do istru = 1, network%sts%Count
          adm%lin2str(network%sts%struct(istru)%link_number) = istru
       enddo

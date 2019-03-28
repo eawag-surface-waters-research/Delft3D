@@ -423,30 +423,12 @@ subroutine loadModel(filename)
          call read_1d_attributes(md_1dfiles, network)
        endif
 
-       call initialize_1dadmin(network, network%gridpointsCount)
-
        ! Set grd back to dflowfm-values
        do i = 1, network%brs%count
           network%brs%branch(i)%grd = network%brs%branch(i)%grd_buf
        enddo
 
        ! fill bed levels from values based on links
-       do L = 1, network%numl
-          tempbob = getbobs(network, L)
-          if (tempbob(1) > 0.5d0* huge(1d0)) tempbob(1) = dmiss
-          if (tempbob(2) > 0.5d0* huge(1d0)) tempbob(2) = dmiss
-
-          k1 = kn(1,L)
-          k2 = kn(2,L)
-          if (zk(k1) == dmiss) then
-             zk(k1) = tempbob(1)
-          endif
-          if (zk(k2) == dmiss) then
-             zk(k2) = tempbob(2)
-          endif
-          zk(k1) = min(zk(k1),tempbob(1))
-          zk(k2) = min(zk(k2),tempbob(2))
-       enddo
 
     endif
 
