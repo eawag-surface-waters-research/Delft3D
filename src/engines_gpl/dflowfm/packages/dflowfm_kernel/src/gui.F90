@@ -22221,6 +22221,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
  use network_data
  use m_flow
  use unstruc_channel_flow
+ use m_structure
  implicit none
 
  integer :: LL
@@ -22228,9 +22229,10 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
  integer :: colc  ! column counter
  integer :: texc  ! tex counter
  integer :: k1, k2! node number
- integer :: branchindex, ilocallin
+ integer :: branchindex, ilocallin, strN, istrtype
+ double precision :: crestlevel, crestwidth, gle, capacity
 
- CHARACTER TEX*60
+ CHARACTER TEX*60, str_type*21
  DOUBLE PRECISION :: ZLIN
 
  IF (LL .LE. 0) THEN
@@ -22334,8 +22336,57 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
        linec = linec + 1
        tex = 'Conveyance       ='
        write(tex(texc:), '(E18.4, A8)') cfuhi(LL), ' (m3/s)'
-       call ktext(tex, colc, linec, 15)       
+       call ktext(tex, colc, linec, 15)
        
+       ! If this flowlink has a stucture on it, then also show related info.
+       if (network%adm%lin2str(LL) > 0) then
+          strN = network%adm%lin2str(LL) ! Assume only 1 structure on the flowlink
+          
+          linec = linec + 1
+          tex = 'Structure id     = '
+          write(tex(texc+1:), '(A21, A4)') network%sts%struct(strN)%id(1:21), ' (-)'
+          call ktext(tex, colc, linec, 15)
+          
+          linec = linec + 1
+          tex = 'Structure type   ='
+          istrtype = network%sts%struct(strN)%st_type
+          call GetStrucType_from_int(istrtype, str_type)
+          write(tex(texc+1:), '(A21, A4)') str_type, ' (-)'
+          call ktext(tex, colc, linec, 15)
+       
+          crestlevel = get_crest_level(network%sts%struct(strN))
+          if (crestlevel .ne. huge(1d0)) then ! only show crestlevel when it is a valid value
+             linec = linec + 1
+             tex = 'Crest level      = '
+             write(tex(texc:), '(E18.4, A8)') crestlevel, ' (m)'
+             call ktext(tex, colc, linec, 15)
+          end if
+          
+          crestwidth = get_width(network%sts%struct(strN))
+          if (crestwidth .ne. huge(1d0)) then
+             linec = linec + 1
+             tex = 'Crest width      = '
+             write(tex(texc:), '(E18.4, A8)') crestwidth, ' (m)'
+             call ktext(tex, colc, linec, 15)
+          end if
+          
+          gle = get_gle(network%sts%struct(strN))
+          if (gle .ne. huge(1d0)) then
+             linec = linec + 1
+             tex = 'Gate l. edge lvl = '
+             write(tex(texc:), '(E18.4, A8)') gle, ' (m)'
+             call ktext(tex, colc, linec, 15)
+          end if
+          
+          capacity = get_capacity(network%sts%struct(strN))
+          if (capacity .ne. huge(1d0)) then
+             linec = linec + 1
+             tex = 'Pump capacity    ='
+             write(tex(texc:), '(E18.4, A8)') capacity, ' (m3/s)'
+             call ktext(tex, colc, linec, 15)
+          end if
+       end if
+
        ! block for node 1
        k1 = ln(1,LL)
        if (k1 > 0) then

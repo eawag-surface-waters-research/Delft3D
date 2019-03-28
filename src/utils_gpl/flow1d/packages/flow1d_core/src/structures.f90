@@ -67,6 +67,7 @@ module m_structure
    public getTableValue
    public getCrossSection
    public getStructureById
+   public GetStrucType_from_int
    public get_crest_level
    public get_crest_level_c_loc
    public get_width
@@ -878,38 +879,40 @@ end subroutine
    end function GetStrucType_from_string
 
 
-   character function GetStrucType_from_int(istrtype)
-      integer :: istrtype
+   subroutine GetStrucType_from_int(istrtype, strng)
+      integer, intent(in) :: istrtype
 
+      character (len=*), intent(out) :: strng
+      
       select case(istrtype)
          case (ST_RIVER_WEIR)
-            GetStrucType_from_int = 'river_weir'
+            strng = 'river_weir'
          case (ST_ADV_WEIR)
-            GetStrucType_from_int = 'advanced_weir'
+            strng = 'advanced_weir'
          case (ST_PUMP)
-            GetStrucType_from_int = 'pump'
+            strng = 'pump'
          case (ST_GENERAL_ST)
-            GetStrucType_from_int = 'general_structure'
+            strng = 'general_structure'
          case (ST_WEIR)
-            GetStrucType_from_int = 'weir'
+            strng = 'weir'
          case (ST_ORIFICE)
-            GetStrucType_from_int = 'orifice'
+            strng = 'orifice'
          case (ST_CULVERT)
-            GetStrucType_from_int = 'culvert'
+            strng = 'culvert'
          case (ST_SIPHON)
-            GetStrucType_from_int = 'siphon'
+            strng = 'siphon'
          case (ST_INV_SIPHON)
-            GetStrucType_from_int = 'inverted_siphon'
+            strng = 'inverted_siphon'
          case (ST_UNI_WEIR)
-            GetStrucType_from_int = 'universal_weir'
+            strng = 'universal_weir'
          case (ST_DAMBREAK)
-            GetStrucType_from_int = 'dambreak'
+            strng = 'dambreak'
          case (ST_BRIDGE)
-            GetStrucType_from_int = 'bridge'
+            strng = 'bridge'
          case default
-            GetStrucType_from_int = 'unknown'
+            strng = 'unknown'
       end select
-   end function GetStrucType_from_int
+   end subroutine GetStrucType_from_int
 
    function getStructureById(sts, id) result(pstru)
       type(t_structureSet), intent(in)    :: sts       !< Current structure set
@@ -1022,6 +1025,8 @@ end subroutine
          get_gle = struc%orifice%openlevel 
       case (ST_GENERAL_ST)
          get_gle = struc%generalst%gateheight 
+      case default
+         get_gle = huge(1d0)
       end select
    end function get_gle
    
@@ -1198,6 +1203,10 @@ end subroutine
    double precision function get_capacity(struc)
       
       type (t_structure), intent(inout) :: struc
+      if (struc%st_type /= ST_PUMP) then
+         get_capacity = huge(1d0)
+         return
+      endif
       
       if (struc%pump%isControlled) then
          get_capacity = struc%pump%capacitySetpoint
