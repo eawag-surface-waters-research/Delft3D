@@ -162,6 +162,8 @@
       use m_couplib
       use precision
       use output
+      use nan_check_module
+      implicit none
 !
       integer       notot , noseg , nopa  , nosfun, itime ,
      +              nodump, nocons, nofun , idt   , noutp ,
@@ -225,16 +227,27 @@
 !
 !     Local declarations
 !
-      parameter   ( igseg = 1, igmon = 2, iggrd = 3, igsub= 4 )
-      parameter   ( luoff = 18 )
-      parameter   ( luoff2= 36 )
+      integer, parameter  :: igseg = 1
+      integer, parameter  :: igmon = 2
+      integer, parameter  :: iggrd = 3
+      integer, parameter  :: igsub = 4
+      integer, parameter  :: luoff = 18
+      integer, parameter  :: luoff2= 36
       integer       k1    , iostrt, iostop, iostep, nrvar ,
-     +              isrtou, igrdou, iniout, lunout, iout
+     +              isrtou, igrdou, iniout, lunout, iout  ,
+     +              ierr  , ierr2 , i     , i1    , i2    ,
+     +              ifi   , ncout , nrvar2, nrvar3, ip1   ,
+     +              iof   , nsegou, intopt 
       character*255 lchout
       character*20  name
-      logical       loflag, lmfirs, ldfirs, lhfirs, ldummy
+      logical       loflag, lmfirs, ldfirs, lhfirs, ldummy, lnonans
       logical       lget  , lread
-      real, allocatable :: surf(:)
+      real, allocatable  :: surf(:)
+      integer            :: idummy       ! dummy not used
+      real               :: rdummy       ! dummy not used
+      character(len=256) :: adummy       ! dummy not used
+      logical            :: lfound       ! Keyword found (or not)
+      logical, save      :: lnancheck    ! Do check on NAN in conc array
 
       integer, save ::       mncrec = 0
       integer, save ::       timeid, bndtimeid
@@ -248,7 +261,26 @@
 
       if (first) then
          allocate(mncwqid1(notot,2) , mncwqid2(novar,2))
+!        allow switching of NAN concentrations check
+         call getcom ( '-nonancheck', 0, lfound, idummy, rdummy, adummy, ierr2)
+         lnancheck = .not. lfound
          first = .false.
+      endif
+
+      if (lnancheck) then
+!        Check for NANs in the concentration array
+         lunout = lun(19)
+         lnonans = nan_check(conc, 'conc(notot, noseg)', lunout)
+         if ( .not. lnonans ) then
+            write(lunout,'(/A)')  '  ERROR : NAN found the concentration array, ending calculation.'
+            write(*     ,'(/A)')  '  ERROR : NAN found the concentration array, ending calculation. See location in mon-file.'
+            write(lunout,'(A)')   '          Current concentration fields written to _res.map.'
+            write(*     ,'(A)')   '          Current concentration fields written to _res.map.'
+            write(lunout,'(/A/)') '  INFO  : If you don''t want NAN checks, use -nonancheck at command line.'
+            write(*     ,'(/A/)') '  INFO  : If you don''t want NAN checks, use -nonancheck at command line.'
+            call dlwq13 (lun, lchar, conc, itime, moname, syname, notot, noseg)
+            call srstop(1)
+         endif
       endif
 !
 !     Evaluate standard DELWAQ output timers
