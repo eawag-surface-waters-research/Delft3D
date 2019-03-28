@@ -175,7 +175,7 @@ module m_ec_filereader_read
                   read(rec, *, IOSTAT = istat) time_steps, ( values(i), i=1,n_values )
                   if (istat == 0) then
                      ! Convert from minutes to MJD
-                     time_steps = fileReaderPtr%tframe%ec_refdate + time_steps /1440.0
+                     time_steps = fileReaderPtr%tframe%ec_refdate - fileReaderPtr%tframe%ec_timezone/24.0 + time_steps /1440.0
                      success = .true.
                   else
                      call setECMessage("Read failure before end of file: "//trim(fileReaderPtr%fileName))
