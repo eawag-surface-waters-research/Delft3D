@@ -22220,6 +22220,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
  use m_devices
  use network_data
  use m_flow
+ use unstruc_channel_flow
  implicit none
 
  integer :: LL
@@ -22227,6 +22228,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
  integer :: colc  ! column counter
  integer :: texc  ! tex counter
  integer :: k1, k2! node number
+ integer :: branchindex, ilocallin
 
  CHARACTER TEX*60
  DOUBLE PRECISION :: ZLIN
@@ -22274,13 +22276,15 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
        call ktext(tex, colc, linec, 15)
        
        linec = linec + 1
+       branchindex = network%adm%lin2ibr(LL)
        tex = 'Branch id        ='
-       write(tex(texc:), '(I18, A8)') -999, ' (-)'
+       write(tex(texc+1:), '(A21, A4)') network%brs%branch(branchindex)%id(1:21), ' (-)'
        call ktext(tex, colc, linec, 15)
        
        linec = linec + 1
+       ilocallin = network%adm%lin2point(LL)
        tex = 'Chainage         ='
-       write(tex(texc:), '(E18.4, A8)') -999.00, ' (m)'
+       write(tex(texc:), '(E18.4, A8)') network%brs%branch(branchindex)%uPointsChainages(ilocallin), ' (m)'
        call ktext(tex, colc, linec, 15)
        
        linec = linec + 1
@@ -22294,12 +22298,12 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
        call ktext(tex, colc, linec, 15)
        
        linec = linec + 1
-       tex = 'Bob0(1,L)         =' 
+       tex = 'Bob0(1,L)        =' 
        write(tex(texc:), '(E18.4, A8)') bob0(1,LL), ' (m)'
        call ktext(tex, colc, linec, 15)
        
        linec = linec + 1
-       tex = 'Bob0(2,L)         =' 
+       tex = 'Bob0(2,L)        =' 
        write(tex(texc:), '(E18.4, A8)') bob0(2,LL), ' (m)'
        call ktext(tex, colc, linec, 15)
        
