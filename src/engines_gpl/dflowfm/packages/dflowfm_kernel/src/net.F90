@@ -33471,7 +33471,7 @@ end subroutine copycurvigridboundstopol
    subroutine partition_write_domains(netfilename,icgsolver,jacells,japolygon)
       
       use m_partitioninfo
-      use unstruc_netcdf, only: unc_write_net, unc_write_net_ugrid
+      use unstruc_netcdf, only: unc_write_net
       use m_polygon, only: NPL
       use dfm_error
 !      use m_missing, only: intmiss
@@ -33535,7 +33535,6 @@ end subroutine copycurvigridboundstopol
          endif
          call unc_write_net(partfilename, janetcell = 1, janetbnd = 1, jaidomain = 1) 
       endif
-      ! call unc_write_net_ugrid(netfilename, janetcell = 1, janetbnd = 1, jaidomain = 1) 
       
       
 
@@ -33560,7 +33559,6 @@ end subroutine copycurvigridboundstopol
  
 !        write partitioning net files, including cell info. and idomain
          call unc_write_net(filename, janetcell = 1, janetbnd = 1, jaidomain = jacells, jaiglobal_s = jacells) ! Save net bnds to prevent unnecessary open bnds
-         ! call unc_write_net_ugrid(filename, janetcell = 1, janetbnd = 1, jaidomain = 1) ! Save net bnds to prevent unnecessary open bnds
        
 !        begin debug
 !        make and write the ghost lists
