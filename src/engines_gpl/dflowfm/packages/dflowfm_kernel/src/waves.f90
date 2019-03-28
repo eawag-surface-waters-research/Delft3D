@@ -1056,7 +1056,7 @@
    my      = 0d0
 
    do k = 1,ndx
-      massflux_max = 1d0/8d0*sag*(hs(k)**1.5)*gammax**2
+      massflux_max = 1d0/8d0*sag*(max(hs(k),0d0)**1.5)*gammax**2
       mnorm  = min(sqrt(mxwav(k)**2+mywav(k)**2), massflux_max)
       mangle = atan2(mywav(k), mxwav(k))
       mx(k)  = mnorm*dcos(mangle)
