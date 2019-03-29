@@ -22218,252 +22218,34 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
  SUBROUTINE DISLN(LL)   ! print link values
  use m_flowgeom
  use m_devices
- use network_data
- use m_flow
- use unstruc_channel_flow
- use m_structure
+ use network_data, only:kn
  implicit none
 
  integer :: LL
- integer :: linec ! line counter
- integer :: colc  ! column counter
- integer :: texc  ! tex counter
- integer :: k1, k2! node number
- integer :: branchindex, ilocallin, strN, istrtype
- double precision :: crestlevel, crestwidth, gle, capacity
-
- CHARACTER TEX*60, str_type*21
+ CHARACTER TEX*23
  DOUBLE PRECISION :: ZLIN
 
  IF (LL .LE. 0) THEN
     TEX = 'NO FLOW LINK FOUND    '
     CALL KTEXT(TEX,IWS-22,4,15)
  ELSE
-    if (kn(3,LL)==2) then
-       TEX = 'FLOW LINK NR:         '
-       WRITE(TEX (14:),'(I10)') LL
-       CALL KTEXT(TEX,IWS-22,4,15)
-       TEX = 'VAL=                  '
-       WRITE(TEX(6:), '(E18.11)') ZLIN(LL)
-       CALL KTEXT(TEX,IWS-22,5,15)
-       TEX = 'Nd1:         '
-       WRITE(TEX (6:),'(I10)') LN(1,LL)
-       CALL KTEXT(TEX,IWS-22,6,15)
-       call gtext(tex, xz(ln(1,LL)), yz(ln(1,LL)), 221)
-       TEX = 'Nd2:         '
-       WRITE(TEX (6:),'(I10)') LN(2,LL)
-       CALL KTEXT(TEX,IWS-22,7,15)
-       call gtext(tex, xz(ln(2,LL)), yz(ln(2,LL)), 221)
-    else ! for a 1d or 1d2d link: kn(3,LL)=1,3,4,5,6,7
-       linec = 6
-       tex = 'Info. of the link and nodes, press q to exit'
-       texc = len(trim(tex))
-       colc = 1
-       call ktext(tex, colc, linec, 15)
-       
-       ! block for flow link
-       linec = linec + 1
-       tex = ''
-       call ktext(tex, colc, linec, 15)
-
-       linec = linec + 1
-       tex = 'Flow link number ='
-       texc = len(trim(tex)) + 1
-       write(tex(texc:), '(I18, A8)') LL, ' (-)'
-       call ktext(tex, colc, linec, 15)
-       
-       linec = linec + 1      
-       tex = 'Flow link type   ='
-       write(tex(texc:), '(I18, A8)') kn(3,LL), ' (-)'
-       call ktext(tex, colc, linec, 15)
-       
-       linec = linec + 1
-       branchindex = network%adm%lin2ibr(LL)
-       tex = 'Branch id        ='
-       write(tex(texc+1:), '(A21, A4)') network%brs%branch(branchindex)%id(1:21), ' (-)'
-       call ktext(tex, colc, linec, 15)
-       
-       linec = linec + 1
-       ilocallin = network%adm%lin2point(LL)
-       tex = 'Chainage         ='
-       write(tex(texc:), '(E18.4, A8)') network%brs%branch(branchindex)%uPointsChainages(ilocallin), ' (m)'
-       call ktext(tex, colc, linec, 15)
-       
-       linec = linec + 1
-       tex = 'Bob(1,L)         =' 
-       write(tex(texc:), '(E18.4, A8)') bob(1,LL), ' (m)'
-       call ktext(tex, colc, linec, 15)
-       
-       linec = linec + 1
-       tex = 'Bob(2,L)         =' 
-       write(tex(texc:), '(E18.4, A8)') bob(2,LL), ' (m)'
-       call ktext(tex, colc, linec, 15)
-       
-       linec = linec + 1
-       tex = 'Bob0(1,L)        =' 
-       write(tex(texc:), '(E18.4, A8)') bob0(1,LL), ' (m)'
-       call ktext(tex, colc, linec, 15)
-       
-       linec = linec + 1
-       tex = 'Bob0(2,L)        =' 
-       write(tex(texc:), '(E18.4, A8)') bob0(2,LL), ' (m)'
-       call ktext(tex, colc, linec, 15)
-       
-       linec = linec + 1
-       tex = 'Flow area        ='
-       write(tex(texc:), '(E18.4, A8)') au(LL), ' (m2)'
-       call ktext(tex, colc, linec, 15)
-       
-       linec = linec + 1
-       tex = 'Flow width       ='
-       write(tex(texc:), '(E18.4, A8)') wu(LL), ' (m)'
-       call ktext(tex, colc, linec, 15)
-      
-       linec = linec + 1
-       tex = 'Water depth      =   '
-       write(tex(texc:), '(E18.4, A8)') hu(LL), ' (m)'
-       call ktext(tex, colc, linec, 15)
-       linec = linec + 1
-       tex = 'Velocity         ='
-       write(tex(texc:), '(E18.4, A8)') u1(LL), ' (m/s)'
-       call ktext(tex, colc, linec, 15)
-       
-       linec = linec + 1
-       tex = 'Discharge        ='
-       write(tex(texc:), '(E18.4, A8)') q1(LL), ' (m3/s)'
-       call ktext(tex, colc, linec, 15)
-       
-       linec = linec + 1
-       tex = 'Conveyance       ='
-       write(tex(texc:), '(E18.4, A8)') cfuhi(LL), ' (m3/s)'
-       call ktext(tex, colc, linec, 15)
-       
-       ! If this flowlink has a stucture on it, then also show related info.
-       if (network%adm%lin2str(LL) > 0) then
-          strN = network%adm%lin2str(LL) ! Assume only 1 structure on the flowlink
-          
-          linec = linec + 1
-          tex = 'Structure id     = '
-          write(tex(texc+1:), '(A21, A4)') network%sts%struct(strN)%id(1:21), ' (-)'
-          call ktext(tex, colc, linec, 15)
-          
-          linec = linec + 1
-          tex = 'Structure type   ='
-          istrtype = network%sts%struct(strN)%st_type
-          call GetStrucType_from_int(istrtype, str_type)
-          write(tex(texc+1:), '(A21, A4)') str_type, ' (-)'
-          call ktext(tex, colc, linec, 15)
-       
-          crestlevel = get_crest_level(network%sts%struct(strN))
-          if (crestlevel .ne. huge(1d0)) then ! only show crestlevel when it is a valid value
-             linec = linec + 1
-             tex = 'Crest level      = '
-             write(tex(texc:), '(E18.4, A8)') crestlevel, ' (m)'
-             call ktext(tex, colc, linec, 15)
-          end if
-          
-          crestwidth = get_width(network%sts%struct(strN))
-          if (crestwidth .ne. huge(1d0)) then
-             linec = linec + 1
-             tex = 'Crest width      = '
-             write(tex(texc:), '(E18.4, A8)') crestwidth, ' (m)'
-             call ktext(tex, colc, linec, 15)
-          end if
-          
-          gle = get_gle(network%sts%struct(strN))
-          if (gle .ne. huge(1d0)) then
-             linec = linec + 1
-             tex = 'Gate l. edge lvl = '
-             write(tex(texc:), '(E18.4, A8)') gle, ' (m)'
-             call ktext(tex, colc, linec, 15)
-          end if
-          
-          capacity = get_capacity(network%sts%struct(strN))
-          if (capacity .ne. huge(1d0)) then
-             linec = linec + 1
-             tex = 'Pump capacity    ='
-             write(tex(texc:), '(E18.4, A8)') capacity, ' (m3/s)'
-             call ktext(tex, colc, linec, 15)
-          end if
-       end if
-
-       ! block for node 1
-       k1 = ln(1,LL)
-       if (k1 > 0) then
-       
-         linec = linec + 1
-         tex = ''
-         call ktext(tex, colc, linec, 15)
-         
-         linec = linec + 1
-         tex = 'Node1 number     = '
-         write(tex(texc:),'(I18, A8)') k1, ' (-)'
-         call ktext(tex, colc, linec,15)
-         
-         linec = linec + 1
-         tex = 'Kfs              = '
-         write(tex(texc:),'(I18, A8)') kfs(k1), ' (-)'
-         call ktext(tex, colc, linec,15)
-         
-         linec = linec + 1
-         tex = 'Water level      ='
-         write(tex(texc:),'(E18.4, A8)') s1(k1), ' (m)'
-         call ktext(tex, colc, linec,15)
-         
-         linec = linec + 1
-         tex = 'Water depth      ='
-         write(tex(texc:),'(E18.4, A8)') hs(k1), ' (m)'
-         call ktext(tex, colc, linec,15)
-         
-         linec = linec + 1
-         tex = 'Bottem level     ='
-         write(tex(texc:),'(E18.4, A8)') bl(k1), ' (m)'
-         call ktext(tex, colc, linec,15)
-         
-         linec = linec + 1
-         tex = 'Volume           ='
-         write(tex(texc:),'(E18.4, A8)') vol1(k1), ' (m3)'
-         call ktext(tex, colc, linec,15) 
-       end if
-       
-       ! block for node 2
-       k2 = ln(2,LL)
-       if (k2 > 0) then
-       
-         linec = linec + 1
-         tex = ''
-         call ktext(tex, colc, linec, 15)
-         
-         linec = linec + 1
-         tex = 'Node2 number     = '
-         write(tex(texc:),'(I18, A8)') k2, ' (-)'
-         call ktext(tex, colc, linec,15)
-         
-         linec = linec + 1
-         tex = 'Kfs              = '
-         write(tex(texc:),'(I18, A8)') kfs(k2), ' (-)'
-         call ktext(tex, colc, linec,15)
-         
-         linec = linec + 1
-         tex = 'Water level      ='
-         write(tex(texc:),'(E18.4, A8)') s1(k2), ' (m)'
-         call ktext(tex, colc, linec,15)
-         
-         linec = linec + 1
-         tex = 'Water depth      ='
-         write(tex(texc:),'(E18.4, A8)') hs(k2), ' (m)'
-         call ktext(tex, colc, linec,15)
-         
-         linec = linec + 1
-         tex = 'Bottem level     ='
-         write(tex(texc:),'(E18.4, A8)') bl(k2), ' (m)'
-         call ktext(tex, colc, linec,15)
-         
-         linec = linec + 1
-         tex = 'Volume           ='
-         write(tex(texc:),'(E18.4, A8)') vol1(k2), ' (m3)'
-         call ktext(tex, colc, linec,15) 
-       end if
+    TEX = 'FLOW LINK NR:         '
+    WRITE(TEX (14:),'(I10)') LL
+    CALL KTEXT(TEX,IWS-22,4,15)
+    TEX = 'VAL=                  '
+    WRITE(TEX(6:), '(E18.11)') ZLIN(LL)
+    CALL KTEXT(TEX,IWS-22,5,15)
+    TEX = 'Nd1:         '
+    WRITE(TEX (6:),'(I10)') LN(1,LL)
+    CALL KTEXT(TEX,IWS-22,6,15)
+    call gtext(tex, xz(ln(1,LL)), yz(ln(1,LL)), 221)
+    TEX = 'Nd2:         '
+    WRITE(TEX (6:),'(I10)') LN(2,LL)
+    CALL KTEXT(TEX,IWS-22,7,15)
+    call gtext(tex, xz(ln(2,LL)), yz(ln(2,LL)), 221)
+    
+    if (kn(3,LL) .ne. 2) then
+       call write_info_1d_link(LL)
     end if
  ENDIF
 
@@ -23705,4 +23487,237 @@ do n = 1,numsrc ! teksorsin
    endif   
 enddo
 
-end subroutine teksorsin 
+   end subroutine teksorsin 
+
+subroutine write_info_1d_link(LL)
+use m_flowgeom
+use network_data
+use m_flow
+use unstruc_channel_flow
+use m_structure
+implicit none
+
+integer, intent(in) :: LL
+
+character TEX*53, str_type*21
+integer :: linec ! line counter
+integer :: colc  ! column counter
+integer :: texc  ! tex counter
+integer :: k1, k2! node number
+integer :: branchindex, ilocallin, strN, istrtype
+double precision :: crestlevel, crestwidth, gle, capacity
+
+linec = 6
+colc  = 1
+texc  = 20
+
+! write an empty line
+tex = ''
+call IOUTSTRINGXY(colc, linec, tex)
+
+! block for node 1
+k1 = ln(1,LL)
+if (k1 > 0) then
+   linec = linec + 1
+   tex = ' Node1 number'
+   write(tex(texc:), '(A3, I22, A8)')'=', k1, '(-)'
+   call IOUTSTRINGXY(colc, linec, tex)
+   
+   linec = linec + 1
+   tex = ' Kfs '
+   write(tex(texc:), '(A3, I22, A8)')'=', kfs(k1), '(-)'
+   call IOUTSTRINGXY(colc, linec, tex)
+   
+   linec = linec + 1
+   tex = ' Water level (s1)'
+   write(tex(texc:), '(A3, E22.4, A8)')'=', s1(k1), '(m)'
+   call IOUTSTRINGXY(colc, linec, tex)
+   
+   linec = linec + 1
+   tex = ' Water depth (hs)'
+   write(tex(texc:), '(A3, E22.4, A8)')'=', hs(k1), '(m)'
+   call IOUTSTRINGXY(colc, linec, tex)
+   
+   linec = linec + 1
+   tex = ' Bottom level (bl)'
+   write(tex(texc:), '(A3, E22.4, A8)')'=', bl(k1), '(m)'
+   call IOUTSTRINGXY(colc, linec, tex)
+   
+   linec = linec + 1
+   tex = ' Volume (vol1)'
+   write(tex(texc:), '(A3, E22.4, A8)')'=', vol1(k1), '(m3)'
+   call IOUTSTRINGXY(colc, linec, tex)
+end if
+
+! write an empty line
+linec = linec + 1
+tex = ''
+call IOUTSTRINGXY(colc, linec, tex)
+
+! block for node 2
+k2 = ln(2,LL)
+if (k2 > 0) then
+   linec = linec + 1
+   tex = ' Node2 number'
+   write(tex(texc:), '(A3, I22, A8)')'=', k2, '(-)'
+   call IOUTSTRINGXY(colc, linec, tex)
+   
+   linec = linec + 1
+   tex = ' Kfs '
+   write(tex(texc:), '(A3, I22, A8)')'=', kfs(k2), '(-)'
+   call IOUTSTRINGXY(colc, linec, tex)
+   
+   linec = linec + 1
+   tex = ' Water level (s1)'
+   write(tex(texc:), '(A3, E22.4, A8)')'=', s1(k2), '(m)'
+   call IOUTSTRINGXY(colc, linec, tex)
+   
+   linec = linec + 1
+   tex = ' Water depth (hs)'
+   write(tex(texc:), '(A3, E22.4, A8)')'=', hs(k2), '(m)'
+   call IOUTSTRINGXY(colc, linec, tex)
+   
+   linec = linec + 1
+   tex = ' Bottom level (bl)'
+   write(tex(texc:), '(A3, E22.4, A8)')'=', bl(k2), '(m)'
+   call IOUTSTRINGXY(colc, linec, tex)
+   
+   linec = linec + 1
+   tex = ' Volume (vol1)'
+   write(tex(texc:), '(A3, E22.4, A8)')'=', vol1(k2), '(m3)'
+   call IOUTSTRINGXY(colc, linec, tex)
+end if
+
+! write an empty line
+linec = linec + 1
+tex = ''
+call IOUTSTRINGXY(colc, linec, tex)
+
+! block for flow link
+linec = linec + 1
+tex = ' Flow link number'
+write(tex(texc:), '(A3, I22, A8)')'=', LL, '(-)'
+call IOUTSTRINGXY(colc, linec, tex)
+
+linec = linec + 1      
+tex = ' Flow link type'
+write(tex(texc:), '(A3, I22, A8)')'=', kn(3,LL), ' (-)'
+call IOUTSTRINGXY(colc, linec, tex)
+
+linec = linec + 1
+branchindex = network%adm%lin2ibr(LL)
+tex = ' Branch id'
+write(tex(texc:), '(A4, A21, A8)')'= ', network%brs%branch(branchindex)%id(1:21), ' (-)'
+call IOUTSTRINGXY(colc, linec, tex)
+
+linec = linec + 1
+ilocallin = network%adm%lin2point(LL)
+tex = ' Chainage'
+write(tex(texc:), '(A3, E22.4, A8)')'=', network%brs%branch(branchindex)%uPointsChainages(ilocallin), ' (m)'
+call IOUTSTRINGXY(colc, linec, tex)
+
+linec = linec + 1
+tex = ' Bob(1,L)' 
+write(tex(texc:), '(A3, E22.4, A8)')'=', bob(1,LL), ' (m)'
+call IOUTSTRINGXY(colc, linec, tex)
+
+linec = linec + 1
+tex = ' Bob(2,L)' 
+write(tex(texc:), '(A3, E22.4, A8)')'=', bob(2,LL), ' (m)'
+call IOUTSTRINGXY(colc, linec, tex)
+
+linec = linec + 1
+tex = ' Bob0(1,L)' 
+write(tex(texc:), '(A3, E22.4, A8)')'=', bob0(1,LL), ' (m)'
+call IOUTSTRINGXY(colc, linec, tex)
+
+linec = linec + 1
+tex = ' Bob0(2,L)' 
+write(tex(texc:), '(A3, E22.4, A8)')'=', bob0(2,LL), ' (m)'
+call IOUTSTRINGXY(colc, linec, tex)
+
+linec = linec + 1
+tex = ' Flow area (au)'
+write(tex(texc:), '(A3, E22.4, A8)')'=', au(LL), ' (m2)'
+call IOUTSTRINGXY(colc, linec, tex)
+
+linec = linec + 1
+tex = ' Flow width (wu)'
+write(tex(texc:), '(A3, E22.4, A8)')'=', wu(LL), ' (m)'
+call IOUTSTRINGXY(colc, linec, tex)
+
+linec = linec + 1
+tex = ' Water depth (hu)'
+write(tex(texc:), '(A3, E22.4, A8)')'=', hu(LL), ' (m)'
+call IOUTSTRINGXY(colc, linec, tex)
+
+linec = linec + 1
+tex = ' Velocity (u1)'
+write(tex(texc:), '(A3, E22.4, A8)')'=', u1(LL), ' (m/s)'
+call IOUTSTRINGXY(colc, linec, tex)
+
+linec = linec + 1
+tex = ' Discharge (q1)'
+write(tex(texc:), '(A3, E22.4, A8)')'=', q1(LL), ' (m3/s)'
+call IOUTSTRINGXY(colc, linec, tex)
+
+linec = linec + 1
+tex = ' Conveyance (cfuhi)'
+write(tex(texc:), '(A3, E22.4, A8)')'=', cfuhi(LL), ' (m3/s)'
+call IOUTSTRINGXY(colc, linec, tex)
+
+! If this flowlink has a stucture on it, then also show related info.
+if (network%adm%lin2str(LL) > 0) then
+   strN = network%adm%lin2str(LL) ! Assume only 1 structure on the flowlink
+   
+   linec = linec + 1
+   tex = 'Structure id     = '
+   write(tex(texc+1:), '(A21, A4)') network%sts%struct(strN)%id(1:21), ' (-)'
+   call ktext(tex, colc, linec, 15)
+   
+   linec = linec + 1
+   tex = 'Structure type   ='
+   istrtype = network%sts%struct(strN)%st_type
+   call GetStrucType_from_int(istrtype, str_type)
+   write(tex(texc+1:), '(A21, A4)') str_type, ' (-)'
+   call ktext(tex, colc, linec, 15)
+
+   crestlevel = get_crest_level(network%sts%struct(strN))
+   if (crestlevel .ne. huge(1d0)) then ! only show crestlevel when it is a valid value
+      linec = linec + 1
+      tex = 'Crest level      = '
+      write(tex(texc:), '(E18.4, A8)') crestlevel, ' (m)'
+      call ktext(tex, colc, linec, 15)
+   end if
+   
+   crestwidth = get_width(network%sts%struct(strN))
+   if (crestwidth .ne. huge(1d0)) then
+      linec = linec + 1
+      tex = 'Crest width      = '
+      write(tex(texc:), '(E18.4, A8)') crestwidth, ' (m)'
+      call ktext(tex, colc, linec, 15)
+   end if
+   
+   gle = get_gle(network%sts%struct(strN))
+   if (gle .ne. huge(1d0)) then
+      linec = linec + 1
+      tex = 'Gate l. edge lvl = '
+      write(tex(texc:), '(E18.4, A8)') gle, ' (m)'
+      call ktext(tex, colc, linec, 15)
+   end if
+   
+   capacity = get_capacity(network%sts%struct(strN))
+   if (capacity .ne. huge(1d0)) then
+      linec = linec + 1
+      tex = 'Pump capacity    ='
+      write(tex(texc:), '(E18.4, A8)') capacity, ' (m3/s)'
+      call ktext(tex, colc, linec, 15)
+   end if
+end if
+
+! write an empty line
+linec = linec + 1
+tex = ''
+call IOUTSTRINGXY(colc, linec, tex)
+return
+end subroutine write_info_1d_link
