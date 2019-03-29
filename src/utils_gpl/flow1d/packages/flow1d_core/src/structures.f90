@@ -62,7 +62,7 @@ module m_structure
    public setValue
    public getValue
    public reIndexCrossSections
-   public getStrucType
+   public getStrucType_from_string
 
    public getTableValue
    public getCrossSection
@@ -90,10 +90,10 @@ module m_structure
       module procedure fill_hashtable_sts
    end interface 
    
-   interface getStrucType
-      module procedure getStrucType_from_string
-      module procedure getStrucType_from_int
-   end interface
+   !interface getStrucType
+   !   module procedure getStrucType_from_string
+   !   module procedure getStrucType_from_int
+   !end interface
    interface AddStructure
       module procedure AddStructure_short
       module procedure AddStructureByCalcPoints

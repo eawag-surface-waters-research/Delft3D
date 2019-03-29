@@ -2511,7 +2511,7 @@ if (npump > 0) then
       ! read the type
       strtype = ' '
       call prop_get_string(str_ptr, '', 'type', strtype, success)
-      istrtype  = getStructype(strtype)
+      istrtype  = getStructype_from_string(strtype)
 
       ! Do a try-read to determine whether this is a staged flow1d pump. If not, just continue (capacity is enough then).
       call prop_get_integer(str_ptr, 'structure', 'nrstages', itmp, success)
@@ -2708,7 +2708,7 @@ if (ndambreak > 0) then
       ! read the type
       strtype = ' '
       call prop_get_string(str_ptr, '', 'type', strtype, success)
-      istrtype  = getStructype(strtype)
+      istrtype  = getStructype_from_string(strtype)
       ! flow1d_io library: add and read SOBEK dambreak
       ! just use the first link of the the structure (the network%sts%struct(istrtmp)%link_number is not used in computations)
       k = L1dambreaksg(n)
