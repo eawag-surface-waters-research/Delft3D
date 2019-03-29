@@ -22245,7 +22245,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
     call gtext(tex, xz(ln(2,LL)), yz(ln(2,LL)), 221)
     
     if (kn(3,LL) .ne. 2) then
-       call write_info_1d_link(LL)
+       call dis_info_1d_link(LL)
     end if
  ENDIF
 
@@ -23487,9 +23487,9 @@ do n = 1,numsrc ! teksorsin
    endif   
 enddo
 
-   end subroutine teksorsin 
+end subroutine teksorsin 
 
-subroutine write_info_1d_link(LL)
+subroutine dis_info_1d_link(LL)
 use m_flowgeom
 use network_data
 use m_flow
@@ -23720,4 +23720,4 @@ linec = linec + 1
 tex = ''
 call IOUTSTRINGXY(colc, linec, tex)
 return
-end subroutine write_info_1d_link
+end subroutine dis_info_1d_link
