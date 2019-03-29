@@ -11857,9 +11857,9 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
       !allocate mesh edges and 1d2d contacts  
       call realloc(edge_nodes, (/ 2, n1dedges /), fill = -999) 
       call realloc(contacts, (/ 2, n1d2dcontacts /), fill = -999) 
-      allocate(id_tsp%edgetoln(n1dedges))
-      allocate(id_tsp%contactstoln(n1d2dcontacts))
-      allocate(contacttype(n1d2dcontacts))
+      call realloc(id_tsp%edgetoln, n1dedges, keepExisting = .false., fill = 0)
+      call realloc(id_tsp%contactstoln, n1d2dcontacts, keepExisting = .false., fill = 0)
+      call realloc(contacttype, n1d2dcontacts, keepExisting = .false., fill = 0)
       
       !assign values to mesh edges 1d2d contacts 
       n1dedges = 0 
