@@ -153,9 +153,8 @@ module m_ec_filereader_read
       function ecUniReadBlock(fileReaderPtr, time_steps, values) result(success)
          logical                               :: success       !< function status
          type(tEcFileReader),    pointer       :: fileReaderPtr !< intent(in)
-         real(hp),               intent(inout) :: time_steps    !< number of time steps of duration: seconds
+         real(hp),               intent(inout) :: time_steps    !< number of time steps of duration: MJD
          real(hp), dimension(:), intent(inout) :: values        !< read values
-         real(hp)                              :: ecReqTime     !< number of time steps of duration: seconds
          !
          integer        :: n_values !< number of quantities in the file
          character(len=:), allocatable :: rec, rec0!< content of a line
