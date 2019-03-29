@@ -1163,8 +1163,14 @@ subroutine prepare_lateral_mask(kc, ilattype)
    case (ILATTP_1D)       ! in everything 1D
       do L = 1,lnx1D
          !if (abs(prof1D(3,L)) .ne. 1 .and. prof1D(3,L) > 0 ) then ! no pipes pos or neg, others only if pos
-            k1 = ln(1,L) ; kc(k1) = 1
-            k2 = ln(2,L) ; kc(k2) = 1
+            k1 = ln(1,L)
+            if (k1 > ndx2d) then
+               kc(k1) = 1
+            end if
+            k2 = ln(2,L)
+            if (k2 > ndx2d) then
+               kc(k2) = 1
+            end if
          !endif   
       enddo   
    case (ILATTP_2D)       ! in everything 2D
