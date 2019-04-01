@@ -1054,14 +1054,21 @@ subroutine mergeLevels(heightin1, levelsCount1, heightin2, levelsCount2, height,
 
 end subroutine mergeLevels
 
-!> this subroutine
+!> this subroutine uses the branchOrders from the input to add extra cross sections  \n
+!! e.g assume a model network, where * represents a gridpoint, C represents a cross section, # represents a connection node \n
+!! branch1: #---C---*------*------*---C---#                                             \n
+!! branch2:                               #------*---C---*------*------*------*---C---# \n
+!! This will result in:                                                                 \n
+!! branch1: #---C---*------*------*---C---#----------C                                  \n
+!! branch2:                           C---#------*---C---*------*------*------*---C---# \n
+!! As a result the interpolation can be restricted to a branch
 subroutine useBranchOrdersCrs(crs, brs)
    ! modules
 
    implicit none
    ! variables
-   type(t_CrossSectionSet)          :: crs       !< Current cross-section set
-   type(t_branchSet)                :: brs       !< Set of reaches
+   type(t_CrossSectionSet), intent(inout)          :: crs       !< Current cross-section set
+   type(t_branchSet)      , intent(in   )          :: brs       !< Set of reaches
 
    ! local variables
    integer  ibr, orderNumberCount
