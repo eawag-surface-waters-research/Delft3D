@@ -133,7 +133,6 @@ module m_oned_functions
    subroutine set_1d_indices_in_network()
       use m_sediment
       use m_flowgeom
-      use m_network
       use m_flow
       use m_cross_helper
       use m_flowparameters
@@ -159,7 +158,7 @@ module m_oned_functions
          call set_linknumbers_in_branches()
          call set_retention_grid_numbers()
          call set_structure_grid_numbers()
-         call initialize_1dadmin(network, lnx1D, lnx, ndx)
+      
          if (jased > 0 .and. stm_included) then
             ! 
             call set_cross_sections_to_gridpoints()
@@ -259,7 +258,6 @@ module m_oned_functions
    subroutine set_structure_grid_numbers()
       use unstruc_channel_flow
       use m_flowexternalforcings
-      use m_flowgeom
       use m_inquire_flowgeom
 
       implicit none
@@ -278,8 +276,9 @@ module m_oned_functions
          pstru   => network%sts%struct(istru)
          pbranch => network%brs%branch(pstru%ibran)
          call findlink(pstru%ibran, pstru%chainage, pstru%link_number)
-         pstru%left_calc_point  = ln(1, pstru%link_number)
-         pstru%right_calc_point = ln(2, pstru%link_number)
+         local_index = pstru%left_calc_point - pbranch%Points(1)+1
+         pstru%left_calc_point  = pbranch%grd(local_index)
+         pstru%right_calc_point = pbranch%grd(local_index+1)
          L1strucsg(istru) = istru
          L2strucsg(istru) = istru
       enddo
@@ -372,8 +371,8 @@ module m_oned_functions
                   jpos = 1
                   dh = min(chainage(i)-chainage(i-1),chainage(i+1)-chainage(i))/2d0
                endif
-               c1 = gpnt2cross(k1)%c1
-               c2 = gpnt2cross(k1)%c2
+               c1 = gpnt2cross(igrid)%c1
+               c2 = gpnt2cross(igrid)%c2
                d1 = abs(network%crs%cross(c1)%chainage - chainage(i))
                d2 = abs(network%crs%cross(c2)%chainage - chainage(i))
                ! cross1%branchid and cross2%branchid should correspond to ibr
