@@ -14631,7 +14631,7 @@ subroutine sumvalueOnCrossSections(resu, numvals)
 
            resu(IPNT_HUA,icrs) = resu(IPNT_HUA,icrs) + hu(L) * au(L)                                 ! upwind waterdepth
            
-           if( jatransportmodule == 1 ) then
+           if( jatransportmodule.ne.0 ) then
               IP = IPNT_HUA
               do num = 1,NUMCONST_MDU
                  IP = IP + 1

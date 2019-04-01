@@ -8934,7 +8934,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
     call fm_wq_processes_ini()
  end if
 
- if ( jatransportmodule.eq.1 ) then
+ if ( jatransportmodule.ne.0 ) then
     call ini_transport()
  end if
 
@@ -16682,7 +16682,7 @@ subroutine unc_write_his(tim)            ! wrihis
             !ierr = nf90_put_att(ihisfile, id_varuavg, 'units', 'm s-1')
             !ierr = nf90_put_att(ihisfile, id_varuavg, 'coordinates', 'cross_section_name')
 
-            if( jatransportmodule == 1 ) then
+            if( jatransportmodule.ne.0 ) then
                do num = 1,NUMCONST_MDU
                   tmpstr = const_names(num)
                   ! Forbidden chars in NetCDF names: space, /, and more.
@@ -17480,7 +17480,7 @@ subroutine unc_write_his(tim)            ! wrihis
           ierr = nf90_put_var(ihisfile, id_varu,    crs(i)%sumvalcur(IPNT_U1A), (/ i, it_his /))
 !          ierr = nf90_put_var(ihisfile, id_varuavg, crs(i)%sumvalavg(IPNT_U1A), (/ i, it_his /))
 
-          if( jatransportmodule == 1 ) then
+          if( jatransportmodule.ne.0 ) then
              IP = IPNT_HUA
              do num = 1,NUMCONST_MDU
                 IP = IP + 1
@@ -25544,7 +25544,7 @@ subroutine transport()                           ! transport for now, advect sal
  endif
 
 ! begin DEBUG
-  if ( jatransportmodule.eq.1 ) then
+  if ( jatransportmodule.ne.0 ) then
      goto 1234
   endif
 ! end DEBUG

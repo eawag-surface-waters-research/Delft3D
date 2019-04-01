@@ -17525,7 +17525,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
    HELPM ( 7) = '2=implicit pressure, 1=no pressure, 0 = only transport      '
    HELPM ( 8) = '0.5 < teta =< 1.0                                           '
    HELPM ( 9) = '1 = GS_OMP, 2 = GS_OMPthreadsafe, 3 = GS, 4 = SaadILUD      '
-   HELPM (10) = '0=Herman transport, 1=transport module (default)            '
+   HELPM (10) = '0=Herman transport, 1=transport module (default), 2=no      '
    HELPM (11) = '0=no salinity, 1=yes salinity                               '
    HELPM (12) = 'Temperature model nr, 0=no temp, 5=heat flux 3=excess       '
    HELPM (13) = '0=No, 1=Yes anticreep  only in sigma layers                 '
