@@ -17062,22 +17062,27 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_def_var(ihisfile, 'dambreak_discharge', nf90_double, (/ id_dambreakdim, id_timedim /), id_dambreak_discharge)
             ierr = nf90_put_att(ihisfile, id_dambreak_discharge, 'long_name', 'Instantaneous discharge through dambreaks')
             ierr = nf90_put_att(ihisfile, id_dambreak_discharge, 'units', 'm3 s-1') !link_sum
+            ierr = nf90_put_att(ihisfile, id_dambreak_discharge, 'coordinates', 'dambreak_name')
 
             ierr = nf90_def_var(ihisfile, 'dambreak_cumulative_discharge', nf90_double, (/ id_dambreakdim, id_timedim /), id_dambreak_cumulative_discharge)
             ierr = nf90_put_att(ihisfile, id_dambreak_cumulative_discharge, 'long_name', 'Cumulative discharge through dambreaks')
             ierr = nf90_put_att(ihisfile, id_dambreak_cumulative_discharge, 'units', 'm3') !link_sum
+            ierr = nf90_put_att(ihisfile, id_dambreak_cumulative_discharge, 'coordinates', 'dambreak_name')
 
             ierr = nf90_def_var(ihisfile, 'dambreak_breach_width_derivative', nf90_double, (/ id_dambreakdim, id_timedim /), id_dambreak_breach_width_derivative)
             ierr = nf90_put_att(ihisfile, id_dambreak_breach_width_derivative, 'long_name', 'breach width time derivative')
             ierr = nf90_put_att(ihisfile, id_dambreak_breach_width_derivative, 'units', 'm s-1')
+            ierr = nf90_put_att(ihisfile, id_dambreak_breach_width_derivative, 'coordinates', 'dambreak_name')
 
             ierr = nf90_def_var(ihisfile, 'dambreak_water_level_jump', nf90_double, (/ id_dambreakdim, id_timedim /), id_dambreak_water_level_jump)
             ierr = nf90_put_att(ihisfile, id_dambreak_water_level_jump, 'long_name', 'breach water level jump')
             ierr = nf90_put_att(ihisfile, id_dambreak_water_level_jump, 'units', 'm')
+            ierr = nf90_put_att(ihisfile, id_dambreak_water_level_jump, 'coordinates', 'dambreak_name')
 
             ierr = nf90_def_var(ihisfile, 'dambreak_normal_velocity', nf90_double, (/ id_dambreakdim, id_timedim /), id_dambreak_normal_velocity)
             ierr = nf90_put_att(ihisfile, id_dambreak_normal_velocity, 'long_name', 'breach normal velocity')
             ierr = nf90_put_att(ihisfile, id_dambreak_normal_velocity, 'units', 'm s-1')
+            ierr = nf90_put_att(ihisfile, id_dambreak_normal_velocity, 'coordinates', 'dambreak_name')
         endif
 
         if(dad_included) then  ! Output for dredging and dumping
