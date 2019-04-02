@@ -1261,7 +1261,7 @@ END subroutine minmxns
 
 !> Display information for a (1D) flow link and its connected nodes.
 !! If it has a structure on it, then also display relevant fields
-!! of this structure
+!! of this structure.
 subroutine dis_info_1d_link(LL)
 use m_flowgeom
 use network_data
