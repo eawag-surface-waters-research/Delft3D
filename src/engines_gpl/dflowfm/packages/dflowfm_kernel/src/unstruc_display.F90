@@ -1259,7 +1259,9 @@ SUBROUTINE MINMXNS()
        RETURN
 END subroutine minmxns
 
-!< Display information of a 1d flow link and its connected nodes. If it has a structure on it, then also display relevant fields of this structure
+!> Display information for a (1D) flow link and its connected nodes.
+!! If it has a structure on it, then also display relevant fields
+!! of this structure
 subroutine dis_info_1d_link(LL)
 use m_flowgeom
 use network_data
@@ -1272,7 +1274,7 @@ use m_Orifice
 use m_Culvert
 implicit none
 
-integer, intent(in) :: LL ! flow link number
+integer, intent(in) :: LL !< flow link number
 
 character TEX*48, str_type*21, tex_empty*48
 integer :: linec ! line counter
@@ -1304,12 +1306,12 @@ call IOUTSTRINGXY(colc, linec, tex_empty)
 ! block for node 1
 k1 = ln(1,LL)
 if (k1 > 0) then
-   call Write2Scr(linec, 'Node1 number', k1, '-')
+   call Write2Scr(linec, 'Node 1 number', k1, '-')
    call Write2Scr(linec, 'Kfs', kfs(k1), '-')
-   call Write2Scr(linec, 'Water level (s1)', s1(k1), 'm')
-   call Write2Scr(linec, 'Water depth (hs)', hs(k1), 'm')
+   call Write2Scr(linec, 'Water level  (s1)', s1(k1), 'm')
+   call Write2Scr(linec, 'Water depth  (hs)', hs(k1), 'm')
    call Write2Scr(linec, 'Bottom level (bl)', bl(k1), 'm')
-   call Write2Scr(linec, 'Volume (vol1)', vol1(k1), 'm3')
+   call Write2Scr(linec, 'Volume     (vol1)', vol1(k1), 'm3')
 end if
 
 ! write an empty line
@@ -1319,12 +1321,12 @@ call IOUTSTRINGXY(colc, linec, tex_empty)
 ! block for node 2
 k2 = ln(2,LL)
 if (k2 > 0) then
-   call Write2Scr(linec, 'Node1 number', k2, '-')
+   call Write2Scr(linec, 'Node 2 number', k2, '-')
    call Write2Scr(linec, 'Kfs', kfs(k2), '-')
-   call Write2Scr(linec, 'Water level (s1)', s1(k2), 'm')
-   call Write2Scr(linec, 'Water depth (hs)', hs(k2), 'm')
+   call Write2Scr(linec, 'Water level  (s1)', s1(k2), 'm')
+   call Write2Scr(linec, 'Water depth  (hs)', hs(k2), 'm')
    call Write2Scr(linec, 'Bottom level (bl)', bl(k2), 'm')
-   call Write2Scr(linec, 'Volume (vol1)', vol1(k2), 'm3')
+   call Write2Scr(linec, 'Volume     (vol1)', vol1(k2), 'm3')
 end if
 
 ! write an empty line
@@ -1335,26 +1337,33 @@ call IOUTSTRINGXY(colc, linec, tex_empty)
 call Write2Scr(linec, 'Flow link number', LL, '-')
 call Write2Scr(linec, 'Flow link type', kn(3,LL), '-')
 
-branchindex = network%adm%lin2ibr(LL)
-call Write2Scr(linec, 'Branch id', network%brs%branch(branchindex)%id(1:21))
+if (network%loaded) then
+   branchindex = network%adm%lin2ibr(LL)
+   call Write2Scr(linec, 'Branch id', network%brs%branch(branchindex)%id(1:21))
 
-ilocallin = network%adm%lin2point(LL)
-call Write2Scr(linec, 'Chainage', network%brs%branch(branchindex)%uPointsChainages(ilocallin), 'm')
+   ilocallin = network%adm%lin2point(LL)
+   call Write2Scr(linec, 'Chainage', network%brs%branch(branchindex)%uPointsChainages(ilocallin), 'm')
+end if
 
 call Write2Scr(linec, 'Bob(1,L)', bob(1,LL), 'm')
 call Write2Scr(linec, 'Bob(2,L)', bob(2,LL), 'm')
 call Write2Scr(linec, 'Bob0(1,L)', bob0(1,LL), 'm')
 call Write2Scr(linec, 'Bob0(2,L)', bob0(2,LL), 'm')
 
-call Write2Scr(linec, 'Flow area (au)', au(LL), 'm2')
-call Write2Scr(linec, 'Flow width (wu)', wu(LL), 'm')
-call Write2Scr(linec, 'Water depth (hu)', hu(LL), 'm')
-call Write2Scr(linec, 'Velocity (u1)', u1(LL), 'm/s')
-call Write2Scr(linec, 'Discharge (q1)', q1(LL), 'm3/s')
+call Write2Scr(linec, 'Flow area     (au)', au(LL), 'm2')
+call Write2Scr(linec, 'Flow width    (wu)', wu(LL), 'm')
+call Write2Scr(linec, 'Water depth   (hu)', hu(LL), 'm')
+call Write2Scr(linec, 'Velocity      (u1)', u1(LL), 'm/s')
+call Write2Scr(linec, 'Discharge     (q1)', q1(LL), 'm3/s')
 call Write2Scr(linec, 'Conveyance (cfuhi)', cfuhi(LL), 'm3/s')
 
 ! If this flowlink has a stucture on it, then also display related info.
-nstruc = network%adm%lin2str(LL) ! Assume only 1 structure on the flowlink
+if (network%loaded) then
+   nstruc = network%adm%lin2str(LL) ! Assume only 1 structure on the flowlink
+else
+   nstruc = 0
+end if
+
 if (nstruc > 0) then
    call Write2Scr(linec, 'Structure id', network%sts%struct(nstruc)%id(1:21))
    
