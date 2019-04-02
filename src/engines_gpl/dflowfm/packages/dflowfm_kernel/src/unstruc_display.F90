@@ -158,6 +158,14 @@ implicit none
     double precision :: profmin(20) = -999d0 
     double precision :: ymn, zmn             ! for tekrailines  
     
+    public dis_info_1d_link
+    
+    interface Write2Scr
+      module procedure Write2ScrInt
+      module procedure Write2ScrDouble
+      module procedure Write2ScrChar
+    end interface Write2Scr
+    
 contains
 
 subroutine load_displaysettings(filename)
@@ -1248,7 +1256,216 @@ SUBROUTINE MINMXNS()
       CALL WEAREL()
 
        RETURN
-      END subroutine minmxns
+END subroutine minmxns
+
+!< Display information of a 1d flow link and its connected nodes. If it has a structure on it, then also display relevant fields of this structure
+subroutine dis_info_1d_link(LL)
+use m_flowgeom
+use network_data
+use m_flow
+use unstruc_channel_flow
+use m_structure
+use m_Pump
+use m_Weir
+use m_Orifice
+use m_Culvert
+implicit none
+
+integer, intent(in) :: LL ! flow link number
+
+character TEX*48, str_type*21, tex_empty*48
+integer :: linec ! line counter
+integer :: colc  ! colume counter
+integer :: k1, k2! node number
+integer :: line_max ! maximal line number
+integer :: branchindex, ilocallin, nstruc, istrtype, i
+type(t_weir), pointer :: pweir
+type(t_pump), pointer :: ppump
+type(t_orifice), pointer :: porifice
+type(t_culvert), pointer :: pculvert
+
+
+linec = 6
+colc  = 1
+line_max = 43
+
+! write an empty line
+tex_empty = ''
+call IOUTSTRINGXY(colc, linec, tex_empty)
+
+! block for node 1
+k1 = ln(1,LL)
+if (k1 > 0) then
+   call Write2Scr(linec, 'Node1 number', k1, '-')
+   call Write2Scr(linec, 'Kfs', kfs(k1), '-')
+   call Write2Scr(linec, 'Water level (s1)', s1(k1), 'm')
+   call Write2Scr(linec, 'Water depth (hs)', hs(k1), 'm')
+   call Write2Scr(linec, 'Bottom level (bl)', bl(k1), 'm')
+   call Write2Scr(linec, 'Volume (vol1)', vol1(k1), 'm3')
+end if
+
+! write an empty line
+linec = linec + 1
+call IOUTSTRINGXY(colc, linec, tex_empty)
+
+! block for node 2
+k2 = ln(2,LL)
+if (k2 > 0) then
+   call Write2Scr(linec, 'Node1 number', k2, '-')
+   call Write2Scr(linec, 'Kfs', kfs(k2), '-')
+   call Write2Scr(linec, 'Water level (s1)', s1(k2), 'm')
+   call Write2Scr(linec, 'Water depth (hs)', hs(k2), 'm')
+   call Write2Scr(linec, 'Bottom level (bl)', bl(k2), 'm')
+   call Write2Scr(linec, 'Volume (vol1)', vol1(k2), 'm3')
+end if
+
+! write an empty line
+linec = linec + 1
+call IOUTSTRINGXY(colc, linec, tex_empty)
+
+! block for flow link
+call Write2Scr(linec, 'Flow link number', LL, '-')
+call Write2Scr(linec, 'Flow link type', kn(3,LL), '-')
+
+branchindex = network%adm%lin2ibr(LL)
+call Write2Scr(linec, 'Branch id', network%brs%branch(branchindex)%id(1:21))
+
+ilocallin = network%adm%lin2point(LL)
+call Write2Scr(linec, 'Chainage', network%brs%branch(branchindex)%uPointsChainages(ilocallin), 'm')
+
+call Write2Scr(linec, 'Bob(1,L)', bob(1,LL), 'm')
+call Write2Scr(linec, 'Bob(2,L)', bob(2,LL), 'm')
+call Write2Scr(linec, 'Bob0(1,L)', bob0(1,LL), 'm')
+call Write2Scr(linec, 'Bob0(2,L)', bob0(2,LL), 'm')
+
+call Write2Scr(linec, 'Flow area (au)', au(LL), 'm2')
+call Write2Scr(linec, 'Flow width (wu)', wu(LL), 'm')
+call Write2Scr(linec, 'Water depth (hu)', hu(LL), 'm')
+call Write2Scr(linec, 'Velocity (u1)', u1(LL), 'm/s')
+call Write2Scr(linec, 'Discharge (q1)', q1(LL), 'm3/s')
+call Write2Scr(linec, 'Conveyance (cfuhi)', cfuhi(LL), 'm3/s')
+
+! If this flowlink has a stucture on it, then also display related info.
+nstruc = network%adm%lin2str(LL) ! Assume only 1 structure on the flowlink
+if (nstruc > 0) then
+   call Write2Scr(linec, 'Structure id', network%sts%struct(nstruc)%id(1:21))
+   
+   istrtype = network%sts%struct(nstruc)%st_type
+   call GetStrucType_from_int(istrtype, str_type)
+   call Write2Scr(linec, 'Structure type', str_type)   
+   
+   select case (istrtype)
+   case (ST_WEIR)
+      pweir=>network%sts%struct(nstruc)%weir
+      call write2scr(linec, 'Crest level', pweir%crestlevel, 'm')
+      call write2scr(linec, 'Crest width', pweir%crestwidth, 'm')
+      call write2scr(linec, 'Discharge coef.', pweir%dischargecoeff, '-')
+      call write2scr(linec, 'Lat. dis. coef.', pweir%latdiscoeff, '-')
+      call write2scr(linec, 'Allowed flow dir.', pweir%allowedflowdir, '-')
+   case (ST_PUMP)
+      ppump=>network%sts%struct(nstruc)%PUMP
+      call Write2Scr(linec, 'Direction', ppump%direction, 'm')
+      call Write2Scr(linec, 'Head', ppump%pump_head, 'm')
+      call Write2Scr(linec, 'Actual stage', ppump%actual_stage, '-')
+      if (ppump%is_active) then
+         call Write2Scr(linec, 'Is active?', 1, '-')
+      else
+         call Write2Scr(linec, 'Is active?', 0, '-')
+      end if
+      call Write2Scr(linec, 'Stage capacity', ppump%stage_capacity, 'm3/s')
+      call Write2Scr(linec, 'Reduction factor', ppump%reduction_factor, '-')
+   case (ST_ORIFICE)
+      porifice=>network%sts%struct(nstruc)%orifice
+      call write2scr(linec, 'Crest level', porifice%crestlevel, 'm')
+      call write2scr(linec, 'Crest width', porifice%crestwidth, 'm')
+      call write2scr(linec, 'Contraction coef.', porifice%contrcoeff, '-')
+      call write2scr(linec, 'Lat. contract coef.', porifice%latcontrcoeff, '-')
+      call write2scr(linec, 'Allowed flow dir.', porifice%allowedflowdir, '-')
+      if (porifice%uselimitflowpos) then
+         call write2scr(linec, 'Use limit flow pos.', 1, '-')
+         call write2scr(linec, 'Limit flow pos.', porifice%limitflowpos, 'm3/s')
+      else 
+         call write2scr(linec, 'Use limit flow pos.', 0, '-')
+      end if
+      if (porifice%uselimitflowneg) then
+         call write2scr(linec, 'Use limit flow neg.', 1, '-')
+         call write2scr(linec, 'Limit flow neg.', porifice%limitflowneg, 'm3/s')
+      else
+         call write2scr(linec, 'Use limit flow neg.', 0, '-')
+      end if
+   case (ST_CULVERT)
+      pculvert=>network%sts%struct(nstruc)%culvert
+      call write2scr(linec, 'Left level', pculvert%leftlevel, 'm')
+      call write2scr(linec, 'Right level', pculvert%rightlevel, 'm')
+      call write2scr(linec, 'Allowed flow dir.', pculvert%allowedflowdir, '-')
+      call write2scr(linec, 'Length', pculvert%length, 'm')
+      
+      if (pculvert%has_valve) then
+         call write2scr(linec, 'Valve opening', pculvert%inivalveopen, 'm')
+      end if
+
+      call write2scr(linec, 'Inlet loss coef.', pculvert%inletlosscoeff, '-')
+      call write2scr(linec, 'Outlet loss coef.', pculvert%outletlosscoeff, '-')
+   case default
+      linec = linec + 1
+      call IOUTSTRINGXY(1, linec, ' Display for this structure type is not supported.')     
+   end select
+end if
+
+! write empty lines to erase lines with structure data from the previous clicked flow link, if any
+do i = linec+1, line_max
+   call IOUTSTRINGXY(colc, i, tex_empty)
+end do
+
+return
+end subroutine dis_info_1d_link
+
+!> Writes a line with integer data to the screen.
+   subroutine Write2ScrInt(ipos, desc, val, unit)
+      implicit none
+      integer, intent(inout)        :: ipos
+      character(len=*), intent(in)  :: desc
+      integer, intent(in)           :: val
+      character(len=*), intent(in)  :: unit
+
+      character :: tex*48, help*27
+      ipos = ipos+1
+      help = ' '//desc
+      write(tex, '(a23,'' = '', i13, '' ('',a,'')'')') help, val, trim(unit)
+      call IOUTSTRINGXY(1,ipos,tex)
+   end subroutine Write2ScrInt
+
+   !> Writes a line with double precision data to the screen.
+   subroutine Write2ScrDouble(ipos, desc, val, unit)
+      implicit none
+      integer, intent(inout)        :: ipos
+      character(len=*), intent(in)  :: desc
+      double precision, intent(in)  :: val
+      character(len=*), intent(in)  :: unit
+
+      character :: tex*48, help*27
+      ipos = ipos+1
+      help = ' '//desc
+      write(tex, '(a23,'' = '', g13.4, '' ('',a,'')'')') help, val, trim(unit)
+      call IOUTSTRINGXY(1,ipos,tex)
+   end subroutine Write2ScrDouble
+
+   !> Writes a line with character data to the screen.
+   subroutine Write2ScrChar(ipos, desc, val)
+      implicit none
+
+      integer, intent(inout)        :: ipos
+      character(len=*), intent(in)     :: desc
+      character(len=*), intent(in)     :: val
+
+      character :: text*48, help*24, help2*21
+
+      ipos = ipos + 1
+      help = ' '//desc
+      help2 = trim(adjustl(val))
+      write(text, '(A23,'' = '',A21)') help, help2
+      call IOUTSTRINGXY(1, ipos, text)
+   end subroutine Write2ScrChar
 
 end module unstruc_display
 
