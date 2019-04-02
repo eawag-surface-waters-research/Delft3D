@@ -149,6 +149,7 @@ implicit none
     integer :: ndrawManholes      = 2   !< how draw manholes
     integer :: ndrawPart          = 2   !< Particles, 1=No, 2=Yes
     integer :: ndrawDots          = 2   !< dots, 1=No, 2=Yes
+    integer :: idisLink           = 0   !< Index of flowlink which is to be displayed with more information
   
     integer :: numzoomshift       = 250 !< nr of steps in zoomshift
     double precision :: wetplot   = 0.001 !< only show wet waterlevel points if (hs>wetplot)
@@ -1285,12 +1286,19 @@ type(t_orifice), pointer :: porifice
 type(t_culvert), pointer :: pculvert
 
 
-linec = 6
+linec = 7
 colc  = 1
-line_max = 43
+line_max = 46
 
 ! write an empty line
 tex_empty = ''
+call IOUTSTRINGXY(colc, linec, tex_empty)
+
+linec = linec + 1
+tex = ' Info. for the link and nodes, press q to exit.'
+call IOUTSTRINGXY(colc, linec, tex)
+
+linec = linec + 1
 call IOUTSTRINGXY(colc, linec, tex_empty)
 
 ! block for node 1

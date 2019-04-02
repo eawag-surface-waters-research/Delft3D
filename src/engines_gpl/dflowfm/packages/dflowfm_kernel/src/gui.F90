@@ -1619,6 +1619,9 @@
    CALL DISPOS()
 
    CALL TEXTFLOW()
+   if (idisLink /= 0) then ! Display info. screen for a 1D flowlink if it has been clicked
+      call dis_info_1d_link(idisLink)
+   end if
   
    CALL IMouseCursorShow()
 
@@ -6108,6 +6111,7 @@ subroutine getktoplot(kk,k)
       use dfm_error
       use unstruc_messages
       use gridoperations
+      use unstruc_display, only: idisLink, dis_info_1d_link
       implicit none
       integer :: MODE, KEY, kb , kt ,k, NL
       integer :: newmode
@@ -6244,6 +6248,9 @@ subroutine getktoplot(kk,k)
          NPUT = 54
       ELSE IF (KEY .EQ. 86 .OR. KEY .EQ. 86+32) THEN    ! V-key
          CALL VIEWCYCLE(KEY)
+      ELSE IF (KEY .EQ. 81 .OR. KEY .EQ. 81+32) THEN    ! Q-key stop flow info screen display for 1D flowlink
+         idisLink = 0
+         key = 3
       ELSE IF (KEY .EQ. 83 .OR. KEY .EQ. 83+32) THEN    ! S-key add salt
          if (jasal > 0) then
             call getkbotktop(nplot,kb , kt )
@@ -22247,6 +22254,7 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
     
     if (kn(3,LL) /= 2) then
        call dis_info_1d_link(LL)
+       idisLink = LL ! Save the link index for later display
     end if
  ENDIF
 
