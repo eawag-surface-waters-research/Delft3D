@@ -1351,6 +1351,7 @@ end subroutine read_land_boundary_netcdf
       CALL INIDIA(unstruc_basename)
       
       CALL FIRSTLIN(MDIA)
+      CALL FIRSTLIN(6)
       
       if ( jaGUI.ne.1 ) return
 
