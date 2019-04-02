@@ -3572,7 +3572,7 @@ end module m_vegetation
  real            , allocatable     :: wdsu  (:)   !< windstress u point  (m2/s2)
 
  double precision, allocatable     :: wavmubnd (:)   !< wave-induced mass flux (on open boundaries)
- real            , allocatable     :: vicLu   (:) !< horizontal eddy viscosity coefficient at u point (m2/s)  (limited only if ja_timestep_auto_diff==0) 
+ real            , allocatable     :: vicLu   (:) !< horizontal eddy viscosity coefficient at u point (m2/s)  (limited only if ja_timestep_auto_visc==0) 
  real            , allocatable     :: viu   (:)   !< horizontal eddy viscosity coefficient at u point (m2/s), modeled part of viscosity = vicLu - viusp
  double precision, allocatable, target    :: viusp(:)   !< [m2/s] user defined spatial eddy viscosity coefficient at u point (m2/s) {"location": "edge", "shape": ["lnx"]}
  double precision, allocatable, target    :: diusp(:)   !< [m2/s] user defined spatial eddy diffusivity coefficient at u point (m2/s) {"location": "edge", "shape": ["lnx"]}
@@ -4216,7 +4216,7 @@ end subroutine reset_flowgeom
  double precision                  :: dt_init     !< dt of first timestep, if not specified, use dt_max, if that also not specified, use 1 s
 
  integer                           :: ja_timestep_auto      !< Use CFL-based dt (with dt_max as upper bound)
- integer                           :: ja_timestep_auto_diff !< Use explicit time step restriction based on diffusive term
+ integer                           :: ja_timestep_auto_visc !< Use explicit time step restriction based on viscosity term
  double precision                  :: tstart_user !< User specified time start (s) w.r.t. refdat
  double precision                  :: tstop_user  !< User specified time stop  (s) w.r.t. refdat
  double precision                  :: time_user   !< Next time of external forcings update (steps increment by dt_user).
@@ -4360,7 +4360,7 @@ subroutine default_flowtimes()
     dt_trach    = 1200d0            !< User specified DtTrt Trachytope roughness update time interval (s)
     dtfacmax    = 1.1d0             !< default setting
     ja_timestep_auto = 1            !< Use CFL-based dt (with dt_max as upper bound)
-    ja_timestep_auto_diff = 0       !< Use explicit time step restriction based on diffusive term
+    ja_timestep_auto_visc = 0       !< Use explicit time step restriction based on viscosity term
     tstart_user = 0d0               !< User specified time start (s) w.r.t. refdat
     tstop_user  = 100*24*3600       !< User specified time stop  (s) w.r.t. refdat
     time_user   = tstart_user       !< Next time of external forcings update (steps increment by dt_user).

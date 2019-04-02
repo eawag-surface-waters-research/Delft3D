@@ -623,6 +623,7 @@ subroutine readMDUFile(filename, istat)
     character(len=255) :: tmpstr
     integer :: ibuf, ifil, mptfile, warn
     integer :: i, n, j, je, iostat, readerr, ierror
+    integer :: jadum
     real(kind=hp) :: hkad
     real(kind=hp) :: ti_rst_array(3), ti_map_array(3), ti_his_array(3), acc, ti_wav_array(3), ti_waq_array(3), ti_classmap_array(3)
     real(kind=sp) :: rtmp
@@ -1236,7 +1237,19 @@ subroutine readMDUFile(filename, istat)
     ! 1.02: Don't read [time] AutoTimestep (ja_timestep_auto) from MDU anymore.
     ! ibuf = 1
     call prop_get_integer (md_ptr, 'time', 'AutoTimestep', ja_timestep_auto, success)
-    call prop_get_integer (md_ptr, 'time', 'Autotimestepdiff' , ja_timestep_auto_diff )
+    call prop_get_integer (md_ptr, 'time', 'Autotimestepdiff' , jadum, success)
+    if ( success .and. jadum.ne.0 ) then
+       call mess(LEVEL_ERROR, 'Autotimestepdiff not supported')
+    end if
+    call prop_get_integer (md_ptr, 'time', 'Autotimestepvisc' , ja_timestep_auto_visc, success)
+    if ( success .and. ja_timestep_auto_visc.ne.0 ) then
+       if (  ja_timestep_auto_visc.ne.1234 ) then
+!         hide feature
+          call mess(LEVEL_ERROR, 'Autotimestepvisc not supported')
+       else
+          ja_timestep_auto_visc = 1
+       end if
+    end if
     ! if (success .and. ibuf /= 1) then
     !   write(msgbuf, '(a,i0,a)') 'MDU [time] AutoTimestep=', ibuf, ' is deprecated, timestep always automatic. Use DtMax instead.'
     !   call warn_flush()
@@ -2630,8 +2643,8 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     if (ja_timestep_auto .ne. 1) then
         call prop_set(prop_ptr, 'time', 'AutoTimestep',  ja_timestep_auto, '0 = no, 1 = 2D (hor. out), 3=3D (hor. out), 5 = 3D (hor. inout + ver. inout), smallest dt')
     endif
-    if (writeall .and. ja_timestep_auto_diff .ne. 1) then
-        call prop_set(prop_ptr, 'time', 'Autotimestepdiff' , ja_timestep_auto_diff, '0 = no, 1 = yes (Time limitation based on explicit diffusive term)' )
+    if (writeall .and. ja_timestep_auto_visc .ne. 1) then
+        call prop_set(prop_ptr, 'time', 'Autotimestepvisc' , ja_timestep_auto_visc, '0 = no, 1 = yes (Time limitation based on explicit diffusive term)' )
     endif
 
     call prop_set(prop_ptr, 'time', 'Tunit',                   md_tunit,        'Time unit for start/stop times (D, H, M or S)')

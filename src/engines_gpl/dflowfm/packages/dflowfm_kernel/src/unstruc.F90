@@ -3457,6 +3457,7 @@ end subroutine setdt
 
  ! locals
  integer                       :: L, LL, k, n1, n2, nsteps, kk, kb, kt, k1,k2, k3, k4, Lb, Lt
+ integer                       :: kk1, kk2
  double precision              :: rhomin, rhomax, cbaroc, drho
  double precision              :: hsx
  double precision              :: cuu                            ! flow velocity
@@ -3465,8 +3466,9 @@ end subroutine setdt
  double precision              :: cfltot, dtsw, dtsc2D
  !integer , save                :: mout = 0
 
- double precision              :: dtsvisc                        ! time step for explicit diffusive term
  double precision              :: dxiAu                          !
+ double precision              :: huv
+ double precision              :: dtsc1, dtsc2
 
  INTEGER                       :: NDRAW
  COMMON /DRAWTHIS/ ndraw(50)
@@ -3698,79 +3700,99 @@ end subroutine setdt
         enddo
 
     endif
-     ! Explicit time step restriction on diffusive term.
-     if (ja_timestep_auto_diff .eq. 1 .and. ihorvic > 0) then
-        dtsvisc = dts
-        if (kmx == 0) then
-           if (istresstyp == 2 .or. istresstyp == 3) then     ! first set stressvector in cell centers
-              do L = lnx1D+1,lnx
-                 if ( jampi.eq.1 ) then
-                    if ( idomain(kk).ne.my_rank ) cycle       ! do not include ghost cells
-                 endif
-                 if (hu(L) > 0) then                          ! link will flow
-                    k1 = ln  (1,L) ; k2 = ln  (2,L)
-                    k3 = lncn(1,L) ; k4 = lncn(2,L)
-                    dxiAu = dxi(L)*hu(L)*wu(L)
-                    !   dt <  vol / dxiAu / N / vicL   ! see Tech Ref.: Limitation of Viscosity Coefficient
-                    if ( dxiAu.gt.0d0 .and. vicLu(L).gt.0d0) then
-                        if (vol1(k1).gt.0d0) then
-                           dtsc = 0.2d0*vol1(k1)/dxiAu
-                           dtsvisc = min(dtsvisc,dtsc)
-                           if (jamapdtcell > 0) then
-                              dtcell(k1) = min( dtcell(k1), dtsc )
-                           endif
-                        end if
-                        if (vol1(k2).gt.0d0) then
-                           dtsc = 0.2d0*vol1(k2)/dxiAu
-                           dtsvisc = min(dtsvisc,dtsc)
-                           if (jamapdtcell > 0) then
-                              dtcell(k2) = min( dtcell(k2), dtsc )
-                           endif
-                        end if
-                        if ( dtsvisc.lt.dts ) then
-                           dts     = dtsvisc ; kkcflmx = k1
-                        endif
-                    endif
-                 endif
-              enddo
-           endif
-        else if (kmx > 0) then
-           if (istresstyp == 2 .or. istresstyp == 3) then     ! first set stressvector in cell centers
-              do LL = lnx1D+1,lnx
-                 if ( jampi.eq.1 ) then
-                    if ( idomain(kk).ne.my_rank ) cycle       ! do not include ghost cells
-                 endif
-                 if (abs(kcu(LL)) .ne. 2) cycle
-                 call getLbotLtop(LL,Lb,Lt)
-                 do L = Lb, Lt
-                    k1 = ln  (1,L) ; k2 = ln  (2,L)
-                    k3 = lncn(1,L) ; k4 = lncn(2,L)
-                    dxiAu = dxi(L)*hu(L)*wu(L)
-                    !   dt <  vol / dxiAu / N / vicL   ! see Tech Ref.: Limitation of Viscosity Coefficient
-                    if ( dxiAu.gt.0d0 .and. vicLu(L).gt.0d0) then
-                        if (vol1(k1).gt.0d0) then
-                           dtsc = 0.2d0*vol1(k1)/dxiAu
-                           dtsvisc = min(dtsvisc,dtsc)
-                           if (jamapdtcell > 0) then
-                              dtcell(k1) = min( dtcell(k1), dtsc )
-                           endif
-                        end if
-                        if (vol1(k2).gt.0d0) then
-                           dtsc = 0.2d0*vol1(k2)/dxiAu
-                           dtsvisc = min(dtsvisc,dtsc)
-                           if (jamapdtcell > 0) then
-                              dtcell(k2) = min( dtcell(k2), dtsc )
-                           endif
-                        end if
-                        if ( dtsvisc.lt.dts ) then
-                           dts     = dtsvisc ; kkcflmx = k1
-                        endif
-                    endif
-                 enddo
-              enddo
-           endif
-        endif
-     endif
+    
+    ! Explicit time step restriction on viscosity term.    
+    if (ja_timestep_auto_visc .eq. 1 .and. ihorvic > 0) then
+       if (kmx == 0) then
+          if (istresstyp == 2 .or. istresstyp == 3) then     ! first set stressvector in cell centers
+             do L = lnx1D+1,lnx
+                if (hu(L) > 0) then                          ! link will flow
+                   k1 = ln  (1,L) ; k2 = ln  (2,L)
+                
+                   if ( jampi.eq.1 ) then
+                      if ( idomain(k1).ne.my_rank .and. idomain(k2).ne.my_rank ) cycle       ! do not include ghost cells
+                   endif
+                   
+                   dxiAu = dxi(L)*wu(L)
+                   if (istresstyp == 3) then
+                      dxiAu  = min(hs(k1), hs(k2)) * dxiAu
+                   endif
+                   
+                   huv = 0.5d0*( hs(k1) + hs(k2) )
+                   
+                   if ( dxiAu.gt.0d0 .and. vicLu(L).gt.0d0 .and. huv > epshu) then ! see "setumod" for huv
+                       dtsc = 0.2d0/(dxiAu*vicLu(L))
+                       if ( istresstyp.eq.3 ) then
+                          dtsc = dtsc * huv
+                       end if
+                          
+                       dtsc1 = dtsc*ba(k1)
+                       if ( dtsc1.lt.dts ) then
+                          dts     = dtsc1 ; kkcflmx = k1
+                       endif
+                       
+                       dtsc2 = dtsc*ba(k2)
+                       if ( dtsc2.lt.dts ) then
+                          dts     = dtsc2 ; kkcflmx = k2
+                       endif
+                       
+                       if (jamapdtcell > 0) then
+                          dtcell(k1) = min( dtcell(k1), dtsc1 )
+                          dtcell(k2) = min( dtcell(k2), dtsc2 )
+                       endif
+                   endif
+                endif
+             enddo
+          endif
+       else if (kmx > 0) then
+          if (istresstyp == 2 .or. istresstyp == 3) then     ! first set stressvector in cell centers
+             do LL = lnx1D+1,lnx
+                if (abs(kcu(LL)) .ne. 2) cycle
+                
+                kk1 = ln  (1,LL) ; kk2 = ln  (2,LL)
+                
+                if ( jampi.eq.1 ) then
+                   if ( idomain(kk1).ne.my_rank .and. idomain(kk2).ne.my_rank ) cycle       ! do not include ghost cells
+                endif
+                
+                call getLbotLtop(LL,Lb,Lt)
+                do L = Lb, Lt
+                   k1 = ln  (1,L) ; k2 = ln  (2,L)
+                   k3 = lncn(1,L) ; k4 = lncn(2,L)
+                   
+                   dxiAu = dxi(LL)*wu(LL)
+                   if (istresstyp == 3) then
+                      dxiAu  = min( zws(k1)-zws(k1-1), zws(k2)-zws(k2-1)  ) * dxiAu
+                   endif
+                   
+                   huv    = 0.5d0 * ( (zws(k1)-zws(k1-1)) + (zws(k2)-zws(k2-1) ) )
+                   
+                   if ( dxiAu.gt.0d0 .and. vicLu(L).gt.0d0 .and. huv.gt.epshu ) then
+                       dtsc = 0.2d0/(dxiAu*vicLu(L))
+                       if ( istresstyp.eq.3 ) then
+                          dtsc = dtsc * huv
+                       end if
+                   
+                       dtsc1 = dtsc*ba(kk1)
+                       if ( dtsc1.lt.dts ) then
+                          dts     = dtsc1 ; kkcflmx = kk1
+                       endif
+                       
+                       dtsc2 = dtsc*ba(kk2)
+                       if ( dtsc2.lt.dts ) then
+                          dts     = dtsc2 ; kkcflmx = kk2
+                       endif
+                       
+                       if (jamapdtcell > 0) then
+                          dtcell(k1) = min( dtcell(k1), dtsc1 )
+                          dtcell(k2) = min( dtcell(k2), dtsc2 )
+                       endif
+                   endif
+                enddo
+             enddo
+          endif
+       endif
+    endif
 
     if (dts  > dt_max) then
         dts  = dt_max ; kkcflmx = 0 ; dtsc = 0
@@ -5708,7 +5730,7 @@ if (ihorvic > 0 .or. NDRAW(29) == 37) then
              endif
              vicL = vicL + vicc
 
-             if (ja_timestep_auto_diff == 0) then
+             if (ja_timestep_auto_visc == 0) then
                 dxiAu = dxi(L)*hu(L)*wu(L)
                 if ( dxiAu.gt.0d0 ) then
                    vicL = min(vicL, 0.2d0*dti*min( vol1(k1) , vol1(k2) )  / dxiAu )  ! see Tech Ref.: Limitation of Viscosity Coefficient
@@ -5825,7 +5847,7 @@ if (ihorvic > 0 .or. NDRAW(29) == 37) then
                  endif
              endif
 
-             if (ja_timestep_auto_diff == 0) then
+             if (ja_timestep_auto_visc == 0) then
                 dxiAu = dxi(LL)*Au(L)
                 if ( dxiAu.gt.0d0 ) then
                    vicL = min(vicL, 0.2d0*dti*min( vol1(k1) , vol1(k2) )  / dxiAu )
