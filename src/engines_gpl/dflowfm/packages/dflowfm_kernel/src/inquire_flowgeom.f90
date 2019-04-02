@@ -159,35 +159,50 @@ module m_inquire_flowgeom
    !> find flow grid number(s), using  a polygon
    subroutine findpoint_by_pli(points, numpoints, mask)         
       use m_flowgeom, only : xz, yz, ndx2D, ndxi
+      use messagehandling
       
       integer,           intent(  out)  :: points(:)    !< array with links, connected to the polygon. Length is the resonsibility of the call-side
       integer,           intent(  out)  :: numpoints    !< number of found links        
       integer, optional, intent(in   )  :: mask         !< select for search range only 1D links (mask==FL_1D), 2d (mask==FL_2D), or both (mask==FL_1D+FL_2D)
-      ! ! 1:ndx2D, ndx2D+1:ndxi, ndxi+1:ndx1Db, ndx1Db:ndx
-      !if (present(mask)) then
-      !   select case(mask)
-      !   case (FL_1D)
-      !      nstart = ndx2D+1
-      !      nend   = ndxi
-      !   case (FL_2D)
-      !      nstart = 1
-      !      nend   = ndx2D
-      !   case (FL_1D + FL_2D)
-      !      nstart = 1
-      !      nend   = ndxi
-      !   end select
-      !else
-      !   nstart = 1
-      !   nend   = ndxi
-      !endif
-      !
-      !size_points = size(points)
-      !numpoints = 0
-      !do n = nstart, nend
-      !   call inwhichpolygon(xp,yp,in)
-      !enddo
       
-      !TODO JN: Implement this function
+      integer :: n
+      integer :: nstart
+      integer :: nend
+      integer :: in
+      integer :: size_points
+      
+       ! 1:ndx2D, ndx2D+1:ndxi, ndxi+1:ndx1Db, ndx1Db:ndx
+      if (present(mask)) then
+         select case(mask)
+         case (FL_1D)
+            nstart = ndx2D+1
+            nend   = ndxi
+         case (FL_2D)
+            nstart = 1
+            nend   = ndx2D
+         case (FL_1D + FL_2D)
+            nstart = 1
+            nend   = ndxi
+         end select
+      else
+         nstart = 1
+         nend   = ndxi
+      endif
+      
+      size_points = size(points)
+      numpoints = 0
+      do n = nstart, nend
+         call inwhichpolygon(xz(n),yz(n),in)
+         if (in > 0) then
+            numpoints = numpoints + 1
+            if (numpoints > size_points) then
+               call setmessage(LEVEL_ERROR, 'INTERNAL ERROR: array size too small (FINDPOINT_BY_PLI)')
+               return
+            endif
+            points(numpoints) = n
+         endif
+      enddo
+      
    end subroutine findpoint_by_pli         
    
    !> find the grid number on node Id 
