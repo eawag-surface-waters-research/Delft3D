@@ -281,6 +281,7 @@ module m_oned_functions
          pstru%right_calc_point = ln(2,pstru%link_number)
          L1strucsg(istru) = istru
          L2strucsg(istru) = istru
+         network%adm%lin2str(network%sts%struct(istru)%link_number) = istru
       enddo
       
    end subroutine set_structure_grid_numbers
