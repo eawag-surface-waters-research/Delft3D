@@ -1280,6 +1280,7 @@ character TEX*48, str_type*21, tex_empty*48
 integer :: linec ! line counter
 integer :: colc  ! colume counter
 integer :: k1, k2! node number
+integer :: L     ! net link number
 integer :: line_max ! maximal line number
 integer :: branchindex, ilocallin, nstruc, istrtype, i
 type(t_weir), pointer :: pweir
@@ -1297,7 +1298,7 @@ tex_empty = ''
 call IOUTSTRINGXY(colc, linec, tex_empty)
 
 linec = linec + 1
-tex = ' Info. for the link and nodes, press q to exit.'
+tex = ' Info for current link+nodes, press q to exit.'
 call IOUTSTRINGXY(colc, linec, tex)
 
 linec = linec + 1
@@ -1335,14 +1336,27 @@ call IOUTSTRINGXY(colc, linec, tex_empty)
 
 ! block for flow link
 call Write2Scr(linec, 'Flow link number', LL, '-')
-call Write2Scr(linec, 'Flow link type', kn(3,LL), '-')
+call Write2Scr(linec, 'Flow link type (kcu)', kcu(LL), '-')
+L = abs(ln2lne(LL))
+call Write2Scr(linec, 'Net link number', L, '-')
+call Write2Scr(linec, 'Net link type  (kn3)', kn(3,L), '-')
 
 if (network%loaded) then
    branchindex = network%adm%lin2ibr(LL)
-   call Write2Scr(linec, 'Branch id', network%brs%branch(branchindex)%id(1:21))
+   if (branchindex >= 1 .and. branchindex <= network%brs%Count) then
+      call Write2Scr(linec, 'Branch id', network%brs%branch(branchindex)%id(1:21))
 
-   ilocallin = network%adm%lin2point(LL)
-   call Write2Scr(linec, 'Chainage', network%brs%branch(branchindex)%uPointsChainages(ilocallin), 'm')
+      ilocallin = network%adm%lin2point(LL)
+      if (ilocallin >= 1 .and. ilocallin <= network%brs%branch(branchindex)%uPointsCount) then
+         call Write2Scr(linec, 'Chainage', network%brs%branch(branchindex)%uPointsChainages(ilocallin), 'm')
+      else
+         call Write2Scr(linec, 'Chainage', 'N/A')
+      end if
+   else
+      call Write2Scr(linec, 'Branch id', 'N/A')
+      call Write2Scr(linec, 'Chainage',  'N/A')
+   end if
+
 end if
 
 call Write2Scr(linec, 'Bob(1,L)', bob(1,LL), 'm')

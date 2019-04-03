@@ -6185,12 +6185,19 @@ subroutine getktoplot(kk,k)
             CALL DISND(KK)
          ELSE IF (NPUT .EQ. 52 .or. NPUT .EQ. 57 ) THEN   ! LINK mode
             call isflowlink(xp, yp, LL)
+            
             if (nput == 57 .and. LL > 0 ) then
                 zp = iadv(LL)
                 CALL TYPEVALUE(zp,KEY)
                 iadv(LL) = int(zp)
             endif
             if ( nput.eq.52 .and. LL.gt.0 ) call plotklnup(LL)
+
+            if (kn(3,LL) /= 2) then
+               idisLink = LL ! Save the link index for later display
+               call dis_info_1d_link(LL)
+            end if
+
          ENDIF
 
          IF ( NPUT .EQ. 53 ) THEN ! Click flow node to set min value for isocol
@@ -22251,11 +22258,6 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
     WRITE(TEX (6:),'(I10)') LN(2,LL)
     CALL KTEXT(TEX,IWS-22,7,15)
     call gtext(tex, xz(ln(2,LL)), yz(ln(2,LL)), 221)
-    
-    if (kn(3,LL) /= 2) then
-       call dis_info_1d_link(LL)
-       idisLink = LL ! Save the link index for later display
-    end if
  ENDIF
 
  RETURN
