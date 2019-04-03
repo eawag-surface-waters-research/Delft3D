@@ -36,19 +36,19 @@ module m_inquire_flowgeom
    private
 
    public findlink !< find flowlink number
-   public findpoint !< find grid index
+   public findnode !< find flownode number
    
    interface findlink
-      module procedure findlink_by_pli          !< find flow link number, using  a polygon
+      module procedure findlink_by_pli          !< find the flow link number, using a polyline
       module procedure findlink_by_branchindex  !< find the flow link number, using (branch index, chainage)
       module procedure findlink_by_branchid     !< find the flow link number, using (branch id, chainage)
    end interface
 
-   interface findpoint
-      module procedure findpoint_by_pli          !< find flow grid number, using  a polygon
-      module procedure findpoint_by_id           !< find the grid number on node Id 
-      module procedure findpoint_by_branchindex  !< find the flow link number, using (branch index, chainage)
-      module procedure findpoint_by_branchid     !< find the flow link number, using (branch id, chainage)
+   interface findnode
+      module procedure findnode_by_pol          !< find the flow node number, using a polygon
+      module procedure findnode_by_id           !< find the flow node number, using node Id 
+      module procedure findnode_by_branchindex  !< find the flow node number, using (branch index, chainage)
+      module procedure findnode_by_branchid     !< find the flow node number, using (branch id, chainage)
    end interface
    
    integer, public, parameter :: FL_1D = 1
@@ -198,14 +198,15 @@ module m_inquire_flowgeom
    end subroutine findlink_by_branchid
 
 
-   !> find flow grid number(s), using  a polygon
-   subroutine findpoint_by_pli(points, numpoints, mask)         
+   !> find flow node number(s), enclosed in a polygon
+   ! TODO: UNST-2370: JN: the polygon is missing in the input (npol, xpol, ypol). Now it is implicitly via m_polygon in subroutine inwhichpolygon.
+   subroutine findnode_by_pol(points, numpoints, nodetype)         
       use m_flowgeom, only : xz, yz, ndx2D, ndxi
       use messagehandling
       
       integer,           intent(  out)  :: points(:)    !< array with links, connected to the polygon. Length is the resonsibility of the call-side
       integer,           intent(  out)  :: numpoints    !< number of found links        
-      integer, optional, intent(in   )  :: mask         !< select for search range only 1D links (mask==FL_1D), 2d (mask==FL_2D), or both (mask==FL_1D+FL_2D)
+      integer, optional, intent(in   )  :: nodetype     !< select for search range only 1D nodes (nodetype==FL_1D), 2d (nodetype==FL_2D), or both (nodetype==FL_1D+FL_2D)
       
       integer :: n
       integer :: nstart
@@ -214,8 +215,8 @@ module m_inquire_flowgeom
       integer :: size_points
       
        ! 1:ndx2D, ndx2D+1:ndxi, ndxi+1:ndx1Db, ndx1Db:ndx
-      if (present(mask)) then
-         select case(mask)
+      if (present(nodetype)) then
+         select case(nodetype)
          case (FL_1D)
             nstart = ndx2D+1
             nend   = ndxi
@@ -238,57 +239,73 @@ module m_inquire_flowgeom
          if (in > 0) then
             numpoints = numpoints + 1
             if (numpoints > size_points) then
-               call setmessage(LEVEL_ERROR, 'INTERNAL ERROR: array size too small (FINDPOINT_BY_PLI)')
+               call setmessage(LEVEL_ERROR, 'INTERNAL ERROR: array size too small (FINDNODE_BY_POL)')
+               ! TODO: UNST-2370: JN: consider returning an ierr state.
                return
             endif
             points(numpoints) = n
          endif
       enddo
       
-   end subroutine findpoint_by_pli         
-   
-   !> find the grid number on node Id 
-   subroutine findpoint_by_id(nodeId, gridindex)         
+   end subroutine findnode_by_pol         
+
+
+   !> Find the flow node number, using node Id.
+   subroutine findnode_by_id(nodeId, nodenr)         
       use messagehandling
       use m_hash_search
       use unstruc_channel_flow
       
       character(len=Idlen), intent(in   ) :: nodeId          !< Id of the connection node
-      integer,              intent(  out) :: gridindex       !< grid index
+      integer,              intent(  out) :: nodenr          !< Found flow node number, -1 when not found.
       
       integer :: nodeindex
       
+      nodenr = -1
       nodeindex = hashsearch(network%nds%hashlist, nodeId)
-      gridindex = network%nds%node(nodeindex)%gridNumber
-      
-   end subroutine findpoint_by_id        
-   
-   !> find the flow link number, using (branch id, chainage)
-   subroutine findpoint_by_branchid(branchId, chainage, gridindex)     
+      if (nodeindex > 0) then
+         nodenr = network%nds%node(nodeindex)%gridNumber
+      end if
+
+   end subroutine findnode_by_id        
+
+
+   !> find the flow node number, using (branch id, chainage).
+   subroutine findnode_by_branchid(branchId, chainage, nodenr)     
       use m_hash_search
       use unstruc_channel_flow
 
       character(len=Idlen), intent(in   ) :: branchid       !< branch Id
-      double precision, intent(in)        :: chainage       !< chainage of item on the branch with index branchindex
-      integer,          intent(  out)     :: gridindex      !< gridnumber 
+      double precision, intent(in)        :: chainage       !< chainage of item on the branch with id branchid
+      integer,          intent(  out)     :: nodenr         !< Found flow node number, -1 when not found.
       
       integer :: branchindex
 
+      nodenr = -1
+
       branchindex = hashsearch(network%brs%hashlist, branchid)
-      
-      gridindex = getGridPointNumber(network%brs%branch(branchindex), chainage)
-   end subroutine findpoint_by_branchid     
- 
-   !> find the flow link number, using (branch id, chainage)
-   subroutine findpoint_by_branchindex(branchIndex, chainage, gridindex)     
+      if (branchindex > 0) then
+         call findnode_by_branchindex(branchindex, chainage, nodenr)
+      end if
+
+   end subroutine findnode_by_branchid     
+
+   
+   !> Find the flow node number, using (branch index, chainage).
+   subroutine findnode_by_branchindex(branchIndex, chainage, nodenr)     
       use m_hash_search
       use unstruc_channel_flow
 
       integer         , intent(in   )     :: branchindex    !< branch index
       double precision, intent(in)        :: chainage       !< chainage of item on the branch with index branchindex
-      integer,          intent(  out)     :: gridindex      !< gridnumber 
+      integer,          intent(  out)     :: nodenr         !< Found flow node number, -1 when not found.
 
-      gridindex = getGridPointNumber(network%brs%branch(branchindex), chainage)
-   end subroutine findpoint_by_branchindex     
+      nodenr = -1
+
+      if (branchIndex >= 1 .and. branchIndex <= network%brs%Count) then
+         nodenr = getGridPointNumber(network%brs%branch(branchindex), chainage)
+      end if
+
+   end subroutine findnode_by_branchindex     
  
 end module m_inquire_flowgeom
