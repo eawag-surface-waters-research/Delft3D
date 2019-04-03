@@ -7288,13 +7288,13 @@ contains
         numg = 0
         select case(opts)
         case (0)
-           call findlink(xp, yp, np, keg, numg)
+           call findlink(np, xp, yp, keg, numg)
         case (1)
-           call findlink(xp, yp, np, keg, numg, lftopol = lftopol)
+           call findlink(np, xp, yp, keg, numg, lftopol = lftopol)
         case (2)
-           call findlink(xp, yp, np, keg, numg, sortlinks = sortlinks)
+           call findlink(np, xp, yp, keg, numg, sortlinks = sortlinks)
         case (3)
-           call findlink(xp, yp, np, keg, numg, lftopol, sortlinks)
+           call findlink(np, xp, yp, keg, numg, lftopol, sortlinks)
         end select
      endif            
      

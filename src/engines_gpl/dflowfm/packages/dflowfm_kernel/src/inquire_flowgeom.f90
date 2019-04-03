@@ -1,3 +1,33 @@
+!----- AGPL --------------------------------------------------------------------
+!
+!  Copyright (C)  Stichting Deltares, 2017-2019.!
+!  This file is part of Delft3D (D-Flow Flexible Mesh component).
+!
+!  Delft3D is free software: you can redistribute it and/or modify
+!  it under the terms of the GNU Affero General Public License as
+!  published by the Free Software Foundation version 3.
+!
+!  Delft3D  is distributed in the hope that it will be useful,
+!  but WITHOUT ANY WARRANTY; without even the implied warranty of
+!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+!  GNU Affero General Public License for more details.
+!
+!  You should have received a copy of the GNU Affero General Public License
+!  along with Delft3D.  If not, see <http://www.gnu.org/licenses/>.
+!
+!  contact: delft3d.support@deltares.nl
+!  Stichting Deltares
+!  P.O. Box 177
+!  2600 MH Delft, The Netherlands
+!
+!  All indications and logos of, and references to, "Delft3D",
+!  "D-Flow Flexible Mesh" and "Deltares" are registered trademarks of Stichting
+!  Deltares, and remain the property of Stichting Deltares. All rights reserved.
+!
+!-------------------------------------------------------------------------------
+
+! $Id$
+! $HeadURL$
 
 !> This module contains general functions for snapping locations to either flowlink numbers or flownode numbers
 module m_inquire_flowgeom
@@ -26,19 +56,19 @@ module m_inquire_flowgeom
 
    contains
    
-   !> find flow link number, using  a polygon
-   subroutine findlink_by_pli(xpol, ypol, npol, Larr , numlinks, lftopol, sortlinks, mask)
+   !> Find flow link number(s) intersected by a given polyline.
+   subroutine findlink_by_pli(npl, xpl, ypl, Larr , numlinks, lftopol, sortlinks, linktype)
       use m_flowgeom, only : xz, yz, ln, lnx, lnx1D
       use sorting_algorithms
       
-      integer, intent(in)              :: npol
-      double precision,  intent(in   )  :: xpol(npol)   !< x-coordinates of the polyline
-      double precision,  intent(in   )  :: ypol(npol)   !< y-coordinates of the polyline
-      integer,           intent(  out)  :: Larr(:)      !< array with links, connected to the polygon. Length is the resonsibility of the call-side
-      integer,           intent(  out)  :: numlinks     !< number of found links        
-      integer, optional, intent(in   )  :: sortlinks    !< indicates whether the links have to be sorted.
-      integer, optional, intent(in   )  :: mask         !< select for search range only 1D links (mask==FL_1D), 2d (mask==FL_2D), or both (mask==FL_1D+FL_2D)
-      integer, optional, intent(inout)  :: lftopol(:)   !< flow link to intersecting polygon segment
+      integer,           intent(in   )  :: npl          !< Number of polyline points.
+      double precision,  intent(in   )  :: xpl(:)       !< x-coordinates of the polyline.
+      double precision,  intent(in   )  :: ypl(:)       !< y-coordinates of the polyline.
+      integer,           intent(  out)  :: Larr(:)      !< array with flow links, intersected by the polyline. Length is the resonsibility of the call site.
+      integer,           intent(  out)  :: numlinks     !< Number of found flow links.
+      integer, optional, intent(in   )  :: sortlinks    !< Indicates whether the flow links have to be sorted.
+      integer, optional, intent(in   )  :: linktype     !< Limit search to specific link types: only 1D flow links (linktype==FL_1D), 2D (linktype==FL_2D), or both (linktype==FL_1D+FL_2D).
+      integer, optional, intent(inout)  :: lftopol(:)   !< Mapping array from flow link to intersecting polyline segment.
       
       double precision :: xa, ya
       double precision :: xb, yb
@@ -62,9 +92,9 @@ module m_inquire_flowgeom
          allocate(distsStartPoly(lnx))
       endif
       
-      ! select 
-      if (present(mask)) then
-         select case(mask)
+      ! select search range for flow links
+      if (present(linktype)) then
+         select case(linktype)
          case (FL_1D)
             Lstart = 1
             Lend   = lnx1D
@@ -79,9 +109,7 @@ module m_inquire_flowgeom
          Lstart = 1
          Lend   = lnx
       endif
-      
-         
-      
+
       do L  = Lstart,Lend
          k1 = ln(1,L)
          k2 = ln(2,L) 
@@ -90,7 +118,7 @@ module m_inquire_flowgeom
          xb = xz(k2)
          yb = yz(k2)
            
-         call crosspoly(xa,ya,xb,yb,xpol,ypol,npol,XM,YM,CRPM,found,isec,dist)
+         call crosspoly(xa,ya,xb,yb,xpl,ypl,npl,XM,YM,CRPM,found,isec,dist)
       
          if (found == 1) then   
             numlinks = numlinks + 1
@@ -109,52 +137,66 @@ module m_inquire_flowgeom
          end if
       enddo
     
-      !if required, sort the links by distance in the polyline
-      if (present(sortLinks) .and. numlinks.gt.0) then
+      ! if required, sort the links by distance along the polyline
+      if (present(sortLinks) .and. numlinks > 0) then
          if (sortLinks==1) then
             allocate(sortedDistsStartPoly(numlinks))
             allocate(sortedIndexses(numlinks))
             allocate(tempLinkArray(numlinks))
   
-            call sort(numlinks,distsStartPoly(1:numlinks),sortedDistsStartPoly,sortedIndexses)
-            tempLinkArray = Larr(sortedIndexses(1:numlinks))
+            call sort(numlinks, distsStartPoly(1:numlinks), sortedDistsStartPoly, sortedIndexses)
+            do L=1,numlinks
+               tempLinkArray(L) = Larr(sortedIndexses(L))
+            end do
             Larr(1:numlinks) = tempLinkArray
-            
-            deallocate(distsStartPoly)
+
             deallocate(sortedDistsStartPoly)
             deallocate(sortedIndexses)
             deallocate(tempLinkArray)
          endif
       endif
+      if (allocated(distsStartPoly)) deallocate(distsStartPoly)
   
    end subroutine findlink_by_pli
-   
-   !> find the flow link number, using (branch index, chainage)
+
+
+   !> Find the nearest flow link number for a given location, using (branch index, chainage).
    subroutine findlink_by_branchindex(branchindex, chainage, L)
       use unstruc_channel_flow
       
-      integer,          intent(in)     :: branchindex    !< branch number
-      double precision, intent(in)     :: chainage       !< chainage of item on the branch with index branchindex
-      integer,          intent(  out)  :: L              !< link number 
-      
-      L = getLinkIndex(network%brs%branch(branchIndex), chainage)
-      
+      integer,          intent(in   )  :: branchindex    !< Branch index in network brs set.
+      double precision, intent(in   )  :: chainage       !< Chainage of item on the branch with index branchindex
+      integer,          intent(  out)  :: L              !< Found flow link number, -1 when not found.
+
+      L = -1
+
+      if (branchIndex >= 1 .and. branchIndex <= network%brs%Count) then
+         L = getLinkIndex(network%brs%branch(branchIndex), chainage)
+      end if
+
    end subroutine findlink_by_branchindex
 
+
+   !> Find the nearest flow link number for a given location, using (branch id, chainage).
    subroutine findlink_by_branchid(branchid, chainage, L)
       use unstruc_channel_flow
       use m_hash_search
       
-      character(len=Idlen), intent(in   ) :: branchid       !< branch Id
-      double precision, intent(in)        :: chainage       !< chainage of item on the branch with index branchindex
-      integer,          intent(  out)     :: L              !< link number 
+      character(len=Idlen), intent(in   ) :: branchid       !< Branch Id to be searched in network brs set.
+      double precision,     intent(in   ) :: chainage       !< Chainage of item on the branch with index branchindex.
+      integer,              intent(  out) :: L              !< Found flow link number, -1 when not found.
       
       integer :: branchindex
 
+      L = -1
+
       branchindex = hashsearch(network%brs%hashlist, branchid)
-      L = getLinkIndex(network%brs%branch(branchIndex), chainage)
-      
+      if (branchindex > 0) then
+         call findlink_by_branchindex(branchindex, chainage, L)
+      end if
+
    end subroutine findlink_by_branchid
+
 
    !> find flow grid number(s), using  a polygon
    subroutine findpoint_by_pli(points, numpoints, mask)         
