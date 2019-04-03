@@ -369,7 +369,9 @@ contains
          adm%hasStructures = .false.
       endif
       do istru = 1, network%sts%Count
-         adm%lin2str(network%sts%struct(istru)%link_number) = istru
+         if (network%sts%struct(istru)%link_number > 0) then
+            adm%lin2str(network%sts%struct(istru)%link_number) = istru
+         endif
       enddo
       
       adm%lin2ibr   = -huge(1)

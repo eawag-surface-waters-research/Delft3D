@@ -257,6 +257,7 @@ module m_oned_functions
    
    subroutine set_structure_grid_numbers()
       use unstruc_channel_flow
+      use m_flowgeom
       use m_flowexternalforcings
       use m_inquire_flowgeom
 
@@ -276,9 +277,8 @@ module m_oned_functions
          pstru   => network%sts%struct(istru)
          pbranch => network%brs%branch(pstru%ibran)
          call findlink(pstru%ibran, pstru%chainage, pstru%link_number)
-         local_index = pstru%left_calc_point - pbranch%Points(1)+1
-         pstru%left_calc_point  = pbranch%grd(local_index)
-         pstru%right_calc_point = pbranch%grd(local_index+1)
+         pstru%left_calc_point  = ln(1,pstru%link_number)
+         pstru%right_calc_point = ln(2,pstru%link_number)
          L1strucsg(istru) = istru
          L2strucsg(istru) = istru
       enddo
