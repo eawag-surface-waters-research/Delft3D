@@ -336,7 +336,7 @@ module m_branch
       do i = 1, branch%uPointsCount
           if (branch%uPointschainages(i) > chainage) then !found
               getGridPointNumber     = branch%grd(i)
-              exit
+              return
           endif
       enddo
       ! return end point of branch
