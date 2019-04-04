@@ -16185,7 +16185,7 @@ double precision :: value
          OPTION(4) =  'm = SET MIN;'
          OPTION(5) =  'M = SET MAX;'
          OPTION(6) =  'Z = ZOOMIN; '
-         option(7) =  'f=search link'
+         OPTION(7) =  'F = FIND link'
          MAXOPT    =  7
       ELSE IF (NUMB .EQ. 17) THEN    ! editgrid
          OPTION(1) =  'B = BELL; '
