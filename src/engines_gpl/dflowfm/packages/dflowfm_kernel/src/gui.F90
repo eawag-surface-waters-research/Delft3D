@@ -6261,7 +6261,7 @@ subroutine getktoplot(kk,k)
       ELSE IF (KEY .EQ. 81 .OR. KEY .EQ. 81+32) THEN    ! Q-key stop flow info screen display for 1D flowlink
          idisLink = 0
          key = 3
-      else if (key == 70+32                   ) then    ! f (case sensitive!) -key search for a flowlink
+      else if (KEY == 70 .or. KEY == 70+32) then        ! F-key search for a flowlink
          call GETINT(' SEARCH: flowlink =  ', L)
          if (L > 0 .and. L <= lnx) then
             nhlFlowLink = L
