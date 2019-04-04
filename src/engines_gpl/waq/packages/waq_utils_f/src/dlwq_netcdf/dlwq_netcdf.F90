@@ -93,25 +93,28 @@ end function dlwqnc_lowercase
 ! Arguments:
 !     ncid               ID of the NetCDF file
 !     attribute          Name of the attribute
+!     value              (Optionally) value of the attribute
 !     varid              ID of the requested variable
 !
 ! Returns:
 !     nf90_noerr if variable found, otherwise an error code
 !
-integer function dlwqnc_find_var_with_att( ncid, attribute, varid )
+integer function dlwqnc_find_var_with_att( ncid, attribute, varid, expected_value )
 
     implicit none
 
-    integer, intent(in)            :: ncid
-    character(len=*), intent(in)   :: attribute
-    integer, intent(out)           :: varid
+    integer, intent(in)                    :: ncid
+    character(len=*), intent(in)           :: attribute
+    integer, intent(out)                   :: varid
+    character(len=*), intent(in), optional :: expected_value
 
-    integer                        :: nvars
-    integer                        :: ierror
-    integer                        :: i
-    integer                        :: xtype, length, attnum
+    integer                                :: nvars
+    integer                                :: ierror
+    integer                                :: i
+    integer                                :: xtype, length, attnum
 
-    character(len=nf90_max_name)   :: varname
+    character(len=nf90_max_name)           :: varname
+    character(len=nf90_max_name)           :: att_value
 
     dlwqnc_find_var_with_att = -1
     varid                    = -1
@@ -130,7 +133,21 @@ integer function dlwqnc_find_var_with_att( ncid, attribute, varid )
         elseif ( ierror == nf90_noerr ) then
             varid = i
             ierror = nf90_inquire_variable( ncid, varid, name=varname )
-            exit
+
+            if ( present(expected_value) ) then
+                ierror = nf90_get_att( ncid, varid, attribute, att_value )
+                if ( ierror /= nf90_noerr ) then
+                    cycle ! Not the right type, it appears
+                else
+                    if ( att_value == expected_value ) then
+                        exit  ! Found the variable we are looking for
+                    else
+                        cycle ! Try and find another one
+                    endif
+                endif
+            else
+                exit ! No further checks needed
+            endif
         endif
     enddo
 
@@ -577,8 +594,12 @@ recursive function dlwqnc_copy_associated( ncidin, ncidout, meshidin, meshidout,
         !       instead.
         !
 #ifdef NetCDF4
-        ierror = nf90_def_var( ncidout, trim(varname), xtype, dimids(1:ndims), newvarid, &
-                     deflate_level = dlwqnc_deflate )
+        if ( ncopt(4) == 1 .and. ncopt(2) /= 0 ) then
+            ierror = nf90_def_var( ncidout, trim(varname), xtype, dimids(1:ndims), newvarid, &
+                         deflate_level = dlwqnc_deflate )
+        else
+            ierror = nf90_def_var( ncidout, trim(varname), xtype, dimids(1:ndims), newvarid )
+        endif
 #else
         ierror = nf90_def_var( ncidout, trim(varname), xtype, dimids(1:ndims), newvarid )
 #endif

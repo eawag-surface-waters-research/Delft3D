@@ -178,7 +178,7 @@
 
             ! Try to find a suitable mesh variable
             ! We do not have an aggregation table: construct one
-            inc_error = dlwqnc_find_var_with_att( ncid, "cf_role", varid )
+            inc_error = dlwqnc_find_var_with_att( ncid, "cf_role", varid, "mesh_topology" )
             if ( inc_error /= nf90_noerr ) then
                write ( lunut , 2540 )
                goto 800

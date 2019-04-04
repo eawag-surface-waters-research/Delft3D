@@ -246,19 +246,31 @@
          if ( gettoken( ioptf, ierr2 ) .gt. 0 ) goto 100
          select case ( ioptf )
             case ( 0 )
-               write (lunut,3000) ' NEFIS history file switched off'
+               if (.not. lncout) then
+                   write (lunut,3000) ' NEFIS history file switched off'
+               else
+                   write (lunut,3000) ' NetCDF history file switched off'
+               endif
             case ( 1 )
-               write (lunut,3000) ' NEFIS history file switched on'
-               if ( hissrt .eq. ihis ) isrtou(6) = ihnf
-               if ( hissrt .eq. ihi2 ) isrtou(6) = ihn2
-               if ( hissrt .eq. ihi3 ) isrtou(6) = ihn3
-               if ( hissrt .eq. ihi4 ) isrtou(6) = ihn4
+               if (.not. lncout) then
+                   write (lunut,3000) ' NEFIS history file switched on'
+                   if ( hissrt .eq. ihis ) isrtou(6) = ihnf
+                   if ( hissrt .eq. ihi2 ) isrtou(6) = ihn2
+                   if ( hissrt .eq. ihi3 ) isrtou(6) = ihn3
+                   if ( hissrt .eq. ihi4 ) isrtou(6) = ihn4
+               else
+                   write (lunut,3000) ' NEFIS history file switched on'
+                   if ( hissrt .eq. ihis ) isrtou(6) = ihnc
+                   if ( hissrt .eq. ihi2 ) isrtou(6) = ihnc2
+                   if ( hissrt .eq. ihi3 ) isrtou(6) = ihnc3
+                   if ( hissrt .eq. ihi4 ) isrtou(6) = ihnc4
+               endif
                nrvar(6)  = hisnrv
                do ivar = 1 , nrvar(6)
                   ounam(ivar,6) = ounam(ivar,3)
                enddo
             case default
-               write (lunut,3010) ' NEFIS history file option =',ioptf
+               write (lunut,3010) ' NEFIS/NetCDF history file option =',ioptf
                write (lunut,3000) ' ERROR option out of range!'
                ierr = ierr + 1
          end select

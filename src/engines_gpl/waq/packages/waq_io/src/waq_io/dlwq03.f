@@ -222,7 +222,7 @@
     !              ierr = ierr + 1
                endif
             else
-               inc_error = dlwqnc_find_var_with_att( ncid, "cf_role", varid )
+               inc_error = dlwqnc_find_var_with_att( ncid, "cf_role", varid, "mesh_topology" )
 
                if ( inc_error /= nf90_noerr ) then
                   write ( lunut , 2540 )

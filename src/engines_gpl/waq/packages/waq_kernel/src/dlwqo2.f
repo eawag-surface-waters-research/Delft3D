@@ -237,7 +237,7 @@
      +              isrtou, igrdou, iniout, lunout, iout  ,
      +              ierr  , ierr2 , i     , i1    , i2    ,
      +              ifi   , ncout , nrvar2, nrvar3, ip1   ,
-     +              iof   , nsegou, intopt 
+     +              iof   , nsegou, intopt
       character*255 lchout
       character*20  name
       logical       loflag, lmfirs, ldfirs, lhfirs, ldummy, lnonans
@@ -249,10 +249,14 @@
       logical            :: lfound       ! Keyword found (or not)
       logical, save      :: lnancheck    ! Do check on NAN in conc array
 
-      integer, save ::       mncrec = 0
-      integer, save ::       timeid, bndtimeid
-      integer, allocatable, save ::  mncwqid1(:,:), mncwqid2(:,:)
-      logical       first  /.true./
+      integer, save ::       mncrec = 0                            ! netCDF map
+      integer, save ::       hncrec = 0                            ! netCDF history
+      integer, save ::       timeid, bndtimeid                     ! netCDF map
+      integer, save ::       timeidh, bndtimeidh                   ! netCDF history
+      integer, allocatable, save ::  mncwqid1(:,:), mncwqid2(:,:)  ! netCDF map
+      integer, allocatable, save ::  hncwqid1(:,:), hncwqid2(:,:)  ! netCDF history
+
+      logical, save ::       first = .true.
 
       real(hp)           :: damass2(notot,5)
 
@@ -529,6 +533,18 @@
      +                      iostrt, iostop     , iostep, nodump, idump ,
      +                      duname, riobuf(iof), iniout)
 !
+            elseif ( isrtou .eq. ihnc ) then
+!
+               hncrec = hncrec + 1
+               iof = nrvar*nodump + 1
+               call outhnc (lun(47)   , lchar(47), lchar(46), timeidh,
+     +                      bndtimeidh, hncrec   , itime    , moname ,
+     +                      idump     , duname   , nodump   , notot  ,
+     +                      conc      , syname   , sysnm    , syuni  ,
+     +                      sydsc     , hncwqid1 , nrvar    , riobuf ,
+     +                      ounam(k1) , ousnm(k1), ouuni(k1), oudsc(k1),
+     +                      mncwqid2  , lun(19))
+!
             elseif ( isrtou .eq. ihi2 ) then
 !
                call outhis (lunout, lchout   , itime , moname, nodump,
@@ -542,6 +558,18 @@
      +                      0     , conc       , ounam(k1), nrvar , riobuf,
      +                      iostrt, iostop     , iostep   , nodump, idump ,
      +                      duname, riobuf(iof), iniout   )
+!
+            elseif ( isrtou .eq. ihnc2 ) then
+!
+               hncrec = hncrec + 1
+               iof = nrvar*nodump + 1
+               call outhnc (lun(47)   , lchar(47), lchar(46), timeidh,
+     +                      bndtimeidh, hncrec   , itime    , moname ,
+     +                      idump     , duname   , nodump   , 0      ,
+     +                      conc      , syname   , sysnm    , syuni  ,
+     +                      sydsc     , hncwqid1 , nrvar    , riobuf ,
+     +                      ounam(k1) , ousnm(k1), ouuni(k1), oudsc(k1),
+     +                      mncwqid2  , lun(19))
 !
             elseif ( isrtou .eq. ihi3 ) then
 !
@@ -565,6 +593,22 @@
      +                      iostrt, iostop     , iostep   , nsegou, idump ,
      +                      danam , riobuf(iof), iniout   )
 !
+            elseif ( isrtou .eq. ihnc3 ) then
+!
+!           Let op RANAM achter DANAM
+!
+               hncrec = hncrec + 1
+               nrvar3 = notot + nrvar2
+               nsegou = ndmpar + noraai
+               iof = nrvar3*nsegou + 1
+               call outhnc (lun(47)   , lchar(47), lchar(46), timeidh,
+     +                      bndtimeidh, hncrec   , itime    , moname ,
+     +                      idump     , danam    , nsegou   , 0      ,
+     +                      conc      , nambuf   , sysnm    , syuni  ,   !<== TODO: standard, unit, description should be checked
+     +                      sydsc     , hncwqid1 , nrvar3   , riobuf ,
+     +                      nambuf    , ousnm(k1), ouuni(k1), oudsc(k1),
+     +                      mncwqid2  , lun(19))
+!
             elseif ( isrtou .eq. ihi4 ) then
 !
                call outhis (lunout, lchout   , itime , moname, ndmpar,
@@ -578,6 +622,18 @@
      +                      0     , conc       , ounam(k1), nrvar2, riobuf,
      +                      iostrt, iostop     , iostep   , ndmpar, idump ,
      +                      danam , riobuf(iof), iniout   )
+!
+            elseif ( isrtou .eq. ihnc4 ) then
+!
+               hncrec = hncrec + 1
+               iof = nrvar2*ndmpar + 1
+               call outhnc (lun(47)   , lchar(47), lchar(46), timeidh,
+     +                      bndtimeidh, hncrec   , itime    , moname ,
+     +                      idump     , danam    , nsegou   , 0      ,
+     +                      conc      , syname   , sysnm    , syuni  ,
+     +                      sydsc     , hncwqid1 , nrvar2   , riobuf ,
+     +                      ounam(k1) , ousnm(k1), ouuni(k1), oudsc(k1),
+     +                      mncwqid2  , lun(19))
 !
             elseif ( isrtou .eq. imap ) then
 !
