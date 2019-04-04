@@ -6111,13 +6111,13 @@ subroutine getktoplot(kk,k)
       use dfm_error
       use unstruc_messages
       use gridoperations
-      use unstruc_display, only: idisLink, dis_info_1d_link
+      use unstruc_display, only: idisLink, dis_info_1d_link, nhlFlowLink
       implicit none
       integer :: MODE, KEY, kb , kt ,k, NL
       integer :: newmode
       integer :: ncol, nput
       integer :: nlevel
-      integer :: KK=0, LL
+      integer :: KK=0, LL, L
       integer :: num
       integer :: numb
       integer :: nwhat
@@ -6146,6 +6146,7 @@ subroutine getktoplot(kk,k)
       NPUT   =  NL
       NUMB   =  16
       NCOL   =  NCOLDN
+      L      =  0
 
       CALL SAVENET()
 
@@ -6260,6 +6261,12 @@ subroutine getktoplot(kk,k)
       ELSE IF (KEY .EQ. 81 .OR. KEY .EQ. 81+32) THEN    ! Q-key stop flow info screen display for 1D flowlink
          idisLink = 0
          key = 3
+      else if (key == 70+32                   ) then    ! f (case sensitive!) -key search for a flowlink
+         call GETINT(' SEARCH: flowlink =  ', L)
+         if (L > 0 .and. L <= lnx) then
+            nhlFlowLink = L
+            call highlight_nodesnlinks()
+         end if
       ELSE IF (KEY .EQ. 83 .OR. KEY .EQ. 83+32) THEN    ! S-key add salt
          if (jasal > 0) then
             call getkbotktop(nplot,kb , kt )
@@ -16178,7 +16185,8 @@ double precision :: value
          OPTION(4) =  'm = SET MIN;'
          OPTION(5) =  'M = SET MAX;'
          OPTION(6) =  'Z = ZOOMIN; '
-         MAXOPT    =  6
+         option(7) =  'f=search link'
+         MAXOPT    =  7
       ELSE IF (NUMB .EQ. 17) THEN    ! editgrid
          OPTION(1) =  'B = BELL; '
          OPTION(2) =  'D = DELETE; '
