@@ -6198,6 +6198,8 @@ subroutine getktoplot(kk,k)
                if (abs(kcu(LL)) /= 2) then
                   idisLink = LL ! Save the link index for later display
                   call dis_info_1d_link(LL)
+                  nhlFlowLink = LL
+                  call highlight_nodesnlinks()
                end if
             end if
 
@@ -6260,6 +6262,7 @@ subroutine getktoplot(kk,k)
          CALL VIEWCYCLE(KEY)
       ELSE IF (KEY .EQ. 81 .OR. KEY .EQ. 81+32) THEN    ! Q-key stop flow info screen display for 1D flowlink
          idisLink = 0
+         nhlFlowLink = 0
          key = 3
       else if (KEY == 70 .or. KEY == 70+32) then        ! F-key search for a flowlink
          call GETINT(' SEARCH: flowlink =  ', L)
