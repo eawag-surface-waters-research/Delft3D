@@ -2468,6 +2468,8 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
             bnd%sshape = 2
           case ('gauss')
             bnd%sshape = 3
+          case ('bin')
+            bnd%sshape = 4
           case default
              write(*,*) 'SWAN_INPUT: missing or invalid boundary spectrum shape type'
              goto 999
@@ -3975,6 +3977,15 @@ subroutine write_swan_inp (wavedata, calccount, &
     myfr       = 0 !swani(12)
     npoints    = sr%npoints
     !
+    ! Dano modifications nfreq, flow and fhigh for shape=BIN
+    ! Only meant for parametric, uniform boundary conditions on all given boundaries
+    bnd => sr%bnd(1)
+    if (bnd%sshape==4) then
+       dom%nfreq=2
+       dom%freqmin=1.d0/bnd%period(1)*0.9d0
+       dom%freqmax=1.d0/bnd%period(1)/0.9d0
+    endif
+    
     msc  = dom%nfreq
     mdc1 = dom%ndir
     cs   = dom%dirspace
@@ -4461,6 +4472,8 @@ subroutine write_swan_inp (wavedata, calccount, &
              line(12:) = 'PM'
           elseif (shape==3) then
              write (line(12:), '(A, 1X, F6.2)') 'GAUSS', bnd%sigfr
+          elseif (shape==4) then
+             line(12:) = 'BIN'
           else
           endif
           if (periodtype==1) then
