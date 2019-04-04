@@ -215,6 +215,7 @@ libWaqKernel_la_SOURCES = \
        outdmp.f \
        outhis.f \
        outhnf.f \
+       outhnc.f \
        outmap.f \
        outmnf.f \
        outmnc.F \
