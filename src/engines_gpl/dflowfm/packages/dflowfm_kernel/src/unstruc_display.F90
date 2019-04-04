@@ -1291,7 +1291,7 @@ type(t_culvert), pointer :: pculvert
 
 linec = 7
 colc  = 1
-line_max = 46
+line_max = 48
 
 ! write an empty line
 tex_empty = ''

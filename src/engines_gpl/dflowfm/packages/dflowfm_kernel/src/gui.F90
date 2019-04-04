@@ -6194,7 +6194,7 @@ subroutine getktoplot(kk,k)
             if ( nput.eq.52 .and. LL.gt.0 ) then
                call plotklnup(LL)
 
-               if (kn(3,LL) /= 2) then
+               if (abs(kcu(LL)) /= 2) then
                   idisLink = LL ! Save the link index for later display
                   call dis_info_1d_link(LL)
                end if
