@@ -263,9 +263,10 @@ module m_oned_functions
 
       implicit none
     
-      integer :: istru, local_index, nstru
+      integer :: istru, local_index, nstru, ierr
       type(t_structure), pointer :: pstru
       type(t_branch), pointer :: pbranch
+
       
       nstru = network%sts%count
       if (nstru>0) then
@@ -276,9 +277,11 @@ module m_oned_functions
       do istru = 1, nstru
          pstru   => network%sts%struct(istru)
          pbranch => network%brs%branch(pstru%ibran)
-         call findlink(pstru%ibran, pstru%chainage, pstru%link_number)
-         pstru%left_calc_point  = ln(1,pstru%link_number)
-         pstru%right_calc_point = ln(2,pstru%link_number)
+         ierr = findlink(pstru%ibran, pstru%chainage, pstru%link_number)
+         if (pstru%link_number > 0) then
+            pstru%left_calc_point  = ln(1,pstru%link_number)
+            pstru%right_calc_point = ln(2,pstru%link_number)
+         endif
          L1strucsg(istru) = istru
          L2strucsg(istru) = istru
          network%adm%lin2str(network%sts%struct(istru)%link_number) = istru

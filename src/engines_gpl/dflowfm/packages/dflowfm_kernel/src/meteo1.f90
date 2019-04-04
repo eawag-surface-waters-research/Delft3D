@@ -7240,6 +7240,7 @@ contains
    !> 
    subroutine selectelset_internal_links( filename, filetype, xz, yz, ln, lnx, keg, numg, xps, yps, nps, lftopol, sortLinks) ! find links cut by polyline filetype 9  
      use m_inquire_flowgeom
+     use messageHandling
      use sorting_algorithms, only: sort
      
      implicit none
@@ -7262,10 +7263,10 @@ contains
      integer, optional, intent(in) :: sortLinks
                                              
      !locals 
-     integer :: minp, L, k1, k2, ja, np, opts
+     integer :: minp, L, k1, k2, ja, np, opts, ierr
      double precision :: xa, ya, xb, yb,xm, ym, CRPM, dist 
      double precision, allocatable, dimension(:) :: xp, yp, distsStartPoly, sortedDistsStartPoly
-     integer, allocatable, dimension(:):: sortedIndexses, tempLinkArray !< the sorted indexses
+     integer, allocatable, dimension(:):: sortedIndexses, tempLinkArray !< the sorted indexes
 
      
      numg = 0 
@@ -7288,15 +7289,21 @@ contains
         numg = 0
         select case(opts)
         case (0)
-           call findlink(np, xp, yp, keg, numg)
+           ierr = findlink(np, xp, yp, keg, numg)
         case (1)
-           call findlink(np, xp, yp, keg, numg, lftopol = lftopol)
+           ierr = findlink(np, xp, yp, keg, numg, lftopol = lftopol)
         case (2)
-           call findlink(np, xp, yp, keg, numg, sortlinks = sortlinks)
+           ierr = findlink(np, xp, yp, keg, numg, sortlinks = sortlinks)
         case (3)
-           call findlink(np, xp, yp, keg, numg, lftopol, sortlinks)
+           ierr = findlink(np, xp, yp, keg, numg, lftopol, sortlinks)
         end select
      endif            
+     
+     if (ierr /= 0) then
+        call setmessage( LEVEL_WARN, 'Internal error while reading '//trim(filename)//'. The number of found links exceeds the available positions.')
+        call setmessage( -LEVEL_WARN, 'The contents of this polygon is ignored.')
+        numg = 0
+     endif
      
       if(present(xps)) then
          if(allocated(xps)) deallocate(xps)
