@@ -126,7 +126,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
 ! Local parameters
 !
     integer, parameter :: IROUGH = 300
-    integer, parameter :: MAXFLD = 10
+    integer, parameter :: MAXFLD = 12
 !
 ! Global variables
 !
@@ -516,6 +516,9 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        , &
     !     Baptist vegetation formulation
     nropar(153) = 4
     nropar(154) = 4
+    !     Vaestilae & Jaervelae (2017) and Jarvela (2004) vegetation formulations
+    nropar(155) = 10
+    nropar(156) = 6
     !
     ! 201-249: Vegetation roughness predictors (linear)
     !
@@ -1139,7 +1142,7 @@ subroutine rdttar(filnam    ,lundia    ,error     ,nttaru    ,ittaru    , &
 !
 ! Local parameters
 !
-    integer, parameter :: MAXFLD = 10
+    integer, parameter :: MAXFLD = 12
 !
 ! Global variables
 !
@@ -1838,7 +1841,7 @@ subroutine dimtrt(lundia    ,error     ,gdtrachy   ,mdfile_ptr , &
 !
 ! Local parameters
 !
-    integer, parameter :: MAXFLD = 10
+    integer, parameter :: MAXFLD = 12
 !
 ! Global variables
 !
@@ -1896,7 +1899,7 @@ subroutine dimtrt(lundia    ,error     ,gdtrachy   ,mdfile_ptr , &
     ntrtobs = 0
     n_q     = 0
     n_zs    = 0
-    nroupa = 7
+    nroupa = 12
     do jdir = 1,nodir 
        nttaru        => gdtrachy%dir(jdir)%nttaru
        nttaru = 0
@@ -2105,7 +2108,7 @@ subroutine dittar(filnam    ,lundia    ,error     ,nttaru    )
 !
 ! Local parameters
 !
-    integer, parameter :: MAXFLD = 10
+    integer, parameter :: MAXFLD = 12
 !
 ! Global variables
 !

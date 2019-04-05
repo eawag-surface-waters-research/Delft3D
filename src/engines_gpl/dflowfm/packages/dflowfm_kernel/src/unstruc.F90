@@ -9543,6 +9543,7 @@ subroutine flow_trachyinit()
     use m_missing
     use m_sferic, only: jsferic,jasfer3D
     use geometry_module, only: dbdistance, half
+    use m_vegetation, only: jabaptist
     !
     implicit none
     !
@@ -9709,13 +9710,26 @@ subroutine flow_trachyinit()
     ! determine if umag is needed.
     !
     update_umag = .false.
-    itt = 0
-    do while ((.not. update_umag) .and. (itt < trachy_fl%dir(1)%nttaru))
-       itt = itt + 1
-       if ((trachy_fl%dir(1)%ittaru(itt,3) == 103) .or. (trachy_fl%dir(1)%ittaru(itt,3) == 104)) then    ! if Van Rijn roughness predictor or Struiksma roughness predictor
+    itrt = 0
+    do while ((.not. update_umag) .and. (itrt < trachy_fl%gen%ntrt))
+       itrt = itrt + 1
+       ! The statement could be optimized a bit more to be evaluated only if such area definitions exist.
+       if ((trachy_fl%gen%ittdef(itrt, 2) == 103) .or. (trachy_fl%gen%ittdef(itrt, 2) == 104) .or. (trachy_fl%gen%ittdef(itrt, 2) == 155)) then    ! if Van Rijn roughness predictor or Struiksma roughness predictor or Vaestila vegetation roughness
           update_umag = .true.
        end if
     enddo
+    !
+    itrt = 0
+    do while ((.not. trachy_resistance) .and. (itrt < trachy_fl%gen%ntrt))
+       itrt = itrt + 1
+       ! The statement could be optimized a bit more to be evaluated only if such area definitions exist (see above).
+       if ((trachy_fl%gen%ittdef(itrt, 2) == 154) .or. (trachy_fl%gen%ittdef(itrt, 2) == 155) .or. (trachy_fl%gen%ittdef(itrt, 2) == 156)) then    ! if Baptist type 154
+          trachy_resistance = .true.
+       end if
+    enddo
+    if (trachy_resistance .and. (jabaptist >= 2)) then 
+        call mess(LEVEL_ERROR, 'Trachytopes and Vegetationmodelnr >= 2 cannot be used in the same simulation', mdia)    
+    endif 
     !
     ! Connection to FM definitions
     !
@@ -9852,6 +9866,7 @@ subroutine flow_trachyupdate()
     use m_sediment
     use m_bedform,  only: bfmpar
     use m_alloc
+    use m_vegetation, only: alfav
     !
     implicit none
     !
@@ -10040,6 +10055,13 @@ subroutine flow_trachyupdate()
            frcu(LF) = frcu(LF) * cftrtfac(LF)  ! This has probably become obsolete
         end if
     end do
+    !
+    if (trachy_resistance) then 
+        do LF = 1, lnx
+            L = ln2lne(LF)
+            alfav(LF) = trachy_fl%dir(1)%rttfu(L,1)/2.0_fp
+        enddo    
+    endif 
     !
     if (jacali == 1) then
         call calibration_backup_frcu()
@@ -33040,6 +33062,7 @@ end subroutine setbobs_fixedweirs
  use m_orifice
  use m_sferic
  use m_culvert
+ use m_trachy, only: trachy_resistance
 
  implicit none
 
@@ -33162,7 +33185,7 @@ end subroutine setbobs_fixedweirs
               else
                  frL = cfuhi(L)*sqrt(u1L*u1L + v2)   ! g / (H.C.C) = (g.K.K) / (A.A) travels in cfu
               endif
-          else if (jaBaptist >= 2) then
+          else if ((jaBaptist >= 2) .or. trachy_resistance) then
               frL = ( cfuhi(L) + alfav(L) )*sqrt(u1L*u1L + v2)      ! g / (H.C.C) = (g.K.K) / (A.A) travels in cfu
           else
               frL = cfuhi(L)*sqrt(u1L*u1L + v2)      ! g / (H.C.C) = (g.K.K) / (A.A) travels in cfu
@@ -36452,6 +36475,7 @@ end function is_1d_boundary_candidate
  use m_partitioninfo
  use m_ec_spatial_extrapolation, only : init_spatial_extrapolation
  use m_sferic, only: jsferic
+ use m_trachy, only: trachy_resistance 
  ! use m_vegetation
 
  implicit none
@@ -38546,6 +38570,11 @@ end if
 
  endif
 
+ if ((jatrt>0) .and. trachy_resistance) then 
+     call realloc(  alfav, Lnx, keepExisting=.false., fill=0d0, stat=ierr)
+     call aerr   (' alfav (Lnx)', ierr, Lnx)
+ endif
+ 
  if (jagrounLay == 1) then
     IF (ALLOCATED (wigr) ) deallocate (wigr, argr, pergr)
     allocate  ( argr(lnx1D) , stat= ierr)  ; argr  = 0d0

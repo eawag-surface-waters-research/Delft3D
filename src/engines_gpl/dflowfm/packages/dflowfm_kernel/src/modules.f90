@@ -713,6 +713,7 @@ module m_trachy
  logical                           :: lfdxx                       !< Logical for sediment diameters  of trachytopes computation (not used yet)
  !logical                           :: spatial_bedform             !< Logical for inclusion of spatially varying dune properties in trachytopes computation (not used yet)
  logical                           :: update_umag                 !< Logical for updating cell-centred velocity magnitude in trachytopes computation
+ logical                           :: trachy_resistance = .false. !< Logical for additional resistance term in momentum equation
  !
  !double precision, allocatable     :: rhosol(:)                   !< Density of sediment (lsedtot)
  double precision, allocatable     :: sig(:)                      !< sigma layer notation as in Delft3D in trachytopes computation
