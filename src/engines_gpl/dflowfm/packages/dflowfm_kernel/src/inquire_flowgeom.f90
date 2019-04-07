@@ -42,6 +42,7 @@ module m_inquire_flowgeom
       module procedure findlink_by_pli          !< find the flow link number, using a polyline
       module procedure findlink_by_branchindex  !< find the flow link number, using (branch index, chainage)
       module procedure findlink_by_branchid     !< find the flow link number, using (branch id, chainage)
+      module procedure findlink_by_structureid  !< find the flow link number, using a structure id
    end interface
 
    interface findnode
@@ -210,6 +211,30 @@ module m_inquire_flowgeom
    end function findlink_by_branchid
 
 
+   !> Given a structure id, find the corresponding flow link L
+   !! If not find, then L returns 0
+   subroutine findlink_by_structureid(strucid, L)
+   use unstruc_channel_flow
+   implicit none
+   character(len=*), intent(in) :: strucid !< Structure id
+   integer         , intent(out):: L       !< Found flowlink number
+   
+   integer :: i
+   character strucid_tmp*40
+   
+   L = 0
+   
+   do i = 1, network%sts%Count
+      strucid_tmp = network%sts%struct(i)%id
+      if (trim(strucid_tmp) == trim(strucid)) then
+         L = network%sts%struct(i)%link_number
+         exit
+      end if
+   end do
+   
+   return
+   end subroutine findlink_by_structureid
+   
    !> find flow node number(s), enclosed in a polygon
    function findnode_by_pol(npol, xpol, ypol, points, numpoints, nodetype) result(ierr)
       use m_flowgeom, only : xz, yz, ndx2D, ndxi

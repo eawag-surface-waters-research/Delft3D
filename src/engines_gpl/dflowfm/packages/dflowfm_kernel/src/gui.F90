@@ -6112,6 +6112,7 @@ subroutine getktoplot(kk,k)
       use unstruc_messages
       use gridoperations
       use unstruc_display, only: idisLink, dis_info_1d_link, nhlFlowLink
+      use m_inquire_flowgeom
       implicit none
       integer :: MODE, KEY, kb , kt ,k, NL
       integer :: newmode
@@ -6135,7 +6136,7 @@ subroutine getktoplot(kk,k)
 
       COMMON /HELPNOW/ WRDKEY,NLEVEL
 
-      CHARACTER TEX*26, WRDKEY*40
+      CHARACTER TEX*26, WRDKEY*40, strucid*40
       integer :: iresult
    
       TEX    = ' Edit FLOW            '
@@ -6264,6 +6265,13 @@ subroutine getktoplot(kk,k)
          idisLink = 0
          nhlFlowLink = 0
          key = 3
+      else if (KEY == 72 .or. KEY == 72+32) then        ! H-key search for a hydraulic structure
+         call getstring(' SEARCH: structure id = ', strucid)
+         call findlink(strucid, L)
+         if (L > 0 .and. L <= lnx) then
+            nhlFlowLink = L
+            call highlight_nodesnlinks()
+         end if
       else if (KEY == 70 .or. KEY == 70+32) then        ! F-key search for a flowlink
          call GETINT(' SEARCH: flowlink =  ', L)
          if (L > 0 .and. L <= lnx) then
@@ -14772,7 +14780,60 @@ end subroutine highlight_form_line
       CALL INPOPUP('OFF')
       CALL ITEXTCOLOURN(NFORGR,NBCKGR)
       RETURN
-      END
+   END
+
+   !> Get a string
+   subroutine getstring(text, string)
+   use m_devices
+   implicit none
+   character(len=*), intent(in)     :: text
+   character(len=*), intent(out)    :: string
+   
+   integer :: infoattribute
+   integer :: infoinput
+   integer :: ixp
+   integer :: iyp
+   integer :: key
+   integer :: nbckgr
+   integer :: nforgr
+   integer :: nlevel
+   integer :: lstring
+   character string_tmp*40
+   character wrdkey*40
+   common /helpnow/   wrdkey,nlevel
+   
+   ixp = iws/2
+   iyp = ihs/2
+   nforgr = InfoAttribute(13)
+   nbckgr = InfoAttribute(14)
+   
+   call inpopup('on')
+20 continue
+   call itextcolour('bwhite', 'red')
+   call inhighlight('blue', 'bwhite')
+   call timlin()
+   call InStringXYDef(ixp,iyp,text,1,string_tmp,lstring)
+   call timlin
+   key = InfoInput(55)
+   if (key >=24 .and. key <= 26) then
+      nlevel = 3
+      wrdkey = text
+      call fkeys(key)
+      if (key == 3) then
+         call inpopup('off')
+         call itextcolourn(nforgr, nbckgr)
+         return
+      end if
+      goto 20
+   else if (key == 21 .or. key ==22) then
+      string = string_tmp(1:lstring)
+   else
+      string = ''
+   end if
+   call inpopup('off')
+   call itextcolourn(nforgr, nbckgr)
+   return 
+   end subroutine getstring
 
       ! Now a double precision (double precision ::)
       SUBROUTINE SHOWREAL(TEXT,VALUE)
@@ -16189,7 +16250,8 @@ double precision :: value
          OPTION(5) =  'M = SET MAX;'
          OPTION(6) =  'Z = ZOOMIN; '
          OPTION(7) =  'F = FIND link'
-         MAXOPT    =  7
+         OPTION(8) =  'H = FIND stru'
+         MAXOPT    =  8
       ELSE IF (NUMB .EQ. 17) THEN    ! editgrid
          OPTION(1) =  'B = BELL; '
          OPTION(2) =  'D = DELETE; '
