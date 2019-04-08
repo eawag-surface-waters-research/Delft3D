@@ -434,16 +434,22 @@ contains
       double precision                   :: af_sub_local(3)
       double precision                   :: perim_sub_local(3)
       double precision                   :: cz_sub_local(3)
+      double precision                   :: cz_
 
       if (network%adm%line2cross(ilink)%c1 <= 0) then
          ! no cross section defined on branch, use default definition
          area = default_width* depth
          perimeter = default_width + 2*depth
-         cz = 60d0
+         if (present(cz)) then
+            cz_ = cz
+         else
+            cz_ = 60d0
+         end if
+
          if (present(flowArea))     flowArea = area
          if (present(flowWidth))    flowWidth = default_width
          if (present(wetPerimeter)) wetPerimeter = perimeter
-         if (present(conveyance))   conveyance = cz* area * sqrt(area/perimeter)
+         if (present(conveyance))   conveyance = cz_* area * sqrt(area/perimeter)
          if (present(af_sub   )) then
             af_sub    = 0d0
             af_sub(1) = area
@@ -454,7 +460,7 @@ contains
          endif
          if (present(cz_sub   )) then
             cz_sub    = 0d0
-            cz_sub(1) = cz
+            cz_sub(1) = cz_
          endif
          return
       endif
@@ -476,7 +482,6 @@ contains
       if (present(af_sub   ))   af_sub    = af_sub_local   
       if (present(perim_sub))   perim_sub = perim_sub_local
       if (present(cz_sub   ))   cz_sub    = cz_sub_local   
-      if (present(cz       ))   cz        = czdum
       if (present(cz       ))   cz        = czdum
 
    end subroutine getCrossFlowData_on_link
