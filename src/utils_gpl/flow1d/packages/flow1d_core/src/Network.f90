@@ -393,10 +393,11 @@ contains
       
       if (network%crs%Count > 0) then
 
+         call useBranchOrders(network%crs, network%brs)
+        
          allocate(crossOrder(network%crs%Count))
          allocate(lastAtBran(network%brs%Count))
-         
-         call useBranchOrders(network%crs, network%brs)
+                  
          call crossSectionsSort(network%crs, network%brs, crossOrder, lastAtBran)
          
          ! Fill in the Index for checking later
