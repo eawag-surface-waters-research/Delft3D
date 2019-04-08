@@ -6136,7 +6136,8 @@ subroutine getktoplot(kk,k)
 
       COMMON /HELPNOW/ WRDKEY,NLEVEL
 
-      CHARACTER TEX*26, WRDKEY*40, strucid*40
+      CHARACTER TEX*26, WRDKEY*40
+      character(len=IdLen) :: strucid
       integer :: iresult
    
       TEX    = ' Edit FLOW            '

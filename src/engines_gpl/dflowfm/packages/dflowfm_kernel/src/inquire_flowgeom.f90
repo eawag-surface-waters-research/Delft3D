@@ -211,29 +211,31 @@ module m_inquire_flowgeom
    end function findlink_by_branchid
 
 
-   !> Given a structure id, find the corresponding flow link L
-   !! If not find, then L returns 0
+   !> Find flow link number for a given structure id.
+   !! If not found, then L = -1 .
    function findlink_by_structureid(strucid, L) result(ierr)
-   use unstruc_channel_flow
-   implicit none
-   character(len=*), intent(in) :: strucid !< Structure id
-   integer         , intent(out):: L       !< Found flowlink number
+      use dfm_error
+      use unstruc_channel_flow
    
-   integer :: i, ierr
-   character strucid_tmp*40
+      integer                         :: ierr    !< Result status, DFM_NOERR in case of success.
+      character(len=*), intent(in   ) :: strucid !< Structure id
+      integer         , intent(  out) :: L       !< Found flow link number, -1 when not found.
    
-   L = 0
-   
-   do i = 1, network%sts%Count
-      strucid_tmp = network%sts%struct(i)%id
-      if (trim(strucid_tmp) == trim(strucid)) then
-         L = network%sts%struct(i)%link_number
-         exit
-      end if
-   end do
-   
-   ierr = 0
-   return
+      integer :: i
+      character(len=Idlen) :: strucid_tmp
+
+      L = -1
+      ierr = DFM_NOERR
+
+      do i = 1, network%sts%Count
+         strucid_tmp = network%sts%struct(i)%id
+         if (trim(strucid_tmp) == trim(strucid)) then
+            L = network%sts%struct(i)%link_number
+            exit
+         end if
+      end do
+
+      return
    end function findlink_by_structureid
    
    !> find flow node number(s), enclosed in a polygon
