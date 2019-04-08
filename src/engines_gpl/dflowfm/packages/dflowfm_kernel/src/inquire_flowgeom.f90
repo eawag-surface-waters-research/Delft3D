@@ -213,13 +213,13 @@ module m_inquire_flowgeom
 
    !> Given a structure id, find the corresponding flow link L
    !! If not find, then L returns 0
-   subroutine findlink_by_structureid(strucid, L)
+   function findlink_by_structureid(strucid, L) result(ierr)
    use unstruc_channel_flow
    implicit none
    character(len=*), intent(in) :: strucid !< Structure id
    integer         , intent(out):: L       !< Found flowlink number
    
-   integer :: i
+   integer :: i, ierr
    character strucid_tmp*40
    
    L = 0
@@ -232,8 +232,9 @@ module m_inquire_flowgeom
       end if
    end do
    
+   ierr = 0
    return
-   end subroutine findlink_by_structureid
+   end function findlink_by_structureid
    
    !> find flow node number(s), enclosed in a polygon
    function findnode_by_pol(npol, xpol, ypol, points, numpoints, nodetype) result(ierr)

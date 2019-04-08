@@ -6267,7 +6267,7 @@ subroutine getktoplot(kk,k)
          key = 3
       else if (KEY == 72 .or. KEY == 72+32) then        ! H-key search for a hydraulic structure
          call getstring(' SEARCH: structure id = ', strucid)
-         call findlink(strucid, L)
+         iresult = findlink(strucid, L)
          if (L > 0 .and. L <= lnx) then
             nhlFlowLink = L
             call highlight_nodesnlinks()
