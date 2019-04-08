@@ -2239,7 +2239,7 @@ end subroutine setfouunit
        if (founam(ifou)(:2)=='ta') then
           iblbs = iblbs + 1
           blnm = 'BS??'
-          write (blnm(3:4), '(i2.2)') ibluc
+          write (blnm(3:4), '(i2.2)') iblbs
           namfun = 'bed shear stress'
        endif
 
