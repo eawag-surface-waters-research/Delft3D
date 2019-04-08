@@ -492,7 +492,7 @@ module m_fourier_analysis
           foutyp(ifou)     = 's'
           fouref(ifou,1)   = fouid
        elseif (founam(ifou)=='bs') then
-          founam(ifou)     = 'taubpu          '
+          founam(ifou)     = 'ta              '
           foutyp(ifou)     = 's'
           fouref(ifou,1)   = fouid
        elseif (founam(ifou)=='ct') then                     ! constituent: temperature (scalar)
@@ -655,7 +655,7 @@ module m_fourier_analysis
        irelp = 7
        !
        if ( founam(ifou)(1:2)/='s1'  .and. &
-            founam(ifou)(1:3)/='tau' .and. &
+            founam(ifou)(1:3)/='ta' .and. &
             founam(ifou)(1:3)/='uxa' .and. &
             founam(ifou)(1:3)/='uya' .and. &
             founam(ifou)(1:2)/='ws') then
@@ -1054,8 +1054,8 @@ end subroutine setfouunit
             nmaxus = lnkx
        case('qxk')
             nmaxus = lnx
-       case('taubpu')
-            nmaxus = lnx
+       case('ta')
+            nmaxus = ndx
        case('ux','uy','uc')
             nmaxus = ndkx
        case('uxa','uya')
@@ -1363,6 +1363,16 @@ end subroutine setfouunit
              nofouvar = nofouvar + 2
           endif
        !
+       ! requested fourier analysis bed shear stress
+       !
+       elseif (columns(1)(1:2)=='bs') then
+          nofou = nofou + 1
+          if (index(record,'max')>0 .or. index(record,'min')>0 .or. index(record,'avg')>0) then
+             nofouvar = nofouvar + 1
+          else
+             nofouvar = nofouvar + 2
+          endif
+       !
        ! requested fourier analysis constituent
        !
        elseif ((columns(1)(1:1)=='c') .and. (index('12345',columns(1)(2:2))>0)) then 
@@ -1518,7 +1528,8 @@ end subroutine setfouunit
                 fieldptr1(1:gddimens%ndx,1:1) => ucmag
              case ('r1')
                 fieldptr1(1:gddimens%ndx,1:1) => constituents(fconno(ifou),:)
-             case ('taubpu')
+             case ('ta')
+                call gettaus(1)
                 fieldptr1(1:gddimens%ndx,1:1) => taus
              case default 
                 continue         ! Unknown FourierVariable exception 
@@ -1812,7 +1823,7 @@ end subroutine setfouunit
                  namfun = 'unit discharge'
               endif
               if (founam(ifou)(:2)=='ta') then
-                 unc_loc = UNC_LOC_U
+                 unc_loc = UNC_LOC_S
                  iblbs = iblbs + 1
                  blnm = 'BS??'
                  write (blnm(3:4), '(i2.2)') iblbs
@@ -1832,9 +1843,9 @@ end subroutine setfouunit
               
               ierr = unc_add_gridmapping_att(fileids%ncid, idvar(:,ivar), jsferic)
               select case (founam(ifou))
-              case('s1','r1','u1','ux','uy','uxa','uya','uc')
+              case('s1','r1','u1','ux','uy','uxa','uya','uc','ta')
                  ierr = unc_put_att(fileids%ncid, idvar(:,ivar),  'coordinates'  , 'FlowElem_xcc FlowElem_ycc')
-              case('qxk','taubpu','ws')
+              case('qxk','ws')
                  ierr = unc_put_att(fileids%ncid, idvar(:,ivar),  'coordinates'  , 'FlowLink_xu FlowLink_yu')
               end select
               ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'Number_of_cycles', fnumcy(ifou))
@@ -1869,9 +1880,9 @@ end subroutine setfouunit
               if (ifou > nofou) exit
               !
               select case (trim(founam(ifou)))
-              case ('s1','ux','uy','uxa','uya','uc','r1')
+              case ('s1','ux','uy','uxa','uya','uc','r1','ta')
                  unc_loc = UNC_LOC_S
-              case ('u1','ws','qx','ta')
+              case ('u1','ws','qx')
                  unc_loc = UNC_LOC_U
               case default
                  unc_loc = -1
@@ -2044,6 +2055,7 @@ end subroutine setfouunit
        integer                              , pointer :: ibluva
        integer                              , pointer :: ibleh
        integer                              , pointer :: iblcn
+       integer                              , pointer :: iblbs
        real(fp)       , dimension(:)        , pointer :: fknfac
        real(fp)       , dimension(:)        , pointer :: foufas
        real(fp)       , dimension(:,:,:)    , pointer :: fousma
@@ -2108,6 +2120,7 @@ end subroutine setfouunit
        ibluc         => gdfourier%ibluc
        ibleh         => gdfourier%ibleh
        iblcn         => gdfourier%iblcn
+       iblbs         => gdfourier%iblbs
        ftmsto        => gdfourier%ftmsto
        ftmstr        => gdfourier%ftmstr
        idvar         => gdfourier%idvar
@@ -2160,8 +2173,8 @@ end subroutine setfouunit
             nmaxus = lnkx
        case('qxk')
             nmaxus = lnx
-       case('taubpu')
-            nmaxus = lnx
+       case('ta')
+            nmaxus = ndx
        case('ux','uy','uc')
             nmaxus = ndkx
        case('uxa','uya')
@@ -2222,6 +2235,12 @@ end subroutine setfouunit
           blnm = 'UC??'
           write (blnm(3:4), '(i2.2)') ibluc
           namfun = 'velocity magnitude'
+       endif
+       if (founam(ifou)(:2)=='ta') then
+          iblbs = iblbs + 1
+          blnm = 'BS??'
+          write (blnm(3:4), '(i2.2)') ibluc
+          namfun = 'bed shear stress'
        endif
 
        !
