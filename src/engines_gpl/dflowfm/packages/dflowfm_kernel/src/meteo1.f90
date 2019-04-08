@@ -7300,8 +7300,8 @@ contains
      endif            
      
      if (ierr /= 0) then
-        call setmessage( LEVEL_WARN, 'Internal error while reading '//trim(filename)//'. The number of found links exceeds the available positions.')
-        call setmessage( -LEVEL_WARN, 'The contents of this polygon is ignored.')
+        call setmessage( LEVEL_WARN, 'Internal error while intersecting flow links for '//trim(filename)//'. The number of found links exceeds the available positions.')
+        call setmessage( -LEVEL_WARN, 'The contents of this polyline is ignored.')
         numg = 0
      endif
      
