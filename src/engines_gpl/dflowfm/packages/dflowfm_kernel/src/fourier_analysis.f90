@@ -655,7 +655,7 @@ module m_fourier_analysis
        irelp = 7
        !
        if ( founam(ifou)(1:2)/='s1'  .and. &
-            founam(ifou)(1:3)/='ta' .and. &
+            founam(ifou)(1:2)/='ta' .and. &
             founam(ifou)(1:3)/='uxa' .and. &
             founam(ifou)(1:3)/='uya' .and. &
             founam(ifou)(1:2)/='ws') then
