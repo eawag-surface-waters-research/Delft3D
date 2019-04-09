@@ -541,7 +541,7 @@ module m_ec_instance
                end if
                do ic=1, targetItemPtr%nConnections
                   connectionPtr => targetItemPtr%connectionsPtr(ic)%ptr
-                  write(line,'(a,i5.5)') '   Connection ',connectionPtr%id 
+                  write(line,'(a,i5.5,a,i5.5)') '   Connection ',connectionPtr%id,', Converter ',connectionPtr%converterPtr%id  
                   call messenger(lvl, line)
                   if (connectionPtr%nSourceItems==0) then
                      write(line,'(a)') '   CONNECTION HAS NO SOURCE ITEMS !!!'

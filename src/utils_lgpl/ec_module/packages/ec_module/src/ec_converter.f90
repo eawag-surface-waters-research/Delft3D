@@ -315,6 +315,7 @@ module m_ec_converter
          
          real(hp), dimension(4) :: xfindpoly, yfindpoly
          integer                :: imin, jmin, iii, jjj
+         integer                :: tgt_ndx
 
          logical hasKDTree
          
@@ -593,20 +594,26 @@ module m_ec_converter
                if (associated(weight%weightFactors)) deallocate(weight%weightFactors)
                allocate(weight%weightFactors(2, n_points))
                weight%weightFactors = ec_undef_hp
-               do i=1, n_points
-                  call polyindexweight(targetElementSet%x(i), &
-                                       targetElementSet%y(i), &
-                                       targetElementSet%xyen(1,i), &
-                                       targetElementSet%xyen(2,i), &
-                                       sourceElementSet%x, &
-                                       sourceElementSet%y, &
-                                       sourceElementSet%mask, &
-                                       sourceElementSet%nCoordinates, &
-                                       weight%indices(1,i), &       ! kL
-                                       weight%weightFactors(1,i), & ! wL
-                                       weight%indices(2,i), &       ! kR
-                                       weight%weightFactors(2,i))   ! wR
-               end do
+               tgt_ndx = connection%converterPtr%targetindex
+               if (tgt_ndx/=ec_undef_int) then
+                  weight%indices(1,tgt_ndx) = 1
+                  weight%weightFactors(1,tgt_ndx) = 1.d0
+               else
+                  do i=1, n_points
+                     call polyindexweight(targetElementSet%x(i), &
+                                          targetElementSet%y(i), &
+                                          targetElementSet%xyen(1,i), &
+                                          targetElementSet%xyen(2,i), &
+                                          sourceElementSet%x, &
+                                          sourceElementSet%y, &
+                                          sourceElementSet%mask, &
+                                          sourceElementSet%nCoordinates, &
+                                          weight%indices(1,i), &       ! kL
+                                          weight%weightFactors(1,i), & ! wL
+                                          weight%indices(2,i), &       ! kR
+                                          weight%weightFactors(2,i))   ! wR
+                  end do
+               end if
                success = .true.
             case default
                success = .true.

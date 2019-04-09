@@ -108,6 +108,11 @@ module m_ec_module
       module procedure ecInstanceCreateConverter
    end interface ecCreateConverter
    
+   !> Set element (= target index) for converter
+   interface ecSetConverterElement
+      module procedure ecConverterSetElement
+   end interface ecSetConverterElement
+   
    !> Construct and initialze a new Connection, returning a unique integer identifier.
    interface ecCreateConnection
       module procedure ecInstanceCreateConnection
