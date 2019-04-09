@@ -55,6 +55,22 @@ implicit none
 
     integer :: klvec=4, klaxs=30, klscl=221, kltex=3, klfra=31, klobs=227, klsam=33, klzm=31, klank=31, klprof=222, KLSRC=233 
 
+    ! Color numbers for standard colors.
+    integer :: ncolgray       = 255
+    integer :: ncolred        = 252
+    integer :: ncolyellow     = 251
+    integer :: ncolgreen      = 250
+    integer :: ncolcyan       = 249
+    integer :: ncolblue       = 248
+    integer :: ncolmagenta    = 247
+    integer :: ncolmaroon     = 246
+    integer :: ncoldarkgreen  = 245
+    integer :: ncolteal       = 244
+    integer :: ncolpink       = 243
+    integer :: ncolorange     = 242
+    integer :: ncollavender   = 241
+    integer :: ncolbrown      = 240
+    
     integer :: ncoldn    = 3   !< Design net
     integer :: ncolrn    = 211 !< Previous state net
     integer :: ncolnn    = 89  ! 203 !< Net node dots
@@ -149,6 +165,7 @@ implicit none
     integer :: ndrawManholes      = 2   !< how draw manholes
     integer :: ndrawPart          = 2   !< Particles, 1=No, 2=Yes
     integer :: ndrawDots          = 2   !< dots, 1=No, 2=Yes
+    integer :: ndrawStructures    = 1   !< structures, 1=No, 2=Yes (only symbols), 3=Yes (symbols and IDs)
     integer :: idisLink           = 0   !< Index of flowlink which is to be displayed with more information
   
     integer :: numzoomshift       = 250 !< nr of steps in zoomshift
@@ -160,6 +177,7 @@ implicit none
     double precision :: ymn, zmn             ! for tekrailines  
     
     public dis_info_1d_link
+    public plotStructures
     
     interface Write2Scr
       module procedure Write2ScrInt
@@ -1258,6 +1276,165 @@ SUBROUTINE MINMXNS()
 
        RETURN
 END subroutine minmxns
+
+!> Plot all structures in the current viewport
+subroutine plotStructures()
+use m_GlobalParameters
+use unstruc_colors
+use unstruc_channel_flow
+use m_flowgeom, only: xu, yu, lnx
+use gridoperations
+use m_flowparameters, only: epshu
+use m_flow, only: hu
+use m_wearelt, only: rcir
+implicit none
+
+integer              :: is,link
+double precision     :: icon_rw_size !< Size of plotted icons in real-world coordinates.
+double precision     :: x, y
+character(len=Idlen) :: text
+logical              :: active
+
+if (ndrawStructures <= 1) then
+   return
+end if
+
+! Determine icon_rw_size. 
+icon_rw_size = 2*rcir
+
+call IGrCharJustify('L')
+
+! Draw structures at the velocity points where they are located
+if (network%loaded) then
+   do is = 1,network%sts%Count
+   
+      ! Get structure x,y coordinates.
+      link = network%sts%struct(is)%link_number
+      if (link > 0 .and. link <= lnx) then ! for safety
+         x = xu(link)
+         y = yu(link)
+         if (.not. inView(x, y)) cycle
+         
+         ! Draw structure.
+         active = hu(link) > epshu         
+         call movabs(x, y)
+         ! Uses same symbols and colors as for Sobek 2.
+         select case(network%sts%struct(is)%st_type)
+         case (ST_RIVER_WEIR)
+            call drawTriangle(x, y, icon_rw_size, ncolcyan, ncolblack, active)
+         case (ST_ADV_WEIR)
+            call drawTriangle(x, y, icon_rw_size, ncolteal, ncolblack, active)
+         case (ST_PUMP)
+            active = network%sts%struct(is)%pump%is_active
+            call drawTriangle(x, y, icon_rw_size, ncolorange, ncolblack, active)
+         case (ST_GENERAL_ST)
+            call drawTriangle(x, y, icon_rw_size, ncolpink, ncolblack, active)
+         case (ST_WEIR)
+            call drawTriangle(x, y, icon_rw_size, ncolgreen, ncolblack, active)
+         case (ST_ORIFICE)
+            call drawTriangle(x, y, icon_rw_size, ncoldarkgreen, ncolblack, active)
+         case (ST_CULVERT)
+            call drawTriangle(x, y, icon_rw_size, ncolmaroon, ncolblack, active)      
+         case (ST_SIPHON)
+            ! Same icon as culvert.
+            call drawTriangle(x, y, icon_rw_size, ncolmaroon, ncolblack, active)
+         case (ST_INV_SIPHON)
+            ! Same icon as culvert.
+            call drawTriangle(x, y, icon_rw_size, ncolmaroon, ncolblack, active)
+         case (ST_UNI_WEIR)
+            call drawTriangle(x, y, icon_rw_size, ncolgray, ncolblack, active)
+         case (ST_BRIDGE)
+            call drawTriangle(x, y, icon_rw_size, ncollavender, ncolblack, active)
+         case (ST_DAMBREAK)
+            call drawStar(x, y, 1.5*icon_rw_size, ncolred, ncolblack)
+         case default
+         end select
+         
+         if (ndrawStructures <= 2) then
+            cycle
+         end if
+         
+         ! Draw label with structure id.
+         call IGrColour('white')
+         call IGrCharJustify('L')
+         call settextsizefac(1.5d0)
+         call igrcharfont(7)
+         write(text, '(A)') network%sts%struct(is)%id
+         call IGrCharOut(real(x + 0.5*icon_rw_size), real(y - 1.3*icon_rw_size), trim(adjustl(text)))
+      end if
+   end do
+end if
+
+end subroutine plotStructures
+
+!> Draws a filled (or empty) triangle at current position.
+!! Filled means: one colour for inside, one colour for edge.
+subroutine drawTriangle(x, y, size, icolfill, icoledge, filled)
+implicit none
+
+double precision, intent(in) :: x        !< x coordinate of center of triangle.
+double precision, intent(in) :: y        !< y coordinate of center of triangle.
+double precision, intent(in) :: size     !< size of triangle in world coordinates.
+integer,          intent(in) :: icolfill !< Colour number for inner fill
+integer,          intent(in) :: icoledge !< Colour number for edge
+logical,          intent(in) :: filled   !< Filled or empty  
+
+if (filled) then 
+   ! Fill
+   call IGrFillPattern(4,0,0)
+   call setcol(icolfill)
+   call IGrTriangle(real(x - size/2), real(y - size/2), real(x + size/2), real(y - size/2), real(x), real(y + size/2))
+   call IGrFillPattern(0,0,0)
+   call setcol(icoledge)
+   call IGrTriangle(real(x - size/2), real(y - size/2), real(x + size/2), real(y - size/2), real(x), real(y + size/2))
+else 
+   ! Edge
+   call IGrFillPattern(0,0,0)  
+   call IGrLineWidth(3,1)
+   call setcol(icoledge)
+   call IGrTriangle(real(x - size/2), real(y - size/2), real(x + size/2), real(y - size/2), real(x), real(y + size/2))
+   call IGrLineWidth(1,1)
+   call setcol(icolfill)
+   call IGrTriangle(real(x - size/2), real(y - size/2), real(x + size/2), real(y - size/2), real(x), real(y + size/2))
+endif 
+! Edge
+call IGrFillPattern(4,0,0)    ! Reset fill pattern
+
+end subroutine drawTriangle
+
+
+!> Draws a filled four-pointed star at current position.
+!! Filled means: one colour for inside, one colour for edge.
+subroutine drawStar(x, y, size, icolfill, icoledge)
+implicit none
+
+double precision,   intent(in) :: x        !< x coordinate of center of star.
+double precision,   intent(in) :: y        !< y coordinate of center of star.
+double precision,   intent(in) :: size     !< size of start in world coordinates.
+integer,            intent(in) :: icolfill !< Colour number for inner fill
+integer,            intent(in) :: icoledge !< Colour number for edge
+
+double precision, dimension(8) :: xs
+double precision, dimension(8) :: ys
+
+xs = (/ x - size/2, x - size/8, x, x + size/8, x + size/2, x + size/8, x, x - size/8 /)
+ys = (/ y, y - size/8, y - size/2, y - size/8, y, y + size/8, y + size/2, y + size/8 /)
+
+! Fill
+call IGrFillPattern(4,0,0)
+call setcol(icolfill)
+call IGrPolygonSimple(real(xs), real(ys), 8)
+
+! Edge
+call IGrFillPattern(0,0,0)
+call setcol(icoledge)
+call IGrPolygonSimple(real(xs), real(ys), 8)
+
+! Reset IGrFillPattern.
+call IGrFillPattern(4,0,0)
+
+end subroutine drawStar
+
 
 !> Display information for a (1D) flow link and its connected nodes.
 !! If it has a structure on it, then also display relevant fields
