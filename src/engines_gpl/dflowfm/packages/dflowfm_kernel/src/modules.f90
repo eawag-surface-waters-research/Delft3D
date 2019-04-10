@@ -5484,6 +5484,34 @@ end type tgeneralstruc
 
 integer, parameter :: numgeneralkeywrd = 26
 character(len=256) :: generalkeywrd(numgeneralkeywrd) = (/ character(len=256) :: &
+   'Upstream1Width',          & ! ( 1)
+   'Upstream1Level',          & ! ( 2)
+   'Upstream2Width',          & ! ( 3)
+   'Upstream2Level',          & ! ( 4)
+   'CrestWidth',              & ! ( 5)
+   'CrestLevel',              & ! ( 6)
+   'Downstream1Width',        & ! ( 7)
+   'Downstream1Level',        & ! ( 8)
+   'Downstream2Width',        & ! ( 9)
+   'Downstream2Level',        & ! (10)
+   'gateheight',              & ! (11)
+   'gateheightintervalcntrl', & ! (12)
+   'pos_freegateflowcoeff',   & ! (13)
+   'pos_drowngateflowcoeff',  & ! (14)
+   'pos_freeweirflowcoeff',   & ! (15)
+   'pos_drownweirflowcoeff',  & ! (16)
+   'pos_contrcoeffreegate',   & ! (17)
+   'neg_freegateflowcoeff',   & ! (18)
+   'neg_drowngateflowcoeff',  & ! (19)
+   'neg_freeweirflowcoeff',   & ! (20)
+   'neg_drownweirflowcoeff',  & ! (21)
+   'neg_contrcoeffreegate',   & ! (22)
+   'extraresistance',         & ! (23)
+   'dynstructext',            & ! (24)
+   'gatedoorheight',          & ! (25)
+   'door_opening_width'       & ! (26)
+   /)
+character(len=256) :: generalkeywrd_old(numgeneralkeywrd) = (/ character(len=256) :: &
    'widthleftW1',             & ! ( 1)
    'levelleftZb1',            & ! ( 2)
    'widthleftWsdl',           & ! ( 3)
@@ -5511,7 +5539,6 @@ character(len=256) :: generalkeywrd(numgeneralkeywrd) = (/ character(len=256) ::
    'gatedoorheight',          & ! (25)
    'door_opening_width'       & ! (26)
    /)
-
 type(tgeneralstruc), allocatable, target :: generalstruc(:)
 
 

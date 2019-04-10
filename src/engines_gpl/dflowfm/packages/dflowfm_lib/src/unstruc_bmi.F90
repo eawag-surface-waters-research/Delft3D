@@ -1492,7 +1492,7 @@ subroutine get_compound_field(c_var_name, c_item_name, c_field_name, x) bind(C, 
      if (item_index <= ncgensg) then 
          ! DFlowFM type structures
          select case(field_name)
-         case("crest_level")
+         case("crest_level", "CrestLevel")
              x = c_loc(zcgen((item_index-1)*3+1))
              return
          case("lat_contr_coeff")
@@ -1503,7 +1503,7 @@ subroutine get_compound_field(c_var_name, c_item_name, c_field_name, x) bind(C, 
          ! DFlowFM1D type structures
          item_index = item_index - ncgensg
          select case(field_name)
-         case("crest_level")
+         case("crest_level", "CrestLevel")
              x = get_crest_level_c_loc(network%sts%struct(item_index))  
              return
          case("lat_contr_coeff")
@@ -1518,19 +1518,19 @@ subroutine get_compound_field(c_var_name, c_item_name, c_field_name, x) bind(C, 
          return
      endif
      select case(field_name)
-     case("sill_level")
+     case("sill_level", "CrestLevel")
          x = c_loc(zcgen((item_index-1)*3+1))
          return
-     case("door_height")
+     case("door_height", "GateHeight")
          x = c_loc(generalstruc(item_index)%gatedoorheight)
          return
-     case("lower_edge_level")
+     case("lower_edge_level", "GateLowerEdgeLevel")
          x = c_loc(zcgen((item_index-1)*3+2))
          return
-     case("opening_width")
+     case("opening_width", "GateOpeningWidth")
          x = c_loc(zcgen((item_index-1)*3+3))
          return
-     case("horizontal_opening_direction")
+     case("horizontal_opening_direction", "GateOpeningHorizontalDirection")
          ! TODO: RTC: AvD: get this from gate/genstru params
          return
      end select
@@ -1734,7 +1734,7 @@ subroutine set_compound_field(c_var_name, c_item_name, c_field_name, xptr) bind(
          return
      endif
      select case(field_name)
-     case("crest_level")
+     case("crest_level", "CrestLevel")
          call c_f_pointer(xptr, x_0d_double_ptr)
          zcgen((item_index-1)*3+1) = x_0d_double_ptr
          return
@@ -1751,23 +1751,23 @@ subroutine set_compound_field(c_var_name, c_item_name, c_field_name, xptr) bind(
          return
      endif
      select case(field_name)
-     case("sill_level")
+     case("sill_level", "CrestLevel")
          call c_f_pointer(xptr, x_0d_double_ptr)
          zcgen((item_index-1)*3+1) = x_0d_double_ptr
          return
-     case("door_height")
+     case("door_height", "GateHeight")
          call c_f_pointer(xptr, x_0d_double_ptr)
          generalstruc(item_index)%gatedoorheight = x_0d_double_ptr ! Not time-controlled, set directly in generalstruc.
          return
-     case("lower_edge_level")
+     case("lower_edge_level", "GateLowerEdgeLevel")
          call c_f_pointer(xptr, x_0d_double_ptr)
          zcgen((item_index-1)*3+2) = x_0d_double_ptr
          return
-     case("opening_width")
+     case("opening_width", "GateOpeningWidth")
          call c_f_pointer(xptr, x_0d_double_ptr)
          zcgen((item_index-1)*3+3) = x_0d_double_ptr
          return
-     case("horizontal_opening_direction")
+     case("horizontal_opening_direction", "GateOpeningHorizontalDirection")
          ! TODO: RTC: AvD: set this once it's used
          return
      end select
@@ -1875,7 +1875,7 @@ subroutine get_compound_field_name(c_var_name, c_field_index, c_field_name) bind
   case("weirs")
      select case(field_index)
      case(1)
-         field_name = "crest_level"
+         field_name = "CrestLevel"
      case(2)
          field_name = "lat_contr_coeff"
      end select
@@ -1883,15 +1883,15 @@ subroutine get_compound_field_name(c_var_name, c_field_index, c_field_name) bind
   case("gates")
      select case(field_index)
      case(1)
-         field_name = "sill_level"
+         field_name = "CrestLevel"
      case(2)
-         field_name = "door_height"
+         field_name = "GateHeight"
      case(3)
-         field_name = "lower_edge_level"
+         field_name = "GateLowerEdgeLevel"
      case(4)
-         field_name = "opening_width"
+         field_name = "GateOpeningWidth"
      case(5)
-         field_name = "horizontal_opening_direction"
+         field_name = "GateOpeningHorizontalDirection"
      end select
 
   ! GENERALSTUCTURES

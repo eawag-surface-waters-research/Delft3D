@@ -2053,9 +2053,12 @@ end do
       !! WEIR !!
       case ('weir')
          rec = ' '
-         call prop_get(str_ptr, '', 'crest_level', rec)
+         call prop_get(str_ptr, '', 'CrestLevel', rec, success)
+         if (.not. success) then
+            call prop_get(str_ptr, '', 'crest_level', rec, success)
+         endif
          if (.not. success .or. len_trim(rec) == 0) then
-            write(msgbuf, '(a,a,a)') 'Required field ''crest_level'' missing in weir ''', trim(strid), '''.'
+            write(msgbuf, '(a,a,a)') 'Required field ''CrestLevel'' missing in weir ''', trim(strid), '''.'
             call warn_flush()
             cycle
          end if
@@ -2064,7 +2067,7 @@ end do
             if (trim(rec) == 'REALTIME') then
                success = .true.
                ! zcgen(1, 1+kx, ..) should be filled via DLL's API
-               write(msgbuf, '(a,a,a)') 'Control for weir ''', trim(strid), ''', crest_level set to REALTIME.'
+               write(msgbuf, '(a,a,a)') 'Control for weir ''', trim(strid), ''', CrestLevel set to REALTIME.'
                call dbg_flush()
             else
                qid = 'generalstructure' ! TODO: werkt dit als je de losse quantities (crest/gateloweredge/width) dezelfde id geeft, maar wel netjes correct veschillende offset?
@@ -2105,9 +2108,12 @@ end do
       !! GATE !!
       case ('gate')
          rec = ' '
-         call prop_get(str_ptr, '', 'sill_level', rec, success)
+         call prop_get(str_ptr, '', 'CrestLevel', rec, success)
+         if (.not. success) then
+            call prop_get(str_ptr, '', 'sill_level', rec, success)
+         endif
          if (.not. success .or. len_trim(rec) == 0) then
-            write(msgbuf, '(a,a,a)') 'Required field ''sill_level'' missing in gate ''', trim(strid), '''.'
+            write(msgbuf, '(a,a,a)') 'Required field ''CrestLevel'' missing in gate ''', trim(strid), '''.'
             call warn_flush()
             cycle
          end if
@@ -2117,7 +2123,7 @@ end do
             if (trim(rec) == 'REALTIME') then
                success = .true.
                ! zcgen(1, 1+kx, ..) should be filled via DLL's API
-               write(msgbuf, '(a,a,a)') 'Control for gate ''', trim(strid), ''', sill_level set to REALTIME.'
+               write(msgbuf, '(a,a,a)') 'Control for gate ''', trim(strid), ''', CrestLevel set to REALTIME.'
                call dbg_flush()
             else
                qid = 'generalstructure'
@@ -2136,7 +2142,10 @@ end do
          end if
 
          tmpval = dmiss
-         call prop_get(str_ptr, '', 'sill_width', tmpval)
+         call prop_get(str_ptr, '', 'CrestWidth', tmpval, success)
+         if (.not. success) then
+            call prop_get(str_ptr, '', 'sill_width', tmpval, success)
+         endif
          if (.not. success .or. tmpval == dmiss) then
             ! Not required, just default to all crossed flow links
             tmpval = huge(1d0)
@@ -2144,9 +2153,12 @@ end do
          gates(ngategen+1)%sill_width = tmpval
 
          tmpval = dmiss
-         call prop_get(str_ptr, '', 'door_height', tmpval) ! Door height (from lower edge level to top, i.e. NOT a level/position)
+         call prop_get(str_ptr, '', 'GateHeight', tmpval, success) ! Gate height (old name: Door height) (from lower edge level to top, i.e. NOT a level/position)
+         if (.not. success) then
+            call prop_get(str_ptr, '', 'door_height', tmpval, success)
+         endif
          if (.not. success .or. tmpval == dmiss) then
-            write(msgbuf, '(a,a,a)') 'Required field ''door_height'' missing in gate ''', trim(strid), '''.'
+            write(msgbuf, '(a,a,a)') 'Required field ''GateHeight'' missing in gate ''', trim(strid), '''.'
             call warn_flush()
             cycle
          end if
@@ -2154,9 +2166,12 @@ end do
          hulp(25,n) = tmpval  ! gatedoorheight.
 
          rec = ' '
-         call prop_get(str_ptr, '', 'lower_edge_level', rec, success)
+         call prop_get(str_ptr, '', 'GateLowerEdgeLevel', rec, success)
+         if (.not. success) then
+            call prop_get(str_ptr, '', 'lower_edge_level', rec, success)
+         endif
          if (.not. success .or. len_trim(rec) == 0) then
-            write(msgbuf, '(a,a,a)') 'Required field ''lower_edge_level'' missing in gate ''', trim(strid), '''.'
+            write(msgbuf, '(a,a,a)') 'Required field ''GateLowerEdgeLevel'' missing in gate ''', trim(strid), '''.'
             call warn_flush()
             cycle
          end if
@@ -2166,7 +2181,7 @@ end do
             if (trim(rec) == 'REALTIME') then
                success = .true.
                ! zcgen(2, 2+kx, ..) should be filled via DLL's API
-               write(msgbuf, '(a,a,a)') 'Control for gate ''', trim(strid), ''', lower_edge_level set to REALTIME.'
+               write(msgbuf, '(a,a,a)') 'Control for gate ''', trim(strid), ''', GateLowerEdgeLevel set to REALTIME.'
                call dbg_flush()
             else
                qid = 'generalstructure'
@@ -2185,7 +2200,10 @@ end do
          end if
 
          rec = ' '
-         call prop_get(str_ptr, '', 'opening_width', rec, success) ! Opening width between left and right doors. (If any. Otherwise set to 0 for a single gate door with under/overflow)
+         call prop_get(str_ptr, '', 'GateOpeningWidth', rec, success) ! Opening width between left and right doors. (If any. Otherwise set to 0 for a single gate door with under/overflow)
+         if (.not. success) then
+            call prop_get(str_ptr, '', 'opening_width', rec, success)
+         endif
          if (.not. success) then
             call prop_get(str_ptr, '', 'door_opening_width', rec, success) ! Better keyword: door_opening_width instead of opening_width
          end if
@@ -2198,7 +2216,7 @@ end do
                if (trim(rec) == 'REALTIME') then
                   success = .true.
                   ! zcgen(3, 3+kx, ..) should be filled via DLL's API
-                  write(msgbuf, '(a,a,a)') 'Control for gate ''', trim(strid), ''', opening_width set to REALTIME.'
+                  write(msgbuf, '(a,a,a)') 'Control for gate ''', trim(strid), ''', GateOpeningWidth set to REALTIME.'
                   call dbg_flush()
                else
                   qid = 'generalstructure' ! todo: check met Hermans gatewidth, if any
@@ -2218,7 +2236,10 @@ end do
          end if
 
          rec = ' '
-         call prop_get(str_ptr, '', 'horizontal_opening_direction', rec, success)
+         call prop_get(str_ptr, '', 'GateOpeningHorizontalDirection', rec, success)
+         if (.not. success) then
+            call prop_get(str_ptr, '', 'horizontal_opening_direction', rec, success)
+         endif
          success = .true. ! horizontal_opening_direction is optional
          select case(trim(rec))
          case ('from_left')
@@ -2243,6 +2264,9 @@ end do
          do k = 1,numgeneralkeywrd        ! generalstructure keywords
             tmpval = dmiss
             call prop_get(str_ptr, '', trim(generalkeywrd(k)), rec, success)
+            if (.not. success) then
+               call prop_get(str_ptr, '', trim(generalkeywrd_old(k)), rec, success)
+            endif
             if (.not. success .or. len_trim(rec) == 0) then
                ! consider all fields optional for now.
                cycle
@@ -2264,7 +2288,7 @@ end do
                else
                   success = .false.
                   select case (trim(generalkeywrd(k)))
-                  case ('levelcenter')
+                  case ('CrestLevel', 'levelcenter')
                      ifld = 1
                   case ('gateheight') ! TODO: UNST-1936
                      ifld = 2
@@ -2359,9 +2383,12 @@ if (ngate > 0) then ! Old-style controllable gateloweredgelevel
       call prop_get_string(str_ptr, '', 'polylinefile', plifile, success)
 
       rec = ' '
-      call prop_get(str_ptr, '', 'lower_edge_level', rec, success)
+      call prop_get(str_ptr, '', 'GateLowerEdgeLevel', rec, success)
+      if (.not. success) then
+         call prop_get(str_ptr, '', 'lower_edge_level', rec, success)
+      endif
       if (.not. success .or. len_trim(rec) == 0) then
-         write(msgbuf, '(a,a,a)') 'Required field ''lower_edge_level'' missing in gate ''', trim(strid), '''.'
+         write(msgbuf, '(a,a,a)') 'Required field ''GateLowerEdgeLevel'' missing in gate ''', trim(strid), '''.'
          call warn_flush()
          cycle
       end if
