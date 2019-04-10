@@ -277,6 +277,22 @@ function makedir(dirname) result(istat)
     ! call execute_command_line(command)
       
     return
-end function
+   end function
 
+!> Return .true. if path is an absolute pathname.
+!! On Unix, that means it begins with a slash, on Windows that it begins
+!! with a (back)slash after chopping off a potential drive letter.
+logical function is_abs(path)
+   character(len=*), intent(in   ) :: path !< Input path
+
+   integer :: idrive ! last char position of possible drive letter start, e.g. 'D:'
+#ifdef HAVE_CONFIG_H
+   is_abs = (path(1:1) == FILESEP)
+#else
+   idrive = index(path, ':')
+   is_abs = (path(idrive+1:idrive+1) == FILESEP .or. path(idrive+1:idrive+1) == '\') ! On Windows, also allow backslash.
+#endif
+
+end function is_abs
+   
 end module system_utils
