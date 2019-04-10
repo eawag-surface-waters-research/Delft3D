@@ -1088,7 +1088,16 @@ logical function initboundaryblocksforcings(filename)
                 call aerr('rain(ndx)', ierr, ndx)
                 rain = 0d0
              endif
-            kx = 1
+             kx = 1
+          case ('windxy')
+             if (.not. allocated(wx) ) then
+                call realloc(kcw, lnx, stat=ierr, keepExisting=.false.)
+                call aerr('kcw(lnx)', ierr, lnx)
+                allocate ( wx(lnx), wy(lnx), stat=ierr)
+                call aerr('wx(lnx), wy(lnx)', ierr, 2*lnx)
+                wx = 0.0_hp ; wy = 0.0_hp ; kcw = 1
+             endif
+             kx = 1
        end select
        success = ec_addtimespacerelation(quantity, xz(1:ndx), yz(1:ndx), kcs, kx, locationtype, filetype=bcascii, method=spaceandtime, operand='O', forcingfile=forcingfile)
        if (success) then
@@ -1096,6 +1105,8 @@ logical function initboundaryblocksforcings(filename)
              case ('rainfall','rainfall_rate')
                 jarain = 1
                 jaqin = 1
+             case ('windxy')
+                jawind = 1
           end select
        endif
        

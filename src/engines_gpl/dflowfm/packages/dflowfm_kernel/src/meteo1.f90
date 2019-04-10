@@ -1080,6 +1080,9 @@ module m_meteo
                end if 
             end if
          else
+            if (ec_filetype == provFile_bc .and. target_name=='windxy') then
+                ec_convtype = convType_unimagdir
+            end if    
             success = initializeConverter(ecInstancePtr, converterId, ec_convtype, ec_operand, ec_method)
          end if
       case default
@@ -1260,6 +1263,12 @@ module m_meteo
                end if
             else if (ec_filetype == provFile_uniform) then
                sourceItemId  = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'uniform_item')
+               success = (sourceItemId /= ec_undef_int)
+               if (.not. success) then
+                  goto 1234
+               end if
+            else if (ec_filetype == provFile_bc) then
+               sourceItemId  = ecFindItemInFileReader(ecInstancePtr, fileReaderId, 'WINDXY')
                success = (sourceItemId /= ec_undef_int)
                if (.not. success) then
                   goto 1234
