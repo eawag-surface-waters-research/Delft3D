@@ -1,28 +1,28 @@
 !----- LGPL --------------------------------------------------------------------
-!                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2018.                                
-!                                                                               
-!  This library is free software; you can redistribute it and/or                
-!  modify it under the terms of the GNU Lesser General Public                   
-!  License as published by the Free Software Foundation version 2.1.                 
-!                                                                               
-!  This library is distributed in the hope that it will be useful,              
-!  but WITHOUT ANY WARRANTY; without even the implied warranty of               
-!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU            
-!  Lesser General Public License for more details.                              
-!                                                                               
-!  You should have received a copy of the GNU Lesser General Public             
-!  License along with this library; if not, see <http://www.gnu.org/licenses/>. 
-!                                                                               
-!  contact: delft3d.support@deltares.nl                                         
-!  Stichting Deltares                                                           
-!  P.O. Box 177                                                                 
-!  2600 MH Delft, The Netherlands                                               
-!                                                                               
-!  All indications and logos of, and references to, "Delft3D" and "Deltares"    
-!  are registered trademarks of Stichting Deltares, and remain the property of  
-!  Stichting Deltares. All rights reserved.                                     
-!                                                                               
+!
+!  Copyright (C)  Stichting Deltares, 2011-2018.
+!
+!  This library is free software; you can redistribute it and/or
+!  modify it under the terms of the GNU Lesser General Public
+!  License as published by the Free Software Foundation version 2.1.
+!
+!  This library is distributed in the hope that it will be useful,
+!  but WITHOUT ANY WARRANTY; without even the implied warranty of
+!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+!  Lesser General Public License for more details.
+!
+!  You should have received a copy of the GNU Lesser General Public
+!  License along with this library; if not, see <http://www.gnu.org/licenses/>.
+!
+!  contact: delft3d.support@deltares.nl
+!  Stichting Deltares
+!  P.O. Box 177
+!  2600 MH Delft, The Netherlands
+!
+!  All indications and logos of, and references to, "Delft3D" and "Deltares"
+!  are registered trademarks of Stichting Deltares, and remain the property of
+!  Stichting Deltares. All rights reserved.
+!
 !-------------------------------------------------------------------------------
 !  $Id$
 !  $HeadURL$
@@ -31,7 +31,7 @@
 !
    !Global modules
    module m_ec_triangle           ! original name : m_triangle
-   use precision
+   use precision, only : hp
    implicit none
    real(kind=hp)   , allocatable :: XCENT(:), YCENT(:)
    integer, allocatable          :: INDX(:,:)
@@ -67,7 +67,7 @@
 
 
    module m_ec_interpolationsettings
-   use precision
+   use precision, only : hp
    implicit none
    integer, parameter              :: INTP_INTP = 1
    integer, parameter              :: INTP_AVG  = 2
@@ -104,9 +104,16 @@
    !---------------------------------------------------------------------------!
 
    module m_ec_basic_interpolation
-   
-   use precision
+
+   use precision, only : sp, hp
    use MessageHandling, only: msgbox, mess, LEVEL_ERROR
+   use geometry_module
+   use m_ec_triangle
+   use m_ec_interpolationsettings
+   use mathconsts,  only: degrad_hp
+   use kdtree2Factory
+   use m_alloc, only : aerr, realloc
+   use sorting_algorithms, only: indexx
 
    interface triinterp2
       module procedure triinterp2_dbldbl
@@ -115,7 +122,7 @@
    end interface triinterp2
 
    private
-   
+
    public   ::  bilin_interp
    public   ::  TRIINTfast
    public   ::  AVERAGING2
@@ -139,7 +146,7 @@
    real(kind=hp), intent(in)            :: YZ(:)
    real(kind=hp), intent(inout)         :: BL(NDX)
    integer,       intent(in)            :: NDX
-   integer,       intent(in)            :: JDLA
+   integer,       intent(out)           :: JDLA
    integer,       intent(in)            :: NS
    integer,       intent(in)            :: jins
    integer,       intent(in)            :: jasfer3D
@@ -158,31 +165,18 @@
    !
    ! Locals
    integer :: jakdtree
-   integer :: jsferic, jakc
+   integer :: jsferic
    !
    ! Body
 
    if (ndx < 1) return
 
-   jakc = 0
-   if (present(kcc)) then
-      jakc = 1
-   endif
-
    jakdtree = 1
 
    if ( MXSAM > 0 .and. MYSAM >  0 ) then  ! bi-linear interpolation
-      if (jakc == 0) then 
-         call bilin_interp(NDX, XZ, YZ, BL, dmiss, XS, YS, ZS, MXSAM, MYSAM, XPL, YPL, ZPL, NPL, jsferic)
-      else   
-         call bilin_interp(NDX, XZ, YZ, BL, dmiss, XS, YS, ZS, MXSAM, MYSAM, XPL, YPL, ZPL, NPL, jsferic, kcc)
-      endif    
+      call bilin_interp(NDX, XZ, YZ, BL, dmiss, XS, YS, ZS, MXSAM, MYSAM, jsferic, kcc)
    else  ! Delauny
-      if (jakc == 0) then
-         call TRIINTfast(XS,YS,ZS,NS,1,XZ,YZ,BL,Ndx,JDLA, jakdtree, jsferic, Npl, jins, dmiss, jasfer3D, XPL, YPL, ZPL, transformcoef)
-      else
-         call TRIINTfast(XS,YS,ZS,NS,1,XZ,YZ,BL,Ndx,JDLA, jakdtree, jsferic, Npl, jins, dmiss, jasfer3D, XPL, YPL, ZPL, transformcoef, kcc)
-      endif
+      call TRIINTfast(XS,YS,ZS,NS,1,XZ,YZ,BL,Ndx,JDLA, jakdtree, jsferic, Npl, jins, dmiss, jasfer3D, XPL, YPL, ZPL, transformcoef, kcc)
 
    end if
 
@@ -197,7 +191,7 @@
    real(kind=sp), intent(in)       :: YZ(NDX)
    real(kind=hp), intent(inout)    :: BL(NDX)
    integer,       intent(in)       :: NDX
-   integer,       intent(in)       :: JDLA
+   integer,       intent(out)      :: JDLA
    integer,       intent(in)       :: NS
    integer,       intent(in)       :: jins
    integer,       intent(in)       :: jasfer3D
@@ -241,7 +235,7 @@
    real(kind=sp), intent(in)            :: YZ(NDX)
    real(kind=sp), intent(inout)         :: BL(NDX)
    integer,       intent(in)            :: NDX
-   integer,       intent(in)            :: JDLA
+   integer,       intent(out)           :: JDLA
    integer,       intent(in)            :: NS
    integer,       intent(in)            :: jins
    integer,       intent(in)            :: jasfer3D
@@ -280,70 +274,58 @@
    deallocate (bl_dbl, stat=ierror)
    end subroutine triinterp2_realreal
 
-   subroutine TRIINTfast(XS, YS, ZS, NS,NDIM,X,Y,Z,NXY,JDLA,jakdtree, jsferic, NH, jins, dmiss, jasfer3D, &
-                         XH, YH, ZH, transformcoef,kc)
-   use m_ec_triangle
-   use m_ec_interpolationsettings
-   use geometry_module, only: dbpinpol
-   use mathconsts,  only: degrad_hp 
-   use physicalconsts, only: earth_radius
-   use kdtree2Factory
-   use MessageHandling
-
+   subroutine TRIINTfast(XS_IN, YS_IN, ZS_IN, NS,NDIM,X,Y,Z,NXY,JDLA,jakdtree, jsferic, NH, jins, dmiss, jasfer3D, &
+                         XH, YH, ZH, transformcoef, kc)
    implicit none
-   integer, intent(inout) :: jakdtree !< use kdtree (1) or not (0)
-   real(kind=hp)    :: af
-   integer :: i, IERR, k, intri, jdla, jslo
-   integer :: n, in, nxx, nxy
-   integer :: NDIM  !< sample vector dimension
-   integer :: naf
-   integer :: nbf
-   integer :: ncf
-   integer :: ncol
-   integer :: nrfind
-   integer :: ns, n2
-   integer :: idim
-
-   real(kind=hp)    :: rd
-   real(kind=hp)    :: slo(NDIM)
-   real(kind=hp)    :: xp, yp, zp(NDIM), xpmin, xpmax,ypmin, ypmax
-   real(kind=hp)    :: XS(ns), YS(ns), ZS(NDIM,ns), X(nxy), Y(nxy), Z(NDIM,nxy)
-   integer, optional:: kc(:)
-   real(kind=hp)    :: XL(3),YL(3)
-   real(kind=hp)   , allocatable :: xx(:), yy(:) , zz(:,:)
-   integer         , allocatable :: ind(:)
-
-   real(kind=hp)   , dimension(:),   allocatable :: xs1, ys1      ! for store/restore of xs, ys
-   real(kind=hp)   , dimension(:,:), allocatable :: zs1           ! for store/restore of zs
-   
-   real(kind=hp)                                 :: xsmin, ysmin, xsmax, ysmax  ! bounding box corner coordinates
-
-   integer                                       :: indf(3)
-   real(kind=hp)                                 :: wf(3)
-
-   integer                                       :: NS1           ! for store/restore of NS
-
-   integer                                       :: jadum, ierror
-
-   logical                                       :: Ldeleteddata  ! for store/restore of xs, ys and zs
-
-   integer                                       :: nh, jins, jsferic
-   real(kind=hp)   , intent(in)                  :: dmiss    
-   integer,          intent(in)                  :: jasfer3D
-   real(kind=hp)                                 :: XH(nh), YH(nh), ZH(nh), transformcoef(:)
-   integer                                       :: KMOD, jakc
-
-   type(kdtree_instance) :: sampletree
-
-   integer                                      :: numsam, ii, k1, jakdtree2
-   real(kind=hp)                                :: R2Search, dist2, cof1, cof2
+   !
+   ! parameters
+   integer,       intent(inout)        :: jakdtree               !< use kdtree (1) or not (0)
+   integer,       intent(in)           :: ns, NDIM               !< sample vector dimension
+   integer,       intent(in)           :: nh, jins, jsferic, nxy
+   integer,       intent(out)          :: jdla                   ! always 0 on return
+   real(kind=hp), intent(in)           :: dmiss
+   integer,       intent(in)           :: jasfer3D
+   real(kind=hp), intent(in), target   :: XS_IN(ns), YS_IN(ns), ZS_IN(NDIM,ns) !< sample coordinates and values
+   real(kind=hp), intent(in)           :: X(:), Y(:)                           !< node coordinates
+   real(kind=hp), intent(inout)        :: Z(NDIM,nxy)                          !< node values
+   real(kind=hp), intent(in)           :: XH(:), YH(:), ZH(:), transformcoef(:)
+   integer,       intent(in), optional :: kc(:)
+   !
+   ! locals
+   real(kind=hp)                       :: af
+   integer                             :: i, ierr, k, intri, jslo
+   integer                             :: n, in, nxx
+   integer                             :: naf
+   integer                             :: nbf
+   integer                             :: ncf
+   integer                             :: ncol
+   integer                             :: nrfind
+   integer                             :: n2
+   integer                             :: idim
+   real(kind=hp)                       :: rd
+   real(kind=hp)                       :: slo(NDIM)
+   real(kind=hp)                       :: xp, yp, zp(NDIM), xpmin, xpmax,ypmin, ypmax
+   real(kind=hp)                       :: XL(3),YL(3)
+   real(kind=hp), allocatable          :: xx(:), yy(:) , zz(:,:)
+   integer      , allocatable          :: ind(:)
+   real(kind=hp), allocatable, target  :: xs1(:), ys1(:), zs1(:,:)      ! for store/restore of xs, ys, zs
+   real(kind=hp), pointer              :: xs(:), ys(:), zs(:,:)
+   real(kind=hp)                       :: xsmin, ysmin, xsmax, ysmax  ! bounding box corner coordinates
+   integer                             :: indf(3)
+   real(kind=hp)                       :: wf(3)
+   integer                             :: NS1           ! for store/restore of NS
+   integer                             :: jadum, ierror
+   logical                             :: Ldeleteddata  ! for store/restore of xs, ys and zs
+   integer                             :: KMOD, jakc
+   type(kdtree_instance)               :: sampletree
+   integer                             :: numsam, ii, k1, jakdtree2
+   real(kind=hp)                       :: R2Search, dist2, cof1, cof2
 
    jakdtree2 = jakdtree
-   
+
    jakc = 0
    if (present(kc)) jakc = 1
-   
-   
+
    if ( jakdtree == 1 ) then
       !       enforce generation of kdtree
       treeglob%itreestat = ITREE_EMPTY
@@ -360,21 +342,31 @@
 
       IF (Nh > 2 ) THEN ! polygon size reduction
 
-         xpmin = minval(xh(1:nh)) ; xpmax = maxval(xh(1:nh))
-         ypmin = minval(yh(1:nh)) ; ypmax = maxval(yh(1:nh))
-         rd = 0.2*(xpmax-xpmin)   ; xpmin = xpmin - rd ; xpmax = xpmax + rd
-         rd = 0.2*(ypmax-ypmin)   ; ypmin = ypmin - rd ; ypmax = ypmax + rd
+         xpmin = minval(xh(1:nh))
+         xpmax = maxval(xh(1:nh))
+         ypmin = minval(yh(1:nh))
+         ypmax = maxval(yh(1:nh))
+         rd    = 0.2*(xpmax-xpmin)
+         xpmin = xpmin - rd
+         xpmax = xpmax + rd
+         rd    = 0.2*(ypmax-ypmin)
+         ypmin = ypmin - rd
+         ypmax = ypmax + rd
 
          !           store original data
-         allocate(xs1(NS), ys1(NS), zs1(NDIM,NS))
+         allocate(xs1(NS), ys1(NS), zs1(NDIM,NS), stat=ierr)
+         call aerr('xs1(NS), ys1(NS), zs1(NDIM,NS)', ierr, (2+NDIM)*NS )
          NS1 = NS
          do i=1,NS
-            xs1(i) = xs(i)
-            ys1(i) = ys(i)
+            xs1(i) = xs_in(i)
+            ys1(i) = ys_in(i)
             do k=1,NDIM
-               zs1(k,i) = zs(k,i)
+               zs1(k,i) = zs_in(k,i)
             end do
          end do
+         xs => xs1
+         ys => ys1
+         zs => zs1
          Ldeleteddata = .true.
 
          n2   = 0
@@ -383,11 +375,17 @@
          DO K = 1,Ns
             if (jins == 1) then
                if ( xs(k) > xpmin .and. xs(k) < xpmax .and. ys(k) > ypmin .and. ys(k) < ypmax .and. zs(idim,k) /= DMISS ) then
-                  n2 = n2 + 1; xs(n2) = xs(k) ; ys(n2) = ys(k) ; zs(1:NDIM,n2) = zs(1:NDIM,k)
+                  n2 = n2 + 1
+                  xs(n2) = xs(k)
+                  ys(n2) = ys(k)
+                  zs(1:NDIM,n2) = zs(1:NDIM,k)
                endif
             else
                if (zs(idim,k) /= DMISS ) then
-                  n2 = n2 + 1; xs(n2) = xs(k) ; ys(n2) = ys(k) ; zs(1:NDIM,n2) = zs(1:NDIM,k)
+                  n2 = n2 + 1
+                  xs(n2) = xs(k)
+                  ys(n2) = ys(k)
+                  zs(1:NDIM,n2) = zs(1:NDIM,k)
                endif
             endif
          ENDDO
@@ -403,25 +401,33 @@
                nxx = nxx + 1
             endif
          ENDDO
-         allocate (xx (nxx), yy(nxx), zz(NDIM,nxx) )
-         allocate (ind(nxx)) ; ind = 0
+         allocate (xx (nxx), yy(nxx), zz(NDIM,nxx), ind(nxx), stat = ierr )
+         call aerr('xx (nxx), yy(nxx), zz(NDIM,nxx), ind(nxx)', ierr, (3+NDIM)*nxx)
+         ind = 0
 
-         nxx  = 0 ; in = -1  ! net/grid size reduction
+         nxx  = 0
+         in = -1  ! net/grid size reduction
          DO K = 1,Nxy
-            if ( jakc == 1 ) then 
+            if ( jakc == 1 ) then
                if (kc(k) == 0) then
                   cycle
-               endif   
-            endif            
+               endif
+            endif
             call dbpinpol(x(k), y(k), in, dmiss, JINS, nh, XH, YH, ZH)
             if (in == 1) then
                nxx = nxx + 1
                ind(nxx) = k
-               xx (nxx) = x(k); yy(nxx) = y(k); zz(1:NDIM,nxx) = z(1:NDIM,k)
+               xx (nxx) = x(k)
+               yy(nxx) = y(k)
+               zz(1:NDIM,nxx) = z(1:NDIM,k)
             endif
          ENDDO
       ELSE
-         NXX = NXY; N2 = NS
+         NXX = NXY
+         N2  = NS
+         xs => xs_in
+         ys => ys_in
+         zs => zs_in
       ENDIF
 
       !        determine sample bounding box
@@ -432,18 +438,18 @@
 
       ierr = 1
       if ( jakdtree /= 1 ) then
-         CALL DLAUN(XS,YS,N2,1,IERR)
+         call dlaun(xs,ys,N2,1,ierr)
       else
          call dlaun(xs,ys,N2,3,ierr)   ! generate edgeindex and triedge
       end if
-      if ( IERR /= 0 ) then
+      if ( ierr /= 0 ) then
          goto 1234
       end if
       JDLA = 0
    ENDIF
 
    IF (NUMTRI  <  1) THEN
-      RETURN
+      goto 1234
    ENDIF
 
    NCOL = 14
@@ -482,14 +488,13 @@
          AF = dble(N-1) / dble(NXX)
       ENDIF
 
-
       idim = 1 ! DMISS check on first sample dimension only
       if (nh > 2) then
          XP = xx(N)
          YP = yy(N)
          RD = zz(idim,N)
       else
-         if ( jakc == 1 ) then 
+         if ( jakc == 1 ) then
             if (kc(n) == 0) then
                cycle
             endif
@@ -507,7 +512,7 @@
          IF (RD == dmiss) then
             if ( jakdtree == 1 ) then
                jadum = 0
-               call findtri_kdtree(XP,YP,ZP,XS,YS,ZS,N2,NDIM,NRFIND,INTRI,JSLO,SLO, & 
+               call findtri_kdtree(XP,YP,ZP,XS,YS,ZS,N2,NDIM,NRFIND,INTRI,JSLO,SLO, &
                                    Jtekinterpolationprocess,jadum,ierror,indf,wf, dmiss, jsferic, jins, jasfer3D)
                if ( ierror /= 0 ) then
                   !                    deallocate
@@ -519,8 +524,8 @@
                end if
             end if
 
-            if ( jakdtree /= 1 ) then              
-               CALL FINDTRI(XP,YP,ZP,XS,YS,ZS,N2,NDIM,NRFIND,INTRI,JSLO,SLO, & 
+            if ( jakdtree /= 1 ) then
+               CALL FINDTRI(XP,YP,ZP,XS,YS,ZS,NDIM,NRFIND,INTRI,JSLO,SLO, &
                             Jtekinterpolationprocess,indf,wf, dmiss, jsferic, jins)
             end if
 
@@ -543,10 +548,10 @@
 
       !!!!!!!!!! give it another try with nearest neighbour opr inverse distance.
       if (intri == 0 .and. R2search > 0d0) then
-      
+
 !  this part is probably not prepared for spherical coordinates (and "jspheric" isn't put to "0" temporarily either)
          call mess(LEVEL_ERROR, 'triintfast: smallest distance search not prepared for spherical coordinates, see UNST-1720')
-      
+
          if (RD == dmiss) then
             if( jakdtree2 == 1 ) then
                call make_queryvector_kdtree(sampletree, xp, yp, jsferic)
@@ -604,11 +609,11 @@
 
    if (nh > 2) then
       do k = 1,nxx
-         if ( jakc == 1 ) then 
+         if ( jakc == 1 ) then
             if (kc(k) == 0) then
                cycle
-            endif   
-         endif            
+            endif
+         endif
          do idim=1,NDIM
             z(idim,ind(k)) = zz(idim,k)
          end do
@@ -629,16 +634,7 @@
       if ( allocated(indx) ) deallocate(indx)
    end if
 
-   !     restore original data
    if ( Ldeleteddata ) then
-      NS = NS1
-      do i=1,NS
-         xs(i) = xs1(i)
-         ys(i) = ys1(i)
-         do k=1,NDIM
-            zs(k,i) = zs1(k,i)
-         end do
-      end do
       deallocate(xs1, ys1, zs1)
    end if
 
@@ -646,25 +642,20 @@
 
 
    subroutine DLAUN(XS,YS,NS,jatri,ierr)
-   use m_ec_triangle
-   use m_alloc
    implicit none
-   integer, intent(out) :: ierr
-   integer              :: maxtri
-   integer              :: nh
-   integer              :: ns
-   integer, intent(in)  :: jatri !< Type of DLaun triangulation: 1: just triangulate,
+   real(kind=hp), intent(in) :: XS(:), YS(:)
+   integer, intent(out)      :: ierr
+   integer , intent(in)      :: ns
+   integer, intent(in)       :: jatri !< Type of DLaun triangulation: 1: just triangulate,
    !! 3: also produce node-edge-triangle mapping tables
    !! for use in Triangulatesamplestonetwork.
-   integer :: nsm
-   real(kind=hp)    :: trisize
 
-   PARAMETER (NH = 1)   ! SPvdP: too small if jatri == 0
-   real(kind=hp)    :: XS(ns), YS(ns)
-
-   real(kind=hp)    :: XH(NH), YH(NH)
-
-   integer, allocatable, dimension(:) :: idum
+   integer              :: maxtri
+   integer, parameter   :: nh= 1   ! SPvdP: too small if jatri == 0
+   integer              :: nsm
+   real(kind=hp)        :: trisize
+   real(kind=hp)        :: XH(NH), YH(NH)
+   integer, allocatable :: idum(:)
 
    !     check memory
    allocate ( idum(50*Ns) ,stat=ierr)     ! probably not enough
@@ -716,13 +707,6 @@
    !>    find triangle for interpolation with kdtree
    !>       will initialize kdtree and triangulation connectivity
    subroutine findtri_kdtree(XP,YP,ZP,XS,YS,ZS,NS,NDIM,NRFIND,INTRI,JSLO,SLO,JATEK,jadum,ierror,ind, wf, dmiss, jsferic, jins, jasfer3D)
-   use m_ec_triangle
-   use kdtree2Factory
-   use mathconsts, only: degrad_hp
-   use physicalconsts, only: earth_radius
-   use geometry_module, only: pinpok, cross, pinpok3D, cross3D, ave3D
-   use m_alloc
-   
    implicit none
 
    real(kind=hp)   , intent(in)                :: xp, yp    !< node coordinates
@@ -764,7 +748,7 @@
    integer,          intent(in)        :: jins
    integer                             :: jsferic
    integer,          intent(in)        :: jasfer3D
-   
+
    real(kind=hp)   , parameter         :: dfac = 1.000001d0  ! enlargement factor for pinpok3D
 
    ierror = 1
@@ -867,7 +851,7 @@
             yv(ii) = ys(inod)
             zv(1:NDIM,ii) = zs(1:NDIM,inod)
          end do
-         
+
 !        get a point in the cell
          if ( jasfer3D == 1 ) then
             call ave3D(3,xv,yv,xz,yz,jsferic,jasfer3D)
@@ -885,7 +869,7 @@
             else
                call pinpok3D(xp,yp,3,xv,yv,intri, dmiss, jins, 1, 1, dfac=dfac, xz=xz, yz=yz)
             end if
-            
+
             imask(i) = IDENT
          end if
 
@@ -958,7 +942,7 @@
       if ( jasfer3D == 0 ) then
          call linear(xv, yv, zv, NDIM, xp, yp, zp, JSLO, SLO, JATEK, wf, dmiss, jsferic)
       else
-         call linear3D(xv, yv, zv, NDIM, xp, yp, zp, JSLO, SLO, JATEK, wf, dmiss, jsferic)
+         call linear3D(xv, yv, zv, NDIM, xp, yp, zp, JSLO, SLO, wf, dmiss)
       end if
       do k = 1,3
          ind(k) = indx(k,nrfind)
@@ -973,36 +957,39 @@
    end subroutine findtri_kdtree
 
 
-   subroutine FINDTRI(XP,YP,ZP,XS,YS,ZS,NS,NDIM,NRFIND,INTRI,JSLO,SLO,JATEK, ind, wf, dmiss, jsferic, jins)
-   use m_ec_triangle
-   use geometry_module, only: pinpok
-
+   subroutine FINDTRI(XP,YP,ZP,XS,YS,ZS,NDIM,NRFIND,INTRI,JSLO,SLO,JATEK, ind, wf, dmiss, jsferic, jins)
    implicit none
-   integer          :: intri, jatek, jslo
-   integer          :: k, k1, k2, numit
-   integer          :: nrfind, nroldfind, interval
-   integer          :: ns
-   integer          :: NDIM   !< sample vector dimension
-   integer          :: idim, ind(3)
-   real(kind=hp)    :: slo(NDIM)
-   real(kind=hp)    :: xp
-   real(kind=hp)    :: xtmax
-   real(kind=hp)    :: xtmin
-   real(kind=hp)    :: yp
-   real(kind=hp)    :: ytmax
-   real(kind=hp)    :: ytmin
-   real(kind=hp)    :: zp(NDIM)
-   real(kind=hp)    :: XS(NS), YS(NS), ZS(NDIM,NS), XT(3),YT(3),ZT(NDIM,3), wf(3)
-   real(kind=hp), intent(in) :: dmiss
-   integer,       intent(in) :: jsferic, jins
+   integer      , intent(out)   :: intri
+   integer      , intent(in)    :: jatek, jslo
+   integer      , intent(out)   :: nrfind
+   integer      , intent(in)    :: NDIM   !< sample vector dimension
+   integer      , intent(inout) :: ind(:)
+   real(kind=hp), intent(inout) :: slo(:)
+   real(kind=hp), intent(in)    :: xp
+   real(kind=hp), intent(in)    :: yp
+   real(kind=hp), intent(out)   :: zp(:)
+   real(kind=hp), intent(in)    :: XS(:), YS(:), ZS(:,:)
+   real(kind=hp), intent(inout) :: wf(:)
+   real(kind=hp), intent(in)    :: dmiss
+   integer,       intent(in)    :: jsferic, jins
 
-   integer          :: ik1, ik2, ik3
+   integer       :: k, k1, k2, numit
+   integer       :: nroldfind, interval
+   integer       :: idim
+   real(kind=hp) :: xtmax
+   real(kind=hp) :: xtmin
+   real(kind=hp) :: ytmax
+   real(kind=hp) :: ytmin
+   real(kind=hp) :: XT(3),YT(3),ZT(NDIM,3)
+   integer       :: ik1, ik2, ik3
 
    DATA NROLDFIND /0/
 
    ZP       = dmiss
    INTRI    = 0
-   interval = 2 ; numit = 0; nrfind = 0
+   interval = 2
+   numit = 0
+   nrfind = 0
 5  CONTINUE
    numit    = numit + 1
    interval = 5*interval
@@ -1055,11 +1042,20 @@
 
 
    subroutine LINEAR ( X, Y, Z, NDIM, XP, YP, ZP, JSLO, SLO, JATEK, wf, dmiss, jsferic)
-   
-   use geometry_module, only: getdx, getdy
-   
-   ! use unstruc_colors
    implicit none
+   integer      , intent(in)    :: NDIM   !< sample vector dimension
+   real(kind=hp), intent(in)    :: X(:),Y(:),Z(:,:)
+   real(kind=hp), intent(out)   :: wf(:)
+   real(kind=hp), intent(out)   :: zp(:)
+   real(kind=hp), intent(inout) :: slo(:)
+   real(kind=hp), intent(in)    :: dmiss
+   integer,       intent(in)    :: jsferic
+   integer,       intent(in)    :: jatek
+   integer,       intent(in)    :: jslo
+   real(kind=hp), intent(in)    :: xp
+   real(kind=hp), intent(in)    :: yp
+
+   integer          :: idim
    real(kind=hp)    :: a11
    real(kind=hp)    :: a12
    real(kind=hp)    :: a21
@@ -1070,28 +1066,16 @@
    real(kind=hp)    :: b2
    real(kind=hp)    :: det
    real(kind=hp)    :: dum
-   integer          :: jatek
-   integer          :: jslo
    real(kind=hp)    :: r3
    real(kind=hp)    :: rlam
    real(kind=hp)    :: rmhu
    real(kind=hp)    :: x3
    real(kind=hp)    :: xn
-   real(kind=hp)    :: xp
    real(kind=hp)    :: xy
    real(kind=hp)    :: y3
    real(kind=hp)    :: yn
-   real(kind=hp)    :: yp
    real(kind=hp)    :: z3
    real(kind=hp)    :: zn
-
-   integer          :: idim
-   integer          :: NDIM   !< sample vector dimension
-   real(kind=hp)    :: X(3),Y(3),Z(NDIM,3), wf(3)
-   real(kind=hp)    :: zp(NDIM)
-   real(kind=hp)    :: slo(NDIM)
-   real(kind=hp)   , intent(in) :: dmiss
-   integer, intent(in) :: jsferic
 
    ZP  = dmiss
    A11 = getdx(x(1),y(1),x(2),y(2),jsferic)   ! X(2) - X(1)
@@ -1146,9 +1130,7 @@
    return
    end subroutine LINEAR
 
-   subroutine linear3D(X, Y, Z, NDIM, XP, YP, ZP, JSLO, SLO, JATEK, w, dmiss, jsferic)
-      use geometry_module
-      use MessageHandling
+   subroutine linear3D(X, Y, Z, NDIM, XP, YP, ZP, JSLO, SLO, w, dmiss)
       implicit none
 
       integer,                             intent(in)     :: NDIM       !< sample vector dimension
@@ -1158,11 +1140,9 @@
       real(kind=hp)   ,                    intent(out)    :: zp(NDIM)
       integer,                             intent(in)     :: jslo       !< not supported
       real(kind=hp)   , dimension(NDIM),   intent(out)    :: slo(NDIM)
-      integer,                             intent(in)     :: jatek      !< not supported
       real(kind=hp)   , dimension(3),      intent(out)    :: w
       real(kind=hp)   ,                    intent(in)     :: dmiss
-      integer,                             intent(in)     :: jsferic
-                                       
+
       real(kind=hp)   , dimension(3)                      :: xx1, xx2, xx3, xxp
       real(kind=hp)   , dimension(3)                      :: s123, rhs
       real(kind=hp)   , dimension(3,3)                    :: A
@@ -1180,31 +1160,31 @@
       call sphertocart3D(x(2), y(2), xx2(1), xx2(2), xx2(3))
       call sphertocart3D(x(3), y(3), xx3(1), xx3(2), xx3(3))
       call sphertocart3D(xp, yp, xxp(1), xxp(2), xxp(3))
-      
+
 !     get (double) area vector
       s123 = vecprod(xx2-xx1,xx3-xx1)
-      
+
       D = sqrt( inprod(s123,s123) )
-      
+
       if ( D > dtol ) then
 !        build system:
 !           gradz . (x2-x1) = z2-z1
 !           gradz . (x3-x1) = z3-z1
 !           gradz . ((x2-x1) X (x3-x1)) = 0
-         
+
          A(1,:) = xx2-xx1
          A(2,:) = xx3-xx1
          A(3,:) = s123
          rhs = 0d0   ! not used
-         
+
 !        compute inverse
          call gaussj(A,3,3,rhs,1,1)
-         
+
 !        compute weights
          w(2) = inprod(xxp-xx1, A(:,1))
          w(3) = inprod(xxp-xx1, A(:,2))
          w(1) = 1d0 - w(2) - w(3)
-         
+
 !        interpolate
          do idim=1,NDIM
             zp(idim) = w(1) * z(idim,1) + w(2) * z(idim,2) + w(3) * z(idim,3)
@@ -1215,33 +1195,32 @@
       end if
 
    end subroutine linear3D
-   
+
    !---------------------------------------------------------------------------!
    !   bilin_interp
    !---------------------------------------------------------------------------!
 
    !> bilinear interpolation of structed sample data at points
-   subroutine bilin_interp(Nc, xc, yc, zc, dmiss, XS, YS, ZS, MXSAM, MYSAM, XPL, YPL, ZPL, NPL, jsferic, kc)
+   subroutine bilin_interp(Nc, xc, yc, zc, dmiss, XS, YS, ZS, MXSAM, MYSAM, jsferic, kc)
 
    implicit none
 
    integer,                         intent(in)  :: Nc       !< number of points to be interpolated
    real(kind=hp)   , dimension(Nc), intent(in)  :: xc, yc   !< point coordinates
    real(kind=hp)   , dimension(Nc), intent(out) :: zc       !< interpolated point values
-   real(kind=hp)                                :: xi, eta
    real(kind=hp)   , intent(in)                 :: dmiss
-   
+
    real(kind=hp)   , intent(in)                 ::  XS(:), YS(:), ZS(:)
-   real(kind=hp)   , intent(in)                 ::  XPL(:),YPL(:), ZPL(:)
-   integer, intent(in)                          ::  MXSAM, MYSAM, NPL, jsferic
-   integer, intent(in), optional                ::  kc(nc) 
-   
+   integer, intent(in)                          ::  MXSAM, MYSAM, jsferic
+   integer, intent(in), optional                ::  kc(nc)
+
+   real(kind=hp)         :: xi, eta
    integer               :: ierror
    integer               :: k, jakc
 
    jakc = 0
    if (present(kc)) jakc = 1
-   
+
    ierror = 1
 
    if ( MXSAM == 0 .or. MYSAM == 0 ) then
@@ -1255,11 +1234,11 @@
 
    do k=1,Nc
       if ( zc(k) == DMISS ) then
-         if (jakc == 0) then 
+         if (jakc == 0) then
             call bilin_interp_loc(MXSAM, MYSAM, MXSAM, MYSAM, 1, XS, YS, ZS, xc(k), yc(k), xi, eta, zc(k), ierror, dmiss, jsferic)
          else if (kc(k) == 1) then
             call bilin_interp_loc(MXSAM, MYSAM, MXSAM, MYSAM, 1, XS, YS, ZS, xc(k), yc(k), xi, eta, zc(k), ierror, dmiss, jsferic)
-         endif   
+         endif
       end if
    end do
 
@@ -1273,9 +1252,6 @@
 
    !> bilinear interpolation between nodes
    subroutine bilin_interp_loc(Nxmax, Nymax, Nx, Ny, NDIM, x, y, z, xp, yp, xi, eta, zp, ierror, dmiss, jsferic)
-   
-   use geometry_module, only: getdxdy
-   
    implicit none
 
    integer,                                    intent(in)    :: Nxmax, Nymax !< node array size
@@ -1374,9 +1350,6 @@
 
    !> bilinear interpolation of node coordinates and Jacobian matrix
    subroutine comp_x_DxDxi(Ncx, Ncy, Nx, Ny, NDIM, x, y, z, xi, eta, x1, y1, z1, DxDxi, ierror, dmiss, jsferic)
-
-   use geometry_module, only: getdx, getdy
-   
    implicit none
 
    integer,                                   intent(in)  :: Ncx, Ncy !< node array sizes
@@ -1393,7 +1366,7 @@
    real(kind=hp)                                          :: xiL, etaL, xiL1, etaL1
 
    integer                                                :: i0, i1, j0, j1, k
-   real(kind=hp)   , intent(in)                           :: dmiss 
+   real(kind=hp)   , intent(in)                           :: dmiss
    integer                                                ::jsferic
 
    ierror = 1
@@ -1450,20 +1423,15 @@
     !---------------------------------------------------------------------------!
     !   averaging2
     !---------------------------------------------------------------------------!
-    
-    
+
+
     !> interpolate/average sample vector data in a polygon (e.g. a netcell)
     !>   note: M_samples is not used
     !>         XS and YS are the sample coordinates, dim(NS)
     !>         ZSS contains a NDIM-dimensional vector for each of the NS samples, dim(NDIM,NS)
-    
+
     subroutine AVERAGING2(NDIM,NS,XS,YS,ZSS,IPSAM,XC,YC,ZC,NX,XX,YY,N6,NNN,jakdtree_, &
                           dmiss, jsferic, jasfer3D, JINS, NPL, xpl, ypl, zpl, kcc) ! WERKT ALLEEN VOOR CELL REGIONS, DIE ZITTEN IN XX EN YY
-    use m_ec_interpolationsettings
-    use kdtree2Factory
-    use geometry_module, only: pinpok, dbdistance, dbpinpol
-    use sorting_algorithms, only: indexx
-
     implicit none
     integer,                              intent(in)    :: NDIM                 ! sample vector dimension
     integer,                              intent(in)    :: NS                   ! number of samples
@@ -1494,16 +1462,11 @@
     real(kind=hp)   , allocatable :: zz(:)
     integer         , allocatable :: kkin(:)
     integer                       :: nin, n1, n2, n12, num
-    
+
     real(kind=hp)   , intent(in)            :: dmiss
     integer, intent(in)                     :: jsferic, jasfer3D, NPL, JINS
     double precision, intent(in)            :: XPL(:), YPL(:), ZPL(:)
-    integer                                 :: i, in_unit, out_unit 
     integer               :: jakc
-
-    INTEGER :: NCOLNOW
-    
-    !COMMON /COLNOW/ NCOLNOW
 
     ! default/no samples in cell
     ! ZC = DMISS
@@ -1561,8 +1524,10 @@
           YH(K) = RCEL*YH(K) + (1D0-RCEL)*YC(N)
        ENDDO
 
-       XLOW = MINVAL(XH(1:NN)) ; XHIH = MAXVAL(XH(1:NN))
-       YLOW = MINVAL(YH(1:NN)) ; YHIH = MAXVAL(YH(1:NN))
+       XLOW = MINVAL(XH(1:NN))
+       XHIH = MAXVAL(XH(1:NN))
+       YLOW = MINVAL(YH(1:NN))
+       YHIH = MAXVAL(YH(1:NN))
 
        !    check for periodic coordinates
        !    it is assumed that the user has provided sufficient sample overlap
@@ -1576,13 +1541,15 @@
                    xh(k) = xh(k) + 360d0
                 end if
              end do
-             XLOW = MINVAL(XH(1:NN)) ; XHIH = MAXVAL(XH(1:NN))
+             XLOW = MINVAL(XH(1:NN))
+             XHIH = MAXVAL(XH(1:NN))
 
           end if
        end if
 
        if ( jakdtree == 0 ) then
-          CALL LOCATE(XS,NS,IPSAM,XLOW,NLOWX); IF (NLOWX == 0) NLOWX = 1
+          CALL LOCATE(XS,NS,IPSAM,XLOW,NLOWX)
+          IF (NLOWX == 0) NLOWX = 1
           CALL LOCATE(XS,NS,IPSAM,XHIH,NHIHX)
           k_start = NLOWX
           k_end   = min(NHIHX+1,NS)
@@ -1652,12 +1619,14 @@
                       IF (IAV == 3) THEN
                          HPARR(IVAR) = MAX(HPARR(IVAR),ZSS(IVAR,K))
                          if (percentileminmax > 0d0 .and. ivar == 1) then
-                            nin = nin + 1 ; kkin(nin) = k
+                            nin = nin + 1
+                            kkin(nin) = k
                          endif
                       ELSE IF (IAV == 4) THEN
                          HPARR(IVAR) = MIN(HPARR(IVAR),ZSS(IVAR,K))
                          if (percentileminmax > 0d0 .and. ivar == 1) then
-                            nin = nin + 1 ; kkin(nin) = k
+                            nin = nin + 1
+                            kkin(nin) = k
                          endif
                       ELSE IF (IAV == 6) THEN
                          HPARR(IVAR) = MIN(ABS(HPARR(IVAR)),ABS(ZSS(IVAR,K)))
@@ -1691,11 +1660,17 @@
                 zz(nn) = zss( 1,kkin(nn) )
              enddo
              call indexx(nin,zz,kkin)
-             rnn   = 0 ; rhp(1) = 0d0; num = nint(0.01d0*percentileminmax*nin)
+             rnn   = 0
+             rhp(1) = 0d0
+             num = nint(0.01d0*percentileminmax*nin)
              if (iav == 4) then
-                n1 = 1   ; n2 =  num           ; n12 = 1
+                n1 = 1
+                n2 =  num
+                n12 = 1
              else
-                n1 = nin ; n2 =  nin - num + 1 ; n12 = -1
+                n1 = nin
+                n2 =  nin - num + 1
+                n12 = -1
              endif
              do nn = n1, n2, n12
                 rnn = rnn + 1d0
@@ -1724,9 +1699,10 @@
   end subroutine AVERAGING2
 
    subroutine LOCATE(XX,N,IPERM,X,J)
-   integer          :: N, J
-   integer, dimension(N), intent(in) :: IPERM !< permutation array (increasing xx)
-   real(kind=hp)    :: XX(N), X
+   integer,       intent(in)  :: N
+   integer,       intent(in)  :: IPERM(:) !< permutation array (increasing xx)
+   real(kind=hp), intent(in)  :: XX(:), X
+   integer,       intent(out) :: J
 
    integer          :: JL, JU, JM
 

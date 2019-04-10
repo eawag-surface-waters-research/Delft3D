@@ -5049,34 +5049,36 @@ SUBROUTINE CUTCELWU(n12, jamasks, ipoly)
   CALL AERR('XC(NUMP)', IERR, NUMP )
   ALLOCATE ( YC(NUMP) , STAT = IERR)
   CALL AERR('YC(NUMP)', IERR, NUMP )
-  ALLOCATE ( AR(NUMP) , STAT = IERR); AR = DMISS
+  ALLOCATE ( AR(NUMP) , STAT = IERR)
   CALL AERR('AR(NUMP)', IERR, NUMP )
+  AR = DMISS
 
   DO N  = 1,NUMP
      CALL getcellsurface ( N, AR(N), XC(N), YC(N) )
   ENDDO
 
-  ALLOCATE( ZC(NUMP) , STAT = IERR); ZC = DMISS
+  ALLOCATE( ZC(NUMP) , STAT = IERR)
   CALL AERR('ZC(NUMP)', IERR, NUMP )
+  ZC = DMISS
 
 ! First interpolate bottom level in netcell-based zc, then use zc as cellmask
   IF (JACOURANTNETWORK == 1) THEN
-     ALLOCATE ( NA(NUMP) , STAT = IERR); NA = 0
+     ALLOCATE ( NA(NUMP) , STAT = IERR)
      CALL AERR('NA(NUMP)', IERR, NUMP )
-
+     NA = 0
 
      if (interpolationtype == INTP_INTP) then
         if ( MXSAM.gt.0 .and. MYSAM.gt.0 ) then
 !          bilinear interpolation of structured sample data
-           call bilin_interp(Numk, xc, yc, zc, &
-                             dmiss, XS, YS, ZS, MXSAM, MYSAM, XPL, YPL, ZPL, NPL, jsferic)
+           call bilin_interp(Numk, xc, yc, zc, dmiss, XS, YS, ZS, MXSAM, MYSAM, jsferic)
         else
            CALL triinterp2(XC,YC,ZC,NUMP,JDLA, & 
                            XS, YS, ZS, NS, dmiss, jsferic, jins, jasfer3D, NPL, MXSAM, MYSAM, XPL, YPL, ZPL, transformcoef)
         end if
      else if (interpolationtype == INTP_AVG) then
         n6 = 6
-        ALLOCATE( XX(N6,NUMP), YY(N6,NUMP), NNN(NUMP) )
+        ALLOCATE( XX(N6,NUMP), YY(N6,NUMP), NNN(NUMP), STAT = IERR )
+        CALL AERR('XX(N6,NUMP), YY(N6,NUMP), NNN(NUMP)', IERR, (1+2*N6)*NUMP)
         DO N = 1,NUMP
            NNN(N) = NETCELL(N)%N
            DO NN = 1, NNN(N)
