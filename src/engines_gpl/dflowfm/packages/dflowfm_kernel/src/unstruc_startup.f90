@@ -503,8 +503,8 @@ subroutine initGUI(INTINIT)
     ! and added some basic colors.
     !call IGRPALETTERGB(ncolgray, 128, 128, 128) ! gray is already set by default (background color).
     i = 11
-    !i=i+1; rgbvalues(1:4, i) = (/ ncolblack, 0, 0, 0 /)
-    !i=i+1; rgbvalues(1:4, i) = (/ ncolwhite, 255, 255, 255 /)
+    i=i+1; rgbvalues(1:4, i) = (/ ncolblack, 0, 0, 0 /)
+    i=i+1; rgbvalues(1:4, i) = (/ ncolwhite, 255, 255, 255 /)
     i=i+1; rgbvalues(1:4, i) = (/ ncolred, 255, 0, 0 /)
     i=i+1; rgbvalues(1:4, i) = (/ ncolyellow, 255, 255, 0 /)
     i=i+1; rgbvalues(1:4, i) = (/ ncolgreen, 0, 255, 0 /) !< lime

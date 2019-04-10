@@ -90,8 +90,8 @@ implicit none
     integer :: ncolhl    =  31 ! Highlight nodes/links
     integer :: ncolANA   =  63 ! 180! ANALYTIC SOLOUTIONS
 
-    integer :: ncolblack = 3
-    integer :: ncolwhite = 255
+    integer :: ncolblack = 254
+    integer :: ncolwhite = 253
     
     ! colors in text screens
     ! 0 : Black       4 : Cyan
@@ -1355,15 +1355,13 @@ if (network%loaded) then
          end if
          
          ! Draw label with structure id.
-         call IGrColour('white')
-         call IGrCharJustify('L')
-         call settextsizefac(1.5d0)
          call igrcharfont(7)
-         write(text, '(A)') network%sts%struct(is)%id
-         call IGrCharOut(real(x + 0.5*icon_rw_size), real(y - 1.3*icon_rw_size), trim(adjustl(text)))
+         call gtext(trim(network%sts%struct(is)%id), x + 0.5*icon_rw_size, y - 1.3*icon_rw_size, ncolwhite)
       end if
    end do
 end if
+
+call resetlinesizesetc()
 
 end subroutine plotStructures
 
