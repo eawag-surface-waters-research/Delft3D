@@ -41428,8 +41428,14 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
        lnfxw(nfxw)    = L
        nfxwL(L)       = nfxw
        crestlevxw(nfxw) = dzcrest(L)
-       shlxw(nfxw)    = dzsillu(L) ; shlxw(nfxw) = max (0.1d0, shlxw(nfxw) )    !  in Simona D1 is at least 0.1 m for application to the Tabellenboek
-       shrxw(nfxw)    = dzsilld(L) ; shrxw(nfxw) = max (0.1d0, shrxw(nfxw) )
+       shlxw(nfxw)    = dzsillu(L)
+       if (ifixedweirscheme == 8) then
+          shlxw(nfxw) = max (0.1d0, shlxw(nfxw) )  !  in case of the Tabellenboek the ground height left should be at least 0.1 m, as in Simona and Delft3D-FLOW 
+       endif   
+       shrxw(nfxw)    = dzsilld(L)
+       if (ifixedweirscheme == 8) then
+          shrxw(nfxw) = max (0.1d0, shrxw(nfxw) )  !  in case of the Tabellenboek the ground height right should be at least 0.1 m, as in Simona and Delft3D-FLOW  
+       endif   
        crestlxw(nfxw) = crestlen(L)
        taludlxw(nfxw) = taludu(L)
        taludrxw(nfxw) = taludd(L)
