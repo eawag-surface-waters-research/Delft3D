@@ -308,7 +308,7 @@
    real(kind=hp)    :: slo(NDIM)
    real(kind=hp)    :: xp, yp, zp(NDIM), xpmin, xpmax,ypmin, ypmax
    real(kind=hp)    :: XS(ns), YS(ns), ZS(NDIM,ns), X(nxy), Y(nxy), Z(NDIM,nxy)
-   integer, optional:: kc(nxy) 
+   integer, optional:: kc(:)
    real(kind=hp)    :: XL(3),YL(3)
    real(kind=hp)   , allocatable :: xx(:), yy(:) , zz(:,:)
    integer         , allocatable :: ind(:)
