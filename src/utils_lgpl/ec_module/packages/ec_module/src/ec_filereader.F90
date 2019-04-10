@@ -37,6 +37,7 @@ module m_ec_filereader
    use m_ec_alloc
    use m_ec_support
    use m_ec_astro
+   use string_module
    
    implicit none
    
@@ -433,7 +434,7 @@ module m_ec_filereader
          fileReaderPtr => ecSupportFindFileReader(instancePtr, fileReaderId)
          if (associated(fileReaderPtr)) then
             do i=1, fileReaderPtr%nItems
-               if (trim(fileReaderPtr%items(i)%ptr%quantityPtr%name) == trim(name)) then
+               if (strcmpi(fileReaderPtr%items(i)%ptr%quantityPtr%name,name)) then                                               !(trim(fileReaderPtr%items(i)%ptr%quantityPtr%name) == trim(name)) then
                   itemId = fileReaderPtr%items(i)%ptr%id
                   exit
                end if
