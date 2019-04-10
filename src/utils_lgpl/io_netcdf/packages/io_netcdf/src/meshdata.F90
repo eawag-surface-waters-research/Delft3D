@@ -149,6 +149,7 @@ type, bind(C) :: c_t_ug_meshgeom
    
    type(c_ptr)  :: layer_zs               !< Vertical coordinates of the mesh layers' center (either z or sigma).
    type(c_ptr)  :: interface_zs           !< Vertical coordinates of the mesh layers' interface (either z or sigma).
+   integer(kind=c_int)  :: start_index    !< Start index of the arrays
 
 end type c_t_ug_meshgeom
 
