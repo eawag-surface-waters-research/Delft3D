@@ -2557,9 +2557,7 @@ if (npump > 0) then
          ! flow1d_io library: add and read SOBEK pump
          ! just use the first link of the the structure (the network%sts%struct(istrtmp)%link_number  is not used in computations)
          if (L1pumpsg(n) <= L2pumpsg(n)) then
-            k = L1pumpsg(n)
-            istrtmp   = addStructure(network%sts, kpump(1,k), kpump(2,k), iabs(kpump(3,k)), -1, "", strid, istrtype)
-            call readPump(network%sts%struct(istrtmp)%pump, str_ptr, success)
+            istrtmp = hashsearch(network%sts%hashlist_pump, strid)
          endif
          
       end if
