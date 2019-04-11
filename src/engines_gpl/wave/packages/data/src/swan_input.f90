@@ -3979,11 +3979,13 @@ subroutine write_swan_inp (wavedata, calccount, &
     !
     ! Dano modifications nfreq, flow and fhigh for shape=BIN
     ! Only meant for parametric, uniform boundary conditions on all given boundaries
-    bnd => sr%bnd(1)
-    if (bnd%sshape==4) then
-       dom%nfreq=2
-       dom%freqmin=1.d0/bnd%period(1)*0.9d0
-       dom%freqmax=1.d0/bnd%period(1)/0.9d0
+    if (nb >= 1) then
+       bnd => sr%bnd(1)
+       if (bnd%sshape == 4) then
+          dom%nfreq   = 2
+          dom%freqmin = 1.d0/bnd%period(1)*0.9d0
+          dom%freqmax = 1.d0/bnd%period(1)/0.9d0
+       endif
     endif
     
     msc  = dom%nfreq
