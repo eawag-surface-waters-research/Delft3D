@@ -2312,7 +2312,8 @@ end do
             if (ierr /= 0) then ! No number, so check for timeseries filename
                if (trim(rec) == 'REALTIME') then
                   select case (trim(generalkeywrd(k)))
-                  case ('levelcenter', 'gatedoorheight', 'gateheight', 'door_opening_width')
+                  case ('levelcenter', 'gatedoorheight', 'gateheight', 'door_opening_width', &
+                        'CrestLevel', 'GateHeight', 'GateLowerEdgeLevel', 'GateOpeningWidth')
                      success = .true.
                      write(msgbuf, '(a,a,a)') 'Control for generalstructure ''', trim(strid), ''', '//trim(generalkeywrd(k))//' set to REALTIME.'
                      call dbg_flush()
@@ -2327,9 +2328,9 @@ end do
                   select case (trim(generalkeywrd(k)))
                   case ('CrestLevel', 'levelcenter')
                      ifld = 1
-                  case ('gateheight') ! TODO: UNST-1936
+                  case ('GateLowerEdgeLevel', 'gateheight')
                      ifld = 2
-                  case ('door_opening_width')
+                  case ('GateOpeningWidth', 'door_opening_width')
                      ifld = 3
                   case default
                      success = .false.
@@ -2422,12 +2423,9 @@ if (ngate > 0) then ! Old-style controllable gateloweredgelevel
       call resolvePath(plifile, md_structurefile_dir, plifile)
 
       rec = ' '
-      call prop_get(str_ptr, '', 'GateLowerEdgeLevel', rec, success)
-      if (.not. success) then
-         call prop_get(str_ptr, '', 'lower_edge_level', rec, success)
-      endif
+      call prop_get(str_ptr, '', 'lower_edge_level', rec, success)
       if (.not. success .or. len_trim(rec) == 0) then
-         write(msgbuf, '(a,a,a)') 'Required field ''GateLowerEdgeLevel'' missing in gate ''', trim(strid), '''.'
+         write(msgbuf, '(a,a,a)') 'Required field ''lower_edge_level'' missing in gate ''', trim(strid), '''.'
          call warn_flush()
          cycle
       end if
@@ -2437,7 +2435,7 @@ if (ngate > 0) then ! Old-style controllable gateloweredgelevel
          if (trim(rec) == 'REALTIME') then
             success = .true.
             ! zgate should be filled via DLL's API
-            write(msgbuf, '(a,a,a)') 'Control for gateloweredgelevel ''', trim(strid), ''' set to REALTIME.'
+            write(msgbuf, '(a,a,a)') 'Control for GateLoweredgelevel ''', trim(strid), ''' set to REALTIME.'
             call dbg_flush()
          else
             qid = 'gateloweredgelevel'

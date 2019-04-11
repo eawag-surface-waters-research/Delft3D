@@ -487,15 +487,15 @@ double precision            :: tmp_x(2), tmp_y(2)
      return
    endif
    
-   id_silllev = dbfaddfield(shphandle, 'SILLLEV', ftdouble, 20, 8)
+   id_silllev = dbfaddfield(shphandle, 'CRESTLEV', ftdouble, 20, 8)
    if (id_silllev /= 1) then
-     call mess(LEVEL_ERROR, 'SHAPEFILE: Could not add field "SILLLEV" to shape file '''//trim(filename)//'''.')
+     call mess(LEVEL_ERROR, 'SHAPEFILE: Could not add field "CRESTLEV" to shape file '''//trim(filename)//'''.')
      return
    endif
    
-   id_sillwidth = dbfaddfield(shphandle, 'SILLWIDTH', ftdouble, 20, 8)
+   id_sillwidth = dbfaddfield(shphandle, 'CRESTWIDTH', ftdouble, 20, 8)
    if (id_sillwidth /= 2) then
-     call mess(LEVEL_ERROR, 'SHAPEFILE: Could not add field "SILLWIDTH" to shape file '''//trim(filename)//'''.')
+     call mess(LEVEL_ERROR, 'SHAPEFILE: Could not add field "CRESTWIDTH" to shape file '''//trim(filename)//'''.')
      return
    endif
    
@@ -511,9 +511,9 @@ double precision            :: tmp_x(2), tmp_y(2)
      return
    endif
    
-   id_doorheight = dbfaddfield(shphandle, 'DOORHEIGHT', ftdouble, 20, 8)
+   id_doorheight = dbfaddfield(shphandle, 'GATEHEIGHT', ftdouble, 20, 8)
    if (id_doorheight /= 5) then
-     call mess(LEVEL_ERROR, 'SHAPEFILE: Could not add field "DOORHEIGHT" to shape file '''//trim(filename)//'''.')
+     call mess(LEVEL_ERROR, 'SHAPEFILE: Could not add field "GATEHEIGHT" to shape file '''//trim(filename)//'''.')
      return
    endif
    
@@ -575,23 +575,23 @@ double precision            :: tmp_x(2), tmp_y(2)
            return
          endif
          
-         ! write SILLLEV
+         ! write CRESTLEV
          if(allocated(zcgen)) then
              j = dbfwriteattribute(shphandle, ishape, id_silllev, zcgen((igen-1)*3+1))
          end if
          
          if (j /= 1) then
-           call mess(LEVEL_ERROR, 'SHAPEFILE: Could not write attribute "SILLLEV" to shape'''//trim(objectid)//'''.')
+           call mess(LEVEL_ERROR, 'SHAPEFILE: Could not write attribute "CRESTLEV" to shape'''//trim(objectid)//'''.')
            return
          endif
          
-         ! write SILLWIDTH
+         ! write CRESTWIDTH
          if(allocated(gates)) then
              j = dbfwriteattribute(shphandle, ishape, id_sillwidth, min(1d10, gates(n)%sill_width))
          end if
          
          if (j /= 1) then
-           call mess(LEVEL_ERROR, 'SHAPEFILE: Could not write attribute "SILLWIDTH" to shape'''//trim(objectid)//'''.')
+           call mess(LEVEL_ERROR, 'SHAPEFILE: Could not write attribute "CRESTWIDTH" to shape'''//trim(objectid)//'''.')
            return
          endif
          
@@ -615,13 +615,13 @@ double precision            :: tmp_x(2), tmp_y(2)
            return
          endif
          
-         ! write DOORHEIGHT
+         ! write GATEHEIGHT
          if(allocated(gates)) then
              j = dbfwriteattribute(shphandle, ishape, id_doorheight, gates(n)%door_height)
          end if
          
          if (j /= 1) then
-           call mess(LEVEL_ERROR, 'SHAPEFILE: Could not write attribute "DOORHEIGHT" to shape'''//trim(objectid)//'''.')
+           call mess(LEVEL_ERROR, 'SHAPEFILE: Could not write attribute "GATEHEIGHT" to shape'''//trim(objectid)//'''.')
            return
          endif
          
@@ -1438,23 +1438,23 @@ double precision            :: tmp_x(2), tmp_y(2)
    endif
    
    checkerror = checkerror + 1
-   id_crestwid = dbfaddfield(shphandle, 'CRESTWID', ftdouble, 20, 8)
+   id_crestwid = dbfaddfield(shphandle, 'CRESTWIDTH', ftdouble, 20, 8)
    if (id_crestwid /= checkerror) then
-     call mess(LEVEL_ERROR, 'SHAPEFILE: Could not add field "CRESTWID" to shape file '''//trim(filename)//'''.')
+     call mess(LEVEL_ERROR, 'SHAPEFILE: Could not add field "CRESTWIDTH" to shape file '''//trim(filename)//'''.')
      return
    endif
    
    checkerror = checkerror + 1
-   id_gateheight = dbfaddfield(shphandle, 'GATEHEIGHT', ftdouble, 20, 8)
+   id_gateheight = dbfaddfield(shphandle, 'LOWEREDGEL', ftdouble, 20, 8)
    if (id_gateheight /= checkerror) then
-     call mess(LEVEL_ERROR, 'SHAPEFILE: Could not add field "GATEHEIGHT" to shape file '''//trim(filename)//'''.')
+     call mess(LEVEL_ERROR, 'SHAPEFILE: Could not add field "LOWEREDGEL" to shape file '''//trim(filename)//'''.')
      return
    endif
    
    checkerror = checkerror + 1
-   id_doorheight = dbfaddfield(shphandle, 'DOORHEIGHT', ftdouble, 20, 8)
+   id_doorheight = dbfaddfield(shphandle, 'GATEHEIGHT', ftdouble, 20, 8)
    if (id_doorheight /= checkerror) then
-     call mess(LEVEL_ERROR, 'SHAPEFILE: Could not add field "DOORHEIGHT" to shape file '''//trim(filename)//'''.')
+     call mess(LEVEL_ERROR, 'SHAPEFILE: Could not add field "GATEHEIGHT" to shape file '''//trim(filename)//'''.')
      return
    endif
    
@@ -1528,30 +1528,30 @@ double precision            :: tmp_x(2), tmp_y(2)
            return
          endif
          
-         ! write CRESTWID
+         ! write CRESTWIDTH
          if(allocated(generalstruc)) then
              j = dbfwriteattribute(shphandle, ishape, id_crestwid, generalstruc(igen)%widthcenter)
          end if
          if (j /= 1) then
-           call mess(LEVEL_ERROR, 'SHAPEFILE: Could not write attribute "CRESTWID" to shape'''//trim(objectid)//'''.')
+           call mess(LEVEL_ERROR, 'SHAPEFILE: Could not write attribute "CRESTWIDTH" to shape'''//trim(objectid)//'''.')
            return
          endif
          
-         ! write GATEHEIGHT
+         ! write LOWEREDGEL
          if(allocated(valgenstru)) then
              j = dbfwriteattribute(shphandle, ishape, id_gateheight, valgenstru(7,n))
          end if
          if (j /= 1) then
-           call mess(LEVEL_ERROR, 'SHAPEFILE: Could not write attribute "GATEHEIGHT" to shape'''//trim(objectid)//'''.')
+           call mess(LEVEL_ERROR, 'SHAPEFILE: Could not write attribute "LOWEREDGEL" to shape'''//trim(objectid)//'''.')
            return
          endif
          
-         ! write DOORHEIGHT
+         ! write GATEHEIGHT
          if(allocated(generalstruc)) then
              j = dbfwriteattribute(shphandle, ishape, id_doorheight, generalstruc(igen)%gatedoorheight)
          end if
          if (j /= 1) then
-           call mess(LEVEL_ERROR, 'SHAPEFILE: Could not write attribute "DOORHEIGHT" to shape'''//trim(objectid)//'''.')
+           call mess(LEVEL_ERROR, 'SHAPEFILE: Could not write attribute "GATEHEIGHT" to shape'''//trim(objectid)//'''.')
            return
          endif
          
