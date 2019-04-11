@@ -1700,10 +1700,10 @@ implicit none
 character(len=256)            :: plifile
 integer                       :: i, L, Lf, kb, LL, ierr, k, kbi, n, ifld, k1, k2
 integer                       :: nstr
-character (len=256)           :: fnam, rec
+character (len=256)           :: fnam, rec, key
 integer, allocatable          :: pumpidx(:), gateidx(:), cdamidx(:), cgenidx(:), dambridx(:) ! temp
 double precision              :: tmpval
-integer                       :: istru, istrtype, itmp
+integer                       :: istru, istrtype, itmp, janewformat
 integer                       :: numg, numd, npum, ngs, numgen, numgs, ilinstr, ndambr
 type(TREE_DATA), pointer      :: str_ptr
 double precision, allocatable :: widths(:)
@@ -2298,12 +2298,24 @@ end do
 
       !! GENERALSTRUCTURE !!
       case ('generalstructure')
+         janewformat = 1
          do k = 1,numgeneralkeywrd        ! generalstructure keywords
             tmpval = dmiss
-            call prop_get(str_ptr, '', trim(generalkeywrd(k)), rec, success)
-            if (.not. success) then
-               call prop_get(str_ptr, '', trim(generalkeywrd_old(k)), rec, success)
+            if (janewformat == 1) then
+               key = generalkeywrd(k)
+               call prop_get(str_ptr, '', trim(key), rec, success)
+               if (.not. success) then
+                  key = generalkeywrd_old(k)
+                  call prop_get(str_ptr, '', trim(key), rec, success)
+                  if (success) then
+                     janewformat = 0 ! old-style keyword found, from now on, only consider old keywords for this structure (needed for gateheight versus GateHeight, which are *not* the same)
+                  end if
+               end if
+            else
+               key = generalkeywrd_old(k)
+               call prop_get(str_ptr, '', trim(key), rec, success)
             endif
+            
             if (.not. success .or. len_trim(rec) == 0) then
                ! consider all fields optional for now.
                cycle
@@ -2325,7 +2337,7 @@ end do
                      
                else
                   success = .false.
-                  select case (trim(generalkeywrd(k)))
+                  select case (key)
                   case ('CrestLevel', 'levelcenter')
                      ifld = 1
                   case ('GateLowerEdgeLevel', 'gateheight')
