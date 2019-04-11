@@ -289,8 +289,8 @@ logical function is_abs(path)
 #ifdef HAVE_CONFIG_H
    is_abs = (path(1:1) == FILESEP)
 #else
-   idrive = index(path, ':')
-   is_abs = (path(idrive+1:idrive+1) == FILESEP .or. path(idrive+1:idrive+1) == '\') ! On Windows, also allow backslash.
+   idrive = index(path, ':') ! Find piece after drive letter:. When not found, still check from index 1, because it might start with / for Windows UNC paths \\share\etc.
+   is_abs = (path(idrive+1:idrive+1) == FILESEP .or. path(idrive+1:idrive+1) == '/') ! On Windows, also allow forward lash.
 #endif
 
 end function is_abs
