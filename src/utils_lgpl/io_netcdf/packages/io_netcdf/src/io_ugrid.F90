@@ -1828,7 +1828,12 @@ function ug_init_network_topology(ncid, varid, netids) result(ierr)
    ierr = att_to_varid(ncid, varid, 'branch_lengths'        , netids%varids(ntid_1dbranchlengths))
    !get the number of geometric points for each branch
    ! TODO: UNST-2391
-   ierr = att_to_varid(ncid, netids%varids(ntid_1dgeometry), 'part_node_count', netids%varids(ntid_1dgeopointsperbranch))
+   
+   ierr = att_to_varid(ncid, netids%varids(ntid_1dgeometry), 'node_count', netids%varids(ntid_1dgeopointsperbranch))
+   ! for backward compatibility: part_node_count was used rather than node_count
+   if ( ierr.ne.0 ) then
+      ierr = att_to_varid(ncid, netids%varids(ntid_1dgeometry), 'part_node_count', netids%varids(ntid_1dgeopointsperbranch))
+   endif
 
    !dim variables
    ierr = nf90_inquire_variable( ncid, netids%varids(ntid_1dbranchids),dimids = dimids)
