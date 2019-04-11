@@ -469,20 +469,20 @@ module m_fourier_analysis
           foutyp(ifou)   = 's'
           fouref(ifou,1) = fouid
           fouelp(ifou)   = 'e'
-       elseif (founam(ifou)=='uva') then                    ! cell-centre velocities components averaged
-          founam(ifou)     = 'uxa             '
-          founam(ifou+1)     = 'uya             '
-          foutyp(ifou)     = 's'
-          foutyp(ifou+1)     = 's'
-          fouref(ifou,1)   = fouid
-          fouref(ifou+1,1)   = fouid
-       elseif (founam(ifou)=='uv') then                     ! cell-centre velocities, (u,v) (only vectorial here)
-          founam(ifou)     = 'u1              '
-          founam(ifou+1)     = 'v1              '
-          foutyp(ifou)     = 'v'
-          foutyp(ifou+1)     = 'v'
-          fouref(ifou,1)   = fouid
-          fouref(ifou+1,1)   = fouid
+       !elseif (founam(ifou)=='uva') then                    ! cell-centre velocities components averaged
+       !   founam(ifou)     = 'uxa             '
+       !   founam(ifou+1)     = 'uya             '
+       !   foutyp(ifou)     = 's'
+       !   foutyp(ifou+1)     = 's'
+       !   fouref(ifou,1)   = fouid
+       !   fouref(ifou+1,1)   = fouid
+       !elseif (founam(ifou)=='uv') then                     ! cell-centre velocities, (u,v) (only vectorial here)
+       !   founam(ifou)     = 'u1              '
+       !   founam(ifou+1)     = 'v1              '
+       !   foutyp(ifou)     = 'v'
+       !   foutyp(ifou+1)     = 'v'
+       !   fouref(ifou,1)   = fouid
+       !   fouref(ifou+1,1)   = fouid
        elseif (founam(ifou)=='uc') then                     ! absolute cell-centre velocity magnitude
           founam(ifou)   = 'uc              '
           foutyp(ifou)   = 's'
@@ -520,7 +520,12 @@ module m_fourier_analysis
              goto 6666
           endif
        else                                                 ! constituent, anything else 
-          read (founam(ifou)(2:2), '(i1)') fconno(ifou)
+          read (founam(ifou)(2:2), '(i1)', iostat=iostat) fconno(ifou)
+          if (iostat /= 0) then
+             write (msgbuf, '(a)') 'Unable to initialize fourier analysis for '''//trim(founam(ifou))//'''.'
+             call warn_flush()
+             goto 6666
+          endif
           fconno(ifou) = fconno(ifou) + max(lsal, ltem)
           if (fconno(ifou)>lstsc) then
              write (msgbuf, '(a)') 'Unable to initialize fourier analysis for constituent '''//trim(founam(ifou))//'''.'
