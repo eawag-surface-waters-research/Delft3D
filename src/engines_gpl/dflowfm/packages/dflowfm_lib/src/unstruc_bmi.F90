@@ -1548,7 +1548,7 @@ subroutine get_compound_field(c_var_name, c_item_name, c_field_name, x) bind(C, 
      case("gatedoorheight", "GateHeight")
          x = c_loc(generalstruc(item_index)%gatedoorheight)
          return
-     case("gateheight", "GateLowerEdgeLevel") ! Pending a new naming (in preparation by stout). This 'gateheight' is actually the gate_lower_edge_level
+     case("gateheight", "GateLowerEdgeLevel")
          x = c_loc(zcgen((item_index-1)*3+2))
          return
      case("door_opening_width", "GateOpeningWidth")
@@ -1788,11 +1788,11 @@ subroutine set_compound_field(c_var_name, c_item_name, c_field_name, xptr) bind(
          call c_f_pointer(xptr, x_0d_double_ptr)
          generalstruc(item_index)%gatedoorheight = x_0d_double_ptr ! Not time-controlled, set directly in generalstruc.
          return
-     case("gateheight", "GateLowerEdgeLevel") ! Pending a new naming (in preparation by stout). This 'gateheight' is actually the gate_lower_edge_level
+     case("gateheight", "GateLowerEdgeLevel")
          call c_f_pointer(xptr, x_0d_double_ptr)
          zcgen((item_index-1)*3+2) = x_0d_double_ptr
          return
-     case("door_opening_width", "GateOpeningWidth")
+     case("door_opening_width", "GateOpeningWidth" )
          call c_f_pointer(xptr, x_0d_double_ptr)
          zcgen((item_index-1)*3+3) = x_0d_double_ptr
          return
@@ -1869,29 +1869,29 @@ subroutine get_compound_field_name(c_var_name, c_field_index, c_field_name) bind
   case("pumps")
      select case(field_index)
      case(1)
-         field_name = "capacity"
+        field_name = "capacity"
      end select
   ! WEIRS
   case("weirs")
      select case(field_index)
      case(1)
-         field_name = "CrestLevel"
+        field_name = "CrestLevel"
      case(2)
-         field_name = "lat_contr_coeff"
+        field_name = "lat_contr_coeff"
      end select
   ! GATES
   case("gates")
      select case(field_index)
      case(1)
-         field_name = "CrestLevel"
+        field_name = "CrestLevel"
      case(2)
-         field_name = "GateHeight"
+        field_name = "GateHeight"
      case(3)
-         field_name = "GateLowerEdgeLevel"
+        field_name = "GateLowerEdgeLevel"
      case(4)
-         field_name = "GateOpeningWidth"
+        field_name = "GateOpeningWidth"
      case(5)
-         field_name = "GateOpeningHorizontalDirection"
+        field_name = "GateOpeningHorizontalDirection"
      end select
 
   ! GENERALSTUCTURES
@@ -1902,7 +1902,7 @@ subroutine get_compound_field_name(c_var_name, c_field_index, c_field_name) bind
      case(2)
         field_name = "GateHeight"
      case(3)
-        field_name = "GateLowerEdgeLevel" ! Pending a new naming (in preparation by stout). This 'gateheight' is actually the gate_lower_edge_level
+        field_name = "GateLowerEdgeLevel"
      case(4)
         field_name = "GateOpeningWidth"
      case(5)
@@ -1913,21 +1913,21 @@ subroutine get_compound_field_name(c_var_name, c_field_index, c_field_name) bind
   case("sourcesinks")
      select case(field_index)
      case(1)
-         field_name = "discharge"
+        field_name = "discharge"
      case(2)
-         field_name = "change_in_salinity"
+        field_name = "change_in_salinity"
      case(3)
-         field_name = "change_in_temperature"
+        field_name = "change_in_temperature"
      end select
   ! OBSERVATION STATIONS
   case("observations")
      select case(field_index)
      case(1)
-         field_name = "water_level"
+        field_name = "water_level"
      case(2)
-         field_name = "water_depth"
+        field_name = "water_depth"
      case(3)
-         field_name = "salinity"
+        field_name = "salinity"
      case default
         return
      end select
@@ -1935,13 +1935,13 @@ subroutine get_compound_field_name(c_var_name, c_field_index, c_field_name) bind
   case("crosssections")
      select case(field_index)
      case(1)
-         field_name = "discharge"
+        field_name = "discharge"
      case(2)
-         field_name = "velocity"
+        field_name = "velocity"
      case(3)
-         field_name = "water_level"
+        field_name = "water_level"
      case(4)
-         field_name = "water_depth"
+        field_name = "water_depth"
      case default
         ! TODO: AvD: error to warn for unimplemented feature?
         return
@@ -1949,7 +1949,7 @@ subroutine get_compound_field_name(c_var_name, c_field_index, c_field_name) bind
   case("laterals")
      select case(field_index)
      case(1)
-         field_name = "water_discharge"
+        field_name = "water_discharge"
      case default
         return
      end select
