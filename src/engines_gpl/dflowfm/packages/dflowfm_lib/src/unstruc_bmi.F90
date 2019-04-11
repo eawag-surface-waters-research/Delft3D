@@ -1542,19 +1542,19 @@ subroutine get_compound_field(c_var_name, c_item_name, c_field_name, x) bind(C, 
          return
      endif
      select case(field_name)
-     case("levelcenter")
+     case("levelcenter", "CrestLevel")
          x = c_loc(zcgen((item_index-1)*3+1))
          return
-     case("gatedoorheight")
+     case("gatedoorheight", "GateHeight")
          x = c_loc(generalstruc(item_index)%gatedoorheight)
          return
-     case("gateheight") ! Pending a new naming (in preparation by stout). This 'gateheight' is actually the gate_lower_edge_level
+     case("gateheight", "GateLowerEdgeLevel") ! Pending a new naming (in preparation by stout). This 'gateheight' is actually the gate_lower_edge_level
          x = c_loc(zcgen((item_index-1)*3+2))
          return
-     case("door_opening_width")
+     case("door_opening_width", "GateOpeningWidth")
          x = c_loc(zcgen((item_index-1)*3+3))
          return
-     case("horizontal_opening_direction")
+     case("horizontal_opening_direction", "GateOpeningHorizontalDirection")
          ! TODO: RTC: AvD: get this from gate/genstru params
          return
      end select
@@ -1780,23 +1780,23 @@ subroutine set_compound_field(c_var_name, c_item_name, c_field_name, xptr) bind(
          return
      endif
      select case(field_name)
-     case("levelcenter")
+     case("levelcenter", "CrestLevel")
          call c_f_pointer(xptr, x_0d_double_ptr)
          zcgen((item_index-1)*3+1) = x_0d_double_ptr
          return
-     case("gatedoorheight")
+     case("gatedoorheight", "GateHeight")
          call c_f_pointer(xptr, x_0d_double_ptr)
          generalstruc(item_index)%gatedoorheight = x_0d_double_ptr ! Not time-controlled, set directly in generalstruc.
          return
-     case("gateheight") ! Pending a new naming (in preparation by stout). This 'gateheight' is actually the gate_lower_edge_level
+     case("gateheight", "GateLowerEdgeLevel") ! Pending a new naming (in preparation by stout). This 'gateheight' is actually the gate_lower_edge_level
          call c_f_pointer(xptr, x_0d_double_ptr)
          zcgen((item_index-1)*3+2) = x_0d_double_ptr
          return
-     case("door_opening_width")
+     case("door_opening_width", "GateOpeningWidth")
          call c_f_pointer(xptr, x_0d_double_ptr)
          zcgen((item_index-1)*3+3) = x_0d_double_ptr
          return
-     case("horizontal_opening_direction")
+     case("horizontal_opening_direction", "GateOpeningHorizontalDirection")
          ! TODO: RTC: AvD: get this from gate/genstru params
          return
      end select
@@ -1898,15 +1898,15 @@ subroutine get_compound_field_name(c_var_name, c_field_index, c_field_name) bind
   case("generalstructures")
      select case(field_index)
      case(1)
-        field_name = "levelcenter"
+        field_name = "CrestLevel"
      case(2)
-        field_name = "gatedoorheight"
+        field_name = "GateHeight"
      case(3)
-        field_name = "gateheight" ! Pending a new naming (in preparation by stout). This 'gateheight' is actually the gate_lower_edge_level
+        field_name = "GateLowerEdgeLevel" ! Pending a new naming (in preparation by stout). This 'gateheight' is actually the gate_lower_edge_level
      case(4)
-        field_name = "door_opening_width"
+        field_name = "GateOpeningWidth"
      case(5)
-        field_name = "horizontal_opening_direction"
+        field_name = "GateOpeningHorizontalDirection"
      end select
 
   ! SOURCE-SINKS
