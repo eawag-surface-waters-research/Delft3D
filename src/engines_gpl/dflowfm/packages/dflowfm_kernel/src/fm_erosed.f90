@@ -395,8 +395,8 @@
          blmin = 999999d0   
          do j = 1, gridpoint2cross(nm)%num_cross_sections
             c = gridpoint2cross(nm)%cross(j)
-            cdef => network%crs%cross(c)%tabdef
             if (c == -999) cycle
+            cdef => network%crs%cross(c)%tabdef
             !LL = nd(nm)%ln(j)
             !L = iabs(LL)
             !if (LL < 0) then 
@@ -1971,6 +1971,7 @@ end module m_fm_update_crosssections
           k1 = pnod%gridnumber
           do j=1,nd(k1)%lnx
              L = iabs(nd(k1)%ln(j))
+             Ldir = sign(1,nd(k1)%ln(j))
              !
              wb1d = wu_mor(L)
              do ised = 1, lsedtot
