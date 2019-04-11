@@ -2610,8 +2610,12 @@ if (npump > 0) then
          ! just use the first link of the the structure (the network%sts%struct(istrtmp)%link_number  is not used in computations)
          if (L1pumpsg(n) <= L2pumpsg(n)) then
             istrtmp = hashsearch(network%sts%hashlist_pump, strid)
+            if (istrtmp == -1) then
+               k = L1pumpsg(n)
+               istrtmp   = addStructure(network%sts, kpump(1,k), kpump(2,k), iabs(kpump(3,k)), -1, "", strid, istrtype)
+               call readPump(network%sts%struct(istrtmp)%pump, str_ptr, success)
+            endif
          endif
-         
       end if
       
       ! mapping for qpump array
