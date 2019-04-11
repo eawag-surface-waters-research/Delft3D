@@ -459,6 +459,30 @@ subroutine basename(filename, filebase, filecat)
 end subroutine basename
 
 
+!> Resolves an input path (typically a file path) to its
+!! actual location. This routine selects whether the path
+!! needs to be resolved relative to a given basedir, or
+!! relative to the MDU current working dir.
+!! If inpath is absolute, then that path is returned unchanged.
+subroutine resolvePath(inpath, basedir, outpath)
+use system_utils, only: is_abs, cat_filename
+use unstruc_model, only: md_paths_relto_parent
+character(len=*), intent(in   ) :: inpath  !< Input path
+character(len=*), intent(in   ) :: basedir !< Basedir w.r.t. which the input path *might* be resolved, depending on PathsRelativeToParent setting.
+character(len=*), intent(  out) :: outpath !< Resolved path
+
+character(len=len_trim(inpath)+len_trim(basedir)+1) :: tmppath
+
+if (is_abs(inpath) .or. md_paths_relto_parent == 0) then
+   outpath = inpath
+else
+   if (md_paths_relto_parent > 0) then
+      tmppath = cat_filename(basedir, inpath)
+      outpath = tmppath
+   end if
+end if
+end subroutine resolvePath
+
 end module unstruc_files
 
 !>

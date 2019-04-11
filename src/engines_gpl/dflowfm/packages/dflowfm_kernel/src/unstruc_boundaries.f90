@@ -55,6 +55,8 @@ subroutine findexternalboundarypoints()             ! find external boundary poi
  use m_sobekdfm
  use m_sediment
  use m_partitioninfo
+ use system_utils, only: split_filename
+ use unstruc_files, only: resolvePath
 
  implicit none
 
@@ -91,6 +93,7 @@ subroutine findexternalboundarypoints()             ! find external boundary poi
        end if
 
        call oldfil(mext,md_extfile)
+       call split_filename(md_extfile, md_extfile_dir, filename) ! Remember base dir for this ext file
        ja_ext_force = 1
     else
        call qnerror( 'External forcing file '''//trim(md_extfile)//''' not found.', '  ', ' ')
@@ -232,6 +235,7 @@ subroutine findexternalboundarypoints()             ! find external boundary poi
  do while (ja_ext_force .eq. 1)                      ! read *.ext file
 
     call readprovider(mext,qid,filename,filetype,method,operand,transformcoef,ja_ext_force,varname)
+    call resolvePath(filename, md_extfile_dir, filename)
     
     if (num_bc_ini_blocks > 0 .and. qid(len_trim(qid)-2:len_trim(qid)) == 'bnd') then
        write(msgbuf, '(a)') 'Boundaries in BOTH external forcing and bound.ext.force file is not allowed'
@@ -269,6 +273,8 @@ subroutine readlocationfilesfromboundaryblocks(filename, filetype, nx, kce, num_
  use tree_structures
  use messageHandling
  use m_flowgeom, only: rrtol
+ use system_utils
+ use unstruc_files, only: resolvePath
 
  implicit none
 
@@ -295,6 +301,7 @@ subroutine readlocationfilesfromboundaryblocks(filename, filetype, nx, kce, num_
  logical                      :: file_ok             !
  logical                      :: group_ok            !
  logical                      :: property_ok         !
+ character(len=256)           :: basedir, fnam
 
  call tree_create(trim(filename), bnd_ptr)
  call prop_file('ini',trim(filename),bnd_ptr,istat)
@@ -302,6 +309,8 @@ subroutine readlocationfilesfromboundaryblocks(filename, filetype, nx, kce, num_
      call qnerror( 'Boundary external forcing file ', trim(filename), ' could not be read' )
      return
  end if
+
+ call split_filename(filename, basedir, fnam) ! Remember base dir of input file, to resolve all refenced files below w.r.t. that base dir.
 
  num_items_in_file = 0
  if (associated(bnd_ptr%child_nodes)) then
@@ -329,14 +338,18 @@ subroutine readlocationfilesfromboundaryblocks(filename, filetype, nx, kce, num_
        group_ok = group_ok .and. property_ok
        
        call prop_get_string(node_ptr, '', 'locationfile', locationfile, property_ok)
-       if (.not. property_ok)  then
+       if (property_ok)  then
+          call resolvePath(locationfile, basedir, locationfile)
+       else
           call qnerror( 'Expected property' , 'locationfile', ' for boundary definition' )
        end if
        
        group_ok = group_ok .and. property_ok
        
        call prop_get_string(node_ptr, '', 'forcingfile ', forcingfile , property_ok)
-       if (.not. property_ok)  then
+       if (property_ok)  then
+          call resolvePath(forcingfile, basedir, forcingfile)
+       else
           call qnerror( 'Expected property' , 'forcingfile', ' for boundary definition' )
        end if
 
@@ -856,6 +869,8 @@ logical function initboundaryblocksforcings(filename)
  use m_meteo, only: ec_addtimespacerelation
  use timespace
  use string_module, only: str_tolower
+ use system_utils
+ use unstruc_files, only: resolvePath
 
 
  implicit none
@@ -884,6 +899,7 @@ logical function initboundaryblocksforcings(filename)
  character(len=ini_value_len) :: locid
  character(len=ini_value_len) :: itemtype
  character(len=256)           :: fnam
+ character(len=256)           :: basedir
  double precision             :: tmpval
  integer                      :: iostat, ierr
  integer                      :: ilattype
@@ -902,6 +918,8 @@ logical function initboundaryblocksforcings(filename)
  call tree_create(trim(filename), bnd_ptr)
  call prop_file('ini',trim(filename),bnd_ptr,istat)
  call init_registered_items()
+
+ call split_filename(filename, basedir, fnam) ! Remember base dir of input file, to resolve all refenced files below w.r.t. that base dir.
 
  num_items_in_file = 0
  if (associated(bnd_ptr%child_nodes)) then
@@ -925,7 +943,9 @@ logical function initboundaryblocksforcings(filename)
        end if
 
        call prop_get_string(node_ptr, '', 'locationfile', locationfile, retVal)
-       if (.not. retVal) then
+       if (retVal) then
+          call resolvePath(locationfile, basedir, locationfile)
+       else
           initboundaryblocksforcings = .false.
           write(msgbuf, '(5a)') 'Incomplete block in file ''', trim(filename), ''': [', trim(groupname), ']. Field ''locationfile'' is missing.'
           call warn_flush()
@@ -933,7 +953,9 @@ logical function initboundaryblocksforcings(filename)
        end if
 
        call prop_get_string(node_ptr, '', 'forcingfile ', forcingfile , retVal)
-       if (.not. retVal) then
+       if (retVal) then
+          call resolvePath(forcingfile, basedir, forcingfile)
+       else
           initboundaryblocksforcings = .false.
           write(msgbuf, '(5a)') 'Incomplete block in file ''', trim(filename), ''': [', trim(groupname), ']. Field ''forcingfile'' is missing.'
           call warn_flush()
@@ -957,8 +979,10 @@ logical function initboundaryblocksforcings(filename)
                 quantity = property_value ! We already knew this
              else if (property_name == 'locationfile') then
                 locationfile = property_value ! We already knew this
+                call resolvePath(locationfile, basedir, locationfile)
              else if (property_name == 'forcingfile') then
                 forcingfile = property_value
+                call resolvePath(forcingfile, basedir, forcingfile)
                 oper = 'O'
                 if (quantity_pli_combination_is_registered(quantity, locationfile)) then
                    oper = '+'
@@ -1024,6 +1048,8 @@ logical function initboundaryblocksforcings(filename)
           write(msgbuf, '(a,a,a)') 'Required field ''LocationFile'' missing in lateral ''', trim(locid), '''.'
           call warn_flush()
           cycle
+       else
+          call resolvePath(locationfile, basedir, locationfile)
        end if
        
        ! TODO: AvD: support NodeIds instead of LocationFile
@@ -1079,6 +1105,8 @@ logical function initboundaryblocksforcings(filename)
           write(msgbuf, '(5a)') 'Incomplete block in file ''', trim(filename), ''': [', trim(groupname), ']. Field ''forcingfile'' is missing.'
           call warn_flush()
           cycle
+       else
+          call resolvePath(forcingfile, basedir, forcingfile)
        end if
        
        select case (quantity)
@@ -1665,6 +1693,8 @@ use m_readstructures
 use m_sferic
 use geometry_module
 USE gridoperations, only: incells
+use unstruc_model, only: md_structurefile_dir
+use unstruc_files, only: resolvePath
  
 implicit none
 character(len=256)            :: plifile
@@ -1793,6 +1823,8 @@ do i=1,nstr
          write(msgbuf, '(a,a,a)') 'Required field ''polylinefile'' missing in '//trim(strtype)//' ''', trim(strid), '''.'
          call warn_flush()
          cycle
+      else
+         call resolvePath(plifile, md_structurefile_dir, plifile)
       end if
    endif
    select case (strtype)
@@ -2016,7 +2048,8 @@ end do
       cgen_ids(n) = strid
 
       plifile = ' '
-      call prop_get_string(str_ptr, '', 'polylinefile', plifile, success)
+      call prop_get_string(str_ptr, '', 'polylinefile', plifile, success) ! TODO: Remove? This plifile is nowhere used below
+      call resolvePath(plifile, md_structurefile_dir, plifile)
 
       ! Start with some general structure default params, and thereafter, make changes depending on actual strtype
       if (strtype /= 'generalstructure') then
@@ -2072,6 +2105,7 @@ end do
             else
                qid = 'generalstructure' ! TODO: werkt dit als je de losse quantities (crest/gateloweredge/width) dezelfde id geeft, maar wel netjes correct veschillende offset?
                fnam = trim(rec)
+               call resolvePath(fnam, md_structurefile_dir, fnam)
                ! Time-interpolated value will be placed in zcgen((n-1)*3+1) when calling ec_gettimespacevalue.
                if (index(trim(fnam)//'|','.tim|')>0) then 
                   success  = ec_addtimespacerelation(qid, xdum, ydum, kdum, 1, fnam, uniform, spaceandtime, 'O', targetIndex=(n-1)*kx+1) ! Hook up 1 component at a time, even when target element set has kx=3
@@ -2128,6 +2162,7 @@ end do
             else
                qid = 'generalstructure'
                fnam = trim(rec)
+               call resolvePath(fnam, md_structurefile_dir, fnam)
                ! Time-interpolated value will be placed in zcgen((n-1)*3+1) when calling ec_gettimespacevalue.
                if (index(trim(fnam)//'|','.tim|')>0) then 
                   success  = ec_addtimespacerelation(qid, xdum, ydum, kdum, 1, fnam, uniform, spaceandtime, 'O', targetIndex=(n-1)*kx+1) ! Hook up 1 component at a time, even when target element set has kx=3
@@ -2186,6 +2221,7 @@ end do
             else
                qid = 'generalstructure'
                fnam = trim(rec)
+               call resolvePath(fnam, md_structurefile_dir, fnam)
                ! Time-interpolated value will be placed in zcgen((n-1)*3+2) when calling ec_gettimespacevalue.
                if (index(trim(fnam)//'|','.tim|')>0) then 
                    success  = ec_addtimespacerelation(qid, xdum, ydum, kdum, 1, fnam, uniform, spaceandtime, 'O', targetIndex=(n-1)*kx+2) ! Hook up 1 component at a time, even when target element set has kx=3
@@ -2221,6 +2257,7 @@ end do
                else
                   qid = 'generalstructure' ! todo: check met Hermans gatewidth, if any
                   fnam = trim(rec)
+                  call resolvePath(fnam, md_structurefile_dir, fnam)
                   ! Time-interpolated value will be placed in zcgen((n-1)*3+3) when calling ec_gettimespacevalue.
                   if (index(trim(fnam)//'|','.tim|')>0) then 
                       success  = ec_addtimespacerelation(qid, xdum, ydum, kdum, 1, fnam, uniform, spaceandtime, 'O', targetIndex=(n-1)*kx+3) ! Hook up 1 component at a time, even when target element set has kx=3
@@ -2303,6 +2340,7 @@ end do
                      ! Time-interpolated value will be placed in zcgen((n-1)*3+...) when calling ec_gettimespacevalue.
                      qid = 'generalstructure'
                      fnam = trim(rec)
+                     call resolvePath(fnam, md_structurefile_dir, fnam)
                      if (index(trim(fnam)//'|','.tim|')>0) then 
                          success  = ec_addtimespacerelation(qid, xdum, ydum, kdum, 1, fnam, uniform, spaceandtime, 'O', targetIndex=(n-1)*kx+ifld) ! Hook up 1 component at a time, even when target element set has kx=3
                      endif 
@@ -2380,7 +2418,8 @@ if (ngate > 0) then ! Old-style controllable gateloweredgelevel
       gate_ids(n) = strid
 
       plifile = ' '
-      call prop_get_string(str_ptr, '', 'polylinefile', plifile, success)
+      call prop_get_string(str_ptr, '', 'polylinefile', plifile, success) ! TODO: Remove? This plifile is nowhere used below
+      call resolvePath(plifile, md_structurefile_dir, plifile)
 
       rec = ' '
       call prop_get(str_ptr, '', 'GateLowerEdgeLevel', rec, success)
@@ -2403,6 +2442,7 @@ if (ngate > 0) then ! Old-style controllable gateloweredgelevel
          else
             qid = 'gateloweredgelevel'
             fnam = trim(rec)
+            call resolvePath(fnam, md_structurefile_dir, fnam)
             if (index(trim(fnam)//'|','.tim|')>0) then 
                ! Time-interpolated value will be placed in zgate(n) when calling ec_gettimespacevalue.
                success  = ec_addtimespacerelation(qid, xdum, ydum, kdum, kx, fnam, uniform, spaceandtime, 'O', targetIndex=n)
@@ -2455,7 +2495,8 @@ if (ncdamsg > 0) then ! Old-style controllable damlevel
       cdam_ids(n) = strid
 
       plifile = ' '
-      call prop_get_string(str_ptr, '', 'polylinefile', plifile)
+      call prop_get_string(str_ptr, '', 'polylinefile', plifile) ! TODO: Remove? This plifile is nowhere used below
+      call resolvePath(plifile, md_structurefile_dir, plifile)
 
       rec = ' '
       call prop_get(str_ptr, '', 'crest_level', rec)
@@ -2469,6 +2510,7 @@ if (ncdamsg > 0) then ! Old-style controllable damlevel
          else
             qid = 'damlevel'
             fnam = trim(rec)
+            call resolvePath(fnam, md_structurefile_dir, fnam)
             if (index(trim(fnam)//'|','.tim|')>0) then 
                ! Time-interpolated value will be placed in zcdam(n) when calling ec_gettimespacevalue.
                success  = ec_addtimespacerelation(qid, xdum, ydum, kdum, kx, fnam, uniform, spaceandtime, 'O', targetIndex=n)
@@ -2571,7 +2613,8 @@ if (npump > 0) then
       if (.not. success) then ! Original pump code, with only a capacity.
 
          plifile = ' '
-         call prop_get_string(str_ptr, '', 'polylinefile', plifile)
+         call prop_get_string(str_ptr, '', 'polylinefile', plifile) ! TODO: Remove? This plifile is nowhere used below
+         call resolvePath(plifile, md_structurefile_dir, plifile)
 
          rec = ' '
          call prop_get(str_ptr, '', 'capacity', rec)
@@ -2585,6 +2628,7 @@ if (npump > 0) then
             else
                qid = 'pump'
                fnam = trim(rec)
+               call resolvePath(fnam, md_structurefile_dir, fnam)
                if (index(trim(fnam)//'|','.tim|')>0) then
                   ! Time-interpolated value will be placed in qpump(n) when calling ec_gettimespacevalue.
                   success  = ec_addtimespacerelation(qid, xdum, ydum, kdum, kx, fnam, uniform, spaceandtime, 'O', targetIndex=n) 

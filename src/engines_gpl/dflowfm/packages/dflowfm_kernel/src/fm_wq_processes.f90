@@ -535,6 +535,7 @@
    use dfm_error
    use processes_input
    use m_fm_wq_processes
+   use unstruc_files, only: resolvePath
 
    implicit none
    integer, intent (out)         :: iresult
@@ -565,6 +566,7 @@
          call delpol()                                    ! remove a possibly existing polygon
          call readprovider(mext,qid,filename,filetype,method,operand,transformcoef,ja,sourcemask)
          if (ja == 1) then
+            call resolvePath(filename, md_extfile_dir, filename)
             call mess(LEVEL_INFO, 'External Forcing or Initialising '''//trim(qid)//''' from file '''//trim(filename)//'''.')
             ! Initialize success to be .false.
             success = .false.

@@ -30934,6 +30934,7 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
  use m_flow
  use m_netw !  only : xk, yk, zk
  use m_missing
+ use unstruc_files, only: resolvePath
 
  use unstruc_netcdf
  implicit none
@@ -31008,6 +31009,7 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
        call delpol()                                    ! ook jammer dan
        call readprovider(mext,qid,filename,filetype,method,operand,transformcoef,ja,varname)
        if (ja == 1) then
+          call resolvePath(filename, md_extfile_dir, filename)
           if (qid == 'bedlevel1D') then
              call mess(LEVEL_INFO, 'setbedlevelfromextfile: Setting bedlevel1D from file '''//trim(filename)//'''.')
              kc(1:mx) = kc1D
@@ -36447,7 +36449,7 @@ end function is_1d_boundary_candidate
  use m_netw
  use unstruc_model
  use unstruc_messages
- use unstruc_files
+ use unstruc_files, only: resolvePath, basename
  use timespace
  use m_missing
  use m_ship
@@ -37177,6 +37179,8 @@ if (mext > 0) then
     maxSearchRadius = -1
     call readprovider(mext,qid,filename,filetype,method,operand,transformcoef,ja,varname,sourcemask,maxSearchRadius)
     if (ja == 1) then
+        call resolvePath(filename, md_extfile_dir, filename)
+
         call mess(LEVEL_INFO, 'External Forcing or Initialising '''//trim(qid)//''' from file '''//trim(filename)//'''.')
         ! Initialize success to be .false.
         success = .false.
@@ -38067,6 +38071,7 @@ if (mext > 0) then
     do while (ja .eq. 1)                             ! for gates again postponed read *.ext file
        call readprovider(mext,qid,filename,filetype,method,operand,transformcoef,ja,varname)
        if (ja == 1 .and. qid == 'gateloweredgelevel') then
+          call resolvePath(filename, md_extfile_dir, filename)
           ngatesg = ngatesg + 1
           ! Prepare time series relation, if the .pli file has an associated .tim file.
           L = index(filename,'.', back=.true.) - 1
@@ -38125,6 +38130,7 @@ if (mext > 0) then
     do while (ja .eq. 1)                             ! for cdams again postponed read *.ext file
        call readprovider(mext,qid,filename,filetype,method,operand,transformcoef,ja,varname)
        if (ja == 1 .and. qid == 'damlevel') then
+          call resolvePath(filename, md_extfile_dir, filename)
           ncdamsg = ncdamsg + 1
           ! Prepare time series relation, if the .pli file has an associated .tim file.
           L = index(filename,'.', back=.true.) - 1
@@ -38167,6 +38173,7 @@ if (mext > 0) then
     do while (ja .eq. 1)                             ! for cdams again postponed read *.ext file
        call readprovider(mext,qid,filename,filetype,method,operand,transformcoef,ja,varname)
        if (ja == 1 .and. qid(1:16) == 'lateraldischarge') then
+          call resolvePath(filename, md_extfile_dir, filename)
           numlatsg = numlatsg + 1
 
           L = index(filename,'.', back=.true.) - 1
@@ -38254,6 +38261,7 @@ if (mext > 0) then
     do while (ja .eq. 1)                             ! for cgens again postponed read *.ext file
        call readprovider(mext,qid,filename,filetype,method,operand,transformcoef,ja,varname)
        if (ja == 1 .and. qid == 'generalstructure') then
+          call resolvePath(filename, md_extfile_dir, filename)
           ncgensg = ncgensg + 1
           ! Prepare time series relation, if the .pli file has an associated .tim file.
           L = index(filename,'.', back=.true.) - 1
@@ -38340,6 +38348,7 @@ if (mext > 0) then
     do while (ja .eq. 1)                             ! for pumps again postponed read *.ext file
        call readprovider(mext,qid,filename,filetype,method,operand,transformcoef,ja,varname)
        if (ja == 1 .and. ( qid == 'pump1D' .or. qid == 'pump') ) then
+          call resolvePath(filename, md_extfile_dir, filename)
           qid = 'pump'
           npumpsg = npumpsg + 1
           success = ec_addtimespacerelation(qid, xpump, ypump, kdp, kx, filename, filetype, method, operand, xy2pump, targetIndex=npumpsg)
@@ -38362,6 +38371,7 @@ if (mext > 0) then
     do while (ja .eq. 1)                                 ! for sorsin again read *.ext file
        call readprovider(mext,qid,filename,filetype,method,operand,transformcoef,ja,varname)
        if (ja == 1 .and. qid == 'discharge_salinity_temperature_sorsin') then
+          call resolvePath(filename, md_extfile_dir, filename)
 
           numsrc = numsrc + 1
           ! 2. Prepare time series relation, if the .pli file has an associated .tim file.

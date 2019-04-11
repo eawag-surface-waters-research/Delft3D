@@ -78,6 +78,7 @@ implicit none
 
     character(len=4)   :: md_tunit         = ' ' !< Unit of tstart_user and tstop_user (only for read and write, while running these are always in seconds).
 
+    integer            :: md_paths_relto_parent = 0 !< Option whether or not (1/0) to resolve filenames (e.g. inside the *.ext file) w.r.t. their direct parent, instead of the toplevel MDU working dir. (UNST-1144)
     type(t_filenames)  :: md_1dfiles
     character(len=255) :: md_netfile       = ' ' !< Net definition                    (e.g., *_net.nc)
     character(len=255) :: md_flowgeomfile  = ' ' !< Storing flow geometry (output)    (e.g., *_flowgeom.nc)
@@ -105,8 +106,11 @@ implicit none
 
     character(len=255) :: md_extfile       = ' ' !< External forcing specification file (e.g., *.ext)
     character(len=255) :: md_extfile_new   = ' ' !< External forcing specification file new style (bct format), (e.g., *.ext)
+    character(len=255) :: md_extfile_dir   = ' ' !< Directory containing the old-style external forcing specification file (e.g., *.ext) (relative to MDU/current working dir)
+    
 
     character(len=255) :: md_structurefile = ' ' !< Structure file, (e.g., *.ini)
+    character(len=255) :: md_structurefile_dir = ' ' !< Directory containing the structure file (e.g., *.ini) (relative to MDU/current working dir).
 
     character(len=255) :: md_wavefile      = ' ' !< File containing wave input (e.g., *_wave.nc)
     character(len=255) :: md_surfbeatfile      = ' ' !< File containing surfbeat input (e.g., params.txt)
@@ -243,6 +247,8 @@ use unstruc_channel_flow
 
     md_specific = ' '
 
+    md_paths_relto_parent = 0
+
     md_netfile = ' '
     md_1dfiles%onednetwork = ' '
     md_flowgeomfile = ' '
@@ -265,7 +271,9 @@ use unstruc_channel_flow
     md_restartfile = ' '
     md_extfile = ' '
     md_extfile_new  = ' '
+    md_extfile_dir = ' '
     md_structurefile = ' '
+    md_structurefile_dir = ' '
     md_wavefile = ' '
     md_surfbeatfile = ' '
 
@@ -606,6 +614,8 @@ subroutine readMDUFile(filename, istat)
     use unstruc_version_module
     use dfm_error
     use MessageHandling
+    use system_utils, only: split_filename
+
 
     use m_sediment
     use m_waves, only: hwavuni, twavuni, phiwavuni
@@ -620,7 +630,7 @@ subroutine readMDUFile(filename, istat)
     character(len=1),dimension(1) :: dummychar
     logical :: dummylog
     character(len=1000) :: charbuf = ' '
-    character(len=255) :: tmpstr
+    character(len=255) :: tmpstr, fnam
     integer :: ibuf, ifil, mptfile, warn
     integer :: i, n, j, je, iostat, readerr, ierror
     integer :: jadum
@@ -690,6 +700,7 @@ subroutine readMDUFile(filename, istat)
 
    call prop_get_integer(md_ptr, 'model', 'AutoStart',  md_jaAutoStart)
    call prop_get_string(md_ptr,  'model', 'ModelSpecific',  md_specific)
+   call prop_get_integer(md_ptr,  'model', 'PathsRelativeToParent',  md_paths_relto_parent)
 
 ! Geometry
     call prop_get_string ( md_ptr, 'geometry', 'OneDNetworkFile',  md_1dfiles%onednetwork,               success)
@@ -1689,6 +1700,9 @@ subroutine readMDUFile(filename, istat)
    if (len_trim(md_structurefile) > 0) then
       call strsplit(md_structurefile,1,fnames,1)
       do ifil=1,size(fnames)
+         ! TODO: UNST-2452: support multiple structurefile basedirs
+         call split_filename(fnames(ifil), md_structurefile_dir, fnam) ! Remember base dir for this structures.ini file
+
          ! TODO: AvD: here we should actually filter out the [structure] blocks only, others may be in the file too
          call prop_file('ini',fnames(ifil),strs_ptr,istat)
          if (istat /= 0) then
@@ -1704,6 +1718,7 @@ subroutine readMDUFile(filename, istat)
       do i = 1,n
          select case (trim(tree_get_name( md_ptr%child_nodes(i)%node_ptr )))
          case ('structure')
+            ! TODO: UNST-2452: support multiple structures in MDU with their own basedir (or not?)
             call tree_add_node(strs_ptr, md_ptr%child_nodes(i)%node_ptr, ierror)
             if (ierror /= 0) then
                write(msgbuf, '(a,i0,a)') 'Failed to add element #', i, ' to list of structures.'
@@ -1986,6 +2001,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     call prop_set(prop_ptr, 'model', 'MDUFormatVersion', trim(tmpstr), 'File format version (do not edit this)')
     call prop_set(prop_ptr, 'model', 'AutoStart', md_jaAutoStart,      'Autostart simulation after loading MDU (0: no, 1: autostart, 2: autostartstop)')
     call prop_set(prop_ptr, 'model', 'ModelSpecific',  md_specific,    'Optional ''model specific ID'', to enable certain custom runtime function calls (instead of via MDU name).')
+    call prop_set(prop_ptr, 'model', 'PathsRelativeToParent',  md_paths_relto_parent, 'Default: 0. Whether or not (1/0) to resolve file names (e.g. inside the *.ext file) relative to their direct parent, instead of to the toplevel MDU working dir.')
 
 
 ! Geometry
