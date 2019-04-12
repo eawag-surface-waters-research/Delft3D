@@ -3550,8 +3550,7 @@ function ug_create_1d_network(ncid, netids, networkName, nNodes, nBranches,nGeom
    !4. Geometry
    ierr = nf90_def_var(ncid, prefix//'_geometry', nf90_int, netids%varids(ntid_1dgeometry))
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dgeometry), 'geometry_type', 'multiline')
-   ierr = nf90_put_att(ncid, netids%varids(ntid_1dgeometry), 'node_count', 'n'//prefix//'_geometry')
-   ierr = nf90_put_att(ncid, netids%varids(ntid_1dgeometry), 'part_node_count', prefix//'_part_node_count')
+   ierr = nf90_put_att(ncid, netids%varids(ntid_1dgeometry), 'node_count', prefix//'_node_count')
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dgeometry), 'node_coordinates', prefix//'_geom_x '//prefix//'_geom_y')
    !4. Geometry: number of geometry points per each branch
    ierr = nf90_def_var(ncid, prefix//'_node_count', nf90_int, (/ netids%dimids(ntdim_1dbranches) /) , netids%varids(ntid_1dgeopointsperbranch))
