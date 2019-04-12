@@ -624,6 +624,8 @@ src/engines_gpl/dflowfm/tests/test_data/2d_ugrid_net.nc -text
 src/engines_gpl/dflowfm/tests/test_data/rectangular_mesh.mdu -text
 src/engines_gpl/dflowfm/tests/test_data/testPolygon.pol -text
 src/engines_gpl/dimr/Makefile.am -text
+src/engines_gpl/dimr/doc/DimrAndBMIDesign_v03.docx -text
+src/engines_gpl/dimr/doc/classDiagramDimr.pdf -text
 src/engines_gpl/dimr/doc/use_dimr_dll_example.c -text
 src/engines_gpl/dimr/packages/DimrTesting/DimrDllNative.cs -text
 src/engines_gpl/dimr/packages/DimrTesting/DimrTesting.csproj -text
