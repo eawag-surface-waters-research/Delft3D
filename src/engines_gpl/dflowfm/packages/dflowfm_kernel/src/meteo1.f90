@@ -47,6 +47,7 @@ module timespace_parameters
   integer, parameter :: triangulation                  =  7  ! 1 veld per tijdstap                    triang
   integer, parameter :: triangulationmagdir            =  8  ! 2 velden u,v per tijdstap 3 dim array  triang, vectormax = 2
                                                              ! op basis van windreeksen op stations mag/dir
+  integer, parameter :: node_id                        = -1  ! for a reference to a node ID
   integer, parameter :: poly_tim                       =  9  ! for line oriented bnd conditions, refs to uniform, fourier or harmonic
   integer, parameter :: inside_polygon                 = 10  ! Constant value inside polygon, used for initial fields.
   integer, parameter :: ncgrid                         = 11  ! NetCDF grid, rectangular type as arcinfo  
@@ -177,6 +178,8 @@ module m_meteo
    integer, target :: item_nudge_tem                                         !< 3D temperature for nudging
    integer, target :: item_nudge_sal                                         !< 3D salinity for nudging
    integer, target :: item_dambreakLevelsAndWidthsFromTable                  !< Dambreak heights and widths
+
+   integer, allocatable, dimension(:) :: countbndpoints(:) 
    !
    integer :: n_qhbnd !< Number of already connected qh-boundaries.
    
@@ -313,6 +316,8 @@ module m_meteo
          case (ncflow)              ! 12
             ec_filetype = provFile_undefined ! only used for timespaceinitialfield, no EC yet.
          case (bcascii)             ! 17
+            ec_filetype = provFile_bc
+         case (node_id)             ! -1
             ec_filetype = provFile_bc
          case (fourier)             ! 101
             ec_filetype = provFile_fourier
@@ -758,6 +763,7 @@ module m_meteo
       use m_sferic, only: jsferic
       use m_missing, only: dmiss
       use m_flowtimes, only: refdate_mjd
+      use string_module, only: str_upper
 
       character(len=*),                         intent(inout) :: name         !< Name for the target Quantity, possibly compounded with a tracer name.
       real(hp), dimension(:),                   intent(in)    :: x            !< Array of x-coordinates for the target ElementSet.
@@ -782,7 +788,7 @@ module m_meteo
       character(len=*),       optional,         intent(in)    :: varname         !< variable name within filename
       real(hp),               optional,         intent(in)    :: maxSearchRadius !< max search radius in case method==11
       !
-      integer :: ec_filetype !< EC-module's provFile_ enumeration.
+      integer :: ec_filetype !< EC-module's   enumeration.
       integer :: ec_convtype !< EC-module's convType_ enumeration.
       integer :: ec_method   !< EC-module's interpolate_ enumeration.
       integer :: ec_operand  !< EC-module's operand_ enumeration.
@@ -1087,6 +1093,9 @@ module m_meteo
          end if
       case default
          success = initializeConverter(ecInstancePtr, converterId, ec_convtype, ec_operand, ec_method)
+         if (present(targetindex)) then
+            success = ecSetConverterElement(ecInstancePtr, converterId, targetindex)
+         end if
       end select
       
       if (.not. success) then
@@ -1156,11 +1165,16 @@ module m_meteo
                'neumannbnd', 'riemannbnd', 'absgenbnd', 'outflowbnd',                      &
                'temperaturebnd', 'sedimentbnd', 'tangentialvelocitybnd', 'uxuyadvectionvelocitybnd', & 
                'normalvelocitybnd', 'qhbnd','criticaloutflowbnd','weiroutflowbnd', 'sedfracbnd')    !JRE DEBUG sedfrac
-            if (.not. checkFileType(ec_filetype, provFile_poly_tim, target_name)) then
+            if ( (.not. checkFileType(ec_filetype, provFile_poly_tim, target_name)) .and.            &  
+                 (.not. checkFileType(ec_filetype, provFile_bc, target_name))  ) then
                return
             end if
-            ! the file reader will have created an item called 'polytim_item'
+            if (ec_filetype == provFile_poly_tim) then
             sourceItemName = 'polytim_item'
+            else if (ec_filetype == provFile_bc) then
+               sourceItemName = name
+               call str_upper(sourceItemName)
+            end if
          case ('rainfall')
             ! the name of the source item depends on the file reader
             if (ec_filetype == provFile_uniform) then
@@ -1535,6 +1549,7 @@ module m_meteo
             endif
          endif
       end if
+      
       success = ecSetConnectionIndexWeights(ecInstancePtr, connectionId)
             
       if ( target_name=='nudge_salinity_temperature' ) then
@@ -7161,6 +7176,7 @@ contains
    subroutine selectelset( filename, filetype, x, y, xyen, kc, mnx, ki, num, usemask, rrtolrel)
      
      use MessageHandling
+     use m_inquire_flowgeom
      use geometry_module, only: cross
      use m_missing, only: dmiss
      use m_sferic, only: jsferic
@@ -7190,6 +7206,7 @@ contains
      double precision                :: wL, wR
      integer                         :: kL, kR, minp, ns, m
      integer                         :: JACROS
+     integer                         :: ierr
      double precision                :: SL,SM,XCR,YCR,CRP
    
      num = 0
@@ -7240,6 +7257,25 @@ contains
         call msg_flush()
 
         deallocate(xs, ys, kcs)
+        
+     elseif (filetype == node_id) then
+        
+        ierr = findlink_by_nodeid(filename, m)
+        if (m==0) then
+           errormessage = 'Unknown node id: '// trim(filename)
+           return
+        endif
+        
+        if (usemask .and. kc(m) .eq. -1 ) then
+           errormessage = 'Boundary location already claimed; Overlap with other bnds?'
+           return
+        else
+           num     =  num + 1
+           ki(num) =  m
+           if (usemask) then ! If we don't use the mask, also don't administer this opened bnd location (e.g. for salinitybnd)
+              kc(m)   = -1                ! this tells you this point is already claimed by some bnd
+           end if
+        end if
         
      end if
    end subroutine selectelset
@@ -7309,8 +7345,8 @@ contains
      endif            
      
      if (ierr /= 0) then
-        call setmessage( LEVEL_WARN, 'Internal error while intersecting flow links for '//trim(filename)//'. The number of found links exceeds the available positions.')
-        call setmessage( -LEVEL_WARN, 'The contents of this polyline is ignored.')
+        call setmessage( LEVEL_WARN, 'Internal error while reading '//trim(filename)//'. The number of found links exceeds the available positions.')
+        call setmessage( -LEVEL_WARN, 'The contents of this polygon is ignored.')
         numg = 0
      endif
      

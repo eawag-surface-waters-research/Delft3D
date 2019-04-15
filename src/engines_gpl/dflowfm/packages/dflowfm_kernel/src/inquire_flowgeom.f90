@@ -37,6 +37,7 @@ module m_inquire_flowgeom
 
    public findlink !< find flowlink number
    public findnode !< find flownode number
+   public findlink_by_nodeid       !< find the flow link number, using node id
    
    interface findlink
       module procedure findlink_by_pli          !< find the flow link number, using a polyline
@@ -216,6 +217,46 @@ module m_inquire_flowgeom
 
    end function findlink_by_branchid
 
+   !> find the flow link number, using node id
+   function findlink_by_nodeid(nodeId, L)  result(ierr)
+      use dfm_error
+      use messagehandling
+      use m_hash_search
+      use unstruc_channel_flow
+      use m_branch
+      
+      integer                             :: ierr
+      character(len=Idlen), intent(in   ) :: nodeId          !< Id of the connection node
+      integer,              intent(  out) :: L               !< Found link number, -1 when not found.
+      
+      integer :: nodeindex
+      integer :: ibr, branch_count
+      type(t_branch), pointer :: pbranch
+      ierr = DFM_NOERR
+      L = -1
+      nodeindex = hashsearch(network%nds%hashlist, nodeId)
+      
+      branch_count = network%brs%Count
+      do ibr = 1, branch_count
+         pbranch => network%brs%branch(ibr)
+         if (pbranch%fromnode%index == nodeindex) then
+            if (L == -1) then
+               L = pbranch%lin(1)
+            else
+               ierr = -1
+               return
+            endif
+         elseif (pbranch%tonode%index == nodeindex) then
+            if (L == -1) then
+               L = pbranch%lin(pbranch%uPointsCount)
+            else
+               ierr = -1
+               return
+            endif
+         endif
+      enddo
+      
+   end function findlink_by_nodeid        
 
    !> Find flow link number for a given structure id.
    !! If not found, then L = -1 .
