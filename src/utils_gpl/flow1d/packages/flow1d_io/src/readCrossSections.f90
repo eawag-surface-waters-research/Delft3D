@@ -397,7 +397,7 @@ module m_readCrossSections
                else
                   groundlayer = 0.0d0
                endif
-               
+               success = .true.
                inext = AddCrossSectionDefinition(network%CSDefinitions, id, numLevels, level, width,               &
                                                  width, plains, crestLevel, baseLevel, flowArea, totalArea,        &
                                                  closed, groundlayerUsed, groundlayer)
