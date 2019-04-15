@@ -70,6 +70,7 @@ subroutine findexternalboundarypoints()             ! find external boundary poi
  integer               :: ierr, method
  double precision      :: return_time
  integer               :: numz, numu, nums, numtm, numsd, numt, numuxy, numn, num1d2d, numqh, numw, numtr, numsf
+ integer               :: nbndpt
  integer               :: nx
  integer               :: ierror
  integer               :: num_bc_ini_blocks
@@ -222,6 +223,7 @@ subroutine findexternalboundarypoints()             ! find external boundary poi
  nshiptxy = 0                                        ! nr of ship xyt signals
 
  nwbnd    = 0                                        ! nr of wave-energy boundaries
+ nbndpt   = 0
 
 
  num_bc_ini_blocks = 0
@@ -247,7 +249,7 @@ subroutine findexternalboundarypoints()             ! find external boundary poi
 
         jatimespace = 1                              ! module is to be used
 
-        call processexternalboundarypoints(qid, filename, filetype, return_time,  nx, kce, numz, numu, nums, numtm, numsd, numt, numuxy, numn, num1d2d, numqh, numw, numtr, numsf, 1d0, transformcoef)
+        call processexternalboundarypoints(qid, filename, filetype, return_time,  nx, kce, numz, numu, nums, numtm, numsd, numt, numuxy, numn, num1d2d, numqh, numw, numtr, numsf, 1d0, transformcoef, nbndpt)
     
     endif
 
@@ -458,7 +460,7 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
  double precision      , intent(in)    :: return_time
  integer               , intent(inout) :: numz, numu, nums, numtm, numsd, &   !
                                           numt, numuxy, numn, num1d2d, numqh, numw, numtr, numsf      !
- integer, optional     , intent(out)   :: nbndpt   !< Value of the last changed num (one of numz, numu ....etc)
+ integer               , intent(out)   :: nbndpt   !< Value of the last changed num (one of numz, numu ....etc)
  double precision      , intent(in)    :: rrtolrel !< To enable a more strict rrtolerance value than the global rrtol. Measured w.r.t. global rrtol.
  
  double precision, dimension(numgeneralkeywrd), optional, intent(in) :: tfc
