@@ -1623,6 +1623,7 @@
 
    CALL TEXTFLOW()
    if (idisLink /= 0) then ! Display info. screen for a 1D flowlink if it has been clicked
+      call disln(idisLink)
       call dis_info_1d_link(idisLink)
    end if
   
@@ -6218,6 +6219,7 @@ subroutine getktoplot(kk,k)
                   nhlFlowLink = LL
                   call highlight_nodesnlinks()
                end if
+               key = 3
             end if
 
          ENDIF
