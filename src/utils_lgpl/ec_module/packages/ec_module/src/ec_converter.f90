@@ -1023,6 +1023,7 @@ module m_ec_converter
          type(tEcField),         pointer     :: targetField   !< Converter's result goes in here
          integer                             :: maxlay        !< maximum number of layers (3D)
          integer                             :: from, thru    !< contiguous range of indices in the target array 
+         integer                             :: jmin, jmax    !< from target position jmin through target position jmax is filled
          !
          success = .false.
          valuesT0 => null()
@@ -1079,12 +1080,20 @@ module m_ec_converter
                   end if
                end do
                ! Select the operation.
+
+               if (connection%converterPtr%targetIndex/=ec_undef_int) then
+                  jmin = connection%converterPtr%targetIndex
+                  jmax = connection%converterPtr%targetIndex
+               else
+                  jmin = 1
+                  jmax = connection%targetItemsPtr(1)%ptr%elementSetPtr%nCoordinates
+               end if
                select case(connection%converterPtr%operandType)
                   case(operand_replace)
                      ! Write all values to one target Item or each value to its own target Item.
                      if (connection%nTargetItems == 1) then                               ! All in one target item
                         targetField => connection%targetItemsPtr(1)%ptr%targetFieldPtr
-                        do j=1, connection%targetItemsPtr(1)%ptr%elementSetPtr%nCoordinates
+                        do j=jmin, jmax
                            from = (j-1)*(maxlay*n_data)+1
                            thru = (j  )*(maxlay*n_data) 
                            targetField%arr1dPtr(from:thru) = valuesT
@@ -1093,7 +1102,7 @@ module m_ec_converter
                      else if (connection%nTargetItems == maxlay*n_data) then              ! Separate target items   
                         do i=1, connection%nTargetItems
                            targetField => connection%targetItemsPtr(i)%ptr%targetFieldPtr
-                           do j=1, connection%targetItemsPtr(i)%ptr%elementSetPtr%nCoordinates
+                           do j=jmin, jmax
                               targetField%arr1dPtr(j) = valuesT(i)
                            end do
                            targetField%timesteps = timesteps

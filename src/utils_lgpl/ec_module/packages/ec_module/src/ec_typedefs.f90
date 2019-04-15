@@ -240,7 +240,7 @@ module m_ec_typedefs
       integer                       :: ofType                !< Converter type, using the convType enumeration
       integer                       :: operandType           !< operand type, using operand enumeration; What to do to the target Item Field.
       integer                       :: interpolationType     !< interpolation type, using the interpolateType enumeration
-      integer                       :: targetIndex           !< Write to the target Item's Field's array element number targetIndex (vectormax (here called n_data) should already be accounted for, that offset is *not* recomputed in the converter).
+      integer                       :: targetIndex = ec_undef_int    !< Write to the target Item's Field's array element number targetIndex (vectormax (here called n_data) should already be accounted for, that offset is *not* recomputed in the converter).
       type(tEcIndexWeight), pointer :: indexWeight => null() !< 
       type(tEcMask)                 :: srcmask               !< Array with mask info on selection of gridpoints
       logical                       :: extrapolated = .false. !< indexWeight is updated as a result of extrapolation

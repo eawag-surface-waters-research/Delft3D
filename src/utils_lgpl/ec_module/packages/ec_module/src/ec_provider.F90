@@ -207,7 +207,7 @@ module m_ec_provider
          end if
 
          select case(fileReaderPtr%bc%func)
-            case (BC_FUNC_TSERIES)
+            case (BC_FUNC_TSERIES, BC_FUNC_CONSTANT)
                success = ecProviderCreateUniformItems(instancePtr, fileReaderPtr)
             case (BC_FUNC_HARMONIC, BC_FUNC_ASTRO)
                success = ecProviderCreateFourierItems(instancePtr, fileReaderPtr)

@@ -497,7 +497,10 @@ module m_ec_item
          !
 
          ! timesteps < t0 : not supported
-         if (comparereal(item%sourceT1FieldPtr%timesteps, timesteps%mjd(), 1.0D-10) == 0) then
+         if (item%quantityPtr%constant) then
+               success = .true.
+               return
+         else if (comparereal(item%sourceT1FieldPtr%timesteps, timesteps%mjd(), 1.0D-10) == 0) then
             ! requested time equals to T1.
             ! no read action needed, UNLESS 'block-from'
             if (item%quantityPtr%timeint /= timeint_bfrom) then
