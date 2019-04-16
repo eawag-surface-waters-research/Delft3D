@@ -1662,6 +1662,11 @@ stocfl,stocsu,stocsc
 "dPrecAPPO4","APATP     ",   1.00000
 "dDissAPPO4","PO4       ",   1.00000
 "dDissAPPO4","APATP     ",  -1.00000
+"dDumHZoop ","Zoopl_V   ",   0.00000
+"dDumHMuss ","Mussel_V  ",   0.00000
+"dDumHGra3 ","Grazer3_V ",   0.00000
+"dDumHGra4 ","Grazer4_V ",   0.00000
+"dDumHGra5 ","Grazer5_V ",   0.00000
 "dVB01     ","VB01      ",   1.00000
 "dMrtC1VB01","VB01      ",  -1.00000
 "dMrtC3VB01","VB01      ",  -1.00000

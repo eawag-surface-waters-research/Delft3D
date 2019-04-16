@@ -125,7 +125,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "Coverage  ","PotEM05   ",  12,"Y","x",1
 "Coverage  ","IBotSeg   ",  13,"N","x",1
 "Coverage  ","RadMacrop ",  14,"N","x",1
-"DAYRAD    ","RadSurf   ",   1,"N","x",1
+"DAYRAD    ","RadSurf   ",   1,"Y","x",1
 "DAYRAD    ","ITIME     ",   2,"N"," ",1
 "DAYRAD    ","Latitude  ",   3,"Y","x",1
 "DAYRAD    ","RefDay    ",   4,"Y","x",1
@@ -322,10 +322,11 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "SpecCarb  ","Salinity  ",   5,"Y","x",1
 "SpecCarb  ","Temp      ",   6,"Y","x",1
 "SpecCarb  ","Poros     ",   7,"Y","x",1
-"EXTINABVLP","ExtVlAlg  ",   1,"Y","x",1
-"EXTINABVLP","BLOOMALG  ",   2,"N","x",1
-"EXTINABVLP","FixAlg    ",   3,"Y","x",1
-"EXTINABVLP","SDMixAlg  ",   4,"Y","x",1
+"EXTINABVLP","BLComment ",   1,"Y"," ",1
+"EXTINABVLP","ExtVlAlg  ",   2,"Y","x",1
+"EXTINABVLP","BLOOMALG  ",   3,"N","x",1
+"EXTINABVLP","FixAlg    ",   4,"Y","x",1
+"EXTINABVLP","SDMixAlg  ",   5,"Y","x",1
 "EXTINABVL ","NAlgBloom ",   1,"Y"," ",1
 "EXTINABVL ","SW_fixin_y",   2,"Y"," ",1
 "EXTINABVL ","Depth     ",   3,"N","x",1
@@ -456,10 +457,11 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "ExtPhDVL  ","ExtVlDiat ",   5,"Y","x",1
 "ExtPhDVL  ","Green     ",   6,"N","x",1
 "ExtPhDVL  ","Diat      ",   7,"Y","x",1
-"EXTINABUVP","ExtUVAlg  ",   1,"Y","x",1
-"EXTINABUVP","BLOOMALG  ",   2,"N","x",1
-"EXTINABUVP","FixAlg    ",   3,"Y","x",1
-"EXTINABUVP","SDMixAlg  ",   4,"Y","x",1
+"EXTINABUVP","BLComment ",   1,"Y"," ",1
+"EXTINABUVP","ExtUVAlg  ",   2,"Y","x",1
+"EXTINABUVP","BLOOMALG  ",   3,"N","x",1
+"EXTINABUVP","FixAlg    ",   4,"Y","x",1
+"EXTINABUVP","SDMixAlg  ",   5,"Y","x",1
 "EXTINABUV ","NAlgBloom ",   1,"Y"," ",1
 "EXTINABUV ","SW_fixin_y",   2,"Y"," ",1
 "EXTINABUV ","Depth     ",   3,"N","x",1
@@ -684,7 +686,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "Extinc_UVG","POC4      ",  33,"Y","x",1
 "CalcRad   ","ExtVl     ",   1,"N","x",1
 "CalcRad   ","Depth     ",   2,"N","x",1
-"CalcRad   ","RadSurf   ",   3,"N","x",1
+"CalcRad   ","RadSurf   ",   3,"Y","x",1
 "CalcRad   ","a_enh     ",   4,"Y","x",1
 "CalcRad   ","Surf      ",   5,"N","x",1
 "CalcRad   ","SwEmersion",   6,"Y","x",1
@@ -700,7 +702,7 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "CalcRadDay","fRefl     ",   8,"Y","x",1
 "CalcRadUV ","ExtUv     ",   1,"N","x",1
 "CalcRadUV ","Depth     ",   2,"N","x",1
-"CalcRadUV ","RadSurf   ",   3,"N","x",1
+"CalcRadUV ","RadSurf   ",   3,"Y","x",1
 "CalcRadUV ","a_enh     ",   4,"Y"," ",1
 "CalcRadUV ","Surf      ",   5,"N","x",1
 "CalcRadUV ","SwEmersion",   6,"Y","x",1
@@ -808,64 +810,65 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "EffABlo   ","EffMALG28 ",  60,"N","x",1
 "EffABlo   ","EffMALG29 ",  61,"N","x",1
 "EffABlo   ","EffMALG30 ",  62,"N","x",1
-"BLOOM_P   ","TimMultBl ",   1,"Y","x",1
-"BLOOM_P   ","ExtVl     ",   2,"N","x",1
-"BLOOM_P   ","ExtVlPhyt ",   3,"Y","x",1
-"BLOOM_P   ","Temp      ",   4,"Y","x",1
-"BLOOM_P   ","Rad       ",   5,"N","x",1
-"BLOOM_P   ","Depth     ",   6,"N","x",1
-"BLOOM_P   ","BloomDepth",   7,"Y","x",1
-"BLOOM_P   ","DayL      ",   8,"Y","x",1
-"BLOOM_P   ","NH4       ",   9,"Y","x",1
-"BLOOM_P   ","NO3       ",  10,"Y","x",1
-"BLOOM_P   ","PO4       ",  11,"Y","x",1
-"BLOOM_P   ","Si        ",  12,"Y","x",1
-"BLOOM_P   ","ThrAlgNH4 ",  13,"Y","x",1
-"BLOOM_P   ","ThrAlgNO3 ",  14,"Y","x",1
-"BLOOM_P   ","ThrAlgPO4 ",  15,"Y","x",1
-"BLOOM_P   ","ThrAlgSi  ",  16,"Y","x",1
-"BLOOM_P   ","PON1      ",  17,"Y","x",1
-"BLOOM_P   ","POP1      ",  18,"Y","x",1
-"BLOOM_P   ","DELT      ",  19,"N","x",1
-"BLOOM_P   ","SWBloomOut",  20,"Y","x",1
-"BLOOM_P   ","SWOxyProd ",  21,"Y","x",1
-"BLOOM_P   ","Cl        ",  22,"Y","x",1
-"BLOOM_P   ","Volume    ",  23,"N","x",1
-"BLOOM_P   ","SwVTRANS  ",  24,"Y","x",1
-"BLOOM_P   ","TIC       ",  25,"Y","x",1
-"BLOOM_P   ","CO2       ",  26,"Y","x",1
-"BLOOM_P   ","SWTICdummy",  27,"Y"," ",1
-"BLOOM_P   ","SWCLim    ",  28,"Y","x",1
-"BLOOM_P   ","SWBloomSA ",  29,"Y"," ",1
-"BLOOM_P   ","TotNBLSA  ",  30,"Y"," ",1
-"BLOOM_P   ","TotPBLSA  ",  31,"Y"," ",1
-"BLOOM_P   ","TotSiBLSA ",  32,"Y"," ",1
-"BLOOM_P   ","BLOOMALG  ",  33,"N","x",1
-"BLOOM_P   ","FrAutAlg  ",  34,"Y","x",1
-"BLOOM_P   ","FrDetAlg  ",  35,"Y","x",1
-"BLOOM_P   ","ExtVlAlg  ",  36,"Y","x",1
-"BLOOM_P   ","DMCFALG   ",  37,"Y","x",1
-"BLOOM_P   ","NCRAlg    ",  38,"Y","x",1
-"BLOOM_P   ","PCRAlg    ",  39,"Y","x",1
-"BLOOM_P   ","SCRAlg    ",  40,"Y","x",1
-"BLOOM_P   ","XNCRAlg   ",  41,"Y","x",1
-"BLOOM_P   ","XPCRAlg   ",  42,"Y","x",1
-"BLOOM_P   ","FNCRAlg   ",  43,"Y","x",1
-"BLOOM_P   ","ChlaCAlg  ",  44,"Y","x",1
-"BLOOM_P   ","PPMaxAlg  ",  45,"Y","x",1
-"BLOOM_P   ","TcPMxAlg  ",  46,"Y","x",1
-"BLOOM_P   ","TFPMxAlg  ",  47,"Y","x",1
-"BLOOM_P   ","Mort0Alg  ",  48,"Y","x",1
-"BLOOM_P   ","TcMrtAlg  ",  49,"Y","x",1
-"BLOOM_P   ","MRespAlg  ",  50,"Y","x",1
-"BLOOM_P   ","TcRspAlg  ",  51,"Y","x",1
-"BLOOM_P   ","SDMixAlg  ",  52,"Y","x",1
-"BLOOM_P   ","MrtExAlg  ",  53,"Y","x",1
-"BLOOM_P   ","Mort2Alg  ",  54,"Y","x",1
-"BLOOM_P   ","MrtB1Alg  ",  55,"Y","x",1
-"BLOOM_P   ","MrtB2Alg  ",  56,"Y","x",1
-"BLOOM_P   ","FixAlg    ",  57,"Y","x",1
-"BLOOM_P   ","EffiAlg   ",  58,"O","x",1
+"BLOOM_P   ","BLComment ",   1,"Y"," ",1
+"BLOOM_P   ","TimMultBl ",   2,"Y","x",1
+"BLOOM_P   ","ExtVl     ",   3,"N","x",1
+"BLOOM_P   ","ExtVlPhyt ",   4,"N","x",1
+"BLOOM_P   ","Temp      ",   5,"Y","x",1
+"BLOOM_P   ","Rad       ",   6,"N","x",1
+"BLOOM_P   ","Depth     ",   7,"N","x",1
+"BLOOM_P   ","BloomDepth",   8,"Y","x",1
+"BLOOM_P   ","DayL      ",   9,"Y","x",1
+"BLOOM_P   ","NH4       ",  10,"Y","x",1
+"BLOOM_P   ","NO3       ",  11,"Y","x",1
+"BLOOM_P   ","PO4       ",  12,"Y","x",1
+"BLOOM_P   ","Si        ",  13,"Y","x",1
+"BLOOM_P   ","ThrAlgNH4 ",  14,"Y","x",1
+"BLOOM_P   ","ThrAlgNO3 ",  15,"Y","x",1
+"BLOOM_P   ","ThrAlgPO4 ",  16,"Y","x",1
+"BLOOM_P   ","ThrAlgSi  ",  17,"Y","x",1
+"BLOOM_P   ","PON1      ",  18,"Y","x",1
+"BLOOM_P   ","POP1      ",  19,"Y","x",1
+"BLOOM_P   ","DELT      ",  20,"N","x",1
+"BLOOM_P   ","SWBloomOut",  21,"Y","x",1
+"BLOOM_P   ","SWOxyProd ",  22,"Y","x",1
+"BLOOM_P   ","Cl        ",  23,"Y","x",1
+"BLOOM_P   ","Volume    ",  24,"N","x",1
+"BLOOM_P   ","SwVTRANS  ",  25,"Y","x",1
+"BLOOM_P   ","TIC       ",  26,"Y","x",1
+"BLOOM_P   ","CO2       ",  27,"Y","x",1
+"BLOOM_P   ","SWTICdummy",  28,"Y"," ",1
+"BLOOM_P   ","SWCLim    ",  29,"Y","x",1
+"BLOOM_P   ","SWBloomSA ",  30,"Y"," ",1
+"BLOOM_P   ","TotNBLSA  ",  31,"Y"," ",1
+"BLOOM_P   ","TotPBLSA  ",  32,"Y"," ",1
+"BLOOM_P   ","TotSiBLSA ",  33,"Y"," ",1
+"BLOOM_P   ","BLOOMALG  ",  34,"N","x",1
+"BLOOM_P   ","FrAutAlg  ",  35,"Y","x",1
+"BLOOM_P   ","FrDetAlg  ",  36,"Y","x",1
+"BLOOM_P   ","ExtVlAlg  ",  37,"Y","x",1
+"BLOOM_P   ","DMCFALG   ",  38,"Y","x",1
+"BLOOM_P   ","NCRAlg    ",  39,"Y","x",1
+"BLOOM_P   ","PCRAlg    ",  40,"Y","x",1
+"BLOOM_P   ","SCRAlg    ",  41,"Y","x",1
+"BLOOM_P   ","XNCRAlg   ",  42,"Y","x",1
+"BLOOM_P   ","XPCRAlg   ",  43,"Y","x",1
+"BLOOM_P   ","FNCRAlg   ",  44,"Y","x",1
+"BLOOM_P   ","ChlaCAlg  ",  45,"Y","x",1
+"BLOOM_P   ","PPMaxAlg  ",  46,"Y","x",1
+"BLOOM_P   ","TcPMxAlg  ",  47,"Y","x",1
+"BLOOM_P   ","TFPMxAlg  ",  48,"Y","x",1
+"BLOOM_P   ","Mort0Alg  ",  49,"Y","x",1
+"BLOOM_P   ","TcMrtAlg  ",  50,"Y","x",1
+"BLOOM_P   ","MRespAlg  ",  51,"Y","x",1
+"BLOOM_P   ","TcRspAlg  ",  52,"Y","x",1
+"BLOOM_P   ","SDMixAlg  ",  53,"Y","x",1
+"BLOOM_P   ","MrtExAlg  ",  54,"Y","x",1
+"BLOOM_P   ","Mort2Alg  ",  55,"Y","x",1
+"BLOOM_P   ","MrtB1Alg  ",  56,"Y","x",1
+"BLOOM_P   ","MrtB2Alg  ",  57,"Y","x",1
+"BLOOM_P   ","FixAlg    ",  58,"Y","x",1
+"BLOOM_P   ","EffiAlg   ",  59,"Y"," ",1
 "BLOOM     ","TimMultBl ",   1,"Y","x",1
 "BLOOM     ","ExtVl     ",   2,"N","x",1
 "BLOOM     ","ExtVlPhyt ",   3,"N","x",1
@@ -1678,36 +1681,36 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "BLOOM     ","FixAlg28  ", 810,"Y","x",1
 "BLOOM     ","FixAlg29  ", 811,"Y","x",1
 "BLOOM     ","FixAlg30  ", 812,"Y","x",1
-"BLOOM     ","EffiALG01 ", 813,"O","x",1
-"BLOOM     ","EffiALG02 ", 814,"O","x",1
-"BLOOM     ","EffiALG03 ", 815,"O","x",1
-"BLOOM     ","EffiALG04 ", 816,"O","x",1
-"BLOOM     ","EffiALG05 ", 817,"O","x",1
-"BLOOM     ","EffiALG06 ", 818,"O","x",1
-"BLOOM     ","EffiALG07 ", 819,"O","x",1
-"BLOOM     ","EffiALG08 ", 820,"O","x",1
-"BLOOM     ","EffiALG09 ", 821,"O","x",1
-"BLOOM     ","EffiALG10 ", 822,"O","x",1
-"BLOOM     ","EffiALG11 ", 823,"O","x",1
-"BLOOM     ","EffiALG12 ", 824,"O","x",1
-"BLOOM     ","EffiALG13 ", 825,"O","x",1
-"BLOOM     ","EffiALG14 ", 826,"O","x",1
-"BLOOM     ","EffiALG15 ", 827,"O","x",1
-"BLOOM     ","EffiALG16 ", 828,"O","x",1
-"BLOOM     ","EffiALG17 ", 829,"O","x",1
-"BLOOM     ","EffiALG18 ", 830,"O","x",1
-"BLOOM     ","EffiALG19 ", 831,"O","x",1
-"BLOOM     ","EffiALG20 ", 832,"O","x",1
-"BLOOM     ","EffiALG21 ", 833,"O","x",1
-"BLOOM     ","EffiALG22 ", 834,"O","x",1
-"BLOOM     ","EffiALG23 ", 835,"O","x",1
-"BLOOM     ","EffiALG24 ", 836,"O","x",1
-"BLOOM     ","EffiALG25 ", 837,"O","x",1
-"BLOOM     ","EffiALG26 ", 838,"O","x",1
-"BLOOM     ","EffiALG27 ", 839,"O","x",1
-"BLOOM     ","EffiALG28 ", 840,"O","x",1
-"BLOOM     ","EffiALG29 ", 841,"O","x",1
-"BLOOM     ","EffiALG30 ", 842,"O","x",1
+"BLOOM     ","EffiALG01 ", 813,"O"," ",1
+"BLOOM     ","EffiALG02 ", 814,"O"," ",1
+"BLOOM     ","EffiALG03 ", 815,"O"," ",1
+"BLOOM     ","EffiALG04 ", 816,"O"," ",1
+"BLOOM     ","EffiALG05 ", 817,"O"," ",1
+"BLOOM     ","EffiALG06 ", 818,"O"," ",1
+"BLOOM     ","EffiALG07 ", 819,"O"," ",1
+"BLOOM     ","EffiALG08 ", 820,"O"," ",1
+"BLOOM     ","EffiALG09 ", 821,"O"," ",1
+"BLOOM     ","EffiALG10 ", 822,"O"," ",1
+"BLOOM     ","EffiALG11 ", 823,"O"," ",1
+"BLOOM     ","EffiALG12 ", 824,"O"," ",1
+"BLOOM     ","EffiALG13 ", 825,"O"," ",1
+"BLOOM     ","EffiALG14 ", 826,"O"," ",1
+"BLOOM     ","EffiALG15 ", 827,"O"," ",1
+"BLOOM     ","EffiALG16 ", 828,"O"," ",1
+"BLOOM     ","EffiALG17 ", 829,"O"," ",1
+"BLOOM     ","EffiALG18 ", 830,"O"," ",1
+"BLOOM     ","EffiALG19 ", 831,"O"," ",1
+"BLOOM     ","EffiALG20 ", 832,"O"," ",1
+"BLOOM     ","EffiALG21 ", 833,"O"," ",1
+"BLOOM     ","EffiALG22 ", 834,"O"," ",1
+"BLOOM     ","EffiALG23 ", 835,"O"," ",1
+"BLOOM     ","EffiALG24 ", 836,"O"," ",1
+"BLOOM     ","EffiALG25 ", 837,"O"," ",1
+"BLOOM     ","EffiALG26 ", 838,"O"," ",1
+"BLOOM     ","EffiALG27 ", 839,"O"," ",1
+"BLOOM     ","EffiALG28 ", 840,"O"," ",1
+"BLOOM     ","EffiALG29 ", 841,"O"," ",1
+"BLOOM     ","EffiALG30 ", 842,"O"," ",1
 "Phy_Blo_P ","NAlgBloom ",   1,"Y"," ",1
 "Phy_Blo_P ","Depth     ",   2,"N","x",1
 "Phy_Blo_P ","BLOOMALG  ",   3,"N","x",1
