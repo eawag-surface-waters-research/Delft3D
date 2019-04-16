@@ -2969,6 +2969,7 @@ src/scripts_lgpl/win32/make_revision.bat -text
 src/scripts_lgpl/win32/oss-install.cmd -text
 src/scripts_lgpl/win32/oss-install_debug.cmd -text
 src/scripts_lgpl/win32/update_version.cmd -text
+src/scripts_lgpl/win64/NUnit_tests_template.sln -text
 src/scripts_lgpl/win64/delft3d_open_template.sln -text
 src/scripts_lgpl/win64/ec_module_template.sln -text
 src/scripts_lgpl/win64/io_netcdf_template.sln -text
