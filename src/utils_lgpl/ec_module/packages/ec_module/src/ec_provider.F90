@@ -1715,6 +1715,7 @@ module m_ec_provider
       !> Create subproviders, which create source Items and their contained types.
       !! meteo1.f90: read1polylin
       function ecProviderCreatePolyTimItemsBC(instancePtr, fileReaderPtr, bctfilename, quantityname) result(success)
+         use m_ec_magic_number
          logical                         :: success       !< function status
          type(tEcInstance),   pointer    :: instancePtr   !< intent(in)
          type(tEcFileReader), pointer    :: fileReaderPtr !< intent(inout)
@@ -1917,7 +1918,6 @@ module m_ec_provider
             crossing = ecFileReaderFindItem(instancePtr, id, 'crossing')
             if (discharge /= ec_undef_int .and. waterlevel /= ec_undef_int .and. &
                slope /= ec_undef_int .and. crossing /= ec_undef_int) then
-               !do i=1, n_points ! commented: only one value per polyline
                ! Initialize the new Converter.
                if (.not. (ecConverterSetType(instancePtr, subconverterId, convType_qhtable) .and. &
                           ecConverterSetOperand(instancePtr, subconverterId, operand_replace_element) .and. &
@@ -1934,7 +1934,7 @@ module m_ec_provider
                if (.not. ecConnectionAddTargetItem(instancePtr, connectionId, itemId)) return
                if (.not. ecItemAddConnection(instancePtr, itemId, connectionId)) return
                n_signals = 1
-               !end do
+               n_points = size(magic_array)
             end if
          endif
 
