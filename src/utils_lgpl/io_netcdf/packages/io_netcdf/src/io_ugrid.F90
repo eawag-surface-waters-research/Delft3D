@@ -1825,7 +1825,17 @@ function ug_init_network_topology(ncid, varid, netids) result(ierr)
    ierr = att_to_varid(ncid, varid, 'edge_node_connectivity', netids%varids(ntid_1dedgenodes))
    ierr = att_to_varid(ncid, varid, 'branch_ids'            , netids%varids(ntid_1dbranchids))
    ierr = att_to_varid(ncid, varid, 'branch_long_names'     , netids%varids(ntid_1dbranchlongnames)) ! TODO: LC: error when not found
-   ierr = att_to_varid(ncid, varid, 'branch_lengths'        , netids%varids(ntid_1dbranchlengths))
+
+   ! branch_lengths/edge_length
+   ierr = nf90_inquire_attribute(ncid, varid, 'branch_lengths')
+   if ( ierr == 0 ) then
+      ! for backward compatibility: branch_lengths was used rather than edge_length. If there get the varid of the attribute
+      ierr = att_to_varid(ncid, varid, 'branch_lengths'        , netids%varids(ntid_1dbranchlengths))
+   else 
+      ! try to get the edge_length
+      ierr = att_to_varid(ncid, varid, 'edge_length'        , netids%varids(ntid_1dbranchlengths))
+   endif
+
    !get the number of geometric points for each branch
    ! TODO: UNST-2391
 
@@ -3514,7 +3524,7 @@ function ug_create_1d_network(ncid, netids, networkName, nNodes, nBranches,nGeom
    !branches attrubutes
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dtopo), 'branch_ids', prefix//'_branch_ids')
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dtopo), 'branch_long_names', prefix//'_branch_long_names')   
-   ierr = nf90_put_att(ncid, netids%varids(ntid_1dtopo), 'branch_lengths', prefix//'_branch_lengths')  
+   ierr = nf90_put_att(ncid, netids%varids(ntid_1dtopo), 'edge_length', prefix//'_edge_length')  
 
    !2. Branch: the start and the end nodes of each branch
    ierr = nf90_def_var(ncid, prefix//'_edge_nodes', nf90_int, (/ netids%dimids(ntdim_two), netids%dimids(ntdim_1dbranches) /), netids%varids(ntid_1dedgenodes))
@@ -3527,7 +3537,7 @@ function ug_create_1d_network(ncid, netids, networkName, nNodes, nBranches,nGeom
    ierr = nf90_def_var(ncid, prefix//'_branch_long_names', nf90_char, (/ netids%dimids(ntdim_longnamestring), netids%dimids(ntdim_1dbranches) /) , netids%varids(ntid_1dbranchlongnames))
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dbranchlongnames), 'long_name', 'the branches long names')
    !2. Branch: the branch lengths
-   ierr = nf90_def_var(ncid, prefix//'_branch_lengths', nf90_double, (/ netids%dimids(ntdim_1dbranches) /) , netids%varids(ntid_1dbranchlengths))
+   ierr = nf90_def_var(ncid, prefix//'_edge_length', nf90_double, (/ netids%dimids(ntdim_1dbranches) /) , netids%varids(ntid_1dbranchlengths))
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dbranchlengths), 'long_name', 'the branch lengths')
  
    !3. Nodes: the ids of the nodes
