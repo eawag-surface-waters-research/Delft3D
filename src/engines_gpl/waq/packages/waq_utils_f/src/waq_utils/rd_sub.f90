@@ -272,9 +272,6 @@
          if (allocated) coname(nocons) = 'ONLY_ACTIVE'
          if (allocated) covalue(nocons)  = 1.0e0
          nocons = nocons + 1
-         if (allocated) coname(nocons) = 'ACTIVE_TotDepth'
-         if (allocated) covalue(nocons)  = 1.0e0
-         nocons = nocons + 1
          if (allocated) coname(nocons) = 'ACTIVE_DynDepth'
          if (allocated) covalue(nocons)  = 1.0e0
 
