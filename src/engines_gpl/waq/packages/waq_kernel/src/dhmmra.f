@@ -1061,79 +1061,81 @@
 !
 ! Note: trick for making sure that memory near the processor is assigned
 !       to the array. This has to do with the NUMA characteristics.
+         if ( l_decl ) then
 !$omp parallel
 !$omp do private(j)
-         do ith = 1,noth
-            do j = 1,size(gm_rhs,1)
-                gm_rhs(j,ith) = 0.0
+            do ith = 1,noth
+               do j = 1,size(gm_rhs,1)
+                   gm_rhs(j,ith) = 0.0
+               enddo
             enddo
-         enddo
 !$omp end do
 
 !$omp do private(j)
-         do ith = 1,noth
-            do j = 1,size(gm_sol,1)
-                gm_sol(j,ith) = 0.0
+            do ith = 1,noth
+               do j = 1,size(gm_sol,1)
+                   gm_sol(j,ith) = 0.0
+               enddo
             enddo
-         enddo
 !$omp end do
 !$omp do private(j)
-         do ith = 1,noth
-            do j = 1,size(gm_work,1)
-                gm_work(j,ith) = 0.0
+            do ith = 1,noth
+               do j = 1,size(gm_work,1)
+                   gm_work(j,ith) = 0.0
+               enddo
             enddo
-         enddo
 !$omp end do
 !$omp do private(j)
-         do ith = 1,noth
-            do j = 1,size(gm_hess,1)
-                gm_hess(j,ith) = 0.0
+            do ith = 1,noth
+               do j = 1,size(gm_hess,1)
+                   gm_hess(j,ith) = 0.0
+               enddo
             enddo
-         enddo
 !$omp end do
 !$omp do private(j)
-         do ith = 1,noth
-            do j = 1,size(gm_amat,1)
-                gm_amat(j,ith) = 0.0
+            do ith = 1,noth
+               do j = 1,size(gm_amat,1)
+                   gm_amat(j,ith) = 0.0
+               enddo
             enddo
-         enddo
 !$omp end do
 !$omp do private(j)
-         do ith = 1,noth
-            do j = 1,size(gm_diag,1)
-                gm_diag(j,ith) = 0.0
+            do ith = 1,noth
+               do j = 1,size(gm_diag,1)
+                   gm_diag(j,ith) = 0.0
+               enddo
             enddo
-         enddo
 !$omp end do
 !$omp do private(j)
-         do ith = 1,noth
-            do j = 1,size(gm_diac,1)
-                gm_diac(j,ith) = 0.0
+            do ith = 1,noth
+               do j = 1,size(gm_diac,1)
+                   gm_diac(j,ith) = 0.0
+               enddo
             enddo
-         enddo
 !$omp end do
 !$omp do private(j)
-         do ith = 1,noth
-            do j = 1,size(gm_trid,1)
-                gm_trid(j,ith) = 0.0
+            do ith = 1,noth
+               do j = 1,size(gm_trid,1)
+                   gm_trid(j,ith) = 0.0
+               enddo
             enddo
-         enddo
 !$omp end do
 !$omp do private(j)
-         do ith = 1,noth
-            do j = 1,size(flowtot,1)
-                flowtot(j,ith) = 0.0
+            do ith = 1,noth
+               do j = 1,size(flowtot,1)
+                   flowtot(j,ith) = 0.0
+               enddo
             enddo
-         enddo
 !$omp end do
 !$omp do private(j)
-         do ith = 1,noth
-            do j = 1,size(disptot,1)
-                disptot(j,ith) = 0.0
+            do ith = 1,noth
+               do j = 1,size(disptot,1)
+                   disptot(j,ith) = 0.0
+               enddo
             enddo
-         enddo
 !$omp end do
 !$omp end parallel
+         endif ! l_decl
 
          if ( intsrt .eq. 21 ) then
             itota  = itota  +  noq  *noth                           ! theta
@@ -1208,92 +1210,94 @@
             if ( ierr .ne. 0 ) then ; write(lunrep,2010) "n2                  " ; call srstop(1) ; endif
             if ( .not. l_decl ) write ( 328, 2040 ) nr_rar, "n2                  ", noseg*noth
 
+            if ( l_decl ) then
 !$omp parallel
 !$omp do private(j)
-            do ith = 1,noth
-               do j = 1,size(theta,1)
-                  theta(j,ith) = 0.0
+               do ith = 1,noth
+                  do j = 1,size(theta,1)
+                     theta(j,ith) = 0.0
+                  enddo
                enddo
-            enddo
 !$omp end do
 !$omp do private(j)
-            do ith = 1,noth
-               do j = 1,size(thetaseg,1)
-                  thetaseg(j,ith) = 0.0
+               do ith = 1,noth
+                  do j = 1,size(thetaseg,1)
+                     thetaseg(j,ith) = 0.0
+                  enddo
                enddo
-            enddo
 !$omp end do
 !$omp do private(j)
-            do ith = 1,noth
-               do j = 1,size(flux,1)
-                  flux(j,ith) = 0.0
+               do ith = 1,noth
+                  do j = 1,size(flux,1)
+                     flux(j,ith) = 0.0
+                  enddo
                enddo
-            enddo
 !$omp end do
 !$omp do private(j)
-            do ith = 1,noth
-               do j = 1,size(lim,1)
-                  lim(j,ith) = 0.0
+               do ith = 1,noth
+                  do j = 1,size(lim,1)
+                     lim(j,ith) = 0.0
+                  enddo
                enddo
-            enddo
 !$omp end do
 !$omp do private(j)
-            do ith = 1,noth
-               do j = 1,size(maxi,1)
-                  maxi(j,ith) = 0.0
+               do ith = 1,noth
+                  do j = 1,size(maxi,1)
+                     maxi(j,ith) = 0.0
+                  enddo
                enddo
-            enddo
 !$omp end do
 !$omp do private(j)
-            do ith = 1,noth
-               do j = 1,size(mini,1)
-                  mini(j,ith) = 0.0
+               do ith = 1,noth
+                  do j = 1,size(mini,1)
+                     mini(j,ith) = 0.0
+                  enddo
                enddo
-            enddo
 !$omp end do
 !$omp do private(j)
-            do ith = 1,noth
-               do j = 1,size(l1,1)
-                  l1(j,ith) = 0.0
+               do ith = 1,noth
+                  do j = 1,size(l1,1)
+                     l1(j,ith) = 0.0
+                  enddo
                enddo
-            enddo
 !$omp end do
 !$omp do private(j)
-            do ith = 1,noth
-               do j = 1,size(l2,1)
-                  l2(j,ith) = 0.0
+               do ith = 1,noth
+                  do j = 1,size(l2,1)
+                     l2(j,ith) = 0.0
+                  enddo
                enddo
-            enddo
 !$omp end do
 !$omp do private(j)
-            do ith = 1,noth
-               do j = 1,size(m1,1)
-                  m1(j,ith) = 0.0
+               do ith = 1,noth
+                  do j = 1,size(m1,1)
+                     m1(j,ith) = 0.0
+                  enddo
                enddo
-            enddo
 !$omp end do
 !$omp do private(j)
-            do ith = 1,noth
-               do j = 1,size(m2,1)
-                  m2(j,ith) = 0.0
+               do ith = 1,noth
+                  do j = 1,size(m2,1)
+                     m2(j,ith) = 0.0
+                  enddo
                enddo
-            enddo
 !$omp end do
 !$omp do private(j)
-            do ith = 1,noth
-               do j = 1,size(n1,1)
-                  n1(j,ith) = 0.0
+               do ith = 1,noth
+                  do j = 1,size(n1,1)
+                     n1(j,ith) = 0.0
+                  enddo
                enddo
-            enddo
 !$omp end do
 !$omp do private(j)
-            do ith = 1,noth
-               do j = 1,size(n2,1)
-                  n2(j,ith) = 0.0
+               do ith = 1,noth
+                  do j = 1,size(n2,1)
+                     n2(j,ith) = 0.0
+                  enddo
                enddo
-            enddo
 !$omp end do
 !$omp end parallel
+            endif ! l_decl
 
          endif
          if ( intsrt .eq. 22 ) then
@@ -1308,22 +1312,25 @@
             if ( l_decl ) allocate ( thetaseg( noseg,noth ), stat=ierr )
             if ( ierr .ne. 0 ) then ; write(lunrep,2010) "thetaseg            " ; call srstop(1) ; endif
             if ( .not. l_decl ) write ( 328, 2040 ) nr_rar, "thetaseg            ", noseg*noth
+
+            if ( l_decl ) then
 !$omp parallel
 !$omp do private(j)
-            do ith = 1,noth
-               do j = 1,size(theta,1)
-                  theta(j,ith) = 0.0
+               do ith = 1,noth
+                  do j = 1,size(theta,1)
+                     theta(j,ith) = 0.0
+                  enddo
                enddo
-            enddo
 !$omp end do
 !$omp do private(j)
-            do ith = 1,noth
-               do j = 1,size(thetaseg,1)
-                  thetaseg(j,ith) = 0.0
+               do ith = 1,noth
+                  do j = 1,size(thetaseg,1)
+                     thetaseg(j,ith) = 0.0
+                  enddo
                enddo
-            enddo
 !$omp end do
 !$omp end parallel
+            endif ! l_decl
          endif
       endif
       if ( intsrt .eq. 24 ) then
