@@ -294,8 +294,8 @@
                   write(line,'(a)') '   Process is activated'
                   call monsys( line , 4 )
                else
-                  nowarn = nowarn + 1
-                  write(line,'(a)') '   WARNING : activated process can NOT be switched on'
+                  nerror = nerror + 1
+                  write(line,'(a)') '   ERROR : activated process can NOT be switched on'
                   call monsys( line , 4 )
                   do imis = 1 , min(nmis,mismax)
                      write(line,'(4a)') '   Not found:[',misnam(imis),'] ', mistxt(imis)

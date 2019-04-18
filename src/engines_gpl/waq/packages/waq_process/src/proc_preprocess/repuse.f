@@ -102,11 +102,19 @@
             endif
          enddo
 
-         ! check active constants, they are used
+         ! check active, close_err and solver constants, they are used
 
          call zoek( 'only_active', 1 , coname(icons), 11 , iused )
          if ( iused .gt. 0 ) used = .true.
          call zoek( 'active', 1 , coname(icons), 6 , iused )
+         if ( iused .gt. 0 ) used = .true.
+         call zoek( 'close_err', 1 , coname(icons), 9 , iused )
+         if ( iused .gt. 0 ) used = .true.
+         call zoek( 'maxiter', 1 , coname(icons), 7 , iused )
+         if ( iused .gt. 0 ) used = .true.
+         call zoek( 'tolerance', 1 , coname(icons), 9 , iused )
+         if ( iused .gt. 0 ) used = .true.
+         call zoek( 'iteration', 1 , coname(icons), 9 , iused )
          if ( iused .gt. 0 ) used = .true.
 
          ! report if not used
