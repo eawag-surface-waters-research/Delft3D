@@ -392,12 +392,13 @@ module m_readCrossSections
                else 
                   groundlayerUsed =  .false.
                endif
+               success = .true.
+
                if (groundlayerUsed) then
                   call prop_get_double(md_ptr%child_nodes(i)%node_ptr, '', 'groundlayer', groundlayer, success)
                else
                   groundlayer = 0.0d0
                endif
-               success = .true.
                inext = AddCrossSectionDefinition(network%CSDefinitions, id, numLevels, level, width,               &
                                                  width, plains, crestLevel, baseLevel, flowArea, totalArea,        &
                                                  closed, groundlayerUsed, groundlayer)
