@@ -123,11 +123,12 @@ module m_readObservationPoints
                else ! the obs is defined by x, y coordinate and locationtype
                   formatbr = 0
                   call prop_get_integer(md_ptr%child_nodes(i)%node_ptr, 'observationpoint', 'LocationType', loctype, success)
+                  if (.not. success) then
+                     loctype = 2
+                  end if
+                  call prop_get_double(md_ptr%child_nodes(i)%node_ptr, 'observationpoint', 'x', xx, success)
                   if (success) then
-                     call prop_get_double(md_ptr%child_nodes(i)%node_ptr, 'observationpoint', 'x', xx, success)
-                     if (success) then
-                        call prop_get_double(md_ptr%child_nodes(i)%node_ptr, 'observationpoint', 'y', yy, success)
-                     end if
+                     call prop_get_double(md_ptr%child_nodes(i)%node_ptr, 'observationpoint', 'y', yy, success)
                   end if
                end if
                

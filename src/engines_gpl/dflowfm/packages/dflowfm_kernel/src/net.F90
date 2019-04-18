@@ -14775,7 +14775,7 @@ subroutine obs_on_flowgeom(iobstype)
     implicit none
 
     integer, intent(in) :: iobstype !< Which obs stations to update: 0=normal, 1=moving, 2=both
-    integer :: i, k, n, n1, n2, k1b, iobs, numobs1d
+    integer :: i, k, n, n1, n2, k1b, iobs, n3
     double precision           :: d1, d2
     
     integer                    :: jakdtree
@@ -14798,10 +14798,10 @@ subroutine obs_on_flowgeom(iobstype)
     call find_flownode(n2-n1+1, xobs(n1:n2), yobs(n1:n2), namobs(n1:n2), kobs(n1:n2), jakdtree, 1)
     
     ! for 1d observation points and add them to obs adm
-    call find_1d_flownode(n2-n1+1, numobs1d)
+    call find_flownode_from_ini_file(n2-n1+1, n3)
     
     if (loglevel_StdOut == LEVEL_DEBUG) then 
-       do iobs = n1,n2+numobs1d
+       do iobs = n1,n2+n3
           if (kobs(iobs)<ndx2D) then
              write(msgbuf, '(a,i0,a,i0,a)') "Obs #",iobs,":"//trim(namobs(iobs))//" on node ",kobs(iobs)," (2D)"
           else if (kobs(iobs)<=ndxi) then 
@@ -14912,7 +14912,7 @@ subroutine find_flownode(N, xobs, yobs, namobs, kobs, jakdtree, jaoutside)
 !! when given branch id and chainage, or given coordinates.
 !! Then adds these 1d observation points to the original administration 
 !! xobs, yobs, namobs, kobs, smxobs, cmxobs
-subroutine find_1d_flownode(n, n1d)
+subroutine find_flownode_from_ini_file(n, nnewobs)
    use MessageHandling
    use m_network
    use m_ObservationPoints
@@ -14924,21 +14924,21 @@ subroutine find_1d_flownode(n, n1d)
    use m_flowgeom, only: xz, yz
    implicit none
    integer, intent(in   )  :: n        !<number of existing observation points
-   integer, intent(  out)  :: n1d      !<number of 1d observation points
+   integer, intent(  out)  :: nnewobs  !<number of new observation points from ini file
   
    integer                        :: i, nodenr, branchIDX, nn, nt, ierr, xycount, jakdtree
    integer, allocatable           :: ixy2obs(:), kobs_tmp(:)
    double precision, allocatable  :: xobs_tmp(:), yobs_tmp(:)
    character(len=40), allocatable :: namobs_tmp(:)
    
-   n1d = network%obs%count
+   nnewobs = network%obs%count
 
-   if (n1d <= 0) then
+   if (nnewobs <= 0) then
       return
    end if
    
    ! realloc
-   nn  = n + n1d
+   nn  = n + nnewobs
    call realloc(xobs,   nn, keepExisting=.true.)
    call realloc(yobs,   nn, keepExisting=.true.)
    call realloc(namobs, nn, keepExisting=.true.)
@@ -14947,15 +14947,15 @@ subroutine find_1d_flownode(n, n1d)
    call realloc(cmxobs, nn, keepExisting=.true.)
    
    ! realloc temperary arrays for obs which are defined by xy coordinate
-   call realloc(ixy2obs,    n1d, keepExisting=.false.)
-   call realloc(xobs_tmp,   n1d, keepExisting=.false.)
-   call realloc(yobs_tmp,   n1d, keepExisting=.false.)
-   call realloc(kobs_tmp,   n1d, keepExisting=.false.)
-   call realloc(namobs_tmp, n1d, keepExisting=.false.)
+   call realloc(ixy2obs,    nnewobs, keepExisting=.false.)
+   call realloc(xobs_tmp,   nnewobs, keepExisting=.false.)
+   call realloc(yobs_tmp,   nnewobs, keepExisting=.false.)
+   call realloc(kobs_tmp,   nnewobs, keepExisting=.false.)
+   call realloc(namobs_tmp, nnewobs, keepExisting=.false.)
    
    xycount = 0 ! count of the obs which is defined by xy coordinate
    
-   do i = 1, n1d
+   do i = 1, nnewobs
       nt = n+i
       branchIdx = network%obs%OPnt(i)%branchIdx
       if (branchIdx > 0) then ! obs which are defined by branchid and chainage
@@ -14999,7 +14999,7 @@ subroutine find_1d_flownode(n, n1d)
    if (allocated(namobs_tmp)) deallocate(namobs_tmp)
       
    return        
-end subroutine find_1d_flownode 
+end subroutine find_flownode_from_ini_file 
     
 
       SUBROUTINE curvilinearGRIDfromsplines()
