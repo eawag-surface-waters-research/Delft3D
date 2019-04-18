@@ -14775,7 +14775,7 @@ subroutine obs_on_flowgeom(iobstype)
     implicit none
 
     integer, intent(in) :: iobstype !< Which obs stations to update: 0=normal, 1=moving, 2=both
-    integer :: i, k, n, n1, n2, k1b, iobs
+    integer :: i, k, n, n1, n2, k1b, iobs, numobs1d
     double precision           :: d1, d2
     
     integer                    :: jakdtree
@@ -14797,8 +14797,11 @@ subroutine obs_on_flowgeom(iobstype)
     
     call find_flownode(n2-n1+1, xobs(n1:n2), yobs(n1:n2), namobs(n1:n2), kobs(n1:n2), jakdtree, 1)
     
+    ! for 1d observation points and add them to obs adm
+    call find_1d_flownode(n2-n1+1, numobs1d)
+    
     if (loglevel_StdOut == LEVEL_DEBUG) then 
-       do iobs = n1,n2
+       do iobs = n1,n2+numobs1d
           if (kobs(iobs)<ndx2D) then
              write(msgbuf, '(a,i0,a,i0,a)') "Obs #",iobs,":"//trim(namobs(iobs))//" on node ",kobs(iobs)," (2D)"
           else if (kobs(iobs)<=ndxi) then 
@@ -14903,8 +14906,101 @@ subroutine find_flownode(N, xobs, yobs, namobs, kobs, jakdtree, jaoutside)
 1234 continue
      
    return
-end subroutine find_flownode
+   end subroutine find_flownode
 
+!> Finds the flow nodes/cell numbers for 1d observation points, 
+!! when given branch id and chainage, or given coordinates.
+!! Then adds these 1d observation points to the original administration 
+!! xobs, yobs, namobs, kobs,smxobs, cmxobs
+subroutine find_1d_flownode(n, n1d)
+   use MessageHandling
+   use m_network
+   use m_ObservationPoints
+   use m_observations
+   use unstruc_channel_flow
+   use m_inquire_flowgeom
+   use dfm_error
+   use m_alloc
+   use m_flowgeom, only: xu, yu
+   implicit none
+   integer, intent(in   )  :: n        !<number of existing observation points
+   integer, intent(  out)  :: n1d      !<number of 1d observation points
+  
+   integer                        :: i, nodenr, branchIDX, nn, nt, ierr, xycount, jakdtree
+   integer, allocatable           :: ixy2obs(:), kobs_tmp(:)
+   double precision, allocatable  :: xobs_tmp(:), yobs_tmp(:)
+   character(len=40), allocatable :: namobs_tmp(:)
+   
+   n1d = network%obs%count
+
+   if (n1d <= 0) then
+      return
+   end if
+   
+   ! realloc
+   nn  = n + n1d
+   call realloc(xobs,   nn, keepExisting=.true.)
+   call realloc(yobs,   nn, keepExisting=.true.)
+   call realloc(namobs, nn, keepExisting=.true.)
+   call realloc(kobs,   nn, keepExisting=.true.)
+   call realloc(smxobs, nn, keepExisting=.true.)
+   call realloc(cmxobs, nn, keepExisting=.true.)
+   
+   ! realloc temperary arrays for obs which are defined by xy coordinate
+   call realloc(ixy2obs,    n1d, keepExisting=.false.)
+   call realloc(xobs_tmp,   n1d, keepExisting=.false.)
+   call realloc(yobs_tmp,   n1d, keepExisting=.false.)
+   call realloc(kobs_tmp,   n1d, keepExisting=.false.)
+   call realloc(namobs_tmp, n1d, keepExisting=.false.)
+   
+   xycount = 0 ! count of the obs which is defined by xy coordinate
+   
+   do i = 1, n1d
+      nt = n+i
+      branchIdx = network%obs%OPnt(i)%branchIdx
+      if (branchIdx > 0) then ! obs which are defined by branchid and chainage
+         ierr = findnode(branchIdx, network%obs%OPnt(i)%chainage, nodenr)
+         if (ierr == DFM_NOERR) then
+            xobs(nt)   = xu(nodenr)
+            yobs(nt)   = yu(nodenr)
+            kobs(nt)   = nodenr
+         else
+            call SetMessage(LEVEL_ERROR, 'Error adding Observation Point '''//trim(network%obs%OPnt(i)%name)//'''')
+         end if
+      else !obs which are defined by xy coordinate
+         xobs(nt)   = network%obs%OPnt(i)%x
+         yobs(nt)   = network%obs%OPnt(i)%y
+         
+         xycount = xycount + 1
+         ixy2obs(xycount)    = i
+         xobs_tmp(xycount)   = xobs(nt)
+         yobs_tmp(xycount)   = yobs(nt)
+         namobs_tmp(xycount) = namobs(nt)
+      end if
+      smxobs(nt) = -999d0
+      cmxobs(nt) = -999d0
+      namobs(nt) = network%obs%OPnt(i)%name
+   end do
+   
+   ! find flow node for obs which are defined by xy coordinate
+   jakdtree = 1
+   ! TODO: This works when there is only 1d network. If the network contains both 1d and 2d , then the following subouritne 
+   ! needs to be modified based on LocationType: when LocationType == 1(or 2) , then find flow nodes in only 1d (or 2d ) flownodes
+   call find_flownode(xycount, xobs_tmp(1:xycount), yobs_tmp(1:xycount), namobs(1:xycount), kobs_tmp(1:xycount), jakdtree, 1)
+   
+   do i = 1, xycount
+      kobs(ixy2obs(i)) = kobs_tmp(i)  
+   end do
+   
+   if (allocated(ixy2obs))    deallocate(ixy2obs)
+   if (allocated(xobs_tmp))   deallocate(xobs_tmp)
+   if (allocated(yobs_tmp))   deallocate(yobs_tmp)
+   if (allocated(yobs_tmp))   deallocate(yobs_tmp)
+   if (allocated(namobs_tmp)) deallocate(namobs_tmp)
+      
+   return        
+end subroutine find_1d_flownode 
+    
 
       SUBROUTINE curvilinearGRIDfromsplines()
       USE M_SPLINES

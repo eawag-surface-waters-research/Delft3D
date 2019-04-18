@@ -48,13 +48,13 @@ module m_readObservationPoints
    public write_obs_point_cache
 
    contains
-
+   !> Reads 1d observation points
    subroutine readObservationPoints(network, observationPointsFile)
-
+      use m_missing, only: dmiss
       implicit none
       
       type(t_network), intent(inout)        :: network
-      character*(*), intent(in)             :: observationPointsFile
+      character*(*)  , intent(in)           :: observationPointsFile
 
       logical                               :: success
       type(tree_data), pointer              :: md_ptr 
@@ -67,24 +67,26 @@ module m_readObservationPoints
       character(len=IdLen)                  :: branchID
       
       double precision                      :: Chainage
+      double precision                      :: xx, yy
+      integer                               :: loctype
       integer                               :: branchIdx
-      integer                               :: p1
-      integer                               :: p2
-      integer                               :: l1
       type(t_ObservationPoint), pointer     :: pOPnt
-      type(t_branch), pointer               :: pbr
-      
-      character(CharLn)                     :: line
-      character(CharLn)                     :: pnt1
-      character(CharLn)                     :: pnt2
-      character(CharLn)                     :: val1
-      character(CharLn)                     :: val2
-
       integer                               :: pos
       integer                               :: ibin = 0
       character(len=Charln)                 :: binfile
       logical                               :: file_exist
+      integer                               :: formatbr       ! =1: use branchid and chainage, =0: use xy coordinate and LocationType
  
+      xx       = dmiss
+      yy       = dmiss
+      Chainage = dmiss
+      loctype  = 1
+      branchIdx= 0
+      
+      branchID     = ''
+      obsPointID   = ''
+      obsPointName = ''
+      
       pos = index(observationPointsFile, '.', back = .true.)
       binfile = observationPointsFile(1:pos)//'cache'
       inquire(file=binfile, exist=file_exist)
@@ -111,27 +113,32 @@ module m_readObservationPoints
       do i = 1, numstr
          
          if (tree_get_name(md_ptr%child_nodes(i)%node_ptr) .eq. 'observationpoint') then
-            
+            formatbr = 1
             ! Read Data
-            
-            call prop_get_string(md_ptr%child_nodes(i)%node_ptr, 'observationpoint', 'id', obsPointID, success)
-            if (success) call prop_get_string(md_ptr%child_nodes(i)%node_ptr, 'observationpoint', 'branchid', branchID, success)
-            if (success) call prop_get_double(md_ptr%child_nodes(i)%node_ptr, 'observationpoint', 'chainage', Chainage, success)
-            if (.not. success) then
-               call SetMessage(LEVEL_ERROR, 'Error Reading Observation Point '''//trim(obsPointID)//'''')
-               cycle
-            endif
-            
             call prop_get_string(md_ptr%child_nodes(i)%node_ptr, 'observationpoint', 'name', obsPointName, success)
-            if (.not. success) then
-               obsPointName = obsPointID
-            endif
-            
-            branchIdx = hashsearch(network%brs%hashlist, branchID)
-            if (branchIdx <= 0) Then
-               call SetMessage(LEVEL_ERROR, 'Error Reading Observation Point '''//trim(obsPointID)//''': Branch: '''//trim(branchID)//''' not Found')
+            if (success) then
+               call prop_get_string(md_ptr%child_nodes(i)%node_ptr, 'observationpoint', 'branchid', branchID, success)
+               if (success) then ! the obs is defined by branchid and chainage
+                  call prop_get_double(md_ptr%child_nodes(i)%node_ptr, 'observationpoint', 'chainage', Chainage, success)
+               else ! the obs is defined by x, y coordinate and locationtype
+                  formatbr = 0
+                  call prop_get_integer(md_ptr%child_nodes(i)%node_ptr, 'observationpoint', 'LocationType', loctype, success)
+                  if (success) then
+                     call prop_get_double(md_ptr%child_nodes(i)%node_ptr, 'observationpoint', 'x', xx, success)
+                     if (success) then
+                        call prop_get_double(md_ptr%child_nodes(i)%node_ptr, 'observationpoint', 'y', yy, success)
+                     end if
+                  end if
+               end if
+               
+               if (.not. success) then
+                  call SetMessage(LEVEL_ERROR, 'Error Reading Observation Point '''//trim(obsPointName)//'''')     
+                  cycle
+               end if
+            else
+               call SetMessage(LEVEL_ERROR, 'Error Reading the name of Observation Point. ')     
                cycle
-            endif
+            end if
       
             network%obs%Count = network%obs%Count+1
             if (network%obs%Count > network%obs%size) then
@@ -143,64 +150,23 @@ module m_readObservationPoints
             
             pOPnt%id        = obsPointID
             pOPnt%name      = obsPointName
-            pOPnt%branch    => network%brs%branch(branchIdx)
-            pOPnt%branchIdx = branchIdx
-            pOPnt%chainage    = Chainage
-            pbr             => network%brs%branch(branchIdx)
-      
-            call get2CalcPoints(network%brs, branchIdx, Chainage, pOPnt%p1, pOPnt%p2, &
-                                pOPnt%pointWeight, pOPnt%l1, pOPnt%l2, pOPnt%linkWeight)
-      
-            if (network%obs%interpolationType == OBS_NEAREST) then
-               if (pOPnt%pointWeight > 0.5d0) then
-                  pOPnt%pointWeight = 1.0d0
-               else
-                  pOPnt%pointWeight = 0.0d0
-               endif
-               p1 = pOPnt%p1 - pbr%Points(1) + 1
-               l1 = pOPnt%l1 - pbr%uPoints(1) + 1
-               if (l1 >= p1) then
-                  pOPnt%linkWeight = 1.0d0
-               else
-                  pOPnt%linkWeight = 0.0d0
-               endif
-            endif
-
-            ! Debug Info
-            
-            if (thresholdLvl_file == LEVEL_DEBUG) then
-            write(val1, '(f10.0)') Chainage
-            call remove_all_spaces(val1)
-            line = 'Observation point '//trim(obsPointID)//' added on branch '//trim(pbr%id)//' at chainage '//val1
-               call setMessage(LEVEL_DEBUG, line)
-            p1 = pOPnt%p1 - pbr%Points(1) + 1
-            p2 = pOPnt%p2 - pbr%Points(1) + 1
-            
-            write(pnt1, '(f10.0)') pbr%gridPointschainages(p1)
-            call remove_all_spaces(pnt1)
-            write(pnt2, '(f10.0)') pbr%gridPointschainages(p2)
-            call remove_all_spaces(pnt2)
-            write(val1,'(f6.3)') pOPnt%pointWeight
-            write(val2,'(f6.3)') 1.0-pOPnt%pointWeight
-            line = '    Values at grid points evaluated by Val(P_'//trim(pnt1)//') * '//trim(val1)//' + Val(P_'//trim(pnt2)//') * '//trim(val2)
-            call setMessage(LEVEL_DEBUG, line)
-            p1 = pOPnt%l1 - pbr%uPoints(1) + 1
-            p2 = pOPnt%l2 - pbr%uPoints(1) + 1
-            
-            write(pnt1, '(f10.0)') pbr%uPointschainages(p1)
-            call remove_all_spaces(pnt1)
-            write(pnt2, '(f10.0)') pbr%uPointschainages(p2)
-            call remove_all_spaces(pnt2)
-            write(val1,'(f6.3)') pOPnt%linkWeight
-            write(val2,'(f6.3)') 1.0-pOPnt%linkWeight
-            line = '    Values at u-points evaluated by Val(P_'//trim(pnt1)//') * '//trim(val1)//' + Val(P_'//trim(pnt2)//') * '//trim(val2)
-            call setMessage(LEVEL_DEBUG, line)
-            endif
-
+            if (formatbr == 1) then
+               branchIdx = hashsearch(network%brs%hashlist, branchID)
+               pOPnt%branch    => network%brs%branch(branchIdx)
+               pOPnt%branchIdx = branchIdx
+               pOPnt%chainage  = Chainage                
+            else
+               pOPnt%x         = xx
+               pOPnt%y         = yy
+               pOPnt%locationtype = loctype
+               pOPnt%branchIdx = 0
+            end if
          endif
-
       end do
-    
+      
+      write(msgbuf,'(i10,a)') network%obs%Count , ' (1D network) observation points have been read.'
+      call msg_flush()
+      
       call fill_hashtable(network%obs)
       
       call tree_destroy(md_ptr)

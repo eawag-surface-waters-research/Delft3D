@@ -74,6 +74,10 @@ module m_ObservationPoints
         integer                     :: branchIdx            !< index of branch on which the observation point is located
         type(t_branch), pointer     :: branch               !< pointer to branch on which the observation point is located
         double precision            :: chainage             !< chainage of observation point on branch
+        !> optional 
+        double precision            :: x                    !< x-coordinate
+        double precision            :: y                    !< y-coordinate
+        integer                     :: locationtype         !< location type: =1, snap to 1d flownode, =2, snap to 2d flownode
    end type
    
    type, public :: t_ObservationPointSet

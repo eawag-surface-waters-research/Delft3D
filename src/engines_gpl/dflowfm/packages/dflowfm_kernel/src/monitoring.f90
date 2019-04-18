@@ -660,6 +660,8 @@ end subroutine purgeObservations
 
 !> Removes all observation points
 subroutine deleteObservations()
+use m_ObservationPoints
+use unstruc_channel_flow, only: network
     if (allocated(xobs)) then
        deallocate(xobs)
        deallocate(yobs)
@@ -669,7 +671,9 @@ subroutine deleteObservations()
        deallocate(smxobs)
        deallocate(cmxobs)
     end if
-
+    
+    call dealloc(network%obs) ! deallocate 1d obs
+    
     allocate(xobs(capacity_))
     allocate(yobs(capacity_))
     allocate(xyobs(2*capacity_))
@@ -690,12 +694,16 @@ end subroutine deleteObservations
 !> Reads observation points from file.
 subroutine loadObservations(filename, jadoorladen)
     use messageHandling
+    use m_readObservationPoints, only: readObservationPoints
+    use unstruc_channel_flow, only: network
+    use m_inquire_flowgeom
+    use dfm_error
     implicit none
     character(len=*), intent(in) :: filename
     integer,          intent(in) :: jadoorladen !< Append to existing observation points or not
 
     logical :: jawel
-    integer :: mobs, n, L, L2
+    integer :: mobs, n, L, L2, tok
     double precision :: xp, yp
     character (len=256) :: rec
     character (len=40) :: nam
@@ -708,21 +716,29 @@ subroutine loadObservations(filename, jadoorladen)
             call deleteObservations()
         end if
 
-        n=0
- 20     read(mobs,'(a)',end =889) rec
-
-        read(rec,*,err=888) xp, yp, nam
-
-        L  = index(rec,'''')
-        if (L > 0) then
-            L  = L + 1  
-            L2 = index(rec(L:),'''') - 2 + L
-            nam = rec(L:L2)
-        endif
-
-        call addObservation(xp, yp, nam)
-        n = n+1
-        goto 20
+        tok = index(filename, '.xyn')
+        if (tok > 0) then
+           n=0
+ 20        read(mobs,'(a)',end =889) rec
+           
+           read(rec,*,err=888) xp, yp, nam
+           
+           L  = index(rec,'''')
+           if (L > 0) then
+               L  = L + 1  
+               L2 = index(rec(L:),'''') - 2 + L
+               nam = rec(L:L2)
+           endif
+           
+           call addObservation(xp, yp, nam)
+           n = n+1
+           goto 20
+        else
+           tok = index(filename, '.ini')
+           if (tok > 0) then
+              call readObservationPoints(network, filename)
+           end if
+        end if
 
 889     call doclose(mobs)
     else
