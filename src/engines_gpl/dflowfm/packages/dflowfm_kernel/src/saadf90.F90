@@ -34,7 +34,7 @@
 ! $Id$
 ! $HeadURL$
 
-#include 'blasfm.h'
+#include "blasfm.h"
 
     MODULE GAMMAS
     double precision ::   gammax,gammay,alpha
