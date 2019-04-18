@@ -640,15 +640,14 @@ subroutine get_filter_coeff(klay)
             iLL1 = nd(kk)%ln(iL)
             LL1 = iabs(iLL1)
             
+!           update typical mesh width         
+            Deltax = max(Deltax, Dx(LL1))      
+!            Deltax = min(Deltax, Dx(LL1))
+            
 !           exclude self
             if ( LL1.eq.LL ) then
                cycle
             end if
-            
-            
-!           update typical mesh width         
-            Deltax = max(Deltax, Dx(LL))      
-!            Deltax = min(Deltax, Dx(LL))
             
 !           update typical viscosity
 !            vicouv = max(vicouv, vicLu(L))
