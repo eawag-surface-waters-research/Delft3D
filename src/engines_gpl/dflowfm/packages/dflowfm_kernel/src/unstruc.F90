@@ -40392,7 +40392,8 @@ double precision :: frcn, cz, cf, conv, af_sub(3), perim_sub(3), cz_sub(3)
 double precision :: q_sub(3)             ! discharge per segment
 integer          :: LL, ka, kb, itp, ifrctyp
 integer          :: k1, k2
-double precision :: u1L, q1L, s1L, dpt
+double precision :: u1L, q1L, s1L, dpt, factor
+type(t_CrossSection), pointer :: cross1, cross2
 
 LL = L
 if (L > lnxi) then                      ! for 1D boundary links, refer to attached link
@@ -40404,7 +40405,12 @@ hpr = hprL
 if (abs(kcu(ll))==1 .and. network%loaded) then !flow1d used only for 1d channels and not for 1d2d roofs and gullies
    cz = 0d0
    if (japerim == 0) then ! calculate total area and volume
-      call getCrossTotalData_on_link(network, LL, hpr, area, width, CSCalculationOption)
+      cross1 => network%crs%cross(network%adm%line2cross(LL)%c1)
+      cross2 => network%crs%cross(network%adm%line2cross(LL)%c2)
+      factor =  network%adm%line2cross(LL)%f
+ 
+      call GetCSParsTotal(cross1, cross2, factor, hpr, area, width, CSCalculationOption, network%adm%hysteresis_for_summerdike(:,LL))
+
    else ! japerim = 1: calculate flow area, conveyance and perimeter.
       call getCrossFlowData_on_link(network, LL, hpr, flowArea=area, flowWidth=width, &
                       wetPerimeter = perim, conveyance=conv, cz = cz, af_sub = af_sub, &
