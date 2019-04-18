@@ -1150,6 +1150,10 @@ if(q /= 0) then
 
  call u1q1()                                         ! the vertical flux qw depends on new sigma => after setkbotktop
  call compute_q_total_1d2d()
+ 
+ !if ( jacheckmonitor.eq.1 ) then
+ !   call comp_checkmonitor()
+ !end if
 
  if ( itstep.eq.4 ) then   ! explicit time-step
     call update_s_explicit()
@@ -5182,11 +5186,6 @@ end subroutine setdt
  if ( jaFrcInternalTides2D.gt.0 .and. kmx.eq.0 ) then   ! internal tides friction (2D only)
     call add_InternalTidesFrictionForces()
  end if
-
-! if ( jaremovecheckerboard.gt.0 ) then
-!  remove checkerboard
-    call removecheckerboard()
-! end if
 
 
  if (chkadvd > 0) then                       ! niet droogtrekken door advectie, stress of wind (allen in adve)
@@ -12437,7 +12436,7 @@ else if (nodval == 27) then
  else if ( linval == 33) then
     zlin = iadv(LL)
  else if ( linval == 34) then
-    zlin = hu(LL) ! plotlin(L)
+    zlin = plotlin(L)
  else if ( linval == 35) then
     zlin = ln(1,L)
  else if ( linval == 36) then
@@ -14040,9 +14039,7 @@ endif
     call inisolver_advec(ierror)
  end if
 
- if ( jafilter.eq.1 ) then
-!    call ini_filter(ierror)
- end if
+ call ini_filter(jafilter, filterorder, jacheckmonitor, ierror)
 
  if (jabarrieradvection == 3) then
     call setstruclink()
@@ -16119,6 +16116,7 @@ subroutine unc_write_his(tim)            ! wrihis
     use m_fm_wq_processes
     use string_module
     use m_dad
+    use m_filter, only: checkmonitor
 
     implicit none
 
@@ -16152,7 +16150,7 @@ subroutine unc_write_his(tim)            ! wrihis
                      id_partdim, id_parttime, id_partx, id_party, id_partz, &
                      id_dredlinkdim, id_dreddim, id_dumpdim, id_dredlink_dis, id_dred_dis, id_dump_dis, id_dred_tfrac, id_plough_tfrac, id_lsedtot, id_dred_name, id_dump_name, id_frac_name, & !id_dump_dis_frac, id_dred_dis_frac, &
                      id_dambreakdim, id_dambreakname, id_dambreak_s1up, id_dambreak_s1dn, id_dambreak_breach_depth,id_dambreak_breach_width, id_dambreak_discharge, id_dambreak_cumulative_discharge, &
-                     id_dambreak_breach_width_derivative, id_dambreak_water_level_jump, id_dambreak_normal_velocity
+                     id_dambreak_breach_width_derivative, id_dambreak_water_level_jump, id_dambreak_normal_velocity, id_checkmon
 
     integer, allocatable, save :: id_tra(:)
     integer, allocatable, save :: id_hwq(:)
@@ -16231,13 +16229,14 @@ subroutine unc_write_his(tim)            ! wrihis
         ierr = nf90_def_dim(ihisfile, 'time', nf90_unlimited, id_timedim)
 
         ierr = nf90_def_dim(ihisfile, 'name_len', 64, id_strlendim)
+        
+        if (kmx > 0) then
+           ierr = nf90_def_dim(ihisfile, 'laydim', kmx, id_laydim)
+           ierr = nf90_def_dim(ihisfile, 'laydimw', kmx+1, id_laydimw)
+        end if
+            
         if (numobs+nummovobs > 0) then
             ierr = nf90_def_dim(ihisfile, 'stations', numobs+nummovobs, id_statdim)
-
-            if (kmx > 0) then
-               ierr = nf90_def_dim(ihisfile, 'laydim', kmx, id_laydim)
-               ierr = nf90_def_dim(ihisfile, 'laydimw', kmx+1, id_laydimw)
-            end if
 
             if (nummovobs > 0) then
                ierr = nf90_def_var(ihisfile, 'station_x_coordinate', nf90_double, (/ id_statdim, id_timedim /), id_statx) ! TODO: AvD: decide on UNST-1606 (trajectory_id vs. timeseries_id)
@@ -17167,6 +17166,12 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_att(ihisfile, id_plough_tfrac, 'long_name', 'Time fraction spent ploughing')
             ierr = nf90_put_att(ihisfile, id_plough_tfrac, 'units', '-') !nploughed
         endif
+        
+        if ( jacheckmonitor.eq.1 ) then
+           ierr = nf90_def_var(ihisfile, 'checkerboard_monitor', nf90_double, (/ id_laydim, id_timedim /), id_checkmon)
+           ierr = nf90_put_att(ihisfile, id_checkmon, 'long_name', 'Checkerboard mode monitor')
+           ierr = nf90_put_att(ihisfile, id_checkmon, 'unit', 'm s-1')
+        end if
 
         ierr = nf90_def_var(ihisfile, 'time', nf90_double, id_timedim, id_time)
         ierr = nf90_put_att(ihisfile, id_time,  'units'        , 'seconds since '//refdat(1:4)//'-'//refdat(5:6)//'-'//refdat(7:8)//' 00:00:00')
@@ -17724,6 +17729,11 @@ subroutine unc_write_his(tim)            ! wrihis
 !          ierr = nf90_put_var(ihisfile, id_zcdam(num)    , zcdam(num)    ,  start=(/ it_his /))
        enddo
     endif
+    
+    if ( jacheckmonitor.eq.1 ) then
+      call comp_checkmonitor()
+      ierr = nf90_put_var(ihisfile, id_checkmon, checkmonitor, start=(/ 1, it_his /))
+    end if
 
     ierr = nf90_sync(ihisfile) ! Flush file
 
@@ -33297,7 +33307,11 @@ end subroutine setbobs_fixedweirs
     enddo
 
  else                                                  ! 3D
-
+ 
+    if ( jafilter.ne.0 ) then
+      call comp_filter_predictor()
+    end if
+ 
     call update_verticalprofiles()
 
  endif
@@ -40049,6 +40063,7 @@ subroutine getymxpar(modind,tauwav, taucur, fw, cdrag, abscos, ypar, ymxpar)
  use m_missing
  use m_waves
  use m_sferic
+ use m_filter, only: ustar, itype
  implicit none
  double precision   :: a(kmxx),b(kmxx),c(kmxx),d(kmxx),e(kmxx), dzu(kxL), womegu(kxL-1), dzv(kmxx)
  integer            :: Lb,Lt,kxL,LL
@@ -40061,7 +40076,14 @@ subroutine getymxpar(modind,tauwav, taucur, fw, cdrag, abscos, ypar, ymxpar)
  double precision   :: aa(kmxx),cc(kmxx) ! for five-diaginal matrix
                                          ! aa(i)*u(i-2)+a(i)*u(i-1)+b(i)*u(i)+c(i)*u(i+1)+cc(i)*u(i+2)=d(i)
 
- a(1:kxL) = 0d0 ; b(1:kxL) = dti ; c(1:kxL) = 0d0 ; d(1:kxL) = u0(Lb:Lt)*dti   ! put u1 in ddk
+ a(1:kxL) = 0d0 ; b(1:kxL) = dti ; c(1:kxL) = 0d0 
+ 
+ if ( jafilter.ne.0 ) then
+   d(1:kxL) = ustar(Lb:Lt)*dti
+ else
+    d(1:kxL) = u0(Lb:Lt)*dti   ! put u1 in ddk
+ end if
+ 
  aa(1:kxL) = 0d0 ; cc(1:kxL) = 0d0
 
  adv = 0d0; adv1 = 0d0
@@ -40247,11 +40269,19 @@ subroutine getymxpar(modind,tauwav, taucur, fw, cdrag, abscos, ypar, ymxpar)
  cu      = gdxi*teta(LL)
  du      = gdxids*(1d0-teta(LL)) - gdxi*slopec
 
- do L = Lb, Lt
-    k = L - Lb + 1
-    b(k) = b(k) + advi(L)
-    d(k) = d(k) - adve(L) - du
- enddo
+ if ( jafilter.ne.0 .and. itype.eq.3 ) then
+    do L = Lb, Lt
+       k = L - Lb + 1
+       b(k) = b(k) + advi(L)
+       d(k) = d(k) - du
+    enddo
+ else
+    do L = Lb, Lt
+       k = L - Lb + 1
+       b(k) = b(k) + advi(L)
+       d(k) = d(k) - adve(L) - du
+    enddo
+ end if
 
  if( javau == 5 ) then
     call pentadiag( aa, a, b, c, cc, d, Ru(Lb:), kxL )
@@ -40266,10 +40296,6 @@ subroutine getymxpar(modind,tauwav, taucur, fw, cdrag, abscos, ypar, ymxpar)
  else
     call tridag(a,b,c,d,e,Fu(Lb:),kxL)
  endif
-
-! if ( jafilter.eq.1 ) then
-!   call filter_furu()
-! end if
 
  end subroutine vertical_profile_u0
 
@@ -43597,42 +43623,6 @@ subroutine makethindamadmin()
    end do
 end subroutine makethindamadmin
 
-
-
-   subroutine removecheckerboard()
-      use m_flowgeom
-      use m_flow
-      use m_flowparameters
-      implicit none
-
-      double precision :: dfac
-      double precision :: ac1, ac2
-
-      integer          :: LL, L, Lb, Lt
-      integer          :: k1, k2
-
-      if ( vicouv_filter.le.0d0 ) return
-
-      do LL=1,Lnx
-         if ( hu(LL).eq.0 ) cycle
-
-         call getLbotLtop(LL, Lb, Lt)
-         dfac =  vicouv_filter*4d0*dxi(LL)*dxi(LL)
-!         ac1 = 0.5d0/acl(LL)
-!         ac2 = 0.5d0/(1d0-acL(LL))
-
-         ac1 = acL(LL)
-         ac2 = (1d0-acL(LL))
-         do L=Lb,Lt
-            k1 = ln(1,L)
-            k2 = ln(2,L)
-            advi(L) = advi(L) + dfac*(ac1 + ac2)
-            adve(L) = adve(L) - dfac*((ac1*ucx(k1) + ac2*ucx(k2))*csu(LL) - (ac1*ucy(k1) + ac2*ucy(k2))*snu(LL))
-         end do
-      end do
-
-      return
-   end subroutine removecheckerboard
 
    ! ********************************************************************
       SUBROUTINE ENTRYFLOW (Y0,J,U,DUDY,TKE,EPS,NUT,GAMT)

@@ -36009,7 +36009,7 @@ ilp:do isplit=1,MAXSPLIT
     
     orient = 1
     
-!   whip out grid
+!   whipe out grid
     call cleargrid()
     
     do
@@ -36061,7 +36061,7 @@ ilp:do isplit=1,MAXSPLIT
        end if
        
 !      compute new grid dimensions
-       Mnew = 2*M-2
+       Mnew = 2*M
        Nnew = N
        
 !      increase grid
@@ -36073,26 +36073,33 @@ ilp:do isplit=1,MAXSPLIT
        
 !      odd j-lines: copy
        do j=1,N,2
-          do i=1,M-1
-!            odd i-lines                
-             xc(2*i-1,j) = x(i,j)
-             yc(2*i-1,j) = y(i,j)
-             
+          do i=1,M
 !            even i-lines
-             xc(2*i,j) = x(i+1,j)
-             yc(2*i,j) = y(i+1,j)
+             xc(2*i,j) = x(i,j)
+             yc(2*i,j) = y(i,j)
+
+!            odd i-lines                
+             xc(2*i-1,j) = xc(2*i,j)
+             yc(2*i-1,j) = yc(2*i,j)
           end do
        end do
        
 !      even j-lines: shift
        do j=2,N,2
+!         boundaries
+          xc(1,j) = x(1,j)
+          yc(1,j) = y(1,j)
+          
+          xc(2*M,j) = x(M,j)
+          yc(2*M,j) = y(M,j)
+          
           do i=1,M-1
-!            odd i-lines
-             call half(x(i,j),y(i,j),x(i+1,j),y(i+1,j),xc(2*i-1,j),yc(2*i-1,j),jsferic,jasfer3D)
+!            even i-lines
+             call half(x(i,j),y(i,j),x(i+1,j),y(i+1,j),xc(2*i,j),yc(2*i,j),jsferic,jasfer3D)
              
-!            even i-lines               
-             xc(2*i,j) = xc(2*i-1,j)
-             yc(2*i,j) = yc(2*i-1,j)
+!            odd i-lines               
+             xc(2*i+1,j) = xc(2*i,j)
+             yc(2*i+1,j) = yc(2*i,j)
           end do
        end do
     

@@ -4698,7 +4698,7 @@ subroutine xbeach_solvesystem(solver,sol,iters,ierror)
    if ( ierror.ne.0 ) goto 1234
    
 !  solve system   
-   call runrc2(solver%numrows,solver%rhs,sol,solver%ipar,solver%fpar,solver%work,solver%a,solver%ja,solver%ia,solver%alu,solver%jlu,solver%ju,iters,solver%eps,solver%jabcgstab,ierror)
+   call runrc2(solver%numrows,solver%rhs,sol,solver%ipar,solver%fpar,solver%work,solver%a,solver%ja,solver%ia,solver%alu,solver%jlu,solver%ju,iters,solver%eps,solver%jabcgstab,ierror,solver%numnonzerosprecond)
    if ( ierror.ne.0 ) goto 1234
    
    ierror=0

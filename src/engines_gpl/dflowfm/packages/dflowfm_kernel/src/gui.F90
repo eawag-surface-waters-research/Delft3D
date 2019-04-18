@@ -18310,8 +18310,9 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
    double precision :: h1,h5,h7,w1,w5,w7 
 
    NLEVEL     = 4
-   OPTION( 1) = 'vicouv_filter                    (m2/s)' ; it(2* 1) = 6
-   OPTION( 2) = 'wu1DUNI                          (m)   ' ; it(2* 2) = 6
+!   OPTION( 1) = 'vicouv_filter                    (m2/s)' ; it(2* 1) = 6
+   OPTION( 1) = 'filter                           ( )   ' ; it(2* 1) = 2
+   OPTION( 2) = 'filter order                     ( )   ' ; it(2* 2) = 2
    OPTION( 3) = 'hh1DUNI                          (m)   ' ; it(2* 3) = 6
    OPTION( 4) = 'Uniformtyp1D                     (m)   ' ; it(2* 4) = 2
    OPTION( 5) = 'wu1DUNI5                         (m)   ' ; it(2* 5) = 6
@@ -18415,11 +18416,13 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
       CALL IFORMATTRIBUTEN(IR,0,0,7)
    ENDDO
 
-   CALL IFORMputdouble  (2* 1 ,vicouv_filter, '(F7.3)' ) 
+!   CALL IFORMputdouble  (2* 1 ,vicouv_filter, '(F7.3)' ) 
+   CALL IFORMputinteger  (2* 1, jafilter)
+   write(6,*) filterorder
+   CALL IFORMputinteger  (2* 2, filterorder)
    w1 = wu1DUNI  ;  h1 = hh1DUNI
    w5 = wu1DUNI5 ;  h5 = hh1DUNI5
    w7 = wu1DUNI7 ;  h7 = hh1DUNI7
-   CALL IFORMputdouble  (2* 2 , wu1DUNI , '(F7.3)' )       
    CALL IFORMputdouble  (2* 3 , hh1DUNI , '(F7.3)' )       
    CALL IFORMputinteger (2* 4 , iproftypuni)       
    CALL IFORMputdouble  (2* 5 , wu1DUNI5, '(F7.3)' )       
@@ -18473,8 +18476,9 @@ SUBROUTINE SETCOLTABFILE(FILNAM,JASECOND)
    ELSE IF (KEY .EQ. 22 .OR. KEY .EQ. 23) THEN
        IF (KEY .EQ. 22) THEN
 
-          CALL IFORMGETdouble  (2* 1 , vicouv_filter)   
-          CALL IFORMgetdouble  (2* 2 , wu1DUNI  )       
+!          CALL IFORMGETdouble  (2* 1 , vicouv_filter)
+          CALL IFORMgetinteger (2* 1, jafilter)
+          CALL IFORMgetinteger (2* 2 , filterorder  )       
           CALL IFORMgetdouble  (2* 3 , hh1DUNI  )       
           CALL IFORMgetinteger (2* 4 , iproftypuni)        
           CALL IFORMgetdouble  (2* 5 , wu1DUNI5 )       

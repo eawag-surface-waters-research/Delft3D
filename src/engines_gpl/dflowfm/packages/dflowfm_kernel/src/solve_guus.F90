@@ -618,6 +618,8 @@ endif
  use MessageHandling
  use m_flowparameters, only : jajipjan
  use m_partitioninfo, only : jampi, sdmn, my_rank
+ use m_netw, only: xzw, yzw
+ use unstruc_model, only: md_ident
 
  implicit none
  integer                                       :: ndx, ipre, its
@@ -628,11 +630,13 @@ endif
  integer,                          intent(out) :: ierror         !< error (1) or not (0)
 
  integer          :: j,jj,n,ntot, na, matr, nietnul, m
- integer          :: minp
+ integer          :: minp, k
  
  double precision :: res, dum
  
  character(len=100) :: message
+ 
+ logical, save :: jaoutput=.false.
 
 
 ! ddr (rechterlid), bbr (diag) , ccr (off diag), s1, row, row()%j, row()%a [AvD]
@@ -819,22 +823,49 @@ endif
     endif   
  end if
  
- if ( .false. ) then
+ if ( jaoutput ) then
  !  BEGIN DEBUG
-    call newfil(minp, 'matrix.crs')
-    write(minp, "('Numrows = ', I0)") nn
-    write(minp, "('startpointers ia = ', $)")
+    call newfil(minp, 'system_' // trim(md_ident) // '.m')
+    write(minp, "('Numrows = ', I0, ';')") nn
+    write(minp, "('%startpointers')")
+    write(minp, "('ia = [', $)")
     write(minp, "(I0, ' ', $)") (iao(i), i=1,nn+1)
-    write(minp, *)
-    write(minp, "('rowindices ja = ', $)")
+    write(minp, "('];')")
+    write(minp, "('%rowindices')")
+    write(minp, "('ja = [', $)")
     write(minp, "(I0, ' ', $)") (jao(i), i=1,iao(nn+1)-1)
-    write(minp, *)
-    write(minp, "('matrix elements aa = ', $)")
+    write(minp, "('];')")
+    write(minp, "('%matrix elements')")
+    write(minp, "('aa = [', $)")
     write(minp, "(E15.5, $)") (ao(i), i=1,iao(nn+1)-1)
-    write(minp, *)
-    write(minp, "('right-hand side rhs = ', $)")
+    write(minp, "('];')")
+    write(minp, "('%right-hand side')")
+    write(minp, "('rhs = [', $)")
     write(minp, "(E15.5, $)") (rhs(i), i=1,nn)
+    write(minp, "('];')")
+    write(minp, "('%x-coordinates')")
+    write(minp, "('x= [', $)")
+    nn = 0
+    do n=nogauss+1,nogauss+nocg
+      k = noel(n)
+      if ( k.gt.0 ) then
+         nn = nn+1
+         write(minp, "(E15.5, $)") xzw(k)
+      end if
+    end do
+    write(minp, "('];')")
+    write(minp, "('%y-coordinates')")
+    write(minp, "('y= [', $)")
+    do n=nogauss+1,nogauss+nocg
+      k = noel(n)
+      if ( k.gt.0 ) then
+         write(minp, "(E15.5, $)") yzw(k)
+      end if
+    end do
+    write(minp, "('];')")
+    
     call doclose(minp)
+    jaoutput = .false.
  !  END DEBUG
  end if
        

@@ -135,7 +135,6 @@
  double precision                  :: tetavkeps                  !< vertical teta k-eps
  double precision                  :: tetavmom                   !< vertical teta momentum
  
- double precision                  :: vicouv_filter              !< artificial viscosity for filtering
  double precision                  :: locsaltlev, locsaltmin, locsaltmax
  contains
 !> Sets ALL (scalar) variables in this module to their default values.
@@ -201,8 +200,6 @@ Jadelvappos                 = 1             !< only positive forced evaporation 
 tetav                       = 0.55d0        !< vertical teta transport
 tetavkeps                   = 0.55d0        !< vertical teta k-eps
 tetavmom                    = 0.55d0        !< vertical teta momentum
-
-vicouv_filter               = 0d-4          !< artificial viscosity for filtering
 
 locsaltlev                  = 1d0           !< salinity level for case of lock exchange
 locsaltmin                  = 5d0           !< minimum salinity for case of lock exchange
@@ -2634,7 +2631,9 @@ end subroutine default_turbulence
 
  integer                           :: iNormalMethod     !< 0: take normal in direction of flowlinks "1-2", 1: take normal perpendicular to netlinks "3-4"
  integer                           :: jaimplicit        !< implicit momentum eqn. (1) or not (0)
- integer                           :: jafilter          !< apply horizontal filter (1) or not (0)
+ integer                           :: jafilter          !< apply horizontal filter (1:explicit, 2:implicit) or not (0)
+ integer                           :: filterorder       !< order of filter
+ integer                           :: jacheckmonitor    !< compute and output "checkerboard" mode monitor
 
 !    Secondary Flow
 ! integer                           :: jasftesting       !< (secondary flow testing: 0: no just compute fm velocitie, 1: prescribe exact ucx,ucy point values 2: prescribe exact edge velocities (FM reconstructs ucx,ucy) 3: prescribe exact ucx,ucy cell-averaged values
@@ -3067,7 +3066,9 @@ subroutine default_flowparameters()
 
     iNormalMethod         = 0
     jaimplicit            = 0
-    jafilter              = 1
+    jafilter              = 0
+    filterorder           = 2
+    jacheckmonitor        = 0
 
     sini       = 0d0     ! uniform initial waterlevel (m),   (uniform bottom level = zkuni)
     uini       = 0       ! uniform initial velocity   (m/s)
@@ -5785,11 +5786,3 @@ contains
    end subroutine reset_save_ugrid_state
    
 end module m_save_ugrid_state
-
-
-module m_filter
-   use m_solver
-   integer,          dimension(:), allocatable :: iLvec2  !< vector Laplacian in CRS format, startpointers
-   integer,          dimension(:), allocatable :: jLvec2  !< vector Laplacian in CRS format, row numbers
-   double precision, dimension(:), allocatable :: ALvec2  !< vector Laplacian in CRS format, matrix entries
-end module m_filter

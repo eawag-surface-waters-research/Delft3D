@@ -975,7 +975,9 @@ subroutine readMDUFile(filename, istat)
 
     call prop_get_integer(md_ptr, 'numerics', 'BarrierAdvection', jabarrieradvection);
 
-    call prop_get_double (md_ptr, 'numerics', 'vicouv_filter'         , vicouv_filter)
+    call prop_get_integer(md_ptr, 'numerics', 'filter'          , jafilter)
+    call prop_get_integer(md_ptr, 'numerics', 'filterorder'     , filterorder)
+    call prop_get_integer(md_ptr, 'numerics', 'checkerboardmonitor', jacheckmonitor)
 
     call prop_get_double (md_ptr, 'numerics', 'LocSaltLev'      , locsaltlev)
     call prop_get_double (md_ptr, 'numerics', 'LocSaltMin'      , locsaltmin)
@@ -2397,8 +2399,13 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        call prop_set_integer(prop_ptr, 'numerics', 'BarrierAdvection', jabarrieradvection, '1 = no correction, 2 = advection correction')
     endif
 
-    if (writeall .or. vicouv_filter.ne.0d0 ) then
-       call prop_set(prop_ptr, 'numerics', 'vicouv_filter',           vicouv_filter,       'artificial viscosity for filtering (m2/s)')
+    if (writeall .or. jafilter.ne.0 ) then
+       call prop_set(prop_ptr, 'numerics', 'filter',           jafilter,       'apply horizontal filter (1:explicit, 2,3:implicit) or not (0)')
+       call prop_set(prop_ptr, 'numerics', 'filterorder',      filterorder,    'order of filter (1, 2 or 3)')
+    end if
+    
+    if (writeall .or. jacheckmonitor.eq.1 ) then
+       call prop_set(prop_ptr, 'numerics', 'checkerboard_monitor', jacheckmonitor,    'compute and output checkerboard monitor (1) or not (0)')
     end if
 
     if (writeall .or. locsaltlev /= 1d0) then
@@ -3108,31 +3115,31 @@ integer,          external   :: numuni
 
     call makedir(getoutputdir()) ! No problem if it exists already.
 
-    call getmdia(mdia)
+!   SPvdP : check status of file, mostly copied from inidia
+    mdia2 = numuni()
+    open (MDIA2, FILE = trim(getoutputdir())//trim(md_ident)//'.dia', action='readwrite', IOSTAT=IERR)
 
-    if ( mdia >0 ) then ! rename diagnostic file to md_ident.dia
+    if ( ierr.eq.0 ) then
 
-!      SPvdP : check status of file, mostly copied from inidia
-       mdia2 = numuni()
-       open (MDIA2, FILE = trim(getoutputdir())//trim(md_ident)//'.dia', action='readwrite', IOSTAT=IERR)
-
-       if ( ierr.eq.0 ) then
+       call getmdia(mdia)
+       
+       if ( mdia >0 ) then ! rename diagnostic file to md_ident.dia
           rewind(mdia)
-
+          
 10        read (mdia, '(a)', end = 20) rec
           write(mdia2,'(a)') trim(rec)
           goto 10
-
+          
 20        continue
-
+          
           close(mdia)
-          mdia    = mdia2
-
-          call setmdia(mdia)
-          call initMessaging(mdia)
-
-          WRITE(MDIA,*) 'Until here copy of previous diagnostic file'
        end if
+       mdia    = mdia2
+
+       call setmdia(mdia)
+       call initMessaging(mdia)
+
+       WRITE(MDIA,*) 'Until here copy of previous diagnostic file'
     end if
 
 end subroutine switch_dia_file

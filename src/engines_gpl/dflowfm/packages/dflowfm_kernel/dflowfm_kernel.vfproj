@@ -41,7 +41,8 @@
 				<Tool Name="VFPreBuildEventTool" CommandLine="call $(SolutionDir)scripts_lgpl\win32\update_version.cmd src\unstruc_version.F90 $(SolutionDir)engines_gpl\dflowfm\ $(SolutionDir)engines_gpl\dflowfm\res\version_number.ini" Description="Expand unstruc_version.F90.svn and version_number.rc.svn to unstruc_version.F90 and version_number.rc"/>
 				<Tool Name="VFPostBuildEventTool"/></Configuration></Configurations>
 	<Files>
-		<Filter Name="Header Files" Filter="fi;fd"/>
+		<Filter Name="Header Files" Filter="fi;fd">
+		<File RelativePath=".\include\blasfm.h"/></Filter>
 		<Filter Name="Resource Files" Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe">
 		<File RelativePath="..\..\res\version_number.ini"/></Filter>
 		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
@@ -64,6 +65,15 @@
 		<File RelativePath="src\dredge_data.f90"/>
 		<File RelativePath="src\dredgepolygon.f90"/>
 		<File RelativePath="src\filez.f90"/>
+		<File RelativePath=".\src\filter.F90">
+			<FileConfiguration Name="Debug|Win32">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Release|x64">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Debug|x64">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Release|Win32">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
 		<File RelativePath="src\fm_bedform.f90"/>
 		<File RelativePath="src\fm_dredge.f90"/>
 		<File RelativePath="src\fm_erosed.f90"/>
@@ -83,6 +93,7 @@
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
 		<File RelativePath="src\hrfft.f"/>
 		<File RelativePath=".\src\inquire_flowgeom.f90"/>
+		<File RelativePath=".\src\m_filter.f90"/>
 		<File RelativePath="src\manholes.f90"/>
 		<File RelativePath="src\meteo1.f90"/>
 		<File RelativePath="src\model_specific.f90"/>

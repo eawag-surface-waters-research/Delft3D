@@ -469,6 +469,7 @@ src/engines_gpl/dflowfm/packages/dflowfm_esmf/src/unstruc_esmf.F90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/Makefile.am -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/dflowfm_kernel.vfproj -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/include/RF.inc -text
+src/engines_gpl/dflowfm/packages/dflowfm_kernel/include/blasfm.h -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/Makefile.am -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/advec.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/bedform_data.f90 -text
@@ -481,7 +482,7 @@ src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dfm_signals.F90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dredge_data.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/dredgepolygon.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/filez.f90 -text
-src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/filter.f90 -text
+src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/filter.F90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/fm_bedform.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/fm_dredge.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/fm_erosed.f90 -text
@@ -494,6 +495,7 @@ src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/gui.F90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/hrfft.f -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/inquire_flowgeom.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/io_openfoam.f90 -text
+src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/m_filter.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/manholes.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/meteo1.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/model_specific.f90 -text

@@ -294,7 +294,7 @@
       
       solver%numrows            = numrows
       solver%numnonzeros        = numnonzeros
-      solver%numnonzerosprecond = 30*numrows
+      solver%numnonzerosprecond = 120*numrows
       solver%nwork              = 2*solver%numnonzerosprecond
       
          !!   ipar(1) = 0               ! initialized in "itaux"

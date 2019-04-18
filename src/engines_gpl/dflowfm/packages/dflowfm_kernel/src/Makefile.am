@@ -23,7 +23,8 @@ EXTRA_DIST = \
 	$(builddir)/../../dflowfm_lib/include/bmi_get_var_type.inc \
 	$(builddir)/../../dflowfm_lib/include/bmi_set_var.inc \
 	$(builddir)/../../dflowfm_lib/include/bmi_set_var_slice.inc \
-	$(builddir)/../include/RF.inc
+	$(builddir)/../include/RF.inc \
+	$(builddir)/../include/blasfm.inc
 
 EXTRA_DIST += $(builddir)/../../dflowfm_lib/templates 
 
@@ -121,7 +122,7 @@ libdflowfm_la_SOURCES+=\
         solve_guus.F90 \
         waves.f90 \
         fm_bedform.f90 \
-		fm_morstatistics.f90 \
+	fm_morstatistics.f90 \
         fm_dredge.f90 \
         fm_erosed.f90 \
         fm_wq_processes.f90 \
@@ -131,6 +132,8 @@ libdflowfm_la_SOURCES+=\
         transport.f90 \
         part.f90 \
         advec.f90 \
+	m_filter.f90 \
+	filter.F90 \
         unstruc.F90
 # and the library interface
 libdflowfm_la_SOURCES+=\

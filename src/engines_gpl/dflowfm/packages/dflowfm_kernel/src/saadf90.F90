@@ -34,33 +34,7 @@
 ! $Id$
 ! $HeadURL$
 
-!! BLAS routines come either from Intel MKL, or standard BLAS from SPARSKIT. Select at compile time.
-!#if defined __INTEL_COMPILER && __INTEL_COMPILER > 1000
-!! MKL available
-!#define HAVE_MKL 1
-!
-!#define dnrm2(N, X, INCX) dnrm2(N, X, INCX)
-!#define ddot(N, DX, INCX, DY, INCY) ddot(N, DX, INCX, DY, INCY)
-!#define daxpy(N, DA, DX, INCX, DY, INCY) daxpy(N, DA, DX, INCX, DY, INCY)
-!#define amux(n, x, y, a, ja, ia) mkl_dcsrgemv('N', n, a, ia, ja, x, y)
-!
-!#define EXTERNAL_DNRM2 double precision, external :: dnrm2
-!#define EXTERNAL_DDOT  double precision, external :: ddot
-!
-!#else
-!! No MKL, BLAS from SPARSKIT
-#define HAVE_MKL 0
-
-#define dnrm2(N, X, INCX) dnrm2XXX(n, vv, 1)
-#define ddot(N, DX, INCX, DY, INCY) ddotXXX(N, DX, INCX, DY, INCY)
-#define daxpy(N, DA, DX, INCX, DY, INCY) daxpyXXX(N, DA, DX, INCX, DY, INCY)
-#define amux(n, x, y, a, ja, ia) amuxXXX(n, x, y, a, ja, ia) 
-
-#define EXTERNAL_DNRM2 double precision, external :: dnrm2XXX
-#define EXTERNAL_DDOT  double precision, external :: ddotXXX
-
-!#endif
-
+#include 'blasfm.h'
 
     MODULE GAMMAS
     double precision ::   gammax,gammay,alpha
@@ -359,10 +333,10 @@
          CALL permsimple( nrow, sol, wk, perm, permselect )
       
          if ( jaini.eq.2 ) then   ! ILU solve only
-            call lusol(nrow,rhs,sol,alu,jlu,ju)
+            call lusol(nrow,rhs,sol,alu,jlu,ju,30*nrow)
             its = 0
          else
-            call runrc2(nrow,rhs,sol,ipar,fpar,wk,a,ja,ia,alu,jlu,ju,its,epssaad,jabcgstab,ierror)
+            call runrc2(nrow,rhs,sol,ipar,fpar,wk,a,ja,ia,alu,jlu,ju,its,epssaad,jabcgstab,ierror,30*nrow)
             res = fpar(5)
          end if
          call permsimpleINVERSE (nrow, sol, wk, perm, permselect)
@@ -2522,7 +2496,7 @@
  4     i=i+1
        its = its + 1
        i1 = i + 1
-       call lusol (n, vv(1,i), rhs, alu, jlu, ju)
+       call lusol (n, vv(1,i), rhs, alu, jlu, ju, 30*n)
        call amux (n, rhs, vv(1,i1), aa, ja, ia)
 !-----------------------------------------
 !     modified gram - schmidt...
@@ -2601,7 +2575,7 @@
 !
 !     call preconditioner.
 !
-       call lusol (n, rhs, rhs, alu, jlu, ju)
+       call lusol (n, rhs, rhs, alu, jlu, ju, 30*n)
        do 17 k=1, n
           sol(k) = sol(k) + rhs(k)
  17    continue
@@ -2698,10 +2672,10 @@
 !-----------------------------------------------------------------------
         end
 
-      subroutine runrc2(n,rhs,sol,ipar,fpar,wk,a,ja,ia,au, jau,ju,its,eps,jabcgstab,ierror)
+      subroutine runrc2(n,rhs,sol,ipar,fpar,wk,a,ja,ia,au, jau,ju,its,eps,jabcgstab,ierror,nau)
       implicit none
-      integer n,ipar(16),ia(n+1),ja(5*n),ju(n),jau(30*n),jabcgstab
-      double precision ::  fpar(16),rhs(n),sol(n),wk(2*30*n),a(5*n),au(30*n), eps
+      integer n,ipar(16),ia(n+1),ja(5*n),ju(n),jau(nau),jabcgstab, nau
+      double precision ::  fpar(16),rhs(n),sol(n),wk(2*nau),a(5*n),au(nau), eps
       integer          :: ierror !< error (1) or not (0)
 
 !-----------------------------------------------------------------------
@@ -2765,7 +2739,7 @@
          call atmux(n, wk(ipar(8)), wk(ipar(9)), a, ja, ia)
          goto 10
       else if (ipar(1).eq.3 .or. ipar(1).eq.5) then
-         call lusol(n,wk(ipar(8)),wk(ipar(9)),au,jau,ju)
+         call lusol(n,wk(ipar(8)),wk(ipar(9)),au,jau,ju,nau)
          goto 10
       else if (ipar(1).eq.4 .or. ipar(1).eq.6) then
          call lutsol(n,wk(ipar(8)),wk(ipar(9)),au,jau,ju)
@@ -2774,7 +2748,7 @@
          if (ipar(1).eq.0) then
    !         print *, 'Iterative sovler has satisfied convergence test.'
          else if (ipar(1).eq.-1) then
-   !         print *, 'Iterative solver has iterated too many times.'
+             print *, 'Iterative solver has iterated too many times.'
          else if (ipar(1).eq.-2) then
              print *, 'Iterative solver was not given enough work space.'
              print *, 'The work space should at least have ', ipar(4),  ' elements.'
@@ -2884,7 +2858,7 @@
          call atmux(n, wk(ipar(8)), wk(ipar(9)), a, ja, ia)
          goto 10
       else if (ipar(1).eq.3 .or. ipar(1).eq.5) then
-         call lusol(n,wk(ipar(8)),wk(ipar(9)),au,jau,ju)
+         call lusol(n,wk(ipar(8)),wk(ipar(9)),au,jau,ju,30*n)
          goto 10
       else if (ipar(1).eq.4 .or. ipar(1).eq.6) then
          call lutsol(n,wk(ipar(8)),wk(ipar(9)),au,jau,ju)
@@ -6727,7 +6701,7 @@
       double precision ::  max, t, abs
       integer j
 !
-      call lusol(n,sol,sol,alu,jlu,ju)
+      call lusol(n,sol,sol,alu,jlu,ju,30*n)
 !
       tmax = 0.0
       do j=1, n
@@ -8260,9 +8234,9 @@
       end
       
       
-    subroutine lusol(n, y, x, alu, jlu, ju)
-    double precision ::  x(n), y(n), alu(30*n)
-   integer n, jlu(30*n), ju(30*n)
+    subroutine lusol(n, y, x, alu, jlu, ju, nau)
+    double precision ::  x(n), y(n), alu(nau)
+   integer n, jlu(nau), ju(nau), nau
 !-----------------------------------------------------------------------
 !
 ! This routine solves the system (LU) x = y,
@@ -8400,7 +8374,7 @@ subroutine allocSolver(solver, ierror)
    call realloc(solver%jlu,   solver%numnonzerosprecond, keepExisting=.false., fill=0)
    
    call realloc(solver%work,  solver%nwork,              keepExisting=.false., fill=0d0)
-   call realloc(solver%jw,  2*solver%numnonzeros,        keepExisting=.false., fill=0)
+   call realloc(solver%jw,    solver%nwork,              keepExisting=.false., fill=0)
    
    ierror = 0
 1234 continue
@@ -8444,27 +8418,43 @@ subroutine deallocSolver(solver)
 end subroutine deallocSolver
 
 !> solve linear system
-subroutine solveSystem(solver,sol,iters,ierror)
+subroutine solveSystem(solver,sol,japrecond,iters,ierror)
    use m_solver
    implicit none
    
-   type(tsolver),                               intent(in)    :: solver !< solver
-   double precision, dimension(solver%numrows), intent(inout) :: sol    !< solution vector
-   integer,                                     intent(out)   :: iters  !< number of iterations
-   integer,                                     intent(inout) :: ierror !< error (1) or not (0)
+   type(tsolver),                               intent(in)    :: solver    !< solver
+   double precision, dimension(solver%numrows), intent(inout) :: sol       !< solution vector
+   integer,                                     intent(in)    :: japrecond !< compute preconditioner (1) or not (0)
+   integer,                                     intent(out)   :: iters     !< number of iterations
+   integer,                                     intent(inout) :: ierror    !< error (1) or not (0)
+   
+!   double precision, dimension(:), allocatable :: w
+!   integer,          dimension(:), allocatable :: jw
+   
+   integer :: N
+   
+   N=solver%numrows
+   
+!   allocate(w(2*N))
+!   allocate(jw(2*N))
    
    ierror = 1
    
-!  compute preconditioner   
-   call ilud(solver%numrows,solver%a,solver%ja,solver%ia,solver%alpha,solver%tol,solver%alu,solver%jlu,solver%ju,solver%numnonzerosprecond,solver%work,solver%jw,ierror,solver%numnonzeros)
-   if ( ierror.ne.0 ) goto 1234
+   if ( japrecond.eq.1 ) then
+!     compute preconditioner   
+      call ilud(solver%numrows,solver%a,solver%ja,solver%ia,solver%alpha,solver%tol,solver%alu,solver%jlu,solver%ju,solver%numnonzerosprecond,solver%work,solver%jw,ierror,solver%numnonzeros)
+      if ( ierror.ne.0 ) goto 1234
+   end if
    
 !  solve system   
-   call runrc2(solver%numrows,solver%rhs,sol,solver%ipar,solver%fpar,solver%work,solver%a,solver%ja,solver%ia,solver%alu,solver%jlu,solver%ju,iters,solver%eps,solver%jabcgstab,ierror)
+   call runrc2(solver%numrows,solver%rhs,sol,solver%ipar,solver%fpar,solver%work,solver%a,solver%ja,solver%ia,solver%alu,solver%jlu,solver%ju,iters,solver%eps,solver%jabcgstab,ierror,solver%numnonzerosprecond)
    if ( ierror.ne.0 ) goto 1234
    
    ierror=0
 1234 continue
+
+!   if ( allocated(w) ) deallocate(w)
+!   if ( allocated(jw) ) deallocate(jw)
    
    return
 end subroutine solveSystem
