@@ -120,7 +120,7 @@ implicit none
     character(len=255) :: md_dredgefile    = ' ' !< File containing dredging settings (e.g., *.dad)
     character(len=255) :: md_bedformfile   = ' ' !< File containing bedform settings (e.g., *.bfm)
 
-    character(len=1024):: md_obsfile       = ' ' !< File containing observation points  (e.g., *_obs.xyn)
+    character(len=1024):: md_obsfile       = ' ' !< File containing observation points  (e.g., *_obs.xyn, *_obs.ini)
     character(len=255) :: md_crsfile       = ' ' !< File containing cross sections      (e.g., *_crs.pli)
     character(len=255) :: md_foufile       = ' ' !< File containing fourier modes to be analyzed
 

@@ -14911,7 +14911,7 @@ subroutine find_flownode(N, xobs, yobs, namobs, kobs, jakdtree, jaoutside)
 !> Finds the flow nodes/cell numbers for 1d observation points, 
 !! when given branch id and chainage, or given coordinates.
 !! Then adds these 1d observation points to the original administration 
-!! xobs, yobs, namobs, kobs,smxobs, cmxobs
+!! xobs, yobs, namobs, kobs, smxobs, cmxobs
 subroutine find_1d_flownode(n, n1d)
    use MessageHandling
    use m_network
@@ -14921,7 +14921,7 @@ subroutine find_1d_flownode(n, n1d)
    use m_inquire_flowgeom
    use dfm_error
    use m_alloc
-   use m_flowgeom, only: xu, yu
+   use m_flowgeom, only: xz, yz
    implicit none
    integer, intent(in   )  :: n        !<number of existing observation points
    integer, intent(  out)  :: n1d      !<number of 1d observation points
@@ -14961,8 +14961,8 @@ subroutine find_1d_flownode(n, n1d)
       if (branchIdx > 0) then ! obs which are defined by branchid and chainage
          ierr = findnode(branchIdx, network%obs%OPnt(i)%chainage, nodenr)
          if (ierr == DFM_NOERR) then
-            xobs(nt)   = xu(nodenr)
-            yobs(nt)   = yu(nodenr)
+            xobs(nt)   = xz(nodenr)
+            yobs(nt)   = yz(nodenr)
             kobs(nt)   = nodenr
          else
             call SetMessage(LEVEL_ERROR, 'Error adding Observation Point '''//trim(network%obs%OPnt(i)%name)//'''')
