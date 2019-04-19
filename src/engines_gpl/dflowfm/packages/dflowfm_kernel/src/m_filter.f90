@@ -15,6 +15,9 @@ module m_filter
    double precision, dimension(:), allocatable :: dtmaxeps  !< maximum time step multiplied with filter coefficient, dim(Lnx)
    double precision, dimension(:), allocatable :: checkmonitor   !< "checkerboard" mode monitor, dim(kmx+1)
    
+   double precision, dimension(:), allocatable :: workin      !< work array, dim(kmx+1)
+   double precision, dimension(:), allocatable :: workout     !< work array, dim(kmx+1)
+   
    integer                                     :: order    !< order, 1st (1) or 3rd (3)
    integer                                     :: itype    !< explicit (1), implicit (2), implicit with hor. terms (3), no filter (0)
                      

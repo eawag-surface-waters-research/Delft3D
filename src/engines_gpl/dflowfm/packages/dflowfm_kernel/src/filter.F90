@@ -14,6 +14,7 @@ subroutine ini_filter(jafilter, filterorder, jacheckmonitor, ierr)
    use unstruc_model, only: md_netfile
    use dfm_error
    use m_alloc
+   use m_partitioninfo, only: jampi
    implicit none
    
    integer,               intent(in)    :: jafilter     !< explicit (1), implicit (2), or no filter (0)
@@ -55,6 +56,10 @@ subroutine ini_filter(jafilter, filterorder, jacheckmonitor, ierr)
    if ( jafilter.ne.0 .or. jacheckmonitor.eq.1 ) then
       if ( kmx.gt.1 ) then
          call realloc(checkmonitor, kmx, keepExisting=.false., fill=0d0)
+         if ( jampi.eq.1 ) then
+            call realloc(workin, kmx+1, keepExisting=.false., fill=0d0)
+            call realloc(workout, kmx+1, keepExisting=.false., fill=0d0)
+         end if
          jacheckmonitor = 1
       else
          jacheckmonitor = 0
@@ -347,6 +352,8 @@ subroutine dealloc_filter
    
    if ( allocated(dtmaxeps) ) deallocate(dtmaxeps)
    if ( allocated(checkmonitor) ) deallocate(checkmonitor)
+   if ( allocated(workin) ) deallocate(workin)
+   if ( allocated(workout) ) deallocate(workout)
    
    if ( allocated(num) ) deallocate(num)
    if ( allocated(dum) ) deallocate(dum)
@@ -429,7 +436,7 @@ subroutine comp_filter_predictor()
                                
    integer                     :: ierror   ! error (1) or not (0)
    
-   double precision, parameter :: facmax = 0.9  ! safety factor for maximum allowed sub time step
+   double precision, parameter :: facmax = 0.9d0 ! safety factor for maximum allowed sub time step
    
    if ( itype.eq.0 ) return
    
@@ -479,6 +486,8 @@ subroutine comp_filter_predictor()
             Nt = 1 + floor(dts/dt)
 !            write(6,"(I4, ':', I4)") klay, Nt
             dt = dts/Nt
+         else
+            dt = dts
          end if
       end if
       
@@ -502,7 +511,16 @@ subroutine comp_filter_predictor()
          else
             fac = eps(LL) * Dt * dsign
          end if
-         plotlin(L) = eps(LL)
+!         plotlin(L) = eps(LL)
+            
+!        BEGIN DEBUG
+         if ( itype.eq.1 ) then
+            plotlin(L) = dts/(dtmaxeps(LL)/max(eps(LL),1e-10))
+         else
+            plotlin(L) = 1d0
+         end if
+!        END DEBUG
+            
          
 !        loop over columns
          do i=solver_filter%ia(LL),solver_filter%ia(LL+1)-1
@@ -598,6 +616,7 @@ subroutine get_filter_coeff(klay)
    double precision              :: Deltax   !< typical mesh width
    double precision              :: vicouv   !< typical viscosity
    double precision              :: maxeps
+   double precision              :: dinpr
    
    integer                       :: LL
    integer                       :: Lb, Lt, L
@@ -640,9 +659,10 @@ subroutine get_filter_coeff(klay)
             iLL1 = nd(kk)%ln(iL)
             LL1 = iabs(iLL1)
             
-!           update typical mesh width         
-            Deltax = max(Deltax, Dx(LL1))      
-!            Deltax = min(Deltax, Dx(LL1))
+!           update typical mesh width
+            dinpr = abs(csu(LL)*csu(LL1) + snu(LL)*snu(LL1))
+!            Deltax = max(Deltax * dinpr , Dx(LL1))      
+            Deltax = min(Deltax * dinpr, Dx(LL1))
             
 !           exclude self
             if ( LL1.eq.LL ) then
@@ -797,12 +817,14 @@ subroutine comp_checkmonitor()
    use m_flow, only: qw, kmx
    use m_turbulence, only: ln0
    use m_filter
+   use m_partitioninfo
    implicit none
    
    double precision                              :: area
    integer                                       :: kk1, kk2, k1, k2
    integer                                       :: Ll, L, Lb, Lt
    integer                                       :: klay
+   integer                                       :: jaghost, idmn_link
    
    checkmonitor = 0d0
    area = 0d0
@@ -811,6 +833,17 @@ subroutine comp_checkmonitor()
 !     get neighboring 2D cells
       kk1 = ln(1,LL)
       kk2 = ln(2,LL)
+      
+      
+      if ( jampi.eq.1 ) then
+!        determine if link is ghost or not
+         call link_ghostdata(my_rank,idomain(kk1),idomain(kk2),jaghost,idmn_link)
+         if ( jaghost.eq.1 ) then
+!           exclude ghost links
+            cycle
+         end if
+      end if
+      
       call getLbotLtop(LL,Lb,Lt)
       do klay=1,kmx
 !        get 3D link number (sigma only)
@@ -826,7 +859,15 @@ subroutine comp_checkmonitor()
       area = area + 0.5d0*Dx(LL)*wu(LL)
    end do
    
-   do klay=1,kmx-1
+   if ( jampi.eq.1 ) then
+      workin(1:kmx) = checkmonitor(1:kmx)
+      workin(kmx+1) = area
+      call reduce_double_sum(kmx+1,workin,workout)
+      checkmonitor(1:kmx) = workout(1:kmx)
+      area = workout(kmx+1)
+   end if
+   
+   do klay=1,kmx
       checkmonitor(klay) = checkmonitor(klay) / area
    end do
    
