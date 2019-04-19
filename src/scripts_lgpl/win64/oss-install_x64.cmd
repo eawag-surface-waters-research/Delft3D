@@ -300,6 +300,10 @@ rem ====================
         call :copyFile !!localstring! !dest_bin!
         set localstring="!mkl_redist_dir!mkl_def.dll"
         call :copyFile !!localstring! !dest_bin!
+        set localstring="!mkl_redist_dir!mkl_core.dll"
+        call :copyFile !!localstring! !dest_bin!
+        set localstring="!mkl_redist_dir!mkl_avx.dll"
+        call :copyFile !!localstring! !dest_bin!
         rem is needed for dimr nuget package? please check 
         call :copyFile !!localstring! !dest_share!
         set localstring="!mkl_redist_dir!mkl_intel_thread.dll"
