@@ -672,7 +672,7 @@ use unstruc_channel_flow, only: network
        deallocate(cmxobs)
     end if
     
-    call dealloc(network%obs) ! deallocate 1d obs
+    call dealloc(network%obs) ! deallocate obs (defined in *.ini file)
     
     allocate(xobs(capacity_))
     allocate(yobs(capacity_))

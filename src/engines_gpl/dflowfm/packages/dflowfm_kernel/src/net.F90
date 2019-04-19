@@ -14797,7 +14797,7 @@ subroutine obs_on_flowgeom(iobstype)
     
     call find_flownode(n2-n1+1, xobs(n1:n2), yobs(n1:n2), namobs(n1:n2), kobs(n1:n2), jakdtree, 1)
     
-    ! for 1d observation points and add them to obs adm
+    ! find flownodes for observation points (read from *.ini file), and add them to obs adm
     call find_flownode_from_ini_file(n2-n1+1, n3)
     
     if (loglevel_StdOut == LEVEL_DEBUG) then 
@@ -14908,9 +14908,9 @@ subroutine find_flownode(N, xobs, yobs, namobs, kobs, jakdtree, jaoutside)
    return
    end subroutine find_flownode
 
-!> Finds the flow nodes/cell numbers for 1d observation points, 
+!> Finds the flow nodes/cell numbers for observation points (read from a *.ini file), 
 !! when given branch id and chainage, or given coordinates.
-!! Then adds these 1d observation points to the original administration 
+!! Then adds these observation points to the original administration 
 !! xobs, yobs, namobs, kobs, smxobs, cmxobs
 subroutine find_flownode_from_ini_file(n, nnewobs)
    use MessageHandling

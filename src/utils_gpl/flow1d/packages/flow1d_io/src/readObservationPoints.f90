@@ -48,7 +48,7 @@ module m_readObservationPoints
    public write_obs_point_cache
 
    contains
-   !> Reads 1d observation points
+   !> Reads observation points from a *.ini file
    subroutine readObservationPoints(network, observationPointsFile)
       use m_missing, only: dmiss
       implicit none
@@ -165,7 +165,7 @@ module m_readObservationPoints
          endif
       end do
       
-      write(msgbuf,'(i10,a)') network%obs%Count , ' (1D network) observation points have been read.'
+      write(msgbuf,'(i10,2a)') network%obs%Count , ' observation points have been read from file ', trim(observationPointsFile)
       call msg_flush()
       
       call fill_hashtable(network%obs)
