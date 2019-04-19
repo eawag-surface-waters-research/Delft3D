@@ -2932,7 +2932,7 @@ if (ndambreak > 0) then
       ! Create the array with the coordinates of the flow links
       if(allocated(xl)) deallocate(xl)
       if(allocated(yl)) deallocate(yl)
-      nDambreakCoordinates = L2dambreaksg(n) - L1dambreaksg(n)  + 2
+      nDambreakCoordinates = L2dambreaksg(n) - L1dambreaksg(n)  + 1
       allocate(xl(nDambreakCoordinates,2))
       allocate(yl(nDambreakCoordinates,2))
       indexLink = 0
