@@ -35,11 +35,12 @@ type sv_postpr
     !
     ! integers
     !
-	integer :: nc_mode !  cmode argument when creating new NetCDF files (NF90_64BIT_OFFSET for NetCDF3, NF90_NETCDF4 for NetCDF4)
-    integer :: nuprpg   !  Current page number print file
-    integer :: nuprln   !  Current line number in print page
-    integer :: io_fp    !  Output precision matching simulation precision (IO_REAL4 or IO_REAL8)
-    integer :: io_prec  !  Output precision (IO_REAL4 or IO_REAL8)
+	integer :: nc_deflate !  deflate_level argument when defining variables on NetCDF4 files
+	integer :: nc_mode    !  cmode argument when creating new NetCDF files (NF90_64BIT_OFFSET for NetCDF3, NF90_NETCDF4 for NetCDF4)
+    integer :: nuprpg     !  Current page number print file
+    integer :: nuprln     !  Current line number in print page
+    integer :: io_fp      !  Output precision matching simulation precision (IO_REAL4 or IO_REAL8)
+    integer :: io_prec    !  Output precision (IO_REAL4 or IO_REAL8)
     !
     ! pointers
     !

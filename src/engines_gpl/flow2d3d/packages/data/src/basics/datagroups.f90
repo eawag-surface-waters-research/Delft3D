@@ -937,7 +937,7 @@ subroutine defnewgrp_core(fds, ifile, gname, gdp, filnam, grpdim, errlog)
           !
           ! Now define the variable
           !
-          error = nf90_def_var(fds, elm_name(ie), nctype, localdim, varid)
+          error = nf90_def_var(fds, elm_name(ie), nctype, localdim, varid, deflate_level = gdp%gdpostpr%nc_deflate)
           call nc_check_err(lundia, error, 'writing '//trim(elm_name(ie)), filnam)
           deallocate(localdim)
           !

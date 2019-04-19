@@ -67,6 +67,7 @@ subroutine rdprfl(lunmd     ,lundia    ,nrrec     ,mdfrec    ,tstprt    , &
     logical,               pointer :: htur2d
     integer,               pointer :: io_fp
     integer,               pointer :: io_prec
+    integer,               pointer :: nc_deflate
     integer,               pointer :: nc_mode
     logical,               pointer :: mergemap
 !
@@ -118,6 +119,7 @@ subroutine rdprfl(lunmd     ,lundia    ,nrrec     ,mdfrec    ,tstprt    , &
     itis       => gdp%gdrdpara%itis
     io_fp      => gdp%gdpostpr%io_fp
     io_prec    => gdp%gdpostpr%io_prec
+    nc_deflate => gdp%gdpostpr%nc_deflate
     nc_mode    => gdp%gdpostpr%nc_mode
     mergemap   => gdp%gdpostpr%mergemap
     newkw = .true.
@@ -179,6 +181,12 @@ subroutine rdprfl(lunmd     ,lundia    ,nrrec     ,mdfrec    ,tstprt    , &
     else
         call prterr(lundia,'U021', "Unknown netCDF format version specified. ncFormat should equal 3 or 4.")
         call d3stop(1, gdp)
+    endif
+    !
+    nc_deflate = 0
+    if (any_netcdf .and. i==4) then
+        call prop_get(gdp%mdfile_ptr, '*', 'ncDeflate', nc_deflate)
+        write (lundia, '(a,i0)') '*** MESSAGE Using deflation level ',nc_deflate
     endif
     !
     ! set the numerical precision of the output to the map and his files.
