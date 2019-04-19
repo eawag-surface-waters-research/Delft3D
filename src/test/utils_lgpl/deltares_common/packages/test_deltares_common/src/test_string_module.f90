@@ -134,7 +134,7 @@ subroutine test_string_token
     string = '"The Number Of Words and Quoted words'
 
     call str_token( string, token, '"' )
-    call assert_equal( token, "The Number of Words and Quoted words", "The returned token is incorrect (user-defined characters)" )
+    call assert_equal( token, '"The Number Of Words and Quoted words             ', "The returned token is incorrect (user-defined characters)" )
 
 end subroutine test_string_token
 
