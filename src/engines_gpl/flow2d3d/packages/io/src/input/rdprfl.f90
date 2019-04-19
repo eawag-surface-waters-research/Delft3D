@@ -67,6 +67,7 @@ subroutine rdprfl(lunmd     ,lundia    ,nrrec     ,mdfrec    ,tstprt    , &
     logical,               pointer :: htur2d
     integer,               pointer :: io_fp
     integer,               pointer :: io_prec
+    integer,               pointer :: nc_mode
     logical,               pointer :: mergemap
 !
 ! Global variables
@@ -91,6 +92,7 @@ subroutine rdprfl(lunmd     ,lundia    ,nrrec     ,mdfrec    ,tstprt    , &
 !
 ! Local variables
 !
+    logical                            :: any_netcdf
     integer                            :: i
     integer                            :: icount
     integer                            :: istat
@@ -116,9 +118,11 @@ subroutine rdprfl(lunmd     ,lundia    ,nrrec     ,mdfrec    ,tstprt    , &
     itis       => gdp%gdrdpara%itis
     io_fp      => gdp%gdpostpr%io_fp
     io_prec    => gdp%gdpostpr%io_prec
+    nc_mode    => gdp%gdpostpr%nc_mode
     mergemap   => gdp%gdpostpr%mergemap
     newkw = .true.
     cdef  = 'YYYYYYYYYY'
+    any_netcdf = .false.
     !
     ! initialize parameters that are to be read
     !
@@ -135,18 +139,22 @@ subroutine rdprfl(lunmd     ,lundia    ,nrrec     ,mdfrec    ,tstprt    , &
     call str_lower(inputstring)
     if (index(inputstring,'map') > 0) then
        gdp%iofiles(FILOUT_MAP)%filetype = FTYPE_NETCDF
+       any_netcdf = .true.
        write (lundia, '(a)') '*** MESSAGE map-file format is NetCDF'
     endif
     if (index(inputstring,'fou') > 0) then
        gdp%iofiles(FILOUT_FOU)%filetype = FTYPE_NETCDF
+       any_netcdf = .true.
        write (lundia, '(a)') '*** MESSAGE fourier-file format is NetCDF'
     endif
     if (index(inputstring,'his') > 0) then
        gdp%iofiles(FILOUT_HIS)%filetype = FTYPE_NETCDF
+       any_netcdf = .true.
        write (lundia, '(a)') '*** MESSAGE history-file format is NetCDF'
     endif
     if (index(inputstring,'dro') > 0) then
        gdp%iofiles(FILOUT_DRO)%filetype = FTYPE_NETCDF
+       any_netcdf = .true.
        write (lundia, '(a)') '*** MESSAGE drogue-file format is NetCDF'
     endif
     if (index(inputstring,'com') > 0) then
@@ -156,6 +164,21 @@ subroutine rdprfl(lunmd     ,lundia    ,nrrec     ,mdfrec    ,tstprt    , &
     if (index(inputstring,'all') > 0) then
        call prterr(lundia, 'U021', "All files in NetCDF format is currently not supported.")
        call d3stop(1, gdp)
+    endif
+    !
+    ! set cmode flag for netCDF nf90_create calls
+    !
+    i = 3 ! by default netCDF3 format
+    if (any_netcdf) call prop_get(gdp%mdfile_ptr, '*', 'ncFormat', i)
+    if (i==3) then
+        nc_mode = NF90_64BIT_OFFSET
+        if (any_netcdf) write (lundia, '(a)') '*** MESSAGE Creating output files in NetCDF3 format'
+    elseif (i==4) then
+        nc_mode = NF90_NETCDF4
+        if (any_netcdf) write (lundia, '(a)') '*** MESSAGE Creating output files in NetCDF4 format'
+    else
+        call prterr(lundia,'U021', "Unknown netCDF format version specified. ncFormat should equal 3 or 4.")
+        call d3stop(1, gdp)
     endif
     !
     ! set the numerical precision of the output to the map and his files.
