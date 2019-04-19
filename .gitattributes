@@ -2983,6 +2983,10 @@ src/scripts_lgpl/win64/tests_template.sln -text
 src/scripts_lgpl/win64/utils_lgpl_template.sln -text
 src/test/Makefile.am -text
 src/test/engines_gpl/Makefile.am -text
+src/test/engines_gpl/dflowfm/packages/dflowfm_kernel/dflowfm_kernel_test.vfproj -text
+src/test/engines_gpl/dflowfm/packages/dflowfm_kernel/src/test_dflowfm_kernel_f.f90 -text
+src/test/engines_gpl/dflowfm/packages/dflowfm_kernel/src/test_read.f90 -text
+src/test/engines_gpl/dflowfm/packages/test_dflowfm/test_data/ObservationPoints_2.ini -text
 src/test/engines_gpl/dflowfm/packages/test_dflowfm/test_data/dflowfm_compare_version_output.py -text
 src/test/engines_gpl/dflowfm/packages/test_dflowfm/test_data/dflowfm_version_lnx.log -text
 src/test/engines_gpl/dflowfm/packages/test_dflowfm/test_data/dflowfm_version_win.log -text
