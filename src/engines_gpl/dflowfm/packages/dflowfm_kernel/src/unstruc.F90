@@ -40404,15 +40404,18 @@ hpr = hprL
 
 if (abs(kcu(ll))==1 .and. network%loaded) then !flow1d used only for 1d channels and not for 1d2d roofs and gullies
    cz = 0d0
-   cross1 => network%crs%cross(network%adm%line2cross(LL)%c1)
-   cross2 => network%crs%cross(network%adm%line2cross(LL)%c2)
-   factor =  network%adm%line2cross(LL)%f
- 
+   if (network%adm%line2cross(LL)%c1 <= 0) then
+      ! no cross section defined on branch, use default definition
+      area = default_width* hpr
+      width = default_width
+   else
+      cross1 => network%crs%cross(network%adm%line2cross(LL)%c1)
+      cross2 => network%crs%cross(network%adm%line2cross(LL)%c2)
+      factor =  network%adm%line2cross(LL)%f
+   endif
+   
    if (japerim == 0) then ! calculate total area and volume
-      if (network%adm%line2cross(LL)%c1 <= 0) then
-         ! no cross section defined on branch, use default definition
-         area = default_width* hpr
-      else
+      if (network%adm%line2cross(LL)%c1 > 0) then
          call GetCSParsTotal(cross1, cross2, factor, hpr, area, width, CSCalculationOption, network%adm%hysteresis_for_summerdike(:,LL))
       endif
    else ! japerim = 1: calculate flow area, conveyance and perimeter.
