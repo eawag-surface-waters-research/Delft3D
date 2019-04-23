@@ -1616,25 +1616,26 @@ subroutine GetCSParsFlowCross(cross, dpt, u1, cz, flowArea, wetPerimeter, flowWi
    
 end subroutine GetCSParsFlowCross
 
+!> Calculate the total area of a cross sectional area, using the two enclosing cross sections cross1 and cross2 and weighting factor f
 subroutine GetCSParsTotalInterpolate(cross1, cross2, f, dpt, totalArea, totalWidth, calculationOption, hysteresis, doSummerDike)
 
    use m_GlobalParameters
    
    implicit none
 
-   type (t_CrossSection), intent(in)     :: cross1         !< cross section
-   type (t_CrossSection), intent(in)     :: cross2         !< cross section
-   double precision, intent(in)          :: f              !< cross = (1-f)*cross1 + f*cross2
-   double precision, intent(in)          :: dpt            !< water depth at cross section
-   double precision, intent(out)         :: totalArea      !< total area for given DPT
-   double precision, intent(out)         :: totalWidth     !< total width of water surface
-                                                           !> type of total area computation, possible values:\n
-                                                           !! CS_TYPE_PREISMAN  Ordinary total area computation, with possible Preisman lock on top\n
-                                                           !! CS_TYPE_PLUS      Total area for only the expanding part of the cross section (Nested Newton method)\n
-                                                           !! CS_TYPE_MIN       Total area for only the narrowing part of the cross section (Nested Newton method)
-   integer, intent(in)                   :: calculationOption 
-   logical, intent(in), optional         :: doSummerDike    !< Switch to calculate Summer Dikes or not
-   logical, intent(inout), optional      :: hysteresis(2)      !< Switch to calculate Summer Dikes or not
+   type (t_CrossSection), intent(in)               :: cross1         !< cross section 1
+   type (t_CrossSection), intent(in)               :: cross2         !< cross section 2
+   double precision,      intent(in)               :: f              !< cross = (1-f)*cross1 + f*cross2
+   double precision,      intent(in)               :: dpt            !< water depth at cross section
+   double precision,      intent(  out)            :: totalArea      !< total area for given DPT
+   double precision,      intent(  out)            :: totalWidth     !< total width of water surface
+                                                                     !> type of total area computation, possible values:\n
+                                                                     !! CS_TYPE_PREISMAN  Ordinary total area computation, with possible Preisman lock on top\n
+                                                                     !! CS_TYPE_PLUS      Total area for only the expanding part of the cross section (Nested Newton method)\n
+                                                                     !! CS_TYPE_MIN       Total area for only the narrowing part of the cross section (Nested Newton method)
+   integer,               intent(in)               :: calculationOption 
+   logical,               intent(in),    optional  :: doSummerDike   !< Switch to calculate Summer Dikes or not
+   logical,               intent(inout), optional  :: hysteresis(2)  !< Switch to calculate Summer Dikes or not
    
    double precision                      :: totalArea1
    double precision                      :: totalArea2
@@ -1685,21 +1686,22 @@ subroutine GetCSParsTotalInterpolate(cross1, cross2, f, dpt, totalArea, totalWid
 
 end subroutine GetCSParsTotalInterpolate
 
+!> Calculate the total area of a cross sectional area, using cross sections cross
 subroutine GetCSParsTotalCross(cross, dpt, totalArea, totalWidth, calculationOption, hysteresis, doSummerDike)
 
    use m_GlobalParameters
    ! Global Variables
-   type (t_CrossSection), intent(in) :: cross           !< cross section
-   double precision, intent(in)      :: dpt             !< water depth at cross section
-   double precision, intent(out)     :: totalArea       !< total area for given DPT
-   double precision, intent(out)     :: totalWidth      !< total width of water surface
-                                                        !> type of total area computation, possible values:\n
-                                                        !! CS_TYPE_PREISMAN  Ordinary total area computation, with possible Preisman lock on top\n
-                                                        !! CS_TYPE_PLUS      Total area for only the expanding part of the cross section (Nested Newton method)\n
-                                                        !! CS_TYPE_MIN       Total area for only the narrowing part of the cross section (Nested Newton method)
-   integer, intent(in)               :: calculationOption 
-   logical, intent(in), optional     :: doSummerDike    !< Switch to calculate Summer Dikes or not
-   logical, intent(inout)            :: hysteresis!< Switch to calculate Summer Dikes or not
+   type (t_CrossSection),  intent(in)                 :: cross           !< cross section
+   double precision,       intent(in)                 :: dpt             !< water depth at cross section
+   double precision,       intent(  out)              :: totalArea       !< total area for given DPT
+   double precision,       intent(  out)              :: totalWidth      !< total width of water surface
+                                                                         !> type of total area computation, possible values:\n
+                                                                         !! CS_TYPE_PREISMAN  Ordinary total area computation, with possible Preisman lock on top\n
+                                                                         !! CS_TYPE_PLUS      Total area for only the expanding part of the cross section (Nested Newton method)\n
+                                                                         !! CS_TYPE_MIN       Total area for only the narrowing part of the cross section (Nested Newton method)
+   integer,                intent(in)                 :: calculationOption 
+   logical,                intent(in), optional       :: doSummerDike    !< Switch to calculate Summer Dikes or not
+   logical,                intent(inout)              :: hysteresis      !< Switch to calculate Summer Dikes or not
 
 
    ! Local Variables
