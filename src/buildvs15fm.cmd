@@ -49,7 +49,7 @@ call "%VS140COMNTOOLS%..\..\VC\vcvarsall.bat" amd64
 
 rem ===========================================================================
 rem dflowfm_open.sln
-devenv.exe dflowfm_open.sln /Build "Release|x64" /Out build_dflowfm_open.log
+devenv.exe dflowfm_open.sln /Build "Release|x64"
 if NOT %ErrorLevel% EQU 0 (
     echo "Error in compiling dflowfm_open.sln: %ErrorLevel%"
     set globalErrorLevel=%ErrorLevel%
@@ -58,7 +58,7 @@ if NOT %ErrorLevel% EQU 0 (
 
 :finished
 
-third_party_open\commandline\bin\win32\sed.exe -e "/[Ee]rror[\:\ ]/s/^/\#\#teamcity\[buildStatus status\=\'FAILURE\' text\=\' /g;/buildStatus/s/$/\'\]/g" build_dflowfm_open.log 
+rem third_party_open\commandline\bin\win32\sed.exe -e "/[Ee]rror[\:\ ]/s/^/\#\#teamcity\[buildStatus status\=\'FAILURE\' text\=\' /g;/buildStatus/s/$/\'\]/g" build_dflowfm_open.log 
 
 
 :end
