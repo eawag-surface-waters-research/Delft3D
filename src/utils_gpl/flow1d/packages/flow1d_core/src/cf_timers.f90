@@ -395,8 +395,8 @@ subroutine timdump ( fileunit )
       write (fileunit, '(a,98(i5))' ) '        called    in seconds      %     in seconds       %', &
                                  ( i, i=2,maxlvl)
 
-      cpfact = 100.0d00/cptime(1)
-      wcfact = 100.0d00/wctime(1)
+      cpfact = 100.0d00/max(1d0,cptime(1))
+      wcfact = 100.0d00/max(1d0,wctime(1))
       do i = 1, nohandl
          if ( level(i) == -1 ) cycle
          write (forchr(34:), '(i5,''x,f8.2,'',i6,''x,a40)'')' ) (level(i)-1)*5+2,(maxlvl-level(i))*5+1
