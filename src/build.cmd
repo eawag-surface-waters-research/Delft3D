@@ -23,7 +23,7 @@ del /F/Q del.log
   rem Set environment parameters for VisualStudio
 call "%VS110COMNTOOLS%..\..\VC\vcvarsall.bat" amd64
 
-  rem The path to devenv.exe is now added to PATH: no full path specificitation needed on next line.
+  rem The path to devenv.exe is now added to PATH: no full path specification needed on next line.
 devenv.exe delft3d_open.sln /Build "Release|x64" /Out build.log
 devenv.exe io_netcdf.sln /Build "Release|x64" /Out build.log
 devenv.exe nefis.sln /Build "Release|x64" /Out build.log
