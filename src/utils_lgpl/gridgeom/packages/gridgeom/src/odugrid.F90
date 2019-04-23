@@ -38,7 +38,7 @@ implicit none
 !user defined data types
    contains
 !
-! Calculates x and y coordinates from UGrid filr format
+! Calculates x and y coordinates from UGrid file format
 ! 
 function odu_get_xy_coordinates(branchids, branchoffsets, geopointsX, geopointsY, nbranchgeometrynodes, branchlengths, jsferic, meshXCoords, meshYCoords) result(ierr)
 
@@ -101,7 +101,8 @@ function odu_get_xy_coordinates(branchids, branchoffsets, geopointsX, geopointsY
    !map the mesh nodes
    nbranches = size(branchlengths,1)
    allocate(meshnodemapping(2,nbranches))
-   meshnodemapping = -1
+   meshnodemapping(1,:) = -1
+   meshnodemapping(2,:) = -2
    ierr = odu_get_start_end_nodes_of_branches(branchids, meshnodemapping(1,:), meshnodemapping(2,:))
    
    ! initialization
@@ -180,6 +181,8 @@ end function odu_get_xy_coordinates
 
 
 !Calculate the start and the end nodes of the branches
+! NOTE: This function assumes that the mesh nodes are numbered in the order of the branches, so
+!       first all mesh nodes on branch 1, then those of branch 2, etc.
 function odu_get_start_end_nodes_of_branches(branchidx, branchStartNode, branchEndNode) result(ierr)
 
    integer, dimension(:), intent(in)      :: branchidx
@@ -195,15 +198,14 @@ function odu_get_start_end_nodes_of_branches(branchidx, branchStartNode, branchE
    nbranches = size(branchStartNode)
    do i = 1, numnode
       if (branchidx(i) > ibran) then
+         if (ibran > 0) then
+            branchEndNode(ibran) = i - 1
+         endif
          ibran = branchidx(i)
          branchStartNode(ibran) = i
-         if (i > 2 .and. ibran >= 2) then
-            branchEndNode(ibran - 1) = i - 1
-         endif
       endif
    enddo
-   branchEndNode(nbranches) = numnode
-
+   branchEndNode(ibran) = numnode
 end function odu_get_start_end_nodes_of_branches
 
 end module odugrid

@@ -282,7 +282,7 @@ module m_flow1d_reader
       call readCrossSectionDefinitions(network, filenames%cross_section_definitions)
       
       if (network%CSDefinitions%Count < 1) then
-         call SetMessage(LEVEL_FATAL, 'No Cross_Section Definitions Found')
+         call SetMessage(LEVEL_WARN, 'No Cross_Section Definitions Found')
       endif
      
       call SetMessage(LEVEL_INFO, 'Reading Cross Section Definitions Done')
@@ -295,7 +295,7 @@ module m_flow1d_reader
       call readCrossSectionLocationFile(network, filenames%cross_section_locations)
          
      if (network%crs%Count < 1) then
-        call SetMessage(LEVEL_FATAL, 'No Cross Sections Found')
+        call SetMessage(LEVEL_WARN, 'No Cross Sections Found')
      endif
 
      call SetMessage(LEVEL_INFO, 'Reading Cross Section Locations Done')
