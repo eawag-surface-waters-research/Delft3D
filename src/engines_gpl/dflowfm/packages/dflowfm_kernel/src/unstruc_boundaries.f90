@@ -1743,7 +1743,7 @@ integer                       :: nstr
 character (len=256)           :: fnam, rec, key, rec_old
 integer, allocatable          :: pumpidx(:), gateidx(:), cdamidx(:), cgenidx(:), dambridx(:) ! temp
 double precision              :: tmpval
-integer                       :: istru, istrtype, itmp, janewformat, jaoldformat
+integer                       :: istru, istrtype, itmp, janewformat
 integer                       :: numg, numd, npum, ngs, numgen, numgs, ilinstr, ndambr
 type(TREE_DATA), pointer      :: str_ptr
 double precision, allocatable :: widths(:)
@@ -1769,7 +1769,6 @@ double precision, allocatable :: xl(:,:), yl(:,:)
 integer                       :: branchIndex   
 double precision              :: chainage
 !! if (jatimespace == 0) goto 888                      ! Just cleanup and close ext file.
-logical                       :: success_old
 
 ngs = 0 ! Local counter for all crossed flow liks by *all* general structures.
 nstr = tree_num_nodes(strs_ptr) ! TODO: minor issue: will count *all* children in structure file.
@@ -2339,36 +2338,39 @@ end do
 
       !! GENERALSTRUCTURE !!
       case ('generalstructure')
-         janewformat = 0
-         jaoldformat = 0
+         janewformat = 1
          do k = 1,numgeneralkeywrd        ! generalstructure keywords
             tmpval = dmiss
-            if (k == 25 .and. janewformat == 1) then                ! The 25th keyword in new format is same as the 11th keyword in the old format. But they are linked to different properties.
-               key = generalkeywrd(k)                               ! Then the format for this keyword (GateHeight) is determined by the other keywords in that single structure.
-               call prop_get(str_ptr, '', trim(key), rec, success)
-            else if (k == 11 .and. jaoldformat == 1) then
-               key = generalkeywrd_old(k)
-               call prop_get(str_ptr, '', trim(key), rec, success)
-            else
-               key = generalkeywrd(k)
+            if (k == 1) then
+               key = generalkeywrd(k)                             ! From the first keyword, decide the format to be new or old
                call prop_get(str_ptr, '', trim(key), rec, success)
                if (.not. success) then
                   key = generalkeywrd_old(k)
                   call prop_get(str_ptr, '', trim(key), rec, success)
-                  jaoldformat = 1
-               else
-                  key = generalkeywrd_old(k)
-                  call prop_get(str_ptr, '', trim(key), rec_old, success_old)
-                  if (.not. success_old) then
-                     janewformat = 1
+                  janewformat = 0
+               endif
+            else
+               if (janewformat == 1) then
+                  key = generalkeywrd(k)
+                  call prop_get(str_ptr, '', trim(key), rec, success)
+                  if (.not. success) then
+                     key = generalkeywrd_old(k)
+                     call prop_get(str_ptr, '', trim(key), rec, success)
+                     if (success) then
+                        call mess(LEVEL_ERROR, 'Combination of old and new keywords for a general structure is not supported ...' )
+                     endif
                   endif
-                  if (success .and. k == 25) then
-                     rec = rec_old
+               else  
+                  key = generalkeywrd_old(k)
+                  call prop_get(str_ptr, '', trim(key), rec, success)
+                  if (.not. success) then
+                     key = generalkeywrd(k)
+                     call prop_get(str_ptr, '', trim(key), rec, success)
+                     if (success) then
+                        call mess(LEVEL_ERROR, 'Combination of old and new keywords for a general structure is not supported ...' )
+                     endif
                   endif
                endif
-            endif
-            if (janewformat == 1 .and. jaoldformat == 1) then
-               call mess(LEVEL_ERROR, 'Combination of old and new keywords for a general structure is not supported ...' )
             endif
             if (.not. success .or. len_trim(rec) == 0) then
                ! consider all fields optional for now.
