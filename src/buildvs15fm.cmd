@@ -50,7 +50,7 @@ call "%VS140COMNTOOLS%..\..\VC\vcvarsall.bat" amd64
 rem ===========================================================================
 rem dflowfm_open.sln
 rem devenv.exe dflowfm_open.sln /Build "Release|x64"
-msbuild -consoleloggerparameters:PerformanceSummary;NoSummary -verbosity:minimal
+msbuild dflowfm_open.sln -consoleloggerparameters:PerformanceSummary;NoSummary -verbosity:minimal
 if NOT %ErrorLevel% EQU 0 (
     echo "Error in compiling dflowfm_open.sln: %ErrorLevel%"
     set globalErrorLevel=%ErrorLevel%
