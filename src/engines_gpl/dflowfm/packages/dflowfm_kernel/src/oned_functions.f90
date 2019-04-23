@@ -173,6 +173,7 @@ module m_oned_functions
    !> set the flowgeom linknumbers and node numbers in the branches
    subroutine set_linknumbers_in_branches()
    
+      use m_globalParameters
       use unstruc_channel_flow
       use m_flowgeom
       use m_sediment

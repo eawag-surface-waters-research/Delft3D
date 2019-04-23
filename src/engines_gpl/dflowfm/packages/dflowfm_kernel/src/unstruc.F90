@@ -33084,6 +33084,7 @@ end subroutine setbobs_fixedweirs
  double precision :: as1, as2, qtotal, s_on_crest, width, st2, cmustr, wetdown, dpt
  double precision :: twot = 2d0/3d0, hb, h23, ustbLL, agp, vLL
  double precision :: hminlwi,fsqrtt
+ double precision :: perimeter, conv, czdum
  logical          :: firstiter, jarea
  type(t_structure), pointer :: pstru
 
@@ -33290,8 +33291,8 @@ end subroutine setbobs_fixedweirs
                    endif
                    dpt = s1(mdown) - bl(mdown)
 
-                   call getCrossFlowData_on_link(network, L, dpt, flowArea=wetdown)
-
+                   call GetCSParsFlow(network%adm%line2cross(L), network%crs%cross, dpt, 0.0d0, czdum, wetdown, perimeter, width, conv)
+ 
                    wetdown = max(wetdown, 0.0001d0)
                    call computeculvert(pstru%culvert, fu(L), ru(L), au(L), width, kfu, cmustr, s1(k1), s1(k2), &
                        q1(L), q1(L), u1(L), u0(L), dx(L), dts, bob(1,L), bob(2,L), wetdown, network%sts%struct(istru)%state, .true.)
@@ -40404,47 +40405,32 @@ hpr = hprL
 
 if (abs(kcu(ll))==1 .and. network%loaded) then !flow1d used only for 1d channels and not for 1d2d roofs and gullies
    cz = 0d0
-   if (network%adm%line2cross(LL)%c1 <= 0) then
-      ! no cross section defined on branch, use default definition
-      area = default_width* hpr
-      width = default_width
-   else
-      cross1 => network%crs%cross(network%adm%line2cross(LL)%c1)
-      cross2 => network%crs%cross(network%adm%line2cross(LL)%c2)
-      factor =  network%adm%line2cross(LL)%f
-   endif
-   
+
    if (japerim == 0) then ! calculate total area and volume
-      if (network%adm%line2cross(LL)%c1 > 0) then
-         call GetCSParsTotal(cross1, cross2, factor, hpr, area, width, CSCalculationOption, network%adm%hysteresis_for_summerdike(:,LL))
-      endif
+      call GetCSParsTotal(network%adm%line2cross(LL), network%crs%cross, hpr, area, width, CSCalculationOption, network%adm%hysteresis_for_summerdike(:,LL))
    else ! japerim = 1: calculate flow area, conveyance and perimeter.
-      call getCrossFlowData_on_link(network, LL, hpr, flowArea=area, flowWidth=width, &
-                      wetPerimeter = perim, conveyance=conv, cz = cz, af_sub = af_sub, &
-                      perim_sub = perim_sub, cz_sub = cz_sub)
+      cz = 0d0
+      call GetCSParsFlow(network%adm%line2cross(LL), network%crs%cross, hpr, u1(LL), cz, area, perim, width, conv, af_sub, perim_sub, cz_sub)
+      
       u1L = u1(LL)
       q1L = q1(LL)
       k1 = ln(1,LL) ; k2 = ln(2,LL)
       s1L = acl(L)*s1(k1) + (1d0-acl(L))*s1(k2)
       dpt = hu(LL)
+      cz = 0d0
+      call getconveyance(network, dpt, u1L, q1L, s1L, LL, perim_sub, af_sub, conv, cz_sub, cz, area, perim)
 
-      if (japerim ==1) then
-         if (af_sub(2)>0) then
-            call getconveyance(network, dpt, u1L, q1L, s1L, LL, perim_sub, af_sub, conv, cz_sub, cz, area, perim)
-         endif
-
-         ! Qmain/ QT = Kmain/KT -> u_main = Kmain/KT * (AT/Amain)
-         if (conv > 0d0) then
-            u_to_umain(L) = area*cz_sub(1) * sqrt(af_sub(1)/perim_sub(1)) /  conv
-            cfuhi(L) = ag/(conv/area)**2
-            frcu(L) = cz
-            frcu_mor(L) = cz_sub(1)
-            call getCrossDischarge(perim_sub, af_sub, cz_sub, q1L, q_sub)
-            q1_main(L) = q_sub(1)
-         else
-            u_to_umain(L) = 1d0
-            cfuhi(L) = 0d0
-         endif
+      ! Qmain/ QT = Kmain/KT -> u_main = Kmain/KT * (AT/Amain)
+      if (conv > 0d0) then
+         u_to_umain(L) = area*cz_sub(1) * sqrt(af_sub(1)/perim_sub(1)) /  conv
+         cfuhi(L) = ag/(conv/area)**2
+         frcu(L) = cz
+         frcu_mor(L) = cz_sub(1)
+         call getCrossDischarge(perim_sub, af_sub, cz_sub, q1L, q_sub)
+         q1_main(L) = q_sub(1)
+      else
+         u_to_umain(L) = 1d0
+         cfuhi(L) = 0d0
       endif
       wu(L) = max(0.01d0,area/hpr)
    endif
@@ -40593,7 +40579,7 @@ endif
 
 
 if (abs(kcu(ll))==1 .and. network%loaded) then !flow1d used only for 1d channels and not for 1d2d roofs and gullies
-   call getCrossTotalData_on_link(network, LL, hpr, area, width, CS_TYPE_MIN)
+   call GetCSParsTotal(network%adm%line2cross(LL), network%crs%cross, hpr, area, width, CS_TYPE_MIN)
    return
 endif
 

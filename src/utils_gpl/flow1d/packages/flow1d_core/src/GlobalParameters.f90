@@ -89,6 +89,13 @@ module m_GlobalParameters
    integer, parameter  :: DENS_ECKART          = 2
    integer, parameter  :: DENS_UNESCO          = 3
    
+   type, public :: t_chainage2cross
+      integer :: c1 = -1           !< cross section index 1
+      integer :: c2 = -1           !< cross section index 2
+      double precision :: f        !< fraction: c_loc = f * c1 + (1-f)*c2
+      double precision :: distance !< geometric distance between two cross sections
+   end type
+ 
    type t_filenames
       character(len=255) :: onednetwork                  = ' ' !< 1d Network definition             (e.g., flow1d.md1d)
       character(len=255) :: cross_section_definitions    = ' ' !< 1d cross section definitions

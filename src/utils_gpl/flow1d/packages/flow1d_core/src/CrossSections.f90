@@ -51,21 +51,24 @@ module m_CrossSections
    public fill_hashtable
    public getBob
    public GetCriticalDepth
-   public GetCrossSectionsCount
+   !public GetCrossSectionsCount
    public GetCrossType
    public GetCSParsFlow
    public GetCSParsTotal
    public getGroundLayer
-   public getHighest1dLevel
-   public GetTabFlowSectionFromTables
-   public interpolateSummerDike
-   public setGroundLayerData
+   !public getHighest1dLevel
+   !public GetTabFlowSectionFromTables
+   !public interpolateSummerDike
+   !public setGroundLayerData
    public SetParsCross
    public useBranchOrders
    public write_crosssection_data
-   public EggProfile
-   public CircleProfile
+   !public EggProfile
+   !public CircleProfile
+   !
    
+   double precision, public :: default_width
+
    interface fill_hashtable
       module procedure fill_hashtable_csdef
    end interface
@@ -1275,15 +1278,14 @@ recursive subroutine findNeighbourAndAddCrossSection(brs, crs, branchid, cross, 
 
 end subroutine findNeighbourAndAddCrossSection
 
-subroutine GetCSParsFlowInterpolate(cross1, cross2, f, dpt, u1, cz, flowArea, wetPerimeter, flowWidth, conv, af_sub, perim_sub, cz_sub)
+subroutine GetCSParsFlowInterpolate(line2cross, cross, dpt, u1, cz, flowArea, wetPerimeter, flowWidth, conv, af_sub, perim_sub, cz_sub)
 
    use m_GlobalParameters
    
    implicit none
 
-   type (t_CrossSection), intent(in)       :: cross1         !< cross section
-   type (t_CrossSection), intent(in)       :: cross2         !< cross section
-   double precision, intent(in)            :: f              !< cross = (1-f)*cross1 + f*cross2
+   type(t_chainage2cross),intent(in)       :: line2cross     !< cross section indirection
+   type(t_CrossSection), target, intent(in) :: cross(:)       !< array containing cross section information
    double precision, intent(in)            :: dpt            !< water depth at cross section
    double precision, intent(in)            :: u1             !< flow velocity
    double precision, intent(inout)         :: cz             !< roughness at cross section
@@ -1295,6 +1297,9 @@ subroutine GetCSParsFlowInterpolate(cross1, cross2, f, dpt, u1, cz, flowArea, we
    double precision, intent(out), optional :: perim_sub(3)      
    double precision, intent(out), optional :: cz_sub(3)      
 
+   type (t_CrossSection), pointer        :: cross1         !< cross section
+   type (t_CrossSection), pointer        :: cross2         !< cross section
+   double precision                      :: f              !< cross = (1-f)*cross1 + f*cross2
    double precision                      :: cz1 = 0.d0
    double precision                      :: cz2 = 0.d0
    double precision                      :: flowArea1
@@ -1312,6 +1317,18 @@ subroutine GetCSParsFlowInterpolate(cross1, cross2, f, dpt, u1, cz, flowArea, we
    double precision                      :: af_sub_local1(3), af_sub_local2(3)      
    double precision                      :: perim_sub_local1(3), perim_sub_local2(3)
    double precision                      :: cz_sub_local1(3), cz_sub_local2(3)      
+
+   if (line2cross%c1 <= 0) then
+      ! no cross section defined on branch, use default definition
+      flowArea = default_width* dpt
+      flowWidth = default_width
+      wetPerimeter = default_width + 2d0*dpt
+      return
+   endif
+
+   cross1 => cross(line2cross%c1)
+   cross2 => cross(line2cross%c2)
+   f =  line2cross%f
 
    if(cross1%crossIndx == cross2%crossIndx) then
       ! Same Cross-Section, no interpolation needed 
@@ -1616,15 +1633,13 @@ subroutine GetCSParsFlowCross(cross, dpt, u1, cz, flowArea, wetPerimeter, flowWi
    
 end subroutine GetCSParsFlowCross
 
-subroutine GetCSParsTotalInterpolate(cross1, cross2, f, dpt, totalArea, totalWidth, calculationOption, hysteresis, doSummerDike)
-
+subroutine GetCSParsTotalInterpolate(line2cross, cross, dpt, totalArea, totalWidth, calculationOption, hysteresis, doSummerDike)
    use m_GlobalParameters
    
    implicit none
 
-   type (t_CrossSection), intent(in)     :: cross1         !< cross section
-   type (t_CrossSection), intent(in)     :: cross2         !< cross section
-   double precision, intent(in)          :: f              !< cross = (1-f)*cross1 + f*cross2
+   type(t_chainage2cross),intent(in)       :: line2cross   !< cross section indirection
+   type(t_CrossSection), target, intent(in):: cross(:)     !< array containing cross section information
    double precision, intent(in)          :: dpt            !< water depth at cross section
    double precision, intent(out)         :: totalArea      !< total area for given DPT
    double precision, intent(out)         :: totalWidth     !< total width of water surface
@@ -1636,11 +1651,25 @@ subroutine GetCSParsTotalInterpolate(cross1, cross2, f, dpt, totalArea, totalWid
    logical, intent(in), optional         :: doSummerDike    !< Switch to calculate Summer Dikes or not
    logical, intent(inout), optional      :: hysteresis(2)      !< Switch to calculate Summer Dikes or not
    
+   double precision                      :: f              !< cross = (1-f)*cross1 + f*cross2
    double precision                      :: totalArea1
    double precision                      :: totalArea2
    double precision                      :: totalWidth1   
    double precision                      :: totalWidth2   
    type (t_CrossSection), save           :: crossi         !< intermediate virtual crosssection     
+   type (t_CrossSection), pointer        :: cross1         !< cross section
+   type (t_CrossSection), pointer        :: cross2         !< cross section
+
+   if (line2cross%c1 <= 0) then
+      ! no cross section defined on branch, use default definition
+      totalArea = default_width* dpt
+      totalWidth = default_width
+      return
+   endif
+
+   cross1 => cross(line2cross%c1)
+   cross2 => cross(line2cross%c2)
+   f =  line2cross%f
 
    if(cross1%crossIndx == cross2%crossIndx) then
       ! Same Cross-Section, no interpolation needed 

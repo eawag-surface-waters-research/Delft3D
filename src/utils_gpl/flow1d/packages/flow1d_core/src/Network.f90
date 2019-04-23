@@ -55,13 +55,6 @@ module m_network
    end interface dealloc
    
 
-   type, public :: t_chainage2cross
-      integer :: c1 = -1           !< cross section index 1
-      integer :: c2 = -1           !< cross section index 2
-      double precision :: f        !< fraction: c_loc = f * c1 + (1-f)*c2
-      double precision :: distance !< geometric distance between two cross sections
-   end type
- 
    ! !TODO JN: zorg voor allocatie en initialisatie. en vullen van lin2ibr en lin2point uit adm%lin. -1 is missing value e.g. for a 2d link, length LINALL
    
    type, public :: t_administration_1d
@@ -536,8 +529,7 @@ contains
                   dpu2 = -network%crs%cross(adm%line2cross(ilnk)%c2)%bedLevel
                   adm%dpu_1d(ll) = (1.0d0 - f) * dpu1 + f * dpu2
                   vel = 0d0
-                  call GetCSParsFlow(network%crs%cross(adm%line2cross(ilnk)%c1), network%crs%cross(adm%line2cross(ilnk)%c2), adm%line2cross(ilnk)%f, &
-                                     thresholdDry, vel, chezy, as, wetPerimeter, adm%minwidth1d(ll), adm%minconv(ll))
+                  call GetCSParsFlow(adm%line2cross(ilnk), network%crs%cross, thresholdDry, vel, chezy, as, wetPerimeter, adm%minwidth1d(ll), adm%minconv(ll))
                endif
                   
             enddo

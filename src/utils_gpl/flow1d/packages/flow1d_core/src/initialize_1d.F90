@@ -155,8 +155,7 @@ subroutine computeCross1d(network, l, hh, u1, cz, area, wetPerimeter, flowWidth,
    
    if(adm%line2cross(l)%c1 >0) then
       cz = 0d0          
-      call GetCSParsFlow(network%crs%cross(adm%line2cross(l)%c1), network%crs%cross(adm%line2cross(l)%c2), adm%line2cross(l)%f, &
-                         hh, u1, cz, area, wetPerimeter, flowWidth, conveyance)
+      call GetCSParsFlow(adm%line2cross(l), network%crs%cross, hh, u1, cz, area, wetPerimeter, flowWidth, conveyance)
       if (hh < thresholdDry) then
          conveyance = adm%minconv(adm%lin2local(l))
          flowWidth = adm%minwidth1d(adm%lin2local(l))
