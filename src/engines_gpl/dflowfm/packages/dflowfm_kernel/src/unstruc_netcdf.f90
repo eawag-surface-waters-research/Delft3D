@@ -4255,21 +4255,21 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
             ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_ssxcum   , nf90_double, UNC_LOC_S, 'ssxcum'  , '', 'Time-averaged suspended load transport, x-component', transpunit, dimids = (/ -2, mapids%id_tsp%id_sedtotdim, -1 /))
             ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_ssycum   , nf90_double, UNC_LOC_S, 'ssycum'  , '', 'Time-averaged suspended load transport, y-component', transpunit, dimids = (/ -2, mapids%id_tsp%id_sedtotdim, -1 /))
          else
-            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_sbxcum   , nf90_double, UNC_LOC_S, 'sbxcum'  , '', 'Time-averaged bed load transport, x-component',       transpunit, dimids = (/ -2, mapids%id_tsp%id_sedtotdim, mapids%id_sedavgtim /))
-            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_sbycum   , nf90_double, UNC_LOC_S, 'sbycum'  , '', 'Time-averaged bed load transport, y-component',       transpunit, dimids = (/ -2, mapids%id_tsp%id_sedtotdim, mapids%id_sedavgtim /))
-            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_ssxcum   , nf90_double, UNC_LOC_S, 'ssxcum'  , '', 'Time-averaged suspended load transport, x-component', transpunit, dimids = (/ -2, mapids%id_tsp%id_sedtotdim, mapids%id_sedavgtim /))
-            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_ssycum   , nf90_double, UNC_LOC_S, 'ssycum'  , '', 'Time-averaged suspended load transport, y-component', transpunit, dimids = (/ -2, mapids%id_tsp%id_sedtotdim, mapids%id_sedavgtim /))
+            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_sbxcum   , nf90_double, UNC_LOC_S, 'sbxcum'  , '', 'Time-averaged bed load transport, x-component',       transpunit, dimids = (/ -2, mapids%id_tsp%id_sedtotdim /))
+            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_sbycum   , nf90_double, UNC_LOC_S, 'sbycum'  , '', 'Time-averaged bed load transport, y-component',       transpunit, dimids = (/ -2, mapids%id_tsp%id_sedtotdim /))
+            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_ssxcum   , nf90_double, UNC_LOC_S, 'ssxcum'  , '', 'Time-averaged suspended load transport, x-component', transpunit, dimids = (/ -2, mapids%id_tsp%id_sedtotdim /))
+            ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_ssycum   , nf90_double, UNC_LOC_S, 'ssycum'  , '', 'Time-averaged suspended load transport, y-component', transpunit, dimids = (/ -2, mapids%id_tsp%id_sedtotdim /))
          endif
          
          ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_mor_bl   , nf90_double, UNC_LOC_S, 'mor_bl'  , '', 'Time-varying bottom level in flow cell center', 'm', dimids = (/ -2, -1 /))
 
          select case (stmpar%morlyr%settings%iunderlyr)
             case (1)
-               ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_bodsed  , nf90_double, UNC_LOC_S, 'bodsed'  , '', 'Available sediment in the bed in flow cell center', 'kg m-2', dimids = (/ mapids%id_tsp%id_sedtotdim, -2, -1 /))
+               ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_bodsed  , nf90_double, UNC_LOC_S, 'bodsed'  , '', 'Available sediment mass in the bed in flow cell center', 'kg m-2', dimids = (/ mapids%id_tsp%id_sedtotdim, -2, -1 /))
                ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_dpsed   , nf90_double, UNC_LOC_S, 'dpsed'  , '', 'Sediment thickness in the bed in flow cell center', 'm', dimids = (/ -2, -1 /))
             case (2)
-               ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_msed   , nf90_double, UNC_LOC_S, 'msed'  , '', 'Available sediment in a layer of the bed in flow cell center', 'kg m-2', dimids = (/ mapids%id_tsp%id_sedtotdim, mapids%id_tsp%id_nlyrdim, -2, -1 /))
-               ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_thlyr  , nf90_double, UNC_LOC_S, 'thlyr'  , '', 'thickness of a layer of the bed in flow cell center', 'm', dimids = (/ mapids%id_tsp%id_nlyrdim, -2, -1 /))
+               ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_msed   , nf90_double, UNC_LOC_S, 'msed'  , '', 'Available sediment mass in a layer of the bed in flow cell center', 'kg m-2', dimids = (/ mapids%id_tsp%id_sedtotdim, mapids%id_tsp%id_nlyrdim, -2, -1 /))
+               ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_thlyr  , nf90_double, UNC_LOC_S, 'thlyr'  , '', 'Thickness of a layer of the bed in flow cell center', 'm', dimids = (/ mapids%id_tsp%id_nlyrdim, -2, -1 /))
                !
                if (stmpar%morlyr%settings%iporosity>0) then
                   ierr = unc_def_var_map(mapids%ncid, mapids%id_tsp  , mapids%id_poros  , nf90_double, UNC_LOC_S, 'poros'  , '', 'Porosity of a layer of the bed in flow cell center', '-', dimids = (/ mapids%id_tsp%id_nlyrdim, -2, -1 /))
@@ -5216,7 +5216,7 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
       ierr = nf90_put_var(mapids%ncid, mapids%id_ssxcum(2), toutputx(1:ndxi,:), start = (/ 1, 1, itim /), count = (/ ndxi, stmpar%lsedtot, 1 /))
       ierr = nf90_put_var(mapids%ncid, mapids%id_ssycum(2), toutputy(1:ndxi,:), start = (/ 1, 1, itim /), count = (/ ndxi, stmpar%lsedtot, 1 /))       
    else
-      if (time_map == ti_mape) then   ! to check, last timestep?
+      if (time_map >= ti_mape) then   ! to check, last timestep?
          ierr = nf90_put_var(mapids%ncid, mapids%id_sedavgtim    , mortime, (/ 1 /))  
          ! Bedload components
          call realloc(toutputx, (/ndx, stmpar%lsedtot /), keepExisting=.false., fill = -999d0)
@@ -5238,8 +5238,8 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
              toutputx = 0d0
              toutputy = 0d0
          endif      
-         ierr = nf90_put_var(mapids%ncid, mapids%id_sbxcum(2), toutputx(1:ndxi,:), start = (/ 1, 1, 1 /), count = (/ ndxi, stmpar%lsedtot, 1 /))
-         ierr = nf90_put_var(mapids%ncid, mapids%id_sbycum(2), toutputy(1:ndxi,:), start = (/ 1, 1, 1 /), count = (/ ndxi, stmpar%lsedtot, 1 /))
+         ierr = nf90_put_var(mapids%ncid, mapids%id_sbxcum(2), toutputx(1:ndxi,:), start = (/ 1, 1 /), count = (/ ndxi, stmpar%lsedtot /))
+         ierr = nf90_put_var(mapids%ncid, mapids%id_sbycum(2), toutputy(1:ndxi,:), start = (/ 1, 1 /), count = (/ ndxi, stmpar%lsedtot /))
          !
          ! Suspended load
          if ( dmorft > 0d0 ) then
@@ -5259,8 +5259,8 @@ if (jamapsed > 0 .and. jased > 0 .and. stm_included) then
              toutputx = 0d0
              toutputy = 0d0
          endif      
-         ierr = nf90_put_var(mapids%ncid, mapids%id_ssxcum(2), toutputx(1:ndxi,:), start = (/ 1, 1, 1 /), count = (/ ndxi, stmpar%lsedtot, 1 /))
-         ierr = nf90_put_var(mapids%ncid, mapids%id_ssycum(2), toutputy(1:ndxi,:), start = (/ 1, 1, 1 /), count = (/ ndxi, stmpar%lsedtot, 1 /))         
+         ierr = nf90_put_var(mapids%ncid, mapids%id_ssxcum(2), toutputx(1:ndxi,:), start = (/ 1, 1 /), count = (/ ndxi, stmpar%lsedtot /))
+         ierr = nf90_put_var(mapids%ncid, mapids%id_ssycum(2), toutputy(1:ndxi,:), start = (/ 1, 1 /), count = (/ ndxi, stmpar%lsedtot /))         
       end if
    end if
 !
