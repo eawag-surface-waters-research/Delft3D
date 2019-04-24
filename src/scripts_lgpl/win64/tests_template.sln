@@ -296,6 +296,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "kdtree_wrapper", "kdtree_wrapper", "{F41B2DFA-AB10-414F-9DA6-7B3D207378D1}"
 EndProject
 Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "kdtree_wrapper", "utils_lgpl\kdtree_wrapper\packages\kdtree_wrapper\kdtree_wrapper.vfproj", "{D343152C-DE4D-43BA-B40F-DCE169B95416}"
+	ProjectSection(ProjectDependencies) = postProject
+		{1ED7D7C9-ACA9-4A50-8217-0901E12B1D70} = {1ED7D7C9-ACA9-4A50-8217-0901E12B1D70}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "gridgeom", "gridgeom", "{EC1172FA-9E7D-4FB8-AC23-380AA2A21DA2}"
 EndProject
@@ -323,6 +326,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "metistools", "metistools", "{191A3ECF-4FD8-4564-893D-F9FB055E0F6A}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "metisoptions", "utils_lgpl\metistools\packages\metisoptions\metisoptions.vcxproj", "{5B3EFD3B-EEED-4D82-86E6-2EA3B6D6299E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{4741F946-CFAA-3469-963D-9F01C053C97E} = {4741F946-CFAA-3469-963D-9F01C053C97E}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "petsc", "petsc", "{56CE9B2F-9A92-42E6-8919-697ECC44B0CB}"
 EndProject
