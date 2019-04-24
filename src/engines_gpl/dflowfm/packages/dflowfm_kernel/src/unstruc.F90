@@ -9363,7 +9363,7 @@ subroutine flow_sedmorinit()
     endif
     !
     if (stmpar%morpar%moroutput%morstats) then
-       ! Check wether anything is asked in mor file
+       ! Check whether anything is asked in mor file
        success = .true.
        if (.not. size(stmpar%morpar%moroutput%avgintv,1)==3) then
           success = .false.
@@ -15824,7 +15824,7 @@ subroutine flow_setexternalforcingsonboundaries(tim, iresult)
    call inctime_split(tim)
 
    if (ti_his > 0) then
-      if (comparereal(tim, time_his, eps10)== 0) then
+      if (comparereal(tim, time_his, eps10)>= 0) then
          if ( jampi.eq.0 .or. ( jampi.eq.1 .and. my_rank.eq.0 ) ) then
             call unc_write_his(tim)   ! wrihis
          endif
