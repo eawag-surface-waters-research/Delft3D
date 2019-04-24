@@ -619,6 +619,18 @@ fi
 # make: Build and install everything
 
 #
+# Third_party/interacter_stub
+log='logs/make_interacter_stub.log'
+command="FC=mpif90 make -C third_party/interacter_stub &> $log"
+log "Running $command"
+eval $command
+if [ $? -ne 0 ]; then
+    log "ERROR: Make # interacter_stub fails!"
+    cd $orgdir
+    exit 1
+fi
+
+#
 # Third_party_open
 log='logs/make_third_party_open.log'
 command="FC=mpif90 make ds-install -C third_party_open &> $log"
@@ -654,13 +666,37 @@ if [ $? -ne 0 ]; then
 fi
 
 #
-# waq_utils_f
-log='logs/make_waq_utils_f.log'
-command="FC=mpif90 make ds-install -C engines_gpl/waq/packages/waq_utils_f &> $log"
+# part
+log='logs/make_part.log'
+command="FC=mpif90 make ds-install -C engines_gpl/part/packages &> $log"
 log "Running $command"
 eval $command
 if [ $? -ne 0 ]; then
-    log "ERROR: Make # waq_utils_f fails!"
+    log "ERROR: Make # part fails!"
+    cd $orgdir
+    exit 1
+fi
+
+#
+# waq
+log='logs/make_waq.log'
+command="FC=mpif90 make ds-install -C engines_gpl/waq/packages &> $log"
+log "Running $command"
+eval $command
+if [ $? -ne 0 ]; then
+    log "ERROR: Make # waq fails!"
+    cd $orgdir
+    exit 1
+fi
+
+#
+# dflowfm_kernel
+log='logs/make_dflowfm_kernel.log'
+command="FC=mpif90 make ds-install -C engines_gpl/dflowfm/packages/dflowfm_kernel &> $log"
+log "Running $command"
+eval $command
+if [ $? -ne 0 ]; then
+    log "ERROR: Make # dflowfm_kernel fails!"
     cd $orgdir
     exit 1
 fi
