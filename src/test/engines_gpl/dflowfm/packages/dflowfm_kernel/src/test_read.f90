@@ -33,13 +33,15 @@ subroutine tests_read
 end subroutine tests_read
 
 subroutine test_read_obs_points
-    use m_oobservations
+    use m_observations
+    use m_partitioninfo, only: jampi
     !
     ! Locals
     integer :: n_obs_pnt
     integer :: n_return
     !
     ! Body
+    jampi = 0
     call loadObservations("ObservationPoints_2.ini", 0)
     n_obs_pnt = 4
     call find_flownode_from_ini_file(n_obs_pnt, n_return)
