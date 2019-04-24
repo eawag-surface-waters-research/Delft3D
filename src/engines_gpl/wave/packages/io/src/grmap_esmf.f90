@@ -1,4 +1,4 @@
-subroutine grmap_esmf(i1, f1, n1, f2, mmax, nmax, f2s, f2g, adaptCovered)
+subroutine grmap_esmf(i1, f1, n1, f2, mmax, nmax, f2s, f2g)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2019.                                
@@ -49,7 +49,6 @@ subroutine grmap_esmf(i1, f1, n1, f2, mmax, nmax, f2s, f2g, adaptCovered)
     real   , dimension(mmax,nmax)           :: f2
     type(grid_map)            , intent(in)  :: f2s
     type(grid)                              :: f2g  ! f2 grid
-    logical                   , optional    :: adaptCovered
 !
 ! Local variables
 !
@@ -57,7 +56,6 @@ subroutine grmap_esmf(i1, f1, n1, f2, mmax, nmax, f2s, f2g, adaptCovered)
     integer :: j
     integer :: n
     integer :: n2
-    logical :: adaptCovered_
 !
 !! executable statements -------------------------------------------------------
 !

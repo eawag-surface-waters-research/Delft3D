@@ -57,12 +57,11 @@ subroutine get_flow_fields (i_flow, sif, fg, sg, f2s, wavedata, sr, flowVelocity
    real               :: alpb         = 0.0
    real               :: dummy        = -999.0
    logical            :: clbot        = .true.
-   logical            :: adaptCovered = .false.
    character(256)     :: mudfilnam    = ' '
    type(input_fields) :: fif                    ! input fields defined on flow grid
 
 interface
-   subroutine grmap_esmf(i1, f1, n1, f2, mmax, nmax, f2s, f2g, adaptCovered)
+   subroutine grmap_esmf(i1, f1, n1, f2, mmax, nmax, f2s, f2g)
     use swan_flow_grid_maps
     integer                   , intent(in)  :: i1
     integer                   , intent(in)  :: n1
@@ -72,7 +71,6 @@ interface
     real   , dimension(mmax,nmax)           :: f2
     type(grid_map)            , intent(in)  :: f2s
     type(grid)                              :: f2g  ! f2 grid
-    logical                   , optional    :: adaptCovered
    end subroutine grmap_esmf
 end interface
 !
@@ -106,11 +104,10 @@ end interface
          !
          ! Map depth to SWAN grid, using ESMF_Regrid weights
          !
-         adaptCovered = .true.
          call grmap_esmf (i_flow,         fif%dps , fif%npts, &
                         & sif%dps       , sif%mmax, sif%nmax, &
-                        & f2s           , sg      , adaptCovered)
-         adaptCovered = .false.
+                        & f2s           , sg                )
+         !
       endif
    endif
    !
