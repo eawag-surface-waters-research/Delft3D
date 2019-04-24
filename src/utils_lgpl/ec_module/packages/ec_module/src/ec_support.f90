@@ -937,7 +937,6 @@ end subroutine ecInstanceListSourceItems
                      success = parseTimezone(string(j:), tzone)
                  endif
              else
-                 call setECMessage("WARNING: ec_support::ecSupportTimestringToUnitAndRefdate: no timezone found; assume same as Kernel.")
                  if (present(tzone_default)) then
                      tzone = tzone_default
                  else

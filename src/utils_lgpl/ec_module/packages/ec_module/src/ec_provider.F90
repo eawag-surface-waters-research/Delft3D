@@ -408,6 +408,7 @@ module m_ec_provider
          integer :: n1, n2 !< helper variables
          character(len=:), allocatable :: elementSetName
          character(len=maxNameLen)     :: quantityName
+         character(len=maxMessageLen)  :: msgstr
 
          !
          success = .true.
@@ -578,11 +579,21 @@ module m_ec_provider
                item_waterlevel%sourceT0FieldPtr%arr1dPtr(i) = waterlevels(i)
                n2 = i-1 
                if (i > 1) then
-                  if ( (discharges(i) > 0 .and. discharges(i) <= discharges(n2)) .or. &
-                       (discharges(i) < 0 .and. discharges(i) >= discharges(n2))      ) then
-                     call setECMessage("ERROR: ec_provider::ecProviderCreateQhtableItems: First column should be ordered increasingly.")
+                  if (discharges(i) > 0 .and. discharges(i) <= discharges(n2)) then
+                     write(msgstr,'(a,i0,a,i0,a,f,a,f)') "  On rows ",i," and ",n2,":",discharges(i)," >= ",discharges(n2)
+                     call setECMessage(msgstr)
+                     call setECMessage("  "//trim(fileReaderPtr%bc%fname)//", location = "//trim(fileReaderPtr%bc%bcname))
+                     call setECMessage("First column in QH-table should be strictly increasing if negative.")
                      success = .false.
-                     exit
+                     return
+                  end if
+                  if (discharges(i) < 0 .and. discharges(i) >= discharges(n2)) then
+                     write(msgstr,'(a,i0,a,i0,a,f,a,f)') "  On rows ",i," and ",n2,":",discharges(i)," >= ",discharges(n2)
+                     call setECMessage(msgstr)
+                     call setECMessage("  "//trim(fileReaderPtr%bc%fname)//", location = "//trim(fileReaderPtr%bc%bcname))
+                     call setECMessage("First column in QH-table should be strictly decreasing if negative.")
+                     success = .false.
+                     return
                   end if
                   item_slope%sourceT0FieldPtr%arr1dPtr(n2) = (waterlevels(i)-waterlevels(n2))/(discharges(i)-discharges(n2))
                   item_crossing%sourceT0FieldPtr%arr1dPtr(n2) = waterlevels(n2) - item_slope%sourceT0FieldPtr%arr1dPtr(n2) * discharges(n2)

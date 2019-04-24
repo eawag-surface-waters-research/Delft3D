@@ -281,6 +281,9 @@ module m_ec_bccollect
     ! Create the items 
     do ifr = instancePtr%nFileReaders-count+1,instancePtr%nFileReaders                   ! The latest set of filereaders = latest set of bcBlocks       
        success = items_from_bc_quantities(instancePtr,instancePtr%ecFileReadersPtr(ifr)%ptr)
+       if (.not.success) then
+           iostat = EC_UNKNOWN_ERROR
+       endif
     enddo
 
     call mf_close(fhandle)
