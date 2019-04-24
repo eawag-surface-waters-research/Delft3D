@@ -700,6 +700,10 @@ test/engines_gpl/waq/packages/Makefile
 test/engines_gpl/waq/packages/waq_utils_f/Makefile
 test/engines_gpl/waq/packages/waq_utils_f/src/Makefile
 test/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/Makefile
+test/engines_gpl/dflowfm/Makefile
+test/engines_gpl/dflowfm/packages/Makefile
+test/engines_gpl/dflowfm/packages/dflowfm_kernel/Makefile
+test/engines_gpl/dflowfm/packages/dflowfm_kernel/src/Makefile
 test/utils_lgpl/deltares_common/Makefile
 test/utils_lgpl/deltares_common/packages/Makefile
 test/utils_lgpl/deltares_common/packages/test_deltares_common/Makefile
