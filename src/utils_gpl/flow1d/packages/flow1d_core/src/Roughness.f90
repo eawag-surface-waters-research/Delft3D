@@ -278,7 +278,7 @@ double precision function getFrictionValue(rgs, spData, ibranch, section, igrid,
     
     rgh => rgs%rough(isec1)
     
-    if (q > 0d0 .or. .not. associated(rgh%rgh_type_neg)) then
+    if (q >= 0d0 .or. .not. associated(rgh%rgh_type_neg)) then
        values    => spData%quant(rgh%spd_pos_idx)
        rgh_type  => rgh%rgh_type_pos 
        fun_type  => rgh%fun_type_pos 
