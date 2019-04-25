@@ -101,8 +101,6 @@ function odu_get_xy_coordinates(branchids, branchoffsets, geopointsX, geopointsY
    !map the mesh nodes
    nbranches = size(branchlengths,1)
    allocate(meshnodemapping(2,nbranches))
-   meshnodemapping(1,:) = -1
-   meshnodemapping(2,:) = -2
    ierr = odu_get_start_end_nodes_of_branches(branchids, meshnodemapping(1,:), meshnodemapping(2,:))
    
    ! initialization
@@ -117,6 +115,12 @@ function odu_get_xy_coordinates(branchids, branchoffsets, geopointsX, geopointsY
       endGeometryNode       = startGeometryNode + nGeometrySegments
       !calculate the branch lenghts
       totalLength = 0.0d0
+      if (startMeshNode==-1 .or. endMeshNode==-1) then
+         !update geometry indexes
+         startGeometryNode = endGeometryNode + 1
+         cycle
+      endif
+      
       do i = startGeometryNode, endGeometryNode - 1
          deltaX(i) = cartGeopointsX(i+1) - cartGeopointsX(i)
          deltaY(i) = cartGeopointsY(i+1) - cartGeopointsY(i)
@@ -196,6 +200,9 @@ function odu_get_start_end_nodes_of_branches(branchidx, branchStartNode, branchE
    ibran =  0
    numnode = size(branchidx)
    nbranches = size(branchStartNode)
+   !initialize
+   branchStartNode = -1
+   branchEndNode = -1
    do i = 1, numnode
       if (branchidx(i) > ibran) then
          if (ibran > 0) then
@@ -208,4 +215,45 @@ function odu_get_start_end_nodes_of_branches(branchidx, branchStartNode, branchE
    branchEndNode(ibran) = numnode
 end function odu_get_start_end_nodes_of_branches
 
+
+function odu_sort_branchoffsets(branchidx, branchoffsets, nbranches, indexses) result(ierr)
+   
+   use sorting_algorithms
+
+   integer, dimension(:), intent(in)                      :: branchidx   
+   double precision, dimension(:), intent(inout)          :: branchoffsets   
+   integer, intent(in)                                    :: nbranches
+   integer, allocatable, dimension(:), intent(inout)      :: indexses	
+   
+   !locals
+   integer                                                :: ierr, ibran, firstNode, lastNode, gridPointsCount
+   integer, allocatable                                   :: branchStartNode(:)
+   integer, allocatable                                   :: branchEndNode(:)
+   double precision, allocatable                          :: branchoffsetsSorted(:)
+   
+	
+   ierr = 0
+   allocate(branchStartNode(nbranches))
+   allocate(branchEndNode(nbranches))
+   
+   ierr = odu_get_start_end_nodes_of_branches(branchidx, branchStartNode, branchEndNode)
+   
+   allocate(branchoffsetsSorted(size(branchidx)))
+   allocate(indexses(size(branchidx)))
+   do ibran = 1, nbranches
+      
+      firstNode = branchStartNode(ibran)
+      lastNode  = branchEndNode(ibran)
+	   if(firstNode==-1 .or.lastNode==-1 ) then
+          cycle
+       endif
+       gridPointsCount = lastNode-firstNode+1
+
+       call sort(gridPointsCount, branchoffsets(firstNode:lastNode), branchoffsetsSorted(firstNode:lastNode), indexses(firstNode:lastNode))
+       branchoffsets(firstNode:lastNode) = branchoffsetsSorted(firstNode:lastNode)
+    end do
+   
+
+end function odu_sort_branchoffsets
+   
 end module odugrid

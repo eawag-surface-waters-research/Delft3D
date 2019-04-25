@@ -45,6 +45,7 @@ module m_1d_networkreader
    public read_1d_ugrid
    public read_network_cache
    public write_network_cache
+   public construct_network_from_meshgeom
 
    contains
     
@@ -128,210 +129,309 @@ module m_1d_networkreader
       endif
        
    end subroutine NetworkUgridReader  
-   
-   subroutine read_1d_ugrid(network, ioncid, dflowfm)
-   
-      use io_netcdf
-      use io_ugrid
-      use m_hash_search
-      use gridgeom
-      use meshdata
-      
-      implicit none
-   
-      type(t_network), target, intent(inout) :: network
-      integer, intent(in)                    :: ioncid
-      logical, optional, intent(inout)       :: dflowfm
-      
-      integer                   :: ibran
-      integer                   :: igridpoint
-      
-      integer                   :: ierr, i, j
-      integer                   :: istat 
-      integer                   :: numMesh
-      integer                   :: meshIndex
-      integer                   :: networkIndex
-      integer                   :: gridPointsCount
-      integer                   :: startIndex
-      type(t_node), dimension(:), pointer :: pnodes
 
-      integer, allocatable, dimension(:)               :: gpFirst
-      integer, allocatable, dimension(:)               :: gpLast
-      
-      double precision, allocatable, dimension(:)      :: gpsX
-      double precision, allocatable, dimension(:)      :: gpsY
-      
-      !character variables
-      character(len=IdLen), allocatable, dimension(:)                  :: gpsID 
-      character(len=ug_idsLongNamesLen), allocatable, dimension(:)     :: gpsIDLongnames
-      character(len=ug_idsLen), allocatable, dimension(:)              :: nodeids
-      character(len=ug_idsLongNamesLen), allocatable, dimension(:)     :: nodelongnames
-      character(len=ug_idsLen), allocatable, dimension(:)              :: branchids
-      character(len=ug_idsLongNamesLen), allocatable, dimension(:)     :: branchlongnames
-      character(len=ug_idsLongNamesLen)                                :: network1dname, mesh1dname
-      
-      !< Structure where all mesh is stored. Internal arrays are all pointers
-      type(t_ug_meshgeom) :: meshgeom
-      
-      ! Make indexes 1-based
-      startIndex = 1
-      
-      
-      ierr = ionc_get_mesh_count(ioncid, numMesh)
-      if (ierr .ne. 0) then
-         call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error Reading Number of Meshes')
-      endif
-      if (numMesh < 1) then
-         call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Data Missing')
-      endif
 
-      ! Get Index of 1D-Mesh
-      ierr = ionc_get_1d_mesh_id_ugrid(ioncid, meshIndex)
-      if (ierr .ne. 0 .or. meshIndex <= 0) then
-         if (present(dflowfm)) then  
-            call SetMessage(LEVEL_INFO, 'Network UGRID-File: No 1D-Mesh Present, Skipped 1D')
-            network%loaded = .false.           
-            return
-         else
-            call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error Reading Mesh ID')
-         endif
-      endif
-      
-      ! Get Index of 1D-Network
-      ierr = ionc_get_1d_network_id_ugrid(ioncid, networkIndex)
-      if (ierr .ne. 0 .or. networkIndex <= 0) then
-         if (present(dflowfm)) then  
-            call SetMessage(LEVEL_INFO, 'Network UGRID-File: No 1D-Network Present, Skipped 1D')
-            network%loaded = .false.
-            return
-         else
-            call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error Reading Mesh ID')
-         endif
-      endif
-      
-      ! Get all data in one call: mesh and network
-      ierr =  ionc_get_meshgeom(ioncid, meshIndex, networkIndex, meshgeom, startIndex, .true., &             
-                                branchids, branchlongnames, nodeids, nodelongnames, & !1d network character variables
-                                gpsID, gpsIDLongnames, network1dname, mesh1dname)     !1d grid character variables
+   integer function construct_network_from_meshgeom(network, meshgeom, branchids, branchlongnames, nodeids, nodelongnames, & !1d network character variables
+      gpsID, gpsIDLongnames, network1dname, mesh1dname, nodesOnBranchVertices) result(ierr)
 
-      if (ierr .ne. 0) then
-         call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error in ionc_get_meshgeom')
-      endif
-      
-      ! check data are present and correct
-      if (meshgeom%numnode .eq. -1) then
-         call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error in meshgeom%numnode')
-      endif
-      if (meshgeom%nbranches .eq. -1) then
-         call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error in meshgeom%nbranches')
-      endif
-      if (.not.associated(meshgeom%nodex)) then
-         call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error in meshgeom%nodex')
-      endif
-      if (.not.associated(meshgeom%nodey)) then
-         call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error in meshgeom%nodey')
-      endif      
-      if (.not.allocated(nodeids)) then
-         call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error in nodeids')
-      endif
-      if (.not.allocated(nodelongnames)) then
-         call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error in nodelongnames')
-      endif
-      
-      
-      if (.not.allocated(branchids)) then
-         call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error in meshgeom%nbranchids')
-      endif
-      if (.not.associated(meshgeom%nedge_nodes)) then
-         call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error in meshgeom%nedge_nodes')
-      endif
-      if (.not.associated(meshgeom%nbranchorder)) then
-         call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error in meshgeom%nbranchorder')
-      endif
-      if (.not.associated(meshgeom%nodex)) then
-         call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error in meshgeom%nodex')
-      endif
-      if (.not.associated(meshgeom%nodey)) then
-         call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error in meshgeom%nodey')
-      endif
-      if (.not.associated(meshgeom%branchoffsets)) then
-         call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error in meshgeom%branchoffsets')
-      endif
-      if (.not.allocated(gpsID)) then
-         call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error in gpsID')
-      endif 
-      if (.not.allocated(gpsIDLongnames)) then
-         call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error in gpsIDLongnames')
-      endif
-    
-      ! Store Node Data into Data Structures      
-      call storeNodes(network%nds, meshgeom%nnodes, meshgeom%nnodex, meshgeom%nnodey, nodeids, nodelongnames)
+   use gridgeom
+   use meshdata
+   use m_hash_search
+   use odugrid
+
+   !in variables
+   type(t_network),  intent(inout) :: network
+   type(t_ug_meshgeom), intent(in) :: meshgeom
+   character(len=ug_idsLen), allocatable, dimension(:), intent(in)             :: branchids
+   character(len=ug_idsLongNamesLen), allocatable, dimension(:),intent(in)     :: branchlongnames
+   character(len=ug_idsLen), allocatable, dimension(:),intent(in)              :: nodeids
+   character(len=ug_idsLongNamesLen), allocatable, dimension(:),intent(in)     :: nodelongnames
+   character(len=IdLen),allocatable, dimension(:),intent(inout)                :: gpsID
+   character(len=ug_idsLongNamesLen), allocatable, dimension(:),intent(inout)  :: gpsIDLongnames
+   character(len=ug_idsLongNamesLen),intent(in)                                :: network1dname
+   character(len=ug_idsLongNamesLen),intent(in)                                :: mesh1dname
+   integer, intent(in)                                                         :: nodesOnBranchVertices
+
+   !locals
+   integer, allocatable, dimension(:)               :: gpFirst
+   integer, allocatable, dimension(:)               :: gpLast
+   double precision, allocatable, dimension(:)      :: gpsX
+   double precision, allocatable, dimension(:)      :: gpsY
+   type(t_node), dimension(:), pointer              :: pnodes
+   integer                                          :: ibran, inode, i, j
+   integer                                          :: gridPointsCount
+   double precision, allocatable, dimension(:)      :: localOffsets
+   double precision, allocatable, dimension(:)      :: localOffsetsSorted
+   integer, allocatable, dimension(:)               :: localSortedIndexses  
+   double precision, allocatable, dimension(:)      :: localGpsX
+   double precision, allocatable, dimension(:)      :: localGpsY
+   character(len=IdLen), allocatable, dimension(:)  :: localGpsID
+   character(len=IdLen), allocatable, dimension(:)  :: idMeshNodesInNetworkNodes
+   integer                                          :: firstNode, lastNode
+   double precision, parameter                      :: snapping_tolerance = 1e-10
    
-      ! Calculate xy coordinates from UGrid index based notation
-      allocate(gpsX(meshgeom%numnode), stat = istat)
-      if (istat == 0) allocate(gpsY(meshgeom%numnode), stat = istat)
-      if (istat .ne. 0) then
-         call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error Allocating Memory for Grid Point Coordinates')
-      endif
 
-      ierr = ggeo_get_xy_coordinates(meshgeom%branchidx, meshgeom%branchoffsets, meshgeom%ngeopointx, meshgeom%ngeopointy, &
-                                     meshgeom%nbranchgeometrynodes, meshgeom%nbranchlengths, 0, gpsX, gpsY)
-      if (ierr .ne. 0) then
-         call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error Getting Mesh Coordinates From UGrid Data')
-      endif
-      
-      ! Get the starting and endig indexes of the grid points 
-      ibran = 0
-      allocate(gpFirst(meshgeom%nbranches), stat = istat)
-      if (istat == 0) allocate(gpLast(meshgeom%nbranches), stat = istat)
-      if (istat .ne. 0) then
-         call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error Allocating Memory for Branches')
-      endif
+   ierr = -1
+   ! check data are present and correct
+   if (meshgeom%numnode .eq. -1) then
+      call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error in meshgeom%numnode')
+   endif
+   if (meshgeom%nbranches .eq. -1) then
+      call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error in meshgeom%nbranches')
+   endif
+   if (.not.associated(meshgeom%nodex)) then
+      call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error in meshgeom%nodex')
+   endif
+   if (.not.associated(meshgeom%nodey)) then
+      call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error in meshgeom%nodey')
+   endif
+   if (.not.allocated(nodeids)) then
+      call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error in nodeids')
+   endif
+   if (.not.allocated(nodelongnames)) then
+      call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error in nodelongnames')
+   endif
+
+   if (.not.allocated(branchids)) then
+      call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error in meshgeom%nbranchids')
+   endif
+   if (.not.associated(meshgeom%nedge_nodes)) then
+      call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error in meshgeom%nedge_nodes')
+   endif
+   if (.not.associated(meshgeom%nbranchorder)) then
+      call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error in meshgeom%nbranchorder')
+   endif
+   if (.not.associated(meshgeom%nodex)) then
+      call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error in meshgeom%nodex')
+   endif
+   if (.not.associated(meshgeom%nodey)) then
+      call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error in meshgeom%nodey')
+   endif
+   if (.not.associated(meshgeom%branchoffsets)) then
+      call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error in meshgeom%branchoffsets')
+   endif
+   if (.not.allocated(gpsID)) then
+      call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error in gpsID')
+   endif
+   if (.not.allocated(gpsIDLongnames)) then
+      call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error in gpsIDLongnames')
+   endif
+
+   ! Store Node Data into Data Structures
+   call storeNodes(network%nds, meshgeom%nnodes, meshgeom%nnodex, meshgeom%nnodey, nodeids, nodelongnames)
+
+   ! Calculate xy coordinates from UGrid index based notation
+   allocate(gpsX(meshgeom%numnode), stat = ierr)
+   if (ierr == 0) allocate(gpsY(meshgeom%numnode), stat = ierr)
+   if (ierr .ne. 0) then
+      call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error Allocating Memory for Grid Point Coordinates')
+   endif
    
-      ierr = ggeo_get_start_end_nodes_of_branches(meshgeom%branchidx, gpFirst, gpLast)
-      if (ierr .ne. 0) then
-         call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error Getting first and last nodes of the network branches')
-      endif 
-      
-      ! Store Branches
+   ierr = ggeo_get_xy_coordinates(meshgeom%branchidx, meshgeom%branchoffsets, meshgeom%ngeopointx, meshgeom%ngeopointy, &
+      meshgeom%nbranchgeometrynodes, meshgeom%nbranchlengths, 0, gpsX, gpsY)
+   if (ierr .ne. 0) then
+      call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error Getting Mesh Coordinates From UGrid Data')
+   endif
+
+   ! Get the starting and endig indexes of the grid points
+   ibran = 0
+   allocate(gpFirst(meshgeom%nbranches), stat = ierr)
+   if (ierr == 0) allocate(gpLast(meshgeom%nbranches), stat = ierr)
+   if (ierr .ne. 0) then
+      call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error Allocating Memory for Branches')
+   endif
+
+   ierr = ggeo_get_start_end_nodes_of_branches(meshgeom%branchidx, gpFirst, gpLast)
+   if (ierr .ne. 0) then
+      call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error Getting first and last nodes of the network branches')
+   endif
+
+   ! Fill the array storing the ids of the mesh nodes in the nework nodes
+   if(nodesOnBranchVertices==0) then
+      allocate(idMeshNodesInNetworkNodes(meshgeom%numnode))
       do ibran = 1, meshgeom%nbranches
-      
-         gridPointsCount = gpLast(ibran) - gpFirst(ibran) + 1
-         
-         call storeBranch(network%brs, network%nds, branchids(ibran), &
-                          nodeids(meshgeom%nedge_nodes(1,ibran)), nodeids(meshgeom%nedge_nodes(2,ibran)), &
-                          meshgeom%nbranchorder(ibran), gridPointsCount, gpsX(gpFirst(ibran):gpLast(ibran)), &
-                          gpsY(gpFirst(ibran):gpLast(ibran)), meshgeom%branchoffsets(gpFirst(ibran):gpLast(ibran)), &
-                          gpsID(gpFirst(ibran):gpLast(ibran)))       
-      enddo
-
-      call adminBranchOrders(network%brs)
-      call fill_hashtable(network%brs)
-      pnodes => network%nds%node  
-      do i = 1, network%nds%count
-         do j = i+1, network%nds%count
-            if (abs(pnodes(i)%x-pnodes(j)%x) + abs(pnodes(i)%y-pnodes(j)%y) < 1d0) then
-               pnodes(j)%x = pnodes(i)%x+0.5d0
-               pnodes(j)%y = pnodes(i)%y+0.5d0
+         firstNode = gpFirst(ibran)
+         lastNode  = gpLast(ibran)
+         ! if no mesh points in the branch, cycle
+         if(firstNode==-1 .or. lastNode==-1) then
+            cycle
+         endif
+         do inode = firstNode, lastNode
+            if(meshgeom%branchoffsets(inode)<snapping_tolerance) then
+               idMeshNodesInNetworkNodes(meshgeom%nedge_nodes(1,ibran))(1:len_trim(gpsID(inode))) = gpsID(inode)(1:len_trim(gpsID(inode)))
+            endif
+            if(abs(meshgeom%branchoffsets(inode)-meshgeom%nbranchlengths(ibran))<snapping_tolerance) then
+               idMeshNodesInNetworkNodes(meshgeom%nedge_nodes(2,ibran))(1:len_trim(gpsID(inode))) = gpsID(inode)(1:len_trim(gpsID(inode)))
             endif
          enddo
       enddo
-      
-      network%loaded = .true.
-      
-      
-      !free memory
-      ierr = t_ug_meshgeom_destructor(meshgeom)
-      deallocate(nodeids)
-      deallocate(nodelongnames)
-      deallocate(branchids)
-      deallocate(gpsID)
-      deallocate(gpsX)
-      deallocate(gpsY)
-      deallocate(gpsIDLongnames)
- 
-   end subroutine read_1d_ugrid 
+   endif
+
+   ! allocate local arrays
+   allocate(localOffsets(meshgeom%numnode))
+   allocate(localOffsetsSorted(meshgeom%numnode))
+   allocate(localSortedIndexses(meshgeom%numnode))
+   allocate(localGpsX(meshgeom%numnode))
+   allocate(localGpsY(meshgeom%numnode))
+   allocate(localGpsID(meshgeom%numnode))
+   do ibran = 1, meshgeom%nbranches
+
+      firstNode = gpFirst(ibran)
+      lastNode  = gpLast(ibran)
+      ! if no mesh points in the branch, cycle
+      if(firstNode==-1 .or. lastNode==-1) then
+         cycle
+      endif
+
+      gridPointsCount                 = lastNode - firstNode + 1
+      localOffsets(1:gridPointsCount) = meshgeom%branchoffsets(firstNode:lastNode)
+      localGpsX(1:gridPointsCount)    = gpsX(firstNode:lastNode)
+      localGpsY(1:gridPointsCount)    = gpsY(firstNode:lastNode)
+      localGpsID(1:gridPointsCount)   = gpsID(firstNode:lastNode)
+
+      if(nodesOnBranchVertices==0) then
+         if(localOffsets(1)>snapping_tolerance .and. abs(localOffsets(gridPointsCount)-meshgeom%nbranchlengths(ibran))< snapping_tolerance) then
+            !start point missing
+            localOffsets(1:gridPointsCount+1)=(/ 0.0d0, localOffsets(1:gridPointsCount) /)
+            localGpsX(1:gridPointsCount+1)=(/ meshgeom%nnodex(meshgeom%nedge_nodes(1,ibran)), localGpsX(1:gridPointsCount) /)
+            localGpsY(1:gridPointsCount+1)=(/ meshgeom%nnodey(meshgeom%nedge_nodes(1,ibran)), localGpsY(1:gridPointsCount) /)
+            localGpsID(1:gridPointsCount+1)=(/ idMeshNodesInNetworkNodes(meshgeom%nedge_nodes(1,ibran)), localGpsID(1:gridPointsCount) /)
+            gridPointsCount = gridPointsCount + 1
+         endif
+         if(localOffsets(1)<snapping_tolerance .and. abs(localOffsets(gridPointsCount)-meshgeom%nbranchlengths(ibran))> snapping_tolerance) then
+            !end point missing
+            localOffsets(1:gridPointsCount+1)=(/ localOffsets(1:gridPointsCount), meshgeom%nbranchlengths(ibran) /)
+            localGpsX(1:gridPointsCount+1)=(/ localGpsX(1:gridPointsCount), meshgeom%nnodex(meshgeom%nedge_nodes(2,ibran)) /)
+            localGpsY(1:gridPointsCount+1)=(/ localGpsY(1:gridPointsCount), meshgeom%nnodey(meshgeom%nedge_nodes(2,ibran)) /)
+            localGpsID(1:gridPointsCount+1)=(/ localGpsID(1:gridPointsCount), idMeshNodesInNetworkNodes(meshgeom%nedge_nodes(2,ibran)) /)
+            gridPointsCount = gridPointsCount + 1
+         endif
+         if(localOffsets(1)>snapping_tolerance .and. abs(localOffsets(gridPointsCount)-meshgeom%nbranchlengths(ibran))> snapping_tolerance) then
+            !start and end points missing
+            localOffsets(1:gridPointsCount+2)=(/ 0.0d0, localOffsets(1:gridPointsCount), meshgeom%nbranchlengths(ibran) /)
+            localGpsX(1:gridPointsCount+2)=(/ meshgeom%nnodex(meshgeom%nedge_nodes(1,ibran)), localGpsX(1:gridPointsCount), meshgeom%nnodex(meshgeom%nedge_nodes(2,ibran)) /)
+            localGpsY(1:gridPointsCount+2)=(/ meshgeom%nnodey(meshgeom%nedge_nodes(1,ibran)), localGpsY(1:gridPointsCount), meshgeom%nnodey(meshgeom%nedge_nodes(2,ibran)) /)
+            localGpsID(1:gridPointsCount+2)=(/ idMeshNodesInNetworkNodes(meshgeom%nedge_nodes(1,ibran)), localGpsID(1:gridPointsCount), idMeshNodesInNetworkNodes(meshgeom%nedge_nodes(2,ibran)) /)
+            gridPointsCount = gridPointsCount + 2
+         endif
+      endif
+
+      call storeBranch(network%brs, network%nds, branchids(ibran), nodeids(meshgeom%nedge_nodes(1,ibran)), nodeids(meshgeom%nedge_nodes(2,ibran)), meshgeom%nbranchorder(ibran),&
+         gridPointsCount, localGpsX(1:gridPointsCount), localGpsY(1:gridPointsCount),localOffsets(1:gridPointsCount), localGpsID(1:gridPointsCount))
+   enddo
+
+   call adminBranchOrders(network%brs)
+   call fill_hashtable(network%brs)
+   pnodes => network%nds%node
+   do i = 1, network%nds%count
+      do j = i+1, network%nds%count
+         if (abs(pnodes(i)%x-pnodes(j)%x) + abs(pnodes(i)%y-pnodes(j)%y) < 1d0) then
+            pnodes(j)%x = pnodes(i)%x+0.5d0
+            pnodes(j)%y = pnodes(i)%y+0.5d0
+         endif
+      enddo
+   enddo
+
+   network%loaded = .true.
+
+   !free local memory
+   deallocate(gpsX)
+   deallocate(gpsY)
+
+   end function construct_network_from_meshgeom
+
+   subroutine read_1d_ugrid(network, ioncid, dflowfm)
+
+   use io_netcdf
+   use io_ugrid
+   use m_hash_search
+   use gridgeom
+   use meshdata
+
+   implicit none
+
+   type(t_network), target, intent(inout) :: network
+   integer, intent(in)                    :: ioncid
+   logical, optional, intent(inout)       :: dflowfm
+
+   integer                   :: igridpoint
+
+   integer                   :: ierr
+   integer                   :: numMesh
+   integer                   :: meshIndex
+   integer                   :: networkIndex
+   integer                   :: startIndex
    
+   character(len=ug_idsLen), allocatable, dimension(:)              :: branchids
+   character(len=ug_idsLongNamesLen), allocatable, dimension(:)     :: branchlongnames
+   character(len=ug_idsLen), allocatable, dimension(:)              :: nodeids
+   character(len=ug_idsLongNamesLen), allocatable, dimension(:)     :: nodelongnames
+   character(len=IdLen), allocatable, dimension(:)                  :: gpsID
+   character(len=ug_idsLongNamesLen), allocatable, dimension(:)     :: gpsIDLongnames
+   character(len=ug_idsLongNamesLen)                                :: network1dname
+   character(len=ug_idsLongNamesLen)                                :: mesh1dname
+   integer, parameter                                               :: nodesOnBranchVertices = 1
+
+
+   !< Structure where all mesh is stored. Internal arrays are all pointers
+   type(t_ug_meshgeom) :: meshgeom
+
+   ! Make indexes 1-based
+   startIndex = 1
+
+
+   ierr = ionc_get_mesh_count(ioncid, numMesh)
+   if (ierr .ne. 0) then
+      call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error Reading Number of Meshes')
+   endif
+   if (numMesh < 1) then
+      call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Data Missing')
+   endif
+
+   ! Get Index of 1D-Mesh
+   ierr = ionc_get_1d_mesh_id_ugrid(ioncid, meshIndex)
+   if (ierr .ne. 0 .or. meshIndex <= 0) then
+      if (present(dflowfm)) then
+         call SetMessage(LEVEL_INFO, 'Network UGRID-File: No 1D-Mesh Present, Skipped 1D')
+         network%loaded = .false.
+         return
+      else
+         call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error Reading Mesh ID')
+      endif
+   endif
+
+   ! Get Index of 1D-Network
+   ierr = ionc_get_1d_network_id_ugrid(ioncid, networkIndex)
+   if (ierr .ne. 0 .or. networkIndex <= 0) then
+      if (present(dflowfm)) then
+         call SetMessage(LEVEL_INFO, 'Network UGRID-File: No 1D-Network Present, Skipped 1D')
+         network%loaded = .false.
+         return
+      else
+         call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error Reading Mesh ID')
+      endif
+   endif
+
+   ! Get all data in one call: mesh and network
+   ierr =  ionc_get_meshgeom(ioncid, meshIndex, networkIndex, meshgeom, startIndex, .true., &
+      branchids, branchlongnames, nodeids, nodelongnames, & !1d network character variables
+      gpsID, gpsIDLongnames, network1dname, mesh1dname)     !1d grid character variables
+
+   ierr = construct_network_from_meshgeom(network, meshgeom, branchids, branchlongnames, nodeids, nodelongnames, & 
+      gpsID, gpsIDLongnames, network1dname, mesh1dname, nodesOnBranchVertices)
+
+   
+   !deallocate memory
+   ierr = t_ug_meshgeom_destructor(meshgeom)
+   deallocate(branchids)
+   deallocate(branchlongnames)
+   deallocate(nodeids)
+   deallocate(nodelongnames)
+   deallocate(gpsID)
+   deallocate(gpsIDLongnames)
+   
+   end subroutine read_1d_ugrid
+
    
    subroutine adminBranchOrders(brs)
       type (t_branchset), intent(inout) :: brs

@@ -9241,11 +9241,11 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
    
    logical           :: dflowfm_1d
    
-   type(t_branch), pointer :: pbr
-   type(t_node), pointer :: pnod
-   integer :: istat, minp, ifil, inod, ibr, ngrd, k, k1, k2
-   type (t_structure), pointer :: pstru
-   integer :: nstru
+   type(t_branch), pointer      :: pbr
+   type(t_node), pointer        :: pnod
+   integer                      :: istat, minp, ifil, inod, ibr, ngrd, k, k1, k2
+   type (t_structure), pointer  :: pstru
+   integer                      :: nstru
    
    ! 1d2d links
    integer                                   :: ncontacts, ncontactmeshes, koffset1dmesh
@@ -9257,6 +9257,7 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
    logical                                   :: includeArrays
    double precision, allocatable             :: xface(:), yface(:)
    integer, allocatable                      :: branchStartNode(:), branchEndNode(:)
+   integer                                   :: nodesOnBranchVertices
 
    numk_read = 0
    numl_read = 0
@@ -9275,108 +9276,17 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
       goto 999
    end if
    
-   !reduce the scope, do deallocation here
+   ! Old convention, with overlapping points
    if (allocated(mesh1dNodeIds)) deallocate(mesh1dNodeIds)
    if (allocated(mesh1dUnmergedToMerged)) deallocate(mesh1dUnmergedToMerged)
    if (allocated(mesh1dMergedToUnMerged)) deallocate(mesh1dMergedToUnMerged)
-      
-   allocate(mesh1dNodeIds(size(xk)))
-   allocate(mesh1dUnmergedToMerged(size(xk)))
-   allocate(mesh1dMergedToUnMerged(size(xk)))
    
-   !! Read 1D from file
-   if (.not. network%loaded) then
-      dflowfm_1d = .true.
-      call read_1d_ugrid(network, ioncid, dflowfm_1d)
-      if (network%loaded) then
-         call admin_network(network, numk, numl)  
-         !! TODO: Start temporary fix, to be removed when 1d ugrid file is correct (at this point branches are not connected)       
-         do inod = 1, network%nds%Count
-            pnod => network%nds%node(inod)
-            pnod%gridNumber = 0
-         enddo
-         
-         numk = 0
-         numl = 0
-         numMesh1dBeforeMerging = 0
-         do ibr = 1, network%brs%Count
-            pbr => network%brs%branch(ibr)
-            ! first step add coordinates and bed levels to nodes
-            if ( pbr%FromNode%gridNumber == 0 ) then
-               numk = numk + 1
-               pbr%FromNode%gridNumber = numk
-               xk(numk) = pbr%Xs(1)
-               yk(numk) = pbr%Ys(1)
-               zk(numk) = dmiss
-            endif
-            pbr%grd(1) = pbr%FromNode%gridNumber            
-            ! id-mesh node mapping
-            numMesh1dBeforeMerging = numMesh1dBeforeMerging + 1
-            mesh1dNodeIds(numMesh1dBeforeMerging) = pbr%gridPointIDs(1)
-            mesh1dUnmergedToMerged(numMesh1dBeforeMerging) = pbr%grd(1)
-            mesh1dMergedToUnMerged(pbr%grd(1)) = numMesh1dBeforeMerging
-            ngrd = pbr%gridPointsCount  
-            do k = 2, ngrd-1
-               ! i do not want to renumber the nodes, otherwise link info gets invalidated
-               numk = numk + 1
-               pbr%grd(k) = numk
-               xk(numk) = pbr%Xs(k)
-               yk(numk) = pbr%Ys(k)
-               zk(numk) = dmiss
-               ! id-mesh node mapping  
-               numMesh1dBeforeMerging = numMesh1dBeforeMerging + 1
-               mesh1dNodeIds(numMesh1dBeforeMerging) = pbr%gridpointids(k)
-               mesh1dUnmergedToMerged(numMesh1dBeforeMerging) = pbr%grd(k)
-               mesh1dMergedToUnMerged(pbr%grd(k)) = numMesh1dBeforeMerging
-            enddo
-            if ( pbr%toNode%gridNumber == 0 ) then
-               numk = numk + 1
-               pbr%toNode%gridNumber = numk
-               xk(numk) = pbr%Xs(ngrd)
-               yk(numk) = pbr%Ys(ngrd)
-               zk(numk) = dmiss
-            endif
-            pbr%grd(ngrd) = pbr%toNode%gridNumber
-            ! id-mesh node mapping   
-            numMesh1dBeforeMerging = numMesh1dBeforeMerging + 1
-            mesh1dNodeIds(numMesh1dBeforeMerging) = pbr%gridPointIDs(ngrd)
-            mesh1dUnmergedToMerged(numMesh1dBeforeMerging) = pbr%grd(ngrd)
-            mesh1dMergedToUnMerged(pbr%grd(ngrd)) = numMesh1dBeforeMerging
-
-            ! second step create links
-            do k = 1, ngrd-1
-               numl = numl+1
-               kn(1,numl) = pbr%grd(k)
-               kn(2,numl) = pbr%grd(k+1)
-               kn(3,numl) = 1
-            enddo
-            
-            ! Store dflowfm grd-values into buffer for later re-use.
-            pbr%grd_buf = pbr%grd
-          
-         enddo
-         
-         network%numk = numk
-         network%numl = numl
-         
-         numk_keep = numk
-         numl_keep = numl
-         
-         numk_last = numk
-         numl_last = numl
-         ! End temporary fix
-       
-         ! TODO: Once dflowfm's own 1D and the flow1d code are aligned, the following switch should probably disappear.         
-         jainterpolatezk1D = 0         
-      else
-         network%numk = 0
-         network%numl = 0
-      endif
+   !this value needs to be determined from file 
+   nodesOnBranchVertices = 1
+   ! Construct network with with old files (nodesOnBranchVertices). In this function 1d edge nodes (kn array) are also set
+   if (nodesOnBranchVertices==1) then
+      ierr = read_1d_mesh_convention_one(ioncid, numk_keep, numl_keep, numk_last, numl_last)
    endif
-   
-   ! re-allocate mesh1dNodeIds and mesh1dUnmergedToMerged
-   call realloc(mesh1dNodeIds, numMesh1dBeforeMerging, keepExisting=.true.)
-   call realloc(mesh1dUnmergedToMerged, numMesh1dBeforeMerging, keepExisting=.true.)
       
    ierr = ionc_get_coordinate_reference_system(ioncid, crs)
    ! ierr = ionc_get_crs(ioncid, crs) ! TODO: make this API routine.
@@ -9416,7 +9326,10 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
                                   nodeids, nodelongnames, network1dname, mesh1dname) 
          meshgeom1d = meshgeom 
          mesh1dname = meshgeom1d%meshname
-         cycle
+         if (nodesOnBranchVertices==1) then 
+             !1d edge nodes (kn array) set above
+             cycle
+         endif
       elseif (meshgeom%dim == 2) then
          !Else 2d/3d mesh
          ierr = ionc_get_meshgeom(ioncid, im, networkIndex, meshgeom, start_index, includeArrays) 
@@ -9439,29 +9352,18 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
       ! not 1d
          ierr = ionc_get_node_coordinates(ioncid, im, XK(numk_last+1:numk_last + meshgeom%numnode), YK(numk_last+1:numk_last + meshgeom%numnode))
       else
-      ! 1d
+         ! 1d part
          koffset1dmesh = numk_last
          ierr = odu_get_xy_coordinates(meshgeom%branchidx, meshgeom%branchoffsets, meshgeom%ngeopointx, meshgeom%ngeopointy, meshgeom%nbranchgeometrynodes, meshgeom%nbranchlengths, jsferic, meshgeom%nodeX, meshgeom%nodeY)
          XK(numk_last+1:numk_last + meshgeom%numnode) = meshgeom%nodeX
-         YK(numk_last+1:numk_last + meshgeom%numnode) = meshgeom%nodeY  
-         ! Network1d administration 
-         allocate(branchStartNode(meshgeom%nbranches))
-         allocate(branchEndNode(meshgeom%nbranches))
-         ierr = odu_get_start_end_nodes_of_branches(meshgeom%branchidx, branchStartNode, branchEndNode)
-         do ibr = 1, network%brs%Count
-             pbr => network%brs%branch(ibr)
-             pbr%FromNode%gridNumber = branchStartNode(ibr)
-             pbr%toNode%gridNumber = branchEndNode(ibr)
-             k1 = 0
-             do k2 = branchStartNode(ibr), branchEndNode(ibr) 
-                k1 = k1 + 1
-                pbr%grd(k1) = numk_last + k2
-             enddo
-            ! Store dflowfm grd-values into buffer for later re-use.
-            pbr%grd_buf = pbr%grd
-         enddo
+         YK(numk_last+1:numk_last + meshgeom%numnode) = meshgeom%nodeY
          network%numk = meshgeom%numnode
-         !get the edge nodes, usually not available (needs to be generated)
+         ! construct network and administrate
+         ierr = construct_network_from_meshgeom(network, meshgeom, nbranchids, nbranchlongnames, nnodeids, nnodelongnames, nodeids, nodelongnames, network1dname, mesh1dname, nodesOnBranchVertices)
+         if (network%loaded) then
+            call admin_network(network, numk, numl)
+         endif
+         ! get the edge nodes, usually not available (needs to be generated)
          if (meshgeom%numedge.eq.-1) then
             ierr = ggeo_count_or_create_edge_nodes(meshgeom%branchidx, meshgeom%branchoffsets, meshgeom%nedge_nodes(1,:), meshgeom%nedge_nodes(2,:), meshgeom%nbranchlengths, start_index, meshgeom%numedge)
             call reallocP(meshgeom%edge_nodes,(/ 2, meshgeom%numedge /), keepExisting = .false.)
@@ -13281,4 +13183,137 @@ subroutine check_flownodesorlinks_numbering_rst(n, janode, x_rst, y_rst, ierror)
    end do
    return
 end subroutine check_flownodesorlinks_numbering_rst
+
+!> Reads the 1d mesh assuming at least two nodes per branch (old file version) 
+integer function read_1d_mesh_convention_one(ioncid, numk_keep, numl_keep, numk_last, numl_last) result (ierr)
+
+   use network_data
+   use unstruc_channel_flow
+   use m_1d_networkreader
+   use m_flow1d_reader
+   use m_profiles
+   use gridoperations
+   use m_save_ugrid_state
+   use m_missing
+
+   integer, intent(in)          :: ioncid
+   integer, intent(inout)       :: numk_keep
+   integer, intent(inout)       :: numl_keep
+   integer, intent(inout)       :: numk_last 
+   integer, intent(inout)       :: numl_last
+
+   !locals
+   type(t_branch), pointer      :: pbr
+   type(t_node), pointer        :: pnod
+   integer                      :: inod, ibr, ngrd, k
+   logical                      :: dflowfm_1d
+   
+   
+   !reduce the scope, do deallocation here
+   if (allocated(mesh1dNodeIds)) deallocate(mesh1dNodeIds)
+   if (allocated(mesh1dUnmergedToMerged)) deallocate(mesh1dUnmergedToMerged)
+   if (allocated(mesh1dMergedToUnMerged)) deallocate(mesh1dMergedToUnMerged)
+
+   allocate(mesh1dNodeIds(size(xk)))
+   allocate(mesh1dUnmergedToMerged(size(xk)))
+   allocate(mesh1dMergedToUnMerged(size(xk)))
+
+   numMesh1dBeforeMerging = 0
+   ierr = 0
+   if (.not. network%loaded) then
+      dflowfm_1d = .true.
+      call read_1d_ugrid(network, ioncid, dflowfm_1d)
+      if (network%loaded) then
+         call admin_network(network, numk, numl)
+
+         !! TODO: Start temporary fix, to be removed when 1d ugrid file is correct (at this point branches are not connected)
+         do inod = 1, network%nds%Count
+            pnod => network%nds%node(inod)
+            pnod%gridNumber = 0
+         enddo
+
+         numk = 0
+         numl = 0
+         do ibr = 1, network%brs%Count
+            pbr => network%brs%branch(ibr)
+            ! first step add coordinates and bed levels to nodes
+            if ( pbr%FromNode%gridNumber == 0 ) then
+               numk = numk + 1
+               pbr%FromNode%gridNumber = numk
+               xk(numk) = pbr%Xs(1)
+               yk(numk) = pbr%Ys(1)
+               zk(numk) = dmiss
+            endif
+            pbr%grd(1) = pbr%FromNode%gridNumber
+            ! id-mesh node mapping
+            numMesh1dBeforeMerging = numMesh1dBeforeMerging + 1
+            mesh1dNodeIds(numMesh1dBeforeMerging) = pbr%gridPointIDs(1)
+            mesh1dUnmergedToMerged(numMesh1dBeforeMerging) = pbr%grd(1)
+            mesh1dMergedToUnMerged(pbr%grd(1)) = numMesh1dBeforeMerging
+            ngrd = pbr%gridPointsCount
+
+            do k = 2, ngrd-1
+               ! i do not want to renumber the nodes, otherwise link info gets invalidated
+               numk = numk + 1
+               pbr%grd(k) = numk
+               xk(numk) = pbr%Xs(k)
+               yk(numk) = pbr%Ys(k)
+               zk(numk) = dmiss
+               ! id-mesh node mapping
+               numMesh1dBeforeMerging = numMesh1dBeforeMerging + 1
+               mesh1dNodeIds(numMesh1dBeforeMerging) = pbr%gridpointids(k)
+               mesh1dUnmergedToMerged(numMesh1dBeforeMerging) = pbr%grd(k)
+               mesh1dMergedToUnMerged(pbr%grd(k)) = numMesh1dBeforeMerging
+            enddo
+            if ( pbr%toNode%gridNumber == 0 ) then
+               numk = numk + 1
+               pbr%toNode%gridNumber = numk
+               xk(numk) = pbr%Xs(ngrd)
+               yk(numk) = pbr%Ys(ngrd)
+               zk(numk) = dmiss
+            endif
+            pbr%grd(ngrd) = pbr%toNode%gridNumber
+            ! id-mesh node mapping
+            numMesh1dBeforeMerging = numMesh1dBeforeMerging + 1
+            mesh1dNodeIds(numMesh1dBeforeMerging) = pbr%gridPointIDs(ngrd)
+            mesh1dUnmergedToMerged(numMesh1dBeforeMerging) = pbr%grd(ngrd)
+            mesh1dMergedToUnMerged(pbr%grd(ngrd)) = numMesh1dBeforeMerging
+
+            ! second step create links
+            do k = 1, ngrd-1
+               numl = numl+1
+               kn(1,numl) = pbr%grd(k)
+               kn(2,numl) = pbr%grd(k+1)
+               kn(3,numl) = 1
+            enddo
+
+            ! Store dflowfm grd-values into buffer for later re-use.
+            pbr%grd_buf = pbr%grd
+
+         enddo
+
+         network%numk = numk
+         network%numl = numl
+
+         numk_keep = numk
+         numl_keep = numl
+
+         numk_last = numk
+         numl_last = numl
+         ! End temporary fix
+         ! TODO: Once dflowfm's own 1D and the flow1d code are aligned, the following switch should probably disappear.
+
+         jainterpolatezk1D = 0
+      else
+         network%numk = 0
+         network%numl = 0
+      endif
+   endif
+   
+   ! re-allocate mesh1dNodeIds and mesh1dUnmergedToMerged
+   call realloc(mesh1dNodeIds, numMesh1dBeforeMerging, keepExisting=.true.)
+   call realloc(mesh1dUnmergedToMerged, numMesh1dBeforeMerging, keepExisting=.true.)
+
+end function read_1d_mesh_convention_one
+
 end module unstruc_netcdf
