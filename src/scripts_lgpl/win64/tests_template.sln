@@ -368,6 +368,9 @@ EndProject
 Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "petsc", "third_party_open\petsc\petsc.vfproj", "{83DF59A1-8F13-4E8C-B31F-8BF4CC2C82B3}"
 EndProject
 Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "deltares_common_mpi", "utils_lgpl\deltares_common\packages\deltares_common_mpi\deltares_common_mpi.vfproj", "{0F609743-C9D1-4551-A1C3-47815AFC5D44}"
+	ProjectSection(ProjectDependencies) = postProject
+		{2D6BCBCA-CC6C-49FE-A6AA-61AF62529118} = {2D6BCBCA-CC6C-49FE-A6AA-61AF62529118}
+	EndProjectSection
 EndProject
 Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "polypack", "third_party_open\polypack\polypack.vfproj", "{36FB187C-1B94-4C1B-8781-C6C9A38C742C}"
 EndProject
