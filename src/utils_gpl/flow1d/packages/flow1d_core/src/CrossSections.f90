@@ -1296,6 +1296,14 @@ subroutine GetCSParsFlowInterpolate(line2cross, cross, dpt, flowArea, wetPerimet
       flowArea = default_width* dpt
       flowWidth = default_width
       wetPerimeter = default_width + 2d0*dpt
+      if (present(af_sub)) then
+         af_sub = 0d0
+         af_sub(1) = flowArea
+      endif
+      if (present(perim_sub)) then
+         perim_sub = 0d0
+         perim_sub(1) = wetPerimeter
+      endif
       return
    endif
 
