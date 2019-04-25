@@ -580,7 +580,7 @@ module m_ec_provider
                n2 = i-1 
                if (i > 1) then
                   if (discharges(i) > 0 .and. discharges(i) <= discharges(n2)) then
-                     write(msgstr,'(a,i0,a,i0,a,f,a,f)') "  On rows ",i," and ",n2,":",discharges(i)," >= ",discharges(n2)
+                     write(msgstr,'(a,i0,a,i0,a,f0.5,a,f0.5)') "  On rows ",i," and ",n2,":",discharges(i)," >= ",discharges(n2)
                      call setECMessage(msgstr)
                      call setECMessage("  "//trim(fileReaderPtr%bc%fname)//", location = "//trim(fileReaderPtr%bc%bcname))
                      call setECMessage("First column in QH-table should be strictly increasing if negative.")
@@ -588,7 +588,7 @@ module m_ec_provider
                      return
                   end if
                   if (discharges(i) < 0 .and. discharges(i) >= discharges(n2)) then
-                     write(msgstr,'(a,i0,a,i0,a,f,a,f)') "  On rows ",i," and ",n2,":",discharges(i)," >= ",discharges(n2)
+                     write(msgstr,'(a,i0,a,i0,a,f0.5,a,f0.5)') "  On rows ",i," and ",n2,":",discharges(i)," >= ",discharges(n2)
                      call setECMessage(msgstr)
                      call setECMessage("  "//trim(fileReaderPtr%bc%fname)//", location = "//trim(fileReaderPtr%bc%bcname))
                      call setECMessage("First column in QH-table should be strictly decreasing if negative.")
