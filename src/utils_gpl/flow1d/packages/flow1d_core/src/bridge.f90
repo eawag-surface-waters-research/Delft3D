@@ -269,7 +269,7 @@ contains
 
          ! Initialize = bridge%pcross
          depth = smax - crestLevel
-         call GetCSParsFlow(bridge%pcross, depth, u0m, chezyBridge, wArea, wPerimiter, wWidth, dummy)     
+         call GetCSParsFlow(bridge%pcross, depth, wArea, wPerimiter, wWidth)     
 
          ! Friction Loss
          hydrRadius = wArea / wPerimiter

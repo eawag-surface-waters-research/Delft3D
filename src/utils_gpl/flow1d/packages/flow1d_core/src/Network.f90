@@ -529,7 +529,7 @@ contains
                   dpu2 = -network%crs%cross(adm%line2cross(ilnk)%c2)%bedLevel
                   adm%dpu_1d(ll) = (1.0d0 - f) * dpu1 + f * dpu2
                   vel = 0d0
-                  call GetCSParsFlow(adm%line2cross(ilnk), network%crs%cross, thresholdDry, vel, chezy, as, wetPerimeter, adm%minwidth1d(ll), adm%minconv(ll))
+                  call GetCSParsFlow(adm%line2cross(ilnk), network%crs%cross, thresholdDry, vel, vel, as, wetPerimeter, adm%minwidth1d(ll), vel)
                endif
                   
             enddo

@@ -787,8 +787,6 @@ subroutine SetParsCross(CrossDef, cross)
    double precision                 :: bedlevel
    integer :: j
    type(t_CrossSection)             :: crossSection
-   double precision                 :: cz
-   double precision                 :: conv
    
    cross%crossType = Crossdef%crossType
    cross%closed    = Crossdef%closed
@@ -830,9 +828,9 @@ subroutine SetParsCross(CrossDef, cross)
       crossSection%tabDef%groundlayer%used      = .false.
       crossSection%tabDef%groundlayer%thickness = 0.0d0
       
-      call GetCSParsFlowCross(crossSection,  cross%tabDef%groundlayer%thickness, 0.0d0, cz,      &
+      call GetCSParsFlowCross(crossSection,  cross%tabDef%groundlayer%thickness, &
                               cross%tabDef%groundlayer%area, cross%tabDef%groundlayer%perimeter, &
-                              cross%tabDef%groundlayer%width, conv)
+                              cross%tabDef%groundlayer%width)
       
       ! Deallocate Temporary Copy
       call dealloc(crossSection)
@@ -1308,15 +1306,10 @@ subroutine GetCSParsFlowInterpolate(line2cross, cross, dpt, u1, cz, flowArea, we
    double precision                      :: wetPerimeter2
    double precision                      :: flowWidth1   
    double precision                      :: flowWidth2   
-   double precision                      :: conv1        
-   double precision                      :: conv2        
    type (t_CrossSection), save           :: crossi         !< intermediate virtual crosssection     
-
-   double precision                      :: charHeight
 
    double precision                      :: af_sub_local1(3), af_sub_local2(3)      
    double precision                      :: perim_sub_local1(3), perim_sub_local2(3)
-   double precision                      :: cz_sub_local1(3), cz_sub_local2(3)      
 
    if (line2cross%c1 <= 0) then
       ! no cross section defined on branch, use default definition
@@ -1332,11 +1325,9 @@ subroutine GetCSParsFlowInterpolate(line2cross, cross, dpt, u1, cz, flowArea, we
 
    if(cross1%crossIndx == cross2%crossIndx) then
       ! Same Cross-Section, no interpolation needed 
-      call GetCSParsFlowCross(cross1, dpt, u1, cz, flowArea, wetPerimeter, flowWidth, conv, af_sub_local1, &
-                     perim_sub_local1, cz_sub_local1)
+      call GetCSParsFlowCross(cross1, dpt, flowArea, wetPerimeter, flowWidth, af_sub_local1, perim_sub_local1)
       if (present(af_sub)   ) af_sub    = af_sub_local1
       if (present(perim_sub)) perim_sub = perim_sub_local1
-      if (present(cz_sub)   ) cz_sub    = cz_sub_local1
    else
       select case (cross1%crosstype)
          
@@ -1359,52 +1350,28 @@ subroutine GetCSParsFlowInterpolate(line2cross, cross, dpt, u1, cz, flowArea, we
             crossi%groundFrictionType = cross1%groundFrictionType
             crossi%tabDef%diameter    = (1.0d0 - f) * cross1%tabDef%diameter + f * cross2%tabDef%diameter
          
-            call GetCSParsFlowCross(crossi, dpt, u1, cz, flowArea, wetPerimeter, flowWidth, conv, af_sub_local1, &
-                     perim_sub_local1, cz_sub_local1)
+            call GetCSParsFlowCross(crossi, dpt, flowArea, wetPerimeter, flowWidth, af_sub_local1, &
+                     perim_sub_local1)
             if (present(af_sub)   ) af_sub    = af_sub_local1
             if (present(perim_sub)) perim_sub = perim_sub_local1
-            if (present(cz_sub)   ) cz_sub    = cz_sub_local1
             
          case default                             ! Call GetCSParsFlowCross twice and interpolate the results 
 
-            cz1 = cz
-            cz2 = cz
-            call GetCSParsFlowCross(cross1, dpt, u1, cz1, flowArea1, wetPerimeter1, flowWidth1, conv1, af_sub_local1, &
-                     perim_sub_local1, cz_sub_local1, .true.)
-            call GetCSParsFlowCross(cross2, dpt, u1, cz2, flowArea2, wetPerimeter2, flowWidth2, conv2, af_sub_local2, &
-                     perim_sub_local2, cz_sub_local2, .true.)
+            call GetCSParsFlowCross(cross1, dpt, flowArea1, wetPerimeter1, flowWidth1, af_sub_local1, &
+                     perim_sub_local1, .true.)
+            call GetCSParsFlowCross(cross2, dpt, flowArea2, wetPerimeter2, flowWidth2, af_sub_local2, &
+                     perim_sub_local2, .true.)
         
             flowArea     = (1.0d0 - f) * flowArea1     + f * flowArea2
             flowWidth    = (1.0d0 - f) * flowWidth1    + f * flowWidth2
             wetPerimeter = (1.0d0 - f) * wetPerimeter1 + f * wetPerimeter2
 
             ! compute average chezy 
-            cz           = (1.0d0 - f) * cz1   + f * cz2
-            conv         = (1.0d0 - f) * conv1 + f * conv2
             if (present(af_sub)) then
                af_sub = (1.0d0 - f) * af_sub_local1     + f * af_sub_local2
             endif
             if (present(perim_sub)) then
                perim_sub = (1.0d0 - f) * perim_sub_local1     + f * perim_sub_local2
-            endif
-            if (present(cz_sub)) then
-               cz_sub = (1.0d0 - f) * cz_sub_local1     + f * cz_sub_local2
-            endif
-            if (cross1%crosstype .ne. CS_YZ_PROF) then
-            
-               ! Find out the conveyance value for interpolated non yz cross section
-               conv = cz * flowArea * sqrt(flowArea / max(1d-6,wetPerimeter))  ! extra_friction_depth
-            
-               ! Criteria to satisfy the criteria  in normup i.e cz(m)*cz(m)*wet
-               if (cz *cz * flowArea < 1.0d0) then
-                  conv = sqrt(flowArea *flowArea / max(1d-6,wetPerimeter))
-               endif
-            
-               if (cross1%closed) then
-                  charHeight = (1.0d0 - f) * cross1%charHeight + f * cross2%charHeight
-                  if (dpt >= charHeight) flowWidth = 0.0d0
-               endif
-            
             endif
          
       end select
@@ -1495,7 +1462,7 @@ subroutine interpolateSummerDike(cross1, cross2, f, dpt, sdArea, sdWidth, doFlow
 
 end subroutine interpolateSummerDike
 
-subroutine GetCSParsFlowCross(cross, dpt, u1, cz, flowArea, wetPerimeter, flowWidth, conv, af_sub, perim_sub, cz_sub, doSummerDike)   
+subroutine GetCSParsFlowCross(cross, dpt, flowArea, wetPerimeter, flowWidth, af_sub, perim_sub, doSummerDike)   
 
    use m_GlobalParameters
    use precision_basics
@@ -1503,26 +1470,18 @@ subroutine GetCSParsFlowCross(cross, dpt, u1, cz, flowArea, wetPerimeter, flowWi
 
    type (t_CrossSection), intent(in) :: cross          !< cross section definition
    double precision, intent(in)      :: dpt            !< water depth at cross section
-   double precision, intent(in)      :: u1             !< flow velocity
-   double precision, intent(inout)   :: cz             !< roughness at cross section
    double precision, intent(out)     :: flowArea       !< flow area for given DPT
    double precision, intent(out)     :: wetPerimeter   !< wet perimeter for given DPT
    double precision, intent(out)     :: flowWidth      !< flow width of water surface
-   double precision, intent(out)     :: conv           !< conveyance
    logical, intent(in), optional     :: doSummerDike   !< Switch to calculate Summer Dikes or not
    double precision, intent(out), optional :: af_sub(3)      
    double precision, intent(out), optional :: perim_sub(3)      
-   double precision, intent(out), optional :: cz_sub(3)      
 
    type(t_CSType), pointer           :: crossDef
    double precision                  :: widgr
-   double precision                  :: czg
    logical                           :: getSummerDikes
    double precision                  :: af_sub_local(3)      
    double precision                  :: perim_sub_local(3)      
-   double precision                  :: cz_sub_local(3)   
-   integer                           :: numsect
-   integer                           :: i
    logical                           :: hysteresis =.true.   ! hysteresis is a dummy variable at this location, since this variable is only used for total areas
   
    perim_sub_local = 0d0
@@ -1530,12 +1489,10 @@ subroutine GetCSParsFlowCross(cross, dpt, u1, cz, flowArea, wetPerimeter, flowWi
       flowArea     = 0.0
       wetPerimeter = 0.0
       flowWidth    = sl
-      conv         = 0.0
       return
    endif
 
    crossDef => cross%tabDef
-   conv = 0.0d0
 
    select case(cross%crosstype)
    case (CS_TABULATED)
@@ -1550,7 +1507,7 @@ subroutine GetCSParsFlowCross(cross, dpt, u1, cz, flowArea, wetPerimeter, flowWi
    case (CS_EGG)
       call EggProfile(dpt, crossDef%diameter, flowArea, flowWidth, wetPerimeter, CS_TYPE_NORMAL)
    case (CS_YZ_PROF)
-      call YZProfile(dpt, u1, cz, cross%convtab, 0, flowArea, flowWidth, wetPerimeter, conv)
+      call YZProfile(dpt, cross%convtab, 0, flowArea, flowWidth, wetPerimeter)
    case default
       call SetMessage(LEVEL_ERROR, 'INTERNAL ERROR: Unknown type of cross section')
    end select
@@ -1563,8 +1520,6 @@ subroutine GetCSParsFlowCross(cross, dpt, u1, cz, flowArea, wetPerimeter, flowWi
       perim_sub_local = 0d0
       perim_sub_local(1) = wetPerimeter
       
-      cz_sub_local = 0d0
-      cz_sub_local(1) = cz
    endif
    ! correction for groundlayers
    if (crossDef%groundlayer%used) then
@@ -1576,59 +1531,12 @@ subroutine GetCSParsFlowCross(cross, dpt, u1, cz, flowArea, wetPerimeter, flowWi
       perim_sub_local(1) = perim_sub_local(1) - crossDef%groundlayer%perimeter + widGr
    endif
 
-   if (conv == 0.0d0 .and. wetperimeter > 0.0d0) then
-      if (comparereal(cz, 0.0d0) == 0) then
-         if (cross%frictionSectionsCount==0) then
-            cz = GetChezy(cross%bedfrictiontype, cross%bedfriction, flowArea  / wetPerimeter, dpt, u1)
-            cz_sub_local = cz 
-         else
-            numsect = 0
-            do i = 1, 3
-               if (perim_sub_local(i) > eps .and. af_sub_local(i) > 0.0d0) then
-                  cz_sub_local(i) = GetChezy(cross%frictionTypePos(i), cross%frictionValuePos(i), &
-                                             af_sub_local(i)  / perim_sub_local(i), dpt, u1)
-                  numsect = numsect+1
-               else
-                  cz_sub_local(i) = 0
-               endif
-            enddo
-         endif
-         
-         if (crossDef%groundlayer%used) then
-            czg = GetChezy(cross%groundfrictiontype, cross%groundfriction, flowArea/wetPerimeter, dpt, u1)
-            cz = ((widGr * czg * czg + (wetPerimeter - widgr) * cz* cz) / (wetperimeter))**0.5d0
-            cz_sub_local(1) = ((widGr * czg * czg + max(0d0, (perim_sub_local(1) - widgr)) * cz* cz) / (perim_sub_local(1)))**0.5d0
-         endif
-
-         do i = 1, 3
-            if (perim_sub_local(i) > eps) then
-               conv = conv + cz_sub_local(i) * af_sub_local(i) * sqrt(af_sub_local(i) / perim_sub_local(i))  ! extra_friction_depth
-               
-            endif
-         enddo
-         cz = conv/(flowArea*dsqrt(flowArea/wetPerimeter))
-      else
-         cz_sub_local = cz
-      endif
-         conv = cz * flowArea * sqrt(flowArea / wetPerimeter)  ! extra_friction_depth
-   
-
-      
-      !        criteria to satisfy the criteria  in normup i.e cz(m)*cz(m)*wet
-      if (cz * cz * flowArea < 1.0d0) then
-         conv = sqrt(flowArea * flowArea / wetPerimeter)
-      endif
-      
-   endif
    
    if (present(af_sub)) then
       af_sub = af_sub_local
    endif
    if (present(perim_sub)) then
       perim_sub = perim_sub_local
-   endif
-   if (present(cz_sub)) then
-      cz_sub = cz_sub_local
    endif
    
 end subroutine GetCSParsFlowCross
@@ -1734,9 +1642,6 @@ subroutine GetCSParsTotalCross(cross, dpt, totalArea, totalWidth, calculationOpt
    ! Local Variables
    type(t_CSType), pointer           :: crossDef
    double precision                  :: wetperimeter
-   double precision                  :: conv
-   double precision                  :: cz = 60.0d0
-   double precision                  :: u1 = 0.0d0
    double precision                  :: wlev            !< water level at cross section
    logical                           :: getSummerDikes
    double precision                  :: af_sub(3), perim_sub(3)
@@ -1763,7 +1668,7 @@ subroutine GetCSParsTotalCross(cross, dpt, totalArea, totalWidth, calculationOpt
          !TODO:
          call EggProfile(dpt, crossDef%diameter, totalArea, totalWidth, wetPerimeter, calculationOption)
       case (CS_YZ_PROF)
-         call YZProfile(dpt, u1, cz, cross%convtab, 1, totalArea, totalWidth, wetPerimeter, conv)
+         call YZProfile(dpt, cross%convtab, 1, totalArea, totalWidth, wetPerimeter)
       case default
          call SetMessage(LEVEL_ERROR, 'INTERNAL ERROR: Unknown type of cross section')
       end select
@@ -2103,10 +2008,6 @@ subroutine GetTabulatedSizes(dpt, crossDef, doFlow, area, width, perimeter, af_s
    double precision, intent(out)                :: af_sub(3)
    double precision, intent(out)                :: perim_sub(3)
    integer, intent(in)                          :: calculationOption 
-
-   double precision                :: width2
-   double precision                :: area2
-   double precision                :: perimeter2
 
    ! local parameters
    integer                                      :: levelsCount
@@ -2698,20 +2599,20 @@ subroutine EggProfile(dpt, diameter, area, width, perimeter, calculationOption)
    
 end subroutine EggProfile
 
-subroutine YZProfile(dpt, u1, cz, convtab, i012, area, width, perimeter, conv)
+subroutine YZProfile(dpt, convtab, i012, area, width, perimeter, u1, cz, conv)
    use m_GlobalParameters
 
    implicit none
 
-   double precision, intent(in)        :: dpt
-   double precision, intent(in)        :: u1
-   double precision, intent(inout)        :: cz
-   integer, intent(in)                 :: i012
-   type(t_crsu), intent(inout)         :: convtab
-   double precision, intent(out)       :: width
-   double precision, intent(out)       :: area
-   double precision, intent(out)       :: perimeter
-   double precision, intent(out)       :: conv
+   double precision, intent(in)              :: dpt
+   integer,          intent(in)              :: i012
+   type(t_crsu),     intent(inout)           :: convtab
+   double precision, intent(out)             :: width
+   double precision, intent(out)             :: area
+   double precision, intent(out)             :: perimeter
+   double precision, intent(in)   , optional :: u1
+   double precision, intent(inout), optional :: cz
+   double precision, intent(out),   optional :: conv
 
 ! locals
 integer            :: nr, i1, i2, i, japos
@@ -2755,38 +2656,41 @@ if (i012 .eq. 0) then                                ! look at u points, mom. eq
       ar2   = 0.5d0*dh2*(c2 + width)                     ! area below i2
       area  = a1*(z1+ar1)   + a2*(z2-ar2)
       !
-      japos = 1
-      if (convtab%negcon .eq. 1) then
-         if (u1 .lt. 0) japos = 0
-      endif
-      !
-      if (japos .eq. 1) then
-         z1 = convtab%cz1(i1)
-         z2 = convtab%cz1(i2)   ! positive flow direction
-         if (convtab%conveyType==CS_VERT_SEGM) then
-         c1 = convtab%co1(i1)
-         c2 = convtab%co1(i2)
+      if (present(conv)) then
+         japos = 1
+         if (convtab%negcon .eq. 1) then
+            if (u1 .lt. 0) japos = 0
          endif
-      else
-         z1 = convtab%cz2(i1)
-         z2 = convtab%cz2(i2)   ! negative flow direction
+         !
+         if (japos .eq. 1) then
+            z1 = convtab%cz1(i1)
+            z2 = convtab%cz1(i2)   ! positive flow direction
+            if (convtab%conveyType==CS_VERT_SEGM) then
+            c1 = convtab%co1(i1)
+            c2 = convtab%co1(i2)
+            endif
+         else
+            z1 = convtab%cz2(i1)
+            z2 = convtab%cz2(i2)   ! negative flow direction
          
-         if (convtab%conveyType==CS_VERT_SEGM) then
-            c1 = convtab%co2(i1)
-            c2 = convtab%co2(i2)
+            if (convtab%conveyType==CS_VERT_SEGM) then
+               c1 = convtab%co2(i1)
+               c2 = convtab%co2(i2)
+            endif
          endif
-      endif
-      !
-      if (convtab%conveyType==CS_LUMPED) then
-         conv = (cz)*area*sqrt(area/perimeter)
-      elseif (convtab%conveyType==CS_VERT_SEGM) then
-         conv  = a1*c1 + a2*c2
+         !
+         if (convtab%conveyType==CS_LUMPED) then
+            conv = (cz)*area*sqrt(area/perimeter)
+         elseif (convtab%conveyType==CS_VERT_SEGM) then
+            conv  = a1*c1 + a2*c2
+         endif
+      
+         r3 = area / perimeter                            ! actual hydraulic radius
+         convtab%chezy_act = conv / (area * dsqrt(r3))  ! Used in function ChezyFromConveyance
+         cz = convtab%chezy_act
+         !
       endif
       
-      r3 = area / perimeter                            ! actual hydraulic radius
-      convtab%chezy_act = conv / (area * dsqrt(r3))  ! Used in function ChezyFromConveyance
-      cz = convtab%chezy_act
-      !
    ELSE                                               ! when above profile
    ! positive direction/ negative direction? -> japos == 1 || japos != 1
    !
@@ -2796,35 +2700,40 @@ if (i012 .eq. 0) then                                ! look at u points, mom. eq
       WIDTH = convtab%wf (i2)
       perimeter = convtab%PF (i2)
       AREA  = convtab%AF (i2)
-      CONV  = convtab%co1(i2)
+      if (present(conv)) then
+         CONV  = convtab%co1(i2)
+      endif
+      
       !
       if ( convtab%jopen .eq. 1) then ! for open profiles add extra conveyance
          AR2   = WIDTH*(DPT-HU2)
          AREA  = AREA + AR2
          perimeter = perimeter + 2*(DPT-HU2)
-         r3    = AREA/perimeter                        ! actual hydraulic radius
+         if (present(conv)) then
+            r3    = AREA/perimeter                        ! actual hydraulic radius
 
-         ! Determine Flow Direction
-         if ( (convtab%negcon .eq. 1) .and. (u1 .lt. 0) ) then
-            japos = 0
-         else
-            japos = 1
-         endif
-         if (convtab%conveyType==CS_VERT_SEGM) then
-            if (japos .eq. 1) then
-               c_b = convtab%b_pos_extr
-               c_a = convtab%a_pos_extr
+            ! Determine Flow Direction
+            if ( (convtab%negcon .eq. 1) .and. (u1 .lt. 0) ) then
+               japos = 0
             else
-               c_b = convtab%b_neg_extr
-               c_a = convtab%a_neg_extr
+               japos = 1
             endif
-            !
-            conv = c_a*((dpt)**(c_b))
-            ! Actual Chezy Value for ChezyFromConveyance
-            convtab%chezy_act = conv / (AREA * DSQRT(r3))
-            cz = convtab%chezy_act
-         else
-            conv = cz*area*sqrt(area/perimeter)
+            if (convtab%conveyType==CS_VERT_SEGM) then
+               if (japos .eq. 1) then
+                  c_b = convtab%b_pos_extr
+                  c_a = convtab%a_pos_extr
+               else
+                  c_b = convtab%b_neg_extr
+                  c_a = convtab%a_neg_extr
+               endif
+               !
+               conv = c_a*((dpt)**(c_b))
+               ! Actual Chezy Value for ChezyFromConveyance
+               convtab%chezy_act = conv / (AREA * DSQRT(r3))
+               cz = convtab%chezy_act
+            else
+               conv = cz*area*sqrt(area/perimeter)
+            endif
          endif
       endif
 
@@ -3281,7 +3190,7 @@ double precision function GetCriticalDepth(q, cross)
    
       first = .false.
       
-      call GetCSParsFlow(cross, depth, 0.0d0, dummy, wArea, dummy, wWidth, dummy)        
+      call GetCSParsFlow(cross, depth, wArea, dummy, wWidth)        
    
       step = 0.5d0 * step
       

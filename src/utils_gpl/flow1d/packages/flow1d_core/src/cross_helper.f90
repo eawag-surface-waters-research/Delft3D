@@ -147,7 +147,10 @@ contains
          ! compute average chezy 
          cz = conv/(flowArea*sqrt(flowArea/wetPerimeter))
          ! criteria to satisfy the criteria  in normup i.e cz(m)*cz(m)*wet
-      
+         if (cz * cz * flowArea < 1.0d0) then
+            conv = sqrt(flowArea * flowArea / wetPerimeter)
+         endif
+
       endif
       !        criteria to satisfy the criteria  in normup i.e cz(m)*cz(m)*wet
       if (cz * cz * flowArea < 1.0d0) then

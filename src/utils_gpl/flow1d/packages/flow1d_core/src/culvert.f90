@@ -367,13 +367,13 @@ contains
       endif
       
       chezyCulvert = 0.0d0
-      call GetCSParsFlow(CrossSection, dpt, u0m, chezyCulvert, wArea, wPerimiter, wWidth, dummy)     
+      call GetCSParsFlow(CrossSection, dpt, wArea, wPerimiter, wWidth)     
                   
       ! Valve Loss
       if (culvert%has_valve .and. (culvert%inivalveopen < dpt)) then
          inivalveopen = culvert%inivalveopen
          chezyValve = 0.0d0
-         call GetCSParsFlow(CrossSection, inivalveopen, u0m, chezyValve, valveArea, valvePerimiter, valveWidth, dummy)     
+         call GetCSParsFlow(CrossSection, inivalveopen, valveArea, valvePerimiter, valveWidth)     
          openingfac = (inivalveopen - gl_thickness) / (CrossSection%charHeight - gl_thickness)
       else
          openingfac = 2.0d0     ! >> 1, so not influenced by valve
