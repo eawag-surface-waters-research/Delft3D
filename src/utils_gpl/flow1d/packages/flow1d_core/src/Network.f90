@@ -331,7 +331,6 @@ contains
       double precision                   :: chainageu
       double precision                   :: chainageg
       double precision                   :: chezy
-      double precision                   :: vel 
       double precision                   :: as
       double precision                   :: wetperimeter
       type(t_administration_1d)          :: adm
@@ -344,8 +343,6 @@ contains
       double precision                   :: xBeg
       double precision                   :: xEnd
       integer                            :: i
-      integer                            :: nstru
-      logical                            :: structure_found 
       logical                            :: interpolDone
       logical                            :: initError = .false.
 
@@ -528,8 +525,7 @@ contains
                   dpu1 = -network%crs%cross(adm%line2cross(ilnk)%c1)%bedLevel
                   dpu2 = -network%crs%cross(adm%line2cross(ilnk)%c2)%bedLevel
                   adm%dpu_1d(ll) = (1.0d0 - f) * dpu1 + f * dpu2
-                  vel = 0d0
-                  call GetCSParsFlow(adm%line2cross(ilnk), network%crs%cross, thresholdDry, vel, vel, as, wetPerimeter, adm%minwidth1d(ll), vel)
+                  call GetCSParsFlow(adm%line2cross(ilnk), network%crs%cross, thresholdDry, as, wetPerimeter, adm%minwidth1d(ll))
                endif
                   
             enddo

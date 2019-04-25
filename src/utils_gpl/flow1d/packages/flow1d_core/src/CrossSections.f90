@@ -51,21 +51,13 @@ module m_CrossSections
    public fill_hashtable
    public getBob
    public GetCriticalDepth
-   !public GetCrossSectionsCount
    public GetCrossType
    public GetCSParsFlow
    public GetCSParsTotal
    public getGroundLayer
-   !public getHighest1dLevel
-   !public GetTabFlowSectionFromTables
-   !public interpolateSummerDike
-   !public setGroundLayerData
    public SetParsCross
    public useBranchOrders
    public write_crosssection_data
-   !public EggProfile
-   !public CircleProfile
-   !
    
    double precision, public :: default_width
 
@@ -903,13 +895,6 @@ integer function AddCrossSectionByCross(crs, cross, branchid, chainage)
 
 end function AddCrossSectionByCross
 
-!> Get actual number of cross-sections in cross-section set
-integer function GetCrossSectionsCount(crs)
-  type(t_CrossSectionSet)                  :: crs
-
-  GetCrossSectionsCount = crs%count
-end function GetCrossSectionsCount
-
 !> interpolation of width arrays.
 subroutine interpolateWidths(height1, width1, levelsCount1, height2, width2, levelsCount2, height, width, levelsCount, f)
    ! modules
@@ -1276,30 +1261,25 @@ recursive subroutine findNeighbourAndAddCrossSection(brs, crs, branchid, cross, 
 
 end subroutine findNeighbourAndAddCrossSection
 
-subroutine GetCSParsFlowInterpolate(line2cross, cross, dpt, u1, cz, flowArea, wetPerimeter, flowWidth, conv, af_sub, perim_sub, cz_sub)
+!> Get the flow area, wet perimeter and flow width located on a link
+subroutine GetCSParsFlowInterpolate(line2cross, cross, dpt, flowArea, wetPerimeter, flowWidth, af_sub, perim_sub)
 
    use m_GlobalParameters
    
    implicit none
 
    type(t_chainage2cross),intent(in)       :: line2cross     !< cross section indirection
-   type(t_CrossSection), target, intent(in) :: cross(:)       !< array containing cross section information
+   type(t_CrossSection), target, intent(in) :: cross(:)      !< array containing cross section information
    double precision, intent(in)            :: dpt            !< water depth at cross section
-   double precision, intent(in)            :: u1             !< flow velocity
-   double precision, intent(inout)         :: cz             !< roughness at cross section
    double precision, intent(out)           :: flowArea       !< flow area for given DPT
    double precision, intent(out)           :: wetPerimeter   !< wet perimeter for given DPT
    double precision, intent(out)           :: flowWidth      !< flow width of water surface
-   double precision, intent(out)           :: conv           !< conveyance
-   double precision, intent(out), optional :: af_sub(3)      
-   double precision, intent(out), optional :: perim_sub(3)      
-   double precision, intent(out), optional :: cz_sub(3)      
+   double precision, intent(out), optional :: af_sub(3)      !< flow area for main, floodplain1 and floodplain2
+   double precision, intent(out), optional :: perim_sub(3)   !< wet perimeter for main, floodplain1 and floodplain2   
 
    type (t_CrossSection), pointer        :: cross1         !< cross section
    type (t_CrossSection), pointer        :: cross2         !< cross section
    double precision                      :: f              !< cross = (1-f)*cross1 + f*cross2
-   double precision                      :: cz1 = 0.d0
-   double precision                      :: cz2 = 0.d0
    double precision                      :: flowArea1
    double precision                      :: flowArea2
    double precision                      :: wetPerimeter1
@@ -1462,20 +1442,21 @@ subroutine interpolateSummerDike(cross1, cross2, f, dpt, sdArea, sdWidth, doFlow
 
 end subroutine interpolateSummerDike
 
+!> Get flow area, wet perimeter and flow width at cross section location
 subroutine GetCSParsFlowCross(cross, dpt, flowArea, wetPerimeter, flowWidth, af_sub, perim_sub, doSummerDike)   
 
    use m_GlobalParameters
    use precision_basics
    use m_Roughness
 
-   type (t_CrossSection), intent(in) :: cross          !< cross section definition
-   double precision, intent(in)      :: dpt            !< water depth at cross section
-   double precision, intent(out)     :: flowArea       !< flow area for given DPT
-   double precision, intent(out)     :: wetPerimeter   !< wet perimeter for given DPT
-   double precision, intent(out)     :: flowWidth      !< flow width of water surface
-   logical, intent(in), optional     :: doSummerDike   !< Switch to calculate Summer Dikes or not
-   double precision, intent(out), optional :: af_sub(3)      
-   double precision, intent(out), optional :: perim_sub(3)      
+   type (t_CrossSection), intent(in)       :: cross          !< cross section definition
+   double precision, intent(in)            :: dpt            !< water depth at cross section
+   double precision, intent(out)           :: flowArea       !< flow area for given DPT
+   double precision, intent(out)           :: wetPerimeter   !< wet perimeter for given DPT
+   double precision, intent(out)           :: flowWidth      !< flow width of water surface
+   logical,          intent(in),  optional :: doSummerDike   !< Switch to calculate Summer Dikes or not
+   double precision, intent(out), optional :: af_sub(3)      !< flow area for main, floodplain1 and floodplain2
+   double precision, intent(out), optional :: perim_sub(3)   !< wet perimeter for main, floodplain1 and floodplain2      
 
    type(t_CSType), pointer           :: crossDef
    double precision                  :: widgr
@@ -1541,23 +1522,24 @@ subroutine GetCSParsFlowCross(cross, dpt, flowArea, wetPerimeter, flowWidth, af_
    
 end subroutine GetCSParsFlowCross
 
+!> Get total area and total width for given location and water depth
 subroutine GetCSParsTotalInterpolate(line2cross, cross, dpt, totalArea, totalWidth, calculationOption, hysteresis, doSummerDike)
    use m_GlobalParameters
    
    implicit none
 
-   type(t_chainage2cross),intent(in)       :: line2cross   !< cross section indirection
-   type(t_CrossSection), target, intent(in):: cross(:)     !< array containing cross section information
-   double precision, intent(in)          :: dpt            !< water depth at cross section
-   double precision, intent(out)         :: totalArea      !< total area for given DPT
-   double precision, intent(out)         :: totalWidth     !< total width of water surface
-                                                           !> type of total area computation, possible values:\n
-                                                           !! CS_TYPE_PREISMAN  Ordinary total area computation, with possible Preisman lock on top\n
-                                                           !! CS_TYPE_PLUS      Total area for only the expanding part of the cross section (Nested Newton method)\n
-                                                           !! CS_TYPE_MIN       Total area for only the narrowing part of the cross section (Nested Newton method)
-   integer, intent(in)                   :: calculationOption 
-   logical, intent(in), optional         :: doSummerDike    !< Switch to calculate Summer Dikes or not
-   logical, intent(inout), optional      :: hysteresis(2)      !< Switch to calculate Summer Dikes or not
+   type(t_chainage2cross),intent(in)         :: line2cross     !< cross section indirection
+   type(t_CrossSection), target, intent(in)  :: cross(:)       !< array containing cross section information
+   double precision, intent(in)              :: dpt            !< water depth at cross section
+   double precision, intent(out)             :: totalArea      !< total area for given DPT
+   double precision, intent(out)             :: totalWidth     !< total width of water surface
+                                                               !> type of total area computation, possible values:\n
+                                                               !! CS_TYPE_PREISMAN  Ordinary total area computation, with possible Preisman lock on top\n
+                                                               !! CS_TYPE_PLUS      Total area for only the expanding part of the cross section (Nested Newton method)\n
+                                                               !! CS_TYPE_MIN       Total area for only the narrowing part of the cross section (Nested Newton method)
+   integer, intent(in)                       :: calculationOption 
+   logical, intent(in), optional             :: doSummerDike   !< Switch to calculate Summer Dikes or not
+   logical, intent(inout), optional          :: hysteresis(2)  !< hysteresis information for summer dikes
    
    double precision                      :: f              !< cross = (1-f)*cross1 + f*cross2
    double precision                      :: totalArea1
@@ -1622,6 +1604,7 @@ subroutine GetCSParsTotalInterpolate(line2cross, cross, dpt, totalArea, totalWid
 
 end subroutine GetCSParsTotalInterpolate
 
+!> Get total area and total width for given cross section location and water depth
 subroutine GetCSParsTotalCross(cross, dpt, totalArea, totalWidth, calculationOption, hysteresis, doSummerDike)
 
    use m_GlobalParameters

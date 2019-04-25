@@ -33291,8 +33291,8 @@ end subroutine setbobs_fixedweirs
                    endif
                    dpt = s1(mdown) - bl(mdown)
 
-                   call GetCSParsFlow(network%adm%line2cross(L), network%crs%cross, dpt, 0.0d0, czdum, wetdown, perimeter, width, conv)
- 
+                   call GetCSParsFlow(network%adm%line2cross(L), network%crs%cross, dpt, wetdown, perimeter, width)
+
                    wetdown = max(wetdown, 0.0001d0)
                    call computeculvert(pstru%culvert, fu(L), ru(L), au(L), width, kfu, cmustr, s1(k1), s1(k2), &
                        q1(L), q1(L), u1(L), u0(L), dx(L), dts, bob(1,L), bob(2,L), wetdown, network%sts%struct(istru)%state, .true.)
@@ -40410,11 +40410,12 @@ if (abs(kcu(ll))==1 .and. network%loaded) then !flow1d used only for 1d channels
       call GetCSParsTotal(network%adm%line2cross(LL), network%crs%cross, hpr, area, width, CSCalculationOption, network%adm%hysteresis_for_summerdike(:,LL))
    else ! japerim = 1: calculate flow area, conveyance and perimeter.
       cz = 0d0
-      call GetCSParsFlow(network%adm%line2cross(LL), network%crs%cross, hpr, u1(LL), cz, area, perim, width, conv, af_sub, perim_sub, cz_sub)
+      call GetCSParsFlow(network%adm%line2cross(LL), network%crs%cross, hpr, area, perim, width, af_sub, perim_sub)
       
       u1L = u1(LL)
       q1L = q1(LL)
-      k1 = ln(1,LL) ; k2 = ln(2,LL)
+      k1 = ln(1,LL)
+      k2 = ln(2,LL)
       s1L = acl(L)*s1(k1) + (1d0-acl(L))*s1(k2)
       dpt = hu(LL)
       cz = 0d0
