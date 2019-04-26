@@ -49,7 +49,7 @@ implicit none
 
     integer                           :: numobs    = 0  !< nr of observation stations
     integer                           :: nummovobs = 0  !< nr of *moving* observation stations
-    double precision, allocatable     :: xobs(:)        !< x-coord of observation points (1:numobs = normal obs, numobs+1:numobs+nummovobs = moving obs)
+    double precision, allocatable     :: xobs(:)        !< x-coord of observation points (1:numobs = normal obs from *.xyn and *.ini files, numobs+1:numobs+nummovobs = moving obs)
     double precision, allocatable     :: yobs(:)        !< y-coord of observation points
     double precision, allocatable, target :: xyobs(:)   !< xy-coord of *moving* observation points (work array for meteo)
     double precision, allocatable     :: smxobs(:)      !< maximum waterlevel of observation points
@@ -611,6 +611,73 @@ use m_alloc
 
 end subroutine addObservation
 
+
+!> Adds observation points that are read from *.ini file
+subroutine addObservation_from_ini(network, filename)
+   use m_network
+   use m_ObservationPoints
+   use odugrid
+   use m_save_ugrid_state
+   use dfm_error
+   implicit none
+   type(t_network),  intent(inout)       :: network            !< network
+   character(len=*), intent(in   )       :: filename           !< filename of the obs file
+   
+   integer                               :: nbrch              ! number of obs that are defined by branchID and chainage
+   integer                               :: ierr, nobsini, i
+   type(t_ObservationPoint), pointer     :: pOPnt
+   integer,              allocatable     :: branchIdx_tmp(:), ibrch2obs(:)
+   double precision    , allocatable     :: Chainage_tmp(:), xx_tmp(:), yy_tmp(:)
+   
+   
+   nbrch = 0
+   nobsini = network%obs%Count
+   
+   !! Step 1. get x- and y-coordinates of obs that are defined by branchID and chainage
+   ! 1a. save their branchIdx and chainage to temporary arrays
+   allocate(branchIdx_tmp(nobsini))
+   allocate(Chainage_tmp(nobsini))
+   allocate(ibrch2obs(nobsini))
+   
+   do i=1, nobsini
+      if (network%obs%OPnt(i)%branchIdx > 0) then
+         nbrch = nbrch + 1
+         branchIdx_tmp(nbrch) = network%obs%OPnt(i)%branchIdx
+         Chainage_tmp(nbrch) = network%obs%OPnt(i)%chainage
+         ibrch2obs(nbrch) = i
+      end if
+   end do
+         
+   ! 1b. get the cooresponding x- and y-coordinates
+   allocate(xx_tmp(nbrch))
+   allocate(yy_tmp(nbrch))
+   ierr = 1
+   ierr = odu_get_xy_coordinates(branchIdx_tmp(1:nbrch), Chainage_tmp(1: nbrch), meshgeom1d%ngeopointx, meshgeom1d%ngeopointy, &
+                                  meshgeom1d%nbranchgeometrynodes, meshgeom1d%nbranchlengths, 0, xx_tmp, yy_tmp)
+   if (ierr /= DFM_NOERR) then
+      call mess(LEVEL_ERROR, "Error occurs when getting the x- and y-coordinates for obs from file '"//trim(filename)//".")
+   end if
+   
+   do i=1, nbrch
+      pOPnt => network%obs%OPnt(ibrch2obs(i))
+      pOPnt%x = xx_tmp(i)
+      pOPnt%y = yy_tmp(i)
+   end do
+   
+   ! Step 2. add all obs from *.ini file
+   do i =1, nobsini
+      call addObservation(network%obs%OPnt(i)%x, network%obs%OPnt(i)%y, network%obs%OPnt(i)%name)
+   end do
+   
+    
+   if(allocated(branchIdx_tmp))deallocate(branchIdx_tmp)
+   if(allocated(Chainage_tmp)) deallocate(Chainage_tmp)
+   if(allocated(ibrch2obs))    deallocate(ibrch2obs)
+   if(allocated(xx_tmp))       deallocate(xx_tmp)
+   if(allocated(yy_tmp))       deallocate(yy_tmp)
+
+end subroutine addObservation_from_ini
+
 !> Adds a moving observation point to the existing points.
 subroutine addMovingObservation(x, y, name)
     double precision, intent(in) :: x !< x-coordinate
@@ -737,6 +804,7 @@ subroutine loadObservations(filename, jadoorladen)
            tok = index(filename, '.ini')
            if (tok > 0) then
               call readObservationPoints(network, filename)
+              call addObservation_from_ini(network, filename)  
            end if
         end if
 
