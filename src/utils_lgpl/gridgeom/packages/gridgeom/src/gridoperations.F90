@@ -2838,23 +2838,32 @@
    integer, intent(in)               :: unMergedOneDmask(:)
    integer, allocatable, intent(out) :: merged(:)
    !locals
-   integer                           :: numUnMergedNodes, i, k, ierr
+   integer                           :: numUnMergedNodes, i, k, maskSize, ierr
 
    ierr = 0
-   
    !noting to do
    if (size(unMergedOneDmask)<=0) then
       return
    endif
-   
+
+   !there is no merging to do
    numUnMergedNodes = size(mesh1dUnMergedToMergedGridGeom)
+   if (numUnMergedNodes<=0) then
+      maskSize = size(unMergedOneDmask)
+      allocate(merged(maskSize))
+      do i=1,maskSize
+         merged(i) = unMergedOneDmask(i)
+      enddo
+      return
+   endif
+
    allocate(merged(numUnMergedNodes))
    do i  = 1,numUnMergedNodes
       k = mesh1dUnMergedToMergedGridGeom(i)
       if(k>0) then
          merged(k) = unMergedOneDmask(i)
-       endif
-    enddo
+      endif
+   enddo
 
    end function ggeo_unMergedArrayToMergedArray
 
