@@ -129,7 +129,7 @@ namespace General.tests
         /// <param name="linkType">The link type</param>
         /// <returns></returns>
         [DllImport(LibDetails.LIB_DLL_NAME, EntryPoint = "ggeo_get_links", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int ggeo_get_links_dll([In, Out] ref IntPtr arrayfrom, [In, Out] ref IntPtr arrayto, [In] ref int nlinks, [In] ref int linkType);
+        public static extern int ggeo_get_links_dll([In, Out] ref IntPtr arrayfrom, [In, Out] ref IntPtr arrayto, [In] ref int nlinks, [In] ref int linkType, [In] ref int startIndex);
 
         /// <summary>
         /// This function fills the memory pointed by c_edgenodes
@@ -300,9 +300,9 @@ namespace General.tests
             return ierr;
         }
 
-        public int ggeo_get_links(ref IntPtr arrayfrom, ref IntPtr arrayto, ref int nlinks, ref int linkType)
+        public int ggeo_get_links(ref IntPtr arrayfrom, ref IntPtr arrayto, ref int nlinks, ref int linkType, ref int startIndex)
         {
-            int ierr = ggeo_get_links_dll(ref arrayfrom, ref arrayto, ref nlinks, ref linkType);
+            int ierr = ggeo_get_links_dll(ref arrayfrom, ref arrayto, ref nlinks, ref linkType, ref startIndex);
             return ierr;
         }
 
