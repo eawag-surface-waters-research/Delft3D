@@ -2841,18 +2841,20 @@
    integer                           :: numUnMergedNodes, i, k, ierr
 
    ierr = 0
-   if (allocated(mesh1dUnMergedToMergedGridGeom)) then
-      numUnMergedNodes = size(mesh1dUnMergedToMergedGridGeom)
-      allocate(merged(numUnMergedNodes))
-      do i  = 1,numUnMergedNodes
-         k = mesh1dUnMergedToMergedGridGeom(i)
-         if(k>0) then
-            merged(k) = unMergedOneDmask(i)
-         endif
-      enddo
-   else
-      ierr = -1
+   
+   !noting to do
+   if (size(unMergedOneDmask)<=0) then
+      return
    endif
+   
+   numUnMergedNodes = size(mesh1dUnMergedToMergedGridGeom)
+   allocate(merged(numUnMergedNodes))
+   do i  = 1,numUnMergedNodes
+      k = mesh1dUnMergedToMergedGridGeom(i)
+      if(k>0) then
+         merged(k) = unMergedOneDmask(i)
+       endif
+    enddo
 
    end function ggeo_unMergedArrayToMergedArray
 
@@ -3671,7 +3673,9 @@
    type(kdtree_instance)         :: treeinst
 
    ierr = 0
-   
+   if (numl1d<=0) then
+      return
+   endif
    !map unMergedOneDmask to merged
    if (present(unMergedOneDmask)) then
       ierr = ggeo_unMergedArrayToMergedArray(unMergedOneDmask, mergedOneDmask)
