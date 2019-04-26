@@ -562,7 +562,7 @@ namespace gridgeom.Tests
             //11. get the links: arrayfrom = 2d cell index, arrayto = 1d node index 
             IntPtr c_arrayfrom = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * n1d2dlinks); //2d cell number
             IntPtr c_arrayto = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * n1d2dlinks); //1d node
-            ierr = wrapperGridgeom.ggeo_get_links(ref c_arrayfrom, ref c_arrayto, ref n1d2dlinks, ref linkType);
+            ierr = wrapperGridgeom.ggeo_get_links(ref c_arrayfrom, ref c_arrayto, ref n1d2dlinks, ref linkType, ref startIndex);
             Assert.That(ierr, Is.EqualTo(0));
 
 
@@ -723,7 +723,7 @@ namespace gridgeom.Tests
             //11. get the links: arrayfrom = 2d cell index, arrayto = 1d node index 
             IntPtr c_arrayfrom = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * n1d2dlinks); //2d cell number
             IntPtr c_arrayto = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * n1d2dlinks); //1d node
-            ierr = wrapperGridgeom.ggeo_get_links(ref c_arrayfrom, ref c_arrayto, ref n1d2dlinks, ref linkType);
+            ierr = wrapperGridgeom.ggeo_get_links(ref c_arrayfrom, ref c_arrayto, ref n1d2dlinks, ref linkType, ref startIndex);
             Assert.That(ierr, Is.EqualTo(0));
 
             int[] rc_arrayfrom = new int[n1d2dlinks];
@@ -864,7 +864,7 @@ namespace gridgeom.Tests
             int meshid = -1;
             int networkid = -1;
             bool includeArrays = true;
-            int start_index = 1;
+            int startIndex = 1;
             int jsferic = 0;
             //--------------------------------------------------------------------------------------//
             //2a. get network and mesh ids
@@ -898,18 +898,18 @@ namespace gridgeom.Tests
             meshoned.nbranchorder = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(double)) * meshoneddim.nbranches);
 
             //2d. get 1d meshgeom array 
-            ierr = wrapperNetcdf.ionc_get_meshgeom(ref ioncid, ref meshid, ref networkid, ref meshoned, ref start_index, ref includeArrays);
+            ierr = wrapperNetcdf.ionc_get_meshgeom(ref ioncid, ref meshid, ref networkid, ref meshoned, ref startIndex, ref includeArrays);
             Assert.That(ierr, Is.EqualTo(0));
 
             ierr = wrapperGridgeom.ggeo_count_edge_nodes(ref meshoned.branchoffsets, ref meshoned.nbranchlengths,
                 ref meshoned.branchidx, ref meshoned.nedge_nodes, ref meshoneddim.nbranches, ref meshoneddim.numnode,
-                ref meshoneddim.numedge, ref start_index);
+                ref meshoneddim.numedge, ref startIndex);
             Assert.That(ierr, Is.EqualTo(0));
 
             meshoned.edge_nodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshoneddim.numedge * 2);
             ierr = wrapperGridgeom.ggeo_create_edge_nodes(ref meshoned.branchoffsets, ref meshoned.nbranchlengths,
                 ref meshoned.branchidx, ref meshoned.nedge_nodes, ref meshoned.edge_nodes, ref meshoneddim.nbranches, ref meshoneddim.numnode,
-                ref meshoneddim.numedge, ref start_index);
+                ref meshoneddim.numedge, ref startIndex);
             Assert.That(ierr, Is.EqualTo(0));
 
             //Read the created edge nodes
@@ -936,7 +936,7 @@ namespace gridgeom.Tests
             meshtwod.edge_nodes = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * meshtwoddim.numedge * 2);
 
             //3d. get meshgeom 
-            ierr = wrapperNetcdf.ionc_get_meshgeom(ref ioncid, ref meshid, ref networkid, ref meshtwod, ref start_index, ref includeArrays);
+            ierr = wrapperNetcdf.ionc_get_meshgeom(ref ioncid, ref meshid, ref networkid, ref meshtwod, ref startIndex, ref includeArrays);
             Assert.That(ierr, Is.EqualTo(0));
 
             //8. close file
@@ -949,10 +949,10 @@ namespace gridgeom.Tests
             ierr = wrapperGridgeom.ggeo_get_xy_coordinates(ref meshoned.branchidx, ref meshoned.branchoffsets, ref meshoned.ngeopointx,
                 ref meshoned.ngeopointy, ref meshoned.nbranchgeometrynodes, ref meshoned.nbranchlengths, ref meshoned.nodex, ref meshoned.nodey, ref jsferic, ref meshoneddim.nbranches, ref meshoneddim.ngeometry, ref meshoneddim.numnode);
             Assert.That(ierr, Is.EqualTo(0));
-            ierr = wrapperGridgeom.ggeo_convert(ref meshoned, ref meshoneddim, ref start_index);
+            ierr = wrapperGridgeom.ggeo_convert(ref meshoned, ref meshoneddim, ref startIndex);
 
             Assert.That(ierr, Is.EqualTo(0));
-            ierr = wrapperGridgeom.ggeo_convert(ref meshtwod, ref meshtwoddim, ref start_index);
+            ierr = wrapperGridgeom.ggeo_convert(ref meshtwod, ref meshtwoddim, ref startIndex);
             Assert.That(ierr, Is.EqualTo(0));
 
             //5. make the links
@@ -976,7 +976,7 @@ namespace gridgeom.Tests
 
             IntPtr c_arrayfrom = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * n1d2dlinks); //2d cell number
             IntPtr c_arrayto = Marshal.AllocCoTaskMem(Marshal.SizeOf(typeof(int)) * n1d2dlinks); //1d node
-            ierr = wrapperGridgeom.ggeo_get_links(ref c_arrayfrom, ref c_arrayto, ref n1d2dlinks, ref linkType);
+            ierr = wrapperGridgeom.ggeo_get_links(ref c_arrayfrom, ref c_arrayto, ref n1d2dlinks, ref linkType,ref startIndex);
             Assert.That(ierr, Is.EqualTo(0));
 
             int[] rc_arrayfrom = new int[n1d2dlinks];
