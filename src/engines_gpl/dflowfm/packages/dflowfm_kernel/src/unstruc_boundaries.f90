@@ -37,6 +37,8 @@ integer            :: max_ext_bnd_items      = 64  ! Starting size, will grow dy
 character(len=max_registered_item_id), allocatable :: registered_items(:)
 integer            :: num_registered_items = 0
 
+private :: countUniqueKeys
+
 contains
 
 subroutine findexternalboundarypoints()             ! find external boundary points
@@ -1552,6 +1554,65 @@ subroutine init_threttimes()
        
 end subroutine
 
+!> helper function to check combined usage of old style and new style keywords in General Structure.
+!! note that some keywords are used both in old style and new style
+subroutine checkCombinationOldNewKeywordsGeneralStructure(janewformat, str_ptr)
+   use m_strucs,         only : numgeneralkeywrd, generalkeywrd, generalkeywrd_old
+   use tree_structures,  only : TREE_DATA
+   use unstruc_messages, only : mess, LEVEL_ERROR
+   integer, intent(out)          :: janewformat
+   type(TREE_DATA), pointer      :: str_ptr
+
+   logical                       :: success
+   integer                       :: k, l, cnt_new, cnt_old
+
+   cnt_new = countUniqueKeys(str_ptr, generalkeywrd, generalkeywrd_old)
+   cnt_old = countUniqueKeys(str_ptr, generalkeywrd_old, generalkeywrd)
+
+   if (cnt_new > 0 .and. cnt_old > 0) then
+      call mess(LEVEL_ERROR, 'Combination of old and new keywords for a general structure is not supported ...' )
+   endif
+
+   if (cnt_old > 0) then
+      janewformat = 0
+   else
+      janewformat = 1
+   endif
+
+end subroutine checkCombinationOldNewKeywordsGeneralStructure
+
+!> helper function for checkCombinationOldNewKeywordsGeneralStructure
+function countUniqueKeys(str_ptr, list1, list2) result(cnt)
+   use properties,       only : prop_get
+   use tree_structures,  only : TREE_DATA
+   use string_module,    only : strcmpi
+   type(TREE_DATA), pointer      :: str_ptr
+   character(len=*), intent(in)  :: list1(:), list2(:)   !< list with keywords
+   integer                       :: cnt                  !< function result
+
+   integer                        :: k, l, length1, length2
+   character (len=256)            :: rec
+   character (len=:), allocatable :: key
+   logical             :: success
+
+   cnt = 0
+   length1 = size(list1)
+   length2 = size(list2)
+   outer: do k = 1,length1        ! count unique old keywords
+      key = trim(list1(k))
+      do l = 1,length2
+         if (strcmpi(key, list2(l))) then
+            cycle outer
+         endif
+      end do
+      call prop_get(str_ptr, '', key, rec, success)
+      if (success) then
+         cnt = cnt + 1
+      endif
+   enddo outer
+
+end function countUniqueKeys
+
 end module unstruc_boundaries
 
 function flow_initwaveforcings_runtime() result(retval)              ! This is the general hook-up to wave conditions
@@ -1719,6 +1780,7 @@ use m_alloc
 use m_flowgeom
 use m_netw
 use unstruc_messages
+use unstruc_boundaries, only : checkCombinationOldNewKeywordsGeneralStructure
 use unstruc_channel_flow
 use m_structures ! Jan's channel_flow for Sobek's generalstructure (TODO)
 use m_strucs     ! Herman's generalstructure
@@ -1755,7 +1817,6 @@ character(len=IdLen)          :: strid ! TODO: where to put IdLen (now in Messag
 character(len=IdLen)          :: strtype ! TODO: where to put IdLen (now in MessageHandling)
                                     ! TODO: in readstruc* change incoming ids to len=*
 character(len=idLen)          :: branchid
-logical                       :: isFirst
 
 integer :: istrtmp
 double precision, allocatable :: hulp(:,:) ! hulp 
@@ -2339,42 +2400,15 @@ end do
 
       !! GENERALSTRUCTURE !!
       case ('generalstructure')
-         janewformat = 1
-         isFirst = .true.
+         call checkCombinationOldNewKeywordsGeneralStructure(janewformat, str_ptr)
          do k = 1,numgeneralkeywrd        ! generalstructure keywords
             tmpval = dmiss
-            if (isFirst) then             ! From the first keyword with a valid value, decide the format to be new or old
+            if (janewformat == 1) then
                key = generalkeywrd(k)
-               call prop_get(str_ptr, '', trim(key), rec, success)
-               if (.not. success) then
-                  key = generalkeywrd_old(k)
-                  call prop_get(str_ptr, '', trim(key), rec, success)
-                  if (success) janewformat = 0
-               endif
-               if (success) isFirst = .false.
             else
-               if (janewformat == 1) then
-                  key = generalkeywrd(k)
-                  call prop_get(str_ptr, '', trim(key), rec, success)
-                  if (.not. success) then
-                     key = generalkeywrd_old(k)
-                     call prop_get(str_ptr, '', trim(key), rec, success)
-                     if (success) then
-                        call mess(LEVEL_ERROR, 'Combination of old and new keywords for a general structure is not supported ...' )
-                     endif
-                  endif
-               else  
-                  key = generalkeywrd_old(k)
-                  call prop_get(str_ptr, '', trim(key), rec, success)
-                  if (.not. success) then
-                     key = generalkeywrd(k)
-                     call prop_get(str_ptr, '', trim(key), rec, success)
-                     if (success) then
-                        call mess(LEVEL_ERROR, 'Combination of old and new keywords for a general structure is not supported ...' )
-                     endif
-                  endif
-               endif
+               key = generalkeywrd_old(k)
             endif
+            call prop_get(str_ptr, '', trim(key), rec, success)
             if (.not. success .or. len_trim(rec) == 0) then
                ! consider all fields optional for now.
                cycle
@@ -3012,7 +3046,7 @@ endif
  if (allocated (cdamidx) ) deallocate (cdamidx)
  if (allocated (cgenidx) ) deallocate (cgenidx)
    end subroutine flow_init_structurecontrol
- 
+
 
 !> Returns the index of a structure in the controllable value arrays.
 !! Structure is identified by strtypename, e.g. 'pumps', and structure name, e.g., 'Pump01'.
