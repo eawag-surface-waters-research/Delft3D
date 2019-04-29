@@ -1755,6 +1755,7 @@ character(len=IdLen)          :: strid ! TODO: where to put IdLen (now in Messag
 character(len=IdLen)          :: strtype ! TODO: where to put IdLen (now in MessageHandling)
                                     ! TODO: in readstruc* change incoming ids to len=*
 character(len=idLen)          :: branchid
+logical                       :: isFirst
 
 integer :: istrtmp
 double precision, allocatable :: hulp(:,:) ! hulp 
@@ -2339,16 +2340,18 @@ end do
       !! GENERALSTRUCTURE !!
       case ('generalstructure')
          janewformat = 1
+         isFirst = .true.
          do k = 1,numgeneralkeywrd        ! generalstructure keywords
             tmpval = dmiss
-            if (k == 1) then
-               key = generalkeywrd(k)                             ! From the first keyword, decide the format to be new or old
+            if (isFirst) then             ! From the first keyword with a valid value, decide the format to be new or old
+               key = generalkeywrd(k)
                call prop_get(str_ptr, '', trim(key), rec, success)
                if (.not. success) then
                   key = generalkeywrd_old(k)
                   call prop_get(str_ptr, '', trim(key), rec, success)
-                  janewformat = 0
+                  if (success) janewformat = 0
                endif
+               if (success) isFirst = .false.
             else
                if (janewformat == 1) then
                   key = generalkeywrd(k)
