@@ -6219,7 +6219,6 @@ subroutine getktoplot(kk,k)
                   nhlFlowLink = LL
                   call highlight_nodesnlinks()
                end if
-               key = 3
             end if
 
          ENDIF
