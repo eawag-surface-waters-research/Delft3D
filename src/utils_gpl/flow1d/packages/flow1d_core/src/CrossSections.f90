@@ -58,7 +58,7 @@ module m_CrossSections
    public SetParsCross
    public useBranchOrders
    public write_crosssection_data
-   
+   public getYZConveyance
    double precision, public :: default_width
 
    interface fill_hashtable
@@ -3407,4 +3407,43 @@ subroutine createTablesForTabulatedProfile(crossDef)
  
    
    end subroutine write_crosssection_data
+
+   !> Get the flow area, wet perimeter and flow width located on a link
+   subroutine getYZConveyance(line2cross, cross, dpt, u1, cz, conv)
+
+      use m_GlobalParameters
+   
+      implicit none
+
+      type(t_chainage2cross),       intent(in)        :: line2cross     !< cross section indirection
+      type(t_CrossSection), target, intent(in)        :: cross(:)       !< array containing cross section information
+      double precision,             intent(in)        :: dpt            !< water depth at cross section
+      double precision,             intent(in)        :: u1             !< water velocity at cross section
+      double precision,             intent(  out)     :: cz             !< computed Chezy value
+      double precision,             intent(  out)     :: conv           !< conveyance
+
+      type (t_CrossSection), pointer        :: cross1         !< cross section
+      type (t_CrossSection), pointer        :: cross2         !< cross section
+      double precision                      :: f              !< cross = (1-f)*cross1 + f*cross2
+      double precision                      :: area 
+      double precision                      :: width 
+      double precision                      :: perimeter 
+      double precision                      :: cz1, cz2
+      double precision                      :: conv1, conv2
+      
+
+      cross1 => cross(line2cross%c1)
+      cross2 => cross(line2cross%c2)
+      f = line2cross%f
+      if(cross1%crossIndx == cross2%crossIndx) then
+         ! Same Cross-Section, no interpolation needed 
+         call YZProfile(dpt, cross1%convTab, 0, area, width, perimeter, u1, cz, conv)
+      else
+         call YZProfile(dpt, cross1%convTab, 0, area, width, perimeter, u1, cz1, conv1)
+         call YZProfile(dpt, cross2%convTab, 0, area, width, perimeter, u1, cz2, conv2)
+         cz   = (1.0d0 - f) * cz1   + f * cz2
+         conv = (1.0d0 - f) * conv1 + f * conv2
+      endif
+
+   end subroutine getYZConveyance
 end module m_CrossSections

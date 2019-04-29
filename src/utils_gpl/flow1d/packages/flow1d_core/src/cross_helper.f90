@@ -115,21 +115,24 @@ contains
       double precision, intent(in)   :: wetPerimeter
       integer                        :: igrid
       integer                        :: ibranch
-      logical                        :: compute_conveyance  
+      logical                        :: YZ_conveyance  
       
       n = network%adm%line2cross(L)%c1
       if ( n <= 0) then
          ! no cross section defined on L
-         compute_conveyance = .true.
+         YZ_conveyance = .false.
       else
          cross => network%crs%cross(n)%tabdef
          igrid   = network%adm%lin2grid(L)
          ibranch = network%adm%lin2ibr(L)
          ! for YZ profiles CalcCSParsFlow computes the conveyance
-         compute_conveyance = cross%crosstype /= CS_YZ_PROF
+         yz_conveyance = cross%crosstype == CS_YZ_PROF
       endif
       
-      if (compute_conveyance) then
+      if (yz_conveyance) then
+         call getYZConveyance(network%adm%line2cross(L), network%crs%cross, dpt, u1L, cz, conv)
+
+      else
          igrid   = network%adm%lin2grid(L)
          ibranch = network%adm%lin2ibr(L)
          conv = 0d0
