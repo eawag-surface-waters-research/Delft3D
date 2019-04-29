@@ -40376,14 +40376,14 @@ use m_cross_helper
 
 implicit none
 integer          :: L, japerim
-double precision :: hprL                 ! hoogte in profiel
-double precision :: area                 ! wet cross sectional area
-double precision :: width                ! width at water surface
-double precision :: perim                ! wet perimeter
+double precision :: hprL                 !< hoogte in profiel
+double precision :: area                 !< wet cross sectional area
+double precision :: width                !< width at water surface
+double precision :: perim                !< wet perimeter
 
-double precision :: profw                ! width  of profile
-double precision :: profh                ! height of profile
-double precision :: hydrad               ! hydraulic radius
+double precision :: profw                !< width  of profile
+double precision :: profh                !< height of profile
+double precision :: hydrad               !< hydraulic radius
 
 double precision :: area2, width2, perim2, cf2, alfa ! second prof i.c. interpolation
 double precision :: area_sbk, width_sbk ! second prof i.c. interpolation
@@ -40421,6 +40421,7 @@ if (abs(kcu(ll))==1 .and. network%loaded) then !flow1d used only for 1d channels
       cz = 0d0
       call getconveyance(network, dpt, u1L, q1L, s1L, LL, perim_sub, af_sub, conv, cz_sub, cz, area, perim)
 
+      ! For sediment transport the discharge in the main channel is required:
       ! Qmain/ QT = Kmain/KT -> u_main = Kmain/KT * (AT/Amain)
       if (conv > 0d0) then
          u_to_umain(L) = area*cz_sub(1) * sqrt(af_sub(1)/perim_sub(1)) /  conv
