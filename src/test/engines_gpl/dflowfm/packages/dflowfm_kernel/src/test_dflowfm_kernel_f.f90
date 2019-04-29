@@ -24,6 +24,7 @@
 program test_dflowfm_kernel
     use ftnunit
     use test_read
+    use test_cross_sections
     
     implicit none
 
@@ -33,7 +34,8 @@ program test_dflowfm_kernel
     !
     ! Tests for ZOEK.F
     !
-    call tests_read
+    call tests_cross_sections
+!    call tests_read
 
     !
     ! Done - properly finalize
