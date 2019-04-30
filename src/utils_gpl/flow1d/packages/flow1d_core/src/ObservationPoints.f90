@@ -77,7 +77,7 @@ module m_ObservationPoints
         !> optional 
         double precision            :: x                    !< x-coordinate
         double precision            :: y                    !< y-coordinate
-        integer                     :: locationtype         !< location type: =1, snap to 1d flownode, =2, snap to 2d flownode
+        integer                     :: locationtype = 3     !< location type:=1(or 2), defined by xy coordinate, snap to 1d (or 2d) flownodes; =3, defined by branchID and chainage (snap to 1d flownode)
    end type
    
    type, public :: t_ObservationPointSet
