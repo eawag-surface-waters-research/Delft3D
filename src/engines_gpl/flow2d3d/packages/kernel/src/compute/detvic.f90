@@ -62,6 +62,7 @@ subroutine detvic(lundia    ,j         ,nmmaxj    ,nmmax     ,kmax      , &
     real(fp)               , pointer :: gamma
     real(fp)               , pointer :: dicmol
     logical                , pointer :: elder
+    real(fp)               , pointer :: drycrt
     real(fp)               , pointer :: ag
     real(fp)               , pointer :: vonkar
     real(fp)               , pointer :: vicmol
@@ -115,6 +116,7 @@ subroutine detvic(lundia    ,j         ,nmmaxj    ,nmmax     ,kmax      , &
     real(fp)       :: b      ! Help var. See "first2d.doc" formula (1a) 
     real(fp)       :: chezy  ! Total chezy value in zeta point 
     real(fp)       :: depth  ! Total depth 
+    real(fp)       :: drytrsh
     real(fp)       :: ks     ! Help var. See "first2d.doc" formula (3a) 
     real(fp)       :: sag
     real(fp)       :: ustar
@@ -134,17 +136,19 @@ subroutine detvic(lundia    ,j         ,nmmaxj    ,nmmax     ,kmax      , &
     gamma     => gdp%gdhtur2d%gamma
     dicmol    => gdp%gdhtur2d%dicmol
     elder     => gdp%gdhtur2d%elder
+    drycrt    => gdp%gdnumeco%drycrt
     ag        => gdp%gdphysco%ag
     vonkar    => gdp%gdphysco%vonkar
     vicmol    => gdp%gdphysco%vicmol
     !
     ! Initialisation local variables
     !
-    ddb    = gdp%d%ddbound
-    icount = 0
-    error  = .false.
-    sag    = sqrt(ag)
-    nm_pos = 1
+    ddb     = gdp%d%ddbound
+    icount  = 0
+    error   = .false.
+    sag     = sqrt(ag)
+    drytrsh = drycrt
+    nm_pos  = 1
     !
     ! The HLES contribution to vicuv/dicuv is stored in array element kmax+2
     ! The background contribution is stored in array element kmax+1
@@ -164,8 +168,11 @@ subroutine detvic(lundia    ,j         ,nmmaxj    ,nmmax     ,kmax      , &
           vvv   = (vmean(ndm)*kfv(ndm) + vmean(nm)*kfv(nm)) / real(kkfv,fp)
           utot  = sqrt(uuu*uuu + vvv*vvv)
           ken   = max( 1 , kfu(nm) + kfu(nmd) + kfv(nm) + kfv(ndm) )
+          !
+          ! Limit Chezy to be larger than 1 to avoid division by zero in points that all inactive (although this should not be possible for kfs(nm)=1)
+          !
           chezy = max( 1.0_fp , (kfu(nmd)*cvalu(nmd) + kfu(nm)*cvalu(nm) + kfv(ndm)*cvalv(ndm) + kfv(nm)*cvalv(nm)) / real(ken,fp) )
-          depth = max( 0.01_fp , real(dps(nm),fp) + s1(nm) )
+          depth = max( drytrsh , real(dps(nm),fp) + s1(nm) )
           b     = 0.75*ag*utot / (depth*chezy*chezy)
           !
           ! determine ks
