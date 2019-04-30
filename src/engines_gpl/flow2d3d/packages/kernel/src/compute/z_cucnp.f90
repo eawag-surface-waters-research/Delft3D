@@ -754,7 +754,7 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     enddo
     call timer_stop(timer_cucnp_advdiffv, gdp)
     !
-    ! HORIZONTAL VISCOSTY
+    ! HORIZONTAL VISCOSITY
     !
     call timer_start(timer_cucnp_vih, gdp)
     if (irov>0) then
