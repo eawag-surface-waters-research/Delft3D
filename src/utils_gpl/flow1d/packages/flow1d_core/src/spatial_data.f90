@@ -58,31 +58,30 @@ module m_spatial_data
    end interface dealloc
 
    !> Derived type containg the grid values
-   type, public:: t_spatial_data
-      integer                         :: numValues
-      logical                         :: interpolate
-      integer                         :: def_type
+   type, public:: t_spatial_data                               !< Derived type for spatial varying data values
+      integer                         :: numValues             !< Array size
+      logical                         :: interpolate           !< Flag indicates values to the grid points have to be interpolated
+      integer                         :: def_type              !< Default type
+                                                               
+      integer, allocatable            :: brIndex(:)            !< Array containing indices to the branches for each input value (length NUMVALUES)
+      double precision, allocatable   :: chainage(:)           !< Array containing chainage on the branch for each input value (length NUMVALUES)
+      double precision, allocatable   :: valuesOnLocation(:)   !< Array containing input values (length NUMVALUES)
+                                  
+      double precision                :: default               !< Default or global value
+      integer                         :: quantity              !< Name (integer type) of the quantity
+      integer, allocatable            :: tblIndex(:)           !< Indirection table from grid point to table index
+      double precision, allocatable   :: values(:)             !< Values of the quantity
       
-      integer, allocatable            :: brIndex(:)
-      double precision, allocatable   :: chainage(:)
-      double precision, allocatable   :: valuesOnLocation(:)
-      
-      ! Only data below into Cache
-      double precision                :: default
-      integer                         :: quantity    !< Name of the quantity
-      integer, allocatable            :: tblIndex(:)
-      double precision, allocatable   :: values(:)   !< Values of the quantity
-      
-      type(t_tableSet)                :: tables
+      type(t_tableSet)                :: tables                !< tables for water level or discharge dependent values
       
    end type    
 
    !> Derived type containing the grid values set
    type, public   :: t_spatial_dataSet
-      integer                                       :: size   = 0            !< current length of array quant
-      integer                                       :: growsBy = 2000        !< used increment for extending array quant
-      integer                                       :: count   = 0           !< number of registered quantial Conditions
-      type(t_spatial_data), pointer, dimension(:)   :: quant   => null()             
+      integer                                       :: size   = 0           !< current length of array quant
+      integer                                       :: growsBy = 2000       !< used increment for extending array quant
+      integer                                       :: count   = 0          !< number of registered quantial Conditions
+      type(t_spatial_data), pointer, dimension(:)   :: quant   => null()            
       integer                                       :: level      = -1      !< index of level in quant array
       integer                                       :: depth      = -1      !< index of level in quant array
       integer                                       :: discharge  = -1      !< index of discharge in quant array
@@ -109,9 +108,9 @@ contains
       implicit none
       
       ! Input/output parameters
-      type(t_spatial_dataSet)                                  :: spData  !< Grid values set           
-      integer, intent(in)                                      :: quantity   !< Name of the quantity           
-      double precision, intent(in), dimension(:)               :: values     !< Array containing grid values
+      type(t_spatial_dataSet) , intent(inout)                  :: spData     !< Grid values set           
+      integer                 , intent(in)                     :: quantity   !< Name (integer) of the quantity           
+      double precision        , intent(in), dimension(:)       :: values     !< Array containing grid values
 
       integer                 :: iQuant
       integer                 :: length
@@ -177,8 +176,8 @@ contains
       implicit none
       
       ! Input/output parameters
-      type(t_spatial_dataSet), intent(inout)          :: spData
-      integer :: quantity  !< Name of the quantity
+      type(t_spatial_dataSet) , intent(inout)          :: spData    !< spatial data set 
+      integer                 , intent(in)             :: quantity  !< Integer name of the quantity
 
       ! Local variables
       integer i
@@ -200,7 +199,7 @@ contains
       implicit none
       
       ! Input/output parameters
-      type(t_spatial_dataSet), intent(inout)          :: spData
+      type(t_spatial_dataSet), intent(inout)          :: spData        !< Spatial data set
 
       ! Local variables
       integer                       :: i
@@ -242,7 +241,7 @@ contains
       implicit none
       
       ! Input/output parameters
-      type(t_spatial_dataSet), intent(inout)          :: spData
+      type(t_spatial_dataSet), intent(inout)          :: spData         !< Spatial data set
       
       ! Local variables
       type(t_spatial_data), pointer, dimension(:)     :: oldspData
@@ -273,11 +272,11 @@ contains
       !
       ! Global variables
       !
-      type(t_spatial_dataSet)         :: spData         !< structure containing grid related values
-      integer                       :: igrid             !< gridnumber
-      double precision              :: f1 
-      double precision              :: f3 
-      double precision              :: f4 
+      type(t_spatial_dataSet), intent(in   )          :: spData         !< structure containing grid related values
+      integer                , intent(in   )          :: igrid          !< gridnumber
+      double precision       , intent(  out)          :: f1             !< Thatcher Harleman F1 term
+      double precision       , intent(  out)          :: f3             !< Thatcher Harleman F3 term
+      double precision       , intent(  out)          :: f4             !< Thatcher Harleman F4 term
       !
  
       !! executable statements -------------------------------------------------------
@@ -301,13 +300,14 @@ contains
       
    end subroutine GetDispersionParameters
    
+   !> Interpolate the inputvalues to grid points
    subroutine ValuesToGridPoints(spData, brs, tbls, interpolateOverBranches)
       use m_branch
    
-      type(t_spatial_data), intent(inout)          :: spData
-      type(t_branchSet), intent(in)                :: brs
-      logical, intent(in)                          :: interpolateOverBranches
-      type(t_ptable), dimension(:), intent(inout)  :: tbls
+      type(t_spatial_data), intent(inout)          :: spData                   !< Spatial data derived type
+      type(t_branchSet), intent(in)                :: brs                      !< Branches
+      logical, intent(in)                          :: interpolateOverBranches  !< Flag indicating if interpolation over branches is required
+      type(t_ptable), dimension(:), intent(inout)  :: tbls                     !< Tables
       
       integer :: i
       integer :: isp1
@@ -482,6 +482,7 @@ contains
       
    end subroutine ValuesToGridPoints
 
+   !> Find value definition on other branch, using branch orders
    recursive function findNeighbourValue(brs, ibr, beginNode, spData, ibr2spDataIndex, value, isp, chainage, interpolateOverBranches) result(found)
       ! modules
       use m_branch
@@ -491,15 +492,15 @@ contains
       ! variables
       logical :: found
       
-      type(t_branchSet), intent(in)           :: brs       !< Set of reaches
-      integer                                 :: ibr  
-      logical, intent(in)                     :: interpolateOverBranches
-      type(t_spatial_data),intent(in)         :: spData    !< grid value object  
-      integer, dimension (:,:)                :: ibr2spDataIndex
-      double precision, intent(out)           :: chainage    !< distance from begin or end of branch
-      double precision, intent(inout)         :: value     !< location of roughness section on branch
-      logical, intent(in)                     :: beginNode !< indicates whether the begin or end node is to be used of the branch
-      integer, intent(inout)                  :: isp
+      type(t_branchSet)       , intent(in   ) :: brs                       !< Set of reaches
+      integer                 , intent(in   ) :: ibr                       !< Branch index
+      logical                 , intent(in   ) :: interpolateOverBranches   !< Flag indicating if interpolation over branches is required
+      type(t_spatial_data)    , intent(in   ) :: spData                    !< Grid value object  
+      integer, dimension (:,:), intent(in   ) :: ibr2spDataIndex           !< Branch to spatial data index table
+      double precision        , intent(  out) :: chainage                  !< Distance from begin or end of branch
+      double precision        , intent(inout) :: value                     !< Location of roughness section on branch
+      logical                 , intent(in   ) :: beginNode                 !< Indicates whether the begin or end node is to be used of the branch
+      integer                 , intent(inout) :: isp
    
       ! local variables
       integer                          :: nodeIndex
@@ -575,17 +576,18 @@ contains
 
    end function findNeighbourValue
 
+   !> Get the function value at a given location (branchid, chainage)
    integer function getValueAtLocation(sp, branchidx, chainage, value, valuetype)
    
       ! Return Values: 0 = Value found at Location
       !                1 = Default Value
       !               -1 = Error, No Value determined
    
-      type(t_spatial_data), intent(in)            :: sp
-      integer, intent(in)                         :: branchidx
-      double precision, intent(in)                :: chainage
-      double precision, intent(out)               :: value
-      integer, intent(out)                        :: valuetype
+      type(t_spatial_data), intent(in)            :: sp         !< spatial data 
+      integer, intent(in)                         :: branchidx  !< branch index
+      double precision, intent(in)                :: chainage   !< chainage
+      double precision, intent(out)               :: value      !< value
+      integer, intent(out)                        :: valuetype  !< valuetype
       
       integer                 :: i
       integer                 :: icount
@@ -663,12 +665,12 @@ contains
    
    end function getValueAtLocation
    
+   !> Free Location Data which is not used anymore \n
+   !! After this the function getValueAtLocation will only give default data
    subroutine freeLocationData(spdSet)
    
-      ! Free Location Data which is not used anymore
-      ! After this the function getValueAtLocation will only give default data
    
-      type(t_spatial_dataSet), intent(inout)           :: spdSet
+      type(t_spatial_dataSet), intent(inout)           :: spdSet     !< spatial data set
       
       type(t_spatial_data), pointer                    :: pspData
       integer                                          :: i

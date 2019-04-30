@@ -50,15 +50,17 @@ module m_readSpatialData
 
 contains
 
+   !> Read spatial data from input file
    subroutine spatial_data_reader(isp, spData, brs, inputfile, default, itype, interpolateOverBranches)
 
-      type(t_spatial_dataSet), intent(inout)    :: spData
-      type(t_branchSet), intent(in)             :: brs
-      character(len=*), intent(in)              :: inputfile
-      integer, intent(in)                       :: itype
-      logical, intent(in)                       :: interpolateOverBranches
-      double precision, intent(inout)           :: default
-      integer, intent(out)                      :: isp  
+      type(t_spatial_dataSet) , intent(inout)  :: spData                   !< Spatial data set
+      type(t_branchSet)       , intent(in   )  :: brs                      !< Branches
+      character(len=*)        , intent(in   )  :: inputfile                !< Name of the input file
+      integer                 , intent(in   )  :: itype                    !< Quantity type
+      logical                 , intent(in   )  :: interpolateOverBranches  !< Flag indicates whether interpolation over branches is required
+      double precision        , intent(inout)  :: default                  !< Default/global value
+      integer                 , intent(  out)  :: isp                      !< Index in spatial data set
+      
       type(t_spatial_data), pointer             :: pspData
       type(tree_data), pointer                  :: md_ptr
       integer                                   :: i
@@ -243,10 +245,11 @@ contains
    
    end subroutine spatial_data_reader
 
+   !> Read the spatial data file from cache
    subroutine read_spatial_data_cache(ibin, network)
 
-      type(t_network), intent(inout)      :: network
-      integer, intent(in)                 :: ibin
+      type(t_network), intent(inout)      :: network     !> network structure
+      integer, intent(in)                 :: ibin        !> unit number of binary cache file
 
       type(t_spatial_data), pointer       :: pQuant
       integer                             :: nValues
@@ -324,10 +327,11 @@ contains
 
    end subroutine read_spatial_data_cache
 
+   !> Read the spatial data file from cache
    subroutine write_spatial_data_cache(ibin, spData)
 
-      type(t_spatial_dataSet), intent(in) :: spData
-      integer, intent(in)                 :: ibin
+      type(t_spatial_dataSet), intent(in) :: spData   !> network structure
+      integer, intent(in)                 :: ibin     !> unit number of binary cache file
 
       type(t_spatial_data), pointer       :: pQuant
       integer                             :: nValues

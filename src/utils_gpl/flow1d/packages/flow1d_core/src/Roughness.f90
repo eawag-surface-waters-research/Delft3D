@@ -73,63 +73,60 @@ module m_Roughness
    end interface 
    
    !> Roughness definition
-   type, public :: t_Roughness
+   type, public :: t_Roughness                           !< Derived type for roughness data 
    
       character(len=idLen)              :: id            !< section id/name
        
-      integer                           :: iSection = 0  !> Section Type
+                                                         !> Section Type
                                                          !! 1 = Main
                                                          !! 2 = Floodplain1
                                                          !! 3 = Floodplan2
                                                          !! Any other = Other section (Default 0)
-
+      integer                           :: iSection = 0
       ! branch oriented data
-      integer, pointer                  :: rgh_type_pos(:)   !< Size = network%brs%count        
-      integer, pointer                  :: fun_type_pos(:)           
-      integer, pointer                  :: rgh_type_neg(:)
-      integer, pointer                  :: fun_type_neg(:)
+      integer, pointer                  :: rgh_type_pos(:)   !< Roughness type for positive flow direction at a branch
+      integer, pointer                  :: fun_type_pos(:)   !< Roughness parameter value for positive flow direction at a branch     
+      integer, pointer                  :: rgh_type_neg(:)   !< Roughness type for negative flow direction at a branch
+      integer, pointer                  :: fun_type_neg(:)   !< Roughness parameter value for negative flow direction at a branch
 
-      integer                           :: spd_pos_idx    ! Index to Spatial Data
-      integer                           :: spd_neg_idx    ! Index to Spatial Data
+      integer                           :: spd_pos_idx       !< Index to Spatial Data for positive flow direction parameter values
+      integer                           :: spd_neg_idx       !< Index to Spatial Data for negative flow direction parameter values
       
    end type
    
-   type, public :: t_RoughnessSet
-      integer                                           :: Size = 0
-      integer                                           :: growsBy = 2000
-      integer                                           :: Count= 0
-      type(t_Roughness), pointer, dimension(:)          :: rough
-      type(t_tableSet)                                  :: tables
-      type(t_hashlist)                                  :: hashlist
+   type, public :: t_RoughnessSet                                           !< Roughness set for roughness sections
+      integer                                           :: Size = 0         !< Current size
+      integer                                           :: growsBy = 2000   !< Increment for growing array
+      integer                                           :: Count= 0         !< Number of elements in array
+      type(t_Roughness), pointer, dimension(:)          :: rough            !< Array containing roughness sections
+      type(t_tableSet)                                  :: tables           !< Array with tables for flow or water level dependend parameter values
+      type(t_hashlist)                                  :: hashlist         !< hashlist for fast searching.
    end type t_RoughnessSet
 
-   integer, parameter, public                           :: R_FunctionConstant = 0
-   integer, parameter, public                           :: R_FunctionDischarge = 1
-   integer, parameter, public                           :: R_FunctionLevel = 2
-   integer, parameter, public                           :: R_Chezy = 1
-   integer, parameter, public                           :: R_Manning = 4
-   integer, parameter, public                           :: R_Nikuradse = 5
-   integer, parameter, public                           :: R_Strickler = 6
-   integer, parameter, public                           :: R_WhiteColebrook = 7
-   integer, parameter, public                           :: R_BosBijkerk = 9
-   double precision, parameter, public                  :: sixth = 1.d0/6.d0
-   double precision, parameter, public                  :: third = 1.d0/3.d0
-   double precision, parameter, public                  :: chlim = 0.001d0
+   integer, parameter, public                           :: R_FunctionConstant = 0      !< Constant type roughness function
+   integer, parameter, public                           :: R_FunctionDischarge = 1     !< Discharge dependend roughness 
+   integer, parameter, public                           :: R_FunctionLevel = 2         !< Water level dependend roughness
+   integer, parameter, public                           :: R_Chezy = 1                 !< Chezy type roughness
+   integer, parameter, public                           :: R_Manning = 4               !< Manning  roughness formula
+   integer, parameter, public                           :: R_Nikuradse = 5             !< Nikuradse roughness formula
+   integer, parameter, public                           :: R_Strickler = 6             !< Strickler roughness formula
+   integer, parameter, public                           :: R_WhiteColebrook = 7        !< White Colebrook roughness formula
+   integer, parameter, public                           :: R_BosBijkerk = 9            !< Bos en Bijkerk roughness formula 
+   double precision, parameter, public                  :: sixth = 1.d0/6.d0           !< 1/6
+   double precision, parameter, public                  :: third = 1.d0/3.d0           !< 1/3
+   double precision, parameter, public                  :: chlim = 0.001d0             !< Lowest Chezy value
 
 contains
    
+!> Reallocate roughness array, while keeping the original values in place   
 subroutine reallocRoughness(rgs)
    ! Modules
    
    implicit none
 
    ! Input/output parameters
-   type(t_RoughnessSet)           :: rgs
+   type(t_RoughnessSet), intent(inout)           :: rgs    !< roughness set
    
-   ! Local variables
-
-   ! Program code
-
    ! Local variables
    type(t_Roughness), pointer, dimension(:)    :: oldrough
    
@@ -155,13 +152,14 @@ subroutine reallocRoughness(rgs)
 
 end subroutine reallocRoughness
    
+!> Deallocate roughness set   
 subroutine deallocRoughness(rgs)
    ! Modules
    
    implicit none
 
    ! Input/output parameters
-   type(t_RoughnessSet)    :: rgs
+   type(t_RoughnessSet), intent(inout)    :: rgs          !< roughness set
    
    ! Local variables
    integer                 :: i
@@ -195,6 +193,7 @@ subroutine deallocRoughness(rgs)
 
 end subroutine deallocRoughness
 
+!> Get friction value (Chezy) for a specific point in the network
 double precision function getFrictionValue(rgs, spData, ibranch, section, igrid, h, q, u, r, d)
 !!--description-----------------------------------------------------------------
 ! NONE
@@ -233,8 +232,8 @@ double precision function getFrictionValue(rgs, spData, ibranch, section, igrid,
 !
 ! Global variables
 !
-    type(t_RoughnessSet), intent(in)        :: rgs
-    type(t_spatial_dataSet), intent(in)     :: spData
+    type(t_RoughnessSet), intent(in)        :: rgs         !< Roughness data
+    type(t_spatial_dataSet), intent(in)     :: spData      !< spatial data
     integer, intent(in)                     :: igrid       !< gridpoint index
     integer, intent(in)                     :: ibranch     !< branch index
     integer, intent(in)                     :: section     !< section index (0=main, 1=Flood plane 1, 2=Flood plane 2)
@@ -308,14 +307,13 @@ double precision function getFrictionValue(rgs, spData, ibranch, section, igrid,
     getFrictionValue = GetChezy(rgh_type(ibranch), cpar, rad, dep, u)
 end function getFrictionValue
 
+!> Get the Chezy value for a given friction type and parameter value
 double precision function GetChezy(frictType, cpar, rad, dep, u)
 
    implicit none
-   double precision, intent(in)   :: dep                     !< water depth
-   !double precision, intent(in)   :: h                     !< water level
-   !double precision, intent(in)   :: q                     !< discharge
-   double precision, intent(in)   :: rad                     !< hydraulic radius
-   double precision, intent(in)   :: cpar
+   double precision, intent(in)   :: dep                   !< water depth
+   double precision, intent(in)   :: rad                   !< hydraulic radius
+   double precision, intent(in)   :: cpar                  !< parameter value
    double precision, intent(in)   :: u                     !< velocity
    integer, intent(in)            :: frictType             !< friction type
 
@@ -386,6 +384,7 @@ double precision function GetChezy(frictType, cpar, rad, dep, u)
 
 end function GetChezy
 
+!> Get the Chezy value, using the Engelund roughness predictor
 subroutine flengrprDouble(d90, u, hrad, chezy)
 !!--description-----------------------------------------------------------------
 ! NONE
@@ -397,10 +396,10 @@ subroutine flengrprDouble(d90, u, hrad, chezy)
 !
 ! Global variables
 !
-    double precision, intent(out)              :: chezy
-    double precision, intent(in)               :: d90
-    double precision, intent(in)               :: hrad
-    double precision, intent(in)               :: u
+    double precision, intent(out)              :: chezy   !< Roughness value
+    double precision, intent(in)               :: d90     !< d90 parameter value
+    double precision, intent(in)               :: hrad    !< hydraulic radius
+    double precision, intent(in)               :: u       !< flow velocity
 !
 !
 ! Local variables
@@ -554,11 +553,12 @@ subroutine flengrprDouble(d90, u, hrad, chezy)
     endif
 end subroutine flengrprDouble
 
+!> Get the Chezy value, using the Engelund roughness predictor
 subroutine flengrprReal(d90, u, hrad, chezy)
-   real, intent(in) :: d90
-   real, intent(in) :: u
-   real, intent(in) :: hrad
-   real, intent(out) :: chezy
+   real, intent(in) :: d90          !< Roughness value
+   real, intent(in) :: u            !< d90 parameter value
+   real, intent(in) :: hrad         !< hydraulic radius
+   real, intent(out) :: chezy       !< flow velocity
    
    double precision C
    

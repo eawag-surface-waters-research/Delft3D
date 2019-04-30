@@ -52,11 +52,13 @@ module m_read_roughness
 
 contains
 
+   !> Read all roughness ini-files
    subroutine roughness_reader(network, roughnessfiles, mapdir, md_ptr)
    
-      type(t_network), intent(inout), target :: network
-      character(len=*), intent(in)           :: mapdir, roughnessfiles
-      type(tree_data), pointer, intent(in), optional   :: md_ptr
+      type(t_network), intent(inout), target :: network                !> Network structure
+      character(len=*), intent(in)           :: mapdir                 !> Location of roughness files
+      character(len=*), intent(in)           :: roughnessfiles         !> separated list of roughness files
+      type(tree_data), pointer, intent(in), optional   :: md_ptr       !> treedata pointer to model definition file
 
       type(t_RoughnessSet), pointer          :: rgs
       type(t_branchSet), pointer             :: brs
@@ -81,6 +83,8 @@ contains
       default = 60d0
       def_type = 1
       def_type = 1
+      
+      !> Check if the model definition file contains global values for roughness
       if (present(md_ptr)) then
          call prop_get_double(md_ptr, 'GlobalValues', 'roughness', default, success)
          if (success) then
@@ -177,14 +181,15 @@ contains
       endif
    end subroutine roughness_reader
 
+   !> Read a specific roughness file
    subroutine read_roughnessfile(rgs, brs, spdata, inputfile, default, def_type)
    
-      type(t_roughnessSet), intent(inout)    :: rgs
-      type(t_branchSet), intent(in)          :: brs
-      type(t_spatial_dataSet), intent(inout) :: spdata
-      character(len=charLn), intent(in)      :: inputfile
-      double precision, intent(inout)        :: default
-      integer, intent(inout)                 :: def_type
+      type(t_roughnessSet), intent(inout)    :: rgs        !> Roughness set
+      type(t_branchSet), intent(in)          :: brs        !> Branches
+      type(t_spatial_dataSet), intent(inout) :: spdata     !> Spatial data set
+      character(len=charLn), intent(in)      :: inputfile  !> Name of the input file
+      double precision, intent(inout)        :: default    !> Default friction parameter
+      integer, intent(inout)                 :: def_type   !> Default friction type
    
       integer                                :: istat
       integer                                :: count
@@ -217,8 +222,13 @@ contains
       endif
       call prop_get_integer(tree_ptr, 'Content', 'globalType', def_type, success)
    
+      ! Look if section Id is already defined, otherwise add it to the list
       irgh = hashsearch_or_add(rgs%hashlist, sectionId)
       if (irgh == rgs%count+1) then
+         rgs%count = irgh
+         if (rgs%count > rgs%size) then
+            call realloc(rgs)
+         endif
          rgs%rough(irgh)%id           = sectionId
          rgs%rough(irgh)%spd_pos_idx  = 0
          rgs%rough(irgh)%spd_neg_idx  = 0
@@ -226,10 +236,6 @@ contains
          rgs%rough(irgh)%rgh_type_neg => null()
          rgs%rough(irgh)%fun_type_pos => null()
          rgs%rough(irgh)%fun_type_neg => null()
-         rgs%count = irgh
-         if (rgs%count > rgs%size) then
-            call realloc(rgs)
-         endif
       elseif (irgh > rgs%count+1) then
          call setmessage(LEVEL_FATAL, 'Internal error in roughness reader')
       endif
@@ -242,7 +248,7 @@ contains
    
       if (.not.flowdir) then
          if (associated(rgh%rgh_type_pos)) then
-            call setmessage(LEVEL_FATAL, 'Internal error in roughness reader')
+            call setmessage(LEVEL_FATAL, 'Roughness section with section Id: '//trim(sectionId)//'and positive flow direction is defined twice. Second time was in '//trim(inputfile))
          endif
          allocate(rgh%rgh_type_pos(brs%count))
          allocate(rgh%fun_type_pos(brs%count))
@@ -250,7 +256,7 @@ contains
          fun_type => rgh%fun_type_pos
       else
          if (associated(rgh%rgh_type_neg)) then
-            call setmessage(LEVEL_FATAL, 'Internal error in roughness reader')
+            call setmessage(LEVEL_FATAL, 'Roughness section with section Id: '//trim(sectionId)//'and negative flow direction is defined twice. Second time was in '//trim(inputfile))
          endif
          allocate(rgh%rgh_type_neg(brs%count))
          allocate(rgh%fun_type_neg(brs%count))
@@ -306,12 +312,13 @@ contains
    
    end subroutine read_roughnessfile
 
+   !> set default values at the branches
    subroutine init_at_branches(brs, rgh_type, fun_type, def_type)
    
-      type(t_branchset), intent(in) :: brs
-      integer, dimension(:), intent(inout) :: rgh_type
-      integer, dimension(:), intent(inout) :: fun_type
-      integer, intent(in) :: def_type
+      type(t_branchset), intent(in) :: brs                  !> Branches
+      integer, dimension(:), intent(inout) :: rgh_type      !> roughness type
+      integer, dimension(:), intent(inout) :: fun_type      !> roughness function type (default constant)
+      integer, intent(in) :: def_type                       !> default type
       integer ibr
 
       do ibr = 1, brs%count
@@ -323,10 +330,11 @@ contains
    
    end subroutine init_at_branches
  
+   !> Read the binary cache file for roughness values
    subroutine read_roughness_cache(ibin, network)
    
-      type(t_network), intent(inout)  :: network
-      integer, intent(in)             :: ibin
+      type(t_network), intent(inout)  :: network   !> Network structure
+      integer, intent(in)             :: ibin      !> Unit number for binary file
       
       integer                         :: i
       integer                         :: j
@@ -393,10 +401,11 @@ contains
       
    end subroutine read_roughness_cache
    
+   !> Write the binary cace file for roughness values
    subroutine write_roughness_cache(ibin, network)
 
-      type(t_network), intent(in)     :: network
-      integer, intent(in)             :: ibin
+      type(t_network), intent(in)     :: network  !< Network structure
+      integer, intent(in)             :: ibin     !< unit number of binary cache file
       
       type(t_RoughnessSet)            :: rgs
       type(t_Roughness), pointer      :: pRough
