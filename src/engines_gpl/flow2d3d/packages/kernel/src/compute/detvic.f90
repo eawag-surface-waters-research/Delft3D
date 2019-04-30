@@ -160,13 +160,12 @@ subroutine detvic(lundia    ,j         ,nmmaxj    ,nmmax     ,kmax      , &
           ndm   = nm - icy
           kkfu  = max( 1 , kfu(nm)+kfu(nmd) )
           kkfv  = max( 1 , kfv(nm)+kfv(ndm) )
-          uuu   = (umean(nmd)*kfu(nmd) + umean(nm)*kfu(nm)) / kkfu
-          vvv   = (vmean(ndm)*kfv(ndm) + vmean(nm)*kfv(nm)) / kkfv
+          uuu   = (umean(nmd)*kfu(nmd) + umean(nm)*kfu(nm)) / real(kkfu,fp)
+          vvv   = (vmean(ndm)*kfv(ndm) + vmean(nm)*kfv(nm)) / real(kkfv,fp)
           utot  = sqrt(uuu*uuu + vvv*vvv)
-          ken   = kfu(nm) + kfu(nmd) + kfv(nm) + kfv(ndm)
-          chezy = (kfu(nmd)*cvalu(nmd) + kfu(nm)*cvalu(nm) + kfv(ndm)*cvalv(ndm) &
-                & + kfv(nm)*cvalv(nm)) / ken
-          depth = real(dps(nm),fp) + s1(nm)
+          ken   = max( 1 , kfu(nm) + kfu(nmd) + kfv(nm) + kfv(ndm) )
+          chezy = max( 1.0_fp , (kfu(nmd)*cvalu(nmd) + kfu(nm)*cvalu(nm) + kfv(ndm)*cvalv(ndm) + kfv(nm)*cvalv(nm)) / real(ken,fp) )
+          depth = max( 0.01_fp , real(dps(nm),fp) + s1(nm) )
           b     = 0.75*ag*utot / (depth*chezy*chezy)
           !
           ! determine ks
@@ -180,9 +179,7 @@ subroutine detvic(lundia    ,j         ,nmmaxj    ,nmmax     ,kmax      , &
              ! not in coupling points because VICUV/DICUV is communicated
              ! by the mapper
              !
-             vicuv(nm, khtur) = &
-                   (sqrt(gamma*gamma*sigmat*sigmat*ptke(nm) + b*b) - b) &
-                   / (ks*ks)
+             vicuv(nm, khtur) = (sqrt(gamma*gamma*sigmat*sigmat*ptke(nm) + b*b) - b) / (ks*ks)
           endif
           !
           ! Add Elder to subgrid viscosity
