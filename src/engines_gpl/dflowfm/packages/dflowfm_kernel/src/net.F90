@@ -14795,7 +14795,7 @@ subroutine obs_on_flowgeom(iobstype)
         n2 = numobs
     end if 
     
-    call find_flownode(n2-n1+1, xobs(n1:n2), yobs(n1:n2), namobs(n1:n2), kobs(n1:n2), jakdtree, 1)
+    call find_flownode_for_obs(n1, n2)   
     
     if (loglevel_StdOut == LEVEL_DEBUG) then 
        do iobs = n1,n2
@@ -14813,7 +14813,7 @@ end subroutine obs_on_flowgeom
 
 
 !> Finds the flow nodes/cell numbers for each given x,y point (e.g., an observation station)
-subroutine find_flownode(N, xobs, yobs, namobs, kobs, jakdtree, jaoutside)
+subroutine find_flownode(N, xobs, yobs, namobs, kobs, jakdtree, jaoutside, jaobsloct)
    use unstruc_messages
    use m_partitioninfo
    use m_flowgeom
@@ -14830,7 +14830,7 @@ subroutine find_flownode(N, xobs, yobs, namobs, kobs, jakdtree, jaoutside)
    integer,           dimension(N), intent(inout)  :: kobs        !< associated flow nodes, if found.
    integer,                         intent(inout)  :: jakdtree    !< use kdtree (1) or not (other)
    integer,                         intent(in)     :: jaoutside   !< allow outside cells (for 1D) (1) or not (0)
-   
+   integer,                         intent(in)     :: jaobsloct   !< (0) not for obs, or obs with locationtype==0, (1) for obs with locationtype==1, (2) for obs with locationtype==2
    integer                                         :: ierror      !  error (1) or not (0)
    integer                                         :: i, k, k1b
    integer,           dimension(1)                 :: idum
@@ -14839,7 +14839,7 @@ subroutine find_flownode(N, xobs, yobs, namobs, kobs, jakdtree, jaoutside)
    ierror = 1
    
    if ( jakdtree.eq.1 ) then
-      call find_flowcells_kdtree(treeglob,N,xobs,yobs,kobs,jaoutside,ierror)
+      call find_flowcells_kdtree(treeglob,N,xobs,yobs,kobs,jaoutside,jaobsloct, ierror)
       
       if ( jampi.eq.1 ) then
 !        globally reduce ierror
@@ -14850,6 +14850,11 @@ subroutine find_flownode(N, xobs, yobs, namobs, kobs, jakdtree, jaoutside)
       
       if ( ierror.ne.0 ) then
          jakdtree = 0   ! retry without kdtree
+         if (jaobsloct /= 0) then
+            write(msgbuf, '(a,i1,a)') 'Find flownode: Kdtree search falied when snapping observation points of locationtype = ', jaobsloct, '.'
+            call mess(LEVEL_ERROR, msgbuf)
+         end if
+         
       end if
       
 !     disable observation stations without attached flowlinks
@@ -14906,6 +14911,167 @@ subroutine find_flownode(N, xobs, yobs, namobs, kobs, jakdtree, jaoutside)
    end subroutine find_flownode
 
 
+!> Finds the flow nodes/cell numbers for all observation points. There are four kinds of obs, treated differently:
+!! obs that are defined in *.xyn file, to be snaped to 1D+2D flow nodes (Locationtype == 0), use kdtree
+!! obs that are defined in *.ini file by xy coordinate, to be snaped to only 1D flow node (Locationtype == 1), use kdtree
+!! obs that are defined in *.ini file by xy coordinate, to be snaped to only 2D flow node (Locationtype == 2), use kdtree
+!! obs that are defined in *.ini file by branchID and chainage, to be snaped to only 1D flow node (Locationtype == 3), do not use kdtree
+subroutine find_flownode_for_obs(nstart, nend)
+   use MessageHandling
+   use m_network
+   use m_ObservationPoints
+   use m_observations
+   use unstruc_channel_flow
+   use m_inquire_flowgeom
+   use dfm_error
+   use m_alloc
+   use m_flowgeom
+   implicit none
+   integer, intent(in)               :: nstart ! starting index of obs for snapping to a flow node
+   integer, intent(in)               :: nend   ! ending index of obs for snapping to a flow node
+   integer                           :: i, nodenr, branchIDX, ntotal, nobsini, ierr, jakdtree, ii
+   integer, allocatable              :: ixy2obs0(:), ixy2obs1(:), ixy2obs2(:)
+   integer, allocatable              :: kobs_tmp0(:), kobs_tmp1(:), kobs_tmp2(:)
+   double precision, allocatable     :: xobs_tmp0(:), xobs_tmp1(:), xobs_tmp2(:)
+   double precision, allocatable     :: yobs_tmp0(:), yobs_tmp1(:), yobs_tmp2(:)
+   character(len=40), allocatable    :: namobs_tmp0(:), namobs_tmp1(:), namobs_tmp2(:)
+   integer                           :: nloctype0, nloctype1, nloctype2 
+   type(t_ObservationPoint), pointer :: pOPnt
+   
+   ntotal = nend - nstart + 1
+   if (ntotal <= 0) then
+      return
+   end if
+   
+   
+   ! realloc temperary arrays for searching
+   call realloc(ixy2obs0,    ntotal, keepExisting=.false.)
+   call realloc(xobs_tmp0,   ntotal, keepExisting=.false.)
+   call realloc(yobs_tmp0,   ntotal, keepExisting=.false.)
+   call realloc(kobs_tmp0,   ntotal, keepExisting=.false.)
+   call realloc(namobs_tmp0, ntotal, keepExisting=.false.)
+   
+   nobsini = network%obs%Count
+   call realloc(ixy2obs1,    nobsini, keepExisting=.false.)
+   call realloc(xobs_tmp1,   nobsini, keepExisting=.false.)
+   call realloc(yobs_tmp1,   nobsini, keepExisting=.false.)
+   call realloc(kobs_tmp1,   nobsini, keepExisting=.false.)
+   call realloc(namobs_tmp1, nobsini, keepExisting=.false.)
+   
+   call realloc(ixy2obs2,    nobsini, keepExisting=.false.)
+   call realloc(xobs_tmp2,   nobsini, keepExisting=.false.)
+   call realloc(yobs_tmp2,   nobsini, keepExisting=.false.)
+   call realloc(kobs_tmp2,   nobsini, keepExisting=.false.)
+   call realloc(namobs_tmp2, nobsini, keepExisting=.false.)
+   
+   nloctype0 = 0
+   nloctype1 = 0
+   nloctype2 = 0
+   
+   ! loop over obs
+   do i = nstart, nend
+      if (locobs(i) == 0) then ! obs to be snapped to a nearest 1D+2D flow node (obs that are defined in *.xyn file)
+         if (ndx <= 0) then
+               write(msgbuf, '(a)') "Observation point "//trim(namobs(i))//" requires to snap to a flow node, but there is no flow node to be snapped to."
+               call mess(LEVEL_ERROR, msgbuf)
+         end if
+         nloctype0 = nloctype0 + 1
+         ixy2obs0(nloctype0)    = i
+         xobs_tmp0(nloctype0)   = xobs(i)
+         yobs_tmp0(nloctype0)   = yobs(i)
+         namobs_tmp0(nloctype0) = namobs(i)
+      else if (locobs(i) == 1) then ! obs to be snapped to only 1D flow node (obs that are defined in *.ini file by xy coordinate, and locationtype ==1)
+         if (ndx - ndx2d <= 0) then
+            write(msgbuf, '(a)') "Observation point "//trim(namobs(i))//" requires to snap to a 1D flow node, but there is no 1D flow node to be snapped to."
+            call mess(LEVEL_ERROR, msgbuf)
+         end if   
+         nloctype1 = nloctype1 + 1
+         ixy2obs1(nloctype1)    = i
+         xobs_tmp1(nloctype1)   = xobs(i)
+         yobs_tmp1(nloctype1)   = yobs(i)
+         namobs_tmp1(nloctype1) = namobs(i)
+      else if (locobs(i) == 2) then ! obs to be snapped to only 2D flow node (obs that are defined in *.ini file by xy coordinate, and locationtype ==2)
+         if (ndx2d <= 0) then
+            write(msgbuf, '(a)') "Observation point "//trim(pOPnt%name)//" requires to snap to a 2D flow node, but there is no 2D flow node to be snapped to."
+            call mess(LEVEL_ERROR, msgbuf)
+         end if  
+         nloctype2 = nloctype2 + 1
+         ixy2obs2(nloctype2)    = i
+         xobs_tmp2(nloctype2)   = xobs(i)
+         yobs_tmp2(nloctype2)   = yobs(i)
+         namobs_tmp2(nloctype2) = namobs(i)
+      else if (locobs(i) == 3) then ! obs to be snapped to only 1D flow node (obs that are defined in *.ini file by branchID and chainage, and locationtype ==3)
+         ii = loc3obs(i) ! local index within all *.ini file defined obs
+         if ( ii > 0) then
+            pOPnt => network%obs%OPnt(ii)
+            branchIdx = pOPnt%branchIdx
+            if (branchIdx > 0) then
+               ierr = findnode(branchIdx, pOPnt%chainage, nodenr) ! find flow node given branchIDx and chainage
+               if (ierr == DFM_NOERR) then
+                  kobs(i)   = nodenr
+               else
+                  call SetMessage(LEVEL_ERROR, 'Error when snapping Observation Point '''//trim(namobs(i))//''' to a 1D flow node.')
+               end if
+            else
+               write(msgbuf, '(a)') "Observation point "//trim(namobs(i))//" does not have a valide branch index."
+               call mess(LEVEL_ERROR, msgbuf)
+            end if
+         else
+            write(msgbuf, '(a)') "Cannot find the local index of Observation point "//trim(namobs(i))//" "
+            call mess(LEVEL_ERROR, msgbuf)
+         end if
+      end if
+   end do
+   
+   
+   ! find flow nodes
+   jakdtree = 1
+   if (nloctype0 > 0) then
+      call find_flownode(nloctype0, xobs_tmp0(1:nloctype0), yobs_tmp0(1:nloctype0), namobs_tmp0(1:nloctype0), kobs_tmp0(1:nloctype0), jakdtree, 0, 1)
+      do i = 1, nloctype0
+         kobs(ixy2obs0(i)) = kobs_tmp0(i)  
+      end do
+   end if
+   
+   jakdtree = 1
+   if (nloctype1 > 0) then
+      call find_flownode(nloctype1, xobs_tmp1(1:nloctype1), yobs_tmp1(1:nloctype1), namobs_tmp1(1:nloctype1), kobs_tmp1(1:nloctype1), jakdtree, 1, 1)
+      do i = 1, nloctype1
+         kobs(ixy2obs1(i)) = kobs_tmp1(i)  
+      end do
+   end if
+   
+   jakdtree = 1
+   if (nloctype2 > 0) then
+      call find_flownode(nloctype2, xobs_tmp2(1:nloctype2), yobs_tmp2(1:nloctype2), namobs_tmp2(1:nloctype2), kobs_tmp2(1:nloctype2), jakdtree, 2, 1)
+       do i = 1, nloctype1
+         kobs(ixy2obs2(i)) = kobs_tmp2(i)  
+      end do
+   end if
+   
+
+   if (allocated(ixy2obs0))    deallocate(ixy2obs0)
+   if (allocated(xobs_tmp0))   deallocate(xobs_tmp0)
+   if (allocated(yobs_tmp0))   deallocate(yobs_tmp0)
+   if (allocated(yobs_tmp0))   deallocate(yobs_tmp0)
+   if (allocated(namobs_tmp0)) deallocate(namobs_tmp0)
+   
+   if (allocated(ixy2obs1))    deallocate(ixy2obs1)
+   if (allocated(xobs_tmp1))   deallocate(xobs_tmp1)
+   if (allocated(yobs_tmp1))   deallocate(yobs_tmp1)
+   if (allocated(yobs_tmp1))   deallocate(yobs_tmp1)
+   if (allocated(namobs_tmp1)) deallocate(namobs_tmp1)
+   
+   if (allocated(ixy2obs2))    deallocate(ixy2obs2)
+   if (allocated(xobs_tmp2))   deallocate(xobs_tmp2)
+   if (allocated(yobs_tmp2))   deallocate(yobs_tmp2)
+   if (allocated(yobs_tmp2))   deallocate(yobs_tmp2)
+   if (allocated(namobs_tmp2)) deallocate(namobs_tmp2)
+   
+   return        
+   end subroutine find_flownode_for_obs  
+   
+   
       SUBROUTINE curvilinearGRIDfromsplines()
       USE M_SPLINES
       implicit none

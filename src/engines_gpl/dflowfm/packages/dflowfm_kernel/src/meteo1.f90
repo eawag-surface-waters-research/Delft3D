@@ -2399,7 +2399,7 @@ contains
                yy(i-i1+1,j-j1+1) = dble(j)
             end do
          end do
-         call find_flowcells_kdtree(treeglob,Ni*Nj,xx,yy,kk,jakdtree,ierror)
+         call find_flowcells_kdtree(treeglob,Ni*Nj,xx,yy,kk,jakdtree,0, ierror)
          if ( ierror.ne.0 ) then
             jakdtree = 0
          end if

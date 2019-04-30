@@ -10482,7 +10482,7 @@ end subroutine cosphiunetcheck
     call doclose(mlim)
     allocate(knum(ndx)) ; knum = 0
     kk = kk - 1
-    call find_flownode(kk, xs, ys, nams, knum, jakdtree, jaoutside)
+    call find_flownode(kk, xs, ys, nams, knum, jakdtree, jaoutside, 0)
     do k = 1,kk
        if (knum(k) > 0) then
           numlimdt(knum(k)) = zs(k)
@@ -14155,7 +14155,7 @@ iqtail = 0 !< Index of most recently added element in work queue.
 !find flowcells
 if ( jakdtree.eq.1 ) then
    allocate(inodes(Ns))
-   call find_flowcells_kdtree(treeglob,Ns,xs,ys,inodes,1,ierror)
+   call find_flowcells_kdtree(treeglob,Ns,xs,ys,inodes,1,0, ierror)
 end if
 
 if ( ierror.ne.0 ) then
@@ -20218,7 +20218,7 @@ end subroutine unc_write_shp
 
  if (Lnx1D < -1 ) then
     kc = 0 ! allocate(inodes(Ndxi-ndx2D)) ; inodes = 0
-    call find_flowcells_kdtree(treeglob,Ndxi-ndx2D,xz(ndx2D+1),yz(ndx2D+1),kc,0,ierr)
+    call find_flowcells_kdtree(treeglob,Ndxi-ndx2D,xz(ndx2D+1),yz(ndx2D+1),kc,0,0,ierr)
     do k1 = ndx2D+1, ndxi
        k2 = kc(k1-ndx2D)
        if ( k2 > 0 ) then
@@ -34167,7 +34167,7 @@ end function ispumpon
  jakdtree = 0
  kdum(1)  = 0
  if (xpl(npl) .ne. -999.999d0) then
-    call find_flownode(1,xpl(npl),ypl(npl),tmpname(1),kdum(1),jakdtree,-1) ; kk2 = kdum(1)
+    call find_flownode(1,xpl(npl),ypl(npl),tmpname(1),kdum(1),jakdtree,-1, 0) ; kk2 = kdum(1)
  endif
 
  ! Support point source/sinks in a single cell if polyline has just one point (npl==1)
@@ -34185,7 +34185,7 @@ end function ispumpon
     tmpname = filename(n1+1:n2) // ' sink'
     kdum(1) = 0
     if (xpl(1) .ne. -999.999d0) then
-       call find_flownode(1,xpl(1),ypl(1),tmpname(1),kdum(1),jakdtree,-1) ; kk = kdum(1)
+       call find_flownode(1,xpl(1),ypl(1),tmpname(1),kdum(1),jakdtree,-1,0) ; kk = kdum(1)
     endif
 
     if (kk.ne.0 .or. kk2.ne.0) then

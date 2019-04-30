@@ -4958,13 +4958,8 @@ end subroutine timdat
    end subroutine find_crossed_links_kdtree2
 
 
-
-
-
-
-
 !> find flow cells with kdtree2
-  subroutine find_flowcells_kdtree(treeinst,Ns,xs,ys,inod,jaoutside,ierror)
+  subroutine find_flowcells_kdtree(treeinst,Ns,xs,ys,inod,jaoutside,jaobsloct, ierror)
 
      use m_missing
      use m_flowgeom
@@ -4984,6 +4979,7 @@ end subroutine timdat
      integer,          dimension(:),  allocatable   :: invperm !< inverse array 
      integer,          dimension(Ns), intent(out)   :: inod    !< flow nodes
      integer,                         intent(in)    :: jaoutside  !< allow outside cells (for 1D) (1) or not (0)
+     integer,                         intent(in)    :: jaobsloct !< (0) not for obs, or obs with locationtype==0, (1) for obs with locationtype==1, (2) for obs with locationtype==2
      integer,                         intent(out)   :: ierror  !< error (>0), or not (0)
      
      character(len=128)                           :: mesg, FNAM
@@ -4999,7 +4995,7 @@ end subroutine timdat
      integer                                      :: i, ip1, isam, in, k, N, NN 
      integer                                      :: inum, num, jj
      integer                                      :: in3D, j, fid
-     
+     integer                                      :: nstart, nend
      logical                                      :: jadouble
      double precision                             :: dist_old, dist_new    
 
@@ -5052,10 +5048,24 @@ end subroutine timdat
         goto 1234
      end if
 
+     ! define the searching range, this is especially for the purpose of snapping obs to 1D, 2D or 1D+2D flownodes. 
+     ! For other purpose it should stay as before
+     select case(jaobsloct)
+     case (0)
+        nstart = 1
+        nend   = ndx
+     case(1) ! 1d flownodes coordinates
+        nstart = ndx2D+1
+        nend   = ndx
+     case(2) ! 2d flownodes coordinates
+        nstart = 1
+        nend   = ndx2D 
+     end select
+     
      call mess(LEVEL_INFO, 'Finding flow nodes...')   
 
 !    loop over flownodes
-     do k=1,Ndx
+     do k = nstart, nend
 !       fill query vector
         call make_queryvector_kdtree(treeinst,xz(k),yz(k), jsferic)
         
@@ -5432,7 +5442,7 @@ implicit none
         kobs(i)   = 0
      end do
 
-     call find_flownode(Nin, xin, yin, namobs, kobs, jakdtree, 1)
+     call find_flownode(Nin, xin, yin, namobs, kobs, jakdtree, 1, 0)
 
 !    copy to output
      Nout = Nin

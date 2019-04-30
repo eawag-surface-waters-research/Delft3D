@@ -57,7 +57,8 @@ implicit none
     integer, allocatable              :: kobs(:)        !< node nrs of ACTIVE observation points
     ! NOTE: kobs is not maintained here (so also not after deleteObservation, etc.) All done once by obs_on_flowgrid.
     character(len=40), allocatable    :: namobs(:)      ! names of observation points
-
+    integer, allocatable              :: locobs(:)      !< location type of observation points, determining to which flownodes to snap to (0=1d2d, 1=1d, 2=2d, 3=1d defined by branchID+chainage)
+    integer, allocatable              :: loc3obs(:)     !< mapping from global obs index to obs that are defined by branchID and chainage 
     integer, parameter, private       :: capacity_ = 1  !< Nr of additionally allocated elements when lists are full
     integer, private                  :: iUniq_ = 1
     character(len=*), parameter, private :: defaultName_ = 'Obs'
@@ -541,15 +542,17 @@ end subroutine updateObservationXY
 
 !> Adds an observation point to the existing points.
 !! New observation point may be a moving one or not.
-subroutine addObservation(x, y, name, isMoving)
+subroutine addObservation(x, y, name, isMoving, loctype, iobs3)
 use m_alloc
     double precision, intent(in) :: x !< x-coordinate
     double precision, intent(in) :: y !< y-coordinate
     character(len=*), optional, intent(in) :: name !< Name of the station, appears in output file.
     logical, optional, intent(in) :: isMoving !< Whether point is a moving station or not. Default: .false.
+    integer, optional, intent(in) :: loctype  !< location type
+    integer, optional, intent(in) :: iobs3    !< local index of obs that are defiend by branchID and chainage (locationtype == 3)
 
     logical :: isMoving_
-    integer :: i, inew, isize
+    integer :: i, inew, isize, loctype_
 
     character(len=40) :: name_
     name_ = ' '
@@ -561,6 +564,12 @@ use m_alloc
         iUniq_ = iUniq_ + 1
     end if
 
+    if (present(loctype)) then
+       loctype_ = loctype
+    else
+       loctype_ = 0
+    end if
+    
     if (present(isMoving)) then
         isMoving_ = isMoving
     else
@@ -581,6 +590,8 @@ use m_alloc
         call realloc(namobs, numobs+nummovobs+capacity_)
         call realloc(smxobs, numobs+nummovobs+capacity_)
         call realloc(cmxobs, numobs+nummovobs+capacity_)
+        call realloc(locobs, numobs+nummovobs+capacity_)
+        call realloc(loc3obs,numobs+nummovobs+capacity_)
     end if
 
     ! Before adding new normal observation station:
@@ -593,6 +604,8 @@ use m_alloc
             namobs(i+1) = namobs(i)
             smxobs(i+1) = smxobs(i)
             cmxobs(i+1) = cmxobs(i)
+            locobs(i+1) = locobs(i)
+            loc3obs(i+1)= loc3obs(i)
         end do
         numobs = numobs+1
         inew   = numobs
@@ -608,11 +621,17 @@ use m_alloc
     kobs(inew)   = -999   ! Cell number is set elsewhere
     smxobs(inew) = -999d0 ! max waterlevel
     cmxobs(inew) = -999d0 ! max velocity mag.
+    locobs(inew) = loctype_
+    if (present(iobs3)) then
+       loc3obs(inew) = iobs3 ! mapping from global obs index to local *.ini obs
+    else
+       loc3obs(inew) = 0
+    end if
 
 end subroutine addObservation
 
 
-!> Adds observation points that are read from *.ini file
+!> Adds observation points that are read from *.ini file to the normal obs adm
 subroutine addObservation_from_ini(network, filename)
    use m_network
    use m_ObservationPoints
@@ -628,6 +647,7 @@ subroutine addObservation_from_ini(network, filename)
    type(t_ObservationPoint), pointer     :: pOPnt
    integer,              allocatable     :: branchIdx_tmp(:), ibrch2obs(:)
    double precision    , allocatable     :: Chainage_tmp(:), xx_tmp(:), yy_tmp(:)
+   integer                               :: loctype_
    
    
    nbrch = 0
@@ -640,11 +660,12 @@ subroutine addObservation_from_ini(network, filename)
    allocate(ibrch2obs(nobsini))
    
    do i=1, nobsini
-      if (network%obs%OPnt(i)%branchIdx > 0) then
+      pOPnt => network%obs%OPnt(i)
+      if (pOPnt%branchIdx > 0) then
          nbrch = nbrch + 1
-         branchIdx_tmp(nbrch) = network%obs%OPnt(i)%branchIdx
-         Chainage_tmp(nbrch) = network%obs%OPnt(i)%chainage
-         ibrch2obs(nbrch) = i
+         branchIdx_tmp(nbrch) = pOPnt%branchIdx
+         Chainage_tmp(nbrch)  = pOPnt%chainage
+         ibrch2obs(nbrch)     = i
       end if
    end do
          
@@ -666,7 +687,13 @@ subroutine addObservation_from_ini(network, filename)
    
    ! Step 2. add all obs from *.ini file
    do i =1, nobsini
-      call addObservation(network%obs%OPnt(i)%x, network%obs%OPnt(i)%y, network%obs%OPnt(i)%name)
+      pOPnt => network%obs%OPnt(i)
+      loctype_ = pOPnt%locationtype
+      if (loctype_ == 3) then ! obs which is defined by branchID and chainage, their locationtype has been set to 3
+         call addObservation(pOPnt%x, pOPnt%y, pOPnt%name, loctype = loctype_, iobs3 = i)
+      else
+         call addObservation(pOPnt%x, pOPnt%y, pOPnt%name, loctype = loctype_)
+      end if
    end do
    
     
@@ -737,6 +764,8 @@ use unstruc_channel_flow, only: network
        deallocate(namobs)
        deallocate(smxobs)
        deallocate(cmxobs)
+       deallocate(locobs)
+       deallocate(loc3obs)
     end if
     
     call dealloc(network%obs) ! deallocate obs (defined in *.ini file)
@@ -748,6 +777,9 @@ use unstruc_channel_flow, only: network
     allocate(namobs(capacity_))
     allocate(smxobs(capacity_))
     allocate(cmxobs(capacity_))
+    allocate(locobs(capacity_))
+    allocate(loc3obs(capacity_))
+
 
     kobs = -999
 
