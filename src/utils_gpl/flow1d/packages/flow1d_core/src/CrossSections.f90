@@ -116,14 +116,12 @@ module m_CrossSections
       module procedure deallocCrossSections
    end interface dealloc
 
-   integer, public, parameter :: CS_STOR_LOSS      =    1
-   integer, public, parameter :: CS_STOR_RESERVOIR =    0
-   integer, public, parameter :: CS_TABULATED      =    1
-   integer, public, parameter :: CS_CIRCLE         =    2
-   integer, public, parameter :: CS_EGG            =    3
-   integer, public, parameter :: CS_RECTANGLE      =    4 ! TODO, placeholder, someone forgot to check in?
-   integer, public, parameter :: CS_TRAPEZIUM      =    5
-   integer, public, parameter :: CS_YZ_PROF        =   10
+   integer, public, parameter :: CS_TABULATED      =    1 !< Tabulated type cross section definition
+   integer, public, parameter :: CS_CIRCLE         =    2 !< Circle type cross section definition
+   integer, public, parameter :: CS_EGG            =    3 !< Egg type cross section definition
+   integer, public, parameter :: CS_RECTANGLE      =    4 !< Rectangular type cross section definition
+   integer, public, parameter :: CS_TRAPEZIUM      =    5 !< Trapezium type cross section definition
+   integer, public, parameter :: CS_YZ_PROF        =   10 !< YZ type cross section definition
    integer, public, parameter :: CS_TYPE_NORMAL    =    1 !< Ordinary total area computation, with possible Preisman lock on top
    integer, public, parameter :: CS_TYPE_PREISMAN  =    2 !< Ordinary total area computation, with possible Preisman lock on top
    integer, public, parameter :: CS_TYPE_PLUS      =    3 !< Total area for only the expanding part of the cross section (Nested Newton method)
@@ -144,15 +142,15 @@ module m_CrossSections
    '            ',&
    '10:YZ       '/)
 
-   type  :: t_groundlayer
-      logical          :: used      = .false.
-      double precision :: thickness = 0.0d0
-      double precision :: area      = 0.0d0
-      double precision :: perimeter = 0.0d0
-      double precision :: width     = 0.0d0
+   type  :: t_groundlayer                               !< Derived type containing groundlayer data
+      logical          :: used      = .false.           !< Flag
+      double precision :: thickness = 0.0d0             !< Thickness of the ground layer
+      double precision :: area      = 0.0d0             !< area occupied by the ground layer
+      double precision :: perimeter = 0.0d0             !< wet perimeter occupied by the groundlayer
+      double precision :: width     = 0.0d0             !< width at the top of the groundlayer
    end type t_groundlayer
 
-   type, public  :: t_summerdike
+   type, public  :: t_summerdike                 !< Derived type containing summerdike data
       double precision :: crestLevel = 0.0d0     !< Crest height of the summerdike
       double precision :: baseLevel  = 0.0d0     !< Base level of the summerdike
       double precision :: flowArea   = 0.0d0     !< Flow area of the summerdike
@@ -161,12 +159,9 @@ module m_CrossSections
 
    !> Derived type for defining one cross-section type
    type, public :: t_CSType
-        character(IdLen)            :: id                      !< unique identification
-         
-        integer                     :: crossType        ! Type of cross section
-                                                       
-       integer                      :: levelsCount = 0  !     number of levels in tabulated cross section
-       integer                      :: reference
+       character(IdLen)             :: id                !< unique identification
+       integer                      :: crossType         !< Type of cross section
+       integer                      :: levelsCount = 0  !< number of levels in tabulated cross section
 
        !*** data for tabulated cross sections ***
        double precision, allocatable, dimension(:)   :: height       !< Specified height of the cross-section
@@ -186,73 +181,73 @@ module m_CrossSections
        
        !--- additional data for river profiles
        double precision                         :: plains(3) = 0.0d0  !< 1: main channel, 2: floopplain 1, 3: floodplain 2
-       integer                                  :: plainsLocation(3)
+       integer                                  :: plainsLocation(3)  !< locations (widths) of the main channel and floodplains
        !--- information for Summerdikes
-       type(t_summerdike),pointer               :: summerdike => null()
+       type(t_summerdike),pointer               :: summerdike => null()   !< pointer to the summerdike data
 
        !*** data for yz cross sections
-       double precision, allocatable            :: y(:)       !< tranversal co-ordinate
-       double precision, allocatable            :: z(:)       !< z-co-ordinate
-       integer                                  :: storLevelsCount = 0 !< Number of actual storage levels
-       double precision, allocatable            :: storLevels(:)       !< Storage levels
-       double precision, allocatable            :: YZstorage(:)        !< Storage levels
-       integer                                  :: storageType     = 0 !< Storage type (default no storage level)
+       double precision, allocatable            :: y(:)                 !< tranversal co-ordinate
+       double precision, allocatable            :: z(:)                 !< z-co-ordinate
+       integer                                  :: storLevelsCount = 0  !< Number of actual storage levels
+       double precision, allocatable            :: storLevels(:)        !< Storage levels
+       double precision, allocatable            :: YZstorage(:)         !< Storage levels
+       integer                                  :: storageType     = 0  !< Storage type (default no storage level)
 
        !** Circle and egg profile data
-       double precision                         :: diameter
+       double precision                         :: diameter             !< diameter of a circle type or egg type profile
 
        !*** ground layer data
-       type(t_groundlayer),pointer              :: groundlayer => null()
+       type(t_groundlayer),pointer              :: groundlayer => null()      !< pointer to groundlayer data
        
        ! Friction Data not needed in Cache, already processed into Cross-Sections, which are cached
-       integer                                  :: frictionSectionsCount = 0 !< Number of actual friction sections
-       character(IdLen), allocatable            :: frictionSectionID(:)      !< Friction Section Identification
-       double precision, allocatable            :: frictionSectionFrom(:)    !<
-       double precision, allocatable            :: frictionSectionTo(:)      !<
+       integer                                  :: frictionSectionsCount = 0  !< Number of actual friction sections
+       character(IdLen), allocatable            :: frictionSectionID(:)       !< Friction Section Identification
+       double precision, allocatable            :: frictionSectionFrom(:)     !< Start point of friction section
+       double precision, allocatable            :: frictionSectionTo(:)       !< End point of friction section
 
    end type t_CSType
 
    !> Derived type to store the cross-section definition, grouped according to the types
    type, public :: t_CSDefinitionSet
-      integer                                   :: size    = 0    !< Size of the cross-section set
+      integer                                   :: size    = 0     !< Size of the cross-section set
       integer                                   :: growsBy = 2000  !< Increment for the cross-section type
-      integer                                   :: count   = 0    !< Actual number of cross-sections
-      type(t_CSType), pointer, dimension(:)     :: CS             !< Cross-section derived type
-      type(t_hashlist)                          :: hashlist       !< hash table for searching cross section definition on id
+      integer                                   :: count   = 0     !< Actual number of cross-sections
+      type(t_CSType), pointer, dimension(:)     :: CS              !< Cross-section derived type
+      type(t_hashlist)                          :: hashlist        !< hash table for searching cross section definition on id
    end type
 
    !---------------------------------------------------------
    !> Derived type to store the cross-section
    type, public :: t_CrossSection
 
-       character (len=IdLen)        :: csid              !< User-defined ID of this crossection
-       integer                      :: crossIndx        !< Index to check on same cross-section
-                                                        !! To Prevent unecessary interpolations.
-       logical                      :: IsCopy = .false. !< Flag to determine if Cross-Section is a copy
+       character (len=IdLen)        :: csid                 !< User-defined ID of this crossection
+       integer                      :: crossIndx            !< Index to check on same cross-section
+                                                            !! To Prevent unecessary interpolations.
+       logical                      :: IsCopy = .false.     !< Flag to determine if Cross-Section is a copy
        
-       integer                      :: crossType        !< Type of cross section
+       integer                      :: crossType            !< Type of cross section
 
-       integer                      :: branchid = -1    !< integer branch id
-       double precision             :: chainage         !< offset in meters along reach
-       double precision             :: bedLevel
-       double precision             :: shift
-       double precision             :: surfaceLevel
-       double precision             :: charHeight
-       double precision             :: charWidth
-       logical                      :: closed
-       integer                      :: bedFrictionType
-       double precision             :: bedFriction
-       integer                      :: groundFrictionType
-       double precision             :: groundFriction
-       integer                      :: iTabDef           !< temporary item to save ireference number to cross section definition
-                                                         !! necessary for reallocation of arrays
+       integer                      :: branchid = -1        !< Integer branch id
+       double precision             :: chainage             !< Offset in meters along reach
+       double precision             :: bedLevel             !< Bed level of the cross section
+       double precision             :: shift                !< Bed level = reference level cross section definition + SHIFT
+       double precision             :: surfaceLevel         !< Highest level of cross section
+       double precision             :: charHeight           !< Characteristic height
+       double precision             :: charWidth            !< Characteristic width
+       logical                      :: closed               !< Flag indicates whether the cross section is closed
+       integer                      :: bedFrictionType      !< Type of bed friction
+       double precision             :: bedFriction          !< Bed friction parameter value
+       integer                      :: groundFrictionType   !< Type of ground friction
+       double precision             :: groundFriction       !< Ground friction parameter
+       integer                      :: iTabDef              !< Temporary item to save ireference number to cross section definition
+                                                            !! Necessary for reallocation of arrays
        type(t_CSType), pointer      :: tabDef => null()
        type(t_crsu), pointer        :: convTab => null()
        
        integer                                  :: frictionSectionsCount = 0 !< Number of actual friction sections
        character(IdLen), allocatable            :: frictionSectionID(:)      !< Friction Section Identification
-       double precision, allocatable            :: frictionSectionFrom(:)    !<
-       double precision, allocatable            :: frictionSectionTo(:)      !<
+       double precision, allocatable            :: frictionSectionFrom(:)    !< Start point of friction section
+       double precision, allocatable            :: frictionSectionTo(:)      !< End point of friction section
        integer, allocatable                     :: frictionTypePos(:)        !< Friction type for positive flow direction
        double precision, allocatable            :: frictionValuePos(:)       !< Friction value for positive flow direction
        integer, allocatable                     :: frictionTypeNeg(:)        !< Friction type for negative flow direction
@@ -262,12 +257,12 @@ module m_CrossSections
 
    !> Derived type to store the cross-section set
    type, public :: t_CrossSectionSet
-      integer                                                :: maxNumberOfConnections=0 ! maximum nr of connections to a node
-      integer                                                :: Size = 0      !< Actual size of cross-section set
-      integer                                                :: growsBy = 2000 !< Increment for cross-section set
-      integer                                                :: Count= 0      !< Actual number of cross-section sets
-      type(t_CrossSection), pointer, dimension(:)            :: cross         !< Current cross-section
-      integer, pointer, dimension(:)                         :: CrossSectionIndex =>null() !< When sorting cross sections, the index of structure related cross sections must be reindexed.
+      integer                                                :: maxNumberOfConnections=0  !< maximum nr of connections to a node
+      integer                                                :: Size = 0                  !< Actual size of cross-section set
+      integer                                                :: growsBy = 2000            !< Increment for cross-section set
+      integer                                                :: Count= 0                  !< Actual number of cross-section sets
+      type(t_CrossSection), pointer, dimension(:)            :: cross                     !< Current cross-section
+      integer, pointer, dimension(:)                         :: CrossSectionIndex =>null()!< When sorting cross sections, the index of structure related cross sections must be reindexed.
    end type t_CrossSectionSet
 
 contains
@@ -278,7 +273,7 @@ subroutine deallocCrossDefinition(CrossDef)
 
    implicit none
    ! Input/output parameters
-   type(t_CSType)                            :: CrossDef !< Current cross-section definition
+   type(t_CSType), intent(inout)                            :: CrossDef !< Current cross-section definition
 
    ! Local variables
    if (allocated(CrossDef%height))                   deallocate(CrossDef%height)
@@ -313,7 +308,7 @@ subroutine deallocCSDefinitions(CSdef)
 
    implicit none
    ! Input/output parameters
-   type(t_CSDefinitionSet)   :: CSdef !< Cross-section definition set
+   type(t_CSDefinitionSet), intent(inout)   :: CSdef !< Cross-section definition set
 
    ! Local variables
    integer length, i
@@ -337,8 +332,8 @@ end subroutine deallocCSDefinitions
 !> Increase the memory used by a cross-section definition
 subroutine reallocCSDefinitionsSize(CSDef,growsBy)
    implicit none
-   type(t_CSDefinitionSet)   :: CSdef !< Current cross-section definition
-   integer, intent(in)       :: growsBy
+   type(t_CSDefinitionSet), intent(inout)    :: CSdef    !< Current cross-section definition
+   integer                , intent(in)       :: growsBy  !< Increment for extending array size
    integer                   :: old_growsBy
    old_growsBy = CSdef%growsBy
    CSdef%growsBy = growsBy
@@ -354,11 +349,11 @@ subroutine reallocCSDefinitions(CSDef)
 
    implicit none
    ! Input/output parameters
-   type(t_CSDefinitionSet)   :: CSdef !< Current cross-section definition
-   integer                   :: ierr
+   type(t_CSDefinitionSet), intent(inout)   :: CSdef !< Current cross-section definition
+   
 
    ! Local variables
-   ! Local variables
+   integer                   :: ierr
    type(t_CSType), pointer, dimension(:)    :: oldDefs
 
    ! Program code
@@ -380,9 +375,10 @@ subroutine reallocCSDefinitions(CSDef)
    CSDef%Size = CSDef%Size+CSDef%growsBy
 end subroutine
 
+!> Retrieve the cross section type number by character string
 integer function GetCrossType(string)
 
-   character(len=*) :: string
+   character(len=*), intent(in) :: string   !< name of the cross section type    
 
    call str_lower(string)
 
@@ -422,9 +418,9 @@ integer function AddRoundCrossSectionDefinition(CSDefinitions, id, diameter, sha
 
    implicit none
    ! Input/output parameters
-   type(t_CSDefinitionSet), intent(inout) :: CSDefinitions
-   character(len=*), intent(in) :: id
-   double precision, intent(in)     :: diameter
+   type(t_CSDefinitionSet), intent(inout) :: CSDefinitions      !< cross section definition set
+   character(len=*), intent(in) :: id                           !< id of the cross section definition
+   double precision, intent(in)     :: diameter                 !< diameter of the cross section definition
    integer, intent(in)              :: shape                    !< shape can be CS_CIRCLE or CS_EGG
    logical, intent(in)              :: groundlayerUsed          !< flag indicating whether a ground layer is used
    double precision, intent(in)     :: groundLayer              !< Thickness of the groundlayer
@@ -560,16 +556,16 @@ integer function AddYZCrossSectionDefinition(CSDefinitions, id, Count, y, z, fri
 
    type(t_CSDefinitionSet) CSDefinitions
    character(len=*), intent(in) :: id
-   integer, intent(in)                        :: Count         !< Size of arrays: y and z
-   integer, intent(in)                        :: frictionCount !< Number of friction settings
-   integer, intent(in)                        :: levelsCount   !< Number of levels
-   double precision, intent(in)               :: y(count)      !< transversal y-co-ordinate
-   double precision, intent(in)               :: z(count)      !< level z-co-ordinate
-   character(IdLen), intent(in)               :: frictionSectionID(frictionCount)
-   double precision, intent(in)               :: frictionSectionFrom(frictionCount)
-   double precision, intent(in)               :: frictionSectionTo(frictionCount)
-   double precision, intent(in)               :: storageLevels(levelsCount)      !< Storage levels
-   double precision, intent(in)               :: storage(levelsCount)            !< Storage values
+   integer, intent(in)                        :: Count                              !< Size of arrays: y and z
+   integer, intent(in)                        :: frictionCount                      !< Number of friction settings
+   integer, intent(in)                        :: levelsCount                        !< Number of levels
+   double precision, intent(in)               :: y(count)                           !< transversal y-co-ordinate
+   double precision, intent(in)               :: z(count)                           !< level z-co-ordinate
+   character(IdLen), intent(in)               :: frictionSectionID(frictionCount)   !< Friction Section Identification
+   double precision, intent(in)               :: frictionSectionFrom(frictionCount) !< Start point of friction section
+   double precision, intent(in)               :: frictionSectionTo(frictionCount)   !< End point of friction section
+   double precision, intent(in)               :: storageLevels(levelsCount)         !< Storage levels
+   double precision, intent(in)               :: storage(levelsCount)               !< Storage values
 
    integer                                    :: i
 
@@ -623,7 +619,7 @@ subroutine deallocCrossSection(cross)
 
    implicit none
    ! Input/output parameters
-   type(t_CrossSection) :: cross !< Current cross-section
+   type(t_CrossSection), intent(inout) :: cross !< Current cross-section
 
    ! Local variables
 
@@ -660,7 +656,7 @@ subroutine deallocCrossSections(crs)
 
    implicit none
    ! Input/output parameters
-   type(t_CrossSectionSet) :: crs !< Current cross-section set
+   type(t_CrossSectionSet), intent(inout) :: crs !< Current cross-section set
 
    ! Local variables
    integer i
@@ -726,14 +722,14 @@ end subroutine
 integer function  AddCrossSectionByVariables(crs, CSDef, branchid, chainage, iref, bedLevel, bedFrictionType, &
                   bedFriction, groundFrictionType, groundFriction)
 
-   type(t_CrossSectionSet)          :: crs       !< Cross-section set
-   type(t_CSDefinitionSet)          :: CSDef     !< Cross-section definition set
-   integer, intent(in)              :: branchid  !< Reach id (integer)
-   double precision, intent(in)     :: chainage  !< chainage on the reach
-   integer, intent(in)              :: iref      !< Current cross-section
-   double precision, intent(in)     :: bedLevel
-   integer, intent(in)              :: bedFrictionType !< bed friction type
-   double precision, intent(in)     :: bedFriction     !< Bed friction value
+   type(t_CrossSectionSet)          :: crs                !< Cross-section set
+   type(t_CSDefinitionSet)          :: CSDef              !< Cross-section definition set
+   integer, intent(in)              :: branchid           !< Reach id (integer)
+   double precision, intent(in)     :: chainage           !< chainage on the reach
+   integer, intent(in)              :: iref               !< Current cross-section
+   double precision, intent(in)     :: bedLevel           !< bed level of the cross section
+   integer, intent(in)              :: bedFrictionType    !< bed friction type
+   double precision, intent(in)     :: bedFriction        !< Bed friction value
    integer, intent(in)              :: groundFrictionType !< Groundlayer fricton type
    double precision, intent(in)     :: groundFriction     !< Groundlayer friction value
 
@@ -770,10 +766,11 @@ integer function  AddCrossSectionByVariables(crs, CSDef, branchid, chainage, ire
    AddCrossSectionByVariables = i
    
 end function  AddCrossSectionByVariables
-                  
+                
+!> set additional cross section parameters  
 subroutine SetParsCross(CrossDef, cross)
-   type(t_CStype), intent(in)          :: CrossDef
-   type(t_CrossSection), intent(inout) :: Cross
+   type(t_CStype), intent(in)          :: CrossDef        !< cross section definition
+   type(t_CrossSection), intent(inout) :: Cross           !< cross section 
       
    double precision                 :: surfLevel
    double precision                 :: bedlevel
@@ -830,11 +827,11 @@ subroutine SetParsCross(CrossDef, cross)
    endif                        
 end subroutine SetParsCross
    
-
+!> Set the groundlayer data
 subroutine setGroundLayerData(crossDef, thickness)
 
    type(t_CStype), pointer, intent(inout) :: crossDef
-   double precision                       :: thickness
+   double precision       , intent(in   ) :: thickness
       
    double precision                    :: area 
    double precision                    :: perimeter
@@ -877,6 +874,7 @@ integer function AddCrossSectionByCross(crs, cross, branchid, chainage)
    type(t_CrossSection), intent(in) :: cross     !< Cross-section
    integer, intent(in)              :: branchid  !< Reach id
    double precision, intent(in)     :: chainage  !< chainage on the reach
+   
    integer                          :: i
 
    crs%count = crs%count+1
@@ -953,92 +951,6 @@ subroutine interpolateWidths(height1, width1, levelsCount1, height2, width2, lev
    enddo
 
 end subroutine interpolateWidths
-
-!> perform a powerlaw interpolation between  val1 and val2 and power p
-!! using the formula: result = ((1-f)*(val1)**p+f*(val2)**p)**1/p
-double precision function interpolateScalarP(val1, val2, f, p)
-   ! modules
-
-   implicit none
-   ! variables
-   double precision, intent(in)    :: val1
-   double precision, intent(in)    :: val2
-   double precision, intent(in)    :: f      !< weight
-   double precision, intent(in)    :: p      !< power
-   ! local variables
-
-   !program code
-   interpolateScalarP = ((1.0d0 - f) * (val1)**p + f * (val2)**p)**(1.0d0 / p)
-end function interpolateScalarP
-
-!> perform a linear interpolation between  val1 and val2
-!! using the formula: result = (1-f)*val1+f*val2
-double precision function interpolateScalar(val1, val2, f)
-   ! modules
-
-   implicit none
-   ! variables
-   double precision, intent(in)    :: val1
-   double precision, intent(in)    :: val2
-   double precision, intent(in)    :: f
-   ! local variables
-
-   !program code
-   interpolateScalar = (1.0d0 - f)*val1 + f*val2
-end function interpolateScalar
-
-subroutine mergeLevels(heightin1, levelsCount1, heightin2, levelsCount2, height, levelsCount, height1, height2, SetbedLevelToZero)
-   ! modules
-
-   implicit none
-   ! variables
-   integer                                            :: levelsCount1
-   integer                                            :: levelsCount2
-   double precision, dimension(levelsCount1)          :: heightin1
-   double precision, dimension(levelsCount2)          :: heightin2
-   double precision, allocatable, dimension(:)        :: height
-   integer                                            :: levelsCount
-   double precision, allocatable, dimension(:)        :: height1
-   double precision, allocatable, dimension(:)        :: height2
-   logical, optional                                  :: SetbedLevelToZero
-
-   ! local variables
-   integer           :: i1
-   integer           :: i2
-   double precision  :: offset1
-   double precision  :: offset2
-   !program code
-   allocate(height(levelscount1+levelscount2))
-   allocate(height1(levelscount1+1))
-   allocate(height2(levelscount2+1))
-
-   ! Set bedLevel at 0
-   offset1 = heightin1(1)
-   offset2 = heightin2(1)
-   if (present(SetbedLevelToZero)) then
-      if (.not. SetbedLevelToZero) then
-         offset1 = 0.0
-         offset2 = 0.0
-      endif
-   endif
-
-   do i1 = 1, levelscount1
-      height(i1)  = heightin1(i1) - offset1
-      height1(i1) = heightin1(i1) - offset1
-   enddo
-   do i2 = 1, levelscount2
-      height(levelsCount1+i2) = heightin2(i2) - offset2
-      height2(i2)            = heightin2(i2) - offset2
-   enddo
-
-   levelsCount = levelscount1+levelscount2
-
-   call regulatehlv(height, levelscount)
-
-   height1(levelsCount1+1) = max(height1(levelsCount1), height2(levelsCount2)+1)
-   height2(levelsCount2+1) = max(height1(levelsCount1), height2(levelsCount2)+1)
-
-end subroutine mergeLevels
 
 !> this subroutine uses the branchOrders from the input to add extra cross sections  \n
 !! e.g assume a model network, where * represents a gridpoint, C represents a cross section, # represents a connection node \n
@@ -1160,9 +1072,10 @@ subroutine useBranchOrdersCrs(crs, brs)
 
 end subroutine useBranchOrdersCrs
 
+!> returns the order number of a given branch index
 integer function getOrderNumber(brs, ibr)
    type(t_branchSet), intent(in)    :: brs       !< Set of reaches
-   integer, intent(in)              :: ibr
+   integer, intent(in)              :: ibr       !< branch index
 
    if (ibr <= brs%count) then
       getOrderNumber = brs%branch(ibr)%orderNumber
@@ -1182,13 +1095,13 @@ recursive subroutine findNeighbourAndAddCrossSection(brs, crs, branchid, cross, 
 
    ! variables
    integer  :: orderNumberCount
-   type(t_CrossSectionSet)          :: crs       !< Current cross-section set
-   type(t_branchSet)                :: brs       !< Set of reaches
-   integer                          :: branchid    !< branch for which a neighbour is requested
-   type(t_CrossSection)             :: cross     !< cross section
-   double precision                 :: offset    !< chainage of cross section on branch
-   logical                          :: beginNode !< indicates whether the begin or end node is to be used of the branch
-   integer, dimension(:,:)          :: orderNumber       !< first index contains orderNumber, second contains start position for this ordernumber
+   type(t_CrossSectionSet), intent(inout)          :: crs            !< Current cross-section set
+   type(t_branchSet)      , intent(in   )          :: brs            !< Set of reaches
+   integer                , intent(in   )          :: branchid       !< branch for which a neighbour is requested
+   type(t_CrossSection)   , intent(in   )          :: cross          !< cross section
+   double precision       , intent(  out)          :: offset         !< chainage of cross section on branch
+   logical                , intent(in   )          :: beginNode      !< indicates whether the begin or end node is to be used of the branch
+   integer, dimension(:,:), intent(in   )          :: orderNumber    !< first index contains orderNumber, second contains start position for this ordernumber
 
    ! local variables
    integer                          :: nodeIndex
@@ -1367,88 +1280,6 @@ subroutine GetCSParsFlowInterpolate(line2cross, cross, dpt, flowArea, wetPerimet
    endif
 
 end subroutine GetCSParsFlowInterpolate
-
-subroutine interpolateSummerDike(cross1, cross2, f, dpt, sdArea, sdWidth, doFlow, hysteresis)
-
-   use m_GlobalParameters
-   
-   implicit none
-
-   type (t_CrossSection), intent(in)     :: cross1         !< cross section
-   type (t_CrossSection), intent(in)     :: cross2         !< cross section
-   double precision, intent(in)          :: f              !< cross = (1-f)*cross1 + f*cross2
-   double precision, intent(in)          :: dpt            !< water depth at cross section
-   double precision, intent(out)         :: sdArea         !< summer dike area
-   double precision, intent(out)         :: sdWidth        !< summer dike width
-   logical, intent(in)                   :: doFlow         !< flag, true = flow, false = total
-   logical, intent(inout)                :: hysteresis     !< Flag for hysteresis of summerdike
-
-   type(t_summerdike), pointer           :: summerdike
-   type(t_summerdike), pointer           :: summerdike1
-   type(t_summerdike), pointer           :: summerdike2
-   double precision                      :: shift1
-   double precision                      :: shift2
-   double precision                      :: wlev
-
-   if (.not. anySummerDike) then
-      sdArea  = 0.0d0
-      sdWidth = 0.0d0
-      return
-   endif
-   
-   allocate(summerdike)
-   summerdike1 => cross1%tabDef%summerdike
-   summerdike2 => cross2%tabDef%summerdike
-            
-   shift1 = cross1%shift
-   shift2 = cross2%shift
-            
-   if (associated(summerdike1) .and. associated(summerdike2)) then
-      summerdike%crestLevel = (1.0d0 - f) * (summerdike1%crestLevel + shift1) + f * (summerdike2%crestLevel + shift2)
-      summerdike%baseLevel  = (1.0d0 - f) * (summerdike1%baseLevel + shift1)  + f * (summerdike2%baseLevel + shift2)
-      summerdike%flowArea   = (1.0d0 - f) * summerdike1%flowArea   + f * summerdike2%flowArea
-      summerdike%totalArea  = (1.0d0 - f) * summerdike1%totalArea   + f * summerdike2%totalArea
-   elseif (associated(summerdike1) .and. .not. associated(summerdike2)) then
-      summerdike%crestLevel = (1.0d0 - f) * (summerdike1%crestLevel + shift1) + f * cross2%bedlevel
-      summerdike%baseLevel  = (1.0d0 - f) * (summerdike1%baseLevel + shift1)  + f * cross2%bedlevel
-      summerdike%flowArea   = (1.0d0 - f) * summerdike1%flowArea
-      summerdike%totalArea  = (1.0d0 - f) * summerdike1%totalArea
-   elseif (.not. associated(summerdike1) .and. associated(summerdike2)) then
-      summerdike%crestLevel = (1.0d0 - f) * cross1%bedlevel + f * (summerdike2%crestLevel + shift2)
-      summerdike%baseLevel  = (1.0d0 - f) * cross1%bedlevel + f * (summerdike2%baseLevel + shift2)
-      summerdike%flowArea   = f * summerdike2%flowArea
-      summerdike%totalArea  = f * summerdike2%totalArea
-   else
-      ! Not any Summer Dike Data
-      deallocate(summerdike)
-      summerdike => null()
-   endif
-
-   if (associated(summerdike)) then
-            
-      wlev = getBobInterpolate(cross1, cross2, f) + dpt
-         
-      if (doFlow) then
-      
-         ! Get Summer Dike Flow Data
-         call GetSummerDikeFlow(summerdike, wlev, sdArea, sdWidth)
-      
-      else
-      
-         ! Get Summer Dike Total Data
-         call GetSummerDikeTotal(summerdike, wlev, sdArea, sdWidth, hysteresis)
-   
-      endif
-         
-      deallocate(summerdike)
-      summerdike => null()
-            
-   else
-      sdArea  = 0.0d0
-      sdWidth = 0.0d0
-   endif
-
-end subroutine interpolateSummerDike
 
 !> Get flow area, wet perimeter and flow width at cross section location
 subroutine GetCSParsFlowCross(cross, dpt, flowArea, wetPerimeter, flowWidth, af_sub, perim_sub, doSummerDike)   
@@ -1666,23 +1497,24 @@ subroutine GetCSParsTotalCross(cross, dpt, totalArea, totalWidth, calculationOpt
 
 end subroutine GetCSParsTotalCross
 
+!> Get area, width and perimeter for a tabulated profile
 subroutine TabulatedProfile(dpt, cross, doFlow, getSummerDikes, area, width, perimeter, af_sub, perim_sub, calculationOption, hysteresis)
 
    use m_GlobalParameters
 
    implicit none
 
-   double precision, intent(in)      :: dpt
-   type (t_CrossSection), intent(in) :: cross           
-   logical, intent(in)               :: doFlow  !> True: Flow, otherwise Total
-   logical, intent(in)               :: getSummerDikes                           
-   double precision, intent(out)     :: width
-   double precision, intent(out)     :: area
-   double precision, intent(out)     :: perimeter
-   double precision, intent(out)     :: af_sub(3)
-   double precision, intent(out)     :: perim_sub(3)
-   integer, intent(in)               :: calculationOption 
-   logical, intent(inout)            :: hysteresis     !< Flag for hysteresis of summerdike
+   double precision, intent(in)      :: dpt                 !< Water depth at cross section location
+   type (t_CrossSection), intent(in) :: cross               !< Cross section
+   logical, intent(in)               :: doFlow              !< True: Flow, otherwise Total
+   logical, intent(in)               :: getSummerDikes      !< Use summerdike data
+   double precision, intent(out)     :: width               !< Width at water surface
+   double precision, intent(out)     :: area                !< Wet area
+   double precision, intent(out)     :: perimeter           !< Wet perimeter
+   double precision, intent(out)     :: af_sub(3)           !< Wet area, split up to main, floodlain1 and floodplain2
+   double precision, intent(out)     :: perim_sub(3)        !< Wet perimeter, split up to main, floodlain1 and floodplain2
+   integer, intent(in)               :: calculationOption   !< Defines the calculation option for closed profiles: Preisman, Plus or min the latter two are used for Nested Newton
+   logical, intent(inout)            :: hysteresis          !< Flag for hysteresis of summerdike
 
    ! local parameters
    type(t_CSType), pointer           :: crossDef
@@ -1740,21 +1572,22 @@ subroutine TabulatedProfile(dpt, cross, doFlow, getSummerDikes, area, width, per
    endif
 end subroutine TabulatedProfile
 
+!> Get area, width and perimeter for a tabulated profile definition
 subroutine GetTabSizesFromTables(dpt, pCSD, doFlow, area, width, perimeter, af_sub, perim_sub, calculationOption)
 
    use m_GlobalParameters
 
    implicit none
 
-   double precision, intent(in)                 :: dpt
-   type (t_CSType), pointer, intent(in)         :: pCSD           
-   logical, intent(in)                          :: doFlow  !> True: Flow, otherwise Total
-   double precision, intent(out)                :: width
-   double precision, intent(out)                :: area
-   double precision, intent(out)                :: perimeter
-   double precision, intent(out)                :: af_sub(3)
-   double precision, intent(out)                :: perim_sub(3)
-   integer, intent(in)                          :: calculationOption 
+   double precision, intent(in)                 :: dpt                  !< Water depth at cross section location
+   type (t_CSType), pointer, intent(in)         :: pCSD                 !< Cross section definition
+   logical, intent(in)                          :: doFlow               !< True: Flow, otherwise Total
+   double precision, intent(out)                :: width                !< Width at water surface
+   double precision, intent(out)                :: area                 !< Wet area
+   double precision, intent(out)                :: perimeter            !< Wet perimeter
+   double precision, intent(out)                :: af_sub(3)            !< Wet area, split up to main, floodlain1 and floodplain2
+   double precision, intent(out)                :: perim_sub(3)         !< Wet perimeter, split up to main, floodlain1 and floodplain2
+   integer, intent(in)                          :: calculationOption    !< Defines the calculation option for closed profiles: Preisman, Plus or min the latter two are used for Nested Newton
 
    ! local parameters
    integer                                      :: levelsCount
@@ -1984,21 +1817,22 @@ subroutine GetTabSizesFromTables(dpt, pCSD, doFlow, area, width, perimeter, af_s
    
 end subroutine GetTabSizesFromTables
 
+!> Get area, width and perimeter from cross section definition
 subroutine GetTabulatedSizes(dpt, crossDef, doFlow, area, width, perimeter, af_sub, perim_sub, calculationOption)
 
    use m_GlobalParameters
 
    implicit none
 
-   double precision, intent(in)                 :: dpt
-   type (t_CSType), pointer, intent(in)         :: crossDef           
-   logical, intent(in)                          :: doFlow  !> True: Flow, otherwise Total
-   double precision, intent(out)                :: width
-   double precision, intent(out)                :: area
-   double precision, intent(out)                :: perimeter
-   double precision, intent(out)                :: af_sub(3)
-   double precision, intent(out)                :: perim_sub(3)
-   integer, intent(in)                          :: calculationOption 
+   double precision, intent(in)                 :: dpt                 !< Water depth at cross section location
+   type (t_CSType), pointer, intent(in)         :: crossDef            !< Cross section definition
+   logical, intent(in)                          :: doFlow              !< True: Flow, otherwise Total
+   double precision, intent(out)                :: width               !< Width at water surface
+   double precision, intent(out)                :: area                !< Wet area
+   double precision, intent(out)                :: perimeter           !< Wet perimeter
+   double precision, intent(out)                :: af_sub(3)           !< Wet area, split up to main, floodlain1 and floodplain2
+   double precision, intent(out)                :: perim_sub(3)        !< Wet perimeter, split up to main, floodlain1 and floodplain2
+   integer, intent(in)                          :: calculationOption   !< Defines the calculation option for closed profiles: Preisman, Plus or min the latter two are used for Nested Newton
 
    ! local parameters
    integer                                      :: levelsCount
@@ -2142,19 +1976,19 @@ subroutine GetTabulatedSizes(dpt, crossDef, doFlow, area, width, perimeter, af_s
    
 end subroutine GetTabulatedSizes
 
-
+!> Get area, width and perimeter from cross section definition
 subroutine GetTabFlowSectionFromTables(dpt, pCross, isector, area, width, perimeter)
 
    use m_GlobalParameters
 
    implicit none
 
-   double precision, intent(in)                 :: dpt
-   type (t_CrossSection), pointer, intent(in)   :: pCross         
-   integer, intent(in)                          :: isector
-   double precision, intent(out)                :: width
-   double precision, intent(out)                :: area
-   double precision, intent(out)                :: perimeter
+   double precision, intent(in)                 :: dpt          !< Water depth
+   type (t_CrossSection), pointer, intent(in)   :: pCross       !< Pointer to cross section
+   integer, intent(in)                          :: isector      !< Section number
+   double precision, intent(out)                :: width        !< Width at water surface
+   double precision, intent(out)                :: area         !< Wet area
+   double precision, intent(out)                :: perimeter    !< Wet perimeter
 
    ! local parameters
    integer                                      :: levelsCount
@@ -2275,14 +2109,15 @@ subroutine GetTabFlowSectionFromTables(dpt, pCross, isector, area, width, perime
    
 end subroutine GetTabFlowSectionFromTables
 
+!> Get flow parameters for summerdike
 subroutine GetSummerDikeFlow(summerdike, wlev, sdArea, sdWidth)
 
    implicit none
 
-   type(t_summerdike), pointer                  :: summerdike
-   double precision, intent(in)                 :: wlev
-   double precision, intent(out)                :: sdArea
-   double precision, intent(out)                :: sdWidth
+   type(t_summerdike), pointer, intent(in)      :: summerdike     !< summerdike data
+   double precision, intent(in)                 :: wlev           !< water level at cross section
+   double precision, intent(out)                :: sdArea         !< area for summerdike
+   double precision, intent(out)                :: sdWidth        !< width for summerdike
 
    ! Local Parameters
    double precision                             :: sdtr
@@ -2328,15 +2163,16 @@ subroutine GetSummerDikeFlow(summerdike, wlev, sdArea, sdWidth)
           
 end subroutine GetSummerDikeFlow
 
+!> Get total parameers for summerdike
 subroutine GetSummerDikeTotal(summerdike, wlev, sdArea, sdWidth, hysteresis)
 
    implicit none
 
-   type(t_summerdike), pointer                  :: summerdike
-   double precision, intent(in)                 :: wlev
-   double precision, intent(out)                :: sdArea
-   double precision, intent(out)                :: sdWidth
-   logical, intent(inout)                       :: hysteresis
+   type(t_summerdike), pointer                  :: summerdike      !< summerdike data
+   double precision, intent(in)                 :: wlev            !< water level at cross section
+   double precision, intent(out)                :: sdArea          !< area for summerdike
+   double precision, intent(out)                :: sdWidth         !< width for summerdike
+   logical, intent(inout)                       :: hysteresis      !< hysteresis parameter for rising or falling water
 
    ! Local Parameters
    double precision                             :: sdtr
@@ -2412,6 +2248,7 @@ subroutine GetSummerDikeTotal(summerdike, wlev, sdArea, sdWidth, hysteresis)
    
 end subroutine GetSummerDikeTotal
 
+!> calculate flow area and width for given trapezium
 subroutine trapez(dpt, d1, d2, w1, w2, area, width, perimeter)
    implicit none
 
@@ -2430,17 +2267,18 @@ subroutine trapez(dpt, d1, d2, w1, w2, area, width, perimeter)
    
 end subroutine trapez
 
+!> Calculate area, width and perimeter for a circle type cross section 
 subroutine CircleProfile(dpt, diameter, area, width, perimeter, calculationOption)
    use m_GlobalParameters
 
    implicit none
 
-   double precision, intent(in)        :: dpt
-   double precision, intent(in)        :: diameter
-   double precision, intent(out)       :: width
-   double precision, intent(out)       :: area
-   double precision, intent(out)       :: perimeter
-   integer, intent(in)                 :: calculationOption
+   double precision, intent(in)        :: dpt                !< water depth
+   double precision, intent(in)        :: diameter           !< diameter of circle
+   double precision, intent(out)       :: width              !< width at given water depth
+   double precision, intent(out)       :: area               !< wet area
+   double precision, intent(out)       :: perimeter          !< wet perimeter
+   integer, intent(in)                 :: calculationOption  !< calculation option for cross section
 
 !
 ! Local variables
@@ -2508,18 +2346,19 @@ subroutine CircleProfile(dpt, diameter, area, width, perimeter, calculationOptio
    
 end subroutine CircleProfile
 
+!> Calculate area, width and perimeter for a circle type cross section 
 subroutine EggProfile(dpt, diameter, area, width, perimeter, calculationOption)
    use m_GlobalParameters
    use precision_basics
 
    implicit none
 
-   double precision, intent(in)        :: dpt
-   double precision, intent(in)        :: diameter
-   double precision, intent(out)       :: width
-   double precision, intent(out)       :: area
-   double precision, intent(out)       :: perimeter
-   integer, intent(in)                 :: calculationOption
+   double precision, intent(in)        :: dpt                !< water depth
+   double precision, intent(in)        :: diameter           !< diameter of circle
+   double precision, intent(out)       :: width              !< width at given water depth
+   double precision, intent(out)       :: area               !< wet area
+   double precision, intent(out)       :: perimeter          !< wet perimeter
+   integer, intent(in)                 :: calculationOption  !< calculation option for cross section
 
    double precision                    :: r
    double precision                    :: dpt2
@@ -2590,20 +2429,21 @@ subroutine EggProfile(dpt, diameter, area, width, perimeter, calculationOption)
    
 end subroutine EggProfile
 
+!> Calculate area, width and perimeter for a circle type cross section 
 subroutine YZProfile(dpt, convtab, i012, area, width, perimeter, u1, cz, conv)
    use m_GlobalParameters
 
    implicit none
 
-   double precision, intent(in)              :: dpt
-   integer,          intent(in)              :: i012
-   type(t_crsu),     intent(inout)           :: convtab
-   double precision, intent(out)             :: width
-   double precision, intent(out)             :: area
-   double precision, intent(out)             :: perimeter
-   double precision, intent(in)   , optional :: u1
-   double precision, intent(inout), optional :: cz
-   double precision, intent(out),   optional :: conv
+   double precision, intent(in)              :: dpt            !< Water depth
+   integer,          intent(in)              :: i012           !< 0: use u point, 1: use water level point 1, 2: use water level point 2
+   type(t_crsu),     intent(inout)           :: convtab        !< Conveyance table
+   double precision, intent(out)             :: width          !< Width at given water depth
+   double precision, intent(out)             :: area           !< Wet area
+   double precision, intent(out)             :: perimeter      !< Wet perimeter
+   double precision, intent(in)   , optional :: u1             !< Flow velocity
+   double precision, intent(inout), optional :: cz             !< Chezy value, when a lumped definition would be used
+   double precision, intent(out),   optional :: conv           !< Calculated conveyance 
 
 ! locals
 integer            :: nr, i1, i2, i, japos
@@ -2768,6 +2608,7 @@ endif
 
 end subroutine YZProfile
 
+!> Generate conveyance table
 subroutine CalcConveyance(crs)
 
 use M_newcross
@@ -2778,7 +2619,8 @@ use M_newcross
    implicit none
 
    integer nc
-   type(t_CrossSection)    :: crs
+   type(t_CrossSection), intent(inout)    :: crs   !< cross section
+   
    type(t_crsu), pointer   :: convTab
    convtab=>null()
    nc = crs%tabDef%levelsCount
@@ -2791,6 +2633,7 @@ use M_newcross
 
 end subroutine CalcConveyance
 
+!> Get the highest level for the two cross sections and interpolate, using weighing factor F
 double precision function getHighest1dLevelInterpolate(c1, c2, f)
    type (t_CrossSection), intent(in)     :: c1      !< cross section definition
    type (t_CrossSection), intent(in)     :: c2      !< cross section definition
@@ -2805,6 +2648,7 @@ double precision function getHighest1dLevelInterpolate(c1, c2, f)
    
 end function getHighest1dLevelInterpolate
    
+!> Get the highest level for the cross section
 double precision function getHighest1dLevelSingle(cross)
 
    type (t_CrossSection), intent(in)     :: cross      !< cross section
@@ -2827,9 +2671,10 @@ double precision function getHighest1dLevelSingle(cross)
  
 end function getHighest1dLevelSingle
 
+!> set characteristic height and width of the cross section
 subroutine SetCharHeightWidth(cross)
 
-type(t_CrossSection), intent(inout)       :: cross
+type(t_CrossSection), intent(inout)       :: cross        !< Cross section
 
    ! Code
    select case(cross%crosstype)
@@ -2851,11 +2696,10 @@ type(t_CrossSection), intent(inout)       :: cross
    
 end subroutine SetCharHeightWidth
 
+!> Returns a Copy from the given CrossSection
 type(t_CrossSection) function CopyCross(CrossFrom)
 
-   ! Returns a Copy from the given CrossSection
-
-   type(t_CrossSection)      :: CrossFrom
+   type(t_CrossSection)      :: CrossFrom   !< Cross section
 
    CopyCross%crossType          = CrossFrom%crossType
    CopyCross%branchid           = CrossFrom%branchid
@@ -2883,17 +2727,14 @@ type(t_CrossSection) function CopyCross(CrossFrom)
       CopyCross%convTab = CopyCrossConv(CrossFrom%convTab)
    endif
 
-end function CopyCross
+   end function CopyCross
 
+!> Returns a Copy from the given CrossSection Definition
 type(t_CSType) function CopyCrossDef(CrossDefFrom)
 
-   ! Returns a Copy from the given CrossSection Definition
-   ! DEALLOCATE this Copy after Use!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-   type(t_CSType) :: CrossDefFrom
+   type(t_CSType) :: CrossDefFrom             !< cross section definition
    
    CopyCrossDef%crossType   = CrossDefFrom%crossType
-   CopyCrossDef%reference   = CrossDefFrom%reference
    CopyCrossDef%levelsCount = CrossDefFrom%levelsCount
 
    !*** data for tabulated cross sections ***
@@ -3001,12 +2842,12 @@ type(t_CSType) function CopyCrossDef(CrossDefFrom)
    CopyCrossDef%groundlayer%width     = CrossDefFrom%groundlayer%width
 end function CopyCrossDef
 
+!> Returns a Copy from the given CrossSection Conveyance
+!! DEALLOCATE this Copy after Use!!!!!!!!!!!!!!!!!!!!!!!!!!
 type(t_crsu) function CopyCrossConv(CrossConvFrom)
 
-   ! Returns a Copy from the given CrossSection Conveyance
-   ! DEALLOCATE this Copy after Use!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-   type(t_crsu) :: CrossConvFrom
+   type(t_crsu) :: CrossConvFrom        !< conveyance table
    
    CopyCrossConv%jopen      = CrossConvFrom%jopen
    CopyCrossConv%msec       = CrossConvFrom%msec
@@ -3089,6 +2930,7 @@ type(t_crsu) function CopyCrossConv(CrossConvFrom)
    
 end function CopyCrossConv
 
+!> Get the interpolated BOB between two cross sections  
 double precision function getBobInterpolate(cross1, cross2, factor)
 
    type (t_CrossSection), intent(in)     :: cross1       !< cross section definition
@@ -3104,6 +2946,7 @@ double precision function getBobInterpolate(cross1, cross2, factor)
    
 end function getBobInterpolate
    
+!> Get the BOB of a cross section
 double precision function getBobSingle(cross)
 
    type (t_CrossSection), intent(in)     :: cross      !< cross section
@@ -3118,9 +2961,9 @@ double precision function getBobSingle(cross)
         getBobSingle = getBobSingle + pCrossDef%groundlayer%thickness
      endif
    endif
-
 end function getBobSingle
 
+!> Get the groundlayer thickness
 double precision function getGroundLayer(cross)
 
    type (t_CrossSection), intent(in)     :: cross      !< cross section
@@ -3140,11 +2983,12 @@ double precision function getGroundLayer(cross)
 
 end function getGroundLayer
 
+!> Compute the critical depth for a cross section
 double precision function GetCriticalDepth(q, cross)
 
    implicit none
 
-   type(t_crosssection)            :: cross
+   type(t_crosssection)            :: cross !< cross section
    double precision, intent(in)    :: q     !< Discharge for which the critical depth should be computed.
    !
    ! Local variables
@@ -3198,9 +3042,10 @@ double precision function GetCriticalDepth(q, cross)
     
 end function GetCriticalDepth
 
+!> Update cross section definition administration
 subroutine admin_crs_def(definitions)
    
-   type(t_CSDefinitionSet), intent(inout), target :: Definitions
+   type(t_CSDefinitionSet), intent(inout), target :: Definitions      !< Cross section definitions
       
    integer i
    character(len=idlen), dimension(:), pointer :: ids
@@ -3217,9 +3062,10 @@ subroutine admin_crs_def(definitions)
       
 end subroutine admin_crs_def
  
+!> Fill the hashtable for the cross section definitions
 subroutine fill_hashtable_csdef(definitions)
    
-   type(t_CSDefinitionSet), intent(inout), target :: definitions
+   type(t_CSDefinitionSet), intent(inout), target :: definitions          !< Cross section definitions
       
    integer i
    character(len=idlen), dimension(:), pointer :: ids
@@ -3236,9 +3082,10 @@ subroutine fill_hashtable_csdef(definitions)
 
 end subroutine fill_hashtable_csdef
 
+!> Create predefined tables for speeding up the calculation of cross section data
 subroutine createTablesForTabulatedProfile(crossDef)
    
-   type(t_CStype), intent(inout) :: crossDef
+   type(t_CStype), intent(inout) :: crossDef       !< cross section definition
    
    ! local parameters
    integer                                           :: levelsCount
@@ -3353,11 +3200,12 @@ subroutine createTablesForTabulatedProfile(crossDef)
    
    end subroutine createTablesForTabulatedProfile
 
+   !> write cross section data to dia file
    subroutine write_crosssection_data(crs, brs)
       use M_newcross
    
-      type(t_CrossSectionSet), intent(in)    :: crs
-      type(t_branchSet), intent(in)          :: brs
+      type(t_CrossSectionSet), intent(in)    :: crs      !< cross sections
+      type(t_branchSet), intent(in)          :: brs      !< branches
       
       integer                       :: icross
       integer                       :: n

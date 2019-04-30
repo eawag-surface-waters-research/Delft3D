@@ -50,21 +50,14 @@ module m_readCrossSections
    public write_cross_section_cache
    public write_convtab
    public read_convtab
-   
-   type, public  :: t_Crosslist
-         integer              :: n
-         integer, allocatable              :: crossnr(:)
-         double precision, allocatable     :: chainage(:)
-   end type
-   
-   type(t_Crosslist), allocatable, public :: crs_by_brs(:)                ! keeping crosssections by branch ordered by chainage
 
    contains
     
+   !> Read the cross section location file
    subroutine readCrossSectionLocationFile(network, CrossSectionfile)
       use m_CrossSections
-      type(t_network), intent(inout) :: network
-      character(len=*), intent(in)   :: CrossSectionFile
+      type(t_network), intent(inout) :: network                 !< Network structure
+      character(len=*), intent(in)   :: CrossSectionFile        !< name of the crossection location input file 
 
       type(tree_data), pointer       :: md_ptr
       integer                        :: istat
@@ -203,65 +196,12 @@ module m_readCrossSections
       !call dumpCross(network%crs, 'dumpCrossFileRead')
       
    end subroutine readCrossSectionLocationFile
- 
-   double precision function dist_line(xp, yp, x1, y1, x2, y2, xn, yn) result(res)
 
-      ! distance from point (xp,yp)  to the line defined by (x1,y1) and (x2,y2)
-
-      ! Result .true. : project to the line is within the interval (x1,y1) and (x2,y2)
-      !                 xn, yn the projection points on the line defined by (x1,y1) and (x2,y2)
-      !        .false.: projection of (xp,yp) not on interval (x1,y1), (x2,y2)
-      !                 dis2 is squared distance to closest point of interval (x1,y1), (x2,y2)
-
-      double precision :: xp
-      double precision :: yp
-      double precision :: x1
-      double precision :: y1
-      double precision :: x2
-      double precision :: y2
-      double precision :: xn
-      double precision :: yn
-      double precision :: dis2
-
-      double precision :: eps
-      double precision :: r2
-      double precision :: lambda
-      double precision :: xp1
-      double precision :: yp1
-      double precision :: x21
-      double precision :: y21
-
-      eps = 1d-10
-
-      x21 = x2-x1
-      y21 = y2-y1
-      xp1 = xp-x1
-      yp1 = yp-y1
-      r2 = (x21*x21 + y21*y21)
-      if (r2 >= eps) then
-         lambda = (xp1*x21 + yp1*y21) / r2
-         if (0.0d0 <= lambda .and. lambda <= 1.0d0) then
-            xn = x1 + lambda*x21
-            yn = y1 + lambda*y21
-            dis2 = sqrt( (xn-x1)*(xn-x1) + (yn-y1)*(yn-y1) )
-         else if (lambda < 0.0d0) then
-            xn = x1
-            yn = y1
-            dis2 = 0.0d0
-         else if (lambda > 1.0d0) then
-            xn = x2
-            yn = y2
-            dis2 = sqrt(r2)
-         end if
-      end if
-      res = dis2
-      return
-   end function
-
+   !> Read the cross section definitions file
    subroutine readCrossSectionDefinitions(network, CrossSectionDefinitionFile)
 
-      type(t_network), target, intent(inout) :: network
-      character(len=*), intent(in)           :: CrossSectionDefinitionFile
+      type(t_network), target, intent(inout) :: network                          !< network structure
+      character(len=*), intent(in)           :: CrossSectionDefinitionFile       !< name of the cross section definition file
       
       type(tree_data), pointer  :: md_ptr
       integer :: istat
@@ -528,72 +468,13 @@ module m_readCrossSections
       
    end subroutine readCrossSectionDefinitions
 
-   logical function readRectangularCS(pCS, node_ptr)  
-      type(t_CSType), pointer, intent(inout) :: pCS
-      type(tree_data), pointer, intent(in)    :: node_ptr
-      
-      integer :: numlevels
-      logical :: success, closed
-      
-      numlevels = 0
-      readRectangularCS= .false.
-      call prop_get_logical(node_ptr, '', 'closed', closed, success)
-
-      if (closed) then
-         numlevels = 3
-      else
-         numlevels = 2
-      endif
-      
-      call realloc(pCS%height, numlevels)
-      call realloc(pCS%flowWidth, numlevels)
-      call realloc(pCS%totalWidth, numlevels)
-      
-      call realloc(pCS%af_sub, 3, numlevels)
-      call realloc(pCS%width_sub, 3, numlevels)
-      call realloc(pCS%perim_sub, 3, numlevels)
-      call realloc(pCS%flowArea, numlevels)
-      call realloc(pCS%wetPerimeter, numlevels)
-      call realloc(pCS%totalArea, numlevels)
-      call realloc(pCS%area_min, numlevels)
-      call realloc(pCS%width_min, numlevels)   
-   !
-      pCS%levelsCount = numlevels
-      
-      pCS%height(1) = 0.0d0
-      call prop_get_double(node_ptr, '', 'height', pCS%height(2), success)
-      if (success) call prop_get_double(node_ptr, '', 'width', pCS%flowWidth(1), success)
-      if (.not. success) then
-            call SetMessage(LEVEL_ERROR, 'Incorrect Cross-Section input for Cross-Section Definition id: '//trim(pCS%id)//'. Invalid levels/widths.')
-            return
-      endif
-      pCS%flowWidth(2) = pCS%flowWidth(1)
-      if (closed) then
-         pCS%height(3)    = pCS%height(2)+1d-5
-         pCS%flowWidth(3) = 0.0d0
-      endif
-      pCS%totalWidth = PCS%flowWidth
-      
-      ! Initialize groundlayer information of the newly added cross-section
-      allocate(pCS%groundlayer)
-      call prop_get_logical(node_ptr, '', 'groundlayerUsed', pCS%groundlayer%used, success)
-      if (pCS%groundlayer%used .and. success) then
-         anyGroundLayer = .true.
-         call prop_get_double(node_ptr, '', 'groundlayer', pCS%groundlayer%thickness, success)
-      else
-         pCS%groundlayer%thickness = 0.0d0
-      endif
-      
-      readRectangularCS =  .true.
-      
-   end function readRectangularCS
-   
+   !> read tabulated cross section definition from treedata input
    logical function readTabulatedCS(pCS, node_ptr)  
    
       use precision_basics
       
-      type(t_CSType), pointer, intent(inout) :: pCS
-      type(tree_data), pointer, intent(in)   :: node_ptr
+      type(t_CSType), pointer, intent(inout) :: pCS           !< cross section definition
+      type(tree_data), pointer, intent(in)   :: node_ptr      !< treedata node pointer to current cross section definition
       
       integer          :: numlevels, level_index_intersect
       logical          :: success
@@ -807,9 +688,10 @@ module m_readCrossSections
       
    end function readTabulatedCS
    
+   !> read YZ cross section from ini file
    logical function readYZCS(pCS, node_ptr) 
-      type(t_CSType), pointer, intent(inout) :: pCS
-      type(tree_data), pointer, intent(in)    :: node_ptr
+      type(t_CSType), pointer, intent(inout) :: pCS             !< cross section item
+      type(tree_data), pointer, intent(in)    :: node_ptr       !< treedata pointer to input for cross section
       
       integer :: numlevels
       integer :: frictionCount
@@ -896,10 +778,11 @@ module m_readCrossSections
       readYZCS = success
    end function readYZCS
    
+   !> write cross section definitions to cache file
    subroutine write_cross_section_definition_cache(ibin, defs)
    
-      type(t_CSDefinitionSet), intent(inout) :: defs
-      integer, intent(in) :: ibin
+      type(t_CSDefinitionSet), intent(inout) :: defs      !< cross section sdefinition
+      integer, intent(in) :: ibin                         !< binary cache file
       
       integer :: i, j, k
       type(t_CSType), pointer :: pdef
@@ -912,7 +795,6 @@ module m_readCrossSections
          write(ibin) pdef%id
          write(ibin) pdef%crossType
          write(ibin) pdef%levelsCount
-         write(ibin) pdef%reference
          write(ibin) pdef%closed
          write(ibin) pdef%diameter
          
@@ -964,9 +846,10 @@ module m_readCrossSections
       
    end subroutine write_cross_section_definition_cache
    
+   !> read cross section definitions from cache
    subroutine read_cross_section_definition_cache(ibin, defs)
-      type(t_CSDefinitionSet), intent(inout) :: defs
-      integer, intent(in) :: ibin
+      type(t_CSDefinitionSet), intent(inout) :: defs         !< cross section definitions
+      integer, intent(in)                    :: ibin         !< binary file
       
       integer                 :: i, j, k
       logical                 :: isAssociated
@@ -983,7 +866,6 @@ module m_readCrossSections
          read(ibin) pdef%id
          read(ibin) pdef%crossType
          read(ibin) pdef%levelsCount
-         read(ibin) pdef%reference
          read(ibin) pdef%closed
          read(ibin) pdef%diameter
          
@@ -1058,11 +940,12 @@ module m_readCrossSections
       call fill_hashtable(defs)
 
    end subroutine read_cross_section_definition_cache
-   
+   !
+   !> write cross section data from binary file
    subroutine write_cross_section_cache(ibin, crs)
    
-      type(t_CrossSectionSet), intent(inout) :: crs
-      integer, intent(in)                    :: ibin
+      type(t_CrossSectionSet), intent(inout) :: crs      !< cross sections 
+      integer, intent(in)                    :: ibin     !< binary file
       
       integer                       :: i
       integer                       :: j
@@ -1121,11 +1004,12 @@ module m_readCrossSections
       
    end subroutine write_cross_section_cache
    !
+   !< read cross section data from binary file
    subroutine read_cross_section_cache(ibin, crs, defs)
    
-      type(t_CSDefinitionSet), intent(inout) :: defs
-      type(t_CrossSectionSet), intent(inout) :: crs
-      integer, intent(in)                    :: ibin
+      type(t_CSDefinitionSet), intent(inout) :: defs      !< cross section definitions
+      type(t_CrossSectionSet), intent(inout) :: crs       !< cross sections 
+      integer, intent(in)                    :: ibin      !< binary file
       
       integer                                :: i
       integer                                :: j
@@ -1198,9 +1082,10 @@ module m_readCrossSections
       
    end subroutine read_cross_section_cache
 
+   !> Write conveyance table from cache file
    subroutine write_convtab(ibin, convtab)
-      integer, intent(in)      :: ibin
-      type(t_crsu), intent(in) :: convtab
+      integer, intent(in)      :: ibin           !< unit number of binary file
+      type(t_crsu), intent(in) :: convtab        !< conveyance table
       
       integer                  :: i, j, nhmax
       
@@ -1237,10 +1122,11 @@ module m_readCrossSections
       
    end subroutine write_convtab
    
+   !> Read conveyance table from cache file
    subroutine read_convtab(ibin, convtab)
    
-      integer, intent(in)         :: ibin
-      type(t_crsu), intent(inout) :: convtab
+      integer, intent(in)         :: ibin        !< unit number of binary file
+      type(t_crsu), intent(inout) :: convtab     !< conveyance table
       
       integer                     :: i, j, nhmax
       
@@ -1291,10 +1177,11 @@ module m_readCrossSections
 
    end subroutine read_convtab
    
+   !> write cross section definitions to file
    subroutine dumpCrossDefs(CSDEfs, fileName)
 
-      type(t_CSDefinitionSet), intent(inout) :: CSDEfs
-      character(len=*)                       :: fileName
+      type(t_CSDefinitionSet), intent(inout) :: CSDEfs            !< Set containing cross section definitions
+      character(len=*),        intent(in   ) :: fileName          !< name of the file
    
       type(t_CSType), pointer       :: pCSDef
       integer                       :: iDef
@@ -1310,7 +1197,6 @@ module m_readCrossSections
          write(dmpUnit, *) pCSDef%id
          write(dmpUnit, *) pCSDef%crossType
          write(dmpUnit, *) pCSDef%levelsCount
-         write(dmpUnit, *) pCSDef%reference
          write(dmpUnit, *) pCSDef%closed
          write(dmpUnit, *) pCSDef%diameter
          
@@ -1361,10 +1247,11 @@ module m_readCrossSections
       
    end subroutine dumpCrossDefs
    
+   !> Write all cross section information to file (not called in current solution)
    subroutine dumpCross(crs, fileName)
    
-      type(t_CrossSectionSet), intent(inout) :: crs
-      character(len=*)                       :: fileName
+      type(t_CrossSectionSet), intent(inout) :: crs              !< Cross section set
+      character(len=*),        intent(in   ) :: fileName         !< filename for writing output
       
       integer                       :: i
       type(t_CrossSection), pointer :: pcross
@@ -1424,10 +1311,11 @@ module m_readCrossSections
       
    end subroutine dumpCross
    
+   !> Subroutine for writing conveyance table to file (not called in current solution)
    subroutine dumpConvtab(dmpUnit, convtab)
    
-      integer, intent(in)      :: dmpUnit
-      type(t_crsu), intent(in) :: convtab
+      integer, intent(in)      :: dmpUnit        !< unit number of file
+      type(t_crsu), intent(in) :: convtab        !< conveyance table
       
       integer                  :: i, j, nhmax
       
@@ -1464,10 +1352,11 @@ module m_readCrossSections
       
    end subroutine dumpConvtab
    
+   !> Retrieve the roughness for given cross section
    subroutine getRougnessForProfile(network, crs)
    
-      type(t_network), intent(inout) :: network
-      type(t_CrossSection)           :: crs
+      type(t_network), intent(inout)      :: network      !< Network structure
+      type(t_CrossSection), intent(inout) :: crs          !< cross section
       
       integer                        :: i
       integer                        :: iRough
