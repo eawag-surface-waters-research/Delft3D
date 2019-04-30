@@ -1596,7 +1596,7 @@ module m_meteo
       type(tEcItem),       pointer :: itemPtrTgt     !< Item corresponding to targetItemId
       integer                      :: vectorMaxSrc   !< vectorMax for source item
       integer                      :: vectorMaxTgt   !< vectorMax for target item
-
+      character(len=1024)          :: msg
       success = .true.
       itemPtrSrc => ecSupportFindItem(ecInstancePtr, sourceItemId)
       itemPtrTgt => ecSupportFindItem(ecInstancePtr, targetItemId)
@@ -1604,10 +1604,16 @@ module m_meteo
       vectorMaxTgt = itemPtrTgt%quantityPtr%vectorMax
       if (vectorMaxSrc /= vectorMaxTgt) then
          success = .false.
-         call mess(LEVEL_WARN, "There was a problem with a source of type " // trim(itemPtrSrc%quantityPtr%name) &
+         select case (itemPtrTgt%quantityPtr%name)   
+         case ('discharge_salinity_temperature_sorsin')
+            write(msg,'(a,i0,a,i0,a)') 'Wrong number of data columns in a discharge_salinity_temperature_sorsin time series: ', vectorMaxTgt, ' requested, ',vectorMaxSrc,' provided.'
+            call mess(LEVEL_ERROR,  trim(msg)) 
+         case default
+            call mess(LEVEL_WARN, "There was a problem with a source of type " // trim(itemPtrSrc%quantityPtr%name) &
                     // " with source file '" // trim(itemPtrSrc%elementsetPtr%name) // "'")
-         call mess(LEVEL_ERROR, "Vector max differs for " // trim(itemPtrTgt%quantityPtr%name) &
+            call mess(LEVEL_ERROR, "Vector max differs for " // trim(itemPtrTgt%quantityPtr%name) &
                     // " values (resp. source, target): ", vectorMaxSrc, vectorMaxTgt)
+         end select
       endif
    end function checkVectorMax
    
