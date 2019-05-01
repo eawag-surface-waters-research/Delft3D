@@ -50,5 +50,5 @@
 		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
 		<File RelativePath=".\src\test_dflowfm_kernel_f.f90"/>
 		<File RelativePath=".\src\test_cross_section.f90"/>
-		<File RelativePath=".\src\test_read.f90"/></Filter></Files>
+		<File RelativePath=".\src\test_observations.f90"/></Filter></Files>
 	<Globals/></VisualStudioProject>

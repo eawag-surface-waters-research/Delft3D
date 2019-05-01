@@ -12,7 +12,7 @@ FMODULES += \
 #-------------------------------------------------------------------------------
 #Sources 
 test_dflowfm_kernel_SOURCES = \
-	test_read.f90 \
+	test_observations.f90 \
 	test_cross_section.f90 \
 	test_dflowfm_kernel_f.f90
 
