@@ -214,7 +214,7 @@ if [ ${ready} -eq 0 ]; then
          #
          # Move PRINT file to output file
          #
-         mv PRINT ${1}.prt
+         cp PRINT ${1}.prt
       fi
       if [ -f "${1}.src" ]; then
         cp source ${1}.src >/dev/null
