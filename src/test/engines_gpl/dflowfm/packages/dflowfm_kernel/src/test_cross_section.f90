@@ -23,6 +23,8 @@
 
 module test_cross_sections
     use ftnunit
+    use m_CrossSections
+
 
     implicit none
 
@@ -33,13 +35,15 @@ subroutine tests_cross_sections
     call test( test_rectangular_cross_section,  'Tests rectangular cross section' )
     call test( test_egg_type_cross_section,     'Tests egg type cross section' )
     call test( test_tabulated_cross_section,    'Tests tabulated cross section' )
-    call test( test_yz_cross_section,     'Tests yz type cross section' )
+    call test( test_yz_cross_section,           'Tests yz type cross section' )
 end subroutine tests_cross_sections
 
 subroutine test_circular_cross_section
    use m_network
+   use m_CrossSections
    
    type(t_network), target :: network
+   logical                 :: hysteresis
    character(len=256)      :: cross_section_definition_file
    integer, parameter      :: n_crs_def = 5
    integer                 :: i
@@ -85,13 +89,15 @@ subroutine test_circular_cross_section
    
    cross => network%crs%cross(1)
    eps = 1d-4
+   hysteresis = .false.
+   
    
    do i = 1, 21
       dpt = (i-1)*0.01
       call GetCSParsFlow(cross, dpt, flowArea, wetPerimeter, flowWidth)   
-      call GetCSParsTotal(cross, dpt, totalArea, totalWidth, CS_TYPE_PREISMAN)
-      call GetCSParsTotal(cross, dpt, plusArea,  plusWidth,  CS_TYPE_PLUS)
-      call GetCSParsTotal(cross, dpt, minArea,   minWidth,   CS_TYPE_MIN)
+      call GetCSParsTotal(cross, dpt, totalArea, totalWidth, CS_TYPE_PREISMAN, hysteresis)
+      call GetCSParsTotal(cross, dpt, plusArea,  plusWidth,  CS_TYPE_PLUS, hysteresis)
+      call GetCSParsTotal(cross, dpt, minArea,   minWidth,   CS_TYPE_MIN, hysteresis)
       call assert_comparable( flowArea  , refdata(1,i), eps, "flowArea   is not correct" )
       call assert_comparable( flowWidth , refdata(2,i), eps, "flowWidth  is not correct" )
       call assert_comparable( totalArea , refdata(3,i), eps, "totalArea  is not correct" )
@@ -110,6 +116,7 @@ subroutine test_rectangular_cross_section
    use m_network
    
    type(t_network), target :: network
+   logical                 :: hysteresis
    character(len=256)      :: cross_section_definition_file
    integer, parameter      :: n_crs_def = 3
    integer                 :: i
@@ -157,13 +164,14 @@ subroutine test_rectangular_cross_section
    call test_cross_section_helper(network, cross_section_definition_file)
    cross => network%crs%cross(2)
    eps = 1d-4
+   hysteresis = .false.
    
    do i = 1, 25
       dpt = (i-1)*0.01
       call GetCSParsFlow(cross, dpt, flowArea, wetPerimeter, flowWidth)   
-      call GetCSParsTotal(cross, dpt, totalArea, totalWidth, CS_TYPE_PREISMAN)
-      call GetCSParsTotal(cross, dpt, plusArea,  plusWidth,  CS_TYPE_PLUS)
-      call GetCSParsTotal(cross, dpt, minArea,   minWidth,   CS_TYPE_MIN)
+      call GetCSParsTotal(cross, dpt, totalArea, totalWidth, CS_TYPE_PREISMAN, hysteresis)
+      call GetCSParsTotal(cross, dpt, plusArea,  plusWidth,  CS_TYPE_PLUS, hysteresis)
+      call GetCSParsTotal(cross, dpt, minArea,   minWidth,   CS_TYPE_MIN, hysteresis)
       call assert_comparable( flowArea  , refdata(1,i), eps, "flowArea   is not correct" )
       call assert_comparable( flowWidth , refdata(2,i), eps, "flowWidth  is not correct" )
       call assert_comparable( totalArea , refdata(3,i), eps, "totalArea  is not correct" )
@@ -182,6 +190,7 @@ subroutine test_egg_type_cross_section
    use m_network
    
    type(t_network), target :: network
+   logical                 :: hysteresis
    character(len=256)      :: cross_section_definition_file
    integer, parameter      :: n_crs_def = 3
    integer                 :: i
@@ -229,13 +238,14 @@ subroutine test_egg_type_cross_section
    call test_cross_section_helper(network, cross_section_definition_file)
    cross => network%crs%cross(3)
    eps = 1d-4
+   hysteresis = .false.
    
    do i = 1, 25
       dpt = (i-1)*0.02
       call GetCSParsFlow(cross, dpt, flowArea, wetPerimeter, flowWidth)   
-      call GetCSParsTotal(cross, dpt, totalArea, totalWidth, CS_TYPE_PREISMAN)
-      call GetCSParsTotal(cross, dpt, plusArea,  plusWidth,  CS_TYPE_PLUS)
-      call GetCSParsTotal(cross, dpt, minArea,   minWidth,   CS_TYPE_MIN)
+      call GetCSParsTotal(cross, dpt, totalArea, totalWidth, CS_TYPE_PREISMAN, hysteresis)
+      call GetCSParsTotal(cross, dpt, plusArea,  plusWidth,  CS_TYPE_PLUS, hysteresis)
+      call GetCSParsTotal(cross, dpt, minArea,   minWidth,   CS_TYPE_MIN, hysteresis)
       call assert_comparable( flowArea  , refdata(1,i), eps, "flowArea   is not correct" )
       call assert_comparable( flowWidth , refdata(2,i), eps, "flowWidth  is not correct" )
       call assert_comparable( totalArea , refdata(3,i), eps, "totalArea  is not correct" )
@@ -254,6 +264,7 @@ subroutine test_tabulated_cross_section
    use m_network
    
    type(t_network), target :: network
+   logical                 :: hysteresis
    character(len=256)      :: cross_section_definition_file
    integer, parameter      :: n_crs_def = 3
    integer                 :: i
@@ -301,11 +312,12 @@ subroutine test_tabulated_cross_section
    call test_cross_section_helper(network, cross_section_definition_file)
    cross => network%crs%cross(4)
    eps = 1d-4
+   hysteresis = .false.
    
    do i = 1, 25
       dpt = (i-1)*0.4
       call GetCSParsFlow(cross, dpt, flowArea, wetPerimeter, flowWidth)   
-      call GetCSParsTotal(cross, dpt, totalArea, totalWidth, CS_TYPE_PREISMAN)
+      call GetCSParsTotal(cross, dpt, totalArea, totalWidth, CS_TYPE_PREISMAN, hysteresis)
       call assert_comparable( flowArea  , refdata(1,i), eps, "flowArea   is not correct" )
       call assert_comparable( flowWidth , refdata(2,i), eps, "flowWidth  is not correct" )
       call assert_comparable( totalArea , refdata(3,i), eps, "totalArea  is not correct" )
@@ -320,6 +332,7 @@ subroutine test_yz_cross_section
    use m_network
    
    type(t_network), target :: network
+   logical                 :: hysteresis
    character(len=256)      :: cross_section_definition_file
    integer, parameter      :: n_crs_def = 3
    integer                 :: i
@@ -384,11 +397,12 @@ subroutine test_yz_cross_section
    call CalcConveyance(cross)
 
    eps = 1d-4
+   hysteresis = .false.
    
    do i = 1, 25
       dpt = (i-1)*0.4
       call GetCSParsFlow(cross, dpt, flowArea, wetPerimeter, flowWidth)   
-      call GetCSParsTotal(cross, dpt, totalArea, totalWidth, CS_TYPE_PREISMAN)
+      call GetCSParsTotal(cross, dpt, totalArea, totalWidth, CS_TYPE_PREISMAN, hysteresis)
       call assert_comparable( flowArea  , refdata(1,i), eps, "flowArea   is not correct" )
       call assert_comparable( flowWidth , refdata(2,i), eps, "flowWidth  is not correct" )
       call assert_comparable( totalArea , refdata(3,i), eps, "totalArea  is not correct" )
