@@ -650,7 +650,8 @@ subroutine addObservation_from_ini(network, filename)
    integer                               :: loctype_
    
    
-   nbrch = 0
+   ierr    = DFM_NOERR
+   nbrch   = 0
    nobsini = network%obs%Count
    
    !! Step 1. get x- and y-coordinates of obs that are defined by branchID and chainage
@@ -672,9 +673,10 @@ subroutine addObservation_from_ini(network, filename)
    ! 1b. get the cooresponding x- and y-coordinates
    allocate(xx_tmp(nbrch))
    allocate(yy_tmp(nbrch))
-   ierr = 1
-   ierr = odu_get_xy_coordinates(branchIdx_tmp(1:nbrch), Chainage_tmp(1: nbrch), meshgeom1d%ngeopointx, meshgeom1d%ngeopointy, &
-                                  meshgeom1d%nbranchgeometrynodes, meshgeom1d%nbranchlengths, 0, xx_tmp, yy_tmp)
+   if (nbrch > 0) then
+      ierr = odu_get_xy_coordinates(branchIdx_tmp(1:nbrch), Chainage_tmp(1: nbrch), meshgeom1d%ngeopointx, meshgeom1d%ngeopointy, &
+                                     meshgeom1d%nbranchgeometrynodes, meshgeom1d%nbranchlengths, 0, xx_tmp, yy_tmp)
+   endif
    if (ierr /= DFM_NOERR) then
       call mess(LEVEL_ERROR, "Error occurs when getting the x- and y-coordinates for obs from file '"//trim(filename)//".")
    end if
