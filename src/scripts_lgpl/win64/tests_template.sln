@@ -268,6 +268,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "trachytopes", "trachytopes"
 EndProject
 Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "trachytopes_io", "utils_gpl\trachytopes\packages\trachytopes_io\trachytopes_io.vfproj", "{86149464-3C39-410E-B699-777E0B452BB5}"
 	ProjectSection(ProjectDependencies) = postProject
+		{0F609743-C9D1-4551-A1C3-47815AFC5D44} = {0F609743-C9D1-4551-A1C3-47815AFC5D44}
 		{8B7F6E47-A981-4BDF-B9D6-228123C60ED5} = {8B7F6E47-A981-4BDF-B9D6-228123C60ED5}
 		{2D6BCBCA-CC6C-49FE-A6AA-61AF62529118} = {2D6BCBCA-CC6C-49FE-A6AA-61AF62529118}
 	EndProjectSection
