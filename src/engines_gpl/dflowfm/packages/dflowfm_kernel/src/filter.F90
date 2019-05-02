@@ -285,6 +285,10 @@ Lp:do Lf=1,Lnx
    call realloc(sol, Lnx, keepExisting=.false., fill=0d0)
    call realloc(ustar, Lnkx, keepExisting=.false., fill=0d0)
    call realloc(eps, Lnx, keepExisting=.false., fill=0d0)
+   call realloc(Deltax, Lnx, keepExisting=.false., fill=0d0)
+   
+!  get typical mesh width
+   call get_Deltax()
    
    if ( itype.eq.1 ) then
       call realloc(dtmaxeps, Lnx, keepExisting=.false., fill=0d0)
@@ -348,7 +352,8 @@ subroutine dealloc_filter
    if ( allocated(ALvec) ) deallocate(ALvec)
    if ( allocated(sol) )   deallocate(sol)
    if ( allocated(ustar) ) deallocate(ustar)
-   if ( allocated(eps)  ) deallocate(eps)
+   if ( allocated(eps)   ) deallocate(eps)
+   if ( allocated(Deltax)) deallocate(Deltax)
    
    if ( allocated(dtmaxeps) ) deallocate(dtmaxeps)
    if ( allocated(checkmonitor) ) deallocate(checkmonitor)
@@ -511,15 +516,15 @@ subroutine comp_filter_predictor()
          else
             fac = eps(LL) * Dt * dsign
          end if
-!         plotlin(L) = eps(LL)
+         plotlin(L) = eps(LL)
             
-!        BEGIN DEBUG
-         if ( itype.eq.1 ) then
-            plotlin(L) = dts/(dtmaxeps(LL)/max(eps(LL),1e-10))
-         else
-            plotlin(L) = 1d0
-         end if
-!        END DEBUG
+!!        BEGIN DEBUG
+!         if ( itype.eq.1 ) then
+!            plotlin(L) = dts/(dtmaxeps(LL)/max(eps(LL),1e-10))
+!         else
+!            plotlin(L) = 1d0
+!         end if
+!!        END DEBUG
             
          
 !        loop over columns
@@ -600,7 +605,7 @@ end subroutine comp_filter_predictor
 subroutine get_filter_coeff(klay)
    use m_flowgeom, only: Lnx, ln, nd, acL, wcx1, wcx2, wcy1, wcy2, csu, snu, Dx, ba
    use m_flow, only: q1, vol1, kmx, vicLu
-   use m_filter, only: iLvec, jLvec, ALvec, jadebug, eps, order
+   use m_filter, only: iLvec, jLvec, ALvec, jadebug, eps, order, Deltax
    implicit none
    
    integer,          intent(in)  :: klay   !< layer number
@@ -613,7 +618,7 @@ subroutine get_filter_coeff(klay)
    double precision              :: Q
    double precision              :: wcx, wcy, w, alpha
    double precision              :: volu
-   double precision              :: Deltax   !< typical mesh width
+!   double precision              :: Deltax   !< typical mesh width
    double precision              :: vicouv   !< typical viscosity
    double precision              :: maxeps
    double precision              :: dinpr
@@ -636,7 +641,7 @@ subroutine get_filter_coeff(klay)
       
 !     compute first-order filter coefficient
       eps1 = 0d0
-      Deltax = Dx(LL)
+!      Deltax = Dx(LL)
       vicouv = vicLu(L)
       
 !     get advection volume
@@ -658,11 +663,6 @@ subroutine get_filter_coeff(klay)
          do iL=1,nd(kk)%lnx
             iLL1 = nd(kk)%ln(iL)
             LL1 = iabs(iLL1)
-            
-!           update typical mesh width
-            dinpr = abs(csu(LL)*csu(LL1) + snu(LL)*snu(LL1))
-!            Deltax = max(Deltax * dinpr , Dx(LL1))      
-            Deltax = min(Deltax * dinpr, Dx(LL1))
             
 !           exclude self
             if ( LL1.eq.LL ) then
@@ -724,11 +724,15 @@ subroutine get_filter_coeff(klay)
          end do
       end do
       
+!     BEGIN DEBUG
+!      Deltax = 1d0
+!     END DEBUG
+      
 !     compute third-order filter coefficient from first-order filter coefficient
-      eps3 = 0.25 * Deltax**2 * eps1
+      eps3 = 0.25 * Deltax(LL)**2 * eps1
       
 !     compute second-order filter coefficient
-      eps2 = max(eps3, 0.25 * Deltax**2 * vicouv)
+      eps2 = max(eps3, 0.25 * Deltax(LL)**2 * vicouv)
       
       
 !     BEGIN DEBUG
@@ -810,6 +814,39 @@ subroutine get_dtmaxeps()
    
    return
 end subroutine get_dtmaxeps
+
+!> determine typical mesh width
+subroutine get_Deltax()
+   use m_flowgeom, only: Dx, csu, snu, Lnx
+   use m_filter
+   implicit none
+   
+   double precision :: dinpr
+   integer          :: L, L1
+   
+   integer          :: j
+   
+   do L=1,Lnx
+      Deltax(L) = Dx(L)
+      
+!     get other links in stencil
+      do j=solver_filter%ia(L),solver_filter%ia(L+1)-1
+         L1 = solver_filter%ja(j)
+         
+!        exclude self
+         if ( L1.eq.L ) cycle
+         
+!        account for orientation
+         dinpr = abs(csu(L)*csu(L1) + snu(L)*snu(L1))
+         
+!        update typical mesh width
+         Deltax(L) = min(Deltax(L),  dinpr*Dx(L1))
+!         Deltax(L) = max(Deltax(L),  dinpr*Dx(L1))
+      end do
+   end do
+   
+   return
+end subroutine get_Deltax
 
 !> compute "checkerboard" mode monitor
 subroutine comp_checkmonitor()
