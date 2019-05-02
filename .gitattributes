@@ -538,6 +538,7 @@ src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/unstruc_opengis.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/unstruc_opengl.F90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/unstruc_shapefile.F90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/unstruc_startup.f90 -text
+src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/unstruc_version.F90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/unstruc_version.F90.svn -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/waves.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/wrwaq.F90 -text
@@ -2782,6 +2783,7 @@ src/engines_gpl/waq/packages/wq_processes/src/wq_processes_integrate_velocities.
 src/engines_gpl/waq/packages/wq_processes/src/wq_processes_pmsa_size.f90 -text
 src/engines_gpl/waq/packages/wq_processes/src/wq_processes_proces.f90 -text
 src/engines_gpl/waq/packages/wq_processes/src/wq_processes_velocities.f90 -text
+src/engines_gpl/waq/packages/wq_processes/src/wq_processes_version.F90 -text
 src/engines_gpl/waq/packages/wq_processes/src/wq_processes_version.F90.svn -text
 src/engines_gpl/waq/packages/wq_processes/wq_processes.vfproj -text
 src/engines_gpl/waq/scripts/Makefile.am -text
@@ -4714,6 +4716,7 @@ src/third_party_open/netcdf/netcdf4.vcxproj -text
 src/third_party_open/netcdf/netcdf4_test.vfproj -text
 src/third_party_open/netcdf/netcdf_license_info.txt -text
 src/third_party_open/netcdf/netcdff.vfproj -text
+src/third_party_open/netcdf/packages.config -text
 src/third_party_open/openda/core/native/include/cta_f77.inc -text
 src/third_party_open/openda/core/native/lib/win32/libcta.lib -text
 src/third_party_open/openda/openda_license_info.txt -text
@@ -14185,6 +14188,7 @@ src/utils_lgpl/io_netcdf/packages/io_netcdf/src/Makefile.am -text
 src/utils_lgpl/io_netcdf/packages/io_netcdf/src/coordinate_reference_system.F90 -text
 src/utils_lgpl/io_netcdf/packages/io_netcdf/src/io_netcdf.f90 -text
 src/utils_lgpl/io_netcdf/packages/io_netcdf/src/io_netcdf_api.F90 -text
+src/utils_lgpl/io_netcdf/packages/io_netcdf/src/io_netcdf_version.F90 -text
 src/utils_lgpl/io_netcdf/packages/io_netcdf/src/io_netcdf_version.F90.svn -text
 src/utils_lgpl/io_netcdf/packages/io_netcdf/src/io_ugrid.F90 -text
 src/utils_lgpl/io_netcdf/packages/io_netcdf/src/meshdata.F90 -text
@@ -14242,6 +14246,7 @@ src/utils_lgpl/nefis/packages/nefis/include/nef-def.h -text
 src/utils_lgpl/nefis/packages/nefis/include/nef-tag.h -text
 src/utils_lgpl/nefis/packages/nefis/include/nef-xdr.h -text
 src/utils_lgpl/nefis/packages/nefis/include/nefis.h -text
+src/utils_lgpl/nefis/packages/nefis/include/nefis_version.h -text
 src/utils_lgpl/nefis/packages/nefis/include/nefis_version.h.svn -text
 src/utils_lgpl/nefis/packages/nefis/include/nefis_version.rc.svn -text
 src/utils_lgpl/nefis/packages/nefis/include/oc.h -text
