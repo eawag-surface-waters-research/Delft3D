@@ -237,7 +237,7 @@ module m_readCrossSections
       endif
       
       select case (trim(fileVersion))
-      case ('1.00')
+      case ('1.00', '1.01')
          call parseCrossSectionDefinitionFile_v100(md_ptr, network)
       case ('2.00')
          call parseCrossSectionDefinitionFile(md_ptr, network)
