@@ -1069,6 +1069,7 @@ subroutine readMDUFile(filename, istat)
     endif
     call prop_get_double (md_ptr, 'veg'    , 'Clveg'          , Clveg)
     call prop_get_double (md_ptr, 'veg'    , 'Cdveg'          , Cdveg)
+    call prop_get_integer(md_ptr, 'veg'    , 'Cdvegspatial'   , JaCdvegsp)
     call prop_get_double (md_ptr, 'veg'    , 'Cbveg'          , Cbveg)
     call prop_get_double (md_ptr, 'veg'    , 'Rhoveg'         , Rhoveg)
     call prop_get_double (md_ptr, 'veg'    , 'Stemheightstd'  , Stemheightstd)

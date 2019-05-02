@@ -767,6 +767,13 @@ end subroutine flow_finalize_single_timestep
            endif
            stemhL   = min(stemhL,hu(L))
            areastem = diaL*stemhL
+           if (jaCdvegsp == 1) then
+              if (Cdvegsp(k1) > 0 .and. Cdvegsp(k2) > 0) then 
+                  Cdveg = 0.5d0*( Cdvegsp(k1) + Cdvegsp(k2) )
+              else
+                  Cdveg = max (Cdvegsp(k1), Cdvegsp(k2) )
+              endif
+           endif
            Cda      = Cdveg*areastem
            if (uchistem > 0d0 .and. expchistem < 0d0) then
               umag  = sqrt( u1(L)**2 + v(L)**2 )
@@ -38553,6 +38560,12 @@ end if
     call aerr   (' rnveg (Ndkx)', ierr, Ndkx)
     call realloc( diaveg, Ndkx, keepExisting=.false., fill=0d0, stat=ierr)
     call aerr   ('diaveg (Ndkx)', ierr, Ndkx)
+
+    if (jaCdvegsp > 0) then 
+       call realloc( Cdvegsp, Ndkx, keepExisting=.false., fill=0d0, stat=ierr)
+       call aerr   ('Cdvegsp (Ndkx)', ierr, Ndkx)
+    endif  
+
     javeg = 1
     if (.not.allocated(stemheight) .and. japillar == 2) then
        call realloc(  stemheight, Ndkx, keepExisting=.false., fill=0d0, stat=ierr)
@@ -39261,19 +39274,26 @@ subroutine update_verticalprofiles()
      endif
 
      if (javeg > 0) then             ! in turbulence model
-        dke(1:Lt - Lb + 1) = 0d0
+        dke(1:Lt - Lb + 1) = 0d0 ; k1 = ln(1,LL) ; k2 = ln(2,LL)
         rnv = 0.5d0*( rnveg(ln(1,LL)) + rnveg(ln(2,LL)) )
         if (rnv > 0d0) then       ! if plants are here
            do L = Lb, Lt
-              k = L - Lb + 1
-              rnv = 0.5d0*( rnveg(ln(1,L)) + rnveg(ln(2,L)) )
+              k = L - Lb + 1 ; k1 = ln(1,L) ; k2 = ln(2,L)
+              rnv = 0.5d0*( rnveg(k1) + rnveg(k2) )
               if (rnv > 0) then  ! if in this layer
-                 if (diaveg(ln(1,L)) > 0 .and. diaveg(ln(2,L)) > 0) then
-                    diav = 0.5d0*( diaveg(ln(1,L)) + diaveg(ln(2,L)) )
+                 if (diaveg(k1) > 0 .and. diaveg(k2) > 0) then
+                    diav = 0.5d0*( diaveg(k1) + diaveg(k2) )
                  else
-                    diav = max( diaveg(ln(1,L)), diaveg(ln(2,L)) )
+                    diav = max( diaveg(k1), diaveg(k2) )
                  endif
                  um      = sqrt( u1(L)*u1(L) + v(L)*v(L) )                ! umod (m2/s2)
+                 if (jaCdvegsp == 1) then
+                    if (Cdvegsp(k1) > 0 .and. Cdvegsp(k2) > 0) then 
+                       Cdveg = 0.5d0*( Cdvegsp(k1) + Cdvegsp(k2) )
+                    else
+                       Cdveg = max (Cdvegsp(k1), Cdvegsp(k2) )
+                    endif
+                 endif
                  vk      = 0.5d0*Cdveg*rnv*diav*um                        ! (1/s)
                  advi(L) = advi(L) + vk                                   ! add to diagonal of u1
                  wk      = vk*um*um                                       ! work done by this layer m2/s3

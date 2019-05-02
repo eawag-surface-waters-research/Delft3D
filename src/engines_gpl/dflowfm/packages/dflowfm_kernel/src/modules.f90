@@ -3270,6 +3270,7 @@ module m_vegetation
                                                               ! 2 = use DFM formulation for cfuhi and alfaveg, such that taubed/ro=cfu*umod**2
                                                               ! 3 = use cfuveg and alfaveg provided by python, such that taubed/ro=cfu*umod**2
  double precision                  :: densvegminbap = 0d0     ! minimum vegetation density for baptist formulation (1/m2)
+ integer                           :: jaCdvegsp = 0           ! 1 = use bmi for Cdvegsp
  double precision, allocatable, target :: rnveg (:)           !< [1/m2] 3D plant density , 2D part is basis input (1/m2) {"location": "face", "shape": ["ndkx"]}
  double precision, allocatable, target :: diaveg(:)           !< [m] 3D plant diameter, 2D part is basis input (m) {"location": "face", "shape": ["ndkx"]}
  double precision, allocatable, target :: cfuveg(:)           !< [ ]   2D only, g/C2 in 2D such that bedstress is computed correctly {"location": "face", "shape": ["lnx"]}
@@ -3277,6 +3278,7 @@ module m_vegetation
  double precision, allocatable, target :: stemdens(:)         !< [1/m2] TEMP 2D plant density (1/m2) {"location": "face", "shape": ["ndx"]}
  double precision, allocatable, target :: stemdiam(:)         !< [m] TEMP 2D plant diameters (m) {"location": "face", "shape": ["ndx"]}
  double precision, allocatable, target :: stemheight(:)       !< [m] 2D plant heights (m) {"location": "face", "shape": ["ndx"]}
+ double precision, allocatable, target :: Cdvegsp(:)          !< [m] spatial plant Cdveg () {"location": "face", "shape": ["ndx"]}
  double precision, allocatable     :: alfav(:)                !< [1/m] used in DFM, computed onboard for jabaptist==2, or pyton if jabaptist==3
  double precision, allocatable     :: phiv(:)                 ! 2D plant stem angle ()
  double precision, allocatable     :: phivt(:)                ! 2D plant angle velocity (1/s)
