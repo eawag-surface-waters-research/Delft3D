@@ -2516,8 +2516,13 @@ if (i012 .eq. 0) then                                ! look at u points, mom. eq
             conv  = a1*c1 + a2*c2
          endif
       
-         r3 = area / perimeter                            ! actual hydraulic radius
-         convtab%chezy_act = conv / (area * dsqrt(r3))  ! Used in function ChezyFromConveyance
+         if (area == 0d0) then
+            r3 = 0d0
+            convtab%chezy_act = 0d0
+         else
+            r3 = area / perimeter                            ! actual hydraulic radius
+            convtab%chezy_act = conv / (area * dsqrt(r3))  ! Used in function ChezyFromConveyance
+         endif
          cz = convtab%chezy_act
          !
       endif
