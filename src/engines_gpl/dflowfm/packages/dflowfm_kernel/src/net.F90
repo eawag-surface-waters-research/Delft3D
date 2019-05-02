@@ -15027,7 +15027,7 @@ subroutine find_flownode_for_obs(nstart, nend)
    ! find flow nodes
    jakdtree = 1
    if (nloctype0 > 0) then
-      call find_flownode(nloctype0, xobs_tmp0(1:nloctype0), yobs_tmp0(1:nloctype0), namobs_tmp0(1:nloctype0), kobs_tmp0(1:nloctype0), jakdtree, 0, 1)
+      call find_flownode(nloctype0, xobs_tmp0(1:nloctype0), yobs_tmp0(1:nloctype0), namobs_tmp0(1:nloctype0), kobs_tmp0(1:nloctype0), jakdtree, 1, 0)
       do i = 1, nloctype0
          kobs(ixy2obs0(i)) = kobs_tmp0(i)  
       end do
@@ -15035,7 +15035,7 @@ subroutine find_flownode_for_obs(nstart, nend)
    
    jakdtree = 1
    if (nloctype1 > 0) then
-      call find_flownode(nloctype1, xobs_tmp1(1:nloctype1), yobs_tmp1(1:nloctype1), namobs_tmp1(1:nloctype1), kobs_tmp1(1:nloctype1), jakdtree, 1, 1)
+      call find_flownode(nloctype1, xobs_tmp1(1:nloctype1), yobs_tmp1(1:nloctype1), namobs_tmp1(1:nloctype1), kobs_tmp1(1:nloctype1), jakdtree, 0, 1)
       do i = 1, nloctype1
          kobs(ixy2obs1(i)) = kobs_tmp1(i)  
       end do
@@ -15043,7 +15043,7 @@ subroutine find_flownode_for_obs(nstart, nend)
    
    jakdtree = 1
    if (nloctype2 > 0) then
-      call find_flownode(nloctype2, xobs_tmp2(1:nloctype2), yobs_tmp2(1:nloctype2), namobs_tmp2(1:nloctype2), kobs_tmp2(1:nloctype2), jakdtree, 2, 1)
+      call find_flownode(nloctype2, xobs_tmp2(1:nloctype2), yobs_tmp2(1:nloctype2), namobs_tmp2(1:nloctype2), kobs_tmp2(1:nloctype2), jakdtree, 0, 2)
        do i = 1, nloctype1
          kobs(ixy2obs2(i)) = kobs_tmp2(i)  
       end do
