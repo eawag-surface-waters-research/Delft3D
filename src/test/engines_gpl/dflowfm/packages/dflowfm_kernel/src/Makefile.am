@@ -7,6 +7,8 @@ FMODULES += \
 	-I$(top_builddir)/utils_lgpl/gridgeom/packages/gridgeom/src \
 	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src \
 	-I$(top_builddir)/utils_lgpl/ftnunit/packages/ftnunit/src \
+	-I$(top_builddir)/utils_gpl/flow1d/packages/flow1d_core/src \
+	-I$(top_builddir)/utils_gpl/flow1d/packages/flow1d_io/src \
 	-I$(top_builddir)/engines_gpl/dflowfm/packages/dflowfm_kernel/src
 
 #-------------------------------------------------------------------------------
