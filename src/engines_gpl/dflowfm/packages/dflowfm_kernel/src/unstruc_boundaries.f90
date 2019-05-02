@@ -280,6 +280,7 @@ subroutine readlocationfilesfromboundaryblocks(filename, nx, kce, num_bc_ini_blo
  use m_meteo, only: countbndpoints
  use system_utils
  use unstruc_files, only: resolvePath
+ use m_alloc
 
  implicit none
 
@@ -322,7 +323,7 @@ subroutine readlocationfilesfromboundaryblocks(filename, nx, kce, num_bc_ini_blo
      num_items_in_file = size(bnd_ptr%child_nodes)
  endif
 
- allocate(countbndpoints(num_items_in_file))
+ call realloc(countbndpoints, num_items_in_file, keepExisting = .false.)
  countbndpoints = 0
  file_ok = .true.
  do i=1,num_items_in_file
