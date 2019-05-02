@@ -16157,7 +16157,7 @@ subroutine unc_write_his(tim)            ! wrihis
                      id_partdim, id_parttime, id_partx, id_party, id_partz, &
                      id_dredlinkdim, id_dreddim, id_dumpdim, id_dredlink_dis, id_dred_dis, id_dump_dis, id_dred_tfrac, id_plough_tfrac, id_lsedtot, id_dred_name, id_dump_name, id_frac_name, & !id_dump_dis_frac, id_dred_dis_frac, &
                      id_dambreakdim, id_dambreakname, id_dambreak_s1up, id_dambreak_s1dn, id_dambreak_breach_depth,id_dambreak_breach_width, id_dambreak_discharge, id_dambreak_cumulative_discharge, &
-                     id_dambreak_breach_width_derivative, id_dambreak_water_level_jump, id_dambreak_normal_velocity, id_checkmon
+                     id_dambreak_breach_width_derivative, id_dambreak_water_level_jump, id_dambreak_normal_velocity, id_checkmon, id_num_timesteps, id_comp_time
 
     integer, allocatable, save :: id_tra(:)
     integer, allocatable, save :: id_hwq(:)
@@ -17178,6 +17178,9 @@ subroutine unc_write_his(tim)            ! wrihis
            ierr = nf90_def_var(ihisfile, 'checkerboard_monitor', nf90_double, (/ id_laydim, id_timedim /), id_checkmon)
            ierr = nf90_put_att(ihisfile, id_checkmon, 'long_name', 'Checkerboard mode monitor')
            ierr = nf90_put_att(ihisfile, id_checkmon, 'unit', 'm s-1')
+           
+           ierr = nf90_def_var(ihisfile, 'num_timesteps', nf90_int, id_timedim, id_num_timesteps)
+           ierr = nf90_def_var(ihisfile, 'comp_time', nf90_double, id_timedim, id_comp_time)
         end if
 
         ierr = nf90_def_var(ihisfile, 'time', nf90_double, id_timedim, id_time)
@@ -17740,6 +17743,9 @@ subroutine unc_write_his(tim)            ! wrihis
     if ( jacheckmonitor.eq.1 ) then
       call comp_checkmonitor()
       ierr = nf90_put_var(ihisfile, id_checkmon, checkmonitor, start=(/ 1, it_his /))
+      
+      ierr = nf90_put_var(ihisfile, id_num_timesteps, int(dnt), start=(/ it_his /))
+      ierr = nf90_put_var(ihisfile, id_comp_time, cpusteps(3), start=(/ it_his /))
     end if
 
     ierr = nf90_sync(ihisfile) ! Flush file

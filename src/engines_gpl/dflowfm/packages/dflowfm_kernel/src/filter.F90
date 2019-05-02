@@ -821,10 +821,12 @@ subroutine get_Deltax()
    use m_filter
    implicit none
    
-   double precision :: dinpr
-   integer          :: L, L1
+   double precision            :: dinpr
+                               
+   integer                     :: L, L1
+   integer                     :: j
    
-   integer          :: j
+   double precision, parameter :: dtol = 1d-8
    
    do L=1,Lnx
       Deltax(L) = Dx(L)
@@ -840,8 +842,9 @@ subroutine get_Deltax()
          dinpr = abs(csu(L)*csu(L1) + snu(L)*snu(L1))
          
 !        update typical mesh width
-         Deltax(L) = min(Deltax(L),  dinpr*Dx(L1))
-!         Deltax(L) = max(Deltax(L),  dinpr*Dx(L1))
+         if ( dinpr.gt.dtol ) then
+            Deltax(L) = min(Deltax(L),  Dx(L1)/dinpr)
+         end if
       end do
    end do
    
