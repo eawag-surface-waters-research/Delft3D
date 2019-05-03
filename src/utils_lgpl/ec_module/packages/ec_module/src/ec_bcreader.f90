@@ -633,14 +633,6 @@ contains
        bc%func=BC_FUNC_TIM3D
     end if
 
-    ! Check vectors
-    if (bc%func==BC_FUNC_TSERIES .or. bc%func==BC_FUNC_TIM3D) then        ! in case of timeseries-like signal  ...
-       if (bc%numcols-1/=bc%numlay*bc%quantity%vectormax) then           ! ... the number of columns minus 1 (time column) should equal ...
-          call setECMessage("Number of selected column mismatch.")
-          return                                                          ! ... the vectordimensionality * number of layers
-       end if
-    endif
-
     success = .true.
   end function checkhdr
 
