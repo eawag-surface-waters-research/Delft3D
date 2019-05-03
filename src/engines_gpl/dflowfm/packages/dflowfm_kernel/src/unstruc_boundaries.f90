@@ -648,7 +648,6 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
      if ( isf.eq.0 ) then   ! add 
      
         numfracs = numfracs+1    
-        nbndpt = numfracs
 !       realloc
         call realloc(kesf, (/Nx, numfracs/), keepExisting=.true., fill=0 )
         call realloc(nbndsf, numfracs, keepExisting=.true., fill=0 )
