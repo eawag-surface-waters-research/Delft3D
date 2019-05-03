@@ -72,7 +72,6 @@ subroutine findexternalboundarypoints()             ! find external boundary poi
  integer               :: ierr, method
  double precision      :: return_time
  integer               :: numz, numu, nums, numtm, numsd, numt, numuxy, numn, num1d2d, numqh, numw, numtr, numsf
- integer               :: nbndpt
  integer               :: nx
  integer               :: ierror
  integer               :: num_bc_ini_blocks
@@ -164,7 +163,6 @@ subroutine findexternalboundarypoints()             ! find external boundary poi
             ketr = 0
 
  if ( allocated(nbndtr) ) deallocate(nbndtr)
- allocate ( nbndtr(1), stat = ierr )
  call aerr('nbndtr(1)', ierr, 1 )
             nbndtr = 0
             
@@ -225,7 +223,6 @@ subroutine findexternalboundarypoints()             ! find external boundary poi
  nshiptxy = 0                                        ! nr of ship xyt signals
 
  nwbnd    = 0                                        ! nr of wave-energy boundaries
- nbndpt   = 0
 
 
  num_bc_ini_blocks = 0
@@ -251,7 +248,7 @@ subroutine findexternalboundarypoints()             ! find external boundary poi
 
         jatimespace = 1                              ! module is to be used
 
-        call processexternalboundarypoints(qid, filename, filetype, return_time,  nx, kce, numz, numu, nums, numtm, numsd, numt, numuxy, numn, num1d2d, numqh, numw, numtr, numsf, 1d0, transformcoef, nbndpt)
+        call processexternalboundarypoints(qid, filename, filetype, return_time,  nx, kce, numz, numu, nums, numtm, numsd, numt, numuxy, numn, num1d2d, numqh, numw, numtr, numsf, 1d0, transformcoef)
     
     endif
 
@@ -277,7 +274,6 @@ subroutine readlocationfilesfromboundaryblocks(filename, nx, kce, num_bc_ini_blo
  use tree_structures
  use messageHandling
  use m_flowgeom, only: rrtol
- use m_meteo, only: countbndpoints
  use system_utils
  use unstruc_files, only: resolvePath
  use m_alloc
@@ -323,8 +319,6 @@ subroutine readlocationfilesfromboundaryblocks(filename, nx, kce, num_bc_ini_blo
      num_items_in_file = size(bnd_ptr%child_nodes)
  endif
 
- call realloc(countbndpoints, num_items_in_file, keepExisting = .false.)
- countbndpoints = 0
  file_ok = .true.
  do i=1,num_items_in_file
     node_ptr => bnd_ptr%child_nodes(i)%node_ptr
@@ -377,9 +371,9 @@ subroutine readlocationfilesfromboundaryblocks(filename, nx, kce, num_bc_ini_blo
 
        if (group_ok) then
           if (rrtolb > 0d0) then
-             call processexternalboundarypoints(quantity, locationfile, filetype, return_time, nx, kce, numz, numu, nums, numtm, numsd, numt, numuxy, numn, num1d2d, numqh, numw, numtr, numsf, rrtolrel = (1+2*rrtolb)/(1+2*rrtol), nbndpt=countbndpoints(i) )
+             call processexternalboundarypoints(quantity, locationfile, filetype, return_time, nx, kce, numz, numu, nums, numtm, numsd, numt, numuxy, numn, num1d2d, numqh, numw, numtr, numsf, rrtolrel = (1+2*rrtolb)/(1+2*rrtol))
           else
-             call processexternalboundarypoints(quantity, locationfile, filetype, return_time, nx, kce, numz, numu, nums, numtm, numsd, numt, numuxy, numn, num1d2d, numqh, numw, numtr, numsf, rrtolrel = 1d0, nbndpt=countbndpoints(i))
+             call processexternalboundarypoints(quantity, locationfile, filetype, return_time, nx, kce, numz, numu, nums, numtm, numsd, numt, numuxy, numn, num1d2d, numqh, numw, numtr, numsf, rrtolrel = 1d0)
           end if
           num_bc_ini_blocks = num_bc_ini_blocks + 1
        endif
@@ -432,7 +426,7 @@ end subroutine appendrettime
 !! This routine is based upon the network admin only, not on the flow admin.
 subroutine processexternalboundarypoints(qid, filename, filetype, return_time, nx, kce, &
                                          numz, numu, nums, numtm, numsd, numt, numuxy, numn, num1d2d, &
-                                         numqh, numw, numtr, numsf, rrtolrel, tfc, nbndpt) ! helper for findin external boundary points
+                                         numqh, numw, numtr, numsf, rrtolrel, tfc) ! helper for findin external boundary points
  use m_netw
  use m_flow, qid_flow => qid, filetype_flow => filetype
  use m_flowgeom                                        
@@ -463,7 +457,6 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
  double precision      , intent(in)    :: return_time
  integer               , intent(inout) :: numz, numu, nums, numtm, numsd, &   !
                                           numt, numuxy, numn, num1d2d, numqh, numw, numtr, numsf      !
- integer               , intent(out)   :: nbndpt   !< Value of the last changed num (one of numz, numu ....etc)
  double precision      , intent(in)    :: rrtolrel !< To enable a more strict rrtolerance value than the global rrtol. Measured w.r.t. global rrtol.
  
  double precision, dimension(numgeneralkeywrd), optional, intent(in) :: tfc
@@ -477,14 +470,12 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
  integer                               :: janew
 
 ! call bndname_to_fm(qid,qidfm)
-  nbndpt = 0
   qidfm = qid
   if (qidfm == 'waterlevelbnd'    .or. qidfm == 'neumannbnd'  .or. qidfm == 'riemannbnd' .or. qidfm == 'outflowbnd' .or. qidfm == 'qhbnd') then
 
      call selectelset( filename, filetype, xe, ye, xyen, kce, nx, kez(nbndz+1:nx), numz, usemask=.true.) !numz=number cells found
      WRITE(msgbuf,'(3a,i8,a)') trim (qid), ' ', trim( filename), numz, ' nr of open bndcells' ; call msg_flush()
      nzbnd = nzbnd + 1
-     nbndpt = nzbnd
 
      if (qidfm == 'waterlevelbnd')  itpbn = 1
      if (qidfm == 'neumannbnd'   )  itpbn = 2
@@ -499,7 +490,6 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
      if (qidfm == 'qhbnd') then
          itpbn = 7
          nqhbnd = nqhbnd + 1
-         nbndpt = nqhbnd
          numqh  = numz
          call realloc(L1qhbnd,nqhbnd) ; L1qhbnd(nqhbnd) = nbndz + 1
          call realloc(L2qhbnd,nqhbnd) ; L2qhbnd(nqhbnd) = nbndz + numz
@@ -522,10 +512,8 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
      
      if (qidfm == 'velocitybnd' ) then 
         itpbn = 3
-        nbndpt = nbndu + numu
      else if (qidfm == 'dischargebnd') then      
         itpbn = 4
-        nbndpt = nqbnd + 1
         nqbnd = nqbnd + 1
         call realloc(L1qbnd,nqbnd) ; L1qbnd(nqbnd) = nbndu + 1
         call realloc(L2qbnd,nqbnd) ; L2qbnd(nqbnd) = nbndu + numu
@@ -565,7 +553,6 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
      if (nums>0) then
         call appendrettime(qidfm, nbnds + 1, return_time)
         nbnds = nbnds + nums
-        nbndpt = nbnds
      end if
   ! JRE
      
@@ -592,7 +579,6 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
      if (numtm>0) then
         call appendrettime(qidfm, nbndtm + 1, return_time)
         nbndtm = nbndtm + numtm
-        nbndpt = nbndtm
      end if
 
   else if (qidfm == 'sedimentbnd' ) then
@@ -603,7 +589,6 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
      if (numsd>0) then
         call appendrettime(qidfm, nbndsd + 1, return_time)
         nbndsd = nbndsd + numsd
-        nbndpt = nbndsd
      end if 
      
   else if (qidfm(1:9) == 'tracerbnd' ) then
@@ -624,7 +609,6 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
      if (numtr>0) then
         call appendrettime(qidfm, nbndtr(itrac) + 1, return_time)
         nbndtr(itrac) = nbndtr(itrac) + numtr
-        nbndpt = nbndtr(itrac)
         nbndtr_all = maxval(nbndtr(1:numtracers))
      end if
      
@@ -663,7 +647,6 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
      if (numsf > 0) then
         call appendrettime(qidfm, nbndsf(isf) + 1, return_time)
         nbndsf(isf) = nbndsf(isf) + numsf
-        nbndpt = nbndsf(isf)
         nbndsf_all = maxval(nbndsf(1:numfracs))
      endif
      
@@ -676,7 +659,6 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
      WRITE(msgbuf,'(2a,i8,a)') trim(qid), trim(filename) , numt, 'nr of tangentialvelocity bndcells' ; call msg_flush()
 
      nbndt = nbndt + numt
-     nbndpt = nbndt
 
   else if (qidfm == 'uxuyadvectionvelocitybnd' ) then
 
@@ -685,7 +667,6 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
      WRITE(msgbuf,'(2a,i8,a)') trim(qid), trim(filename) , numuxy, 'nr of tangentialvelocity bndcells' ; call msg_flush()
 
      nbnduxy = nbnduxy + numuxy
-     nbndpt = nbnduxy
 
 
   else if (qidfm == 'normalvelocitybnd' ) then
@@ -695,7 +676,6 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
      WRITE(msgbuf,'(2a,i8,a)') trim(qid), trim(filename) , numn, 'nr of normalvelocity bndcells' ; call msg_flush()
 
      nbndn = nbndn + numn
-     nbndpt = nbndn
 
   else if (qidfm == '1d2dbnd' ) then ! SOBEK1D-FM2D
 
@@ -705,12 +685,10 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
 
      call addopenbndsection(num1d2d, ke1d2d(nbnd1d2d+1:nbnd1d2d+num1d2d), filename, IBNDTP_1D2D)
      nbnd1d2d = nbnd1d2d + num1d2d
-     nbndpt = nbnd1d2d
 
   else if (qidfm == 'shiptxy' ) then
 
      nshiptxy = nshiptxy + 1
-     nbndpt = nshiptxy
      
   else if (qidfm == 'nudgetime' .or. qidfm == 'nudgerate' .or. qidfm == 'nudge_salinity_temperature' ) then
   
@@ -925,6 +903,8 @@ logical function initboundaryblocksforcings(filename)
  integer                      :: k, n
  integer                      :: file_type
  integer                      :: fmmethod
+ integer, dimension(1)        :: targetindex 
+ integer                      :: ib
  
  double precision, allocatable :: xdum(:), ydum(:)!, xy2dum(:,:)
  integer, allocatable          :: kdum(:)
@@ -947,6 +927,7 @@ logical function initboundaryblocksforcings(filename)
      num_items_in_file = size(bnd_ptr%child_nodes)
  endif
 
+ ib = 0
  do i=1,num_items_in_file
 
     node_ptr => bnd_ptr%child_nodes(i)%node_ptr
@@ -962,6 +943,7 @@ logical function initboundaryblocksforcings(filename)
           call warn_flush()
           cycle
        end if
+       ib = ib + 1
 
        call prop_get_string(node_ptr, '', 'nodeId', locationfile, retVal)
        if (retVal) then
@@ -1019,12 +1001,20 @@ logical function initboundaryblocksforcings(filename)
                 endif
                 call register_quantity_pli_combination(quantity, locationfile)
                 if (file_type == node_id) then
+                   select case(quantity)
+                   case ('waterlevelbnd')
+                      targetindex = maxloc(itpenz(1:nbndz),itpenz(1:nbndz)==ib)   
+                   case ('dischargebnd')
+                      targetindex = maxloc(itpenu(1:nbndu),itpenu(1:nbndu)==ib)   
+                   case default
+                      targetindex = (/-1/)
+                   end select
                    if (forcingfile == '-') then
                       retVal = addtimespacerelation_boundaries(quantity, locationfile, filetype=file_type, method=fmmethod, operand=oper, &
-                                                               targetindex=countbndpoints(i))
+                                                               targetindex=targetindex(1))
                    else
                       retVal = addtimespacerelation_boundaries(quantity, locationfile, filetype=file_type, method=fmmethod, operand=oper, forcingfile = forcingfile, &
-                                                               targetindex=countbndpoints(i))
+                                                               targetindex=targetindex(1))
                    endif
                 else
                    if (forcingfile == '-') then
