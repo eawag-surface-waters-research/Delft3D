@@ -2182,6 +2182,10 @@ end subroutine count_occurrences
        return
     endif
     
+    if (present(versionstring)) then
+       versionstring= string
+    endif
+   
     idot = index(string, '.')
     if (idot==0) then
        success = .false.
@@ -2206,9 +2210,5 @@ end subroutine count_occurrences
        
        read(string(idot+1:iend), '(i)') minor
     endif
-    if (present(versionstring)) then
-       versionstring= string
-    endif
-    
  end subroutine prop_get_version_number
 end module properties

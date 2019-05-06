@@ -31,6 +31,7 @@ contains
 subroutine tests_properties
     call test( test_properties_load, 'Simply load a properties file' )
     call test( test_properties_check, 'Checking if the values in a properties file get loaded correctly' )
+    call test( test_properties_version, 'Checking if the fileversion get loaded correctly' )
 end subroutine tests_properties
 
 subroutine test_properties_load
@@ -168,5 +169,40 @@ subroutine test_properties_check
     enddo
 
 end subroutine test_properties_check
+
+
+subroutine test_properties_version
+    character(len=20)        :: filename
+    character(len=20)        :: fileVersion
+    type(tree_data), pointer :: tree
+    integer                  :: error
+    logical                  :: success
+    integer                  :: major 
+    integer                  :: minor 
+    !
+    ! Check that a non-existing file causes an error
+    !
+    ! Note:
+    ! Apparently, the tree variable needs to be associated/allocated beforehand
+    !
+    allocate( tree )
+
+    call prop_inifile( 'test_fileversion.ini', tree, error )
+
+    ! test default version number
+    call prop_get_version_number(tree, major = major, minor = minor, success = success)
+    call assert_equal( major, 1, 'Major version')
+    call assert_equal( minor, 245, 'Minor version')
+    
+    call prop_get_version_number(tree, keyin = 'versionNumber', major = major, minor = minor, versionstring = fileVersion, success = success)
+    call assert_equal( success, .false., 'Incorrect version string')
+    call assert_equal( trim(fileVersion), '3', 'version string')
+    
+    call prop_get_version_number(tree, 'new', 'version', major = major, minor = minor, versionstring = fileVersion, success = success)
+    call assert_equal( major, 5, 'Major version')
+    call assert_equal( minor, 1, 'Minor version')
+    call assert_equal( trim(fileVersion), '5.001', 'version string')
+    
+end subroutine test_properties_version
 
 end module test_properties
