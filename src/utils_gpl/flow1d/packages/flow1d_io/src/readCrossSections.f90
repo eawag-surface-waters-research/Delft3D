@@ -211,6 +211,8 @@ module m_readCrossSections
       character(len=Charln)         :: binfile
       logical                       :: file_exist
       character(len=Idlen)          :: fileVersion
+      integer                       :: major 
+      integer                       :: minor
       
       pos = index(CrossSectionDefinitionFile, '.', back = .true.)
       binfile = CrossSectionDefinitionFile(1:pos)//'cache'
@@ -231,15 +233,16 @@ module m_readCrossSections
       call tree_create(trim(CrossSectionDefinitionFile), md_ptr, maxlenpar)
       call prop_file('ini',trim(CrossSectionDefinitionFile),md_ptr,istat)
 
-      call prop_get_string(md_ptr, 'General', 'fileVersion', fileVersion, success)
+      call prop_get_version_number(md_ptr, major = major, minor = minor, success = success)
       if (.not. success) then
-         fileVersion = '1.00'
+         major = 1
+         minor = 0
       endif
       
-      select case (trim(fileVersion))
-      case ('1.00', '1.01')
+      select case (major)
+      case (1)
          call parseCrossSectionDefinitionFile_v100(md_ptr, network)
-      case ('2.00')
+      case (2)
          call parseCrossSectionDefinitionFile(md_ptr, network)
       case default
          call SetMessage(LEVEL_FATAL,'Unsupported fileVersion for cross section definition file:'//trim(fileVersion))
