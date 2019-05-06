@@ -294,8 +294,13 @@
                   write(line,'(a)') '   Process is activated'
                   call monsys( line , 4 )
                else
-                  nerror = nerror + 1
-                  write(line,'(a)') '   ERROR : activated process can NOT be switched on'
+                  if (proc1%name(1:8).eq.'VertDisp') then
+                     nowarn = nowarn + 1
+                     write(line,'(a)') '   WARNING : VertDisp can NOT be switched on, is this a 2D model?'
+                  else
+                     nerror = nerror + 1
+                     write(line,'(a)') '   ERROR : activated process can NOT be switched on'
+                  end if
                   call monsys( line , 4 )
                   do imis = 1 , min(nmis,mismax)
                      write(line,'(4a)') '   Not found:[',misnam(imis),'] ', mistxt(imis)

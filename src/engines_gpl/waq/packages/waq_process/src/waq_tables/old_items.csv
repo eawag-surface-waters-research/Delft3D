@@ -107,10 +107,8 @@ old_name,new_name,old_default,configuration,serial,action_type
 "SedDetC   ","VSedOpal  ",   0.100000    ,"          ",2012032801,         6
 "Sed_OOC   ","Sed_POC2  ",    0.00000    ,"          ",2012032801,         1
 "Sed_OOC   ","VSedPOC2  ",   0.100000    ,"          ",2012032801,         6
-"Sed_OOC   ","VSedOpal  ",   0.100000    ,"          ",2012032801,         6
 "SedN_Det  ","Sed_Opal  ",    0.00000    ,"          ",2012032801,         4
 "SedN_Det  ","SedNPOC1  ",    0.00000    ,"          ",2012032801,         1
-"SedN_OOC  ","Sed_Opal  ",    0.00000    ,"          ",2012032801,         4
 "SedN_OOC  ","SedNPOC2  ",    0.00000    ,"          ",2012032801,         1
 "ZSedDetC  ","ZSedPOC1  ",    0.00000    ,"          ",2012032801,         2
 "VSedDetC  ","VSedPOC1  ",    0.00000    ,"          ",2012032801,         2
@@ -119,9 +117,7 @@ old_name,new_name,old_default,configuration,serial,action_type
 "VSedOOC   ","VSedPOC2  ",    0.00000    ,"          ",2012032801,         2
 "TauCSOOC  ","TaucSPOC2 ",    0.00000    ,"          ",2012032801,         2
 "VSedPOC1  ","VSedOpal  ",    0.00000    ,"          ",2012032801,         8
-"VSedPOC2  ","VSedOpal  ",    0.00000    ,"          ",2012032801,         8
 "TauCSPOC1 ","TaucSOpal ",    0.00000    ,"          ",2012032801,         8
-"TauCSPOC2 ","TaucSOpal ",    0.00000    ,"          ",2012032801,         8
 "ExtPODVL  ","ExtPOGVL  ",    0.00000    ,"          ",2012032801,         1
 "ExtPODVL  ","ExtVLPOC1 ",   0.470000    ,"          ",2012032801,         6
 "ExtPODVL  ","ExtVLPOC2 ",   0.600000E-01,"          ",2012032801,         6
