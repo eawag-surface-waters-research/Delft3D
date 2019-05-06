@@ -1574,6 +1574,7 @@ module m_readCrossSections
                   groundlayerUsed = (hasgroundlayer == 1)
                else 
                   groundlayerUsed =  .false.
+                  success = .true.
                endif
                if (groundlayerUsed) then
                   call prop_get_double(md_ptr%child_nodes(i)%node_ptr, '', 'groundlayer', groundlayer, success)
