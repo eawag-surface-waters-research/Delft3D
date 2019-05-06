@@ -48,6 +48,7 @@ module m_fourier_analysis
 
     use precision 
     use string_module, only: str_lower
+    use unstruc_netcdf
     implicit none
 
     type gd_fourier
@@ -106,13 +107,13 @@ module m_fourier_analysis
     
     type(gd_fourier), target  :: gdfourier
     type(gd_fourier), pointer :: gdfourier_ptr => null()
-    integer,        parameter :: maxMessageLen = 1000
     character(maxMessageLen)  :: FouMessage     = ' '
     character(len=:), allocatable   :: FouOutputFile
 
     private
 
     integer                   :: nofou  ! Number of fourier components to be analyzed
+    type(t_unc_mapids)        :: fileids!< Set of file and variable ids for this file.
 
     real(fp)                  :: ag_fouana = 9.81d0  
     real(fp)                  :: time_unit_factor
@@ -1403,6 +1404,7 @@ end subroutine setfouunit
        !
        !
    999 continue
+       fileids%ncid = 0
        success = .True. 
      rewind(lunfou)
    end subroutine fouini
@@ -1552,7 +1554,9 @@ end subroutine setfouunit
        ! only once when all fourier periods are complete
        !
        if (nst==fouwrt) then
-          call wrfou(trifil ,dtsec ,versio ,const_names ,itdate ,hdt ,tzone ,gdfourier ,gddimens_ptr)
+          if (fileids%ncid == 0) then
+             call wrfou(trifil ,dtsec ,versio ,const_names ,itdate ,hdt ,tzone ,gdfourier ,gddimens_ptr)
+          endif
        endif
     endif   
     end subroutine postpr_fourier
@@ -1648,7 +1652,6 @@ end subroutine setfouunit
     !
     ! Local variables
     !
-        type(t_unc_mapids)       :: fileids      !< Set of file and variable ids for this file.
         integer                  :: iddim_nflowelem
         integer                  :: iddim_nflowlink
         integer                  :: iddim 
@@ -1713,164 +1716,154 @@ end subroutine setfouunit
         !
         fougrp = 'fou-fields'
         !
-        if (idfile == 0) then
-           !filename = trifil(1:3) // 'f' // trifil(5:)
-           !write(filename,'(2a)') trim(filename), '.nc'
-           !!
-           !ierror = nf90_create(filename, NF90_WRITE, idfile)
-           ierr = unc_create(trim(trifil), 0, fileids%ncid)
-           FouMessage = ''
-           if (ierr/=0) FouMessage = nf90_strerror(ierr)
-           !  DEFINITIONS 
-           !
-           ! Assumption: wrimap has already created the map-NetCDF file
-           !
-           ierr = ug_addglobalatts(fileids%ncid, ug_meta_fm) 
-           call unc_write_flowgeom_filepointer_ugrid(fileids%ncid, fileids%id_tsp, 1)
+        ierr = unc_create(trim(trifil), 0, fileids%ncid)
+        FouMessage = ''
+        if (ierr/=0) FouMessage = nf90_strerror(ierr)
+        ierr = ug_addglobalatts(fileids%ncid, ug_meta_fm) 
+        call unc_write_flowgeom_filepointer_ugrid(fileids%ncid, fileids%id_tsp, 1)
 
+        !
+        ifou  = 1
+        iblwl = 0
+        iblws = 0
+        ibleh = 0
+        iblcn = 0
+        ibluv = 0
+        ibluva= 0
+        ibluc = 0
+        iblqf = 0
+        iblbs = 0
+        iblep = 0
+        do ivar=1, nofouvar
+           if (ifou < nofou) then
+              if (fouref(ifou+1,2) <= ivar) then
+                 ifou = ifou + 1
+              endif
+           endif
+           freqnt = foufas(ifou)*raddeg*3600.0_fp/dtsec
+           tfastr = real(ftmstr(ifou),fp)*dtsec/60.0_fp
+           tfasto = real(ftmsto(ifou),fp)*dtsec/60.0_fp
            !
-           ifou  = 1
-           iblwl = 0
-           iblws = 0
-           ibleh = 0
-           iblcn = 0
-           ibluv = 0
-           ibluva= 0
-           ibluc = 0
-           iblqf = 0
-           iblbs = 0
-           iblep = 0
-           do ivar=1, nofouvar
-              if (ifou < nofou) then
-                 if (fouref(ifou+1,2) <= ivar) then
-                    ifou = ifou + 1
-                 endif
+           if (founam(ifou)(:2)=='s1') then
+              unc_loc = UNC_LOC_S
+              if (fouelp(ifou)=='e') then
+                 ibleh = ibleh + 1
+                 blnm = 'EH??'
+                 write (blnm(3:4), '(i2.2)') ibleh
+                 namfun = 'energy head'
+              else
+                 iblwl = iblwl + 1
+                 blnm = 'WL??'
+                 write (blnm(3:4), '(i2.2)') iblwl
+                 namfun = 'water level'
               endif
-              freqnt = foufas(ifou)*raddeg*3600.0_fp/dtsec
-              tfastr = real(ftmstr(ifou),fp)*dtsec/60.0_fp
-              tfasto = real(ftmsto(ifou),fp)*dtsec/60.0_fp
-              !
-              if (founam(ifou)(:2)=='s1') then
-                 unc_loc = UNC_LOC_S
-                 if (fouelp(ifou)=='e') then
-                    ibleh = ibleh + 1
-                    blnm = 'EH??'
-                    write (blnm(3:4), '(i2.2)') ibleh
-                    namfun = 'energy head'
-                 else
-                    iblwl = iblwl + 1
-                    blnm = 'WL??'
-                    write (blnm(3:4), '(i2.2)') iblwl
-                    namfun = 'water level'
-                 endif
-              endif
-              if (founam(ifou)(:2)=='ws') then
-                 unc_loc = UNC_LOC_U
-                 iblws = iblws + 1
-                 blnm = 'WS??'
-                 write (blnm(3:4), '(i2.2)') iblws
-                 namfun = 'wind speed'
-              endif
-              if (founam(ifou)(:2)=='ux') then
-                 unc_loc = UNC_LOC_S
-                 ibluv = ibluv + 1
-                 blnm = 'UX??'
-                 write (blnm(3:4), '(i2.2)') ibluv
-                 namfun = 'U-component of cell-centre velocity'
-              endif
-              if (founam(ifou)(:2)=='uy') then
-                 unc_loc = UNC_LOC_S
-                 ibluv = ibluv + 1
-                 blnm = 'UY??'
-                 write (blnm(3:4), '(i2.2)') ibluv
-                 namfun = 'V-component of cell-centre velocity'
-              endif
-              if (founam(ifou)(:3)=='uxa') then
-                 unc_loc = UNC_LOC_S
-                 ibluva = ibluva + 1
-                 blnm = 'UX??'
-                 write (blnm(3:4), '(i2.2)') ibluva
-                 namfun = 'U-component velocity, column average'
-              endif
-              if (founam(ifou)(:3)=='uya') then
-                 unc_loc = UNC_LOC_S
-                 ibluva = ibluva + 1
-                 blnm = 'UY??'
-                 write (blnm(3:4), '(i2.2)') ibluva
-                 namfun = 'V-component velocity, column average'
-              endif
-              if (founam(ifou)(:2)=='uc') then
-                 unc_loc = UNC_LOC_S
-                 ibluc = ibluc + 1
-                 blnm = 'UC??'
-                 write (blnm(3:4), '(i2.2)') ibluc
-                 namfun = 'velocity magnitude'
-              endif
-              if (founam(ifou)(:2)=='r1') then
-                 unc_loc = UNC_LOC_S
-                 iblcn = iblcn + 1
-                 blnm = 'CO??'
-                 write (blnm(3:4), '(i2.2)') iblcn
-                 namfun = namcon(fconno(ifou))
-              endif
-              if (founam(ifou)(:2)=='u1') then
-                 unc_loc = UNC_LOC_U
-                 ibluv = ibluv + 1
-                 blnm = 'UV??'
-                 write (blnm(3:4), '(i2.2)') ibluv
-                 namfun = 'velocity'
-              endif
-              if (founam(ifou)(:2)=='qx') then
-                 unc_loc = UNC_LOC_U
-                 iblqf = iblqf + 1
-                 blnm = 'QF??'
-                 write (blnm(3:4), '(i2.2)') iblqf
-                 namfun = 'unit discharge'
-              endif
-              if (founam(ifou)(:2)=='ta') then
-                 unc_loc = UNC_LOC_S
-                 iblbs = iblbs + 1
-                 blnm = 'BS??'
-                 write (blnm(3:4), '(i2.2)') iblbs
-                 namfun = 'bed stress'
-              endif
-              write(namfunlong,'(i3.3,2a)') fouref(ifou,1), ": ", trim(namfun)
-              !
-              idvar(:,ivar) = imissval 
-              ierr = unc_def_var_map(fileids%ncid,fileids%id_tsp, idvar(:,ivar), NF90_DOUBLE, unc_loc, trim(fouvarnam(ivar)), trim(fouvarnam(ivar)), &
-                             'Fourier analysis '//trim(namfunlong)//', '//trim(fouvarnamlong(ivar)), fouvarunit(ivar),0)
-              ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'long_name','Fourier analysis '//trim(namfunlong)//', '//trim(fouvarnamlong(ivar)))
-              ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'units',fouvarunit(ivar))
-              ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'layer_number', flayno(ifou))
-              ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'Reference_date_in_yyyymmdd', itdate)
-              ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'Starttime_fourier_analysis_in_minutes_since_reference_date', tfastr)
-              ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'Stoptime_fourier_analysis_in_minutes_since_reference_date', tfasto)
-              
-              ierr = unc_add_gridmapping_att(fileids%ncid, idvar(:,ivar), jsferic)
-              select case (founam(ifou))
-              case('s1','r1','u1','ux','uy','uxa','uya','uc','ta')
-                 ierr = unc_put_att(fileids%ncid, idvar(:,ivar),  'coordinates'  , 'FlowElem_xcc FlowElem_ycc')
-              case('qxk','ws')
-                 ierr = unc_put_att(fileids%ncid, idvar(:,ivar),  'coordinates'  , 'FlowLink_xu FlowLink_yu')
-              end select
-              ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'Number_of_cycles', fnumcy(ifou))
-              ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'Frequency_degrees_per_hour', freqnt)
-              !
-           enddo
+           endif
+           if (founam(ifou)(:2)=='ws') then
+              unc_loc = UNC_LOC_U
+              iblws = iblws + 1
+              blnm = 'WS??'
+              write (blnm(3:4), '(i2.2)') iblws
+              namfun = 'wind speed'
+           endif
+           if (founam(ifou)(:2)=='ux') then
+              unc_loc = UNC_LOC_S
+              ibluv = ibluv + 1
+              blnm = 'UX??'
+              write (blnm(3:4), '(i2.2)') ibluv
+              namfun = 'U-component of cell-centre velocity'
+           endif
+           if (founam(ifou)(:2)=='uy') then
+              unc_loc = UNC_LOC_S
+              ibluv = ibluv + 1
+              blnm = 'UY??'
+              write (blnm(3:4), '(i2.2)') ibluv
+              namfun = 'V-component of cell-centre velocity'
+           endif
+           if (founam(ifou)(:3)=='uxa') then
+              unc_loc = UNC_LOC_S
+              ibluva = ibluva + 1
+              blnm = 'UX??'
+              write (blnm(3:4), '(i2.2)') ibluva
+              namfun = 'U-component velocity, column average'
+           endif
+           if (founam(ifou)(:3)=='uya') then
+              unc_loc = UNC_LOC_S
+              ibluva = ibluva + 1
+              blnm = 'UY??'
+              write (blnm(3:4), '(i2.2)') ibluva
+              namfun = 'V-component velocity, column average'
+           endif
+           if (founam(ifou)(:2)=='uc') then
+              unc_loc = UNC_LOC_S
+              ibluc = ibluc + 1
+              blnm = 'UC??'
+              write (blnm(3:4), '(i2.2)') ibluc
+              namfun = 'velocity magnitude'
+           endif
+           if (founam(ifou)(:2)=='r1') then
+              unc_loc = UNC_LOC_S
+              iblcn = iblcn + 1
+              blnm = 'CO??'
+              write (blnm(3:4), '(i2.2)') iblcn
+              namfun = namcon(fconno(ifou))
+           endif
+           if (founam(ifou)(:2)=='u1') then
+              unc_loc = UNC_LOC_U
+              ibluv = ibluv + 1
+              blnm = 'UV??'
+              write (blnm(3:4), '(i2.2)') ibluv
+              namfun = 'velocity'
+           endif
+           if (founam(ifou)(:2)=='qx') then
+              unc_loc = UNC_LOC_U
+              iblqf = iblqf + 1
+              blnm = 'QF??'
+              write (blnm(3:4), '(i2.2)') iblqf
+              namfun = 'unit discharge'
+           endif
+           if (founam(ifou)(:2)=='ta') then
+              unc_loc = UNC_LOC_S
+              iblbs = iblbs + 1
+              blnm = 'BS??'
+              write (blnm(3:4), '(i2.2)') iblbs
+              namfun = 'bed stress'
+           endif
+           write(namfunlong,'(i3.3,2a)') fouref(ifou,1), ": ", trim(namfun)
            !
-           ! Reset the global indices
+           idvar(:,ivar) = imissval 
+           ierr = unc_def_var_map(fileids%ncid,fileids%id_tsp, idvar(:,ivar), NF90_DOUBLE, unc_loc, trim(fouvarnam(ivar)), trim(fouvarnam(ivar)), &
+                          'Fourier analysis '//trim(namfunlong)//', '//trim(fouvarnamlong(ivar)), fouvarunit(ivar),0)
+           ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'long_name','Fourier analysis '//trim(namfunlong)//', '//trim(fouvarnamlong(ivar)))
+           ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'units',fouvarunit(ivar))
+           ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'layer_number', flayno(ifou))
+           ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'Reference_date_in_yyyymmdd', itdate)
+           ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'Starttime_fourier_analysis_in_minutes_since_reference_date', tfastr)
+           ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'Stoptime_fourier_analysis_in_minutes_since_reference_date', tfasto)
+           
+           ierr = unc_add_gridmapping_att(fileids%ncid, idvar(:,ivar), jsferic)
+           select case (founam(ifou))
+           case('s1','r1','u1','ux','uy','uxa','uya','uc','ta')
+              ierr = unc_put_att(fileids%ncid, idvar(:,ivar),  'coordinates'  , 'FlowElem_xcc FlowElem_ycc')
+           case('qxk','ws')
+              ierr = unc_put_att(fileids%ncid, idvar(:,ivar),  'coordinates'  , 'FlowLink_xu FlowLink_yu')
+           end select
+           ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'Number_of_cycles', fnumcy(ifou))
+           ierr = unc_put_att(fileids%ncid,idvar(:,ivar), 'Frequency_degrees_per_hour', freqnt)
            !
-           iblwl = 0
-           iblws = 0
-           ibleh = 0
-           iblcn = 0
-           ibluv = 0
-           ibluva= 0
-           ibluc = 0
-           iblqf = 0
-           iblbs = 0
-           iblep = 0
-        endif 
+        enddo
+        !
+        ! Reset the global indices
+        !
+        iblwl = 0
+        iblws = 0
+        ibleh = 0
+        iblcn = 0
+        ibluv = 0
+        ibluva= 0
+        ibluc = 0
+        iblqf = 0
+        iblbs = 0
+        iblep = 0
 
         ! END DEFINITION MODE 
         ierr =  nf90_enddef(fileids%ncid)
@@ -1913,7 +1906,7 @@ end subroutine setfouunit
         !
         ! Close fourier output file
         !
-        ierr = nf90_close(fileids%ncid)
+        ierr = nf90_close(fileids%ncid)         ! ncid NOT set to zero, to avoid writing the fourier output file again.
     end subroutine wrfou
 
     
