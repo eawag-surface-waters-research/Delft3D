@@ -69,7 +69,11 @@ module properties
        module procedure prop_set_double
        module procedure prop_set_doubles
     end interface
-
+    
+    interface get_version_number
+       module procedure prop_get_version_number
+    end interface
+    
 contains
 
 subroutine prop_file(filetype, filename , tree, error)
@@ -2137,4 +2141,74 @@ end subroutine count_occurrences
 
  end subroutine prop_get_strings
 
+ !> returns the version number found in the ini file default location is "[General], fileVersion"
+ subroutine prop_get_version_number(tree, chapterin, keyin, major, minor, versionstring, success)
+    use MessageHandling
+    
+    implicit none
+    !
+    ! Parameters
+    !
+    type(tree_data), pointer, intent(in   )                 :: tree           !< pointer to treedata structure of input
+    character(*)            , intent(in   ), optional       :: chapterin      !< chapter for the for the fileVersion, if not present 'General' is used 
+    character(*)            , intent(in   ), optional       :: keyin          !< key for fileVersion, if not present 'fileVersion' is used 
+    integer                 , intent(  out), optional       :: major          !< Major number of the fileVersion
+    integer                 , intent(  out), optional       :: minor          !< Minor number of the fileVersion
+    character(len=*)        , intent(  out), optional       :: versionstring  !< Version string
+    logical                 , intent(  out), optional       :: success        !< Returns whether fileVersion is found
+    
+    character(len=IdLen)      :: chapterin_
+    character(len=IdLen)      :: keyin_
+    character(len=IdLen)      :: string
+    logical                   :: success_
+    logical                   :: isnum
+    integer                   :: idot
+    integer                   :: iend
+    
+    
+    if (present(chapterin)) then
+       chapterin_ = chapterin
+    else
+       chapterin_ = 'General'
+    endif
+    if (present(keyin)) then
+       keyin_ = keyin
+    else
+       keyin_ = 'fileVersion'
+    endif
+    
+    call prop_get_string(tree, chapterin_, keyin_, string, success)
+    if (.not. success) then
+       return
+    endif
+    
+    idot = index(string, '.')
+    if (idot==0) then
+       success = .false.
+       return
+    endif
+       
+    if (present(major)) then
+       read(string(1:idot-1), '(i)') major
+    endif
+    if (present(minor)) then
+       iend = idot
+       isnum = .true.
+       do while (isnum) 
+          if (iend+1 > len(string)) then
+             isnum = .false.
+          elseif (scan(string(iend+1:iend+1),'01234567890') /= 0) then
+             iend = iend+1
+          else
+             isnum = .false.
+          endif
+       enddo
+       
+       read(string(idot+1:iend), '(i)') minor
+    endif
+    if (present(versionstring)) then
+       versionstring= string
+    endif
+    
+ end subroutine prop_get_version_number
 end module properties
