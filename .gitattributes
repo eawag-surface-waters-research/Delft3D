@@ -3023,6 +3023,7 @@ src/test/utils_lgpl/deltares_common/packages/test_deltares_common/src/test_sorti
 src/test/utils_lgpl/deltares_common/packages/test_deltares_common/src/test_string_module.f90 -text
 src/test/utils_lgpl/deltares_common/packages/test_deltares_common/test_data/no-chapters.ini -text
 src/test/utils_lgpl/deltares_common/packages/test_deltares_common/test_data/simple-file.ini -text
+src/test/utils_lgpl/deltares_common/packages/test_deltares_common/test_data/test_fileversion.ini -text
 src/test/utils_lgpl/deltares_common/packages/test_deltares_common/test_deltares_common.vfproj -text
 src/third_party/Makefile.am -text
 src/third_party/interacter_stub/Makefile.am -text
