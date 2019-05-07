@@ -2141,7 +2141,7 @@ end subroutine count_occurrences
 
  end subroutine prop_get_strings
 
- !> returns the version number found in the ini file default location is "[General], fileVersion"
+ !> returns the version number found in the ini file. Default location is "[General], fileVersion"
  subroutine prop_get_version_number(tree, chapterin, keyin, major, minor, versionstring, success)
     use MessageHandling
     
@@ -2150,7 +2150,7 @@ end subroutine count_occurrences
     ! Parameters
     !
     type(tree_data), pointer, intent(in   )                 :: tree           !< pointer to treedata structure of input
-    character(*)            , intent(in   ), optional       :: chapterin      !< chapter for the for the fileVersion, if not present 'General' is used 
+    character(*)            , intent(in   ), optional       :: chapterin      !< chapter for the fileVersion, if not present 'General' is used 
     character(*)            , intent(in   ), optional       :: keyin          !< key for fileVersion, if not present 'fileVersion' is used 
     integer                 , intent(  out), optional       :: major          !< Major number of the fileVersion
     integer                 , intent(  out), optional       :: minor          !< Minor number of the fileVersion
@@ -2201,7 +2201,7 @@ end subroutine count_occurrences
        do while (isnum) 
           if (iend+1 > len(string)) then
              isnum = .false.
-          elseif (scan(string(iend+1:iend+1),'01234567890') /= 0) then
+          elseif (scan(string(iend+1:iend+1),'0123456789') /= 0) then
              iend = iend+1
           else
              isnum = .false.
