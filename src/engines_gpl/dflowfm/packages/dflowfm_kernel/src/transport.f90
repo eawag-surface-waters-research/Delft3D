@@ -1411,7 +1411,7 @@ subroutine alloc_transport(Keepexisting)
    use m_transport
    use m_alloc
    use m_meteo, only: numtracers, numfracs
-   use m_flowexternalforcings, only: numsrc, qcsrc, vcsrc
+   use m_flowexternalforcings, only: numsrc, qcsrc, vcsrc, wstracers
    use m_sediment, only: stm_included, jasedtranspveldebug
    implicit none
    
@@ -1440,6 +1440,7 @@ subroutine alloc_transport(Keepexisting)
    call realloc(dsedy       , (/ NUMCONST, Ndkx /), keepExisting=KeepExisting, fill=0d0)
    
    call realloc(thetavert, NUMCONST, keepExisting=KeepExisting, fill=0d0)
+   call realloc(wstracers, NUMCONST, keepExisting=KeepExisting, fill=0d0)
    
    call realloc(const_names, NUMCONST, keepExisting=KeepExisting, fill='')
    call realloc(const_units, NUMCONST, keepExisting=KeepExisting, fill='')
