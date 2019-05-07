@@ -2193,7 +2193,7 @@ end subroutine count_occurrences
     endif
        
     if (present(major)) then
-       read(string(1:idot-1), '(i)') major
+       read(string(1:idot-1), *) major
     endif
     if (present(minor)) then
        iend = idot
@@ -2208,7 +2208,7 @@ end subroutine count_occurrences
           endif
        enddo
        
-       read(string(idot+1:iend), '(i)') minor
+       read(string(idot+1:iend), *) minor
     endif
  end subroutine prop_get_version_number
 end module properties
