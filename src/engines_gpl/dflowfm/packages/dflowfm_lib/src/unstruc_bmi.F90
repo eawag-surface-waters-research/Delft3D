@@ -1183,6 +1183,16 @@ subroutine set_var(c_var_name, xptr) bind(C, name="set_var")
   include "bmi_set_var.inc"
 
   ! custom overrides
+  select case(var_name)
+  case("zk")
+      do i = 1, numk
+          call update_land_nodes(i, x_1d_double_ptr(i))
+      enddo
+      call land_change_callback()
+
+      return
+  end select
+  
   if (numconst > 0) then
      iconst = findname(numconst, const_names, var_name)
   endif
@@ -1234,6 +1244,8 @@ subroutine set_var_slice(c_var_name, c_start, c_count, xptr) bind(C, name="set_v
 
   call c_f_pointer(xptr, x_1d_double_ptr, (/ c_count(1) /))
 
+  include 'bmi_set_var_slice.inc'
+
   ! custom overrides
   select case(var_name)
   case("ucx")
@@ -1284,8 +1296,6 @@ subroutine set_var_slice(c_var_name, c_start, c_count, xptr) bind(C, name="set_v
       !call dropland(xz(index + 1), yz(index + 1), 1)
       return
   end select
-
-  include 'bmi_set_var_slice.inc'
 
   if (numconst > 0) then
      iconst = findname(numconst, const_names, var_name)
