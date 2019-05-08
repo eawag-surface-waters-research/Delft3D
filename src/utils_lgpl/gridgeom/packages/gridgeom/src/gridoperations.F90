@@ -2577,9 +2577,9 @@
    integer, allocatable                   :: mergedOneDmask(:)                   !< Masking array for 1d mesh points, merged nodes
    
    !ap unMergedOneDmask to merged
-   if (present(unMergedOneDmask)) then
-      ierr = ggeo_unMergedArrayToMergedArray(unMergedOneDmask, mergedOneDmask)
-   endif
+   !if (present(unMergedOneDmask)) then
+   !   ierr = ggeo_unMergedArrayToMergedArray(unMergedOneDmask, mergedOneDmask)
+   !endif
    
    ierr = 0
    call savenet()
@@ -2847,23 +2847,23 @@
    endif
 
    !there is no merging to do
-   numUnMergedNodes = size(mesh1dUnMergedToMergedGridGeom)
-   if (numUnMergedNodes<=0) then
-      maskSize = size(unMergedOneDmask)
-      allocate(merged(maskSize))
-      do i=1,maskSize
-         merged(i) = unMergedOneDmask(i)
-      enddo
-      return
-   endif
-
-   allocate(merged(numUnMergedNodes))
-   do i  = 1,numUnMergedNodes
-      k = mesh1dUnMergedToMergedGridGeom(i)
-      if(k>0) then
-         merged(k) = unMergedOneDmask(i)
-      endif
-   enddo
+   !numUnMergedNodes = size(mesh1dUnMergedToMergedGridGeom)
+   !if (numUnMergedNodes<=0) then
+   !   maskSize = size(unMergedOneDmask)
+   !   allocate(merged(maskSize))
+   !   do i=1,maskSize
+   !      merged(i) = unMergedOneDmask(i)
+   !   enddo
+   !   return
+   !endif
+   !
+   !allocate(merged(numUnMergedNodes))
+   !do i  = 1,numUnMergedNodes
+   !   k = mesh1dUnMergedToMergedGridGeom(i)
+   !   if(k>0) then
+   !      merged(k) = unMergedOneDmask(i)
+   !   endif
+   !enddo
 
    end function ggeo_unMergedArrayToMergedArray
 

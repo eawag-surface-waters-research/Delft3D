@@ -977,16 +977,17 @@ double precision, allocatable :: mappedValues(:)
       ! Internal 1d flownodes. Horizontal position: nodes in 1d mesh.
       if (ndx1d > 0) then
          ! temporary UGRID fix
-         if(numMesh1dBeforeMerging>0) then
-            if(allocated(mappedValues)) deallocate(mappedValues)
-            allocate(mappedValues(numMesh1dBeforeMerging))
-            do i =1, numMesh1dBeforeMerging
-               mappedValues(i)=values(ndx2d+mesh1dUnmergedToMerged(i))
-            enddo  
-            ierr = nf90_put_var(ncid, id_var(1), mappedValues, start = (/ 1, id_tsp%idx_curtime /))
-         else
+         !if(numMesh1dBeforeMerging>0) then
+         !   if(allocated(mappedValues)) deallocate(mappedValues)
+         !   allocate(mappedValues(numMesh1dBeforeMerging))
+         !   do i =1, numMesh1dBeforeMerging
+         !      !mappedValues(i)=values(ndx2d+mesh1dUnmergedToMerged(i))
+         !      mappedValues(i)=values(ndx2d)
+         !   enddo  
+         !   ierr = nf90_put_var(ncid, id_var(1), mappedValues, start = (/ 1, id_tsp%idx_curtime /))
+         !else
             ierr = nf90_put_var(ncid, id_var(1), values(ndx2d+1:ndxi), start = (/ 1, id_tsp%idx_curtime /))
-         end if
+         !end if
       end if
       ! Internal 2d flownodes. Horizontal position: faces in 2d mesh.
       if (ndx2d > 0) then
@@ -9278,8 +9279,8 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
    
    ! Old convention, with overlapping points
    if (allocated(mesh1dNodeIds)) deallocate(mesh1dNodeIds)
-   if (allocated(mesh1dUnmergedToMerged)) deallocate(mesh1dUnmergedToMerged)
-   if (allocated(mesh1dMergedToUnMerged)) deallocate(mesh1dMergedToUnMerged)
+   !if (allocated(mesh1dUnmergedToMerged)) deallocate(mesh1dUnmergedToMerged)
+   !if (allocated(mesh1dMergedToUnMerged)) deallocate(mesh1dMergedToUnMerged)
    
    !this value needs to be determined from file 
    nodesOnBranchVertices = 1
@@ -9503,12 +9504,13 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
          YK(numk_last+l) = yface(mesh2indexes(l))
          currentNodeId   = nodeids(mesh1indexes(l))
          ! For 1d use mapping 
-         do i = 1, numMesh1dBeforeMerging
-            if (mesh1dNodeIds(i) == currentNodeId) then
-               kn(1,numl_last+l) = mesh1dUnmergedToMerged(i)
-               exit
-            endif
-         enddo         
+         !do i = 1, numMesh1dBeforeMerging
+         !   if (mesh1dNodeIds(i) == currentNodeId) then
+         !      kn(1,numl_last+l) = mesh1dUnmergedToMerged(i)
+         !      exit
+         !   endif
+         !enddo         
+         kn(1,numl_last+l) = numl_last+l
          kn(2,numl_last+l) = numk_last+l
          kn(3,numl_last+l) = contacttype(l)
       enddo
@@ -11717,12 +11719,12 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
    end if
 
    ! Temporary UGRID fix
-   if(numMesh1dBeforeMerging>0) then
-      ndx1d=numMesh1dBeforeMerging
-   else
+   !if(numMesh1dBeforeMerging>0) then
+   !   ndx1d=numMesh1dBeforeMerging
+   !else
       ! 1D flow grid geometry + 1D2D connections
       ndx1d = ndxi - ndx2d
-   endif
+   !endif
    
    n1d2dcontacts = 0
    if (ndx1d > 0) then
@@ -11731,17 +11733,19 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
       call realloc(x1dn, ndx1d)
       call realloc(y1dn, ndx1d)
       ! Temporary UGRID fix
-      if(numMesh1dBeforeMerging>0) then
-         do n =1,ndx1d
-            x1dn(n)=xz(ndx2d+mesh1dUnmergedToMerged(n))
-            y1dn(n)=xz(ndx2d+mesh1dUnmergedToMerged(n))
-         enddo  
-      else
+      !if(numMesh1dBeforeMerging>0) then
+      !   do n =1,ndx1d
+      !      !x1dn(n)=xz(ndx2d+mesh1dUnmergedToMerged(n))
+      !      !y1dn(n)=xz(ndx2d+mesh1dUnmergedToMerged(n))
+      !      x1dn(n)=xz(ndx2d+n)
+      !      y1dn(n)=xz(ndx2d+n)
+      !   enddo  
+      !else
          do n=1,ndx1d
             x1dn(n) = xz(ndx2d+n)
             y1dn(n) = yz(ndx2d+n)
          enddo
-      endif
+      !endif
       
       !count 1d mesh edges and 1d2d contacts 
       n1dedges = 0 
@@ -11769,11 +11773,11 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
       do L=1,lnx1d
          if (kcu(L) == 1) then
             n1dedges = n1dedges + 1
-            if (allocated(mesh1dMergedToUnMerged)) then 
-                edge_nodes(1:2,n1dedges) = mesh1dMergedToUnMerged(ln(1:2,L) - ndx2d) !only 1d edge nodes
-            else
+            !if (allocated(mesh1dMergedToUnMerged)) then 
+            !    edge_nodes(1:2,n1dedges) = mesh1dMergedToUnMerged(ln(1:2,L) - ndx2d) !only 1d edge nodes
+            !else
                 edge_nodes(1:2,n1dedges) = ln(1:2,L) - ndx2d !only 1d edge nodes
-            endif
+            !endif
             !mappings
             id_tsp%edgetoln(n1dedges) = L
          else if (kcu(L) == 3 .or. kcu(L) == 4 .or. kcu(L) == 5 .or. kcu(L) == 7) then  ! 1d2d, lateralLinks, streetinlet, roofgutterpipe
@@ -11782,18 +11786,18 @@ subroutine unc_write_flowgeom_filepointer_ugrid(ncid,id_tsp, jabndnd)
             id_tsp%contactstoln(n1d2dcontacts) = L
             contacttype(n1d2dcontacts) = kcu(L)
             if (ln(1,L) > ndx2d) then  ! First point of 1D link is 1D cell
-               if (allocated(mesh1dMergedToUnMerged)) then ! mesh1dMergedToUnMerged is allocated only for UGrid file format (where merging might be necessary)
-                  contacts(1,n1d2dcontacts) = mesh1dMergedToUnMerged(ln(1,L) - ndx2d)
-               else
+               !if (allocated(mesh1dMergedToUnMerged)) then ! mesh1dMergedToUnMerged is allocated only for UGrid file format (where merging might be necessary)
+               !   contacts(1,n1d2dcontacts) = mesh1dMergedToUnMerged(ln(1,L) - ndx2d)
+               !else
                   contacts(1,n1d2dcontacts) = ln(1,L) - ndx2d
-               endif
+               !endif
                contacts(2,n1d2dcontacts) = ln(2,L)   ! In m_flowgeom: 1D nodenr = ndx2d+n, in UGrid 1D flowgeom: local 1D nodenr = n.
             else                       ! Second point of 1D link is 1D cell
-               if (allocated(mesh1dMergedToUnMerged)) then 
-                  contacts(1,n1d2dcontacts) = mesh1dMergedToUnMerged(ln(2,L) - ndx2d)
-               else
+               !if (allocated(mesh1dMergedToUnMerged)) then 
+               !   contacts(1,n1d2dcontacts) = mesh1dMergedToUnMerged(ln(2,L) - ndx2d)
+               !else
                   contacts(1,n1d2dcontacts) = ln(2,L) - ndx2d
-               endif
+               !endif
                contacts(2,n1d2dcontacts) = ln(1,L)         !2d
             end if
          else
@@ -13211,14 +13215,14 @@ integer function read_1d_mesh_convention_one(ioncid, numk_keep, numl_keep, numk_
    
    !reduce the scope, do deallocation here
    if (allocated(mesh1dNodeIds)) deallocate(mesh1dNodeIds)
-   if (allocated(mesh1dUnmergedToMerged)) deallocate(mesh1dUnmergedToMerged)
-   if (allocated(mesh1dMergedToUnMerged)) deallocate(mesh1dMergedToUnMerged)
+   !if (allocated(mesh1dUnmergedToMerged)) deallocate(mesh1dUnmergedToMerged)
+   !if (allocated(mesh1dMergedToUnMerged)) deallocate(mesh1dMergedToUnMerged)
 
    allocate(mesh1dNodeIds(size(xk)))
-   allocate(mesh1dUnmergedToMerged(size(xk)))
-   allocate(mesh1dMergedToUnMerged(size(xk)))
+   !allocate(mesh1dUnmergedToMerged(size(xk)))
+   !allocate(mesh1dMergedToUnMerged(size(xk)))
 
-   numMesh1dBeforeMerging = 0
+   !numMesh1dBeforeMerging = 0
    ierr = 0
    if (.not. network%loaded) then
       dflowfm_1d = .true.
@@ -13246,10 +13250,10 @@ integer function read_1d_mesh_convention_one(ioncid, numk_keep, numl_keep, numk_
             endif
             pbr%grd(1) = pbr%FromNode%gridNumber
             ! id-mesh node mapping
-            numMesh1dBeforeMerging = numMesh1dBeforeMerging + 1
-            mesh1dNodeIds(numMesh1dBeforeMerging) = pbr%gridPointIDs(1)
-            mesh1dUnmergedToMerged(numMesh1dBeforeMerging) = pbr%grd(1)
-            mesh1dMergedToUnMerged(pbr%grd(1)) = numMesh1dBeforeMerging
+            !numMesh1dBeforeMerging = numMesh1dBeforeMerging + 1
+            !mesh1dNodeIds(numMesh1dBeforeMerging) = pbr%gridPointIDs(1)
+            !mesh1dUnmergedToMerged(numMesh1dBeforeMerging) = pbr%grd(1)
+            !mesh1dMergedToUnMerged(pbr%grd(1)) = numMesh1dBeforeMerging
             ngrd = pbr%gridPointsCount
 
             do k = 2, ngrd-1
@@ -13260,10 +13264,10 @@ integer function read_1d_mesh_convention_one(ioncid, numk_keep, numl_keep, numk_
                yk(numk) = pbr%Ys(k)
                zk(numk) = dmiss
                ! id-mesh node mapping
-               numMesh1dBeforeMerging = numMesh1dBeforeMerging + 1
-               mesh1dNodeIds(numMesh1dBeforeMerging) = pbr%gridpointids(k)
-               mesh1dUnmergedToMerged(numMesh1dBeforeMerging) = pbr%grd(k)
-               mesh1dMergedToUnMerged(pbr%grd(k)) = numMesh1dBeforeMerging
+               !numMesh1dBeforeMerging = numMesh1dBeforeMerging + 1
+               !mesh1dNodeIds(numMesh1dBeforeMerging) = pbr%gridpointids(k)
+               !mesh1dUnmergedToMerged(numMesh1dBeforeMerging) = pbr%grd(k)
+               !mesh1dMergedToUnMerged(pbr%grd(k)) = numMesh1dBeforeMerging
             enddo
             if ( pbr%toNode%gridNumber == 0 ) then
                numk = numk + 1
@@ -13274,10 +13278,10 @@ integer function read_1d_mesh_convention_one(ioncid, numk_keep, numl_keep, numk_
             endif
             pbr%grd(ngrd) = pbr%toNode%gridNumber
             ! id-mesh node mapping
-            numMesh1dBeforeMerging = numMesh1dBeforeMerging + 1
-            mesh1dNodeIds(numMesh1dBeforeMerging) = pbr%gridPointIDs(ngrd)
-            mesh1dUnmergedToMerged(numMesh1dBeforeMerging) = pbr%grd(ngrd)
-            mesh1dMergedToUnMerged(pbr%grd(ngrd)) = numMesh1dBeforeMerging
+            !numMesh1dBeforeMerging = numMesh1dBeforeMerging + 1
+            !mesh1dNodeIds(numMesh1dBeforeMerging) = pbr%gridPointIDs(ngrd)
+            !mesh1dUnmergedToMerged(numMesh1dBeforeMerging) = pbr%grd(ngrd)
+            !mesh1dMergedToUnMerged(pbr%grd(ngrd)) = numMesh1dBeforeMerging
 
             ! second step create links
             do k = 1, ngrd-1
@@ -13311,8 +13315,8 @@ integer function read_1d_mesh_convention_one(ioncid, numk_keep, numl_keep, numk_
    endif
    
    ! re-allocate mesh1dNodeIds and mesh1dUnmergedToMerged
-   call realloc(mesh1dNodeIds, numMesh1dBeforeMerging, keepExisting=.true.)
-   call realloc(mesh1dUnmergedToMerged, numMesh1dBeforeMerging, keepExisting=.true.)
+   !call realloc(mesh1dNodeIds, numMesh1dBeforeMerging, keepExisting=.true.)
+   !call realloc(mesh1dUnmergedToMerged, numMesh1dBeforeMerging, keepExisting=.true.)
 
 end function read_1d_mesh_convention_one
 

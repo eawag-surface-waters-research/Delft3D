@@ -370,7 +370,7 @@ module m_1d_networkreader
    character(len=ug_idsLongNamesLen), allocatable, dimension(:)     :: gpsIDLongnames
    character(len=ug_idsLongNamesLen)                                :: network1dname
    character(len=ug_idsLongNamesLen)                                :: mesh1dname
-   integer, parameter                                               :: nodesOnBranchVertices = 1
+   integer, parameter                                               :: nodesOnBranchVertices = 0
 
 
    !< Structure where all mesh is stored. Internal arrays are all pointers
