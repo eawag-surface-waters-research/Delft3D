@@ -3469,16 +3469,43 @@ end function ug_write_map_ugrid
 
 ! UGRID mesh and network1d functions 
 
-!> This function creates a 1d network accordingly to the new 1d format. 
+!> This function creates a 1d network accordingly to the new 1d format.
+!> This version of the interface is kept for backward compatibility.
 function ug_create_1d_network(ncid, netids, networkName, nNodes, nBranches,nGeometry) result(ierr)
 
-   integer, intent(in)                  :: ncid 
-   character(len=*), intent(in)         :: networkName
-   integer, intent(in)                  :: nNodes,nBranches,nGeometry
-   integer                              :: ierr, wasInDefine
+   integer,            intent(in   ) :: ncid 
+   character(len=*),   intent(in   ) :: networkName
+   integer,            intent(in   ) :: nNodes
+   integer,            intent(in   ) :: nBranches
+   integer,            intent(in   ) :: nGeometry
+   type(t_ug_network), intent(inout) :: netids
+   integer                           :: ierr
+
+   !locals
+   type(t_crs)                       :: crs           !< Coordinate reference system for the x/y-coordinates variables.
+
+   crs%varname = 'Unknown projected'
+   crs%epsg_code = 0
+   
+   ierr = ug_create_1d_network_v1(ncid, netids, networkName, nNodes, nBranches,nGeometry,crs)
+end function ug_create_1d_network
+
+!> This function creates a 1d network accordingly to the new 1d format. 
+function ug_create_1d_network_v1(ncid, netids, networkName, nNodes, nBranches,nGeometry,crs) result(ierr)
+
+   integer,            intent(in   ) :: ncid 
+   character(len=*),   intent(in   ) :: networkName
+   integer,            intent(in   ) :: nNodes
+   integer,            intent(in   ) :: nBranches
+   integer,            intent(in   ) :: nGeometry
+   type(t_ug_network), intent(inout) :: netids
+   type(t_crs),        intent(in   ) :: crs           !< Coordinate reference system for the x/y-coordinates variables.
+   integer                           :: ierr
+   
+   !locals
+   integer                              :: wasInDefine
    character(len=len_trim(networkName)) :: prefix
-   type(t_ug_network), intent(inout)    :: netids
-    
+
    prefix=trim(networkName)
    
    ierr = UG_SOMEERR
@@ -3548,14 +3575,11 @@ function ug_create_1d_network(ncid, netids, networkName, nNodes, nBranches,nGeom
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dnodlongnames), 'long_name', 'long names of the network connection nodes')
    !3. Nodes: x coord
    ierr = nf90_def_var(ncid, prefix//'_nodes_x', nf90_double, (/ netids%dimids(ntdim_1dnodes) /) , netids%varids(ntid_1dnodex))
-   ierr = nf90_put_att(ncid, netids%varids(ntid_1dnodex), 'standard_name', 'projection_x_coordinate')
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dnodex), 'long_name', 'x coordinates of the network connection nodes')
-   ierr = nf90_put_att(ncid, netids%varids(ntid_1dnodex), 'units', 'm')
    !3. Nodes: y coord
    ierr = nf90_def_var(ncid, prefix//'_nodes_y', nf90_double, (/ netids%dimids(ntdim_1dnodes) /) , netids%varids(ntid_1dnodey))
-   ierr = nf90_put_att(ncid, netids%varids(ntid_1dnodey), 'standard_name', 'projection_y_coordinate')
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dnodey), 'long_name', 'y coordinates of the network connection nodes')
-   ierr = nf90_put_att(ncid, netids%varids(ntid_1dnodey), 'units', 'm')
+   ierr = ug_addcoordatts(ncid, netids%varids(ntid_1dnodex), netids%varids(ntid_1dnodey), crs)
 
    !4. Geometry
    ierr = nf90_def_var(ncid, prefix//'_geometry', nf90_int, netids%varids(ntid_1dgeometry))
@@ -3587,7 +3611,7 @@ function ug_create_1d_network(ncid, netids, networkName, nNodes, nBranches,nGeom
       ierr = nf90_enddef(ncid)
    endif
    
-end function ug_create_1d_network
+end function ug_create_1d_network_v1
 
 !> This function is included for backward compatibility
 function ug_create_1d_mesh(ncid, networkname, meshids, meshname, nmeshpoints) result(ierr)
@@ -3604,13 +3628,39 @@ end function ug_create_1d_mesh
 !> This function creates a 1d mesh accordingly to the new 1d format. 
 function ug_create_1d_mesh_v1(ncid, networkname, meshids, meshname, nmeshpoints, writexy) result(ierr)
    
-   integer, intent(in)                  :: ncid, nmeshpoints
-   type(t_ug_mesh), intent(inout)       :: meshids   
-   character(len=*),intent(in)          :: meshname, networkname
-   integer, intent(in)                  :: writexy
-   !locals
-   integer                              :: ierr, wasInDefine
+   integer,          intent(in   ) :: ncid
+   integer,          intent(in   ) :: nmeshpoints
+   type(t_ug_mesh),  intent(inout) :: meshids   
+   character(len=*), intent(in   ) :: networkname
+   character(len=*), intent(in   ) :: meshname
+   integer,          intent(in   ) :: writexy
+   integer                         :: ierr
 
+   !locals
+   type(t_crs)                     :: crs           !< Coordinate reference system for the x/y-coordinates variables.
+
+   crs%varname = 'Unknown projected'
+   crs%epsg_code = 0
+   
+   ierr = -1
+   ierr = ug_create_1d_mesh_v2(ncid, networkname, meshids, meshname, nmeshpoints, writexy, crs)
+end function ug_create_1d_mesh_v1
+
+!> This function creates a 1d mesh accordingly to the new 1d format.
+!> Including correct names for x and y coordinates.
+function ug_create_1d_mesh_v2(ncid, networkname, meshids, meshname, nmeshpoints, writexy, crs) result(ierr)
+   
+   integer         , intent(in)    :: ncid
+   integer         , intent(in)    :: nmeshpoints
+   type(t_ug_mesh) , intent(inout) :: meshids   
+   character(len=*), intent(in)    :: networkname
+   character(len=*), intent(in)    :: meshname
+   integer         , intent(in)    :: writexy
+   type(t_crs)     , intent(in)    :: crs           !< Coordinate reference system for the x/y-coordinates variables.
+   integer                         :: ierr
+   
+   !locals
+   integer                              :: wasInDefine
    character(len=len_trim(meshname))    :: prefix
    character(len=nf90_max_name)         :: buffer
       
@@ -3655,19 +3705,21 @@ function ug_create_1d_mesh_v1(ncid, networkname, meshids, meshname, nmeshpoints,
    ! 2. mesh1D :assign the the offset from the starting node
    ierr = nf90_def_var(ncid, prefix//'_nodes_branch_offset', nf90_double, (/ meshids%dimids(mdim_node) /) , meshids%varids(mid_1doffset))
    ierr = nf90_put_att(ncid, meshids%varids(mid_1doffset), 'long_name', 'Offset along the branch at which the node is located')   
+   ierr = nf90_put_att(ncid, meshids%varids(mid_1doffset), 'units', 'm')   
    
    if (writexy == 1) then
        ierr = nf90_def_var(ncid, prefix//'_nodes_x', nf90_double, (/ meshids%dimids(mdim_node) /), meshids%varids(mid_nodex))
        ierr = nf90_put_att(ncid, meshids%varids(mid_nodex), 'long_name', 'x coordinates of the mesh nodes')
        ierr = nf90_def_var(ncid, prefix//'_nodes_y', nf90_double, (/ meshids%dimids(mdim_node) /), meshids%varids(mid_nodey))
        ierr = nf90_put_att(ncid, meshids%varids(mid_nodey), 'long_name', 'y coordinates of the mesh nodes')
+       ierr = ug_addcoordatts(ncid, meshids%varids(mid_nodex), meshids%varids(mid_nodey), crs)
    endif
    
    if (wasInDefine==0) then
       ierr = nf90_enddef(ncid)
    endif
 
-end function ug_create_1d_mesh_v1
+end function ug_create_1d_mesh_v2
 
 !> This function defines the ids of a specific entity (node/edge/face) on the current mesh and creates the variable to store the ids
 function ug_def_mesh_ids(ncid, meshids, meshname, locationType) result(ierr)

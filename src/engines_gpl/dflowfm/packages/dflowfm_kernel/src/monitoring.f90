@@ -634,6 +634,7 @@ end subroutine addObservation
 !> Adds observation points that are read from *.ini file to the normal obs adm
 subroutine addObservation_from_ini(network, filename)
    use m_network
+   use m_sferic, only:jsferic
    use m_ObservationPoints
    use odugrid
    use m_save_ugrid_state
@@ -675,7 +676,7 @@ subroutine addObservation_from_ini(network, filename)
    allocate(yy_tmp(nbrch))
    if (nbrch > 0) then
       ierr = odu_get_xy_coordinates(branchIdx_tmp(1:nbrch), Chainage_tmp(1: nbrch), meshgeom1d%ngeopointx, meshgeom1d%ngeopointy, &
-                                     meshgeom1d%nbranchgeometrynodes, meshgeom1d%nbranchlengths, 0, xx_tmp, yy_tmp)
+                                     meshgeom1d%nbranchgeometrynodes, meshgeom1d%nbranchlengths, jsferic, xx_tmp, yy_tmp)
    endif
    if (ierr /= DFM_NOERR) then
       call mess(LEVEL_ERROR, "Error occurs when getting the x- and y-coordinates for obs from file '"//trim(filename)//".")

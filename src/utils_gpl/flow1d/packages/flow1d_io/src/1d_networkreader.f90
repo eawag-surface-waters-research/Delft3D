@@ -158,7 +158,7 @@ module m_1d_networkreader
    double precision, allocatable, dimension(:)      :: gpsX
    double precision, allocatable, dimension(:)      :: gpsY
    type(t_node), dimension(:), pointer              :: pnodes
-   integer                                          :: ibran, inode, i, j
+   integer                                          :: ibran, inode, i, j, jsferic
    integer                                          :: gridPointsCount
    double precision, allocatable, dimension(:)      :: localOffsets
    double precision, allocatable, dimension(:)      :: localOffsetsSorted
@@ -227,8 +227,13 @@ module m_1d_networkreader
       call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error Allocating Memory for Grid Point Coordinates')
    endif
    
+   if (meshgeom%epsg==4326) then
+      jsferic = 1
+   else
+      jsferic = 0
+   endif
    ierr = ggeo_get_xy_coordinates(meshgeom%branchidx, meshgeom%branchoffsets, meshgeom%ngeopointx, meshgeom%ngeopointy, &
-      meshgeom%nbranchgeometrynodes, meshgeom%nbranchlengths, 0, gpsX, gpsY)
+      meshgeom%nbranchgeometrynodes, meshgeom%nbranchlengths, jsferic, gpsX, gpsY)
    if (ierr .ne. 0) then
       call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error Getting Mesh Coordinates From UGrid Data')
    endif

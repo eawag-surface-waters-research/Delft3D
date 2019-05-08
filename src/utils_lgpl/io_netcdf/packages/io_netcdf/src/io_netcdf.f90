@@ -1492,7 +1492,7 @@ function ionc_create_1d_network_ugrid(ioncid, networkid, networkName, nNodes, nB
    ! set the network name
    datasets(ioncid)%ug_file%networksnames(networkid) = networkName
    ! add a 1d network
-   ierr = ug_create_1d_network(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%netids(networkid), networkName, nNodes, nBranches, nGeometry)
+   ierr = ug_create_1d_network_v1(datasets(ioncid)%ncid, datasets(ioncid)%ug_file%netids(networkid), networkName, nNodes, nBranches, nGeometry, datasets(ioncid)%crs)
    
 end function ionc_create_1d_network_ugrid
 
@@ -1664,7 +1664,7 @@ function ionc_create_1d_mesh_ugrid_v1(ioncid, networkname, meshid, meshname, nme
    ! set the meshname
    datasets(ioncid)%ug_file%meshnames(meshid) = meshname
    ! create mesh
-   ierr = ug_create_1d_mesh_v1(datasets(ioncid)%ncid, networkname, datasets(ioncid)%ug_file%meshids(meshid), meshname, nmeshpoints, writexy)
+   ierr = ug_create_1d_mesh_v2(datasets(ioncid)%ncid, networkname, datasets(ioncid)%ug_file%meshids(meshid), meshname, nmeshpoints, writexy, datasets(ioncid)%crs)
   
 end function ionc_create_1d_mesh_ugrid_v1
 
