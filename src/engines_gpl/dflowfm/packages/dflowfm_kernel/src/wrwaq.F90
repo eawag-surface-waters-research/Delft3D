@@ -1700,13 +1700,14 @@ end subroutine waq_wri_couple_files
 !! Currently, default: one-to-one.
 subroutine waq_prepare_aggr()
     use m_flowgeom
-    use m_partitioninfo, only: jampi
+    use m_partitioninfo
     use m_flow
     use m_flowexternalforcings
     use m_alloc
     implicit none
     
     integer :: i, kb, kt, ktx, vaglay
+    integer, dimension(1) :: kmxnr
     integer :: lunvag, istat, ierr
     logical :: test_aggr, test_layeraggr
 
@@ -1747,6 +1748,13 @@ subroutine waq_prepare_aggr()
         waqpar%kmxnx = maxval(kmxn)
     end if
 
+    ! Determine maximum number of layers in all domains (for z-layers)
+    if (jampi.eq.1) then
+       kmxnr(1) = waqpar%kmxnx
+       call reduce_int_max(1, kmxnr)
+       waqpar%kmxnx = kmxnr(1)
+    end if
+    
     call realloc(waqpar%ilaggrhyd, waqpar%kmxnx, keepExisting=.false., fill=1)
     call realloc(waqpar%ilaggr, waqpar%kmxnx, keepExisting=.false., fill=0)
     waqpar%aggrel = 0
