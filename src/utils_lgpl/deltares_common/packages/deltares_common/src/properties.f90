@@ -2141,7 +2141,9 @@ end subroutine count_occurrences
 
  end subroutine prop_get_strings
 
- !> returns the version number found in the ini file. Default location is "[General], fileVersion"
+ !> Returns the version number found in the ini file default location is "[General], fileVersion".
+ !! FileVersion should contain <<major>>.<<minor>><<additional info>>. 
+ !! SUCCESS is set to false, when no '.' is found or when the key cannot be found.
  subroutine prop_get_version_number(tree, chapterin, keyin, major, minor, versionstring, success)
     use MessageHandling
     
