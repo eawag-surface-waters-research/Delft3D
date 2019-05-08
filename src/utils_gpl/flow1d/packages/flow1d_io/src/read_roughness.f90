@@ -412,7 +412,7 @@ contains
       integer, pointer, dimension(:)         :: fun_type
      
       ! Get section id
-      call prop_get_string(tree_ptr, 'Content', 'frictionId', frictionId, success)
+      call prop_get_string(tree_ptr, 'Content', 'sectionId', frictionId, success)
       if (.not. success) then
          call setmessage(LEVEL_FATAL, 'frictionId not found in roughness definition file: '//trim(inputfile))
       endif
@@ -660,4 +660,4 @@ contains
 
    end subroutine write_roughness_cache
 
-end module m_read_roughness
+    end module m_read_roughness
