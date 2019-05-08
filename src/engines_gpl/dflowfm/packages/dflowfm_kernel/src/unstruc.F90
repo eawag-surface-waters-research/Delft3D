@@ -23109,6 +23109,7 @@ endif
  if (jawind > 0) then
     call realloc(wx, lnx, keepExisting = .false., fill = 0d0, stat = ierr)
     call realloc(wy, lnx, keepExisting = .false., fill = 0d0, stat = ierr)
+    call realloc(kcw, lnx, keepExisting = .false., fill = 1, stat = ierr)
  end if 
  
  if (jaQinext > 0) then
@@ -36568,7 +36569,7 @@ end function is_1d_boundary_candidate
 
  if (jatimespace == 0) goto 888                      ! Just cleanup and close ext file.
 
- !if (allocated(wx))           deallocate(wx,wy)              ! wind arrays
+ !if (allocated(wx))           deallocate(wx,wy)              ! wind arrays are not deallocated here for use with bmi
  if (allocated(wmag))         deallocate(wmag)
  if (allocated(ec_pwxwy_x))   deallocate(ec_pwxwy_x)
  if (allocated(ec_pwxwy_y))   deallocate(ec_pwxwy_y)
@@ -37685,12 +37686,20 @@ if (mext > 0) then
               call err_flush()
            endif
 
-           if (.not. allocated(wx) ) then
+           if (.not. allocated(kcw)) then 
               call realloc(kcw, lnx, stat=ierr, keepExisting=.false.)
               call aerr('kcw(lnx)', ierr, lnx)
-              allocate ( wx(lnx), wy(lnx), stat=ierr)
-              call aerr('wx(lnx), wy(lnx)', ierr, 2*lnx)
-              wx = 0.0_hp ; wy = 0.0_hp ; kcw = 1
+              kcw = 1
+           endif 
+           if (.not. allocated(wx) ) then
+              allocate ( wx(lnx), stat=ierr)
+              call aerr('wx(lnx)', ierr, lnx)
+              wx = 0.0_hp 
+           endif
+           if (.not. allocated(wy) ) then
+              allocate ( wy(lnx), stat=ierr)
+              call aerr('wy(lnx)', ierr, lnx)
+              wy = 0.0_hp
            endif
 
            if (len_trim(sourcemask)>0)  then
