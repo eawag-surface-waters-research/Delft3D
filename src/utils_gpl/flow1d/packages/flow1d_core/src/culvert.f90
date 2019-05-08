@@ -93,6 +93,7 @@ contains
                               
    subroutine ComputeCulvert(culvert, fum, rum, aum, dadsm, kfum, cmustr, s1m1, s1m2, qm,  &
                              q0m, u1m, u0m, dxm, dt, bobgrm1, bobgrm2, wetdown, state, infuru)
+      use m_Roughness
       
       implicit none
       !
@@ -366,8 +367,8 @@ contains
          dpt = CrossSection%charHeight
       endif
       
-      chezyCulvert = 0.0d0
       call GetCSParsFlow(CrossSection, dpt, wArea, wPerimiter, wWidth)     
+      chezyCulvert = getchezy(CrossSection%frictionTypePos(1), CrossSection%frictionValuePos(1), warea/wPerimiter, dpt, 1d0)
                   
       ! Valve Loss
       if (culvert%has_valve .and. (culvert%inivalveopen < dpt)) then
