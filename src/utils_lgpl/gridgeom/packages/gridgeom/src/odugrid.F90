@@ -85,7 +85,7 @@ function odu_get_xy_coordinates(branchids, branchoffsets, geopointsX, geopointsY
    allocate(cartMeshYCoords(size(meshXCoords,1)))
    allocate(cartMeshZCoords(size(meshXCoords,1)))
    
-   !If the coordinates are spherical, trasform them in cartesian, so we operate in linear space
+   !If the coordinates are spherical, transform them in cartesian, so we operate in linear space
    maxlat = 0
    if (jsferic == 1) then
       do i = 1, size(geopointsX,1)
