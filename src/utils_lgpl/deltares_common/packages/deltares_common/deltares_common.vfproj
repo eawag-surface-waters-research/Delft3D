@@ -79,12 +79,14 @@
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
 		<File RelativePath=".\src\deltares_common_version.F90.svn"/>
+		<File RelativePath=".\src\dictionary_class.f90"/>
 		<File RelativePath="src\distance.f90"/>
 		<File RelativePath=".\src\geometry_module.f90"/>
 		<File RelativePath=".\src\grid_dimens_module.f90"/>
 		<File RelativePath="src\handles.f90"/>
 		<File RelativePath=".\src\hash_search.f90"/>
 		<File RelativePath=".\src\iso_c_utils.F90"/>
+		<File RelativePath=".\src\m_tablematrices.f90"/>
 		<File RelativePath=".\src\m_tables.f90"/>
 		<File RelativePath="src\malloc.f90"/>
 		<File RelativePath=".\src\mathconsts.f90"/>
@@ -103,7 +105,6 @@
 		<File RelativePath="src\small.f90"/>
 		<File RelativePath=".\src\sorting_algorithms.f90"/>
 		<File RelativePath=".\src\string_module.f90"/>
-		<File RelativePath=".\src\dictionary_class.f90"/>
 		<File RelativePath="src\stringsequal.f90"/>
 		<File RelativePath=".\src\system_utils.F90">
 			<FileConfiguration Name="Debug|Win32">
