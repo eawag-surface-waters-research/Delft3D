@@ -13588,6 +13588,7 @@ src/utils_lgpl/deltares_common/packages/deltares_common/src/grid_dimens_module.f
 src/utils_lgpl/deltares_common/packages/deltares_common/src/handles.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/hash_search.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/iso_c_utils.F90 -text
+src/utils_lgpl/deltares_common/packages/deltares_common/src/m_tablematrices.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/m_tables.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/malloc.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/mathconsts.f90 -text
