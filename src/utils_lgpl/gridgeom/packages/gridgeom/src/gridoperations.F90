@@ -2579,8 +2579,8 @@
    !ap unMergedOneDmask to merged
    !if (present(unMergedOneDmask)) then
    !   ierr = ggeo_unMergedArrayToMergedArray(unMergedOneDmask, mergedOneDmask)
-   !endif
-   
+   !endif 
+   i = size(xk) ; deallocate(kc) ; allocate(kc(i))
    ierr = 0
    call savenet()
    call findcells(0)
@@ -2625,8 +2625,10 @@
    NML  = NUML
    DO K = 1,NUMK
 
-      IF ((NMK(K) == 2 .and. kc(k) == 1) .or. (kc(k) == 1 .and. allocated(mergedOneDmask))) THEN ! Do not connect the extreme vertices of the 1d mesh. 
-                                                                                         ! TODO: If oneDmask, calls comes from Delta Shell, remove when this information can be retrived from an extra argument  
+!      IF ((NMK(K) == 2 .and. kc(k) == 1) .or. (kc(k) == 1 .and. present(oneDmask))) THEN ! Do not connect the extreme vertices of the 1d mesh. 
+!                                                                                         ! TODO: If oneDmask, calls comes from Delta Shell, remove when this information can be retrived from an extra argument  
+
+      if (kc(k) == 1) then  
 
          IF (allocated(KC) ) then 
             if ( KC(K) == 1) THEN
