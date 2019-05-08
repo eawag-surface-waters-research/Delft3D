@@ -43,6 +43,7 @@ module m_Roughness
    use m_alloc
    use m_branch
    use m_tables
+   use m_tablematrices
    use m_spatial_data
    use m_hash_search
    
@@ -72,6 +73,8 @@ module m_Roughness
       module procedure flengrprDouble
    end interface 
    
+   !> roughness definition
+   
    !> Roughness definition
    type, public :: t_Roughness                           !< Derived type for roughness data 
    
@@ -83,9 +86,13 @@ module m_Roughness
                                                          !! 3 = Floodplan2
                                                          !! Any other = Other section (Default 0)
       integer                           :: iSection = 0
-      ! branch oriented data
+      type(t_tablematrix), pointer      :: table(:)          !< table for space and parameter dependend roughness
+      logical                           :: useGlobalFriction !< Flag indicates to use frictionValue and frictionType or to use the table
+      double precision                  :: frictionValue     !< Global friction Value
+      integer                           :: frictionType      !< Global friction Type
       integer, pointer                  :: rgh_type_pos(:)   !< Roughness type for positive flow direction at a branch
       integer, pointer                  :: fun_type_pos(:)   !< Roughness parameter value for positive flow direction at a branch     
+      ! branch oriented data (obsolete)
       integer, pointer                  :: rgh_type_neg(:)   !< Roughness type for negative flow direction at a branch
       integer, pointer                  :: fun_type_neg(:)   !< Roughness parameter value for negative flow direction at a branch
 

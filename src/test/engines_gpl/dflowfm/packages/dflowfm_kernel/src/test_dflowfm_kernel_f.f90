@@ -25,6 +25,7 @@ program test_dflowfm_kernel
     use ftnunit
     use test_observations
     use test_cross_sections
+    use test_roughness
     
     implicit none
     
@@ -34,6 +35,7 @@ program test_dflowfm_kernel
     !
     ! Tests for ZOEK.F
     !
+    call tests_roughness
     call tests_cross_sections
     call tests_observations
     !

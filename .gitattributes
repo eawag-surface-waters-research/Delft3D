@@ -2992,6 +2992,7 @@ src/test/engines_gpl/dflowfm/packages/dflowfm_kernel/src/Makefile.am -text
 src/test/engines_gpl/dflowfm/packages/dflowfm_kernel/src/test_cross_section.f90 -text
 src/test/engines_gpl/dflowfm/packages/dflowfm_kernel/src/test_dflowfm_kernel_f.f90 -text
 src/test/engines_gpl/dflowfm/packages/dflowfm_kernel/src/test_observations.f90 -text
+src/test/engines_gpl/dflowfm/packages/dflowfm_kernel/src/test_roughness.f90 -text
 src/test/engines_gpl/dflowfm/packages/test_dflowfm/test_data/ObservationPoints_2.ini -text
 src/test/engines_gpl/dflowfm/packages/test_dflowfm/test_data/crsdef.ini -text
 src/test/engines_gpl/dflowfm/packages/test_dflowfm/test_data/dflowfm_compare_version_output.py -text

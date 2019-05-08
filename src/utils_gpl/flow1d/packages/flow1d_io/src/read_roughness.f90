@@ -148,6 +148,7 @@ contains
             rgs%rough(i)%rgh_type_neg => null()
             rgs%rough(i)%fun_type_pos => null()
             rgs%rough(i)%fun_type_neg => null()
+            rgs%rough(i)%table        => null()
          endif
       enddo
    
@@ -191,7 +192,207 @@ contains
       double precision, intent(inout)        :: default    !> Default friction parameter
       integer, intent(inout)                 :: def_type   !> Default friction type
    
+      integer                                :: major
+      integer                                :: minor
       integer                                :: istat
+      logical                                :: success
+      type(tree_data), pointer               :: tree_ptr
+   
+      ! create and fill tree
+      call tree_create(trim(inputfile), tree_ptr, maxlenpar)
+      call prop_file('ini',trim(inputfile),tree_ptr,istat)
+   
+      call prop_get_version_number(tree_ptr, major = major, minor = minor, success = success)
+      if (.not. success) then
+         major = 1
+         minor = 0
+      endif
+
+      select case(major)
+      case(1)
+         call scan_roughness_input_v100(tree_ptr, rgs, brs, spdata, inputfile, default, def_type)
+      case(2)
+         call scan_roughness_input(tree_ptr, rgs, brs, spdata, inputfile, default, def_type)
+      case default
+         call SetMessage(LEVEL_FATAL,'Unsupported fileVersion for roughness file: '//trim(inputfile))
+      end select
+   end subroutine read_roughnessfile
+
+   subroutine scan_roughness_input(tree_ptr, rgs, brs, spdata, inputfile, default, def_type)
+      use m_tablematrices
+      
+      type(tree_data), pointer, intent(in)   :: tree_ptr   !< treedata pointer to input
+      type(t_roughnessSet), intent(inout)    :: rgs        !< Roughness set
+      type(t_branchSet), intent(in)          :: brs        !< Branches
+      type(t_spatial_dataSet), intent(inout) :: spdata     !< Spatial data set
+      character(len=charLn), intent(in)      :: inputfile  !< Name of the input file
+      double precision, intent(inout)        :: default    !< Default friction parameter
+      integer, intent(inout)                 :: def_type   !< Default friction type
+      
+      integer                                :: count
+      integer                                :: functionType
+      integer                                :: numlocations
+      integer                                :: numlevels
+      integer                                :: itype
+      integer                                :: irgh
+      integer                                :: ibr
+      integer                                :: i
+      integer                                :: nlev
+      integer                                :: numSections
+      integer                                :: maxlevels
+      integer                                :: isp
+      logical                                :: flowdir
+      logical                                :: success
+      logical                                :: branchdef
+      type(t_roughness), pointer             :: rgh
+      character(len=Idlen)                   :: frictionId
+      character(len=Idlen)                   :: branchid
+      double precision, allocatable          :: levels(:)
+      double precision, allocatable          :: locations(:)
+      double precision, allocatable          :: values(:)
+   
+      integer, pointer, dimension(:)         :: rgh_type
+      integer, pointer, dimension(:)         :: fun_type
+     
+      count = 0
+      if (associated(tree_ptr%child_nodes)) then
+            count = size(tree_ptr%child_nodes)
+      end if
+   
+      !Scan for global sections 
+      numSections = 0
+      branchdef = .false.
+      do i = 1, count
+         if (tree_get_name(tree_ptr%child_nodes(i)%node_ptr) .eq. 'global') then
+            numsections = numSections+1
+         elseif (tree_get_name(tree_ptr%child_nodes(i)%node_ptr) .eq. 'branch') then
+            branchdef = .true.
+         endif
+      enddo 
+      
+      if (numsections >=2 .and. branchdef) then
+         call setmessage(LEVEL_ERROR, 'In inputfile '//trim(inputfile)// ' more than 1 Global section is found, together with a Branch section, this is not allowed')
+         return
+      endif
+      
+      !> when branches are defined, the friction can be defined per branch, then additional arrays are required
+      if (branchdef) then
+         
+         call prop_get_string(tree_ptr, 'Global', 'frictionId', frictionId, success)
+         if (.not. success) then
+            call setmessage(LEVEL_FATAL, 'frictionId not found in roughness definition file: '//trim(inputfile))
+         endif
+         irgh = hashsearch_or_add(rgs%hashlist, frictionId)
+         if (irgh > rgs%size) then
+            call realloc(rgs)
+         endif
+         rgh => rgs%rough(irgh)
+         if (irgh == rgs%count+1) then
+            rgs%count = irgh
+            rgh%id           = frictionId
+            allocate(rgh%rgh_type_pos(brs%Count))
+            allocate(rgh%fun_type_pos(brs%Count))
+            allocate(rgh%table(brs%Count))
+         else
+            if (.not. associated(rgh%rgh_type_pos))   allocate(rgh%rgh_type_pos(brs%Count))
+            if (.not. associated(rgh%fun_type_pos))   allocate(rgh%fun_type_pos(brs%Count))
+            if (.not. associated(rgh%table))          allocate(rgh%table(brs%Count))
+            rgh%rgh_type_pos = -1
+            rgh%fun_type_pos = -1
+            do i = 1, brs%count
+               rgh%table(i)%lengths = -1
+            enddo
+            
+         endif         
+      endif
+      
+      ! Now scan the complete input
+      do i = 1, count
+         if (tree_get_name(tree_ptr%child_nodes(i)%node_ptr) .eq. 'global') then
+            ! Get section id
+            call prop_get_string(tree_ptr%child_nodes(i)%node_ptr, '', 'frictionId', frictionId, success)
+            if (.not. success) then
+               call setmessage(LEVEL_ERROR, 'frictionId not found in roughness definition file: '//trim(inputfile))
+            endif
+            ! Look if section Id is already defined, otherwise add it to the list
+            irgh = hashsearch_or_add(rgs%hashlist, frictionId)
+            if (irgh == rgs%count+1) then
+               rgs%count = irgh
+               if (rgs%count > rgs%size) then
+                  call realloc(rgs)
+               endif
+            endif
+            
+            call prop_get(tree_ptr%child_nodes(i)%node_ptr, '', 'frictionType', rgs%rough(irgh)%frictionType, success)
+            call prop_get(tree_ptr%child_nodes(i)%node_ptr, '', 'frictionValue', rgs%rough(irgh)%frictionValue, success)
+         else if (tree_get_name(tree_ptr%child_nodes(i)%node_ptr) .eq. 'branch') then
+            call prop_get(tree_ptr%child_nodes(i)%node_ptr, '', 'branchId', branchid, success)
+            if (.not. success) then
+               call setmessage(LEVEL_ERROR, 'Branchid not found in chapter branch of input file: '//trim(inputfile))
+               cycle
+            endif
+            
+            ibr = hashsearch(brs%hashlist, branchid)
+            if (ibr <= 0 .or. ibr > brs%count) then
+               call setmessage(LEVEL_ERROR, 'Branchid '//trim(branchid)//' does not exist see input file: '//trim(inputfile))
+               cycle
+            endif
+            
+            call prop_get(tree_ptr%child_nodes(i)%node_ptr, '', 'frictionType', rgh%rgh_type_pos(ibr), success)
+            if (success) call prop_get(tree_ptr%child_nodes(i)%node_ptr, '', 'functionType', rgh%fun_type_pos(ibr), success)
+            if (.not. success) then
+               call setmessage(LEVEL_ERROR, 'Missing data for branchid '//trim(branchid)//' see input file: '//trim(inputfile))
+               cycle
+            endif
+            
+            numlevels = 1
+            call prop_get(tree_ptr%child_nodes(i)%node_ptr, '', 'numLevels', numlevels, success)
+            numlocations = 1
+            call prop_get(tree_ptr%child_nodes(i)%node_ptr, '', 'numlocations', numlocations, success)
+            success = .true.
+            if (allocated(levels   )) deallocate(levels   )
+            if (allocated(locations)) deallocate(locations)
+            if (allocated(values   )) deallocate(values   )
+            allocate(levels(numlevels))
+            allocate(locations(numlocations))
+            allocate(values(numlevels*numlocations))
+            if (numlevels > 1) then
+               call prop_get(tree_ptr%child_nodes(i)%node_ptr, '', 'levels', levels, numlevels, success)
+            else
+               levels(1) = 0d0
+            endif
+            
+            if (success .and. numlocations > 1) then
+               call prop_get(tree_ptr%child_nodes(i)%node_ptr, '', 'chainage', locations, numlocations, success)
+            else 
+               locations(1) = 0d0
+            endif
+            
+            if (success) then
+               call prop_get(tree_ptr%child_nodes(i)%node_ptr, '', 'frictionValues', values, numlevels*numlocations, success)
+            endif
+            
+            if (.not. success) then
+               call setmessage(LEVEL_ERROR, 'Missing data for branchid '//trim(branchid)//' see input file: '//trim(inputfile))
+               cycle
+            endif
+
+            call setTableMatrix(rgh%table(ibr), locations, levels, (/numlocations, numlevels/), linear=values)
+            
+         endif
+      enddo   
+  
+   end subroutine scan_roughness_input
+
+   subroutine scan_roughness_input_v100(tree_ptr, rgs, brs, spdata, inputfile, default, def_type)
+      type(tree_data), pointer, intent(in)   :: tree_ptr   !< treedata pointer to input
+      type(t_roughnessSet), intent(inout)    :: rgs        !< Roughness set
+      type(t_branchSet), intent(in)          :: brs        !< Branches
+      type(t_spatial_dataSet), intent(inout) :: spdata     !< Spatial data set
+      character(len=charLn), intent(in)      :: inputfile  !< Name of the input file
+      double precision, intent(inout)        :: default    !< Default friction parameter
+      integer, intent(inout)                 :: def_type   !< Default friction type
+      
       integer                                :: count
       integer                                :: itype
       integer                                :: irgh
@@ -202,34 +403,29 @@ contains
       integer                                :: isp
       logical                                :: flowdir
       logical                                :: success
-      type(tree_data), pointer               :: tree_ptr
       type(t_roughness), pointer             :: rgh
-      character(len=Idlen)                   :: sectionId
+      character(len=Idlen)                   :: frictionId
       character(len=Idlen)                   :: branchid
       double precision, allocatable          :: levels(:,:)
    
       integer, pointer, dimension(:)         :: rgh_type
       integer, pointer, dimension(:)         :: fun_type
-   
-      ! create and fill tree
-      call tree_create(trim(inputfile), tree_ptr, maxlenpar)
-      call prop_file('ini',trim(inputfile),tree_ptr,istat)
-   
+     
       ! Get section id
-      call prop_get_string(tree_ptr, 'Content', 'sectionId', sectionId, success)
+      call prop_get_string(tree_ptr, 'Content', 'frictionId', frictionId, success)
       if (.not. success) then
-         call setmessage(LEVEL_FATAL, 'SectionId not found in roughness definition file: '//trim(inputfile))
+         call setmessage(LEVEL_FATAL, 'frictionId not found in roughness definition file: '//trim(inputfile))
       endif
       call prop_get_integer(tree_ptr, 'Content', 'globalType', def_type, success)
    
       ! Look if section Id is already defined, otherwise add it to the list
-      irgh = hashsearch_or_add(rgs%hashlist, sectionId)
+      irgh = hashsearch_or_add(rgs%hashlist, frictionId)
       if (irgh == rgs%count+1) then
          rgs%count = irgh
          if (rgs%count > rgs%size) then
             call realloc(rgs)
          endif
-         rgs%rough(irgh)%id           = sectionId
+         rgs%rough(irgh)%id           = frictionId
          rgs%rough(irgh)%spd_pos_idx  = 0
          rgs%rough(irgh)%spd_neg_idx  = 0
          rgs%rough(irgh)%rgh_type_pos => null()
@@ -247,16 +443,17 @@ contains
       call prop_get_logical(tree_ptr, 'Content', 'flowDirection', flowdir, success)
    
       if (.not.flowdir) then
-         if (associated(rgh%rgh_type_pos)) then
-            call setmessage(LEVEL_FATAL, 'Roughness section with section Id: '//trim(sectionId)//'and positive flow direction is defined twice. Second time was in '//trim(inputfile))
-         endif
-         allocate(rgh%rgh_type_pos(brs%count))
-         allocate(rgh%fun_type_pos(brs%count))
-         rgh_type => rgh%rgh_type_pos
-         fun_type => rgh%fun_type_pos
+   
+      if (associated(rgh%rgh_type_pos)) then
+         call setmessage(LEVEL_FATAL, 'Roughness section with section Id: '//trim(frictionId)//'and positive flow direction is defined twice. Second time was in '//trim(inputfile))
+      endif
+      allocate(rgh%rgh_type_pos(brs%count))
+      allocate(rgh%fun_type_pos(brs%count))
+      rgh_type => rgh%rgh_type_pos
+      fun_type => rgh%fun_type_pos
       else
          if (associated(rgh%rgh_type_neg)) then
-            call setmessage(LEVEL_FATAL, 'Roughness section with section Id: '//trim(sectionId)//'and negative flow direction is defined twice. Second time was in '//trim(inputfile))
+            call setmessage(LEVEL_FATAL, 'Roughness section with section Id: '//trim(frictionId)//'and negative flow direction is defined twice. Second time was in '//trim(inputfile))
          endif
          allocate(rgh%rgh_type_neg(brs%count))
          allocate(rgh%fun_type_neg(brs%count))
@@ -310,7 +507,7 @@ contains
    
       deallocate(levels)
    
-   end subroutine read_roughnessfile
+   end subroutine scan_roughness_input_v100
 
    !> set default values at the branches
    subroutine init_at_branches(brs, rgh_type, fun_type, def_type)
