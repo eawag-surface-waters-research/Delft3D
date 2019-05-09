@@ -207,7 +207,12 @@ contains
          major = 1
          minor = 0
       endif
-
+      if (rgs%version == -1) then
+         rgs%version = major
+      else if (rgs%version /= major) then
+         call setmessage(LEVEL_FATAL, 'Roughness files with different versions are not allowed in one model')
+      endif
+      
       select case(major)
       case(1)
          call scan_roughness_input_v100(tree_ptr, rgs, brs, spdata, inputfile, default, def_type)
@@ -323,6 +328,8 @@ contains
                endif
             endif
             
+            rgs%rough(irgh)%useGlobalFriction = .not. branchdef
+            
             call prop_get(tree_ptr%child_nodes(i)%node_ptr, '', 'frictionType', rgs%rough(irgh)%frictionType, success)
             call prop_get(tree_ptr%child_nodes(i)%node_ptr, '', 'frictionValue', rgs%rough(irgh)%frictionValue, success)
          else if (tree_get_name(tree_ptr%child_nodes(i)%node_ptr) .eq. 'branch') then
@@ -404,7 +411,7 @@ contains
       logical                                :: flowdir
       logical                                :: success
       type(t_roughness), pointer             :: rgh
-      character(len=Idlen)                   :: frictionId
+      character(len=Idlen)                   :: sectionId
       character(len=Idlen)                   :: branchid
       double precision, allocatable          :: levels(:,:)
    
@@ -412,20 +419,20 @@ contains
       integer, pointer, dimension(:)         :: fun_type
      
       ! Get section id
-      call prop_get_string(tree_ptr, 'Content', 'sectionId', frictionId, success)
+      call prop_get_string(tree_ptr, 'Content', 'sectionId', sectionId, success)
       if (.not. success) then
-         call setmessage(LEVEL_FATAL, 'frictionId not found in roughness definition file: '//trim(inputfile))
+         call setmessage(LEVEL_FATAL, 'SectionId not found in roughness definition file: '//trim(inputfile))
       endif
       call prop_get_integer(tree_ptr, 'Content', 'globalType', def_type, success)
+      def_type = frictiontype_v1_to_new(def_type)
    
-      ! Look if section Id is already defined, otherwise add it to the list
-      irgh = hashsearch_or_add(rgs%hashlist, frictionId)
+      irgh = hashsearch_or_add(rgs%hashlist, sectionId)
       if (irgh == rgs%count+1) then
          rgs%count = irgh
          if (rgs%count > rgs%size) then
             call realloc(rgs)
          endif
-         rgs%rough(irgh)%id           = frictionId
+         rgs%rough(irgh)%id           = sectionId
          rgs%rough(irgh)%spd_pos_idx  = 0
          rgs%rough(irgh)%spd_neg_idx  = 0
          rgs%rough(irgh)%rgh_type_pos => null()
@@ -438,14 +445,14 @@ contains
 
       rgh => rgs%rough(irgh)
       rgh%iSection = irgh
-   
+      rgh%useGlobalFriction = .false.
       flowDir = 0
       call prop_get_logical(tree_ptr, 'Content', 'flowDirection', flowdir, success)
    
       if (.not.flowdir) then
    
       if (associated(rgh%rgh_type_pos)) then
-         call setmessage(LEVEL_FATAL, 'Roughness section with section Id: '//trim(frictionId)//'and positive flow direction is defined twice. Second time was in '//trim(inputfile))
+         call setmessage(LEVEL_FATAL, 'Roughness section with section Id: '//trim(sectionId)//'and positive flow direction is defined twice. Second time was in '//trim(inputfile))
       endif
       allocate(rgh%rgh_type_pos(brs%count))
       allocate(rgh%fun_type_pos(brs%count))
@@ -453,7 +460,7 @@ contains
       fun_type => rgh%fun_type_pos
       else
          if (associated(rgh%rgh_type_neg)) then
-            call setmessage(LEVEL_FATAL, 'Roughness section with section Id: '//trim(frictionId)//'and negative flow direction is defined twice. Second time was in '//trim(inputfile))
+            call setmessage(LEVEL_FATAL, 'Roughness section with section Id: '//trim(sectionId)//'and negative flow direction is defined twice. Second time was in '//trim(inputfile))
          endif
          allocate(rgh%rgh_type_neg(brs%count))
          allocate(rgh%fun_type_neg(brs%count))
@@ -483,6 +490,7 @@ contains
             cycle
          endif
          call prop_get_integer(tree_ptr%child_nodes(i)%node_ptr, '', 'roughnessType',itype,success)
+         itype = frictiontype_v1_to_new(itype)
          call prop_get_string(tree_ptr%child_nodes(i)%node_ptr, '', 'branchId',branchid, success)
          ibr = hashsearch(brs%hashlist, branchid)
          if (ibr <= 0 .or. ibr > brs%count) then
