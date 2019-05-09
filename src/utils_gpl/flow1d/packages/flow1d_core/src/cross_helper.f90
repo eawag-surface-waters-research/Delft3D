@@ -115,7 +115,8 @@ contains
       double precision, intent(in)   :: wetPerimeter
       integer                        :: igrid
       integer                        :: ibranch
-      logical                        :: YZ_conveyance  
+      logical                        :: YZ_conveyance 
+      double precision                :: chainage
       
       n = network%adm%line2cross(L)%c1
       if ( n <= 0) then
@@ -123,8 +124,6 @@ contains
          YZ_conveyance = .false.
       else
          cross => network%crs%cross(n)%tabdef
-         igrid   = network%adm%lin2grid(L)
-         ibranch = network%adm%lin2ibr(L)
          ! for YZ profiles CalcCSParsFlow computes the conveyance
          yz_conveyance = cross%crosstype == CS_YZ_PROF
       endif
@@ -140,7 +139,7 @@ contains
             do i = 1, 3
                if (perim_sub(i) > eps .and. flowarea_sub(i) > 0.0d0) then
                   r = flowarea_sub(i)/perim_sub(i)
-                  cz_sub(i) =  getFrictionValue(network%rgs, network%spData, ibranch, i, igrid, s1L, q1L, u1L, r, dpt)
+                  cz_sub(i) =  getFrictionValue(network%rgs, network%spData, ibranch, i, igrid, s1L, q1L, u1L, r, dpt, chainage)
                   conv = conv + cz_sub(i) * flowarea_sub(i) * sqrt(flowarea_sub(i) / perim_sub(i))
                else
                   cz_sub(i) = 0

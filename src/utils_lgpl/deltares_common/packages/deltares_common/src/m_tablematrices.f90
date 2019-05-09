@@ -163,7 +163,7 @@ contains
       ! interpolate to x
       val1 = fac_x*table%fun(i1,j1) + (1d0-fac_x)*table%fun(i2,j1)
       val2 = fac_x*table%fun(i1,j2) + (1d0-fac_x)*table%fun(i2,j2)
-      InterpolateTableMatrix = fac_y*val1 + fac_y*val2
+      InterpolateTableMatrix = fac_y*val1 + (1d0-fac_y)*val2
       
    end function InterpolateTableMatrix
    
@@ -177,8 +177,9 @@ contains
       
       logical found
       
+      found = .false.
       do i2 = 1, lenarr
-         if (xs > xarr(i2)) then
+         if (xs < xarr(i2)) then
             found = .true.
             exit
          endif
@@ -187,12 +188,11 @@ contains
          i1 = lenarr
          i2 = lenarr
          fac = 0d0
-      elseif (i2 <= 2) then
+      elseif (i2 <= 1) then
          i1 = 1
          i2 = 1
          fac = 0d0
       else
-         i2  = i2 - 1
          i1  = i2 - 1
          fac = (xarr(i2) - xs)/(xarr(i2) - xarr(i1))
       endif

@@ -56,7 +56,14 @@ module m_Roughness
    public GetChezy
    public getFrictionValue
    public flengrpr
+   public setVonkar
+   public frictiontype_v1_to_new
    
+   double precision :: vonkar      = 0.41        !< von Karman constant ()
+   double precision :: ag          = 9.81d0     !< gravity acceleration
+   double precision :: sag                      !< = sqrt(ag)  
+   double precision :: ee                       !< natural e ()
+
 !   public setCrossSectionIncrement
 !   
    interface realloc
@@ -102,6 +109,7 @@ module m_Roughness
    end type
    
    type, public :: t_RoughnessSet                                           !< Roughness set for roughness sections
+      integer                                           :: version =-1      !< Version number for roughness input
       integer                                           :: Size = 0         !< Current size
       integer                                           :: growsBy = 2000   !< Increment for growing array
       integer                                           :: Count= 0         !< Number of elements in array
@@ -125,6 +133,13 @@ module m_Roughness
 
 contains
    
+subroutine setVonkar(vonkarIn)
+   double precision, intent(in) :: vonkarIn
+   
+   vonkar = vonkarIn
+end subroutine setVonkar
+
+   
 !> Reallocate roughness array, while keeping the original values in place   
 subroutine reallocRoughness(rgs)
    ! Modules
@@ -143,6 +158,10 @@ subroutine reallocRoughness(rgs)
       allocate(oldrough(rgs%Size))
       oldrough=rgs%rough
       deallocate(rgs%rough)
+   else
+      ! set some parameters (not the correct location)
+      ee = exp(1d0)
+      sag = sqrt(ag)
    endif
    
    if (rgs%growsBy <=0) then
@@ -201,7 +220,7 @@ subroutine deallocRoughness(rgs)
 end subroutine deallocRoughness
 
 !> Get friction value (Chezy) for a specific point in the network
-double precision function getFrictionValue(rgs, spData, ibranch, section, igrid, h, q, u, r, d)
+double precision function getFrictionValue(rgs, spData, ibranch, section, igrid, h, q, u, r, d, chainage)
 !!--description-----------------------------------------------------------------
 ! NONE
 !!--pseudo code and references--------------------------------------------------
@@ -249,6 +268,7 @@ double precision function getFrictionValue(rgs, spData, ibranch, section, igrid,
     double precision, intent(in)            :: q           !< discharge
     double precision, intent(in)            :: r           !< hydraulic radius
     double precision, intent(in)            :: u           !< velocity
+    double precision, intent(in)            :: chainage    !< chainage (location on branch)
 !
 !
 ! Local variables
@@ -256,6 +276,7 @@ double precision function getFrictionValue(rgs, spData, ibranch, section, igrid,
     integer                         :: isec1
     double precision                :: cpar
     double precision                :: dep
+    double precision                :: ys
     double precision                :: rad
     type(t_Roughness), pointer      :: rgh 
     type(t_spatial_data), pointer   :: values
@@ -284,6 +305,11 @@ double precision function getFrictionValue(rgs, spData, ibranch, section, igrid,
     
     rgh => rgs%rough(isec1)
     
+    if (rgh%useGlobalFriction)then
+       getFrictionValue = GetChezy(rgh%frictionType, rgh%frictionValue, rad, dep, u)
+       return
+    endif
+    
     if (q >= 0d0 .or. .not. associated(rgh%rgh_type_neg)) then
        values    => spData%quant(rgh%spd_pos_idx)
        rgh_type  => rgh%rgh_type_pos 
@@ -297,22 +323,69 @@ double precision function getFrictionValue(rgs, spData, ibranch, section, igrid,
     !
     !        Roughness function of discharge depending on flow direction
     !
-    if (fun_type(ibranch) == R_FunctionDischarge) then
-       cpar = interpolate(values%tables%tb(values%tblIndex(igrid))%table,  abs(q))
-    !
-    !        Roughness function of water level depending on flow direction
-    !
-    elseif (fun_type(ibranch) == R_FunctionLevel) then
-       cpar = interpolate(values%tables%tb(values%tblIndex(igrid))%table,  h)
-    !
-    !        Roughness constant depending on flow direction
-    !
-    else
-       cpar = values%values(igrid)
+    if (rgh_type(ibranch) ==-1)  then
+       getFrictionValue = GetChezy(rgh%frictionType, rgh%frictionValue, rad, dep, u)
+       return
     endif
-
+    
+    if (rgs%version == 1) then
+       if (fun_type(ibranch) == R_FunctionDischarge) then
+          cpar = interpolate(values%tables%tb(values%tblIndex(igrid))%table,  abs(q))
+       !
+       !        Roughness function of water level depending on flow direction
+       !
+       elseif (fun_type(ibranch) == R_FunctionLevel) then
+          cpar = interpolate(values%tables%tb(values%tblIndex(igrid))%table,  h)
+       !
+       !        Roughness constant depending on flow direction
+       !
+       else
+          cpar = values%values(igrid)
+       endif
+    else
+       if (fun_type(ibranch) == R_FunctionDischarge) then
+          ys = abs(q)
+       elseif (fun_type(ibranch) == R_FunctionLevel) then
+          ys = h
+       else
+          ys = 0d0
+       endif
+       
+       cpar = interpolate(rgh%table(ibranch), chainage, ys)
+    endif
+    
     getFrictionValue = GetChezy(rgh_type(ibranch), cpar, rad, dep, u)
 end function getFrictionValue
+
+integer function frictiontype_v1_to_new(frictionType)
+   integer, intent(in) :: frictionType
+   
+   select case(frictionTYpe)
+   case(1)
+      ! Chezy
+      frictiontype_v1_to_new = 0
+   case (4) 
+      ! Manning-formula
+      frictiontype_v1_to_new = 1
+   case (5) 
+      !           Strickler-1 formula
+      frictiontype_v1_to_new = 7
+   case (6) 
+      !           Strickler-2 formula
+      frictiontype_v1_to_new = 8
+   case (7) 
+      !           Nikuradze-formula == White Colebrook Waqua style
+      frictiontype_v1_to_new = 3
+   case (8)
+      !        Engelund-like roughness predictor
+      frictiontype_v1_to_new = 10
+   case (9) 
+      !           Bos Bijkerk formula
+      frictiontype_v1_to_new = 9
+   end select
+   
+end function frictiontype_v1_to_new
+
 
 !> Get the Chezy value for a given friction type and parameter value
 double precision function GetChezy(frictType, cpar, rad, dep, u)
@@ -323,61 +396,43 @@ double precision function GetChezy(frictType, cpar, rad, dep, u)
    double precision, intent(in)   :: cpar                  !< parameter value
    double precision, intent(in)   :: u                     !< velocity
    integer, intent(in)            :: frictType             !< friction type
-
-!
    !
    !     Declaration of Parameters:
    !
-   !
-
+   double precision        :: rad0
+   double precision        :: z0
+   double precision        :: sqcf
+   
+   rad0 = max(rad,1d-4)
+   
    select case(frictType)
-   case (7) 
-      !
-      !           Nikuradze-formula
-      !           [Doc. S-FO-001.5KV  Eq. 3-1]
-      !
-      GetChezy = 18.0d0*log10(12.d0*rad/cpar)
-   !
-   case (4) 
-      !
-      !           Manning-formula
-      !           [Doc. S-FO-001.5KV  Eq. 3-2]
-      !
-      GetChezy = rad**sixth/cpar
-   !
-   case (5) 
-      !
-      !           Strickler-1 formula
-      !           [Doc. S-FO-001.5KV  Eq. 3-3]
-      !
-      GetChezy = 25.0d0*(rad/cpar)**sixth
-   !
-   case (6) 
-      !
-      !           Strickler-2 formula
-      !           [Doc. S-FO-001.5KV  Eq. 3-4]
-      !
-      GetChezy = cpar*rad**sixth
-   !
-   case (9) 
-      !
-      !           Bos Bijkerk formula
-      !           [See Technical Reference - for DLG]
-      !
-      GetChezy = cpar*dep**third*rad**sixth
-   !
-   case (8)
-      !
-      !        Engelund-like roughness predictor
-      !        [Doc. S-FO-001.5KV  Eq. 3-5]
-      !
-      !                      d90
-      call flengrpr(cpar, u, rad, GetChezy)
-   case default
-      !
-      !           Chezy value (kode 0 or 1)
-      !
+   case(0)
+      !           Chezy value
       GetChezy = cpar
+   case (1) 
+      !           Manning-formula
+      GetChezy = rad0**sixth/cpar
+   case (2) 
+     !            White Colebrook Delft3d
+     z0        = min( cpar / 30d0 , rad0*0.3d0)
+     sqcf      = vonkar/log( rad0/(ee*z0) )
+     getChezy  = sag/sqcf
+   case (3) 
+      !           White Colebrook WAQUA / Nikuradze-formula
+      GetChezy = 18.0d0*log10(12.d0*rad0/cpar)
+   case (7) 
+      !           Strickler-1 formula
+      GetChezy = 25.0d0*(rad0/cpar)**sixth
+   case (8) 
+      !           Strickler-2 formula
+      GetChezy = cpar*rad0**sixth
+   case (9) 
+      !           Bos Bijkerk formula
+      GetChezy = cpar*dep**third*rad0**sixth
+   case (10)
+      !        Engelund-like roughness predictor
+      call flengrpr(cpar, u, rad0, GetChezy)
+   case default
    end select
    !
    !

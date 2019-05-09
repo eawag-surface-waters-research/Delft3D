@@ -2998,6 +2998,8 @@ src/test/engines_gpl/dflowfm/packages/test_dflowfm/test_data/crsdef.ini -text
 src/test/engines_gpl/dflowfm/packages/test_dflowfm/test_data/dflowfm_compare_version_output.py -text
 src/test/engines_gpl/dflowfm/packages/test_dflowfm/test_data/dflowfm_version_lnx.log -text
 src/test/engines_gpl/dflowfm/packages/test_dflowfm/test_data/dflowfm_version_win.log -text
+src/test/engines_gpl/dflowfm/packages/test_dflowfm/test_data/roughness/roughness-globals.ini -text
+src/test/engines_gpl/dflowfm/packages/test_dflowfm/test_data/roughness/roughness_main.ini -text
 src/test/engines_gpl/waq/Makefile.am -text
 src/test/engines_gpl/waq/packages/Makefile.am -text
 src/test/engines_gpl/waq/packages/waq_utils_f/Makefile.am -text
