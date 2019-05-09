@@ -16,6 +16,7 @@ FMODULES += \
 test_dflowfm_kernel_SOURCES = \
 	test_observations.f90 \
 	test_cross_section.f90 \
+	test_roughness.f90 \
 	test_dflowfm_kernel_f.f90
 
 #-------------------------------------------------------------------------------
