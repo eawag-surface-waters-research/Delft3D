@@ -202,8 +202,11 @@ module m_CrossSections
        ! Friction Data not needed in Cache, already processed into Cross-Sections, which are cached
        integer                                  :: frictionSectionsCount = 0  !< Number of actual friction sections
        character(IdLen), allocatable            :: frictionSectionID(:)       !< Friction Section Identification
+       integer         , allocatable            :: frictionSectionIndex(:)    !< Friction Section index
        double precision, allocatable            :: frictionSectionFrom(:)     !< Start point of friction section
        double precision, allocatable            :: frictionSectionTo(:)       !< End point of friction section
+       integer, allocatable                     :: frictionType(:)            !< Friction type 
+       double precision, allocatable            :: frictionValue(:)           !< Friction value
 
    end type t_CSType
 
@@ -404,6 +407,10 @@ integer function GetCrossType(string)
       case ('cunette')
          GetCrossType = CS_TABULATED
       case ('steelcunette')
+         GetCrossType = CS_TABULATED
+      case ('zw')
+         GetCrossType = CS_TABULATED
+      case ('zw-river')
          GetCrossType = CS_TABULATED
       case default
          GetCrossType = -1
