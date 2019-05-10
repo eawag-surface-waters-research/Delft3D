@@ -2406,7 +2406,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     end if
     
     if (writeall .or. jacheckmonitor.eq.1 ) then
-       call prop_set(prop_ptr, 'numerics', 'checkerboard_monitor', jacheckmonitor,    'compute and output checkerboard monitor (1) or not (0)')
+       call prop_set(prop_ptr, 'numerics', 'checkerboardmonitor', jacheckmonitor,    'compute and output checkerboard monitor (1) or not (0)')
     end if
 
     if (writeall .or. locsaltlev /= 1d0) then
