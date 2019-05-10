@@ -44,6 +44,7 @@ module m_network
    public dealloc
    public admin_network
    public initialize_1dadmin
+   public getFrictionValue
  
    interface realloc
       module procedure realloc_1dadmin
@@ -876,5 +877,160 @@ contains
       id = 'No retention area assigned to node '//getnodeid(network%nds, gridpoint)
       
    end function getRetentionId
+
+
+!> Get friction value (Chezy) for a specific point in the network
+!> This function is moved from Roughness.f90 to Network.f90 to avoid circular references
+double precision function getFrictionValue(rgs, spdata, cross, ibranch, section, igrid, h, q, u, r, d, chainage)
+
+use m_tables
+use m_tablematrices
+!!--description-----------------------------------------------------------------
+! NONE
+!!--pseudo code and references--------------------------------------------------
+! NONE
+!!--declarations----------------------------------------------------------------
+    !=======================================================================
+    !                       Deltares
+    !                One-Two Dimensional Modelling System
+    !                           S O B E K
+    !
+    ! Subsystem:          Flow Module
+    !
+    ! Programmer:
+    !
+    ! Function:           getFrictionValue, replacement of old FLCHZT (FLow CHeZy Friction coeff)
+    !
+    ! Module description: Chezy coefficient is computed for a certain gridpoint
+    !
+    !
+    !
+    !     update information
+    !     person                    date
+    !     Kuipers                   5-9-2001
+    !     Van Putten                11-8-2011
+    !
+    !     Use stored table counters
+    !
+    !
+    !
+    !
+    !     Declaration of Parameters:
+    !
+
+    implicit none
+!
+! Global variables
+!
+    type t_parr
+       type(t_CSType), pointer        :: cross
+    end type
+    
+
+    type(t_RoughnessSet), intent(in)        :: rgs         !< Roughness data
+    type(t_spatial_dataSet), intent(in)     :: spData      !< spatial data
+    type(t_CSType), pointer, intent(in)     :: cross
+    integer, intent(in)                     :: igrid       !< gridpoint index
+    integer, intent(in)                     :: ibranch     !< branch index
+    integer, intent(in)                     :: section     !< section index (0=main, 1=Flood plane 1, 2=Flood plane 2)
+    double precision, intent(in)            :: d           !< water depth
+    double precision, intent(in)            :: h           !< water level
+    double precision, intent(in)            :: q           !< discharge
+    double precision, intent(in)            :: r           !< hydraulic radius
+    double precision, intent(in)            :: u           !< velocity
+    double precision, intent(in)            :: chainage    !< chainage (location on branch)
+    
+!
+!
+! Local variables
+!
+    integer                         :: isec, i
+    double precision                :: cpar
+    double precision                :: cz
+    double precision                :: dep
+    double precision                :: ys
+    double precision                :: rad
+    type(t_Roughness), pointer      :: rgh 
+    type(t_spatial_data), pointer   :: values
+    integer, dimension(:), pointer  :: rgh_type
+    integer, dimension(:), pointer  :: fun_type
+
+    !     Explanation:
+    !     -----------
+    !
+    !     1. Each Chezy formula, apart from Engelund bed friction, is defined
+    !        by 1 constant parameter. This constant is stored in bfricp.
+    !        An exception is the Engelund bed friction defined by 10 parameters.
+    !     2. For the Engelund bed friction the specific parameters are stored
+    !        in the array engpar.
+    !
+    !
+    !     Prevention against zero hydraulic radius and depth
+    !
+    rad = max(r, 1.d-6)
+    dep = max(d, 1.d-6)
+    !
+    isec = cross%frictionsectionIndex(section)
+    
+    if (rgs%version == 1) then
+      rgh => rgs%rough(isec)
+      if (q >= 0d0 .or. .not. associated(rgh%rgh_type_neg)) then
+          values    => spData%quant(rgh%spd_pos_idx)
+          rgh_type  => rgh%rgh_type_pos 
+          fun_type  => rgh%fun_type_pos 
+       else 
+          values    => spData%quant(rgh%spd_neg_idx)
+          rgh_type  => rgh%rgh_type_neg 
+          fun_type  => rgh%fun_type_neg 
+       endif   
+       if (fun_type(ibranch) == R_FunctionDischarge) then
+          cpar = interpolate(values%tables%tb(values%tblIndex(igrid))%table,  dabs(q))
+       !
+       !        Roughness function of water level depending on flow direction
+       !
+       elseif (fun_type(ibranch) == R_FunctionLevel) then
+          cpar = interpolate(values%tables%tb(values%tblIndex(igrid))%table,  h)
+       !
+       !        Roughness constant depending on flow direction
+       !
+       else
+          cpar = values%values(igrid)
+       endif
+       getFrictionValue = GetChezy(rgh_type(ibranch), cpar, rad, dep, u)    !
+    !     Formulation = .not. Engelund
+    !
+    else ! Version 2 roughness
+       do i = 1, 2
+          if (isec < 0) then
+             cz = GetChezy(cross%frictionType(section), cross%frictionValue(section), rad, dep, u)
+          else
+             rgh => rgs%rough(isec)
+             if (rgh%useGlobalFriction)then
+                cz= GetChezy(rgh%frictionType, rgh%frictionValue, rad, dep, u)
+             else
+                rgh_type  => rgh%rgh_type_pos 
+                fun_type  => rgh%fun_type_pos 
+                if (rgh_type(ibranch) ==-1)  then
+                   cz = GetChezy(rgh%frictionType, rgh%frictionValue, rad, dep, u)
+                else
+                   if (fun_type(ibranch) == R_FunctionDischarge) then
+                      ys = abs(q)
+                   elseif (fun_type(ibranch) == R_FunctionLevel) then
+                      ys = h
+                   else
+                      ys = 0d0
+                   endif
+       
+                   cpar = interpolate(rgh%table(ibranch), chainage, ys)
+                   cz = GetChezy(rgh_type(ibranch), cpar, rad, dep, u)
+                endif
+             endif
+          endif
+       enddo
+       getFrictionValue = cz
+    endif
+    
+    
+end function getFrictionValue
 
 end module m_network
