@@ -1465,6 +1465,7 @@ end subroutine setfouunit
     integer         , pointer        :: kfs_ptr(:,:), kfst0_ptr(:,:)
 
     integer    :: itdate   !<  Reference time in yyyymmdd as an integer 
+    double precision, allocatable, target :: constit(:)
     
     read(refdat,*) itdate 
     
@@ -1499,6 +1500,10 @@ end subroutine setfouunit
     bl_ptr(1:gddimens%ndx,1:1) => bl
     kfs_ptr(1:gddimens%ndx,1:1) => kfs
     kfst0_ptr(1:gddimens%ndx,1:1) => kfst0
+    
+    if (.not. allocated(constit)) then
+      allocate (constit(1:gddimens%ndkx))
+    endif
 
     if (allocated(wmag) .and. allocated(wx) .and. allocated(wy)) then
        wmag = sqrt(wx*wx + wy*wy)
@@ -1528,13 +1533,14 @@ end subroutine setfouunit
              case ('uy')
                 fieldptr1(1:gddimens%ndkx,1:1) => ucy
              case ('uxa')
-                fieldptr1(1:gddimens%ndx,1:1) => ucxq
+                fieldptr1(1:gddimens%ndkx,1:1) => ucxq
              case ('uya')
-                fieldptr1(1:gddimens%ndx,1:1) => ucyq
+                fieldptr1(1:gddimens%ndkx,1:1) => ucyq
              case ('uc')                        ! ucmag, velocity magnitude
-                fieldptr1(1:gddimens%ndx,1:1) => ucmag
+                fieldptr1(1:gddimens%ndkx,1:1) => ucmag
              case ('r1')
-                fieldptr1(1:gddimens%ndx,1:1) => constituents(fconno(ifou),:)
+                constit(1:gddimens%ndkx) = constituents(fconno(ifou),:)
+                fieldptr1(1:gddimens%ndkx,1:1) => constit
              case ('ta')
                 call gettaus(1)
                 fieldptr1(1:gddimens%ndx,1:1) => taus
