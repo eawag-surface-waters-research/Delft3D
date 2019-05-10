@@ -100,27 +100,32 @@ module m_oned_functions
                enddo
             else
                iRough = hashsearch(network%rgs%hashlist, crs(cross)%frictionSectionID(1))
-               rgh_type => network%rgs%rough(irough)%rgh_type_pos
-               fun_type => network%rgs%rough(irough)%fun_type_pos
-               cpar     => network%spData%quant(network%rgs%rough(irough)%spd_pos_idx)%values
-               do i = 1, pbr%uPointsCount
-                  L = pbr%lin(i)
-                  k = pbr%points(1) -1 + i
-                  ifrcutp(L) = rgh_mapping(rgh_type(ibr))
-                  if (ifrcutp(L) >=0) then
-                     ! R_FunctionConstant, R_FunctionDischarge, R_FunctionLevel are computed as Chezy, frcu(L) and frcu_mor(L) are set in getprof_1D 
-                     ifrcutp(L) = 0
-                  else
-                     if (.not. stop_warnings) then
-                        call setmessage(LEVEL_WARN, '1D roughness type on branch '//pbr%id//' is not available in D-FlowFM')
-                        stop_warnings = .true.
+               if (iRough <=0) then
+                  iRough = hashsearch(network%rgs%hashlist, crs(cross)%tabdef%frictionSectionID(1))
+               endif
+               if (iRough > 0) then
+                  rgh_type => network%rgs%rough(irough)%rgh_type_pos
+                  fun_type => network%rgs%rough(irough)%fun_type_pos
+                  cpar     => network%spData%quant(network%rgs%rough(irough)%spd_pos_idx)%values
+                  do i = 1, pbr%uPointsCount
+                     L = pbr%lin(i)
+                     k = pbr%points(1) -1 + i
+                     ifrcutp(L) = rgh_mapping(rgh_type(ibr))
+                     if (ifrcutp(L) >=0) then
+                        ! R_FunctionConstant, R_FunctionDischarge, R_FunctionLevel are computed as Chezy, frcu(L) and frcu_mor(L) are set in getprof_1D 
+                        ifrcutp(L) = 0
+                     else
+                        if (.not. stop_warnings) then
+                           call setmessage(LEVEL_WARN, '1D roughness type on branch '//pbr%id//' is not available in D-FlowFM')
+                           stop_warnings = .true.
+                        endif
+                        
+                        ifrcutp(L) = 0
+                        frcu(L)    = 45d0
+                        frcu_mor(L) = frcu(L)
                      endif
-                     
-                     ifrcutp(L) = 0
-                     frcu(L)    = 45d0
-                     frcu_mor(L) = frcu(L)
-                  endif
-               enddo
+                  enddo
+               endif
             endif
          enddo
       endif

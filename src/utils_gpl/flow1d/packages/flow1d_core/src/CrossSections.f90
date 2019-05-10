@@ -2826,6 +2826,7 @@ type(t_CSType) function CopyCrossDef(CrossDefFrom)
       allocate (CopyCrossDef%frictionSectionID(CopyCrossDef%frictionSectionsCount))
       allocate (CopyCrossDef%frictionSectionFrom(CopyCrossDef%frictionSectionsCount))
       allocate (CopyCrossDef%frictionSectionTo(CopyCrossDef%frictionSectionsCount))
+      allocate (CopyCrossDef%frictionSectionIndex(CopyCrossDef%frictionSectionsCount))
    
       CopyCrossDef%frictionSectionID = CrossDefFrom%frictionSectionID
       CopyCrossDef%frictionSectionFrom = CrossDefFrom%frictionSectionFrom

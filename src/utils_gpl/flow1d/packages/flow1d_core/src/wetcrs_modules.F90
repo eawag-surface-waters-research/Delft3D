@@ -691,6 +691,7 @@ subroutine CalcConveyanceTables(jf, vf, y, d, hlv, nc, n12, jgetlevels, zminpr, 
           endif
 
           conv = 0.5d0*ikpt(n12,j,1) + 0.5d0*ikpt(n12,j-1,1)
+          co = max(co,1d-6)
           dif2 = abs(conv - co)/(co)
           accuracy = 0.01d0
 
@@ -986,15 +987,15 @@ endif
 if(d0.lt.dz.or.d1.lt.dz) then   ! beta#0
    if(bt.lt.-0.01d0) then
       select case (ct)
-      case (1)                   ! Chezy
+      case (0)                   ! Chezy
          co = 2.0d0*dcf/(5.0d0*dabs(bt)*(1.0d0+bt**2)**s14)*d1**s52
-      case (4)                   ! Manning (n)
+      case (1)                   ! Manning (n)
          co = 3.0d0/(8.0d0*dcf*dabs(bt)*(1.0d0+bt**2)**s14)*d1**s83
-      case (5)                   ! Strickler (kn)
+      case (7)                   ! Strickler (kn)
          co = 75.0d0*dcf**sixth/(8.0d0*dabs(bt)*(1.0d0+bt**2)**s14)*d1**s83
-      case (6)                   ! Strickler (ks)
+      case (8)                   ! Strickler (ks)
          co = 3.0d0*dcf/(8.0d0*dabs(bt)*(1.0d0+bt**2)**s14)*d1**s83
-      case (7)                   ! White-Colebrook (kn)
+      case (3)                   ! White-Colebrook (kn)
          if(d1/c2.le.1.495d0) then 
             f1 = 2.13d-3
          else
@@ -1006,15 +1007,15 @@ if(d0.lt.dz.or.d1.lt.dz) then   ! beta#0
       end select
    else if(bt.ge.-0.01.and.bt.lt.0) then
       select case (ct)
-      case (1)                   ! Chezy
+      case (0)                   ! Chezy
          co = dcf/(((1.0d0+bt**2)**s14))*(d1/2.0d0)**s32*(-d1/bt)
-      case (4)                   ! Manning (n)
+      case (1)                   ! Manning (n)
          co = 1/(dcf*(1.0d0+bt**2)**s14)*(d1/2.0d0)**s53*(-d1/bt)
-      case (5)                   ! Strickler (kn)
+      case (7)                   ! Strickler (kn)
          co = 25.0d0*dcf**sixth/((1.0d0+bt**2)**s14)*(d1/2.0d0)**s53*(-d1/bt)
-      case (6)                   ! Strickler (ks)
+      case (8)                   ! Strickler (ks)
          co = dcf/((1.0d0+bt**2)**s14)*(d1/2.0d0)**s53*(-d1/bt)
-      case (7)                   ! White-Colebrook (kn)
+      case (3)                   ! White-Colebrook (kn)
          if(6.0d0*d1/dcf.le.1.0005d0) then
             f1 = 2.2d-4
          else
@@ -1026,15 +1027,15 @@ if(d0.lt.dz.or.d1.lt.dz) then   ! beta#0
       end select
   else if(bt.le.0.01.and.bt.gt.0) then
       select case (ct)
-      case (1)                   ! Chezy
+      case (0)                   ! Chezy
          co = dcf/((1.0d0+bt**2)**s14)*(d0/2.0d0)**s32*(d0/bt)
-      case (4)                   ! Manning (n)
+      case (1)                   ! Manning (n)
          co = 1/(dcf*(1.0d0+bt**2)**s14)*(d0/2.0d0)**s53*(d0/bt)
-      case (5)                   ! Strickler (kn)
+      case (7)                   ! Strickler (kn)
          co = 25.0d0*dcf**sixth/((1.0d0+bt**2)**s14)*(d0/2.0d0)**s53*(d0/bt)
-      case (6)                   ! Strickler (ks)
+      case (8)                   ! Strickler (ks)
          co = dcf/((1.0d0+bt**2)**s14)*(d0/2.0d0)**s53*(d0/bt)
-      case (7)                   ! White-Colebrook (kn)
+      case (3)                   ! White-Colebrook (kn)
          if(6.0d0*d0/dcf.le.1.0005d0) then
             f1 = 2.2d-4
          else
@@ -1046,15 +1047,15 @@ if(d0.lt.dz.or.d1.lt.dz) then   ! beta#0
       end select
   else if(bt.gt.0.01) then
       select case (ct)
-      case (1)                   ! Chezy
+      case (0)                   ! Chezy
          co = 2.0d0*dcf/(5.0d0*dabs(bt)*(1.0d0+bt**2)**s14)*d0**s52
-      case (4)                   ! Manning (n)
+      case (1)                   ! Manning (n)
          co = 3.0d0/(8.0d0*dcf*dabs(bt)*(1.0d0+bt**2)**s14)*d0**s83
-      case (5)                   ! Strickler (kn)
+      case (7)                   ! Strickler (kn)
          co = 75.0d0*dcf**sixth/(8.0d0*dabs(bt)*(1.0d0+bt**2)**s14)*d0**s83
-      case (6)                   ! Strickler (ks)
+      case (8)                   ! Strickler (ks)
          co = 3.0d0*dcf/(8.0d0*dabs(bt)*(1.0d0+bt**2)**s14)*d0**s83
-      case (7)                   ! White-Colebrook (kn)
+      case (3)                   ! White-Colebrook (kn)
          if(d0/c2.le.1.495d0) then 
             f1 = 2.13d-3
          else
@@ -1069,15 +1070,15 @@ endif
 if(d0.ge.dz.or.d1.ge.dz) then   
   if(bt.ge.-0.01d0.and.bt.le.0.01d0) then
       select case (ct)
-      case (1)                   ! Chezy
+      case (0)                   ! Chezy
          co = dcf/((1.0d0+bt**2)**s14)*((d0+d1)/2.0d0)**s32*bb
-      case (4)                   ! Manning (n)
+      case (1)                   ! Manning (n)
          co = 1.0d0/(dcf*(1.0d0+bt**2)**s14)*((d0+d1)/2.0d0)**s53*bb
-      case (5)                   ! Strickler (kn)
+      case (7)                   ! Strickler (kn)
          co = 25.0d0*dcf**sixth/((1.0d0+bt**2)**s14)*((d0+d1)/2.0d0)**s53*bb
-      case (6)                   ! Strickler (ks)
+      case (8)                   ! Strickler (ks)
          co = dcf/((1.0d0+bt**2)**s14)*((d0+d1)/2.0d0)**s53*bb
-      case (7)                   ! White-Colebrook (kn)
+      case (3)                   ! White-Colebrook (kn)
          if(6.0d0*(d0+d1)/dcf.le.1.0005d0) then
             f1 = 2.2d-4
          else
@@ -1089,15 +1090,15 @@ if(d0.ge.dz.or.d1.ge.dz) then
       end select
   elseif (dabs(bt) .gt. 0.01d0) then
       select case (ct)
-      case (1)                   ! Chezy
+      case (0)                   ! Chezy
          co = 2.0d0*dcf/(5.0d0*dabs(bt)*(1.0d0+bt**2)**s14)*dabs(d0**s52-d1**s52)
-      case (4)                   ! Manning (n)
+      case (1)                   ! Manning (n)
          co = 3.0d0/(8.0d0*dcf*dabs(bt)*(1.0d0+bt**2)**s14)*dabs(d0**s83-d1**s83)
-      case (5)                   ! Strickler (kn)
+      case (7)                   ! Strickler (kn)
          co = 75.0d0*dcf**sixth/(8.0d0*dabs(bt)*(1.0d0+bt**2)**s14)*dabs(d0**s83-d1**s83)
-      case (6)                   ! Strickler (ks)
+      case (8)                   ! Strickler (ks)
          co = 3.0d0*dcf/(8.0d0*dabs(bt)*(1.0d0+bt**2)**s14)*dabs(d0**s83-d1**s83)
-      case (7)                   ! White-Colebrook (kn)
+      case (3)                   ! White-Colebrook (kn)
          if(d0/c2.le.1.495d0) then 
             f1 = 2.13d-3
          else

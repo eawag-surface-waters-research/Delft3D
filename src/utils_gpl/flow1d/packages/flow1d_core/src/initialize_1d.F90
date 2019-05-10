@@ -50,7 +50,6 @@ module initialize_1d
 !      
 !      ! each branch has 1 link less than gridpoints
 !      linksCount = network%brs%gridpointsCount - network%brs%count
-!      allocate(network%adm%dpu_1d(linksCount))
 !      
 !      do l = 1, size(network%adm%lin2local)
 !         if (network%adm%lin2local(l) <= 0) then
@@ -60,7 +59,6 @@ module initialize_1d
 !         icrs1 = network%adm%line2cross(l)%c1
 !         icrs2 = network%adm%line2cross(l)%c2
 !         f = network%adm%line2cross(l)%f
-!         network%adm%dpu_1d(network%adm%lin2local(l)) = -((1d0-f) * network%crs%cross(icrs1)%bedLevel + f * network%crs%cross(icrs2)%bedLevel)
 !      enddo
 !      
 !   end subroutine initDpu
@@ -109,14 +107,10 @@ module initialize_1d
 !               ! calculate area1d for water depth of hsija
 !               
 !               loc = network%adm%lin2local(l)
-!               if (loc > size(network%adm%dpu_1d)) then
-!                  continue
-!               endif
 !               if (network%adm%lin2ibr(l) < 1 .or. network%adm%lin2ibr(l) > network%brs%count) then
 !                  continue
 !               endif
 !               
-!               hh = max(0d0, lvl1 - dps + network%adm%dpu_1d(loc))
 !               call computeCross1d(network, l, hh, u1, cz, area1d, wetPerimeter, flowWidth, conveyance) 
 !               pbr=>network%brs%branch(network%adm%lin2ibr(l))
 !               if (network%adm%lin2point(l) > size(pbr%dx)) then

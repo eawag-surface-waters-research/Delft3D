@@ -220,7 +220,9 @@ subroutine deallocRoughness(rgs)
 end subroutine deallocRoughness
 
 !> Get friction value (Chezy) for a specific point in the network
-double precision function getFrictionValue(rgs, spData, ibranch, section, igrid, h, q, u, r, d, chainage)
+double precision function getFrictionValue(rgs, spdata, cross, ibranch, section, igrid, h, q, u, r, d, chainage)
+                                          
+use m_crossSections
 !!--description-----------------------------------------------------------------
 ! NONE
 !!--pseudo code and references--------------------------------------------------
@@ -258,8 +260,14 @@ double precision function getFrictionValue(rgs, spData, ibranch, section, igrid,
 !
 ! Global variables
 !
+    type t_parr
+       type(t_CSType), pointer        :: cross
+    end type
+    
+
     type(t_RoughnessSet), intent(in)        :: rgs         !< Roughness data
     type(t_spatial_dataSet), intent(in)     :: spData      !< spatial data
+    type(t_CSType), pointer, intent(in)     :: cross
     integer, intent(in)                     :: igrid       !< gridpoint index
     integer, intent(in)                     :: ibranch     !< branch index
     integer, intent(in)                     :: section     !< section index (0=main, 1=Flood plane 1, 2=Flood plane 2)
@@ -269,12 +277,14 @@ double precision function getFrictionValue(rgs, spData, ibranch, section, igrid,
     double precision, intent(in)            :: r           !< hydraulic radius
     double precision, intent(in)            :: u           !< velocity
     double precision, intent(in)            :: chainage    !< chainage (location on branch)
+    
 !
 !
 ! Local variables
 !
-    integer                         :: isec1
+    integer                         :: isec, i
     double precision                :: cpar
+    double precision                :: cz
     double precision                :: dep
     double precision                :: ys
     double precision                :: rad
@@ -298,37 +308,19 @@ double precision function getFrictionValue(rgs, spData, ibranch, section, igrid,
     rad = max(r, 1.d-6)
     dep = max(d, 1.d-6)
     !
-    isec1 = section
-    !
-    !     Formulation = .not. Engelund
-    !
-    
-    rgh => rgs%rough(isec1)
-    
-    if (rgh%useGlobalFriction)then
-       getFrictionValue = GetChezy(rgh%frictionType, rgh%frictionValue, rad, dep, u)
-       return
-    endif
-    
-    if (q >= 0d0 .or. .not. associated(rgh%rgh_type_neg)) then
-       values    => spData%quant(rgh%spd_pos_idx)
-       rgh_type  => rgh%rgh_type_pos 
-       fun_type  => rgh%fun_type_pos 
-    else 
-       values    => spData%quant(rgh%spd_neg_idx)
-       rgh_type  => rgh%rgh_type_neg 
-       fun_type  => rgh%fun_type_neg 
-    endif   
-    !        Positive flow
-    !
-    !        Roughness function of discharge depending on flow direction
-    !
-    if (rgh_type(ibranch) ==-1)  then
-       getFrictionValue = GetChezy(rgh%frictionType, rgh%frictionValue, rad, dep, u)
-       return
-    endif
+    isec = cross%frictionsectionIndex(section)
     
     if (rgs%version == 1) then
+      rgh => rgs%rough(isec)
+      if (q >= 0d0 .or. .not. associated(rgh%rgh_type_neg)) then
+          values    => spData%quant(rgh%spd_pos_idx)
+          rgh_type  => rgh%rgh_type_pos 
+          fun_type  => rgh%fun_type_pos 
+       else 
+          values    => spData%quant(rgh%spd_neg_idx)
+          rgh_type  => rgh%rgh_type_neg 
+          fun_type  => rgh%fun_type_neg 
+       endif   
        if (fun_type(ibranch) == R_FunctionDischarge) then
           cpar = interpolate(values%tables%tb(values%tblIndex(igrid))%table,  abs(q))
        !
@@ -342,19 +334,41 @@ double precision function getFrictionValue(rgs, spData, ibranch, section, igrid,
        else
           cpar = values%values(igrid)
        endif
-    else
-       if (fun_type(ibranch) == R_FunctionDischarge) then
-          ys = abs(q)
-       elseif (fun_type(ibranch) == R_FunctionLevel) then
-          ys = h
-       else
-          ys = 0d0
-       endif
+       getFrictionValue = GetChezy(rgh_type(ibranch), cpar, rad, dep, u)    !
+    !     Formulation = .not. Engelund
+    !
+    else ! Version 2 roughness
+       do i = 1, 2
+          if (isec < 0) then
+             cz = GetChezy(cross%frictionType(section), cross%frictionValue(section), rad, dep, u)
+          else
+             rgh => rgs%rough(isec)
+             if (rgh%useGlobalFriction)then
+                cz= GetChezy(rgh%frictionType, rgh%frictionValue, rad, dep, u)
+             else
+                rgh_type  => rgh%rgh_type_pos 
+                fun_type  => rgh%fun_type_pos 
+                if (rgh_type(ibranch) ==-1)  then
+                   cz = GetChezy(rgh%frictionType, rgh%frictionValue, rad, dep, u)
+                else
+                   if (fun_type(ibranch) == R_FunctionDischarge) then
+                      ys = abs(q)
+                   elseif (fun_type(ibranch) == R_FunctionLevel) then
+                      ys = h
+                   else
+                      ys = 0d0
+                   endif
        
-       cpar = interpolate(rgh%table(ibranch), chainage, ys)
+                   cpar = interpolate(rgh%table(ibranch), chainage, ys)
+                   cz = GetChezy(rgh_type(ibranch), cpar, rad, dep, u)
+                endif
+             endif
+          endif
+       enddo
+       getFrictionValue = cz
     endif
     
-    getFrictionValue = GetChezy(rgh_type(ibranch), cpar, rad, dep, u)
+    
 end function getFrictionValue
 
 integer function frictiontype_v1_to_new(frictionType)

@@ -63,8 +63,7 @@ module m_network
       logical                       :: hasStructures = .false.             !< Flag, true if one or more structures in model
       integer, allocatable          :: lin2ibr(:)                          !< indirection list, containing branch number on which the flow link is positioned 
       integer, allocatable          :: lin2point(:)                        !< indirection list, containing relative index of link on branch adm%lin2ibr(l)
-                                                                           !> indirection list, containing local link index for 1d arrays. e.g. flow area of \n  
-                                                                           !! link l is found by adm%au_1d(adm%lin2local(l))  
+                                                                           !> indirection list, containing local link index for 1d arrays.
       integer, allocatable          :: lin2local(:)
       integer, allocatable          :: lin2grid(:)
       type(t_chainage2cross), pointer :: line2cross(:) => null()             !< list containing cross section indices per u-chainage
@@ -73,7 +72,6 @@ module m_network
 
       double precision, allocatable :: au_1d(:)
       double precision, allocatable :: conv_1d(:)
-      double precision, allocatable :: dpu_1d(:)
       double precision, allocatable :: minwidth1d(:)
    
       double precision, allocatable :: minconv(:)                      ! minimal 1d conveyance in link: C*P*sqrt(A/P)
@@ -123,7 +121,6 @@ contains
       adm%hysteresis_for_summerdike = .true.
       if (.not. allocated(adm%au_1d)) allocate(adm%au_1d(oned_links_count))
       if (.not. allocated(adm%conv_1d)) allocate(adm%conv_1d(oned_links_count))
-      if (.not. allocated(adm%dpu_1d)) allocate(adm%dpu_1d(oned_links_count))
       if (.not. allocated(adm%minwidth1d)) allocate(adm%minwidth1d(oned_links_count))
       if (.not. allocated(adm%minconv)) allocate(adm%minconv(oned_links_count))   
       
@@ -142,7 +139,6 @@ contains
       if (allocated(adm%hysteresis_for_summerdike)) deallocate(adm%hysteresis_for_summerdike)
       if (allocated(adm%au_1d))        deallocate(adm%au_1d)
       if (allocated(adm%conv_1d))      deallocate(adm%conv_1d)
-      if (allocated(adm%dpu_1d))       deallocate(adm%dpu_1d)
       if (allocated(adm%minwidth1d))   deallocate(adm%minwidth1d)
       if (allocated(adm%minconv))      deallocate(adm%minconv)
 
@@ -375,7 +371,7 @@ contains
             if (pbran%lin(m) > 0) then
                adm%lin2ibr(pbran%lin(m)) = ibran
                adm%lin2point(pbran%lin(m)) = m
-               adm%lin2local(pbran%lin(m)) = pbran%lin(m)
+               adm%lin2local(pbran%lin(m)) = m
                adm%lin2grid(pbran%lin(m))  = pbran%grd(m)
             endif
          enddo
@@ -524,7 +520,6 @@ contains
                   f = adm%line2cross(ilnk)%f
                   dpu1 = -network%crs%cross(adm%line2cross(ilnk)%c1)%bedLevel
                   dpu2 = -network%crs%cross(adm%line2cross(ilnk)%c2)%bedLevel
-                  adm%dpu_1d(ll) = (1.0d0 - f) * dpu1 + f * dpu2
                   call GetCSParsFlow(adm%line2cross(ilnk), network%crs%cross, thresholdDry, as, wetPerimeter, adm%minwidth1d(ll))
                endif
                   

@@ -8888,7 +8888,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  endif
 
  !! flow1d -> dflowfm initialization
- call set_1d_roughnesses()
+ ! call set_1d_roughnesses()
 
  ! need number of fractions for allocation of sed array
  if ( len_trim(md_sedfile) > 0 ) then

@@ -279,11 +279,7 @@ module m_readCrossSections
       double precision              :: totalArea
       logical                       :: closed
       
-      double precision              :: slope                  ! Slope of trapezium (m)
-      double precision              :: maximumFlowWidth       ! Maximum flow width of trapezium (m)
-      double precision              :: bottomWidth            ! Bottom width of trapezium (m)
       
-      integer                       :: hasGroundLayer
       logical                       :: groundlayerUsed = .false.
       double precision              :: groundlayer
       double precision              :: height
@@ -1744,6 +1740,7 @@ module m_readCrossSections
       double precision              :: bottomWidth            ! Bottom width of trapezium (m)
       
       integer                       :: hasGroundLayer
+      integer                       :: j
       logical                       :: groundlayerUsed
       double precision              :: groundlayer
       double precision              :: height
@@ -1931,6 +1928,7 @@ module m_readCrossSections
                allocate(pCs%frictionSectionID  (pCs%frictionSectionsCount))      !< Friction Section Identification
                allocate(pCs%frictionSectionFrom(pCs%frictionSectionsCount))    !<
                allocate(pCs%frictionSectionTo  (pCs%frictionSectionsCount))      !<
+               allocate(pCs%frictionSectionIndex(pCs%frictionSectionsCount))      !<
                
                call prop_get_strings(md_ptr%child_nodes(i)%node_ptr, '', 'roughnessNames', pCs%frictionSectionsCount, pCS%frictionSectionID, success)
 
@@ -1950,6 +1948,11 @@ module m_readCrossSections
          if (success) then
             network%CSDefinitions%count = inext
          endif
+         
+         call realloc( pCs%frictionSectionIndex, pCs%frictionSectionsCount)
+         do j = 1, pCs%frictionSectionsCount
+            pCs%frictionSectionIndex(j) = hashsearch(network%rgs%hashlist, pCS%frictionSectionID(j))
+         enddo
          
       enddo
 

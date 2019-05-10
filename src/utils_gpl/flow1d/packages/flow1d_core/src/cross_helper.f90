@@ -107,25 +107,27 @@ contains
       integer                        :: i , L, n
       double precision, dimension(3), intent(in) :: flowarea_sub, perim_sub
       double precision, dimension(3), intent(out) :: cz_sub
-      type(t_CSType), pointer        :: cross
       double precision, intent(out)  :: cz
-      double precision, parameter    :: eps = 1d-3               !< accuracy parameter for determining wetperimeter == 0d0
-      double precision               :: r
       double precision, intent(in)   :: flowArea
       double precision, intent(in)   :: wetPerimeter
+
+      double precision, parameter    :: eps = 1d-3               !< accuracy parameter for determining wetperimeter == 0d0
+      double precision               :: r, cz1, cz2
+      double precision               :: f
       integer                        :: igrid
       integer                        :: ibranch
       logical                        :: YZ_conveyance 
-      double precision                :: chainage
+      double precision               :: chainage
+      type(t_CSType), pointer        :: cross
       
       n = network%adm%line2cross(L)%c1
       if ( n <= 0) then
          ! no cross section defined on L
-         YZ_conveyance = .false.
+         conv = 45d0* flowarea_sub(1) * sqrt(flowarea_sub(1) / perim_sub(1))
+         return
       else
-         cross => network%crs%cross(n)%tabdef
          ! for YZ profiles CalcCSParsFlow computes the conveyance
-         yz_conveyance = cross%crosstype == CS_YZ_PROF
+         yz_conveyance = network%crs%cross(n)%crosstype == CS_YZ_PROF
       endif
       
       if (yz_conveyance) then
@@ -134,12 +136,18 @@ contains
       else
          igrid   = network%adm%lin2grid(L)
          ibranch = network%adm%lin2ibr(L)
+         chainage = network%brs%branch(ibranch)%uPointsChainages(network%adm%lin2local(L))
          conv = 0d0
          if (perim_sub(1)> 0.0d0) then
             do i = 1, 3
                if (perim_sub(i) > eps .and. flowarea_sub(i) > 0.0d0) then
                   r = flowarea_sub(i)/perim_sub(i)
-                  cz_sub(i) =  getFrictionValue(network%rgs, network%spData, ibranch, i, igrid, s1L, q1L, u1L, r, dpt, chainage)
+                  cross => network%crs%cross(network%adm%line2cross(L)%c1)%tabdef
+                  cz1 = getFrictionValue(network%rgs, network%spdata, cross, ibranch, i, igrid, s1L, q1L, u1L, r, dpt, chainage)
+                  cross => network%crs%cross(network%adm%line2cross(L)%c2)%tabdef
+                  cz2 = getFrictionValue(network%rgs, network%spdata, cross, ibranch, i, igrid, s1L, q1L, u1L, r, dpt, chainage)
+                  f = network%adm%line2cross(L)%f
+                  cz_sub(i) = (1.0d0 - f) * cz1     + f * cz2
                   conv = conv + cz_sub(i) * flowarea_sub(i) * sqrt(flowarea_sub(i) / perim_sub(i))
                else
                   cz_sub(i) = 0
