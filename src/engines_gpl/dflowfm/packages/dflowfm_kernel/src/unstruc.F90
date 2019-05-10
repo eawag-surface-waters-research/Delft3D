@@ -319,6 +319,10 @@ subroutine flow_finalize_usertimestep(iresult)
               if (jahisbal > 0) then ! Update WaterBalances etc.
                  call updateBalance()
               endif
+              if ( jacheckmonitor.eq.1 ) then
+!                compute "checkerboard" monitor
+                 call comp_checkmonitor()
+              end if
          endif
       endif
 
@@ -17741,7 +17745,6 @@ subroutine unc_write_his(tim)            ! wrihis
     endif
     
     if ( jacheckmonitor.eq.1 ) then
-      call comp_checkmonitor()
       ierr = nf90_put_var(ihisfile, id_checkmon, checkmonitor, start=(/ 1, it_his /))
       
       ierr = nf90_put_var(ihisfile, id_num_timesteps, int(dnt), start=(/ it_his /))
