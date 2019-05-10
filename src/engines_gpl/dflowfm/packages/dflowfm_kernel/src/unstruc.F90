@@ -30973,12 +30973,16 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
  integer              :: mxyb, ja, method, iprimpos
  integer              :: k, L, k1, k2, mx
  integer, allocatable :: kcc(:), kc1D(:), kc2D(:)
+ 
+ integer              :: kc_size_store
 
  character(len=256) :: filename
  character(len=64)  :: varname
 ! character(len=1)   :: operand
 ! double precision   :: transformcoef(25) !< Transform coefficients a+b*x
 
+ kc_size_store = 0
+ 
  inquire(file = md_xybfile, exist=jawel)
  jawel = jawel .and. (len_trim(md_xybfile) > 0) ! strange behavior on some Linux systems if file name is empty, but reported exist=.true.
 
@@ -31007,6 +31011,7 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
     rewind(mext)
     ja = 1
 
+    kc_size_store = size(kc)
     allocate(kcc(mx),kc1d(mx),kc2d(mx)) ; kcc = 1; kc1D = 0 ; kc2D = 0
     call realloc(kc, mx, keepExisting = .false., fill = 0)
 
@@ -31097,9 +31102,11 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
     enddo
     call mess(LEVEL_INFO, 'setbedlevelfromextfile: Mirroring input bedlevels at open boundaries.')
 
-    call realloc(kc, numk, keepExisting = .false., fill = 0)
-
  endif
+ 
+ if ( kc_size_store.gt.0 ) then
+    call realloc(kc, kc_size_store, keepExisting = .false., fill = 0)
+ end if
 
 
  end subroutine setbedlevelfromextfile ! setbottomlevels
