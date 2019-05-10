@@ -3596,8 +3596,6 @@ function ug_create_1d_network_v1(ncid, netids, networkName, nNodes, nBranches,nG
    ierr = ug_addcoordatts(ncid, netids%varids(ntid_1dgeox), netids%varids(ntid_1dgeoy), crs)
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dgeox), 'long_name', 'x coordinates of the branch geometries')
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dgeoy), 'long_name', 'y coordinates of the branch geometries')
-   ierr = nf90_put_att(ncid, netids%varids(ntid_1dgeox), 'cf_role', 'geometry_x_node')
-   ierr = nf90_put_att(ncid, netids%varids(ntid_1dgeoy), 'cf_role', 'geometry_y_node')
    
    !5 Branch order : might be temporary, could be defined, written and retrived using ug_def_var, ug_put_var, ug_get_var
    ierr = nf90_def_var(ncid, prefix//'_branch_order', nf90_int, (/ netids%dimids(ntdim_1dbranches) /) , netids%varids(ntid_1dbranchorder))
