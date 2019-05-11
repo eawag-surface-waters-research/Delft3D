@@ -66,7 +66,7 @@ subroutine test_roughness_branches
    network%brs%branch(6)%id = 'Channel6'
    network%brs%branch(7)%id = 'Channel7'
    call fill_hashtable(network%brs)
-   cross => network%crs%cross(network%adm%line2cross(1)%c1)%tabdef
+   cross => null()
    
    roughnessfiles = 'roughness_main.ini;roughness-globals.ini'
    mapdir         = 'roughness\'

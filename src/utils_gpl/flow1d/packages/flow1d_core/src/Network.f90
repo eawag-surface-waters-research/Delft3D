@@ -970,7 +970,11 @@ use m_tablematrices
     rad = max(r, 1.d-6)
     dep = max(d, 1.d-6)
     !
-    isec = cross%frictionsectionIndex(section)
+    if (associated(cross)) then
+       isec = cross%frictionsectionIndex(section)
+    else
+       isec = section
+    endif
     
     if (rgs%version == 1) then
       rgh => rgs%rough(isec)
