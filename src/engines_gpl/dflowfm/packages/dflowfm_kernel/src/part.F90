@@ -2052,6 +2052,7 @@ subroutine ini_part(japartfile, partfile, jatracer_loc, starttime_loc, timestep_
    use m_flowtimes, only: tstart_user
    use m_missing
    use m_partitioninfo
+   use unstruc_messages
    implicit none
    
    integer,            intent(in) :: japartfile    !< use particle file (1) or not (0)
@@ -2123,6 +2124,8 @@ subroutine ini_part(japartfile, partfile, jatracer_loc, starttime_loc, timestep_
             call savesam()
             call reasam(minp, 0)
             japart = 1
+         else
+            call mess(LEVEL_ERROR, 'the specified initial particle locations file could not be found: ', trim(partfile))
          end if
       end if
    else  ! initialize only
