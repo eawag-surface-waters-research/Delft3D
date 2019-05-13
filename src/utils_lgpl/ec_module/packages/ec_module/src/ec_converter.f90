@@ -400,11 +400,10 @@ module m_ec_converter
                         if (np>0 .and. mp>0) then
                            wx = (targetElementSet%x(i) - sourceElementSet%x(mp))/(sourceElementSet%x(mp+1) - sourceElementSet%x(mp)) 
                            wy = (targetElementSet%y(i) - sourceElementSet%y(np))/(sourceElementSet%y(np+1) - sourceElementSet%y(np)) 
-                           do jj=0,1
-                              do ii=0,1
-                                 weight%weightFactors(1+ii+2*jj,i) = ((1.-wx)*(1-ii) + wx*ii) * ((1.-wy)*(1-jj) + wy*jj)
-                              enddo
-                           enddo
+                           weight%weightFactors(1,i) = (1.-wx)*(1-wy)                 ! 4        3
+                           weight%weightFactors(2,i) = (   wx)*(1-wy)
+                           weight%weightFactors(3,i) = (   wx)*(  wy)
+                           weight%weightFactors(4,i) = (1.-wx)*(  wy)                 ! 1        2
                         endif
 
                         weight%indices(1,i) = np
@@ -2403,7 +2402,7 @@ module m_ec_converter
          logical, dimension(:), allocatable  :: missing 
          real(hp), dimension(2,2,2,2) :: sourcevals
          real(hp), dimension(2,2)   :: val
-         real(hp)                   :: weight, lastvalue
+         real(hp)                   :: lastvalue
          integer                    :: ii, jj, kk, LL
          integer                    :: jamissing
          integer                    :: ierr
@@ -2591,12 +2590,10 @@ module m_ec_converter
                                  val = 0d0   ! (down-up,old-new)
                                  do ll=1,2
                                     do kk=1,2
-                                       do jj=1,2
-                                          do ii=1,2
-                                              weight = indexWeight%weightFactors(ii+2*(jj-1),j)
-                                              val(kk,ll) = val(kk,ll) + weight * sourcevals(ii, jj, kk, ll)
-                                          end do
-                                       end do
+                                       val(kk,ll) = val(kk,ll) + sourcevals(1, 1, kk, ll) * indexWeight%weightFactors(1,j)    !   4      3
+                                       val(kk,ll) = val(kk,ll) + sourcevals(2, 1, kk, ll) * indexWeight%weightFactors(2,j)
+                                       val(kk,ll) = val(kk,ll) + sourcevals(2, 2, kk, ll) * indexWeight%weightFactors(3,j)
+                                       val(kk,ll) = val(kk,ll) + sourcevals(1, 2, kk, ll) * indexWeight%weightFactors(4,j)    !   1      2
                                     end do
                                  end do                                 
                                  ! get weights for vertical interpolation
@@ -2661,13 +2658,14 @@ module m_ec_converter
                               missing(j) = .True.    ! Mark missings in the target grid in a temporary logical array  
                               if (allocated(x_extrapolate)) x_extrapolate(j)=ec_undef_hp                                ! no-data -> unelectable for kdtree later
                            else
-                              do jj=0,1
-                                 do ii=0,1
-                                    weight = indexWeight%weightFactors(1+ii+2*jj,j)
-                                    targetValues(j) = targetValues(j) + a0 * weight * s2D_T0(mp+ii, np+jj)
-                                    targetValues(j) = targetValues(j) + a1 * weight * s2D_T1(mp+ii, np+jj)
-                                 end do
-                              end do
+                              targetValues(j) = targetValues(j) + a0 * s2D_T0(mp  , np  ) * indexWeight%weightFactors(1,j)        !  4                 3
+                              targetValues(j) = targetValues(j) + a1 * s2D_T1(mp  , np  ) * indexWeight%weightFactors(1,j)
+                              targetValues(j) = targetValues(j) + a0 * s2D_T0(mp+1, np  ) * indexWeight%weightFactors(2,j)
+                              targetValues(j) = targetValues(j) + a1 * s2D_T1(mp+1, np  ) * indexWeight%weightFactors(2,j)
+                              targetValues(j) = targetValues(j) + a0 * s2D_T0(mp+1, np+1) * indexWeight%weightFactors(3,j)
+                              targetValues(j) = targetValues(j) + a1 * s2D_T1(mp+1, np+1) * indexWeight%weightFactors(3,j)
+                              targetValues(j) = targetValues(j) + a0 * s2D_T0(mp  , np+1) * indexWeight%weightFactors(4,j)
+                              targetValues(j) = targetValues(j) + a1 * s2D_T1(mp  , np+1) * indexWeight%weightFactors(4,j)        !  1                 2
                               if (allocated(x_extrapolate)) x_extrapolate(j)=targetElementSet%x(j)                      ! x_extrapolate is a copy of the x with missing points marked by ec_undef_hp
                            end if
                         end if
