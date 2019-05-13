@@ -214,7 +214,10 @@
          
 !        allocate vertical exchanges array
          call realloc(iexpnt, [4, noq3], keepExisting=.false., fill=0)
-      
+
+!        allocate array that indicates is dflowfm cells are wet or dry
+         call realloc(wetdry, ktx, keepExisting=.false.)
+         
 !        allocate array that indicates active cells (segments)
          call realloc(iknmrk, noseg, keepExisting=.false., fill=0)
          
@@ -1051,7 +1054,13 @@
          end if
       end do
       
-     
+!     determine dry/wet cells 
+      do kk=1,Ndxi
+         call getkbotktopmax(kk,kb,kt,ktmax)
+         do k=kb,kt
+            wetdry(k) = vol1(k).gt.waq_vol_dry_thr .and. (vol1(k)/ba(kk)).gt.waq_dep_dry_thr
+         enddo
+      enddo
       
 !     fill concentrations   
       do k=kbx,ktx
@@ -1063,7 +1072,7 @@
 
 !     fill masses (transported)
       do k=kbx,ktx
-         if (vol1(k).gt.waq_vol_dry_thr) then
+         if (wetdry(k)) then
             do isys=1,nosys
                iconst = isys2const(isys)
                amass(isys,k-kbx+1) = constituents(iconst,k)*vol1(k)
@@ -1098,29 +1107,24 @@
                iknmrk_dry = int(iknmrk(kwaq)/10) * 10
                iknmrk_wet = iknmrk_dry + 1
                
-               if ( vol1(k).gt.waq_vol_dry_thr ) then
+               if (wetdry(k)) then
                   iknmrk(kwaq) = iknmrk_wet
                else
                   iknmrk(kwaq) = iknmrk_dry
                end if
             end do
             
+!           segments above kt always inactive (z-layer)
             do k=kt+1,ktmax
                kwaq = k-kbx+1
                
                iknmrk_dry = int(iknmrk(kwaq)/10) * 10
-               iknmrk_wet = iknmrk_dry + 1
-               
-               if ( vol1(k).gt.waq_vol_dry_thr ) then
-                  iknmrk(kwaq) = iknmrk_wet
-               else
-                  iknmrk(kwaq) = iknmrk_dry
-               end if
+               iknmrk(kwaq) = iknmrk_dry
             end do
          end do
       else
          do k=1,Ndxi
-            if ( vol1(k).gt.waq_vol_dry_thr ) then
+            if (wetdry(k)) then
                iknmrk(k) = 1101
             else
                iknmrk(k) = 1100
@@ -1162,7 +1166,7 @@
       do kk=1,Ndxi
          call getkbotktopmax(kk,kb,kt,ktmax)
          do k=kb,kt
-            if (vol1(k).gt.waq_vol_dry_thr) then
+            if (wetdry(k)) then
                do isys=1,nosys
                   iconst = isys2const(isys)
                   constituents(iconst,k) = amass(isys,k-kbx+1) / vol1(k)
@@ -1204,11 +1208,11 @@
                ip = ip_arr + (iv_idx-1)*idim1
                incr = 1
             endif
-            do i = 1, noseg
-                waqoutputs(j,i) = pmsa(ip)
-                ip = ip + incr
-            enddo
-        endif
+               do i = 1, noseg
+                   waqoutputs(j,i) = pmsa(ip)
+                   ip = ip + incr
+               enddo
+            endif
       enddo 
       return
    end subroutine copy_data_from_wq_processes_to_fm

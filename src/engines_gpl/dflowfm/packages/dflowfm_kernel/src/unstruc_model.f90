@@ -609,6 +609,7 @@ subroutine readMDUFile(filename, istat)
     use m_sobekdfm,              only : sbkdfm_umin,sbkdfm_umin_method,minimal_1d2d_embankment, sbkdfm_relax
     use string_module
     use m_heatfluxes
+    use m_fm_wq_processes
     use m_xbeach_avgoutput
     use unstruc_netcdf, only: UNC_CONV_CFOLD, UNC_CONV_UGRID, unc_set_ncformat
     use unstruc_version_module
@@ -1746,6 +1747,8 @@ subroutine readMDUFile(filename, istat)
    call prop_get_string (md_ptr, 'processes', 'AdditionalHistoryOutputFile', md_ehofile, success)
    call prop_get_double (md_ptr, 'processes', 'ThetaVertical', md_thetav_waq, success)
    call prop_get_integer(md_ptr, 'processes', 'ProcessFluxIntegration', md_flux_int, success)
+   call prop_get_double (md_ptr, 'processes', 'VolumeDryThreshold', waq_vol_dry_thr)
+   call prop_get_double (md_ptr, 'processes', 'DepthDryThreshold', waq_dep_dry_thr)
 
    call prop_get_double (md_ptr, 'processes', 'DtProcesses', md_dt_waqproc, success)
    if (md_dt_waqproc <= 0d0) then
@@ -1975,6 +1978,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     use m_grw
     use m_missing
     use m_heatfluxes
+    use m_fm_wq_processes
     use m_trachy
     use m_transport, only: ITRA1
     use m_structures, only: jahiscgen, jahiscdam, jahispump, jahisgate, jahisweir
@@ -3053,6 +3057,8 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
    call prop_set_double (prop_ptr, 'processes', 'DtProcesses', md_dt_waqproc, 'waq processes time step')
    call prop_set_double (prop_ptr, 'processes', 'DtMassBalance', md_dt_waqbal, 'waq mass balance output time step')
    call prop_set_integer(prop_ptr, 'processes', 'ProcessFluxIntegration', md_flux_int, 'Process fluxes integration option (1: WAQ, 2: D-Flow FM)')
+   call prop_set_double (prop_ptr, 'processes', 'VolumeDryThreshold', waq_vol_dry_thr)
+   call prop_set_double (prop_ptr, 'processes', 'DepthDryThreshold', waq_dep_dry_thr)
 
 !   Secondary Flow
     !call prop_set(prop_ptr, 'output', 'SecFlowTesting', jasftesting, '0:none, 1: exact ucx,ucy point vel, 2: exact staggered vels.')

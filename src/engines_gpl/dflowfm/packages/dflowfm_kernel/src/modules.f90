@@ -5225,7 +5225,8 @@ module m_fm_wq_processes
    integer, parameter                        :: NAMWAQLEN = 128
    integer                                   :: ithndlwq = 0                !< overall timer for water quality processes
    integer                                   :: jawaqproc                   !< switch for water quality processes
-   real(hp)                                  :: waq_vol_dry_thr = 1d-16     !< minimum volume for processes to be active
+   real(hp)                                  :: waq_vol_dry_thr = 1.0d-3    !< minimum volume for processes to be active
+   real(hp)                                  :: waq_dep_dry_thr = 1.0d-3    !< minimum depth for processes to be active
    integer                                   :: flux_int                    !< flux integration by WAQ (1) or by FM (2, not implemented)
    integer                                   :: kbx                         !< pointer of first segment to D-Flow FM 3D administration
    integer                                   :: ktx                         !< pointer of last  segment to D-Flow FM 3D administration
@@ -5239,7 +5240,10 @@ module m_fm_wq_processes
    integer,  allocatable, dimension(:)       :: iex2k                       !< exchange to interface
 
    real(hp), allocatable, dimension(:,:)     :: amass                       !< mass array to be updated
-   integer , allocatable, dimension(:)       :: iknmrk                      !< Integration suboptions
+   logical , allocatable, dimension(:)       :: wetdry                      !< wet/dry indicator (wet=true/dry=false)
+   integer , allocatable, dimension(:)       :: iknmrk                      !< segment characteristics.
+                                                                            !< 1st digit from the right indicates wet/dry (1/0),
+                                                                            !< 2nd digit indicates top/middle/bottom/top&bottom in water column (1/2/3/0).
 
    integer                                   :: sizepmsa                    !< size of (pms)a-array
    real(sp), allocatable, dimension(:)       :: pmsa                        !< the actual data array
