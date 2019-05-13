@@ -7305,14 +7305,13 @@ contains
      integer         , intent(in)    :: lnx    
      integer         , intent(out)   :: keg(:)
      integer         , intent(out)   :: numg
-     integer                         :: isec
-     
+
      !optional inputs/outputs
-     double precision, allocatable, optional, dimension(:), intent(inout) :: xps(:), yps(:) 
-     integer, optional, intent(inout) :: nps
-     integer, optional, dimension(:), intent(inout) :: lftopol
-     integer, optional, intent(in) :: sortLinks
-                                             
+     double precision, allocatable, optional, intent(inout) :: xps(:), yps(:) !< (Optional) Arrays in which the read in polyline x,y-points can be stored.
+     integer,                       optional, intent(inout) :: nps            !< (Optional) Number of polyline points that have been read in.
+     integer,                       optional, intent(inout) :: lftopol(:)     !< (Optional) Mapping array from flow links to the polyline index that intersected that flow link.
+     integer,                       optional, intent(in   ) :: sortLinks      !< (Optional) Whether or not to sort the found flow links along the polyline path.
+
      !locals 
      integer :: minp, L, k1, k2, ja, np, opts, ierr
      double precision :: xa, ya, xb, yb,xm, ym, CRPM, dist 
