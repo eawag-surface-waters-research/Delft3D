@@ -7289,7 +7289,7 @@ contains
    !
    ! ==========================================================================
    !> 
-   subroutine selectelset_internal_links( filename, filetype, xz, yz, ln, lnx, keg, numg, xps, yps, nps, lftopol, sortLinks) ! find links cut by polyline filetype 9  
+   subroutine selectelset_internal_links( filename, filetype, xz, yz, ln, lnx, keg, numg, xps, yps, nps, lftopol, sortLinks, linktype) ! find links cut by polyline filetype 9  
      use m_inquire_flowgeom
      use messageHandling
      use sorting_algorithms, only: sort
@@ -7311,6 +7311,7 @@ contains
      integer,                       optional, intent(inout) :: nps            !< (Optional) Number of polyline points that have been read in.
      integer,                       optional, intent(inout) :: lftopol(:)     !< (Optional) Mapping array from flow links to the polyline index that intersected that flow link.
      integer,                       optional, intent(in   ) :: sortLinks      !< (Optional) Whether or not to sort the found flow links along the polyline path.
+     integer,                       optional, intent(in   ) :: linktype       !< (Optional) Limit search to specific link types: only 1D flow links (linktype==IFLTP_1D), 2D (linktype==IFLTP_2D), or both (linktype==IFLTP_ALL).
 
      !locals 
      integer :: minp, L, k1, k2, ja, np, opts, ierr
@@ -7318,7 +7319,14 @@ contains
      double precision, allocatable, dimension(:) :: xp, yp, distsStartPoly, sortedDistsStartPoly
      integer, allocatable, dimension(:):: sortedIndexses, tempLinkArray !< the sorted indexes
 
-     
+     integer :: linktype_
+
+     if (present(linktype)) then
+        linktype_ = linktype
+     else
+        linktype_ = IFLTP_ALL
+     end if
+
      numg = 0 
      if (filetype == poly_tim) then
    
@@ -7339,13 +7347,13 @@ contains
         numg = 0
         select case(opts)
         case (0)
-           ierr = findlink(np, xp, yp, keg, numg)
+           ierr = findlink(np, xp, yp, keg, numg, linktype = linktype_)
         case (1)
-           ierr = findlink(np, xp, yp, keg, numg, lftopol = lftopol)
+           ierr = findlink(np, xp, yp, keg, numg, lftopol = lftopol, linktype = linktype_)
         case (2)
-           ierr = findlink(np, xp, yp, keg, numg, sortlinks = sortlinks)
+           ierr = findlink(np, xp, yp, keg, numg, sortlinks = sortlinks, linktype = linktype_)
         case (3)
-           ierr = findlink(np, xp, yp, keg, numg, lftopol, sortlinks)
+           ierr = findlink(np, xp, yp, keg, numg, lftopol, sortlinks, linktype = linktype_)
         end select
      endif            
      

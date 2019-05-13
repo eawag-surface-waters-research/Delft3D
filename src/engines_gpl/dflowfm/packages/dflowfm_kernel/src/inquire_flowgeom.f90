@@ -53,8 +53,10 @@ module m_inquire_flowgeom
       module procedure findnode_by_branchid     !< find the flow node number, using (branch id, chainage)
    end interface
    
-   integer, public, parameter :: FL_1D = 1
-   integer, public, parameter :: FL_2D = 2
+   integer, public, parameter :: IFLTP_1D  = 1  !< Type code for flow links that are 1D
+   integer, public, parameter :: IFLTP_2D  = 2  !< Type code for flow links that are 2D
+   integer, public, parameter :: IFLTP_ALL = 3  !< Type code for flow links that are 1D or 2D
+   
 
    contains
    
@@ -71,7 +73,7 @@ module m_inquire_flowgeom
       integer,           intent(  out)  :: Larr(:)      !< array with flow links, intersected by the polyline. Length is the resonsibility of the call site.
       integer,           intent(  out)  :: numlinks     !< Number of found flow links.
       integer, optional, intent(in   )  :: sortlinks    !< Indicates whether the flow links have to be sorted.
-      integer, optional, intent(in   )  :: linktype     !< Limit search to specific link types: only 1D flow links (linktype==FL_1D), 2D (linktype==FL_2D), or both (linktype==FL_1D+FL_2D).
+      integer, optional, intent(in   )  :: linktype     !< Limit search to specific link types: only 1D flow links (linktype==IFLTP_1D), 2D (linktype==IFLTP_2D), or both (linktype==IFLTP_ALL).
       integer, optional, intent(inout)  :: lftopol(:)   !< Mapping array from flow link to intersecting polyline segment.
       
       double precision :: xa, ya
@@ -101,13 +103,13 @@ module m_inquire_flowgeom
       ! select search range for flow links
       if (present(linktype)) then
          select case(linktype)
-         case (FL_1D)
+         case (IFLTP_1D)
             Lstart = 1
             Lend   = lnx1D
-         case (FL_2D)
+         case (IFLTP_2D)
             Lstart = lnx1D + 1
             Lend   = lnx
-         case (FL_1D+FL_2D)
+         case (IFLTP_ALL)
             Lstart = 1
             Lend   = lnx
          end select
@@ -311,13 +313,13 @@ module m_inquire_flowgeom
       ! 1:ndx2D, ndx2D+1:ndxi, ndxi+1:ndx1Db, ndx1Db:ndx
       if (present(nodetype)) then
          select case(nodetype)
-         case (FL_1D)
+         case (IFLTP_1D)
             nstart = ndx2D+1
             nend   = ndxi
-         case (FL_2D)
+         case (IFLTP_2D)
             nstart = 1
             nend   = ndx2D
-         case (FL_1D + FL_2D)
+         case (IFLTP_ALL)
             nstart = 1
             nend   = ndxi
          end select

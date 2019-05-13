@@ -36485,6 +36485,7 @@ end function is_1d_boundary_candidate
  use m_flowparameters
  use m_flowtimes                                     ! Two stages: 1 = collect elsets for which data is provided
  use m_flowgeom                                      !             2 = add relations between elsets and their providers
+ use m_inquire_flowgeom, only: IFLTP_1D, IFLTP_ALL
  use m_netw
  use unstruc_model
  use unstruc_messages
@@ -37966,9 +37967,9 @@ if (mext > 0) then
         else if (jaoldstr > 0 .and. (qid == 'pump1D' .or. qid == 'pump') ) then
 
            if (qid == 'pump1D') then
-               call selectelset_internal_links( filename, filetype, xz, yz, ln, lnx1D, kep(npump+1:numl), npum )
+               call selectelset_internal_links( filename, filetype, xz, yz, ln, lnx1D, kep(npump+1:numl), npum, linktype = IFLTP_1D )
            else
-               call selectelset_internal_links( filename, filetype, xz, yz, ln, lnx, kep(npump+1:numl), npum )
+               call selectelset_internal_links( filename, filetype, xz, yz, ln, lnx, kep(npump+1:numl), npum, linktype = IFLTP_ALL )
            endif
            success = .true.
            WRITE(msgbuf,'(a,1x,a,i8,a)') trim(qid), trim(filename) , npum, ' nr of pump links' ; call msg_flush()
