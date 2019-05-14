@@ -5237,7 +5237,6 @@ module m_fm_wq_processes
    integer                                   :: noq3                        !< Number of exchanges vertical
    integer                                   :: noq4                        !< Number of exchanges in the bed
    integer,  allocatable, dimension(:,:)     :: iexpnt                      !< Exchange pointer
-   integer,  allocatable, dimension(:)       :: iex2k                       !< exchange to interface
 
    real(hp), allocatable, dimension(:,:)     :: amass                       !< mass array to be updated
    logical , allocatable, dimension(:)       :: wetdry                      !< wet/dry indicator (wet=true/dry=false)

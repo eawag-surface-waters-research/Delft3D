@@ -173,9 +173,6 @@
 !        allocate array that indicates active cells (segments)
          call realloc(iknmrk, noseg, keepExisting=.false., fill=0)
          
-!        allocate exchange to interface array
-         call realloc(iex2k, noq3, keepExisting=.false., fill=0)
-         
 !        set vertical exchanges
          iex = 0
          do kk=1,Ndxi
@@ -184,8 +181,6 @@
                iex = iex+1
                iexpnt(1,iex) = k - kbx+1
                iexpnt(2,iex) = k-1 - kbx+1
-               
-               iex2k(iex) = k-1
             end do
          end do
             
@@ -215,18 +210,15 @@
 !        allocate vertical exchanges array
          call realloc(iexpnt, [4, noq3], keepExisting=.false., fill=0)
 
-!        allocate array that indicates is dflowfm cells are wet or dry
-         call realloc(wetdry, ktx, keepExisting=.false.)
-         
 !        allocate array that indicates active cells (segments)
          call realloc(iknmrk, noseg, keepExisting=.false., fill=0)
-         
-!        allocate exchange to interface array
-         call realloc(iex2k, noq3, keepExisting=.false., fill=0)
          
 !        set array that indicates active cells (segments)
          iknmrk = 1101
       end if
+
+!    allocate array that indicates is dflowfm cells are wet or dry
+     call realloc(wetdry, ktx, keepExisting=.false.)
    
 ! ======================
 ! Start initialising WAQ
