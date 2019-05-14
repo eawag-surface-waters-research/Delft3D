@@ -3542,7 +3542,7 @@ function ug_create_1d_network_v1(ncid, netids, networkName, nNodes, nBranches,nG
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dtopo), 'edge_dimension', 'n'//prefix//'_branch')
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dtopo), 'edge_geometry', prefix//'_geometry')
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dtopo), 'edge_node_connectivity', prefix//'_edge_nodes')
-   ierr = nf90_put_att(ncid, netids%varids(ntid_1dtopo), 'node_coordinates', prefix//'_nodes_x '//prefix//'_nodes_y')
+   ierr = nf90_put_att(ncid, netids%varids(ntid_1dtopo), 'node_coordinates', prefix//'_node_x '//prefix//'_node_y')
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dtopo), 'node_dimension', 'n'//prefix//'_node')
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dtopo), 'topology_dimension', 1)
    !nodes attributes
@@ -3575,8 +3575,8 @@ function ug_create_1d_network_v1(ncid, netids, networkName, nNodes, nBranches,nG
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dnodlongnames), 'long_name', 'long names of the network connection nodes')
    !3. Nodes: x coord
    !3. Nodes: y coord
-   ierr = nf90_def_var(ncid, prefix//'_nodes_x', nf90_double, (/ netids%dimids(ntdim_1dnodes) /) , netids%varids(ntid_1dnodex))
-   ierr = nf90_def_var(ncid, prefix//'_nodes_y', nf90_double, (/ netids%dimids(ntdim_1dnodes) /) , netids%varids(ntid_1dnodey))
+   ierr = nf90_def_var(ncid, prefix//'_node_x', nf90_double, (/ netids%dimids(ntdim_1dnodes) /) , netids%varids(ntid_1dnodex))
+   ierr = nf90_def_var(ncid, prefix//'_node_y', nf90_double, (/ netids%dimids(ntdim_1dnodes) /) , netids%varids(ntid_1dnodey))
    ierr = ug_addcoordatts(ncid, netids%varids(ntid_1dnodex), netids%varids(ntid_1dnodey), crs)
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dnodex), 'long_name', 'x coordinates of the network connection nodes')
    ierr = nf90_put_att(ncid, netids%varids(ntid_1dnodey), 'long_name', 'y coordinates of the network connection nodes')
@@ -3688,7 +3688,7 @@ function ug_create_1d_mesh_v2(ncid, networkname, meshids, meshname, nmeshpoints,
    ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'edge_node_connectivity', prefix//'_edge_nodes')
    ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'node_dimension','n'//prefix//'_node')
    if (writexy == 1) then
-       ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'node_coordinates', prefix//'_nodes_branch_id '//prefix//'_nodes_branch_offset '//prefix//'_nodes_x '//prefix//'_nodes_y')
+       ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'node_coordinates', prefix//'_nodes_branch_id '//prefix//'_nodes_branch_offset '//prefix//'_node_x '//prefix//'_node_y')
    endif
    if (writexy == 0) then
        ierr = nf90_put_att(ncid, meshids%varids(mid_meshtopo), 'node_coordinates', prefix//'_nodes_branch_id '//prefix//'_nodes_branch_offset')
@@ -3703,8 +3703,8 @@ function ug_create_1d_mesh_v2(ncid, networkname, meshids, meshname, nmeshpoints,
    ierr = nf90_put_att(ncid, meshids%varids(mid_1doffset), 'units', 'm')   
    
    if (writexy == 1) then
-       ierr = nf90_def_var(ncid, prefix//'_nodes_x', nf90_double, (/ meshids%dimids(mdim_node) /), meshids%varids(mid_nodex))
-       ierr = nf90_def_var(ncid, prefix//'_nodes_y', nf90_double, (/ meshids%dimids(mdim_node) /), meshids%varids(mid_nodey))
+       ierr = nf90_def_var(ncid, prefix//'_node_x', nf90_double, (/ meshids%dimids(mdim_node) /), meshids%varids(mid_nodex))
+       ierr = nf90_def_var(ncid, prefix//'_node_y', nf90_double, (/ meshids%dimids(mdim_node) /), meshids%varids(mid_nodey))
        ierr = ug_addcoordatts(ncid, meshids%varids(mid_nodex), meshids%varids(mid_nodey), crs)
        ierr = nf90_put_att(ncid, meshids%varids(mid_nodex), 'long_name', 'x coordinates of the mesh nodes')
        ierr = nf90_put_att(ncid, meshids%varids(mid_nodey), 'long_name', 'y coordinates of the mesh nodes')
