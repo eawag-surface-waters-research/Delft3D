@@ -322,8 +322,8 @@ subroutine flow_finalize_usertimestep(iresult)
               if ( jacheckmonitor.eq.1 ) then
 !                compute "checkerboard" monitor
                  call comp_checkmonitor()
-              end if
          endif
+      endif
       endif
 
 
@@ -3464,7 +3464,7 @@ end subroutine setdt
 ! use unstruc_model
  use m_partitioninfo
  use m_missing
- use m_transport, only: time_dtmax, dtmax, dtmin_transp, kk_dtmin
+ use m_transport, only: time_dtmax, dtmax !, dtmin_transp, kk_dtmin
  implicit none
 
 
@@ -3595,11 +3595,11 @@ end subroutine setdt
 
     else if (  ja_timestep_auto.eq.5 ) then   ! full 3D
 
-       if ( jatransportmodule.eq.1 .and. time_dtmax.eq.time1 ) then
-          dts = dtmin_transp
-          kkcflmx = kk_dtmin
-          jareduced = 1
-       else
+!       if ( jatransportmodule.eq.1 .and. time_dtmax.eq.time1 ) then
+!          dts = dtmin_transp
+!          kkcflmx = kk_dtmin
+!          jareduced = 1
+!       else
        do kk=1,Ndxi
           if ( jampi.eq.1 ) then
 !            do not include ghost cells
@@ -3621,7 +3621,7 @@ end subroutine setdt
              end do
           end if
        end do
-       end if
+ !      end if
 
     else if (  ja_timestep_auto.eq.6) then
        do kk=1,Ndxi
@@ -30973,7 +30973,7 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
  integer              :: mxyb, ja, method, iprimpos
  integer              :: k, L, k1, k2, mx
  integer, allocatable :: kcc(:), kc1D(:), kc2D(:)
- 
+
  integer              :: kc_size_store
 
  character(len=256) :: filename
@@ -31103,10 +31103,10 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
     call mess(LEVEL_INFO, 'setbedlevelfromextfile: Mirroring input bedlevels at open boundaries.')
 
  endif
- 
+
  if ( kc_size_store.gt.0 ) then
     call realloc(kc, kc_size_store, keepExisting = .false., fill = 0)
- end if
+ endif
 
 
  end subroutine setbedlevelfromextfile ! setbottomlevels

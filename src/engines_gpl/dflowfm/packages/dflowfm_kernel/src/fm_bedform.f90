@@ -1064,7 +1064,8 @@ subroutine fm_advecbedform(thevar, uadv, qadv, bedform_sour, bedform_sink, limit
    end do
 
 !  compute horizontal fluxes, explicit part
-   call comp_fluxhor3D(1, limityp, Ndx, Lnx, uadv, qadv, wu, bfsqi, ba, kbot, Lbot, Ltop,  kmxn, kmxL, thevar, difsedubf, sigdifibf, dumL, dumd, 1, jabfupdate, jabfhorupdate, nbfdeltasteps, (/ 1 /), fluxhorbf, dumx, dumy)
+   call comp_dxiAu()
+   call comp_fluxhor3D(1, limityp, Ndx, Lnx, uadv, qadv, wu, bfsqi, ba, kbot, Lbot, Ltop,  kmxn, kmxL, thevar, difsedubf, sigdifibf, dumL, dumd, 1, jabfupdate, jabfhorupdate, nbfdeltasteps, (/ 1 /), fluxhorbf, dumx, dumy, 1, dxiAu)
    call comp_sumhorflux(1, 0, Lnkx, Ndkx, Lbot, Ltop, fluxhorbf, bfsumhorflux)
    call solve_2D(1, Ndx, Lnx, ba, kbot, ktop, Lbot, Ltop, bfsumhorflux, fluxverbf, const_sourbf, const_sinkbf, 1, jabfupdate, nbfdeltasteps, thevar, rhsbf)
    ierror = 0

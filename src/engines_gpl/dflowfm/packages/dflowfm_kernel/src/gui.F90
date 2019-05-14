@@ -22571,7 +22571,7 @@ subroutine isosmoothflownode2(k) ! smooth isolines in flow cells use depmax2
  character, save :: TEX1*210 = '@'
  character, save :: TEX2*210 = ''
  character, save :: TEX3*210 = ''
- character(len=3) :: c_nsubsteps
+ character(len=4) :: c_nsubsteps
  character(len=7) :: c_numnonglobal
  character(len=15) :: c_lts
  integer, save :: mout = 0
@@ -22643,7 +22643,7 @@ subroutine isosmoothflownode2(k) ! smooth isolines in flow cells use depmax2
        write(c_lts(9:), '(i4)') min(9999, nums1mit)  
     endif   
  else
-    write(c_nsubsteps, "(i3)") min(nsubsteps,999)   ! min: safe text width
+    write(c_nsubsteps, "(i4)") min(nsubsteps,9999)   ! min: safe text width
     write(c_numnonglobal, "(i7)") min(numnonglobal,9999999)   ! min: safe text width
     c_lts = 'lts:' // trim(adjustl(c_nsubsteps)) // '|' // trim(adjustl(c_numnonglobal))
  end if

@@ -83,6 +83,10 @@ subroutine update_constituents(jarhoonly)
       call fill_constituents(1)
    endif   
    
+!  compute areas of horizontal diffusive fluxes divided by Dx
+   call comp_dxiAu()
+   
+!  get maximum transport time step   
    call get_dtmax()
    
    if ( jalts.eq.1 ) then  ! local time-stepping
@@ -137,7 +141,7 @@ subroutine update_constituents(jarhoonly)
       
 !     compute horizontal fluxes, explicit part
       if (.not. stm_included) then     ! just do the normal stuff
-         call comp_fluxhor3D(NUMCONST, limtyp, Ndkx, Lnkx, u1, q1, au, sqi, vol1, kbot, Lbot, Ltop,  kmxn, kmxL, constituents, difsedu, sigdifi, viu, vicouv, nsubsteps, jaupdate, jaupdatehorflux, ndeltasteps, jaupdateconst,fluxhor, dsedx, dsedy)   
+         call comp_fluxhor3D(NUMCONST, limtyp, Ndkx, Lnkx, u1, q1, au, sqi, vol1, kbot, Lbot, Ltop,  kmxn, kmxL, constituents, difsedu, sigdifi, viu, vicouv, nsubsteps, jaupdate, jaupdatehorflux, ndeltasteps, jaupdateconst,fluxhor, dsedx, dsedy, jalimitdiff, dxiAu)   
       else
          if ( jatranspvel.eq.0 .or. jatranspvel.eq.1 ) then       ! Lagrangian approach
             ! only add velocity asymmetry
@@ -158,9 +162,9 @@ subroutine update_constituents(jarhoonly)
                q1sed(Lbot(LL)) = q1sed(Lbot(LL))+mtd%uau(LL)*Au(Lbot(LL))  ! VR2004 already has this effect
             end do
          end if
-         call comp_fluxhor3D(NUMCONST, limtyp, Ndkx, Lnkx, u1sed, q1sed, au, sqi, vol1, kbot, Lbot, Ltop,  kmxn, kmxL, constituents, difsedu, sigdifi, viu, vicouv, nsubsteps, jaupdate, jaupdatehorflux, ndeltasteps, noupdateconst, fluxhor, dsedx, dsedy)         
+         call comp_fluxhor3D(NUMCONST, limtyp, Ndkx, Lnkx, u1sed, q1sed, au, sqi, vol1, kbot, Lbot, Ltop,  kmxn, kmxL, constituents, difsedu, sigdifi, viu, vicouv, nsubsteps, jaupdate, jaupdatehorflux, ndeltasteps, noupdateconst, fluxhor, dsedx, dsedy, jalimitdiff, dxiAu)         
 !        water advection velocity
-         call comp_fluxhor3D(NUMCONST, limtyp, Ndkx, Lnkx, u1,    q1,    au, sqi, vol1, kbot, Lbot, Ltop,  kmxn, kmxL, constituents, difsedu, sigdifi, viu, vicouv, nsubsteps, jaupdate, jaupdatehorflux, ndeltasteps, jaupdateconst, fluxhor, dsedx, dsedy)
+         call comp_fluxhor3D(NUMCONST, limtyp, Ndkx, Lnkx, u1,    q1,    au, sqi, vol1, kbot, Lbot, Ltop,  kmxn, kmxL, constituents, difsedu, sigdifi, viu, vicouv, nsubsteps, jaupdate, jaupdatehorflux, ndeltasteps, jaupdateconst, fluxhor, dsedx, dsedy, jalimitdiff, dxiAu)
       end if   
       
       call starttimer(IDEBUG)
@@ -244,7 +248,7 @@ subroutine update_constituents(jarhoonly)
 end subroutine update_constituents
 
 !> compute horizontal transport fluxes at flowlink
-subroutine comp_fluxhor3D(NUMCONST, limtyp, Ndkx, Lnkx, u1, q1, au, sqi, vol1, kbot, Lbot, Ltop, kmxn, kmxL, sed, difsed, sigdifi, viu, vicouv, nsubsteps, jaupdate, jaupdatehorflux, ndeltasteps, jaupdateconst, flux, dsedx, dsedy)
+subroutine comp_fluxhor3D(NUMCONST, limtyp, Ndkx, Lnkx, u1, q1, au, sqi, vol1, kbot, Lbot, Ltop, kmxn, kmxL, sed, difsed, sigdifi, viu, vicouv, nsubsteps, jaupdate, jaupdatehorflux, ndeltasteps, jaupdateconst, flux, dsedx, dsedy, jalimitdiff, dxiAu)
    use m_flowgeom,  only: Ndx, Lnx, Lnxi, ln, nd, klnup, slnup, dxi, acl, csu, snu, wcx1, wcx2, wcy1, wcy2, Dx  ! static mesh information
    use m_flowtimes, only: dts, dnt
    use m_flowparameters, only: cflmx
@@ -281,6 +285,8 @@ subroutine comp_fluxhor3D(NUMCONST, limtyp, Ndkx, Lnkx, u1, q1, au, sqi, vol1, k
    double precision, dimension(NUMCONST,Lnkx), intent(inout) :: flux     !< adds horizontal advection and diffusion fluxes
    double precision, dimension(NUMCONST,ndkx), intent(inout) :: dsedx    !< grrx 
    double precision, dimension(NUMCONST,ndkx), intent(inout) :: dsedy    !< grry 
+   integer,                                    intent(in)    :: jalimitdiff   !< limit diffusion (for time step) (1) or not (0)
+   double precision, dimension(Lnkx),          intent(in)    :: dxiAu    !< area of horizontal diffusive flux divided by Dx
   
    
    double precision                                          :: sl1L, sl2L, sl3L, sl1R, sl2R, sl3R
@@ -518,12 +524,14 @@ subroutine comp_fluxhor3D(NUMCONST, limtyp, Ndkx, Lnkx, u1, q1, au, sqi, vol1, k
             dt_loc = dts
          end if
       
-         !monotinicity criterion, safe for triangles, quad and pentagons, but not for hexahedrons
-         !dfac1 = 0.2d0
-         !dfac2 = 0.2d0
-
-         dfac1 = 1d0/dble(nd(ln(1,LL))%lnx)
-         dfac2 = 1d0/dble(nd(ln(2,LL))%lnx)
+         if ( jalimitdiff.eq.1 ) then
+            !monotinicity criterion, safe for triangles, quad and pentagons, but not for hexahedrons
+            !dfac1 = 0.2d0
+            !dfac2 = 0.2d0
+         
+            dfac1 = 1d0/dble(nd(ln(1,LL))%lnx)
+            dfac2 = 1d0/dble(nd(ln(2,LL))%lnx)
+         end if
 
          if (jadiusp == 1) then 
              diuspL = diusp(LL)
@@ -536,8 +544,10 @@ subroutine comp_fluxhor3D(NUMCONST, limtyp, Ndkx, Lnkx, u1, q1, au, sqi, vol1, k
          do L=Lb,Lt
             k1 = ln(1,L)
             k2 = ln(2,L)
-            fluxfacMaxL  = dfac1*vol1(k1)/dt_loc - sqi(k1)
-            fluxfacMaxR  = dfac2*vol1(k2)/dt_loc - sqi(k2)
+            if ( jalimitdiff.eq.1 ) then
+               fluxfacMaxL  = dfac1*vol1(k1)/dt_loc - sqi(k1)
+               fluxfacMaxR  = dfac2*vol1(k2)/dt_loc - sqi(k2)
+            end if
             do j=1,NUMCONST
                if ( jaupdateconst(j).ne.1 ) cycle
                
@@ -545,8 +555,10 @@ subroutine comp_fluxhor3D(NUMCONST, limtyp, Ndkx, Lnkx, u1, q1, au, sqi, vol1, k
                                                                    ! difsed only contains molecular value, 
                                                                    ! so then you only get user specified value  
 
-               fluxfac   = difcoeff*au(L)*dxi(LL)
-               fluxfac   = min(fluxfac, fluxfacMaxL, fluxfacMaxR)  ! zie Borsboom sobek note
+               fluxfac   = difcoeff*dxiAu(L)
+               if ( jalimitdiff.eq.1 ) then
+                  fluxfac   = min(fluxfac, fluxfacMaxL, fluxfacMaxR)  ! zie Borsboom sobek note
+               end if
                fluxfac   = max(fluxfac, 0d0)
                if (jacreep .ne. 1) then  
                    flux(j,L) = flux(j,L) - fluxfac*(sed(j,k2) - sed(j,k1))
@@ -565,6 +577,8 @@ subroutine comp_fluxhor3D(NUMCONST, limtyp, Ndkx, Lnkx, u1, q1, au, sqi, vol1, k
                      !    dtemL(L) =  min(0d0, max(dtemL(L), sed(j,k2) - sed(j,k1) ) ) 
                      !endif
                      flux(j,L) = flux(j,L) - fluxfac*dtemL(L)  
+                  else  ! SPvdP: I think this was missing
+                     flux(j,L) = flux(j,L) - fluxfac*(sed(j,k2) - sed(j,k1))
                   endif
                endif
             end do
@@ -1268,6 +1282,24 @@ subroutine ini_transport()
       ITRAN = NUMCONST
    end if
    
+   select case ( jatransportautotimestepdiff )
+   case ( 0 )
+!     limitation of diffusion   
+      jalimitdiff = 1
+      jalimitdtdiff = 0
+   case ( 1 )
+!     limitation of transport time step due to diffusion 
+      jalimitdiff = 0
+      jalimitdtdiff = 1
+   case ( 2 )
+!     no limitation of transport time step due to diffusion, and no limitation of diffusion 
+      jalimitdiff = 0
+      jalimitdtdiff = 0
+   case default   ! as 0
+      jalimitdiff = 1
+      jalimitdtdiff = 0
+   end select
+   
    call alloc_transport(.false.)
    
    if ( ISALT.gt.0 ) then
@@ -1452,6 +1484,11 @@ subroutine alloc_transport(Keepexisting)
    call realloc(jaupdate,    Ndx, keepExisting=.false., fill=1)
    call realloc(jaupdatehorflux, Lnx, keepExisting=.false., fill=1)
    call realloc(dtmax,       Ndx, keepExisting=.false., fill=0d0)
+   
+   if ( jalimitdtdiff.eq.1 ) then
+      call realloc(sumdifflim, Ndkx, keepExisting=.false., fill = 0d0)
+   end if
+   call realloc(dxiAu, Lnkx, keepExisting=.false., fill = 0d0)
    
    call realloc(jaupdateconst, NUMCONST, keepExisting=.false., fill=1)
    if ( stm_included ) then
@@ -2273,18 +2310,25 @@ end subroutine apply_tracer_bc
 
 !> get maximum timestep for water columns (see setdtorg)
 subroutine get_dtmax()
-   use m_flowgeom, only: Ndx, Ndxi, bl, nd, Dx
-   use m_flow, only: s1, epshu, squ, sqi, vol1, kmx, u1, hu
-   use m_flowparameters, only: eps10, cflmx
+   use m_flowgeom, only: Ndx, Ndxi, bl, nd, Dx, ln, lnx
+   use m_flow, only: s1, epshu, squ, sqi, vol1, kmx, u1, hu, diusp, viu, Lbot, Ltop
+   use m_flowparameters, only: eps10, cflmx, jadiusp
+   use m_turbulence, only: sigdifi
    use m_flowtimes, only: time1
+   use m_physcoef, only:  dicouv
    use m_timer
    use m_transport
    use m_partitioninfo
 
    implicit none
    
+   double precision                              :: difcoeff
+   double precision                              :: diuspL
+   
    integer                                       :: kk, k, kb, kt
-   integer                                       :: L, LL
+   integer                                       :: L, LL, Lb, Lt
+   integer                                       :: k1, k2
+   integer                                       :: j
    integer                                       :: ierror
    
    double precision,                 parameter   :: dtmax_default = 1d4
@@ -2292,14 +2336,56 @@ subroutine get_dtmax()
    dtmin_transp = huge(1d0)
    kk_dtmin = 0
    
+   if ( jalimitdtdiff.eq.1 ) then
+!     determine contribution of diffusion to time-step limitation, mosly copied from "comp_fluxhor3D"
+      sumdifflim = 0d0
+      do LL=1,Lnx
+         if (jadiusp == 1) then 
+             diuspL = diusp(LL)
+         else
+             diuspL = dicouv
+         endif 
+         
+         Lb = Lbot(LL)
+         Lt = Ltop(LL)
+         
+         do L=Lb,Lt
+            k1 = ln(1,L)
+            k2 = ln(2,L)
+            
+            difcoeff = 0d0
+            
+            
+!           compute maximum diffusion coefficient     
+            do j=1,NUMCONST
+!              compute diffusion coefficient (copied from "comp_fluxhor3D")
+               difcoeff  = max(difcoeff, sigdifi(j)*viu(L) + difsedu(j) + diuspL)  ! without smagorinsky, viu is 0 , 
+                                                                                   ! difsed only contains molecular value, 
+                                                                                   ! so then you only get user specified value  
+            end do
+               
+            sumdifflim(k2) = sumdifflim(k2) + difcoeff*dxiAu(L)
+            sumdifflim(k1) = sumdifflim(k1) + difcoeff*dxiAu(L)
+         end do
+      end do
+   end if
+   
    if ( kmx.eq.0 ) then
    
       do k=1,Ndxi
          dtmax(k) = dtmax_default
          
 !         if ( s1(k)-bl(k).gt.epshu ) then
-            if ( squ(k).gt.eps10 ) then
-               dtmax(k) = min(dtmax(k),cflmx*vol1(k)/squ(k))
+         
+            if ( jalimitdtdiff.eq.0 ) then
+               if ( squ(k).gt.eps10 ) then
+                  dtmax(k) = min(dtmax(k),cflmx*vol1(k)/squ(k))
+               end if
+            else
+               if ( sqi(k)+sumdifflim(k).gt. eps10 ) then
+                  dtmax(k) = min(dtmax(k), cflmx*vol1(k)/(sqi(k)+sumdifflim(k)))
+!                  dtmax = min(dtmax(k), cflmx*vol1(k)/(squ(k)+sumdifflim(k)))
+               end if
             end if
          
 ! BEGIN DEBUG
@@ -2331,11 +2417,20 @@ subroutine get_dtmax()
          
          if ( s1(kk)-bl(kk).gt.epshu ) then
             call getkbotktop(kk,kb,kt)
-            do k=kb,kt
-               if ( squ(k).gt.eps10 .or. sqi(k).gt.eps10 ) then
-                  dtmax(kk) = min(dtmax(kk),vol1(k)/max(squ(k),sqi(k)))
-               end if
-            end do
+            if ( jalimitdtdiff.eq.0 ) then
+               do k=kb,kt
+                  if ( squ(k).gt.eps10 .or. sqi(k).gt.eps10 ) then
+                     dtmax(kk) = min(dtmax(kk),vol1(k)/max(squ(k),sqi(k)))
+                  end if
+               end do
+            else
+               do k=kb,kt
+                  if ( sqi(k)+sumdifflim(k).gt.eps10 ) then
+                     dtmax(kk) = min(dtmax(kk),vol1(k)/(sqi(k)+sumdifflim(k)))
+!                     dtmax(kk) = min(dtmax(kk),vol1(k)/(squ(k)+sumdifflim(k)))
+                  end if
+               end do
+            end if
             dtmax(kk) = cflmx*dtmax(kk)
             
             if ( jampi.eq.1 ) then
@@ -2529,7 +2624,7 @@ subroutine get_jaupdatehorflux(nsubsteps, limtyp, jaupdate,jaupdatehorflux)
             k1 = ln(1,LL)
             k2 = ln(2,LL)
             if ( jaupdate(k1).eq.1 .or. jaupdate(k2).eq.1 ) then
-               jaupdatehorflux(LL) = 1
+               jaupdatehorflux(LL) = 1 ! also for diffusion
             end if
          end do
       else
@@ -2537,7 +2632,7 @@ subroutine get_jaupdatehorflux(nsubsteps, limtyp, jaupdate,jaupdatehorflux)
             k1 = ln(1,LL)
             k2 = ln(2,LL)
             if ( jaupdate(k1).eq.1 .or. jaupdate(k2).eq.1 ) then
-               jaupdatehorflux(LL) = 1
+               jaupdatehorflux(LL) = 1 ! also for diffusion
                cycle
             end if
             
@@ -2857,3 +2952,84 @@ subroutine comp_sinktot()
    endif
 
 end subroutine comp_sinktot
+
+! compute Au/Dx for diffusive flux
+subroutine comp_dxiAu()
+   use m_flowgeom, only: ln, Lnx, dxi, wu
+   use m_flow, only: hs, zws, kmx, Au
+   use m_transport, only : dxiAu, jalimitdtdiff
+   implicit none
+   
+   integer :: k1, k2
+   integer :: LL, L, Lb, Lt
+   
+   if ( jalimitdtdiff.eq.0 ) then
+      if ( kmx.eq.0 ) then
+         do L=1,Lnx
+            dxiAu(L) = dxi(L)*Au(L)
+         end do
+      else
+         do LL=1,Lnx
+            call getLbotLtop(LL,Lb,Lt)
+            do L=Lb,Lt
+               dxiAu(L) = dxi(LL)*Au(L)
+            end do
+         end do
+      end if
+   else
+      if ( kmx.eq.0 ) then
+         do L=1,Lnx
+            k1 = ln(1,L)
+            k2 = ln(2,L)
+            dxiAu(L) = dxi(L)*wu(L) * min(hs(k1), hs(k2))
+         end do
+      else
+         do LL=1,Lnx
+            call getLbotLtop(LL,Lb,Lt)
+            do L=Lb,Lt
+               k1 = ln(1,L)
+               k2 = ln(2,L)
+               dxiAu(L) = dxi(LL)*wu(LL) * min(zws(k1)-zws(k1-1),zws(k2)-zws(k2-1))
+            end do
+         end do
+      end if
+   end if
+      
+   
+   return
+end subroutine comp_dxiAu
+
+subroutine sum_const(iter, vol1)
+   use m_transport
+   use m_flowgeom, only: Ndx
+   use m_flow, only: Ndkx
+   implicit none
+   
+   integer,                           intent(in) :: iter
+   double precision, dimension(Ndkx), intent(in) :: vol1
+   
+   double precision, dimension(NUMCONST)         :: sum
+                                                 
+   integer                                       :: kk, k, kb, kt
+   integer                                       :: j
+   
+   sum = 0d0
+   
+   do kk=1,Ndx
+      call getkbotktop(kk,kb,kt)
+      do k=kb,kt
+         do j=1,NUMCONST
+            sum(j) = sum(j) + vol1(k)*constituents(j,k)
+         end do
+      end do
+   end do
+   
+   write(6,"(I5, ':', $)") iter
+   do j=1,NUMCONST
+      write(6,"(E25.15, $)") sum(j)
+   end do
+   write(6,*)
+   
+   
+   return
+end subroutine sum_const

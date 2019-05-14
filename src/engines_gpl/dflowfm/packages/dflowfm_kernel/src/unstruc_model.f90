@@ -874,6 +874,7 @@ subroutine readMDUFile(filename, istat)
        ja_timestep_auto = 5
     endif
     call prop_get_integer(md_ptr, 'numerics', 'TransportTimestepping' , jaLts)
+    call prop_get_integer(md_ptr, 'numerics', 'TransportAutoTimestep' , jatransportautotimestepdiff)
 
     call prop_get_integer(md_ptr, 'numerics', 'Vertadvtypsal'   , javasal)
 
@@ -2231,6 +2232,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     call prop_set(prop_ptr, 'numerics', 'TransportMethod', jatransportmodule,   'Transport method (0: Herman''s method, 1: transport module)')
     if (writeall .or. jatransportmodule == 1) then
        call prop_set(prop_ptr, 'numerics', 'TransportTimestepping', jaLts,   'Timestepping method in Transport module, 0 = global, 1 = local (default) ')
+       call prop_set(prop_ptr, 'numerics', 'TransportAutoTimestep', jatransportautotimestepdiff,   'Auto Timestep in Transport module, 0 = limitation of diffusion, but no limitation of time-step due to diffusion, 1 = no limitation of diffusion, but limitation of time step due to diffusion, 2: no limitation of diffusion and no limitation of time step due to diffusion')
     endif
 
     call prop_set(prop_ptr, 'numerics', 'Vertadvtypsal', Javasal,   'Vertical advection type for salinity (0: none, 1: upwind explicit, 2: central explicit, 3: upwind implicit, 4: central implicit, 5: central implicit but upwind for neg. stratif., 6: higher order explicit, no Forester)')
