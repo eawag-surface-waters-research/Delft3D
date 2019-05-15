@@ -628,6 +628,7 @@
                   call realloc(funame, nofun, keepExisting=.true., fill=waqinput)
                   call reallocP(funinp, [nofun, 1], keepExisting=.true., fill=0.0d0)
                end if
+               success = .true.
       
             else if (qid(1:18) == 'waqmassbalancearea') then
                imba = findname(nomba, mbaname, waqinput)
@@ -947,6 +948,9 @@
       if (nofun>0) then
          do ifun=1,nofun
             success = ec_gettimespacevalue(ecInstancePtr, item_waqfun(ifun), irefdate, tzone, tunit, time)
+            if (.not.success) then
+               call mess(LEVEL_ERROR, 'Error reading data for segment function: ', trim(funame(ifun)))
+            endif
          end do
          ip = arrpoi(iifunc)
          do ifun=1,nofun
