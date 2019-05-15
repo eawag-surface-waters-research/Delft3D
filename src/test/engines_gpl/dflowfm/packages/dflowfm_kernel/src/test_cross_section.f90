@@ -27,6 +27,8 @@ module test_cross_sections
 
 
     implicit none
+    double precision, parameter :: eps        = 1.0d-4
+    logical                     :: hysteresis = .false.
 
 contains
 
@@ -43,12 +45,10 @@ subroutine test_circular_cross_section
    use m_CrossSections
    
    type(t_network), target :: network
-   logical                 :: hysteresis
    character(len=256)      :: cross_section_definition_file
    integer, parameter      :: n_crs_def = 5
    integer                 :: i
    double precision        :: dpt
-   double precision        :: eps
    double precision        :: flowarea
    double precision        :: flowwidth
    double precision        :: wetperimeter
@@ -83,13 +83,11 @@ subroutine test_circular_cross_section
                  2.010619298297468D-002, 1.000000000000000D-002, 2.200619295913282D-002, 1.000000000000000D-002, 2.955309608617576D-002, 0.170000000000000, 7.546903127042936D-003, 0.160000000000000             , &
                  2.010619298297468D-002, 1.000000000000000D-002, 2.210619286376539D-002, 1.000000000000000D-002, 3.125309446492942D-002, 0.170000000000000, 9.146901601164031D-003, 0.160000000000000             /
    
-   cross_section_definition_file = 'crsdef.ini'
+   cross_section_definition_file = 'cross_sections/crsdef.ini'
    call test_cross_section_helper(network, cross_section_definition_file)
-   call assert_equal( n_crs_def, network%CSDefinitions%count, 'Returned number of observation points correct (read from ini file)' )
+   call assert_equal( n_crs_def, network%CSDefinitions%count, 'Returned number of cross sections incorrect' )
    
    cross => network%crs%cross(1)
-   eps = 1d-4
-   hysteresis = .false.
    
    
    do i = 1, 21
@@ -116,12 +114,10 @@ subroutine test_rectangular_cross_section
    use m_network
    
    type(t_network), target :: network
-   logical                 :: hysteresis
    character(len=256)      :: cross_section_definition_file
    integer, parameter      :: n_crs_def = 3
    integer                 :: i
    double precision        :: dpt
-   double precision        :: eps
    double precision        :: flowarea
    double precision        :: flowwidth
    double precision        :: wetperimeter
@@ -160,11 +156,9 @@ subroutine test_rectangular_cross_section
                  4.000100005000001D-002, 1.000000000000000D-002, 4.000100005000001D-002, 1.000000000000000D-005, 4.000100005000001D-002, 1.000000000000000D-005, 4.000100005000001D-002, 1.000000000000000D-005        , &
                  4.000100005000001D-002, 1.000000000000000D-002, 4.000100005000001D-002, 1.000000000000000D-005, 4.000100005000001D-002, 1.000000000000000D-005, 4.000100005000001D-002, 1.000000000000000D-005        /
    
-   cross_section_definition_file = 'crsdef.ini'
+   cross_section_definition_file = 'cross_sections/crsdef.ini'
    call test_cross_section_helper(network, cross_section_definition_file)
    cross => network%crs%cross(2)
-   eps = 1d-4
-   hysteresis = .false.
    
    do i = 1, 25
       dpt = (i-1)*0.01
@@ -190,12 +184,10 @@ subroutine test_egg_type_cross_section
    use m_network
    
    type(t_network), target :: network
-   logical                 :: hysteresis
    character(len=256)      :: cross_section_definition_file
    integer, parameter      :: n_crs_def = 3
    integer                 :: i
    double precision        :: dpt
-   double precision        :: eps
    double precision        :: flowarea
    double precision        :: flowwidth
    double precision        :: wetperimeter
@@ -234,11 +226,9 @@ subroutine test_egg_type_cross_section
                  4.594130039215089D-002, 1.000000000000000D-002, 5.054130017757416D-002, 1.000000000000000D-002, 8.683333642780779D-002, 0.210000000000000, 3.629203625023363D-002, 0.200000000000000                  , &
                  4.594130039215089D-002, 1.000000000000000D-002, 5.074130028486253D-002, 1.000000000000000D-002, 9.103333868086336D-002, 0.210000000000000, 4.029203839600083D-002, 0.200000000000000                  /
                                                                                                                                                                                                                                                                                                                                                                                                                  
-   cross_section_definition_file = 'crsdef.ini'
+   cross_section_definition_file = 'cross_sections/crsdef.ini'
    call test_cross_section_helper(network, cross_section_definition_file)
    cross => network%crs%cross(3)
-   eps = 1d-4
-   hysteresis = .false.
    
    do i = 1, 25
       dpt = (i-1)*0.02
@@ -264,12 +254,10 @@ subroutine test_tabulated_cross_section
    use m_network
    
    type(t_network), target :: network
-   logical                 :: hysteresis
    character(len=256)      :: cross_section_definition_file
    integer, parameter      :: n_crs_def = 3
    integer                 :: i
    double precision        :: dpt
-   double precision        :: eps
    double precision        :: flowarea
    double precision        :: flowwidth
    double precision        :: wetperimeter
@@ -308,11 +296,9 @@ subroutine test_tabulated_cross_section
                  2154.99994754791, 275.000000000000, 5749.99980926514, 1000.00000000000                                 , &
                  2265.00010490417, 275.000000000000, 6150.00038146973, 1000.00000000000                                 /
                                                                                                                                                                                                                    
-   cross_section_definition_file = 'crsdef.ini'
+   cross_section_definition_file = 'cross_sections/crsdef.ini'
    call test_cross_section_helper(network, cross_section_definition_file)
    cross => network%crs%cross(4)
-   eps = 1d-4
-   hysteresis = .false.
    
    do i = 1, 25
       dpt = (i-1)*0.4
@@ -332,12 +318,10 @@ subroutine test_yz_cross_section
    use m_network
    
    type(t_network), target :: network
-   logical                 :: hysteresis
    character(len=256)      :: cross_section_definition_file
    integer, parameter      :: n_crs_def = 3
    integer                 :: i
    double precision        :: dpt
-   double precision        :: eps
    double precision        :: flowarea
    double precision        :: flowwidth
    double precision        :: wetperimeter
@@ -376,7 +360,7 @@ subroutine test_yz_cross_section
                  3549.99990463257, 500.000000000000, 3549.99990463257, 500.000000000000                             , &
                  3750.00019073486, 500.000000000000, 3750.00019073486, 500.000000000000                             /
                                                                                                                                                                                                                                                                                                                                                                                                                  
-   cross_section_definition_file = 'crsdef.ini'
+   cross_section_definition_file = 'cross_sections/crsdef.ini'
    call test_cross_section_helper(network, cross_section_definition_file)
    cross => network%crs%cross(5)
    cross%frictionSectionsCount = 1
@@ -396,9 +380,6 @@ subroutine test_yz_cross_section
    
    call CalcConveyance(cross)
 
-   eps = 1d-4
-   hysteresis = .false.
-   
    do i = 1, 25
       dpt = (i-1)*0.4
       call GetCSParsFlow(cross, dpt, flowArea, wetPerimeter, flowWidth)   
@@ -410,7 +391,15 @@ subroutine test_yz_cross_section
 
       continue
    enddo
-   
+
+   deallocate(cross%frictionSectionID)     
+   deallocate(cross%frictionSectionFrom) 
+   deallocate(cross%frictionSectionTo)   
+   deallocate(cross%frictionTypePos  )
+   deallocate(cross%frictionValuePos )
+   deallocate(cross%frictionTypeNeg  )
+   deallocate(cross%frictionValueNeg )
+
 end subroutine test_yz_cross_section
 
 subroutine test_cross_section_helper(network, cross_section_definition_file)
@@ -428,11 +417,11 @@ subroutine test_cross_section_helper(network, cross_section_definition_file)
    call realloc(network%crs)
    do i = 1, network%csdefinitions%count
       network%crs%count = network%crs%count + 1
-      pcsDef => network%CSDefinitions%cs(i)
-      pcrs   => network%crs%cross(i)
-      pcrs%csid = pcsDef%id
-      pcrs%iTabDef = i
-      pcrs%tabDef => pcsDef
+      pcsDef            => network%CSDefinitions%cs(i)
+      pcrs              => network%crs%cross(i)
+      pcrs%csid         = pcsDef%id
+      pcrs%iTabDef      = i
+      pcrs%tabDef       => pcsDef
       call setparsCross(pcsDef, pcrs)
    enddo
    

@@ -64,8 +64,6 @@ subroutine test_read_obs_points
         call assert_comparable(xobs(i)  , refdata(1,i), eps, 'x-coordinate of observation points incorrect' )
         call assert_comparable(yobs(i)  , refdata(2,i), eps, 'y-coordinate of observation points incorrect' )
         call assert_equal     (namobs(i), refnames(i) , "Obeservation point name incorrect" )
-        write(*,*) namobs(i)
-        write(*,*) locobs(i)
     enddo
 end subroutine test_read_obs_points
 !
@@ -111,8 +109,6 @@ subroutine test_read_snapped_obs_points
         call assert_comparable(xobs(i)  , refdata(1,i), eps, 'x-coordinate of observation points incorrect' )
         call assert_comparable(yobs(i)  , refdata(2,i), eps, 'y-coordinate of observation points incorrect' )
         call assert_equal     (namobs(i), refnames(i) , "Obeservation point name incorrect" )
-        write(*,*) namobs(i)
-        write(*,*) locobs(i)
     enddo
 end subroutine test_read_snapped_obs_points
 
