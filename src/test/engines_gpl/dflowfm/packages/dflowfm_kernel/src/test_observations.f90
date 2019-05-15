@@ -20,7 +20,6 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
-
 module test_observations
     use ftnunit
     use precision
@@ -29,12 +28,16 @@ module test_observations
     real(fp), parameter :: eps = 1.0e-6_fp
 
 contains
-
+!
+!
+!==============================================================================
 subroutine tests_observations
     call test( test_read_obs_points, 'Tests the reading of observation points' )
-    ! call test( test_read_monitoringcrosssections_points, 'Tests the reading of monsecs' )
+    call test( test_read_snapped_obs_points, 'Tests the reading of snapped observation points' )
 end subroutine tests_observations
-
+!
+!
+!==============================================================================
 subroutine test_read_obs_points
     use m_observations
     use m_partitioninfo, only: jampi
@@ -44,11 +47,11 @@ subroutine test_read_obs_points
     integer                                    :: i
     double precision                           :: refdata(2,N_OBS_POINTS)
     character(len=40), dimension(N_OBS_POINTS) :: refnames
-
-   data refdata /0.000000000000000D+000, 0.000000000000000D+000, &
-                 145964.000000         , 427274.000000         , &
-                 0.000000000000000D+000, 0.000000000000000D+000, &
-                 145852.00000          , 427142.000000           /
+    !
+    data refdata /0.000000000000000D+000, 0.000000000000000D+000, &
+                  145964.000000         , 427274.000000         , &
+                  0.000000000000000D+000, 0.000000000000000D+000, &
+                  145852.00000          , 427142.000000           /
     refnames(1) = 'TestLocation1'
     refnames(2) = 'TestLocation_xy1'
     refnames(3) = 'TestLocation2'
@@ -56,27 +59,61 @@ subroutine test_read_obs_points
     !
     ! Body
     jampi = 0
-    call loadObservations("ObservationPoints_2.ini", 0)
+    call loadObservations("observations/ObservationPoints_2.ini", 0)
     do i=1,N_OBS_POINTS
-        call assert_comparable(xobs(i)  , refdata(1,i), eps, 'Returned number of observation points correct (read from ini file)' )
-        call assert_comparable(yobs(i)  , refdata(2,i), eps, 'Returned number of observation points correct (read from ini file)' )
-        call assert_equal     (namobs(i), refnames(i) , "Obeservation point name is as expected" )
+        call assert_comparable(xobs(i)  , refdata(1,i), eps, 'x-coordinate of observation points incorrect' )
+        call assert_comparable(yobs(i)  , refdata(2,i), eps, 'y-coordinate of observation points incorrect' )
+        call assert_equal     (namobs(i), refnames(i) , "Obeservation point name incorrect" )
         write(*,*) namobs(i)
         write(*,*) locobs(i)
     enddo
 end subroutine test_read_obs_points
-
-subroutine test_read_monitoringcrosssections_points
+!
+!
+!==============================================================================
+subroutine test_read_snapped_obs_points
+    use gridoperations
+    use m_netw
     use m_observations
+    use unstruc_model
     use m_partitioninfo, only: jampi
     !
+    ! Externals
+    integer, external :: flow_modelinit
+    !
     ! Locals
-    integer :: n_obs_pnt
-    integer :: n_return
+    integer, parameter                         :: N_OBS_POINTS = 4
+    integer                                    :: i
+    integer                                    :: istat
+    double precision                           :: refdata(2,N_OBS_POINTS)
+    character(len=40), dimension(N_OBS_POINTS) :: refnames
+    !
+    data refdata /99999.0000000         , 25000.0000000         , &
+                  0.000000000000000D+000, 50000.0000000         , &
+                  32.0000000000         , 100000.000000         , &
+                  100000.000000         , 75000.0000000           /
+    refnames(1) = 'TestLocation1'
+    refnames(2) = 'TestLocation_xy1'
+    refnames(3) = 'TestLocation2'
+    refnames(4) = 'TestLocation_xy2'
     !
     ! Body
     jampi = 0
-
-end subroutine test_read_monitoringcrosssections_points
+    kmax  = 2
+    lmax  = 2
+    call resetFullFlowModel()
+    call increaseNetw(kmax, lmax)
+    !
+    call loadModel('observations_snapped/Flow1d.mdu')
+    istat = flow_modelinit()
+    !
+    do i=1,N_OBS_POINTS
+        call assert_comparable(xobs(i)  , refdata(1,i), eps, 'x-coordinate of observation points incorrect' )
+        call assert_comparable(yobs(i)  , refdata(2,i), eps, 'y-coordinate of observation points incorrect' )
+        call assert_equal     (namobs(i), refnames(i) , "Obeservation point name incorrect" )
+        write(*,*) namobs(i)
+        write(*,*) locobs(i)
+    enddo
+end subroutine test_read_snapped_obs_points
 
 end module test_observations

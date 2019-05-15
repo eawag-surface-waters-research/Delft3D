@@ -3004,6 +3004,7 @@ src/test/engines_gpl/dflowfm/packages/test_dflowfm/test_data/observations_snappe
 src/test/engines_gpl/dflowfm/packages/test_dflowfm/test_data/observations_snapped/Flow1d.ext -text
 src/test/engines_gpl/dflowfm/packages/test_dflowfm/test_data/observations_snapped/Flow1d.mdu -text
 src/test/engines_gpl/dflowfm/packages/test_dflowfm/test_data/observations_snapped/Flow1d_net.nc -text
+src/test/engines_gpl/dflowfm/packages/test_dflowfm/test_data/observations_snapped/ObservationPoints.ini -text
 src/test/engines_gpl/dflowfm/packages/test_dflowfm/test_data/observations_snapped/roughness-Main.ini -text
 src/test/engines_gpl/dflowfm/packages/test_dflowfm/test_data/roughness/roughness-globals.ini -text
 src/test/engines_gpl/dflowfm/packages/test_dflowfm/test_data/roughness/roughness_main.ini -text
