@@ -365,8 +365,17 @@
 !     Skip constants from the sub-file that are will be added by DFM
       do i = 1, nocons
          call zoekns(coname_sub(i),nopa,paname,20,ipar)
+         if (ipar>0) then
+            call mess(LEVEL_INFO, 'Water quality constant replaced by spatial parameter: ', coname_sub(i))
+         endif
          call zoekns(coname_sub(i),nofun,funame,20,ifun)
+         if (ifun>0) then
+            call mess(LEVEL_INFO, 'Water quality constant replaced by temporal function: ', coname_sub(i))
+         endif
          call zoekns(coname_sub(i),nosfun,sfname,20,isfun)
+         if (isfun>0) then
+            call mess(LEVEL_INFO, 'Water quality constant replaced by segment function: ', coname_sub(i))
+         endif
          if (ipar<0 .and. ifun<0 .and. isfun<0) then
             j = j + 1
             coname(j) = coname_sub(i)
