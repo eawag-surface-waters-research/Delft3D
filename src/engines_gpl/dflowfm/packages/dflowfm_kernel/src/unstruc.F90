@@ -17379,13 +17379,6 @@ subroutine unc_write_his(tim)            ! wrihis
        ierr = nf90_put_var(ihisfile, id_varrain,  valobsT(:,IPNT_rain),    start = (/ 1, it_his /), count = (/ ntot, 1 /))
     endif
 
-    if (IVAL_WQB1 > 0) then
-       do j = IVAL_WQB1,IVAL_WQBN   ! enumerators of tracers in valobs array (not the pointer)
-         i = j - IVAL_WQB1 + 1
-         ierr = nf90_put_var(ihisfile, id_hwqb(i), valobsT(:,IPNT_WQB1 + i-1), start = (/ 1, it_his /), count = (/ ntot, 1/))
-       end do
-    endif
-
     if (numobs+nummovobs > 0) then
       if ( kmx>0 ) then
 !      3D
@@ -17465,6 +17458,14 @@ subroutine unc_write_his(tim)            ! wrihis
        if (jased > 0 .and. .not. stm_included) then
           ierr = nf90_put_var(ihisfile, id_varsed, valobsT(:,IPNT_SED),  start = (/ 1, it_his /), count = (/ ntot, 1 /))
        end if
+     endif
+
+!    waq bottom variables are always 2D
+     if (IVAL_WQB1 > 0) then
+       do j = IVAL_WQB1,IVAL_WQBN   ! enumerators of tracers in valobs array (not the pointer)
+         i = j - IVAL_WQB1 + 1
+         ierr = nf90_put_var(ihisfile, id_hwqb(i), valobsT(:,IPNT_WQB1 + i-1), start = (/ 1, it_his /), count = (/ ntot, 1/))
+       end do
      endif
     endif
 
