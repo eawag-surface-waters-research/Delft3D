@@ -265,6 +265,7 @@
 
       if (first) then
          allocate(mncwqid1(notot,2) , mncwqid2(novar,2))
+         allocate(hncwqid1(notot,2) , hncwqid2(novar,2))
 !        allow switching of NAN concentrations check
          call getcom ( '-nonancheck', 0, lfound, idummy, rdummy, adummy, ierr2)
          lnancheck = .not. lfound
@@ -543,7 +544,7 @@
      +                      conc      , syname   , sysnm    , syuni  ,
      +                      sydsc     , hncwqid1 , nrvar    , riobuf ,
      +                      ounam(k1) , ousnm(k1), ouuni(k1), oudsc(k1),
-     +                      mncwqid2  , lun(19))
+     +                      hncwqid2  , lun(19))
 !
             elseif ( isrtou .eq. ihi2 ) then
 !
@@ -569,7 +570,7 @@
      +                      conc      , syname   , sysnm    , syuni  ,
      +                      sydsc     , hncwqid1 , nrvar    , riobuf ,
      +                      ounam(k1) , ousnm(k1), ouuni(k1), oudsc(k1),
-     +                      mncwqid2  , lun(19))
+     +                      hncwqid2  , lun(19))
 !
             elseif ( isrtou .eq. ihi3 ) then
 !
@@ -607,7 +608,7 @@
      +                      conc      , nambuf   , sysnm    , syuni  ,   !<== TODO: standard, unit, description should be checked
      +                      sydsc     , hncwqid1 , nrvar3   , riobuf ,
      +                      nambuf    , ousnm(k1), ouuni(k1), oudsc(k1),
-     +                      mncwqid2  , lun(19))
+     +                      hncwqid2  , lun(19))
 !
             elseif ( isrtou .eq. ihi4 ) then
 !
@@ -633,7 +634,7 @@
      +                      conc      , syname   , sysnm    , syuni  ,
      +                      sydsc     , hncwqid1 , nrvar2   , riobuf ,
      +                      ounam(k1) , ousnm(k1), ouuni(k1), oudsc(k1),
-     +                      mncwqid2  , lun(19))
+     +                      hncwqid2  , lun(19))
 !
             elseif ( isrtou .eq. imap ) then
 !
