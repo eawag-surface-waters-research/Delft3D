@@ -32,7 +32,7 @@ module m_network
    use m_GlobalParameters
    use networkTypes
    use m_crossSections
-   use m_structure
+   use m_1d_structures
    use m_roughness
    use m_trenches
    use m_ExtraResistance

@@ -468,7 +468,7 @@ module m_oned_functions
    use messagehandling
    use unstruc_messages
    use unstruc_channel_flow
-   use m_structure
+   use m_1d_structures
    use m_cross_helper
    use network_data
    

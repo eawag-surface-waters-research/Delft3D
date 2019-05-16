@@ -2474,7 +2474,7 @@ subroutine getseg1D(hpr,wu2,dz,ai,frcn,ifrctyp, wid,ar,conv,perim,jaconv)  ! cop
     use m_netw
     use m_fixedweirs
     use unstruc_channel_flow
-    use m_structure
+    use m_1d_structures
 
     implicit none
 
@@ -33089,7 +33089,7 @@ end subroutine setbobs_fixedweirs
  use m_sediment
  use unstruc_channel_flow
  use m_cross_helper
- use m_structure
+ use m_1d_structures
  use m_general_structure
  use m_weir
  use m_orifice

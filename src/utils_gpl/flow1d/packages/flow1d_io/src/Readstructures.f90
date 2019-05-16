@@ -33,7 +33,7 @@ module m_readstructures
    use string_module
    use m_network
    use m_CrossSections
-   use m_structure
+   use m_1d_structures
    use m_Weir
    use m_Universal_Weir
    use m_River_Weir

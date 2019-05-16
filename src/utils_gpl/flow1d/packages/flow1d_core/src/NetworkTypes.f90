@@ -33,7 +33,7 @@ module networkTypes
    use m_node
    use m_branch
    use m_CrossSections
-   use m_structure
+   use m_1d_structures
    use m_spatial_data
    use m_boundaryConditions
    use m_ObservationPoints

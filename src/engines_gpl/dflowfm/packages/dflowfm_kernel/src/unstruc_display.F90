@@ -1442,7 +1442,7 @@ use m_flowgeom
 use network_data
 use m_flow
 use unstruc_channel_flow
-use m_structure
+use m_1d_structures
 use m_Pump
 use m_Weir
 use m_Orifice

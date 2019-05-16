@@ -1,7 +1,7 @@
 
   subroutine update_weirs(structures, weirs)
     ! convert structures to weirs (fortran to c conversion)
-    use m_structure
+    use m_1d_structures
     use MessageHandling
     use m_weir
 
@@ -74,7 +74,7 @@
   end subroutine update_weirs
   subroutine update_orifices(structures, orifices)
     ! convert structures to orifices (fortran to c conversion)
-    use m_structure
+    use m_1d_structures
     use MessageHandling
     use m_orifice
 
@@ -150,7 +150,7 @@
   end subroutine update_orifices
   subroutine update_pumps(structures, pumps)
     ! convert structures to pumps (fortran to c conversion)
-    use m_structure
+    use m_1d_structures
     use MessageHandling
     use m_pump
 
@@ -225,7 +225,7 @@
   end subroutine update_pumps
   subroutine update_culverts(structures, culverts)
     ! convert structures to culverts (fortran to c conversion)
-    use m_structure
+    use m_1d_structures
     use MessageHandling
     use m_culvert
 

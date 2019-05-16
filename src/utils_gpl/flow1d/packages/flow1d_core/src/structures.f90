@@ -1,4 +1,4 @@
-module m_structure
+module m_1d_structures
 !----- AGPL --------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2017-2019.                                
@@ -1212,4 +1212,4 @@ end subroutine
       
    end function get_capacity
    
-end module m_structure
+end module m_1d_structures

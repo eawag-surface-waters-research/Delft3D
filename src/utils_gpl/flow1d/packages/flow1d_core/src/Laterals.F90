@@ -32,7 +32,7 @@ module m_Laterals
 
    use m_node
    use m_branch
-   use m_structure
+   use m_1d_structures
    use m_tables
    use m_hash_search
    use MessageHandling

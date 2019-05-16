@@ -3,7 +3,7 @@
   subroutine get_weir_by_id(id, c_weir)
     ! convert structures to pumps (fortran to c conversion)
     use modelGlobalData
-    use m_structure
+    use m_1d_structures
     use m_weir
 
     character(len=*), intent(in) :: id
@@ -45,7 +45,7 @@
   subroutine get_orifice_by_id(id, c_orifice)
     ! convert structures to pumps (fortran to c conversion)
     use modelGlobalData
-    use m_structure
+    use m_1d_structures
     use m_orifice
 
     character(len=*), intent(in) :: id
@@ -90,7 +90,7 @@
   subroutine get_pump_by_id(id, c_pump)
     ! convert structures to pumps (fortran to c conversion)
     use modelGlobalData
-    use m_structure
+    use m_1d_structures
     use m_pump
 
     character(len=*), intent(in) :: id
@@ -134,7 +134,7 @@
   subroutine get_culvert_by_id(id, c_culvert)
     ! convert structures to pumps (fortran to c conversion)
     use modelGlobalData
-    use m_structure
+    use m_1d_structures
     use m_culvert
 
     character(len=*), intent(in) :: id
