@@ -1459,7 +1459,7 @@ subroutine get_compound_field(c_var_name, c_item_name, c_field_name, x) bind(C, 
   use m_monitoring_crosssections
   use m_strucs
   use m_structures , only: valdambreak
-  use m_1d_structure , only: get_crest_level_c_loc
+  use m_1d_structures , only: get_crest_level_c_loc
   use m_wind
   use unstruc_channel_flow, only: network
   
