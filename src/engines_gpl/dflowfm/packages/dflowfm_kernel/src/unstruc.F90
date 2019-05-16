@@ -772,7 +772,7 @@ end subroutine flow_finalize_single_timestep
            stemhL   = min(stemhL,hu(L))
            areastem = diaL*stemhL
            if (jaCdvegsp == 1) then
-              if (Cdvegsp(k1) > 0 .and. Cdvegsp(k2) > 0) then 
+              if (Cdvegsp(k1) > 0 .and. Cdvegsp(k2) > 0) then
                   Cdveg = 0.5d0*( Cdvegsp(k1) + Cdvegsp(k2) )
               else
                   Cdveg = max (Cdvegsp(k1), Cdvegsp(k2) )
@@ -1161,7 +1161,7 @@ if(q /= 0) then
 
  call u1q1()                                         ! the vertical flux qw depends on new sigma => after setkbotktop
  call compute_q_total_1d2d()
- 
+
  !if ( jacheckmonitor.eq.1 ) then
  !   call comp_checkmonitor()
  !end if
@@ -3000,9 +3000,9 @@ end subroutine sethu
         s1(k) = bl(k) + 1d-9
     endif
  enddo
- 
+
  bob0(:, lnx1D+1:lnxi) = bob(:, lnx1D+1:lnxi)
- 
+
  end subroutine bathyupdate
 
  subroutine writesluices()
@@ -3715,42 +3715,42 @@ end subroutine setdt
         enddo
 
     endif
-    
-    ! Explicit time step restriction on viscosity term.    
+
+    ! Explicit time step restriction on viscosity term.
     if (ja_timestep_auto_visc .eq. 1 .and. ihorvic > 0) then
        if (kmx == 0) then
           if (istresstyp == 2 .or. istresstyp == 3) then     ! first set stressvector in cell centers
              do L = lnx1D+1,lnx
                 if (hu(L) > 0) then                          ! link will flow
                    k1 = ln  (1,L) ; k2 = ln  (2,L)
-                
+
                    if ( jampi.eq.1 ) then
                       if ( idomain(k1).ne.my_rank .and. idomain(k2).ne.my_rank ) cycle       ! do not include ghost cells
                    endif
-                   
+
                    dxiAu = dxi(L)*wu(L)
                    if (istresstyp == 3) then
                       dxiAu  = min(hs(k1), hs(k2)) * dxiAu
                    endif
-                   
+
                    huv = 0.5d0*( hs(k1) + hs(k2) )
-                   
+
                    if ( dxiAu.gt.0d0 .and. vicLu(L).gt.0d0 .and. huv > epshu) then ! see "setumod" for huv
                        dtsc = 0.2d0/(dxiAu*vicLu(L))
                        if ( istresstyp.eq.3 ) then
                           dtsc = dtsc * huv
                        end if
-                          
+
                        dtsc1 = dtsc*ba(k1)
                        if ( dtsc1.lt.dts ) then
                           dts     = dtsc1 ; kkcflmx = k1
                        endif
-                       
+
                        dtsc2 = dtsc*ba(k2)
                        if ( dtsc2.lt.dts ) then
                           dts     = dtsc2 ; kkcflmx = k2
                        endif
-                       
+
                        if (jamapdtcell > 0) then
                           dtcell(k1) = min( dtcell(k1), dtsc1 )
                           dtcell(k2) = min( dtcell(k2), dtsc2 )
@@ -3763,41 +3763,41 @@ end subroutine setdt
           if (istresstyp == 2 .or. istresstyp == 3) then     ! first set stressvector in cell centers
              do LL = lnx1D+1,lnx
                 if (abs(kcu(LL)) .ne. 2) cycle
-                
+
                 kk1 = ln  (1,LL) ; kk2 = ln  (2,LL)
-                
+
                 if ( jampi.eq.1 ) then
                    if ( idomain(kk1).ne.my_rank .and. idomain(kk2).ne.my_rank ) cycle       ! do not include ghost cells
                 endif
-                
+
                 call getLbotLtop(LL,Lb,Lt)
                 do L = Lb, Lt
                    k1 = ln  (1,L) ; k2 = ln  (2,L)
                    k3 = lncn(1,L) ; k4 = lncn(2,L)
-                   
+
                    dxiAu = dxi(LL)*wu(LL)
                    if (istresstyp == 3) then
                       dxiAu  = min( zws(k1)-zws(k1-1), zws(k2)-zws(k2-1)  ) * dxiAu
                    endif
-                   
+
                    huv    = 0.5d0 * ( (zws(k1)-zws(k1-1)) + (zws(k2)-zws(k2-1) ) )
-                   
+
                    if ( dxiAu.gt.0d0 .and. vicLu(L).gt.0d0 .and. huv.gt.epshu ) then
                        dtsc = 0.2d0/(dxiAu*vicLu(L))
                        if ( istresstyp.eq.3 ) then
                           dtsc = dtsc * huv
                        end if
-                   
+
                        dtsc1 = dtsc*ba(kk1)
                        if ( dtsc1.lt.dts ) then
                           dts     = dtsc1 ; kkcflmx = kk1
                        endif
-                       
+
                        dtsc2 = dtsc*ba(kk2)
                        if ( dtsc2.lt.dts ) then
                           dts     = dtsc2 ; kkcflmx = kk2
                        endif
-                       
+
                        if (jamapdtcell > 0) then
                           dtcell(k1) = min( dtcell(k1), dtsc1 )
                           dtcell(k2) = min( dtcell(k2), dtsc2 )
@@ -9737,9 +9737,9 @@ subroutine flow_trachyinit()
           trachy_resistance = .true.
        end if
     enddo
-    if (trachy_resistance .and. (jabaptist >= 2)) then 
-        call mess(LEVEL_ERROR, 'Trachytopes and Vegetationmodelnr >= 2 cannot be used in the same simulation', mdia)    
-    endif 
+    if (trachy_resistance .and. (jabaptist >= 2)) then
+        call mess(LEVEL_ERROR, 'Trachytopes and Vegetationmodelnr >= 2 cannot be used in the same simulation', mdia)
+    endif
     !
     ! Connection to FM definitions
     !
@@ -10066,12 +10066,12 @@ subroutine flow_trachyupdate()
         end if
     end do
     !
-    if (trachy_resistance) then 
+    if (trachy_resistance) then
         do LF = 1, lnx
             L = ln2lne(LF)
             alfav(LF) = trachy_fl%dir(1)%rttfu(L,1)/2.0_fp
-        enddo    
-    endif 
+        enddo
+    endif
     !
     if (jacali == 1) then
         call calibration_backup_frcu()
@@ -10419,7 +10419,7 @@ end subroutine cosphiunetcheck
  if (ti_waqbal > 0) then
     call mba_final(time_user)
  endif
- 
+
  if ( len_trim(md_subfile) > 0 ) then
     call fm_wq_processes_finalise()
  endif
@@ -14069,7 +14069,7 @@ endif
  if (nonlin==2) then
     s1m = bl
  endif
-    
+
  end function flow_flowinit
 
 
@@ -14659,8 +14659,8 @@ subroutine flow_setexternalforcings(tim, l_initPhase, iresult)
          call tauwavefetch(tim)
       endif
    endif
-   
-   if (jawind > 0) then 
+
+   if (jawind > 0) then
       call setwindstress()
    endif
 
@@ -16240,12 +16240,12 @@ subroutine unc_write_his(tim)            ! wrihis
         ierr = nf90_def_dim(ihisfile, 'time', nf90_unlimited, id_timedim)
 
         ierr = nf90_def_dim(ihisfile, 'name_len', 64, id_strlendim)
-        
+
         if (kmx > 0) then
            ierr = nf90_def_dim(ihisfile, 'laydim', kmx, id_laydim)
            ierr = nf90_def_dim(ihisfile, 'laydimw', kmx+1, id_laydimw)
         end if
-            
+
         if (numobs+nummovobs > 0) then
             ierr = nf90_def_dim(ihisfile, 'stations', numobs+nummovobs, id_statdim)
 
@@ -17177,12 +17177,12 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_att(ihisfile, id_plough_tfrac, 'long_name', 'Time fraction spent ploughing')
             ierr = nf90_put_att(ihisfile, id_plough_tfrac, 'units', '-') !nploughed
         endif
-        
+
         if ( jacheckmonitor.eq.1 ) then
            ierr = nf90_def_var(ihisfile, 'checkerboard_monitor', nf90_double, (/ id_laydim, id_timedim /), id_checkmon)
            ierr = nf90_put_att(ihisfile, id_checkmon, 'long_name', 'Checkerboard mode monitor')
            ierr = nf90_put_att(ihisfile, id_checkmon, 'unit', 'm s-1')
-           
+
            ierr = nf90_def_var(ihisfile, 'num_timesteps', nf90_int, id_timedim, id_num_timesteps)
            ierr = nf90_def_var(ihisfile, 'comp_time', nf90_double, id_timedim, id_comp_time)
         end if
@@ -17744,10 +17744,10 @@ subroutine unc_write_his(tim)            ! wrihis
 !          ierr = nf90_put_var(ihisfile, id_zcdam(num)    , zcdam(num)    ,  start=(/ it_his /))
        enddo
     endif
-    
+
     if ( jacheckmonitor.eq.1 ) then
       ierr = nf90_put_var(ihisfile, id_checkmon, checkmonitor, start=(/ 1, it_his /))
-      
+
       ierr = nf90_put_var(ihisfile, id_num_timesteps, int(dnt), start=(/ it_his /))
       ierr = nf90_put_var(ihisfile, id_comp_time, cpusteps(3), start=(/ it_his /))
     end if
@@ -18810,7 +18810,7 @@ subroutine unc_write_shp()
           endif
        endif
     endif
-    
+
     ! general structures
     if (jashp_genstruc > 0) then
        if (jampi .eq. 0) then
@@ -18838,8 +18838,8 @@ subroutine unc_write_shp()
           endif
        endif
     endif
-    
-    
+
+
 
 end subroutine unc_write_shp
 #endif
@@ -23116,8 +23116,8 @@ endif
     call realloc(wx, lnx, keepExisting = .false., fill = 0d0, stat = ierr)
     call realloc(wy, lnx, keepExisting = .false., fill = 0d0, stat = ierr)
     call realloc(kcw, lnx, keepExisting = .false., fill = 1, stat = ierr)
- end if 
- 
+ end if
+
  if (jaQinext > 0) then
     call realloc(qinext, ndkx, keepExisting = .false., fill = 0d0, stat = ierr)
     call aerr('qinext(ndkx)', ierr, ndkx)
@@ -28357,6 +28357,7 @@ end function densfm
  endif
 
  sqrt2 = sqrt(2d0)
+
  do k = 1,ndx2d
     Hwav(k)   = 0d0
     Twav(k)   = 0d0
@@ -28406,26 +28407,6 @@ end function densfm
        endif
     endif
 
-    ! need something for 2D ustokes
-    do LL = 1, lnx
-       if (hu(L)>epswav) then
-          k1 = ln(1,LL); k2 = ln(2,LL)
-          dir = atan2(wy(LL), wx(LL))
-          sind = sin(dir); cosd = cos(dir)
-          ustx1 = ustk(k1)*cosd
-          ustx2 = ustk(k2)*cosd
-          usty1 = ustk(k1)*sind
-          usty2 = ustk(k2)*sind
-          ustokes(LL) =      acL(LL) *(csu(LL)*ustx1 + snu(LL)*usty1) + &
-                        (1d0-acL(LL))*(csu(LL)*ustx2 + snu(LL)*usty2)
-          vstokes(LL) = acL(LL) *(-snu(LL)*ustx1 + csu(LL)*usty1) + &
-                        (1d0-acL(LL))*(-snu(L)*ustx2 + csu(L)*usty2)
-       else
-          ustokes(LL) = 0d0
-          vstokes(LL) = 0d0
-       endif
-    end do
-
     if (NDRAW(28) == 35) then
        plotlin(k) = fetchL
     else if (NDRAW(28) == 36) then
@@ -28441,6 +28422,26 @@ end function densfm
     endif
 
  enddo
+
+ ! need something for 2D ustokes
+ do LL = 1, lnx
+   if (hu(L)>epswav) then
+       k1 = ln(1,LL); k2 = ln(2,LL)
+       dir = atan2(wy(LL), wx(LL))
+       sind = sin(dir); cosd = cos(dir)
+       ustx1 = ustk(k1)*cosd
+       ustx2 = ustk(k2)*cosd
+       usty1 = ustk(k1)*sind
+       usty2 = ustk(k2)*sind
+       ustokes(LL) =      acL(LL) *(csu(LL)*ustx1 + snu(LL)*usty1) + &
+                     (1d0-acL(LL))*(csu(LL)*ustx2 + snu(LL)*usty2)
+       vstokes(LL) = acL(LL) *(-snu(LL)*ustx1 + csu(LL)*usty1) + &
+                     (1d0-acL(LL))*(-snu(L)*ustx2 + csu(L)*usty2)
+    else
+       ustokes(LL) = 0d0
+       vstokes(LL) = 0d0
+    endif
+ end do
 
 end subroutine tauwavefetch
 
@@ -30985,7 +30986,7 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
 ! double precision   :: transformcoef(25) !< Transform coefficients a+b*x
 
  kc_size_store = 0
- 
+
  inquire(file = md_xybfile, exist=jawel)
  jawel = jawel .and. (len_trim(md_xybfile) > 0) ! strange behavior on some Linux systems if file name is empty, but reported exist=.true.
 
@@ -31337,7 +31338,7 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
 
  enddo
  bob0(:,lnx1d+1:lnx) = bob(:,lnx1d+1:lnx)
- 
+
  if (jaupdbobbl1d > 0) then
     call setbobs_1d()
     jaupdbobbl1d = 0 ! update bobs and bl only at initialization. After initialisation bobs should only follow from bl, in particular for morphological updating. When considering nodal relations, some special treatment may be required
@@ -31374,8 +31375,8 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
              bl(n2)    = min(bl(n2) , blv)
           endif
        endif
-    enddo 
-    bob0(:, 1:lnx1d) =bob(:, 1:lnx1d) 
+    enddo
+    bob0(:, 1:lnx1d) =bob(:, 1:lnx1d)
  endif
  do L = 1,lnx1D                                       ! 1D
     n1  = ln(1,L)   ; n2 = ln(2,L)                    ! flow ref
@@ -31423,23 +31424,23 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
     if (bl(n1) .ne. 1d30 ) then
        bob(1,L) = bl(n1)
        bob0(1,L) = bl(n1)
-    else    
+    else
        bob(1,L) = zn1
        bob0(1,L) = zn1
-    endif   
-    if (bl(n1) .ne. 1d30 ) then 
-       bob(2,L) = bl(n2) 
-       bob0(2,L) = bl(n2) 
-    else 
-       bob(2,L) = zn2 
-       bob0(2,L) = zn2 
-    endif   
-    if (bl(n1) .ne. 1d30 ) then 
-       bob(2,L) = bl(n2) 
-       bob0(2,L) = bl(n2) 
-    else 
-       bob(2,L) = zn2 
-       bob0(2,L) = zn2 
+    endif
+    if (bl(n1) .ne. 1d30 ) then
+       bob(2,L) = bl(n2)
+       bob0(2,L) = bl(n2)
+    else
+       bob(2,L) = zn2
+       bob0(2,L) = zn2
+    endif
+    if (bl(n1) .ne. 1d30 ) then
+       bob(2,L) = bl(n2)
+       bob0(2,L) = bl(n2)
+    else
+       bob(2,L) = zn2
+       bob0(2,L) = zn2
     endif
     if (setHorizontalBobsFor1d2d) then
        bob(:,L) = max(bob(1,L), bob(2,L))
@@ -31739,11 +31740,11 @@ end subroutine setbobs_fixedweirs
  integer :: n, kb, ki, ndn
 
  kfs = 0
- 
+
  ! open all grid points with positive lateral inflow
  do ndn = 1, ndx
    if (qin(ndn)>1d-12) then
-     kfs(ndn) = 1 
+     kfs(ndn) = 1
    endif
  enddo
 
@@ -33335,11 +33336,11 @@ end subroutine setbobs_fixedweirs
     enddo
 
  else                                                  ! 3D
- 
+
     if ( jafilter.ne.0 ) then
       call comp_filter_predictor()
     end if
- 
+
     call update_verticalprofiles()
 
  endif
@@ -36515,7 +36516,7 @@ end function is_1d_boundary_candidate
  use m_partitioninfo
  use m_ec_spatial_extrapolation, only : init_spatial_extrapolation
  use m_sferic, only: jsferic
- use m_trachy, only: trachy_resistance 
+ use m_trachy, only: trachy_resistance
  ! use m_vegetation
 
  implicit none
@@ -37700,15 +37701,15 @@ if (mext > 0) then
               call err_flush()
            endif
 
-           if (.not. allocated(kcw)) then 
+           if (.not. allocated(kcw)) then
               call realloc(kcw, lnx, stat=ierr, keepExisting=.false.)
               call aerr('kcw(lnx)', ierr, lnx)
               kcw = 1
-           endif 
+           endif
            if (.not. allocated(wx) ) then
               allocate ( wx(lnx), stat=ierr)
               call aerr('wx(lnx)', ierr, lnx)
-              wx = 0.0_hp 
+              wx = 0.0_hp
            endif
            if (.not. allocated(wy) ) then
               allocate ( wy(lnx), stat=ierr)
@@ -37825,6 +37826,7 @@ if (mext > 0) then
            pkbot => kbot
            pktop => ktop
 
+           if (allocated (kcw) ) deallocate(kcw) ; allocate( kcw(ndx) ) ; kcw = 1
            success = ec_addtimespacerelation(qid, xz(1:ndx), yz(1:ndx), kcw, kx, filename, filetype, method, operand, z=zcs, pkbot=pkbot, pktop=pktop, varname=varname)
 
            if ( success ) then
@@ -38590,10 +38592,10 @@ end if
     call realloc( diaveg, Ndkx, keepExisting=.false., fill=0d0, stat=ierr)
     call aerr   ('diaveg (Ndkx)', ierr, Ndkx)
 
-    if (jaCdvegsp > 0) then 
+    if (jaCdvegsp > 0) then
        call realloc( Cdvegsp, Ndkx, keepExisting=.false., fill=0d0, stat=ierr)
        call aerr   ('Cdvegsp (Ndkx)', ierr, Ndkx)
-    endif  
+    endif
 
     javeg = 1
     if (.not.allocated(stemheight) .and. japillar == 2) then
@@ -38632,11 +38634,11 @@ end if
 
  endif
 
- if ((jatrt>0) .and. trachy_resistance) then 
+ if ((jatrt>0) .and. trachy_resistance) then
      call realloc(  alfav, Lnx, keepExisting=.false., fill=0d0, stat=ierr)
      call aerr   (' alfav (Lnx)', ierr, Lnx)
  endif
- 
+
  if (jagrounLay == 1) then
     IF (ALLOCATED (wigr) ) deallocate (wigr, argr, pergr)
     allocate  ( argr(lnx1D) , stat= ierr)  ; argr  = 0d0
@@ -39317,7 +39319,7 @@ subroutine update_verticalprofiles()
                  endif
                  um      = sqrt( u1(L)*u1(L) + v(L)*v(L) )                ! umod (m2/s2)
                  if (jaCdvegsp == 1) then
-                    if (Cdvegsp(k1) > 0 .and. Cdvegsp(k2) > 0) then 
+                    if (Cdvegsp(k1) > 0 .and. Cdvegsp(k2) > 0) then
                        Cdveg = 0.5d0*( Cdvegsp(k1) + Cdvegsp(k2) )
                     else
                        Cdveg = max (Cdvegsp(k1), Cdvegsp(k2) )
@@ -40126,14 +40128,14 @@ subroutine getymxpar(modind,tauwav, taucur, fw, cdrag, abscos, ypar, ymxpar)
  double precision   :: aa(kmxx),cc(kmxx) ! for five-diaginal matrix
                                          ! aa(i)*u(i-2)+a(i)*u(i-1)+b(i)*u(i)+c(i)*u(i+1)+cc(i)*u(i+2)=d(i)
 
- a(1:kxL) = 0d0 ; b(1:kxL) = dti ; c(1:kxL) = 0d0 
- 
+ a(1:kxL) = 0d0 ; b(1:kxL) = dti ; c(1:kxL) = 0d0
+
  if ( jafilter.ne.0 ) then
    d(1:kxL) = ustar(Lb:Lt)*dti
  else
     d(1:kxL) = u0(Lb:Lt)*dti   ! put u1 in ddk
  end if
- 
+
  aa(1:kxL) = 0d0 ; cc(1:kxL) = 0d0
 
  adv = 0d0; adv1 = 0d0
@@ -40460,7 +40462,7 @@ if (abs(kcu(ll))==1 .and. network%loaded) then !flow1d used only for 1d channels
    else ! japerim = 1: calculate flow area, conveyance and perimeter.
       cz = 0d0
       call GetCSParsFlow(network%adm%line2cross(LL), network%crs%cross, hpr, area, perim, width, af_sub, perim_sub)
-      
+
       u1L = u1(LL)
       q1L = q1(LL)
       k1 = ln(1,LL)
@@ -41511,12 +41513,12 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
        crestlevxw(nfxw) = dzcrest(L)
        shlxw(nfxw)    = dzsillu(L)
        if (ifixedweirscheme == 8) then
-          shlxw(nfxw) = max (0.1d0, shlxw(nfxw) )  !  in case of the Tabellenboek the ground height left should be at least 0.1 m, as in Simona and Delft3D-FLOW 
-       endif   
+          shlxw(nfxw) = max (0.1d0, shlxw(nfxw) )  !  in case of the Tabellenboek the ground height left should be at least 0.1 m, as in Simona and Delft3D-FLOW
+       endif
        shrxw(nfxw)    = dzsilld(L)
        if (ifixedweirscheme == 8) then
-          shrxw(nfxw) = max (0.1d0, shrxw(nfxw) )  !  in case of the Tabellenboek the ground height right should be at least 0.1 m, as in Simona and Delft3D-FLOW  
-       endif   
+          shrxw(nfxw) = max (0.1d0, shrxw(nfxw) )  !  in case of the Tabellenboek the ground height right should be at least 0.1 m, as in Simona and Delft3D-FLOW
+       endif
        crestlxw(nfxw) = crestlen(L)
        taludlxw(nfxw) = taludu(L)
        taludrxw(nfxw) = taludd(L)
@@ -41669,7 +41671,7 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
          zc       = sl*zpL(k+1) + (1d0-sl)*zpL(k)
          bob(1,L) = min(zc, bob(1,L), bob(2,L) ) ; bob(2,L) = bob(1,L)
          bob0(:,L) = bob(:,L)
-         
+
          bl(n1)   = min(bl(n1),zc)
          bl(n2)   = min(bl(n2),zc)
          nt       = nt + 1
@@ -41953,8 +41955,8 @@ subroutine setbobsonroofs( )      ! override bobs along pliz's
          endif
          bob(1,L) = zc ; bob(2,L) = bob(1,L)
          bob0(:,L) = bob(:,L)
-         bl(n1)   = min(bl(n1),zc)  
-         bl(n2)   = min(bl(n2),zc)  
+         bl(n1)   = min(bl(n1),zc)
+         bl(n2)   = min(bl(n2),zc)
          iadv(L)  = 8
          nt2 = nt2 + 1
      endif
@@ -41972,9 +41974,9 @@ subroutine setbobsonroofs( )      ! override bobs along pliz's
        endif
        if (ip2 > 0) then
           bob(2,L) = bl(n2) ; ! zk(k2) = bl(n2)
-       endif  
+       endif
        bob0(:,L) = bob(:,L)
-       if (ip1 > 0 .or. ip2 > 0) then 
+       if (ip1 > 0 .or. ip2 > 0) then
           dx(L)        = max(dx(L), dxminroofgutterpipe)
           frcuroofs(L) = frcuniroofgutterpipe
        endif
