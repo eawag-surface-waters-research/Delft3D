@@ -19295,7 +19295,9 @@ end subroutine unc_write_shp
     call mess(LEVEL_INFO, 'Global cell numbers could not be read. Subdomain number:', my_rank)
  end if
 
- call reduce_int_min(jaiglobal_s)
+ if ( jampi.eq.1 ) then
+    call reduce_int_min(jaiglobal_s)
+ end if
 
  !if (len_trim(md_dryptsfile) > 0) then
  !   call strsplit(md_dryptsfile,1,fnames,1)
