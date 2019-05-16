@@ -71,6 +71,7 @@ end subroutine test_read_obs_points
 !==============================================================================
 subroutine test_read_snapped_obs_points
     use gridoperations
+    use m_cell_geometry, only: xz, yz
     use m_netw
     use m_observations
     use unstruc_model
@@ -80,15 +81,17 @@ subroutine test_read_snapped_obs_points
     integer, external :: flow_modelinit
     !
     ! Locals
-    integer, parameter                         :: N_OBS_POINTS = 4
-    integer                                    :: i
-    integer                                    :: istat
-    double precision                           :: refdata(2,N_OBS_POINTS)
-    character(len=40), dimension(N_OBS_POINTS) :: refnames
+    integer, parameter                           :: N_OBS_POINTS = 4
+    integer                                      :: i
+    integer                                      :: istat
+    integer          , dimension(N_OBS_POINTS)   :: ref_k
+    double precision , dimension(2,N_OBS_POINTS) :: refdata
+    character(len=40), dimension(N_OBS_POINTS)   :: refnames
     !
-    data refdata /99999.0000000         , 25000.0000000         , &
+    data ref_k / 522, 1043, 1565, 1304 /
+    data refdata /100000.000000         , 25000.0000000         , &
                   0.000000000000000D+000, 50000.0000000         , &
-                  32.0000000000         , 100000.000000         , &
+                  0.000000000000000D+000, 100000.000000         , &
                   100000.000000         , 75000.0000000           /
     refnames(1) = 'TestLocation1'
     refnames(2) = 'TestLocation_xy1'
@@ -106,9 +109,10 @@ subroutine test_read_snapped_obs_points
     istat = flow_modelinit()
     !
     do i=1,N_OBS_POINTS
-        call assert_comparable(xobs(i)  , refdata(1,i), eps, 'x-coordinate of observation points incorrect' )
-        call assert_comparable(yobs(i)  , refdata(2,i), eps, 'y-coordinate of observation points incorrect' )
-        call assert_equal     (namobs(i), refnames(i) , "Obeservation point name incorrect" )
+        call assert_equal     (kobs(i)    , ref_k    (i), 'index of snapped observation points incorrect' )
+        call assert_comparable(xz(kobs(i)), refdata(1,i), eps, 'x-coordinate of snapped observation points incorrect' )
+        call assert_comparable(yz(kobs(i)), refdata(2,i), eps, 'y-coordinate of snapped observation points incorrect' )
+        call assert_equal     (namobs(i)  , refnames (i), "Snapped obeservation point name incorrect" )
     enddo
 end subroutine test_read_snapped_obs_points
 
