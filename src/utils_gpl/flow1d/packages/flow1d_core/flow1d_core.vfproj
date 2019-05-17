@@ -69,6 +69,7 @@
 		<File RelativePath=".\src\NetworkTypes.f90"/>
 		<File RelativePath=".\src\nodes.f90"/>
 		<File RelativePath=".\src\ObservationPoints.f90"/>
+		<File RelativePath=".\src\ObservCrossSections.f90"/>
 		<File RelativePath=".\src\Orifice.f90"/>
 		<File RelativePath=".\src\Pump.f90"/>
 		<File RelativePath=".\src\Qsort.f90"/>

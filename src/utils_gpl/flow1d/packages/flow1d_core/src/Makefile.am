@@ -46,6 +46,7 @@ libflow1d_core_la_SOURCES = \
          ModelParameters.f90 \
          Storage.f90 \
          ObservationPoints.f90 \
+		 ObservCrossSections.f90 \
          NetworkTypes.f90 \
          Trenches.f90 \
          df1d_transport.f90 \
