@@ -1,4 +1,4 @@
-subroutine get_flow_fields (i_flow, sif, fg, sg, f2s, wavedata, sr, flowVelocityType)
+subroutine get_flow_fields (i_flow, i_swan, sif, fg, sg, f2s, wavedata, sr, flowVelocityType)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2019.                                
@@ -42,6 +42,7 @@ subroutine get_flow_fields (i_flow, sif, fg, sg, f2s, wavedata, sr, flowVelocity
 ! Global variables
 !
    integer                          :: i_flow
+   integer                          :: i_swan
    integer                          :: flowVelocityType
    type(input_fields)               :: sif              ! input fields defined on swan grid
    type(grid)                       :: fg               ! flow grid
@@ -80,7 +81,7 @@ end interface
    !
    call alloc_input_fields(fg, fif, wavedata%mode)
    !
-   if (sr%swmor) then
+   if (sr%dom(i_swan)%qextnd(q_bath)>0) then
       if (sr%flowgridfile == ' ') then
          !
          ! Read depth from com-file
@@ -115,7 +116,7 @@ end interface
    !
    call dam_cod (fg%x, fg%y, fg%kcs, fg%mmax, fg%nmax)
    !
-   if (sr%swwlt) then
+   if (sr%dom(i_swan)%qextnd(q_wl)>0) then
       if (sr%flowgridfile == ' ') then
          !
          ! Read water level from com-file
@@ -146,7 +147,7 @@ end interface
       endif
    endif
    !
-   if (sr%swuvt) then
+   if (sr%dom(i_swan)%qextnd(q_cur)>0) then
       if (sr%flowgridfile == ' ') then
          !
          ! Read velocity from com-file
@@ -199,7 +200,7 @@ end interface
       endif
    endif
    !
-   if (sr%swwindt .and. sr%dom(1)%qextnd(q_wind) >= 1) then
+   if (sr%dom(i_swan)%qextnd(q_wind) >= 1) then
       if (sr%flowgridfile == ' ') then
          !
          ! Read wind from com-file
