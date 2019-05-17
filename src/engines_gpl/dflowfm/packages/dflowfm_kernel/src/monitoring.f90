@@ -889,6 +889,8 @@ type tcrs
     character(len=64)             :: name          !< Name
     integer                       :: nval          !< Nr. of different quantities monitored
     type(tcrspath)                :: path          !< Polyline+crossed flow links that defines this cross section.
+    integer                       :: loccrs = 0    !< location type:=3, defined by branchID and chainage (snap to 1d flowlinks). =0, snap to 1d+2d
+    integer                       :: loc3crs= 0    !< mapping from global obs index to obs that are defined by branchID and chainage 
     double precision, allocatable :: sumvalcur(:)  !< Values integrated over the crs
     double precision, allocatable :: sumvalcum(:)  !< Values integrated over crs *and* time
     double precision, allocatable :: sumvalavg(:)  !< Values integrated over crs and averaged in time.
@@ -1042,10 +1044,12 @@ end subroutine increaseCrossSections
 
 
 !> Starts a new cross section in the active array of crs, increasing memory when necessary.
-subroutine addCrossSection(name, xp, yp)
+subroutine addCrossSections(name, xp, yp, loctype, icrs3)
     character(len=*), intent(in) :: name
     double precision, intent(in) :: xp(:), yp(:)
-
+    integer, optional, intent(in):: loctype                 !< location type
+    integer, optional, intent(in):: icrs3                   !< local index of crs that are defiend by branchID and chainage (locationtype == 3)
+    
     integer :: m
     character(len=1) :: cdigits
 
@@ -1066,7 +1070,21 @@ subroutine addCrossSection(name, xp, yp)
         write(crs(ncrs)%name, '(a,i'//cdigits//'.'//cdigits//')'), trim(defaultName_), iUniq_
         iUniq_ = iUniq_ + 1
     end if
-end subroutine addCrossSection
+    
+    ! Set locationtype and mapping from global index to local crs that are defined by branchId and chainage
+    if (present(loctype)) then
+       crs(ncrs)%loccrs = loctype
+    else
+       crs(ncrs)%loccrs = 0
+    end if
+    
+    if (present(icrs3)) then
+       crs(ncrs)%loc3crs = icrs3
+    else
+       crs(ncrs)%loc3crs = 0
+    end if
+    
+end subroutine addCrossSections
 
 
 !> Deletes all cross sections from crs.
@@ -1085,6 +1103,97 @@ subroutine delCrossSections()
 
     ! Do not reset crs data, just let it be overwritten later.
 end subroutine delCrossSections
+
+!> Reads observation cross sections defined in a *.ini file,
+!! then adds them to the normal crs adm
+subroutine loadObservCrossSections(network, filename)
+   use m_readObservCrossSections, only: readObservCrossSections
+   use m_network
+   
+   implicit none
+   type(t_network),  intent(inout)        :: network
+   character(len=*), intent(in   )        :: filename
+   
+   call readObservCrossSections(network, filename)
+   call addObservCrsFromIni(network, filename)
+   
+end subroutine loadObservCrossSections
+
+!> Adds observation cross sections, that are read from *.ini file, to the normal cross section adm
+subroutine addObservCrsFromIni(network, filename)
+   use m_network
+   use odugrid
+   use m_save_ugrid_state
+   use dfm_error
+   use m_missing
+   use m_ObservCrossSections
+   implicit none
+   type(t_network),  intent(inout)       :: network            !< network
+   character(len=*), intent(in   )       :: filename           !< filename of the cross section file
+   
+   integer                               :: nbrch              ! number of cross sections that are defined by branchID and chainage
+   integer                               :: ierr, ncrsini, i, numv
+   type(t_observCrossSection), pointer   :: pCrs
+   integer,              allocatable     :: branchIdx_tmp(:), ibrch2crs(:)
+   double precision    , allocatable     :: Chainage_tmp(:), xx_tmp(:), yy_tmp(:)
+   
+   
+   ierr    = DFM_NOERR
+   nbrch   = 0
+   ncrsini = network%observcrs%count
+   
+   !! Step 1. get x- and y-coordinates of crs that are defined by branchID and chainage
+   ! 1a. save their branchIdx and chainage to temporary arrays
+   allocate(branchIdx_tmp(ncrsini))
+   allocate(Chainage_tmp(ncrsini))
+   allocate(ibrch2crs(ncrsini))
+   
+   do i=1, ncrsini
+      pCrs => network%observcrs%observcross(i)
+      if (pCrs%branchIdx > 0) then
+         nbrch = nbrch + 1
+         branchIdx_tmp(nbrch) = pCrs%branchIdx
+         Chainage_tmp(nbrch)  = pCrs%chainage
+         ibrch2crs(nbrch)     = i
+      end if
+   end do
+         
+   ! 1b. get the corresponding x- and y-coordinates
+   if (nbrch > 0) then
+      allocate(xx_tmp(nbrch))
+      allocate(yy_tmp(nbrch))
+      ierr = odu_get_xy_coordinates(branchIdx_tmp(1:nbrch), Chainage_tmp(1: nbrch), meshgeom1d%ngeopointx, meshgeom1d%ngeopointy, &
+                                    meshgeom1d%nbranchgeometrynodes, meshgeom1d%nbranchlengths, 0, xx_tmp, yy_tmp)
+      
+      if (ierr /= DFM_NOERR) then
+         call mess(LEVEL_ERROR, "Error occurs when getting xy coordinates for observation cross sections from file '"//trim(filename)//".")
+      end if
+      
+      do i=1, nbrch
+         pCrs => network%observcrs%observcross(ibrch2crs(i))
+         pCrs%x(1) = xx_tmp(i)
+         pCrs%y(1) = yy_tmp(i)
+      end do
+   endif
+   
+   ! Step 2. add all observation crs from *.ini file
+   do i =1, ncrsini
+      pCrs => network%observcrs%observcross(i)
+      numv = pCrs%numValues
+      if (pCrs%branchIdx > 0) then ! crs which is defined by branchID and chainage
+         call addCrossSections(pCrs%name, pCrs%x(1:numv), pCrs%y(1:numv), loctype = pCrs%locationtype, icrs3 = i)
+      else
+         call addCrossSections(pCrs%name, pCrs%x(1:numv), pCrs%y(1:numv))
+      end if
+   end do
+    
+   if(allocated(branchIdx_tmp))deallocate(branchIdx_tmp)
+   if(allocated(Chainage_tmp)) deallocate(Chainage_tmp)
+   if(allocated(ibrch2crs))    deallocate(ibrch2crs)
+   if(allocated(xx_tmp))       deallocate(xx_tmp)
+   if(allocated(yy_tmp))       deallocate(yy_tmp)
+
+end subroutine addObservCrsFromIni
 
 
 !> Converts a set of polylines into cross sections
@@ -1124,7 +1233,7 @@ subroutine pol_to_crosssections(xpl, ypl, npl, names)
                 end if
 
                 ! 2: add the current polyline as a new crs.
-                call addCrossSection(name, xpl(i1:i2), ypl(i1:i2))
+                call addCrossSections(name, xpl(i1:i2), ypl(i1:i2))
             end if
             i1 = i+1
             cycle

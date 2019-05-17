@@ -55,6 +55,7 @@
 		<File RelativePath=".\src\readLaterals.f90"/>
 		<File RelativePath=".\src\readModelParameters.f90"/>
 		<File RelativePath=".\src\readObservationPoints.f90"/>
+		<File RelativePath=".\src\readObservCrossSections.f90"/>
 		<File RelativePath=".\src\readRetentions.f90"/>
 		<File RelativePath=".\src\readSalinityParameters.f90"/>
 		<File RelativePath=".\src\readspatialdata.f90"/>

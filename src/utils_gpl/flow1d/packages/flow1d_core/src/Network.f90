@@ -37,6 +37,7 @@ module m_network
    use m_trenches
    use m_ExtraResistance
    use m_df1d_transport
+   use m_ObservCrossSections
    
    implicit none
 
@@ -99,6 +100,7 @@ module m_network
       type(t_spatial_dataSet)                   :: spData
       type(t_boundarySet)                       :: boundaries
       type(t_transportSet)                      :: trans
+      type(t_ObservCrossSectionSet)             :: observcrs               !< set of observation Cross-Sections 
       logical                                   :: loaded      = .false.
       logical                                   :: initialized = .false.
    end type
@@ -172,6 +174,7 @@ contains
       call dealloc(network%spData)
       call dealloc(network%boundaries)
       call dealloc(network%trans)
+      call dealloc(network%observcrs)
       network%loaded = .false.
    
    end subroutine deallocNetwork

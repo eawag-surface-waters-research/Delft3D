@@ -121,7 +121,7 @@ implicit none
     character(len=255) :: md_bedformfile   = ' ' !< File containing bedform settings (e.g., *.bfm)
 
     character(len=1024):: md_obsfile       = ' ' !< File containing observation points  (e.g., *_obs.xyn, *_obs.ini)
-    character(len=255) :: md_crsfile       = ' ' !< File containing cross sections      (e.g., *_crs.pli)
+    character(len=255) :: md_crsfile       = ' ' !< File containing cross sections (e.g., *_crs.pli, observation cross section *_crs.ini)
     character(len=255) :: md_foufile       = ' ' !< File containing fourier modes to be analyzed
 
     character(len=255) :: md_hisfile       = ' ' !< Output history file for monitoring  (e.g., *_his.nc)
@@ -391,7 +391,7 @@ subroutine loadModel(filename)
     integer :: istat, minp, ifil, jadoorladen
 
     integer :: i
-    integer :: L, k1, k2
+    integer :: L, k1, k2, tok
     integer :: ntot_lb
 
     integer      :: iDumk = 0
@@ -541,17 +541,29 @@ subroutine loadModel(filename)
         enddo
         deallocate(fnames)
     end if
-
-    ! Load cross sections polygons from file.
+    ! Load cross sections polygons from file, and load observation cross sections from *.ini files
     if (len_trim(md_crsfile) > 0) then
         call strsplit(md_crsfile,1,fnames,1)
-        call oldfil(minp, fnames(1))
-        call reapol(minp, 0)
-        do ifil=2,size(fnames)
-           call oldfil(minp, fnames(ifil))
-           call reapol(minp, 1)
-        enddo
+        ! firstly handle all *.pli files
+        do ifil = 1,size(fnames)
+           tok = index(fnames(ifil), '.pli')
+           if (tok > 0) then
+              call oldfil(minp, fnames(ifil))
+              if (ifil == 1) then
+                 call reapol(minp, 0)
+              else
+                 call reapol(minp, 1)
+              end if
+           end if
+        end do
         call pol_to_crosssections(xpl, ypl, npl, names=nampli)
+        ! secondly handle all *.ini files
+        do ifil = 1,size(fnames)
+           tok = index(fnames(ifil), '.ini')
+           if (tok > 0) then
+              call loadObservCrossSections(network, fnames(ifil))
+           end if
+        enddo
         deallocate(fnames)
     end if
 

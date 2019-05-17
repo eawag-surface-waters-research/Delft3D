@@ -14045,6 +14045,9 @@ subroutine crosssections_on_flowgeom()
     use m_missing
     use kdtree2Factory
     use unstruc_messages
+    use dfm_error
+    use unstruc_channel_flow
+    use m_inquire_flowgeom
     implicit none
 
     integer                                       :: ic, icmod
@@ -14061,6 +14064,9 @@ subroutine crosssections_on_flowgeom()
     integer                                       :: jakdtree=1
     double precision                              :: t0, t1
     character(len=128)                            :: mesg
+    integer                                       :: linknr, ii, branchIdx
+    type(t_observCrossSection), pointer           :: pCrs
+    
 
     if ( ncrs.lt.1 ) return
 
@@ -14076,8 +14082,10 @@ subroutine crosssections_on_flowgeom()
         num = 0
 !       determine polyline size
         do ic=1,ncrs
-           num = num+crs(ic)%path%np+1 ! add space for missing value
-           istartcrs(ic+1) = num+1
+           if (crs(ic)%loccrs == 0) then  ! only for crs which are snapped to 1d+2d flowlinks
+              num = num+crs(ic)%path%np+1 ! add space for missing value
+              istartcrs(ic+1) = num+1
+           end if
         end do
 
 !       allocate
@@ -14086,15 +14094,17 @@ subroutine crosssections_on_flowgeom()
 !       determine paths to single polyline map
         num = 0
         do ic=1,ncrs
-           do i=1,crs(ic)%path%np
-              num = num+1
-              xx(num) = crs(ic)%path%xp(i)
-              yy(num) = crs(ic)%path%yp(i)
-           end do
+           if (crs(ic)%loccrs == 0) then
+              do i=1,crs(ic)%path%np
+                 num = num+1
+                 xx(num) = crs(ic)%path%xp(i)
+                 yy(num) = crs(ic)%path%yp(i)
+              end do
 !          add missing value
-           num = num+1
-           xx(num) = DMISS
-           yy(num) = DMISS
+              num = num+1
+              xx(num) = DMISS
+              yy(num) = DMISS
+           end if
         end do
 
 !       allocate
@@ -14116,12 +14126,14 @@ subroutine crosssections_on_flowgeom()
 
            do i=1,numcrossedlinks
               do ic=1,ncrs
-                 istart  = istartcrs(ic)
-                 iend    = istartcrs(ic+1)-1
-                 if ( ipol(i).ge.istart .and. ipol(i).le.iend ) then
-                    numlist(ic) = numlist(ic)+1
-                    linklist(numlist(ic),ic) = iLink(i)
-                 end if
+                 if (crs(ic)%loccrs == 0) then
+                    istart  = istartcrs(ic)
+                    iend    = istartcrs(ic+1)-1
+                    if ( ipol(i).ge.istart .and. ipol(i).le.iend ) then
+                       numlist(ic) = numlist(ic)+1
+                       linklist(numlist(ic),ic) = iLink(i)
+                    end if
+                 end if 
               end do
            end do
 
@@ -14153,11 +14165,31 @@ subroutine crosssections_on_flowgeom()
         if (mod(ic,icMOD) == 0) then
             CALL READYY('Enabling cross sections on grid', dble(ic)/dble(ncrs))
         end if
-        if ( jakdtree.eq.0 ) then
-           call crspath_on_flowgeom(crs(ic)%path,0,0,1,idum)
-        else
-           call crspath_on_flowgeom(crs(ic)%path,0,1,numlist(ic),linklist(1,ic))
-        end if        
+        if (crs(ic)%loccrs == 0) then
+          if ( jakdtree.eq.0 ) then
+             call crspath_on_flowgeom(crs(ic)%path,0,0,1,idum, 0)
+          else
+             call crspath_on_flowgeom(crs(ic)%path,0,1,numlist(ic),linklist(1,ic), 0)
+          end if
+        else if (crs(ic)%loccrs == 3) then ! snap to only 1d flow link
+          ii = crs(ic)%loc3crs
+          pCrs => network%observcrs%observcross(ii)
+          branchIdx = pCrs%branchIdx
+          if (branchIdx > 0) then
+             ierror = 1
+             ierror = findlink(branchIdx, pCrs%chainage, linknr) ! find flow link given branchIdx and chainage
+             if (ierror == DFM_NOERR) then
+                numlist(ic) = 1
+				    linklist(1,ic) = linknr
+                call crspath_on_flowgeom(crs(ic)%path,0,1,numlist(ic),linklist(1,ic), 1)
+             else
+                call SetMessage(LEVEL_ERROR, 'Error occurs when snapping Observation cross section '''//trim(crs(ic)%name)//''' to a 1D flow link.')
+             end if
+          else
+             write(msgbuf, '(a)') "Observation cross section "//trim(crs(ic)%name)//" does not have a valide branch index."
+             call mess(LEVEL_ERROR, msgbuf)
+          end if
+        end if 
     end do
 
     CALL READYY('Enabling cross sections on grid', -1d0)
@@ -14320,7 +14352,7 @@ subroutine fixedweirs_on_flowgeom()
     idum = 0
 
     do ic=1,nfxw
-        call crspath_on_flowgeom(fxw(ic),1,0,1,idum)
+        call crspath_on_flowgeom(fxw(ic),1,0,1,idum, 0)
     end do
 end subroutine fixedweirs_on_flowgeom
 
@@ -14333,7 +14365,7 @@ end subroutine fixedweirs_on_flowgeom
 !! coordinates in xk,yk.
 !!
 !! \see crspath_on_netgeom, crosssections_on_flowgeom, fixedweirs_on_flowgeom
-subroutine crspath_on_flowgeom(path,includeghosts,jalinklist,numlinks,linklist)
+subroutine crspath_on_flowgeom(path,includeghosts,jalinklist,numlinks,linklist, jaloc3)
     use m_crspath
     use m_flowgeom
     use network_data
@@ -14350,6 +14382,7 @@ subroutine crspath_on_flowgeom(path,includeghosts,jalinklist,numlinks,linklist)
     integer,                      intent(in)    :: jalinklist    !< use link list (1) or not (0)
     integer,                      intent(in)    :: numlinks      !< number of links in list
     integer, dimension(numlinks), intent(in)    :: linklist      !< list of flowlinks crossed by path
+    integer,                      intent(in   ) :: jaloc3        !< If it has locationtype==3, then jaloc3>0, for Crs defined by branchID and chainage
 
     integer                       :: i, iend, iLf, L, Lf, n1, n2, kint
 
@@ -14411,11 +14444,20 @@ subroutine crspath_on_flowgeom(path,includeghosts,jalinklist,numlinks,linklist)
             x2 = .5d0*(xz(n1)+xz(n2)) + .5d0*xn
             y2 = .5d0*(yz(n1)+yz(n2)) + .5d0*yn
         end if
-
-        call crspath_on_singlelink(path, Lf, x1, y1, x2, y2, xz(n1), yz(n1), xz(n2), yz(n2))
+        if (jaloc3 > 0) then ! for Crs defined by branchID and chainage
+           call increaseCrossSectionPath(path, 0, 1)
+           path%xk(1,1) = x1 
+           path%yk(1,1) = y1
+           path%xk(2,1) = x2
+           path%yk(2,1) = y2
+           path%lnx = 1
+           path%ln(1) = Lf
+        else
+           call crspath_on_singlelink(path, Lf, x1, y1, x2, y2, xz(n1), yz(n1), xz(n2), yz(n2))
+        end if
    enddo
 
-   if ( path%lnx.gt.0 ) then
+   if ( path%lnx.gt.0 .and. jaloc3 == 0) then
 
    !  determine permutation array of flowlinks by increasing arc length order
       do i=1,path%lnx

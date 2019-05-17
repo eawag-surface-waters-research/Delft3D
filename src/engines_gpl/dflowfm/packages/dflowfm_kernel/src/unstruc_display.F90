@@ -1070,14 +1070,18 @@ subroutine plotCrossSectionPath(path, met, ncol, jaArrow, label)
         !call cir(.4d0*rcir)
         jmax = 1 ! jmax is the last visible point in coarse polyline.
                  ! Only #1 is not checked (so user should zoom out when even that one is not visible)
-        do j=2,path%np
-            call lnabs(path%xp(j), path%yp(j))
-
-            if (inview(path%xp(j), path%yp(j))) then  ! find first and last j in viewing area
-                jmax = j
-            end if
-            !call cir(.4d0*rcir)
-        end do
+        if (path%np > 1) then
+           do j=2,path%np
+               call lnabs(path%xp(j), path%yp(j))
+           
+               if (inview(path%xp(j), path%yp(j))) then  ! find first and last j in viewing area
+                   jmax = j
+               end if
+               !call cir(.4d0*rcir)
+           end do
+        else if (path%np == 1) then
+           call cir(rcir)
+        end if
         xx2 = path%xp(jmax)
         yy2 = path%yp(jmax)
     ! Else, default: plot all crossed flow links in crs.
