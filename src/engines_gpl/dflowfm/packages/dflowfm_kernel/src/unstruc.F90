@@ -5005,6 +5005,7 @@ end subroutine setdt
  use m_flow
  use m_flowparameters, only: trshcorio
  use m_flowgeom
+ use m_netw
  use MessageHandling
  use m_alloc
  use m_wind
@@ -5016,19 +5017,26 @@ end subroutine setdt
  integer          :: L,LL, Lb, Lt, k1,k2
  double precision :: dpatm, tidp, trshcorioi, fmax, floc, dzt, dztm, alf
  double precision :: GradHinUc
- double precision :: p1, p2
+ double precision :: p1, p2, wfac, Dzk
 
  trshcorioi = 1d0/trshcorio
 
- if (jawind > 0) then
+if (jawind > 0) then
 
     if (kmx == 0) then
        !$OMP PARALLEL DO                                          &
        !$OMP PRIVATE(L)
-        do L  = 1,lnx
-           if ( hu(L) > 0 ) then
-              ! wdsu/huvli = [(m^2/s^2)*m^-1]
-              adve(L) = adve(L) - wdsu(L)*huvli(L)
+        do LL = 1,lnx
+           if ( hu(LL) > 0 ) then
+               wfac = 1d0 
+               if (ibedlevtyp == 3) then 
+                  Dzk  = abs( zk(lncn(1,LL)) - zk(lncn(2,LL)) )
+                  if (Dzk > 0d0) then 
+                     wfac = min( 1d0, hu(LL) / Dzk )
+                  endif 
+               endif
+               ! wdsu/huvli = [(m^2/s^2)*m^-1]
+               adve(LL) = adve(LL) - wdsu(LL)*wfac*huvli(LL)
            endif
         enddo
         !$OMP END PARALLEL DO
@@ -5037,6 +5045,14 @@ end subroutine setdt
 
         do LL  = 1,lnx
            if (hu(LL) > 0d0) then
+               wfac = 1d0 
+               if (ibedlevtyp == 3) then 
+                  Dzk  = abs( zk(lncn(1,LL)) - zk(lncn(2,LL)) )
+                  if (Dzk > 0d0) then 
+                     wfac = min( 1d0, hu(LL) / Dzk )
+                  endif 
+               endif
+
                Lt = Ltop(LL)
                ! adve(Lt) = adve(Lt) - wdsu(LL) / max( toplayminthick, hu(Lt) - hu(Lt-1)  )
 
@@ -5045,10 +5061,10 @@ end subroutine setdt
                   if ( dzt < 0.05d0 ) then
                      dztm  =  hu(Lt-1) - hu(Lt-2)
                      alf   =  dzt / ( dzt + dztm )
-                     adve(Lt-1) = adve(Lt-1) - (1d0-alf)*wdsu(LL) / dztm
+                     adve(Lt-1) = adve(Lt-1) - (1d0-alf)*wdsu(LL)*wfac / dztm
                   endif
                endif
-               adve(Lt) = adve(Lt) - alf*wdsu(LL) / dzt
+               adve(Lt) = adve(Lt) - alf*wdsu(LL)*wfac / dzt
            endif
         enddo
 
