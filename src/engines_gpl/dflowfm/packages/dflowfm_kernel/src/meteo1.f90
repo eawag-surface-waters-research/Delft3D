@@ -1911,8 +1911,8 @@ contains
      end if
 
      keywrd = 'VARNAME'
-     call zoekopt(minp, rec, keywrd, ja)
-     if (ja == 1) then
+     call zoekopt(minp, rec, keywrd, jaopt)
+     if (jaopt == 1) then
         varname = adjustl(rec)
      else
         varname = ' '
@@ -1957,8 +1957,8 @@ contains
         method = 100 + weightfactors
      else
         keywrd = 'EXTRAPOLATION_METHOD'
-        call zoekopt(minp, rec, keywrd, ja)
-        if (ja == 1) then
+        call zoekopt(minp, rec, keywrd, jaopt)
+        if (jaopt == 1) then
            read(rec,*,err=990) extrapolation
            method = method + 100 * extrapolation
         endif
@@ -1966,8 +1966,8 @@ contains
 
      if (present(maxSearchRadius)) then
         keywrd = 'MAXSEARCHRADIUS'
-        call zoekopt(minp, rec, keywrd, ja)
-        if (ja == 1) then
+        call zoekopt(minp, rec, keywrd, jaopt)
+        if (jaopt == 1) then
            read(rec,*,err=990) maxSearchRadius
         else
            maxSearchRadius = -1.0_hp
@@ -2094,8 +2094,8 @@ contains
      
      if (qid == 'generalstructure') then 
         do k = 1,numgeneralkeywrd        ! generalstructure 
-           call readandchecknextrecord(minp, rec, generalkeywrd(k), ja)
-           if (ja == 1) then
+           call readandchecknextrecord(minp, rec, generalkeywrd(k), jaopt)
+           if (jaopt == 1) then
                L1 = index(rec,'=') + 1
                read (rec(L1:),*) transformcoef(k)
            else
