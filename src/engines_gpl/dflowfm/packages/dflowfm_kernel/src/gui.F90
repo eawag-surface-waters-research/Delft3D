@@ -596,15 +596,10 @@
       OPTION(37)= 'tracers                                 '
       OPTION(38)= 'Display Sources & Sinks                 '
       OPTION(39)= 'Display dots                            '
+      OPTION(40)= 'Display structures                      '
       
-      MAXOPT    = 39
-      
-      if ( .false. ) then
-         OPTION(40)= 'Display structures                      '
-      
-         MAXOPT    = 40
-      end if
-      
+      MAXOPT    = 40
+     
       if ( get_japart() ) then
          MAXOPT = MAXOPT+1
          OPTION(MAXOPT) = 'particles                               '
@@ -2542,7 +2537,7 @@
       else if (ndraw(28).eq.numoptwav) then
          if (jawave>0) then
             ndraw(28) = 1
-            nwhat     = 41 ! WAVE submenu
+            nwhat     = 42 ! WAVE submenu
             goto 1234
          else
             ndraw(28) = 0
@@ -2550,7 +2545,7 @@
       else if (ndraw(28).eq.numoptsf) then
          if (jasecflow>0) then
             ndraw(28) = 1
-            nwhat     = 42 ! SECF submenu
+            nwhat     = 43 ! SECF submenu
             goto 1234
          else
             ndraw(28) = 0
@@ -2558,7 +2553,7 @@
       else if (ndraw(28).eq.numoptsed) then
          if (stm_included) then
             ndraw(28) = 1
-            nwhat     = 44 ! STM flow nodes submenu
+            nwhat     = 45 ! STM flow nodes submenu
             goto 1234
          else
             ndraw(28) = 0
@@ -2643,7 +2638,7 @@
       if (ndraw(29).eq.numoptsed) then
          if (stm_included) then
             ndraw(29) = 1
-            nwhat     = 43 ! STM flow links submenu
+            nwhat     = 44 ! STM flow links submenu
             goto 1234
          else
             ndraw(28) = 0
@@ -3002,7 +2997,7 @@
          NDRAWDOTS = NWHAT2
       end if
       KEY = 3
-   else if (NWHAT == 40 .and. .false.) then
+   else if (NWHAT == 40) then
       EXP(1)    = 'MENU                                    '
       EXP(2)    = 'SHOW STRUCTURES YES/NO                '
       OPTION(1) = 'DO NOT SHOW STRUCTURES                '
@@ -3014,7 +3009,7 @@
       ndrawStructures = NWHAT2
       KEY = 3
       
-   ELSE IF (NWHAT .EQ. 40 ) THEN
+   ELSE IF (NWHAT .EQ. 41 ) THEN
       EXP(1)    = 'MENU                                    '
       EXP(2)    = 'SHOW PARTICLES YES/NO                   '
       OPTION(1) = 'DO NOT SHOW PARTICLES                   '
@@ -3024,7 +3019,7 @@
       CALL MENUV3(NWHAT2,OPTION,MAXOPT,EXP,MAXEXP)
       NDRAWPART = NWHAT2
       KEY = 3
-   ELSE IF (NWHAT.EQ.41) THEN          ! wave stuff         ! TODO: this menu has been lost in MENUV1
+   ELSE IF (NWHAT.EQ.42) THEN          ! wave stuff     
       EXP(1)     = 'MENU                                    '
       EXP(2)     = 'SHOW WAVEPARS YES/NO                    '
       OPTION(1)  = 'RMS wave height                      (m)'
@@ -3076,7 +3071,7 @@
       end if
       NDRAW(28) = numoptwav
       
-   ELSE IF (NWHAT .EQ. 42) THEN     ! Spiral flow parameters ! ! TODO: this menu has been lost in MENUV1
+   ELSE IF (NWHAT .EQ. 43) THEN     ! Spiral flow parameters 
       EXP(1)    = 'MENU                                    '
       EXP(2)    = 'SHOW Spiral Flow Parameters YES/NO      '
       OPTION(1) = 'Streamlines curvature              (1/m)'
@@ -3095,7 +3090,7 @@
          CALL PARAMTEXT(option(nwhat2),1)
       end if
       
-   ELSE IF (NWHAT .EQ. 43) THEN     ! Sed trsp on flow links ! TODO: this menu has been lost in MENUV1
+   ELSE IF (NWHAT .EQ. 44) THEN     ! Sed trsp on flow links 
       EXP(1)    = 'MENU                                    '
       EXP(2)    = 'SHOW Mophology Parameters YES/NO        '
       OPTION(1) = 'Curr. rel. bedload transport    (kg/s/m)'
@@ -3116,7 +3111,7 @@
          CALL PARAMTEXT(option(nwhat2),2)
       end if
 
-   ELSE IF (NWHAT .EQ. 44) THEN     ! Sed trsp on flow nodes  ! TODO: this menu has been lost in MENUV1
+   ELSE IF (NWHAT .EQ. 45) THEN     ! Sed trsp on flow nodes 
       EXP(1)    = 'MENU                                    '
       EXP(2)    = 'SHOW Mophology Parameters YES/NO        '
       OPTION(1) = 'Bottom level change in last timestep (m)'
