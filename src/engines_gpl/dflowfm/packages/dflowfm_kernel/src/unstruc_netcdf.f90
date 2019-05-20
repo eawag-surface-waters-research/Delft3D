@@ -10937,10 +10937,10 @@ subroutine unc_read_map(filename, tim, ierr)
           ! Forbidden chars in NetCDF names: space, /, and more.
           call replace_char(tmpstr,32,95) 
           call replace_char(tmpstr,47,95) 
-          ierr = nf90_inq_varid(imapfile, trim(tmpstr), id_rwqb(i))
+          ierr = nf90_inq_varid(imapfile, trim(tmpstr), id_rwqb(iwqbot))
           if ( ierr.eq.NF90_NOERR ) then
 !            water quality bottom variable exists in restart file
-             ierr = nf90_get_var(imapfile, id_rwqb(i), tmpvar(1,1:ndxi_own), start = (/ kstart, it_read/), count = (/ndxi,1/))
+             ierr = nf90_get_var(imapfile, id_rwqb(iwqbot), tmpvar(1,1:ndxi_own), start = (/ kstart, it_read/), count = (/ndxi,1/))
              do kk = 1, ndxi
                 if (jamergedmap == 1) then
                    kloc = inode_own(kk)
