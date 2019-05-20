@@ -596,9 +596,15 @@
       OPTION(37)= 'tracers                                 '
       OPTION(38)= 'Display Sources & Sinks                 '
       OPTION(39)= 'Display dots                            '
-      OPTION(40)= 'Display structures                      '
       
-      MAXOPT    = 40
+      MAXOPT    = 39
+      
+      if ( .false. ) then
+         OPTION(40)= 'Display structures                      '
+      
+         MAXOPT    = 40
+      end if
+      
       if ( get_japart() ) then
          MAXOPT = MAXOPT+1
          OPTION(MAXOPT) = 'particles                               '
