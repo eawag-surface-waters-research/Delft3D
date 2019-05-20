@@ -2996,7 +2996,7 @@
          NDRAWDOTS = NWHAT2
       end if
       KEY = 3
-   else if (NWHAT == 40) then
+   else if (NWHAT == 40 .and. .false.) then
       EXP(1)    = 'MENU                                    '
       EXP(2)    = 'SHOW STRUCTURES YES/NO                '
       OPTION(1) = 'DO NOT SHOW STRUCTURES                '
@@ -3008,7 +3008,7 @@
       ndrawStructures = NWHAT2
       KEY = 3
       
-   ELSE IF (NWHAT .EQ. 41 ) THEN
+   ELSE IF (NWHAT .EQ. 40 ) THEN
       EXP(1)    = 'MENU                                    '
       EXP(2)    = 'SHOW PARTICLES YES/NO                   '
       OPTION(1) = 'DO NOT SHOW PARTICLES                   '
