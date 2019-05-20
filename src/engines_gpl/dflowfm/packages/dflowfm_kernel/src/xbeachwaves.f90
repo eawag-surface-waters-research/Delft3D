@@ -985,7 +985,7 @@ subroutine xbeach_instationary()
  
    
    call xbeach_wave_compute_celerities()
-
+   
 
    hh = max(hs, epshs)
 
@@ -3955,14 +3955,15 @@ subroutine xbeach_inisolver(solver, NDIM, ierror)
    solver%ipar(3) = 1               ! stopping criteria
    solver%ipar(4) = solver%nwork    ! number of elems in array 'wk'
    solver%ipar(5) = 10              ! size of Krylov subspace in GMRES and variants
-   solver%ipar(6) = 1000            ! max number of mat-vec multiplies
+   solver%ipar(6) = 100000            ! max number of mat-vec multiplies
 
    solver%fpar(1) = 0.0D-16         ! relative tolerance ('exact' solve, except
    solver%fpar(2) = 1.0d-14         ! absolute tolerance
 
    solver%lfil  = 3
    solver%alpha = 1d0
-   solver%tol   = 0.50D-2
+!   solver%tol   = 0.50D-2
+   solver%tol   = 0.1d-2
    
    solver%jabcgstab = 1
    
@@ -4684,17 +4685,40 @@ end subroutine xbeach_fillsystem
 !> solve linear system
 subroutine xbeach_solvesystem(solver,sol,iters,ierror)
    use m_solver
+   use m_alloc
+   use unstruc_messages
    implicit none
    
-   type(tsolver),                               intent(in)    :: solver !< solver
+   type(tsolver),                               intent(inout) :: solver !< solver
    double precision, dimension(solver%numrows), intent(inout) :: sol    !< solution vector
    integer,                                     intent(out)   :: iters  !< number of iterations
    integer,                                     intent(inout) :: ierror !< error (1) or not (0)
    
+   integer                                                    :: irealloc
+   
+   logical                                                    :: Lredo
+   
+   double precision,                            parameter     :: REALLOCFAC = 1.2d0
+   integer,                                     parameter     :: MAXREALLOC = 15
+   
    ierror = 1
    
-!  compute preconditioner   
-   call ilud(solver%numrows,solver%a,solver%ja,solver%ia,solver%alpha,solver%tol,solver%alu,solver%jlu,solver%ju,solver%numnonzerosprecond,solver%work,solver%jw,ierror,solver%numnonzeros)
+!  compute preconditioner
+   irealloc = 0
+   
+   Lredo = .true.
+   do while ( Lredo )
+      irealloc = irealloc+1
+      call ilud(solver%numrows,solver%a,solver%ja,solver%ia,solver%alpha,solver%tol,solver%alu,solver%jlu,solver%ju,solver%numnonzerosprecond,solver%work,solver%jw,ierror,solver%numnonzeros)
+      
+      Lredo = .false.
+      if ( irealloc.lt.MAXREALLOC .and. ierror.eq.-2 ) then
+         Lredo = .true.
+         solver%numnonzerosprecond = 1 + int(REALLOCFAC*dble(solver%numnonzerosprecond))
+         call realloc(solver%alu,   solver%numnonzerosprecond, keepExisting=.false., fill=0d0)
+         call realloc(solver%jlu,   solver%numnonzerosprecond, keepExisting=.false., fill=0)
+      end if
+   end do
    if ( ierror.ne.0 ) goto 1234
    
 !  solve system   
@@ -4703,6 +4727,10 @@ subroutine xbeach_solvesystem(solver,sol,iters,ierror)
    
    ierror=0
 1234 continue
+
+   if ( ierror.ne.0 ) then
+      call mess(LEVEL_ERROR, 'xbeach_solvesystem gave error')
+   end if
    
    return
 end subroutine xbeach_solvesystem
@@ -4717,7 +4745,7 @@ subroutine update_ee1rr(dtmaxwav, sigt, cgwav, ctheta, horadvec, thetaadvec, E, 
                         urms_cc, fwcutoff, Df, DDlok, wete, rrhoradvec, rrthetaadvec,  jawsource, mwind, &
                         snx, csx, limtypw, &
                         ee1, rr, drr, wci, rhs, solver, nbndw, kbndw, zbndw)
-   use m_flowgeom, only: ntheta, Ndxi, Ndx, Lnx, ba, bai, dtheta, thetabin
+   use m_flowgeom, only: ntheta, Ndxi, Ndx, Lnx, ba, bai, dtheta, thetabin, xz, yz
    use m_flowparameters, only: epshs
    use m_flow, only: vol1 
    use m_physcoef, only: rhog, rhomean, ag
@@ -4793,6 +4821,8 @@ subroutine update_ee1rr(dtmaxwav, sigt, cgwav, ctheta, horadvec, thetaadvec, E, 
    integer                                                   :: k, itheta
    integer                                                   :: n
    integer                                                   :: iters, ierror
+   
+   integer, save :: jaoutput=0
       
 !  allocate and initialize
    allocate(src_coeff(ntheta,Ndx))
@@ -4855,16 +4885,45 @@ subroutine update_ee1rr(dtmaxwav, sigt, cgwav, ctheta, horadvec, thetaadvec, E, 
       do itheta=1,ntheta
          dis = (D(k)+Df(k))/max(E(k),1d-10)
          src_coeff(itheta,k) = (src_coeff(itheta,k) - dis) / sigt(itheta,k)
-         src_expl(itheta,k) = src_expl(itheta,k) 
+!         src_expl(itheta,k) = src_expl(itheta,k) 
       end do
    end do  
    
 
-   call xbeach_fillsystem(solver,ntheta,ee1,src_coeff,src_expl,cgwav,csx,snx,ctheta,dtheta,dtmaxwav,nbndw,kbndw,zbndw,0,ierror)
+   call xbeach_fillsystem(solver,ntheta,ee1,src_coeff,src_expl,cgwav,csx,snx,ctheta,dtheta,dtmaxwav,nbndw,kbndw,zbndw,jaoutput,ierror)
    !write(6,*) 'Fill wave energy system:: ierror=', ierror
    
    call xbeach_solvesystem(solver,ee1,iters,ierror)
-   !write(6,*) 'Solve wave energy system:: ierror=', ierror, ', no of iters=',iters
+   write(6,*) 'Solve wave energy system:: ierror=', ierror, ', no of iters=',iters
+   
+   if ( jaoutput.eq.1 ) then
+      open(1235,file='tmp.m')
+      write(1235,"('ee1= [', $)")
+      do k=1,Ndx
+         do itheta=1,ntheta
+            write(1235,"(E15.5, $)") ee1(itheta,k)
+         end do
+      end do
+      write(1235,"('];')")
+   
+      write(1235,"('x= [', $)")
+      do k=1,Ndx
+            write(1235,"(E15.5, $)") xz(k)
+      end do
+      write(1235,"('];')")
+   
+      write(1235,"('y= [', $)")
+      do k=1,Ndx
+            write(1235,"(E15.5, $)") yz(k)
+      end do
+      write(1235,"('];')")
+   
+      write(1235,"('Ndxi=', I, ';')") Ndxi
+   
+      close(1235)
+      
+      jaoutput = 0
+   end if
    
    do k=1,Ndx
       if ( vol1(k).lt.epshs*ba(k) ) then
