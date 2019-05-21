@@ -4918,7 +4918,7 @@ subroutine update_ee1rr(dtmaxwav, sigt, cgwav, ctheta, horadvec, thetaadvec, E, 
       end do
       write(1235,"('];')")
    
-      write(1235,"('Ndxi=', I, ';')") Ndxi
+      write(1235,"('Ndxi=', I0, ';')") Ndxi
    
       close(1235)
       
