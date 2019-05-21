@@ -19624,17 +19624,32 @@ end subroutine unc_write_shp
           else                                             ! 1D link
              kcu(Lf) = 1
           endif
-       else if (kn(3,L) == 3 .or. kn(3,L) == 5 .or. kn(3,L) == 7) then
-          kcu(Lf) = kn(3,L)                                ! 1D2D internal link
-          if (n1a <= ndx2d) then
-             kcs(n1a) = 21
+       else if (kn(3,L) == 3 .or. kn(3,L) == 7) then
+          if (n1a > ndx2d .and. n2a <= ndx2d .or. &
+             n2a > ndx2d .and. n1a <= ndx2d ) then
+             kcu(Lf) = kn(3,L)                                ! 1D2D internal link
+             if (n1a <= ndx2d) then
+                kcs(n1a) = 21
+             endif
+             if (n2a <= ndx2d) then
+                kcs(n2a) = 21
+             endif
+             if (kcs(n2a)*kcs(n1a) .ne. 21) then
+                 write (msgbuf, '(a,i0,a)') '(netlink L=', L, ')'
+                 call qnerror('1d2d link kn3 = 3 or 5 or 7 not connected between kcs=21 and kcs=1 ',trim(msgbuf),' ')
+             endif
           endif
-          if (n2a <= ndx2d) then
-             kcs(n2a) = 21
-          endif
-          if (kcs(n2a)*kcs(n1a) .ne. 21) then
-              write (msgbuf, '(a,i0,a)') '(netlink L=', L, ')'
-              call qnerror('1d2d link kn3 = 3 or 5 not connected between kcs=21 and kcs=1 ',trim(msgbuf),' ')
+       else if (kn(3,L) == 5) then
+          if (n1a > ndx2d .and. n2a <= ndx2d .or. &
+              n2a > ndx2d .and. n1a <= ndx2d .or. & 
+              n2a <= ndx2d .and. n1a <= ndx2d) then
+             kcu(Lf) = kn(3,L)                                ! 1D2D internal link, now also between 2 2D pts
+             if (n1a <= ndx2d) then
+                kcs(n1a) = 21
+             endif
+             if (n2a <= ndx2d) then
+                kcs(n2a) = 21
+             endif
           endif
        else if (kn(3,L) == 2) then                         ! 2D link
           kcu(Lf) = 2
@@ -28196,6 +28211,7 @@ end function densfm
  use geometry_module, only: getdx, getdy, dbdistance, cross, normalout, normalin
  use m_missing, only: dmiss
  use m_sferic
+ use m_plotdots
 
  implicit none
 
@@ -28252,10 +28268,11 @@ end function densfm
       if (tifetch == 0d0) time_fetch = 1d30
 
       fetch = dmiss ; fetdp = dmiss
-      do n  = 1, nwf
+mainloop:do n  = 1, nwf
          if (jagui > 0) then
             call cls1()
             call setcol(221)
+            ! numdots = 0
          endif
          dir   = twopi *real (n-1) / real(nwf-1)
          uwin  = cos(dir) ; vwin = sin(dir)
@@ -28275,8 +28292,20 @@ end function densfm
                else
                   k2 = netcell(k)%nod(kk+1)
                endif
-               wdep   = s1(k) - min(zk(k1),zk(k2))
                celsiz = max(celsiz, dbdistance(xk(k1), yk(k1), xk(k2), yk(k2), jsferic, jasfer3D, dmiss) )
+            enddo
+            if (jsferic == 1) celsiz=celsiz*rd2dg/ra
+             
+            do kk = 1,netcell(k)%n
+               L  = netcell(k)%lin(kk)
+               k1 = netcell(k)%nod(kk)
+               if (kk == netcell(k)%n) then
+                  k2 = netcell(k)%nod(1)
+               else
+                  k2 = netcell(k)%nod(kk+1)
+               endif
+
+               wdep   = s1(k) - min(zk(k1),zk(k2))
                if (lnn(L) == 1 .or.  wdep < 0.5d0 .or. kn(3,L) == 0) then    ! link shallow or closed => start fetch here
                   call normalout(xk(k1), yk(k1), xk(k2), yk(k2), xn, yn, jsferic, jasfer3D, dmiss, dxymis)
                   prin = uwin*xn + vwin*yn
@@ -28301,7 +28330,10 @@ end function densfm
             if (kkmin > 0) then
                 fetch(n,k) = min(distmin, celsiz)
                 fetdp(n,k) = max( hs(k), .1d0)
-                if (jagui > 0) CALL rCIRc(Xz(k),Yz(k) ) !, fetch(n,k))
+                if (jagui > 0) then 
+                   CALL rCIRc(Xz(k),Yz(k) ) !, fetch(n,k))
+                   !call adddot(Xz(k),Yz(k),1d0)
+                endif
                 ndone      = ndone + 1
             endif
 
@@ -28353,7 +28385,10 @@ end function densfm
                      fetch(n,k) = fetc/sumw
                      fetdp(n,k) = fetd/ ( sumw*fetch(n,k) )
                      ndone      = ndone + 1
-                     if (jagui > 0) CALL rCIRc(Xz(k),Yz(k) )
+                     if (jagui > 0) then
+                        CALL rCIRc(Xz(k),Yz(k) )
+                        !call adddot(Xz(k),Yz(k),2d0)
+                     end if
                   endif
                else
                   ndone = ndone + 1
@@ -28366,9 +28401,14 @@ end function densfm
                ndone = ndoner
             endif
 
+            if ( ndone.eq.ndoneprevcycle ) then
+               call QNERROR('connectivity issue in fetch', ' ', ' ')
+               exit mainloop
+            end if
+
          enddo
 
-      enddo
+    enddo mainloop
 
  endif
 
