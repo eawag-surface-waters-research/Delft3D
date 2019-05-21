@@ -1322,6 +1322,7 @@ end subroutine read_land_boundary_netcdf
       use unstruc_startup
       use unstruc_version_module, only : unstruc_basename
       use unstruc_display, only : jaGUI
+      use unstruc_messages
 
       implicit none
 
@@ -1341,6 +1342,8 @@ end subroutine read_land_boundary_netcdf
       COMMON /MESSAGETOSCREEN/ JSCREEN
       CHARACTER NAMEGRID*80,NAMEFIELDI*80,NAMEFIELDO*80,GRIDAT*1
       CHARACTER WRDKEY*40
+      CHARACTER(len=8192) :: cmd
+      integer :: cmdlen
 
 !
       WRDKEY  = 'PROGRAM PURPOSE'
@@ -1349,10 +1352,13 @@ end subroutine read_land_boundary_netcdf
       INFOFILE = 0
       
       CALL INIDIA(unstruc_basename)
-      
+
       CALL FIRSTLIN(MDIA)
       CALL FIRSTLIN(6)
       
+      CALL get_command(cmd, cmdlen)
+      write (msgbuf, '(a,a)') 'Command: ', cmd(1:cmdlen); call msg_flush()
+
       if ( jaGUI.ne.1 ) return
 
 !     initialisatiefiles
@@ -4737,7 +4743,7 @@ end subroutine timdat
       WRITE(MRGF,'(A)') '* '//trim(unstruc_version_full)
       call get_unstruc_source(TEX)
       WRITE(MRGF,'(A)') '* Source: '//trim(TEX)
-      TEX = '* File creation date: ' //RUNDAT
+      TEX = '* File creation date: ' //trim(RUNDAT)
       WRITE(MRGF,'(A)') TEX
 
       RETURN
