@@ -55,6 +55,20 @@
 *         =9  : only spatial, internal diffusion
 *         =10 : only initial vertical profiles
 *
+* OPERAND =O  : Override at all points
+*         =+  : Add to previously specified value
+*         =*  : Multiply with previously specified value
+*         =A  : Apply only if no value specified previously (For Initial fields, similar to Quickin preserving best data specified first)
+*         =X  : MAX with prev. spec.
+*         =N  : MIN with prev. spec.
+*
+* EXTRAPOLATION_METHOD (ONLY WHEN METHOD=3)
+*         = 0 : No spatial extrapolation.
+*         = 1 : Do spatial extrapolation outside of source data bounding box.
+*
+* MAXSEARCHRADIUS (ONLY WHEN EXTRAPOLATION_METHOD=1)
+*         = search radius (in m) for model grid points that lie outside of the source data bounding box.
+*
 * AVERAGINGTYPE (ONLY WHEN METHOD=6)
 *         =1  : SIMPLE AVERAGING
 *         =2  : NEAREST NEIGHBOUR
@@ -66,15 +80,11 @@
 *
 * RELATIVESEARCHCELLSIZE : For METHOD=6, the relative search cell size for samples inside cell (default: 1.01)
 *
-* PERCENTILEMINMAX : Percentileminmax, average min or max Perc %
-* 
-* OPERAND =O  : Override at all points
-*         =+  : Add to previously specified value
-*         =*  : Multiply with previously specified value
-*         =A  : Apply only if no value specified previously (For Initial fields, similar to Quickin preserving best data specified first)
-*         =X  : MAX with prev. spec.
-*         =N  : MIN with prev. spec.
+* PERCENTILEMINMAX : (ONLY WHEN AVERAGINGTYPE=3 or 4) Changes the min/max operator to an average of the
+*               highest/lowest data points. The value sets the percentage of the total set that is to be included.
 *
+* NUMMIN  =   : For METHOD=6, minimum required number of source data points in each target cell.
+* 
 * VALUE   =   : Offset value for this provider
 *
 * FACTOR  =   : Conversion factor for this provider
