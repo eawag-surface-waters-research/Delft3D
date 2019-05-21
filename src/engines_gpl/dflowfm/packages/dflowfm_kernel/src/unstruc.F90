@@ -41380,6 +41380,14 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
           wu(L) = wu(L) * abs( xn*csu(L) + yn*snu(L) )           ! projected length of fixed weir
 
           if (jakol45 == 2) then                                 ! use local type definition
+             !
+             ! recompute ground heights if zc is larger than previous crest levels
+             !
+             if (zc .gt. dzcrest(L)) then
+                dzsillu(L)  = zc - dztoeu(L)
+                dzsilld(L)  = zc - dztoed(L)
+             endif
+             !  
              dzcrest(L)  = zc
              !
              ! lowest toe is applied
