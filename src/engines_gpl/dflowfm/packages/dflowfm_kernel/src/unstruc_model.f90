@@ -133,6 +133,9 @@ implicit none
     character(len=255) :: md_avgsedquantfile = ' ' !< Output map file for time-averaged sedmor output (e.g., *_sed.nc)
     character(len=255) :: md_waqfilebase   = ' ' !< File basename for all Delwaq files. (defaults to md_ident)
     character(len=255) :: md_waqoutputdir  = ' ' !< Output directory for all WAQ communication files (waqgeom, vol, flo, etc.)
+    character(len=255) :: md_waqhoraggr    = ' ' !< DELWAQ output horizontal aggregation file (*.dwq)
+    character(len=255) :: md_waqvertaggr   = ' ' !< DELWAQ output vertical aggregation file (*.vag)
+
     character(len=255) :: md_partitionfile = ' ' !< File with domain partitioning polygons (e.g. *_part.pol)
     character(len=255) :: md_outputdir     = ' ' !< Output directory for map-, his-, rst-, dat- and timings-files
 
@@ -1544,6 +1547,8 @@ subroutine readMDUFile(filename, istat)
     ti_waq_array = 0d0
     call prop_get_doubles(md_ptr, 'output', 'WaqInterval'   ,  ti_waq_array, 3, success)
     call getOutputTimeArrays(ti_waq_array, ti_waqs, ti_waq, ti_waqe, success)
+    call prop_get_string(md_ptr, 'output', 'WaqHorAggr', md_waqhoraggr, success)
+    call prop_get_string(md_ptr, 'output', 'WaqVertAggr', md_waqvertaggr, success)
 
     if (jawave > 0 .and. ti_waq > 0) then
        jawaveSwartDelwaq = 1
@@ -2815,7 +2820,9 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     ti_waq_array(1) = ti_waq
     ti_waq_array(2) = ti_waqs
     ti_waq_array(3) = ti_waqe
-    call prop_set(prop_ptr, 'output', 'WaqInterval', ti_waq_array, 'DELWAQ output times, given as "interval" "start period" "end period" (s)')
+    call prop_set(prop_ptr, 'output', 'WaqInterval', ti_waq_array,         'DELWAQ output times, given as "interval" "start period" "end period" (s)')
+    call prop_set(prop_ptr, 'output', 'WaqHorAggr',  trim(md_waqhoraggr),  'DELWAQ output horizontal aggregation file (*.dwq)')
+    call prop_set(prop_ptr, 'output', 'WaqVertAggr', trim(md_waqvertaggr), 'DELWAQ output vertical aggregation file (*.vag)')
 
     ti_classmap_array = [ti_classmap, ti_classmaps, ti_classmape]
     call prop_set(prop_ptr, 'output', 'ClassMapInterval', ti_classmap_array, 'Class map output times, given as "interval" "start period" "end period" (s)')
@@ -3092,8 +3099,8 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
 
     
 !  processes (WAQ)   
-   call prop_set_string (prop_ptr, 'processes', 'SubstanceFile', md_subfile, 'substance file')
-   call prop_set_string (prop_ptr, 'processes', 'AdditionalHistoryOutputFile', md_ehofile, 'extra history output file')
+   call prop_set_string (prop_ptr, 'processes', 'SubstanceFile', trim(md_subfile), 'substance file')
+   call prop_set_string (prop_ptr, 'processes', 'AdditionalHistoryOutputFile', trim(md_ehofile), 'extra history output file')
    call prop_set_double (prop_ptr, 'processes', 'ThetaVertical', md_thetav_waq, 'theta vertical for waq')
    call prop_set_double (prop_ptr, 'processes', 'DtProcesses', md_dt_waqproc, 'waq processes time step')
    call prop_set_double (prop_ptr, 'processes', 'DtMassBalance', md_dt_waqbal, 'waq mass balance output time step')

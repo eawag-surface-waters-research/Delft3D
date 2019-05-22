@@ -343,74 +343,55 @@ module waq
 
     logical, parameter :: waq_format_ascii = .false. !< For debugging: .true. produces ascii files. .false. the binary files used for DELWAQ input.
 type gd_waqpar
-!    !
-!    ! doubles
-!    !
-!    !
-!    ! reals
-!    !
-!    real(fp) :: mtimstep  !  maximum explicit time step for whole simulation
-!    !
-!    ! integers
-!    !
-    integer  :: aggre     !  0: no aggregation (=active cells only in FM), 1: aggregation according to content of flaggr
-    integer  :: aggrel    !  0: no layer aggregation, 1: layer aggregation
-!    integer  :: itwqff    !  start time for writing binary waq files
-!    integer  :: itwqfi    !  time step for writing binary waq files
-!    integer  :: itwqfl    !  end time for writing binary waq files
-!    integer  :: itim      !  last writen time
-    integer  :: lunvol    !  file unit number to an output file
-    integer  :: lunare    !  file unit number to an output file
-    integer  :: lunflo    !  file unit number to an output file
-    integer  :: lunsal    !  file unit number to an output file
-    integer  :: luntem    !  file unit number to an output file
-    integer  :: lunvdf    !  file unit number to an output file
-    integer  :: luntau    !  file unit number to an output file
-    integer  :: noseg     !  number of WAQ segments
-    integer  :: nosegl    !  number of WAQ segments per layer
-    integer  :: noq       !  total number of WAQ exchanges
-    integer  :: noql      !  number of horizontal WAQ exchanges per layer
-    integer  :: noq12     !  number of horizontal WAQ exchanges (excluding sink/sources)
-    integer  :: noq12s    !  number of horizontal WAQ exchanges (including sink/sources)
-    integer  :: numsrc    !  number of sinks/sources
-    integer  :: numsrcbnd !  number of sinks/sources that are boundary conditions
-    integer  :: numsrcwaq !  number of adition sources/sinks exchanges in waq (based on posible combinations)
-    integer  :: kmxnx     ! maximum number of active layers
-    integer  :: kmxnxa    ! maximum number of aggregated layers
-    integer  :: ndkxi     ! nr of internal flowcells (3D)
-    !
-    ! pointers
-    !
-!    integer , dimension(:)  , pointer :: iwlk      ! walkings
-    integer ,          allocatable :: ilaggr(:)     ! layer aggregation pointer
-    integer ,          allocatable :: ilaggrhyd(:)  ! layer aggregation table for hyd-file
-    integer ,          allocatable :: isaggr(:)     ! segment aggregation pointer
-    integer ,          allocatable :: iapnt (:)     ! flow-to-waq pointer (mapping of flow cells to waq cells)
-    integer ,          allocatable :: iqaggr(:)     ! exchange aggregation pointer
-    integer ,          allocatable :: iqwaggr(:)    ! exchange aggregation pointer for the vertical
-    integer ,          allocatable :: ifrmto(:,:)   ! from-to pointer table
-    integer ,          allocatable :: ifrmtosrc(:,:) ! from-to pointer table for sources
-
-    integer ,          allocatable :: ifsmin(:)     ! first active layer (counting from the top) (z-model)
-    integer ,          allocatable :: ifsmax(:)     ! maximum active layer (counting from the top) (z-model)
-    integer ,          allocatable :: nosega(:)     ! no of segments aggregated into WAQ segments
-    integer ,          allocatable :: kmk1(:)       ! First WAQ segment features at start of calculation (1 is active 0 is not)
-    integer ,          allocatable :: kmk2(:)       ! Second WAQ segment features at start of calculation (1 surface, 3 bottom, 0 both, 2 neither)
-     double precision, allocatable :: horsurf(:)    ! horizontal surfaces of segments
-     double precision, allocatable :: vol(:)        ! WAQ (aggregated) volumes
-     double precision, allocatable :: sal(:)        ! WAQ (aggregated) salinity
-     double precision, allocatable :: tem(:)        ! WAQ (aggregated) temperature
-     double precision, allocatable :: tau(:)        ! WAQ (aggregated) taus
-     double precision, allocatable :: vdf(:)        ! WAQ (aggregated) vertical diffusion
+    integer                        :: aggre         !  0: no aggregation (=active cells only in FM), 1: aggregation according to content of flhoraggr
+    integer                        :: aggrel        !  0: no layer aggregation, 1: layer aggregation
+    integer                        :: lunvol        !  file unit number to an output file
+    integer                        :: lunare        !  file unit number to an output file
+    integer                        :: lunflo        !  file unit number to an output file
+    integer                        :: lunsal        !  file unit number to an output file
+    integer                        :: luntem        !  file unit number to an output file
+    integer                        :: lunvdf        !  file unit number to an output file
+    integer                        :: luntau        !  file unit number to an output file
+    integer                        :: noseg         !  number of WAQ segments
+    integer                        :: nosegl        !  number of WAQ segments per layer
+    integer                        :: noq           !  total number of WAQ exchanges
+    integer                        :: noql          !  number of horizontal WAQ exchanges per layer
+    integer                        :: noq12         !  number of horizontal WAQ exchanges (excluding sink/sources)
+    integer                        :: noq12s        !  number of horizontal WAQ exchanges (including sink/sources)
+    integer                        :: numsrc        !  number of sinks/sources
+    integer                        :: numsrcbnd     !  number of sinks/sources that are boundary conditions
+    integer                        :: numsrcwaq     !  number of adition sources/sinks exchanges in waq (based on posible combinations)
+    integer                        :: kmxnx         ! maximum number of active layers
+    integer                        :: kmxnxa        ! maximum number of aggregated layers
+    integer                        :: ndkxi         ! nr of internal flowcells (3D)
+    integer,           allocatable :: ilaggr(:)     ! layer aggregation pointer
+    integer,           allocatable :: ilaggrhyd(:)  ! layer aggregation table for hyd-file
+    integer,           allocatable :: isaggr(:)     ! segment aggregation pointer
+    integer,           allocatable :: iapnt (:)     ! flow-to-waq pointer (mapping of flow cells to waq cells)
+    integer,           allocatable :: iqaggr(:)     ! exchange aggregation pointer
+    integer,           allocatable :: iqwaggr(:)    ! exchange aggregation pointer for the vertical
+    integer,           allocatable :: ifrmto(:,:)   ! from-to pointer table
+    integer,           allocatable :: ifrmtosrc(:,:) ! from-to pointer table for sources
+    integer,           allocatable :: ifsmin(:)     ! first active layer (counting from the top) (z-model)
+    integer,           allocatable :: ifsmax(:)     ! maximum active layer (counting from the top) (z-model)
+    integer,           allocatable :: nosega(:)     ! no of segments aggregated into WAQ segments
+    integer,           allocatable :: kmk1(:)       ! First WAQ segment features at start of calculation (1 is active 0 is not)
+    integer,           allocatable :: kmk2(:)       ! Second WAQ segment features at start of calculation (1 surface, 3 bottom, 0 both, 2 neither)
+    double precision,  allocatable :: horsurf(:)    ! horizontal surfaces of segments
+    double precision,  allocatable :: vol(:)        ! WAQ (aggregated) volumes
+    double precision,  allocatable :: sal(:)        ! WAQ (aggregated) salinity
+    double precision,  allocatable :: tem(:)        ! WAQ (aggregated) temperature
+    double precision,  allocatable :: tau(:)        ! WAQ (aggregated) taus
+    double precision,  allocatable :: vdf(:)        ! WAQ (aggregated) vertical diffusion
     double precision,  allocatable :: qag(:)        ! WAQ (aggregated) flux
     double precision,  allocatable :: area(:)       ! WAQ (aggregated) exchange areas
-!    !
-!    ! characters
-!    !
-    character(256) :: flaggr !  Name of input aggregation file
+    character(256) :: flhoraggr  !  Name of input aggregation file
+    character(256) :: flvertaggr !  Name of input aggregation file
 end type gd_waqpar
 
-type(gd_waqpar) :: waqpar
+type(gd_waqpar) :: waqpar        ! all waq data
+logical         :: horaggr       ! horizontal aggregation is on
+logical         :: vertaggr      ! vertical aggregation is on
 
 !-- Start subroutines -------------
 contains
@@ -534,10 +515,15 @@ subroutine waq_wri_hyd()
     end if
 
     write ( lunhyd , '(A,A    )' ) 'hydrodynamic-file           ', ''''//trim(md_ident)//''''
-    if ( waqpar%aggre <= 0 ) then
-        write ( lunhyd , '(A,A    )' ) 'aggregation-file            ', 'none'
+    if ( horaggr ) then
+        write ( lunhyd , '(A,A    )' ) 'aggregation-file            ', ''''//trim(waqpar%flhoraggr)//''''
     else
-        write ( lunhyd , '(A,A    )' ) 'aggregation-file            ', ''''//trim(waqpar%flaggr)//''''
+        write ( lunhyd , '(A,A    )' ) 'aggregation-file            ', 'none'
+    endif
+    if ( vertaggr ) then
+        write ( lunhyd , '(A,A    )' ) 'vertical-aggregation-file   ', ''''//trim(waqpar%flvertaggr)//''''
+    else
+        write ( lunhyd , '(A,A    )' ) 'vertical-aggregation-file   ', 'none'
     endif
 
 ! Grid and boundary conditions    
@@ -1701,6 +1687,7 @@ end subroutine waq_wri_couple_files
 subroutine waq_prepare_aggr()
     use m_flowgeom
     use m_partitioninfo
+    use unstruc_model
     use m_flow
     use m_flowexternalforcings
     use m_alloc
@@ -1709,32 +1696,43 @@ subroutine waq_prepare_aggr()
     integer :: i, kb, kt, ktx, vaglay
     integer, dimension(1) :: kmxnr
     integer :: lunvag, istat, ierr
-    logical :: test_aggr, test_layeraggr
 
     call realloc(waqpar%iapnt,  ndx, keepExisting=.false., fill=0)
     call realloc(waqpar%isaggr, ndkx, keepExisting=.false., fill=0)
     call realloc(waqpar%iqaggr, lnkx, keepExisting=.false., fill=0)
     call realloc(waqpar%iqwaggr, ndkx, keepExisting=.false., fill=0)
 
-! Is there a DIDO aggregation? Otherwise set default aggregation
-    inquire (file = "waqtest.dwq", exist = test_aggr)! no interface supported yet
-    if (test_aggr .and. jampi.eq.0 ) then ! Change to true to test DIDO aggregation
+! Is there a DIDO aggregation, and no MPI? Otherwise set default aggregation
+    if (md_waqhoraggr.ne.' ') then
+        waqpar%flhoraggr = md_waqhoraggr
+        inquire (file = waqpar%flhoraggr, exist = horaggr)! no interface supported yet
+        if (.not.horaggr) then
+             call mess(LEVEL_ERROR, 'Horizontal aggregation of WAQ output was specified, but file was not found:', trim(md_waqhoraggr))
+        end if
+    else
+        horaggr=.false.
+    endif
+    
+    if (horaggr .and. jampi.ne.0 ) then
+        call mess(LEVEL_WARN, 'Horizontal aggregation of WAQ output was specified, but is not (yet) supported in MPI simulations! Aggregation is ignored.')
+        horaggr=.false.
+    end if
+
+    if (horaggr) then
+        call mess(LEVEL_INFO, 'Using horizontal aggregation of hydrodynamics for WAQ from: ', trim(md_waqhoraggr))
+        ! read the horizontal aggregation
         waqpar%aggre = 1
-        waqpar%flaggr = "waqtest.dwq"
-        call waq_read_dwq(ndxi, ndx, waqpar%iapnt, waqpar%flaggr)
+        call waq_read_dwq(ndxi, ndx, waqpar%iapnt, waqpar%flhoraggr)
         waqpar%nosegl = maxval(waqpar%iapnt)
     else
-        if (test_aggr .and. jampi.ne.0 ) then
-            call mess(LEVEL_WARN, 'Horizontal aggregation of WAQ output was found (waqtest.dwq), but is not supported in MPI simulations! Aggregation is ignored.')
-        end if
-! no aggregation, create default one to one aggregation
+        ! no aggregation, create default one to one aggregation
         waqpar%aggre = 0
-        waqpar%flaggr = " "
+        waqpar%flhoraggr = " "
         do i = 1, ndxi
             waqpar%iapnt(i) = i
         end do
         waqpar%nosegl = ndxi
-! add pointer for boundary nodes    
+        ! add pointer for boundary nodes    
         do i = ndxi+1,ndx
             waqpar%iapnt(i) = -(i-ndxi)
         enddo
@@ -1760,24 +1758,31 @@ subroutine waq_prepare_aggr()
     waqpar%aggrel = 0
     waqpar%kmxnxa = waqpar%kmxnx
 
-    ! Is there a layer aggregation file?
-    inquire (file = "waqtest.vag", exist = test_layeraggr)! no interface supported yet
-    if (test_layeraggr) then
-        call mess(LEVEL_INFO, 'Try to read vertical aggregation file for DELWAQ.')
-        call oldfil(lunvag, "waqtest.vag")
+    ! Is there a vertical aggregation specified?
+    if (md_waqvertaggr.ne.' ') then
+        waqpar%flvertaggr = md_waqvertaggr
+        inquire (file = waqpar%flvertaggr, exist = vertaggr)! no interface supported yet
+        if (.not.vertaggr) then
+             call mess(LEVEL_ERROR, 'Vertical aggregation of WAQ output was specified, but file was not found:', trim(md_waqvertaggr))
+        end if
+        call mess(LEVEL_INFO, 'Using vertical aggregation of hydrodynamics for WAQ from: ', trim(md_waqvertaggr))
+    else
+        vertaggr=.false.
+    endif
+
+    if (vertaggr) then
+        call oldfil(lunvag, waqpar%flvertaggr)
         read (lunvag, *, iostat=istat) vaglay
         if (vaglay == -1) then
             call mess(LEVEL_INFO, 'Found -1 as number of layers in waqtest.vag. Will aggregate DELWAQ output to 2D.')
             waqpar%kmxnxa = 1
             waqpar%ilaggrhyd(1) = waqpar%kmxnx
         elseif (vaglay /= waqpar%kmxnx) then
-            call mess(LEVEL_WARN, 'Mismatch in number of layers in DELWAQ vag layer aggregation file in '''//trim("waqtest.vag")//'''.')
-            call mess(LEVEL_WARN, 'no layer aggregation applied.')
+            call mess(LEVEL_ERROR, 'Mismatch in number of layers in DELWAQ vertical aggregation file: ', trim(md_waqvertaggr))
         else
             read (lunvag, *, iostat=istat) waqpar%ilaggr(1:vaglay)
             if ( istat /= 0) then
-                call mess(LEVEL_WARN, 'unable to read the layer aggregation pointer in '''//trim("waqtest.vag")//'''.')
-                call mess(LEVEL_WARN, 'no layer aggregation applied.')
+                call mess(LEVEL_ERROR, 'Error reading the vertical aggregation pointer in: ', trim(md_waqvertaggr))
             else
                 ! Check validity of the layer aggregation and create waqpar%ilaggrhyd
                 ierr = 0
@@ -1798,9 +1803,7 @@ subroutine waq_prepare_aggr()
                 endif
                 if (ierr == 1) then
                     ! No correct layer aggregation, default: no layer aggragation
-                    call mess(LEVEL_WARN, 'layer aggregation is incorrect. no layer aggregation applied.')
-                    waqpar%ilaggrhyd = 1
-                    waqpar%kmxnxa = waqpar%kmxnx
+                    call mess(LEVEL_ERROR, 'Incorrect vertical aggregation pointer in: ', trim(md_waqvertaggr))
                 else
                     waqpar%aggrel = 1
                 end if
@@ -2842,22 +2845,22 @@ subroutine waq_read_dwq(ndxi, ndx, iapnt, filename)
     else    
         call oldfil(lundwq, trim(filename)) ! when the file does not exist the program stops(!)
         if ( lundwq == 0 ) then
-            call mess(LEVEL_WARN, 'unable to open aggregation file '''//trim(filename)//'''.')
+            call mess(LEVEL_WARN, 'Unable to open the horizontal aggregation file.')
             aggregate = .false.
         else
             read (lundwq, *, iostat=istat) headervals
             if ( istat /= 0) then
-                call mess(LEVEL_WARN, 'unable to read dimensions in aggregation file '''//trim(filename)//'''.')
+                call mess(LEVEL_WARN, 'Unable to read dimensions in the horizontal aggregation file.')
                 aggregate = .false.
             else
                 if (headervals(3) /= ndxi) then
-                    call mess(LEVEL_WARN, 'mmax*nmax in dwqfile '''//trim(filename)//''' does not match ndxi: ', headervals(3), ndxi)
+                    call mess(LEVEL_WARN, 'The dimension of the the horizontal aggregation file (1) do not match the number of cells (2): ', headervals(3), ndxi)
                     aggregate = .false.
                 else
 ! read the aggregation array
                     read  ( lundwq , *, iostat=istat) iapnt(1:ndxi)
                     if ( istat /= 0) then
-                        call mess(LEVEL_WARN, 'unable to read aggregation pointer in '''//trim(filename)//'''.')
+                        call mess(LEVEL_WARN, 'Error reading the horizontal aggregation pointer.')
                         aggregate = .false.
                     end if
                 end if
@@ -2868,10 +2871,7 @@ subroutine waq_read_dwq(ndxi, ndx, iapnt, filename)
     
     if (.not. aggregate) then
 ! if no aggregation could be read correctly, create default one to one aggregation
-        call mess(LEVEL_WARN, 'no aggregation will be used '''//trim(filename)//'''.')
-        do i = 1, ndxi
-            iapnt(i) = i
-        end do
+        call mess(LEVEL_ERROR, 'There was a problem with the aggregation file: '''//trim(filename)//'''.')
     end if
 
 ! add pointer for boundary nodes    
