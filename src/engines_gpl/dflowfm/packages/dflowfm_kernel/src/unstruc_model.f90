@@ -652,6 +652,7 @@ subroutine readMDUFile(filename, istat)
     real(kind=sp) :: rtmp
     character(len=200), dimension(:), allocatable       :: fnames
     double precision, external     :: densfm
+    double precision :: tim 
     
     hkad = -999
     istat = 0 ! Success
@@ -1288,6 +1289,24 @@ subroutine readMDUFile(filename, istat)
     call prop_get_double  (md_ptr, 'time', 'DtInit',  dt_init)
 
     call prop_get_integer (md_ptr, 'time', 'Timestepanalysis', jatimestepanalysis)
+
+    Startdatetime = ' '
+    call prop_get_string  (md_ptr, 'time', 'Startdatetime', Startdatetime, success)
+    if (len_trim(Startdatetime) > 0 .and. success) then
+        call maketimeinverse( Startdatetime, tim, iostat)
+        if (iostat == 0) then
+           Tstart_user = tim
+        endif
+    endif
+
+    Stopdatetime = ' '
+    call prop_get_string  (md_ptr, 'time', 'Stopdatetime', Stopdatetime, success)
+    if (len_trim(Stopdatetime) > 0 .and. success) then
+        call maketimeinverse( Stopdatetime, tim, iostat)
+        if (iostat == 0) then
+           Tstop_user = tim
+        endif
+    endif
 
     !
     ! TIDAL TURBINES: Insert calls to rdturbine and echoturbine here (use the structure_turbines variable defined in m_structures)
@@ -2703,6 +2722,14 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     end select
     call prop_set(prop_ptr, 'time', 'TStart',             tstart_user/tfac,       'Start time w.r.t. RefDate (in TUnit)')
     call prop_set(prop_ptr, 'time', 'TStop',              tstop_user/tfac,        'Stop  time w.r.t. RefDate (in TUnit)')
+
+    if (len_trim(Startdatetime) > 0) then
+    call prop_set(prop_ptr, 'time', 'Startdatetime', trim(Startdatetime),  'Computation Startdatetime (yyyymmddhhmmss)')
+    endif
+
+    if (len_trim(Stopdatetime) > 0) then
+    call prop_set(prop_ptr, 'time', 'Stopdatetime',  trim(Stopdatetime),   'Computation Stopdatetime  (yyyymmddhhmmss)')
+    endif
 
 
 ! Restart settings

@@ -4343,6 +4343,8 @@ end subroutine reset_flowgeom
  character(len=20)                 :: rundat0     !< start and end date (wallclock) of computer run
  character(len=20)                 :: rundat2     !< start and end date (wallclock) of computer run format = _yymmddhhmmss
  character(len=20)                 :: restartdatetime = ' '!< desired time to be taken from restart map files
+ character(len=14)                 :: Startdatetime   = ' '!< optional replacement of Tstart_user 
+ character(len=14)                 :: Stopdatetime    = ' '!< optional replacement of Tstop_user 
  integer                           :: jarestart   !< use restart yes/no, 1/0
 
  double precision                  :: tlfsmo = 0d0  !< fourier bnd smoothing times
