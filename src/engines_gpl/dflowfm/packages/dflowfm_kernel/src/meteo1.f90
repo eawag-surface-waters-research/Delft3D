@@ -1865,7 +1865,7 @@ contains
    !! The (external forcing) file is opened elsewhere and read block-by-block
    !! by consecutive calls to this routine.
    subroutine readprovider(minp,qid,filename,filetype,method,operand,transformcoef,ja,varname,smask, maxSearchRadius)
-     use m_strucs, only: generalkeywrd, numgeneralkeywrd
+     use m_strucs, only: generalkeywrd_old, numgeneralkeywrd
      use MessageHandling, only : LEVEL_INFO, mess
      ! globals
      integer,           intent(in)            :: minp             !< File handle to already opened input file.
@@ -2094,12 +2094,12 @@ contains
      
      if (qid == 'generalstructure') then 
         do k = 1,numgeneralkeywrd        ! generalstructure 
-           call readandchecknextrecord(minp, rec, generalkeywrd(k), jaopt)
+           call readandchecknextrecord(minp, rec, generalkeywrd_old(k), jaopt)
            if (jaopt == 1) then
                L1 = index(rec,'=') + 1
                read (rec(L1:),*) transformcoef(k)
            else
-              call qnerror('Looking for '//trim(generalkeywrd(k))//', but getting ', rec, ' ')
+              call qnerror('Looking for '//trim(generalkeywrd_old(k))//', but getting ', rec, ' ')
            end if
         enddo
      endif   
