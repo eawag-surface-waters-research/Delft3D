@@ -38,6 +38,7 @@ module m_readCrossSections
    use m_GlobalParameters
    use m_hash_search
    use m_spatial_data
+   use string_module, only: strcmpi
 
 
    implicit none
@@ -105,7 +106,7 @@ module m_readCrossSections
          inext = network%crs%count+1
          pCrs => network%crs%cross(inext)
          
-         if (tree_get_name(md_ptr%child_nodes(i)%node_ptr) .ne. 'CrossSection') then
+         if (.not. strcmpi(tree_get_name(md_ptr%child_nodes(i)%node_ptr), 'CrossSection')) then
             cycle
          endif
          
@@ -257,6 +258,7 @@ module m_readCrossSections
    !> Parse cross section definition file with fileVersion 2.00
    subroutine parseCrossSectionDefinitionFile(md_ptr, network)
       use m_hash_search
+      use string_module, only: strcmpi
    
       type(t_network), target,  intent(inout)   :: network        !< network structure
       type(tree_data), pointer, intent(in   )   :: md_ptr         !< treedata pointer to cross section definitions
@@ -294,14 +296,15 @@ module m_readCrossSections
 
       do i = 1, numstr
          
-         if (tree_get_name(md_ptr%child_nodes(i)%node_ptr) .ne. 'definition') then
+         if (.not. strcmpi(tree_get_name(md_ptr%child_nodes(i)%node_ptr), 'Definition')) then
             cycle
          endif
          
          call prop_get_string(md_ptr%child_nodes(i)%node_ptr, '', 'id', id, success)
          if (success) call prop_get_string(md_ptr%child_nodes(i)%node_ptr, '', 'type', typestr, success)
          if (.not. success) then
-            call SetMessage(LEVEL_ERROR, 'Incorrect Cross-Section input for Cross-Section Definition with type '//trim(typestr)//' and id: '//trim(id))
+            call SetMessage(LEVEL_ERROR, 'Incorrect CrossSection input for CrossSection '//trim(id)// &
+               '. No type was given.')
             cycle
          endif
          crossType = getCrosstype(typestr)
@@ -333,7 +336,8 @@ module m_readCrossSections
             level(numlevels) = 0.0d0
             call prop_get_doubles(md_ptr%child_nodes(i)%node_ptr, '', 'width', width, numlevels, success)
             if (.not. success) then
-                call SetMessage(LEVEL_ERROR, 'Incorrect Cross-Section input for Cross-Section Definition with type '//trim(typestr)//' and id: '//trim(id))
+                call SetMessage(LEVEL_ERROR, 'Incorrect CrossSection input for CrossSection Definition with type '//trim(typestr)//' and id: '//trim(id)// &
+               '. No width was given.')
             endif
             
             call prop_get_logical(md_ptr%child_nodes(i)%node_ptr, '', 'closed', closed, success)
@@ -342,7 +346,8 @@ module m_readCrossSections
             if (closed) then
                call prop_get_double(md_ptr%child_nodes(i)%node_ptr, '', 'height', height, success)
                if (.not. success) then
-                  call SetMessage(LEVEL_ERROR, 'HEIGHT is obligatory for closed rectangular cross sections. Refer to cross-section definition with id '//trim(id))
+                  call SetMessage(LEVEL_ERROR, 'Incorrect CrossSection input for CrossSection Definition with type '//trim(typestr)//' and id: '//trim(id)// &
+                  '. No height was given.')
                   cycle
                endif
                numlevels = numlevels + 1
@@ -374,7 +379,8 @@ module m_readCrossSections
             ! use analytical description of circle and egg profile
             call prop_get_double(md_ptr%child_nodes(i)%node_ptr, '', 'diameter', diameter, success)
             if (.not. success) then
-               call SetMessage(LEVEL_ERROR, 'DIAMETER not found for Cross-Section Definition with type '//trim(typestr)//' and id: '//trim(id))
+               call SetMessage(LEVEL_ERROR, 'Incorrect CrossSection input for CrossSection Definition with type '//trim(typestr)//' and id: '//trim(id)// &
+               '. No diameter was given.')
             endif
 
             pCs%frictionSectionsCount = 1
@@ -385,7 +391,7 @@ module m_readCrossSections
             success = readYZCS(pCS, md_ptr%child_nodes(i)%node_ptr) 
             
          case default
-            call SetMessage(LEVEL_ERROR, 'Incorrect Cross-Section type for Cross-Section Definition with given type '//trim(typestr)//' and id: '//trim(id))
+            call SetMessage(LEVEL_ERROR, 'Incorrect CrossSection type for CrossSection Definition with given type '//trim(typestr)//' and id: '//trim(id))
             success = .false.
             
          end select
