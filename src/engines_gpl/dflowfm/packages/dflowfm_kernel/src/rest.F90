@@ -4743,8 +4743,8 @@ end subroutine timdat
       WRITE(MRGF,'(A)') '* '//trim(unstruc_version_full)
       call get_unstruc_source(TEX)
       WRITE(MRGF,'(A)') '* Source: '//trim(TEX)
-      TEX = '* File creation date: ' //trim(RUNDAT)
-      WRITE(MRGF,'(A)') TEX
+      TEX = '* File creation date: ' //RUNDAT
+      WRITE(MRGF,'(A)') trim(TEX)
 
       RETURN
       END
