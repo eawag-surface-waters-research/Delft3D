@@ -51,5 +51,6 @@
 		<File RelativePath=".\src\test_cross_section.f90"/>
 		<File RelativePath=".\src\test_dflowfm_kernel_f.f90"/>
 		<File RelativePath=".\src\test_observations.f90"/>
+		<File RelativePath=".\src\test_observ_Cross_Sections.f90"/>
 		<File RelativePath=".\src\test_roughness.f90"/></Filter></Files>
 	<Globals/></VisualStudioProject>
