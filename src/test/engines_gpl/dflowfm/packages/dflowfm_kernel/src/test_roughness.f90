@@ -69,7 +69,7 @@ subroutine test_roughness_branches
    cross => null()
    
    roughnessfiles = 'roughness_main.ini;roughness-globals.ini'
-   mapdir         = 'roughness\'
+   mapdir         = 'roughness/'
    call roughness_reader(network, roughnessfiles, mapdir)
    
    ibranch  = 4
