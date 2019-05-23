@@ -680,7 +680,7 @@ subroutine processexternalboundarypoints(qid, filename, filetype, return_time, n
   else if (qidfm == '1d2dbnd' ) then ! SOBEK1D-FM2D
 
      ! kce   = 1 ! switch kce back on as points to be potentially flagged
-     call selectelset( filename, filetype, xe, ye, xyen, kce, nx, ke1d2d(nbnd1d2d+1:nx), num1d2d, usemask=.true., rrtolrel=rrtolrel)
+     call selectelset( filename, filetype, xe, ye, xyen, kce, nx, ke1d2d(nbnd1d2d+1:nx), num1d2d, usemask=.false., rrtolrel=rrtolrel)
      WRITE(msgbuf,'(2a,i8,a)') trim(qid), trim(filename) , num1d2d, 'nr of SOBEK1D-FM2D bndcells' ; call msg_flush()
 
      call addopenbndsection(num1d2d, ke1d2d(nbnd1d2d+1:nbnd1d2d+num1d2d), filename, IBNDTP_1D2D)
