@@ -3633,6 +3633,27 @@ end subroutine partition_make_globalnumbers
       return
    end subroutine reduce_sum
    
+   !> take maximum integer over all subdomains
+   subroutine reduce_int1_max(var)
+#ifdef HAVE_MPI
+      use mpi
+#endif
+
+      implicit none
+      
+      integer, intent(inout) :: var !< array with values to be summed over the subdomains (not an array summation)
+      
+      integer                :: dum
+      
+      integer                :: ierror
+      
+#ifdef HAVE_MPI
+      call MPI_allreduce(var,dum,1,mpi_integer,mpi_max,DFM_COMM_DFMWORLD,ierror)
+      var = dum
+#endif      
+      return
+   end subroutine reduce_int1_max
+   
    
    
    !> for an array over integers, take maximum over all subdomains (not over the array itself)

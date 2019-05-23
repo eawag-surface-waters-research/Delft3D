@@ -85,6 +85,11 @@ subroutine ini_filter(jafilter, filterorder, jacheckmonitor, ierr)
       goto 1234
    end if
    
+!  check parallelization
+   if ( jampi.eq.1 .and. itype.ne.1 ) then
+      call mess(LEVEL_ERROR, 'filter: only explicit filter supported in parallel simulations')
+   end if
+   
 !  construct vector Laplacian
 !  boundary conditions: u.n = 0, n.du/ds = 0
    
@@ -423,6 +428,7 @@ subroutine comp_filter_predictor()
    use m_physcoef, only: ag
    use unstruc_messages
    use m_saad, only: jasafe   ! for amux
+   use m_partitioninfo, only: jampi, update_ghosts, ITYPE_U, reduce_int1_max
    implicit none
    
    double precision            :: fac, dsign
@@ -494,6 +500,11 @@ subroutine comp_filter_predictor()
          else
             dt = dts
          end if
+         
+         if ( jampi.eq.1 ) then
+            call reduce_int1_max(Nt)
+            dt = dts/Nt
+         end if
       end if
       
 !     construct matrix
@@ -557,6 +568,11 @@ subroutine comp_filter_predictor()
 !        sub time steps
          do it=1,Nt
             call amux(Lnx, solver_filter%rhs, sol, solver_filter%A, solver_filter%jA, solver_filter%iA)
+            
+            if ( jampi.eq.1 ) then
+               call update_ghosts(ITYPE_U, 1, Lnx, sol, ierror)
+            end if
+            
             if ( it.lt.Nt ) then
                solver_filter%rhs = sol
             end if
