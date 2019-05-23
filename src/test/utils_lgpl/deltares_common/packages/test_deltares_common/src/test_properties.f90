@@ -91,7 +91,8 @@ subroutine test_properties_check
     ! Note:
     ! Apparently, the tree variable needs to be associated/allocated beforehand
     !
-    allocate( tree )
+    allocate( tree1 )
+    allocate( tree2 )
 
     !
     ! Note: A chapter "*" is considered to indicate a keyword outside a (named) chapter
