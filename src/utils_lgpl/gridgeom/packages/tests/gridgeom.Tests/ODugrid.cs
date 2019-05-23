@@ -1022,7 +1022,7 @@ namespace gridgeom.Tests
               5 };
             for (int i = 0; i < n1d2dlinks; i++)
             {
-                Console.Write("i:%d rc_arrayfrom:%d arrayfrom:%d rc_arrayto:%d arrayto:%d\n", i, rc_arrayfrom, arrayfrom, rc_arrayto, arrayto);
+                Console.Write("i:{0} rc_arrayfrom:{1} arrayfrom:{2} rc_arrayto:{3} arrayto:{4}\n", i.ToString("D"), rc_arrayfrom[i].ToString("D"), arrayfrom[i].ToString("D"), rc_arrayto[i].ToString("D"), arrayto[i].ToString("D"));
                 Assert.That(rc_arrayfrom[i], Is.EqualTo(arrayfrom[i]));
                 Assert.That(rc_arrayto[i], Is.EqualTo(arrayto[i]));
             }
