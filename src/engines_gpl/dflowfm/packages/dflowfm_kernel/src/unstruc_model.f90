@@ -397,8 +397,8 @@ subroutine loadModel(filename)
     integer :: L, k1, k2, tok
     integer :: ntot_lb
 
-    integer      :: iDumk = 0
-    integer      :: iDuml = 0
+    integer      :: iDumk
+    integer      :: iDuml
 
     call resetModel()
 
@@ -428,6 +428,8 @@ subroutine loadModel(filename)
 
     if (jadoorladen == 0 .and. network%numk > 0 .and. network%numl > 0) then
 
+       iDumk = 0
+       iDuml = 0
        call admin_network(network, iDumk, iDuml)
 
        if (network%L1D > 0) then
