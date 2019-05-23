@@ -133,6 +133,7 @@ module m_readCrossSections
             cycle
          endif
          call prop_get_string(md_ptr%child_nodes(i)%node_ptr, '', 'definitionId', defid, success)
+         if (.not. success) call prop_get_string(md_ptr%child_nodes(i)%node_ptr, '', 'definition', defid, success) ! Backwards compatibility
          iref = hashsearch(network%CSDefinitions%hashlist, defid)
          if (iref < 1) then
             call SetMessage(LEVEL_ERROR, 'Incorrect CrossSection input for CrossSection on branch '//trim(branchid)// &
