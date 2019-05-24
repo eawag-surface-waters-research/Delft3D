@@ -36495,7 +36495,8 @@ end subroutine make_mirrorcells
                    end if
                 else
                    ! Should not happen for any model, only for debugging
-                   write(msgbuf, '(a,a,a,i0)') 'Could not find crest level for SOBEK1D-FM2D boundary ''', trim(openbndname(i)), ''': no overlap found for net link ', L
+                   write(msgbuf,'(a,i0,a,f12.4,a,f12.4,a)') 'Could not find crest level for SOBEK1D-FM2D boundary '''//trim(openbndname(i))//''': no overlap found for net link ', &
+                                                           L, ' [',(xce2+xz(k2))/2.,',',(yce2+yz(k2))/2.,']'
                    call err_flush()
                 end if
              else
