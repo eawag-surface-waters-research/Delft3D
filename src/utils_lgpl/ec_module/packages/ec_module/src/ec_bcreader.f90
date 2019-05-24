@@ -684,6 +684,8 @@ contains
           call mf_read(bcPtr%fhandle,rec,savepos)
           if (rec(1:1)=='#') cycle
           if (index(rec,'[forcing]'         )>0 .or. &
+              index(rec,'[Forcing]'         )>0 .or. &
+              index(rec,'[boundary]'        )>0 .or. &
               index(rec,'[Boundary]'        )>0 .or. &
               index(rec,'[LateralDischarge]')>0) then ! new boundary chapter
              select case (BCPtr%func)
