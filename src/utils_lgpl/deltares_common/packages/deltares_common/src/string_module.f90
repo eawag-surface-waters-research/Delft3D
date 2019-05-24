@@ -56,6 +56,7 @@ module string_module
    public :: find_first_char
    public :: count_words
    public :: remove_substr
+   public :: remove_chars
    public :: replace_char
    public :: splitstr
    public :: strsplit
@@ -643,6 +644,22 @@ module string_module
             endif
          enddo
       end subroutine replace_char      
+
+      subroutine remove_chars(r,charset) 
+         character(len=*), intent(inout) :: r
+         character(len=*), intent(in)    :: charset
+         !
+         integer :: i, j
+         !
+         j=1
+         do i=1,len_trim(r)
+            if (index(charset,r(i:i))<=0) then
+               r(j:j) = r(i:i)
+               j = j + 1
+            endif
+         enddo
+         r(j:len_trim(r)) = ' '
+      end subroutine remove_chars
         
       !> Remove substring substr from r
       subroutine remove_substr(r,substr)

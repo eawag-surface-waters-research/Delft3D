@@ -334,13 +334,11 @@ contains
     iq = 0
     iq_sel = 0
     do ifld=1,nfld
-       call replace_char(hdrkeys(ifld)%s,ichar('-'),ichar(' '))
-       call replace_char(hdrkeys(ifld)%s,ichar('_'),ichar(' '))
-       call replace_char(hdrkeys(ifld)%s,ichar('.'),ichar(' '))
+       call remove_chars(hdrkeys(ifld)%s,' -_.')         ! filter out all connection characters from the keywords
        select case (adjustl(hdrkeys(ifld)%s))
        case ('QUANTITY')
-          iq = iq + 1                                     ! count quantities, corresponds with column numbers [iq]
-          if (hdrvals(ifld)%s==bc%qname) then         ! detected quantity of interest
+          iq = iq + 1                                    ! count quantities, corresponds with column numbers [iq]
+          if (hdrvals(ifld)%s==bc%qname) then            ! detected quantity of interest
              bc%quantity%name=bc%qname
              bc%quantity%jacolumn(iq)=.true.
              iq_sel = iq_sel + 1
