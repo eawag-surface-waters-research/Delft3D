@@ -393,7 +393,7 @@ subroutine loadModel(filename)
 
     integer :: istat, minp, ifil, jadoorladen
 
-    integer :: i
+    integer :: i, ipli
     integer :: L, k1, k2, tok
     integer :: ntot_lb
 
@@ -550,14 +550,15 @@ subroutine loadModel(filename)
     if (len_trim(md_crsfile) > 0) then
         call strsplit(md_crsfile,1,fnames,1)
         ! firstly handle all *.pli files
+        ipli = 0
         do ifil = 1,size(fnames)
            tok = index(fnames(ifil), '.pli')
            if (tok > 0) then
               call oldfil(minp, fnames(ifil))
               if (ifil == 1) then
-                 call reapol(minp, 0)
+                 call reapol_nampli(minp, 0, 1, ipli)
               else
-                 call reapol(minp, 1)
+                 call reapol_nampli(minp, 1, 1, ipli)
               end if
            end if
         end do

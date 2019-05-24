@@ -494,11 +494,22 @@ subroutine read_land_boundary_netcdf(filename)
     endif
 end subroutine read_land_boundary_netcdf
 
+
+      subroutine reapol(mpol, jadoorladen)
+      implicit none
+      integer :: mpol
+      integer, intent(in)           :: jadoorladen !< Append to existing polygons (intended to read multiple crs files)
+      integer                       :: ipli
+      ipli = 0
+      call reapol_nampli(mpol, jadoorladen, 0, ipli)    
+      end subroutine reapol
+    
+
       !> Read polygon file (or cross section/pli file) and store in global polygon.
       !! File should contain Tekal block(s) with two or three columns.
       !! The block names may be used for cross sections.
       !! A dmiss line starts a new polyline without a name. Multiple dmiss lines are skipped.
-      SUBROUTINE REAPOL(MPOL, jadoorladen)
+      SUBROUTINE REAPOL_NAMPLI(MPOL, jadoorladen, janampl, ipli)
       USE M_POLYGON
       use network_data, only: netstat, NETSTAT_CELLS_DIRTY
       USE M_MISSING
@@ -509,9 +520,11 @@ end subroutine read_land_boundary_netcdf
  
       implicit none
       integer :: mpol
-      integer, intent(in) :: jadoorladen !< Append to existing polygons (intended to read multiple crs files)
+      integer, intent(in)           :: jadoorladen !< Append to existing polygons (intended to read multiple crs files)
+      integer, intent(in)           :: janampl     !< Store the pli-name as crosssection name
+      integer, intent(inout)        :: ipli
      
-      integer :: i, ipli, janampl
+      integer :: i
       integer :: nkol
       integer :: nrow
       integer :: nmiss
@@ -523,16 +536,6 @@ end subroutine read_land_boundary_netcdf
       character(len=64) :: MATR
       character(len=256) :: REC
       
-      janampl = 0
-      if (index (filenames(mpol),'crs' ) > 0) then 
-         janampl = 1
-      endif
-  
-      if (index (filenames(mpol),'CRS' ) > 0)  then 
-         janampl = 1
-      endif
-
-      ipli = 0
       if (jadoorladen /= 1) then
         if (.not. allocated(XPL)) allocate(XPL(1), YPL(1), ZPL(1))
         XPL = XYMIS
@@ -540,13 +543,6 @@ end subroutine read_land_boundary_netcdf
         ZPL = XYMIS
         NPL = 0
         call realloc(nampli,20, keepExisting = .false., fill = ' ')
-      else
-        ! Count number of existing polylines, to start storing new names at proper index.
-        do i=1,npl-1
-            if (xpl(i) == dmiss) then
-                ipli = ipli + 1
-            end if
-        end do
       end if
 
 
@@ -567,11 +563,13 @@ end subroutine read_land_boundary_netcdf
       end if
       CALL INCREASEPOL(NPL + NROW + 1, 1) ! previous pols (if any) + 1 dmiss + new polyline
 
-   11 ipli = ipli + 1         ! Start reading a new polyline
+11    ipli = ipli + 1         ! Start reading a new polyline
      
-      if (janampl == 1) then  ! hk: only store names when called from reacrosssections
+      if (janampl>0) then
          if (len_trim(matr) > 0) then 
-            call realloc(nampli, int(1.2*ipli) + 1, fill = ' ')
+            if (ipli>size(nampli)) then
+               call realloc(nampli, int(1.2*ipli) + 1, keepexisting = .True.)
+            endif
             nampli(ipli) = matr  ! Temporarily store cross section name with polyline
          endif
       endif
@@ -689,7 +687,7 @@ end subroutine read_land_boundary_netcdf
       call doclose (MPOL)
       RETURN
 
-      END subroutine reapol
+      END SUBROUTINE REAPOL_NAMPLI
 
       SUBROUTINE WRIPOL(MPOL)
       USE M_POLYGON
