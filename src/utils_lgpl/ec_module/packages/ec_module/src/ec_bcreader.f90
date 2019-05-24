@@ -318,9 +318,6 @@ contains
     bc%quantity%col2elm = -1
     vectordefinition = ''
 
-
-! HIER GAAT IETS FOUT, KIJK IN DE OORSPRONKELIJKE CODE:
-    
     ipos1=1
     do ifld = 1, nfld
        ipos2 = index(keyvaluestr(ipos1:), "',")+1
@@ -438,10 +435,10 @@ contains
        case ('FACTOR')
           if (iq>0) cycle
           read(hdrvals(ifld)%s,*) bc%quantity%factor
-       case ('VERTICALPOSITION')
+       case ('VERTICALPOSITION','VERTPOSITIONINDEX')
           read(hdrvals(ifld)%s,*) il(iq)
           bc%quantity%vertndx = il(iq)                          ! layer this column belongs to, default 1
-       case ('VERTICALPOSITIONSPECIFICATION')
+       case ('VERTICALPOSITIONSPECIFICATION','VERTPOSITIONS')
           npos=0
           if (len_trim(hdrvals(ifld)%s)>0) then
              npos = count([(verify(hdrvals(ifld)%s(i:i),', ')>0   &
@@ -452,8 +449,6 @@ contains
           read(hdrvals(ifld)%s,*) (bc%vp(ipos),ipos=1,npos)       ! globally store ALL vertical positions
           allocate(perm_vpos(npos))
           call sortndx(bc%vp,perm_vpos,npos)                    ! produce the permutation that sorts the vertical positions perm_vpos
-       case ('MISSINGVALUEDEFINITION')
-          read(hdrvals(ifld)%s,*) bc%missing
        case ('TIMEINTERPOLATION')
           select case (adjustl(hdrvals(ifld)%s))
           case ('LINEAR')
@@ -476,7 +471,7 @@ contains
           case default
              bc%periodic = .False.
           end select
-       case ('VERTICALINTERPOLATION')
+       case ('VERTICALINTERPOLATION','VERTINTERPOLATION')
           select case (adjustl(hdrvals(ifld)%s))
           case ('LINEAR')
              bc%zInterpolationType = zinterpolate_linear
@@ -490,7 +485,7 @@ contains
                                 "' in file "//trim(bc%fname)//", block "//trim(bc%bcname)//".") 
              return
           end select
-       case ('VERTICALPOSITIONTYPE')
+       case ('VERTICALPOSITIONTYPE','VERTPOSITIONTYPE')
           IF (index(hdrvals(ifld)%s,'PERCEN')+index(hdrvals(ifld)%s,'BED')>0) then
              hdrvals(ifld)%s = 'PERCBED'
           endif
