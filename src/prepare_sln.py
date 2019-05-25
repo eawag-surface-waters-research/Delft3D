@@ -190,6 +190,7 @@ toolsversion[2014] = "12.0"
 toolsversion[2015] = "14.0"
 toolsversion[2016] = "14.0"
 toolsversion[2017] = "14.0"
+toolsversion[2019] = "14.0"
 
 #
 #
@@ -214,6 +215,7 @@ platformtoolset[2014] = "    <PlatformToolset>v120</PlatformToolset>"
 platformtoolset[2015] = "    <PlatformToolset>v140</PlatformToolset>"
 platformtoolset[2016] = "    <PlatformToolset>v140</PlatformToolset>"
 platformtoolset[2017] = "    <PlatformToolset>v141</PlatformToolset>"
+platformtoolset[2019] = "    <PlatformToolset>v142</PlatformToolset>"
 
 #
 #
@@ -229,6 +231,8 @@ ucrtlibdir["201532"] = "$(UniversalCRTSdkDir)Lib\\UCRTLIBDIRVERSIONNUMBER\\ucrt\
 ucrtlibdir["201564"] = "$(UniversalCRTSdkDir)Lib\\UCRTLIBDIRVERSIONNUMBER\\ucrt\\x64"
 ucrtlibdir["201732"] = "$(UniversalCRTSdkDir)Lib\\UCRTLIBDIRVERSIONNUMBER\\ucrt\\x86"
 ucrtlibdir["201764"] = "$(UniversalCRTSdkDir)Lib\\UCRTLIBDIRVERSIONNUMBER\\ucrt\\x64"
+ucrtlibdir["201932"] = "$(UniversalCRTSdkDir)Lib\\UCRTLIBDIRVERSIONNUMBER\\ucrt\\x86"
+ucrtlibdir["201964"] = "$(UniversalCRTSdkDir)Lib\\UCRTLIBDIRVERSIONNUMBER\\ucrt\\x64"
 
 #
 #
@@ -238,6 +242,7 @@ ucrtlibdir["201764"] = "$(UniversalCRTSdkDir)Lib\\UCRTLIBDIRVERSIONNUMBER\\ucrt\
 getucrtdir = {}
 getucrtdir["2015"] = '"' + str(os.environ.get("VS140COMNTOOLS")) + "..\\..\\VC\\vcvarsall.bat" + '" amd64&&set UniversalCRTSdkDir'
 getucrtdir["2017"] = '"' + str(os.environ.get("VS2017INSTALLDIR")) + "\\VC\\Auxiliary\\Build\\vcvarsall.bat" + '" amd64&&set UniversalCRTSdkDir'
+getucrtdir["2019"] = '"' + str(os.environ.get("VS2019INSTALLDIR")) + "\\VC\\Auxiliary\\Build\\vcvarsall.bat" + '" amd64&&set UniversalCRTSdkDir'
 
 #
 #
@@ -301,6 +306,8 @@ def process_solution_file(sln, slntemplate):
                     line = "Microsoft Visual Studio Solution File, Format Version 12.00\r\n"
                 elif vs == 2017:
                     line = "Microsoft Visual Studio Solution File, Format Version 12.00\r\n"
+                elif vs == 2019:
+                    line = "Microsoft Visual Studio Solution File, Format Version 12.00\r\n"
                 # else:
                     # leave line unchanged
             startpos = line.find("# Visual Studio")
@@ -319,6 +326,8 @@ def process_solution_file(sln, slntemplate):
                     line = "# Visual Studio 2016\r\n"
                 elif vs == 2017:
                     line = "# Visual Studio 2017\r\n"
+                elif vs == 2019:
+                    line = "# Visual Studio 2019\r\n"
                 # else:
                     # leave line unchanged
             filouthandle.write(line)
@@ -654,11 +663,12 @@ def build_gui():
     
     Label(text="Visual Studio Version:", relief=RIDGE, width=20).grid(row=0, column=0)
     
-    Radiobutton(root, text="VS 2017                           ", variable=vs_gui, value=2017).grid(row=1, column=0, sticky=W)
-    Radiobutton(root, text="VS 2015, Update 3                 ", variable=vs_gui, value=2015).grid(row=2, column=0, sticky=W)
-    Radiobutton(root, text="VS 2013                           ", variable=vs_gui, value=2013).grid(row=3, column=0, sticky=W)
-    Radiobutton(root, text="VS 2012                           ", variable=vs_gui, value=2012).grid(row=4, column=0, sticky=W)
-    Radiobutton(root, text="VS 2010                           ", variable=vs_gui, value=2010).grid(row=5, column=0, sticky=W)
+    Radiobutton(root, text="VS 2019                           ", variable=vs_gui, value=2019).grid(row=1, column=0, sticky=W)
+    Radiobutton(root, text="VS 2017                           ", variable=vs_gui, value=2017).grid(row=2, column=0, sticky=W)
+    Radiobutton(root, text="VS 2015, Update 3                 ", variable=vs_gui, value=2015).grid(row=3, column=0, sticky=W)
+    Radiobutton(root, text="VS 2013                           ", variable=vs_gui, value=2013).grid(row=4, column=0, sticky=W)
+    Radiobutton(root, text="VS 2012                           ", variable=vs_gui, value=2012).grid(row=5, column=0, sticky=W)
+    Radiobutton(root, text="VS 2010                           ", variable=vs_gui, value=2010).grid(row=6, column=0, sticky=W)
     # default value
     vs_gui.set(2015)
     
