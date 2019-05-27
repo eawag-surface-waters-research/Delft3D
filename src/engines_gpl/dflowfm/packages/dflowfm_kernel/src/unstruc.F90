@@ -5028,12 +5028,12 @@ if (jawind > 0) then
        !$OMP PRIVATE(L)
         do LL = 1,lnx
            if ( hu(LL) > 0 ) then
-               wfac = 1d0 
-               if (ibedlevtyp == 3) then 
+               wfac = 1d0
+               if (ibedlevtyp == 3) then
                   Dzk  = abs( zk(lncn(1,LL)) - zk(lncn(2,LL)) )
-                  if (Dzk > 0d0) then 
+                  if (Dzk > 0d0) then
                      wfac = min( 1d0, hu(LL) / Dzk )
-                  endif 
+                  endif
                endif
                ! wdsu/huvli = [(m^2/s^2)*m^-1]
                adve(LL) = adve(LL) - wdsu(LL)*wfac*huvli(LL)
@@ -5045,12 +5045,12 @@ if (jawind > 0) then
 
         do LL  = 1,lnx
            if (hu(LL) > 0d0) then
-               wfac = 1d0 
-               if (ibedlevtyp == 3) then 
+               wfac = 1d0
+               if (ibedlevtyp == 3) then
                   Dzk  = abs( zk(lncn(1,LL)) - zk(lncn(2,LL)) )
-                  if (Dzk > 0d0) then 
+                  if (Dzk > 0d0) then
                      wfac = min( 1d0, hu(LL) / Dzk )
-                  endif 
+                  endif
                endif
 
                Lt = Ltop(LL)
@@ -5058,8 +5058,9 @@ if (jawind > 0) then
 
                dzt = hu(Lt) - hu(Lt-1) ; alf = 1d0
                if ( Lbot(LL) < Lt ) then
+                  dztm  =  hu(Lt-1) - hu(Lt-2)
+                  !if ( dzt < 0.8d0*dztm ) then
                   if ( dzt < 0.05d0 ) then
-                     dztm  =  hu(Lt-1) - hu(Lt-2)
                      alf   =  dzt / ( dzt + dztm )
                      adve(Lt-1) = adve(Lt-1) - (1d0-alf)*wdsu(LL)*wfac / dztm
                   endif
@@ -19641,7 +19642,7 @@ end subroutine unc_write_shp
           endif
        else if (kn(3,L) == 5) then
           if (n1a > ndx2d .and. n2a <= ndx2d .or. &
-              n2a > ndx2d .and. n1a <= ndx2d .or. & 
+              n2a > ndx2d .and. n1a <= ndx2d .or. &
               n2a <= ndx2d .and. n1a <= ndx2d) then
              kcu(Lf) = kn(3,L)                                ! 1D2D internal link, now also between 2 2D pts
              if (n1a <= ndx2d) then
@@ -21972,8 +21973,8 @@ end do
 ! (rx,ry) outward normal in reference frame of half(x3,y3,x4,y4)
  call normaloutchk(x3, y3, x4, y4, xzw(n), yzw(n), rx, ry, ja, jsferic, jasfer3D, dmiss, dxymis)
 
- xci  = xzw(n)
- yci  = yzw(n)
+ xci  = xz(n)
+ yci  = yz(n)
 
  if ( jsferic.eq.1 .and. jasfer3D.eq.1 ) then
     CALL DLINEDIS(Xci,Yci,X3,Y3,X4,Y4,JA,DIS2,Xd,Yd, jsferic, jasfer3D, dmiss)  ! dis is half cell size in boundary normal dir
@@ -28295,7 +28296,7 @@ mainloop:do n  = 1, nwf
                celsiz = max(celsiz, dbdistance(xk(k1), yk(k1), xk(k2), yk(k2), jsferic, jasfer3D, dmiss) )
             enddo
             if (jsferic == 1) celsiz=celsiz*rd2dg/ra
-             
+
             do kk = 1,netcell(k)%n
                L  = netcell(k)%lin(kk)
                k1 = netcell(k)%nod(kk)
@@ -28330,7 +28331,7 @@ mainloop:do n  = 1, nwf
             if (kkmin > 0) then
                 fetch(n,k) = min(distmin, celsiz)
                 fetdp(n,k) = max( hs(k), .1d0)
-                if (jagui > 0) then 
+                if (jagui > 0) then
                    CALL rCIRc(Xz(k),Yz(k) ) !, fetch(n,k))
                    !call adddot(Xz(k),Yz(k),1d0)
                 endif
@@ -28667,9 +28668,9 @@ end subroutine Swart
  hrm    = min( Hrms,gammax*depth )
  shs    = sinhsafei(rk*depth)
  uorbi  = pi*hrm*shs/tsig                       !omeg*(0.5*hsig)
- omeg    = twopi/tsig
- asg     = 0.5d0*hrms
- ust     = 0.5d0*omeg*asg*asg/depth
+ omeg   = twopi/tsig
+ asg    = 0.5d0*hrms
+ ust    = 0.5d0*omeg*asg*asg/depth
  return
 
  if (ndraw(28) > 40) then
@@ -41428,7 +41429,7 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
                 dzsillu(L)  = zc - dztoeu(L)
                 dzsilld(L)  = zc - dztoed(L)
              endif
-             !  
+             !
              dzcrest(L)  = zc
              !
              ! lowest toe is applied
