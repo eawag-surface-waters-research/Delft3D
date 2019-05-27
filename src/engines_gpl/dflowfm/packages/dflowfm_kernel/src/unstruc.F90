@@ -1532,7 +1532,7 @@ if(q /= 0) then
 
  implicit none
 
- integer           :: japerim, L, ja
+ integer           :: japerim, L, ja, calcConv
 
  integer           :: k1, k2, K, LL
  double precision  :: ar1, wid1, cf1, ar2, wid2, cf2, dx1, dx2, widu, diam, perim
@@ -1540,6 +1540,7 @@ if(q /= 0) then
 
  if (japerim == 0) then
 
+    calcConv = 0
     k1  = ln(1,L) ; k2 = ln(2,L)
 
     dx1 = 0.5d0*dx(L) ; dx2 = dx1
@@ -1556,12 +1557,12 @@ if(q /= 0) then
     if (kcs(k1) == 1) then
        hpr = max(0d0,s1(k1)-bob0(1,L))                ! this statement is called most nr of times through waterlevel iteration
        if (hpr > 0) then                             !
-          call getprof_1D(L, hpr, ar1, wid1, japerim, perim)
+          call getprof_1D(L, hpr, ar1, wid1, japerim, calcConv, perim)
           a1(k1) =   a1(k1) + dx1*wid1
           vol1(k1) = vol1(k1) + dx1*ar1
           ! flow volume
           if(network%loaded) then
-             call getprof_1D(L, hpr, ar1, wid1, 1, perim)
+             call getprof_1D(L, hpr, ar1, wid1, 1, calcConv, perim)
              vol1_f(k1) = vol1_f(k1) + dx1*ar1
           else
              vol1_f(k1) = vol1(k1)
@@ -1572,12 +1573,12 @@ if(q /= 0) then
     if (kcs(k2) == 1) then
        hpr = max(0d0,s1(k2)-bob0(2,L))
        if (hpr > 0) then                             !
-          call getprof_1D(L, hpr, ar2, wid2, japerim, perim)
+          call getprof_1D(L, hpr, ar2, wid2, japerim, calcConv, perim)
           a1(k2) =   a1(k2) + dx2*wid2
           vol1(k2) = vol1(k2) + dx2*ar2
           ! flow volume
           if(network%loaded) then
-             call getprof_1D(L, hpr, ar2, wid2, 1, perim)
+             call getprof_1D(L, hpr, ar2, wid2, 1, calcConv, perim)
              vol1_f(k2) = vol1_f(k2) + dx2*ar2
           else
              vol1_f(k2) = vol1(k2)
@@ -1630,8 +1631,8 @@ if(q /= 0) then
 
  else if (hu(L) > 0) then
 
-
-    call getprof_1D(L, hu(L), au(L), widu, japerim, perim)  ! memory closeness of profiles causes this statement here instead of in setau
+    calcConv = 1
+    call getprof_1D(L, hu(L), au(L), widu, japerim, calcConv, perim)  ! memory closeness of profiles causes this statement here instead of in setau
                                                             ! getprof1D sets cfu
     endif
 
@@ -1646,17 +1647,17 @@ if(q /= 0) then
 
  integer           :: japerim, L, ja
 
- integer           :: k1, k2, K
+ integer           :: k1, k2, K, calcConv
  double precision  :: ar1, wid1, cf1, ar2, wid2, cf2, dx1, dx2, widu, perim
  double precision  :: hpr
 
  if (japerim == 0) then
-
+    calcConv = 0
     k1  = ln(1,L) ; k2 = ln(2,L)
 
     hpr = max(0d0,s1(k1)-bl(k1))    ! this statement is called most nr of times through waterlevel iteration
     if (hpr > 0) then                             !
-       call getprof_1D(L, hpr, ar1, wid1, japerim, perim)
+       call getprof_1D(L, hpr, ar1, wid1, japerim, calcConv, perim)
        dx1  = dx(L)*acl(L)
        a1(k1) =   a1(k1) + dx1*wid1
        vol1(k1)   = vol1(k1)   + dx1*ar1
@@ -1665,7 +1666,7 @@ if(q /= 0) then
 
     hpr = max(0d0,s1(k2)-bl(k2))
     if (hpr > 0) then                             !
-       call getprof_1D(L, hpr, ar2, wid2, japerim, perim)
+       call getprof_1D(L, hpr, ar2, wid2, japerim, calcConv, perim)
        dx2  = dx(L)*(1d0-acl(L))
        a1(k2) =   a1(k2) + dx2*wid2
        vol1(k2)   = vol1(k2)   + dx2*ar2
@@ -1673,8 +1674,8 @@ if(q /= 0) then
     endif
 
  else if (hu(L) > 0) then
-
-       call getprof_1D(L, hu(L), au(L), widu, japerim, perim)  ! memory closeness of profiles causes this statement here instead of in setau
+    calcConv = 1
+       call getprof_1D(L, hu(L), au(L), widu, japerim, calcConv, perim)  ! memory closeness of profiles causes this statement here instead of in setau
                                                                ! getprof1D sets cfu
  endif
  end subroutine addlink1Dkcu3
@@ -8909,7 +8910,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
  endif
 
  !! flow1d -> dflowfm initialization
- ! call set_1d_roughnesses()
+ call set_1d_roughnesses()
 
  ! need number of fractions for allocation of sed array
  if ( len_trim(md_sedfile) > 0 ) then
@@ -38718,7 +38719,7 @@ end if
     do L = 1,lnx1D
        itp = prof1D(3,L)
        if (grounlay(L) > 0d0 .and. iabs(itp) <= 3) then
-          call getprof_1D(L, grounlay(L), argr(L), wigr(L), 1, pergr(L))
+          call getprof_1D(L, grounlay(L), argr(L), wigr(L), 1, 1, pergr(L))
        endif
     enddo
     jagrounlay = 1
@@ -40474,7 +40475,7 @@ subroutine getymxpar(modind,tauwav, taucur, fw, cdrag, abscos, ypar, ymxpar)
 
 ! =================================================================================================
 ! =================================================================================================
-subroutine getprof_1D(L, hprL, area, width, japerim, perim)
+subroutine getprof_1D(L, hprL, area, width, japerim, calcConv, perim)
 use m_profiles
 use m_flow
 use m_flowgeom
@@ -40484,7 +40485,7 @@ use m_crosssections
 use m_cross_helper
 
 implicit none
-integer          :: L, japerim
+integer          :: L, japerim, calcConv
 double precision :: hprL                 !< hoogte in profiel
 double precision :: area                 !< wet cross sectional area
 double precision :: width                !< width at water surface
@@ -40521,28 +40522,31 @@ if (abs(kcu(ll))==1 .and. network%loaded) then !flow1d used only for 1d channels
       cz = 0d0
       call GetCSParsFlow(network%adm%line2cross(LL), network%crs%cross, hpr, area, perim, width, af_sub, perim_sub)
 
-      u1L = u1(LL)
-      q1L = q1(LL)
-      k1 = ln(1,LL)
-      k2 = ln(2,LL)
-      s1L = acl(L)*s1(k1) + (1d0-acl(L))*s1(k2)
-      dpt = hu(LL)
-      cz = 0d0
-      call getconveyance(network, dpt, u1L, q1L, s1L, LL, perim_sub, af_sub, conv, cz_sub, cz, area, perim)
+!      if (calcConv ==1) then
+         u1L = u1(LL)
+         q1L = q1(LL)
+         k1 = ln(1,LL)
+         k2 = ln(2,LL)
+         s1L = acl(L)*s1(k1) + (1d0-acl(L))*s1(k2)
+         dpt = hu(L)
+         cz = 0d0
+         call getconveyance(network, dpt, u1L, q1L, s1L, LL, perim_sub, af_sub, conv, cz_sub, cz, area, perim)
 
-      ! For sediment transport the discharge in the main channel is required:
-      ! Qmain/ QT = Kmain/KT -> u_main = Kmain/KT * (AT/Amain)
-      if (conv > 0d0) then
-         u_to_umain(L) = area*cz_sub(1) * sqrt(af_sub(1)/perim_sub(1)) /  conv
-         cfuhi(L) = ag/(conv/area)**2
-         frcu(L) = cz
-         frcu_mor(L) = cz_sub(1)
-         call getCrossDischarge(perim_sub, af_sub, cz_sub, q1L, q_sub)
-         q1_main(L) = q_sub(1)
-      else
-         u_to_umain(L) = 1d0
-         cfuhi(L) = 0d0
-      endif
+         ! For sediment transport the discharge in the main channel is required:
+         ! Qmain/ QT = Kmain/KT -> u_main = Kmain/KT * (AT/Amain)
+         if (conv > 0d0) then
+            u_to_umain(L) = area*cz_sub(1) * sqrt(af_sub(1)/perim_sub(1)) /  conv
+            cfuhi(L) = ag/(conv/area)**2
+            frcu(L) = cz
+            frcu_mor(L) = cz_sub(1)
+            call getCrossDischarge(perim_sub, af_sub, cz_sub, q1L, q_sub)
+            q1_main(L) = q_sub(1)
+         else
+            u_to_umain(L) = 1d0
+            cfuhi(L) = 0d0
+         endif
+ !     endif
+      
       wu(L) = max(0.01d0,area/hpr)
    endif
    ! finished for 1d network from flow1d

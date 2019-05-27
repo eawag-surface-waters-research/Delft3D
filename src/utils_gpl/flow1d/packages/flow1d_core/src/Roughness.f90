@@ -120,11 +120,11 @@ module m_Roughness
    integer, parameter, public                           :: R_FunctionConstant = 0      !< Constant type roughness function
    integer, parameter, public                           :: R_FunctionDischarge = 1     !< Discharge dependend roughness 
    integer, parameter, public                           :: R_FunctionLevel = 2         !< Water level dependend roughness
-   integer, parameter, public                           :: R_Chezy = 1                 !< Chezy type roughness
-   integer, parameter, public                           :: R_Manning = 4               !< Manning  roughness formula
-   integer, parameter, public                           :: R_Nikuradse = 5             !< Nikuradse roughness formula
-   integer, parameter, public                           :: R_Strickler = 6             !< Strickler roughness formula
-   integer, parameter, public                           :: R_WhiteColebrook = 7        !< White Colebrook roughness formula
+   integer, parameter, public                           :: R_Chezy = 0                 !< Chezy type roughness
+   integer, parameter, public                           :: R_Manning = 1               !< Manning  roughness formula
+   integer, parameter, public                           :: R_Nikuradse = 7             !< Nikuradse roughness formula
+   integer, parameter, public                           :: R_Strickler = 8             !< Strickler roughness formula
+   integer, parameter, public                           :: R_WhiteColebrook = 3        !< White Colebrook roughness formula
    integer, parameter, public                           :: R_BosBijkerk = 9            !< Bos en Bijkerk roughness formula 
    double precision, parameter, public                  :: sixth = 1.d0/6.d0           !< 1/6
    double precision, parameter, public                  :: third = 1.d0/3.d0           !< 1/3
@@ -161,6 +161,7 @@ subroutine reallocRoughness(rgs)
       ! set some parameters (not the correct location)
       ee = exp(1d0)
       sag = sqrt(ag)
+      rgs%version = -1
    endif
    
    if (rgs%growsBy <=0) then

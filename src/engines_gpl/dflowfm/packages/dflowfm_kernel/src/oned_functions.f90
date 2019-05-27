@@ -69,7 +69,7 @@ module m_oned_functions
       double precision, dimension(:), pointer :: cpar
       integer,          dimension(:), pointer :: rgh_type
       integer,          dimension(:), pointer :: fun_type
-      integer,          dimension(9)          :: rgh_mapping
+      integer,          dimension(0:9)          :: rgh_mapping
       type(t_CrossSection), dimension(:), pointer :: crs
       
       logical stop_warnings
