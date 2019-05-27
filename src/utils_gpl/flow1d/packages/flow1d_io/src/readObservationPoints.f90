@@ -51,6 +51,7 @@ module m_readObservationPoints
    !> Reads observation points from a *.ini file
    subroutine readObservationPoints(network, observationPointsFile)
       use m_missing, only: dmiss
+      use string_module, only: strcmpi
       implicit none
       
       type(t_network), intent(inout)        :: network
@@ -112,23 +113,23 @@ module m_readObservationPoints
 
       do i = 1, numstr
          
-         if (tree_get_name(md_ptr%child_nodes(i)%node_ptr) .eq. 'observationpoint') then
+         if (strcmpi(tree_get_name(md_ptr%child_nodes(i)%node_ptr), 'ObservationPoint')) then
             ! Read Data
-            call prop_get_string(md_ptr%child_nodes(i)%node_ptr, 'observationpoint', 'name', obsPointName, success)
+            call prop_get_string(md_ptr%child_nodes(i)%node_ptr, '', 'name', obsPointName, success)
             if (success) then
-               call prop_get_string(md_ptr%child_nodes(i)%node_ptr, 'observationpoint', 'branchid', branchID, success)
+               call prop_get_string(md_ptr%child_nodes(i)%node_ptr, '', 'branchId', branchID, success)
                if (success) then ! the obs is defined by branchid and chainage
                   formatbr = 1
-                  call prop_get_double(md_ptr%child_nodes(i)%node_ptr, 'observationpoint', 'chainage', Chainage, success)
+                  call prop_get_double(md_ptr%child_nodes(i)%node_ptr, '', 'chainage', Chainage, success)
                   loctype = INDTP_1D
                else ! the obs is defined by x, y coordinate and locationtype
                   formatbr = 0
                   loctype  = INDTP_2D ! Default when not user-defined.
-                  call prop_get_integer(md_ptr%child_nodes(i)%node_ptr, 'observationpoint', 'LocationType', loctype, success)
+                  call prop_get_integer(md_ptr%child_nodes(i)%node_ptr, '', 'locationType', loctype, success)
 
-                  call prop_get_double(md_ptr%child_nodes(i)%node_ptr, 'observationpoint', 'x', xx, success)
+                  call prop_get_double(md_ptr%child_nodes(i)%node_ptr, '', 'x', xx, success)
                   if (success) then
-                     call prop_get_double(md_ptr%child_nodes(i)%node_ptr, 'observationpoint', 'y', yy, success)
+                     call prop_get_double(md_ptr%child_nodes(i)%node_ptr, '', 'y', yy, success)
                   end if
                end if
                
