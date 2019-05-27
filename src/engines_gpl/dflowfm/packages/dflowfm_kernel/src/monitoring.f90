@@ -57,8 +57,9 @@ implicit none
     integer, allocatable              :: kobs(:)        !< node nrs of ACTIVE observation points
     ! NOTE: kobs is not maintained here (so also not after deleteObservation, etc.) All done once by obs_on_flowgrid.
     character(len=40), allocatable    :: namobs(:)      ! names of observation points
-    integer, allocatable              :: locobs(:)      !< location type of observation points, determining to which flownodes to snap to (0=1d2d, 1=1d, 2=2d, 3=1d defined by branchID+chainage)
-    integer, allocatable              :: loc3obs(:)     !< mapping from global obs index to obs that are defined by branchID and chainage 
+    integer, allocatable              :: locTpObs(:)    !< location type of observation points, determining to which flownodes to snap to (0=1d2d, 1=1d, 2=2d, 3=1d defined by branchID+chainage)
+    integer, allocatable              :: obs2OP(:)      !< mapping from global m_observation::obs index to m_network::network%obs index (i.e., the ones defined via a *.ini file)
+
     integer, parameter, private       :: capacity_ = 1  !< Nr of additionally allocated elements when lists are full
     integer, private                  :: iUniq_ = 1
     character(len=*), parameter, private :: defaultName_ = 'Obs'
@@ -542,14 +543,14 @@ end subroutine updateObservationXY
 
 !> Adds an observation point to the existing points.
 !! New observation point may be a moving one or not.
-subroutine addObservation(x, y, name, isMoving, loctype, iobs3)
+subroutine addObservation(x, y, name, isMoving, loctype, iOP)
 use m_alloc
     double precision, intent(in) :: x !< x-coordinate
     double precision, intent(in) :: y !< y-coordinate
     character(len=*), optional, intent(in) :: name !< Name of the station, appears in output file.
     logical, optional, intent(in) :: isMoving !< Whether point is a moving station or not. Default: .false.
-    integer, optional, intent(in) :: loctype  !< location type
-    integer, optional, intent(in) :: iobs3    !< local index of obs that are defiend by branchID and chainage (locationtype == 3)
+    integer, optional, intent(in) :: loctype  !< location type (one of INDTP_1D/2D/ALL)
+    integer, optional, intent(in) :: iOP      !< local index of obs that are defined via *.ini, in the m_network%network%obs set.
 
     logical :: isMoving_
     integer :: i, inew, isize, loctype_
@@ -590,8 +591,8 @@ use m_alloc
         call realloc(namobs, numobs+nummovobs+capacity_)
         call realloc(smxobs, numobs+nummovobs+capacity_)
         call realloc(cmxobs, numobs+nummovobs+capacity_)
-        call realloc(locobs, numobs+nummovobs+capacity_)
-        call realloc(loc3obs,numobs+nummovobs+capacity_)
+        call realloc(locTpObs, numobs+nummovobs+capacity_)
+        call realloc(obs2OP, numobs+nummovobs+capacity_)
     end if
 
     ! Before adding new normal observation station:
@@ -604,8 +605,8 @@ use m_alloc
             namobs(i+1) = namobs(i)
             smxobs(i+1) = smxobs(i)
             cmxobs(i+1) = cmxobs(i)
-            locobs(i+1) = locobs(i)
-            loc3obs(i+1)= loc3obs(i)
+            locTpObs(i+1) = locTpObs(i)
+            obs2OP(i+1) = obs2OP(i)
         end do
         numobs = numobs+1
         inew   = numobs
@@ -621,11 +622,11 @@ use m_alloc
     kobs(inew)   = -999   ! Cell number is set elsewhere
     smxobs(inew) = -999d0 ! max waterlevel
     cmxobs(inew) = -999d0 ! max velocity mag.
-    locobs(inew) = loctype_
-    if (present(iobs3)) then
-       loc3obs(inew) = iobs3 ! mapping from global obs index to local *.ini obs
+    locTpObs(inew) = loctype_
+    if (present(iOP)) then
+       obs2OP(inew) = iOP ! mapping from global obs index to local *.ini obs
     else
-       loc3obs(inew) = 0
+       obs2OP(inew) = 0
     end if
 
 end subroutine addObservation
@@ -643,7 +644,7 @@ subroutine addObservation_from_ini(network, filename)
    type(t_network),  intent(inout)       :: network            !< network
    character(len=*), intent(in   )       :: filename           !< filename of the obs file
    
-   integer                               :: nbrch              ! number of obs that are defined by branchID and chainage
+   integer                               :: nByBrch            ! number of obs that are defined by branchID and chainage
    integer                               :: ierr, nobsini, i
    type(t_ObservationPoint), pointer     :: pOPnt
    integer,              allocatable     :: branchIdx_tmp(:), ibrch2obs(:)
@@ -652,7 +653,7 @@ subroutine addObservation_from_ini(network, filename)
    
    
    ierr    = DFM_NOERR
-   nbrch   = 0
+   nByBrch = 0
    nobsini = network%obs%Count
    
    !! Step 1. get x- and y-coordinates of obs that are defined by branchID and chainage
@@ -664,25 +665,25 @@ subroutine addObservation_from_ini(network, filename)
    do i=1, nobsini
       pOPnt => network%obs%OPnt(i)
       if (pOPnt%branchIdx > 0) then
-         nbrch = nbrch + 1
-         branchIdx_tmp(nbrch) = pOPnt%branchIdx
-         Chainage_tmp(nbrch)  = pOPnt%chainage
-         ibrch2obs(nbrch)     = i
+         nByBrch = nByBrch + 1
+         branchIdx_tmp(nByBrch) = pOPnt%branchIdx
+         Chainage_tmp(nByBrch)  = pOPnt%chainage
+         ibrch2obs(nByBrch)     = i
       end if
    end do
          
-   ! 1b. get the cooresponding x- and y-coordinates
-   allocate(xx_tmp(nbrch))
-   allocate(yy_tmp(nbrch))
-   if (nbrch > 0) then
-      ierr = odu_get_xy_coordinates(branchIdx_tmp(1:nbrch), Chainage_tmp(1: nbrch), meshgeom1d%ngeopointx, meshgeom1d%ngeopointy, &
+   ! 1b. get the corresponding x- and y-coordinates
+   allocate(xx_tmp(nByBrch))
+   allocate(yy_tmp(nByBrch))
+   if (nByBrch > 0) then
+      ierr = odu_get_xy_coordinates(branchIdx_tmp(1:nByBrch), Chainage_tmp(1:nByBrch), meshgeom1d%ngeopointx, meshgeom1d%ngeopointy, &
                                      meshgeom1d%nbranchgeometrynodes, meshgeom1d%nbranchlengths, jsferic, xx_tmp, yy_tmp)
    endif
    if (ierr /= DFM_NOERR) then
       call mess(LEVEL_ERROR, "Error occurs when getting the x- and y-coordinates for obs from file '"//trim(filename)//".")
    end if
    
-   do i=1, nbrch
+   do i=1, nByBrch
       pOPnt => network%obs%OPnt(ibrch2obs(i))
       pOPnt%x = xx_tmp(i)
       pOPnt%y = yy_tmp(i)
@@ -691,12 +692,7 @@ subroutine addObservation_from_ini(network, filename)
    ! Step 2. add all obs from *.ini file
    do i =1, nobsini
       pOPnt => network%obs%OPnt(i)
-      loctype_ = pOPnt%locationtype
-      if (loctype_ == 3) then ! obs which is defined by branchID and chainage, their locationtype has been set to 3
-         call addObservation(pOPnt%x, pOPnt%y, pOPnt%name, loctype = loctype_, iobs3 = i)
-      else
-         call addObservation(pOPnt%x, pOPnt%y, pOPnt%name, loctype = loctype_)
-      end if
+      call addObservation(pOPnt%x, pOPnt%y, pOPnt%name, loctype = pOPnt%locationtype, iOP = i)
    end do
    
     
@@ -767,8 +763,8 @@ use unstruc_channel_flow, only: network
        deallocate(namobs)
        deallocate(smxobs)
        deallocate(cmxobs)
-       deallocate(locobs)
-       deallocate(loc3obs)
+       deallocate(locTpObs)
+       deallocate(obs2OP)
     end if
     
     call dealloc(network%obs) ! deallocate obs (defined in *.ini file)
@@ -780,8 +776,8 @@ use unstruc_channel_flow, only: network
     allocate(namobs(capacity_))
     allocate(smxobs(capacity_))
     allocate(cmxobs(capacity_))
-    allocate(locobs(capacity_))
-    allocate(loc3obs(capacity_))
+    allocate(locTpObs(capacity_))
+    allocate(obs2OP(capacity_))
 
 
     kobs = -999
@@ -794,6 +790,7 @@ end subroutine deleteObservations
 
 
 !> Reads observation points from file.
+!! Two file types are supported: *_obs.xyn and *_obs.ini.
 subroutine loadObservations(filename, jadoorladen)
     use messageHandling
     use m_readObservationPoints, only: readObservationPoints
@@ -801,40 +798,21 @@ subroutine loadObservations(filename, jadoorladen)
     use m_inquire_flowgeom
     use dfm_error
     implicit none
-    character(len=*), intent(in) :: filename
+    character(len=*), intent(in) :: filename    !< File containing the observation points. Either a *_obs.xyn or a *_obs.ini.
     integer,          intent(in) :: jadoorladen !< Append to existing observation points or not
 
     logical :: jawel
-    integer :: mobs, n, L, L2, tok
-    double precision :: xp, yp
-    character (len=256) :: rec
-    character (len=40) :: nam
+    integer :: tok
 
     inquire(file = filename, exist = jawel)
     if (jawel) then
-        call oldfil(mobs,filename)
-
         if (jadoorladen == 0) then
             call deleteObservations()
         end if
 
         tok = index(filename, '.xyn')
         if (tok > 0) then
-           n=0
- 20        read(mobs,'(a)',end =889) rec
-           
-           read(rec,*,err=888) xp, yp, nam
-           
-           L  = index(rec,'''')
-           if (L > 0) then
-               L  = L + 1  
-               L2 = index(rec(L:),'''') - 2 + L
-               nam = rec(L:L2)
-           endif
-           
-           call addObservation(xp, yp, nam)
-           n = n+1
-           goto 20
+           call loadObservations_from_xyn(filename)
         else
            tok = index(filename, '.ini')
            if (tok > 0) then
@@ -842,15 +820,51 @@ subroutine loadObservations(filename, jadoorladen)
               call addObservation_from_ini(network, filename)  
            end if
         end if
-
-889     call doclose(mobs)
     else
-        !call mess(LEVEL_WARN, "Observation file '"//trim(filename)//"' not found! Skipping ...")
         call mess(LEVEL_ERROR, "Observation file '"//trim(filename)//"' not found!")
     endif
-    return
-888 call readerror('reading x,y,nam but getting ',rec,mobs)
+
 end subroutine loadObservations
+
+
+!> Reads observation points from an *.xyn file.
+! Typically called via loadObservations().
+subroutine loadObservations_from_xyn(filename)
+    use messageHandling
+    use dfm_error
+    implicit none
+    character(len=*), intent(in) :: filename
+
+    integer :: mobs, n, L, L2
+    double precision :: xp, yp
+    character (len=256) :: rec
+    character (len=40) :: nam
+
+    call oldfil(mobs,filename)
+
+    n=0
+20  read(mobs,'(a)',end =889) rec
+    
+    read(rec,*,err=888) xp, yp, nam
+    
+    L  = index(rec,'''')
+    if (L > 0) then
+        L  = L + 1  
+        L2 = index(rec(L:),'''') - 2 + L
+        nam = rec(L:L2)
+    endif
+    
+    call addObservation(xp, yp, nam)
+    n = n+1
+    goto 20
+
+889 call doclose(mobs)
+    return
+
+888 call readerror('reading x,y,nam but getting ',rec,mobs)
+
+end subroutine loadObservations_from_xyn
+
 
 subroutine saveObservations(filename)
     use m_sferic, only: jsferic

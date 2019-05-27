@@ -14855,10 +14855,11 @@ end subroutine obs_on_flowgeom
 
 
 !> Finds the flow nodes/cell numbers for each given x,y point (e.g., an observation station)
-subroutine find_flownode(N, xobs, yobs, namobs, kobs, jakdtree, jaoutside, jaobsloct)
+subroutine find_flownode(N, xobs, yobs, namobs, kobs, jakdtree, jaoutside, iLocTp)
    use unstruc_messages
    use m_partitioninfo
    use m_flowgeom
+   use m_GlobalParameters, only: INDTP_1D, INDTP_2D, INDTP_ALL
    use kdtree2Factory
    use geometry_module, only: dbdistance
    use m_missing, only: dmiss
@@ -14872,7 +14873,7 @@ subroutine find_flownode(N, xobs, yobs, namobs, kobs, jakdtree, jaoutside, jaobs
    integer,           dimension(N), intent(inout)  :: kobs        !< associated flow nodes, if found.
    integer,                         intent(inout)  :: jakdtree    !< use kdtree (1) or not (other)
    integer,                         intent(in)     :: jaoutside   !< allow outside cells (for 1D) (1) or not (0)
-   integer,                         intent(in)     :: jaobsloct   !< (0) not for obs, or obs with locationtype==0, (1) for obs with locationtype==1, (2) for obs with locationtype==2
+   integer,                         intent(in)     :: iLocTp      !< Node type, one of INDTP_1D/2D/ALL.
    integer                                         :: ierror      !  error (1) or not (0)
    integer                                         :: i, k, k1b
    integer,           dimension(1)                 :: idum
@@ -14881,7 +14882,7 @@ subroutine find_flownode(N, xobs, yobs, namobs, kobs, jakdtree, jaoutside, jaobs
    ierror = 1
    
    if ( jakdtree.eq.1 ) then
-      call find_flowcells_kdtree(treeglob,N,xobs,yobs,kobs,jaoutside,jaobsloct, ierror)
+      call find_flowcells_kdtree(treeglob,N,xobs,yobs,kobs,jaoutside,iLocTp, ierror)
       
       if ( jampi.eq.1 ) then
 !        globally reduce ierror
@@ -14892,11 +14893,6 @@ subroutine find_flownode(N, xobs, yobs, namobs, kobs, jakdtree, jaoutside, jaobs
       
       if ( ierror.ne.0 ) then
          jakdtree = 0   ! retry without kdtree
-         if (jaobsloct /= 0) then
-            write(msgbuf, '(a,i1,a)') 'Find flownode: Kdtree search falied when snapping observation points of locationtype = ', jaobsloct, '.'
-            call mess(LEVEL_ERROR, msgbuf)
-         end if
-         
       end if
       
 !     disable observation stations without attached flowlinks
@@ -14912,8 +14908,8 @@ subroutine find_flownode(N, xobs, yobs, namobs, kobs, jakdtree, jaoutside, jaobs
    
    if ( jakdtree.ne.1 ) then
       do i=1,N
-         call inflowcell(xobs(i),yobs(i),k,jaoutside)
-         if ( jaoutside.eq.1 ) then
+         call inflowcell(xobs(i),yobs(i),k,jaoutside, iLocTp)
+         if ( jaoutside.eq.1 .and. (iLocTp == INDTP_1D .or. iLocTp == INDTP_ALL)) then
             call CLOSETO1DORBND(xobs(i),yobs(i),k1B)
             IF (K .ne. 0 .and. k1b .ne. 0) THEN 
                 D1 = DBDISTANCE(XZ(K1B), YZ(K1B), XOBS(I), YOBS(I), jsferic, jasfer3D, dmiss)
@@ -14965,19 +14961,20 @@ subroutine find_flownode_for_obs(nstart, nend)
    use m_observations
    use unstruc_channel_flow
    use m_inquire_flowgeom
+   use m_GlobalParameters, only: INDTP_1D, INDTP_2D, INDTP_ALL
    use dfm_error
    use m_alloc
    use m_flowgeom
    implicit none
    integer, intent(in)               :: nstart ! starting index of obs for snapping to a flow node
    integer, intent(in)               :: nend   ! ending index of obs for snapping to a flow node
-   integer                           :: i, nodenr, branchIDX, ntotal, nobsini, ierr, jakdtree, ii
+   integer                           :: i, nodenr, branchIdx, ntotal, nobsini, ierr, jakdtree, jabybranch
    integer, allocatable              :: ixy2obs0(:), ixy2obs1(:), ixy2obs2(:)
    integer, allocatable              :: kobs_tmp0(:), kobs_tmp1(:), kobs_tmp2(:)
    double precision, allocatable     :: xobs_tmp0(:), xobs_tmp1(:), xobs_tmp2(:)
    double precision, allocatable     :: yobs_tmp0(:), yobs_tmp1(:), yobs_tmp2(:)
    character(len=40), allocatable    :: namobs_tmp0(:), namobs_tmp1(:), namobs_tmp2(:)
-   integer                           :: nloctype0, nloctype1, nloctype2 
+   integer                           :: nloctype1D, nloctype2D, nloctypeAll 
    type(t_ObservationPoint), pointer :: pOPnt
    
    ntotal = nend - nstart + 1
@@ -15006,87 +15003,86 @@ subroutine find_flownode_for_obs(nstart, nend)
    call realloc(kobs_tmp2,   nobsini, keepExisting=.false.)
    call realloc(namobs_tmp2, nobsini, keepExisting=.false.)
    
-   nloctype0 = 0
-   nloctype1 = 0
-   nloctype2 = 0
-   
+   nloctype1D = 0
+   nloctype2D = 0
+   nloctypeAll = 0
+
    ! loop over obs
    do i = nstart, nend
-      if (locobs(i) == 0) then ! obs to be snapped to a nearest 1D+2D flow node (obs that are defined in *.xyn file)
+      if (locTpObs(i) == INDTP_ALL) then ! obs to be snapped to a nearest 1D or 2D flow node (obs that are defined in *.xyn file)
          if (ndx <= 0) then
                write(msgbuf, '(a)') "Observation point "//trim(namobs(i))//" requires to snap to a flow node, but there is no flow node to be snapped to."
                call mess(LEVEL_ERROR, msgbuf)
          end if
-         nloctype0 = nloctype0 + 1
-         ixy2obs0(nloctype0)    = i
-         xobs_tmp0(nloctype0)   = xobs(i)
-         yobs_tmp0(nloctype0)   = yobs(i)
-         namobs_tmp0(nloctype0) = namobs(i)
-      else if (locobs(i) == 1) then ! obs to be snapped to only 1D flow node (obs that are defined in *.ini file by xy coordinate, and locationtype ==1)
+         nloctypeAll = nloctypeAll + 1
+         ixy2obs0(nloctypeAll)    = i
+         xobs_tmp0(nloctypeAll)   = xobs(i)
+         yobs_tmp0(nloctypeAll)   = yobs(i)
+         namobs_tmp0(nloctypeAll) = namobs(i)
+      else if (locTpObs(i) == INDTP_1D) then ! obs to be snapped to only 1D flow node (obs that are defined in *.ini file (either by branchid+chainage, or xy coordinate), and locationtype ==1)
          if (ndx - ndx2d <= 0) then
             write(msgbuf, '(a)') "Observation point "//trim(namobs(i))//" requires to snap to a 1D flow node, but there is no 1D flow node to be snapped to."
             call mess(LEVEL_ERROR, msgbuf)
-         end if   
-         nloctype1 = nloctype1 + 1
-         ixy2obs1(nloctype1)    = i
-         xobs_tmp1(nloctype1)   = xobs(i)
-         yobs_tmp1(nloctype1)   = yobs(i)
-         namobs_tmp1(nloctype1) = namobs(i)
-      else if (locobs(i) == 2) then ! obs to be snapped to only 2D flow node (obs that are defined in *.ini file by xy coordinate, and locationtype ==2)
-         if (ndx2d <= 0) then
-            write(msgbuf, '(a)') "Observation point "//trim(pOPnt%name)//" requires to snap to a 2D flow node, but there is no 2D flow node to be snapped to."
-            call mess(LEVEL_ERROR, msgbuf)
-         end if  
-         nloctype2 = nloctype2 + 1
-         ixy2obs2(nloctype2)    = i
-         xobs_tmp2(nloctype2)   = xobs(i)
-         yobs_tmp2(nloctype2)   = yobs(i)
-         namobs_tmp2(nloctype2) = namobs(i)
-      else if (locobs(i) == 3) then ! obs to be snapped to only 1D flow node (obs that are defined in *.ini file by branchID and chainage, and locationtype ==3)
-         ii = loc3obs(i) ! local index within all *.ini file defined obs
-         if ( ii > 0) then
-            pOPnt => network%obs%OPnt(ii)
+         end if
+         jabybranch = 0
+         ! 1D, option a: Try to handle branchid+chainage input directly:
+         if (obs2OP(i) > 0) then
+            pOPnt => network%obs%OPnt(obs2OP(i))
             branchIdx = pOPnt%branchIdx
             if (branchIdx > 0) then
+               jabybranch = 1
                ierr = findnode(branchIdx, pOPnt%chainage, nodenr) ! find flow node given branchIDx and chainage
                if (ierr == DFM_NOERR) then
                   kobs(i)   = nodenr
                else
                   call SetMessage(LEVEL_ERROR, 'Error when snapping Observation Point '''//trim(namobs(i))//''' to a 1D flow node.')
                end if
-            else
-               write(msgbuf, '(a)') "Observation point "//trim(namobs(i))//" does not have a valide branch index."
-               call mess(LEVEL_ERROR, msgbuf)
             end if
-         else
-            write(msgbuf, '(a)') "Cannot find the local index of Observation point "//trim(namobs(i))//" "
-            call mess(LEVEL_ERROR, msgbuf)
          end if
+
+         ! 1D, option b: via x/y coords, prepare input
+         if (jabybranch == 0) then
+            nloctype1D = nloctype1D + 1
+            ixy2obs1(nloctype1D)    = i
+            xobs_tmp1(nloctype1D)   = xobs(i)
+            yobs_tmp1(nloctype1D)   = yobs(i)
+            namobs_tmp1(nloctype1D) = namobs(i)
+         end if
+      else if (locTpObs(i) == INDTP_2D) then ! obs to be snapped to only 2D flow node (obs that are defined in *.ini file by xy coordinate, and locationtype ==2)
+         if (ndx2d <= 0) then
+            write(msgbuf, '(a)') "Observation point "//trim(pOPnt%name)//" requires to snap to a 2D flow node, but there is no 2D flow node to be snapped to."
+            call mess(LEVEL_ERROR, msgbuf)
+         end if  
+         nloctype2D = nloctype2D + 1
+         ixy2obs2(nloctype2D)    = i
+         xobs_tmp2(nloctype2D)   = xobs(i)
+         yobs_tmp2(nloctype2D)   = yobs(i)
+         namobs_tmp2(nloctype2D) = namobs(i)
       end if
    end do
    
    
    ! find flow nodes
    jakdtree = 1
-   if (nloctype0 > 0) then
-      call find_flownode(nloctype0, xobs_tmp0(1:nloctype0), yobs_tmp0(1:nloctype0), namobs_tmp0(1:nloctype0), kobs_tmp0(1:nloctype0), jakdtree, 1, 0)
-      do i = 1, nloctype0
+   if (nloctypeAll > 0) then
+      call find_flownode(nloctypeAll, xobs_tmp0(1:nloctypeAll), yobs_tmp0(1:nloctypeAll), namobs_tmp0(1:nloctypeAll), kobs_tmp0(1:nloctypeAll), jakdtree, 1, INDTP_ALL)
+      do i = 1, nloctypeAll
          kobs(ixy2obs0(i)) = kobs_tmp0(i)  
       end do
    end if
    
    jakdtree = 1
-   if (nloctype1 > 0) then
-      call find_flownode(nloctype1, xobs_tmp1(1:nloctype1), yobs_tmp1(1:nloctype1), namobs_tmp1(1:nloctype1), kobs_tmp1(1:nloctype1), jakdtree, 0, 1)
-      do i = 1, nloctype1
+   if (nloctype1D > 0) then
+      call find_flownode(nloctype1D, xobs_tmp1(1:nloctype1D), yobs_tmp1(1:nloctype1D), namobs_tmp1(1:nloctype1D), kobs_tmp1(1:nloctype1D), jakdtree, 0, INDTP_1D)
+      do i = 1, nloctype1D
          kobs(ixy2obs1(i)) = kobs_tmp1(i)  
       end do
    end if
    
    jakdtree = 1
-   if (nloctype2 > 0) then
-      call find_flownode(nloctype2, xobs_tmp2(1:nloctype2), yobs_tmp2(1:nloctype2), namobs_tmp2(1:nloctype2), kobs_tmp2(1:nloctype2), jakdtree, 0, 2)
-       do i = 1, nloctype1
+   if (nloctype2D > 0) then
+      call find_flownode(nloctype2D, xobs_tmp2(1:nloctype2D), yobs_tmp2(1:nloctype2D), namobs_tmp2(1:nloctype2D), kobs_tmp2(1:nloctype2D), jakdtree, 0, INDTP_2D)
+       do i = 1, nloctype2D
          kobs(ixy2obs2(i)) = kobs_tmp2(i)  
       end do
    end if

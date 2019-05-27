@@ -12742,6 +12742,7 @@ end subroutine plot_ridges
       SUBROUTINE ANCHOR(X,Y)
       use unstruc_colors
       use m_flow, only: nplot
+      use m_GlobalParameters, only: INDTP_ALL
       implicit none
       integer :: jashow
       integer :: jmouse
@@ -12770,7 +12771,7 @@ end subroutine plot_ridges
          YA = Y
       ENDIF
 
-      call inflowcell(XA,YA,k,1) ! Use anchor for new nplot point (vertical profile)
+      call inflowcell(XA,YA,k,1,INDTP_ALL) ! Use anchor for new nplot point (vertical profile)
       if (k > 0) nplot = k
 
       CALL SETXOR(1)

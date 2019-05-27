@@ -31,6 +31,7 @@
 
 !> This module contains general functions for snapping locations to either flowlink numbers or flownode numbers
 module m_inquire_flowgeom
+   use m_GlobalParameters, only: INDTP_1D, INDTP_2D, INDTP_ALL
    implicit none
    
    private

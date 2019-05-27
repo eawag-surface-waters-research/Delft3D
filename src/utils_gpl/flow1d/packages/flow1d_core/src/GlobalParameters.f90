@@ -159,7 +159,12 @@ module m_GlobalParameters
    integer, public, parameter              :: ST_INV_SIPHON = 23
    integer, public, parameter              :: ST_BRIDGE     = 32
    integer, public, parameter              :: ST_MAX_TYPE   = 32 !< Max id of structure types. The preceding ids must be lower than this.
-   
+
+   ! Flow geometry / computational grid
+   integer, public, parameter              :: INDTP_1D      = 1  !< Type code for flow nodes that are 1D
+   integer, public, parameter              :: INDTP_2D      = 2  !< Type code for flow nodes that are 2D
+   integer, public, parameter              :: INDTP_ALL     = 3  !< Type code for flow nodes that are 1D or 2D
+
    ! element set integer ids
    integer, public, parameter :: CFiBranchNodes             = 1
    integer, public, parameter :: CFiBranchLinks             = 2

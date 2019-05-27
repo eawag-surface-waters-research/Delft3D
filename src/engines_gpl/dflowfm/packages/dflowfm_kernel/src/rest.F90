@@ -4963,10 +4963,11 @@ end subroutine timdat
 
 
 !> find flow cells with kdtree2
-  subroutine find_flowcells_kdtree(treeinst,Ns,xs,ys,inod,jaoutside,jaobsloct, ierror)
+  subroutine find_flowcells_kdtree(treeinst,Ns,xs,ys,inod,jaoutside,iLocTp, ierror)
 
      use m_missing
      use m_flowgeom
+     use m_GlobalParameters, only: INDTP_1D, INDTP_2D, INDTP_ALL
      use kdtree2Factory
      use m_sferic
      use unstruc_messages
@@ -4983,7 +4984,7 @@ end subroutine timdat
      integer,          dimension(:),  allocatable   :: invperm !< inverse array 
      integer,          dimension(Ns), intent(out)   :: inod    !< flow nodes
      integer,                         intent(in)    :: jaoutside  !< allow outside cells (for 1D) (1) or not (0)
-     integer,                         intent(in)    :: jaobsloct !< (0) not for obs, or obs with locationtype==0, (1) for obs with locationtype==1, (2) for obs with locationtype==2
+     integer,                         intent(in)    :: iLocTp !< (0) not for obs, or obs with locationtype==0, (1) for obs with locationtype==1, (2) for obs with locationtype==2
      integer,                         intent(out)   :: ierror  !< error (>0), or not (0)
      
      character(len=128)                           :: mesg, FNAM
@@ -5054,14 +5055,14 @@ end subroutine timdat
 
      ! define the searching range, this is especially for the purpose of snapping obs to 1D, 2D or 1D+2D flownodes. 
      ! For other purpose it should stay as before
-     select case(jaobsloct)
-     case (0)
+     select case(iLocTp)
+     case (INDTP_ALL)
         nstart = 1
         nend   = ndx
-     case(1) ! 1d flownodes coordinates
+     case(INDTP_1D) ! 1d flownodes coordinates
         nstart = ndx2D+1
         nend   = ndx
-     case(2) ! 2d flownodes coordinates
+     case(INDTP_2D) ! 2d flownodes coordinates
         nstart = 1
         nend   = ndx2D 
      end select
@@ -5413,6 +5414,7 @@ implicit none
   subroutine snappnt(Nin, xin, yin, dsep, Nout, xout, yout, ipoLout, ierror)
      use m_alloc
      use m_flowgeom, only: xz, yz
+     use m_GlobalParameters, only: INDTP_ALL
      implicit none
 
      integer,                                     intent(in)  :: Nin          !< thin-dyke polyline size
@@ -5446,7 +5448,7 @@ implicit none
         kobs(i)   = 0
      end do
 
-     call find_flownode(Nin, xin, yin, namobs, kobs, jakdtree, 1, 0)
+     call find_flownode(Nin, xin, yin, namobs, kobs, jakdtree, 1, INDTP_ALL)
 
 !    copy to output
      Nout = Nin

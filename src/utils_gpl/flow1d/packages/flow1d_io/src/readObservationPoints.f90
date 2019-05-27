@@ -80,7 +80,7 @@ module m_readObservationPoints
       xx       = dmiss
       yy       = dmiss
       Chainage = dmiss
-      loctype  = 1
+      loctype  = INDTP_1D
       branchIdx= 0
       
       branchID     = ''
@@ -113,19 +113,19 @@ module m_readObservationPoints
       do i = 1, numstr
          
          if (tree_get_name(md_ptr%child_nodes(i)%node_ptr) .eq. 'observationpoint') then
-            formatbr = 1
             ! Read Data
             call prop_get_string(md_ptr%child_nodes(i)%node_ptr, 'observationpoint', 'name', obsPointName, success)
             if (success) then
                call prop_get_string(md_ptr%child_nodes(i)%node_ptr, 'observationpoint', 'branchid', branchID, success)
                if (success) then ! the obs is defined by branchid and chainage
+                  formatbr = 1
                   call prop_get_double(md_ptr%child_nodes(i)%node_ptr, 'observationpoint', 'chainage', Chainage, success)
+                  loctype = INDTP_1D
                else ! the obs is defined by x, y coordinate and locationtype
                   formatbr = 0
+                  loctype  = INDTP_2D ! Default when not user-defined.
                   call prop_get_integer(md_ptr%child_nodes(i)%node_ptr, 'observationpoint', 'LocationType', loctype, success)
-                  if (.not. success) then
-                     loctype = 2
-                  end if
+
                   call prop_get_double(md_ptr%child_nodes(i)%node_ptr, 'observationpoint', 'x', xx, success)
                   if (success) then
                      call prop_get_double(md_ptr%child_nodes(i)%node_ptr, 'observationpoint', 'y', yy, success)
@@ -156,6 +156,7 @@ module m_readObservationPoints
                pOPnt%branch    => network%brs%branch(branchIdx)
                pOPnt%branchIdx = branchIdx
                pOPnt%chainage  = Chainage                
+               pOPnt%locationtype = loctype ! ==INDTP_1D
             else
                pOPnt%x         = xx
                pOPnt%y         = yy

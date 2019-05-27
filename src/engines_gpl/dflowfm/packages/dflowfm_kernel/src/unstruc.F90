@@ -10482,6 +10482,8 @@ end subroutine cosphiunetcheck
 
  subroutine reanumlimdt()
  use m_flowgeom
+ use m_GlobalParameters, only: INDTP_ALL
+
  use m_flow
  use m_partitioninfo
  use m_samples
@@ -10511,7 +10513,7 @@ end subroutine cosphiunetcheck
     call doclose(mlim)
     allocate(knum(ndx)) ; knum = 0
     kk = kk - 1
-    call find_flownode(kk, xs, ys, nams, knum, jakdtree, jaoutside, 0)
+    call find_flownode(kk, xs, ys, nams, knum, jakdtree, jaoutside, INDTP_ALL)
     do k = 1,kk
        if (knum(k) > 0) then
           numlimdt(knum(k)) = zs(k)
@@ -11330,6 +11332,7 @@ end subroutine copynetlinkstosam
  subroutine samplestobl(key)
  use m_samples
  use m_flowgeom
+ use m_GlobalParameters, only: INDTP_ALL
  use m_flow
  implicit none
 
@@ -11338,7 +11341,7 @@ end subroutine copynetlinkstosam
  integer :: k,n
 
  do n = 1,ns
-    call inflowcell(xs(n), ys(n),k,1)
+    call inflowcell(xs(n), ys(n),k,1, INDTP_ALL)
     if (k > 0) then
        bl(k) = zs(n)
     endif
@@ -11349,9 +11352,10 @@ end subroutine copynetlinkstosam
  end subroutine samplestobl
 
 
- subroutine inflowcell(xp,yp,k,jaoutside)                      ! is this point in a flowcell
+ subroutine inflowcell(xp,yp,k,jaoutside, iLocTp)                      ! is this point in a flowcell
 
  use m_flowgeom
+ use m_GlobalParameters, only: INDTP_1D, INDTP_2D, INDTP_ALL
  use m_flow
  use m_flowexternalforcings
  use geometry_module, only: pinpok
@@ -11361,6 +11365,7 @@ end subroutine copynetlinkstosam
 
  double precision  :: xp, yp
  integer           :: k, jaoutside
+ integer,                         intent(in)     :: iLocTp      !< Node type, one of INDTP_1D/2D/ALL.
 
  ! locals
  integer           :: n, nn, in, kb, L
@@ -34203,6 +34208,8 @@ end function ispumpon
  use m_flowexternalforcings
  use m_polygon
  use m_flow
+ use m_GlobalParameters, only: INDTP_ALL
+
  use m_missing
  use unstruc_messages
  use dfm_error
@@ -34253,7 +34260,7 @@ end function ispumpon
  jakdtree = 0
  kdum(1)  = 0
  if (xpl(npl) .ne. -999.999d0) then
-    call find_flownode(1,xpl(npl),ypl(npl),tmpname(1),kdum(1),jakdtree,-1, 0) ; kk2 = kdum(1)
+    call find_flownode(1,xpl(npl),ypl(npl),tmpname(1),kdum(1),jakdtree,-1, INDTP_ALL) ; kk2 = kdum(1)
  endif
 
  ! Support point source/sinks in a single cell if polyline has just one point (npl==1)
@@ -34271,7 +34278,7 @@ end function ispumpon
     tmpname = filename(n1+1:n2) // ' sink'
     kdum(1) = 0
     if (xpl(1) .ne. -999.999d0) then
-       call find_flownode(1,xpl(1),ypl(1),tmpname(1),kdum(1),jakdtree,-1,0) ; kk = kdum(1)
+       call find_flownode(1,xpl(1),ypl(1),tmpname(1),kdum(1),jakdtree,-1,INDTP_ALL) ; kk = kdum(1)
     endif
 
     if (kk.ne.0 .or. kk2.ne.0) then
