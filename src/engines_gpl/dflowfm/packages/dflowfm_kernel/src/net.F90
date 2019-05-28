@@ -741,12 +741,15 @@
    if (japaramscreen == 1) then
       CALL MAKENETPARAMETERS()
    end if
-
-   IF (NPL > 0) THEN
-       CALL  DMINMAX(   XPL ,  NPL  ,  XPLMIN,  XPLMAX, NPL)
-       CALL  DMINMAX(   YPL ,  NPL  ,  YPLMIN,  YPLMAX, NPL)
-       X0 = XPLMIN ; Y0 = YPLMIN
-   ENDIF
+   
+!  get parameters from polygon if available
+   call pol2netparams()
+   
+!   IF (NPL > 0) THEN
+!       CALL  DMINMAX(   XPL ,  NPL  ,  XPLMIN,  XPLMAX, NPL)
+!       CALL  DMINMAX(   YPL ,  NPL  ,  YPLMIN,  YPLMAX, NPL)
+!       X0 = XPLMIN ; Y0 = YPLMIN
+!   ENDIF
 
    AEL = PI*THICK*THICK/4  ! RDIAM in mm
    SIZ = SIZE
@@ -789,6 +792,9 @@
 
           ENDDO
       ENDDO
+      
+      call del_grid_outside_pol()
+      
       ! CALL GRIDTONET()
       ! MC = 0 ; NC = 0; XC = DMISS; YC = DMISS
 
@@ -12441,14 +12447,76 @@ numka:DO K0 = 1,NUMK                 ! ATTRACTION PARAMETERS
       RETURN
       END SUBROUTINE accumulateDistance
 
-      !> Refine entire current polygon from start to end.
+!> Refine entire current polyline from start to end.
       subroutine refinepolygon()
-      use m_polygon, only: npl
+      use m_polygon  !, only: npl, dxuni
+      use m_tpoly
+      use m_sferic
+      use m_missing
+      use geometry_module, only: dbdistance, half
       implicit none
-        integer :: i1, i2
-        i1 = 1
-        i2 = npl
-        call refinepolygonpart(i1,i2,0)
+      integer :: i1, i2
+      integer :: key
+      
+      type(tpoly), dimension(:), allocatable :: pli, pliout              ! tpoly-type polygons
+      
+      double precision                       :: dl, xnew, ynew, znew
+      
+      integer                                :: numpols, numpolsout      ! number of tpoly-type polygons
+      integer                                :: i
+      integer                                :: iter, j
+      integer                                :: M, NPUT
+      
+      i1 = 1
+      i2 = npl
+      call refinepolygonpart(i1,i2,0)
+      
+      call TYPEVALUE(dxuni,key)
+      
+      call pol_to_tpoly(numpols, pli, keepExisting=.false.)
+      call delpol()
+      
+      write(6,*) numpols
+      do i=1,numpols
+         write(6,*) i
+         call tpoly_to_pol(pli,iselect=i)
+!         i1 = 1
+!         i2 = NPL
+!         call refinepolygonpart(i1,i2,1)
+         
+!        loop over polygon points
+         j = 1
+         do while ( j.lt.NPL )
+!           get length           
+            dl = dbdistance(xpl(j), ypl(j), xpl(j+1), ypl(j+1), jsferic, jasfer3D, dmiss)
+            
+!           check length
+            if ( dl.gt.dxuni ) then
+!              compute new point coordinates                 
+               call half(xpl(j), ypl(j), xpl(j+1), ypl(j+1),xnew,ynew,jsferic,jasfer3D)
+               znew = DMISS
+               if ( zpl(j).ne.DMISS .and. zpl(j+1).ne.DMISS ) then
+                  znew = 0.5*(zpl(j)+zpl(j+1))
+               end if
+!              add point
+               call increasepol(NPL+1, 1)
+               NPUT = -1
+               M = j
+               CALL MODLN2(XPL, YPL, ZPL, MAXPOL, NPL, M, xnew, ynew, NPUT)
+               ZPL(M) = znew
+            else
+               j = j+1
+            end if
+         end do
+         
+         call pol_to_tpoly(numpolsout, pliout, keepExisting=.true.)
+         call delpol()
+      end do
+      
+      call tpoly_to_pol(pliout)
+      call dealloc_tpoly(pli)
+      call dealloc_tpoly(pliout)
+        
       end subroutine refinepolygon
 
       !> Refine part of a polygon, indicated by start and end index.
@@ -36355,3 +36423,168 @@ ilp:do isplit=1,MAXSPLIT
    
    return
  end subroutine delete_dry_points_and_areas
+ 
+ !> get uniform curvilinear grid parameters in "makenet" from polygon
+ subroutine pol2netparams()
+   use m_makenet
+   use m_polygon
+   use m_sferic
+   use m_missing
+   use  geometry_module
+   implicit none
+   
+   double precision :: ximin, ximax
+   double precision :: etamin, etamax
+   double precision :: xref, yref, Dx, Dy
+   double precision :: xi, eta, csa, sna
+   
+   integer          :: i
+   
+   integer          :: ierror ! error (1) or not (0)
+   
+   ierror = 0
+   
+!  check if polygon exists
+   if ( NPL.lt.3 ) return
+   
+   ierror = 1
+   
+!  get reference point: first non-missing
+   i = 1;
+   do while ( i.le. NPL .and. ( xpl(i).eq.DMISS .or. ypl(i).eq.DMISS ) )
+      i = i+1
+   end do
+   
+!  check if point was found
+   if ( i.gt.NPL ) goto 1234
+   
+   xref = xpl(i)
+   yref = ypl(i)
+   
+   csa = cos(dg2rd*ANGLE)
+   sna = sin(dg2rd*ANGLE)
+   
+!  get polygon min/max in rotated (xi,eta) coordinaes
+   ximin = huge(1d0)
+   ximax = -ximin
+   etamin = huge(1d0)
+   etamax = -etamin
+   do i=1,NPL
+      if ( xpl(i).ne.DMISS ) then
+         call getdxdy(xref,yref,xpl(i),ypl(i),Dx,Dy, jsferic)
+         xi  =  Dx*csa + Dy*sna
+         eta = -Dx*sna + Dy*csa
+         ximin = min(ximin, xi)
+         ximax = max(ximax, xi)
+         etamin = min(etamin, eta)
+         etamax = max(etamax, eta)
+      end if
+   end do
+   
+!  get x0, y0, NRX, NRY
+   Dx = ximin*csa - etamin*sna
+   Dy = ximin*sna + etamin*csa
+   if ( jsferic.eq.1	) then
+      Dx = Dx/Ra*rd2dg
+      Dy = Dy/(Ra*cos(yref*dg2rd))*rd2dg
+   end if
+   x0 = xref + Dx
+   y0 = yref + Dy
+   
+   NRX = ceiling((ximax-ximin)/DX0)
+   NRY = ceiling((etamax-etamin)/DY0)
+ 
+   ierror = 0
+1234 continue 
+   
+   return
+ end subroutine pol2netparams
+ 
+ ! delete curviliniar grid outside polygon(s)
+ subroutine del_grid_outside_pol()
+   use m_grid
+   use m_polygon
+   use m_tpoly
+   use m_missing
+   implicit none
+   
+   type(tpoly), dimension(:),   allocatable :: pols
+   
+   integer,		 dimension(:,:), allocatable :: kn  ! grid node-based mask
+   integer,		 dimension(:,:), allocatable :: kc  ! grid cell-based mask
+   
+   integer                                  :: numpols, inpol
+   integer                                  :: i, j
+   integer                                  :: ipol
+                                            
+   integer                                  :: ierror ! error (1) or not (0)
+   
+   ierror = 0
+   if ( NPL.lt.2 .or. MC.lt.1 .or. NC.lt.1 ) goto 1234 ! nothing to do
+   
+   ierror = 1
+   
+!  allocate
+   allocate(kn(MC+1,NC+1))
+   kn = 0
+   allocate(kc(MC,NC))
+   kc = 0
+   
+!  convert global polygon to array of tpoly-type polygons
+   call pol_to_tpoly(numpols, pols, keepExisting=.false.)
+   
+!	loop over polygons
+   do ipol=1,numpols
+!     mask grid points that are inside a polygon
+      inpol = 0  ! do not initialize (already in pol_to_tpoly)
+      do j=1,NC+1
+         do i=1,MC+1
+            call dbpinpol_tpoly(pols(ipol), xc(i,j),yc(i,j),inpol)
+            if ( inpol.eq.1 ) then
+               kn(i,j) = 1
+            end if
+         end do
+      end do
+   end do
+   
+!  mark grid cells inside oudside polygons when at least one of its nodes is inside
+   do j=1,NC
+      do i=1,MC
+         if ( kn(i,j).eq.1 .or. kn(i+1,j).eq.1 .or. kn(i,j+1).eq.1 .or. kn(i+1,j+1).eq.1 ) then
+            kc(i,j) = 1
+         end if
+      end do
+   end do
+   
+!  mark nodes that are member of a cell inside the polygon(s)
+   kn = 0
+   do j=1,NC
+      do i=1,MC
+         if ( kc(i,j).eq.1 ) then
+            kn(i,j)     = 1
+            kn(i+1,j)   = 1
+            kn(i,j+1)   = 1
+            kn(i+1,j+1) = 1
+         end if
+      end do
+   end do
+   
+!  remove grid cells outside polygon
+   do j=1,NC+1
+      do i=1,MC+1
+         if ( kn(i,j).eq.0 ) then
+            xc(i,j)     = DMISS
+            yc(i,j)     = DMISS
+         end if
+      end do
+   end do
+   
+   ierror = 0
+1234 continue
+
+   call dealloc_tpoly(pols)
+   if ( allocated(kn) ) deallocate(kn)
+   if ( allocated(kc) ) deallocate(kc)
+   
+   return
+ end subroutine del_grid_outside_pol
