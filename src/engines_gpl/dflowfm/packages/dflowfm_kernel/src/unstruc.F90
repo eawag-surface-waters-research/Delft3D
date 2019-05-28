@@ -11368,11 +11368,25 @@ end subroutine copynetlinkstosam
  integer,                         intent(in)     :: iLocTp      !< Node type, one of INDTP_1D/2D/ALL.
 
  ! locals
- integer           :: n, nn, in, kb, L
+ integer           :: n, nn, in, kb, L, nstart, nend
  double precision  :: dxx, dyy, r
 
+ ! define the searching range, this is especially for the purpose of snapping obs to 1D, 2D or 1D+2D flownodes. 
+ ! For other purpose it should stay as before
+ select case(iLocTp)
+   case (INDTP_ALL)
+      nstart = 1
+      nend   = ndxi
+   case(INDTP_1D) ! 1d flownodes coordinates
+      nstart = ndx2D+1
+      nend   = ndxi
+   case(INDTP_2D) ! 2d flownodes coordinates
+      nstart = 1
+      nend   = ndx2D 
+ end select
+     
  k = 0
- do n = 1,ndxi
+ do n = nstart,nend
      nn = size( nd(n)%x )
      IF (NN > 2) THEN
         call PINPOK (Xp, Yp, Nn, nd(n)%x, nd(n)%y, IN, jins, dmiss)
