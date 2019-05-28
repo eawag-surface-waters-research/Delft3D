@@ -545,6 +545,7 @@ end subroutine updateObservationXY
 !! New observation point may be a moving one or not.
 subroutine addObservation(x, y, name, isMoving, loctype, iOP)
 use m_alloc
+use m_GlobalParameters, only: INDTP_ALL
     double precision, intent(in) :: x !< x-coordinate
     double precision, intent(in) :: y !< y-coordinate
     character(len=*), optional, intent(in) :: name !< Name of the station, appears in output file.
@@ -568,7 +569,7 @@ use m_alloc
     if (present(loctype)) then
        loctype_ = loctype
     else
-       loctype_ = 0
+       loctype_ = INDTP_ALL
     end if
     
     if (present(isMoving)) then
