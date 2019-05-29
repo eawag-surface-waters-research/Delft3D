@@ -101,6 +101,8 @@ function d_hydro () {
     copyFile "$prefix/bin/d_hydro.exe" 					    $dest_bin
     copyFile "$srcdir/engines_gpl/d_hydro/scripts/create_config_xml.tcl"    $dest_menu
     copyFile "$srcdir/engines_gpl/flow2d3d/scripts/run_*.sh"                $dest_scripts
+    copyFile "$srcdir/engines_gpl/flow2d3d/scripts/submit_dflow2d3d.sh"     $dest_scripts
+    copyFile "$srcdir/engines_gpl/flow2d3d/scripts/rd2d3d.sh"               $dest_scripts
 
     echo "Gathering libraries for d_hydro..."
     cp -u `$gatherScript $prefix/bin/d_hydro.exe | eval grep -v $gatherExcludeFilter` $dest_bin
