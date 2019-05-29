@@ -1126,7 +1126,9 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
    if ( ierr /= UG_NOERR) then
       ierr = nf90_def_dim(ncid, 'Two', 2,  meshids%dimids(mdim_two))
    endif
-      
+
+   ierr = ug_add_coordmapping(ncid, crs)
+
    if (.not.present(ngeopointx) .or. (.not.associated(ngeopointx))) then !2d/3d and 1d not UGRID 1.6
       ierr = ug_write_meshtopology(ncid, meshids, meshName, dim, dataLocs, add_edge_face_connectivity, add_face_edge_connectivity, add_face_face_connectivity, add_layers)
       ! Dimensions
@@ -1150,8 +1152,6 @@ function ug_write_mesh_arrays(ncid, meshids, meshName, dim, dataLocs, numNode, n
          ierr = nf90_def_dim(ncid, 'n'//prefix//'_layer',     numLayer,     meshids%dimids(mdim_layer))
          ierr = nf90_def_dim(ncid, 'n'//prefix//'_interface', numLayer + 1, meshids%dimids(mdim_interface))
       end if
-
-      ierr = ug_add_coordmapping(ncid, crs)
 
       ! Nodes
       ! node x,y coordinates.
