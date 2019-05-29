@@ -60,6 +60,7 @@ module string_module
    public :: replace_char
    public :: splitstr
    public :: strsplit
+   public :: char_array_to_string_by_len
    public :: strip_quotes
    public :: real2string, real2stringLeft
    public :: GetLine
@@ -695,6 +696,19 @@ module string_module
          endif
          
       end function splitstr
+
+      !> Constructs a character string from an array of single characters.
+      pure function char_array_to_string_by_len(char_array, N) result(string)
+        character(len=1), intent(in) :: char_array(:) !< Input array of single characters.
+        integer,          intent(in) :: N             !< Length up to which the array needs to be converted.
+        character(len=N)             :: string        !< The resulting string of exactly length N.
+
+        integer :: i
+        do i = 1, N
+           string(i:i) = char_array(i)
+        enddo
+      end function char_array_to_string_by_len
+
 
       subroutine get_substr_ndx(tgt,ndx0,ndx)
          implicit none
