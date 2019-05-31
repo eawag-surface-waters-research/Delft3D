@@ -1331,6 +1331,7 @@ function detect_coordinate_system(ioncid) result(ierr)
       !!datasets(ioncid)%epsg = epsg_code
       ierr = ug_get_var_attset(datasets(ioncid)%ncid, id_crs, datasets(ioncid)%crs%attset)
       ierr = detect_proj_string(datasets(ioncid)%crs)
+      ierr = IONC_NOERR ! NOTE: AvD: PROJ-string errors should not be fatal now, so always return success.
    else 
       goto 999
    end if
