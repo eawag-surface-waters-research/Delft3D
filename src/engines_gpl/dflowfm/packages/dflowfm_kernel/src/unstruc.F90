@@ -36508,6 +36508,9 @@ end subroutine make_mirrorcells
                 call mirrorcell( k2, xk(k3), yk(k3), xk(k4), yk(k4), xci, yci, xz(k1), yz(k1), xce2, yce2, nd(k1)%x, nd(k1)%y)
 
                 call polyindexweight(xce2, yce2, xz(k2), yz(k2), xpl, ypl, kdum, npl, kL, wL, kR, wR) ! xz(k1), yz(k1),
+                if (.not.(kL > 0 .and. kR > 0)) then
+                   call polyindexweight(xz(k2), yz(k2), 2*xz(k2)-xce2, 2*yz(k2)-yce2, xpl, ypl, kdum, npl, kL, wL, kR, wR)
+                endif
                 if (kL > 0 .and. kR > 0) then
                    if (zpl(kL) == dmiss) then
                       write(msgbuf, '(a,a,a,i0)') 'Missing crest level for SOBEK1D-FM2D boundary ''', trim(openbndname(i)), ''': missing value found on point #', kL
