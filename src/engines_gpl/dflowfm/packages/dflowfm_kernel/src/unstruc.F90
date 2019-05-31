@@ -14171,6 +14171,7 @@ subroutine flow_initfloodfill()
 use m_samples
 use m_flow
 use m_flowgeom
+use m_GlobalParameters, only: INDTP_ALL
 use m_alloc
 use kdtree2Factory
 implicit none
@@ -14203,7 +14204,7 @@ iqtail = 0 !< Index of most recently added element in work queue.
 !find flowcells
 if ( jakdtree.eq.1 ) then
    allocate(inodes(Ns))
-   call find_flowcells_kdtree(treeglob,Ns,xs,ys,inodes,1,0, ierror)
+   call find_flowcells_kdtree(treeglob,Ns,xs,ys,inodes,1,INDTP_ALL, ierror)
 end if
 
 if ( ierror.ne.0 ) then
@@ -19181,6 +19182,7 @@ end subroutine unc_write_shp
  subroutine flow_geominit(iphase)                          ! initialise flow geometry
  use m_netw
  use m_flowgeom
+ use m_GlobalParameters, only: INDTP_2D
  use unstruc_model
  use m_flowexternalforcings
  use m_physcoef
@@ -20289,7 +20291,7 @@ end subroutine unc_write_shp
 
  if (Lnx1D < -1 ) then
     kc = 0 ! allocate(inodes(Ndxi-ndx2D)) ; inodes = 0
-    call find_flowcells_kdtree(treeglob,Ndxi-ndx2D,xz(ndx2D+1),yz(ndx2D+1),kc,0,0,ierr)
+    call find_flowcells_kdtree(treeglob,Ndxi-ndx2D,xz(ndx2D+1),yz(ndx2D+1),kc,0,INDTP_2D,ierr)
     do k1 = ndx2D+1, ndxi
        k2 = kc(k1-ndx2D)
        if ( k2 > 0 ) then
