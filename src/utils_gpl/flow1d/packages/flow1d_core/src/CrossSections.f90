@@ -387,31 +387,31 @@ integer function GetCrossType(string)
 
    select case(trim(string))
       case ('tabulated')
-         GetCrossType = CS_TABULATED
+         GetCrossType = CS_TABULATED ! v1
       case ('trapezium')
-         GetCrossType = CS_TRAPEZIUM
+         GetCrossType = CS_TRAPEZIUM ! v1, v2
       case ('circle')
-         GetCrossType = CS_CIRCLE
+         GetCrossType = CS_CIRCLE    ! v1, v2
       case ('egg')
-         GetCrossType = CS_EGG
+         GetCrossType = CS_EGG       ! v1
       case ('yz')
-         GetCrossType = CS_YZ_PROF
+         GetCrossType = CS_YZ_PROF   ! v1, v2
       case ('rectangle')
-         GetCrossType = CS_RECTANGLE
+         GetCrossType = CS_RECTANGLE ! v1, v2
       case ('xyz')
-         GetCrossType = CS_YZ_PROF
+         GetCrossType = CS_YZ_PROF   ! v1, v2
       case ('ellipse')
-         GetCrossType = CS_TABULATED
+         GetCrossType = CS_TABULATED ! v1
       case ('arch')
-         GetCrossType = CS_TABULATED
+         GetCrossType = CS_TABULATED ! v1
       case ('cunette')
-         GetCrossType = CS_TABULATED
+         GetCrossType = CS_TABULATED ! v1
       case ('steelcunette')
-         GetCrossType = CS_TABULATED
+         GetCrossType = CS_TABULATED ! v1
       case ('zw')
-         GetCrossType = CS_TABULATED
-      case ('zw-river')
-         GetCrossType = CS_TABULATED
+         GetCrossType = CS_TABULATED !     v2
+      case ('zwriver')
+         GetCrossType = CS_TABULATED !     v2
       case default
          GetCrossType = -1
    end select
