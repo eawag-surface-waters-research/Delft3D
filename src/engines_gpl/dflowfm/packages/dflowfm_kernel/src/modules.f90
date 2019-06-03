@@ -5278,6 +5278,8 @@ module m_fm_wq_processes
 
    type(outputcoll)                          :: outputs                     !< output structure
    integer,  allocatable, dimension(:,:)     :: id_waq                      !< waq output id's in map-file
+   integer,  allocatable, dimension(:,:)     :: id_wqst                     !< waq stat time output id's in map-file
+   integer,  allocatable, dimension(:,:)     :: id_wqse                     !< waq stat end output id's in map-file
    real(hp), allocatable, dimension(:,:)     :: waqoutputs                  !< waq outputs, dim(noout,Ndkx)
 
    integer                                   :: isfsal                      !< pointer to Salinity        segment function

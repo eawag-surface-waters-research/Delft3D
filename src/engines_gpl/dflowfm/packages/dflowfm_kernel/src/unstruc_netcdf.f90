@@ -206,6 +206,8 @@ type t_unc_mapids
    integer, dimension(:,:), allocatable :: id_const !< Variable ID for (3, NUM_CONST) constituents (on 1D, 2D, 3D grid parts resp.)
    integer, dimension(:,:), allocatable :: id_wqb !< Variable ID for (3, numwqbots) water quality bottom variables output (on 2D grid only)
    integer, dimension(:,:), allocatable :: id_waq !< Variable ID for (3, noout) waq output (on 1D, 2D, 3D grid parts resp.)
+   integer, dimension(:,:), allocatable :: id_wqst !< Variable ID for (3, noout) waq time stat output (on 1D, 2D, 3D grid parts resp.)
+   integer, dimension(:,:), allocatable :: id_wqse !< Variable ID for (3, noout) waq end stat output (on 1D, 2D, 3D grid parts resp.)
    integer :: id_mba(4)    = -1 !< Variable ID for mass balance areas 
    integer, dimension(:,:), allocatable :: id_sed !< Variable ID for 
    integer, dimension(:,:), allocatable :: id_ero !< Variable ID for 
@@ -3767,7 +3769,7 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
 !    Secondary Flow 
 !        id_rsi, id_rsiexact, id_dudx, id_dudy, id_dvdx, id_dvdy, id_dsdx, id_dsdy
 
-   integer :: iid, i, j, numContPts, numNodes, itim, n, LL, L, Lb, Lt, LLL, k, k1, k2, k3
+   integer :: iid, i, j, jj, numContPts, numNodes, itim, n, LL, L, Lb, Lt, LLL, k, k1, k2, k3
    integer :: kk, kb, kt
    integer :: ndxndxi ! Either ndx or ndxi, depending on whether boundary nodes also need to be written.
    integer :: iLocS ! Either UNC_LOC_S or UNC_LOC_S3D, depending on whether layers are present.
@@ -4019,6 +4021,32 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
                tmpstr = trim(outputs%names(j))//' - '//trim(outputs%descrs(j))//' in flow element'
                call replace_multiple_spaces_by_single_spaces(tmpstr)
                ierr = nf90_put_att(mapids%ncid, mapids%id_waq(2,j),  'description'  , tmpstr)
+            end do
+         endif
+         if (noout_statt > 0) then
+            call realloc(mapids%id_wqst, (/ 3, noout_statt /), keepExisting=.false., fill = 0)
+            do j=1,noout_statt
+               jj = noout_user + j
+               tmpstr = ' '
+               write (tmpstr, "('water_quality_stat_',I0)") j
+               ierr = unc_def_var_map(mapids%ncid,  mapids%id_tsp, mapids%id_wqst(:,j), nf90_double, iLocS, tmpstr, &
+                                      '', outputs%names(jj), outputs%units(jj))
+               tmpstr = trim(outputs%names(jj))//' - '//trim(outputs%descrs(jj))//' in flow element'
+               call replace_multiple_spaces_by_single_spaces(tmpstr)
+               ierr = nf90_put_att(mapids%ncid, mapids%id_wqst(2,j),  'description'  , tmpstr)
+            end do
+         endif
+         if (noout_state > 0) then
+            call realloc(mapids%id_wqse, (/ 3, noout_state /), keepExisting=.false., fill = 0)
+            do j=1,noout_state
+               jj = noout_user + noout_statt + j
+               tmpstr = ' '
+               write (tmpstr, "('water_quality_stat_',I0)") noout_statt + j
+               ierr = unc_def_var_map(mapids%ncid,  mapids%id_tsp, mapids%id_wqse(:,j), nf90_double, iLocS, tmpstr, &
+                                      '', outputs%names(jj), outputs%units(jj), 0)
+               tmpstr = trim(outputs%names(jj))//' - '//trim(outputs%descrs(jj))//' in flow element'
+               call replace_multiple_spaces_by_single_spaces(tmpstr)
+               ierr = nf90_put_att(mapids%ncid, mapids%id_wqse(2,j),  'description'  , tmpstr)
             end do
          endif
       endif
@@ -4836,6 +4864,52 @@ subroutine unc_write_map_filepointer_ugrid(mapids, tim, jabndnd) ! wrimap
              end if
           end if
        end do
+       do j=1,noout_statt
+          jj = noout_user + j
+          if (outvar(jj)>0)then
+             workx = DMISS ! For proper fill values in z-model runs.
+             if ( kmx>0 ) then
+!               3D
+                do kk=1,ndxndxi
+                   call getkbotktop(kk,kb,kt)
+                   do k = kb,kt
+                      workx(k) = waqoutputs(jj,k-kbx+1)
+                   enddo
+                end do
+                ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_wqst(:,j), UNC_LOC_S3D, workx)
+             else
+!               2D                
+                do kk=1,NdxNdxi
+                   workx(kk) = waqoutputs(jj,kk)
+                end do
+                ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_wqst(:,j), UNC_LOC_S, workx)
+             end if
+          end if
+       end do
+       if (comparereal(tim, ti_mape, eps10) == 0) then
+          do j=1,noout_state
+             jj = noout_user + noout_statt + j
+             if (outvar(jj)>0)then
+                workx = DMISS ! For proper fill values in z-model runs.
+                if ( kmx>0 ) then
+!                  3D
+                   do kk=1,ndxndxi
+                      call getkbotktop(kk,kb,kt)
+                      do k = kb,kt
+                         workx(k) = waqoutputs(jj,k-kbx+1)
+                      enddo
+                   end do
+                   ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_wqse(:,j), UNC_LOC_S3D, workx)
+                else
+!                  2D                
+                   do kk=1,NdxNdxi
+                      workx(kk) = waqoutputs(jj,kk)
+                   end do
+                   ierr = unc_put_var_map(mapids%ncid, mapids%id_tsp, mapids%id_wqse(:,j), UNC_LOC_S, workx)
+                end if
+             end if
+          end do
+      end if
     end if
 
    ! Turbulence.
@@ -5646,7 +5720,7 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
     use m_bedform
     use m_wind
     use m_flowparameters, only: jatrt, jacali
-    use m_fm_wq_processes, only: jawaqproc, outputs, id_wqb, numwqbots, wqbotnames, wqbotunits, wqbot, id_waq, waqoutputs, kbx, outvar, noout_map, nomba, mbaname, mbadef, id_mba
+    use m_fm_wq_processes
     use m_xbeach_data
     use m_transport, only: NUMCONST, itemp, ITRA1, ITRAN, ISED1, ISEDN, constituents, const_names, const_units, id_const
     use bedcomposition_module, only: bedcomp_getpointer_integer
@@ -5709,7 +5783,7 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
     
     integer,          dimension(:), allocatable :: idum
 
-    integer :: iid, i, j, numContPts, numNodes, itim, k, kb, kt, kk, n, LL, Ltx, Lb, L, nm, nlayb,nrlay, nlaybL, nrlayLx
+    integer :: iid, i, j, jj, numContPts, numNodes, itim, k, kb, kt, kk, n, LL, Ltx, Lb, L, nm, nlayb,nrlay, nlaybL, nrlayLx
     integer :: ndxndxi ! Either ndx or ndxi, depending on whether boundary nodes also need to be written.
     double precision, dimension(:), allocatable :: windx, windy, windang
     double precision, dimension(:), allocatable :: numlimdtdbl ! TODO: WO/AvD: remove this once integer version of unc_def_map_var is available
@@ -6152,6 +6226,46 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
                     ierr = nf90_put_att(imapfile, id_waq(iid,j),  'units'        , trim(outputs%units(j)))
                     ierr = nf90_put_att(imapfile, id_waq(iid,j),  'description'  , tmpstr)
                     ierr = nf90_put_att(imapfile, id_waq(iid,j),  '_FillValue'   , dmiss)
+                 end do
+              endif
+              if (noout_statt > 0) then
+                 call realloc(id_wqst, (/ 3, noout_statt /), keepExisting=.false., fill = 0)
+                 do j=1,noout_statt
+                    jj = noout_user + j
+                    tmpstr = ' '
+                    write (tmpstr, "('water_quality_stat_',I0)") j
+                    if ( kmx > 0 ) then  !        3D
+                       ierr = nf90_def_var(imapfile, tmpstr, nf90_double, (/ id_laydim(iid), id_flowelemdim (iid), id_timedim (iid)/) , id_wqst(iid,j))
+                    else
+                       ierr = nf90_def_var(imapfile, tmpstr, nf90_double, (/ id_flowelemdim (iid), id_timedim (iid)/) , id_wqst(iid,j))
+                    end if
+                    tmpstr = trim(outputs%names(jj))//' - '//trim(outputs%descrs(jj))//' in flow element'
+                    call replace_multiple_spaces_by_single_spaces(tmpstr)
+                    ierr = nf90_put_att(imapfile, id_wqst(iid,j),  'coordinates'  , 'FlowElem_xcc FlowElem_ycc')
+                    ierr = nf90_put_att(imapfile, id_wqst(iid,j),  'long_name'    , trim(outputs%names(jj)))
+                    ierr = nf90_put_att(imapfile, id_wqst(iid,j),  'units'        , trim(outputs%units(jj)))
+                    ierr = nf90_put_att(imapfile, id_wqst(iid,j),  'description'  , tmpstr)
+                    ierr = nf90_put_att(imapfile, id_wqst(iid,j),  '_FillValue'   , dmiss)
+                 end do
+              endif
+              if (noout_state > 0) then
+                 call realloc(id_wqse, (/ 3, noout_state /), keepExisting=.false., fill = 0)
+                 do j=1,noout_state
+                    jj = noout_user + noout_statt + j
+                    tmpstr = ' '
+                    write (tmpstr, "('water_quality_stat_',I0)") noout_statt + j
+                    if ( kmx > 0 ) then  !        3D
+                       ierr = nf90_def_var(imapfile, tmpstr, nf90_double, (/ id_laydim(iid), id_flowelemdim (iid)/) , id_wqse(iid,j))
+                    else
+                       ierr = nf90_def_var(imapfile, tmpstr, nf90_double, (/ id_flowelemdim (iid)/) , id_wqse(iid,j))
+                    end if
+                    tmpstr = trim(outputs%names(jj))//' - '//trim(outputs%descrs(jj))//' in flow element'
+                    call replace_multiple_spaces_by_single_spaces(tmpstr)
+                    ierr = nf90_put_att(imapfile, id_wqse(iid,j),  'coordinates'  , 'FlowElem_xcc FlowElem_ycc')
+                    ierr = nf90_put_att(imapfile, id_wqse(iid,j),  'long_name'    , trim(outputs%names(jj)))
+                    ierr = nf90_put_att(imapfile, id_wqse(iid,j),  'units'        , trim(outputs%units(jj)))
+                    ierr = nf90_put_att(imapfile, id_wqse(iid,j),  'description'  , tmpstr)
+                    ierr = nf90_put_att(imapfile, id_wqse(iid,j),  '_FillValue'   , dmiss)
                  end do
               endif
            endif 
@@ -7655,6 +7769,58 @@ subroutine unc_write_map_filepointer(imapfile, tim, jaseparate) ! wrimap
                 end if
              end if
           end do
+          do j=1,noout_statt
+             jj = noout_user + j
+             if (outvar(jj)>0)then
+                work1 = DMISS ! For proper fill values in z-model runs.
+                if ( kmx>0 ) then
+!                  3D
+                   do kk=1,ndxndxi
+                      work1(:, kk) = dmiss ! For proper fill values in z-model runs.
+                      call getkbotktop(kk,kb,kt)
+                      call getlayerindices(kk, nlayb, nrlay)  
+                      do k = kb,kt
+                         work1(k-kb+nlayb, kk) = waqoutputs(jj,k-kbx+1)
+                      enddo
+                   end do
+                   ierr = nf90_put_var(imapfile, id_wqst(iid,j), work1(1:kmx,1:ndxndxi), (/ 1, 1, itim /), (/ kmx, ndxndxi, 1 /))
+                else
+                   call realloc(dum,NdxNdxi, keepExisting=.false.)
+                   do kk=1,NdxNdxi
+                      dum(kk) = waqoutputs(jj,kk)
+                   end do
+                   ierr = nf90_put_var(imapfile, id_wqst(iid,j), dum, (/ 1, itim /), (/ NdxNdxi, 1 /) )
+                   if (allocated(dum)) deallocate(dum)
+                end if
+             end if
+          end do
+          if (comparereal(tim, ti_mape, eps10) == 0) then
+             do j=1,noout_state
+                jj = noout_user + noout_statt + j
+                if (outvar(jj)>0)then
+                   work1 = DMISS ! For proper fill values in z-model runs.
+                   if ( kmx>0 ) then
+!                     3D
+                      do kk=1,ndxndxi
+                         work1(:, kk) = dmiss ! For proper fill values in z-model runs.
+                         call getkbotktop(kk,kb,kt)
+                         call getlayerindices(kk, nlayb, nrlay)  
+                         do k = kb,kt
+                            work1(k-kb+nlayb, kk) = waqoutputs(jj,k-kbx+1)
+                         enddo
+                      end do
+                      ierr = nf90_put_var(imapfile, id_wqse(iid,j), work1(1:kmx,1:ndxndxi), (/ 1, 1 /), (/ kmx, ndxndxi, 1 /))
+                   else
+                      call realloc(dum,NdxNdxi, keepExisting=.false.)
+                      do kk=1,NdxNdxi
+                         dum(kk) = waqoutputs(jj,kk)
+                      end do
+                      ierr = nf90_put_var(imapfile, id_wqse(iid,j), dum, (/ 1 /), (/ NdxNdxi, 1 /) )
+                      if (allocated(dum)) deallocate(dum)
+                   end if
+                end if
+             end do
+          end if
        end if
 
        if (jased>0 .and. stm_included) then

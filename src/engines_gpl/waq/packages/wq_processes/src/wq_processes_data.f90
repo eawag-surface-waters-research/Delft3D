@@ -31,8 +31,11 @@
       integer  ( 4)              :: nosfun          !< Number of segment functions
       integer  ( 4)              :: nodisp          !< Number of dispersion arrays
       integer  ( 4)              :: novelo          !< Number of velocity arrays
-      integer  ( 4)              :: noout_map       !< Number of map outputs
-      integer  ( 4)              :: noout           !< Number of his outputs
+      integer  ( 4)              :: noout_map       !< Total number of map outputs
+      integer  ( 4)              :: noout_user      !< Number of user outputs
+      integer  ( 4)              :: noout_statt     !< Number of stat map time outputs
+      integer  ( 4)              :: noout_state     !< Number of stat map end outputs
+      integer  ( 4)              :: noout           !< Total number of outputs
       character(20),allocatable  :: syname_sub(:)   !< substance names from sub-file (before old items replacement)
       character(20),allocatable  :: syname(:)       !< substance names
       character(20),allocatable  :: syunit(:)       !< substance names
@@ -47,12 +50,11 @@
       character(20),allocatable  :: dename(:)       !< default array names
       character(20),allocatable  :: locnam(:)       !< local array names
 
-      integer itstrt                                !< Simulation start time ( scu )
-      integer itstop                                !< Simulation stop time ( scu )
-      integer itfact                                !< factor between time scales
-      integer isflag                                !< date string flag ( 0 = no , 1 = yes )
-      integer intsrt                                !< Integration type
-      integer intopt                                !< Integration options
+      integer                    :: itstrt_process  !< Simulation start time ( scu )
+      integer                    :: itstop_process  !< Simulation stop time ( scu )
+      real   ( 8)                :: otime           !< t0 (Julian offset of the real time)
+      integer                    :: isfact          !< system clock in seconds
+      integer                    :: itfact          !< time scale factor processes
 
 ! Dispersion arrays, are used in advection/difusion, set through process library. Useable in FM?
 ! There might also be dispersion arrays from other input in Delwa itself...

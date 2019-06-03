@@ -281,6 +281,7 @@
 		<File RelativePath=".\src\waq_utils\putgtc.f"/>
 		<File RelativePath=".\src\waq_utils\rapdef.f"/>
 		<File RelativePath=".\src\waq_utils\rbpdef.f"/>
+		<File RelativePath=".\src\waq_utils\rd_stt.f90"/>
 		<File RelativePath=".\src\waq_utils\rd_sub.f90"/>
 		<File RelativePath=".\src\waq_utils\rdvers.f"/>
 		<File RelativePath=".\src\waq_utils\rdwrk3.f"/>

@@ -140,14 +140,14 @@
          IF ( IERR2 .EQ. 2 ) GOTO 500
          IF ( IERR2 .EQ. 3 .AND. NOSTAT .EQ. 0 ) GOTO 500
          IF ( IERR2 .EQ. 3 ) THEN
-            WRITE(LUNREP,*)
-     +       'ERROR : closing delimiter block 10 not found'
-            IERR = IERR + 1
+            IF (VRSION.GE.0.0) THEN
+               WRITE(LUNREP,*) 'ERROR : closing delimiter block 10 not found'
+               IERR = IERR + 1
+            ENDIF
             GOTO 500
          ENDIF
          IF ( IERR2 .NE. 0 ) THEN
-            WRITE(LUNREP,*)
-     +       'ERROR : reading block 10'
+            WRITE(LUNREP,*) 'ERROR : reading block 10'
             IERR = IERR + 1
             GOTO 500
          ENDIF
@@ -246,8 +246,7 @@
                IF ( ITYPE .EQ. 1 ) THEN
                   CALL DLWQ0T ( KNAM, istart, .FALSE., .FALSE., IERR2 )
                   IF ( IERR2 .NE. 0 ) THEN
-                     WRITE(LUNREP,*)'ERROR interpreting start time:',
-     +                              KNAM
+                     WRITE(LUNREP,*)'ERROR interpreting start time:', KNAM
                      IERR = IERR + 1
                   ENDIF
                ELSE

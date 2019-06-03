@@ -2755,6 +2755,7 @@ src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/putget.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/putgtc.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/rapdef.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/rbpdef.f -text
+src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/rd_stt.f90 -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/rd_sub.f90 -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/rdvers.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/rdwrk3.f -text

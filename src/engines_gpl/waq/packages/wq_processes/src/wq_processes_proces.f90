@@ -25,7 +25,7 @@
                                        idt    , deriv  , ndmpar , nproc  , noflux , &
                                        ipmsa  , prvnio , promnr , iflux  , increm , &
                                        flux   , flxdmp , stochi , ibflag , ipbloo , &
-                                       ioffbl , amass  , nosys  , itfact , intopt , &
+                                       ioffbl , amass  , nosys  , isfact , itfact , &
                                        iexpnt , iknmrk , noq1   , noq2   , noq3   , &
                                        noq4   , area   , ndspn  , idpnew , dispnw , &
                                        ndspx  , dspx   , dsto   , nveln  , ivpnew , &
@@ -76,8 +76,8 @@
       integer( 4), intent(in   ) :: ioffbl                      !< Offset in IPMSA for Bloom
       real   ( 8), intent(inout) :: amass (notot,noseg)         !< mass array to be updated
       integer( 4), intent(in   ) :: nosys                       !< number of active substances
+      integer( 4), intent(in   ) :: isfact                      !< system clock in seconds
       integer( 4), intent(in   ) :: itfact                      !< time scale factor processes
-      integer( 4), intent(in   ) :: intopt                      !< Integration suboptions
       integer( 4), intent(in   ) :: iexpnt(4,*)                 !< Exchange pointer
       integer( 4), intent(in   ) :: iknmrk(noseg)               !< Integration suboptions
       integer( 4), intent(in   ) :: noq1                        !< Number of exchanges first direction

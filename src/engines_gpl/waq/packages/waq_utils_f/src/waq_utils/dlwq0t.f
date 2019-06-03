@@ -21,6 +21,15 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
+      module dlwq0t_data
+      
+      integer :: dlwq0t_itstrt   ! Simulation start time ( scu )
+      integer :: dlwq0t_itstop   ! Simulation stop time ( scu )
+      integer :: dlwq0t_isfact   ! System timer in seconds
+      real*8  :: dlwq0t_otime    ! Time base in Julian time
+      
+      end module dlwq0t_data
+
       subroutine dlwq0t ( chulp  , ihulp  , dtflg1 , dtflg3 , ierr   )
 
 !     Deltares Software Centre
@@ -37,6 +46,7 @@
 !     Modified           : June  '08 by L. Postma to support long integers
 
       use timers       !   performance timers
+      use dlwq0t_data
 
       implicit none
 
@@ -73,18 +83,6 @@
       real      ( 8) afact    !  system clock in days
       real      ( 8) rhulp    !  help variable
 
-!     COMMON  /  SYSI   /   System timers
-
-!     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-!     ---------------------------------------------------------
-!     block sysi.inc
-!     ITSTRT  INTEGER    1         INPUT   Simulation start time ( scu )
-!     ITSTOP  INTEGER    1         INPUT   Simulation stop time ( scu )
-!     ISFACT  INTEGER    1         INPUT   system clock in seconds
-!     OTIME   REAL*8     1         INPUT   Julian offset of the real time
-
-      INCLUDE 'sysi.inc'
-
       integer(4) :: ithndl = 0
       if (timon) call timstrt( "dlwq0t", ithndl )
 
@@ -96,14 +94,14 @@
       key = 'START'
       call zoek( key, 1, chulp, 20, ikey )
       if ( ikey .gt. 0 ) then                       !  'start' string found
-         ihulp = itstrt
+         ihulp = dlwq0t_itstrt
          goto 9999
       endif
 
       key = 'STOP'
       call zoek( key, 1, chulp, 20, ikey )
       if ( ikey .gt. 0 ) then                       !  'stop' string found
-         ihulp = itstop
+         ihulp = dlwq0t_itstop
          goto 9999
       endif
 
@@ -121,12 +119,12 @@
       idate  = iyear*10000+imonth*100+iday
       itime  = ihour*10000+iminut*100+isecnd
       otim2  = julian ( idate , itime )
-      afact  = isfact/864.0d+02
-      if ( isfact .lt. 0 ) afact = -1.0d+00/isfact/864.0d+02     ! this should support
+      afact  = dlwq0t_isfact/864.0d+02
+      if ( dlwq0t_isfact .lt. 0 ) afact = -1.0d+00/dlwq0t_isfact/864.0d+02     ! this should support
                                                                  ! time steps < 1 second
 !     check if time will fit in the integer
 
-      rhulp = (otim2 - otime)/afact
+      rhulp = (otim2 - dlwq0t_otime)/afact
 
 !     no format maximum is 2**31 which is 2.147.483.648 or around 2.1E9 scu
 

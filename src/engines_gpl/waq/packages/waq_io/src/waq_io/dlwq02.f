@@ -75,6 +75,7 @@
       use filtyp_mod   !   for PARTicle tracking
       use fileinfo     !   a filename array in PART
       use alloc_mod
+      use dlwq0t_data
       use timers       !   performance timers
 
       implicit none
@@ -442,6 +443,10 @@
             write ( lunut , 2330 )
             ierr = ierr + 1
       end select
+
+!     Copy timers data to dlwqt0_data
+      dlwq0t_itstrt = itstrt
+      dlwq0t_itstop = itstop  
 
 !     Read monitoring area's
 

@@ -68,6 +68,7 @@
       character(len=256)       :: proc_log_file         !< processes log file
       character(len=256)       :: proc_def_file         !< processes definition file
       character(len=256)       :: bloom_file            !< BLOOM algae spiecies paramter file
+      character(len=256)       :: statistics_file       !< file with configuration for statistics
       
       type(procespropcoll)     :: statprocesdef   !< the statistical proces definition
       integer  ( 4), parameter :: nomult = 0      !< number of multiple substances
@@ -95,7 +96,7 @@
       
       integer :: ierror
       
-      logical :: Lsub, Lpdf, Lblm, Leho, opened, Lallocated, writebalance
+      logical :: Lsub, Leho, Lstt, Lpdf, Lblm, opened, Lallocated, writebalance
 
       integer(4), save         :: ithndl = 0
 
@@ -116,29 +117,39 @@
       his_output_file = md_ehofile
       proc_def_file = md_pdffile
       bloom_file = md_blmfile
+      statistics_file = md_sttfile
       proc_log_file = defaultfilename('wq_lsp')
       
+!     try to open the lsp-file for logging output
       open (newunit=lunlsp , file=proc_log_file, status='unknown', iostat=ierr)
       if (ierr.ne.0) then
          call mess(LEVEL_ERROR, 'Could not open processes log file: ', trim(proc_log_file))
       end if
       call setmlu(lunlsp)
       
-!     check if sub- and pdffile have a value and exist
+!     check if substance file exists
       inquire(file=substance_file,exist=Lsub)
       if ( .not.Lsub) then
          call mess(LEVEL_ERROR, 'Substance file does not exist: ', trim(substance_file))
       end if
       
+!     check if additional history output file exists
       if (his_output_file.ne.' ') then
          inquire(file=his_output_file,exist=Leho)
          if ( .not.Leho) then
-            call mess(LEVEL_ERROR, 'Extra histrory output file specified, but does not exist: ', trim(his_output_file))
+            call mess(LEVEL_ERROR, 'Additional histrory output file specified, but does not exist: ', trim(his_output_file))
          end if
       else
          Leho = .false.
       endif
 
+!     check if statistics file exists
+      inquire(file=statistics_file,exist=Lstt)
+      if ( .not.Lstt) then
+         call mess(LEVEL_ERROR, 'Substance file does not exist: ', trim(substance_file))
+      end if
+
+!     check if proc_def file exists
       if (proc_def_file.ne.' ') then
          inquire(file=proc_def_file,exist=Lpdf)
          if ( .not.Lpdf) then
@@ -148,6 +159,7 @@
          call mess(LEVEL_ERROR, 'No process library file specified. Use commandline argument --processlibrary "<path>/<name>"')
       endif   
       
+!     check if bloom file exists
       if (bloom_file.ne.' ') then
          inquire(file=bloom_file,exist=Lblm)
          if ( .not.Lblm) then
@@ -269,9 +281,6 @@
          noout_eho = 0
       end if
 
-      
-      noout = noout_map + noout_eho
-
 !     The active substances should be initialised as 'constituents' in DFM.
 !     Initial concentration (fields), boundary conditions and additional (waste) loads
 !     should be specified in DFM
@@ -360,7 +369,11 @@
       call realloc(coname, noconm)
       ierr2 = dlwq_init_item(constants)
       ierr2 = dlwq_resize(constants,noconm)
-      j=0
+      j=1
+      coname(j) = 'itime'
+      constants%ipnt(j) = 1
+      constants%name(j) = 'itime'
+      constants%constant(j) = 0.0
 
 !     Skip constants from the sub-file that are will be added by DFM
       do i = 1, nocons
@@ -389,15 +402,15 @@
 
 !     Set the required output data.
 !     -> When outputs are not specified, they might end up in A(1), a 'black hole' location that is constantly overwritten
-      allocate(outputs%names(noout))
-      allocate(outputs%stdnames(noout))
-      allocate(outputs%pointers(noout))
-      allocate(outputs%units(noout))
-      allocate(outputs%descrs(noout))
+      noout_user = noout_map + noout_eho
+
+      allocate(outputs%names(noout_user))
+      allocate(outputs%stdnames(noout_user))
+      allocate(outputs%pointers(noout_user))
+      allocate(outputs%units(noout_user))
+      allocate(outputs%descrs(noout_user))
       
-      call realloc(waqoutputs, [noout, noseg], keepExisting=.false., fill = 0.0d0)
-      
-      outputs%cursize  = noout
+      outputs%cursize  = noout_user
       do i = 1, noout_sub
           outputs%names(i) = ouname_sub(i)
           outputs%stdnames(i) = ' '
@@ -419,17 +432,20 @@
       deallocate (ouname_sub)
 
 !     calculation timers need to be known for the statistical processes (start time/stop time)
-      itfact = 86400              !< time scale factor processes
-      itstrt = nint(tstart_user)
-      itstop = nint(tstop_user)
-      
-!     for now, disable statistical processes
-      statprocesdef%cursize = 0
+      isfact = 1
+      itfact = 86400
+      itstrt_process = nint(tstart_user)
+      itstop_process = floor(tstop_user/ti_waqproc + 0.001d0)*ti_waqproc
+      otime = dble(julrefdat)-0.5d0 !refdate_mjd
 
 !     Finally, evaluate the processes using the proces library
 !     --------------------------------------------------------
-      call wq_processes_initialise ( lunlsp, proc_def_file, bloom_file, statprocesdef, outputs, &
+      call wq_processes_initialise ( lunlsp, proc_def_file, bloom_file, statistics_file, statprocesdef, outputs, &
                                      nomult, imultp, constants, noinfo, nowarn, ierr)
+      if (ierr .ne. 0) then
+         call mess(LEVEL_ERROR, 'Something went wrong during initialisation of the processes. Check the lsp-file: ', trim(proc_log_file))
+      endif
+
 
 !     proces fractional step multiplier is 1 for all
       prondt = 1
@@ -509,7 +525,7 @@
          call add_wqbot(trim(syname_sub(i)), syunit(i), isys2wqbot(i), janew)
       end do
       
-      noout = outputs%cursize   
+      call realloc(waqoutputs, [noout, noseg], keepExisting=.false., fill = 0.0d0)
       call realloc(outvar,noout,keepExisting=.false.,fill=0)
       do j=1,noout
           call zoekns(outputs%names(j),novar,varnam,20,ivar)
@@ -892,10 +908,11 @@
       
       idt   = int(dt)
       itime = int(time)
+      pmsa(ipoidefa+1) = itime
       
       call wq_processes_proces (notot , noseg , pmsa(ipoiconc), pmsa(ipoivol) , itime , idt   , deriv , ndmpar, &
                                 nproc , nflux , ipmsa , prvnio, promnr, iflux , increm, flux  , flxdmp, stochi, &
-                                ibflag, ipbloo, ioffbl, amass , nosys , itfact, intopt, iexpnt, iknmrk, noq1  , &
+                                ibflag, ipbloo, ioffbl, amass , nosys , isfact, itfact , iexpnt, iknmrk, noq1  , &
                                 noq2  , noq3  , noq4  , pmsa(ipoiarea), ndspn , idpnew, dispnw, ndspx , dspx  , &
                                 dsto  , nveln , ivpnw , velonw, nvelx , pmsa(ipoivelx), vsto  , mbadefdomain(kbx:ktx), &
                                 pmsa(ipoidefa), prondt, prvvar, prvtyp, vararr, varidx, arrpoi, arrknd, arrdm1, &
@@ -1232,6 +1249,7 @@
       jamba = 0      
       md_subfile = ''
       md_ehofile = ''
+      md_sttfile = ''
       md_thetav_waq = 0d0
       md_dt_waqproc = 0d0
       

@@ -327,7 +327,9 @@
       NSPROC = ISPROC
 !
   500 CONTINUE
-      WRITE ( LUNREP , 3000 ) 10
+      IF(VRSION.GE.0.0) THEN
+         WRITE ( LUNREP , 3000 ) 10
+      END IF
 !
       if ( timon ) call timstop( ithndl )
       RETURN

@@ -25,6 +25,7 @@ libwaq_utils_la_SOURCES =  \
        dlwq1_grid_mod.f \
        dlwq_data.f \
        dwq_proces_set.f \
+       rd_stt.f90 \
        rd_sub.f90 \
        dlwq0t.f \
        dhcommand.f90 \

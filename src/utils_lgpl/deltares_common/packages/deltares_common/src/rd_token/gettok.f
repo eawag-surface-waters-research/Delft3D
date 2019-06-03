@@ -86,6 +86,9 @@
       chtab = char(9)
       ch_cr = char(13)
       ctrlz = char(26)
+      str  = ' '
+      int  = 0
+      reel = 0.0
 
 !         see if we are in a repeat cycle
 

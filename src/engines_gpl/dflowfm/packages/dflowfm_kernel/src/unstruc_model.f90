@@ -151,6 +151,7 @@ implicit none
     character(len=255) :: md_ehofile = ' '      !< extra history output file
     character(len=255) :: md_pdffile = ' '      !< process library file
     character(len=255) :: md_blmfile = ' '      !< BLOOM aglae species definition file
+    character(len=255) :: md_sttfile = ' '      !< statistics definition file
     double precision   :: md_thetav_waq = 0d0   !< thetav for waq
     double precision   :: md_dt_waqproc = 0d0   !< processes time step
     double precision   :: md_dt_waqbal = 0d0    !< mass balance output time step
@@ -1785,6 +1786,7 @@ subroutine readMDUFile(filename, istat)
 !  processes (WAQ)   
    call prop_get_string (md_ptr, 'processes', 'SubstanceFile', md_subfile, success)
    call prop_get_string (md_ptr, 'processes', 'AdditionalHistoryOutputFile', md_ehofile, success)
+   call prop_get_string (md_ptr, 'processes', 'StatisticsFile', md_sttfile, success)
    call prop_get_double (md_ptr, 'processes', 'ThetaVertical', md_thetav_waq, success)
    call prop_get_integer(md_ptr, 'processes', 'ProcessFluxIntegration', md_flux_int, success)
    call prop_get_double (md_ptr, 'processes', 'VolumeDryThreshold', waq_vol_dry_thr)
@@ -3104,6 +3106,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
 !  processes (WAQ)   
    call prop_set_string (prop_ptr, 'processes', 'SubstanceFile', trim(md_subfile), 'substance file')
    call prop_set_string (prop_ptr, 'processes', 'AdditionalHistoryOutputFile', trim(md_ehofile), 'extra history output file')
+   call prop_set_string (prop_ptr, 'processes', 'StatisticsFile', trim(md_sttfile), 'statistics file')
    call prop_set_double (prop_ptr, 'processes', 'ThetaVertical', md_thetav_waq, 'theta vertical for waq')
    call prop_set_double (prop_ptr, 'processes', 'DtProcesses', md_dt_waqproc, 'waq processes time step')
    call prop_set_double (prop_ptr, 'processes', 'DtMassBalance', md_dt_waqbal, 'waq mass balance output time step')

@@ -56,6 +56,7 @@
 !                           lun( 2) = unit system-intermediate file
 
       use rd_token     !   tokenized reading
+      use dlwq0t_data
       use timers       !   performance timers
       implicit none
 
@@ -175,6 +176,10 @@
             write ( lunut  , 2060 ) -isfact
          endif
       endif
+
+!     Copy timers data to dlwqt0_data
+      dlwq0t_otime  = otime 
+      dlwq0t_isfact = isfact  
 
 !     Read number of transported and number of passive systems
 

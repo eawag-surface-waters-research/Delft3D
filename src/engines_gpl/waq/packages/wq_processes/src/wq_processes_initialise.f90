@@ -22,7 +22,7 @@
 !!  rights reserved.
       
       subroutine wq_processes_initialise ( lunlsp       , pdffil       , blmfil    , &
-                                           statprocesdef,                outputs   , &
+                                           sttfil       , statprocesdef, outputs   , &
                                            nomult       , imultp       , constants , &
                                            noinfo       , nowarn       , ierr)
 
@@ -42,6 +42,7 @@
       use processes_pointers
       
       use dlwq_data
+      use dlwq0t_data
       use processet
       use output
       use string_module
@@ -56,9 +57,13 @@
       integer             , intent(in   ) :: lunlsp          !< unit number spe
       character(len=*)    , intent(inout) :: pdffil          !< filename proc_def
       character(len=*)    , intent(inout) :: blmfil          !< filename spe
+      character(len=*)    , intent(inout) :: sttfil          !< filename stt
 
-      type(procespropcoll), intent(in   ) :: statprocesdef   !< the statistical proces definition
+      type(procespropcoll), intent(inout) :: statprocesdef   !< the statistical proces definition
       type(outputcoll)    , intent(inout) :: outputs         !< output structure
+      character(len=20)                   :: statproc        !< name of statistics proces
+      character(len=20)                   :: statname        !< name of stat output variable
+      integer                             :: statival        !< pointer in waq arrays of stat output
       integer  ( 4)       , intent(in   ) :: nomult          !< number of multiple substances
       integer  ( 4)       , intent(in   ) :: imultp(2,nomult)!< multiple substance administration
       type(t_dlwq_item)   , intent(inout) :: constants       !< delwaq constants list
@@ -128,6 +133,7 @@
 
       type(procespropcoll)      :: procesdef       ! the complete process definition
       type(procesprop), pointer :: proc            ! process description
+      type(arrayprop)           :: aarrayprop      !  one array property to add into collection
       real                      :: scale           ! stochi factor
       character(len=20)         :: flxnam          ! output buffer
       integer                   :: nbpr            ! number of processes
@@ -187,18 +193,11 @@
 
       type(old_item_coll)                :: old_items        ! the old_items table
 
-      ! Dummy file structure (temp?)
-      integer               :: lun(50)                 !< unit numbers
-      character(len=255)    :: lchar(50)               !< filenames
-
       integer(4), save :: ithndl = 0
       if (timon) call timstrt( "wq_processes_initialise", ithndl )
 
+      ierr = 0
       ierr2 = 0
-      lun =  0
-      lchar = ' '
-      lun(24) = 1972
-      lchar(24) = 'test-proces.wrk'
       
       ! allocate
 
@@ -262,10 +261,31 @@
       laswi = .true.
       ! laswi = .false.
 
+      ! initialise statistical processes
+      statprocesdef%cursize = 0
+      statprocesdef%maxsize = 0
+      if (sttfil.ne.' ') then
+         dlwq0t_itstrt = itstrt_process
+         dlwq0t_itstop = itstop_process
+         dlwq0t_isfact = isfact
+         dlwq0t_otime  = otime
+
+         write(lunlsp,*) ' '
+         write(lunlsp,*) ' Reading statistics definition file: ', trim(sttfil)
+         call rd_stt(lunlsp, sttfil, statprocesdef, allitems, noinfo, nowarn, ierr2)
+         if (ierr2.ne.0) then
+            write(lunlsp,*) ' ERROR: Could not read the statistics definition file.'
+            write(*,*) ' ERROR: Could not read the statistics definition file.'
+            ierr = ierr + 1
+            return
+         else
+         endif   
+      endif
+      
       ! read process definition file
 
-      call rd_tabs( pdffil, lunlsp , versio, serial, noinfo, nowarn, ierr )
-      if (ierr.gt.ierr2) then
+      call rd_tabs( pdffil, lunlsp , versio, serial, noinfo, nowarn, ierr2 )
+      if (ierr2.ne.0) then
          write(lunlsp,*) ' '
          write(lunlsp,*) ' ERROR: Could not read the process definition file.'
          write(lunlsp,*) '        Check if the filename after -p is correct, and exists.'
@@ -277,7 +297,8 @@
          write(*,*) '        Check if the filename after -p is correct, and exists.'
          write(*,*) '        Use -np if you want to run without processes.'
          write(*,*) ' '
-         call srstop(1)
+         ierr = ierr + 1
+         return
       else
          write (lunlsp, *  )
          write (lunlsp,2001) trim(pdffil)
@@ -516,16 +537,52 @@
       ! handle output from statistical processes
 
 !      call set_stat_output( statprocesdef, noutp, ioutps, nrvart, outputs)
-
-      ! set output boot dimensions, attention !!!!! is new ncbufm written to work file?
-
-!       call outbo2 ( noutp , ioutps, nosss , nodump, nx    ,
-!     +               ny    , nrvart, nbufmx, ndmpar, notot ,
-!     +               ncbufm, noraai)
-
-
+      noout_statt = 0
+      noout_state = 0
+!     first statistics with temporal output
+      if ( statprocesdef%cursize .gt. 0 ) then
+         do istat = 1 , statprocesdef%cursize
+            do iitem = 1 , statprocesdef%procesprops(istat)%no_output
+               if ( statprocesdef%procesprops(istat)%output_item(iitem)%type .eq. iotype_segment_output ) then
+                  statproc = statprocesdef%procesprops(istat)%routine
+                  if (statproc.eq.'STADAY'.or.statproc.eq.'STADPT') then
+                     statname = statprocesdef%procesprops(istat)%output_item(iitem)%name
+                     noout = outputs%cursize + 1
+                     noout_statt = noout_statt + 1
+                     call reallocP(outputs%names, noout, keepExisting = .true., fill=statname)
+                     call reallocP(outputs%stdnames, noout, keepExisting = .true., fill=' ')
+                     call reallocP(outputs%pointers, noout, keepExisting = .true., fill=-1)
+                     call reallocP(outputs%units, noout, keepExisting = .true., fill=' ')
+                     call reallocP(outputs%descrs, noout, keepExisting = .true., fill=' ')
+                     outputs%cursize = noout
+                  endif
+               endif
+            enddo
+         enddo
+      endif
+!     then statistics with end output
+      if ( statprocesdef%cursize .gt. 0 ) then
+         do istat = 1 , statprocesdef%cursize
+            do iitem = 1 , statprocesdef%procesprops(istat)%no_output
+               if ( statprocesdef%procesprops(istat)%output_item(iitem)%type .eq. iotype_segment_output ) then
+                  statproc = statprocesdef%procesprops(istat)%routine
+                  if (.not.(statproc.eq.'STADAY'.or.statproc.eq.'STADPT')) then
+                     statname = statprocesdef%procesprops(istat)%output_item(iitem)%name
+                     noout = outputs%cursize + 1
+                     noout_state = noout_state + 1
+                     call reallocP(outputs%names, noout, keepExisting = .true., fill=statname)
+                     call reallocP(outputs%stdnames, noout, keepExisting = .true., fill=' ')
+                     call reallocP(outputs%pointers, noout, keepExisting = .true., fill=-1)
+                     call reallocP(outputs%units, noout, keepExisting = .true., fill=' ')
+                     call reallocP(outputs%descrs, noout, keepExisting = .true., fill=' ')
+                     outputs%cursize = noout
+                  endif
+               endif
+            enddo
+         enddo
+      endif
+ 
       ! replace names of bloom algea with actual names
-
       if ( l_eco .and. nbpr .gt. 0 ) then
 
          ! now replace process parameters
@@ -567,7 +624,8 @@
                     nopa     , paname, nofun , funame, nosfun,    &
                     sfname   , nodisp, diname, novelo, vename,    &
                     noqtt    , laswi , no_act, actlst, noinfo,    &
-                    nowarn   , ierr  )
+                    nowarn   , ierr2  )
+      if ( ierr2 .ne. 0 ) ierr = ierr + 1
       deallocate(actlst)
 
       ! determine wich primary processes must be turned on
@@ -584,7 +642,8 @@
       call primpro ( procesdef, notot , syname, ndspx , nvelx , &
                      ioffx    , nosys , dsto  , vsto  , ndspn , &
                      idpnw    , nveln , ivpnw , noqtt , noinfo, &
-                     nowarn   , ierr  )
+                     nowarn   , ierr2 )
+      if ( ierr2 .ne. 0 ) ierr = ierr + 1
 
       ! determine wich processes must be turned on for output purposes
 
@@ -601,21 +660,12 @@
       call realloc(dename, maxdef, keepExisting=.false.,Fill=' ')
 
       defaul    = 0.0
-      defaul(5) = float(itstrt)
-      defaul(6) = float(itstop)
+      defaul(5) = float(itstrt_process)
+      defaul(6) = float(itstop_process)
       call realloc(locnam, novarm, keepExisting=.false.,Fill=' ')
 
       ! put theta in local array if wanted for output, the value will be filled by the integration routine
       ! noloc is already 1?, use this space!
-
-      parnam = 'theta'
-      call zoekns(parnam,outputs%cursize,outputs%names,20,parindx)
-      if ( parindx .gt. 0 .and. (intsrt .eq. 21 .or. intsrt .eq. 22) ) then
-         locnam(1) = parnam
-         outputs%pointers(parindx) = nopred + nocons + nopa + nofun + nosfun + notot + 1
-         write ( line , '(3a)' ) ' output [',parnam,'] will be generated by numerical scheme'
-         call monsys( line , 4 )
-      endif
 
       call getinv ( procesdef, notot , syname, nocons, constants, &
                     nopa     , paname, nofun , funame, nosfun,    &
@@ -636,8 +686,6 @@
       ! if not all input present , stop with exit code
 
       if ( nmis .gt. 0 ) then
-!         call dhopnf ( lun(24) , lchar(24), 24    , 1     , ierr2 )   why?
-!         close ( lun(24) )                                            why?
          write(lunlsp,*) ' not all input available.'
          write(lunlsp,*) ' number off missing variables :',nmis
          write(lunlsp,*) ' simulation impossible.'

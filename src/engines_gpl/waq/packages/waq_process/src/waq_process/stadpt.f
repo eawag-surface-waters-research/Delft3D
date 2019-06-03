@@ -50,141 +50,134 @@
 !     Name     Type   Library
 !     ------   -----  ------------
 
-      IMPLICIT NONE
+      implicit none
 
-      REAL     PMSA  ( * ) , FL    (*)
-      INTEGER  IPOINT( * ) , INCREM(*) , NOSEG , NOFLUX,
-     +         IEXPNT(4,*) , IKNMRK(*) , NOQ1, NOQ2, NOQ3, NOQ4
+      real     pmsa  ( * ) , fl    (*)
+      integer  ipoint( * ) , increm(*) , noseg , noflux
+      integer  iexpnt(4,*) , iknmrk(*) , noq1, noq2, noq3, noq4
 !
-      INTEGER  IP1   , IP2   , IP3   , IP4   , IP5   ,
-     +         IN1   , IN2   , IN3   , IN4   , IN5
-      INTEGER  IPP2  , IPP3  , IPP4  , IPP5  , ISEGL , NOSEGL, LUNREP
-      INTEGER  NOLAY , ILAY
-      INTEGER  IKMRK
-      REAL     VOLUME
+      integer  ip1   , ip2   , ip3   , ip4   , ip5
+      integer  in1   , in2   , in3   , in4   , in5
+      integer  ikmrk
+      real     volume
 
-      IP1 = IPOINT(1)
-      IP2 = IPOINT(2)
-      IP3 = IPOINT(3)
-      IP4 = IPOINT(4)
-      IP5 = IPOINT(5)
+!     work arrays
+      real, allocatable :: cdepsum(:)
+      real, allocatable :: vdepsum(:)
+      real, allocatable :: cdepavg(:)
+      real, allocatable :: cdepmax(:)
+      real, allocatable :: cdepmin(:)
+      
+      integer           :: iseg, ifrom, ito, ik1from, ik1to, iq
 
-      IN1 = INCREM(1)
-      IN2 = INCREM(2)
-      IN3 = INCREM(3)
-      IN4 = INCREM(4)
-      IN5 = INCREM(5)
+      ip1 = ipoint(1)
+      ip2 = ipoint(2)
+      ip3 = ipoint(3)
+      ip4 = ipoint(4)
+      ip5 = ipoint(5)
+
+      in1 = increm(1)
+      in2 = increm(2)
+      in3 = increm(3)
+      in4 = increm(4)
+      in5 = increm(5)
 
 !
 !     The averaging is independent of a time interval, as the outcome
 !     is itself time-dependent (there is only a reduction in the
 !     spatial coordinates)
 !
-!     Problem:
-!     DELWAQ does not use explicit layer information. So:
-!     - Assume that the segments are numbered per layer
-!     - Assume that the exchanges are numbered per layer
-!     - Then the number of layers is: NOQ1/(NOQ1-NOQ3)
+
+!     This method also works when the vertical is unstructured
+!     The only assumption is that the direction in which the exchanges are
+!     defined is the same as the order that they were arranged in.
 !
-!     Also: Simple check to catch obvious errors
+!     so:  from 1 to 2, from 2 to 3, from 3 to 4
+!     or:  from 4 to 3, from 3 to 2, from 2 to 1
+!     not: from 2 to 1, from 3 to 2, from 4 to 3
+!
+!     this assumtion is made elsewhere in Delwaq
 !
 
-      NOSEGL = NOSEG - NOQ3
-      NOLAY  = NOSEG / NOSEGL
+!     allocate and initialise work arrays
+      allocate (cdepsum(noseg))
+      allocate (vdepsum(noseg))
+      allocate (cdepavg(noseg))
+      allocate (cdepmax(noseg))
+      allocate (cdepmin(noseg))
+      cdepsum = 0.0
+      vdepsum = 0.0
+      cdepavg = 0.0
+      cdepmax = 0.0
+      cdepmin = 0.0
 
-      IF ( NOSEG .NE. NOSEGL*NOLAY ) THEN
-         CALL GETMLU( LUNREP )
-         WRITE( LUNREP, * ) 'ERROR in STADPT'
-         WRITE( LUNREP, * )
-     &'Number of segments inconsistent with expected number of layers'
-         WRITE( LUNREP, * )
-     &'Segments, layers: ', NOSEG, NOLAY
-         WRITE( *     , * ) 'ERROR in STADPT'
-         WRITE( *     , * )
-     &'Number of segments inconsistent with expected number of layers'
-         WRITE( LUNREP, * )
-     &'Segments, layers: ', NOSEG, NOLAY
-         CALL SRSTOP( 1 )
-      ENDIF
+!     default output is the value from the segment itself
+      do iseg=1,noseg
+         call dhkmrk( 1, iknmrk(iseg), ikmrk )
+         if ( ikmrk .ne. 0 ) then
+            cdepsum(iseg) = pmsa(ip1) * pmsa(ip2)
+            vdepsum(iseg) = pmsa(ip2)
+            cdepavg(iseg) = pmsa(ip1)
+            cdepmax(iseg) = pmsa(ip1)
+            cdepmin(iseg) = pmsa(ip1)
+         endif
+         ip1       = ip1 + in1
+         ip2       = ip2 + in2
+      end do
 
-!
-!     Initialise the output arrays
-!     Assumption:
-!     If a segment in the first layer is active, all others are active
-!     as well. This need not be true for the layers below the first.
-!
-      DO 1000 ISEGL=1,NOSEGL
-         CALL DHKMRK( 1, IKNMRK(ISEGL), IKMRK )
-         IF ( IKMRK .NE. 0 ) THEN
-            PMSA(IP3) = PMSA(IP1) * PMSA(IP2)
-            PMSA(IP4) = PMSA(IP1)
-            PMSA(IP5) = PMSA(IP1)
-         ENDIF
-         IP1       = IP1 + IN1
-         IP2       = IP2 + IN2
-         IP3       = IP3 + IN3
-         IP4       = IP4 + IN4
-         IP5       = IP5 + IN5
- 1000 CONTINUE
+!     first loop forwards
+      do iq = noq1+noq2+1 , noq1+noq2+noq3
+         ifrom  = iexpnt(1,iq)
+         ito    = iexpnt(2,iq)
+         if ( ifrom .gt. 0 .and. ito .gt. 0 ) then
+            call dhkmrk( 1, iknmrk(ifrom ), ik1from )
+            call dhkmrk( 1, iknmrk(ito)   , ik1to )
+            if ( ik1from .eq. 1 .and. ik1to .eq. 1 ) then
+               cdepsum(ito) = cdepsum(ito) + cdepsum(ifrom)
+               vdepsum(ito) = vdepsum(ito) + vdepsum(ifrom)
+               if (vdepsum(ito).gt.0.0) then
+                  cdepavg(ito) = cdepsum(ito) / vdepsum(ito)
+               endif
+               cdepmax(ito) = max(cdepmax(ifrom), cdepmax(ito))
+               cdepmin(ito) = min(cdepmin(ifrom), cdepmin(ito))
+            endif
+         endif
+      enddo
 
-      DO 9200 ISEGL=1,NOSEGL
-!
-!        The first layer is already done. So prepare for the next ...
-!
-         IP1 = IPOINT(1) + IN1*(ISEGL-1)
-         IP2 = IPOINT(2) + IN2*(ISEGL-1)
-         IP3 = IPOINT(3) + IN3*(ISEGL-1)
-         IP4 = IPOINT(4) + IN4*(ISEGL-1)
-         IP5 = IPOINT(5) + IN5*(ISEGL-1)
+!     second loop backwards
+      do iq = noq1+noq2+noq3, noq1+noq2+1, -1
+         ifrom  = iexpnt(1,iq)
+         ito    = iexpnt(2,iq)
+         if ( ifrom .gt. 0 .and. ito .gt. 0 ) then
+            call dhkmrk( 1, iknmrk(ifrom ), ik1from )
+            call dhkmrk( 1, iknmrk(ito)   , ik1to )
+            if ( ik1from .eq. 1 .and. ik1to .eq. 1 ) then
+               cdepavg(ifrom) = cdepavg(ito)
+               cdepmax(ifrom) = cdepmax(ito)
+               cdepmin(ifrom) = cdepmin(ito)
+            endif
+         endif
+      enddo
 
-         IPP2= IP2
-         IPP3= IP3
-         IPP4= IP4
-         IPP5= IP5
+!     copy final result back into pmsa array
+      do iseg=1,noseg
+         call dhkmrk( 1, iknmrk(iseg), ikmrk )
+         if ( ikmrk .ne. 0 ) then
+            pmsa(ip3) = cdepavg(iseg)
+            pmsa(ip4) = cdepmax(iseg)
+            pmsa(ip5) = cdepmin(iseg)
+         endif
+         ip3       = ip3 + in3
+         ip4       = ip4 + in4
+         ip5       = ip5 + in5
+      end do
+      
+!     deallocate work arrays
+      deallocate (cdepsum)
+      deallocate (vdepsum)
+      deallocate (cdepavg)
+      deallocate (cdepmax)
+      deallocate (cdepmin)
 
-         VOLUME = PMSA(IPP2)
-
-         DO 9000 ILAY=2,NOLAY
-
-            IP1 = IP1 + IN1*NOSEGL
-            IP2 = IP2 + IN2*NOSEGL
-
-!
-!           Only look at active segments
-!
-            CALL DHKMRK( 1, IKNMRK(ISEGL+(ILAY-1)*NOSEGL), IKMRK )
-            IF ( IKMRK .EQ. 0 ) GOTO 9000
-
-            VOLUME = VOLUME + PMSA(IP2)
-            IF ( PMSA(IP2) .GT. 0.0 ) THEN
-               PMSA(IPP3) = PMSA(IPP3) + PMSA(IP1) * PMSA(IP2)
-               PMSA(IPP4) = MAX( PMSA(IPP4), PMSA(IP1) )
-               PMSA(IPP5) = MIN( PMSA(IPP5), PMSA(IP1) )
-            ENDIF
-
- 9000    CONTINUE
-
-         IF ( VOLUME .GT. 0.0 ) THEN
-            PMSA(IPP3) = PMSA(IPP3) / VOLUME
-         ENDIF
-
-         IP3 = IPOINT(3) + IN3*(NOSEGL+ISEGL-1)
-         IP4 = IPOINT(4) + IN4*(NOSEGL+ISEGL-1)
-         IP5 = IPOINT(5) + IN5*(NOSEGL+ISEGL-1)
-
-         DO 9100 ILAY=2,NOLAY
-
-            PMSA(IP3) = PMSA(IPP3)
-            PMSA(IP4) = PMSA(IPP4)
-            PMSA(IP5) = PMSA(IPP5)
-
-            IP3 = IP3 + IN3*NOSEGL
-            IP4 = IP4 + IN4*NOSEGL
-            IP5 = IP5 + IN5*NOSEGL
-
- 9100    CONTINUE
-
- 9200 CONTINUE
-
-      RETURN
-      END
+      return
+      end
