@@ -545,8 +545,8 @@ subroutine comp_fluxhor3D(NUMCONST, limtyp, Ndkx, Lnkx, u1, q1, au, sqi, vol1, k
             k1 = ln(1,L)
             k2 = ln(2,L)
             if ( jalimitdiff.eq.1 ) then
-               fluxfacMaxL  = dfac1*vol1(k1)/dt_loc - sqi(k1)
-               fluxfacMaxR  = dfac2*vol1(k2)/dt_loc - sqi(k2)
+               fluxfacMaxL  = dfac1*( vol1(k1)/dt_loc - sqi(k1) )
+               fluxfacMaxR  = dfac2*( vol1(k2)/dt_loc - sqi(k2) )
             end if
             do j=1,NUMCONST
                if ( jaupdateconst(j).ne.1 ) cycle

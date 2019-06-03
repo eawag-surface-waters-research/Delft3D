@@ -26158,7 +26158,7 @@ subroutine transport()                           ! transport for now, advect sal
                 k1  = ln(1,L) ; k2 = ln(2,L)
                 viL = max(0d0, viu(L))
                 qds = (sigsali*viL + diuspl)*dxi(LL)*au(L)
-                qds = min( qds,  dfac1*vol1(k1)/dts - sqi(k1) , dfac2*vol1(k2)/dts - sqi(k2) ) ! zie Borsboom sobek note
+                qds = min( qds,  dfac1*( vol1(k1)/dts - sqi(k1) ) , dfac2*( vol1(k2)/dts - sqi(k2) ) ) ! zie Borsboom sobek note
                 qds = max( 0d0, qds)
                 if (jasal > 0) then
                    if (jacreep == 1) then
