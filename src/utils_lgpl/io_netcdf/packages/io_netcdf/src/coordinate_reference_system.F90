@@ -82,7 +82,6 @@ function find_grid_mapping_var(ncid, varid, preferred_name) result(ierr)
    character(len=*), optional, intent(in   ) :: preferred_name !< Searches first for the given variable name, before trying the defaults.
    integer                                   :: ierr           !< Result status (IONC_NOERR==NF90_NOERR) if successful.
 
-   character(len=nf90_max_name) :: varname
    integer :: i, numvar
    logical :: found
 
@@ -91,6 +90,7 @@ function find_grid_mapping_var(ncid, varid, preferred_name) result(ierr)
 
    ! 1. preferred_name
    if (present(preferred_name)) then
+      call mess(LEVEL_DEBUG, "call nf90_inq_varid with preferred_name")
       ierr = nf90_inq_varid(ncid, preferred_name, varid)
       if (ierr == nf90_noerr) then
          found = is_grid_mapping(ncid, varid)
@@ -102,6 +102,7 @@ function find_grid_mapping_var(ncid, varid, preferred_name) result(ierr)
    end if
 
    ! 2. projected_coordinate_system
+   call mess(LEVEL_DEBUG, "call nf90_inq_varid with projected_coordinate_system")
    ierr = nf90_inq_varid(ncid, 'projected_coordinate_system', varid)
    if (ierr == nf90_noerr) then
       found = is_grid_mapping(ncid, varid)
@@ -112,8 +113,10 @@ function find_grid_mapping_var(ncid, varid, preferred_name) result(ierr)
    end if
 
    ! 3. wgs84
+   call mess(LEVEL_DEBUG, "call nf90_inq_varid with wgs84")
    ierr = nf90_inq_varid(ncid, 'wgs84', varid)
    if (ierr /= nf90_noerr) then
+      call mess(LEVEL_DEBUG, "call nf90_inq_varid with WGS84")
       ierr = nf90_inq_varid(ncid, 'WGS84', varid)  ! needed for DIMR sets 2.0.6, 2.0.7 and 2.0.8
    end if
    if (ierr == nf90_noerr) then
