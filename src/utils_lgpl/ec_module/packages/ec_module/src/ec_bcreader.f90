@@ -717,11 +717,7 @@ contains
 
           call mf_read(bcPtr%fhandle,rec,savepos)
           if (rec(1:1)=='#') cycle
-          if (index(rec,'[forcing]'         )>0 .or. &
-              index(rec,'[Forcing]'         )>0 .or. &
-              index(rec,'[boundary]'        )>0 .or. &
-              index(rec,'[Boundary]'        )>0 .or. &
-              index(rec,'[LateralDischarge]')>0) then ! new boundary chapter
+          if (index(rec,'[')>0 .and. index(rec,']')>0) then ! lines with [ and ] are assumed as block headings
              select case (BCPtr%func)
              case (BC_FUNC_TSERIES, BC_FUNC_TIM3D)
                 call setECMessage("   File: "//trim(bcPtr%fname)//", Location: "//trim(bcPtr%bcname)//", Quantity: "//trim(bcPtr%qname))
