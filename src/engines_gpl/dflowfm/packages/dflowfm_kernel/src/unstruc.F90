@@ -13526,6 +13526,9 @@ end if
        iadv(L) = 8
     endif
  enddo
+ 
+! check if at most one structure claims a flowlink
+ call check_structures_and_fixed_weirs()
 
  call adjust_bobs_for_dams_and_structs()
 
