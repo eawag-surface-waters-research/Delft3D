@@ -1890,7 +1890,7 @@ module m_ec_provider
                else
                   all_points_are_corr = .false.
                endif
-               is_tim = (bcBlockPtr%func == BC_FUNC_TSERIES)
+               is_tim = (bcBlockPtr%func == BC_FUNC_TSERIES) .or. (bcBlockPtr%func == BC_FUNC_CONSTANT)
                is_cmp = ((bcBlockPtr%func == BC_FUNC_HARMONIC) .or. (bcBlockPtr%func == BC_FUNC_ASTRO))
                is_tim3d = (bcBlockPtr%func == BC_FUNC_TIM3D)
 
