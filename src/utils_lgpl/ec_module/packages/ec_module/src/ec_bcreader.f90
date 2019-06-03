@@ -113,6 +113,10 @@ contains
     integer (kind=8)              ::  savepos
     type(tEcBlockList), pointer   ::  blocklistPtr
     type(tEcBCFile), pointer      ::  bcFilePtr
+    integer                       ::  blocktype
+    integer, parameter            ::  BT_GENERAL = 0
+    integer, parameter            ::  BT_FORCING = 1
+    character(len=15)             ::  key, val
 
     success = .false.
     iostat = EC_UNKNOWN_ERROR
@@ -150,52 +154,78 @@ contains
           call mf_read(fhandle,rec,savepos)
           if (index('!#%*',rec(1:1))>0) cycle
  
-          if (len_trim(rec)>0) then                     ! skip empty lines
-             if (index(rec,'[forcing]')>0) then                   ! new boundary chapter
-                jaheader = .true.                                 ! switching to header mode
-                keyvaluestr = ''
-                nfld = 0                                          ! count the number of fields in this header block
-                nq = 0                                            ! count the (maximum) number of quantities in this block
+          if (len_trim(rec)>0) then                                  ! skip empty lines
+             if (index(rec,'[')>0 .and. index(rec,']')>0) then 
+                if (strcmpi(rec,'[general]')) then                    ! new boundary chapter
+                   blocktype = BT_GENERAL
+                else if (strcmpi(rec,'[forcing]')) then
+                   jaheader = .true.                                 ! switching to header mode
+                   blocktype = BT_FORCING
+                   keyvaluestr = ''
+                   nfld = 0                                          ! count the number of fields in this header block
+                   nq = 0                                            ! count the (maximum) number of quantities in this block
+                else
+                   call setECMessage("Unknown block type '"//trim(rec)//           &
+                                "' in file "//trim(bc%fname)//", block "//trim(bc%bcname)//".") 
+                   return
+                endif
              else
-                if (jaheader) then
-                   posfs = index(rec,'=')               ! key value pair ?
+                select case (blocktype)
+                case (BT_FORCING)
+                   if (jaheader) then
+                      posfs = index(rec,'=')               ! key value pair ?
+                      if (posfs>0) then
+                         call replace_char(rec,9,32)                 ! replace tabs by spaces, header key-value pairs only
+                         nfld = nfld + 1                             ! count the number of lines in the header file
+                         ! TODO: Replace this key-value string by a linked list-base class for key-value dictionaries
+                         call str_upper(rec(1:posfs-1))              ! all keywords uppercase , not case sensitive
+                         if (index(rec(1:posfs-1),'QUANTITY')>0) then
+                            nq = nq + 1
+                         endif
+                         keyvaluestr = trim(keyvaluestr)//''''// (trim(adjustl(rec(1:posfs-1))))//''',''' //(trim(adjustl(rec(posfs+1:))))//''','
+                      else                                                    ! switch to datamode
+                         ! TODO: Store the location information somewhere to be able to return to it later 
+                         call str_upper(keyvaluestr,len(trim(keyvaluestr)))   ! case insensitive format
+      
+                         allocate(blocklistPtr)                                   ! Add information for this block to the administration
+                         blocklistPtr%position = savepos
+                         blocklistPtr%keyvaluestr = keyvaluestr
+                         blocklistPtr%next => bcFilePtr%blocklist
+                         blocklistPtr%nfld = nfld
+                         blocklistPtr%nq = nq
+                         bcFilePtr%blocklist => blocklistPtr
+                         bcFilePtr%last_position = savepos
+      
+                         if (matchblock(keyvaluestr,bc%bcname,bc%qname,funtype=funtype)) then
+                            if (.not.processhdr(bc,nfld,nq,keyvaluestr)) return   ! dumb translation of bc-object metadata
+                            if (.not.checkhdr(bc)) return                         ! check on the contents of the bc-object
+                            call mf_backspace(fhandle, savepos)                   ! Rewind the first line with data
+                            success = .true.
+                            iostat = EC_NOERR
+                            return
+                         else
+                            ! location was found, but not all required meta data was present
+                            iostat = EC_METADATA_INVALID
+                         endif                                    ! Right quantity
+                         jaheader = .false.                       ! No, we are NOT reading a header
+                      endif                                       ! switch to datamode
+                   endif          ! in header mode (data lines are ignored)
+                case (BT_GENERAL)
+                   posfs = index(rec,'=')
                    if (posfs>0) then
-                      call replace_char(rec,9,32)                 ! replace tabs by spaces, header key-value pairs only
-                      nfld = nfld + 1                             ! count the number of lines in the header file
-                      ! TODO: Replace this key-value string by a linked list-base class for key-value dictionaries
-                      call str_upper(rec(1:posfs-1))              ! all keywords uppercase , not case sensitive
-                      if (index(rec(1:posfs-1),'QUANTITY')>0) then
-                         nq = nq + 1
-                      endif
-                      keyvaluestr = trim(keyvaluestr)//''''// (trim(adjustl(rec(1:posfs-1))))//''',''' //(trim(adjustl(rec(posfs+1:))))//''','
-                   else                                                    ! switch to datamode
-                      ! TODO: Store the location information somewhere to be able to return to it later 
-                      call str_upper(keyvaluestr,len(trim(keyvaluestr)))   ! case insensitive format
-   
-                      allocate(blocklistPtr)                                   ! Add information for this block to the administration
-                      blocklistPtr%position = savepos
-                      blocklistPtr%keyvaluestr = keyvaluestr
-                      blocklistPtr%next => bcFilePtr%blocklist
-                      blocklistPtr%nfld = nfld
-                      blocklistPtr%nq = nq
-                      bcFilePtr%blocklist => blocklistPtr
-                      bcFilePtr%last_position = savepos
-   
-                      if (matchblock(keyvaluestr,bc%bcname,bc%qname,funtype=funtype)) then
-                         if (.not.processhdr(bc,nfld,nq,keyvaluestr)) return   ! dumb translation of bc-object metadata
-                         if (.not.checkhdr(bc)) return                         ! check on the contents of the bc-object
-                         call mf_backspace(fhandle, savepos)                   ! Rewind the first line with data
-                         success = .true.
-                         iostat = EC_NOERR
-                         return
-                      else
-                         ! location was found, but not all required meta data was present
-                         iostat = EC_METADATA_INVALID
-                      endif                                    ! Right quantity
-                      jaheader = .false.                       ! No, we are NOT reading a header
-                   endif                                       ! switch to datamode
-                endif          ! in header mode (data lines are ignored)
-             endif             ! not a new '[forcing]' item
+                      call replace_char(rec,9,32)
+                      key = adjustl(rec(:posfs-1))
+                      val = adjustl(rec(posfs+1:))
+                      call str_upper(key)
+                      select case (key)
+                      case ('FILEVERSION')
+                         bcFilePtr%FileVersion = trim(val)
+                      case ('FILETYPE') 
+                         bcFilePtr%FileType = trim(val)
+                      end select
+                   endif
+                end select
+             endif
           endif                ! non-empty string
        enddo                   ! read/scan loop
     else

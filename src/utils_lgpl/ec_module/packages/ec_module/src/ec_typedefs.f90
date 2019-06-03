@@ -155,6 +155,8 @@ module m_ec_typedefs
       character(len=:), allocatable :: bcfilename          !< file name of the BC-file 
       type (tEcBlocklist), pointer  :: blocklist => null() !< list of blocks (table of contents for this BC-file)
       integer                       :: last_position = 0   !< last position in the scan-process                   
+      character(len=15)             :: FileVersion
+      character(len=15)             :: FileType
    end type tEcBCFile
 
    type tEcBCFilePtr
