@@ -646,9 +646,10 @@ module string_module
          enddo
       end subroutine replace_char      
 
+      !> For each character in the given set, remove any occurrence in the subject
       subroutine remove_chars(r,charset) 
-         character(len=*), intent(inout) :: r
-         character(len=*), intent(in)    :: charset
+         character(len=*), intent(inout) :: r               !< subject on which to perform removal
+         character(len=*), intent(in)    :: charset         !< collection of characters to be removed 
          !
          integer :: i, j
          !
