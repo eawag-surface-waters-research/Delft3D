@@ -142,11 +142,12 @@ module m_ec_typedefs
    ! this is the Table of Contents for a BC-file
    ! the keyvaluestr, nfld and nq can be passed to processhdr to initialize a filereader for a particular block in the BC-file
    type tEcBlocklist
-      character(len=:), allocatable :: keyvaluestr      ! contains information key-value pairs from the header
-      integer                       :: position         ! position of data in the file
-      integer                       :: nfld             ! number of fields (i.e. key-value pairs)
-      integer                       :: nq               ! number of quantities detected among these fields
-      type (tEcBlocklist), pointer  :: next             ! pointer to the next block
+      character(len=:), allocatable :: keyvaluestr      !< contains information key-value pairs from the header
+      integer                       :: position         !< position of data in the file
+      integer                       :: blocktype        !< type of the block (BT_GENERAL, BT_FORCING, ....) 
+      integer                       :: nfld             !< number of fields (i.e. key-value pairs)
+      integer                       :: nq               !< number of quantities detected among these fields
+      type (tEcBlocklist), pointer  :: next             !< pointer to the next block
    end type tEcBlocklist
       
    ! description of a BC-file of which the most important point is the blocklist
@@ -154,6 +155,7 @@ module m_ec_typedefs
       integer                       :: id                  !< unique NCBlock number, set by ecInstanceCreateNCBlock
       character(len=:), allocatable :: bcfilename          !< file name of the BC-file 
       type (tEcBlocklist), pointer  :: blocklist => null() !< list of blocks (table of contents for this BC-file)
+      integer                       :: last_blocktype      !< type of the block (BT_GENERAL, BT_FORCING, ....) 
       integer                       :: last_position = 0   !< last position in the scan-process                   
       character(len=15)             :: FileVersion
       character(len=15)             :: FileType

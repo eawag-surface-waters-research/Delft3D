@@ -1895,7 +1895,7 @@ module m_ec_provider
                is_tim3d = (bcBlockPtr%func == BC_FUNC_TIM3D)
 
                if (.not. ecProviderConnectSourceItemsToTargets(instancePtr, is_tim, is_cmp, is_tim3d, id, itemId, i,        &
-                                                        n_signals, maxlay, itemIDList,qname=quantityname)) then
+                                                        n_signals, maxlay, itemIDList, qname=quantityname)) then
                   !
                   ! No sub-FileReader made.
                   mask(i) = 0

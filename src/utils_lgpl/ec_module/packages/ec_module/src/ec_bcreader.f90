@@ -135,10 +135,12 @@ contains
     jafound = .false.
     jaheader = .false.
     currentpos = bcFilePtr%last_position
+    blocktype = bcFilePtr%last_blocktype
     do while (associated(blocklistPtr))
        if (matchblock(blocklistPtr%keyvaluestr,bc%bcname,bc%qname,funtype=funtype)) then
           jafound = .true.
           currentpos = blocklistPtr%position
+          blocktype = blocklistPtr%blocktype
           exit
        endif 
        blocklistPtr => blocklistPtr%next 
@@ -189,12 +191,14 @@ contains
       
                          allocate(blocklistPtr)                                   ! Add information for this block to the administration
                          blocklistPtr%position = savepos
+                         blocklistPtr%blocktype = blocktype
                          blocklistPtr%keyvaluestr = keyvaluestr
                          blocklistPtr%next => bcFilePtr%blocklist
                          blocklistPtr%nfld = nfld
                          blocklistPtr%nq = nq
                          bcFilePtr%blocklist => blocklistPtr
                          bcFilePtr%last_position = savepos
+                         bcFilePtr%last_blocktype = blocktype
       
                          if (matchblock(keyvaluestr,bc%bcname,bc%qname,funtype=funtype)) then
                             if (.not.processhdr(bc,nfld,nq,keyvaluestr)) return   ! dumb translation of bc-object metadata
