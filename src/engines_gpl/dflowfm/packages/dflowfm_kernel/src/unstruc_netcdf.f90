@@ -9425,6 +9425,7 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
    double precision, allocatable             :: xface(:), yface(:)
    integer, allocatable                      :: branchStartNode(:), branchEndNode(:)
    integer                                   :: nodesOnBranchVertices
+   character(len=255)                        :: tmpstring
 
    numk_read = 0
    numl_read = 0
@@ -9448,8 +9449,26 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
    !if (allocated(mesh1dUnmergedToMerged)) deallocate(mesh1dUnmergedToMerged)
    !if (allocated(mesh1dMergedToUnMerged)) deallocate(mesh1dMergedToUnMerged)
    
-   !this value needs to be determined from file 
+   ! UNST-2510: Based on _net.nc version either read with or without duplicatie points on connection nodes.
    nodesOnBranchVertices = 1
+   ierr = ionc_get_ncid(ioncid, ncid)
+   tmpstring = ''
+   ierr = nf90_get_att(ncid, nf90_global, 'Conventions', tmpstring)
+   if (ierr == NF90_ENOTATT) then
+      nodesOnBranchVertices = 0 ! New format.
+      call mess(LEVEL_DEBUG,  'No NetCDF Conventions found. Defaulting to current format (>= "CF-1.8 UGRID-1.0 Deltares-0.9") for '''//trim(filename)//'''.')
+   elseif (ierr == nf90_noerr) then
+      i = index(tmpstring, 'Deltares')
+      if (i > 0 .and. tmpstring(i+9:i+11) == '0.8') then
+         nodesOnBranchVertices = 1 ! Old format
+         call mess(LEVEL_DEBUG,  'Detected old format for 1D ("'//trim(tmpstring)//'") in '''//trim(filename)//'''.')
+   else
+         nodesOnBranchVertices = 0 ! New format
+         call mess(LEVEL_DEBUG,  'Detected new format for 1D ("'//trim(tmpstring)//'") in '''//trim(filename)//'''.')
+      end if
+   end if
+   
+      
    ! Construct network with with old files (nodesOnBranchVertices). In this function 1d edge nodes (kn array) are also set
    if (nodesOnBranchVertices==1) then
       ierr = read_1d_mesh_convention_one(ioncid, numk_keep, numl_keep, numk_last, numl_last)
