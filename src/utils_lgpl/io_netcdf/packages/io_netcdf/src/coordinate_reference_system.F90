@@ -152,8 +152,11 @@ function is_grid_mapping(ncid, varid)
    logical :: is_grid_mapping !< Indicates whether the variable is a grid_mapping variable.
    
    integer :: ierr
-   character(len=1) :: attval
+   integer                       :: attlen
+   character(len=:), allocatable :: attval
 
+   ierr = nf90_inquire_attribute(ncid, varid, name='grid_mapping_name', len=attlen)
+   allocate(character(attlen) :: attval)
    ierr = nf90_get_att(ncid, varid, 'grid_mapping_name', attval)
    
    is_grid_mapping = (ierr == nf90_noerr) ! Note: we don't check on the actual attribute value.
