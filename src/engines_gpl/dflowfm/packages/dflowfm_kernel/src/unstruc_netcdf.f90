@@ -9446,7 +9446,7 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
    
    ! Old convention, with overlapping points
    if (allocated(mesh1dNodeIds)) deallocate(mesh1dNodeIds)
-   !if (allocated(mesh1dUnmergedToMerged)) deallocate(mesh1dUnmergedToMerged)
+   if (allocated(mesh1dUnmergedToMerged)) deallocate(mesh1dUnmergedToMerged)
    !if (allocated(mesh1dMergedToUnMerged)) deallocate(mesh1dMergedToUnMerged)
    
    ! UNST-2510: Based on _net.nc version either read with or without duplicatie points on connection nodes.
@@ -9695,7 +9695,11 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
          !      exit
          !   endif
          !enddo         
-         kn(1,numl_last+l) = numl_last+l
+         if (nodesOnBranchVertices == 1) then
+            kn(1,numl_last+l) = mesh1dUnmergedToMerged(mesh1indexes(l))
+         else
+            kn(1,numl_last+l) = mesh1indexes(l)
+         endif
          kn(2,numl_last+l) = numk_last+l
          kn(3,numl_last+l) = contacttype(l)
       enddo
@@ -13400,14 +13404,14 @@ integer function read_1d_mesh_convention_one(ioncid, numk_keep, numl_keep, numk_
    
    !reduce the scope, do deallocation here
    if (allocated(mesh1dNodeIds)) deallocate(mesh1dNodeIds)
-   !if (allocated(mesh1dUnmergedToMerged)) deallocate(mesh1dUnmergedToMerged)
+   if (allocated(mesh1dUnmergedToMerged)) deallocate(mesh1dUnmergedToMerged)
    !if (allocated(mesh1dMergedToUnMerged)) deallocate(mesh1dMergedToUnMerged)
 
    allocate(mesh1dNodeIds(size(xk)))
-   !allocate(mesh1dUnmergedToMerged(size(xk)))
+   allocate(mesh1dUnmergedToMerged(size(xk)))
    !allocate(mesh1dMergedToUnMerged(size(xk)))
 
-   !numMesh1dBeforeMerging = 0
+   numMesh1dBeforeMerging = 0
    ierr = 0
    if (.not. network%loaded) then
       dflowfm_1d = .true.
@@ -13435,9 +13439,9 @@ integer function read_1d_mesh_convention_one(ioncid, numk_keep, numl_keep, numk_
             endif
             pbr%grd(1) = pbr%FromNode%gridNumber
             ! id-mesh node mapping
-            !numMesh1dBeforeMerging = numMesh1dBeforeMerging + 1
-            !mesh1dNodeIds(numMesh1dBeforeMerging) = pbr%gridPointIDs(1)
-            !mesh1dUnmergedToMerged(numMesh1dBeforeMerging) = pbr%grd(1)
+            numMesh1dBeforeMerging = numMesh1dBeforeMerging + 1
+            mesh1dNodeIds(numMesh1dBeforeMerging) = pbr%gridPointIDs(1)
+            mesh1dUnmergedToMerged(numMesh1dBeforeMerging) = pbr%grd(1)
             !mesh1dMergedToUnMerged(pbr%grd(1)) = numMesh1dBeforeMerging
             ngrd = pbr%gridPointsCount
 
@@ -13449,9 +13453,9 @@ integer function read_1d_mesh_convention_one(ioncid, numk_keep, numl_keep, numk_
                yk(numk) = pbr%Ys(k)
                zk(numk) = dmiss
                ! id-mesh node mapping
-               !numMesh1dBeforeMerging = numMesh1dBeforeMerging + 1
-               !mesh1dNodeIds(numMesh1dBeforeMerging) = pbr%gridpointids(k)
-               !mesh1dUnmergedToMerged(numMesh1dBeforeMerging) = pbr%grd(k)
+               numMesh1dBeforeMerging = numMesh1dBeforeMerging + 1
+               mesh1dNodeIds(numMesh1dBeforeMerging) = pbr%gridpointids(k)
+               mesh1dUnmergedToMerged(numMesh1dBeforeMerging) = pbr%grd(k)
                !mesh1dMergedToUnMerged(pbr%grd(k)) = numMesh1dBeforeMerging
             enddo
             if ( pbr%toNode%gridNumber == 0 ) then
@@ -13463,9 +13467,9 @@ integer function read_1d_mesh_convention_one(ioncid, numk_keep, numl_keep, numk_
             endif
             pbr%grd(ngrd) = pbr%toNode%gridNumber
             ! id-mesh node mapping
-            !numMesh1dBeforeMerging = numMesh1dBeforeMerging + 1
-            !mesh1dNodeIds(numMesh1dBeforeMerging) = pbr%gridPointIDs(ngrd)
-            !mesh1dUnmergedToMerged(numMesh1dBeforeMerging) = pbr%grd(ngrd)
+            numMesh1dBeforeMerging = numMesh1dBeforeMerging + 1
+            mesh1dNodeIds(numMesh1dBeforeMerging) = pbr%gridPointIDs(ngrd)
+            mesh1dUnmergedToMerged(numMesh1dBeforeMerging) = pbr%grd(ngrd)
             !mesh1dMergedToUnMerged(pbr%grd(ngrd)) = numMesh1dBeforeMerging
 
             ! second step create links
@@ -13500,8 +13504,8 @@ integer function read_1d_mesh_convention_one(ioncid, numk_keep, numl_keep, numk_
    endif
    
    ! re-allocate mesh1dNodeIds and mesh1dUnmergedToMerged
-   !call realloc(mesh1dNodeIds, numMesh1dBeforeMerging, keepExisting=.true.)
-   !call realloc(mesh1dUnmergedToMerged, numMesh1dBeforeMerging, keepExisting=.true.)
+   call realloc(mesh1dNodeIds, numMesh1dBeforeMerging, keepExisting=.true.)
+   call realloc(mesh1dUnmergedToMerged, numMesh1dBeforeMerging, keepExisting=.true.)
 
 end function read_1d_mesh_convention_one
 
