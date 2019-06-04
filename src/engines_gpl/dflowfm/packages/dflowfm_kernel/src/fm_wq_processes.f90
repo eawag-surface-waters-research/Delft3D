@@ -144,9 +144,11 @@
       endif
 
 !     check if statistics file exists
-      inquire(file=statistics_file,exist=Lstt)
-      if ( .not.Lstt) then
-         call mess(LEVEL_ERROR, 'Substance file does not exist: ', trim(substance_file))
+      if (statistics_file.ne.' ') then
+         inquire(file=statistics_file,exist=Lstt)
+         if ( .not.Lstt) then
+            call mess(LEVEL_ERROR, 'Statistics file does not exist: ', trim(statistics_file))
+         end if
       end if
 
 !     check if proc_def file exists
