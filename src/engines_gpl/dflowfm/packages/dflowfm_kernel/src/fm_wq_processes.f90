@@ -405,6 +405,7 @@
 !     Set the required output data.
 !     -> When outputs are not specified, they might end up in A(1), a 'black hole' location that is constantly overwritten
       noout_user = noout_map + noout_eho
+      noout = noout_user
 
       allocate(outputs%names(noout_user))
       allocate(outputs%stdnames(noout_user))
