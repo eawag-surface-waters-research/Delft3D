@@ -1517,7 +1517,7 @@ if(q /= 0) then
 
  do L = lnxi+1,Lnx
     k1 = ln(1,L) ; k2 = ln(2,L)
-    a1  (k1) = a1(k2)   ! ba(k2)                                   ! set bnd a1 to ba of inside point
+    a1  (k1) = ba(k2)                                   ! set bnd a1 to ba of inside point
     vol1(k1) = vol1(k2) ! a1(k1)*(s1(k1) - bl(k1))
     vol1_f(k1) = vol1_f(k2)
  enddo
