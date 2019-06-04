@@ -31128,6 +31128,10 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
        call readprovider(mext,qid,filename,filetype,method,operand,transformcoef,ja,varname)
        if (ja == 1) then
           call resolvePath(filename, md_extfile_dir, filename)
+          if (index(qid,'bedlevel') > 0 .and. len_trim(md_inifieldfile) > 0) then
+              call mess(LEVEL_WARN, 'Bed level info. should be defined in file '''//trim(md_inifieldfile)//'''. They are ignored if defined in external forcing file '''//trim(md_extfile)//'''.')
+              return
+          end if
           if (qid == 'bedlevel1D') then
              call mess(LEVEL_INFO, 'setbedlevelfromextfile: Setting bedlevel1D from file '''//trim(filename)//'''.')
              kc(1:mx) = kc1D
@@ -36605,6 +36609,7 @@ end function is_1d_boundary_candidate
  use m_ec_spatial_extrapolation, only : init_spatial_extrapolation
  use m_sferic, only: jsferic
  use m_trachy, only: trachy_resistance
+ use unstruc_ini
  ! use m_vegetation
 
  implicit none
@@ -36669,6 +36674,11 @@ end function is_1d_boundary_candidate
  call initialize_ec_module()
 
  call flow_init_structurecontrol()
+
+ if (len_trim(md_inifieldfile) > 0) then
+    call initInitialFields(md_inifieldfile)
+ end if
+ 
 
  if (jatimespace == 0) goto 888                      ! Just cleanup and close ext file.
 
@@ -37332,6 +37342,10 @@ if (mext > 0) then
         call init_spatial_extrapolation(maxSearchRadius, jsferic)
 
         if (qid == 'frictioncoefficient') then
+           if (len_trim(md_inifieldfile) > 0) then
+              call mess(LEVEL_WARN, 'Friction coefficients should be defined in file '''//trim(md_inifieldfile)//'''. They are ignored if defined in file external forcing file '''//trim(md_extfile)//'''.')
+              cycle
+           end if
 
             success = timespaceinitialfield(xu, yu, frcu, lnx, filename, filetype, method,  operand, transformcoef, 1) ! zie meteo module
             if (success) then
@@ -37426,7 +37440,11 @@ if (mext > 0) then
             success = timespaceinitialfield_int(xu, yu, ibot, lnx, filename, filetype, method, operand, transformcoef) ! zie meteo module
 
         else if (qid(1:17) == 'initialwaterlevel') then
-
+           if (len_trim(md_inifieldfile) > 0) then
+              call mess(LEVEL_WARN, 'Initial water level should be defined in file '''//trim(md_inifieldfile)//'''. They are ignored if defined in external forcing file '''//trim(md_extfile)//'''.')
+              cycle
+           end if
+           
            call realloc(kcsini, ndx, keepExisting=.false.)
 
            ! NOTE: we intentionally re-use the lateral coding here for selection of 1D and/or 2D flow nodes

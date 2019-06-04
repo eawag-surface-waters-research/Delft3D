@@ -54,6 +54,7 @@ module timespace_parameters
   integer, parameter :: ncflow                         = 12  ! NetCDF flow, with arbitrary type of input
   integer, parameter :: ncwave                         = 14  ! NetCDF com file, with arbitrary type of input
   integer, parameter :: bcascii                        = 17  ! .bc format as ASCII file
+  integer, parameter :: field1d                        = 18  ! 1d field ini file
   integer, parameter :: max_file_types                 = 103  !  max nr of supported types for end user in ext file.
   ! Enumeration for file types of sub-providers (not directly in ext file)
   integer, parameter :: fourier                        = 101 ! period(hrs), ampl(m), phas(deg) NOTE: not directly used in ext file by users.

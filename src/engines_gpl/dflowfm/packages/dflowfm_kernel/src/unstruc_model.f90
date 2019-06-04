@@ -101,7 +101,8 @@ implicit none
     character(len=255) :: md_manholefile   = ' ' !< File containing manholes          (e.g., *.ini)
     character(len=255) :: md_pipefile      = ' ' !< File containing pipe-based 'culverts' (e.g., *.pliz)
     character(len=255) :: md_shipdeffile   = ' ' !< File containing shipdefinition    (e.g., *.shd)
-
+    character(len=255) :: md_inifieldfile  = ' ' !< File of initial fields            (e.g., *.ini)
+    
     character(len=255) :: md_restartfile   = ' ' !< File containing map-files to restart a computation          (e.g., *_map.nc), input only, NOT used for storing the names of output restart files.
 
     character(len=255) :: md_extfile       = ' ' !< External forcing specification file (e.g., *.ext)
@@ -741,6 +742,7 @@ subroutine readMDUFile(filename, istat)
     call prop_get_string ( md_ptr, 'geometry', 'LandBoundaryFile', md_ldbfile,      success)
     call prop_get_string ( md_ptr, 'geometry', 'ThinDamFile' ,     md_thdfile,      success)
     call prop_get_string ( md_ptr, 'geometry', 'Cutcelllist' ,     md_cutcelllist,  success)
+    call prop_get_string ( md_ptr, 'geometry', 'IniFieldFile',     md_inifieldfile, success)
 
     call prop_get_string ( md_ptr, 'geometry', 'FixedWeirFile',    md_fixedweirfile, success)
     if (.not. success) then ! Backwards compatibility: read old ThindykeFile keyword.
@@ -2070,7 +2072,9 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     call prop_set(prop_ptr, 'geometry', 'ProflocFile',      trim(md_proflocfile),   'Channel profile location file *_proflocation.xyz with rows x, y, z, profile number ref'  )
     call prop_set(prop_ptr, 'geometry', 'ProfdefFile',      trim(md_profdeffile),   'Channel profile definition file *_profdefinition.def with definition for all profile numbers'  )
     call prop_set(prop_ptr, 'geometry', 'ProfdefxyzFile',   trim(md_profdefxyzfile),'Channel profile definition file _profdefinition.def with definition for all profile numbers'  )
-
+    call prop_set(prop_ptr, 'geometry', 'IniFieldFile',     trim(md_inifieldfile),  'Initial values and parameter fields file'  )
+ 
+    
     call prop_set(prop_ptr, 'geometry', 'Uniformwidth1D',   wu1Duni,                'Uniform width for channel profiles not specified by profloc')
     if (hh1Duni .ne. 2d0) then
     call prop_set(prop_ptr, 'geometry', 'Uniformheight1D',  hh1Duni,                'Uniform height for channel profiles not specified by profloc')
