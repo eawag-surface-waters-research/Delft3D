@@ -968,7 +968,7 @@ subroutine solve_vertical(NUMCONST, ISED1, ISEDN, limtyp, thetavert, Ndkx, Lnkx,
    double precision, dimension(NUMCONST,Ndkx), intent(in)    :: fluxver     !< vertical fluxes
    double precision, dimension(NUMCONST,Ndkx), intent(in)    :: source      !< sources
    double precision, dimension(NUMCONST,Ndkx), intent(in)    :: sink        !< sinks
-   double precision, dimension(NUMCONST,Ndkx), intent(in)    :: difsed      !< scalar-specific diffusion coefficent (dicoww+difmod)
+   double precision, dimension(NUMCONST),      intent(in)    :: difsed      !< scalar-specific diffusion coefficent (dicoww+difmod)
    double precision, dimension(Ndkx),          intent(in)    :: vicwws      !< vertical eddy viscosity, NOTE: real, not double
    double precision, dimension(NUMCONST),      intent(in)    :: sigdifi     !< 1/(Prandtl number) for heat, 1/(Schmidt number) for mass
    integer,                                    intent(in)    :: nsubsteps   !< number of substeps
@@ -1061,7 +1061,7 @@ subroutine solve_vertical(NUMCONST, ISED1, ISEDN, limtyp, thetavert, Ndkx, Lnkx,
             if (jased > 3 .and. j >= ISED1 .and. j <= ISEDN) then  ! sediment d3d
                fluxfac = (mtd%seddif(j-ISED1+1,k))*dtbazi
             else                     
-               fluxfac = (sigdifi(j)*vicwws(k) + difsed(j,k) + ozmid)*dtbazi
+               fluxfac = (sigdifi(j)*vicwws(k) + difsed(j) + ozmid)*dtbazi
             end if
             
 !           BEGIN DEBUG
@@ -1459,7 +1459,7 @@ subroutine alloc_transport(Keepexisting)
    call realloc(sinkftot,    (/ NUMCONST, Ndx /), keepExisting=KeepExisting, fill=0d0)
    
    call realloc(difsedu, NUMCONST, keepExisting=KeepExisting, fill=0d0)
-   call realloc(difsedw, (/ NUMCONST, ndkx /), keepExisting=KeepExisting, fill=0d0)
+   call realloc(difsedw, NUMCONST, keepExisting=KeepExisting, fill=0d0)
    call realloc(sigdifi, NUMCONST, keepExisting=KeepExisting, fill=0d0)
    call realloc(wsf, NUMCONST, keepExisting=.true., fill=0d0)
    
@@ -1472,7 +1472,8 @@ subroutine alloc_transport(Keepexisting)
    call realloc(dsedy       , (/ NUMCONST, Ndkx /), keepExisting=KeepExisting, fill=0d0)
    
    call realloc(thetavert, NUMCONST, keepExisting=KeepExisting, fill=0d0)
-   call realloc(wstracers, NUMCONST, keepExisting=KeepExisting, fill=0d0)
+   !call realloc(wstracers, NUMCONST, keepExisting=KeepExisting, fill=0d0)
+   call realloc(wstracers, NUMCONST, keepExisting=.true., fill=0d0)
    
    call realloc(const_names, NUMCONST, keepExisting=KeepExisting, fill='')
    call realloc(const_units, NUMCONST, keepExisting=KeepExisting, fill='')
@@ -1596,7 +1597,7 @@ subroutine fill_constituents(jas) ! if jas == 1 do sources
           difsedu(ISALT) =          difmolsal
       endif 
       if (dicoww .ge. 0d0) then 
-          difsedw(ISALT,:) = dicoww + difmolsal
+          difsedw(ISALT) = dicoww + difmolsal
           sigdifi(ISALT) = 1d0/sigsal
       endif
    end if
@@ -1606,43 +1607,38 @@ subroutine fill_constituents(jas) ! if jas == 1 do sources
           difsedu(ITEMP) =          difmoltem
       endif 
       if (dicoww .ge. 0d0) then 
-          difsedw(ITEMP,:) = dicoww + difmoltem
+          difsedw(ITEMP) = dicoww + difmoltem
           sigdifi(ITEMP) = 1d0/sigtem
       endif
    end if
    
    if( jasecflow > 0 .and. jaequili == 0 .and. kmx == 0 ) then
       difsedu(ISPIR) = 0d0
-      difsedw(ISPIR,:) = 0d0 !dicoww + difmoltem
+      difsedw(ISPIR) = 0d0 !dicoww + difmoltem
       sigdifi(ISPIR) = 0d0 !/sigspi 
    endif 
 
-   if ( ISED1.ne.0 .and. stm_included) then
+   if ( ISED1.ne.0) then
       do i=1,mxgr
          iconst = ISED1+i-1
          if (dicouv .ge. 0d0) difsedu(iconst) = 0d0
-         !if (dicoww .ge. 0d0) difsedw(iconst,:) = dicoww
-         difsedw(iconst,:) = mtd%seddif(i,:)
-         sigdifi(iconst) = 1d0/sigsed
-      end do
-   end if
-   
-   if ( ISED1.ne.0 .and. .not. stm_included) then
-      do i=1,mxgr
-         iconst = ISED1+i-1
-         if (dicouv .ge. 0d0) difsedu(iconst) = 0d0
-         if (dicoww .ge. 0d0) difsedw(iconst,:) = dicoww
-         sigdifi(iconst) = 1d0/sigsed
-         wsf(iconst)     = ws(i)
+         if (dicoww .ge. 0d0) then 
+            difsedw(iconst) = dicoww 
+            ! difsedw(iconst,:) = mtd%seddif(i,:)
+            sigdifi(iconst) = 1d0/sigsed
+         endif
+         wsf(iconst) = ws(i)
       end do
    end if
    
    if ( ITRA1.gt.0 ) then
       do i=ITRA1,ITRAN
          difsedu(i)   =          difmoltr
-         if (dicoww .ge. 0d0) difsedw(i,:) = dicoww + difmoltr 
-         sigdifi(i)   = 1d0
-         wsf(i)       = wstracers(i - itra1 + 1)
+         if (dicoww .ge. 0d0) then 
+             difsedw(i) = dicoww + difmoltr 
+             sigdifi(i) = 1d0
+         endif
+         wsf(i) = wstracers(i - itra1 + 1)
       end do
    end if
    

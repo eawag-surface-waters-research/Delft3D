@@ -2754,6 +2754,8 @@ end subroutine default_turbulence
  
  integer                           :: jatransportautotimestepdiff = 0 ! Auto Timestep in Transport module, 0 = limitation of diffusion, but no limitation of time-step due to diffusion, 1 = no limitation of diffusion, but limitation of time step due to diffusion, 2: no limitation of diffusion and no limitation of time step due to diffusion
 
+ integer                           :: jaexplicitsinks = 1 
+
  integer                           :: jaanalytic        !< analytic solution available in black sideview => do not also show computed surface in black
 
  integer                           :: jaustarint              !< 1=integral bed layer velocity,  0=velocity at half bed layer
@@ -5176,7 +5178,7 @@ module m_transport
    double precision, dimension(:),   allocatable :: thetavert  ! vertical advection fluxes explicit (0) or implicit (1)
 
    double precision, dimension(:),   allocatable :: difsedu  ! sum of molecular and user-specified diffusion coefficient
-   double precision, dimension(:,:), allocatable :: difsedw  ! sum of molecular and user-specified diffusion coefficient
+   double precision, dimension(:),   allocatable :: difsedw  ! sum of molecular and user-specified diffusion coefficient
   
    double precision, allocatable                 :: dsedx   (:,:) !< cell center constituent gradient  
    double precision, allocatable                 :: dsedy   (:,:) !< cell center constituent gradient   
