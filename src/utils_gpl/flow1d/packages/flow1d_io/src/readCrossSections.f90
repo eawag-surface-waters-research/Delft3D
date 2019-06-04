@@ -327,7 +327,7 @@ module m_readCrossSections
             if (trim(typestr) == 'zwRiver') then
                plural = .true.
             endif
-            success = readTabulatedCS_v100(pCS, md_ptr%child_nodes(i)%node_ptr) 
+            success = readTabulatedCS(pCS, md_ptr%child_nodes(i)%node_ptr) 
             
          case(CS_RECTANGLE)
             
@@ -1654,6 +1654,12 @@ module m_readCrossSections
          endif
          
          pRgs => network%rgs%rough(iRough)
+         if (network%rgs%version == 2) then
+            call getFrictionParameters(pRgs,  1d0, crs%branchid, crs%chainage, crs%frictionTypePos(i), crs%frictionValuePos(i))
+            call getFrictionParameters(pRgs, -1d0, crs%branchid, crs%chainage, crs%frictionTypeNeg(i), crs%frictionValueNeg(i))
+            cycle
+         endif
+         
          if (pRgs%iSection == 0) then
             ! roughness section does not exist
             call setMessage(LEVEL_ERROR, 'Roughness section '// trim(crs%frictionSectionID(i)) //', used in '//trim(crs%csid)//' does not exist')
