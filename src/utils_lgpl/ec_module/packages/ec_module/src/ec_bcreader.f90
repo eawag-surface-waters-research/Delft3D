@@ -158,9 +158,10 @@ contains
  
           if (len_trim(rec)>0) then                                  ! skip empty lines
              if (index(rec,'[')>0 .and. index(rec,']')>0) then 
-                if (strcmpi(rec,'[general]')) then                    ! new boundary chapter
+                if (strcmpi(adjustl(rec),'[general]')) then                    ! new boundary chapter
                    blocktype = BT_GENERAL
-                else if (strcmpi(rec,'[forcing]')) then
+                else if (strcmpi(adjustl(rec),'[forcing]') .or. &
+                         strcmpi(adjustl(rec),'[boundary]')) then
                    jaheader = .true.                                 ! switching to header mode
                    blocktype = BT_FORCING
                    keyvaluestr = ''
