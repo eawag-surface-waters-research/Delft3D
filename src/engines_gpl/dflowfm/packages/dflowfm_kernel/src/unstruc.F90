@@ -16216,7 +16216,7 @@ subroutine unc_write_his(tim)            ! wrihis
 
 
     double precision, save       :: curtime_split = 0d0 ! Current time-partition that the file writer has open.
-    integer                      :: ntot, mobs, k, i, j, i1, ierr, mnp, kk, kb, kt, klay, idims(3), LL,Lb,Lt,L, Lf, k3, k4
+    integer                      :: ntot, mobs, k, i, j, jj, i1, ierr, mnp, kk, kb, kt, klay, idims(3), LL,Lb,Lt,L, Lf, k3, k4
     logical                      :: jawel
     double precision             :: xp, yp, qsum, vals, valx, valy, valwx, valwy, valpatm, wind, cof0
 
@@ -16603,9 +16603,9 @@ subroutine unc_write_his(tim)            ! wrihis
 
 !          waq output
              if(jawaqproc .eq. 1) then
-               if (noout > 0) then
-                  call realloc(id_hwq, noout, keepExisting = .false.)
-                  do j=1,noout
+               if (noout_user > 0) then
+                  call realloc(id_hwq, noout_user, keepExisting = .false.)
+                  do j=1,noout_user
                      tmpstr = ' '
                      write (tmpstr, "('water_quality_output_',I0)") j
                      if ( kmx > 0 ) then  !        3D
@@ -16621,6 +16621,48 @@ subroutine unc_write_his(tim)            ! wrihis
                      ierr = nf90_put_att(ihisfile, id_hwq(j), 'long_name', trim(outputs%names(j)))
                      ierr = nf90_put_att(ihisfile, id_hwq(j), 'units', trim(outputs%units(j)))
                      ierr = nf90_put_att(ihisfile, id_hwq(j), 'description', tmpstr)
+                  enddo
+               endif
+               if (noout_statt > 0) then
+                  call realloc(id_hwq, noout_user + noout_statt, keepExisting = .true.)
+                  do j=1,noout_statt
+                     jj = noout_user + j
+                     tmpstr = ' '
+                     write (tmpstr, "('water_quality_stat_',I0)") j
+                     if ( kmx > 0 ) then  !        3D
+                        ierr = nf90_def_var(ihisfile, trim(tmpstr), nf90_double, (/ id_laydim, id_statdim, id_timedim /), id_hwq(jj))
+                        ierr = nf90_put_att(ihisfile, id_hwq(jj), 'coordinates', 'station_x_coordinate station_y_coordinate station_name zcoordinate_c')
+                     else
+                        ierr = nf90_def_var(ihisfile, trim(tmpstr), nf90_double, (/ id_statdim, id_timedim /), id_hwq(jj))
+                        ierr = nf90_put_att(ihisfile, id_hwq(jj), 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+                     end if
+                     tmpstr = trim(outputs%names(jj))//' - '//trim(outputs%descrs(jj))//' in flow element'
+                     call replace_multiple_spaces_by_single_spaces(tmpstr)
+                     ierr = nf90_put_att(ihisfile, id_hwq(jj), '_FillValue', dmiss)
+                     ierr = nf90_put_att(ihisfile, id_hwq(jj), 'long_name', trim(outputs%names(jj)))
+                     ierr = nf90_put_att(ihisfile, id_hwq(jj), 'units', trim(outputs%units(jj)))
+                     ierr = nf90_put_att(ihisfile, id_hwq(jj), 'description', tmpstr)
+                  enddo
+               endif
+               if (noout_state> 0) then
+                  call realloc(id_hwq, noout, keepExisting = .true.)
+                  do j=1,noout_state
+                     jj = noout_user + noout_statt + j
+                     tmpstr = ' '
+                     write (tmpstr, "('water_quality_stat_',I0)") noout_statt + j
+                     if ( kmx > 0 ) then  !        3D
+                        ierr = nf90_def_var(ihisfile, trim(tmpstr), nf90_double, (/ id_laydim, id_statdim /), id_hwq(jj))
+                        ierr = nf90_put_att(ihisfile, id_hwq(jj), 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+                     else
+                        ierr = nf90_def_var(ihisfile, trim(tmpstr), nf90_double, (/ id_statdim /), id_hwq(jj))
+                        ierr = nf90_put_att(ihisfile, id_hwq(jj), 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+                     end if
+                     tmpstr = trim(outputs%names(jj))//' - '//trim(outputs%descrs(jj))//' in flow element'
+                     call replace_multiple_spaces_by_single_spaces(tmpstr)
+                     ierr = nf90_put_att(ihisfile, id_hwq(jj), '_FillValue', dmiss)
+                     ierr = nf90_put_att(ihisfile, id_hwq(jj), 'long_name', trim(outputs%names(jj)))
+                     ierr = nf90_put_att(ihisfile, id_hwq(jj), 'units', trim(outputs%units(jj)))
+                     ierr = nf90_put_att(ihisfile, id_hwq(jj), 'description', tmpstr)
                   enddo
                endif
             endif
@@ -17449,7 +17491,11 @@ subroutine unc_write_his(tim)            ! wrihis
           if (IVAL_HWQ1 > 0) then
              do j = IVAL_HWQ1,IVAL_HWQN   ! enumerators of tracers in valobs array (not the pointer)
                i = j - IVAL_HWQ1 + 1
-               ierr = nf90_put_var(ihisfile, id_hwq(i), valobsT(:,IPNT_HWQ1 + (i-1)*kmx+kk-1), start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1/))
+               if (i .le. noout_user + noout_statt) then
+                  ierr = nf90_put_var(ihisfile, id_hwq(i), valobsT(:,IPNT_HWQ1 + (i-1)*kmx+kk-1), start = (/ kk, 1, it_his /), count = (/ 1, ntot, 1/))
+               else if (comparereal(tim, ti_mape, eps10) == 0) then
+                  ierr = nf90_put_var(ihisfile, id_hwq(i), valobsT(:,IPNT_HWQ1 + (i-1)*kmx+kk-1), start = (/ kk, 1 /), count = (/ 1, ntot, 1/))
+               endif
              enddo
           end if
           if (IVAL_SF1 > 0) then
