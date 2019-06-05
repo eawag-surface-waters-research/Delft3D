@@ -545,27 +545,31 @@ end function ug_addcoordvars
 !> Adds WGS84 coordinate variables according to CF conventions.
 !! Non-standard attributes (such as bounds) should be set elsewhere.
 function ug_addlonlatcoordvars(ncid, id_varlon, id_varlat, id_dimension, name_varlon, name_varlat, longname_varlon, longname_varlat, mesh, location) result(ierr)
-   integer,               intent(in)    :: ncid            !< NetCDF dataset id
-   integer,               intent(inout) :: id_varlon       !< NetCDF 'lon' variable id
-   integer,               intent(inout) :: id_varlat       !< NetCDF 'lat' variable id
-   integer, dimension(:), intent(in)    :: id_dimension    !< NetCDF dimension id
-   character(len=*),      intent(in)    :: name_varlon     !< NetCDF 'lon' variable name
-   character(len=*),      intent(in)    :: name_varlat     !< NetCDF 'lat' variable name
-   character(len=*),      intent(in)    :: longname_varlon !< NetCDF 'lon' variable long name
-   character(len=*),      intent(in)    :: longname_varlat !< NetCDF 'lat' variable long name
-   character(len=*),      intent(in)    :: mesh            !< Name of the mesh that contains the coordinate variables to add
-   character(len=*),      intent(in)    :: location        !< location on the mesh of the coordinate variables to add
-   integer                              :: ierr            !< Result status (UG_NOERR==NF90_NOERR) if successful.
+   integer,                    intent(in)    :: ncid            !< NetCDF dataset id
+   integer,                    intent(inout) :: id_varlon       !< NetCDF 'lon' variable id
+   integer,                    intent(inout) :: id_varlat       !< NetCDF 'lat' variable id
+   integer, dimension(:),      intent(in)    :: id_dimension    !< NetCDF dimension id
+   character(len=*),           intent(in)    :: name_varlon     !< NetCDF 'lon' variable name
+   character(len=*),           intent(in)    :: name_varlat     !< NetCDF 'lat' variable name
+   character(len=*),           intent(in)    :: longname_varlon !< NetCDF 'lon' variable long name
+   character(len=*),           intent(in)    :: longname_varlat !< NetCDF 'lat' variable long name
+   character(len=*), optional, intent(in)    :: mesh            !< (Optional) Name of the mesh that contains the coordinate variables to add.
+   character(len=*), optional, intent(in)    :: location        !< (Optional) Location on the mesh of the coordinate variables to add.
+   integer                                   :: ierr            !< Result status (UG_NOERR==NF90_NOERR) if successful.
 
    ierr = UG_NOERR
 
    ierr = nf90_def_var(ncid, name_varlon, nf90_double, id_dimension, id_varlon)
    ierr = nf90_def_var(ncid, name_varlat, nf90_double, id_dimension, id_varlat)
    ierr = ug_addlonlatcoordatts(ncid, id_varlon, id_varlat)
-   ierr = nf90_put_att(ncid, id_varlon, 'mesh',      mesh)
-   ierr = nf90_put_att(ncid, id_varlat, 'mesh',      mesh)
-   ierr = nf90_put_att(ncid, id_varlon, 'location',  location)
-   ierr = nf90_put_att(ncid, id_varlat, 'location',  location)
+   if (present(mesh)) then
+      ierr = nf90_put_att(ncid, id_varlon, 'mesh',      mesh)
+      ierr = nf90_put_att(ncid, id_varlat, 'mesh',      mesh)
+   end if
+   if (present(location)) then
+      ierr = nf90_put_att(ncid, id_varlon, 'location',  location)
+      ierr = nf90_put_att(ncid, id_varlat, 'location',  location)
+   end if
    ierr = nf90_put_att(ncid, id_varlon, 'long_name', longname_varlon)
    ierr = nf90_put_att(ncid, id_varlat, 'long_name', longname_varlat)
 end function ug_addlonlatcoordvars
