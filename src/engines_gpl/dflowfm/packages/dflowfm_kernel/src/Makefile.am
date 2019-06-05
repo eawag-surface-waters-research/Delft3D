@@ -48,7 +48,6 @@ endif
 libdflowfm_la_SOURCES=\
         unstruc_version.F90 \
         unstruc_messages.f90 \
-        unstruc_ini.f90 \
         xbeach_typesandkinds.F90 \
         dredge_data.f90 \
         bedform_data.f90 \
@@ -79,6 +78,8 @@ libdflowfm_la_SOURCES=\
         unstruc_shapefile.F90 \
         dredgepolygon.f90 \
         bedform_io.f90 \
+        unstruc_boundaries.f90 \
+        unstruc_ini.f90 \
         unstruc_startup.f90 \
         unstruc_opengis.f90 \
         wrwaq.F90 \
@@ -89,7 +90,6 @@ libdflowfm_la_SOURCES=\
         rcm.f90 \
         unstruc_api.F90 \
         rest.F90 \
-        unstruc_boundaries.f90 \
         xbeach_paramsconst.f90 \
         xbeach_netcdf.f90 \
         xbeach_errorhandling.f90 \
