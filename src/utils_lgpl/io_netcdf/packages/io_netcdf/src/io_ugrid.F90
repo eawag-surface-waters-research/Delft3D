@@ -3179,6 +3179,8 @@ subroutine write_face_global_number_variable(igeomfile, meshids, meshName, iglob
 
 end subroutine write_face_global_number_variable
 
+! TODO: LC: all routines below are for testing only. Probably better to move thenm to a different file.
+
 !> Creates and initializes mesh geometry that contains the 2D unstructured network and edge type array.
 !! NOTE: this routine is currently only a TEST GEOMETRY CREATOR
 !!
