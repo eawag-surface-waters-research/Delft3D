@@ -3097,6 +3097,7 @@ subroutine write_edge_type_variable(igeomfile, meshids, meshName, edge_type)
 
 end subroutine write_edge_type_variable
 
+! TODO: MJ: move this routine to unstruc_netcdf.F90
 !> Writes the given face domain number to the given netcdf file.
 subroutine write_face_domain_number_variable(igeomfile, meshids, meshName, idomain)
     implicit none
@@ -3137,6 +3138,7 @@ subroutine write_face_domain_number_variable(igeomfile, meshids, meshName, idoma
 
 end subroutine write_face_domain_number_variable
 
+! TODO: MJ: move this routine to unstruc_netcdf.F90
 !> Writes the given global face number to the given netcdf file.
 subroutine write_face_global_number_variable(igeomfile, meshids, meshName, iglobal_s)
     implicit none
