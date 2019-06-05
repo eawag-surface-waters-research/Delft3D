@@ -5015,7 +5015,7 @@ end subroutine setdt
 
  implicit none
 
- integer          :: L,LL, Lb, Lt, k1,k2
+ integer          :: L,LL, Lb, Lt, k1,k2, kt1, kt2
  double precision :: dpatm, tidp, trshcorioi, fmax, floc, dzt, dztm, alf
  double precision :: GradHinUc
  double precision :: p1, p2, wfac, Dzk
@@ -5057,7 +5057,13 @@ if (jawind > 0) then
                Lt = Ltop(LL)
                ! adve(Lt) = adve(Lt) - wdsu(LL) / max( toplayminthick, hu(Lt) - hu(Lt-1)  )
 
-               dzt = hu(Lt) - hu(Lt-1) ; alf = 1d0
+               alf = 1d0
+               if (jawindfinvol == 0) then 
+                  dzt = hu(Lt) - hu(Lt-1) 
+               else   
+                  kt1 = ktop( ln(1,LL) ) ; kt2 = ktop( ln(2,LL) ) 
+                  dzt = acL(LL)*(zws(kt1) - zws(kt1-1)) + (1d0-acL(LL))*(zws(kt2) - zws(kt2-1)) 
+               endif
                if ( Lbot(LL) < Lt ) then
                   dztm  =  hu(Lt-1) - hu(Lt-2)
                   !if ( dzt < 0.8d0*dztm ) then

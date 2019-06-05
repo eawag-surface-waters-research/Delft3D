@@ -1183,6 +1183,7 @@ subroutine readMDUFile(filename, istat)
        call prop_get_doubles(md_ptr, 'wind', 'Cdbreakpoints'          ,  Cdb, 2)
     endif
     call prop_get_integer(md_ptr, 'wind',  'Relativewind'              ,  jarelativewind)
+    call prop_get_integer(md_ptr, 'wind',  'Windfinvol'                ,  jawindfinvol)
     call prop_get_double (md_ptr, 'wind' , 'Rhoair'             , rhoair )
     call prop_get_double (md_ptr, 'wind' , 'PavIni'             , PavIni )
     call prop_get_double (md_ptr, 'wind' , 'PavBnd'             , PavBnd )
@@ -2652,6 +2653,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     if (writeall .or. jarelativewind == 0) then
        call prop_set(prop_ptr,    'wind', 'Relativewind',         jarelativewind,   'Wind speed relative to top-layer water speed, 1=yes, 0 = no) ' )
     endif
+  
     call prop_set(prop_ptr, 'wind', 'Rhoair',                  Rhoair,   'Air density (kg/m3)')
     call prop_set(prop_ptr, 'wind', 'PavBnd',                  PavBnd,   'Average air pressure on open boundaries (N/m2) (only applied if > 0)')
     call prop_set(prop_ptr, 'wind', 'Pavini',                  PavIni,   'Average air pressure for initial water level correction (N/m2) (only applied if > 0)')

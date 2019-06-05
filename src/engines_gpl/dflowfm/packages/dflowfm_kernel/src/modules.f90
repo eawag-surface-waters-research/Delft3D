@@ -1159,6 +1159,7 @@ double precision                  :: cdb(3)          !< breakpoints cd function 
 double precision                  :: wdb(3)          !< breakpoints cd function windspeed
 integer                           :: ICdtyp          !< 1=Const; 2=Smith&Banke (2 pts); 3=S&B (3 pts); 4=Charnock 1955, 5=Hwang 2005, 6=Wuest 2005
 integer                           :: jarelativewind  !< 1 = relative, 0 not relative
+integer                           :: jawindfinvol    !< 1 = finite volume , 0 = hu
 
 contains
 
@@ -1183,6 +1184,7 @@ use m_physcoef, only : rhomean
     wdb(3)  = 30
     icdtyp  = 2
     jarelativewind = 0    !< wind relative
+    jawindfinvol   = 0    !< 
 
     windxav = 0d0
     windyav = 0d0
