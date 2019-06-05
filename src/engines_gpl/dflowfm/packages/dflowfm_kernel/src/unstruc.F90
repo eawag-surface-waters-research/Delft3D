@@ -20818,7 +20818,7 @@ end subroutine unc_write_shp
         CALL CLOSETO1Dnetlink(Xc,Yc,LS,XLS,YLS,dum)
         if (Ls > 0) then
             Lf = lne2ln(Ls)
-            if (kcu(Lf) == 1) then
+            if (kcu(Lf) == 1 .or. kcu(Lf) == 5) then
                k1 = ln(1,Lf)  ; bob(1,Lf) = max(z1,bl(k1))
                k2 = ln(2,Lf)  ; bob(2,Lf) = max(z2,bl(k2))              ! flat
                prof1D(1,Lf)   = w1
@@ -41375,7 +41375,7 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
     SL = dsl(iL)
     n1 = ln(1,L) ; n2 = ln(2,L)
 
-    if (kcu(L) .eq. 1) then
+    if (kcu(L) .eq. 1 .or. kcu(L) == 5) then
        cycle ! UNST-2226: test code for forbidding fixed weirs on 1D
     end if
 
@@ -41400,69 +41400,71 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
        endif
 
        jaweir   = 0
-       if (jakol45 == 0) then ! no dzl or dzr specified
-          jaweir = 1
-       else
-          dz1   = sl*dzL(k+1) + (1d0-sl)*dzL(k)
-          dz2   = sl*dzR(k+1) + (1d0-sl)*dzR(k)
-
-          if (min (dz1,dz2) >= sillheightmin) then  ! weir if sufficiently high and regular link
+       if (ifixedweirscheme > 0) then
+          if (jakol45 == 0) then ! no dzl or dzr specified
              jaweir = 1
-          elseif (ifixedweirscheme == 8 .or. ifixedweirscheme == 9) then
-             ! For Villemonte and Tabellenboek weirs with low sills are also applied, in order to be consistent with Simona
-             jaweir = 1
-          endif
+          else
+             dz1   = sl*dzL(k+1) + (1d0-sl)*dzL(k)
+             dz2   = sl*dzR(k+1) + (1d0-sl)*dzR(k)
 
-          if (jaconveyance2D > 0) then   ! now set adjacent bobs of netlinks | sufficiently perpendicular to fixedweir to local ground level
-             do i = 1,2
-                n1 = lncn(i,L)
-                do kk  = 1, nmk(n1)                                  !          |         |
-                   Lnt = nod(n1)%lin(kk)                             ! ---------o---------o-------fixedweir
-                   Lf = lne2ln(Lnt)                                  !          |         |
-                   if (Lf == 0) cycle
-                   if (iLcr(abs(Lf)) == 1) cycle
-                   nna = kn(1,Lnt)
-                   nnb = kn(2,Lnt)
-                   xa  = xk(nna) ; ya = yk(nna)
-                   xb  = xk(nnb) ; yb = yk(nnb)
+             if (min (dz1,dz2) >= sillheightmin) then  ! weir if sufficiently high and regular link
+                jaweir = 1
+             elseif (ifixedweirscheme == 8 .or. ifixedweirscheme == 9) then
+                ! For Villemonte and Tabellenboek weirs with low sills are also applied, in order to be consistent with Simona
+                jaweir = 1
+             endif
 
-                   COSPHI = DCOSPHI(Xpl(k), Ypl(k), xpl(k+1), ypl(k+1), xa, ya, xb, yb, jsferic, jasfer3D, dxymis)
-                   if (abs(cosphi) < 0.5d0) then
-                       if (nna .ne. n1) then
-                           nhh = nna
-                           nna = nnb
-                           nnb = nhh
-                       endif  ! na is now basepoint
-                       xa = xk(nna) ; ya = yk(nna)
-                       xb = xk(nnb) ; yb = yk(nnb)
-                       call duitpl(Xpl(k), Ypl(k), xpl(k+1), ypl(k+1), xa, ya, xb, yb, sig, jsferic)
-                       adjacentbob = dmiss
-                       if (sig > 0 ) then
-                           if (dz2 > 3d0 .and. dz1 < 3d0) then  ! kade at other side deeper than 3 m
-                              adjacentbob = zc - dz1            ! then set kade ground level
-                           endif
-                       else
-                           if (dz1 > 3d0 .and. dz2 < 3d0) then
-                              adjacentbob = zc - dz2
-                           endif
-                       endif
+             if (jaconveyance2D > 0) then   ! now set adjacent bobs of netlinks | sufficiently perpendicular to fixedweir to local ground level
+                do i = 1,2
+                   n1 = lncn(i,L)
+                   do kk  = 1, nmk(n1)                                  !          |         |
+                      Lnt = nod(n1)%lin(kk)                             ! ---------o---------o-------fixedweir
+                      Lf = lne2ln(Lnt)                                  !          |         |
+                      if (Lf == 0) cycle
+                      if (iLcr(abs(Lf)) == 1) cycle
+                      nna = kn(1,Lnt)
+                      nnb = kn(2,Lnt)
+                      xa  = xk(nna) ; ya = yk(nna)
+                      xb  = xk(nnb) ; yb = yk(nnb)
 
-                       if (Lf > 0 .and. adjacentbob .ne. dmiss) then
-                          if (lncn(1,Lf) == n1) then
-                              bob(1,Lf) = adjacentbob
+                      COSPHI = DCOSPHI(Xpl(k), Ypl(k), xpl(k+1), ypl(k+1), xa, ya, xb, yb, jsferic, jasfer3D, dxymis)
+                      if (abs(cosphi) < 0.5d0) then
+                          if (nna .ne. n1) then
+                              nhh = nna
+                              nna = nnb
+                              nnb = nhh
+                          endif  ! na is now basepoint
+                          xa = xk(nna) ; ya = yk(nna)
+                          xb = xk(nnb) ; yb = yk(nnb)
+                          call duitpl(Xpl(k), Ypl(k), xpl(k+1), ypl(k+1), xa, ya, xb, yb, sig, jsferic)
+                          adjacentbob = dmiss
+                          if (sig > 0 ) then
+                              if (dz2 > 3d0 .and. dz1 < 3d0) then  ! kade at other side deeper than 3 m
+                                 adjacentbob = zc - dz1            ! then set kade ground level
+                              endif
                           else
-                              bob(2,Lf) = adjacentbob
+                              if (dz1 > 3d0 .and. dz2 < 3d0) then
+                                 adjacentbob = zc - dz2
+                              endif
                           endif
-                          nl1 = ln(1,Lf) ; nl2 = ln(2,Lf)
-                          bl(nl1) = min(bl(nl1), adjacentbob )
-                          bl(nl2) = min(bl(nl2), adjacentbob )
-                       endif
 
-                   endif
+                          if (Lf > 0 .and. adjacentbob .ne. dmiss) then
+                             if (lncn(1,Lf) == n1) then
+                                 bob(1,Lf) = adjacentbob
+                             else
+                                 bob(2,Lf) = adjacentbob
+                             endif
+                             nl1 = ln(1,Lf) ; nl2 = ln(2,Lf)
+                             bl(nl1) = min(bl(nl1), adjacentbob )
+                             bl(nl2) = min(bl(nl2), adjacentbob )
+                          endif
 
-                enddo
+                      endif
 
-             enddo !1,2
+                   enddo
+
+                enddo !1,2
+             endif
           endif
        endif
 
