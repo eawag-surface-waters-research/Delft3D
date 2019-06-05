@@ -392,8 +392,8 @@ AS_IF([test "x$with_petsc" != "xno"],
 				PKG_CHECK_MODULES([PETSc], [PETSc >= 3.8])					
 			])
 			# do we need fortran cflags here??
-			AC_DEFINE([HAVE_PETSC],1,[Defined if you have PETSc library.]) 
-			  
+			AC_DEFINE([HAVE_PETSC],1,[Defined if you have PETSc library.])
+			
 		],
 	    	AC_MSG_RESULT([no]))
 
@@ -512,7 +512,7 @@ AS_IF([test "x$with_metis" != "xno"], [
   	AS_IF([test "x$METIS_CFLAGS" != "x"], [
   		AX_APPEND_FLAG($METIS_CFLAGS, CPPFLAGS) ],
   	[
-  		AS_IF([test "x$METIS_DIR" != "x"], 
+  		AS_IF([test "x$METIS_DIR" != "x"],
   		[
       	dnl # Look for METIS on the user specified inky install path
       		METIS_CFLAGS="-I$METIS_DIR/include";
@@ -522,7 +522,7 @@ AS_IF([test "x$with_metis" != "xno"], [
   	AS_IF([test "x$METIS_LIBS" != "x"], [
   		AX_APPEND_FLAG($METIS_LIBS, LDFLAGS) ],
   	[
-  		AS_IF([test "x$METIS_DIR" != "x"], 
+  		AS_IF([test "x$METIS_DIR" != "x"],
   		[
       	dnl # Look for METIS on the user specified inky install path
       		METIS_LIBS="-L$METIS_DIR/lib";
@@ -781,6 +781,14 @@ tools_gpl/waq_run_processes/packages/waq_run_processes/Makefile
 tools_gpl/waq_run_processes/packages/waq_run_processes/src/Makefile
 tools_gpl/waq_run_processes/packages/waq_run_processes_version_number/Makefile
 tools_gpl/waq_run_processes/packages/waq_run_processes_version_number/src/Makefile
+tools_gpl/waqpb/Makefile
+tools_gpl/waqpb/packages/Makefile
+tools_gpl/waqpb/packages/waqpb_export/Makefile
+tools_gpl/waqpb/packages/waqpb_export/src/Makefile
+tools_gpl/waqpb/packages/waqpb_import/Makefile
+tools_gpl/waqpb/packages/waqpb_import/src/Makefile
+tools_gpl/waqpb/packages/waqpb_lib/Makefile
+tools_gpl/waqpb/packages/waqpb_lib/src/Makefile
 utils_gpl/flow1d/include/Makefile
 utils_gpl/flow1d/Makefile
 utils_gpl/flow1d/packages/flow1d_core/Makefile
@@ -946,7 +954,7 @@ utils_lgpl/ods/packages/Makefile
 utils_lgpl/ods/packages/ods/Makefile
 utils_lgpl/ods/packages/ods/srcf/Makefile
 utils_lgpl/ods/packages/ods/src/Makefile
-    
+
 ])
 
 AC_CONFIG_SUBDIRS([
