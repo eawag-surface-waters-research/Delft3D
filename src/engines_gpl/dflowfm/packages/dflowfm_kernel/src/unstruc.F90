@@ -13309,6 +13309,7 @@ end if
 
         ux    = 0.5d0*(ux1+ux2)/rmx
         uy    = 0.5d0*(uy1+uy2)/rmx
+
         u1(L) = ux*csu(L) + uy*snu(L)
         do LL = Lbot(L), Lbot(L) + kmxL(L) - 1
            u1(LL) = u1(L)
@@ -20878,7 +20879,7 @@ end subroutine unc_write_shp
 
  double precision                            :: XLS, YLS, XLB, DXB, dum, ZA, ZB, wa, wb, zul, wul
  double precision                            :: wn(100), zn(100)
- integer                                     :: np(100) , nn, n1
+ integer                                     :: np(100) , nn, n1, kn3now
 
  if ( jampi.ne.1 ) then
     if (lnx1D == 0) return
@@ -20925,7 +20926,7 @@ end subroutine unc_write_shp
        end if
 
        if ( allocated(xllin) ) then
-           deallocate(xllin)
+           deallocate(xllin)   
        endif
        ierr = 0
        allocate ( XLLIN(numL) , stat = ierr)
@@ -21146,36 +21147,39 @@ end subroutine unc_write_shp
 
           IF (jainterpolatezk1D > 0) THEN
 
-              allocate ( zkk(numk), wkk(numk)) ; wkk = 0d0 ; zkk = 0d0
-              do L = 1, lnx1D
-                 if (kcu(L) == 1 .or. kcu(L) == -1) then   ! regular 1D links
-                     KA = PROF1D(1,L)
-                     KB = PROF1D(2,L)
-                     IF (KA < 0 .AND. KB < 0 ) THEN        ! for which profile pointering exists
-                         ALFA    = PROF1D(3,L)
-                         ZA      = profiles1D(-KA)%ZMIN
-                         ZB      = profiles1D(-KB)%ZMIN
-                         WA      = profiles1D(-KA)%width
-                         WB      = profiles1D(-KB)%width
-                         zuL     = (1d0-ALFA)*ZA + ALFA*ZB  ! z on these links
-                         wuL     = (1d0-ALFA)*WA + ALFA*WB  ! z on these links
-                         LL      = abs( ln2lne(L) )
-                         k       = kn(1,LL)
-                         zkk(k)  = zkk(k) + zul*wuL
-                         wkk(k)  = wkk(k) + wuL
-                         k       = kn(2,LL)
-                         zkk(k)  = zkk(k) + zul*wuL
-                         wkk(k)  = wkk(k) + wuL
-                     ENDIF
-                 endif
-              enddo
-              do k = 1, numk
-                 if (zk(k) == dmiss .or. zk(k) == zkuni) then
-                    if (wkk(k) .ne. 0) then
-                       zk(k) = zkk(k) / wkk(k)
+              allocate ( zkk(numk), wkk(numk)) 
+              do kn3now = 6,1,-5
+                 wkk = 0d0 ; zkk = 0d0
+                 do L = 1, lnx1D
+                    if (abs(kcu(L)) == 1 .and. kn(3,ln2lne(L)) == kn3now ) then   ! regular 1D links
+                        KA = PROF1D(1,L)
+                        KB = PROF1D(2,L)
+                        IF (KA < 0 .AND. KB < 0 ) THEN        ! for which profile pointering exists
+                            ALFA    = PROF1D(3,L)
+                            ZA      = profiles1D(-KA)%ZMIN
+                            ZB      = profiles1D(-KB)%ZMIN
+                            WA      = profiles1D(-KA)%width
+                            WB      = profiles1D(-KB)%width
+                            zuL     = (1d0-ALFA)*ZA + ALFA*ZB  ! z on these links
+                            wuL     = (1d0-ALFA)*WA + ALFA*WB  ! z on these links
+                            LL      = abs( ln2lne(L) )
+                            k       = kn(1,LL)
+                            zkk(k)  = zkk(k) + zul*wuL
+                            wkk(k)  = wkk(k) + wuL
+                            k       = kn(2,LL)
+                            zkk(k)  = zkk(k) + zul*wuL
+                            wkk(k)  = wkk(k) + wuL
+                        ENDIF
                     endif
-                 endif
-              enddo
+                 enddo
+                 do k = 1, numk
+                    if (zk(k) == dmiss .or. zk(k) == zkuni) then
+                       if (wkk(k) .ne. 0) then
+                          zk(k) = zkk(k) / wkk(k)
+                       endif
+                    endif
+                 enddo
+              enddo   
               deallocate (zkk, wkk)
           ENDIF
 
@@ -37666,7 +37670,7 @@ if (mext > 0) then
 
         else if (qid(1:13) == 'initialtracer') then
            call get_tracername(qid, tracnam, qidnam)
-!           call add_tracer(tracnam, iconst)  ! or just gets constituents number if tracer already exists
+           call add_tracer(tracnam, iconst)  ! or just gets constituents number if tracer already exists
            itrac = findname(numtracers, trnames, tracnam)
 
            if ( itrac.eq.0 ) then
