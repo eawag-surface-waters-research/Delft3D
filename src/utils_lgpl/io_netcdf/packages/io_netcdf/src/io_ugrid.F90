@@ -2605,7 +2605,7 @@ function ug_get_node_coordinates(ncid, meshids, xn, yn) result(ierr)
 
    ierr = nf90_get_var(ncid, meshids%varids(mid_nodex), xn)
    if(ierr /= UG_NOERR) then 
-       Call SetMessage(Level_Fatal, 'could not read x coordinates')
+      call SetMessage(LEVEL_WARN, 'could not read x coordinates') ! low level lib may not throw fatal errors
    end if 
    ierr = nf90_get_var(ncid, meshids%varids(mid_nodey), yn)
    ! TODO: AvD: some more careful error handling
@@ -2623,7 +2623,7 @@ function ug_put_node_coordinates(ncid, meshids, xn, yn) result(ierr)
 
    ierr = nf90_put_var(ncid, meshids%varids(mid_nodex), xn)
    if(ierr /= NF90_NOERR) then 
-       Call SetMessage(Level_Fatal, 'could not put x coordinates')
+      call SetMessage(LEVEL_WARN, 'could not put x coordinates') ! low level lib may not throw fatal errors
    end if 
    ierr = nf90_put_var(ncid, meshids%varids(mid_nodey), yn)
    ! TODO: AvD: some more careful error handling
@@ -2703,7 +2703,7 @@ function ug_get_face_coordinates(ncid, meshids, xf, yf) result(ierr)
 
    ierr = nf90_get_var(ncid, meshids%varids(mid_facex), xf)
    if(ierr /= UG_NOERR) then 
-       ! TODO: AvD: low level lib may not throw fatal errors: ! Call SetMessage(LEVEL_FATAL, 'could not read x coordinates')
+      call SetMessage(LEVEL_WARN, 'could not read x coordinates') ! low level lib may not throw fatal errors
    end if 
    ierr = nf90_get_var(ncid, meshids%varids(mid_facey), yf)
    ! TODO: AvD: some more careful error handling
@@ -2721,7 +2721,7 @@ function ug_put_face_coordinates(ncid, meshids, xf, yf) result(ierr)
 
    ierr = nf90_put_var(ncid, meshids%varids(mid_facex), xf)
    if(ierr /= NF90_NOERR) then 
-       ! TODO: AvD: low level lib may not throw fatal errors: ! Call SetMessage(LEVEL_FATAL, 'could not put x coordinates')
+      call SetMessage(LEVEL_WARN, 'could not put x coordinates') ! low level lib may not throw fatal errors
    end if 
    ierr = nf90_put_var(ncid, meshids%varids(mid_facey), yf)
    ! TODO: AvD: some more careful error handling
