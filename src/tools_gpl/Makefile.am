@@ -7,5 +7,4 @@ SUBDIRS = \
 	mormerge \
 	nesthd1 \
 	nesthd2 \
-	vs \
-	waqpb
+	vs
