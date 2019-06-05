@@ -6,6 +6,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
+noinst_LTLIBRARIES = libwaqpb.la
 
 AM_FCFLAGS +=  $(FINCLUDES) $(FMODULES)
 AM_FFLAGS  +=  $(FINCLUDES) $(FMODULES)
@@ -16,7 +17,7 @@ AM_FFLAGS  +=  $(FINCLUDES) $(FMODULES)
 
 
 FMODULES += \
-        -I$(top_builddir)/tools_gpl/waqpb/include
+        -I../include
 
 #-------------------------------------------------------------------------------
 #Sources
