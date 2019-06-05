@@ -277,6 +277,7 @@ subroutine readlocationfilesfromboundaryblocks(filename, nx, kce, num_bc_ini_blo
  use system_utils
  use unstruc_files, only: resolvePath
  use m_alloc
+ use string_module, only: strcmpi
 
  implicit none
 
@@ -323,7 +324,7 @@ subroutine readlocationfilesfromboundaryblocks(filename, nx, kce, num_bc_ini_blo
  do i=1,num_items_in_file
     node_ptr => bnd_ptr%child_nodes(i)%node_ptr
     groupname = tree_get_name(bnd_ptr%child_nodes(i)%node_ptr)
-    if (trim(groupname) == 'boundary') then
+    if (strcmpi(groupname, 'Boundary')) then
        quantity = ''
        locationfile = ''
        forcingfile = ''
@@ -343,31 +344,32 @@ subroutine readlocationfilesfromboundaryblocks(filename, nx, kce, num_bc_ini_blo
        if (property_ok)  then
           filetype = node_id
        else
-          call prop_get_string(node_ptr, '', 'locationfile', locationfile, property_ok)
+          call prop_get_string(node_ptr, '', 'locationFile', locationfile, property_ok)
           filetype = poly_tim
        endif
        
        if (property_ok)  then
           call resolvePath(locationfile, basedir, locationfile)
        else
-          call qnerror( 'Expected property' , 'locationfile', ' for boundary definition' )
+          call qnerror( 'Expected property' , 'locationFile', ' for boundary definition' )
        end if
        
        group_ok = group_ok .and. property_ok
        
-       call prop_get_string(node_ptr, '', 'forcingfile ', forcingfile , property_ok)
+       call prop_get_string(node_ptr, '', 'forcingFile ', forcingfile , property_ok)
        if (property_ok)  then
           call resolvePath(forcingfile, basedir, forcingfile)
        else
-          call qnerror( 'Expected property' , 'forcingfile', ' for boundary definition' )
+          call qnerror( 'Expected property' , 'forcingFile', ' for boundary definition' )
        end if
 
        group_ok = group_ok .and. property_ok
 
-       call prop_get_double(node_ptr, '', 'return_time', return_time )
+       call prop_get_double(node_ptr, '', 'returnTime', return_time )
+       call prop_get_double(node_ptr, '', 'return_time', return_time ) ! UNST-2386: Backwards compatibility reading.
 
        rrtolb = 0d0
-       call prop_get_double(node_ptr, '', 'OpenBoundaryTolerance', rrtolb)
+       call prop_get_double(node_ptr, '', 'openBoundaryTolerance', rrtolb)
 
        if (group_ok) then
           if (rrtolb > 0d0) then
