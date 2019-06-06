@@ -97,14 +97,15 @@ module m_ec_filereader_read
          ! continue reading lines untill a data line is encountered
          do
             iomsg = ""
-            call GetLine(fileReaderPtr%fileHandle, rec, istat, iomsg=iomsg)
+!           call GetLine(fileReaderPtr%fileHandle, rec, istat, iomsg=iomsg)
+            call GetLine(fileReaderPtr%fileHandle, rec, istat)
             if (istat == 0) then
                call strip_comment(rec)
                if (len_trim(rec)>0) then
                   exit
                end if
             else
-               call setECMessage("  IOMessage: "//trim(iomsg))
+!              call setECMessage("  IOMessage: "//trim(iomsg))
                call setECMessage("File error in "//trim(fileReaderPtr%fileName))
                exit
             end if
