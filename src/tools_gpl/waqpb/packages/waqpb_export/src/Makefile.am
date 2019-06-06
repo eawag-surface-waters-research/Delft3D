@@ -4,7 +4,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libwaqpb.la
+bin_PROGRAMS = waqpbexport
 
 #AM_FCFLAGS += -fopenmp $(OPENMP_FCFLAGS)
 #AM_FFLAGS += -fopenmp $(OPENMP_FFLAGS)
@@ -17,12 +17,12 @@ FMODULES += \
 
 #-------------------------------------------------------------------------------
 #Sources
-waqpb_export_SOURCES = \
+waqpbexport_SOURCES = \
        waqpb_export.f
 
 #-------------------------------------------------------------------------------
 # Libraries
 
-waqpb_export_LIBADD = \
-    $(top_builddir)/tools_lgpl/waqpb/packages/waqpb_lib/src/libwaqpb.la \
+waqpbexport_LDADD = \
+    $(top_builddir)/tools_gpl/waqpb/packages/waqpb_lib/src/libwaqpb.la \
     $(top_builddir)/utils_lgpl/nefis/packages/nefis/src/libNefis.la

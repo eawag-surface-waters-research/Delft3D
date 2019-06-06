@@ -17,7 +17,7 @@ AM_FFLAGS  +=  $(FINCLUDES) $(FMODULES)
 
 
 FMODULES += \
-        -I../include
+        -I../../include
 
 #-------------------------------------------------------------------------------
 #Sources
@@ -27,6 +27,8 @@ libwaqpb_la_SOURCES = \
         cldept.f \
         clrcar.f \
         coefed.f \
+        dattim.f \
+        dhdelf.f \
         finuni.f \
         makind.f \
         pdfnef.f \

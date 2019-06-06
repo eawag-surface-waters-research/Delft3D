@@ -12223,6 +12223,8 @@ src/tools_gpl/waqpb/packages/waqpb_lib/src/chksto.f -text
 src/tools_gpl/waqpb/packages/waqpb_lib/src/cldept.f -text
 src/tools_gpl/waqpb/packages/waqpb_lib/src/clrcar.f -text
 src/tools_gpl/waqpb/packages/waqpb_lib/src/coefed.f -text
+src/tools_gpl/waqpb/packages/waqpb_lib/src/dattim.f -text
+src/tools_gpl/waqpb/packages/waqpb_lib/src/dhdelf.f -text
 src/tools_gpl/waqpb/packages/waqpb_lib/src/finuni.f -text
 src/tools_gpl/waqpb/packages/waqpb_lib/src/makind.f -text
 src/tools_gpl/waqpb/packages/waqpb_lib/src/newfrm.txt -text
