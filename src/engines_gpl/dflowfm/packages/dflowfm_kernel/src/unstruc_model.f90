@@ -1166,31 +1166,36 @@ subroutine readMDUFile(filename, istat)
 
     call prop_get_string (md_ptr, 'bedform', 'BedformFile',  md_bedformfile, success)
 
-    call prop_get_integer(md_ptr, 'wind', 'ICdtyp'                    ,  ICdtyp)
+    call prop_get_integer(md_ptr, 'wind', 'ICdtyp'                    , ICdtyp)
     if (Icdtyp == 1) then
-       call prop_get_doubles(md_ptr, 'wind', 'Cdbreakpoints'          ,  Cdb, 1)
+       call prop_get_doubles(md_ptr, 'wind', 'Cdbreakpoints'          , Cdb, 1)
     else if (Icdtyp == 2) then
-       call prop_get_doubles(md_ptr, 'wind', 'Cdbreakpoints'          ,  Cdb, 2)
-       call prop_get_doubles(md_ptr, 'wind', 'Windspeedbreakpoints'   ,  Wdb, 2)
+       call prop_get_doubles(md_ptr, 'wind', 'Cdbreakpoints'          , Cdb, 2)
+       call prop_get_doubles(md_ptr, 'wind', 'Windspeedbreakpoints'   , Wdb, 2)
        Cdb(3) = Cdb(2)
        Wdb(2) = max(Wdb(2), Wdb(1) + .1d0)
        Wdb(3) = Wdb(2) + .1d0
     else if (Icdtyp == 3) then
-       call prop_get_doubles(md_ptr, 'wind', 'Cdbreakpoints'          ,  Cdb, 3)
-       call prop_get_doubles(md_ptr, 'wind', 'Windspeedbreakpoints'   ,  Wdb, 3)
+       call prop_get_doubles(md_ptr, 'wind', 'Cdbreakpoints'          , Cdb, 3)
+       call prop_get_doubles(md_ptr, 'wind', 'Windspeedbreakpoints'   , Wdb, 3)
        Wdb(2) = max(Wdb(2), Wdb(1) + .1d0)
        Wdb(3) = max(Wdb(3), Wdb(2) + .1d0)
     else if (Icdtyp == 4) then
-       call prop_get_doubles(md_ptr, 'wind', 'Cdbreakpoints'          ,  Cdb, 1)
+       call prop_get_doubles(md_ptr, 'wind', 'Cdbreakpoints'          , Cdb, 1)
     else if (Icdtyp == 7) then
-       call prop_get_doubles(md_ptr, 'wind', 'Cdbreakpoints'          ,  Cdb, 2)
+       call prop_get_doubles(md_ptr, 'wind', 'Cdbreakpoints'          , Cdb, 2)
     endif
-    call prop_get_integer(md_ptr, 'wind',  'Relativewind'              ,  jarelativewind)
-    call prop_get_integer(md_ptr, 'wind',  'Windfinvol'                ,  jawindfinvol)
-    call prop_get_double (md_ptr, 'wind' , 'Rhoair'             , rhoair )
-    call prop_get_double (md_ptr, 'wind' , 'PavIni'             , PavIni )
-    call prop_get_double (md_ptr, 'wind' , 'PavBnd'             , PavBnd )
-    call prop_get_integer(md_ptr, 'wind' , 'Stericcorrection'   , jasteric)
+    call prop_get_integer(md_ptr, 'wind',  'Relativewind'             , jarelativewind)
+    if (kmx == 0) then 
+       jawindhuorzwsbased = 1
+    else 
+       jawindhuorzwsbased = 0
+    endif
+    call prop_get_integer(md_ptr, 'wind',  'Windhuorzwsbased'            , jawindhuorzwsbased)
+    call prop_get_double (md_ptr, 'wind' , 'Rhoair'                   , rhoair )
+    call prop_get_double (md_ptr, 'wind' , 'PavIni'                   , PavIni )
+    call prop_get_double (md_ptr, 'wind' , 'PavBnd'                   , PavBnd )
+    call prop_get_integer(md_ptr, 'wind' , 'Stericcorrection'         , jasteric)
     if (Jasteric > 0) then 
        rhosteric = densfm(backgroundsalinity, backgroundwatertemperature) 
     endif
@@ -2654,7 +2659,10 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        call prop_set(prop_ptr, 'wind', 'Windspeedbreakpoints', Wdb(1:3), 'Wind speed break points (m/s)')
     endif
     if (writeall .or. jarelativewind == 0) then
-       call prop_set(prop_ptr,    'wind', 'Relativewind',         jarelativewind,   'Wind speed relative to top-layer water speed, 1=yes, 0 = no) ' )
+       call prop_set(prop_ptr,    'wind', 'Relativewind',      jarelativewind,   'Wind speed relative to top-layer water speed, 1=yes, 0 = no) ' )
+    endif
+    if (kmx == 0 .and. jawindhuorzwsbased == 0 .or. kmx > 0 .and. jawindhuorzwsbased == 1) then
+       call prop_set(prop_ptr,    'wind', 'Windhuorzwsbased', j awindhuorzwsbased,   'Wind hu or zws based , 0 = hu, 1 = zws) ' )
     endif
   
     call prop_set(prop_ptr, 'wind', 'Rhoair',                  Rhoair,   'Air density (kg/m3)')

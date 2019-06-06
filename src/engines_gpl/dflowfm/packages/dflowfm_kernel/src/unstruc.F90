@@ -5037,7 +5037,11 @@ if (jawind > 0) then
                   endif
                endif
                ! wdsu/huvli = [(m^2/s^2)*m^-1]
-               adve(LL) = adve(LL) - wdsu(LL)*wfac*huvli(LL)
+               if (jawindhuorzwsbased == 0) then  
+                  adve(LL) = adve(LL) - wdsu(LL)*wfac/hu(LL)
+               else
+                  adve(LL) = adve(LL) - wdsu(LL)*wfac*huvli(LL)
+               endif
            endif
         enddo
         !$OMP END PARALLEL DO
@@ -5058,7 +5062,7 @@ if (jawind > 0) then
                ! adve(Lt) = adve(Lt) - wdsu(LL) / max( toplayminthick, hu(Lt) - hu(Lt-1)  )
 
                alf = 1d0
-               if (jawindfinvol == 0) then 
+               if (jawindhuorzwsbased == 0) then 
                   dzt = hu(Lt) - hu(Lt-1) 
                else   
                   kt1 = ktop( ln(1,LL) ) ; kt2 = ktop( ln(2,LL) ) 
