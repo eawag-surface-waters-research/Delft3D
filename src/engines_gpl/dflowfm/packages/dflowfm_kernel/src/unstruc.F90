@@ -40625,7 +40625,7 @@ if (abs(kcu(ll))==1 .and. network%loaded) then !flow1d used only for 1d channels
       cz = 0d0
       call GetCSParsFlow(network%adm%line2cross(LL), network%crs%cross, hpr, area, perim, width, af_sub, perim_sub)
 
-!      if (calcConv ==1) then
+      if (calcConv ==1) then
          u1L = u1(LL)
          q1L = q1(LL)
          k1 = ln(1,LL)
@@ -40638,17 +40638,18 @@ if (abs(kcu(ll))==1 .and. network%loaded) then !flow1d used only for 1d channels
          ! For sediment transport the discharge in the main channel is required:
          ! Qmain/ QT = Kmain/KT -> u_main = Kmain/KT * (AT/Amain)
          if (conv > 0d0) then
-            u_to_umain(L) = area*cz_sub(1) * sqrt(af_sub(1)/perim_sub(1)) /  conv
-            cfuhi(L) = ag/(conv/area)**2
-            frcu(L) = cz
-            frcu_mor(L) = cz_sub(1)
+            u_to_umain(L)  = area*cz_sub(1) * sqrt(af_sub(1)/perim_sub(1)) /  conv
+            cfuhi(L)       = ag/(conv/area)**2
+            frcu(L)        = cz
+            ifrcutp(L)     = 0
+            frcu_mor(L)    = cz_sub(1)
             call getCrossDischarge(perim_sub, af_sub, cz_sub, q1L, q_sub)
             q1_main(L) = q_sub(1)
          else
             u_to_umain(L) = 1d0
             cfuhi(L) = 0d0
          endif
- !     endif
+      endif
       
       wu(L) = max(0.01d0,area/hpr)
    endif
