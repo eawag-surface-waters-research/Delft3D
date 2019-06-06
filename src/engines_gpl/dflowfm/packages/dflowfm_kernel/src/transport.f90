@@ -1627,7 +1627,7 @@ subroutine fill_constituents(jas) ! if jas == 1 do sources
             ! difsedw(iconst,:) = mtd%seddif(i,:)
             sigdifi(iconst) = 1d0/sigsed
          endif
-         wsf(iconst) = ws(i)
+         if (jased < 4) wsf(iconst) = ws(i)
       end do
    end if
    
