@@ -121,7 +121,7 @@
 !     number for the unlimited-size dimension and there can be only one of those)
 
       if ( nodump == 0 ) then
-          return
+          goto 900
       endif
 
 !     Initialize file
