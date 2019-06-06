@@ -389,7 +389,7 @@ module m_readCrossSections
             
          case(CS_YZ_PROF)
             plural = .true.
-            success = readYZCS(pCS, md_ptr%child_nodes(i)%node_ptr) 
+            success = readYZCS(pCS, md_ptr%child_nodes(i)%node_ptr, network%sferic) 
             
          case default
             call SetMessage(LEVEL_ERROR, 'Incorrect CrossSection type for CrossSection Definition with given type '//trim(typestr)//' and id: '//trim(id))
@@ -865,23 +865,29 @@ module m_readCrossSections
    end function readTabulatedCS_v100
    
    !> read YZ cross section from ini file
-   logical function readYZCS(pCS, node_ptr) 
-      type(t_CSType), pointer, intent(inout) :: pCS             !< cross section item
-      type(tree_data), pointer, intent(in)    :: node_ptr       !< treedata pointer to input for cross section
+   logical function readYZCS(pCS, node_ptr, sferic) 
+      use precision
       
+      type(t_CSType), pointer,  intent(inout) :: pCS             !< cross section item
+      type(tree_data), pointer, intent(in)    :: node_ptr        !< treedata pointer to input for cross section
+      logical                 , intent(in)    :: sferic          !< indicates whether spherical coordinates are used or metric
       integer :: numlevels
       integer :: frictionCount
-      logical :: success
+      logical :: success, sferic_local
       double precision, allocatable, dimension(:) :: positions
-
+      double precision, allocatable, dimension(:) :: xcoordinates, ycoordinates
+      real(hp)                                    :: dearthrad = 6378137.0_hp
       integer          :: i
       double precision :: locShift
 
       
       readYZCS = .false.
+      sferic_local = .false.
       call prop_get_integer(node_ptr, '', 'yzCount', numlevels, success)
       if (.not. success) then
          call prop_get_integer(node_ptr, '', 'xyzCount', numlevels, success)
+         ! only for xyz cross sections the coordinates may be spherical 
+         sferic_local = sferic
       endif
       
       if (success) call prop_get_integer(node_ptr, '', 'sectionCount', frictionCount, success)
@@ -894,6 +900,8 @@ module m_readCrossSections
       pCS%frictionSectionsCount = frictionCount
       pCS%storLevelsCount       = 0
       
+      call realloc(xcoordinates, numlevels)
+      call realloc(ycoordinates, numlevels)
       call realloc(pCS%y, numlevels)
       call realloc(pCS%z, numlevels)
       call realloc(pCS%storLevels, 2)
@@ -906,11 +914,18 @@ module m_readCrossSections
       call realloc(pCS%frictionSectionTo, frictionCount)
       allocate(positions(frictionCount+1))
       
-      call prop_get_doubles(node_ptr, '', 'yCoordinates', pCS%y, numlevels, success)
+      xcoordinates = 0d0
+      call prop_get_doubles(node_ptr, '', 'xCoordinates', xcoordinates, numlevels, success)
+      call prop_get_doubles(node_ptr, '', 'yCoordinates', ycoordinates, numlevels, success)
       if (success) call prop_get_doubles(node_ptr, '', 'zCoordinates', pCS%z, numlevels, success)
       if (.not. success) then
           call SetMessage(LEVEL_ERROR, 'Error while reading number of yz-levels for YZ-Cross-Section Definition ID: '//trim(pCS%id))
       endif
+      pCS%y(1) = 0d0
+      do i = 2, numlevels
+         call distance(sferic_local, xcoordinates(i-1), ycoordinates(i-1), xcoordinates(i), ycoordinates(i), pCS%y(i), dearthrad)
+         pCS%y(i) = pCS%y(i-1) + pCS%y(i) 
+      enddo
       
       pCS%storLevels = 0
       

@@ -377,6 +377,7 @@ subroutine loadModel(filename)
     use m_netw_flow1d
     use m_flow1d_reader
     use m_flowexternalforcings, only: pillar
+    use m_sferic
 
     interface
        subroutine realan(mlan, antot)
@@ -428,6 +429,8 @@ subroutine loadModel(filename)
 
     call loadNetwork(md_netfile, istat, jadoorladen)
 
+    network%sferic = jsferic==1
+    
     if (jadoorladen == 0 .and. network%numk > 0 .and. network%numl > 0) then
 
        iDumk = 0

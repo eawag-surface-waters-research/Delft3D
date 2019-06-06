@@ -394,12 +394,10 @@ integer function GetCrossType(string)
          GetCrossType = CS_CIRCLE    ! v1, v2
       case ('egg')
          GetCrossType = CS_EGG       ! v1
-      case ('yz')
+      case ('yz', 'xyz')
          GetCrossType = CS_YZ_PROF   ! v1, v2
       case ('rectangle')
          GetCrossType = CS_RECTANGLE ! v1, v2
-      case ('xyz')
-         GetCrossType = CS_YZ_PROF   ! v1, v2
       case ('ellipse')
          GetCrossType = CS_TABULATED ! v1
       case ('arch')

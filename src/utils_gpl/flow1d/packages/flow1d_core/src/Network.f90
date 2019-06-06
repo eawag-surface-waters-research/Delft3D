@@ -85,6 +85,7 @@ module m_network
       integer                                   :: l1d                     !< total number of links (internal and boundary)
       integer                                   :: numk                    !< total number of links (internal and boundary)
       integer                                   :: numl                    !< total number of links (internal and boundary)
+      logical                                   :: sferic                  !< flag indicating whether the used coordinate system is sferical or metric
       type(t_administration_1d)                 :: adm                     !< network administration
       type(t_nodeSet)                           :: nds                     !< set of nodes
       type(t_branchSet)                         :: brs                     !< set of branches
