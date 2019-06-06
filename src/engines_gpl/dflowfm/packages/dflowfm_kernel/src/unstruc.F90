@@ -13673,6 +13673,8 @@ end if
  ! one call to derive stokes drift etc needed at start
   if (jawave==3) then
     if( kmx == 0 ) then
+       !hs = s1-bl
+       !hs = max(hs, 0d0)
        call wave_comp_stokes_velocities()
        call wave_uorbrlabda()                       ! hwav gets depth-limited here
        call tauwave()
@@ -16176,6 +16178,7 @@ subroutine unc_write_his(tim)            ! wrihis
     use string_module
     use m_dad
     use m_filter, only: checkmonitor
+    use m_alloc
 
     implicit none
 
@@ -16207,9 +16210,11 @@ subroutine unc_write_his(tim)            ! wrihis
                      id_sedbtrans, id_sedstrans,&
                      id_srcdim, id_srclendim, id_srcname, id_qsrccur, id_vsrccum, id_qsrcavg, id_pred, id_presa, id_pretm, id_srcx, id_srcy, id_srcptsdim, &
                      id_partdim, id_parttime, id_partx, id_party, id_partz, &
-                     id_dredlinkdim, id_dreddim, id_dumpdim, id_dredlink_dis, id_dred_dis, id_dump_dis, id_dred_tfrac, id_plough_tfrac, id_lsedtot, id_dred_name, id_dump_name, id_frac_name, & !id_dump_dis_frac, id_dred_dis_frac, &
+                     id_dredlinkdim, id_dreddim, id_dumpdim, id_dredlink_dis, id_dred_dis, id_dump_dis, id_dred_tfrac, id_plough_tfrac, id_sedtotdim, id_dred_name, id_dump_name, id_frac_name, & !id_dump_dis_frac, id_dred_dis_frac, &
                      id_dambreakdim, id_dambreakname, id_dambreak_s1up, id_dambreak_s1dn, id_dambreak_breach_depth,id_dambreak_breach_width, id_dambreak_discharge, id_dambreak_cumulative_discharge, &
-                     id_dambreak_breach_width_derivative, id_dambreak_water_level_jump, id_dambreak_normal_velocity, id_checkmon, id_num_timesteps, id_comp_time
+                     id_dambreak_breach_width_derivative, id_dambreak_water_level_jump, id_dambreak_normal_velocity, id_checkmon, id_num_timesteps, id_comp_time, &
+                     id_sscx, id_sscy, id_sswx, id_sswy, id_sbcx, id_sbcy, id_sbwx, id_sbwy
+                     
 
     integer, allocatable, save :: id_tra(:)
     integer, allocatable, save :: id_hwq(:)
@@ -16227,13 +16232,16 @@ subroutine unc_write_his(tim)            ! wrihis
     double precision             :: xp, yp, qsum, vals, valx, valy, valwx, valwy, valpatm, wind, cof0
 
     character(len=255)           :: filename
+    character(len=25)            :: transpunit
     integer                      :: igen
     integer                      :: ndims
-    character(len=255) :: tmpstr, tmpstr2, tmpstr3, unit1, unit2, unit3
+    character(len=255)           :: tmpstr, tmpstr2, tmpstr3, unit1, unit2, unit3
     integer                      :: jawrizc = 0
     integer                      :: jawrizw = 0
     double precision             :: w1, pumplensum, pumplenmid, pumpxmid, pumpymid
-
+    double precision             :: rhol
+    double precision, allocatable::toutputx(:,:), toutputy(:,:)
+    
     if (jahiszcor > 0) then
        jawrizc = 1
        jawrizw = 1
@@ -16720,7 +16728,66 @@ subroutine unc_write_his(tim)            ! wrihis
                    jawrizc = 1
                enddo
             endif
-
+            !
+            ! Sediment transports
+            !
+            if (jased > 0 .and. stm_included .and. jahissed > 0) then
+               ierr = nf90_def_dim(ihisfile, 'nSedTot', stmpar%lsedtot, id_sedtotdim)
+               !
+               ierr = nf90_def_var(ihisfile, 'sedfrac_name', nf90_char, (/ id_strlendim, id_sedtotdim /), id_frac_name)
+               ierr = nf90_put_att(ihisfile, id_frac_name,'long_name', 'sediment fraction identifier')
+               !
+               select case(stmpar%morpar%moroutput%transptype)
+                  case (0)
+                     transpunit = 'kg s-1 m-1'
+                  case (1)
+                     transpunit = 'm3 s-1 m-1'
+                  case (2)
+                     transpunit = 'm3 s-1 m-1'
+               end select
+               !
+               if (stmpar%morpar%moroutput%sbcuv) then
+                  ierr = nf90_def_var(ihisfile, 'Current related bedload transport, x-component', nf90_double, (/  id_statdim, id_sedtotdim, id_timedim /), id_sbcx)
+                  ierr = nf90_put_att(ihisfile, id_sbcx, 'long_name', 'Current related bedload transport, x-component')
+                  ierr = nf90_put_att(ihisfile, id_sbcx, 'units', transpunit)
+                  ierr = nf90_put_att(ihisfile, id_sbcx, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+                  ierr = nf90_def_var(ihisfile, 'Current related bedload transport, y-component', nf90_double, (/ id_statdim, id_sedtotdim, id_timedim /), id_sbcy)
+                  ierr = nf90_put_att(ihisfile, id_sbcy, 'long_name', 'Current related bedload transport, y-component')
+                  ierr = nf90_put_att(ihisfile, id_sbcy, 'units', transpunit)
+                  ierr = nf90_put_att(ihisfile, id_sbcy, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+               endif
+               if (stmpar%morpar%moroutput%sbwuv .and. jawave>0) then
+                  ierr = nf90_def_var(ihisfile, 'Wave related bedload transport, x-component', nf90_double, (/ id_statdim, id_sedtotdim, id_timedim /), id_sbwx)
+                  ierr = nf90_put_att(ihisfile, id_sbwx, 'long_name', 'Wave related bedload transport, x-component')
+                  ierr = nf90_put_att(ihisfile, id_sbwx, 'units', transpunit)
+                  ierr = nf90_put_att(ihisfile, id_sbwx, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')               
+                  ierr = nf90_def_var(ihisfile, 'Wave related bedload transport, y-component', nf90_double, (/ id_statdim, id_sedtotdim, id_timedim /), id_sbwy)
+                  ierr = nf90_put_att(ihisfile, id_sbwy, 'long_name', 'Wave related bedload transport, y-component')
+                  ierr = nf90_put_att(ihisfile, id_sbwy, 'units', transpunit)
+                  ierr = nf90_put_att(ihisfile, id_sbwy, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+               endif
+               if (stmpar%morpar%moroutput%sswuv .and. jawave>0) then
+                  ierr = nf90_def_var(ihisfile, 'Wave related suspended transport, x-component', nf90_double, (/ id_statdim, id_sedtotdim, id_timedim /), id_sswx)
+                  ierr = nf90_put_att(ihisfile, id_sswx, 'long_name', 'Wave related suspended transport, x-component')
+                  ierr = nf90_put_att(ihisfile, id_sswx, 'units', transpunit)
+                  ierr = nf90_put_att(ihisfile, id_sswx, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+                  ierr = nf90_def_var(ihisfile, 'Wave related suspended transport, y-component', nf90_double, (/ id_statdim, id_sedtotdim, id_timedim /), id_sswy)
+                  ierr = nf90_put_att(ihisfile, id_sswy, 'long_name', 'Wave related suspended transport, y-component')
+                  ierr = nf90_put_att(ihisfile, id_sswy, 'units', transpunit)
+                  ierr = nf90_put_att(ihisfile, id_sswy, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+               end if
+               if (stmpar%morpar%moroutput%sscuv) then
+                  ierr = nf90_def_var(ihisfile, 'Current related suspended transport, x-component', nf90_double, (/ id_statdim, id_sedtotdim, id_timedim /), id_sscx)
+                  ierr = nf90_put_att(ihisfile, id_sscx, 'long_name', 'Current related suspended transport, x-component')
+                  ierr = nf90_put_att(ihisfile, id_sscx, 'units', transpunit)
+                  ierr = nf90_put_att(ihisfile, id_sscx, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+                  ierr = nf90_def_var(ihisfile, 'Current related suspended transport, y-component', nf90_double, (/ id_statdim, id_sedtotdim, id_timedim /), id_sscy)
+                  ierr = nf90_put_att(ihisfile, id_sscy, 'long_name', 'Current related suspended transport, y-component')
+                  ierr = nf90_put_att(ihisfile, id_sscy, 'units', transpunit)
+                  ierr = nf90_put_att(ihisfile, id_sscy, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
+               endif
+            endif
+            !
             if (jased > 0 .and. .not. stm_included .and. jahissed > 0) then
                if ( kmx.gt.0 ) then
                   ierr = nf90_def_var(ihisfile, 'sediment_concentration', nf90_double, (/ id_laydim, id_statdim, id_timedim /), id_varsed)
@@ -17228,7 +17295,7 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_def_dim(ihisfile, 'ndredlink', dadpar%nalink, id_dredlinkdim)
             ierr = nf90_def_dim(ihisfile, 'ndred', dadpar%nadred+dadpar%nasupl, id_dreddim)
             ierr = nf90_def_dim(ihisfile, 'ndump', dadpar%nadump, id_dumpdim)
-            ierr = nf90_def_dim(ihisfile, 'nfrac', stmpar%lsedtot+1, id_lsedtot)
+            !ierr = nf90_def_dim(ihisfile, 'nfrac', stmpar%lsedtot, id_sedtotdim)
 
             ierr = nf90_def_var(ihisfile, 'dredge_area_name',         nf90_char,   (/ id_strlendim, id_dreddim /), id_dred_name)
             ierr = nf90_put_att(ihisfile, id_dred_name,  'long_name'    , 'dredge area identifier')
@@ -17236,10 +17303,10 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_def_var(ihisfile, 'dump_area_name',         nf90_char,   (/ id_strlendim, id_dumpdim /), id_dump_name)
             ierr = nf90_put_att(ihisfile, id_dump_name,  'long_name'    , 'dump area identifier')
 
-            ierr = nf90_def_var(ihisfile, 'sedfrac_name',         nf90_char,   (/ id_strlendim, id_lsedtot /), id_frac_name)
-            ierr = nf90_put_att(ihisfile, id_frac_name,  'long_name'    , 'sediment fraction identifier')
+            !ierr = nf90_def_var(ihisfile, 'sedfrac_name',         nf90_char,   (/ id_strlendim, id_sedtotdim /), id_frac_name)
+            !ierr = nf90_put_att(ihisfile, id_frac_name,  'long_name'    , 'sediment fraction identifier')
 
-            ierr = nf90_def_var(ihisfile, 'dred_link_discharge',     nf90_double, (/ id_dredlinkdim, id_lsedtot, id_timedim /), id_dredlink_dis)
+            ierr = nf90_def_var(ihisfile, 'dred_link_discharge',     nf90_double, (/ id_dredlinkdim, id_sedtotdim, id_timedim /), id_dredlink_dis)
             ierr = nf90_put_att(ihisfile, id_dredlink_dis, 'long_name', 'Cumulative dredged material transported via links per fraction')
             ierr = nf90_put_att(ihisfile, id_dredlink_dis, 'units', 'm3') !link_sum
 
@@ -17251,11 +17318,11 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_att(ihisfile, id_dump_dis, 'long_name', 'Cumulative dredged material for dump areas')
             ierr = nf90_put_att(ihisfile, id_dump_dis, 'units', 'm3') !totvoldump
 
-            !ierr = nf90_def_var(ihisfile, 'dred_discharge_frac',     nf90_double, (/ id_dreddim, id_lsedtot, id_timedim /), id_dred_dis_frac)
+            !ierr = nf90_def_var(ihisfile, 'dred_discharge_frac',     nf90_double, (/ id_dreddim, id_sedtotdim, id_timedim /), id_dred_dis_frac)
             !ierr = nf90_put_att(ihisfile, id_dred_dis_frac, 'long_name', 'Cumulative dredged material per fraction for dredge areas')
             !ierr = nf90_put_att(ihisfile, id_dred_dis_frac, 'units', 'm3') !totvoldred
 
-            !ierr = nf90_def_var(ihisfile, 'dump_discharge_frac',     nf90_double, (/ id_dumpdim, id_lsedtot, id_timedim /), id_dump_dis_frac)
+            !ierr = nf90_def_var(ihisfile, 'dump_discharge_frac',     nf90_double, (/ id_dumpdim, id_sedtotdim, id_timedim /), id_dump_dis_frac)
             !ierr = nf90_put_att(ihisfile, id_dump_dis_frac, 'long_name', 'Cumulative dumped material per fraction for dump areas')
             !ierr = nf90_put_att(ihisfile, id_dump_dis_frac, 'units', 'm3') !totvoldump
 
@@ -17393,13 +17460,19 @@ subroutine unc_write_his(tim)            ! wrihis
                ierr = nf90_put_var(ihisfile, id_dambreakname, trim(dambreak_ids(i)),(/ 1, i /))
             end do
         end if
-
-        if (dad_included) then
-           !
+        
+        if (jased>0 .and. stm_included .and. jahissed>0) then
            do i=1,stmpar%lsedtot
               ierr = nf90_put_var(ihisfile, id_frac_name, trim(stmpar%sedpar%namsed(i)), (/ 1, i /))
            enddo
-           ierr = nf90_put_var(ihisfile, id_frac_name, 'subsoil sediment', (/ 1, stmpar%lsedtot+1 /))        ! rest category
+        end if
+
+        if (dad_included) then
+           !
+           !do i=1,stmpar%lsedtot
+           !   ierr = nf90_put_var(ihisfile, id_frac_name, trim(stmpar%sedpar%namsed(i)), (/ 1, i /))
+           !enddo
+           !ierr = nf90_put_var(ihisfile, id_frac_name, 'subsoil sediment', (/ 1, stmpar%lsedtot+1 /))        ! rest category
            !
            do i=1,(dadpar%nadred+dadpar%nasupl)
               ierr = nf90_put_var(ihisfile, id_dred_name, trim(dadpar%dredge_areas(i)), (/ 1, i /))
@@ -17773,9 +17846,87 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_var(ihisfile, id_dambreak_normal_velocity, normalVelocityDambreak(i), (/ i, it_his /))  			
          end do
       end if
+      !
+      if (jased>0 .and. stm_included .and. jahissed>0 .and. stmpar%lsedtot>0) then
+         if (stmpar%morpar%moroutput%sbcuv) then
+            call realloc(toutputx, (/ntot, stmpar%lsedtot /), keepExisting=.false., fill = -999d0)
+            call realloc(toutputy, (/ntot, stmpar%lsedtot /), keepExisting=.false., fill = -999d0)
+            do l = 1, stmpar%lsedtot
+               select case(stmpar%morpar%moroutput%transptype)
+               case (0)
+                  rhol = 1d0
+               case (1)
+                  rhol = stmpar%sedpar%cdryb(l)
+               case (2)
+                  rhol = stmpar%sedpar%rhosol(l)
+               end select
+               toutputy(:,l) = valobsT(:,IPNT_SBCY1+l-1)/rhol
+               toutputx(:,l) = valobsT(:,IPNT_SBCX1+l-1)/rhol
+            end do
+            ierr = nf90_put_var(ihisfile, id_sbcx, toutputx  , start = (/ 1, 1, it_his /), count = (/ ntot, stmpar%lsedtot, 1 /))
+            ierr = nf90_put_var(ihisfile, id_sbcy, toutputy  , start = (/ 1, 1, it_his /), count = (/ ntot, stmpar%lsedtot, 1 /))
+         endif
+         !
+         if (stmpar%morpar%moroutput%sscuv) then
+            call realloc(toutputx, (/ntot, stmpar%lsedtot /), keepExisting=.false., fill = -999d0)
+            call realloc(toutputy, (/ntot, stmpar%lsedtot /), keepExisting=.false., fill = -999d0)
+            do l = 1, stmpar%lsedtot
+               select case(stmpar%morpar%moroutput%transptype)
+               case (0)
+                  rhol = 1d0
+               case (1)
+                  rhol = stmpar%sedpar%cdryb(l)
+               case (2)
+                  rhol = stmpar%sedpar%rhosol(l)
+               end select
+               toutputy(:,l) = valobsT(:,IPNT_SSCY1+l-1)/rhol
+               toutputx(:,l) = valobsT(:,IPNT_SSCX1+l-1)/rhol
+            end do
+            ierr = nf90_put_var(ihisfile, id_sscx, toutputx  , start = (/ 1, 1, it_his /), count = (/ ntot, stmpar%lsedtot, 1 /))
+            ierr = nf90_put_var(ihisfile, id_sscy, toutputy  , start = (/ 1, 1, it_his /), count = (/ ntot, stmpar%lsedtot, 1 /))
+         endif
+         !
+         if (stmpar%morpar%moroutput%sbwuv .and. jawave>0) then
+            call realloc(toutputx, (/ntot, stmpar%lsedtot /), keepExisting=.false., fill = -999d0)
+            call realloc(toutputy, (/ntot, stmpar%lsedtot /), keepExisting=.false., fill = -999d0)
+            do l = 1, stmpar%lsedtot
+               select case(stmpar%morpar%moroutput%transptype)
+               case (0)
+                  rhol = 1d0
+               case (1)
+                  rhol = stmpar%sedpar%cdryb(l)
+               case (2)
+                  rhol = stmpar%sedpar%rhosol(l)
+               end select
+               toutputy(:,l) = valobsT(:,IPNT_SBWY1+l-1)/rhol
+               toutputx(:,l) = valobsT(:,IPNT_SBWX1+l-1)/rhol
+            end do
+            ierr = nf90_put_var(ihisfile, id_sbwx, toutputx  , start = (/ 1, 1, it_his /), count = (/ ntot, stmpar%lsedtot, 1 /))
+            ierr = nf90_put_var(ihisfile, id_sbwy, toutputy  , start = (/ 1, 1, it_his /), count = (/ ntot, stmpar%lsedtot, 1 /))
+         endif
+         !
+         if (stmpar%morpar%moroutput%sswuv .and. jawave>0) then
+            call realloc(toutputx, (/ntot, stmpar%lsedtot /), keepExisting=.false., fill = -999d0)
+            call realloc(toutputy, (/ntot, stmpar%lsedtot /), keepExisting=.false., fill = -999d0)
+            do l = 1, stmpar%lsedtot
+               select case(stmpar%morpar%moroutput%transptype)
+               case (0)
+                  rhol = 1d0
+               case (1)
+                  rhol = stmpar%sedpar%cdryb(l)
+               case (2)
+                  rhol = stmpar%sedpar%rhosol(l)
+               end select
+               toutputy(:,l) = valobsT(:,IPNT_SSWY1+l-1)/rhol
+               toutputx(:,l) = valobsT(:,IPNT_SSWX1+l-1)/rhol
+            end do
+            ierr = nf90_put_var(ihisfile, id_sswx, toutputx  , start = (/ 1, 1, it_his /), count = (/ ntot, stmpar%lsedtot, 1 /))
+            ierr = nf90_put_var(ihisfile, id_sswy, toutputy  , start = (/ 1, 1, it_his /), count = (/ ntot, stmpar%lsedtot, 1 /))
+         endif
+      endif
 
-    if( dad_included ) then  ! Output for dredging and dumping
-       ierr = nf90_put_var(ihisfile, id_dredlink_dis, dadpar%link_sum  , start = (/ 1, 1, it_his /), count = (/ dadpar%nalink, stmpar%lsedtot+1, 1 /))
+    if ( dad_included ) then  ! Output for dredging and dumping
+       ierr = nf90_put_var(ihisfile, id_dredlink_dis, dadpar%link_sum  , start = (/ 1, 1, it_his /), count = (/ dadpar%nalink, stmpar%lsedtot, 1 /))
        ierr = nf90_put_var(ihisfile, id_dred_dis    , dadpar%totvoldred, start = (/ 1, it_his /), count = (/ dadpar%nadred+dadpar%nasupl, 1 /))
        ierr = nf90_put_var(ihisfile, id_dump_dis    , dadpar%totvoldump, start = (/ 1, it_his /), count = (/ dadpar%nadump, 1 /))
        !ierr = nf90_put_var(ihisfile, id_dred_dis_frac    , dadpar%totvoldredfrac, start = (/ 1, 1, it_his /), count = (/ dadpar%nadred+dadpar%nasupl, stmpar%lsedtot+1, 1 /))
@@ -18112,6 +18263,43 @@ subroutine fill_valobs()
             valobs(IPNT_WAVEL,i) = rlabda(k)
             valobs(IPNT_WAVEU,i) = uorb(k)
             valobs(IPNT_WAVETAU,i) = taus(k)
+         endif
+         
+         if (stm_included .and. jased>0) then
+            do j = IVAL_SBCX1, IVAL_SBCXN
+               ii = j-IVAL_SBCX1+1
+               valobs(IPNT_SBCX1+ii-1,i)=sedtra%sbcx(k,ii)
+            enddo
+            do j = IVAL_SBCY1, IVAL_SBCYN
+               ii = j-IVAL_SBCY1+1
+               valobs(IPNT_SBCY1+ii-1,i)=sedtra%sbcy(k,ii)
+            enddo
+            do j = IVAL_SSCX1, IVAL_SSCXN
+               ii = j-IVAL_SSCX1+1
+               valobs(IPNT_SSCX1+ii-1,i)=sedtra%sscx(k,ii)
+            enddo
+            do j = IVAL_SSCY1, IVAL_SSCYN
+               ii = j-IVAL_SSCY1+1
+               valobs(IPNT_SSCY1+ii-1,i)=sedtra%sscy(k,ii)
+            enddo
+            if (jawave>0) then
+               do j = IVAL_SBWX1, IVAL_SBWXN
+                  ii = j-IVAL_SBWX1+1
+                  valobs(IPNT_SBWX1+ii-1,i)=sedtra%sbwx(k,ii)
+               enddo
+               do j = IVAL_SBWY1, IVAL_SBWYN
+                  ii = j-IVAL_SBWY1+1
+                  valobs(IPNT_SBWY1+ii-1,i)=sedtra%sbwy(k,ii)
+               enddo
+               do j = IVAL_SSWX1, IVAL_SSWXN
+                  ii = j-IVAL_SSWX1+1
+                  valobs(IPNT_SSWX1+ii-1,i)=sedtra%sswx(k,ii)
+               enddo
+               do j = IVAL_SSWY1, IVAL_SSWYN
+                  ii = j-IVAL_SSWY1+1
+                  valobs(IPNT_SSWY1+ii-1,i)=sedtra%sswy(k,ii)
+               enddo
+            endif
          endif
 
          if ( IVAL_WQB1.gt.0 ) then
@@ -22209,7 +22397,6 @@ end do
  call aerr('hs  (ndx) , s00 (ndx)', ierr, 2*ndx) ; hs   = 0 ; s00  = 0
  allocate ( cfs (ndx) , stat = ierr)
  call aerr('cfs (ndx)', ierr,   ndx) ; cfs = 0
-
 
  if (allocated (kbot) ) then
     deallocate( kbot,ktop,ktop0,kmxn,Lbot,Ltop,kmxL )

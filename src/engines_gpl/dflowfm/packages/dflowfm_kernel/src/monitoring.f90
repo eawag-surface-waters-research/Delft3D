@@ -126,6 +126,22 @@ implicit none
     integer                           :: IVAL_QFRC
     integer                           :: IVAL_QTOT
     integer                           :: IVAL_RHO
+    integer                           :: IVAL_SBCX1
+    integer                           :: IVAL_SBCXN
+    integer                           :: IVAL_SBCY1
+    integer                           :: IVAL_SBCYN
+    integer                           :: IVAL_SBWX1
+    integer                           :: IVAL_SBWXN
+    integer                           :: IVAL_SBWY1
+    integer                           :: IVAL_SBWYN
+    integer                           :: IVAL_SSCX1
+    integer                           :: IVAL_SSCXN
+    integer                           :: IVAL_SSCY1
+    integer                           :: IVAL_SSCYN
+    integer                           :: IVAL_SSWX1
+    integer                           :: IVAL_SSWXN
+    integer                           :: IVAL_SSWY1  
+    integer                           :: IVAL_SSWYN
     
     integer                           :: IPNT_S1            ! pointers in valobs work array
     integer                           :: IPNT_HS
@@ -181,6 +197,22 @@ implicit none
     integer                           :: IPNT_QTOT
     integer                           :: IPNT_NUM
     integer                           :: IPNT_RHO
+    integer                           :: IPNT_SBCX1           ! should be done per fraction
+    integer                           :: IPNT_SBCXN
+    integer                           :: IPNT_SBCY1
+    integer                           :: IPNT_SBCYN
+    integer                           :: IPNT_SBWX1
+    integer                           :: IPNT_SBWXN
+    integer                           :: IPNT_SBWY1
+    integer                           :: IPNT_SBWYN
+    integer                           :: IPNT_SSCX1
+    integer                           :: IPNT_SSCXN
+    integer                           :: IPNT_SSCY1
+    integer                           :: IPNT_SSCYN
+    integer                           :: IPNT_SSWX1
+    integer                           :: IPNT_SSWXN
+    integer                           :: IPNT_SSWY1    
+    integer                           :: IPNT_SSWYN    
 contains
 
 !> (re)initialize valobs and set pointers for observation stations
@@ -229,10 +261,10 @@ subroutine init_valobs_pointers()
    use m_flow, only: iturbulencemodel, idensform, kmx
    use m_transport, only: ITRA1, ITRAN, ISED1, ISEDN
    use m_fm_wq_processes, only: noout, numwqbots
-   use m_sediment, only: stm_included
+   use m_sediment, only: stm_included, stmpar
    implicit none
    
-   integer             :: i, i0
+   integer             :: i, i0, numfracs
    
    MAXNUMVALOBS2D  = 0
    MAXNUMVALOBS3D  = 0
@@ -291,6 +323,22 @@ subroutine init_valobs_pointers()
    IVAL_QTOT       = 0
    IVAL_RAIN       = 0
    IVAL_RHO        = 0
+   IVAL_SBCX1      = 0          ! should be done per fraction
+   IVAL_SBCXN      = 0
+   IVAL_SBCY1      = 0
+   IVAL_SBCYN      = 0
+   IVAL_SBWX1      = 0
+   IVAL_SBWXN      = 0
+   IVAL_SBWY1      = 0
+   IVAL_SBWYN      = 0
+   IVAL_SSCX1      = 0
+   IVAL_SSCXN      = 0
+   IVAL_SSCY1      = 0
+   IVAL_SSCYN      = 0
+   IVAL_SSWX1      = 0
+   IVAL_SSWXN      = 0
+   IVAL_SSWY1      = 0   
+   IVAL_SSWYN      = 0
    
 !  2D
    i=0
@@ -341,6 +389,27 @@ subroutine init_valobs_pointers()
    if ( numwqbots.gt.0 ) then
       i=i+1;            IVAL_WQB1       = i
       i=i+numwqbots-1; IVAL_WQBN       = i
+   end if
+   if (stm_included .and. jased>0) then
+      numfracs = stmpar%lsedtot
+      i=i+1;          IVAL_SBCX1      = i          ! should be done per fraction
+      i=i+numfracs-1; IVAL_SBCXN      = i
+      i=i+1;          IVAL_SBCY1      = i
+      i=i+numfracs-1; IVAL_SBCYN      = i
+      i=i+1;          IVAL_SSCX1      = i
+      i=i+numfracs-1; IVAL_SSCXN      = i
+      i=i+1;          IVAL_SSCY1      = i
+      i=i+numfracs-1; IVAL_SSCYN      = i
+      if (jawave>0) then
+         i=i+1;          IVAL_SBWX1      = i
+         i=i+numfracs-1; IVAL_SBWXN      = i
+         i=i+1;          IVAL_SBWY1      = i
+         i=i+numfracs-1; IVAL_SBWYN      = i
+         i=i+1;          IVAL_SSWX1      = i
+         i=i+numfracs-1; IVAL_SSWXN      = i
+         i=i+1;          IVAL_SSWY1      = i   
+         i=i+numfracs-1; IVAL_SSWYN      = i
+      end if
    end if
    MAXNUMVALOBS2D                       = i-i0
    
@@ -443,6 +512,24 @@ subroutine init_valobs_pointers()
    IPNT_WSN   = ivalpoint(IVAL_WSN,   kmx)
    IPNT_SEDDIF1 = ivalpoint(IVAL_SEDDIF1,   kmx)
    IPNT_SEDDIFN = ivalpoint(IVAL_SEDDIFN,   kmx)
+   IPNT_SBCX1 = ivalpoint(IVAL_SBCX1,   kmx)
+   IPNT_SBCXN = ivalpoint(IVAL_SBCXN,   kmx)
+   IPNT_SBCY1 = ivalpoint(IVAL_SBCY1,   kmx)
+   IPNT_SBCYN = ivalpoint(IVAL_SBCYN,   kmx)
+   IPNT_SSCX1 = ivalpoint(IVAL_SSCX1,   kmx)
+   IPNT_SSCXN = ivalpoint(IVAL_SSCXN,   kmx)
+   IPNT_SSCY1 = ivalpoint(IVAL_SSCY1,   kmx)
+   IPNT_SSCYN = ivalpoint(IVAL_SSCYN,   kmx)
+   if (jawave>0) then
+      IPNT_SBWX1 = ivalpoint(IVAL_SBWX1,   kmx)
+      IPNT_SBWXN = ivalpoint(IVAL_SBWXN,   kmx)
+      IPNT_SBWY1 = ivalpoint(IVAL_SBWY1,   kmx)
+      IPNT_SBWYN = ivalpoint(IVAL_SBWYN,   kmx)
+      IPNT_SSWX1 = ivalpoint(IVAL_SSWX1,   kmx)
+      IPNT_SSWXN = ivalpoint(IVAL_SSWXN,   kmx)
+      IPNT_SSWY1 = ivalpoint(IVAL_SSWY1,   kmx)
+      IPNT_SSWYN = ivalpoint(IVAL_SSWYN,   kmx)
+   endif
    
    IPNT_TAIR  = ivalpoint(IVAL_TAIR,  kmx)
    IPNT_WIND  = ivalpoint(IVAL_WIND,  kmx)
