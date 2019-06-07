@@ -157,8 +157,8 @@ module m_ec_typedefs
       type (tEcBlocklist), pointer  :: blocklist => null() !< list of blocks (table of contents for this BC-file)
       integer                       :: last_blocktype      !< type of the block (BT_GENERAL, BT_FORCING, ....) 
       integer                       :: last_position = 0   !< last position in the scan-process                   
-      character(len=15)             :: FileVersion
-      character(len=15)             :: FileType
+      character(len=15)             :: FileVersion         !< File version stamp read from [General]::FileVersion in the bc-file
+      character(len=15)             :: FileType            !< File type read from [General]::FileType in the bc-file
    end type tEcBCFile
 
    type tEcBCFilePtr
