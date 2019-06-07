@@ -131,6 +131,12 @@ module m_1d_networkreader
    end subroutine NetworkUgridReader  
 
 
+   !> Constructs a flow1d t_network datastructure, based on meshgeom read from a 1D UGRID file.
+   !! meshgeom is only used for reading a UGRID NetCDF file, whereas network is used during
+   !! a model computation.
+   !! The network data structure assumes to have grid points on all start and end points of branches,
+   !! but the input meshgeom often will only have one unique grid point on a connection node.
+   !! In that case, parameter nodesOnBranchVertices allows to automatically create duplicate start/end points.
    integer function construct_network_from_meshgeom(network, meshgeom, branchids, branchlongnames, nodeids, nodelongnames, & !1d network character variables
       gpsID, gpsIDLongnames, network1dname, mesh1dname, nodesOnBranchVertices) result(ierr)
 
@@ -150,7 +156,8 @@ module m_1d_networkreader
    character(len=ug_idsLongNamesLen), allocatable, dimension(:),intent(inout)  :: gpsIDLongnames
    character(len=ug_idsLongNamesLen),intent(in)                                :: network1dname
    character(len=ug_idsLongNamesLen),intent(in)                                :: mesh1dname
-   integer, intent(in)                                                         :: nodesOnBranchVertices
+   integer, intent(in)                                                         :: nodesOnBranchVertices !< Whether or not (1/0) the input meshgeom itself already contains duplicate points on each connection node between multiple branches.
+                                                                                                        !! If not (0), additional grid points will be created.
 
    !locals
    integer, allocatable, dimension(:)               :: gpFirst
@@ -217,17 +224,17 @@ module m_1d_networkreader
       call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error in gpsIDLongnames')
    endif
 
-   ! Store Node Data into Data Structures
+   ! Store Network Node Data ('connection nodes') into Data Structures.
    call storeNodes(network%nds, meshgeom%nnodes, meshgeom%nnodex, meshgeom%nnodey, nodeids, nodelongnames)
 
-   ! Calculate xy coordinates from UGrid index based notation
+   ! Calculate mesh1d x,y coordinates (computational grid points), based on UGRID branchId-based notation.
    allocate(gpsX(meshgeom%numnode), stat = ierr)
    if (ierr == 0) allocate(gpsY(meshgeom%numnode), stat = ierr)
    if (ierr .ne. 0) then
       call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error Allocating Memory for Grid Point Coordinates')
    endif
    
-   if (meshgeom%epsg==4326) then
+   if (meshgeom%epsg==4326) then ! TODO: UNST-2510: LC: %epsg is never set (unless via c_meshgeom?), so this code does not work for lat/lon 1D networks.
       jsferic = 1
    else
       jsferic = 0
@@ -238,7 +245,7 @@ module m_1d_networkreader
       call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error Getting Mesh Coordinates From UGrid Data')
    endif
 
-   ! Get the starting and endig indexes of the grid points
+   ! Get the starting and ending mesh1d grid point indexes for each network branch.
    ibran = 0
    allocate(gpFirst(meshgeom%nbranches), stat = ierr)
    if (ierr == 0) allocate(gpLast(meshgeom%nbranches), stat = ierr)
@@ -251,7 +258,7 @@ module m_1d_networkreader
       call SetMessage(LEVEL_FATAL, 'Network UGRID-File: Error Getting first and last nodes of the network branches')
    endif
 
-   ! Fill the array storing the ids of the mesh nodes in the nework nodes
+   ! Fill the array storing the mesh1d node ids for each network node.
    if(nodesOnBranchVertices==0) then
       allocate(idMeshNodesInNetworkNodes(meshgeom%numnode))
       do ibran = 1, meshgeom%nbranches
@@ -279,6 +286,8 @@ module m_1d_networkreader
    allocate(localGpsX(meshgeom%numnode))
    allocate(localGpsY(meshgeom%numnode))
    allocate(localGpsID(meshgeom%numnode))
+
+   ! Store the branches + computational grid points on them into Data Structures.
    do ibran = 1, meshgeom%nbranches
 
       firstNode = gpFirst(ibran)
@@ -327,15 +336,6 @@ module m_1d_networkreader
 
    call adminBranchOrders(network%brs)
    call fill_hashtable(network%brs)
-   pnodes => network%nds%node
-   do i = 1, network%nds%count
-      do j = i+1, network%nds%count
-         if (abs(pnodes(i)%x-pnodes(j)%x) + abs(pnodes(i)%y-pnodes(j)%y) < 1d0) then
-            pnodes(j)%x = pnodes(i)%x+0.5d0
-            pnodes(j)%y = pnodes(i)%y+0.5d0
-         endif
-      enddo
-   enddo
 
    network%loaded = .true.
 
@@ -422,6 +422,7 @@ module m_1d_networkreader
       branchids, branchlongnames, nodeids, nodelongnames, & !1d network character variables
       gpsID, gpsIDLongnames, network1dname, mesh1dname)     !1d grid character variables
 
+   ! Fill the flow1d m_network::network data structure based on the meshgeom from file.
    ierr = construct_network_from_meshgeom(network, meshgeom, branchids, branchlongnames, nodeids, nodelongnames, & 
       gpsID, gpsIDLongnames, network1dname, mesh1dname, nodesOnBranchVertices)
 
