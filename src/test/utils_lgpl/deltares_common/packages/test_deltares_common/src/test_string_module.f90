@@ -37,6 +37,7 @@ subroutine tests_string_module
     call test( test_string_compare, 'Test string comparison' )
     call test( test_string_count_words, 'Test word counting' )
     call test( test_string_split, 'Test splitting a string into an array of words' )
+    call test( test_remove_chars, 'Test Removing characters given set' )
 end subroutine tests_string_module
 
 subroutine count_differences( string1, string2, number )
@@ -191,5 +192,12 @@ subroutine test_string_split
         call assert_equal( element(i), word(i), "The returned element is incorrect" )
     enddo
 end subroutine test_string_split
+
+subroutine test_remove_chars
+    character(len=50)                            :: string = 'The [Number] __Of Words [And] _"Quoted Words"'
+    call remove_chars( string, '[]"_- ')
+    call assert_equal( string, 'TheNumberOfWordsAndQuotedWords', "")
+end subroutine test_remove_chars
+
 
 end module test_string_module
