@@ -20,6 +20,31 @@
 !!  All indications and logos of, and references to registered trademarks
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
+module chdir_mod
+
+  implicit none
+
+  interface
+    integer function c_chdir(path) bind(C,name="chdir")
+      use iso_c_binding
+      character(kind=c_char) :: path(*)
+    end function
+  end interface
+
+contains
+
+  subroutine chdir(path, err)
+    use iso_c_binding
+    character(*) :: path
+    integer, optional, intent(out) :: err
+    integer :: loc_err
+
+    loc_err =  c_chdir(path//c_null_char)
+
+    if (present(err)) err = loc_err
+  end subroutine
+end module chdir_mod
+    
 module test_observations
     use ftnunit
     use precision
@@ -76,6 +101,8 @@ subroutine test_read_snapped_obs_points
     use m_observations
     use unstruc_model
     use m_partitioninfo, only: jampi
+    !use chdir_mod
+    use ifport
     !
     ! Externals
     integer, external :: flow_modelinit
@@ -105,8 +132,13 @@ subroutine test_read_snapped_obs_points
     call resetFullFlowModel()
     call increaseNetw(kmax, lmax)
     !
-    call loadModel('observations_snapped/Flow1d.mdu')
+    istat = CHANGEDIRQQ("observations_snapped")
+    !istat = SYSTEM("echo %CD%")
+    
+    call loadModel('Flow1d.mdu')
     istat = flow_modelinit()
+    
+    istat = CHANGEDIRQQ("..")
     !
     do i=1,N_OBS_POINTS
         call assert_equal     (kobs(i)    , ref_k    (i), 'index of snapped observation points incorrect' )

@@ -9,7 +9,7 @@ GuiVersion        = 1.5.0.42078
 AutoStart         = 0
 
 [geometry]
-NetFile           = observCrossSections_snapped/FlowFM_net.nc
+NetFile           = FlowFM_net.nc
 BathymetryFile    =
 DryPointsFile     =
 GridEnclosureFile =
@@ -20,10 +20,10 @@ FixedWeirFile     =
 PillarFile        =
 StructureFile     =
 VertplizFile      =
-CrossDefFile      = observCrossSections_snapped/crsdef.ini
-CrossLocFile      = observCrossSections_snapped/crsloc.ini
-RoughnessFiles    = observCrossSections_snapped/roughness-Main.ini;observCrossSections_snapped/roughness-Sewer.ini
-NodeFile          = observCrossSections_snapped/nodeFile.ini
+CrossDefFile      = crsdef.ini
+CrossLocFile      = crsloc.ini
+RoughnessFiles    = roughness-Main.ini;roughness-Sewer.ini
+NodeFile          = nodeFile.ini
 RoofsFile         =
 LeveeBreachFile   =
 ProfdefxyzFile    =
@@ -158,8 +158,8 @@ RestartFile       =
 RestartDateTime   = 20190313
 
 [external forcing]
-#ExtForceFile      = observCrossSections_snapped/ext_force.ext
-#ExtForceFileNew   = observCrossSections_snapped/FlowFM_bnd.ext
+#ExtForceFile      = ext_force.ext
+#ExtForceFileNew   = FlowFM_bnd.ext
 
 [trachytopes]
 TrtRou            = N
@@ -182,7 +182,7 @@ Wrishp_pump       = 0
 OutputDir         =
 FlowGeomFile      =
 ObsFile           =
-CrsFile           = observCrossSections_snapped/observcrs.ini
+CrsFile           = observcrs.ini
 HisFile           =
 HisInterval       = 60
 XLSInterval       =

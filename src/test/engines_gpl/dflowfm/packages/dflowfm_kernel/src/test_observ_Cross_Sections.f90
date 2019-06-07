@@ -45,6 +45,7 @@ subroutine test_read_snapped_observ_crs
     use unstruc_model
     use m_partitioninfo, only: jampi
     use network_data, only: numk
+    use ifport
     !
     ! Externals
     integer, external :: flow_modelinit
@@ -99,8 +100,10 @@ subroutine test_read_snapped_observ_crs
     
     
     !
-    call loadModel('observCrossSections_snapped/FlowFM.mdu')
+    istat = CHANGEDIRQQ("observCrossSections_snapped")
+    call loadModel('FlowFM.mdu')
     istat = flow_modelinit()
+    istat = CHANGEDIRQQ("..")
     !
     ! first observCrs
     call assert_equal     (crs(1)%name, refnames(1), 'Name of the first observation cross section incorrect' )
