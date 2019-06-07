@@ -2662,7 +2662,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
        call prop_set(prop_ptr,    'wind', 'Relativewind',      jarelativewind,   'Wind speed relative to top-layer water speed, 1=yes, 0 = no) ' )
     endif
     if (kmx == 0 .and. jawindhuorzwsbased == 0 .or. kmx > 0 .and. jawindhuorzwsbased == 1) then
-       call prop_set(prop_ptr,    'wind', 'Windhuorzwsbased', j awindhuorzwsbased,   'Wind hu or zws based , 0 = hu, 1 = zws) ' )
+       call prop_set(prop_ptr,    'wind', 'Windhuorzwsbased', jawindhuorzwsbased,   'Wind hu or zws based , 0 = hu, 1 = zws) ' )
     endif
   
     call prop_set(prop_ptr, 'wind', 'Rhoair',                  Rhoair,   'Air density (kg/m3)')
