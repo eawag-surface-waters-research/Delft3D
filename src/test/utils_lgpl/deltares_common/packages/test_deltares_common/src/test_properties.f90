@@ -91,8 +91,7 @@ subroutine test_properties_check
     ! Note:
     ! Apparently, the tree variable needs to be associated/allocated beforehand
     !
-    allocate( tree1 )
-    allocate( tree2 )
+    allocate( tree )
 
     !
     ! Note: A chapter "*" is considered to indicate a keyword outside a (named) chapter
@@ -114,7 +113,7 @@ subroutine test_properties_check
         integerValue = -999
         call prop_get( tree, chapter(i), 'integerValue', integerValue, success )
         call assert_true( success, "Retrieving the integer value should succeed (chapter: " // trim(chapter(i)) // ")" )
-        call assert_equal( integerValue, 1, "The integer value should be 1 (chapter: " // trim(chapter(i)) // ")"  )
+        call assert_equal( integerValue, 1, "Thke integer value should be 1 (chapter: " // trim(chapter(i)) // ")"  )
 
         realValue = -999.0
         call prop_get( tree, chapter(i), 'realValue', realValue, success )
