@@ -702,11 +702,16 @@ subroutine averagingTypeStringToDouble(sAveragingType, dAveragingType)
 
 end subroutine averagingTypeStringToDouble
 
-!> Initialize the values based on the given sample values.
-!! The method is:            *
-!!                          / \
-!!                         /   *----
-!!                    ----*
+!> Initialize the values based on the given sample values
+!! The method is: 
+!! 1) When one sample value is given:
+!!    if it is from a [Global] block, then this value will be set on all branches.
+!!    if it is from a [Branch] block, then this value will be set on a this branch.
+!! 2) if more than one sample values are given, then on this branch:
+!!          *
+!!         / \
+!!        /   *----
+!!   ----*
 !! between two samples use linear interpolation,                             
 !! on the left side of the most left sample, use constant value of this sample,
 !! on the right side of the most right sample, use constant value of this sample.
@@ -728,10 +733,10 @@ subroutine spaceInit1dField(sBranchId, sChainages, sValues, ipos, res)
    integer,          intent(in   ) :: ipos          !< position: 1= u point location, 2= 1d flownode(netnode) location
    double precision, intent(  out) :: res(:)        !< result
    
-   integer :: nbrstart, nbrend, ibr, k, j, i, ierr, ipre, ns, ncount
+   integer                 :: nbrstart, nbrend, ibr, k, j, i, ierr, ipre, ns, ncount
    type(t_branch), pointer :: pbr
-   double precision :: chai, sChaiPrev, sChai, sValPrev, sVal, minsChai, maxsChai
-   character(len=256) :: brId
+   double precision        :: chai, sChaiPrev, sChai, sValPrev, sVal, minsChai, maxsChai
+   character(len=256)      :: brId
    
   
    if (size(sValues) == 1) then 
@@ -791,10 +796,10 @@ subroutine spaceInit1dField(sBranchId, sChainages, sValues, ipos, res)
       do j = 1, ncount
          if (ipos == 1) then
             chai = pbr%uPointsChainages(j)
-            ierr = findlink(brid, chai, k) ! find flowlink index given branchId and chainage
+            ierr = findlink(sBranchId, chai, k) ! find flowlink index given branchId and chainage
          else if (ipos == 2) then
             chai = pbr%gridPointsChainages(j)
-            ierr = findnode(brid, chai, k) ! find flownode/netnode index given branchId and chainage
+            ierr = findnode(sBranchId, chai, k) ! find flownode/netnode index given branchId and chainage
          end if
    
          if (ierr /= DFM_NOERR) then
@@ -821,10 +826,9 @@ subroutine spaceInit1dField(sBranchId, sChainages, sValues, ipos, res)
                   else
                      res(k) = (sVal + sValPrev)/2
                   end if
-               end if
-               
-               ipre = i
-               exit
+                  ipre = i
+                  exit
+               end if  
             end do
          end if
       end do
