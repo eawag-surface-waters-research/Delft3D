@@ -163,6 +163,7 @@ subroutine findexternalboundarypoints()             ! find external boundary poi
             ketr = 0
 
  if ( allocated(nbndtr) ) deallocate(nbndtr)
+ allocate ( nbndtr(1), stat = ierr )
  call aerr('nbndtr(1)', ierr, 1 )
             nbndtr = 0
             

@@ -16224,7 +16224,7 @@ subroutine unc_write_his(tim)            ! wrihis
     integer, allocatable, save :: id_hwq(:)
     integer, allocatable, save :: id_hwqb(:)
     integer, allocatable, save :: id_sf(:), id_ws(:), id_seddif(:)            ! sediment fractions
-    integer, allocatable, save :: id_const(:), id_voltot(:)
+    integer, allocatable, save :: id_const(:), id_const_cum(:), id_voltot(:)
     double precision, allocatable, save :: valobsT(:,:)
 
     integer                      :: IP, num, ntmp, n
@@ -16280,6 +16280,7 @@ subroutine unc_write_his(tim)            ! wrihis
         call realloc(id_seddif, ISEDN-ISED1+1, keepExisting = .false.)
 
         call realloc(id_const, NUMCONST_MDU, keepExisting = .false.)
+        call realloc(id_const_cum, NUMCONST_MDU, keepExisting = .false.)
 
         call realloc(id_voltot, MAX_IDX, keepExisting = .false.)
 
@@ -16904,13 +16905,26 @@ subroutine unc_write_his(tim)            ! wrihis
                   ! Forbidden chars in NetCDF names: space, /, and more.
                   call replace_char(tmpstr,32,95)
                   call replace_char(tmpstr,47,95)
+                  ierr = nf90_def_var(ihisfile, 'cross_section_cumulative_'//trim(tmpstr), nf90_double, (/ id_crsdim, id_timedim /), id_const_cum(num))
+                  ierr = nf90_put_att(ihisfile, id_const_cum(num), 'long_name', 'cumulative flux (based on upwind flow element) for '//trim(tmpstr)//'.')
+                  
                   ierr = nf90_def_var(ihisfile, 'cross_section_'//trim(tmpstr), nf90_double, (/ id_crsdim, id_timedim /), id_const(num))
-                  ierr = nf90_put_att(ihisfile, id_const(num), 'long_name', 'cumulative flux (based on upwind flow element) for '//trim(tmpstr)//'.')
+                  ierr = nf90_put_att(ihisfile, id_const(num), 'long_name', 'flux (based on upwind flow element) for '//trim(tmpstr)//'.')
+                  
                   if (const_units(num).ne.' ') then
-                     tmpstr = const_units(num)
+                     tmpstr = trim(const_units(num)) // ' m3'
                   else
                      tmpstr = '-'
-                  endif
+                  endif                  
+                  ierr = nf90_put_att(ihisfile, id_const_cum(num), 'units', tmpstr)
+                  ierr = nf90_put_att(ihisfile, id_const_cum(num), 'coordinates', 'cross_section_name')
+                  
+                  
+                  if (const_units(num).ne.' ') then
+                     tmpstr = trim(const_units(num)) // ' m3/s'
+                  else
+                     tmpstr = '-'
+                  endif                  
                   ierr = nf90_put_att(ihisfile, id_const(num), 'units', tmpstr)
                   ierr = nf90_put_att(ihisfile, id_const(num), 'coordinates', 'cross_section_name')
                enddo
@@ -17719,7 +17733,8 @@ subroutine unc_write_his(tim)            ! wrihis
              IP = IPNT_HUA
              do num = 1,NUMCONST_MDU
                 IP = IP + 1
-                ierr = nf90_put_var(ihisfile, id_const(num), crs(i)%sumvalcur(IP), (/ i, it_his /))
+                ierr = nf90_put_var(ihisfile, id_const_cum(num), crs(i)%sumvalcum(IP), (/ i, it_his /))
+                ierr = nf90_put_var(ihisfile, id_const(num),     crs(i)%sumvalcur(IP), (/ i, it_his /))
              end do
           endif
 
