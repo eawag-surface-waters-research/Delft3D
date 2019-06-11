@@ -885,15 +885,19 @@ module m_readCrossSections
       double precision, allocatable, dimension(:) :: xcoordinates, ycoordinates
       integer          :: i
       double precision :: locShift
+      logical          :: xyz_cross_section 
 
       
       readYZCS = .false.
       sferic_local = .false.
       call prop_get_integer(node_ptr, '', 'yzCount', numlevels, success)
       if (.not. success) then
+         xyz_cross_section = .true.
          call prop_get_integer(node_ptr, '', 'xyzCount', numlevels, success)
          ! only for xyz cross sections the coordinates may be spherical 
          sferic_local = sferic
+      else
+         xyz_cross_section = .false.
       endif
       
       if (success) call prop_get_integer(node_ptr, '', 'sectionCount', frictionCount, success)
@@ -927,11 +931,14 @@ module m_readCrossSections
       if (.not. success) then
           call SetMessage(LEVEL_ERROR, 'Error while reading number of yz-levels for YZ-Cross-Section Definition ID: '//trim(pCS%id))
       endif
-      pCS%y(1) = 0d0
-      do i = 2, numlevels
-         call distance(sferic_local, xcoordinates(i-1), ycoordinates(i-1), xcoordinates(i), ycoordinates(i), pCS%y(i), earth_radius)
-         pCS%y(i) = pCS%y(i-1) + pCS%y(i) 
-      enddo
+      
+      if (xyz_cross_section) then
+         pCS%y(1) = 0d0
+         do i = 2, numlevels
+            call distance(sferic_local, xcoordinates(i-1), ycoordinates(i-1), xcoordinates(i), ycoordinates(i), pCS%y(i), dearthrad)
+            pCS%y(i) = pCS%y(i-1) + pCS%y(i) 
+         enddo
+      endif
       
       pCS%storLevels = 0
       
