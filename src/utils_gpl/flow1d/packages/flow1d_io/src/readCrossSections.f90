@@ -935,7 +935,7 @@ module m_readCrossSections
       if (xyz_cross_section) then
          pCS%y(1) = 0d0
          do i = 2, numlevels
-            call distance(sferic_local, xcoordinates(i-1), ycoordinates(i-1), xcoordinates(i), ycoordinates(i), pCS%y(i), dearthrad)
+            call distance(sferic_local, xcoordinates(i-1), ycoordinates(i-1), xcoordinates(i), ycoordinates(i), pCS%y(i), earth_radius)
             pCS%y(i) = pCS%y(i-1) + pCS%y(i) 
          enddo
       endif
