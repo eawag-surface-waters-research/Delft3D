@@ -146,6 +146,8 @@ contains
                   cz1 = getFrictionValue(network%rgs, network%spdata, cross, ibranch, i, igrid, s1L, q1L, u1L, r, dpt, chainage)
                   cross => network%crs%cross(network%adm%line2cross(L)%c2)%tabdef
                   cz2 = getFrictionValue(network%rgs, network%spdata, cross, ibranch, i, igrid, s1L, q1L, u1L, r, dpt, chainage)
+                  ! Compute weighting of left and right cross section on this grid point.
+                  ! Note: friction coefficient was already interpolated onto this grid point inside getFrictionValue.
                   f = network%adm%line2cross(L)%f
                   cz_sub(i) = (1.0d0 - f) * cz1     + f * cz2
                   conv = conv + cz_sub(i) * flowarea_sub(i) * sqrt(flowarea_sub(i) / perim_sub(i))
@@ -156,10 +158,6 @@ contains
          endif
          ! compute average chezy 
          cz = conv/(flowArea*sqrt(flowArea/wetPerimeter))
-         ! criteria to satisfy the criteria  in normup i.e cz(m)*cz(m)*wet
-         if (cz * cz * flowArea < 1.0d0) then
-            conv = sqrt(flowArea * flowArea / wetPerimeter)
-         endif
 
       endif
       !        criteria to satisfy the criteria  in normup i.e cz(m)*cz(m)*wet

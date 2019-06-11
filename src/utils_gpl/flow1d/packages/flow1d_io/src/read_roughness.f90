@@ -173,13 +173,17 @@ contains
          call read_roughnessfile(rgs, brs, spdata, file, default, def_type)
       enddo
    
-      if (rgs%rough(1)%iSection == 1 .and. .not. associated(rgs%rough(1)%fun_type_pos)) then
-         call setmessage(LEVEL_FATAL, 'Obligatory main roughness section for ZW cross sections is missing')
-      elseif (rgs%rough(2)%iSection == 2 .and. .not. associated(rgs%rough(2)%fun_type_pos)) then
-         call setmessage(LEVEL_FATAL, 'roughness section FloodPlain1 is missing, while at least one ZW cross section contains section Floodplain1')
-      elseif (rgs%rough(3)%iSection == 3 .and. .not. associated(rgs%rough(3)%fun_type_pos)) then
-         call setmessage(LEVEL_FATAL, 'roughness section FloodPlain2 is missing, while at least one ZW cross section contains section Floodplain2')
-      endif
+      if (rgs%version == 1) then
+         ! Note: for v2 roughness files, the check on valid roughness types is already in the cross section readers.
+         if (rgs%rough(1)%iSection == 1 .and. .not. associated(rgs%rough(1)%fun_type_pos)) then
+            call setmessage(LEVEL_FATAL, 'Obligatory main roughness section for ZW cross sections is missing')
+         elseif (rgs%rough(2)%iSection == 2 .and. .not. associated(rgs%rough(2)%fun_type_pos)) then
+            call setmessage(LEVEL_FATAL, 'roughness section FloodPlain1 is missing, while at least one ZW cross section contains section Floodplain1')
+         elseif (rgs%rough(3)%iSection == 3 .and. .not. associated(rgs%rough(3)%fun_type_pos)) then
+            call setmessage(LEVEL_FATAL, 'roughness section FloodPlain2 is missing, while at least one ZW cross section contains section Floodplain2')
+         endif
+      end if
+
    end subroutine roughness_reader
 
    !> Read a specific roughness file

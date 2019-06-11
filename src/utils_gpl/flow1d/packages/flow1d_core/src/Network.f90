@@ -975,8 +975,10 @@ use m_tablematrices
     dep = max(d, 1.d-6)
     !
     if (associated(cross)) then
+       ! section refers to the roughness section *within* the cross section. Actual friction section index then comes from lookup.
        isec = cross%frictionsectionIndex(section)
     else
+       ! No cross section definition: section directly refers to a friction section index.
        isec = section
     endif
     
@@ -1010,15 +1012,17 @@ use m_tablematrices
     else ! Version 2 roughness
        do i = 1, 2
           if (isec < 0) then
+             ! Current cross section does *not* refer to a friction section index, but has defined direct roughness type+coefficient.
              cz = GetChezy(cross%frictionType(section), cross%frictionValue(section), rad, dep, u)
           else
              rgh => rgs%rough(isec)
              if (rgh%useGlobalFriction)then
-                cz= GetChezy(rgh%frictionType, rgh%frictionValue, rad, dep, u)
+                cz = GetChezy(rgh%frictionType, rgh%frictionValue, rad, dep, u)
              else
+                ! For now, direction independent, always *_pos values.
                 rgh_type  => rgh%rgh_type_pos 
                 fun_type  => rgh%fun_type_pos 
-                if (rgh_type(ibranch) ==-1)  then
+                if (rgh_type(ibranch) == -1)  then ! This branch has no own roughness definition, use global.
                    cz = GetChezy(rgh%frictionType, rgh%frictionValue, rad, dep, u)
                 else
                    if (fun_type(ibranch) == R_FunctionDischarge) then

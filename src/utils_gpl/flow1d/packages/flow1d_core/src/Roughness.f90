@@ -93,13 +93,14 @@ module m_Roughness
                                                          !! 3 = Floodplan2
                                                          !! Any other = Other section (Default 0)
       integer                           :: iSection = 0
-      type(t_tablematrix), pointer      :: table(:)          !< table for space and parameter dependend roughness
+      type(t_tablematrix), pointer      :: table(:)          !< table for space and parameter dependent roughness
       logical                           :: useGlobalFriction !< Flag indicates to use frictionValue and frictionType or to use the table
       double precision                  :: frictionValue     !< Global friction Value
       integer                           :: frictionType      !< Global friction Type
       integer, pointer                  :: rgh_type_pos(:)   !< Roughness type for positive flow direction at a branch
       integer, pointer                  :: fun_type_pos(:)   !< Roughness parameter value for positive flow direction at a branch     
-      ! branch oriented data (obsolete)
+
+      ! All fields below: branch oriented data (roughness v1, obsolete for v2)
       integer, pointer                  :: rgh_type_neg(:)   !< Roughness type for negative flow direction at a branch
       integer, pointer                  :: fun_type_neg(:)   !< Roughness parameter value for negative flow direction at a branch
 
@@ -228,25 +229,25 @@ integer function frictiontype_v1_to_new(frictionType)
    select case(frictionTYpe)
    case(1)
       ! Chezy
-      frictiontype_v1_to_new = 0
+      frictiontype_v1_to_new = R_Chezy
    case (4) 
       ! Manning-formula
-      frictiontype_v1_to_new = 1
+      frictiontype_v1_to_new = R_Manning
    case (5) 
       !           Strickler-1 formula
-      frictiontype_v1_to_new = 7
+      frictiontype_v1_to_new = R_Nikuradse
    case (6) 
       !           Strickler-2 formula
-      frictiontype_v1_to_new = 8
+      frictiontype_v1_to_new = R_Strickler
    case (7) 
       !           Nikuradze-formula == White Colebrook Waqua style
-      frictiontype_v1_to_new = 3
+      frictiontype_v1_to_new = R_WhiteColebrook
    case (8)
       !        Engelund-like roughness predictor
       frictiontype_v1_to_new = 10
    case (9) 
       !           Bos Bijkerk formula
-      frictiontype_v1_to_new = 9
+      frictiontype_v1_to_new = R_BosBijkerk
    end select
    
 end function frictiontype_v1_to_new
