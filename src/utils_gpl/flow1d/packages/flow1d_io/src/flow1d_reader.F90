@@ -214,6 +214,7 @@ module m_flow1d_reader
 
       ! Convert c string to fortran string and read md1d file into tree
       
+      nullify(md_ptr)
       md1d_flow1d_file = filenames%onednetwork
       folder = filenames%roughnessdir
       call timini()
