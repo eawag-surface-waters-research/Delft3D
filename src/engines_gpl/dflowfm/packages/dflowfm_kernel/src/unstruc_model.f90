@@ -244,6 +244,7 @@ use unstruc_channel_flow
     nullify(trtdef_ptr) ! trtdef_ptr was only pointing to subtree of md_ptr, so is now a dangling pointer: model's responsibility to nullify it here.
         
     network%loaded = .false.
+    network%initialized = .false.
 
     md_ident   = ' '
     md_mdu = ' ' ! TODO: AvD: I believe the (newer) md_mdu may be an unnecessary duplicate of md_ident_sequential
@@ -256,6 +257,13 @@ use unstruc_channel_flow
 
     md_netfile = ' '
     md_1dfiles%onednetwork = ' '
+    md_1dfiles%cross_section_definitions = ' '
+    md_1dfiles%cross_section_locations = ' '
+    md_1dfiles%roughness = ' '
+    md_1dfiles%roughnessdir = ' '
+    md_1dfiles%retentions = ' '
+    md_1dfiles%structures = ' '
+    
     md_flowgeomfile = ' '
     md_xybfile = ' '
     md_dryptsfile = ' '
