@@ -199,7 +199,7 @@ module m_readCrossSections
       
    end subroutine readCrossSectionLocationFile
 
-   !> Read the cross section definitions file
+   !> Read the cross section definitions file, taking the file version into account.
    subroutine readCrossSectionDefinitions(network, CrossSectionDefinitionFile)
 
       type(t_network), target, intent(inout) :: network                          !< network structure
@@ -256,13 +256,14 @@ module m_readCrossSections
    end subroutine readCrossSectionDefinitions
       
       
-   !> Parse cross section definition file with fileVersion 2.00
+   !> Parse cross section definition file with fileVersion 2.00.
+   !! file must already have been read into an ini tree.
    subroutine parseCrossSectionDefinitionFile(md_ptr, network)
       use m_hash_search
       use string_module, only: strcmpi
    
       type(t_network), target,  intent(inout)   :: network        !< network structure
-      type(tree_data), pointer, intent(in   )   :: md_ptr         !< treedata pointer to cross section definitions
+      type(tree_data), pointer, intent(in   )   :: md_ptr         !< treedata pointer to cross section definitions, already created.
    
       !integer :: istat
       integer :: numstr
@@ -302,7 +303,12 @@ module m_readCrossSections
          endif
          
          call prop_get_string(md_ptr%child_nodes(i)%node_ptr, '', 'id', id, success)
-         if (success) call prop_get_string(md_ptr%child_nodes(i)%node_ptr, '', 'type', typestr, success)
+         if (.not. success) then
+            write (msgbuf, '(a,i0,a)') 'Incorrect CrossSection input for CrossSection #', i, '. No id was given.'
+            call err_flush()
+            cycle
+         endif
+         call prop_get_string(md_ptr%child_nodes(i)%node_ptr, '', 'type', typestr, success)
          if (.not. success) then
             call SetMessage(LEVEL_ERROR, 'Incorrect CrossSection input for CrossSection '//trim(id)// &
                '. No type was given.')
