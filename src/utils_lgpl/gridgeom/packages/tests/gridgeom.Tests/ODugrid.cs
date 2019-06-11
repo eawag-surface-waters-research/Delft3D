@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Runtime.InteropServices;
 using NUnit.Framework;
 using General.tests;
@@ -1058,13 +1058,13 @@ namespace gridgeom.Tests
               4,
               4,
               4,
-              5,
-              5 };
+              6,
+              6 };
             for (int i = 0; i < n1d2dlinks; i++)
             {
-                Console.Write("i:{0} rc_arrayfrom:{1} arrayfrom:{2} rc_arrayto:{3} arrayto:{4}\n", i.ToString("D"), rc_arrayfrom[i].ToString("D"), arrayfrom[i].ToString("D"), rc_arrayto[i].ToString("D"), arrayto[i].ToString("D"));
-                // Assert.That(rc_arrayfrom[i], Is.EqualTo(arrayfrom[i]));
-                // Assert.That(rc_arrayto[i], Is.EqualTo(arrayto[i]));
+                // Console.Write("i:{0} rc_arrayfrom:{1} arrayfrom:{2} rc_arrayto:{3} arrayto:{4}\n", i.ToString("D"), rc_arrayfrom[i].ToString("D"), arrayfrom[i].ToString("D"), rc_arrayto[i].ToString("D"), arrayto[i].ToString("D"));
+                Assert.That(rc_arrayfrom[i], Is.EqualTo(arrayfrom[i]));
+                Assert.That(rc_arrayto[i], Is.EqualTo(arrayto[i]));
             }
            // 7.deallocate memory of gridgeom
             ierr = wrapperGridgeom.ggeo_deallocate();
