@@ -867,6 +867,7 @@ module m_readCrossSections
    !> read YZ cross section from ini file
    logical function readYZCS(pCS, node_ptr, sferic) 
       use precision
+      use physicalconsts, only: earth_radius
       
       type(t_CSType), pointer,  intent(inout) :: pCS             !< cross section item
       type(tree_data), pointer, intent(in)    :: node_ptr        !< treedata pointer to input for cross section
@@ -876,7 +877,6 @@ module m_readCrossSections
       logical :: success, sferic_local
       double precision, allocatable, dimension(:) :: positions
       double precision, allocatable, dimension(:) :: xcoordinates, ycoordinates
-      real(hp)                                    :: dearthrad = 6378137.0_hp
       integer          :: i
       double precision :: locShift
 
@@ -923,7 +923,7 @@ module m_readCrossSections
       endif
       pCS%y(1) = 0d0
       do i = 2, numlevels
-         call distance(sferic_local, xcoordinates(i-1), ycoordinates(i-1), xcoordinates(i), ycoordinates(i), pCS%y(i), dearthrad)
+         call distance(sferic_local, xcoordinates(i-1), ycoordinates(i-1), xcoordinates(i), ycoordinates(i), pCS%y(i), earth_radius)
          pCS%y(i) = pCS%y(i-1) + pCS%y(i) 
       enddo
       
