@@ -261,7 +261,7 @@ double precision function GetChezy(frictType, cpar, rad, dep, u)
    double precision, intent(in)   :: rad                   !< hydraulic radius
    double precision, intent(in)   :: cpar                  !< parameter value
    double precision, intent(in)   :: u                     !< velocity
-   integer, intent(in)            :: frictType             !< friction type
+   integer,          intent(in)   :: frictType             !< friction type (e.g., R_Manning, etc.)
    !
    !     Declaration of Parameters:
    !
