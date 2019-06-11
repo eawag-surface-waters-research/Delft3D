@@ -16899,7 +16899,7 @@ subroutine unc_write_his(tim)            ! wrihis
             !ierr = nf90_put_att(ihisfile, id_varuavg, 'units', 'm s-1')
             !ierr = nf90_put_att(ihisfile, id_varuavg, 'coordinates', 'cross_section_name')
 
-            if( jatransportmodule.ne.0 ) then
+            if( jatransportmodule /= 0 ) then
                do num = 1,NUMCONST_MDU
                   tmpstr = const_names(num)
                   ! Forbidden chars in NetCDF names: space, /, and more.
@@ -16907,24 +16907,23 @@ subroutine unc_write_his(tim)            ! wrihis
                   call replace_char(tmpstr,47,95)
                   ierr = nf90_def_var(ihisfile, 'cross_section_cumulative_'//trim(tmpstr), nf90_double, (/ id_crsdim, id_timedim /), id_const_cum(num))
                   ierr = nf90_put_att(ihisfile, id_const_cum(num), 'long_name', 'cumulative flux (based on upwind flow element) for '//trim(tmpstr)//'.')
-                  
+
                   ierr = nf90_def_var(ihisfile, 'cross_section_'//trim(tmpstr), nf90_double, (/ id_crsdim, id_timedim /), id_const(num))
                   ierr = nf90_put_att(ihisfile, id_const(num), 'long_name', 'flux (based on upwind flow element) for '//trim(tmpstr)//'.')
-                  
-                  if (const_units(num).ne.' ') then
+
+                  if (const_units(num) /= ' ') then
                      tmpstr = trim(const_units(num)) // ' m3'
                   else
                      tmpstr = '-'
-                  endif                  
+                  endif
                   ierr = nf90_put_att(ihisfile, id_const_cum(num), 'units', tmpstr)
                   ierr = nf90_put_att(ihisfile, id_const_cum(num), 'coordinates', 'cross_section_name')
-                  
-                  
-                  if (const_units(num).ne.' ') then
+
+                  if (const_units(num) /= ' ') then
                      tmpstr = trim(const_units(num)) // ' m3/s'
                   else
                      tmpstr = '-'
-                  endif                  
+                  endif
                   ierr = nf90_put_att(ihisfile, id_const(num), 'units', tmpstr)
                   ierr = nf90_put_att(ihisfile, id_const(num), 'coordinates', 'cross_section_name')
                enddo
@@ -17729,7 +17728,7 @@ subroutine unc_write_his(tim)            ! wrihis
           ierr = nf90_put_var(ihisfile, id_varu,    crs(i)%sumvalcur(IPNT_U1A), (/ i, it_his /))
 !          ierr = nf90_put_var(ihisfile, id_varuavg, crs(i)%sumvalavg(IPNT_U1A), (/ i, it_his /))
 
-          if( jatransportmodule.ne.0 ) then
+          if( jatransportmodule /= 0 ) then
              IP = IPNT_HUA
              do num = 1,NUMCONST_MDU
                 IP = IP + 1
