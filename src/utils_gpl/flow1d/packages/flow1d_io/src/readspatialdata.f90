@@ -248,8 +248,8 @@ contains
    !> Read the spatial data file from cache
    subroutine read_spatial_data_cache(ibin, network)
 
-      type(t_network), intent(inout)      :: network     !> network structure
-      integer, intent(in)                 :: ibin        !> unit number of binary cache file
+      type(t_network), intent(inout)      :: network     !< network structure
+      integer, intent(in)                 :: ibin        !< unit number of binary cache file
 
       type(t_spatial_data), pointer       :: pQuant
       integer                             :: nValues
@@ -330,8 +330,8 @@ contains
    !> Read the spatial data file from cache
    subroutine write_spatial_data_cache(ibin, spData)
 
-      type(t_spatial_dataSet), intent(in) :: spData   !> network structure
-      integer, intent(in)                 :: ibin     !> unit number of binary cache file
+      type(t_spatial_dataSet), intent(in) :: spData   !< network structure
+      integer, intent(in)                 :: ibin     !< unit number of binary cache file
 
       type(t_spatial_data), pointer       :: pQuant
       integer                             :: nValues

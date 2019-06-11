@@ -55,10 +55,10 @@ contains
    !> Read all roughness ini-files
    subroutine roughness_reader(network, roughnessfiles, mapdir, md_ptr)
    
-      type(t_network), intent(inout), target :: network                !> Network structure
-      character(len=*), intent(in)           :: mapdir                 !> Location of roughness files
-      character(len=*), intent(in)           :: roughnessfiles         !> separated list of roughness files
-      type(tree_data), pointer, intent(in), optional   :: md_ptr       !> treedata pointer to model definition file
+      type(t_network), intent(inout), target :: network                !< Network structure
+      character(len=*), intent(in)           :: mapdir                 !< Location of roughness files
+      character(len=*), intent(in)           :: roughnessfiles         !< separated list of roughness files
+      type(tree_data), pointer, intent(in), optional   :: md_ptr       !< treedata pointer to model definition file
 
       type(t_RoughnessSet), pointer          :: rgs
       type(t_branchSet), pointer             :: brs
@@ -185,12 +185,12 @@ contains
    !> Read a specific roughness file
    subroutine read_roughnessfile(rgs, brs, spdata, inputfile, default, def_type)
    
-      type(t_roughnessSet), intent(inout)    :: rgs        !> Roughness set
-      type(t_branchSet), intent(in)          :: brs        !> Branches
-      type(t_spatial_dataSet), intent(inout) :: spdata     !> Spatial data set
-      character(len=charLn), intent(in)      :: inputfile  !> Name of the input file
-      double precision, intent(inout)        :: default    !> Default friction parameter
-      integer, intent(inout)                 :: def_type   !> Default friction type
+      type(t_roughnessSet), intent(inout)    :: rgs        !< Roughness set
+      type(t_branchSet), intent(in)          :: brs        !< Branches
+      type(t_spatial_dataSet), intent(inout) :: spdata     !< Spatial data set
+      character(len=charLn), intent(in)      :: inputfile  !< Name of the input file
+      double precision, intent(inout)        :: default    !< Default friction parameter
+      integer, intent(inout)                 :: def_type   !< Default friction type
    
       integer                                :: major
       integer                                :: minor
@@ -520,10 +520,10 @@ contains
    !> set default values at the branches
    subroutine init_at_branches(brs, rgh_type, fun_type, def_type)
    
-      type(t_branchset), intent(in) :: brs                  !> Branches
-      integer, dimension(:), intent(inout) :: rgh_type      !> roughness type
-      integer, dimension(:), intent(inout) :: fun_type      !> roughness function type (default constant)
-      integer, intent(in) :: def_type                       !> default type
+      type(t_branchset), intent(in) :: brs                  !< Branches
+      integer, dimension(:), intent(inout) :: rgh_type      !< roughness type
+      integer, dimension(:), intent(inout) :: fun_type      !< roughness function type (default constant)
+      integer, intent(in) :: def_type                       !< default type
       integer ibr
 
       do ibr = 1, brs%count
@@ -538,8 +538,8 @@ contains
    !> Read the binary cache file for roughness values
    subroutine read_roughness_cache(ibin, network)
    
-      type(t_network), intent(inout)  :: network   !> Network structure
-      integer, intent(in)             :: ibin      !> Unit number for binary file
+      type(t_network), intent(inout)  :: network   !< Network structure
+      integer, intent(in)             :: ibin      !< Unit number for binary file
       
       integer                         :: i
       integer                         :: j
