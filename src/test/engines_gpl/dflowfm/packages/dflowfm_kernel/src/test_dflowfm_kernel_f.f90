@@ -27,6 +27,7 @@ program test_dflowfm_kernel
     use test_cross_sections
     use test_roughness
     use test_obserCrossSections
+    use test_ini_Field_1dField
     
     implicit none
     
@@ -40,6 +41,7 @@ program test_dflowfm_kernel
     call tests_cross_sections
     call tests_observations
     call tests_observCrossSections
+    call tests_iniField_1dField
     !
     ! Done - properly finalize
     !

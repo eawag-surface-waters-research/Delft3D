@@ -18,6 +18,7 @@ test_dflowfm_kernel_SOURCES = \
 	test_cross_section.f90 \
 	test_roughness.f90 \
 	test_observ_Cross_Sections.f90 \
+	test_iniField_1dField.f90 \
 	test_dflowfm_kernel_f.f90
 
 #-------------------------------------------------------------------------------
