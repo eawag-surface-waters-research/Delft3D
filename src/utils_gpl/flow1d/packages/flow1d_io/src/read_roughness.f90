@@ -54,7 +54,6 @@ contains
 
    !> Read all roughness ini-files
    subroutine roughness_reader(network, roughnessfiles, mapdir, md_ptr)
-   
       type(t_network), intent(inout), target :: network                !< Network structure
       character(len=*), intent(in)           :: mapdir                 !< Location of roughness files
       character(len=*), intent(in)           :: roughnessfiles         !< separated list of roughness files
@@ -186,7 +185,7 @@ contains
 
    end subroutine roughness_reader
 
-   !> Read a specific roughness file
+   !> Read a specific roughness file, taking the file version into account.
    subroutine read_roughnessfile(rgs, brs, spdata, inputfile, default, def_type)
    
       type(t_roughnessSet), intent(inout)    :: rgs        !< Roughness set
@@ -227,10 +226,15 @@ contains
       end select
    end subroutine read_roughnessfile
 
+
+   !> Reads a single v2 roughness file.
+   !! File must already have been opened into an ini tree.
    subroutine scan_roughness_input(tree_ptr, rgs, brs, spdata, inputfile, default, def_type)
       use m_tablematrices
+      use m_alloc
+      use string_module, only: strcmpi
       
-      type(tree_data), pointer, intent(in)   :: tree_ptr   !< treedata pointer to input
+      type(tree_data), pointer, intent(in)   :: tree_ptr   !< treedata pointer to input file, must already be created.
       type(t_roughnessSet), intent(inout)    :: rgs        !< Roughness set
       type(t_branchSet), intent(in)          :: brs        !< Branches
       type(t_spatial_dataSet), intent(inout) :: spdata     !< Spatial data set
@@ -248,6 +252,7 @@ contains
       integer                                :: i
       integer                                :: nlev
       integer                                :: numSections
+      integer                                :: maxlocations
       integer                                :: maxlevels
       integer                                :: isp
       logical                                :: flowdir
@@ -272,9 +277,9 @@ contains
       numSections = 0
       branchdef = .false.
       do i = 1, count
-         if (tree_get_name(tree_ptr%child_nodes(i)%node_ptr) .eq. 'global') then
+         if (strcmpi(tree_get_name(tree_ptr%child_nodes(i)%node_ptr), 'Global')) then
             numsections = numSections+1
-         elseif (tree_get_name(tree_ptr%child_nodes(i)%node_ptr) .eq. 'branch') then
+         elseif (strcmpi(tree_get_name(tree_ptr%child_nodes(i)%node_ptr), 'Branch')) then
             branchdef = .true.
          endif
       enddo 
@@ -315,9 +320,11 @@ contains
          endif         
       endif
       
+      maxlevels    = 0
+      maxlocations = 0
       ! Now scan the complete input
       do i = 1, count
-         if (tree_get_name(tree_ptr%child_nodes(i)%node_ptr) .eq. 'global') then
+         if (strcmpi(tree_get_name(tree_ptr%child_nodes(i)%node_ptr), 'Global')) then
             ! Get section id
             call prop_get_string(tree_ptr%child_nodes(i)%node_ptr, '', 'frictionId', frictionId, success)
             if (.not. success) then
@@ -335,38 +342,50 @@ contains
             rgs%rough(irgh)%useGlobalFriction = .not. branchdef
             
             call prop_get(tree_ptr%child_nodes(i)%node_ptr, '', 'frictionType', rgs%rough(irgh)%frictionType, success)
+            if (.not. success) then
+               call setmessage(LEVEL_ERROR, 'frictionType not found/valid in roughness definition file '''//trim(inputfile)//''' for frictionId='//trim(frictionId)//'.')
+            end if
             call prop_get(tree_ptr%child_nodes(i)%node_ptr, '', 'frictionValue', rgs%rough(irgh)%frictionValue, success)
-         else if (tree_get_name(tree_ptr%child_nodes(i)%node_ptr) .eq. 'branch') then
+            if (.not. success) then
+               call setmessage(LEVEL_ERROR, 'frictionValue not found/valid in roughness definition file '''//trim(inputfile)//''' for frictionId='//trim(frictionId)//'.')
+            end if
+         else if (strcmpi(tree_get_name(tree_ptr%child_nodes(i)%node_ptr), 'Branch')) then
             call prop_get(tree_ptr%child_nodes(i)%node_ptr, '', 'branchId', branchid, success)
             if (.not. success) then
-               call setmessage(LEVEL_ERROR, 'Branchid not found in chapter branch of input file: '//trim(inputfile))
+               call setmessage(LEVEL_ERROR, 'branchId not found in chapter Branch of input file: '//trim(inputfile))
                cycle
             endif
             
             ibr = hashsearch(brs%hashlist, branchid)
             if (ibr <= 0 .or. ibr > brs%count) then
-               call setmessage(LEVEL_ERROR, 'Branchid '//trim(branchid)//' does not exist see input file: '//trim(inputfile))
+               call setmessage(LEVEL_ERROR, 'branchId '//trim(branchid)//' does not exist in network, see input file: '//trim(inputfile))
                cycle
             endif
             
             call prop_get(tree_ptr%child_nodes(i)%node_ptr, '', 'frictionType', rgh%rgh_type_pos(ibr), success)
-            if (success) call prop_get(tree_ptr%child_nodes(i)%node_ptr, '', 'functionType', rgh%fun_type_pos(ibr), success)
             if (.not. success) then
-               call setmessage(LEVEL_ERROR, 'Missing data for branchid '//trim(branchid)//' see input file: '//trim(inputfile))
+               call setmessage(LEVEL_ERROR, 'Missing frictionType for branchId '//trim(branchid)//' see input file: '//trim(inputfile))
+               cycle
+            endif
+            call prop_get(tree_ptr%child_nodes(i)%node_ptr, '', 'functionType', rgh%fun_type_pos(ibr), success)
+            if (.not. success) then
+               call setmessage(LEVEL_ERROR, 'Missing functionType for branchId '//trim(branchid)//' see input file: '//trim(inputfile))
                cycle
             endif
             
             numlevels = 1
             call prop_get(tree_ptr%child_nodes(i)%node_ptr, '', 'numLevels', numlevels, success)
             numlocations = 1
-            call prop_get(tree_ptr%child_nodes(i)%node_ptr, '', 'numlocations', numlocations, success)
+            call prop_get(tree_ptr%child_nodes(i)%node_ptr, '', 'numLocations', numlocations, success)
             success = .true.
-            if (allocated(levels   )) deallocate(levels   )
-            if (allocated(locations)) deallocate(locations)
-            if (allocated(values   )) deallocate(values   )
-            allocate(levels(numlevels))
-            allocate(locations(numlocations))
-            allocate(values(numlevels*numlocations))
+
+            maxlevels    = max(maxlevels,    numlevels)
+            maxlocations = max(maxlocations, numlocations)
+
+            call realloc(levels,    maxlevels,              keepExisting=.false.)
+            call realloc(locations, maxlocations,           keepExisting=.false.)
+            call realloc(values,    maxlevels*maxlocations, keepExisting=.false.)
+
             if (numlevels > 1) then
                call prop_get(tree_ptr%child_nodes(i)%node_ptr, '', 'levels', levels, numlevels, success)
             else
@@ -394,6 +413,7 @@ contains
       enddo   
   
    end subroutine scan_roughness_input
+
 
    subroutine scan_roughness_input_v100(tree_ptr, rgs, brs, spdata, inputfile, default, def_type)
       type(tree_data), pointer, intent(in)   :: tree_ptr   !< treedata pointer to input
