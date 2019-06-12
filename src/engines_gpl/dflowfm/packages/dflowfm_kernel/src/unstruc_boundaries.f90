@@ -1027,7 +1027,7 @@ logical function initboundaryblocksforcings(filename)
                    endif
                 endif
                 initboundaryblocksforcings = initboundaryblocksforcings .and. retVal ! Remember any previous errors.
-             else if (property_name == 'return_time') then
+             else if (property_name == 'returntime' .or. property_name == 'return_time') then
                 continue                   ! used elsewhere to set Thatcher-Harleman delay 
              else if (property_name == 'openboundarytolerance') then
                 continue                   ! used in findexternalboundarypoints/readlocationfiles... to set search distance. Not relevant here. 
