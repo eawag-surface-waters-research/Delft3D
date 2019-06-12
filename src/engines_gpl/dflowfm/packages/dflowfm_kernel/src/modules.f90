@@ -2406,7 +2406,7 @@ end module m_structures
  double precision, allocatable     :: tureps1  (:)      ! eps new        , at layer interface at u
 
  double precision, allocatable     :: vicwwu   (:)      ! vertical eddy viscosity (m2/s) at layer interface at u point
- double precision, allocatable, target :: vicwws   (:)  !< [m2/s] vertical eddy viscosity at layer interface at s point u {"location": "face", "shape": ["ndkx"]}
+ double precision, allocatable, target :: vicwws   (:)  !< [m2/s] vertical eddy viscosity at layer interface at s point {"location": "face", "shape": ["ndkx"]}
 
  !real            , allocatable     :: tkepro   (:)      ! vertical production t
  !real            , allocatable     :: tkedis   (:)      ! vertical dissipation
@@ -3327,7 +3327,7 @@ end module m_vegetation
  ! 3D parameters
  integer                           :: kmx               !< nr of 3d layers, increasing in positive upward direction
                                                         !! if kmx==0 then 2D code. if kmx==1 then 3D code
- integer                           :: kmx1              !< kmx + 1, for dimensioning arrays that used be (0:kmax)
+ integer                           :: kmx1              !< kmx + 1, for dimensioning arrays that used to be (0:kmax)
  integer                           :: kmxd              !< dim of kmx, >= 1
  integer                           :: ndkx              !< dim of 3d flow nodes (internal + boundary)
  integer                           :: ndkx1             !< dim of 3d flow horizontal interfaces (internal + boundary), (0:kmx)
@@ -4143,7 +4143,7 @@ double precision, allocatable      :: thindam(:,:)
  integer                                     :: ntheta          !< Number of wave direction bins
  double precision                            :: thetamax        !< upper limit wave directional sector
  double precision                            :: thetamin        !< lower limit wave directional sector
- double precision                            :: thetanaut       !< nautical convention or not
+ integer                                     :: thetanaut       !< nautical convention or not
  double precision                            :: dtheta          !< directional resolution
  double precision                            :: theta0          !< mean theta-grid direction
  double precision, allocatable               :: thetabin(:)     !< bin-means of theta-grid

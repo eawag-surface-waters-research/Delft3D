@@ -179,11 +179,12 @@ contains
        fmax = 1.d0   ! assume 1Hz as maximum frequency. Increase in loop below if needed.
        do iloc = 1,nspectra
          
-          call writelog('sl','(a,i0)','Reading spectrum at location ',ibnd)
+          call writelog('sl','(a,i0)','Reading spectrum at location ',iloc)
          
           ! Read input file 
           waveSpectrumFileName%fname = waveSpectrumAdministration(ibnd)%bcfiles(iloc)%fname
-          
+          waveSpectrumFileName%listline=0
+
           call read_spectrum_input(ibnd, wp,waveSpectrumFileName,specin(iloc))
 
           write(6,*) 'Spectrum read from: ',trim(waveSpectrumAdministration(ibnd)%bcfiles(iloc)%fname)
@@ -2677,7 +2678,7 @@ contains
     real*8                                       :: deltaf       ! difference frequency
     real*8,dimension(:), allocatable             :: term1,term2,term2new,dif,chk1,chk2, qinterp
     real*8,dimension(npb)                        :: distx,disty
-    real*8,dimension(:,:),allocatable            :: Eforc,D,deltheta,KKx,KKy,dphi3,k3,cg3,theta3,Abnd
+    real*8,dimension(:,:),allocatable            :: Eforc,D,deltheta,KKx,KKy,dphi3,k3,cg3,theta3,Abnd, D_sign
     real*8,dimension(:,:,:),allocatable          :: q
     complex(fftkind),dimension(:),allocatable    :: Comptemp,Comptemp2,Gn
     complex(fftkind),dimension(:,:,:),allocatable:: Ftemp
@@ -2772,6 +2773,28 @@ contains
 
        ! Determine difference-interaction coefficient according to Herbers 1994
        ! eq. A5
+       !term1 = (-wp%wgen(1:K-m))*wp%wgen(m+1:K)
+       !term2 = (-wp%wgen(1:K-m))+wp%wgen(m+1:K)
+       !term2new = cg3(m,1:K-m)*k3(m,1:K-m)
+       !dif = (abs(term2-term2new))
+       !if (any(dif>0.01*term2) .and. firsttime) then
+       !   firsttime = .false.
+       !endif
+       !chk1  = cosh(wp%kgen(1:K-m)*hb0)
+       !chk2  = cosh(wp%kgen(m+1:K)*hb0)
+       !
+       !D(m,1:K-m) = -par_g*wp%kgen(1:K-m)*wp%kgen(m+1:K)*dcos(deltheta(m,1:K-m))/2.d0/term1+par_g*term2*(chk1*chk2)/ &
+       !     ((par_g*k3(m,1:K-m)*tanh(k3(m,1:K-m)*hb0)-(term2new)**2)*term1*cosh(k3(m,1:K-m)*hb0))* &
+       !     (term2*((term1)**2/par_g/par_g - wp%kgen(1:K-m)*wp%kgen(m+1:K)*dcos(deltheta(m,1:K-m))) &
+       !     - 0.50d0*((-wp%wgen(1:K-m))*wp%kgen(m+1:K)**2/(chk2**2)+wp%wgen(m+1:K)*wp%kgen(1:K-m)**2/(chk1**2)))
+       !
+       !! Correct for surface elevation input and output instead of bottom pressure
+       !! so it is consistent with Van Dongeren et al 2003 eq. 18
+       !D(m,1:K-m) = D(m,1:K-m)*cosh(k3(m,1:K-m)*hb0)/(cosh(wp%kgen(1:K-m)*hb0)*cosh(wp%kgen(m+1:K)*hb0))
+       
+       
+       ! Determine difference-interaction coefficient according to Okihiro et al eq. 4a
+       ! Instead of Herbers 1994 this coefficient is derived for the surface elavtion in stead of the bottom pressure. 
        term1 = (-wp%wgen(1:K-m))*wp%wgen(m+1:K)
        term2 = (-wp%wgen(1:K-m))+wp%wgen(m+1:K)
        term2new = cg3(m,1:K-m)*k3(m,1:K-m)
@@ -2782,15 +2805,12 @@ contains
        chk1  = cosh(wp%kgen(1:K-m)*hb0)
        chk2  = cosh(wp%kgen(m+1:K)*hb0)
 
-       D(m,1:K-m) = -par_g*wp%kgen(1:K-m)*wp%kgen(m+1:K)*dcos(deltheta(m,1:K-m))/2.d0/term1+par_g*term2*(chk1*chk2)/ &
-            ((par_g*k3(m,1:K-m)*tanh(k3(m,1:K-m)*hb0)-(term2new)**2)*term1*cosh(k3(m,1:K-m)*hb0))* &
-            (term2*((term1)**2/par_g/par_g - wp%kgen(1:K-m)*wp%kgen(m+1:K)*dcos(deltheta(m,1:K-m))) &
-            - 0.50d0*((-wp%wgen(1:K-m))*wp%kgen(m+1:K)**2/(chk2**2)+wp%wgen(m+1:K)*wp%kgen(1:K-m)**2/(chk1**2)))
-
-       ! Correct for surface elevation input and output instead of bottom pressure
-       ! so it is consistent with Van Dongeren et al 2003 eq. 18
-       D(m,1:K-m) = D(m,1:K-m)*cosh(k3(m,1:K-m)*hb0)/(cosh(wp%kgen(1:K-m)*hb0)*cosh(wp%kgen(m+1:K)*hb0))
-
+       D(m,1:K-m) = -par_g*wp%kgen(1:K-m)*wp%kgen(m+1:K)*dcos(deltheta(m,1:K-m))/2.d0/term1+ &
+                    +term2**2/(par_g*2)+par_g*term2/ &
+                    ((par_g*k3(m,1:K-m)*tanh(k3(m,1:K-m)*hb0)-(term2new)**2)*term1)* &
+                    (term2*((term1)**2/par_g/par_g - wp%kgen(1:K-m)*wp%kgen(m+1:K)*dcos(deltheta(m,1:K-m))) &
+                    - 0.50d0*((-wp%wgen(1:K-m))*wp%kgen(m+1:K)**2/(chk2**2)+wp%wgen(m+1:K)*wp%kgen(1:K-m)**2/(chk1**2)))
+       
        ! Exclude interactions with components smaller than or equal to current
        ! component according to lower limit Herbers 1994 eq. 1
        where(wp%fgen<=deltaf) D(m,:)=0.d0
@@ -2806,7 +2826,8 @@ contains
        allocate(Comptemp(K-m),Comptemp2(K-m))
        Comptemp=conjg(wp%CompFn(1,wp%Findex(1)+m:wp%Findex(1)+K-1))
        Comptemp2=conjg(wp%CompFn(1,wp%Findex(1):wp%Findex(1)+K-m-1))
-       dphi3(m,1:K-m) = par_pi+imag(log(Comptemp))-imag(log(Comptemp2))
+       !dphi3(m,1:K-m) = par_pi+imag(log(Comptemp))-imag(log(Comptemp2))
+       dphi3(m,1:K-m) = imag(log(Comptemp))-imag(log(Comptemp2))
        deallocate (Comptemp,Comptemp2)
        !
        ! Determine angle of bound long wave according to Van Dongeren et al. 2003 eq. 22
@@ -2848,7 +2869,19 @@ contains
        enddo
        !
        ! Calculate bound wave amplitude for this offshore grid point
-       Abnd = sqrt(2*Eforc*wp%dfgen)
+       !Abnd = sqrt(2*Eforc*wp%dfgen)
+       
+       ! Menno: add the sign of the interaction coefficient in the amplitude. Large dtheta can result in a positive D. 
+       ! The phase of the bound wave is now only determined by phi1+phi2
+       allocate(D_sign(K-1,K))
+       D_sign = 1
+       ! Menno: put the sign of D in front of D_sign
+       D_sign = sign(D_sign,D)
+       ! Multiply amplitude with the sign of D
+       Abnd = sqrt(2*Eforc*wp%dfgen) * D_sign
+       deallocate(D_sign)
+       !\DEBUG
+       
        !
        ! Determine complex description of bound long wave per interaction pair of
        ! primary waves for first y-coordinate along seaside boundary
