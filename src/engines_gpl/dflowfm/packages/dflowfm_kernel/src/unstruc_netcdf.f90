@@ -9518,12 +9518,15 @@ subroutine unc_read_net_ugrid(filename, numk_keep, numl_keep, numk_read, numl_re
          endif
       elseif (meshgeom%dim == 2) then
          !Else 2d/3d mesh
+         if (meshgeom%numnode < 0 .or. meshgeom%numface < 0) then
+            cycle
+         end if
          ierr = ionc_get_meshgeom(ioncid, im, networkIndex, meshgeom, start_index, includeArrays) 
          mesh2dname = meshgeom%meshname
          !Variable to store the coordinates of face centres
          allocate(xface(meshgeom%numface)) ! TODO: LC: this is only used when there are mesh contacts. Also: have these not already been read into meshgeom%facex/y?
          allocate(yface(meshgeom%numface))
-         ierr = ionc_get_face_coordinates(ioncid, nmesh, xface, yface)
+         ierr = ionc_get_face_coordinates(ioncid, im, xface, yface)
       else
          ! Only support 1D network and 2D grid
          write(msgbuf, '(a,i0,a,i0,a)') 'unc_read_net_ugrid: unsupported topology dimension ', meshgeom%dim, &
