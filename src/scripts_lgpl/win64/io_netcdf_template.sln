@@ -45,22 +45,22 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "deltares_common", "deltares
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "fortrangis", "fortrangis", "{5BD34D22-517C-43CD-8BA8-03F3C1C8052E}"
 EndProject
-Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "libfortranc", "..\oss_delft3d_svn\src\third_party_open\fortrangis\libfortranc\libfortranc.vfproj", "{9249B679-366D-4838-ADCE-A9A8E6EAEAB4}"
+Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "libfortranc", "third_party_open\fortrangis\libfortranc\libfortranc.vfproj", "{9249B679-366D-4838-ADCE-A9A8E6EAEAB4}"
 	ProjectSection(ProjectDependencies) = postProject
 		{B38AA81E-A244-3E86-BCBB-7B7E187DB218} = {B38AA81E-A244-3E86-BCBB-7B7E187DB218}
 	EndProjectSection
 EndProject
-Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "libfortrangis", "..\oss_delft3d_svn\src\third_party_open\fortrangis\libfortrangis\libfortrangis.vfproj", "{B8F4B0C9-1EE7-4719-B927-5126F82E9713}"
+Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "libfortrangis", "third_party_open\fortrangis\libfortrangis\libfortrangis.vfproj", "{B8F4B0C9-1EE7-4719-B927-5126F82E9713}"
 	ProjectSection(ProjectDependencies) = postProject
 		{9249B679-366D-4838-ADCE-A9A8E6EAEAB4} = {9249B679-366D-4838-ADCE-A9A8E6EAEAB4}
 		{9867C9D6-9122-494E-8D05-FEEB0E94CF75} = {9867C9D6-9122-494E-8D05-FEEB0E94CF75}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "proj", "..\oss_delft3d_svn\src\third_party_open\proj4\src\proj.vcxproj", "{B38AA81E-A244-3E86-BCBB-7B7E187DB218}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "proj", "third_party_open\proj4\src\proj.vcxproj", "{B38AA81E-A244-3E86-BCBB-7B7E187DB218}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "shp", "..\oss_delft3d_svn\src\third_party_open\shapelib\src\shp.vcxproj", "{9867C9D6-9122-494E-8D05-FEEB0E94CF75}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "shp", "third_party_open\shapelib\src\shp.vcxproj", "{9867C9D6-9122-494E-8D05-FEEB0E94CF75}"
 EndProject
-Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "shapelib_test", "..\oss_delft3d_svn\src\third_party_open\shapelib\test\shapelib_test.vfproj", "{EAF6A200-687E-4965-A739-85F6A3E6416F}"
+Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "shapelib_test", "third_party_open\shapelib\test\shapelib_test.vfproj", "{EAF6A200-687E-4965-A739-85F6A3E6416F}"
 	ProjectSection(ProjectDependencies) = postProject
 		{9249B679-366D-4838-ADCE-A9A8E6EAEAB4} = {9249B679-366D-4838-ADCE-A9A8E6EAEAB4}
 		{B8F4B0C9-1EE7-4719-B927-5126F82E9713} = {B8F4B0C9-1EE7-4719-B927-5126F82E9713}
