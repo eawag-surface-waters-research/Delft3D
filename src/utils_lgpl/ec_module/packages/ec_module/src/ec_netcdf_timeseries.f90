@@ -41,7 +41,7 @@ module m_ec_netcdf_timeseries
           ! ...... 
        end if
        if (istat /= 0) then
-          call setECMessage("ec_bcreader::ecNetCDFCreate: Unable to allocate additional memory.")
+          call setECMessage("ec_netcdf_timeseries::ecNetCDFCreate: Unable to allocate additional memory.")
           netCDFPtr => null()
           return
        end if

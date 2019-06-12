@@ -3180,10 +3180,8 @@ module m_ec_provider
             case (provFile_bc)
                ! Filereader was created thru a BC-instance. This instance has a timeunit (netcdf-style) property
                if (fileReaderPtr%bc%func == BC_FUNC_TSERIES .or. fileReaderPtr%bc%func == BC_FUNC_TIM3D) then
-                  defTimeZone = fileReaderPtr%tframe%ec_timezone
-                  success = ecSupportTimestringToUnitAndRefdate(fileReaderPtr%bc%timeunit, &
-                                fileReaderPtr%tframe%ec_timestep_unit, fileReaderPtr%tframe%ec_refdate, &
-                                fileReaderPtr%tframe%ec_timezone, defTimeZone)
+                  success = ecSupportTimestringToUnitAndRefdate(fileReaderPtr%bc%timeunit, fileReaderPtr%tframe%ec_timestep_unit, fileReaderPtr%tframe%ec_refdate, &
+                                                                                           tzone = fileReaderPtr%tframe%ec_timezone)
                else
                   success = .true.
                endif
@@ -3213,7 +3211,8 @@ module m_ec_provider
          rec = ecFindInFile(fileReaderPtr%fileHandle, keyword)
          if (len_trim(rec) > 0) then
             ! Determine the timestep unit and reference date for the time data in the file.
-            if (.not. ecSupportTimestringToUnitAndRefdate(rec, fileReaderPtr%tframe%ec_timestep_unit, fileReaderPtr%tframe%ec_refdate)) return
+            if (.not. ecSupportTimestringToUnitAndRefdate(rec, fileReaderPtr%tframe%ec_timestep_unit, fileReaderPtr%tframe%ec_refdate, &
+                                                               tzone = fileReaderPtr%tframe%ec_timezone)) return 
          else
             call setECMessage("ERROR: ec_provider::ecDefaultInitializeTimeFrame: Unable to identify the first data block.")
             return
@@ -3303,7 +3302,8 @@ module m_ec_provider
          ! Surprisingly, the reference date is part of the "units" attribute.
          units = '' ! NetCDF does not completely overwrite a string, so re-initialize.
          if (.not. ecSupportNetcdfCheckError(nf90_get_att(fileReaderPtr%fileHandle, time_id, "units", units), "obtain units", fileReaderPtr%fileName)) return
-         if (.not. ecSupportTimestringToUnitAndRefdate(units, fileReaderPtr%tframe%ec_timestep_unit, fileReaderPtr%tframe%ec_refdate,fileReaderPtr%tframe%ec_timezone)) return
+         if (.not. ecSupportTimestringToUnitAndRefdate(units, fileReaderPtr%tframe%ec_timestep_unit, fileReaderPtr%tframe%ec_refdate, &
+                                                              tzone = fileReaderPtr%tframe%ec_timezone)) return
          !
          ! Determine the total number of timesteps.
          if (.not. ecSupportNetcdfCheckError(nf90_inquire_variable(fileReaderPtr%fileHandle, time_id, dimids=dimid), "obtain time dimension ids", fileReaderPtr%fileName)) return

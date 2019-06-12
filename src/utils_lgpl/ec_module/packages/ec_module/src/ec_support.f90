@@ -153,8 +153,9 @@ module m_ec_support
          end do
 
          if (posTimeUnit > 0) then
-            if (.not.ecSupportTimestringToUnitAndRefdate(time_string(posTimeUnit:), unit, ref_date, tzone, 0.0_hp))     &
+            if (.not.ecSupportTimestringToUnitAndRefdate(time_string(posTimeUnit:), unit, ref_date, tzone=tzone)) then
                call setECMessage("ec_support::ecGetTimesteps: can not convert time unit string: " // time_string // ".")
+            endif
          endif
 
          if (posTimeUnit > 0) then
@@ -173,13 +174,13 @@ module m_ec_support
          end if
          select case (unit)
              case (ec_second)
-                time_steps = ref_date + time_in / 86400.0_hp
+                time_steps = ref_date + tzone / 24.0_hp + time_in / 86400.0_hp
              case (ec_minute)
-                time_steps = ref_date + time_in / 1440.0_hp
+                time_steps = ref_date + tzone / 24.0_hp + time_in / 1440.0_hp
              case (ec_hour)
-                time_steps = ref_date + time_in / 24.0_hp
+                time_steps = ref_date + tzone / 24.0_hp + time_in / 24.0_hp
              case (ec_day)
-                time_steps = ref_date + time_in
+                time_steps = ref_date + tzone / 24.0_hp + time_in
              case default
                 call setECMessage("ec_support::ecGetTimesteps: Unable to identify the time unit.")
                 return
