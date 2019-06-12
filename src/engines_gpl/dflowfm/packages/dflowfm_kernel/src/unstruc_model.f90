@@ -1444,6 +1444,9 @@ subroutine readMDUFile(filename, istat)
       call warn_flush()
     end if
     call prop_get_integer(md_ptr, 'output', 'Wrihis_heat_fluxes', jahisheatflux, success)
+    if (.not. success) then
+      call prop_get_integer(md_ptr, 'output', 'Wrihis_heatflux', jahisheatflux, success)
+    endif
     call prop_get_integer(md_ptr, 'output', 'Wrihis_salinity', jahissal, success)
     if (success .and. jahissal == 1 .and. jasal < 1) then
       write (msgbuf, '(a)') 'MDU setting "Wrihis_salinity = 1" asks to write salinity to the output his file, ' &
