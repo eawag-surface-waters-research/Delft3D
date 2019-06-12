@@ -8832,7 +8832,6 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
     call initimer()
  end if
 
- call init_unstruc_netcdf()
  call unc_set_ncformat(md_ncformat)
 
  call reset_unstruc_netcdf_map_class()
@@ -10592,6 +10591,7 @@ end subroutine cosphiunetcheck
  use m_flowgeom
  use m_flowtimes
  use m_samples
+ use unstruc_netcdf
  use unstruc_model
  use unstruc_display
  use m_observations
@@ -10614,6 +10614,8 @@ end subroutine cosphiunetcheck
 
     ! Only reset counters and other scalars, allocatables should be
     ! automatically reset elsewhere (e.g., allocateandset*, flow_geominit)
+
+    call init_unstruc_netcdf()
 
     ! TODO: UNST-487: Add default_fourier + reset
     call resetModel()

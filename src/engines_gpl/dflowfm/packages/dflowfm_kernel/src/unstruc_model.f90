@@ -642,7 +642,7 @@ subroutine readMDUFile(filename, istat)
     use m_heatfluxes
     use m_fm_wq_processes
     use m_xbeach_avgoutput
-    use unstruc_netcdf, only: UNC_CONV_CFOLD, UNC_CONV_UGRID, unc_set_ncformat
+    use unstruc_netcdf, only: UNC_CONV_CFOLD, UNC_CONV_UGRID, unc_set_ncformat, unc_writeopts, UG_WRITE_LATLON, UG_WRITE_NOOPTS
     use unstruc_version_module
     use dfm_error
     use MessageHandling
@@ -1426,6 +1426,12 @@ subroutine readMDUFile(filename, istat)
     call prop_get_integer(md_ptr, 'output', 'NcFormat', md_ncformat, success)
     call unc_set_ncformat(md_ncformat)
 
+    ibuf = 0
+    call prop_get_integer(md_ptr, 'output', 'NcWriteLatLon', ibuf, success)
+    if (success .and. ibuf > 0) then
+       unc_writeopts = UG_WRITE_LATLON
+    end if
+
     call prop_get_integer(md_ptr, 'output', 'Wrihis_balance', jahisbal, success)
     call prop_get_integer(md_ptr, 'output', 'Wrihis_sourcesink', jahissourcesink, success)
     call prop_get_integer(md_ptr, 'output', 'Wrihis_structure_gen', jahiscgen, success)
@@ -2033,6 +2039,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     use network_data,            only : zkuni, Dcenterinside, removesmalllinkstrsh, cosphiutrsh
     use m_sferic,                only : anglat, anglon, jsferic, jasfer3D
     use m_physcoef
+    use unstruc_netcdf, only: unc_writeopts, UG_WRITE_LATLON, UG_WRITE_NOOPTS
     use unstruc_version_module
     use m_equatorial
     use m_sediment
@@ -2057,7 +2064,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     character(len=20)              :: rundat
     character(len=128)             :: helptxt
     character(len=256)             :: tmpstr
-    integer                        :: i
+    integer                        :: i, ibuf
     real(kind=hp)                  :: ti_wav_array(3), ti_map_array(3), ti_rst_array(3), ti_his_array(3), ti_waq_array(3), ti_classmap_array(3)
 
     logical, external              :: get_japart
@@ -2897,6 +2904,15 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     call prop_set(prop_ptr, 'output', 'MapFormat', md_mapformat, trim(helptxt))
 
     call prop_set(prop_ptr, 'output', 'NcFormat',  md_ncformat, 'Format for all NetCDF output files (3: classic, 4: NetCDF4+HDF5)')
+
+    if (writeall .or. unc_writeopts /= UG_WRITE_NOOPTS) then
+       if (iand(unc_writeopts, UG_WRITE_LATLON) == UG_WRITE_LATLON) then
+          ibuf = 1
+       else
+          ibuf = 0
+       end if
+       call prop_set(prop_ptr, 'output', 'NcWriteLatLon', ibuf, 'Write extra lat-lon coordinates for all projected coordinate variables in each NetCDF file (for CF-compliancy).')
+    end if
 
     if (writeall .or. jahisbal /= 1) then
        call prop_set(prop_ptr, 'output', 'Wrihis_balance', jahisbal, 'Write mass balance totals to his file (1: yes, 0: no)' )
