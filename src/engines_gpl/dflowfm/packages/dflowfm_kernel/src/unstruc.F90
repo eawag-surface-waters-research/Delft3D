@@ -15089,9 +15089,9 @@ subroutine update_dambreak_breach(startTime, deltaTime)
 
    !locals
    double precision                      :: tempValue
-   integer                  			 :: indAverageUpStream(ndambreak)
-   integer                  			 :: indAverageDownStream(ndambreak)
-   integer                  			 :: nAverageUpStream, nAverageDownStream
+   integer                               :: indAverageUpStream(ndambreak)
+   integer                               :: indAverageDownStream(ndambreak)
+   integer                               :: nAverageUpStream, nAverageDownStream
    integer                               :: n, ierr, istru, indexLevelsAndWidths
 
    if (ndambreak > 0) then
@@ -15118,7 +15118,7 @@ subroutine update_dambreak_breach(startTime, deltaTime)
 
          ! Compute sumQuantitiesByWeight upstream
          ierr = getAverageQuantityFromLinks(L1dambreaksg(dambreakAverigingUpstreamMapping(1:nDambreakAveragingUpstream)), L2dambreaksg(dambreakAverigingUpstreamMapping(1:nDambreakAveragingUpstream)), wu, kdambreak(3,:), s1, kdambreak(1,:), dambreakAveraging, 0, &
-		                                    hu, dmiss, activeDambreakLinks, 0)
+                                            hu, dmiss, activeDambreakLinks, 0)
 
          if (ierr.ne.0) then
             success=.false.
@@ -15145,7 +15145,7 @@ subroutine update_dambreak_breach(startTime, deltaTime)
 
          ! Compute sumQuantitiesByWeight downstream
          ierr = getAverageQuantityFromLinks(L1dambreaksg(dambreakAverigingDownstreamMapping(1:nDambreakAveragingDownstream)), L2dambreaksg(dambreakAverigingDownstreamMapping(1:nDambreakAveragingDownstream)), wu, kdambreak(3,:), s1, kdambreak(2,:), dambreakAveraging, 0, &
-		                                    hu, dmiss, activeDambreakLinks, 0)
+                                            hu, dmiss, activeDambreakLinks, 0)
 
          if (ierr.ne.0) then
             success=.false.
@@ -15159,10 +15159,10 @@ subroutine update_dambreak_breach(startTime, deltaTime)
          enddo
       endif
 
-	  !
+      !
       ! u0 velocity on the flowlinks (averaged by the wetted area). The mask is the water level itself
       !
-	  ierr = getAverageQuantityFromLinks(L1dambreaksg, L2dambreaksg, au, kdambreak(3,:), u1, kdambreak(3,:), dambreakAveraging, 1, &
+      ierr = getAverageQuantityFromLinks(L1dambreaksg, L2dambreaksg, au, kdambreak(3,:), u1, kdambreak(3,:), dambreakAveraging, 1, &
                                         hu, dmiss, activeDambreakLinks, 0)
       if (ierr.ne.0) success=.false.
 
