@@ -2207,6 +2207,7 @@ function ug_is_mesh_topology(ncid, varid) result(is_mesh_topo)
 
    integer :: ierr, topology_dimension 
    character(len=nf90_max_name) :: edge_geometry_buffer, cf_role_buffer
+   integer :: ndum
 
    is_mesh_topo = .false.
 
@@ -2216,7 +2217,14 @@ function ug_is_mesh_topology(ncid, varid) result(is_mesh_topo)
    ierr = nf90_get_att(ncid, varid, 'cf_role', cf_role_buffer)
    
    if (trim(cf_role_buffer)=='mesh_topology') then
-     
+      ! Some data producers confusingly use 'mesh_topology' for parent meshes too (instead of 'parent_mesh_topology').
+      ! We want to filter those out here: if the var has an attribute :meshes (with any value), then discard.
+      ierr = nf90_inquire_attribute(ncid, varid, 'meshes', ndum)
+      if (ierr .ne. nf90_enotatt) then
+         is_mesh_topo = .false.
+         return
+      end if
+            
       ierr = nf90_get_att(ncid, varid, 'topology_dimension', topology_dimension)
       
       if (topology_dimension.eq.1) then !1d case
