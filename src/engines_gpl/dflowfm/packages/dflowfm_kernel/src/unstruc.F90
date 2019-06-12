@@ -8832,6 +8832,7 @@ subroutine QucPeripiaczekteta(n12,L,ai,ae,volu,iad)  ! sum of (Q*uc cell IN cent
     call initimer()
  end if
 
+ call init_unstruc_netcdf()
  call unc_set_ncformat(md_ncformat)
 
  call reset_unstruc_netcdf_map_class()
@@ -10591,7 +10592,6 @@ end subroutine cosphiunetcheck
  use m_flowgeom
  use m_flowtimes
  use m_samples
- use unstruc_netcdf
  use unstruc_model
  use unstruc_display
  use m_observations
@@ -10614,8 +10614,6 @@ end subroutine cosphiunetcheck
 
     ! Only reset counters and other scalars, allocatables should be
     ! automatically reset elsewhere (e.g., allocateandset*, flow_geominit)
-
-    call init_unstruc_netcdf()
 
     ! TODO: UNST-487: Add default_fourier + reset
     call resetModel()
@@ -16167,7 +16165,7 @@ subroutine unc_write_his(tim)            ! wrihis
     use m_missing
     use netcdf
     use unstruc_files, only: defaultFilename
-    use unstruc_netcdf, only: unc_create, unc_close, unc_addcoordatts, unc_def_var_nonspatial, crsys => crs, unc_writeopts
+    use unstruc_netcdf, only: unc_create, unc_close, unc_addcoordatts, unc_def_var_nonspatial
     use unstruc_messages
     use m_sferic, only: jsferic
     use m_partitioninfo
@@ -16183,8 +16181,6 @@ subroutine unc_write_his(tim)            ! wrihis
     use m_fm_wq_processes
     use string_module
     use m_dad
-    use coordinate_reference_system
-    use io_ugrid, only: ug_addlonlatcoordvars, UG_WRITE_LATLON
     use m_filter, only: checkmonitor
     use m_alloc
 
@@ -16196,10 +16192,8 @@ subroutine unc_write_his(tim)            ! wrihis
     integer, save :: ihisfile = 0, id_laydim , id_laydimw, &
                      id_statdim, id_mstatdim, id_strlendim, id_crsdim, id_crslendim, id_crsptsdim, id_timedim, &
                      id_statx, id_staty, id_statid, id_statname, id_time, id_timestep, &
-                     id_statlon, id_statlat, &
                      id_mstatx, id_mstaty, id_mstatname, &
                      id_crsx, id_crsy, id_crsname, &
-                     id_crslon, id_crslat, &
                      id_vars, id_varucx, id_varucy, id_varucz, id_varsal, id_vartem, id_varsed, id_varrho, &
                      id_varQ, id_varQint, id_varb, & ! id_varQavg,
                      id_varAu,  & ! id_varAuavg,
@@ -16219,7 +16213,6 @@ subroutine unc_write_his(tim)            ! wrihis
                      id_genstru_s1up, id_genstru_s1dn,                                                                                        &
                      id_sedbtrans, id_sedstrans,&
                      id_srcdim, id_srclendim, id_srcname, id_qsrccur, id_vsrccum, id_qsrcavg, id_pred, id_presa, id_pretm, id_srcx, id_srcy, id_srcptsdim, &
-                     id_srclon, id_srclat, &
                      id_partdim, id_parttime, id_partx, id_party, id_partz, &
                      id_dredlinkdim, id_dreddim, id_dumpdim, id_dredlink_dis, id_dred_dis, id_dump_dis, id_dred_tfrac, id_plough_tfrac, id_sedtotdim, id_dred_name, id_dump_name, id_frac_name, & !id_dump_dis_frac, id_dred_dis_frac, &
                      id_dambreakdim, id_dambreakname, id_dambreak_s1up, id_dambreak_s1dn, id_dambreak_breach_depth,id_dambreak_breach_width, id_dambreak_discharge, id_dambreak_cumulative_discharge, &
@@ -16249,8 +16242,6 @@ subroutine unc_write_his(tim)            ! wrihis
     character(len=255)           :: tmpstr, tmpstr2, tmpstr3, unit1, unit2, unit3
     integer                      :: jawrizc = 0
     integer                      :: jawrizw = 0
-    logical                      :: add_latlon
-    double precision, allocatable:: worklat(:), worklon(:)
     double precision             :: w1, pumplensum, pumplenmid, pumpxmid, pumpymid
     double precision             :: rhol
     double precision, allocatable::toutputx(:,:), toutputy(:,:)
@@ -16280,12 +16271,6 @@ subroutine unc_write_his(tim)            ! wrihis
         ihisfile = -1 ! -1 stands for: no file open, no obs/crs defined.
         return
     end if
-
-#ifdef HAVE_PROJ
-    add_latlon = crsys%epsg_code /= 4326 .and. iand(unc_writeopts, UG_WRITE_LATLON) == UG_WRITE_LATLON
-#else
-    add_latlon = .false.
-#endif
 
     if (ihisfile == 0) then
 
@@ -16328,21 +16313,9 @@ subroutine unc_write_his(tim)            ! wrihis
             if (nummovobs > 0) then
                ierr = nf90_def_var(ihisfile, 'station_x_coordinate', nf90_double, (/ id_statdim, id_timedim /), id_statx) ! TODO: AvD: decide on UNST-1606 (trajectory_id vs. timeseries_id)
                ierr = nf90_def_var(ihisfile, 'station_y_coordinate', nf90_double, (/ id_statdim, id_timedim /), id_staty)
-#ifdef HAVE_PROJ
-               if (add_latlon) then ! If x,y are not in WGS84 system, then add mandatory additional lon/lat coordinates.
-                  ierr = ug_addlonlatcoordvars(ihisfile, id_statlon, id_statlat, (/ id_statdim, id_timedim /), 'station_longitude', 'station_latitude', &
-                                         'original longitude of station (non-snapped)', 'original latitude of station (non-snapped)')
-               end if
-#endif
             else
                ierr = nf90_def_var(ihisfile, 'station_x_coordinate', nf90_double, id_statdim, id_statx)
                ierr = nf90_def_var(ihisfile, 'station_y_coordinate', nf90_double, id_statdim, id_staty)
-#ifdef HAVE_PROJ
-               if (add_latlon) then ! If x,y are not in WGS84 system, then add mandatory additional lon/lat coordinates.
-                  ierr = ug_addlonlatcoordvars(ihisfile, id_statlon, id_statlat, (/ id_statdim /), 'station_longitude', 'station_latitude', &
-                                         'original longitude of station (non-snapped)', 'original latitude of station (non-snapped)')
-               end if
-#endif
             endif
             ierr = unc_addcoordatts(ihisfile, id_statx, id_staty, jsferic)
             ierr = nf90_put_att(ihisfile, id_statx, 'long_name', 'original x-coordinate of station (non-snapped)')
@@ -16472,10 +16445,6 @@ subroutine unc_write_his(tim)            ! wrihis
                ierr = nf90_put_att(ihisfile, id_varucx, 'coordinates', 'station_x_coordinate station_y_coordinate station_name zcoordinate_c')
                ierr = nf90_put_att(ihisfile, id_varucy, 'coordinates', 'station_x_coordinate station_y_coordinate station_name zcoordinate_c')
             else
-               if (add_latlon) then
-                  ierr = nf90_put_att(ihisfile, id_varucx, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
-                  ierr = nf90_put_att(ihisfile, id_varucy, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
-               end if
                ierr = nf90_put_att(ihisfile, id_varucx, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
                ierr = nf90_put_att(ihisfile, id_varucy, 'coordinates', 'station_x_coordinate station_y_coordinate station_name')
             end if
@@ -16898,12 +16867,6 @@ subroutine unc_write_his(tim)            ! wrihis
 
             ierr = nf90_def_var(ihisfile, 'cross_section_x_coordinate', nf90_double, (/ id_crsptsdim, id_crsdim /), id_crsx)
             ierr = nf90_def_var(ihisfile, 'cross_section_y_coordinate', nf90_double, (/ id_crsptsdim, id_crsdim /), id_crsy)
-#ifdef HAVE_PROJ
-            if (add_latlon) then ! If x,y are not in WGS84 system, then add mandatory additional lon/lat coordinates.
-               ierr = ug_addlonlatcoordvars(ihisfile, id_crslon, id_crslat, (/ id_crsptsdim, id_crsdim /), 'cross_section_longitude', 'cross_section_latitude', &
-                                            'original longitude of cross section points (non-snapped)', 'original latitude of cross section points (non-snapped)')
-            end if
-#endif
             ierr = nf90_def_var(ihisfile, 'cross_section_name',         nf90_char,   (/ id_crslendim, id_crsdim /), id_crsname)
             ierr = nf90_put_att(ihisfile, id_crsname,  'cf_role', 'timeseries_id')
             ierr = nf90_put_att(ihisfile, id_crsname,  'long_name', 'cross section name'    )
@@ -16995,15 +16958,6 @@ subroutine unc_write_his(tim)            ! wrihis
            ierr = unc_addcoordatts(ihisfile, id_srcx, id_srcy, jsferic)
            ierr = nf90_put_att(ihisfile, id_srcx, '_FillValue', dmiss)
            ierr = nf90_put_att(ihisfile, id_srcy, '_FillValue', dmiss)
-#ifdef HAVE_PROJ
-           if (add_latlon) then ! If x,y are not in WGS84 system, then add mandatory additional lon/lat coordinates.
-              ierr = ug_addlonlatcoordvars(ihisfile, id_srclon, id_srclat, (/ id_srcdim, id_srcptsdim /), 'source_sink_longitude', 'source_sink_latitude', &
-                                           'original longitude of source-sink points (non-snapped)', 'original latitude of source-sink points (non-snapped)')
-              ierr = nf90_put_att(ihisfile, id_srclon, '_FillValue', dmiss)
-              ierr = nf90_put_att(ihisfile, id_srclat, '_FillValue', dmiss)
-           end if
-#endif
-
 
            ierr = nf90_def_var(ihisfile, 'source_sink_prescribed_discharge', nf90_double, (/ id_srcdim, id_timedim /), id_pred)
            ierr = nf90_put_att(ihisfile, id_pred,    'units', 'm3 s-1')
@@ -17422,27 +17376,17 @@ subroutine unc_write_his(tim)            ! wrihis
         ierr = nf90_enddef(ihisfile)
 
         do i=1,numobs+nummovobs
+!           ierr = nf90_put_var(ihisfile, id_statx,    xobs(i),         (/ i /))
+!           ierr = nf90_put_var(ihisfile, id_staty,    yobs(i),         (/ i /))
            ierr = nf90_put_var(ihisfile, id_statid, trim(namobs(i)), (/ 1, i /)) ! Extra for OpenDA-wrapper
            ierr = nf90_put_var(ihisfile, id_statname, trim(namobs(i)), (/ 1, i /))
         end do
 
         if (ncrs > 0) then
-            ntot = 0
             do i=1,ncrs
                 ierr = nf90_put_var(ihisfile, id_crsx,     crs(i)%path%xp(1:crs(i)%path%np), (/ 1, i /))
                 ierr = nf90_put_var(ihisfile, id_crsy,     crs(i)%path%yp(1:crs(i)%path%np), (/ 1, i /))
                 ierr = nf90_put_var(ihisfile, id_crsname,  trim(crs(i)%name),      (/ 1, i /))
-#ifdef HAVE_PROJ
-                if (add_latlon) then ! If x,y are not in WGS84 system, then add mandatory additional lon/lat coordinates.
-                   ntot = max(ntot, crs(i)%path%np)
-                   call realloc(worklon, ntot, fill=dmiss, keepExisting=.false.)
-                   call realloc(worklat, ntot, fill=dmiss, keepExisting=.false.)
-                   call transform_coordinates(crsys%proj_string, WGS84_PROJ_STRING, crs(i)%path%xp(1:crs(i)%path%np), crs(i)%path%yp(1:crs(i)%path%np), worklon(1:crs(i)%path%np), worklat(1:crs(i)%path%np))
-
-                   ierr = nf90_put_var(ihisfile, id_crslon, worklon(:),        start = (/ 1 /), count = (/ crs(i)%path%np /))
-                   ierr = nf90_put_var(ihisfile, id_crslat, worklat(:),        start = (/ 1 /), count = (/ crs(i)%path%np /))
-                end if
-#endif
             end do
         end if
 
@@ -17579,34 +17523,13 @@ subroutine unc_write_his(tim)            ! wrihis
        else
           ierr = nf90_put_var(ihisfile,    id_varb,   valobsT(:,IPNT_BL),    start = (/ 1 /) )
        endif
-#ifdef HAVE_PROJ
-       if (add_latlon .and. (nummovobs > 0 .or. it_his == 1)) then ! If x,y are not in WGS84 system, then add mandatory additional lon/lat coordinates.
-          call realloc(worklon, ntot, fill=dmiss, keepExisting=.false.)
-          call realloc(worklat, ntot, fill=dmiss, keepExisting=.false.)
-          call transform_coordinates(crsys%proj_string, WGS84_PROJ_STRING, xobs(1:ntot), yobs(1:ntot), worklon, worklat)
-       end if
-#endif
-
-
 
        if ( nummovobs > 0 ) then
           ierr = nf90_put_var(ihisfile,    id_statx,  xobs(:),            start = (/ 1, it_his /), count = (/ ntot, 1 /))
           ierr = nf90_put_var(ihisfile,    id_staty,  yobs(:),            start = (/ 1, it_his /), count = (/ ntot, 1 /))
-#ifdef HAVE_PROJ
-          if (add_latlon) then ! If x,y are not in WGS84 system, then add mandatory additional lon/lat coordinates.
-             ierr = nf90_put_var(ihisfile, id_statlon, worklon(:),        start = (/ 1, it_his /), count = (/ ntot, 1 /))
-             ierr = nf90_put_var(ihisfile, id_statlat, worklat(:),        start = (/ 1, it_his /), count = (/ ntot, 1 /))
-          end if
-#endif
-       else if (it_his == 1) then
+       else
           ierr = nf90_put_var(ihisfile,    id_statx,  xobs(:),            start = (/ 1 /), count = (/ ntot /))
           ierr = nf90_put_var(ihisfile,    id_staty,  yobs(:),            start = (/ 1 /), count = (/ ntot /))
-#ifdef HAVE_PROJ
-          if (add_latlon) then ! If x,y are not in WGS84 system, then add mandatory additional lon/lat coordinates.
-             ierr = nf90_put_var(ihisfile, id_statlon, worklon(:),        start = (/ 1 /), count = (/ ntot /))
-             ierr = nf90_put_var(ihisfile, id_statlat, worklat(:),        start = (/ 1 /), count = (/ ntot /))
-          end if
-#endif
        endif
     endif
 
@@ -17833,24 +17756,6 @@ subroutine unc_write_his(tim)            ! wrihis
         enddo
         ierr = nf90_put_var(ihisfile, id_srcx, xsrc)
         ierr = nf90_put_var(ihisfile, id_srcy, ysrc)
-#ifdef HAVE_PROJ
-        if (add_latlon) then ! If x,y are not in WGS84 system, then add mandatory additional lon/lat coordinates.
-           call realloc(workx,   msrc, fill=dmiss, keepExisting=.false.)
-           call realloc(worky,   msrc, fill=dmiss, keepExisting=.false.)
-           call realloc(worklon, msrc, fill=dmiss, keepExisting=.false.)
-           call realloc(worklat, msrc, fill=dmiss, keepExisting=.false.)
-           do i = 1, numsrc
-              ! To avoid stack overflow we need temp storage for the x and y. TODO: AvD consider transposing the srcx/y everywhere...
-              do j=1,nxsrc(i)
-                 workx(j) = xsrc(i,j)
-                 worky(j) = ysrc(i,j)
-              end do
-              call transform_coordinates(crsys%proj_string, WGS84_PROJ_STRING, workx(1:nxsrc(i)), worky(1:nxsrc(i)), worklon(1:nxsrc(i)), worklat(1:nxsrc(i)))
-              ierr = nf90_put_var(ihisfile, id_srclon, worklon(:),        start = (/ i, 1 /), count = (/ 1, nxsrc(i) /))
-              ierr = nf90_put_var(ihisfile, id_srclat, worklat(:),        start = (/ i, 1 /), count = (/ 1, nxsrc(i) /))
-           end do
-        end if
-#endif
       else
          ierr = nf90_put_var(ihisfile, id_qsrccur, qsrc, (/ 1, it_his /))
       endif
@@ -17956,7 +17861,7 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_var(ihisfile, id_dambreak_cumulative_discharge, valdambreak(2,i), (/ i, it_his /))
             ierr = nf90_put_var(ihisfile, id_dambreak_breach_width_derivative, breachWidthDerivativeDambreak(i), (/ i, it_his /))
             ierr = nf90_put_var(ihisfile, id_dambreak_water_level_jump, waterLevelJumpDambreak(i), (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_dambreak_normal_velocity, normalVelocityDambreak(i), (/ i, it_his /))
+            ierr = nf90_put_var(ihisfile, id_dambreak_normal_velocity, normalVelocityDambreak(i), (/ i, it_his /))  			
          end do
       end if
       !
