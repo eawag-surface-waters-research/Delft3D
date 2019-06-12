@@ -200,9 +200,6 @@ function defaultFilename(filecat, timestamp, prefixWithDirectory, allowWildcard)
     case ('bot')
         activeFile = ''
         suffix     = '.xyb'
-    case ('_lev.xyz')
-        activeFile = ''
-        suffix     = '_lev.xyz' ! dus..    
     case ('pipe')
         activeFile = md_pipefile
         suffix     = '_pipes.pliz'
