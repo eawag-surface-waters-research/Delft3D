@@ -1,12 +1,12 @@
 @ echo off
 title run_dflowfm
     rem
-    rem This script runs dflowfm on Windows
+    rem This script runs dfmoutput on Windows
     rem Adapt and use it for your own purpose
     rem
     rem Usage example:
     rem Execute in the working directory:
-    rem path\to\delft3d\installation\x64\dflowfm\scripts\run_dflowfm.bat
+    rem path\to\delft3d\installation\x64\dflowfm\scripts\run_dfmoutput.bat
 
 setlocal enabledelayedexpansion
 
@@ -52,16 +52,16 @@ set sharedir=%D3D_HOME%\%ARCH%\share\bin
 
     rem Run
 set PATH=%dflowfmexedir%;%sharedir%
-echo executing: "%dflowfmexedir%\dflowfm-cli.exe" --nodisplay --autostartstop %1 %2 %3 %4 %5 %6 %7 %8 %9
-"%dflowfmexedir%\dflowfm-cli.exe" --nodisplay --autostartstop %1 %2 %3 %4 %5 %6 %7 %8 %9
+echo executing: "%dflowfmexedir%\dfmoutput.exe" --verbose %1 %2 %3 %4 %5 %6 %7 %8 %9
+"%dflowfmexedir%\dfmoutput.exe" --verbose %1 %2 %3 %4 %5 %6 %7 %8 %9
 
 goto end
 
 :usage
 echo Usage:
-echo run_dflowfm.bat [--help] [dflowfm options]
-echo     --help          : (Optional) show this usage
-echo     dflowfm options : (Optional) arguments to pass through to dflowfm
+echo run_dfmoutput.bat [--help] [dfmoutput options]
+echo     --help            : (Optional) show this usage
+echo     dfmoutput options : (Optional) arguments to pass through to dfmoutput
 
 :end
     rem To prevent the DOS box from disappearing immediately: remove the rem on the following line

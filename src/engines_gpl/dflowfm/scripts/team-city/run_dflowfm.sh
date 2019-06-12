@@ -1,29 +1,50 @@
-#/bin/bash
-	#
-	# This script is an example for running DflowFM on Linux 
-	# Adapt and use it for your own purposes
-	#
-	# michal.kleczek@deltares.nl 
-	# 28 June 2015 
-	#
+#!/bin/bash
 
-function usage () {
-    echo "Usage:"
-    echo "run_dflowfm.sh [--help] [--mpi <ndomains>] YOUR_MDU_FILE.mdu"
-    echo "    --help    	: [Optional] show this usage"
-    echo "    --mpi <ndom> 	: [Optional] parallel simulation with <ndom> domains"
-    echo "    --<sth>		: [Optional] all following arguments are passed to the D-Flow FM."
-    exit
+function print_usage_info {
+    echo "Usage: ${0##*/} [OPTION]... [--] [DFLOWFMOPTIONS]..."
+    echo "Run dflowfm program."
+    echo
+    echo
+    echo "Options for ${0##*/}:"
+    echo "-h, --help"
+    echo "       print this help message and exit"
+    echo
+    echo "--"
+    echo "       All following arguments are passed to D-Flow FM."
+    echo "       (optional)"
+    echo "Options for D-Flow FM, see dflowfm --help"
+
+    exit 1
 }
 
-#Assuming that default is sequential simulation
-NDOM=1
+# Estimates the number of physical cores based on /proc/cpuinfo (not counting hyperthreading)
+# If not found variable $numcores remains empty.
+function estimate_num_cores {
+    corespercpu=$(grep 'cpu cores' /proc/cpuinfo 2>/dev/null | head -1 | sed -e 's/.*:[ ]*\([0-9]*\)/\1/')
+    numcpu=$(grep 'physical id' /proc/cpuinfo 2>/dev/null | sort | uniq | wc -l)
 
-## NOT NECESSARY WHEN USING MPICH version >= 1.1.4
-##Assuming that default is one machine
-##NHOST=1
-##mpdboot -n $NHOST    
-###################################################
+    if [ ! -z "$corespercpu" ] && [ ! -z "$numcpu" ]; then
+        numcores=$(( ${numcpu}*${corespercpu} ))
+    fi
+}
+
+function set_omp_threads {
+    estimate_num_cores
+
+    if [ ! -z "${OMP_NUM_THREADS}" ]; then
+        # Do nothing: someone has already set OMP_NUM_THREADS
+        :
+    #elif [ ! -z "$numcores" ]; then
+        # Use numcores-1 (if multiple cores at all)
+        # Set OMP_NUM_THREADS variable in current process (no need to export)
+    #    OMP_NUM_THREADS=$((numcores > 2 ? numcores-1 : 1))
+    else
+        # Could not determine numcores, leave OMP_NUM_THREADS empty.
+        :
+    fi
+}
+
+
 
 while [[ $# -ge 1 ]]
 do
@@ -31,11 +52,7 @@ key="$1"
 shift
 case $key in
     -h|--help)
-    usage
-    ;;
-    --mpi)
-	NDOM="$1"
-	shift
+    print_usage_info
     ;;
     --)
     dfmoptions=$*
@@ -48,26 +65,15 @@ case $key in
 esac
 done
 
-# Determine the location of the script:
-SCRIPT_DIR=$( cd ${0%/*} && pwd -P )
+scriptdirname=`readlink \-f \$0`
+scriptdir=`dirname $scriptdirname`
+export D3D_HOME=$scriptdir/.. 
+export LD_LIBRARY_PATH=$D3D_HOME/lib:$LD_LIBRARY_PATH
 
-# Static location of the dflowfm executable in reference to this script location
-dflowexec=`/usr/bin/readlink -m $SCRIPT_DIR/../bin`
-dflowlib=`/usr/bin/readlink -m $SCRIPT_DIR/../lib`
+set_omp_threads
 
-# Setting up PATH and LD_LIBRARY_PATH environmental variables
-export PATH=$SCRIPT_DIR:$dflowexec:$PATH
-export LD_LIBRARY_PATH=$SCRIPT_DIR:$dflowexec:$dflowlib:$LD_LIBRARY_PATH
+echo "$D3D_HOME/bin/dflowfm --nodisplay --autostartstop $dfmoptions"
+#ldd $D3D_HOME/bin/dflowfm
+$D3D_HOME/bin/dflowfm --nodisplay --autostartstop $dfmoptions
 
-echo "NUMBER OF DOMAINS: $NDOM"
-
-if [ "$NDOM" -gt 1 ]; then
-	echo "PARALLEL SIMULATION"
-	mpiexec -np $NDOM $dflowexec/dflowfm --nodisplay --autostartstop $dfmoptions
-	exit
-else
-	echo "SEQUENTIAL SIMULATION"
-	$dflowexec/dflowfm --nodisplay --autostartstop $dfmoptions
-	exit
-fi
 

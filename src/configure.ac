@@ -559,6 +559,8 @@ engines_gpl/dflowfm/packages/dflowfm_kernel/Makefile
 engines_gpl/dflowfm/packages/dflowfm_kernel/src/Makefile
 engines_gpl/dflowfm/packages/Makefile
 engines_gpl/dflowfm/scripts/parallel/Makefile
+engines_gpl/dflowfm/scripts/team-city/Makefile
+engines_gpl/dflowfm/scripts/Makefile
 engines_gpl/d_hydro/Makefile
 engines_gpl/d_hydro/packages/d_hydro/Makefile
 engines_gpl/d_hydro/packages/d_hydro/src/Makefile
