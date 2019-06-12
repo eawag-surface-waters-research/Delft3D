@@ -17861,7 +17861,7 @@ subroutine unc_write_his(tim)            ! wrihis
             ierr = nf90_put_var(ihisfile, id_dambreak_cumulative_discharge, valdambreak(2,i), (/ i, it_his /))
             ierr = nf90_put_var(ihisfile, id_dambreak_breach_width_derivative, breachWidthDerivativeDambreak(i), (/ i, it_his /))
             ierr = nf90_put_var(ihisfile, id_dambreak_water_level_jump, waterLevelJumpDambreak(i), (/ i, it_his /))
-            ierr = nf90_put_var(ihisfile, id_dambreak_normal_velocity, normalVelocityDambreak(i), (/ i, it_his /))  			
+            ierr = nf90_put_var(ihisfile, id_dambreak_normal_velocity, normalVelocityDambreak(i), (/ i, it_his /))
          end do
       end if
       !
