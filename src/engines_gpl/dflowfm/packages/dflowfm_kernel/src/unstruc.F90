@@ -36912,6 +36912,7 @@ end function is_1d_boundary_candidate
 
  integer, external             :: findname
  double precision,  external   :: ran0
+ logical, external             :: flow_init_structurecontrol
 
  integer                       :: L1, L2
  integer                       :: ilattype
@@ -36936,7 +36937,10 @@ end function is_1d_boundary_candidate
 
  call initialize_ec_module()
 
- call flow_init_structurecontrol()
+ if (.not.flow_init_structurecontrol()) then
+    iresult = DFM_EXTFORCERROR
+    goto 888
+ endif
 
  if (len_trim(md_inifieldfile) > 0) then
     call initInitialFields(md_inifieldfile)

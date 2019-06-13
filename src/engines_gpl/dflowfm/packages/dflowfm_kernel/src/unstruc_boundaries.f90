@@ -1766,7 +1766,7 @@ end function flow_initwaveforcings_runtime
 
 !> Initializes controllers that force structures.
 !! Currently only time series files, in the future also realtime control (RTC).
-subroutine flow_init_structurecontrol()
+function flow_init_structurecontrol() result (status)
 use m_flowexternalforcings
 use m_hash_search
 use m_alloc
@@ -1792,6 +1792,7 @@ use unstruc_model, only: md_structurefile_dir
 use unstruc_files, only: resolvePath
  
 implicit none
+logical                       :: status
 character(len=256)            :: plifile
 integer                       :: i, L, Lf, kb, LL, ierr, k, kbi, n, ifld, k1, k2
 integer                       :: nstr
@@ -1825,6 +1826,7 @@ integer                       :: branchIndex
 double precision              :: chainage
 !! if (jatimespace == 0) goto 888                      ! Just cleanup and close ext file.
 
+status = .False.
 ngs = 0 ! Local counter for all crossed flow liks by *all* general structures.
 nstr = tree_num_nodes(strs_ptr) ! TODO: minor issue: will count *all* children in structure file.
 if (nstr > 0) then
@@ -2451,6 +2453,7 @@ end do
             else
                hulp(k,n) = tmpval ! Constant value for always, set it now already.
             end if
+            if (.not.success) goto 888
          end do
 
          ! Set some zcgen values to their initial scalar values (for example, zcgen((n-1)*3+1) is quickly need for updating bobs.)
@@ -3021,6 +3024,7 @@ if (ndambreak > 0) then
       deallocate(dambreakPolygons(indexInStructure)%xp)
    enddo
 endif
+status = .True.
 
 ! Cleanup:
 888 continue
@@ -3038,7 +3042,7 @@ endif
  if (allocated (gateidx) ) deallocate (gateidx)
  if (allocated (cdamidx) ) deallocate (cdamidx)
  if (allocated (cgenidx) ) deallocate (cgenidx)
-   end subroutine flow_init_structurecontrol
+end function flow_init_structurecontrol
 
 
 !> Returns the index of a structure in the controllable value arrays.
