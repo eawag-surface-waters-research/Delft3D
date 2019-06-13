@@ -125,9 +125,7 @@
   130 CONTINUE
       IF (IOFLAG .EQ. 1) CALL CLRSCR
       WRITE(OUUNI,99810)
-      CALL VIDEO (1)
       WRITE(OUUNI,99805) (WCHANG(I),I=5,NCHANG)
-      CALL VIDEO (0)
       WRITE(OUUNI,99800)
       GO TO 100
 !
@@ -269,9 +267,7 @@
       WRITE (OUUNI,99620)
       GOTO 100
   805 CONTINUE
-      CALL VIDEO (7)
       IRC=CMS(LINE,80)
-      CALL VIDEO (0)
       POSIT = 0
       IF(IRC .NE. 0) WRITE (OUUNI,810) IRC
   810 FORMAT (' Return code from CMS: ',I5,'.')

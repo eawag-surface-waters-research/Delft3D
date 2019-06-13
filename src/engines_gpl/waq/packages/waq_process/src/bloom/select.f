@@ -88,17 +88,11 @@
    10 FORMAT (1X,'Select one of the following:',2(' ',/))
       WRITE (OUUNI,20) (ARRAY(I), I = 1, NELEM)
    20 FORMAT (8(2X,A8))
-!     CALL CURSOR (24,1)
-      CALL CURSOR (23,1)
-      CALL VIDEO (7)
-!     CALL CURSOR (24,1)
-      CALL CURSOR (23,1)
       WRITE (OUUNI,25)
    25 FORMAT (2X,'Cursor keys = Select      Home = Choose input method',
      1        '       Enter = Confirm   ')
 !     CALL CURSOR (24,1)
       CALL CURSOR (23,1)
-      CALL VIDEO (0)
       CALL CURSOR (MAXLIN+8,1)
       CALL BLPROMPT (LABEL, 0)
       CALL PSHCUR
@@ -109,11 +103,9 @@
 ! them following the selected option.
 !
    30 CALL CURSOR (CURLIN+FRSLIN,(CURCOL-1)*9+CURCOL)
-      CALL VIDEO (7)
       CALL CURSOR (CURLIN+FRSLIN,(CURCOL-1)*9+CURCOL)
       WRITE (OUUNI,40) ARRAY(CHOISE)
    40 FORMAT (1X,A8)
-      CALL VIDEO (0)
    50 CALL CURSOR (MAXLIN+8,1)
       CALL POPCUR
       IF ( .NOT. LHOME) WRITE (OUUNI,60) ARRAY (CHOISE)

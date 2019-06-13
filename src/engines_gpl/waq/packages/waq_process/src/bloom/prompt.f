@@ -52,10 +52,8 @@
       IF (INDEX .LT. 1000) RETURN
       LENOUT = LENST (OUTSTR, 80)
       IRC = STOS (OUTSTR, 1, LENOUT, OUTST2, LENOU2)
-      CALL VIDEO (7)
       WRITE (OUUNI,10) (OUTST2(I),I=1,LENOUT),BLANK
 10    FORMAT (80A1)
-      CALL VIDEO (0)
 !
 ! Position the cursor 2 lines backwards and afterwards shift it right
 ! LENOUT positions.

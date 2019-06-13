@@ -37,13 +37,10 @@
 !
       IF (IOFLAG .EQ. 1) CALL CLRSCR
       WRITE (OUUNI,99900)
-      CALL VIDEO (1)
       WRITE (OUUNI,99898) (WOPTIO(I),I=1,NOPT)
    10 CONTINUE
-      CALL VIDEO (0)
       IF (IOFLAG .EQ. 1) call blselect (woptio, nopt, 1074)
       I=INPTDT(1074,WORD,LENWRD)
-      CALL VIDEO (1)
       IF (MATCH(WOPTIO,NOPT,8,WORD,LENWRD,0,NUM) .NE. 1)
      1    NUM=NOPT+1
       GO TO ( 130,   160,   80,  220,  180,  290,   70,  240,

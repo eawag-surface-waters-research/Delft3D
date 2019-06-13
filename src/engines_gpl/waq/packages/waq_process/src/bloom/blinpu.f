@@ -24,7 +24,7 @@
 !    Module to read BLOOM input files
 !
 !    Called by: BLOOMC
-!    Calls    : INPUT2, OPTION, CHANGE, VIDEO
+!    Calls    : INPUT2, OPTION, CHANGE
 !
       SUBROUTINE BLINPU (NTYP_M, NTYP_A, NGRO_A, ALGTYP, LMIXO , LFIXN ,
      J                   LCARB , NUNUCOM, NUTCON, FLXCON, CON2OUT)
@@ -272,9 +272,6 @@
          WRITE (OUUNI,40)
    40    FORMAT (1X,'No "RUN" command or a fatal error was detected; ',
      1           'execution terminates',/)
-!$ Dit moet waarschijnlijk gewoon weg, is alleen maar scherm-actie??
-         CALL VIDEO (0)
-         CALL VIDEO (3744)
          GOTO 902
       ENDIF
 

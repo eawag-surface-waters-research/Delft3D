@@ -230,10 +230,8 @@
   200 CONTINUE
       IF (IOFLAG .EQ. 1) CALL CLRSCR
       WRITE (OUUNI,99930)
-      CALL VIDEO (1)
       WRITE (OUUNI,99925) WOPTIO(1), (WOPTIO(I),I=3,14),
      1                   (WOPTIO(I),I=16,NOPT)
-      CALL VIDEO (0)
       GO TO 70
   210 CONTINUE
       WRITE (OUUNI,99840) WOPTIO(NUMWRD)
@@ -318,9 +316,7 @@
       REWIND IPL1
       REWIND IPL3
   350 IF (IOFLAG .EQ. 1) THEN
-         CALL VIDEO (7)
          WRITE(OUUNI,360)
-         CALL VIDEO (0)
       END IF
   360 FORMAT(' Enter main title for every plot:')
       IF (IOFLAG .EQ. 1) REWIND (INUNI, ERR = 370, IOSTAT= IRC)
@@ -467,7 +463,7 @@
 ! Call subroutine NEWS to print release notes.
 !
   595 OFON(NUMWRD)=1
-      CALL NEWS
+!      CALL NEWS
       GO TO 70
 !
 ! Determine the objective of the model: maximize biomass or growth.
@@ -571,11 +567,9 @@
   740 CONTINUE
       IF (IOFLAG .EQ. 1) CALL CLRSCR
   750 WRITE (OUUNI,99880)
-      CALL VIDEO (1)
       WRITE (OUUNI,99925) WOPTIO(3),(WOPTIO(I),I=6,13),
      1      (WOPTIO(I),I=16,17),WOPTIO(19),
      2      (WOPTIO(I),I=22,25), (WOPTIO(I),I=28,29),WOPTIO(31)
-      CALL VIDEO (0)
       GO TO 620
   760 CONTINUE
       WRITE (OUUNI,99870)

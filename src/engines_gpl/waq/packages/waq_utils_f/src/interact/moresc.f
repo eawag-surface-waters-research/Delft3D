@@ -29,11 +29,9 @@
       SUBROUTINE MORESC
       INTEGER KEY
 !
-      CALL VIDEO (1)
       WRITE (*,10)
 10    FORMAT (' Press any key to continue ...')
 20    CALL INKEY (KEY)
       IF (KEY .EQ. 0) GO TO 20
-      CALL VIDEO (0)
       RETURN
       END

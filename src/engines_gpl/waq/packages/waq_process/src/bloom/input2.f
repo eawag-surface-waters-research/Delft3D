@@ -354,14 +354,10 @@
   230 READ (INEFF,240) DL(I),(DAYMUL(I,J),J=1,NUECOG)
   240 FORMAT (11F5.0)
 !----------------------------------------------------------------------
-!
-!  Get current date.
-!
-      CALL CALEND (CUDATE,IOU(5))
       CASE(10) = BLANK
-      CASE(11) = CUDATE(1)
-      CASE(12) = CUDATE(2)
-      CASE(13) = CUDATE(3)
+      CASE(11) = BLANK
+      CASE(12) = BLANK
+      CASE(13) = BLANK
 !
 !  Record names of limiting factors.
 !
