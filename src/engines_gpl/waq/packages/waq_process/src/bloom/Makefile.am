@@ -26,11 +26,9 @@ libbloom_la_SOURCES = blclmort.f \
        bloutc.f \
        blprim.f \
        bvect.f \
-       calend.f \
        ccons.f \
        change.f \
        chhelp.f \
-       consb2.f \
        constr.f \
        cspgro.f \
        cspsto.f \
@@ -38,33 +36,22 @@ libbloom_la_SOURCES = blclmort.f \
        czoopl.f \
        dayeu.f \
        diel.f \
-       domina.f \
        dynrun.f \
        ebcalc.f \
        edit.f \
        exclud.f \
        fixinf.f \
-       getal.f \
-       getcoe.f \
-       getnam.f \
        grazin.f \
        hdrblm.f \
        headin.f \
        iblbal.f \
        inptdt.f \
        inptnm.f \
-       input1.f \
        input2.f \
-       input3.f \
-       input4.f \
-       intpol_bloom.f \
        lenst.f \
-       maxgra.f \
        maxgro.f \
-       maxmor.f \
        maxprd.f \
        natmor.f \
-       news.f \
        nutfea.f \
        ophelp.f \
        option.f \
@@ -73,19 +60,14 @@ libbloom_la_SOURCES = blclmort.f \
        prinsu.f \
        print6.f \
        prinun.f \
-       produc.f \
        promes.f \
        prompt.f \
-       prplot.f \
        qslp.f \
-       record.f \
        select.f \
        setabc.f \
        setuni.f \
        solvlp.f \
        spcsd.f \
-       spindi.f \
-       videoc.f
-
+       spindi.f 
 #-------------------------------------------------------------------------------
 # Libraries
