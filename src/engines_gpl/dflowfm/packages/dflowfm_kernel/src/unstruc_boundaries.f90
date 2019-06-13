@@ -1832,8 +1832,10 @@ nstr = tree_num_nodes(strs_ptr) ! TODO: minor issue: will count *all* children i
 if (nstr > 0) then
    jaoldstr = 0
 else
-   jaoldstr = 1 ; RETURN ! DEZE SUBROUTINE IS EEN KOPIE VAN MIJN CODE EN DAT BRENGT ME IN DE WAR
-                         ! DAAROM VOORLOPIG UIT UNSTRUC.F90 VERPLAATST
+   jaoldstr = 1
+   status = .True.
+   RETURN ! DEZE SUBROUTINE IS EEN KOPIE VAN MIJN CODE EN DAT BRENGT ME IN DE WAR
+          ! DAAROM VOORLOPIG UIT UNSTRUC.F90 VERPLAATST
 end if
 
 if (allocated(strnums)) deallocate(strnums)
