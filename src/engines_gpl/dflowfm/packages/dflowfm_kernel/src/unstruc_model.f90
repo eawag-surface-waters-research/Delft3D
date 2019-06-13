@@ -51,10 +51,14 @@ implicit none
     !! * if a new format is not backwards compatible (i.e., old MDU files
     !!   need to be converted/updated by user), then the major version number
     !!   is incremented.
-    real(kind=sp), parameter :: MDUFormatVersion = 1.06
+
+    ! MDUFormatVersion = 1.07
+    integer, parameter       :: MDUFormatMajorVersion = 1
+    integer, parameter       :: MDUFormatMinorVersion = 7
 
     ! History MDUFormatVersion:
 
+    ! 1.07 (2019-06-13): Renamed [model] block as [General] block, replace keyword MDUFormatVersion by FileVersion 
     ! 1.06 (2016-05-16): Removed 1 variable for secondary flow, EffectSpiral as it is given by Espir contained in .mor file
     ! 1.05 (2015-07-22): The structure parameters are added (jahisstr, jahisdam, jahispump, jahisgate)
     ! 1.04 (2015-03-19): Anti-Creep option is added
@@ -662,7 +666,7 @@ subroutine readMDUFile(filename, istat)
     character(len=1),dimension(1) :: dummychar
     logical :: dummylog
     character(len=1000) :: charbuf = ' '
-    character(len=255) :: tmpstr, fnam
+    character(len=255) :: tmpstr, fnam, bnam
     integer :: ibuf, ifil, mptfile, warn
     integer :: i, n, j, je, iostat, readerr, ierror
     integer :: jadum
@@ -672,6 +676,7 @@ subroutine readMDUFile(filename, istat)
     character(len=200), dimension(:), allocatable       :: fnames
     double precision, external     :: densfm
     double precision :: tim 
+    integer :: major, minor
     
     hkad = -999
     istat = 0 ! Success
@@ -696,44 +701,53 @@ subroutine readMDUFile(filename, istat)
     call prop_get_string(md_ptr, 'output', 'OutputDir', md_outputdir, success)
     call switch_dia_file()
     
-
+! Read FileVersion into major and minor from the [General] block.
+! If it fails, then try to read MDUFormatVersion from the [model] block
+    call prop_get_version_number(md_ptr, major = major, minor = minor, success = success)
+    if (success) then
+       bnam = 'General'
+       rtmp = major + real(minor)/100
+    else
+       bnam = 'model'
+       rtmp = 0.00
+       tmpstr = ''
+       call prop_get(md_ptr, bnam, 'MDUFormatVersion', tmpstr)
+       
+       if (len_trim(tmpstr) == 0) then
+          tmpstr = '1.00' ! If MDU file has no version number, don't do any checking (such that older pre-versioning models continue to work)
+       end if
+       
+       read (tmpstr, '(f4.2)', err=999) rtmp
+999    continue
+       major = int(rtmp)
+    end if
+! Correct file version ?
+! Note: older MDUs are usually supported (backwards compatible).
+! Only if major version d.xx nr of MDU file is other than current, show an error.
+! Check for equality of major version number
+    if (major /= MDUFormatMajorVersion) then
+       write (msgbuf, '(a,f4.2,a,f4.2,a)') 'Unsupported MDU format detected: v', rtmp, '. Current format: v', MDUFormatMajorVersion + real(MDUFormatMinorVersion)/100, '. Please review your input.'
+       call qnerror(trim(msgbuf), ' ',' ')
+       call err_flush()
+       istat = DFM_EFILEFORMAT
+       istat = DFM_NOERR ! For now: error was shown to user, and below try reading anyway.
+       ! TODO: fix all mdu's in modeldatabase before quiting.
+       ! return
+    end if
+! Note: in future, version checking may be done on a per-key basis below  
+    
+    
+    call prop_get_string(md_ptr, bnam, 'Program', program, success)
 ! Correct program ?
-    call prop_get_string(md_ptr, 'model', 'Program', program, success)
     if (.not. success .or. (program /= 'Unstruc' .and. program /= 'UNSTRUC' .and. program /= 'D-Flow FM' .and. program /= 'D-Flow Flexible Mesh')) then
         istat = -1
         call mess(LEVEL_ERROR, 'Wrong model definition file. ', trim(program), ' should be ''D-Flow FM''.')
         return
     end if
 
-! Correct file version ?
-! Note: older MDUs are usually supported (backwards compatible).
-! Only if major version d.xx nr of MDU file is other than current, show an error.
-   rtmp = 0.00
-   tmpstr = ''
-   call prop_get(md_ptr, 'model', 'MDUFormatVersion', tmpstr)
-   if (len_trim(tmpstr) == 0) then
-      tmpstr = '1.00' ! If MDU file has no version number, don't do any checking (such that older pre-versioning models continue to work)
-   end if
-
-   read (tmpstr, '(f4.2)', err=999) rtmp
-
-999 continue
-
-   ! Check for equality of major version number
-   if (int(rtmp) /= int(MDUFormatVersion)) then
-      write (msgbuf, '(a,f4.2,a,f4.2,a)') 'Unsupported MDU format detected: v', rtmp, '. Current format: v', MDUFormatVersion, '. Please review your input.'
-      call qnerror(trim(msgbuf), ' ',' ')
-      call err_flush()
-      istat = DFM_EFILEFORMAT
-      istat = DFM_NOERR ! For now: error was shown to user, and below try reading anyway.
-      ! TODO: fix all mdu's in modeldatabase before quiting.
-      ! return
-   end if
-   ! Note: in future, version checking may be done on a per-key basis below
-
-   call prop_get_integer(md_ptr, 'model', 'AutoStart',  md_jaAutoStart)
-   call prop_get_string(md_ptr,  'model', 'ModelSpecific',  md_specific)
-   call prop_get_integer(md_ptr,  'model', 'PathsRelativeToParent',  md_paths_relto_parent)
+    call prop_get_integer(md_ptr, bnam, 'AutoStart',  md_jaAutoStart)
+    call prop_get_string(md_ptr,  bnam, 'ModelSpecific',  md_specific)
+    call prop_get_integer(md_ptr, bnam, 'PathsRelativeToParent',  md_paths_relto_parent)
 
 ! Geometry
     call prop_get_string ( md_ptr, 'geometry', 'OneDNetworkFile',  md_1dfiles%onednetwork,               success)
@@ -2072,14 +2086,14 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
 
 ! Put settings for .mdu file into a property tree first
     call tree_create(trim(md_ident), prop_ptr)
-    call prop_set(prop_ptr, 'model', 'Program',   unstruc_program)
-    call prop_set(prop_ptr, 'model', 'Version',   unstruc_version)
+    call prop_set(prop_ptr, 'General', 'Program',   unstruc_program)
+    call prop_set(prop_ptr, 'General', 'Version',   unstruc_version)
     tmpstr = ''
-    write(tmpstr, '(f4.2)') MDUFormatVersion
-    call prop_set(prop_ptr, 'model', 'MDUFormatVersion', trim(tmpstr), 'File format version (do not edit this)')
-    call prop_set(prop_ptr, 'model', 'AutoStart', md_jaAutoStart,      'Autostart simulation after loading MDU (0: no, 1: autostart, 2: autostartstop)')
-    call prop_set(prop_ptr, 'model', 'ModelSpecific',  md_specific,    'Optional ''model specific ID'', to enable certain custom runtime function calls (instead of via MDU name).')
-    call prop_set(prop_ptr, 'model', 'PathsRelativeToParent',  md_paths_relto_parent, 'Default: 0. Whether or not (1/0) to resolve file names (e.g. inside the *.ext file) relative to their direct parent, instead of to the toplevel MDU working dir.')
+    write(tmpstr, '(f4.2)') MDUFormatMajorVersion + real(MDUFormatMinorVersion)/100
+    call prop_set(prop_ptr, 'General', 'FileVersion', trim(tmpstr), 'File format version (do not edit this)')
+    call prop_set(prop_ptr, 'General', 'AutoStart', md_jaAutoStart,      'Autostart simulation after loading MDU (0: no, 1: autostart, 2: autostartstop)')
+    call prop_set(prop_ptr, 'General', 'ModelSpecific',  md_specific,    'Optional ''model specific ID'', to enable certain custom runtime function calls (instead of via MDU name).')
+    call prop_set(prop_ptr, 'General', 'PathsRelativeToParent',  md_paths_relto_parent, 'Default: 0. Whether or not (1/0) to resolve file names (e.g. inside the *.ext file) relative to their direct parent, instead of to the toplevel MDU working dir.')
 
 
 ! Geometry
