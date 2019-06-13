@@ -2859,7 +2859,7 @@ subroutine write_netgeom(c_net_file) bind(C, name="write_netgeom")
    if ( netstat.ne.NETSTAT_OK ) then
       call findcells(0)
    end if
-   call unc_write_net(netgeom_file, 1, 0, 0, 2)
+   call unc_write_net(netgeom_file, janetcell=1, janetbnd=0, jaidomain=0, jaiglobal_s = 0, iconventions = 2)
 end subroutine write_netgeom
 
 subroutine write_partition_metis(c_netfile_in, c_netfile_out, c_npart, c_jacontiguous) bind(C, name="write_partition_metis")
