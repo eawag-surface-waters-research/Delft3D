@@ -54,6 +54,7 @@ integer, parameter, public :: CL_NOT_IN_SUBDOMAIN = -77777
 integer, parameter, public :: CL_WATERLEVEL_TYPE  = 1
 integer, parameter, public :: CL_DISCHARGE_TYPE   = 2
 integer, parameter, public :: CLD_MAXFLD = 4
+integer, parameter, public :: CLD_MAXCHR = 80
 integer, parameter, public :: CLL_MAXFLD = 5
 integer, parameter, public :: CLD_MAXDEF = 10000
 
@@ -149,7 +150,7 @@ subroutine read_cldfile(md_cldfile, clddata, phase)
     integer                          :: nrflds
     integer                          :: prev_cld_no    = CL_UNDEFINED
     integer                          :: prev_cld_type  = CL_UNDEFINED
-    character(30), dimension(CLD_MAXFLD) :: cfield
+    character(CLD_MAXCHR), dimension(CLD_MAXFLD) :: cfield
     character(len=255)               :: filtmp
     character(len=132)               :: rec132
     logical                          :: error 
@@ -432,6 +433,26 @@ subroutine read_cldfile(md_cldfile, clddata, phase)
                 goto 9999
             end if                
         endif
+    elseif (nrflds .eq. -1) then 
+        errmsg = 'One ore more parameters wrong in rd_cldfile() on line: '// rec132
+        call mess(LEVEL_ERROR, errmsg)
+        error = .true.
+        goto 9999
+    elseif (nrflds .eq. -2) then 
+        write (errmsg, '(A,i4,A,A)'), 'More than ', CLD_MAXFLD, ' fields in rd_cldfile() on line: ', rec132
+        call mess(LEVEL_ERROR, errmsg)
+        error = .true.
+        goto 9999
+    elseif (nrflds .eq. -3) then 
+        write (errmsg, '(A,i4,A,A)'), 'Character string longer than ', CLD_MAXCHR, ' characters in rd_cldfile() on line: ', rec132
+        call mess(LEVEL_ERROR, errmsg)
+        error = .true.
+        goto 9999
+    elseif (nrflds .eq. -4) then 
+        errmsg = 'Unmatching quotes in rd_cldfile() on line: '// rec132
+        call mess(LEVEL_ERROR, errmsg)
+        error = .true.
+        goto 9999
     endif
     goto 110
 
