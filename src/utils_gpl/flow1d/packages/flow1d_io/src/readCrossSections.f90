@@ -938,6 +938,8 @@ module m_readCrossSections
             call distance(sferic_local, xcoordinates(i-1), ycoordinates(i-1), xcoordinates(i), ycoordinates(i), pCS%y(i), earth_radius)
             pCS%y(i) = pCS%y(i-1) + pCS%y(i) 
          enddo
+      else
+         pcs%y = ycoordinates
       endif
       
       pCS%storLevels = 0

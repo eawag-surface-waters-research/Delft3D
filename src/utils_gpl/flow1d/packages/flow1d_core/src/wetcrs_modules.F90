@@ -979,7 +979,7 @@ double precision            :: c1, c2, dcf, f1, f2
 
 co = 0.0d0
 dcf = cf
-if(ct.eq.7) then
+if(ct.eq.3) then
    c1 = (1.0d0+bt**2)**s14*dlog(10.0d0)
    c2 = dcf/12.0d0
 endif
