@@ -1,5 +1,7 @@
 #!/bin/bash
 
+ulimit -s unlimited
+
 function print_usage_info {
     echo "Usage: ${0##*/} [OPTION]... [--] [DFLOWFMOPTIONS]..."
     echo "Run dflowfm program."
