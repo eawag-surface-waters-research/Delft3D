@@ -672,7 +672,6 @@ subroutine readMDUFile(filename, istat)
     integer :: jadum
     real(kind=hp) :: hkad
     real(kind=hp) :: ti_rst_array(3), ti_map_array(3), ti_his_array(3), acc, ti_wav_array(3), ti_waq_array(3), ti_classmap_array(3)
-    real(kind=sp) :: rtmp
     character(len=200), dimension(:), allocatable       :: fnames
     double precision, external     :: densfm
     double precision :: tim 
@@ -706,10 +705,8 @@ subroutine readMDUFile(filename, istat)
     call prop_get_version_number(md_ptr, major = major, minor = minor, success = success)
     if (success) then
        bnam = 'General'
-       rtmp = major + real(minor)/100
     else
        bnam = 'model'
-       rtmp = 0.00
        tmpstr = ''
        call prop_get(md_ptr, bnam, 'MDUFormatVersion', tmpstr)
        
@@ -717,16 +714,15 @@ subroutine readMDUFile(filename, istat)
           tmpstr = '1.00' ! If MDU file has no version number, don't do any checking (such that older pre-versioning models continue to work)
        end if
        
-       read (tmpstr, '(f4.2)', err=999) rtmp
+       read (tmpstr, '(i1,1X,i2)', err=999) major, minor
 999    continue
-       major = int(rtmp)
     end if
 ! Correct file version ?
 ! Note: older MDUs are usually supported (backwards compatible).
 ! Only if major version d.xx nr of MDU file is other than current, show an error.
 ! Check for equality of major version number
     if (major /= MDUFormatMajorVersion) then
-       write (msgbuf, '(a,f4.2,a,f4.2,a)') 'Unsupported MDU format detected: v', rtmp, '. Current format: v', MDUFormatMajorVersion + real(MDUFormatMinorVersion)/100, '. Please review your input.'
+       write (msgbuf, '(a,i0,".",i2.2,a,i0,".",i2.2,a)') 'Unsupported MDU format detected: v', major, minor, '. Current format: v', MDUFormatMajorVersion, MDUFormatMinorVersion, '. Please review your input.'
        call qnerror(trim(msgbuf), ' ',' ')
        call err_flush()
        istat = DFM_EFILEFORMAT
@@ -2089,7 +2085,7 @@ subroutine writeMDUFilepointer(mout, writeall, istat)
     call prop_set(prop_ptr, 'General', 'Program',   unstruc_program)
     call prop_set(prop_ptr, 'General', 'Version',   unstruc_version)
     tmpstr = ''
-    write(tmpstr, '(f4.2)') MDUFormatMajorVersion + real(MDUFormatMinorVersion)/100
+    write(tmpstr, '(i0,".",i2.2)') MDUFormatMajorVersion, MDUFormatMinorVersion
     call prop_set(prop_ptr, 'General', 'FileVersion', trim(tmpstr), 'File format version (do not edit this)')
     call prop_set(prop_ptr, 'General', 'AutoStart', md_jaAutoStart,      'Autostart simulation after loading MDU (0: no, 1: autostart, 2: autostartstop)')
     call prop_set(prop_ptr, 'General', 'ModelSpecific',  md_specific,    'Optional ''model specific ID'', to enable certain custom runtime function calls (instead of via MDU name).')
