@@ -3349,8 +3349,8 @@ subroutine check_structures_and_fixed_weirs()
       end do
    end do
    
-   if ( nummulti.gt.0 .or. numweir.gt.0 ) then
-      call mess(LEVEL_ERROR, 'multiple general structures and/or fixed weir defined on one or more flowlink(s), see preceding message(s).')
+   if ( nummulti.gt.0 ) then
+      call mess(LEVEL_ERROR, 'multiple general structures defined on one or more flowlink(s), see preceding message(s).')
    end if
    
 !  deallocate   
