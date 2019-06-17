@@ -2240,14 +2240,12 @@ src/engines_gpl/waq/packages/waq_process/src/bloom/bloom.f -text
 src/engines_gpl/waq/packages/waq_process/src/bloom/bloutc.f -text
 src/engines_gpl/waq/packages/waq_process/src/bloom/blprim.f -text
 src/engines_gpl/waq/packages/waq_process/src/bloom/bvect.f -text
-src/engines_gpl/waq/packages/waq_process/src/bloom/ccons.f -text
 src/engines_gpl/waq/packages/waq_process/src/bloom/change.f -text
 src/engines_gpl/waq/packages/waq_process/src/bloom/chhelp.f -text
 src/engines_gpl/waq/packages/waq_process/src/bloom/constr.f -text
 src/engines_gpl/waq/packages/waq_process/src/bloom/cspgro.f -text
 src/engines_gpl/waq/packages/waq_process/src/bloom/cspsto.f -text
 src/engines_gpl/waq/packages/waq_process/src/bloom/cvrblm.f -text
-src/engines_gpl/waq/packages/waq_process/src/bloom/czoopl.f -text
 src/engines_gpl/waq/packages/waq_process/src/bloom/dayeu.f -text
 src/engines_gpl/waq/packages/waq_process/src/bloom/diel.f -text
 src/engines_gpl/waq/packages/waq_process/src/bloom/dynrun.f -text
@@ -2267,9 +2265,7 @@ src/engines_gpl/waq/packages/waq_process/src/bloom/maxgro.f -text
 src/engines_gpl/waq/packages/waq_process/src/bloom/maxprd.f -text
 src/engines_gpl/waq/packages/waq_process/src/bloom/natmor.f -text
 src/engines_gpl/waq/packages/waq_process/src/bloom/nutfea.f -text
-src/engines_gpl/waq/packages/waq_process/src/bloom/ophelp.f -text
 src/engines_gpl/waq/packages/waq_process/src/bloom/option.f -text
-src/engines_gpl/waq/packages/waq_process/src/bloom/plotgr.f -text
 src/engines_gpl/waq/packages/waq_process/src/bloom/pools.f -text
 src/engines_gpl/waq/packages/waq_process/src/bloom/prinma.f -text
 src/engines_gpl/waq/packages/waq_process/src/bloom/prinsu.f -text
@@ -2278,7 +2274,6 @@ src/engines_gpl/waq/packages/waq_process/src/bloom/prinun.f -text
 src/engines_gpl/waq/packages/waq_process/src/bloom/promes.f -text
 src/engines_gpl/waq/packages/waq_process/src/bloom/prompt.f -text
 src/engines_gpl/waq/packages/waq_process/src/bloom/qslp.f -text
-src/engines_gpl/waq/packages/waq_process/src/bloom/select.f -text
 src/engines_gpl/waq/packages/waq_process/src/bloom/setabc.f -text
 src/engines_gpl/waq/packages/waq_process/src/bloom/setuni.f -text
 src/engines_gpl/waq/packages/waq_process/src/bloom/solvlp.f -text

@@ -65,7 +65,6 @@
       IF (LCHA .EQ. 1) GO TO 50
       CALL FORMFE (OUUNI)
    10 POSIT=0
-      IF (IOFLAG .EQ. 1) CALL BLSELECT (WCHANG, 4, 1001)
       I=INPTDT(1001,WORD,LENWRD)
       IF (MATCH(WCHANG,4,8,WORD,LENWRD,0,NUMWRD) .NE. 1) NUMWRD=5
       GO TO (    40,  2400,    100,  2400,    20), NUMWRD
@@ -89,7 +88,7 @@
 !     *******************************
 !
    50 IF (IOFLAG .EQ. 1) CALL CLRSCR
-  100 IF (IOFLAG .EQ. 1) CALL BLSELECT (WCHANG, NCHANG, 1002)
+  100 CONTINUE
       I=INPTDT(1002,WORD,LENWRD)
       IF (MATCH(WCHANG,NCHANG,8,WORD,LENWRD,0,NUMWRD) .NE. 1)
      1   NUMWRD=NCHANG+1
@@ -176,7 +175,6 @@
 !  Modify nutrient concentrations
 !
   600 CONTINUE
-      IF (IOFLAG .EQ. 1) CALL BLSELECT (CSTRA, NUNUCO, 1005)
       I = INPTDT(1005,WNUNAM,LENWRD)
       IF (MATCH(CSTRA,NUNUCO,8,WNUNAM,LENWRD,0,NUMNUT).NE.1) GOTO 610
       IF (IOFLAG .EQ. 1)
@@ -208,7 +206,6 @@
 !  Modify nutrient mineralization rate constants
 !
   700 CONTINUE
-      IF (IOFLAG .EQ. 1) CALL BLSELECT (CSTRA, NUNUCO, 1005)
       I = INPTDT(1005,WNUNAM,LENWRD)
       IF (MATCH(CSTRA,NUNUCO,8,WNUNAM,LENWRD,0,NUMNUT).NE.1) GOTO 720
       IF (IOFLAG .EQ. 1) THEN
@@ -219,7 +216,6 @@
          END IF
       END IF
   702 CONTINUE
-      IF (IOFLAG .EQ. 1) CALL BLSELECT ('DEPENDENINDEPEND', 2, 1013)
       I = INPTDT(1013,WORD,LENWRD)
 !     IF (MATCH('DEPENDEN',1,8,WORD,LENWRD,0,NUM).EQ.1) THEN
       IF (MATCH(indepen(1:),1,8,WORD,LENWRD,0,NUM).EQ.1) THEN
@@ -322,7 +318,6 @@
 !  Modify mortality rate constants
 !
  1000 CONTINUE
-      IF (IOFLAG .EQ. 1) CALL BLSELECT (CONTRO(2)//CONTRO(7), 2, 1012)
       I = INPTDT(1012,WMORT,LENWRD)
       IF (MATCH(CONTRO,7,8,WMORT,LENWRD,0,NUMMOR).NE.1) GOTO 990
       GO TO ( 990, 1020,  990, 990,  990, 990, 1040), NUMMOR
@@ -472,12 +467,7 @@
 !  Modify zooplankton characteristics
 !  0895 MvdV goto subroutine CCONS if NUGRAZ > 0
 !
- 2350 IF (NUGRAZ.EQ.0) THEN
-        CALL CZOOPL(LERR)
-      ELSE
-        CALL CCONS (LERR)
-      ENDIF
-      IF (LERR .EQ. 1) GO TO 1810
+ 2350 CONTINUE
       GO TO 50
 !
 !  Call subroutine OPTION to (re)set options for this run

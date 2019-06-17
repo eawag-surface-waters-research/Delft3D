@@ -53,26 +53,12 @@
 ! Exit if LPRINT <= 1: nothing more to be done here.
 !
       IF (LPRINT .LE. 1) RETURN
-!
-!  Write heading for (optional) zooplankton output NZOUT.
-!
-      IF (NUGRAZ.GT.1) THEN
-        DO 11 IG=1,NUGRAZ
-          WRITE(WWORDS(IG),'(A4,1X,I2)') WORDS(5),IG
-   11   CONTINUE
-      ENDIF
       IF (IPERM .GT. 1) THEN
          WRITE(NZOUT,10)
    10    FORMAT(2X,'Summary of all solutions for this run:',/,' ')
-         IF (NUGRAZ.GT.1) THEN
-           WRITE(NZOUT,21) (WORDS(K),K=1,4),(WWORDS(IG),IG=1,NUGRAZ),
-     1                  (GRNAME(K),K=1,NUECOG),(WORDS(K),K=6,7)
-   21      FORMAT(2X,A4,2X,2(A8,1X),7X,(A4,1X),32(A8,1X))
-         ELSE
-           WRITE(NZOUT,20) (WORDS(K),K=1,5),(GRNAME(K),K=1,NUECOG),
-     1                  (WORDS(K),K=6,7)
-   20      FORMAT(2X,A4,2X,2(A8,1X),7X,2(A4,1X),1X,12(A8,1X))
-         ENDIF
+         WRITE(NZOUT,20) (WORDS(K),K=1,5),(GRNAME(K),K=1,NUECOG),
+     1                (WORDS(K),K=6,7)
+   20    FORMAT(2X,A4,2X,2(A8,1X),7X,2(A4,1X),1X,12(A8,1X))
          WRITE (NZOUT,150)
       END IF
 !
@@ -167,13 +153,8 @@
 ! and batch runs.
 !
       IF (IOFLAG .EQ. 0) THEN
-        IF (NUGRAZ.GT.1) THEN
-          WRITE(OUUNI,141) (WORDS(K),K=1,3),(WWORDS(IG),IG=1,NUGRAZ),
-     1                     (GRNAME(K),K=1,NUECOG),(WORDS(K),K=6,7)
-        ELSE
-          WRITE(OUUNI,140) (WORDS(K),K=1,3),WORDS(5),
-     1                     (GRNAME(K),K=1,NUECOG),(WORDS(K),K=6,7)
-        ENDIF
+        WRITE(OUUNI,140) (WORDS(K),K=1,3),WORDS(5),
+     1                   (GRNAME(K),K=1,NUECOG),(WORDS(K),K=6,7)
       ELSE
 
          WRITE(OUUNI,110) (WORDS(K),K=1,3),(GRNAME(K),K=1,NUECOG),
@@ -186,13 +167,8 @@
 !  unit OUUNI in a batch job.
 !
          WRITE(IOU(21),30)
-         IF (NUGRAZ.GT.1) THEN
-           WRITE(IOU(21),141) (WORDS(K),K=1,3),(WWORDS(IG),IG=1,NUGRAZ),
-     1                        (GRNAME(K),K=1,NUECOG),(WORDS(K),K=6,7)
-         ELSE
-           WRITE(IOU(21),140) (WORDS(K),K=1,3),WORDS(5),
-     1                        (GRNAME(K),K=1,NUECOG),(WORDS(K),K=6,7)
-         ENDIF
+         WRITE(IOU(21),140) (WORDS(K),K=1,3),WORDS(5),
+     1                      (GRNAME(K),K=1,NUECOG),(WORDS(K),K=6,7)
   140    FORMAT(2X,A4,2X,2(A8,1X),8X,A4,5X,12(A8,1X))
   141    FORMAT(2X,A4,2X,2(A8,1X),8X,32(A8,1X))
          WRITE (IOU(21),150)
@@ -236,11 +212,5 @@
   220 FORMAT (2X,A4,6X,12(A8,4X))
       WRITE (IOU(14),240) ((CSTRA(K),I=1,2),K=1,NUNUCO)
   240 FORMAT (10X,10(A8,4X))
-!
-! Future heading for output IOU(26). This file contains the limiting
-! factors.
-!
-!     WRITE (IOU(26),250) (LIMNAM(I),I=1,NUNUCO+3)
-! 250 FORMAT (1X,8(A3,1X))
       RETURN
       END

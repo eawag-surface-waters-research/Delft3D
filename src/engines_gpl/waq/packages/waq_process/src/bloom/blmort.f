@@ -109,7 +109,7 @@
       DEAT  = 0D0
       ZOODD = 0D0
       TEMP8 = DBLE(TEMP)
-      CALL NATMOR ( DEAT  , ZOODD , TEMP8 , 1)
+      CALL NATMOR ( DEAT  , ZOODD , TEMP8)
       DEAT4 = SNGL(DEAT)
 !
 !  Mortality module.

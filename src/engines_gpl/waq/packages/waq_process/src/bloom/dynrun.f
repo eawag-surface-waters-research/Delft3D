@@ -63,7 +63,7 @@
 !  version of BLOOM II.
 !
       SUBROUTINE DYNRUN(EXTTOT,EXTB,TMP,SOL,DEP,DAYL,CHLOR,ID,ISEG,
-     1                  LCOUPL,NSET,EXTLIM,DEAT,TOTCHL,TOTDRY,TOTCAR,SWBLSA)
+     1                  NSET,EXTLIM,DEAT,TOTCHL,TOTDRY,TOTCAR,SWBLSA)
       IMPLICIT REAL*8 (A-H,O-Z)
 
       INCLUDE 'blmdim.inc'
@@ -125,12 +125,9 @@
 !  **** Update for ECOLUMN version:
 !       TOTDRY (total dry weight) passed in position NUCOLS+2 of XDEF.
 !
-      DO 129 I=0,NUGRAZ
-        ZOODII(I) = ZOOD(ID,I)
-  129 CONTINUE
       CALL BLOOM(CDATE,ID,MI,TMP,SOL,CHLOR,EXTB,DAYL,DEAT,ZOODII,
      1           DEP,XINIT,XDEF,XECO,TOTCHL,EXTTOT,EXTLIM,NSET,INFEAS,
-     2           NONUN,NUMUN,LCOUPL,SWBLSA)
+     2           NONUN,NUMUN,SWBLSA)
       TOTDRY = XDEF (NUCOLS+2)
       TOTCAR = 0.0
       DO 130 I = 1, NUSPEC

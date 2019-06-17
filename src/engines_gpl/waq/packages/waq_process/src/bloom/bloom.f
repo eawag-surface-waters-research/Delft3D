@@ -60,16 +60,11 @@
 
 !    Update 1.82: Added LCOUPL flag to if statement before call to
 !                 MAXMOR:this makes it possible to maitain a single
-!                 version on all platforms!
+!                 version on all platforms! (LCOUPL is removed, always 1)
 !                 Added conditional write statements for N fixation
 !                 and or mixotrophy (NUNUCO > 3). Although not very
 !                 elegant, the same code can be used for all possible
 !                 cases.
-!
-!    0895 MvdV extended for multiple grazer types, subroutine CONSBL added
-!              CONSBL is called if NUGRAZ > 0
-!              extension of the dimension of ZOOD for multiple grazers
-!              addition of ZOOC, GRADET, GDTOLD
 !
 !    Update 1.81: Solved the actual cause of problem at 1.8. Error in
 !                 PRINT6. This module needs both INOW and J so changed
@@ -106,7 +101,7 @@
 !
       SUBROUTINE BLOOM(CDATE,ID,MI,T,CSOL,PHYT,EXTB,DAY,DEATH,ZOOD,
      1           DEP,XINIT,XDEF,XECO,TOTAL,EXTTOT,EXTLIM,NSET,INFEAS,
-     2           NONUN,NUMUN,LCOUPL,SWBLSA)
+     2           NONUN,NUMUN,SWBLSA)
 
       USE DATA_3DL
 
@@ -139,18 +134,6 @@
 !  Calculate maximum primary production and respiration rates.
 !
       CALL MAXPRD(T)
-!
-!  In the stand-alone version of BLOOM II
-!  compute the total extinction (EXTTOT) as:
-!
-!   EXTTOT = EXTB + EXLIVE + EXDEAD
-!
-!  to account for eventual variations in the background extinction.
-!  Set A-matrix and B and C vectors; inititate detritus pools (optional)
-!  In coupled model versions EXTTOT is updated by the calling program.
-!
-!
-      IF (NREP .NE. 1 .AND. LCOUPL .EQ. 0) EXTTOT = EXTB+EXLIVE+EXDEAD
 !
 !  Update 900109:
 !  Make a copy of the (unconverted) solar radiation level. PRINUN needs

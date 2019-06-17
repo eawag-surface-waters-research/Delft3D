@@ -37,7 +37,7 @@
       SUBROUTINE BLPRIM (BIOMAS, CNH4  , CNO3  , CPO4  , CSIO  , 
      J                   CDETN , CDETP ,         CCO2  , CTIC  ,
      J                   FLMORA, FLDETN, TSTEPI, EXTOT , EXALG , TEMP  ,
-     J                   RAD   , DEPTH , DAYL  , ID    , LCOUPL, NSET  ,
+     J                   RAD   , DEPTH , DAYL  , ID    , NSET  ,
      J                   DEAT4 , TOTNUT, CHLTOT, FLPRPA, FLUPTN, FACLIM,
      J                   UPTNIT, FRACAM, FBOD5 , RATGRO, RATMOR, ALGDM ,
      J                   ISEG  , CGROUP, LMIXO , LFIXN , LCARB , NUTCON,
@@ -70,7 +70,6 @@
 !     DEPTH   R*4   1        I    Depth (m)
 !     DAYL    R*4   1        I    Length of light period (h)
 !     ID      I     1        I    Week number (1 to 52)
-!     LCOUPL  I     1        I    Coupling flag
 !     NSET    I     1        I    Counter
 !     DEAT4   R*4   1        I    ??
 !     TOTNUT  R*4   4        O    Total C,N,P,Si in algae (g/m3)
@@ -102,7 +101,7 @@
      J                RAD, DEPTH, DAYL, DEAT4, TOTNUT(*), CHLTOT, FBOD5,
      J                FLPRPA(*), FLUPTN(*), FACLIM(*), UPTNIT, FRACAM,
      J                RATMOR(*), ALGDM, CGROUP(*)
-      INTEGER         LCOUPL, NSET, ID, ISEG, NOUTLIM, NUNUCOM, NUECOGM
+      INTEGER         NSET, ID, ISEG, NOUTLIM, NUNUCOM, NUECOGM
       INTEGER         CON2OUT(NUNUCOM), NUTCON(NUNUCOM), FLXCON(NUNUCOM)
       REAL            OUTLIM(NOUTLIM), TotNin, TotPin, TotSIin
       LOGICAL         LMIXO , LFIXN , LCARB
@@ -326,7 +325,7 @@
 !      write (1961,1001) 'X       ',(X(J), J=1,NUSPEC)
 
       CALL DYNRUN (EXTOT8, EXBAC8, TEMP8 , RAD8  , DEPTH8, DAYL8 ,
-     J             CHLOR8, ID    , ISEG  , LCOUPL, NSET  , EXTLIM,
+     J             CHLOR8, ID    , ISEG  , NSET  , EXTLIM,
      J             DEAT  , TOTCHL, TOTDRY, TOTCAR, SWBLSA)
 
 !      write (1961,1001) 'XDEFA   ',(XDEF(J), J=1,NUNUCO)

@@ -29,7 +29,7 @@
 !
 !  Lahey fortran PC version: use FORMATTED input for efficiency curves.
 !
-      SUBROUTINE INPUT2 (NDEC,INPU,INEFF,LCOUPL)
+      SUBROUTINE INPUT2 (NDEC,INPU,INEFF)
       IMPLICIT REAL*8 (A-H,O-Z)
       INCLUDE 'blmdim.inc'
       INCLUDE 'putin1.inc'
@@ -76,12 +76,7 @@
 !   NPER(J,3)--interval step size between NPER(J,1) and NPER(J,2)
 !   NRUN--number of successive runs.
 !
-      IF (LCOUPL.NE.0) THEN
-        READ (INPU,99980) NUADCO
-        NUGRAZ = 0
-      ELSE
-        READ (INPU,99987) NUSPEC,NUECOG,NUNUCO,NUADCO,NUGRAZ
-      ENDIF
+      READ (INPU,99980) NUADCO
       IF (NUSPEC .GT. MT) THEN
          WRITE (OUUNI,99985) NUSPEC,MT
          CALL SRSTOP(6)
@@ -94,14 +89,6 @@
          WRITE (OUUNI,99981) NUNUCO,MN
          CALL SRSTOP(6)
       END IF
-      IF (NUGRAZ .GT. MG) THEN
-         WRITE (OUUNI,99979) NUGRAZ,MG
-         CALL SRSTOP(6)
-      END IF
-      DO 260 J=1,NUGRAZ
-        BZOOD(J) = 1.D0
-        DZOOD(J) = 0.D0
-  260 CONTINUE
       READ (INPU,99987) NPER(1,1),NPER(1,2),NPER(1,3),NRUN
       IF (NRUN .EQ. 0) NRUN = 1
       IF (NRUN .GT. 1) THEN
@@ -132,7 +119,7 @@
 !  specified modification.
 !
       NUNUC2 = NUNUCO
-      IF ((LCOUPL.NE.0).AND.(NUNUCO.GT.3)) NUNUCO = 3
+      IF (NUNUCO.GT.3) NUNUCO = 3
 
       DO 40 J=1,NUNUCO
       READ (INPU,99999) CSTRA(J),WTEMP,RNUT(1,J),WBASE,WMULT,BNUT(J),
@@ -235,70 +222,13 @@
 !  instantaneously at autolysis and does not enter the dead algal pool.
 !  Read sedimentation rate of dead algae.
 !
-      IF (LCOUPL.NE.0) THEN
-        READ (INPU,99992) SEDRAT
-      ELSE
-        READ (INPU,99978) AUTOFR,SEDRAT
-        AVAILN=1.0-AUTOFR
-      ENDIF
-!
-!  Read species matrix name.
-!
-      IF (LCOUPL.EQ.0) READ (INPU,99991) WSTOCH
-!
-!  Read species name, specific extinction, stochiometric
-!  constants for nutrients and dry weight to chlrophyll ratio of the
-!  types. CHLTOC--conversion from
-!  chlorophyll to C and CTODRY--conversion from C to dry weight.
-!
-      IF (LCOUPL.EQ.0) THEN
-        DO 130 I=1,NUSPEC
-        READ (INPU,99990) SPNAME(I),EKX(I),(AA(K,I),K=1,NUNUCO),
-     1                    CHLTOC(I),CTODRY(I)
-  130   CONTINUE
-!
-!  Calculate CHLR--the conversion from chlorophyll to dry weight.
-!
-        DO 140 I=1,NUSPEC
-  140   CHLR(I)=CHLTOC(I)*CTODRY(I)
-!
-!  Read additional phytoplankton characteristics for the computation
-!   of the net growth: PMAX1, PMAX2, LPMAX, RMORT1, RMORT2, RES1, RES2,
-!   SDMIX--mixing depth multiplier and ZOOPR--zooplankton preference
-!   coefficient.
-!
-        READ (INPU,99991) WGROUP
-      ENDIF
-
+      READ (INPU,99992) SEDRAT
       DO 150 I=1,NUSPEC
-        IF (LCOUPL.NE.0) THEN
 !
 ! Hans Los: Why? Origin: Marinus sources
-!         SDMIX(I) = 1.0
-          ZOOPR(I,0) = 1.0
-        ELSE
-          READ (INPU,99989) PMAX1(I),PMAX2(I),PWORD,RMORT1(I),RMORT2(I),
-     1                      RES1(I),RES2(I),SDMIX(I),ZOOPR(I,0)
-          IF (PWORD .EQ. CONTRO(7)) THEN
-             LPMAX(I) = 0
-          ELSE
-             IF (PWORD .EQ. CONTRO(8)) THEN
-                LPMAX(I) = 1
-             ELSE
-                WRITE (OUUNI,99984) PWORD
-                CALL SRSTOP(6)
-             END IF
-          END IF
-        ENDIF
+!       SDMIX(I) = 1.0
+        ZOOPR(I,0) = 1.0
   150 CONTINUE
-!
-!  Call subroutine "SPINDI" to determine the number of the first and
-!  the last type of each species.
-!
-      IF (LCOUPL.EQ.0) THEN
-        CALL SPINDI (LSPIND)
-        IF (LSPIND .EQ. 1) CALL SRSTOP(6)
-      ENDIF
 !
 !  Read data for the integrated photosynthetic efficiency curves
 !  from unit 12. These data are produced by the efficiency program

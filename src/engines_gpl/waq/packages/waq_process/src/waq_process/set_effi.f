@@ -72,7 +72,7 @@
       DAY    = DAYLEN
       DEAT   = 0D0
       ZOODD  = 0D0
-      CALL NATMOR ( DEAT  , ZOODD , TEMP  , 1)
+      CALL NATMOR ( DEAT  , ZOODD , TEMP)
       DO ITYPE = 1,NTYP_3DL
          IF (SDMIX(ITYPE) .LT. 0.0) THEN
             SDMIXN(ITYPE) = 1.0D0 + SDMIX(ITYPE)

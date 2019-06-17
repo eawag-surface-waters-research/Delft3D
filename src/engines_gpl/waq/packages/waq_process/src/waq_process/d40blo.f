@@ -91,7 +91,6 @@
 !     ISWVTR  I     1             Switch if 3DL is to be used
 !     LIMFAC  R     6             Limiting factors (-)
 !     LPRINO  I     1             Saves original value of LPRINT
-!     LCOUPL  I     1             Flag for BLOOM II
 !     LDUMPO  I     1             Saves original value of IDUMP
 !     MRTM1   I     NTYP          Mortality parameter
 !     MRTM2   I     NTYP          Mortality parameter
@@ -136,7 +135,7 @@
       CHARACTER*12    RUNNAM
       LOGICAL  HISTOR, THIS, LMIXO,LFIXN,LCARB
       INTEGER  NTYP_A, NGRO_A,
-     J         NSET  , LCOUPL, LPRINO, LDUMPO, ID
+     J         NSET  , LPRINO, LDUMPO, ID
       REAL     TIMMUL, TEMPER, RADIAT, DEPTHW, DEPTH,  DAYLEN,
      J         AMMONI, NITRAT, PHOSPH, SILICA, DELTAT, BLSTEP,
      J         EXTTOT, DEAT4 , NUPTAK, FRAMMO, FBOD5 , EXTALG,
@@ -173,7 +172,6 @@
 !
       DATA     INIT   / 1 /
       DATA     NSET   / 0 /
-      DATA     LCOUPL / 1 /
 !
       IF ( INIT .EQ. 1 ) THEN
          INIT = 0
@@ -714,7 +712,7 @@
      J              FL(IFDETR)    , BLSTEP        , EXTTOT        ,
      J              EXTALG        , TEMPER        , RADIAT        ,
      J              DEPTHW        , DAYLEN        , ID            ,
-     J              LCOUPL        , NSET          , DEAT4         ,
+     J              NSET          , DEAT4         ,
      J              TOTNUT        , CHLORO        , FL(IFPROD)    ,
      J              FL(IFUPTA)    , LIMFAC        , NUPTAK        ,
      J              FRAMMO        , FBOD5         , RATGRO        ,

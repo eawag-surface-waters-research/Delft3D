@@ -150,7 +150,6 @@
 !     RETURN
 
    70 IF (POSIT .LT. 0) POSIT = 0
-      if (ioflag .eq. 1) call blselect (woptio, nopt, 1071)
       I=INPTDT(1071,WO1,LENWRD)
       IF (MATCH(WOPTIO,NOPT,8,WO1,LENWRD,0,NUMWRD) .NE. 1)
      1    NUMWRD=NOPT+1
@@ -221,11 +220,6 @@
   180 WRITE (OUUNI,99940) WOPTIO(NUMWRD)
       GO TO 70
   190 CONTINUE
-      IOFLAG=1
-      INUNI=IOU(5)
-      OUUNI=IOU(6)
-      OFON(NUMWRD)=1
-      WRITE (OUUNI,99970) WOPTIO(NUMWRD)
       GO TO 70
   200 CONTINUE
       IF (IOFLAG .EQ. 1) CALL CLRSCR
@@ -249,7 +243,7 @@
   240 LGROCH=1
       OFON(NUMWRD)=1
       LGBASE = 0
-  250 if (ioflag .eq. 1) call blselect (wbase, 2, 1075)
+  250 CONTINUE
       I=INPTDT(1075,WORD,LENWRD)
       IF (MATCH(WBASE,2,8,WORD,LENWRD,0,NUMWRD) .NE. 1)
      1    NUMWRD=3
@@ -469,7 +463,7 @@
 ! Determine the objective of the model: maximize biomass or growth.
 !
   596 CONTINUE
-  597 if (ioflag .eq. 1) call blselect (oject, 2, 1082)
+  597 CONTINUE
       I=INPTDT(1082,WORD,LENWRD)
       IF (MATCH(OJECT,2,8,WORD,LENWRD,0,NUM) .NE. 1) GO TO 597
        GO TO (598, 599), NUM
@@ -508,8 +502,7 @@
 !----------------------------------------------------------------------
 !
   610 CONTINUE
-      IF (IOFLAG .EQ. 1) CALL CLRSCR
-  620 if (ioflag .eq. 1) call blselect (woptio, nopt, 1073)
+  620 CONTINUE
       I=INPTDT(1073,WA,LENWRD)
       IF (MATCH(WOPTIO,NOPT,8,WA,LENWRD,0,NUM2) .NE. 1)
      1    NUM2=NOPT+1
@@ -680,11 +673,7 @@
 !       Call SUBROUTINE OPHELP for help
 !----------------------------------------------------------------------
 !
-  920 LOPHLP = 0
-      CALL OPHELP (WOPTIO,NOPT,LOPHLP)
-      IF (LOPHLP .EQ. 0) GO TO 70
-      LRUN = 0
-      RETURN
+  920 RETURN
 !
 !  Exit after "STOP"/"CONTINUE" has been set.
 !

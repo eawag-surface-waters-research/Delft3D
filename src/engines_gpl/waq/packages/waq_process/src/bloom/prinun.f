@@ -65,7 +65,7 @@
 !
       IF (FIRST) THEN
          FIRST = .FALSE.
-         WRITE (IOU(26)) NUSPEC, NUECOG, NUNUCO, NUROWS, NUGRAZ
+         WRITE (IOU(26)) NUSPEC, NUECOG, NUNUCO, NUROWS, 0 ! NUGRAZ=0
          WRITE (IOU(26)) (CSTRA(J), J = 1, NUNUCO)
          WRITE (IOU(26)) (SPNAME(J), J = 1, NUSPEC)
          WRITE (IOU(26)) (GRNAME(J), J = 1, NUECOG)
@@ -91,7 +91,6 @@
      9                    (CONCEN (I), I = 1, NUNUCO),
      A                    (XDEF (I), I = 1, NUNUCO), EXTTOT, EXLIVE,
      B                    EXDEAD, EXTB, T, CSOL, DAY, DEP,
-     C                    (ZOOD(IG)*GCTDRY(IG),IG=1,NUGRAZ),
-     D                     ZMAX,GRAMX
+     C                    ZMAX,GRAMX
       RETURN
       END

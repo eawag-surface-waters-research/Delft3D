@@ -26,14 +26,12 @@ libbloom_la_SOURCES = blclmort.f \
        bloutc.f \
        blprim.f \
        bvect.f \
-       ccons.f \
        change.f \
        chhelp.f \
        constr.f \
        cspgro.f \
        cspsto.f \
        cvrblm.f \
-       czoopl.f \
        dayeu.f \
        diel.f \
        dynrun.f \
@@ -53,7 +51,6 @@ libbloom_la_SOURCES = blclmort.f \
        maxprd.f \
        natmor.f \
        nutfea.f \
-       ophelp.f \
        option.f \
        pools.f \
        prinma.f \
@@ -63,7 +60,6 @@ libbloom_la_SOURCES = blclmort.f \
        promes.f \
        prompt.f \
        qslp.f \
-       select.f \
        setabc.f \
        setuni.f \
        solvlp.f \

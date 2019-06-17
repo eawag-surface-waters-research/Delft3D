@@ -56,14 +56,12 @@
 		<File RelativePath=".\src\bloom\bloutc.f"/>
 		<File RelativePath=".\src\bloom\blprim.f"/>
 		<File RelativePath=".\src\bloom\bvect.f"/>
-		<File RelativePath=".\src\bloom\ccons.f"/>
 		<File RelativePath=".\src\bloom\change.f"/>
 		<File RelativePath=".\src\bloom\chhelp.f"/>
 		<File RelativePath=".\src\bloom\constr.f"/>
 		<File RelativePath=".\src\bloom\cspgro.f"/>
 		<File RelativePath=".\src\bloom\cspsto.f"/>
 		<File RelativePath=".\src\bloom\cvrblm.f"/>
-		<File RelativePath=".\src\bloom\czoopl.f"/>
 		<File RelativePath=".\src\bloom\dayeu.f"/>
 		<File RelativePath=".\src\bloom\diel.f"/>
 		<File RelativePath=".\src\bloom\dynrun.f"/>
@@ -83,9 +81,7 @@
 		<File RelativePath=".\src\bloom\maxprd.f"/>
 		<File RelativePath=".\src\bloom\natmor.f"/>
 		<File RelativePath=".\src\bloom\nutfea.f"/>
-		<File RelativePath=".\src\bloom\ophelp.f"/>
 		<File RelativePath=".\src\bloom\option.f"/>
-		<File RelativePath=".\src\bloom\plotgr.f"/>
 		<File RelativePath=".\src\bloom\pools.f"/>
 		<File RelativePath=".\src\bloom\prinma.f"/>
 		<File RelativePath=".\src\bloom\prinsu.f"/>
@@ -94,7 +90,6 @@
 		<File RelativePath=".\src\bloom\promes.f"/>
 		<File RelativePath=".\src\bloom\prompt.f"/>
 		<File RelativePath=".\src\bloom\qslp.f"/>
-		<File RelativePath=".\src\bloom\select.f"/>
 		<File RelativePath=".\src\bloom\setabc.f"/>
 		<File RelativePath=".\src\bloom\setuni.f"/>
 		<File RelativePath=".\src\bloom\solvlp.f"/>

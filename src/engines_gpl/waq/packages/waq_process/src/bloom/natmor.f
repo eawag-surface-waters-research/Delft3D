@@ -30,7 +30,7 @@
 !  971217 MvdV extra mortality above critical temp for ulvae
 !  0895 MvdV output of grazer biomass extended for multiple grazer types
 
-      SUBROUTINE NATMOR(DEATH,ZOOD,TEMP,LCOUPL)
+      SUBROUTINE NATMOR(DEATH,ZOOD,TEMP)
       IMPLICIT REAL*8 (A-H,O-Z)
       INCLUDE 'blmdim.inc'
       INCLUDE 'size.inc'
@@ -71,15 +71,11 @@
       TEMP2 = TEMP
       IF (LTLIM .EQ. 0) GO TO 90
       IF (TEMP .GE. TEMLIM) GO TO 90
-      IF ((NREP .EQ. 1).AND.(LCOUPL.EQ.0)) THEN
-         TEMP2 = TEMP + 5.0
-         GO TO 90
-      END IF
-         DO 80 I = 1,NUSPEC
+      DO 80 I = 1,NUSPEC
          RMORT(I) = BASMOR
-   80    CONTINUE
-         DEATH = BASMOR
-         GO TO 110
+   80 CONTINUE
+      DEATH = BASMOR
+      GO TO 110
    90 DEATH = 0.0
       DO 100 I = 1,NUSPEC
 !       MvdV 971217 addition for ulvae

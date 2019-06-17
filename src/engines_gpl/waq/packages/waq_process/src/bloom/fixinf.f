@@ -151,8 +151,7 @@
       IF (NI .EQ. 0 .OR. IRS(3) .LE. NUEXRO + NUECOG) GO TO 130
 
 ! ----------------------------------------------------------------------
-! Problem is infeasible due to a mortality constraint. In stand-alone
-! BLOOM (LCOUPL = 0) drop the violated mortality constraint. Rerun.
+! Problem is infeasible due to a mortality constraint. 
 !
 ! In coupled model versions, it is almost always sufficient to increase
 ! the energy constraint. Compute the minimum extinction value that could
