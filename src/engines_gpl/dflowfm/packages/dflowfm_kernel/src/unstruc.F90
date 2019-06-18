@@ -41793,7 +41793,7 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
                 dzsillu(L) = zc - bl(n1) ; dzsilld(L) = zc - bl(n2)  ! if not specified then estimate
              else if (ifixedweirscheme == 9) then
                 iadv(L)    = 25    !  Villemonte
-                dzsillu(L) = zc - bl(n1) ; dzsilld(L) = zc - bl(n2)  ! if not specified then estimate
+                dzsillu(L) = zc - bl(n1) ; dzsilld(L) = max(0.0, zc - bl(n2))  ! if not specified then estimate
              else
                 iadv(L)    = 21    !  Ifixedweirscheme 6
              endif
