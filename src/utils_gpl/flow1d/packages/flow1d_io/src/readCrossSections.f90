@@ -159,6 +159,8 @@ module m_readCrossSections
             allocate(pCrs%frictionValuePos(pCrs%tabDef%frictionSectionsCount))       !< Friction value for positive flow direction
             allocate(pCrs%frictionTypeNeg(pCrs%tabDef%frictionSectionsCount))        !< Friction type for negative flow direction
             allocate(pCrs%frictionValueNeg(pCrs%tabDef%frictionSectionsCount))       !< Friction value for negative flow direction
+            call realloc(pCrs%tabdef%frictionSectionFrom, pCrs%tabDef%frictionSectionsCount)
+            call realloc(pCrs%tabdef%frictionSectionto, pCrs%tabDef%frictionSectionsCount)
 
             pCrs%frictionSectionsCount = pCrs%tabDef%frictionSectionsCount
             pCrs%frictionSectionID     = pCrs%tabDef%frictionSectionID
@@ -403,46 +405,42 @@ module m_readCrossSections
             
          end select
             
-         if (success .and. crossType /= CS_YZ_PROF) then
-            allocate(pCs%frictionSectionID  (pCs%frictionSectionsCount))      !< Friction Section Identification
-            allocate(pCs%frictionSectionFrom(pCs%frictionSectionsCount))    !<
-            allocate(pCs%frictionSectionTo  (pCs%frictionSectionsCount))      !<
-            allocate(pCS%frictionSectionIndex(pCs%frictionSectionsCount))
-            allocate(pCS%frictionType       (pCs%frictionSectionsCount))
-            allocate(pCS%frictionValue      (pCs%frictionSectionsCount))
+         allocate(pCs%frictionSectionID  (pCs%frictionSectionsCount))      !< Friction Section Identification
+         allocate(pCS%frictionSectionIndex(pCs%frictionSectionsCount))
+         allocate(pCS%frictionType       (pCs%frictionSectionsCount))
+         allocate(pCS%frictionValue      (pCs%frictionSectionsCount))
 
-            if (plural) then
-               call prop_get_strings(md_ptr%child_nodes(i)%node_ptr, '', 'frictionIds', pCs%frictionSectionsCount, pCS%frictionSectionID, success)
-            else
-               call prop_get_strings(md_ptr%child_nodes(i)%node_ptr, '', 'frictionId', pCs%frictionSectionsCount, pCS%frictionSectionID, success)
-            endif
-            
-            if (.not. success) then
-               if (plural) then
-                  call prop_get(md_ptr%child_nodes(i)%node_ptr, '', 'frictionTypes', pCS%frictionType, pCs%frictionSectionsCount, success)
-                  if (success) call prop_get(md_ptr%child_nodes(i)%node_ptr, '', 'frictionValues', pCS%frictionValue, pCs%frictionSectionsCount, success)
-               else
-                  call prop_get(md_ptr%child_nodes(i)%node_ptr, '', 'frictionType', pCS%frictionType, pCs%frictionSectionsCount, success)
-                  if (success) call prop_get(md_ptr%child_nodes(i)%node_ptr, '', 'frictionValue', pCS%frictionValue, pCs%frictionSectionsCount, success)
-               endif
-               
-               if (.not. success) then
-                  pCs%frictionSectionID(1) = 'Main'
-                  if (pCs%frictionSectionsCount >=2) then
-                     pCs%frictionSectionID(2) = 'FloodPlain1'
-                  endif
-                  if (pCs%frictionSectionsCount ==3) then
-                     pCs%frictionSectionID(3) = 'FloodPlain2'
-                  endif
-               else
-                  do j = 1, pCs%frictionSectionsCount
-                     pCS%frictionSectionID(j) = ''
-                  enddo
-               endif
-               
-            endif
-            success = .true.
+         if (plural) then
+            call prop_get_strings(md_ptr%child_nodes(i)%node_ptr, '', 'frictionIds', pCs%frictionSectionsCount, pCS%frictionSectionID, success)
+         else
+            call prop_get_strings(md_ptr%child_nodes(i)%node_ptr, '', 'frictionId', pCs%frictionSectionsCount, pCS%frictionSectionID, success)
          endif
+            
+         if (.not. success) then
+            if (plural) then
+               call prop_get(md_ptr%child_nodes(i)%node_ptr, '', 'frictionTypes', pCS%frictionType, pCs%frictionSectionsCount, success)
+               if (success) call prop_get(md_ptr%child_nodes(i)%node_ptr, '', 'frictionValues', pCS%frictionValue, pCs%frictionSectionsCount, success)
+            else
+               call prop_get(md_ptr%child_nodes(i)%node_ptr, '', 'frictionType', pCS%frictionType, pCs%frictionSectionsCount, success)
+               if (success) call prop_get(md_ptr%child_nodes(i)%node_ptr, '', 'frictionValue', pCS%frictionValue, pCs%frictionSectionsCount, success)
+            endif
+               
+            if (.not. success) then
+               pCs%frictionSectionID(1) = 'Main'
+               if (pCs%frictionSectionsCount >=2) then
+                  pCs%frictionSectionID(2) = 'FloodPlain1'
+               endif
+               if (pCs%frictionSectionsCount ==3) then
+                  pCs%frictionSectionID(3) = 'FloodPlain2'
+               endif
+            else
+               do j = 1, pCs%frictionSectionsCount
+                  pCS%frictionSectionID(j) = ''
+               enddo
+            endif
+               
+         endif
+         success = .true.
          
          if (success) then
             network%CSDefinitions%count = inext
@@ -916,10 +914,6 @@ module m_readCrossSections
       call realloc(pCS%z, numlevels)
       call realloc(pCS%storLevels, 2)
       call realloc(pCS%YZstorage, 2)
-      call realloc(pCS%frictionSectionID, frictionCount)
-      call realloc(pCS%frictionSectionIndex, frictionCount)
-      call realloc(pCS%frictionType, frictionCount)
-      call realloc(pCS%frictionValue, frictionCount)
       call realloc(pCS%frictionSectionFrom, frictionCount)
       call realloc(pCS%frictionSectionTo, frictionCount)
       allocate(positions(frictionCount+1))
@@ -943,16 +937,6 @@ module m_readCrossSections
       endif
       
       pCS%storLevels = 0
-      
-      call prop_get_strings(node_ptr, '', 'frictionIds', frictionCount, pCS%frictionSectionID, success)
-      if (.not. success) then
-         pCS%frictionSectionID = ''
-         call prop_get(node_ptr, '', 'frictionTypes', pCS%frictionType, frictionCount, success)
-         if (success) call prop_get(node_ptr, '', 'frictionValues', pCS%frictionValue, frictionCount, success)
-         if (.not. success) then
-            call SetMessage(LEVEL_ERROR, 'Error while reading friction IDs/frictionValues for YZ-Cross-Section Definition ID: '//trim(pCS%id))
-         endif
-      endif
       
       call prop_get_doubles(node_ptr, '', 'frictionPositions', positions, frictionCount+1, success)
       

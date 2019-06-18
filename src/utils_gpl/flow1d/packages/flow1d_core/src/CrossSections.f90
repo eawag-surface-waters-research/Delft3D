@@ -2625,6 +2625,7 @@ use M_newcross
    !use m_parseConveyance
    !use modelGlobalData
    !use convTables
+use messageHandling
 
    implicit none
 
@@ -2632,8 +2633,18 @@ use M_newcross
    type(t_CrossSection), intent(inout)    :: crs   !< cross section
    
    type(t_crsu), pointer   :: convTab
+   integer                 :: i
    convtab=>null()
    nc = crs%tabDef%levelsCount
+   ! Check if type is not equal to walLawNikuradse (type=2), since this option is not implemented yet
+   do i = 1, crs%frictionSectionsCount
+      if (crs%frictionTypePos(i) == 2 .or. crs%frictionTypeNeg(i) == 2 ) then
+         ! TODO: make this error message obsolete
+         msgbuf = 'Friction type wallLawNikuradse is not (yet) implemented for vertically segmented conveyance, see cross section: '//trim(crs%csid)
+         call err_flush()
+      endif
+   enddo
+   
    call generateConvtab(convtab, crs%tabDef%levelsCount, crs%shift, crs%tabDef%groundLayer%thickness, crs%tabDef%crossType, &
                         nc, crs%tabDef%frictionSectionsCount, crs%branchid, crs%bedFrictionType,                               &
                         crs%groundFriction, crs%tabdef%y, crs%tabdef%z,                                                        &
