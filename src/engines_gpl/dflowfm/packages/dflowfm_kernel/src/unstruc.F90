@@ -41477,7 +41477,7 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
  integer                       :: jaweir, Lastfoundk, kf, kL, jarestorepol, Lnt, k1, nna, nnb, nl1, nl2, k3, k4
  integer         , allocatable :: iwu(:), ihu(:)
  double precision              :: SL, SM, XCR, YCR, CRP, Xa, Ya, Xb, Yb, zc, zh, af, dz1, dz2, xn, yn, adjacentbob, cosphi, sig, bobL
- double precision, allocatable :: csh(:), snh(:), dzcrest(:), dzsillu(:), dzsilld(:), crestlen(:), taludu(:), taludd(:), vegetat(:),dztoeu(:),dztoed(:)
+ double precision, allocatable :: csh(:), snh(:), zcrest(:), dzsillu(:), dzsilld(:), crestlen(:), taludu(:), taludd(:), vegetat(:),ztoeu(:),ztoed(:)
  integer         , allocatable :: iweirtyp(:)
  integer         , allocatable :: ifirstweir(:)
 
@@ -41512,17 +41512,17 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
  call readyy('Setfixedweirs', 0d0)
 
  !if (allocated(csh) ) then
- !   deallocate(ihu, csh, snh, dzcrest, dzsillu, dzsilld, crestlen, taludu, taludd, vegetat) ! (10 arrays)
+ !   deallocate(ihu, csh, snh, zcrest, dzsillu, dzsilld, crestlen, taludu, taludd, vegetat) ! (10 arrays)
  !endif
 
  allocate (ihu(lnx))      ; ihu = 0
  allocate (csh(lnx))      ; csh = 0d0
  allocate (snh(lnx))      ; snh = 0d0
- allocate (dzcrest(lnx))  ; dzcrest = -1000d0   ! starting from a low value
+ allocate (zcrest(lnx))  ; zcrest = -1000d0   ! starting from a low value
  allocate (dzsillu(lnx))  ; dzsillu = 0d0
  allocate (dzsilld(lnx))  ; dzsilld = 0d0
- allocate (dztoeu(lnx))   ; dztoeu = 1000d0  ! starting from a high value
- allocate (dztoed(lnx))   ; dztoed = 1000d0  ! starting from a high value
+ allocate (ztoeu(lnx))   ; ztoeu = 1000d0  ! starting from a high value
+ allocate (ztoed(lnx))   ; ztoed = 1000d0  ! starting from a high value
  allocate (crestlen(lnx)) ; crestlen = 3d0
  allocate (taludu(lnx))   ; taludu = 4d0
  allocate (taludd(lnx))   ; taludd = 4d0
@@ -41652,7 +41652,7 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
        bobL = max(bob(1,L), bob(2,L))
     endif
 
-    if ( (zc > bobL .and. zc > dzcrest(L)) .or. ( (ifixedweirscheme == 8 .or. ifixedweirscheme == 9) .and. ifirstweir(L) == 1) ) then   ! For Villemonte and Tabellenboek fixed weirs under bed level are also possible
+    if ( (zc > bobL .and. zc > zcrest(L)) .or. ( (ifixedweirscheme == 8 .or. ifixedweirscheme == 9) .and. ifirstweir(L) == 1) ) then   ! For Villemonte and Tabellenboek fixed weirs under bed level are also possible
 
        ! Set whether this is the first time that for this link weir values are set:
        ! As a result, only the first fixed weir under the bed level is used
@@ -41747,26 +41747,26 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
              !
              ! recompute ground heights if zc is larger than previous crest levels
              !
-             if (zc .gt. dzcrest(L)) then
-                dzsillu(L)  = zc - dztoeu(L)
-                dzsilld(L)  = zc - dztoed(L)
+             if (zc .gt. zcrest(L)) then
+                dzsillu(L)  = zc - ztoeu(L)
+                dzsilld(L)  = zc - ztoed(L)
              endif
              !
-             dzcrest(L)  = zc
+             zcrest(L)  = zc
              !
              ! lowest toe is applied
              !
              zh = (1d0-sl)*dzl(k) + sl*dzl(k+1)
-             if (zc-zh .lt. dztoeu(L)) then
-                dztoeu(L)   = zc - zh
-                dzsillu(L)  = dzcrest(L) - dztoeu(L)
+             if (zc-zh .lt. ztoeu(L)) then
+                ztoeu(L)   = zc - zh
+                dzsillu(L)  = zcrest(L) - ztoeu(L)
              endif
              zh = (1d0-sl)*dzr(k) + sl*dzr(k+1)
-             if (zc-zh .lt. dztoed(L)) then
-                dztoed(L)   = zc - zh
-                dzsilld(L)  = dzcrest(L) - dztoed(L)
+             if (zc-zh .lt. ztoed(L)) then
+                ztoed(L)   = zc - zh
+                dzsilld(L)  = zcrest(L) - ztoed(L)
              endif
-             !! write (msgbuf,'(a,i5,4f10.3)') 'Crest and Toe level ', L, dzcrest(L), dztoeu(L), dztoed(L); call msg_flush()
+             !! write (msgbuf,'(a,i5,4f10.3)') 'Crest and Toe level ', L, zcrest(L), ztoeu(L), ztoed(L); call msg_flush()
 
              crestlen(L) = (1d0-sl)*dcrest(k) + sl*dcrest(k+1)   ! crest length
              taludu(L)   = (1d0-sl)*dtl(k)    + sl*dtl(k+1)      ! talud at ln(1,L)
@@ -41831,22 +41831,22 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
           !
           ! check whether crestlevel is higher
           !
-          if (zc > dzcrest(L)) then
-             dzcrest(L) = zc
-             !! write (msgbuf,'(a,i5,f10.3)') 'Higher crest level: ', L,  dzcrest(L); call msg_flush()
+          if (zc > zcrest(L)) then
+             zcrest(L) = zc
+             !! write (msgbuf,'(a,i5,f10.3)') 'Higher crest level: ', L,  zcrest(L); call msg_flush()
          endif
          !
          ! check whether toe is lower. If so, also adjust sill height
          !
-         if (zc-zh .lt. dztoeu(L)) then
-            dztoeu(L)   = zc - zh
-            dzsillu(L)  = dzcrest(L) - dztoeu(L)
+         if (zc-zh .lt. ztoeu(L)) then
+            ztoeu(L)   = zc - zh
+            dzsillu(L)  = zcrest(L) - ztoeu(L)
             !! write (msgbuf,'(a,i5,f10.3)') 'Larger sill up:     ', L,  dzsillu(L); call msg_flush()
          endif
          zh =  (1d0-sl)*dzR(k) + sl*dzR(k+1)
-         if (zc-zh .lt. dztoed(L)) then
-            dztoed(L)   = zc - zh
-            dzsilld(L)  = dzcrest(L) - dztoed(L)
+         if (zc-zh .lt. ztoed(L)) then
+            ztoed(L)   = zc - zh
+            dzsilld(L)  = zcrest(L) - ztoed(L)
             !! write (msgbuf,'(a,i5,f10.3)') 'Larger sill down:   ', L, dzsilld(L); call msg_flush()
          endif
        endif
@@ -41898,7 +41898,7 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
        nfxw = nfxw + 1
        lnfxw(nfxw)    = L
        nfxwL(L)       = nfxw
-       crestlevxw(nfxw) = dzcrest(L)
+       crestlevxw(nfxw) = zcrest(L)
        shlxw(nfxw)    = dzsillu(L)
        if (ifixedweirscheme == 8) then
           shlxw(nfxw) = max (0.1d0, shlxw(nfxw) )  !  in case of the Tabellenboek the ground height left should be at least 0.1 m, as in Simona and Delft3D-FLOW
@@ -41915,7 +41915,7 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
     endif
  enddo
 
- deallocate(ihu, csh, snh, dzcrest, dzsillu, dzsilld, crestlen, taludu, taludd, vegetat, iweirtyp, dztoeu, dztoed)
+ deallocate(ihu, csh, snh, zcrest, dzsillu, dzsilld, crestlen, taludu, taludd, vegetat, iweirtyp, ztoeu, ztoed)
  if (jatabellenboekorvillemonte == 0 .and. jashp_fxw == 0 .and. allocated(shlxw) ) then
     deallocate(shlxw, shrxw, crestlevxw, crestlxw, taludlxw, taludrxw, vegxw, iweirtxw)
  endif
