@@ -28806,7 +28806,6 @@ do k = 1,ndx
    fetch(n,k) = fett(1,k)
    fetdp(n,k) = fett(2,k)
 enddo
-write(*,*) 'reducefett'
 end subroutine
 
 
