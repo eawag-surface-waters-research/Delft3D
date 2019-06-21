@@ -47,6 +47,25 @@ module m_readObservationPoints
    public read_obs_point_cache
    public write_obs_point_cache
 
+   !> The file version number of the observation points file format: d.dd, [config_major].[config_minor], e.g., 1.03
+   !!
+   !! Note: read config_minor as a 2 digit-number, i.e., 1.1 > 1.02 (since .1 === .10 > .02).
+   !! Convention for format version changes:
+   !! * if a new format is backwards compatible with old files, only
+   !!   the minor version number is incremented.
+   !! * if a new format is not backwards compatible (i.e., old files
+   !!   need to be converted/updated by user), then the major version number
+   !!   is incremented.
+   
+   ! Observation points file current version: 2.00
+   integer, parameter :: ObsFileMajorVersion = 2
+   integer, parameter :: ObsFileMinorVersion = 0
+   
+   ! History observation points file versions:
+
+   ! 2.00 (2019-06-18): Change LocationType from integer to strings, and change ExtrapolationMethod to yes/no value.
+   ! 1.01 (2019-03-12): First version of *.ini type observation point file.
+
    contains
    !> Reads observation points from a *.ini file
    subroutine readObservationPoints(network, observationPointsFile)
@@ -66,6 +85,7 @@ module m_readObservationPoints
       character(len=IdLen)                  :: obsPointID
       character(len=IdLen)                  :: obsPointName
       character(len=IdLen)                  :: branchID
+      character(len=IdLen)                  :: locationType
       
       double precision                      :: Chainage
       double precision                      :: xx, yy
@@ -77,7 +97,8 @@ module m_readObservationPoints
       character(len=Charln)                 :: binfile
       logical                               :: file_exist
       integer                               :: formatbr       ! =1: use branchid and chainage, =0: use xy coordinate and LocationType
- 
+      integer                               :: major, minor, ierr
+      
       xx       = dmiss
       yy       = dmiss
       Chainage = dmiss
@@ -106,6 +127,21 @@ module m_readObservationPoints
       call tree_create(trim(observationPointsFile), md_ptr, maxlenpar)
       call prop_file('ini',trim(observationPointsFile),md_ptr, istat)
       
+      ! check FileVersion
+      ierr = 0
+      major = 0
+      minor = 0
+      call prop_get_version_number(md_ptr, major = major, minor = minor, success = success)
+      if (.not. success .or. major < ObsFileMajorVersion) then
+         write (msgbuf, '(a,i0,".",i2.2,a,i0,".",i2.2,a)') 'Unsupported format of observation point file detected in '''//trim(observationPointsFile)//''': v', major, minor, '. Current format: v',ObsFileMajorVersion,ObsFileMinorVersion,'. Ignoring this file.'
+         call warn_flush()
+         ierr = 1
+      end if
+      
+      if (ierr /= 0) then
+         goto 999
+      end if
+      
       numstr = 0
       if (associated(md_ptr%child_nodes)) then
          numstr = size(md_ptr%child_nodes)
@@ -124,8 +160,14 @@ module m_readObservationPoints
                   loctype = INDTP_1D
                else ! the obs is defined by x, y coordinate and locationtype
                   formatbr = 0
-                  loctype  = INDTP_2D ! Default when not user-defined.
-                  call prop_get_integer(md_ptr%child_nodes(i)%node_ptr, '', 'locationType', loctype, success)
+                  locationType = '2d' ! Default when not user-defined.
+                  call prop_get_string(md_ptr%child_nodes(i)%node_ptr, '', 'locationType', locationType, success)
+                  call locationTypeStringToInteger(locationType, loctype)
+                  if (loctype < 0) then
+                     call SetMessage(LEVEL_ERROR, 'Error reading observation point '''//trim(obsPointName)//''' from file ''' // &
+                                                   trim(observationPointsFile)//'''. Invalid locationType '''//trim(locationType)//''' given.')
+                     cycle
+                  end if
 
                   call prop_get_double(md_ptr%child_nodes(i)%node_ptr, '', 'x', xx, success)
                   if (success) then
@@ -134,11 +176,11 @@ module m_readObservationPoints
                end if
                
                if (.not. success) then
-                  call SetMessage(LEVEL_ERROR, 'Error Reading Observation Point '''//trim(obsPointName)//'''')     
+                  call SetMessage(LEVEL_ERROR, 'Error Reading Observation Point '''//trim(obsPointName)//'''')
                   cycle
                end if
             else
-               call SetMessage(LEVEL_ERROR, 'Error Reading the name of Observation Point. ')     
+               call SetMessage(LEVEL_ERROR, 'Error Reading the name of Observation Point. ')
                cycle
             end if
       
@@ -172,6 +214,7 @@ module m_readObservationPoints
       
       call fill_hashtable(network%obs)
       
+999   continue
       call tree_destroy(md_ptr)
 
    end subroutine readObservationPoints
@@ -196,7 +239,7 @@ module m_readObservationPoints
          read(ibin) pobs%name 
          read(ibin) pobs%p1
          read(ibin) pobs%p2
-         read(ibin) pobs%pointWeight          
+         read(ibin) pobs%pointWeight
          read(ibin) pobs%l1
          read(ibin) pobs%l2
          read(ibin) pobs%linkWeight
@@ -241,5 +284,25 @@ module m_readObservationPoints
       
    end subroutine write_obs_point_cache
    
+   !> Converts a location type as text string into the integer parameter constant.
+   !! E.g. INDTP_1D, etc. If input string is invalid, -1 is returned.
+   subroutine locationTypeStringToInteger(slocType, ilocType)
+      implicit none
+      character(len=*), intent(in   ) :: slocType        !< Location type string.
+      integer,          intent(  out) :: ilocType        !< Location type integer. When string is invalid, -1 is returned.
+      
+      call str_lower(slocType)
+      select case (trim(slocType))
+      case ('1d')
+         ilocType = INDTP_1D
+      case ('2d')
+         ilocType = INDTP_2D
+      case ('all')
+         ilocType = INDTP_ALL
+      case default
+         ilocType = -1
+      end select
+      return
    
+   end subroutine locationTypeStringToInteger
 end module m_readObservationPoints
