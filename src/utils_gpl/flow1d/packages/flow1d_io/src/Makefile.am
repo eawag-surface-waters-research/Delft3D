@@ -35,7 +35,6 @@ libflow1d_io_la_SOURCES = \
          hash_list_io.f90 \
          1d_networkreader.f90 \
          read_table.f90 \
-         readCrossSections.f90 \
 		 readObservCrossSections.f90 \
          readBoundaries.f90 \
          readLaterals.f90 \
@@ -44,7 +43,8 @@ libflow1d_io_la_SOURCES = \
          readRetentions.f90 \
          readSalinityParameters.f90 \
          readspatialdata.f90 \
-         read_roughness.f90 \
+		 read_roughness.f90 \
+         readCrossSections.f90 \
          readModelParameters.f90 \
          flow1d_reader.F90 \
          flow1d_io.F90

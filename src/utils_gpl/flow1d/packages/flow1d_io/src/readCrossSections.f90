@@ -52,6 +52,27 @@ module m_readCrossSections
    public write_convtab
    public read_convtab
 
+   !> The file version number of the cross section definition file format: d.dd, [config_major].[config_minor], e.g., 1.03
+   !!
+   !! Note: read config_minor as a 2 digit-number, i.e., 1.1 > 1.02 (since .1 === .10 > .02).
+   !! Convention for format version changes:
+   !! * if a new format is backwards compatible with old files, only
+   !!   the minor version number is incremented.
+   !! * if a new format is not backwards compatible (i.e., old files
+   !!   need to be converted/updated by user), then the major version number
+   !!   is incremented.
+   
+   ! Cross section definition file current version: 3.00
+   integer, parameter :: CrsDefFileMajorVersion      = 3
+   integer, parameter :: CrsDefFileMinorVersion      = 0
+   integer, parameter :: CrsDefFileMajorVersionSobek = 1  !< Version number as used in Sobek 3
+   
+   ! History cross section definition file versions:
+   
+   ! 3.00 (2019-06-18): use strings, instead of integers, for "closed" and "frictionType(s)".
+   ! 2.00 (2019-05-29): A completely new description of cross section definition file. See more details in issue UNST-2387.
+   ! 1.01 (2019-03-12): First version of *.ini type cross section definition file.
+
    contains
     
    !> Read the cross section location file
@@ -244,9 +265,9 @@ module m_readCrossSections
       endif
       
       select case (major)
-      case (1)
+      case (CrsDefFileMajorVersionSobek)
          call parseCrossSectionDefinitionFile_v100(md_ptr, network)
-      case (2)
+      case (CrsDefFileMajorVersion)
          call parseCrossSectionDefinitionFile(md_ptr, network)
       case default
          call SetMessage(LEVEL_FATAL,'Unsupported fileVersion for cross section definition file:'//trim(fileVersion))
@@ -258,11 +279,12 @@ module m_readCrossSections
    end subroutine readCrossSectionDefinitions
       
       
-   !> Parse cross section definition file with fileVersion 2.00.
+   !> Parse cross section definition file of the current version.
    !! file must already have been read into an ini tree.
    subroutine parseCrossSectionDefinitionFile(md_ptr, network)
       use m_hash_search
       use string_module, only: strcmpi
+      use m_read_roughness, only: frictionTypeStringToInteger
    
       type(t_network), target,  intent(inout)   :: network        !< network structure
       type(tree_data), pointer, intent(in   )   :: md_ptr         !< treedata pointer to cross section definitions, already created.
@@ -292,13 +314,14 @@ module m_readCrossSections
       integer                       :: inext
       logical                       :: plural                 !< indicates whether friction input is plural or not (e.g. frictionId or frictionIds)
       type(t_CSType), pointer       :: pCS
-    
+      character(len=IdLen), allocatable :: fricTypes(:)
+      
       numstr = 0
       if (associated(md_ptr%child_nodes)) then
          numstr = size(md_ptr%child_nodes)
       end if
 
-      do i = 1, numstr
+  crs:do i = 1, numstr
          
          if (.not. strcmpi(tree_get_name(md_ptr%child_nodes(i)%node_ptr), 'Definition')) then
             cycle
@@ -408,6 +431,7 @@ module m_readCrossSections
          allocate(pCs%frictionSectionID  (pCs%frictionSectionsCount))      !< Friction Section Identification
          allocate(pCS%frictionSectionIndex(pCs%frictionSectionsCount))
          allocate(pCS%frictionType       (pCs%frictionSectionsCount))
+         allocate(fricTypes              (pCs%frictionSectionsCount))
          allocate(pCS%frictionValue      (pCs%frictionSectionsCount))
 
          if (plural) then
@@ -418,11 +442,27 @@ module m_readCrossSections
             
          if (.not. success) then
             if (plural) then
-               call prop_get(md_ptr%child_nodes(i)%node_ptr, '', 'frictionTypes', pCS%frictionType, pCs%frictionSectionsCount, success)
-               if (success) call prop_get(md_ptr%child_nodes(i)%node_ptr, '', 'frictionValues', pCS%frictionValue, pCs%frictionSectionsCount, success)
+               call prop_get_strings(md_ptr%child_nodes(i)%node_ptr, '', 'frictionTypes', pCs%frictionSectionsCount, fricTypes, success)
             else
-               call prop_get(md_ptr%child_nodes(i)%node_ptr, '', 'frictionType', pCS%frictionType, pCs%frictionSectionsCount, success)
-               if (success) call prop_get(md_ptr%child_nodes(i)%node_ptr, '', 'frictionValue', pCS%frictionValue, pCs%frictionSectionsCount, success)
+               call prop_get_strings(md_ptr%child_nodes(i)%node_ptr, '', 'frictionType' , pCs%frictionSectionsCount, fricTypes, success)
+            end if
+            
+            if (success) then
+               do j = 1, pCs%frictionSectionsCount
+                  call frictionTypeStringToInteger(fricTypes(j), pCS%frictionType(j))
+                  if (pCS%frictionType(j) < 0) then
+                     write(msgbuf, '(a,i0,a)') 'Incorrect CrossSection input for CrossSection Definition with type '//trim(typestr)//' and id: '//trim(id)// &
+                                               '. frictionType '''//trim(fricTypes(j))//''' is wrong in section #', j, '.'
+                     call err_flush()
+                     cycle crs ! Skip this entire cross section
+                  endif
+               end do
+               
+               if (plural) then                  
+                  call prop_get(md_ptr%child_nodes(i)%node_ptr, '', 'frictionValues', pCS%frictionValue, pCs%frictionSectionsCount, success)
+               else
+                  call prop_get(md_ptr%child_nodes(i)%node_ptr, '', 'frictionValue' , pCS%frictionValue, pCs%frictionSectionsCount, success)
+               end if
             endif
                
             if (.not. success) then
@@ -450,7 +490,7 @@ module m_readCrossSections
             pCs%frictionSectionIndex(j) = hashsearch(network%rgs%hashlist, pCS%frictionSectionID(j))
          enddo
          
-      enddo
+      enddo crs
 
    end subroutine parseCrossSectionDefinitionFile
 
@@ -1668,7 +1708,7 @@ module m_readCrossSections
          endif
          
          pRgs => network%rgs%rough(iRough)
-         if (network%rgs%version == 2) then
+         if (network%rgs%version == RoughFileMajorVersion) then
             call getFrictionParameters(pRgs,  1d0, crs%branchid, crs%chainage, crs%frictionTypePos(i), crs%frictionValuePos(i))
             call getFrictionParameters(pRgs, -1d0, crs%branchid, crs%chainage, crs%frictionTypeNeg(i), crs%frictionValueNeg(i))
             cycle

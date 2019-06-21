@@ -39,7 +39,7 @@ module m_read_roughness
    use m_Roughness
    use m_spatial_data
    use properties
-   use  string_module
+   use string_module
    use messagehandling
 
    implicit none
@@ -49,6 +49,30 @@ module m_read_roughness
    public roughness_reader
    public read_roughness_cache
    public write_roughness_cache
+   public frictionTypeStringToInteger
+
+   !> The file version number of the roughness file format: d.dd, [config_major].[config_minor], e.g., 1.03
+   !!
+   !! Note: read config_minor as a 2 digit-number, i.e., 1.1 > 1.02 (since .1 === .10 > .02).
+   !! Convention for format version changes:
+   !! * if a new format is backwards compatible with old files, only
+   !!   the minor version number is incremented.
+   !! * if a new format is not backwards compatible (i.e., old files
+   !!   need to be converted/updated by user), then the major version number
+   !!   is incremented.
+   
+   ! Roughness file current version: 3.00
+   integer, parameter, public       :: RoughFileMajorVersion = 3
+   integer, parameter, public       :: RoughFileMinorVersion = 0
+   
+   integer, parameter               :: RoughFileMajorVersionSobek = 1  !< Version number as used in Sobek 3
+   
+   
+   ! History roughness file versions:
+
+   ! 3.00 (2019-06-18): Use strings, instead of integers, for "frictionType" and "functionType".
+   ! 2.00 (2019-05-31): A completely new description of roughness file, see issue UNST-2388.
+   ! 1.01 (2019-03-12): First version of *.ini type roughness file.
 
 contains
 
@@ -217,9 +241,9 @@ contains
       endif
       
       select case(major)
-      case(1)
+      case(RoughFileMajorVersionSobek)
          call scan_roughness_input_v100(tree_ptr, rgs, brs, spdata, inputfile, default, def_type)
-      case(2)
+      case(RoughFileMajorVersion)
          call scan_roughness_input(tree_ptr, rgs, brs, spdata, inputfile, default, def_type)
       case default
          call SetMessage(LEVEL_FATAL,'Unsupported fileVersion for roughness file: '//trim(inputfile))
@@ -227,7 +251,7 @@ contains
    end subroutine read_roughnessfile
 
 
-   !> Reads a single v2 roughness file.
+   !> Reads a single roughness file of current version.
    !! File must already have been opened into an ini tree.
    subroutine scan_roughness_input(tree_ptr, rgs, brs, spdata, inputfile, default, def_type)
       use m_tablematrices
@@ -267,6 +291,9 @@ contains
    
       integer, pointer, dimension(:)         :: rgh_type
       integer, pointer, dimension(:)         :: fun_type
+      
+      character(len=Idlen)                   :: fricType
+      character(len=Idlen)                   :: funcType
      
       count = 0
       if (associated(tree_ptr%child_nodes)) then
@@ -341,9 +368,14 @@ contains
             
             rgs%rough(irgh)%useGlobalFriction = .not. branchdef
             
-            call prop_get(tree_ptr%child_nodes(i)%node_ptr, '', 'frictionType', rgs%rough(irgh)%frictionType, success)
+            fricType = ''
+            call prop_get_string(tree_ptr%child_nodes(i)%node_ptr, '', 'frictionType', fricType, success)
             if (.not. success) then
-               call setmessage(LEVEL_ERROR, 'frictionType not found/valid in roughness definition file '''//trim(inputfile)//''' for frictionId='//trim(frictionId)//'.')
+               call setmessage(LEVEL_ERROR, 'frictionType not found in roughness definition file '''//trim(inputfile)//''' for frictionId='//trim(frictionId)//'.')
+            end if
+            call frictionTypeStringToInteger(fricType, rgs%rough(irgh)%frictionType)
+            if (rgs%rough(irgh)%frictionType < 0) then
+               call setmessage(LEVEL_ERROR, 'frictionType '''//trim(fricType)//''' invalid in roughness definition file '''//trim(inputfile)//''' for frictionId='//trim(frictionId)//'.')
             end if
             call prop_get(tree_ptr%child_nodes(i)%node_ptr, '', 'frictionValue', rgs%rough(irgh)%frictionValue, success)
             if (.not. success) then
@@ -362,14 +394,23 @@ contains
                cycle
             endif
             
-            call prop_get(tree_ptr%child_nodes(i)%node_ptr, '', 'frictionType', rgh%rgh_type_pos(ibr), success)
+            fricType = ''
+            call prop_get_string(tree_ptr%child_nodes(i)%node_ptr, '', 'frictionType', fricType, success)
             if (.not. success) then
                call setmessage(LEVEL_ERROR, 'Missing frictionType for branchId '//trim(branchid)//' see input file: '//trim(inputfile))
                cycle
+            end if
+            call frictionTypeStringToInteger(fricType, rgh%rgh_type_pos(ibr))
+            if (rgh%rgh_type_pos(ibr) < 0) then
+               call setmessage(LEVEL_ERROR, 'frictionType '''//trim(fricType)//''' invalid for branchId '//trim(branchid)//' see input file: '//trim(inputfile))
+               cycle
             endif
-            call prop_get(tree_ptr%child_nodes(i)%node_ptr, '', 'functionType', rgh%fun_type_pos(ibr), success)
-            if (.not. success) then
-               call setmessage(LEVEL_ERROR, 'Missing functionType for branchId '//trim(branchid)//' see input file: '//trim(inputfile))
+
+            funcType = 'constant'
+            call prop_get_string(tree_ptr%child_nodes(i)%node_ptr, '', 'functionType', funcType, success)
+            call functionTypeStringToInteger(funcType, rgh%fun_type_pos(ibr))
+            if (rgh%fun_type_pos(ibr) < 0) then
+               call setmessage(LEVEL_ERROR, 'functionType '''//trim(funcType)//''' invalid for branchId '//trim(branchid)//' see input file: '//trim(inputfile))
                cycle
             endif
             
@@ -691,5 +732,57 @@ contains
       call write_hash_list_cache(ibin, rgs%hashlist)
 
    end subroutine write_roughness_cache
+   
+   !> Converts a friction type as text string into the integer parameter constant.
+   !! E.g. R_Manning, etc. If input string is invalid, -1 is returned.
+   subroutine frictionTypeStringToInteger(sfricType, ifricType)
+      implicit none
+      character(len=*), intent(in   ) :: sfricType !< Friction type string.
+      integer,          intent(  out) :: ifricType !< Friction type integer. When string is invalid, -1 is returned.
+      
+      call str_lower(sfricType)
+      select case (trim(sfricType))
+         case ('chezy')
+            ifricType = R_Chezy
+         case ('manning')
+            ifricType = R_Manning
+         case ('walllawnikuradse')
+            ifricType = 2 ! TODO: JN: White-Colebrook $k_n$ (m) -- Delft3D style not available yet, no PARAMETER.
+         case ('whitecolebrook')
+            ifricType = R_WhiteColebrook
+         case ('stricklernikuradse')
+            ifricType = R_Nikuradse
+         case ('strickler')
+            ifricType = R_Strickler
+         case ('debosbijkerk')
+            ifricType = R_BosBijkerk
+         case default
+            ifricType = -1
+      end select
+      return
+   
+   end subroutine frictionTypeStringToInteger
+   
+   !> Converts a (friction) function type as text string into the integer parameter constant.
+   !! E.g. R_FunctionConstant, etc. If input string is invalid, -1 is returned.
+   subroutine functionTypeStringToInteger(sfuncType, ifuncType)
+      implicit none
+      character(len=*), intent(in   ) :: sfuncType !< Function type string.
+      integer,          intent(  out) :: ifuncType !< Function type integer. When string is invalid, -1 is returned.
+      
+      call str_lower(sfuncType)
+      select case (trim(sfuncType))
+         case ('constant')
+            ifuncType = R_FunctionConstant
+         case ('absdischarge')
+            ifuncType = R_FunctionDischarge
+         case ('waterlevel ')
+            ifuncType = R_FunctionLevel
+         case default
+            ifuncType = -1
+      end select
+      return
+   
+   end subroutine functionTypeStringToInteger
 
     end module m_read_roughness
