@@ -43,6 +43,25 @@ module m_readObservCrossSections
    
    public readObservCrossSections
    public read_observ_cross_section_cache
+
+   !> The file version number of the observation cross section file format: d.dd, [config_major].[config_minor], e.g., 1.03
+   !!
+   !! Note: read config_minor as a 2 digit-number, i.e., 1.1 > 1.02 (since .1 === .10 > .02).
+   !! Convention for format version changes:
+   !! * if a new format is backwards compatible with old files, only
+   !!   the minor version number is incremented.
+   !! * if a new format is not backwards compatible (i.e., old files
+   !!   need to be converted/updated by user), then the major version number
+   !!   is incremented.
+   
+   ! Observation cross section file current version: 1.01
+   integer, parameter :: ObservCrsFileMajorVersion = 1
+   integer, parameter :: ObservCrsFileMinorVersion = 1
+   
+   ! History observation cross section file versions:
+
+   ! 1.01 (2019-03-12): First version of *.ini type observation cross section file.
+
    contains
    
    !> Reads observation cross sections from a *.ini file
@@ -73,6 +92,7 @@ module m_readObservCrossSections
       character(len=Charln)                 :: binfile
       logical                               :: file_exist
       integer                               :: formatbr       ! =1: use branchid and chainage, =0: use xy coordinate and numValues
+      integer                               :: major, minor, ierr
       
       Chainage   = dmiss
       numv       = 0
@@ -97,6 +117,22 @@ module m_readObservCrossSections
       
       call tree_create(trim(CrossSectionfile), md_ptr, maxlenpar)
       call prop_file('ini',trim(CrossSectionfile),md_ptr,istat)
+
+      ! check FileVersion
+      ierr = 0
+      major = 0
+      minor = 0
+      call prop_get_version_number(md_ptr, major = major, minor = minor, success = success)
+      if (.not. success .or. major < ObservCrsFileMajorVersion) then
+         write (msgbuf, '(a,i0,".",i2.2,a,i0,".",i2.2,a)') 'Unsupported format of observation cross section file detected in '''//trim(CrossSectionFile)//''': v', major, minor, '. Current format: v',ObservCrsFileMajorVersion,ObservCrsFileMinorVersion,'. Ignoring this file.'
+         call warn_flush()
+         ierr = 1
+      end if
+
+      if (ierr /= 0) then
+         goto 999
+      end if
+
       numstr = 0
       if (associated(md_ptr%child_nodes)) then
          numstr = size(md_ptr%child_nodes)
@@ -170,8 +206,9 @@ module m_readObservCrossSections
       end do
       
       write(msgbuf,'(i10,2a)') network%observcrs%Count , ' (1d network) observation cross sections have been read from file ', trim(CrossSectionFile)
-      call msg_flush()      
-            
+      call msg_flush() 
+      
+999   continue
       call tree_destroy(md_ptr)
       
       if (allocated(xx)) deallocate(xx)
