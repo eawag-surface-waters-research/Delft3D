@@ -1224,6 +1224,7 @@ end subroutine loadObservCrossSections
 !> Adds observation cross sections, that are read from *.ini file, to the normal cross section adm
 subroutine addObservCrsFromIni(network, filename)
    use m_network
+   use m_sferic, only:jsferic
    use odugrid
    use m_save_ugrid_state
    use dfm_error
@@ -1265,7 +1266,7 @@ subroutine addObservCrsFromIni(network, filename)
       allocate(xx_tmp(nbrch))
       allocate(yy_tmp(nbrch))
       ierr = odu_get_xy_coordinates(branchIdx_tmp(1:nbrch), Chainage_tmp(1: nbrch), meshgeom1d%ngeopointx, meshgeom1d%ngeopointy, &
-                                    meshgeom1d%nbranchgeometrynodes, meshgeom1d%nbranchlengths, 0, xx_tmp, yy_tmp)
+                                    meshgeom1d%nbranchgeometrynodes, meshgeom1d%nbranchlengths, jsferic, xx_tmp, yy_tmp)
       
       if (ierr /= DFM_NOERR) then
          call mess(LEVEL_ERROR, "Error occurs when getting xy coordinates for observation cross sections from file '"//trim(filename)//".")
