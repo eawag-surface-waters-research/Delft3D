@@ -1682,6 +1682,7 @@ module m_readCrossSections
    
    !> Retrieve the roughness for given cross section
    subroutine getRougnessForProfile(network, crs)
+      use m_read_roughness, only: RoughFileMajorVersion
    
       type(t_network), intent(inout)      :: network      !< Network structure
       type(t_CrossSection), intent(inout) :: crs          !< cross section
