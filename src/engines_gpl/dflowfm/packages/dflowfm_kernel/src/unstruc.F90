@@ -37716,16 +37716,12 @@ if (mext > 0) then
            ! NOTE: we intentionally re-use the lateral coding here for selection of 1D and/or 2D flow nodes
            select case (trim(qid(18:)))
            case ('1d')
-              ilattype = ILATTP_1D
+              ilattype = ILATTP_1D ; call prepare_lateral_mask(kcsini, ilattype)
            case ('2d')
-              ilattype = ILATTP_2D
-           case ('1d2d')
-              ilattype = ILATTP_ALL
-           case default
-              ilattype = ILATTP_ALL
+              ilattype = ILATTP_2D ; call prepare_lateral_mask(kcsini, ilattype)
+            case default
+              kcsini = 1 
            end select
-
-           call prepare_lateral_mask(kcsini, ilattype)
 
            success = timespaceinitialfield(xz, yz, s1, ndx, filename, filetype, method, operand, transformcoef, 2, kcsini) ! zie meteo module
 
@@ -41865,7 +41861,7 @@ subroutine setfixedweirs()      ! override bobs along pliz's, jadykes == 0: only
  if (nfxw > 0) then
     if (allocated (lnfxw) )   deallocate(nfxwL,lnfxw)
     if (allocated (weirdte) ) deallocate(weirdte)
-    if (allocated (shlxw) )   deallocate(shlxw,shrxw,crestlxw,taludlxw,taludrxw,vegxw,iweirtxw)
+    if (allocated (shlxw) )   deallocate(shlxw,shrxw,crestlevxw,crestlxw,taludlxw,taludrxw,vegxw,iweirtxw)
     allocate ( nfxwL(Lnx) ,stat=ierr)
     call aerr('nfxwL(Lnx)',ierr,lnx)
 
