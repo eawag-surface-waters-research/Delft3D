@@ -214,6 +214,7 @@
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
 		<File RelativePath="src\unstruc_files.f90"/>
 		<File RelativePath="src\unstruc_ini.f90"/>
+		<File RelativePath=".\src\unstruc_inifields.f90"/>
 		<File RelativePath="src\unstruc_messages.f90"/>
 		<File RelativePath="src\unstruc_model.f90"/>
 		<File RelativePath="src\unstruc_netcdf.f90"/>
