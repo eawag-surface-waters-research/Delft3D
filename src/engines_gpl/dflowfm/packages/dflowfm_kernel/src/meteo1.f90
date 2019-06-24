@@ -7530,7 +7530,12 @@ contains
    if (filetype .ne. ncflow .and. filetype .ne. arcinfo) then
        call oldfil(minp0, filename)
    end if
-      
+
+   !if (filetype == 1dfield) then
+   !   call init1dField(dataFile,filename, quantity)
+   !   ! return?
+   !end if
+
    if (method == 4) then       ! polyfil 
         
       call savepol()

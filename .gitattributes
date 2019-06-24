@@ -530,6 +530,7 @@ src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/unstruc_boundaries.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/unstruc_display.F90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/unstruc_files.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/unstruc_ini.f90 -text
+src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/unstruc_inifields.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/unstruc_messages.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/unstruc_model.f90 -text
 src/engines_gpl/dflowfm/packages/dflowfm_kernel/src/unstruc_netcdf.f90 -text

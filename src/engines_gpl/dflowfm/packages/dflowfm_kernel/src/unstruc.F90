@@ -31309,7 +31309,11 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
  use m_flow
  use m_netw !  only : xk, yk, zk
  use m_missing
+ use system_utils, only: split_filename
  use unstruc_files, only: resolvePath
+ use string_module, only: strcmpi
+ use unstruc_inifields, only: readIniFieldProvider, checkIniFieldFileVersion
+ use dfm_error
 
  use unstruc_netcdf
  implicit none
@@ -31321,13 +31325,26 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
  integer              :: mxyb, ja, method, iprimpos
  integer              :: k, L, k1, k2, mx
  integer, allocatable :: kcc(:), kc1D(:), kc2D(:)
-
+ integer              :: ibathyfiletype
  integer              :: kc_size_store
 
  character(len=256) :: filename
  character(len=64)  :: varname
 ! character(len=1)   :: operand
 ! double precision   :: transformcoef(25) !< Transform coefficients a+b*x
+
+ type(tree_data),  pointer       :: inifield_ptr        !< tree of inifield-file's [Initial] or [Parameter] blocks
+ type(tree_data),  pointer       :: node_ptr            
+ integer                         :: istat               
+ integer                         :: num_items_in_file   
+ integer, parameter              :: ini_key_len   = 32  
+ integer, parameter              :: ini_value_len = 256 
+ character(len=ini_key_len)      :: groupname           
+ character(len=255)              :: fnam
+ character(len=255)              :: basedir
+ integer :: major, minor
+ integer :: i, iLocType
+ 
 
  kc_size_store = 0
 
@@ -31355,10 +31372,8 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
     iprimpos = 3 ; mx = numk
  end select
 
- if (mext > 0) then
-    rewind(mext)
-    ja = 1
-
+ if (mext > 0 .or. len_trim(md_inifieldfile) > 0) then
+    ! 0.a Prepare masks for 1D/2D distinctions
     kc_size_store = size(kc)
     allocate(kcc(mx),kc1d(mx),kc2d(mx)) ; kcc = 1; kc1D = 0 ; kc2D = 0
     call realloc(kc, mx, keepExisting = .false., fill = 0)
@@ -31385,25 +31400,74 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
        kc2D(1:ndx2D) = 1
     endif
 
-    do while (ja .eq. 1)                                ! read *.ext file
-       call delpol()                                    ! ook jammer dan
-       call readprovider(mext,qid,filename,filetype,method,operand,transformcoef,ja,varname)
-       if (ja == 1) then
-          call resolvePath(filename, md_extfile_dir, filename)
-          if (index(qid,'bedlevel') > 0 .and. len_trim(md_inifieldfile) > 0) then
-              call mess(LEVEL_WARN, 'Bed level info. should be defined in file '''//trim(md_inifieldfile)//'''. They are ignored if defined in external forcing file '''//trim(md_extfile)//'''.')
-              return
+    ja = 0
+    ! 0.b Prepare loop across old ext file:
+    if (mext > 0) then
+       rewind(mext)
+       ja = 1
+    end if
+
+    ! 0.c Prepare loop across new initial field file:
+    if (len_trim(md_inifieldfile) > 0) then
+       call tree_create(trim(md_inifieldfile), inifield_ptr)
+       call prop_file('ini',trim(md_inifieldfile),inifield_ptr,istat) 
+       call split_filename(md_inifieldfile, basedir, fnam)
+       istat = checkIniFieldFileVersion(md_inifieldfile, inifield_ptr)
+       if (istat /= DFM_NOERR) then
+          num_items_in_file = 0
+       end if
+       if (associated(inifield_ptr%child_nodes)) then
+           num_items_in_file = size(inifield_ptr%child_nodes)
+       endif
+       if (num_items_in_file > 0) then
+          i  = 1
+          ja = 1
+       end if
+    end if
+
+    ! Trick: loop across the 2 supported file types (*.ext and *.ini), most inner do-loop code is the same for both.
+    do ibathyfiletype=1,2
+    if (ibathyfiletype == 1) then
+       call split_filename(md_extfile,      basedir, fnam) ! Remember base dir of *.ext file, to resolve all refenced files below w.r.t. that base dir.
+    else if (ibathyfiletype == 2) then
+       call split_filename(md_inifieldfile, basedir, fnam) ! Remember base dir of *.ini file, to resolve all refenced files below w.r.t. that base dir.
+    end if
+
+    do while (ja .eq. 1)
+       if (ibathyfiletype == 1) then       ! read *.ext file
+          call delpol()
+          call readprovider(mext,qid,filename,filetype,method,operand,transformcoef,ja,varname)
+       else if (ibathyfiletype == 2) then  ! read *.ini file
+          if (i > num_items_in_file) then
+             ja = 0
+             exit
           end if
-          if (qid == 'bedlevel1D') then
-             call mess(LEVEL_INFO, 'setbedlevelfromextfile: Setting bedlevel1D from file '''//trim(filename)//'''.')
+          node_ptr => inifield_ptr%child_nodes(i)%node_ptr
+          call readIniFieldProvider(md_inifieldfile, node_ptr,groupname,qid,filename,filetype,method,iLocType,operand,transformcoef,ja,varname) !,smask, maxSearchRadius)
+          i = i + 1
+          if (.not. strcmpi(groupname, 'Initial')) then
+             cycle
+          end if
+       end if
+
+       ! Initialize bedlevel based on the read provider info
+       if (ja == 1) then
+          call resolvePath(filename, basedir, filename)
+          if (index(qid,'bedlevel') > 0 .and. ibathyfiletype == 1 .and. len_trim(md_inifieldfile) > 0) then
+             ! Don't support bedlevel in *.ext file when there is ALSO a *.ini file.
+             call mess(LEVEL_WARN, 'Bed level info should be defined in file '''//trim(md_inifieldfile)//'''. Quantity '//trim(qid)//' ignored in external forcing file '''//trim(md_extfile)//'''.')
+             return
+          end if
+          if (strcmpi(qid, 'bedlevel1D') .or. (strcmpi(qid, 'bedlevel') .and. ibathyfiletype == 2 .and. iLocType == ILATTP_1D)) then
+             call mess(LEVEL_INFO, 'setbedlevelfromextfile: Setting 1D bedlevel from file '''//trim(filename)//'''.')
              kc(1:mx) = kc1D
              success = timespaceinitialfield_mpi(xk, yk, zk, numk, filename, filetype, method, operand, transformcoef, 3, kc) ! zie meteo module
-          else if (index(qid,'bedlevel') > 0) then
-             if (qid == 'bedlevel')  then
-                call mess(LEVEL_INFO, 'setbedlevelfromextfile: Setting bedlevelboth1D2D from file '''//trim(filename)//'''.')
+          else if (strcmpi(qid,'bedlevel', 8)) then
+             if ((strcmpi(qid, 'bedlevel') .and. ibathyfiletype == 1) .or. (strcmpi(qid, 'bedlevel') .and. ibathyfiletype == 2 .and. iLocType == ILATTP_ALL))  then
+                call mess(LEVEL_INFO, 'setbedlevelfromextfile: Setting both 1D and 2D bedlevel from file '''//trim(filename)//'''.')
                 kc(1:mx) = kcc
-             else if (qid == 'bedlevel2D') then
-                call mess(LEVEL_INFO, 'setbedlevelfromextfile: Setting bedlevel2D from file '''//trim(filename)//'''.')
+             else if (strcmpi(qid, 'bedlevel2D') .or. (strcmpi(qid, 'bedlevel') .and. ibathyfiletype == 2 .and. iLocType == ILATTP_2D)) then
+                call mess(LEVEL_INFO, 'setbedlevelfromextfile: Setting 2D bedlevel from file '''//trim(filename)//'''.')
                 kc(1:mx) = kc2D
              endif
 
@@ -31417,10 +31481,16 @@ subroutine setbedlevelfromextfile()    ! setbedlevels()  ! check presence of old
           endif
        endif
 
-    enddo
+    end do ! ja==1 provider loop
+    end do ! ibathyfiletype=1,2
 
+    ! Clean up *.ext file
     rewind (mext)
+    
+    ! Clean up *.ini file.
+    call tree_destroy(inifield_ptr)
 
+    ! Interpreted values for debugging.
     if ( md_jasavenet.eq.1 ) then
 !      save network
        select case (ibedlevtyp)
@@ -36871,7 +36941,7 @@ end function is_1d_boundary_candidate
  use m_ec_spatial_extrapolation, only : init_spatial_extrapolation
  use m_sferic, only: jsferic
  use m_trachy, only: trachy_resistance
- use unstruc_ini
+ use unstruc_inifields, only: initInitialFields
  ! use m_vegetation
 
  implicit none
@@ -36936,13 +37006,24 @@ end function is_1d_boundary_candidate
 
  call initialize_ec_module()
 
+ ! First initialize new-style StructureFile quantities.
  if (.not.flow_init_structurecontrol()) then
     iresult = DFM_EXTFORCERROR
     goto 888
  endif
 
+ ! First initialize new-style IniFieldFile quantities.
  if (len_trim(md_inifieldfile) > 0) then
-    call initInitialFields(md_inifieldfile)
+    inquire (file = trim(md_inifieldfile), exist = exist)
+    if (exist) then
+       iresult = initInitialFields(md_inifieldfile)
+    else
+       call qnerror( 'Initial fields and parameters file '''//trim(md_inifieldfile)//''' not found.', '  ', ' ')
+       write(msgbuf, '(a,a,a)') 'Initial fields and parameters file ''', trim(md_inifieldfile), ''' not found.'
+       call warn_flush()
+       iresult = DFM_EXTFORCERROR
+       goto 888
+    endif
  end if
  
 
@@ -37569,6 +37650,7 @@ end function is_1d_boundary_candidate
 
  call setzminmax(); call setsigmabnds() ! our side of preparation for 3D ec module
 
+ ! First initialize new-style ExtForceFileNew quantities.
  if (len_trim(md_extfile_new) > 0) then
     success = initboundaryblocksforcings(md_extfile_new)
     if (.not. success) then
@@ -37579,6 +37661,7 @@ end function is_1d_boundary_candidate
     end if
  endif
 
+ ! Finish with all remaining old-style ExtForceFile quantities.
 if (mext > 0) then
  ja = 1
 
@@ -37609,7 +37692,7 @@ if (mext > 0) then
 
         if (qid == 'frictioncoefficient') then
            if (len_trim(md_inifieldfile) > 0) then
-              call mess(LEVEL_WARN, 'Friction coefficients should be defined in file '''//trim(md_inifieldfile)//'''. They are ignored if defined in file external forcing file '''//trim(md_extfile)//'''.')
+              call mess(LEVEL_WARN, 'Friction coefficients should be defined in file '''//trim(md_inifieldfile)//'''. Quantity '//trim(qid)//' ignored in external forcing file '''//trim(md_extfile)//'''.')
               cycle
            end if
 
@@ -37707,7 +37790,7 @@ if (mext > 0) then
 
         else if (qid(1:17) == 'initialwaterlevel') then
            if (len_trim(md_inifieldfile) > 0) then
-              call mess(LEVEL_WARN, 'Initial water level should be defined in file '''//trim(md_inifieldfile)//'''. They are ignored if defined in external forcing file '''//trim(md_extfile)//'''.')
+              call mess(LEVEL_WARN, 'Initial water level should be defined in file '''//trim(md_inifieldfile)//'''. Quantity '//trim(qid)//' ignored in external forcing file '''//trim(md_extfile)//'''.')
               cycle
            end if
            
