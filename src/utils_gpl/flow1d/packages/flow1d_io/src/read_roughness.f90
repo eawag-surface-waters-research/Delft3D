@@ -319,6 +319,7 @@ contains
       !> when branches are defined, the friction can be defined per branch, then additional arrays are required
       if (branchdef) then
          
+         ! *If* there's [Branch] blocks, then there will be one and only one [Global] block.
          call prop_get_string(tree_ptr, 'Global', 'frictionId', frictionId, success)
          if (.not. success) then
             call setmessage(LEVEL_FATAL, 'frictionId not found in roughness definition file: '//trim(inputfile))
@@ -329,22 +330,23 @@ contains
          endif
          rgh => rgs%rough(irgh)
          if (irgh == rgs%count+1) then
+            ! Create a new Roughness section.
             rgs%count = irgh
             rgh%id           = frictionId
             allocate(rgh%rgh_type_pos(brs%Count))
             allocate(rgh%fun_type_pos(brs%Count))
             allocate(rgh%table(brs%Count))
          else
+            ! Initialize an existing Roughness section.
             if (.not. associated(rgh%rgh_type_pos))   allocate(rgh%rgh_type_pos(brs%Count))
             if (.not. associated(rgh%fun_type_pos))   allocate(rgh%fun_type_pos(brs%Count))
             if (.not. associated(rgh%table))          allocate(rgh%table(brs%Count))
-            rgh%rgh_type_pos = -1
-            rgh%fun_type_pos = -1
-            do i = 1, brs%count
-               rgh%table(i)%lengths = -1
-            enddo
-            
          endif         
+         rgh%rgh_type_pos = -1
+         rgh%fun_type_pos = -1
+         do i = 1, brs%count
+            rgh%table(i)%lengths = -1
+         enddo
       endif
       
       maxlevels    = 0
